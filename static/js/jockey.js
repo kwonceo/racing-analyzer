@@ -62,5 +62,52 @@
 
   function all() { return _jockeys.slice(); }
 
-  global.JockeyDB = { load, get, upsert, all };
+  // ===== [6번] 확장 조회 =====
+  function rate(o) { return o && o.rides ? Math.round((o.places / o.rides) * 1000) / 10 : 0; }
+  function recent30Rate(name) { const j = get(name); return j && j.recent30 ? rate(j.recent30) : null; }
+  function distRate(name, dist) {
+    const j = get(name); const d = String(parseInt(dist, 10) || '');
+    return j && j.byDistance && j.byDistance[d] ? rate(j.byDistance[d]) : null;
+  }
+  function trackRate(name, track) {
+    const j = get(name);
+    return j && j.byTrack && j.byTrack[track] ? rate(j.byTrack[track]) : null;
+  }
+  function comboStat(name, horse) {
+    const j = get(name);
+    return j && j.byHorse && j.byHorse[horse] ? j.byHorse[horse] : null;
+  }
+  /** 리딩 기수 순위 (복승권율 기준) */
+  function leaders() {
+    return all().slice().sort((a, b) => (b.placeRate || 0) - (a.placeRate || 0))
+      .map((j, i) => Object.assign({ rank: i + 1 }, j));
+  }
+
+  /** [6번] 경주 결과로 기수 성적 자동 갱신 */
+  function recordRace(name, info) {
+    const j = get((name || '').trim()); if (!j || !info) return;
+    const placing = parseInt(info.placing, 10);
+    if (!placing) return;
+    const win = placing === 1, place = placing >= 1 && placing <= 3;
+    const bump = (o) => { o.rides = (o.rides || 0) + 1; if (win) o.wins = (o.wins || 0) + 1; if (place) o.places = (o.places || 0) + 1; };
+    // 최근 30경주(롤링)
+    j.recent = (j.recent || []).concat(placing).slice(-30);
+    j.recent30 = {
+      rides: j.recent.length,
+      wins: j.recent.filter((p) => p === 1).length,
+      places: j.recent.filter((p) => p >= 1 && p <= 3).length,
+    };
+    const d = String(parseInt(info.distance, 10) || '');
+    if (d) { j.byDistance = j.byDistance || {}; j.byDistance[d] = j.byDistance[d] || { rides: 0, places: 0 }; bump(j.byDistance[d]); }
+    if (info.track) { j.byTrack = j.byTrack || {}; j.byTrack[info.track] = j.byTrack[info.track] || { rides: 0, places: 0 }; bump(j.byTrack[info.track]); }
+    if (info.horse) { j.byHorse = j.byHorse || {}; j.byHorse[info.horse] = j.byHorse[info.horse] || { rides: 0, wins: 0, places: 0 }; bump(j.byHorse[info.horse]); }
+    j.rides = (j.rides || 0) + 1;
+    _rebuildIndex(); _persist();
+    return j;
+  }
+
+  global.JockeyDB = {
+    load, get, upsert, all,
+    rate, recent30Rate, distRate, trackRate, comboStat, leaders, recordRace,
+  };
 })(window);

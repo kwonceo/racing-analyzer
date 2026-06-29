@@ -51,6 +51,7 @@
         $('#tab-' + btn.dataset.tab).classList.add('active');
         if (btn.dataset.tab === 'stats') renderStats();
         if (btn.dataset.tab === 'result') renderResultForm();
+        if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
         if (btn.dataset.tab === 'japan') refreshOddsRaceSelect();
         if (btn.dataset.tab === 'combined') refreshCombinedRaceSelect();
       });
@@ -271,7 +272,7 @@
       showLoading(`${title} BMED 분석 중...`);
       const horses = applyWeights(title, sheetHorses);
       const report = await Analysis.analyzeRace(
-        { raceNo: race.raceNo, raceTitle: title, horses, condition: state.raceCondition }, state.jockeyStats);
+        { raceNo: race.raceNo, raceTitle: title, horses, condition: state.raceCondition, distance: race.distance }, state.jockeyStats);
       state.lastReports[title] = report;
       renderReport('#koreaReport', report, '한국', title);
       renderPageControl(idx);
@@ -810,6 +811,8 @@
       showLoading('3종 배당판 동시 분석 중...');
       const rep = await Analysis.analyzeOddsTriple(caps);
       hideLoading();
+      // [5번] 복승 불일치 감지 여부 저장(결과기록 시 통계 반영)
+      state.lastTriple = { mismatch: (rep.inconsistencies || []).length > 0 };
       renderTriple(rep);
     } catch (e) { hideLoading(); toast('3종 분석 실패: ' + e.message); }
   }
@@ -1154,13 +1157,20 @@
 
   /** 통합 결과를 결과기록/통계용으로 저장 (적중 판정·이상감지 효과 검증에 사용) */
   function stashCombined(title, res, budget) {
-    const had = (res.horses || []).some((h) => ((h.anomaly || {}).signalScore >= 75) || ((h.anomaly || {}).drop >= 0.5))
+    const horses = res.horses || [];
+    // [5번] 패턴 신호: 급락50%+ / 배당압축
+    const drop50 = horses.some((h) => ((h.anomaly || {}).drop || 0) >= 0.50);
+    const oh = (res.odds && res.odds.horses) || [];
+    const od = oh.filter((h) => h.lastOdds > 0).sort((a, b) => a.lastOdds - b.lastOdds);
+    const squeeze = od.length >= 2 && od[1].lastOdds <= od[0].lastOdds * 1.2;
+    const had = drop50 || horses.some((h) => ((h.anomaly || {}).signalScore || 0) >= 75)
       || (res.alerts || []).some((a) => a.type === '쌍승역전');
     const qab = (res.bets || []).find((b) => b.key === 'q_ab');
     state.lastCombined[title] = {
       bets: (res.bets || []).filter((b) => b.available).map((b) => ({ type: b.type, combo: b.combo })),
       recOdds: qab ? qab.fairOdds : null,
       hadAnomaly: had,
+      signals: { drop50, squeeze },   // mismatch(복승 불일치)는 3종 분석에서 별도
       budget: budget || 0,
     };
   }
@@ -1216,6 +1226,27 @@
 
   // ---------- 결과 입력 (Phase 5-1 / 5-3) ----------
   function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+  /** [5번] 결과 레코드에 저장할 이상감지 패턴 신호 */
+  function signalsFor(c) {
+    const s = (c && c.signals) || {};
+    return { drop50: !!s.drop50, squeeze: !!s.squeeze, mismatch: !!(state.lastTriple && state.lastTriple.mismatch) };
+  }
+
+  /** [6번] 착순 결과로 기수-마필/거리/주로 성적 자동 갱신 */
+  function updateJockeysFromResult(title, result) {
+    const sheet = state.lastSheets[title];
+    if (!sheet || !sheet.horses) return;
+    const byNo = {}; sheet.horses.forEach((h) => { byNo[h.horseNum] = h; });
+    (result || []).forEach((no, i) => {
+      const h = byNo[no];
+      if (h && h.jockey) {
+        JockeyDB.recordRace(h.jockey, {
+          horse: h.horseName, distance: sheet.distance, track: state.raceCondition.track, placing: i + 1,
+        });
+      }
+    });
+  }
 
   /** 적중 판정용 베팅: 통합분석(Phase4) 결과 우선, 없으면 BMED 추천 */
   function betsForRace(title) {
@@ -1329,6 +1360,7 @@
         raceTitle: key || `${r.venue || ''} ${r.raceNo}경주`,
         bets, result: placing, hit, stake, payout,
         hadAnomaly: !!c.hadAnomaly, recOdds: c.recOdds == null ? null : c.recOdds,
+        signals: signalsFor(c),
       });
       saved++;
     });
@@ -1351,7 +1383,9 @@
     History.addResult({
       date, region, raceTitle: title, bets, result, hit, stake, payout,
       hadAnomaly: !!c.hadAnomaly, recOdds: c.recOdds == null ? null : c.recOdds,
+      signals: signalsFor(c),
     });
+    updateJockeysFromResult(title, result);   // [6번] 기수 성적 자동 갱신
     toast(`저장됨 — ${hit ? '✅ 적중!' : '❌ 미적중'} (투자 ${stake.toLocaleString()} / 수익 ${payout.toLocaleString()})`);
     renderStats();
   }
@@ -1408,14 +1442,77 @@
       <h3 style="margin-top:18px">월별 손익 <span class="hint" style="font-weight:400">(파랑=투자 / 초록=수익)</span></h3>
       <div class="mbars">${bars}</div>` : '';
 
+    // [5번] 이상감지 패턴별 효과
+    const sg = s.bySignal || {};
+    const sigRows = [
+      ['🔴 급락 50%+', sg.drop50],
+      ['🟡 복승 불일치', sg.mismatch],
+      ['🟡 배당 압축', sg.squeeze],
+      ['⚪ 감지 없음', sg.none],
+    ];
+    const anySig = sigRows.some(([, v]) => v && v.n > 0);
+    const patternHtml = anySig
+      ? `<table class="data-table">
+           <thead><tr><th>감지 패턴</th><th>경주수</th><th>적중</th><th>적중률</th><th>ROI</th></tr></thead>
+           <tbody>${sigRows.map(([label, v]) => {
+             v = v || { n: 0, hit: 0, rate: 0, roi: 0 };
+             const roiColor = v.roi >= 0 ? 'var(--green)' : 'var(--red)';
+             return `<tr><td>${label}</td><td>${v.n}</td><td>${v.hit}</td><td>${v.rate}%</td>
+               <td style="color:${v.n ? roiColor : 'var(--text-dim)'}">${v.n ? (v.roi >= 0 ? '+' : '') + v.roi + '%' : '-'}</td></tr>`;
+           }).join('')}</tbody></table>
+         <p class="hint">감지 패턴별 적중률·수익률 비교 — 어떤 신호가 실제로 적중에 도움이 되는지 누적 검증.</p>`
+      : `<p class="hint">📊 아직 데이터가 없습니다. 통합분석/3종분석 후 결과를 입력하면 <b>기록이 쌓이는 대로 자동으로 채워집니다.</b></p>`;
+    const patterns = `<h3 style="margin-top:18px">🔍 이상감지 패턴별 효과</h3>${patternHtml}`;
+
     const types = `
       <h3 style="margin-top:18px">베팅 종류별</h3>
       <table class="data-table"><thead><tr><th>종류</th><th>건수</th><th>적중</th><th>적중률</th></tr></thead>
         <tbody>${Object.entries(s.byType).map(([t, v]) =>
           `<tr><td>${t}</td><td>${v.n}</td><td>${v.hit}</td><td>${v.n ? Math.round(v.hit / v.n * 100) : 0}%</td></tr>`).join('')}</tbody></table>`;
 
-    $('#statsDashboard').innerHTML = basic + anomaly + bands + monthly + types +
+    $('#statsDashboard').innerHTML = basic + anomaly + bands + patterns + monthly + types +
       (s.total ? '' : '<p class="hint" style="margin-top:12px">아직 기록이 없습니다. 결과기록 탭에서 입력하세요.</p>');
+  }
+
+  // ---------- [6번] 기수 DB 조회 ----------
+  function renderJockeyDb() {
+    const leaders = JockeyDB.leaders();
+    // 리딩 순위
+    const rankRows = leaders.map((j) =>
+      `<tr><td>${j.rank}</td><td><b>${esc(j.name)}</b></td><td>${esc(j.track || '')}</td>
+        <td>${j.winRate != null ? j.winRate + '%' : '-'}</td><td>${j.placeRate != null ? j.placeRate + '%' : '-'}</td>
+        <td>${j.recent30 ? JockeyDB.rate(j.recent30) + '%' : '-'}</td><td>${j.rides || 0}</td></tr>`).join('');
+    $('#jockeyDbView').innerHTML = `
+      <h3>리딩 기수 순위 (복승권율)</h3>
+      <table class="data-table"><thead><tr><th>#</th><th>기수</th><th>소속</th><th>승률</th><th>복승권율</th><th>최근30</th><th>기승</th></tr></thead>
+        <tbody>${rankRows}</tbody></table>
+      <div id="jockeyDetail" style="margin-top:16px"></div>`;
+    // 셀렉트 채우기
+    const sel = $('#jockeySelect');
+    sel.innerHTML = leaders.map((j) => `<option value="${esc(j.name)}">${esc(j.name)}</option>`).join('');
+    sel.onchange = () => renderJockeyDetail(sel.value);
+    if (leaders.length) renderJockeyDetail(sel.value || leaders[0].name);
+  }
+
+  function renderJockeyDetail(name) {
+    const j = JockeyDB.get(name); if (!j) return;
+    const statRow = (label, o) => `<tr><td>${esc(label)}</td><td>${o ? o.places + '/' + o.rides : '-'}</td><td>${o ? JockeyDB.rate(o) + '%' : '-'}</td></tr>`;
+    const dist = Object.entries(j.byDistance || {}).map(([d, o]) => statRow(d + 'm', o)).join('') || '<tr><td colspan="3" class="hint">데이터 없음</td></tr>';
+    const trk = Object.entries(j.byTrack || {}).map(([t, o]) => statRow(t, o)).join('') || '<tr><td colspan="3" class="hint">데이터 없음</td></tr>';
+    const horse = Object.entries(j.byHorse || {}).map(([h, o]) => statRow(h, o)).join('') || '<tr><td colspan="3" class="hint">조합 기록 없음 — 결과 입력 시 쌓입니다</td></tr>';
+    $('#jockeyDetail').innerHTML = `
+      <h3>${esc(name)} 상세</h3>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="num">${j.placeRate || 0}%</div><div class="label">통산 복승권율</div></div>
+        <div class="stat-card"><div class="num">${j.recent30 ? JockeyDB.rate(j.recent30) : 0}%</div><div class="label">최근 30경주</div></div>
+        <div class="stat-card"><div class="num">${j.winRate || 0}%</div><div class="label">통산 승률</div></div>
+      </div>
+      <div class="upload-grid" style="margin-top:12px">
+        <div><h3 style="font-size:14px">거리별 적성</h3><table class="data-table"><thead><tr><th>거리</th><th>복/기</th><th>율</th></tr></thead><tbody>${dist}</tbody></table></div>
+        <div><h3 style="font-size:14px">주로상태별</h3><table class="data-table"><thead><tr><th>주로</th><th>복/기</th><th>율</th></tr></thead><tbody>${trk}</tbody></table></div>
+      </div>
+      <h3 style="font-size:14px;margin-top:12px">기수-마필 조합 성적</h3>
+      <table class="data-table"><thead><tr><th>마명</th><th>복/기</th><th>율</th></tr></thead><tbody>${horse}</tbody></table>`;
   }
 
   // ---------- escape ----------

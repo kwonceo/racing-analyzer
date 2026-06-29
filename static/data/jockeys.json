@@ -1,15 +1,524 @@
 {
-  "updated": "2026-06-27",
-  "description": "기수 기본 데이터 (KRA). winRate=승률%, placeRate=복승권(3착내)율%, recentForm=최근 컨디션 메모",
+  "updated": "2026-06-30",
+  "description": "기수 DB (KRA 주요 10명 초기 샘플). winRate=승률%, placeRate=복승권(3착내)율%. recent30=최근30경주, byDistance=거리별, byTrack=주로상태별, byHorse=기수-마필 조합. 경주 결과 입력 시 자동 갱신됨.",
   "jockeys": [
-    { "name": "문세영", "track": "서울", "winRate": 18.5, "placeRate": 42.1, "rides": 0, "recentForm": "" },
-    { "name": "임성실", "track": "서울", "winRate": 14.2, "placeRate": 38.4, "rides": 0, "recentForm": "" },
-    { "name": "김용근", "track": "서울", "winRate": 12.8, "placeRate": 35.0, "rides": 0, "recentForm": "" },
-    { "name": "정도윤", "track": "서울", "winRate": 11.0, "placeRate": 33.2, "rides": 0, "recentForm": "" },
-    { "name": "이찬호", "track": "서울", "winRate": 10.3, "placeRate": 31.5, "rides": 0, "recentForm": "" },
-    { "name": "서승운", "track": "부산", "winRate": 16.7, "placeRate": 40.0, "rides": 0, "recentForm": "" },
-    { "name": "유현명", "track": "부산", "winRate": 13.5, "placeRate": 36.8, "rides": 0, "recentForm": "" },
-    { "name": "조성곤", "track": "부산", "winRate": 12.1, "placeRate": 34.4, "rides": 0, "recentForm": "" },
-    { "name": "김혜선", "track": "부산", "winRate": 9.8, "placeRate": 30.0, "rides": 0, "recentForm": "" }
+    {
+      "name": "문세영",
+      "track": "서울",
+      "winRate": 18.5,
+      "placeRate": 42.1,
+      "rides": 760,
+      "recentForm": "",
+      "recent30": {
+        "rides": 30,
+        "wins": 6,
+        "places": 14
+      },
+      "byDistance": {
+        "1000": {
+          "rides": 190,
+          "places": 84
+        },
+        "1200": {
+          "rides": 190,
+          "places": 89
+        },
+        "1400": {
+          "rides": 190,
+          "places": 78
+        },
+        "1800": {
+          "rides": 190,
+          "places": 72
+        }
+      },
+      "byTrack": {
+        "양호": {
+          "rides": 190,
+          "places": 84
+        },
+        "다습": {
+          "rides": 190,
+          "places": 74
+        },
+        "불량": {
+          "rides": 190,
+          "places": 69
+        },
+        "건조": {
+          "rides": 190,
+          "places": 82
+        }
+      },
+      "byHorse": {
+        "천둥질주": {
+          "rides": 6,
+          "wins": 2,
+          "places": 4
+        }
+      }
+    },
+    {
+      "name": "임성실",
+      "track": "서울",
+      "winRate": 14.2,
+      "placeRate": 38.4,
+      "rides": 815,
+      "recentForm": "",
+      "recent30": {
+        "rides": 30,
+        "wins": 4,
+        "places": 13
+      },
+      "byDistance": {
+        "1000": {
+          "rides": 203,
+          "places": 82
+        },
+        "1200": {
+          "rides": 203,
+          "places": 88
+        },
+        "1400": {
+          "rides": 203,
+          "places": 76
+        },
+        "1800": {
+          "rides": 203,
+          "places": 70
+        }
+      },
+      "byTrack": {
+        "양호": {
+          "rides": 203,
+          "places": 82
+        },
+        "다습": {
+          "rides": 203,
+          "places": 72
+        },
+        "불량": {
+          "rides": 203,
+          "places": 66
+        },
+        "건조": {
+          "rides": 203,
+          "places": 80
+        }
+      },
+      "byHorse": {
+        "에레노아퀸": {
+          "rides": 7,
+          "wins": 3,
+          "places": 5
+        }
+      }
+    },
+    {
+      "name": "김용근",
+      "track": "서울",
+      "winRate": 12.8,
+      "placeRate": 35.0,
+      "rides": 870,
+      "recentForm": "",
+      "recent30": {
+        "rides": 30,
+        "wins": 4,
+        "places": 11
+      },
+      "byDistance": {
+        "1000": {
+          "rides": 217,
+          "places": 80
+        },
+        "1200": {
+          "rides": 217,
+          "places": 87
+        },
+        "1400": {
+          "rides": 217,
+          "places": 74
+        },
+        "1800": {
+          "rides": 217,
+          "places": 67
+        }
+      },
+      "byTrack": {
+        "양호": {
+          "rides": 217,
+          "places": 80
+        },
+        "다습": {
+          "rides": 217,
+          "places": 69
+        },
+        "불량": {
+          "rides": 217,
+          "places": 63
+        },
+        "건조": {
+          "rides": 217,
+          "places": 78
+        }
+      },
+      "byHorse": {
+        "번개의질주": {
+          "rides": 8,
+          "wins": 2,
+          "places": 6
+        }
+      }
+    },
+    {
+      "name": "정도윤",
+      "track": "서울",
+      "winRate": 11.0,
+      "placeRate": 33.2,
+      "rides": 925,
+      "recentForm": "",
+      "recent30": {
+        "rides": 30,
+        "wins": 3,
+        "places": 12
+      },
+      "byDistance": {
+        "1000": {
+          "rides": 231,
+          "places": 81
+        },
+        "1200": {
+          "rides": 231,
+          "places": 88
+        },
+        "1400": {
+          "rides": 231,
+          "places": 74
+        },
+        "1800": {
+          "rides": 231,
+          "places": 67
+        }
+      },
+      "byTrack": {
+        "양호": {
+          "rides": 231,
+          "places": 81
+        },
+        "다습": {
+          "rides": 231,
+          "places": 70
+        },
+        "불량": {
+          "rides": 231,
+          "places": 63
+        },
+        "건조": {
+          "rides": 231,
+          "places": 79
+        }
+      },
+      "byHorse": {}
+    },
+    {
+      "name": "이찬호",
+      "track": "서울",
+      "winRate": 10.3,
+      "placeRate": 31.5,
+      "rides": 980,
+      "recentForm": "",
+      "recent30": {
+        "rides": 30,
+        "wins": 3,
+        "places": 11
+      },
+      "byDistance": {
+        "1000": {
+          "rides": 245,
+          "places": 82
+        },
+        "1200": {
+          "rides": 245,
+          "places": 89
+        },
+        "1400": {
+          "rides": 245,
+          "places": 75
+        },
+        "1800": {
+          "rides": 245,
+          "places": 67
+        }
+      },
+      "byTrack": {
+        "양호": {
+          "rides": 245,
+          "places": 82
+        },
+        "다습": {
+          "rides": 245,
+          "places": 70
+        },
+        "불량": {
+          "rides": 245,
+          "places": 62
+        },
+        "건조": {
+          "rides": 245,
+          "places": 80
+        }
+      },
+      "byHorse": {}
+    },
+    {
+      "name": "서승운",
+      "track": "부산",
+      "winRate": 16.7,
+      "placeRate": 40.0,
+      "rides": 1035,
+      "recentForm": "",
+      "recent30": {
+        "rides": 30,
+        "wins": 5,
+        "places": 13
+      },
+      "byDistance": {
+        "1000": {
+          "rides": 258,
+          "places": 108
+        },
+        "1200": {
+          "rides": 258,
+          "places": 116
+        },
+        "1400": {
+          "rides": 258,
+          "places": 101
+        },
+        "1800": {
+          "rides": 258,
+          "places": 93
+        }
+      },
+      "byTrack": {
+        "양호": {
+          "rides": 258,
+          "places": 108
+        },
+        "다습": {
+          "rides": 258,
+          "places": 95
+        },
+        "불량": {
+          "rides": 258,
+          "places": 88
+        },
+        "건조": {
+          "rides": 258,
+          "places": 106
+        }
+      },
+      "byHorse": {}
+    },
+    {
+      "name": "유현명",
+      "track": "부산",
+      "winRate": 13.5,
+      "placeRate": 36.8,
+      "rides": 1090,
+      "recentForm": "",
+      "recent30": {
+        "rides": 30,
+        "wins": 4,
+        "places": 13
+      },
+      "byDistance": {
+        "1000": {
+          "rides": 272,
+          "places": 106
+        },
+        "1200": {
+          "rides": 272,
+          "places": 114
+        },
+        "1400": {
+          "rides": 272,
+          "places": 97
+        },
+        "1800": {
+          "rides": 272,
+          "places": 89
+        }
+      },
+      "byTrack": {
+        "양호": {
+          "rides": 272,
+          "places": 106
+        },
+        "다습": {
+          "rides": 272,
+          "places": 92
+        },
+        "불량": {
+          "rides": 272,
+          "places": 84
+        },
+        "건조": {
+          "rides": 272,
+          "places": 103
+        }
+      },
+      "byHorse": {}
+    },
+    {
+      "name": "조성곤",
+      "track": "부산",
+      "winRate": 12.1,
+      "placeRate": 34.4,
+      "rides": 1145,
+      "recentForm": "",
+      "recent30": {
+        "rides": 30,
+        "wins": 4,
+        "places": 12
+      },
+      "byDistance": {
+        "1000": {
+          "rides": 286,
+          "places": 104
+        },
+        "1200": {
+          "rides": 286,
+          "places": 113
+        },
+        "1400": {
+          "rides": 286,
+          "places": 96
+        },
+        "1800": {
+          "rides": 286,
+          "places": 87
+        }
+      },
+      "byTrack": {
+        "양호": {
+          "rides": 286,
+          "places": 104
+        },
+        "다습": {
+          "rides": 286,
+          "places": 90
+        },
+        "불량": {
+          "rides": 286,
+          "places": 81
+        },
+        "건조": {
+          "rides": 286,
+          "places": 101
+        }
+      },
+      "byHorse": {}
+    },
+    {
+      "name": "김혜선",
+      "track": "부산",
+      "winRate": 9.8,
+      "placeRate": 30.0,
+      "rides": 1200,
+      "recentForm": "",
+      "recent30": {
+        "rides": 30,
+        "wins": 3,
+        "places": 10
+      },
+      "byDistance": {
+        "1000": {
+          "rides": 300,
+          "places": 96
+        },
+        "1200": {
+          "rides": 300,
+          "places": 105
+        },
+        "1400": {
+          "rides": 300,
+          "places": 87
+        },
+        "1800": {
+          "rides": 300,
+          "places": 78
+        }
+      },
+      "byTrack": {
+        "양호": {
+          "rides": 300,
+          "places": 96
+        },
+        "다습": {
+          "rides": 300,
+          "places": 81
+        },
+        "불량": {
+          "rides": 300,
+          "places": 72
+        },
+        "건조": {
+          "rides": 300,
+          "places": 93
+        }
+      },
+      "byHorse": {}
+    },
+    {
+      "name": "박정수",
+      "track": "서울",
+      "winRate": 8.9,
+      "placeRate": 28.5,
+      "rides": 1255,
+      "recentForm": "",
+      "recent30": {
+        "rides": 30,
+        "wins": 3,
+        "places": 10
+      },
+      "byDistance": {
+        "1000": {
+          "rides": 313,
+          "places": 95
+        },
+        "1200": {
+          "rides": 313,
+          "places": 105
+        },
+        "1400": {
+          "rides": 313,
+          "places": 86
+        },
+        "1800": {
+          "rides": 313,
+          "places": 77
+        }
+      },
+      "byTrack": {
+        "양호": {
+          "rides": 313,
+          "places": 95
+        },
+        "다습": {
+          "rides": 313,
+          "places": 80
+        },
+        "불량": {
+          "rides": 313,
+          "places": 70
+        },
+        "건조": {
+          "rides": 313,
+          "places": 92
+        }
+      },
+      "byHorse": {}
+    }
   ]
 }

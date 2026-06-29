@@ -505,10 +505,27 @@ def analyze():
     jstats = body.get("jockeyStats", {})
     lines = []
     any_weight = False
+    rdist = _to_int(race.get("distance"))
+    rtrack = (race.get("condition") or {}).get("track")
     for h in race.get("horses", []):
         j = jstats.get(h.get("jockey", ""))
-        jstat = (f"(승률 {j['winRate']}%, 복승권 {j['placeRate']}%, 기승 {j['rides']})"
-                 if j else "(기수통계 없음)")
+        jstat = "(기수통계 없음)"
+        if j:
+            # [6번] 기수 거리/주로/마필 적성 자동 반영
+            extra = ""
+            r30 = j.get("recent30")
+            if r30 and r30.get("rides"):
+                extra += f", 최근30 {round(r30['places'] / r30['rides'] * 100)}%"
+            bd = (j.get("byDistance") or {}).get(str(rdist)) if rdist else None
+            if bd and bd.get("rides"):
+                extra += f", {rdist}m {round(bd['places'] / bd['rides'] * 100)}%"
+            bt = (j.get("byTrack") or {}).get(rtrack) if rtrack else None
+            if bt and bt.get("rides"):
+                extra += f", 주로{rtrack} {round(bt['places'] / bt['rides'] * 100)}%"
+            bh = (j.get("byHorse") or {}).get(h.get("horseName"))
+            if bh and bh.get("rides"):
+                extra += f", 이 말과 복승권 {bh['places']}/{bh['rides']}"
+            jstat = f"(승률 {j['winRate']}%, 복승권 {j['placeRate']}%, 기승 {j['rides']}{extra})"
         # [2번] 마체중 변동
         weight_note = ""
         bw = h.get("bodyWeight")

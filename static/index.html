@@ -24,6 +24,7 @@
     <button class="tab-btn" data-tab="japan">🎰 배당판 캡처</button>
     <button class="tab-btn" data-tab="combined">🎯 통합분석</button>
     <button class="tab-btn" data-tab="result">📝 결과기록</button>
+    <button class="tab-btn" data-tab="jockeydb">🏇 기수DB</button>
     <button class="tab-btn" data-tab="stats">📊 통계</button>
   </nav>
 
@@ -186,6 +187,18 @@
         <h2>경주 결과 입력</h2>
         <p class="hint">실제 착순을 입력하면 누적 학습 DB에 반영됩니다.</p>
         <div id="resultForm"></div>
+      </div>
+    </section>
+
+    <!-- [6번] 기수 DB -->
+    <section id="tab-jockeydb" class="tab-panel">
+      <div class="panel-card">
+        <h2>🏇 기수 DB (리딩 순위 · 거리/주로/마필 적성)</h2>
+        <p class="hint">기수별 성적은 결과기록 시 자동 갱신됩니다(거리·주로상태·기수-마필 조합·최근 30경주). 분석 시 자동 반영됩니다.</p>
+        <div class="cfg-row">
+          <label class="hint">기수 상세<br><select id="jockeySelect" class="cfg-input" style="width:160px"></select></label>
+        </div>
+        <div id="jockeyDbView"></div>
       </div>
     </section>
 
