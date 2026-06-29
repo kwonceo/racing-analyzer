@@ -142,7 +142,17 @@
             </label>
             <button id="snap1Btn" class="btn btn-primary">📸 1차 캡처 · 10분전</button>
             <button id="snap2Btn" class="btn btn-primary">📸 2차 캡처 · 1분30초전</button>
+            <button id="quickOddsBtn" class="btn">⌨️ 빠른입력</button>
             <button id="oddsDetectBtn" class="btn" disabled>⚡ 이상감지 분석</button>
+          </div>
+          <!-- [2번] 빠른 입력 모드 — Vision 없이 마번·배당 숫자만 입력해 즉시 이상감지 -->
+          <div id="quickOddsBox" class="hidden" style="margin-top:10px;background:rgba(0,0,0,.04);padding:10px;border-radius:8px">
+            <p class="hint" style="margin:0 0 6px">⌨️ <b>빠른입력</b> — Vision 없이 즉시 계산(0.1초). 한 줄에 <code>마번 배당</code> (예: <code>4 2.4</code>). 콤마/줄바꿈 구분, <code>번/배</code> 같은 글자는 무시됩니다.</p>
+            <textarea id="quickOddsInput" rows="4" class="cfg-input" style="width:100%;box-sizing:border-box;font-family:monospace" placeholder="1 4.9&#10;4 2.4&#10;6 4.8"></textarea>
+            <div class="cfg-row" style="margin-top:6px">
+              <button id="quickOddsApplyBtn" class="btn btn-primary">⚡ 즉시 이상감지</button>
+              <span class="hint" style="margin:0">스냅샷이 없으면 1차로, 1차가 있으면 2차로 저장 후 1차와 자동 비교합니다.</span>
+            </div>
           </div>
           <p class="hint" id="oddsTrackHint" style="margin-top:8px">먼저 화면을 캡처/크롭한 뒤 [1차 캡처]를 누르세요.</p>
           <p class="hint" id="snapTimer" style="margin-top:4px;font-weight:600"></p>

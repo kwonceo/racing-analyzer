@@ -18,7 +18,7 @@
     lastReports: {},
     lastSheets: {},   // title -> {horses(추출 출전마), distance} — Phase 4 통합분석용
     lastCombined: {}, // title -> {bets, recOdds, hadAnomaly, budget} — Phase 5 결과기록용
-    oddsTrack: { betType: '복승', raceKey: null, snaps: 0, nos: new Set() },
+    oddsTrack: { betType: '복승', raceKey: null, snaps: 0, nos: new Set(), firstOdds: {} },
     raceCondition: { track: '', weather: '' }, // [1번] 주로 상태 / 날씨
     horseWeights: {},        // [2번] title -> { 마번: {cur, prev} }
     activeKoreaCtx: null,    // 재분석용 컨텍스트 {idx,title,race,sheetHorses}
@@ -506,7 +506,13 @@
     }));
     $('#snap1Btn').addEventListener('click', () => captureSnapshot(1));
     $('#snap2Btn').addEventListener('click', () => captureSnapshot(2));
-    $('#oddsDetectBtn').addEventListener('click', runOddsDetect);
+    $('#oddsDetectBtn').addEventListener('click', () => runOddsDetect());
+    // [2번] 빠른입력 모드
+    $('#quickOddsBtn').addEventListener('click', () => {
+      const box = $('#quickOddsBox'); box.classList.toggle('hidden');
+      if (!box.classList.contains('hidden')) $('#quickOddsInput').focus();
+    });
+    $('#quickOddsApplyBtn').addEventListener('click', submitQuickOdds);
 
     // [3번] 3종 동시 캡처/분석
     $$('.triple-cap-btn').forEach((b) => b.addEventListener('click', () => captureTriple(b.dataset.kind)));
@@ -875,35 +881,89 @@
     return out;
   }
 
+  /** 배당 스냅샷 저장 코어 — Vision/빠른입력 공통. round1=새 추적+1차 캐시, round2=정지+즉시 비교.
+   *  Vision API를 호출하지 않으므로(이미 받은 odds 사용) ~0.1초. quiet=true면 결과 렌더 시 오버레이 생략. */
+  async function applyOddsSnapshot(round, odds, quiet) {
+    const raceKey = round === 1 ? selectedRaceKey() : (state.oddsTrack.raceKey || selectedRaceKey());
+    if (round === 1) {
+      await Analysis.oddsClear(raceKey);       // 1차 = 새 추적 시작
+      state.oddsTrack = { betType: state.oddsTrack.betType, raceKey, snaps: 0, nos: new Set(), firstOdds: {} };
+    }
+    const r = await Analysis.oddsSnapshot(raceKey, odds);
+    state.oddsTrack.snaps = r.snaps;
+    Object.keys(odds).forEach((n) => state.oddsTrack.nos.add(+n));
+    if (round === 1) state.oddsTrack.firstOdds = { ...odds };  // [1번] 1차 결과 캐시
+
+    $('#oddsDetectBtn').disabled = state.oddsTrack.snaps < 2;
+    const got = Object.keys(odds).length;
+    $('#oddsTrackHint').textContent =
+      `${round}차 저장됨 (마번 ${got}두 · 누적 스냅샷 ${state.oddsTrack.snaps}회) — ` +
+      (state.oddsTrack.snaps < 2 ? '2차 캡처/빠른입력을 진행하세요.' : '자동 비교 완료(또는 [이상감지 분석]).');
+
+    if (round === 1) { startSnapTimer(); notify('📸 1차 저장 — 8분30초 후 2차 알림', true); }
+    else { stopSnapTimer(); await runOddsDetect(true); }  // 2차 = 즉시 비교(변동폭만, API 재호출 없음)
+  }
+
   async function captureSnapshot(round) {
     if (!cap.canvas) { toast('먼저 화면을 캡처하거나 이미지를 올리세요.'); return; }
-    const raceKey = round === 1 ? selectedRaceKey() : (state.oddsTrack.raceKey || selectedRaceKey());
+    const block = capturedBlock();   // 프레임을 먼저 확보(이후 화면이 바뀌어도 안전)
+    const hasFirst = state.oddsTrack.firstOdds && Object.keys(state.oddsTrack.firstOdds).length;
+    // [3번] 2차는 즉시 1차 결과 + "분석 중"을 표시하고 Vision은 백그라운드(비차단)로 처리
+    const bg = round === 2 && hasFirst;
+    if (bg) { renderSecondPending(); notify('📸 2차 캡처 — 즉시 1차 표시 · 백그라운드 판독 중', true); }
+    else { showLoading(`${round}차 배당 판독 중... (Vision)`); }
     try {
-      showLoading(`${round}차 배당 판독 중... (Vision)`);
-      const rep = await Analysis.analyzeOdds(capturedBlock());
+      const rep = await Analysis.analyzeOdds(block);
       const odds = perHorseOdds(rep);
-      if (!Object.keys(odds).length) { hideLoading(); toast('배당 수치를 못 읽었습니다. 영역을 다시 선택해 보세요.'); return; }
-
-      if (round === 1) {
-        await Analysis.oddsClear(raceKey);     // 1차 = 새 추적 시작
-        state.oddsTrack = { betType: state.oddsTrack.betType, raceKey, snaps: 0, nos: new Set() };
+      if (!Object.keys(odds).length) {
+        if (!bg) hideLoading();
+        toast('배당 수치를 못 읽었습니다. 영역을 다시 선택하거나 [빠른입력]을 쓰세요.'); return;
       }
-      $('#loadingText').textContent = `${round}차 배당 저장 중...`;
-      const r = await Analysis.oddsSnapshot(raceKey, odds);
-      state.oddsTrack.snaps = r.snaps;
-      Object.keys(odds).forEach((n) => state.oddsTrack.nos.add(+n));
-      hideLoading();
+      if (!bg) $('#loadingText').textContent = `${round}차 배당 저장 중...`;
+      await applyOddsSnapshot(round, odds, bg);   // 완료 시 화면 자동 업데이트
+      if (bg) notify('✅ 2차 판독 완료 — 변동폭 자동 갱신', true);
+    } catch (e) {
+      toast(`${round}차 캡처 실패: ` + e.message);
+    } finally {
+      if (!bg) hideLoading();
+    }
+  }
 
-      $('#oddsDetectBtn').disabled = state.oddsTrack.snaps < 2;
-      const got = Object.keys(odds).length;
-      $('#oddsTrackHint').textContent =
-        `${round}차 저장됨 (마번 ${got}두 · 누적 스냅샷 ${state.oddsTrack.snaps}회) — ` +
-        (state.oddsTrack.snaps < 2 ? '2차 캡처를 진행하세요.' : '[이상감지 분석]을 누르세요.');
+  /** [2번] "마번 배당" 줄들을 파싱 → {마번: 배당}. 숫자 외 문자(번/배/콜론 등)는 구분자로 처리. */
+  function parseQuickOdds(text) {
+    const out = {};
+    String(text || '').split(/[\n,;]+/).forEach((line) => {
+      const t = line.replace(/[^\d. ]+/g, ' ').trim().split(/\s+/).filter(Boolean);
+      if (t.length >= 2) {
+        const no = parseInt(t[0], 10), v = parseFloat(t[1]);
+        if (no > 0 && v > 0) out[no] = v;
+      }
+    });
+    return out;
+  }
 
-      // [3단계] 1차 → 타이머 시작 / 2차 → 타이머 정지 + 자동 비교
-      if (round === 1) { startSnapTimer(); notify('📸 1차 저장 — 8분30초 후 2차 알림', true); }
-      else if (round === 2) { stopSnapTimer(); notify('📸 2차 저장 — 자동 비교 분석', true); runOddsDetect(); }
-    } catch (e) { hideLoading(); toast(`${round}차 캡처 실패: ` + e.message); }
+  /** [2번] 빠른입력 제출 — Vision 없이 즉시 스냅샷 저장 + (2차면) 자동 비교 */
+  async function submitQuickOdds() {
+    const odds = parseQuickOdds($('#quickOddsInput').value);
+    const n = Object.keys(odds).length;
+    if (!n) { toast('마번·배당을 한 줄에 하나씩 입력하세요. 예: 4 2.4'); return; }
+    const round = autoRound();
+    try {
+      await applyOddsSnapshot(round, odds, true);   // quiet — 오버레이 없이 즉시
+      notify(`⌨️ 빠른입력 ${round}차 저장 (${n}두)`, true);
+      if (round === 2) $('#quickOddsInput').value = '';
+    } catch (e) { toast('빠른입력 실패: ' + e.message); }
+  }
+
+  /** [3번] 2차 백그라운드 판독 중 즉시 표시할 1차 기준 화면 */
+  function renderSecondPending() {
+    const el = $('#oddsTrackReport'); el.innerHTML = '';
+    const fo = state.oddsTrack.firstOdds || {};
+    const rows = Object.keys(fo).map(Number).sort((a, b) => a - b)
+      .map((no) => `<tr><td>${no}</td><td>${fo[no]}</td></tr>`).join('');
+    add(el, 'panel-card', `<h3>📡 2차 Vision 판독 중… <span class="hint" style="font-weight:400">완료 시 드롭·괴리·신호 자동 표시</span></h3>
+      <table class="data-table"><thead><tr><th>마번</th><th>1차 배당(기준)</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="hint" style="margin-top:8px">⏳ 화면은 즉시 1차 기준을 표시합니다. 백그라운드 판독이 끝나면 변동폭이 채워집니다.</p>`);
   }
 
   // ---------- [3단계] 1차/2차 자동 타이머 ----------
@@ -958,14 +1018,14 @@
     return [...state.oddsTrack.nos].sort((a, b) => a - b).map((no) => ({ no, name: '', score: 0 }));
   }
 
-  async function runOddsDetect() {
+  async function runOddsDetect(quiet) {
     const raceKey = state.oddsTrack.raceKey || selectedRaceKey();
     try {
-      showLoading('이상감지 계산 중...');
+      if (!quiet) showLoading('이상감지 계산 중...');   // compute는 ms 단위(서버 순수 연산) — quiet면 오버레이 생략
       const c = await Analysis.oddsCompute(raceKey, bmedHorsesFor(raceKey));
-      hideLoading();
+      if (!quiet) hideLoading();
       renderOddsDetect(c);
-    } catch (e) { hideLoading(); toast('이상감지 실패: ' + e.message); }
+    } catch (e) { if (!quiet) hideLoading(); toast('이상감지 실패: ' + e.message); }
   }
 
   /** 신호 점수 → 신호등 색. 높을수록 강한 이상신호(매수). */
