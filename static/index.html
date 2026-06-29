@@ -33,6 +33,26 @@
       <div class="panel-card">
         <h2>한국경마 출주표 분석</h2>
         <p class="hint">KRA 출주표는 한글이 벡터로 그려져 텍스트 추출이 불가합니다. 각 페이지를 이미지로 렌더링해 서버 AI Vision으로 판독합니다.</p>
+
+        <!-- [1번] 경주 환경: 주로 상태 + 날씨 (분석 프롬프트에 반영) -->
+        <div class="cond-bar" id="condBar">
+          <div class="cond-group">
+            <span class="cond-label">주로</span>
+            <button type="button" class="cond-btn" data-track="양호">양호</button>
+            <button type="button" class="cond-btn" data-track="다습">다습</button>
+            <button type="button" class="cond-btn" data-track="불량">불량</button>
+            <button type="button" class="cond-btn" data-track="건조">건조</button>
+          </div>
+          <div class="cond-group">
+            <span class="cond-label">날씨</span>
+            <button type="button" class="cond-btn" data-weather="맑음">맑음</button>
+            <button type="button" class="cond-btn" data-weather="흐림">흐림</button>
+            <button type="button" class="cond-btn" data-weather="비">비</button>
+            <button type="button" class="cond-btn" data-weather="강풍">강풍</button>
+          </div>
+          <span class="hint" id="condHint" style="margin:0">선택 사항 — 비 선택 시 주로가 불량으로 자동 설정됩니다</span>
+        </div>
+
         <div class="upload-zone" id="koreaUploadZone">
           <input type="file" id="koreaPdfInput" accept="application/pdf" hidden />
           <div class="upload-inner">
@@ -114,6 +134,7 @@
             <div class="seg" id="betTypeSeg">
               <button type="button" class="seg-btn active" data-bt="복승">복승</button>
               <button type="button" class="seg-btn" data-bt="쌍승">쌍승</button>
+              <button type="button" class="seg-btn" data-bt="삼복승">삼복승</button>
             </div>
             <label class="hint">연결 분석(BMED)<br>
               <select id="oddsRaceSelect" class="cfg-input" style="width:190px"></select>
@@ -125,7 +146,21 @@
           <p class="hint" id="oddsTrackHint" style="margin-top:8px">먼저 화면을 캡처/크롭한 뒤 [1차 캡처]를 누르세요.</p>
           <p class="hint" id="snapTimer" style="margin-top:4px;font-weight:600"></p>
         </div>
+
+        <!-- [3번] 복승/쌍승/삼복승 3종 동시 분석 -->
+        <div id="triplePanel" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+          <h3>🎯 3종 동시 분석 (복승 · 쌍승 · 삼복승)</h3>
+          <p class="hint">각 배당판을 띄우고 캡처하세요(현재 화면 전체). 3종을 함께 판독해 <b>베팅종류 간 불일치(이상)</b>를 감지합니다.</p>
+          <div class="cfg-row">
+            <button class="btn triple-cap-btn" data-kind="quinella">🎰 복승 캡처 <span class="tri-st" id="triSt-quinella">⬜</span></button>
+            <button class="btn triple-cap-btn" data-kind="exacta">🔀 쌍승 캡처 <span class="tri-st" id="triSt-exacta">⬜</span></button>
+            <button class="btn triple-cap-btn" data-kind="trio">🎲 삼복승 캡처 <span class="tri-st" id="triSt-trio">⬜</span></button>
+            <button id="tripleRunBtn" class="btn btn-primary" disabled>⚡ 3종 동시 분석</button>
+            <span class="hint" id="tripleHint" style="margin:0">최소 1종 캡처 후 분석 가능</span>
+          </div>
+        </div>
       </div>
+      <div id="tripleReport" class="report-area"></div>
       <div id="oddsTrackReport" class="report-area"></div>
       <div id="oddsReport" class="report-area"></div>
     </section>

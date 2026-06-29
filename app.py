@@ -504,17 +504,35 @@ def analyze():
     race = body.get("raceData", {})
     jstats = body.get("jockeyStats", {})
     lines = []
+    any_weight = False
     for h in race.get("horses", []):
         j = jstats.get(h.get("jockey", ""))
         jstat = (f"(승률 {j['winRate']}%, 복승권 {j['placeRate']}%, 기승 {j['rides']})"
                  if j else "(기수통계 없음)")
+        # [2번] 마체중 변동
+        weight_note = ""
+        bw = h.get("bodyWeight")
+        if bw:
+            any_weight = True
+            d = h.get("weightDelta")
+            weight_note = f" / 마체중 {bw}kg"
+            if d is not None:
+                flag = " 🔴위험" if abs(d) >= 20 else " 🟡경고" if abs(d) >= 10 else ""
+                weight_note += f"(전회대비 {'+' if d >= 0 else ''}{d}kg{flag})"
         lines.append(
             f"{h.get('horseNum')}번 {h.get('horseName')} / 기수 {h.get('jockey') or '미상'} {jstat} / "
             f"부담 {h.get('weight') or '-'} / 레이팅 {h.get('rating') or '-'} / 전적 {h.get('recentRecord') or '-'} / "
-            f"상태 {h.get('health') or '-'} / 조교 {h.get('training') or '-'}"
+            f"상태 {h.get('health') or '-'} / 조교 {h.get('training') or '-'}{weight_note}"
         )
     title = race.get("raceTitle") or (f"제{race.get('raceNo')}경주" if race.get("raceNo") else "경주")
-    prompt = (f"{ANALYSIS_GUIDE}\n\n[{title}] 출전마 정보:\n" + "\n".join(lines) +
+    cond = race.get("condition") or {}
+    cond_line = ""
+    if cond.get("track") or cond.get("weather"):
+        cond_line = (f"\n\n경주 환경: 주로 {cond.get('track') or '미상'}, 날씨 {cond.get('weather') or '미상'}. "
+                     "주로 상태(불량/다습 등)와 날씨가 각 말의 적성에 미치는 영향을 평가에 반영하세요.")
+    weight_line = ("\n마체중: ±10kg 이상(🟡)은 컨디션 변화 신호, ±20kg 이상(🔴)은 위험 신호로 평가에 반영하세요."
+                   if any_weight else "")
+    prompt = (f"{ANALYSIS_GUIDE}\n\n[{title}] 출전마 정보:\n" + "\n".join(lines) + cond_line + weight_line +
               "\n\n위 정보로 분석과 베팅 추천을 JSON으로 응답하세요.")
     out = call_claude([{"type": "text", "text": prompt}], ANALYSIS_SCHEMA, 4096, body.get("api_key"))
     return jsonify(out)
@@ -572,6 +590,69 @@ def analyze_odds():
     )
     out = call_claude([{"type": "text", "text": prompt}, image_block(body.get("image"))],
                       ODDS_SCHEMA, 4096, body.get("api_key"))
+    return jsonify(out)
+
+
+# [3번] 복승/쌍승/삼복승 3종 동시 분석 + 불일치(이상) 감지
+_TRIPLE_COMBO = {
+    "type": "object",
+    "properties": {
+        "combo": {"type": "array", "items": {"type": "integer"}},
+        "odds": {"type": "string"},
+        "abnormal": {"type": "boolean"},
+    },
+    "required": ["combo", "odds", "abnormal"],
+    "additionalProperties": False,
+}
+TRIPLE_ODDS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "summary": {"type": "string"},
+        "quinella": {"type": "array", "items": _TRIPLE_COMBO},   # 복승
+        "exacta": {"type": "array", "items": _TRIPLE_COMBO},     # 쌍승
+        "trio": {"type": "array", "items": _TRIPLE_COMBO},       # 삼복승
+        "inconsistencies": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "combo": {"type": "array", "items": {"type": "integer"}},
+                    "level": {"type": "string", "enum": ["🔴", "🟡", ""]},
+                    "note": {"type": "string"},
+                },
+                "required": ["combo", "level", "note"],
+                "additionalProperties": False,
+            },
+        },
+        "alerts": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["summary", "quinella", "exacta", "trio", "inconsistencies", "alerts"],
+    "additionalProperties": False,
+}
+
+
+@app.route("/api/analyze/odds/triple", methods=["POST"])
+def analyze_odds_triple():
+    """복승/쌍복/삼복승 배당판 3종을 한 번에 판독하고 베팅종류 간 불일치(이상)를 감지."""
+    body = request.json or {}
+    prompt = (
+        "아래에 같은 경주의 [복승 배당판], [쌍승 배당판], [삼복승 배당판]이 주어집니다(일부만 올 수 있음).\n"
+        "[1단계] 각 배당판을 매트릭스/리스트 헤더 마번 기준으로 정확히 파싱:\n"
+        "- 복승(quinella): combo=[2마리], odds. / 쌍승(exacta): combo=[선착,후착 2마리], odds. / 삼복승(trio): combo=[3마리], odds.\n"
+        "- 비정상적으로 낮은(급락) 배당은 abnormal=true.\n"
+        "[2단계] 베팅종류 간 불일치(이상) 감지 — inconsistencies 에 기록:\n"
+        "- 예: 복승 A-B가 매우 싼데(인기), 대응하는 쌍승(A→B, B→A) 또는 A·B를 포함한 삼복승이 그만큼 싸지 않으면 불일치 → 한쪽 배당 이상 의심.\n"
+        "- 예: 삼복승 A-B-C는 싼데 복승 A-B/ B-C/ A-C 중 일부가 비싸면 특정 두 마리 신뢰도 불일치.\n"
+        "- 불일치 강도: 큰 괴리 🔴, 중간 🟡. combo(관련 마번), level, note(어느 종류끼리 어떻게 어긋났는지) 기재.\n"
+        "[3단계] alerts 에 핵심 경고 한두 줄, summary 한 줄 요약. 배당판이 아니면 모두 빈 배열 + alerts=['배당판 인식 실패']."
+    )
+    content = [{"type": "text", "text": prompt}]
+    for key, label in [("quinella", "[복승 배당판]"), ("exacta", "[쌍승 배당판]"), ("trio", "[삼복승 배당판]")]:
+        if body.get(key):
+            content += [{"type": "text", "text": label}, image_block(body[key])]
+    if len(content) == 1:
+        return jsonify({"error": "복승/쌍승/삼복승 중 최소 1장의 배당판 이미지가 필요합니다."}), 400
+    out = call_claude(content, TRIPLE_ODDS_SCHEMA, 4096, body.get("api_key"))
     return jsonify(out)
 
 

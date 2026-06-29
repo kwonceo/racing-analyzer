@@ -101,6 +101,22 @@ body {
 .panel-card h2 { font-size: 18px; margin-bottom: 6px; }
 .hint { color: var(--text-dim); font-size: 13px; margin-bottom: 16px; }
 
+/* ===== [1번] 경주 환경(주로/날씨) 바 ===== */
+.cond-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 14px; margin-bottom: 14px;
+}
+.cond-group { display: flex; align-items: center; gap: 6px; }
+.cond-label { font-size: 12px; color: var(--text-dim); font-weight: 600; margin-right: 2px; }
+.cond-btn {
+  background: var(--bg); border: 1px solid var(--border); color: var(--text-dim);
+  padding: 5px 12px; border-radius: 16px; cursor: pointer; font-size: 13px; font-family: var(--font);
+  transition: all .15s;
+}
+.cond-btn:hover { color: var(--text); border-color: var(--text-dim); }
+.cond-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
 /* ===== 업로드 존 ===== */
 .upload-zone {
   border: 2px dashed var(--border);

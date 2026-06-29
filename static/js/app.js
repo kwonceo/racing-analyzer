@@ -19,6 +19,10 @@
     lastSheets: {},   // title -> {horses(추출 출전마), distance} — Phase 4 통합분석용
     lastCombined: {}, // title -> {bets, recOdds, hadAnomaly, budget} — Phase 5 결과기록용
     oddsTrack: { betType: '복승', raceKey: null, snaps: 0, nos: new Set() },
+    raceCondition: { track: '', weather: '' }, // [1번] 주로 상태 / 날씨
+    horseWeights: {},        // [2번] title -> { 마번: {cur, prev} }
+    activeKoreaCtx: null,    // 재분석용 컨텍스트 {idx,title,race,sheetHorses}
+    tripleCaps: { quinella: null, exacta: null, trio: null }, // [3번] 3종 배당판 이미지
   };
 
   const $ = (s) => document.querySelector(s);
@@ -70,6 +74,38 @@
       else { const n = parseInt(part.trim(), 10); if (!isNaN(n)) out.add(n); }
     });
     return [...out].filter((n) => n >= 1 && n <= max).sort((a, b) => a - b);
+  }
+
+  // ---------- [1번] 경주 환경(주로/날씨) ----------
+  function initCondBar() {
+    const bar = $('#condBar');
+    if (!bar) return;
+    bar.querySelectorAll('.cond-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const isTrack = btn.dataset.track != null;
+        const attr = isTrack ? 'track' : 'weather';
+        const val = btn.dataset[attr];
+        const group = btn.parentElement;
+        const already = btn.classList.contains('active');
+        group.querySelectorAll('.cond-btn').forEach((b) => b.classList.remove('active'));
+        if (already) { state.raceCondition[attr] = ''; }
+        else { btn.classList.add('active'); state.raceCondition[attr] = val; }
+        // 비 선택 시 주로 불량 자동 연동
+        if (!isTrack && !already && val === '비') {
+          state.raceCondition.track = '불량';
+          bar.querySelectorAll('.cond-btn[data-track]').forEach((b) =>
+            b.classList.toggle('active', b.dataset.track === '불량'));
+        }
+        updateCondHint();
+      });
+    });
+    updateCondHint();
+  }
+  function updateCondHint() {
+    const c = state.raceCondition;
+    $('#condHint').textContent = (c.track || c.weather)
+      ? `선택됨 — 주로: ${c.track || '-'} / 날씨: ${c.weather || '-'} (분석에 반영)`
+      : '선택 사항 — 비 선택 시 주로가 불량으로 자동 설정됩니다';
   }
 
   // ---------- 한국경마 ----------
@@ -194,7 +230,7 @@
     return sheet;
   }
 
-  /** 칩 클릭: 요약 페이지(메인표+조교표) 추출 → BMED 분석 */
+  /** 칩 클릭: 요약 페이지 추출 → 컨텍스트 저장 → 분석 실행 */
   async function analyzeKoreaRace(idx, chipEl) {
     const race = state.koreaRaces[idx]; if (!race) return;
     $$('#koreaRaceList .race-chip').forEach((c) => c.classList.remove('active'));
@@ -208,15 +244,83 @@
         hideLoading(); renderPageControl(idx);
         toast('출전마를 못 읽었습니다. ← → 로 페이지를 ±1 보정해보세요.'); return;
       }
-      $('#loadingText').textContent = `${title} BMED 분석 중...`;
-      const report = await Analysis.analyzeRace({ raceNo: race.raceNo, raceTitle: title, horses: sheet.horses }, state.jockeyStats);
-      state.lastReports[title] = report;
       state.lastSheets[title] = { horses: sheet.horses, distance: race.distance };
+      state.activeKoreaCtx = { idx, title, race, sheetHorses: sheet.horses };
+      await runKoreaAnalysis();
+    } catch (err) { hideLoading(); toast('분석 실패: ' + err.message); }
+  }
+
+  /** [2번] 마체중 입력값을 출전마에 병합 */
+  function applyWeights(title, horses) {
+    const wmap = state.horseWeights[title] || {};
+    return horses.map((h) => {
+      const w = wmap[h.horseNum];
+      if (w && typeof w.cur === 'number') {
+        return { ...h, bodyWeight: w.cur, prevWeight: (typeof w.prev === 'number' ? w.prev : null),
+          weightDelta: (typeof w.prev === 'number' ? w.cur - w.prev : null) };
+      }
+      return h;
+    });
+  }
+
+  /** 분석 실행(재분석 공용): 마체중·환경 반영 → 리포트 + 전적점수 + 마체중 패널 */
+  async function runKoreaAnalysis() {
+    const ctx = state.activeKoreaCtx; if (!ctx) return;
+    const { idx, title, race, sheetHorses } = ctx;
+    try {
+      showLoading(`${title} BMED 분석 중...`);
+      const horses = applyWeights(title, sheetHorses);
+      const report = await Analysis.analyzeRace(
+        { raceNo: race.raceNo, raceTitle: title, horses, condition: state.raceCondition }, state.jockeyStats);
+      state.lastReports[title] = report;
       renderReport('#koreaReport', report, '한국', title);
       renderPageControl(idx);
-      try { await renderFormScores(race, sheet); } catch (e) { console.warn('전적 점수 패널 실패:', e); }
+      try { await renderFormScores(race, { horses: sheetHorses }); } catch (e) { console.warn('전적 점수 패널 실패:', e); }
+      renderWeightPanel(title, sheetHorses);
       hideLoading();
     } catch (err) { hideLoading(); toast('분석 실패: ' + err.message); }
+  }
+
+  /** [2번] 마번별 마체중 변동 입력 패널 */
+  function renderWeightPanel(title, horses) {
+    state.horseWeights[title] = state.horseWeights[title] || {};
+    const wmap = state.horseWeights[title];
+    const rows = horses.slice().sort((a, b) => a.horseNum - b.horseNum).map((h) => {
+      const w = wmap[h.horseNum] || {};
+      return `<tr data-no="${h.horseNum}">
+        <td>${h.horseNum}</td><td>${esc(h.horseName || '')}</td>
+        <td><input type="number" step="1" class="cfg-input w-cur" style="width:84px" value="${w.cur != null ? w.cur : ''}" placeholder="현재" /></td>
+        <td><input type="number" step="1" class="cfg-input w-prev" style="width:84px" value="${w.prev != null ? w.prev : ''}" placeholder="전회" /></td>
+        <td class="w-delta">-</td>
+      </tr>`;
+    }).join('');
+    const el = document.createElement('div');
+    el.className = 'panel-card';
+    el.innerHTML = `<h3>⚖️ 마체중 변동 입력 (kg)</h3>
+      <p class="hint">현재 + 전회 마체중 입력 → 변동 자동 계산. ±10kg 🟡 경고 / ±20kg 🔴 위험. [반영 재분석] 시 분석 프롬프트에 포함됩니다.</p>
+      <table class="data-table"><thead><tr><th>마번</th><th>마명</th><th>현재 마체중</th><th>전회 마체중</th><th>변동</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      <button class="btn btn-primary" id="weightReanalyzeBtn" style="margin-top:8px">⚖️ 마체중 반영 재분석</button>`;
+    $('#koreaReport').appendChild(el);
+
+    const recompute = () => {
+      el.querySelectorAll('tr[data-no]').forEach((tr) => {
+        const no = +tr.dataset.no;
+        const cur = parseFloat(tr.querySelector('.w-cur').value);
+        const prev = parseFloat(tr.querySelector('.w-prev').value);
+        wmap[no] = { cur: isNaN(cur) ? null : cur, prev: isNaN(prev) ? null : prev };
+        const cell = tr.querySelector('.w-delta');
+        if (!isNaN(cur) && !isNaN(prev)) {
+          const d = cur - prev, ad = Math.abs(d);
+          const badge = ad >= 20 ? '🔴 위험' : ad >= 10 ? '🟡 경고' : '';
+          const color = ad >= 20 ? 'var(--red)' : ad >= 10 ? 'var(--accent-2)' : 'var(--text)';
+          cell.innerHTML = `<b style="color:${color}">${d >= 0 ? '+' : ''}${d}kg ${badge}</b>`;
+        } else { cell.textContent = '-'; }
+      });
+    };
+    el.querySelectorAll('.w-cur,.w-prev').forEach((inp) => inp.addEventListener('input', recompute));
+    recompute();
+    el.querySelector('#weightReanalyzeBtn').addEventListener('click', () => runKoreaAnalysis());
   }
 
   /** 페이지 ±1 보정 컨트롤을 리포트 상단에 삽입 */
@@ -402,6 +506,10 @@
     $('#snap1Btn').addEventListener('click', () => captureSnapshot(1));
     $('#snap2Btn').addEventListener('click', () => captureSnapshot(2));
     $('#oddsDetectBtn').addEventListener('click', runOddsDetect);
+
+    // [3번] 3종 동시 캡처/분석
+    $$('.triple-cap-btn').forEach((b) => b.addEventListener('click', () => captureTriple(b.dataset.kind)));
+    $('#tripleRunBtn').addEventListener('click', analyzeTriple);
     $('#cropYesBtn').addEventListener('click', () => { $('#capConfirm').classList.add('hidden'); runCropAnalysis(); });
     $('#cropNoBtn').addEventListener('click', () => {
       $('#capConfirm').classList.add('hidden'); cap.rect = null; drawCap();
@@ -679,6 +787,57 @@
     if (!(rep.horses || []).length && !(rep.combos || []).length) {
       add(el, 'panel-card', `<p class="hint">배당 데이터를 인식하지 못했습니다.</p>`);
     }
+  }
+
+  // ---------- [3번] 3종 동시 분석 ----------
+  const TRIPLE_LABEL = { quinella: '복승', exacta: '쌍승', trio: '삼복승' };
+  async function captureTriple(kind) {
+    try {
+      const full = await grabFrame();
+      state.tripleCaps[kind] = canvasToBlock(full);
+      $('#triSt-' + kind).textContent = '✅';
+      const n = Object.values(state.tripleCaps).filter(Boolean).length;
+      $('#tripleRunBtn').disabled = n < 1;
+      $('#tripleHint').textContent = `${TRIPLE_LABEL[kind]} 캡처됨 (${n}/3) — [3종 동시 분석] 가능`;
+      notify(`✅ ${TRIPLE_LABEL[kind]} 배당판 캡처`);
+    } catch (e) { notify('캡처 실패: ' + e.message, false); }
+  }
+
+  async function analyzeTriple() {
+    const caps = state.tripleCaps;
+    if (!(caps.quinella || caps.exacta || caps.trio)) { toast('최소 1종 배당판을 캡처하세요.'); return; }
+    try {
+      showLoading('3종 배당판 동시 분석 중...');
+      const rep = await Analysis.analyzeOddsTriple(caps);
+      hideLoading();
+      renderTriple(rep);
+    } catch (e) { hideLoading(); toast('3종 분석 실패: ' + e.message); }
+  }
+
+  function renderTriple(rep) {
+    const el = $('#tripleReport'); el.innerHTML = '';
+    add(el, 'panel-card', `<h2>🎯 3종 배당판 분석</h2><p class="hint">${esc(rep.summary || '')}</p>`);
+
+    // 불일치(이상) 감지 — 핵심
+    const inc = rep.inconsistencies || [];
+    add(el, 'bet-box', `<h3>🚨 베팅종류 간 불일치(이상)</h3>` +
+      (inc.length ? inc.map((i) =>
+        `<div class="bet-line"><span>${i.level || '•'} <span class="bet-type">${(i.combo || []).join('-')}</span></span>
+         <span>${esc(i.note || '')}</span></div>`).join('')
+        : '<p class="hint">감지된 불일치 없음</p>') +
+      ((rep.alerts || []).length ? rep.alerts.map((a) =>
+        `<div class="bet-line"><span class="bet-type" style="color:var(--red)">●</span><span>${esc(a)}</span></div>`).join('') : ''));
+
+    // 종류별 조합 배당
+    const section = (arr, label) => {
+      if (!(arr || []).length) return '';
+      const rows = arr.map((c) =>
+        `<tr${c.abnormal ? ' style="background:rgba(255,92,92,.12)"' : ''}>
+          <td>${(c.combo || []).join('-')}</td><td>${esc(c.odds || '')}</td><td>${c.abnormal ? '⚠️ 급락' : ''}</td></tr>`).join('');
+      return `<h3>${label}</h3><table class="data-table"><thead><tr><th>조합</th><th>배당</th><th>이상</th></tr></thead><tbody>${rows}</tbody></table>`;
+    };
+    const body = section(rep.quinella, '복승') + section(rep.exacta, '쌍승') + section(rep.trio, '삼복승');
+    if (body) add(el, 'panel-card', body);
   }
 
   // ---------- 배당 시계열 이상감지 (Phase 2) ----------
@@ -1264,7 +1423,7 @@
 
   // ---------- 부트 ----------
   async function boot() {
-    initTabs(); initKorea(); initJapanRace(); initOdds(); initCombined();
+    initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initCombined();
     checkServerHealth();
     try { await JockeyDB.load(); rebuildJockeyStats(); } catch (e) { console.warn('기수 DB 로드 실패:', e); }
   }

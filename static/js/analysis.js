@@ -32,6 +32,14 @@
   function extractTraining(block) { return post('/api/extract/training', { image: imgPayload(block) }); }
   function analyzeRace(raceData, jockeyStats) { return post('/api/analyze', { raceData, jockeyStats }); }
   function analyzeOdds(block) { return post('/api/analyze/odds', { image: imgPayload(block) }); }
+  /** [3번] 복승/쌍승/삼복승 3종 동시 분석 */
+  function analyzeOddsTriple(blocks) {
+    const b = {};
+    if (blocks.quinella) b.quinella = imgPayload(blocks.quinella);
+    if (blocks.exacta) b.exacta = imgPayload(blocks.exacta);
+    if (blocks.trio) b.trio = imgPayload(blocks.trio);
+    return post('/api/analyze/odds/triple', b);
+  }
   function extractResults(block) { return post('/api/extract/results', { image: imgPayload(block) }); }
 
   // ----- 배당 이상감지(시계열) -----
@@ -69,7 +77,7 @@
   global.Analysis = {
     health, detectPages,
     extractJockeySheet, extractRaceSheet, extractTraining, extractResults,
-    analyzeRace, analyzeJapanRace, analyzeOdds,
+    analyzeRace, analyzeJapanRace, analyzeOdds, analyzeOddsTriple,
     oddsSnapshot, oddsCompute, oddsClear, oddsUndo,
     scoreHorses, analyzeCombined,
     fileToImageBlock,
