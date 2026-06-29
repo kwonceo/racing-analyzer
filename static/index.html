@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>경마 BMED 분석기</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- PDF.js는 js/pdf-parser.js에서 동적 import로 로드됩니다 -->
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo">🏇</span>
+      <h1>경마 BMED 분석기</h1>
+    </div>
+    <div class="server-box">
+      <span id="serverStatus" class="api-status">● 서버 확인 중...</span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="korea">🇰🇷 한국경마</button>
+    <button class="tab-btn" data-tab="jp">🇯🇵 일본경마</button>
+    <button class="tab-btn" data-tab="japan">🎰 배당판 캡처</button>
+    <button class="tab-btn" data-tab="combined">🎯 통합분석</button>
+    <button class="tab-btn" data-tab="result">📝 결과기록</button>
+    <button class="tab-btn" data-tab="stats">📊 통계</button>
+  </nav>
+
+  <main class="app-main">
+    <!-- 한국경마 -->
+    <section id="tab-korea" class="tab-panel active">
+      <div class="panel-card">
+        <h2>한국경마 출주표 분석</h2>
+        <p class="hint">KRA 출주표는 한글이 벡터로 그려져 텍스트 추출이 불가합니다. 각 페이지를 이미지로 렌더링해 서버 AI Vision으로 판독합니다.</p>
+        <div class="upload-zone" id="koreaUploadZone">
+          <input type="file" id="koreaPdfInput" accept="application/pdf" hidden />
+          <div class="upload-inner">
+            <span class="upload-icon">📄</span>
+            <p>PDF 출주표를 끌어다 놓거나 <button class="link-btn" id="koreaBrowseBtn">파일 선택</button></p>
+          </div>
+        </div>
+
+        <div id="koreaConfig" class="hidden">
+          <p class="hint" id="koreaPdfInfo"></p>
+          <div class="cfg-row">
+            <button id="koreaScanBtn" class="btn btn-primary">자동 감지 &amp; 경주 목록 생성</button>
+          </div>
+          <p class="hint" id="koreaProgress"></p>
+        </div>
+
+        <div id="koreaRaceList" class="race-list"></div>
+      </div>
+      <div id="koreaReport" class="report-area"></div>
+    </section>
+
+    <!-- 일본경마: 배당판 캡처 + 전적표 업로드 통합 -->
+    <section id="tab-jp" class="tab-panel">
+      <div class="panel-card">
+        <h2>일본경마 통합 분석 (배당판 + 전적표)</h2>
+        <p class="hint">배당판은 <kbd>Alt</kbd>+<kbd>C</kbd> 화면 캡처 또는 파일, 전적표는 이미지 업로드. <b>하나를 바꿔도 다른 하나는 유지됩니다.</b></p>
+        <div class="upload-grid">
+          <div class="jp-slot" id="jpOddsSlot">
+            <div class="jp-slot-head"><span>🎰 배당판</span><span class="jp-status" id="jpOddsStatus">⬜ 미설정</span></div>
+            <img id="jpOddsPreview" class="jp-preview hidden" alt="" />
+            <div class="cfg-row" style="margin-top:8px">
+              <button id="jpOddsCapBtn" class="btn btn-primary btn-small">🖥️ 배당판 캡처</button>
+              <button id="jpOddsFileBtn" class="btn btn-small">📁 파일</button>
+              <input type="file" id="jpOddsInput" accept="image/*" hidden />
+            </div>
+          </div>
+          <div class="jp-slot" id="jpFormSlot">
+            <div class="jp-slot-head"><span>📋 전적표</span><span class="jp-status" id="jpFormStatus">⬜ 미설정</span></div>
+            <img id="jpFormPreview" class="jp-preview hidden" alt="" />
+            <div class="cfg-row" style="margin-top:8px">
+              <button id="jpFormFileBtn" class="btn btn-primary btn-small">📁 전적표 업로드</button>
+              <input type="file" id="jpFormInput" accept="image/*" hidden />
+            </div>
+          </div>
+        </div>
+        <button id="jpAnalyzeBtn" class="btn btn-primary" disabled>분석 시작</button>
+        <span class="hint" id="jpHint" style="margin-left:8px">배당판과 전적표를 모두 준비하세요</span>
+      </div>
+      <div id="jpReport" class="report-area"></div>
+    </section>
+
+    <!-- 배당판 캡처 -->
+    <section id="tab-japan" class="tab-panel">
+      <div class="panel-card">
+        <h2>배당판 캡처 &amp; 이상배당 감지</h2>
+        <p class="hint"><kbd>Alt</kbd>+<kbd>C</kbd>로 현재 화면을 즉시 캡처할 수 있습니다(첫 1회 화면공유 허용 후 팝업 없이 재캡처). 또는 [화면 캡처]/이미지 파일 업로드 → 영역 드래그 → 분석.</p>
+        <div class="cfg-row">
+          <button id="capBtn" class="btn btn-primary">🖥️ 화면 캡처</button>
+          <input type="file" id="oddsFileInput" accept="image/*" hidden />
+          <button id="oddsFileBtn" class="btn">📁 이미지 파일</button>
+          <button id="oddsAnalyzeBtn" class="btn btn-primary" disabled>이상배당 분석</button>
+          <span class="hint" id="capHint"></span>
+        </div>
+        <div id="capWrap" class="hidden" style="margin-top:12px">
+          <canvas id="capCanvas" style="max-width:100%;border:1px solid var(--border);border-radius:8px;cursor:crosshair"></canvas>
+          <p class="hint">배당판 영역을 마우스로 드래그해 선택하세요. 선택하지 않으면 전체를 분석합니다.</p>
+          <div id="capConfirm" class="hidden cfg-row" style="margin-top:8px;align-items:center">
+            <span class="hint" id="cropConfirmText" style="margin:0"></span>
+            <button id="cropYesBtn" class="btn btn-primary">✅ 맞음 → 분석</button>
+            <button id="cropNoBtn" class="btn">✋ 직접 선택</button>
+          </div>
+        </div>
+
+        <!-- 시계열 이상감지 (Phase 2) -->
+        <div id="oddsTrackPanel" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+          <h3>📡 배당 시계열 이상감지 (1차/2차 캡처)</h3>
+          <p class="hint">화면을 캡처/크롭한 상태에서 ① 베팅종류 선택 → ② [1차 캡처]·[2차 캡처]로 두 시점의 배당을 저장 → ③ [이상감지 분석].</p>
+          <div class="cfg-row">
+            <div class="seg" id="betTypeSeg">
+              <button type="button" class="seg-btn active" data-bt="복승">복승</button>
+              <button type="button" class="seg-btn" data-bt="쌍승">쌍승</button>
+            </div>
+            <label class="hint">연결 분석(BMED)<br>
+              <select id="oddsRaceSelect" class="cfg-input" style="width:190px"></select>
+            </label>
+            <button id="snap1Btn" class="btn btn-primary">📸 1차 캡처 · 10분전</button>
+            <button id="snap2Btn" class="btn btn-primary">📸 2차 캡처 · 1분30초전</button>
+            <button id="oddsDetectBtn" class="btn" disabled>⚡ 이상감지 분석</button>
+          </div>
+          <p class="hint" id="oddsTrackHint" style="margin-top:8px">먼저 화면을 캡처/크롭한 뒤 [1차 캡처]를 누르세요.</p>
+          <p class="hint" id="snapTimer" style="margin-top:4px;font-weight:600"></p>
+        </div>
+      </div>
+      <div id="oddsTrackReport" class="report-area"></div>
+      <div id="oddsReport" class="report-area"></div>
+    </section>
+
+    <!-- 통합분석 (Phase 4) -->
+    <section id="tab-combined" class="tab-panel">
+      <div class="panel-card">
+        <h2>🎯 통합 분석 (전적 + 배당 이상감지)</h2>
+        <p class="hint">한국경마 PDF로 분석한 경주를 선택하고, (배당판 캡처 탭에서 <b>같은 경주명</b>으로 1·2차 배당을 저장했다면) 예산을 입력해 [통합 분석]을 누르세요. 전적 점수 + 배당 신호 → 등급·베팅을 한 화면에 표시합니다.</p>
+        <div class="cfg-row">
+          <label class="hint">분석 경주<br><select id="combinedRaceSelect" class="cfg-input" style="width:230px"></select></label>
+          <label class="hint">예산(원)<br><input id="combinedBudget" class="cfg-input" type="number" min="0" step="1000" value="100000" style="width:130px" /></label>
+          <button id="combinedRunBtn" class="btn btn-primary">통합 분석</button>
+          <span class="hint" id="combinedHint">먼저 한국경마 탭에서 경주를 분석하세요.</span>
+        </div>
+      </div>
+      <div id="combinedReport" class="report-area"></div>
+    </section>
+
+    <!-- 결과입력 -->
+    <section id="tab-result" class="tab-panel">
+      <div class="panel-card">
+        <h2>경주 결과 입력</h2>
+        <p class="hint">실제 착순을 입력하면 누적 학습 DB에 반영됩니다.</p>
+        <div id="resultForm"></div>
+      </div>
+    </section>
+
+    <!-- 통계 -->
+    <section id="tab-stats" class="tab-panel">
+      <div class="panel-card">
+        <h2>통계 대시보드</h2>
+        <div id="statsDashboard"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="spinner"></div>
+    <p id="loadingText">AI 분석 중...</p>
+  </div>
+
+  <script src="js/jockey.js"></script>
+  <script src="js/pdf-parser.js"></script>
+  <script src="js/analysis.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

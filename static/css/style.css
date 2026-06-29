@@ -1,0 +1,293 @@
+/* ===== 경마 BMED 분석기 스타일 ===== */
+:root {
+  --bg: #0f1419;
+  --bg-card: #1a2029;
+  --bg-elev: #232b36;
+  --border: #2e3744;
+  --text: #e6e9ef;
+  --text-dim: #8a94a6;
+  --accent: #4f8cff;
+  --accent-2: #ffb74f;
+  --green: #3ecf8e;
+  --red: #ff5c5c;
+  --radius: 10px;
+  --font: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ===== 헤더 ===== */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand .logo { font-size: 28px; }
+.brand h1 { font-size: 18px; font-weight: 700; }
+.server-box .api-status { font-size: 13px; }
+
+/* ===== 등급 배지 ===== */
+.grade-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 6px;
+  font-weight: 700; font-size: 12px; color: #0f1419;
+}
+.grade-A { background: #ffd166; }
+.grade-B { background: #6fe3b0; }
+.grade-C { background: #6fb4ff; }
+.grade-D { background: #b9a6ff; }
+
+.api-key-box { display: flex; align-items: center; gap: 6px; }
+.api-key-box input {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 10px;
+  border-radius: 8px;
+  width: 280px;
+  font-size: 13px;
+}
+.api-status { color: var(--red); font-size: 14px; }
+.api-status.ok { color: var(--green); }
+
+/* ===== 탭 ===== */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--font);
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ===== 메인 / 패널 ===== */
+.app-main { padding: 20px; max-width: 1100px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.panel-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.panel-card h2 { font-size: 18px; margin-bottom: 6px; }
+.hint { color: var(--text-dim); font-size: 13px; margin-bottom: 16px; }
+
+/* ===== 업로드 존 ===== */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--accent);
+  background: rgba(79,140,255,.06);
+}
+.upload-zone.has-file { border-color: var(--green); border-style: solid; }
+.upload-icon { font-size: 36px; display: block; margin-bottom: 8px; }
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+
+/* 일본경마 통합 슬롯 (배당판 캡처 + 전적표 업로드) */
+.jp-slot { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+.jp-slot.dragover { border-color: var(--accent); background: rgba(79,140,255,.06); }
+.jp-slot-head { display: flex; justify-content: space-between; align-items: center; font-weight: 600; margin-bottom: 8px; }
+.jp-status { font-size: 12px; color: var(--text-dim); font-weight: 600; }
+.jp-status.ready { color: var(--green); }
+.jp-preview { display: block; width: 100%; max-height: 220px; object-fit: contain; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
+
+/* ===== 버튼 ===== */
+.btn {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--font);
+  transition: background .15s, opacity .15s;
+}
+.btn:hover { background: var(--border); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { background: #3d78e8; }
+.btn-small { padding: 7px 12px; font-size: 13px; }
+.link-btn { background: none; border: none; color: var(--accent); cursor: pointer; text-decoration: underline; font-size: inherit; font-family: inherit; }
+
+/* ===== 한국경마 설정 행 ===== */
+#koreaConfig { margin-top: 16px; }
+.cfg-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.cfg-row label { font-size: 12px; color: var(--text-dim); }
+.cfg-input {
+  display: block; margin-top: 4px; width: 110px;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  color: var(--text); padding: 7px 10px; border-radius: 8px; font-size: 13px;
+}
+
+/* ===== 경주 리스트 ===== */
+.race-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.race-chip {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.race-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ===== 리포트 영역 ===== */
+.report-area { display: flex; flex-direction: column; gap: 16px; }
+
+/* 말 카드 */
+.horse-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.horse-card.top-pick { border-left-color: var(--accent-2); }
+.horse-card .horse-head { display: flex; align-items: center; justify-content: space-between; }
+.horse-card .horse-no {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--bg-elev); font-weight: 700; margin-right: 8px;
+}
+.horse-card .score { font-size: 20px; font-weight: 700; color: var(--accent-2); }
+.horse-card .meta { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
+.horse-card .reason { font-size: 13px; margin-top: 8px; }
+
+/* 베팅 추천 */
+.bet-box {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.bet-box h3 { font-size: 15px; margin-bottom: 10px; }
+.bet-line { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
+.bet-line:last-child { border-bottom: none; }
+.bet-type { color: var(--accent); font-weight: 600; }
+
+/* 근거(PDF 원문) */
+.evidence {
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--bg);
+  border-left: 2px solid var(--border);
+  padding: 6px 10px;
+  margin-top: 8px;
+  white-space: pre-wrap;
+}
+
+/* ===== 배당 시계열 이상감지 (Phase 2) ===== */
+#oddsTrackPanel h3 { font-size: 15px; margin-bottom: 6px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; height: 38px; align-self: flex-end; }
+.seg-btn {
+  background: var(--bg-elev); border: none; color: var(--text-dim);
+  padding: 0 16px; cursor: pointer; font-size: 14px; font-family: var(--font);
+}
+.seg-btn.active { background: var(--accent); color: #fff; font-weight: 600; }
+.odds-tag {
+  display: inline-block; font-size: 11px; padding: 2px 7px; margin: 1px 0;
+  border-radius: 10px; background: var(--bg); border: 1px solid var(--border); white-space: nowrap;
+}
+table.data-table td.pos { color: var(--green); font-weight: 600; }
+table.data-table td.neg { color: var(--red); font-weight: 600; }
+
+/* 전적 점수 특수 플래그 (Phase 3) */
+.flag {
+  display: inline-block; font-size: 11px; padding: 2px 7px; margin: 1px 0;
+  border-radius: 10px; white-space: nowrap; border: 1px solid transparent;
+}
+.flag-must { background: rgba(255,92,92,.16); color: #ff8a8a; border-color: rgba(255,92,92,.4); }
+.flag-warn { background: rgba(255,183,79,.16); color: var(--accent-2); border-color: rgba(255,183,79,.4); }
+.flag-caution { background: rgba(255,209,102,.14); color: #ffd166; border-color: rgba(255,209,102,.35); }
+.flag-info { background: rgba(79,140,255,.16); color: #8ab4ff; border-color: rgba(79,140,255,.4); }
+
+/* 월별 손익 막대 그래프 (Phase 5-2) */
+.mbars { display: flex; gap: 14px; align-items: flex-end; padding: 12px 0; overflow-x: auto; }
+.mbar { display: flex; flex-direction: column; align-items: center; min-width: 56px; }
+.mbar-cols { display: flex; gap: 3px; align-items: flex-end; height: 120px; }
+.mbar-col { width: 16px; border-radius: 3px 3px 0 0; min-height: 2px; }
+.mbar-col.stake { background: var(--accent); }
+.mbar-col.payout { background: var(--green); }
+.mbar-label { font-size: 11px; color: var(--text-dim); text-align: center; margin-top: 6px; }
+
+/* ===== 통계 ===== */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 12px; }
+.stat-card { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+.stat-card .num { font-size: 28px; font-weight: 700; color: var(--accent); }
+.stat-card .label { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
+
+table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+table.data-table th, table.data-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+table.data-table th { color: var(--text-dim); font-weight: 600; }
+
+/* ===== 로딩 ===== */
+.loading-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,20,25,.85);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; z-index: 1000;
+}
+.loading-overlay.hidden { display: none; }
+.spinner {
+  width: 44px; height: 44px;
+  border: 4px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 비차단 캡처 알림 토스트 (Phase UX) */
+.cap-notice {
+  position: fixed; top: 18px; left: 50%;
+  transform: translateX(-50%) translateY(-16px);
+  padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  z-index: 2000; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+  box-shadow: 0 6px 24px rgba(0,0,0,.4);
+}
+.cap-notice.ok { background: var(--green); color: #07120c; }
+.cap-notice.err { background: var(--red); color: #fff; }
+.cap-notice.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.hidden { display: none !important; }
+
+@media (max-width: 640px) {
+  .api-key-box input { width: 160px; }
+  .upload-grid { grid-template-columns: 1fr; }
+}
