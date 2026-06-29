@@ -1497,8 +1497,16 @@
   function renderJockeyDetail(name) {
     const j = JockeyDB.get(name); if (!j) return;
     const statRow = (label, o) => `<tr><td>${esc(label)}</td><td>${o ? o.places + '/' + o.rides : '-'}</td><td>${o ? JockeyDB.rate(o) + '%' : '-'}</td></tr>`;
-    const dist = Object.entries(j.byDistance || {}).map(([d, o]) => statRow(d + 'm', o)).join('') || '<tr><td colspan="3" class="hint">데이터 없음</td></tr>';
-    const trk = Object.entries(j.byTrack || {}).map(([t, o]) => statRow(t, o)).join('') || '<tr><td colspan="3" class="hint">데이터 없음</td></tr>';
+    // [거리 동적] 기록 있는 거리만(rides>0) 거리 오름차순 표시, 없는 거리는 숨김
+    const distEntries = Object.entries(j.byDistance || {}).filter(([, o]) => o && o.rides > 0)
+      .sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10));
+    const dist = distEntries.length
+      ? distEntries.map(([d, o]) => statRow(d + 'm', o)).join('')
+      : '<tr><td colspan="3" class="hint">기록 있는 거리 없음 — 결과 입력 시 자동 추가</td></tr>';
+    const trkEntries = Object.entries(j.byTrack || {}).filter(([, o]) => o && o.rides > 0);
+    const trk = trkEntries.length
+      ? trkEntries.map(([t, o]) => statRow(t, o)).join('')
+      : '<tr><td colspan="3" class="hint">기록 있는 주로 없음</td></tr>';
     const horse = Object.entries(j.byHorse || {}).map(([h, o]) => statRow(h, o)).join('') || '<tr><td colspan="3" class="hint">조합 기록 없음 — 결과 입력 시 쌓입니다</td></tr>';
     $('#jockeyDetail').innerHTML = `
       <h3>${esc(name)} 상세</h3>
