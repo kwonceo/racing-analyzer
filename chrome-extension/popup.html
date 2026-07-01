@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>경마 배당 자동수집기</title>
+  <style>
+    :root { --green:#22c55e; --red:#ef4444; --gray:#94a3b8; --bg:#0f172a; --card:#1e293b; }
+    * { box-sizing: border-box; }
+    body {
+      width: 300px; margin: 0; padding: 14px;
+      font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+      background: var(--bg); color: #e2e8f0; font-size: 13px;
+    }
+    h1 { font-size: 15px; margin: 0 0 12px; display:flex; align-items:center; gap:6px; }
+    .dot { width:9px; height:9px; border-radius:50%; background:var(--gray); display:inline-block; }
+    .dot.on { background: var(--green); box-shadow:0 0 6px var(--green); }
+    .dot.off { background: var(--red); }
+    .row { display:flex; justify-content:space-between; align-items:center; margin:8px 0; gap:8px; }
+    .card { background:var(--card); border-radius:8px; padding:10px; margin-bottom:10px; }
+    label { color:#94a3b8; }
+    input[type=text], select {
+      background:#0f172a; color:#e2e8f0; border:1px solid #334155;
+      border-radius:6px; padding:5px 7px; font-size:12px;
+    }
+    input[type=text] { width:150px; }
+    button {
+      width:100%; padding:9px; border:none; border-radius:8px; cursor:pointer;
+      font-weight:600; font-size:13px; margin-top:4px;
+    }
+    .primary { background:var(--green); color:#04210f; }
+    .primary:active { transform:translateY(1px); }
+    .status-line { font-size:12px; color:#cbd5e1; }
+    .muted { color:#64748b; font-size:11px; }
+    .ok { color:var(--green); } .err { color:var(--red); }
+    .switch { position:relative; width:40px; height:22px; }
+    .switch input { display:none; }
+    .slider { position:absolute; inset:0; background:#475569; border-radius:22px; transition:.2s; }
+    .slider:before { content:""; position:absolute; width:16px; height:16px; left:3px; top:3px;
+      background:#fff; border-radius:50%; transition:.2s; }
+    input:checked + .slider { background:var(--green); }
+    input:checked + .slider:before { transform:translateX(18px); }
+  </style>
+</head>
+<body>
+  <h1>🐎 경마 배당 자동수집기</h1>
+
+  <div class="card">
+    <div class="row">
+      <span><span id="srvDot" class="dot"></span> 서버 연결</span>
+      <span id="srvText" class="muted">확인 중…</span>
+    </div>
+    <div class="row">
+      <label>raceKey</label>
+      <input id="raceKey" type="text" placeholder="자동 감지 / 직접 입력" />
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <label>자동 전송</label>
+      <span class="switch">
+        <input id="autoSend" type="checkbox" />
+        <span class="slider"></span>
+      </span>
+    </div>
+    <div class="row">
+      <label>전송 간격</label>
+      <select id="interval">
+        <option value="15">15초</option>
+        <option value="30">30초</option>
+        <option value="60" selected>1분</option>
+        <option value="120">2분</option>
+        <option value="300">5분</option>
+      </select>
+    </div>
+  </div>
+
+  <button id="sendNow" class="primary">지금 전송</button>
+
+  <div class="card" style="margin-top:10px;">
+    <div class="status-line" id="lastResult">마지막 전송: —</div>
+    <div class="muted" id="lastDetail"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
