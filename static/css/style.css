@@ -183,6 +183,32 @@ body {
 }
 .race-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
+/* [기능3] 진행상황 칩 상태 */
+.race-chip .chip-status { font-size: 12px; }
+.race-chip .chip-page { color: var(--text-dim); font-size: 11px; }
+.race-chip.chip-todo { opacity: .72; }
+.race-chip.chip-analyzed { border-color: var(--green); }
+.race-chip.chip-analyzed .chip-status { color: var(--green); }
+.race-chip.chip-done { border-color: var(--accent); }
+.race-chip.chip-done .chip-status { color: var(--accent); }
+.race-chip.active .chip-page { color: rgba(255,255,255,.75); }
+
+/* [기능3] 진행상황 범례 */
+.chip-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; font-size: 13px; }
+.chip-legend .lg { color: var(--text-dim); }
+.chip-legend .lg-analyzed { color: var(--green); }
+.chip-legend .lg-done { color: var(--accent); }
+
+/* [기능1·2] 리포트 하단 푸터 (경주 이동 / 결과입력) */
+.korea-footer { display: flex; flex-direction: column; gap: 12px; }
+.korea-footer .foot-actions { display: flex; justify-content: flex-end; }
+.korea-footer .foot-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.korea-footer .foot-pos { font-weight: 700; font-size: 15px; text-align: center; flex: 1; }
+.korea-footer .foot-spacer { display: inline-block; min-width: 96px; }
+
+/* [기능2] 결과입력 이동 시 강조 */
+.res-block.res-focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(79,140,255,.35); }
+
 /* ===== 리포트 영역 ===== */
 .report-area { display: flex; flex-direction: column; gap: 16px; }
 

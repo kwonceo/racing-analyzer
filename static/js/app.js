@@ -23,6 +23,7 @@
     horseWeights: {},        // [2번] title -> { 마번: {cur, prev} }
     activeKoreaCtx: null,    // 재분석용 컨텍스트 {idx,title,race,sheetHorses}
     tripleCaps: { quinella: null, exacta: null, trio: null }, // [3번] 3종 배당판 이미지
+    pendingResultTitle: null, // [기능2] 결과입력 탭 이동 시 포커스할 경주명
   };
 
   const $ = (s) => document.querySelector(s);
@@ -206,9 +207,28 @@
     state.koreaRaces.forEach((race, idx) => {
       const chip = document.createElement('button');
       chip.className = 'race-chip';
-      chip.textContent = `${raceLabel(race)} (p${race.summaryPage})`;
+      chip.dataset.idx = idx;
+      chip.innerHTML = `<span class="chip-status">○</span> ${esc(raceLabel(race))} <span class="chip-page">(p${race.summaryPage})</span>`;
       chip.addEventListener('click', () => analyzeKoreaRace(idx, chip));
       list.appendChild(chip);
+    });
+    const legend = $('#koreaChipLegend');
+    if (legend) legend.classList.toggle('hidden', !state.koreaRaces.length);
+    refreshRaceChipStatus();
+  }
+
+  /** [기능3] 경주 칩 진행상황 갱신: 미분석 ○(회색) / 분석완료 ✅(초록) / 결과입력 🏁(파랑) */
+  function refreshRaceChipStatus() {
+    const savedTitles = new Set(History.all().map((r) => r.raceTitle));
+    $$('#koreaRaceList .race-chip').forEach((chip) => {
+      const race = state.koreaRaces[+chip.dataset.idx];
+      if (!race) return;
+      const title = raceLabel(race);
+      const st = chip.querySelector('.chip-status');
+      chip.classList.remove('chip-todo', 'chip-analyzed', 'chip-done');
+      if (savedTitles.has(title)) { chip.classList.add('chip-done'); if (st) st.textContent = '🏁'; }
+      else if (state.lastReports[title]) { chip.classList.add('chip-analyzed'); if (st) st.textContent = '✅'; }
+      else { chip.classList.add('chip-todo'); if (st) st.textContent = '○'; }
     });
   }
 
@@ -278,8 +298,43 @@
       renderPageControl(idx);
       try { await renderFormScores(race, { horses: sheetHorses }); } catch (e) { console.warn('전적 점수 패널 실패:', e); }
       renderWeightPanel(title, sheetHorses);
+      renderKoreaFooter(idx, title, race);   // [기능1·2] 경주 이동 + 결과입력 버튼
+      refreshRaceChipStatus();               // [기능3] 진행상황 칩 갱신 (이 경주 → ✅)
       hideLoading();
     } catch (err) { hideLoading(); toast('분석 실패: ' + err.message); }
+  }
+
+  /** [기능1·2] 리포트 하단 푸터: [결과 입력] + [← 이전][서울 3R / 전체 13R][다음 →] */
+  function renderKoreaFooter(idx, title, race) {
+    const host = $('#koreaReport');
+    const total = state.koreaRaces.length;
+    const hasPrev = idx > 0;
+    const hasNext = idx < total - 1;
+    const posText = `${esc(race.venue || '')} ${race.raceNo}R / 전체 ${total}R`;
+
+    const foot = document.createElement('div');
+    foot.className = 'panel-card korea-footer';
+    foot.innerHTML = `
+      <div class="foot-actions">
+        <button class="btn btn-primary" id="footResultBtn">📝 결과 입력</button>
+      </div>
+      <div class="foot-nav">
+        ${hasPrev ? '<button class="btn" id="footPrev">← 이전 경주</button>' : '<span class="foot-spacer"></span>'}
+        <span class="foot-pos">${posText}</span>
+        ${hasNext ? '<button class="btn btn-primary" id="footNext">다음 경주 →</button>' : '<span class="foot-spacer"></span>'}
+      </div>`;
+    host.appendChild(foot);
+
+    foot.querySelector('#footResultBtn').addEventListener('click', () => openResultFor(title));
+    const chips = $$('#koreaRaceList .race-chip');
+    if (hasPrev) foot.querySelector('#footPrev').addEventListener('click', () => analyzeKoreaRace(idx - 1, chips[idx - 1]));
+    if (hasNext) foot.querySelector('#footNext').addEventListener('click', () => analyzeKoreaRace(idx + 1, chips[idx + 1]));
+  }
+
+  /** [기능2] 결과기록 탭으로 이동하며 해당 경주 블록에 포커스 (경주명·추천·날짜는 자동 채워짐) */
+  function openResultFor(title) {
+    state.pendingResultTitle = title;
+    activateTab('result'); // 탭 버튼 클릭 → renderResultForm() 실행 → pendingResultTitle 소비
   }
 
   /** [2번] 마번별 마체중 변동 입력 패널 */
@@ -1349,6 +1404,19 @@
     $('#resultImgBtn').addEventListener('click', () => $('#resultImgInput').click());
     $('#resultImgInput').addEventListener('change', () => { if ($('#resultImgInput').files[0]) handleResultImage($('#resultImgInput').files[0]); });
     $$('.save-result-btn').forEach((btn) => btn.addEventListener('click', () => saveResult(btn)));
+
+    // [기능2] 분석 리포트의 [결과 입력]으로 넘어온 경우 해당 경주 블록에 포커스
+    if (state.pendingResultTitle) {
+      const focus = state.pendingResultTitle;
+      state.pendingResultTitle = null;
+      const block = $$('.res-block').find((b) => b.dataset.title === focus);
+      if (block) {
+        block.classList.add('res-focus');
+        block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const inp = block.querySelector('.res-place');
+        if (inp) inp.focus();
+      }
+    }
   }
 
   async function handleResultImage(file) {
@@ -1446,6 +1514,7 @@
       signals: signalsFor(c),
     });
     updateJockeysFromResult(title, result);   // [6번] 기수 성적 자동 갱신
+    refreshRaceChipStatus();                   // [기능3] 진행상황 칩 갱신 (이 경주 → 🏁)
     toast(`저장됨 — ${hit ? '✅ 적중!' : '❌ 미적중'} (투자 ${stake.toLocaleString()} / 수익 ${payout.toLocaleString()})`);
     renderStats();
   }
