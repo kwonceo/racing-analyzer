@@ -18,7 +18,10 @@
     lastReports: {},
     lastSheets: {},   // title -> {horses(추출 출전마), distance} — Phase 4 통합분석용
     lastCombined: {}, // title -> {bets, recOdds, hadAnomaly, budget} — Phase 5 결과기록용
-    oddsTrack: { betType: '복승', raceKey: null, snaps: 0, nos: new Set(), firstOdds: {} },
+    oddsTrack: { betType: '복승', raceKey: null, snaps: 0, nos: new Set(), firstOdds: {},
+      series: {}, times: [], alerted: {}, auto: null, deadlineMs: 0,
+      exSeries: {}, exTimes: [], dual: true, _pendingType: null }, // 다중 캡처 + 복승/쌍승 동시
+
     raceCondition: { track: '', weather: '' }, // [1번] 주로 상태 / 날씨
     horseWeights: {},        // [2번] title -> { 마번: {cur, prev} }
     activeKoreaCtx: null,    // 재분석용 컨텍스트 {idx,title,race,sheetHorses}
@@ -559,9 +562,17 @@
       b.classList.add('active');
       state.oddsTrack.betType = b.dataset.bt;
     }));
-    $('#snap1Btn').addEventListener('click', () => captureSnapshot(1));
-    $('#snap2Btn').addEventListener('click', () => captureSnapshot(2));
-    $('#oddsDetectBtn').addEventListener('click', () => runOddsDetect());
+    // [다중캡처] 캡처 누적 / 복승+쌍승 동시 / 자동 인터벌 / 중지 / 초기화
+    $('#snapAddBtn').addEventListener('click', () => { state.oddsTrack._pendingType = '복승'; captureNow(); });
+    $('#dualCapBtn').addEventListener('click', dualCapture);   // [1번] 복승+쌍승 2단 캡처
+    $$('.auto-int-btn').forEach((b) => b.addEventListener('click', () => startAutoCapture(+b.dataset.min)));
+    $('#autoStopBtn').addEventListener('click', () => { stopAutoCapture(); notify('⏹ 자동 캡처 중지', true); });
+    $('#oddsResetBtn').addEventListener('click', oddsReset);
+    $('#deadlineInput').addEventListener('change', applyDeadline);
+    const alt = $('#altExactaChk');
+    if (alt) { alt.checked = state.oddsTrack.dual !== false; alt.addEventListener('change', () => { state.oddsTrack.dual = alt.checked; }); }
+    $('#quickPairsApplyBtn').addEventListener('click', submitQuickPairs); // [4번] 쌍승 빠른입력
+    setStep(1);
     // [2번] 빠른입력 모드
     $('#quickOddsBtn').addEventListener('click', () => {
       const box = $('#quickOddsBox'); box.classList.toggle('hidden');
@@ -777,7 +788,10 @@
     const area = (r.w * r.h) / (dw * dh);
     const cv = $('#capCanvas');
     if (!r.w || !r.h || area < 0.04 || area > 0.96) {
-      cap.rect = null; drawCap(); cap.autoAnalyze = false; showCropConfirm(false); return;
+      cap.rect = null; drawCap();
+      if (cap.autoAnalyze) { cap.autoAnalyze = false; runCropAnalysis(); } // 자동 캡처: 감지 실패해도 전체 프레임으로 진행
+      else showCropConfirm(false);
+      return;
     }
     cap.rect = { x: r.x * cv.width / dw, y: r.y * cv.height / dh, w: r.w * cv.width / dw, h: r.h * cv.height / dh };
     drawCap();
@@ -798,9 +812,8 @@
     bar.classList.remove('hidden');
   }
 
-  /** 자동 라운드: 누적 스냅샷 0이면 1차, 아니면 2차 */
-  function autoRound() { return state.oddsTrack.snaps >= 1 ? 2 : 1; }
-  async function runCropAnalysis() { await captureSnapshot(autoRound()); }
+  /** 크롭 확인/자동 크롭 후 → 현재 프레임을 시계열에 누적 */
+  async function runCropAnalysis() { await captureAccumulate(); }
 
   async function runOddsAnalysis() {
     if (!cap.canvas) { toast('먼저 화면을 캡처하거나 이미지를 올리세요.'); return; }
@@ -936,52 +949,494 @@
     return out;
   }
 
-  /** 배당 스냅샷 저장 코어 — Vision/빠른입력 공통. round1=새 추적+1차 캐시, round2=정지+즉시 비교.
-   *  Vision API를 호출하지 않으므로(이미 받은 odds 사용) ~0.1초. quiet=true면 결과 렌더 시 오버레이 생략. */
-  async function applyOddsSnapshot(round, odds, quiet) {
-    const raceKey = round === 1 ? selectedRaceKey() : (state.oddsTrack.raceKey || selectedRaceKey());
-    if (round === 1) {
-      await Analysis.oddsClear(raceKey);       // 1차 = 새 추적 시작
-      state.oddsTrack = { betType: state.oddsTrack.betType, raceKey, snaps: 0, nos: new Set(), firstOdds: {} };
-    }
-    const r = await Analysis.oddsSnapshot(raceKey, odds);
-    state.oddsTrack.snaps = r.snaps;
-    Object.keys(odds).forEach((n) => state.oddsTrack.nos.add(+n));
-    if (round === 1) state.oddsTrack.firstOdds = { ...odds };  // [1번] 1차 결과 캐시
-
-    $('#oddsDetectBtn').disabled = state.oddsTrack.snaps < 2;
-    const got = Object.keys(odds).length;
-    $('#oddsTrackHint').textContent =
-      `${round}차 저장됨 (마번 ${got}두 · 누적 스냅샷 ${state.oddsTrack.snaps}회) — ` +
-      (state.oddsTrack.snaps < 2 ? '2차 캡처/빠른입력을 진행하세요.' : '자동 비교 완료(또는 [이상감지 분석]).');
-
-    if (round === 1) { startSnapTimer(); notify('📸 1차 저장 — 8분30초 후 2차 알림', true); }
-    else { stopSnapTimer(); await runOddsDetect(true); }  // 2차 = 즉시 비교(변동폭만, API 재호출 없음)
+  /** 쌍승(exacta) 배당판 → {"A>B": 배당} 순서쌍. 2마리 조합 셀을 방향(행→열) 그대로 사용. */
+  function perPairOdds(rep) {
+    const num = (s) => { const m = String(s == null ? '' : s).replace(/,/g, '').match(/[\d.]+/); return m ? parseFloat(m[0]) : null; };
+    const combos = (rep.combos || []).filter((c) => (c.combo || []).length === 2);
+    const hasExacta = combos.some((c) => /쌍/.test(c.type || ''));
+    const out = {};
+    combos.forEach((c) => {
+      if (hasExacta && !/쌍/.test(c.type || '')) return;   // 쌍승 항목이 있으면 그것만
+      const a = +c.combo[0], b = +c.combo[1], v = num(c.odds);
+      if (a > 0 && b > 0 && a !== b && v > 0) out[`${a}>${b}`] = v;
+    });
+    return out;
   }
 
-  async function captureSnapshot(round) {
+  // ========== [다중 캡처 시계열 + 실시간 분석] ==========
+  const ODDS_MAX = 20;          // [1번] 최대 누적 포인트
+  const SIGNAL_ALERT = 80;      // [6번] 알림 임계 신호점수
+  const CHART_COLORS = ['#4f8cff', '#3ecf8e', '#ffb74f', '#ff5c5c', '#b98cff'];
+
+  /** [1번] 스냅샷 누적 — 첫 캡처는 새 추적 시작, 이후 계속 append(최대 20). Vision 재호출 없이 즉시 저장. */
+  async function accumulateOdds(odds, quiet) {
+    let t = state.oddsTrack;
+    const fresh = !t.raceKey || !t.snaps;
+    if (fresh) {
+      const raceKey = selectedRaceKey();
+      try { await Analysis.oddsClear(raceKey); } catch (_) { /* 무시 */ }
+      t = state.oddsTrack = {
+        betType: t.betType, raceKey, snaps: 0, nos: new Set(),
+        firstOdds: { ...odds }, series: {}, times: [], alerted: {},
+        auto: t.auto || null, deadlineMs: t.deadlineMs || 0,
+        _autoId: t._autoId || null, _cdId: t._cdId || null,
+        exSeries: {}, exTimes: [], dual: t.dual !== false, _pendingType: t._pendingType || null,
+        _autoRound: 0,
+      };
+    }
+    if (t.snaps >= ODDS_MAX) { notify('⚠️ 최대 20포인트 — 더 저장하지 않습니다', false); stopAutoCapture(); return; }
+    const r = await Analysis.oddsSnapshot(t.raceKey, odds);
+    t.snaps = r.snaps || (t.snaps + 1);
+    if (r.series) t.series = r.series;
+    t.times.push(Date.now());
+    Object.keys(odds).forEach((n) => t.nos.add(+n));
+    await refreshRealtime(quiet);
+    if (t.snaps >= ODDS_MAX) { notify('✅ 20포인트 도달 — 자동 캡처 종료', true); stopAutoCapture(); }
+  }
+
+  /** 현재 캡처된 프레임(크롭 반영)을 판독해 누적. _pendingType='쌍승'이면 쌍승 시계열로. */
+  async function captureAccumulate() {
     if (!cap.canvas) { toast('먼저 화면을 캡처하거나 이미지를 올리세요.'); return; }
-    const block = capturedBlock();   // 프레임을 먼저 확보(이후 화면이 바뀌어도 안전)
-    const hasFirst = state.oddsTrack.firstOdds && Object.keys(state.oddsTrack.firstOdds).length;
-    // [3번] 2차는 즉시 1차 결과 + "분석 중"을 표시하고 Vision은 백그라운드(비차단)로 처리
-    const bg = round === 2 && hasFirst;
-    if (bg) { renderSecondPending(); notify('📸 2차 캡처 — 즉시 1차 표시 · 백그라운드 판독 중', true); }
-    else { showLoading(`${round}차 배당 판독 중... (Vision)`); }
+    const type = state.oddsTrack._pendingType || '복승';
+    if (type === '복승' && state.oddsTrack.snaps >= ODDS_MAX) { notify('최대 20포인트 도달', false); stopAutoCapture(); return; }
+    const block = capturedBlock();
+    const quiet = !!state.oddsTrack.auto || type === '쌍승';   // 자동/쌍승 캡처는 오버레이 생략
+    if (!quiet) showLoading('배당 판독 중... (Vision)');
     try {
       const rep = await Analysis.analyzeOdds(block);
-      const odds = perHorseOdds(rep);
-      if (!Object.keys(odds).length) {
-        if (!bg) hideLoading();
-        toast('배당 수치를 못 읽었습니다. 영역을 다시 선택하거나 [빠른입력]을 쓰세요.'); return;
+      if (type === '쌍승') {
+        const pairs = perPairOdds(rep);
+        if (!Object.keys(pairs).length) { toast('쌍승 배당을 못 읽었습니다. 쌍승 매트릭스 화면인지 확인하세요.'); return; }
+        accumulateExacta(pairs);
+        notify(`🔀 쌍승 ${state.oddsTrack.exTimes.length}번째 캡처 누적 (${Object.keys(pairs).length}쌍)`, true);
+      } else {
+        const odds = perHorseOdds(rep);
+        if (!Object.keys(odds).length) { toast('복승 배당을 못 읽었습니다. 영역 재선택 또는 [빠른입력].'); return; }
+        await accumulateOdds(odds, true);
+        notify(`📸 복승 ${state.oddsTrack.snaps}번째 캡처 누적`, true);
       }
-      if (!bg) $('#loadingText').textContent = `${round}차 배당 저장 중...`;
-      await applyOddsSnapshot(round, odds, bg);   // 완료 시 화면 자동 업데이트
-      if (bg) notify('✅ 2차 판독 완료 — 변동폭 자동 갱신', true);
-    } catch (e) {
-      toast(`${round}차 캡처 실패: ` + e.message);
-    } finally {
-      if (!bg) hideLoading();
+    } catch (e) { toast('캡처 실패: ' + e.message); }
+    finally { if (!quiet) hideLoading(); }
+  }
+
+  /** 새 프레임을 즉시 잡아 자동 크롭 → 누적 (수동 [캡처 누적] · 자동 인터벌 공용) */
+  async function captureNow() {
+    try {
+      cap.autoAnalyze = true;               // 자동 크롭 성공/실패 모두 runCropAnalysis로 이어짐
+      setCaptured(await grabFrame());
+    } catch (e) { notify('캡처 실패: ' + e.message, false); }
+  }
+
+  /** 지정 타입으로 1회 캡처를 끝까지 await (복승+쌍승 시퀀스용) */
+  async function captureAs(type) {
+    state.oddsTrack._pendingType = type;
+    try {
+      cap.autoAnalyze = false;
+      setCaptured(await grabFrame());       // cap.canvas + 자동 크롭 rect 설정
+      $('#capConfirm').classList.add('hidden');
+      await captureAccumulate();            // _pendingType 으로 라우팅
+    } catch (e) { notify('캡처 실패: ' + e.message, false); }
+    finally { state.oddsTrack._pendingType = null; }
+  }
+
+  // ---------- [1·2번] 복승+쌍승 2단 캡처 + 카운트다운 + 스텝 가이드 ----------
+  /** [캡처] 1번 → 복승 캡처 → (쌍승 탭 전환 안내 카운트다운) → 쌍승 캡처 */
+  async function dualCapture() {
+    if (state.oddsTrack.auto) { toast('자동 캡처 중에는 [중지] 후 사용하세요.'); return; }
+    setStep(2);
+    showLoading('복승 배당 판독 중... (Vision)');
+    try { await captureAs('복승'); } finally { hideLoading(); }
+    setStep(3);
+    await countdownCapture('🔀 지금 [쌍승] 탭을 클릭하세요! 곧 자동으로 쌍승을 캡처합니다', 3, '쌍승');
+    setStep(1);
+    notify('✅ 복승+쌍승 동시 캡처 완료', true);
+  }
+
+  /** 안내 문구 + N초 카운트다운(3..2..1) 후 지정 타입 자동 캡처 */
+  async function countdownCapture(msg, secs, type) {
+    const ov = $('#capCountdown'); if (!ov) { await captureAs(type); return; }
+    ov.classList.remove('hidden');
+    for (let s = secs; s >= 1; s--) {
+      ov.innerHTML = `<div class="cd-msg">${esc(msg)}</div><div class="cd-num">${s}</div>`;
+      beepShort();
+      await new Promise((r) => setTimeout(r, 1000));
     }
+    ov.innerHTML = '<div class="cd-msg">📸 쌍승 캡처 중...</div>';
+    await captureAs(type);
+    ov.classList.add('hidden');
+  }
+
+  /** [2번] 캡처 순서 스텝 가이드 강조 (1~3, 0=없음) */
+  function setStep(n) {
+    $$('#captureSteps .cap-step').forEach((el) => el.classList.toggle('active', +el.dataset.step === n));
+  }
+
+  function beepShort() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AC();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine'; o.frequency.value = 660;
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+      o.start(); o.stop(ctx.currentTime + 0.2);
+    } catch (_) { /* 무시 */ }
+  }
+
+  // ---------- 쌍승(exacta) 시계열 (클라이언트 저장) ----------
+  /** {"A>B": 배당} 한 라운드를 exSeries에 누적 (null 패딩으로 인덱스 정합) */
+  function accumulateExacta(pairs) {
+    const t = state.oddsTrack;
+    if (!t.exSeries) { t.exSeries = {}; t.exTimes = []; }
+    const idx = t.exTimes.length;
+    const keys = new Set([...Object.keys(t.exSeries), ...Object.keys(pairs)]);
+    keys.forEach((k) => {
+      const arr = t.exSeries[k] || new Array(idx).fill(null);
+      while (arr.length < idx) arr.push(null);
+      arr.push(k in pairs ? pairs[k] : null);
+      t.exSeries[k] = arr;
+    });
+    t.exTimes.push(Date.now());
+    renderExactaReversal();
+  }
+
+  /** [4번 소비] 쌍승 A→B / B→A 표 + 방향 대소 뒤바뀜(역전) 감지 */
+  function renderExactaReversal() {
+    const el = $('#exactaReport'); if (!el) return; el.innerHTML = '';
+    const t = state.oddsTrack; const ex = t.exSeries || {};
+    if (!Object.keys(ex).length) return;
+    const lastVal = (arr) => { for (let i = (arr || []).length - 1; i >= 0; i--) if (typeof arr[i] === 'number') return arr[i]; return null; };
+    const seen = new Set(); const rows = [];
+    Object.keys(ex).forEach((k) => {
+      const [a, b] = k.split('>').map(Number);
+      const uk = a < b ? `${a}|${b}` : `${b}|${a}`;
+      if (seen.has(uk)) return; seen.add(uk);
+      const ab = ex[`${a}>${b}`] || [], ba = ex[`${b}>${a}`] || [];
+      let rev = false, prevSign = 0;
+      const len = Math.max(ab.length, ba.length);
+      for (let i = 0; i < len; i++) {
+        const x = ab[i], y = ba[i];
+        if (typeof x === 'number' && typeof y === 'number' && x !== y) {
+          const s = x < y ? -1 : 1;
+          if (prevSign && s !== prevSign) rev = true;
+          prevSign = s;
+        }
+      }
+      rows.push({ a, b, abL: lastVal(ab), baL: lastVal(ba), rev });
+    });
+    rows.sort((p, q) => (p.rev === q.rev ? 0 : p.rev ? -1 : 1));
+    const trs = rows.map((r) => `<tr${r.rev ? ' style="background:rgba(255,92,92,.12)"' : ''}>
+      <td>${r.a}→${r.b}</td><td>${r.abL != null ? r.abL : '-'}</td>
+      <td>${r.b}→${r.a}</td><td>${r.baL != null ? r.baL : '-'}</td>
+      <td>${r.rev ? '🔴 역전' : ''}</td></tr>`).join('');
+    add(el, 'panel-card', `<h3>🔀 쌍승 A→B / B→A 시계열 (${t.exTimes.length}포인트)</h3>
+      <table class="data-table"><thead><tr><th>정방향</th><th>배당</th><th>역방향</th><th>배당</th><th>역전</th></tr></thead><tbody>${trs}</tbody></table>
+      <p class="hint" style="margin-top:6px">두 방향 배당의 대소가 시계열 중 뒤바뀌면 🔴 역전 — 인기 순서 반전 신호</p>`);
+  }
+
+  // ---------- [2번] 자동 캡처 인터벌 ----------
+  function startAutoCapture(min) {
+    stopAutoCapture();
+    applyDeadline();
+    state.oddsTrack.auto = { min };
+    state.oddsTrack._autoId = setInterval(autoTick, min * 60 * 1000);
+    const sb = $('#autoStopBtn'); if (sb) sb.disabled = false;
+    $$('.auto-int-btn').forEach((b) => b.classList.toggle('active', +b.dataset.min === min));
+    notify(`⏱ ${min}분 간격 자동 캡처 시작 (Alt+C 자동 실행·누적)`, true);
+    autoTick();                              // 즉시 1회 캡처
+    startAutoCountdown(min);
+  }
+  async function autoTick() {
+    const t = state.oddsTrack;
+    if (reachedDeadline()) { stopAutoCapture(); beep(); notify('⏰ 마감 시각 도달 — 자동 캡처 종료', true); return; }
+    if (t.snaps >= ODDS_MAX) { stopAutoCapture(); return; }
+    t._autoRound = (t._autoRound || 0) + 1;
+    if (t.dual && t._autoRound % 2 === 0) {
+      // [3번] 짝수 회차 → 쌍승: "쌍승 탭으로 전환" 안내 후 5초 대기 → 자동 캡처
+      notify('🔀 쌍승 탭으로 전환해주세요 — 5초 후 자동 캡처', true);
+      await countdownCapture('🔀 [쌍승] 탭으로 전환하세요! 5초 후 자동 캡처', 5, '쌍승');
+    } else {
+      state.oddsTrack._pendingType = '복승';
+      captureNow();                          // 홀수 회차 → 복승 (사용자가 복승 탭 열어둠)
+    }
+    if (t.auto) startAutoCountdown(t.auto.min);
+  }
+  function stopAutoCapture() {
+    const t = state.oddsTrack;
+    if (t._autoId) clearInterval(t._autoId);
+    t._autoId = null; t.auto = null;
+    stopAutoCountdown();
+    const sb = $('#autoStopBtn'); if (sb) sb.disabled = true;
+    $$('.auto-int-btn').forEach((b) => b.classList.remove('active'));
+    updateTrackHint();
+  }
+
+  // ---------- 마감 시각 (자동 중지 + 차트 X축 기준) ----------
+  function parseDeadline() {
+    const inp = $('#deadlineInput');
+    if (!inp || !inp.value) return 0;
+    const [h, m] = inp.value.split(':').map(Number);
+    if (isNaN(h)) return 0;
+    const d = new Date(); d.setHours(h, m, 0, 0);
+    let ms = d.getTime();
+    if (ms < Date.now() - 60000) ms += 24 * 3600 * 1000; // 이미 지난 시각이면 다음날로
+    return ms;
+  }
+  function applyDeadline() { state.oddsTrack.deadlineMs = parseDeadline(); updateTrackHint(); }
+  function reachedDeadline() { const dl = state.oddsTrack.deadlineMs || parseDeadline(); return dl > 0 && Date.now() >= dl; }
+
+  // ---------- 다음 캡처 카운트다운 (snapTimer 재사용) ----------
+  function startAutoCountdown(min) {
+    stopAutoCountdown();
+    state.oddsTrack._nextAt = Date.now() + min * 60 * 1000;
+    state.oddsTrack._cdId = setInterval(updateAutoTimer, 1000);
+    updateAutoTimer();
+  }
+  function updateAutoTimer() {
+    const el = $('#snapTimer'); if (!el) return;
+    const t = state.oddsTrack;
+    if (!t.auto) { el.textContent = ''; return; }
+    const left = Math.max(0, Math.round((t._nextAt - Date.now()) / 1000));
+    const m = Math.floor(left / 60), s = left % 60;
+    const dl = t.deadlineMs || 0;
+    const dlTxt = dl ? ` · 마감까지 ${Math.max(0, Math.round((dl - Date.now()) / 60000))}분` : '';
+    el.textContent = `⏱ 다음 자동 캡처까지 ${m}:${String(s).padStart(2, '0')} (${t.auto.min}분 간격)${dlTxt}`;
+    el.style.color = left <= 15 ? 'var(--accent-2)' : '';
+  }
+  function stopAutoCountdown() {
+    const t = state.oddsTrack;
+    if (t._cdId) clearInterval(t._cdId); t._cdId = null;
+    const el = $('#snapTimer'); if (el) el.textContent = '';
+  }
+
+  /** 시계열 초기화 */
+  async function oddsReset() {
+    stopAutoCapture();
+    const t = state.oddsTrack;
+    if (t.raceKey) { try { await Analysis.oddsClear(t.raceKey); } catch (_) { /* 무시 */ } }
+    state.oddsTrack = {
+      betType: t.betType, raceKey: null, snaps: 0, nos: new Set(), firstOdds: {},
+      series: {}, times: [], alerted: {}, auto: null, deadlineMs: t.deadlineMs || 0,
+      exSeries: {}, exTimes: [], dual: t.dual !== false, _pendingType: null, _autoRound: 0,
+    };
+    $('#oddsTrackReport').innerHTML = '';
+    const ex = $('#exactaReport'); if (ex) ex.innerHTML = '';
+    const w = $('#oddsChartWrap'); if (w) w.classList.add('hidden');
+    setStep(1);
+    updateTrackHint();
+    notify('🗑 시계열 초기화됨', true);
+  }
+
+  function updateTrackHint() {
+    const el = $('#oddsTrackHint'); if (!el) return;
+    const t = state.oddsTrack;
+    if (!t.snaps) { el.textContent = '화면 캡처 후 [📸 캡처 누적] 또는 자동 캡처(2/3/5분)를 시작하세요.'; return; }
+    el.textContent = `누적 ${t.snaps}/${ODDS_MAX}포인트 · 마번 ${t.nos.size}두${t.auto ? ` · 자동(${t.auto.min}분) 진행중` : ''}`;
+  }
+
+  // ---------- [5번] 실시간 신호 재계산 + [3·4번] 차트 + [6번] 알림 ----------
+  /** [5번] 추세 지속성: 직전까지 연속 하락 중이면 신호 +10 */
+  function augmentTrend(computed, series) {
+    (computed.horses || []).forEach((h) => {
+      const arr = (series[h.no] || series[String(h.no)] || []).filter((v) => typeof v === 'number' && v > 0);
+      let streak = 0;
+      for (let i = arr.length - 1; i > 0; i--) { if (arr[i] < arr[i - 1]) streak++; else break; }
+      h.trendStreak = streak;
+      h.persist = streak >= 2 ? 10 : 0;
+      if (h.persist) {
+        h.signalScore = Math.min(100, (h.signalScore || 0) + h.persist);
+        (h.tags = h.tags || []).push('⏬ 지속하락');
+      }
+    });
+  }
+
+  /** 캡처마다: 서버 신호 계산 → 추세 보정 → 차트/표/알림 갱신 */
+  async function refreshRealtime(quiet) {
+    const t = state.oddsTrack;
+    if (!t.raceKey) return;
+    let computed = null;
+    try { computed = await Analysis.oddsCompute(t.raceKey, bmedHorsesFor(t.raceKey)); }
+    catch (e) { if (!quiet) toast('신호 계산 실패: ' + e.message); }
+    if (computed) augmentTrend(computed, t.series || {});
+    drawOddsChart(t, computed);   // t._reversals 설정
+    renderOddsRealtime(computed);
+    maybeAlert(computed);
+    updateTrackHint();
+  }
+
+  /** [6번] 신호 임계 초과 시 소리 + 요약 알림 (마번별 1회, 히스테리시스로 재알림) */
+  function maybeAlert(computed) {
+    if (!computed) return;
+    const t = state.oddsTrack;
+    (computed.horses || []).forEach((h) => {
+      if (h.signalScore >= SIGNAL_ALERT && !t.alerted[h.no]) {
+        t.alerted[h.no] = true;
+        beep();
+        notify(`🔔 ${h.no}번 신호 ${h.signalScore}점 · ${t.betType} ${h.no}번 가능성`, true);
+      } else if (h.signalScore < SIGNAL_ALERT - 10) {
+        t.alerted[h.no] = false;
+      }
+    });
+  }
+
+  /** 차트에 그릴 상위 5마리 (신호 높은 순, 시계열 존재하는 말만) */
+  function pickTopHorses(computed, series, n) {
+    const has = (no) => (series[no] || series[String(no)] || []).some((v) => typeof v === 'number' && v > 0);
+    return (computed && computed.horses || []).filter((h) => has(h.no))
+      .sort((a, b) => (b.signalScore - a.signalScore) || ((a.lastOdds || 99) - (b.lastOdds || 99)))
+      .slice(0, n);
+  }
+
+  /** [3번] 시계열 라인 차트 (상위5·급락 빨강/반등 노랑) + [4번] 라인 교차=역전 표시 */
+  function drawOddsChart(t, computed) {
+    const wrap = $('#oddsChartWrap'); const cv = $('#oddsChart');
+    if (!wrap || !cv) return;
+    const series = t.series || {};
+    const top = pickTopHorses(computed, series, 5);
+    if (!top.length || t.snaps < 1) { wrap.classList.add('hidden'); t._reversals = 0; return; }
+    wrap.classList.remove('hidden');
+
+    const dl = t.deadlineMs || parseDeadline();
+    const times = t.times || [];
+    const invert = !!dl;                   // 마감 기준이면 오른쪽이 0분(마감)
+    const xVal = (i) => {
+      if (dl && times[i]) return (dl - times[i]) / 60000;          // 남은 분(클수록 과거)
+      if (times[i] && times[0]) return (times[i] - times[0]) / 60000; // 경과 분
+      return i;
+    };
+    const n = t.snaps;
+    const xs = []; for (let i = 0; i < n; i++) xs.push(xVal(i));
+
+    const lines = top.map((h, idx) => {
+      const arr = series[h.no] || series[String(h.no)] || [];
+      const pts = [];
+      for (let i = 0; i < n; i++) { const v = arr[i]; if (typeof v === 'number' && v > 0) pts.push({ i, x: xs[i], y: v }); }
+      return { no: h.no, color: CHART_COLORS[idx % CHART_COLORS.length], pts, sig: h.signalScore };
+    }).filter((l) => l.pts.length);
+    if (!lines.length) { wrap.classList.add('hidden'); t._reversals = 0; return; }
+
+    const allY = []; lines.forEach((l) => l.pts.forEach((p) => allY.push(p.y)));
+    let minX = Math.min(...xs), maxX = Math.max(...xs);
+    let minY = Math.min(...allY), maxY = Math.max(...allY);
+    if (minX === maxX) { minX -= 1; maxX += 1; }
+    if (minY === maxY) { minY *= 0.9; maxY *= 1.1 || 1; }
+    const padY = (maxY - minY) * 0.1 || 0.5; minY -= padY; maxY += padY;
+
+    const W = Math.max(320, wrap.clientWidth || 640), H = 260;
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    const L = 46, R = 14, TT = 16, B = 28; const pw = W - L - R, ph = H - TT - B;
+
+    const sx = (x) => { let f = (x - minX) / (maxX - minX || 1); if (invert) f = 1 - f; return L + f * pw; };
+    const sy = (y) => TT + (1 - (y - minY) / (maxY - minY || 1)) * ph;
+
+    ctx.strokeStyle = 'rgba(140,148,166,.2)'; ctx.fillStyle = '#8a94a6'; ctx.font = '11px sans-serif'; ctx.lineWidth = 1;
+    for (let g = 0; g <= 4; g++) {
+      const yy = TT + ph * g / 4; const yv = maxY - (maxY - minY) * g / 4;
+      ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(L + pw, yy); ctx.stroke();
+      ctx.fillText(yv.toFixed(1), 6, yy + 3);
+    }
+    const xticks = 4;
+    for (let g = 0; g <= xticks; g++) {
+      const xx = L + pw * g / xticks;
+      const xv = invert ? (maxX - (maxX - minX) * g / xticks) : (minX + (maxX - minX) * g / xticks);
+      ctx.fillText((dl || times.length) ? xv.toFixed(0) + '분' : '#' + g, xx - 8, H - 8);
+    }
+    ctx.fillText(dl ? '← 마감까지 남은 분 (오른쪽=마감)' : '경과(분)', L, 11);
+
+    const RED = '#ff5c5c', YEL = '#ffd24f';
+    lines.forEach((l) => {
+      for (let k = 1; k < l.pts.length; k++) {
+        const a = l.pts[k - 1], b = l.pts[k];
+        const rel = a.y ? (a.y - b.y) / a.y : 0;   // >0 하락(배당 짧아짐)
+        let col = l.color, lw = 2;
+        if (rel >= 0.06) { col = RED; lw = 3; }       // [3번] 급락
+        else if (rel <= -0.06) { col = YEL; lw = 3; } // [3번] 반등
+        ctx.strokeStyle = col; ctx.lineWidth = lw;
+        ctx.beginPath(); ctx.moveTo(sx(a.x), sy(a.y)); ctx.lineTo(sx(b.x), sy(b.y)); ctx.stroke();
+      }
+      ctx.fillStyle = l.color;
+      l.pts.forEach((p) => { ctx.beginPath(); ctx.arc(sx(p.x), sy(p.y), 2.5, 0, Math.PI * 2); ctx.fill(); });
+      const lp = l.pts[l.pts.length - 1];
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText(`${l.no}번`, sx(lp.x) + 4, sy(lp.y) - 4);
+    });
+
+    // [4번] 라인 교차 → 역전 발생 표시
+    let reversals = 0;
+    for (let a = 0; a < lines.length; a++) {
+      for (let b = a + 1; b < lines.length; b++) {
+        const A = lines[a], B = lines[b];
+        const mA = {}; A.pts.forEach((p) => { mA[p.i] = p.y; });
+        const mB = {}; B.pts.forEach((p) => { mB[p.i] = p.y; });
+        const idxs = Object.keys(mA).map(Number).filter((i) => i in mB).sort((x, y) => x - y);
+        for (let k = 1; k < idxs.length; k++) {
+          const i0 = idxs[k - 1], i1 = idxs[k];
+          const d0 = mA[i0] - mB[i0], d1 = mA[i1] - mB[i1];
+          if (d0 === 0 || d1 === 0) continue;
+          if ((d0 < 0) !== (d1 < 0)) {
+            const frac = Math.abs(d0) / (Math.abs(d0) + Math.abs(d1));
+            const xc = xs[i0] + (xs[i1] - xs[i0]) * frac;
+            const mx = sx(xc);
+            ctx.strokeStyle = 'rgba(255,92,92,.55)'; ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
+            ctx.beginPath(); ctx.moveTo(mx, TT); ctx.lineTo(mx, TT + ph); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = RED; ctx.font = '12px sans-serif'; ctx.fillText('🔴역전', mx - 12, TT + 12);
+            reversals++;
+          }
+        }
+      }
+    }
+    t._reversals = reversals;
+  }
+
+  /** [5번] 실시간 신호 표 (직전 대비 변화율 · 누적드롭 · 괴리 · 신호+지속) */
+  function renderOddsRealtime(computed) {
+    const el = $('#oddsTrackReport'); el.innerHTML = '';
+    const t = state.oddsTrack;
+    if (!computed || !computed.snapCount) { add(el, 'panel-card', '<p class="hint">캡처를 시작하면 실시간 분석이 표시됩니다.</p>'); return; }
+    const series = t.series || {};
+    const dl = t.deadlineMs || parseDeadline();
+    const leftMin = dl ? Math.max(0, Math.round((dl - Date.now()) / 60000)) : null;
+
+    const prevDelta = (no) => {
+      const arr = (series[no] || series[String(no)] || []).filter((v) => typeof v === 'number' && v > 0);
+      if (arr.length < 2) return null;
+      const p = arr[arr.length - 2], c = arr[arr.length - 1];
+      return p ? (p - c) / p : null;   // >0 하락
+    };
+
+    const rows = computed.horses.slice().sort((a, b) => b.signalScore - a.signalScore).map((h) => {
+      const dpct = h.firstOdds != null ? (h.drop * 100).toFixed(0) + '%' : '-';
+      const pd = prevDelta(h.no);
+      const pdTxt = pd == null ? '-' : (pd >= 0 ? '▼' : '▲') + (Math.abs(pd) * 100).toFixed(0) + '%';
+      const epct = h.edge != null ? (h.edge >= 0 ? '+' : '') + (h.edge * 100).toFixed(1) + '%p' : '-';
+      const persist = h.persist ? ` <span class="odds-tag">+${h.persist}</span>` : '';
+      const streak = h.trendStreak ? ` <span class="hint">(${h.trendStreak}연속↓)</span>` : '';
+      return `<tr${h.signalScore >= SIGNAL_ALERT ? ' style="background:rgba(255,92,92,.10)"' : ''}>
+        <td>${h.no}</td><td>${esc(h.name || '')}</td>
+        <td>${h.lastOdds != null ? h.lastOdds : '-'}</td>
+        <td class="${pd > 0.02 ? 'pos' : pd < -0.02 ? 'neg' : ''}">${pdTxt}</td>
+        <td class="${h.drop > 0.02 ? 'pos' : h.drop < -0.02 ? 'neg' : ''}">${dpct}</td>
+        <td>${epct}</td>
+        <td><b>${sigColor(h.signalScore)} ${h.signalScore}</b>${persist}${streak}</td>
+        <td>${(h.tags || []).map((x) => `<span class="odds-tag">${esc(x)}</span>`).join(' ')}</td>
+      </tr>`;
+    }).join('');
+
+    add(el, 'panel-card', `<h3>⚡ 실시간 배당 분석 <span class="hint" style="font-weight:400">스냅샷 ${computed.snapCount}/${ODDS_MAX}${leftMin != null ? ` · 마감 ${leftMin}분 전` : ''}${t._reversals ? ` · 🔴 역전 ${t._reversals}건` : ''}</span></h3>
+      <table class="data-table">
+        <thead><tr><th>마번</th><th>마명</th><th>배당</th><th>직전Δ</th><th>누적드롭</th><th>괴리</th><th>신호</th><th>판정</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p class="hint" style="margin-top:8px">직전Δ=직전 캡처 대비 · 누적드롭=1차 대비 · 연속 하락 시 신호 +10 · 🔔 신호 ≥${SIGNAL_ALERT} 소리알림 · 🔴≥75 🟠60 🟡45</p>`);
+
+    const bets = (computed.bets || []).map((b) =>
+      `<div class="bet-line"><span><span class="bet-type">${esc(b.type)}</span> ${(b.combo || []).join('-')}</span>
+       <span>신호 ${b.confidence} · ${esc(b.note || '')}</span></div>`).join('') || '<p class="hint">신호가 충분하지 않습니다.</p>';
+    add(el, 'bet-box', `<h3>💰 이상감지 보정 추천 <span class="hint" style="font-weight:400">(${esc(t.betType)})</span></h3>${bets}`);
   }
 
   /** [2번] "마번 배당" 줄들을 파싱 → {마번: 배당}. 숫자 외 문자(번/배/콜론 등)는 구분자로 처리. */
@@ -997,54 +1452,42 @@
     return out;
   }
 
-  /** [2번] 빠른입력 제출 — Vision 없이 즉시 스냅샷 저장 + (2차면) 자동 비교 */
+  /** [2번] 빠른입력 제출 — Vision 없이 즉시 스냅샷 누적 + 실시간 갱신 */
   async function submitQuickOdds() {
     const odds = parseQuickOdds($('#quickOddsInput').value);
     const n = Object.keys(odds).length;
     if (!n) { toast('마번·배당을 한 줄에 하나씩 입력하세요. 예: 4 2.4'); return; }
-    const round = autoRound();
     try {
-      await applyOddsSnapshot(round, odds, true);   // quiet — 오버레이 없이 즉시
-      notify(`⌨️ 빠른입력 ${round}차 저장 (${n}두)`, true);
-      if (round === 2) $('#quickOddsInput').value = '';
+      await accumulateOdds(odds, true);
+      notify(`⌨️ 복승 빠른입력 ${state.oddsTrack.snaps}번째 누적 (${n}두)`, true);
+      $('#quickOddsInput').value = '';
     } catch (e) { toast('빠른입력 실패: ' + e.message); }
   }
 
-  /** [3번] 2차 백그라운드 판독 중 즉시 표시할 1차 기준 화면 */
-  function renderSecondPending() {
-    const el = $('#oddsTrackReport'); el.innerHTML = '';
-    const fo = state.oddsTrack.firstOdds || {};
-    const rows = Object.keys(fo).map(Number).sort((a, b) => a - b)
-      .map((no) => `<tr><td>${no}</td><td>${fo[no]}</td></tr>`).join('');
-    add(el, 'panel-card', `<h3>📡 2차 Vision 판독 중… <span class="hint" style="font-weight:400">완료 시 드롭·괴리·신호 자동 표시</span></h3>
-      <table class="data-table"><thead><tr><th>마번</th><th>1차 배당(기준)</th></tr></thead><tbody>${rows}</tbody></table>
-      <p class="hint" style="margin-top:8px">⏳ 화면은 즉시 1차 기준을 표시합니다. 백그라운드 판독이 끝나면 변동폭이 채워집니다.</p>`);
+  /** [4번] 쌍승 빠른입력 파싱 — 한 줄 "A B ab ba" → {"A>B":ab, "B>A":ba}. ba 생략 가능. */
+  function parseQuickPairs(text) {
+    const out = {};
+    String(text || '').split(/[\n;]+/).forEach((line) => {
+      const t = line.replace(/[^\d. ]+/g, ' ').trim().split(/\s+/).filter(Boolean).map(Number);
+      if (t.length >= 3) {
+        const [a, b, ab, ba] = t;
+        if (a > 0 && b > 0 && a !== b) {
+          if (ab > 0) out[`${a}>${b}`] = ab;
+          if (ba > 0) out[`${b}>${a}`] = ba;
+        }
+      }
+    });
+    return out;
   }
 
-  // ---------- [3단계] 1차/2차 자동 타이머 ----------
-  const SNAP_GAP_SEC = 510; // 8분30초 (10분전 1차 → 1분30초전 2차)
-
-  function startSnapTimer() {
-    stopSnapTimer();
-    const t = state.oddsTrack;
-    t.deadline = Date.now() + SNAP_GAP_SEC * 1000;
-    t.timerInt = setInterval(updateSnapTimer, 1000);
-    t.timerTO = setTimeout(onSnapDue, SNAP_GAP_SEC * 1000);
-    updateSnapTimer();
-  }
-  function updateSnapTimer() {
-    const el = $('#snapTimer'); if (!el) return;
-    const left = Math.max(0, Math.round((state.oddsTrack.deadline - Date.now()) / 1000));
-    const m = Math.floor(left / 60), s = left % 60;
-    el.textContent = left > 0 ? `⏱ 2차 캡처까지 ${m}:${String(s).padStart(2, '0')}` : '⏰ 지금 2차 캡처하세요! (Alt+C)';
-    el.style.color = left <= 60 ? 'var(--accent-2)' : '';
-  }
-  function onSnapDue() { beep(); notify('⏰ 2차 캡처 하세요! (Alt+C)', true); updateSnapTimer(); }
-  function stopSnapTimer() {
-    const t = state.oddsTrack;
-    clearInterval(t.timerInt); clearTimeout(t.timerTO);
-    t.timerInt = t.timerTO = null; t.deadline = 0;
-    const el = $('#snapTimer'); if (el) el.textContent = '';
+  /** [4번] 쌍승 빠른입력 제출 — 즉시 쌍승 시계열 누적 */
+  function submitQuickPairs() {
+    const pairs = parseQuickPairs($('#quickPairsInput').value);
+    const n = Object.keys(pairs).length;
+    if (!n) { toast('쌍승은 한 줄에 "A B A→B배당 B→A배당" 형식으로. 예: 3 7 4.2 6.1'); return; }
+    accumulateExacta(pairs);
+    notify(`🔀 쌍승 빠른입력 ${state.oddsTrack.exTimes.length}번째 누적 (${n}쌍)`, true);
+    $('#quickPairsInput').value = '';
   }
 
   /** 알림음 (WebAudio, 외부 파일 없이 비프 3회) */
@@ -1073,50 +1516,8 @@
     return [...state.oddsTrack.nos].sort((a, b) => a - b).map((no) => ({ no, name: '', score: 0 }));
   }
 
-  async function runOddsDetect(quiet) {
-    const raceKey = state.oddsTrack.raceKey || selectedRaceKey();
-    try {
-      if (!quiet) showLoading('이상감지 계산 중...');   // compute는 ms 단위(서버 순수 연산) — quiet면 오버레이 생략
-      const c = await Analysis.oddsCompute(raceKey, bmedHorsesFor(raceKey));
-      if (!quiet) hideLoading();
-      renderOddsDetect(c);
-    } catch (e) { if (!quiet) hideLoading(); toast('이상감지 실패: ' + e.message); }
-  }
-
   /** 신호 점수 → 신호등 색. 높을수록 강한 이상신호(매수). */
   function sigColor(s) { return s >= 75 ? '🔴' : s >= 60 ? '🟠' : s >= 45 ? '🟡' : '🟢'; }
-
-  function renderOddsDetect(c) {
-    const el = $('#oddsTrackReport'); el.innerHTML = '';
-    if (!c.snapCount) { add(el, 'panel-card', '<p class="hint">저장된 배당 스냅샷이 없습니다. 1차/2차 캡처를 먼저 하세요.</p>'); return; }
-
-    const rows = c.horses.slice().sort((a, b) => b.signalScore - a.signalScore).map((h) => {
-      const dpct = h.firstOdds != null ? (h.drop * 100).toFixed(0) + '%' : '-';
-      const epct = h.edge != null ? (h.edge >= 0 ? '+' : '') + (h.edge * 100).toFixed(1) + '%p' : '-';
-      const e = h.edge || 0;
-      return `<tr>
-        <td>${h.no}</td><td>${esc(h.name || '')}</td>
-        <td>${h.lastOdds != null ? h.lastOdds : '-'}</td>
-        <td class="${h.drop > 0.02 ? 'pos' : h.drop < -0.02 ? 'neg' : ''}">${dpct}</td>
-        <td class="${e > 0.02 ? 'pos' : e < -0.02 ? 'neg' : ''}">${epct}</td>
-        <td><b>${sigColor(h.signalScore)} ${h.signalScore}</b></td>
-        <td>${(h.tags || []).map((t) => `<span class="odds-tag">${esc(t)}</span>`).join(' ')}</td>
-      </tr>`;
-    }).join('');
-
-    add(el, 'panel-card', `<h3>⚡ 배당 이상감지 결과 (스냅샷 ${c.snapCount}회)</h3>
-      <table class="data-table">
-        <thead><tr><th>마번</th><th>마명</th><th>배당</th><th>드롭</th><th>괴리</th><th>신호</th><th>판정</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-      <p class="hint" style="margin-top:8px">🔴≥75 · 🟠60+ · 🟡45+ · 🟢&lt;45 │ 드롭=배당 짧아진 비율(자금유입) · 괴리=BMED 기대확률−시장 내재확률 · 신호 50=중립</p>`);
-
-    const bt = state.oddsTrack.betType;
-    const bets = (c.bets || []).map((b) =>
-      `<div class="bet-line"><span><span class="bet-type">${esc(b.type)}</span> ${(b.combo || []).join('-')}</span>
-       <span>신호 ${b.confidence} · ${esc(b.note || '')}</span></div>`).join('') || '<p class="hint">신호가 충분하지 않습니다.</p>';
-    add(el, 'bet-box', `<h3>💰 이상감지 보정 추천 <span class="hint" style="font-weight:400">(선택: ${esc(bt)})</span></h3>${bets}`);
-  }
 
   // ---------- 베팅 평탄화 (History 판정용) ----------
   function flattenBets(report) {

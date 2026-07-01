@@ -133,10 +133,20 @@
           </div>
         </div>
 
-        <!-- 시계열 이상감지 (Phase 2) -->
+        <!-- 배당 시계열 다중 캡처 · 실시간 분석 -->
         <div id="oddsTrackPanel" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
-          <h3>📡 배당 시계열 이상감지 (1차/2차 캡처)</h3>
-          <p class="hint">화면을 캡처/크롭한 상태에서 ① 베팅종류 선택 → ② [1차 캡처]·[2차 캡처]로 두 시점의 배당을 저장 → ③ [이상감지 분석].</p>
+          <h3>📡 배당 시계열 다중 캡처 · 실시간 분석 (복승+쌍승)</h3>
+          <p class="hint">화면 캡처/크롭 후 [📸 캡처 누적] 반복 또는 [🔀 복승+쌍승 캡처]로 두 배당을 한 번에. 자동 캡처(2/3/5분)는 복승/쌍승을 교대로 누적합니다.</p>
+
+          <!-- [2번] 캡처 순서 가이드 -->
+          <div id="captureSteps" class="cap-steps">
+            <div class="cap-step active" data-step="1"><span class="cap-step-no">1</span> [복승] 탭 열기</div>
+            <div class="cap-step-arrow">→</div>
+            <div class="cap-step" data-step="2"><span class="cap-step-no">2</span> [🔀 복승+쌍승 캡처] 누르기</div>
+            <div class="cap-step-arrow">→</div>
+            <div class="cap-step" data-step="3"><span class="cap-step-no">3</span> 안내 뜨면 [쌍승] 탭으로 전환 (자동 캡처)</div>
+          </div>
+
           <div class="cfg-row">
             <div class="seg" id="betTypeSeg">
               <button type="button" class="seg-btn active" data-bt="복승">복승</button>
@@ -146,22 +156,46 @@
             <label class="hint">연결 분석(BMED)<br>
               <select id="oddsRaceSelect" class="cfg-input" style="width:190px"></select>
             </label>
-            <button id="snap1Btn" class="btn btn-primary">📸 1차 캡처 · 10분전</button>
-            <button id="snap2Btn" class="btn btn-primary">📸 2차 캡처 · 1분30초전</button>
+            <button id="dualCapBtn" class="btn btn-primary">🔀 복승+쌍승 캡처</button>
+            <button id="snapAddBtn" class="btn">📸 복승만 누적</button>
             <button id="quickOddsBtn" class="btn">⌨️ 빠른입력</button>
-            <button id="oddsDetectBtn" class="btn" disabled>⚡ 이상감지 분석</button>
+            <button id="oddsResetBtn" class="btn">🗑 초기화</button>
           </div>
-          <!-- [2번] 빠른 입력 모드 — Vision 없이 마번·배당 숫자만 입력해 즉시 이상감지 -->
+          <!-- [2번] 자동 캡처 인터벌 -->
+          <div class="cfg-row" style="margin-top:8px;align-items:flex-end">
+            <span class="cond-label">자동 캡처</span>
+            <button type="button" class="btn auto-int-btn" data-min="2">2분</button>
+            <button type="button" class="btn auto-int-btn" data-min="3">3분</button>
+            <button type="button" class="btn auto-int-btn" data-min="5">5분</button>
+            <button id="autoStopBtn" class="btn" disabled>⏹ 캡처 중지</button>
+            <label class="hint">마감 시각(자동중지)<br><input id="deadlineInput" type="time" class="cfg-input" style="width:120px" /></label>
+            <label class="hint" style="display:flex;align-items:center;gap:5px"><input id="altExactaChk" type="checkbox" checked /> 복승/쌍승 교대</label>
+            <span class="hint" style="margin:0">홀수=복승 · 짝수="쌍승 전환" 안내 후 5초 뒤 자동 캡처</span>
+          </div>
+          <!-- [2번] 빠른 입력 모드 — Vision 없이 마번·배당 숫자만 입력해 즉시 누적 -->
           <div id="quickOddsBox" class="hidden" style="margin-top:10px;background:rgba(0,0,0,.04);padding:10px;border-radius:8px">
             <p class="hint" style="margin:0 0 6px">⌨️ <b>빠른입력</b> — Vision 없이 즉시 계산(0.1초). 한 줄에 <code>마번 배당</code> (예: <code>4 2.4</code>). 콤마/줄바꿈 구분, <code>번/배</code> 같은 글자는 무시됩니다.</p>
             <textarea id="quickOddsInput" rows="4" class="cfg-input" style="width:100%;box-sizing:border-box;font-family:monospace" placeholder="1 4.9&#10;4 2.4&#10;6 4.8"></textarea>
             <div class="cfg-row" style="margin-top:6px">
-              <button id="quickOddsApplyBtn" class="btn btn-primary">⚡ 즉시 이상감지</button>
-              <span class="hint" style="margin:0">스냅샷이 없으면 1차로, 1차가 있으면 2차로 저장 후 1차와 자동 비교합니다.</span>
+              <button id="quickOddsApplyBtn" class="btn btn-primary">⚡ 복승 즉시 누적</button>
+              <span class="hint" style="margin:0">입력할 때마다 시계열에 한 포인트씩 누적됩니다.</span>
+            </div>
+            <!-- [4번] 쌍승 빠른입력 -->
+            <div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px">
+              <p class="hint" style="margin:0 0 6px">🔀 <b>쌍승 빠른입력</b> — 한 줄에 <code>A B A→B배당 B→A배당</code> (예: <code>3 7 4.2 6.1</code>). 두 방향 배당의 대소가 뒤바뀌면 역전으로 표시됩니다.</p>
+              <textarea id="quickPairsInput" rows="3" class="cfg-input" style="width:100%;box-sizing:border-box;font-family:monospace" placeholder="3 7 4.2 6.1&#10;1 4 2.8 3.5"></textarea>
+              <div class="cfg-row" style="margin-top:6px">
+                <button id="quickPairsApplyBtn" class="btn btn-primary">🔀 쌍승 즉시 누적</button>
+              </div>
             </div>
           </div>
-          <p class="hint" id="oddsTrackHint" style="margin-top:8px">먼저 화면을 캡처/크롭한 뒤 [1차 캡처]를 누르세요.</p>
+          <p class="hint" id="oddsTrackHint" style="margin-top:8px">[복승] 탭을 열고 [🔀 복승+쌍승 캡처]를 누르세요.</p>
           <p class="hint" id="snapTimer" style="margin-top:4px;font-weight:600"></p>
+          <!-- [3번] 시계열 라인 차트 -->
+          <div id="oddsChartWrap" class="hidden" style="margin-top:12px">
+            <canvas id="oddsChart" height="260"></canvas>
+            <p class="hint" style="margin-top:4px">상위 5마리 · <span style="color:#ff5c5c">■</span> 급락 · <span style="color:#ffd24f">■</span> 반등 · <span style="color:#ff5c5c">🔴역전</span> 라인 교차</p>
+          </div>
         </div>
 
         <!-- [3번] 복승/쌍승/삼복승 3종 동시 분석 -->
@@ -179,6 +213,7 @@
       </div>
       <div id="tripleReport" class="report-area"></div>
       <div id="oddsTrackReport" class="report-area"></div>
+      <div id="exactaReport" class="report-area"></div>
       <div id="oddsReport" class="report-area"></div>
     </section>
 
@@ -231,6 +266,9 @@
     <div class="spinner"></div>
     <p id="loadingText">AI 분석 중...</p>
   </div>
+
+  <!-- [1번] 복승→쌍승 전환 카운트다운 오버레이 -->
+  <div id="capCountdown" class="cap-countdown hidden"></div>
 
   <script src="js/jockey.js"></script>
   <script src="js/pdf-parser.js"></script>

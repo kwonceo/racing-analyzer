@@ -269,6 +269,37 @@ body {
 table.data-table td.pos { color: var(--green); font-weight: 600; }
 table.data-table td.neg { color: var(--red); font-weight: 600; }
 
+/* [다중캡처] 자동 캡처 인터벌 버튼 활성 + 시계열 차트 */
+.auto-int-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+#oddsChartWrap { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; }
+#oddsChart { display: block; width: 100%; }
+
+/* [2번] 캡처 순서 가이드 스텝 */
+.cap-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 14px; }
+.cap-step {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg-elev); border: 1px solid var(--border); color: var(--text-dim);
+  border-radius: 8px; padding: 6px 12px; font-size: 13px; transition: all .15s;
+}
+.cap-step-no {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%; background: var(--border);
+  color: var(--text); font-size: 12px; font-weight: 700;
+}
+.cap-step.active { border-color: var(--accent); color: var(--text); background: rgba(79,140,255,.12); box-shadow: 0 0 0 1px var(--accent); }
+.cap-step.active .cap-step-no { background: var(--accent); color: #fff; }
+.cap-step-arrow { color: var(--text-dim); font-size: 14px; }
+
+/* [1번] 복승→쌍승 전환 카운트다운 오버레이 */
+.cap-countdown {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(15,20,25,.82);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+}
+.cap-countdown.hidden { display: none; }
+.cap-countdown .cd-msg { font-size: 22px; font-weight: 700; color: var(--accent-2); text-align: center; max-width: 640px; padding: 0 20px; }
+.cap-countdown .cd-num { font-size: 96px; font-weight: 800; color: var(--accent); line-height: 1; }
+
 /* 전적 점수 특수 플래그 (Phase 3) */
 .flag {
   display: inline-block; font-size: 11px; padding: 2px 7px; margin: 1px 0;
