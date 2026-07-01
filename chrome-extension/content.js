@@ -195,6 +195,54 @@
     };
   }
 
+  // ── [2번] 결과(성적) 페이지: 1~3착 자동 추출 ────────────────────────
+  //   keiba 결과 페이지 = RaceMarkTable(레이스 성적표). URL에 result/RaceMarkTable
+  //   포함 또는 "着順" 헤더가 있으면 결과 페이지로 판단.
+  //   표 헤더: 着順 | 枠 | 馬番 | 馬名 | … → 착순의 마번/말이름 추출.
+  function isResultPage() {
+    if (/result|racemarktable/i.test(location.href)) return true;
+    return [...document.querySelectorAll('table')].some((t) => {
+      const h = [...(t.querySelector('tr')?.querySelectorAll('th,td') || [])].map((c) => txt(c));
+      return h.includes('着順') && h.some((x) => /馬番/.test(x));
+    });
+  }
+
+  function extractResults() {
+    for (const table of document.querySelectorAll('table')) {
+      const trs = [...table.querySelectorAll('tr')];
+      if (trs.length < 2) continue;
+      const head = [...trs[0].querySelectorAll('th,td')].map((c) => txt(c));
+      const iRank = head.findIndex((h) => /着順/.test(h));
+      const iNo = head.findIndex((h) => /^馬番$/.test(h));
+      const iName = head.findIndex((h) => /馬名/.test(h));
+      if (iRank === -1 || iNo === -1) continue;
+      const results = [];
+      for (const tr of trs.slice(1)) {
+        const cells = [...tr.querySelectorAll('th,td')].map((c) => txt(c));
+        const rank = toNum(cells[iRank]);
+        const no = toNum(cells[iNo]);
+        // 착순이 정수이고 마번이 유효할 때만 (失格/中止/除外 등은 착순 숫자 없음 → 제외)
+        if (!Number.isInteger(rank) || rank < 1 || !isHorseNo(no) || !/^\d+$/.test(cells[iRank] || '')) continue;
+        results.push({ rank, no, name: iName >= 0 ? cells[iName] : '' });
+      }
+      if (results.length) { results.sort((a, b) => a.rank - b.rank); return results; }
+    }
+    return [];
+  }
+
+  async function sendResults(reason) {
+    const results = extractResults();
+    if (!results.length) return { ok: false, error: '착순을 찾지 못했습니다. 결과(성적) 페이지인지 확인하세요.' };
+    const { raceKey: override } = await getSettings();
+    const raceKey = (override && override.trim()) || extractRaceKey();
+    if (!raceKey) return { ok: false, error: 'raceKey를 만들 수 없습니다. 팝업에서 직접 입력하세요.' };
+    const res = await chrome.runtime.sendMessage({
+      type: 'POST_RESULTS', reason,
+      payload: { raceKey, results, source: location.href },
+    });
+    return res || { ok: false, error: 'background 응답 없음' };
+  }
+
   // ── 설정 로드 & 자동전송 루프 ───────────────────────────────────────
   let timer = null;
 
@@ -242,6 +290,10 @@
       doSend('manual').then(sendResponse);
       return true; // async
     }
+    if (msg?.type === 'MANUAL_SEND_RESULTS') {
+      sendResults('manual').then(sendResponse);
+      return true;
+    }
     if (msg?.type === 'PREVIEW') {
       chrome.storage.local.get({ raceKey: '' }, ({ raceKey }) => {
         sendResponse(buildPayload(raceKey));
@@ -251,4 +303,9 @@
   });
 
   restartLoop();
+
+  // [2번] 결과 페이지면 로드 직후 1회 자동 전송 (URL result/성적표 감지)
+  if (isResultPage()) {
+    setTimeout(() => { sendResults('auto-result').catch(() => {}); }, 800);
+  }
 })();

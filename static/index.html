@@ -13,7 +13,11 @@
       <span class="logo">🏇</span>
       <h1>경마 BMED 분석기</h1>
     </div>
-    <div class="server-box">
+    <div class="server-box" style="display:flex;align-items:center;gap:8px">
+      <input id="kraKeyInput" type="password" placeholder="data.go.kr KRA API 키" title="공공데이터포털 인증키"
+             style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:190px" />
+      <button id="kraKeySave" class="btn" style="padding:5px 10px;font-size:12px">키 저장</button>
+      <span id="kraKeyStatus" class="hint" style="margin:0">⬜</span>
       <span id="serverStatus" class="api-status">● 서버 확인 중...</span>
     </div>
   </header>
@@ -188,6 +192,14 @@
                 <button id="quickPairsApplyBtn" class="btn btn-primary">🔀 쌍승 즉시 누적</button>
               </div>
             </div>
+            <!-- [1-1] 복승 매트릭스 빠른입력 -->
+            <div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px">
+              <p class="hint" style="margin:0 0 6px">🎰 <b>복승 매트릭스 빠른입력</b> — 한 줄에 <code>A B 배당</code> (예: <code>3 7 8.4</code>). 순서무관 조합 배당을 삼각 매트릭스로 표시합니다.</p>
+              <textarea id="quickQuinInput" rows="3" class="cfg-input" style="width:100%;box-sizing:border-box;font-family:monospace" placeholder="1 2 8.4&#10;3 5 12.0"></textarea>
+              <div class="cfg-row" style="margin-top:6px">
+                <button id="quickQuinApplyBtn" class="btn btn-primary">🎰 복승 매트릭스 누적</button>
+              </div>
+            </div>
           </div>
           <p class="hint" id="oddsTrackHint" style="margin-top:8px">[복승] 탭을 열고 [🔀 복승+쌍승 캡처]를 누르세요.</p>
           <p class="hint" id="snapTimer" style="margin-top:4px;font-weight:600"></p>
@@ -275,5 +287,23 @@
   <script src="js/analysis.js"></script>
   <script src="js/history.js"></script>
   <script src="js/app.js"></script>
+  <script>
+    // [4번] KRA data.go.kr API 키 저장/상태 (fetch_kra.py 와 data/kra_key.txt 공유)
+    (function () {
+      var inp = document.getElementById('kraKeyInput');
+      var btn = document.getElementById('kraKeySave');
+      var st = document.getElementById('kraKeyStatus');
+      function setStatus(has) { st.textContent = has ? '🟢 저장됨' : '⬜ 미설정'; }
+      fetch('/api/kra/key').then(function (r) { return r.json(); })
+        .then(function (d) { setStatus(d.hasKey); }).catch(function () {});
+      btn.addEventListener('click', function () {
+        var key = inp.value.trim();
+        fetch('/api/kra/key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key }) })
+          .then(function (r) { return r.json(); })
+          .then(function (d) { setStatus(d.hasKey); inp.value = ''; alert(d.hasKey ? '✅ KRA API 키 저장됨\n\n수집: python tools/fetch_kra.py --from 20260101 --to 20260131 --jockeys' : '키가 비어 있습니다.'); })
+          .catch(function () { alert('저장 실패 — 서버 확인'); });
+      });
+    })();
+  </script>
 </body>
 </html>

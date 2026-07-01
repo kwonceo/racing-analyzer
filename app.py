@@ -701,6 +701,23 @@ def _odds_get_race(db, race_key):
     return db.get(race_key) or {"snaps": [], "series": {}}
 
 
+# ───────── 결과(착순) 저장소 — 확장 프로그램 결과페이지 자동수집용 ─────────
+RESULTS_STORE = os.path.join(os.path.dirname(__file__), "results_store.json")
+
+
+def _results_load():
+    try:
+        with open(RESULTS_STORE, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _results_save(db):
+    with open(RESULTS_STORE, "w", encoding="utf-8") as f:
+        json.dump(db, f, ensure_ascii=False)
+
+
 def _clamp(x, lo, hi):
     return max(lo, min(hi, x))
 
@@ -858,6 +875,83 @@ def odds_snapshot():
         return jsonify({"error": "odds(마번:배당)가 비어 있습니다."}), 400
     race = odds_add_snapshot(race_key, body["odds"])
     return jsonify({"snaps": len(race["snaps"]), "series": race["series"]})
+
+
+@app.route("/api/results/auto", methods=["POST"])
+def results_auto():
+    """확장 프로그램: keiba 결과페이지에서 자동 추출한 착순 저장.
+    body: {raceKey, results:[{rank,no,name}], source?} → {ok, saved, top3}"""
+    body = request.json or {}
+    race_key = (body.get("raceKey") or "").strip()
+    results = body.get("results") or []
+    if not race_key:
+        return jsonify({"error": "raceKey가 필요합니다."}), 400
+    # 정규화: rank/no는 정수, 유효한 착순만
+    norm = []
+    for r in results:
+        try:
+            rank = int(r.get("rank"))
+            no = int(r.get("no"))
+        except (TypeError, ValueError):
+            continue
+        if rank >= 1 and no >= 1:
+            norm.append({"rank": rank, "no": no, "name": (r.get("name") or "").strip()})
+    if not norm:
+        return jsonify({"error": "results(착순)가 비어 있습니다."}), 400
+    norm.sort(key=lambda x: x["rank"])
+    top3 = [x["no"] for x in norm if x["rank"] <= 3]
+
+    db = _results_load()
+    db[race_key] = {"results": norm, "top3": top3,
+                    "source": body.get("source") or "extension", "t": time.time()}
+    _results_save(db)
+    print(f"[결과 자동수집] {race_key}: 1~3착 {top3}")
+    return jsonify({"ok": True, "saved": len(norm), "top3": top3})
+
+
+@app.route("/api/results/get", methods=["POST"])
+def results_get():
+    """저장된 착순 조회: {raceKey} → {results, top3} (없으면 빈 값)"""
+    body = request.json or {}
+    rec = _results_load().get((body.get("raceKey") or "").strip())
+    return jsonify(rec or {"results": [], "top3": []})
+
+
+# ───────── KRA 공공데이터: API 키 저장 + 마필 과거기록 조회 ─────────
+KRA_KEY_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_key.txt")
+KRA_HISTORY_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_history.json")
+
+
+@app.route("/api/kra/key", methods=["GET", "POST"])
+def kra_key():
+    """data.go.kr 서비스키 저장/조회. 저장 위치는 tools/fetch_kra.py 와 공유(data/kra_key.txt)."""
+    if request.method == "POST":
+        key = ((request.json or {}).get("key") or "").strip()
+        os.makedirs(os.path.dirname(KRA_KEY_FILE), exist_ok=True)
+        with open(KRA_KEY_FILE, "w", encoding="utf-8") as f:
+            f.write(key)
+        return jsonify({"ok": True, "hasKey": bool(key)})
+    has = os.path.exists(KRA_KEY_FILE) and os.path.getsize(KRA_KEY_FILE) > 0
+    return jsonify({"hasKey": has})
+
+
+@app.route("/api/kra/horse", methods=["POST"])
+def kra_horse():
+    """마명으로 KRA 과거기록 자동매칭: {name} → {records, starts, wins, places, placeRate}"""
+    name = ((request.json or {}).get("name") or "").strip()
+    try:
+        with open(KRA_HISTORY_FILE, encoding="utf-8") as f:
+            hist = json.load(f)
+    except Exception:
+        return jsonify({"name": name, "records": [], "starts": 0, "placeRate": 0})
+    recs = (hist.get("byHorse") or {}).get(name) or []
+    starts = len(recs)
+    placed = sum(1 for r in recs if isinstance(r.get("stOrd"), (int, float)) and 0 < r["stOrd"] <= 3)
+    wins = sum(1 for r in recs if r.get("stOrd") == 1)
+    return jsonify({
+        "name": name, "records": recs, "starts": starts, "wins": wins, "places": placed,
+        "placeRate": round(placed / starts * 100, 1) if starts else 0,
+    })
 
 
 @app.route("/api/odds/undo", methods=["POST"])

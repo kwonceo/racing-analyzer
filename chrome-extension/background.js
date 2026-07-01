@@ -10,6 +10,16 @@
 
 const SERVER = 'http://127.0.0.1:8011';
 const SNAPSHOT_URL = `${SERVER}/api/odds/snapshot`;
+const RESULTS_URL = `${SERVER}/api/results/auto`;
+
+/** 아이콘 배지: 성공=초록(카운트/✓), 실패=빨강(!). 잠시 후 자동 소거. */
+function setBadge(ok, count) {
+  try {
+    chrome.action.setBadgeText({ text: ok ? (count != null ? String(count) : '✓') : '!' });
+    chrome.action.setBadgeBackgroundColor({ color: ok ? '#22c55e' : '#ef4444' });
+    setTimeout(() => chrome.action.setBadgeText({ text: '' }), 4000);
+  } catch (_) { /* noop */ }
+}
 
 // 기본 설정 초기화
 chrome.runtime.onInstalled.addListener(() => {
@@ -56,6 +66,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           lastReason: msg.reason || '',
         };
         chrome.storage.local.set({ status });
+        setBadge(true, data?.snaps);
         sendResponse({ ok: true, data, status });
       })
       .catch((err) => {
@@ -67,7 +78,40 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           lastReason: msg.reason || '',
         };
         chrome.storage.local.set({ status });
+        setBadge(false);
         sendResponse({ ok: false, error: status.lastError, status });
+      });
+    return true; // async
+  }
+
+  if (msg?.type === 'POST_RESULTS') {
+    fetch(RESULTS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg.payload),
+    })
+      .then(async (res) => {
+        let d = null; try { d = await res.json(); } catch (_) { /* noop */ }
+        if (!res.ok) throw new Error((d && d.error) || `HTTP ${res.status}`);
+        return d;
+      })
+      .then((data) => {
+        const resultStatus = {
+          lastResult: Date.now(), lastResultOk: true, lastResultError: '',
+          lastResultRaceKey: msg.payload.raceKey, lastTop3: data?.top3 || [], lastReason: msg.reason || '',
+        };
+        chrome.storage.local.set({ resultStatus });
+        setBadge(true, (data?.top3 || []).length || '✓');
+        sendResponse({ ok: true, data, status: resultStatus });
+      })
+      .catch((err) => {
+        const resultStatus = {
+          lastResult: Date.now(), lastResultOk: false, lastResultError: String(err.message || err),
+          lastResultRaceKey: msg.payload?.raceKey || '',
+        };
+        chrome.storage.local.set({ resultStatus });
+        setBadge(false);
+        sendResponse({ ok: false, error: resultStatus.lastResultError, status: resultStatus });
       });
     return true; // async
   }

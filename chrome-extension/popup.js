@@ -29,12 +29,13 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 60, raceKey: '', status: null },
+    { autoSend: false, intervalSec: 60, raceKey: '', status: null, resultStatus: null },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
       els.interval.value = String(v.intervalSec || 60);
       els.raceKey.value = v.raceKey || '';
       renderStatus(v.status);
+      renderResultStatus(v.resultStatus);
     }
   );
 }
@@ -119,9 +120,46 @@ function resetBtn() {
   els.sendNow.textContent = '지금 전송';
 }
 
+// ── [2번] 결과(1~3착) 전송 ──────────────────────────────────────────
+const btnResults = document.getElementById('sendResults');
+const resultRow = document.getElementById('lastResultRow');
+const resultDetail = document.getElementById('lastResultDetail');
+
+function renderResultStatus(rs) {
+  if (!rs || !rs.lastResult) return;
+  const when = fmtTime(rs.lastResult);
+  if (rs.lastResultOk) {
+    resultRow.innerHTML = `결과 전송: <span class="ok">성공 ${when}</span>`;
+    resultDetail.textContent = `${rs.lastResultRaceKey || ''} · 1~3착 ${(rs.lastTop3 || []).join('-')}`;
+  } else {
+    resultRow.innerHTML = `결과 전송: <span class="err">실패 ${when}</span>`;
+    resultDetail.textContent = rs.lastResultError || '';
+  }
+}
+
+btnResults.addEventListener('click', async () => {
+  btnResults.disabled = true; btnResults.textContent = '전송 중…';
+  const tab = await activeKeibaTab();
+  if (!tab) {
+    resultRow.innerHTML = '<span class="err">keiba.go.jp 결과(성적) 페이지에서 눌러주세요.</span>';
+  } else {
+    chrome.tabs.sendMessage(tab.id, { type: 'MANUAL_SEND_RESULTS' }, (res) => {
+      if (chrome.runtime.lastError || !res) {
+        resultRow.innerHTML = '<span class="err">페이지 응답 없음. 새로고침 후 재시도.</span>';
+      } else {
+        renderResultStatus(res.status || null);
+        if (!res.ok && res.error) resultRow.innerHTML = `<span class="err">${res.error}</span>`;
+      }
+    });
+  }
+  btnResults.disabled = false; btnResults.textContent = '🏁 결과(1~3착) 전송';
+});
+
 // 상태가 background 에서 갱신되면 실시간 반영
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.status) renderStatus(changes.status.newValue);
+  if (area !== 'local') return;
+  if (changes.status) renderStatus(changes.status.newValue);
+  if (changes.resultStatus) renderResultStatus(changes.resultStatus.newValue);
 });
 
 // ── 초기화 ──────────────────────────────────────────────────────────

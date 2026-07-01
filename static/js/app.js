@@ -572,6 +572,7 @@
     const alt = $('#altExactaChk');
     if (alt) { alt.checked = state.oddsTrack.dual !== false; alt.addEventListener('change', () => { state.oddsTrack.dual = alt.checked; }); }
     $('#quickPairsApplyBtn').addEventListener('click', submitQuickPairs); // [4번] 쌍승 빠른입력
+    { const b = $('#quickQuinApplyBtn'); if (b) b.addEventListener('click', submitQuickQuin); } // [1-1] 복승 매트릭스 빠른입력
     setStep(1);
     // [2번] 빠른입력 모드
     $('#quickOddsBtn').addEventListener('click', () => {
@@ -963,6 +964,21 @@
     return out;
   }
 
+  /** 복승(quinella) 배당판 → {"A|B": 배당} 순서무관 쌍. 2마리 조합 셀을 정렬 키로 누적. */
+  function perQuinellaPairs(rep) {
+    const num = (s) => { const m = String(s == null ? '' : s).replace(/,/g, '').match(/[\d.]+/); return m ? parseFloat(m[0]) : null; };
+    const out = {};
+    (rep.combos || []).filter((c) => (c.combo || []).length === 2).forEach((c) => {
+      if (/쌍/.test(c.type || '')) return;                 // 쌍승(순서) 항목 제외
+      const a = +c.combo[0], b = +c.combo[1], v = num(c.odds);
+      if (a > 0 && b > 0 && a !== b && v > 0) {
+        const k = a < b ? `${a}|${b}` : `${b}|${a}`;
+        if (out[k] == null || v < out[k]) out[k] = v;
+      }
+    });
+    return out;
+  }
+
   // ========== [다중 캡처 시계열 + 실시간 분석] ==========
   const ODDS_MAX = 20;          // [1번] 최대 누적 포인트
   const SIGNAL_ALERT = 80;      // [6번] 알림 임계 신호점수
@@ -980,7 +996,7 @@
         firstOdds: { ...odds }, series: {}, times: [], alerted: {},
         auto: t.auto || null, deadlineMs: t.deadlineMs || 0,
         _autoId: t._autoId || null, _cdId: t._cdId || null,
-        exSeries: {}, exTimes: [], dual: t.dual !== false, _pendingType: t._pendingType || null,
+        exSeries: {}, exTimes: [], qSeries: {}, qTimes: [], dual: t.dual !== false, _pendingType: t._pendingType || null,
         _autoRound: 0,
       };
     }
@@ -1012,7 +1028,12 @@
       } else {
         const odds = perHorseOdds(rep);
         if (!Object.keys(odds).length) { toast('복승 배당을 못 읽었습니다. 영역 재선택 또는 [빠른입력].'); return; }
-        await accumulateOdds(odds, true);
+        const qpairs = perQuinellaPairs(rep);
+        await accumulateOdds(odds, true);                       // state 생성/스냅샷/렌더
+        if (Object.keys(qpairs).length) {                       // 복승 쌍 누적 → 매트릭스 갱신
+          accumulateQuinellaPairs(qpairs);
+          renderOddsMatrix(state.oddsTrack._lastComputed);
+        }
         notify(`📸 복승 ${state.oddsTrack.snaps}번째 캡처 누적`, true);
       }
     } catch (e) { toast('캡처 실패: ' + e.message); }
@@ -1100,6 +1121,23 @@
     });
     t.exTimes.push(Date.now());
     renderExactaReversal();
+    if ($('#oddsMatrixHost')) renderOddsMatrix(t._lastComputed);   // 쌍승 추가 시 매트릭스 즉시 갱신
+  }
+
+  // ---------- 복승(quinella) 쌍 시계열 (매트릭스용, 순서무관) ----------
+  /** {"A|B": 배당} 한 라운드를 qSeries에 누적 (null 패딩으로 인덱스 정합) */
+  function accumulateQuinellaPairs(pairs) {
+    const t = state.oddsTrack;
+    if (!t.qSeries) { t.qSeries = {}; t.qTimes = []; }
+    const idx = t.qTimes.length;
+    const keys = new Set([...Object.keys(t.qSeries), ...Object.keys(pairs)]);
+    keys.forEach((k) => {
+      const arr = t.qSeries[k] || new Array(idx).fill(null);
+      while (arr.length < idx) arr.push(null);
+      arr.push(k in pairs ? pairs[k] : null);
+      t.qSeries[k] = arr;
+    });
+    t.qTimes.push(Date.now());
   }
 
   /** [4번 소비] 쌍승 A→B / B→A 표 + 방향 대소 뒤바뀜(역전) 감지 */
@@ -1219,7 +1257,7 @@
     state.oddsTrack = {
       betType: t.betType, raceKey: null, snaps: 0, nos: new Set(), firstOdds: {},
       series: {}, times: [], alerted: {}, auto: null, deadlineMs: t.deadlineMs || 0,
-      exSeries: {}, exTimes: [], dual: t.dual !== false, _pendingType: null, _autoRound: 0,
+      exSeries: {}, exTimes: [], qSeries: {}, qTimes: [], dual: t.dual !== false, _pendingType: null, _autoRound: 0,
     };
     $('#oddsTrackReport').innerHTML = '';
     const ex = $('#exactaReport'); if (ex) ex.innerHTML = '';
@@ -1260,6 +1298,7 @@
     try { computed = await Analysis.oddsCompute(t.raceKey, bmedHorsesFor(t.raceKey)); }
     catch (e) { if (!quiet) toast('신호 계산 실패: ' + e.message); }
     if (computed) augmentTrend(computed, t.series || {});
+    t._lastComputed = computed;   // 매트릭스 추천 표시용
     drawOddsChart(t, computed);   // t._reversals 설정
     renderOddsRealtime(computed);
     maybeAlert(computed);
@@ -1437,6 +1476,136 @@
       `<div class="bet-line"><span><span class="bet-type">${esc(b.type)}</span> ${(b.combo || []).join('-')}</span>
        <span>신호 ${b.confidence} · ${esc(b.note || '')}</span></div>`).join('') || '<p class="hint">신호가 충분하지 않습니다.</p>';
     add(el, 'bet-box', `<h3>💰 이상감지 보정 추천 <span class="hint" style="font-weight:400">(${esc(t.betType)})</span></h3>${bets}`);
+    el.insertAdjacentHTML('beforeend', '<div class="panel-card" id="oddsMatrixHost"></div>');
+    renderOddsMatrix(computed);
+  }
+
+  // ---------- [1번] 배당판 매트릭스 (복승 삼각 · 쌍승 정방형 + 추천 카드) ----------
+  const lastNum = (arr) => { for (let i = (arr || []).length - 1; i >= 0; i--) if (typeof arr[i] === 'number') return arr[i]; return null; };
+  const firstNum = (arr) => { for (let i = 0; i < (arr || []).length; i++) if (typeof arr[i] === 'number') return arr[i]; return null; };
+  const prevNum = (arr) => { const ns = (arr || []).filter((v) => typeof v === 'number'); return ns.length >= 2 ? ns[ns.length - 2] : null; };
+
+  /** 낮은 배당 = 진한 파랑 (로그 스케일). v 없으면 투명. */
+  function heatColor(v, lo, hi) {
+    if (!(v > 0)) return 'transparent';
+    const l = Math.log(v), a0 = Math.log(lo), a1 = Math.log(hi);
+    const f = a1 > a0 ? (l - a0) / (a1 - a0) : 0;      // 0=최저배당, 1=최고배당
+    return `rgba(37,99,235,${(0.88 - 0.72 * f).toFixed(2)})`;
+  }
+
+  function renderOddsMatrix(computed) {
+    const host = $('#oddsMatrixHost'); if (!host) return;
+    const t = state.oddsTrack;
+    const q = t.qSeries || {}, ex = t.exSeries || {};
+    const hasQ = Object.keys(q).length, hasX = Object.keys(ex).length;
+
+    // 마번 집합 (쌍 데이터 우선, 없으면 신호 계산의 출전마)
+    const nosSet = new Set();
+    Object.keys(q).forEach((k) => k.split('|').forEach((n) => nosSet.add(+n)));
+    Object.keys(ex).forEach((k) => k.split('>').forEach((n) => nosSet.add(+n)));
+    if (!nosSet.size && computed) (computed.horses || []).forEach((h) => nosSet.add(+h.no));
+    const nos = [...nosSet].filter((n) => n > 0).sort((a, b) => a - b);
+    if (!nos.length || (!hasQ && !hasX)) {
+      host.innerHTML = '<h3>🔢 배당판 매트릭스</h3><p class="hint">복승/쌍승을 캡처하면 실제 배당판과 동일한 매트릭스로 표시됩니다. (복승 매트릭스 화면 또는 쌍승 캡처 필요)</p>';
+      return;
+    }
+
+    // 추천 조합 (신호 계산 bets → 복승/쌍승 키)
+    const recQ = new Set(), recX = new Set();
+    const score = {}; (computed?.horses || []).forEach((h) => { score[h.no] = h.signalScore; });
+    (computed?.bets || []).forEach((b) => {
+      const c = (b.combo || []).map(Number); if (c.length !== 2) return;
+      if (/복/.test(b.type)) recQ.add(c[0] < c[1] ? `${c[0]}|${c[1]}` : `${c[1]}|${c[0]}`);
+      if (/쌍/.test(b.type)) recX.add(`${c[0]}>${c[1]}`);
+    });
+
+    let html = '';
+
+    // ── [1-1] 복승 삼각 매트릭스 ──
+    if (hasQ) {
+      const vals = Object.values(q).map(lastNum).filter((v) => v > 0);
+      const lo = Math.min(...vals), hi = Math.max(...vals);
+      let head = '<tr><th class="corner">복승</th>' + nos.slice(0, -1).map((n) => `<th>${n}</th>`).join('') + '</tr>';
+      let body = '';
+      for (let r = 1; r < nos.length; r++) {
+        const rowNo = nos[r];
+        let tds = '';
+        for (let cIdx = 0; cIdx < r; cIdx++) {
+          const colNo = nos[cIdx];
+          const key = rowNo < colNo ? `${rowNo}|${colNo}` : `${colNo}|${rowNo}`;
+          const v = lastNum(q[key]);
+          if (v > 0) {
+            const rec = recQ.has(key) ? ' rec-q' : '';
+            tds += `<td class="cell${rec}" style="background:${heatColor(v, lo, hi)}" title="${rowNo}-${colNo}">${v}</td>`;
+          } else tds += '<td class="empty">·</td>';
+        }
+        tds += '<td class="diag">—</td>';
+        body += `<tr><th>${rowNo}</th>${tds}</tr>`;
+      }
+      html += `<div class="matrix-title">🎰 복승 매트릭스 <span class="hint" style="font-weight:400">${vals.length}조합 · ${t.qTimes.length}회 캡처</span></div>
+        <div class="matrix-legend"><span>낮은 배당</span><span class="legend-grad"></span><span>높은 배당</span><span style="margin-left:10px">🔴 추천 조합</span></div>
+        <div class="matrix-wrap"><table class="odds-matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+    }
+
+    // ── [1-2] 쌍승 정방형 매트릭스 (순서 있음: 행→열) ──
+    if (hasX) {
+      const vals = Object.values(ex).map(lastNum).filter((v) => v > 0);
+      const lo = Math.min(...vals), hi = Math.max(...vals);
+      let head = '<tr><th class="corner">쌍승 ↓→</th>' + nos.map((n) => `<th>${n}</th>`).join('') + '</tr>';
+      let body = '';
+      for (const rowNo of nos) {
+        let tds = '';
+        for (const colNo of nos) {
+          if (rowNo === colNo) { tds += '<td class="diag">—</td>'; continue; }
+          const v = lastNum(ex[`${rowNo}>${colNo}`]);
+          if (v > 0) {
+            const rec = recX.has(`${rowNo}>${colNo}`) ? ' rec-x' : '';
+            tds += `<td class="cell${rec}" style="background:${heatColor(v, lo, hi)}" title="${rowNo}→${colNo}">${v}</td>`;
+          } else tds += '<td class="empty">·</td>';
+        }
+        body += `<tr><th>${rowNo}</th>${tds}</tr>`;
+      }
+      html += `<div class="matrix-title">🔀 쌍승 매트릭스 <span class="hint" style="font-weight:400">행→열 순서 · ${vals.length}쌍</span></div>
+        <div class="matrix-legend"><span>낮은 배당</span><span class="legend-grad"></span><span>높은 배당</span><span style="margin-left:10px">🟠 추천 조합</span></div>
+        <div class="matrix-wrap"><table class="odds-matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+    }
+
+    // ── 추천 조합 카드 (복승 우선, 신호 bets 있으면 표시) ──
+    const cards = buildComboCards(q, computed, score, recQ);
+    if (cards) html += `<div class="matrix-title">⭐ 추천 조합</div><div class="combo-cards">${cards}</div>`;
+
+    host.innerHTML = html;
+  }
+
+  /** 추천 조합 카드: 신호 bets(복승) 우선, 없으면 배당 낮은 복승 쌍 상위. 급락(1차 대비)·막판(직전 대비) 변화 표기. */
+  function buildComboCards(q, computed, score, recQ) {
+    const move = (arr) => {
+      const f = firstNum(arr), p = prevNum(arr), l = lastNum(arr);
+      const drop = f && l ? (l - f) / f : null;       // <0 = 배당 하락(급락)
+      const late = p && l ? (l - p) / p : null;
+      const fmt = (x) => x == null ? '-' : `<span class="${x < 0 ? 'dn' : x > 0 ? 'up' : ''}">${x >= 0 ? '+' : ''}${(x * 100).toFixed(0)}%</span>`;
+      return `급락 ${fmt(drop)} / 막판 ${fmt(late)}`;
+    };
+    let picks = [];
+    (computed?.bets || []).forEach((b) => {
+      const c = (b.combo || []).map(Number); if (c.length !== 2 || !/복/.test(b.type)) return;
+      const key = c[0] < c[1] ? `${c[0]}|${c[1]}` : `${c[1]}|${c[0]}`;
+      picks.push({ type: '복승', a: c[0], b: c[1], key, rec: true, note: b.note });
+    });
+    if (!picks.length && Object.keys(q).length) {          // bets 없으면 배당 낮은 복승 쌍 상위 3
+      picks = Object.keys(q).map((k) => ({ key: k, odds: lastNum(q[k]) })).filter((x) => x.odds > 0)
+        .sort((x, y) => x.odds - y.odds).slice(0, 3)
+        .map((x) => { const [a, b] = x.key.split('|').map(Number); return { type: '복승', a, b, key: x.key, rec: recQ.has(x.key) }; });
+    }
+    return picks.slice(0, 4).map((p) => {
+      const odds = lastNum(q[p.key]);
+      const sa = score[p.a] != null ? `(${score[p.a]})` : '', sb = score[p.b] != null ? `(${score[p.b]})` : '';
+      return `<div class="combo-card${p.rec ? ' rec' : ''}">
+        <div class="cc-head"><span class="cc-type">${p.type} ${p.a}+${p.b}</span><span class="cc-odds">${odds != null ? odds + '배' : '-'}</span></div>
+        <div class="cc-horses">${p.a}번${sa} + ${p.b}번${sb}</div>
+        <div class="cc-move">${move(q[p.key])}</div>
+      </div>`;
+    }).join('');
   }
 
   /** [2번] "마번 배당" 줄들을 파싱 → {마번: 배당}. 숫자 외 문자(번/배/콜론 등)는 구분자로 처리. */
@@ -1488,6 +1657,30 @@
     accumulateExacta(pairs);
     notify(`🔀 쌍승 빠른입력 ${state.oddsTrack.exTimes.length}번째 누적 (${n}쌍)`, true);
     $('#quickPairsInput').value = '';
+  }
+
+  /** [1-1] 복승 매트릭스 빠른입력 파싱 — 한 줄 "A B 배당" → {"A|B": 배당} (순서무관) */
+  function parseQuickQuin(text) {
+    const out = {};
+    String(text || '').split(/[\n;]+/).forEach((line) => {
+      const p = line.replace(/[^\d. ]+/g, ' ').trim().split(/\s+/).filter(Boolean);
+      if (p.length >= 3) {
+        const a = parseInt(p[0], 10), b = parseInt(p[1], 10), v = parseFloat(p[2]);
+        if (a > 0 && b > 0 && a !== b && v > 0) out[a < b ? `${a}|${b}` : `${b}|${a}`] = v;
+      }
+    });
+    return out;
+  }
+
+  /** [1-1] 복승 매트릭스 빠른입력 제출 — qSeries에 한 라운드 누적 + 매트릭스 갱신 */
+  function submitQuickQuin() {
+    const pairs = parseQuickQuin($('#quickQuinInput').value);
+    const n = Object.keys(pairs).length;
+    if (!n) { toast('복승은 한 줄에 "A B 배당" 형식으로. 예: 3 7 8.4'); return; }
+    accumulateQuinellaPairs(pairs);
+    if ($('#oddsMatrixHost')) renderOddsMatrix(state.oddsTrack._lastComputed);
+    notify(`🎰 복승 매트릭스 빠른입력 ${state.oddsTrack.qTimes.length}번째 누적 (${n}쌍)`, true);
+    $('#quickQuinInput').value = '';
   }
 
   /** 알림음 (WebAudio, 외부 파일 없이 비프 3회) */
