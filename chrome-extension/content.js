@@ -597,6 +597,7 @@
       await wait(1000); // 해당 말 기준 배당 로딩 대기
       let sig = oddsSignature(), tries = 0;
       while (sig === before && tries < 2) { await wait(700); sig = oddsSignature(); tries++; }
+      if (sig === before) console.warn(`[배당수집] ⚠ ${axis}번 축 클릭 후 배당 매트릭스가 바뀌지 않음 — 잘못된 버튼이거나 로딩 지연. 추출된 조합이 부정확할 수 있습니다.`);
       let cnt = 0;
       for (const p of currentMatrixPairs(oddsClass)) {            // p={a:행, b:열} = 남은 두 말
         const combo = [axis, p.a, p.b];
@@ -641,7 +642,8 @@
       const recCell = iRec >= 0 ? (cells[iRec] || '') : '';
       const seq = (recCell.match(/\d+(?:\s*[-·・]\s*\d+){1,5}/) || [])[0]
         || (cells.join(' ').match(/\d+(?:\s*[-·・]\s*\d+){2,5}/) || [])[0] || '';
-      const recent = seq ? seq.split(/[-·・]/).map((x) => parseInt(x.trim(), 10)).filter((n) => n > 0).slice(0, 5) : [];
+      // 착순은 1~18위 범위만 유효 — 마체중(480 등)·배당이 폴백 정규식에 잡히는 오인 방지
+      const recent = seq ? seq.split(/[-·・]/).map((x) => parseInt(x.trim(), 10)).filter((n) => n >= 1 && n <= 18).slice(0, 5) : [];
       out.push({
         no, name: iName >= 0 ? cells[iName] : '', jockey: iJock >= 0 ? cells[iJock] : '',
         recent, weight: iW >= 0 ? toNum(cells[iW]) : null,

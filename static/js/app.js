@@ -1745,26 +1745,38 @@
   }
 
   // [3번] 변동 히스토리 타임라인 (배당판 캡처 탭, 이상감지 진행 + 클릭 시 스냅샷 배당)
+  //  [버그수정] 자동갱신(10초) 때마다 innerHTML을 재생성하면 사용자가 펼쳐 둔
+  //  스냅샷 배당이 매번 닫혀 버렸다. 펼침 상태를 스냅샷 시각(고유키)으로 보존해
+  //  갱신 후에도 그대로 유지한다. 경주가 바뀌면 초기화.
+  let _tlRaceKey = null;
+  const _tlExpanded = new Set();
+  function _tlSnapDetail(s) {
+    const q = Object.entries((s && s.quinella) || {}).sort((x, y) => x[1] - y[1])
+      .slice(0, 12).map(([k, v]) => `${k}:${v}`).join(' · ');
+    return '복승 ' + (q || '없음');
+  }
   async function loadOddsTimeline(raceKey) {
     const el = $('#oddsTimeline'); if (!el || !raceKey) return;
     let d; try { d = await (await fetch('/api/history/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey }) })).json(); }
-    catch (e) { return; }
+    catch (e) { el.innerHTML = ''; return; }   // 조회 실패 시 이전 경주 타임라인 잔상 제거
     if (!d || d.error || !(d.snapshots || []).length) { el.innerHTML = ''; return; }
+    if (raceKey !== _tlRaceKey) { _tlExpanded.clear(); _tlRaceKey = raceKey; }
     const snaps = d.snapshots;
     const rows = snaps.map((s, i) => {
       const anom = (s.anomalies || []).map((x) => `<span class="chip chip-red">${esc(x)}</span>`).join(' ') || '<span class="hint">정상 범위</span>';
       const mb = s.minutes_before != null ? `(${s.minutes_before}분전)` : '';
-      return `<div class="tl-row" data-i="${i}" style="cursor:pointer;padding:4px 6px;border-left:2px solid var(--border);margin-left:4px">
+      const key = s.time || String(i);
+      const open = _tlExpanded.has(key);
+      return `<div class="tl-row" data-i="${i}" data-key="${esc(key)}" style="cursor:pointer;padding:4px 6px;border-left:2px solid var(--border);margin-left:4px">
         <b>${esc(s.time || '')}</b> <span class="hint">${mb}</span> ${anom}</div>
-        <div id="tl-snap-${i}" style="display:none;margin:2px 0 6px 14px" class="hint"></div>`;
+        <div id="tl-snap-${i}" style="display:${open ? 'block' : 'none'};margin:2px 0 6px 14px" class="hint">${open ? esc(_tlSnapDetail(s)) : ''}</div>`;
     }).join('');
     el.innerHTML = `<div class="matrix-title" style="font-size:13px">🕒 배당 변동 타임라인 <span class="hint" style="font-weight:400">${snaps.length}회 수집</span></div>${rows}`;
     el.querySelectorAll('.tl-row').forEach((r) => r.addEventListener('click', () => {
-      const i = r.dataset.i; const box = $(`#tl-snap-${i}`); if (!box) return;
+      const i = r.dataset.i, key = r.dataset.key; const box = $(`#tl-snap-${i}`); if (!box) return;
       if (box.style.display === 'none') {
-        const q = Object.entries(snaps[i].quinella || {}).sort((x, y) => x[1] - y[1]).slice(0, 12).map(([k, v]) => `${k}:${v}`).join(' · ');
-        box.textContent = '복승 ' + (q || '없음'); box.style.display = 'block';
-      } else box.style.display = 'none';
+        box.textContent = _tlSnapDetail(snaps[i]); box.style.display = 'block'; _tlExpanded.add(key);
+      } else { box.style.display = 'none'; _tlExpanded.delete(key); }
     }));
   }
 
