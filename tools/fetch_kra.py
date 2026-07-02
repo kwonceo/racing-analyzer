@@ -187,20 +187,22 @@ def fetch_races(d_from, d_to, meets, key):
                 rc_no = str(it.get("rcNo") or it.get("rc_no") or "")
                 rkey = f"{meet}_{date}_{rc_no}"
                 horse = {
-                    "stOrd": _num(it.get("stOrd") or it.get("ord")),
-                    "hrNo": _num(it.get("hrNo")),
+                    "stOrd": _num(it.get("stOrd") or it.get("ord")),      # 착순
+                    "no": _num(it.get("chulNo")),                          # 마번(출전번호)
+                    "hrId": (str(it.get("hrNo") or "")).strip(),           # 마 등록번호
                     "hrName": (it.get("hrName") or "").strip(),
                     "jkName": (it.get("jkName") or "").strip(),
                     "trName": (it.get("trName") or "").strip(),
-                    "win": _num(it.get("win")),
-                    "plc": _num(it.get("plc")),
+                    "win": _num(it.get("win")),                            # 단승 확정배당
+                    "plc": _num(it.get("plc")),                            # 복승 확정배당
                     "rcTime": it.get("rcTime"),
-                    "wgHr": it.get("wgHr"),
-                    "rcDist": it.get("rcDist") or it.get("rcDist_"),
+                    "wgHr": it.get("wgHr"),                                # 마체중
+                    "wgBudam": it.get("wgBudam"),                          # 부담중량
+                    "hrRating": _num(it.get("hrRating")),                  # 레이팅
                 }
                 rec = races.setdefault(rkey, {"meet": meet, "date": date, "rcNo": rc_no, "horses": []})
                 # 같은 마번 중복 방지
-                if not any(h.get("hrNo") == horse["hrNo"] for h in rec["horses"]):
+                if not any(h.get("no") == horse["no"] for h in rec["horses"]):
                     rec["horses"].append(horse)
                     added += 1
                 # 마명 인덱스(과거기록 자동매칭용)
@@ -211,7 +213,7 @@ def fetch_races(d_from, d_to, meets, key):
                     if not any(x.get("_tag") == tag for x in arr):
                         arr.append({"_tag": tag, "date": date, "meet": meet, "rcNo": rc_no,
                                     "stOrd": horse["stOrd"], "win": horse["win"],
-                                    "jkName": horse["jkName"], "rcDist": horse["rcDist"]})
+                                    "jkName": horse["jkName"], "hrRating": horse["hrRating"]})
             print(f"  · {MEETS[meet]} {date}: {len(items)}두")
             time.sleep(SLEEP)
     hist["races"] = races
