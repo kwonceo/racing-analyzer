@@ -75,10 +75,12 @@ function checkServer() {
   });
 }
 
-// ── 활성 탭의 content script 로 메시지 (keiba.go.jp 인지 확인) ─────────
+// ── 활성 탭의 content script 로 메시지 (지원 배당판 사이트인지 확인) ────
+//    keiba.go.jp + 사설 배당판(asyukk/qwqwd) 모두 허용
+const SUPPORTED_SITE = /keiba\.go\.jp|asyukk|qwqwd/i;
 async function activeKeibaTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab || !/keiba\.go\.jp/.test(tab.url || '')) return null;
+  if (!tab || !SUPPORTED_SITE.test(tab.url || '')) return null;
   return tab;
 }
 
@@ -126,6 +128,68 @@ function resetBtn() {
   els.sendNow.disabled = false;
   els.sendNow.textContent = '지금 전송';
 }
+
+// ── [4번] 미리보기: 전송 전 추출 결과·검증·상위 10조합 확인 ────────────
+const previewBtn = document.getElementById('previewBtn');
+const previewCard = document.getElementById('previewCard');
+const previewHead = document.getElementById('previewHead');
+const previewTop = document.getElementById('previewTop');
+const previewWarn = document.getElementById('previewWarn');
+const previewSend = document.getElementById('previewSend');
+
+previewBtn.addEventListener('click', async () => {
+  previewBtn.disabled = true; previewBtn.textContent = '추출 중…';
+  const tab = await activeKeibaTab();
+  if (!tab) {
+    previewCard.style.display = 'block';
+    previewHead.innerHTML = '<span class="err">지원 배당판 페이지(keiba.go.jp / 사설 배당판)에서 눌러주세요.</span>';
+    previewTop.textContent = ''; previewWarn.textContent = ''; previewSend.style.display = 'none';
+  } else {
+    chrome.tabs.sendMessage(tab.id, { type: 'PREVIEW' }, (r) => {
+      previewCard.style.display = 'block';
+      if (chrome.runtime.lastError || !r) {
+        previewHead.innerHTML = '<span class="err">페이지 응답 없음. 새로고침 후 재시도.</span>';
+        previewTop.textContent = ''; previewWarn.textContent = ''; previewSend.style.display = 'none';
+      } else {
+        const rk = r.raceKey || '(raceKey 미입력 — 위 칸에 입력하세요)';
+        previewHead.innerHTML = `<b>[${r.site}]</b> ${rk}<br>단승 ${r.singles}두 · 복승 ${r.combos}조합`;
+        previewTop.textContent = (r.top || []).length
+          ? '상위 10 (배당 낮은순):\n' + r.top.map((t) => `  ${t.combo}  →  ${t.odds}`).join('\n')
+          : '추출된 조합이 없습니다.';
+        previewWarn.className = 'err';
+        previewWarn.textContent = (r.validation && !r.validation.ok)
+          ? '⚠ ' + r.validation.warnings.join(' / ') : '';
+        // 검증 실패해도 전송은 허용하되 경고 표시
+        previewSend.style.display = (r.combos || r.singles) ? 'block' : 'none';
+      }
+    });
+  }
+  previewBtn.disabled = false; previewBtn.textContent = '🔍 미리보기 (전송 전 확인)';
+});
+
+previewSend.addEventListener('click', async () => {
+  previewSend.disabled = true; previewSend.textContent = '전송 중…';
+  const tab = await activeKeibaTab();
+  if (!tab) {
+    previewHead.innerHTML = '<span class="err">지원 배당판 페이지에서 눌러주세요.</span>';
+  } else {
+    await new Promise((resolve) => {
+      chrome.tabs.sendMessage(tab.id, { type: 'MANUAL_SEND' }, (res) => {
+        if (chrome.runtime.lastError || !res) {
+          previewWarn.textContent = '페이지 응답 없음. 새로고침 후 재시도.';
+        } else if (res.ok) {
+          previewWarn.className = 'ok';
+          previewWarn.textContent = `✅ 전송 완료 · ${res.detail || res.raceKey || ''}`;
+        } else {
+          previewWarn.className = 'err';
+          previewWarn.textContent = `❌ ${res.error || '전송 실패'}${res.detail ? ' · ' + res.detail : ''}`;
+        }
+        resolve();
+      });
+    });
+  }
+  previewSend.disabled = false; previewSend.textContent = '✅ 확인 후 전송';
+});
 
 // ── [2번] 결과(1~3착) 전송 ──────────────────────────────────────────
 const btnResults = document.getElementById('sendResults');

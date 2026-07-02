@@ -171,12 +171,143 @@
     return { pairs: list, matrix };
   }
 
-  // ── 전체 payload 조립 → 서버 snapshot 형식 ──────────────────────────
-  //   서버 계약: POST /api/odds/snapshot  { raceKey, odds:{마번:단승배당} }
-  //   (복승 매트릭스/말이름은 확장 필드로 함께 실어 보냄 — 서버는 무시해도 안전)
+  // ═══════════════════════════════════════════════════════════════════
+  //  사이트 자동 감지 + 범용 배당 매트릭스 파서
+  //  ---------------------------------------------------------------------
+  //  keiba.go.jp 외에 asyukk34.qwqwd25.net(사설 배당판, class=odds_table/
+  //  odds_content) 등 사이트마다 DOM 이 달라, URL 로 사이트를 감지해 파서를
+  //  분기한다. 미지의 사이트는 "표 안의 마번 축 + 숫자 셀" 패턴으로 범용 파싱.
+  // ═══════════════════════════════════════════════════════════════════
+
+  // [2번] 사이트 자동 감지
+  function detectSite() {
+    const h = location.host;
+    if (/(^|\.)keiba\.go\.jp$/.test(h)) return 'keiba';
+    if (/asyukk|qwqwd/i.test(h)) return 'asyukk';
+    return 'generic';
+  }
+
+  const pureInt = (s) => (/^\d{1,2}$/.test((s || '').trim()) ? parseInt(s, 10) : null);
+
+  // [1번][3번] 범용 매트릭스 표 파서
+  //   - 헤더 행(정수 마번이 가장 많은 행)에서 "열 마번" 축을 구성 (cellIndex→마번)
+  //   - 각 데이터 행의 첫 정수 셀 = "행 마번"
+  //   - 배당 셀(opts.oddsClass 가 있으면 그 class, 없으면 소수점 숫자 셀)만 추출
+  //   - matrix(열 마번 축 2개↑)면 조합쌍, 아니면 단일(단승) 리스트로 해석
+  //   - "-"·빈칸·1.0 미만은 자동 무시
+  function parseMatrixTable(table, opts = {}) {
+    const rows = [...table.rows];
+    if (rows.length < 2) return { pairs: [], singles: [] };
+
+    // 헤더 행: 앞 3행 중 정수 마번이 가장 많은 행(2개 이상일 때만 헤더로 인정)
+    let headerRow = null, best = 1;
+    for (const r of rows.slice(0, 3)) {
+      const c = [...r.cells].filter((td) => pureInt(td.textContent) != null).length;
+      if (c > best) { best = c; headerRow = r; }
+    }
+    const colNoByIndex = {};
+    if (headerRow) {
+      for (const cell of headerRow.cells) {
+        const n = pureInt(cell.textContent);
+        if (n != null) colNoByIndex[cell.cellIndex] = n;
+      }
+    }
+    const colCount = Object.keys(colNoByIndex).length;
+    const isOdds = opts.oddsClass
+      ? (td) => td.classList.contains(opts.oddsClass)
+      : (td) => /^\d+\.\d+$/.test((td.textContent || '').trim()); // 소수점 있는 숫자 = 배당
+
+    const pairs = [], singles = [];
+    for (const r of rows) {
+      if (r === headerRow) continue;
+      // 행 마번 = 첫 정수 셀
+      let rowNo = null;
+      for (const cell of r.cells) { const n = pureInt(cell.textContent); if (n != null) { rowNo = n; break; } }
+      const oddsCells = [...r.cells].filter(isOdds);
+      if (!oddsCells.length) continue;
+
+      if (colCount >= 2) {
+        // ── 매트릭스: 행 마번 × 열 마번 → 조합 ──
+        for (const oc of oddsCells) {
+          const colNo = colNoByIndex[oc.cellIndex];
+          const val = toNum(oc.textContent);
+          if (rowNo != null && colNo != null && rowNo !== colNo && val != null && val >= 1.0) {
+            pairs.push({ a: rowNo, b: colNo, odds: val });
+          }
+        }
+      } else if (rowNo != null) {
+        // ── 리스트: 행 마번 + 단승(첫 배당)·복승(다음 배당) ──
+        const vals = oddsCells.map((o) => (o.textContent || '').trim());
+        const win = toNum(vals[0]);
+        if (win != null && win >= 1.0) {
+          singles.push({ no: rowNo, win, place: vals[1] ? parseRange(vals.slice(1).join(' ')) : null });
+        }
+      }
+    }
+    return { pairs, singles };
+  }
+
+  // asyukk34/범용 사이트에서 배당 표들을 모아 {horses, quinella} 로 정리
+  function extractByMatrix(oddsClass) {
+    const tables = new Set();
+    if (oddsClass) {
+      for (const c of document.querySelectorAll('.' + oddsClass)) {
+        const t = c.closest('table'); if (t) tables.add(t);
+      }
+    }
+    // .odds_table 또는 (범용) 모든 표
+    for (const t of document.querySelectorAll('table.odds_table, table')) tables.add(t);
+
+    const pairsMap = {}; // "a-b"(a<b) -> odds (최소값 유지)
+    const singleMap = {}; // no -> {no,win,place}
+    for (const t of tables) {
+      const { pairs, singles } = parseMatrixTable(t, oddsClass ? { oddsClass } : {});
+      for (const p of pairs) {
+        if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
+        const key = p.a < p.b ? `${p.a}-${p.b}` : `${p.b}-${p.a}`;
+        if (pairsMap[key] == null || p.odds < pairsMap[key]) pairsMap[key] = p.odds;
+      }
+      for (const s of singles) if (isHorseNo(s.no) && singleMap[s.no] == null) singleMap[s.no] = s;
+    }
+
+    const list = Object.entries(pairsMap).map(([k, odds]) => {
+      const [a, b] = k.split('-').map(Number); return { a, b, odds };
+    });
+    const matrix = {};
+    for (const { a, b, odds } of list) {
+      (matrix[a] = matrix[a] || {})[b] = odds;
+      (matrix[b] = matrix[b] || {})[a] = odds;
+    }
+    const horses = Object.values(singleMap).sort((a, b) => a.no - b.no)
+      .map((s) => ({ no: s.no, name: '', win: s.win, place: s.place || null }));
+    return { horses, quinella: { pairs: list, matrix } };
+  }
+
+  // [3번] 추출 결과 검증: 마번 1~16 · 배당 ≥1.0 · 최소 3조합
+  function validateExtraction(payload) {
+    const warnings = [];
+    const combos = (payload.quinella && payload.quinella.pairs) || [];
+    const badNo = combos.filter((c) => !(c.a >= 1 && c.a <= 16 && c.b >= 1 && c.b <= 16));
+    const badOdds = combos.filter((c) => !(c.odds >= 1.0));
+    if (combos.length < 3) warnings.push(`복승 조합이 ${combos.length}개뿐 (최소 3개 필요)`);
+    if (badNo.length) warnings.push(`마번 범위(1~16) 벗어난 조합 ${badNo.length}개`);
+    if (badOdds.length) warnings.push(`배당 1.0 미만 조합 ${badOdds.length}개`);
+    return { ok: warnings.length === 0, warnings, combos: combos.length, singles: (payload.horses || []).length };
+  }
+
+  // ── 전체 payload 조립 (사이트별 파서 분기) ──────────────────────────
+  //   keiba: 기존 단복/랭킹표 파서 / asyukk·generic: 범용 매트릭스 파서
   function buildPayload(overrideRaceKey) {
-    const horses = extractHorses();
-    const quinella = extractQuinella();
+    const site = detectSite();
+    let horses, quinella;
+    if (site === 'asyukk') ({ horses, quinella } = extractByMatrix('odds_content'));
+    else if (site === 'generic') ({ horses, quinella } = extractByMatrix(null));
+    else { horses = extractHorses(); quinella = extractQuinella(); }
+
+    // asyukk/generic 에서 아무것도 못 찾으면 keiba식 폴백도 시도
+    if (site !== 'keiba' && !quinella.pairs.length && !horses.length) {
+      horses = extractHorses(); quinella = extractQuinella();
+    }
 
     // 서버 필수 필드: odds = {마번: 단승배당}
     const odds = {};
@@ -186,6 +317,7 @@
 
     return {
       raceKey,
+      site, // 'keiba' | 'asyukk' | 'generic'
       odds, // ← 서버가 저장하는 단승 시계열
       // 확장 필드 (참고용)
       horses, // [{no,name,win,place}]
@@ -353,6 +485,43 @@
     return res || { ok: false, error: 'background 응답 없음' };
   }
 
+  // ── 사이트 무관 전송: 복승 매트릭스→triple ingest, 단승→snapshot ──────
+  //   snapshot 은 단승(odds) 이 비면 거부하고 복승 매트릭스를 저장하지 않으므로,
+  //   asyukk/generic 의 복승 매트릭스는 /api/odds/triple/ingest(quinella) 로 보내
+  //   서버 앱의 매트릭스 UI 에서 바로 보이게 한다. 단승이 있으면 snapshot 도 함께.
+  async function sendCurrent(reason) {
+    const { raceKey: override } = await getSettings();
+    const payload = buildPayload(override);
+    if (!payload.raceKey) {
+      return { ok: false, error: 'raceKey 를 만들 수 없습니다. 팝업 raceKey 칸에 직접 입력하세요.', payload };
+    }
+    const pairs = (payload.quinella && payload.quinella.pairs) || [];
+    const oddsMap = payload.odds || {};
+    if (!pairs.length && !Object.keys(oddsMap).length) {
+      return { ok: false, error: '전송할 배당이 없습니다(복승 매트릭스·단승 모두 비어있음). 배당판 페이지인지 확인하세요.', payload };
+    }
+    const parts = [];
+    // 복승 매트릭스 → triple ingest (매트릭스 UI 용)
+    if (pairs.length) {
+      const quinella = pairs
+        .map((p) => ({ combo: [p.a, p.b], odds: Math.round(p.odds * 10) / 10 }))
+        .sort((a, b) => a.odds - b.odds).slice(0, 300);
+      const r = await chrome.runtime.sendMessage({
+        type: 'POST_TRIPLE', reason,
+        payload: { raceKey: payload.raceKey, quinella, exacta: [], trio: [], capturedAt: payload.capturedAt, source: payload.source },
+      });
+      parts.push({ kind: '복승매트릭스', n: quinella.length, ...(r || { ok: false, error: 'background 응답 없음' }) });
+    }
+    // 단승 → snapshot
+    if (Object.keys(oddsMap).length) {
+      const r = await chrome.runtime.sendMessage({ type: 'POST_SNAPSHOT', reason, payload });
+      parts.push({ kind: '단승', n: Object.keys(oddsMap).length, ...(r || { ok: false, error: 'background 응답 없음' }) });
+    }
+    const ok = parts.length > 0 && parts.every((p) => p.ok);
+    const detail = parts.map((p) => `${p.kind} ${p.n}${p.ok ? '✅' : '❌'}`).join(' · ');
+    return { ok, parts, detail, raceKey: payload.raceKey, error: ok ? '' : (parts.find((p) => !p.ok)?.error || '전송 실패') };
+  }
+
   async function restartLoop() {
     if (timer) { clearInterval(timer); timer = null; }
     const { autoSend, intervalSec, autoMode } = await getSettings();
@@ -373,7 +542,8 @@
   // 팝업 ↔ content 메시지 처리
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.type === 'MANUAL_SEND') {
-      doSend('manual').then(sendResponse);
+      // keiba 는 단승 snapshot, 그 외(asyukk/generic)는 복승 매트릭스+단승 통합 전송
+      (detectSite() === 'keiba' ? doSend('manual') : sendCurrent('manual')).then(sendResponse);
       return true; // async
     }
     if (msg?.type === 'MANUAL_SEND_RESULTS') {
@@ -384,9 +554,20 @@
       collectTriple('manual').then(sendResponse);
       return true;
     }
+    // [4번] 미리보기: 전송 전 추출 결과 + 검증 + 상위 10조합 반환
     if (msg?.type === 'PREVIEW') {
-      chrome.storage.local.get({ raceKey: '' }, ({ raceKey }) => {
-        sendResponse(buildPayload(raceKey));
+      getSettings().then(({ raceKey }) => {
+        const payload = buildPayload(raceKey);
+        const validation = validateExtraction(payload);
+        const top = ((payload.quinella && payload.quinella.pairs) || [])
+          .slice().sort((a, b) => a.odds - b.odds).slice(0, 10)
+          .map((p) => ({ combo: `${p.a}-${p.b}`, odds: p.odds }));
+        sendResponse({
+          site: payload.site, raceKey: payload.raceKey,
+          singles: (payload.horses || []).length,
+          combos: ((payload.quinella && payload.quinella.pairs) || []).length,
+          top, validation,
+        });
       });
       return true;
     }
