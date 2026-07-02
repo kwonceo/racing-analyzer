@@ -189,6 +189,20 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true; // async
   }
 
+  // [출마표2] keiba.go.jp DebaTable 등 교차출처 페이지 HTML 가져오기.
+  //  content script(asyukk)에서 keiba.go.jp 로 직접 fetch 하면 CORS 로 막히므로,
+  //  host_permissions 를 가진 서비스워커가 대신 가져와 HTML 문자열을 돌려준다.
+  if (msg?.type === 'FETCH_URL') {
+    fetch(msg.url, { credentials: 'omit' })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      })
+      .then((html) => sendResponse({ ok: true, html }))
+      .catch((err) => sendResponse({ ok: false, error: String(err.message || err) }));
+    return true; // async
+  }
+
   if (msg?.type === 'CHECK_SERVER') {
     checkServer().then(sendResponse);
     return true;

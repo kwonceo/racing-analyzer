@@ -93,7 +93,8 @@ API 키는 서버 `.env`에만 두고 브라우저로 노출하지 않는다.
 - **이변 신호 제거 취소** — 제거 대상이라도 **배당 급락 30%+ 또는 쌍승 상위 10위**면 "⚠️ 제거 대상이나 이변 신호"로 후보 유지
 - **UI** — `출전 N두 → 후보 M두 압축`, 🟢후보/🔴제거 목록, **말 클릭으로 제거↔후보 수동 전환**(경주 바뀌면 초기화), 후보 기준 복승/삼복승 자동 조합 생성
 
-전적 소스: **일본** = Chrome 확장 출마표2(`collectStartersByTab` → `/api/extract/japan`) · **한국** = KRA 과거기록(`GET|POST /api/kra/horse?name=마명` → `records/placeRate/recentPlacings`, PDF 분석 시 마명 자동 매칭).
+전적 소스: **일본** = keiba.go.jp **DebaTable(출마표2)** 페이지를 확장이 fetch·파싱(`parseDebaTable`: 말당 5행 rowspan 구조에서 馬番/競走馬/騎手 + 競走成績 前走~5走前 착순 추출) → `/api/extract/japan`. asyukk 배당판에서는 background(FETCH_URL)로 교차출처 fetch, keiba 배당판에서는 동일출처 fetch. keiba DebaTable 페이지를 직접 열면 로드 즉시 자동 추출·전송(+파라미터 저장). · **한국** = KRA 과거기록(`GET|POST /api/kra/horse?name=마명` → `records/placeRate/recentPlacings`, PDF 분석 시 마명 자동 매칭).
+  - DebaTable URL: `…/TodayRaceInfo/DebaTable?k_raceNo=&k_raceDate=&k_babaCode=&odds_flg=4` (babaCode 예: 20=大井·24=名古屋·19=船橋·27=園田·31=高知). [전체 자동 수집] 4단계: 복승→쌍승→삼복승→DebaTable 전적.
 
 ## 실행
 ```bash

@@ -448,8 +448,18 @@
       }
       setTripleProgress('서버 전송중…');
       const res = await chrome.runtime.sendMessage({ type: 'POST_TRIPLE', payload, reason });
+      // 4) 출마표2 전적: 동일출처 DebaTable fetch → 추출 → 통합분석(POST_JAPAN)
+      let starters = [];
+      try {
+        setTripleProgress('출마표2 전적 수집중…');
+        starters = await fetchDebaStarters({ k_raceDate: sp.get('k_raceDate'), k_raceNo: sp.get('k_raceNo'), k_babaCode: sp.get('k_babaCode') });
+      } catch (e) { console.warn('[전적수집] DebaTable 오류', e); }
+      if (starters.length) {
+        const { timerDeadline } = await getSettings();
+        await chrome.runtime.sendMessage({ type: 'POST_JAPAN', reason, payload: { raceKey, horses: starters, deadline: timerDeadline || null, source: location.href } });
+      }
       setTripleProgress(res && res.ok
-        ? `3종 수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}`
+        ? `3종 수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두`
         : `❌ 전송 실패: ${(res && res.error) || ''}`, true);
       return res || { ok: false, error: 'background 응답 없음' };
     } catch (e) {
@@ -626,8 +636,9 @@
     jockey: /騎手|기수|jockey/i, weight: /斤量|부담중량|부담|負担|중량|weight/i,
     recent: /최근|전적|着順|성적|근성적|recent/i,
   };
-  function collectStarters() {
-    const tables = [...document.querySelectorAll('table')];
+  function collectStarters(root) {
+    const D = root || document;   // root 지정 시 fetch 해온 DebaTable 문서에서 추출
+    const tables = [...D.querySelectorAll('table')];
     const nospace = (s) => (s || '').replace(/\s+/g, '');
     // ── A) 헤더 기반 탐색(마번+마명, 공백 제거 후 매칭) ──
     let best = null, bestScore = -1, bestHead = null;
@@ -664,7 +675,7 @@
       }
       if (!fbT || fbBest < 3) {
         console.warn('[전적수집] ❌ 출마표 테이블을 찾지 못함(마번+마명 헤더·연속 마번열 모두 실패). 출마표2 탭이 열렸는지, iframe 내부인지 확인하세요.');
-        console.warn(`[전적수집] 참고: 페이지 table 수=${tables.length}, tr 수=${document.querySelectorAll('table tr').length}`);
+        console.warn(`[전적수집] 참고: 문서 table 수=${tables.length}, tr 수=${D.querySelectorAll('table tr').length}`);
         return [];
       }
       trs = [...fbT.querySelectorAll('tr')]; iNo = fbNoCol;
@@ -723,6 +734,113 @@
     console.log(`[전적수집] 페이지 전체 table tr 수: ${document.querySelectorAll('table tr').length} (F12에서 document.querySelectorAll('table tr').length 로도 확인 가능)`);
     await wait(1500);
     return collectStarters();
+  }
+
+  // ── [출마표2 = keiba.go.jp DebaTable 별도 페이지] 전적 fetch·추출 ──────────
+  //  DebaTable URL 예: /KeibaWeb/TodayRaceInfo/DebaTable?k_raceNo=9&k_raceDate=2026/07/02&k_babaCode=20&odds_flg=4
+  const DEBA_PATH = 'https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable';
+  function debaParamsFromUrl(url) {
+    try {
+      const sp = new URLSearchParams(new URL(url, location.href).search);
+      const d = sp.get('k_raceDate'), n = sp.get('k_raceNo'), b = sp.get('k_babaCode');
+      if (d && n && b) return { k_raceDate: d, k_raceNo: n, k_babaCode: b };
+    } catch (_) { /* */ }
+    return null;
+  }
+  function buildDebaUrl(p) {
+    return `${DEBA_PATH}?k_raceNo=${encodeURIComponent(p.k_raceNo)}`
+      + `&k_raceDate=${encodeURIComponent(p.k_raceDate)}`
+      + `&k_babaCode=${encodeURIComponent(p.k_babaCode)}&odds_flg=4`;
+  }
+  function isDebaPage() {
+    return /(^|\.)keiba\.go\.jp$/.test(location.host) && /\/DebaTable/i.test(location.pathname);
+  }
+  // keiba DebaTable 전용 파서: 말당 5행(rowspan) 구조 + 競走成績(前走~5走前) 착순 추출.
+  //  실제 페이지 검증 완료: 馬番/競走馬/騎手 + 최근5착순(前走→5走前).
+  function parseDebaTable(D) {
+    let main = null;
+    for (const t of (D || document).querySelectorAll('table')) {
+      const h = [...t.querySelectorAll('tr')][0];
+      const head = h ? [...h.querySelectorAll('th,td')].map(txt).join('|') : '';
+      if (/馬番|마번/.test(head) && /(競走馬|馬名|마명)/.test(head)) { main = t; break; }
+    }
+    if (!main) { console.warn('[전적수집] DebaTable 메인 테이블(馬番+競走馬 헤더) 못찾음'); return []; }
+    const out = [];
+    for (const tr of main.querySelectorAll('tr')) {
+      const cells = [...tr.querySelectorAll('th,td')];
+      // 競走成績 셀: "착순 YY.MM.DD ..." (前走~5走前). 이게 있는 행이 말의 메인행.
+      const recCells = cells.filter((c) => /^\d{1,2}\s+\d{2}\.\d{1,2}\.\d{1,2}/.test(txt(c)));
+      if (!recCells.length) continue;
+      // 馬番: rowSpan 정수셀 중 2번째(枠番 다음). 프레임 공유 시 1번째가 곧 馬番.
+      const spanNums = cells.filter((c) => (c.rowSpan || 1) >= 2 && /^\d{1,2}$/.test(txt(c)));
+      const no = spanNums.length >= 2 ? parseInt(txt(spanNums[1]), 10)
+        : (spanNums[0] ? parseInt(txt(spanNums[0]), 10) : null);
+      if (!isHorseNo(no)) continue;
+      const nameCell = cells.find((c) => (c.colSpan || 1) >= 2
+        && /[ぁ-んァ-ヶ一-龯A-Za-z가-힣]/.test(txt(c)) && !/^[\d.]/.test(txt(c)));
+      const name = nameCell ? txt(nameCell) : '';
+      const ni = cells.indexOf(nameCell);
+      const jockey = (ni >= 0 && cells[ni + 1]) ? txt(cells[ni + 1]) : '';
+      const recent = recCells.slice(0, 5).map((c) => parseInt(txt(c), 10)).filter((n) => n >= 1 && n <= 18);
+      out.push({ no, name, jockey, recent, weight: null });
+    }
+    return out;
+  }
+  /** DebaTable 파라미터 확보: keiba면 현재 URL, 아니면 저장된 lastDebaParams / 페이지의 keiba 링크 */
+  async function getDebaParams() {
+    if (isDebaPage() || /(^|\.)keiba\.go\.jp$/.test(location.host)) {
+      const p = debaParamsFromUrl(location.href); if (p) return p;
+    }
+    // asyukk 페이지 내 keiba DebaTable/오즈 링크에서 파라미터 추출 시도
+    for (const a of document.querySelectorAll('a[href*="keiba.go.jp"], a[href*="k_raceDate"]')) {
+      const p = debaParamsFromUrl(a.getAttribute('href') || ''); if (p) return p;
+    }
+    // 마지막 수단: keiba DebaTable 방문 시 저장해 둔 파라미터
+    return new Promise((resolve) => {
+      try { chrome.storage.local.get({ lastDebaParams: null }, (v) => resolve(v.lastDebaParams || null)); }
+      catch (_) { resolve(null); }
+    });
+  }
+  /** DebaTable 페이지를 가져와(교차출처는 background 경유) 전적 추출. */
+  async function fetchDebaStarters(params) {
+    const p = params || (await getDebaParams());
+    if (!p) { console.warn('[전적수집] ⚠ DebaTable 파라미터(k_raceDate/k_raceNo/k_babaCode)를 찾지 못함 — keiba 출마표2를 한 번 열면 자동 저장됩니다.'); return []; }
+    const url = buildDebaUrl(p);
+    console.log('[전적수집] DebaTable fetch:', url);
+    let html = null;
+    try {
+      if (/(^|\.)keiba\.go\.jp$/.test(location.host)) {
+        html = await fetch(url, { credentials: 'same-origin' }).then((r) => r.text());   // 동일출처
+      } else {
+        const res = await chrome.runtime.sendMessage({ type: 'FETCH_URL', url });          // 교차출처 → background
+        if (!res || !res.ok) { console.warn('[전적수집] ⚠ DebaTable fetch 실패:', res && res.error); return []; }
+        html = res.html;
+      }
+    } catch (e) { console.warn('[전적수집] ⚠ DebaTable fetch 오류:', e); return []; }
+    const doc = new DOMParser().parseFromString(html || '', 'text/html');
+    let starters = parseDebaTable(doc);                 // 전용 파서 우선
+    if (!starters.length) starters = collectStarters(doc);  // 폴백: 제네릭
+    console.log(`[전적수집] DebaTable에서 ${starters.length}두 추출`);
+    if (starters.length) console.log('[전적수집] 예:', starters.slice(0, 3).map((h) => `${h.no}번 ${h.name} [${(h.recent || []).join('-')}]`).join(' / '));
+    return starters;
+  }
+  /** keiba DebaTable 페이지 로드 시: 파라미터 저장 + 전적 추출 후 서버 전송(POST_JAPAN). */
+  async function collectDebaOnPage() {
+    const p = debaParamsFromUrl(location.href);
+    if (p) { try { chrome.storage.local.set({ lastDebaParams: p }); } catch (_) { /* */ } }
+    console.log('[전적수집] DebaTable 페이지 감지 — 전적 추출 시작');
+    let starters = parseDebaTable(document);
+    if (!starters.length) starters = collectStarters();
+    if (!starters.length) { console.warn('[전적수집] DebaTable에서 전적을 추출하지 못함'); return; }
+    console.log(`[전적수집] DebaTable 추출 ${starters.length}두:`, starters.slice(0, 3).map((h) => `${h.no}번 ${h.name} [${(h.recent || []).join('-')}]`).join(' / '));
+    const { raceKey: override } = await getSettings();
+    const raceKey = (override && override.trim()) || extractRaceKey();
+    const { timerDeadline } = await getSettings();
+    const res = await chrome.runtime.sendMessage({
+      type: 'POST_JAPAN', reason: 'deba-page',
+      payload: { raceKey, horses: starters, deadline: timerDeadline || null, source: location.href },
+    });
+    console.log(`[전적수집] DebaTable 전적 서버 전송: ${res && res.ok ? '✅ ' + starters.length + '두 (raceKey=' + raceKey + ')' : '❌ ' + (res && res.error)}`);
   }
 
   // asyukk/generic 전체 3종 수집 (탭 클릭 방식)
@@ -795,11 +913,16 @@
       }
       console.log(`[배당수집] 삼복승 총 추출: ${trio.length}개 조합`);
 
-      // 4) 출마표2 전적 (탭 클릭 → 1.5초 → 추출 → 복승 복귀)
-      setTripleProgress('출마표2 전적 수집중…');
+      // 4) 출마표2 전적: keiba.go.jp DebaTable을 fetch해 추출(우선) → 실패 시 인페이지 탭 클릭 폴백
+      setTripleProgress('출마표2 전적 수집중…(keiba DebaTable)');
       let starters = [];
-      try { starters = await collectStartersByTab(); } catch (e) { console.warn('[전적] 수집 오류', e); }
-      await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false); // 복승으로 복귀
+      try { starters = await fetchDebaStarters(); } catch (e) { console.warn('[전적수집] DebaTable fetch 오류', e); }
+      if (!starters.length) {
+        console.log('[전적수집] DebaTable 실패/없음 → 인페이지 출마표2 탭 시도(폴백)');
+        setTripleProgress('출마표2 전적 수집중…(인페이지 폴백)');
+        try { starters = await collectStartersByTab(); } catch (e) { console.warn('[전적수집] 인페이지 수집 오류', e); }
+        await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false); // 복승으로 복귀
+      }
 
       const payload = {
         raceKey, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
@@ -957,5 +1080,10 @@
   // [2번] 결과 페이지면 로드 직후 1회 자동 전송 (URL result/성적표 감지)
   if (isResultPage()) {
     setTimeout(() => { sendResults('auto-result').catch(() => {}); }, 800);
+  }
+
+  // [출마표2] keiba.go.jp DebaTable 페이지면 로드 직후 전적 자동 추출·전송 + 파라미터 저장
+  if (isDebaPage()) {
+    setTimeout(() => { collectDebaOnPage().catch((e) => console.warn('[전적수집] DebaTable 자동수집 오류', e)); }, 900);
   }
 })();
