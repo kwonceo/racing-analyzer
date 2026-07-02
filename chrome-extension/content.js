@@ -600,24 +600,71 @@
     return Object.entries(freq).sort((a, b) => b[1] - a[1]).map(([h]) => +h).slice(0, 3);
   }
 
-  // [2번] 상단 마번(축마) 버튼 찾기: 텍스트가 정확히 그 숫자인 클릭요소.
-  //   오즈 테이블 밖 · button/a 우선(테이블 헤더 숫자와 구분).
+  // [2번] 상단 마번(축마) 버튼 찾기.
+  //   [긴급수정] ① <input type=button value="4"> 는 textContent 가 비어 못 찾던 버그
+  //   → value 도 함께 매칭. ② 오즈 테이블 헤더 td/th 숫자와 혼동 방지를 위해
+  //   '마번 버튼이 모여있는 컨테이너'를 먼저 찾고 그 안에서 숫자 버튼을 클릭.
+  const AXIS_SEL = 'input[type=button],input[type=submit],input[type=radio],input[type=checkbox],'
+    + 'button,a,[onclick],[role=button],.btn,.num,label,span,li,dd,td';
+  function _btnLabel(e) {
+    const raw = (e.tagName === 'INPUT') ? (e.value != null ? String(e.value) : '') : (e.textContent || '');
+    return raw.replace(/\s+/g, '').trim();
+  }
+  function _btnVisible(e) { return e.offsetParent !== null || (e.getClientRects && e.getClientRects().length > 0); }
+  function _btnClickable(e) {
+    return /^(BUTTON|A|INPUT|LABEL)$/.test(e.tagName) || e.hasAttribute('onclick')
+      || e.getAttribute('role') === 'button' || /\b(btn|button|num|axis|jiku|select)\b/i.test(e.className || '');
+  }
+  // 마번 버튼 컨테이너: 서로 다른 1~2자리 숫자 요소가 3개 이상 모인 부모(오즈 테이블 밖·클릭요소 우선).
+  function findAxisContainer() {
+    const nums = [...document.querySelectorAll(AXIS_SEL)]
+      .filter((e) => (e.children.length === 0 || e.tagName === 'INPUT') && /^\d{1,2}$/.test(_btnLabel(e)) && _btnVisible(e));
+    const byParent = new Map();
+    for (const e of nums) { const p = e.parentElement; if (!p) continue; (byParent.get(p) || byParent.set(p, []).get(p)).push(e); }
+    let best = null, bestScore = -1;
+    for (const [p, els] of byParent) {
+      const distinct = new Set(els.map(_btnLabel)).size;
+      if (distinct < 3) continue;
+      const clickyRatio = els.filter(_btnClickable).length / els.length;
+      const tablePenalty = p.closest('table') ? 0.6 : 1;   // 테이블(헤더) 내부면 감점
+      const score = distinct * (0.4 + clickyRatio) * tablePenalty;
+      if (score > bestScore) { bestScore = score; best = p; }
+    }
+    return best;
+  }
+  let _axisContainer = undefined;   // 경주별 1회 탐색 캐시(null=없음)
   function findHorseButton(no) {
     const want = String(no);
-    const pool = [...document.querySelectorAll('button, a, [onclick], .btn, .num, li, span, td')]
-      .filter((e) => (e.textContent || '').trim() === want && (e.offsetParent !== null));
-    pool.sort((a, b) => {
-      const inTbl = (e) => (e.closest('table.odds_table, .odds_table, table') ? 1 : 0);
-      if (inTbl(a) !== inTbl(b)) return inTbl(a) - inTbl(b);            // 테이블 밖 우선
-      const rank = (e) => (/^(BUTTON|A)$/.test(e.tagName) || e.hasAttribute('onclick') ? 0 : 1);
-      return rank(a) - rank(b);
-    });
-    return pool[0] || null;
+    if (_axisContainer === undefined) {
+      _axisContainer = findAxisContainer();
+      if (_axisContainer) console.log('[삼복승축마] 마번 버튼 컨테이너 발견:', _axisContainer.tagName, _axisContainer.className || '(class없음)');
+      else console.warn('[삼복승축마] ⚠ 마번 버튼 컨테이너를 못 찾음 — 전역에서 탐색합니다.');
+    }
+    const pick = (scope) => {
+      const cands = [...scope.querySelectorAll(AXIS_SEL)]
+        .filter((e) => _btnLabel(e) === want && _btnVisible(e));
+      cands.sort((a, b) => {
+        const inTbl = (e) => (e.closest('table') ? 1 : 0);
+        if (inTbl(a) !== inTbl(b)) return inTbl(a) - inTbl(b);          // 테이블 밖 우선
+        return (_btnClickable(a) ? 0 : 1) - (_btnClickable(b) ? 0 : 1); // 클릭요소 우선
+      });
+      return cands[0] || null;
+    };
+    // 1) 컨테이너 안에서 먼저 → 2) 전역 폴백
+    return (_axisContainer && pick(_axisContainer)) || pick(document);
   }
 
   // [1번][3번] 삼복승: 유력마 3마리를 "축"으로 각각 클릭 → 남은 두 말 매트릭스 → 3마리 조합
   async function collectTrioByAxis(keyHorses, oddsClass) {
     const trioMap = {};
+    _axisContainer = undefined;   // 경주별 컨테이너 캐시 초기화(다음 findHorseButton 에서 1회 재탐색)
+    // [진단] 페이지 내 '숫자 하나' 클릭요소 후보를 자동 출력 → 사용자가 F12 로 확인·공유 가능
+    try {
+      const diag = [...document.querySelectorAll('input[type=button],input[type=submit],input[type=radio],button,a')]
+        .filter((b) => /^\d{1,2}$/.test(_btnLabel(b)) && _btnVisible(b))
+        .map((b) => `${b.tagName}|${b.className || '-'}|"${_btnLabel(b)}"|${b.closest('table') ? 'in-table' : 'outside'}`);
+      console.log(`[삼복승축마] 숫자 클릭요소 후보 ${diag.length}개:`, diag);
+    } catch (_) { /* */ }
     for (const axis of keyHorses) {
       console.log(`[배당수집] 삼복승 축 ${axis}번 버튼 클릭 시도...`);
       const btn = findHorseButton(axis);
