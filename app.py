@@ -1011,6 +1011,11 @@ def triple_ingest():
     db[rk] = {"quinella": q, "exacta": x, "trio": tr, "history": hist,
               "source": body.get("source"), "t": now}
     _triple_save(db)
+    # 배당 변동 히스토리 파일에 스냅샷 누적 (타임스탬프+발주전분+이상감지)
+    try:
+        _history_append(rk, q, x, body.get("deadline"))
+    except Exception as e:
+        print("[히스토리] 기록 실패:", e)
     counts = {"quinella": len(q), "exacta": len(x), "trio": len(tr)}
     print(f"[3종 수집] {rk}: {counts} (history {len(hist)})")
     return jsonify({"ok": True, "counts": counts})
@@ -1221,6 +1226,15 @@ def _triple_analyze(rk, rec):
             chart_series.append({"label": label, "odds": odds})
     chart = {"times": [h.get("t") for h in hist], "series": chart_series}
 
+    # [4번] 학습결과 반영: 과거 실적 기반 급락 감지 적중률 안내
+    learned = None
+    try:
+        _da = (_learning_load().get("stats", {}) or {}).get("drop_anomaly") or {}
+        if drops and _da.get("n", 0) >= 5 and _da.get("rate") is not None:
+            learned = f"과거 데이터: 급락 감지 시 해당말 입상률 {_da['rate']}% ({_da['hit']}/{_da['n']}경주)"
+    except Exception:
+        learned = None
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
         "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio), "history": len(hist)},
@@ -1229,6 +1243,7 @@ def _triple_analyze(rk, rec):
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
         "summary": summary, "chart": chart,
         "form": _form_from_starters(rk, drops),  # 출마표2 전적 등급(있으면)
+        "learned": learned,  # 학습 통계 안내(있으면)
     }
 
 
@@ -1256,6 +1271,10 @@ def extract_japan():
         tdb[rk] = {"quinella": q, "exacta": x, "trio": tr, "history": hist,
                    "source": body.get("source"), "t": time.time()}
         _triple_save(tdb)
+        try:
+            _history_append(rk, q, x, body.get("deadline"))
+        except Exception as e:
+            print("[히스토리] 기록 실패:", e)
     trec = _triple_load().get(rk) or {}
     print(f"[출마표2 전적] {rk}: {len(horses)}두 저장")
     return jsonify(_triple_analyze(rk, trec))
@@ -1273,6 +1292,209 @@ def triple_analyze():
     if not rk or rk not in db:
         rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
     return jsonify(_triple_analyze(rk, db.get(rk) or {}))
+
+
+# ══════════════ 배당 변동 히스토리 + 결과기반 자동학습 (Phase 5) ══════════════
+ODDS_HISTORY_DIR = os.path.join(os.path.dirname(__file__), "data", "odds_history")
+LEARNING_FILE = os.path.join(os.path.dirname(__file__), "data", "learning.json")
+
+
+def _hist_path(rk):
+    """raceKey → (파일경로, date, race). 예: '2026-07-02 나고야 4경주' / '나고야 4경주'."""
+    m = re.search(r"(\d{4}-\d{2}-\d{2})", rk or "")
+    date = m.group(1) if m else time.strftime("%Y-%m-%d", time.localtime())
+    race = re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip() or (rk or "race")
+    safe = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
+    os.makedirs(ODDS_HISTORY_DIR, exist_ok=True)
+    return os.path.join(ODDS_HISTORY_DIR, safe + ".json"), date, race
+
+
+def _combo_dict(arr):
+    """[{combo,odds}] → {'1+2': 45.2, ...}."""
+    d = {}
+    for it in arr or []:
+        try:
+            c, o = it["combo"], float(it["odds"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if o > 0:
+            d["+".join(str(int(x)) for x in c)] = round(o, 1)
+    return d
+
+
+def _history_append(rk, quinella, exacta, deadline=None):
+    """경주별 히스토리 파일에 스냅샷 1건 추가. 직전 대비 급락(≤-20%) 이상감지 기록."""
+    path, date, race = _hist_path(rk)
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        doc = {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None}
+    now = time.time()
+    minutes_before = None
+    try:
+        if deadline:
+            dl = float(deadline)                     # epoch ms 또는 s
+            dl_ms = dl if dl > 1e12 else dl * 1000
+            mb = round((dl_ms - now * 1000) / 60000)
+            minutes_before = mb if mb >= 0 else None
+    except (TypeError, ValueError):
+        minutes_before = None
+    curQ = _odds_map_un(quinella)
+    anomalies = []
+    if doc["snapshots"]:
+        prevQ = {}
+        for k, v in (doc["snapshots"][-1].get("quinella") or {}).items():
+            try:
+                prevQ[tuple(sorted(int(x) for x in k.split("+")))] = float(v)
+            except ValueError:
+                pass
+        for k, o in curQ.items():
+            po = prevQ.get(k)
+            if po and po > 0:
+                pct = round((o - po) / po * 100)
+                if pct <= -20:
+                    anomalies.append(f"급락감지: {'+'.join(map(str, k))} {pct}%")
+    doc["snapshots"].append({
+        "time": time.strftime("%H:%M:%S", time.localtime(now)),
+        "minutes_before": minutes_before,
+        "quinella": _combo_dict(quinella), "exacta": _combo_dict(exacta),
+        "anomalies": anomalies, "t": now,
+    })
+    doc["snapshots"] = doc["snapshots"][-300:]
+    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+    return path
+
+
+def _learning_load():
+    try:
+        return json.load(open(LEARNING_FILE, encoding="utf-8"))
+    except Exception:
+        return {"records": [], "stats": {}}
+
+
+def _learning_save(d):
+    os.makedirs(os.path.dirname(LEARNING_FILE), exist_ok=True)
+    json.dump(d, open(LEARNING_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+
+
+def _rate(records, sel, cond):
+    s = [r for r in records if sel(r)]
+    hit = sum(1 for r in s if cond(r))
+    return {"n": len(s), "hit": hit, "rate": (round(hit / len(s) * 100, 1) if s else None)}
+
+
+def _recompute_learning_stats(records):
+    """이상감지 유형별 실제 적중률 + 추천 적중률."""
+    def rev_hit(r):
+        favs = [rv["favored"][0] for rv in (r.get("reversals") or []) if rv.get("favored")]
+        return r.get("result", {}).get("1st") in favs
+    return {
+        "total": len(records),
+        "recommend_hit": _rate(records, lambda r: True, lambda r: r.get("was_hit")),
+        "drop_anomaly": _rate(records, lambda r: r.get("anomalies_detected"),
+                              lambda r: r.get("anomaly_was_correct")),
+        "reversal": _rate(records, lambda r: r.get("reversals"), rev_hit),
+    }
+
+
+@app.route("/api/history/list", methods=["GET", "POST"])
+def history_list():
+    """저장된 경주 히스토리 목록 → [{file,date,race,raceKey,snaps,hasResult}]."""
+    out = []
+    if os.path.isdir(ODDS_HISTORY_DIR):
+        for fn in sorted(os.listdir(ODDS_HISTORY_DIR), reverse=True):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(ODDS_HISTORY_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            out.append({"file": fn, "date": d.get("date"), "race": d.get("race"),
+                        "raceKey": d.get("raceKey"), "snaps": len(d.get("snapshots") or []),
+                        "hasResult": bool(d.get("result"))})
+    return jsonify({"races": out})
+
+
+@app.route("/api/history/get", methods=["POST"])
+def history_get():
+    """{raceKey|file} → 히스토리 전체(타임라인·스냅샷별 이상감지)."""
+    body = request.json or {}
+    fn = body.get("file")
+    if fn:
+        path = os.path.join(ODDS_HISTORY_DIR, os.path.basename(fn))
+    else:
+        path, _, _ = _hist_path((body.get("raceKey") or "").strip())
+    try:
+        return jsonify(json.load(open(path, encoding="utf-8")))
+    except Exception:
+        return jsonify({"error": "히스토리가 없습니다."}), 404
+
+
+@app.route("/api/history/record-result", methods=["POST"])
+def history_record_result():
+    """경주 결과 입력 → 히스토리에 결과 기록 + 자동학습 레코드/통계 갱신.
+    body: {raceKey, result:{'1st':7,'2nd':1,'3rd':9}}"""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
+    result = body.get("result") or {}
+    top3 = [result.get("1st"), result.get("2nd"), result.get("3rd")]
+    top3 = [int(x) for x in top3 if x not in (None, "")]
+    if not rk or len(top3) < 1:
+        return jsonify({"error": "raceKey와 결과(1~3착)가 필요합니다."}), 400
+
+    path, _, _ = _hist_path(rk)
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        doc = {"raceKey": rk, "snapshots": [], "result": None}
+    doc["result"] = result
+    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+
+    an = _triple_analyze(rk, _triple_load().get(rk) or {})
+
+    def in3(combo):
+        return all(x in top3 for x in combo)
+    was_hit = any(in3(r["combo"]) for r in an.get("betRecommend", []))
+
+    anomalies_detected, anomaly_correct = [], False
+    for d in an.get("drops", [])[:5]:
+        if d["pct"] < 0:
+            anomalies_detected.append(f"급락: {d['combo'][0]}-{d['combo'][1]} {d['pct']}%")
+            if any(h in top3 for h in d["combo"]):
+                anomaly_correct = True
+
+    def snap_near(minb):
+        best = None
+        for s in doc.get("snapshots", []):
+            mb = s.get("minutes_before")
+            if mb is None:
+                continue
+            if best is None or abs(mb - minb) < abs(best[0] - minb):
+                best = (mb, s)
+        return best[1] if best else None
+
+    record = {
+        "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
+        "anomalies_detected": anomalies_detected, "anomaly_was_correct": anomaly_correct,
+        "reversals": [r for r in an.get("reversals", []) if r.get("flipped")],
+        "keyHorses": an.get("keyHorses"),
+        "odds_at_10min": (snap_near(10) or {}).get("quinella"),
+        "odds_at_1min30sec": (snap_near(2) or {}).get("quinella"),
+        "t": time.time(),
+    }
+    L = _learning_load()
+    L["records"].append(record)
+    L["stats"] = _recompute_learning_stats(L["records"])
+    _learning_save(L)
+    print(f"[자동학습] {rk} 결과 {top3} → 추천적중 {was_hit}, 급락적중 {anomaly_correct}")
+    return jsonify({"ok": True, "record": record, "stats": L["stats"]})
+
+
+@app.route("/api/learning/stats", methods=["GET", "POST"])
+def learning_stats():
+    """누적 학습 통계 대시보드."""
+    L = _learning_load()
+    return jsonify({"stats": L.get("stats", {}), "count": len(L.get("records", []))})
 
 
 # ───────── KRA 공공데이터: API 키 저장 + 마필 과거기록 조회 ─────────

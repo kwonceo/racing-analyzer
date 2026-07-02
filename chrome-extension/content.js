@@ -663,7 +663,7 @@
   async function collectTripleByTabs(reason) {
     const site = detectSite();
     const oddsClass = site === 'asyukk' ? 'odds_content' : null;
-    const { raceKey: override } = await getSettings();
+    const { raceKey: override, timerDeadline } = await getSettings();
     const raceKey = (override && override.trim()) || extractRaceKey();
     if (!raceKey) {
       setTripleProgress('❌ raceKey 필요', true);
@@ -727,7 +727,7 @@
 
       const payload = {
         raceKey, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
-        capturedAt: new Date().toISOString(), source: location.href,
+        deadline: timerDeadline || null, capturedAt: new Date().toISOString(), source: location.href,
       };
       console.log(`[배당수집] ===== 완료: 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두 =====`);
       if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length && !starters.length) {
@@ -741,7 +741,7 @@
       if (starters.length) {
         japan = await chrome.runtime.sendMessage({
           type: 'POST_JAPAN', reason,
-          payload: { raceKey, horses: starters, source: location.href },
+          payload: { raceKey, horses: starters, deadline: timerDeadline || null, source: location.href },
         });
         console.log('[전적] /api/extract/japan 응답:', japan && japan.ok ? 'ok' : (japan && japan.error));
       }
@@ -767,8 +767,8 @@
   async function getSettings() {
     return new Promise((resolve) => {
       chrome.storage.local.get(
-        // autoMode: 'triple'(전체 3종) | 'snapshot'(단승만)
-        { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple' },
+        // autoMode: 'triple'(전체 3종) | 'snapshot'(단승만) · timerDeadline: 발주시각(epoch ms)
+        { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple', timerDeadline: 0 },
         (v) => resolve(v)
       );
     });

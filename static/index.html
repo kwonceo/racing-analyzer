@@ -286,6 +286,26 @@
         <h2>통계 대시보드</h2>
         <div id="statsDashboard"></div>
       </div>
+
+      <!-- [5번] 배당 변동 히스토리 + 자동학습 대시보드 -->
+      <div class="panel-card">
+        <h2>📈 배당 변동 히스토리 & 자동학습</h2>
+        <div class="cfg-row">
+          <button id="histRefreshBtn" class="btn btn-primary">🔄 경주 목록 새로고침</button>
+          <button id="learnStatsBtn" class="btn">📊 학습 통계</button>
+        </div>
+        <div id="learnDashboard" style="margin-top:10px"></div>
+        <div class="cfg-row" style="margin-top:12px;gap:16px;align-items:flex-start">
+          <div style="min-width:230px">
+            <h3 style="font-size:14px">경주 목록</h3>
+            <div id="histRaceList" class="report-area"></div>
+          </div>
+          <div style="flex:1">
+            <h3 style="font-size:14px">타임라인 · 이상감지 vs 결과</h3>
+            <div id="histTimeline" class="report-area"><p class="hint">경주를 선택하면 배당 변동 타임라인이 표시됩니다.</p></div>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 

@@ -577,6 +577,8 @@
     { const b = $('#analyzeTripleBtn'); if (b) b.addEventListener('click', () => { loadTripleFromServer(); analyzeTripleRules(); }); } // [1번] 이상감지
     { const c = $('#autoRefreshTriple'); if (c) c.addEventListener('change', () => toggleTripleAutoRefresh(c.checked)); } // [2번] 자동 갱신
     { const b = $('#tripleBudget'); if (b) b.addEventListener('input', () => { if (_lastTripleAnalyze) renderTripleAnalyze(_lastTripleAnalyze); }); } // [버그3] 예산 금액 재계산
+    { const b = $('#histRefreshBtn'); if (b) b.addEventListener('click', () => { loadHistoryList(); loadLearningStats(); }); } // [5번] 히스토리
+    { const b = $('#learnStatsBtn'); if (b) b.addEventListener('click', loadLearningStats); }
     setStep(1);
     // [2번] 빠른입력 모드
     $('#quickOddsBtn').addEventListener('click', () => {
@@ -1715,6 +1717,70 @@
         <tbody>${rows}</tbody>
         ${totalAmt != null ? `<tfoot><tr><td colspan="3"></td><td><b>${totalAlloc}%</b></td><td><b>${totalAmt.toLocaleString('ko-KR')}원</b></td></tr></tfoot>` : ''}
       </table>`;
+  }
+
+  // ── [5번] 배당 변동 히스토리 + 자동학습 UI ──────────────────────────
+  async function loadHistoryList() {
+    const el = $('#histRaceList'); if (!el) return;
+    el.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/history/list')).json(); }
+    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">${esc(e.message)}</p>`; return; }
+    const races = d.races || [];
+    if (!races.length) { el.innerHTML = '<p class="hint">저장된 히스토리가 없습니다. 확장에서 자동 수집하면 경주별로 쌓입니다.</p>'; return; }
+    el.innerHTML = races.map((r) => `<div class="race-chip ${r.hasResult ? 'chip-done' : 'chip-todo'}" data-file="${esc(r.file)}" data-rk="${esc(r.raceKey || '')}" style="cursor:pointer;margin:3px 0;display:block">
+      <b>${esc(r.race || r.raceKey || '')}</b> <span class="chip-page">${esc(r.date || '')} · ${r.snaps}스냅${r.hasResult ? ' · ✅결과' : ''}</span></div>`).join('');
+    el.querySelectorAll('.race-chip').forEach((c) => c.addEventListener('click', () => openHistory(c.dataset.file, c.dataset.rk)));
+  }
+
+  async function openHistory(file, rk) {
+    const el = $('#histTimeline'); if (!el) return;
+    el.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/history/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file }) })).json(); }
+    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">${esc(e.message)}</p>`; return; }
+    if (d.error) { el.innerHTML = `<p class="hint">${esc(d.error)}</p>`; return; }
+    const snaps = d.snapshots || [];
+    const rows = snaps.map((s) => {
+      const q = Object.entries(s.quinella || {}).sort((a, b) => a[1] - b[1]).slice(0, 5).map(([k, v]) => `${k}:${v}`).join(' · ');
+      const anom = (s.anomalies || []).map((a) => `<span class="chip chip-red">${esc(a)}</span>`).join(' ');
+      return `<tr><td>${esc(s.time || '')}</td><td>${s.minutes_before != null ? s.minutes_before + '분전' : '-'}</td><td>${esc(q)}</td><td>${anom}</td></tr>`;
+    }).join('');
+    const res = d.result ? `1착 ${d.result['1st'] || '?'} · 2착 ${d.result['2nd'] || '?'} · 3착 ${d.result['3rd'] || '?'}` : '미입력';
+    const rkUse = rk || d.raceKey || '';
+    el.innerHTML = `<div class="matrix-title">${esc(d.race || d.raceKey || '')} <span class="hint" style="font-weight:400">${esc(d.date || '')} · 결과: ${esc(res)}</span></div>
+      <table class="data-table"><thead><tr><th>시각</th><th>발주전</th><th>복승 상위(낮은순)</th><th>이상감지</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="cfg-row" style="margin-top:8px">
+        <span class="hint">결과 입력:</span>
+        <input id="resIn1" class="cfg-input" type="number" placeholder="1착" style="width:70px">
+        <input id="resIn2" class="cfg-input" type="number" placeholder="2착" style="width:70px">
+        <input id="resIn3" class="cfg-input" type="number" placeholder="3착" style="width:70px">
+        <button id="resSaveBtn" class="btn btn-primary">결과 저장 + 학습</button>
+      </div>
+      <div id="resMsg" class="hint" style="margin-top:6px"></div>`;
+    $('#resSaveBtn').addEventListener('click', () => recordResult(rkUse, file));
+  }
+
+  async function recordResult(rk, file) {
+    const g = (id) => parseInt(($(id) || {}).value, 10);
+    const r1 = g('#resIn1'), r2 = g('#resIn2'), r3 = g('#resIn3');
+    if (!r1) { $('#resMsg').textContent = '최소 1착은 입력하세요.'; return; }
+    const result = {}; if (r1) result['1st'] = r1; if (r2) result['2nd'] = r2; if (r3) result['3rd'] = r3;
+    let d; try { d = await (await fetch('/api/history/record-result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk, result }) })).json(); }
+    catch (e) { $('#resMsg').textContent = '실패: ' + e.message; return; }
+    if (d.error) { $('#resMsg').textContent = d.error; return; }
+    $('#resMsg').innerHTML = `✅ 저장 완료 — 추천적중 ${d.record.was_hit ? 'O' : 'X'} · 급락적중 ${d.record.anomaly_was_correct ? 'O' : 'X'}`;
+    loadLearningStats(); loadHistoryList();
+  }
+
+  async function loadLearningStats() {
+    const el = $('#learnDashboard'); if (!el) return;
+    let d; try { d = await (await fetch('/api/learning/stats')).json(); }
+    catch (e) { el.innerHTML = `<p class="hint">${esc(e.message)}</p>`; return; }
+    const s = d.stats || {};
+    const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
+    el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
+      ${card('추천 적중률', s.recommend_hit)}
+      ${card('급락 감지 적중률', s.drop_anomaly)}
+      ${card('쌍승 역전 적중률', s.reversal)}`;
   }
 
   // [2번-A] 3종 시계열 차트: 복승·쌍승·삼복승 최인기 배당을 첫 수집=100% 로 정규화해 3줄 표시
