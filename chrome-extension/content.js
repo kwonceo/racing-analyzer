@@ -468,19 +468,24 @@
 
   // [1번] 텍스트로 탭 버튼 찾기 (button/a/td/th/li/span/div, 보이는 것만)
   function findTabButton(labels) {
-    const cands = [...document.querySelectorAll('button, a, td, th, li, span, div[role="tab"], .tab, .btn')];
+    const cands = [...document.querySelectorAll('button, a, td, th, li, span, div[role="tab"], .tab, .btn, [onclick]')];
     const norm = (e) => (e.textContent || '').replace(/\s+/g, '').trim();
     const visible = (e) => e.offsetParent !== null || (e.getClientRects && e.getClientRects().length > 0);
-    // 1) 텍스트가 정확히 라벨과 같은 요소 (짧은 것 우선)
-    for (const lb of labels) {
-      const exact = cands.filter((e) => norm(e) === lb && visible(e))
-        .sort((a, b) => (a.textContent || '').length - (b.textContent || '').length)[0];
-      if (exact) return exact;
+    const clickScore = (e) => (/^(BUTTON|A)$/.test(e.tagName) || e.hasAttribute('onclick')
+      || e.getAttribute('role') === 'tab' || /\b(tab|btn|nav)\b/i.test(e.className || '') ? 1 : 0);
+    // 긴 라벨 먼저(‘출마표2’가 ‘출마표’보다 우선 매칭되도록)
+    const ordered = [...labels].sort((a, b) => b.length - a.length);
+    // 1) 정확히 일치 — 클릭가능 요소 우선
+    for (const lb of ordered) {
+      const hit = cands.filter((e) => norm(e) === lb && visible(e))
+        .sort((a, b) => clickScore(b) - clickScore(a))[0];
+      if (hit) return hit;
     }
-    // 2) 짧은 텍스트에 라벨 포함
-    for (const lb of labels) {
-      const c = cands.find((e) => { const t = norm(e); return t.length <= 6 && t.includes(lb) && visible(e); });
-      if (c) return c;
+    // 2) 포함(배지·공백·개수표시 허용) — 텍스트가 라벨과 가깝고 클릭가능한 것 우선
+    for (const lb of ordered) {
+      const hits = cands.filter((e) => { const t = norm(e); return t.includes(lb) && t.length <= lb.length + 10 && visible(e); });
+      hits.sort((a, b) => (clickScore(b) - clickScore(a)) || (norm(a).length - norm(b).length));
+      if (hits[0]) return hits[0];
     }
     return null;
   }
@@ -594,10 +599,15 @@
       if (!btn) { console.warn(`[배당수집] ⚠ ${axis}번 축 버튼을 찾지 못함`); continue; }
       const before = oddsSignature();
       try { btn.click(); } catch (e) { console.warn(`[배당수집] ${axis}번 클릭 오류`, e); }
-      await wait(1000); // 해당 말 기준 배당 로딩 대기
+      await wait(3000); // 해당 말 기준 배당 로딩 대기(2초→3초)
       let sig = oddsSignature(), tries = 0;
-      while (sig === before && tries < 2) { await wait(700); sig = oddsSignature(); tries++; }
-      if (sig === before) console.warn(`[배당수집] ⚠ ${axis}번 축 클릭 후 배당 매트릭스가 바뀌지 않음 — 잘못된 버튼이거나 로딩 지연. 추출된 조합이 부정확할 수 있습니다.`);
+      // 재시도 강화: 변화 없으면 버튼을 다시 찾아 재클릭 후 대기(최대 3회, 총 ~12초)
+      while (sig === before && tries < 3) {
+        console.log(`[배당수집] ${axis}번 축 매트릭스 변화 없음 → 재클릭·대기 ${tries + 1}/3`);
+        try { (findHorseButton(axis) || btn).click(); } catch (_) { /* */ }
+        await wait(3000); sig = oddsSignature(); tries++;
+      }
+      if (sig === before) console.warn(`[배당수집] ⚠ ${axis}번 축 클릭 후에도 배당 매트릭스가 바뀌지 않음(재시도 ${tries}회) — 잘못된 버튼이거나 로딩 지연. 추출된 조합이 부정확할 수 있습니다.`);
       let cnt = 0;
       for (const p of currentMatrixPairs(oddsClass)) {            // p={a:행, b:열} = 남은 두 말
         const combo = [axis, p.a, p.b];
@@ -617,29 +627,60 @@
     recent: /최근|전적|着順|성적|근성적|recent/i,
   };
   function collectStarters() {
-    let best = null, bestScore = -1;
-    for (const t of document.querySelectorAll('table')) {
+    const tables = [...document.querySelectorAll('table')];
+    const nospace = (s) => (s || '').replace(/\s+/g, '');
+    // ── A) 헤더 기반 탐색(마번+마명, 공백 제거 후 매칭) ──
+    let best = null, bestScore = -1, bestHead = null;
+    for (const t of tables) {
       const trs = [...t.querySelectorAll('tr')]; if (trs.length < 2) continue;
       const head = [...trs[0].querySelectorAll('th,td')].map((c) => txt(c));
-      const hasNo = head.some((h) => STARTER_HDR.no.test(h));
-      const hasName = head.some((h) => STARTER_HDR.name.test(h));
-      if (!hasNo || !hasName) continue;
-      let score = 0; for (const k in STARTER_HDR) if (head.some((h) => STARTER_HDR[k].test(h))) score++;
-      if (score > bestScore) { best = t; bestScore = score; }
+      const hn = head.map(nospace);
+      if (!hn.some((h) => STARTER_HDR.no.test(h)) || !hn.some((h) => STARTER_HDR.name.test(h))) continue;
+      let score = 0; for (const k in STARTER_HDR) if (hn.some((h) => STARTER_HDR[k].test(h))) score++;
+      if (score > bestScore) { best = t; bestScore = score; bestHead = head; }
     }
-    if (!best) {
-      console.warn('[전적수집] ❌ 출마표 테이블(마번+마명 헤더)을 찾지 못함 — 출마표2 탭이 열려있는지 확인하세요.');
-      console.warn(`[전적수집] 참고: 페이지 table 수=${document.querySelectorAll('table').length}, tr 수=${document.querySelectorAll('table tr').length}`);
-      return [];
+    let trs, iNo, iName, iJock = -1, iW = -1, iRec = -1;
+    if (best) {
+      trs = [...best.querySelectorAll('tr')];
+      const hn = bestHead.map(nospace);
+      const idx = (k) => hn.findIndex((h) => STARTER_HDR[k].test(h));
+      iNo = idx('no'); iName = idx('name'); iJock = idx('jockey'); iW = idx('weight'); iRec = idx('recent');
+      console.log('[전적수집] 헤더:', JSON.stringify(bestHead), '| 열위치 no/name/jockey/weight/recent =', iNo, iName, iJock, iW, iRec);
+      if (iRec < 0) console.warn('[전적수집] ⚠ 최근착순(recent) 열을 헤더에서 못 찾음 — 행 전체에서 착순 시퀀스를 추정합니다(부정확할 수 있음).');
+    } else {
+      // ── B) 폴백: 헤더 라벨이 없을 때, 본문 어느 열이 연속 마번(1~20)인지로 테이블 판별 ──
+      let fbT = null, fbBest = -1, fbNoCol = 0;
+      for (const t of tables) {
+        const rows = [...t.querySelectorAll('tr')]; if (rows.length < 3) continue;
+        for (let c = 0; c < 4; c++) {
+          const seen = new Set();
+          for (const r of rows) {
+            const cells = [...r.querySelectorAll('td,th')];
+            const v = cells[c] ? txt(cells[c]) : '';
+            if (/^\d{1,2}$/.test(v)) { const n = parseInt(v, 10); if (n >= 1 && n <= 20) seen.add(n); }
+          }
+          if (seen.size > fbBest) { fbBest = seen.size; fbT = t; fbNoCol = c; }
+        }
+      }
+      if (!fbT || fbBest < 3) {
+        console.warn('[전적수집] ❌ 출마표 테이블을 찾지 못함(마번+마명 헤더·연속 마번열 모두 실패). 출마표2 탭이 열렸는지, iframe 내부인지 확인하세요.');
+        console.warn(`[전적수집] 참고: 페이지 table 수=${tables.length}, tr 수=${document.querySelectorAll('table tr').length}`);
+        return [];
+      }
+      trs = [...fbT.querySelectorAll('tr')]; iNo = fbNoCol;
+      // 마명 열: 마번열 외에 '대부분 한글/영문/한자 텍스트'인 첫 열
+      const ncol = Math.max(0, ...trs.map((r) => r.querySelectorAll('td,th').length));
+      iName = -1;
+      for (let c = 0; c < ncol; c++) {
+        if (c === iNo) continue;
+        let tot = 0, textish = 0;
+        for (const r of trs) { const cells = [...r.querySelectorAll('td,th')]; const v = cells[c] ? txt(cells[c]) : ''; if (!v) continue; tot++; if (/[가-힣A-Za-z一-龯ぁ-ヶ]/.test(v) && !/^[\d.\-\s]+$/.test(v)) textish++; }
+        if (tot >= 3 && textish >= tot * 0.6) { iName = c; break; }
+      }
+      console.warn(`[전적수집] ⚠ 헤더 라벨 없음 → 폴백 사용: 마번열=${iNo}, 마명열=${iName} (연속 마번 ${fbBest}개 감지). 착순 열 미상 → 행 전체에서 추정.`);
     }
-    const trs = [...best.querySelectorAll('tr')];
-    const head = [...trs[0].querySelectorAll('th,td')].map((c) => txt(c));
-    const idx = (k) => head.findIndex((h) => STARTER_HDR[k].test(h));
-    const iNo = idx('no'), iName = idx('name'), iJock = idx('jockey'), iW = idx('weight'), iRec = idx('recent');
-    console.log('[전적수집] 헤더:', JSON.stringify(head), '| 열위치 no/name/jockey/weight/recent =', iNo, iName, iJock, iW, iRec);
-    if (iRec < 0) console.warn('[전적수집] ⚠ 최근착순(recent) 열을 헤더에서 못 찾음 — 행 전체에서 착순 시퀀스를 추정합니다(부정확할 수 있음).');
     const out = [];
-    for (const tr of trs.slice(1)) {
+    for (const tr of trs) {   // 헤더/비데이터 행은 마번 정규식으로 자연 스킵
       const cells = [...tr.querySelectorAll('th,td')].map((c) => txt(c));
       const no = toNum(cells[iNo]);
       if (!isHorseNo(no) || !/^\d{1,2}$/.test((cells[iNo] || '').trim())) continue;
@@ -668,6 +709,15 @@
   // [1번] 출마표2 탭 클릭 → 1.5초 대기 → 전적 추출 (탭 없으면 현재화면 시도)
   async function collectStartersByTab() {
     console.log('[전적수집] 출마표2 탭 클릭 시도... (labels=출마표2/출마표/출주표/出馬表)');
+    // 진단: 화면의 ‘출마’ 포함 요소를 모두 출력(실제 탭 버튼 텍스트/태그/클래스 확인용)
+    try {
+      let n = 0;
+      document.querySelectorAll('button, a, td, th, li, span, div[role="tab"], .tab, .btn').forEach((el) => {
+        const t = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+        if (t && t.length <= 14 && t.includes('출마')) { console.log('[전적수집] ‘출마’ 후보:', el.tagName, '|', el.className || '(class없음)', '|', JSON.stringify(t)); n++; }
+      });
+      if (!n) console.warn('[전적수집] ⚠ ‘출마’ 텍스트 요소가 하나도 없음 — 출마표 페이지가 아니거나 iframe 내부일 수 있습니다.');
+    } catch (_) { /* */ }
     const r = await clickTabAndWait(['출마표2', '출마표', '출주표', '出馬表'], oddsSignature(), '출마표2', false);
     console.log(`[전적수집] 출마표2 탭: ${r.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음(현재 화면에서 시도)'} · 화면 ${r.changed ? '변경 확인' : '변화 없음'}`);
     console.log(`[전적수집] 페이지 전체 table tr 수: ${document.querySelectorAll('table tr').length} (F12에서 document.querySelectorAll('table tr').length 로도 확인 가능)`);
