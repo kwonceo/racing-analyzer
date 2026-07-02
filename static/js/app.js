@@ -20,7 +20,7 @@
     lastCombined: {}, // title -> {bets, recOdds, hadAnomaly, budget} — Phase 5 결과기록용
     oddsTrack: { betType: '복승', raceKey: null, snaps: 0, nos: new Set(), firstOdds: {},
       series: {}, times: [], alerted: {}, auto: null, deadlineMs: 0,
-      exSeries: {}, exTimes: [], dual: true, _pendingType: null }, // 다중 캡처 + 복승/쌍승 동시
+      exSeries: {}, exTimes: [], dual: false, _pendingType: null }, // 다중 캡처(자동 교대 중단: 쌍승은 확장 수집)
 
     raceCondition: { track: '', weather: '' }, // [1번] 주로 상태 / 날씨
     horseWeights: {},        // [2번] title -> { 마번: {cur, prev} }
@@ -874,6 +874,7 @@
   // ---------- [3번] 3종 동시 분석 ----------
   const TRIPLE_LABEL = { quinella: '복승', exacta: '쌍승', trio: '삼복승' };
   async function captureTriple(kind) {
+    if (kind === 'exacta') { notify('🧩 쌍승은 Chrome 확장 [전체 자동 수집]으로 수집하세요 (캡처 중단).', true); return; }
     try {
       const full = await grabFrame();
       state.tripleCaps[kind] = canvasToBlock(full);
@@ -1078,15 +1079,15 @@
 
   // ---------- [1·2번] 복승+쌍승 2단 캡처 + 카운트다운 + 스텝 가이드 ----------
   /** [캡처] 1번 → 복승 캡처 → (쌍승 탭 전환 안내 카운트다운) → 쌍승 캡처 */
+  // [변경] 복승 전용 캡처. (쌍승은 화면 캡처 대신 Chrome 확장 [전체 자동 수집]으로 통일 —
+  //  캡처 방식은 쌍승 탭 전환이 불안정해 복승만 잡히는 문제가 있었다.)
   async function dualCapture() {
     if (state.oddsTrack.auto) { toast('자동 캡처 중에는 [중지] 후 사용하세요.'); return; }
     setStep(2);
     showLoading('복승 배당 판독 중... (Vision)');
     try { await captureAs('복승'); } finally { hideLoading(); }
-    setStep(3);
-    await countdownCapture('🔀 지금 [쌍승] 탭을 클릭하세요! 곧 자동으로 쌍승을 캡처합니다', 3, '쌍승');
     setStep(1);
-    notify('✅ 복승+쌍승 동시 캡처 완료', true);
+    notify('✅ 복승 캡처 완료 · 쌍승은 확장 [전체 자동 수집] 사용', true);
   }
 
   /** 안내 문구 + N초 카운트다운(3..2..1) 후 지정 타입 자동 캡처 */

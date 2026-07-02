@@ -140,15 +140,15 @@
         <!-- 배당 시계열 다중 캡처 · 실시간 분석 -->
         <div id="oddsTrackPanel" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
           <h3>📡 배당 시계열 다중 캡처 · 실시간 분석 (복승+쌍승)</h3>
-          <p class="hint">화면 캡처/크롭 후 [📸 캡처 누적] 반복 또는 [🔀 복승+쌍승 캡처]로 두 배당을 한 번에. 자동 캡처(2/3/5분)는 복승/쌍승을 교대로 누적합니다.</p>
+          <p class="hint">화면 캡처/크롭 후 [📸 캡처 누적] 반복 또는 [🎰 복승 캡처]로 복승 배당을 누적. <b>쌍승·삼복승은 Chrome 확장 [전체 자동 수집]</b>으로 받으세요.</p>
 
           <!-- [2번] 캡처 순서 가이드 -->
           <div id="captureSteps" class="cap-steps">
             <div class="cap-step active" data-step="1"><span class="cap-step-no">1</span> [복승] 탭 열기</div>
             <div class="cap-step-arrow">→</div>
-            <div class="cap-step" data-step="2"><span class="cap-step-no">2</span> [🔀 복승+쌍승 캡처] 누르기</div>
+            <div class="cap-step" data-step="2"><span class="cap-step-no">2</span> [🎰 복승 캡처] 누르기</div>
             <div class="cap-step-arrow">→</div>
-            <div class="cap-step" data-step="3"><span class="cap-step-no">3</span> 안내 뜨면 [쌍승] 탭으로 전환 (자동 캡처)</div>
+            <div class="cap-step" data-step="3"><span class="cap-step-no">3</span> 쌍승은 확장 [전체 자동 수집] 사용</div>
           </div>
 
           <div class="cfg-row">
@@ -160,7 +160,7 @@
             <label class="hint">연결 분석(BMED)<br>
               <select id="oddsRaceSelect" class="cfg-input" style="width:190px"></select>
             </label>
-            <button id="dualCapBtn" class="btn btn-primary">🔀 복승+쌍승 캡처</button>
+            <button id="dualCapBtn" class="btn btn-primary">🎰 복승 캡처</button>
             <button id="snapAddBtn" class="btn">📸 복승만 누적</button>
             <button id="quickOddsBtn" class="btn">⌨️ 빠른입력</button>
             <button id="oddsResetBtn" class="btn">🗑 초기화</button>
@@ -173,8 +173,8 @@
             <button type="button" class="btn auto-int-btn" data-min="5">5분</button>
             <button id="autoStopBtn" class="btn" disabled>⏹ 캡처 중지</button>
             <label class="hint">마감 시각(자동중지)<br><input id="deadlineInput" type="time" class="cfg-input" style="width:120px" /></label>
-            <label class="hint" style="display:flex;align-items:center;gap:5px"><input id="altExactaChk" type="checkbox" checked /> 복승/쌍승 교대</label>
-            <span class="hint" style="margin:0">홀수=복승 · 짝수="쌍승 전환" 안내 후 5초 뒤 자동 캡처</span>
+            <label class="hint" style="display:flex;align-items:center;gap:5px;opacity:.5"><input id="altExactaChk" type="checkbox" disabled /> 복승/쌍승 교대 <span style="font-size:11px">(중단됨)</span></label>
+            <span class="hint" style="margin:0">자동 캡처는 <b>복승만</b> 누적합니다. 쌍승은 Chrome 확장으로 수집하세요.</span>
           </div>
           <!-- [2번] 빠른 입력 모드 — Vision 없이 마번·배당 숫자만 입력해 즉시 누적 -->
           <div id="quickOddsBox" class="hidden" style="margin-top:10px;background:rgba(0,0,0,.04);padding:10px;border-radius:8px">
@@ -201,7 +201,7 @@
               </div>
             </div>
           </div>
-          <p class="hint" id="oddsTrackHint" style="margin-top:8px">[복승] 탭을 열고 [🔀 복승+쌍승 캡처]를 누르세요.</p>
+          <p class="hint" id="oddsTrackHint" style="margin-top:8px">[복승] 탭을 열고 [🎰 복승 캡처]를 누르세요. 쌍승은 Chrome 확장 [전체 자동 수집]으로 받습니다.</p>
           <p class="hint" id="snapTimer" style="margin-top:4px;font-weight:600"></p>
           <!-- [3번] 시계열 라인 차트 -->
           <div id="oddsChartWrap" class="hidden" style="margin-top:12px">
@@ -216,11 +216,16 @@
           <p class="hint">각 배당판을 띄우고 캡처하세요(현재 화면 전체). 3종을 함께 판독해 <b>베팅종류 간 불일치(이상)</b>를 감지합니다.</p>
           <div class="cfg-row">
             <button class="btn triple-cap-btn" data-kind="quinella">🎰 복승 캡처 <span class="tri-st" id="triSt-quinella">⬜</span></button>
-            <button class="btn triple-cap-btn" data-kind="exacta">🔀 쌍승 캡처 <span class="tri-st" id="triSt-exacta">⬜</span></button>
+            <button class="btn triple-cap-btn" data-kind="exacta" disabled title="쌍승은 Chrome 확장으로 자동 수집됩니다" style="opacity:.5;cursor:not-allowed">🔀 쌍승 캡처 <span class="tri-st" id="triSt-exacta">🧩</span></button>
             <button class="btn triple-cap-btn" data-kind="trio">🎲 삼복승 캡처 <span class="tri-st" id="triSt-trio">⬜</span></button>
             <button id="tripleRunBtn" class="btn btn-primary" disabled>⚡ 3종 동시 분석</button>
             <span class="hint" id="tripleHint" style="margin:0">최소 1종 캡처 후 분석 가능</span>
           </div>
+          <p class="hint" style="margin:6px 0 0;padding:7px 10px;background:rgba(78,161,255,.1);border-left:3px solid #4ea1ff;border-radius:6px">
+            🧩 <b>쌍승은 Chrome 확장으로 자동 수집됩니다.</b> 확장 아이콘 → <b>[전체 자동 수집]</b> 클릭 →
+            복승·쌍승·삼복승이 한 번에 수집되어 <b>[📥 확장 수집 3종 불러오기]</b>로 표시됩니다.
+            (화면 캡처 방식은 쌍승 탭 전환이 불안정해 복승만 잡히는 문제가 있어 중단했습니다.)
+          </p>
           <div class="cfg-row" style="margin-top:8px;border-top:1px dashed var(--border);padding-top:8px">
             <button id="loadTripleBtn" class="btn btn-primary">📥 확장 수집 3종 불러오기</button>
             <button id="analyzeTripleBtn" class="btn" style="background:#dc2626;color:#fff">🚨 이상감지 분석</button>

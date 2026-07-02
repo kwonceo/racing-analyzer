@@ -694,8 +694,11 @@
       console.log(`[배당수집] 복승 데이터 추출: ${quinella.length}개 조합`);
 
       // 2) 쌍승 (순서 있음 → 방향 유지, dedupe는 a>b 키)
+      //  [디버그 강화] 쌍승 탭이 실제로 전환·로드됐는지, 조합이 뽑혔는지 상세 로그.
       setTripleProgress('쌍승 수집중…');
+      console.log('[쌍승수집] 탭 클릭 시도... (labels=쌍승/마단/쌍승식/馬単)');
       const r2 = await clickTabAndWait(['쌍승', '마단', '쌍승식', '馬単'], sig, '쌍승', true);
+      console.log(`[쌍승수집] 탭 클릭 결과: ${r2.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${r2.changed ? '변경 확인' : '⚠ 변화 없음(복승 화면 그대로일 수 있음)'}`);
       sig = r2.sig || oddsSignature();
       const exMap = {};
       for (const p of currentMatrixPairs(oddsClass)) {
@@ -706,7 +709,14 @@
       const exacta = Object.entries(exMap).map(([k, o]) => {
         const [a, b] = k.split('>').map(Number); return { combo: [a, b], odds: o };
       });
-      console.log(`[배당수집] 쌍승 데이터 추출: ${exacta.length}개 조합`);
+      console.log(`[쌍승수집] 추출된 조합 수: ${exacta.length}개`);
+      if (exacta.length) {
+        const top5 = [...exacta].sort((a, b) => a.odds - b.odds).slice(0, 5)
+          .map((e) => `${e.combo[0]}→${e.combo[1]} ${e.odds}`).join(' · ');
+        console.log(`[쌍승수집] 상위 5개(최저배당순): ${top5}`);
+      } else {
+        console.warn('[쌍승수집] ⚠ 쌍승 조합을 추출하지 못함 — 쌍승(馬単) 탭이 활성화됐는지, 매트릭스가 로드됐는지 확인하세요.');
+      }
 
       // 3) 삼복승: 유력마 3마리를 축으로 클릭 → 각 축 매트릭스 추출 (텍스트형이면 폴백)
       const keyHorses = localKeyHorses(quinella);

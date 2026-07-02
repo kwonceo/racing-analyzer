@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "경마 배당 자동수집기 (keiba.go.jp)",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "keiba.go.jp·사설 배당판(asyukk 등)에서 단승/복승 배당과 결과를 사이트 자동감지로 수집·전송하고, 모든 탭 상단에 경주 카운트다운 타이머를 표시합니다. 범용 매트릭스 파서 + 검증 + 미리보기 지원.",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": [
