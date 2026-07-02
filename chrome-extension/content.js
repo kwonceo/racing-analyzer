@@ -627,12 +627,17 @@
       let score = 0; for (const k in STARTER_HDR) if (head.some((h) => STARTER_HDR[k].test(h))) score++;
       if (score > bestScore) { best = t; bestScore = score; }
     }
-    if (!best) { console.warn('[전적] 출마표 테이블(마번+마명 헤더)을 찾지 못함'); return []; }
+    if (!best) {
+      console.warn('[전적수집] ❌ 출마표 테이블(마번+마명 헤더)을 찾지 못함 — 출마표2 탭이 열려있는지 확인하세요.');
+      console.warn(`[전적수집] 참고: 페이지 table 수=${document.querySelectorAll('table').length}, tr 수=${document.querySelectorAll('table tr').length}`);
+      return [];
+    }
     const trs = [...best.querySelectorAll('tr')];
     const head = [...trs[0].querySelectorAll('th,td')].map((c) => txt(c));
     const idx = (k) => head.findIndex((h) => STARTER_HDR[k].test(h));
     const iNo = idx('no'), iName = idx('name'), iJock = idx('jockey'), iW = idx('weight'), iRec = idx('recent');
-    console.log('[전적] 헤더:', JSON.stringify(head), '| no/name/jockey/weight/recent =', iNo, iName, iJock, iW, iRec);
+    console.log('[전적수집] 헤더:', JSON.stringify(head), '| 열위치 no/name/jockey/weight/recent =', iNo, iName, iJock, iW, iRec);
+    if (iRec < 0) console.warn('[전적수집] ⚠ 최근착순(recent) 열을 헤더에서 못 찾음 — 행 전체에서 착순 시퀀스를 추정합니다(부정확할 수 있음).');
     const out = [];
     for (const tr of trs.slice(1)) {
       const cells = [...tr.querySelectorAll('th,td')].map((c) => txt(c));
@@ -649,14 +654,23 @@
         recent, weight: iW >= 0 ? toNum(cells[iW]) : null,
       });
     }
-    console.log(`[전적] 추출: ${out.length}두`, out.slice(0, 3));
+    console.log(`[전적수집] 추출된 말 수: ${out.length}마리`);
+    let withRec = 0;
+    for (const h of out) {
+      const recTxt = (h.recent && h.recent.length) ? h.recent.join('-') : '(전적 없음)';
+      if (h.recent && h.recent.length) withRec++;
+      console.log(`[전적수집] ${h.no}번말 ${h.name || ''} 전적: ${recTxt}`);
+    }
+    console.log(`[전적수집] 착순 데이터 있는 말: ${withRec}/${out.length}마리${withRec === 0 ? ' ⚠ 전적이 하나도 안 잡혔습니다 — recent 열 인식/셀 형식 확인 필요' : ''}`);
     return out;
   }
 
   // [1번] 출마표2 탭 클릭 → 1.5초 대기 → 전적 추출 (탭 없으면 현재화면 시도)
   async function collectStartersByTab() {
+    console.log('[전적수집] 출마표2 탭 클릭 시도... (labels=출마표2/출마표/출주표/出馬表)');
     const r = await clickTabAndWait(['출마표2', '출마표', '출주표', '出馬表'], oddsSignature(), '출마표2', false);
-    if (!r.clicked) console.warn('[전적] 출마표2 탭 버튼을 찾지 못함 — 현재 화면에서 시도');
+    console.log(`[전적수집] 출마표2 탭: ${r.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음(현재 화면에서 시도)'} · 화면 ${r.changed ? '변경 확인' : '변화 없음'}`);
+    console.log(`[전적수집] 페이지 전체 table tr 수: ${document.querySelectorAll('table tr').length} (F12에서 document.querySelectorAll('table tr').length 로도 확인 가능)`);
     await wait(1500);
     return collectStarters();
   }

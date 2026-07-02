@@ -1777,7 +1777,7 @@
         <b style="font-size:15px;min-width:22px">${tierIcon(h)}</b>
         <b style="min-width:34px;color:#4ea1ff">${h.no}번</b>
         <span>${esc(h.name || '')}</span>
-        <span class="hint" style="margin-left:auto;text-align:right">배당 ${oddsTxt(h)} · 전적 ${h.formScore != null ? h.formScore : '-'} · 합산 ${h.total}${_elimToggle.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}${h.override ? `<br><span style="color:#f59e0b">⚠️ 제거대상이나 이변(${esc(h.overrideReason)})</span>` : ''}</span>
+        <span class="hint" style="margin-left:auto;text-align:right">배당 ${oddsTxt(h)} · 전적 ${h.formScore != null ? h.formScore : '<span style="color:#f59e0b">미수집</span>'} · 합산 ${h.total}${_elimToggle.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}${h.override ? `<br><span style="color:#f59e0b">⚠️ 제거대상이나 이변(${esc(h.overrideReason)})</span>` : ''}</span>
       </div>`).join('');
     const elimRows = elim.map((h) => `
       <div class="elim-row" data-no="${h.no}" title="클릭 → 후보로 전환" style="cursor:pointer;padding:5px 8px;border-left:3px solid ${h.verdict === '🔴' ? '#ef4444' : '#ff9f43'};margin:3px 0;border-radius:4px;opacity:.85">
@@ -1788,9 +1788,14 @@
     if (cand.length >= 2) ab.push('복승 ' + [cand[0].no, cand[1].no].sort((x, y) => x - y).join('+'));
     if (cand.length >= 3) ab.push('삼복승 ' + [cand[0].no, cand[1].no, cand[2].no].sort((x, y) => x - y).join('+'));
     const abTxt = ab.map((s) => `<span class="chip" style="background:rgba(56,211,159,.15);border-color:#38d39f">${s}</span>`).join(' ');
+    const formWarn = !e.formAvailable
+      ? `<div class="hint" style="margin:2px 0 6px;padding:6px 8px;background:rgba(245,158,11,.12);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b">⚠️ <b>전적 데이터 미수집</b> — 배당만으로 판단 중입니다. 확장 [전체 자동 수집] 시 출마표2 전적이 함께 수집되면 전적 보정이 반영됩니다. (F12 콘솔의 <code>[전적수집]</code> 로그 확인)</div>`
+      : (e.formCount < e.horses.length
+        ? `<div class="hint" style="margin:2px 0 6px;color:#f59e0b">⚠️ 일부 말만 전적 있음(${e.formCount}/${e.horses.length}두) — 나머지는 배당 기준</div>` : '');
     return `<div id="elimPanel" style="margin:8px 0;border:1px solid var(--border);border-radius:8px;padding:8px">
       <div class="matrix-title" style="font-size:14px">🧮 제거 분석 <span class="hint" style="font-weight:400">출전 ${e.horses.length}두 → 후보 ${cand.length}두 압축</span></div>
       <div class="hint" style="margin:2px 0 6px">말 클릭 시 제거↔후보 전환 · 배당점수+전적보정 합산 (71+🟢 / 51~70🟡 / 31~50🟠 / ~30🔴)</div>
+      ${formWarn}
       <div style="font-weight:700;color:#38d39f;margin-top:4px">🟢 후보 ${cand.length}두</div>
       ${candRows || '<div class="hint">후보 없음</div>'}
       ${abTxt ? `<div style="margin:6px 0 2px"><span class="hint">🎯 후보 기준 자동 조합</span> ${abTxt}</div>` : ''}

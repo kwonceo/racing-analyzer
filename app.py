@@ -1171,7 +1171,11 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None):
             verdict, label, keep = "🟡", "관찰", True
         else:
             verdict, label, keep = "🟢", "유력 후보", True
-        reason = f"배당 {('%g배' % o) if o is not None else '미수집'}({os_}) + 전적 {ftotal if ftotal is not None else '-'}({'+' if fadj > 0 else ''}{fadj}) = {total}"
+        o_txt = ('%g배' % o) if o is not None else '미수집'
+        if ftotal is None:  # 전적 미수집 → 100점 기본값이 아니라 '배당 기준' 판단임을 명시
+            reason = f"배당 {o_txt}({os_}) · 전적 미수집 → 배당만으로 {total}"
+        else:
+            reason = f"배당 {o_txt}({os_}) + 전적 {ftotal}({'+' if fadj > 0 else ''}{fadj}) = {total}"
         # 이변 신호 → 제거 취소
         override, ov_reasons = False, []
         if not keep:
@@ -1222,6 +1226,8 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None):
         "horses": horses,
         "counts": {"entrants": len(horses), "candidates": len(kept), "eliminated": len(elim)},
         "autoBets": auto_bets,
+        "formAvailable": bool(form_by_no),                       # 전적 데이터 존재 여부
+        "formCount": len(form_by_no),                            # 전적 있는 말 수
     }
 
 
