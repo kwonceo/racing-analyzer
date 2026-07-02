@@ -1778,9 +1778,12 @@
     (data.quinella || []).forEach((c) => { const [a, b] = c.combo; if (a && b) { q[a < b ? `${a}|${b}` : `${b}|${a}`] = c.odds; nosSet.add(a); nosSet.add(b); } });
     (data.exacta || []).forEach((c) => { const [a, b] = c.combo; if (a && b) { x[`${a}>${b}`] = c.odds; nosSet.add(a); nosSet.add(b); } });
     (data.trio || []).forEach((c) => (c.combo || []).forEach((n) => nosSet.add(n)));
-    // [버그1] 조합에 등장한 마번만 쓰면 중간 번호가 빠져 열이 잘림 → 1~최대마번 연속 생성(최대 16)
-    const maxNo = Math.min(16, Math.max(0, ...[...nosSet].filter((n) => n > 0)));
-    const nos = []; for (let i = 1; i <= maxNo; i++) nos.push(i);
+    // [버그1] 실제 등장 마번의 최소~최대를 "연속"으로 생성(최대 16).
+    //  · 조합 등장 번호만 쓰면 중간 번호가 빠져 잘림 → 연속 채움
+    //  · 1~최대로 강제하면 존재하지 않는 앞번호(예:1번)가 빈 열로 붙음 → 최소부터 시작
+    const present = [...nosSet].filter((n) => n > 0 && n <= 16);
+    const nos = [];
+    if (present.length) { const lo = Math.min(...present), hi = Math.max(...present); for (let i = lo; i <= hi; i++) nos.push(i); }
     let html = `<div class="matrix-title">📥 확장 수집 3종 <span class="hint" style="font-weight:400">${esc(data.raceKey)} · 복승 ${(data.quinella || []).length}·쌍승 ${(data.exacta || []).length}·삼복승 ${(data.trio || []).length}</span></div>`;
 
     if (Object.keys(q).length) {
