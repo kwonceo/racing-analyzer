@@ -965,10 +965,17 @@ def triple_ingest():
         return jsonify({"error": "raceKey가 필요합니다."}), 400
     q, x, tr = body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or []
     db = _triple_load()
-    db[rk] = {"quinella": q, "exacta": x, "trio": tr, "source": body.get("source"), "t": time.time()}
+    prev = db.get(rk) or {}
+    now = time.time()
+    # 변동 추적용 히스토리(최근 12회) — 직전 대비 급락/순위/역전 계산에 사용
+    hist = (prev.get("history") or [])
+    hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr})
+    hist = hist[-12:]
+    db[rk] = {"quinella": q, "exacta": x, "trio": tr, "history": hist,
+              "source": body.get("source"), "t": now}
     _triple_save(db)
     counts = {"quinella": len(q), "exacta": len(x), "trio": len(tr)}
-    print(f"[3종 수집] {rk}: {counts}")
+    print(f"[3종 수집] {rk}: {counts} (history {len(hist)})")
     return jsonify({"ok": True, "counts": counts})
 
 
@@ -986,6 +993,178 @@ def triple_latest():
     rec = db.get(rk) or {}
     return jsonify({"raceKey": rk, "quinella": rec.get("quinella", []),
                     "exacta": rec.get("exacta", []), "trio": rec.get("trio", [])})
+
+
+# ───────── 3종 규칙기반 즉시 분석: 급락·순위변동·역전·유력마·삼복승추천 ─────────
+#   Claude 미사용(빠르고 무료). 확장 [즉시 분석] + 프론트 자동갱신이 함께 사용.
+def _un(combo):
+    """순서무관 정렬 튜플 키."""
+    return tuple(sorted(int(x) for x in combo))
+
+
+def _odds_map_un(arr):
+    """[{combo,odds}] → {정렬튜플: 최저배당}."""
+    m = {}
+    for it in arr or []:
+        try:
+            k, o = _un(it["combo"]), float(it["odds"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if o > 0 and (k not in m or o < m[k]):
+            m[k] = o
+    return m
+
+
+def _odds_map_dir(arr):
+    """[{combo,odds}] → {(선,후): 배당} (순서있음, 2마리만)."""
+    m = {}
+    for it in arr or []:
+        try:
+            k = tuple(int(x) for x in it["combo"])
+            o = float(it["odds"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if len(k) == 2 and o > 0 and (k not in m or o < m[k]):
+            m[k] = o
+    return m
+
+
+def _triple_analyze(rk, rec):
+    quin = rec.get("quinella") or []
+    exa = rec.get("exacta") or []
+    trio = rec.get("trio") or []
+    hist = rec.get("history") or []
+    prev = hist[-2] if len(hist) >= 2 else None  # 직전 수집
+
+    curQ = _odds_map_un(quin)
+    prevQ = _odds_map_un(prev.get("quinella")) if prev else {}
+
+    # 1) 변동/급락 (복승 조합, 음수 pct = 배당 하락=자금유입)
+    drops = []
+    for k, o in curQ.items():
+        po = prevQ.get(k)
+        if po and po > 0:
+            pct = round((o - po) / po * 100, 1)
+            if abs(pct) >= 8:
+                drops.append({"combo": list(k), "prev": po, "cur": o, "pct": pct})
+    drops.sort(key=lambda d: d["pct"])
+
+    # 2) 순위 변동 (배당 낮은=인기 순위)
+    def _ranks(m):
+        return {k: i + 1 for i, (k, _) in enumerate(sorted(m.items(), key=lambda kv: kv[1]))}
+    curR, prevR = _ranks(curQ), _ranks(prevQ)
+    rank_changes = []
+    for k in curQ:
+        if k in prevR:
+            delta = prevR[k] - curR[k]  # 양수 = 인기 상승
+            if abs(delta) >= 3:
+                rank_changes.append({"combo": list(k), "prevRank": prevR[k],
+                                     "curRank": curR[k], "delta": delta})
+    rank_changes.sort(key=lambda d: -abs(d["delta"]))
+    rank_changes = rank_changes[:10]
+
+    # 3) 쌍승 역전 (A→B vs B→A)
+    curD = _odds_map_dir(exa)
+    prevD = _odds_map_dir(prev.get("exacta")) if prev else {}
+    reversals, seen = [], set()
+    for (a, b), o in curD.items():
+        pair = tuple(sorted((a, b)))
+        if pair in seen:
+            continue
+        rev = curD.get((b, a))
+        if rev is None:
+            continue
+        seen.add(pair)
+        favored = [a, b] if o <= rev else [b, a]
+        info = {"pair": list(pair), "favored": favored,
+                "favoredOdds": min(o, rev), "otherOdds": max(o, rev), "flipped": False}
+        if prev:
+            pa, pb = prevD.get((a, b)), prevD.get((b, a))
+            if pa is not None and pb is not None:
+                prev_fav = [a, b] if pa <= pb else [b, a]
+                info["flipped"] = (prev_fav != favored)
+        reversals.append(info)
+    reversals.sort(key=lambda r: (not r["flipped"], -(r["otherOdds"] / max(r["favoredOdds"], 0.1))))
+    reversals = reversals[:10]
+
+    # 4) 유력마 3마리 (상위 10개 복승 조합 등장 빈도 + 인기가중). 복승 없으면 쌍승 무순.
+    base = curQ if curQ else {k: min(curD[k2] for k2 in (k, (k[1], k[0])) if k2 in curD)
+                              for k in {tuple(sorted(p)) for p in curD}}
+    top = sorted(base.items(), key=lambda kv: kv[1])[:10]
+    freq = {}
+    for k, o in top:
+        for h in k:
+            freq[h] = freq.get(h, 0.0) + 1.0 + 1.0 / max(o, 0.1)
+    ranked = [h for h, _ in sorted(freq.items(), key=lambda kv: -kv[1])]
+    key_horses = ranked[:3]
+
+    # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
+    anomaly_horse = None
+    for d in drops:
+        for h in d["combo"]:
+            if h not in key_horses:
+                anomaly_horse = h
+                break
+        if anomaly_horse is not None:
+            break
+    if anomaly_horse is None:
+        anomaly_horse = ranked[3] if len(ranked) > 3 else (key_horses[-1] if key_horses else None)
+
+    # 5) 삼복승 추천 (메인 + 보험1/2), 예상배당은 수집된 삼복승에서 매칭
+    trio_map = _odds_map_un(trio)
+    recs = []
+
+    def _add(label, combo):
+        cc = sorted(set(int(x) for x in combo))
+        if len(cc) != 3:
+            return
+        key = tuple(cc)
+        if any(tuple(r["combo"]) == key for r in recs):
+            return
+        recs.append({"label": label, "combo": cc, "expOdds": trio_map.get(key)})
+
+    if len(key_horses) >= 3:
+        _add("메인", key_horses[:3])
+        if anomaly_horse is not None:
+            _add("보험1", [key_horses[0], key_horses[1], anomaly_horse])
+            _add("보험2", [key_horses[0], key_horses[2], anomaly_horse])
+
+    # 요약(팝업/화면 상단용)
+    parts = []
+    if drops:
+        d0 = drops[0]
+        arrow = "▼" if d0["pct"] < 0 else "▲"
+        parts.append(f"급락 {d0['combo'][0]}-{d0['combo'][1]} {arrow}{abs(d0['pct'])}%")
+    if any(r["flipped"] for r in reversals):
+        r0 = next(r for r in reversals if r["flipped"])
+        parts.append(f"🔴쌍승역전 {r0['favored'][0]}→{r0['favored'][1]}")
+    if key_horses:
+        parts.append("유력마 " + "·".join(map(str, key_horses)))
+    if recs:
+        parts.append("메인 " + "+".join(map(str, recs[0]["combo"])))
+    summary = " / ".join(parts) if parts else "데이터 부족 — 복승 수집 필요"
+
+    return {
+        "raceKey": rk, "hasPrev": bool(prev),
+        "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio), "history": len(hist)},
+        "drops": drops[:15], "rankChanges": rank_changes, "reversals": reversals,
+        "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
+        "trioRecommend": recs, "summary": summary,
+    }
+
+
+@app.route("/api/odds/triple/analyze", methods=["GET", "POST"])
+def triple_analyze():
+    """규칙기반 즉시 분석(Claude 미사용): 급락·순위변동·쌍승역전·유력마·삼복승추천."""
+    rk = None
+    if request.method == "POST":
+        rk = ((request.json or {}).get("raceKey") or "").strip() or None
+    db = _triple_load()
+    if not db:
+        return jsonify({"error": "수집된 3종 배당이 없습니다. 먼저 [전체 자동 수집]을 실행하세요."}), 404
+    if not rk or rk not in db:
+        rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
+    return jsonify(_triple_analyze(rk, db.get(rk) or {}))
 
 
 # ───────── KRA 공공데이터: API 키 저장 + 마필 과거기록 조회 ─────────

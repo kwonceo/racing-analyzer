@@ -12,6 +12,7 @@ const SERVER = 'http://127.0.0.1:8011';
 const SNAPSHOT_URL = `${SERVER}/api/odds/snapshot`;
 const RESULTS_URL = `${SERVER}/api/results/auto`;
 const TRIPLE_URL = `${SERVER}/api/odds/triple/ingest`;
+const ANALYZE_URL = `${SERVER}/api/odds/triple/analyze`;
 
 /** 아이콘 배지: 성공=초록(카운트/✓), 실패=빨강(!). 잠시 후 자동 소거. */
 function setBadge(ok, count) {
@@ -147,6 +148,23 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         setBadge(false);
         sendResponse({ ok: false, error: tripleStatus.lastTripleError, status: tripleStatus });
       });
+    return true; // async
+  }
+
+  // [1번] 즉시 분석: 규칙기반 이상감지+유력마+삼복승추천 (서버가 최신 3종으로 계산)
+  if (msg?.type === 'ANALYZE_TRIPLE') {
+    fetch(ANALYZE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ raceKey: msg.raceKey || '' }),
+    })
+      .then(async (res) => {
+        let d = null; try { d = await res.json(); } catch (_) { /* noop */ }
+        if (!res.ok) throw new Error((d && d.error) || `HTTP ${res.status}`);
+        return d;
+      })
+      .then((data) => sendResponse({ ok: true, data }))
+      .catch((err) => sendResponse({ ok: false, error: String(err.message || err) }));
     return true; // async
   }
 

@@ -223,8 +223,13 @@
           </div>
           <div class="cfg-row" style="margin-top:8px;border-top:1px dashed var(--border);padding-top:8px">
             <button id="loadTripleBtn" class="btn btn-primary">📥 확장 수집 3종 불러오기</button>
-            <span class="hint" style="margin:0">Chrome 확장 [⚡ 전체 자동 수집]으로 보낸 복승·쌍승·삼복승 배당을 매트릭스로 표시합니다.</span>
+            <button id="analyzeTripleBtn" class="btn" style="background:#dc2626;color:#fff">🚨 이상감지 분석</button>
+            <label class="hint" style="margin:0;display:flex;align-items:center;gap:4px">
+              <input type="checkbox" id="autoRefreshTriple" /> 자동 갱신(10초)
+            </label>
+            <span class="hint" style="margin:0">확장이 보낸 3종 배당을 매트릭스로 표시하고, 규칙기반 이상감지(급락·역전·유력마·삼복승추천)를 실행합니다.</span>
           </div>
+          <div id="tripleAnalyzeReport" class="report-area" style="margin-top:10px"></div>
           <div id="tripleMatrixReport" class="report-area" style="margin-top:10px"></div>
         </div>
       </div>

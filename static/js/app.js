@@ -574,6 +574,8 @@
     $('#quickPairsApplyBtn').addEventListener('click', submitQuickPairs); // [4번] 쌍승 빠른입력
     { const b = $('#quickQuinApplyBtn'); if (b) b.addEventListener('click', submitQuickQuin); } // [1-1] 복승 매트릭스 빠른입력
     { const b = $('#loadTripleBtn'); if (b) b.addEventListener('click', loadTripleFromServer); } // [연동] 확장 3종 불러오기
+    { const b = $('#analyzeTripleBtn'); if (b) b.addEventListener('click', () => { loadTripleFromServer(); analyzeTripleRules(); }); } // [1번] 이상감지
+    { const c = $('#autoRefreshTriple'); if (c) c.addEventListener('change', () => toggleTripleAutoRefresh(c.checked)); } // [2번] 자동 갱신
     setStep(1);
     // [2번] 빠른입력 모드
     $('#quickOddsBtn').addEventListener('click', () => {
@@ -1631,6 +1633,49 @@
       return;
     }
     renderTripleMatrices(data);
+  }
+
+  // ── [1번] 규칙기반 이상감지 분석 (급락·순위·역전·유력마·삼복승추천) ──────
+  async function analyzeTripleRules() {
+    const el = $('#tripleAnalyzeReport'); if (!el) return;
+    if (!el.innerHTML) el.innerHTML = '<p class="hint">이상감지 분석 중…</p>';
+    let a;
+    try { a = await (await fetch('/api/odds/triple/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).json(); }
+    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">분석 실패: ${esc(e.message)}</p>`; return; }
+    if (!a || a.error) { el.innerHTML = `<p class="hint">${esc((a && a.error) || '수집된 3종 배당이 없습니다.')}</p>`; return; }
+    renderTripleAnalyze(a);
+  }
+
+  function renderTripleAnalyze(a) {
+    const el = $('#tripleAnalyzeReport'); if (!el) return;
+    const drops = (a.drops || []).slice(0, 8).map((d) =>
+      `<span class="chip ${d.pct < 0 ? 'chip-red' : 'chip-yellow'}">${d.combo[0]}-${d.combo[1]} ${d.prev}→${d.cur} ${d.pct < 0 ? '▼' : '▲'}${Math.abs(d.pct)}%</span>`).join(' ');
+    const flips = (a.reversals || []).filter((r) => r.flipped).slice(0, 6).map((r) =>
+      `<span class="chip chip-red">🔴 ${r.favored[0]}→${r.favored[1]} (${r.favoredOdds}&lt;${r.otherOdds})</span>`).join(' ');
+    const ranks = (a.rankChanges || []).slice(0, 6).map((r) =>
+      `<span class="chip">${r.combo[0]}-${r.combo[1]} ${r.prevRank}위→${r.curRank}위 (${r.delta > 0 ? '▲' : '▼'}${Math.abs(r.delta)})</span>`).join(' ');
+    const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    const trios = (a.trioRecommend || []).map((r) =>
+      `<div class="combo-card"><div class="cc-head"><span class="cc-type">${esc(r.label)} ${r.combo.join('+')}</span><span class="cc-odds">${r.expOdds != null ? r.expOdds + '배' : '미수집'}</span></div></div>`).join('');
+    el.innerHTML = `
+      <div class="matrix-title">🚨 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}</span></div>
+      <div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary || '')}</div>
+      ${drops ? `<div style="margin:6px 0"><span class="hint">📉 급락/변동</span><br>${drops}</div>` : ''}
+      ${flips ? `<div style="margin:6px 0"><span class="hint">🔀 쌍승 역전</span><br>${flips}</div>` : ''}
+      ${ranks ? `<div style="margin:6px 0"><span class="hint">📊 순위 변동</span><br>${ranks}</div>` : ''}
+      <div style="margin:6px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
+      ${trios ? `<div class="matrix-title" style="font-size:13px">🎯 삼복승 추천</div><div class="combo-cards">${trios}</div>` : ''}`;
+  }
+
+  // [2번] 자동 갱신 (10초마다 3종 불러오기 + 이상감지)
+  let _tripleAutoTimer = null;
+  function toggleTripleAutoRefresh(on) {
+    if (_tripleAutoTimer) { clearInterval(_tripleAutoTimer); _tripleAutoTimer = null; }
+    if (on) {
+      const tick = () => { loadTripleFromServer(); analyzeTripleRules(); };
+      tick();
+      _tripleAutoTimer = setInterval(tick, 10000);
+    }
   }
 
   function renderTripleMatrices(data) {

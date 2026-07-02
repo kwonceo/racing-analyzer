@@ -274,6 +274,64 @@ btnTriple.addEventListener('click', async () => {
   btnTriple.disabled = false; btnTriple.textContent = '⚡ 전체 자동 수집 (복승·쌍승·삼복승)';
 });
 
+// ── [1번] 즉시 분석: 수집 → 서버 이상감지 → 요약 표시 ────────────────
+const btnInstant = document.getElementById('instantAnalyze');
+const analyzeCard = document.getElementById('analyzeCard');
+const analyzeSummary = document.getElementById('analyzeSummary');
+const analyzeDetail = document.getElementById('analyzeDetail');
+
+function renderAnalyze(a) {
+  analyzeCard.style.display = 'block';
+  analyzeSummary.className = 'status-line ok';
+  analyzeSummary.textContent = a.summary || '분석 결과';
+  const lines = [];
+  if ((a.drops || []).length) {
+    const d = a.drops.slice(0, 3).map((x) => `${x.combo[0]}-${x.combo[1]} ${x.prev}→${x.cur} (${x.pct > 0 ? '▲' : '▼'}${Math.abs(x.pct)}%)`);
+    lines.push('📉 급락: ' + d.join(', '));
+  }
+  const flips = (a.reversals || []).filter((r) => r.flipped);
+  if (flips.length) lines.push('🔴 쌍승역전: ' + flips.slice(0, 2).map((r) => `${r.favored[0]}→${r.favored[1]}`).join(', '));
+  if ((a.keyHorses || []).length) lines.push('⭐ 유력마: ' + a.keyHorses.join('·') + (a.anomalyHorse != null ? ` (이상감지말 ${a.anomalyHorse})` : ''));
+  (a.trioRecommend || []).forEach((r) => {
+    lines.push(`🎯 ${r.label}: ${r.combo.join('+')}${r.expOdds != null ? ` (약 ${r.expOdds}배)` : ' (배당 미수집)'}`);
+  });
+  if (!a.hasPrev) lines.push('※ 직전 데이터 없음 — 변동은 다음 수집부터');
+  analyzeDetail.textContent = lines.join('\n');
+}
+
+btnInstant.addEventListener('click', async () => {
+  btnInstant.disabled = true; btnInstant.textContent = '수집 중…';
+  analyzeCard.style.display = 'block';
+  analyzeSummary.className = 'status-line'; analyzeSummary.textContent = '① 배당 수집 중…';
+  analyzeDetail.textContent = '';
+  const tab = await activeKeibaTab();
+  if (!tab) {
+    analyzeSummary.className = 'status-line err';
+    analyzeSummary.textContent = '지원 배당판 페이지(keiba / 사설 배당판)에서 눌러주세요.';
+    btnInstant.disabled = false; btnInstant.textContent = '🚨 즉시 분석 (수집→이상감지)';
+    return;
+  }
+  // ① 수집(복승+쌍승+삼복승 → 서버 ingest)
+  await new Promise((resolve) => {
+    chrome.tabs.sendMessage(tab.id, { type: 'MANUAL_COLLECT_TRIPLE' }, () => resolve());
+  });
+  // ② 서버 이상감지 실행
+  btnInstant.textContent = '분석 중…';
+  analyzeSummary.textContent = '② 이상감지 분석 중…';
+  chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: '' }, (res) => {
+    if (chrome.runtime.lastError || !res) {
+      analyzeSummary.className = 'status-line err';
+      analyzeSummary.textContent = '서버 응답 없음 (8011 실행 확인).';
+    } else if (!res.ok) {
+      analyzeSummary.className = 'status-line err';
+      analyzeSummary.textContent = res.error || '분석 실패';
+    } else {
+      renderAnalyze(res.data);
+    }
+    btnInstant.disabled = false; btnInstant.textContent = '🚨 즉시 분석 (수집→이상감지)';
+  });
+});
+
 // 상태가 background 에서 갱신되면 실시간 반영
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;

@@ -183,6 +183,15 @@ body {
 }
 .race-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
+/* [배당 이상감지] 인라인 칩 */
+.chip {
+  display: inline-block; margin: 2px 3px; padding: 3px 9px; border-radius: 12px;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  font-size: 12px; white-space: nowrap;
+}
+.chip-red { background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.5); color: #ff8a8a; }
+.chip-yellow { background: rgba(255,210,79,.14); border-color: rgba(255,210,79,.45); color: #ffd24f; }
+
 /* [기능3] 진행상황 칩 상태 */
 .race-chip .chip-status { font-size: 12px; }
 .race-chip .chip-page { color: var(--text-dim); font-size: 11px; }
