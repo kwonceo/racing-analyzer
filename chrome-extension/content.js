@@ -269,38 +269,59 @@
     return new DOMParser().parseFromString(html, 'text/html');
   }
 
-  async function collectTriple(reason) {
+  // 3종은 keiba에서 별도 페이지(탭 클릭=페이지 이동)라, 페이지 이동 없이
+  // 순서대로(복승→쌍승→삼복승) 동일출처 fetch 하여 각 배당을 추출한다.
+  const TRIPLE_STEPS = [
+    { key: 'quinella', oper: 'OddsUmLenFuku', label: '복승', len: 2, cap: 200 },
+    { key: 'exacta', oper: 'OddsUmLenTan', label: '쌍승', len: 2, cap: 400 },
+    { key: 'trio', oper: 'Odds3LenFuku', label: '삼복승', len: 3, cap: 300 },
+  ];
+
+  // [2] 진행상황 → storage 로 브로드캐스트 (팝업이 실시간 표시)
+  function setTripleProgress(msg, done) {
+    try { chrome.storage.local.set({ tripleProgress: { msg, done: !!done, t: Date.now() } }); } catch (_) { /* noop */ }
+  }
+
+  // [4] keiba 배당판(오즈) 페이지인지 확인 (경주 날짜·번호 URL 필수)
+  function isKeibaOddsPage() {
     const sp = new URLSearchParams(location.search);
-    if (!sp.get('k_raceDate') || !sp.get('k_raceNo')) {
-      return { ok: false, error: 'keiba 경주 페이지(날짜·경주번호가 URL에 있는)에서 실행하세요.' };
+    return /(^|\.)keiba\.go\.jp$/.test(location.host) && !!sp.get('k_raceDate') && !!sp.get('k_raceNo');
+  }
+
+  async function collectTriple(reason) {
+    if (!isKeibaOddsPage()) {
+      setTripleProgress('❌ 배당판 페이지 아님', true);
+      return { ok: false, error: 'keiba.go.jp 배당판(오즈) 페이지가 맞는지 확인하세요 — 경주 날짜·번호가 URL에 있어야 합니다.' };
     }
+    const sp = new URLSearchParams(location.search);
     const q = ['k_raceDate', 'k_babaCode', 'k_raceNo']
       .filter((k) => sp.get(k)).map((k) => `${k}=${encodeURIComponent(sp.get(k))}`).join('&');
     const { raceKey: override } = await getSettings();
     const raceKey = (override && override.trim()) || extractRaceKey();
+    const clean = (arr, cap) => arr
+      .filter((c) => c.odds > 0)
+      .map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10 }))
+      .sort((a, b) => a.odds - b.odds)
+      .slice(0, cap);
+    const payload = { raceKey, quinella: [], exacta: [], trio: [], capturedAt: new Date().toISOString(), source: location.href };
     try {
-      const [qd, xd, td] = await Promise.all([
-        fetchOddsDoc('OddsUmLenFuku', q), fetchOddsDoc('OddsUmLenTan', q), fetchOddsDoc('Odds3LenFuku', q),
-      ]);
-      // 전송 전 정리: 배당 0/무효 제거 · 소수점 1자리 · 배당 낮은(인기) 순 정렬 · 상한(전송량 억제)
-      const clean = (arr, cap) => arr
-        .filter((c) => c.odds > 0)
-        .map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10 }))
-        .sort((a, b) => a.odds - b.odds)
-        .slice(0, cap);
-      const payload = {
-        raceKey,
-        quinella: clean(parseRankingCombos(qd).filter((c) => c.combo.length === 2), 200),  // 복승(순서무관)
-        exacta: clean(parseRankingCombos(xd).filter((c) => c.combo.length === 2), 400),    // 쌍승(순서있음)
-        trio: clean(parseRankingCombos(td).filter((c) => c.combo.length === 3), 300),      // 삼복승(인기 상위)
-        capturedAt: new Date().toISOString(), source: location.href,
-      };
+      for (const st of TRIPLE_STEPS) {
+        setTripleProgress(`${st.label} 수집중…`);        // "복승 수집중…" → "쌍승 수집중…" → …
+        const doc = await fetchOddsDoc(st.oper, q);
+        payload[st.key] = clean(parseRankingCombos(doc).filter((c) => c.combo.length === st.len), st.cap);
+      }
       if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length) {
+        setTripleProgress('❌ 3종 배당 없음(발매 시간 확인)', true);
         return { ok: false, error: '3종 배당을 찾지 못했습니다(발매 시간/경주 확인).' };
       }
+      setTripleProgress('서버 전송중…');
       const res = await chrome.runtime.sendMessage({ type: 'POST_TRIPLE', payload, reason });
+      setTripleProgress(res && res.ok
+        ? `3종 수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}`
+        : `❌ 전송 실패: ${(res && res.error) || ''}`, true);
       return res || { ok: false, error: 'background 응답 없음' };
     } catch (e) {
+      setTripleProgress('❌ 수집 실패', true);
       return { ok: false, error: String(e.message || e) };
     }
   }
@@ -311,7 +332,8 @@
   async function getSettings() {
     return new Promise((resolve) => {
       chrome.storage.local.get(
-        { autoSend: false, intervalSec: 60, raceKey: '' },
+        // autoMode: 'triple'(전체 3종) | 'snapshot'(단승만)
+        { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple' },
         (v) => resolve(v)
       );
     });
@@ -333,17 +355,19 @@
 
   async function restartLoop() {
     if (timer) { clearInterval(timer); timer = null; }
-    const { autoSend, intervalSec } = await getSettings();
+    const { autoSend, intervalSec, autoMode } = await getSettings();
     if (autoSend) {
       const ms = Math.max(10, Number(intervalSec) || 60) * 1000;
-      timer = setInterval(() => doSend('auto'), ms);
-      doSend('auto-immediate'); // 켜는 즉시 1회
+      // [3] 자동간격 설정 시 전체 3종 수집(기본) 또는 단승 스냅샷
+      const runAuto = () => (autoMode === 'snapshot' ? doSend('auto') : collectTriple('auto'));
+      timer = setInterval(runAuto, ms);
+      runAuto(); // 켜는 즉시 1회
     }
   }
 
   // 설정이 바뀌면 루프 재시작
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && (changes.autoSend || changes.intervalSec)) restartLoop();
+    if (area === 'local' && (changes.autoSend || changes.intervalSec || changes.autoMode)) restartLoop();
   });
 
   // 팝업 ↔ content 메시지 처리

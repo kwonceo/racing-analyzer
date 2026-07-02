@@ -15,6 +15,7 @@ const els = {
   raceKey: $('raceKey'),
   autoSend: $('autoSend'),
   interval: $('interval'),
+  autoMode: $('autoMode'),
   sendNow: $('sendNow'),
   lastResult: $('lastResult'),
   lastDetail: $('lastDetail'),
@@ -29,14 +30,16 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 60, raceKey: '', status: null, resultStatus: null, tripleStatus: null },
+    { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
       els.interval.value = String(v.intervalSec || 60);
+      els.autoMode.value = v.autoMode || 'triple';
       els.raceKey.value = v.raceKey || '';
       renderStatus(v.status);
       renderResultStatus(v.resultStatus);
       renderTripleStatus(v.tripleStatus);
+      if (v.tripleProgress && !v.tripleProgress.done) renderTripleProgress(v.tripleProgress);
     }
   );
 }
@@ -85,6 +88,9 @@ els.autoSend.addEventListener('change', () => {
 });
 els.interval.addEventListener('change', () => {
   chrome.storage.local.set({ intervalSec: parseInt(els.interval.value, 10) });
+});
+els.autoMode.addEventListener('change', () => {
+  chrome.storage.local.set({ autoMode: els.autoMode.value });
 });
 els.raceKey.addEventListener('change', () => {
   chrome.storage.local.set({ raceKey: els.raceKey.value.trim() });
@@ -174,11 +180,20 @@ function renderTripleStatus(ts) {
   }
 }
 
+// content.js 가 storage.tripleProgress 로 흘려보내는 실시간 진행상황 표시
+function renderTripleProgress(p) {
+  if (!p || !p.msg) return;
+  tripleRow.innerHTML = p.done
+    ? (/✅|완료/.test(p.msg) ? `<span class="ok">${p.msg}</span>` : `<span class="err">${p.msg}</span>`)
+    : `<span class="muted">${p.msg}</span>`;
+}
+
 btnTriple.addEventListener('click', async () => {
-  btnTriple.disabled = true; btnTriple.textContent = '수집 중… (3종 페이지)';
+  btnTriple.disabled = true; btnTriple.textContent = '수집 중… (복승→쌍승→삼복승)';
+  tripleDetail.textContent = '';
   const tab = await activeKeibaTab();
   if (!tab) {
-    tripleRow.innerHTML = '<span class="err">keiba.go.jp 경주 페이지에서 눌러주세요.</span>';
+    tripleRow.innerHTML = '<span class="err">keiba.go.jp 경주(오즈) 페이지에서 눌러주세요.</span>';
   } else {
     await new Promise((resolve) => {
       chrome.tabs.sendMessage(tab.id, { type: 'MANUAL_COLLECT_TRIPLE' }, (res) => {
@@ -201,6 +216,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes.status) renderStatus(changes.status.newValue);
   if (changes.resultStatus) renderResultStatus(changes.resultStatus.newValue);
   if (changes.tripleStatus) renderTripleStatus(changes.tripleStatus.newValue);
+  if (changes.tripleProgress) renderTripleProgress(changes.tripleProgress.newValue);
 });
 
 // ── 초기화 ──────────────────────────────────────────────────────────
