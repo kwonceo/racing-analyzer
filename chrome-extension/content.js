@@ -420,7 +420,7 @@
     return /(^|\.)keiba\.go\.jp$/.test(location.host) && !!sp.get('k_raceDate') && !!sp.get('k_raceNo');
   }
 
-  async function collectTriple(reason) {
+  async function collectTripleKeiba(reason) {
     if (!isKeibaOddsPage()) {
       setTripleProgress('❌ 배당판 페이지 아님', true);
       return { ok: false, error: 'keiba.go.jp 배당판(오즈) 페이지가 맞는지 확인하세요 — 경주 날짜·번호가 URL에 있어야 합니다.' };
@@ -456,6 +456,184 @@
       setTripleProgress('❌ 수집 실패', true);
       return { ok: false, error: String(e.message || e) };
     }
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  //  asyukk/사설 배당판: 인페이지 탭([복승][쌍승][삼복승]) 자동 클릭 수집
+  //  ------------------------------------------------------------------
+  //  keiba 와 달리 사설 사이트는 같은 페이지의 탭 버튼으로 배당표를 바꾼다.
+  //  → 탭을 텍스트로 찾아 클릭 → 표가 바뀌었는지 확인 → 추출(변화 없으면 재시도)
+  // ══════════════════════════════════════════════════════════════════
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // [1번] 텍스트로 탭 버튼 찾기 (button/a/td/th/li/span/div, 보이는 것만)
+  function findTabButton(labels) {
+    const cands = [...document.querySelectorAll('button, a, td, th, li, span, div[role="tab"], .tab, .btn')];
+    const norm = (e) => (e.textContent || '').replace(/\s+/g, '').trim();
+    const visible = (e) => e.offsetParent !== null || (e.getClientRects && e.getClientRects().length > 0);
+    // 1) 텍스트가 정확히 라벨과 같은 요소 (짧은 것 우선)
+    for (const lb of labels) {
+      const exact = cands.filter((e) => norm(e) === lb && visible(e))
+        .sort((a, b) => (a.textContent || '').length - (b.textContent || '').length)[0];
+      if (exact) return exact;
+    }
+    // 2) 짧은 텍스트에 라벨 포함
+    for (const lb of labels) {
+      const c = cands.find((e) => { const t = norm(e); return t.length <= 6 && t.includes(lb) && visible(e); });
+      if (c) return c;
+    }
+    return null;
+  }
+
+  // 현재 표 상태의 시그니처(배당 셀 값) — 탭 전환 여부 감지용
+  function oddsSignature() {
+    const cells = [...document.querySelectorAll('.odds_content')].slice(0, 40)
+      .map((c) => (c.textContent || '').trim());
+    if (cells.length) return cells.join('|');
+    return [...document.querySelectorAll('table.odds_table, table')]
+      .map((t) => t.innerText).join(' ').replace(/\s+/g, ' ').slice(0, 400);
+  }
+
+  // [2번] 탭 클릭 → 대기 → 표 변경 확인(변화 없으면 재시도)
+  async function clickTabAndWait(labels, prevSig, betLabel, requireChange) {
+    console.log(`[배당수집] ${betLabel} 탭 클릭 시도... (labels=${labels.join('/')})`);
+    let el = findTabButton(labels);
+    if (!el) {
+      console.warn(`[배당수집] ⚠ ${betLabel} 탭 버튼을 찾지 못했습니다.`);
+      return { clicked: false, changed: false, sig: oddsSignature() };
+    }
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try { el.click(); } catch (e) { console.warn(`[배당수집] ${betLabel} 클릭 오류`, e); }
+      await wait(2000); // 데이터 로딩 대기
+      const sig = oddsSignature();
+      const changed = sig !== prevSig && sig.length > 0;
+      if (!requireChange || changed) {
+        console.log(`[배당수집] ${betLabel} 탭 활성화 ${changed ? '(데이터 변경 확인)' : '(현재 탭 유지)'}`);
+        return { clicked: true, changed, sig };
+      }
+      console.warn(`[배당수집] ${betLabel} 데이터 변화 없음 → 재시도 ${attempt}/3`);
+      el = findTabButton(labels) || el;
+    }
+    console.warn(`[배당수집] ⚠ ${betLabel} 클릭했으나 표가 바뀌지 않음.`);
+    return { clicked: true, changed: false, sig: oddsSignature() };
+  }
+
+  // 현재 화면 매트릭스에서 (행 마번 × 열 마번) 쌍 원본 추출 (dedupe 없음)
+  function currentMatrixPairs(oddsClass) {
+    const tables = new Set();
+    for (const c of document.querySelectorAll('.' + (oddsClass || 'odds_content'))) {
+      const t = c.closest('table'); if (t) tables.add(t);
+    }
+    const scan = tables.size ? [...tables] : [...document.querySelectorAll('table.odds_table, table')];
+    const out = [];
+    for (const t of scan) {
+      const { pairs } = parseMatrixTable(t, oddsClass ? { oddsClass } : {});
+      out.push(...pairs); // {a:행, b:열, odds}
+    }
+    return out;
+  }
+
+  // 현재 화면에서 삼복승(3마리) 조합 추출: "a-b-c" 텍스트 + 인접/동행 배당
+  function currentTrios() {
+    const out = [], seen = new Set();
+    for (const el of document.querySelectorAll('td, th, span, div, li')) {
+      const t = (el.textContent || '').trim();
+      const m = t.match(/^(\d{1,2})\s*[-–—ー]\s*(\d{1,2})\s*[-–—ー]\s*(\d{1,2})$/);
+      if (!m) continue;
+      const combo = [parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10)];
+      if (combo.some((n) => !isHorseNo(n)) || new Set(combo).size !== 3) continue;
+      // 배당: 같은 행의 .odds_content, 없으면 다음 형제 셀 숫자
+      let od = null;
+      const cell = el.closest('td, th') || el;
+      const row = cell.closest('tr');
+      if (row) { const oc = row.querySelector('.odds_content'); if (oc) od = toNum(oc.textContent); }
+      if (od == null && cell.nextElementSibling) od = toNum(cell.nextElementSibling.textContent);
+      if (od != null && od >= 1.0) {
+        const k = combo.join('-');
+        if (!seen.has(k)) { seen.add(k); out.push({ combo, odds: od }); }
+      }
+    }
+    return out;
+  }
+
+  // asyukk/generic 전체 3종 수집 (탭 클릭 방식)
+  async function collectTripleByTabs(reason) {
+    const site = detectSite();
+    const oddsClass = site === 'asyukk' ? 'odds_content' : null;
+    const { raceKey: override } = await getSettings();
+    const raceKey = (override && override.trim()) || extractRaceKey();
+    if (!raceKey) {
+      setTripleProgress('❌ raceKey 필요', true);
+      return { ok: false, error: '사설 사이트는 raceKey 자동 감지가 안 됩니다. 팝업 raceKey 칸에 입력 후 다시 시도하세요.' };
+    }
+    const clean = (arr, cap) => arr
+      .filter((c) => c.odds > 0)
+      .map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10 }))
+      .sort((a, b) => a.odds - b.odds).slice(0, cap);
+    console.log('[배당수집] ===== 전체 3종 수집 시작 (탭 클릭 방식) =====');
+
+    try {
+      // 1) 복승 (이미 복승 탭일 수 있음 → 변화 강제 안 함)
+      setTripleProgress('복승 수집중…');
+      await clickTabAndWait(['복승', '복연', '馬連'], '', '복승', false);
+      let sig = oddsSignature();
+      const quinMap = {};
+      for (const p of currentMatrixPairs(oddsClass)) {
+        if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
+        const k = p.a < p.b ? `${p.a}-${p.b}` : `${p.b}-${p.a}`;
+        if (quinMap[k] == null || p.odds < quinMap[k]) quinMap[k] = p.odds;
+      }
+      const quinella = Object.entries(quinMap).map(([k, o]) => {
+        const [a, b] = k.split('-').map(Number); return { combo: [a, b], odds: o };
+      });
+      console.log(`[배당수집] 복승 데이터 추출: ${quinella.length}개 조합`);
+
+      // 2) 쌍승 (순서 있음 → 방향 유지, dedupe는 a>b 키)
+      setTripleProgress('쌍승 수집중…');
+      const r2 = await clickTabAndWait(['쌍승', '마단', '쌍승식', '馬単'], sig, '쌍승', true);
+      sig = r2.sig || oddsSignature();
+      const exMap = {};
+      for (const p of currentMatrixPairs(oddsClass)) {
+        if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
+        const k = `${p.a}>${p.b}`;
+        if (exMap[k] == null || p.odds < exMap[k]) exMap[k] = p.odds;
+      }
+      const exacta = Object.entries(exMap).map(([k, o]) => {
+        const [a, b] = k.split('>').map(Number); return { combo: [a, b], odds: o };
+      });
+      console.log(`[배당수집] 쌍승 데이터 추출: ${exacta.length}개 조합`);
+
+      // 3) 삼복승 (3마리 조합 텍스트)
+      setTripleProgress('삼복승 수집중…');
+      await clickTabAndWait(['삼복승', '삼복', '삼쌍승', '3連複'], sig, '삼복승', true);
+      const trio = currentTrios().map((t) => ({ combo: t.combo, odds: t.odds }));
+      console.log(`[배당수집] 삼복승 데이터 추출: ${trio.length}개 조합`);
+
+      const payload = {
+        raceKey, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
+        capturedAt: new Date().toISOString(), source: location.href,
+      };
+      console.log(`[배당수집] ===== 완료: 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length} =====`);
+      if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length) {
+        setTripleProgress('❌ 3종 배당 없음(콘솔 로그 확인)', true);
+        return { ok: false, error: '3종 배당을 찾지 못했습니다. F12 콘솔의 [배당수집] 로그를 확인하세요.' };
+      }
+      setTripleProgress('서버 전송중…');
+      const res = await chrome.runtime.sendMessage({ type: 'POST_TRIPLE', payload, reason });
+      setTripleProgress(res && res.ok
+        ? `3종 수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}`
+        : `❌ 전송 실패: ${(res && res.error) || ''}`, true);
+      return res || { ok: false, error: 'background 응답 없음' };
+    } catch (e) {
+      console.error('[배당수집] 수집 실패', e);
+      setTripleProgress('❌ 수집 실패', true);
+      return { ok: false, error: String(e.message || e) };
+    }
+  }
+
+  // 사이트별 3종 수집 분기: keiba=별도URL fetch / 그 외=탭 클릭
+  async function collectTriple(reason) {
+    return detectSite() === 'keiba' ? collectTripleKeiba(reason) : collectTripleByTabs(reason);
   }
 
   // ── 설정 로드 & 자동전송 루프 ───────────────────────────────────────
