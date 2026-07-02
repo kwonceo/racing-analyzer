@@ -1665,8 +1665,27 @@
       ${flips ? `<div style="margin:6px 0"><span class="hint">🔀 쌍승 역전</span><br>${flips}</div>` : ''}
       ${ranks ? `<div style="margin:6px 0"><span class="hint">📊 순위 변동</span><br>${ranks}</div>` : ''}
       <div style="margin:6px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
-      ${renderBetRecommend(a)}`;
+      ${renderBetRecommend(a)}
+      ${renderFormGrades(a.form)}`;
     drawTripleChart(a.chart);
+  }
+
+  // [4번] 출마표2 전적 등급 표 (A/B/C/D)
+  function renderFormGrades(form) {
+    if (!form || !form.length) return '';
+    const gc = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#8a94a6' };
+    const rows = form.map((h) => `<tr>
+      <td><b style="color:${gc[h.grade] || '#fff'}">${h.grade}</b></td>
+      <td>${h.no}</td><td>${esc(h.name || '')}</td><td>${esc(h.jockey || '')}</td>
+      <td>${(h.recentPlacings || []).join('-') || '-'}</td>
+      <td>${h.totalScore}</td>
+      <td>${(h.flags || []).map((f) => `<span class="chip ${f.level === 'must' ? 'chip-red' : ''}">${esc(f.msg)}</span>`).join(' ')}</td>
+    </tr>`).join('');
+    return `<div class="matrix-title" style="font-size:13px">🏇 전적 등급 (출마표2)</div>
+      <table class="data-table" style="margin-top:4px">
+        <thead><tr><th>등급</th><th>마번</th><th>마명</th><th>기수</th><th>최근착순</th><th>점수</th><th>플래그</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
   }
 
   // [버그2·3] 복승/삼복승 추천 + 예산 배분 금액 표

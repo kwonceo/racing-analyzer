@@ -13,6 +13,7 @@ const SNAPSHOT_URL = `${SERVER}/api/odds/snapshot`;
 const RESULTS_URL = `${SERVER}/api/results/auto`;
 const TRIPLE_URL = `${SERVER}/api/odds/triple/ingest`;
 const ANALYZE_URL = `${SERVER}/api/odds/triple/analyze`;
+const JAPAN_URL = `${SERVER}/api/extract/japan`;
 
 /** 아이콘 배지: 성공=초록(카운트/✓), 실패=빨강(!). 잠시 후 자동 소거. */
 function setBadge(ok, count) {
@@ -148,6 +149,26 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         setBadge(false);
         sendResponse({ ok: false, error: tripleStatus.lastTripleError, status: tripleStatus });
       });
+    return true; // async
+  }
+
+  // [출마표2] 전적 + 배당 통합 분석 (/api/extract/japan)
+  if (msg?.type === 'POST_JAPAN') {
+    fetch(JAPAN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg.payload),
+    })
+      .then(async (res) => {
+        let d = null; try { d = await res.json(); } catch (_) { /* noop */ }
+        if (!res.ok) throw new Error((d && d.error) || `HTTP ${res.status}`);
+        return d;
+      })
+      .then((data) => {
+        chrome.storage.local.set({ japanStatus: { t: Date.now(), ok: true, raceKey: msg.payload.raceKey, horses: (msg.payload.horses || []).length } });
+        sendResponse({ ok: true, data });
+      })
+      .catch((err) => sendResponse({ ok: false, error: String(err.message || err) }));
     return true; // async
   }
 

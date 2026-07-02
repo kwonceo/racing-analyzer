@@ -956,6 +956,43 @@ def _triple_save(db):
         json.dump(db, f, ensure_ascii=False)
 
 
+# 출마표2 전적 저장소 (raceKey → {horses:[{no,name,jockey,recent,weight}], t})
+STARTERS_STORE = os.path.join(os.path.dirname(__file__), "starters_store.json")
+
+
+def _starters_load():
+    try:
+        with open(STARTERS_STORE, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _starters_save(db):
+    with open(STARTERS_STORE, "w", encoding="utf-8") as f:
+        json.dump(db, f, ensure_ascii=False)
+
+
+def _form_from_starters(rk, drops):
+    """저장된 출마표2 전적으로 마필 점수·등급 계산. 배당 급락마는 이상감지 상향 반영."""
+    rec = _starters_load().get(rk)
+    if not rec or not rec.get("horses"):
+        return None
+    anomaly_by_no = {}
+    for d in drops or []:
+        if d.get("pct", 0) < 0:  # 배당 하락(자금유입)
+            for h in d["combo"]:
+                anomaly_by_no.setdefault(int(h), {
+                    "signalScore": min(100, 50 + int(abs(d["pct"]))),
+                    "drop": abs(d["pct"]) / 100.0})
+    horses = [{"no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
+               "recentPlacings": h.get("recent") or [], "currentWeight": h.get("weight")}
+              for h in rec["horses"]]
+    scored = compute_horse_scores({}, horses, None, anomaly_by_no)
+    scored.sort(key=lambda x: -x["totalScore"])
+    return scored
+
+
 @app.route("/api/odds/triple/ingest", methods=["POST"])
 def triple_ingest():
     """확장 [전체 자동 수집]: {raceKey, quinella[], exacta[], trio[]} 저장 → {ok, counts}"""
@@ -1191,7 +1228,37 @@ def _triple_analyze(rk, rec):
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
         "summary": summary, "chart": chart,
+        "form": _form_from_starters(rk, drops),  # 출마표2 전적 등급(있으면)
     }
+
+
+@app.route("/api/extract/japan", methods=["POST"])
+def extract_japan():
+    """[출마표2] 전적 + (선택)배당을 함께 받아 저장하고 통합 분석 반환.
+    body: {raceKey, horses:[{no,name,jockey,recent[],weight}], quinella?, exacta?, trio?}
+    → _triple_analyze 결과(전적 등급 form 포함)."""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"error": "raceKey가 필요합니다."}), 400
+    horses = body.get("horses") or []
+    sdb = _starters_load()
+    sdb[rk] = {"horses": horses, "t": time.time()}
+    _starters_save(sdb)
+    # 배당이 함께 오면 triple_store 도 갱신(히스토리 유지)
+    if body.get("quinella") or body.get("exacta") or body.get("trio"):
+        tdb = _triple_load()
+        prev = tdb.get(rk) or {}
+        q, x, tr = body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or []
+        hist = (prev.get("history") or [])
+        hist.append({"t": time.time(), "quinella": q, "exacta": x, "trio": tr})
+        hist = hist[-12:]
+        tdb[rk] = {"quinella": q, "exacta": x, "trio": tr, "history": hist,
+                   "source": body.get("source"), "t": time.time()}
+        _triple_save(tdb)
+    trec = _triple_load().get(rk) or {}
+    print(f"[출마표2 전적] {rk}: {len(horses)}두 저장")
+    return jsonify(_triple_analyze(rk, trec))
 
 
 @app.route("/api/odds/triple/analyze", methods=["GET", "POST"])

@@ -297,6 +297,9 @@ function renderAnalyze(a) {
       : (r.expOddsEst != null ? `추정 ${r.expOddsEst}배` : '배당 미수집');
     lines.push(`🎯 ${r.label}: ${r.combo.join('+')} (${od})`);
   });
+  if ((a.form || []).length) {
+    lines.push('🏇 전적등급: ' + a.form.slice(0, 4).map((h) => `${h.grade} ${h.no}번(${h.totalScore})`).join(', '));
+  }
   if (!a.hasPrev) lines.push('※ 직전 데이터 없음 — 변동은 다음 수집부터');
   analyzeDetail.textContent = lines.join('\n');
 }

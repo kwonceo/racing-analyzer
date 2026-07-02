@@ -609,6 +609,56 @@
     return Object.entries(trioMap).map(([k, o]) => ({ combo: k.split('-').map(Number), odds: o }));
   }
 
+  // [2번] 출마표2 전적 추출 (헤더 라벨 기반, 한국어·일본어 대응) + 상세 로그
+  const STARTER_HDR = {
+    no: /^(馬番|마번|번호|No\.?|출전)$/i, name: /馬名|마명|말이름|말명|Horse/i,
+    jockey: /騎手|기수|jockey/i, weight: /斤量|부담중량|부담|負担|중량|weight/i,
+    recent: /최근|전적|着順|성적|근성적|recent/i,
+  };
+  function collectStarters() {
+    let best = null, bestScore = -1;
+    for (const t of document.querySelectorAll('table')) {
+      const trs = [...t.querySelectorAll('tr')]; if (trs.length < 2) continue;
+      const head = [...trs[0].querySelectorAll('th,td')].map((c) => txt(c));
+      const hasNo = head.some((h) => STARTER_HDR.no.test(h));
+      const hasName = head.some((h) => STARTER_HDR.name.test(h));
+      if (!hasNo || !hasName) continue;
+      let score = 0; for (const k in STARTER_HDR) if (head.some((h) => STARTER_HDR[k].test(h))) score++;
+      if (score > bestScore) { best = t; bestScore = score; }
+    }
+    if (!best) { console.warn('[전적] 출마표 테이블(마번+마명 헤더)을 찾지 못함'); return []; }
+    const trs = [...best.querySelectorAll('tr')];
+    const head = [...trs[0].querySelectorAll('th,td')].map((c) => txt(c));
+    const idx = (k) => head.findIndex((h) => STARTER_HDR[k].test(h));
+    const iNo = idx('no'), iName = idx('name'), iJock = idx('jockey'), iW = idx('weight'), iRec = idx('recent');
+    console.log('[전적] 헤더:', JSON.stringify(head), '| no/name/jockey/weight/recent =', iNo, iName, iJock, iW, iRec);
+    const out = [];
+    for (const tr of trs.slice(1)) {
+      const cells = [...tr.querySelectorAll('th,td')].map((c) => txt(c));
+      const no = toNum(cells[iNo]);
+      if (!isHorseNo(no) || !/^\d{1,2}$/.test((cells[iNo] || '').trim())) continue;
+      // 최근 착순: recent 열의 "1-3-2" 패턴 → 없으면 행 전체에서 착순 시퀀스 탐색
+      const recCell = iRec >= 0 ? (cells[iRec] || '') : '';
+      const seq = (recCell.match(/\d+(?:\s*[-·・]\s*\d+){1,5}/) || [])[0]
+        || (cells.join(' ').match(/\d+(?:\s*[-·・]\s*\d+){2,5}/) || [])[0] || '';
+      const recent = seq ? seq.split(/[-·・]/).map((x) => parseInt(x.trim(), 10)).filter((n) => n > 0).slice(0, 5) : [];
+      out.push({
+        no, name: iName >= 0 ? cells[iName] : '', jockey: iJock >= 0 ? cells[iJock] : '',
+        recent, weight: iW >= 0 ? toNum(cells[iW]) : null,
+      });
+    }
+    console.log(`[전적] 추출: ${out.length}두`, out.slice(0, 3));
+    return out;
+  }
+
+  // [1번] 출마표2 탭 클릭 → 1.5초 대기 → 전적 추출 (탭 없으면 현재화면 시도)
+  async function collectStartersByTab() {
+    const r = await clickTabAndWait(['출마표2', '출마표', '출주표', '出馬表'], oddsSignature(), '출마표2', false);
+    if (!r.clicked) console.warn('[전적] 출마표2 탭 버튼을 찾지 못함 — 현재 화면에서 시도');
+    await wait(1500);
+    return collectStarters();
+  }
+
   // asyukk/generic 전체 3종 수집 (탭 클릭 방식)
   async function collectTripleByTabs(reason) {
     const site = detectSite();
@@ -669,19 +719,34 @@
       }
       console.log(`[배당수집] 삼복승 총 추출: ${trio.length}개 조합`);
 
+      // 4) 출마표2 전적 (탭 클릭 → 1.5초 → 추출 → 복승 복귀)
+      setTripleProgress('출마표2 전적 수집중…');
+      let starters = [];
+      try { starters = await collectStartersByTab(); } catch (e) { console.warn('[전적] 수집 오류', e); }
+      await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false); // 복승으로 복귀
+
       const payload = {
         raceKey, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
         capturedAt: new Date().toISOString(), source: location.href,
       };
-      console.log(`[배당수집] ===== 완료: 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length} =====`);
-      if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length) {
-        setTripleProgress('❌ 3종 배당 없음(콘솔 로그 확인)', true);
-        return { ok: false, error: '3종 배당을 찾지 못했습니다. F12 콘솔의 [배당수집] 로그를 확인하세요.' };
+      console.log(`[배당수집] ===== 완료: 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두 =====`);
+      if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length && !starters.length) {
+        setTripleProgress('❌ 배당·전적 모두 없음(콘솔 로그 확인)', true);
+        return { ok: false, error: '배당·전적을 찾지 못했습니다. F12 콘솔의 로그를 확인하세요.' };
       }
       setTripleProgress('서버 전송중…');
       const res = await chrome.runtime.sendMessage({ type: 'POST_TRIPLE', payload, reason });
+      // [3번] 전적이 있으면 배당+전적 통합 분석 엔드포인트로 전송
+      let japan = null;
+      if (starters.length) {
+        japan = await chrome.runtime.sendMessage({
+          type: 'POST_JAPAN', reason,
+          payload: { raceKey, horses: starters, source: location.href },
+        });
+        console.log('[전적] /api/extract/japan 응답:', japan && japan.ok ? 'ok' : (japan && japan.error));
+      }
       setTripleProgress(res && res.ok
-        ? `3종 수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}`
+        ? `수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두`
         : `❌ 전송 실패: ${(res && res.error) || ''}`, true);
       return res || { ok: false, error: 'background 응답 없음' };
     } catch (e) {
