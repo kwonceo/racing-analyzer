@@ -1665,6 +1665,72 @@
       ${ranks ? `<div style="margin:6px 0"><span class="hint">📊 순위 변동</span><br>${ranks}</div>` : ''}
       <div style="margin:6px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
       ${trios ? `<div class="matrix-title" style="font-size:13px">🎯 삼복승 추천</div><div class="combo-cards">${trios}</div>` : ''}`;
+    drawTripleChart(a.chart);
+  }
+
+  // [2번-A] 3종 시계열 차트: 복승·쌍승·삼복승 최인기 배당을 첫 수집=100% 로 정규화해 3줄 표시
+  const TRIPLE_CHART = { 복승: '#4ea1ff', 쌍승: '#ffd24f', 삼복승: '#38d39f' };
+  function drawTripleChart(chart) {
+    const wrap = $('#tripleChartWrap'); const cv = $('#tripleChart');
+    if (!wrap || !cv) return;
+    const series = (chart && chart.series) || [];
+    const times = (chart && chart.times) || [];
+    const n = times.length;
+    // 각 라인: 첫 유효값 대비 % (정규화). 2회 이상 데이터가 있어야 변동 의미.
+    const lines = series.map((s) => {
+      const base = (s.odds || []).find((v) => typeof v === 'number' && v > 0);
+      const pts = [];
+      (s.odds || []).forEach((v, i) => { if (typeof v === 'number' && v > 0 && base) pts.push({ i, rel: v / base * 100, raw: v }); });
+      return { label: s.label, color: TRIPLE_CHART[s.label] || '#8a94a6', pts };
+    }).filter((l) => l.pts.length);
+    if (n < 2 || !lines.some((l) => l.pts.length >= 2)) { wrap.classList.add('hidden'); return; }
+    wrap.classList.remove('hidden');
+
+    const relAll = []; lines.forEach((l) => l.pts.forEach((p) => relAll.push(p.rel)));
+    let minY = Math.min(...relAll), maxY = Math.max(...relAll);
+    if (minY === maxY) { minY -= 5; maxY += 5; }
+    const padY = (maxY - minY) * 0.12 || 2; minY -= padY; maxY += padY;
+    const minX = 0, maxX = n - 1;
+
+    const W = Math.max(320, wrap.clientWidth || 640), H = 220;
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    const L = 48, R = 56, TT = 14, B = 26; const pw = W - L - R, ph = H - TT - B;
+    const sx = (x) => L + (x - minX) / (maxX - minX || 1) * pw;
+    const sy = (y) => TT + (1 - (y - minY) / (maxY - minY || 1)) * ph;
+
+    // 격자 + Y축(%) + 100% 기준선
+    ctx.strokeStyle = 'rgba(140,148,166,.2)'; ctx.fillStyle = '#8a94a6'; ctx.font = '11px sans-serif'; ctx.lineWidth = 1;
+    for (let g = 0; g <= 4; g++) {
+      const yy = TT + ph * g / 4; const yv = maxY - (maxY - minY) * g / 4;
+      ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(L + pw, yy); ctx.stroke();
+      ctx.fillText(yv.toFixed(0) + '%', 6, yy + 3);
+    }
+    if (minY < 100 && maxY > 100) {
+      ctx.strokeStyle = 'rgba(140,148,166,.5)'; ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(L, sy(100)); ctx.lineTo(L + pw, sy(100)); ctx.stroke(); ctx.setLineDash([]);
+    }
+    for (let g = 0; g <= Math.min(maxX, 6); g++) {
+      const i = Math.round(maxX * g / Math.min(maxX, 6));
+      ctx.fillStyle = '#8a94a6'; ctx.fillText('#' + (i + 1), sx(i) - 6, H - 8);
+    }
+
+    const RED = '#ff5c5c';
+    lines.forEach((l) => {
+      for (let k = 1; k < l.pts.length; k++) {
+        const a = l.pts[k - 1], b = l.pts[k];
+        const rel = a.rel ? (a.rel - b.rel) / a.rel : 0; // >0 하락(배당 짧아짐=급락)
+        ctx.strokeStyle = rel >= 0.06 ? RED : l.color; ctx.lineWidth = rel >= 0.06 ? 3.5 : 2.5;
+        ctx.beginPath(); ctx.moveTo(sx(a.i), sy(a.rel)); ctx.lineTo(sx(b.i), sy(b.rel)); ctx.stroke();
+      }
+      ctx.fillStyle = l.color;
+      l.pts.forEach((p) => { ctx.beginPath(); ctx.arc(sx(p.i), sy(p.rel), 2.5, 0, Math.PI * 2); ctx.fill(); });
+      const lp = l.pts[l.pts.length - 1]; const fp = l.pts[0];
+      const pct = Math.round(lp.rel - 100);
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText(`${l.label} ${lp.raw}배(${pct >= 0 ? '+' : ''}${pct}%)`, Math.min(sx(lp.i) + 5, W - R - 2), sy(lp.rel) - 4);
+    });
   }
 
   // [2번] 자동 갱신 (10초마다 3종 불러오기 + 이상감지)

@@ -1144,12 +1144,23 @@ def _triple_analyze(rk, rec):
         parts.append("메인 " + "+".join(map(str, recs[0]["combo"])))
     summary = " / ".join(parts) if parts else "데이터 부족 — 복승 수집 필요"
 
+    # 시계열 차트: 복승·쌍승·삼복승 각 "최저(최인기) 배당"의 라운드별 변화 (3줄)
+    def _min_odds(arr):
+        m = _odds_map_un(arr)
+        return min(m.values()) if m else None
+    chart_series = []
+    for label, field in (("복승", "quinella"), ("쌍승", "exacta"), ("삼복승", "trio")):
+        odds = [_min_odds(h.get(field)) for h in hist]
+        if any(o is not None for o in odds):
+            chart_series.append({"label": label, "odds": odds})
+    chart = {"times": [h.get("t") for h in hist], "series": chart_series}
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
         "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio), "history": len(hist)},
         "drops": drops[:15], "rankChanges": rank_changes, "reversals": reversals,
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
-        "trioRecommend": recs, "summary": summary,
+        "trioRecommend": recs, "summary": summary, "chart": chart,
     }
 
 
