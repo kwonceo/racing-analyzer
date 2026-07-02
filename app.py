@@ -1021,16 +1021,37 @@ def triple_ingest():
     return jsonify({"ok": True, "counts": counts})
 
 
+@app.route("/api/odds/triple/reset", methods=["POST"])
+def triple_reset():
+    """[🔄 새 경주 시작] 활성 3종 배당(triple_store)을 비워 새 경주로 전환.
+    경주별 히스토리 파일(data/odds_history)은 그대로 보존(=[히스토리 보기]).
+    body: {raceKey?} — 주면 그 경주만, 없으면 전체 활성 초기화."""
+    rk = ((request.json or {}).get("raceKey") or "").strip()
+    db = _triple_load()
+    if rk:
+        removed = 1 if db.pop(rk, None) is not None else 0
+    else:
+        removed = len(db)
+        db = {}
+    _triple_save(db)
+    print(f"[새 경주] 활성 3종 초기화: {rk or '전체'} ({removed}건). 히스토리 파일은 보존.")
+    return jsonify({"ok": True, "cleared": rk or "all", "removed": removed})
+
+
 @app.route("/api/odds/triple/latest", methods=["GET", "POST"])
 def triple_latest():
-    """최근(또는 지정 raceKey) 3종 배당 조회 → {raceKey, quinella, exacta, trio}"""
-    rk = None
+    """최근(또는 지정 raceKey) 3종 배당 조회 → {raceKey, quinella, exacta, trio}.
+    raceKey 명시 & 데이터 없으면 빈 결과(waiting) — 이전 경주로 폴백하지 않음."""
+    rk, explicit = None, False
     if request.method == "POST":
         rk = ((request.json or {}).get("raceKey") or "").strip() or None
+        explicit = rk is not None
     db = _triple_load()
     if not db:
         return jsonify({})
-    if not rk or rk not in db:
+    if rk not in db:
+        if explicit:
+            return jsonify({"raceKey": rk, "quinella": [], "exacta": [], "trio": [], "waiting": True})
         rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
     rec = db.get(rk) or {}
     return jsonify({"raceKey": rk, "quinella": rec.get("quinella", []),
@@ -1470,14 +1491,19 @@ def extract_japan():
 
 @app.route("/api/odds/triple/analyze", methods=["GET", "POST"])
 def triple_analyze():
-    """규칙기반 즉시 분석(Claude 미사용): 급락·순위변동·쌍승역전·유력마·삼복승추천."""
-    rk = None
+    """규칙기반 즉시 분석(Claude 미사용): 급락·순위변동·쌍승역전·유력마·삼복승추천.
+    raceKey를 명시하면 그 경주만(없으면 대기), 없으면 최근 경주."""
+    rk, explicit = None, False
     if request.method == "POST":
         rk = ((request.json or {}).get("raceKey") or "").strip() or None
+        explicit = rk is not None
     db = _triple_load()
     if not db:
         return jsonify({"error": "수집된 3종 배당이 없습니다. 먼저 [전체 자동 수집]을 실행하세요."}), 404
-    if not rk or rk not in db:
+    if rk not in db:
+        if explicit:  # 지정 경주 데이터가 아직 없음 → 폴백 없이 대기 안내(이전 경주 표시 방지)
+            return jsonify({"error": f"'{rk}' 경주의 수집 데이터가 없습니다. 확장에서 해당 raceKey로 [전체 자동 수집]을 실행하세요.",
+                            "raceKey": rk, "waiting": True}), 404
         rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
     return jsonify(_triple_analyze(rk, db.get(rk) or {}))
 

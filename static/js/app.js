@@ -575,6 +575,9 @@
     { const b = $('#quickQuinApplyBtn'); if (b) b.addEventListener('click', submitQuickQuin); } // [1-1] 복승 매트릭스 빠른입력
     { const b = $('#loadTripleBtn'); if (b) b.addEventListener('click', loadTripleFromServer); } // [연동] 확장 3종 불러오기
     { const b = $('#analyzeTripleBtn'); if (b) b.addEventListener('click', () => { loadTripleFromServer(); analyzeTripleRules(); }); } // [1번] 이상감지
+    { const b = $('#newRaceBtn'); if (b) b.addEventListener('click', startNewRace); }   // [4번] 새 경주 시작
+    { const b = $('#histViewBtn'); if (b) b.addEventListener('click', showHistoryView); } // [3번] 히스토리 보기
+    setActiveRaceKey(getActiveRaceKey());  // 라벨 초기화(저장된 활성 경주 반영)
     { const c = $('#autoRefreshTriple'); if (c) c.addEventListener('change', () => toggleTripleAutoRefresh(c.checked)); } // [2번] 자동 갱신
     { const b = $('#tripleBudget'); if (b) b.addEventListener('input', () => { if (_lastTripleAnalyze) renderTripleAnalyze(_lastTripleAnalyze); }); } // [버그3] 예산 금액 재계산
     { const b = $('#histRefreshBtn'); if (b) b.addEventListener('click', () => { loadHistoryList(); loadLearningStats(); }); } // [5번] 히스토리
@@ -1626,27 +1629,100 @@
   }
 
   // ── [연동] 확장 [전체 자동 수집] 3종을 서버에서 불러와 매트릭스로 표시 ──
-  async function loadTripleFromServer() {
-    const el = $('#tripleMatrixReport'); if (!el) return;
-    el.innerHTML = '<p class="hint">불러오는 중…</p>';
-    let data;
-    try { data = await (await fetch('/api/odds/triple/latest')).json(); }
-    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">불러오기 실패: ${esc(e.message)}</p>`; return; }
-    if (!data || !data.raceKey) {
-      el.innerHTML = '<p class="hint">확장에서 수집된 3종 배당이 없습니다. Chrome 확장 [⚡ 전체 자동 수집]을 먼저 실행하세요.</p>';
-      return;
+  // ── [경주별 분리] 활성 raceKey 모델 — 현재 경주만 표시, 나머지는 히스토리 ──
+  const ACTIVE_RK_KEY = 'bmed_activeRaceKey';
+  function getActiveRaceKey() { try { return localStorage.getItem(ACTIVE_RK_KEY) || null; } catch (_) { return null; } }
+  function setActiveRaceKey(rk) {
+    try { if (rk) localStorage.setItem(ACTIVE_RK_KEY, rk); else localStorage.removeItem(ACTIVE_RK_KEY); } catch (_) { /* */ }
+    const lb = $('#activeRaceLabel'); if (lb) lb.textContent = '현재 경주: ' + (rk || '— (다음 수집 시 자동 설정)');
+  }
+  /** 서버 최신 raceKey 조회(폴백=최근). 활성과 다르면 새 경주로 판단. */
+  async function fetchLatestRaceKey() {
+    try {
+      const d = await (await fetch('/api/odds/triple/latest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).json();
+      return d && d.raceKey ? d.raceKey : null;
+    } catch (_) { return null; }
+  }
+  /** [2번] 확장이 새 raceKey로 수집하면 자동 전환(이전 경주는 히스토리 파일로 이미 보존). */
+  async function reconcileActiveRace() {
+    const latest = await fetchLatestRaceKey();
+    if (!latest) return getActiveRaceKey();
+    const active = getActiveRaceKey();
+    if (active && latest !== active) {
+      notify(`🆕 새 경주 감지 → 전환: ${latest}\n(이전 경주 ${active}는 [📜 히스토리 보기]에 보존)`, true);
+      _resetTripleView(false);   // 화면/토글만 초기화(서버 데이터는 유지)
     }
-    renderTripleMatrices(data);
+    if (latest !== active) setActiveRaceKey(latest);
+    return latest;
   }
 
-  // ── [1번] 규칙기반 이상감지 분석 (급락·순위·역전·유력마·삼복승추천) ──────
+  async function loadTripleFromServer() {
+    const el = $('#tripleMatrixReport');
+    const active = getActiveRaceKey();
+    if (el) el.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let data;
+    try {
+      const body = active ? JSON.stringify({ raceKey: active }) : '{}';
+      data = await (await fetch('/api/odds/triple/latest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })).json();
+    } catch (e) { if (el) el.innerHTML = `<p class="hint" style="color:var(--red)">불러오기 실패: ${esc(e.message)}</p>`; return null; }
+    if (!data || !data.raceKey) {
+      if (el) el.innerHTML = '<p class="hint">확장에서 수집된 3종 배당이 없습니다. Chrome 확장 [⚡ 전체 자동 수집]을 먼저 실행하세요.</p>';
+      return null;
+    }
+    if (data.waiting || !(data.quinella || []).length && !(data.exacta || []).length && !(data.trio || []).length) {
+      if (el) el.innerHTML = `<p class="hint">🔄 새 경주 <b>${esc(data.raceKey)}</b> 데이터 대기중 — 확장에서 이 raceKey로 [전체 자동 수집]을 실행하세요.</p>`;
+      return data;
+    }
+    renderTripleMatrices(data);
+    return data;
+  }
+
+  /** 화면(분석/타임라인/매트릭스)·토글 초기화. clearActive=true면 활성 raceKey도 해제. */
+  function _resetTripleView(clearActive) {
+    ['#tripleAnalyzeReport', '#oddsTimeline', '#tripleMatrixReport'].forEach((s) => { const e = $(s); if (e) e.innerHTML = ''; });
+    const cw = $('#tripleChartWrap'); if (cw) cw.classList.add('hidden');
+    _elimToggle.clear(); _prevBetKey = null; _prevSignalKeys = null; _elimRaceKey = null; _tlRaceKey = null;
+    if (clearActive) setActiveRaceKey(null);
+  }
+
+  // [4번] 🔄 새 경주 시작 — 현재 데이터 히스토리 보존 + 활성 초기화 + 새 raceKey 요청
+  async function startNewRace() {
+    if (!confirm('현재 경주 데이터를 히스토리에 보존하고 새 경주를 시작할까요?\n(이전 데이터는 [📜 히스토리 보기]에서 계속 확인할 수 있습니다.)')) return;
+    const old = getActiveRaceKey();
+    try {
+      await fetch('/api/odds/triple/reset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+    } catch (_) { /* */ }
+    _resetTripleView(true);
+    const rk = prompt('새 경주의 raceKey를 입력하세요 (예: 2026-07-02 나고야 5경주).\n※ Chrome 확장 팝업의 raceKey 칸에도 동일하게 입력해야 합니다.', old || '');
+    if (rk && rk.trim()) {
+      setActiveRaceKey(rk.trim());
+      notify(`🔄 새 경주 시작: ${rk.trim()} — 확장에서 동일 raceKey로 [전체 자동 수집] 하세요`, true);
+    } else {
+      setActiveRaceKey(null);
+      notify('🔄 초기화 완료 — 다음 수집부터 새 경주로 자동 설정됩니다', true);
+    }
+  }
+
+  // [3번] 📜 히스토리 보기 — 통계 탭의 경주별 히스토리 대시보드로 이동
+  function showHistoryView() {
+    activateTab('stats');
+    try { loadHistoryList(); } catch (_) { /* */ }
+    const sec = $('#histRaceList'); if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ── [1번] 규칙기반 이상감지 분석 (현재 경주만) ──────
   async function analyzeTripleRules() {
     const el = $('#tripleAnalyzeReport'); if (!el) return;
     if (!el.innerHTML) el.innerHTML = '<p class="hint">이상감지 분석 중…</p>';
+    const active = await reconcileActiveRace();   // [2] 새 경주 자동 전환 + 활성 확정
     let a;
-    try { a = await (await fetch('/api/odds/triple/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).json(); }
-    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">분석 실패: ${esc(e.message)}</p>`; return; }
+    try {
+      const body = active ? JSON.stringify({ raceKey: active }) : '{}';   // [1·3] 현재 경주만 분석
+      a = await (await fetch('/api/odds/triple/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })).json();
+    } catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">분석 실패: ${esc(e.message)}</p>`; return; }
+    if (a && a.waiting) { el.innerHTML = `<p class="hint">🔄 새 경주 <b>${esc(a.raceKey || active || '')}</b> 데이터 대기중 — 확장에서 이 raceKey로 [전체 자동 수집]을 실행하세요.</p>`; return; }
     if (!a || a.error) { el.innerHTML = `<p class="hint">${esc((a && a.error) || '수집된 3종 배당이 없습니다.')}</p>`; return; }
+    if (!getActiveRaceKey() && a.raceKey) setActiveRaceKey(a.raceKey);   // 최초 진입 시 활성 설정
     renderTripleAnalyze(a);
   }
 

@@ -52,6 +52,9 @@ API 키는 서버 `.env`에만 두고 브라우저로 노출하지 않는다.
 | POST | `/api/odds/race` | `{raceKey}` | `{snaps, series}` (저장된 시계열) |
 | POST | `/api/odds/undo` | `{raceKey}` | `{ok}` (직전 스냅샷 취소) |
 | POST | `/api/odds/clear` | `{raceKey}` | `{ok}` (경주 시계열 초기화) |
+| POST | `/api/odds/triple/reset` | `{raceKey?}` | `{ok, removed}` ([🔄 새 경주 시작] 활성 3종 초기화, 히스토리 파일은 보존) |
+
+**경주별 분리 (raceKey 격리)**: 3종 배당은 `triple_store`에 raceKey별로 저장되고, 경주별 타임라인은 `data/odds_history/<raceKey>.json`에 영구 보존된다. 프론트는 **활성 raceKey**(localStorage)를 기준으로 **현재 경주만** 매트릭스·타임라인·이상감지에 표시한다(`/api/odds/triple/analyze`·`latest`에 raceKey 전달, 데이터 없으면 `waiting`으로 이전 경주 폴백 방지). 확장이 새 raceKey로 수집하면 자동 전환하며 이전 경주는 히스토리로 보존된다. **[🔄 새 경주 시작]**은 활성 3종을 초기화하고 새 raceKey를 요청하며, **[📜 히스토리 보기]**는 통계 탭의 경주별 히스토리 대시보드로 이동한다.
 
 **프론트엔드 흐름 (배당판 캡처 탭)**: 화면 캡처/크롭 → 복승/쌍승 선택 → `[1차 캡처·10분전]`/`[2차 캡처·1분30초전]`로 두 시점 저장(Vision으로 마번별 배당 추출 후 `/api/odds/snapshot`) → `[이상감지 분석]`(`/api/odds/compute`) → 🔴🟠🟡🟢 신호·태그·보정 추천 표시. 복승/쌍승 매트릭스는 각 말이 낀 최소 조합배당을 대표 배당으로 사용.
 

@@ -229,11 +229,16 @@
           <div class="cfg-row" style="margin-top:8px;border-top:1px dashed var(--border);padding-top:8px">
             <button id="loadTripleBtn" class="btn btn-primary">📥 확장 수집 3종 불러오기</button>
             <button id="analyzeTripleBtn" class="btn" style="background:#dc2626;color:#fff">🚨 이상감지 분석</button>
+            <button id="newRaceBtn" class="btn" style="background:#0ea5e9;color:#fff">🔄 새 경주 시작</button>
+            <button id="histViewBtn" class="btn">📜 히스토리 보기</button>
             <label class="hint" style="margin:0;display:flex;align-items:center;gap:4px">
               <input type="checkbox" id="autoRefreshTriple" /> 자동 갱신(10초)
             </label>
             <label class="hint" style="margin:0">예산(원) <input id="tripleBudget" type="number" min="0" step="1000" value="0" style="width:110px" /></label>
-            <span class="hint" style="margin:0">확장이 보낸 3종 배당을 매트릭스로 표시하고, 규칙기반 이상감지(급락·역전·유력마·복승/삼복승 추천)를 실행합니다.</span>
+          </div>
+          <div class="cfg-row" style="margin-top:4px">
+            <span class="hint" id="activeRaceLabel" style="margin:0;font-weight:600;color:#38d39f">현재 경주: —</span>
+            <span class="hint" style="margin:0">확장이 보낸 3종 배당을 <b>현재 경주만</b> 매트릭스·타임라인으로 표시합니다. raceKey가 바뀌면 이전 경주는 자동으로 히스토리에 보존됩니다.</span>
           </div>
           <div id="tripleAnalyzeReport" class="report-area" style="margin-top:10px"></div>
           <div id="oddsTimeline" class="report-area" style="margin-top:10px"></div>
