@@ -282,11 +282,17 @@
       const [qd, xd, td] = await Promise.all([
         fetchOddsDoc('OddsUmLenFuku', q), fetchOddsDoc('OddsUmLenTan', q), fetchOddsDoc('Odds3LenFuku', q),
       ]);
+      // 전송 전 정리: 배당 0/무효 제거 · 소수점 1자리 · 배당 낮은(인기) 순 정렬 · 상한(전송량 억제)
+      const clean = (arr, cap) => arr
+        .filter((c) => c.odds > 0)
+        .map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10 }))
+        .sort((a, b) => a.odds - b.odds)
+        .slice(0, cap);
       const payload = {
         raceKey,
-        quinella: parseRankingCombos(qd).filter((c) => c.combo.length === 2),  // 복승(순서무관)
-        exacta: parseRankingCombos(xd).filter((c) => c.combo.length === 2),    // 쌍승(순서있음)
-        trio: parseRankingCombos(td).filter((c) => c.combo.length === 3),      // 삼복승
+        quinella: clean(parseRankingCombos(qd).filter((c) => c.combo.length === 2), 200),  // 복승(순서무관)
+        exacta: clean(parseRankingCombos(xd).filter((c) => c.combo.length === 2), 400),    // 쌍승(순서있음)
+        trio: clean(parseRankingCombos(td).filter((c) => c.combo.length === 3), 300),      // 삼복승(인기 상위)
         capturedAt: new Date().toISOString(), source: location.href,
       };
       if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length) {

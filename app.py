@@ -47,6 +47,8 @@ def load_env():
 load_env()
 
 app = Flask(__name__, static_folder="static", static_url_path="")
+# [1] 대용량 요청 허용 (큰 배당판 이미지/3종 데이터 업로드 시 413 방지)
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB
 
 
 def client(api_key=None):
@@ -371,7 +373,15 @@ def call_claude(content, schema, max_tokens=4096, api_key=None):
     text = next((b.text for b in msg.content if getattr(b, "type", None) == "text"), None)
     if not text:
         raise RuntimeError("빈 응답")
-    return json.loads(text)
+    # [4] JSON 파싱 실패를 명확한 메시지로 (특히 max_tokens 초과로 잘린 경우)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as e:
+        if getattr(msg, "stop_reason", None) == "max_tokens":
+            raise RuntimeError(
+                f"AI 응답이 max_tokens({max_tokens})를 초과해 JSON이 중간에 잘렸습니다. "
+                f"조합이 많은 배당판입니다 — 상위 인기 조합만 분석하도록 조정했습니다. (파싱 위치 {e.pos})")
+        raise RuntimeError(f"AI 응답 JSON 파싱 실패: {e} (길이 {len(text)}자)")
 
 
 def image_block(img):
@@ -611,10 +621,12 @@ def analyze_odds():
         "[3단계] 이상배당 — 비정상적으로 낮은(급락) 배당은 abnormal=true. "
         "alerts에 경고(예 '3-7 복승 급락: 인기 집중'). summary는 한 줄 요약.\n\n"
         "해당 없는 배열은 비워두세요. 배당판이 아니면 betTypes=[], horses=[], combos=[], "
-        "alerts=['배당판을 인식하지 못함']."
+        "alerts=['배당판을 인식하지 못함'].\n\n"
+        "[중요] 조합(복승·쌍승·삼복승)은 전체 매트릭스를 다 넣지 말고 "
+        "배당이 낮은(인기) 상위 40개 조합만 combos에 넣으세요(응답 크기 제한)."
     )
     out = call_claude([{"type": "text", "text": prompt}, image_block(body.get("image"))],
-                      ODDS_SCHEMA, 4096, body.get("api_key"))
+                      ODDS_SCHEMA, 8192, body.get("api_key"))
     return jsonify(out)
 
 
@@ -669,7 +681,9 @@ def analyze_odds_triple():
         "- 예: 복승 A-B가 매우 싼데(인기), 대응하는 쌍승(A→B, B→A) 또는 A·B를 포함한 삼복승이 그만큼 싸지 않으면 불일치 → 한쪽 배당 이상 의심.\n"
         "- 예: 삼복승 A-B-C는 싼데 복승 A-B/ B-C/ A-C 중 일부가 비싸면 특정 두 마리 신뢰도 불일치.\n"
         "- 불일치 강도: 큰 괴리 🔴, 중간 🟡. combo(관련 마번), level, note(어느 종류끼리 어떻게 어긋났는지) 기재.\n"
-        "[3단계] alerts 에 핵심 경고 한두 줄, summary 한 줄 요약. 배당판이 아니면 모두 빈 배열 + alerts=['배당판 인식 실패']."
+        "[3단계] alerts 에 핵심 경고 한두 줄, summary 한 줄 요약. 배당판이 아니면 모두 빈 배열 + alerts=['배당판 인식 실패'].\n"
+        "[중요] 각 종류(quinella·exacta·trio)는 전체 매트릭스를 다 넣지 말고 "
+        "배당이 낮은(인기) 상위 40개 조합만 반환하세요(응답 크기 제한). 소수 배당은 소수점 1자리."
     )
     content = [{"type": "text", "text": prompt}]
     for key, label in [("quinella", "[복승 배당판]"), ("exacta", "[쌍승 배당판]"), ("trio", "[삼복승 배당판]")]:
@@ -677,7 +691,7 @@ def analyze_odds_triple():
             content += [{"type": "text", "text": label}, image_block(body[key])]
     if len(content) == 1:
         return jsonify({"error": "복승/쌍승/삼복승 중 최소 1장의 배당판 이미지가 필요합니다."}), 400
-    out = call_claude(content, TRIPLE_ODDS_SCHEMA, 4096, body.get("api_key"))
+    out = call_claude(content, TRIPLE_ODDS_SCHEMA, 8192, body.get("api_key"))
     return jsonify(out)
 
 

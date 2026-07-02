@@ -890,7 +890,17 @@
       // [5번] 복승 불일치 감지 여부 저장(결과기록 시 통계 반영)
       state.lastTriple = { mismatch: (rep.inconsistencies || []).length > 0 };
       renderTriple(rep);
-    } catch (e) { hideLoading(); toast('3종 분석 실패: ' + e.message); }
+    } catch (e) {
+      hideLoading();
+      // [4] alert 대신 화면에 에러 표시 + 원인/대응 안내
+      const el = $('#tripleReport');
+      if (el) el.innerHTML =
+        `<div class="panel-card" style="border-color:var(--red)">
+           <h3 style="color:var(--red)">❌ 3종 배당판 분석 실패</h3>
+           <p class="hint">${esc(e.message)}</p>
+           <p class="hint">배당 조합이 많으면 응답이 잘릴 수 있어, 서버가 <b>배당 낮은(인기) 상위 40개</b>만 반환하도록 조정되었습니다. 다시 [⚡ 3종 동시 분석]을 눌러보세요. 계속 실패하면 캡처 영역을 한 종류씩 좁혀 시도하세요.</p>
+         </div>`;
+    }
   }
 
   function renderTriple(rep) {
