@@ -1678,10 +1678,12 @@
     const rows = recs.map((r) => {
       const amt = budget > 0 ? won(budget * (r.alloc || 0) / 100) : null;
       const kindColor = r.kind === '복승' ? '#4ea1ff' : '#38d39f';
+      const odTxt = r.expOdds != null ? r.expOdds + '배'
+        : (r.expOddsEst != null ? r.expOddsEst + '배<span class="hint">(추정)</span>' : '<span class="hint">미수집</span>');
       return `<tr>
         <td><b style="color:${kindColor}">${esc(r.label)}</b></td>
         <td style="font-weight:700">${r.combo.join('+')}</td>
-        <td>${r.expOdds != null ? r.expOdds + '배' : '<span class="hint">미수집</span>'}</td>
+        <td>${odTxt}</td>
         <td>${r.alloc || 0}%</td>
         <td>${amt != null ? amt.toLocaleString('ko-KR') + '원' : '<span class="hint">예산입력</span>'}</td>
       </tr>`;

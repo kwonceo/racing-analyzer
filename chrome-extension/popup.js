@@ -293,7 +293,9 @@ function renderAnalyze(a) {
   if (flips.length) lines.push('🔴 쌍승역전: ' + flips.slice(0, 2).map((r) => `${r.favored[0]}→${r.favored[1]}`).join(', '));
   if ((a.keyHorses || []).length) lines.push('⭐ 유력마: ' + a.keyHorses.join('·') + (a.anomalyHorse != null ? ` (이상감지말 ${a.anomalyHorse})` : ''));
   (a.betRecommend || a.trioRecommend || []).forEach((r) => {
-    lines.push(`🎯 ${r.label}: ${r.combo.join('+')}${r.expOdds != null ? ` (약 ${r.expOdds}배)` : ' (배당 미수집)'}`);
+    const od = r.expOdds != null ? `약 ${r.expOdds}배`
+      : (r.expOddsEst != null ? `추정 ${r.expOddsEst}배` : '배당 미수집');
+    lines.push(`🎯 ${r.label}: ${r.combo.join('+')} (${od})`);
   });
   if (!a.hasPrev) lines.push('※ 직전 데이터 없음 — 변동은 다음 수집부터');
   analyzeDetail.textContent = lines.join('\n');

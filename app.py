@@ -1141,8 +1141,20 @@ def _triple_analyze(rk, rec):
                     trio_map.get(tuple(sorted([h1, h2, anomaly_horse]))))
             _addbet("삼복승", "삼복승 보험2", [h1, h3, anomaly_horse], 4,
                     trio_map.get(tuple(sorted([h1, h3, anomaly_horse]))))
+    # [3번] 삼복승 실배당 미수집 시: 구성 복승 3쌍의 기하평균×2 로 추정(라벨=추정)
+    def _trio_est(cc):
+        ps = [_q(cc[0], cc[1]), _q(cc[0], cc[2]), _q(cc[1], cc[2])]
+        if any(p is None or p <= 0 for p in ps):
+            return None
+        gm = (ps[0] * ps[1] * ps[2]) ** (1.0 / 3.0)
+        return round(gm * 2, 1)
+    for r in bet_rec:
+        if r["kind"] == "삼복승" and r["expOdds"] is None:
+            r["expOddsEst"] = _trio_est(r["combo"])
+
     # 삼복승만 뽑은 하위 호환 필드
-    trio_rec = [{"label": r["label"], "combo": r["combo"], "expOdds": r["expOdds"]}
+    trio_rec = [{"label": r["label"], "combo": r["combo"],
+                 "expOdds": r["expOdds"], "expOddsEst": r.get("expOddsEst")}
                 for r in bet_rec if r["kind"] == "삼복승"]
 
     # 요약(팝업/화면 상단용)

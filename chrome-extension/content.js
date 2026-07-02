@@ -556,6 +556,59 @@
     return out;
   }
 
+  // [1번] 로컬 유력마 3마리 (서버 로직과 동일: 상위 10 복승조합 등장빈도+인기가중)
+  function localKeyHorses(quin) {
+    const m = {};
+    for (const it of quin) {
+      const c = it.combo; if (!c || c.length < 2) continue;
+      const k = [c[0], c[1]].sort((a, b) => a - b).join('-'); const o = it.odds;
+      if (o > 0 && (m[k] == null || o < m[k])) m[k] = o;
+    }
+    const top = Object.entries(m).sort((a, b) => a[1] - b[1]).slice(0, 10);
+    const freq = {};
+    for (const [k, o] of top) for (const h of k.split('-').map(Number)) freq[h] = (freq[h] || 0) + 1 + 1 / Math.max(o, 0.1);
+    return Object.entries(freq).sort((a, b) => b[1] - a[1]).map(([h]) => +h).slice(0, 3);
+  }
+
+  // [2번] 상단 마번(축마) 버튼 찾기: 텍스트가 정확히 그 숫자인 클릭요소.
+  //   오즈 테이블 밖 · button/a 우선(테이블 헤더 숫자와 구분).
+  function findHorseButton(no) {
+    const want = String(no);
+    const pool = [...document.querySelectorAll('button, a, [onclick], .btn, .num, li, span, td')]
+      .filter((e) => (e.textContent || '').trim() === want && (e.offsetParent !== null));
+    pool.sort((a, b) => {
+      const inTbl = (e) => (e.closest('table.odds_table, .odds_table, table') ? 1 : 0);
+      if (inTbl(a) !== inTbl(b)) return inTbl(a) - inTbl(b);            // 테이블 밖 우선
+      const rank = (e) => (/^(BUTTON|A)$/.test(e.tagName) || e.hasAttribute('onclick') ? 0 : 1);
+      return rank(a) - rank(b);
+    });
+    return pool[0] || null;
+  }
+
+  // [1번][3번] 삼복승: 유력마 3마리를 "축"으로 각각 클릭 → 남은 두 말 매트릭스 → 3마리 조합
+  async function collectTrioByAxis(keyHorses, oddsClass) {
+    const trioMap = {};
+    for (const axis of keyHorses) {
+      console.log(`[배당수집] 삼복승 축 ${axis}번 버튼 클릭 시도...`);
+      const btn = findHorseButton(axis);
+      if (!btn) { console.warn(`[배당수집] ⚠ ${axis}번 축 버튼을 찾지 못함`); continue; }
+      const before = oddsSignature();
+      try { btn.click(); } catch (e) { console.warn(`[배당수집] ${axis}번 클릭 오류`, e); }
+      await wait(1000); // 해당 말 기준 배당 로딩 대기
+      let sig = oddsSignature(), tries = 0;
+      while (sig === before && tries < 2) { await wait(700); sig = oddsSignature(); tries++; }
+      let cnt = 0;
+      for (const p of currentMatrixPairs(oddsClass)) {            // p={a:행, b:열} = 남은 두 말
+        const combo = [axis, p.a, p.b];
+        if (new Set(combo).size !== 3 || combo.some((n) => !isHorseNo(n))) continue;
+        const key = [...combo].sort((x, y) => x - y).join('-');
+        if (trioMap[key] == null || p.odds < trioMap[key]) { trioMap[key] = p.odds; cnt++; }
+      }
+      console.log(`[배당수집] 삼복승 ${axis}번 기준 추출: ${cnt}개 조합`);
+    }
+    return Object.entries(trioMap).map(([k, o]) => ({ combo: k.split('-').map(Number), odds: o }));
+  }
+
   // asyukk/generic 전체 3종 수집 (탭 클릭 방식)
   async function collectTripleByTabs(reason) {
     const site = detectSite();
@@ -603,11 +656,18 @@
       });
       console.log(`[배당수집] 쌍승 데이터 추출: ${exacta.length}개 조합`);
 
-      // 3) 삼복승 (3마리 조합 텍스트)
-      setTripleProgress('삼복승 수집중…');
-      await clickTabAndWait(['삼복승', '삼복', '삼쌍승', '3連複'], sig, '삼복승', true);
-      const trio = currentTrios().map((t) => ({ combo: t.combo, odds: t.odds }));
-      console.log(`[배당수집] 삼복승 데이터 추출: ${trio.length}개 조합`);
+      // 3) 삼복승: 유력마 3마리를 축으로 클릭 → 각 축 매트릭스 추출 (텍스트형이면 폴백)
+      const keyHorses = localKeyHorses(quinella);
+      console.log(`[배당수집] 유력마(로컬) 1~3순위: ${keyHorses.join('·') || '-'}`);
+      setTripleProgress(`삼복승 수집중… (축 ${keyHorses.join('·') || '?'})`);
+      await clickTabAndWait(['삼복승', '삼복', '삼쌍승', '3連複'], sig, '삼복승', false);
+      let trio = [];
+      if (keyHorses.length) trio = await collectTrioByAxis(keyHorses, oddsClass);
+      if (!trio.length) {                                   // 폴백: "a-b-c" 텍스트형
+        trio = currentTrios().map((t) => ({ combo: t.combo, odds: t.odds }));
+        console.log(`[배당수집] 삼복승 텍스트형 폴백 추출: ${trio.length}개 조합`);
+      }
+      console.log(`[배당수집] 삼복승 총 추출: ${trio.length}개 조합`);
 
       const payload = {
         raceKey, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
