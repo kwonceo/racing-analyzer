@@ -1651,9 +1651,11 @@
   }
 
   let _lastTripleAnalyze = null, _prevBetKey = null, _betUpdatedFlag = false;
+  let _elimRaceKey = null;
   function renderTripleAnalyze(a) {
     const el = $('#tripleAnalyzeReport'); if (!el) return;
     _lastTripleAnalyze = a;
+    if (a.raceKey !== _elimRaceKey) { _elimToggle.clear(); _elimRaceKey = a.raceKey; } // 경주 바뀌면 수동 토글 초기화
     // [5번] 추천 조합 변경 감지
     const betKey = JSON.stringify((a.betRecommend || []).map((r) => r.combo));
     _betUpdatedFlag = (_prevBetKey !== null && betKey !== _prevBetKey);
@@ -1672,11 +1674,62 @@
       ${flips ? `<div style="margin:6px 0"><span class="hint">🔀 쌍승 역전</span><br>${flips}</div>` : ''}
       ${ranks ? `<div style="margin:6px 0"><span class="hint">📊 순위 변동</span><br>${ranks}</div>` : ''}
       <div style="margin:6px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
+      ${renderEliminationHTML(a.elimination)}
       ${renderBetRecommend(a)}
       ${renderFormGrades(a.form)}`;
+    _attachElimHandlers();       // 제거↔후보 클릭 토글
     drawTripleChart(a.chart);
     updateOddsAlert(a);          // [1·4·5] 우상단 실시간 알림 + 소리 + 조합업데이트
     loadOddsTimeline(a.raceKey); // [3] 변동 타임라인
+  }
+
+  // ── [제거/후보] 배당+전적 복합 제거 판정 패널 ─────────────────────────
+  //  각 말 클릭 → 제거↔후보 수동 전환(_elimToggle). 후보 기준 자동 조합 재생성.
+  let _lastElim = null;
+  const _elimToggle = new Set();
+  function _elimKeep(h) { const base = h.keep || h.override; return _elimToggle.has(h.no) ? !base : base; }
+  function renderEliminationHTML(e) {
+    _lastElim = e || null;
+    if (!e || !(e.horses || []).length) return '<div id="elimPanel"></div>';
+    const cand = e.horses.filter(_elimKeep).sort((a, b) => b.total - a.total);
+    const elim = e.horses.filter((h) => !_elimKeep(h)).sort((a, b) => b.total - a.total);
+    const oddsTxt = (h) => (h.oddsRepr != null ? h.oddsRepr + '배' : '미수집');
+    const tierIcon = (h) => (h.override ? '⚠️' : (h.tier || h.verdict));
+    const tierColor = (h) => (h.override ? '#f59e0b' : h.verdict === '🟢' ? '#38d39f' : '#ffd24f');
+    const candRows = cand.map((h) => `
+      <div class="elim-row" data-no="${h.no}" title="클릭 → 제거로 전환" style="cursor:pointer;display:flex;gap:8px;align-items:center;padding:5px 8px;border-left:3px solid ${tierColor(h)};margin:3px 0;background:rgba(255,255,255,.03);border-radius:4px">
+        <b style="font-size:15px;min-width:22px">${tierIcon(h)}</b>
+        <b style="min-width:34px;color:#4ea1ff">${h.no}번</b>
+        <span>${esc(h.name || '')}</span>
+        <span class="hint" style="margin-left:auto;text-align:right">배당 ${oddsTxt(h)} · 전적 ${h.formScore != null ? h.formScore : '-'} · 합산 ${h.total}${_elimToggle.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}${h.override ? `<br><span style="color:#f59e0b">⚠️ 제거대상이나 이변(${esc(h.overrideReason)})</span>` : ''}</span>
+      </div>`).join('');
+    const elimRows = elim.map((h) => `
+      <div class="elim-row" data-no="${h.no}" title="클릭 → 후보로 전환" style="cursor:pointer;padding:5px 8px;border-left:3px solid ${h.verdict === '🔴' ? '#ef4444' : '#ff9f43'};margin:3px 0;border-radius:4px;opacity:.85">
+        <b>${h.verdict} ${h.no}번</b> ${esc(h.name || '')}
+        <span class="hint">· ${esc(h.reason)}${_elimToggle.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}</span>
+      </div>`).join('');
+    const ab = [];
+    if (cand.length >= 2) ab.push('복승 ' + [cand[0].no, cand[1].no].sort((x, y) => x - y).join('+'));
+    if (cand.length >= 3) ab.push('삼복승 ' + [cand[0].no, cand[1].no, cand[2].no].sort((x, y) => x - y).join('+'));
+    const abTxt = ab.map((s) => `<span class="chip" style="background:rgba(56,211,159,.15);border-color:#38d39f">${s}</span>`).join(' ');
+    return `<div id="elimPanel" style="margin:8px 0;border:1px solid var(--border);border-radius:8px;padding:8px">
+      <div class="matrix-title" style="font-size:14px">🧮 제거 분석 <span class="hint" style="font-weight:400">출전 ${e.horses.length}두 → 후보 ${cand.length}두 압축</span></div>
+      <div class="hint" style="margin:2px 0 6px">말 클릭 시 제거↔후보 전환 · 배당점수+전적보정 합산 (71+🟢 / 51~70🟡 / 31~50🟠 / ~30🔴)</div>
+      <div style="font-weight:700;color:#38d39f;margin-top:4px">🟢 후보 ${cand.length}두</div>
+      ${candRows || '<div class="hint">후보 없음</div>'}
+      ${abTxt ? `<div style="margin:6px 0 2px"><span class="hint">🎯 후보 기준 자동 조합</span> ${abTxt}</div>` : ''}
+      <div style="font-weight:700;color:#ef4444;margin-top:8px">🔴 제거 ${elim.length}두</div>
+      ${elimRows || '<div class="hint">제거 대상 없음</div>'}
+    </div>`;
+  }
+  function _attachElimHandlers() {
+    const p = $('#elimPanel'); if (!p) return;
+    p.querySelectorAll('.elim-row').forEach((r) => r.addEventListener('click', () => {
+      const no = +r.dataset.no;
+      if (_elimToggle.has(no)) _elimToggle.delete(no); else _elimToggle.add(no);
+      p.outerHTML = renderEliminationHTML(_lastElim);   // 패널만 재렌더(알림/차트 재실행 없이)
+      _attachElimHandlers();
+    }));
   }
 
   // ── [1·2·4번] 실시간 변동 알림 오버레이 + 소리 + 플래시 ──────────────

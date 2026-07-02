@@ -1071,6 +1071,139 @@ def _odds_map_dir(arr):
     return m
 
 
+# ── 전적+배당 복합 제거(elimination) 엔진 ─────────────────────────────
+#  각 출전마의 대표 복승배당(가장 싼 조합)으로 배당점수(0~100)를, 출마표2/KRA 전적
+#  총점으로 전적보정(-30~+20)을 매겨 합산한다. 합산이 낮을수록 제거 대상.
+#  이변 신호(급락 30%+·쌍승 상위 10위)가 있으면 제거를 취소한다.
+def _odds_score(o):
+    """대표 배당 → 배당점수(시장이 얼마나 지지하는가). 낮은 배당=강한 지지=고점."""
+    if o is None or o >= 150:
+        return 0
+    if o >= 80:
+        return 20
+    if o >= 50:
+        return 40
+    if o >= 30:
+        return 60
+    return 100
+
+
+def _form_adj(total):
+    """전적 총점 → 제거 가중치. 전적 없으면 0(중립)."""
+    if total is None:
+        return 0
+    if total <= 20:
+        return -30
+    if total <= 40:
+        return -10
+    if total <= 60:
+        return 0
+    if total <= 80:
+        return 10
+    return 20
+
+
+def _elimination(curQ, curD, exa, drops, form, trio_map=None):
+    """배당+전적 복합 제거 판정. 반환: {horses:[...], counts, autoBets}."""
+    trio_map = trio_map or {}
+    # 1) 출전마 집합 + 대표 복승배당(각 말이 낀 조합 중 최저)
+    repr_odds = {}
+    for (a, b), o in curQ.items():
+        for h in (a, b):
+            if o > 0 and (repr_odds.get(h) is None or o < repr_odds[h]):
+                repr_odds[h] = o
+    for (a, b), o in curD.items():                 # 복승 없으면 쌍승으로 폴백
+        for h in (a, b):
+            if o > 0 and repr_odds.get(h) is None:
+                repr_odds[h] = o
+    form_by_no = {h["no"]: h for h in (form or []) if h.get("no") is not None}
+    nos = set(repr_odds) | set(form_by_no)
+    if not nos:
+        return None
+
+    # 2) 이변 신호 집합: 급락 30%+ / 쌍승 상위 10위 내
+    drop30 = {}
+    for d in drops or []:
+        if d.get("pct", 0) <= -30:
+            for h in d["combo"]:
+                drop30[int(h)] = min(drop30.get(int(h), 0), d["pct"])
+    top_exa = set()
+    for it in sorted([e for e in (exa or []) if (e.get("odds") or 0) > 0],
+                     key=lambda e: e["odds"])[:10]:
+        for h in it.get("combo", []):
+            top_exa.add(int(h))
+
+    horses = []
+    for no in nos:
+        o = repr_odds.get(no)
+        fh = form_by_no.get(no)
+        ftotal = fh.get("totalScore") if fh else None
+        os_ = _odds_score(o)
+        fadj = _form_adj(ftotal)
+        total = os_ + fadj
+        # 기본 판정
+        if total <= 30:
+            verdict, label, keep = "🔴", "확실 제거", False
+        elif total <= 50:
+            verdict, label, keep = "🟠", "제거 권장", False
+        elif total <= 70:
+            verdict, label, keep = "🟡", "관찰", True
+        else:
+            verdict, label, keep = "🟢", "유력 후보", True
+        reason = f"배당 {('%g배' % o) if o is not None else '미수집'}({os_}) + 전적 {ftotal if ftotal is not None else '-'}({'+' if fadj > 0 else ''}{fadj}) = {total}"
+        # 이변 신호 → 제거 취소
+        override, ov_reasons = False, []
+        if not keep:
+            if no in drop30:
+                override = True
+                ov_reasons.append(f"배당 급락 {drop30[no]}%")
+            if no in top_exa:
+                override = True
+                ov_reasons.append("쌍승 상위10")
+        # 후보 세부 등급: ⭐강력유력(배당낮음+전적우수+이상감지) / ★유력(배당낮음+전적우수) / △관찰
+        tier = None
+        anomaly_sig = (no in drop30) or (no in top_exa) or bool(fh and fh.get("anomaly"))
+        low_odds = os_ >= 100          # 30배 미만 = 시장 강한 지지
+        good_form = fadj >= 10         # 전적 61점 이상
+        if keep:
+            if low_odds and good_form and anomaly_sig:
+                tier = "⭐"
+            elif low_odds and good_form:
+                tier = "★"
+            else:
+                tier = "△"
+        horses.append({
+            "no": no, "name": (fh or {}).get("name", ""),
+            "oddsRepr": o, "oddsScore": os_,
+            "formScore": ftotal, "formAdj": fadj, "total": total,
+            "verdict": verdict, "verdictLabel": label, "keep": keep,
+            "tier": tier, "override": override,
+            "overrideReason": " · ".join(ov_reasons), "anomalySig": anomaly_sig,
+            "reason": reason,
+        })
+
+    horses.sort(key=lambda h: -h["total"])
+    kept = [h for h in horses if h["keep"] or h["override"]]
+    elim = [h for h in horses if not (h["keep"] or h["override"])]
+
+    # 후보 기준 자동 조합(복승 top2 / 삼복승 top3)
+    cand_nos = [h["no"] for h in sorted(kept, key=lambda h: -h["total"])]
+    auto_bets = []
+    if len(cand_nos) >= 2:
+        a, b = cand_nos[0], cand_nos[1]
+        auto_bets.append({"kind": "복승", "combo": sorted([a, b]),
+                          "odds": curQ.get(tuple(sorted((a, b))))})
+    if len(cand_nos) >= 3:
+        c3 = sorted(cand_nos[:3])
+        auto_bets.append({"kind": "삼복승", "combo": c3,
+                          "odds": trio_map.get(tuple(c3))})  # 실배당 없으면 None
+    return {
+        "horses": horses,
+        "counts": {"entrants": len(horses), "candidates": len(kept), "eliminated": len(elim)},
+        "autoBets": auto_bets,
+    }
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -1285,6 +1418,9 @@ def _triple_analyze(rk, rec):
     except Exception:
         last_snap = None
 
+    form = _form_from_starters(rk, drops)  # 출마표2/KRA 전적 등급(있으면)
+    elimination = _elimination(curQ, curD, exa, drops, form, trio_map)  # 배당+전적 복합 제거
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
         "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio), "history": len(hist)},
@@ -1292,7 +1428,8 @@ def _triple_analyze(rk, rec):
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
         "summary": summary, "chart": chart,
-        "form": _form_from_starters(rk, drops),  # 출마표2 전적 등급(있으면)
+        "form": form,
+        "elimination": elimination,  # 배당+전적 복합 제거/후보 판정
         "learned": learned,  # 학습 통계 안내(있으면)
         "signals": signals, "lastSnapshot": last_snap,  # 실시간 변동 알림용
     }
@@ -1566,10 +1703,14 @@ def kra_key():
     return jsonify({"hasKey": has})
 
 
-@app.route("/api/kra/horse", methods=["POST"])
+@app.route("/api/kra/horse", methods=["GET", "POST"])
 def kra_horse():
-    """마명으로 KRA 과거기록 자동매칭: {name} → {records, starts, wins, places, placeRate}"""
-    name = ((request.json or {}).get("name") or "").strip()
+    """마명으로 KRA 과거기록 자동매칭.
+    POST {name} 또는 GET ?name=마명 → {records, starts, wins, places, placeRate, recentPlacings}"""
+    if request.method == "GET":
+        name = (request.args.get("name") or "").strip()
+    else:
+        name = ((request.json or {}).get("name") or "").strip()
     try:
         with open(KRA_HISTORY_FILE, encoding="utf-8") as f:
             hist = json.load(f)
@@ -1579,9 +1720,13 @@ def kra_horse():
     starts = len(recs)
     placed = sum(1 for r in recs if isinstance(r.get("stOrd"), (int, float)) and 0 < r["stOrd"] <= 3)
     wins = sum(1 for r in recs if r.get("stOrd") == 1)
+    ordered = sorted(recs, key=lambda r: r.get("date", ""), reverse=True)
+    recent_placings = [int(r["stOrd"]) for r in ordered[:5]
+                       if isinstance(r.get("stOrd"), (int, float)) and r["stOrd"] > 0]
     return jsonify({
         "name": name, "records": recs, "starts": starts, "wins": wins, "places": placed,
         "placeRate": round(placed / starts * 100, 1) if starts else 0,
+        "recentPlacings": recent_placings,  # 최근 5착순(전적 자동 대입용)
     })
 
 
