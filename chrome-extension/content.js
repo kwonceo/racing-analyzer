@@ -346,11 +346,17 @@
   //   keiba 결과 페이지 = RaceMarkTable(레이스 성적표). URL에 result/RaceMarkTable
   //   포함 또는 "着順" 헤더가 있으면 결과 페이지로 판단.
   //   표 헤더: 着順 | 枠 | 馬番 | 馬名 | … → 착순의 마번/말이름 추출.
+  //   [1번] asyukk34 · [2번] keiba RaceResult 둘 다 감지.
+  const RANK_HDR = /^(着順|착순|순위|등위|순위착순|rank)$/i;
+  const RNO_HDR = /^(馬番|마번|번호|말번호|말번|no\.?)$/i;
+  const RNAME_HDR = /(馬名|마명|말명|말이름|horse)/i;
   function isResultPage() {
-    if (/result|racemarktable/i.test(location.href)) return true;
+    if (/result|racemarktable|raceresult/i.test(location.href)) return true;
     return [...document.querySelectorAll('table')].some((t) => {
-      const h = [...(t.querySelector('tr')?.querySelectorAll('th,td') || [])].map((c) => txt(c));
-      return h.includes('着順') && h.some((x) => /馬番/.test(x));
+      const h = [...(t.querySelector('tr')?.querySelectorAll('th,td') || [])].map((c) => txt(c).replace(/\s+/g, ''));
+      // keiba(着順+馬番) 또는 사설(착순/순위 + 마번/번호)
+      return (h.includes('着順') && h.some((x) => /馬番/.test(x)))
+        || (h.some((x) => RANK_HDR.test(x)) && h.some((x) => RNO_HDR.test(x)));
     });
   }
 
@@ -359,17 +365,18 @@
       const trs = [...table.querySelectorAll('tr')];
       if (trs.length < 2) continue;
       const head = [...trs[0].querySelectorAll('th,td')].map((c) => txt(c));
-      const iRank = head.findIndex((h) => /着順/.test(h));
-      const iNo = head.findIndex((h) => /^馬番$/.test(h));
-      const iName = head.findIndex((h) => /馬名/.test(h));
+      const hn = head.map((h) => h.replace(/\s+/g, ''));   // 공백 제거 후 라벨 매칭(한/일 공통)
+      const iRank = hn.findIndex((h) => RANK_HDR.test(h));
+      const iNo = hn.findIndex((h) => RNO_HDR.test(h));
+      const iName = hn.findIndex((h) => RNAME_HDR.test(h));
       if (iRank === -1 || iNo === -1) continue;
       const results = [];
       for (const tr of trs.slice(1)) {
         const cells = [...tr.querySelectorAll('th,td')].map((c) => txt(c));
         const rank = toNum(cells[iRank]);
         const no = toNum(cells[iNo]);
-        // 착순이 정수이고 마번이 유효할 때만 (失格/中止/除外 등은 착순 숫자 없음 → 제외)
-        if (!Number.isInteger(rank) || rank < 1 || !isHorseNo(no) || !/^\d+$/.test(cells[iRank] || '')) continue;
+        // 착순이 정수이고 마번이 유효할 때만 (失格/中止/除外/실격 등은 착순 숫자 없음 → 제외)
+        if (!Number.isInteger(rank) || rank < 1 || !isHorseNo(no) || !/^\d+$/.test((cells[iRank] || '').trim())) continue;
         results.push({ rank, no, name: iName >= 0 ? cells[iName] : '' });
       }
       if (results.length) { results.sort((a, b) => a.rank - b.rank); return results; }
@@ -377,15 +384,47 @@
     return [];
   }
 
+  //   확정(정산) 배당 추출: 복승(2두)·삼복승(3두) 조합 + 배당.
+  //   keiba 払戻金 표(馬連/3連複 + 組番 + 払戻金) 및 사설 확정배당 표를 텍스트로 스캔.
+  //   배당 = 100원(엔)당 払戻金 / 100. 못 찾으면 null.
+  function extractResultOdds() {
+    const KQ = /(馬連|복승|複勝連|우마렌)/, KT = /(3連複|３連複|삼복승|三連複|산렌푸쿠)/;
+    const res = { quinella: null, trio: null, raw: [] };
+    for (const tr of document.querySelectorAll('tr, li, dl, .result, [class*=payout], [class*=haraimodoshi]')) {
+      const cells = [...tr.querySelectorAll('th,td,dt,dd,span')].map((c) => txt(c));
+      const line = (cells.length ? cells.join(' ') : txt(tr));
+      const combo = (line.match(/\b\d{1,2}(?:\s*[-－ー]\s*\d{1,2}){1,2}\b/) || [])[0];
+      const money = (line.match(/([\d,]{2,})\s*(?:円|원|엔)/) || [])[1];
+      if (!combo || !money) continue;
+      const nums = combo.split(/[-－ー]/).map((s) => parseInt(s.trim(), 10)).filter((n) => n >= 1 && n <= 20);
+      const odds = Math.round((parseInt(money.replace(/,/g, ''), 10) / 100) * 10) / 10;
+      if (!nums.length || !(odds > 0)) continue;
+      const entry = { combo: nums, odds };
+      res.raw.push(entry);
+      if (KQ.test(line) && nums.length === 2 && !res.quinella) res.quinella = entry;
+      if (KT.test(line) && nums.length === 3 && !res.trio) res.trio = entry;
+    }
+    return res;
+  }
+
   async function sendResults(reason) {
     const results = extractResults();
-    if (!results.length) return { ok: false, error: '착순을 찾지 못했습니다. 결과(성적) 페이지인지 확인하세요.' };
+    if (!results.length) {
+      // [진단] 사설 결과 페이지 구조 확인용 — 사용자가 F12 로 공유 가능
+      const hint = document.querySelectorAll('.result, .chakujun, [class*=result], [class*=chaku]').length;
+      console.warn(`[결과수집] ❌ 착순 테이블을 못 찾음. (result/chaku 관련 요소 ${hint}개, table ${document.querySelectorAll('table').length}개) — 경주결과 탭이 열렸는지 확인하세요.`);
+      return { ok: false, error: '착순을 찾지 못했습니다. 결과(성적) 페이지인지 확인하세요.' };
+    }
+    const finalOdds = extractResultOdds();
     const { raceKey: override } = await getSettings();
     const raceKey = (override && override.trim()) || extractRaceKey();
     if (!raceKey) return { ok: false, error: 'raceKey를 만들 수 없습니다. 팝업에서 직접 입력하세요.' };
+    console.log(`[결과수집] ✅ 1~3착: ${results.filter((r) => r.rank <= 3).map((r) => `${r.rank}착 ${r.no}번`).join(', ')}`
+      + ` | 확정배당 복승: ${finalOdds.quinella ? finalOdds.quinella.combo.join('-') + '=' + finalOdds.quinella.odds + '배' : '미검출'}`
+      + `, 삼복승: ${finalOdds.trio ? finalOdds.trio.combo.join('-') + '=' + finalOdds.trio.odds + '배' : '미검출'}`);
     const res = await chrome.runtime.sendMessage({
       type: 'POST_RESULTS', reason,
-      payload: { raceKey, results, source: location.href },
+      payload: { raceKey, results, finalOdds, source: location.href },
     });
     return res || { ok: false, error: 'background 응답 없음' };
   }

@@ -922,13 +922,31 @@ def results_auto():
         return jsonify({"error": "results(착순)가 비어 있습니다."}), 400
     norm.sort(key=lambda x: x["rank"])
     top3 = [x["no"] for x in norm if x["rank"] <= 3]
+    final_odds = body.get("finalOdds") or None
 
     db = _results_load()
-    db[race_key] = {"results": norm, "top3": top3,
+    db[race_key] = {"results": norm, "top3": top3, "finalOdds": final_odds,
                     "source": body.get("source") or "extension", "t": time.time()}
     _results_save(db)
-    print(f"[결과 자동수집] {race_key}: 1~3착 {top3}")
-    return jsonify({"ok": True, "saved": len(norm), "top3": top3})
+    print(f"[결과 자동수집] {race_key}: 1~3착 {top3}"
+          + (f" · 확정배당 {final_odds}" if final_odds else ""))
+
+    # [3번] 결과 수신 즉시 자동학습 반영(이상감지·추천·전적유력마·제거 적중 판정 → learning.json)
+    learned = None
+    try:
+        result = {}
+        for x in norm:
+            if x["rank"] == 1:
+                result["1st"] = x["no"]
+            elif x["rank"] == 2:
+                result["2nd"] = x["no"]
+            elif x["rank"] == 3:
+                result["3rd"] = x["no"]
+        _rec, learned = _apply_result_learning(race_key, result, top3, final_odds)
+    except Exception as e:
+        print(f"[결과 자동수집] 자동학습 반영 실패: {e}")
+
+    return jsonify({"ok": True, "saved": len(norm), "top3": top3, "learned": learned})
 
 
 @app.route("/api/results/get", methods=["POST"])
@@ -1604,7 +1622,7 @@ def _rate(records, sel, cond):
 
 
 def _recompute_learning_stats(records):
-    """이상감지 유형별 실제 적중률 + 추천 적중률."""
+    """이상감지 유형별 실제 적중률 + 추천 적중률 + 전적/제거 예측 적중률."""
     def rev_hit(r):
         favs = [rv["favored"][0] for rv in (r.get("reversals") or []) if rv.get("favored")]
         return r.get("result", {}).get("1st") in favs
@@ -1614,6 +1632,12 @@ def _recompute_learning_stats(records):
         "drop_anomaly": _rate(records, lambda r: r.get("anomalies_detected"),
                               lambda r: r.get("anomaly_was_correct")),
         "reversal": _rate(records, lambda r: r.get("reversals"), rev_hit),
+        # 전적 기반 유력마(제거법 1순위 후보)가 3착 이내에 든 비율
+        "form_pick": _rate(records, lambda r: r.get("form_available"),
+                           lambda r: r.get("form_pick_hit")),
+        # 제거(🔴/🟠) 판정이 옳았던 비율(제거마가 3착 밖으로 밀려남)
+        "elimination": _rate(records, lambda r: r.get("eliminated"),
+                             lambda r: r.get("elimination_correct")),
     }
 
 
@@ -1650,24 +1674,18 @@ def history_get():
         return jsonify({"error": "히스토리가 없습니다."}), 404
 
 
-@app.route("/api/history/record-result", methods=["POST"])
-def history_record_result():
-    """경주 결과 입력 → 히스토리에 결과 기록 + 자동학습 레코드/통계 갱신.
-    body: {raceKey, result:{'1st':7,'2nd':1,'3rd':9}}"""
-    body = request.json or {}
-    rk = (body.get("raceKey") or "").strip()
-    result = body.get("result") or {}
-    top3 = [result.get("1st"), result.get("2nd"), result.get("3rd")]
-    top3 = [int(x) for x in top3 if x not in (None, "")]
-    if not rk or len(top3) < 1:
-        return jsonify({"error": "raceKey와 결과(1~3착)가 필요합니다."}), 400
-
+def _apply_result_learning(rk, result, top3, final_odds=None):
+    """경주 결과 → 히스토리 기록 + 자동학습 레코드/통계 갱신(공용).
+    keiba/asyukk 결과 자동수집(results_auto)과 수동 입력(record-result)이 함께 사용.
+    이상감지·추천·전적유력마·제거 판정의 실제 적중 여부를 판정해 learning.json 누적."""
     path, _, _ = _hist_path(rk)
     try:
         doc = json.load(open(path, encoding="utf-8"))
     except Exception:
         doc = {"raceKey": rk, "snapshots": [], "result": None}
     doc["result"] = result
+    if final_odds:
+        doc["finalOdds"] = final_odds
     json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
 
     an = _triple_analyze(rk, _triple_load().get(rk) or {})
@@ -1682,6 +1700,18 @@ def history_record_result():
             anomalies_detected.append(f"급락: {d['combo'][0]}-{d['combo'][1]} {d['pct']}%")
             if any(h in top3 for h in d["combo"]):
                 anomaly_correct = True
+
+    # ── [3번] 전적 예측 + 제거법 적중 판정 ──
+    elim = an.get("elimination") or {}
+    elim_horses = elim.get("horses") or []
+    form_available = bool(elim.get("formAvailable"))
+    # 전적 유력마 = 제거법 1순위 후보(keep/override 중 total 최고). 3착 이내면 적중.
+    kept = [h for h in elim_horses if h.get("keep") or h.get("override")]
+    form_pick = kept[0]["no"] if kept else None
+    form_pick_hit = bool(form_pick is not None and form_pick in top3)
+    # 제거(🔴 확실제거/🟠 제거권장) 판정: 해당 말들이 모두 3착 밖이면 제거가 옳았음.
+    eliminated_nos = [h["no"] for h in elim_horses if not (h.get("keep") or h.get("override"))]
+    elimination_correct = bool(eliminated_nos and all(n not in top3 for n in eliminated_nos))
 
     def snap_near(minb):
         best = None
@@ -1698,6 +1728,9 @@ def history_record_result():
         "anomalies_detected": anomalies_detected, "anomaly_was_correct": anomaly_correct,
         "reversals": [r for r in an.get("reversals", []) if r.get("flipped")],
         "keyHorses": an.get("keyHorses"),
+        "form_available": form_available, "form_pick": form_pick, "form_pick_hit": form_pick_hit,
+        "eliminated": eliminated_nos, "elimination_correct": elimination_correct,
+        "finalOdds": final_odds,
         "odds_at_10min": (snap_near(10) or {}).get("quinella"),
         "odds_at_1min30sec": (snap_near(2) or {}).get("quinella"),
         "t": time.time(),
@@ -1706,8 +1739,24 @@ def history_record_result():
     L["records"].append(record)
     L["stats"] = _recompute_learning_stats(L["records"])
     _learning_save(L)
-    print(f"[자동학습] {rk} 결과 {top3} → 추천적중 {was_hit}, 급락적중 {anomaly_correct}")
-    return jsonify({"ok": True, "record": record, "stats": L["stats"]})
+    print(f"[자동학습] {rk} 결과 {top3} → 추천적중 {was_hit}, 급락적중 {anomaly_correct}, "
+          f"전적유력마 {form_pick}({'적중' if form_pick_hit else '실패'}), 제거적중 {elimination_correct}")
+    return record, L["stats"]
+
+
+@app.route("/api/history/record-result", methods=["POST"])
+def history_record_result():
+    """경주 결과 입력 → 히스토리에 결과 기록 + 자동학습 레코드/통계 갱신.
+    body: {raceKey, result:{'1st':7,'2nd':1,'3rd':9}}"""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
+    result = body.get("result") or {}
+    top3 = [result.get("1st"), result.get("2nd"), result.get("3rd")]
+    top3 = [int(x) for x in top3 if x not in (None, "")]
+    if not rk or len(top3) < 1:
+        return jsonify({"error": "raceKey와 결과(1~3착)가 필요합니다."}), 400
+    record, stats = _apply_result_learning(rk, result, top3, body.get("finalOdds"))
+    return jsonify({"ok": True, "record": record, "stats": stats})
 
 
 @app.route("/api/learning/stats", methods=["GET", "POST"])

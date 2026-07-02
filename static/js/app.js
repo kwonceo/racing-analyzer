@@ -2024,7 +2024,9 @@
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
       ${card('추천 적중률', s.recommend_hit)}
       ${card('급락 감지 적중률', s.drop_anomaly)}
-      ${card('쌍승 역전 적중률', s.reversal)}`;
+      ${card('쌍승 역전 적중률', s.reversal)}
+      ${card('전적 유력마 적중률', s.form_pick)}
+      ${card('제거 판정 적중률', s.elimination)}`;
   }
 
   // [2번-A] 3종 시계열 차트: 복승·쌍승·삼복승 최인기 배당을 첫 수집=100% 로 정규화해 3줄 표시
@@ -2097,7 +2099,8 @@
   function toggleTripleAutoRefresh(on) {
     if (_tripleAutoTimer) { clearInterval(_tripleAutoTimer); _tripleAutoTimer = null; }
     if (on) {
-      const tick = () => { loadTripleFromServer(); analyzeTripleRules(); };
+      // [3번] 결과가 확장에서 자동 수신되면 서버 학습통계가 갱신됨 → 통계 탭도 함께 자동 갱신
+      const tick = () => { loadTripleFromServer(); analyzeTripleRules(); loadLearningStats(); };
       tick();
       _tripleAutoTimer = setInterval(tick, 10000);
     }
