@@ -57,12 +57,31 @@ SLEEP = 0.25            # 호출 간 간격(초) — 트래픽 제한 배려
 
 
 # ── 유틸 ─────────────────────────────────────────────────────────────
+def _env_from_dotenv(name):
+    """의존성 없이 .env 에서 name 값 읽기 (app.py 와 동일 방식)."""
+    path = os.path.join(ROOT, ".env")
+    if not os.path.exists(path):
+        return ""
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            if k.strip() == name:
+                return v.strip().strip('"').strip("'")
+    return ""
+
+
 def load_key(cli_key):
     if cli_key:
         return cli_key.strip()
     env = os.environ.get("KRA_API_KEY")
     if env:
         return env.strip()
+    dot = _env_from_dotenv("KRA_API_KEY")     # .env 파일 직접 지원
+    if dot:
+        return dot.strip()
     if os.path.exists(KEY_FILE):
         with open(KEY_FILE, encoding="utf-8") as f:
             return f.read().strip()
