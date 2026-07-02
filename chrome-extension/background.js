@@ -11,6 +11,7 @@
 const SERVER = 'http://127.0.0.1:8011';
 const SNAPSHOT_URL = `${SERVER}/api/odds/snapshot`;
 const RESULTS_URL = `${SERVER}/api/results/auto`;
+const TRIPLE_URL = `${SERVER}/api/odds/triple/ingest`;
 
 /** 아이콘 배지: 성공=초록(카운트/✓), 실패=빨강(!). 잠시 후 자동 소거. */
 function setBadge(ok, count) {
@@ -112,6 +113,39 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         chrome.storage.local.set({ resultStatus });
         setBadge(false);
         sendResponse({ ok: false, error: resultStatus.lastResultError, status: resultStatus });
+      });
+    return true; // async
+  }
+
+  if (msg?.type === 'POST_TRIPLE') {
+    fetch(TRIPLE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg.payload),
+    })
+      .then(async (res) => {
+        let d = null; try { d = await res.json(); } catch (_) { /* noop */ }
+        if (!res.ok) throw new Error((d && d.error) || `HTTP ${res.status}`);
+        return d;
+      })
+      .then((data) => {
+        const tripleStatus = {
+          lastTriple: Date.now(), lastTripleOk: true, lastTripleError: '',
+          lastTripleRaceKey: msg.payload.raceKey, lastCounts: data?.counts || {}, lastReason: msg.reason || '',
+        };
+        chrome.storage.local.set({ tripleStatus });
+        const total = data && data.counts ? Object.values(data.counts).reduce((a, b) => a + b, 0) : '✓';
+        setBadge(true, total);
+        sendResponse({ ok: true, data, status: tripleStatus });
+      })
+      .catch((err) => {
+        const tripleStatus = {
+          lastTriple: Date.now(), lastTripleOk: false, lastTripleError: String(err.message || err),
+          lastTripleRaceKey: msg.payload?.raceKey || '',
+        };
+        chrome.storage.local.set({ tripleStatus });
+        setBadge(false);
+        sendResponse({ ok: false, error: tripleStatus.lastTripleError, status: tripleStatus });
       });
     return true; // async
   }

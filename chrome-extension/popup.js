@@ -29,13 +29,14 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 60, raceKey: '', status: null, resultStatus: null },
+    { autoSend: false, intervalSec: 60, raceKey: '', status: null, resultStatus: null, tripleStatus: null },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
       els.interval.value = String(v.intervalSec || 60);
       els.raceKey.value = v.raceKey || '';
       renderStatus(v.status);
       renderResultStatus(v.resultStatus);
+      renderTripleStatus(v.tripleStatus);
     }
   );
 }
@@ -155,11 +156,51 @@ btnResults.addEventListener('click', async () => {
   btnResults.disabled = false; btnResults.textContent = '🏁 결과(1~3착) 전송';
 });
 
+// ── [전체 자동 수집] 복승·쌍승·삼복승 3종 ────────────────────────────
+const btnTriple = document.getElementById('collectTriple');
+const tripleRow = document.getElementById('tripleRow');
+const tripleDetail = document.getElementById('tripleDetail');
+
+function renderTripleStatus(ts) {
+  if (!ts || !ts.lastTriple) return;
+  const when = fmtTime(ts.lastTriple);
+  if (ts.lastTripleOk) {
+    const c = ts.lastCounts || {};
+    tripleRow.innerHTML = `3종 수집: <span class="ok">성공 ${when}</span>`;
+    tripleDetail.textContent = `${ts.lastTripleRaceKey || ''} · 복승 ${c.quinella || 0} · 쌍승 ${c.exacta || 0} · 삼복승 ${c.trio || 0}`;
+  } else {
+    tripleRow.innerHTML = `3종 수집: <span class="err">실패 ${when}</span>`;
+    tripleDetail.textContent = ts.lastTripleError || '';
+  }
+}
+
+btnTriple.addEventListener('click', async () => {
+  btnTriple.disabled = true; btnTriple.textContent = '수집 중… (3종 페이지)';
+  const tab = await activeKeibaTab();
+  if (!tab) {
+    tripleRow.innerHTML = '<span class="err">keiba.go.jp 경주 페이지에서 눌러주세요.</span>';
+  } else {
+    await new Promise((resolve) => {
+      chrome.tabs.sendMessage(tab.id, { type: 'MANUAL_COLLECT_TRIPLE' }, (res) => {
+        if (chrome.runtime.lastError || !res) {
+          tripleRow.innerHTML = '<span class="err">페이지 응답 없음. 새로고침 후 재시도.</span>';
+        } else {
+          renderTripleStatus(res.status || null);
+          if (!res.ok && res.error) tripleRow.innerHTML = `<span class="err">${res.error}</span>`;
+        }
+        resolve();
+      });
+    });
+  }
+  btnTriple.disabled = false; btnTriple.textContent = '⚡ 전체 자동 수집 (복승·쌍승·삼복승)';
+});
+
 // 상태가 background 에서 갱신되면 실시간 반영
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
   if (changes.status) renderStatus(changes.status.newValue);
   if (changes.resultStatus) renderResultStatus(changes.resultStatus.newValue);
+  if (changes.tripleStatus) renderTripleStatus(changes.tripleStatus.newValue);
 });
 
 // ── 초기화 ──────────────────────────────────────────────────────────

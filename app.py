@@ -925,6 +925,55 @@ def results_get():
     return jsonify(rec or {"results": [], "top3": []})
 
 
+# ───────── 3종(복승·쌍승·삼복승) 확장 원버튼 수집 저장소 ─────────
+TRIPLE_STORE = os.path.join(os.path.dirname(__file__), "triple_store.json")
+
+
+def _triple_load():
+    try:
+        with open(TRIPLE_STORE, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _triple_save(db):
+    with open(TRIPLE_STORE, "w", encoding="utf-8") as f:
+        json.dump(db, f, ensure_ascii=False)
+
+
+@app.route("/api/odds/triple/ingest", methods=["POST"])
+def triple_ingest():
+    """확장 [전체 자동 수집]: {raceKey, quinella[], exacta[], trio[]} 저장 → {ok, counts}"""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"error": "raceKey가 필요합니다."}), 400
+    q, x, tr = body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or []
+    db = _triple_load()
+    db[rk] = {"quinella": q, "exacta": x, "trio": tr, "source": body.get("source"), "t": time.time()}
+    _triple_save(db)
+    counts = {"quinella": len(q), "exacta": len(x), "trio": len(tr)}
+    print(f"[3종 수집] {rk}: {counts}")
+    return jsonify({"ok": True, "counts": counts})
+
+
+@app.route("/api/odds/triple/latest", methods=["GET", "POST"])
+def triple_latest():
+    """최근(또는 지정 raceKey) 3종 배당 조회 → {raceKey, quinella, exacta, trio}"""
+    rk = None
+    if request.method == "POST":
+        rk = ((request.json or {}).get("raceKey") or "").strip() or None
+    db = _triple_load()
+    if not db:
+        return jsonify({})
+    if not rk or rk not in db:
+        rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
+    rec = db.get(rk) or {}
+    return jsonify({"raceKey": rk, "quinella": rec.get("quinella", []),
+                    "exacta": rec.get("exacta", []), "trio": rec.get("trio", [])})
+
+
 # ───────── KRA 공공데이터: API 키 저장 + 마필 과거기록 조회 ─────────
 KRA_KEY_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_key.txt")
 KRA_HISTORY_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_history.json")

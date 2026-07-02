@@ -243,6 +243,62 @@
     return res || { ok: false, error: 'background 응답 없음' };
   }
 
+  // ── [전체 자동 수집] 복승·쌍승·삼복승 3종 한 번에 ──────────────────
+  //   현재 경주(URL 파라미터)의 3개 오즈 페이지를 동일출처 fetch → 파싱 → 서버 전송.
+  //   복승=馬連(OddsUmLenFuku) · 쌍승=馬単(OddsUmLenTan) · 삼복승=3連複(Odds3LenFuku)
+  function parseRankingCombos(doc) {
+    const out = [];
+    for (const t of doc.querySelectorAll('table.odd_ranking_table')) {
+      const trs = [...t.querySelectorAll('tr')];
+      const head = [...(trs[0]?.querySelectorAll('th,td') || [])].map((c) => txt(c));
+      const ci = Math.max(0, head.findIndex((h) => /組合せ|組番/.test(h)));
+      const oi = Math.max(1, head.findIndex((h) => /オッズ/.test(h)));
+      for (const tr of trs.slice(1)) {
+        const cells = [...tr.querySelectorAll('th,td')].map((c) => txt(c));
+        if (!/^\d{1,2}(\s*[-–—ー]\s*\d{1,2})+$/.test(cells[ci] || '')) continue;
+        const combo = cells[ci].split(/[-–—ー]/).map((x) => parseInt(x.trim(), 10)).filter((n) => n > 0);
+        const odds = toNum(cells[oi]);
+        if (combo.length >= 2 && odds != null) out.push({ combo, odds });
+      }
+    }
+    return out;
+  }
+
+  async function fetchOddsDoc(oper, q) {
+    const html = await fetch(`/KeibaWeb/TodayRaceInfo/${oper}?${q}`, { credentials: 'same-origin' }).then((r) => r.text());
+    return new DOMParser().parseFromString(html, 'text/html');
+  }
+
+  async function collectTriple(reason) {
+    const sp = new URLSearchParams(location.search);
+    if (!sp.get('k_raceDate') || !sp.get('k_raceNo')) {
+      return { ok: false, error: 'keiba 경주 페이지(날짜·경주번호가 URL에 있는)에서 실행하세요.' };
+    }
+    const q = ['k_raceDate', 'k_babaCode', 'k_raceNo']
+      .filter((k) => sp.get(k)).map((k) => `${k}=${encodeURIComponent(sp.get(k))}`).join('&');
+    const { raceKey: override } = await getSettings();
+    const raceKey = (override && override.trim()) || extractRaceKey();
+    try {
+      const [qd, xd, td] = await Promise.all([
+        fetchOddsDoc('OddsUmLenFuku', q), fetchOddsDoc('OddsUmLenTan', q), fetchOddsDoc('Odds3LenFuku', q),
+      ]);
+      const payload = {
+        raceKey,
+        quinella: parseRankingCombos(qd).filter((c) => c.combo.length === 2),  // 복승(순서무관)
+        exacta: parseRankingCombos(xd).filter((c) => c.combo.length === 2),    // 쌍승(순서있음)
+        trio: parseRankingCombos(td).filter((c) => c.combo.length === 3),      // 삼복승
+        capturedAt: new Date().toISOString(), source: location.href,
+      };
+      if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length) {
+        return { ok: false, error: '3종 배당을 찾지 못했습니다(발매 시간/경주 확인).' };
+      }
+      const res = await chrome.runtime.sendMessage({ type: 'POST_TRIPLE', payload, reason });
+      return res || { ok: false, error: 'background 응답 없음' };
+    } catch (e) {
+      return { ok: false, error: String(e.message || e) };
+    }
+  }
+
   // ── 설정 로드 & 자동전송 루프 ───────────────────────────────────────
   let timer = null;
 
@@ -292,6 +348,10 @@
     }
     if (msg?.type === 'MANUAL_SEND_RESULTS') {
       sendResults('manual').then(sendResponse);
+      return true;
+    }
+    if (msg?.type === 'MANUAL_COLLECT_TRIPLE') {
+      collectTriple('manual').then(sendResponse);
       return true;
     }
     if (msg?.type === 'PREVIEW') {

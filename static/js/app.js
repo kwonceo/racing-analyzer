@@ -573,6 +573,7 @@
     if (alt) { alt.checked = state.oddsTrack.dual !== false; alt.addEventListener('change', () => { state.oddsTrack.dual = alt.checked; }); }
     $('#quickPairsApplyBtn').addEventListener('click', submitQuickPairs); // [4번] 쌍승 빠른입력
     { const b = $('#quickQuinApplyBtn'); if (b) b.addEventListener('click', submitQuickQuin); } // [1-1] 복승 매트릭스 빠른입력
+    { const b = $('#loadTripleBtn'); if (b) b.addEventListener('click', loadTripleFromServer); } // [연동] 확장 3종 불러오기
     setStep(1);
     // [2번] 빠른입력 모드
     $('#quickOddsBtn').addEventListener('click', () => {
@@ -1606,6 +1607,59 @@
         <div class="cc-move">${move(q[p.key])}</div>
       </div>`;
     }).join('');
+  }
+
+  // ── [연동] 확장 [전체 자동 수집] 3종을 서버에서 불러와 매트릭스로 표시 ──
+  async function loadTripleFromServer() {
+    const el = $('#tripleMatrixReport'); if (!el) return;
+    el.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let data;
+    try { data = await (await fetch('/api/odds/triple/latest')).json(); }
+    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">불러오기 실패: ${esc(e.message)}</p>`; return; }
+    if (!data || !data.raceKey) {
+      el.innerHTML = '<p class="hint">확장에서 수집된 3종 배당이 없습니다. Chrome 확장 [⚡ 전체 자동 수집]을 먼저 실행하세요.</p>';
+      return;
+    }
+    renderTripleMatrices(data);
+  }
+
+  function renderTripleMatrices(data) {
+    const el = $('#tripleMatrixReport');
+    const q = {}, x = {}; const nosSet = new Set();
+    (data.quinella || []).forEach((c) => { const [a, b] = c.combo; if (a && b) { q[a < b ? `${a}|${b}` : `${b}|${a}`] = c.odds; nosSet.add(a); nosSet.add(b); } });
+    (data.exacta || []).forEach((c) => { const [a, b] = c.combo; if (a && b) { x[`${a}>${b}`] = c.odds; nosSet.add(a); nosSet.add(b); } });
+    (data.trio || []).forEach((c) => (c.combo || []).forEach((n) => nosSet.add(n)));
+    const nos = [...nosSet].filter((n) => n > 0).sort((a, b) => a - b);
+    let html = `<div class="matrix-title">📥 확장 수집 3종 <span class="hint" style="font-weight:400">${esc(data.raceKey)} · 복승 ${(data.quinella || []).length}·쌍승 ${(data.exacta || []).length}·삼복승 ${(data.trio || []).length}</span></div>`;
+
+    if (Object.keys(q).length) {
+      const vals = Object.values(q).filter((v) => v > 0); const lo = Math.min(...vals), hi = Math.max(...vals);
+      let head = '<tr><th class="corner">복승</th>' + nos.slice(0, -1).map((n) => `<th>${n}</th>`).join('') + '</tr>';
+      let body = '';
+      for (let r = 1; r < nos.length; r++) {
+        const rn = nos[r]; let tds = '';
+        for (let c = 0; c < r; c++) { const cn = nos[c]; const v = q[rn < cn ? `${rn}|${cn}` : `${cn}|${rn}`]; tds += v > 0 ? `<td class="cell" style="background:${heatColor(v, lo, hi)}" title="${rn}-${cn}">${v}</td>` : '<td class="empty">·</td>'; }
+        body += `<tr><th>${rn}</th>${tds}<td class="diag">—</td></tr>`;
+      }
+      html += `<div class="matrix-title" style="font-size:13px">🎰 복승 매트릭스</div><div class="matrix-wrap"><table class="odds-matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+    }
+    if (Object.keys(x).length) {
+      const vals = Object.values(x).filter((v) => v > 0); const lo = Math.min(...vals), hi = Math.max(...vals);
+      let head = '<tr><th class="corner">쌍승 ↓→</th>' + nos.map((n) => `<th>${n}</th>`).join('') + '</tr>';
+      let body = '';
+      for (const rn of nos) {
+        let tds = '';
+        for (const cn of nos) { if (rn === cn) { tds += '<td class="diag">—</td>'; continue; } const v = x[`${rn}>${cn}`]; tds += v > 0 ? `<td class="cell" style="background:${heatColor(v, lo, hi)}" title="${rn}→${cn}">${v}</td>` : '<td class="empty">·</td>'; }
+        body += `<tr><th>${rn}</th>${tds}</tr>`;
+      }
+      html += `<div class="matrix-title" style="font-size:13px">🔀 쌍승 매트릭스</div><div class="matrix-wrap"><table class="odds-matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+    }
+    const trio = (data.trio || []).filter((c) => c.odds > 0).sort((a, b) => a.odds - b.odds).slice(0, 12);
+    if (trio.length) {
+      const cards = trio.map((c) => `<div class="combo-card"><div class="cc-head"><span class="cc-type">삼복승 ${c.combo.join('-')}</span><span class="cc-odds">${c.odds}배</span></div></div>`).join('');
+      html += `<div class="matrix-title" style="font-size:13px">🎲 삼복승 인기 상위 ${trio.length}</div><div class="combo-cards">${cards}</div>`;
+    }
+    el.innerHTML = html;
   }
 
   /** [2번] "마번 배당" 줄들을 파싱 → {마번: 배당}. 숫자 외 문자(번/배/콜론 등)는 구분자로 처리. */
