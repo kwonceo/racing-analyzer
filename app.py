@@ -1110,24 +1110,40 @@ def _triple_analyze(rk, rec):
     if anomaly_horse is None:
         anomaly_horse = ranked[3] if len(ranked) > 3 else (key_horses[-1] if key_horses else None)
 
-    # 5) 삼복승 추천 (메인 + 보험1/2), 예상배당은 수집된 삼복승에서 매칭
+    # 5) 베팅 추천: 복승 메인/보조 + 삼복승 메인/보험1/보험2 + 예산 배분율(alloc %)
     trio_map = _odds_map_un(trio)
-    recs = []
 
-    def _add(label, combo):
+    def _q(a, b):
+        return curQ.get(tuple(sorted((a, b))))
+
+    bet_rec, seen_rec = [], set()
+
+    def _addbet(kind, label, combo, alloc, odds):
+        need = 2 if kind == "복승" else 3
         cc = sorted(set(int(x) for x in combo))
-        if len(cc) != 3:
+        if len(cc) != need:
             return
-        key = tuple(cc)
-        if any(tuple(r["combo"]) == key for r in recs):
+        key = (kind, tuple(cc))
+        if key in seen_rec:
             return
-        recs.append({"label": label, "combo": cc, "expOdds": trio_map.get(key)})
+        seen_rec.add(key)
+        bet_rec.append({"kind": kind, "label": label, "combo": cc, "alloc": alloc, "expOdds": odds})
 
+    if len(key_horses) >= 2:
+        h1, h2 = key_horses[0], key_horses[1]
+        _addbet("복승", "복승 메인", [h1, h2], 43, _q(h1, h2))
     if len(key_horses) >= 3:
-        _add("메인", key_horses[:3])
+        h1, h2, h3 = key_horses[0], key_horses[1], key_horses[2]
+        _addbet("복승", "복승 보조", [h1, h3], 20, _q(h1, h3))
+        _addbet("삼복승", "삼복승 메인", [h1, h2, h3], 29, trio_map.get(tuple(sorted([h1, h2, h3]))))
         if anomaly_horse is not None:
-            _add("보험1", [key_horses[0], key_horses[1], anomaly_horse])
-            _add("보험2", [key_horses[0], key_horses[2], anomaly_horse])
+            _addbet("삼복승", "삼복승 보험1", [h1, h2, anomaly_horse], 4,
+                    trio_map.get(tuple(sorted([h1, h2, anomaly_horse]))))
+            _addbet("삼복승", "삼복승 보험2", [h1, h3, anomaly_horse], 4,
+                    trio_map.get(tuple(sorted([h1, h3, anomaly_horse]))))
+    # 삼복승만 뽑은 하위 호환 필드
+    trio_rec = [{"label": r["label"], "combo": r["combo"], "expOdds": r["expOdds"]}
+                for r in bet_rec if r["kind"] == "삼복승"]
 
     # 요약(팝업/화면 상단용)
     parts = []
@@ -1140,8 +1156,9 @@ def _triple_analyze(rk, rec):
         parts.append(f"🔴쌍승역전 {r0['favored'][0]}→{r0['favored'][1]}")
     if key_horses:
         parts.append("유력마 " + "·".join(map(str, key_horses)))
-    if recs:
-        parts.append("메인 " + "+".join(map(str, recs[0]["combo"])))
+    main_bet = next((r for r in bet_rec if r["label"] == "복승 메인"), None)
+    if main_bet:
+        parts.append("복승 " + "+".join(map(str, main_bet["combo"])))
     summary = " / ".join(parts) if parts else "데이터 부족 — 복승 수집 필요"
 
     # 시계열 차트: 복승·쌍승·삼복승 각 "최저(최인기) 배당"의 라운드별 변화 (3줄)
@@ -1160,7 +1177,8 @@ def _triple_analyze(rk, rec):
         "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio), "history": len(hist)},
         "drops": drops[:15], "rankChanges": rank_changes, "reversals": reversals,
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
-        "trioRecommend": recs, "summary": summary, "chart": chart,
+        "trioRecommend": trio_rec, "betRecommend": bet_rec,
+        "summary": summary, "chart": chart,
     }
 
 

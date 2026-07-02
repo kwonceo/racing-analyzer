@@ -227,7 +227,8 @@
             <label class="hint" style="margin:0;display:flex;align-items:center;gap:4px">
               <input type="checkbox" id="autoRefreshTriple" /> 자동 갱신(10초)
             </label>
-            <span class="hint" style="margin:0">확장이 보낸 3종 배당을 매트릭스로 표시하고, 규칙기반 이상감지(급락·역전·유력마·삼복승추천)를 실행합니다.</span>
+            <label class="hint" style="margin:0">예산(원) <input id="tripleBudget" type="number" min="0" step="1000" value="0" style="width:110px" /></label>
+            <span class="hint" style="margin:0">확장이 보낸 3종 배당을 매트릭스로 표시하고, 규칙기반 이상감지(급락·역전·유력마·복승/삼복승 추천)를 실행합니다.</span>
           </div>
           <div id="tripleAnalyzeReport" class="report-area" style="margin-top:10px"></div>
           <div id="tripleChartWrap" class="hidden" style="margin-top:10px">

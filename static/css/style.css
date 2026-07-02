@@ -382,7 +382,9 @@ table.data-table th { color: var(--text-dim); font-weight: 600; }
 table.odds-matrix { border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
 table.odds-matrix th, table.odds-matrix td { border: 1px solid var(--border); text-align: center; padding: 3px 5px; min-width: 42px; height: 28px; }
 table.odds-matrix thead th, table.odds-matrix tbody th { background: var(--bg-elev); color: var(--text-dim); font-weight: 700; position: sticky; }
-table.odds-matrix thead th.corner { background: var(--bg-card); }
+table.odds-matrix thead th { top: 0; z-index: 2; }
+table.odds-matrix tbody th { left: 0; z-index: 1; }  /* 가로 스크롤 시 좌측 마번 고정 */
+table.odds-matrix thead th.corner { background: var(--bg-card); left: 0; z-index: 3; }
 table.odds-matrix td.diag { background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,.05) 4px, rgba(255,255,255,.05) 8px); color: var(--text-dim); }
 table.odds-matrix td.empty { color: var(--text-dim); opacity: .35; }
 table.odds-matrix td.cell { color: #fff; font-weight: 600; }
