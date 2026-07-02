@@ -505,6 +505,8 @@ def analyze():
     jstats = body.get("jockeyStats", {})
     lines = []
     any_weight = False
+    any_kra = False
+    kra_hist = _kra_load_history()          # [KRA] 마필 과거기록 자동매칭
     rdist = _to_int(race.get("distance"))
     rtrack = (race.get("condition") or {}).get("track")
     for h in race.get("horses", []):
@@ -536,10 +538,13 @@ def analyze():
             if d is not None:
                 flag = " 🔴위험" if abs(d) >= 20 else " 🟡경고" if abs(d) >= 10 else ""
                 weight_note += f"(전회대비 {'+' if d >= 0 else ''}{d}kg{flag})"
+        kra_note = kra_horse_summary(h.get("horseName"), kra_hist)   # [KRA] 실제 과거 성적
+        if kra_note:
+            any_kra = True
         lines.append(
             f"{h.get('horseNum')}번 {h.get('horseName')} / 기수 {h.get('jockey') or '미상'} {jstat} / "
             f"부담 {h.get('weight') or '-'} / 레이팅 {h.get('rating') or '-'} / 전적 {h.get('recentRecord') or '-'} / "
-            f"상태 {h.get('health') or '-'} / 조교 {h.get('training') or '-'}{weight_note}"
+            f"상태 {h.get('health') or '-'} / 조교 {h.get('training') or '-'}{weight_note}{kra_note}"
         )
     title = race.get("raceTitle") or (f"제{race.get('raceNo')}경주" if race.get("raceNo") else "경주")
     cond = race.get("condition") or {}
@@ -549,7 +554,10 @@ def analyze():
                      "주로 상태(불량/다습 등)와 날씨가 각 말의 적성에 미치는 영향을 평가에 반영하세요.")
     weight_line = ("\n마체중: ±10kg 이상(🟡)은 컨디션 변화 신호, ±20kg 이상(🔴)은 위험 신호로 평가에 반영하세요."
                    if any_weight else "")
-    prompt = (f"{ANALYSIS_GUIDE}\n\n[{title}] 출전마 정보:\n" + "\n".join(lines) + cond_line + weight_line +
+    kra_line = ("\nKRA전적: 한국마사회 실제 과거 성적(출전수·1-2-3착·복승권율·최근 착순)입니다. "
+                "복승권율이 높고 최근 착순이 안정/상승세인 마필을 신뢰도 있게 평가에 반영하세요."
+                if any_kra else "")
+    prompt = (f"{ANALYSIS_GUIDE}\n\n[{title}] 출전마 정보:\n" + "\n".join(lines) + cond_line + weight_line + kra_line +
               "\n\n위 정보로 분석과 베팅 추천을 JSON으로 응답하세요.")
     out = call_claude([{"type": "text", "text": prompt}], ANALYSIS_SCHEMA, 4096, body.get("api_key"))
     return jsonify(out)
@@ -952,6 +960,34 @@ def kra_horse():
         "name": name, "records": recs, "starts": starts, "wins": wins, "places": placed,
         "placeRate": round(placed / starts * 100, 1) if starts else 0,
     })
+
+
+def _kra_load_history():
+    try:
+        with open(KRA_HISTORY_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def kra_horse_summary(name, hist=None):
+    """마명 → KRA 실제 과거기록 요약 문자열(분석 프롬프트 주입용). 기록 없으면 ''"""
+    if not name:
+        return ""
+    if hist is None:
+        hist = _kra_load_history()
+    recs = (hist.get("byHorse") or {}).get(name) or []
+    if not recs:
+        return ""
+    ordered = sorted(recs, key=lambda r: r.get("date", ""), reverse=True)
+    starts = len(recs)
+    w = sum(1 for r in recs if r.get("stOrd") == 1)
+    s = sum(1 for r in recs if r.get("stOrd") == 2)
+    t = sum(1 for r in recs if r.get("stOrd") == 3)
+    rate = round((w + s + t) / starts * 100) if starts else 0
+    recent = "·".join(str(int(r["stOrd"])) for r in ordered[:5]
+                      if isinstance(r.get("stOrd"), (int, float)) and r["stOrd"] > 0)
+    return f", KRA전적 {starts}전 {w}-{s}-{t} 복승권{rate}%" + (f" 최근{recent}착" if recent else "")
 
 
 @app.route("/api/odds/undo", methods=["POST"])
