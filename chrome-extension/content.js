@@ -205,14 +205,15 @@
       const c = [...r.cells].filter((td) => pureInt(td.textContent) != null).length;
       if (c > best) { best = c; headerRow = r; }
     }
+    // 헤더의 '열 마번'을 등장 순서(headerNos)와 cellIndex 두 방식으로 수집
+    const headerNos = [];
     const colNoByIndex = {};
     if (headerRow) {
       for (const cell of headerRow.cells) {
         const n = pureInt(cell.textContent);
-        if (n != null) colNoByIndex[cell.cellIndex] = n;
+        if (n != null) { headerNos.push(n); colNoByIndex[cell.cellIndex] = n; }
       }
     }
-    const colCount = Object.keys(colNoByIndex).length;
     const isOdds = opts.oddsClass
       ? (td) => td.classList.contains(opts.oddsClass)
       : (td) => /^\d+\.\d+$/.test((td.textContent || '').trim()); // 소수점 있는 숫자 = 배당
@@ -226,13 +227,27 @@
       const oddsCells = [...r.cells].filter(isOdds);
       if (!oddsCells.length) continue;
 
-      if (colCount >= 2) {
-        // ── 매트릭스: 행 마번 × 열 마번 → 조합 ──
-        for (const oc of oddsCells) {
-          const colNo = colNoByIndex[oc.cellIndex];
-          const val = toNum(oc.textContent);
-          if (rowNo != null && colNo != null && rowNo !== colNo && val != null && val >= 1.0) {
-            pairs.push({ a: rowNo, b: colNo, odds: val });
+      if (headerNos.length >= 2 && rowNo != null) {
+        // ── 매트릭스: [버그수정] 삼각형/전체 구조 모두 대응.
+        //   삼각 매트릭스는 행마다 배당셀이 좌우로 밀려 cellIndex 정렬이 깨진다.
+        //   → 배당셀 개수로 열 집합(전체/상삼각/하삼각)을 판별해 '순서 기반'으로 매핑.
+        const all = headerNos.filter((n) => n !== rowNo);
+        const upper = headerNos.filter((n) => n > rowNo);
+        const lower = headerNos.filter((n) => n < rowNo);
+        let cols = null;
+        if (oddsCells.length === all.length) cols = all;
+        else if (oddsCells.length === upper.length) cols = upper;
+        else if (oddsCells.length === lower.length) cols = lower;
+        if (cols) {
+          oddsCells.forEach((oc, i) => {
+            const colNo = cols[i]; const val = toNum(oc.textContent);
+            if (colNo != null && colNo !== rowNo && val != null && val >= 1.0) pairs.push({ a: rowNo, b: colNo, odds: val });
+          });
+        } else {
+          // 폴백: 빈칸 placeholder가 위치를 유지하는 구조 → cellIndex 정렬
+          for (const oc of oddsCells) {
+            const colNo = colNoByIndex[oc.cellIndex]; const val = toNum(oc.textContent);
+            if (colNo != null && colNo !== rowNo && val != null && val >= 1.0) pairs.push({ a: rowNo, b: colNo, odds: val });
           }
         }
       } else if (rowNo != null) {
@@ -873,7 +888,9 @@
       const quinella = Object.entries(quinMap).map(([k, o]) => {
         const [a, b] = k.split('-').map(Number); return { combo: [a, b], odds: o };
       });
-      console.log(`[배당수집] 복승 데이터 추출: ${quinella.length}개 조합`);
+      console.log(`[복승수집] 파싱 ${quinella.length}조합. 최저배당순 상위: `
+        + quinella.slice().sort((a, b) => a.odds - b.odds).slice(0, 10).map((c) => `${c.combo[0]}-${c.combo[1]}=${c.odds}`).join(' · '));
+      console.log('[복승수집] 실제 배당판과 몇 개 대조해 보세요(예: 4-7). 값이 다르면 매트릭스 열 정렬 문제 → 콘솔의 이 로그를 공유해주세요.');
 
       // 2) 쌍승 (순서 있음 → 방향 유지, dedupe는 a>b 키)
       //  [디버그 강화] 쌍승 탭이 실제로 전환·로드됐는지, 조합이 뽑혔는지 상세 로그.
