@@ -1649,10 +1649,14 @@
     renderTripleAnalyze(a);
   }
 
-  let _lastTripleAnalyze = null;
+  let _lastTripleAnalyze = null, _prevBetKey = null, _betUpdatedFlag = false;
   function renderTripleAnalyze(a) {
     const el = $('#tripleAnalyzeReport'); if (!el) return;
     _lastTripleAnalyze = a;
+    // [5번] 추천 조합 변경 감지
+    const betKey = JSON.stringify((a.betRecommend || []).map((r) => r.combo));
+    _betUpdatedFlag = (_prevBetKey !== null && betKey !== _prevBetKey);
+    _prevBetKey = betKey;
     const drops = (a.drops || []).slice(0, 8).map((d) =>
       `<span class="chip ${d.pct < 0 ? 'chip-red' : 'chip-yellow'}">${d.combo[0]}-${d.combo[1]} ${d.prev}→${d.cur} ${d.pct < 0 ? '▼' : '▲'}${Math.abs(d.pct)}%</span>`).join(' ');
     const flips = (a.reversals || []).filter((r) => r.flipped).slice(0, 6).map((r) =>
@@ -1670,6 +1674,98 @@
       ${renderBetRecommend(a)}
       ${renderFormGrades(a.form)}`;
     drawTripleChart(a.chart);
+    updateOddsAlert(a);          // [1·4·5] 우상단 실시간 알림 + 소리 + 조합업데이트
+    loadOddsTimeline(a.raceKey); // [3] 변동 타임라인
+  }
+
+  // ── [1·2·4번] 실시간 변동 알림 오버레이 + 소리 + 플래시 ──────────────
+  const LEVEL_RANK = { '🔴': 3, '🟠': 2, '🔄': 2, '🟡': 1 };
+  const lvColor = (l) => (l === '🔴' ? '#ef4444' : l === '🟠' ? '#ff9f43' : l === '🔄' ? '#a855f7' : '#ffd24f');
+  let _prevSignalKeys = null;
+
+  function ensureAlertOverlay() {
+    let el = document.getElementById('oddsAlertOverlay');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'oddsAlertOverlay';
+      el.style.cssText = 'position:fixed;top:70px;right:16px;width:330px;max-height:72vh;overflow:auto;z-index:9999;display:none';
+      el.addEventListener('click', (e) => { if (e.target.id === 'oddsAlertClose') el.style.display = 'none'; });
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+  function _ac() { try { window._audioCtx = window._audioCtx || new (window.AudioContext || window.webkitAudioContext)(); return window._audioCtx; } catch (_) { return null; } }
+  function _beep(freq, dur, when, type) {
+    const ac = _ac(); if (!ac) return;
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type || 'sine'; o.frequency.value = freq; o.connect(g); g.connect(ac.destination);
+    const t = ac.currentTime + when;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.start(t); o.stop(t + dur);
+  }
+  function playAlert(level) { // [4번] 심각도별 소리
+    if (level === '🔴') [0, 0.15, 0.3].forEach((w) => _beep(1050, 0.12, w, 'square'));
+    else if (level === '🟠') [0, 0.2].forEach((w) => _beep(900, 0.13, w, 'square'));
+    else if (level === '🔄') { _beep(1400, 0.1, 0, 'sine'); _beep(700, 0.2, 0.12, 'sine'); }
+    else if (level === '🟡') _beep(760, 0.15, 0, 'sine');
+  }
+  function flashScreen() {
+    let f = document.getElementById('oddsFlash');
+    if (!f) { f = document.createElement('div'); f.id = 'oddsFlash'; f.style.cssText = 'position:fixed;inset:0;background:rgba(239,68,68,.32);z-index:9998;pointer-events:none;opacity:0;transition:opacity .15s'; document.body.appendChild(f); }
+    f.style.opacity = '1'; setTimeout(() => { f.style.opacity = '0'; }, 220);
+  }
+  function alertShell(snap, body, red, updated) {
+    const t = snap && snap.time ? `⏱ ${esc(snap.time)} 수집` : '⏱ 실시간';
+    const mb = snap && snap.minutes_before != null ? ` (발주 ${snap.minutes_before}분전)` : '';
+    const badge = updated ? '<div style="color:#38d39f;font-weight:700;margin-top:4px">⚡ 새 이상감지 반영 → 조합 업데이트됨</div>' : '';
+    return `<div style="background:#141c2b;border:2px solid ${red ? '#ef4444' : '#334155'};border-radius:10px;padding:10px;box-shadow:0 4px 20px rgba(0,0,0,.5)">
+      <div style="display:flex;justify-content:space-between;align-items:center"><b>${t}${mb}</b><span id="oddsAlertClose" style="cursor:pointer;color:#8a94a6">✕</span></div>
+      ${badge}${body}</div>`;
+  }
+  function updateOddsAlert(a) {
+    const el = ensureAlertOverlay();
+    const sigs = a.signals || [];
+    if (!sigs.length) {
+      el.style.display = 'block';
+      el.innerHTML = alertShell(a.lastSnapshot, '<div class="hint" style="padding:6px 2px">변동 신호 없음 · 정상 범위</div>', false, _betUpdatedFlag);
+      _prevSignalKeys = new Set();
+      return;
+    }
+    const maxLvl = sigs.map((s) => s.level).sort((x, y) => (LEVEL_RANK[y] || 0) - (LEVEL_RANK[x] || 0))[0];
+    const keys = new Set(sigs.map((s) => s.level + '|' + s.text));
+    let hasNew = _prevSignalKeys === null;
+    if (!hasNew) for (const k of keys) if (!_prevSignalKeys.has(k)) { hasNew = true; break; }
+    _prevSignalKeys = keys;
+    const body = sigs.map((s) => `<div style="margin:6px 0;padding:6px 8px;border-left:3px solid ${lvColor(s.level)};background:rgba(255,255,255,.04)">
+      <div style="font-weight:700">${s.level} ${esc(s.text)}</div>
+      <div class="hint" style="margin-top:2px">→ ${esc(s.detail)}</div></div>`).join('');
+    el.style.display = 'block';
+    el.innerHTML = alertShell(a.lastSnapshot, body, maxLvl === '🔴', _betUpdatedFlag);
+    if (hasNew) { playAlert(maxLvl); if (maxLvl === '🔴') flashScreen(); }
+  }
+
+  // [3번] 변동 히스토리 타임라인 (배당판 캡처 탭, 이상감지 진행 + 클릭 시 스냅샷 배당)
+  async function loadOddsTimeline(raceKey) {
+    const el = $('#oddsTimeline'); if (!el || !raceKey) return;
+    let d; try { d = await (await fetch('/api/history/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey }) })).json(); }
+    catch (e) { return; }
+    if (!d || d.error || !(d.snapshots || []).length) { el.innerHTML = ''; return; }
+    const snaps = d.snapshots;
+    const rows = snaps.map((s, i) => {
+      const anom = (s.anomalies || []).map((x) => `<span class="chip chip-red">${esc(x)}</span>`).join(' ') || '<span class="hint">정상 범위</span>';
+      const mb = s.minutes_before != null ? `(${s.minutes_before}분전)` : '';
+      return `<div class="tl-row" data-i="${i}" style="cursor:pointer;padding:4px 6px;border-left:2px solid var(--border);margin-left:4px">
+        <b>${esc(s.time || '')}</b> <span class="hint">${mb}</span> ${anom}</div>
+        <div id="tl-snap-${i}" style="display:none;margin:2px 0 6px 14px" class="hint"></div>`;
+    }).join('');
+    el.innerHTML = `<div class="matrix-title" style="font-size:13px">🕒 배당 변동 타임라인 <span class="hint" style="font-weight:400">${snaps.length}회 수집</span></div>${rows}`;
+    el.querySelectorAll('.tl-row').forEach((r) => r.addEventListener('click', () => {
+      const i = r.dataset.i; const box = $(`#tl-snap-${i}`); if (!box) return;
+      if (box.style.display === 'none') {
+        const q = Object.entries(snaps[i].quinella || {}).sort((x, y) => x[1] - y[1]).slice(0, 12).map(([k, v]) => `${k}:${v}`).join(' · ');
+        box.textContent = '복승 ' + (q || '없음'); box.style.display = 'block';
+      } else box.style.display = 'none';
+    }));
   }
 
   // [4번] 출마표2 전적 등급 표 (A/B/C/D)
@@ -1711,7 +1807,8 @@
     }).join('');
     const totalAlloc = recs.reduce((s, r) => s + (r.alloc || 0), 0);
     const totalAmt = budget > 0 ? won(budget * totalAlloc / 100) : null;
-    return `<div class="matrix-title" style="font-size:13px">🎯 베팅 추천 ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
+    const upd = _betUpdatedFlag ? ' <span style="color:#38d39f">⚡ 업데이트됨</span>' : '';
+    return `<div class="matrix-title" style="font-size:13px">🎯 베팅 추천${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
       <table class="data-table" style="margin-top:4px">
         <thead><tr><th>종류</th><th>조합</th><th>예상배당</th><th>배분</th><th>금액</th></tr></thead>
         <tbody>${rows}</tbody>

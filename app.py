@@ -1235,6 +1235,56 @@ def _triple_analyze(rk, rec):
     except Exception:
         learned = None
 
+    # ── [실시간 변동 신호 + 이유 자동 설명] ──
+    signals = []
+
+    def _drop_reason(pct):
+        if pct <= -50:
+            return "🔴", "단기간 대량 자금 유입 → 내부 정보성 베팅 가능성"
+        if pct <= -30:
+            return "🟠", "자금 유입 감지 → 주목 필요"
+        if pct <= -15:
+            return "🟡", "자금 유입 초기 → 관찰 필요"
+        return None, None
+
+    for d in drops:
+        lvl, reason = _drop_reason(d["pct"])
+        if lvl:
+            signals.append({"level": lvl, "type": "급락",
+                            "text": f"{d['combo'][0]}+{d['combo'][1]} 복승 {d['prev']}→{d['cur']} ({d['pct']}%)",
+                            "detail": reason})
+    for r in reversals:
+        if r.get("flipped"):
+            signals.append({"level": "🔄", "type": "역전",
+                            "text": f"쌍승 {r['favored'][0]}→{r['favored'][1]} ({r['favoredOdds']}) < {r['favored'][1]}→{r['favored'][0]} ({r['otherOdds']})",
+                            "detail": f"시장이 {r['favored'][0]}번을 실질 1착으로 판단"})
+    # 배당 압축: 상위 4개 복승 근접
+    tops = sorted(curQ.values())[:4]
+    if len(tops) >= 3 and tops[0] > 0 and tops[-1] / tops[0] < 1.3:
+        signals.append({"level": "🟡", "type": "압축",
+                        "text": f"상위 복승 배당 근접 ({tops[0]}~{tops[-1]})",
+                        "detail": "자금 분산 / 결과 예측 어려움"})
+    # 급락 후 반등: 히스토리에서 상위 조합이 15%↓ 후 15%↑
+    for k in list(curQ)[:8]:
+        seq = [hm[k] for hm in (_odds_map_un(h.get("quinella")) for h in hist[-4:]) if k in hm]
+        if len(seq) >= 3:
+            lo = min(seq)
+            if seq[0] > 0 and lo > 0 and (seq[0] - lo) / seq[0] >= 0.15 and (seq[-1] - lo) / lo >= 0.15:
+                signals.append({"level": "🟡", "type": "반등",
+                                "text": f"{k[0]}+{k[1]} 급락 후 반등 ({seq[0]}→{lo}→{seq[-1]})",
+                                "detail": "페이크 베팅 의심 / 해당말 신뢰도 하락"})
+
+    # 최근 스냅샷 시각·발주전분(히스토리 파일에서)
+    last_snap = None
+    try:
+        _hp, _, _ = _hist_path(rk)
+        _hd = json.load(open(_hp, encoding="utf-8"))
+        if _hd.get("snapshots"):
+            _s = _hd["snapshots"][-1]
+            last_snap = {"time": _s.get("time"), "minutes_before": _s.get("minutes_before")}
+    except Exception:
+        last_snap = None
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
         "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio), "history": len(hist)},
@@ -1244,6 +1294,7 @@ def _triple_analyze(rk, rec):
         "summary": summary, "chart": chart,
         "form": _form_from_starters(rk, drops),  # 출마표2 전적 등급(있으면)
         "learned": learned,  # 학습 통계 안내(있으면)
+        "signals": signals, "lastSnapshot": last_snap,  # 실시간 변동 알림용
     }
 
 
