@@ -932,7 +932,7 @@ def results_auto():
           + (f" · 확정배당 {final_odds}" if final_odds else ""))
 
     # [3번] 결과 수신 즉시 자동학습 반영(이상감지·추천·전적유력마·제거 적중 판정 → learning.json)
-    learned = None
+    learned, hit = None, None
     try:
         result = {}
         for x in norm:
@@ -943,10 +943,12 @@ def results_auto():
             elif x["rank"] == 3:
                 result["3rd"] = x["no"]
         _rec, learned = _apply_result_learning(race_key, result, top3, final_odds)
+        hit = {"quinella": _rec.get("quinella_hit"), "trifecta": _rec.get("trifecta_hit"),
+               "was_hit": _rec.get("was_hit"), "payouts": _rec.get("payouts")}
     except Exception as e:
         print(f"[결과 자동수집] 자동학습 반영 실패: {e}")
 
-    return jsonify({"ok": True, "saved": len(norm), "top3": top3, "learned": learned})
+    return jsonify({"ok": True, "saved": len(norm), "top3": top3, "learned": learned, "hit": hit})
 
 
 @app.route("/api/results/get", methods=["POST"])
@@ -1615,6 +1617,27 @@ def _learning_save(d):
     json.dump(d, open(LEARNING_FILE, "w", encoding="utf-8"), ensure_ascii=False)
 
 
+# [4번] 고배당 적중 하이라이트 저장소
+HIGHLIGHT_FILE = os.path.join(os.path.dirname(__file__), "data", "highlight_wins.json")
+
+
+def _safe_num(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _highlight_save(entry):
+    os.makedirs(os.path.dirname(HIGHLIGHT_FILE), exist_ok=True)
+    try:
+        arr = json.load(open(HIGHLIGHT_FILE, encoding="utf-8"))
+    except Exception:
+        arr = []
+    arr.append(entry)
+    json.dump(arr[-500:], open(HIGHLIGHT_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+
+
 def _rate(records, sel, cond):
     s = [r for r in records if sel(r)]
     hit = sum(1 for r in s if cond(r))
@@ -1694,6 +1717,28 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
         return all(x in top3 for x in combo)
     was_hit = any(in3(r["combo"]) for r in an.get("betRecommend", []))
 
+    # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
+    rec_bets = an.get("betRecommend", [])
+    top2 = sorted(top3[:2]) if len(top3) >= 2 else []
+    top3s = sorted(top3[:3]) if len(top3) >= 3 else []
+    quinella_hit = bool(top2 and any(r.get("kind") == "복승" and sorted(r["combo"]) == top2 for r in rec_bets))
+    trifecta_hit = bool(top3s and any(r.get("kind") == "삼복승" and sorted(r["combo"]) == top3s for r in rec_bets))
+    fo = final_odds if isinstance(final_odds, dict) else {}
+
+    def _odds_val(x):  # 확장은 {combo,odds} 중첩, 수동입력은 숫자 → 둘 다 허용
+        return _safe_num(x.get("odds")) if isinstance(x, dict) else _safe_num(x)
+    q_odds = _odds_val(fo.get("quinella"))
+    t_odds = _odds_val(fo.get("trifecta") or fo.get("trio"))
+    payouts = {"quinella": (q_odds if quinella_hit and q_odds else 0),
+               "trifecta": (t_odds if trifecta_hit and t_odds else 0)}
+    try:
+        if (quinella_hit and q_odds and q_odds >= 30) or (trifecta_hit and t_odds and t_odds >= 100):
+            _highlight_save({"raceKey": rk, "top3": top3,
+                             "quinella_hit": quinella_hit, "quinella_odds": q_odds,
+                             "trifecta_hit": trifecta_hit, "trifecta_odds": t_odds, "t": time.time()})
+    except Exception as e:
+        print("[하이라이트] 저장 실패:", e)
+
     anomalies_detected, anomaly_correct = [], False
     for d in an.get("drops", [])[:5]:
         if d["pct"] < 0:
@@ -1725,6 +1770,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
 
     record = {
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
+        "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
         "anomalies_detected": anomalies_detected, "anomaly_was_correct": anomaly_correct,
         "reversals": [r for r in an.get("reversals", []) if r.get("flipped")],
         "keyHorses": an.get("keyHorses"),

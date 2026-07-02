@@ -203,8 +203,77 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true; // async
   }
 
+  // [1번] 결과 자동수집 타이머 예약/취소 (chrome.alarms)
+  if (msg?.type === 'SCHEDULE_RESULT_TIMER') {
+    scheduleResultTimer(msg.raceKey, msg.deadline).then(sendResponse);
+    return true;
+  }
+  if (msg?.type === 'CANCEL_RESULT_TIMER') {
+    chrome.alarms.clear('resultCheck');
+    chrome.storage.local.remove('resultTimer');
+    chrome.storage.local.set({ resultAutoStatus: { state: 'cancelled', t: Date.now() } });
+    sendResponse({ ok: true });
+    return true;
+  }
+
   if (msg?.type === 'CHECK_SERVER') {
     checkServer().then(sendResponse);
     return true;
+  }
+});
+
+// ── [1번] 결과 자동수집 타이머 (발주 후 10/12/14분 = 종료 7분후 + 재시도 2회) ──
+const RESULT_CHECK_OFFSETS = [10, 12, 14]; // 발주시각 기준 분
+
+async function scheduleResultTimer(raceKey, deadline) {
+  if (!deadline) return { ok: false, error: '발주시각(타이머)을 먼저 설정하세요.' };
+  const times = RESULT_CHECK_OFFSETS.map((m) => deadline + m * 60000);
+  await chrome.storage.local.set({
+    resultTimer: { raceKey: raceKey || '', deadline, times, idx: 0 },
+    resultAutoStatus: { state: 'scheduled', raceKey: raceKey || '', nextAt: times[0], t: Date.now() },
+  });
+  chrome.alarms.create('resultCheck', { when: Math.max(Date.now() + 3000, times[0]) });
+  return { ok: true, firstCheck: times[0] };
+}
+
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (alarm.name !== 'resultCheck') return;
+  const { resultTimer } = await chrome.storage.local.get({ resultTimer: null });
+  if (!resultTimer) return;
+  const { raceKey, times, idx } = resultTimer;
+
+  // asyukk 탭을 찾아 결과 수집 지시 (content script 가 경주결과 탭 클릭 + 추출)
+  let done = false, data = null;
+  try {
+    const tabs = await chrome.tabs.query({ url: ['*://*.qwqwd25.net/*'] });
+    if (tabs.length) {
+      const res = await chrome.tabs.sendMessage(tabs[0].id, { type: 'COLLECT_RESULTS', reason: 'timer' })
+        .catch(() => null);
+      if (res && res.ok) { done = true; data = res.data || null; }
+    } else {
+      console.warn('[결과타이머] asyukk 탭이 열려있지 않아 결과를 수집할 수 없습니다.');
+    }
+  } catch (e) { console.warn('[결과타이머] 수집 오류', e); }
+
+  if (done) {
+    await chrome.storage.local.remove('resultTimer');
+    await chrome.storage.local.set({
+      resultAutoStatus: { state: 'done', raceKey, top3: data && data.top3, hit: data && data.hit, t: Date.now() },
+    });
+    setBadge(true, '✓');
+  } else {
+    const nextIdx = idx + 1;
+    if (nextIdx < times.length) {
+      resultTimer.idx = nextIdx;
+      await chrome.storage.local.set({
+        resultTimer,
+        resultAutoStatus: { state: 'retry', raceKey, attempt: nextIdx + 1, nextAt: times[nextIdx], t: Date.now() },
+      });
+      chrome.alarms.create('resultCheck', { when: Math.max(Date.now() + 3000, times[nextIdx]) });
+    } else {
+      await chrome.storage.local.remove('resultTimer');
+      await chrome.storage.local.set({ resultAutoStatus: { state: 'manual', raceKey, t: Date.now() } });
+      setBadge(false);
+    }
   }
 });

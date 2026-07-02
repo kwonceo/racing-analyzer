@@ -407,6 +407,23 @@
     return res;
   }
 
+  // [2번] 경주결과 탭 자동 클릭 → 1.5초 대기 → 착순·확정배당 추출·전송
+  //   결과 미확정이면 {ok:false, notReady:true} 로 반환 → 타이머가 재시도.
+  async function collectResultsByTab(reason) {
+    if (!isResultPage()) {
+      console.log('[결과수집] 경주결과 탭 클릭 시도... (labels=경주결과/결과/성적/払戻/成績)');
+      const r = await clickTabAndWait(['경주결과', '결과', '성적', '払戻', '成績', 'レース結果'],
+        oddsSignature(), '경주결과', false);
+      if (r.clicked) await wait(1500);
+    }
+    const results = extractResults();
+    if (!results.length) {
+      console.warn('[결과수집] 아직 착순 없음(경주 미종료/미확정) → 재시도 대기');
+      return { ok: false, notReady: true, error: '결과 미확정' };
+    }
+    return sendResults(reason);
+  }
+
   async function sendResults(reason) {
     const results = extractResults();
     if (!results.length) {
@@ -1153,6 +1170,11 @@
     }
     if (msg?.type === 'MANUAL_SEND_RESULTS') {
       sendResults('manual').then(sendResponse);
+      return true;
+    }
+    // [1·2번] 결과 자동수집: 경주결과 탭 클릭 → 대기 → 추출·전송 (타이머/수동 공용)
+    if (msg?.type === 'COLLECT_RESULTS') {
+      collectResultsByTab(msg.reason || 'auto').then(sendResponse);
       return true;
     }
     if (msg?.type === 'MANUAL_COLLECT_TRIPLE') {

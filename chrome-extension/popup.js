@@ -30,7 +30,7 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null },
+    { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
       els.interval.value = String(v.intervalSec || 60);
@@ -40,6 +40,7 @@ function loadState() {
       renderResultStatus(v.resultStatus);
       renderTripleStatus(v.tripleStatus);
       if (v.tripleProgress && !v.tripleProgress.done) renderTripleProgress(v.tripleProgress);
+      renderResultTimer(v.resultAutoStatus);
     }
   );
 }
@@ -189,6 +190,51 @@ previewSend.addEventListener('click', async () => {
     });
   }
   previewSend.disabled = false; previewSend.textContent = '✅ 확인 후 전송';
+});
+
+// ── [1·5번] 결과 자동수집 타이머 예약 + 상태 표시 ────────────────────
+const btnArmTimer = document.getElementById('armResultTimer');
+const timerCard = document.getElementById('resultTimerCard');
+const timerRow = document.getElementById('resultTimerRow');
+const timerDetail = document.getElementById('resultTimerDetail');
+
+function renderResultTimer(st) {
+  if (!st || !st.state) { timerCard.style.display = 'none'; return; }
+  timerCard.style.display = 'block';
+  const at = st.nextAt ? new Date(st.nextAt).toLocaleTimeString('ko-KR', { hour12: false }) : '';
+  if (st.state === 'scheduled') { timerRow.innerHTML = `<span class="ok">⏱ 예약됨</span> ${esc(st.raceKey || '')}`; timerDetail.textContent = `첫 체크 ${at} (발주+10분)`; }
+  else if (st.state === 'retry') { timerRow.innerHTML = `<span>🔄 재시도 ${st.attempt}/3</span>`; timerDetail.textContent = `다음 체크 ${at}`; }
+  else if (st.state === 'done') {
+    const h = st.hit || {};
+    const win = h.quinella || h.trifecta || h.was_hit;
+    timerRow.innerHTML = win ? '<span class="ok">✅ 결과 수집 완료 · 적중!</span>' : '<span class="err">✅ 결과 수집 완료 · 미적중</span>';
+    const parts = [];
+    if (st.top3) parts.push(`실제 ${(st.top3 || []).join('-')}`);
+    if (h.quinella) parts.push(`복승 적중${h.payouts && h.payouts.quinella ? ' ' + h.payouts.quinella + '배' : ''}`);
+    if (h.trifecta) parts.push(`삼복승 적중${h.payouts && h.payouts.trifecta ? ' ' + h.payouts.trifecta + '배' : ''}`);
+    if (!h.quinella && !h.trifecta) parts.push('추천 조합 미적중');
+    timerDetail.textContent = parts.join(' · ');
+  } else if (st.state === 'manual') { timerRow.innerHTML = '<span class="err">❌ 결과 수동 확인 필요 (3회 재시도 실패)</span>'; timerDetail.textContent = ''; }
+  else if (st.state === 'cancelled') { timerRow.textContent = '예약 취소됨'; timerDetail.textContent = ''; }
+}
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+btnArmTimer.addEventListener('click', () => {
+  btnArmTimer.disabled = true; btnArmTimer.textContent = '예약 중…';
+  chrome.storage.local.get({ raceKey: '', timerDeadline: 0 }, ({ raceKey, timerDeadline }) => {
+    if (!timerDeadline) {
+      timerCard.style.display = 'block';
+      timerRow.innerHTML = '<span class="err">먼저 상단 타이머에 발주시각을 설정하세요.</span>';
+      timerDetail.textContent = '';
+      btnArmTimer.disabled = false; btnArmTimer.textContent = '⏱ 결과 자동수집 예약 (발주시각 기준)';
+      return;
+    }
+    chrome.runtime.sendMessage({ type: 'SCHEDULE_RESULT_TIMER', raceKey, deadline: timerDeadline }, (res) => {
+      if (!res || !res.ok) { timerCard.style.display = 'block'; timerRow.innerHTML = `<span class="err">${(res && res.error) || '예약 실패'}</span>`; }
+      btnArmTimer.disabled = false; btnArmTimer.textContent = '⏱ 결과 자동수집 예약 (발주시각 기준)';
+    });
+  });
 });
 
 // ── [2번] 결과(1~3착) 전송 ──────────────────────────────────────────
@@ -344,6 +390,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes.resultStatus) renderResultStatus(changes.resultStatus.newValue);
   if (changes.tripleStatus) renderTripleStatus(changes.tripleStatus.newValue);
   if (changes.tripleProgress) renderTripleProgress(changes.tripleProgress.newValue);
+  if (changes.resultAutoStatus) renderResultTimer(changes.resultAutoStatus.newValue);
 });
 
 // ── 초기화 ──────────────────────────────────────────────────────────
