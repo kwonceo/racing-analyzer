@@ -2190,6 +2190,23 @@ def learning_stats():
     return jsonify({"stats": L.get("stats", {}), "count": len(L.get("records", []))})
 
 
+# [v2.0.0] 확장(백그라운드 자동수집 엔진) → 분석기(웹) 상태 브리지.
+#   확장 서비스워커가 수집 상태를 POST 하고, 분석기 페이지가 GET 으로 폴링해
+#   "🟢 자동수집 중 | 마지막 | 다음 | 발주까지" 상태바를 그린다.
+_AUTO_STATUS = {}
+
+
+@app.route("/api/auto/status", methods=["GET", "POST"])
+def auto_status():
+    global _AUTO_STATUS
+    if request.method == "POST":
+        s = request.json or {}
+        s["serverAt"] = time.time()
+        _AUTO_STATUS = s
+        return jsonify({"ok": True})
+    return jsonify(_AUTO_STATUS)
+
+
 # ───────── KRA 공공데이터: API 키 저장 + 마필 과거기록 조회 ─────────
 KRA_KEY_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_key.txt")
 KRA_HISTORY_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_history.json")

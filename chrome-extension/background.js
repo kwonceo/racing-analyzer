@@ -24,11 +24,11 @@ function setBadge(ok, count) {
   } catch (_) { /* noop */ }
 }
 
-// 기본 설정 초기화
+// 기본 설정 초기화 + [v2] 자동수집 엔진 복원
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.get(
     { autoSend: false, intervalSec: 30, raceKey: '' },
-    (v) => chrome.storage.local.set(v)
+    (v) => { chrome.storage.local.set(v); syncAutoEngine(); }
   );
 });
 
@@ -237,6 +237,8 @@ async function scheduleResultTimer(raceKey, deadline) {
 }
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
+  // [v2] 자동수집 하트비트/단계 알람 → 엔진 tick (서비스워커가 죽어도 알람이 부활시킴)
+  if (alarm.name === AUTO_ALARM || /^stageT/.test(alarm.name)) { autoTick('alarm'); return; }
   if (alarm.name !== 'resultCheck') return;
   const { resultTimer } = await chrome.storage.local.get({ resultTimer: null });
   if (!resultTimer) return;
@@ -277,3 +279,158 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     }
   }
 });
+
+
+/* ═══════════════════ [v2.0.0] 백그라운드 자동수집 엔진 ═══════════════════
+ * 팝업이 닫혀도, 다른 탭으로 이동해도 자동수집이 계속되도록 타이머를
+ * content.js(탭) → background.js(서비스워커) 로 이관한다.
+ *   - chrome.alarms(30초 하트비트): 서비스워커가 잠들어도 다시 깨워 수집 지속
+ *   - 살아있는 동안은 fine setInterval(5초 점검)로 실제 간격 준수
+ *       · 평상시 기본 간격(30초) · 마감 3분전(T-3) → 15초로 단축
+ *   - 발주 임박 단계는 chrome.notifications 로 팝업 없이도 알림:
+ *       · T-1분: 이상감지 강제 + "🚨 마감 1분전! 복승 A+B 급락감지"
+ *       · T-30초: "⏰ 30초! 지금 베팅: 복승 A+B"
+ *       · T-0: 수집 중지 + "🏁 경주 시작"
+ * ===================================================================== */
+const AUTO_ALARM = 'autoCollectTick';           // 30초 하트비트(서비스워커 부활)
+const AUTO_STATUS_URL = `${SERVER}/api/auto/status`;
+let _fineTimer = null, _keepaliveTimer = null, _collecting = false, _nextDueAt = 0;
+
+function _autoCfg() {
+  return new Promise((r) => chrome.storage.local.get(
+    { autoSend: false, intervalSec: 30, autoMode: 'triple', timerDeadline: 0 }, r));
+}
+function _setAutoStatus(s) {
+  const st = Object.assign({ t: Date.now() }, s);
+  chrome.storage.local.set({ autoCollectStatus: st });
+  // [4번] 분석기(웹)는 chrome.storage 를 못 읽으므로 서버로도 상태를 흘려보낸다.
+  try { fetch(AUTO_STATUS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(st) }); } catch (_) { /* */ }
+}
+
+// 단계 발화 1회성 보장(서비스워커가 죽었다 살아나도 재발화 안 되게 storage 로 영속화)
+async function _stageFiredOnce(deadline, key) {
+  const { autoStageFired } = await chrome.storage.local.get({ autoStageFired: null });
+  const f = (autoStageFired && autoStageFired.deadline === deadline) ? autoStageFired : { deadline, stages: [] };
+  if (f.stages.includes(String(key))) return true;
+  f.stages.push(String(key));
+  await chrome.storage.local.set({ autoStageFired: f });
+  return false;
+}
+
+async function syncAutoEngine() {
+  const cfg = await _autoCfg();
+  if (!cfg.autoSend) { stopAutoEngine(); return; }
+  chrome.alarms.create(AUTO_ALARM, { periodInMinutes: 0.5 });   // 30초 하트비트
+  ['stageT1', 'stageT30', 'stageT0'].forEach((n) => chrome.alarms.clear(n));
+  const now = Date.now();
+  if (cfg.timerDeadline) {   // 발주 임박 단계 정확 발화용 1회성 백업 알람
+    if (cfg.timerDeadline - 60000 > now) chrome.alarms.create('stageT1', { when: cfg.timerDeadline - 60000 });
+    if (cfg.timerDeadline - 30000 > now) chrome.alarms.create('stageT30', { when: cfg.timerDeadline - 30000 });
+    if (cfg.timerDeadline > now) chrome.alarms.create('stageT0', { when: cfg.timerDeadline });
+  }
+  _ensureFineLoop();
+  autoTick('start');
+}
+function stopAutoEngine() {
+  chrome.alarms.clear(AUTO_ALARM);
+  ['stageT1', 'stageT30', 'stageT0'].forEach((n) => chrome.alarms.clear(n));
+  if (_fineTimer) { clearInterval(_fineTimer); _fineTimer = null; }
+  if (_keepaliveTimer) { clearInterval(_keepaliveTimer); _keepaliveTimer = null; }
+}
+function _ensureFineLoop() {
+  if (!_fineTimer) _fineTimer = setInterval(() => autoTick('fine'), 5000);
+  // keepalive: 20초마다 가벼운 API 호출로 서비스워커 idle 타이머 리셋(마감 임박 정밀도 유지)
+  if (!_keepaliveTimer) _keepaliveTimer = setInterval(() => { try { chrome.runtime.getPlatformInfo(() => {}); } catch (_) { /* */ } }, 20000);
+}
+
+async function _findOddsTab() {
+  const tabs = await chrome.tabs.query({ url: ['*://*.keiba.go.jp/*', '*://*.qwqwd25.net/*'] });
+  if (!tabs.length) return null;
+  return tabs.find((t) => /Odds|배당|TodayRaceInfo|DebaTable/i.test(t.url || '')) || tabs[0];
+}
+async function _collectOnce() {
+  const tab = await _findOddsTab();
+  if (!tab) { _setAutoStatus({ running: true, warn: '배당판 탭이 열려있지 않음' }); return null; }
+  try {
+    return await chrome.tabs.sendMessage(tab.id, { type: 'AUTO_COLLECT', reason: 'bg' });
+  } catch (e) {
+    _setAutoStatus({ running: true, warn: '수집 탭 응답 없음(페이지 새로고침 필요)' });
+    return null;
+  }
+}
+async function _forceAnalyze() {
+  try {
+    const res = await fetch(ANALYZE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: '' }) });
+    const d = await res.json();
+    if (res.ok) chrome.storage.local.set({ analyzeStatus: { data: d, at: Date.now() } });
+    return res.ok ? d : null;
+  } catch (_) { return null; }
+}
+function _mainBet(d) { const r = (d && d.betRecommend) || []; const m = r.find((x) => x.label === '복승 메인') || r[0]; return m ? ('복승 ' + m.combo.join('+')) : ''; }
+function _trioBet(d) { const r = (d && d.betRecommend) || []; const m = r.find((x) => x.label === '삼복승 메인'); return m ? m.combo.join('+') : ''; }
+function _topDrop(d) { const dr = (d && d.drops) || []; const x = dr.find((y) => y.pct < 0); return x ? `복승 ${x.combo[0]}+${x.combo[1]} (${x.pct}%) 급락감지` : ''; }
+
+function _notify(id, title, message, strong) {
+  try {
+    chrome.notifications.create('kb_' + id + '_' + Date.now(), {
+      type: 'basic', iconUrl: 'icons/icon128.png', title, message,
+      priority: 2, requireInteraction: !!strong, buttons: [{ title: '📊 분석기 열기' }],
+    });
+  } catch (_) { /* */ }
+  // 온페이지 배너+소리(timer.js) 병행 — 배당 페이지/분석기 탭에서도 보이고 들린다.
+  chrome.storage.local.set({ collectAlert: { level: strong ? '🚨' : '🟠', text: title + ' · ' + (message || '').split('\n')[0], at: Date.now() } });
+}
+
+async function autoTick(reason) {
+  const cfg = await _autoCfg();
+  if (!cfg.autoSend) { stopAutoEngine(); _setAutoStatus({ running: false }); return; }
+  _ensureFineLoop();
+  const now = Date.now();
+  const left = cfg.timerDeadline ? (cfg.timerDeadline - now) : null;
+
+  // T-0: 수집 중지 + 경주 시작 알림
+  if (left != null && left <= 0) {
+    if (!(await _stageFiredOnce(cfg.timerDeadline, 'stop'))) _notify('start', '🏁 경주 시작', '배당 수집을 자동 중지했습니다.', false);
+    stopAutoEngine();
+    _setAutoStatus({ running: false, stopped: true, deadline: cfg.timerDeadline });
+    return;
+  }
+
+  // 수집(due 시각에만 실제 수집 — fine 5초 점검이지만 간격은 지킴)
+  const baseMs = Math.max(10, Number(cfg.intervalSec) || 30) * 1000;
+  const intervalMs = (left != null && left <= 180000) ? 15000 : baseMs;   // T-3분 → 15초
+  if ((reason === 'start' || now >= _nextDueAt) && !_collecting) {
+    _collecting = true;
+    try { await _collectOnce(); } catch (_) { /* */ }
+    _collecting = false;
+    _nextDueAt = Date.now() + intervalMs;
+    _setAutoStatus({ running: true, last: Date.now(), next: _nextDueAt, deadline: cfg.timerDeadline || 0, intervalMs });
+    _forceAnalyze();   // 수집 직후 분석 1회 → 분석기/팝업 실시간 갱신
+  }
+
+  // T-1분: 이상감지 강제 실행 + Chrome 알림
+  if (left != null && left <= 60000 && !(await _stageFiredOnce(cfg.timerDeadline, 't1'))) {
+    const a = await _forceAnalyze();
+    const drop = _topDrop(a), bet = _mainBet(a), trio = _trioBet(a);
+    _notify('t1', '🚨 마감 1분전 이상감지',
+      `${drop || '급락 신호 확인'}\n최종 베팅: ${bet || '데이터 부족'}${trio ? (' / 삼복승 ' + trio) : ''}`, true);
+  }
+  // T-30초: 최종 알림
+  if (left != null && left <= 30000 && !(await _stageFiredOnce(cfg.timerDeadline, 't30'))) {
+    const a = await _forceAnalyze();
+    _notify('t30', '⏰ 30초! 지금 베팅', `${_mainBet(a) || '데이터 부족'}`, true);
+  }
+}
+
+chrome.notifications.onButtonClicked.addListener(() => { chrome.tabs.create({ url: `${SERVER}/` }); });
+chrome.notifications.onClicked.addListener(() => { chrome.tabs.create({ url: `${SERVER}/` }); });
+
+// 설정(autoSend/간격/발주시각) 변경 → 엔진 즉시 동기화
+chrome.storage.onChanged.addListener((ch, area) => {
+  if (area !== 'local') return;
+  if (ch.autoSend || ch.intervalSec || ch.autoMode || ch.timerDeadline) syncAutoEngine();
+});
+// 브라우저 시작/서비스워커 부활 시 엔진 복원
+chrome.runtime.onStartup.addListener(syncAutoEngine);
+// 로드 즉시 1회 동기화(이미 autoSend 켜져 있으면 바로 재개)
+syncAutoEngine();

@@ -3382,9 +3382,43 @@
   // ---------- escape ----------
   function esc(str) { return String(str == null ? '' : str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
+  // [v2.0.0] 자동수집 상태바 — 확장 백그라운드 엔진 상태를 서버 브리지(/api/auto/status)로
+  //   폴링해 "🟢 자동수집 중 | 마지막 | 다음 | 발주까지" 를 화면 하단에 항상 표시.
+  function initAutoStatusBar() {
+    if (document.getElementById('autoStatusBar')) return;
+    const bar = document.createElement('div');
+    bar.id = 'autoStatusBar';
+    bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99998;padding:5px 12px;'
+      + 'font:600 12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
+      + 'color:#e2e8f0;border-top:1px solid #334155;display:none;text-align:center;letter-spacing:.2px';
+    document.body.appendChild(bar);
+    const two = (n) => String(n).padStart(2, '0');
+    const hms = (ms) => { const d = new Date(ms); return two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds()); };
+    const cd = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + '분 ' + two(s % 60) + '초'; };
+    async function tick() {
+      let s = null;
+      try { s = await (await fetch('/api/auto/status')).json(); } catch (_) { /* */ }
+      const now = Date.now();
+      if (!s || (!s.running && !s.stopped)) { bar.style.display = 'none'; return; }
+      bar.style.display = 'block';
+      if (s.stopped) { bar.style.background = '#1e293b'; bar.textContent = '⏹ 자동수집 중지됨 (발주 마감)'; return; }
+      const active = !!(s.running && s.last && (now - s.last < 90000));
+      const parts = [active ? '🟢 자동수집 중' : '🟡 자동수집 대기'];
+      if (s.last) parts.push('마지막 ' + hms(s.last));
+      if (s.next) parts.push('다음 ' + hms(s.next));
+      if (s.deadline && s.deadline > now) parts.push('발주까지 ' + cd(s.deadline - now));
+      if (s.warn) parts.push('⚠ ' + s.warn);
+      bar.style.background = active ? '#0f291b' : '#0f172a';
+      bar.textContent = parts.join('   |   ');
+    }
+    tick();
+    setInterval(tick, 2000);
+  }
+
   // ---------- 부트 ----------
   async function boot() {
     initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initKoreaHistory();
+    initAutoStatusBar();   // [v2.0.0] 자동수집 상태바
     // [개편] initCombined() 제거 — 통합분석 탭 폐지(한국/일본 탭에 자동 표시).
     checkServerHealth();
     try { await JockeyDB.load(); rebuildJockeyStats(); } catch (e) { console.warn('기수 DB 로드 실패:', e); }

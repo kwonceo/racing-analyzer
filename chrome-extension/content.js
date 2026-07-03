@@ -1287,9 +1287,14 @@
     return m ? `복승 ${m.combo.join('+')}` : '';
   }
 
+  // [v2.0.0] 자동수집 타이머를 background.js(서비스워커)로 이관 → 팝업이 닫혀도,
+  //   다른 탭으로 이동해도 수집이 계속된다. content.js 는 background 의 AUTO_COLLECT
+  //   메시지에만 반응해 수집을 실행한다. (아래 자체 setTimeout 루프는 하위호환 보존·기본 비활성)
+  const BG_DRIVES = true;
   async function restartLoop() {
     if (timer) { clearTimeout(timer); timer = null; }
     _stageFired = new Set();
+    if (BG_DRIVES) return;   // background.js 가 타이머를 담당하므로 자체 루프는 돌리지 않음
     const { autoSend } = await getSettings();
     if (!autoSend) return;
 
@@ -1385,6 +1390,20 @@
     if (msg?.type === 'MANUAL_COLLECT_TRIPLE') {
       collectTriple('manual').then(sendResponse);
       return true;
+    }
+    // [v2.0.0] background 자동수집 엔진의 수집 지시(팝업/탭 무관하게 주기적으로 옴)
+    if (msg?.type === 'AUTO_COLLECT') {
+      (async () => {
+        if (_autoRunning) { sendResponse({ ok: false, error: '이전 수집 진행중(건너뜀)' }); return; }
+        _autoRunning = true;
+        try {
+          const { autoMode } = await getSettings();
+          const r = await (autoMode === 'snapshot' ? doSend('auto') : collectTriple('auto'));
+          sendResponse(r || { ok: false });
+        } catch (e) { sendResponse({ ok: false, error: String(e.message || e) }); }
+        finally { _autoRunning = false; }
+      })();
+      return true; // async
     }
     // [4번] 미리보기: 전송 전 추출 결과 + 검증 + 상위 10조합 반환
     if (msg?.type === 'PREVIEW') {
