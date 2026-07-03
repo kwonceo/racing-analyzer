@@ -994,7 +994,9 @@ def _starters_save(db):
 
 
 def _form_from_starters(rk, drops):
-    """저장된 출마표2 전적으로 마필 점수·등급 계산. 배당 급락마는 이상감지 상향 반영."""
+    """저장된 전적으로 마필 점수·등급 계산. 배당 급락마는 이상감지 상향 반영.
+    - 일본(출마표2): recent 착순으로 점수 재계산
+    - 한국(PDF): 프론트에서 이미 계산한 formScore/totalScore를 그대로 사용(마명·기수 한글 유지)."""
     rec = _starters_load().get(rk)
     if not rec or not rec.get("horses"):
         return None
@@ -1005,9 +1007,30 @@ def _form_from_starters(rk, drops):
                 anomaly_by_no.setdefault(int(h), {
                     "signalScore": min(100, 50 + int(abs(d["pct"]))),
                     "drop": abs(d["pct"]) / 100.0})
+    raw = rec["horses"]
+    # [한국경마] 사전 계산된 전적점수가 있으면 그대로 통과(PDF Vision 한글 데이터)
+    prescored = any(h.get("formScore") is not None or h.get("totalScore") is not None for h in raw)
+    if rec.get("source") == "korea" or prescored:
+        scored = []
+        for h in raw:
+            ts = h.get("totalScore")
+            if ts is None:
+                ts = h.get("formScore")
+            no = h.get("no")
+            an = anomaly_by_no.get(int(no)) if no is not None else None
+            scored.append({
+                "no": no, "name": h.get("name", ""), "jockey": h.get("jockey", ""),
+                "recentPlacings": (h.get("recent") or h.get("recentPlacings") or [])[:5],
+                "baseScore": round(ts or 0, 1), "courseBonus": 0, "jockeyBonus": 0,
+                "totalScore": round(ts or 0, 1), "detail": [], "flags": [], "anomaly": an,
+            })
+        classify_grades(scored)
+        scored.sort(key=lambda x: -x["totalScore"])
+        return scored
+    # [일본경마] 출마표2 착순으로 재계산
     horses = [{"no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
                "recentPlacings": h.get("recent") or [], "currentWeight": h.get("weight")}
-              for h in rec["horses"]]
+              for h in raw]
     scored = compute_horse_scores({}, horses, None, anomaly_by_no)
     scored.sort(key=lambda x: -x["totalScore"])
     return scored
@@ -1251,6 +1274,104 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None):
     }
 
 
+def _parse_combo_map(qd):
+    """히스토리 스냅샷의 quinella dict('1+2':45.2) → {(1,2):45.2}."""
+    out = {}
+    for k, v in (qd or {}).items():
+        try:
+            out[tuple(sorted(int(x) for x in k.split("+")))] = float(v)
+        except (ValueError, TypeError):
+            pass
+    return out
+
+
+# [한국경마 급락 기준] 마감 임박일수록 작은 급락도 민감하게:
+#   10분전 대비 20%↑ → 🟡 주의 / 5분전 대비 15%↑ → 🟠 주의 / 2분전 대비 10%↑ → 🔴 급락
+KR_DROP_BANDS = [(10, 0.20, "🟡"), (5, 0.15, "🟠"), (2, 0.10, "🔴")]
+_TIER_RANK = {"🟡": 1, "🟠": 2, "🔴": 3}
+
+
+def _time_based_drop_signals(rk):
+    """경주 히스토리(발주전분 기록)로 시간대별 마감 임박 급락 신호 생성.
+    최신 스냅샷을 각 시간대(10/5/2분전) 기준 스냅샷과 비교. 발주시각 미설정이면 빈 리스트."""
+    try:
+        path, _, _ = _hist_path(rk)
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return []
+    snaps = [s for s in (doc.get("snapshots") or []) if s.get("minutes_before") is not None]
+    if len(snaps) < 2:
+        return []
+    latest = snaps[-1]
+    curQ = _parse_combo_map(latest.get("quinella"))
+    if not curQ:
+        return []
+
+    def _ref(minutes):
+        # minutes분 이상 전 스냅샷 중 minutes에 가장 가까운 것(없으면 None)
+        cands = [s for s in snaps[:-1] if (s.get("minutes_before") or 0) >= minutes]
+        return min(cands, key=lambda s: s["minutes_before"] - minutes) if cands else None
+
+    best = {}  # combo → {level, band, prev, cur, pct} (가장 강한 티어만 유지)
+    for minutes, thr, icon in KR_DROP_BANDS:
+        ref = _ref(minutes)
+        if not ref:
+            continue
+        refQ = _parse_combo_map(ref.get("quinella"))
+        for k, o in curQ.items():
+            po = refQ.get(k)
+            if po and po > 0 and o > 0:
+                drop = (po - o) / po  # 양수 = 배당 하락(자금유입)
+                if drop >= thr:
+                    cand = {"level": icon, "band": minutes, "prev": round(po, 1),
+                            "cur": round(o, 1), "pct": round(-drop * 100, 1)}
+                    cur = best.get(k)
+                    if cur is None or _TIER_RANK[icon] > _TIER_RANK[cur["level"]]:
+                        best[k] = cand
+    reasons = {"🟡": "마감 10분전 대비 급락 → 자금 유입 초기(관찰)",
+               "🟠": "마감 5분전 대비 급락 → 자금 유입 가속(주목)",
+               "🔴": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"}
+    out = [{"level": d["level"], "type": "마감급락", "combo": list(k),
+            "text": f"{k[0]}+{k[1]} 복승 {d['prev']}→{d['cur']} ({d['band']}분전 대비 {d['pct']}%)",
+            "detail": reasons.get(d["level"], "")}
+           for k, d in best.items()]
+    out.sort(key=lambda s: _TIER_RANK.get(s["level"], 0), reverse=True)
+    return out
+
+
+def _integrated_grades(form, curQ, curD):
+    """[통합분석] 전적 40% + 배당 60% 결합 점수 → A/B/C/D 재부여.
+    form=[{no,name,jockey,totalScore}]. 배당 대표값=해당 말이 낀 최저 복승(없으면 쌍승)배당."""
+    if not form:
+        return None
+    repr_odds = {}
+    for (a, b), o in (curQ or {}).items():
+        for h in (a, b):
+            if o > 0 and (repr_odds.get(h) is None or o < repr_odds[h]):
+                repr_odds[h] = o
+    if not repr_odds:
+        for (a, b), o in (curD or {}).items():
+            for h in (a, b):
+                if o > 0 and (repr_odds.get(h) is None or o < repr_odds[h]):
+                    repr_odds[h] = o
+    out = []
+    for h in form:
+        no = h.get("no")
+        fscore = max(0.0, min(100.0, float(h.get("totalScore") or 0)))
+        o = repr_odds.get(int(no)) if no is not None else None
+        oscore = _odds_score(o)
+        integ = round(0.4 * fscore + 0.6 * oscore, 1)
+        out.append({"no": no, "name": h.get("name", ""), "jockey": h.get("jockey", ""),
+                    "formScore": round(fscore, 1), "oddsScore": oscore,
+                    "odds": o, "integrated": integ})
+    out.sort(key=lambda x: -x["integrated"])
+    n = len(out)
+    for i, h in enumerate(out):
+        frac = i / n if n else 0
+        h["grade"] = "A" if frac < 0.25 else "B" if frac < 0.50 else "C" if frac < 0.75 else "D"
+    return out
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -1465,8 +1586,15 @@ def _triple_analyze(rk, rec):
     except Exception:
         last_snap = None
 
-    form = _form_from_starters(rk, drops)  # 출마표2/KRA 전적 등급(있으면)
+    form = _form_from_starters(rk, drops)  # 출마표2/KRA/PDF 전적 등급(있으면)
     elimination = _elimination(curQ, curD, exa, drops, form, trio_map)  # 배당+전적 복합 제거
+
+    # [한국경마] 시간대별(발주 10/5/2분전 대비) 마감 임박 급락 신호를 앞쪽에 병합
+    time_drops = _time_based_drop_signals(rk)
+    if time_drops:
+        signals = time_drops + signals
+    # [통합분석] 전적 40% + 배당 60% 통합 등급(전적이 있을 때만)
+    integrated = _integrated_grades(form, curQ, curD)
 
     return {
         "raceKey": rk, "hasPrev": bool(prev),
@@ -1477,6 +1605,7 @@ def _triple_analyze(rk, rec):
         "summary": summary, "chart": chart,
         "form": form,
         "elimination": elimination,  # 배당+전적 복합 제거/후보 판정
+        "integrated": integrated,    # 전적40%+배당60% 통합 등급(A/B/C/D)
         "learned": learned,  # 학습 통계 안내(있으면)
         "signals": signals, "lastSnapshot": last_snap,  # 실시간 변동 알림용
     }
@@ -1513,6 +1642,66 @@ def extract_japan():
     trec = _triple_load().get(rk) or {}
     print(f"[출마표2 전적] {rk}: {len(horses)}두 저장")
     return jsonify(_triple_analyze(rk, trec))
+
+
+@app.route("/api/korea/form", methods=["POST"])
+def korea_form():
+    """[한국경마] PDF Vision 전적을 STARTERS_STORE에 저장(마명·기수 한글 그대로, 전적점수 포함).
+    body:{raceKey, horses:[{no,name,jockey,formScore(또는 totalScore),recentPlacings}]} → {ok,count}.
+    저장 후 같은 raceKey로 배당이 수집되면 /api/odds/triple/analyze 가 통합(전적+배당) 결과를 낸다."""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"error": "raceKey가 필요합니다."}), 400
+    horses = body.get("horses") or []
+    sdb = _starters_load()
+    sdb[rk] = {"horses": horses, "t": time.time(), "source": "korea"}
+    _starters_save(sdb)
+    print(f"[한국 전적] {rk}: {len(horses)}두 저장(PDF)")
+    return jsonify({"ok": True, "count": len(horses), "raceKey": rk})
+
+
+def _rk_venue_num(k):
+    """raceKey/경주명에서 (경마장, 경주번호) 추출. 예:'2026-07-03 서울 5R' → ('서울',5)."""
+    m = re.search(r"(\d+)\s*(?:R\b|경주|레이스)", k or "", re.IGNORECASE)
+    num = int(m.group(1)) if m else None
+    venue = None
+    for v in ("부산경남", "부경", "부산", "서울", "제주"):
+        if v in (k or ""):
+            venue = "부경" if v in ("부산경남", "부산", "부경") else v
+            break
+    return venue, num
+
+
+@app.route("/api/odds/triple/match", methods=["POST"])
+def triple_match():
+    """[한국경마 자동연결] 경마장·경주번호로 수집된 배당 raceKey를 찾아 통합분석 반환.
+    body:{title?, venue?, num?} → {matched, raceKey?, analysis?, candidates}.
+    확장이 '서울 5R'로 수집하면 PDF '서울 5경주'와 번호로 자동 매칭된다."""
+    body = request.json or {}
+    num = body.get("num")
+    venue = (body.get("venue") or "").strip()
+    if num is None and body.get("title"):
+        v2, n2 = _rk_venue_num(body["title"])
+        venue, num = (venue or v2 or ""), n2
+    if venue in ("부산경남", "부산", "부경"):
+        venue = "부경"
+    db = _triple_load()
+    keys = sorted(db.keys(), key=lambda k: db[k].get("t", 0), reverse=True)
+    if not db:
+        return jsonify({"matched": False, "reason": "no_data", "candidates": []})
+    if num is None:
+        return jsonify({"matched": False, "reason": "no_num", "candidates": keys[:8]})
+    match = None
+    for k in keys:  # 최신 우선
+        kv, kn = _rk_venue_num(k)
+        if kn == int(num) and (not venue or not kv or kv == venue):
+            match = k
+            break
+    if not match:
+        return jsonify({"matched": False, "reason": "no_match", "candidates": keys[:8]})
+    return jsonify({"matched": True, "raceKey": match,
+                    "analysis": _triple_analyze(match, db.get(match) or {})})
 
 
 @app.route("/api/odds/triple/analyze", methods=["GET", "POST"])

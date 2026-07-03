@@ -16,6 +16,7 @@ const els = {
   autoSend: $('autoSend'),
   interval: $('interval'),
   autoMode: $('autoMode'),
+  market: $('market'),
   sendNow: $('sendNow'),
   lastResult: $('lastResult'),
   lastDetail: $('lastDetail'),
@@ -30,11 +31,12 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null },
+    { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple', market: 'auto', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
       els.interval.value = String(v.intervalSec || 60);
       els.autoMode.value = v.autoMode || 'triple';
+      if (els.market) els.market.value = v.market || 'auto';
       els.raceKey.value = v.raceKey || '';
       renderStatus(v.status);
       renderResultStatus(v.resultStatus);
@@ -94,6 +96,9 @@ els.interval.addEventListener('change', () => {
 });
 els.autoMode.addEventListener('change', () => {
   chrome.storage.local.set({ autoMode: els.autoMode.value });
+});
+if (els.market) els.market.addEventListener('change', () => {
+  chrome.storage.local.set({ market: els.market.value });
 });
 els.raceKey.addEventListener('change', () => {
   chrome.storage.local.set({ raceKey: els.raceKey.value.trim() });

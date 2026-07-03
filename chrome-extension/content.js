@@ -580,8 +580,8 @@
       .map((t) => t.innerText).join(' ').replace(/\s+/g, ' ').slice(0, 400);
   }
 
-  // [2번] 탭 클릭 → 대기 → 표 변경 확인(변화 없으면 재시도)
-  async function clickTabAndWait(labels, prevSig, betLabel, requireChange) {
+  // [2번] 탭 클릭 → 대기 → 표 변경 확인(변화 없으면 재시도). waitMs=탭당 로딩 대기(기본 2초)
+  async function clickTabAndWait(labels, prevSig, betLabel, requireChange, waitMs) {
     console.log(`[배당수집] ${betLabel} 탭 클릭 시도... (labels=${labels.join('/')})`);
     let el = findTabButton(labels);
     if (!el) {
@@ -590,7 +590,7 @@
     }
     for (let attempt = 1; attempt <= 3; attempt++) {
       try { el.click(); } catch (e) { console.warn(`[배당수집] ${betLabel} 클릭 오류`, e); }
-      await wait(2000); // 데이터 로딩 대기
+      await wait(waitMs || 2000); // 데이터 로딩 대기
       const sig = oddsSignature();
       const changed = sig !== prevSig && sig.length > 0;
       if (!requireChange || changed) {
@@ -965,7 +965,8 @@
   async function collectTripleByTabs(reason) {
     const site = detectSite();
     const oddsClass = site === 'asyukk' ? 'odds_content' : null;
-    const { raceKey: override, timerDeadline } = await getSettings();
+    const { raceKey: override, timerDeadline, market } = await getSettings();
+    const isKorea = market === 'korea';   // [5번] 한국경마: 출마표2(keiba DebaTable) 수집 생략 → 전적은 PDF에서
     const raceKey = (override && override.trim()) || extractRaceKey();
     if (!raceKey) {
       setTripleProgress('❌ raceKey 필요', true);
@@ -997,9 +998,10 @@
 
       // 2) 쌍승 (순서 있음 → 방향 유지, dedupe는 a>b 키)
       //  [디버그 강화] 쌍승 탭이 실제로 전환·로드됐는지, 조합이 뽑혔는지 상세 로그.
-      setTripleProgress('쌍승 수집중…');
-      console.log('[쌍승수집] 탭 클릭 시도... (labels=쌍승/마단/쌍승식/馬単)');
-      const r2 = await clickTabAndWait(['쌍승', '마단', '쌍승식', '馬単'], sig, '쌍승', true);
+      setTripleProgress('쌍승 수집중…(최대 5초)');
+      console.log('[쌍승수집] 탭 클릭 시도... (labels=쌍승/마단/쌍승식/馬単, 타임아웃 5초·재시도 3회)');
+      // [1번] 쌍승은 불안정 → 타임아웃 5초·재시도 3회. 실패해도 오류 없이 복승만으로 진행.
+      const r2 = await clickTabAndWait(['쌍승', '마단', '쌍승식', '馬単'], sig, '쌍승', true, 5000);
       console.log(`[쌍승수집] 탭 클릭 결과: ${r2.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${r2.changed ? '변경 확인' : '⚠ 변화 없음(복승 화면 그대로일 수 있음)'}`);
       sig = r2.sig || oddsSignature();
       const exMap = {};
@@ -1017,7 +1019,9 @@
           .map((e) => `${e.combo[0]}→${e.combo[1]} ${e.odds}`).join(' · ');
         console.log(`[쌍승수집] 상위 5개(최저배당순): ${top5}`);
       } else {
-        console.warn('[쌍승수집] ⚠ 쌍승 조합을 추출하지 못함 — 쌍승(馬単) 탭이 활성화됐는지, 매트릭스가 로드됐는지 확인하세요.');
+        // [1번] 쌍승 실패는 치명적이지 않음 → 복승만으로 계속 진행(사용자에게 안내만)
+        console.warn('[쌍승수집] ⚠ 쌍승 미수집 — 복승만으로 분석을 진행합니다. (쌍승 탭 활성/매트릭스 로드 확인)');
+        setTripleProgress('쌍승 미수집 — 복승만으로 분석 진행');
       }
 
       // 3) 삼복승: 유력마 3마리를 축으로 클릭 → 각 축 매트릭스 추출 (텍스트형이면 폴백)
@@ -1034,14 +1038,20 @@
       console.log(`[배당수집] 삼복승 총 추출: ${trio.length}개 조합`);
 
       // 4) 출마표2 전적: keiba.go.jp DebaTable을 fetch해 추출(우선) → 실패 시 인페이지 탭 클릭 폴백
-      setTripleProgress('출마표2 전적 수집중…(keiba DebaTable)');
+      //    [5번] 한국경마(market=korea)는 출마표2가 없고 전적은 PDF에서 추출하므로 수집 시도 자체를 생략 → 관련 오류 제거
       let starters = [];
-      try { starters = await fetchDebaStarters(); } catch (e) { console.warn('[전적수집] DebaTable fetch 오류', e); }
-      if (!starters.length) {
-        console.log('[전적수집] DebaTable 실패/없음 → 인페이지 출마표2 탭 시도(폴백)');
-        setTripleProgress('출마표2 전적 수집중…(인페이지 폴백)');
-        try { starters = await collectStartersByTab(); } catch (e) { console.warn('[전적수집] 인페이지 수집 오류', e); }
-        await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false); // 복승으로 복귀
+      if (isKorea) {
+        console.log('[전적수집] 한국경마 모드 → 출마표2(keiba DebaTable) 수집 생략(전적은 PDF에서 추출)');
+        setTripleProgress('한국경마 모드 — 전적은 PDF에서 (출마표2 생략)');
+      } else {
+        setTripleProgress('출마표2 전적 수집중…(keiba DebaTable)');
+        try { starters = await fetchDebaStarters(); } catch (e) { console.warn('[전적수집] DebaTable fetch 오류', e); }
+        if (!starters.length) {
+          console.log('[전적수집] DebaTable 실패/없음 → 인페이지 출마표2 탭 시도(폴백)');
+          setTripleProgress('출마표2 전적 수집중…(인페이지 폴백)');
+          try { starters = await collectStartersByTab(); } catch (e) { console.warn('[전적수집] 인페이지 수집 오류', e); }
+          await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false); // 복승으로 복귀
+        }
       }
 
       const payload = {
@@ -1064,8 +1074,10 @@
         });
         console.log('[전적] /api/extract/japan 응답:', japan && japan.ok ? 'ok' : (japan && japan.error));
       }
+      const exNote = payload.exacta.length ? `·쌍승 ${payload.exacta.length}` : '·쌍승 미수집';
+      const stNote = isKorea ? '·전적 PDF' : `·전적 ${starters.length}두`;
       setTripleProgress(res && res.ok
-        ? `수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두`
+        ? `수집 완료 ✅ 복승 ${payload.quinella.length}${exNote}·삼복승 ${payload.trio.length}${stNote}`
         : `❌ 전송 실패: ${(res && res.error) || ''}`, true);
       return res || { ok: false, error: 'background 응답 없음' };
     } catch (e) {
@@ -1087,7 +1099,7 @@
     return new Promise((resolve) => {
       chrome.storage.local.get(
         // autoMode: 'triple'(전체 3종) | 'snapshot'(단승만) · timerDeadline: 발주시각(epoch ms)
-        { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple', timerDeadline: 0 },
+        { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple', timerDeadline: 0, market: 'auto' },
         (v) => resolve(v)
       );
     });

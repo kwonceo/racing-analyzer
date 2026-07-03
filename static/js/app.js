@@ -16,6 +16,7 @@
     japanOdds: null,
     japanForm: null,
     lastReports: {},
+    koreaScored: {},  // title -> {race, form:[{no,name,jockey,formScore,recentPlacings}]} — 배당 통합용
     lastSheets: {},   // title -> {horses(추출 출전마), distance} — Phase 4 통합분석용
     lastCombined: {}, // title -> {bets, recOdds, hadAnomaly, budget} — Phase 5 결과기록용
     oddsTrack: { betType: '복승', raceKey: null, snaps: 0, nos: new Set(), firstOdds: {},
@@ -299,7 +300,10 @@
       state.lastReports[title] = report;
       renderReport('#koreaReport', report, '한국', title);
       renderPageControl(idx);
-      try { await renderFormScores(race, { horses: sheetHorses }); } catch (e) { console.warn('전적 점수 패널 실패:', e); }
+      let scored = null;
+      try { scored = await renderFormScores(race, { horses: sheetHorses }); } catch (e) { console.warn('전적 점수 패널 실패:', e); }
+      // [통합분석] 전적 초안 후 배당판 자동 연결 감시 시작(전적 40% + 배당 60%)
+      try { await wireKoreaOdds(title, race, scored || []); } catch (e) { console.warn('배당 연결 실패:', e); }
       renderWeightPanel(title, sheetHorses);
       renderKoreaFooter(idx, title, race);   // [기능1·2] 경주 이동 + 결과입력 버튼
       refreshRaceChipStatus();               // [기능3] 진행상황 칩 갱신 (이 경주 → ✅)
@@ -2334,9 +2338,10 @@
       recentPlacings: h.recentPlacings || [],
       jockey3mPlaceRate: (state.jockeyStats[h.jockey] || {}).placeRate,
     }));
-    if (!horses.length) return;
+    if (!horses.length) return null;
     const res = await Analysis.scoreHorses(raceCtx, horses);
     renderFormScorePanel(res.horses || []);
+    return res.horses || [];
   }
 
   function renderFormScorePanel(scored) {
@@ -2364,6 +2369,128 @@
         <tbody>${rows}</tbody>
       </table>`;
     host.appendChild(el);
+  }
+
+  // ---------- [통합분석] 한국경마 PDF 전적 + 배당판 자동 연결 ----------
+  //  전적 초안(A/B/C/D) → 확장이 같은 경주번호로 배당 수집 → 자동 통합(전적40%+배당60%) 재조정.
+  let _koreaOddsTimer = null, _koreaOddsTitle = null;
+
+  function stopKoreaOddsWatch() {
+    if (_koreaOddsTimer) { clearInterval(_koreaOddsTimer); _koreaOddsTimer = null; }
+  }
+
+  function koreaRaceParts(title) {
+    const m = String(title || '').match(/(\d+)\s*(?:R|경주|레이스)/i);
+    const num = m ? parseInt(m[1], 10) : null;
+    let venue = '';
+    ['서울', '부산경남', '부경', '부산', '제주'].forEach((v) => { if (!venue && String(title).includes(v)) venue = v; });
+    return { venue, num };
+  }
+
+  /** 전적 초안 저장 후 배당판 자동 연결 감시 시작(경주 전환 시 교체) */
+  async function wireKoreaOdds(title, race, scored) {
+    stopKoreaOddsWatch();
+    _koreaOddsTitle = title;
+    const form = (scored || []).map((h) => ({
+      no: h.no, name: h.name, jockey: h.jockey || '',
+      formScore: h.totalScore, recentPlacings: h.recentPlacings || [],
+    }));
+    state.koreaScored[title] = { race, form };
+    setKoreaOddsStatus('waiting', title);
+    $('#koreaIntegrated').innerHTML = '';
+    const tick = () => pollKoreaOdds(title, form);
+    await tick();
+    _koreaOddsTimer = setInterval(tick, 12000);   // 12초마다 배당 매칭 재시도(마감 임박 배당변화 반영)
+  }
+
+  /** 배당 raceKey 자동 매칭 → 전적 저장 → 통합분석 렌더 */
+  async function pollKoreaOdds(title, form) {
+    if (_koreaOddsTitle !== title) return;   // 다른 경주로 이동됨 → 중단
+    let m;
+    try {
+      m = await (await fetch('/api/odds/triple/match', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }),
+      })).json();
+    } catch (_) { return; }
+    if (_koreaOddsTitle !== title) return;
+    if (!m || !m.matched) {
+      const noMatch = m && m.reason === 'no_match' && (m.candidates || []).length;
+      setKoreaOddsStatus(noMatch ? 'nomatch' : 'waiting', title, m);
+      return;
+    }
+    try {
+      // 매칭된 raceKey로 한글 전적 저장 → 그 raceKey의 통합분석(전적+배당) 재요청
+      await fetch('/api/korea/form', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raceKey: m.raceKey, horses: form }),
+      });
+      const a = await (await fetch('/api/odds/triple/analyze', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: m.raceKey }),
+      })).json();
+      if (_koreaOddsTitle !== title) return;
+      if (a && !a.error && !a.waiting) {
+        setKoreaOddsStatus('linked', title, { raceKey: m.raceKey });
+        renderKoreaIntegrated(a);
+      }
+    } catch (e) { console.warn('[통합분석] 실패', e); }
+  }
+
+  function setKoreaOddsStatus(kind, title, info) {
+    const el = $('#koreaOddsStatus'); if (!el) return;
+    const { venue, num } = koreaRaceParts(title);
+    const rkHint = `${venue || ''} ${num != null ? num + 'R' : ''}`.trim();
+    if (kind === 'waiting') {
+      el.innerHTML = `<div class="hint" style="padding:8px 10px;background:rgba(245,158,11,.12);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b">
+        🟡 <b>배당판 미연결 — 전적 기준 초안</b><br>배당판을 수집하면 더 정확한 분석이 됩니다. Chrome 확장(종목=한국경마)에서 <b>${esc(rkHint)}</b> raceKey로 [⚡ 전체 자동 수집]을 실행하세요.</div>`;
+    } else if (kind === 'nomatch') {
+      const cands = ((info && info.candidates) || []).map((c) => `<span class="chip">${esc(c)}</span>`).join(' ');
+      el.innerHTML = `<div class="hint" style="padding:8px 10px;background:rgba(239,68,68,.12);border-left:3px solid #ef4444;border-radius:6px;color:#ff9f9f">
+        ⚠️ <b>배당판 경주명을 확인하세요</b> — 배당은 수집됐지만 <b>${esc(rkHint)}</b>와 경주번호가 매칭되지 않습니다.<br>수집된 경주: ${cands || '—'}</div>`;
+    } else if (kind === 'linked') {
+      el.innerHTML = `<div class="hint" style="padding:8px 10px;background:rgba(56,211,159,.14);border-left:3px solid #38d39f;border-radius:6px;color:#38d39f">
+        ✅ <b>배당판 연결 완료 — 통합 분석</b> (전적 40% + 배당 60%) · <b>${esc((info && info.raceKey) || '')}</b></div>`;
+    }
+  }
+
+  function renderKoreaIntegratedTable(integ) {
+    if (!integ || !integ.length) return '';
+    const gc = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#8a94a6' };
+    const rows = integ.map((h) => `<tr>
+      <td><b style="color:${gc[h.grade] || '#fff'}">${h.grade}</b></td>
+      <td>${h.no}</td><td>${esc(h.name || '')}</td><td>${esc(h.jockey || '')}</td>
+      <td>${h.formScore}</td><td>${h.oddsScore}</td>
+      <td>${h.odds != null ? h.odds + '배' : '-'}</td>
+      <td><b>${h.integrated}</b></td>
+    </tr>`).join('');
+    return `<div class="matrix-title" style="font-size:13px">🎯 통합 등급 (전적 40% + 배당 60%)</div>
+      <table class="data-table" style="margin-top:4px">
+        <thead><tr><th>등급</th><th>마번</th><th>마명</th><th>기수</th><th>전적</th><th>배당점수</th><th>대표배당</th><th>통합</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function renderKoreaSignals(signals) {
+    const rel = (signals || []).filter((s) => s.type === '마감급락');
+    if (!rel.length) return '';
+    const rows = rel.map((s) => `<div style="margin:3px 0"><b>${s.level}</b> ${esc(s.text)} <span class="hint">${esc(s.detail || '')}</span></div>`).join('');
+    return `<div class="matrix-title" style="font-size:13px;margin-top:8px">⏱ 마감 임박 급락 (한국경마 기준: 10분전 20%↑🟡 / 5분전 15%↑🟠 / 2분전 10%↑🔴)</div>${rows}`;
+  }
+
+  /** 통합분석 결과(제거분석·유력마·통합등급·베팅·마감급락) 렌더 — 한글 데이터 그대로 */
+  function renderKoreaIntegrated(a) {
+    const host = $('#koreaIntegrated'); if (!host) return;
+    if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
+    const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    // 제거분석 패널 재사용(읽기전용): id 충돌 방지 위해 패널 id 치환
+    const elimHtml = renderEliminationHTML(a.elimination).replace('id="elimPanel"', 'id="koreaElimPanel"');
+    host.innerHTML = `<div class="panel-card">
+      <h3>🔗 통합 분석 결과 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
+      ${renderKoreaIntegratedTable(a.integrated)}
+      <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
+      ${elimHtml}
+      ${renderKoreaSignals(a.signals)}
+      ${renderBetRecommend(a)}
+    </div>`;
   }
 
   // ---------- 통합 분석 (Phase 4) ----------
