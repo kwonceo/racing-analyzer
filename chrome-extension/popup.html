@@ -33,7 +33,7 @@
     .status-line { font-size:12px; color:#cbd5e1; }
     .muted { color:#64748b; font-size:11px; }
     .ok { color:var(--green); } .err { color:var(--red); }
-    .switch { position:relative; width:40px; height:22px; }
+    .switch { position:relative; display:inline-block; width:40px; height:22px; cursor:pointer; }
     .switch input { display:none; }
     .slider { position:absolute; inset:0; background:#475569; border-radius:22px; transition:.2s; }
     .slider:before { content:""; position:absolute; width:16px; height:16px; left:3px; top:3px;
@@ -67,10 +67,10 @@
   <div class="card">
     <div class="row">
       <label>자동 전송</label>
-      <span class="switch">
+      <label class="switch">
         <input id="autoSend" type="checkbox" />
         <span class="slider"></span>
-      </span>
+      </label>
     </div>
     <div class="row">
       <label>전송 간격</label>
