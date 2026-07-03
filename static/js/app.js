@@ -3415,10 +3415,103 @@
     setInterval(tick, 2000);
   }
 
+  // ══════════ [분석 로그] 완전 기록 UI (통계 탭) ══════════
+  async function loadAnalysisLogList() {
+    const el = document.querySelector('#logRaceList'); if (!el) return;
+    el.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/analysis-log/list')).json(); }
+    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">${esc(e.message)}</p>`; return; }
+    const logs = d.logs || [];
+    if (!logs.length) { el.innerHTML = '<p class="hint">로그가 없습니다. [오늘 로그 즉시 생성]을 눌러 생성하세요.</p>'; return; }
+    const byDate = {};
+    logs.forEach((l) => { (byDate[l.date || '?'] = byDate[l.date || '?'] || []).push(l); });
+    el.innerHTML = Object.keys(byDate).sort().reverse().map((date) =>
+      `<div style="margin-bottom:8px"><div class="hint" style="font-weight:700;margin:4px 0">${esc(date)}</div>`
+      + byDate[date].map((l) => `<div class="race-chip ${l.hasResult ? 'chip-done' : 'chip-todo'}" data-file="${esc(l.file)}" style="cursor:pointer;margin:3px 0;display:block">
+        <b>${esc(l.race || l.race_id || '')}</b> <span class="chip-page">${esc(l.analyzed_at || '')} · ${l.snaps}스냅 · 신호${l.signals}${l.hasResult ? ' · ✅결과' : ''}</span></div>`).join('')
+      + '</div>').join('');
+    el.querySelectorAll('.race-chip').forEach((c) => c.addEventListener('click', () => openAnalysisLog(c.dataset.file)));
+  }
+
+  async function openAnalysisLog(file) {
+    const el = document.querySelector('#logDetail'); if (!el) return;
+    el.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/analysis-log/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file }) })).json(); }
+    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">${esc(e.message)}</p>`; return; }
+    if (d.error) { el.innerHTML = `<p class="hint">${esc(d.error)}</p>`; return; }
+    el.innerHTML = renderAnalysisLog(d);
+    const btn = document.querySelector('#logMemoSave');
+    if (btn) btn.addEventListener('click', () => saveLogMemo(file));
+  }
+
+  function renderAnalysisLog(d) {
+    const inp = d.input_data || {}, tl = d.odds_timeline || [], sig = d.signals_detected || [];
+    const horses = d.horses || [], fr = d.final_recommendation || {}, elim = d.elimination || {};
+    const res = d.result, hit = d.hit || {};
+    const sev = (s) => /🔴|🚨/.test(s || '') ? 'chip-red' : '';
+    const inputHtml = `<div class="matrix-title" style="font-size:13px">📥 입력 데이터</div>
+      <div class="hint">소스: ${esc(inp.source || '-')}${inp.odds_source ? ' · 배당: ' + esc(inp.odds_source) : ''}${inp.image_file ? ' · 이미지: ' + esc(inp.image_file) : ''}${inp.pdf_file ? ' · PDF: ' + esc(inp.pdf_file) : ''}</div>`;
+    const tlRows = tl.slice(-12).map((s) => {
+      const q = Object.entries(s.quinella || {}).sort((a, b) => a[1] - b[1]).slice(0, 4).map(([k, v]) => `${k}:${v}`).join(' · ');
+      return `<div class="hint"><b>${esc(s.time || '')}</b> ${s.minutes_before != null ? '(' + s.minutes_before + '분전)' : ''} ${esc(q)}</div>`;
+    }).join('');
+    const tlHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">📈 배당 타임라인 <span class="hint" style="font-weight:400">${tl.length}회</span></div>${tlRows || '<div class="hint">수집 없음</div>'}`;
+    const sigHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🚨 이상감지 신호</div>`
+      + (sig.length ? sig.slice(0, 12).map((s) => `<div style="margin:2px 0"><span class="chip ${sev(s.severity)}">${esc(s.severity || '')} ${esc(s.type || '')}</span> ${esc(s.detail || '')}${s.reason ? ` <span class="hint">— ${esc(s.reason)}</span>` : ''}</div>`).join('') : '<div class="hint">없음</div>');
+    const hRows = horses.slice(0, 16).map((h) => `<tr><td><b>${esc(String(h.grade || '-'))}</b></td><td>${h.no}</td><td>${esc(h.name || '')}</td><td>${h.record_score != null ? h.record_score : '-'}</td><td>${h.odds != null ? h.odds : '-'}</td><td class="hint">${esc(h.grade_reason || '')}</td></tr>`).join('');
+    const hHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🏇 추천 이유 (말별)</div>
+      <table class="data-table"><thead><tr><th>등급</th><th>마번</th><th>마명</th><th>전적</th><th>배당</th><th>이유</th></tr></thead><tbody>${hRows}</tbody></table>`;
+    const elimHtml = `<div class="hint" style="margin-top:6px">후보: <b>${(elim.candidates || []).join(', ') || '-'}</b> · 제거: ${(elim.eliminated || []).join(', ') || '-'}</div>`;
+    const recRow = (k, label) => { const r = fr[k]; return r ? `<tr><td>${label}</td><td style="font-weight:700">${esc(r.combo)}</td><td>${r.odds != null ? r.odds + '배' : '-'}</td><td class="hint">${esc(r.reason || '')}</td></tr>` : ''; };
+    const frHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🎯 추천 조합</div>
+      <table class="data-table"><thead><tr><th>종류</th><th>조합</th><th>배당</th><th>이유</th></tr></thead><tbody>${recRow('quinella_main', '복승 메인')}${recRow('quinella_sub', '복승 보조')}${recRow('trifecta_main', '삼복승 메인')}${recRow('trifecta_insurance1', '삼복승 보험1')}${recRow('trifecta_insurance2', '삼복승 보험2')}</tbody></table>`;
+    let resHtml = '<div class="hint" style="margin-top:8px">🏁 결과 미입력</div>';
+    if (res) {
+      const yn = (b) => b ? '<span style="color:#38d39f">✅ 적중</span>' : '<span style="color:#f87171">❌ 미적중</span>';
+      resHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🏁 실제 결과</div>
+        <div><b>1착 ${res['1st'] != null ? res['1st'] : '?'} / 2착 ${res['2nd'] != null ? res['2nd'] : '?'} / 3착 ${res['3rd'] != null ? res['3rd'] : '?'}</b></div>
+        <div style="margin-top:2px">복승 ${yn(hit.quinella_hit)} · 삼복승 ${yn(hit.trifecta_hit)}${hit.anomaly_was_correct != null ? ' · 이상감지 ' + yn(hit.anomaly_was_correct) : ''}</div>`;
+    }
+    const memoHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">📝 복기 메모</div>
+      <textarea id="logMemoInput" class="cfg-input" style="width:100%;min-height:70px" placeholder="이 경주 복기 메모…">${esc(d.review || '')}</textarea>
+      <div class="cfg-row" style="margin-top:4px"><button id="logMemoSave" class="btn btn-primary">메모 저장</button> <span id="logMemoMsg" class="hint"></span></div>`;
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:10px">
+      <div class="matrix-title">${esc(d.race || d.race_id || '')} <span class="hint" style="font-weight:400">${esc(d.date || '')} · 분석 ${esc(d.analyzed_at || '')}</span></div>
+      ${inputHtml}${sigHtml}${hHtml}${elimHtml}${frHtml}${tlHtml}${resHtml}${memoHtml}</div>`;
+  }
+
+  async function saveLogMemo(file) {
+    const ta = document.querySelector('#logMemoInput'); if (!ta) return;
+    const msg = document.querySelector('#logMemoMsg');
+    try {
+      const r = await (await fetch('/api/analysis-log/memo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file, review: ta.value }) })).json();
+      if (msg) msg.textContent = r.ok ? '✅ 저장됨' : (r.error || '실패');
+    } catch (e) { if (msg) msg.textContent = '실패: ' + e.message; }
+  }
+
+  function initAnalysisLog() {
+    const q = (s) => document.querySelector(s);
+    const msg = q('#logMsg');
+    const rb = q('#logRefreshBtn'); if (rb) rb.addEventListener('click', loadAnalysisLogList);
+    const bf = q('#logBackfillBtn'); if (bf) bf.addEventListener('click', async () => {
+      if (msg) msg.textContent = '오늘까지의 경주 로그 생성 중…';
+      try { const r = await (await fetch('/api/analysis-log/backfill', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).json();
+        if (msg) msg.textContent = `✅ ${r.count}개 로그 생성/갱신`; loadAnalysisLogList();
+      } catch (e) { if (msg) msg.textContent = '실패: ' + e.message; }
+    });
+    const bk = q('#logBackupBtn'); if (bk) bk.addEventListener('click', async () => {
+      if (msg) msg.textContent = 'GitHub 백업 중…';
+      try { const r = await (await fetch('/api/analysis-log/backup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).json();
+        if (msg) msg.textContent = r.committed ? (r.pushed ? '✅ GitHub 백업 완료' : '✅ 커밋됨(푸시 건너뜀)') : ('커밋 없음: ' + esc(r.msg || ''));
+      } catch (e) { if (msg) msg.textContent = '실패: ' + e.message; }
+    });
+  }
+
   // ---------- 부트 ----------
   async function boot() {
     initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initKoreaHistory();
     initAutoStatusBar();   // [v2.0.0] 자동수집 상태바
+    initAnalysisLog();     // [분석 로그] 완전 기록 섹션
     // [개편] initCombined() 제거 — 통합분석 탭 폐지(한국/일본 탭에 자동 표시).
     checkServerHealth();
     try { await JockeyDB.load(); rebuildJockeyStats(); } catch (e) { console.warn('기수 DB 로드 실패:', e); }

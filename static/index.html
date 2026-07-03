@@ -199,6 +199,27 @@
           </div>
         </div>
       </div>
+
+      <!-- [분석 로그] 완전 저장 시스템: 왜 이 말을 추천했는지까지 추적 -->
+      <div class="panel-card">
+        <h2>📒 분석 로그 (완전 기록)</h2>
+        <div class="cfg-row">
+          <button id="logRefreshBtn" class="btn btn-primary">🔄 로그 목록</button>
+          <button id="logBackfillBtn" class="btn">📝 오늘 로그 즉시 생성</button>
+          <button id="logBackupBtn" class="btn">☁️ GitHub 백업</button>
+        </div>
+        <div id="logMsg" class="hint" style="margin-top:6px"></div>
+        <div class="cfg-row" style="margin-top:12px;gap:16px;align-items:flex-start">
+          <div style="min-width:240px">
+            <h3 style="font-size:14px">날짜별 경주</h3>
+            <div id="logRaceList" class="report-area"><p class="hint">[로그 목록]을 누르세요.</p></div>
+          </div>
+          <div style="flex:1">
+            <h3 style="font-size:14px">분석 로그 상세 (입력·타임라인·추천 이유·결과)</h3>
+            <div id="logDetail" class="report-area"><p class="hint">경주를 선택하면 당시 분석 전 과정이 표시됩니다.</p></div>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 

@@ -1832,6 +1832,8 @@ def triple_analyze():
         _history_save_analysis(rk, an)
     except Exception as e:
         print("[복기저장] 실패:", e)
+    # [분석 로그] 배당 수집·이상감지·추천이 갱신될 때마다 완전 로그 갱신(추적 가능 기록)
+    _analysis_log_save(rk, an)
     return jsonify(an)
 
 
@@ -1964,6 +1966,150 @@ def _history_save_analysis(rk, an):
         json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     except Exception as e:
         print("[복기저장] 실패:", e)
+
+
+# ══════════════ [분석 로그 완전 저장] data/analysis_log/ (추적 가능한 전체 기록) ══════════════
+#   왜 이 말을 추천했는지·어떤 배당을 보고 판단했는지까지 리치 스키마로 경주별 저장.
+#   기존 odds_history/learning 파이프라인은 그대로 두고, 그 데이터를 종합해 추가로 남긴다.
+ANALYSIS_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
+
+
+def _analysis_log_path(rk):
+    m = re.search(r"(\d{4}-\d{2}-\d{2})", rk or "")
+    date = m.group(1) if m else time.strftime("%Y-%m-%d", time.localtime())
+    race = re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip() or (rk or "race")
+    safe = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
+    os.makedirs(ANALYSIS_LOG_DIR, exist_ok=True)
+    return os.path.join(ANALYSIS_LOG_DIR, safe + ".json"), date, race
+
+
+def _build_analysis_log(rk, an=None):
+    """_triple_analyze 결과 + odds_history(타임라인/결과) + 전적을 종합해 리치 로그를 만들고 저장.
+    기존 로그가 있으면 사용자 입력(analyzed_at·복기 메모·profit)은 보존한다."""
+    rec = _triple_load().get(rk) or {}
+    if an is None:
+        an = _triple_analyze(rk, rec)
+    path, date, race = _analysis_log_path(rk)
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        doc = {}
+
+    # 배당 타임라인 + 실제 결과/적중(odds_history 에서)
+    timeline, result_doc, review_doc = [], None, None
+    try:
+        hp, _, _ = _hist_path(rk)
+        hist = json.load(open(hp, encoding="utf-8"))
+        for s in hist.get("snapshots", []):
+            timeline.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
+                             "quinella": s.get("quinella", {})})
+        result_doc, review_doc = hist.get("result"), hist.get("review")
+    except Exception:
+        pass
+
+    # 이상감지 신호(이유 포함)
+    last_t = (an.get("lastSnapshot") or {}).get("time")
+    signals = [{"time": last_t, "type": s.get("type"), "detail": s.get("text"),
+                "severity": s.get("level"), "reason": s.get("detail")} for s in (an.get("signals") or [])]
+
+    # 말별 상세(전적 점수 + 등급 + 등급 이유 + 배당)
+    grade_by = {h.get("no"): h.get("grade") for h in (an.get("integrated") or [])}
+    drop_set = set()
+    for d in (an.get("drops") or []):
+        if d.get("pct", 0) < 0:
+            for x in d.get("combo", []):
+                drop_set.add(x)
+    form_by = {h.get("no"): h for h in (an.get("form") or [])}
+    elim = an.get("elimination") or {}
+    ehorses = elim.get("horses") or []
+    win = an.get("single") or {}
+    horses = []
+    for h in sorted(ehorses, key=lambda x: -(x.get("total") or 0)):
+        no = h.get("no")
+        f = form_by.get(no, {})
+        rp = f.get("recentPlacings") or []
+        horses.append({
+            "no": no, "name": f.get("name") or h.get("name") or "",
+            "jockey": f.get("jockey") or "",
+            "record_score": f.get("totalScore"),
+            "record_detail": ("최근 " + "-".join(str(x) for x in rp)) if rp else "",
+            "odds": win.get(str(no)) if isinstance(win, dict) else None,
+            "grade": grade_by.get(no) or f.get("grade") or h.get("tier") or h.get("verdict"),
+            "grade_reason": h.get("reason"),
+        })
+
+    cand = [h["no"] for h in ehorses if h.get("keep") or h.get("override")]
+    elim_no = [h["no"] for h in ehorses if not (h.get("keep") or h.get("override"))]
+    elim_reasons = {str(h["no"]): h.get("reason") for h in ehorses
+                    if not (h.get("keep") or h.get("override"))}
+
+    def _combo_reason(nos):
+        gs = "·".join(f"{n}번({grade_by.get(n, '?')})" for n in nos)
+        return gs + (" · 급락감지" if any(n in drop_set for n in nos) else "")
+
+    label_map = [("복승 메인", "quinella_main"), ("복승 보조", "quinella_sub"),
+                 ("삼복승 메인", "trifecta_main"), ("삼복승 보험1", "trifecta_insurance1"),
+                 ("삼복승 보험2", "trifecta_insurance2")]
+    final, alloc = {}, {}
+    for lbl, key in label_map:
+        r = next((b for b in (an.get("betRecommend") or []) if b.get("label") == lbl), None)
+        if not r:
+            continue
+        od = r.get("expOdds") if r.get("expOdds") is not None else r.get("expOddsEst")
+        final[key] = {"combo": "+".join(str(x) for x in r["combo"]), "odds": od, "reason": _combo_reason(r["combo"])}
+        alloc["trifecta_insurance" if "보험" in lbl else key] = f"{r.get('alloc', 0)}%"
+    final["budget_allocation"] = alloc
+
+    input_data = (doc.get("input_data") if doc else None) or {
+        "source": "Chrome확장 자동수집(배당) + 전적표",
+        "pdf_file": None, "image_file": None,
+        "odds_source": rec.get("source") or "asyukk34 Chrome확장 자동수집",
+    }
+
+    log = {
+        "race_id": os.path.splitext(os.path.basename(path))[0],
+        "date": date, "race": race,
+        "analyzed_at": (doc.get("analyzed_at") if doc else None) or time.strftime("%H:%M:%S", time.localtime()),
+        "updated_at": time.strftime("%H:%M:%S", time.localtime()),
+        "input_data": input_data,
+        "odds_timeline": timeline,
+        "signals_detected": signals,
+        "horses": horses,
+        "elimination": {"candidates": cand, "eliminated": elim_no, "elimination_reasons": elim_reasons},
+        "final_recommendation": final,
+        "summary": an.get("summary"),
+        "keyHorses": an.get("keyHorses"),
+        "result": result_doc,
+        "hit": review_doc,
+        "profit": (doc.get("profit") if doc else None),
+        "review": (doc.get("review") if doc else None),   # 사용자 복기 메모(텍스트)
+    }
+    json.dump(log, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    return log
+
+
+def _analysis_log_save(rk, an=None):
+    try:
+        return _build_analysis_log(rk, an)
+    except Exception as e:
+        print("[분석로그] 저장 실패:", e)
+        return None
+
+
+def _analysis_log_git_backup(label):
+    """data/analysis_log/ 를 커밋(+가능하면 push). 원격/인증 미설정이면 조용히 건너뜀."""
+    root = os.path.dirname(os.path.abspath(__file__))
+    try:
+        subprocess.run(["git", "add", "data/analysis_log"], cwd=root, timeout=30, capture_output=True)
+        r = subprocess.run(["git", "commit", "-m", (label or "분석 로그 백업").strip()],
+                           cwd=root, timeout=30, capture_output=True, text=True)
+        if r.returncode != 0:
+            return {"committed": False, "msg": ((r.stdout or "") + (r.stderr or "")).strip()[:200]}
+        pr = subprocess.run(["git", "push"], cwd=root, timeout=90, capture_output=True, text=True)
+        return {"committed": True, "pushed": pr.returncode == 0,
+                "msg": (pr.stderr or "").strip()[:200] if pr.returncode != 0 else "pushed"}
+    except Exception as e:
+        return {"committed": False, "msg": str(e)}
 
 
 def _learning_load():
@@ -2163,6 +2309,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
         json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     except Exception as e:
         print("[복기저장] 결과 요약 실패:", e)
+    # [분석 로그] 결과 입력 시 로그에 실제 결과·적중 반영
+    _analysis_log_save(rk)
     print(f"[자동학습] {rk} 결과 {top3} → 추천적중 {was_hit}, 급락적중 {anomaly_correct}, "
           f"전적유력마 {form_pick}({'적중' if form_pick_hit else '실패'}), 제거적중 {elimination_correct}")
     return record, L["stats"]
@@ -2205,6 +2353,92 @@ def auto_status():
         _AUTO_STATUS = s
         return jsonify({"ok": True})
     return jsonify(_AUTO_STATUS)
+
+
+# ══════════════ [분석 로그] 목록/조회/메모/백필/백업 API ══════════════
+@app.route("/api/analysis-log/list", methods=["GET", "POST"])
+def analysis_log_list():
+    """저장된 분석 로그 목록(날짜별 정렬) → [{file,race_id,date,race,analyzed_at,snaps,hasResult}]."""
+    out = []
+    if os.path.isdir(ANALYSIS_LOG_DIR):
+        for fn in sorted(os.listdir(ANALYSIS_LOG_DIR), reverse=True):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(ANALYSIS_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            out.append({"file": fn, "race_id": d.get("race_id"), "date": d.get("date"),
+                        "race": d.get("race"), "analyzed_at": d.get("analyzed_at"),
+                        "snaps": len(d.get("odds_timeline") or []),
+                        "signals": len(d.get("signals_detected") or []),
+                        "hasResult": bool(d.get("result"))})
+    return jsonify({"logs": out})
+
+
+@app.route("/api/analysis-log/get", methods=["POST"])
+def analysis_log_get():
+    """{file|raceKey} → 분석 로그 전체."""
+    body = request.json or {}
+    fn = body.get("file")
+    if fn:
+        path = os.path.join(ANALYSIS_LOG_DIR, os.path.basename(fn))
+    else:
+        path, _, _ = _analysis_log_path((body.get("raceKey") or "").strip())
+    try:
+        return jsonify(json.load(open(path, encoding="utf-8")))
+    except Exception:
+        return jsonify({"error": "분석 로그가 없습니다."}), 404
+
+
+@app.route("/api/analysis-log/memo", methods=["POST"])
+def analysis_log_memo():
+    """복기 메모 저장: {file|raceKey, review} → 로그 파일의 review 필드 갱신."""
+    body = request.json or {}
+    fn = body.get("file")
+    if fn:
+        path = os.path.join(ANALYSIS_LOG_DIR, os.path.basename(fn))
+    else:
+        path, _, _ = _analysis_log_path((body.get("raceKey") or "").strip())
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return jsonify({"error": "분석 로그가 없습니다."}), 404
+    doc["review"] = body.get("review", "")
+    doc["profit"] = body.get("profit", doc.get("profit"))
+    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/analysis-log/backfill", methods=["POST"])
+def analysis_log_backfill():
+    """[4번] 지금까지 수집/분석된 경주들의 로그를 즉시 생성(없으면 생성, 있으면 최신화).
+    triple_store(현재 배당) + odds_history(과거 스냅샷)에 존재하는 모든 raceKey 대상."""
+    keys = set(_triple_load().keys())
+    if os.path.isdir(ODDS_HISTORY_DIR):
+        for fn in os.listdir(ODDS_HISTORY_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(ODDS_HISTORY_DIR, fn), encoding="utf-8"))
+                if d.get("raceKey"):
+                    keys.add(d["raceKey"])
+            except Exception:
+                continue
+    made = []
+    for rk in keys:
+        log = _analysis_log_save(rk)
+        if log:
+            made.append(log.get("race_id"))
+    return jsonify({"ok": True, "count": len(made), "races": sorted(made)})
+
+
+@app.route("/api/analysis-log/backup", methods=["POST"])
+def analysis_log_backup():
+    """[5번] data/analysis_log/ 를 GitHub에 커밋(+push). 하루 경주 종료 후 호출."""
+    label = ((request.json or {}).get("label") or f"분석 로그 백업 {time.strftime('%Y-%m-%d', time.localtime())}").strip()
+    res = _analysis_log_git_backup(label)
+    return jsonify({"ok": True, **res})
 
 
 # ───────── KRA 공공데이터: API 키 저장 + 마필 과거기록 조회 ─────────
