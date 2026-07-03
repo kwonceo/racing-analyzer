@@ -21,6 +21,9 @@
     koreaScored: {},  // title -> {race, form:[{no,name,jockey,formScore,recentPlacings}]} — 배당 통합용
     koreaOddsPrev: {},  // [2번] title -> 직전 signal text Set (신규 변동 감지용)
     koreaTimeline: {},  // [3번] title -> [{time,changed,signals,integrated,raceKey}]
+    jpForm: null,       // [5번] 일본경마 전적표 이미지 블록
+    jpOddsPrev: null,   // [5번] 일본 직전 signal text Set
+    jpTimeline: [],     // [5번] 일본 배당 변동 타임라인
     lastSheets: {},   // title -> {horses(추출 출전마), distance} — Phase 4 통합분석용
     lastCombined: {}, // title -> {bets, recOdds, hadAnomaly, budget} — Phase 5 결과기록용
     oddsTrack: { betType: '복승', raceKey: null, snaps: 0, nos: new Set(), firstOdds: {},
@@ -61,8 +64,7 @@
         if (btn.dataset.tab === 'stats') renderStats();
         if (btn.dataset.tab === 'result') renderResultForm();
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
-        if (btn.dataset.tab === 'japan') refreshOddsRaceSelect();
-        if (btn.dataset.tab === 'combined') refreshCombinedRaceSelect();
+        if (btn.dataset.tab === 'jp') startJapanOddsWatch();   // [5번] 일본경마: 실시간 배당 연동 시작
       });
     });
   }
@@ -494,12 +496,7 @@
 
   // ---------- 일본경마 (배당판 캡처 + 전적표 업로드 통합) ----------
   function initJapanRace() {
-    // 배당판: 화면 캡처 / 파일 (state.jpOdds 만 갱신 — 전적표 유지)
-    $('#jpOddsCapBtn').addEventListener('click', captureJpOdds);
-    $('#jpOddsFileBtn').addEventListener('click', () => $('#jpOddsInput').click());
-    $('#jpOddsInput').addEventListener('change', () => { if ($('#jpOddsInput').files[0]) handleJpOdds($('#jpOddsInput').files[0]); });
-    jpDropOnly($('#jpOddsSlot'), handleJpOdds);
-    // 전적표: 파일 업로드 (state.jpForm 만 갱신 — 배당판 유지)
+    // [개편] 배당판 캡처 폐지 → 전적표 이미지 업로드만. 배당은 Chrome 확장 실시간 연동.
     $('#jpFormFileBtn').addEventListener('click', () => $('#jpFormInput').click());
     $('#jpFormInput').addEventListener('change', () => { if ($('#jpFormInput').files[0]) handleJpForm($('#jpFormInput').files[0]); });
     jpDropOnly($('#jpFormSlot'), handleJpForm);
@@ -532,38 +529,18 @@
   }
 
   function setJpStatus(kind, ok) {
-    const el = $(kind === 'odds' ? '#jpOddsStatus' : '#jpFormStatus');
+    const el = $('#jpFormStatus'); if (!el) return;
     el.textContent = ok ? '✅ 준비됨' : '⬜ 미설정';
     el.classList.toggle('ready', ok);
-    if (kind === 'odds') $('#jpOddsCapBtn').textContent = ok ? '🖥️ 배당판 다시 캡처' : '🖥️ 배당판 캡처';
-    else $('#jpFormFileBtn').textContent = ok ? '📁 전적표 교체' : '📁 전적표 업로드';
+    $('#jpFormFileBtn').textContent = ok ? '📁 전적표 교체' : '📁 전적표 업로드';
   }
 
   function updateJpReady() {
-    const both = !!(state.jpOdds && state.jpForm);
-    $('#jpAnalyzeBtn').disabled = !both;
-    $('#jpHint').textContent = both ? '준비 완료 — [분석 시작]을 누르세요'
-      : state.jpOdds ? '전적표를 업로드하세요'
-        : state.jpForm ? '배당판을 캡처/업로드하세요'
-          : '배당판과 전적표를 모두 준비하세요';
+    const ok = !!state.jpForm;
+    $('#jpAnalyzeBtn').disabled = !ok;
+    $('#jpHint').textContent = ok ? '준비 완료 — [전적 분석]을 누르세요' : '전적표를 업로드하세요';
   }
 
-  /** 배당판 화면 캡처 (전적표 state는 건드리지 않음) */
-  async function captureJpOdds() {
-    try {
-      const full = await grabFrame();          // 기존 지속 스트림 재사용
-      state.jpOdds = canvasToBlock(full);
-      setJpPreview('#jpOddsPreview', state.jpOdds);
-      setJpStatus('odds', true);
-      updateJpReady();
-      notify('✅ 배당판 캡처 완료 (전적표 유지)');
-    } catch (e) { notify('배당판 캡처 실패: ' + e.message, false); }
-  }
-  async function handleJpOdds(file) {
-    state.jpOdds = await Analysis.fileToImageBlock(file);
-    setJpPreview('#jpOddsPreview', state.jpOdds);
-    setJpStatus('odds', true); updateJpReady();
-  }
   async function handleJpForm(file) {
     state.jpForm = await Analysis.fileToImageBlock(file);
     setJpPreview('#jpFormPreview', state.jpForm);
@@ -571,13 +548,14 @@
   }
 
   async function analyzeJp() {
-    if (!(state.jpOdds && state.jpForm)) { toast('배당판과 전적표를 모두 업로드하세요'); return; }
+    if (!state.jpForm) { toast('전적표를 업로드하세요'); return; }
     try {
-      showLoading('일본경마 병합 분석 중...');
-      const rep = await Analysis.analyzeJapanRace(state.jpOdds, state.jpForm);
+      showLoading('일본경마 전적 분석 중...');
+      const rep = await Analysis.analyzeJapanRace(null, state.jpForm);   // [개편] 전적만 분석(배당은 실시간 연동)
       state.lastReports['일본경마'] = rep;
       renderJapanReport('#jpReport', rep);
       hideLoading();
+      startJapanOddsWatch();   // 분석 후 실시간 배당 연동 시작
     } catch (err) { hideLoading(); toast('분석 실패: ' + err.message); }
   }
 
@@ -636,73 +614,13 @@
   // ---------- 배당판 캡처 & 이상배당 ----------
   const cap = { canvas: null, dragging: false, sx: 0, sy: 0, rect: null, stream: null, video: null, autoAnalyze: false }; // rect: 캔버스(표시) 좌표
 
+  // [개편] 배당판 캡처(화면캡처·Alt+C·이미지 업로드) 전면 폐지 → 배당은 Chrome 확장 실시간 수집으로 통일.
+  //   여기서는 통계 탭에 남은 '배당 변동 히스토리 & 자동학습' 대시보드 버튼만 연결한다.
+  //   (기존 캡처 관련 함수 captureScreen/dualCapture/captureTriple 등은 미사용 상태로 남겨둠 = 주석처리 효과)
   function initOdds() {
-    $('#capBtn').addEventListener('click', captureScreen);
-    $('#oddsFileBtn').addEventListener('click', () => $('#oddsFileInput').click());
-    $('#oddsFileInput').addEventListener('change', () => { if ($('#oddsFileInput').files[0]) loadOddsFile($('#oddsFileInput').files[0]); });
-    $('#oddsAnalyzeBtn').addEventListener('click', runOddsAnalysis);
-
-    // 시계열 이상감지 (1차/2차 캡처)
-    $$('#betTypeSeg .seg-btn').forEach((b) => b.addEventListener('click', () => {
-      $$('#betTypeSeg .seg-btn').forEach((x) => x.classList.remove('active'));
-      b.classList.add('active');
-      state.oddsTrack.betType = b.dataset.bt;
-    }));
-    // [다중캡처] 캡처 누적 / 복승+쌍승 동시 / 자동 인터벌 / 중지 / 초기화
-    $('#snapAddBtn').addEventListener('click', () => { state.oddsTrack._pendingType = '복승'; captureNow(); });
-    $('#dualCapBtn').addEventListener('click', dualCapture);   // [1번] 복승+쌍승 2단 캡처
-    $$('.auto-int-btn').forEach((b) => b.addEventListener('click', () => startAutoCapture(+b.dataset.min)));
-    $('#autoStopBtn').addEventListener('click', () => { stopAutoCapture(); notify('⏹ 자동 캡처 중지', true); });
-    $('#oddsResetBtn').addEventListener('click', oddsReset);
-    $('#deadlineInput').addEventListener('change', applyDeadline);
-    const alt = $('#altExactaChk');
-    if (alt) { alt.checked = state.oddsTrack.dual !== false; alt.addEventListener('change', () => { state.oddsTrack.dual = alt.checked; }); }
-    $('#quickPairsApplyBtn').addEventListener('click', submitQuickPairs); // [4번] 쌍승 빠른입력
-    { const b = $('#quickQuinApplyBtn'); if (b) b.addEventListener('click', submitQuickQuin); } // [1-1] 복승 매트릭스 빠른입력
-    { const b = $('#loadTripleBtn'); if (b) b.addEventListener('click', loadTripleFromServer); } // [연동] 확장 3종 불러오기
-    { const b = $('#analyzeTripleBtn'); if (b) b.addEventListener('click', () => { loadTripleFromServer(); analyzeTripleRules(); }); } // [1번] 이상감지
-    { const b = $('#newRaceBtn'); if (b) b.addEventListener('click', startNewRace); }   // [4번] 새 경주 시작
-    { const b = $('#histViewBtn'); if (b) b.addEventListener('click', showHistoryView); } // [3번] 히스토리 보기
-    setActiveRaceKey(getActiveRaceKey());  // 라벨 초기화(저장된 활성 경주 반영)
-    { const c = $('#autoRefreshTriple'); if (c) c.addEventListener('change', () => toggleTripleAutoRefresh(c.checked)); } // [2번] 자동 갱신
-    { const b = $('#tripleBudget'); if (b) b.addEventListener('input', () => { if (_lastTripleAnalyze) renderTripleAnalyze(_lastTripleAnalyze); }); } // [버그3] 예산 금액 재계산
+    { const b = $('#tripleBudget'); if (b) b.addEventListener('input', () => { if (_lastTripleAnalyze) renderTripleAnalyze(_lastTripleAnalyze); }); }
     { const b = $('#histRefreshBtn'); if (b) b.addEventListener('click', () => { loadHistoryList(); loadLearningStats(); }); } // [5번] 히스토리
     { const b = $('#learnStatsBtn'); if (b) b.addEventListener('click', loadLearningStats); }
-    setStep(1);
-    // [2번] 빠른입력 모드
-    $('#quickOddsBtn').addEventListener('click', () => {
-      const box = $('#quickOddsBox'); box.classList.toggle('hidden');
-      if (!box.classList.contains('hidden')) $('#quickOddsInput').focus();
-    });
-    $('#quickOddsApplyBtn').addEventListener('click', submitQuickOdds);
-
-    // [3번] 3종 동시 캡처/분석
-    $$('.triple-cap-btn').forEach((b) => b.addEventListener('click', () => captureTriple(b.dataset.kind)));
-    $('#tripleRunBtn').addEventListener('click', analyzeTriple);
-    $('#cropYesBtn').addEventListener('click', () => { $('#capConfirm').classList.add('hidden'); runCropAnalysis(); });
-    $('#cropNoBtn').addEventListener('click', () => {
-      $('#capConfirm').classList.add('hidden'); cap.rect = null; drawCap();
-      notify('영역을 마우스로 직접 드래그하세요', true);
-    });
-    const cv = $('#capCanvas');
-    cv.addEventListener('mousedown', (e) => { $('#capConfirm').classList.add('hidden'); const p = capPos(e); cap.dragging = true; cap.sx = p.x; cap.sy = p.y; cap.rect = null; });
-    cv.addEventListener('mousemove', (e) => {
-      if (!cap.dragging) return;
-      const p = capPos(e);
-      cap.rect = { x: Math.min(cap.sx, p.x), y: Math.min(cap.sy, p.y), w: Math.abs(p.x - cap.sx), h: Math.abs(p.y - cap.sy) };
-      drawCap();
-    });
-    window.addEventListener('mouseup', () => { cap.dragging = false; });
-
-    // [1단계] Alt+C 단축키 캡처 (활성 탭에 따라 대상 결정)
-    document.addEventListener('keydown', (e) => {
-      if (e.altKey && !e.ctrlKey && !e.metaKey && (e.code === 'KeyC' || e.key === 'c' || e.key === 'C')) {
-        e.preventDefault();
-        const active = document.querySelector('.tab-btn.active')?.dataset.tab;
-        if (active === 'jp') captureJpOdds(); // 일본경마: 배당판만 캡처(전적표 유지)
-        else hotkeyCapture();                 // 그 외: 배당판 캡처 탭(시계열)
-      }
-    });
   }
 
   function capPos(e) {
@@ -2813,6 +2731,138 @@
     </div>`;
   }
 
+  // ---------- [5·6번] 일본경마 실시간 배당 연동 (단승 급락 우선 · 복승/쌍승 보조) ----------
+  //  전적표 이미지 분석 후 Chrome 확장(종목=일본)이 같은 raceKey로 단승·복승·쌍승을 수집.
+  //  최신 수집 raceKey를 30초 간격으로 폴링 → 통합분석·이상감지(단승급락 우선)를 자동 표시.
+  let _jpOddsTimer = null;
+
+  function stopJapanOddsWatch() {
+    if (_jpOddsTimer) { clearInterval(_jpOddsTimer); _jpOddsTimer = null; }
+  }
+
+  /** 일본 배당 실시간 감시 시작(탭 진입/전적 분석 후). 30초 간격(확장 주기와 정렬). */
+  function startJapanOddsWatch() {
+    stopJapanOddsWatch();
+    state.jpOddsPrev = state.jpOddsPrev || new Set();
+    state.jpTimeline = state.jpTimeline || [];
+    setJpOddsStatus('waiting');
+    const tick = () => pollJapanOdds();
+    tick();
+    _jpOddsTimer = setInterval(tick, 30000);
+  }
+
+  /** 최신 수집 raceKey → 통합분석 → 단승 급락 우선 이상감지 렌더 + 변동 알림/타임라인 */
+  async function pollJapanOdds() {
+    let latest;
+    try { latest = await (await fetch('/api/odds/triple/latest')).json(); }
+    catch (_) { return; }
+    const rk = latest && latest.raceKey;
+    if (!rk) { setJpOddsStatus('waiting'); return; }
+    let a;
+    try {
+      a = await (await fetch('/api/odds/triple/analyze', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }),
+      })).json();
+    } catch (_) { return; }
+    if (!a || a.error || a.waiting) { setJpOddsStatus('waiting'); return; }
+    setJpOddsStatus('linked', rk);
+    renderJapanIntegrated(a);
+    onJapanOddsUpdate(rk, a);
+  }
+
+  /** [6번] 신규 변동 감지 → 토스트+소리(단승급락 우선) / 타임라인 누적 */
+  function onJapanOddsUpdate(rk, a) {
+    const firstLink = !state.jpTimeline || !state.jpTimeline.length;
+    const hhmmss = new Date().toTimeString().slice(0, 8);
+    // 일본: 단승급락 우선 + 복승/쌍승 급락·역전 보조
+    const signals = (a.signals || []).filter((s) => s.type === '단승급락' || s.type === '급락' || s.type === '역전');
+    const prev = state.jpOddsPrev || new Set();
+    const fresh = signals.filter((s) => !prev.has(s.text));
+
+    if (fresh.length && !firstLink) {
+      const ordered = fresh.slice().sort((x, y) => (y.type === '단승급락') - (x.type === '단승급락'));
+      const lines = ordered.map((s) => `${s.level} ${s.type === '단승급락' ? '🔥' : ''}${esc(s.text)}`);
+      oddsToast(`⏱ 일본 ${esc(rk)} 배당 변동`, lines);
+      const worst = fresh.map((s) => s.level).sort((p, q) => sevRank(q) - sevRank(p))[0];
+      try { playAlert(worst); } catch (_) {}
+    }
+    state.jpOddsPrev = new Set(signals.map((s) => s.text));
+
+    const tl = state.jpTimeline || (state.jpTimeline = []);
+    tl.push({
+      time: hhmmss, raceKey: rk, changed: fresh.length > 0,
+      signals: signals.map((s) => ({ level: s.level, type: s.type, text: s.text, detail: s.detail })),
+    });
+    if (tl.length > 200) tl.splice(0, tl.length - 200);
+    renderJapanTimeline();
+  }
+
+  function setJpOddsStatus(kind, rk) {
+    const el = $('#jpOddsStatus'); if (!el) return;
+    if (kind === 'linked') {
+      el.innerHTML = `<div class="hint" style="padding:8px 10px;background:rgba(56,211,159,.14);border-left:3px solid #38d39f;border-radius:6px;color:#38d39f">
+        ✅ <b>실시간 배당 연결 — 단승 급락 우선 이상감지</b> · <b>${esc(rk || '')}</b></div>`;
+    } else {
+      el.innerHTML = `<div class="hint" style="padding:8px 10px;background:rgba(245,158,11,.12);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b">
+        🟡 <b>배당 수집 대기중</b> — Chrome 확장(종목=일본경마)에서 raceKey를 설정하고 <b>[⚡ 전체 자동 수집]</b>을 실행하세요. 단승→복승→쌍승이 30초 간격으로 연동됩니다.</div>`;
+    }
+  }
+
+  /** 단승 급락 우선 이상감지 신호 렌더 */
+  function renderJapanSignals(signals) {
+    const rel = (signals || []).filter((s) => s.type === '단승급락' || s.type === '급락' || s.type === '역전');
+    if (!rel.length) return '';
+    const ordered = rel.slice().sort((x, y) => (y.type === '단승급락') - (x.type === '단승급락'));
+    const rows = ordered.map((s) => `<div style="margin:3px 0"><b>${s.level}</b> ${s.type === '단승급락' ? '🔥 ' : ''}${esc(s.text)} <span class="hint">${esc(s.detail || '')}</span></div>`).join('');
+    return `<div class="matrix-title" style="font-size:13px;margin-top:8px">⚠️ 이상감지 (일본: 단승 급락 우선 · 복승/쌍승 보조)</div>${rows}`;
+  }
+
+  /** 실시간 배당 통합분석 결과 렌더(단승 순위·급락·유력마·베팅) */
+  function renderJapanIntegrated(a) {
+    const host = $('#jpIntegrated'); if (!host) return;
+    if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
+    const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    const single = a.single || {};
+    const ranking = a.singleRanking || [];
+    const singleHtml = ranking.length ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">🏆 단승 배당 순위 (낮을수록 인기)</div>
+      <table class="data-table" style="margin-top:4px"><thead><tr><th>순위</th><th>마번</th><th>단승배당</th></tr></thead>
+      <tbody>${ranking.map((no, i) => `<tr><td>${i + 1}</td><td>${no}</td><td><b>${single[no] != null ? single[no] + '배' : '-'}</b></td></tr>`).join('')}</tbody></table>` : '';
+    const sd = a.singleDrops || [];
+    const sdHtml = sd.length ? `<div class="matrix-title" style="font-size:13px">🔥 단승 급락 (가장 강한 자금 유입 신호)</div>
+      ${sd.map((d) => `<div style="margin:3px 0"><b>${d.no}번</b> 단승 ${d.prev}→${d.cur} <b style="color:${d.pct < 0 ? '#ff5c5c' : '#ffd24f'}">(${d.pct}%)</b></div>`).join('')}` : '';
+    host.innerHTML = `<div class="panel-card">
+      <h3>🔗 실시간 배당 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
+      ${sdHtml}
+      ${singleHtml}
+      <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
+      ${renderJapanSignals(a.signals)}
+      ${renderBetRecommend(a)}
+    </div>`;
+  }
+
+  /** 일본 배당 변동 타임라인 렌더(수집 1건 = 항목 1개) */
+  function renderJapanTimeline() {
+    let host = $('#jpTimeline');
+    if (!host) {
+      const anchor = $('#jpIntegrated'); if (!anchor) return;
+      host = document.createElement('div'); host.id = 'jpTimeline'; host.className = 'panel-card';
+      anchor.insertAdjacentElement('afterend', host);
+    }
+    const tl = state.jpTimeline || [];
+    if (!tl.length) {
+      host.innerHTML = `<h3>⏱ 배당 변동 타임라인</h3><p class="hint">배당이 수집되면 30초 간격으로 변동 내역이 누적됩니다.</p>`;
+      return;
+    }
+    const rows = tl.map((e) => {
+      const badge = e.changed ? e.signals.map((s) => s.level).join('') : '<span class="hint">변동 없음</span>';
+      const summary = e.changed ? e.signals.map((s) => (s.type === '단승급락' ? '🔥' : '') + esc(s.text)).join(' · ') : '';
+      return `<div style="padding:4px 6px;border-left:3px solid ${e.changed ? '#f59e0b' : 'transparent'};border-radius:4px">
+        <b>${e.time}</b> ${badge} <span class="hint">${summary}</span></div>`;
+    }).reverse().join('');
+    host.innerHTML = `<h3>⏱ 배당 변동 타임라인 <span class="hint" style="font-weight:400">(${tl.length}회 수집)</span></h3>
+      <div style="max-height:220px;overflow:auto">${rows}</div>`;
+  }
+
   // ---------- 통합 분석 (Phase 4) ----------
   function refreshCombinedRaceSelect() {
     const sel = $('#combinedRaceSelect');
@@ -3240,7 +3290,8 @@
 
   // ---------- 부트 ----------
   async function boot() {
-    initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initCombined(); initKoreaHistory();
+    initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initKoreaHistory();
+    // [개편] initCombined() 제거 — 통합분석 탭 폐지(한국/일본 탭에 자동 표시).
     checkServerHealth();
     try { await JockeyDB.load(); rebuildJockeyStats(); } catch (e) { console.warn('기수 DB 로드 실패:', e); }
     // [2번·3번] 저장된 한국경마 분석 결과 자동 복원(JockeyDB 로드 후 → 세션 기수통계로 덮어씀)

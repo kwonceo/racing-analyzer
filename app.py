@@ -1060,22 +1060,23 @@ def triple_ingest():
     if not rk:
         return jsonify({"error": "raceKey가 필요합니다."}), 400
     q, x, tr = body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or []
+    win = _win_map_clean(body.get("win"))   # [단승] {마번(str): 배당}
     db = _triple_load()
     prev = db.get(rk) or {}
     now = time.time()
     # 변동 추적용 히스토리(최근 12회) — 직전 대비 급락/순위/역전 계산에 사용
     hist = (prev.get("history") or [])
-    hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr})
+    hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
     hist = hist[-12:]
-    db[rk] = {"quinella": q, "exacta": x, "trio": tr, "history": hist,
+    db[rk] = {"quinella": q, "exacta": x, "trio": tr, "win": win, "history": hist,
               "source": body.get("source"), "t": now}
     _triple_save(db)
     # 배당 변동 히스토리 파일에 스냅샷 누적 (타임스탬프+발주전분+이상감지)
     try:
-        _history_append(rk, q, x, body.get("deadline"))
+        _history_append(rk, q, x, body.get("deadline"), win)
     except Exception as e:
         print("[히스토리] 기록 실패:", e)
-    counts = {"quinella": len(q), "exacta": len(x), "trio": len(tr)}
+    counts = {"quinella": len(q), "exacta": len(x), "trio": len(tr), "win": len(win)}
     print(f"[3종 수집] {rk}: {counts} (history {len(hist)})")
     return jsonify({"ok": True, "counts": counts})
 
@@ -1134,6 +1135,37 @@ def _odds_map_un(arr):
             continue
         if o > 0 and (k not in m or o < m[k]):
             m[k] = o
+    return m
+
+
+def _win_map_clean(w):
+    """단승 배당 입력({마번:배당} dict 또는 [{no,win}] list) → {마번(str): float} 정규화."""
+    out = {}
+    if isinstance(w, dict):
+        items = w.items()
+    elif isinstance(w, list):
+        items = [(it.get("no"), it.get("win", it.get("odds"))) for it in w if isinstance(it, dict)]
+    else:
+        return out
+    for k, v in items:
+        try:
+            no = int(k)
+            od = float(v)
+        except (TypeError, ValueError):
+            continue
+        if 1 <= no <= 30 and od > 0:
+            out[str(no)] = round(od, 1)
+    return out
+
+
+def _win_map_int(w):
+    """{마번(str):배당} → {마번(int):배당}."""
+    m = {}
+    for k, v in (w or {}).items():
+        try:
+            m[int(k)] = float(v)
+        except (TypeError, ValueError):
+            continue
     return m
 
 
@@ -1398,6 +1430,20 @@ def _triple_analyze(rk, rec):
     curQ = _odds_map_un(quin)
     prevQ = _odds_map_un(prev.get("quinella")) if prev else {}
 
+    # [단승] 현재/직전 단승 배당 + 급락 (가장 강한 신호)
+    curWin = _win_map_int(rec.get("win"))
+    prevWin = _win_map_int(prev.get("win")) if prev else {}
+    single_drops = []
+    for no, o in curWin.items():
+        po = prevWin.get(no)
+        if po and po > 0:
+            pct = round((o - po) / po * 100, 1)
+            if abs(pct) >= 8:
+                single_drops.append({"no": no, "prev": po, "cur": o, "pct": pct})
+    single_drops.sort(key=lambda d: d["pct"])   # 가장 큰 급락 먼저
+    # [3번] 단승 배당 순위(낮을수록 인기) — 유력마 자동 산출용
+    single_rank = [no for no, _ in sorted(curWin.items(), key=lambda kv: kv[1])]
+
     # 1) 변동/급락 (복승 조합, 음수 pct = 배당 하락=자금유입)
     drops = []
     for k, o in curQ.items():
@@ -1455,6 +1501,11 @@ def _triple_analyze(rk, rec):
         for h in k:
             freq[h] = freq.get(h, 0.0) + 1.0 + 1.0 / max(o, 0.1)
     ranked = [h for h, _ in sorted(freq.items(), key=lambda kv: -kv[1])]
+    # [3번] 단승 배당이 있으면 그 순위를 유력마 1순위 기준으로 사용(가장 직접적인 시장 신호).
+    #  단승 순위를 앞세우고, 복승 빈도 순위를 뒤에 이어붙여 3마리를 채운다.
+    if single_rank:
+        merged = single_rank + [h for h in ranked if h not in single_rank]
+        ranked = merged
     key_horses = ranked[:3]
 
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
@@ -1564,6 +1615,13 @@ def _triple_analyze(rk, rec):
             return "🟡", "자금 유입 초기 → 관찰 필요"
         return None, None
 
+    # [2번] 단승 급락 = 가장 강한 신호 → 복승 조합 알림보다 먼저 표시
+    for d in single_drops:
+        lvl, reason = _drop_reason(d["pct"])
+        if lvl:
+            signals.append({"level": lvl, "type": "단승급락", "horse": d["no"],
+                            "text": f"{d['no']}번 단승 {d['prev']}→{d['cur']} ({d['pct']}%)",
+                            "detail": reason})
     for d in drops:
         lvl, reason = _drop_reason(d["pct"])
         if lvl:
@@ -1611,12 +1669,17 @@ def _triple_analyze(rk, rec):
         signals = time_drops + signals
     # [통합분석] 전적 40% + 배당 60% 통합 등급(전적이 있을 때만)
     integrated = _integrated_grades(form, curQ, curD)
+    # [단승] 통합 등급 행에 단승 배당 부착(타임라인/화면 표시용)
+    for h in integrated or []:
+        h["win"] = curWin.get(h.get("no"))
 
     return {
         "raceKey": rk, "hasPrev": bool(prev),
-        "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio), "history": len(hist)},
-        "drops": drops[:15], "rankChanges": rank_changes, "reversals": reversals,
+        "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio),
+                   "win": len(curWin), "history": len(hist)},
+        "drops": drops[:15], "singleDrops": single_drops[:15], "rankChanges": rank_changes, "reversals": reversals,
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
+        "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
         "summary": summary, "chart": chart,
         "form": form,
@@ -1767,7 +1830,7 @@ def _combo_dict(arr):
     return d
 
 
-def _history_append(rk, quinella, exacta, deadline=None):
+def _history_append(rk, quinella, exacta, deadline=None, win=None):
     """경주별 히스토리 파일에 스냅샷 1건 추가. 직전 대비 급락(≤-20%) 이상감지 기록."""
     path, date, race = _hist_path(rk)
     try:
@@ -1785,10 +1848,25 @@ def _history_append(rk, quinella, exacta, deadline=None):
     except (TypeError, ValueError):
         minutes_before = None
     curQ = _odds_map_un(quinella)
+    curWin = _win_map_int(_win_map_clean(win))
     anomalies = []
     if doc["snapshots"]:
+        last = doc["snapshots"][-1]
+        # [단승] 급락 감지 — 가장 강한 신호이므로 먼저 기록
+        prevWin = {}
+        for k, v in (last.get("win") or {}).items():
+            try:
+                prevWin[int(k)] = float(v)
+            except (TypeError, ValueError):
+                pass
+        for no, o in sorted(curWin.items()):
+            po = prevWin.get(no)
+            if po and po > 0:
+                pct = round((o - po) / po * 100)
+                if pct <= -15:
+                    anomalies.append(f"단승급락: {no}번 {po}→{o} ({pct}%)")
         prevQ = {}
-        for k, v in (doc["snapshots"][-1].get("quinella") or {}).items():
+        for k, v in (last.get("quinella") or {}).items():
             try:
                 prevQ[tuple(sorted(int(x) for x in k.split("+")))] = float(v)
             except ValueError:
@@ -1803,6 +1881,7 @@ def _history_append(rk, quinella, exacta, deadline=None):
         "time": time.strftime("%H:%M:%S", time.localtime(now)),
         "minutes_before": minutes_before,
         "quinella": _combo_dict(quinella), "exacta": _combo_dict(exacta),
+        "win": {str(k): v for k, v in curWin.items()},
         "anomalies": anomalies, "t": now,
     })
     doc["snapshots"] = doc["snapshots"][-300:]

@@ -27,7 +27,7 @@ function setBadge(ok, count) {
 // 기본 설정 초기화
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 60, raceKey: '' },
+    { autoSend: false, intervalSec: 30, raceKey: '' },
     (v) => chrome.storage.local.set(v)
   );
 });

@@ -25,8 +25,11 @@
   <nav class="tabs">
     <button class="tab-btn active" data-tab="korea">🇰🇷 한국경마</button>
     <button class="tab-btn" data-tab="jp">🇯🇵 일본경마</button>
+    <!-- [개편] 배당판 캡처·통합분석 탭 제거: 캡처 방식 폐지, 배당은 Chrome 확장 실시간 수집으로 통일.
+         통합분석은 한국/일본 탭에 자동 표시됨.
     <button class="tab-btn" data-tab="japan">🎰 배당판 캡처</button>
     <button class="tab-btn" data-tab="combined">🎯 통합분석</button>
+    -->
     <button class="tab-btn" data-tab="result">📝 결과기록</button>
     <button class="tab-btn" data-tab="jockeydb">🏇 기수DB</button>
     <button class="tab-btn" data-tab="stats">📊 통계</button>
@@ -93,186 +96,25 @@
     <!-- 일본경마: 배당판 캡처 + 전적표 업로드 통합 -->
     <section id="tab-jp" class="tab-panel">
       <div class="panel-card">
-        <h2>일본경마 통합 분석 (배당판 + 전적표)</h2>
-        <p class="hint">배당판은 <kbd>Alt</kbd>+<kbd>C</kbd> 화면 캡처 또는 파일, 전적표는 이미지 업로드. <b>하나를 바꿔도 다른 하나는 유지됩니다.</b></p>
-        <div class="upload-grid">
-          <div class="jp-slot" id="jpOddsSlot">
-            <div class="jp-slot-head"><span>🎰 배당판</span><span class="jp-status" id="jpOddsStatus">⬜ 미설정</span></div>
-            <img id="jpOddsPreview" class="jp-preview hidden" alt="" />
-            <div class="cfg-row" style="margin-top:8px">
-              <button id="jpOddsCapBtn" class="btn btn-primary btn-small">🖥️ 배당판 캡처</button>
-              <button id="jpOddsFileBtn" class="btn btn-small">📁 파일</button>
-              <input type="file" id="jpOddsInput" accept="image/*" hidden />
-            </div>
-          </div>
-          <div class="jp-slot" id="jpFormSlot">
-            <div class="jp-slot-head"><span>📋 전적표</span><span class="jp-status" id="jpFormStatus">⬜ 미설정</span></div>
-            <img id="jpFormPreview" class="jp-preview hidden" alt="" />
-            <div class="cfg-row" style="margin-top:8px">
-              <button id="jpFormFileBtn" class="btn btn-primary btn-small">📁 전적표 업로드</button>
-              <input type="file" id="jpFormInput" accept="image/*" hidden />
-            </div>
+        <h2>일본경마 통합 분석 (전적표 + 실시간 배당)</h2>
+        <p class="hint">전적표 이미지를 업로드해 분석하고, <b>Chrome 확장(종목=일본)에서 [전체 자동 수집]</b>을 실행하면
+          단승·복승·쌍승 배당이 30초 간격으로 연동되어 통합분석·이상감지가 자동 표시됩니다. (화면 캡처 방식 폐지)</p>
+        <div class="jp-slot" id="jpFormSlot" style="max-width:420px">
+          <div class="jp-slot-head"><span>📋 전적표</span><span class="jp-status" id="jpFormStatus">⬜ 미설정</span></div>
+          <img id="jpFormPreview" class="jp-preview hidden" alt="" />
+          <div class="cfg-row" style="margin-top:8px">
+            <button id="jpFormFileBtn" class="btn btn-primary btn-small">📁 전적표 업로드</button>
+            <input type="file" id="jpFormInput" accept="image/*" hidden />
           </div>
         </div>
-        <button id="jpAnalyzeBtn" class="btn btn-primary" disabled>분석 시작</button>
-        <span class="hint" id="jpHint" style="margin-left:8px">배당판과 전적표를 모두 준비하세요</span>
+        <div style="margin-top:10px">
+          <button id="jpAnalyzeBtn" class="btn btn-primary" disabled>전적 분석</button>
+          <span class="hint" id="jpHint" style="margin-left:8px">전적표를 업로드하세요</span>
+        </div>
       </div>
       <div id="jpReport" class="report-area"></div>
-    </section>
-
-    <!-- 배당판 캡처 -->
-    <section id="tab-japan" class="tab-panel">
-      <div class="panel-card">
-        <h2>배당판 캡처 &amp; 이상배당 감지</h2>
-        <p class="hint"><kbd>Alt</kbd>+<kbd>C</kbd>로 현재 화면을 즉시 캡처할 수 있습니다(첫 1회 화면공유 허용 후 팝업 없이 재캡처). 또는 [화면 캡처]/이미지 파일 업로드 → 영역 드래그 → 분석.</p>
-        <div class="cfg-row">
-          <button id="capBtn" class="btn btn-primary">🖥️ 화면 캡처</button>
-          <input type="file" id="oddsFileInput" accept="image/*" hidden />
-          <button id="oddsFileBtn" class="btn">📁 이미지 파일</button>
-          <button id="oddsAnalyzeBtn" class="btn btn-primary" disabled>이상배당 분석</button>
-          <span class="hint" id="capHint"></span>
-        </div>
-        <div id="capWrap" class="hidden" style="margin-top:12px">
-          <canvas id="capCanvas" style="max-width:100%;border:1px solid var(--border);border-radius:8px;cursor:crosshair"></canvas>
-          <p class="hint">배당판 영역을 마우스로 드래그해 선택하세요. 선택하지 않으면 전체를 분석합니다.</p>
-          <div id="capConfirm" class="hidden cfg-row" style="margin-top:8px;align-items:center">
-            <span class="hint" id="cropConfirmText" style="margin:0"></span>
-            <button id="cropYesBtn" class="btn btn-primary">✅ 맞음 → 분석</button>
-            <button id="cropNoBtn" class="btn">✋ 직접 선택</button>
-          </div>
-        </div>
-
-        <!-- 배당 시계열 다중 캡처 · 실시간 분석 -->
-        <div id="oddsTrackPanel" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
-          <h3>📡 배당 시계열 다중 캡처 · 실시간 분석 (복승+쌍승)</h3>
-          <p class="hint">화면 캡처/크롭 후 [📸 캡처 누적] 반복 또는 [🎰 복승 캡처]로 복승 배당을 누적. <b>쌍승·삼복승은 Chrome 확장 [전체 자동 수집]</b>으로 받으세요.</p>
-
-          <!-- [2번] 캡처 순서 가이드 -->
-          <div id="captureSteps" class="cap-steps">
-            <div class="cap-step active" data-step="1"><span class="cap-step-no">1</span> [복승] 탭 열기</div>
-            <div class="cap-step-arrow">→</div>
-            <div class="cap-step" data-step="2"><span class="cap-step-no">2</span> [🎰 복승 캡처] 누르기</div>
-            <div class="cap-step-arrow">→</div>
-            <div class="cap-step" data-step="3"><span class="cap-step-no">3</span> 쌍승은 확장 [전체 자동 수집] 사용</div>
-          </div>
-
-          <div class="cfg-row">
-            <div class="seg" id="betTypeSeg">
-              <button type="button" class="seg-btn active" data-bt="복승">복승</button>
-              <button type="button" class="seg-btn" data-bt="쌍승">쌍승</button>
-              <button type="button" class="seg-btn" data-bt="삼복승">삼복승</button>
-            </div>
-            <label class="hint">연결 분석(BMED)<br>
-              <select id="oddsRaceSelect" class="cfg-input" style="width:190px"></select>
-            </label>
-            <button id="dualCapBtn" class="btn btn-primary">🎰 복승 캡처</button>
-            <button id="snapAddBtn" class="btn">📸 복승만 누적</button>
-            <button id="quickOddsBtn" class="btn">⌨️ 빠른입력</button>
-            <button id="oddsResetBtn" class="btn">🗑 초기화</button>
-          </div>
-          <!-- [2번] 자동 캡처 인터벌 -->
-          <div class="cfg-row" style="margin-top:8px;align-items:flex-end">
-            <span class="cond-label">자동 캡처</span>
-            <button type="button" class="btn auto-int-btn" data-min="2">2분</button>
-            <button type="button" class="btn auto-int-btn" data-min="3">3분</button>
-            <button type="button" class="btn auto-int-btn" data-min="5">5분</button>
-            <button id="autoStopBtn" class="btn" disabled>⏹ 캡처 중지</button>
-            <label class="hint">마감 시각(자동중지)<br><input id="deadlineInput" type="time" class="cfg-input" style="width:120px" /></label>
-            <label class="hint" style="display:flex;align-items:center;gap:5px;opacity:.5"><input id="altExactaChk" type="checkbox" disabled /> 복승/쌍승 교대 <span style="font-size:11px">(중단됨)</span></label>
-            <span class="hint" style="margin:0">자동 캡처는 <b>복승만</b> 누적합니다. 쌍승은 Chrome 확장으로 수집하세요.</span>
-          </div>
-          <!-- [2번] 빠른 입력 모드 — Vision 없이 마번·배당 숫자만 입력해 즉시 누적 -->
-          <div id="quickOddsBox" class="hidden" style="margin-top:10px;background:rgba(0,0,0,.04);padding:10px;border-radius:8px">
-            <p class="hint" style="margin:0 0 6px">⌨️ <b>빠른입력</b> — Vision 없이 즉시 계산(0.1초). 한 줄에 <code>마번 배당</code> (예: <code>4 2.4</code>). 콤마/줄바꿈 구분, <code>번/배</code> 같은 글자는 무시됩니다.</p>
-            <textarea id="quickOddsInput" rows="4" class="cfg-input" style="width:100%;box-sizing:border-box;font-family:monospace" placeholder="1 4.9&#10;4 2.4&#10;6 4.8"></textarea>
-            <div class="cfg-row" style="margin-top:6px">
-              <button id="quickOddsApplyBtn" class="btn btn-primary">⚡ 복승 즉시 누적</button>
-              <span class="hint" style="margin:0">입력할 때마다 시계열에 한 포인트씩 누적됩니다.</span>
-            </div>
-            <!-- [4번] 쌍승 빠른입력 -->
-            <div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px">
-              <p class="hint" style="margin:0 0 6px">🔀 <b>쌍승 빠른입력</b> — 한 줄에 <code>A B A→B배당 B→A배당</code> (예: <code>3 7 4.2 6.1</code>). 두 방향 배당의 대소가 뒤바뀌면 역전으로 표시됩니다.</p>
-              <textarea id="quickPairsInput" rows="3" class="cfg-input" style="width:100%;box-sizing:border-box;font-family:monospace" placeholder="3 7 4.2 6.1&#10;1 4 2.8 3.5"></textarea>
-              <div class="cfg-row" style="margin-top:6px">
-                <button id="quickPairsApplyBtn" class="btn btn-primary">🔀 쌍승 즉시 누적</button>
-              </div>
-            </div>
-            <!-- [1-1] 복승 매트릭스 빠른입력 -->
-            <div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px">
-              <p class="hint" style="margin:0 0 6px">🎰 <b>복승 매트릭스 빠른입력</b> — 한 줄에 <code>A B 배당</code> (예: <code>3 7 8.4</code>). 순서무관 조합 배당을 삼각 매트릭스로 표시합니다.</p>
-              <textarea id="quickQuinInput" rows="3" class="cfg-input" style="width:100%;box-sizing:border-box;font-family:monospace" placeholder="1 2 8.4&#10;3 5 12.0"></textarea>
-              <div class="cfg-row" style="margin-top:6px">
-                <button id="quickQuinApplyBtn" class="btn btn-primary">🎰 복승 매트릭스 누적</button>
-              </div>
-            </div>
-          </div>
-          <p class="hint" id="oddsTrackHint" style="margin-top:8px">[복승] 탭을 열고 [🎰 복승 캡처]를 누르세요. 쌍승은 Chrome 확장 [전체 자동 수집]으로 받습니다.</p>
-          <p class="hint" id="snapTimer" style="margin-top:4px;font-weight:600"></p>
-          <!-- [3번] 시계열 라인 차트 -->
-          <div id="oddsChartWrap" class="hidden" style="margin-top:12px">
-            <canvas id="oddsChart" height="260"></canvas>
-            <p class="hint" style="margin-top:4px">상위 5마리 · <span style="color:#ff5c5c">■</span> 급락 · <span style="color:#ffd24f">■</span> 반등 · <span style="color:#ff5c5c">🔴역전</span> 라인 교차</p>
-          </div>
-        </div>
-
-        <!-- [3번] 복승/쌍승/삼복승 3종 동시 분석 -->
-        <div id="triplePanel" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
-          <h3>🎯 3종 동시 분석 (복승 · 쌍승 · 삼복승)</h3>
-          <p class="hint">각 배당판을 띄우고 캡처하세요(현재 화면 전체). 3종을 함께 판독해 <b>베팅종류 간 불일치(이상)</b>를 감지합니다.</p>
-          <div class="cfg-row">
-            <button class="btn triple-cap-btn" data-kind="quinella">🎰 복승 캡처 <span class="tri-st" id="triSt-quinella">⬜</span></button>
-            <button class="btn triple-cap-btn" data-kind="exacta" disabled title="쌍승은 Chrome 확장으로 자동 수집됩니다" style="opacity:.5;cursor:not-allowed">🔀 쌍승 캡처 <span class="tri-st" id="triSt-exacta">🧩</span></button>
-            <button class="btn triple-cap-btn" data-kind="trio">🎲 삼복승 캡처 <span class="tri-st" id="triSt-trio">⬜</span></button>
-            <button id="tripleRunBtn" class="btn btn-primary" disabled>⚡ 3종 동시 분석</button>
-            <span class="hint" id="tripleHint" style="margin:0">최소 1종 캡처 후 분석 가능</span>
-          </div>
-          <p class="hint" style="margin:6px 0 0;padding:7px 10px;background:rgba(78,161,255,.1);border-left:3px solid #4ea1ff;border-radius:6px">
-            🧩 <b>쌍승은 Chrome 확장으로 자동 수집됩니다.</b> 확장 아이콘 → <b>[전체 자동 수집]</b> 클릭 →
-            복승·쌍승·삼복승이 한 번에 수집되어 <b>[📥 확장 수집 3종 불러오기]</b>로 표시됩니다.
-            (화면 캡처 방식은 쌍승 탭 전환이 불안정해 복승만 잡히는 문제가 있어 중단했습니다.)
-          </p>
-          <div class="cfg-row" style="margin-top:8px;border-top:1px dashed var(--border);padding-top:8px">
-            <button id="loadTripleBtn" class="btn btn-primary">📥 확장 수집 3종 불러오기</button>
-            <button id="analyzeTripleBtn" class="btn" style="background:#dc2626;color:#fff">🚨 이상감지 분석</button>
-            <button id="newRaceBtn" class="btn" style="background:#0ea5e9;color:#fff">🔄 새 경주 시작</button>
-            <button id="histViewBtn" class="btn">📜 히스토리 보기</button>
-            <label class="hint" style="margin:0;display:flex;align-items:center;gap:4px">
-              <input type="checkbox" id="autoRefreshTriple" /> 자동 갱신(10초)
-            </label>
-            <label class="hint" style="margin:0">예산(원) <input id="tripleBudget" type="number" min="0" step="1000" value="0" style="width:110px" /></label>
-          </div>
-          <div class="cfg-row" style="margin-top:4px">
-            <span class="hint" id="activeRaceLabel" style="margin:0;font-weight:600;color:#38d39f">현재 경주: —</span>
-            <span class="hint" style="margin:0">확장이 보낸 3종 배당을 <b>현재 경주만</b> 매트릭스·타임라인으로 표시합니다. raceKey가 바뀌면 이전 경주는 자동으로 히스토리에 보존됩니다.</span>
-          </div>
-          <div id="tripleAnalyzeReport" class="report-area" style="margin-top:10px"></div>
-          <div id="oddsTimeline" class="report-area" style="margin-top:10px"></div>
-          <div id="tripleChartWrap" class="hidden" style="margin-top:10px">
-            <canvas id="tripleChart" height="220"></canvas>
-            <p class="hint" style="margin-top:4px">최인기 배당 변동(첫 수집=100%) · <span style="color:#4ea1ff">■</span> 복승 · <span style="color:#ffd24f">■</span> 쌍승 · <span style="color:#38d39f">■</span> 삼복승 · <span style="color:#ff5c5c">▼</span> 급락 구간</p>
-          </div>
-          <div id="tripleMatrixReport" class="report-area" style="margin-top:10px"></div>
-        </div>
-      </div>
-      <div id="tripleReport" class="report-area"></div>
-      <div id="oddsTrackReport" class="report-area"></div>
-      <div id="exactaReport" class="report-area"></div>
-      <div id="oddsReport" class="report-area"></div>
-    </section>
-
-    <!-- 통합분석 (Phase 4) -->
-    <section id="tab-combined" class="tab-panel">
-      <div class="panel-card">
-        <h2>🎯 통합 분석 (전적 + 배당 이상감지)</h2>
-        <p class="hint">한국경마 PDF로 분석한 경주를 선택하고, (배당판 캡처 탭에서 <b>같은 경주명</b>으로 1·2차 배당을 저장했다면) 예산을 입력해 [통합 분석]을 누르세요. 전적 점수 + 배당 신호 → 등급·베팅을 한 화면에 표시합니다.</p>
-        <div class="cfg-row">
-          <label class="hint">분석 경주<br><select id="combinedRaceSelect" class="cfg-input" style="width:230px"></select></label>
-          <label class="hint">예산(원)<br><input id="combinedBudget" class="cfg-input" type="number" min="0" step="1000" value="100000" style="width:130px" /></label>
-          <button id="combinedRunBtn" class="btn btn-primary">통합 분석</button>
-          <span class="hint" id="combinedHint">먼저 한국경마 탭에서 경주를 분석하세요.</span>
-        </div>
-      </div>
-      <div id="combinedReport" class="report-area"></div>
+      <div id="jpOddsStatus" style="margin:10px 0"></div>
+      <div id="jpIntegrated" class="report-area"></div>
     </section>
 
     <!-- 결과입력 -->

@@ -604,6 +604,27 @@
     return { clicked: true, changed: false, sig: oddsSignature() };
   }
 
+  // [일본] 현재(단승 탭) 화면에서 마번별 단승 배당 추출 → {마번: 배당}
+  function currentSingles(oddsClass) {
+    const winMap = {};
+    const tables = new Set();
+    for (const c of document.querySelectorAll('.' + (oddsClass || 'odds_content'))) {
+      const t = c.closest('table'); if (t) tables.add(t);
+    }
+    const scan = tables.size ? [...tables] : [...document.querySelectorAll('table.odds_table, table')];
+    for (const t of scan) {
+      const { singles } = parseMatrixTable(t, oddsClass ? { oddsClass } : {});
+      for (const s of singles) {
+        if (isHorseNo(s.no) && s.win != null && s.win >= 1.0 && winMap[s.no] == null) winMap[s.no] = s.win;
+      }
+    }
+    // 폴백: keiba 単勝複勝 표(odd_popular_table_02) 구조
+    if (!Object.keys(winMap).length) {
+      for (const h of extractHorses()) if (h.win != null && h.win >= 1.0) winMap[h.no] = h.win;
+    }
+    return winMap;
+  }
+
   // 현재 화면 매트릭스에서 (행 마번 × 열 마번) 쌍 원본 추출 (dedupe 없음)
   function currentMatrixPairs(oddsClass) {
     const tables = new Set();
@@ -976,12 +997,22 @@
       .filter((c) => c.odds > 0)
       .map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10 }))
       .sort((a, b) => a.odds - b.odds).slice(0, cap);
-    console.log('[배당수집] ===== 전체 3종 수집 시작 (탭 클릭 방식) =====');
+    console.log(`[배당수집] ===== 배당 수집 시작 (탭 클릭 방식, ${isKorea ? '한국:복승' : '일본:단승+복승+쌍승'}) =====`);
 
     try {
-      // 1) 복승 (이미 복승 탭일 수 있음 → 변화 강제 안 함)
+      // 0) [일본 전용] 단승 — 가장 강한 신호. 한국은 단승 수집 안 함(복승만).
+      let win = {};
+      if (!isKorea) {
+        setTripleProgress('단승 수집중…');
+        await clickTabAndWait(['단승', '단식', '單勝', '単勝', 'WIN'], '', '단승', false);
+        win = currentSingles(oddsClass);
+        console.log(`[단승수집] ${Object.keys(win).length}두: `
+          + Object.entries(win).slice(0, 8).map(([n, o]) => `${n}=${o}`).join(' · '));
+      }
+
+      // 1) 복승 (이미 복승 탭일 수 있음 → 변화 강제 안 함). 단승 탭에서 왔으면 변화 요구.
       setTripleProgress('복승 수집중…');
-      await clickTabAndWait(['복승', '복연', '馬連'], '', '복승', false);
+      await clickTabAndWait(['복승', '복연', '馬連'], isKorea ? '' : oddsSignature(), '복승', !isKorea);
       let sig = oddsSignature();
       const quinMap = {};
       for (const p of currentMatrixPairs(oddsClass)) {
@@ -996,32 +1027,36 @@
         + quinella.slice().sort((a, b) => a.odds - b.odds).slice(0, 10).map((c) => `${c.combo[0]}-${c.combo[1]}=${c.odds}`).join(' · '));
       console.log('[복승수집] 실제 배당판과 몇 개 대조해 보세요(예: 4-7). 값이 다르면 매트릭스 열 정렬 문제 → 콘솔의 이 로그를 공유해주세요.');
 
-      // 2) 쌍승 (순서 있음 → 방향 유지, dedupe는 a>b 키)
-      //  [디버그 강화] 쌍승 탭이 실제로 전환·로드됐는지, 조합이 뽑혔는지 상세 로그.
-      setTripleProgress('쌍승 수집중…(최대 5초)');
-      console.log('[쌍승수집] 탭 클릭 시도... (labels=쌍승/마단/쌍승식/馬単, 타임아웃 5초·재시도 3회)');
-      // [1번] 쌍승은 불안정 → 타임아웃 5초·재시도 3회. 실패해도 오류 없이 복승만으로 진행.
-      const r2 = await clickTabAndWait(['쌍승', '마단', '쌍승식', '馬単'], sig, '쌍승', true, 5000);
-      console.log(`[쌍승수집] 탭 클릭 결과: ${r2.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${r2.changed ? '변경 확인' : '⚠ 변화 없음(복승 화면 그대로일 수 있음)'}`);
-      sig = r2.sig || oddsSignature();
-      const exMap = {};
-      for (const p of currentMatrixPairs(oddsClass)) {
-        if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
-        const k = `${p.a}>${p.b}`;
-        if (exMap[k] == null || p.odds < exMap[k]) exMap[k] = p.odds;
-      }
-      const exacta = Object.entries(exMap).map(([k, o]) => {
-        const [a, b] = k.split('>').map(Number); return { combo: [a, b], odds: o };
-      });
-      console.log(`[쌍승수집] 추출된 조합 수: ${exacta.length}개`);
-      if (exacta.length) {
-        const top5 = [...exacta].sort((a, b) => a.odds - b.odds).slice(0, 5)
-          .map((e) => `${e.combo[0]}→${e.combo[1]} ${e.odds}`).join(' · ');
-        console.log(`[쌍승수집] 상위 5개(최저배당순): ${top5}`);
+      // 2) 쌍승 — [일본 전용]. 한국경마는 쌍승을 수집하지 않는다(복승만).
+      let exacta = [];
+      if (isKorea) {
+        console.log('[쌍승수집] 한국경마 모드 → 쌍승 수집 생략(복승만).');
       } else {
-        // [1번] 쌍승 실패는 치명적이지 않음 → 복승만으로 계속 진행(사용자에게 안내만)
-        console.warn('[쌍승수집] ⚠ 쌍승 미수집 — 복승만으로 분석을 진행합니다. (쌍승 탭 활성/매트릭스 로드 확인)');
-        setTripleProgress('쌍승 미수집 — 복승만으로 분석 진행');
+        //  [디버그 강화] 쌍승 탭이 실제로 전환·로드됐는지, 조합이 뽑혔는지 상세 로그.
+        setTripleProgress('쌍승 수집중…(최대 5초)');
+        console.log('[쌍승수집] 탭 클릭 시도... (labels=쌍승/마단/쌍승식/馬単, 타임아웃 5초·재시도 3회)');
+        // 쌍승은 불안정 → 타임아웃 5초·재시도 3회. 실패해도 오류 없이 복승만으로 진행.
+        const r2 = await clickTabAndWait(['쌍승', '마단', '쌍승식', '馬単'], sig, '쌍승', true, 5000);
+        console.log(`[쌍승수집] 탭 클릭 결과: ${r2.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${r2.changed ? '변경 확인' : '⚠ 변화 없음(복승 화면 그대로일 수 있음)'}`);
+        sig = r2.sig || oddsSignature();
+        const exMap = {};
+        for (const p of currentMatrixPairs(oddsClass)) {
+          if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
+          const k = `${p.a}>${p.b}`;
+          if (exMap[k] == null || p.odds < exMap[k]) exMap[k] = p.odds;
+        }
+        exacta = Object.entries(exMap).map(([k, o]) => {
+          const [a, b] = k.split('>').map(Number); return { combo: [a, b], odds: o };
+        });
+        console.log(`[쌍승수집] 추출된 조합 수: ${exacta.length}개`);
+        if (exacta.length) {
+          const top5 = [...exacta].sort((a, b) => a.odds - b.odds).slice(0, 5)
+            .map((e) => `${e.combo[0]}→${e.combo[1]} ${e.odds}`).join(' · ');
+          console.log(`[쌍승수집] 상위 5개(최저배당순): ${top5}`);
+        } else {
+          console.warn('[쌍승수집] ⚠ 쌍승 미수집 — 복승만으로 분석을 진행합니다.');
+          setTripleProgress('쌍승 미수집 — 복승만으로 분석 진행');
+        }
       }
 
       // 3) 삼복승: 유력마 3마리를 축으로 클릭 → 각 축 매트릭스 추출 (텍스트형이면 폴백)
@@ -1055,11 +1090,11 @@
       }
 
       const payload = {
-        raceKey, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
+        raceKey, win, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
         deadline: timerDeadline || null, capturedAt: new Date().toISOString(), source: location.href,
       };
-      console.log(`[배당수집] ===== 완료: 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두 =====`);
-      if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length && !starters.length) {
+      console.log(`[배당수집] ===== 완료: 단승 ${Object.keys(win).length}·복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두 =====`);
+      if (!Object.keys(win).length && !payload.quinella.length && !payload.exacta.length && !payload.trio.length && !starters.length) {
         setTripleProgress('❌ 배당·전적 모두 없음(콘솔 로그 확인)', true);
         return { ok: false, error: '배당·전적을 찾지 못했습니다. F12 콘솔의 로그를 확인하세요.' };
       }
@@ -1074,10 +1109,11 @@
         });
         console.log('[전적] /api/extract/japan 응답:', japan && japan.ok ? 'ok' : (japan && japan.error));
       }
-      const exNote = payload.exacta.length ? `·쌍승 ${payload.exacta.length}` : '·쌍승 미수집';
+      const winNote = isKorea ? '' : `단승 ${Object.keys(win).length}·`;
+      const exNote = isKorea ? '' : (payload.exacta.length ? `·쌍승 ${payload.exacta.length}` : '·쌍승 미수집');
       const stNote = isKorea ? '·전적 PDF' : `·전적 ${starters.length}두`;
       setTripleProgress(res && res.ok
-        ? `수집 완료 ✅ 복승 ${payload.quinella.length}${exNote}·삼복승 ${payload.trio.length}${stNote}`
+        ? `수집 완료 ✅ ${winNote}복승 ${payload.quinella.length}${exNote}·삼복승 ${payload.trio.length}${stNote}`
         : `❌ 전송 실패: ${(res && res.error) || ''}`, true);
       return res || { ok: false, error: 'background 응답 없음' };
     } catch (e) {
@@ -1099,7 +1135,7 @@
     return new Promise((resolve) => {
       chrome.storage.local.get(
         // autoMode: 'triple'(전체 3종) | 'snapshot'(단승만) · timerDeadline: 발주시각(epoch ms)
-        { autoSend: false, intervalSec: 60, raceKey: '', autoMode: 'triple', timerDeadline: 0, market: 'auto' },
+        { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', timerDeadline: 0, market: 'auto' },
         (v) => resolve(v)
       );
     });
