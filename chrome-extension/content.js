@@ -1239,29 +1239,96 @@
     return { ok, parts, detail, raceKey: payload.raceKey, error: ok ? '' : (parts.find((p) => !p.ok)?.error || '전송 실패') };
   }
 
-  async function restartLoop() {
-    if (timer) { clearInterval(timer); timer = null; }
-    const { autoSend, intervalSec, autoMode } = await getSettings();
-    if (autoSend) {
-      const ms = Math.max(10, Number(intervalSec) || 60) * 1000;
-      // [3] 자동간격 설정 시 전체 3종 수집(기본) 또는 단승 스냅샷
-      // [5번] await + 재진입 가드: 한 번의 수집이 간격(기본 30초)보다 오래 걸려도
-      //       다음 틱과 겹쳐 실행되지 않도록 하여 타임라인이 매 주기 깔끔히 누적되게 한다.
-      const runAuto = async () => {
-        if (_autoRunning) { console.log(`[자동수집] 이전 수집 진행중 → 이번 틱(${new Date().toLocaleTimeString('ko-KR', { hour12: false })}) 건너뜀`); return; }
-        _autoRunning = true;
-        try { await (autoMode === 'snapshot' ? doSend('auto') : collectTriple('auto')); }
-        catch (e) { console.warn('[자동수집] 틱 실행 오류', e); }
-        finally { _autoRunning = false; }
-      };
-      timer = setInterval(runAuto, ms);
-      runAuto(); // 켜는 즉시 1회
-    }
+  // [1번] 발주 임박 단계(120/60초·마감) 1회성 트리거 기록 (발주시각 바뀌면 초기화)
+  let _stageFired = new Set();
+
+  // [1번] 발주 임박/최종베팅 알림을 모든 탭에 전달 → timer.js 가 배너+소리로 표시
+  function pushCollectAlert(level, text) {
+    try { chrome.storage.local.set({ collectAlert: { level, text, at: Date.now() } }); } catch (_) { /* noop */ }
   }
 
-  // 설정이 바뀌면 루프 재시작
+  // [1번] 서버 이상감지 분석 실행 → 분석결과(betRecommend 등) 반환. 실패 시 null.
+  function runAnalyzeForAlert() {
+    return new Promise((resolve) => {
+      let done = false;
+      chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: '' }, (res) => {
+        done = true;
+        if (chrome.runtime.lastError || !res || !res.ok || !res.data) { resolve(null); return; }
+        try { chrome.storage.local.set({ analyzeStatus: { data: res.data, at: Date.now() } }); } catch (_) { /* noop */ }
+        resolve(res.data);
+      });
+      setTimeout(() => { if (!done) resolve(null); }, 8000); // 서버 무응답 방어
+    });
+  }
+
+  // [1번] 분석결과 → "복승 6+9" 형태의 최종 베팅 문자열
+  function _mainBet(data) {
+    const recs = (data && data.betRecommend) || [];
+    const m = recs.find((r) => r.label === '복승 메인') || recs[0];
+    return m ? `복승 ${m.combo.join('+')}` : '';
+  }
+
+  async function restartLoop() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    _stageFired = new Set();
+    const { autoSend } = await getSettings();
+    if (!autoSend) return;
+
+    // [5번] await + 재진입 가드: 한 번의 수집이 간격보다 오래 걸려도 다음 틱과 겹치지 않게
+    const runAuto = async () => {
+      if (_autoRunning) { console.log(`[자동수집] 이전 수집 진행중 → 이번 틱(${new Date().toLocaleTimeString('ko-KR', { hour12: false })}) 건너뜀`); return; }
+      _autoRunning = true;
+      try {
+        const { autoMode } = await getSettings();
+        await (autoMode === 'snapshot' ? doSend('auto') : collectTriple('auto'));
+      } catch (e) { console.warn('[자동수집] 틱 실행 오류', e); }
+      finally { _autoRunning = false; }
+    };
+
+    // [1번] 발주시각 기준 동적 루프: 마감 3분전 10초 간격 + T-2/T-1 이상감지 알림 + 마감 자동중지.
+    //   발주시각 미설정(timerDeadline=0) 시 기존 동작(고정 간격·무한 수집) 그대로 유지.
+    const loop = async () => {
+      const { autoSend: on, intervalSec, timerDeadline } = await getSettings();
+      if (!on) { timer = null; return; }                 // 자동수집 꺼짐 → 종료
+      const left = timerDeadline ? (timerDeadline - Date.now()) : null;
+
+      // 마감(발주시각) 도달 → 수집 자동 중지 (루프 재예약 안 함)
+      if (left != null && left <= 0) {
+        if (!_stageFired.has('stop')) {
+          _stageFired.add('stop');
+          pushCollectAlert('🔴', '⏹ 발주 마감 · 배당 수집을 자동 중지했습니다');
+        }
+        timer = null; return;
+      }
+
+      await runAuto();                                   // 이번 틱 수집
+
+      // T-2분: 즉시 이상감지 분석 + 알림
+      if (left != null && left <= 120000 && !_stageFired.has(120)) {
+        _stageFired.add(120);
+        const data = await runAnalyzeForAlert();
+        pushCollectAlert('🟠', `🔔 마감 2분전 · 이상감지 분석 완료${data && _mainBet(data) ? ' · ' + _mainBet(data) : ''}`);
+      }
+      // T-1분: 최종 베팅 추천 확정 + 강한 알림
+      if (left != null && left <= 60000 && !_stageFired.has(60)) {
+        _stageFired.add(60);
+        const data = await runAnalyzeForAlert();
+        const bet = data ? _mainBet(data) : '';
+        pushCollectAlert('🚨', `🚨 마감 1분전 · 최종 베팅: ${bet || '데이터 부족'}`);
+      }
+
+      // 다음 간격: 마감 3분전부터 10초, 그 외 설정값(기본 30초)
+      const baseMs = Math.max(10, Number(intervalSec) || 30) * 1000;
+      const ms = (left != null && left <= 180000) ? 10000 : baseMs;
+      timer = setTimeout(loop, ms);
+    };
+
+    loop(); // 켜는 즉시 1회
+  }
+
+  // 설정이 바뀌면 루프 재시작 (발주시각 변경 시에도 단계 알림 재설정)
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && (changes.autoSend || changes.intervalSec || changes.autoMode)) restartLoop();
+    if (area === 'local' && (changes.autoSend || changes.intervalSec || changes.autoMode || changes.timerDeadline)) restartLoop();
   });
 
   // 팝업 ↔ content 메시지 처리

@@ -1985,6 +1985,69 @@
     el.addEventListener('input', onChange);
   }
 
+  // ── [복기] 당시 분석 전체(전적점수·이상감지·제거/후보·베팅추천) + 결과·적중판정 ──
+  //   서버가 히스토리 파일에 저장해 둔 analysis/review 블록을 그대로 재현한다.
+  function renderReview(d) {
+    const an = d.analysis;
+    if (!an) return '<p class="hint" style="margin:6px 0">※ 당시 분석 데이터가 없습니다(구버전 수집분). 다음 경주부터 복기 정보가 표시됩니다.</p>';
+    const parts = [];
+    if ((an.keyHorses || []).length) {
+      parts.push(`<div style="margin:6px 0"><b>⭐ 유력마</b> ${an.keyHorses.join(' · ')}${an.anomalyHorse != null ? ` <span class="hint">(이상감지말 ${an.anomalyHorse})</span>` : ''}</div>`);
+    }
+    const formHtml = renderFormGrades(an.form);
+    if (formHtml) parts.push(formHtml);
+    // 이상감지 신호 목록
+    const sd = an.signalsDetail || [];
+    if (sd.length) {
+      const rows = sd.map((s) => `<div style="margin:2px 0"><span class="chip ${/🔴|🚨/.test(s.level || '') ? 'chip-red' : ''}">${esc(s.level || '')} ${esc(s.type || '')}</span> ${esc(s.text || '')}${s.detail ? ` <span class="hint">— ${esc(s.detail)}</span>` : ''}</div>`).join('');
+      parts.push(`<div class="matrix-title" style="font-size:13px;margin-top:8px">🚨 이상감지 신호 (당시)</div>${rows}`);
+    } else {
+      parts.push('<div class="hint" style="margin-top:8px">🚨 이상감지 신호 없음 (당시)</div>');
+    }
+    // 제거/후보
+    const elim = an.elimination || {};
+    if ((elim.horses || []).length) {
+      const cand = elim.horses.filter((h) => h.keep || h.override);
+      const gone = elim.horses.filter((h) => !(h.keep || h.override));
+      const chip = (h) => `<span class="chip">${esc(h.verdict || '')}${esc(h.tier || '')} ${h.no}번${h.total != null ? ` <span class="hint">${h.total}</span>` : ''}</span>`;
+      parts.push(`<div class="matrix-title" style="font-size:13px;margin-top:8px">🧮 제거법 (당시) <span class="hint" style="font-weight:400">후보 ${cand.length} · 제거 ${gone.length}</span></div>
+        <div style="margin:3px 0"><b>후보</b> ${cand.map(chip).join(' ') || '-'}</div>
+        <div style="margin:3px 0"><b>제거</b> ${gone.map(chip).join(' ') || '-'}</div>`);
+    }
+    // 베팅 추천 + 최종추천
+    const betHtml = renderBetRecommend({ betRecommend: an.betRecommend || [] });
+    if (betHtml) parts.push(betHtml);
+    const fr = an.final_recommend || {};
+    const frList = [['복승 메인', fr.quinella_main], ['복승 보조', fr.quinella_sub], ['삼복승 메인', fr.trifecta_main]].filter((x) => x[1]);
+    if (frList.length) parts.push(`<div style="margin:6px 0"><b>🎯 최종 추천</b> ${frList.map((x) => `${x[0]} <b>${esc(x[1])}</b>`).join(' · ')}</div>`);
+    // 실제 결과 + 적중 여부 + 이상감지 자동 판정
+    const rv = d.review;
+    if (d.result) {
+      const r = d.result;
+      const resTxt = `1착 ${r['1st'] != null ? r['1st'] : '?'} · 2착 ${r['2nd'] != null ? r['2nd'] : '?'} · 3착 ${r['3rd'] != null ? r['3rd'] : '?'}`;
+      let judge = '';
+      if (rv) {
+        const yn = (b) => (b ? '<span style="color:#38d39f">✅ 적중</span>' : '<span style="color:#f87171">❌ 미적중</span>');
+        const sc = rv.signal_correct || [];
+        judge = `<div style="margin-top:6px">
+          <div>복승 추천: ${yn(rv.quinella_hit)}${rv.payouts && rv.payouts.quinella ? ` <span class="hint">${rv.payouts.quinella}배</span>` : ''}</div>
+          <div>삼복승 추천: ${yn(rv.trifecta_hit)}${rv.payouts && rv.payouts.trifecta ? ` <span class="hint">${rv.payouts.trifecta}배</span>` : ''}</div>
+          <div>제거법: ${yn(rv.elimination_correct)}</div>
+          <div>전적 유력마: ${yn(rv.form_pick_hit)}${rv.form_pick != null ? ` <span class="hint">(${rv.form_pick}번)</span>` : ''}</div>
+          <div style="margin-top:4px"><b>이상감지가 맞았나?</b> ${rv.anomaly_was_correct ? '<span style="color:#38d39f">✅ 예 — 급락 신호가 입상마를 예측</span>' : '<span style="color:#f87171">❌ 아니오</span>'}</div>
+          ${sc.length ? `<div class="hint" style="margin-top:2px">${sc.map(esc).join('<br>')}</div>` : ''}
+        </div>`;
+      }
+      parts.push(`<div class="matrix-title" style="font-size:13px;margin-top:8px">🏁 실제 결과 & 적중 판정</div>
+        <div><b>${esc(resTxt)}</b></div>${judge}`);
+    } else {
+      parts.push('<div class="hint" style="margin-top:8px">🏁 결과 미입력 — 아래에서 입력하면 적중 판정이 자동 표시됩니다.</div>');
+    }
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:10px">
+      <div class="matrix-title">📋 복기 — 당시 분석 전체 ${an.summary ? `<span class="hint" style="font-weight:400">${esc(an.summary)}</span>` : ''}</div>
+      ${parts.join('')}</div>`;
+  }
+
   // ── [5번] 배당 변동 히스토리 + 자동학습 UI ──────────────────────────
   async function loadHistoryList() {
     const el = $('#histRaceList'); if (!el) return;
@@ -2013,6 +2076,8 @@
     const res = d.result ? `1착 ${d.result['1st'] || '?'} · 2착 ${d.result['2nd'] || '?'} · 3착 ${d.result['3rd'] || '?'}` : '미입력';
     const rkUse = rk || d.raceKey || '';
     el.innerHTML = `<div class="matrix-title">${esc(d.race || d.raceKey || '')} <span class="hint" style="font-weight:400">${esc(d.date || '')} · 결과: ${esc(res)}</span></div>
+      ${renderReview(d)}
+      <div class="matrix-title" style="font-size:13px;margin-top:8px">🕒 배당 변동 타임라인</div>
       <table class="data-table"><thead><tr><th>시각</th><th>발주전</th><th>복승 상위(낮은순)</th><th>이상감지</th></tr></thead><tbody>${rows}</tbody></table>
       <div class="cfg-row" style="margin-top:8px">
         <span class="hint">결과 입력:</span>

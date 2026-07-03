@@ -137,8 +137,19 @@
     if (nd !== deadline) { deadline = nd; resetFired(); }
     if (elLabel.value) elLabel.title = elLabel.value;
   }
+  // [1번] 수집기(content.js)가 보내는 발주 임박/최종베팅 알림을 배너+소리로 표시
+  function showCollectAlert(a) {
+    if (!a || !a.text) return;
+    elMsg.textContent = a.text;
+    elMsg.style.color = a.level === '🚨' ? '#f87171' : a.level === '🟠' ? '#fbbf24' : '#fca5a5';
+    msgUntil = Date.now() + 30000;
+    beep();
+    if (a.level === '🚨') { setTimeout(beep, 700); setTimeout(beep, 1400); } // 강한 알림(연속 비프)
+  }
+
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
+    if (changes.collectAlert && changes.collectAlert.newValue) showCollectAlert(changes.collectAlert.newValue);
     if (changes.timerDeadline || changes.timerLabel || changes.timerTime) {
       chrome.storage.local.get({ timerDeadline: 0, timerLabel: '', timerTime: '' }, applyState);
     }

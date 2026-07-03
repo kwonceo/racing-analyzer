@@ -1826,7 +1826,13 @@ def triple_analyze():
             return jsonify({"error": f"'{rk}' 경주의 수집 데이터가 없습니다. 확장에서 해당 raceKey로 [전체 자동 수집]을 실행하세요.",
                             "raceKey": rk, "waiting": True}), 404
         rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
-    return jsonify(_triple_analyze(rk, db.get(rk) or {}))
+    an = _triple_analyze(rk, db.get(rk) or {})
+    # [복기] 분석 시점의 전적/제거/신호/추천을 히스토리 파일에 보존(통계 탭 복기용)
+    try:
+        _history_save_analysis(rk, an)
+    except Exception as e:
+        print("[복기저장] 실패:", e)
+    return jsonify(an)
 
 
 # ══════════════ 배당 변동 히스토리 + 결과기반 자동학습 (Phase 5) ══════════════
@@ -1914,6 +1920,50 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None):
     doc["snapshots"] = doc["snapshots"][-300:]
     json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     return path
+
+
+def _history_save_analysis(rk, an):
+    """[경주별 복기] 분석 시점의 전적점수·제거/후보·이상감지 신호·최종 베팅추천을
+    경주별 히스토리 파일(data/odds_history)에 함께 보존한다. 통계 탭 '복기' 섹션이
+    '당시 분석 전체'를 그대로 재현할 수 있게 하기 위함(스냅샷 누적과는 별도)."""
+    if not rk or not an:
+        return
+    path, date, race = _hist_path(rk)
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        doc = {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None}
+    elim = an.get("elimination") or {}
+    ehorses = elim.get("horses") or []
+    candidates = [h["no"] for h in ehorses if (h.get("keep") or h.get("override"))]
+    eliminated = [h["no"] for h in ehorses if not (h.get("keep") or h.get("override"))]
+    bets = an.get("betRecommend") or []
+
+    def _pick(label):
+        r = next((b for b in bets if b.get("label") == label), None)
+        return "+".join(map(str, r["combo"])) if r else None
+
+    doc["analysis"] = {
+        "keyHorses": an.get("keyHorses") or [],
+        "anomalyHorse": an.get("anomalyHorse"),
+        "form": an.get("form") or [],                       # 전적 점수(등급/점수/플래그 포함)
+        "elimination": {"candidates": candidates, "eliminated": eliminated,
+                        "horses": ehorses, "counts": elim.get("counts")},
+        "signals": [s.get("text") for s in (an.get("signals") or []) if s.get("text")],
+        "signalsDetail": an.get("signals") or [],
+        "betRecommend": bets,
+        "final_recommend": {
+            "quinella_main": _pick("복승 메인"),
+            "quinella_sub": _pick("복승 보조"),
+            "trifecta_main": _pick("삼복승 메인"),
+        },
+        "summary": an.get("summary"),
+        "at": time.time(),
+    }
+    try:
+        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+    except Exception as e:
+        print("[복기저장] 실패:", e)
 
 
 def _learning_load():
@@ -2051,11 +2101,16 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
         print("[하이라이트] 저장 실패:", e)
 
     anomalies_detected, anomaly_correct = [], False
+    signal_correct = []   # [복기] 사람이 읽는 형태: "7+12 급락 → 12번 입상 적중"
     for d in an.get("drops", [])[:5]:
         if d["pct"] < 0:
             anomalies_detected.append(f"급락: {d['combo'][0]}-{d['combo'][1]} {d['pct']}%")
-            if any(h in top3 for h in d["combo"]):
+            hit_horses = [h for h in d["combo"] if h in top3]
+            if hit_horses:
                 anomaly_correct = True
+                signal_correct.append(
+                    f"{d['combo'][0]}+{d['combo'][1]} 복승 급락({d['pct']}%) → "
+                    f"{'·'.join(str(h) for h in hit_horses)}번 입상 적중")
 
     # ── [3번] 전적 예측 + 제거법 적중 판정 ──
     elim = an.get("elimination") or {}
@@ -2083,6 +2138,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
         "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
         "anomalies_detected": anomalies_detected, "anomaly_was_correct": anomaly_correct,
+        "signal_correct": signal_correct,
         "reversals": [r for r in an.get("reversals", []) if r.get("flipped")],
         "keyHorses": an.get("keyHorses"),
         "form_available": form_available, "form_pick": form_pick, "form_pick_hit": form_pick_hit,
@@ -2096,6 +2152,17 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
     L["records"].append(record)
     L["stats"] = _recompute_learning_stats(L["records"])
     _learning_save(L)
+    # [복기] 결과 적중/판정 요약을 히스토리 파일에도 저장 → 통계 탭에서 재계산 없이 표시
+    try:
+        doc["review"] = {
+            "was_hit": was_hit, "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit,
+            "payouts": payouts, "anomaly_was_correct": anomaly_correct,
+            "signal_correct": signal_correct, "elimination_correct": elimination_correct,
+            "eliminated": eliminated_nos, "form_pick": form_pick, "form_pick_hit": form_pick_hit,
+        }
+        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+    except Exception as e:
+        print("[복기저장] 결과 요약 실패:", e)
     print(f"[자동학습] {rk} 결과 {top3} → 추천적중 {was_hit}, 급락적중 {anomaly_correct}, "
           f"전적유력마 {form_pick}({'적중' if form_pick_hit else '실패'}), 제거적중 {elimination_correct}")
     return record, L["stats"]
