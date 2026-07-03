@@ -1752,6 +1752,21 @@ def _rk_venue_num(k):
     return venue, num
 
 
+# [한국 배당연결] 일본 지방경마장(한자/한글 표기) — 한국 경주가 같은 번호의
+#   일본 잔여 키(예:'후나바시 3경주')에 잘못 매칭되는 것을 막기 위한 목록.
+_JP_TRACKS = (
+    "船橋", "大井", "名古屋", "園田", "高知", "帯広", "門別", "盛岡", "水沢",
+    "浦和", "川崎", "金沢", "笠松", "姫路", "佐賀",
+    "후나바시", "오이", "나고야", "소노다", "고치", "가와사키", "우라와",
+    "가나자와", "카사마츠", "히메지", "사가", "모리오카", "미즈사와", "오비히로", "몬베츠",
+)
+
+
+def _is_japan_key(k):
+    """raceKey에 일본 경마장명이 들어있으면 True(한국 경주 매칭에서 제외용)."""
+    return any(t in (k or "") for t in _JP_TRACKS)
+
+
 @app.route("/api/odds/triple/match", methods=["POST"])
 def triple_match():
     """[한국경마 자동연결] 경마장·경주번호로 수집된 배당 raceKey를 찾아 통합분석 반환.
@@ -1771,12 +1786,24 @@ def triple_match():
         return jsonify({"matched": False, "reason": "no_data", "candidates": []})
     if num is None:
         return jsonify({"matched": False, "reason": "no_num", "candidates": keys[:8]})
-    match = None
+    # [한국 배당연결 강화] 번호가 같은 후보 중에서
+    #   ① 경마장까지 정확히 일치하는 키를 최우선,
+    #   ② 없으면 경마장 미상(사용자가 번호만 입력)인 한국계 키,
+    #   순으로 매칭한다. 한국 경주(venue 있음)는 같은 번호의 일본 잔여 키에는
+    #   절대 매칭되지 않도록 _is_japan_key 로 제외 → 엉뚱한 외국 배당 표시 방지.
+    exact, loose = None, None
     for k in keys:  # 최신 우선
         kv, kn = _rk_venue_num(k)
-        if kn == int(num) and (not venue or not kv or kv == venue):
-            match = k
+        if kn != int(num):
+            continue
+        if venue and _is_japan_key(k):
+            continue  # 한국 탭인데 일본 경마장 키 → 스킵
+        if venue and kv == venue:
+            exact = k
             break
+        if loose is None and (not venue or not kv):
+            loose = k
+    match = exact or loose
     if not match:
         return jsonify({"matched": False, "reason": "no_match", "candidates": keys[:8]})
     return jsonify({"matched": True, "raceKey": match,

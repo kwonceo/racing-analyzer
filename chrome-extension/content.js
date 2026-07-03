@@ -547,9 +547,34 @@
   // ══════════════════════════════════════════════════════════════════
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  // [1번] 텍스트로 탭 버튼 찾기 (button/a/td/th/li/span/div, 보이는 것만)
+  // [1번] 동일출처 iframe/frame 문서까지 포함해 스캔 (asyukk 배당판은 탭·표를
+  //   프레임 내부에 그리는 경우가 많아, top document 만 보면 출마표2 탭·표를 못 찾음).
+  //   교차출처 프레임은 contentDocument 접근이 막혀 자동 skip 된다.
+  function sameOriginDocs() {
+    const docs = [document];
+    const seen = new Set([document]);
+    const dig = (root) => {
+      let frames = [];
+      try { frames = [...root.querySelectorAll('iframe, frame')]; } catch (_) { return; }
+      for (const f of frames) {
+        let d = null;
+        try { d = f.contentDocument || (f.contentWindow && f.contentWindow.document) || null; } catch (_) { d = null; }
+        if (d && d.querySelectorAll && !seen.has(d)) { seen.add(d); docs.push(d); dig(d); }  // 중첩 프레임도 재귀
+      }
+    };
+    dig(document);
+    return docs;
+  }
+  // 모든 동일출처 문서에서 셀렉터 매칭 요소를 평탄하게 수집
+  function queryAllDocs(sel) {
+    const out = [];
+    for (const d of sameOriginDocs()) { try { out.push(...d.querySelectorAll(sel)); } catch (_) { /* */ } }
+    return out;
+  }
+
+  // [1번] 텍스트로 탭 버튼 찾기 (button/a/td/th/li/span/div, 보이는 것만 · iframe 포함)
   function findTabButton(labels) {
-    const cands = [...document.querySelectorAll('button, a, td, th, li, span, div[role="tab"], .tab, .btn, [onclick]')];
+    const cands = queryAllDocs('button, a, td, th, li, span, div[role="tab"], .tab, .btn, [onclick]');
     const norm = (e) => (e.textContent || '').replace(/\s+/g, '').trim();
     const visible = (e) => e.offsetParent !== null || (e.getClientRects && e.getClientRects().length > 0);
     const clickScore = (e) => (/^(BUTTON|A)$/.test(e.tagName) || e.hasAttribute('onclick')
@@ -859,20 +884,32 @@
   // [1번] 출마표2 탭 클릭 → 1.5초 대기 → 전적 추출 (탭 없으면 현재화면 시도)
   async function collectStartersByTab() {
     console.log('[전적수집] 출마표2 탭 클릭 시도... (labels=출마표2/출마표/출주표/出馬表)');
-    // 진단: 화면의 ‘출마’ 포함 요소를 모두 출력(실제 탭 버튼 텍스트/태그/클래스 확인용)
+    // 진단: 화면의 ‘출마’/‘出馬’ 포함 요소를 모두 출력(실제 탭 버튼 텍스트/태그/클래스 확인용).
+    //   [1번] top document 뿐 아니라 동일출처 iframe 내부까지 스캔한다.
     try {
+      const docs = sameOriginDocs();
       let n = 0;
-      document.querySelectorAll('button, a, td, th, li, span, div[role="tab"], .tab, .btn').forEach((el) => {
+      queryAllDocs('button, a, td, th, li, span, div[role="tab"], .tab, .btn').forEach((el) => {
         const t = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
-        if (t && t.length <= 14 && t.includes('출마')) { console.log('[전적수집] ‘출마’ 후보:', el.tagName, '|', el.className || '(class없음)', '|', JSON.stringify(t)); n++; }
+        if (t && t.length <= 14 && /(출마|出馬|출주)/.test(t)) { console.log('[전적수집] ‘출마’ 후보:', el.tagName, '|', el.className || '(class없음)', '|', JSON.stringify(t)); n++; }
       });
-      if (!n) console.warn('[전적수집] ⚠ ‘출마’ 텍스트 요소가 하나도 없음 — 출마표 페이지가 아니거나 iframe 내부일 수 있습니다.');
+      console.log(`[전적수집] 동일출처 문서 수: ${docs.length}${docs.length > 1 ? ' (iframe 포함)' : ''}`);
+      if (!n) console.warn('[전적수집] ⚠ ‘출마’ 텍스트 요소가 하나도 없음 — 출마표 페이지가 아니거나 교차출처 iframe 내부일 수 있습니다.');
     } catch (_) { /* */ }
     const r = await clickTabAndWait(['출마표2', '출마표', '출주표', '出馬表'], oddsSignature(), '출마표2', false);
     console.log(`[전적수집] 출마표2 탭: ${r.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음(현재 화면에서 시도)'} · 화면 ${r.changed ? '변경 확인' : '변화 없음'}`);
-    console.log(`[전적수집] 페이지 전체 table tr 수: ${document.querySelectorAll('table tr').length} (F12에서 document.querySelectorAll('table tr').length 로도 확인 가능)`);
+    console.log(`[전적수집] 페이지 전체 table tr 수: ${queryAllDocs('table tr').length} (F12에서 document.querySelectorAll('table tr').length 로도 확인 가능)`);
     await wait(1500);
-    return collectStarters();
+    // [1번] top document 우선 추출 → 실패 시 동일출처 iframe 문서들에서 재시도
+    let starters = collectStarters();
+    if (!starters.length) {
+      for (const d of sameOriginDocs()) {
+        if (d === document) continue;
+        const s = collectStarters(d);
+        if (s.length) { console.log(`[전적수집] iframe 문서에서 전적 ${s.length}두 추출 성공`); starters = s; break; }
+      }
+    }
+    return starters;
   }
 
   // ── [출마표2 = keiba.go.jp DebaTable 별도 페이지] 전적 fetch·추출 ──────────
