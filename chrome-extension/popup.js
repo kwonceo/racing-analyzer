@@ -31,7 +31,7 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', market: 'auto', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null },
+    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', market: 'auto', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
       els.interval.value = String(v.intervalSec || 30);
@@ -43,6 +43,8 @@ function loadState() {
       renderTripleStatus(v.tripleStatus);
       if (v.tripleProgress && !v.tripleProgress.done) renderTripleProgress(v.tripleProgress);
       renderResultTimer(v.resultAutoStatus);
+      // [3번] 창을 닫았다 다시 열어도 마지막 즉시분석 결과를 복원
+      if (v.analyzeStatus && v.analyzeStatus.data) renderAnalyze(v.analyzeStatus.data, v.analyzeStatus.at);
     }
   );
 }
@@ -331,10 +333,11 @@ const analyzeCard = document.getElementById('analyzeCard');
 const analyzeSummary = document.getElementById('analyzeSummary');
 const analyzeDetail = document.getElementById('analyzeDetail');
 
-function renderAnalyze(a) {
+function renderAnalyze(a, at) {
+  if (!a) return;
   analyzeCard.style.display = 'block';
   analyzeSummary.className = 'status-line ok';
-  analyzeSummary.textContent = a.summary || '분석 결과';
+  analyzeSummary.textContent = (a.summary || '분석 결과') + (at ? ` · ${fmtTime(at)}` : '');
   const lines = [];
   if ((a.drops || []).length) {
     const d = a.drops.slice(0, 3).map((x) => `${x.combo[0]}-${x.combo[1]} ${x.prev}→${x.cur} (${x.pct > 0 ? '▲' : '▼'}${Math.abs(x.pct)}%)`);
@@ -382,7 +385,10 @@ btnInstant.addEventListener('click', async () => {
       analyzeSummary.className = 'status-line err';
       analyzeSummary.textContent = res.error || '분석 실패';
     } else {
-      renderAnalyze(res.data);
+      const at = Date.now();
+      renderAnalyze(res.data, at);
+      // [3번] 즉시분석 결과를 저장 → 팝업을 닫았다 열어도 자동 복원
+      chrome.storage.local.set({ analyzeStatus: { data: res.data, at } });
     }
     btnInstant.disabled = false; btnInstant.textContent = '🚨 즉시 분석 (수집→이상감지)';
   });
@@ -396,6 +402,9 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes.tripleStatus) renderTripleStatus(changes.tripleStatus.newValue);
   if (changes.tripleProgress) renderTripleProgress(changes.tripleProgress.newValue);
   if (changes.resultAutoStatus) renderResultTimer(changes.resultAutoStatus.newValue);
+  if (changes.analyzeStatus && changes.analyzeStatus.newValue) {
+    const av = changes.analyzeStatus.newValue; renderAnalyze(av.data, av.at);
+  }
 });
 
 // ── 초기화 ──────────────────────────────────────────────────────────

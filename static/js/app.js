@@ -1767,12 +1767,15 @@
   //  각 말 클릭 → 제거↔후보 수동 전환(_elimToggle). 후보 기준 자동 조합 재생성.
   let _lastElim = null;
   const _elimToggle = new Set();
-  function _elimKeep(h) { const base = h.keep || h.override; return _elimToggle.has(h.no) ? !base : base; }
-  function renderEliminationHTML(e) {
+  function _elimKeep(h, tog) { const base = h.keep || h.override; return (tog || _elimToggle).has(h.no) ? !base : base; }
+  //  [1번] tog: 수동 토글 집합. 생략 시 한국 통합패널이 쓰는 공용 _elimToggle(대화형).
+  //  일본 통합패널은 읽기전용이라 빈 Set을 넘겨 한국 토글에 오염되지 않게 한다.
+  function renderEliminationHTML(e, tog) {
+    const T = tog || _elimToggle;
     _lastElim = e || null;
     if (!e || !(e.horses || []).length) return '<div id="elimPanel"></div>';
-    const cand = e.horses.filter(_elimKeep).sort((a, b) => b.total - a.total);
-    const elim = e.horses.filter((h) => !_elimKeep(h)).sort((a, b) => b.total - a.total);
+    const cand = e.horses.filter((h) => _elimKeep(h, T)).sort((a, b) => b.total - a.total);
+    const elim = e.horses.filter((h) => !_elimKeep(h, T)).sort((a, b) => b.total - a.total);
     const oddsTxt = (h) => (h.oddsRepr != null ? h.oddsRepr + '배' : '미수집');
     const tierIcon = (h) => (h.override ? '⚠️' : (h.tier || h.verdict));
     const tierColor = (h) => (h.override ? '#f59e0b' : h.verdict === '🟢' ? '#38d39f' : '#ffd24f');
@@ -1781,12 +1784,12 @@
         <b style="font-size:15px;min-width:22px">${tierIcon(h)}</b>
         <b style="min-width:34px;color:#4ea1ff">${h.no}번</b>
         <span>${esc(h.name || '')}</span>
-        <span class="hint" style="margin-left:auto;text-align:right">배당 ${oddsTxt(h)} · 전적 ${h.formScore != null ? h.formScore : '<span style="color:#f59e0b">미수집</span>'} · 합산 ${h.total}${_elimToggle.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}${h.override ? `<br><span style="color:#f59e0b">⚠️ 제거대상이나 이변(${esc(h.overrideReason)})</span>` : ''}</span>
+        <span class="hint" style="margin-left:auto;text-align:right">배당 ${oddsTxt(h)} · 전적 ${h.formScore != null ? h.formScore : '<span style="color:#f59e0b">미수집</span>'} · 합산 ${h.total}${T.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}${h.override ? `<br><span style="color:#f59e0b">⚠️ 제거대상이나 이변(${esc(h.overrideReason)})</span>` : ''}</span>
       </div>`).join('');
     const elimRows = elim.map((h) => `
       <div class="elim-row" data-no="${h.no}" title="클릭 → 후보로 전환" style="cursor:pointer;padding:5px 8px;border-left:3px solid ${h.verdict === '🔴' ? '#ef4444' : '#ff9f43'};margin:3px 0;border-radius:4px;opacity:.85">
         <b>${h.verdict} ${h.no}번</b> ${esc(h.name || '')}
-        <span class="hint">· ${esc(h.reason)}${_elimToggle.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}</span>
+        <span class="hint">· ${esc(h.reason)}${T.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}</span>
       </div>`).join('');
     const ab = [];
     if (cand.length >= 2) ab.push('복승 ' + [cand[0].no, cand[1].no].sort((x, y) => x - y).join('+'));
@@ -1807,13 +1810,19 @@
       ${elimRows || '<div class="hint">제거 대상 없음</div>'}
     </div>`;
   }
-  function _attachElimHandlers() {
-    const p = $('#elimPanel'); if (!p) return;
+  //  [1번] 컨테이너별(제거분석은 한국·일본 통합패널에서도 재사용) 클릭 토글.
+  //  id/데이터를 인자로 받아 한국(#koreaElimPanel)·일본(#jpElimPanel)에서도 동작하게 일반화.
+  //  인자 없이 호출하면 기존 동작(#elimPanel, _lastElim) 그대로 유지(하위호환).
+  function _attachElimHandlers(id, e) {
+    id = id || 'elimPanel';
+    const data = e || _lastElim;
+    const p = document.getElementById(id); if (!p) return;
     p.querySelectorAll('.elim-row').forEach((r) => r.addEventListener('click', () => {
       const no = +r.dataset.no;
       if (_elimToggle.has(no)) _elimToggle.delete(no); else _elimToggle.add(no);
-      p.outerHTML = renderEliminationHTML(_lastElim);   // 패널만 재렌더(알림/차트 재실행 없이)
-      _attachElimHandlers();
+      // 패널만 재렌더(알림/차트 재실행 없이). 컨테이너별 고유 id를 유지한다.
+      p.outerHTML = renderEliminationHTML(data).replace('id="elimPanel"', `id="${id}"`);
+      _attachElimHandlers(id, data);
     }));
   }
 
@@ -1938,10 +1947,11 @@
   }
 
   // [버그2·3] 복승/삼복승 추천 + 예산 배분 금액 표
-  function renderBetRecommend(a) {
+  function renderBetRecommend(a, budgetSel) {
     const recs = a.betRecommend || [];
     if (!recs.length) return '';
-    const budget = Math.max(0, parseInt(($('#tripleBudget') && $('#tripleBudget').value) || '0', 10) || 0);
+    const bEl = document.querySelector(budgetSel || '#tripleBudget');
+    const budget = Math.max(0, parseInt((bEl && bEl.value) || '0', 10) || 0);
     const won = (n) => Math.round(n / 100) * 100; // 100원 단위 반올림
     const rows = recs.map((r) => {
       const amt = budget > 0 ? won(budget * (r.alloc || 0) / 100) : null;
@@ -1965,6 +1975,14 @@
         <tbody>${rows}</tbody>
         ${totalAmt != null ? `<tfoot><tr><td colspan="3"></td><td><b>${totalAlloc}%</b></td><td><b>${totalAmt.toLocaleString('ko-KR')}원</b></td></tr></tfoot>` : ''}
       </table>`;
+  }
+
+  // [1번] 예산 입력칸에 재계산 리스너를 1회만 연결(중복 방지). 값 입력 시 통합패널 재렌더 → 금액 갱신.
+  function _bindBudgetInput(sel, onChange) {
+    const el = document.querySelector(sel);
+    if (!el || el._budgetBound) return;
+    el._budgetBound = true;
+    el.addEventListener('input', onChange);
   }
 
   // ── [5번] 배당 변동 히스토리 + 자동학습 UI ──────────────────────────
@@ -2390,6 +2408,7 @@
   /** 전적 초안 저장 후 배당판 자동 연결 감시 시작(경주 전환 시 교체) */
   async function wireKoreaOdds(title, race, scored) {
     stopKoreaOddsWatch();
+    _elimToggle.clear();   // [1번] 경주가 바뀌면 제거분석 수동 토글 초기화(경주별 독립)
     _koreaOddsTitle = title;
     const form = (scored || []).map((h) => ({
       no: h.no, name: h.name, jockey: h.jockey || '',
@@ -2718,8 +2737,9 @@
   function renderKoreaIntegrated(a) {
     const host = $('#koreaIntegrated'); if (!host) return;
     if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
+    state.koreaLastInteg = a;   // [1번] 예산 변경 시 베팅 금액 재계산용
     const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
-    // 제거분석 패널 재사용(읽기전용): id 충돌 방지 위해 패널 id 치환
+    // [1번] 제거분석 패널 재사용: id 충돌 방지 위해 패널 id 치환. 아래에서 클릭 토글 핸들러 연결.
     const elimHtml = renderEliminationHTML(a.elimination).replace('id="elimPanel"', 'id="koreaElimPanel"');
     host.innerHTML = `<div class="panel-card">
       <h3>🔗 통합 분석 결과 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
@@ -2727,8 +2747,10 @@
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
       ${elimHtml}
       ${renderKoreaSignals(a.signals)}
-      ${renderBetRecommend(a)}
+      ${renderBetRecommend(a, '#koreaBudget')}
     </div>`;
+    _attachElimHandlers('koreaElimPanel', a.elimination);   // [1번] 제거↔후보 클릭 전환 복원
+    _bindBudgetInput('#koreaBudget', () => { if (state.koreaLastInteg) renderKoreaIntegrated(state.koreaLastInteg); });
   }
 
   // ---------- [5·6번] 일본경마 실시간 배당 연동 (단승 급락 우선 · 복승/쌍승 보조) ----------
@@ -2821,6 +2843,7 @@
   function renderJapanIntegrated(a) {
     const host = $('#jpIntegrated'); if (!host) return;
     if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
+    state.jpLastInteg = a;   // [1번] 예산 변경 시 베팅 금액 재계산용
     const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     const single = a.single || {};
     const ranking = a.singleRanking || [];
@@ -2830,14 +2853,20 @@
     const sd = a.singleDrops || [];
     const sdHtml = sd.length ? `<div class="matrix-title" style="font-size:13px">🔥 단승 급락 (가장 강한 자금 유입 신호)</div>
       ${sd.map((d) => `<div style="margin:3px 0"><b>${d.no}번</b> 단승 ${d.prev}→${d.cur} <b style="color:${d.pct < 0 ? '#ff5c5c' : '#ffd24f'}">(${d.pct}%)</b></div>`).join('')}` : '';
+    // [1번] 전적 점수별 말 목록(출마표2 등급표) + 제거 분석(읽기전용) 복원
+    const formHtml = renderFormGrades(a.form);
+    const elimHtml = renderEliminationHTML(a.elimination, new Set()).replace('id="elimPanel"', 'id="jpElimPanel"');
     host.innerHTML = `<div class="panel-card">
       <h3>🔗 실시간 배당 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
       ${sdHtml}
       ${singleHtml}
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
+      ${formHtml}
+      ${elimHtml}
       ${renderJapanSignals(a.signals)}
-      ${renderBetRecommend(a)}
+      ${renderBetRecommend(a, '#jpBudget')}
     </div>`;
+    _bindBudgetInput('#jpBudget', () => { if (state.jpLastInteg) renderJapanIntegrated(state.jpLastInteg); });
   }
 
   /** 일본 배당 변동 타임라인 렌더(수집 1건 = 항목 1개) */

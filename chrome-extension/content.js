@@ -1059,21 +1059,9 @@
         }
       }
 
-      // 3) 삼복승: 유력마 3마리를 축으로 클릭 → 각 축 매트릭스 추출 (텍스트형이면 폴백)
-      const keyHorses = localKeyHorses(quinella);
-      console.log(`[배당수집] 유력마(로컬) 1~3순위: ${keyHorses.join('·') || '-'}`);
-      setTripleProgress(`삼복승 수집중… (축 ${keyHorses.join('·') || '?'})`);
-      await clickTabAndWait(['삼복승', '삼복', '삼쌍승', '3連複'], sig, '삼복승', false);
-      let trio = [];
-      if (keyHorses.length) trio = await collectTrioByAxis(keyHorses, oddsClass);
-      if (!trio.length) {                                   // 폴백: "a-b-c" 텍스트형
-        trio = currentTrios().map((t) => ({ combo: t.combo, odds: t.odds }));
-        console.log(`[배당수집] 삼복승 텍스트형 폴백 추출: ${trio.length}개 조합`);
-      }
-      console.log(`[배당수집] 삼복승 총 추출: ${trio.length}개 조합`);
-
-      // 4) 출마표2 전적: keiba.go.jp DebaTable을 fetch해 추출(우선) → 실패 시 인페이지 탭 클릭 폴백
-      //    [5번] 한국경마(market=korea)는 출마표2가 없고 전적은 PDF에서 추출하므로 수집 시도 자체를 생략 → 관련 오류 제거
+      // 3) [일본 전용] 출마표2 전적: keiba.go.jp DebaTable을 fetch해 추출(우선) → 실패 시 인페이지 탭 클릭 폴백
+      //    [4번] 단승→복승→쌍승→출마표2 순서. 불안정한 삼복승보다 먼저 수집해 전적 누락을 방지한다.
+      //    [2·5번] 한국경마(market=korea)는 출마표2가 없고 전적은 PDF에서 추출하므로 수집 시도 자체를 생략 → 관련 오류 제거
       let starters = [];
       if (isKorea) {
         console.log('[전적수집] 한국경마 모드 → 출마표2(keiba DebaTable) 수집 생략(전적은 PDF에서 추출)');
@@ -1087,6 +1075,27 @@
           try { starters = await collectStartersByTab(); } catch (e) { console.warn('[전적수집] 인페이지 수집 오류', e); }
           await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false); // 복승으로 복귀
         }
+      }
+
+      // 4) 삼복승 — [일본 전용]. [2번] 한국경마는 삼복승을 수집하지 않는다(복승만).
+      //    삼복승은 축 클릭이 불안정할 수 있어 try/catch로 감싸 실패해도 앞서 모은 복승/쌍승/출마표2는 그대로 전송한다.
+      let trio = [];
+      if (isKorea) {
+        console.log('[삼복승수집] 한국경마 모드 → 삼복승 수집 생략(복승만).');
+      } else {
+        try {
+          const keyHorses = localKeyHorses(quinella);
+          console.log(`[배당수집] 유력마(로컬) 1~3순위: ${keyHorses.join('·') || '-'}`);
+          setTripleProgress(`삼복승 수집중… (축 ${keyHorses.join('·') || '?'})`);
+          sig = oddsSignature();   // 출마표2 수집 후 현재(복승) 화면 기준으로 시그니처 갱신
+          await clickTabAndWait(['삼복승', '삼복', '삼쌍승', '3連複'], sig, '삼복승', false);
+          if (keyHorses.length) trio = await collectTrioByAxis(keyHorses, oddsClass);
+          if (!trio.length) {                                   // 폴백: "a-b-c" 텍스트형
+            trio = currentTrios().map((t) => ({ combo: t.combo, odds: t.odds }));
+            console.log(`[배당수집] 삼복승 텍스트형 폴백 추출: ${trio.length}개 조합`);
+          }
+          console.log(`[배당수집] 삼복승 총 추출: ${trio.length}개 조합`);
+        } catch (e) { console.warn('[삼복승수집] 실패 — 무시하고 진행', e); }
       }
 
       const payload = {
@@ -1130,6 +1139,7 @@
 
   // ── 설정 로드 & 자동전송 루프 ───────────────────────────────────────
   let timer = null;
+  let _autoRunning = false;   // [5번] 재진입 방지: 이전 수집이 30초를 넘겨도 겹치지 않게
 
   async function getSettings() {
     return new Promise((resolve) => {
@@ -1198,7 +1208,15 @@
     if (autoSend) {
       const ms = Math.max(10, Number(intervalSec) || 60) * 1000;
       // [3] 자동간격 설정 시 전체 3종 수집(기본) 또는 단승 스냅샷
-      const runAuto = () => (autoMode === 'snapshot' ? doSend('auto') : collectTriple('auto'));
+      // [5번] await + 재진입 가드: 한 번의 수집이 간격(기본 30초)보다 오래 걸려도
+      //       다음 틱과 겹쳐 실행되지 않도록 하여 타임라인이 매 주기 깔끔히 누적되게 한다.
+      const runAuto = async () => {
+        if (_autoRunning) { console.log(`[자동수집] 이전 수집 진행중 → 이번 틱(${new Date().toLocaleTimeString('ko-KR', { hour12: false })}) 건너뜀`); return; }
+        _autoRunning = true;
+        try { await (autoMode === 'snapshot' ? doSend('auto') : collectTriple('auto')); }
+        catch (e) { console.warn('[자동수집] 틱 실행 오류', e); }
+        finally { _autoRunning = false; }
+      };
       timer = setInterval(runAuto, ms);
       runAuto(); // 켜는 즉시 1회
     }
