@@ -593,6 +593,13 @@
       hits.sort((a, b) => (clickScore(b) - clickScore(a)) || (norm(a).length - norm(b).length));
       if (hits[0]) return hits[0];
     }
+    // 3) [긴급2] 최후 폴백: 길이 제한 없이 라벨 포함(클릭가능·짧은 텍스트 우선).
+    //    사설 배당판이 '쌍승식 배당표' 처럼 라벨을 길게 쓰는 경우까지 잡는다.
+    for (const lb of ordered) {
+      const hits = cands.filter((e) => norm(e).includes(lb) && visible(e));
+      hits.sort((a, b) => (clickScore(b) - clickScore(a)) || (norm(a).length - norm(b).length));
+      if (hits[0]) return hits[0];
+    }
     return null;
   }
 
@@ -615,15 +622,16 @@
     }
     for (let attempt = 1; attempt <= 3; attempt++) {
       try { el.click(); } catch (e) { console.warn(`[배당수집] ${betLabel} 클릭 오류`, e); }
-      await wait(waitMs || 2000); // 데이터 로딩 대기
+      // [긴급2] 탭 로딩 대기: 기본 2초, 재시도마다 1초씩 증가(느린 사설 배당판 대응)
+      await wait((waitMs || 2000) + (attempt - 1) * 1000);
       const sig = oddsSignature();
       const changed = sig !== prevSig && sig.length > 0;
       if (!requireChange || changed) {
         console.log(`[배당수집] ${betLabel} 탭 활성화 ${changed ? '(데이터 변경 확인)' : '(현재 탭 유지)'}`);
         return { clicked: true, changed, sig };
       }
-      console.warn(`[배당수집] ${betLabel} 데이터 변화 없음 → 재시도 ${attempt}/3`);
-      el = findTabButton(labels) || el;
+      console.warn(`[배당수집] ${betLabel} 데이터 변화 없음 → 재시도 ${attempt}/3 (버튼 재탐색)`);
+      el = findTabButton(labels) || el;   // 매번 버튼을 다시 찾아 재클릭
     }
     console.warn(`[배당수집] ⚠ ${betLabel} 클릭했으나 표가 바뀌지 않음.`);
     return { clicked: true, changed: false, sig: oddsSignature() };
@@ -743,8 +751,12 @@
       else console.warn('[삼복승축마] ⚠ 마번 버튼 컨테이너를 못 찾음 — 전역에서 탐색합니다.');
     }
     const pick = (scope) => {
-      const cands = [...scope.querySelectorAll(AXIS_SEL)]
-        .filter((e) => _btnLabel(e) === want && _btnVisible(e));
+      const all = [...scope.querySelectorAll(AXIS_SEL)].filter(_btnVisible);
+      // [긴급2] 1차: 완전일치. 2차: 토큰 경계 포함("4번","軸4","[4]","4 番" 등은 매칭,
+      //   14·40 처럼 다른 숫자에 붙은 경우는 제외)로 확장해 '마번 버튼 못 찾음' 방지.
+      const exact = all.filter((e) => _btnLabel(e) === want);
+      const re = new RegExp('(^|\\D)' + want + '(\\D|$)');
+      const cands = exact.length ? exact : all.filter((e) => re.test(_btnLabel(e)));
       cands.sort((a, b) => {
         const inTbl = (e) => (e.closest('table') ? 1 : 0);
         if (inTbl(a) !== inTbl(b)) return inTbl(a) - inTbl(b);          // 테이블 밖 우선
@@ -899,7 +911,7 @@
     const r = await clickTabAndWait(['출마표2', '출마표', '출주표', '出馬表'], oddsSignature(), '출마표2', false);
     console.log(`[전적수집] 출마표2 탭: ${r.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음(현재 화면에서 시도)'} · 화면 ${r.changed ? '변경 확인' : '변화 없음'}`);
     console.log(`[전적수집] 페이지 전체 table tr 수: ${queryAllDocs('table tr').length} (F12에서 document.querySelectorAll('table tr').length 로도 확인 가능)`);
-    await wait(1500);
+    await wait(2000);   // [긴급2] 탭 로딩 대기 1.5초 → 2초
     // [1번] top document 우선 추출 → 실패 시 동일출처 iframe 문서들에서 재시도
     let starters = collectStarters();
     if (!starters.length) {
@@ -1038,31 +1050,38 @@
 
     try {
       // 0) [일본 전용] 단승 — 가장 강한 신호. 한국은 단승 수집 안 함(복승만).
+      //    [긴급2] 각 종목을 독립 try 로 감싸 한 종목이 실패해도 다음 종목은 계속 수집(전체 중단 방지).
       let win = {};
       if (!isKorea) {
-        setTripleProgress('단승 수집중…');
-        await clickTabAndWait(['단승', '단식', '單勝', '単勝', 'WIN'], '', '단승', false);
-        win = currentSingles(oddsClass);
-        console.log(`[단승수집] ${Object.keys(win).length}두: `
-          + Object.entries(win).slice(0, 8).map(([n, o]) => `${n}=${o}`).join(' · '));
+        try {
+          setTripleProgress('단승 수집중…');
+          await clickTabAndWait(['단승', '단식', '單勝', '単勝', 'WIN'], '', '단승', false);
+          win = currentSingles(oddsClass);
+          console.log(`[단승수집] ${Object.keys(win).length}두: `
+            + Object.entries(win).slice(0, 8).map(([n, o]) => `${n}=${o}`).join(' · '));
+        } catch (e) { console.warn('[단승수집] 실패 — 건너뛰고 계속', e); }
       }
 
       // 1) 복승 (이미 복승 탭일 수 있음 → 변화 강제 안 함). 단승 탭에서 왔으면 변화 요구.
-      setTripleProgress('복승 수집중…');
-      await clickTabAndWait(['복승', '복연', '馬連'], isKorea ? '' : oddsSignature(), '복승', !isKorea);
-      let sig = oddsSignature();
-      const quinMap = {};
-      for (const p of currentMatrixPairs(oddsClass)) {
-        if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
-        const k = p.a < p.b ? `${p.a}-${p.b}` : `${p.b}-${p.a}`;
-        if (quinMap[k] == null || p.odds < quinMap[k]) quinMap[k] = p.odds;
-      }
-      const quinella = Object.entries(quinMap).map(([k, o]) => {
-        const [a, b] = k.split('-').map(Number); return { combo: [a, b], odds: o };
-      });
-      console.log(`[복승수집] 파싱 ${quinella.length}조합. 최저배당순 상위: `
-        + quinella.slice().sort((a, b) => a.odds - b.odds).slice(0, 10).map((c) => `${c.combo[0]}-${c.combo[1]}=${c.odds}`).join(' · '));
-      console.log('[복승수집] 실제 배당판과 몇 개 대조해 보세요(예: 4-7). 값이 다르면 매트릭스 열 정렬 문제 → 콘솔의 이 로그를 공유해주세요.');
+      let sig = '';
+      let quinella = [];
+      try {
+        setTripleProgress('복승 수집중…');
+        await clickTabAndWait(['복승', '복연', '馬連'], isKorea ? '' : oddsSignature(), '복승', !isKorea);
+        sig = oddsSignature();
+        const quinMap = {};
+        for (const p of currentMatrixPairs(oddsClass)) {
+          if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
+          const k = p.a < p.b ? `${p.a}-${p.b}` : `${p.b}-${p.a}`;
+          if (quinMap[k] == null || p.odds < quinMap[k]) quinMap[k] = p.odds;
+        }
+        quinella = Object.entries(quinMap).map(([k, o]) => {
+          const [a, b] = k.split('-').map(Number); return { combo: [a, b], odds: o };
+        });
+        console.log(`[복승수집] 파싱 ${quinella.length}조합. 최저배당순 상위: `
+          + quinella.slice().sort((a, b) => a.odds - b.odds).slice(0, 10).map((c) => `${c.combo[0]}-${c.combo[1]}=${c.odds}`).join(' · '));
+        console.log('[복승수집] 실제 배당판과 몇 개 대조해 보세요(예: 4-7). 값이 다르면 매트릭스 열 정렬 문제 → 콘솔의 이 로그를 공유해주세요.');
+      } catch (e) { console.warn('[복승수집] 실패 — 건너뛰고 계속', e); sig = sig || oddsSignature(); }
 
       // 2) 쌍승 — [일본 전용]. 한국경마는 쌍승을 수집하지 않는다(복승만).
       let exacta = [];
@@ -1285,14 +1304,20 @@
       finally { _autoRunning = false; }
     };
 
-    // [1번] 발주시각 기준 동적 루프: 마감 3분전 10초 간격 + T-2/T-1 이상감지 알림 + 마감 자동중지.
+    // [긴급1] 발주시각 기준 동적 루프:
+    //   T-5분: 수집 간격 30초 → 15초 단축
+    //   T-2분: 이상감지 즉시 실행 + 알림
+    //   T-1분: 최종 베팅 확정 + 🚨 강한 알림(소리 3번)
+    //   T-30초: 마지막 경고
+    //   T-0: 수집 중지
     //   발주시각 미설정(timerDeadline=0) 시 기존 동작(고정 간격·무한 수집) 그대로 유지.
+    const STAGE_MS = [120000, 60000, 30000, 0];   // 알림/중지 경계(정확히 이 시점에 깨어나도록 정렬)
     const loop = async () => {
       const { autoSend: on, intervalSec, timerDeadline } = await getSettings();
       if (!on) { timer = null; return; }                 // 자동수집 꺼짐 → 종료
       const left = timerDeadline ? (timerDeadline - Date.now()) : null;
 
-      // 마감(발주시각) 도달 → 수집 자동 중지 (루프 재예약 안 함)
+      // T-0: 발주 마감 도달 → 수집 자동 중지 (루프 재예약 안 함)
       if (left != null && left <= 0) {
         if (!_stageFired.has('stop')) {
           _stageFired.add('stop');
@@ -1301,25 +1326,35 @@
         timer = null; return;
       }
 
-      await runAuto();                                   // 이번 틱 수집
+      await runAuto();                                   // 이번 틱 수집(완료 즉시 아래 분석)
 
-      // T-2분: 즉시 이상감지 분석 + 알림
+      // T-2분: 이상감지 즉시 실행 + 알림
       if (left != null && left <= 120000 && !_stageFired.has(120)) {
         _stageFired.add(120);
         const data = await runAnalyzeForAlert();
-        pushCollectAlert('🟠', `🔔 마감 2분전 · 이상감지 분석 완료${data && _mainBet(data) ? ' · ' + _mainBet(data) : ''}`);
+        pushCollectAlert('🟠', `⚠️ 마감 2분전 이상감지 결과${data && _mainBet(data) ? ' · ' + _mainBet(data) : ''}`);
       }
-      // T-1분: 최종 베팅 추천 확정 + 강한 알림
+      // T-1분: 최종 베팅 추천 확정 + 강한 알림(소리 3번)
       if (left != null && left <= 60000 && !_stageFired.has(60)) {
         _stageFired.add(60);
         const data = await runAnalyzeForAlert();
         const bet = data ? _mainBet(data) : '';
-        pushCollectAlert('🚨', `🚨 마감 1분전 · 최종 베팅: ${bet || '데이터 부족'}`);
+        pushCollectAlert('🚨', `🚨 마감 1분전 - 최종베팅: ${bet || '데이터 부족'}`);
+      }
+      // T-30초: 마지막 경고
+      if (left != null && left <= 30000 && !_stageFired.has(30)) {
+        _stageFired.add(30);
+        pushCollectAlert('🚨', '⏰ 30초 남음 - 지금 베팅하세요!');
       }
 
-      // 다음 간격: 마감 3분전부터 10초, 그 외 설정값(기본 30초)
+      // 다음 간격: 마감 5분전부터 15초, 그 외 설정값(기본 30초).
+      //   단, 다음 단계 경계(T-2·T-1·T-30·T-0)가 더 가까우면 그 시점에 정확히 깨어난다.
       const baseMs = Math.max(10, Number(intervalSec) || 30) * 1000;
-      const ms = (left != null && left <= 180000) ? 10000 : baseMs;
+      let ms = (left != null && left <= 300000) ? 15000 : baseMs;
+      if (left != null) {
+        for (const s of STAGE_MS) { if (left > s) { ms = Math.min(ms, left - s); break; } }
+        ms = Math.max(1000, ms);   // 과도한 폭주 방지(최소 1초)
+      }
       timer = setTimeout(loop, ms);
     };
 
