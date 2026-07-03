@@ -401,3 +401,34 @@ table.odds-matrix td.rec-x { outline: 3px solid var(--accent-2); outline-offset:
 .combo-card .cc-move { font-size: 11px; color: var(--text-dim); }
 .combo-card .cc-move .dn { color: var(--red); font-weight: 700; }
 .combo-card .cc-move .up { color: var(--accent-2); font-weight: 700; }
+
+/* [v1.12.0] 한국경마 서버 세션 복원 배너 */
+.restore-banner {
+  background: var(--accent-soft, #1e2a44);
+  border: 1px solid var(--accent, #4a7bd8);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.restore-banner.hidden { display: none; }
+.restore-banner b { color: var(--accent, #6fa8ff); }
+
+/* [v1.13.0] 한국경마 배당 변동 알림 토스트 (우상단 스택) */
+#oddsToastHost {
+  position: fixed; top: 16px; right: 16px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 10px; max-width: 360px;
+}
+.odds-toast {
+  background: #1a1f2e; border: 1px solid #f59e0b; border-left: 4px solid #f59e0b;
+  border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 13px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.4); cursor: pointer;
+  opacity: 0; transform: translateX(24px); transition: opacity .3s, transform .3s;
+}
+.odds-toast.show { opacity: 1; transform: translateX(0); }
+.odds-toast .ot-head { font-weight: 700; margin-bottom: 4px; color: #ffd24f; }
+.odds-toast .ot-line { line-height: 1.5; }
+.tl-row:hover { background: rgba(255,255,255,.05); }

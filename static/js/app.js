@@ -12,11 +12,15 @@
 
   const state = {
     jockeyStats: {},
+    koreaFile: null,      // [v1.12.0] 업로드 대기중 PDF File
+    koreaPolling: null,   // [v1.12.0] 진행상황 폴링 setInterval 핸들
     koreaRaces: [],
     japanOdds: null,
     japanForm: null,
     lastReports: {},
     koreaScored: {},  // title -> {race, form:[{no,name,jockey,formScore,recentPlacings}]} — 배당 통합용
+    koreaOddsPrev: {},  // [2번] title -> 직전 signal text Set (신규 변동 감지용)
+    koreaTimeline: {},  // [3번] title -> [{time,changed,signals,integrated,raceKey}]
     lastSheets: {},   // title -> {horses(추출 출전마), distance} — Phase 4 통합분석용
     lastCombined: {}, // title -> {bets, recOdds, hadAnomaly, budget} — Phase 5 결과기록용
     oddsTrack: { betType: '복승', raceKey: null, snaps: 0, nos: new Set(), firstOdds: {},
@@ -114,83 +118,145 @@
       : '선택 사항 — 비 선택 시 주로가 불량으로 자동 설정됩니다';
   }
 
-  // ---------- 한국경마 ----------
+  // ---------- 한국경마 (서버 백그라운드 분석 v1.12.0) ----------
+  // PDF를 서버로 업로드 → 서버가 감지·추출·분석을 백그라운드로 수행 → 클라이언트는 진행상황만 폴링.
+  // 탭 전환/새로고침/서버 재시작에도 계속 진행되고, 결과는 data/korea_session.json 에 영구 저장.
   function initKorea() {
     const zone = $('#koreaUploadZone'), input = $('#koreaPdfInput');
     $('#koreaBrowseBtn').addEventListener('click', (e) => { e.stopPropagation(); input.click(); });
     wireDropZone(zone, input, handleKoreaPdf, /application\/pdf/);
-    $('#koreaScanBtn').addEventListener('click', runKoreaAuto);
+    $('#koreaScanBtn').addEventListener('click', startKoreaServerAnalysis);
+    $('#koreaResetBtn').addEventListener('click', resetKoreaSession);
   }
 
+  /** 파일 선택 = '새 PDF 업로드' → 기존 서버 세션 초기화 후 대기(자동 감지 버튼으로 시작) */
   async function handleKoreaPdf(file) {
     try {
-      showLoading('PDF 로드 중...');
-      const n = await PdfParser.load(file);
-      hideLoading();
+      stopKoreaPolling();
+      await fetch('/api/korea/reset', { method: 'POST' }).catch(() => {});
+      state.koreaFile = file;
+      state.koreaRaces = []; state.lastReports = {}; state.lastSheets = {};
+      state.koreaTimeline = {}; state.koreaOddsPrev = {};
+      stopKoreaOddsWatch();
+      $('#koreaReport').innerHTML = ''; $('#koreaIntegrated').innerHTML = '';
+      { const t = $('#koreaTimeline'); if (t) t.remove(); }
+      $('#koreaRaceList').innerHTML = '';
+      $('#koreaRestoreBanner').classList.add('hidden');
       $('#koreaUploadZone').classList.add('has-file');
       $('#koreaConfig').classList.remove('hidden');
-      $('#koreaPdfInfo').textContent = `${n}페이지 감지됨. [자동 감지]를 누르면 전 페이지를 훑어 경주를 찾아냅니다.`;
-    } catch (err) { hideLoading(); toast('PDF 로드 실패: ' + err.message); }
+      $('#koreaResetBtn').style.display = 'none';
+      $('#koreaPdfInfo').textContent = `${file.name} 준비됨. [자동 감지]를 누르면 서버가 백그라운드로 전 경주를 분석합니다 (탭 전환·새로고침해도 계속 진행).`;
+      $('#koreaProgress').textContent = '';
+    } catch (err) { toast('PDF 준비 실패: ' + err.message); }
   }
 
-  /** 전 페이지 자동 감지 → 경주 목록 생성 */
-  async function runKoreaAuto() {
-    const total = PdfParser.numPages();
-    if (!total) { toast('먼저 PDF를 업로드하세요.'); return; }
-    const CHUNK = 6;
-    const detected = {}; // page -> {type,venue,raceNo,distance,layout}
-    const progress = $('#koreaProgress');
-
-    showLoading('페이지 스캔 중...');
+  /** [1번] PDF를 서버로 업로드하고 백그라운드 분석 시작 → 폴링 */
+  async function startKoreaServerAnalysis() {
+    if (!state.koreaFile) { toast('먼저 PDF를 업로드하세요.'); return; }
+    const btn = $('#koreaScanBtn');
     try {
-      // 1) 감지 (썸네일 배치)
-      let scanned = 0;
-      for (let s = 1; s <= total; s += CHUNK) {
-        const pages = [];
-        for (let p = s; p < Math.min(s + CHUNK, total + 1); p++) pages.push(p);
-        $('#loadingText').textContent = `페이지 스캔 ${pages[0]}–${pages[pages.length - 1]} / ${total}`;
-        try {
-          const blocks = [];
-          for (const p of pages) blocks.push((await PdfParser.renderThumb(p)).block);
-          const out = await Analysis.detectPages(blocks);
-          (out.pages || []).forEach((r) => { const pg = pages[r.index]; if (pg) detected[pg] = r; });
-        } catch (e) { console.warn('detect', pages, e); }
-        scanned += pages.length;
-        progress.textContent = `스캔 ${scanned}/${total}`;
-      }
+      btn.disabled = true;
+      $('#koreaProgress').textContent = 'PDF 업로드 중...';
+      const fd = new FormData();
+      fd.append('pdf', state.koreaFile);
+      const r = await fetch('/api/korea/start', { method: 'POST', body: fd });
+      const d = await r.json();
+      if (!r.ok || d.error) throw new Error(d.error || `업로드 실패(${r.status})`);
+      $('#koreaProgress').textContent = '분석 시작됨 — 백그라운드로 진행됩니다.';
+      startKoreaPolling();
+    } catch (err) { toast('분석 시작 실패: ' + err.message); }
+    finally { btn.disabled = false; }
+  }
 
-      // 2) 기수현황표 추출
-      const jockeyPages = Object.keys(detected).map(Number).filter((p) => detected[p].type === 'jockey');
-      for (const jp of jockeyPages) {
-        $('#loadingText').textContent = `기수현황표 ${jp}p 판독 중...`;
-        try {
-          const { block } = await PdfParser.renderPage(jp);
-          const o = await Analysis.extractJockeySheet(block);
-          (o.jockeys || []).forEach(mergeJockey);
-        } catch (e) { console.warn(`기수 ${jp}p 실패:`, e); }
-      }
-      rebuildJockeyStats();
+  /** [1번] 진행상황 폴링(탭 전환과 무관하게 서버가 진행) */
+  function startKoreaPolling() {
+    stopKoreaPolling();
+    state.koreaPolling = setInterval(pollKoreaStatus, 2000);
+    pollKoreaStatus();
+  }
+  function stopKoreaPolling() {
+    if (state.koreaPolling) { clearInterval(state.koreaPolling); state.koreaPolling = null; }
+  }
+  async function pollKoreaStatus() {
+    let s;
+    try { s = await (await fetch('/api/korea/status')).json(); }
+    catch (e) { return; } // 네트워크 순간 오류는 다음 폴링에서 회복
+    const prog = $('#koreaProgress');
+    if (s.status === 'running') {
+      prog.textContent = s.message || `분석 중... ${s.done || 0}/${s.total || 0} 경주 완료`;
+    } else if (s.status === 'done') {
+      stopKoreaPolling();
+      prog.textContent = s.message || '완료';
+      await loadKoreaSession(true);
+      toast('✅ 분석 완료 — 결과가 서버에 저장되었습니다.');
+    } else if (s.status === 'error') {
+      stopKoreaPolling();
+      prog.textContent = '오류: ' + (s.error || '알 수 없음');
+      toast('분석 오류: ' + (s.error || ''));
+    }
+  }
 
-      // 3) 경주를 venue+raceNo로 묶고, 요약 페이지 선택
-      const groups = new Map();
-      Object.keys(detected).map(Number).forEach((p) => {
-        const r = detected[p];
-        if (r.type !== 'race') return;
-        const key = (r.venue || '') + '#' + r.raceNo;
-        if (!groups.has(key)) groups.set(key, { venue: r.venue || '', raceNo: r.raceNo, distance: r.distance || '', pages: [] });
-        groups.get(key).pages.push({ page: p, layout: r.layout });
-      });
-      state.koreaRaces = [...groups.values()].map((g) => {
-        const sum = g.pages.find((x) => x.layout === 'summary');
-        g.summaryPage = sum ? sum.page : Math.min(...g.pages.map((x) => x.page));
-        return g;
-      }).sort((a, b) => (a.venue || '').localeCompare(b.venue || '') || a.raceNo - b.raceNo);
+  /** 서버 세션(전체)을 불러와 칩·리포트 상태 복원 */
+  async function loadKoreaSession(silent) {
+    let sess;
+    try { sess = await (await fetch('/api/korea/session')).json(); }
+    catch (e) { if (!silent) toast('세션 로드 실패'); return null; }
+    applyKoreaSession(sess);
+    return sess;
+  }
 
-      hideLoading();
-      renderRaceChips();
-      progress.textContent = `완료 — 경주 ${state.koreaRaces.length}개, 기수현황표 ${jockeyPages.length}p. 칩을 눌러 분석하세요.`;
-      if (!state.koreaRaces.length) toast('경주를 찾지 못했습니다. PDF를 확인하세요.');
-    } catch (err) { hideLoading(); toast('스캔 실패: ' + err.message); }
+  /** 세션 → state 반영 후 칩 렌더 */
+  function applyKoreaSession(sess) {
+    if (!sess || !(sess.races || []).length) return;
+    state.koreaSessionDate = sess.date || state.koreaSessionDate;
+    state.jockeyStats = Object.assign({}, state.jockeyStats, sess.jockeyStats || {});
+    state.koreaRaces = sess.races.map((r) => ({
+      venue: r.venue, raceNo: r.raceNo, distance: r.distance, summaryPage: r.summaryPage, title: r.title,
+    }));
+    sess.races.forEach((r) => {
+      if (r.horses && r.horses.length) state.lastSheets[r.title] = { horses: r.horses, distance: r.distance };
+      if (r.report) state.lastReports[r.title] = r.report;
+    });
+    renderRaceChips();
+  }
+
+  /** [2번·3번] 페이지 로드 시 저장된 분석 결과 자동 복원 */
+  async function restoreKoreaSession() {
+    let sess;
+    try { sess = await (await fetch('/api/korea/session')).json(); }
+    catch (e) { return; }
+    if (!sess) return;
+    const hasData = (sess.races || []).length > 0;
+    if (!hasData && sess.status !== 'running') return;
+    if (hasData) {
+      applyKoreaSession(sess);
+      const banner = $('#koreaRestoreBanner');
+      banner.innerHTML = `📂 이전 분석 결과를 불러왔습니다 — <b>${esc(sess.label || '')}</b>. 칩을 눌러 확인하거나, 위에서 새 PDF를 올려 다시 분석하세요.`;
+      banner.classList.remove('hidden');
+      $('#koreaConfig').classList.remove('hidden');
+      $('#koreaResetBtn').style.display = '';
+      $('#koreaPdfInfo').textContent = '';
+    }
+    if (sess.status === 'running') {
+      $('#koreaConfig').classList.remove('hidden');
+      $('#koreaProgress').textContent = sess.message || '분석 중...';
+      startKoreaPolling();  // 서버 재시작 후에도 계속 진행중이면 이어서 폴링
+    }
+  }
+
+  /** [초기화] '새 PDF 업로드' — 서버 세션/PDF 삭제 후 UI 리셋 */
+  async function resetKoreaSession() {
+    stopKoreaPolling();
+    await fetch('/api/korea/reset', { method: 'POST' }).catch(() => {});
+    state.koreaFile = null; state.koreaRaces = []; state.lastReports = {}; state.lastSheets = {};
+    $('#koreaReport').innerHTML = ''; $('#koreaIntegrated').innerHTML = '';
+    $('#koreaRaceList').innerHTML = '';
+    $('#koreaRestoreBanner').classList.add('hidden');
+    $('#koreaConfig').classList.add('hidden');
+    $('#koreaUploadZone').classList.remove('has-file');
+    $('#koreaPdfInput').value = '';
+    $('#koreaPdfInfo').textContent = ''; $('#koreaProgress').textContent = '';
+    toast('초기화됨 — 새 PDF를 업로드하세요.');
   }
 
   function mergeJockey(j) {
@@ -236,43 +302,53 @@
     });
   }
 
-  /** 요약페이지 1장에서 메인표 + 조교표 두 밴드를 추출해 레이팅까지 병합 */
-  async function extractRaceFull(page) {
-    const { block } = await PdfParser.renderBand(page);
-    const sheet = await Analysis.extractRaceSheet(block);
-    try {
-      const tb = await PdfParser.renderTrainingBand(page);
-      const tr = await Analysis.extractTraining(tb.block);
-      const map = {}; (tr.horses || []).forEach((t) => { map[t.horseNum] = t; });
-      (sheet.horses || []).forEach((h) => {
-        const t = map[h.horseNum];
-        if (t) {
-          if (t.rating) h.rating = t.rating;
-          if (t.trainer) h.training = ((h.training || '') + ` 조교사 ${t.trainer} ${t.mark || ''}`).trim();
-        }
-      });
-    } catch (e) { console.warn('조교 추출 실패:', e); }
-    return sheet;
-  }
 
-  /** 칩 클릭: 요약 페이지 추출 → 컨텍스트 저장 → 분석 실행 */
+  /** 칩 클릭: 서버가 이미 분석한 결과를 렌더(재분석 없음). 결과가 없으면 서버 재추출. */
   async function analyzeKoreaRace(idx, chipEl) {
     const race = state.koreaRaces[idx]; if (!race) return;
     $$('#koreaRaceList .race-chip').forEach((c) => c.classList.remove('active'));
     if (chipEl) chipEl.classList.add('active');
     state.activeKorea = idx;
     const title = raceLabel(race);
+    const sheet = state.lastSheets[title];
+    if (!sheet || !(sheet.horses || []).length) {
+      // 서버가 아직 못 읽었거나 비어있음 → 재추출 시도
+      await reextractKoreaRace(idx, null);
+      return;
+    }
+    state.activeKoreaCtx = { idx, title, race, sheetHorses: sheet.horses };
+    const report = state.lastReports[title];
+    if (report) {
+      await renderKoreaRaceUI(report);   // 저장된 리포트 즉시 렌더(추가 과금 없음)
+    } else {
+      await runKoreaAnalysis();           // 리포트가 없으면 클라이언트 분석
+    }
+  }
+
+  /** 서버 재추출: ±1 페이지 보정 후 해당 경주만 다시 추출·분석 */
+  async function reextractKoreaRace(idx, page) {
+    const race = state.koreaRaces[idx]; if (!race) return;
+    const title = raceLabel(race);
     try {
-      showLoading(`${title} 추출 중... (p${race.summaryPage})`);
-      const sheet = await extractRaceFull(race.summaryPage);
-      if (!(sheet.horses || []).length) {
-        hideLoading(); renderPageControl(idx);
-        toast('출전마를 못 읽었습니다. ← → 로 페이지를 ±1 보정해보세요.'); return;
+      showLoading(`${title} 서버 재추출 중...`);
+      const r = await fetch('/api/korea/reextract', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idx, page }),
+      });
+      const d = await r.json();
+      hideLoading();
+      if (d.error) {
+        if (d.summaryPage) race.summaryPage = d.summaryPage;
+        renderPageControl(idx);
+        toast(d.error); return;
       }
-      state.lastSheets[title] = { horses: sheet.horses, distance: race.distance };
-      state.activeKoreaCtx = { idx, title, race, sheetHorses: sheet.horses };
-      await runKoreaAnalysis();
-    } catch (err) { hideLoading(); toast('분석 실패: ' + err.message); }
+      const rc = d.race;
+      race.summaryPage = rc.summaryPage;
+      state.lastSheets[title] = { horses: rc.horses, distance: race.distance };
+      state.lastReports[title] = rc.report;
+      state.activeKoreaCtx = { idx, title, race, sheetHorses: rc.horses };
+      await renderKoreaRaceUI(rc.report);
+    } catch (err) { hideLoading(); toast('재추출 실패: ' + err.message); }
   }
 
   /** [2번] 마체중 입력값을 출전마에 병합 */
@@ -288,27 +364,34 @@
     });
   }
 
-  /** 분석 실행(재분석 공용): 마체중·환경 반영 → 리포트 + 전적점수 + 마체중 패널 */
+  /** 마체중·환경 반영 재분석(클라이언트 /api/analyze 호출) → 렌더 */
   async function runKoreaAnalysis() {
     const ctx = state.activeKoreaCtx; if (!ctx) return;
-    const { idx, title, race, sheetHorses } = ctx;
+    const { title, race, sheetHorses } = ctx;
     try {
       showLoading(`${title} BMED 분석 중...`);
       const horses = applyWeights(title, sheetHorses);
       const report = await Analysis.analyzeRace(
         { raceNo: race.raceNo, raceTitle: title, horses, condition: state.raceCondition, distance: race.distance }, state.jockeyStats);
       state.lastReports[title] = report;
-      renderReport('#koreaReport', report, '한국', title);
-      renderPageControl(idx);
-      let scored = null;
-      try { scored = await renderFormScores(race, { horses: sheetHorses }); } catch (e) { console.warn('전적 점수 패널 실패:', e); }
-      // [통합분석] 전적 초안 후 배당판 자동 연결 감시 시작(전적 40% + 배당 60%)
-      try { await wireKoreaOdds(title, race, scored || []); } catch (e) { console.warn('배당 연결 실패:', e); }
-      renderWeightPanel(title, sheetHorses);
-      renderKoreaFooter(idx, title, race);   // [기능1·2] 경주 이동 + 결과입력 버튼
-      refreshRaceChipStatus();               // [기능3] 진행상황 칩 갱신 (이 경주 → ✅)
+      await renderKoreaRaceUI(report);
       hideLoading();
     } catch (err) { hideLoading(); toast('분석 실패: ' + err.message); }
+  }
+
+  /** 리포트 + 부가 패널(전적점수·배당·마체중·푸터) 렌더 — 서버/클라이언트 공용 */
+  async function renderKoreaRaceUI(report) {
+    const ctx = state.activeKoreaCtx; if (!ctx) return;
+    const { idx, title, race, sheetHorses } = ctx;
+    renderReport('#koreaReport', report, '한국', title);
+    renderPageControl(idx);
+    let scored = null;
+    try { scored = await renderFormScores(race, { horses: sheetHorses }); } catch (e) { console.warn('전적 점수 패널 실패:', e); }
+    // [통합분석] 전적 초안 후 배당판 자동 연결 감시 시작(전적 40% + 배당 60%)
+    try { await wireKoreaOdds(title, race, scored || []); } catch (e) { console.warn('배당 연결 실패:', e); }
+    renderWeightPanel(title, sheetHorses);
+    renderKoreaFooter(idx, title, race);   // [기능1·2] 경주 이동 + 결과입력 버튼
+    refreshRaceChipStatus();               // [기능3] 진행상황 칩 갱신 (이 경주 → ✅)
   }
 
   /** [기능1·2] 리포트 하단 푸터: [결과 입력] + [← 이전][서울 3R / 전체 13R][다음 →] */
@@ -405,9 +488,8 @@
   function shiftRacePage(idx, delta) {
     const race = state.koreaRaces[idx];
     const np = race.summaryPage + delta;
-    if (np < 1 || np > PdfParser.numPages()) { toast('페이지 범위를 벗어났습니다.'); return; }
-    race.summaryPage = np;
-    analyzeKoreaRace(idx, null);
+    if (np < 1) { toast('페이지 범위를 벗어났습니다.'); return; }
+    reextractKoreaRace(idx, np);   // 서버가 해당 페이지를 재렌더·재추출
   }
 
   // ---------- 일본경마 (배당판 캡처 + 전적표 업로드 통합) ----------
@@ -2396,15 +2478,19 @@
       formScore: h.totalScore, recentPlacings: h.recentPlacings || [],
     }));
     state.koreaScored[title] = { race, form };
+    state.koreaOddsPrev[title] = state.koreaOddsPrev[title] || new Set();
+    state.koreaTimeline[title] = state.koreaTimeline[title] || [];
     setKoreaOddsStatus('waiting', title);
     $('#koreaIntegrated').innerHTML = '';
-    const tick = () => pollKoreaOdds(title, form);
+    renderKoreaTimeline(title);
+    const tick = () => pollKoreaOdds(title, race, form);
     await tick();
-    _koreaOddsTimer = setInterval(tick, 12000);   // 12초마다 배당 매칭 재시도(마감 임박 배당변화 반영)
+    // [2번] 30초 간격 수집·변동 감시 (확장 [전체 자동 수집] 주기와 정렬)
+    _koreaOddsTimer = setInterval(tick, 30000);
   }
 
-  /** 배당 raceKey 자동 매칭 → 전적 저장 → 통합분석 렌더 */
-  async function pollKoreaOdds(title, form) {
+  /** 배당 raceKey 자동 매칭 → 전적 저장 → 통합분석 렌더 + 변동 알림/타임라인/히스토리 */
+  async function pollKoreaOdds(title, race, form) {
     if (_koreaOddsTitle !== title) return;   // 다른 경주로 이동됨 → 중단
     let m;
     try {
@@ -2429,10 +2515,244 @@
       })).json();
       if (_koreaOddsTitle !== title) return;
       if (a && !a.error && !a.waiting) {
+        const firstLink = !state.koreaTimeline[title] || !state.koreaTimeline[title].length;
         setKoreaOddsStatus('linked', title, { raceKey: m.raceKey });
         renderKoreaIntegrated(a);
+        onKoreaOddsUpdate(title, race, m.raceKey, a, firstLink);   // [2·3·4번]
       }
     } catch (e) { console.warn('[통합분석] 실패', e); }
+  }
+
+  /** [2·3·4번] 통합분석 갱신 시: 신규 변동 감지 → 토스트+소리 / 타임라인 누적 / 히스토리 저장 */
+  function onKoreaOddsUpdate(title, race, raceKey, a, firstLink) {
+    const now = new Date();
+    const hhmmss = now.toTimeString().slice(0, 8);
+    const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '역전');
+    const prev = state.koreaOddsPrev[title] || new Set();
+    const fresh = signals.filter((s) => !prev.has(s.text));   // 직전에 없던 신규 변동만
+
+    // [2번] 신규 변동 → 우상단 토스트 + 심각도별 소리
+    if (fresh.length && !firstLink) {
+      const { venue, num } = koreaRaceParts(title);
+      const head = `⏱ ${venue || ''} ${num != null ? num + 'R' : ''} 배당 변동`.trim();
+      const lines = fresh.map((s) => `${s.level} ${esc(s.text)}${/급락/.test(s.type) && s.level === '🔴' ? ' 급락!' : ''}`);
+      oddsToast(head, lines);
+      // 가장 심각한 레벨로 경고음 (🔴 3회 / 🟠 2회 / 🟡 1회)
+      const worst = fresh.map((s) => s.level).sort((x, y) => sevRank(y) - sevRank(x))[0];
+      try { playAlert(worst); } catch (_) {}
+    }
+    state.koreaOddsPrev[title] = new Set(signals.map((s) => s.text));
+
+    // [3번] 타임라인 누적 (수집 1건 = 항목 1개)
+    const tl = state.koreaTimeline[title] || (state.koreaTimeline[title] = []);
+    tl.push({
+      time: hhmmss, raceKey, changed: fresh.length > 0,
+      signals: signals.map((s) => ({ level: s.level, text: s.text, detail: s.detail })),
+      integrated: (a.integrated || []).map((h) => ({ no: h.no, name: h.name, grade: h.grade, odds: h.odds, integrated: h.integrated })),
+      anomalyHorse: a.anomalyHorse,
+    });
+    if (tl.length > 200) tl.splice(0, tl.length - 200);
+    renderKoreaTimeline(title);
+
+    // [4번] 경주별 히스토리 저장(전적+배당타임라인+추천+이상감지)
+    saveKoreaHistory(title, race, raceKey, a);
+  }
+
+  function sevRank(level) { return { '🔴': 3, '🟠': 2, '🟡': 1, '🔄': 1 }[level] || 0; }
+
+  /** [4번] 통합 스냅샷을 data/korea_history 에 저장(디바운스) */
+  let _koreaSaveTimer = null;
+  function saveKoreaHistory(title, race, raceKey, a) {
+    if (_koreaSaveTimer) clearTimeout(_koreaSaveTimer);
+    _koreaSaveTimer = setTimeout(async () => {
+      const { venue, num } = koreaRaceParts(title);
+      const anomalies = (a.signals || []).filter((s) => s.type === '급락').map((s) => `${s.level} ${s.text}`);
+      const payload = {
+        date: (state.koreaSessionDate || todayStr()), venue: venue || race.venue || '',
+        raceNo: num != null ? num : race.raceNo, raceKey, title,
+        report: state.lastReports[title] || null,
+        formScores: (state.koreaScored[title] || {}).form || null,
+        integrated: a.integrated || [], recommend: a.betRecommend || [],
+        anomalies, signals: a.signals || [], timeline: state.koreaTimeline[title] || [],
+      };
+      try {
+        await fetch('/api/korea/history/save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+        });
+      } catch (e) { console.warn('[히스토리 저장] 실패', e); }
+    }, 1200);
+  }
+
+  /** [3번] 배당 변동 타임라인 렌더(클릭 시 해당 시점 통합배당판 표시) */
+  function renderKoreaTimeline(title) {
+    let host = $('#koreaTimeline');
+    if (!host) {
+      host = document.createElement('div'); host.id = 'koreaTimeline'; host.className = 'panel-card';
+      $('#koreaIntegrated').insertAdjacentElement('afterend', host);
+    }
+    const tl = state.koreaTimeline[title] || [];
+    if (!tl.length) {
+      host.innerHTML = `<h3>⏱ 배당 변동 타임라인</h3><p class="hint">배당판이 수집되면 30초 간격으로 변동 내역이 누적됩니다.</p>`;
+      return;
+    }
+    const rows = tl.map((e, i) => {
+      const badge = e.changed
+        ? e.signals.map((s) => s.level).join('')
+        : '<span class="hint">변동 없음</span>';
+      const summary = e.changed ? e.signals.map((s) => esc(s.text)).join(' · ') : '';
+      return `<div class="tl-row" data-i="${i}" style="cursor:pointer;padding:4px 6px;border-left:3px solid ${e.changed ? '#f59e0b' : 'transparent'};border-radius:4px">
+        <b>${e.time}</b> ${badge} <span class="hint">${summary}</span></div>`;
+    }).reverse().join('');
+    host.innerHTML = `<h3>⏱ 배당 변동 타임라인 <span class="hint" style="font-weight:400">(${tl.length}회 수집 · 클릭 시 해당 시점 배당판)</span></h3>
+      <div style="max-height:220px;overflow:auto">${rows}</div>
+      <div id="koreaTimelineSnap" style="margin-top:8px"></div>`;
+    host.querySelectorAll('.tl-row').forEach((r) => r.addEventListener('click', () => showKoreaSnapshot(title, +r.dataset.i)));
+  }
+
+  function showKoreaSnapshot(title, i) {
+    const e = (state.koreaTimeline[title] || [])[i]; if (!e) return;
+    const snap = $('#koreaTimelineSnap'); if (!snap) return;
+    const gc = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#8a94a6' };
+    const rows = (e.integrated || []).map((h) => `<tr>
+      <td><b style="color:${gc[h.grade] || '#fff'}">${h.grade || '-'}</b></td>
+      <td>${h.no}</td><td>${esc(h.name || '')}</td>
+      <td>${h.odds != null ? h.odds + '배' : '-'}</td><td><b>${h.integrated != null ? h.integrated : '-'}</b></td>
+    </tr>`).join('');
+    const sig = e.signals.length ? e.signals.map((s) => `<div>${s.level} ${esc(s.text)} <span class="hint">${esc(s.detail || '')}</span></div>`).join('') : '<span class="hint">변동 없음</span>';
+    snap.innerHTML = `<div class="matrix-title" style="font-size:13px">🕐 ${e.time} 시점 통합배당판 ${e.anomalyHorse != null ? `· 이상감지말 <b style="color:#ff5c5c">${e.anomalyHorse}</b>` : ''}</div>
+      <table class="data-table" style="margin-top:4px"><thead><tr><th>등급</th><th>마번</th><th>마명</th><th>대표배당</th><th>통합</th></tr></thead><tbody>${rows}</tbody></table>
+      <div style="margin-top:6px">${sig}</div>`;
+  }
+
+  // ---------- [5번] 경주 분석 히스토리 조회 (통계 탭) ----------
+  function initKoreaHistory() {
+    const rb = $('#koreaHistRefreshBtn'), bb = $('#koreaHistBackupBtn');
+    if (rb) rb.addEventListener('click', loadKoreaHistoryList);
+    if (bb) bb.addEventListener('click', async () => {
+      bb.disabled = true; bb.textContent = '백업 중...';
+      try { await fetch('/api/korea/backup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ label: '경주 히스토리 백업' }) }); notify('☁️ GitHub 백업 요청됨(원격 설정 시 push)'); }
+      catch (e) { notify('백업 실패: ' + e.message, false); }
+      finally { bb.disabled = false; bb.textContent = '☁️ GitHub 백업'; }
+    });
+  }
+
+  async function loadKoreaHistoryList() {
+    const host = $('#koreaHistList'); if (!host) return;
+    host.innerHTML = '<p class="hint">불러오는 중...</p>';
+    let d;
+    try { d = await (await fetch('/api/korea/history/list')).json(); }
+    catch (e) { host.innerHTML = '<p class="hint">목록 로드 실패</p>'; return; }
+    const items = d.items || [];
+    if (!items.length) { host.innerHTML = '<p class="hint">저장된 경주 히스토리가 없습니다. 한국경마 분석 + 배당 연동 시 자동 저장됩니다.</p>'; return; }
+    // 날짜 → 경마장 그룹
+    const byDate = {};
+    items.forEach((it) => { (byDate[it.date] = byDate[it.date] || []).push(it); });
+    const html = Object.keys(byDate).sort().reverse().map((date) => {
+      const rows = byDate[date].sort((a, b) => (a.venue || '').localeCompare(b.venue || '') || (a.raceNo || 0) - (b.raceNo || 0))
+        .map((it) => `<div class="tl-row korea-hist-item" data-file="${esc(it.file)}" style="cursor:pointer;padding:5px 8px;border-radius:4px">
+          <b>${esc(it.venue || '')} ${it.raceNo}R</b>
+          ${it.hasResult ? '<span style="color:#38d39f">🏁</span>' : ''}
+          ${it.anomalyCount ? `<span style="color:#f59e0b">⚡${it.anomalyCount}</span>` : ''}
+          <span class="hint">${esc(it.savedAt || '')}</span>
+        </div>`).join('');
+      return `<div style="margin-bottom:10px"><div class="matrix-title" style="font-size:13px">📅 ${esc(date)}</div>${rows}</div>`;
+    }).join('');
+    host.innerHTML = html;
+    host.querySelectorAll('.korea-hist-item').forEach((el) => el.addEventListener('click', () => {
+      host.querySelectorAll('.korea-hist-item').forEach((x) => x.style.background = '');
+      el.style.background = 'rgba(78,161,255,.15)';
+      openKoreaHistory(el.dataset.file);
+    }));
+  }
+
+  async function openKoreaHistory(file) {
+    const host = $('#koreaHistDetail'); if (!host) return;
+    host.innerHTML = '<p class="hint">불러오는 중...</p>';
+    let d;
+    try { d = await (await fetch('/api/korea/history/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file }) })).json(); }
+    catch (e) { host.innerHTML = '<p class="hint">로드 실패</p>'; return; }
+    if (d.error) { host.innerHTML = `<p class="hint">${esc(d.error)}</p>`; return; }
+    const gc = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#8a94a6' };
+
+    // 전적 점수
+    const fs = (d.formScores || []).slice().sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+    const formHtml = fs.length ? `<div class="matrix-title" style="font-size:13px">📄 전적 점수</div>
+      <table class="data-table"><thead><tr><th>마번</th><th>마명</th><th>기수</th><th>전적점수</th></tr></thead>
+      <tbody>${fs.map((h) => `<tr><td>${h.no}</td><td>${esc(h.name || '')}</td><td>${esc(h.jockey || '')}</td><td><b>${h.formScore != null ? h.formScore : (h.totalScore != null ? h.totalScore : '-')}</b></td></tr>`).join('')}</tbody></table>` : '';
+
+    // 통합 등급
+    const integHtml = (d.integrated || []).length ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">🎯 통합 등급 (전적40+배당60)</div>
+      <table class="data-table"><thead><tr><th>등급</th><th>마번</th><th>마명</th><th>대표배당</th><th>통합</th></tr></thead>
+      <tbody>${d.integrated.map((h) => `<tr><td><b style="color:${gc[h.grade] || '#fff'}">${h.grade || '-'}</b></td><td>${h.no}</td><td>${esc(h.name || '')}</td><td>${h.odds != null ? h.odds + '배' : '-'}</td><td><b>${h.integrated != null ? h.integrated : '-'}</b></td></tr>`).join('')}</tbody></table>` : '';
+
+    // 배당 타임라인 그래프(최저 대표배당 추이) + 리스트
+    const chart = koreaHistChartSVG(d.timeline || []);
+    const tlRows = (d.timeline || []).map((e) => `<div style="padding:2px 4px;border-left:3px solid ${e.changed ? '#f59e0b' : 'transparent'}">
+      <b>${esc(e.time || '')}</b> ${e.changed ? (e.signals || []).map((s) => `${s.level} ${esc(s.text)}`).join(' · ') : '<span class="hint">변동 없음</span>'}</div>`).reverse().join('');
+    const tlHtml = (d.timeline || []).length ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">⏱ 배당 변동 타임라인 (${d.timeline.length}회)</div>${chart}<div style="max-height:160px;overflow:auto;margin-top:6px">${tlRows}</div>` : '';
+
+    // 이상감지
+    const anoHtml = (d.anomalies || []).length ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">⚠️ 이상감지 내역</div>${d.anomalies.map((a) => `<div>${esc(a)}</div>`).join('')}` : '';
+
+    // 추천
+    const rec = d.recommend || [];
+    const recHtml = rec.length ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">💰 최종 추천</div>
+      <table class="data-table"><thead><tr><th>종류</th><th>조합</th><th>배분</th></tr></thead>
+      <tbody>${rec.map((r) => `<tr><td>${esc(r.label || r.kind || '')}</td><td><b>${(r.combo || []).join('+')}</b></td><td>${r.alloc != null ? r.alloc + '%' : '-'}</td></tr>`).join('')}</tbody></table>` : '';
+
+    // 실제 결과
+    const resHtml = (d.result && d.result.length)
+      ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">🏁 실제 결과</div><div>착순: <b>${d.result.join(' → ')}</b></div>`
+      : `<div style="margin-top:8px"><span class="hint">실제 결과 미입력</span> <button class="btn btn-small" id="koreaHistResultBtn">결과 입력</button></div>`;
+
+    host.innerHTML = `<div class="panel-card">
+      <h3>${esc(d.title || '')} <span class="hint" style="font-weight:400">${esc(d.raceKey || '')} · ${esc(d.savedAt || '')}</span></h3>
+      ${formHtml}${integHtml}${tlHtml}${anoHtml}${recHtml}${resHtml}
+    </div>`;
+    const rbtn = $('#koreaHistResultBtn');
+    if (rbtn) rbtn.addEventListener('click', async () => {
+      const s = prompt('실제 착순을 마번 순서로 입력 (예: 3 1 5)');
+      if (!s) return;
+      const result = s.trim().split(/[\s,]+/).map((x) => parseInt(x, 10)).filter((n) => !isNaN(n));
+      if (!result.length) return;
+      await fetch('/api/korea/history/result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file, result }) });
+      openKoreaHistory(file); loadKoreaHistoryList();
+    });
+  }
+
+  /** 타임라인 스냅샷들의 최저 통합배당 추이를 간단 SVG 라인으로 */
+  function koreaHistChartSVG(timeline) {
+    const pts = (timeline || []).map((e) => {
+      const odds = (e.integrated || []).map((h) => h.odds).filter((o) => typeof o === 'number' && o > 0);
+      return odds.length ? Math.min(...odds) : null;
+    });
+    const valid = pts.filter((p) => p != null);
+    if (valid.length < 2) return '';
+    const W = 460, H = 90, pad = 22;
+    const lo = Math.min(...valid), hi = Math.max(...valid);
+    const span = hi - lo || 1;
+    const n = pts.length;
+    const xf = (i) => pad + (n === 1 ? 0 : i * (W - 2 * pad) / (n - 1));
+    const yf = (v) => H - pad - ((v - lo) / span) * (H - 2 * pad);
+    let dpath = '', last = null;
+    pts.forEach((p, i) => { if (p == null) return; const c = `${xf(i)},${yf(p)}`; dpath += (last == null ? 'M' : 'L') + c + ' '; last = p; });
+    const dots = pts.map((p, i) => p == null ? '' : `<circle cx="${xf(i)}" cy="${yf(p)}" r="2.5" fill="${timeline[i].changed ? '#f59e0b' : '#4ea1ff'}"/>`).join('');
+    return `<svg width="100%" viewBox="0 0 ${W} ${H}" style="background:rgba(255,255,255,.03);border-radius:6px">
+      <text x="4" y="14" fill="#8a94a6" font-size="10">최저 통합배당 ${hi}→${lo}</text>
+      <path d="${dpath}" fill="none" stroke="#4ea1ff" stroke-width="1.6"/>${dots}</svg>`;
+  }
+
+  /** [2번] 우상단 스택형 토스트 (급락 알림 전용, 비차단) */
+  function oddsToast(head, lines) {
+    let host = $('#oddsToastHost');
+    if (!host) { host = document.createElement('div'); host.id = 'oddsToastHost'; document.body.appendChild(host); }
+    const el = document.createElement('div');
+    el.className = 'odds-toast';
+    el.innerHTML = `<div class="ot-head">${esc(head)}</div>${(lines || []).map((l) => `<div class="ot-line">${l}</div>`).join('')}`;
+    host.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 400); }, 7000);
+    el.addEventListener('click', () => { el.classList.remove('show'); setTimeout(() => el.remove(), 400); });
   }
 
   function setKoreaOddsStatus(kind, title, info) {
@@ -2920,9 +3240,11 @@
 
   // ---------- 부트 ----------
   async function boot() {
-    initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initCombined();
+    initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initCombined(); initKoreaHistory();
     checkServerHealth();
     try { await JockeyDB.load(); rebuildJockeyStats(); } catch (e) { console.warn('기수 DB 로드 실패:', e); }
+    // [2번·3번] 저장된 한국경마 분석 결과 자동 복원(JockeyDB 로드 후 → 세션 기수통계로 덮어씀)
+    try { await restoreKoreaSession(); } catch (e) { console.warn('한국 세션 복원 실패:', e); }
   }
   document.addEventListener('DOMContentLoaded', boot);
 })();

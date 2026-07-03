@@ -22,10 +22,14 @@ import os
 import re
 import json
 import time
+import base64
+import threading
+import subprocess
 from itertools import permutations
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.exceptions import HTTPException
 import anthropic
+import fitz  # PyMuPDF — 서버측 PDF 렌더(한국경마 백그라운드 분석)
 
 MODEL = "claude-sonnet-4-6"
 
@@ -409,9 +413,7 @@ def health():
                     "has_key": bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())})
 
 
-@app.route("/api/extract/jockey", methods=["POST"])
-def extract_jockey():
-    body = request.json or {}
+def _do_extract_jockey(img, api_key=None):
     prompt = (
         '이 이미지는 KRA 출주표의 "기수 기승현황표"입니다.\n'
         "표의 모든 기수 행을 읽어 JSON으로 추출하세요.\n"
@@ -419,14 +421,17 @@ def extract_jockey():
         "month(당월 기승수), mW1/mW2/mW3(당월 1/2/3착).\n"
         "숫자를 못 읽으면 0. 기수현황표가 아니면 jockeys를 빈 배열로."
     )
-    out = call_claude([{"type": "text", "text": prompt}, image_block(body.get("image"))],
-                      JOCKEY_SCHEMA, 8192, body.get("api_key"))
-    return jsonify(out)
+    return call_claude([{"type": "text", "text": prompt}, image_block(img)],
+                       JOCKEY_SCHEMA, 8192, api_key)
 
 
-@app.route("/api/extract/race", methods=["POST"])
-def extract_race():
+@app.route("/api/extract/jockey", methods=["POST"])
+def extract_jockey():
     body = request.json or {}
+    return jsonify(_do_extract_jockey(body.get("image"), body.get("api_key")))
+
+
+def _do_extract_race(img, api_key=None):
     prompt = (
         "이 이미지는 한국마사회(KRA) 출주표의 한 경주 출전표입니다. 표의 각 행이 한 마리입니다.\n"
         "KRA 출주표의 칸 위치를 정확히 구분해 추출하세요(필드를 섞지 마세요):\n"
@@ -445,15 +450,17 @@ def extract_race():
         "raceNo(경주 번호, 모르면 0), raceTitle(예 '제1경주', 모르면 '').\n"
         "마번 1번부터 마지막까지 한 마리도 빠짐없이. 출전표가 아니면 horses를 빈 배열로."
     )
-    out = call_claude([{"type": "text", "text": prompt}, image_block(body.get("image"))],
-                      RACE_SHEET_SCHEMA, 8192, body.get("api_key"))
-    return jsonify(out)
+    return call_claude([{"type": "text", "text": prompt}, image_block(img)],
+                       RACE_SHEET_SCHEMA, 8192, api_key)
 
 
-@app.route("/api/extract/training", methods=["POST"])
-def extract_training():
-    """출주표 하단 '조교훈련 및 종합분석' 표 → 마번별 레이팅/조교사/평가기호"""
+@app.route("/api/extract/race", methods=["POST"])
+def extract_race():
     body = request.json or {}
+    return jsonify(_do_extract_race(body.get("image"), body.get("api_key")))
+
+
+def _do_extract_training(img, api_key=None):
     prompt = (
         "이 이미지는 KRA 출주표 하단의 '조교훈련 및 종합분석' 표입니다. 각 행이 한 마리입니다.\n"
         "- horseNum: 마번.\n"
@@ -462,9 +469,15 @@ def extract_training():
         "- mark: 행 우측 종합 평가 기호(★◎○△※ 중 하나), 없으면 ''.\n"
         "칸이 비면 ''. 모든 출전마를 마번과 함께 반환."
     )
-    out = call_claude([{"type": "text", "text": prompt}, image_block(body.get("image"))],
-                      TRAINING_SCHEMA, 4096, body.get("api_key"))
-    return jsonify(out)
+    return call_claude([{"type": "text", "text": prompt}, image_block(img)],
+                       TRAINING_SCHEMA, 4096, api_key)
+
+
+@app.route("/api/extract/training", methods=["POST"])
+def extract_training():
+    """출주표 하단 '조교훈련 및 종합분석' 표 → 마번별 레이팅/조교사/평가기호"""
+    body = request.json or {}
+    return jsonify(_do_extract_training(body.get("image"), body.get("api_key")))
 
 
 @app.route("/api/extract/results", methods=["POST"])
@@ -482,11 +495,7 @@ def extract_results():
     return jsonify(out)
 
 
-@app.route("/api/detect", methods=["POST"])
-def detect():
-    """여러 페이지 썸네일을 순서대로 받아 race/jockey/other 분류"""
-    body = request.json or {}
-    imgs = body.get("images", [])
+def _do_detect(imgs, api_key=None):
     content = [{"type": "text", "text": (
         "여러 장의 KRA 출주표 페이지 썸네일이 '페이지 인덱스' 라벨과 함께 순서대로 주어집니다.\n"
         "각 페이지를 분류하세요:\n"
@@ -504,15 +513,17 @@ def detect():
     for i, im in enumerate(imgs):
         content.append({"type": "text", "text": f"[페이지 인덱스 {i}]"})
         content.append(image_block(im))
-    out = call_claude(content, DETECT_SCHEMA, 2048, body.get("api_key"))
-    return jsonify(out)
+    return call_claude(content, DETECT_SCHEMA, 2048, api_key)
 
 
-@app.route("/api/analyze", methods=["POST"])
-def analyze():
+@app.route("/api/detect", methods=["POST"])
+def detect():
+    """여러 페이지 썸네일을 순서대로 받아 race/jockey/other 분류"""
     body = request.json or {}
-    race = body.get("raceData", {})
-    jstats = body.get("jockeyStats", {})
+    return jsonify(_do_detect(body.get("images", []), body.get("api_key")))
+
+
+def _do_analyze(race, jstats, api_key=None):
     lines = []
     any_weight = False
     any_kra = False
@@ -569,8 +580,13 @@ def analyze():
                 if any_kra else "")
     prompt = (f"{ANALYSIS_GUIDE}\n\n[{title}] 출전마 정보:\n" + "\n".join(lines) + cond_line + weight_line + kra_line +
               "\n\n위 정보로 분석과 베팅 추천을 JSON으로 응답하세요.")
-    out = call_claude([{"type": "text", "text": prompt}], ANALYSIS_SCHEMA, 4096, body.get("api_key"))
-    return jsonify(out)
+    return call_claude([{"type": "text", "text": prompt}], ANALYSIS_SCHEMA, 4096, api_key)
+
+
+@app.route("/api/analyze", methods=["POST"])
+def analyze():
+    body = request.json or {}
+    return jsonify(_do_analyze(body.get("raceData", {}), body.get("jockeyStats", {}), body.get("api_key")))
 
 
 @app.route("/api/analyze/japan", methods=["POST"])
@@ -2488,6 +2504,452 @@ def analyze_combined():
     })
 
 
+# ─────────────────────────────────────────
+# [한국경마] 서버측 PDF 백그라운드 분석 (v1.12.0)
+#   PDF 업로드 → 서버가 PyMuPDF로 페이지/밴드를 렌더 → Vision 감지·추출·분석을 백그라운드
+#   스레드에서 수행하고, 진행상황·결과를 data/korea_session.json 에 실시간 저장한다.
+#   → 탭 전환/새로고침/서버 재시작에도 분석이 계속되고, 결과가 영구 보존된다.
+#   렌더 밴드 좌표는 static/js/pdf-parser.js 와 동일하게 맞춘다.
+# ─────────────────────────────────────────
+KOREA_SESSION = os.path.join(os.path.dirname(__file__), "data", "korea_session.json")
+KOREA_PDF = os.path.join(os.path.dirname(__file__), "data", "korea_last.pdf")
+_BAND = (0.0, 0.10, 1.0, 0.41)          # 메인 출전마 표 밴드
+_TRAIN_BAND = (0.0, 0.355, 1.0, 0.585)  # 조교훈련/레이팅 표 밴드
+_korea_lock = threading.Lock()
+_korea_job = {"gen": 0}   # 세대 카운터: 새 업로드/리셋 시 증가 → 이전 스레드 자가 취소
+
+
+def _korea_default_session():
+    return {"status": "idle", "phase": "", "message": "", "done": 0, "total": 0,
+            "label": "", "date": "", "startedAt": None, "updatedAt": None,
+            "numPages": 0, "detected": None, "detectDone": False, "jockeyDone": False,
+            "jockeyStats": {}, "races": [], "error": None}
+
+
+def _korea_load():
+    try:
+        with open(KOREA_SESSION, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def _korea_save(sess):
+    sess["updatedAt"] = time.time()
+    with _korea_lock:
+        os.makedirs(os.path.dirname(KOREA_SESSION), exist_ok=True)
+        tmp = KOREA_SESSION + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(sess, f, ensure_ascii=False)
+        os.replace(tmp, KOREA_SESSION)
+
+
+def _render_region_b64(page, frac, target_w):
+    """PDF 페이지의 frac(x0,y0,x1,y1 비율) 영역을 target_w 픽셀 폭 PNG(base64)로 렌더.
+    pdf-parser.js 의 _renderRegion 와 동일한 스케일 공식을 사용한다."""
+    r = page.rect
+    x0, y0, x1, y1 = frac
+    region_w_pt = (x1 - x0) * r.width
+    scale = max(0.3, min(6.0, target_w / region_w_pt)) if region_w_pt else 1.0
+    clip = fitz.Rect(x0 * r.width, y0 * r.height, x1 * r.width, y1 * r.height)
+    pix = page.get_pixmap(matrix=fitz.Matrix(scale, scale), clip=clip, alpha=False)
+    return {"media_type": "image/png", "data": base64.b64encode(pix.tobytes("png")).decode("ascii")}
+
+
+def _render_thumb(page):  return _render_region_b64(page, (0, 0, 1, 1), 640)
+def _render_band(page):   return _render_region_b64(page, _BAND, 1568)
+def _render_train(page):  return _render_region_b64(page, _TRAIN_BAND, 1568)
+def _render_full(page):   return _render_region_b64(page, (0, 0, 1, 1), 1540)
+
+
+def _korea_race_label(venue, race_no, distance):
+    """static/js/app.js 의 raceLabel 과 동일 — History 제목 매칭을 위해 형식 유지."""
+    v = (venue + " ") if venue else ""
+    d = (" " + distance) if distance else ""
+    return f"{v}{race_no}경주{d}"
+
+
+def _load_base_jockeys():
+    """정적 기수 DB(static/data/jockeys.json)를 이름 키 dict 로 로드. PDF 추출값을 위에 덮어씀."""
+    stats = {}
+    try:
+        p = os.path.join(os.path.dirname(__file__), "static", "data", "jockeys.json")
+        for j in (json.load(open(p, encoding="utf-8")).get("jockeys") or []):
+            if j.get("name"):
+                stats[j["name"]] = dict(j)
+    except Exception as e:
+        print("[한국] 기수 DB 로드 실패:", e)
+    return stats
+
+
+def _merge_jockey(stats, j):
+    """PDF '기수 기승현황표' 한 행을 stats 에 병합 (app.js mergeJockey 와 동일 계산)."""
+    name = j.get("name") or ""
+    total = j.get("total") or 0
+    if not name:
+        return
+    w1, w2, w3 = j.get("w1", 0), j.get("w2", 0), j.get("w3", 0)
+    win = round(w1 / total * 1000) / 10 if total else 0
+    place = round((w1 + w2 + w3) / total * 1000) / 10 if total else 0
+    base = stats.get(name, {"name": name})
+    base.update({"winRate": win, "placeRate": place, "rides": total, "w1": w1, "w2": w2, "w3": w3,
+                 "month": j.get("month", 0), "mW1": j.get("mW1", 0), "mW2": j.get("mW2", 0), "mW3": j.get("mW3", 0)})
+    stats[name] = base
+
+
+def _korea_extract_race(doc, race, api_key=None):
+    """요약 페이지 1장에서 메인표+조교표를 추출·병합해 출전마 리스트 반환 (app.js extractRaceFull)."""
+    pg = doc[race["summaryPage"] - 1]   # summaryPage 는 1-based
+    sheet = _do_extract_race(_render_band(pg), api_key)
+    horses = sheet.get("horses") or []
+    try:
+        tr = _do_extract_training(_render_train(pg), api_key)
+        tmap = {t.get("horseNum"): t for t in (tr.get("horses") or [])}
+        for h in horses:
+            t = tmap.get(h.get("horseNum"))
+            if t:
+                if t.get("rating"):
+                    h["rating"] = t["rating"]
+                if t.get("trainer"):
+                    h["training"] = ((h.get("training") or "") + f" 조교사 {t['trainer']} {t.get('mark', '')}").strip()
+    except Exception as e:
+        print("[한국] 조교 추출 실패:", e)
+    return horses
+
+
+def _korea_git_backup(label):
+    """완료 후 data/korea_session.json + data/korea_history/ 를 커밋(+가능하면 push).
+    원격/인증 미설정이면 조용히 건너뜀."""
+    root = os.path.dirname(os.path.abspath(__file__))
+    try:
+        subprocess.run(["git", "add", "data/korea_session.json", "data/korea_history"],
+                       cwd=root, timeout=30, capture_output=True)
+        msg = (f"한국경마 세션 백업 {label}").strip()
+        r = subprocess.run(["git", "commit", "-m", msg], cwd=root, timeout=30, capture_output=True, text=True)
+        if r.returncode != 0:
+            print("[한국] git commit 없음/실패:", ((r.stdout or "") + (r.stderr or "")).strip()[:200])
+            return
+        pr = subprocess.run(["git", "push"], cwd=root, timeout=90, capture_output=True, text=True)
+        if pr.returncode == 0:
+            print("[한국] GitHub 백업 완료:", label)
+        else:
+            print("[한국] git push 건너뜀(원격/인증 미설정?):", (pr.stderr or "").strip()[:200])
+    except Exception as e:
+        print("[한국] git 백업 예외:", e)
+
+
+def _korea_run_job(gen, api_key=None):
+    """백그라운드 분석 본체. 세션(disk)을 기준으로 진행하며, 이미 끝난 단계는 건너뛰어 '재개'를 지원."""
+    def cancelled():
+        return _korea_job.get("gen") != gen
+
+    sess = _korea_load() or _korea_default_session()
+    try:
+        doc = fitz.open(KOREA_PDF)
+    except Exception as e:
+        sess["status"] = "error"; sess["error"] = f"PDF 열기 실패: {e}"; _korea_save(sess); return
+
+    try:
+        total_pages = doc.page_count
+        sess["numPages"] = total_pages
+        sess["status"] = "running"; sess["error"] = None
+        _korea_save(sess)
+
+        # 1) 페이지 감지 (썸네일 6장 배치)
+        if not sess.get("detectDone"):
+            sess["phase"] = "detect"
+            detected = {}
+            CHUNK = 6
+            for s in range(0, total_pages, CHUNK):
+                if cancelled():
+                    return
+                pages = list(range(s, min(s + CHUNK, total_pages)))   # 0-based
+                sess["message"] = f"페이지 스캔 {pages[0] + 1}–{pages[-1] + 1} / {total_pages}"
+                _korea_save(sess)
+                try:
+                    imgs = [_render_thumb(doc[p]) for p in pages]
+                    out = _do_detect(imgs, api_key)
+                    for r in (out.get("pages") or []):
+                        i = r.get("index")
+                        if i is not None and 0 <= i < len(pages):
+                            detected[str(pages[i] + 1)] = r   # 1-based 키로 저장
+                except Exception as e:
+                    print("[한국] detect 실패", pages, e)
+            sess["detected"] = detected
+            sess["detectDone"] = True
+            _korea_save(sess)
+        detected = sess["detected"] or {}
+
+        # 2) 기수현황표 추출 → jockeyStats
+        if not sess.get("jockeyDone"):
+            sess["phase"] = "jockey"; sess["message"] = "기수현황표 판독 중..."
+            _korea_save(sess)
+            stats = _load_base_jockeys()
+            for jp in [int(p) for p, r in detected.items() if r.get("type") == "jockey"]:
+                if cancelled():
+                    return
+                try:
+                    o = _do_extract_jockey(_render_full(doc[jp - 1]), api_key)
+                    for j in (o.get("jockeys") or []):
+                        _merge_jockey(stats, j)
+                except Exception as e:
+                    print(f"[한국] 기수 {jp}p 실패:", e)
+            sess["jockeyStats"] = stats
+            sess["jockeyDone"] = True
+            _korea_save(sess)
+
+        # 3) 경주 그룹핑 (venue+raceNo) → 요약 페이지 선택
+        if not sess.get("races"):
+            groups = {}
+            for p, r in detected.items():
+                if r.get("type") != "race":
+                    continue
+                key = (r.get("venue") or "") + "#" + str(r.get("raceNo"))
+                g = groups.setdefault(key, {"venue": r.get("venue") or "", "raceNo": r.get("raceNo") or 0,
+                                            "distance": r.get("distance") or "", "pages": []})
+                g["pages"].append({"page": int(p), "layout": r.get("layout")})
+            races = []
+            for g in groups.values():
+                summ = next((x["page"] for x in g["pages"] if x["layout"] == "summary"),
+                            min(x["page"] for x in g["pages"]))
+                races.append({"venue": g["venue"], "raceNo": g["raceNo"], "distance": g["distance"],
+                              "summaryPage": summ, "title": _korea_race_label(g["venue"], g["raceNo"], g["distance"]),
+                              "horses": [], "report": None, "status": "todo"})
+            races.sort(key=lambda x: ((x["venue"] or ""), x["raceNo"] or 0))
+            sess["races"] = races
+            sess["total"] = len(races)
+            venue = races[0]["venue"] if races else ""
+            sess["label"] = (f"{sess.get('date', '')} {venue}경마 {len(races)}경주").strip()
+            _korea_save(sess)
+
+        # 4) 경주별 추출 + BMED 분석
+        sess["phase"] = "analyze"
+        races = sess["races"]
+        for i, race in enumerate(races):
+            if cancelled():
+                return
+            if race.get("report") and race.get("horses"):
+                continue   # 이미 완료(재개 시 건너뜀)
+            done = sum(1 for r in races if r.get("status") == "done")
+            sess["done"] = done
+            sess["message"] = f"분석 중... {done}/{len(races)} 경주 완료 — {race['title']} 추출"
+            _korea_save(sess)
+            try:
+                horses = _korea_extract_race(doc, race, api_key)
+                if not horses:
+                    race["status"] = "empty"; _korea_save(sess); continue
+                race["horses"] = horses
+                if cancelled():
+                    return
+                race["report"] = _do_analyze(
+                    {"raceNo": race["raceNo"], "raceTitle": race["title"], "horses": horses, "distance": race["distance"]},
+                    sess.get("jockeyStats") or {}, api_key)
+                race["status"] = "done"
+            except Exception as e:
+                race["status"] = "error"; race["error"] = str(e)
+                print(f"[한국] 경주 '{race['title']}' 분석 실패:", e)
+            sess["done"] = sum(1 for r in races if r.get("status") == "done")
+            _korea_save(sess)
+
+        sess["status"] = "done"; sess["phase"] = "done"
+        sess["done"] = sum(1 for r in races if r.get("status") == "done")
+        sess["message"] = f"완료 — {sess['done']}/{len(races)} 경주 분석 완료"
+        _korea_save(sess)
+        _korea_git_backup(sess.get("label") or "")
+    except Exception as e:
+        if not cancelled():
+            sess["status"] = "error"; sess["error"] = str(e); _korea_save(sess)
+        print("[한국] 백그라운드 작업 예외:", e)
+    finally:
+        doc.close()
+
+
+def _korea_start_job(api_key=None):
+    _korea_job["gen"] = _korea_job.get("gen", 0) + 1
+    gen = _korea_job["gen"]
+    threading.Thread(target=_korea_run_job, args=(gen, api_key), daemon=True).start()
+
+
+@app.route("/api/korea/start", methods=["POST"])
+def korea_start():
+    """PDF 업로드 → 새 세션 시작(기존 세션/진행중 작업은 덮어씀 = '새 PDF 업로드' 초기화)."""
+    f = request.files.get("pdf")
+    if not f:
+        return jsonify({"error": "PDF 파일이 없습니다 (multipart 'pdf' 필드)."}), 400
+    os.makedirs(os.path.dirname(KOREA_PDF), exist_ok=True)
+    f.save(KOREA_PDF)
+    date = time.strftime("%Y-%m-%d")
+    sess = _korea_default_session()
+    sess.update({"status": "running", "startedAt": time.time(), "date": date,
+                 "label": f"{date} 분석 준비 중", "message": "업로드 완료 — 분석 시작"})
+    _korea_save(sess)
+    _korea_start_job(request.form.get("api_key"))
+    return jsonify({"ok": True})
+
+
+@app.route("/api/korea/status", methods=["GET"])
+def korea_status():
+    """진행상황만(경량) — 폴링용."""
+    s = _korea_load() or _korea_default_session()
+    return jsonify({k: s.get(k) for k in
+                    ("status", "phase", "message", "done", "total", "label", "error", "numPages", "updatedAt")})
+
+
+@app.route("/api/korea/session", methods=["GET"])
+def korea_session():
+    """전체 세션(경주·리포트 포함) — 페이지 로드 시 복원용."""
+    return jsonify(_korea_load() or _korea_default_session())
+
+
+@app.route("/api/korea/reset", methods=["POST"])
+def korea_reset():
+    """'새 PDF 업로드' 초기화 — 진행중 작업 취소 + 저장 세션/PDF 삭제. (새로고침으로는 초기화 안 됨)"""
+    _korea_job["gen"] = _korea_job.get("gen", 0) + 1
+    for p in (KOREA_SESSION, KOREA_PDF):
+        try:
+            if os.path.exists(p):
+                os.remove(p)
+        except Exception as e:
+            print("[한국] reset 삭제 실패:", p, e)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/korea/reextract", methods=["POST"])
+def korea_reextract():
+    """경주 요약 페이지 ±1 보정 후 재추출·재분석 (감지가 1p 어긋난 경우)."""
+    body = request.json or {}
+    idx = body.get("idx")
+    sess = _korea_load()
+    if not sess or idx is None or idx >= len(sess.get("races") or []):
+        return jsonify({"error": "세션 또는 경주를 찾을 수 없습니다."}), 400
+    if not os.path.exists(KOREA_PDF):
+        return jsonify({"error": "저장된 PDF가 없습니다. 새 PDF를 업로드하세요."}), 400
+    race = sess["races"][idx]
+    if body.get("page"):
+        race["summaryPage"] = int(body["page"])
+    doc = fitz.open(KOREA_PDF)
+    try:
+        if race["summaryPage"] < 1 or race["summaryPage"] > doc.page_count:
+            return jsonify({"error": "페이지 범위를 벗어났습니다."}), 400
+        horses = _korea_extract_race(doc, race, body.get("api_key"))
+        if not horses:
+            return jsonify({"error": "출전마를 못 읽었습니다. ←/→ 로 페이지를 보정해 보세요.",
+                            "summaryPage": race["summaryPage"]}), 200
+        race["horses"] = horses
+        race["report"] = _do_analyze(
+            {"raceNo": race["raceNo"], "raceTitle": race["title"], "horses": horses, "distance": race["distance"]},
+            sess.get("jockeyStats") or {}, body.get("api_key"))
+        race["status"] = "done"
+        _korea_save(sess)
+        return jsonify({"ok": True, "race": race})
+    finally:
+        doc.close()
+
+
+# ── [4번·5번] 경주별 분석 히스토리 (data/korea_history/) ──
+#   PDF 전적분석 + 배당 타임라인 + 최종 추천 + 이상감지를 경주 1건 = 파일 1개로 영구 저장.
+#   파일명: 2026-07-03_서울_5R.json
+KOREA_HISTORY_DIR = os.path.join(os.path.dirname(__file__), "data", "korea_history")
+
+
+def _korea_hist_file(date, venue, race_no):
+    # 날짜 하이픈 보존: 2026-07-03_서울_5R.json
+    safe = re.sub(r"[^\w가-힣-]+", "_", f"{date}_{venue or '경마'}_{race_no}R").strip("_")
+    return os.path.join(KOREA_HISTORY_DIR, safe + ".json")
+
+
+@app.route("/api/korea/history/save", methods=["POST"])
+def korea_history_save():
+    """통합분석 스냅샷 저장/갱신. 같은 경주 파일은 덮어쓰되 결과(result)는 보존."""
+    b = request.json or {}
+    date = b.get("date") or time.strftime("%Y-%m-%d")
+    venue = (b.get("venue") or "").strip()
+    race_no = b.get("raceNo") or 0
+    os.makedirs(KOREA_HISTORY_DIR, exist_ok=True)
+    path = _korea_hist_file(date, venue, race_no)
+    prev = {}
+    try:
+        prev = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        prev = {}
+    doc = {
+        "date": date, "venue": venue, "raceNo": race_no,
+        "raceKey": b.get("raceKey"), "title": b.get("title"),
+        "report": b.get("report"),           # PDF 전적 BMED 분석 결과
+        "formScores": b.get("formScores"),   # 전적 점수 패널
+        "integrated": b.get("integrated"),   # 통합 등급(전적40+배당60)
+        "recommend": b.get("recommend"),     # 최종 베팅 추천
+        "anomalies": b.get("anomalies") or [],  # 이상감지 내역
+        "signals": b.get("signals") or [],
+        "timeline": b.get("timeline") or [],    # 배당 변동 타임라인
+        "result": prev.get("result"),           # 실제 착순(입력 시 보존)
+        "savedAt": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+        "t": time.time(),
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(doc, f, ensure_ascii=False)
+    return jsonify({"ok": True, "file": os.path.basename(path)})
+
+
+@app.route("/api/korea/history/list", methods=["GET"])
+def korea_history_list():
+    items = []
+    if os.path.isdir(KOREA_HISTORY_DIR):
+        for fn in sorted(os.listdir(KOREA_HISTORY_DIR), reverse=True):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(KOREA_HISTORY_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            items.append({
+                "file": fn, "date": d.get("date"), "venue": d.get("venue"),
+                "raceNo": d.get("raceNo"), "title": d.get("title"), "raceKey": d.get("raceKey"),
+                "hasResult": bool(d.get("result")), "savedAt": d.get("savedAt"),
+                "anomalyCount": len(d.get("anomalies") or []), "snaps": len(d.get("timeline") or []),
+            })
+    return jsonify({"items": items})
+
+
+@app.route("/api/korea/history/get", methods=["POST"])
+def korea_history_get():
+    fn = os.path.basename((request.json or {}).get("file") or "")
+    path = os.path.join(KOREA_HISTORY_DIR, fn)
+    if not fn or not os.path.exists(path):
+        return jsonify({"error": "해당 히스토리를 찾을 수 없습니다."}), 404
+    return jsonify(json.load(open(path, encoding="utf-8")))
+
+
+@app.route("/api/korea/history/result", methods=["POST"])
+def korea_history_result():
+    """실제 착순 입력 → 해당 히스토리 파일에 result 병합."""
+    b = request.json or {}
+    fn = os.path.basename(b.get("file") or "")
+    path = os.path.join(KOREA_HISTORY_DIR, fn)
+    if not fn or not os.path.exists(path):
+        return jsonify({"error": "해당 히스토리를 찾을 수 없습니다."}), 404
+    doc = json.load(open(path, encoding="utf-8"))
+    doc["result"] = b.get("result")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(doc, f, ensure_ascii=False)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/korea/backup", methods=["POST"])
+def korea_backup():
+    """완료 후 GitHub 백업 (세션 + 경주 히스토리). best-effort."""
+    _korea_git_backup((request.json or {}).get("label") or "korea history")
+    return jsonify({"ok": True})
+
+
+def _korea_maybe_resume():
+    """서버 재시작 시 진행중이던 분석 자동 재개 (data/korea_session.json 기준)."""
+    s = _korea_load()
+    if s and s.get("status") == "running" and os.path.exists(KOREA_PDF):
+        print("[한국] 이전 분석 재개:", s.get("label"))
+        _korea_start_job(None)
+
+
 @app.errorhandler(Exception)
 def on_error(e):
     # HTTP 예외(404/405 등)는 원래 상태코드를 보존 — 405가 500으로 둔갑하던 버그 수정
@@ -2500,4 +2962,7 @@ if __name__ == "__main__":
     print("서버 시작: http://127.0.0.1:8011 (자동 리로드 ON, 코드 수정이 바로 반영됩니다)")
     # debug=True: 코드 저장 시 자동 재기동(stale 서버로 인한 405 재발 방지). 로컬 전용(127.0.0.1).
     # threaded=True: 브라우저의 다중 keep-alive 연결을 동시 처리(단일 스레드 멈춤 방지).
+    # 재개는 리로더의 실제 작업 프로세스(WERKZEUG_RUN_MAIN)에서만 1회 수행.
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        _korea_maybe_resume()
     app.run(host="127.0.0.1", port=8011, debug=True, threaded=True)

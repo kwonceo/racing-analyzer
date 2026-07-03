@@ -58,6 +58,8 @@
           <span class="hint" id="condHint" style="margin:0">선택 사항 — 비 선택 시 주로가 불량으로 자동 설정됩니다</span>
         </div>
 
+        <div id="koreaRestoreBanner" class="restore-banner hidden"></div>
+
         <div class="upload-zone" id="koreaUploadZone">
           <input type="file" id="koreaPdfInput" accept="application/pdf" hidden />
           <div class="upload-inner">
@@ -69,7 +71,8 @@
         <div id="koreaConfig" class="hidden">
           <p class="hint" id="koreaPdfInfo"></p>
           <div class="cfg-row">
-            <button id="koreaScanBtn" class="btn btn-primary">자동 감지 &amp; 경주 목록 생성</button>
+            <button id="koreaScanBtn" class="btn btn-primary">자동 감지 &amp; 경주 목록 생성 (서버 백그라운드)</button>
+            <button id="koreaResetBtn" class="btn" style="display:none">🆕 새 PDF 업로드</button>
           </div>
           <p class="hint" id="koreaProgress"></p>
         </div>
@@ -298,6 +301,25 @@
       <div class="panel-card">
         <h2>통계 대시보드</h2>
         <div id="statsDashboard"></div>
+      </div>
+
+      <!-- [5번] 한국경마 경주별 분석 히스토리 (data/korea_history) -->
+      <div class="panel-card">
+        <h2>🏇 경주 분석 히스토리 (한국)</h2>
+        <div class="cfg-row">
+          <button id="koreaHistRefreshBtn" class="btn btn-primary">🔄 목록 새로고침</button>
+          <button id="koreaHistBackupBtn" class="btn">☁️ GitHub 백업</button>
+        </div>
+        <div class="cfg-row" style="margin-top:12px;gap:16px;align-items:flex-start">
+          <div style="min-width:250px">
+            <h3 style="font-size:14px">날짜 · 경마장별 경주</h3>
+            <div id="koreaHistList" class="report-area"><p class="hint">[목록 새로고침]을 누르세요.</p></div>
+          </div>
+          <div style="flex:1">
+            <h3 style="font-size:14px">분석 상세 · 배당 타임라인</h3>
+            <div id="koreaHistDetail" class="report-area"><p class="hint">경주를 선택하면 당시 분석 결과 전체가 표시됩니다.</p></div>
+          </div>
+        </div>
       </div>
 
       <!-- [5번] 배당 변동 히스토리 + 자동학습 대시보드 -->
