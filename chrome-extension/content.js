@@ -446,6 +446,106 @@
     return res || { ok: false, error: 'background 응답 없음' };
   }
 
+  // ══════════════════════════════════════════════════════════════════
+  //  [v2.0.1] 경주결과 자동수집 — 사설 배당판 /bet/result 표를 fetch → 파싱
+  //  ------------------------------------------------------------------
+  //   결과가 iframe(/bet/result?id=..)로 들어오는 사이트 대응. 현재 로그인 세션
+  //   쿠키로 동일출처 fetch → 경주지역/라운드/1~3착/복승/삼복승 파싱 →
+  //   설정 raceKey(예 '나고야 3경주')와 지역+라운드로 매칭 → /api/results/auto 전송.
+  // ══════════════════════════════════════════════════════════════════
+  function findResultUrl() {
+    if (/\/bet\/result/i.test(location.href)) return location.href;
+    for (const d of sameOriginDocs()) {
+      let frames = [];
+      try { frames = [...d.querySelectorAll('iframe, frame')]; } catch (_) { frames = []; }
+      for (const f of frames) {
+        const s = f.src || (f.getAttribute && f.getAttribute('src')) || '';
+        if (s && /\/bet\/result/i.test(s)) { try { return new URL(s, d.baseURI || location.href).href; } catch (_) { return s; } }
+      }
+    }
+    for (const a of queryAllDocs('a[href]')) {
+      const h = a.getAttribute('href') || '';
+      if (/\/bet\/result/i.test(h)) { try { return new URL(h, location.href).href; } catch (_) { return h; } }
+    }
+    return null;
+  }
+
+  function _parseResultDoc(doc) {
+    const rows = [...doc.querySelectorAll('table tr')];
+    const norm = (r) => (r.innerText || r.textContent || '').replace(/\s+/g, '');
+    const headerRow = rows.find((r) => /경주지역|경마장/.test(norm(r)) && /라운드|회차|경주/.test(norm(r)))
+      || rows.find((r) => /경주지역|라운드/.test(norm(r)));
+    if (!headerRow) return [];
+    const heads = [...headerRow.querySelectorAll('th,td')].map((c) => (c.textContent || '').replace(/\s+/g, ''));
+    const idx = (re) => heads.findIndex((h) => re.test(h));
+    const iArea = idx(/경주지역|경마장|지역/);
+    const iRound = idx(/라운드|회차|경주(?!지역)|^R$|^경주번호/);   // '경주지역'(지역열)과 혼동 방지
+    const i1 = idx(/1착|1위|1등/), i2 = idx(/2착|2위/), i3 = idx(/3착|3위/);
+    const iQ = idx(/복승/), iT = idx(/삼복승|삼복/);
+    const out = [];
+    for (const r of rows.slice(rows.indexOf(headerRow) + 1)) {
+      const cells = [...r.querySelectorAll('th,td')].map((c) => (c.textContent || '').trim());
+      if (cells.length < 3) continue;
+      const area = iArea >= 0 ? cells[iArea] : '';
+      const round = iRound >= 0 ? cells[iRound] : '';
+      if (!area && !round) continue;
+      out.push({
+        area, round,
+        no1: toNum(cells[i1]), no2: toNum(cells[i2]), no3: toNum(cells[i3]),
+        qOdds: iQ >= 0 ? toNum(cells[iQ]) : null, tOdds: iT >= 0 ? toNum(cells[iT]) : null,
+      });
+    }
+    return out;
+  }
+
+  // raceKey('2026-07-03 나고야 3경주') ↔ 결과행(지역='나고야', 라운드='3') 매칭
+  function _matchResultRow(rows, raceKey) {
+    const rk = (raceKey || '').replace(/\d{4}-\d{2}-\d{2}/, '').trim();
+    const area = (rk.match(/[가-힣]{2,}/) || [])[0] || '';
+    const no = parseInt((rk.match(/\d{1,2}/) || [])[0] || '', 10);
+    if (!area || !no) return null;
+    return rows.find((r) => {
+      const a = (r.area || '').replace(/\s/g, '');
+      const rn = parseInt((String(r.round).match(/\d{1,2}/) || [])[0] || '', 10);
+      return rn === no && !!a && (a.includes(area) || area.includes(a));
+    }) || null;
+  }
+
+  async function collectResultsByFetch(reason) {
+    const { raceKey: override } = await getSettings();
+    const raceKey = (override && override.trim()) || extractRaceKey();
+    if (!raceKey) return { ok: false, error: 'raceKey 없음(팝업에서 입력)' };
+    const url = findResultUrl();
+    if (!url) return { ok: false, notReady: true, error: '/bet/result 페이지(결과 iframe)를 찾지 못함' };
+    let html;
+    try { html = await (await fetch(url, { credentials: 'include' })).text(); }
+    catch (e) { return { ok: false, error: 'result fetch 실패: ' + (e.message || e) }; }
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const rows = _parseResultDoc(doc);
+    if (!rows.length) return { ok: false, notReady: true, error: '결과표 파싱 실패(미확정 가능)' };
+    const row = _matchResultRow(rows, raceKey);
+    if (!row) return { ok: false, notReady: true, error: `'${raceKey}' 매칭 행 없음(${rows.length}행)` };
+    const results = [];
+    if (isHorseNo(row.no1)) results.push({ rank: 1, no: row.no1 });
+    if (isHorseNo(row.no2)) results.push({ rank: 2, no: row.no2 });
+    if (isHorseNo(row.no3)) results.push({ rank: 3, no: row.no3 });
+    if (!results.length) return { ok: false, notReady: true, error: '착순 마번 없음(미확정)' };
+    const finalOdds = {};
+    if (row.qOdds != null && row.qOdds > 0) finalOdds.quinella = { combo: [row.no1, row.no2].filter(isHorseNo), odds: row.qOdds };
+    if (row.tOdds != null && row.tOdds > 0) finalOdds.trio = { combo: [row.no1, row.no2, row.no3].filter(isHorseNo), odds: row.tOdds };
+    console.log(`[결과fetch] ${raceKey} → ${results.map((r) => r.rank + '착 ' + r.no).join(' / ')}`
+      + (finalOdds.quinella ? ` · 복승 ${finalOdds.quinella.odds}` : ''));
+    const res = await chrome.runtime.sendMessage({
+      type: 'POST_RESULTS', reason: reason || 'auto-result',
+      payload: { raceKey, results, finalOdds, source: url },
+    });
+    if (res && res.ok) {
+      const d = res.data || {};
+      return { ok: true, raceKey, top3: d.top3 || results.map((r) => r.no), hit: d.hit || null };
+    }
+    return { ok: false, error: (res && res.error) || '서버 전송 실패' };
+  }
+
   // ── [전체 자동 수집] 복승·쌍승·삼복승 3종 한 번에 ──────────────────
   //   현재 경주(URL 파라미터)의 3개 오즈 페이지를 동일출처 fetch → 파싱 → 서버 전송.
   //   복승=馬連(OddsUmLenFuku) · 쌍승=馬単(OddsUmLenTan) · 삼복승=3連複(Odds3LenFuku)
@@ -1385,6 +1485,11 @@
     // [1·2번] 결과 자동수집: 경주결과 탭 클릭 → 대기 → 추출·전송 (타이머/수동 공용)
     if (msg?.type === 'COLLECT_RESULTS') {
       collectResultsByTab(msg.reason || 'auto').then(sendResponse);
+      return true;
+    }
+    // [v2.0.1] 결과 자동수집(fetch 방식): /bet/result 표를 fetch·파싱·전송
+    if (msg?.type === 'COLLECT_RESULTS_FETCH') {
+      collectResultsByFetch(msg.reason || 'auto-result').then(sendResponse);
       return true;
     }
     if (msg?.type === 'MANUAL_COLLECT_TRIPLE') {

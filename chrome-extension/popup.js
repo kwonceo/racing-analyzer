@@ -209,8 +209,8 @@ function renderResultTimer(st) {
   if (!st || !st.state) { timerCard.style.display = 'none'; return; }
   timerCard.style.display = 'block';
   const at = st.nextAt ? new Date(st.nextAt).toLocaleTimeString('ko-KR', { hour12: false }) : '';
-  if (st.state === 'scheduled') { timerRow.innerHTML = `<span class="ok">⏱ 예약됨</span> ${esc(st.raceKey || '')}`; timerDetail.textContent = `첫 체크 ${at} (발주+10분)`; }
-  else if (st.state === 'retry') { timerRow.innerHTML = `<span>🔄 재시도 ${st.attempt}/3</span>`; timerDetail.textContent = `다음 체크 ${at}`; }
+  if (st.state === 'scheduled') { timerRow.innerHTML = `<span class="ok">🔄 결과 수집 예약됨</span> ${esc(st.raceKey || '')}`; timerDetail.textContent = at ? `첫 체크 ${at} (발주 후 7분)` : '발주 후 7분'; }
+  else if (st.state === 'retry') { timerRow.innerHTML = `<span>🔄 결과 수집 재시도 ${st.attempt || ''}/3</span>`; timerDetail.textContent = at ? `다음 체크 ${at}` : ''; }
   else if (st.state === 'done') {
     const h = st.hit || {};
     const win = h.quinella || h.trifecta || h.was_hit;
@@ -221,7 +221,7 @@ function renderResultTimer(st) {
     if (h.trifecta) parts.push(`삼복승 적중${h.payouts && h.payouts.trifecta ? ' ' + h.payouts.trifecta + '배' : ''}`);
     if (!h.quinella && !h.trifecta) parts.push('추천 조합 미적중');
     timerDetail.textContent = parts.join(' · ');
-  } else if (st.state === 'manual') { timerRow.innerHTML = '<span class="err">❌ 결과 수동 확인 필요 (3회 재시도 실패)</span>'; timerDetail.textContent = ''; }
+  } else if (st.state === 'manual') { timerRow.innerHTML = '<span class="err">❌ 결과 수집 실패 - 수동 확인 필요</span>'; timerDetail.textContent = '(발주 후 7/9/11분 재시도 실패)'; }
   else if (st.state === 'cancelled') { timerRow.textContent = '예약 취소됨'; timerDetail.textContent = ''; }
 }
 

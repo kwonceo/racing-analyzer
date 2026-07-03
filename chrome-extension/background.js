@@ -239,6 +239,8 @@ async function scheduleResultTimer(raceKey, deadline) {
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   // [v2] 자동수집 하트비트/단계 알람 → 엔진 tick (서비스워커가 죽어도 알람이 부활시킴)
   if (alarm.name === AUTO_ALARM || /^stageT/.test(alarm.name)) { autoTick('alarm'); return; }
+  // [v2.0.1] 발주 후 결과 자동수집 알람
+  if (/^resFetch\d/.test(alarm.name)) { doResultFetch(parseInt(alarm.name.replace('resFetch', ''), 10)); return; }
   if (alarm.name !== 'resultCheck') return;
   const { resultTimer } = await chrome.storage.local.get({ resultTimer: null });
   if (!resultTimer) return;
@@ -327,6 +329,14 @@ async function syncAutoEngine() {
     if (cfg.timerDeadline - 60000 > now) chrome.alarms.create('stageT1', { when: cfg.timerDeadline - 60000 });
     if (cfg.timerDeadline - 30000 > now) chrome.alarms.create('stageT30', { when: cfg.timerDeadline - 30000 });
     if (cfg.timerDeadline > now) chrome.alarms.create('stageT0', { when: cfg.timerDeadline });
+    // [v2.0.1] 발주 후 결과 자동수집(7/9/11분) 예약 — 이미 수집 성공했으면 재예약 안 함
+    ['resFetch0', 'resFetch1', 'resFetch2'].forEach((n) => chrome.alarms.clear(n));
+    const { resultCollected } = await chrome.storage.local.get({ resultCollected: null });
+    if (!(resultCollected && resultCollected.deadline === cfg.timerDeadline)) {
+      [7, 9, 11].forEach((min, i) => { const at = cfg.timerDeadline + min * 60000; if (at > now) chrome.alarms.create('resFetch' + i, { when: at }); });
+      const firstAt = cfg.timerDeadline + 7 * 60000;
+      if (firstAt > now) chrome.storage.local.set({ resultAutoStatus: { state: 'scheduled', raceKey: '', nextAt: firstAt, t: Date.now() } });
+    }
   }
   _ensureFineLoop();
   autoTick('start');
@@ -419,6 +429,34 @@ async function autoTick(reason) {
   if (left != null && left <= 30000 && !(await _stageFiredOnce(cfg.timerDeadline, 't30'))) {
     const a = await _forceAnalyze();
     _notify('t30', '⏰ 30초! 지금 베팅', `${_mainBet(a) || '데이터 부족'}`, true);
+  }
+}
+
+// [v2.0.1] 발주 후 결과 자동수집(fetch 방식). attempt 0/1/2 = 발주+7/9/11분.
+async function doResultFetch(attempt) {
+  const cfg = await _autoCfg();
+  const { resultCollected } = await chrome.storage.local.get({ resultCollected: null });
+  if (resultCollected && resultCollected.deadline === cfg.timerDeadline) return;   // 이미 성공
+  const tab = await _findOddsTab();
+  let res = null;
+  if (tab) { try { res = await chrome.tabs.sendMessage(tab.id, { type: 'COLLECT_RESULTS_FETCH', reason: 'auto-result' }); } catch (_) { res = null; } }
+  if (res && res.ok) {
+    await chrome.storage.local.set({ resultCollected: { deadline: cfg.timerDeadline, t: Date.now() } });
+    ['resFetch0', 'resFetch1', 'resFetch2'].forEach((n) => chrome.alarms.clear(n));
+    const hit = res.hit || {};
+    const win = hit.quinella || hit.trifecta || hit.was_hit;
+    const top3 = res.top3 || [];
+    chrome.storage.local.set({ resultAutoStatus: { state: 'done', raceKey: res.raceKey, top3, hit, t: Date.now() } });
+    const t3 = top3.slice(0, 3).map((n, i) => `${i + 1}착 ${n}번`).join(' / ');
+    _notify('result', `✅ ${res.raceKey || '경주'} 결과 수집`,
+      `${t3}${hit.quinella ? ' / 복승 적중!' : (win ? ' / 적중!' : ' / 미적중')}`, false);
+    setBadge(true, '✓');
+  } else {
+    const last = attempt >= 2;
+    const nextMin = attempt === 0 ? 9 : 11;
+    const nextAt = (!last && cfg.timerDeadline) ? cfg.timerDeadline + nextMin * 60000 : null;
+    chrome.storage.local.set({ resultAutoStatus: { state: last ? 'manual' : 'retry', attempt: attempt + 2, nextAt, raceKey: '', t: Date.now() } });
+    if (last) _notify('resultFail', '❌ 결과 수집 실패', '수동 확인이 필요합니다.', false);
   }
 }
 
