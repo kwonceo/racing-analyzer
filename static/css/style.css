@@ -374,6 +374,52 @@ table.data-table th { color: var(--text-dim); font-weight: 600; }
   .upload-grid { grid-template-columns: 1fr; }
 }
 
+/* ===== [#4] 모바일 화면 최적화 (태블릿/폰) ===== */
+@media (max-width: 768px) {
+  /* 본문 가로 스크롤 방지 — 넓은 요소는 각자 내부에서 스크롤 */
+  html, body { max-width: 100%; overflow-x: hidden; }
+
+  /* 헤더 */
+  .app-header { padding: 10px 12px; gap: 8px; }
+  .brand h1 { font-size: 16px; }
+  .brand .logo { font-size: 22px; }
+  .api-key-box input { width: 130px; }
+
+  /* 탭: 줄바꿈 대신 가로 스크롤(터치) */
+  .tabs { padding: 0 8px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .tabs::-webkit-scrollbar { height: 0; }
+  .tab-btn { padding: 11px 12px; font-size: 13px; white-space: nowrap; flex: 0 0 auto; }
+
+  /* 메인/카드 여백 축소 */
+  .app-main { padding: 12px 10px; }
+  .panel-card { padding: 14px 12px; border-radius: 10px; }
+  .panel-card h2 { font-size: 16px; }
+  .panel-card, .report-area { max-width: 100%; }
+
+  /* 넓은 표는 카드 안에서 가로 스크롤(본문은 안 밀림) */
+  table.data-table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+
+  /* 상단 경주 새로고침 바 줄바꿈 */
+  #raceRefreshBar { flex-wrap: wrap; gap: 8px; padding: 8px 12px; }
+
+  /* 터치 타깃 확대 */
+  .btn, .cfg-input, .cond-btn, .jt-btn { min-height: 42px; }
+  .cfg-row { gap: 8px; }
+
+  /* 추천 조합/통계 카드 2열 */
+  .combo-card { min-width: 0; flex: 1 1 46%; }
+  .stat-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+}
+
+/* 아주 좁은 폰(≤430px) */
+@media (max-width: 430px) {
+  .brand h1 { font-size: 15px; }
+  .app-main { padding: 10px 8px; }
+  .panel-card { padding: 12px 10px; }
+  .combo-card { flex-basis: 100%; }
+  .btn-small { padding: 8px 10px; }
+}
+
 /* ===== [1번] 배당판 매트릭스 (복승 삼각 · 쌍승 정방형) ===== */
 .matrix-title { font-size: 14px; font-weight: 700; margin: 16px 0 6px; display: flex; align-items: center; gap: 8px; }
 .matrix-legend { font-size: 11px; color: var(--text-dim); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 0 0 6px; }
