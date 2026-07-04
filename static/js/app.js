@@ -714,8 +714,8 @@
       _rrLastRk = rk;
       resetOddsTimeline();                            // [4번] 배당 타임라인 초기화(새 경주 시작)
       refreshActiveView(rk);                          // [3번] 분석기 화면 자동 업데이트
-      if (status) status.textContent = '✅ 업데이트됨';
-      notify(`✅ 경주 정보 업데이트: ${rk}`, true);    // [5번] 예: "✅ 경주 정보 업데이트: 제주 3경주"
+      if (status) status.textContent = '✅ 업데이트 완료';
+      notify(`✅ ${rk} 업데이트 완료`, true);          // 예: "✅ 제주 3경주 업데이트 완료"
       return;
     }
     // [자동 감지·30초] 경주가 바뀌면 자동 전환하지 않고 새로고침을 유도하는 알림만 표시
