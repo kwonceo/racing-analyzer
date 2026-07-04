@@ -165,8 +165,15 @@
   window.addEventListener('message', (e) => {
     if (e.source !== window) return;
     const d = e.data;
-    if (d && d.source === 'bmed-analyzer' && d.type === 'FORCE_COLLECT') {
+    if (!d || d.source !== 'bmed-analyzer') return;
+    if (d.type === 'FORCE_COLLECT') {
       try { chrome.runtime.sendMessage({ type: 'FORCE_COLLECT' }); } catch (_) { /* */ }
+    }
+    // [2번] 분석기 '별도 창으로 열기' → 확장이 '일반 창'으로 연다(포커스 잃어도 안 사라짐).
+    //   처리했음을 ACK 로 알려 페이지가 window.open 폴백을 하지 않게 한다.
+    if (d.type === 'OPEN_ANALYZER_WINDOW') {
+      try { chrome.runtime.sendMessage({ type: 'OPEN_ANALYZER', force: true }); } catch (_) { /* */ }
+      try { window.postMessage({ source: 'bmed-timer', type: 'OPEN_ANALYZER_ACK' }, '*'); } catch (_) { /* */ }
     }
   });
 

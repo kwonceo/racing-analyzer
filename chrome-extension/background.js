@@ -231,33 +231,38 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true; // async
   }
 
-  // [4번] 배당판의 '📊 분석기 열기' → 분석기를 별도 팝업 창으로 열기(이미 있으면 포커스).
+  // [4번] 배당판의 '📊 분석기 열기' → 분석기를 별도 '일반 창'으로 열기(이미 있으면 포커스).
+  //   msg.force=true 면 재사용하지 않고 항상 새 창을 만든다(분석기 안의 '별도 창으로 열기'용).
   if (msg?.type === 'OPEN_ANALYZER') {
-    openAnalyzerWindow().then(sendResponse);
+    openAnalyzerWindow(!!msg.force).then(sendResponse);
     return true; // async
   }
 });
 
-// ── [별도 창] 분석기 팝업 창 열기 + 위치/크기 기억 ──────────────────────
+// ── [별도 창] 분석기 창 열기 + 위치/크기 기억 ──────────────────────────
+//   [2번 수정] popup 타입은 포커스를 잃으면 일부 환경에서 뒤로 숨는다 → 'normal'(일반 창)으로 연다.
+//   일반 창은 작업표시줄에 남고 포커스를 잃어도 사라지지 않는다.
 const ANALYZER_URL = `${SERVER}/`;
 let _analyzerWinId = null;
 
-async function openAnalyzerWindow() {
-  // 이미 열린 분석기 창이 있으면 새로 만들지 않고 그 창을 포커스
-  try {
-    const wins = await chrome.windows.getAll({ populate: true });
-    for (const w of wins) {
-      if ((w.tabs || []).some((t) => (t.url || '').startsWith(ANALYZER_URL))) {
-        await chrome.windows.update(w.id, { focused: true, drawAttention: true });
-        _analyzerWinId = w.id;
-        return { ok: true, reused: true };
+async function openAnalyzerWindow(force) {
+  // force 가 아니면: 이미 열린 분석기 창이 있으면 새로 만들지 않고 포커스
+  if (!force) {
+    try {
+      const wins = await chrome.windows.getAll({ populate: true });
+      for (const w of wins) {
+        if ((w.tabs || []).some((t) => (t.url || '').startsWith(ANALYZER_URL))) {
+          await chrome.windows.update(w.id, { focused: true, drawAttention: true });
+          _analyzerWinId = w.id;
+          return { ok: true, reused: true };
+        }
       }
-    }
-  } catch (_) { /* */ }
-  // 저장된 위치/크기(analyzerGeom)로 popup 타입 창 생성
+    } catch (_) { /* */ }
+  }
+  // 저장된 위치/크기(analyzerGeom)로 '일반 창' 생성
   const { analyzerGeom } = await chrome.storage.local.get({ analyzerGeom: null });
   const opts = {
-    url: ANALYZER_URL + '?popup=1', type: 'popup', focused: true,
+    url: ANALYZER_URL + '?popup=1', type: 'normal', focused: true,
     width: (analyzerGeom && analyzerGeom.width) || 1200,
     height: (analyzerGeom && analyzerGeom.height) || 900,
   };

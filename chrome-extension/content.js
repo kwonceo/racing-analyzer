@@ -67,6 +67,13 @@
       const tm = (cand.match(TRACKS) || body.replace(/[\s　]/g, '').match(TRACKS));
       if (tm) track = tm[1];
     }
+
+    // [1번][한국·사설 배당판] 하단 네비게이션 "이전 제주 3경주 1400M 다음" 에서
+    //   회장(한글)+경주번호를 추출한다. 현재 표시 중인 경주의 '가장 확실한' 신호이므로
+    //   위 URL/일본어 추출값보다 우선 적용한다(경주가 바뀌면 이 텍스트가 바뀐다).
+    const km = body.match(/(제주|서울|부산경남|부경|부산|과천|나고야|오오이|오이|소노다|후나바시|카와사키|가와사키|몬베츠|후크시마|후쿠시마|히코다테|하코다테|모리오카|미즈사와|우라와|카나자와|가나자와|카사마츠|사가|고치|히메지|오비히로|반에이|카고시마|몬베쓰|카시와)\s*(\d{1,2})\s*경주/);
+    if (km) { track = km[1]; raceNo = `${parseInt(km[2], 10)}경주`; }
+
     return [date, track, raceNo].filter(Boolean).join(' ').trim();
   }
 
@@ -1546,7 +1553,30 @@
     }
   });
 
+  // [1번] 경주 자동 읽기: 30초마다 배당판에서 현재 경주를 감지 → raceKey 자동 업데이트 + 서버 전송.
+  //   배당판에서 '이전/다음'으로 경주를 바꾸면(예: 제주 3경주 → 제주 4경주) 자동으로 따라간다.
+  let _raceWatchTimer = null, _lastWatchedRace = '';
+  async function watchRaceChange() {
+    let rk = '';
+    try { rk = extractRaceKey(); } catch (_) { return; }
+    if (!rk) return;                                   // 감지 실패 → 기존(수동) raceKey 유지
+    if (rk === _lastWatchedRace) return;               // 이번 페이지에서 변경 없음
+    _lastWatchedRace = rk;
+    const { raceKey: cur } = await getSettings();
+    if (rk === (cur || '').trim()) return;             // 저장된 raceKey 와 이미 동일
+    await new Promise((r) => chrome.storage.local.set({ raceKey: rk }, r));
+    console.log(`[경주감지] 현재 경주 자동 감지 → raceKey 업데이트: "${rk}" (이전 "${cur || ''}")`);
+    setTripleProgress(`🆕 경주 자동 감지: ${rk} — 수집합니다…`, false);
+    if (!_autoRunning) { collectTriple('race-change').catch(() => { /* */ }); }   // 서버에 자동 전송
+  }
+  function startRaceWatch() {
+    if (_raceWatchTimer) clearInterval(_raceWatchTimer);
+    setTimeout(watchRaceChange, 1500);                 // 로드 직후 1회
+    _raceWatchTimer = setInterval(watchRaceChange, 30000);
+  }
+
   restartLoop();
+  startRaceWatch();   // [1번] 경주 자동 감지 시작
 
   // [2번] 결과 페이지면 로드 직후 1회 자동 전송 (URL result/성적표 감지)
   if (isResultPage()) {

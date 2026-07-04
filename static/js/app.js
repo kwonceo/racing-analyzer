@@ -783,16 +783,28 @@
   }
 
   function openAnalyzerPopup() {
-    let g = null;
-    try { g = JSON.parse(localStorage.getItem(POPUP_GEOM_KEY) || 'null'); } catch (_) { /* */ }
-    const w = (g && g.w) || 1200, h = (g && g.h) || 900;
-    const x = (g && g.x != null) ? g.x : Math.max(0, Math.round((screen.availWidth - w) / 2));
-    const y = (g && g.y != null) ? g.y : Math.max(0, Math.round((screen.availHeight - h) / 2));
-    const feats = `popup=yes,resizable=yes,scrollbars=yes,width=${w},height=${h},left=${x},top=${y}`;
-    const win = window.open(location.origin + '/?popup=1', POPUP_NAME, feats);
-    if (win) { try { win.focus(); } catch (_) { /* */ } notify('🪟 분석기를 별도 창으로 열었습니다', true); }
-    else notify('팝업이 차단되었습니다 — 브라우저 팝업 허용을 확인하세요', false);
-    return win;
+    // [2번] 확장이 있으면 background 가 '일반 창(type:normal)'으로 연다(포커스 잃어도 안 사라짐).
+    //   확장이 ACK 하면 window.open 폴백을 건너뛴다. 확장이 없으면(ACK 없음) window.open 으로 연다.
+    let acked = false;
+    const onAck = (e) => {
+      if (e.source === window && e.data && e.data.source === 'bmed-timer' && e.data.type === 'OPEN_ANALYZER_ACK') acked = true;
+    };
+    window.addEventListener('message', onAck);
+    try { window.postMessage({ source: 'bmed-analyzer', type: 'OPEN_ANALYZER_WINDOW' }, '*'); } catch (_) { /* */ }
+    setTimeout(() => {
+      window.removeEventListener('message', onAck);
+      if (acked) { notify('🪟 분석기를 별도(일반) 창으로 열었습니다', true); return; }
+      // 폴백: 확장 미설치 → window.open (일반 창 시도)
+      let g = null;
+      try { g = JSON.parse(localStorage.getItem(POPUP_GEOM_KEY) || 'null'); } catch (_) { /* */ }
+      const w = (g && g.w) || 1200, h = (g && g.h) || 900;
+      const x = (g && g.x != null) ? g.x : Math.max(0, Math.round((screen.availWidth - w) / 2));
+      const y = (g && g.y != null) ? g.y : Math.max(0, Math.round((screen.availHeight - h) / 2));
+      const feats = `resizable=yes,scrollbars=yes,width=${w},height=${h},left=${x},top=${y}`;
+      const win = window.open(location.origin + '/?popup=1', POPUP_NAME, feats);
+      if (win) { try { win.focus(); } catch (_) { /* */ } notify('🪟 분석기를 별도 창으로 열었습니다', true); }
+      else notify('팝업이 차단되었습니다 — 브라우저 팝업 허용을 확인하세요', false);
+    }, 350);
   }
 
   function _savePopupGeom() {
@@ -809,7 +821,11 @@
       try { chk.checked = localStorage.getItem(POPUP_ONTOP_KEY) === '1'; } catch (_) { /* */ }
       chk.addEventListener('change', () => {
         try { localStorage.setItem(POPUP_ONTOP_KEY, chk.checked ? '1' : '0'); } catch (_) { /* */ }
-        notify(chk.checked ? '📌 항상 위 켜짐 (브라우저 제한상 팝업 창 유지 수준)' : '📌 항상 위 꺼짐', true);
+        if (chk.checked) {
+          notify('📌 항상 위: 브라우저는 창 고정을 지원하지 않습니다. Windows에서 창을 클릭 후 [Win+Ctrl+T]로 고정하세요(PowerToys 필요).', true);
+        } else {
+          notify('📌 항상 위 꺼짐', true);
+        }
       });
     }
     // 이 페이지가 '별도 창'이면: 위치/크기를 주기적으로 기억 + 닫힐 때 저장. 별도창 버튼은 숨김.
