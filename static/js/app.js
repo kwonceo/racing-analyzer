@@ -2270,6 +2270,8 @@
     const el = $('#learnDashboard'); if (!el) return;
     let d; try { d = await (await fetch('/api/learning/stats')).json(); }
     catch (e) { el.innerHTML = `<p class="hint">${esc(e.message)}</p>`; return; }
+    // [2번] 부진마 역전 학습(전적 기반)도 함께 조회
+    let up = null; try { up = await (await fetch('/api/learning/upset')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
@@ -2279,7 +2281,46 @@
       ${card('전적 유력마 적중률', s.form_pick)}
       ${card('제거 판정 적중률', s.elimination)}
       ${renderPatternStats(s.pattern_stats)}
-      ${renderDropTiming(s.drop_timing)}`;
+      ${renderDropTiming(s.drop_timing)}
+      ${renderUpsetStats(up)}`;
+  }
+
+  /** [2번] 부진마 이변(역전) 조건별 적중률 표 + 최근 이변 사례.
+   *  부진마 = 최근 5경주 평균 착순 ≥ threshold. 조건 동반 시 실제 입상(이변) 비율을 보여준다. */
+  function renderUpsetStats(up) {
+    if (!up) return '';
+    const rows0 = (up.conditionRows || []).filter((r) => r.count > 0);
+    const th = up.threshold != null ? up.threshold : 4.0;
+    // 조건 이름 보기 좋게(기준선/조건없음은 뒤로)
+    const label = { '급락동반': '급락 30%+ 동반', '이상감지동반': '복승 이상감지 동반', '조건없음': '조건 없음', '전체부진마': '전체 부진마(기준선)' };
+    const order = ['급락동반', '이상감지동반', '조건없음', '전체부진마'];
+    rows0.sort((a, b) => (order.indexOf(a.condition) - order.indexOf(b.condition)));
+    const baseline = (up.condition_stats && up.condition_stats['전체부진마']) || null;
+    const baseRate = baseline && baseline.count ? (baseline.hit / baseline.count * 100) : null;
+    const rows = rows0.map((r) => {
+      const rate = r.rate != null ? r.rate : 0;
+      const color = rate >= 65 ? '#38d39f' : rate >= 40 ? '#ffd24f' : '#ff6b6b';
+      // 기준선 대비 상승폭(전체 부진마 입상률보다 얼마나 높은가)
+      const lift = (baseRate != null && r.condition !== '전체부진마') ? (rate - baseRate) : null;
+      const liftTxt = lift != null ? ` <span class="hint">(기준 ${lift >= 0 ? '+' : ''}${lift.toFixed(1)}p)</span>` : '';
+      return `<tr><td><b>${esc(label[r.condition] || r.condition)}</b></td>
+        <td style="text-align:center">${r.count}</td><td style="text-align:center">${r.hit}</td>
+        <td style="text-align:center;color:${color};font-weight:700">${r.rate}%${liftTxt}</td></tr>`;
+    }).join('');
+    const table = rows
+      ? `<table class="data-table" style="width:100%"><thead><tr>
+          <th>동반 조건</th><th style="text-align:center">부진마 수</th><th style="text-align:center">입상(이변)</th><th style="text-align:center">이변 적중률</th>
+        </tr></thead><tbody>${rows}</tbody></table>`
+      : `<p class="hint">아직 부진마 이변 표본이 없습니다. 전적(착순)이 있는 경주에 결과가 입력되면 자동 누적됩니다.</p>`;
+    const cases = (up.patterns || []).slice(0, 8).map((p) =>
+      `<div style="margin:2px 0">🐎 <b>${esc(p.race || '')}</b> ${p.horse_no}번 · 평균착순 ${p.recent_avg} → ${p.win_place}착 입상
+        <span class="hint">[${(p.conditions || []).map(esc).join(', ') || '조건없음'}]${p.date ? ' · ' + esc(p.date) : ''}</span></div>`).join('');
+    return `<div class="panel-card" style="margin-top:10px">
+      <h3>🔥 부진마 이변 조건별 적중률</h3>
+      <p class="hint" style="margin-top:0">부진마 = 최근 5경주 평균 착순 ${th} 이상. 각 조건을 동반한 부진마가 실제로 1~3착에 든(이변 성공) 비율입니다. 총 사례 ${up.total || 0}건.</p>
+      ${table}
+      ${cases ? `<div style="margin-top:8px"><b>최근 이변 사례</b>${cases}</div>` : ''}
+      <p class="hint" style="margin-top:4px">‘기준 +Np’는 전체 부진마 평균 입상률 대비 상승폭 — 값이 클수록 그 조건이 이변을 예고하는 힘이 큽니다.</p></div>`;
   }
 
   /** [2번] 패턴별 적중률 표: 패턴 | 발생횟수 | 적중 | 적중률 (발생 많은 순) */

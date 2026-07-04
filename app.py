@@ -2287,6 +2287,91 @@ def _learning_save(d):
     json.dump(d, open(LEARNING_FILE, "w", encoding="utf-8"), ensure_ascii=False)
 
 
+# ── [2번] 부진마 역전 학습 (전적 기반) ─────────────────────────────────
+#   부진마 판정: 최근 5경주 평균 착순 ≥ 4.0
+#   입상(1~3착) 시 동반 조건(급락30%+·복승이상감지)을 태깅해 pattern_learning.json 누적.
+#   condition_stats: 부진마가 그 조건을 동반한 횟수(count) + 그중 입상(이변 성공)한 횟수(hit)
+#   → 적중률 = hit/count = "부진마가 이 조건을 동반했을 때 실제로 이변을 낸 비율".
+UPSET_FILE = os.path.join(os.path.dirname(__file__), "data", "pattern_learning.json")
+UPSET_AVG_THRESHOLD = 4.0   # 최근5경주 평균 착순 이 값 이상이면 부진마
+
+
+def _upset_load():
+    try:
+        d = json.load(open(UPSET_FILE, encoding="utf-8"))
+    except Exception:
+        d = {}
+    d.setdefault("patterns", [])
+    d.setdefault("condition_stats", {})
+    return d
+
+
+def _upset_save(d):
+    os.makedirs(os.path.dirname(UPSET_FILE), exist_ok=True)
+    json.dump(d, open(UPSET_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+
+
+def _upset_bump(stats, key, hit):
+    c = stats.setdefault(key, {"count": 0, "hit": 0})
+    c["count"] += 1
+    if hit:
+        c["hit"] += 1
+
+
+def _learn_upset(rk, an, top3, date_str=None):
+    """부진마(최근5경주 평균착순≥4.0)의 입상 여부 + 동반 조건을 학습.
+    반환: 갱신된 pattern_learning dict(없으면 None)."""
+    form = an.get("form") or []
+    if not form:
+        return None
+    drops = an.get("drops") or []
+    single_nos = {d.get("no") for d in (an.get("singleDrops") or [])}
+    key_nos = {h.get("no") for h in (an.get("keyHorses") or [])}
+    anom_no = (an.get("anomalyHorse") or {}).get("no")
+    top3 = [int(x) for x in (top3 or []) if str(x).lstrip("-").isdigit()]
+    d = _upset_load()
+    stats = d["condition_stats"]
+    learned = []
+    for f in form:
+        no = f.get("no")
+        rp = [int(x) for x in (f.get("recentPlacings") or [])[:5] if isinstance(x, (int, float))]
+        if no is None or not rp:
+            continue
+        avg = round(sum(rp) / len(rp), 1)
+        if avg < UPSET_AVG_THRESHOLD:
+            continue   # 부진마 아님
+        placed = no in top3
+        # 동반 조건 판정 — 이 부진마가 낀 복승 조합의 급락/이상감지
+        my_drops = [dr for dr in drops if no in (dr.get("combo") or [])]
+        strong = [dr for dr in my_drops if (dr.get("pct") or 0) <= -30]
+        conditions = []
+        if strong:
+            worst = min(dr.get("pct") or 0 for dr in strong)
+            conditions.append(f"급락{abs(int(worst))}%")
+            _upset_bump(stats, "급락동반", placed)
+        anomaly = bool(my_drops) or (no in single_nos) or (no in key_nos) or (no == anom_no)
+        if anomaly:
+            conditions.append("복승이상감지")
+            _upset_bump(stats, "이상감지동반", placed)
+        if not conditions:
+            _upset_bump(stats, "조건없음", placed)   # 조건 없는 부진마도 분모로 집계(비교용)
+        _upset_bump(stats, "전체부진마", placed)      # 부진마 전체 입상률(기준선)
+        # 입상한 이변 사례만 patterns[]에 근거 사례로 보존
+        if placed:
+            d["patterns"].append({
+                "race": rk, "horse_no": no, "recent_avg": avg,
+                "win_place": top3.index(no) + 1,
+                "conditions": conditions, "date": date_str or "",
+            })
+            learned.append((no, avg, conditions))
+    d["patterns"] = d["patterns"][-500:]   # 무한 성장 방지(최근 500건 유지)
+    _upset_save(d)
+    if learned:
+        print(f"[부진마학습] {rk}: 부진마 입상 {len(learned)}건 → " +
+              ", ".join(f"{no}번(평균{avg},{'+'.join(c) if c else '조건없음'})" for no, avg, c in learned))
+    return d
+
+
 # [4번] 고배당 적중 하이라이트 저장소
 HIGHLIGHT_FILE = os.path.join(os.path.dirname(__file__), "data", "highlight_wins.json")
 
@@ -2505,6 +2590,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
     L["records"].append(record)
     L["stats"] = _recompute_learning_stats(L["records"])
     _learning_save(L)
+    # [2번] 부진마 역전 학습(전적 있는 경주만 작동) — 급락30%+·복승이상감지 동반 조건별 적중률 누적
+    try:
+        _learn_upset(rk, an, top3, time.strftime("%Y-%m-%d"))
+    except Exception as e:
+        print("[부진마학습] 실패:", e)
     # [복기] 결과 적중/판정 요약을 히스토리 파일에도 저장 → 통계 탭에서 재계산 없이 표시
     try:
         doc["review"] = {
@@ -2543,6 +2633,27 @@ def learning_stats():
     """누적 학습 통계 대시보드."""
     L = _learning_load()
     return jsonify({"stats": L.get("stats", {}), "count": len(L.get("records", []))})
+
+
+@app.route("/api/learning/upset", methods=["GET"])
+def learning_upset():
+    """[2번] 부진마 역전 학습 조회 → {patterns, condition_stats, summary}.
+    조건별 적중률(rate=hit/count)을 계산해 통계 탭에서 바로 표시한다."""
+    d = _upset_load()
+    cs = d.get("condition_stats") or {}
+    rows = []
+    for key, v in cs.items():
+        cnt, hit = int(v.get("count", 0)), int(v.get("hit", 0))
+        rows.append({"condition": key, "count": cnt, "hit": hit,
+                     "rate": round(hit / cnt * 100, 1) if cnt else 0.0})
+    rows.sort(key=lambda r: (-r["count"], -r["rate"]))
+    return jsonify({
+        "threshold": UPSET_AVG_THRESHOLD,
+        "condition_stats": cs,
+        "conditionRows": rows,
+        "patterns": (d.get("patterns") or [])[-30:][::-1],   # 최근 30건(최신 우선)
+        "total": len(d.get("patterns") or []),
+    })
 
 
 # [v2.0.0] 확장(백그라운드 자동수집 엔진) → 분석기(웹) 상태 브리지.
