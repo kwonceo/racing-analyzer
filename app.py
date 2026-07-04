@@ -2372,6 +2372,166 @@ def _learn_upset(rk, an, top3, date_str=None):
     return d
 
 
+# ── [전체 데이터 저장·패턴 자동 발견] ──────────────────────────────────
+#   원시 데이터는 data/analysis_log/ 에 매 분석마다 이미 완전 저장(배당 타임라인 30초·전적점수·
+#   이상감지·결과)됨. 여기서는 그 로그들을 스캔해 "적중한 경주들의 공통점"을 자동 발견한다.
+DISCOVERED_FILE = os.path.join(os.path.dirname(__file__), "data", "discovered_patterns.json")
+DISCOVERY_MIN_RACES = 10    # 결과 있는 경주가 이 이상 쌓이면 패턴 발견 시작
+DISCOVERY_TARGET = 50       # 데이터 충분도 100% 기준(경주 수)
+
+
+def _drop_timing_from_timeline(timeline):
+    """배당 타임라인(30초 스냅샷)에서 복승 배당의 최대 하락과 그 시점(T-N분 버킷)."""
+    snaps = [s for s in (timeline or []) if isinstance(s.get("quinella"), dict)]
+    best_pct, best_mb = 0.0, None
+    for i in range(1, len(snaps)):
+        prev, cur = snaps[i - 1]["quinella"], snaps[i]["quinella"]
+        for k, o in cur.items():
+            try:
+                po, oo = float(prev.get(k)), float(o)
+            except (TypeError, ValueError):
+                continue
+            if po > 0 and oo > 0:
+                pct = (oo - po) / po * 100.0
+                if pct < best_pct:
+                    best_pct, best_mb = pct, snaps[i].get("minutes_before")
+    return (_pattern_timing_bucket(best_mb) if best_mb is not None else None), round(best_pct, 1)
+
+
+def _race_features(log):
+    """분석 로그 1건 → 패턴 발견용 특징. 결과 미입력이면 None(학습 대상 제외)."""
+    hit = log.get("hit") or {}
+    if not log.get("result") and not hit:
+        return None
+    good = bool(hit.get("quinella_hit") or hit.get("trifecta_hit") or hit.get("was_hit"))
+    sigs = log.get("signals_detected") or []
+    types = [s.get("type") for s in sigs]
+    drop_pcts = []
+    for s in sigs:
+        if s.get("type") in ("급락", "단승급락"):
+            m = re.search(r"\(-?(\d+)%\)", s.get("detail") or "")
+            if m:
+                drop_pcts.append(int(m.group(1)))
+    tl_bucket, tl_pct = _drop_timing_from_timeline(log.get("odds_timeline") or [])
+    max_drop = max(drop_pcts + ([abs(tl_pct)] if tl_pct <= -15 else []) or [0])
+    # 적중 경주의 상위등급마(A/B/상) 전적점수 분포(전적 있는 경주만)
+    form_scores = [h.get("record_score") for h in (log.get("horses") or [])
+                   if isinstance(h.get("record_score"), (int, float))
+                   and h.get("grade") in ("A", "B", "상")]
+    return {
+        "good": good,
+        "had_drop": ("급락" in types or "단승급락" in types or max_drop >= 15),
+        "strong_drop": max_drop >= 30,
+        "very_strong_drop": max_drop >= 50,
+        "had_reversal": "역전" in types,
+        "had_compression": "압축" in types,
+        "drop_timing": tl_bucket,
+        "form_scores": form_scores,
+    }
+
+
+def _discover_patterns():
+    """data/analysis_log/ 전체를 스캔해 적중 경주의 공통점을 자동 발견 → discovered_patterns.json."""
+    feats = []
+    if os.path.isdir(ANALYSIS_LOG_DIR):
+        for fn in os.listdir(ANALYSIS_LOG_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                log = json.load(open(os.path.join(ANALYSIS_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            f = _race_features(log)
+            if f:
+                feats.append(f)
+    n = len(feats)
+    out = {
+        "generated_at": time.time(),
+        "races_with_result": n, "target": DISCOVERY_TARGET,
+        "sufficiency": round(min(1.0, n / DISCOVERY_TARGET) * 100),
+        "min_races": DISCOVERY_MIN_RACES, "patterns": [],
+    }
+    if n < DISCOVERY_MIN_RACES:
+        out["note"] = f"패턴 발견까지 결과 입력 경주 {DISCOVERY_MIN_RACES - n}건 더 필요 (현재 {n}/{DISCOVERY_MIN_RACES})"
+        _discovered_save(out)
+        return out
+
+    goods = [f for f in feats if f["good"]]
+    base = len(goods) / n * 100.0   # 전체 적중률(기준선)
+    patterns = []
+
+    def add_bool(key, label):
+        with_ = [f for f in feats if f.get(key)]
+        if len(with_) < 5:
+            return
+        g = sum(1 for f in with_ if f["good"])
+        rate = g / len(with_) * 100.0
+        lift = rate - base
+        if lift >= 12:   # 기준선 대비 +12%p 이상일 때만 '발견된 패턴'으로 채택
+            patterns.append({
+                "type": "배당변화", "key": key, "desc": label,
+                "rate": round(rate, 1), "baseline": round(base, 1),
+                "lift": round(lift, 1), "support": len(with_), "hit": g,
+            })
+
+    add_bool("had_drop", "급락(자금유입) 동반 경주")
+    add_bool("strong_drop", "30%+ 강한 급락 동반 경주")
+    add_bool("very_strong_drop", "50%+ 대량 급락 동반 경주")
+    add_bool("had_reversal", "쌍승 역전 동반 경주")
+    add_bool("had_compression", "배당 압축 동반 경주")
+
+    # 급락 시점 버킷별 적중률(적중 경주에서 급락이 주로 언제?)
+    from collections import Counter
+    tc, tg = Counter(), Counter()
+    for f in feats:
+        b = f.get("drop_timing")
+        if b:
+            tc[b] += 1
+            if f["good"]:
+                tg[b] += 1
+    for b, c in tc.items():
+        if c >= 5:
+            rate = tg[b] / c * 100.0
+            if rate - base >= 12:
+                patterns.append({
+                    "type": "시점", "key": f"timing:{b}",
+                    "desc": f"급락이 {b}에 발생한 경주",
+                    "rate": round(rate, 1), "baseline": round(base, 1),
+                    "lift": round(rate - base, 1), "support": c, "hit": tg[b],
+                })
+
+    # 적중 경주 상위등급마 전적점수 범위(사분위)
+    fs = sorted(s for f in goods for s in (f.get("form_scores") or []))
+    if len(fs) >= 8:
+        q1 = fs[len(fs) // 4]
+        q3 = fs[len(fs) * 3 // 4]
+        patterns.append({
+            "type": "전적점수", "key": "form_range",
+            "desc": f"적중 경주 상위등급마 전적점수 주로 {q1}~{q3} 구간",
+            "range": [q1, q3], "support": len(fs),
+        })
+
+    patterns.sort(key=lambda p: (-(p.get("lift") or 0), -(p.get("support") or 0)))
+    out["patterns"] = patterns
+    out["baseline_hit_rate"] = round(base, 1)
+    _discovered_save(out)
+    print(f"[패턴발견] 결과 {n}경주 스캔 → 발견 패턴 {len(patterns)}개(기준 적중률 {round(base,1)}%)")
+    return out
+
+
+def _discovered_load():
+    try:
+        return json.load(open(DISCOVERED_FILE, encoding="utf-8"))
+    except Exception:
+        return {"races_with_result": 0, "target": DISCOVERY_TARGET, "sufficiency": 0,
+                "min_races": DISCOVERY_MIN_RACES, "patterns": []}
+
+
+def _discovered_save(out):
+    os.makedirs(os.path.dirname(DISCOVERED_FILE), exist_ok=True)
+    json.dump(out, open(DISCOVERED_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
 # [4번] 고배당 적중 하이라이트 저장소
 HIGHLIGHT_FILE = os.path.join(os.path.dirname(__file__), "data", "highlight_wins.json")
 
@@ -2608,6 +2768,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
         print("[복기저장] 결과 요약 실패:", e)
     # [분석 로그] 결과 입력 시 로그에 실제 결과·적중 반영
     _analysis_log_save(rk)
+    # [전체데이터·패턴발견] 결과 반영된 로그까지 포함해 적중 경주 공통점 자동 발견
+    try:
+        _discover_patterns()
+    except Exception as e:
+        print("[패턴발견] 실패:", e)
     print(f"[자동학습] {rk} 결과 {top3} → 추천적중 {was_hit}, 급락적중 {anomaly_correct}, "
           f"전적유력마 {form_pick}({'적중' if form_pick_hit else '실패'}), 제거적중 {elimination_correct}")
     return record, L["stats"]
@@ -2654,6 +2819,18 @@ def learning_upset():
         "patterns": (d.get("patterns") or [])[-30:][::-1],   # 최근 30건(최신 우선)
         "total": len(d.get("patterns") or []),
     })
+
+
+@app.route("/api/patterns/discovered", methods=["GET", "POST"])
+def patterns_discovered():
+    """[전체데이터·패턴발견] 적중 경주 공통점 자동 발견 결과 + 데이터 충분도.
+    POST(또는 ?recompute=1)면 즉시 재계산."""
+    if request.method == "POST" or request.args.get("recompute"):
+        try:
+            return jsonify(_discover_patterns())
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    return jsonify(_discovered_load())
 
 
 # [v2.0.0] 확장(백그라운드 자동수집 엔진) → 분석기(웹) 상태 브리지.

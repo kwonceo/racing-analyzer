@@ -2272,6 +2272,8 @@
     catch (e) { el.innerHTML = `<p class="hint">${esc(e.message)}</p>`; return; }
     // [2번] 부진마 역전 학습(전적 기반)도 함께 조회
     let up = null; try { up = await (await fetch('/api/learning/upset')).json(); } catch (_) { /* */ }
+    // [전체데이터·패턴발견] 적중 경주 공통점 자동 발견 + 데이터 충분도
+    let disc = null; try { disc = await (await fetch('/api/patterns/discovered')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
@@ -2280,9 +2282,46 @@
       ${card('쌍승 역전 적중률', s.reversal)}
       ${card('전적 유력마 적중률', s.form_pick)}
       ${card('제거 판정 적중률', s.elimination)}
+      ${renderDiscoveredPatterns(disc)}
       ${renderPatternStats(s.pattern_stats)}
       ${renderDropTiming(s.drop_timing)}
       ${renderUpsetStats(up)}`;
+  }
+
+  /** [전체데이터·패턴발견] 학습된 패턴 수 + 데이터 충분도(50경주 진행바) + 발견된 공통점 */
+  function renderDiscoveredPatterns(disc) {
+    if (!disc) return '';
+    const n = disc.races_with_result || 0;
+    const target = disc.target || 50;
+    const suf = disc.sufficiency != null ? disc.sufficiency : Math.round(Math.min(1, n / target) * 100);
+    const pats = disc.patterns || [];
+    const bar = `<div style="background:#1e2330;border-radius:6px;height:14px;overflow:hidden;margin:4px 0">
+      <div style="height:100%;width:${suf}%;background:linear-gradient(90deg,#4ea1ff,#38d39f);transition:width .3s"></div></div>`;
+    const rows = pats.map((p) => {
+      if (p.type === '전적점수') {
+        return `<tr><td>🎯 전적점수</td><td colspan="2"><b>${esc(p.desc)}</b></td>
+          <td style="text-align:center" class="hint">표본 ${p.support}</td></tr>`;
+      }
+      const color = (p.rate >= 65) ? '#38d39f' : (p.rate >= 50) ? '#ffd24f' : '#4ea1ff';
+      const icon = p.type === '시점' ? '⏱' : '📈';
+      return `<tr><td>${icon} ${esc(p.type)}</td><td><b>${esc(p.desc)}</b></td>
+        <td style="text-align:center;color:${color};font-weight:700">${p.rate}%<br><span class="hint" style="font-weight:400">기준 ${p.baseline}% (+${p.lift}p)</span></td>
+        <td style="text-align:center" class="hint">${p.hit}/${p.support}</td></tr>`;
+    }).join('');
+    const body = pats.length
+      ? `<table class="data-table" style="width:100%"><thead><tr>
+          <th>유형</th><th>발견된 공통점</th><th style="text-align:center">적중률</th><th style="text-align:center">표본</th>
+        </tr></thead><tbody>${rows}</tbody></table>`
+      : `<p class="hint">${esc(disc.note || `결과 입력 경주가 ${disc.min_races || 10}건 이상 쌓이면 적중 경주의 공통점을 자동 분석합니다.`)}</p>`;
+    return `<div class="panel-card" style="margin-top:10px">
+      <h3>🔎 자동 발견 패턴 <span class="hint" style="font-weight:400">(전체 데이터 기반)</span></h3>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:6px">
+        <div><span class="hint">학습된 패턴</span><br><span style="font-size:20px;color:#38d39f">${pats.length}</span> 개</div>
+        <div style="flex:1;min-width:200px"><span class="hint">데이터 충분도 (${n}/${target}경주)</span>${bar}
+          <span class="hint">${suf}%${suf >= 100 ? ' · 충분' : ` · ${target - n}경주 더 쌓이면 100%`}</span></div>
+      </div>
+      ${body}
+      <p class="hint" style="margin-top:4px">매 분석마다 배당 타임라인(30초)·전적점수·이상감지·결과가 <code>data/analysis_log/</code>에 전부 저장되며, 결과 입력 시 적중 경주 공통점이 자동 갱신됩니다.</p></div>`;
   }
 
   /** [2번] 부진마 이변(역전) 조건별 적중률 표 + 최근 이변 사례.
