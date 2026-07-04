@@ -511,20 +511,46 @@
   //   쿠키로 동일출처 fetch → 경주지역/라운드/1~3착/복승/삼복승 파싱 →
   //   설정 raceKey(예 '나고야 3경주')와 지역+라운드로 매칭 → /api/results/auto 전송.
   // ══════════════════════════════════════════════════════════════════
+  //  [1번] 결과 페이지 URL 감지 — 사이트가 결과를 <iframe id="video_iframe" src="/bet/result?id=N">
+  //   로 싣는 구조에 대응. 우선순위: 현재URL → video_iframe → 모든 iframe/frame src(교차출처도
+  //   getAttribute 로 읽음) → 링크 → 페이지 HTML 정규식 폴백. 진단 로그 포함.
+  const RESULT_RE = /\/bet\/result(?:\?[^"'\s<>]*)?/i;
+  function _abs(u) { try { return new URL(u, location.href).href; } catch (_) { return u; } }
   function findResultUrl() {
-    if (/\/bet\/result/i.test(location.href)) return location.href;
-    for (const d of sameOriginDocs()) {
-      let frames = [];
-      try { frames = [...d.querySelectorAll('iframe, frame')]; } catch (_) { frames = []; }
-      for (const f of frames) {
-        const s = f.src || (f.getAttribute && f.getAttribute('src')) || '';
-        if (s && /\/bet\/result/i.test(s)) { try { return new URL(s, d.baseURI || location.href).href; } catch (_) { return s; } }
+    if (RESULT_RE.test(location.href)) return location.href;
+    // (a) 사이트가 지정한 결과 iframe(video_iframe) 최우선
+    try {
+      const vf = document.getElementById('video_iframe');
+      if (vf) {
+        const s = vf.src || vf.getAttribute('src') || (vf.dataset && vf.dataset.src) || '';
+        console.log('[결과수집] video_iframe src =', JSON.stringify(s));
+        if (RESULT_RE.test(s)) return _abs(s.match(RESULT_RE)[0]);
+        try { const h = vf.contentWindow && vf.contentWindow.location && vf.contentWindow.location.href;
+          if (h && RESULT_RE.test(h)) return _abs(h); } catch (_) { /* 교차출처 */ }
       }
+    } catch (_) { /* */ }
+    // (b) 모든 iframe/frame 의 src(교차출처 프레임도 속성값은 부모에서 읽힘)
+    let allFrames = [];
+    try { allFrames = [...document.querySelectorAll('iframe, frame')]; } catch (_) { allFrames = []; }
+    for (const d of sameOriginDocs()) {
+      try { allFrames.push(...d.querySelectorAll('iframe, frame')); } catch (_) { /* */ }
     }
+    for (const f of allFrames) {
+      const s = f.src || (f.getAttribute && f.getAttribute('src')) || (f.dataset && f.dataset.src) || '';
+      if (RESULT_RE.test(s)) return _abs(s.match(RESULT_RE)[0]);
+    }
+    // (c) 결과 링크
     for (const a of queryAllDocs('a[href]')) {
       const h = a.getAttribute('href') || '';
-      if (/\/bet\/result/i.test(h)) { try { return new URL(h, location.href).href; } catch (_) { return h; } }
+      if (RESULT_RE.test(h)) return _abs(h.match(RESULT_RE)[0]);
     }
+    // (d) 폴백: 페이지 HTML 어디든 /bet/result?id=N 이 있으면 사용(동적 삽입 대응)
+    try {
+      const html = document.documentElement ? document.documentElement.innerHTML : '';
+      const m = html.match(/\/bet\/result\?id=\d+/i) || html.match(RESULT_RE);
+      if (m) { console.log('[결과수집] HTML 폴백으로 결과 URL 감지:', m[0]); return _abs(m[0]); }
+    } catch (_) { /* */ }
+    console.warn('[결과수집] ❌ /bet/result URL을 찾지 못함 (video_iframe·iframe·링크·HTML 모두 실패)');
     return null;
   }
 

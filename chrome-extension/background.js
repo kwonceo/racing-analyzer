@@ -566,8 +566,12 @@ async function doResultFetch(attempt) {
     const top3 = res.top3 || [];
     chrome.storage.local.set({ resultAutoStatus: { state: 'done', raceKey: res.raceKey, top3, hit, t: Date.now() } });
     const t3 = top3.slice(0, 3).map((n, i) => `${i + 1}착 ${n}번`).join(' / ');
-    _notify('result', `✅ ${res.raceKey || '경주'} 결과 수집`,
-      `${t3}${hit.quinella ? ' / 복승 적중!' : (win ? ' / 적중!' : ' / 미적중')}`, false);
+    // 스펙: "✅ 서울 5R 결과 수집 · 복승 3+7 적중!" — 복승 적중 시 조합 표시
+    const q = top3.slice(0, 2);
+    const hitMsg = hit.quinella ? ` · 복승 ${q.join('+')} 적중!`
+      : hit.trifecta ? ` · 삼복승 ${top3.slice(0, 3).join('+')} 적중!`
+      : win ? ' · 적중!' : ' · 미적중';
+    _notify('result', `✅ ${res.raceKey || '경주'} 결과 수집`, `${t3}${hitMsg}`, false);
     setBadge(true, '✓');
   } else {
     const last = attempt >= 2;
