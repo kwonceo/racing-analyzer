@@ -29,12 +29,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **배당 급락말 → 삼복승 보험픽 자동 추가**
 
 ## 현재 보완 필요 항목
-1. **KRA 실제 기수 데이터 연동** (현재 미연동)
-2. **일본 NAR 전적 수집 라이브 검증** (`parseDebaTable` 실제 keiba 페이지 확인)
-3. **결과 페이지 파싱 라이브 검증** (일괄 등록 실제 HTML로 확인)
-4. **모바일 화면 최적화**
-5. **실제 투자금액 입력 필드** (현재 정액 1,000원 가정)
-6. **패턴 학습 데이터 축적 중** (결과 입력 쌓여야 통계 산출)
+1. ✅ **KRA 실제 기수 데이터 연동 완료** — 현직기수 104명 실데이터(합성기수 0). `static/data/jockeys.json`.
+2. **일본 NAR 전적 수집** — `parseDebaTable` try/catch+2회 재시도로 코드 안정화 완료. 실제 keiba 라이브 경주 검증만 잔여.
+3. **결과 페이지 파싱** — `_parseResultDoc`(확장)·`_parse_result_rows`(서버) 전각숫자·着 컬럼·완화 헤더 매칭 보강 완료. 실경주 HTML 라이브 검증만 잔여.
+4. ✅ **모바일 화면 최적화 완료** (반응형 CSS).
+5. **실제 투자금액 입력 필드** (현재 정액 1,000원 가정) — 미구현.
+6. **패턴 학습 데이터 축적 중** (결과 입력 쌓여야 통계 산출) — 진행 중.
 
 ## 단축 명령어
 - `#보완` → 현재 보완점 파악 후 우선순위 작업
@@ -111,7 +111,8 @@ cd chrome-extension && python -c "import zipfile,os; zf=zipfile.ZipFile('../chro
 ## ⚠️ 알려진 데이터 제약
 - **KRA 실데이터 연동됨**(data.go.kr, `tools/fetch_kra.py`): 현직기수 104명(실 복승률, `static/data/jockeys.json`) + 경주성적 647경주(20260403~0704, `data/kra_history.json`)로 **전적 3건+ 보유마 1,120두** 확보. `kra_horse_summary`로 한국 분석 프롬프트에 실제 전적 주입됨.
 - **한국 PDF 전적 정상 작동**(formScore·recentPlacings). 출마표2 파서가 오즈표를 긁어 334행 쓰레기로 한국 전적을 덮어쓰던 버그 수정(`_sanitize_starters` 마번 1~18 중복제거 + 전적 0두가 기존 전적 덮어쓰기 방지).
-- **일본 NAR DebaTable recent 파싱은 라이브 검증 필요**.
+- **일본 NAR DebaTable recent 파싱**: 코드 안정화 완료(`parseDebaTable` try/catch + `fetchDebaStarters` 2회 재시도로 [] 폴백). 실제 keiba 라이브 경주 최종 검증만 잔여.
+- **중앙 JRA 결과 파싱**: 전각숫자(０-９)·전각콜론·1着/2着/3着·複勝·三連複 컬럼 + 완화 헤더 매칭 대응 완료(`_parseResultDoc`·`_parse_result_rows`). 착순 컬럼 부재 시 [] 조기 반환.
 - **거리·코스·기수이력 세부는 미수집** → 부진마 학습의 "거리 변경/기수 교체" 조건은 이력 수집 선행 필요(현재 배당 급락·이상감지 동반만 계산). KRA전적의 착순은 확보됨.
 - KRA 기수통산성적비교 API는 EndPoint 미확정(500) — `--comp-url`로 정확 주소 지정 필요. 통산 핵심 지표는 현직기수정보에 포함.
 
