@@ -647,6 +647,7 @@
   function initBulkResult() {
     const toggle = $('#bulkResultToggle'); if (!toggle) return;
     const panel = $('#bulkResultPanel');
+    { const st = $('#bulkStake'); if (st) st.value = _defaultStake(); }   // [#5] 기본 투자금액 반영
     toggle.addEventListener('click', () => {
       const open = panel.style.display !== 'none';
       panel.style.display = open ? 'none' : 'block';
@@ -655,6 +656,7 @@
     const run = async (payload) => {
       const box = $('#bulkResultSummary');
       const stake = parseInt(($('#bulkStake') && $('#bulkStake').value) || '1000', 10) || 1000;
+      if (stake > 0) localStorage.setItem('bmed_default_stake', String(stake));   // [#5] 기본값 기억
       box.innerHTML = '<p class="hint">⏳ 파싱·매칭·학습 중…</p>';
       let d;
       try {
@@ -2352,21 +2354,33 @@
         <input id="resIn1" class="cfg-input" type="number" placeholder="1착" style="width:70px">
         <input id="resIn2" class="cfg-input" type="number" placeholder="2착" style="width:70px">
         <input id="resIn3" class="cfg-input" type="number" placeholder="3착" style="width:70px">
+        <label class="hint">투자금액(원)<br><input id="resStake" class="cfg-input" type="number" min="0" step="100" value="${_defaultStake()}" style="width:110px"></label>
         <button id="resSaveBtn" class="btn btn-primary">결과 저장 + 학습</button>
       </div>
       <div id="resMsg" class="hint" style="margin-top:6px"></div>`;
     $('#resSaveBtn').addEventListener('click', () => recordResult(rkUse, file));
   }
 
+  /** [#5] 기본 투자금액(정액) — 마지막 입력값을 localStorage에 기억(기본 1000원). */
+  function _defaultStake() {
+    const v = parseInt(localStorage.getItem('bmed_default_stake') || '1000', 10);
+    return (v > 0) ? v : 1000;
+  }
+
   async function recordResult(rk, file) {
     const g = (id) => parseInt(($(id) || {}).value, 10);
     const r1 = g('#resIn1'), r2 = g('#resIn2'), r3 = g('#resIn3');
     if (!r1) { $('#resMsg').textContent = '최소 1착은 입력하세요.'; return; }
+    const stake = parseInt(($('#resStake') || {}).value, 10) || 1000;
+    if (stake > 0) localStorage.setItem('bmed_default_stake', String(stake));   // 기본값 기억
     const result = {}; if (r1) result['1st'] = r1; if (r2) result['2nd'] = r2; if (r3) result['3rd'] = r3;
-    let d; try { d = await (await fetch('/api/history/record-result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk, result }) })).json(); }
+    let d; try { d = await (await fetch('/api/history/record-result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk, result, stake }) })).json(); }
     catch (e) { $('#resMsg').textContent = '실패: ' + e.message; return; }
     if (d.error) { $('#resMsg').textContent = d.error; return; }
-    $('#resMsg').innerHTML = `✅ 저장 완료 — 추천적중 ${d.record.was_hit ? 'O' : 'X'} · 급락적중 ${d.record.anomaly_was_correct ? 'O' : 'X'}`;
+    const pnl = (d.record && d.record.pnl) || 0;
+    const pnlTxt = pnl > 0 ? `<span style="color:#38d39f">+${pnl.toLocaleString()}원</span>`
+      : pnl < 0 ? `<span style="color:#ff6b6b">${pnl.toLocaleString()}원</span>` : '±0원';
+    $('#resMsg').innerHTML = `✅ 저장 완료 — 추천적중 ${d.record.was_hit ? 'O' : 'X'} · 급락적중 ${d.record.anomaly_was_correct ? 'O' : 'X'} · 손익 ${pnlTxt}`;
     loadLearningStats(); loadHistoryList();
   }
 
@@ -2381,6 +2395,7 @@
     const s = d.stats || {};
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
+      ${renderProfitSummary(s.profit_summary)}
       ${card('추천 적중률', s.recommend_hit)}
       ${card('급락 감지 적중률', s.drop_anomaly)}
       ${card('쌍승 역전 적중률', s.reversal)}
@@ -2390,6 +2405,20 @@
       ${renderPatternStats(s.pattern_stats)}
       ${renderDropTiming(s.drop_timing)}
       ${renderUpsetStats(up)}`;
+  }
+
+  /** [#5] 누적 손익 요약 카드 — 실제 투자금액 기반 순손익·ROI·적중. */
+  function renderProfitSummary(ps) {
+    if (!ps || !ps.bets) return '';
+    const net = ps.net || 0;
+    const color = net > 0 ? '#38d39f' : net < 0 ? '#ff6b6b' : '#8a94a6';
+    const sign = net > 0 ? '+' : '';
+    const roi = (ps.roi != null) ? `${ps.roi >= 0 ? '+' : ''}${ps.roi}%` : '-';
+    return `<div class="bet-box" style="display:block;margin:4px 0 10px">
+      <b>💰 누적 손익 <span class="hint" style="font-weight:400">(실제 투자금액 기준)</span></b><br>
+      <span style="font-size:24px;color:${color};font-weight:800">${sign}${net.toLocaleString()}원</span>
+      <span class="hint" style="margin-left:10px">ROI ${roi} · 투자합 ${(ps.staked || 0).toLocaleString()}원 · 적중 ${ps.wins || 0}/${ps.bets}경주</span>
+    </div>`;
   }
 
   /** [전체데이터·패턴발견] 학습된 패턴 수 + 데이터 충분도(50경주 진행바) + 발견된 공통점 */

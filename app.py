@@ -2597,8 +2597,19 @@ def _recompute_learning_stats(records):
     for d in drop_timing.values():
         d["rate"] = round(d["hit"] / d["n"] * 100, 1) if d["n"] else None
 
+    # [#5] 누적 손익(pnl) 집계 — 베팅 참여(추천 있던) 경주 기준 순손익·투자합·ROI.
+    bet_recs = [r for r in records if r.get("pnl") is not None and (r.get("bet_type") or r.get("stake"))]
+    net_profit = sum(int(r.get("pnl") or 0) for r in bet_recs)
+    total_staked = sum(int(r.get("stake") or 0) for r in bet_recs if r.get("bet_type"))
+    profit_summary = {
+        "net": net_profit, "bets": len(bet_recs), "staked": total_staked,
+        "roi": round(net_profit / total_staked * 100, 1) if total_staked else None,
+        "wins": sum(1 for r in bet_recs if (r.get("pnl") or 0) > 0),
+    }
+
     return {
         "total": len(records),
+        "profit_summary": profit_summary,
         "recommend_hit": _rate(records, lambda r: True, lambda r: r.get("was_hit")),
         "drop_anomaly": _rate(records, lambda r: r.get("anomalies_detected"),
                               lambda r: r.get("anomaly_was_correct")),
@@ -2648,7 +2659,7 @@ def history_get():
         return jsonify({"error": "히스토리가 없습니다."}), 404
 
 
-def _apply_result_learning(rk, result, top3, final_odds=None):
+def _apply_result_learning(rk, result, top3, final_odds=None, stake=None):
     """경주 결과 → 히스토리 기록 + 자동학습 레코드/통계 갱신(공용).
     keiba/asyukk 결과 자동수집(results_auto)과 수동 입력(record-result)이 함께 사용.
     이상감지·추천·전적유력마·제거 판정의 실제 적중 여부를 판정해 learning.json 누적."""
@@ -2732,9 +2743,22 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
     _pattern_timing = {p: _timing for p in _patterns if p.startswith("급락")}
     _bet_type = (rec_bets[0].get("kind") if rec_bets else None)
 
+    # [#5] 실제 투자금액 기반 손익(pnl). stake 미지정 시 정액 1000 가정.
+    #   적중: +(확정배당-1)*stake · 추천했으나 미적중: -stake · 추천 없음: 0(불참).
+    stake = int(stake) if (stake and int(stake) > 0) else 1000
+    if quinella_hit and payouts.get("quinella"):
+        pnl = round((payouts["quinella"] - 1) * stake)
+    elif trifecta_hit and payouts.get("trifecta"):
+        pnl = round((payouts["trifecta"] - 1) * stake)
+    elif _bet_type:
+        pnl = -stake
+    else:
+        pnl = 0
+
     record = {
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
         "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
+        "stake": stake, "pnl": pnl,
         "anomalies_detected": anomalies_detected, "anomaly_was_correct": anomaly_correct,
         "signal_correct": signal_correct,
         "reversals": [r for r in an.get("reversals", []) if r.get("flipped")],
@@ -2791,7 +2815,7 @@ def history_record_result():
     top3 = [int(x) for x in top3 if x not in (None, "")]
     if not rk or len(top3) < 1:
         return jsonify({"error": "raceKey와 결과(1~3착)가 필요합니다."}), 400
-    record, stats = _apply_result_learning(rk, result, top3, body.get("finalOdds"))
+    record, stats = _apply_result_learning(rk, result, top3, body.get("finalOdds"), stake=body.get("stake"))
     return jsonify({"ok": True, "record": record, "stats": stats})
 
 
@@ -2945,21 +2969,13 @@ def results_bulk():
         for i, no in enumerate(top3[:3]):
             result[["1st", "2nd", "3rd"][i]] = no
         try:
-            rec, _ = _apply_result_learning(rk, result, top3, final_odds or None)
+            rec, _ = _apply_result_learning(rk, result, top3, final_odds or None, stake=stake)
         except Exception as e:
             errors.append({"raceKey": rk, "error": str(e)})
             continue
         q_hit, t_hit = bool(rec.get("quinella_hit")), bool(rec.get("trifecta_hit"))
         won = q_hit or t_hit or bool(rec.get("was_hit"))
-        # 수익: 정액 stake 가정 — 적중 시 +(배당-1)*stake, 추천했으나 미적중 시 -stake
-        pnl = 0
-        pays = rec.get("payouts") or {}
-        if q_hit and pays.get("quinella"):
-            pnl = round((pays["quinella"] - 1) * stake)
-        elif t_hit and pays.get("trifecta"):
-            pnl = round((pays["trifecta"] - 1) * stake)
-        elif rec.get("bet_type"):   # 추천이 있었는데 미적중
-            pnl = -stake
+        pnl = int(rec.get("pnl") or 0)   # [#5] 손익은 학습 레코드에서 단일 계산
         if won:
             hits += 1
         profit += pnl
