@@ -1452,6 +1452,79 @@ def _integrated_grades(form, curQ, curD):
     return out
 
 
+# ══════════ [패턴 학습 강화 시스템] 이상감지 패턴 태깅·매칭·비중조정 ══════════
+#   결과 입력 시 패턴 태그 저장 → 패턴별/시점별 적중률 집계 → 현재 경주 패턴 매칭·베팅 비중.
+def _pattern_timing_bucket(mb):
+    """급락 발생 시점을 T-N분 버킷으로. (발주전 분)"""
+    if mb is None:
+        return "미상"
+    for b in (1, 2, 3, 5, 10):
+        if mb <= b + 0.5:
+            return f"T-{b}분"
+    return "T-10분+"
+
+
+def _extract_patterns(drops, reversals, signals, curQ, bet_rec):
+    """[1·5번] 분석 결과에서 이상감지 패턴 태그 추출."""
+    pats = []
+    min_pct = min((d.get("pct") for d in (drops or []) if d.get("pct") is not None), default=0)
+    if min_pct <= -50:
+        pats.append("급락50+")
+    elif min_pct <= -30:
+        pats.append("급락30+")
+    if any(r.get("flipped") for r in (reversals or [])):
+        pats.append("쌍승역전")
+    if any(s.get("type") == "압축" for s in (signals or [])):
+        pats.append("배당압축")
+    # 복승불일치: 추천 복승메인 조합 vs 시장 최저배당 복승 조합이 다를 때(전적유력마 ↔ 배당인기 불일치)
+    if curQ and bet_rec:
+        market_top = min(curQ.items(), key=lambda kv: kv[1])[0]
+        main = next((b for b in bet_rec if b.get("label") == "복승 메인"), None)
+        if main and tuple(sorted(int(x) for x in main["combo"])) != tuple(sorted(market_top)):
+            pats.append("복승불일치")
+    return pats
+
+
+def _pattern_confidence(cur_patterns, pstats):
+    """[5번] 매칭된 패턴들의 과거 적중률(표본가중 평균)로 신뢰도 산출. (n>=5 패턴만)"""
+    rated = [(p, pstats[p]) for p in cur_patterns
+             if p in pstats and (pstats[p].get("n") or 0) >= 5 and pstats[p].get("rate") is not None]
+    if not rated:
+        return {"level": "데이터부족", "rate": None, "n": 0}
+    tot_n = sum(d["n"] for _, d in rated)
+    avg = round(sum(d["rate"] * d["n"] for _, d in rated) / tot_n, 1)
+    lvl = "높음" if avg >= 65 else "보통" if avg >= 50 else "주의" if avg >= 40 else "낮음"
+    return {"level": lvl, "rate": avg, "n": tot_n}
+
+
+def _scale_alloc(bet_rec, label, target):
+    """[4번] 특정 베팅(label)의 alloc 을 target% 로 두고 나머지를 비례 재분배(합 100 유지)."""
+    main = next((b for b in bet_rec if b.get("label") == label), None)
+    if not main:
+        return
+    others = [b for b in bet_rec if b is not main]
+    rest = sum(b.get("alloc", 0) for b in others)
+    main["alloc"] = target
+    if rest > 0:
+        f = (100 - target) / rest
+        for b in others:
+            b["alloc"] = round(b.get("alloc", 0) * f)
+
+
+def _adjust_bet_weights(bet_rec, conf):
+    """[4번] 패턴 신뢰도로 복승/삼복승 비중 자동 조정."""
+    lvl = conf.get("level")
+    if not bet_rec or lvl in (None, "데이터부족"):
+        return None
+    if lvl == "높음":
+        _scale_alloc(bet_rec, "복승 메인", 50)   # 복승 메인 비중 상향
+        return {"note": f"신뢰도 높음({conf['rate']}%) → 복승 메인 비중 상향(50%)", "adjusted": True}
+    if lvl == "낮음":
+        _scale_alloc(bet_rec, "복승 메인", 33)   # 복승 하향 → 삼복승(보험 포함) 비중 상향
+        return {"note": f"신뢰도 낮음({conf['rate']}%) → 복승 비중 하향·삼복승 보험 비중 상향", "adjusted": True}
+    return {"note": f"신뢰도 {lvl}({conf.get('rate')}%) → 기본 비중 유지", "adjusted": False}
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -1705,6 +1778,21 @@ def _triple_analyze(rk, rec):
     for h in integrated or []:
         h["win"] = curWin.get(h.get("no"))
 
+    # [5번] 현재 경주 패턴 매칭 + [4번] 신뢰도 기반 베팅 비중 자동 조정
+    pattern_match = None
+    try:
+        cur_patterns = _extract_patterns(drops, reversals, signals, curQ, bet_rec)
+        if cur_patterns:
+            _pstats = (_learning_load().get("stats", {}) or {}).get("pattern_stats") or {}
+            matched = [dict({"pattern": p}, **(_pstats.get(p) or {})) for p in cur_patterns]
+            conf = _pattern_confidence(cur_patterns, _pstats)
+            bet_advice = _adjust_bet_weights(bet_rec, conf)   # bet_rec 의 alloc 조정(제자리)
+            pattern_match = {"patterns": cur_patterns, "matched": matched, "confidence": conf,
+                             "betAdvice": bet_advice,
+                             "recommend": conf.get("level") in ("높음", "보통")}
+    except Exception as _e:
+        print("[패턴매칭] 실패:", _e)
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
         "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio),
@@ -1719,6 +1807,7 @@ def _triple_analyze(rk, rec):
         "integrated": integrated,    # 전적40%+배당60% 통합 등급(A/B/C/D)
         "learned": learned,  # 학습 통계 안내(있으면)
         "signals": signals, "lastSnapshot": last_snap,  # 실시간 변동 알림용
+        "patternMatch": pattern_match,  # [4·5번] 현재 패턴 매칭 + 신뢰도 + 베팅 비중 조정
     }
 
 
@@ -2188,6 +2277,37 @@ def _recompute_learning_stats(records):
     def rev_hit(r):
         favs = [rv["favored"][0] for rv in (r.get("reversals") or []) if rv.get("favored")]
         return r.get("result", {}).get("1st") in favs
+
+    # [2번] 패턴별 적중률: 패턴 태그별 발생/적중 + '동시(2개+)' 버킷
+    pattern_stats = {}
+    for r in records:
+        pats = r.get("patterns") or []
+        hit = bool(r.get("was_hit"))
+        for p in pats:
+            d = pattern_stats.setdefault(p, {"n": 0, "hit": 0})
+            d["n"] += 1
+            d["hit"] += 1 if hit else 0
+        if len(pats) >= 2:
+            d = pattern_stats.setdefault("동시(2개+)", {"n": 0, "hit": 0})
+            d["n"] += 1
+            d["hit"] += 1 if hit else 0
+    for d in pattern_stats.values():
+        d["rate"] = round(d["hit"] / d["n"] * 100, 1) if d["n"] else None
+
+    # [3번] 시점별 급락 효과: 급락 발생 시점(T-N분) 버킷별 이상감지 적중률
+    drop_timing = {}
+    for r in records:
+        seen_buckets = set()
+        for _p, t in (r.get("pattern_timing") or {}).items():
+            if t in seen_buckets:
+                continue
+            seen_buckets.add(t)
+            d = drop_timing.setdefault(t, {"n": 0, "hit": 0})
+            d["n"] += 1
+            d["hit"] += 1 if r.get("anomaly_was_correct") else 0
+    for d in drop_timing.values():
+        d["rate"] = round(d["hit"] / d["n"] * 100, 1) if d["n"] else None
+
     return {
         "total": len(records),
         "recommend_hit": _rate(records, lambda r: True, lambda r: r.get("was_hit")),
@@ -2200,6 +2320,9 @@ def _recompute_learning_stats(records):
         # 제거(🔴/🟠) 판정이 옳았던 비율(제거마가 3착 밖으로 밀려남)
         "elimination": _rate(records, lambda r: r.get("eliminated"),
                              lambda r: r.get("elimination_correct")),
+        # [2·3번] 패턴 학습
+        "pattern_stats": pattern_stats,
+        "drop_timing": drop_timing,
     }
 
 
@@ -2312,6 +2435,14 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
                 best = (mb, s)
         return best[1] if best else None
 
+    # [1번] 이상감지 패턴 태깅 + 시점 저장 (결과 입력 시 자동)
+    _pm = an.get("patternMatch") or {}
+    _patterns = _pm.get("patterns") or []
+    _last_mb = (an.get("lastSnapshot") or {}).get("minutes_before")
+    _timing = _pattern_timing_bucket(_last_mb)
+    _pattern_timing = {p: _timing for p in _patterns if p.startswith("급락")}
+    _bet_type = (rec_bets[0].get("kind") if rec_bets else None)
+
     record = {
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
         "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
@@ -2324,6 +2455,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None):
         "finalOdds": final_odds,
         "odds_at_10min": (snap_near(10) or {}).get("quinella"),
         "odds_at_1min30sec": (snap_near(2) or {}).get("quinella"),
+        # [1번] 패턴 학습 필드
+        "patterns": _patterns, "pattern_timing": _pattern_timing, "bet_type": _bet_type,
         "t": time.time(),
     }
     L = _learning_load()

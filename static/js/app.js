@@ -2277,7 +2277,67 @@
       ${card('급락 감지 적중률', s.drop_anomaly)}
       ${card('쌍승 역전 적중률', s.reversal)}
       ${card('전적 유력마 적중률', s.form_pick)}
-      ${card('제거 판정 적중률', s.elimination)}`;
+      ${card('제거 판정 적중률', s.elimination)}
+      ${renderPatternStats(s.pattern_stats)}
+      ${renderDropTiming(s.drop_timing)}`;
+  }
+
+  /** [2번] 패턴별 적중률 표: 패턴 | 발생횟수 | 적중 | 적중률 (발생 많은 순) */
+  function renderPatternStats(ps) {
+    const entries = Object.entries(ps || {}).filter(([, v]) => (v && v.n));
+    if (!entries.length) return '';
+    entries.sort((a, b) => b[1].n - a[1].n);
+    const rows = entries.map(([name, v]) => {
+      const rate = v.rate != null ? v.rate : 0;
+      const color = rate >= 65 ? '#38d39f' : rate >= 40 ? '#ffd24f' : '#ff6b6b';
+      return `<tr><td><b>${esc(name)}</b></td><td style="text-align:center">${v.n}</td><td style="text-align:center">${v.hit}</td>
+        <td style="text-align:center;color:${color};font-weight:700">${v.rate != null ? v.rate + '%' : '-'}</td></tr>`;
+    }).join('');
+    return `<div class="panel-card" style="margin-top:10px">
+      <h3>🧠 이상감지 패턴별 적중률</h3>
+      <table class="data-table" style="width:100%"><thead><tr>
+        <th>패턴</th><th style="text-align:center">발생횟수</th><th style="text-align:center">적중</th><th style="text-align:center">적중률</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+      <p class="hint" style="margin-top:4px">패턴이 많이 쌓일수록(발생 5회+) 분석 시 신뢰도·베팅 비중에 자동 반영됩니다.</p></div>`;
+  }
+
+  /** [3번] 시점별 급락 효과: 급락 발생 시점(T-N분)별 이상감지 적중률 */
+  function renderDropTiming(dt) {
+    const order = ['T-1분', 'T-2분', 'T-3분', 'T-5분', 'T-10분', 'T-10분+', '미상'];
+    const entries = Object.entries(dt || {}).filter(([, v]) => (v && v.n));
+    if (!entries.length) return '';
+    entries.sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
+    const rows = entries.map(([t, v]) => {
+      const rate = v.rate != null ? v.rate : 0;
+      const color = rate >= 65 ? '#38d39f' : rate >= 40 ? '#ffd24f' : '#ff6b6b';
+      return `<tr><td><b>${esc(t)}</b></td><td style="text-align:center">${v.n}</td><td style="text-align:center">${v.hit}</td>
+        <td style="text-align:center;color:${color};font-weight:700">${v.rate != null ? v.rate + '%' : '-'}</td></tr>`;
+    }).join('');
+    return `<div class="panel-card" style="margin-top:10px">
+      <h3>⏱ 급락 발생 시점별 효과</h3>
+      <table class="data-table" style="width:100%"><thead><tr>
+        <th>발생 시점</th><th style="text-align:center">발생횟수</th><th style="text-align:center">적중</th><th style="text-align:center">적중률</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+      <p class="hint" style="margin-top:4px">적중률 높은 시점의 급락일수록 신뢰도가 높습니다.</p></div>`;
+  }
+
+  /** [5번] 현재 경주 패턴 매칭 카드 (분석기 통합 화면용) */
+  function renderPatternMatch(pm) {
+    if (!pm || !(pm.patterns || []).length) return '';
+    const conf = pm.confidence || {};
+    const lvlColor = { '높음': '#38d39f', '보통': '#4ea1ff', '주의': '#ffd24f', '낮음': '#ff6b6b', '데이터부족': '#8a94a6' }[conf.level] || '#8a94a6';
+    const tags = pm.patterns.map((p) => `<span class="tag" style="background:${lvlColor}22;color:${lvlColor};border:1px solid ${lvlColor}55;border-radius:5px;padding:1px 6px;margin-right:4px">${esc(p)}</span>`).join('');
+    const matchRows = (pm.matched || []).filter((m) => m.n).map((m) =>
+      `<div style="margin:2px 0"><b>${esc(m.pattern)}</b> — 과거 ${m.rate != null ? m.rate + '%' : '-'} <span class="hint">(${m.hit || 0}/${m.n})</span></div>`).join('');
+    const confLine = conf.rate != null
+      ? `종합 신뢰도 <b style="color:${lvlColor}">${conf.level} (${conf.rate}%, 표본 ${conf.n})</b>${pm.recommend ? ' · ✅ 베팅 권장' : ' · ⚠️ 보수적 접근'}`
+      : `종합 신뢰도 <b style="color:${lvlColor}">데이터 부족</b> <span class="hint">(패턴별 5회+ 쌓이면 산출)</span>`;
+    const adviceLine = (pm.betAdvice && pm.betAdvice.note)
+      ? `<div style="margin-top:4px" class="hint">💡 ${esc(pm.betAdvice.note)}</div>` : '';
+    return `<div class="matrix-title" style="font-size:13px;margin-top:8px">🧠 현재 경주 패턴 매칭</div>
+      <div style="margin:4px 0">${tags}</div>
+      <div style="margin:4px 0">${confLine}</div>
+      ${matchRows}${adviceLine}`;
   }
 
   // [2번-A] 3종 시계열 차트: 복승·쌍승·삼복승 최인기 배당을 첫 수집=100% 로 정규화해 3줄 표시
@@ -2976,6 +3036,7 @@
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
       ${elimHtml}
       ${renderKoreaSignals(a.signals)}
+      ${renderPatternMatch(a.patternMatch)}
       ${renderBetRecommend(a, '#koreaBudget')}
     </div>`;
     _attachElimHandlers('koreaElimPanel', a.elimination);   // [1번] 제거↔후보 클릭 전환 복원
@@ -3081,6 +3142,7 @@
       ${formHtml}
       ${elimHtml}
       ${renderJapanSignals(a.signals)}
+      ${renderPatternMatch(a.patternMatch)}
       ${renderBetRecommend(a, '#jpBudget')}
     </div>`;
     _bindBudgetInput('#jpBudget', () => { if (state.jpLastInteg) renderJapanIntegrated(state.jpLastInteg); });
