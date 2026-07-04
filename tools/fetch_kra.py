@@ -48,6 +48,9 @@ KEY_FILE = os.path.join(DATA_DIR, "kra_key.txt")
 BASE = "http://apis.data.go.kr/B551015"
 EP_RACE = f"{BASE}/racedetailresult/getracedetailresult"      # 경주별상세성적표
 EP_JOCKEY = f"{BASE}/currentjockeyInfo/getcurrentjockeyinfo"    # 현직기수정보
+# 한국마사회_기수통산성적비교 — 활용신청 상세페이지의 '요청주소(End Point)'로 교체 가능.
+#   기본값은 명명규칙 추정치. 환경변수 KRA_JOCKEY_COMP_URL 또는 --comp-url 로 정확한 주소 지정.
+EP_JOCKEY_COMP = os.environ.get("KRA_JOCKEY_COMP_URL") or f"{BASE}/jockeyResult/getJockeyResult"
 # AI학습용 경주결과: 신청 페이지의 요청주소로 교체 후 --ai 사용 (파라미터 rccrs_cd, race_dt)
 EP_AI = f"{BASE}/AI_RaceResult/getAiRaceResult"                 # ⚠ 확인 필요(플레이스홀더)
 
@@ -109,7 +112,10 @@ def api_get(url, params, key):
     else:
         p2 = dict(p); p2["serviceKey"] = key
         r = requests.get(url, params=p2, timeout=20)
-    r.raise_for_status()
+    # HTTP 오류 시 data.go.kr 응답 본문을 함께 노출(401 원인 진단: 미승인/미활성/키형식)
+    if r.status_code != 200:
+        raise RuntimeError(f"HTTP {r.status_code} — {r.text[:200].strip() or '(빈 응답)'} "
+                           f"[키길이 {len(key)}, %{'O' if '%' in key else 'X'}]")
     # JSON 우선, 실패 시 원문 반환(에러 메시지 노출용)
     try:
         data = r.json()
@@ -265,12 +271,63 @@ def fetch_jockeys(meets, key):
     return count
 
 
+# ── 2b) 기수통산성적비교 → jockeys.json 통산 상세(career) 보강 ────────────
+def fetch_jockey_comp(meets, key, url=None):
+    """한국마사회_기수통산성적비교: 기수별 통산 상세성적(연도/경마장 비교)을 병합.
+    현직기수정보에 없는 세부 필드를 career 로 채운다. 엔드포인트가 다르면 --comp-url 로 지정."""
+    ep = url or EP_JOCKEY_COMP
+    db = load_json(JOCKEYS_FILE, {"jockeys": []})
+    existing = {j.get("name"): j for j in db.get("jockeys", [])}
+    count = 0
+    for meet in meets:
+        items = paged(ep, {"meet": meet}, key, label=f"기수통산 {MEETS.get(meet, meet)}")
+        for it in items:
+            name = (it.get("jkName") or it.get("jockeyName") or "").strip()
+            if not name:
+                continue
+            # 통산(T)·올해(Y) 착별 카운트를 방어적으로 수집(제공 필드명 편차 대응)
+            def g(*keys):
+                for k in keys:
+                    v = it.get(k)
+                    if v not in (None, ""):
+                        return _num(v)
+                return None
+            career = {
+                "totalRides": g("rcCntT", "totRcCnt", "rcCnt"),
+                "win": g("ord1CntT", "totOrd1Cnt", "ord1Cnt"),
+                "second": g("ord2CntT", "totOrd2Cnt", "ord2Cnt"),
+                "third": g("ord3CntT", "totOrd3Cnt", "ord3Cnt"),
+                "winRate": g("winRateT", "totWinRate", "winRate"),
+                "placeRate": g("plcRateT", "totPlcRate", "plcRate"),
+                "thisYearRides": g("rcCntY", "yrRcCnt"),
+                "thisYearWin": g("ord1CntY", "yrOrd1Cnt"),
+            }
+            j = existing.get(name, {"name": name})
+            j["career"] = {k: v for k, v in career.items() if v is not None}
+            # 현직기수정보가 비어있으면 통산비교 값으로 승률/복승률 보강
+            if j.get("placeRate") in (None, 0) and career.get("placeRate"):
+                j["placeRate"] = career["placeRate"]
+            if j.get("winRate") in (None, 0) and career.get("winRate"):
+                j["winRate"] = career["winRate"]
+            j["kraCompSynced"] = True
+            existing[name] = j
+            count += 1
+        time.sleep(SLEEP)
+    db["jockeys"] = list(existing.values())
+    db["kraCompUpdated"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    save_json(JOCKEYS_FILE, db)
+    print(f"✓ 기수통산성적비교: {count}명 career 보강 → {JOCKEYS_FILE}")
+    return count
+
+
 def main():
     ap = argparse.ArgumentParser(description="KRA 공공데이터 수집기")
     ap.add_argument("--from", dest="d_from", help="시작일 YYYYMMDD")
     ap.add_argument("--to", dest="d_to", help="종료일 YYYYMMDD (미지정 시 시작일과 동일)")
     ap.add_argument("--meet", type=int, choices=[1, 2, 3], help="경마장 1서울/2제주/3부경 (미지정=전체)")
-    ap.add_argument("--jockeys", action="store_true", help="현직기수 DB 갱신")
+    ap.add_argument("--jockeys", action="store_true", help="현직기수 DB 갱신(+기수통산성적비교 병합)")
+    ap.add_argument("--comp-url", help="기수통산성적비교 요청주소(EndPoint) — data.go.kr 활용신청 상세의 정확한 주소")
+    ap.add_argument("--no-comp", action="store_true", help="기수통산성적비교 병합 생략")
     ap.add_argument("--key", help="data.go.kr 서비스키 (미지정 시 env/파일)")
     args = ap.parse_args()
 
@@ -291,6 +348,12 @@ def main():
     if args.jockeys:
         print(f"■ 현직기수 갱신 · {[MEETS[m] for m in meets]}")
         fetch_jockeys(meets, key)
+        if not args.no_comp:
+            print(f"■ 기수통산성적비교 병합 · EndPoint={args.comp_url or EP_JOCKEY_COMP}")
+            try:
+                fetch_jockey_comp(meets, key, args.comp_url)
+            except Exception as e:
+                print(f"  ! 기수통산성적비교 실패(엔드포인트 확인 필요, --comp-url 로 지정): {e}")
     print("완료.")
 
 
