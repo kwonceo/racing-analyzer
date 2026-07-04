@@ -1022,6 +1022,37 @@ def _starters_save(db):
         json.dump(db, f, ensure_ascii=False)
 
 
+def _horse_has_form(h):
+    """이 마필 항목이 실제 전적(착순/전적점수)을 담고 있는가."""
+    if h.get("recent") or h.get("recentPlacings"):
+        return True
+    return (h.get("formScore") is not None) or (h.get("totalScore") is not None)
+
+
+def _rec_form_count(rec):
+    """레코드 안에서 전적이 채워진 마필 수."""
+    return sum(1 for h in ((rec or {}).get("horses") or []) if _horse_has_form(h))
+
+
+def _sanitize_starters(horses):
+    """출마표2/DebaTable 파서 오탐(오즈표·전체목록 스크레이핑으로 수백 행이 딸려오는 경우) 방어.
+    - 마번(no) 1~18 범위만 유효 · 마번 기준 중복 제거(전적 있는 항목 우선 보존)
+    - 한 경주 출전마는 최대 18두이므로 334행 같은 쓰레기 입력을 정상 규모로 축소한다.
+    반환: 정제된 리스트(마번 오름차순)."""
+    by_no = {}
+    for h in horses or []:
+        try:
+            no = int(h.get("no"))
+        except (TypeError, ValueError):
+            continue
+        if no < 1 or no > 18:
+            continue
+        prev = by_no.get(no)
+        if prev is None or (_horse_has_form(h) and not _horse_has_form(prev)):
+            by_no[no] = h
+    return [by_no[k] for k in sorted(by_no)]
+
+
 def _form_from_starters(rk, drops):
     """저장된 전적으로 마필 점수·등급 계산. 배당 급락마는 이상감지 상향 반영.
     - 일본(출마표2): recent 착순으로 점수 재계산
@@ -1820,10 +1851,21 @@ def extract_japan():
     rk = (body.get("raceKey") or "").strip()
     if not rk:
         return jsonify({"error": "raceKey가 필요합니다."}), 400
-    horses = body.get("horses") or []
+    raw_horses = body.get("horses") or []
+    horses = _sanitize_starters(raw_horses)   # [전적복구] 오즈표/전체목록 오탐 방어(중복 마번 제거·1~18만)
     sdb = _starters_load()
-    sdb[rk] = {"horses": horses, "t": time.time()}
-    _starters_save(sdb)
+    prev = sdb.get(rk)
+    new_form = sum(1 for h in horses if _horse_has_form(h))
+    prev_form = _rec_form_count(prev)
+    # [전적복구] 전적 0두인 새 수집이 기존 전적(한국 PDF/이전 출마표2)을 덮어쓰지 못하게 보호.
+    #   배당 갱신은 아래에서 계속 진행하되, starters(전적)만 기존 것을 유지한다.
+    if prev and prev_form > 0 and new_form == 0:
+        print(f"[출마표2 전적] {rk}: 새 수집 전적 0두 · 원본 {len(raw_horses)}행 → 기존 전적 {prev_form}두 보존(덮어쓰기 방지)")
+    else:
+        if len(raw_horses) != len(horses):
+            print(f"[출마표2 전적] {rk}: 입력 {len(raw_horses)}행 → 정제 {len(horses)}두(중복·범위밖 제거)")
+        sdb[rk] = {"horses": horses, "t": time.time()}
+        _starters_save(sdb)
     # 배당이 함께 오면 triple_store 도 갱신(히스토리 유지)
     if body.get("quinella") or body.get("exacta") or body.get("trio"):
         tdb = _triple_load()
@@ -1840,7 +1882,7 @@ def extract_japan():
         except Exception as e:
             print("[히스토리] 기록 실패:", e)
     trec = _triple_load().get(rk) or {}
-    print(f"[출마표2 전적] {rk}: {len(horses)}두 저장")
+    print(f"[출마표2 전적] {rk}: 전적 {new_form}두 반영(수신 {len(horses)}두)")
     return jsonify(_triple_analyze(rk, trec))
 
 
@@ -1853,11 +1895,11 @@ def korea_form():
     rk = (body.get("raceKey") or "").strip()
     if not rk:
         return jsonify({"error": "raceKey가 필요합니다."}), 400
-    horses = body.get("horses") or []
+    horses = _sanitize_starters(body.get("horses") or [])   # [전적복구] 중복 마번 제거
     sdb = _starters_load()
     sdb[rk] = {"horses": horses, "t": time.time(), "source": "korea"}
     _starters_save(sdb)
-    print(f"[한국 전적] {rk}: {len(horses)}두 저장(PDF)")
+    print(f"[한국 전적] {rk}: {len(horses)}두 저장(PDF, 전적 {sum(1 for h in horses if _horse_has_form(h))}두)")
     return jsonify({"ok": True, "count": len(horses), "raceKey": rk})
 
 

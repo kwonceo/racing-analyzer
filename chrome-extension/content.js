@@ -925,6 +925,25 @@
     jockey: /騎手|기수|jockey/i, weight: /斤量|부담중량|부담|負担|중량|weight/i,
     recent: /최근|전적|着順|성적|근성적|recent/i,
   };
+  // [전적복구] 마번 기준 중복 제거(전적 있는 항목 우선) + 규모 검증.
+  //   오즈 조합표·전체 경주목록을 잘못 긁어 수백 행이 딸려오는 오탐을 정상 규모(≤18두)로 축소한다.
+  function dedupeStarters(list, tag) {
+    const byNo = new Map();
+    for (const h of (list || [])) {
+      const no = parseInt(h && h.no, 10);
+      if (!(no >= 1 && no <= 18)) continue;
+      const prev = byNo.get(no);
+      const hasRec = h.recent && h.recent.length;
+      const prevRec = prev && prev.recent && prev.recent.length;
+      if (!prev || (hasRec && !prevRec)) byNo.set(no, h);
+    }
+    const out = [...byNo.keys()].sort((a, b) => a - b).map((k) => byNo.get(k));
+    if ((list || []).length !== out.length) {
+      console.log(`[전적수집] ${tag || ''} 중복/범위밖 정제: ${(list || []).length}행 → ${out.length}두`
+        + (((list || []).length > 30) ? ' ⚠ 원본이 비정상적으로 큼(오즈표/전체목록 오탐 가능)' : ''));
+    }
+    return out;
+  }
   function collectStarters(root) {
     const D = root || document;   // root 지정 시 fetch 해온 DebaTable 문서에서 추출
     const tables = [...D.querySelectorAll('table')];
@@ -1003,7 +1022,7 @@
       console.log(`[전적수집] ${h.no}번말 ${h.name || ''} 전적: ${recTxt}`);
     }
     console.log(`[전적수집] 착순 데이터 있는 말: ${withRec}/${out.length}마리${withRec === 0 ? ' ⚠ 전적이 하나도 안 잡혔습니다 — recent 열 인식/셀 형식 확인 필요' : ''}`);
-    return out;
+    return dedupeStarters(out, 'collectStarters');
   }
 
   // [1번] 출마표2 탭 클릭 → 1.5초 대기 → 전적 추출 (탭 없으면 현재화면 시도)
@@ -1085,7 +1104,7 @@
       const recent = recCells.slice(0, 5).map((c) => parseInt(txt(c), 10)).filter((n) => n >= 1 && n <= 18);
       out.push({ no, name, jockey, recent, weight: null });
     }
-    return out;
+    return dedupeStarters(out, 'parseDebaTable');
   }
   /** DebaTable 파라미터 확보: keiba면 현재 URL, 아니면 저장된 lastDebaParams / 페이지의 keiba 링크 */
   async function getDebaParams() {
