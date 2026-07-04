@@ -1073,6 +1073,7 @@ def _form_from_starters(rk, drops):
     # [한국경마] 사전 계산된 전적점수가 있으면 그대로 통과(PDF Vision 한글 데이터)
     prescored = any(h.get("formScore") is not None or h.get("totalScore") is not None for h in raw)
     if rec.get("source") == "korea" or prescored:
+        kra_hist = _kra_load_history()   # [전적→부진마 학습 연결] 마명으로 KRA 실전적 백필
         scored = []
         for h in raw:
             ts = h.get("totalScore")
@@ -1080,19 +1081,30 @@ def _form_from_starters(rk, drops):
                 ts = h.get("formScore")
             no = h.get("no")
             an = anomaly_by_no.get(int(no)) if no is not None else None
+            rp = (h.get("recent") or h.get("recentPlacings") or [])[:5]
+            if not rp and h.get("name"):
+                rp = _kra_recent_placings(h["name"], kra_hist)   # 저장 전적이 비면 KRA 실전적으로 채움
+            # 전적점수가 없고(0/None) KRA 착순을 채웠으면 실전적 기반 점수로 보강(부진마·통합등급 반영)
+            if (ts in (None, 0)) and rp:
+                ts = base_form_score(rp)
             scored.append({
                 "no": no, "name": h.get("name", ""), "jockey": h.get("jockey", ""),
-                "recentPlacings": (h.get("recent") or h.get("recentPlacings") or [])[:5],
+                "recentPlacings": rp,
                 "baseScore": round(ts or 0, 1), "courseBonus": 0, "jockeyBonus": 0,
                 "totalScore": round(ts or 0, 1), "detail": [], "flags": [], "anomaly": an,
             })
         classify_grades(scored)
         scored.sort(key=lambda x: -x["totalScore"])
         return scored
-    # [일본경마] 출마표2 착순으로 재계산
-    horses = [{"no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
-               "recentPlacings": h.get("recent") or [], "currentWeight": h.get("weight")}
-              for h in raw]
+    # [일본경마] 출마표2 착순으로 재계산 (착순이 비면 KRA 실전적으로 백필 — 한국 마명만 매칭)
+    kra_hist = _kra_load_history()
+    horses = []
+    for h in raw:
+        rp = h.get("recent") or []
+        if not rp and h.get("name"):
+            rp = _kra_recent_placings(h["name"], kra_hist)
+        horses.append({"no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
+                       "recentPlacings": rp, "currentWeight": h.get("weight")})
     scored = compute_horse_scores({}, horses, None, anomaly_by_no)
     scored.sort(key=lambda x: -x["totalScore"])
     return scored
@@ -3178,12 +3190,41 @@ def kra_horse():
     })
 
 
+_KRA_HIST_CACHE = {"mtime": None, "data": None}
+
+
 def _kra_load_history():
+    """kra_history.json 로드(파일 mtime 기준 캐시 — 30초 폴링마다 재파싱 방지)."""
     try:
-        with open(KRA_HISTORY_FILE, encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
+        mt = os.path.getmtime(KRA_HISTORY_FILE)
+    except OSError:
         return {}
+    if _KRA_HIST_CACHE["mtime"] != mt:
+        try:
+            with open(KRA_HISTORY_FILE, encoding="utf-8") as f:
+                _KRA_HIST_CACHE["data"] = json.load(f)
+            _KRA_HIST_CACHE["mtime"] = mt
+        except Exception:
+            return {}
+    return _KRA_HIST_CACHE["data"] or {}
+
+
+def _kra_recent_placings(name, hist=None):
+    """마명 → KRA 실제 최근 착순 배열(최대 5, 최신순). 없으면 []. [전적→부진마 학습 연결]"""
+    if not name:
+        return []
+    if hist is None:
+        hist = _kra_load_history()
+    recs = (hist.get("byHorse") or {}).get(name.strip()) or []
+    if not recs:
+        return []
+    ordered = sorted(recs, key=lambda r: r.get("date", ""), reverse=True)
+    out = []
+    for r in ordered[:5]:
+        v = r.get("stOrd")
+        if isinstance(v, (int, float)) and 1 <= int(v) <= 18:
+            out.append(int(v))
+    return out
 
 
 def kra_horse_summary(name, hist=None):
