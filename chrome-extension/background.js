@@ -230,7 +230,51 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     })();
     return true; // async
   }
+
+  // [4번] 배당판의 '📊 분석기 열기' → 분석기를 별도 팝업 창으로 열기(이미 있으면 포커스).
+  if (msg?.type === 'OPEN_ANALYZER') {
+    openAnalyzerWindow().then(sendResponse);
+    return true; // async
+  }
 });
+
+// ── [별도 창] 분석기 팝업 창 열기 + 위치/크기 기억 ──────────────────────
+const ANALYZER_URL = `${SERVER}/`;
+let _analyzerWinId = null;
+
+async function openAnalyzerWindow() {
+  // 이미 열린 분석기 창이 있으면 새로 만들지 않고 그 창을 포커스
+  try {
+    const wins = await chrome.windows.getAll({ populate: true });
+    for (const w of wins) {
+      if ((w.tabs || []).some((t) => (t.url || '').startsWith(ANALYZER_URL))) {
+        await chrome.windows.update(w.id, { focused: true, drawAttention: true });
+        _analyzerWinId = w.id;
+        return { ok: true, reused: true };
+      }
+    }
+  } catch (_) { /* */ }
+  // 저장된 위치/크기(analyzerGeom)로 popup 타입 창 생성
+  const { analyzerGeom } = await chrome.storage.local.get({ analyzerGeom: null });
+  const opts = {
+    url: ANALYZER_URL + '?popup=1', type: 'popup', focused: true,
+    width: (analyzerGeom && analyzerGeom.width) || 1200,
+    height: (analyzerGeom && analyzerGeom.height) || 900,
+  };
+  if (analyzerGeom && analyzerGeom.left != null) { opts.left = analyzerGeom.left; opts.top = analyzerGeom.top; }
+  try { const w = await chrome.windows.create(opts); _analyzerWinId = w.id; return { ok: true }; }
+  catch (e) { return { ok: false, error: String(e.message || e) }; }
+}
+
+// [2번] 분석기 창의 위치/크기가 바뀌면 저장 → 다음에 같은 위치로 연다.
+if (chrome.windows.onBoundsChanged) {
+  chrome.windows.onBoundsChanged.addListener((w) => {
+    if (w.id === _analyzerWinId && w.width > 200 && w.height > 200) {
+      chrome.storage.local.set({ analyzerGeom: { left: w.left, top: w.top, width: w.width, height: w.height } });
+    }
+  });
+}
+chrome.windows.onRemoved.addListener((id) => { if (id === _analyzerWinId) _analyzerWinId = null; });
 
 // ── [1번] 결과 자동수집 타이머 (발주 후 10/12/14분 = 종료 7분후 + 재시도 2회) ──
 const RESULT_CHECK_OFFSETS = [10, 12, 14]; // 발주시각 기준 분

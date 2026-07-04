@@ -42,6 +42,12 @@
     <b id="rrCurrentRace" style="color:#38d39f;font-size:14px">— (수집 대기)</b>
     <button id="rrRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px" title="확장이 수집한 현재 경주를 즉시 불러와 화면을 갱신합니다">🔄 경주 새로고침</button>
     <span id="rrStatus" class="hint" style="margin:0"></span>
+    <span style="flex:1"></span>
+    <!-- [별도 창] 배당판과 나란히 볼 수 있도록 분석기를 팝업 창으로 열기 -->
+    <button id="popoutBtn" class="btn" style="padding:5px 12px;font-size:13px" title="분석기를 별도 창으로 열어 배당판과 함께 봅니다">🪟 별도 창으로 열기</button>
+    <label id="onTopWrap" title="브라우저 제한상 완전한 '항상 위'는 불가 — 팝업 창 유지 옵션" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#94a3b8;cursor:pointer">
+      <input type="checkbox" id="onTopChk" style="cursor:pointer" /> 📌 항상 위
+    </label>
   </div>
 
   <main class="app-main">

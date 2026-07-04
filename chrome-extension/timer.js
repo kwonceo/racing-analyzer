@@ -129,6 +129,19 @@
   elLabel.addEventListener('change', () => chrome.storage.local.set({ timerLabel: elLabel.value }));
   $('kbTimerClose').addEventListener('click', () => bar.remove());
 
+  // [4번] 배당판 탭에 '📊 분석기 열기' 버튼 — 분석기를 별도 창으로 연다.
+  //   분석기 자신 페이지(127.0.0.1:8011)에는 표시하지 않는다.
+  if (!/(?:127\.0\.0\.1|localhost):8011/.test(location.host)) {
+    const ab = document.createElement('button');
+    ab.id = 'kbOpenAnalyzer';
+    ab.textContent = '📊 분석기 열기';
+    ab.title = '경마배당분석기를 별도 창으로 엽니다 (배당판과 나란히 보기)';
+    ab.style.cssText = 'all:initial;cursor:pointer;background:#2563eb;color:#fff;border-radius:5px;'
+      + "padding:3px 9px;font:700 12px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin-left:2px";
+    ab.addEventListener('click', () => { try { chrome.runtime.sendMessage({ type: 'OPEN_ANALYZER' }); } catch (_) { /* */ } });
+    bar.insertBefore(ab, $('kbTimerClose'));
+  }
+
   // ── storage 변경 → 모든 탭 동기화 ──
   function applyState(v) {
     if (v.timerLabel != null && document.activeElement !== elLabel) elLabel.value = v.timerLabel || '';

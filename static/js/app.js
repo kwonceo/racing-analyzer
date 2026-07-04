@@ -770,6 +770,58 @@
     try { window.postMessage({ source: 'bmed-analyzer', type: 'FORCE_COLLECT' }, '*'); } catch (_) { /* */ }
   }
 
+  // ---------- [별도 창] 분석기 팝업 창 열기 + 위치/크기 기억 ----------
+  //  배당판을 보면서 분석기도 함께 볼 수 있도록 별도(popup) 창으로 연다.
+  //  ※ 브라우저 보안 정책상 웹페이지는 창을 '항상 최상단'으로 강제할 수 없어,
+  //    '항상 위' 옵션은 설정만 기억한다(팝업 창 형태 유지). OS/브라우저 자체 기능 필요.
+  const POPUP_NAME = 'keibaAnalyzerPopup';
+  const POPUP_GEOM_KEY = 'bmed_popupGeom';
+  const POPUP_ONTOP_KEY = 'bmed_popupOnTop';
+
+  function _isAnalyzerPopup() {
+    try { return window.name === POPUP_NAME || new URLSearchParams(location.search).has('popup'); } catch (_) { return false; }
+  }
+
+  function openAnalyzerPopup() {
+    let g = null;
+    try { g = JSON.parse(localStorage.getItem(POPUP_GEOM_KEY) || 'null'); } catch (_) { /* */ }
+    const w = (g && g.w) || 1200, h = (g && g.h) || 900;
+    const x = (g && g.x != null) ? g.x : Math.max(0, Math.round((screen.availWidth - w) / 2));
+    const y = (g && g.y != null) ? g.y : Math.max(0, Math.round((screen.availHeight - h) / 2));
+    const feats = `popup=yes,resizable=yes,scrollbars=yes,width=${w},height=${h},left=${x},top=${y}`;
+    const win = window.open(location.origin + '/?popup=1', POPUP_NAME, feats);
+    if (win) { try { win.focus(); } catch (_) { /* */ } notify('🪟 분석기를 별도 창으로 열었습니다', true); }
+    else notify('팝업이 차단되었습니다 — 브라우저 팝업 허용을 확인하세요', false);
+    return win;
+  }
+
+  function _savePopupGeom() {
+    try {
+      const geom = { x: window.screenX, y: window.screenY, w: window.outerWidth, h: window.outerHeight };
+      if (geom.w > 200 && geom.h > 200) localStorage.setItem(POPUP_GEOM_KEY, JSON.stringify(geom));
+    } catch (_) { /* */ }
+  }
+
+  function initPopout() {
+    const btn = $('#popoutBtn'), chk = $('#onTopChk');
+    if (btn) btn.addEventListener('click', openAnalyzerPopup);
+    if (chk) {
+      try { chk.checked = localStorage.getItem(POPUP_ONTOP_KEY) === '1'; } catch (_) { /* */ }
+      chk.addEventListener('change', () => {
+        try { localStorage.setItem(POPUP_ONTOP_KEY, chk.checked ? '1' : '0'); } catch (_) { /* */ }
+        notify(chk.checked ? '📌 항상 위 켜짐 (브라우저 제한상 팝업 창 유지 수준)' : '📌 항상 위 꺼짐', true);
+      });
+    }
+    // 이 페이지가 '별도 창'이면: 위치/크기를 주기적으로 기억 + 닫힐 때 저장. 별도창 버튼은 숨김.
+    if (_isAnalyzerPopup()) {
+      if (btn) btn.style.display = 'none';
+      _savePopupGeom();
+      setInterval(_savePopupGeom, 3000);
+      window.addEventListener('beforeunload', _savePopupGeom);
+      try { document.title = '📊 경마배당분석기 (별도 창)'; } catch (_) { /* */ }
+    }
+  }
+
   /** 비차단 토스트 알림 (alert 대체 — 캡처 흐름을 막지 않음) */
   function notify(msg, ok) {
     let n = $('#capNotice');
@@ -3596,6 +3648,7 @@
     initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initKoreaHistory();
     initAutoStatusBar();   // [v2.0.0] 자동수집 상태바
     initRaceRefresh();     // [경주 자동 업데이트] 상단 새로고침 바 + 30초 자동 감지
+    initPopout();          // [별도 창] 분석기 팝업 창 열기 + 위치 기억
     initAnalysisLog();     // [분석 로그] 완전 기록 섹션
     // [개편] initCombined() 제거 — 통합분석 탭 폐지(한국/일본 탭에 자동 표시).
     checkServerHealth();
