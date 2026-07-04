@@ -62,6 +62,16 @@
         <option value="japan">일본경마 (출마표2)</option>
       </select>
     </div>
+    <!-- [1번] 일본 중앙(JRA)/지방(NAR) 분기: 중앙=배당만·마감1분30초전, 지방=전적+배당 -->
+    <div class="row" id="japanTypeRow">
+      <label>일본 종류</label>
+      <div style="display:flex;gap:6px">
+        <button type="button" class="jt-btn" id="jtLocal" data-jt="local"
+          style="cursor:pointer;border:1px solid #334155;background:#1e293b;color:#e2e8f0;border-radius:6px;padding:4px 8px;font:inherit;font-size:12px">🏟 지방(NAR)</button>
+        <button type="button" class="jt-btn" id="jtCentral" data-jt="central"
+          style="cursor:pointer;border:1px solid #334155;background:#1e293b;color:#e2e8f0;border-radius:6px;padding:4px 8px;font:inherit;font-size:12px">🏇 중앙(JRA)</button>
+      </div>
+    </div>
   </div>
 
   <div class="card">

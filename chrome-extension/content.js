@@ -1148,8 +1148,9 @@
   async function collectTripleByTabs(reason) {
     const site = detectSite();
     const oddsClass = site === 'asyukk' ? 'odds_content' : null;
-    const { raceKey: override, timerDeadline, market } = await getSettings();
+    const { raceKey: override, timerDeadline, market, japanType } = await getSettings();
     const isKorea = market === 'korea';   // [5번] 한국경마: 출마표2(keiba DebaTable) 수집 생략 → 전적은 PDF에서
+    const isCentral = !isKorea && japanType === 'central';   // [1번] 일본 중앙(JRA): 전적표 없음 → 배당만 분석
     const raceKey = (override && override.trim()) || extractRaceKey();
     if (!raceKey) {
       setTripleProgress('❌ raceKey 필요', true);
@@ -1226,8 +1227,14 @@
       if (isKorea) {
         console.log('[전적수집] 한국경마 모드 → 출마표2(keiba DebaTable) 수집 생략(전적은 PDF에서 추출)');
         setTripleProgress('한국경마 모드 — 전적은 PDF에서 (출마표2 생략)');
+      } else if (isCentral) {
+        // [1번] 일본 중앙(JRA): 전적표(출마표2)가 없다 → 수집 시도 자체를 생략, 배당만으로 분석.
+        console.log('[전적수집] 일본 중앙경마(JRA) 모드 → 전적표 없음, 출마표2 수집 생략(배당만 분석)');
+        setTripleProgress('중앙경마(JRA) — 배당만 분석 (전적표 생략)');
       } else {
+        // [1번] 일본 지방(NAR): 전적표 있음 → 출마표2(keiba DebaTable) 수집
         setTripleProgress('출마표2 전적 수집중…(keiba DebaTable)');
+        console.log('[배당수집] 출마표2 탭 클릭 시도... (지방경마 NAR — 전적+배당 통합)');
         try { starters = await fetchDebaStarters(); } catch (e) { console.warn('[전적수집] DebaTable fetch 오류', e); }
         if (!starters.length) {
           console.log('[전적수집] DebaTable 실패/없음 → 인페이지 출마표2 탭 시도(폴백)');
@@ -1235,6 +1242,7 @@
           try { starters = await collectStartersByTab(); } catch (e) { console.warn('[전적수집] 인페이지 수집 오류', e); }
           await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false); // 복승으로 복귀
         }
+        console.log(`[배당수집] 전적 추출: ${starters.length}두`);
       }
 
       // 4) 삼복승 — [일본 전용]. [2번] 한국경마는 삼복승을 수집하지 않는다(복승만).
@@ -1305,7 +1313,8 @@
     return new Promise((resolve) => {
       chrome.storage.local.get(
         // autoMode: 'triple'(전체 3종 수집) — 단승 스냅샷 모드는 폐지됨 · timerDeadline: 발주시각(epoch ms)
-        { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', timerDeadline: 0, market: 'auto' },
+        // japanType: 'local'(지방 NAR·전적+배당) | 'central'(중앙 JRA·배당만)
+        { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', timerDeadline: 0, market: 'auto', japanType: 'local' },
         (v) => resolve(v)
       );
     });

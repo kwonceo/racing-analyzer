@@ -17,6 +17,9 @@ const els = {
   interval: $('interval'),
   autoMode: $('autoMode'),
   market: $('market'),
+  japanTypeRow: $('japanTypeRow'),
+  jtLocal: $('jtLocal'),
+  jtCentral: $('jtCentral'),
   sendNow: $('sendNow'),
   lastResult: $('lastResult'),
   lastDetail: $('lastDetail'),
@@ -31,12 +34,14 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', market: 'auto', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null },
+    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', market: 'auto', japanType: 'local', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
       els.interval.value = String(v.intervalSec || 30);
       els.autoMode.value = v.autoMode || 'triple';
       if (els.market) els.market.value = v.market || 'auto';
+      renderJapanType(v.japanType || 'local');   // [1번] 중앙/지방 버튼 상태
+      syncJapanTypeUI();
       els.raceKey.value = v.raceKey || '';
       renderStatus(v.status);
       renderResultStatus(v.resultStatus);
@@ -102,6 +107,27 @@ els.autoMode.addEventListener('change', () => {
 });
 if (els.market) els.market.addEventListener('change', () => {
   chrome.storage.local.set({ market: els.market.value });
+  syncJapanTypeUI();
+});
+
+// [1번] 일본 중앙(JRA)/지방(NAR) 선택 — 중앙=배당만·마감1분30초전, 지방=전적+배당
+function renderJapanType(jt) {
+  const on = 'background:#2563eb;border-color:#2563eb;color:#fff';
+  const off = 'background:#1e293b;border-color:#334155;color:#e2e8f0';
+  const base = 'cursor:pointer;border:1px solid;border-radius:6px;padding:4px 8px;font:inherit;font-size:12px;';
+  if (els.jtLocal) els.jtLocal.style.cssText = base + (jt === 'central' ? off : on);
+  if (els.jtCentral) els.jtCentral.style.cssText = base + (jt === 'central' ? on : off);
+}
+function syncJapanTypeUI() {
+  // 한국경마 모드에서는 일본 종류 선택을 숨긴다.
+  if (els.japanTypeRow) els.japanTypeRow.style.display = (els.market && els.market.value === 'korea') ? 'none' : '';
+}
+[els.jtLocal, els.jtCentral].forEach((b) => {
+  if (b) b.addEventListener('click', () => {
+    const jt = b.dataset.jt;
+    chrome.storage.local.set({ japanType: jt });
+    renderJapanType(jt);
+  });
 });
 els.raceKey.addEventListener('change', () => {
   chrome.storage.local.set({ raceKey: els.raceKey.value.trim() });
