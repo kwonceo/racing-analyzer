@@ -1131,6 +1131,25 @@ def triple_latest():
                     "exacta": rec.get("exacta", []), "trio": rec.get("trio", [])})
 
 
+@app.route("/api/current_race", methods=["GET"])
+def current_race():
+    """확장이 마지막으로 수집한 '현재 경주' 반환 → {raceKey, updatedAt, counts}.
+    분석기 상단 '경주 새로고침' 바가 폴링해 현재 경주명을 표시·자동 전환한다.
+    (배당 본문 없이 경주명만 필요하므로 triple/latest 보다 가볍다.)"""
+    db = _triple_load()
+    if not db:
+        return jsonify({"raceKey": None})
+    rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
+    rec = db.get(rk) or {}
+    return jsonify({
+        "raceKey": rk,
+        "updatedAt": rec.get("t"),
+        "counts": {"quinella": len(rec.get("quinella") or []),
+                   "exacta": len(rec.get("exacta") or []),
+                   "trio": len(rec.get("trio") or [])},
+    })
+
+
 # ───────── 3종 규칙기반 즉시 분석: 급락·순위변동·역전·유력마·삼복승추천 ─────────
 #   Claude 미사용(빠르고 무료). 확장 [즉시 분석] + 프론트 자동갱신이 함께 사용.
 def _un(combo):

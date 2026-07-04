@@ -697,7 +697,10 @@
       await new Promise((r) => setTimeout(r, 1200));  // 확장 수집·서버 저장 잠깐 대기
     }
     let rk = null;
-    try { const d = await (await fetch('/api/odds/triple/latest')).json(); rk = d && d.raceKey; } catch (_) { /* */ }
+    try { const d = await (await fetch('/api/current_race')).json(); rk = d && d.raceKey; } catch (_) { /* */ }
+    if (!rk) {  // 폴백: 구 엔드포인트
+      try { const d = await (await fetch('/api/odds/triple/latest')).json(); rk = d && d.raceKey; } catch (_) { /* */ }
+    }
     if (!rk) {
       if (label) label.textContent = '— (수집된 경주 없음)';
       if (status) status.textContent = manual ? '확장 [전체 자동 수집]을 먼저 실행하세요.' : '';
