@@ -35,6 +35,15 @@
     <button class="tab-btn" data-tab="stats">📊 통계</button>
   </nav>
 
+  <!-- [경주 자동 업데이트] 확장이 수집 중인 현재 배당판 경주 표시 + 즉시 새로고침 -->
+  <div id="raceRefreshBar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 16px;background:#0f172a;border-bottom:1px solid #334155">
+    <span style="font-size:15px">🏇</span>
+    <span class="hint" style="margin:0;color:#94a3b8">현재 배당판 경주</span>
+    <b id="rrCurrentRace" style="color:#38d39f;font-size:14px">— (수집 대기)</b>
+    <button id="rrRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px" title="확장이 수집한 현재 경주를 즉시 불러와 화면을 갱신합니다">🔄 경주 새로고침</button>
+    <span id="rrStatus" class="hint" style="margin:0"></span>
+  </div>
+
   <main class="app-main">
     <!-- 한국경마 -->
     <section id="tab-korea" class="tab-panel active">

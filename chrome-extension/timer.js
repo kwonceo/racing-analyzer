@@ -147,6 +147,16 @@
     if (a.level === '🚨') { setTimeout(beep, 700); setTimeout(beep, 1400); } // 강한 알림(연속 비프)
   }
 
+  // [경주 새로고침] 분석기 페이지(127.0.0.1) → 확장: 즉시 수집 트리거 릴레이.
+  //   분석기 웹페이지는 chrome.runtime 에 직접 접근 못 하므로 timer.js 가 중계한다.
+  window.addEventListener('message', (e) => {
+    if (e.source !== window) return;
+    const d = e.data;
+    if (d && d.source === 'bmed-analyzer' && d.type === 'FORCE_COLLECT') {
+      try { chrome.runtime.sendMessage({ type: 'FORCE_COLLECT' }); } catch (_) { /* */ }
+    }
+  });
+
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
     if (changes.collectAlert && changes.collectAlert.newValue) showCollectAlert(changes.collectAlert.newValue);

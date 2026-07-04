@@ -674,6 +674,73 @@
     if (btn && !btn.classList.contains('active')) btn.click();
   }
 
+  // ---------- [경주 자동 업데이트] 확장 수집 경주 → 상단 표시 + 새로고침 ----------
+  //  확장(background)이 30초마다 배당판에서 수집 → 서버 latest 에 최신 raceKey 저장.
+  //  분석기는 이 바에서 (1) 새로고침 버튼으로 즉시, (2) 30초마다 자동으로 최신 경주를 조회해
+  //  상단에 "제주 3경주" 처럼 표시하고, 경주가 바뀌면 화면을 자동 갱신한다. (기존 기능은 유지)
+  let _rrTimer = null, _rrLastRk = null;
+
+  function initRaceRefresh() {
+    const btn = $('#rrRefreshBtn');
+    if (btn) btn.addEventListener('click', () => refreshCurrentRace(true));
+    refreshCurrentRace(false);
+    if (_rrTimer) clearInterval(_rrTimer);
+    _rrTimer = setInterval(() => refreshCurrentRace(false), 30000);   // [3번] 30초마다 경주 변경 확인
+  }
+
+  /** 확장이 마지막으로 수집한 경주(server latest) 조회 → 상단 표시 + (변경/수동 시) 화면 갱신 */
+  async function refreshCurrentRace(manual) {
+    const label = $('#rrCurrentRace'), status = $('#rrStatus');
+    if (manual) {
+      if (status) status.textContent = '확장에 즉시 수집 요청…';
+      nudgeExtensionCollect();                       // [1번] 확장에서 현재 경주 즉시 수집
+      await new Promise((r) => setTimeout(r, 1200));  // 확장 수집·서버 저장 잠깐 대기
+    }
+    let rk = null;
+    try { const d = await (await fetch('/api/odds/triple/latest')).json(); rk = d && d.raceKey; } catch (_) { /* */ }
+    if (!rk) {
+      if (label) label.textContent = '— (수집된 경주 없음)';
+      if (status) status.textContent = manual ? '확장 [전체 자동 수집]을 먼저 실행하세요.' : '';
+      return;
+    }
+    if (label) label.textContent = rk;
+    const changed = rk !== _rrLastRk;
+    _rrLastRk = rk;
+    if (changed && status) status.textContent = '🆕 새 경주';
+    else if (status) status.textContent = manual ? '✅ 최신입니다' : '';
+    if (changed || manual) {
+      notify(`🔄 업데이트: ${rk}`, true);            // 예: "🔄 업데이트: 제주 3경주"
+      refreshActiveView(rk);
+    }
+  }
+
+  /** 활성 탭에 맞춰 화면 갱신: 일본=실시간 폴 / 한국=칩 자동 선택 */
+  function refreshActiveView(rk) {
+    const activeBtn = document.querySelector('.tab-btn.active');
+    const tab = activeBtn ? activeBtn.dataset.tab : '';
+    if (tab === 'jp') { try { pollJapanOdds(); } catch (_) { /* */ } return; }
+    try { autoSelectKoreaRace(rk); } catch (_) { /* */ }
+  }
+
+  /** raceKey(예 "2026-07-04 제주 3R" / "제주 3경주")에서 회장·경주번호를 뽑아 한국 칩 자동 선택 */
+  function autoSelectKoreaRace(rk) {
+    if (!state.koreaRaces || !state.koreaRaces.length) return;
+    const s = String(rk);
+    const m = s.match(/(\d{1,2})\s*(?:R|경주)/i);
+    const no = m ? parseInt(m[1], 10) : null;
+    if (no == null) return;
+    let idx = state.koreaRaces.findIndex((r) => parseInt(r.raceNo, 10) === no && r.venue && s.includes(r.venue));
+    if (idx < 0) idx = state.koreaRaces.findIndex((r) => parseInt(r.raceNo, 10) === no);
+    if (idx < 0 || state.activeKorea === idx) return;   // 없거나 이미 선택됨 → 재선택 안 함(감시 리셋 방지)
+    const chip = document.querySelector(`#koreaRaceList .race-chip[data-idx="${idx}"]`);
+    if (chip) chip.click();
+  }
+
+  /** 분석기 페이지 → timer.js(확장) 릴레이: 즉시 수집 트리거(postMessage) */
+  function nudgeExtensionCollect() {
+    try { window.postMessage({ source: 'bmed-analyzer', type: 'FORCE_COLLECT' }, '*'); } catch (_) { /* */ }
+  }
+
   /** 비차단 토스트 알림 (alert 대체 — 캡처 흐름을 막지 않음) */
   function notify(msg, ok) {
     let n = $('#capNotice');
@@ -3499,6 +3566,7 @@
   async function boot() {
     initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initKoreaHistory();
     initAutoStatusBar();   // [v2.0.0] 자동수집 상태바
+    initRaceRefresh();     // [경주 자동 업데이트] 상단 새로고침 바 + 30초 자동 감지
     initAnalysisLog();     // [분석 로그] 완전 기록 섹션
     // [개편] initCombined() 제거 — 통합분석 탭 폐지(한국/일본 탭에 자동 표시).
     checkServerHealth();

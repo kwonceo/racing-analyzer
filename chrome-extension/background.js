@@ -220,6 +220,16 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     checkServer().then(sendResponse);
     return true;
   }
+
+  // [경주 새로고침] 분석기의 '🔄 경주 새로고침' → 배당판에서 현재 경주 즉시 수집 + 분석.
+  //   자동수집 ON/OFF 와 무관하게 1회 강제 수집한다(엔진 상태는 건드리지 않음).
+  if (msg?.type === 'FORCE_COLLECT') {
+    (async () => {
+      try { await _collectOnce(); await _forceAnalyze(); sendResponse({ ok: true }); }
+      catch (e) { sendResponse({ ok: false, error: String(e.message || e) }); }
+    })();
+    return true; // async
+  }
 });
 
 // ── [1번] 결과 자동수집 타이머 (발주 후 10/12/14분 = 종료 7분후 + 재시도 2회) ──
