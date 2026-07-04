@@ -23,7 +23,35 @@ const els = {
   sendNow: $('sendNow'),
   lastResult: $('lastResult'),
   lastDetail: $('lastDetail'),
+  postTime: $('postTime'),
 };
+
+// [3번] 발주시각 표시: "발주 16:00 (4분 30초 후)" — 1초마다 남은시간 갱신.
+function fmtLeft(ms) {
+  if (ms <= 0) return '마감';
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  if (h > 0) return `${h}시간 ${m}분 후`;
+  if (m > 0) return `${m}분 ${sec}초 후`;
+  return `${sec}초 후`;
+}
+function renderPostTime(timerTime, deadline, source) {
+  const el = els.postTime; if (!el) return;
+  if (!deadline) { el.textContent = '자동 감지 대기…'; el.style.color = '#94a3b8'; return; }
+  const left = deadline - Date.now();
+  const tag = source === 'manual' ? ' · 수동' : ' · 자동';
+  el.textContent = `발주 ${timerTime || '--:--'} (${fmtLeft(left)})${tag}`;
+  el.style.color = left <= 0 ? '#f87171' : left <= 60000 ? '#f87171' : left <= 300000 ? '#fbbf24' : '#38d39f';
+}
+let _postTimeTimer = null;
+function startPostTimeTicker() {
+  const paint = () => chrome.storage.local.get(
+    { timerTime: '', timerDeadline: 0, deadlineSource: '' },
+    (v) => renderPostTime(v.timerTime, v.timerDeadline, v.deadlineSource));
+  paint();
+  if (_postTimeTimer) clearInterval(_postTimeTimer);
+  _postTimeTimer = setInterval(paint, 1000);
+}
 
 function fmtTime(ts) {
   if (!ts) return '—';
@@ -445,3 +473,4 @@ chrome.storage.onChanged.addListener((changes, area) => {
 // ── 초기화 ──────────────────────────────────────────────────────────
 loadState();
 checkServer();
+startPostTimeTicker();   // [3번] 발주시각 실시간 표시

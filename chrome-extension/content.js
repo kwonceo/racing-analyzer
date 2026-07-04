@@ -77,6 +77,57 @@
     return [date, track, raceNo].filter(Boolean).join(' ').trim();
   }
 
+  // ── [발주시간 자동 감지] 배당판 본문에서 발주시각(HH:MM) 읽기 ──────────
+  //   한국/사설: "발주 16:00" · "발주시각 16:00" 등, 일본: "発走 16:00" · "締切 15:59".
+  //   키워드 인접 패턴만 채택(본문의 무관한 시각 오탐 방지).
+  const POST_TIME_RES = [
+    /(?:발주\s*(?:시각|시간|예정|예상)?|출발\s*시각?)\s*[:：]?\s*(\d{1,2})\s*[:：]\s*(\d{2})/,
+    /(?:発走\s*(?:時刻|予定)?|締\s*切|締め切り|発売\s*締切)\s*[:：]?\s*(\d{1,2})\s*[:：]\s*(\d{2})/,
+  ];
+  function detectPostTime() {
+    const txt = ((document.body && document.body.innerText) || '').replace(/\s+/g, ' ');
+    for (const re of POST_TIME_RES) {
+      const m = txt.match(re);
+      if (m) {
+        const h = parseInt(m[1], 10), mi = parseInt(m[2], 10);
+        if (h >= 0 && h <= 23 && mi >= 0 && mi <= 59) {
+          return { hh: h, mm: mi, raw: `${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}` };
+        }
+      }
+    }
+    return null;
+  }
+  // HH:MM → 오늘(이미 지났으면 내일) epoch ms. timer.js timeToDeadline 과 동일 규칙.
+  function postTimeToDeadline(hh, mm) {
+    const d = new Date(); d.setHours(hh, mm, 0, 0);
+    let ms = d.getTime();
+    if (ms < Date.now() - 60000) ms += 24 * 3600 * 1000;
+    return ms;
+  }
+  /** 발주시각을 감지해 storage(timerDeadline·timerTime)에 자동 설정 → timer.js 카운트다운 자동 시작.
+   *  같은 경주에서 사용자가 수동 입력했으면 존중하고, 경주가 바뀌면 자동 감지가 다시 우선한다. */
+  function autoDetectPostTime(raceKey) {
+    const pt = detectPostTime();
+    if (!pt) return Promise.resolve(null);
+    const ms = postTimeToDeadline(pt.hh, pt.mm);
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.get({ timerDeadline: 0, deadlineSource: '', autoDeadlineRaceKey: '' }, (v) => {
+          const raceChanged = !!(raceKey && v.autoDeadlineRaceKey && v.autoDeadlineRaceKey !== raceKey);
+          if (v.deadlineSource === 'manual' && !raceChanged) { resolve(null); return; }  // 이 경주는 수동값 존중
+          const diff = Math.abs((v.timerDeadline || 0) - ms);
+          if (diff < 30000 && v.autoDeadlineRaceKey === raceKey) { resolve(pt); return; } // 이미 동일 → 재기록 생략
+          chrome.storage.local.set({
+            timerDeadline: ms, timerTime: pt.raw, deadlineSource: 'auto', autoDeadlineRaceKey: raceKey || '',
+          }, () => {
+            console.log(`[발주감지] 발주시각 ${pt.raw} 자동 설정${raceKey ? ' (raceKey=' + raceKey + ')' : ''}`);
+            resolve(pt);
+          });
+        });
+      } catch (_) { resolve(null); }
+    });
+  }
+
   // ── 1+2+ : 마번/말이름 + 단승 + 복승(place) 추출 (単勝・複勝 표) ──────
   //   실측 구조(class="odd_popular_table_02"):
   //     헤더: 枠 | 馬番 | 馬名 | 単勝オッズ | 複勝オッズ(3着払い) | [複勝上限] | 性齢 | …
@@ -1321,6 +1372,8 @@
 
   // 사이트별 3종 수집 분기: keiba=별도URL fetch / 그 외=탭 클릭
   async function collectTriple(reason) {
+    // [발주감지] 수집 때마다 발주시각을 배당판에서 자동 읽어 타이머에 반영(수동 입력 불필요)
+    try { await autoDetectPostTime(extractRaceKey()); } catch (_) { /* */ }
     return detectSite() === 'keiba' ? collectTripleKeiba(reason) : collectTripleByTabs(reason);
   }
 
@@ -1595,6 +1648,8 @@
     await new Promise((r) => chrome.storage.local.set({ raceKey: rk }, r));
     console.log(`[경주감지] 현재 경주 자동 감지 → raceKey 업데이트: "${rk}" (이전 "${cur || ''}")`);
     setTripleProgress(`🆕 경주 자동 감지: ${rk} — 수집합니다…`, false);
+    // [발주감지] 경주가 바뀌면 발주시각도 새 경주 기준으로 자동 갱신(수동값보다 우선)
+    try { await autoDetectPostTime(rk); } catch (_) { /* */ }
     if (!_autoRunning) { collectTriple('race-change').catch(() => { /* */ }); }   // 서버에 자동 전송
   }
   function startRaceWatch() {

@@ -124,7 +124,8 @@
 
   // ── 입력 → storage 저장 (모든 탭 공유) ──
   elTime.addEventListener('change', () => {
-    chrome.storage.local.set({ timerTime: elTime.value, timerDeadline: timeToDeadline(elTime.value) });
+    // [발주감지] 사용자가 직접 입력하면 'manual'로 표시 → content.js 자동 감지가 이 경주에선 덮어쓰지 않음
+    chrome.storage.local.set({ timerTime: elTime.value, timerDeadline: timeToDeadline(elTime.value), deadlineSource: 'manual' });
   });
   elLabel.addEventListener('change', () => chrome.storage.local.set({ timerLabel: elLabel.value }));
   $('kbTimerClose').addEventListener('click', () => bar.remove());
