@@ -599,7 +599,8 @@
     const sp = new URLSearchParams(location.search);
     const q = ['k_raceDate', 'k_babaCode', 'k_raceNo']
       .filter((k) => sp.get(k)).map((k) => `${k}=${encodeURIComponent(sp.get(k))}`).join('&');
-    const { raceKey: override } = await getSettings();
+    const { raceKey: override, market } = await getSettings();
+    const isKorea = market === 'korea';   // [2번] 한국경마: 삼복승 수집 안 함(복승만). 일본모드는 기존대로 3종 수집.
     const raceKey = (override && override.trim()) || extractRaceKey();
     const clean = (arr, cap) => arr
       .filter((c) => c.odds > 0)
@@ -607,8 +608,11 @@
       .sort((a, b) => a.odds - b.odds)
       .slice(0, cap);
     const payload = { raceKey, quinella: [], exacta: [], trio: [], capturedAt: new Date().toISOString(), source: location.href };
+    // [2번] 한국모드면 삼복승(trio) 스텝을 완전히 제외 → 탭 fetch 자체를 시도하지 않는다.
+    const steps = isKorea ? TRIPLE_STEPS.filter((s) => s.key !== 'trio') : TRIPLE_STEPS;
+    if (isKorea) console.log('[배당수집] 한국경마 모드 → 삼복승 수집 생략(복승·쌍승만).');
     try {
-      for (const st of TRIPLE_STEPS) {
+      for (const st of steps) {
         setTripleProgress(`${st.label} 수집중…`);        // "복승 수집중…" → "쌍승 수집중…" → …
         const doc = await fetchOddsDoc(st.oper, q);
         payload[st.key] = clean(parseRankingCombos(doc).filter((c) => c.combo.length === st.len), st.cap);
@@ -630,7 +634,7 @@
         await chrome.runtime.sendMessage({ type: 'POST_JAPAN', reason, payload: { raceKey, horses: starters, deadline: timerDeadline || null, source: location.href } });
       }
       setTripleProgress(res && res.ok
-        ? `3종 수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두`
+        ? `수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}${isKorea ? '' : `·삼복승 ${payload.trio.length}`}·전적 ${starters.length}두`
         : `❌ 전송 실패: ${(res && res.error) || ''}`, true);
       return res || { ok: false, error: 'background 응답 없음' };
     } catch (e) {
