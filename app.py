@@ -1292,6 +1292,106 @@ def _form_adj(total):
     return 20
 
 
+# ── [유력마/제거마 공식 개선] 확률·기대값·배당신뢰도·기수 복승률 ──────────
+JOCKEYS_JSON = os.path.join(os.path.dirname(__file__), "static", "data", "jockeys.json")
+_JOCKEYS_CACHE = {"mtime": None, "byName": {}}
+
+
+def _jockey_place_rate(name):
+    """기수 복승권율(%) — static/data/jockeys.json(KRA 실데이터, mtime 캐시). 없으면 None."""
+    if not name:
+        return None
+    try:
+        mt = os.path.getmtime(JOCKEYS_JSON)
+    except OSError:
+        return None
+    if _JOCKEYS_CACHE["mtime"] != mt:
+        try:
+            data = json.load(open(JOCKEYS_JSON, encoding="utf-8"))
+            _JOCKEYS_CACHE["byName"] = {j.get("name"): j for j in data.get("jockeys", [])}
+            _JOCKEYS_CACHE["mtime"] = mt
+        except Exception:
+            return None
+    j = _JOCKEYS_CACHE["byName"].get(name.strip())
+    return (j or {}).get("placeRate")
+
+
+def _placings_list(placings):
+    return [int(p) for p in (placings or [])[:5] if isinstance(p, (int, float)) and p > 0]
+
+
+def _avg_placing(placings):
+    ps = _placings_list(placings)
+    return round(sum(ps) / len(ps), 1) if ps else None
+
+
+def _prob_ev(o, placings):
+    """[3번] 시장확률=1/배당×0.75 · 전적확률=최근입상수/경주수 · 통합=시장0.6+전적0.4 · 기대값=통합×배당-1."""
+    market = (1.0 / o * 0.75) if (o and o > 0) else 0.0
+    ps = _placings_list(placings)
+    form = (sum(1 for p in ps if p <= 3) / len(ps)) if ps else 0.0
+    combined = market * 0.6 + form * 0.4
+    ev = (combined * o - 1) if (o and o > 0) else None
+    return (round(market * 100, 1), round(form * 100, 1), round(combined * 100, 1),
+            (round(ev * 100, 1) if ev is not None else None))
+
+
+def _confidence(ftotal, o):
+    """[1번] 배당신뢰도(-10~+30): 전적우수+배당낮음→+30, 전적불량+배당낮음→-10(이변의심), 배당낮음 단독→0."""
+    if o is None or o >= 30:      # 배당 낮음(<30배) 일 때만 신뢰도 판정
+        return 0
+    if ftotal is None:
+        return 0
+    if ftotal >= 61:
+        return 30
+    if ftotal <= 40:
+        return -10
+    return 0
+
+
+def _fav_score(ftotal, o, jk_rate):
+    """[1번] 유력마 점수 = 전적40% + 배당신뢰도30% + 기수20% + 조건적성10% (각 0~100)."""
+    form_sub = ftotal if ftotal is not None else 40           # 전적 미수집 → 중립 40
+    low = (o is not None and o < 30)
+    if low and ftotal is not None and ftotal >= 61:
+        conf_sub = 90                                          # 전적우수+배당낮음 = 신뢰 높음
+    elif low and ftotal is not None and ftotal <= 40:
+        conf_sub = 20                                          # 전적불량+배당낮음 = 이변 의심
+    elif low:
+        conf_sub = 55
+    else:
+        conf_sub = 40                                          # 배당 높음 = 시장 지지 약함
+    jk_sub = jk_rate if jk_rate is not None else 40            # 기수 복승률(미상 40)
+    apt_sub = 50                                               # 조건적성(거리/코스 데이터 부족 → 중립)
+    return round(form_sub * 0.4 + conf_sub * 0.3 + jk_sub * 0.2 + apt_sub * 0.1, 1)
+
+
+def _elim_score(o, avg_place, jk_rate, has_drop30, in_top_exa):
+    """[2번] 제거 점수(기본 100에서 감점 + 이변 보류 가점). 낮을수록 제거 대상."""
+    score = 100
+    reasons = []
+    if o is None or o >= 150:
+        score -= 40
+        reasons.append("배당 150배+ -40")
+    elif o >= 80:
+        score -= 20
+        reasons.append("배당 80~149 -20")
+    if avg_place is not None and avg_place >= 5:
+        score -= 30
+        reasons.append(f"최근평균 {avg_place}착 -30")
+    if jk_rate is not None and jk_rate < 10:
+        score -= 10
+        reasons.append(f"기수 복승률 {jk_rate}% -10")
+    # (현재 거리 경험 없음 -15: 거리 이력 데이터 확보 시 반영 — 현재는 미적용)
+    if has_drop30:
+        score += 30
+        reasons.append("배당 급락 30%+ +30(제거 보류)")
+    if in_top_exa:
+        score += 20
+        reasons.append("쌍승 상위 +20(제거 보류)")
+    return max(0, min(130, score)), reasons
+
+
 def _elimination(curQ, curD, exa, drops, form, trio_map=None):
     """배당+전적 복합 제거 판정. 반환: {horses:[...], counts, autoBets}."""
     trio_map = trio_map or {}
@@ -1327,50 +1427,65 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None):
         o = repr_odds.get(no)
         fh = form_by_no.get(no)
         ftotal = fh.get("totalScore") if fh else None
-        os_ = _odds_score(o)
-        fadj = _form_adj(ftotal)
-        total = os_ + fadj
-        # 기본 판정
-        if total <= 30:
+        placings = (fh or {}).get("recentPlacings") or []
+        avg_place = _avg_placing(placings)
+        jk_rate = _jockey_place_rate((fh or {}).get("jockey"))
+        os_ = _odds_score(o)           # (보존) 기존 배당점수
+        fadj = _form_adj(ftotal)       # (보존) 기존 전적보정
+        has_drop30 = no in drop30
+        in_top_exa = no in top_exa
+
+        # [2번] 제거 점수(신 공식) → verdict 구동
+        total, elim_reasons = _elim_score(o, avg_place, jk_rate, has_drop30, in_top_exa)
+        if total < 30:
             verdict, label, keep = "🔴", "확실 제거", False
-        elif total <= 50:
+        elif total < 50:
             verdict, label, keep = "🟠", "제거 권장", False
-        elif total <= 70:
+        elif total < 70:
             verdict, label, keep = "🟡", "관찰", True
         else:
             verdict, label, keep = "🟢", "유력 후보", True
+
+        # [1번] 유력마 점수 + 배당신뢰도 · [3번] 확률/기대값
+        fav = _fav_score(ftotal, o, jk_rate)
+        conf = _confidence(ftotal, o)
+        mkt_p, form_p, comb_p, ev = _prob_ev(o, placings)
+
         o_txt = ('%g배' % o) if o is not None else '미수집'
-        if ftotal is None:  # 전적 미수집 → 100점 기본값이 아니라 '배당 기준' 판단임을 명시
-            reason = f"배당 {o_txt}({os_}) · 전적 미수집 → 배당만으로 {total}"
-        else:
-            reason = f"배당 {o_txt}({os_}) + 전적 {ftotal}({'+' if fadj > 0 else ''}{fadj}) = {total}"
-        # 이변 신호 → 제거 취소
+        reason = f"배당 {o_txt} · " + (" / ".join(elim_reasons) if elim_reasons else "감점 없음") + f" = {total}점"
+
+        # 이변 신호로 제거 보류(점수엔 이미 가점됨) 표시
         override, ov_reasons = False, []
-        if not keep:
-            if no in drop30:
-                override = True
+        if not keep and (has_drop30 or in_top_exa):
+            override = True
+            if has_drop30:
                 ov_reasons.append(f"배당 급락 {drop30[no]}%")
-            if no in top_exa:
-                override = True
+            if in_top_exa:
                 ov_reasons.append("쌍승 상위10")
-        # 후보 세부 등급: ⭐강력유력(배당낮음+전적우수+이상감지) / ★유력(배당낮음+전적우수) / △관찰
+
+        # [5번] 세부 등급: 전적/배당/기수 중 몇 가지가 우수한가
+        good_form = (ftotal is not None and ftotal >= 61)
+        low_odds = (o is not None and o < 30)
+        good_jockey = (jk_rate is not None and jk_rate >= 30)
+        strong_cnt = sum([good_form, low_odds, good_jockey])
+        anomaly_sig = has_drop30 or in_top_exa or bool(fh and fh.get("anomaly"))
         tier = None
-        anomaly_sig = (no in drop30) or (no in top_exa) or bool(fh and fh.get("anomaly"))
-        low_odds = os_ >= 100          # 30배 미만 = 시장 강한 지지
-        good_form = fadj >= 10         # 전적 61점 이상
         if keep:
-            if low_odds and good_form and anomaly_sig:
-                tier = "⭐"
-            elif low_odds and good_form:
-                tier = "★"
+            if strong_cnt >= 3:
+                tier = "⭐"       # 강력유력: 전적+배당+기수 모두 우수
+            elif strong_cnt == 2:
+                tier = "★"        # 유력: 2가지 이상 우수
             else:
-                tier = "△"
+                tier = "△"        # 관찰: 1가지 이하
         horses.append({
             "no": no, "name": (fh or {}).get("name", ""),
             "oddsRepr": o, "oddsScore": os_,
             "formScore": ftotal, "formAdj": fadj, "total": total,
+            "avgPlacing": avg_place, "jockeyPlaceRate": jk_rate,
+            "favScore": fav, "confidence": conf,
+            "marketProb": mkt_p, "formProb": form_p, "combinedProb": comb_p, "ev": ev,
             "verdict": verdict, "verdictLabel": label, "keep": keep,
-            "tier": tier, "override": override,
+            "tier": tier, "override": override, "strongCount": strong_cnt,
             "overrideReason": " · ".join(ov_reasons), "anomalySig": anomaly_sig,
             "reason": reason,
         })

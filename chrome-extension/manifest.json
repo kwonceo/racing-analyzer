@@ -1,9 +1,16 @@
 {
   "manifest_version": 3,
   "name": "경마 배당 자동수집기 (keiba.go.jp)",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "발주시각 기반 백그라운드 자동수집(팝업/탭 무관·chrome.alarms 30초 하트비트)·마감임박 이상감지 Chrome 알림. keiba.go.jp·사설 배당판에서 복승/쌍승/삼복승 배당과 결과를 사이트 자동감지로 수집·전송하고, 모든 탭 상단에 경주 카운트다운 타이머를 표시합니다. 한국=복승만·일본=복승/쌍승/삼복승(단승 제거). 경기 마감 감지 시 자동수집 중단.",
-  "permissions": ["storage", "activeTab", "scripting", "alarms", "tabs", "notifications"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "alarms",
+    "tabs",
+    "notifications"
+  ],
   "host_permissions": [
     "https://www.keiba.go.jp/*",
     "*://asyukk34.qwqwd25.net/*",
@@ -16,13 +23,24 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.keiba.go.jp/*", "*://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable*", "*://asyukk34.qwqwd25.net/*", "*://*.qwqwd25.net/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://www.keiba.go.jp/*",
+        "*://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable*",
+        "*://asyukk34.qwqwd25.net/*",
+        "*://*.qwqwd25.net/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["<all_urls>"],
-      "js": ["timer.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "timer.js"
+      ],
       "run_at": "document_idle",
       "all_frames": false
     }

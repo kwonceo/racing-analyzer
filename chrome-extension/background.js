@@ -524,9 +524,13 @@ async function autoTick(reason) {
     return;
   }
 
+  // [4번] T-3분 이상감지 자동 시작 — 수집 간격 10초로 단축 + 1회 안내
+  if (left != null && left <= 180000 && left > 120000 && !(await _stageFiredOnce(cfg.timerDeadline, 't3'))) {
+    _notify('t3', '🔔 마감 3분 · 이상감지 집중 감시 시작', '수집 간격 10초로 단축합니다.', false);
+  }
   // 수집(due 시각에만 실제 수집 — fine 5초 점검이지만 간격은 지킴)
   const baseMs = Math.max(10, Number(cfg.intervalSec) || 30) * 1000;
-  const intervalMs = (left != null && left <= 180000) ? 15000 : baseMs;   // T-3분 → 15초
+  const intervalMs = (left != null && left <= 180000) ? 10000 : baseMs;   // [4번] T-3분 → 10초
   if ((reason === 'start' || now >= _nextDueAt) && !_collecting) {
     _collecting = true;
     let r = null;
@@ -549,7 +553,13 @@ async function autoTick(reason) {
         `${drop || '급락 신호 확인'}\n최종 베팅 확정: ${bet || '데이터 부족'}`, true);
     }
   } else {
-    // [지방/기존] T-1분: 이상감지 강제 + 알림
+    // [4번] T-2분: 강제 이상감지 실행(지방/한국)
+    if (left != null && left <= 120000 && left > 60000 && !(await _stageFiredOnce(cfg.timerDeadline, 't2'))) {
+      const a = await _forceAnalyze();
+      _notify('t2', '🚨 마감 2분전 이상감지 완료',
+        `${_topDrop(a) || '급락 신호 확인'}\n베팅 후보: ${_mainBet(a) || '데이터 부족'}`, true);
+    }
+    // [지방/기존] T-1분: 이상감지 강제 + 최종 베팅 확정
     if (left != null && left <= 60000 && !(await _stageFiredOnce(cfg.timerDeadline, 't1'))) {
       const a = await _forceAnalyze();
       const drop = _topDrop(a), bet = _mainBet(a), trio = _trioBet(a);

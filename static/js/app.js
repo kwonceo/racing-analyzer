@@ -2049,17 +2049,26 @@
     const oddsTxt = (h) => (h.oddsRepr != null ? h.oddsRepr + '배' : '미수집');
     const tierIcon = (h) => (h.override ? '⚠️' : (h.tier || h.verdict));
     const tierColor = (h) => (h.override ? '#f59e0b' : h.verdict === '🟢' ? '#38d39f' : '#ffd24f');
+    const TIER_LABEL = { '⭐': '강력유력', '★': '유력', '△': '관찰' };
+    const pct = (v) => (v != null ? v + '%' : '-');
+    // [3번] 각 말별 확률/기대값 라인
+    const probLine = (h) => `<span class="hint" style="font-size:11px;display:block;margin-top:2px">시장 ${pct(h.marketProb)} · 전적 ${pct(h.formProb)} · 통합 <b>${pct(h.combinedProb)}</b>${h.ev != null ? ` · 기대값 <b style="color:${h.ev >= 0 ? '#38d39f' : '#ff6b6b'}">${h.ev >= 0 ? '+' : ''}${h.ev}%</b>` : ''}</span>`;
     const candRows = cand.map((h) => `
-      <div class="elim-row" data-no="${h.no}" title="클릭 → 제거로 전환" style="cursor:pointer;display:flex;gap:8px;align-items:center;padding:5px 8px;border-left:3px solid ${tierColor(h)};margin:3px 0;background:rgba(255,255,255,.03);border-radius:4px">
-        <b style="font-size:15px;min-width:22px">${tierIcon(h)}</b>
-        <b style="min-width:34px;color:#4ea1ff">${h.no}번</b>
-        <span>${esc(h.name || '')}</span>
-        <span class="hint" style="margin-left:auto;text-align:right">배당 ${oddsTxt(h)} · 전적 ${h.formScore != null ? h.formScore : '<span style="color:#f59e0b">미수집</span>'} · 합산 ${h.total}${T.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}${h.override ? `<br><span style="color:#f59e0b">⚠️ 제거대상이나 이변(${esc(h.overrideReason)})</span>` : ''}</span>
+      <div class="elim-row" data-no="${h.no}" title="클릭 → 제거로 전환" style="cursor:pointer;padding:5px 8px;border-left:3px solid ${tierColor(h)};margin:3px 0;background:rgba(255,255,255,.03);border-radius:4px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <b style="font-size:15px;min-width:22px">${tierIcon(h)}</b>
+          <b style="min-width:34px;color:#4ea1ff">${h.no}번</b>
+          <span>${esc(h.name || '')}</span>
+          ${h.tier ? `<span class="hint" style="color:${tierColor(h)}">${TIER_LABEL[h.tier] || ''}</span>` : ''}
+          <span class="hint" style="margin-left:auto;text-align:right">배당 ${oddsTxt(h)} · 전적 ${h.formScore != null ? h.formScore : '<span style="color:#f59e0b">미수집</span>'} · 유력 ${h.favScore != null ? h.favScore : '-'} · 제거점수 ${h.total}${T.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}</span>
+        </div>
+        ${probLine(h)}
+        ${h.override ? `<div style="color:#f59e0b;font-size:11px">⚠️ 제거대상이나 이변(${esc(h.overrideReason)})</div>` : ''}
       </div>`).join('');
     const elimRows = elim.map((h) => `
       <div class="elim-row" data-no="${h.no}" title="클릭 → 후보로 전환" style="cursor:pointer;padding:5px 8px;border-left:3px solid ${h.verdict === '🔴' ? '#ef4444' : '#ff9f43'};margin:3px 0;border-radius:4px;opacity:.85">
-        <b>${h.verdict} ${h.no}번</b> ${esc(h.name || '')}
-        <span class="hint">· ${esc(h.reason)}${T.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}</span>
+        <div><b>${h.verdict} ${h.no}번</b> ${esc(h.name || '')} <span class="hint">· ${esc(h.reason)}${T.has(h.no) ? ' <span style="color:#4ea1ff">(수동)</span>' : ''}</span></div>
+        ${probLine(h)}
       </div>`).join('');
     const ab = [];
     if (cand.length >= 2) ab.push('복승 ' + [cand[0].no, cand[1].no].sort((x, y) => x - y).join('+'));
@@ -2071,7 +2080,7 @@
         ? `<div class="hint" style="margin:2px 0 6px;color:#f59e0b">⚠️ 일부 말만 전적 있음(${e.formCount}/${e.horses.length}두) — 나머지는 배당 기준</div>` : '');
     return `<div id="elimPanel" style="margin:8px 0;border:1px solid var(--border);border-radius:8px;padding:8px">
       <div class="matrix-title" style="font-size:14px">🧮 제거 분석 <span class="hint" style="font-weight:400">출전 ${e.horses.length}두 → 후보 ${cand.length}두 압축</span></div>
-      <div class="hint" style="margin:2px 0 6px">말 클릭 시 제거↔후보 전환 · 배당점수+전적보정 합산 (71+🟢 / 51~70🟡 / 31~50🟠 / ~30🔴)</div>
+      <div class="hint" style="margin:2px 0 6px">말 클릭 시 제거↔후보 전환 · 제거점수(100기준 감점, 급락/쌍승 시 +가점) (70+🟢후보 / 50~69🟡관찰 / 30~49🟠제거권장 / ~29🔴확실제거) · ⭐강력유력(전적+배당+기수 모두우수) ★유력(2개+) △관찰(1개)</div>
       ${formWarn}
       <div style="font-weight:700;color:#38d39f;margin-top:4px">🟢 후보 ${cand.length}두</div>
       ${candRows || '<div class="hint">후보 없음</div>'}
