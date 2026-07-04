@@ -624,6 +624,25 @@
     initBulkResult();   // [일괄 결과 등록]
   }
 
+  /** 확장(timer.js 릴레이)에 결과 URL fetch를 요청하고 HTML을 받는다. 6초 내 응답 없으면 실패. */
+  function fetchResultViaExtension(url) {
+    return new Promise((resolve) => {
+      const reqId = 'br_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      let done = false;
+      const onMsg = (e) => {
+        if (e.source !== window) return;
+        const d = e.data;
+        if (!d || d.source !== 'bmed-timer' || d.type !== 'FETCH_RESULT_HTML_ACK' || d.reqId !== reqId) return;
+        done = true; window.removeEventListener('message', onMsg);
+        resolve({ ok: !!d.ok, html: d.html || '', error: d.error || '' });
+      };
+      window.addEventListener('message', onMsg);
+      try { window.postMessage({ source: 'bmed-analyzer', type: 'FETCH_RESULT_HTML', url, reqId }, '*'); }
+      catch (ex) { window.removeEventListener('message', onMsg); resolve({ ok: false, error: String(ex) }); return; }
+      setTimeout(() => { if (!done) { window.removeEventListener('message', onMsg); resolve({ ok: false, error: '확장 응답 시간초과(확장 미설치/미로그인?)' }); } }, 6000);
+    });
+  }
+
   /** [일괄 결과 등록] 결과 페이지 URL/HTML → 서버 일괄 파싱·매칭·학습 → 요약 표시 */
   function initBulkResult() {
     const toggle = $('#bulkResultToggle'); if (!toggle) return;
@@ -653,9 +672,19 @@
       // 통계·히스토리 자동 갱신
       try { loadLearningStats(); loadHistoryList(); } catch (_) { /* */ }
     };
-    { const b = $('#bulkResultLoad'); if (b) b.addEventListener('click', () => {
+    { const b = $('#bulkResultLoad'); if (b) b.addEventListener('click', async () => {
       const url = ($('#bulkResultUrl').value || '').trim();
-      if (!url) { $('#bulkResultSummary').innerHTML = '<p class="err">URL을 입력하세요.</p>'; return; }
+      const box = $('#bulkResultSummary');
+      if (!url) { box.innerHTML = '<p class="err">URL을 입력하세요.</p>'; return; }
+      // [확장 경유] 로그인 세션을 가진 확장에 fetch 요청 → HTML 받으면 서버로 파싱 전송.
+      box.innerHTML = '<p class="hint">⏳ 확장(로그인 세션)으로 결과 페이지 가져오는 중…</p>';
+      const ext = await fetchResultViaExtension(url);
+      if (ext && ext.ok && ext.html) {
+        run({ html: ext.html });
+        return;
+      }
+      // [폴백] 확장 미설치/실패 → 서버 직접 fetch 시도(공개 페이지만 성공)
+      box.innerHTML = `<p class="hint">확장 경유 실패(${esc((ext && ext.error) || '응답 없음')}) → 서버 직접 로드 시도…</p>`;
       run({ url });
     }); }
     { const b = $('#bulkResultParse'); if (b) b.addEventListener('click', () => {

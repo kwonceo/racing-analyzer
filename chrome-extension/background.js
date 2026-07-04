@@ -203,6 +203,20 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true; // async
   }
 
+  // [일괄 결과 등록] 결과 페이지를 로그인 세션(쿠키)으로 가져와 HTML 반환.
+  //   서버(127.0.0.1)는 asyukk 로그인 세션이 없어 직접 못 여는 URL을, host_permissions +
+  //   credentials:'include' 를 가진 확장이 대신 fetch 한다. → 분석기 페이지가 서버로 전달해 파싱.
+  if (msg?.type === 'FETCH_RESULT_HTML') {
+    fetch(msg.url, { credentials: 'include' })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      })
+      .then((html) => sendResponse({ ok: true, html, finalUrl: msg.url }))
+      .catch((err) => sendResponse({ ok: false, error: String(err.message || err) }));
+    return true; // async
+  }
+
   // [1번] 결과 자동수집 타이머 예약/취소 (chrome.alarms)
   if (msg?.type === 'SCHEDULE_RESULT_TIMER') {
     scheduleResultTimer(msg.raceKey, msg.deadline).then(sendResponse);

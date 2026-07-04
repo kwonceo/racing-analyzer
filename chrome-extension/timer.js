@@ -176,6 +176,22 @@
       try { chrome.runtime.sendMessage({ type: 'OPEN_ANALYZER', force: true }); } catch (_) { /* */ }
       try { window.postMessage({ source: 'bmed-timer', type: 'OPEN_ANALYZER_ACK' }, '*'); } catch (_) { /* */ }
     }
+    // [일괄 결과 등록] 분석기 페이지가 요청한 URL을 확장(로그인 세션)이 fetch → HTML을 되돌려준다.
+    if (d.type === 'FETCH_RESULT_HTML' && d.url) {
+      const reqId = d.reqId;
+      try {
+        chrome.runtime.sendMessage({ type: 'FETCH_RESULT_HTML', url: d.url }, (res) => {
+          const err = chrome.runtime.lastError;
+          window.postMessage({
+            source: 'bmed-timer', type: 'FETCH_RESULT_HTML_ACK', reqId,
+            ok: !!(res && res.ok), html: (res && res.html) || '',
+            error: err ? err.message : (res && res.error) || '',
+          }, '*');
+        });
+      } catch (ex) {
+        window.postMessage({ source: 'bmed-timer', type: 'FETCH_RESULT_HTML_ACK', reqId, ok: false, error: String(ex) }, '*');
+      }
+    }
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
