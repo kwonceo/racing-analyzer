@@ -708,13 +708,39 @@
     }
     if (label) label.textContent = rk;
     const changed = rk !== _rrLastRk;
-    _rrLastRk = rk;
-    if (changed && status) status.textContent = '🆕 새 경주';
-    else if (status) status.textContent = manual ? '✅ 최신입니다' : '';
-    if (changed || manual) {
-      notify(`🔄 업데이트: ${rk}`, true);            // 예: "🔄 업데이트: 제주 3경주"
-      refreshActiveView(rk);
+
+    if (manual) {
+      // [수동 새로고침] 완전 갱신: 화면 업데이트 + 배당 타임라인 초기화 + 성공 메시지
+      _rrLastRk = rk;
+      resetOddsTimeline();                            // [4번] 배당 타임라인 초기화(새 경주 시작)
+      refreshActiveView(rk);                          // [3번] 분석기 화면 자동 업데이트
+      if (status) status.textContent = '✅ 업데이트됨';
+      notify(`✅ 경주 정보 업데이트: ${rk}`, true);    // [5번] 예: "✅ 경주 정보 업데이트: 제주 3경주"
+      return;
     }
+    // [자동 감지·30초] 경주가 바뀌면 자동 전환하지 않고 새로고침을 유도하는 알림만 표시
+    if (changed && _rrLastRk != null) {
+      if (status) status.textContent = '🔔 새 경주 감지 — 새로고침 클릭';
+      notify(`🔔 새 경주 감지: ${rk} · [🔄 경주 새로고침] 버튼을 클릭하세요`, true);
+    }
+    _rrLastRk = rk;
+  }
+
+  /** [4번] 배당 변동 타임라인 초기화 — 새 경주 시작 시 이전 경주의 누적 변동을 비운다. */
+  function resetOddsTimeline() {
+    // 일본 타임라인
+    state.jpTimeline = [];
+    state.jpOddsPrev = new Set();
+    { const el = document.getElementById('jpTimeline'); if (el) el.remove(); }
+    // 한국 타임라인(현재 활성 경주)
+    try {
+      const t = _koreaOddsTitle;
+      if (t) {
+        if (state.koreaTimeline) state.koreaTimeline[t] = [];
+        if (state.koreaOddsPrev) state.koreaOddsPrev[t] = new Set();
+      }
+    } catch (_) { /* */ }
+    { const el = document.getElementById('koreaTimeline'); if (el) el.remove(); }
   }
 
   /** 활성 탭에 맞춰 화면 갱신: 일본=실시간 폴 / 한국=칩 자동 선택 */
