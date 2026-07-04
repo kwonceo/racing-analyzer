@@ -2978,14 +2978,24 @@ def _parse_result_rows(html):
         return []
     rows = p.rows
 
+    def _fw2ascii(s):
+        # 전각숫자(０-９)·전각콜론 → 반각(중앙 JRA 결과표 대응)
+        return (s or "").translate({0xFF10 + i: 0x30 + i for i in range(10)}).replace("：", ":")
+
     def ns(s):
-        return re.sub(r"\s+", "", s or "")
+        return re.sub(r"\s+", "", _fw2ascii(s))
     hi = None
     for i, r in enumerate(rows):
         joined = "".join(ns(c) for c in r)
-        if re.search(r"경주지역|경마장|지역", joined) and re.search(r"라운드|회차|경주", joined):
+        if re.search(r"경주지역|경마장|지역|開催|競馬場", joined) and re.search(r"라운드|회차|경주|着|着順|レース", joined):
             hi = i
             break
+    if hi is None:  # 완화 매칭 폴백
+        for i, r in enumerate(rows):
+            joined = "".join(ns(c) for c in r)
+            if re.search(r"경주지역|라운드|着順|レース", joined):
+                hi = i
+                break
     if hi is None:
         return []
     heads = [ns(c) for c in rows[hi]]
@@ -2995,16 +3005,18 @@ def _parse_result_rows(html):
             if re.search(pat, h):
                 return k
         return -1
-    iArea = idx(r"경주지역|경마장|지역")
-    iRound = idx(r"라운드|회차|경주번호|^경주$|^R$")
-    i1, i2, i3 = idx(r"1착|1위"), idx(r"2착|2위"), idx(r"3착|3위")
-    iQ, iT = idx(r"복승"), idx(r"삼복승|삼복")
+    iArea = idx(r"경주지역|경마장|지역|開催|競馬場|レース場")
+    iRound = idx(r"라운드|회차|경주번호|^경주$|^R$|レース番号|^レース$")
+    i1, i2, i3 = idx(r"1착|1위|1着"), idx(r"2착|2위|2着"), idx(r"3착|3위|3着")
+    iQ, iT = idx(r"복승|複勝"), idx(r"삼복승|삼복|三連複|3連複")
+    if i1 < 0 and i2 < 0 and i3 < 0:  # 착순 컬럼이 전혀 없으면 결과표 아님
+        return []
 
     def cell(r, k):
-        return r[k] if (0 <= k < len(r)) else ""
+        return _fw2ascii(r[k]) if (0 <= k < len(r)) else ""
 
     def firstnum(s):
-        m = re.search(r"\d+", s or "")
+        m = re.search(r"\d+", _fw2ascii(s))
         return int(m.group()) if m else None
     out = []
     for r in rows[hi + 1:]:

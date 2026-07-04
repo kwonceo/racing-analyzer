@@ -554,32 +554,49 @@
     return null;
   }
 
+  // 전각숫자(０-９)·전각콜론 → 반각 정규화(중앙 JRA 결과표 대응)
+  const fw2ascii = (s) => String(s == null ? '' : s)
+    .replace(/[０-９]/g, (d) => String.fromCharCode(d.charCodeAt(0) - 0xfee0))
+    .replace(/：/g, ':');
+
   function _parseResultDoc(doc) {
-    const rows = [...doc.querySelectorAll('table tr')];
-    const norm = (r) => (r.innerText || r.textContent || '').replace(/\s+/g, '');
-    const headerRow = rows.find((r) => /경주지역|경마장/.test(norm(r)) && /라운드|회차|경주/.test(norm(r)))
-      || rows.find((r) => /경주지역|라운드/.test(norm(r)));
-    if (!headerRow) return [];
-    const heads = [...headerRow.querySelectorAll('th,td')].map((c) => (c.textContent || '').replace(/\s+/g, ''));
-    const idx = (re) => heads.findIndex((h) => re.test(h));
-    const iArea = idx(/경주지역|경마장|지역/);
-    const iRound = idx(/라운드|회차|경주(?!지역)|^R$|^경주번호/);   // '경주지역'(지역열)과 혼동 방지
-    const i1 = idx(/1착|1위|1등/), i2 = idx(/2착|2위/), i3 = idx(/3착|3위/);
-    const iQ = idx(/복승/), iT = idx(/삼복승|삼복/);
-    const out = [];
-    for (const r of rows.slice(rows.indexOf(headerRow) + 1)) {
-      const cells = [...r.querySelectorAll('th,td')].map((c) => (c.textContent || '').trim());
-      if (cells.length < 3) continue;
-      const area = iArea >= 0 ? cells[iArea] : '';
-      const round = iRound >= 0 ? cells[iRound] : '';
-      if (!area && !round) continue;
-      out.push({
-        area, round,
-        no1: toNum(cells[i1]), no2: toNum(cells[i2]), no3: toNum(cells[i3]),
-        qOdds: iQ >= 0 ? toNum(cells[iQ]) : null, tOdds: iT >= 0 ? toNum(cells[iT]) : null,
-      });
+    try {
+      const rows = [...doc.querySelectorAll('table tr')];
+      const norm = (r) => fw2ascii(r.innerText || r.textContent || '').replace(/\s+/g, '');
+      // 헤더 후보: 지역/경마장 + 라운드/경주/着 계열이 함께 있는 행 → 실패 시 완화 매칭
+      const headerRow =
+        rows.find((r) => /경주지역|경마장|開催|レース場/.test(norm(r)) && /라운드|회차|경주|着|着順|レース番号/.test(norm(r)))
+        || rows.find((r) => /경주지역|라운드|着順|レース/.test(norm(r)));
+      if (!headerRow) return [];
+      const heads = [...headerRow.querySelectorAll('th,td')].map((c) => fw2ascii(c.textContent || '').replace(/\s+/g, ''));
+      const idx = (re) => heads.findIndex((h) => re.test(h));
+      const iArea = idx(/경주지역|경마장|지역|開催|レース場|競馬場/);
+      const iRound = idx(/라운드|회차|경주(?!지역)|^R$|^경주번호|レース番号|^レース$/);   // '경주지역'(지역열)과 혼동 방지
+      // 착순 컬럼: 한국(1착/1위/1등) + 중앙 일본(1着/１着) 모두 대응
+      const i1 = idx(/1착|1위|1등|1着/), i2 = idx(/2착|2위|2着/), i3 = idx(/3착|3위|3着/);
+      const iQ = idx(/복승|複勝/), iT = idx(/삼복승|삼복|三連複|3連複/);
+      // 착순 컬럼을 하나도 못 찾으면 이 표는 결과표가 아님 → 빈 배열
+      if (i1 < 0 && i2 < 0 && i3 < 0) return [];
+      const out = [];
+      for (const r of rows.slice(rows.indexOf(headerRow) + 1)) {
+        try {
+          const cells = [...r.querySelectorAll('th,td')].map((c) => fw2ascii(c.textContent || '').trim());
+          if (cells.length < 3) continue;
+          const area = iArea >= 0 ? (cells[iArea] || '') : '';
+          const round = iRound >= 0 ? (cells[iRound] || '') : '';
+          if (!area && !round) continue;
+          out.push({
+            area, round,
+            no1: toNum(cells[i1]), no2: toNum(cells[i2]), no3: toNum(cells[i3]),
+            qOdds: iQ >= 0 ? toNum(cells[iQ]) : null, tOdds: iT >= 0 ? toNum(cells[iT]) : null,
+          });
+        } catch (rowErr) { /* 개별 행 파싱 실패는 건너뜀 */ }
+      }
+      return out;
+    } catch (e) {
+      console.warn('[결과수집] _parseResultDoc 예외 → [] 반환(폴백):', e && e.message);
+      return [];
     }
-    return out;
   }
 
   // raceKey('2026-07-03 나고야 3경주') ↔ 결과행(지역='나고야', 라운드='3') 매칭
@@ -1155,33 +1172,38 @@
   // keiba DebaTable 전용 파서: 말당 5행(rowspan) 구조 + 競走成績(前走~5走前) 착순 추출.
   //  실제 페이지 검증 완료: 馬番/競走馬/騎手 + 최근5착순(前走→5走前).
   function parseDebaTable(D) {
-    let main = null;
-    for (const t of (D || document).querySelectorAll('table')) {
-      const h = [...t.querySelectorAll('tr')][0];
-      const head = h ? [...h.querySelectorAll('th,td')].map(txt).join('|') : '';
-      if (/馬番|마번/.test(head) && /(競走馬|馬名|마명)/.test(head)) { main = t; break; }
+    try {   // [안정화] 예상 밖 DOM에서도 throw 없이 [] 반환 → 상위 폴백(collectStarters) 동작
+      let main = null;
+      for (const t of (D || document).querySelectorAll('table')) {
+        const h = [...t.querySelectorAll('tr')][0];
+        const head = h ? [...h.querySelectorAll('th,td')].map(txt).join('|') : '';
+        if (/馬番|마번/.test(head) && /(競走馬|馬名|마명)/.test(head)) { main = t; break; }
+      }
+      if (!main) { console.warn('[전적수집] DebaTable 메인 테이블(馬番+競走馬 헤더) 못찾음'); return []; }
+      const out = [];
+      for (const tr of main.querySelectorAll('tr')) {
+        const cells = [...tr.querySelectorAll('th,td')];
+        // 競走成績 셀: "착순 YY.MM.DD ..." (前走~5走前). 이게 있는 행이 말의 메인행.
+        const recCells = cells.filter((c) => /^\d{1,2}\s+\d{2}\.\d{1,2}\.\d{1,2}/.test(txt(c)));
+        if (!recCells.length) continue;
+        // 馬番: rowSpan 정수셀 중 2번째(枠番 다음). 프레임 공유 시 1번째가 곧 馬番.
+        const spanNums = cells.filter((c) => (c.rowSpan || 1) >= 2 && /^\d{1,2}$/.test(txt(c)));
+        const no = spanNums.length >= 2 ? parseInt(txt(spanNums[1]), 10)
+          : (spanNums[0] ? parseInt(txt(spanNums[0]), 10) : null);
+        if (!isHorseNo(no)) continue;
+        const nameCell = cells.find((c) => (c.colSpan || 1) >= 2
+          && /[ぁ-んァ-ヶ一-龯A-Za-z가-힣]/.test(txt(c)) && !/^[\d.]/.test(txt(c)));
+        const name = nameCell ? txt(nameCell) : '';
+        const ni = cells.indexOf(nameCell);
+        const jockey = (ni >= 0 && cells[ni + 1]) ? txt(cells[ni + 1]) : '';
+        const recent = recCells.slice(0, 5).map((c) => parseInt(txt(c), 10)).filter((n) => n >= 1 && n <= 18);
+        out.push({ no, name, jockey, recent, weight: null });
+      }
+      return dedupeStarters(out, 'parseDebaTable');
+    } catch (e) {
+      console.warn('[전적수집] parseDebaTable 예외 → [] 반환(폴백):', e && e.message);
+      return [];
     }
-    if (!main) { console.warn('[전적수집] DebaTable 메인 테이블(馬番+競走馬 헤더) 못찾음'); return []; }
-    const out = [];
-    for (const tr of main.querySelectorAll('tr')) {
-      const cells = [...tr.querySelectorAll('th,td')];
-      // 競走成績 셀: "착순 YY.MM.DD ..." (前走~5走前). 이게 있는 행이 말의 메인행.
-      const recCells = cells.filter((c) => /^\d{1,2}\s+\d{2}\.\d{1,2}\.\d{1,2}/.test(txt(c)));
-      if (!recCells.length) continue;
-      // 馬番: rowSpan 정수셀 중 2번째(枠番 다음). 프레임 공유 시 1번째가 곧 馬番.
-      const spanNums = cells.filter((c) => (c.rowSpan || 1) >= 2 && /^\d{1,2}$/.test(txt(c)));
-      const no = spanNums.length >= 2 ? parseInt(txt(spanNums[1]), 10)
-        : (spanNums[0] ? parseInt(txt(spanNums[0]), 10) : null);
-      if (!isHorseNo(no)) continue;
-      const nameCell = cells.find((c) => (c.colSpan || 1) >= 2
-        && /[ぁ-んァ-ヶ一-龯A-Za-z가-힣]/.test(txt(c)) && !/^[\d.]/.test(txt(c)));
-      const name = nameCell ? txt(nameCell) : '';
-      const ni = cells.indexOf(nameCell);
-      const jockey = (ni >= 0 && cells[ni + 1]) ? txt(cells[ni + 1]) : '';
-      const recent = recCells.slice(0, 5).map((c) => parseInt(txt(c), 10)).filter((n) => n >= 1 && n <= 18);
-      out.push({ no, name, jockey, recent, weight: null });
-    }
-    return dedupeStarters(out, 'parseDebaTable');
   }
   /** DebaTable 파라미터 확보: keiba면 현재 URL, 아니면 저장된 lastDebaParams / 페이지의 keiba 링크 */
   async function getDebaParams() {
@@ -1204,16 +1226,24 @@
     if (!p) { console.warn('[전적수집] ⚠ DebaTable 파라미터(k_raceDate/k_raceNo/k_babaCode)를 찾지 못함 — keiba 출마표2를 한 번 열면 자동 저장됩니다.'); return []; }
     const url = buildDebaUrl(p);
     console.log('[전적수집] DebaTable fetch:', url);
-    let html = null;
-    try {
+    // [안정화] 네트워크 전송 실패 시 1회 재시도(일시적 오류 대응)
+    const fetchHtml = async () => {
       if (/(^|\.)keiba\.go\.jp$/.test(location.host)) {
-        html = await fetch(url, { credentials: 'same-origin' }).then((r) => r.text());   // 동일출처
-      } else {
-        const res = await chrome.runtime.sendMessage({ type: 'FETCH_URL', url });          // 교차출처 → background
-        if (!res || !res.ok) { console.warn('[전적수집] ⚠ DebaTable fetch 실패:', res && res.error); return []; }
-        html = res.html;
+        return await fetch(url, { credentials: 'same-origin' }).then((r) => r.text());     // 동일출처
       }
-    } catch (e) { console.warn('[전적수집] ⚠ DebaTable fetch 오류:', e); return []; }
+      const res = await chrome.runtime.sendMessage({ type: 'FETCH_URL', url });             // 교차출처 → background
+      if (!res || !res.ok) throw new Error((res && res.error) || 'FETCH_URL 실패');
+      return res.html;
+    };
+    let html = null;
+    for (let attempt = 0; attempt < 2 && html == null; attempt++) {
+      try { html = await fetchHtml(); }
+      catch (e) {
+        console.warn(`[전적수집] ⚠ DebaTable fetch 오류(시도 ${attempt + 1}/2):`, e && e.message);
+        if (attempt === 0) await wait(800);   // 잠깐 대기 후 1회 재시도
+      }
+    }
+    if (html == null) { console.warn('[전적수집] ⚠ DebaTable fetch 최종 실패 → 빈 전적'); return []; }
     const doc = new DOMParser().parseFromString(html || '', 'text/html');
     let starters = parseDebaTable(doc);                 // 전용 파서 우선
     if (!starters.length) starters = collectStarters(doc);  // 폴백: 제네릭
