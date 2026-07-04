@@ -26,6 +26,8 @@ import base64
 import threading
 import subprocess
 from itertools import permutations
+from html.parser import HTMLParser
+from urllib.request import urlopen, Request
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.exceptions import HTTPException
 import anthropic
@@ -2791,6 +2793,185 @@ def history_record_result():
         return jsonify({"error": "raceKey와 결과(1~3착)가 필요합니다."}), 400
     record, stats = _apply_result_learning(rk, result, top3, body.get("finalOdds"))
     return jsonify({"ok": True, "record": record, "stats": stats})
+
+
+# ── [일괄 결과 등록] 결과 페이지(HTML/URL) 전체 파싱 → 분석경주 자동매칭·학습 ──
+class _TableRowCollector(HTMLParser):
+    """모든 table 의 tr/td|th 텍스트를 [[셀,...], ...] 로 수집(테이블 경계 무시, 헤더는 내용으로 판별)."""
+    def __init__(self):
+        super().__init__()
+        self.rows, self._cur, self._cell = [], None, None
+    def handle_starttag(self, tag, attrs):
+        if tag == "tr":
+            self._cur = []
+        elif tag in ("td", "th") and self._cur is not None:
+            self._cell = []
+    def handle_data(self, data):
+        if self._cell is not None:
+            self._cell.append(data)
+    def handle_endtag(self, tag):
+        if tag in ("td", "th") and self._cell is not None:
+            self._cur.append("".join(self._cell).strip())
+            self._cell = None
+        elif tag == "tr" and self._cur is not None:
+            self.rows.append(self._cur)
+            self._cur = None
+
+
+def _parse_result_rows(html):
+    """결과 페이지 HTML → [{area,round,no1,no2,no3,qOdds,tOdds}]. 헤더 라벨로 컬럼 판별."""
+    p = _TableRowCollector()
+    try:
+        p.feed(html or "")
+    except Exception:
+        return []
+    rows = p.rows
+
+    def ns(s):
+        return re.sub(r"\s+", "", s or "")
+    hi = None
+    for i, r in enumerate(rows):
+        joined = "".join(ns(c) for c in r)
+        if re.search(r"경주지역|경마장|지역", joined) and re.search(r"라운드|회차|경주", joined):
+            hi = i
+            break
+    if hi is None:
+        return []
+    heads = [ns(c) for c in rows[hi]]
+
+    def idx(pat):
+        for k, h in enumerate(heads):
+            if re.search(pat, h):
+                return k
+        return -1
+    iArea = idx(r"경주지역|경마장|지역")
+    iRound = idx(r"라운드|회차|경주번호|^경주$|^R$")
+    i1, i2, i3 = idx(r"1착|1위"), idx(r"2착|2위"), idx(r"3착|3위")
+    iQ, iT = idx(r"복승"), idx(r"삼복승|삼복")
+
+    def cell(r, k):
+        return r[k] if (0 <= k < len(r)) else ""
+
+    def firstnum(s):
+        m = re.search(r"\d+", s or "")
+        return int(m.group()) if m else None
+    out = []
+    for r in rows[hi + 1:]:
+        if len(r) < 3:
+            continue
+        area, rnd = cell(r, iArea), cell(r, iRound)
+        if not area and not rnd:
+            continue
+        out.append({
+            "area": area, "round": rnd,
+            "no1": firstnum(cell(r, i1)), "no2": firstnum(cell(r, i2)), "no3": firstnum(cell(r, i3)),
+            "qOdds": _safe_num(cell(r, iQ)) if iQ >= 0 else None,
+            "tOdds": _safe_num(cell(r, iT)) if iT >= 0 else None,
+        })
+    return out
+
+
+def _area_num(s):
+    """문자열에서 (한글 회장명 토큰, 경주번호) 추출. 결과행·raceKey 공용."""
+    txt = s or ""
+    m = re.search(r"[가-힣]{2,}", txt.replace(" ", ""))
+    area = m.group() if m else None
+    n = re.search(r"(\d{1,2})\s*(?:R\b|경주|라운드|레이스)", txt, re.IGNORECASE)
+    num = int(n.group(1)) if n else None
+    return area, num
+
+
+def _match_row_to_key(row, analyzed_keys):
+    """결과행(area,round) → 분석된 raceKey 중 지역+번호가 맞는 것 찾기."""
+    r_area = re.sub(r"\s", "", row.get("area") or "")
+    m = re.search(r"[가-힣]{2,}", r_area)
+    r_area = m.group() if m else r_area
+    r_num = None
+    mn = re.search(r"\d{1,2}", str(row.get("round") or ""))
+    if mn:
+        r_num = int(mn.group())
+    if not r_area or r_num is None:
+        return None
+    for rk in analyzed_keys:
+        k_area, k_num = _area_num(rk)
+        if k_num != r_num or not k_area:
+            continue
+        if r_area in k_area or k_area in r_area:
+            return rk
+    return None
+
+
+@app.route("/api/results/bulk", methods=["POST"])
+def results_bulk():
+    """[일괄 결과 등록] 결과 페이지 전체를 한 번에 파싱→분석경주 자동매칭→적중판정·학습→요약.
+    body: {html?} 또는 {url?} 또는 {rows?}, stake?(정액 베팅 가정, 기본 1000).
+    → {ok, registered, hits, profit, matched:[...], unmatched:[...], errors:[...]}"""
+    body = request.json or {}
+    stake = _safe_num(body.get("stake")) or 1000
+    rows = body.get("rows")
+    if not rows:
+        html = body.get("html") or ""
+        if not html and body.get("url"):
+            try:
+                req = Request(body["url"], headers={"User-Agent": "Mozilla/5.0"})
+                html = urlopen(req, timeout=10).read().decode("utf-8", "replace")
+            except Exception as e:
+                return jsonify({"error": f"URL 로드 실패({e}). 결과 페이지 HTML을 붙여넣어 주세요.",
+                                "needPaste": True}), 200
+        rows = _parse_result_rows(html)
+    if not rows:
+        return jsonify({"error": "결과표를 파싱하지 못했습니다. (경주지역·라운드·1~3착 컬럼이 있는 결과 페이지 HTML인지 확인)",
+                        "needPaste": True}), 200
+
+    analyzed_keys = list(_triple_load().keys())
+    matched, unmatched, errors = [], [], []
+    hits = 0
+    profit = 0
+    for row in rows:
+        top3 = [row.get("no1"), row.get("no2"), row.get("no3")]
+        top3 = [int(x) for x in top3 if isinstance(x, int) and x >= 1]
+        if not top3:
+            continue
+        rk = _match_row_to_key(row, analyzed_keys)
+        if not rk:
+            unmatched.append({"area": row.get("area"), "round": row.get("round"), "top3": top3})
+            continue
+        final_odds = {}
+        if row.get("qOdds"):
+            final_odds["quinella"] = {"combo": top3[:2], "odds": row["qOdds"]}
+        if row.get("tOdds"):
+            final_odds["trio"] = {"combo": top3[:3], "odds": row["tOdds"]}
+        result = {}
+        for i, no in enumerate(top3[:3]):
+            result[["1st", "2nd", "3rd"][i]] = no
+        try:
+            rec, _ = _apply_result_learning(rk, result, top3, final_odds or None)
+        except Exception as e:
+            errors.append({"raceKey": rk, "error": str(e)})
+            continue
+        q_hit, t_hit = bool(rec.get("quinella_hit")), bool(rec.get("trifecta_hit"))
+        won = q_hit or t_hit or bool(rec.get("was_hit"))
+        # 수익: 정액 stake 가정 — 적중 시 +(배당-1)*stake, 추천했으나 미적중 시 -stake
+        pnl = 0
+        pays = rec.get("payouts") or {}
+        if q_hit and pays.get("quinella"):
+            pnl = round((pays["quinella"] - 1) * stake)
+        elif t_hit and pays.get("trifecta"):
+            pnl = round((pays["trifecta"] - 1) * stake)
+        elif rec.get("bet_type"):   # 추천이 있었는데 미적중
+            pnl = -stake
+        if won:
+            hits += 1
+        profit += pnl
+        matched.append({"raceKey": rk, "top3": top3, "quinella_hit": q_hit,
+                        "trifecta_hit": t_hit, "won": won, "pnl": pnl})
+
+    print(f"[일괄결과] 등록 {len(matched)}건 · 적중 {hits} · 손익 {profit}원 · 매칭실패 {len(unmatched)}건")
+    return jsonify({
+        "ok": True, "registered": len(matched), "hits": hits, "profit": profit,
+        "stake": stake, "matched": matched, "unmatched": unmatched, "errors": errors,
+        "parsedRows": len(rows),
+    })
 
 
 @app.route("/api/learning/stats", methods=["GET", "POST"])

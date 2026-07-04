@@ -621,6 +621,81 @@
     { const b = $('#tripleBudget'); if (b) b.addEventListener('input', () => { if (_lastTripleAnalyze) renderTripleAnalyze(_lastTripleAnalyze); }); }
     { const b = $('#histRefreshBtn'); if (b) b.addEventListener('click', () => { loadHistoryList(); loadLearningStats(); }); } // [5번] 히스토리
     { const b = $('#learnStatsBtn'); if (b) b.addEventListener('click', loadLearningStats); }
+    initBulkResult();   // [일괄 결과 등록]
+  }
+
+  /** [일괄 결과 등록] 결과 페이지 URL/HTML → 서버 일괄 파싱·매칭·학습 → 요약 표시 */
+  function initBulkResult() {
+    const toggle = $('#bulkResultToggle'); if (!toggle) return;
+    const panel = $('#bulkResultPanel');
+    toggle.addEventListener('click', () => {
+      const open = panel.style.display !== 'none';
+      panel.style.display = open ? 'none' : 'block';
+      toggle.textContent = open ? '📋 일괄 등록 열기' : '📋 일괄 등록 닫기';
+    });
+    const run = async (payload) => {
+      const box = $('#bulkResultSummary');
+      const stake = parseInt(($('#bulkStake') && $('#bulkStake').value) || '1000', 10) || 1000;
+      box.innerHTML = '<p class="hint">⏳ 파싱·매칭·학습 중…</p>';
+      let d;
+      try {
+        d = await (await fetch('/api/results/bulk', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.assign({ stake }, payload)),
+        })).json();
+      } catch (e) { box.innerHTML = `<p class="err">요청 실패: ${esc(e.message)}</p>`; return; }
+      if (d.error) {
+        box.innerHTML = `<p class="err">${esc(d.error)}</p>`;
+        if (d.needPaste) $('#bulkResultHtml').focus();
+        return;
+      }
+      renderBulkSummary(d);
+      // 통계·히스토리 자동 갱신
+      try { loadLearningStats(); loadHistoryList(); } catch (_) { /* */ }
+    };
+    { const b = $('#bulkResultLoad'); if (b) b.addEventListener('click', () => {
+      const url = ($('#bulkResultUrl').value || '').trim();
+      if (!url) { $('#bulkResultSummary').innerHTML = '<p class="err">URL을 입력하세요.</p>'; return; }
+      run({ url });
+    }); }
+    { const b = $('#bulkResultParse'); if (b) b.addEventListener('click', () => {
+      const html = $('#bulkResultHtml').value || '';
+      if (!html.trim()) { $('#bulkResultSummary').innerHTML = '<p class="err">결과표 HTML을 붙여넣으세요.</p>'; return; }
+      run({ html });
+    }); }
+  }
+
+  /** 일괄 등록 결과 요약: "결과 등록 완료 · 적중 N건 · 수익/손실" + 매칭실패 목록 */
+  function renderBulkSummary(d) {
+    const box = $('#bulkResultSummary'); if (!box) return;
+    const profit = d.profit || 0;
+    const pnlTxt = profit >= 0
+      ? `<span style="color:#38d39f">수익: +${profit.toLocaleString()}원</span>`
+      : `<span style="color:#ff6b6b">손실: ${profit.toLocaleString()}원</span>`;
+    const matchedRows = (d.matched || []).map((m) => {
+      const tag = m.quinella_hit ? '복승 적중' : m.trifecta_hit ? '삼복승 적중' : m.won ? '적중' : '미적중';
+      const color = m.won ? '#38d39f' : '#8a94a6';
+      const pnl = m.pnl > 0 ? `+${m.pnl.toLocaleString()}` : m.pnl.toLocaleString();
+      return `<tr><td>${esc(m.raceKey)}</td><td style="text-align:center">${(m.top3 || []).join('-')}</td>
+        <td style="text-align:center;color:${color};font-weight:700">${tag}</td>
+        <td style="text-align:right;color:${m.pnl >= 0 ? '#38d39f' : '#ff6b6b'}">${pnl}원</td></tr>`;
+    }).join('');
+    const unmatched = (d.unmatched || []).map((u) =>
+      `<li>${esc(u.area || '')} ${esc(String(u.round || ''))} · 착순 ${(u.top3 || []).join('-')} <span class="hint">(분석 경주 없음)</span></li>`).join('');
+    box.innerHTML = `
+      <div class="bet-box">
+        <h3 style="margin-top:0">✅ 결과 등록 완료</h3>
+        <div style="font-size:15px;line-height:1.9">
+          등록 <b>${d.registered || 0}</b>건 (파싱 ${d.parsedRows || 0}행) · 적중 <b style="color:#38d39f">${d.hits || 0}</b>건 · ${pnlTxt}
+          <span class="hint">(정액 ${(d.stake || 1000).toLocaleString()}원 가정)</span>
+        </div>
+      </div>
+      ${matchedRows ? `<table class="data-table" style="width:100%;margin-top:8px"><thead><tr>
+        <th>경주</th><th style="text-align:center">1~3착</th><th style="text-align:center">판정</th><th style="text-align:right">손익</th>
+      </tr></thead><tbody>${matchedRows}</tbody></table>` : ''}
+      ${unmatched ? `<div class="panel-card" style="margin-top:8px"><h3 style="margin-top:0">⚠️ 수동 확인 필요 (매칭 실패 ${d.unmatched.length}건)</h3>
+        <ul style="margin:4px 0 0 18px">${unmatched}</ul>
+        <p class="hint">해당 경주는 분석(배당 수집) 기록이 없어 자동 매칭되지 않았습니다. 위 [경주 결과 입력]에서 직접 등록하세요.</p></div>` : ''}`;
   }
 
   function capPos(e) {

@@ -150,6 +150,27 @@
 
     <!-- 결과입력 -->
     <section id="tab-result" class="tab-panel">
+      <!-- [일괄 결과 등록] 경기 마감 후 결과 페이지 전체를 한 번에 등록 -->
+      <div class="panel-card">
+        <h2>📋 일괄 결과 등록</h2>
+        <p class="hint">결과 페이지(asyukk34 등)의 URL을 넣거나 결과표 HTML을 붙여넣으면, 모든 경주의 1~3착·확정배당을 한 번에 파싱해 분석한 경주와 자동 매칭·적중판정·학습합니다.</p>
+        <div class="cfg-row">
+          <button id="bulkResultToggle" class="btn btn-primary">📋 일괄 등록 열기</button>
+        </div>
+        <div id="bulkResultPanel" style="display:none;margin-top:10px">
+          <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="bulkResultUrl" class="cfg-input" style="flex:1;min-width:280px" placeholder="결과 페이지 URL (예: https://asyukk34.../bet/result?id=123)" />
+            <label class="hint">정액 가정<br><input id="bulkStake" class="cfg-input" type="number" value="1000" style="width:90px" />원</label>
+            <button id="bulkResultLoad" class="btn btn-primary">불러와 등록</button>
+          </div>
+          <p class="hint" style="margin:6px 0 2px">URL 로드가 안 되면(로그인 필요) 결과 페이지에서 <b>전체 선택(Ctrl+A)→복사→아래에 붙여넣기</b> 후 [붙여넣기 등록].</p>
+          <textarea id="bulkResultHtml" class="cfg-input" style="width:100%;height:110px;font-family:monospace;font-size:12px" placeholder="결과 페이지 HTML 또는 표 전체를 여기에 붙여넣기"></textarea>
+          <div class="cfg-row" style="margin-top:6px">
+            <button id="bulkResultParse" class="btn btn-primary">붙여넣기 등록</button>
+          </div>
+          <div id="bulkResultSummary" style="margin-top:10px"></div>
+        </div>
+      </div>
       <div class="panel-card">
         <h2>경주 결과 입력</h2>
         <p class="hint">실제 착순을 입력하면 누적 학습 DB에 반영됩니다.</p>
