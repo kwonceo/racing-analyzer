@@ -29,7 +29,18 @@ from itertools import permutations
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.exceptions import HTTPException
 import anthropic
-import fitz  # PyMuPDF — 서버측 PDF 렌더(한국경마 백그라운드 분석)
+try:
+    import fitz  # PyMuPDF — 서버측 PDF 렌더(한국경마 백그라운드 분석)
+except Exception as _fitz_err:  # noqa: N816
+    # PyMuPDF 미설치여도 서버는 반드시 기동한다.
+    # (import 실패로 서버가 안 뜨면, 포트에 남은 구버전 서버가 요청을 받아
+    #  '/api/korea/start' 에 405 를 반환하던 것이 405 재발의 실제 원인이었다.)
+    fitz = None
+    _FITZ_IMPORT_ERROR = str(_fitz_err)
+    print("[경고] PyMuPDF(fitz) import 실패 — 한국경마 PDF 분석만 비활성화됩니다:", _FITZ_IMPORT_ERROR)
+    print("       설치:  pip install PyMuPDF")
+else:
+    _FITZ_IMPORT_ERROR = None
 
 MODEL = "claude-sonnet-4-6"
 
@@ -410,7 +421,9 @@ def index():
 @app.route("/api/health")
 def health():
     return jsonify({"ok": True, "model": MODEL,
-                    "has_key": bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())})
+                    "has_key": bool(os.environ.get("ANTHROPIC_API_KEY", "").strip()),
+                    "pdf_ready": fitz is not None,
+                    "pdf_error": _FITZ_IMPORT_ERROR})
 
 
 def _do_extract_jockey(img, api_key=None):
@@ -3197,6 +3210,9 @@ def _korea_start_job(api_key=None):
 @app.route("/api/korea/start", methods=["POST"])
 def korea_start():
     """PDF 업로드 → 새 세션 시작(기존 세션/진행중 작업은 덮어씀 = '새 PDF 업로드' 초기화)."""
+    if fitz is None:
+        return jsonify({"error": "서버에 PyMuPDF(fitz)가 설치되지 않아 PDF 분석을 할 수 없습니다. "
+                                 "터미널에서 'pip install PyMuPDF' 실행 후 서버를 재시작하세요."}), 503
     f = request.files.get("pdf")
     if not f:
         return jsonify({"error": "PDF 파일이 없습니다 (multipart 'pdf' 필드)."}), 400
@@ -3248,6 +3264,9 @@ def korea_reextract():
         return jsonify({"error": "세션 또는 경주를 찾을 수 없습니다."}), 400
     if not os.path.exists(KOREA_PDF):
         return jsonify({"error": "저장된 PDF가 없습니다. 새 PDF를 업로드하세요."}), 400
+    if fitz is None:
+        return jsonify({"error": "서버에 PyMuPDF(fitz)가 설치되지 않았습니다. "
+                                 "'pip install PyMuPDF' 실행 후 서버를 재시작하세요."}), 503
     race = sess["races"][idx]
     if body.get("page"):
         race["summaryPage"] = int(body["page"])
@@ -3368,6 +3387,8 @@ def korea_backup():
 
 def _korea_maybe_resume():
     """서버 재시작 시 진행중이던 분석 자동 재개 (data/korea_session.json 기준)."""
+    if fitz is None:
+        return
     s = _korea_load()
     if s and s.get("status") == "running" and os.path.exists(KOREA_PDF):
         print("[한국] 이전 분석 재개:", s.get("label"))
