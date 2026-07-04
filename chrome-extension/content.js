@@ -1152,23 +1152,14 @@
       .filter((c) => c.odds > 0)
       .map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10 }))
       .sort((a, b) => a.odds - b.odds).slice(0, cap);
-    console.log(`[배당수집] ===== 배당 수집 시작 (탭 클릭 방식, ${isKorea ? '한국:복승' : '일본:단승+복승+쌍승'}) =====`);
+    console.log(`[배당수집] ===== 배당 수집 시작 (탭 클릭 방식, ${isKorea ? '한국:복승' : '일본:복승+쌍승+삼복승'}) =====`);
 
     try {
-      // 0) [일본 전용] 단승 — 가장 강한 신호. 한국은 단승 수집 안 함(복승만).
+      // [단승 제거] 한국=복승만 / 일본=복승·쌍승·삼복승. 단승은 더 이상 수집하지 않는다.
       //    [긴급2] 각 종목을 독립 try 로 감싸 한 종목이 실패해도 다음 종목은 계속 수집(전체 중단 방지).
-      let win = {};
-      if (!isKorea) {
-        try {
-          setTripleProgress('단승 수집중…');
-          await clickTabAndWait(['단승', '단식', '單勝', '単勝', 'WIN'], '', '단승', false);
-          win = currentSingles(oddsClass);
-          console.log(`[단승수집] ${Object.keys(win).length}두: `
-            + Object.entries(win).slice(0, 8).map(([n, o]) => `${n}=${o}`).join(' · '));
-        } catch (e) { console.warn('[단승수집] 실패 — 건너뛰고 계속', e); }
-      }
+      const win = {};   // 단승 미수집 — 서버 payload 호환용 빈 맵 유지
 
-      // 1) 복승 (이미 복승 탭일 수 있음 → 변화 강제 안 함). 단승 탭에서 왔으면 변화 요구.
+      // 1) 복승 (이미 복승 탭일 수 있음 → 변화 강제 안 함).
       let sig = '';
       let quinella = [];
       try {
@@ -1264,8 +1255,8 @@
         raceKey, win, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
         deadline: timerDeadline || null, capturedAt: new Date().toISOString(), source: location.href,
       };
-      console.log(`[배당수집] ===== 완료: 단승 ${Object.keys(win).length}·복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두 =====`);
-      if (!Object.keys(win).length && !payload.quinella.length && !payload.exacta.length && !payload.trio.length && !starters.length) {
+      console.log(`[배당수집] ===== 완료: 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두 =====`);
+      if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length && !starters.length) {
         setTripleProgress('❌ 배당·전적 모두 없음(콘솔 로그 확인)', true);
         return { ok: false, error: '배당·전적을 찾지 못했습니다. F12 콘솔의 로그를 확인하세요.' };
       }
@@ -1280,11 +1271,11 @@
         });
         console.log('[전적] /api/extract/japan 응답:', japan && japan.ok ? 'ok' : (japan && japan.error));
       }
-      const winNote = isKorea ? '' : `단승 ${Object.keys(win).length}·`;
       const exNote = isKorea ? '' : (payload.exacta.length ? `·쌍승 ${payload.exacta.length}` : '·쌍승 미수집');
+      const trioNote = isKorea ? '' : `·삼복승 ${payload.trio.length}`;
       const stNote = isKorea ? '·전적 PDF' : `·전적 ${starters.length}두`;
       setTripleProgress(res && res.ok
-        ? `수집 완료 ✅ ${winNote}복승 ${payload.quinella.length}${exNote}·삼복승 ${payload.trio.length}${stNote}`
+        ? `수집 완료 ✅ 복승 ${payload.quinella.length}${exNote}${trioNote}${stNote}`
         : `❌ 전송 실패: ${(res && res.error) || ''}`, true);
       return res || { ok: false, error: 'background 응답 없음' };
     } catch (e) {
@@ -1306,31 +1297,19 @@
   async function getSettings() {
     return new Promise((resolve) => {
       chrome.storage.local.get(
-        // autoMode: 'triple'(전체 3종) | 'snapshot'(단승만) · timerDeadline: 발주시각(epoch ms)
+        // autoMode: 'triple'(전체 3종 수집) — 단승 스냅샷 모드는 폐지됨 · timerDeadline: 발주시각(epoch ms)
         { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', timerDeadline: 0, market: 'auto' },
         (v) => resolve(v)
       );
     });
   }
 
-  async function doSend(reason) {
-    const { raceKey } = await getSettings();
-    const payload = buildPayload(raceKey);
-    if (!payload.raceKey) {
-      return { ok: false, error: 'raceKey 를 만들 수 없습니다. 팝업에서 직접 입력하세요.', payload };
-    }
-    if (!Object.keys(payload.odds).length) {
-      return { ok: false, error: '단승 배당을 찾지 못했습니다. 배당 페이지가 맞는지 확인하세요.', payload };
-    }
-    // 실제 POST 는 background 가 담당 (mixed-content/CORS 회피)
-    const res = await chrome.runtime.sendMessage({ type: 'POST_SNAPSHOT', payload, reason });
-    return res || { ok: false, error: 'background 응답 없음' };
-  }
+  // [단승 제거] doSend(단승 snapshot 전용)·autoMode 'snapshot' 폐지.
+  //   keiba/asyukk 모두 collectTriple 로 복승(+쌍승·삼복승)만 수집한다.
 
-  // ── 사이트 무관 전송: 복승 매트릭스→triple ingest, 단승→snapshot ──────
-  //   snapshot 은 단승(odds) 이 비면 거부하고 복승 매트릭스를 저장하지 않으므로,
-  //   asyukk/generic 의 복승 매트릭스는 /api/odds/triple/ingest(quinella) 로 보내
-  //   서버 앱의 매트릭스 UI 에서 바로 보이게 한다. 단승이 있으면 snapshot 도 함께.
+  // ── 사이트 무관 전송: 복승 매트릭스 → triple ingest ─────────────────
+  //   asyukk/generic 의 복승 매트릭스를 /api/odds/triple/ingest(quinella) 로 보내
+  //   서버 앱의 매트릭스 UI 에서 바로 보이게 한다. (단승 snapshot 은 폐지)
   async function sendCurrent(reason) {
     const { raceKey: override } = await getSettings();
     const payload = buildPayload(override);
@@ -1338,9 +1317,8 @@
       return { ok: false, error: 'raceKey 를 만들 수 없습니다. 팝업 raceKey 칸에 직접 입력하세요.', payload };
     }
     const pairs = (payload.quinella && payload.quinella.pairs) || [];
-    const oddsMap = payload.odds || {};
-    if (!pairs.length && !Object.keys(oddsMap).length) {
-      return { ok: false, error: '전송할 배당이 없습니다(복승 매트릭스·단승 모두 비어있음). 배당판 페이지인지 확인하세요.', payload };
+    if (!pairs.length) {
+      return { ok: false, error: '전송할 복승 매트릭스가 없습니다. 배당판 페이지인지 확인하세요.', payload };
     }
     const parts = [];
     // 복승 매트릭스 → triple ingest (매트릭스 UI 용)
@@ -1354,11 +1332,6 @@
       });
       parts.push({ kind: '복승매트릭스', n: quinella.length, ...(r || { ok: false, error: 'background 응답 없음' }) });
     }
-    // 단승 → snapshot
-    if (Object.keys(oddsMap).length) {
-      const r = await chrome.runtime.sendMessage({ type: 'POST_SNAPSHOT', reason, payload });
-      parts.push({ kind: '단승', n: Object.keys(oddsMap).length, ...(r || { ok: false, error: 'background 응답 없음' }) });
-    }
     const ok = parts.length > 0 && parts.every((p) => p.ok);
     const detail = parts.map((p) => `${p.kind} ${p.n}${p.ok ? '✅' : '❌'}`).join(' · ');
     return { ok, parts, detail, raceKey: payload.raceKey, error: ok ? '' : (parts.find((p) => !p.ok)?.error || '전송 실패') };
@@ -1366,6 +1339,39 @@
 
   // [1번] 발주 임박 단계(120/60초·마감) 1회성 트리거 기록 (발주시각 바뀌면 초기화)
   let _stageFired = new Set();
+
+  // ── [경기 마감 감지] 한/일 공통: 마감되면 자동수집을 중단시킨다 ──────────
+  //   1) DOM 텍스트에서 "발매마감/締切" 등 마감 문구 감지
+  //   2) 배당이 CLOSE_UNCHANGED_TICKS 회 연속 무변동(발주 임박/미설정 시에만 적용)
+  let _lastOddsSig = '';
+  let _oddsUnchangedCount = 0;
+  const CLOSE_UNCHANGED_TICKS = 5;   // 배당 5회 연속 무변동 → 마감 간주(≈수집 5틱)
+  // 마감/종료 문구(한국·일본 배당판 공통). "마감" 단독은 오탐 위험이 커 제외.
+  const CLOSE_TEXT_RE = /발매\s*마감|발매\s*종료|투표\s*마감|투표\s*종료|접수\s*마감|접수\s*종료|締\s*切|締め切り|発売\s*締切|発売\s*終了|受付\s*終了|販売\s*終了/;
+
+  function detectRaceClosed(deadline) {
+    // 1) DOM 텍스트 기반 마감 감지 (가장 확실)
+    try {
+      const txt = (document.body && document.body.innerText) || '';
+      if (CLOSE_TEXT_RE.test(txt)) return { closed: true, reason: 'DOM 발매마감 감지' };
+    } catch (_) { /* noop */ }
+    // 2) 배당 무변동 기반 감지 — 발주시각 미설정이거나 마감 2분 이내에서만 적용(오탐 방지)
+    try {
+      const now = Date.now();
+      const near = !deadline || (deadline - now) <= 120000;
+      const sig = (typeof oddsSignature === 'function') ? oddsSignature() : '';
+      if (sig && sig === _lastOddsSig) {
+        _oddsUnchangedCount++;
+        if (near && _oddsUnchangedCount >= CLOSE_UNCHANGED_TICKS) {
+          return { closed: true, reason: `배당 ${CLOSE_UNCHANGED_TICKS}회 무변동` };
+        }
+      } else {
+        _oddsUnchangedCount = 0;
+        _lastOddsSig = sig;
+      }
+    } catch (_) { /* noop */ }
+    return { closed: false };
+  }
 
   // [1번] 발주 임박/최종베팅 알림을 모든 탭에 전달 → timer.js 가 배너+소리로 표시
   function pushCollectAlert(level, text) {
@@ -1409,8 +1415,7 @@
       if (_autoRunning) { console.log(`[자동수집] 이전 수집 진행중 → 이번 틱(${new Date().toLocaleTimeString('ko-KR', { hour12: false })}) 건너뜀`); return; }
       _autoRunning = true;
       try {
-        const { autoMode } = await getSettings();
-        await (autoMode === 'snapshot' ? doSend('auto') : collectTriple('auto'));
+        await collectTriple('auto');   // [단승 제거] 항상 3종(복승·쌍승·삼복승) 수집
       } catch (e) { console.warn('[자동수집] 틱 실행 오류', e); }
       finally { _autoRunning = false; }
     };
@@ -1480,8 +1485,8 @@
   // 팝업 ↔ content 메시지 처리
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.type === 'MANUAL_SEND') {
-      // keiba 는 단승 snapshot, 그 외(asyukk/generic)는 복승 매트릭스+단승 통합 전송
-      (detectSite() === 'keiba' ? doSend('manual') : sendCurrent('manual')).then(sendResponse);
+      // [단승 제거] keiba 는 3종 수집(복승·쌍승·삼복승), 그 외(asyukk/generic)는 복승 매트릭스 전송
+      (detectSite() === 'keiba' ? collectTriple('manual') : sendCurrent('manual')).then(sendResponse);
       return true; // async
     }
     if (msg?.type === 'MANUAL_SEND_RESULTS') {
@@ -1508,9 +1513,15 @@
         if (_autoRunning) { sendResponse({ ok: false, error: '이전 수집 진행중(건너뜀)' }); return; }
         _autoRunning = true;
         try {
-          const { autoMode } = await getSettings();
-          const r = await (autoMode === 'snapshot' ? doSend('auto') : collectTriple('auto'));
-          sendResponse(r || { ok: false });
+          const { timerDeadline } = await getSettings();
+          const r = await collectTriple('auto');   // [단승 제거] 항상 3종 수집
+          // [수정2] 경기 마감 감지 → background 엔진에 중단 신호 전달
+          const close = detectRaceClosed(timerDeadline);
+          if (close.closed) {
+            setTripleProgress('⏹ 경기 마감 - 자동수집 중단됨', true);
+            console.log('[자동수집] 경기 마감 감지 → 자동수집 중단:', close.reason);
+          }
+          sendResponse(Object.assign({ ok: false }, r || {}, { closed: close.closed, closeReason: close.reason || '' }));
         } catch (e) { sendResponse({ ok: false, error: String(e.message || e) }); }
         finally { _autoRunning = false; }
       })();

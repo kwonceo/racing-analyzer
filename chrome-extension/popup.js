@@ -31,7 +31,7 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', market: 'auto', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null },
+    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', market: 'auto', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
       els.interval.value = String(v.intervalSec || 30);
@@ -42,6 +42,7 @@ function loadState() {
       renderResultStatus(v.resultStatus);
       renderTripleStatus(v.tripleStatus);
       if (v.tripleProgress && !v.tripleProgress.done) renderTripleProgress(v.tripleProgress);
+      renderAutoClosed(v.autoCollectStatus);   // [수정2] 경기 마감 시 중단 안내(팝업 재오픈에도 유지)
       renderResultTimer(v.resultAutoStatus);
       // [3번] 창을 닫았다 다시 열어도 마지막 즉시분석 결과를 복원
       if (v.analyzeStatus && v.analyzeStatus.data) renderAnalyze(v.analyzeStatus.data, v.analyzeStatus.at);
@@ -160,7 +161,7 @@ previewBtn.addEventListener('click', async () => {
         previewTop.textContent = ''; previewWarn.textContent = ''; previewSend.style.display = 'none';
       } else {
         const rk = r.raceKey || '(raceKey 미입력 — 위 칸에 입력하세요)';
-        previewHead.innerHTML = `<b>[${r.site}]</b> ${rk}<br>단승 ${r.singles}두 · 복승 ${r.combos}조합`;
+        previewHead.innerHTML = `<b>[${r.site}]</b> ${rk}<br>복승 ${r.combos}조합`;
         previewTop.textContent = (r.top || []).length
           ? '상위 10 (배당 낮은순):\n' + r.top.map((t) => `  ${t.combo}  →  ${t.odds}`).join('\n')
           : '추출된 조합이 없습니다.';
@@ -305,6 +306,12 @@ function renderTripleProgress(p) {
     : `<span class="muted">${p.msg}</span>`;
 }
 
+// [수정2] 경기 마감으로 자동수집이 중단된 상태를 팝업에 표시
+function renderAutoClosed(st) {
+  if (!st || !st.closed) return;
+  tripleRow.innerHTML = `<span class="err">⏹ 경기 마감 - 자동수집 중단됨${st.closeReason ? ' (' + st.closeReason + ')' : ''}</span>`;
+}
+
 btnTriple.addEventListener('click', async () => {
   btnTriple.disabled = true; btnTriple.textContent = '수집 중… (복승→쌍승→삼복승)';
   tripleDetail.textContent = '';
@@ -401,6 +408,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes.resultStatus) renderResultStatus(changes.resultStatus.newValue);
   if (changes.tripleStatus) renderTripleStatus(changes.tripleStatus.newValue);
   if (changes.tripleProgress) renderTripleProgress(changes.tripleProgress.newValue);
+  if (changes.autoCollectStatus) renderAutoClosed(changes.autoCollectStatus.newValue);
+  if (changes.autoSend) els.autoSend.checked = !!changes.autoSend.newValue;   // [수정2] 마감 시 자동 OFF 반영
   if (changes.resultAutoStatus) renderResultTimer(changes.resultAutoStatus.newValue);
   if (changes.analyzeStatus && changes.analyzeStatus.newValue) {
     const av = changes.analyzeStatus.newValue; renderAnalyze(av.data, av.at);

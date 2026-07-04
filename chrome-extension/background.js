@@ -362,11 +362,24 @@ async function _collectOnce() {
   const tab = await _findOddsTab();
   if (!tab) { _setAutoStatus({ running: true, warn: '배당판 탭이 열려있지 않음' }); return null; }
   try {
-    return await chrome.tabs.sendMessage(tab.id, { type: 'AUTO_COLLECT', reason: 'bg' });
+    const r = await chrome.tabs.sendMessage(tab.id, { type: 'AUTO_COLLECT', reason: 'bg' });
+    // [수정2] 경기 마감 감지 시 자동수집 엔진 정지
+    if (r && r.closed) { await _onRaceClosed(r.closeReason || ''); }
+    return r;
   } catch (e) {
     _setAutoStatus({ running: true, warn: '수집 탭 응답 없음(페이지 새로고침 필요)' });
     return null;
   }
+}
+
+// [수정2] 경기 마감 → 자동 배당 수집 중단(엔진·인터벌 정지) + 팝업/알림 표시.
+//   결과 자동수집(발주 후 7/9/11분 resFetch 알람)은 그대로 유지된다.
+async function _onRaceClosed(reason) {
+  stopAutoEngine();
+  await chrome.storage.local.set({ autoSend: false });   // 인터벌·하트비트 정지(설정 OFF)
+  _setAutoStatus({ running: false, stopped: true, closed: true, closeReason: reason });
+  _notify('closed', '⏹ 경기 마감 - 자동수집 중단됨',
+    `배당이 마감되어 자동수집을 중단했습니다.${reason ? ' (' + reason + ')' : ''}`, false);
 }
 async function _forceAnalyze() {
   try {
@@ -411,8 +424,11 @@ async function autoTick(reason) {
   const intervalMs = (left != null && left <= 180000) ? 15000 : baseMs;   // T-3분 → 15초
   if ((reason === 'start' || now >= _nextDueAt) && !_collecting) {
     _collecting = true;
-    try { await _collectOnce(); } catch (_) { /* */ }
+    let r = null;
+    try { r = await _collectOnce(); } catch (_) { /* */ }
     _collecting = false;
+    // [수정2] 경기 마감 감지 → 엔진이 이미 정지됨. 상태를 running:true 로 덮어쓰지 않고 종료.
+    if (r && r.closed) return;
     _nextDueAt = Date.now() + intervalMs;
     _setAutoStatus({ running: true, last: Date.now(), next: _nextDueAt, deadline: cfg.timerDeadline || 0, intervalMs });
     _forceAnalyze();   // 수집 직후 분석 1회 → 분석기/팝업 실시간 갱신

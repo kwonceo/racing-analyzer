@@ -2818,9 +2818,9 @@
     _bindBudgetInput('#koreaBudget', () => { if (state.koreaLastInteg) renderKoreaIntegrated(state.koreaLastInteg); });
   }
 
-  // ---------- [5·6번] 일본경마 실시간 배당 연동 (단승 급락 우선 · 복승/쌍승 보조) ----------
-  //  전적표 이미지 분석 후 Chrome 확장(종목=일본)이 같은 raceKey로 단승·복승·쌍승을 수집.
-  //  최신 수집 raceKey를 30초 간격으로 폴링 → 통합분석·이상감지(단승급락 우선)를 자동 표시.
+  // ---------- [5·6번] 일본경마 실시간 배당 연동 (복승·쌍승·삼복승 이상감지) ----------
+  //  전적표 이미지 분석 후 Chrome 확장(종목=일본)이 같은 raceKey로 복승·쌍승·삼복승을 수집.
+  //  최신 수집 raceKey를 30초 간격으로 폴링 → 통합분석·이상감지를 자동 표시. (단승 제거)
   let _jpOddsTimer = null;
 
   function stopJapanOddsWatch() {
@@ -2857,18 +2857,17 @@
     onJapanOddsUpdate(rk, a);
   }
 
-  /** [6번] 신규 변동 감지 → 토스트+소리(단승급락 우선) / 타임라인 누적 */
+  /** [6번] 신규 변동 감지 → 토스트+소리(복승/쌍승 급락·역전) / 타임라인 누적 */
   function onJapanOddsUpdate(rk, a) {
     const firstLink = !state.jpTimeline || !state.jpTimeline.length;
     const hhmmss = new Date().toTimeString().slice(0, 8);
-    // 일본: 단승급락 우선 + 복승/쌍승 급락·역전 보조
-    const signals = (a.signals || []).filter((s) => s.type === '단승급락' || s.type === '급락' || s.type === '역전');
+    // 일본: 복승/쌍승 급락·역전 이상감지 (단승 제거)
+    const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '역전');
     const prev = state.jpOddsPrev || new Set();
     const fresh = signals.filter((s) => !prev.has(s.text));
 
     if (fresh.length && !firstLink) {
-      const ordered = fresh.slice().sort((x, y) => (y.type === '단승급락') - (x.type === '단승급락'));
-      const lines = ordered.map((s) => `${s.level} ${s.type === '단승급락' ? '🔥' : ''}${esc(s.text)}`);
+      const lines = fresh.map((s) => `${s.level} ${esc(s.text)}`);
       oddsToast(`⏱ 일본 ${esc(rk)} 배당 변동`, lines);
       const worst = fresh.map((s) => s.level).sort((p, q) => sevRank(q) - sevRank(p))[0];
       try { playAlert(worst); } catch (_) {}
@@ -2888,43 +2887,32 @@
     const el = $('#jpOddsStatus'); if (!el) return;
     if (kind === 'linked') {
       el.innerHTML = `<div class="hint" style="padding:8px 10px;background:rgba(56,211,159,.14);border-left:3px solid #38d39f;border-radius:6px;color:#38d39f">
-        ✅ <b>실시간 배당 연결 — 단승 급락 우선 이상감지</b> · <b>${esc(rk || '')}</b></div>`;
+        ✅ <b>실시간 배당 연결 — 복승·쌍승·삼복승 이상감지</b> · <b>${esc(rk || '')}</b></div>`;
     } else {
       el.innerHTML = `<div class="hint" style="padding:8px 10px;background:rgba(245,158,11,.12);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b">
-        🟡 <b>배당 수집 대기중</b> — Chrome 확장(종목=일본경마)에서 raceKey를 설정하고 <b>[⚡ 전체 자동 수집]</b>을 실행하세요. 단승→복승→쌍승이 30초 간격으로 연동됩니다.</div>`;
+        🟡 <b>배당 수집 대기중</b> — Chrome 확장(종목=일본경마)에서 raceKey를 설정하고 <b>[⚡ 전체 자동 수집]</b>을 실행하세요. 복승·쌍승·삼복승이 30초 간격으로 연동됩니다.</div>`;
     }
   }
 
-  /** 단승 급락 우선 이상감지 신호 렌더 */
+  /** 복승/쌍승 급락·역전 이상감지 신호 렌더 (단승 제거) */
   function renderJapanSignals(signals) {
-    const rel = (signals || []).filter((s) => s.type === '단승급락' || s.type === '급락' || s.type === '역전');
+    const rel = (signals || []).filter((s) => s.type === '급락' || s.type === '역전');
     if (!rel.length) return '';
-    const ordered = rel.slice().sort((x, y) => (y.type === '단승급락') - (x.type === '단승급락'));
-    const rows = ordered.map((s) => `<div style="margin:3px 0"><b>${s.level}</b> ${s.type === '단승급락' ? '🔥 ' : ''}${esc(s.text)} <span class="hint">${esc(s.detail || '')}</span></div>`).join('');
-    return `<div class="matrix-title" style="font-size:13px;margin-top:8px">⚠️ 이상감지 (일본: 단승 급락 우선 · 복승/쌍승 보조)</div>${rows}`;
+    const rows = rel.map((s) => `<div style="margin:3px 0"><b>${s.level}</b> ${esc(s.text)} <span class="hint">${esc(s.detail || '')}</span></div>`).join('');
+    return `<div class="matrix-title" style="font-size:13px;margin-top:8px">⚠️ 이상감지 (일본: 복승·쌍승·삼복승)</div>${rows}`;
   }
 
-  /** 실시간 배당 통합분석 결과 렌더(단승 순위·급락·유력마·베팅) */
+  /** 실시간 배당 통합분석 결과 렌더(유력마·이상감지·베팅) — 단승 제거 */
   function renderJapanIntegrated(a) {
     const host = $('#jpIntegrated'); if (!host) return;
     if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
     state.jpLastInteg = a;   // [1번] 예산 변경 시 베팅 금액 재계산용
     const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
-    const single = a.single || {};
-    const ranking = a.singleRanking || [];
-    const singleHtml = ranking.length ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">🏆 단승 배당 순위 (낮을수록 인기)</div>
-      <table class="data-table" style="margin-top:4px"><thead><tr><th>순위</th><th>마번</th><th>단승배당</th></tr></thead>
-      <tbody>${ranking.map((no, i) => `<tr><td>${i + 1}</td><td>${no}</td><td><b>${single[no] != null ? single[no] + '배' : '-'}</b></td></tr>`).join('')}</tbody></table>` : '';
-    const sd = a.singleDrops || [];
-    const sdHtml = sd.length ? `<div class="matrix-title" style="font-size:13px">🔥 단승 급락 (가장 강한 자금 유입 신호)</div>
-      ${sd.map((d) => `<div style="margin:3px 0"><b>${d.no}번</b> 단승 ${d.prev}→${d.cur} <b style="color:${d.pct < 0 ? '#ff5c5c' : '#ffd24f'}">(${d.pct}%)</b></div>`).join('')}` : '';
     // [1번] 전적 점수별 말 목록(출마표2 등급표) + 제거 분석(읽기전용) 복원
     const formHtml = renderFormGrades(a.form);
     const elimHtml = renderEliminationHTML(a.elimination, new Set()).replace('id="elimPanel"', 'id="jpElimPanel"');
     host.innerHTML = `<div class="panel-card">
       <h3>🔗 실시간 배당 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
-      ${sdHtml}
-      ${singleHtml}
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
       ${formHtml}
       ${elimHtml}
@@ -2949,7 +2937,7 @@
     }
     const rows = tl.map((e) => {
       const badge = e.changed ? e.signals.map((s) => s.level).join('') : '<span class="hint">변동 없음</span>';
-      const summary = e.changed ? e.signals.map((s) => (s.type === '단승급락' ? '🔥' : '') + esc(s.text)).join(' · ') : '';
+      const summary = e.changed ? e.signals.map((s) => esc(s.text)).join(' · ') : '';
       return `<div style="padding:4px 6px;border-left:3px solid ${e.changed ? '#f59e0b' : 'transparent'};border-radius:4px">
         <b>${e.time}</b> ${badge} <span class="hint">${summary}</span></div>`;
     }).reverse().join('');
