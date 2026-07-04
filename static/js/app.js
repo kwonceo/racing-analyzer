@@ -3015,11 +3015,34 @@
       </table>`;
   }
 
-  function renderKoreaSignals(signals) {
-    const rel = (signals || []).filter((s) => s.type === '마감급락');
+  // [3번] 이상감지 UI 단순화: 신호를 🔴상/🟡중/🟢하 3단계로 묶어 '종합 한눈에' + 상위 3건만 표시.
+  //   (정보 삭제 아님 — 상세 사유는 접기/툴팁으로 보존)
+  function _signalTier(level) {
+    if (level === '🔴') return { key: '상', icon: '🔴', color: '#ff5c5c', rank: 3 };
+    if (level === '🟠' || level === '🔄') return { key: '중', icon: '🟡', color: '#ffd24f', rank: 2 };
+    return { key: '하', icon: '🟢', color: '#38d39f', rank: 1 };
+  }
+  function renderSignalsSimple(signals, title, filterFn) {
+    const rel = (signals || []).filter(filterFn);
     if (!rel.length) return '';
-    const rows = rel.map((s) => `<div style="margin:3px 0"><b>${s.level}</b> ${esc(s.text)} <span class="hint">${esc(s.detail || '')}</span></div>`).join('');
-    return `<div class="matrix-title" style="font-size:13px;margin-top:8px">⏱ 마감 임박 급락 (한국경마 기준: 10분전 20%↑🟡 / 5분전 15%↑🟠 / 2분전 10%↑🔴)</div>${rows}`;
+    const cnt = { 상: 0, 중: 0, 하: 0 };
+    rel.forEach((s) => { cnt[_signalTier(s.level).key]++; });
+    const chip = (k, icon, color) => cnt[k] ? `<b style="color:${color}">${icon} ${k} ${cnt[k]}</b>` : '';
+    const summary = ['상', '중', '하'].map((k) => {
+      const t = _signalTier(k === '상' ? '🔴' : k === '중' ? '🟠' : '🟡');
+      return chip(k, t.icon, t.color);
+    }).filter(Boolean).join(' · ') || '<span class="hint">없음</span>';
+    const sorted = rel.slice().sort((a, b) => _signalTier(b.level).rank - _signalTier(a.level).rank);
+    const shown = sorted.slice(0, 3).map((s) => {
+      const t = _signalTier(s.level);
+      return `<div style="margin:2px 0" title="${esc(s.detail || '')}"><b style="color:${t.color}">${t.icon}</b> ${esc(s.text)}</div>`;
+    }).join('');
+    const more = sorted.length > 3 ? `<div class="hint">외 ${sorted.length - 3}건 (마우스 올리면 사유 표시)</div>` : '';
+    return `<div class="matrix-title" style="font-size:13px;margin-top:8px">${title} · 종합 ${summary}</div>${shown}${more}`;
+  }
+
+  function renderKoreaSignals(signals) {
+    return renderSignalsSimple(signals, '⏱ 마감 임박 급락', (s) => s.type === '마감급락');
   }
 
   /** 통합분석 결과(제거분석·유력마·통합등급·베팅·마감급락) 렌더 — 한글 데이터 그대로 */
@@ -3119,12 +3142,9 @@
     }
   }
 
-  /** 복승/쌍승 급락·역전 이상감지 신호 렌더 (단승 제거) */
+  /** 복승/쌍승 급락·역전 이상감지 신호 렌더 (단승 제거) — [3번] 🔴상/🟡중/🟢하 단순화 */
   function renderJapanSignals(signals) {
-    const rel = (signals || []).filter((s) => s.type === '급락' || s.type === '역전');
-    if (!rel.length) return '';
-    const rows = rel.map((s) => `<div style="margin:3px 0"><b>${s.level}</b> ${esc(s.text)} <span class="hint">${esc(s.detail || '')}</span></div>`).join('');
-    return `<div class="matrix-title" style="font-size:13px;margin-top:8px">⚠️ 이상감지 (일본: 복승·쌍승·삼복승)</div>${rows}`;
+    return renderSignalsSimple(signals, '⚠️ 이상감지 (복승·쌍승·삼복승)', (s) => s.type === '급락' || s.type === '역전');
   }
 
   /** 실시간 배당 통합분석 결과 렌더(유력마·이상감지·베팅) — 단승 제거 */
