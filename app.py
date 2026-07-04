@@ -1366,8 +1366,10 @@ def _fav_score(ftotal, o, jk_rate):
     return round(form_sub * 0.4 + conf_sub * 0.3 + jk_sub * 0.2 + apt_sub * 0.1, 1)
 
 
-def _elim_score(o, avg_place, jk_rate, has_drop30, in_top_exa):
-    """[2번] 제거 점수(기본 100에서 감점 + 이변 보류 가점). 낮을수록 제거 대상."""
+def _elim_score(o, avg_place, jk_rate, has_drop30, in_top_exa, no_dist_exp=False):
+    """[2번] 제거 점수(기본 100에서 감점 + 이변 보류 가점). 낮을수록 제거 대상.
+    no_dist_exp=True → '현재 거리 경험 없음 -15'. 거리 이력 데이터 확보 시
+    호출부(_elimination)가 마별 플래그를 넘기면 자동 활성화(현재는 데이터 미수집→기본 False)."""
     score = 100
     reasons = []
     if o is None or o >= 150:
@@ -1382,7 +1384,9 @@ def _elim_score(o, avg_place, jk_rate, has_drop30, in_top_exa):
     if jk_rate is not None and jk_rate < 10:
         score -= 10
         reasons.append(f"기수 복승률 {jk_rate}% -10")
-    # (현재 거리 경험 없음 -15: 거리 이력 데이터 확보 시 반영 — 현재는 미적용)
+    if no_dist_exp:
+        score -= 15
+        reasons.append("현재 거리 경험 없음 -15")
     if has_drop30:
         score += 30
         reasons.append("배당 급락 30%+ +30(제거 보류)")
@@ -1436,7 +1440,10 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None):
         in_top_exa = no in top_exa
 
         # [2번] 제거 점수(신 공식) → verdict 구동
-        total, elim_reasons = _elim_score(o, avg_place, jk_rate, has_drop30, in_top_exa)
+        #   거리경험 플래그: 전적표에 현재 거리 주행 이력이 명시적으로 '없음'일 때만 True.
+        #   (현재 거리 이력 미수집 → fh.noDistExp 부재 시 None→False, 감점 미적용)
+        no_dist_exp = bool(fh.get("noDistExp")) if fh else False
+        total, elim_reasons = _elim_score(o, avg_place, jk_rate, has_drop30, in_top_exa, no_dist_exp)
         if total < 30:
             verdict, label, keep = "🔴", "확실 제거", False
         elif total < 50:
