@@ -2558,6 +2558,8 @@
         <input id="resIn1" class="cfg-input" type="number" placeholder="1착" style="width:70px">
         <input id="resIn2" class="cfg-input" type="number" placeholder="2착" style="width:70px">
         <input id="resIn3" class="cfg-input" type="number" placeholder="3착" style="width:70px">
+        <input id="resIn4" class="cfg-input" type="number" placeholder="4착" style="width:70px" title="삼복승 아깝게 미적중(추천 말 4착) 학습용">
+        <span class="hint">4착=거의적중 학습</span>
         <label class="hint">투자금액(원)<br><input id="resStake" class="cfg-input" type="number" min="0" step="100" value="${_defaultStake()}" style="width:110px"></label>
         <label class="hint">실수령 배당금(원)<br><input id="resPayout" class="cfg-input" type="number" min="0" step="100" placeholder="적중 시 실수령액" style="width:130px"></label>
         <button id="resSaveBtn" class="btn btn-primary">결과 저장 + 학습</button>
@@ -2574,11 +2576,12 @@
 
   async function recordResult(rk, file) {
     const g = (id) => parseInt(($(id) || {}).value, 10);
-    const r1 = g('#resIn1'), r2 = g('#resIn2'), r3 = g('#resIn3');
+    const r1 = g('#resIn1'), r2 = g('#resIn2'), r3 = g('#resIn3'), r4 = g('#resIn4');
     if (!r1) { $('#resMsg').textContent = '최소 1착은 입력하세요.'; return; }
     const stake = parseInt(($('#resStake') || {}).value, 10) || 1000;
     if (stake > 0) localStorage.setItem('bmed_default_stake', String(stake));   // 기본값 기억
     const result = {}; if (r1) result['1st'] = r1; if (r2) result['2nd'] = r2; if (r3) result['3rd'] = r3;
+    if (r4) result['4th'] = r4;   // [4착] 삼복승 아깝게 미적중 학습
     // [보완#3] 실수령 배당금(선택) — 입력 시 서버가 추정 대신 실제 손익 계산. 공란이면 확정배당 추정.
     const payoutRaw = ($('#resPayout') || {}).value;
     const payload = { raceKey: rk, result, stake };
@@ -2600,6 +2603,8 @@
     catch (e) { el.innerHTML = `<p class="hint">${esc(e.message)}</p>`; return; }
     // [2번] 부진마 역전 학습(전적 기반)도 함께 조회
     let up = null; try { up = await (await fetch('/api/learning/upset')).json(); } catch (_) { /* */ }
+    // [4착] near-miss(추천 말 4착) 케이스 + 4착 빈번 말
+    let nm = null; try { nm = await (await fetch('/api/learning/near-miss')).json(); } catch (_) { /* */ }
     // [전체데이터·패턴발견] 적중 경주 공통점 자동 발견 + 데이터 충분도
     let disc = null; try { disc = await (await fetch('/api/patterns/discovered')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
@@ -2612,6 +2617,7 @@
       ${card('쌍승 역전 적중률', s.reversal)}
       ${card('전적 유력마 적중률', s.form_pick)}
       ${card('제거 판정 적중률', s.elimination)}
+      ${renderNearMissStats(s.near_miss, nm)}
       ${renderDiscoveredPatterns(disc)}
       ${renderPatternStats(s.pattern_stats)}
       ${renderDropTiming(s.drop_timing)}
@@ -2645,6 +2651,21 @@
         ${cell('🏇 전적 기반 추천', cs.form, '#4ea1ff')}
         ${cell('🎯 최종 추천(블렌드)', cs.final, '#38d39f')}
       </div></div>`;
+  }
+
+  /** [4착] 아깝게 4착(추천 말 4착=거의 적중) 건수 + 4착 빈번 말(삼복승 보험픽 우선). */
+  function renderNearMissStats(nmStat, nm) {
+    const cnt = (nmStat && nmStat.n) || 0;
+    const freq = (nm && nm.frequent) || [];
+    if (!cnt && !freq.length) return '';
+    const freqTxt = freq.length
+      ? freq.slice(0, 8).map((f) => `<span class="chip">${esc(f.name)} <b>${f.count}회</b></span>`).join(' ')
+      : '<span class="hint">아직 없음(2회+ 4착 시 표시)</span>';
+    return `<div class="bet-box" style="display:block;margin:4px 0 10px">
+      <b>🟡 삼복승 아깝게 4착 (거의 적중)</b> <span class="hint" style="font-weight:400">추천 말이 4착으로 아깝게 미적중한 케이스</span><br>
+      <span style="font-size:18px;color:#ffd24f;font-weight:700">${cnt}건</span>${(nmStat && nmStat.trio_near) ? ` <span class="hint">(삼복승 근접 ${nmStat.trio_near}건)</span>` : ''}
+      <div class="hint" style="margin-top:6px">🎯 <b>4착 빈번 말</b>(다음 경주 삼복승 보험픽 우선 고려): ${freqTxt}</div>
+    </div>`;
   }
 
   /** [#5] 누적 손익 요약 카드 — 실제 투자금액 기반 순손익·ROI·적중. */
@@ -3800,7 +3821,7 @@
           <div class="cfg-row" style="margin-top:8px">
             <label class="hint">날짜<br><input class="cfg-input res-date" type="date" value="${todayStr()}" /></label>
             <label class="hint">투자금액(원)<br><input class="cfg-input res-stake" type="number" min="0" step="100" value="${c.budget || 0}" style="width:120px" /></label>
-            <label class="hint">1·2·3착(콤마)<br><input class="cfg-input res-place" placeholder="3,7,1" style="width:120px" /></label>
+            <label class="hint">1·2·3·4착(콤마)<br><input class="cfg-input res-place" placeholder="3,7,1,5" style="width:130px" /></label>
             <label class="hint">수익금액(원)<br><input class="cfg-input res-payout" type="number" min="0" step="100" value="0" style="width:120px" /></label>
             <button class="btn btn-primary save-result-btn">결과 저장</button>
           </div>
@@ -4463,6 +4484,7 @@
         <label class="hint">1착 <input id="jpRes1" class="cfg-input" type="number" min="1" style="width:60px" value="${vv(res['1st'])}"></label>
         <label class="hint">2착 <input id="jpRes2" class="cfg-input" type="number" min="1" style="width:60px" value="${vv(res['2nd'])}"></label>
         <label class="hint">3착 <input id="jpRes3" class="cfg-input" type="number" min="1" style="width:60px" value="${vv(res['3rd'])}"></label>
+        <label class="hint">4착 <input id="jpRes4" class="cfg-input" type="number" min="1" style="width:60px" value="${vv(res['4th'])}" title="추천 말이 4착이면 '아깝게 미적중' 학습"></label>
       </div>
       <div class="cfg-row" style="gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px">
         <label class="hint">투자금액 <input id="jpStake" class="cfg-input" type="number" min="0" step="1000" style="width:100px" value="${vv(hit.stake || 1000)}">원</label>
@@ -4480,6 +4502,7 @@
       signal_correct: hit.signal_correct || [], anomaly_was_correct: hit.anomaly_was_correct,
       form_pick: hit.form_pick, form_pick_hit: hit.form_pick_hit,
       elimination_correct: hit.elimination_correct, pnl: hit.pnl, stake: hit.stake,
+      near_miss: hit.near_miss, near_miss_horse: hit.near_miss_horse, result4: (d.result || {})['4th'],
     }, rk);
     return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px">
       <div class="matrix-title">${esc(d.race || rk)} <span class="hint" style="font-weight:400">${esc(d.date || '')} · 분석 ${esc(d.analyzed_at || '')}</span></div>
@@ -4502,8 +4525,9 @@
     return `<div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:10px;background:rgba(56,189,248,.06)">
       <div class="matrix-title">🧾 ${esc(rk)} 복기</div>
       <div>추천: <b>${esc(rep.recommend || '-')}</b></div>
-      <div>결과: <b>1착 ${r['1st'] != null ? r['1st'] : '?'}번 / 2착 ${r['2nd'] != null ? r['2nd'] : '?'}번 / 3착 ${r['3rd'] != null ? r['3rd'] : '?'}번</b></div>
+      <div>결과: <b>1착 ${r['1st'] != null ? r['1st'] : '?'}번 / 2착 ${r['2nd'] != null ? r['2nd'] : '?'}번 / 3착 ${r['3rd'] != null ? r['3rd'] : '?'}번${(r['4th'] != null || rep.result4 != null) ? ` / 4착 ${r['4th'] != null ? r['4th'] : rep.result4}번` : ''}</b></div>
       <div style="margin-top:4px">판정: 복승 ${yn(rep.quinella_hit)} · 삼복승 ${yn(rep.trifecta_hit)}</div>
+      ${rep.near_miss ? `<div style="margin-top:4px;color:#ffd24f">🟡 <b>아깝게 4착 - 거의 적중</b>${rep.near_miss_horse != null ? ` (추천 ${rep.near_miss_horse}번이 4착)` : ''} → 삼복승 보험픽 학습 반영</div>` : ''}
       <div class="matrix-title" style="font-size:12px;margin-top:8px">이상감지 분석</div>${anomalyLines}
       ${formLine}${pnlHtml}</div>`;
   }
@@ -4513,9 +4537,11 @@
     const g = (id) => { const e = document.querySelector(id); return e ? e.value.trim() : ''; };
     const n1 = g('#jpRes1'), n2 = g('#jpRes2'), n3 = g('#jpRes3');
     if (!n1) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '최소 1착은 입력하세요'; } return; }
+    const n4 = g('#jpRes4');
     const result = {}; result['1st'] = parseInt(n1, 10);
     if (n2) result['2nd'] = parseInt(n2, 10);
     if (n3) result['3rd'] = parseInt(n3, 10);
+    if (n4) result['4th'] = parseInt(n4, 10);   // [4착] 아깝게 미적중 학습
     const stake = g('#jpStake'), payout = g('#jpPayout');
     const payload = { raceKey: rk, result };
     if (stake) payload.stake = parseInt(stake, 10);
@@ -4532,6 +4558,7 @@
       signal_correct: rec.signal_correct || [], anomaly_was_correct: rec.anomaly_was_correct,
       form_pick: rec.form_pick, form_pick_hit: rec.form_pick_hit,
       elimination_correct: rec.elimination_correct, pnl: rec.pnl, stake: rec.stake,
+      near_miss: rec.near_miss, near_miss_horse: rec.near_miss_horse, result4: (rec.result || result)['4th'],
     };
     const rc = document.querySelector('#jpReport'); if (rc) rc.innerHTML = renderJapanReviewReport(rep, rk);
     // [4번] 통계 자동 업데이트(적중률·이상감지 패턴·손익)

@@ -1226,6 +1226,22 @@ def anomaly_feed():
     return jsonify({"raceKey": rk, "events": events})
 
 
+@app.route("/api/learning/near-miss", methods=["GET"])
+def learning_near_miss():
+    """[2·3번] 4착 near-miss 케이스 + 4착 빈번(2회+) 말 목록(다음 경주 삼복승 보험픽 우선 고려)."""
+    d = _near_miss_load()
+    cases = sorted(d.get("cases", []), key=lambda c: -(c.get("t") or 0))
+    cnt = {}
+    for c in cases:
+        nm = (c.get("name") or "").strip()
+        if nm:
+            cnt[nm] = cnt.get(nm, 0) + 1
+    frequent = sorted([{"name": k, "count": v} for k, v in cnt.items() if v >= 2],
+                      key=lambda x: -x["count"])
+    return jsonify({"cases": cases, "count": len(cases), "frequent": frequent,
+                    "note": "추천 말이 4착(아깝게 미적중)한 경주 — 4착 빈번 말은 삼복승 보험픽 우선 고려"})
+
+
 @app.route("/api/after-close/cases", methods=["GET"])
 def after_close_cases():
     """[4번] 마감(T-0) 후 감지되어 베팅 반영 불가했던 신호 케이스 목록 → 수집 간격 단축 필요성 근거."""
@@ -1929,6 +1945,49 @@ def _record_after_close_case(rk, date, mb_signed, anomalies):
     _after_close_save(d)
 
 
+# ───────── [4착 near-miss] 삼복승 아깝게 미적중(추천 말 4착) 학습 ─────────
+NEAR_MISS_FILE = os.path.join(os.path.dirname(__file__), "data", "near_miss.json")
+
+
+def _near_miss_load():
+    try:
+        return json.load(open(NEAR_MISS_FILE, encoding="utf-8"))
+    except Exception:
+        return {"cases": []}
+
+
+def _near_miss_save(d):
+    os.makedirs(os.path.dirname(NEAR_MISS_FILE), exist_ok=True)
+    json.dump(d, open(NEAR_MISS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _record_near_miss(rk, date, no, name):
+    """[2·3번] 추천 말이 4착(아깝게 미적중)한 케이스 저장. 경주별 1건."""
+    d = _near_miss_load()
+    cases = d.setdefault("cases", [])
+    payload = {"raceKey": rk, "date": date, "no": no, "name": (name or "").strip(), "t": time.time()}
+    existing = next((c for c in cases if c.get("raceKey") == rk and c.get("date") == date), None)
+    if existing:
+        existing.update(payload)
+    else:
+        cases.append(payload)
+    d["cases"] = cases[-1000:]
+    _near_miss_save(d)
+
+
+def _near_miss_frequent(min_count=2):
+    """4착 빈번(min_count회+) 말 이름 집합 → 다음 경주 삼복승 보험픽 우선 고려."""
+    try:
+        cnt = {}
+        for c in _near_miss_load().get("cases", []):
+            nm = (c.get("name") or "").strip()
+            if nm:
+                cnt[nm] = cnt.get(nm, 0) + 1
+        return {nm for nm, n in cnt.items() if n >= min_count}
+    except Exception:
+        return set()
+
+
 def _deadline_phase_label(mb, after_close):
     """이상감지 신호의 유효 시점 라벨. 마감 후=회색 표시용."""
     if after_close:
@@ -2309,6 +2368,22 @@ def _triple_analyze(rk, rec):
     integrated_adaptive = _integrated_adaptive(form, curQ, curD, excess, situation)
     for h in integrated_adaptive or []:
         h["win"] = curWin.get(h.get("no"))
+    # [4착 학습] 4착 빈번 말이 이번 출전마에 있으면 삼복승 보험픽 우선 추가(마감 전만·기존 조합 유지)
+    try:
+        _freq = _near_miss_frequent()
+        if _freq and not after_close and len(key_horses) >= 2:
+            for _h in (form or []):
+                _nm, _no = (_h.get("name") or "").strip(), _h.get("no")
+                if _nm and _nm in _freq and _no is not None and _no not in key_horses:
+                    _trio = sorted([int(key_horses[0]), int(key_horses[1]), int(_no)])
+                    if not any(b.get("kind") == "삼복승" and sorted(b["combo"]) == _trio for b in bet_rec):
+                        bet_rec.append({"kind": "삼복승", "label": "삼복승 보험(4착빈번)", "combo": _trio,
+                                        "alloc": 3, "expOdds": trio_map.get(tuple(_trio)),
+                                        "nearMissPick": True, "nearMissHorse": _no})
+                    break
+    except Exception as _e:
+        print("[4착학습] 보험픽 실패:", _e)
+
     # [비교학습] 이상감지/전적/최종 추천 조합 3종 + 현재 통합 가중치(학습 조정 반영)
     compare_recommend = _compare_recommend(form, key_horses, excess, drops, bet_rec)
     _iw_fw, _iw_ow = _learned_integrated_weights()
@@ -3240,6 +3315,9 @@ def _recompute_learning_stats(records):
         # [비교학습] 이상감지/전적/최종 추천별 적중률 + 현재 통합 가중치(50경주+ 자동 조정)
         "compare_stats": compare_stats,
         "integrated_weights": integrated_weights,
+        # [4착] 아깝게 미적중(추천 말 4착) 건수 + 삼복승 근접 건수
+        "near_miss": {"n": sum(1 for r in records if r.get("near_miss")),
+                      "trio_near": sum(1 for r in records if r.get("trio_near_miss"))},
     }
 
 
@@ -3320,6 +3398,35 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     cmp_anomaly_hit = _cmp_hit(cmp_rec.get("anomaly"))
     cmp_form_hit = _cmp_hit(cmp_rec.get("form"))
     cmp_final_hit = _cmp_hit(cmp_rec.get("final"))
+
+    # [2·3번] 4착 near-miss: 추천 말(삼복승 조합)이 4착 → '아깝게 미적중' 별도 기록
+    try:
+        _t4 = result.get("4th")
+        top4 = int(_t4) if _t4 not in (None, "") else None
+    except (TypeError, ValueError):
+        top4 = None
+    rec_horses = set()
+    for b in rec_bets:
+        for x in b.get("combo", []):
+            rec_horses.add(int(x))
+    trio_near = False   # 추천 삼복승 2두 top3 + 나머지 1두가 정확히 4착 → '거의 적중'
+    for b in rec_bets:
+        if b.get("kind") == "삼복승":
+            cc = [int(x) for x in b.get("combo", [])]
+            in3 = [x for x in cc if x in top3s]
+            out = [x for x in cc if x not in top3s]
+            if len(in3) == 2 and len(out) == 1 and top4 is not None and out[0] == top4:
+                trio_near = True
+                break
+    near_miss_horse = top4 if (top4 is not None and (top4 in rec_horses or trio_near)) else None
+    near_miss = bool(near_miss_horse)
+    _name_by = {h.get("no"): h.get("name") for h in (an.get("form") or [])}
+    near_miss_name = _name_by.get(near_miss_horse) if near_miss_horse is not None else None
+    if near_miss:
+        try:
+            _record_near_miss(rk, time.strftime("%Y-%m-%d"), near_miss_horse, near_miss_name)
+        except Exception as e:
+            print("[4착학습] near-miss 저장 실패:", e)
     fo = final_odds if isinstance(final_odds, dict) else {}
 
     def _odds_val(x):  # 확장은 {combo,odds} 중첩, 수동입력은 숫자 → 둘 다 허용
@@ -3418,6 +3525,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         # [비교학습] 이상감지/전적/최종 추천별 적중 여부 + 조합(통계 누적·가중치 조정 근거)
         "cmp_anomaly_hit": cmp_anomaly_hit, "cmp_form_hit": cmp_form_hit, "cmp_final_hit": cmp_final_hit,
         "cmp_recommend": cmp_rec,
+        # [2·3번] 4착 near-miss(추천 말 4착=아깝게 미적중) — 통계·보험픽 학습 근거
+        "top4": top4, "near_miss": near_miss, "near_miss_horse": near_miss_horse,
+        "near_miss_name": near_miss_name, "trio_near_miss": trio_near,
         "t": time.time(),
     }
     L = _learning_load()
@@ -3442,6 +3552,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             "signal_correct": signal_correct, "elimination_correct": elimination_correct,
             "eliminated": eliminated_nos, "form_pick": form_pick, "form_pick_hit": form_pick_hit,
             "pnl": pnl, "stake": stake,   # [일본경마 복기] 재조회 시 손익 그대로 표시
+            "near_miss": near_miss, "near_miss_horse": near_miss_horse,  # [4착] 아깝게 미적중
         }
         json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     except Exception as e:
