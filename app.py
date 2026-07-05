@@ -2343,14 +2343,17 @@ def _advanced_anomaly(hist, curQ, drops):
             out["horseConfAdj"][int(h)] = out["horseConfAdj"].get(int(h), 0) + pts
 
     # ① 급락 속도 = 급락폭 / 수집간격(분). 분당 10%+ 강한 신호(🔴), 5%+ 주의(🟡)
+    #   [보완] 마감 임박 짧은 간격(5초 등)에서 -5% 블립이 분당 60%로 과대평가되던 문제 →
+    #   간격 하한(0.25분) + '절대 급락폭'도 함께 요구(🔴 abs≥15%, 🟡 abs≥8%)해 과대 신호 제거.
     gap_min = None
     if len(times) >= 2 and times[-1] and times[-2]:
-        gap_min = max(0.1, round((times[-1] - times[-2]) / 60.0, 2))
+        gap_min = max(0.25, round((times[-1] - times[-2]) / 60.0, 2))
     if gap_min:
         for d in (drops or []):
             if d.get("pct") is not None and d["pct"] < 0:
                 speed = round(abs(d["pct"]) / gap_min, 1)
-                lvl = "🔴" if speed >= 10 else ("🟡" if speed >= 5 else None)
+                amag = abs(d["pct"])
+                lvl = "🔴" if (speed >= 10 and amag >= 15) else ("🟡" if (speed >= 5 and amag >= 8) else None)
                 if lvl:
                     out["velocity"].append({"combo": d["combo"], "pct": d["pct"],
                                             "minutes": gap_min, "speed": speed, "level": lvl})
@@ -4275,29 +4278,32 @@ def _recompute_learning_stats(records):
     integrated_weights = {"form": _fw, "anomaly": _ow, "adjusted": _adjusted,
                           "sample": min(_a.get("n") or 0, _f.get("n") or 0), "need": 50}
 
-    # [5번] 경마장별·월별 적중률/수익 자동 집계
-    by_track, by_month = {}, {}
+    # [5번] 경마장별·월별 + [전략 성과 학습] 전략별 적중률/수익 자동 집계
+    by_track, by_month, by_strategy = {}, {}, {}
     for r in records:
         rk = r.get("race") or ""
         track, _ = _area_num(rk)
         m = re.search(r"(\d{4}-\d{2})", rk)
         month = m.group(1) if m else None
+        strat = r.get("bmed_strategy")
+        if r.get("inverse_detected") and not strat:
+            strat = "역배열형"
         pnl = int(r.get("pnl") or 0) if r.get("pnl") is not None else 0
         hit = 1 if r.get("was_hit") else 0
-        for bucket, key in ((by_track, track), (by_month, month)):
+        for bucket, key in ((by_track, track), (by_month, month), (by_strategy, strat)):
             if not key:
                 continue
             d = bucket.setdefault(key, {"n": 0, "hit": 0, "profit": 0})
             d["n"] += 1
             d["hit"] += hit
             d["profit"] += pnl
-    for bucket in (by_track, by_month):
+    for bucket in (by_track, by_month, by_strategy):
         for d in bucket.values():
             d["rate"] = round(d["hit"] / d["n"] * 100, 1) if d["n"] else None
 
     return {
         "total": len(records),
-        "by_track": by_track, "by_month": by_month,   # [5번] 경마장별·월별
+        "by_track": by_track, "by_month": by_month, "by_strategy": by_strategy,   # [5번]·[전략성과]
         "profit_summary": profit_summary,
         "recommend_hit": _rate(records, lambda r: True, lambda r: r.get("was_hit")),
         "drop_anomaly": _rate(records, lambda r: r.get("anomalies_detected"),
@@ -4567,6 +4573,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         "near_miss_name": near_miss_name, "trio_near_miss": trio_near,
         # [1번] 적중 근거 요약(전적점수·급락점수+폭·역배열·최종신뢰도·한줄근거)
         "hit_basis": hit_basis,
+        # [전략 성과 학습] 적용된 BMED 전략·역배열 여부(전략별 적중률 집계 근거)
+        "bmed_strategy": ((an.get("bmed") or {}).get("strategy")),
+        "inverse_detected": bool((an.get("inverse") or {}).get("detected")),
         "t": time.time(),
     }
     L = _learning_load()

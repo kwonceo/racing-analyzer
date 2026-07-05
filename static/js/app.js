@@ -2719,17 +2719,17 @@
       ${card('전적 유력마 적중률', s.form_pick)}
       ${card('제거 판정 적중률', s.elimination)}
       ${renderNearMissStats(s.near_miss, nm)}
-      ${renderTrackMonthStats(s.by_track, s.by_month)}
+      ${renderTrackMonthStats(s.by_track, s.by_month, s.by_strategy)}
       ${renderDiscoveredPatterns(disc)}
       ${renderPatternStats(s.pattern_stats)}
       ${renderDropTiming(s.drop_timing)}
       ${renderUpsetStats(up)}`;
   }
 
-  // [5번] 경마장별·월별 적중률/수익 집계 표시
-  function renderTrackMonthStats(byTrack, byMonth) {
+  // [5번]·[전략성과] 경마장별·월별·전략별 적중률/수익 집계 표시
+  function renderTrackMonthStats(byTrack, byMonth, byStrategy) {
     const has = (o) => o && Object.keys(o).length;
-    if (!has(byTrack) && !has(byMonth)) return '';
+    if (!has(byTrack) && !has(byMonth) && !has(byStrategy)) return '';
     const won = (n) => (n || 0).toLocaleString() + '원';
     const col = (v) => (v >= 0 ? '#38d39f' : '#f87171');
     const rows = (o) => Object.entries(o).sort((a, b) => (b[1].n || 0) - (a[1].n || 0)).map(([k, v]) =>
@@ -2737,7 +2737,7 @@
     const tbl = (title, o) => has(o) ? `<div style="display:inline-block;vertical-align:top;margin:4px 10px 4px 0">
       <div class="hint" style="font-weight:700;margin-bottom:2px">${title}</div>
       <table class="data-table"><thead><tr><th>구분</th><th>경주</th><th>적중</th><th>적중률</th><th>손익</th></tr></thead><tbody>${rows(o)}</tbody></table></div>` : '';
-    return `<div style="margin:8px 0"><div class="matrix-title" style="font-size:14px">📊 경마장별 · 월별 성과</div>${tbl('🏟️ 경마장별', byTrack)}${tbl('📅 월별', byMonth)}</div>`;
+    return `<div style="margin:8px 0"><div class="matrix-title" style="font-size:14px">📊 경마장별 · 월별 · 전략별 성과</div>${tbl('🏟️ 경마장별', byTrack)}${tbl('📅 월별', byMonth)}${tbl('🎯 BMED 전략별', byStrategy)}</div>`;
   }
 
   /** [비교학습] 이상감지 vs 전적 vs 최종 추천 적중률 + 통합 가중치 자동 조정 상태. */
