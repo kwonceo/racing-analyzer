@@ -192,6 +192,8 @@ def fetch_races(d_from, d_to, meets, key):
             for it in items:
                 rc_no = str(it.get("rcNo") or it.get("rc_no") or "")
                 rkey = f"{meet}_{date}_{rc_no}"
+                # [보완#3] 경주 거리(m) — 엔드포인트별 필드명 방어. 없으면 None(거리경험 훅 비활성 유지).
+                rc_dist = _num(it.get("rcDist") or it.get("rc_dist") or it.get("distance") or it.get("rcLength"))
                 horse = {
                     "stOrd": _num(it.get("stOrd") or it.get("ord")),      # 착순
                     "no": _num(it.get("chulNo")),                          # 마번(출전번호)
@@ -206,7 +208,10 @@ def fetch_races(d_from, d_to, meets, key):
                     "wgBudam": it.get("wgBudam"),                          # 부담중량
                     "hrRating": _num(it.get("hrRating")),                  # 레이팅
                 }
-                rec = races.setdefault(rkey, {"meet": meet, "date": date, "rcNo": rc_no, "horses": []})
+                rec = races.setdefault(rkey, {"meet": meet, "date": date, "rcNo": rc_no,
+                                              "rcDist": rc_dist, "horses": []})
+                if rec.get("rcDist") is None and rc_dist is not None:
+                    rec["rcDist"] = rc_dist   # 기존 레코드 백필
                 # 같은 마번 중복 방지
                 if not any(h.get("no") == horse["no"] for h in rec["horses"]):
                     rec["horses"].append(horse)
@@ -218,7 +223,7 @@ def fetch_races(d_from, d_to, meets, key):
                     tag = f"{date}_{meet}_{rc_no}"
                     if not any(x.get("_tag") == tag for x in arr):
                         arr.append({"_tag": tag, "date": date, "meet": meet, "rcNo": rc_no,
-                                    "stOrd": horse["stOrd"], "win": horse["win"],
+                                    "stOrd": horse["stOrd"], "win": horse["win"], "rcDist": rc_dist,
                                     "jkName": horse["jkName"], "hrRating": horse["hrRating"]})
             print(f"  · {MEETS[meet]} {date}: {len(items)}두")
             time.sleep(SLEEP)

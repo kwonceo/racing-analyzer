@@ -3137,7 +3137,10 @@ def results_bulk():
             hits += 1
         profit += pnl
         matched.append({"raceKey": rk, "top3": top3, "quinella_hit": q_hit,
-                        "trifecta_hit": t_hit, "won": won, "pnl": pnl})
+                        "trifecta_hit": t_hit, "won": won, "pnl": pnl,
+                        "stake": stake, "payouts": rec.get("payouts"),
+                        "payout_actual": rec.get("payout_actual"),
+                        "had_bet": bool(rec.get("bet_type"))})
 
     print(f"[일괄결과] 등록 {len(matched)}건 · 적중 {hits} · 손익 {profit}원 · 매칭실패 {len(unmatched)}건")
     return jsonify({
@@ -3145,6 +3148,67 @@ def results_bulk():
         "stake": stake, "matched": matched, "unmatched": unmatched, "errors": errors,
         "parsedRows": len(rows),
     })
+
+
+def _recompute_pnl(rec, stake, payout):
+    """[보완#1] 조정용 손익 재계산 — 단건 record-result 와 동일 규칙.
+    payout(실수령) 지정 시 실수령−투자금, 아니면 확정배당(payouts)×stake 추정."""
+    stake = int(stake) if (stake and int(stake) > 0) else 1000
+    actual = None
+    try:
+        if payout is not None and str(payout) != "":
+            actual = int(round(float(payout)))
+    except (TypeError, ValueError):
+        actual = None
+    payouts = rec.get("payouts") or {}
+    if actual is not None:
+        pnl = actual - stake
+    elif rec.get("quinella_hit") and payouts.get("quinella"):
+        pnl = round((payouts["quinella"] - 1) * stake)
+    elif rec.get("trifecta_hit") and payouts.get("trifecta"):
+        pnl = round((payouts["trifecta"] - 1) * stake)
+    elif rec.get("bet_type"):
+        pnl = -stake
+    else:
+        pnl = 0
+    return stake, actual, pnl
+
+
+@app.route("/api/results/adjust", methods=["POST"])
+def results_adjust():
+    """[보완#1] 일괄 등록 후 경주별 투자금/실수령 배당금 조정 → 저장된 학습 레코드 in-place 갱신.
+    body: {items:[{raceKey, stake, payout}]} 또는 단건 {raceKey, stake, payout}.
+    같은 raceKey 는 가장 최근 레코드 1건만 갱신(일괄 재등록 중복 방지)."""
+    body = request.json or {}
+    items = body.get("items")
+    if items is None:
+        items = [{"raceKey": body.get("raceKey"), "stake": body.get("stake"), "payout": body.get("payout")}]
+    L = _learning_load()
+    records = L.get("records", [])
+    updated, net = [], 0
+    for it in items:
+        rk = (it.get("raceKey") or "").strip()
+        if not rk:
+            continue
+        # 해당 raceKey 의 가장 최근 레코드(뒤에서부터)
+        target = None
+        for r in reversed(records):
+            if r.get("race") == rk:
+                target = r
+                break
+        if target is None:
+            continue
+        stake, actual, pnl = _recompute_pnl(target, it.get("stake"), it.get("payout"))
+        target["stake"] = stake
+        target["payout_actual"] = actual
+        target["pnl"] = pnl
+        net += pnl
+        updated.append({"raceKey": rk, "stake": stake, "payout_actual": actual, "pnl": pnl})
+    if updated:
+        L["stats"] = _recompute_learning_stats(records)
+        _learning_save(L)
+    return jsonify({"ok": True, "updated": updated, "net": net,
+                    "profit_summary": (L.get("stats") or {}).get("profit_summary")})
 
 
 @app.route("/api/learning/stats", methods=["GET", "POST"])

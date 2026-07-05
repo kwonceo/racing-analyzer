@@ -137,12 +137,25 @@
   function initPrerace() {
     const toggle = $('#koreaPreraceToggle'); if (!toggle) return;
     const list = $('#koreaPreraceList');
+    const refresh = $('#koreaPreraceRefresh');
     toggle.addEventListener('click', async () => {
       const open = list.style.display !== 'none';
-      if (open) { list.style.display = 'none'; toggle.textContent = '📅 저장된 사전분석 열기'; return; }
+      if (open) {
+        list.style.display = 'none'; toggle.textContent = '📅 저장된 사전분석 열기';
+        if (refresh) refresh.style.display = 'none';
+        return;
+      }
       list.style.display = 'block'; toggle.textContent = '📅 저장된 사전분석 닫기';
+      if (refresh) refresh.style.display = '';
       await loadPreraceList();
     });
+    if (refresh) refresh.addEventListener('click', () => loadPreraceList());
+  }
+
+  /** 사전분석 패널이 열려 있으면 목록 갱신(분석 진행 중 폴링에서 호출) */
+  function refreshPreraceIfOpen() {
+    const list = $('#koreaPreraceList');
+    if (list && list.style.display !== 'none') loadPreraceList();
   }
 
   /** /api/korea/prerace 목록을 날짜별로 그룹핑해 렌더 */
@@ -253,10 +266,12 @@
     const prog = $('#koreaProgress');
     if (s.status === 'running') {
       prog.textContent = s.message || `분석 중... ${s.done || 0}/${s.total || 0} 경주 완료`;
+      refreshPreraceIfOpen();   // [보완#2] 진행 중이면 저장된 사전분석 목록도 실시간 갱신
     } else if (s.status === 'done') {
       stopKoreaPolling();
       prog.textContent = s.message || '완료';
       await loadKoreaSession(true);
+      refreshPreraceIfOpen();   // [보완#2] 완료 시 최종 목록 갱신
       toast('✅ 분석 완료 — 결과가 서버에 저장되었습니다.');
     } else if (s.status === 'error') {
       stopKoreaPolling();
@@ -763,20 +778,43 @@
     }); }
   }
 
-  /** 일괄 등록 결과 요약: "결과 등록 완료 · 적중 N건 · 수익/손실" + 매칭실패 목록 */
+  /** [보완#1] 경주별 손익 미리보기 — 서버 _recompute_pnl 과 동일 규칙(클라 미리보기). */
+  function _bulkRowPnl(m, stake, payout) {
+    stake = (stake > 0) ? stake : 1000;
+    if (payout !== '' && payout != null && !isNaN(payout)) return Math.round(payout - stake);
+    const p = m.payouts || {};
+    if (m.quinella_hit && p.quinella) return Math.round((p.quinella - 1) * stake);
+    if (m.trifecta_hit && p.trifecta) return Math.round((p.trifecta - 1) * stake);
+    if (m.had_bet) return -stake;
+    return 0;
+  }
+
+  /** 일괄 등록 결과 요약: 경주별 투자금/실수령 편집 → 정확 손익 조정 + 매칭실패 목록 */
   function renderBulkSummary(d) {
     const box = $('#bulkResultSummary'); if (!box) return;
     const profit = d.profit || 0;
     const pnlTxt = profit >= 0
       ? `<span style="color:#38d39f">수익: +${profit.toLocaleString()}원</span>`
       : `<span style="color:#ff6b6b">손실: ${profit.toLocaleString()}원</span>`;
-    const matchedRows = (d.matched || []).map((m) => {
+    const matched = d.matched || [];
+    const oddsHint = (m) => {
+      const p = m.payouts || {};
+      if (m.quinella_hit && p.quinella) return `복승 ${p.quinella}배`;
+      if (m.trifecta_hit && p.trifecta) return `삼복승 ${p.trifecta}배`;
+      return '';
+    };
+    const matchedRows = matched.map((m, i) => {
       const tag = m.quinella_hit ? '복승 적중' : m.trifecta_hit ? '삼복승 적중' : m.won ? '적중' : '미적중';
       const color = m.won ? '#38d39f' : '#8a94a6';
-      const pnl = m.pnl > 0 ? `+${m.pnl.toLocaleString()}` : m.pnl.toLocaleString();
-      return `<tr><td>${esc(m.raceKey)}</td><td style="text-align:center">${(m.top3 || []).join('-')}</td>
-        <td style="text-align:center;color:${color};font-weight:700">${tag}</td>
-        <td style="text-align:right;color:${m.pnl >= 0 ? '#38d39f' : '#ff6b6b'}">${pnl}원</td></tr>`;
+      const stake = m.stake || 1000;
+      const payVal = (m.payout_actual != null) ? m.payout_actual : '';
+      return `<tr data-i="${i}">
+        <td>${esc(m.raceKey)}</td>
+        <td style="text-align:center">${(m.top3 || []).join('-')}</td>
+        <td style="text-align:center;color:${color};font-weight:700">${tag}<br><span class="hint" style="font-weight:400">${oddsHint(m)}</span></td>
+        <td style="text-align:right"><input class="cfg-input bulk-stake" type="number" min="0" step="100" value="${stake}" style="width:90px"></td>
+        <td style="text-align:right"><input class="cfg-input bulk-payout" type="number" min="0" step="100" value="${payVal}" placeholder="${m.won ? '실수령' : '0'}" style="width:100px"></td>
+        <td class="bulk-pnl" style="text-align:right;font-weight:700"></td></tr>`;
     }).join('');
     const unmatched = (d.unmatched || []).map((u) =>
       `<li>${esc(u.area || '')} ${esc(String(u.round || ''))} · 착순 ${(u.top3 || []).join('-')} <span class="hint">(분석 경주 없음)</span></li>`).join('');
@@ -785,15 +823,64 @@
         <h3 style="margin-top:0">✅ 결과 등록 완료</h3>
         <div style="font-size:15px;line-height:1.9">
           등록 <b>${d.registered || 0}</b>건 (파싱 ${d.parsedRows || 0}행) · 적중 <b style="color:#38d39f">${d.hits || 0}</b>건 · ${pnlTxt}
-          <span class="hint">(정액 ${(d.stake || 1000).toLocaleString()}원 가정)</span>
+          <span class="hint">(배당배수=결과페이지 실제 확정배당 · 투자금 기본 ${(d.stake || 1000).toLocaleString()}원)</span>
         </div>
       </div>
       ${matchedRows ? `<table class="data-table" style="width:100%;margin-top:8px"><thead><tr>
-        <th>경주</th><th style="text-align:center">1~3착</th><th style="text-align:center">판정</th><th style="text-align:right">손익</th>
-      </tr></thead><tbody>${matchedRows}</tbody></table>` : ''}
+        <th>경주</th><th style="text-align:center">1~3착</th><th style="text-align:center">판정</th>
+        <th style="text-align:right">투자(원)</th><th style="text-align:right">실수령(원)</th><th style="text-align:right">손익</th>
+      </tr></thead><tbody>${matchedRows}</tbody></table>
+      <div class="cfg-row" style="margin-top:8px;justify-content:space-between;align-items:center">
+        <span id="bulkAdjSum" class="hint"></span>
+        <button id="bulkAdjSave" class="btn btn-primary">💾 조정 저장 → 학습 반영</button>
+      </div>
+      <p class="hint" style="margin:4px 0 0">경주별 실제 투자금·실수령 배당금을 입력하면 정확한 손익으로 학습 통계에 반영됩니다(공란이면 확정배당 추정).</p>` : ''}
       ${unmatched ? `<div class="panel-card" style="margin-top:8px"><h3 style="margin-top:0">⚠️ 수동 확인 필요 (매칭 실패 ${d.unmatched.length}건)</h3>
         <ul style="margin:4px 0 0 18px">${unmatched}</ul>
         <p class="hint">해당 경주는 분석(배당 수집) 기록이 없어 자동 매칭되지 않았습니다. 위 [경주 결과 입력]에서 직접 등록하세요.</p></div>` : ''}`;
+    if (!matched.length) return;
+
+    const recalc = () => {
+      let sum = 0;
+      box.querySelectorAll('tr[data-i]').forEach((tr) => {
+        const m = matched[+tr.dataset.i];
+        const st = parseInt(tr.querySelector('.bulk-stake').value, 10) || 0;
+        const pvRaw = tr.querySelector('.bulk-payout').value;
+        const pv = (pvRaw === '' ? '' : parseInt(pvRaw, 10));
+        const pnl = _bulkRowPnl(m, st, pv);
+        sum += pnl;
+        const cell = tr.querySelector('.bulk-pnl');
+        cell.textContent = (pnl >= 0 ? '+' : '') + pnl.toLocaleString() + '원';
+        cell.style.color = pnl >= 0 ? '#38d39f' : '#ff6b6b';
+      });
+      const el = $('#bulkAdjSum');
+      if (el) el.innerHTML = `조정 손익 합계: <b style="color:${sum >= 0 ? '#38d39f' : '#ff6b6b'}">${(sum >= 0 ? '+' : '') + sum.toLocaleString()}원</b>`;
+    };
+    box.querySelectorAll('.bulk-stake,.bulk-payout').forEach((inp) => inp.addEventListener('input', recalc));
+    recalc();
+
+    $('#bulkAdjSave').addEventListener('click', async () => {
+      const items = [];
+      box.querySelectorAll('tr[data-i]').forEach((tr) => {
+        const m = matched[+tr.dataset.i];
+        const st = parseInt(tr.querySelector('.bulk-stake').value, 10) || 0;
+        const pvRaw = tr.querySelector('.bulk-payout').value;
+        const it = { raceKey: m.raceKey, stake: st };
+        if (pvRaw !== '') it.payout = parseInt(pvRaw, 10);
+        items.push(it);
+      });
+      const btn = $('#bulkAdjSave'); btn.disabled = true; btn.textContent = '저장 중…';
+      try {
+        const r = await (await fetch('/api/results/adjust', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items }),
+        })).json();
+        if (r.error) { toast('조정 실패: ' + r.error); return; }
+        toast(`✅ ${r.updated ? r.updated.length : 0}건 조정 반영 · 조정분 손익 ${(r.net >= 0 ? '+' : '') + (r.net || 0).toLocaleString()}원`);
+        loadLearningStats(); loadHistoryList();
+      } catch (e) { toast('조정 실패: ' + e.message); }
+      finally { btn.disabled = false; btn.textContent = '💾 조정 저장 → 학습 반영'; }
+    });
   }
 
   function capPos(e) {
