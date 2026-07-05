@@ -134,7 +134,7 @@ cd chrome-extension && python -c "import zipfile,os; zf=zipfile.ZipFile('../chro
 ### 데이터 커밋 정책 (churn 운영 규칙)
 - **워킹트리 churn은 정상**: 라이브 분석 중 서버가 데이터 파일(`analysis_log/`·`korea_session.json`·`discovered_patterns.json`·`prerace/` 등)을 30초 주기로 갱신 → `git status`가 상시 dirty. 이는 **의도된 동작**이며 매 변경마다 커밋하지 않는다.
 - **커밋 시점 = 명시적 백업만**: 서버 백업 함수(`_analysis_log_git_backup`·`_korea_git_backup`, 버튼/엔드포인트) 또는 `#백업`/마일스톤 커밋에서만 데이터 스토어를 커밋한다(자동 30초 커밋 없음).
-- **추적 유지(백업 대상)**: `analysis_log/`(패턴학습 코퍼스)·`korea_session.json`·`korea_history/`·`prerace/`·`discovered_patterns.json`·`pattern_learning.json`.
+- **추적 유지(백업 대상)**: `analysis_log/`(패턴학습 코퍼스)·`race_results/`(경주별 완전 저장·AI 학습용)·`korea_session.json`·`korea_history/`·`prerace/`·`discovered_patterns.json`·`pattern_learning.json`.
 - **gitignore(고빈도 임시)**: `triple_store.json`·`starters_store.json`·`results_store.json`·`odds_store.json`·`learning.json`·`odds_history/`·`kra_history.json`·`.claude/`.
 
 ## PDF 전경주 사전분석 (한국)

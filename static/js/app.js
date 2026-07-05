@@ -2719,10 +2719,25 @@
       ${card('전적 유력마 적중률', s.form_pick)}
       ${card('제거 판정 적중률', s.elimination)}
       ${renderNearMissStats(s.near_miss, nm)}
+      ${renderTrackMonthStats(s.by_track, s.by_month)}
       ${renderDiscoveredPatterns(disc)}
       ${renderPatternStats(s.pattern_stats)}
       ${renderDropTiming(s.drop_timing)}
       ${renderUpsetStats(up)}`;
+  }
+
+  // [5번] 경마장별·월별 적중률/수익 집계 표시
+  function renderTrackMonthStats(byTrack, byMonth) {
+    const has = (o) => o && Object.keys(o).length;
+    if (!has(byTrack) && !has(byMonth)) return '';
+    const won = (n) => (n || 0).toLocaleString() + '원';
+    const col = (v) => (v >= 0 ? '#38d39f' : '#f87171');
+    const rows = (o) => Object.entries(o).sort((a, b) => (b[1].n || 0) - (a[1].n || 0)).map(([k, v]) =>
+      `<tr><td>${esc(k)}</td><td>${v.n}</td><td>${v.hit}</td><td><b>${v.rate != null ? v.rate + '%' : '-'}</b></td><td style="color:${col(v.profit)}">${won(v.profit)}</td></tr>`).join('');
+    const tbl = (title, o) => has(o) ? `<div style="display:inline-block;vertical-align:top;margin:4px 10px 4px 0">
+      <div class="hint" style="font-weight:700;margin-bottom:2px">${title}</div>
+      <table class="data-table"><thead><tr><th>구분</th><th>경주</th><th>적중</th><th>적중률</th><th>손익</th></tr></thead><tbody>${rows(o)}</tbody></table></div>` : '';
+    return `<div style="margin:8px 0"><div class="matrix-title" style="font-size:14px">📊 경마장별 · 월별 성과</div>${tbl('🏟️ 경마장별', byTrack)}${tbl('📅 월별', byMonth)}</div>`;
   }
 
   /** [비교학습] 이상감지 vs 전적 vs 최종 추천 적중률 + 통합 가중치 자동 조정 상태. */
@@ -4527,9 +4542,22 @@
     return parts.join(' / ') || '추천 없음';
   }
 
+  // [3번] 오늘 분석했으나 결과 미입력 경주 추적 배너(누락 방지)
+  async function renderMissingBanner() {
+    try {
+      const m = await (await fetch('/api/race-results/missing')).json();
+      if (!m || !m.count) return '';
+      const names = (m.missing || []).map((x) => esc(x.raceKey || x.race)).join(' / ');
+      return `<div style="margin:0 0 8px;padding:8px 10px;border-left:3px solid #ff5c5c;background:rgba(255,92,92,.1);border-radius:6px;color:#ff8a8a">
+        ⚠️ <b>오늘 결과 미입력: ${m.count}경주</b><br><span class="hint" style="color:#ffb0b0">${names}</span>
+        <div class="hint" style="margin-top:3px;font-size:11px">아래 목록에서 경주를 눌러 결과를 입력하세요 (완전 저장 → AI 학습 반영).</div></div>`;
+    } catch (_) { return ''; }
+  }
+
   async function loadJapanReviewList() {
     const el = document.querySelector('#jpReviewList'); if (!el) return;
     el.innerHTML = '<p class="hint">불러오는 중…</p>';
+    const missBanner = await renderMissingBanner();
     let d; try { d = await (await fetch('/api/analysis-log/list')).json(); }
     catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">${esc(e.message)}</p>`; return; }
     let logs = (d.logs || []).filter((l) => jpIsJapanName(l.race || l.raceKey || ''));
@@ -4538,10 +4566,10 @@
       const todays = logs.filter((l) => (l.date || '') === jpTodayStr());
       if (todays.length) logs = todays;   // 오늘 경주가 있으면 오늘만, 없으면 전체(최근순)
     }
-    if (!logs.length) { el.innerHTML = '<p class="hint">분석된 일본경마 경주가 없습니다. 일본경마 배당을 수집·분석하면 자동으로 목록에 쌓입니다.</p>'; return; }
+    if (!logs.length) { el.innerHTML = missBanner + '<p class="hint">분석된 일본경마 경주가 없습니다. 일본경마 배당을 수집·분석하면 자동으로 목록에 쌓입니다.</p>'; return; }
     const byDate = {};
     logs.forEach((l) => { (byDate[l.date || '?'] = byDate[l.date || '?'] || []).push(l); });
-    el.innerHTML = Object.keys(byDate).sort().reverse().map((date) =>
+    el.innerHTML = missBanner + Object.keys(byDate).sort().reverse().map((date) =>
       `<div style="margin-bottom:8px"><div class="hint" style="font-weight:700;margin:4px 0">${esc(date)}</div>`
       + byDate[date].map((l) => `<div class="race-chip ${l.hasResult ? 'chip-done' : 'chip-todo'}" data-file="${esc(l.file)}" data-rk="${esc(l.raceKey || l.race || '')}" style="cursor:pointer;margin:3px 0;display:block">
         <b>${esc(l.race || l.race_id || '')}</b> <span class="chip-page">${esc(l.analyzed_at || '')} · 신호${l.signals || 0}${l.hasResult ? ' · ✅결과입력됨' : ' · ⬜결과대기'}</span></div>`).join('')
@@ -4591,11 +4619,18 @@
         <label class="hint">투자금액 <input id="jpStake" class="cfg-input" type="number" min="0" step="1000" style="width:100px" value="${vv(hit.stake || 1000)}">원</label>
         <label class="hint">실수령 배당금(선택) <input id="jpPayout" class="cfg-input" type="number" min="0" style="width:120px" placeholder="적중 시 총 수령액">원</label>
       </div>
+      <div class="cfg-row" style="gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px">
+        <label class="hint">확정 복승배당 <input id="jpQOdds" class="cfg-input" type="number" min="1" step="0.1" style="width:80px" placeholder="배">배</label>
+        <label class="hint">확정 삼복승배당 <input id="jpTOdds" class="cfg-input" type="number" min="1" step="0.1" style="width:80px" placeholder="배">배</label>
+      </div>
+      <div class="cfg-row" style="margin-top:4px">
+        <label class="hint" style="flex:1">메모(특이사항) <input id="jpMemo" class="cfg-input" type="text" style="width:100%;max-width:340px" placeholder="예: 선행마 도주 성공 / 인기마 출발 지연"></label>
+      </div>
       <div class="cfg-row" style="margin-top:6px">
         <button id="jpResSave" class="btn btn-primary">💾 결과 저장 · 자동 복기</button>
         <span id="jpResMsg" class="hint" style="margin-left:6px"></span>
       </div>
-      <p class="hint" style="margin:4px 0 0">실수령 배당금을 입력하면 정확한 손익으로 계산됩니다. 공란이면 확정배당 추정치로 계산합니다.</p>`;
+      <p class="hint" style="margin:4px 0 0">실수령 배당금을 입력하면 정확한 손익으로 계산됩니다. 확정배당·메모는 완전 저장(AI 학습용)에 함께 기록됩니다.</p>`;
     let reportHtml = '';
     if (d.result && d.hit) reportHtml = renderJapanReviewReport({
       recommend: jpRecSummary(fr), result: d.result,
@@ -4667,11 +4702,19 @@
     const payload = { raceKey: rk, result };
     if (stake) payload.stake = parseInt(stake, 10);
     if (payout) payload.payout = parseInt(payout, 10);
+    // [2번] 확정배당·메모·예산 → 완전 저장(AI 학습용)
+    const qo = g('#jpQOdds'), to = g('#jpTOdds'), memo = g('#jpMemo');
+    if (qo) payload.quinellaOdds = parseFloat(qo);
+    if (to) payload.trifectaOdds = parseFloat(to);
+    if (memo) payload.memo = memo;
+    if (stake) payload.budget = parseInt(stake, 10);
     if (msg) { msg.style.color = ''; msg.textContent = '저장·판정 중…'; }
     let d; try { d = await (await fetch('/api/history/record-result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
     catch (e) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '실패: ' + e.message; } return; }
     if (d.error) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = d.error; } return; }
-    if (msg) { msg.style.color = '#38d39f'; msg.textContent = '✅ 저장·학습 완료'; }
+    // [4번] 데이터 품질 경고
+    const derr = d.dataErrors || [];
+    if (msg) { msg.style.color = derr.length ? '#ffb020' : '#38d39f'; msg.textContent = derr.length ? '✅ 저장(⚠️ ' + derr.join(', ') + ')' : '✅ 저장·학습·완전저장 완료'; }
     const rec = d.record || {};
     const rep = {
       recommend: recSummary, result: rec.result || result,
