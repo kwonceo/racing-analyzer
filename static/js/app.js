@@ -2173,7 +2173,8 @@
       `<span class="chip">${r.combo[0]}-${r.combo[1]} ${r.prevRank}위→${r.curRank}위 (${r.delta > 0 ? '▲' : '▼'}${Math.abs(r.delta)})</span>`).join(' ');
     const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     el.innerHTML = `
-      <div class="matrix-title">🚨 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}</span></div>
+      <div class="matrix-title">🚨 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>
+      ${a.afterClose ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #8a94a6;background:rgba(138,148,166,.14);border-radius:6px;color:#b8c0cc">⚠️ <b>마감 후 수집</b> — 발주(T-0) 이후 신호는 <b>참고만</b> 하세요. 급락이 있어도 <b>추천 조합·보험에는 반영되지 않습니다</b>(마감 전 기준 유지).</div>` : ''}
       <div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary || '')}</div>
       ${drops ? `<div style="margin:6px 0"><span class="hint">📉 급락/변동</span><br>${drops}</div>` : ''}
       ${flips ? `<div style="margin:6px 0"><span class="hint">🔀 쌍승 역전</span><br>${flips}</div>` : ''}
@@ -2319,12 +2320,19 @@
     let hasNew = _prevSignalKeys === null;
     if (!hasNew) for (const k of keys) if (!_prevSignalKeys.has(k)) { hasNew = true; break; }
     _prevSignalKeys = keys;
-    const body = sigs.map((s) => `<div style="margin:6px 0;padding:6px 8px;border-left:3px solid ${lvColor(s.level)};background:rgba(255,255,255,.04)">
-      <div style="font-weight:700">${s.level} ${esc(s.text)}</div>
-      <div class="hint" style="margin-top:2px">→ ${esc(s.detail)}</div></div>`).join('');
+    // [3번] 각 신호에 유효 시점 라벨(마감 N분전) + 마감 후 신호는 회색·참고만
+    const body = sigs.map((s) => {
+      const gray = !!s.afterClose;
+      const ph = s.phase ? `<span class="hint" style="font-size:10px;margin-left:6px">🕒 ${esc(s.phase)}${gray ? '' : ' 신호'}</span>` : '';
+      return `<div style="margin:6px 0;padding:6px 8px;border-left:3px solid ${gray ? '#8a94a6' : lvColor(s.level)};background:rgba(255,255,255,.04);${gray ? 'opacity:.6' : ''}">
+      <div style="font-weight:700">${s.level} ${esc(s.text)}${ph}</div>
+      <div class="hint" style="margin-top:2px">→ ${esc(s.note || s.detail || '')}</div></div>`;
+    }).join('');
     el.style.display = 'block';
-    el.innerHTML = alertShell(a.lastSnapshot, body, maxLvl === '🔴', _betUpdatedFlag);
-    if (hasNew) { playAlert(maxLvl); if (maxLvl === '🔴') flashScreen(); }
+    el.innerHTML = alertShell(a.lastSnapshot, body, maxLvl === '🔴' && !a.afterClose, _betUpdatedFlag);
+    // [1번] 마감 후 신호뿐이면 소리·플래시 생략(참고만) — 마감 전 신호에서만 경보
+    const allAfter = sigs.every((s) => s.afterClose);
+    if (hasNew && !allAfter) { playAlert(maxLvl); if (maxLvl === '🔴') flashScreen(); }
   }
 
   // [3번] 변동 히스토리 타임라인 (배당판 캡처 탭, 이상감지 진행 + 클릭 시 스냅샷 배당)

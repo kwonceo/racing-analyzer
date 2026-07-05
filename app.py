@@ -1226,6 +1226,15 @@ def anomaly_feed():
     return jsonify({"raceKey": rk, "events": events})
 
 
+@app.route("/api/after-close/cases", methods=["GET"])
+def after_close_cases():
+    """[4번] 마감(T-0) 후 감지되어 베팅 반영 불가했던 신호 케이스 목록 → 수집 간격 단축 필요성 근거."""
+    d = _after_close_load()
+    cases = sorted(d.get("cases", []), key=lambda c: -(c.get("t") or 0))
+    return jsonify({"cases": cases, "count": len(cases),
+                    "note": "마감 후 감지된 신호(베팅 반영 불가) — 수집 간격 단축의 필요성 근거 데이터"})
+
+
 @app.route("/api/current_race", methods=["GET"])
 def current_race():
     """확장이 마지막으로 수집한 '현재 경주' 반환 → {raceKey, updatedAt, counts}.
@@ -1885,6 +1894,50 @@ def _integrated_adaptive(form, curQ, curD, excess, situation):
     return out
 
 
+# ───────── [마감 후 신호] 발주(T-0) 이후 감지 신호 처리 + 케이스 학습 ─────────
+AFTER_CLOSE_FILE = os.path.join(os.path.dirname(__file__), "data", "after_close_cases.json")
+
+
+def _after_close_load():
+    try:
+        return json.load(open(AFTER_CLOSE_FILE, encoding="utf-8"))
+    except Exception:
+        return {"cases": []}
+
+
+def _after_close_save(d):
+    os.makedirs(os.path.dirname(AFTER_CLOSE_FILE), exist_ok=True)
+    json.dump(d, open(AFTER_CLOSE_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _record_after_close_case(rk, date, mb_signed, anomalies):
+    """[4번] 마감 후 신호로 베팅 반영 불가했던 케이스 저장. 경주별 1건(신호 최다 시점)으로 갱신."""
+    d = _after_close_load()
+    cases = d.setdefault("cases", [])
+    mins_after = abs(mb_signed) if mb_signed is not None else None
+    payload = {"raceKey": rk, "date": date, "minutes_after_close": mins_after,
+               "signal_count": len(anomalies), "signals": list(anomalies)[:6], "t": time.time()}
+    existing = next((c for c in cases if c.get("raceKey") == rk and c.get("date") == date), None)
+    if existing:
+        if len(anomalies) >= (existing.get("signal_count") or 0):
+            existing.update(payload)
+    else:
+        cases.append(payload)
+    d["cases"] = cases[-500:]
+    _after_close_save(d)
+
+
+def _deadline_phase_label(mb, after_close):
+    """이상감지 신호의 유효 시점 라벨. 마감 후=회색 표시용."""
+    if after_close:
+        return "마감 후"
+    if mb is None:
+        return None
+    if mb <= 0:
+        return "마감 직전"
+    return f"마감 {mb}분전"
+
+
 def _combo_signal_quality(combo, excess):
     """[4번] 추천 조합의 신호 품질(상/중/하) + 근거. 조합 내 최대 초과급락 말 기준."""
     ehorses = (excess or {}).get("horses") or {}
@@ -1938,6 +1991,19 @@ def _triple_analyze(rk, rec):
     # [신호 품질] 초과 급락률(시장 평균 대비 집중도) + 상황별 가중치
     excess = _excess_drop_analysis(drops, curQ)
     situation = _signal_situation(drops, mass_drop, excess)
+    # [1번] 마감 후(T-0 이후) 감지 여부 — 현재 스냅샷의 부호 포함 발주전분(mb_signed<0)
+    cur_mb, after_close = None, False
+    try:
+        _hp0, _, _ = _hist_path(rk)
+        _hd0 = json.load(open(_hp0, encoding="utf-8"))
+        if _hd0.get("snapshots"):
+            _s0 = _hd0["snapshots"][-1]
+            cur_mb = _s0.get("mb_signed")
+            if cur_mb is None:
+                cur_mb = _s0.get("minutes_before")
+            after_close = bool(_s0.get("after_close")) or (cur_mb is not None and cur_mb < 0)
+    except Exception:
+        cur_mb, after_close = None, False
 
     # 2) 순위 변동 (배당 낮은=인기 순위)
     def _ranks(m):
@@ -1994,8 +2060,9 @@ def _triple_analyze(rk, rec):
     key_horses = ranked[:3]
 
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
+    # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
     anomaly_horse = None
-    for d in drops:
+    for d in (drops if not after_close else []):
         for h in d["combo"]:
             if h not in key_horses:
                 anomaly_horse = h
@@ -2048,7 +2115,8 @@ def _triple_analyze(rk, rec):
             r["expOddsEst"] = _trio_est(r["combo"])
 
     # [대규모급락 전략] 삼복승 보험 8→15% 확대·중배당 복승 보험 추가·최저배당 신뢰도 하락(기존 조합 유지)
-    mass_drop_strategy = _apply_mass_drop_strategy(bet_rec, mass_drop, drops, curQ)
+    # [1번] 마감 후에는 대규모급락 전략도 추천에 반영하지 않음(참고만)
+    mass_drop_strategy = _apply_mass_drop_strategy(bet_rec, mass_drop, drops, curQ) if not after_close else None
 
     # [4번] 추천 조합별 신호 품질(상/중/하) + 근거(초과급락 말) 부착
     for r in bet_rec:
@@ -2178,6 +2246,14 @@ def _triple_analyze(rk, rec):
     time_drops = _time_based_drop_signals(rk)
     if time_drops:
         signals = time_drops + signals
+    # [1·3번] 모든 신호에 유효 시점 라벨 부착 + 마감 후 신호는 '참고만' 태깅(추천 미반영)
+    _phase = _deadline_phase_label(cur_mb, after_close)
+    for _s in signals:
+        _s.setdefault("minutesBefore", cur_mb)
+        _s["phase"] = "마감 후" if after_close else _phase
+        if after_close:
+            _s["afterClose"] = True
+            _s["note"] = "⚠️ 마감 후 신호 - 참고만(추천 미반영)"
     # [통합분석] 전적 40% + 배당 60% 통합 등급(전적이 있을 때만)
     integrated = _integrated_grades(form, curQ, curD)
     # [단승] 통합 등급 행에 단승 배당 부착(타임라인/화면 표시용)
@@ -2222,6 +2298,8 @@ def _triple_analyze(rk, rec):
         # [신호 품질 필터링] 초과급락(집중도)·상황별 가중치·적응형 통합 등급
         "signalQuality": {"excess": excess, "situation": situation,
                           "integratedAdaptive": integrated_adaptive},
+        # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
+        "afterClose": after_close, "minutesBefore": cur_mb,
     }
 
 
@@ -2420,14 +2498,19 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None):
         doc = {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None}
     now = time.time()
     minutes_before = None
+    mb_signed = None       # [마감후] 부호 포함(음수=마감 후) — after_close 판별용
+    after_close = False
     try:
         if deadline:
             dl = float(deadline)                     # epoch ms 또는 s
             dl_ms = dl if dl > 1e12 else dl * 1000
             mb = round((dl_ms - now * 1000) / 60000)
-            minutes_before = mb if mb >= 0 else None
+            mb_signed = mb
+            minutes_before = mb if mb >= 0 else None  # (하위호환) 기존 소비자는 >=0만 사용
+            after_close = mb < 0
     except (TypeError, ValueError):
-        minutes_before = None
+        minutes_before = mb_signed = None
+        after_close = False
     curQ = _odds_map_un(quinella)
     curWin = _win_map_int(_win_map_clean(win))
     anomalies = []
@@ -2486,11 +2569,18 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None):
     doc["snapshots"].append({
         "time": time.strftime("%H:%M:%S", time.localtime(now)),
         "minutes_before": minutes_before,
+        "mb_signed": mb_signed, "after_close": after_close,   # [마감후] 부호 포함·마감 후 여부
         "quinella": _combo_dict(quinella), "exacta": _combo_dict(exacta),
         "win": {str(k): v for k, v in curWin.items()},
         "anomalies": anomalies, "t": now,
     })
     doc["snapshots"] = doc["snapshots"][-300:]
+    # [4번] 마감 후 신호로 베팅 반영 불가했던 케이스 저장(수집 간격 단축 필요성 근거)
+    if after_close and anomalies:
+        try:
+            _record_after_close_case(rk, date, mb_signed, anomalies)
+        except Exception as e:
+            print("[마감후학습] 케이스 저장 실패:", e)
     json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     return path
 
