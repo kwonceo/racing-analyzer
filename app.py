@@ -2247,6 +2247,88 @@ def _signal_confidence(excess, wx_reversals, mismatch):
     return {"horses": out, "strong": strong, "refer": refer}
 
 
+def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mismatch, excess):
+    """[역배열 감지] 단승 유력마 순서 ≠ 복승/쌍승 배당 순서 = 실질 유력마 변경 가능성.
+    4유형(①쌍승역전 ②복승불일치 ③배당압축 ④초과급락)을 하나로 통합.
+    반환 {detected, types:[{kind,level,text,horses}], invHorses:[no], invCombos:[{combo,odds}], banner}."""
+    types, inv_horses = [], []
+
+    def _add_inv(h):
+        if h is not None and int(h) not in inv_horses:
+            inv_horses.append(int(h))
+
+    ref_no = fav_rank[0] if fav_rank else None                 # 단승(없으면 복승인기) 1위
+    ref_odds = curWin.get(ref_no) if (has_win and ref_no is not None) else None
+    fav_pair, fav_odds = (min(curQ.items(), key=lambda kv: kv[1]) if curQ else (None, None))
+
+    # 유형1 - 쌍승 역전
+    for r in (wx_reversals or [])[:3]:
+        types.append({"kind": "쌍승역전", "level": r["level"],
+                      "text": f"🔄 쌍승역전: 단승 {r['favorite']}번 유력이나 쌍승에서 {r['challenger']}번 1착이 더 낮음",
+                      "detail": f"{r['challenger']}→{r['favorite']}({r['reverseExacta']}) < {r['favorite']}→{r['challenger']}({r['favoredExacta']}) → 비정상 (비율 {r['ratio']})",
+                      "horses": [r["challenger"]]})
+        _add_inv(r["challenger"])
+    # 유형2 - 복승 불일치
+    if quin_mismatch:
+        foc = quin_mismatch.get("focusHorses") or []
+        ep, ap = quin_mismatch["expected"], quin_mismatch["actual"]
+        types.append({"kind": "복승불일치", "level": quin_mismatch["level"],
+                      "text": f"⚠️ 복승불일치: 단승 기준 {ep[0]}+{ep[1]} 예상, 실제 최저는 {ap[0]}+{ap[1]} → {('·'.join(map(str, foc)) or '동일')}번 주목",
+                      "detail": f"불일치점수 {quin_mismatch['ratio']} (예상 {quin_mismatch['expectedOdds']} / 실제 {quin_mismatch['actualOdds']})",
+                      "horses": foc})
+        for h in foc:
+            _add_inv(h)
+    # 유형3 - 배당 압축(상위 복승 근접)
+    tops = sorted(curQ.values())[:4] if curQ else []
+    if len(tops) >= 3 and tops[0] > 0 and tops[-1] / tops[0] < 1.3:
+        comp_horses = []
+        for k, _o in sorted(curQ.items(), key=lambda kv: kv[1])[:4]:
+            for h in k:
+                if h not in comp_horses:
+                    comp_horses.append(h)
+        types.append({"kind": "배당압축", "level": "🟡",
+                      "text": f"📊 배당압축: 상위 말들 배당 비정상적으로 근접 ({tops[0]}~{tops[-1]})",
+                      "detail": "자금 분산 → 특정 유력마 불명확(이변 가능성↑)", "horses": comp_horses})
+    # 유형4 - 초과급락(집중)
+    for h in (excess.get("concentrated") or [])[:3]:
+        e = excess["horses"][h]
+        amt = "절대 10%+" if e.get("absStrong") else f"{abs(e['excess'])}%p"
+        types.append({"kind": "초과급락", "level": "🔴",
+                      "text": f"🔴 집중급락: {h}번 전체 평균보다 {amt} 더 급락 → 실질 유력",
+                      "detail": f"평균급락 {e['avg']}% (시장평균 {excess.get('overall')}% 대비)", "horses": [h]})
+        _add_inv(h)
+
+    # 역배열 판정: 유형 존재 또는 복승 최저 조합이 단승 1위를 미포함(단승≠복승 순서)
+    fav_normal = (ref_no is not None and fav_pair is not None and ref_no in fav_pair)
+    detected = bool(types) or (has_win and ref_no is not None and fav_pair is not None and not fav_normal)
+
+    # 복승 역배열 조합: 역배열 감지말이 낀 복승 조합(배당 있는 것, 저배당순)
+    inv_combos, seen_c = [], set()
+    for h in inv_horses:
+        for k, o in curQ.items():
+            if h in k and o and o > 0:
+                pair = tuple(sorted(k))
+                if pair not in seen_c:
+                    seen_c.add(pair)
+                    inv_combos.append({"combo": list(pair), "odds": o})
+    inv_combos.sort(key=lambda c: c["odds"])
+    inv_combos = inv_combos[:6]
+
+    top_rev = (wx_reversals or [None])[0]
+    banner = {
+        "refLabel": "단승 1위" if has_win else "복승인기 1위",
+        "refNo": ref_no, "refOdds": ref_odds,
+        "favPair": list(fav_pair) if fav_pair else None, "favOdds": fav_odds,
+        "favNormal": bool(fav_normal),
+        "reversal": ({"favorite": top_rev["favorite"], "challenger": top_rev["challenger"],
+                      "favoredExacta": top_rev["favoredExacta"], "reverseExacta": top_rev["reverseExacta"],
+                      "ratio": top_rev["ratio"]} if top_rev else None),
+    } if detected else None
+
+    return {"detected": detected, "types": types, "invHorses": inv_horses,
+            "invCombos": inv_combos, "banner": banner}
+
+
 # ───────── [이상감지 vs 추천 비교 학습] 3종 추천 조합 산출 + 가중치 자동 조정 ─────────
 def _compare_recommend(form, key_horses, excess, drops, bet_rec):
     """[1번] 이상감지 기반 / 전적 기반 / 최종 추천 조합을 각각 산출(복승 2두·삼복승 3두).
@@ -2420,6 +2502,9 @@ def _triple_analyze(rk, rec):
     wx_reversals = _win_exacta_reversal(fav_rank, curD)
     quin_mismatch = _quinella_mismatch(fav_rank, curQ)
     signal_confidence = _signal_confidence(excess, wx_reversals, quin_mismatch)
+    # [역배열 감지] 단승 순서 ≠ 복승/쌍승 순서 → 4유형 통합(쌍승역전·복승불일치·배당압축·초과급락)
+    inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
+                                   wx_reversals, quin_mismatch, excess)
 
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
@@ -2805,6 +2890,8 @@ def _triple_analyze(rk, rec):
         "baselineSet": baseline_set, "baselineReset": baseline_reset,
         # [배당판 일치 검증] 추천↔배당판 인기 조합 불일치·배당 불안정(초반 미수집) 경고
         "marketCheck": market_check,
+        # [역배열 감지] 단승≠복승/쌍승 순서(4유형 통합) + 역배열 감지말·복승 역배열 조합
+        "inverse": inverse,
         # [비교학습] 이상감지/전적/최종 추천 3종 + 통합 가중치(전적/이상감지, 학습 조정 반영)
         "compareRecommend": compare_recommend,
         "integratedWeights": {"form": _iw_fw, "anomaly": _iw_ow},

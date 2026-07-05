@@ -2157,6 +2157,31 @@
 
   let _lastTripleAnalyze = null, _prevBetKey = null, _betUpdatedFlag = false;
   let _elimRaceKey = null;
+  // [역배열 감지] 단승≠복승/쌍승 순서 → 추천 상단 특별 표시(4유형 + 역배열 감지말·조합)
+  function renderInverse(inv) {
+    if (!inv || !inv.detected) return '';
+    const b = inv.banner || {};
+    const kindColor = { '쌍승역전': '#ff8a8a', '복승불일치': '#ffd24f', '배당압축': '#7dd3fc', '초과급락': '#ff5c5c' };
+    // 배너 상단부: 단승 1위 · 복승 최저 · 쌍승 역전
+    const lines = [];
+    if (b.refNo != null) lines.push(`${b.refLabel}: <b>${b.refNo}번</b>${b.refOdds != null ? ` (${b.refOdds}배)` : ''}`);
+    if (b.favPair) lines.push(`복승 최저: <b>${b.favPair.join('+')}</b> (${b.favOdds}배) → ${b.favNormal ? '정상(단승1위 포함)' : '<span style="color:#ff8a8a">불일치(단승1위 빠짐)</span>'}`);
+    if (b.reversal) { const r = b.reversal; lines.push(`쌍승 역전: <span style="color:#ff8a8a">${r.challenger}→${r.favorite} (${r.reverseExacta}) &lt; ${r.favorite}→${r.challenger} (${r.favoredExacta}) → 비정상</span>`); }
+    // 유형별 목록
+    const typeHtml = (inv.types || []).map((t) =>
+      `<div style="margin:3px 0"><span class="chip" style="border-color:${kindColor[t.kind] || '#8a94a6'};color:${kindColor[t.kind] || '#ccc'}">${t.level} ${t.kind}</span> <span class="hint">${esc(t.text)}</span></div>`).join('');
+    // [3번] 역배열 감지말 + 복승 역배열 조합(일반 추천과 구분)
+    const invH = (inv.invHorses || []).map((h) => `<b style="color:#ff5c5c">${h}번</b>`).join(' · ');
+    const invC = (inv.invCombos || []).map((c) => `<span class="chip chip-red">${c.combo.join('+')} <span class="hint">${c.odds}배</span></span>`).join(' ');
+    const invBlock = (inv.invHorses && inv.invHorses.length) ? `<div style="margin:6px 0 2px;padding:6px 8px;background:rgba(255,92,92,.08);border-radius:6px">
+      <div>⭐ <b style="color:#ff8a8a">역배열 감지말</b>: ${invH} <span class="hint">(배당 높아도 우선 노출)</span></div>
+      ${invC ? `<div style="margin-top:4px"><span class="hint">복승 역배열</span> ${invC}</div>` : ''}</div>` : '';
+    return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #ff5c5c;border-radius:8px;background:rgba(255,92,92,.1)">
+      <div style="font-size:15px;font-weight:800;color:#ff8a8a">🔄 역배열 감지!</div>
+      <div class="hint" style="margin:3px 0 5px;line-height:1.7">${lines.join('<br>')}<br>→ <b style="color:#ffd24f">실질 유력마가 바뀌었을 가능성</b></div>
+      ${typeHtml}${invBlock}</div>`;
+  }
+
   function renderTripleAnalyze(a) {
     const el = $('#tripleAnalyzeReport'); if (!el) return;
     _lastTripleAnalyze = a;
@@ -2179,6 +2204,7 @@
       ${a.afterClose ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #8a94a6;background:rgba(138,148,166,.14);border-radius:6px;color:#b8c0cc">⚠️ <b>마감 후 수집</b> — 발주(T-0) 이후 신호는 <b>참고만</b> 하세요. 급락이 있어도 <b>추천 조합·보험에는 반영되지 않습니다</b>(마감 전 기준 유지).</div>` : ''}
       ${a.marketCheck && a.marketCheck.diverged ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ff5c5c;background:rgba(255,92,92,.12);border-radius:6px;color:#ff8a8a">⚠️ <b>배당판 불일치</b> — 추천 복승(${(a.marketCheck.mainPair || []).join('+')}=${a.marketCheck.mainOdds}배)이 <b>배당판 최저 인기 조합(${a.marketCheck.favPair.join('+')}=${a.marketCheck.favOdds}배)</b>과 다릅니다. 배당판을 초반에 못 끌어왔거나 전적 편중일 수 있어요 → <b>배당판 인기 조합을 추천에 추가</b>했습니다. 배당 재확인 권장.</div>` : ''}
       ${a.marketCheck && a.marketCheck.stale ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffb020;background:rgba(255,176,32,.12);border-radius:6px;color:#ffc862">⚠️ <b>배당 불안정</b> — 최저 복승도 ${a.marketCheck.favOdds}배(실자금 미형성/초반 미수집 의심). <b>배당판 새로고침 후 재수집</b> 권장. 현재 추천은 참고만.</div>` : ''}
+      ${renderInverse(a.inverse)}
       <div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary || '')}</div>
       ${drops ? `<div style="margin:6px 0"><span class="hint">📉 급락/변동</span><br>${drops}</div>` : ''}
       ${flips ? `<div style="margin:6px 0"><span class="hint">🔀 쌍승 역전</span><br>${flips}</div>` : ''}
