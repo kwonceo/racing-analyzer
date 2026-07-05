@@ -2847,9 +2847,15 @@ def history_list():
                 d = json.load(open(os.path.join(ODDS_HISTORY_DIR, fn), encoding="utf-8"))
             except Exception:
                 continue
+            # [이상감지 히스토리] 스냅샷의 이상감지를 중복제거해 개수 집계(경주별 분리 표시용)
+            _seen = set()
+            for _s in (d.get("snapshots") or []):
+                for _raw in (_s.get("anomalies") or []):
+                    _seen.add(_anomaly_pretty(_raw)["text"])
             out.append({"file": fn, "date": d.get("date"), "race": d.get("race"),
                         "raceKey": d.get("raceKey"), "snaps": len(d.get("snapshots") or []),
-                        "hasResult": bool(d.get("result"))})
+                        "anomalyCount": len(_seen), "hasResult": bool(d.get("result")),
+                        "lastT": (d.get("snapshots") or [{}])[-1].get("t") if d.get("snapshots") else None})
     return jsonify({"races": out})
 
 

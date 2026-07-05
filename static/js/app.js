@@ -2151,6 +2151,7 @@
     if (a && a.waiting) { el.innerHTML = `<p class="hint">🔄 새 경주 <b>${esc(a.raceKey || active || '')}</b> 데이터 대기중 — 확장에서 이 raceKey로 [전체 자동 수집]을 실행하세요.</p>`; return; }
     if (!a || a.error) { el.innerHTML = `<p class="hint">${esc((a && a.error) || '수집된 3종 배당이 없습니다.')}</p>`; return; }
     if (!getActiveRaceKey() && a.raceKey) setActiveRaceKey(a.raceKey);   // 최초 진입 시 활성 설정
+    if (a.raceKey) setAnomalyPanelRace(a.raceKey);   // [보완#1·2] 좌하단 누적 패널을 이 경주로(경주별 분리)
     renderTripleAnalyze(a);
   }
 
@@ -3125,6 +3126,7 @@
       if (a && !a.error && !a.waiting) {
         const firstLink = !state.koreaTimeline[title] || !state.koreaTimeline[title].length;
         setKoreaOddsStatus('linked', title, { raceKey: m.raceKey });
+        setAnomalyPanelRace(m.raceKey);   // [보완#1] 한국경마도 좌하단 누적 패널에 영구 표시(경주별 분리)
         renderKoreaIntegrated(a);
         onKoreaOddsUpdate(title, race, m.raceKey, a, firstLink);   // [2·3·4번]
       }
@@ -4051,11 +4053,49 @@
     } catch (_) { /* 오디오 미지원 무시 */ }
   }
 
-  const _closing = { firedRk: null, fired: new Set(), tick: 0, lastEvents: [] };
+  const _closing = { firedRk: null, fired: new Set(), tick: 0, lastEvents: [], panelRk: null, historyMode: false };
 
-  /** [1번] 누적 이상감지 피드 갱신 — 서버 스냅샷에서 시간순·중복제거로 누적(마감 후에도 유지) */
+  /** raceKey → 짧은 라벨(예: '2026-07-05_서울_5' → '2026-07-05 서울 5R') */
+  function _rkLabel(rk) {
+    if (!rk) return '';
+    return String(rk).replace(/_/g, ' ').replace(/(\d+)\s*경주/, '$1R').trim();
+  }
+
+  /** [1번] 패널이 표시할 '현재 경주' 설정 — 한국·일본 흐름 모두 여기로 현재 raceKey를 알려준다 */
+  function setAnomalyPanelRace(rk) {
+    if (!rk || _closing.panelRk === rk) return;
+    _closing.panelRk = rk;
+    _closing.historyMode = false;   // 새 경주로 전환 시 자동으로 '현재 보기'로 복귀
+    refreshAnomalyFeed(rk);
+  }
+
+  /** 이상감지 이벤트 배열 → 행 HTML(시각·발주전·심각도색) */
+  function _anomalyRows(ev) {
+    return (ev || []).map((e) => {
+      const mb = e.minutes_before != null ? ` <span style="color:#64748b">${e.minutes_before}분전</span>` : '';
+      const col = e.severity === '🔴' ? '#f87171' : '#fbbf24';
+      return `<div style="padding:1px 0 1px 8px"><span style="color:#94a3b8">${esc(e.time || '')}</span>${mb} <span style="color:${col};font-weight:700">${e.severity} ${esc(e.text)}</span></div>`;
+    }).join('');
+  }
+
+  function _panelHeader(titleHtml, rightHtml) {
+    return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px">
+        <b style="color:#fca5a5">${titleHtml}</b>
+        <span style="white-space:nowrap">${rightHtml || ''}<span id="anomalyFeedClose" style="cursor:pointer;color:#64748b;padding:0 4px">✕</span></span></div>`;
+  }
+  function _wireFeedButtons(panel) {
+    const cl = panel.querySelector('#anomalyFeedClose');
+    if (cl) cl.addEventListener('click', () => { panel.style.display = 'none'; });
+    const hb = panel.querySelector('#anomalyHistBtn');
+    if (hb) hb.addEventListener('click', () => renderAnomalyHistory());
+    const bk = panel.querySelector('#anomalyBackBtn');
+    if (bk) bk.addEventListener('click', () => { _closing.historyMode = false; refreshAnomalyFeed(_closing.panelRk || getActiveRaceKey()); });
+  }
+
+  /** [1·2번] 현재 경주 이상감지 누적 — [raceKey] 헤더 블록 1개(다른 경주와 섞이지 않음). 한국·일본 공통. */
   async function refreshAnomalyFeed(rk) {
     const panel = document.getElementById('anomalyFeedPanel'); if (!panel) return;
+    if (_closing.historyMode) return;                 // 히스토리 보기 중이면 현재 갱신 보류
     if (!rk) { panel.style.display = 'none'; return; }
     let d;
     try { d = await (await fetch('/api/odds/anomaly-feed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }) })).json(); }
@@ -4063,17 +4103,43 @@
     const ev = (d && d.events) || [];
     _closing.lastEvents = ev;
     if (!ev.length) { panel.style.display = 'none'; return; }
-    const rows = ev.map((e) => {
-      const mb = e.minutes_before != null ? ` <span style="color:#64748b">${e.minutes_before}분전</span>` : '';
-      const col = e.severity === '🔴' ? '#f87171' : '#fbbf24';
-      return `<div style="padding:2px 0"><span style="color:#94a3b8">${esc(e.time || '')}</span>${mb} <span style="color:${col};font-weight:700">${e.severity} ${esc(e.text)}</span></div>`;
-    }).join('');
     panel.style.display = 'block';
-    panel.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <b style="color:#fca5a5">🚨 이상감지 누적 (${ev.length})</b>
-        <span id="anomalyFeedClose" style="cursor:pointer;color:#64748b;padding:0 4px">✕</span></div>${rows}`;
-    const cl = document.getElementById('anomalyFeedClose');
-    if (cl) cl.addEventListener('click', () => { panel.style.display = 'none'; });
+    panel.innerHTML = _panelHeader(`🚨 이상감지 누적 (${ev.length})`,
+        `<span id="anomalyHistBtn" title="이전 경주 이상감지 보기" style="cursor:pointer;color:#8ab4f8;padding:0 6px;font-weight:600">📜 히스토리</span>`)
+      + `<div style="color:#e2e8f0;font-weight:700;margin:2px 0">[${esc(_rkLabel(rk))}]</div>${_anomalyRows(ev)}`;
+    _wireFeedButtons(panel);
+  }
+
+  /** [3번] 히스토리 보기 — 이상감지가 있는 모든 과거 경주를 [raceKey] 블록으로 분리 표시 */
+  async function renderAnomalyHistory() {
+    const panel = document.getElementById('anomalyFeedPanel'); if (!panel) return;
+    _closing.historyMode = true;
+    panel.style.display = 'block';
+    const backBtn = `<span id="anomalyBackBtn" title="현재 경주로" style="cursor:pointer;color:#8ab4f8;padding:0 6px;font-weight:600">◀ 현재</span>`;
+    panel.innerHTML = _panelHeader('🚨 이상감지 히스토리', backBtn) + '<div class="hint" style="padding:4px 8px">불러오는 중…</div>';
+    _wireFeedButtons(panel);
+    let list;
+    try { list = ((await (await fetch('/api/history/list')).json()) || {}).races || []; }
+    catch (_) { panel.innerHTML = _panelHeader('🚨 이상감지 히스토리', backBtn) + '<div class="hint" style="padding:4px 8px">목록 로드 실패</div>'; _wireFeedButtons(panel); return; }
+    const cur = _closing.panelRk || getActiveRaceKey();
+    const withAnom = list.filter((r) => (r.anomalyCount || 0) > 0).sort((a, b) => (b.lastT || 0) - (a.lastT || 0));
+    if (!withAnom.length) {
+      panel.innerHTML = _panelHeader('🚨 이상감지 히스토리', backBtn) + '<div class="hint" style="padding:4px 8px">이상감지 기록이 있는 경주가 없습니다.</div>';
+      _wireFeedButtons(panel); return;
+    }
+    const blocks = await Promise.all(withAnom.slice(0, 30).map(async (r) => {
+      let ev = [];
+      try { ev = ((await (await fetch('/api/odds/anomaly-feed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: r.raceKey }) })).json()) || {}).events || []; }
+      catch (_) { /* */ }
+      if (!ev.length) return '';
+      const badge = (r.raceKey === cur) ? ' <span style="color:#38d39f;font-size:10px">● 현재</span>' : '';
+      const shown = ev.slice(-40);           // 경주당 최근 40건(히스토리 과밀 방지)
+      const more = ev.length > shown.length ? `<div class="hint" style="padding:1px 8px">…외 ${ev.length - shown.length}건 더</div>` : '';
+      return `<div style="margin:4px 0 6px;border-top:1px solid #1e293b;padding-top:4px">
+        <div style="color:#e2e8f0;font-weight:700">[${esc(_rkLabel(r.raceKey || r.race))}]${badge} <span class="hint" style="font-weight:400">${ev.length}건</span></div>${_anomalyRows(shown)}${more}</div>`;
+    }));
+    panel.innerHTML = _panelHeader(`🚨 이상감지 히스토리 (${withAnom.length}경주)`, backBtn) + (blocks.filter(Boolean).join('') || '<div class="hint" style="padding:4px 8px">기록 없음</div>');
+    _wireFeedButtons(panel);
   }
 
   /** [3번] 알림에 넣을 누적 이상감지 요약(최근 max건) */
@@ -4125,9 +4191,9 @@
 
   async function closingTick() {
     _closing.tick++;
-    let rk = getActiveRaceKey();
-    if (!rk) { try { const d = await (await fetch('/api/odds/triple/latest')).json(); rk = d && d.raceKey; } catch (_) { /* */ } }
-    if (rk && _closing.tick % 3 === 0) refreshAnomalyFeed(rk);   // 피드 3초마다 갱신
+    let rk = _closing.panelRk || getActiveRaceKey();   // 패널 현재경주(한국·일본 흐름이 지정) 우선
+    if (!rk) { try { const d = await (await fetch('/api/odds/triple/latest')).json(); rk = d && d.raceKey; if (rk) _closing.panelRk = rk; } catch (_) { /* */ } }
+    if (rk && !_closing.historyMode && _closing.tick % 3 === 0) refreshAnomalyFeed(rk);   // 현재 보기일 때만 3초 갱신
     let s = null;
     try { s = await (await fetch('/api/auto/status')).json(); } catch (_) { return; }
     const dl = s && s.deadline; if (!dl) return;
