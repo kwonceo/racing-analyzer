@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 4. **각 단계 완료 후 보고**
 5. **GitHub 백업 필수** (`git push origin master`)
 6. **작업 완료 후 보완점 자동 파악해서 함께 보고**
+7. **CHANGELOG 자동 갱신** — 새 기능 추가·버그 수정 시 `CHANGELOG.md` 최신 버전 섹션에 반영(아래 규칙)
 
 > 커밋 메시지 끝에 `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>`.
 
@@ -36,11 +37,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 5. **실제 투자금액 입력 필드** (현재 정액 1,000원 가정) — 미구현.
 6. **패턴 학습 데이터 축적 중** (결과 입력 쌓여야 통계 산출) — 진행 중.
 
+## CHANGELOG 자동 관리
+**새 기능 추가 / 버그 수정 / 보완 작업을 할 때마다 `CHANGELOG.md`를 함께 갱신한다(잊지 말 것).**
+- **위치**: 파일 최상단의 **현재 최신 버전 섹션**(`## vX.Y.Z (날짜) — 제목 · 현재 최신`) 안의 해당 소제목에 한 줄 추가.
+  - 새 기능 → `### 추가된 기능` / 버그 수정 → `### 수정된 버그` / 남은 과제 → `### 보완점`
+- **새 버전 승격 기준**: 큰 기능 묶음/마일스톤이면 새 `## vX.Y.Z` 섹션을 최상단에 추가(이전 "현재 최신" 표기는 제거)하고, 그 커밋에 `git tag -a vX.Y.Z -m "..."` + `git push origin --tags`.
+  - 버전 규칙: 호환 깨짐=MAJOR / 기능 추가=MINOR / 버그·문서=PATCH.
+- **커밋 관례**: 코드 변경 커밋에 `CHANGELOG.md` 갱신을 **같은 커밋**에 포함. 문구는 커밋 메시지와 일치시킨다.
+- 되돌리기 안내는 `README.md` "🔄 버전 관리 & 되돌리기" 섹션 유지.
+
 ## 단축 명령어
 - `#보완` → 현재 보완점 파악 후 우선순위 작업
 - `#백업` → `git add . && git commit && git push`
 - `#상태` → 파일 구조 + 현재 상태 보고
 - `#기능` → 완성 기능 목록 보고
+- `#변경` → 최근 작업을 `CHANGELOG.md` 최신 섹션에 반영(+ 필요 시 새 버전 태그)
 
 ## 세션 시작 자동 실행
 1. `git pull`로 최신 코드 확인
