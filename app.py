@@ -3851,7 +3851,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         doc["finalOdds"] = final_odds
     json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
 
-    an = _triple_analyze(rk, _triple_load().get(rk) or {})
+    # [매칭 유연화] triple_store(활성)에 없으면 odds_history 스냅샷에서 rec 재구성 → 분석 재현
+    rec = _triple_load().get(rk) or {}
+    if not (rec.get("quinella") or rec.get("history")):
+        rec = _rec_from_history(rk) or rec
+    an = _triple_analyze(rk, rec)
 
     def in3(combo):
         return all(x in top3 for x in combo)
@@ -4051,15 +4055,18 @@ def history_record_result():
     """경주 결과 입력 → 히스토리에 결과 기록 + 자동학습 레코드/통계 갱신.
     body: {raceKey, result:{'1st':7,'2nd':1,'3rd':9}}"""
     body = request.json or {}
-    rk = (body.get("raceKey") or "").strip()
+    rk_in = (body.get("raceKey") or "").strip()
     result = body.get("result") or {}
     top3 = [result.get("1st"), result.get("2nd"), result.get("3rd")]
     top3 = [int(x) for x in top3 if x not in (None, "")]
-    if not rk or len(top3) < 1:
+    if not rk_in or len(top3) < 1:
         return jsonify({"error": "raceKey와 결과(1~3착)가 필요합니다."}), 400
+    # [매칭 유연화] '서울 5' ↔ '2026-07-05 서울 5경주' 형식 불일치 방어 → 실제 분석 key로 해석
+    rk = _resolve_race_key(rk_in) or rk_in
     record, stats = _apply_result_learning(rk, result, top3, body.get("finalOdds"),
                                            stake=body.get("stake"), payout=body.get("payout"))
-    return jsonify({"ok": True, "record": record, "stats": stats})
+    return jsonify({"ok": True, "record": record, "stats": stats, "raceKey": rk,
+                    "matchedFrom": rk_in if rk != rk_in else None})
 
 
 # ── [일괄 결과 등록] 결과 페이지(HTML/URL) 전체 파싱 → 분석경주 자동매칭·학습 ──
@@ -4150,34 +4157,118 @@ def _parse_result_rows(html):
     return out
 
 
+_TRACK_ALIAS = {"부경": "부산", "부산경남": "부산", "서울경마": "서울", "제주도": "제주"}
+
+
+def _track_norm(a):
+    """경마장명 정규화(부경=부산 등 별칭 통일)."""
+    a = (a or "").strip()
+    return _TRACK_ALIAS.get(a, a)
+
+
 def _area_num(s):
-    """문자열에서 (한글 회장명 토큰, 경주번호) 추출. 결과행·raceKey 공용."""
-    txt = s or ""
-    m = re.search(r"[가-힣]{2,}", txt.replace(" ", ""))
-    area = m.group() if m else None
-    n = re.search(r"(\d{1,2})\s*(?:R\b|경주|라운드|레이스)", txt, re.IGNORECASE)
+    """문자열에서 (경마장 토큰[정규화], 경주번호) 추출. 결과행·raceKey 공용.
+    한글·일본어(가나·한자) 경마장명 모두 지원. '서울 5'(접미사 없음)도 번호 추출."""
+    txt = re.sub(r"\d{4}-\d{2}-\d{2}", " ", s or "")   # 날짜 먼저 제거(번호 오검출 방지)
+    m = re.search(r"[가-힣ぁ-んァ-ヶ一-龯]{2,}", txt.replace(" ", ""))
+    area = _track_norm(m.group()) if m else None
+    # 경주번호: 'N경주/NR/N라운드/Nレース' 우선, 없으면 (날짜 제거 후) 첫 숫자
+    n = re.search(r"(\d{1,2})\s*(?:R\b|경주|라운드|레이스|レース|R)", txt, re.IGNORECASE)
+    if not n:
+        n = re.search(r"(\d{1,2})", txt)
     num = int(n.group(1)) if n else None
     return area, num
 
 
-def _match_row_to_key(row, analyzed_keys):
-    """결과행(area,round) → 분석된 raceKey 중 지역+번호가 맞는 것 찾기."""
-    r_area = re.sub(r"\s", "", row.get("area") or "")
-    m = re.search(r"[가-힣]{2,}", r_area)
-    r_area = m.group() if m else r_area
-    r_num = None
-    mn = re.search(r"\d{1,2}", str(row.get("round") or ""))
-    if mn:
-        r_num = int(mn.group())
-    if not r_area or r_num is None:
-        return None
-    for rk in analyzed_keys:
-        k_area, k_num = _area_num(rk)
-        if k_num != r_num or not k_area:
+def _analyzed_race_keys():
+    """분석/수집된 모든 raceKey 후보 집합(활성 3종 배당 + odds_history 스냅샷 + analysis_log).
+    한국·일본 중앙/지방 모든 경기 포함."""
+    keys = set(_triple_load().keys())
+    for d in (ODDS_HISTORY_DIR, ANALYSIS_LOG_DIR):
+        if not os.path.isdir(d):
             continue
-        if r_area in k_area or k_area in r_area:
-            return rk
+        for fn in os.listdir(d):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                doc = json.load(open(os.path.join(d, fn), encoding="utf-8"))
+                rk = doc.get("raceKey") or doc.get("race")
+                if rk:
+                    keys.add(rk)
+            except Exception:
+                continue
+    return keys
+
+
+def _resolve_race_key(rk, candidates=None):
+    """입력 raceKey를 실제 분석된 key로 유연 매칭(형식 불일치 방어).
+    예: '서울 5' → '2026-07-05 서울 5경주'. 오늘 날짜 후보 우선.
+    우선순위: ①완전 일치 ②경마장+경주번호 일치 ③경주번호만 일치(후보 유일할 때만).
+    매칭 실패 시 None."""
+    rk = (rk or "").strip()
+    if not rk:
+        return None
+    cands = list(candidates) if candidates is not None else list(_analyzed_race_keys())
+    if rk in cands:
+        return rk                                  # ① 완전 일치
+    r_area, r_num = _area_num(rk)
+    if r_num is None:
+        return None
+    today = time.strftime("%Y-%m-%d")
+
+    def _today_first(ks):
+        return sorted(ks, key=lambda k: (today not in k, k))
+    # ② 경마장 + 경주번호 일치 (오늘 날짜 우선)
+    tier2 = [k for k in cands
+             if _area_num(k)[1] == r_num and r_area and _area_num(k)[0]
+             and (r_area in _area_num(k)[0] or _area_num(k)[0] in r_area)]
+    if tier2:
+        return _today_first(tier2)[0]
+    # ③ 경주번호만 일치 — 모호하지 않게(오늘 후보가 유일할 때만) 매칭
+    tier3 = [k for k in cands if _area_num(k)[1] == r_num]
+    pool = [k for k in tier3 if today in k] or tier3
+    if len(pool) == 1:
+        return pool[0]
     return None
+
+
+def _rec_from_history(rk):
+    """triple_store에 활성 데이터가 없을 때 odds_history 스냅샷에서 rec 재구성(결과학습용).
+    (triple_store는 churn/삭제되어 결과 입력 시점엔 비어있을 수 있음 — 스냅샷은 영구 보존)."""
+    path, _, _ = _hist_path(rk)
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return {}
+    snaps = doc.get("snapshots") or []
+    if not snaps:
+        return {}
+
+    def _arr(d):   # {'1+2':45.2} → [{combo:[1,2],odds:45.2}]
+        out = []
+        for k, v in (d or {}).items():
+            try:
+                out.append({"combo": [int(x) for x in str(k).split("+")], "odds": float(v)})
+            except (ValueError, TypeError):
+                continue
+        return out
+    hist = []
+    for s in snaps:
+        hist.append({"t": s.get("t"), "quinella": _arr(s.get("quinella")),
+                     "exacta": _arr(s.get("exacta")), "trio": [],
+                     "win": {k: v for k, v in (s.get("win") or {}).items()}})
+    last = snaps[-1]
+    return {"quinella": _arr(last.get("quinella")), "exacta": _arr(last.get("exacta")),
+            "trio": [], "win": last.get("win") or {}, "history": hist}
+
+
+def _match_row_to_key(row, analyzed_keys):
+    """결과행(area,round) → 분석된 raceKey 유연 매칭(한국·일본 모든 경기). 실패 시 None."""
+    pseudo = f"{row.get('area') or ''} {row.get('round') or ''}".strip()
+    if _area_num(pseudo)[1] is None:
+        return None
+    matched = _resolve_race_key(pseudo, analyzed_keys)
+    return matched if matched in analyzed_keys else None
 
 
 @app.route("/api/results/bulk", methods=["POST"])
