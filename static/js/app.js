@@ -2179,6 +2179,7 @@
       ${flips ? `<div style="margin:6px 0"><span class="hint">🔀 쌍승 역전</span><br>${flips}</div>` : ''}
       ${ranks ? `<div style="margin:6px 0"><span class="hint">📊 순위 변동</span><br>${ranks}</div>` : ''}
       <div style="margin:6px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
+      ${renderSignalQuality(a.signalQuality)}
       ${renderEliminationHTML(a.elimination)}
       ${renderBetRecommend(a)}
       ${renderFormGrades(a.form)}`;
@@ -2380,6 +2381,32 @@
       </table>`;
   }
 
+  // [신호 품질 필터링] 초과 급락(집중도) + 상황별 가중치 + 적응형 통합 등급
+  function renderSignalQuality(sq) {
+    if (!sq) return '';
+    const ex = sq.excess || {}, st = sq.situation || {}, ia = sq.integratedAdaptive || [];
+    const horses = ex.horses || {};
+    const rows = Object.keys(horses).map((no) => ({ no: +no, ...horses[no] }))
+      .filter((h) => h.grade)   // 노이즈(초과≥0) 제외 → 진짜/약한 신호만
+      .sort((a, b) => a.excess - b.excess);
+    const stColor = /집중|대규모/.test(st.name || '') ? '#38bdf8' : st.name === '이상감지 다수' ? '#ff9f43' : '#8a94a6';
+    const exRows = rows.length ? rows.map((h) => `<div style="margin:2px 0">
+      <span class="chip ${h.grade === '🔴' ? 'chip-red' : ''}">${h.grade} ${h.no}번</span>
+      <span class="hint">평균급락 ${h.avg}% · 초과 <b style="color:${h.grade === '🔴' ? '#ef4444' : '#ffd24f'}">${h.excess}%p</b> · ${h.combos}개 조합</span></div>`).join('')
+      : `<div class="hint">시장 평균 대비 집중 급락 말 없음 — 전체 노이즈(시장 전반 급락)</div>`;
+    const gc = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#8a94a6' };
+    const iaHtml = (st.signalSource === 'concentration' && ia.length)
+      ? `<div class="hint" style="margin:6px 0 2px">🔀 <b>집중신호 가중 통합 등급</b>(대규모 급락 시 배당 대신 집중도 반영)</div>`
+        + `<table class="data-table" style="margin-top:2px"><thead><tr><th>등급</th><th>마번</th><th>마명</th><th>전적</th><th>집중신호</th><th>통합</th></tr></thead><tbody>`
+        + ia.slice(0, 8).map((h) => `<tr><td><b style="color:${gc[h.grade] || '#fff'}">${h.grade}</b></td><td>${h.no}</td><td>${esc(h.name || '')}</td><td>${h.formScore}</td><td>${h.signalScore}</td><td><b>${h.integrated}</b></td></tr>`).join('')
+        + `</tbody></table>` : '';
+    return `<div style="margin:8px 0;border:1px solid var(--border);border-radius:8px;padding:8px">
+      <div class="matrix-title" style="font-size:14px">🎯 신호 품질 분석 <span class="hint" style="font-weight:400">노이즈 제거 · 자금 집중 감지</span></div>
+      <div style="margin:3px 0"><span class="chip" style="border-color:${stColor};color:${stColor}">${esc(st.name || '일반')}</span> <span class="hint">가중치 전적 <b>${Math.round((st.formW || 0.5) * 100)}%</b> · 신호 <b>${Math.round((st.signalW || 0.5) * 100)}%</b> · ${esc(st.note || '')}</span></div>
+      <div class="hint" style="margin:4px 0 2px">시장 전체 평균 급락 <b>${ex.overall != null ? ex.overall + '%' : '-'}</b> 대비 <b>초과 급락(집중도)</b> — 초과 5%p+ 🔴 진짜신호 · 0~5%p 🟡 약한신호 · 그 외 노이즈 제거</div>
+      ${exRows}${iaHtml}</div>`;
+  }
+
   // [버그2·3] 복승/삼복승 추천 + 예산 배분 금액 표
   function renderBetRecommend(a, budgetSel) {
     const recs = a.betRecommend || [];
@@ -2387,14 +2414,19 @@
     const bEl = document.querySelector(budgetSel || '#tripleBudget');
     const budget = Math.max(0, parseInt((bEl && bEl.value) || '0', 10) || 0);
     const won = (n) => Math.round(n / 100) * 100; // 100원 단위 반올림
+    const qc = { '상': '#38d39f', '중': '#ffd24f', '하': '#8a94a6' };
     const rows = recs.map((r) => {
       const amt = budget > 0 ? won(budget * (r.alloc || 0) / 100) : null;
       const kindColor = r.kind === '복승' ? '#4ea1ff' : '#38d39f';
       const odTxt = r.expOdds != null ? r.expOdds + '배'
         : (r.expOddsEst != null ? r.expOddsEst + '배<span class="hint">(추정)</span>' : '<span class="hint">미수집</span>');
+      const qTxt = r.signalQuality
+        ? `<b style="color:${qc[r.signalQuality] || '#8a94a6'}">${esc(r.signalQuality)}</b>${r.signalReason ? `<br><span class="hint" style="font-size:10px">${esc(r.signalReason)}</span>` : ''}`
+        : '<span class="hint">-</span>';
       return `<tr>
         <td><b style="color:${kindColor}">${esc(r.label)}</b></td>
         <td style="font-weight:700">${r.combo.join('+')}</td>
+        <td>${qTxt}</td>
         <td>${odTxt}</td>
         <td>${r.alloc || 0}%</td>
         <td>${amt != null ? amt.toLocaleString('ko-KR') + '원' : '<span class="hint">예산입력</span>'}</td>
@@ -2405,9 +2437,9 @@
     const upd = _betUpdatedFlag ? ' <span style="color:#38d39f">⚡ 업데이트됨</span>' : '';
     return `<div class="matrix-title" style="font-size:13px">🎯 베팅 추천${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
       <table class="data-table" style="margin-top:4px">
-        <thead><tr><th>종류</th><th>조합</th><th>예상배당</th><th>배분</th><th>금액</th></tr></thead>
+        <thead><tr><th>종류</th><th>조합</th><th>신호품질</th><th>예상배당</th><th>배분</th><th>금액</th></tr></thead>
         <tbody>${rows}</tbody>
-        ${totalAmt != null ? `<tfoot><tr><td colspan="3"></td><td><b>${totalAlloc}%</b></td><td><b>${totalAmt.toLocaleString('ko-KR')}원</b></td></tr></tfoot>` : ''}
+        ${totalAmt != null ? `<tfoot><tr><td colspan="4"></td><td><b>${totalAlloc}%</b></td><td><b>${totalAmt.toLocaleString('ko-KR')}원</b></td></tr></tfoot>` : ''}
       </table>`;
   }
 

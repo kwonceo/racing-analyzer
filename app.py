@@ -1793,6 +1793,113 @@ def _apply_mass_drop_strategy(bet_rec, mass_drop, drops, curQ):
     return {"applied": True, "changes": changes}
 
 
+# ───────── [신호 품질 필터링] 초과 급락률·상황별 가중치·조합 품질 ─────────
+#   시장 전체가 함께 내려가는 '노이즈'와, 특정 말에 자금이 집중된 '진짜 신호'를 구분한다.
+def _excess_drop_analysis(drops, curQ):
+    """[1번] 초과 급락률 — 시장 전체 평균 급락 대비 각 말의 집중도.
+    drops=[{combo:[a,b], pct}] (pct<0=급락=자금유입). 반환:
+      {overall: 전체평균급락%, horses:{no:{avg,excess,grade,combos}}, concentrated:[🔴 말], count}.
+    excess = 해당말 평균급락% - 전체평균급락% (음수일수록 평균보다 더 급락=자금집중).
+      excess<=-5 → 🔴 진짜신호 / -5<excess<0 → 🟡 약한신호 / excess>=0 → 노이즈(시장 전체 급락)."""
+    dd = [d for d in (drops or []) if d.get("pct") is not None and d["pct"] < 0]
+    if not dd:
+        return {"overall": None, "horses": {}, "concentrated": [], "count": 0}
+    overall = round(sum(d["pct"] for d in dd) / len(dd), 1)
+    by_horse = {}
+    for d in dd:
+        for h in d.get("combo", []):
+            by_horse.setdefault(int(h), []).append(d["pct"])
+    horses, concentrated = {}, []
+    for h, pcts in by_horse.items():
+        avg = round(sum(pcts) / len(pcts), 1)
+        excess = round(avg - overall, 1)   # 음수 = 평균보다 더 급락(집중)
+        grade = "🔴" if excess <= -5 else ("🟡" if excess < 0 else None)
+        horses[h] = {"avg": avg, "excess": excess, "grade": grade, "combos": len(pcts)}
+        if grade == "🔴":
+            concentrated.append(h)
+    concentrated.sort(key=lambda n: horses[n]["excess"])   # 가장 집중된 말 먼저
+    return {"overall": overall, "horses": horses, "concentrated": concentrated, "count": len(dd)}
+
+
+def _concentration_score(excess_val):
+    """초과급락(음수 %p)을 0~100 집중신호 점수로. -20%p 이상 초과급락=100점."""
+    if excess_val is None or excess_val >= 0:
+        return 0.0
+    return round(min(100.0, (-excess_val) / 20.0 * 100.0), 1)
+
+
+def _signal_situation(drops, mass_drop, excess):
+    """[3번] 상황별 가중치 자동 조정. 반환 {name, formW, signalW, signalSource, note}.
+    - 일반: 전적50 신호50 / 이상감지다수(30%+급락 3개↑): 전적40 신호60
+    - 대규모 급락: 전적30 집중신호70 / 대규모+집중(집중신호 말 존재): 전적20 집중신호80."""
+    big = [d for d in (drops or []) if d.get("pct") is not None and d["pct"] <= -30]
+    concentrated = (excess or {}).get("concentrated") or []
+    if mass_drop and concentrated:
+        return {"name": "대규모+집중", "formW": 0.2, "signalW": 0.8, "signalSource": "concentration",
+                "note": "대규모 급락 + 집중 신호 → 집중신호 80% 가중(개별 배당 무시)"}
+    if mass_drop:
+        return {"name": "대규모 급락", "formW": 0.3, "signalW": 0.7, "signalSource": "concentration",
+                "note": "대규모 급락 → 개별 신호 신뢰도 하향·집중신호 70% 가중"}
+    if len(big) >= 3:
+        return {"name": "이상감지 다수", "formW": 0.4, "signalW": 0.6, "signalSource": "odds",
+                "note": "이상감지 다수(30%+ 급락 3건↑) → 신호 60% 가중"}
+    return {"name": "일반", "formW": 0.5, "signalW": 0.5, "signalSource": "odds",
+            "note": "일반 → 전적·신호 균형(50:50)"}
+
+
+def _integrated_adaptive(form, curQ, curD, excess, situation):
+    """[3번] 상황별 가중치로 통합 등급 재산출(기존 _integrated_grades 40/60은 그대로 두고 별도 추가).
+    신호점수 = 대규모 상황이면 집중신호점수(초과급락), 아니면 배당점수(_odds_score)."""
+    if not form:
+        return None
+    repr_odds = {}
+    for (a, b), o in (curQ or {}).items():
+        for h in (a, b):
+            if o > 0 and (repr_odds.get(h) is None or o < repr_odds[h]):
+                repr_odds[h] = o
+    if not repr_odds:
+        for (a, b), o in (curD or {}).items():
+            for h in (a, b):
+                if o > 0 and (repr_odds.get(h) is None or o < repr_odds[h]):
+                    repr_odds[h] = o
+    fw, sw = situation["formW"], situation["signalW"]
+    use_conc = situation["signalSource"] == "concentration"
+    ehorses = (excess or {}).get("horses") or {}
+    out = []
+    for h in form:
+        no = h.get("no")
+        fscore = max(0.0, min(100.0, float(h.get("totalScore") or 0)))
+        if use_conc:
+            sscore = _concentration_score((ehorses.get(int(no)) or {}).get("excess")) if no is not None else 0.0
+        else:
+            sscore = _odds_score(repr_odds.get(int(no)) if no is not None else None)
+        integ = round(fw * fscore + sw * sscore, 1)
+        out.append({"no": no, "name": h.get("name", ""), "jockey": h.get("jockey", ""),
+                    "formScore": round(fscore, 1), "signalScore": sscore,
+                    "odds": repr_odds.get(int(no)) if no is not None else None, "integrated": integ})
+    out.sort(key=lambda x: -x["integrated"])
+    n = len(out)
+    for i, h in enumerate(out):
+        frac = i / n if n else 0
+        h["grade"] = "A" if frac < 0.25 else "B" if frac < 0.50 else "C" if frac < 0.75 else "D"
+    return out
+
+
+def _combo_signal_quality(combo, excess):
+    """[4번] 추천 조합의 신호 품질(상/중/하) + 근거. 조합 내 최대 초과급락 말 기준."""
+    ehorses = (excess or {}).get("horses") or {}
+    best = None
+    for h in (combo or []):
+        e = ehorses.get(int(h))
+        if e and e.get("excess") is not None and e["excess"] < 0:
+            if best is None or e["excess"] < best[1]:
+                best = (int(h), e["excess"], e.get("grade"))
+    if best is None:
+        return {"quality": "하", "reason": "집중 급락 없음(시장 전체 급락·노이즈)"}
+    no, ex, grade = best
+    return {"quality": ("상" if grade == "🔴" else "중"), "reason": f"{no}번 초과급락 {ex}%p"}
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -1828,6 +1935,9 @@ def _triple_analyze(rk, rec):
     drops.sort(key=lambda d: d["pct"])
     # [대규모 급락] 전체 조합의 50%+ 또는 30개+ 동시 30%급락 → 자금 분산 패턴 감지
     mass_drop = _mass_drop_detect(drops, curQ)
+    # [신호 품질] 초과 급락률(시장 평균 대비 집중도) + 상황별 가중치
+    excess = _excess_drop_analysis(drops, curQ)
+    situation = _signal_situation(drops, mass_drop, excess)
 
     # 2) 순위 변동 (배당 낮은=인기 순위)
     def _ranks(m):
@@ -1940,6 +2050,12 @@ def _triple_analyze(rk, rec):
     # [대규모급락 전략] 삼복승 보험 8→15% 확대·중배당 복승 보험 추가·최저배당 신뢰도 하락(기존 조합 유지)
     mass_drop_strategy = _apply_mass_drop_strategy(bet_rec, mass_drop, drops, curQ)
 
+    # [4번] 추천 조합별 신호 품질(상/중/하) + 근거(초과급락 말) 부착
+    for r in bet_rec:
+        _cq = _combo_signal_quality(r.get("combo"), excess)
+        r["signalQuality"] = _cq["quality"]
+        r["signalReason"] = _cq["reason"]
+
     # 삼복승만 뽑은 하위 호환 필드
     trio_rec = [{"label": r["label"], "combo": r["combo"],
                  "expOdds": r["expOdds"], "expOddsEst": r.get("expOddsEst")}
@@ -1989,6 +2105,12 @@ def _triple_analyze(rk, rec):
                         "text": f"대규모 자금 분산 — {mass_drop['dropped']}/{mass_drop['total']}조합"
                                 f"({int(mass_drop['ratio']*100)}%) 동시 30%+ 급락",
                         "detail": mass_drop["note"]})
+    # [1·2번] 초과 급락(집중) 말 = 시장 평균보다 크게 급락 → 노이즈 제거 후 진짜 신호로 승격
+    for _h in (excess.get("concentrated") or [])[:5]:
+        _e = excess["horses"][_h]
+        signals.append({"level": "🔴", "type": "집중급락", "horse": _h,
+                        "text": f"{_h}번 초과급락 {_e['excess']}%p (시장평균 {excess['overall']}% 대비 집중)",
+                        "detail": "시장 평균보다 크게 급락 → 특정 말에 자금 집중(진짜 신호)"})
 
     def _drop_reason(pct):
         if pct <= -50:
@@ -2009,9 +2131,14 @@ def _triple_analyze(rk, rec):
     for d in drops:
         lvl, reason = _drop_reason(d["pct"])
         if lvl:
-            signals.append({"level": lvl, "type": "급락",
-                            "text": f"{d['combo'][0]}+{d['combo'][1]} 복승 {d['prev']}→{d['cur']} ({d['pct']}%)",
-                            "detail": reason})
+            _sig = {"level": lvl, "type": "급락",
+                    "text": f"{d['combo'][0]}+{d['combo'][1]} 복승 {d['prev']}→{d['cur']} ({d['pct']}%)",
+                    "detail": reason}
+            # [2번] 대규모 급락 중이면 개별 신호는 신뢰도 하향(초과급락 분석으로 판단 전환)
+            if mass_drop:
+                _sig["lowConfidence"] = True
+                _sig["detail"] = reason + " · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
+            signals.append(_sig)
     for r in reversals:
         if r.get("flipped"):
             signals.append({"level": "🔄", "type": "역전",
@@ -2056,6 +2183,10 @@ def _triple_analyze(rk, rec):
     # [단승] 통합 등급 행에 단승 배당 부착(타임라인/화면 표시용)
     for h in integrated or []:
         h["win"] = curWin.get(h.get("no"))
+    # [3번] 상황별 가중치 적응형 통합 등급(기존 40/60 integrated 는 유지, 이건 추가 필드)
+    integrated_adaptive = _integrated_adaptive(form, curQ, curD, excess, situation)
+    for h in integrated_adaptive or []:
+        h["win"] = curWin.get(h.get("no"))
 
     # [5번] 현재 경주 패턴 매칭 + [4번] 신뢰도 기반 베팅 비중 자동 조정
     pattern_match = None
@@ -2088,6 +2219,9 @@ def _triple_analyze(rk, rec):
         "signals": signals, "lastSnapshot": last_snap,  # 실시간 변동 알림용
         "patternMatch": pattern_match,  # [4·5번] 현재 패턴 매칭 + 신뢰도 + 베팅 비중 조정
         "massDrop": mass_drop, "massDropStrategy": mass_drop_strategy,  # [대규모급락] 감지 + 베팅 전략
+        # [신호 품질 필터링] 초과급락(집중도)·상황별 가중치·적응형 통합 등급
+        "signalQuality": {"excess": excess, "situation": situation,
+                          "integratedAdaptive": integrated_adaptive},
     }
 
 
