@@ -740,9 +740,12 @@
       .sort((a, b) => a.odds - b.odds)
       .slice(0, cap);
     const payload = { raceKey, quinella: [], exacta: [], trio: [], capturedAt: new Date().toISOString(), source: location.href };
-    // [2번] 한국모드면 복승(quinella)만 남긴다 → 쌍승·삼복승은 탭 fetch 자체를 시도하지 않는다.
-    const steps = isKorea ? TRIPLE_STEPS.filter((s) => s.key === 'quinella') : TRIPLE_STEPS;
+    // [2번] 한국모드=복승만. [삼복승 제거] 일본=복승+쌍승만(삼복승 fetch 자체를 하지 않음).
+    const steps = isKorea
+      ? TRIPLE_STEPS.filter((s) => s.key === 'quinella')
+      : TRIPLE_STEPS.filter((s) => s.key !== 'trio');   // 일본: 복승+쌍승 (삼복승 제외)
     if (isKorea) console.log('[한국모드] 복승만 수집 - 쌍승/삼복승 생략');
+    else console.log('[삼복승 제거] 일본경마 복승+쌍승만 수집 - 삼복승 생략');
     try {
       for (const st of steps) {
         setTripleProgress(`${st.label} 수집중…`);        // "복승 수집중…" → "쌍승 수집중…" → …
@@ -768,7 +771,7 @@
       setTripleProgress(res && res.ok
         ? (isKorea
           ? `수집 완료 ✅ 복승 ${payload.quinella.length}·전적 ${starters.length}두`
-          : `수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두`)
+          : `수집 완료 ✅ 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·전적 ${starters.length}두`)
         : `❌ 전송 실패: ${(res && res.error) || ''}`, true);
       return res || { ok: false, error: 'background 응답 없음' };
     } catch (e) {
@@ -1406,33 +1409,16 @@
         console.log(`[배당수집] 전적 추출: ${starters.length}두`);
       }
 
-      // 4) 삼복승 — [일본 전용]. [2번] 한국경마는 삼복승을 수집하지 않는다(복승만).
-      //    삼복승은 축 클릭이 불안정할 수 있어 try/catch로 감싸 실패해도 앞서 모은 복승/쌍승/출마표2는 그대로 전송한다.
-      let trio = [];
-      if (isKorea) {
-        console.log('[한국모드] 삼복승 수집 생략');   // 삼복승 탭 클릭 코드 자체를 실행하지 않음(완전 스킵)
-        console.log('[삼복승수집] 한국경마 모드 → 삼복승 수집 생략(복승만).');
-      } else {
-        try {
-          const keyHorses = localKeyHorses(quinella);
-          console.log(`[배당수집] 유력마(로컬) 1~3순위: ${keyHorses.join('·') || '-'}`);
-          setTripleProgress(`삼복승 수집중… (축 ${keyHorses.join('·') || '?'})`);
-          sig = oddsSignature();   // 출마표2 수집 후 현재(복승) 화면 기준으로 시그니처 갱신
-          await clickTabAndWait(['삼복승', '삼복', '삼쌍승', '3連複'], sig, '삼복승', false);
-          if (keyHorses.length) trio = await collectTrioByAxis(keyHorses, oddsClass);
-          if (!trio.length) {                                   // 폴백: "a-b-c" 텍스트형
-            trio = currentTrios().map((t) => ({ combo: t.combo, odds: t.odds }));
-            console.log(`[배당수집] 삼복승 텍스트형 폴백 추출: ${trio.length}개 조합`);
-          }
-          console.log(`[배당수집] 삼복승 총 추출: ${trio.length}개 조합`);
-        } catch (e) { console.warn('[삼복승수집] 실패 — 무시하고 진행', e); }
-      }
+      // 4) [삼복승 제거] 복승+쌍승만 사용 — 삼복승 탭 클릭/수집을 완전히 제거(일본·한국 공통).
+      //    기존 삼복승 수집 함수(collectTrioByAxis 등)는 코드로 보존하되 여기서 호출하지 않는다.
+      const trio = [];
+      console.log('[삼복승 제거] 삼복승 수집 안 함 — 복승+쌍승만 사용');
 
       const payload = {
         raceKey, win, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
         deadline: timerDeadline || null, capturedAt: new Date().toISOString(), source: location.href,
       };
-      console.log(`[배당수집] ===== 완료: 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두 =====`);
+      console.log(`[배당수집] ===== 완료: 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·전적 ${starters.length}두 (삼복승 미사용) =====`);
       if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length && !starters.length) {
         setTripleProgress('❌ 배당·전적 모두 없음(콘솔 로그 확인)', true);
         return { ok: false, error: '배당·전적을 찾지 못했습니다. F12 콘솔의 로그를 확인하세요.' };
@@ -1449,10 +1435,9 @@
         console.log('[전적] /api/extract/japan 응답:', japan && japan.ok ? 'ok' : (japan && japan.error));
       }
       const exNote = isKorea ? '' : (payload.exacta.length ? `·쌍승 ${payload.exacta.length}` : '·쌍승 미수집');
-      const trioNote = isKorea ? '' : `·삼복승 ${payload.trio.length}`;
       const stNote = isKorea ? '·전적 PDF' : `·전적 ${starters.length}두`;
       setTripleProgress(res && res.ok
-        ? `수집 완료 ✅ 복승 ${payload.quinella.length}${exNote}${trioNote}${stNote}`
+        ? `수집 완료 ✅ 복승 ${payload.quinella.length}${exNote}${stNote}`
         : `❌ 전송 실패: ${(res && res.error) || ''}`, true);
       return res || { ok: false, error: 'background 응답 없음' };
     } catch (e) {

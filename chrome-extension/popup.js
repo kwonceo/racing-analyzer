@@ -345,7 +345,7 @@ function renderTripleStatus(ts) {
   if (ts.lastTripleOk) {
     const c = ts.lastCounts || {};
     tripleRow.innerHTML = `3종 수집: <span class="ok">성공 ${when}</span>`;
-    tripleDetail.textContent = `${ts.lastTripleRaceKey || ''} · 복승 ${c.quinella || 0} · 쌍승 ${c.exacta || 0} · 삼복승 ${c.trio || 0}`;
+    tripleDetail.textContent = `${ts.lastTripleRaceKey || ''} · 복승 ${c.quinella || 0} · 쌍승 ${c.exacta || 0}`;
   } else {
     tripleRow.innerHTML = `3종 수집: <span class="err">실패 ${when}</span>`;
     tripleDetail.textContent = ts.lastTripleError || '';
@@ -367,7 +367,7 @@ function renderAutoClosed(st) {
 }
 
 btnTriple.addEventListener('click', async () => {
-  btnTriple.disabled = true; btnTriple.textContent = '수집 중… (복승→쌍승→삼복승)';
+  btnTriple.disabled = true; btnTriple.textContent = '수집 중… (복승→쌍승)';
   tripleDetail.textContent = '';
   const tab = await activeKeibaTab();
   if (!tab) {
@@ -385,7 +385,7 @@ btnTriple.addEventListener('click', async () => {
       });
     });
   }
-  btnTriple.disabled = false; btnTriple.textContent = '⚡ 전체 자동 수집 (복승·쌍승·삼복승)';
+  btnTriple.disabled = false; btnTriple.textContent = '⚡ 전체 자동 수집 (복승·쌍승)';
 });
 
 // ── [1번] 즉시 분석: 수집 → 서버 이상감지 → 요약 표시 ────────────────
