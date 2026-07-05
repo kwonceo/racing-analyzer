@@ -2709,8 +2709,11 @@
     // [전체데이터·패턴발견] 적중 경주 공통점 자동 발견 + 데이터 충분도
     let disc = null; try { disc = await (await fetch('/api/patterns/discovered')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
+    // [AI Phase1] AI 학습 데이터 현황 대시보드
+    let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
+      ${renderAiDataStatus(ai)}
       ${renderProfitSummary(s.profit_summary)}
       ${renderCompareStats(s.compare_stats, s.integrated_weights)}
       ${card('추천 적중률', s.recommend_hit)}
@@ -2724,6 +2727,22 @@
       ${renderPatternStats(s.pattern_stats)}
       ${renderDropTiming(s.drop_timing)}
       ${renderUpsetStats(up)}`;
+  }
+
+  // [AI Phase1·3번] AI 학습 데이터 현황 대시보드(수집/완전/목표 진행률/예상 완료)
+  function renderAiDataStatus(ai) {
+    if (!ai) return '';
+    const pct = Math.max(0, Math.min(100, ai.progress || 0));
+    const filled = Math.round(pct / 10);
+    const bar = '█'.repeat(filled) + '░'.repeat(10 - filled);
+    const eta = ai.eta_months != null ? `약 ${ai.eta_months}개월 후` : '수집 시작 후 산출';
+    return `<div style="margin:8px 0;padding:10px;border:2px solid #8b5cf6;border-radius:8px;background:rgba(139,92,246,.08)">
+      <div class="matrix-title" style="font-size:14px;color:#c4b5fd">🤖 AI 학습 데이터 현황</div>
+      <div style="margin:4px 0">수집 경주: <b>${ai.collected || 0}</b>경주 · 완전한 데이터: <b>${ai.complete || 0}</b>경주 (${ai.complete_pct || 0}%) · 평균 품질 <b>${ai.avg_quality || 0}</b>점</div>
+      <div style="margin:4px 0">목표: <b>${ai.target || 500}</b>경주 · 진행률 <b style="color:${pct >= 50 ? '#38d39f' : '#ffd24f'}">${pct}%</b></div>
+      <div style="font-family:monospace;font-size:15px;letter-spacing:1px;color:#a78bfa">${bar} ${pct}%</div>
+      <div class="hint" style="margin-top:3px">일평균 ${ai.per_day || 0}경주 수집(${ai.days_collected || 0}일) · 목표까지 ${ai.remaining || 0}경주 · 예상 완료: <b>${eta}</b></div>
+      <div class="hint" style="font-size:11px;margin-top:2px">결과 입력 시 <code>data/ai_training/</code>에 완전 데이터 자동 저장 → <code>tools/export_ai_data.py</code>로 CSV/JSON 내보내기 가능</div></div>`;
   }
 
   // [5번]·[전략성과] 경마장별·월별·전략별 적중률/수익 집계 표시

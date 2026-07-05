@@ -2,8 +2,9 @@
 .claude/
 __pycache__/
 *.pyc
-# 참고: data/analysis_log/ 는 의도적으로 추적 유지 — _discover_patterns 패턴학습 코퍼스 +
-#       결과 입력 시 적중/복기 주석이 누적되는 원시 데이터라 백업/복원 대상.
+# 참고: data/analysis_log/ · data/race_results/ · data/ai_training/ 는 의도적으로 추적 유지
+#       — 패턴학습·AI 학습 코퍼스(백업/복원 대상). dist/(내보내기 출력)만 무시.
+dist/
 odds_store.json
 results_store.json
 triple_store.json

@@ -3868,6 +3868,249 @@ def _missing_results(date=None):
     return {"date": date, "missing": missing, "count": len(missing)}
 
 
+# ───────── [AI 분석 Phase1] AI 학습용 완전 데이터(data/ai_training/) + 품질검증 + 현황 ─────────
+AI_TRAINING_DIR = os.path.join(os.path.dirname(__file__), "data", "ai_training")
+AI_TARGET_RACES = 500   # [3번] 목표 경주 수
+
+
+def _ai_training_path(rk):
+    os.makedirs(AI_TRAINING_DIR, exist_ok=True)
+    rid, _ = _race_result_id(rk)
+    return os.path.join(AI_TRAINING_DIR, rid + ".json"), rid
+
+
+def _odds_range_label(o):
+    if o is None:
+        return None
+    return "저배당" if o < 3 else ("중배당" if o < 7 else "고배당")
+
+
+def _build_ai_training(rk, an, record, result, top4, inputs=None):
+    """[1번] AI 학습용 완전 데이터 구조 조립 — 말별 피처 + 배당 피처 + 예측 + 결과 + 라벨."""
+    inputs = inputs or {}
+    rid, date = _race_result_id(rk)
+    track, rnd = _extract_track_round(rk)
+    sq = an.get("signalQuality") or {}
+    excess = sq.get("excess") or {}
+    ex_h = excess.get("horses") or {}
+    adv = sq.get("advanced") or {}
+    inv = an.get("inverse") or {}
+    wx = sq.get("winExactaReversals") or []
+    mm = sq.get("quinellaMismatch") or {}
+
+    # 말별 피처(전적·기수·거리 등 — 미수집 항목은 null, 스키마 미래 대비)
+    win = an.get("single") or {}
+    horses = []
+    for f in (an.get("form") or []):
+        no = f.get("no")
+        horses.append({
+            "no": no, "name": f.get("name") or "", "jockey": f.get("jockey") or "",
+            "jockey_winrate": _jockey_place_rate(f.get("jockey")),
+            "recent_results": _placings_list(f.get("recentPlacings")),
+            "record_score": f.get("totalScore"),
+            "distance_score": f.get("distanceScore"),        # 미수집 → None
+            "interval_days": f.get("intervalDays"),           # 미수집 → None
+            "weight_change": f.get("weightChange"),           # 미수집 → None
+            "odds": win.get(str(no)) if isinstance(win, dict) else None,
+        })
+
+    # 배당 피처(이미 계산된 신호 재사용)
+    drop_rates, excess_drops, drop_speed, consecutive = {}, {}, {}, {}
+    for d in (an.get("drops") or []):
+        if d.get("pct") is not None and d["pct"] < 0:
+            for h in d["combo"]:
+                if str(h) not in drop_rates or d["pct"] < drop_rates[str(h)]:
+                    drop_rates[str(h)] = d["pct"]
+    for no, e in ex_h.items():
+        if e.get("excess") is not None and e["excess"] < 0:
+            excess_drops[str(no)] = e["excess"]
+    for v in adv.get("velocity", []):
+        for h in v["combo"]:
+            key = str(h)
+            if key not in drop_speed or v["speed"] > abs(drop_speed[key]):
+                drop_speed[key] = -abs(v["speed"])
+    for _key, st in (adv.get("streaks") or {}).items():
+        if st.get("type") == "연속하락":
+            for h in st["combo"]:
+                consecutive[str(h)] = max(consecutive.get(str(h), 0), 3)
+    ov = adv.get("overround") or {}
+    refund_rate = None
+    if ov.get("invSum"):
+        refund_rate = round(min(1.0, 1.0 / ov["invSum"]), 3) if ov["invSum"] > 1 else round(ov["invSum"], 3)
+    odds_features = {
+        "timeline": [{"time": s.get("time"), "quinella": s.get("quinella", {})}
+                     for s in _ai_timeline(rk)],
+        "drop_rates": drop_rates, "excess_drops": excess_drops, "drop_speed": drop_speed,
+        "exacta_reversal": bool(wx) or any(r.get("flipped") for r in (an.get("reversals") or [])),
+        "reversal_ratio": (wx[0]["ratio"] if wx else None),
+        "quinella_mismatch": mm.get("ratio"),
+        "refund_rate": refund_rate,
+        "consecutive_drops": consecutive,
+        "fake_betting": bool(adv.get("fakes")),
+        "large_scale_drop": bool(an.get("massDrop")),
+    }
+
+    # 예측
+    elim = an.get("elimination") or {}
+    ehorses = elim.get("horses") or []
+    cand = [h["no"] for h in ehorses if h.get("keep") or h.get("override")] or (an.get("keyHorses") or [])
+    elim_no = [h["no"] for h in ehorses if not (h.get("keep") or h.get("override"))]
+    rec_bets = an.get("betRecommend") or []
+    _main = next((b for b in rec_bets if b.get("label") == "복승 메인"), None)
+    bmed = an.get("bmed") or {}
+    conf_h = ((sq.get("signalConfidence") or {}).get("horses")) or {}
+    top_conf = max([(conf_h.get(h) or {}).get("confidence", 0) for h in cand] or [0])
+    prediction = {
+        "candidates": cand, "eliminated": elim_no,
+        "recommend": "+".join(map(str, _main["combo"])) if _main else None,
+        "strategy": ("BMED_" + bmed.get("strategy")) if bmed.get("strategy") else None,
+        "confidence": round(top_conf, 1),
+        "signal_quality": next((b.get("signalQuality") for b in rec_bets if b.get("signalQuality")), None),
+    }
+
+    # 결과 + 라벨
+    q_odds = _safe_num(inputs.get("quinella_odds"))
+    result_block = {
+        "1st": result.get("1st"), "2nd": result.get("2nd"),
+        "3rd": result.get("3rd"), "4th": result.get("4th"),
+        "quinella_odds": q_odds, "exacta_odds": _safe_num(inputs.get("exacta_odds")),
+        "hit": bool(record.get("was_hit")),
+        "hit_pattern": (record.get("hit_basis") or {}).get("reason") if record.get("was_hit") else None,
+    }
+    labels = {
+        "quinella_hit": bool(record.get("quinella_hit")),
+        "winner": result.get("1st"), "second": result.get("2nd"),
+        "odds_range": _odds_range_label(q_odds),
+    }
+    data = {
+        "race_id": rid,
+        "race_info": {
+            "date": date, "track": track, "round": rnd,
+            "distance": inputs.get("distance"), "condition": inputs.get("track_condition"),
+            "weather": inputs.get("weather"),
+            "horse_count": inputs.get("horse_count") or len(horses) or None, "grade": inputs.get("grade"),
+        },
+        "horses": horses,
+        "odds_features": odds_features,
+        "prediction": prediction,
+        "result": result_block,
+        "labels": labels,
+        "saved_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+    }
+    data["quality"] = _ai_quality_score(data)
+    return data
+
+
+def _ai_timeline(rk):
+    """odds_history 스냅샷 → 학습용 배당 타임라인."""
+    try:
+        hp, _, _ = _hist_path(rk)
+        return (json.load(open(hp, encoding="utf-8")).get("snapshots") or [])
+    except Exception:
+        return []
+
+
+def _ai_quality_score(data):
+    """[2번] 데이터 품질 자동 검증 + 점수(완전 100점, 누락/오류마다 감점). {score, missing, errors}."""
+    score, missing, errors = 100, [], []
+    ri = data.get("race_info") or {}
+    # 필수 항목 존재(누락 감점)
+    checks = [("race_info.date", ri.get("date")), ("race_info.track", ri.get("track")),
+              ("race_info.round", ri.get("round")), ("horses", data.get("horses")),
+              ("prediction.recommend", (data.get("prediction") or {}).get("recommend")),
+              ("result.1st", (data.get("result") or {}).get("1st"))]
+    for label, v in checks:
+        if v in (None, "", [], {}):
+            missing.append(label)
+            score -= 12
+    # 선택(있으면 가점 유지, 없으면 소폭 감점) — 거리·마장·날씨·확정배당
+    for label, v in (("distance", ri.get("distance")), ("condition", ri.get("condition")),
+                     ("weather", ri.get("weather")),
+                     ("quinella_odds", (data.get("result") or {}).get("quinella_odds"))):
+        if v in (None, ""):
+            missing.append(label)
+            score -= 4
+    # 범위 검증(오류)
+    res = data.get("result") or {}
+    for k in ("1st", "2nd", "3rd", "4th"):
+        n = res.get(k)
+        if n not in (None, ""):
+            try:
+                if not (1 <= int(n) <= 16):
+                    errors.append(f"마번 범위 초과: {k}={n}")
+                    score -= 10
+            except (TypeError, ValueError):
+                errors.append(f"마번 숫자 아님: {k}={n}")
+                score -= 10
+    for k in ("quinella_odds", "exacta_odds"):
+        o = res.get(k)
+        if o not in (None, "", 0):
+            try:
+                if not (1.0 <= float(o) <= 9999):
+                    errors.append(f"배당 범위 초과: {k}={o}")
+                    score -= 6
+            except (TypeError, ValueError):
+                errors.append(f"배당 숫자 아님: {k}={o}")
+                score -= 6
+    if not re.match(r"^\d{4}-\d{2}-\d{2}$", str(ri.get("date") or "")):
+        errors.append("날짜 형식 오류")
+        score -= 8
+    score = max(0, score)
+    return {"score": score, "complete": score >= 90 and not errors,
+            "missing": missing, "errors": errors}
+
+
+def _save_ai_training(rk, an, record, result, top4, inputs=None):
+    """[1·2번] AI 학습 완전 데이터 저장 + 품질검증(중복=같은 race_id 덮어쓰기)."""
+    try:
+        data = _build_ai_training(rk, an, record, result, top4, inputs)
+    except Exception as e:
+        print("[AI학습저장] 조립 실패:", e)
+        return {"ok": False, "errors": [str(e)]}
+    path, rid = _ai_training_path(rk)
+    try:
+        json.dump(data, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[AI학습저장] 파일 저장 실패:", e)
+        return {"ok": False, "errors": [str(e)]}
+    q = data.get("quality") or {}
+    return {"ok": True, "race_id": rid, "score": q.get("score"), "complete": q.get("complete")}
+
+
+def _ai_data_status():
+    """[3번] AI 학습 데이터 현황 — 수집/완전 경주 수·품질 평균·목표 진행률·예상 완료."""
+    total, complete, score_sum, days = 0, 0, 0, set()
+    if os.path.isdir(AI_TRAINING_DIR):
+        for fn in os.listdir(AI_TRAINING_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(AI_TRAINING_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            total += 1
+            q = d.get("quality") or {}
+            score_sum += q.get("score") or 0
+            if q.get("complete"):
+                complete += 1
+            dt = (d.get("race_info") or {}).get("date")
+            if dt:
+                days.add(dt)
+    progress = round(total / AI_TARGET_RACES * 100, 1) if AI_TARGET_RACES else None
+    # 예상 완료: 일평균 수집량 기준 남은 경주/일평균 → 개월
+    per_day = (total / len(days)) if days else 0
+    remain = max(0, AI_TARGET_RACES - total)
+    eta_months = round(remain / per_day / 30, 1) if per_day > 0 else None
+    return {
+        "collected": total, "complete": complete,
+        "complete_pct": round(complete / total * 100, 1) if total else 0,
+        "avg_quality": round(score_sum / total, 1) if total else 0,
+        "target": AI_TARGET_RACES, "progress": progress, "remaining": remain,
+        "days_collected": len(days), "per_day": round(per_day, 1),
+        "eta_months": eta_months,
+    }
+
+
 def _analysis_log_git_backup(label):
     """data/analysis_log/ 를 커밋(+가능하면 push). 원격/인증 미설정이면 조용히 건너뜀."""
     root = os.path.dirname(os.path.abspath(__file__))
@@ -4615,6 +4858,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         record["race_result_errors"] = _rr.get("errors") or []
     except Exception as e:
         print("[결과완전저장] 실패:", e)
+    # [AI 학습 Phase1] AI 학습용 완전 데이터(data/ai_training/) 저장 + 품질점수
+    try:
+        _ai = _save_ai_training(rk, an, record, result, top4, inputs)
+        record["ai_training_saved"] = _ai.get("ok")
+        record["ai_quality_score"] = _ai.get("score")
+    except Exception as e:
+        print("[AI학습저장] 실패:", e)
     # [전체데이터·패턴발견] 결과 반영된 로그까지 포함해 적중 경주 공통점 자동 발견
     try:
         _discover_patterns()
@@ -4700,6 +4950,52 @@ def race_results_get():
 def race_results_missing():
     """[3번] 당일 분석했으나 결과 미입력 경주 추적(누락 방지)."""
     return jsonify(_missing_results(request.args.get("date")))
+
+
+@app.route("/api/ai-training/status", methods=["GET"])
+def ai_training_status():
+    """[3번] AI 학습 데이터 현황 대시보드(수집/완전/품질/목표 진행률/예상 완료)."""
+    return jsonify(_ai_data_status())
+
+
+@app.route("/api/ai-training/list", methods=["GET"])
+def ai_training_list():
+    """[1번] AI 학습 데이터 목록(최신순·품질점수 포함)."""
+    out = []
+    if os.path.isdir(AI_TRAINING_DIR):
+        for fn in sorted(os.listdir(AI_TRAINING_DIR), reverse=True):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(AI_TRAINING_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            q = d.get("quality") or {}
+            out.append({"race_id": d.get("race_id"), "date": (d.get("race_info") or {}).get("date"),
+                        "track": (d.get("race_info") or {}).get("track"),
+                        "round": (d.get("race_info") or {}).get("round"),
+                        "quality": q.get("score"), "complete": q.get("complete"),
+                        "hit": (d.get("result") or {}).get("hit")})
+    return jsonify({"data": out, "count": len(out)})
+
+
+@app.route("/api/ai-training/get", methods=["POST", "GET"])
+def ai_training_get():
+    """[1번] AI 학습 데이터 1건 조회. {race_id | raceKey}."""
+    if request.method == "POST":
+        body = request.json or {}
+        rid, rk = body.get("race_id"), body.get("raceKey")
+    else:
+        rid, rk = request.args.get("race_id"), request.args.get("raceKey")
+    if not rid and rk:
+        rid, _ = _race_result_id(rk)
+    if not rid:
+        return jsonify({"error": "race_id 또는 raceKey가 필요합니다."}), 400
+    path = os.path.join(AI_TRAINING_DIR, os.path.basename(rid) + ".json")
+    try:
+        return jsonify(json.load(open(path, encoding="utf-8")))
+    except Exception:
+        return jsonify({"error": "AI 학습 데이터가 없습니다.", "race_id": rid}), 404
 
 
 # ── [일괄 결과 등록] 결과 페이지(HTML/URL) 전체 파싱 → 분석경주 자동매칭·학습 ──
