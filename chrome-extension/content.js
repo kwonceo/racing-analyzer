@@ -698,6 +698,20 @@
   function isKoreaByRaceKey(raceKey) {
     return !!(raceKey && KRA_TRACK_RE.test(String(raceKey)));
   }
+  // [한국모드 강화2] raceKey 추출이 실패해도(사설 보드 표기 다양) 페이지 본문/URL 에
+  //   KRA 경마장명 + 경마 맥락이 있으면 한국으로 확정 → 쌍승/삼복승 클릭 완전 차단.
+  function pageLooksKorean() {
+    try {
+      if (KRA_TRACK_RE.test(location.href)) return true;
+      const body = (document.body && document.body.innerText) || '';
+      if (!KRA_TRACK_RE.test(body)) return false;
+      return /(경주|경마|복승|배당|발주|출주|마번)/.test(body);   // 경마장명 + 경마 맥락 동시 존재 시만
+    } catch (_) { return false; }
+  }
+  // [한국모드 최종 판정] 종목=한국(팝업) 이거나 raceKey/페이지에서 KRA 감지되면 true.
+  function isKoreaMode(raceKey, market) {
+    return market === 'korea' || isKoreaByRaceKey(raceKey) || pageLooksKorean();
+  }
 
   async function collectTripleKeiba(reason) {
     if (!isKeibaOddsPage()) {
@@ -709,9 +723,9 @@
       .filter((k) => sp.get(k)).map((k) => `${k}=${encodeURIComponent(sp.get(k))}`).join('&');
     const { raceKey: override, market } = await getSettings();
     const raceKey = (override && override.trim()) || extractRaceKey();
-    // [2번][한국모드 강화] market 토글=korea 이거나 raceKey에 KRA 경마장명 포함 시 → 복승만(쌍승·삼복승 완전 제외).
-    const isKorea = market === 'korea' || isKoreaByRaceKey(raceKey);
-    if (isKorea && market !== 'korea') console.log('[한국모드] raceKey KRA 경마장 감지 → 복승만 수집(쌍승·삼복승 차단):', raceKey);
+    // [2번][한국모드 강화] 종목=한국 이거나 raceKey/페이지에서 KRA(서울/부산/제주/과천) 감지 시 → 복승만(쌍승·삼복승 완전 제외).
+    const isKorea = isKoreaMode(raceKey, market);
+    if (isKorea && market !== 'korea') console.log('[한국모드] KRA 경마장 감지(raceKey/페이지) → 복승만 수집:', raceKey || '(raceKey 미상)');
     const clean = (arr, cap) => arr
       .filter((c) => c.odds > 0)
       .map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10 }))
@@ -720,7 +734,7 @@
     const payload = { raceKey, quinella: [], exacta: [], trio: [], capturedAt: new Date().toISOString(), source: location.href };
     // [2번] 한국모드면 복승(quinella)만 남긴다 → 쌍승·삼복승은 탭 fetch 자체를 시도하지 않는다.
     const steps = isKorea ? TRIPLE_STEPS.filter((s) => s.key === 'quinella') : TRIPLE_STEPS;
-    if (isKorea) { console.log('[배당수집] 한국경마 모드 → 복승만 수집(쌍승·삼복승 생략).'); console.log('[한국모드] 삼복승 수집 생략'); }
+    if (isKorea) console.log('[한국모드] 복승만 수집 - 쌍승/삼복승 생략');
     try {
       for (const st of steps) {
         setTripleProgress(`${st.label} 수집중…`);        // "복승 수집중…" → "쌍승 수집중…" → …
@@ -1285,10 +1299,10 @@
     const oddsClass = site === 'asyukk' ? 'odds_content' : null;
     const { raceKey: override, timerDeadline, market, japanType } = await getSettings();
     const raceKey = (override && override.trim()) || extractRaceKey();
-    // [5번][한국모드 강화] market 토글=korea 이거나 raceKey에 KRA 경마장명(서울/부산/제주/과천) 포함 시 → 무조건 복승만.
+    // [5번][한국모드 강화] 종목=한국 이거나 raceKey/페이지에서 KRA(서울/부산/제주/과천) 감지 시 → 무조건 복승만.
     //   한국경마: 출마표2(keiba DebaTable) 수집 생략(전적은 PDF에서) + 쌍승·삼복승 탭 클릭 완전 차단.
-    const isKorea = market === 'korea' || isKoreaByRaceKey(raceKey);
-    if (isKorea && market !== 'korea') console.log('[한국모드] raceKey KRA 경마장 감지 → 복승만 수집(쌍승·삼복승 차단):', raceKey);
+    const isKorea = isKoreaMode(raceKey, market);
+    if (isKorea) console.log('[한국모드] 복승만 수집 - 쌍승/삼복승 생략', market !== 'korea' ? '(감지: raceKey/페이지, raceKey=' + (raceKey || '미상') + ')' : '(종목=한국)');
     const isCentral = !isKorea && japanType === 'central';   // [1번] 일본 중앙(JRA): 전적표 없음 → 배당만 분석
     if (!raceKey) {
       setTripleProgress('❌ raceKey 필요', true);

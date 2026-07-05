@@ -18,7 +18,8 @@
 - 격리 테스트(누적·중복제거·심각도·쌍승역전) + 라이브 수집→피드 파이프라인 + history/list anomalyCount 검증
 
 ### 수정된 버그
-- **한국경마 삼복승 수집 완전 차단(확장 v2.1.5)**: `market` 토글이 korea가 아니어도 raceKey에 KRA 경마장명(서울/부산/제주/과천, 부경/부산경남 포함)이 있으면 무조건 한국모드로 판단(`isKoreaByRaceKey`) → 복승만 수집, 쌍승·삼복승 탭 클릭 코드 자체를 스킵. `collectTripleKeiba`·`collectTripleByTabs` 양 경로 모두 raceKey 기반 판정으로 강화. 콘솔 로그 `[한국모드] 삼복승 수집 생략` 추가. 판정 로직 11케이스 검증
+- **한국경마 쌍승/삼복승 수집 완전 차단(확장 v2.1.6)**: 부산 등 KRA 경주인데도 `market`=auto + raceKey 추출 실패(사설 보드 표기 다양) 시 삼복승 탭을 클릭하던 문제. `pageLooksKorean()` 추가 — raceKey가 비어도 **페이지 본문/URL에 KRA 경마장명(서울/부산/제주/과천) + 경마 맥락**이 있으면 한국 확정. `isKoreaMode(raceKey, market)`로 판정 통일(종목=한국 OR raceKey OR 페이지). `collectTripleKeiba`·`collectTripleByTabs` 양 경로 적용 → 복승만 수집, 쌍승/삼복승 탭 클릭 완전 스킵. 로그 `[한국모드] 복승만 수집 - 쌍승/삼복승 생략`. 부산 화면 시나리오 포함 판정 검증.
+- **(v2.1.5)** raceKey에 KRA 경마장명이 있으면 무조건 한국모드(`isKoreaByRaceKey`) — v2.1.6에서 페이지 감지까지 확장.
 
 ### 보완점
 - 쌍승 역전은 "최저 쌍승 조합 방향 반전"만 감지(다중 순위 역전은 향후 확장 여지)

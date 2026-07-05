@@ -19,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **경로**: `C:\Users\USER\Desktop\경마분석서버`
 - **GitHub**: https://github.com/kwonceo/racing-analyzer.git (`origin/master`)
 - **서버**: Flask, port 8011 (`python app.py`, `debug=True` 자동 리로드)
-- **Chrome 확장**: v2.1.5 (`chrome-extension/`, MV3)
+- **Chrome 확장**: v2.1.6 (`chrome-extension/`, MV3)
 
 ## 분석 원칙
 - **통합 점수 = 이상감지(배당) 60% + 전적 40%** (`_integrated_grades`)
@@ -104,7 +104,7 @@ cd chrome-extension && python -c "import zipfile,os; zf=zipfile.ZipFile('../chro
 
 ## 시장별 수집 규칙
 - **한국**: 복승만. 전적=PDF Vision. **일본**: 복승·쌍승·삼복승(단승 제거).
-  - **한국 판정 강화(확장 v2.1.5)**: `market` 토글 외에도 raceKey에 KRA 경마장명(서울/부산/제주/과천·부경/부산경남)이 있으면 `isKoreaByRaceKey`가 무조건 한국모드 → 복승만·쌍승/삼복승 탭 클릭 완전 스킵(`collectTripleKeiba`·`collectTripleByTabs` 양 경로). 로그 `[한국모드] 삼복승 수집 생략`.
+  - **한국 판정 강화(확장 v2.1.6)**: `isKoreaMode(raceKey, market)` = 종목=한국(팝업) OR raceKey에 KRA 경마장명(`isKoreaByRaceKey`) OR **페이지 본문/URL에 KRA 경마장명+경마맥락**(`pageLooksKorean`, raceKey 추출 실패 대비). true면 복승만·쌍승/삼복승 탭 클릭 완전 스킵(`collectTripleKeiba`·`collectTripleByTabs` 양 경로). 로그 `[한국모드] 복승만 수집 - 쌍승/삼복승 생략`. ⚠ 확장 코드 변경이므로 **브라우저에서 확장 새로고침 필수**(안 하면 구코드가 계속 실행).
   - **지방(NAR, keiba.go.jp)**: 전적표(출마표2/DebaTable) 있음. 마감 T-1분·T-30초.
   - **중앙(JRA)**: 전적표 없음→배당만. 마감 T-1분30초 수집중지, 이상감지 T-2분 강제. 팝업 `japanType` 토글.
 - **마감 감지**: "발매마감/締切" DOM 또는 배당 무변동 5틱 → 자동수집 중단.
