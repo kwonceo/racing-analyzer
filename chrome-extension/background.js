@@ -312,6 +312,8 @@ async function scheduleResultTimer(raceKey, deadline) {
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   // [v2] 자동수집 하트비트/단계 알람 → 엔진 tick (서비스워커가 죽어도 알람이 부활시킴)
   if (alarm.name === AUTO_ALARM || /^stageT/.test(alarm.name)) { autoTick('alarm'); return; }
+  // [무변동 소프트 일시중지] 60초 뒤 재점검 → 엔진 재동기화(autoSend 유지면 자동 재개)
+  if (alarm.name === 'resumeCheck') { syncAutoEngine(); return; }
   // [v2.0.1] 발주 후 결과 자동수집 알람
   if (/^resFetch\d/.test(alarm.name)) { doResultFetch(parseInt(alarm.name.replace('resFetch', ''), 10)); return; }
   if (alarm.name !== 'resultCheck') return;
@@ -452,14 +454,22 @@ async function _collectOnce() {
   }
 }
 
-// [수정2] 경기 마감 → 자동 배당 수집 중단(엔진·인터벌 정지) + 팝업/알림 표시.
-//   결과 자동수집(발주 후 7/9/11분 resFetch 알람)은 그대로 유지된다.
+// [마감 처리] 확정 마감(DOM 발매마감)만 완전 정지, 무변동(추정)은 자동 재개되는 소프트 일시중지.
+//   [버그수정] 예전엔 무변동 추정에도 autoSend 를 꺼버려, 한 번 오검출되면 수집이 꺼진 채 배너가 안 사라졌다.
+//   결과 자동수집(발주 후 7/9/11분 resFetch 알람)은 어느 경우든 유지된다.
 async function _onRaceClosed(reason) {
+  const definitive = /DOM|발매\s*마감|발매\s*종료|투표|접수|締|販売|受付|終了/.test(reason || '');
   stopAutoEngine();
-  await chrome.storage.local.set({ autoSend: false });   // 인터벌·하트비트 정지(설정 OFF)
-  _setAutoStatus({ running: false, stopped: true, closed: true, closeReason: reason });
-  _notify('closed', '⏹ 경기 마감 - 자동수집 중단됨',
-    `배당이 마감되어 자동수집을 중단했습니다.${reason ? ' (' + reason + ')' : ''}`, false);
+  if (definitive) {
+    await chrome.storage.local.set({ autoSend: false });   // 확정 마감만 완전 정지(설정 OFF)
+    _setAutoStatus({ running: false, stopped: true, closed: true, closeReason: reason });
+    _notify('closed', '⏹ 경기 마감 - 자동수집 중단됨',
+      `배당이 마감되어 자동수집을 중단했습니다.${reason ? ' (' + reason + ')' : ''}`, false);
+  } else {
+    // 무변동(추정) — autoSend 유지, 소프트 일시중지. 60초 뒤 재점검(배당 변동/새 경주면 자동 재개).
+    _setAutoStatus({ running: false, paused: true, closeReason: reason });
+    chrome.alarms.create('resumeCheck', { when: Date.now() + 60000 });
+  }
 }
 async function _forceAnalyze() {
   try {
