@@ -102,6 +102,15 @@
           <span class="hint" style="margin:0">· 칩을 누르면 해당 경주로 이동합니다</span>
         </div>
         <div id="koreaRaceList" class="race-list"></div>
+
+        <!-- [보완#2] 저장된 사전분석: 세션과 무관하게 과거 PDF 분석을 날짜별로 즉시 불러오기 -->
+        <div id="koreaPreracePanel" style="margin-top:12px">
+          <div class="cfg-row" style="align-items:center">
+            <button id="koreaPreraceToggle" class="btn" type="button">📅 저장된 사전분석 열기</button>
+            <span class="hint" id="koreaPreraceHint" style="margin:0">아침에 분석해 둔 과거 경주를 날짜별로 즉시 불러옵니다(세션 무관).</span>
+          </div>
+          <div id="koreaPreraceList" style="display:none;margin-top:8px"></div>
+        </div>
       </div>
       <div id="koreaReport" class="report-area"></div>
       <div id="koreaOddsStatus" style="margin:10px 0"></div>

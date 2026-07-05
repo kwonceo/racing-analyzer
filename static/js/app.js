@@ -129,6 +129,73 @@
     wireDropZone(zone, input, handleKoreaPdf, /application\/pdf/);
     $('#koreaScanBtn').addEventListener('click', startKoreaServerAnalysis);
     $('#koreaResetBtn').addEventListener('click', resetKoreaSession);
+    initPrerace();   // [보완#2] 저장된 사전분석 목록(세션 무관 과거 접근)
+  }
+
+  // ---------- [보완#2] 저장된 사전분석 (data/prerace) ----------
+  // 아침에 분석해 둔 과거 경주를 세션과 무관하게 날짜별로 즉시 불러온다.
+  function initPrerace() {
+    const toggle = $('#koreaPreraceToggle'); if (!toggle) return;
+    const list = $('#koreaPreraceList');
+    toggle.addEventListener('click', async () => {
+      const open = list.style.display !== 'none';
+      if (open) { list.style.display = 'none'; toggle.textContent = '📅 저장된 사전분석 열기'; return; }
+      list.style.display = 'block'; toggle.textContent = '📅 저장된 사전분석 닫기';
+      await loadPreraceList();
+    });
+  }
+
+  /** /api/korea/prerace 목록을 날짜별로 그룹핑해 렌더 */
+  async function loadPreraceList() {
+    const box = $('#koreaPreraceList'); if (!box) return;
+    box.innerHTML = '<p class="hint">⏳ 불러오는 중…</p>';
+    let races;
+    try { races = ((await (await fetch('/api/korea/prerace')).json()) || {}).races || []; }
+    catch (e) { box.innerHTML = `<p class="err">목록 로드 실패: ${esc(e.message)}</p>`; return; }
+    if (!races.length) {
+      box.innerHTML = '<p class="hint">저장된 사전분석이 없습니다. PDF를 업로드해 전경주 분석을 실행하면 경주별로 여기에 쌓입니다.</p>';
+      return;
+    }
+    // 날짜별 그룹핑(index는 savedAt 내림차순 → 날짜 최신순 유지)
+    const groups = {};
+    races.forEach((r) => { (groups[r.date || '날짜미상'] = groups[r.date || '날짜미상'] || []).push(r); });
+    const html = Object.keys(groups).map((date) => {
+      const chips = groups[date].sort((a, b) => (a.raceNo || 0) - (b.raceNo || 0)).map((r) => {
+        const label = `${esc(r.venue || '')} ${r.raceNo}R${r.distance ? ' ' + esc(r.distance) : ''}`;
+        const cnt = r.horseCount ? ` <span class="chip-page">(${r.horseCount}두)</span>` : '';
+        return `<button class="race-chip prerace-chip" data-key="${esc(r.key)}">📄 ${label}${cnt}</button>`;
+      }).join('');
+      return `<div class="prerace-group" style="margin-bottom:10px">
+        <div class="matrix-title" style="font-size:13px">🗓 ${esc(date)} <span class="hint" style="font-weight:400">· ${groups[date].length}경주</span></div>
+        <div class="race-list">${chips}</div></div>`;
+    }).join('');
+    box.innerHTML = html;
+    box.querySelectorAll('.prerace-chip').forEach((c) =>
+      c.addEventListener('click', () => openPreraceRace(c.dataset.key)));
+  }
+
+  /** 사전분석 1건을 즉시 로드 → 세션 state에 병합 후 기존 렌더 흐름 재사용 */
+  async function openPreraceRace(key) {
+    if (!key) return;
+    showLoading('저장된 사전분석 불러오는 중…');
+    let d;
+    try { d = await (await fetch('/api/korea/prerace/' + encodeURIComponent(key))).json(); }
+    catch (e) { hideLoading(); toast('불러오기 실패: ' + e.message); return; }
+    hideLoading();
+    if (!d || d.error) { toast(d && d.error ? d.error : '사전분석을 찾을 수 없습니다.'); return; }
+    const race = { venue: d.venue, raceNo: d.raceNo, distance: d.distance, title: d.title, summaryPage: d.summaryPage };
+    const title = raceLabel(race);
+    // state에 병합(중복이면 갱신) — 이후 analyzeKoreaRace가 푸터·결과입력까지 완전 렌더
+    if (d.horses && d.horses.length) state.lastSheets[title] = { horses: d.horses, distance: d.distance };
+    if (d.report) state.lastReports[title] = d.report;
+    let idx = state.koreaRaces.findIndex((r) => raceLabel(r) === title);
+    if (idx < 0) { state.koreaRaces.push(race); idx = state.koreaRaces.length - 1; }
+    else { state.koreaRaces[idx] = race; }
+    renderRaceChips();
+    const chip = $$('#koreaRaceList .race-chip')[idx];
+    await analyzeKoreaRace(idx, chip);
+    if (chip && chip.scrollIntoView) chip.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast(`📄 ${title} 사전분석 로드 완료`);
   }
 
   /** 파일 선택 = '새 PDF 업로드' → 기존 서버 세션 초기화 후 대기(자동 감지 버튼으로 시작) */
@@ -2364,6 +2431,7 @@
         <input id="resIn2" class="cfg-input" type="number" placeholder="2착" style="width:70px">
         <input id="resIn3" class="cfg-input" type="number" placeholder="3착" style="width:70px">
         <label class="hint">투자금액(원)<br><input id="resStake" class="cfg-input" type="number" min="0" step="100" value="${_defaultStake()}" style="width:110px"></label>
+        <label class="hint">실수령 배당금(원)<br><input id="resPayout" class="cfg-input" type="number" min="0" step="100" placeholder="적중 시 실수령액" style="width:130px"></label>
         <button id="resSaveBtn" class="btn btn-primary">결과 저장 + 학습</button>
       </div>
       <div id="resMsg" class="hint" style="margin-top:6px"></div>`;
@@ -2383,13 +2451,18 @@
     const stake = parseInt(($('#resStake') || {}).value, 10) || 1000;
     if (stake > 0) localStorage.setItem('bmed_default_stake', String(stake));   // 기본값 기억
     const result = {}; if (r1) result['1st'] = r1; if (r2) result['2nd'] = r2; if (r3) result['3rd'] = r3;
-    let d; try { d = await (await fetch('/api/history/record-result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk, result, stake }) })).json(); }
+    // [보완#3] 실수령 배당금(선택) — 입력 시 서버가 추정 대신 실제 손익 계산. 공란이면 확정배당 추정.
+    const payoutRaw = ($('#resPayout') || {}).value;
+    const payload = { raceKey: rk, result, stake };
+    if (payoutRaw !== '' && payoutRaw != null && !isNaN(parseInt(payoutRaw, 10))) payload.payout = parseInt(payoutRaw, 10);
+    let d; try { d = await (await fetch('/api/history/record-result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
     catch (e) { $('#resMsg').textContent = '실패: ' + e.message; return; }
     if (d.error) { $('#resMsg').textContent = d.error; return; }
     const pnl = (d.record && d.record.pnl) || 0;
     const pnlTxt = pnl > 0 ? `<span style="color:#38d39f">+${pnl.toLocaleString()}원</span>`
       : pnl < 0 ? `<span style="color:#ff6b6b">${pnl.toLocaleString()}원</span>` : '±0원';
-    $('#resMsg').innerHTML = `✅ 저장 완료 — 추천적중 ${d.record.was_hit ? 'O' : 'X'} · 급락적중 ${d.record.anomaly_was_correct ? 'O' : 'X'} · 손익 ${pnlTxt}`;
+    const srcTxt = (d.record && d.record.payout_actual != null) ? ' <span class="hint">(실수령 반영)</span>' : ' <span class="hint">(확정배당 추정)</span>';
+    $('#resMsg').innerHTML = `✅ 저장 완료 — 추천적중 ${d.record.was_hit ? 'O' : 'X'} · 급락적중 ${d.record.anomaly_was_correct ? 'O' : 'X'} · 손익 ${pnlTxt}${srcTxt}`;
     loadLearningStats(); loadHistoryList();
   }
 

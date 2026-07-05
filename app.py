@@ -2793,7 +2793,7 @@ def history_get():
         return jsonify({"error": "히스토리가 없습니다."}), 404
 
 
-def _apply_result_learning(rk, result, top3, final_odds=None, stake=None):
+def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout=None):
     """경주 결과 → 히스토리 기록 + 자동학습 레코드/통계 갱신(공용).
     keiba/asyukk 결과 자동수집(results_auto)과 수동 입력(record-result)이 함께 사용.
     이상감지·추천·전적유력마·제거 판정의 실제 적중 여부를 판정해 learning.json 누적."""
@@ -2879,8 +2879,18 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None):
 
     # [#5] 실제 투자금액 기반 손익(pnl). stake 미지정 시 정액 1000 가정.
     #   적중: +(확정배당-1)*stake · 추천했으나 미적중: -stake · 추천 없음: 0(불참).
+    # [보완#3] payout(실수령 배당금) 지정 시 확정배당 추정 대신 실제 손익으로 계산.
+    #   pnl = 실수령액 - 투자금. 실수령 0 = 미적중. 정확도 우선(추정 오차 제거).
     stake = int(stake) if (stake and int(stake) > 0) else 1000
-    if quinella_hit and payouts.get("quinella"):
+    actual_payout = None
+    try:
+        if payout is not None and str(payout) != "":
+            actual_payout = int(round(float(payout)))
+    except (TypeError, ValueError):
+        actual_payout = None
+    if actual_payout is not None:
+        pnl = actual_payout - stake
+    elif quinella_hit and payouts.get("quinella"):
         pnl = round((payouts["quinella"] - 1) * stake)
     elif trifecta_hit and payouts.get("trifecta"):
         pnl = round((payouts["trifecta"] - 1) * stake)
@@ -2892,7 +2902,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None):
     record = {
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
         "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
-        "stake": stake, "pnl": pnl,
+        "stake": stake, "pnl": pnl, "payout_actual": actual_payout,
         "anomalies_detected": anomalies_detected, "anomaly_was_correct": anomaly_correct,
         "signal_correct": signal_correct,
         "reversals": [r for r in an.get("reversals", []) if r.get("flipped")],
@@ -2949,7 +2959,8 @@ def history_record_result():
     top3 = [int(x) for x in top3 if x not in (None, "")]
     if not rk or len(top3) < 1:
         return jsonify({"error": "raceKey와 결과(1~3착)가 필요합니다."}), 400
-    record, stats = _apply_result_learning(rk, result, top3, body.get("finalOdds"), stake=body.get("stake"))
+    record, stats = _apply_result_learning(rk, result, top3, body.get("finalOdds"),
+                                           stake=body.get("stake"), payout=body.get("payout"))
     return jsonify({"ok": True, "record": record, "stats": stats})
 
 
