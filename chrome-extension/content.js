@@ -1697,6 +1697,11 @@
     if (msg?.type === 'AUTO_COLLECT') {
       (async () => {
         if (_autoRunning) { sendResponse({ ok: false, error: '이전 수집 진행중(건너뜀)' }); return; }
+        // [버그수정] 자동전송 OFF 시 탭 클릭 방지: 사용자가 방금 자동수집을 껐는데
+        //   in-flight 알람(stageT/fine)이 도착하면 복승/쌍승 탭을 강제 클릭해 수동 베팅을 방해하던 문제.
+        //   background 엔진은 autoSend 게이트가 있지만, 끄는 순간 이미 발사된 틱은 여기서 최종 차단.
+        const { autoSend: _on } = await getSettings();
+        if (!_on) { sendResponse({ ok: false, skipped: true, error: '자동전송 OFF — 수집/탭클릭 생략' }); return; }
         _autoRunning = true;
         try {
           const { timerDeadline } = await getSettings();

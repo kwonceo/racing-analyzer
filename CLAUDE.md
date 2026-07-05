@@ -20,6 +20,51 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **GitHub**: https://github.com/kwonceo/racing-analyzer.git (`origin/master`)
 - **서버**: Flask, port 8011 (`python app.py`, `debug=True` 자동 리로드)
 - **Chrome 확장**: v2.1.11 (`chrome-extension/`, MV3)
+- **안정 체크포인트**: 태그 `v2.3.0-stable` (AI 준비 인프라 완성). 복구는 `RECOVERY.md`.
+
+## 📘 완전 가이드 (한눈 요약)
+### 시스템 개요
+- Flask 서버 port 8011 + Chrome 확장 v2.1.x + 분석기 웹(5개 탭).
+- 일본(복승·쌍승·전적)·한국(복승·PDF전적) 경마 이상감지 분석.
+- **AI 학습 데이터 수집 중**(`data/ai_training/`, 목표 500경주 → Phase 2/3).
+
+### 핵심 분석 공식
+1. **초과급락** = 말N 평균급락 − 전체평균급락. 절대 **10%+ 급락 → 집중신호(노이즈 아님)** (`_excess_drop_analysis` `ABS_STRONG=-10`).
+2. **역전비율** = 쌍승(B→A) / 쌍승(A→B). **<0.95 역전신호** / <0.80 강한 / <0.60 압도적 (`_win_exacta_reversal`).
+3. **불일치점수** = 예상최저복승 / 실제최저복승. **1.2+ 주의** / 1.5+ 강한 / 2.0+ 압도적 (`_quinella_mismatch`).
+4. **종합 신뢰도** = 초과급락40% + 쌍승역전35% + 복승불일치25% (70+ 🔴 / 40~69 🟡) (`_signal_confidence`).
+5. **BMED 전략 5가지**(`_bmed_strategy`): 보험형(이상감지 없음+유력마 명확)·압축형(2두 강한신호)·역배열형(쌍승역전)·분산형(대규모급락)·고배당도전형(강한신호+고배당) + 원금보전 배분·기대환수율 + 보험용 매트릭스(정상/보험 2종).
+6. **실시간 고도화**(`_advanced_anomaly`): 급락속도(분당%·간격하한0.25분+절대폭)·연속하락(+20)/단발반등(−15)·페이크베팅·복승 환급률(역수합).
+
+### 데이터 구조 (`data/`)
+```
+data/
+├── ai_training/     ← AI 학습 핵심(완전 데이터 + 품질점수)  [추적]
+├── analysis_log/    ← 분석 로그(패턴학습 코퍼스)            [추적]
+├── race_results/    ← 경주 결과 완전 저장                   [추적]
+├── daily_summary/   ← 일별 자동 요약(YYYY-MM-DD.json)       [추적]
+├── pattern_learning.json / discovered_patterns.json ← 패턴 통계 [추적]
+├── prerace/ · korea_history/ · korea_session.json ← 한국 PDF/결과 [추적]
+└── odds_history/ · triple_store.json · learning.json ← 임시·고빈도 [gitignore]
+```
+
+### 알려진 버그 (전부 수정 완료 ✅)
+- **노이즈 판정 오류**(초과급락 미반영) → ✅ 절대 10%+ 집중신호 승격(`ABS_STRONG`).
+- **한국경마 raceKey 매칭 불일치**(`서울 5`↔`2026-.. 서울 5경주`) → ✅ `_resolve_race_key` 유연 매칭.
+- **자동전송 OFF 시 탭 클릭 버그** → ✅ 수집 게이트에서 autoSend/한국모드 우선 체크.
+- **신호말 전체 조합 미표시**(147배 놓침) → ✅ `_signal_combo_bets` 신호말 전 조합 추천.
+- **마감 오판/첫수집 가짜급락/opening 배당 정착** → ✅ `pageRemainingMs`·워밍업·`_is_opening_settle`.
+
+### AI 개발 로드맵
+- **Phase 1 (지금)**: 데이터 수집 — `ai_training/` 완전 구조 + 품질점수(80+ AI학습용).
+- **Phase 2 (100경주)**: 데이터 정제 — 패턴 자동 발견 강화.
+- **Phase 3 (500경주)**: 모델 학습 — `tools/export_ai_data.py`로 CSV/JSON 내보내 학습.
+- **Phase 4 (검증 후)**: AI 통합 — 예측 모델을 분석 파이프라인에 병합.
+- 현황·마일스톤은 통계 탭 `🤖 AI 학습 준비 현황` + `GET /api/ai-training/status`.
+
+### 홈서버 운영
+- **자동 시작**: `경마서버_자동시작.bat`(서버+배당판 열기) · 시작프로그램 등록 `scripts/register_startup.bat`.
+- **자동 백업**: `scripts/backup_checkpoint.bat`(수동) · 매일 자정 자동 `scripts/register_daily_backup.bat`(작업 스케줄러 등록).
 
 ## 분석 원칙
 - **통합 점수 = 이상감지(배당) 60% + 전적 40%** (`_integrated_grades` 기본값). **50경주+ 누적 시 비교학습으로 자동 조정**(`_learned_integrated_weights`: 이상감지·전적 적중률 우세 쪽으로 ±15%p, 이상감지 0.45~0.75).

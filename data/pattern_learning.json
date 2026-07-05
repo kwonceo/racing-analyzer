@@ -1,4 +1,154 @@
 {
-  "patterns": [],
-  "condition_stats": {}
+  "patterns": [
+    {
+      "race": "카나자와 10경주",
+      "horse_no": 6,
+      "recent_avg": 5.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-05"
+    },
+    {
+      "race": "카나자와 10경주",
+      "horse_no": 3,
+      "recent_avg": 6.6,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-05"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사가 9경주",
+      "total_combos_dropped": 25,
+      "drop_ratio": 0.694,
+      "result": "4+5",
+      "result_odds": "저배당",
+      "result_quinella_odds": 3.4,
+      "signal_result_combo": null,
+      "recommended_hit": true,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783252782.554595
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사가 9경주",
+      "total_combos_dropped": 25,
+      "drop_ratio": 0.694,
+      "result": "2+7",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": "-66.0%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783254253.5142453
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사가 9경주",
+      "total_combos_dropped": 25,
+      "drop_ratio": 0.694,
+      "result": "2+7",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": "-66.0%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783254287.9365366
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사가 9경주",
+      "total_combos_dropped": 25,
+      "drop_ratio": 0.694,
+      "result": "3+16",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783254309.5305674
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사가 9경주",
+      "total_combos_dropped": 25,
+      "drop_ratio": 0.694,
+      "result": "11+13",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783254309.6711323
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사가 9경주",
+      "total_combos_dropped": 25,
+      "drop_ratio": 0.694,
+      "result": "2+5",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783254309.8104703
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사가 9경주",
+      "total_combos_dropped": 25,
+      "drop_ratio": 0.694,
+      "result": "3+16",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783258003.1821237
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사가 9경주",
+      "total_combos_dropped": 25,
+      "drop_ratio": 0.694,
+      "result": "11+13",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783258003.3279903
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사가 9경주",
+      "total_combos_dropped": 25,
+      "drop_ratio": 0.694,
+      "result": "2+5",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783258003.4891813
+    }
+  ],
+  "condition_stats": {
+    "조건없음": {
+      "count": 9,
+      "hit": 2
+    },
+    "전체부진마": {
+      "count": 9,
+      "hit": 2
+    },
+    "대규모급락": {
+      "count": 9,
+      "high_odds": 0,
+      "recommended_hit": 1,
+      "high_odds_rate": 0.0,
+      "hit_rate": 11.1
+    }
+  }
 }

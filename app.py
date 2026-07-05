@@ -4011,53 +4011,54 @@ def _ai_timeline(rk):
 
 
 def _ai_quality_score(data):
-    """[2번] 데이터 품질 자동 검증 + 점수(완전 100점, 누락/오류마다 감점). {score, missing, errors}."""
-    score, missing, errors = 100, [], []
+    """[5번] 데이터 품질 점수 — 필수 5항목 각 20점(합 100). 등급:
+      80+ AI학습용 / 60~79 참고용 / 60미만 제외. 범위 오류(마번·배당·날짜) 시 '제외'로 강등.
+    필수: ①배당 타임라인(2회+) ②이상감지 결과 ③전적 데이터 ④결과(1~4착) ⑤확정 배당."""
     ri = data.get("race_info") or {}
-    # 필수 항목 존재(누락 감점)
-    checks = [("race_info.date", ri.get("date")), ("race_info.track", ri.get("track")),
-              ("race_info.round", ri.get("round")), ("horses", data.get("horses")),
-              ("prediction.recommend", (data.get("prediction") or {}).get("recommend")),
-              ("result.1st", (data.get("result") or {}).get("1st"))]
-    for label, v in checks:
-        if v in (None, "", [], {}):
-            missing.append(label)
-            score -= 12
-    # 선택(있으면 가점 유지, 없으면 소폭 감점) — 거리·마장·날씨·확정배당
-    for label, v in (("distance", ri.get("distance")), ("condition", ri.get("condition")),
-                     ("weather", ri.get("weather")),
-                     ("quinella_odds", (data.get("result") or {}).get("quinella_odds"))):
-        if v in (None, ""):
-            missing.append(label)
-            score -= 4
-    # 범위 검증(오류)
+    of = data.get("odds_features") or {}
     res = data.get("result") or {}
+    horses = data.get("horses") or []
+    checks = [
+        ("배당 타임라인(2회+)", len(of.get("timeline") or []) >= 2),
+        ("이상감지 결과", bool(of.get("drop_rates") or of.get("excess_drops")
+                          or of.get("exacta_reversal") or of.get("large_scale_drop")
+                          or of.get("quinella_mismatch") is not None)),
+        ("전적 데이터", any(h.get("record_score") is not None for h in horses)),
+        ("결과(1~3착)", all(res.get(k) not in (None, "") for k in ("1st", "2nd", "3rd"))),
+        ("확정 배당", res.get("quinella_odds") not in (None, "", 0)),
+    ]
+    score = sum(20 for _label, ok in checks if ok)
+    missing = [label for label, ok in checks if not ok]
+    # 범위 검증(오류) — 있으면 학습 부적합('제외')
+    errors = []
     for k in ("1st", "2nd", "3rd", "4th"):
         n = res.get(k)
         if n not in (None, ""):
             try:
                 if not (1 <= int(n) <= 16):
                     errors.append(f"마번 범위 초과: {k}={n}")
-                    score -= 10
             except (TypeError, ValueError):
                 errors.append(f"마번 숫자 아님: {k}={n}")
-                score -= 10
     for k in ("quinella_odds", "exacta_odds"):
         o = res.get(k)
         if o not in (None, "", 0):
             try:
                 if not (1.0 <= float(o) <= 9999):
                     errors.append(f"배당 범위 초과: {k}={o}")
-                    score -= 6
             except (TypeError, ValueError):
                 errors.append(f"배당 숫자 아님: {k}={o}")
-                score -= 6
     if not re.match(r"^\d{4}-\d{2}-\d{2}$", str(ri.get("date") or "")):
         errors.append("날짜 형식 오류")
-        score -= 8
-    score = max(0, score)
-    return {"score": score, "complete": score >= 90 and not errors,
-            "missing": missing, "errors": errors}
+    if errors:
+        grade = "제외"
+    elif score >= 80:
+        grade = "AI학습용"
+    elif score >= 60:
+        grade = "참고용"
+    else:
+        grade = "제외"
+    return {"score": score, "grade": grade, "complete": grade == "AI학습용",
+            "ai_ready": grade == "AI학습용", "missing": missing, "errors": errors}
 
 
 def _save_ai_training(rk, an, record, result, top4, inputs=None):
@@ -4074,12 +4075,13 @@ def _save_ai_training(rk, an, record, result, top4, inputs=None):
         print("[AI학습저장] 파일 저장 실패:", e)
         return {"ok": False, "errors": [str(e)]}
     q = data.get("quality") or {}
-    return {"ok": True, "race_id": rid, "score": q.get("score"), "complete": q.get("complete")}
+    return {"ok": True, "race_id": rid, "score": q.get("score"),
+            "grade": q.get("grade"), "complete": q.get("complete")}
 
 
 def _ai_data_status():
-    """[3번] AI 학습 데이터 현황 — 수집/완전 경주 수·품질 평균·목표 진행률·예상 완료."""
-    total, complete, score_sum, days = 0, 0, 0, set()
+    """[3·7번] AI 학습 데이터 현황 — 수집/고품질/평균품질·목표 진행률·마일스톤(100/500) 예상 일정."""
+    total, high_q, score_sum, days = 0, 0, 0, set()
     if os.path.isdir(AI_TRAINING_DIR):
         for fn in os.listdir(AI_TRAINING_DIR):
             if not fn.endswith(".json"):
@@ -4091,24 +4093,78 @@ def _ai_data_status():
             total += 1
             q = d.get("quality") or {}
             score_sum += q.get("score") or 0
-            if q.get("complete"):
-                complete += 1
+            if q.get("ai_ready") or q.get("complete"):   # 80점+ AI학습용(고품질)
+                high_q += 1
             dt = (d.get("race_info") or {}).get("date")
             if dt:
                 days.add(dt)
     progress = round(total / AI_TARGET_RACES * 100, 1) if AI_TARGET_RACES else None
-    # 예상 완료: 일평균 수집량 기준 남은 경주/일평균 → 개월
     per_day = (total / len(days)) if days else 0
-    remain = max(0, AI_TARGET_RACES - total)
-    eta_months = round(remain / per_day / 30, 1) if per_day > 0 else None
+
+    def _eta_days(target):
+        r = max(0, target - total)
+        return (0 if r == 0 else (round(r / per_day) if per_day > 0 else None))
     return {
-        "collected": total, "complete": complete,
-        "complete_pct": round(complete / total * 100, 1) if total else 0,
+        "collected": total, "complete": high_q, "high_quality": high_q,
+        "complete_pct": round(high_q / total * 100, 1) if total else 0,
         "avg_quality": round(score_sum / total, 1) if total else 0,
-        "target": AI_TARGET_RACES, "progress": progress, "remaining": remain,
+        "target": AI_TARGET_RACES, "progress": progress,
+        "remaining": max(0, AI_TARGET_RACES - total),
         "days_collected": len(days), "per_day": round(per_day, 1),
-        "eta_months": eta_months,
+        "eta_months": (round(_eta_days(AI_TARGET_RACES) / 30, 1)
+                       if _eta_days(AI_TARGET_RACES) not in (None, 0) else _eta_days(AI_TARGET_RACES)),
+        # [7번] 마일스톤: 패턴 발견 100경주 · 모델 학습 500경주
+        "milestones": {
+            "pattern_discovery": {"target": 100, "reached": total >= 100, "eta_days": _eta_days(100)},
+            "model_training": {"target": 500, "reached": total >= 500, "eta_days": _eta_days(500)},
+        },
     }
+
+
+# ───────── [6번] 일별 자동 요약(data/daily_summary/YYYY-MM-DD.json) ─────────
+DAILY_SUMMARY_DIR = os.path.join(os.path.dirname(__file__), "data", "daily_summary")
+
+
+def _build_daily_summary(date=None):
+    """[6번] 당일 경주 요약 저장 — 총경주·평균품질·이상감지·적중·적중률·AI준비 경주·누적."""
+    date = date or time.strftime("%Y-%m-%d", time.localtime())
+    total_races, q_sum, anomalies, hits, ai_ready = 0, 0, 0, 0, 0
+    cumulative = 0
+    if os.path.isdir(AI_TRAINING_DIR):
+        for fn in os.listdir(AI_TRAINING_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(AI_TRAINING_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            cumulative += 1
+            if (d.get("race_info") or {}).get("date") != date:
+                continue
+            total_races += 1
+            q = d.get("quality") or {}
+            q_sum += q.get("score") or 0
+            if q.get("ai_ready"):
+                ai_ready += 1
+            of = d.get("odds_features") or {}
+            anomalies += len(of.get("drop_rates") or {})
+            if (d.get("result") or {}).get("hit"):
+                hits += 1
+    summary = {
+        "date": date, "total_races": total_races,
+        "data_quality": round(q_sum / total_races) if total_races else 0,
+        "anomalies_detected": anomalies, "hits": hits,
+        "hit_rate": round(hits / total_races * 100, 1) if total_races else 0.0,
+        "ai_ready_races": ai_ready, "cumulative_total": cumulative,
+        "updated_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+    }
+    try:
+        os.makedirs(DAILY_SUMMARY_DIR, exist_ok=True)
+        json.dump(summary, open(os.path.join(DAILY_SUMMARY_DIR, date + ".json"), "w", encoding="utf-8"),
+                  ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[일별요약] 저장 실패:", e)
+    return summary
 
 
 def _analysis_log_git_backup(label):
@@ -4863,8 +4919,15 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _ai = _save_ai_training(rk, an, record, result, top4, inputs)
         record["ai_training_saved"] = _ai.get("ok")
         record["ai_quality_score"] = _ai.get("score")
+        record["ai_quality_grade"] = _ai.get("grade")
     except Exception as e:
         print("[AI학습저장] 실패:", e)
+    # [6번] 해당 경주 날짜의 일별 요약 갱신(결과 입력마다 최신화)
+    try:
+        _dt = _race_result_id(rk)[1]
+        _build_daily_summary(_dt)
+    except Exception as e:
+        print("[일별요약] 갱신 실패:", e)
     # [전체데이터·패턴발견] 결과 반영된 로그까지 포함해 적중 경주 공통점 자동 발견
     try:
         _discover_patterns()
@@ -4996,6 +5059,32 @@ def ai_training_get():
         return jsonify(json.load(open(path, encoding="utf-8")))
     except Exception:
         return jsonify({"error": "AI 학습 데이터가 없습니다.", "race_id": rid}), 404
+
+
+@app.route("/api/daily-summary", methods=["GET", "POST"])
+def daily_summary():
+    """[6번] 일별 자동 요약 조회/갱신. GET ?date=YYYY-MM-DD(없으면 오늘) · POST=강제 재생성.
+    ?list=1 → 저장된 일별 요약 목록(최신순)."""
+    if request.args.get("list"):
+        out = []
+        if os.path.isdir(DAILY_SUMMARY_DIR):
+            for fn in sorted(os.listdir(DAILY_SUMMARY_DIR), reverse=True):
+                if fn.endswith(".json"):
+                    try:
+                        out.append(json.load(open(os.path.join(DAILY_SUMMARY_DIR, fn), encoding="utf-8")))
+                    except Exception:
+                        continue
+        return jsonify({"summaries": out, "count": len(out)})
+    date = (request.args.get("date") or "").strip() or None
+    if request.method == "POST":
+        return jsonify(_build_daily_summary(date))   # 강제 재생성
+    # GET: 저장본 있으면 반환, 없으면 즉석 생성
+    d = date or time.strftime("%Y-%m-%d", time.localtime())
+    path = os.path.join(DAILY_SUMMARY_DIR, d + ".json")
+    try:
+        return jsonify(json.load(open(path, encoding="utf-8")))
+    except Exception:
+        return jsonify(_build_daily_summary(d))
 
 
 # ── [일괄 결과 등록] 결과 페이지(HTML/URL) 전체 파싱 → 분석경주 자동매칭·학습 ──
