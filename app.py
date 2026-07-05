@@ -3804,6 +3804,8 @@ def analyze_combined():
 # ─────────────────────────────────────────
 KOREA_SESSION = os.path.join(os.path.dirname(__file__), "data", "korea_session.json")
 KOREA_PDF = os.path.join(os.path.dirname(__file__), "data", "korea_last.pdf")
+# [사전분석] 경주별 분석결과를 파일로 영구 저장 → 경주 선택 시 개별 즉시 로드.
+KOREA_PRERACE_DIR = os.path.join(os.path.dirname(__file__), "data", "prerace")
 _BAND = (0.0, 0.10, 1.0, 0.41)          # 메인 출전마 표 밴드
 _TRAIN_BAND = (0.0, 0.355, 1.0, 0.585)  # 조교훈련/레이팅 표 밴드
 _korea_lock = threading.Lock()
@@ -3913,7 +3915,7 @@ def _korea_git_backup(label):
     원격/인증 미설정이면 조용히 건너뜀."""
     root = os.path.dirname(os.path.abspath(__file__))
     try:
-        subprocess.run(["git", "add", "data/korea_session.json", "data/korea_history"],
+        subprocess.run(["git", "add", "data/korea_session.json", "data/korea_history", "data/prerace"],
                        cwd=root, timeout=30, capture_output=True)
         msg = (f"한국경마 세션 백업 {label}").strip()
         r = subprocess.run(["git", "commit", "-m", msg], cwd=root, timeout=30, capture_output=True, text=True)
@@ -3927,6 +3929,110 @@ def _korea_git_backup(label):
             print("[한국] git push 건너뜀(원격/인증 미설정?):", (pr.stderr or "").strip()[:200])
     except Exception as e:
         print("[한국] git 백업 예외:", e)
+
+
+# ── [PDF 전경주 사전분석 저장] 경주별 파일 영구 저장 + 개별 즉시 로드 ──────────
+#   기존 korea_session.json(전체 세션) 흐름은 그대로 두고, '완료된 경주'만 별도로
+#   data/prerace/<날짜>_<경마장>_<라운드>.json 에 저장해 개별 조회를 빠르게 한다.
+def _prerace_key(date, venue, race_no):
+    """파일 안전 키: '2026-07-05_부산_3'. 경마장 미상은 '기타'."""
+    safe_v = re.sub(r"[^0-9A-Za-z가-힣]", "", str(venue or "")) or "기타"
+    return f"{date or 'nodate'}_{safe_v}_{race_no}"
+
+
+def _prerace_save_race(date, race):
+    """완료된 경주 1건을 data/prerace/<key>.json 에 원자적 저장 + index.json 갱신.
+    실패해도 본 분석 흐름을 막지 않도록 예외를 삼킨다."""
+    try:
+        os.makedirs(KOREA_PRERACE_DIR, exist_ok=True)
+        key = _prerace_key(date, race.get("venue"), race.get("raceNo"))
+        payload = {
+            "key": key, "date": date, "venue": race.get("venue", ""),
+            "raceNo": race.get("raceNo"), "distance": race.get("distance", ""),
+            "title": race.get("title", ""), "horses": race.get("horses") or [],
+            "report": race.get("report"), "status": race.get("status", "done"),
+            "savedAt": time.time(),
+        }
+        path = os.path.join(KOREA_PRERACE_DIR, key + ".json")
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False)
+        os.replace(tmp, path)
+        _prerace_index_update({"key": key, "date": date, "venue": payload["venue"],
+                               "raceNo": payload["raceNo"], "distance": payload["distance"],
+                               "title": payload["title"], "status": payload["status"],
+                               "savedAt": payload["savedAt"],
+                               "horseCount": len(payload["horses"])})
+        return key
+    except Exception as e:
+        print("[사전분석] 경주 저장 실패:", e)
+        return None
+
+
+def _prerace_index_path():
+    return os.path.join(KOREA_PRERACE_DIR, "index.json")
+
+
+def _prerace_index_update(entry):
+    """index.json 의 동일 key 항목을 교체(없으면 추가). savedAt 내림차순 정렬."""
+    idx = _prerace_index_load()
+    idx = [e for e in idx if e.get("key") != entry.get("key")]
+    idx.append(entry)
+    idx.sort(key=lambda e: e.get("savedAt") or 0, reverse=True)
+    tmp = _prerace_index_path() + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(idx, f, ensure_ascii=False)
+    os.replace(tmp, _prerace_index_path())
+
+
+def _prerace_index_load():
+    """index.json 로드. 없으면 디렉터리 스캔으로 복구(디스크가 진실 소스)."""
+    try:
+        with open(_prerace_index_path(), encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        pass
+    rebuilt = []
+    try:
+        for fn in os.listdir(KOREA_PRERACE_DIR):
+            if not fn.endswith(".json") or fn == "index.json":
+                continue
+            try:
+                d = json.load(open(os.path.join(KOREA_PRERACE_DIR, fn), encoding="utf-8"))
+                rebuilt.append({"key": d.get("key"), "date": d.get("date"),
+                                "venue": d.get("venue", ""), "raceNo": d.get("raceNo"),
+                                "distance": d.get("distance", ""), "title": d.get("title", ""),
+                                "status": d.get("status", "done"), "savedAt": d.get("savedAt") or 0,
+                                "horseCount": len(d.get("horses") or [])})
+            except Exception:
+                continue
+    except FileNotFoundError:
+        return []
+    rebuilt.sort(key=lambda e: e.get("savedAt") or 0, reverse=True)
+    return rebuilt
+
+
+def _prerace_load(key):
+    """key 로 경주 1건 전체(리포트 포함) 로드. 없으면 None."""
+    if not key or "/" in key or "\\" in key or ".." in key:   # 경로 조작 방어
+        return None
+    try:
+        with open(os.path.join(KOREA_PRERACE_DIR, key + ".json"), encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def _prerace_clear():
+    """data/prerace/ 전체 삭제('새 PDF 업로드' 초기화 시). 폴더 없으면 무시."""
+    try:
+        for fn in os.listdir(KOREA_PRERACE_DIR):
+            try:
+                os.remove(os.path.join(KOREA_PRERACE_DIR, fn))
+            except Exception:
+                pass
+    except FileNotFoundError:
+        pass
 
 
 def _korea_run_job(gen, api_key=None):
@@ -4036,6 +4142,7 @@ def _korea_run_job(gen, api_key=None):
                     {"raceNo": race["raceNo"], "raceTitle": race["title"], "horses": horses, "distance": race["distance"]},
                     sess.get("jockeyStats") or {}, api_key)
                 race["status"] = "done"
+                _prerace_save_race(sess.get("date"), race)   # [사전분석] 완료 즉시 경주별 파일 저장
             except Exception as e:
                 race["status"] = "error"; race["error"] = str(e)
                 print(f"[한국] 경주 '{race['title']}' 분석 실패:", e)
@@ -4105,6 +4212,7 @@ def korea_reset():
                 os.remove(p)
         except Exception as e:
             print("[한국] reset 삭제 실패:", p, e)
+    _prerace_clear()   # [사전분석] 저장된 경주 파일도 초기화
     return jsonify({"ok": True})
 
 
@@ -4138,9 +4246,25 @@ def korea_reextract():
             sess.get("jockeyStats") or {}, body.get("api_key"))
         race["status"] = "done"
         _korea_save(sess)
+        _prerace_save_race(sess.get("date"), race)   # [사전분석] 재추출 결과도 경주별 파일 갱신
         return jsonify({"ok": True, "race": race})
     finally:
         doc.close()
+
+
+@app.route("/api/korea/prerace", methods=["GET"])
+def korea_prerace_list():
+    """[사전분석] 저장된 경주 목록(index) — 경주 선택 UI/즉시 로드용. 리포트 본문은 제외(경량)."""
+    return jsonify({"races": _prerace_index_load()})
+
+
+@app.route("/api/korea/prerace/<key>", methods=["GET"])
+def korea_prerace_get(key):
+    """[사전분석] 저장된 경주 1건 전체(출전마·리포트 포함) 즉시 로드."""
+    d = _prerace_load(key)
+    if not d:
+        return jsonify({"error": "저장된 사전분석을 찾을 수 없습니다.", "key": key}), 404
+    return jsonify(d)
 
 
 # ── [4번·5번] 경주별 분석 히스토리 (data/korea_history/) ──
