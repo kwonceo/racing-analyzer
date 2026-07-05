@@ -1645,11 +1645,13 @@ def _time_based_drop_signals(rk):
     return out
 
 
-def _integrated_grades(form, curQ, curD):
-    """[통합분석] 전적 40% + 배당 60% 결합 점수 → A/B/C/D 재부여.
+def _integrated_grades(form, curQ, curD, weights=None):
+    """[통합분석] 전적 + 배당(이상감지) 결합 점수 → A/B/C/D 재부여. 기본 전적 40% + 배당 60%.
+    [3번] weights=(fw,ow) 미지정 시 학습 가중치 자동 적용(50경주+ 누적 시 적중률 비교로 조정).
     form=[{no,name,jockey,totalScore}]. 배당 대표값=해당 말이 낀 최저 복승(없으면 쌍승)배당."""
     if not form:
         return None
+    fw, ow = weights if weights else _learned_integrated_weights()
     repr_odds = {}
     for (a, b), o in (curQ or {}).items():
         for h in (a, b):
@@ -1666,7 +1668,7 @@ def _integrated_grades(form, curQ, curD):
         fscore = max(0.0, min(100.0, float(h.get("totalScore") or 0)))
         o = repr_odds.get(int(no)) if no is not None else None
         oscore = _odds_score(o)
-        integ = round(0.4 * fscore + 0.6 * oscore, 1)
+        integ = round(fw * fscore + ow * oscore, 1)
         out.append({"no": no, "name": h.get("name", ""), "jockey": h.get("jockey", ""),
                     "formScore": round(fscore, 1), "oddsScore": oscore,
                     "odds": o, "integrated": integ})
@@ -1951,6 +1953,50 @@ def _combo_signal_quality(combo, excess):
         return {"quality": "하", "reason": "집중 급락 없음(시장 전체 급락·노이즈)"}
     no, ex, grade = best
     return {"quality": ("상" if grade == "🔴" else "중"), "reason": f"{no}번 초과급락 {ex}%p"}
+
+
+# ───────── [이상감지 vs 추천 비교 학습] 3종 추천 조합 산출 + 가중치 자동 조정 ─────────
+def _compare_recommend(form, key_horses, excess, drops, bet_rec):
+    """[1번] 이상감지 기반 / 전적 기반 / 최종 추천 조합을 각각 산출(복승 2두·삼복승 3두).
+    - 이상감지 기반: 집중급락(초과) 상위 → 급락 조합 등장 말 → 배당 인기(key_horses)
+    - 전적 기반: 전적 총점 상위 / 최종: betRecommend 복승·삼복승 메인(블렌드)."""
+    def pt(order):
+        order = [int(x) for x in order]
+        return {"quinella": sorted(order[:2]) if len(order) >= 2 else None,
+                "trio": sorted(order[:3]) if len(order) >= 3 else None}
+    form_order = [h.get("no") for h in sorted(form or [], key=lambda x: -(x.get("totalScore") or 0))
+                  if h.get("no") is not None]
+    anom_order = [int(x) for x in ((excess or {}).get("concentrated") or [])]
+    for d in (drops or []):
+        for h in d.get("combo", []):
+            if int(h) not in anom_order:
+                anom_order.append(int(h))
+    for h in (key_horses or []):
+        if int(h) not in anom_order:
+            anom_order.append(int(h))
+    fq = next((sorted(b["combo"]) for b in (bet_rec or []) if b.get("label") == "복승 메인"), None)
+    ft = next((sorted(b["combo"]) for b in (bet_rec or []) if b.get("label") == "삼복승 메인"), None)
+    return {"anomaly": pt(anom_order),
+            "form": (pt(form_order) if len(form_order) >= 2 else {"quinella": None, "trio": None}),
+            "final": {"quinella": fq, "trio": ft}}
+
+
+def _learned_integrated_weights():
+    """[3번] 50경주+ 누적 시 이상감지/전적 적중률 비교로 통합 가중치 자동 조정.
+    기본 전적0.4 + 이상감지(배당)0.6. 데이터 부족(각 50경주 미만) 시 기본값 유지.
+    이상감지 적중률>전적이면 이상감지 비중↑, 반대면 전적 비중↑(±15%p, 이상감지 0.45~0.75)."""
+    fw, ow = 0.4, 0.6
+    try:
+        cs = (_learning_load().get("stats", {}) or {}).get("compare_stats") or {}
+        a, f = cs.get("anomaly") or {}, cs.get("form") or {}
+        if (a.get("n") or 0) >= 50 and (f.get("n") or 0) >= 50 \
+                and a.get("rate") is not None and f.get("rate") is not None:
+            shift = max(-0.15, min(0.15, (a["rate"] - f["rate"]) / 100.0))
+            ow = round(max(0.45, min(0.75, 0.6 + shift)), 3)
+            fw = round(1 - ow, 3)
+    except Exception:
+        fw, ow = 0.4, 0.6
+    return fw, ow
 
 
 def _triple_analyze(rk, rec):
@@ -2263,6 +2309,9 @@ def _triple_analyze(rk, rec):
     integrated_adaptive = _integrated_adaptive(form, curQ, curD, excess, situation)
     for h in integrated_adaptive or []:
         h["win"] = curWin.get(h.get("no"))
+    # [비교학습] 이상감지/전적/최종 추천 조합 3종 + 현재 통합 가중치(학습 조정 반영)
+    compare_recommend = _compare_recommend(form, key_horses, excess, drops, bet_rec)
+    _iw_fw, _iw_ow = _learned_integrated_weights()
 
     # [5번] 현재 경주 패턴 매칭 + [4번] 신뢰도 기반 베팅 비중 자동 조정
     pattern_match = None
@@ -2300,6 +2349,9 @@ def _triple_analyze(rk, rec):
                           "integratedAdaptive": integrated_adaptive},
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
+        # [비교학습] 이상감지/전적/최종 추천 3종 + 통합 가중치(전적/이상감지, 학습 조정 반영)
+        "compareRecommend": compare_recommend,
+        "integratedWeights": {"form": _iw_fw, "anomaly": _iw_ow},
     }
 
 
@@ -2739,6 +2791,7 @@ def _build_analysis_log(rk, an=None):
         "horses": horses,
         "elimination": {"candidates": cand, "eliminated": elim_no, "elimination_reasons": elim_reasons},
         "final_recommendation": final,
+        "compare_recommendation": an.get("compareRecommend"),   # [비교학습] 이상감지/전적/최종 3종
         "summary": an.get("summary"),
         "keyHorses": an.get("keyHorses"),
         "result": result_doc,
@@ -3149,6 +3202,25 @@ def _recompute_learning_stats(records):
         "wins": sum(1 for r in bet_recs if (r.get("pnl") or 0) > 0),
     }
 
+    # [비교학습] 이상감지/전적/최종 추천별 적중률(비교 기록 있는 경주만) + 현재 통합 가중치
+    compare_stats = {
+        "anomaly": _rate(records, lambda r: r.get("cmp_anomaly_hit") is not None,
+                         lambda r: r.get("cmp_anomaly_hit")),
+        "form": _rate(records, lambda r: r.get("cmp_form_hit") is not None,
+                      lambda r: r.get("cmp_form_hit")),
+        "final": _rate(records, lambda r: r.get("cmp_final_hit") is not None,
+                       lambda r: r.get("cmp_final_hit")),
+    }
+    _a, _f = compare_stats["anomaly"], compare_stats["form"]
+    _fw, _ow, _adjusted = 0.4, 0.6, False
+    if (_a.get("n") or 0) >= 50 and (_f.get("n") or 0) >= 50 \
+            and _a.get("rate") is not None and _f.get("rate") is not None:
+        _ow = round(max(0.45, min(0.75, 0.6 + max(-0.15, min(0.15, (_a["rate"] - _f["rate"]) / 100.0)))), 3)
+        _fw = round(1 - _ow, 3)
+        _adjusted = True
+    integrated_weights = {"form": _fw, "anomaly": _ow, "adjusted": _adjusted,
+                          "sample": min(_a.get("n") or 0, _f.get("n") or 0), "need": 50}
+
     return {
         "total": len(records),
         "profit_summary": profit_summary,
@@ -3165,6 +3237,9 @@ def _recompute_learning_stats(records):
         # [2·3번] 패턴 학습
         "pattern_stats": pattern_stats,
         "drop_timing": drop_timing,
+        # [비교학습] 이상감지/전적/최종 추천별 적중률 + 현재 통합 가중치(50경주+ 자동 조정)
+        "compare_stats": compare_stats,
+        "integrated_weights": integrated_weights,
     }
 
 
@@ -3233,6 +3308,18 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     top3s = sorted(top3[:3]) if len(top3) >= 3 else []
     quinella_hit = bool(top2 and any(r.get("kind") == "복승" and sorted(r["combo"]) == top2 for r in rec_bets))
     trifecta_hit = bool(top3s and any(r.get("kind") == "삼복승" and sorted(r["combo"]) == top3s for r in rec_bets))
+
+    # [비교학습] 이상감지/전적/최종 추천 조합 각각의 적중 판정(복승 top2 정확 또는 삼복승 top3 정확)
+    cmp_rec = an.get("compareRecommend") or {}
+
+    def _cmp_hit(block):
+        if not block:
+            return None
+        q, t = block.get("quinella"), block.get("trio")
+        return bool((q and top2 and sorted(q) == top2) or (t and top3s and sorted(t) == top3s))
+    cmp_anomaly_hit = _cmp_hit(cmp_rec.get("anomaly"))
+    cmp_form_hit = _cmp_hit(cmp_rec.get("form"))
+    cmp_final_hit = _cmp_hit(cmp_rec.get("final"))
     fo = final_odds if isinstance(final_odds, dict) else {}
 
     def _odds_val(x):  # 확장은 {combo,odds} 중첩, 수동입력은 숫자 → 둘 다 허용
@@ -3328,6 +3415,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         "odds_at_1min30sec": (snap_near(2) or {}).get("quinella"),
         # [1번] 패턴 학습 필드
         "patterns": _patterns, "pattern_timing": _pattern_timing, "bet_type": _bet_type,
+        # [비교학습] 이상감지/전적/최종 추천별 적중 여부 + 조합(통계 누적·가중치 조정 근거)
+        "cmp_anomaly_hit": cmp_anomaly_hit, "cmp_form_hit": cmp_form_hit, "cmp_final_hit": cmp_final_hit,
+        "cmp_recommend": cmp_rec,
         "t": time.time(),
     }
     L = _learning_load()

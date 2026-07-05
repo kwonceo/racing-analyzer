@@ -2606,6 +2606,7 @@
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
       ${renderProfitSummary(s.profit_summary)}
+      ${renderCompareStats(s.compare_stats, s.integrated_weights)}
       ${card('추천 적중률', s.recommend_hit)}
       ${card('급락 감지 적중률', s.drop_anomaly)}
       ${card('쌍승 역전 적중률', s.reversal)}
@@ -2615,6 +2616,35 @@
       ${renderPatternStats(s.pattern_stats)}
       ${renderDropTiming(s.drop_timing)}
       ${renderUpsetStats(up)}`;
+  }
+
+  /** [비교학습] 이상감지 vs 전적 vs 최종 추천 적중률 + 통합 가중치 자동 조정 상태. */
+  function renderCompareStats(cs, iw) {
+    if (!cs) return '';
+    const any = ['anomaly', 'form', 'final'].some((k) => cs[k] && cs[k].n);
+    if (!any) return '';
+    const cell = (title, st, color) => `<div class="bet-box" style="display:inline-block;min-width:180px;margin:4px;vertical-align:top">
+      <b>${title}</b><br>${(st && st.rate != null)
+        ? `<span style="font-size:22px;color:${color};font-weight:800">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n}경주)</span>`
+        : '<span class="hint">데이터 없음</span>'}</div>`;
+    // [3번] 가중치 조정 상태
+    let wNote = '';
+    if (iw) {
+      const fp = Math.round((iw.form || 0.4) * 100), ap = Math.round((iw.anomaly || 0.6) * 100);
+      if (iw.adjusted) {
+        wNote = `<div class="hint" style="margin:4px 0 8px;color:#38d39f">⚙️ <b>가중치 자동 조정됨</b> — 이상감지 <b>${ap}%</b> + 전적 <b>${fp}%</b> (표본 ${iw.sample}경주 · 적중률 비교 반영)</div>`;
+      } else {
+        wNote = `<div class="hint" style="margin:4px 0 8px">⚙️ 통합 가중치 이상감지 <b>${ap}%</b> + 전적 <b>${fp}%</b> <span style="color:#8a94a6">(기본값 · ${iw.sample || 0}/${iw.need || 50}경주 쌓이면 적중률 우세 쪽으로 자동 조정)</span></div>`;
+      }
+    }
+    return `<div class="bet-box" style="display:block;margin:4px 0 10px">
+      <b>🆚 이상감지 vs 전적 추천 적중률 비교</b> <span class="hint" style="font-weight:400">(복승 top2 정확 또는 삼복승 top3 정확 기준)</span>
+      ${wNote}
+      <div style="margin-top:2px">
+        ${cell('🚨 이상감지 기반 추천', cs.anomaly, '#ff9f43')}
+        ${cell('🏇 전적 기반 추천', cs.form, '#4ea1ff')}
+        ${cell('🎯 최종 추천(블렌드)', cs.final, '#38d39f')}
+      </div></div>`;
   }
 
   /** [#5] 누적 손익 요약 카드 — 실제 투자금액 기반 순손익·ROI·적중. */
