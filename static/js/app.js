@@ -2452,11 +2452,19 @@
     const mm = sq.quinellaMismatch;
     const mmHtml = mm ? `<div class="hint" style="margin:8px 0 2px">⚠️ <b>복승 불일치 감지</b>(단승 예상 vs 실제 최저) — 1.2+ 🟡 · 1.5+ 🔴 · 2.0+ 🔴🔴</div>`
       + `<div style="margin:2px 0"><span class="chip ${/🔴/.test(mm.level) ? 'chip-red' : ''}">${mm.level} 불일치 ${mm.ratio}</span> <span class="hint">${esc(mm.text)}</span></div>` : '';
+    // [2번 고도화] 급락속도·연속하락/반등·페이크·환급률
+    const adv = sq.advanced || {};
+    const advParts = [];
+    (adv.velocity || []).slice(0, 3).forEach((v) => advParts.push(`<div style="margin:2px 0"><span class="chip ${v.level === '🔴' ? 'chip-red' : ''}">${v.level} 급락속도</span> <span class="hint">${v.combo[0]}+${v.combo[1]} 분당 <b>${v.speed}%</b> (${Math.abs(v.pct)}%/${v.minutes}분)</span></div>`));
+    Object.values(adv.streaks || {}).forEach((s) => advParts.push(`<div style="margin:2px 0"><span class="chip ${s.type === '연속하락' ? 'chip-red' : ''}">${s.type === '연속하락' ? '🔴 연속하락 +20' : '🟡 단발반등 −15'}</span> <span class="hint">${s.combo[0]}+${s.combo[1]}</span></div>`));
+    (adv.fakes || []).forEach((f) => advParts.push(`<div style="margin:2px 0"><span class="chip chip-yellow">⚠️ 페이크 의심</span> <span class="hint">${f.combo[0]}+${f.combo[1]} 급락후반등 (${f.seq.join('→')})</span></div>`));
+    if (adv.overround && adv.overround.concentrated) advParts.push(`<div style="margin:2px 0"><span class="chip" style="border-color:#ff9f43;color:#ff9f43">🟠 자금집중</span> <span class="hint">상위 3조합이 전체의 <b>${Math.round(adv.overround.top3Share * 100)}%</b> 점유 (역수합 ${adv.overround.invSum})</span></div>`);
+    const advHtml = advParts.length ? `<div class="hint" style="margin:8px 0 2px">⚡ <b>실시간 이상감지 고도화</b>(급락속도·연속성·페이크·자금집중)</div>${advParts.join('')}` : '';
     return `<div style="margin:8px 0;border:1px solid var(--border);border-radius:8px;padding:8px">
       <div class="matrix-title" style="font-size:14px">🎯 신호 품질 분석 <span class="hint" style="font-weight:400">노이즈 제거 · 자금 집중 감지</span></div>
       <div style="margin:3px 0"><span class="chip" style="border-color:${stColor};color:${stColor}">${esc(st.name || '일반')}</span> <span class="hint">가중치 전적 <b>${Math.round((st.formW || 0.5) * 100)}%</b> · 신호 <b>${Math.round((st.signalW || 0.5) * 100)}%</b> · ${esc(st.note || '')}</span></div>
       <div class="hint" style="margin:4px 0 2px">시장 전체 평균 급락 <b>${ex.overall != null ? ex.overall + '%' : '-'}</b> 대비 <b>초과 급락(집중도)</b> — 초과 5%p+ 🔴 진짜신호 · 0~5%p 🟡 약한신호 · 그 외 노이즈 제거</div>
-      ${exRows}${confHtml}${wxHtml}${mmHtml}${iaHtml}</div>`;
+      ${exRows}${confHtml}${wxHtml}${mmHtml}${advHtml}${iaHtml}</div>`;
   }
 
   // [버그2·3] 복승/삼복승 추천 + 예산 배분 금액 표
@@ -4551,6 +4559,7 @@
       form_pick: hit.form_pick, form_pick_hit: hit.form_pick_hit,
       elimination_correct: hit.elimination_correct, pnl: hit.pnl, stake: hit.stake,
       near_miss: hit.near_miss, near_miss_horse: hit.near_miss_horse, result4: (d.result || {})['4th'],
+      hit_basis: hit.hit_basis,   // [1번] 적중 근거 요약(재조회)
     }, rk);
     return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px">
       <div class="matrix-title">${esc(d.race || rk)} <span class="hint" style="font-weight:400">${esc(d.date || '')} · 분석 ${esc(d.analyzed_at || '')}</span></div>
@@ -4576,8 +4585,27 @@
       <div>결과: <b>1착 ${r['1st'] != null ? r['1st'] : '?'}번 / 2착 ${r['2nd'] != null ? r['2nd'] : '?'}번 / 3착 ${r['3rd'] != null ? r['3rd'] : '?'}번${(r['4th'] != null || rep.result4 != null) ? ` / 4착 ${r['4th'] != null ? r['4th'] : rep.result4}번` : ''}</b></div>
       <div style="margin-top:4px">판정: 복승 ${yn(rep.quinella_hit)} · 삼복승 ${yn(rep.trifecta_hit)}</div>
       ${rep.near_miss ? `<div style="margin-top:4px;color:#ffd24f">🟡 <b>아깝게 4착 - 거의 적중</b>${rep.near_miss_horse != null ? ` (추천 ${rep.near_miss_horse}번이 4착)` : ''} → 삼복승 보험픽 학습 반영</div>` : ''}
+      ${renderHitBasis(rep.hit_basis)}
       <div class="matrix-title" style="font-size:12px;margin-top:8px">이상감지 분석</div>${anomalyLines}
       ${formLine}${pnlHtml}</div>`;
+  }
+
+  // [1번] 적중 근거 한눈 요약(전적점수·급락점수+폭·역배열·최종신뢰도·한줄근거)
+  function renderHitBasis(hb) {
+    if (!hb) return '';
+    const chip = (label, val, color) => val == null || val === '' ? '' :
+      `<span class="chip" style="border-color:${color};color:${color}">${label} ${val}</span>`;
+    const chips = [
+      chip('전적점수', hb.formScore != null ? Math.round(hb.formScore) : null, '#4ea1ff'),
+      chip('급락점수', hb.dropScore ? Math.round(hb.dropScore) : null, '#ff9f43'),
+      chip('급락폭', hb.dropAmt != null ? hb.dropAmt + '%' : null, '#ff5c5c'),
+      chip('역배열', hb.inverse ? (hb.inverseHit && hb.inverseHit.length ? '감지·입상 ' + hb.inverseHit.join('·') + '번' : '감지') : null, '#ff8a8a'),
+      chip('최종신뢰도', hb.confidence ? Math.round(hb.confidence) : null, hb.confidence >= 70 ? '#ef4444' : '#ffd24f'),
+    ].filter(Boolean).join(' ');
+    return `<div style="margin-top:6px;padding:6px 8px;background:rgba(255,159,67,.08);border-radius:6px">
+      <div style="font-size:12px;font-weight:700;color:#ffb26b">🎯 적중 근거</div>
+      <div style="margin:3px 0">${chips || '<span class="hint">근거 데이터 없음</span>'}</div>
+      <div class="hint" style="font-size:12px">📌 ${esc(hb.reason || '')}</div></div>`;
   }
 
   async function saveJapanResult(rk, file, recSummary) {
@@ -4607,6 +4635,7 @@
       form_pick: rec.form_pick, form_pick_hit: rec.form_pick_hit,
       elimination_correct: rec.elimination_correct, pnl: rec.pnl, stake: rec.stake,
       near_miss: rec.near_miss, near_miss_horse: rec.near_miss_horse, result4: (rec.result || result)['4th'],
+      hit_basis: rec.hit_basis,   // [1번] 적중 근거 요약
     };
     const rc = document.querySelector('#jpReport'); if (rc) rc.innerHTML = renderJapanReviewReport(rep, rk);
     // [4번] 통계 자동 업데이트(적중률·이상감지 패턴·손익)

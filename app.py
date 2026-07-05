@@ -2329,6 +2329,74 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
             "invCombos": inv_combos, "banner": banner}
 
 
+def _advanced_anomaly(hist, curQ, drops):
+    """[2번 고도화] 급락 속도·연속하락/단발반등·페이크베팅·복승 환급률(역수합) 감지.
+    hist: 스냅샷 리스트(각 {t, quinella}). 반환:
+      {velocity:[{combo,pct,minutes,speed,level}], streaks:{key:{type,confAdj}},
+       fakes:[{combo,seq}], overround:{invSum,top3Share,concentrated}, horseConfAdj:{no:점수}}."""
+    out = {"velocity": [], "streaks": {}, "fakes": [], "overround": None, "horseConfAdj": {}}
+    maps = [_odds_map_un(h.get("quinella")) for h in (hist or [])]
+    times = [h.get("t") for h in (hist or [])]
+
+    def _adj(combo, pts):
+        for h in combo:
+            out["horseConfAdj"][int(h)] = out["horseConfAdj"].get(int(h), 0) + pts
+
+    # ① 급락 속도 = 급락폭 / 수집간격(분). 분당 10%+ 강한 신호(🔴), 5%+ 주의(🟡)
+    gap_min = None
+    if len(times) >= 2 and times[-1] and times[-2]:
+        gap_min = max(0.1, round((times[-1] - times[-2]) / 60.0, 2))
+    if gap_min:
+        for d in (drops or []):
+            if d.get("pct") is not None and d["pct"] < 0:
+                speed = round(abs(d["pct"]) / gap_min, 1)
+                lvl = "🔴" if speed >= 10 else ("🟡" if speed >= 5 else None)
+                if lvl:
+                    out["velocity"].append({"combo": d["combo"], "pct": d["pct"],
+                                            "minutes": gap_min, "speed": speed, "level": lvl})
+        out["velocity"].sort(key=lambda v: -v["speed"])
+
+    # ② 연속 하락(3회 연속 → +20) vs 단발 후 반등(-15) + ③ 페이크 베팅(급락 후 반등)
+    if len(maps) >= 3:
+        keys = set()
+        for m in maps[-4:]:
+            keys.update(m.keys())
+        for k in keys:
+            seq = [m[k] for m in maps[-4:] if k in m and m[k] > 0]
+            if len(seq) < 3:
+                continue
+            last3 = seq[-3:]
+            # 3회 연속 단조 하락 + 총 하락폭 8%+ (미미한 표류는 제외)
+            consec = (all(last3[i] > last3[i + 1] for i in range(2))
+                      and last3[0] > 0 and (last3[0] - last3[-1]) / last3[0] >= 0.08)
+            lo = min(seq)
+            lo_i = seq.index(lo)
+            pre_max = max(seq[:lo_i + 1]) if lo_i >= 0 else seq[0]
+            drop_frac = (pre_max - lo) / pre_max if pre_max > 0 else 0.0
+            rebound_frac = (seq[-1] - lo) / lo if lo > 0 else 0.0
+            rebounded = lo_i < len(seq) - 1 and drop_frac >= 0.10 and rebound_frac >= 0.10
+            key = f"{k[0]}+{k[1]}"
+            if rebounded:
+                out["streaks"][key] = {"combo": list(k), "type": "단발후반등", "confAdj": -15}
+                _adj(k, -15)
+                if drop_frac >= 0.15 and rebound_frac >= 0.15:   # 급락 후 반등 = 페이크 의심
+                    out["fakes"].append({"combo": list(k), "seq": [round(x, 1) for x in seq]})
+            elif consec:
+                out["streaks"][key] = {"combo": list(k), "type": "연속하락", "confAdj": 20}
+                _adj(k, 20)
+
+    # ④ 복승 환급률(역수 합) + 상위 조합 집중도. top3 조합이 전체 자금의 90%+ → 특정 조합 집중
+    if curQ:
+        inv = [1.0 / o for o in curQ.values() if o > 0]
+        inv_sum = round(sum(inv), 3)
+        if inv_sum > 0:
+            top = sorted(inv, reverse=True)
+            top3_share = round(sum(top[:3]) / inv_sum, 3)
+            out["overround"] = {"invSum": inv_sum, "top3Share": top3_share,
+                                "concentrated": top3_share >= 0.90}
+    return out
+
+
 # ───────── [이상감지 vs 추천 비교 학습] 3종 추천 조합 산출 + 가중치 자동 조정 ─────────
 def _compare_recommend(form, key_horses, excess, drops, bet_rec):
     """[1번] 이상감지 기반 / 전적 기반 / 최종 추천 조합을 각각 산출(복승 2두·삼복승 3두).
@@ -2505,6 +2573,24 @@ def _triple_analyze(rk, rec):
     # [역배열 감지] 단승 순서 ≠ 복승/쌍승 순서 → 4유형 통합(쌍승역전·복승불일치·배당압축·초과급락)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
                                    wx_reversals, quin_mismatch, excess)
+    # [2번 고도화] 급락속도·연속하락/단발반등·페이크베팅·복승 환급률(역수합)
+    advanced = _advanced_anomaly(hist, curQ, drops)
+    # 연속하락(+20)/단발반등(-15) → 종합 신뢰도 점수 보정(0~100 재클램프)
+    if advanced.get("horseConfAdj"):
+        _sc_h = signal_confidence.get("horses") or {}
+        for _no, _pts in advanced["horseConfAdj"].items():
+            _cur = _sc_h.get(_no) or {"excessScore": 0.0, "reversalScore": 0.0,
+                                      "mismatchScore": 0.0, "confidence": 0.0, "grade": None}
+            _nc = round(max(0.0, min(100.0, _cur["confidence"] + _pts)), 1)
+            _cur["confidence"] = _nc
+            _cur["velocityAdj"] = _cur.get("velocityAdj", 0) + _pts
+            _cur["grade"] = "🔴" if _nc >= 70 else ("🟡" if _nc >= 40 else None)
+            _sc_h[_no] = _cur
+        signal_confidence["horses"] = _sc_h
+        signal_confidence["strong"] = sorted([n for n, v in _sc_h.items() if v["confidence"] >= 70],
+                                             key=lambda n: -_sc_h[n]["confidence"])
+        signal_confidence["refer"] = sorted([n for n, v in _sc_h.items() if 40 <= v["confidence"] < 70],
+                                            key=lambda n: -_sc_h[n]["confidence"])
 
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
@@ -2771,6 +2857,29 @@ def _triple_analyze(rk, rec):
                 signals.append({"level": "🟡", "type": "반등",
                                 "text": f"{k[0]}+{k[1]} 급락 후 반등 ({seq[0]}→{lo}→{seq[-1]})",
                                 "detail": "페이크 베팅 의심 / 해당말 신뢰도 하락"})
+    # [2번 고도화] ① 급락 속도 — 분당 급락%(급락폭/수집간격). 분당 10%+ 강한 신호
+    for _v in advanced.get("velocity", [])[:4]:
+        signals.append({"level": _v["level"], "type": "급락속도",
+                        "text": f"{_v['combo'][0]}+{_v['combo'][1]} 급락 속도 분당 {_v['speed']}% "
+                                f"({abs(_v['pct'])}% / {_v['minutes']}분)",
+                        "detail": "분당 10%+ = 단시간 집중 자금(강한 신호)" if _v["level"] == "🔴" else "분당 5%+ = 자금 유입 가속(주의)"})
+    # [2번 고도화] ② 연속 하락(신뢰도 +20) — 3회 연속 하락 = 지속 자금 유입
+    for _key, _st in advanced.get("streaks", {}).items():
+        if _st["type"] == "연속하락":
+            signals.append({"level": "🔴", "type": "연속하락", "horse": _st["combo"][0],
+                            "text": f"{_key} 3회 연속 하락 → 신뢰도 +20",
+                            "detail": "지속적 자금 유입(단발 아님) → 신호 신뢰도 상향"})
+    # [2번 고도화] ③ 페이크 베팅 의심 — 급락 후 반등(신뢰도 -15)
+    for _f in advanced.get("fakes", []):
+        signals.append({"level": "⚠️", "type": "페이크베팅", "horse": _f["combo"][0],
+                        "text": f"⚠️ 페이크 베팅 의심: {_f['combo'][0]}+{_f['combo'][1]} 급락 후 반등 ({'→'.join(map(str, _f['seq']))})",
+                        "detail": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"})
+    # [2번 고도화] ④ 복승 환급률 이상 — 상위 조합 자금 집중(역수합 top3 점유율 90%+)
+    _ov = advanced.get("overround")
+    if _ov and _ov.get("concentrated"):
+        signals.append({"level": "🟠", "type": "자금집중",
+                        "text": f"복승 자금 집중 — 상위 3개 조합이 전체의 {int(_ov['top3Share']*100)}% 점유",
+                        "detail": f"복승 역수합 {_ov['invSum']} · 소수 조합 편중 = 특정 결과에 자금 쏠림(이변 시 고배당)"})
 
     # 최근 스냅샷 시각·발주전분(히스토리 파일에서)
     last_snap = None
@@ -2883,7 +2992,8 @@ def _triple_analyze(rk, rec):
                           "integratedAdaptive": integrated_adaptive,
                           "winExactaReversals": wx_reversals,
                           "quinellaMismatch": quin_mismatch,
-                          "signalConfidence": signal_confidence},
+                          "signalConfidence": signal_confidence,
+                          "advanced": advanced},
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
         # [경주전환 방어] 첫 수집(기준값 설정)/비정상 변동폭(기준값 재설정) 여부
@@ -3988,6 +4098,39 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     else:
         pnl = 0
 
+    # [1번] 적중 근거 한눈 요약 — 전적점수·급락점수+폭·역배열·최종신뢰도 + 한줄 근거
+    _sq = an.get("signalQuality") or {}
+    _conf_h = (_sq.get("signalConfidence") or {}).get("horses") or {}
+    _inv = an.get("inverse") or {}
+    _form_map = {h.get("no"): h.get("totalScore") for h in (an.get("form") or [])}
+    _win_no = top3[0] if top3 else None
+    _form_score = _form_map.get(_win_no)
+    # 결과 입상마가 낀 최대 급락(급락폭) + 그 말 집중신호 점수(급락점수)
+    _best_drop = None
+    for _d in an.get("drops", []):
+        if _d.get("pct", 0) < 0 and any(h in top3 for h in _d["combo"]):
+            if _best_drop is None or _d["pct"] < _best_drop["pct"]:
+                _best_drop = _d
+    _drop_amt = _best_drop["pct"] if _best_drop else None
+    _hit_conf = max([(_conf_h.get(h) or {}).get("confidence", 0) for h in top3] or [0])
+    _drop_score = max([(_conf_h.get(h) or {}).get("excessScore", 0) for h in top3] or [0])
+    _inv_hit = [h for h in (_inv.get("invHorses") or []) if h in top3]
+    _basis = []
+    if form_pick_hit:
+        _basis.append(f"전적유력마 {form_pick}번 적중")
+    if signal_correct:
+        _basis.append(signal_correct[0])
+    if _inv.get("detected") and _inv_hit:
+        _basis.append(f"역배열 감지말 {'·'.join(map(str, _inv_hit))}번 입상")
+    if elimination_correct:
+        _basis.append("제거 적중")
+    hit_basis = {
+        "formScore": _form_score, "dropAmt": _drop_amt, "dropScore": _drop_score,
+        "inverse": bool(_inv.get("detected")), "inverseHorses": _inv.get("invHorses") or [],
+        "inverseHit": _inv_hit, "confidence": _hit_conf,
+        "reason": " · ".join(_basis) or ("적중" if was_hit else "추천 미적중"),
+    }
+
     record = {
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
         "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
@@ -4009,6 +4152,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         # [2·3번] 4착 near-miss(추천 말 4착=아깝게 미적중) — 통계·보험픽 학습 근거
         "top4": top4, "near_miss": near_miss, "near_miss_horse": near_miss_horse,
         "near_miss_name": near_miss_name, "trio_near_miss": trio_near,
+        # [1번] 적중 근거 요약(전적점수·급락점수+폭·역배열·최종신뢰도·한줄근거)
+        "hit_basis": hit_basis,
         "t": time.time(),
     }
     L = _learning_load()
@@ -4034,6 +4179,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             "eliminated": eliminated_nos, "form_pick": form_pick, "form_pick_hit": form_pick_hit,
             "pnl": pnl, "stake": stake,   # [일본경마 복기] 재조회 시 손익 그대로 표시
             "near_miss": near_miss, "near_miss_horse": near_miss_horse,  # [4착] 아깝게 미적중
+            "hit_basis": hit_basis,   # [1번] 적중 근거 요약
         }
         json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     except Exception as e:
