@@ -2397,6 +2397,196 @@ def _advanced_anomaly(hist, curQ, drops):
     return out
 
 
+# ───────── [BMED 매트릭스 베팅 전략] 상황별 5전략 자동선택 + 원금보전 배분 + 기대환수율 ─────────
+def _capital_preservation(combos):
+    """[2번] 원금 보전 자동 계산(예산 무관 '비율' 산출 → 프론트가 예산 곱함).
+    combos=[{combo,odds}]. 각 조합 적중 시 총원금 이상 회수되도록 배당 역산 배분.
+      Σ(1/o)≤1: base_i=1/o(적중 시 정확히 원금) + 잔여 균등분배(고배당 조합 상방 확대) = 원금 보전.
+      Σ(1/o)>1: 등환수 더치(1/o 정규화) = 손실 최소·모든 적중 동일 회수율(보전 불가).
+    반환 (plan[{combo,odds,ratio,payoutRatio}], preserved, returnRate%)."""
+    cc = [(tuple(int(x) for x in c["combo"]), float(c["odds"]))
+          for c in (combos or []) if c.get("odds") and c["odds"] > 0]
+    if not cc:
+        return [], False, None
+    S = sum(1.0 / o for _, o in cc)
+    n = len(cc)
+    plan = []
+    if S <= 1.0:
+        leftover = 1.0 - S
+        for c, o in cc:
+            ratio = 1.0 / o + leftover / n           # 원금 보전 + 잔여 균등(고배당일수록 회수↑)
+            plan.append({"combo": list(c), "odds": round(o, 1), "ratio": round(ratio, 4),
+                         "payoutRatio": round(ratio * o, 3)})
+        preserved = True
+        return_rate = round(min(p["payoutRatio"] for p in plan) * 100, 1)
+    else:
+        for c, o in cc:
+            ratio = (1.0 / o) / S                    # 등환수 더치(보전 불가 시 손실 최소)
+            plan.append({"combo": list(c), "odds": round(o, 1), "ratio": round(ratio, 4),
+                         "payoutRatio": round(ratio * o, 3)})
+        preserved = False
+        return_rate = round((1.0 / S) * 100, 1)
+    return plan, preserved, return_rate
+
+
+def _expected_return(plan, curQ):
+    """[3번] 기대 환수율 = Σ(적중확률_i × 회수비율_i). 확률=시장 복승 역수(1/o) 정규화(전체 조합).
+    반환 (expected%, bestCasePayoutRatio, coveredProb%)."""
+    if not plan:
+        return None, None, None
+    inv_all = sum(1.0 / o for o in curQ.values() if o > 0) or 1.0
+    exp, covered = 0.0, 0.0
+    for x in plan:
+        p = (1.0 / x["odds"]) / inv_all if x["odds"] > 0 else 0.0
+        covered += p
+        exp += p * x["payoutRatio"]
+    return round(exp * 100, 1), round(max(x["payoutRatio"] for x in plan), 3), round(covered * 100, 1)
+
+
+def _bmed_insurance(key_horses, curQ, signal_confidence, inverse):
+    """[보험용 추천] BMED 보험형 매트릭스 — 1착 유력마 축 + 2·3·4위 상대 3조합.
+       1+2(최다 베팅·수익 극대)·1+3(중간·준수익)·1+4(최소·손실 최소).
+       배당별 자동 비율: 저배당(A+B<3) 60/25/15 · 중배당(3~7) 원금보전 역산 · 고배당(≥7) 40/35/25.
+    활성조건: 유력마 4두 압축 + 1착 신뢰도 70%+ + A+B 3배+ + 역배열 미감지.
+    (이런 경기 유형일 때만 '보험용'으로 정상 추천과 함께 제시 → 사용자가 보고 선택)."""
+    horses = list(dict.fromkeys(int(h) for h in (key_horses or [])))
+    h4 = horses[:4]
+    cond_compress = len(horses) >= 4
+    # 1착 신뢰도(배당 기반): 최저 4개 복승 조합 중 1착축(h0) 포함 비율(%)
+    fav_conf = 0.0
+    if h4 and curQ:
+        cheapest4 = [k for k, _ in sorted(curQ.items(), key=lambda kv: kv[1])[:4]]
+        if cheapest4:
+            fav_conf = round(sum(1 for k in cheapest4 if h4[0] in k) / len(cheapest4) * 100)
+    cond_conf = fav_conf >= 70
+    ab_odds = curQ.get(tuple(sorted(h4[:2]))) if len(h4) >= 2 else None
+    cond_ab = ab_odds is not None and ab_odds >= 3.0   # 3배+ = 원금보전 여력(저배당은 제한)
+    inv_det = bool(inverse and inverse.get("detected"))
+    conditions = [
+        {"label": "유력마 4두 압축", "ok": cond_compress},
+        {"label": "1착 신뢰도 70%+", "ok": cond_conf, "value": f"{int(fav_conf)}%"},
+        {"label": "A+B 배당 3배+(원금보전)", "ok": cond_ab, "value": (f"{ab_odds}배" if ab_odds else "-")},
+        {"label": "역배열 미감지", "ok": not inv_det},
+    ]
+    # 활성화 = 구조 조건(4두 압축 + 1착 신뢰도 + 역배열 아님). A+B<3(저배당)이면 활성이되 원금보전 제한 표시.
+    active = cond_compress and cond_conf and not inv_det and (ab_odds is not None)
+    res = {"active": active, "conditions": conditions, "favConf": fav_conf,
+           "anchor": h4[0] if h4 else None, "horses": h4, "abOdds": ab_odds,
+           "usage": "유력마 압축 + 1착 확실 (역배열 아님)"}
+    if not active:
+        res["alternate"] = "역배열형" if inv_det else ("분산형" if len(horses) < 2 else "정상 추천")
+        res["altReason"] = ("역배열 감지됨 → BMED 역배열형 권장" if inv_det else
+                            "유력마 압축/신뢰도/배당 조건 미충족 → 정상 추천 사용")
+        return res
+    # 3조합: 1+2, 1+3, 1+4 (1착축 h0 고정)
+    combos = []
+    for i, lbl in ((1, "1+2"), (2, "1+3"), (3, "1+4")):
+        if i < len(h4):
+            pair = tuple(sorted((h4[0], h4[i])))
+            o = curQ.get(pair)
+            if o and o > 0:
+                combos.append({"combo": list(pair), "odds": round(o, 1), "label": lbl})
+    if ab_odds < 3:
+        band, ratios = "저배당", [0.60, 0.25, 0.15]
+    elif ab_odds < 7:
+        band, ratios = "중배당", None   # 원금보전 역산
+    else:
+        band, ratios = "고배당", [0.40, 0.35, 0.25]
+    if ratios is None:   # 중배당 = 원금보전 자동 계산
+        plan, _pres, _rr = _capital_preservation(combos)
+        by = {tuple(p["combo"]): p for p in plan}
+        for c in combos:
+            p = by.get(tuple(c["combo"]))
+            c["ratio"] = p["ratio"] if p else None
+            c["payoutRatio"] = p["payoutRatio"] if p else None
+    else:                # 저/고배당 = 고정 비율(합 100%)
+        for c, r in zip(combos, ratios):
+            c["ratio"] = r
+            c["payoutRatio"] = round(r * c["odds"], 3)
+    payouts = [c["payoutRatio"] for c in combos if c.get("payoutRatio") is not None]
+    res.update({
+        "band": band, "combos": combos,
+        "bestRatio": max(payouts) if payouts else None,
+        "midRatio": sorted(payouts)[len(payouts) // 2] if payouts else None,
+        "worstRatio": min(payouts) if payouts else None,
+        "preserved": bool(payouts and all(p >= 1.0 for p in payouts)),   # 모든 조합 적중 시 원금 이상
+        "expectedReturn": _expected_return(combos, curQ)[0] if combos else None,
+    })
+    return res
+
+
+def _bmed_strategy(curQ, key_horses, excess, inverse, mass_drop, signal_confidence, after_close):
+    """[1·4번] 현재 상황 자동 분석 → BMED 5전략 중 최적 선택 + 근거 + 원금보전 배분 + 기대환수율.
+    5전략: 보험형(이상감지 없음+유력마 명확)·압축형(2두 강한신호)·역배열형(쌍승역전)
+          ·분산형(대규모 급락 노이즈)·고배당도전형(강한 신호+고배당).
+    + 보험용 매트릭스(_bmed_insurance)를 함께 산출 → 정상 추천과 나란히 제시(조건 충족 시)."""
+    if not curQ:
+        return None
+    strong = list(signal_confidence.get("strong") or [])
+    concentrated = list((excess or {}).get("concentrated") or [])
+    inv_det = bool(inverse and inverse.get("detected"))
+    inv_rev = inv_det and any(t.get("kind") == "쌍승역전" for t in (inverse.get("types") or []))
+
+    def _co(pairs):
+        out, seen = [], set()
+        for p in pairs:
+            pp = tuple(sorted(int(x) for x in p))
+            if len(pp) == 2 and pp not in seen and curQ.get(pp) and curQ[pp] > 0:
+                seen.add(pp)
+                out.append({"combo": list(pp), "odds": curQ[pp]})
+        return out
+
+    def _pairs(hs):
+        hs = list(dict.fromkeys(hs))
+        return [(hs[i], hs[j]) for i in range(len(hs)) for j in range(i + 1, len(hs))]
+    cheapest = [list(k) for k, _ in sorted(curQ.items(), key=lambda kv: kv[1])]
+    # 강한 신호 말 조합(2두+) + 고배당 여부
+    strong_pairs = _pairs(strong[:3]) if len(strong) >= 2 else \
+        ([(strong[0], h) for h in key_horses if h != strong[0]] if strong else [])
+    strong_combos = _co(strong_pairs)
+    strong_hi = [c for c in strong_combos if c["odds"] >= 20]
+
+    if mass_drop:
+        name, emoji = "분산형", "🌊"
+        reason = "대규모 급락(자금 분산·노이즈) → 특정 유력마 불명확, 넓게 원금 보전"
+        combos = _co([tuple(c) for c in cheapest[:6]])
+    elif inv_rev:
+        name, emoji = "역배열형", "🔄"
+        ih = inverse.get("invHorses") or []
+        reason = f"쌍승 역전 감지 → 실질 유력마({'·'.join(map(str, ih[:2])) or '-'}번) 역배열 조합 우선"
+        combos = _co([tuple(c["combo"]) for c in (inverse.get("invCombos") or [])]) or _co([tuple(cheapest[0])])
+    elif strong_hi:
+        name, emoji = "고배당도전형", "🚀"
+        reason = f"강한 신호 + 고배당 조합({strong_hi[0]['combo'][0]}+{strong_hi[0]['combo'][1]}={strong_hi[0]['odds']}배) → 상방 도전"
+        combos = strong_hi + _co([tuple(cheapest[0])])   # 고배당 도전 + 최저 1개 안전판
+    elif len(strong) >= 2 or len(concentrated) >= 2:
+        name, emoji = "압축형", "🎯"
+        base = strong[:2] if len(strong) >= 2 else concentrated[:2]
+        reason = f"2두 강한 신호({'·'.join(map(str, base))}번) → 압축 집중 베팅"
+        combos = _co(_pairs(base + key_horses[:1]))
+    else:
+        name, emoji = "보험형", "🛡️"
+        reason = "유력마 명확 + 이상감지 없음 → 상위 조합 원금 보전 안정 베팅"
+        combos = _co([tuple(c) for c in cheapest[:4]])
+
+    plan, preserved, return_rate = _capital_preservation(combos)
+    expected, best_ratio, covered = _expected_return(plan, curQ)
+    insurance = _bmed_insurance(key_horses, curQ, signal_confidence, inverse)
+    return {
+        "strategy": name, "emoji": emoji, "label": f"BMED {name}", "reason": reason,
+        "afterClose": bool(after_close),
+        "plan": plan, "preserved": preserved,
+        "returnRate": return_rate,          # 보장 환수율%(모든 적중 동일/최소)
+        "expectedReturn": expected,          # 기대 환수율%(시장확률 가중)
+        "bestCaseRatio": best_ratio,         # 최선 수령 비율(×예산) — 최선 시나리오
+        "worstCaseRatio": -1.0,              # 최악(커버 조합 모두 미적중) = 예산 전액 손실
+        "coveredProb": covered,              # 커버 조합 시장 적중확률 합%
+        "note": "예산 입력 시 각 조합 베팅액·수령액 자동 계산" if plan else "복승 배당 부족 — 배분 계산 불가",
+        # [보험용 추천] 정상 추천과 함께 제시(조건 충족 시만 active) → 사용자가 보고 선택
+        "insurance": insurance,
+    }
+
+
 # ───────── [이상감지 vs 추천 비교 학습] 3종 추천 조합 산출 + 가중치 자동 조정 ─────────
 def _compare_recommend(form, key_horses, excess, drops, bet_rec):
     """[1번] 이상감지 기반 / 전적 기반 / 최종 추천 조합을 각각 산출(복승 2두·삼복승 3두).
@@ -2955,6 +3145,14 @@ def _triple_analyze(rk, rec):
     compare_recommend = _compare_recommend(form, key_horses, excess, drops, bet_rec)
     _iw_fw, _iw_ow = _learned_integrated_weights()
 
+    # [BMED 전략] 상황 자동판별 5전략 + 원금보전 배분 + 기대환수율 + 보험용 매트릭스 추천
+    #   보험용은 유력마 4두가 필요 → ranked(전체 인기순위) 전달(전략 조합은 내부에서 상위만 사용)
+    try:
+        bmed = _bmed_strategy(curQ, ranked, excess, inverse, mass_drop, signal_confidence, after_close)
+    except Exception as _e:
+        print("[BMED] 실패:", _e)
+        bmed = None
+
     # [5번] 현재 경주 패턴 매칭 + [4번] 신뢰도 기반 베팅 비중 자동 조정
     pattern_match = None
     try:
@@ -3002,6 +3200,8 @@ def _triple_analyze(rk, rec):
         "marketCheck": market_check,
         # [역배열 감지] 단승≠복승/쌍승 순서(4유형 통합) + 역배열 감지말·복승 역배열 조합
         "inverse": inverse,
+        # [BMED 전략] 5전략 자동선택 + 원금보전 배분 + 기대환수율 + 보험용 매트릭스(정상과 함께 선택)
+        "bmed": bmed,
         # [비교학습] 이상감지/전적/최종 추천 3종 + 통합 가중치(전적/이상감지, 학습 조정 반영)
         "compareRecommend": compare_recommend,
         "integratedWeights": {"form": _iw_fw, "anomaly": _iw_ow},

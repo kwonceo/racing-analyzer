@@ -2157,6 +2157,50 @@
 
   let _lastTripleAnalyze = null, _prevBetKey = null, _betUpdatedFlag = false;
   let _elimRaceKey = null;
+  // [BMED 전략] 5전략 자동선택 + 기대환수율 + 보험용 매트릭스(정상 추천과 함께 선택)
+  function renderBMED(b) {
+    if (!b) return '';
+    const bEl = document.querySelector('#tripleBudget');
+    const budget = Math.max(0, parseInt((bEl && bEl.value) || '0', 10) || 0);
+    const won = (n) => (Math.round(n / 100) * 100).toLocaleString();
+    const sign = (n) => (n >= 0 ? '+' : '') + won(n);
+    // 전략명 + 근거 [4번]
+    const head = `<div style="font-size:15px;font-weight:800;color:#c4b5fd">📊 현재 적용 전략: ${esc(b.label || '-')}</div>
+      <div class="hint" style="margin:2px 0 6px">근거: ${esc(b.reason || '')}${b.afterClose ? ' <span style="color:#8a94a6">· ⚠️ 마감 후(참고만)</span>' : ''}</div>`;
+    // 기대 환수율 [3번] — 자동선택 전략 plan 기준
+    let expBlock = '';
+    if (b.plan && b.plan.length) {
+      const best = budget > 0 && b.bestCaseRatio != null ? `<br>최선 시나리오: <b style="color:#38d39f">${sign(b.bestCaseRatio * budget - budget)}원</b>` : '';
+      const worst = budget > 0 ? `<br>최악 시나리오: <b style="color:#f87171">${sign(-budget)}원</b> (커버 조합 모두 미적중)` : '';
+      expBlock = `<div class="hint" style="margin:4px 0">기대 환수율: <b style="color:${(b.expectedReturn || 0) >= 100 ? '#38d39f' : '#ffd24f'}">${b.expectedReturn != null ? b.expectedReturn + '%' : '-'}</b>${b.returnRate != null ? ` · 보장 환수율 ${b.returnRate}%` : ''}${b.preserved ? ' <span style="color:#38d39f">(원금 보전)</span>' : ''}${best}${worst}</div>`;
+    }
+    // [2번] 보험용 추천 매트릭스 — 정상 추천과 구분해서 나란히 제시(조건 충족 시만)
+    const ins = b.insurance || {};
+    let insBlock = '';
+    if (ins.active && ins.combos && ins.combos.length) {
+      const rows = ins.combos.map((c) => {
+        const stake = budget > 0 ? won(c.ratio * budget) : Math.round(c.ratio * 100) + '%';
+        const pay = budget > 0 && c.payoutRatio != null ? won(c.payoutRatio * budget) : (c.payoutRatio != null ? c.payoutRatio + 'x' : '-');
+        const diff = budget > 0 && c.payoutRatio != null ? ` <span style="color:${c.payoutRatio >= 1 ? '#38d39f' : '#f87171'}">(${sign(c.payoutRatio * budget - budget)})</span>` : '';
+        return `<div style="margin:2px 0"><b style="color:#c4b5fd">${c.label}</b> ${c.combo[0]}+${c.combo[1]}(${c.odds}배): <b>${stake}${budget > 0 ? '원' : ''}</b> → 적중 시 ${pay}${budget > 0 ? '원' : ''}${diff}</div>`;
+      }).join('');
+      const sc = budget > 0 ? `<div class="hint" style="margin-top:4px">최선 <b style="color:#38d39f">${sign((ins.bestRatio - 1) * budget)}</b> · 중간 ${sign((ins.midRatio - 1) * budget)} · 최악 <b style="color:#f87171">${sign((ins.worstRatio - 1) * budget)}</b> · 기대환수 ${ins.expectedReturn != null ? ins.expectedReturn + '%' : '-'}</div>` : '';
+      insBlock = `<div style="margin-top:8px;padding:8px;border:1px dashed #a78bfa;border-radius:7px;background:rgba(167,139,250,.08)">
+        <div style="font-weight:800;color:#c4b5fd">🛡️ 보험용 추천 (BMED 보험형 · ${esc(ins.band || '')})</div>
+        <div class="hint" style="margin:2px 0 5px">1착축 ${ins.anchor}번 · 1+2 최다 / 1+3 중간 / 1+4 최소 ${ins.preserved ? '<span style="color:#38d39f">· 원금 보전</span>' : '<span style="color:#ffb020">· 저배당(원금보전 제한)</span>'}</div>
+        ${rows}${sc}
+        <div class="hint" style="margin-top:4px;font-size:11px">✅ 정상 추천과 <b>둘 다 확인 후 선택</b>하세요. 보험용은 손실 최소화형입니다.</div></div>`;
+    } else if (ins.conditions) {
+      const conds = ins.conditions.map((c) => `<span class="chip" style="border-color:${c.ok ? '#38d39f' : '#8a94a6'};color:${c.ok ? '#38d39f' : '#8a94a6'}">${c.ok ? '✅' : '❌'} ${esc(c.label)}${c.value ? ' ' + c.value : ''}</span>`).join(' ');
+      insBlock = `<div style="margin-top:8px;padding:8px;border:1px dashed #6b7280;border-radius:7px;background:rgba(107,114,128,.06)">
+        <div class="hint">🛡️ 보험용 추천 조건 미충족 → <b>정상 추천${ins.alternate && ins.alternate !== '정상 추천' ? ' / BMED ' + esc(ins.alternate) : ''}</b> 사용${ins.altReason ? ` <span style="font-size:11px">(${esc(ins.altReason)})</span>` : ''}</div>
+        <div style="margin-top:3px">${conds}</div></div>`;
+    }
+    return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #8b5cf6;border-radius:8px;background:rgba(139,92,246,.08)">
+      ${head}${expBlock}${insBlock}
+      <div class="hint" style="margin-top:5px;font-size:11px">${esc(b.note || '')}${budget <= 0 ? ' · 예산 입력 시 금액 자동 계산' : ''}</div></div>`;
+  }
+
   // [역배열 감지] 단승≠복승/쌍승 순서 → 추천 상단 특별 표시(4유형 + 역배열 감지말·조합)
   function renderInverse(inv) {
     if (!inv || !inv.detected) return '';
@@ -2213,6 +2257,7 @@
       ${renderSignalQuality(a.signalQuality)}
       ${renderEliminationHTML(a.elimination)}
       ${renderBetRecommend(a)}
+      ${renderBMED(a.bmed)}
       ${renderFormGrades(a.form)}`;
     _attachElimHandlers();       // 제거↔후보 클릭 토글
     drawTripleChart(a.chart);
