@@ -2428,8 +2428,11 @@
     const rows = recs.map((r) => {
       const amt = budget > 0 ? won(budget * (r.alloc || 0) / 100) : null;
       const kindColor = r.kind === '복승' ? '#4ea1ff' : '#38d39f';
-      const odTxt = r.expOdds != null ? r.expOdds + '배'
-        : (r.expOddsEst != null ? r.expOddsEst + '배<span class="hint">(추정)</span>' : '<span class="hint">미수집</span>');
+      const tierTxt = r.signalTier
+        ? ` <span class="hint" style="color:${/고배당/.test(r.signalTier) ? '#ffd24f' : /낮은/.test(r.signalTier) ? '#4ea1ff' : '#8a94a6'};font-weight:700">${esc(r.signalTier)}</span>`
+        : '';
+      const odTxt = (r.expOdds != null ? r.expOdds + '배'
+        : (r.expOddsEst != null ? r.expOddsEst + '배<span class="hint">(추정)</span>' : '<span class="hint">미수집</span>')) + tierTxt;
       const qTxt = r.signalQuality
         ? `<b style="color:${qc[r.signalQuality] || '#8a94a6'}">${esc(r.signalQuality)}</b>${r.signalReason ? `<br><span class="hint" style="font-size:10px">${esc(r.signalReason)}</span>` : ''}`
         : '<span class="hint">-</span>';

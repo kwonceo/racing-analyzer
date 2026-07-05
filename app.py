@@ -2016,6 +2016,41 @@ def _deadline_phase_label(mb, after_close):
     return f"마감 {mb}분전"
 
 
+def _signal_combo_bets(signal_horses, curQ, bet_rec, cap=5):
+    """[신호 조합] 이상감지 신호가 있는 말들의 모든 복승 조합을 추천에 추가(고배당 포함).
+    이미 추천된 복승 조합은 스킵. 배당 높은 순 우선 노출(고배당 놓침 방지). 반환: 추가 alloc 총합.
+    예: 신호말 2·6·7 → 2+6(147배 고배당신호)·2+7·6+7 전부 추천 목록에 포함."""
+    existing = {tuple(sorted(int(x) for x in b["combo"])) for b in bet_rec if b.get("kind") == "복승"}
+    sh = []
+    for h in signal_horses:
+        if h is not None and int(h) not in sh:
+            sh.append(int(h))
+    combos = []
+    for i in range(len(sh)):
+        for j in range(i + 1, len(sh)):
+            pair = tuple(sorted((sh[i], sh[j])))
+            if pair in existing:
+                continue
+            o = curQ.get(pair)
+            if o is None or o <= 0:   # 배당 미수집 조합은 제외(신호 조합은 복승 배당 있는 것만)
+                continue
+            combos.append((pair, o))
+            existing.add(pair)
+    combos.sort(key=lambda x: -(x[1] or 0))   # 고배당 우선 노출
+    added = 0.0
+    for pair, odds in combos[:cap]:
+        if odds >= 50:
+            tier = "고배당신호"
+        elif odds < 7:
+            tier = "낮은배당신호"
+        else:
+            tier = "신호기반"
+        bet_rec.append({"kind": "복승", "label": "복승 신호", "combo": list(pair),
+                        "alloc": 3, "expOdds": odds, "signalTier": tier, "signalCombo": True})
+        added += 3
+    return added
+
+
 def _combo_signal_quality(combo, excess):
     """[4번] 추천 조합의 신호 품질(상/중/하) + 근거. 조합 내 최대 초과급락 말 기준."""
     ehorses = (excess or {}).get("horses") or {}
@@ -2249,6 +2284,32 @@ def _triple_analyze(rk, rec):
     # [대규모급락 전략] 삼복승 보험 8→15% 확대·중배당 복승 보험 추가·최저배당 신뢰도 하락(기존 조합 유지)
     # [1번] 마감 후에는 대규모급락 전략도 추천에 반영하지 않음(참고만)
     mass_drop_strategy = _apply_mass_drop_strategy(bet_rec, mass_drop, drops, curQ) if not after_close else None
+
+    # [신호 조합] 이상감지 신호가 있는 말들의 모든 복승 조합을 추천에 추가(고배당 포함) → 147배 놓침 방지
+    if not after_close:
+        _sh_order = []
+
+        def _push_sig(h):
+            if h is not None and int(h) not in _sh_order:
+                _sh_order.append(int(h))
+        for _h in (excess.get("concentrated") or []):
+            _push_sig(_h)
+        for _d in single_drops:
+            _push_sig(_d.get("no"))
+        for _d in drops:
+            for _h in _d.get("combo", []):
+                _push_sig(_h)
+        for _rv in reversals:
+            if _rv.get("flipped"):
+                for _h in (_rv.get("favored") or []):
+                    _push_sig(_h)
+        if anomaly_horse is not None:
+            _push_sig(anomaly_horse)
+        if len(_sh_order) >= 2:
+            _sig_added = _signal_combo_bets(_sh_order, curQ, bet_rec)
+            _main = next((b for b in bet_rec if b.get("label") == "복승 메인"), None)
+            if _main and _sig_added:
+                _main["alloc"] = max(20, round(_main.get("alloc", 43) - _sig_added, 1))
 
     # [4번] 추천 조합별 신호 품질(상/중/하) + 근거(초과급락 말) 부착
     for r in bet_rec:
