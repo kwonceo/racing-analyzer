@@ -1742,6 +1742,57 @@ def _adjust_bet_weights(bet_rec, conf):
     return {"note": f"신뢰도 {lvl}({conf.get('rate')}%) → 기본 비중 유지", "adjusted": False}
 
 
+# ───────── [대규모 급락 패턴] 전체 조합 동시 급락 감지 + 베팅 전략 ─────────
+#   특정 유력마 없이 시장 전체에 자금이 퍼진 상태(자금 분산) → 이변 가능성↑.
+#   히스토리 분석 결과 수집 경주의 다수에서 반복 관측됨(반복 패턴).
+def _mass_drop_detect(drops, curQ, minutes_before=None):
+    """전체 복승 조합의 50%+ 또는 30개+ 가 동시에 30%+ 급락하면 '대규모 급락'."""
+    total = len(curQ or {})
+    if total < 8:
+        return None
+    dropped = [d for d in (drops or []) if d.get("pct") is not None and d["pct"] <= -30]
+    ratio = round(len(dropped) / total, 3) if total else 0.0
+    if ratio >= 0.50 or len(dropped) >= 30:
+        return {"detected": True, "dropped": len(dropped), "total": total, "ratio": ratio,
+                "minutes_before": minutes_before,
+                "note": "🌊 대규모 자금 분산 패턴 — 특정 유력마 없음 · 이변 가능성↑ · 중배당 조합 병행 체크 권장"}
+    return None
+
+
+def _apply_mass_drop_strategy(bet_rec, mass_drop, drops, curQ):
+    """[대규모급락 전략] 삼복승 보험 8%→15% 확대 + 중배당(7~40배) 급락 복승 보험 추가 +
+    최저배당 복승 신뢰도 하락 표기. 기존 조합은 삭제하지 않고 alloc 조정·보험 추가만(합계≈100 유지)."""
+    if not mass_drop or not bet_rec:
+        return None
+    main = next((b for b in bet_rec if b.get("label") == "복승 메인"), None)
+    ins = [b for b in bet_rec if b.get("kind") == "삼복승" and "보험" in (b.get("label") or "")]
+    changes, deduct = [], 0.0
+    cur_ins = sum(b.get("alloc", 0) for b in ins)
+    if ins and cur_ins < 15:
+        add = round((15 - cur_ins) / len(ins), 1)
+        for b in ins:
+            b["alloc"] = round(b.get("alloc", 0) + add, 1)
+        deduct += add * len(ins)
+        changes.append(f"삼복승 보험 {int(cur_ins)}%→15% 확대")
+    # 중배당(7~40배) 급락 복승 보험 1개 추가(급락 가장 큰 것)
+    mids = [(d, curQ.get(tuple(sorted(d["combo"]))))
+            for d in (drops or []) if d.get("pct") is not None and d["pct"] <= -30]
+    mids = sorted([(d, o) for d, o in mids if o and 7 <= o <= 40], key=lambda x: x[0]["pct"])
+    if mids:
+        d, o = mids[0]
+        cc = sorted(int(x) for x in d["combo"])
+        if not any(b.get("kind") == "복승" and b.get("combo") == cc for b in bet_rec):
+            bet_rec.append({"kind": "복승", "label": "복승 중배당보험(대규모급락)", "combo": cc,
+                            "alloc": 6, "expOdds": o, "massDrop": True})
+            deduct += 6
+            changes.append(f"중배당 복승 보험 {cc[0]}+{cc[1]}({o}배) 추가")
+    if main and deduct:
+        main["alloc"] = max(8, round(main.get("alloc", 43) - deduct, 1))
+    if main:
+        main["massDropNote"] = "대규모 급락 → 최저배당 조합 신뢰도 하락(중배당·삼복승 분산 권장)"
+    return {"applied": True, "changes": changes}
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -1775,6 +1826,8 @@ def _triple_analyze(rk, rec):
             if abs(pct) >= 8:
                 drops.append({"combo": list(k), "prev": po, "cur": o, "pct": pct})
     drops.sort(key=lambda d: d["pct"])
+    # [대규모 급락] 전체 조합의 50%+ 또는 30개+ 동시 30%급락 → 자금 분산 패턴 감지
+    mass_drop = _mass_drop_detect(drops, curQ)
 
     # 2) 순위 변동 (배당 낮은=인기 순위)
     def _ranks(m):
@@ -1884,6 +1937,9 @@ def _triple_analyze(rk, rec):
         if r["kind"] == "삼복승" and r["expOdds"] is None:
             r["expOddsEst"] = _trio_est(r["combo"])
 
+    # [대규모급락 전략] 삼복승 보험 8→15% 확대·중배당 복승 보험 추가·최저배당 신뢰도 하락(기존 조합 유지)
+    mass_drop_strategy = _apply_mass_drop_strategy(bet_rec, mass_drop, drops, curQ)
+
     # 삼복승만 뽑은 하위 호환 필드
     trio_rec = [{"label": r["label"], "combo": r["combo"],
                  "expOdds": r["expOdds"], "expOddsEst": r.get("expOddsEst")}
@@ -1927,6 +1983,12 @@ def _triple_analyze(rk, rec):
 
     # ── [실시간 변동 신호 + 이유 자동 설명] ──
     signals = []
+    # [대규모 급락] 최상단 별도 알림 — 특정 유력마 없음·이변 가능성↑
+    if mass_drop:
+        signals.append({"level": "🌊", "type": "대규모급락",
+                        "text": f"대규모 자금 분산 — {mass_drop['dropped']}/{mass_drop['total']}조합"
+                                f"({int(mass_drop['ratio']*100)}%) 동시 30%+ 급락",
+                        "detail": mass_drop["note"]})
 
     def _drop_reason(pct):
         if pct <= -50:
@@ -2025,6 +2087,7 @@ def _triple_analyze(rk, rec):
         "learned": learned,  # 학습 통계 안내(있으면)
         "signals": signals, "lastSnapshot": last_snap,  # 실시간 변동 알림용
         "patternMatch": pattern_match,  # [4·5번] 현재 패턴 매칭 + 신뢰도 + 베팅 비중 조정
+        "massDrop": mass_drop, "massDropStrategy": mass_drop_strategy,  # [대규모급락] 감지 + 베팅 전략
     }
 
 
@@ -2529,6 +2592,51 @@ def _upset_bump(stats, key, hit):
         c["hit"] += 1
 
 
+def _learn_mass_drop(rk, an, top3, payouts=None):
+    """[대규모급락 학습] 결과 입력 시 pattern_learning.json 의 patterns 배열에 사례 1건 추가 + 통계 갱신.
+    대규모 급락(전체 조합 50%+ 동시급락)이 감지된 경주만 기록 → 이변/고배당 여부를 축적."""
+    md = an.get("massDrop")
+    if not md or not md.get("detected"):
+        return None
+    top2 = sorted(top3[:2]) if len(top3) >= 2 else []
+    res_combo = "+".join(str(x) for x in top2) if top2 else ""
+    # 결과 복승 조합이 급락 목록에 있었는지 + 그 급락%
+    signal = None
+    for d in an.get("drops", []):
+        if sorted(d.get("combo") or []) == top2 and d.get("pct") is not None:
+            signal = f"{d['pct']}%"
+            break
+    q_odds = ((payouts or {}).get("quinella") or 0) or 0
+    result_odds = "고배당" if q_odds >= 20 else ("중배당" if q_odds >= 7 else ("저배당" if q_odds > 0 else "미상"))
+    rec_bets = an.get("betRecommend") or []
+    recommended_hit = bool(top2 and any(b.get("kind") == "복승" and sorted(b.get("combo") or []) == top2 for b in rec_bets))
+    entry = {
+        "pattern": "대규모급락", "raceKey": rk,
+        "total_combos_dropped": md.get("dropped"), "drop_ratio": md.get("ratio"),
+        "result": res_combo, "result_odds": result_odds,
+        "result_quinella_odds": q_odds or None,
+        "signal_result_combo": signal,          # 결과 조합이 감지됐던 급락% (예: '-58.4%')
+        "recommended_hit": recommended_hit,      # 추천 복승이 적중했는지
+        "lesson": "전체급락 시 이변 가능성 높음", "t": time.time(),
+    }
+    P = _upset_load()
+    patterns = P.setdefault("patterns", [])
+    patterns.append(entry)
+    # 대규모급락 조건 통계(적중률·고배당 비율) 갱신
+    md_recs = [p for p in patterns if p.get("pattern") == "대규모급락"]
+    n = len(md_recs)
+    high = sum(1 for p in md_recs if p.get("result_odds") == "고배당")
+    hits = sum(1 for p in md_recs if p.get("recommended_hit"))
+    P.setdefault("condition_stats", {})["대규모급락"] = {
+        "count": n, "high_odds": high, "recommended_hit": hits,
+        "high_odds_rate": round(high / n * 100, 1) if n else None,
+        "hit_rate": round(hits / n * 100, 1) if n else None,
+    }
+    _upset_save(P)
+    print(f"[대규모급락학습] {rk} 기록 · 결과 {res_combo}({result_odds}) · 누적 {n}건")
+    return entry
+
+
 def _learn_upset(rk, an, top3, date_str=None):
     """부진마(최근5경주 평균착순≥4.0)의 입상 여부 + 동반 조건을 학습.
     반환: 갱신된 pattern_learning dict(없으면 None)."""
@@ -3006,6 +3114,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _learn_upset(rk, an, top3, time.strftime("%Y-%m-%d"))
     except Exception as e:
         print("[부진마학습] 실패:", e)
+    # [대규모급락 학습] 이 경주가 대규모 급락 패턴이면 결과와 함께 pattern_learning 에 사례 기록
+    try:
+        _learn_mass_drop(rk, an, top3, payouts)
+    except Exception as e:
+        print("[대규모급락학습] 실패:", e)
     # [복기] 결과 적중/판정 요약을 히스토리 파일에도 저장 → 통계 탭에서 재계산 없이 표시
     try:
         doc["review"] = {

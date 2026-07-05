@@ -2261,8 +2261,8 @@
   }
 
   // ── [1·2·4번] 실시간 변동 알림 오버레이 + 소리 + 플래시 ──────────────
-  const LEVEL_RANK = { '🔴': 3, '🟠': 2, '🔄': 2, '🟡': 1 };
-  const lvColor = (l) => (l === '🔴' ? '#ef4444' : l === '🟠' ? '#ff9f43' : l === '🔄' ? '#a855f7' : '#ffd24f');
+  const LEVEL_RANK = { '🌊': 4, '🔴': 3, '🟠': 2, '🔄': 2, '🟡': 1 };   // 🌊 대규모급락 = 최상위
+  const lvColor = (l) => (l === '🌊' ? '#38bdf8' : l === '🔴' ? '#ef4444' : l === '🟠' ? '#ff9f43' : l === '🔄' ? '#a855f7' : '#ffd24f');
   let _prevSignalKeys = null;
 
   function ensureAlertOverlay() {
@@ -3137,7 +3137,7 @@
   function onKoreaOddsUpdate(title, race, raceKey, a, firstLink) {
     const now = new Date();
     const hhmmss = now.toTimeString().slice(0, 8);
-    const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '역전');
+    const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '역전' || s.type === '대규모급락');
     const prev = state.koreaOddsPrev[title] || new Set();
     const fresh = signals.filter((s) => !prev.has(s.text));   // 직전에 없던 신규 변동만
 
@@ -3168,7 +3168,7 @@
     saveKoreaHistory(title, race, raceKey, a);
   }
 
-  function sevRank(level) { return { '🔴': 3, '🟠': 2, '🟡': 1, '🔄': 1 }[level] || 0; }
+  function sevRank(level) { return { '🌊': 4, '🔴': 3, '🟠': 2, '🟡': 1, '🔄': 1 }[level] || 0; }
 
   /** [4번] 통합 스냅샷을 data/korea_history 에 저장(디바운스) */
   let _koreaSaveTimer = null;
@@ -3494,7 +3494,7 @@
     const firstLink = !state.jpTimeline || !state.jpTimeline.length;
     const hhmmss = new Date().toTimeString().slice(0, 8);
     // 일본: 복승/쌍승 급락·역전 이상감지 (단승 제거)
-    const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '역전');
+    const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '역전' || s.type === '대규모급락');
     const prev = state.jpOddsPrev || new Set();
     const fresh = signals.filter((s) => !prev.has(s.text));
 
