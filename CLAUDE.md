@@ -19,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **경로**: `C:\Users\USER\Desktop\경마분석서버`
 - **GitHub**: https://github.com/kwonceo/racing-analyzer.git (`origin/master`)
 - **서버**: Flask, port 8011 (`python app.py`, `debug=True` 자동 리로드)
-- **Chrome 확장**: v2.1.6 (`chrome-extension/`, MV3)
+- **Chrome 확장**: v2.1.7 (`chrome-extension/`, MV3)
 
 ## 분석 원칙
 - **통합 점수 = 이상감지(배당) 60% + 전적 40%** (`_integrated_grades`)
