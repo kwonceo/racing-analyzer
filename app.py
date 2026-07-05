@@ -1268,6 +1268,20 @@ def after_close_cases():
                     "note": "마감 후 감지된 신호(베팅 반영 불가) — 수집 간격 단축의 필요성 근거 데이터"})
 
 
+@app.route("/api/learning/signal-lessons", methods=["GET", "POST"])
+def learning_signal_lessons():
+    """초과급락 신호말이 입상했으나 노이즈 판정으로 추천 누락된 사례(집중신호 오판 학습).
+    POST로 사례 수동 추가 가능(race/result/signal_horse/lesson 등)."""
+    if request.method == "POST":
+        body = request.get_json(silent=True) or {}
+        _record_signal_lesson(body)
+    d = _signal_lesson_load()
+    cases = sorted(d.get("cases", []), key=lambda c: -(c.get("t") or 0))
+    return jsonify({"cases": cases, "count": len(cases),
+                    "note": "초과급락 신호 → 실제 입상인데 노이즈 판정으로 추천 미반영된 사례. "
+                            "절대 10%+ 급락은 집중신호로 승격(수정 완료)"})
+
+
 @app.route("/api/current_race", methods=["GET"])
 def current_race():
     """확장이 마지막으로 수집한 '현재 경주' 반환 → {raceKey, updatedAt, counts}.
@@ -1844,7 +1858,11 @@ def _excess_drop_analysis(drops, curQ):
     drops=[{combo:[a,b], pct}] (pct<0=급락=자금유입). 반환:
       {overall: 전체평균급락%, horses:{no:{avg,excess,grade,combos}}, concentrated:[🔴 말], count}.
     excess = 해당말 평균급락% - 전체평균급락% (음수일수록 평균보다 더 급락=자금집중).
-      excess<=-5 → 🔴 진짜신호 / -5<excess<0 → 🟡 약한신호 / excess>=0 → 노이즈(시장 전체 급락)."""
+      excess<=-5 → 🔴 진짜신호 / -5<excess<0 → 🟡 약한신호 / excess>=0 → 노이즈(시장 전체 급락).
+    [긴급수정] 절대 급락 10%+(avg<=-10)는 시장평균과 무관하게 🔴 집중신호로 승격 —
+      대규모 급락 때 시장평균에 묻혀 노이즈로 버려지던 실입상마 방어
+      (카나자와 10R 5-3-6: 3번 -17% 2착이 노이즈 판정으로 추천 누락된 3번째 동일 패턴)."""
+    ABS_STRONG = -10.0   # 절대 급락 임계(집중신호 승격 · 노이즈 기준 완화)
     dd = [d for d in (drops or []) if d.get("pct") is not None and d["pct"] < 0]
     if not dd:
         return {"overall": None, "horses": {}, "concentrated": [], "count": 0}
@@ -1858,15 +1876,21 @@ def _excess_drop_analysis(drops, curQ):
         avg = round(sum(pcts) / len(pcts), 1)
         excess = round(avg - overall, 1)   # 음수 = 평균보다 더 급락(집중)
         grade = "🔴" if excess <= -5 else ("🟡" if excess < 0 else None)
-        horses[h] = {"avg": avg, "excess": excess, "grade": grade, "combos": len(pcts)}
+        abs_strong = avg <= ABS_STRONG
+        if abs_strong:
+            grade = "🔴"   # 절대 10%+ 급락 = 자금집중 확정 → 집중신호 승격(시장평균 무관)
+        # 신호강도(%p, 음수) = 초과급락·절대급락 중 더 강한 쪽 → 점수/정렬 일관 사용
+        strength = min(excess, avg) if abs_strong else excess
+        horses[h] = {"avg": avg, "excess": excess, "grade": grade,
+                     "combos": len(pcts), "absStrong": abs_strong, "strength": strength}
         if grade == "🔴":
             concentrated.append(h)
-    concentrated.sort(key=lambda n: horses[n]["excess"])   # 가장 집중된 말 먼저
+    concentrated.sort(key=lambda n: horses[n]["strength"])   # 가장 집중된 말 먼저
     return {"overall": overall, "horses": horses, "concentrated": concentrated, "count": len(dd)}
 
 
 def _concentration_score(excess_val):
-    """초과급락(음수 %p)을 0~100 집중신호 점수로. -20%p 이상 초과급락=100점."""
+    """신호강도(음수 %p, 초과급락 또는 절대급락 중 강한 쪽)를 0~100 집중신호 점수로. -20%p 이상=100점."""
     if excess_val is None or excess_val >= 0:
         return 0.0
     return round(min(100.0, (-excess_val) / 20.0 * 100.0), 1)
@@ -1914,7 +1938,7 @@ def _integrated_adaptive(form, curQ, curD, excess, situation):
         no = h.get("no")
         fscore = max(0.0, min(100.0, float(h.get("totalScore") or 0)))
         if use_conc:
-            sscore = _concentration_score((ehorses.get(int(no)) or {}).get("excess")) if no is not None else 0.0
+            sscore = _concentration_score((ehorses.get(int(no)) or {}).get("strength")) if no is not None else 0.0
         else:
             sscore = _odds_score(repr_odds.get(int(no)) if no is not None else None)
         integ = round(fw * fscore + sw * sscore, 1)
@@ -2005,6 +2029,39 @@ def _near_miss_frequent(min_count=2):
         return set()
 
 
+# ───────── [집중신호 오판 학습] 초과급락 신호말이 입상했는데 노이즈 판정으로 추천 누락된 사례 ─────────
+SIGNAL_LESSON_FILE = os.path.join(os.path.dirname(__file__), "data", "signal_lessons.json")
+
+
+def _signal_lesson_load():
+    try:
+        return json.load(open(SIGNAL_LESSON_FILE, encoding="utf-8"))
+    except Exception:
+        return {"cases": []}
+
+
+def _signal_lesson_save(d):
+    os.makedirs(os.path.dirname(SIGNAL_LESSON_FILE), exist_ok=True)
+    json.dump(d, open(SIGNAL_LESSON_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _record_signal_lesson(case):
+    """초과급락 신호 → 실제 입상인데 노이즈 판정으로 추천 미반영된 사례 축적(경주별 1건)."""
+    d = _signal_lesson_load()
+    cases = d.setdefault("cases", [])
+    case = dict(case)
+    case.setdefault("t", time.time())
+    rk, dt = case.get("race"), case.get("date")
+    existing = next((c for c in cases if c.get("race") == rk and c.get("date") == dt), None) if rk else None
+    if existing:
+        existing.update(case)
+    else:
+        cases.append(case)
+    d["cases"] = cases[-1000:]
+    _signal_lesson_save(d)
+    return d
+
+
 def _deadline_phase_label(mb, after_close):
     """이상감지 신호의 유효 시점 라벨. 마감 후=회색 표시용."""
     if after_close:
@@ -2057,13 +2114,17 @@ def _combo_signal_quality(combo, excess):
     best = None
     for h in (combo or []):
         e = ehorses.get(int(h))
-        if e and e.get("excess") is not None and e["excess"] < 0:
-            if best is None or e["excess"] < best[1]:
-                best = (int(h), e["excess"], e.get("grade"))
+        s = (e or {}).get("strength")
+        if s is None:
+            s = (e or {}).get("excess")
+        if e and s is not None and s < 0:
+            if best is None or s < best[1]:
+                best = (int(h), e.get("excess"), e.get("grade"), e.get("absStrong"))
     if best is None:
         return {"quality": "하", "reason": "집중 급락 없음(시장 전체 급락·노이즈)"}
-    no, ex, grade = best
-    return {"quality": ("상" if grade == "🔴" else "중"), "reason": f"{no}번 초과급락 {ex}%p"}
+    no, ex, grade, abs_strong = best
+    reason = f"{no}번 초과급락 {ex}%p" + ("·절대 10%+ 집중" if abs_strong else "")
+    return {"quality": ("상" if grade == "🔴" else "중"), "reason": reason}
 
 
 # ───────── [이상감지 vs 추천 비교 학습] 3종 추천 조합 산출 + 가중치 자동 조정 ─────────
@@ -2377,9 +2438,14 @@ def _triple_analyze(rk, rec):
     # [1·2번] 초과 급락(집중) 말 = 시장 평균보다 크게 급락 → 노이즈 제거 후 진짜 신호로 승격
     for _h in (excess.get("concentrated") or [])[:5]:
         _e = excess["horses"][_h]
-        signals.append({"level": "🔴", "type": "집중급락", "horse": _h,
-                        "text": f"{_h}번 초과급락 {_e['excess']}%p (시장평균 {excess['overall']}% 대비 집중)",
-                        "detail": "시장 평균보다 크게 급락 → 특정 말에 자금 집중(진짜 신호)"})
+        if _e.get("absStrong"):
+            signals.append({"level": "🔴", "type": "집중급락", "horse": _h,
+                            "text": f"{_h}번 급락 {_e['avg']}% (절대 10%+ 자금집중·추천 필수)",
+                            "detail": "시장 전체 급락에 묻혀도 절대 10%+ 급락은 특정 말 자금집중 확정 → 노이즈 아님(집중신호 승격)"})
+        else:
+            signals.append({"level": "🔴", "type": "집중급락", "horse": _h,
+                            "text": f"{_h}번 초과급락 {_e['excess']}%p (시장평균 {excess['overall']}% 대비 집중)",
+                            "detail": "시장 평균보다 크게 급락 → 특정 말에 자금 집중(진짜 신호)"})
 
     def _drop_reason(pct):
         if pct <= -50:
