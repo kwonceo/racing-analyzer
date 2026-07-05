@@ -1110,6 +1110,18 @@ def _form_from_starters(rk, drops):
     return scored
 
 
+def _baseline_reset_needed(prev_q, cur_q, thresh=-90.0, min_ratio=0.6, min_combos=4):
+    """[경주전환 방어] 직전 대비 공통 복승 조합의 다수(60%+)가 90%+ 급락하면
+    다른 경주 배당 잔존으로 판단 → 기준값 재설정 필요. (예: 147.4→5.7 등 시장 전반 붕괴)
+    정상 경주는 일부만 급락(자금이 특정 말로 이동)하므로 시장 전반 동시 붕괴만 걸린다."""
+    pm, cm = _odds_map_un(prev_q), _odds_map_un(cur_q)
+    common = [k for k in cm if k in pm and pm[k] > 0 and cm[k] > 0]
+    if len(common) < min_combos:
+        return False
+    big = sum(1 for k in common if (cm[k] - pm[k]) / pm[k] * 100 <= thresh)
+    return (big / len(common)) >= min_ratio
+
+
 @app.route("/api/odds/triple/ingest", methods=["POST"])
 def triple_ingest():
     """확장 [전체 자동 수집]: {raceKey, quinella[], exacta[], trio[]} 저장 → {ok, counts}"""
@@ -1123,7 +1135,10 @@ def triple_ingest():
     prev = db.get(rk) or {}
     now = time.time()
     # 변동 추적용 히스토리(최근 12회) — 직전 대비 급락/순위/역전 계산에 사용
-    hist = (prev.get("history") or [])
+    prev_hist = prev.get("history") or []
+    # [1·3번] 경주 전환 방어: 직전 배당 대비 다수 조합 95%+ 급락 = 다른 경주 잔존 → 기준값 재설정
+    baseline_reset = bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q))
+    hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주) 배당 완전 제거
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
     hist = hist[-12:]
     db[rk] = {"quinella": q, "exacta": x, "trio": tr, "win": win, "history": hist,
@@ -1131,12 +1146,14 @@ def triple_ingest():
     _triple_save(db)
     # 배당 변동 히스토리 파일에 스냅샷 누적 (타임스탬프+발주전분+이상감지)
     try:
-        _history_append(rk, q, x, body.get("deadline"), win)
+        _history_append(rk, q, x, body.get("deadline"), win, baseline_reset=baseline_reset)
     except Exception as e:
         print("[히스토리] 기록 실패:", e)
     counts = {"quinella": len(q), "exacta": len(x), "trio": len(tr), "win": len(win)}
-    print(f"[3종 수집] {rk}: {counts} (history {len(hist)})")
-    return jsonify({"ok": True, "counts": counts})
+    if baseline_reset:
+        print(f"[경주전환 감지] {rk}: 비정상 변동폭(95%+ 다수) → 기준값 재설정(이전 배당 초기화)")
+    print(f"[3종 수집] {rk}: {counts} (history {len(hist)}{' · 기준재설정' if baseline_reset else ''})")
+    return jsonify({"ok": True, "counts": counts, "baselineReset": baseline_reset})
 
 
 @app.route("/api/odds/triple/reset", methods=["POST"])
@@ -2068,6 +2085,12 @@ def _triple_analyze(rk, rec):
     curQ = _odds_map_un(quin)
     prevQ = _odds_map_un(prev.get("quinella")) if prev else {}
 
+    # [경주전환 방어] 직전 대비 다수 조합 95%+ 급락 = 다른 경주 배당 잔존 → 기준값 재설정(변동 계산 안 함)
+    baseline_reset = bool(prev and _baseline_reset_needed(prev.get("quinella"), quin))
+    baseline_set = not prev   # 첫 수집(비교 대상 없음) = 기준값 설정
+    if baseline_reset:
+        prev, prevQ = None, {}   # 오염된 직전값 무효화 → 이 수집을 새 기준값으로
+
     # [단승] 현재/직전 단승 배당 + 급락 (가장 강한 신호)
     curWin = _win_map_int(rec.get("win"))
     prevWin = _win_map_int(prev.get("win")) if prev else {}
@@ -2076,6 +2099,8 @@ def _triple_analyze(rk, rec):
         po = prevWin.get(no)
         if po and po > 0:
             pct = round((o - po) / po * 100, 1)
+            if pct <= -95:   # [3번] 비정상 변동폭 → 제외(이전 경주 잔존 의심)
+                continue
             if abs(pct) >= 8:
                 single_drops.append({"no": no, "prev": po, "cur": o, "pct": pct})
     single_drops.sort(key=lambda d: d["pct"])   # 가장 큰 급락 먼저
@@ -2088,6 +2113,8 @@ def _triple_analyze(rk, rec):
         po = prevQ.get(k)
         if po and po > 0:
             pct = round((o - po) / po * 100, 1)
+            if pct <= -95:   # [3번] 비정상 변동폭(95%+ 급락) = 이전 경주 잔존 의심 → 제외
+                continue
             if abs(pct) >= 8:
                 drops.append({"combo": list(k), "prev": po, "cur": o, "pct": pct})
     drops.sort(key=lambda d: d["pct"])
@@ -2272,6 +2299,11 @@ def _triple_analyze(rk, rec):
 
     # ── [실시간 변동 신호 + 이유 자동 설명] ──
     signals = []
+    # [경주전환 방어] 비정상 변동폭으로 기준값 재설정된 경우 안내(변동 신호는 계산하지 않음)
+    if baseline_reset:
+        signals.append({"level": "🟡", "type": "기준재설정",
+                        "text": "⚠️ 비정상 변동폭 감지 — 기준값 재설정됨",
+                        "detail": "이전 경주 배당 잔존 의심(95%+ 급락 다수) → 이번 수집을 새 기준값으로 설정. 다음 수집부터 변동 계산."})
     # [대규모 급락] 최상단 별도 알림 — 특정 유력마 없음·이변 가능성↑
     if mass_drop:
         signals.append({"level": "🌊", "type": "대규모급락",
@@ -2424,6 +2456,8 @@ def _triple_analyze(rk, rec):
                           "integratedAdaptive": integrated_adaptive},
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
+        # [경주전환 방어] 첫 수집(기준값 설정)/비정상 변동폭(기준값 재설정) 여부
+        "baselineSet": baseline_set, "baselineReset": baseline_reset,
         # [비교학습] 이상감지/전적/최종 추천 3종 + 통합 가중치(전적/이상감지, 학습 조정 반영)
         "compareRecommend": compare_recommend,
         "integratedWeights": {"form": _iw_fw, "anomaly": _iw_ow},
@@ -2616,8 +2650,9 @@ def _combo_dict(arr):
     return d
 
 
-def _history_append(rk, quinella, exacta, deadline=None, win=None):
-    """경주별 히스토리 파일에 스냅샷 1건 추가. 직전 대비 급락(≤-20%) 이상감지 기록."""
+def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_reset=False):
+    """경주별 히스토리 파일에 스냅샷 1건 추가. 직전 대비 급락(≤-20%) 이상감지 기록.
+    baseline_reset=True(경주 전환 감지)면 이 스냅샷을 새 기준값으로만 저장(이상감지 계산 생략)."""
     path, date, race = _hist_path(rk)
     try:
         doc = json.load(open(path, encoding="utf-8"))
@@ -2641,7 +2676,8 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None):
     curQ = _odds_map_un(quinella)
     curWin = _win_map_int(_win_map_clean(win))
     anomalies = []
-    if doc["snapshots"]:
+    # [경주전환 방어] 기준값 재설정이면 직전 스냅샷과 비교하지 않음(다른 경주 잔존 → 오검출 방지)
+    if doc["snapshots"] and not baseline_reset:
         last = doc["snapshots"][-1]
         # [단승] 급락 감지 — 가장 강한 신호이므로 먼저 기록
         prevWin = {}
@@ -2697,6 +2733,7 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None):
         "time": time.strftime("%H:%M:%S", time.localtime(now)),
         "minutes_before": minutes_before,
         "mb_signed": mb_signed, "after_close": after_close,   # [마감후] 부호 포함·마감 후 여부
+        "baseline_reset": bool(baseline_reset),   # [경주전환] 기준값 재설정 시점(변동 계산 제외)
         "quinella": _combo_dict(quinella), "exacta": _combo_dict(exacta),
         "win": {str(k): v for k, v in curWin.items()},
         "anomalies": anomalies, "t": now,
