@@ -64,7 +64,7 @@
         if (btn.dataset.tab === 'stats') renderStats();
         if (btn.dataset.tab === 'result') renderResultForm();
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
-        if (btn.dataset.tab === 'jp') startJapanOddsWatch();   // [5번] 일본경마: 실시간 배당 연동 시작
+        if (btn.dataset.tab === 'jp') { startJapanOddsWatch(); loadJapanReviewList(); }   // [5번] 일본경마: 실시간 배당 연동 + 분석 내역 복기 목록
       });
     });
   }
@@ -4323,6 +4323,159 @@
     });
   }
 
+  // ══════════ [일본경마 복기] 분석 내역 목록 + 결과 입력 + 자동 판정 리포트 ══════════
+  const JP_KR_TRACKS = ['서울', '부산', '부경', '제주', '과천'];
+  function jpIsKoreaName(s) { return JP_KR_TRACKS.some((t) => (s || '').indexOf(t) >= 0); }
+  function jpIsJapanName(s) { s = (s || '').trim(); return !!s && !jpIsKoreaName(s) && !/TEST/i.test(s); }
+  function jpTodayStr() { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; }
+  function jpRecSummary(fr) {
+    fr = fr || {}; const parts = [];
+    if (fr.quinella_main && fr.quinella_main.combo) parts.push('복승 ' + fr.quinella_main.combo);
+    if (fr.trifecta_main && fr.trifecta_main.combo) parts.push('삼복승 ' + fr.trifecta_main.combo);
+    return parts.join(' / ') || '추천 없음';
+  }
+
+  async function loadJapanReviewList() {
+    const el = document.querySelector('#jpReviewList'); if (!el) return;
+    el.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/analysis-log/list')).json(); }
+    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">${esc(e.message)}</p>`; return; }
+    let logs = (d.logs || []).filter((l) => jpIsJapanName(l.race || l.raceKey || ''));
+    const allDates = document.querySelector('#jpReviewAllDates');
+    if (!(allDates && allDates.checked)) {
+      const todays = logs.filter((l) => (l.date || '') === jpTodayStr());
+      if (todays.length) logs = todays;   // 오늘 경주가 있으면 오늘만, 없으면 전체(최근순)
+    }
+    if (!logs.length) { el.innerHTML = '<p class="hint">분석된 일본경마 경주가 없습니다. 일본경마 배당을 수집·분석하면 자동으로 목록에 쌓입니다.</p>'; return; }
+    const byDate = {};
+    logs.forEach((l) => { (byDate[l.date || '?'] = byDate[l.date || '?'] || []).push(l); });
+    el.innerHTML = Object.keys(byDate).sort().reverse().map((date) =>
+      `<div style="margin-bottom:8px"><div class="hint" style="font-weight:700;margin:4px 0">${esc(date)}</div>`
+      + byDate[date].map((l) => `<div class="race-chip ${l.hasResult ? 'chip-done' : 'chip-todo'}" data-file="${esc(l.file)}" data-rk="${esc(l.raceKey || l.race || '')}" style="cursor:pointer;margin:3px 0;display:block">
+        <b>${esc(l.race || l.race_id || '')}</b> <span class="chip-page">${esc(l.analyzed_at || '')} · 신호${l.signals || 0}${l.hasResult ? ' · ✅결과입력됨' : ' · ⬜결과대기'}</span></div>`).join('')
+      + '</div>').join('');
+    el.querySelectorAll('.race-chip').forEach((c) => c.addEventListener('click', () => openJapanReview(c.dataset.file, c.dataset.rk)));
+  }
+
+  async function openJapanReview(file, raceKey) {
+    const el = document.querySelector('#jpReviewDetail'); if (!el) return;
+    el.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/analysis-log/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file }) })).json(); }
+    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">${esc(e.message)}</p>`; return; }
+    if (d.error) { el.innerHTML = `<p class="hint">${esc(d.error)}</p>`; return; }
+    const rk = raceKey || d.raceKey || d.race || '';
+    el.innerHTML = renderJapanReview(d, rk, file);
+    const btn = document.querySelector('#jpResSave');
+    if (btn) btn.addEventListener('click', () => saveJapanResult(rk, file, jpRecSummary(d.final_recommendation)));
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function renderJapanReview(d, rk, file) {
+    const sig = d.signals_detected || [], fr = d.final_recommendation || {}, elim = d.elimination || {};
+    const horses = d.horses || [];
+    const sev = (s) => /🔴|🚨|🌊/.test(s || '') ? 'chip-red' : '';
+    const gradeOf = {}; horses.forEach((h) => { gradeOf[h.no] = h.grade; });
+    const cand = elim.candidates || [], elimNo = elim.eliminated || [];
+    const candHtml = cand.length ? cand.map((n) => `<span class="chip">${n}번${gradeOf[n] ? '(' + esc(String(gradeOf[n])) + ')' : ''}</span>`).join(' ') : '<span class="hint">없음</span>';
+    const elimHtml = elimNo.length ? elimNo.map((n) => `<span class="chip chip-red">${n}번</span>`).join(' ') : '<span class="hint">없음</span>';
+    const keyBlock = `<div class="matrix-title" style="font-size:13px">🏇 유력마 / 제거마</div>
+      <div style="margin:2px 0"><b>유력마:</b> ${candHtml}</div>
+      <div style="margin:2px 0"><b>제거마:</b> ${elimHtml}</div>`;
+    const sigHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🚨 이상감지 내역</div>`
+      + (sig.length ? sig.slice(0, 12).map((s) => `<div style="margin:2px 0"><span class="chip ${sev(s.severity)}">${esc(s.severity || '')} ${esc(s.type || '')}</span> ${esc(s.detail || '')}${s.reason ? ` <span class="hint">— ${esc(s.reason)}</span>` : ''}</div>`).join('') : '<div class="hint">감지된 이상신호 없음</div>');
+    const recRow = (k, label) => { const r = fr[k]; return r ? `<tr><td>${label}</td><td style="font-weight:700">${esc(r.combo)}</td><td>${r.odds != null ? r.odds + '배' : '-'}</td></tr>` : ''; };
+    const frHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🎯 추천 조합</div>
+      <table class="data-table"><thead><tr><th>종류</th><th>조합</th><th>배당</th></tr></thead><tbody>${recRow('quinella_main', '복승 메인')}${recRow('quinella_sub', '복승 보조')}${recRow('trifecta_main', '삼복승 메인')}${recRow('trifecta_insurance1', '삼복승 보험1')}${recRow('trifecta_insurance2', '삼복승 보험2')}</tbody></table>`;
+    const res = d.result || {}, hit = d.hit || {};
+    const vv = (x) => (x != null && x !== '') ? x : '';
+    const formHtml = `<div class="matrix-title" style="font-size:13px;margin-top:10px">✍️ 실제 결과 입력</div>
+      <div class="cfg-row" style="gap:6px;align-items:center;flex-wrap:wrap">
+        <label class="hint">1착 <input id="jpRes1" class="cfg-input" type="number" min="1" style="width:60px" value="${vv(res['1st'])}"></label>
+        <label class="hint">2착 <input id="jpRes2" class="cfg-input" type="number" min="1" style="width:60px" value="${vv(res['2nd'])}"></label>
+        <label class="hint">3착 <input id="jpRes3" class="cfg-input" type="number" min="1" style="width:60px" value="${vv(res['3rd'])}"></label>
+      </div>
+      <div class="cfg-row" style="gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px">
+        <label class="hint">투자금액 <input id="jpStake" class="cfg-input" type="number" min="0" step="1000" style="width:100px" value="${vv(hit.stake || 1000)}">원</label>
+        <label class="hint">실수령 배당금(선택) <input id="jpPayout" class="cfg-input" type="number" min="0" style="width:120px" placeholder="적중 시 총 수령액">원</label>
+      </div>
+      <div class="cfg-row" style="margin-top:6px">
+        <button id="jpResSave" class="btn btn-primary">💾 결과 저장 · 자동 복기</button>
+        <span id="jpResMsg" class="hint" style="margin-left:6px"></span>
+      </div>
+      <p class="hint" style="margin:4px 0 0">실수령 배당금을 입력하면 정확한 손익으로 계산됩니다. 공란이면 확정배당 추정치로 계산합니다.</p>`;
+    let reportHtml = '';
+    if (d.result && d.hit) reportHtml = renderJapanReviewReport({
+      recommend: jpRecSummary(fr), result: d.result,
+      quinella_hit: hit.quinella_hit, trifecta_hit: hit.trifecta_hit,
+      signal_correct: hit.signal_correct || [], anomaly_was_correct: hit.anomaly_was_correct,
+      form_pick: hit.form_pick, form_pick_hit: hit.form_pick_hit,
+      elimination_correct: hit.elimination_correct, pnl: hit.pnl, stake: hit.stake,
+    }, rk);
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px">
+      <div class="matrix-title">${esc(d.race || rk)} <span class="hint" style="font-weight:400">${esc(d.date || '')} · 분석 ${esc(d.analyzed_at || '')}</span></div>
+      ${keyBlock}${sigHtml}${frHtml}${formHtml}<div id="jpReport">${reportHtml}</div></div>`;
+  }
+
+  function renderJapanReviewReport(rep, rk) {
+    const yn = (b) => b ? '<span style="color:#38d39f;font-weight:700">✅ 적중</span>' : '<span style="color:#f87171;font-weight:700">❌ 미적중</span>';
+    const r = rep.result || {};
+    const anomalyLines = (rep.signal_correct && rep.signal_correct.length)
+      ? rep.signal_correct.map((s) => `<div style="margin:1px 0">🔴 ${esc(s)}</div>`).join('')
+      : `<div class="hint">이상감지 적중 없음${rep.anomaly_was_correct ? '' : ' (급락말이 입상권에 없었음)'}</div>`;
+    const pnl = rep.pnl;
+    const pnlHtml = (pnl != null && pnl !== '')
+      ? `<div style="font-weight:800;font-size:15px;margin-top:6px">수익: <span style="color:${pnl >= 0 ? '#38d39f' : '#f87171'}">${pnl >= 0 ? '+' : ''}${Number(pnl).toLocaleString()}원</span>${rep.stake ? ` <span class="hint" style="font-weight:400">(투자 ${Number(rep.stake).toLocaleString()}원)</span>` : ''}</div>`
+      : '';
+    const formLine = (rep.form_pick != null)
+      ? `<div style="margin-top:4px">전적 유력마 ${rep.form_pick}번 → ${yn(rep.form_pick_hit)}${rep.elimination_correct != null ? ' · 제거 판정 ' + yn(rep.elimination_correct) : ''}</div>`
+      : (rep.elimination_correct != null ? `<div style="margin-top:4px">제거 판정 ${yn(rep.elimination_correct)}</div>` : '');
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:10px;background:rgba(56,189,248,.06)">
+      <div class="matrix-title">🧾 ${esc(rk)} 복기</div>
+      <div>추천: <b>${esc(rep.recommend || '-')}</b></div>
+      <div>결과: <b>1착 ${r['1st'] != null ? r['1st'] : '?'}번 / 2착 ${r['2nd'] != null ? r['2nd'] : '?'}번 / 3착 ${r['3rd'] != null ? r['3rd'] : '?'}번</b></div>
+      <div style="margin-top:4px">판정: 복승 ${yn(rep.quinella_hit)} · 삼복승 ${yn(rep.trifecta_hit)}</div>
+      <div class="matrix-title" style="font-size:12px;margin-top:8px">이상감지 분석</div>${anomalyLines}
+      ${formLine}${pnlHtml}</div>`;
+  }
+
+  async function saveJapanResult(rk, file, recSummary) {
+    const msg = document.querySelector('#jpResMsg');
+    const g = (id) => { const e = document.querySelector(id); return e ? e.value.trim() : ''; };
+    const n1 = g('#jpRes1'), n2 = g('#jpRes2'), n3 = g('#jpRes3');
+    if (!n1) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '최소 1착은 입력하세요'; } return; }
+    const result = {}; result['1st'] = parseInt(n1, 10);
+    if (n2) result['2nd'] = parseInt(n2, 10);
+    if (n3) result['3rd'] = parseInt(n3, 10);
+    const stake = g('#jpStake'), payout = g('#jpPayout');
+    const payload = { raceKey: rk, result };
+    if (stake) payload.stake = parseInt(stake, 10);
+    if (payout) payload.payout = parseInt(payout, 10);
+    if (msg) { msg.style.color = ''; msg.textContent = '저장·판정 중…'; }
+    let d; try { d = await (await fetch('/api/history/record-result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
+    catch (e) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '실패: ' + e.message; } return; }
+    if (d.error) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = d.error; } return; }
+    if (msg) { msg.style.color = '#38d39f'; msg.textContent = '✅ 저장·학습 완료'; }
+    const rec = d.record || {};
+    const rep = {
+      recommend: recSummary, result: rec.result || result,
+      quinella_hit: rec.quinella_hit, trifecta_hit: rec.trifecta_hit,
+      signal_correct: rec.signal_correct || [], anomaly_was_correct: rec.anomaly_was_correct,
+      form_pick: rec.form_pick, form_pick_hit: rec.form_pick_hit,
+      elimination_correct: rec.elimination_correct, pnl: rec.pnl, stake: rec.stake,
+    };
+    const rc = document.querySelector('#jpReport'); if (rc) rc.innerHTML = renderJapanReviewReport(rep, rk);
+    // [4번] 통계 자동 업데이트(적중률·이상감지 패턴·손익)
+    try { loadLearningStats(); } catch (_) { /* */ }
+    try { if (typeof loadHistoryList === 'function') loadHistoryList(); } catch (_) { /* */ }
+    try { renderStats(); } catch (_) { /* */ }
+    try { loadJapanReviewList(); } catch (_) { /* */ }
+  }
+
+  function initJapanReview() {
+    const rb = document.querySelector('#jpReviewRefresh'); if (rb) rb.addEventListener('click', loadJapanReviewList);
+    const ad = document.querySelector('#jpReviewAllDates'); if (ad) ad.addEventListener('change', loadJapanReviewList);
+  }
+
   // ---------- 부트 ----------
   async function boot() {
     initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initKoreaHistory();
@@ -4331,6 +4484,7 @@
     initRaceRefresh();     // [경주 자동 업데이트] 상단 새로고침 바 + 30초 자동 감지
     initPopout();          // [별도 창] 분석기 팝업 창 열기 + 위치 기억
     initAnalysisLog();     // [분석 로그] 완전 기록 섹션
+    initJapanReview();     // [일본경마 복기] 분석 내역 목록 + 결과 입력 + 자동 판정 리포트
     // [개편] initCombined() 제거 — 통합분석 탭 폐지(한국/일본 탭에 자동 표시).
     checkServerHealth();
     try { await JockeyDB.load(); rebuildJockeyStats(); } catch (e) { console.warn('기수 DB 로드 실패:', e); }

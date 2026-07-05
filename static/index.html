@@ -156,6 +156,19 @@
         <span class="hint">입력 시 통합분석 베팅 추천에 조합별 금액이 표시됩니다</span>
       </div>
       <div id="jpIntegrated" class="report-area"></div>
+
+      <!-- [일본경마 복기] 분석했던 경주 목록 → 클릭 → 유력마/제거마·이상감지·추천조합·결과입력·복기 -->
+      <div class="panel-card" id="jpReviewCard" style="margin-top:12px">
+        <h2>📒 일본경마 분석 내역 · 결과 복기</h2>
+        <p class="hint">오늘 분석한 일본경마 경주 목록입니다. 경주를 누르면 당시 <b>유력마/제거마·이상감지·추천 조합</b>을 보고 <b>실제 결과·투자금액</b>을 입력할 수 있습니다. 저장하면 적중 판정·손익·이상감지 정확도가 자동 계산되고 학습/통계에 반영됩니다.</p>
+        <div class="cfg-row" style="margin:4px 0 8px">
+          <button id="jpReviewRefresh" class="btn btn-primary btn-small">🔄 목록 새로고침</button>
+          <label class="hint" style="margin-left:8px"><input type="checkbox" id="jpReviewAllDates" /> 지난 날짜도 보기</label>
+          <span id="jpReviewMsg" class="hint" style="margin-left:8px"></span>
+        </div>
+        <div id="jpReviewList"><p class="hint">불러오는 중…</p></div>
+        <div id="jpReviewDetail" style="margin-top:10px"></div>
+      </div>
     </section>
 
     <!-- 결과입력 -->

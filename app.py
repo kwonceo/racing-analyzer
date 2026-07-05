@@ -2505,6 +2505,7 @@ def _build_analysis_log(rk, an=None):
 
     log = {
         "race_id": os.path.splitext(os.path.basename(path))[0],
+        "raceKey": rk,   # [일본경마 복기] 결과 입력 시 record-result 로 그대로 전달(정확 매칭)
         "date": date, "race": race,
         "analyzed_at": (doc.get("analyzed_at") if doc else None) or time.strftime("%H:%M:%S", time.localtime()),
         "updated_at": time.strftime("%H:%M:%S", time.localtime()),
@@ -3126,6 +3127,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             "payouts": payouts, "anomaly_was_correct": anomaly_correct,
             "signal_correct": signal_correct, "elimination_correct": elimination_correct,
             "eliminated": eliminated_nos, "form_pick": form_pick, "form_pick_hit": form_pick_hit,
+            "pnl": pnl, "stake": stake,   # [일본경마 복기] 재조회 시 손익 그대로 표시
         }
         json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     except Exception as e:
@@ -3476,7 +3478,8 @@ def analysis_log_list():
             except Exception:
                 continue
             out.append({"file": fn, "race_id": d.get("race_id"), "date": d.get("date"),
-                        "race": d.get("race"), "analyzed_at": d.get("analyzed_at"),
+                        "race": d.get("race"), "raceKey": d.get("raceKey") or d.get("race"),
+                        "analyzed_at": d.get("analyzed_at"),
                         "snaps": len(d.get("odds_timeline") or []),
                         "signals": len(d.get("signals_detected") or []),
                         "hasResult": bool(d.get("result"))})
