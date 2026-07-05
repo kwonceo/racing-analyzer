@@ -1176,6 +1176,56 @@ def triple_latest():
                     "exacta": rec.get("exacta", []), "trio": rec.get("trio", [])})
 
 
+def _anomaly_pretty(raw):
+    """스냅샷 이상감지 원문 → {text, severity} 로 정규화(사람이 읽는 누적 피드용)."""
+    m = re.search(r"(-?\d+)\s*%", raw or "")
+    pct = int(m.group(1)) if m else None
+    sev = "🔴" if ("역전" in raw or (pct is not None and pct <= -30)) else "🟡"
+    if raw.startswith("급락감지:"):
+        combo = raw.split(":", 1)[1].strip().split()[0]
+        text = f"{combo} 복승 급락 {pct}%" if pct is not None else f"{combo} 복승 급락"
+    elif raw.startswith("단승급락:"):
+        mm = re.search(r"(\d+)번", raw)
+        no = mm.group(1) if mm else "?"
+        text = f"{no}번 단승 급락 {pct}%" if pct is not None else f"{no}번 단승 급락"
+    elif raw.startswith("쌍승역전:"):
+        pair = raw.split(":", 1)[1].strip()
+        text = f"쌍승 역전 {pair}"
+    else:
+        text = raw
+    return {"text": text, "severity": sev, "pct": pct}
+
+
+@app.route("/api/odds/anomaly-feed", methods=["GET", "POST"])
+def anomaly_feed():
+    """[이상감지 누적] 경주별 스냅샷에서 감지된 이상을 시간순·중복제거로 누적 반환.
+    스냅샷은 삭제되지 않으므로 마감 후에도, 새 수집 후에도 과거 감지가 유지된다.
+    body/query: {raceKey}. → {raceKey, events:[{time,minutes_before,text,severity,pct,t}]}"""
+    if request.method == "POST":
+        rk = ((request.json or {}).get("raceKey") or "").strip()
+    else:
+        rk = (request.args.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"raceKey": rk, "events": []})
+    path, _, _ = _hist_path(rk)
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return jsonify({"raceKey": rk, "events": []})
+    events, seen = [], set()
+    for s in doc.get("snapshots", []):
+        for raw in (s.get("anomalies") or []):
+            p = _anomaly_pretty(raw)
+            if p["text"] in seen:      # 최초 감지 시각만 유지(중복 누적 방지)
+                continue
+            seen.add(p["text"])
+            events.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
+                           "text": p["text"], "severity": p["severity"], "pct": p["pct"],
+                           "t": s.get("t")})
+    events.sort(key=lambda e: e.get("t") or 0)   # 시간순
+    return jsonify({"raceKey": rk, "events": events})
+
+
 @app.route("/api/current_race", methods=["GET"])
 def current_race():
     """확장이 마지막으로 수집한 '현재 경주' 반환 → {raceKey, updatedAt, counts}.
@@ -2211,6 +2261,31 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None):
                 pct = round((o - po) / po * 100)
                 if pct <= -20:
                     anomalies.append(f"급락감지: {'+'.join(map(str, k))} {pct}%")
+        # [이상감지 누적] 쌍승(exacta) 역전 → 영구 기록(마감 후에도 유지).
+        #   최저(가장 유력한) 쌍승 조합의 순서가 (a,b)→(b,a)로 뒤집히면 1·2착 예측 역전.
+        def _low_exa(exa_dict):
+            best = None
+            for kk, vv in (exa_dict or {}).items():
+                try:
+                    ov = float(vv)
+                except (TypeError, ValueError):
+                    continue
+                if ov <= 0:
+                    continue
+                parts = str(kk).split("+")
+                if len(parts) != 2:
+                    continue
+                try:
+                    pair = (int(parts[0]), int(parts[1]))
+                except ValueError:
+                    continue
+                if best is None or ov < best[1]:
+                    best = (pair, ov)
+            return best[0] if best else None
+        prev_low = _low_exa(last.get("exacta"))
+        cur_low = _low_exa(_combo_dict(exacta))
+        if prev_low and cur_low and cur_low == prev_low[::-1] and cur_low != prev_low:
+            anomalies.append(f"쌍승역전: {cur_low[0]}↔{cur_low[1]}")
     doc["snapshots"].append({
         "time": time.strftime("%H:%M:%S", time.localtime(now)),
         "minutes_before": minutes_before,

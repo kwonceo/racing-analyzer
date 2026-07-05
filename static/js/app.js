@@ -4031,6 +4031,140 @@
     setInterval(tick, 2000);
   }
 
+  // ══════════ [보완] 이상감지 누적 피드 + 마감 전 단계 알림 (T-1:30 / T-1:00 / T-30초) ══════════
+  //  · 이상감지: 서버 스냅샷(영구)에서 누적·중복제거 → 새 수집/마감 후에도 유지(기존 감지 삭제 안 함)
+  //  · 단계 알림: /api/auto/status 의 deadline 으로 남은시간 계산 → 소리 + 화면 강조 + 누적이상 + 베팅요약
+  function beepTimes(n, freq) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AC();
+      for (let i = 0; i < n; i++) {
+        const t = i * 0.5;
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = 'sine'; o.frequency.value = freq || 880;
+        g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.42);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.45);
+      }
+    } catch (_) { /* 오디오 미지원 무시 */ }
+  }
+
+  const _closing = { firedRk: null, fired: new Set(), tick: 0, lastEvents: [] };
+
+  /** [1번] 누적 이상감지 피드 갱신 — 서버 스냅샷에서 시간순·중복제거로 누적(마감 후에도 유지) */
+  async function refreshAnomalyFeed(rk) {
+    const panel = document.getElementById('anomalyFeedPanel'); if (!panel) return;
+    if (!rk) { panel.style.display = 'none'; return; }
+    let d;
+    try { d = await (await fetch('/api/odds/anomaly-feed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }) })).json(); }
+    catch (_) { return; }
+    const ev = (d && d.events) || [];
+    _closing.lastEvents = ev;
+    if (!ev.length) { panel.style.display = 'none'; return; }
+    const rows = ev.map((e) => {
+      const mb = e.minutes_before != null ? ` <span style="color:#64748b">${e.minutes_before}분전</span>` : '';
+      const col = e.severity === '🔴' ? '#f87171' : '#fbbf24';
+      return `<div style="padding:2px 0"><span style="color:#94a3b8">${esc(e.time || '')}</span>${mb} <span style="color:${col};font-weight:700">${e.severity} ${esc(e.text)}</span></div>`;
+    }).join('');
+    panel.style.display = 'block';
+    panel.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <b style="color:#fca5a5">🚨 이상감지 누적 (${ev.length})</b>
+        <span id="anomalyFeedClose" style="cursor:pointer;color:#64748b;padding:0 4px">✕</span></div>${rows}`;
+    const cl = document.getElementById('anomalyFeedClose');
+    if (cl) cl.addEventListener('click', () => { panel.style.display = 'none'; });
+  }
+
+  /** [3번] 알림에 넣을 누적 이상감지 요약(최근 max건) */
+  function _anomalySummaryHtml(max) {
+    const ev = _closing.lastEvents || [];
+    if (!ev.length) return '<div style="opacity:.85">감지된 이상 없음</div>';
+    return ev.slice(-(max || 6)).map((e) =>
+      `<div>${e.severity} ${esc(e.text)}${e.time ? ` <span style="opacity:.7">(${esc(e.time)})</span>` : ''}</div>`).join('');
+  }
+
+  /** 알림에 넣을 메인 베팅(복승/삼복승) — /api/odds/triple/analyze 의 betRecommend 사용 */
+  async function _mainBetsHtml(rk) {
+    let a;
+    try { a = await (await fetch('/api/odds/triple/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }) })).json(); }
+    catch (_) { return ''; }
+    const recs = (a && a.betRecommend) || [];
+    const q = recs.filter((r) => r.kind === '복승').sort((x, y) => (y.alloc || 0) - (x.alloc || 0))[0];
+    const t = recs.filter((r) => r.kind === '삼복승').sort((x, y) => (y.alloc || 0) - (x.alloc || 0))[0];
+    const line = (r, tag) => r ? `<div style="font-size:16px;margin:2px 0"><b>${tag}</b> ${(r.combo || []).join('+')}${r.expOdds != null ? ` <span style="opacity:.8">${r.expOdds}배</span>` : ''}</div>` : '';
+    return line(q, '복승') + line(t, '삼복승') || '<div style="opacity:.85">추천 조합 없음</div>';
+  }
+
+  const CLOSING_STAGES = [
+    { id: 't90', at: 90, beeps: 2, freq: 880, bg: '#b45309', title: '⚠️ 마감 1분 30초 전 — 현재 이상감지',
+      showAnom: true, betLabel: '추천:', foot: '', plain: '⚠️ 마감 1분 30초 전', autoHide: 25000 },
+    { id: 't60', at: 60, beeps: 3, freq: 950, bg: '#b91c1c', title: '🚨 마감 1분 전 — 최종 베팅',
+      showAnom: true, betLabel: '최종 베팅(메인):', foot: '지금 베팅하세요!', plain: '🚨 마감 1분 전 · 최종 베팅', autoHide: 30000 },
+    { id: 't30', at: 30, beeps: 4, freq: 1046, bg: '#7f1d1d', border: '2px solid #fca5a5', title: '⏰ 30초! 마지막 기회!',
+      showAnom: false, betLabel: '', foot: '지금 베팅하세요!', plain: '⏰ 30초! 마지막 기회!', autoHide: 20000 },
+  ];
+
+  async function fireClosingAlert(st, rk) {
+    beepTimes(st.beeps, st.freq);
+    const overlay = document.getElementById('closingAlert'); if (!overlay) return;
+    const anom = _anomalySummaryHtml(6);
+    const bets = rk ? await _mainBetsHtml(rk) : '';
+    overlay.style.background = st.bg;
+    overlay.style.border = st.border || 'none';
+    overlay.dataset.stage = st.id;
+    overlay.innerHTML = `<div style="font-size:18px;margin-bottom:6px">${st.title}</div>
+      ${st.showAnom ? `<div style="margin:4px 0"><div style="opacity:.85;font-size:13px">오늘 감지된 이상:</div>${anom}</div>` : ''}
+      ${bets ? `<div style="margin:6px 0 2px;border-top:1px solid rgba(255,255,255,.25);padding-top:6px">${st.betLabel || '추천 베팅'}<br>${bets}</div>` : ''}
+      ${st.foot ? `<div style="margin-top:8px;font-size:17px;font-weight:800">${st.foot}</div>` : ''}
+      <div style="opacity:.6;font-size:11px;margin-top:6px">클릭하면 닫힘</div>`;
+    overlay.style.display = 'block';
+    if (st.autoHide) setTimeout(() => { if (overlay.dataset.stage === st.id) overlay.style.display = 'none'; }, st.autoHide);
+    try { notify(st.plain, false); } catch (_) { /* */ }
+  }
+
+  async function closingTick() {
+    _closing.tick++;
+    let rk = getActiveRaceKey();
+    if (!rk) { try { const d = await (await fetch('/api/odds/triple/latest')).json(); rk = d && d.raceKey; } catch (_) { /* */ } }
+    if (rk && _closing.tick % 3 === 0) refreshAnomalyFeed(rk);   // 피드 3초마다 갱신
+    let s = null;
+    try { s = await (await fetch('/api/auto/status')).json(); } catch (_) { return; }
+    const dl = s && s.deadline; if (!dl) return;
+    const dlMs = dl > 1e12 ? dl : dl * 1000;
+    const left = dlMs - Date.now();
+    const key = rk || String(dlMs);
+    if (_closing.firedRk !== key) {   // 경주 바뀌면 리셋 + 이미 지난 단계는 조용히 소진(늦게 열어도 스팸 방지)
+      _closing.firedRk = key; _closing.fired = new Set();
+      CLOSING_STAGES.forEach((st) => { if (left <= st.at * 1000) _closing.fired.add(st.id); });
+    }
+    for (const st of CLOSING_STAGES) {
+      if (left <= st.at * 1000 && left > 0 && !_closing.fired.has(st.id)) {
+        _closing.fired.add(st.id);
+        fireClosingAlert(st, rk);
+      }
+    }
+  }
+
+  function initClosingWatch() {
+    if (document.getElementById('anomalyFeedPanel')) return;
+    const feed = document.createElement('div');
+    feed.id = 'anomalyFeedPanel';
+    feed.style.cssText = 'position:fixed;left:0;bottom:30px;z-index:99997;width:320px;max-width:86vw;max-height:44vh;overflow:auto;'
+      + 'background:#0f172a;border:1px solid #334155;border-radius:0 8px 0 0;padding:8px 10px;display:none;'
+      + 'font:600 12px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#e2e8f0;box-shadow:0 -2px 12px rgba(0,0,0,.4)';
+    document.body.appendChild(feed);
+    const overlay = document.createElement('div');
+    overlay.id = 'closingAlert';
+    overlay.style.cssText = 'position:fixed;top:44px;left:50%;transform:translateX(-50%);z-index:2147483646;'
+      + 'width:min(92vw,560px);display:none;padding:14px 18px;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.55);'
+      + 'font:700 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;cursor:pointer';
+    overlay.addEventListener('click', () => { overlay.style.display = 'none'; });
+    document.body.appendChild(overlay);
+    setInterval(closingTick, 1000);
+    closingTick();
+  }
+
   // ══════════ [분석 로그] 완전 기록 UI (통계 탭) ══════════
   async function loadAnalysisLogList() {
     const el = document.querySelector('#logRaceList'); if (!el) return;
@@ -4127,6 +4261,7 @@
   async function boot() {
     initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initKoreaHistory();
     initAutoStatusBar();   // [v2.0.0] 자동수집 상태바
+    initClosingWatch();    // [보완] 이상감지 누적 피드 + 마감 전 단계 알림
     initRaceRefresh();     // [경주 자동 업데이트] 상단 새로고침 바 + 30초 자동 감지
     initPopout();          // [별도 창] 분석기 팝업 창 열기 + 위치 기억
     initAnalysisLog();     // [분석 로그] 완전 기록 섹션
