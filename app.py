@@ -2477,15 +2477,24 @@ def _triple_analyze(rk, rec):
     except Exception as _e:
         print("[4착학습] 보험픽 실패:", _e)
 
-    # [삼복승 제거] 복승+쌍승만 사용 — 삼복승 배당 미수집(수집 제거) 시 삼복승 추천 전체 제외.
-    #   기존 삼복승 로직은 보존(삭제 안 함) — 삼복승 배당이 있으면 그대로 동작. 복승 메인/보조 중심 재배분.
+    # [삼복승 절충] 삼복승 배당은 수집하지 않지만(안정성), 추천은 추정배당(_trio_est)으로 유지.
+    #   복승 중심으로 삼복승은 '보험(추정)' 소액(총 ≤18%)만 배분하고 남는 몫은 복승 메인으로.
+    #   삼복승 배당이 실제로 수집되면(trio_map 있음) 기존 로직 그대로(추정 아님).
     if not trio_map:
-        bet_rec[:] = [b for b in bet_rec if b.get("kind") != "삼복승"]
-        _tot = sum(b.get("alloc", 0) for b in bet_rec)
-        if _tot > 0:
-            for b in bet_rec:
-                b["alloc"] = round(b.get("alloc", 0) * 100.0 / _tot, 1)
-        trio_rec = []
+        _trio_bets = [b for b in bet_rec if b.get("kind") == "삼복승"]
+        for b in _trio_bets:
+            b["estimated"] = True   # 추정배당 기반 보험(프론트 '추정' 표기)
+        _cur_trio = sum(b.get("alloc", 0) for b in _trio_bets)
+        _cap = 18.0
+        if _cur_trio > _cap:
+            _scale, _freed = _cap / _cur_trio, 0.0
+            for b in _trio_bets:
+                _new = round(b.get("alloc", 0) * _scale, 1)
+                _freed += b.get("alloc", 0) - _new
+                b["alloc"] = _new
+            _main = next((b for b in bet_rec if b.get("label") == "복승 메인"), None)
+            if _main:
+                _main["alloc"] = round(_main.get("alloc", 43) + _freed, 1)
 
     # [비교학습] 이상감지/전적/최종 추천 조합 3종 + 현재 통합 가중치(학습 조정 반영)
     compare_recommend = _compare_recommend(form, key_horses, excess, drops, bet_rec)

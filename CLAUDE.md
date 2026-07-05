@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 분석 원칙
 - **통합 점수 = 이상감지(배당) 60% + 전적 40%** (`_integrated_grades` 기본값). **50경주+ 누적 시 비교학습으로 자동 조정**(`_learned_integrated_weights`: 이상감지·전적 적중률 우세 쪽으로 ±15%p, 이상감지 0.45~0.75).
-- **한국경마**: 복승만 수집 / **일본경마**: 복승+쌍승+전적 (삼복승 제거 v2.1.9 — 삼복승 로직은 코드 보존)
+- **한국경마**: 복승만 수집 / **일본경마**: 복승+쌍승+전적 (삼복승 **수집만** 제거 v2.1.9 — 추천은 추정배당 보험으로 유지, 삼복승 로직 코드 보존)
 - **이상감지**: T-2분 강제 실행 (중앙 JRA)
 - **배당 급락**: 30%↑ 경고(🟠) / 50%↑ 강력(🔴)
 - **A/B/C/D 등급**: 상위 비율 45:28:17:10
@@ -109,7 +109,7 @@ cd chrome-extension && python -c "import zipfile,os; zf=zipfile.ZipFile('../chro
 - 한글 본문 POST는 shell curl 대신 python urllib로 테스트(인코딩).
 
 ## 시장별 수집 규칙
-- **한국**: 복승만. 전적=PDF Vision. **일본**: 복승·쌍승(삼복승 제거 v2.1.9 · 단승 제거). 삼복승 배당 미수집 시 `_triple_analyze`가 삼복승 추천 전체 제외·복승 재배분(코드는 보존).
+- **한국**: 복승만. 전적=PDF Vision. **일본**: 복승·쌍승 수집(삼복승 수집 제거 v2.1.9 · 단승 제거). 삼복승 배당 미수집 시 `_triple_analyze`가 삼복승을 `_trio_est` 추정배당 '보험(추정)' 소액(≤18%)으로 유지(`estimated`)·복승 메인에 잔여 배분. 실배당 수집 시 기존 로직.
   - **한국 판정 강화(확장 v2.1.6)**: `isKoreaMode(raceKey, market)` = 종목=한국(팝업) OR raceKey에 KRA 경마장명(`isKoreaByRaceKey`) OR **페이지 본문/URL에 KRA 경마장명+경마맥락**(`pageLooksKorean`, raceKey 추출 실패 대비). true면 복승만·쌍승/삼복승 탭 클릭 완전 스킵(`collectTripleKeiba`·`collectTripleByTabs` 양 경로). 로그 `[한국모드] 복승만 수집 - 쌍승/삼복승 생략`. ⚠ 확장 코드 변경이므로 **브라우저에서 확장 새로고침 필수**(안 하면 구코드가 계속 실행).
   - **지방(NAR, keiba.go.jp)**: 전적표(출마표2/DebaTable) 있음. 마감 T-1분·T-30초.
   - **중앙(JRA)**: 전적표 없음→배당만. 마감 T-1분30초 수집중지, 이상감지 T-2분 강제. 팝업 `japanType` 토글.

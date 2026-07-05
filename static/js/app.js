@@ -2436,8 +2436,9 @@
       const qTxt = r.signalQuality
         ? `<b style="color:${qc[r.signalQuality] || '#8a94a6'}">${esc(r.signalQuality)}</b>${r.signalReason ? `<br><span class="hint" style="font-size:10px">${esc(r.signalReason)}</span>` : ''}`
         : '<span class="hint">-</span>';
+      const estBadge = r.estimated ? ' <span class="hint" style="font-size:10px;color:#a855f7">추정보험</span>' : '';
       return `<tr>
-        <td><b style="color:${kindColor}">${esc(r.label)}</b></td>
+        <td><b style="color:${kindColor}">${esc(r.label)}</b>${estBadge}</td>
         <td style="font-weight:700">${r.combo.join('+')}</td>
         <td>${qTxt}</td>
         <td>${odTxt}</td>
