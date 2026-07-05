@@ -1110,16 +1110,32 @@ def _form_from_starters(rk, drops):
     return scored
 
 
+OPENING_ODDS = 100.0    # [배당판 미수집 방어] 복승/단승 이 값 이상 = opening/placeholder(실자금 거의 없음)
+OPENING_DROP = -80.0    # opening 배당이 실배당으로 정착할 때의 기계적 급락(신호 아님)
+
+
+def _is_opening_settle(po, pct):
+    """opening/placeholder 배당(직전 100배+)이 실배당으로 정착하며 생기는 기계적 급락(≤-80%).
+    배당판을 초반에 못 끌어와 캡처된 가짜 고배당 → 실배당 = 자금유입 신호가 아님(제외 대상)."""
+    return po is not None and po >= OPENING_ODDS and pct is not None and pct <= OPENING_DROP
+
+
 def _baseline_reset_needed(prev_q, cur_q, thresh=-90.0, min_ratio=0.6, min_combos=4):
-    """[경주전환 방어] 직전 대비 공통 복승 조합의 다수(60%+)가 90%+ 급락하면
-    다른 경주 배당 잔존으로 판단 → 기준값 재설정 필요. (예: 147.4→5.7 등 시장 전반 붕괴)
-    정상 경주는 일부만 급락(자금이 특정 말로 이동)하므로 시장 전반 동시 붕괴만 걸린다."""
+    """[경주전환·초반미수집 방어] 직전 대비 공통 복승 조합의 다수(60%+)가:
+    ①90%+ 급락(다른 경주 배당 잔존, 예: 147.4→5.7 시장 전반 붕괴), 또는
+    ②opening 배당(100배+)에서 70%+ 정착(새 경주 배당판을 초반에 못 끌어와 생긴 가짜 고배당)
+    → 기준값 재설정. 정상 경주는 일부만 급락(자금이 특정 말로 이동)하므로 시장 전반 동시 붕괴만 걸린다."""
     pm, cm = _odds_map_un(prev_q), _odds_map_un(cur_q)
     common = [k for k in cm if k in pm and pm[k] > 0 and cm[k] > 0]
     if len(common) < min_combos:
         return False
     big = sum(1 for k in common if (cm[k] - pm[k]) / pm[k] * 100 <= thresh)
-    return (big / len(common)) >= min_ratio
+    if (big / len(common)) >= min_ratio:
+        return True
+    # [초반 미수집] opening 배당(100배+)이 실배당으로 대거 정착(70%+) → 가짜 급락 방지
+    opening = sum(1 for k in common
+                  if pm[k] >= OPENING_ODDS and (cm[k] - pm[k]) / pm[k] * 100 <= -70.0)
+    return (opening / len(common)) >= min_ratio
 
 
 @app.route("/api/odds/triple/ingest", methods=["POST"])
@@ -1233,6 +1249,10 @@ def anomaly_feed():
     for s in doc.get("snapshots", []):
         for raw in (s.get("anomalies") or []):
             p = _anomaly_pretty(raw)
+            # [초반미수집 방어] opening 배당 정착으로 이미 기록된 가짜 급락(-88%↓)은 피드에서 숨김
+            #   (복승/단승 급락만 · 쌍승역전은 유지). 물리적으로 정상 시장의 복승 -88%↓는 거의 없음.
+            if p["pct"] is not None and p["pct"] <= -88 and ("복승 급락" in p["text"] or "단승 급락" in p["text"]):
+                continue
             if p["text"] in seen:      # 최초 감지 시각만 유지(중복 누적 방지)
                 continue
             seen.add(p["text"])
@@ -2300,6 +2320,8 @@ def _triple_analyze(rk, rec):
             pct = round((o - po) / po * 100, 1)
             if pct <= -95:   # [3번] 비정상 변동폭 → 제외(이전 경주 잔존 의심)
                 continue
+            if _is_opening_settle(po, pct):   # [초반미수집] opening 배당 정착(가짜 급락) 제외
+                continue
             if abs(pct) >= 8:
                 single_drops.append({"no": no, "prev": po, "cur": o, "pct": pct})
     single_drops.sort(key=lambda d: d["pct"])   # 가장 큰 급락 먼저
@@ -2313,6 +2335,8 @@ def _triple_analyze(rk, rec):
         if po and po > 0:
             pct = round((o - po) / po * 100, 1)
             if pct <= -95:   # [3번] 비정상 변동폭(95%+ 급락) = 이전 경주 잔존 의심 → 제외
+                continue
+            if _is_opening_settle(po, pct):   # [초반미수집] opening 배당 정착(가짜 급락) 제외
                 continue
             if abs(pct) >= 8:
                 drops.append({"combo": list(k), "prev": po, "cur": o, "pct": pct})
@@ -2491,6 +2515,25 @@ def _triple_analyze(rk, rec):
             if _main and _sig_added:
                 _main["alloc"] = max(20, round(_main.get("alloc", 43) - _sig_added, 1))
 
+    # [배당판 일치 검증] 추천 복승 메인이 실제 배당판 최저(최인기) 조합과 크게 다르면 경고 + 인기조합 추가
+    #   원인: 배당판을 초반에 못 끌어와 opening 배당 캡처 → 유력마/추천이 현재 배당판과 불일치("2+9=7.1" vs 실제 63.2).
+    market_check = None
+    if curQ and not after_close:
+        _mfav_pair, _mfav_odds = min(curQ.items(), key=lambda kv: kv[1])
+        _main = next((b for b in bet_rec if b.get("label") == "복승 메인"), None)
+        _main_odds = (_main or {}).get("expOdds")
+        # (a) 배당판 자체가 opening/불안정(최저 복승도 80배+) → 수집 재시도 권장
+        market_stale = _mfav_odds is not None and _mfav_odds >= 80.0
+        # (b) 추천 메인이 배당판 인기 조합보다 2.5배+ 비쌈 = 배당판과 불일치(유력마가 배당 최저와 동떨어짐)
+        diverged = (_main_odds is not None and _mfav_odds and _main_odds > _mfav_odds * 2.5)
+        if market_stale or diverged:
+            market_check = {"favPair": list(_mfav_pair), "favOdds": _mfav_odds,
+                            "mainPair": (_main or {}).get("combo"), "mainOdds": _main_odds,
+                            "stale": market_stale, "diverged": bool(diverged)}
+            # 실제 배당판 최저(인기) 복승을 추천에 반드시 포함(놓침 방지) — _addbet 이 중복 자동 제거
+            if len(_mfav_pair) == 2:
+                _addbet("복승", "복승 인기(배당최저)", list(_mfav_pair), 5, _mfav_odds)
+
     # [4번] 추천 조합별 신호 품질(상/중/하) + 근거(초과급락 말) 부착
     for r in bet_rec:
         _cq = _combo_signal_quality(r.get("combo"), excess)
@@ -2615,6 +2658,19 @@ def _triple_analyze(rk, rec):
                         "text": f"{_no}번 종합 신뢰도 {_c['confidence']} → 🔴 강력 신호",
                         "detail": f"초과급락 {_c['excessScore']}×0.4 + 쌍승역전 {_c['reversalScore']}×0.35 "
                                   f"+ 복승불일치 {_c['mismatchScore']}×0.25 = {_c['confidence']}"})
+    # [배당판 일치 검증] 추천이 실제 배당판과 어긋나거나 배당판이 불안정하면 최상단 경고
+    if market_check:
+        if market_check["stale"]:
+            signals.insert(0, {"level": "⚠️", "type": "배당불안정",
+                               "text": f"배당판 불안정 — 최저 복승도 {market_check['favOdds']}배(실자금 미형성/초반 미수집 의심)",
+                               "detail": "배당판을 초반에 못 끌어왔을 수 있음 → 배당판 새로고침 후 재수집 권장. 현재 추천은 참고만."})
+        if market_check["diverged"]:
+            fp = market_check["favPair"]
+            signals.insert(0, {"level": "⚠️", "type": "배당불일치",
+                               "text": f"추천 복승({'+'.join(map(str, market_check['mainPair'] or []))}={market_check['mainOdds']}배)이 "
+                                       f"배당판 인기 조합({fp[0]}+{fp[1]}={market_check['favOdds']}배)과 다름",
+                               "detail": "유력마가 배당판 최저(인기)와 동떨어짐 = 초반 배당 미수집/전적 편중 의심. "
+                                         "배당판 인기 조합을 추천에 추가함 — 배당 재확인 권장."})
     # 배당 압축: 상위 4개 복승 근접
     tops = sorted(curQ.values())[:4]
     if len(tops) >= 3 and tops[0] > 0 and tops[-1] / tops[0] < 1.3:
@@ -2747,6 +2803,8 @@ def _triple_analyze(rk, rec):
         "afterClose": after_close, "minutesBefore": cur_mb,
         # [경주전환 방어] 첫 수집(기준값 설정)/비정상 변동폭(기준값 재설정) 여부
         "baselineSet": baseline_set, "baselineReset": baseline_reset,
+        # [배당판 일치 검증] 추천↔배당판 인기 조합 불일치·배당 불안정(초반 미수집) 경고
+        "marketCheck": market_check,
         # [비교학습] 이상감지/전적/최종 추천 3종 + 통합 가중치(전적/이상감지, 학습 조정 반영)
         "compareRecommend": compare_recommend,
         "integratedWeights": {"form": _iw_fw, "anomaly": _iw_ow},
@@ -2981,6 +3039,8 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
             po = prevWin.get(no)
             if po and po > 0:
                 pct = round((o - po) / po * 100)
+                if _is_opening_settle(po, pct):   # [초반미수집] opening 배당 정착(가짜 급락) 제외
+                    continue
                 if pct <= -15:
                     anomalies.append(f"단승급락: {no}번 {po}→{o} ({pct}%)")
         prevQ = {}
@@ -2993,6 +3053,8 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
             po = prevQ.get(k)
             if po and po > 0:
                 pct = round((o - po) / po * 100)
+                if _is_opening_settle(po, pct):   # [초반미수집] opening 배당 정착(가짜 급락) 제외
+                    continue
                 if pct <= -20:
                     anomalies.append(f"급락감지: {'+'.join(map(str, k))} {pct}%")
         # [이상감지 누적] 쌍승(exacta) 역전 → 영구 기록(마감 후에도 유지).
