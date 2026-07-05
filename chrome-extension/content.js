@@ -1514,21 +1514,42 @@
   // 마감/종료 문구(한국·일본 배당판 공통). "마감" 단독은 오탐 위험이 커 제외.
   const CLOSE_TEXT_RE = /발매\s*마감|발매\s*종료|투표\s*마감|투표\s*종료|접수\s*마감|접수\s*종료|締\s*切|締め切り|発売\s*締切|発売\s*終了|受付\s*終了|販売\s*終了/;
 
+  // [마감오판 방지] 배당판의 실제 "남은시간"을 직접 읽어 마감 임박 여부 판단(확장 발주시각 미검출 대비).
+  //   "남은시간 2분 40초" / "남은시간 00:45" / "2분 40초" 등을 ms 로 환산. 없으면 null.
+  function pageRemainingMs() {
+    try {
+      const txt = (document.body && document.body.innerText) || '';
+      let m = txt.match(/남은\s*시간[\s\S]{0,12}?(\d{1,2})\s*분\s*(\d{1,2})\s*초/);
+      if (!m) m = txt.match(/남은\s*시간[\s\S]{0,12}?(\d{1,2})\s*[:：]\s*(\d{2})/);
+      if (!m) m = txt.match(/(\d{1,2})\s*분\s*(\d{1,2})\s*초/);   // 폴백: 화면 어딘가의 "N분 M초"
+      if (m) return (parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) * 1000;
+    } catch (_) { /* noop */ }
+    return null;
+  }
+
   function detectRaceClosed(deadline) {
     // 1) DOM 텍스트 기반 마감 감지 (가장 확실)
     try {
       const txt = (document.body && document.body.innerText) || '';
       if (CLOSE_TEXT_RE.test(txt)) return { closed: true, reason: 'DOM 발매마감 감지' };
     } catch (_) { /* noop */ }
-    // 2) 배당 무변동 기반 감지 — 발주시각 미설정이거나 마감 2분 이내에서만 적용(오탐 방지)
+    // 2) 배당 무변동 기반 감지 — '진짜 마감 임박(≤90초)'일 때만 적용(오탐 방지).
+    //    [버그수정] 발주시각 미설정 시 무조건 적용하던 것을 제거 → 페이지 남은시간을 우선 신뢰.
+    //    · 페이지에 남은시간 있으면 그 값이 90초 이하일 때만
+    //    · 없으면 확장 발주시각(deadline)이 90초 이하일 때만
+    //    · 둘 다 없으면(시간 정보 전무) 무변동만으로는 마감 처리하지 않음(DOM 문구에만 의존)
     try {
       const now = Date.now();
-      const near = !deadline || (deadline - now) <= 120000;
+      const pageLeft = pageRemainingMs();
+      let near;
+      if (pageLeft != null) near = pageLeft <= 90000;
+      else if (deadline) near = (deadline - now) <= 90000;
+      else near = false;
       const sig = (typeof oddsSignature === 'function') ? oddsSignature() : '';
       if (sig && sig === _lastOddsSig) {
         _oddsUnchangedCount++;
         if (near && _oddsUnchangedCount >= CLOSE_UNCHANGED_TICKS) {
-          return { closed: true, reason: `배당 ${CLOSE_UNCHANGED_TICKS}회 무변동` };
+          return { closed: true, reason: `배당 ${CLOSE_UNCHANGED_TICKS}회 무변동(마감 임박)` };
         }
       } else {
         _oddsUnchangedCount = 0;

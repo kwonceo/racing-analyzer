@@ -2122,9 +2122,12 @@ def _triple_analyze(rk, rec):
 
     # [경주전환 방어] 직전 대비 다수 조합 95%+ 급락 = 다른 경주 배당 잔존 → 기준값 재설정(변동 계산 안 함)
     baseline_reset = bool(prev and _baseline_reset_needed(prev.get("quinella"), quin))
-    baseline_set = not prev   # 첫 수집(비교 대상 없음) = 기준값 설정
-    if baseline_reset:
-        prev, prevQ = None, {}   # 오염된 직전값 무효화 → 이 수집을 새 기준값으로
+    # [첫수집 방어] 첫 비교(수집 2건뿐)는 첫 수집 배당이 불안정(못 가져옴/시장 형성 초기 고배당)해
+    #   가짜 급락(-90%대)이 뜬다 → 1틱 워밍업: 2번째 수집을 기준으로만 두고 급락 계산 보류(3번째부터 계산).
+    market_forming = (len(hist) == 2)
+    baseline_set = (not prev) or market_forming   # 첫 수집/첫 비교 = 기준값 설정(변동 계산 안 함)
+    if baseline_reset or market_forming:
+        prev, prevQ = None, {}   # 오염/불안정 직전값 무효화 → 이 수집을 새 기준값으로
 
     # [단승] 현재/직전 단승 배당 + 급락 (가장 강한 신호)
     curWin = _win_map_int(rec.get("win"))
@@ -2757,7 +2760,9 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
     curWin = _win_map_int(_win_map_clean(win))
     anomalies = []
     # [경주전환 방어] 기준값 재설정이면 직전 스냅샷과 비교하지 않음(다른 경주 잔존 → 오검출 방지)
-    if doc["snapshots"] and not baseline_reset:
+    # [첫수집 방어] 첫 비교(스냅샷 1건뿐)는 첫 수집 배당이 불안정(못 가져옴/시장 형성 초기 고배당)해
+    #   가짜 급락(-90%대)이 뜬다. 스냅샷 2건 이상(2번째 수집을 기준)일 때부터 이상감지 기록.
+    if len(doc["snapshots"]) >= 2 and not baseline_reset:
         last = doc["snapshots"][-1]
         # [단승] 급락 감지 — 가장 강한 신호이므로 먼저 기록
         prevWin = {}
