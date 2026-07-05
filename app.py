@@ -2127,6 +2127,106 @@ def _combo_signal_quality(combo, excess):
     return {"quality": ("상" if grade == "🔴" else "중"), "reason": reason}
 
 
+# ───────── [핵심 이상감지 수학 공식] 쌍승역전·복승불일치·종합신뢰도 ─────────
+def _win_exacta_reversal(fav_rank, curD):
+    """[1번] 쌍승 역전 감지 공식. 단승 유력마 A vs 다른 말 B 방향 비교.
+      역전비율 = 쌍승(B→A) / 쌍승(A→B).  A가 유력한데 B→A가 더 싸면(비율<1) 시장은 B를 실질 1착으로 봄.
+        <0.95 🟡 역전 / <0.80 🔴 강한역전 / <0.60 🔴🔴 압도적역전.
+      (단승 미수집(일본)이면 복승인기 순위를 유력마 순위로 대체.)"""
+    out = []
+    if not fav_rank or not curD:
+        return out
+    a = fav_rank[0]                     # 최유력마(단승 1위 또는 복승인기 1위)
+    for b in fav_rank[1:]:
+        ab, ba = curD.get((a, b)), curD.get((b, a))
+        if not ab or not ba or ab <= 0:
+            continue
+        ratio = round(ba / ab, 3)      # <1 = B→A(=B 1착)가 더 쌈 = 역전
+        if ratio < 0.60:
+            lvl, tag = "🔴🔴", "압도적 역전"
+        elif ratio < 0.80:
+            lvl, tag = "🔴", "강한 역전"
+        elif ratio < 0.95:
+            lvl, tag = "🟡", "역전 신호"
+        else:
+            continue
+        out.append({"favorite": a, "challenger": b, "ratio": ratio, "level": lvl, "tag": tag,
+                    "favoredExacta": ab, "reverseExacta": ba,
+                    "text": f"🔄 역전감지: 단승 {a}번 유력이나 쌍승에서 {b}번 1착({ba})이 "
+                            f"{a}번 1착({ab})보다 낮음 → 실질 1착: {b}번 가능성 ({tag} {ratio})"})
+    out.sort(key=lambda r: r["ratio"])   # 가장 강한 역전(비율 작은) 먼저
+    return out
+
+
+def _quinella_mismatch(fav_rank, curQ):
+    """[2번] 복승 불일치 감지 공식. 단승 1+2위 예상 조합 vs 실제 최저복승.
+      불일치점수 = 예상최저복승 / 실제최저복승.  >1 = 예상 밖 조합에 자금집중.
+        1.2+ 🟡 주의 / 1.5+ 🔴 강한신호 / 2.0+ 🔴🔴 압도적신호."""
+    if not fav_rank or len(fav_rank) < 2 or not curQ:
+        return None
+    exp_pair = tuple(sorted((fav_rank[0], fav_rank[1])))
+    exp_odds = curQ.get(exp_pair)
+    if not exp_odds or exp_odds <= 0:
+        return None
+    act_pair, act_odds = min(curQ.items(), key=lambda kv: kv[1])
+    if not act_odds or act_odds <= 0:
+        return None
+    ratio = round(exp_odds / act_odds, 3)
+    if ratio < 1.2:
+        return None                     # 예상=실제 근접 → 신호 없음
+    lvl = "🔴🔴" if ratio >= 2.0 else ("🔴" if ratio >= 1.5 else "🟡")
+    exp_set = set(exp_pair)
+    focus = [h for h in act_pair if h not in exp_set]   # 집중 자금 유입 말
+    return {"expected": list(exp_pair), "actual": list(act_pair),
+            "expectedOdds": exp_odds, "actualOdds": act_odds, "ratio": ratio,
+            "level": lvl, "focusHorses": focus,
+            "text": f"⚠️ 복승 불일치: 단승 기준 예상 {exp_pair[0]}+{exp_pair[1]}({exp_odds}) / "
+                    f"실제 최저 {act_pair[0]}+{act_pair[1]}({act_odds}) → "
+                    f"{('·'.join(map(str, focus)) or '동일')}번 집중 자금 유입 ({lvl} {ratio})"}
+
+
+def _reversal_strength_score(ratio):
+    """역전비율(<1)을 0~100 점수(0.60이하=100, 0.95=0 선형)."""
+    if ratio is None or ratio >= 0.95:
+        return 0.0
+    return round(min(100.0, (0.95 - ratio) / (0.95 - 0.60) * 100.0), 1)
+
+
+def _mismatch_strength_score(ratio):
+    """불일치점수(>1)를 0~100 점수(2.0이상=100, 1.2=0 선형)."""
+    if ratio is None or ratio <= 1.2:
+        return 0.0
+    return round(min(100.0, (ratio - 1.2) / (2.0 - 1.2) * 100.0), 1)
+
+
+def _signal_confidence(excess, wx_reversals, mismatch):
+    """[4번] 종합 신뢰도 점수 = 초과급락 40% + 쌍승역전 35% + 복승불일치 25% (말별 0~100).
+      70+ → 🔴 강력 신호 / 40~69 → 🟡 참고 신호 / 40 미만 → 노이즈.
+      반환 {horses:{no:{excessScore,reversalScore,mismatchScore,confidence,grade}}, strong:[no], refer:[no]}."""
+    horses = {}
+    ehorses = (excess or {}).get("horses") or {}
+    for no, e in ehorses.items():
+        horses.setdefault(int(no), {})["excessScore"] = _concentration_score(e.get("strength"))
+    for r in (wx_reversals or []):       # 실질 1착으로 지목된 challenger(B)에 점수
+        b = int(r["challenger"])
+        d = horses.setdefault(b, {})
+        d["reversalScore"] = max(d.get("reversalScore", 0.0), _reversal_strength_score(r["ratio"]))
+    if mismatch:                          # 집중 자금 유입 말(focus)에 점수
+        sc = _mismatch_strength_score(mismatch["ratio"])
+        for h in mismatch.get("focusHorses", []):
+            d = horses.setdefault(int(h), {})
+            d["mismatchScore"] = max(d.get("mismatchScore", 0.0), sc)
+    out = {}
+    for no, d in horses.items():
+        ex, rv, mm = d.get("excessScore", 0.0), d.get("reversalScore", 0.0), d.get("mismatchScore", 0.0)
+        conf = round(0.40 * ex + 0.35 * rv + 0.25 * mm, 1)
+        out[no] = {"excessScore": ex, "reversalScore": rv, "mismatchScore": mm,
+                   "confidence": conf, "grade": ("🔴" if conf >= 70 else ("🟡" if conf >= 40 else None))}
+    strong = sorted([no for no, v in out.items() if v["confidence"] >= 70], key=lambda n: -out[n]["confidence"])
+    refer = sorted([no for no, v in out.items() if 40 <= v["confidence"] < 70], key=lambda n: -out[n]["confidence"])
+    return {"horses": out, "strong": strong, "refer": refer}
+
+
 # ───────── [이상감지 vs 추천 비교 학습] 3종 추천 조합 산출 + 가중치 자동 조정 ─────────
 def _compare_recommend(form, key_horses, excess, drops, bet_rec):
     """[1번] 이상감지 기반 / 전적 기반 / 최종 추천 조합을 각각 산출(복승 2두·삼복승 3두).
@@ -2290,6 +2390,13 @@ def _triple_analyze(rk, rec):
         ranked = merged
     key_horses = ranked[:3]
 
+    # [1·2·4번] 핵심 이상감지 공식: 쌍승역전·복승불일치·종합신뢰도
+    #   단승 미수집(일본)이면 복승인기 순위(ranked)를 유력마 순위로 대체
+    fav_rank = single_rank if single_rank else ranked
+    wx_reversals = _win_exacta_reversal(fav_rank, curD)
+    quin_mismatch = _quinella_mismatch(fav_rank, curQ)
+    signal_confidence = _signal_confidence(excess, wx_reversals, quin_mismatch)
+
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
     anomaly_horse = None
@@ -2356,6 +2463,15 @@ def _triple_analyze(rk, rec):
         def _push_sig(h):
             if h is not None and int(h) not in _sh_order:
                 _sh_order.append(int(h))
+        # [5번] 종합 신뢰도 기반 우선 반영 — 강력(70+)·참고(40~69) 신호말을 최우선 순위로
+        for _h in (signal_confidence.get("strong") or []):
+            _push_sig(_h)
+        for _h in (signal_confidence.get("refer") or []):
+            _push_sig(_h)
+        for _rv in wx_reversals:          # 쌍승 역전으로 실질 1착 지목된 말
+            _push_sig(_rv.get("challenger"))
+        for _h in (quin_mismatch or {}).get("focusHorses", []):   # 복승 불일치 집중 자금 유입 말
+            _push_sig(_h)
         for _h in (excess.get("concentrated") or []):
             _push_sig(_h)
         for _d in single_drops:
@@ -2479,6 +2595,26 @@ def _triple_analyze(rk, rec):
             signals.append({"level": "🔄", "type": "역전",
                             "text": f"쌍승 {r['favored'][0]}→{r['favored'][1]} ({r['favoredOdds']}) < {r['favored'][1]}→{r['favored'][0]} ({r['otherOdds']})",
                             "detail": f"시장이 {r['favored'][0]}번을 실질 1착으로 판단"})
+    # [1번] 쌍승 역전 감지 공식 — 단승(복승인기) 유력마 vs 쌍승 방향 역전(비율 기반)
+    for r in wx_reversals[:5]:
+        signals.append({"level": r["level"], "type": "쌍승역전공식", "horse": r["challenger"],
+                        "text": r["text"],
+                        "detail": f"역전비율 = 쌍승({r['challenger']}→{r['favorite']}) {r['reverseExacta']} / "
+                                  f"쌍승({r['favorite']}→{r['challenger']}) {r['favoredExacta']} = {r['ratio']} ({r['tag']})"})
+    # [2번] 복승 불일치 감지 공식 — 단승 예상 조합 vs 실제 최저복승 괴리
+    if quin_mismatch:
+        signals.append({"level": quin_mismatch["level"], "type": "복승불일치공식",
+                        "horse": (quin_mismatch["focusHorses"] or [None])[0],
+                        "text": quin_mismatch["text"],
+                        "detail": f"불일치점수 = 예상최저복승 {quin_mismatch['expectedOdds']} / "
+                                  f"실제최저복승 {quin_mismatch['actualOdds']} = {quin_mismatch['ratio']}"})
+    # [4번] 종합 신뢰도 강력 신호(70+) 요약
+    for _no in (signal_confidence.get("strong") or [])[:5]:
+        _c = signal_confidence["horses"][_no]
+        signals.append({"level": "🔴", "type": "종합신뢰도", "horse": _no,
+                        "text": f"{_no}번 종합 신뢰도 {_c['confidence']} → 🔴 강력 신호",
+                        "detail": f"초과급락 {_c['excessScore']}×0.4 + 쌍승역전 {_c['reversalScore']}×0.35 "
+                                  f"+ 복승불일치 {_c['mismatchScore']}×0.25 = {_c['confidence']}"})
     # 배당 압축: 상위 4개 복승 근접
     tops = sorted(curQ.values())[:4]
     if len(tops) >= 3 and tops[0] > 0 and tops[-1] / tops[0] < 1.3:
@@ -2601,8 +2737,12 @@ def _triple_analyze(rk, rec):
         "patternMatch": pattern_match,  # [4·5번] 현재 패턴 매칭 + 신뢰도 + 베팅 비중 조정
         "massDrop": mass_drop, "massDropStrategy": mass_drop_strategy,  # [대규모급락] 감지 + 베팅 전략
         # [신호 품질 필터링] 초과급락(집중도)·상황별 가중치·적응형 통합 등급
+        # [핵심 공식] 쌍승역전·복승불일치·종합신뢰도(초과40+역전35+불일치25)
         "signalQuality": {"excess": excess, "situation": situation,
-                          "integratedAdaptive": integrated_adaptive},
+                          "integratedAdaptive": integrated_adaptive,
+                          "winExactaReversals": wx_reversals,
+                          "quinellaMismatch": quin_mismatch,
+                          "signalConfidence": signal_confidence},
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
         # [경주전환 방어] 첫 수집(기준값 설정)/비정상 변동폭(기준값 재설정) 여부

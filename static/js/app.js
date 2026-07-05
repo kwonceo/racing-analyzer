@@ -2410,11 +2410,25 @@
         + `<table class="data-table" style="margin-top:2px"><thead><tr><th>등급</th><th>마번</th><th>마명</th><th>전적</th><th>집중신호</th><th>통합</th></tr></thead><tbody>`
         + ia.slice(0, 8).map((h) => `<tr><td><b style="color:${gc[h.grade] || '#fff'}">${h.grade}</b></td><td>${h.no}</td><td>${esc(h.name || '')}</td><td>${h.formScore}</td><td>${h.signalScore}</td><td><b>${h.integrated}</b></td></tr>`).join('')
         + `</tbody></table>` : '';
+    // [핵심 공식] 종합 신뢰도(초과40+역전35+불일치25) + 쌍승역전 + 복승불일치
+    const conf = sq.signalConfidence || {}, ch = conf.horses || {};
+    const confRows = Object.keys(ch).map((no) => ({ no: +no, ...ch[no] }))
+      .filter((h) => h.grade).sort((a, b) => b.confidence - a.confidence);
+    const confHtml = confRows.length ? `<div class="hint" style="margin:8px 0 2px">🎯 <b>종합 신뢰도</b>(초과급락40% + 쌍승역전35% + 복승불일치25%) — 70+ 🔴 강력 · 40~69 🟡 참고</div>`
+      + `<table class="data-table" style="margin-top:2px"><thead><tr><th>신뢰도</th><th>마번</th><th>초과급락</th><th>쌍승역전</th><th>복승불일치</th></tr></thead><tbody>`
+      + confRows.slice(0, 8).map((h) => `<tr><td><b style="color:${h.grade === '🔴' ? '#ef4444' : '#ffd24f'}">${h.grade} ${h.confidence}</b></td><td>${h.no}번</td><td>${h.excessScore}</td><td>${h.reversalScore}</td><td>${h.mismatchScore}</td></tr>`).join('')
+      + `</tbody></table>` : '';
+    const wx = sq.winExactaReversals || [];
+    const wxHtml = wx.length ? `<div class="hint" style="margin:8px 0 2px">🔄 <b>쌍승 역전 감지</b>(단승 유력마 vs 쌍승 방향) — 역전비율 &lt;0.95 🟡 · &lt;0.80 🔴 · &lt;0.60 🔴🔴</div>`
+      + wx.slice(0, 5).map((r) => `<div style="margin:2px 0"><span class="chip ${/🔴/.test(r.level) ? 'chip-red' : ''}">${r.level} ${r.challenger}번</span> <span class="hint">${esc(r.text)}</span></div>`).join('') : '';
+    const mm = sq.quinellaMismatch;
+    const mmHtml = mm ? `<div class="hint" style="margin:8px 0 2px">⚠️ <b>복승 불일치 감지</b>(단승 예상 vs 실제 최저) — 1.2+ 🟡 · 1.5+ 🔴 · 2.0+ 🔴🔴</div>`
+      + `<div style="margin:2px 0"><span class="chip ${/🔴/.test(mm.level) ? 'chip-red' : ''}">${mm.level} 불일치 ${mm.ratio}</span> <span class="hint">${esc(mm.text)}</span></div>` : '';
     return `<div style="margin:8px 0;border:1px solid var(--border);border-radius:8px;padding:8px">
       <div class="matrix-title" style="font-size:14px">🎯 신호 품질 분석 <span class="hint" style="font-weight:400">노이즈 제거 · 자금 집중 감지</span></div>
       <div style="margin:3px 0"><span class="chip" style="border-color:${stColor};color:${stColor}">${esc(st.name || '일반')}</span> <span class="hint">가중치 전적 <b>${Math.round((st.formW || 0.5) * 100)}%</b> · 신호 <b>${Math.round((st.signalW || 0.5) * 100)}%</b> · ${esc(st.note || '')}</span></div>
       <div class="hint" style="margin:4px 0 2px">시장 전체 평균 급락 <b>${ex.overall != null ? ex.overall + '%' : '-'}</b> 대비 <b>초과 급락(집중도)</b> — 초과 5%p+ 🔴 진짜신호 · 0~5%p 🟡 약한신호 · 그 외 노이즈 제거</div>
-      ${exRows}${iaHtml}</div>`;
+      ${exRows}${confHtml}${wxHtml}${mmHtml}${iaHtml}</div>`;
   }
 
   // [버그2·3] 복승/삼복승 추천 + 예산 배분 금액 표
