@@ -3,7 +3,7 @@
  "date": "2026-07-05",
  "race": "후쿠시마 2경주",
  "analyzed_at": "10:26:16",
- "updated_at": "10:35:36",
+ "updated_at": "10:46:45",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -238,43 +238,23 @@
  "horses": [
   {
    "no": 2,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
+   "name": "천마누비",
+   "jockey": "용호",
+   "record_score": 110,
+   "record_detail": "최근 1",
    "odds": null,
-   "grade": "△",
+   "grade": "A",
    "grade_reason": "배당 19.6배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
-   "no": 3,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 15.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
    "no": 8,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
+   "name": "로드투퍼",
+   "jockey": "다빈",
+   "record_score": 110,
+   "record_detail": "최근 1",
    "odds": null,
-   "grade": "△",
+   "grade": "A",
    "grade_reason": "배당 9배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 9,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 5.1배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 11,
@@ -298,63 +278,43 @@
   },
   {
    "no": 1,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
+   "name": "리더스파",
+   "jockey": "옥성",
+   "record_score": 25,
+   "record_detail": "최근 4",
    "odds": null,
-   "grade": "△",
+   "grade": "C",
    "grade_reason": "배당 40.3배 · 감점 없음 = 100점"
   },
   {
-   "no": 4,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 24.6배 · 감점 없음 = 100점"
-  },
-  {
    "no": 5,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
+   "name": "성실위너",
+   "jockey": "우주",
+   "record_score": 110,
+   "record_detail": "최근 1",
    "odds": null,
-   "grade": "△",
+   "grade": "A",
    "grade_reason": "배당 79.8배 · 감점 없음 = 100점"
   },
   {
-   "no": 7,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
+   "no": 3,
+   "name": "라이징원",
+   "jockey": "청준",
+   "record_score": 0,
+   "record_detail": "최근 5",
    "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 29.3배 · 감점 없음 = 100점"
+   "grade": "B",
+   "grade_reason": "배당 15.4배 · 최근평균 5.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
   },
   {
-   "no": 6,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
+   "no": 9,
+   "name": "동진비룡",
+   "jockey": "아르",
+   "record_score": 0,
+   "record_detail": "최근 5",
    "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 137.9배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 10,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 96.8배 · 배당 80~149 -20 = 80점"
+   "grade": "C",
+   "grade_reason": "배당 5.1배 · 최근평균 5.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
   },
   {
    "no": 12,
@@ -377,6 +337,26 @@
    "grade_reason": "배당 107배 · 배당 80~149 -20 = 80점"
   },
   {
+   "no": 4,
+   "name": "피엔에스",
+   "jockey": "드레",
+   "record_score": 0,
+   "record_detail": "최근 7",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 24.6배 · 최근평균 7.0착 -30 = 70점"
+  },
+  {
+   "no": 7,
+   "name": "창조의화",
+   "jockey": "재철",
+   "record_score": 0,
+   "record_detail": "최근 9",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 29.3배 · 최근평균 9.0착 -30 = 70점"
+  },
+  {
    "no": 15,
    "name": "",
    "jockey": "",
@@ -385,25 +365,45 @@
    "odds": null,
    "grade": "△",
    "grade_reason": "배당 385.7배 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 6,
+   "name": "라비타",
+   "jockey": "범현",
+   "record_score": 0,
+   "record_detail": "최근 7",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 137.9배 · 배당 80~149 -20 / 최근평균 7.0착 -30 = 50점"
+  },
+  {
+   "no": 10,
+   "name": "금성사이",
+   "jockey": "태희",
+   "record_score": 0,
+   "record_detail": "최근 6",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 96.8배 · 배당 80~149 -20 / 최근평균 6.0착 -30 = 50점"
   }
  ],
  "elimination": {
   "candidates": [
    2,
-   3,
    8,
-   9,
    11,
    14,
    1,
-   4,
    5,
-   7,
-   6,
-   10,
+   3,
+   9,
    12,
    13,
-   15
+   4,
+   7,
+   15,
+   6,
+   10
   ],
   "eliminated": [],
   "elimination_reasons": {}
@@ -412,27 +412,27 @@
   "quinella_main": {
    "combo": "9+11",
    "odds": 5.1,
-   "reason": "9번(?)·11번(?)"
+   "reason": "9번(C)·11번(?)"
   },
   "quinella_sub": {
    "combo": "8+9",
    "odds": 9.0,
-   "reason": "8번(?)·9번(?)"
+   "reason": "8번(A)·9번(C)"
   },
   "trifecta_main": {
    "combo": "8+9+11",
    "odds": 10.2,
-   "reason": "8번(?)·9번(?)·11번(?)"
+   "reason": "8번(A)·9번(C)·11번(?)"
   },
   "trifecta_insurance1": {
    "combo": "3+9+11",
    "odds": 16.2,
-   "reason": "3번(?)·9번(?)·11번(?)"
+   "reason": "3번(B)·9번(C)·11번(?)"
   },
   "trifecta_insurance2": {
    "combo": "3+8+9",
    "odds": 28.8,
-   "reason": "3번(?)·8번(?)·9번(?)"
+   "reason": "3번(B)·8번(A)·9번(C)"
   },
   "budget_allocation": {
    "quinella_main": "43%",
