@@ -24,9 +24,10 @@ if not exist "%BACKUP%" (
 REM 기존 동일 작업이 있으면 갱신(먼저 삭제 시도 후 재등록)
 schtasks /Delete /TN "%TASK%" /F >nul 2>&1
 
-REM 무인 실행: backup_checkpoint 는 마지막에 pause 가 있으나 스케줄러는 창 없이 종료됨.
+REM 무인 실행: /auto 인자를 넘겨 backup_checkpoint 의 마지막 pause 를 건너뛴다
+REM   (안 넘기면 스케줄러 작업이 키 입력 대기로 멈춰 백업이 완료되지 않음).
 schtasks /Create /SC DAILY /ST 00:00 /TN "%TASK%" ^
-  /TR "cmd /c \"%BACKUP%\"" /F
+  /TR "cmd /c \"%BACKUP%\" /auto" /F
 
 if %errorlevel%==0 (
   echo ✅ 등록 완료. 매일 자정 data/ + 문서가 GitHub 에 자동 커밋됩니다.

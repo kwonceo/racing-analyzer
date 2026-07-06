@@ -8,6 +8,18 @@ REM  기존 기능 삭제 없음(추가만). 프로젝트 루트에서 실행.
 REM ============================================================
 cd /d "%~dp0.."
 
+REM [보완] 무인(스케줄러) 실행 감지: /auto 인자면 마지막 pause 생략(안 하면 자정 백업이 키 대기로 멈춤)
+set AUTORUN=0
+if /I "%~1"=="/auto" set AUTORUN=1
+
+REM [보완] git 잠금 충돌 방어: 서버가 커밋 중(.git\index.lock 존재)이면 이번 회차는 건너뜀(다음 자정 재시도)
+if exist ".git\index.lock" (
+  echo ⚠️ git 잠금(.git\index.lock) 감지 - 다른 커밋 진행 중. 이번 백업은 건너뜁니다.
+  echo %date% %time% - SKIP (index.lock)>> data\backup_log.txt
+  if "%AUTORUN%"=="0" pause
+  goto :eof
+)
+
 echo [1/4] 현재 상태 확인...
 git status --short
 
@@ -40,4 +52,7 @@ echo 백업 날짜 기록: data\backup_log.txt
 echo.
 echo ===== 백업 체크포인트 완료 =====
 endlocal
+REM [보완] 무인 실행(/auto·스케줄러)에서는 pause 생략 → 작업이 멈추지 않고 정상 종료.
+REM   %~1 은 파라미터라 endlocal 영향을 안 받음(변수 %AUTORUN% 은 endlocal 로 사라짐).
+if /I "%~1"=="/auto" goto :eof
 pause
