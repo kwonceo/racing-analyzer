@@ -1157,9 +1157,38 @@
   function initRaceRefresh() {
     const btn = $('#rrRefreshBtn');
     if (btn) btn.addEventListener('click', () => refreshCurrentRace(true));
+    const nb = $('#rrNewRaceBtn');           // [3번] 강제 초기화 버튼
+    if (nb) nb.addEventListener('click', newRaceStart);
     refreshCurrentRace(false);
     if (_rrTimer) clearInterval(_rrTimer);
-    _rrTimer = setInterval(() => refreshCurrentRace(false), 30000);   // [3번] 30초마다 경주 변경 확인
+    _rrTimer = setInterval(() => refreshCurrentRace(false), 30000);   // [4번] 30초마다 경주 변경 확인·자동 전환
+  }
+
+  /** [1·3번] 활성 배당·이상감지·타임라인·경고 상태를 모두 초기화(새 경주 준비). */
+  function hardResetRaceState() {
+    resetOddsTimeline();                     // 배당 타임라인(일본·한국) 초기화
+    state.jpOddsPrev = new Set();             // 이상감지 경고 중복추적 초기화
+    state.jpTimeline = [];
+    state.jpCurrentRk = null;                 // 현재 경주 기준 초기화
+    _rrLastRk = null;
+    try { setJpOddsStatus('waiting'); } catch (_) { /* */ }
+  }
+
+  /** [3번] 🆕 새 경주 시작: 서버 활성 3종 배당 초기화 + 프론트 상태 초기화 + 새 수집 요청. */
+  async function newRaceStart() {
+    if (!confirm('현재 활성 배당 데이터를 모두 초기화하고 새 경주를 시작할까요?\n(경주별 히스토리·학습 기록은 그대로 보존됩니다)')) return;
+    const status = $('#rrStatus');
+    if (status) status.textContent = '초기화 중…';
+    try {
+      await fetch('/api/odds/triple/reset', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
+      });
+    } catch (_) { /* */ }
+    hardResetRaceState();
+    { const el = $('#rrCurrentRace'); if (el) el.textContent = '— (새 경주 수집 대기)'; }
+    if (status) status.textContent = '✅ 초기화 완료 — 확장에서 새 경주 [전체 자동 수집]을 실행하세요';
+    notify('🆕 새 경주 시작: 활성 배당 초기화 완료. 확장에서 새 경주를 수집하세요.', true);
+    nudgeExtensionCollect();                  // 확장에 즉시 수집 요청(새 경주)
   }
 
   /** 확장이 마지막으로 수집한 경주(server latest) 조회 → 상단 표시 + (변경/수동 시) 화면 갱신 */
@@ -1170,14 +1199,16 @@
       nudgeExtensionCollect();                       // [1번] 확장에서 현재 경주 즉시 수집
       await new Promise((r) => setTimeout(r, 1200));  // 확장 수집·서버 저장 잠깐 대기
     }
-    let rk = null;
-    try { const d = await (await fetch('/api/current_race')).json(); rk = d && d.raceKey; } catch (_) { /* */ }
+    let rk = null, stale = false;
+    try { const d = await (await fetch('/api/current_race')).json(); rk = d && d.raceKey; stale = !!(d && d.stale); } catch (_) { /* */ }
     if (!rk) {  // 폴백: 구 엔드포인트
-      try { const d = await (await fetch('/api/odds/triple/latest')).json(); rk = d && d.raceKey; } catch (_) { /* */ }
+      try { const d = await (await fetch('/api/odds/triple/latest')).json(); rk = d && d.raceKey; stale = !!(d && d.stale); } catch (_) { /* */ }
     }
-    if (!rk) {
-      if (label) label.textContent = '— (수집된 경주 없음)';
+    // [경주전환 잔존 방어] 최신 경주도 30분+ 미갱신(=끝난 경주)이면 표시 억제(직전 경주 잔존 방지)
+    if (!rk || stale) {
+      if (label) label.textContent = stale ? '— (직전 경주 종료 · 새 수집 대기)' : '— (수집된 경주 없음)';
       if (status) status.textContent = manual ? '확장 [전체 자동 수집]을 먼저 실행하세요.' : '';
+      if (stale) _rrLastRk = null;   // 다음에 새 경주가 오면 '변경'으로 감지
       return;
     }
     if (label) label.textContent = rk;
@@ -1185,17 +1216,23 @@
 
     if (manual) {
       // [수동 새로고침] 완전 갱신: 화면 업데이트 + 배당 타임라인 초기화 + 성공 메시지
+      if (changed) hardResetRaceState();              // 경주 바뀌었으면 이전 상태 완전 초기화
       _rrLastRk = rk;
-      resetOddsTimeline();                            // [4번] 배당 타임라인 초기화(새 경주 시작)
-      refreshActiveView(rk);                          // [3번] 분석기 화면 자동 업데이트
+      resetOddsTimeline();                            // [1번] 배당 타임라인 초기화(새 경주 시작)
+      refreshActiveView(rk);                          // 분석기 화면 자동 업데이트
       if (status) status.textContent = '✅ 업데이트 완료';
       notify(`✅ ${rk} 업데이트 완료`, true);          // 예: "✅ 제주 3경주 업데이트 완료"
       return;
     }
-    // [자동 감지·30초] 경주가 바뀌면 자동 전환하지 않고 새로고침을 유도하는 알림만 표시
+    // [4번] 자동 감지·30초: 경주가 바뀌면 자동 초기화 + 새 경주로 화면 전환(직전 경주 잔존 방지)
     if (changed && _rrLastRk != null) {
-      if (status) status.textContent = '🔔 새 경주 감지 — 새로고침 클릭';
-      notify(`🔔 새 경주 감지: ${rk} · [🔄 경주 새로고침] 버튼을 클릭하세요`, true);
+      _rrLastRk = rk;
+      hardResetRaceState();                           // [1번] 직전 경주 스냅샷·이상감지·타임라인·경고 초기화
+      _rrLastRk = rk;                                 // hardReset이 null로 만든 값 복원(현재 경주로 고정)
+      refreshActiveView(rk);                          // 새 경주 첫 수집을 기준값으로 자동 표시
+      if (status) status.textContent = '🔄 새 경주 자동 전환됨';
+      notify(`🔄 새 경주 자동 전환: ${rk}`, true);
+      return;
     }
     _rrLastRk = rk;
   }
@@ -4003,7 +4040,8 @@
     try { latest = await (await fetch('/api/odds/triple/latest')).json(); }
     catch (_) { return; }
     const rk = latest && latest.raceKey;
-    if (!rk) { setJpOddsStatus('waiting'); return; }
+    // [경주전환 잔존 방어] 수집 경주 없음 또는 30분+ 미갱신(끝난 경주) → 직전 배당 표시 안 함
+    if (!rk || latest.stale) { setJpOddsStatus('waiting'); return; }
     let a;
     try {
       a = await (await fetch('/api/odds/triple/analyze', {
@@ -4011,6 +4049,8 @@
       })).json();
     } catch (_) { return; }
     if (!a || a.error || a.waiting) { setJpOddsStatus('waiting'); return; }
+    // [2번] raceKey 검증: 분석 응답이 요청한 경주와 다르면(직전 경주 잔존) 무시
+    if (a.raceKey && a.raceKey !== rk) { setJpOddsStatus('waiting'); return; }
     setJpOddsStatus('linked', rk);
     renderJapanIntegrated(a);
     onJapanOddsUpdate(rk, a);

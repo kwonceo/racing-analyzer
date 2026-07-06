@@ -1112,6 +1112,7 @@ def _form_from_starters(rk, drops):
 
 OPENING_ODDS = 100.0    # [배당판 미수집 방어] 복승/단승 이 값 이상 = opening/placeholder(실자금 거의 없음)
 OPENING_DROP = -80.0    # opening 배당이 실배당으로 정착할 때의 기계적 급락(신호 아님)
+STALE_ACTIVE_SEC = 1800  # [경주전환 잔존 방어] 활성 3종 배당이 이 시간(30분) 넘게 미갱신 → 끝난 경주로 간주(활성 캐시서 정리)
 
 
 def _is_opening_settle(po, pct):
@@ -1168,6 +1169,21 @@ def _next_race_surge(prev_q, cur_q, thresh=200.0, min_ratio=0.6, min_combos=4):
     return (big / len(common)) >= min_ratio
 
 
+def _triple_prune_stale(db, keep_rk=None, max_age=STALE_ACTIVE_SEC):
+    """[경주전환 잔존 방어] 활성 3종 배당(triple_store)에서 max_age(기본 30분) 넘게
+    갱신 안 된 경주를 제거한다. 경주별 히스토리 파일(data/odds_history)은 영구 보존되므로
+    학습·복기·이상감지 누적에는 전혀 영향이 없다(활성 표시 캐시만 정리).
+    keep_rk(방금 수집한 경주)는 나이와 무관하게 항상 유지. 반환: 제거된 raceKey 리스트.
+    → max-t 폴백(triple_latest/current_race/analyze)이 '끝난 직전 경주'를 계속 끌어오던 문제 해소.
+    한국·일본 동시 진행 등 최근(30분내) 갱신된 경주는 그대로 두어 병행 수집도 안전."""
+    now = time.time()
+    stale = [k for k, v in db.items()
+             if k != keep_rk and (now - (v.get("t") or 0)) > max_age]
+    for k in stale:
+        db.pop(k, None)
+    return stale
+
+
 @app.route("/api/odds/triple/ingest", methods=["POST"])
 def triple_ingest():
     """확장 [전체 자동 수집]: {raceKey, quinella[], exacta[], trio[]} 저장 → {ok, counts}"""
@@ -1194,6 +1210,9 @@ def triple_ingest():
     hist = hist[-12:]
     db[rk] = {"quinella": q, "exacta": x, "trio": tr, "win": win, "history": hist,
               "source": body.get("source"), "t": now}
+    # [경주전환 잔존 방어] 30분+ 미갱신된 '끝난 직전 경주'를 활성 캐시에서 정리(히스토리는 보존)
+    #   → max-t 폴백이 직전 경주 배당을 계속 끌어오던 문제 차단.
+    pruned = _triple_prune_stale(db, keep_rk=rk)
     _triple_save(db)
     # 배당 변동 히스토리 파일에 스냅샷 누적 (타임스탬프+발주전분+이상감지)
     try:
@@ -1203,8 +1222,11 @@ def triple_ingest():
     counts = {"quinella": len(q), "exacta": len(x), "trio": len(tr), "win": len(win)}
     if baseline_reset:
         print(f"[경주전환 감지] {rk}: 비정상 변동폭(95%+ 다수) → 기준값 재설정(이전 배당 초기화)")
+    if pruned:
+        print(f"[활성정리] 끝난 경주 {len(pruned)}건 제거(히스토리 보존): {', '.join(pruned)}")
     print(f"[3종 수집] {rk}: {counts} (history {len(hist)}{' · 기준재설정' if baseline_reset else ''})")
-    return jsonify({"ok": True, "counts": counts, "baselineReset": baseline_reset})
+    return jsonify({"ok": True, "counts": counts, "baselineReset": baseline_reset,
+                    "pruned": pruned})
 
 
 @app.route("/api/odds/triple/reset", methods=["POST"])
@@ -1240,8 +1262,11 @@ def triple_latest():
             return jsonify({"raceKey": rk, "quinella": [], "exacta": [], "trio": [], "waiting": True})
         rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
     rec = db.get(rk) or {}
+    # [경주전환 잔존 방어] 30분+ 미갱신 최신 경주 = 끝난 경주 → stale 표기(프론트가 표시 억제)
+    age = time.time() - (rec.get("t") or 0)
     return jsonify({"raceKey": rk, "quinella": rec.get("quinella", []),
-                    "exacta": rec.get("exacta", []), "trio": rec.get("trio", [])})
+                    "exacta": rec.get("exacta", []), "trio": rec.get("trio", []),
+                    "ageSeconds": round(age), "stale": (not explicit) and age > STALE_ACTIVE_SEC})
 
 
 def _anomaly_pretty(raw):
@@ -1347,9 +1372,13 @@ def current_race():
         return jsonify({"raceKey": None})
     rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
     rec = db.get(rk) or {}
+    # [경주전환 잔존 방어] 최신 경주도 30분+ 미갱신이면 '끝난 경주' → stale 표기(프론트가 표시 억제)
+    age = time.time() - (rec.get("t") or 0)
     return jsonify({
         "raceKey": rk,
         "updatedAt": rec.get("t"),
+        "ageSeconds": round(age),
+        "stale": age > STALE_ACTIVE_SEC,
         "counts": {"quinella": len(rec.get("quinella") or []),
                    "exacta": len(rec.get("exacta") or []),
                    "trio": len(rec.get("trio") or [])},
