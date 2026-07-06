@@ -105,6 +105,21 @@
     }
     return null;
   }
+  // [발주시각 오탐 방지] 배당판의 "남은시간"(현재 표시 경주 전용) 라벨만 엄격히 읽어 ms 반환.
+  //   상단 네비게이션의 다른 경주 "발주 HH:MM"을 발주시각으로 잘못 잡던 버그 방지용.
+  //   pageRemainingMs()의 3번째 폴백(라벨 없는 "N분 M초")은 오탐 우려로 제외한다.
+  function labeledRemainingMs() {
+    try {
+      const txt = (document.body && document.body.innerText) || '';
+      let m = txt.match(/남은\s*시간[\s\S]{0,12}?(\d{1,2})\s*분\s*(\d{1,2})\s*초/);
+      if (!m) m = txt.match(/남은\s*시간[\s\S]{0,12}?(\d{1,2})\s*[:：]\s*(\d{2})/);
+      if (m) {
+        const ms = (parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) * 1000;
+        if (ms >= 0 && ms <= 12 * 3600 * 1000) return ms;  // 0~12h 방어
+      }
+    } catch (_) { /* noop */ }
+    return null;
+  }
   // HH:MM → 오늘(이미 지났으면 내일) epoch ms. timer.js timeToDeadline 과 동일 규칙.
   function postTimeToDeadline(hh, mm) {
     const d = new Date(); d.setHours(hh, mm, 0, 0);
@@ -115,9 +130,20 @@
   /** 발주시각을 감지해 storage(timerDeadline·timerTime)에 자동 설정 → timer.js 카운트다운 자동 시작.
    *  같은 경주에서 사용자가 수동 입력했으면 존중하고, 경주가 바뀌면 자동 감지가 다시 우선한다. */
   function autoDetectPostTime(raceKey) {
-    const pt = detectPostTime();
-    if (!pt) return Promise.resolve(null);
-    const ms = postTimeToDeadline(pt.hh, pt.mm);
+    // [최우선] 배당판 "남은시간"(현재 표시 경주 전용)이 있으면 그것으로 발주시각 산출.
+    //   상단 네비의 다른 경주 "발주 HH:MM"(예: 大井12R 07:23)을 잘못 잡던 버그 방지.
+    let pt, ms;
+    const remain = labeledRemainingMs();
+    if (remain != null) {
+      ms = Date.now() + remain;
+      const d = new Date(ms);
+      pt = { hh: d.getHours(), mm: d.getMinutes(),
+             raw: `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` };
+    } else {
+      pt = detectPostTime();
+      if (!pt) return Promise.resolve(null);
+      ms = postTimeToDeadline(pt.hh, pt.mm);
+    }
     return new Promise((resolve) => {
       try {
         chrome.storage.local.get({ timerDeadline: 0, deadlineSource: '', autoDeadlineRaceKey: '' }, (v) => {
