@@ -3433,6 +3433,41 @@ def _combo_dict(arr):
     return d
 
 
+EXA_REVERSAL_TOPN = 3   # [다중조합] 영구 기록할 상위 저배당(유력) 쌍승 조합 수
+
+
+def _exa_fav_dirs(exa_dict):
+    """쌍승(방향성) 배당 dict('a+b'→odds) → {무순쌍: (유력방향튜플, 유력배당)}.
+    양방향 중 저배당 방향을 '유력(1→2착)'으로 판단. 한 방향만 있으면 그 방향."""
+    raw = {}
+    for kk, vv in (exa_dict or {}).items():
+        try:
+            ov = float(vv)
+        except (TypeError, ValueError):
+            continue
+        if ov <= 0:
+            continue
+        parts = str(kk).split("+")
+        if len(parts) != 2:
+            continue
+        try:
+            a, b = int(parts[0]), int(parts[1])
+        except ValueError:
+            continue
+        raw[(a, b)] = ov
+    out = {}
+    for (a, b), ov in raw.items():
+        key = tuple(sorted((a, b)))
+        rev = raw.get((b, a))
+        fav_dir, fav_odds = (a, b), ov
+        if rev is not None and rev < ov:
+            fav_dir, fav_odds = (b, a), rev
+        rec = out.get(key)
+        if rec is None or fav_odds < rec[1]:
+            out[key] = (fav_dir, fav_odds)
+    return out
+
+
 def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_reset=False):
     """경주별 히스토리 파일에 스냅샷 1건 추가. 직전 대비 급락(≤-20%) 이상감지 기록.
     baseline_reset=True(경주 전환 감지)면 이 스냅샷을 새 기준값으로만 저장(이상감지 계산 생략)."""
@@ -3493,31 +3528,17 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
                     continue
                 if pct <= -20:
                     anomalies.append(f"급락감지: {'+'.join(map(str, k))} {pct}%")
-        # [이상감지 누적] 쌍승(exacta) 역전 → 영구 기록(마감 후에도 유지).
-        #   최저(가장 유력한) 쌍승 조합의 순서가 (a,b)→(b,a)로 뒤집히면 1·2착 예측 역전.
-        def _low_exa(exa_dict):
-            best = None
-            for kk, vv in (exa_dict or {}).items():
-                try:
-                    ov = float(vv)
-                except (TypeError, ValueError):
-                    continue
-                if ov <= 0:
-                    continue
-                parts = str(kk).split("+")
-                if len(parts) != 2:
-                    continue
-                try:
-                    pair = (int(parts[0]), int(parts[1]))
-                except ValueError:
-                    continue
-                if best is None or ov < best[1]:
-                    best = (pair, ov)
-            return best[0] if best else None
-        prev_low = _low_exa(last.get("exacta"))
-        cur_low = _low_exa(_combo_dict(exacta))
-        if prev_low and cur_low and cur_low == prev_low[::-1] and cur_low != prev_low:
-            anomalies.append(f"쌍승역전: {cur_low[0]}↔{cur_low[1]}")
+        # [이상감지 누적] 쌍승(exacta) 방향 역전 → 영구 기록(마감 후에도 유지).
+        #   [다중조합] 상위 EXA_REVERSAL_TOPN개 저배당(유력) 조합 각각의 유력방향이
+        #   (a,b)→(b,a)로 뒤집히면 1·2착 예측 역전으로 기록(기존 '최저 1조합'만 → 다중 확장).
+        #   무순쌍당 1회, 조합별로 별도 라인(피드는 text 기준 중복제거·별도 표시).
+        prev_fav = _exa_fav_dirs(last.get("exacta"))
+        cur_fav = _exa_fav_dirs(_combo_dict(exacta))
+        cur_top = sorted(cur_fav.items(), key=lambda kv: kv[1][1])[:EXA_REVERSAL_TOPN]
+        for _key, (cur_dir, _od) in cur_top:
+            pv = prev_fav.get(_key)
+            if pv and pv[0] == cur_dir[::-1] and pv[0] != cur_dir:
+                anomalies.append(f"쌍승역전: {cur_dir[0]}↔{cur_dir[1]}")
     doc["snapshots"].append({
         "time": time.strftime("%H:%M:%S", time.localtime(now)),
         "minutes_before": minutes_before,
