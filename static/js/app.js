@@ -2672,7 +2672,7 @@
       `<span class="chip">${r.combo[0]}-${r.combo[1]} ${r.prevRank}위→${r.curRank}위 (${r.delta > 0 ? '▲' : '▼'}${Math.abs(r.delta)})</span>`).join(' ');
     const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     el.innerHTML = `
-      <div class="matrix-title">🚨 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.baselineReset ? '⚠️ 기준값 재설정됨' : a.baselineSet ? '🎯 기준값 설정됨' : a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>
+      <div class="matrix-title">🚨 이상감지 ${a.sport && a.sport !== 'horse' ? `<span class="chip" style="border-color:#a855f7;color:#c4b5fd">${a.sport === 'cycle' ? '🚴 경륜' : '🚤 경정'}</span> ` : ''}<span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.baselineReset ? '⚠️ 기준값 재설정됨' : a.baselineSet ? '🎯 기준값 설정됨' : a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>
       ${a.baselineReset ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffd24f;background:rgba(255,210,79,.12);border-radius:6px;color:#ffd24f">⚠️ <b>비정상 변동폭 감지 → 기준값 재설정</b> — 이전 경주 배당 잔존 의심(95%+ 급락 다수). 이번 수집을 새 기준값으로 설정했습니다. <b>다음 수집부터 변동을 계산</b>합니다.</div>`
         : a.baselineSet ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.1);border-radius:6px;color:#7dd3fc">🎯 <b>기준값 설정됨</b> — 새 경주 첫 수집입니다. 변동폭은 <b>다음 수집부터</b> 계산됩니다.</div>` : ''}
       ${a.afterClose ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #8a94a6;background:rgba(138,148,166,.14);border-radius:6px;color:#b8c0cc">⚠️ <b>마감 후 수집</b> — 발주(T-0) 이후 신호는 <b>참고만</b> 하세요. 급락이 있어도 <b>추천 조합·보험에는 반영되지 않습니다</b>(마감 전 기준 유지).</div>` : ''}
@@ -2686,6 +2686,7 @@
       ${flips ? `<div style="margin:6px 0"><span class="hint">🔀 쌍승 역전</span><br>${flips}</div>` : ''}
       ${ranks ? `<div style="margin:6px 0"><span class="hint">📊 순위 변동</span><br>${ranks}</div>` : ''}
       <div style="margin:6px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
+      ${renderIntegratedGrades(a)}
       ${renderSignalQuality(a.signalQuality)}
       ${renderEliminationHTML(a.elimination)}
       ${renderBetRecommend(a)}
@@ -2894,6 +2895,48 @@
         <thead><tr><th>등급</th><th>마번</th><th>마명</th><th>기수</th><th>최근착순</th><th>점수</th><th>플래그</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
+  }
+
+  // [수정#4] 전적등급 + 배당유력마 통합 표시 — 따로 나오던 두 신호를 말별 한 줄로 합쳐 보여준다.
+  //   예) "1번 A등급 (전적65·배당유력)" / "4번 (배당유력)" / "7번 A등급 (전적80·배당신호없음)".
+  //   기존 '⭐ 유력마' 줄·'🏇 전적 등급' 표는 그대로 두고, 이 통합 카드를 추가만 한다.
+  function renderIntegratedGrades(a) {
+    const form = a.form || [];
+    const keys = (a.keyHorses || []).map(Number);
+    const anomaly = a.anomalyHorse != null ? +a.anomalyHorse : null;
+    if (!form.length && !keys.length) return '';
+    const fmap = {}; form.forEach((h) => { fmap[h.no] = h; });
+    const gc = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#8a94a6' };
+    const nos = Array.from(new Set([...form.map((h) => h.no), ...keys]));
+    const rows = nos.map((no) => {
+      const f = fmap[no] || null;
+      return {
+        no,
+        grade: f ? f.grade : null,
+        score: f ? f.totalScore : null,
+        name: f ? (f.name || '') : '',
+        isKey: keys.includes(no),
+        isAnom: anomaly === no,
+      };
+    });
+    // 정렬: 배당유력 우선 → 전적점수 내림차순 → 마번
+    rows.sort((x, y) => (y.isKey - x.isKey) || ((y.score || 0) - (x.score || 0)) || (x.no - y.no));
+    const line = rows.map((r) => {
+      const tags = [];
+      if (r.score != null) tags.push(`전적${r.score}`);
+      if (r.isKey) tags.push('<b style="color:#4ea1ff">배당유력</b>');
+      else if (r.grade) tags.push('<span style="color:#8a94a6">배당신호없음</span>');
+      if (r.isAnom) tags.push('<b style="color:#ff5c5c">🚨이상감지</b>');
+      const gcol = gc[r.grade] || '#c7cfdb';
+      const gradeTxt = r.grade ? `<b style="color:${gcol}">${r.grade}등급</b>` : '<span class="hint">전적없음</span>';
+      return `<div style="margin:2px 0;font-size:13px">
+        <b style="color:#4ea1ff;min-width:34px;display:inline-block">${r.no}번</b> ${gradeTxt}
+        ${r.name ? `<span class="hint">${esc(r.name)}</span>` : ''}
+        <span class="hint">(${tags.join('·') || '-'})</span></div>`;
+    }).join('');
+    return `<div style="margin:8px 0;padding:8px 10px;border:1px solid #2b6cb0;border-radius:8px;background:rgba(43,108,176,.08)">
+      <div class="matrix-title" style="font-size:13px;color:#7db6ff">🎖️ 통합 등급 <span class="hint" style="font-weight:400">전적등급 + 배당유력마 한눈에</span></div>
+      ${line}</div>`;
   }
 
   // [신호 품질 필터링] 초과 급락(집중도) + 상황별 가중치 + 적응형 통합 등급

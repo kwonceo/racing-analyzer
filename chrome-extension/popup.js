@@ -17,7 +17,9 @@ const els = {
   overlayEnabled: $('overlayEnabled'),   // [보완#1] 배당판 오버레이 ON/OFF
   interval: $('interval'),
   autoMode: $('autoMode'),
+  sport: $('sport'),           // [수정#3] 종목: horse|cycle|boat
   market: $('market'),
+  marketRow: $('marketRow'),
   japanTypeRow: $('japanTypeRow'),
   jtLocal: $('jtLocal'),
   jtCentral: $('jtCentral'),
@@ -63,14 +65,16 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', market: 'auto', japanType: 'local', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null, overlayEnabled: false },
+    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', sport: 'horse', market: 'auto', japanType: 'local', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null, overlayEnabled: false },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
       if (els.overlayEnabled) els.overlayEnabled.checked = !!v.overlayEnabled;   // [보완#1] 오버레이 상태 복원
       els.interval.value = String(v.intervalSec || 30);
       els.autoMode.value = v.autoMode || 'triple';
+      if (els.sport) els.sport.value = v.sport || 'horse';   // [수정#3] 종목 복원
       if (els.market) els.market.value = v.market || 'auto';
       renderJapanType(v.japanType || 'local');   // [1번] 중앙/지방 버튼 상태
+      syncSportUI();                              // [수정#3] 경륜/경정이면 경마 지역/종류 숨김
       syncJapanTypeUI();
       els.raceKey.value = v.raceKey || '';
       renderStatus(v.status);
@@ -144,6 +148,17 @@ if (els.market) els.market.addEventListener('change', () => {
   chrome.storage.local.set({ market: els.market.value });
   syncJapanTypeUI();
 });
+// [수정#3] 종목 변경(경마/경륜/경정) — 경륜·경정은 경마 지역·일본 종류 선택을 숨긴다.
+if (els.sport) els.sport.addEventListener('change', () => {
+  chrome.storage.local.set({ sport: els.sport.value });
+  syncSportUI();
+  syncJapanTypeUI();
+});
+function syncSportUI() {
+  const isHorse = !els.sport || els.sport.value === 'horse';
+  if (els.marketRow) els.marketRow.style.display = isHorse ? '' : 'none';
+  if (els.japanTypeRow && !isHorse) els.japanTypeRow.style.display = 'none';
+}
 
 // [1번] 일본 중앙(JRA)/지방(NAR) 선택 — 중앙=배당만·마감1분30초전, 지방=전적+배당
 function renderJapanType(jt) {
@@ -154,8 +169,10 @@ function renderJapanType(jt) {
   if (els.jtCentral) els.jtCentral.style.cssText = base + (jt === 'central' ? on : off);
 }
 function syncJapanTypeUI() {
-  // 한국경마 모드에서는 일본 종류 선택을 숨긴다.
-  if (els.japanTypeRow) els.japanTypeRow.style.display = (els.market && els.market.value === 'korea') ? 'none' : '';
+  // 한국경마 모드 또는 경륜/경정(비-경마)에서는 일본 종류 선택을 숨긴다.
+  const nonHorse = els.sport && els.sport.value !== 'horse';
+  const hide = nonHorse || (els.market && els.market.value === 'korea');
+  if (els.japanTypeRow) els.japanTypeRow.style.display = hide ? 'none' : '';
 }
 [els.jtLocal, els.jtCentral].forEach((b) => {
   if (b) b.addEventListener('click', () => {

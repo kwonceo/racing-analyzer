@@ -1208,8 +1208,10 @@ def triple_ingest():
     hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주) 배당 완전 제거
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
     hist = hist[-12:]
+    # [수정#3 경륜/경정] 종목 태그 저장(horse|cycle|boat). 기본 horse(경마) → 기존 동작 불변.
+    sport = (body.get("sport") or prev.get("sport") or "horse")
     db[rk] = {"quinella": q, "exacta": x, "trio": tr, "win": win, "history": hist,
-              "source": body.get("source"), "t": now}
+              "source": body.get("source"), "sport": sport, "t": now}
     # [경주전환 잔존 방어] 30분+ 미갱신된 '끝난 직전 경주'를 활성 캐시에서 정리(히스토리는 보존)
     #   → max-t 폴백이 직전 경주 배당을 계속 끌어오던 문제 차단.
     pruned = _triple_prune_stale(db, keep_rk=rk)
@@ -2614,8 +2616,10 @@ def _bmed_insurance(key_horses, curQ, signal_confidence, inverse):
     (이런 경기 유형일 때만 '보험용'으로 정상 추천과 함께 제시 → 사용자가 보고 선택)."""
     horses = list(dict.fromkeys(int(h) for h in (key_horses or [])))
     h4 = horses[:4]
-    cond_compress = len(horses) >= 4
-    # 1착 신뢰도(배당 기반): 최저 4개 복승 조합 중 1착축(h0) 포함 비율(%)
+    # [수정#2 조건완화] 유력마 4두→3두 이상이면 매트릭스 표시(데이터 부족 시에도 보험형 제공).
+    #   3두면 1+2·1+3(2조합), 4두면 1+2·1+3·1+4(3조합) 자동 생성.
+    cond_compress = len(horses) >= 3
+    # 1착 신뢰도(배당 기반): 최저 4개 복승 조합 중 1착축(h0) 포함 비율(%) — 참고 지표(게이트 아님)
     fav_conf = 0.0
     if h4 and curQ:
         cheapest4 = [k for k, _ in sorted(curQ.items(), key=lambda kv: kv[1])[:4]]
@@ -2626,20 +2630,21 @@ def _bmed_insurance(key_horses, curQ, signal_confidence, inverse):
     cond_ab = ab_odds is not None and ab_odds >= 3.0   # 3배+ = 원금보전 여력(저배당은 제한)
     inv_det = bool(inverse and inverse.get("detected"))
     conditions = [
-        {"label": "유력마 4두 압축", "ok": cond_compress},
-        {"label": "1착 신뢰도 70%+", "ok": cond_conf, "value": f"{int(fav_conf)}%"},
+        {"label": "유력마 3두+ 압축", "ok": cond_compress, "value": f"{len(horses)}두"},
+        {"label": "1착 신뢰도(참고)", "ok": cond_conf, "value": f"{int(fav_conf)}%"},
         {"label": "A+B 배당 3배+(원금보전)", "ok": cond_ab, "value": (f"{ab_odds}배" if ab_odds else "-")},
         {"label": "역배열 미감지", "ok": not inv_det},
     ]
-    # 활성화 = 구조 조건(4두 압축 + 1착 신뢰도 + 역배열 아님). A+B<3(저배당)이면 활성이되 원금보전 제한 표시.
-    active = cond_compress and cond_conf and not inv_det and (ab_odds is not None)
+    # [수정#2 조건완화] 활성화 = 유력마 3두+ 압축 + 역배열 아님 + A+B 복승배당 존재.
+    #   신뢰도 70% 게이트 제거(데이터 부족 시에도 표시). 신뢰도는 참고 지표로만 노출.
+    active = cond_compress and not inv_det and (ab_odds is not None)
     res = {"active": active, "conditions": conditions, "favConf": fav_conf,
            "anchor": h4[0] if h4 else None, "horses": h4, "abOdds": ab_odds,
            "usage": "유력마 압축 + 1착 확실 (역배열 아님)"}
     if not active:
-        res["alternate"] = "역배열형" if inv_det else ("분산형" if len(horses) < 2 else "정상 추천")
+        res["alternate"] = "역배열형" if inv_det else ("분산형" if len(horses) < 3 else "정상 추천")
         res["altReason"] = ("역배열 감지됨 → BMED 역배열형 권장" if inv_det else
-                            "유력마 압축/신뢰도/배당 조건 미충족 → 정상 추천 사용")
+                            "유력마 3두 미만 또는 A+B 복승배당 미수집 → 정상 추천 사용")
         return res
     # 3조합: 1+2, 1+3, 1+4 (1착축 h0 고정)
     combos = []
@@ -2663,7 +2668,11 @@ def _bmed_insurance(key_horses, curQ, signal_confidence, inverse):
             c["ratio"] = p["ratio"] if p else None
             c["payoutRatio"] = p["payoutRatio"] if p else None
     else:                # 저/고배당 = 고정 비율(합 100%)
-        for c, r in zip(combos, ratios):
+        # [수정#2] 3두(2조합)면 앞 2개 비율만 쓰이므로 합이 100% 미만 → 조합 수만큼 재정규화.
+        rr = ratios[:len(combos)]
+        rsum = sum(rr) or 1.0
+        rr = [round(x / rsum, 3) for x in rr]
+        for c, r in zip(combos, rr):
             c["ratio"] = r
             c["payoutRatio"] = round(r * c["odds"], 3)
     payouts = [c["payoutRatio"] for c in combos if c.get("payoutRatio") is not None]
@@ -3454,6 +3463,7 @@ def _triple_analyze(rk, rec):
 
     return {
         "raceKey": rk, "hasPrev": bool(prev),
+        "sport": rec.get("sport") or "horse",   # [수정#3] 종목(horse|cycle|boat) → 프론트 배지
         "alertSignal": alert_signal,   # [신규 3번] 경고 신호 감지 요약(배너)
         "signalTimeline": signal_timeline,   # [신규 3·4·5번] 신호말 변경이력·안정화·유효시점
         "nextRaceBlocked": bool(signal_timeline and signal_timeline.get("excluded", {}).get("next_race")),

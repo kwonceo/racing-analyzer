@@ -759,6 +759,20 @@
     return market === 'korea' || isKoreaByRaceKey(raceKey) || pageLooksKorean();
   }
 
+  // [수정#3] 경륜/경정 자동 감지 — asyukk34 사설 배당판의 탭/본문 텍스트로 종목을 구분.
+  //   팝업 종목이 '경마'인데 페이지가 경륜/경정으로 보이면 이 감지값을 사용(수동 선택이 우선).
+  //   반환: 'cycle'(경륜) | 'boat'(경정) | null(경마/불명).
+  function detectSport() {
+    try {
+      const body = (((document.body && document.body.innerText) || '') + ' ' + location.href);
+      // 경정(보트) 우선 판정 → 경륜 → 없으면 null(경마)
+      if (/(경정|競艇|보트|모터보트|미사리|경정장|보트경주)/.test(body)) return 'boat';
+      if (/(경륜|競輪|사이클|자전거|벨로드롬|velodrome|경륜장|광명돔|선수경주)/.test(body)) return 'cycle';
+    } catch (_) { /* */ }
+    return null;
+  }
+  const SPORT_LABEL = { horse: '경마', cycle: '경륜', boat: '경정' };
+
   async function collectTripleKeiba(reason) {
     if (!isKeibaOddsPage()) {
       setTripleProgress('❌ 배당판 페이지 아님', true);
@@ -777,13 +791,13 @@
       .map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10 }))
       .sort((a, b) => a.odds - b.odds)
       .slice(0, cap);
-    const payload = { raceKey, quinella: [], exacta: [], trio: [], capturedAt: new Date().toISOString(), source: location.href };
-    // [2번] 한국모드=복승만. [삼복승 제거] 일본=복승+쌍승만(삼복승 fetch 자체를 하지 않음).
+    const payload = { raceKey, quinella: [], exacta: [], trio: [], sport: 'horse', capturedAt: new Date().toISOString(), source: location.href };
+    // [2번] 한국모드=복승만. [수정#1 삼복승 복구] 일본=복승+쌍승+삼복승 3종(keiba는 Odds3LenFuku fetch로 안정 수집).
     const steps = isKorea
       ? TRIPLE_STEPS.filter((s) => s.key === 'quinella')
-      : TRIPLE_STEPS.filter((s) => s.key !== 'trio');   // 일본: 복승+쌍승 (삼복승 제외)
+      : TRIPLE_STEPS;   // 일본: 복승+쌍승+삼복승 3종
     if (isKorea) console.log('[한국모드] 복승만 수집 - 쌍승/삼복승 생략');
-    else console.log('[삼복승 제거] 일본경마 복승+쌍승만 수집 - 삼복승 생략');
+    else console.log('[삼복승 복구] 일본경마 복승+쌍승+삼복승 3종 수집');
     try {
       for (const st of steps) {
         setTripleProgress(`${st.label} 수집중…`);        // "복승 수집중…" → "쌍승 수집중…" → …
@@ -1367,13 +1381,18 @@
   async function collectTripleByTabs(reason) {
     const site = detectSite();
     const oddsClass = site === 'asyukk' ? 'odds_content' : null;
-    const { raceKey: override, timerDeadline, market, japanType } = await getSettings();
+    const { raceKey: override, timerDeadline, sport, market, japanType } = await getSettings();
     const raceKey = (override && override.trim()) || extractRaceKey();
+    // [수정#3] 종목 결정: 팝업 선택(수동)이 우선, '경마'인데 페이지가 경륜/경정이면 자동 감지값 사용.
+    const effSport = (sport && sport !== 'horse') ? sport : (detectSport() || 'horse');
+    const isCycleBoat = (effSport === 'cycle' || effSport === 'boat');   // 경륜·경정: 6명·복승+쌍승만·전적 없음
+    if (isCycleBoat) console.log(`[${SPORT_LABEL[effSport]}] 종목=${SPORT_LABEL[effSport]} → 복승+쌍승만 수집(삼복승·전적 생략)`, (sport === 'horse' ? '(자동 감지)' : '(수동 선택)'));
     // [5번][한국모드 강화] 종목=한국 이거나 raceKey/페이지에서 KRA(서울/부산/제주/과천) 감지 시 → 무조건 복승만.
     //   한국경마: 출마표2(keiba DebaTable) 수집 생략(전적은 PDF에서) + 쌍승·삼복승 탭 클릭 완전 차단.
-    const isKorea = isKoreaMode(raceKey, market);
+    //   [수정#3] 경륜/경정은 한국경마 판정을 하지 않는다(경마장명 오탐 방지).
+    const isKorea = !isCycleBoat && isKoreaMode(raceKey, market);
     if (isKorea) console.log('[한국모드] 복승만 수집 - 쌍승/삼복승 생략', market !== 'korea' ? '(감지: raceKey/페이지, raceKey=' + (raceKey || '미상') + ')' : '(종목=한국)');
-    const isCentral = !isKorea && japanType === 'central';   // [1번] 일본 중앙(JRA): 전적표 없음 → 배당만 분석
+    const isCentral = !isKorea && !isCycleBoat && japanType === 'central';   // [1번] 일본 중앙(JRA): 전적표 없음 → 배당만 분석
     if (!raceKey) {
       setTripleProgress('❌ raceKey 필요', true);
       return { ok: false, error: '사설 사이트는 raceKey 자동 감지가 안 됩니다. 팝업 raceKey 칸에 입력 후 다시 시도하세요.' };
@@ -1454,6 +1473,10 @@
         // [1번] 일본 중앙(JRA): 전적표(출마표2)가 없다 → 수집 시도 자체를 생략, 배당만으로 분석.
         console.log('[전적수집] 일본 중앙경마(JRA) 모드 → 전적표 없음, 출마표2 수집 생략(배당만 분석)');
         setTripleProgress('중앙경마(JRA) — 배당만 분석 (전적표 생략)');
+      } else if (isCycleBoat) {
+        // [수정#3] 경륜/경정: 출마표2(전적) 개념이 없다 → 수집 생략, 배당만으로 분석.
+        console.log(`[전적수집] ${SPORT_LABEL[effSport]} 모드 → 전적표 없음, 출마표2 수집 생략(배당만 분석)`);
+        setTripleProgress(`${SPORT_LABEL[effSport]} — 배당만 분석 (전적표 생략)`);
       } else {
         // [1번] 일본 지방(NAR): 전적표 있음 → 출마표2(keiba DebaTable) 수집
         setTripleProgress('출마표2 전적 수집중…(keiba DebaTable)');
@@ -1468,16 +1491,39 @@
         console.log(`[배당수집] 전적 추출: ${starters.length}두`);
       }
 
-      // 4) [삼복승 제거] 복승+쌍승만 사용 — 삼복승 탭 클릭/수집을 완전히 제거(일본·한국 공통).
-      //    기존 삼복승 수집 함수(collectTrioByAxis 등)는 코드로 보존하되 여기서 호출하지 않는다.
-      const trio = [];
-      console.log('[삼복승 제거] 삼복승 수집 안 함 — 복승+쌍승만 사용');
+      // 4) [수정#1 삼복승 복구] 일본경마: 삼복승 탭 클릭 + 유력마 3두 축마 버튼 자동 클릭 → 3종 수집.
+      //    한국경마는 복승만이므로 생략. 삼복승은 불안정할 수 있어 독립 try/catch로 격리(실패해도 복승·쌍승은 유지).
+      let trio = [];
+      if (isKorea) {
+        console.log('[한국모드] 삼복승 수집 생략(복승만)');
+      } else if (isCycleBoat) {
+        console.log(`[${SPORT_LABEL[effSport]}] 삼복승 수집 생략(복승+쌍승만)`);
+      } else {
+        try {
+          setTripleProgress('삼복승 수집중…(유력마 축마 클릭)');
+          const keyH = localKeyHorses(quinella);   // 상위 복승조합 등장빈도+인기가중 유력마 3두
+          console.log('[삼복승수집] 유력마(축) 후보:', keyH.join('·') || '(없음)');
+          if (keyH.length) {
+            const rt = await clickTabAndWait(['삼복승', '삼복', '三連複', '3連複', '３連複', '삼연복'], sig, '삼복승', true, 5000);
+            console.log(`[삼복승수집] 탭 클릭 결과: ${rt.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${rt.changed ? '변경 확인' : '⚠ 변화 없음(복승 화면 그대로일 수 있음)'}`);
+            sig = rt.sig || oddsSignature();
+            trio = await collectTrioByAxis(keyH, oddsClass);   // 유력마 각각을 축으로 클릭 → 3두 조합
+            console.log(`[삼복승수집] 추출된 조합 수: ${trio.length}개`);
+            if (!trio.length) console.warn('[삼복승수집] ⚠ 삼복승 미수집 — 복승/쌍승만으로 분석 진행');
+            // 복승으로 복귀(다음 수집 사이클 안정화)
+            await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false);
+          } else {
+            console.warn('[삼복승수집] 유력마 산출 불가(복승 조합 부족) → 삼복승 생략');
+          }
+        } catch (e) { console.warn('[삼복승수집] 실패 — 복승/쌍승만으로 진행', e); }
+      }
 
       const payload = {
         raceKey, win, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
+        sport: effSport,   // [수정#3] 종목(horse|cycle|boat) → 서버 저장·분석 배지
         deadline: timerDeadline || null, capturedAt: new Date().toISOString(), source: location.href,
       };
-      console.log(`[배당수집] ===== 완료: 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·전적 ${starters.length}두 (삼복승 미사용) =====`);
+      console.log(`[배당수집] ===== 완료: [${SPORT_LABEL[effSport]}] 복승 ${payload.quinella.length}·쌍승 ${payload.exacta.length}·삼복승 ${payload.trio.length}·전적 ${starters.length}두 =====`);
       if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length && !starters.length) {
         setTripleProgress('❌ 배당·전적 모두 없음(콘솔 로그 확인)', true);
         return { ok: false, error: '배당·전적을 찾지 못했습니다. F12 콘솔의 로그를 확인하세요.' };
@@ -1522,7 +1568,7 @@
       chrome.storage.local.get(
         // autoMode: 'triple'(전체 3종 수집) — 단승 스냅샷 모드는 폐지됨 · timerDeadline: 발주시각(epoch ms)
         // japanType: 'local'(지방 NAR·전적+배당) | 'central'(중앙 JRA·배당만)
-        { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', timerDeadline: 0, market: 'auto', japanType: 'local' },
+        { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', timerDeadline: 0, sport: 'horse', market: 'auto', japanType: 'local' },
         (v) => resolve(v)
       );
     });
