@@ -776,6 +776,220 @@
       if (!html.trim()) { $('#bulkResultSummary').innerHTML = '<p class="err">결과표 HTML을 붙여넣으세요.</p>'; return; }
       run({ html });
     }); }
+    initQuickEntry();      // [2번-방법3] 순서대로 빠른 입력
+    initFailureReview();   // [복기 학습] 실패 대시보드 + 명예의 전당
+  }
+
+  // ══════════ [2번-방법3] 순서대로 빠른 입력 (경주 시간순 나열 → 1~3착만 입력) ══════════
+  function _today() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+
+  function initQuickEntry() {
+    const load = $('#quickLoad'); if (!load) return;
+    { const dt = $('#quickDate'); if (dt && !dt.value) dt.value = _today(); }
+    load.addEventListener('click', loadQuickEntry);
+    { const b = $('#quickSaveAll'); if (b) b.addEventListener('click', () => saveQuickAll()); }
+  }
+
+  async function loadQuickEntry() {
+    const el = $('#quickEntryList'); if (!el) return;
+    const date = ($('#quickDate') && $('#quickDate').value) || _today();
+    const pending = $('#quickPendingOnly') && $('#quickPendingOnly').checked ? '&pending=1' : '';
+    el.innerHTML = '<p class="hint">⏳ 경주 불러오는 중…</p>';
+    let d; try { d = await (await fetch(`/api/races/list?date=${encodeURIComponent(date)}${pending}`)).json(); }
+    catch (e) { el.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+    const races = d.races || [];
+    if (!races.length) { el.innerHTML = `<p class="hint">${esc(date)} 분석 경주가 없습니다. ${pending ? '(미입력만 표시 중 — 체크 해제 시 전체)' : ''}</p>`; return; }
+    const dl = races.map((r) => `<option value="${esc(r.raceKey)}">`).join('');
+    const rows = races.map((r, i) => {
+      const t = r.top3 || [];
+      const done = r.hasResult ? '<span style="color:#38d39f">✅ 입력됨</span>' : '<span class="hint">미입력</span>';
+      return `<tr data-rk="${esc(r.raceKey)}">
+        <td class="hint" style="white-space:nowrap">${i + 1}. ${esc(r.raceKey)}</td>
+        <td><input class="cfg-input q-1" type="number" min="1" style="width:52px" value="${t[0] != null ? t[0] : ''}"></td>
+        <td><input class="cfg-input q-2" type="number" min="1" style="width:52px" value="${t[1] != null ? t[1] : ''}"></td>
+        <td><input class="cfg-input q-3" type="number" min="1" style="width:52px" value="${t[2] != null ? t[2] : ''}"></td>
+        <td><input class="cfg-input q-4" type="number" min="1" style="width:52px" placeholder="4착"></td>
+        <td><input class="cfg-input q-q" type="number" min="1" step="0.1" style="width:64px" placeholder="복승배"></td>
+        <td><input class="cfg-input q-t" type="number" min="1" step="0.1" style="width:64px" placeholder="삼복승배"></td>
+        <td><button class="btn q-save" style="padding:2px 8px">저장</button> <span class="q-stat">${done}</span></td>
+      </tr>`;
+    }).join('');
+    el.innerHTML = `<datalist id="raceNameList">${dl}</datalist>
+      <table class="data-table"><thead><tr><th>경주(시간순)</th><th>1착</th><th>2착</th><th>3착</th><th>4착</th><th>복승</th><th>삼복승</th><th>저장</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      <p class="hint" style="margin-top:4px">저장 시 즉시 적중판정·복기가 실행됩니다. 미적중이면 아래에 복기 리포트가 표시됩니다.</p>
+      <div id="quickReviewOut" style="margin-top:8px"></div>`;
+    el.querySelectorAll('.q-save').forEach((btn) => btn.addEventListener('click', (e) => {
+      const tr = e.target.closest('tr'); if (tr) saveQuickRow(tr);
+    }));
+  }
+
+  async function saveQuickRow(tr) {
+    const rk = tr.getAttribute('data-rk');
+    const g = (cls) => { const e = tr.querySelector(cls); return e ? e.value.trim() : ''; };
+    const n1 = g('.q-1'), n2 = g('.q-2'), n3 = g('.q-3'), n4 = g('.q-4');
+    const stat = tr.querySelector('.q-stat');
+    if (!n1) { if (stat) stat.innerHTML = '<span class="err">1착 필수</span>'; return; }
+    const result = { '1st': parseInt(n1, 10) };
+    if (n2) result['2nd'] = parseInt(n2, 10);
+    if (n3) result['3rd'] = parseInt(n3, 10);
+    if (n4) result['4th'] = parseInt(n4, 10);
+    const body = { raceKey: rk, result, stake: _defaultStake() };
+    const q = g('.q-q'), t = g('.q-t');
+    if (q) body.quinellaOdds = parseFloat(q);
+    if (t) body.trifectaOdds = parseFloat(t);
+    if (stat) stat.innerHTML = '⏳';
+    let d; try {
+      d = await (await fetch('/api/history/record-result', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      })).json();
+    } catch (e) { if (stat) stat.innerHTML = `<span class="err">${esc(e.message)}</span>`; return; }
+    if (d.error) { if (stat) stat.innerHTML = `<span class="err">${esc(d.error)}</span>`; return; }
+    const rec = d.record || {};
+    const hit = rec.was_hit;
+    if (stat) stat.innerHTML = hit ? '<span style="color:#38d39f;font-weight:700">✅ 적중</span>' : '<span style="color:#f87171;font-weight:700">❌ 미적중</span>';
+    // 미적중 → 복기 리포트 자동 표시
+    if (!hit) showFailureReport(rk);
+    try { loadLearningStats(); } catch (_) { /* */ }
+  }
+
+  async function saveQuickAll() {
+    const rows = document.querySelectorAll('#quickEntryList tr[data-rk]');
+    const msg = $('#quickMsg');
+    let n = 0;
+    for (const tr of rows) {
+      if (tr.querySelector('.q-1') && tr.querySelector('.q-1').value.trim()) { await saveQuickRow(tr); n++; }
+    }
+    if (msg) { msg.style.color = '#38d39f'; msg.textContent = `${n}개 경주 저장 완료`; }
+  }
+
+  /** [3번-B] 미적중 경주 복기 리포트를 서버에서 받아 표시(순서대로 빠른입력 하단 공용). */
+  async function showFailureReport(rk, targetSel) {
+    const out = $(targetSel || '#quickReviewOut'); if (!out) return;
+    out.insertAdjacentHTML('afterbegin', `<div id="fr-loading" class="hint">⏳ ${esc(rk)} 복기 생성 중…</div>`);
+    let d; try { d = await (await fetch(`/api/failure/report?raceKey=${encodeURIComponent(rk)}`)).json(); }
+    catch (e) { const l = $('#fr-loading'); if (l) l.remove(); return; }
+    const l = $('#fr-loading'); if (l) l.remove();
+    if (!d.ok || d.was_hit) return;
+    out.insertAdjacentHTML('afterbegin', renderFailureReport(d));
+  }
+
+  /** [2·3번] 복기 리포트 카드(실패 유형 + 정답말 역추적 타임라인 + 개선점). */
+  function renderFailureReport(d) {
+    const f = d.failure || {};
+    const tl = (d.timelines || {});
+    const sigColor = (s) => /강한/.test(s) ? '#f87171' : (/약한/.test(s) ? '#ffd24f' : (/반등/.test(s) ? '#8a94a6' : '#8a94a6'));
+    const tlRows = (no) => (tl[String(no)] || []).map((p) => {
+      const mb = p.mb;
+      const tstr = (mb == null) ? (p.src || '') : (mb >= 0 ? `T-${mb}분` : `마감후${Math.abs(mb)}분`);
+      const pct = p.pct != null ? ` <b style="color:${p.pct <= -8 ? '#f87171' : (p.pct >= 8 ? '#8a94a6' : '#cdd6e3')}">${p.pct > 0 ? '+' : ''}${p.pct}%</b>` : '';
+      return `<div style="margin:1px 0;font-size:12px">${tstr}: ${p.odds}배${pct} <span style="color:${sigColor(p.signal)}">${esc(p.signal || '')}</span></div>`;
+    }).join('') || '<div class="hint" style="font-size:12px">타임라인 없음</div>';
+    const focusBlock = (f.focus != null)
+      ? `<div class="matrix-title" style="font-size:12px;margin-top:6px">❓ 왜 ${f.focus}번을 놓쳤나</div>${tlRows(f.focus)}
+         <div style="margin-top:3px;font-size:12px">→ ${esc(f.reason || '')}</div>` : '';
+    const others = (d.top3 || []).filter((h) => h !== f.focus).map((h) =>
+      `<div style="margin-top:4px"><span class="chip">${h}번(${h === d.top3[0] ? '1착' : (h === d.top3[1] ? '2착' : '3착')})</span></div>${tlRows(h)}`).join('');
+    return `<div style="border:1px solid #f87171;border-radius:8px;padding:10px;margin-bottom:8px;background:rgba(248,113,113,.06)">
+      <div class="matrix-title" style="color:#ff8a8a">❌ 복기 리포트 — ${esc(d.raceKey)}</div>
+      ${f.label ? `<div style="margin:2px 0"><b>실패 유형:</b> <span style="color:#ffd24f">${esc(f.label)}</span></div>` : ''}
+      <div>실제 정답: <b>${(d.top3 || []).join('-')}</b> · 우리 추천: <b>${(d.recommended || []).join(' / ') || '없음'}</b></div>
+      ${focusBlock}
+      <div class="matrix-title" style="font-size:12px;margin-top:8px">📈 정답말 역추적(1·2·3착)</div>${others}
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(56,211,159,.08);border-radius:6px">
+        <b style="color:#38d39f">🔍 개선점:</b> ${esc(f.improvement || '상위 3신호 말 전부 추천 포함')}</div>
+    </div>`;
+  }
+
+  // ══════════ [복기 학습] 실패 유형 대시보드 + 명예의 전당 ══════════
+  function initFailureReview() {
+    { const b = $('#failReviewRefresh'); if (b) b.addEventListener('click', loadFailureReview); }
+    { const b = $('#hallRefresh'); if (b) b.addEventListener('click', loadHallOfFame); }
+  }
+
+  async function loadFailureReview() {
+    const el = $('#failReviewDashboard'); if (!el) return;
+    el.innerHTML = '<p class="hint">⏳ 복기 통계 불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/failure/stats')).json(); }
+    catch (e) { el.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+    el.innerHTML = renderFailureReview(d);
+  }
+
+  function renderFailureReview(fs) {
+    if (!fs || !fs.total) return '<p class="hint">아직 미적중 분석 데이터가 없습니다. 결과를 입력하면 실패 유형이 자동 분류됩니다.</p>';
+    const bar = (pct, color) => `<span style="display:inline-block;height:8px;width:${Math.max(3, pct)}%;max-width:160px;background:${color};border-radius:4px;vertical-align:middle"></span>`;
+    const tColor = { '신호미반영': '#ff9f43', '페이크베팅': '#a78bfa', '노이즈': '#4ea1ff', '전적오판': '#f87171', '타이밍': '#38bdf8' };
+    const typeRows = (fs.types || []).map((t) =>
+      `<tr><td>${esc(t.label)}</td><td style="text-align:right"><b>${t.count}</b>건</td><td style="text-align:right">${t.pct}%</td><td>${bar(t.pct, tColor[t.type] || '#8a94a6')}</td></tr>`).join('');
+    const top = fs.top_type;
+    const topTxt = top && top.count ? `<div style="margin:6px 0;padding:6px 8px;background:rgba(255,159,67,.1);border-radius:6px">가장 많은 실패 원인: <b style="color:#ffb26b">${esc(top.label)}</b> (${top.count}건, ${top.pct}%) → 개선 방향: ${esc((fs.types.find((x) => x.type === top.type) && FAIL_IMPROVE[top.type]) || '상위 3신호 전부 추천')}</div>` : '';
+    // 놓친 신호 패턴 TOP
+    const missed = (fs.missed_top || []).map((mp, i) => `<div style="margin:2px 0">${i + 1}. ${esc(mp.pattern)}: <b>${mp.count}회</b></div>`).join('') || '<div class="hint">없음</div>';
+    // [4번] 실제 1착말 신호 보유율
+    const ws = fs.winner_signal || {};
+    const wsBlock = (ws.rate != null)
+      ? `<div style="margin:8px 0;padding:8px;border:1px solid #ffd24f;border-radius:6px;background:rgba(255,210,79,.06)">
+          <b>🎯 실제 1착 말이 신호 있었던 비율:</b> <span style="font-size:20px;color:#ffd24f;font-weight:800">${ws.rate}%</span> <span class="hint">(${ws.had}/${ws.total})</span>
+          <div class="hint" style="margin-top:2px">→ 신호는 감지됐으나 추천에 미반영된 비율 · 높을수록 '추천 로직' 개선 여지</div></div>` : '';
+    // [4번] 개선 전/후 적중률
+    const imp = fs.improve;
+    const impBlock = (imp && (imp.before != null || imp.after != null))
+      ? `<div style="margin:8px 0;padding:8px;border:1px solid #38d39f;border-radius:6px;background:rgba(56,211,159,.06)">
+          <b>📈 개선 후 적중률 변화</b> <span class="hint">(규칙: ${esc(imp.rule || '')})</span><br>
+          수정 전 <b style="color:#8a94a6">${imp.before != null ? imp.before + '%' : '-'}</b> → 수정 후 <b style="color:#38d39f;font-size:18px">${imp.after != null ? imp.after + '%' : '집계중'}</b>
+          <span class="hint">(${esc(imp.since || '')} 규칙 적용 이후)</span></div>` : '';
+    // [7번] 자동 학습 규칙
+    const rules = (fs.rules || []).length
+      ? (fs.rules).map((r) => `<div style="margin:4px 0;padding:6px 8px;border-left:3px solid #38d39f;background:rgba(56,211,159,.06)">
+          🔔 <b>새 규칙 학습:</b> ${esc(r.text)}<br><span class="hint">근거: ${esc(r.basis || '')} · ${esc(r.created || '')}${r.after_rate != null ? ` · 적용 후 적중률 ${r.after_rate}%` : ''}</span></div>`).join('')
+      : '<div class="hint">아직 자동 생성된 규칙이 없습니다. 같은 패턴 3회+ 실패 시 규칙이 자동 추가됩니다.</div>';
+    // 최근 실패 사례
+    const recent = (fs.recent || []).slice(0, 6).map((c) =>
+      `<div style="margin:2px 0;font-size:12px"><span class="chip">${esc(c.label || c.type || '')}</span> ${esc(c.race || '')} · 정답 ${(c.top3 || []).join('-')} <span class="hint">${esc(c.reason || '')}</span></div>`).join('');
+    return `<div style="margin-bottom:6px">실패 분석 <b>${fs.total}</b>경주</div>
+      <table class="data-table" style="max-width:520px"><thead><tr><th>실패 유형</th><th>건수</th><th>비율</th><th></th></tr></thead><tbody>${typeRows}</tbody></table>
+      ${topTxt}${wsBlock}${impBlock}
+      <div class="matrix-title" style="font-size:13px;margin-top:10px">🔍 놓친 신호 패턴 TOP</div>${missed}
+      <div class="matrix-title" style="font-size:13px;margin-top:10px">🔔 실패에서 배운 규칙 (자동 생성)</div>${rules}
+      <div class="matrix-title" style="font-size:13px;margin-top:10px">🗂️ 최근 실패 사례</div>${recent || '<div class="hint">없음</div>'}`;
+  }
+
+  const FAIL_IMPROVE = {
+    '신호미반영': '상위 3개 신호 말 전부 추천 포함',
+    '페이크베팅': '반등폭<급락폭이면 신호 유지',
+    '노이즈': '대규모 급락 시 집중도 상위 말 우선',
+    '전적오판': '이변 조건(컨디션·거리/기수) 학습 강화',
+    '타이밍': 'T-3분/T-1분 수집 간격 단축',
+  };
+
+  async function loadHallOfFame() {
+    const el = $('#hallOfFame'); if (!el) return;
+    el.innerHTML = '<p class="hint">⏳ 불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/hall-of-fame')).json(); }
+    catch (e) { el.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+    el.innerHTML = renderHallOfFame(d);
+  }
+
+  function renderHallOfFame(d) {
+    const wins = (d && d.wins) || [];
+    if (!wins.length) return '<p class="hint">아직 고배당 적중 기록이 없습니다. 복승 30배+ / 삼복승 100배+ 적중 시 자동 등록됩니다.</p>';
+    return wins.slice(0, 30).map((w) => {
+      const bigQ = w.quinella_hit && w.quinella_odds;
+      const bigT = w.trifecta_hit && w.trifecta_odds;
+      const odds = bigT ? `삼복승 <b style="color:#ffd24f">${w.trifecta_odds}배</b>` : (bigQ ? `복승 <b style="color:#ffd24f">${w.quinella_odds}배</b>` : '');
+      const tlNo = (w.top3 || [])[0];
+      const tl = (w.timelines || {})[String(tlNo)] || [];
+      const tlTxt = tl.length ? tl.map((p) => {
+        const mb = p.mb; const tstr = (mb == null) ? '' : (mb >= 0 ? `T-${mb}` : `마감후${Math.abs(mb)}`);
+        return `${tstr}:${p.odds}`;
+      }).join(' → ') : '';
+      return `<div style="border:1px solid #ffd24f;border-radius:8px;padding:8px 10px;margin-bottom:6px;background:rgba(255,210,79,.06)">
+        <div><b style="color:#ffb26b">🏆 ${esc(w.raceKey || '')}</b> <span class="hint">${esc(w.date || '')}</span></div>
+        <div style="margin:2px 0">${odds} 적중 · 정답 <b>${(w.top3 || []).join('-')}</b></div>
+        ${w.story ? `<div style="font-size:12px;margin:2px 0">📖 ${esc(w.story)}</div>` : ''}
+        ${tlTxt ? `<div class="hint" style="font-size:11px">${esc(String(tlNo))}번 배당: ${esc(tlTxt)}</div>` : ''}
+      </div>`;
+    }).join('');
   }
 
   /** [보완#1] 경주별 손익 미리보기 — 서버 _recompute_pnl 과 동일 규칙(클라 미리보기). */
@@ -2797,6 +3011,8 @@
       ${renderPatternStats(s.pattern_stats)}
       ${renderDropTiming(s.drop_timing)}
       ${renderUpsetStats(up)}`;
+    // [복기 학습] 실패 대시보드 + 명예의 전당도 함께 갱신
+    try { loadFailureReview(); loadHallOfFame(); } catch (_) { /* */ }
   }
 
   // [AI Phase1·3·7번] AI 학습 준비 현황 대시보드(수집/고품질/목표 진행률/마일스톤/예상 일정)
@@ -5081,6 +5297,8 @@
     el.innerHTML = renderJapanReview(d, rk, file);
     const btn = document.querySelector('#jpResSave');
     if (btn) btn.addEventListener('click', () => saveJapanResult(rk, file, jpRecSummary(d.final_recommendation)));
+    // [3번-B] 이미 결과가 있고 미적중이면 복기 리포트 자동 표시(재조회 시)
+    try { const hit = d.hit || {}; if (d.result && !(hit.quinella_hit || hit.trifecta_hit)) showFailureReport(rk, '#jpFailReport'); } catch (_) { /* */ }
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
@@ -5161,7 +5379,8 @@
       ${rep.near_miss ? `<div style="margin-top:4px;color:#ffd24f">🟡 <b>아깝게 4착 - 거의 적중</b>${rep.near_miss_horse != null ? ` (추천 ${rep.near_miss_horse}번이 4착)` : ''} → 삼복승 보험픽 학습 반영</div>` : ''}
       ${renderHitBasis(rep.hit_basis)}
       <div class="matrix-title" style="font-size:12px;margin-top:8px">이상감지 분석</div>${anomalyLines}
-      ${formLine}${pnlHtml}</div>`;
+      ${formLine}${pnlHtml}
+      <div id="jpFailReport"></div></div>`;
   }
 
   // [1번] 적중 근거 한눈 요약(전적점수·급락점수+폭·역배열·최종신뢰도·한줄근거)
@@ -5220,6 +5439,8 @@
       hit_basis: rec.hit_basis,   // [1번] 적중 근거 요약
     };
     const rc = document.querySelector('#jpReport'); if (rc) rc.innerHTML = renderJapanReviewReport(rep, rk);
+    // [3번-B] 미적중 시 복기 리포트(정답말 역추적) 자동 표시
+    try { if (!rec.was_hit) showFailureReport(rk, '#jpFailReport'); } catch (_) { /* */ }
     // [4번] 통계 자동 업데이트(적중률·이상감지 패턴·손익)
     try { loadLearningStats(); } catch (_) { /* */ }
     try { if (typeof loadHistoryList === 'function') loadHistoryList(); } catch (_) { /* */ }

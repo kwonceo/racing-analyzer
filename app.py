@@ -5149,6 +5149,29 @@ def _build_race_report(rk, an, record, result, doc):
     return report
 
 
+def _highlight_story(an, top3, doc):
+    """[명예의전당] 고배당 적중 '왜 맞았는지' 스토리 + 정답말 배당 타임라인 스냅샷."""
+    basis = []
+    for d in (an.get("drops") or [])[:6]:
+        if d.get("pct", 0) < 0:
+            hit = [h for h in (d.get("combo") or []) if h in top3]
+            if hit:
+                basis.append(f"{d['combo'][0]}+{d['combo'][1]} 복승 급락({d['pct']}%) → "
+                             f"{'·'.join(map(str, hit))}번 입상")
+    inv = an.get("inverse") or {}
+    inv_hit = [h for h in (inv.get("invHorses") or []) if h in top3]
+    if inv.get("detected") and inv_hit:
+        basis.append(f"역배열 감지말 {'·'.join(map(str, inv_hit))}번 입상")
+    if an.get("massDrop"):
+        basis.append("대규모 급락 속 집중신호마 적중")
+    tl = {}
+    try:
+        tl = {str(h): _horse_repr_timeline(doc, h) for h in top3[:3]}
+    except Exception:
+        tl = {}
+    return (" · ".join(basis) or "배당 신호 포착 적중"), tl
+
+
 def _rate(records, sel, cond):
     s = [r for r in records if sel(r)]
     hit = sum(1 for r in s if cond(r))
@@ -5522,7 +5545,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
                "trifecta": (t_odds if trifecta_hit and t_odds else 0)}
     try:
         if (quinella_hit and q_odds and q_odds >= 30) or (trifecta_hit and t_odds and t_odds >= 100):
-            # [2번] 명예의 전당: 적중 근거(초과급락·역전·전적)·태깅·리포트 슬러그 포함(리치)
+            # [2번] 명예의 전당: 적중 근거(초과급락·역전·전적)·태깅·리포트 슬러그 + 스토리·정답말 타임라인(병합)
             _hp, _hd, _hr = _hist_path(rk)
             _slug = re.sub(r"[^\w가-힣]+", "_", f"{_hd}_{_hr}").strip("_")
             _wt2 = _signal_win_tags(an, top3)
@@ -5533,6 +5556,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             if _alert_fired and _alert_hit:
                 _lesson = "경고 말이 실제 입상 — 경고 신호를 추천에 반영했어야" if (_al or {}).get("ignored") \
                     else "경고 말이 실제 입상 — 경고 신호 추천 반영이 적중"
+            _hl_story, _hl_tl = _highlight_story(an, top3, doc)   # [복기] 스토리+정답말 타임라인
             _highlight_save({"raceKey": rk, "top3": top3,
                              "quinella_hit": quinella_hit, "quinella_odds": q_odds,
                              "trifecta_hit": trifecta_hit, "trifecta_odds": t_odds,
@@ -5540,6 +5564,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
                              "win_tags": _wt2.get("tags"), "combo_tags": _wt2.get("combo"),
                              "alert_triggered": _alert_fired, "alert_horses": (_al or {}).get("horses") or [],
                              "alert_ignored": bool(_al and _al.get("ignored")), "lesson": _lesson,
+                             "story": _hl_story, "timelines": _hl_tl,
                              "t": time.time()})
     except Exception as e:
         print("[하이라이트] 저장 실패:", e)
@@ -5741,9 +5766,490 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _discover_patterns()
     except Exception as e:
         print("[패턴발견] 실패:", e)
+    # [실패 복기 학습] 미적중 경주 → 실패 유형 자동 분류 + 정답말 역추적 + 놓친 신호 패턴 누적
+    #   + 10건+ 반복 시 규칙 자동 생성. 적중 시엔 건너뜀(복기 대상 아님).
+    try:
+        if not was_hit:
+            _fail = _failure_record(rk, an, top3, doc, record, L.get("stats") or {})
+            record["failure"] = _fail   # 레코드에 실패 분류 첨부(복기 리포트 재사용)
+            try:                        # 히스토리 review 블록에도 실패 분류 저장(재조회 시 재계산 불필요)
+                doc.setdefault("review", {})["failure"] = _fail
+                json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+            except Exception as _e2:
+                print("[복기저장] 실패분류 저장 실패:", _e2)
+    except Exception as e:
+        print("[실패복기] 분류/학습 실패:", e)
     print(f"[자동학습] {rk} 결과 {top3} → 추천적중 {was_hit}, 급락적중 {anomaly_correct}, "
           f"전적유력마 {form_pick}({'적중' if form_pick_hit else '실패'}), 제거적중 {elimination_correct}")
     return record, L["stats"]
+
+
+# ══════════════ 실패 복기 학습 시스템 (미적중 자동 분류 · 정답말 역추적 · 규칙 자동생성) ══════════════
+#   결과 입력 시 미적중이면 실제 입상마의 배당 타임라인을 역추적해 5개 실패 유형으로 자동 분류하고,
+#   놓친 신호 패턴을 누적한다. 같은 패턴이 임계치(기본 10건) 이상 반복되면 개선 규칙을 자동 생성.
+#   ⚠ 기존 학습(learning.json·pattern_learning 등)과 독립된 별도 저장소 → 기존 기능 영향 없음.
+FAILURE_FILE = os.path.join(os.path.dirname(__file__), "data", "failure_review.json")
+FAIL_RULE_THRESHOLD = 3   # 같은 실패 패턴 N건+ 반복 시 규칙 자동 생성(반복 실패 조기 감지)
+
+# 실패 유형 정의(번호 → 코드 → 표시라벨)
+FAIL_TYPE_LABEL = {
+    "신호미반영": "유형1 · 신호 미반영",
+    "페이크베팅": "유형2 · 페이크 베팅",
+    "노이즈":     "유형3 · 노이즈",
+    "전적오판":   "유형4 · 전적 오판",
+    "타이밍":     "유형5 · 타이밍(마감 후)",
+}
+FAIL_TYPE_ORDER = ["신호미반영", "페이크베팅", "노이즈", "전적오판", "타이밍"]
+
+
+def _failure_load():
+    try:
+        d = json.load(open(FAILURE_FILE, encoding="utf-8"))
+    except Exception:
+        d = {}
+    d.setdefault("cases", [])
+    d.setdefault("type_counts", {})
+    d.setdefault("missed_patterns", {})
+    d.setdefault("rules", [])
+    d.setdefault("winner_signal", {"had": 0, "total": 0})   # [4번] 실제 1착말 신호 보유율
+    return d
+
+
+def _failure_save(d):
+    os.makedirs(os.path.dirname(FAILURE_FILE), exist_ok=True)
+    json.dump(d, open(FAILURE_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _horse_repr_timeline(doc, no):
+    """[3번] 특정 말의 대표 배당 타임라인을 스냅샷에서 역추적.
+    단승(win) 우선, 없으면 그 말이 포함된 최저 복승 조합 배당(자금 유입 대리지표).
+    반환 [{mb, odds, pct(직전대비%), time, after(마감후), src}] (시간순)."""
+    try:
+        no = int(no)
+    except (TypeError, ValueError):
+        return []
+    tl, prev = [], None
+    for s in (doc.get("snapshots") or []):
+        o = None
+        w = (s.get("win") or {}).get(str(no))
+        if w not in (None, ""):
+            try:
+                o = float(w)
+            except (TypeError, ValueError):
+                o = None
+        src = "단승"
+        if o is None:   # 단승 미수집(일본 등) → 그 말이 낀 최저 복승 조합
+            best = None
+            for k, v in (s.get("quinella") or {}).items():
+                if str(no) in str(k).split("+"):
+                    try:
+                        ov = float(v)
+                    except (TypeError, ValueError):
+                        continue
+                    if ov > 0 and (best is None or ov < best):
+                        best = ov
+            o, src = best, "복승"
+        if o is None or o <= 0:
+            continue
+        mbs = s.get("mb_signed")
+        pct = round((o - prev) / prev * 100) if (prev and prev > 0) else None
+        tl.append({"mb": mbs, "odds": round(o, 1), "pct": pct,
+                   "time": s.get("time"), "after": bool(s.get("after_close")), "src": src})
+        prev = o
+    return tl
+
+
+def _timeline_rebound(tl):
+    """타임라인이 '급락 후 반등'(페이크 의심)인지 판정. 최저점까지 10%+ 하락 후 최저 대비 10%+ 반등."""
+    odds = [p["odds"] for p in (tl or []) if p.get("odds")]
+    if len(odds) < 3:
+        return False
+    lo = min(odds)
+    lo_i = odds.index(lo)
+    pre_max = max(odds[:lo_i + 1]) if lo_i >= 0 else odds[0]
+    drop_frac = (pre_max - lo) / pre_max if pre_max > 0 else 0.0
+    rebound_frac = (odds[-1] - lo) / lo if lo > 0 else 0.0
+    return lo_i < len(odds) - 1 and drop_frac >= 0.10 and rebound_frac >= 0.10
+
+
+def _timeline_signal_label(pct):
+    """직전대비 급락% → 사람이 읽는 신호 강도 라벨(역추적 리포트용)."""
+    if pct is None:
+        return "기준"
+    if pct <= -25:
+        return "강한 신호 감지됨"
+    if pct <= -15:
+        return "강한 신호"
+    if pct <= -8:
+        return "약한 신호"
+    if pct >= 8:
+        return "반등(자금 이탈)"
+    return "신호 없음"
+
+
+def _classify_failure(rk, an, top3, doc):
+    """[1번] 미적중 경주의 실패 유형 자동 분류 + [2·3번] 정답말 역추적 근거 생성.
+    실제 입상마(추천에서 빠진 최상위 말)의 배당 타임라인을 분석해 5개 유형으로 분류.
+    반환 dict {type, label, focus, winner, missed, reason, improvement, missed_signal,
+               timeline, maxDrop, buriedBy}."""
+    top3 = [int(x) for x in top3 if x not in (None, "")]
+    if not top3:
+        return None
+    rec_horses = set()
+    for b in (an.get("betRecommend") or []):
+        for x in (b.get("combo") or []):
+            try:
+                rec_horses.add(int(x))
+            except (TypeError, ValueError):
+                pass
+    winner = top3[0]
+    missed = [h for h in top3 if h not in rec_horses]      # 입상했으나 추천에 없던 말
+    focus = missed[0] if missed else winner                 # 복기 초점 말
+    tl = _horse_repr_timeline(doc, focus)
+
+    pcts = [p["pct"] for p in tl if p.get("pct") is not None]
+    max_drop = min(pcts) if pcts else 0                      # 초점 말 최대 급락(음수)
+    pre_close = [p for p in tl if not p.get("after") and p.get("pct") is not None]
+    pre_close_drop = min([p["pct"] for p in pre_close], default=0)
+    after_drop = min([p["pct"] for p in tl if p.get("after") and p.get("pct") is not None], default=0)
+
+    excess = ((an.get("signalQuality") or {}).get("excess")) or {}
+    ehorses = excess.get("horses") or {}
+    fx = ehorses.get(focus) or ehorses.get(str(focus)) or {}
+    focus_grade = fx.get("grade")                           # 🔴/🟡/None
+    focus_strength = fx.get("strength")
+    adv = an.get("advanced") or {}
+    fakes = adv.get("fakes") or []
+    focus_fake = any(focus in (f.get("combo") or []) for f in fakes)
+    mass = bool(an.get("massDrop"))
+    after_close = bool(an.get("afterClose"))
+    rebounded = _timeline_rebound(tl)
+
+    pre_close_signal = (pre_close_drop <= -10) or (focus_grade in ("🔴", "🟡")) or focus_fake
+    has_signal = (max_drop <= -10) or (focus_grade in ("🔴", "🟡")) or focus_fake or rebounded
+
+    # ── 유형 판정(우선순위: 타이밍 → 전적오판 → 페이크 → 노이즈 → 신호미반영) ──
+    if after_close and after_drop <= -10 and not pre_close_signal:
+        ftype = "타이밍"
+    elif not has_signal:
+        ftype = "전적오판"
+    elif rebounded or focus_fake:
+        ftype = "페이크베팅"
+    elif mass:
+        ftype = "노이즈"
+    else:
+        ftype = "신호미반영"
+
+    # ── 묻힘 원인(신호미반영): 추천된 다른 말의 신호가 더 강했나 ──
+    buried_by = None
+    if ftype == "신호미반영":
+        for h, info in ehorses.items():
+            try:
+                hh = int(h)
+            except (TypeError, ValueError):
+                continue
+            if hh == focus:
+                continue
+            s = info.get("strength")
+            if s is not None and s < 0 and (focus_strength is None or s < focus_strength) and hh in rec_horses:
+                if buried_by is None or s < (ehorses.get(buried_by) or {}).get("strength", 0):
+                    buried_by = hh
+
+    # ── 놓친 신호 패턴(누적 통계용 라벨) ──
+    if ftype == "타이밍":
+        missed_signal = "마감 후 신호"
+    elif ftype == "전적오판":
+        missed_signal = "배당 신호 없음(전적 이변)"
+    elif ftype == "페이크베팅":
+        missed_signal = "페이크 후 진짜 신호"
+    elif ftype == "노이즈":
+        missed_signal = "대규모급락 속 집중신호 미분리"
+    elif focus_grade == "🟡" or -15 < max_drop <= -8:
+        missed_signal = "약한 신호 무시"
+    else:
+        missed_signal = "연속 하락 미감지"
+
+    # ── 사람이 읽는 원인 + 개선점 ──
+    dv = f"{max_drop}%" if max_drop else "변화 미미"
+    if ftype == "신호미반영":
+        reason = f"{focus}번은 급락 신호({dv})가 있었으나 추천에서 제외됨"
+        if buried_by is not None:
+            reason += f" — 추천은 {buried_by}번(더 강한 급락)이라 {focus}번 신호가 묻힘"
+        improvement = "상위 3개 신호 말 전부 추천에 포함 · 배당 높아도 신호 있으면 표시"
+    elif ftype == "페이크베팅":
+        reason = f"{focus}번이 급락 후 반등(페이크 의심)해 신호를 신뢰하지 않음 → 실제로는 입상"
+        improvement = "반등폭 < 급락폭이면 신호 유지 · 최종 배당이 초기 대비 낮으면 재평가"
+    elif ftype == "노이즈":
+        reason = f"전체 급락(대규모)으로 {focus}번 개별 급락({dv})이 노이즈로 처리됨"
+        improvement = "대규모 급락 시 초과급락(집중도) 상위 말 우선 · 절대 10%+ 급락 승격"
+    elif ftype == "전적오판":
+        reason = f"{focus}번은 배당 변화 없이 입상 → 배당은 정상, 전적 판단 실패(이변)"
+        improvement = "전적 하위라도 최근 컨디션·거리/기수 변경 반영 · 이변 조건 학습 강화"
+    else:  # 타이밍
+        reason = f"{focus}번 신호({dv})가 마감 후에 나타나 베팅 반영 불가"
+        improvement = "T-3분/T-1분 수집 간격 단축 · 마감 임박 급변 조기 알림"
+
+    # [4번] 실제 1착말 자체의 신호 보유 여부(초점 말이 1착이 아닐 수 있어 별도 산출)
+    if winner == focus:
+        winner_signal = has_signal
+    else:
+        wtl = _horse_repr_timeline(doc, winner)
+        wdrop = min([p["pct"] for p in wtl if p.get("pct") is not None], default=0)
+        wgrade = (ehorses.get(winner) or ehorses.get(str(winner)) or {}).get("grade")
+        winner_signal = (wdrop <= -10) or (wgrade in ("🔴", "🟡"))
+
+    return {
+        "type": ftype, "label": FAIL_TYPE_LABEL.get(ftype, ftype),
+        "focus": focus, "winner": winner, "missed": missed,
+        "reason": reason, "improvement": improvement, "missed_signal": missed_signal,
+        "timeline": tl, "maxDrop": max_drop, "buriedBy": buried_by,
+        "afterClose": after_close, "massDrop": mass, "winnerSignal": bool(winner_signal),
+    }
+
+
+def _failure_record(rk, an, top3, doc, record, stats):
+    """[1·4·7번] 실패 분류 → failure_review.json 누적(유형 카운트·놓친 패턴) + 규칙 자동 생성.
+    반환: 이 경주의 분류 dict(레코드/히스토리에 첨부)."""
+    fail = _classify_failure(rk, an, top3, doc)
+    if not fail:
+        return None
+    d = _failure_load()
+    ftype, mpat = fail["type"], fail["missed_signal"]
+    d["type_counts"][ftype] = d["type_counts"].get(ftype, 0) + 1
+    d["missed_patterns"][mpat] = d["missed_patterns"].get(mpat, 0) + 1
+    ws = d.setdefault("winner_signal", {"had": 0, "total": 0})   # [4번] 1착말 신호 보유율 누적
+    ws["total"] += 1
+    if fail.get("winnerSignal"):
+        ws["had"] += 1
+    rec_bets = an.get("betRecommend") or []
+    d["cases"].append({
+        "race": rk, "date": time.strftime("%Y-%m-%d"),
+        "top3": top3, "winner": fail["winner"], "focus": fail["focus"],
+        "recommended": ["+".join(map(str, b.get("combo") or [])) for b in rec_bets[:6]],
+        "type": ftype, "label": fail["label"], "missed_signal": mpat,
+        "reason": fail["reason"], "improvement": fail["improvement"],
+        "maxDrop": fail["maxDrop"], "t": time.time(),
+    })
+    d["cases"] = d["cases"][-500:]
+    # [7번] 같은 놓친 패턴이 임계치+ 반복 → 개선 규칙 자동 생성(중복 방지)
+    try:
+        _failure_autorule(d, mpat, ftype, rk, stats)
+    except Exception as e:
+        print("[실패복기] 규칙 자동생성 실패:", e)
+    _failure_save(d)
+    return fail
+
+
+def _failure_autorule(d, mpat, ftype, rk, stats):
+    """[7번] 놓친 패턴 N건+ 반복 시 규칙 자동 생성. [5번] 생성 시점 추천 적중률을 before로 스냅샷."""
+    cnt = d["missed_patterns"].get(mpat, 0)
+    if cnt < FAIL_RULE_THRESHOLD:
+        return
+    if any(r.get("pattern") == mpat for r in d["rules"]):
+        return   # 이미 규칙화된 패턴
+    rule_text = {
+        "연속 하락 미감지": "연속 하락 3회 이상 말은 배당 높아도 추천에 포함",
+        "약한 신호 무시": "약한 급락(-8~-15%) 신호도 상위 3말이면 추천 후보 유지",
+        "페이크 후 진짜 신호": "급락 후 반등이라도 반등폭<급락폭이면 신호 유지",
+        "대규모급락 속 집중신호 미분리": "대규모 급락 시 초과급락(집중도) 상위 말 우선 추천",
+        "마감 후 신호": "T-3분/T-1분 수집 간격 단축 · 마감 임박 급변 조기 알림",
+        "배당 신호 없음(전적 이변)": "전적 하위라도 최근 컨디션·거리/기수 변경 이변 조건 강화",
+    }.get(mpat, f"{mpat} 패턴 반복 → 추천 로직 보완")
+    before_rate = None
+    try:
+        before_rate = ((stats or {}).get("recommend_hit") or {}).get("rate")
+    except Exception:
+        before_rate = None
+    d["rules"].append({
+        "pattern": mpat, "type": ftype, "text": rule_text,
+        "basis": f"{cnt}건 반복 분석", "sample": cnt,
+        "before_rate": before_rate, "created_t": time.time(), "created": time.strftime("%Y-%m-%d"),
+    })
+    print(f"[실패복기] 🔔 새 규칙 학습: {rule_text} (근거: {cnt}건)")
+
+
+def _failure_report(rk):
+    """[2·3번] 미적중 경주 복기 리포트 생성(온디맨드). 히스토리 결과+스냅샷에서 재구성.
+    반환 {ok, raceKey, top3, recommended, was_hit, failure, timelines(1·2·3착), text}."""
+    path, _, _ = _hist_path(rk)
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return {"ok": False, "error": f"'{rk}' 히스토리 없음"}
+    result = doc.get("result") or {}
+    top3 = [result.get("1st"), result.get("2nd"), result.get("3rd")]
+    top3 = [int(x) for x in top3 if x not in (None, "")]
+    if not top3:
+        return {"ok": False, "error": "결과(착순) 미입력 경주"}
+    rec = _triple_load().get(rk) or {}
+    if not (rec.get("quinella") or rec.get("history")):
+        rec = _rec_from_history(rk) or rec
+    an = _triple_analyze(rk, rec)
+    rec_bets = an.get("betRecommend") or []
+    recommended = ["+".join(map(str, b.get("combo") or [])) for b in rec_bets[:6]]
+
+    def _in3(combo):
+        return all(int(x) in top3 for x in combo)
+    was_hit = any(_in3(b.get("combo") or []) for b in rec_bets)
+
+    # [저장된 분류 우선, 없으면 즉석 재분류]
+    fail = ((doc.get("review") or {}).get("failure")) if not was_hit else None
+    if not was_hit and not fail:
+        fail = _classify_failure(rk, an, top3, doc)
+
+    # [3번] 1·2·3착 정답말 배당 역추적(각 말 타임라인 + 신호 라벨)
+    timelines = {}
+    for h in top3:
+        tl = _horse_repr_timeline(doc, h)
+        timelines[str(h)] = [{"mb": p["mb"], "odds": p["odds"], "pct": p["pct"],
+                              "after": p["after"], "src": p["src"],
+                              "signal": _timeline_signal_label(p["pct"])} for p in tl]
+
+    # [2번] 텍스트 리포트 생성
+    text = _failure_report_text(rk, top3, recommended, was_hit, fail, timelines)
+    return {"ok": True, "raceKey": rk, "top3": top3, "recommended": recommended,
+            "was_hit": was_hit, "failure": fail, "timelines": timelines, "text": text}
+
+
+def _failure_report_text(rk, top3, recommended, was_hit, fail, timelines):
+    """[2·3번] 복기 리포트를 사람이 읽는 텍스트로."""
+    if was_hit:
+        return f"✅ {rk} — 추천 적중 경주(복기 대상 아님)"
+    lines = [f"❌ 복기 리포트 - {rk}", ""]
+    if fail:
+        lines.append(f"실패 유형: {fail.get('label', fail.get('type', ''))}")
+        lines.append("")
+    lines.append(f"실제 정답: {'-'.join(map(str, top3))}")
+    lines.append(f"우리 추천: {' / '.join(recommended) if recommended else '없음'}")
+    lines.append("")
+    focus = (fail or {}).get("focus")
+    if focus is not None:
+        lines.append(f"❓ 왜 {focus}번을 놓쳤나:")
+        tl = timelines.get(str(focus)) or []
+        for p in tl:
+            mb = p.get("mb")
+            tstr = (f"T-{mb}분" if isinstance(mb, (int, float)) and mb >= 0
+                    else (f"마감후{abs(mb)}분" if isinstance(mb, (int, float)) else (p.get("src") or "")))
+            pctstr = f" ({p['pct']:+d}%)" if p.get("pct") is not None else ""
+            lines.append(f"  {tstr}: {p['odds']}배{pctstr} — {p.get('signal', '')}")
+        lines.append(f"  → {fail.get('reason', '')}")
+        lines.append("")
+    lines.append(f"🔍 개선점: {(fail or {}).get('improvement', '상위 3신호 말 전부 추천 포함')}")
+    return "\n".join(lines)
+
+
+def _failure_stats():
+    """[5·6번] 복기 대시보드 데이터. 유형별 분포 + 놓친 패턴 TOP + 규칙(개선 전/후 적중률)."""
+    d = _failure_load()
+    tc = d.get("type_counts") or {}
+    total = sum(tc.values())
+    types = []
+    for k in FAIL_TYPE_ORDER:
+        n = tc.get(k, 0)
+        types.append({"type": k, "label": FAIL_TYPE_LABEL.get(k, k), "count": n,
+                      "pct": round(n / total * 100) if total else 0})
+    top_type = max(types, key=lambda x: x["count"]) if total else None
+    missed = sorted((d.get("missed_patterns") or {}).items(), key=lambda kv: -kv[1])
+    missed_top = [{"pattern": k, "count": v} for k, v in missed[:5]]
+
+    # [5번] 규칙별 개선 전/후 적중률(after=규칙 생성 이후 결과 레코드의 추천 적중률)
+    records = (_learning_load().get("records") or [])
+    rules = []
+    for r in (d.get("rules") or []):
+        ct = r.get("created_t") or 0
+        after = [x for x in records if (x.get("t") or 0) >= ct]
+        hit = sum(1 for x in after if x.get("was_hit"))
+        after_rate = round(hit / len(after) * 100) if after else None
+        rules.append({**r, "after_rate": after_rate, "after_n": len(after)})
+
+    # [4번] 실제 1착말 신호 보유율(신호 감지는 됐으나 추천 미반영 규모)
+    ws = d.get("winner_signal") or {"had": 0, "total": 0}
+    winner_signal_rate = round(ws["had"] / ws["total"] * 100) if ws.get("total") else None
+
+    # [4번] 개선 후 적중률 변화(가장 최근 규칙 기준 전/후 · 규칙 없으면 전체)
+    improve = None
+    if rules:
+        last = max(rules, key=lambda r: r.get("created_t") or 0)
+        improve = {"before": last.get("before_rate"), "after": last.get("after_rate"),
+                   "rule": last.get("text"), "since": last.get("created")}
+
+    return {"total": total, "types": types, "top_type": top_type,
+            "missed_top": missed_top, "rules": rules,
+            "winner_signal": {"had": ws.get("had", 0), "total": ws.get("total", 0),
+                              "rate": winner_signal_rate},
+            "improve": improve,
+            "recent": list(reversed((d.get("cases") or [])[-12:]))}
+
+
+@app.route("/api/failure/report", methods=["GET", "POST"])
+def failure_report():
+    """[2·3번] 미적중 경주 복기 리포트(정답말 역추적 포함). ?raceKey= 또는 body{raceKey}."""
+    rk = request.args.get("raceKey") or ""
+    if not rk and request.method == "POST":
+        rk = (request.json or {}).get("raceKey") or ""
+    rk = (rk or "").strip()
+    if not rk:
+        return jsonify({"ok": False, "error": "raceKey가 필요합니다."}), 400
+    rk = _resolve_race_key(rk) or rk
+    return jsonify(_failure_report(rk))
+
+
+@app.route("/api/failure/stats", methods=["GET"])
+def failure_stats():
+    """[5·6번] 복기 학습 대시보드(유형 분포·놓친 패턴 TOP·개선 규칙 전/후 적중률)."""
+    return jsonify(_failure_stats())
+
+
+@app.route("/api/failure/rules", methods=["GET"])
+def failure_rules():
+    """[7번] 실패에서 자동 학습된 규칙 목록."""
+    d = _failure_load()
+    return jsonify({"rules": d.get("rules") or []})
+
+
+@app.route("/api/hall-of-fame", methods=["GET"])
+def hall_of_fame():
+    """[5번] 고배당 적중 명예의 전당(복승 30배+/삼복승 100배+) — 최신순 + 스토리·타임라인."""
+    try:
+        arr = json.load(open(HIGHLIGHT_FILE, encoding="utf-8"))
+    except Exception:
+        arr = []
+    arr = sorted(arr, key=lambda x: x.get("t", 0), reverse=True)
+    return jsonify({"wins": arr[:100], "count": len(arr)})
+
+
+@app.route("/api/races/list", methods=["GET"])
+def races_list():
+    """[2번] 결과 입력용 경주 목록(시간순). ?date=YYYY-MM-DD &pending=1(미입력만).
+    → {races:[{raceKey,area,num,hasResult,top3,lastT,snaps}]} — 자동완성·순서대로 빠른입력용."""
+    date = (request.args.get("date") or "").strip()
+    pending = request.args.get("pending") in ("1", "true", "yes")
+    out = []
+    if os.path.isdir(ODDS_HISTORY_DIR):
+        for fn in os.listdir(ODDS_HISTORY_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(ODDS_HISTORY_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            rk = d.get("raceKey") or d.get("race")
+            if not rk:
+                continue
+            if date and date not in (rk or "") and date != (d.get("date") or ""):
+                continue
+            has_result = bool(d.get("result"))
+            if pending and has_result:
+                continue
+            area, num = _area_num(rk)
+            res = d.get("result") or {}
+            top3 = [res.get("1st"), res.get("2nd"), res.get("3rd")]
+            snaps = d.get("snapshots") or []
+            out.append({"raceKey": rk, "area": area, "num": num, "hasResult": has_result,
+                        "top3": [x for x in top3 if x not in (None, "")],
+                        "lastT": (snaps[-1].get("t") if snaps else 0), "snaps": len(snaps)})
+    out.sort(key=lambda x: (x.get("lastT") or 0))   # 수집 시각순 → 결과 목록 시간순 매칭
+    return jsonify({"races": out, "count": len(out)})
 
 
 @app.route("/api/history/record-result", methods=["POST"])
@@ -5985,10 +6491,59 @@ def _parse_result_rows(html):
 
 _TRACK_ALIAS = {"부경": "부산", "부산경남": "부산", "서울경마": "서울", "제주도": "제주"}
 
+# [일괄등록 유연화] 일본 경마장 표기 변형(한국어 표준 ↔ 한자 ↔ 로마자/약칭) 통일.
+#   raceKey는 한국어 표기(예: '나고야 4경주')로 저장되므로 한자·영문 입력을 한국어로 정규화.
+_TRACK_GROUPS = {
+    "오비히로": ["帯広", "obihiro", "obi"],
+    "모리오카": ["盛岡", "morioka", "mori"],
+    "미즈사와": ["水沢", "mizusawa", "mizu"],
+    "카와사키": ["川崎", "kawasaki", "kawa"],
+    "후나바시": ["船橋", "funabashi", "funa"],
+    "오이": ["大井", "ooi", "oi"],
+    "우라와": ["浦和", "urawa", "ura"],
+    "나고야": ["名古屋", "nagoya", "nago"],
+    "카사마츠": ["笠松", "kasamatsu", "kasa"],
+    "카나자와": ["金沢", "kanazawa", "kana"],
+    "소노다": ["園田", "sonoda", "sono"],
+    "히메지": ["姫路", "himeji", "hime"],
+    "코치": ["高知", "kochi"],
+    "사가": ["佐賀", "saga"],
+    "몬베츠": ["門別", "monbetsu", "mombetsu", "monb"],
+    "도쿄": ["東京", "tokyo"],
+    "나카야마": ["中山", "nakayama", "naka"],
+    "한신": ["阪神", "hanshin", "hans"],
+    "쿄토": ["京都", "kyoto"],
+    "추쿄": ["中京", "chukyo", "chuk"],
+    "코쿠라": ["小倉", "kokura", "koku"],
+    "니가타": ["新潟", "niigata", "niig"],
+    "후쿠시마": ["福島", "fukushima", "fuku"],
+    "삿포로": ["札幌", "sapporo", "sapp"],
+    "하코다테": ["函館", "hakodate", "hako"],
+}
+# 역방향 조회맵: 별칭(소문자) → 한국어 표준 + 한국어 자기자신도 포함
+_TRACK_REVERSE = {}
+for _std, _als in _TRACK_GROUPS.items():
+    _TRACK_REVERSE[_std.lower()] = _std
+    for _a in _als:
+        _TRACK_REVERSE[_a.lower()] = _std
+
 
 def _track_norm(a):
-    """경마장명 정규화(부경=부산 등 별칭 통일)."""
+    """경마장명 정규화(부경=부산 · 帯広/obihiro/OBI=오비히로 등 한/일/영 별칭 통일).
+    영문 약칭은 접두 일치(OBI→오비히로)까지 허용."""
     a = (a or "").strip()
+    if not a:
+        return a
+    if a in _TRACK_ALIAS:      # 한국 경마장 기존 별칭 우선
+        return _TRACK_ALIAS[a]
+    low = a.lower()
+    if low in _TRACK_REVERSE:  # 한자·로마자·약칭 정확 일치
+        return _TRACK_REVERSE[low]
+    # 영문 약칭(접두) — 'obi'가 'obihiro'의 접두이거나 그 반대
+    if re.fullmatch(r"[a-z]{2,}", low):
+        for alias, std in _TRACK_REVERSE.items():
+            if re.fullmatch(r"[a-z]{2,}", alias) and (alias.startswith(low) or low.startswith(alias)):
+                return std
     return _TRACK_ALIAS.get(a, a)
 
 
@@ -5997,7 +6552,11 @@ def _area_num(s):
     한글·일본어(가나·한자) 경마장명 모두 지원. '서울 5'(접미사 없음)도 번호 추출."""
     txt = re.sub(r"\d{4}-\d{2}-\d{2}", " ", s or "")   # 날짜 먼저 제거(번호 오검출 방지)
     m = re.search(r"[가-힣ぁ-んァ-ヶ一-龯]{2,}", txt.replace(" ", ""))
-    area = _track_norm(m.group()) if m else None
+    token = m.group() if m else None
+    if not token:   # [일괄등록 유연화] 한/일 경마장명 없으면 영문 토큰(obihiro·OBI 등)
+        m2 = re.search(r"[A-Za-z]{2,}", txt)
+        token = m2.group() if m2 else None
+    area = _track_norm(token) if token else None
     # 경주번호: 'N경주/NR/N라운드/Nレース' 우선, 없으면 (날짜 제거 후) 첫 숫자
     n = re.search(r"(\d{1,2})\s*(?:R\b|경주|라운드|레이스|レース|R)", txt, re.IGNORECASE)
     if not n:

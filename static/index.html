@@ -210,6 +210,19 @@
           <div id="bulkResultSummary" style="margin-top:10px"></div>
         </div>
       </div>
+      <!-- [2번-방법3] 순서대로 빠른 입력 — 분석 경주를 시간순으로 나열, 1~3착만 순서대로 입력 -->
+      <div class="panel-card">
+        <h2>⚡ 순서대로 빠른 입력</h2>
+        <p class="hint">분석한 경주를 <b>시간순</b>으로 나열합니다. 경주명은 자동 매칭되므로 <b>1~3착(+4착·배당)만</b> 순서대로 입력하고 [저장]하면 즉시 적중판정·복기가 실행됩니다.</p>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
+          <label class="hint">날짜 <input id="quickDate" class="cfg-input" type="date" style="width:150px" /></label>
+          <label class="hint"><input id="quickPendingOnly" type="checkbox" checked /> 미입력만</label>
+          <button id="quickLoad" class="btn btn-primary">🔄 경주 불러오기</button>
+          <button id="quickSaveAll" class="btn">💾 입력한 경주 전체 저장</button>
+          <span id="quickMsg" class="hint"></span>
+        </div>
+        <div id="quickEntryList" style="margin-top:10px"></div>
+      </div>
       <div class="panel-card">
         <h2>경주 결과 입력</h2>
         <p class="hint">실제 착순을 입력하면 누적 학습 DB에 반영됩니다.</p>
@@ -251,6 +264,25 @@
       <div class="panel-card">
         <h2>통계 대시보드</h2>
         <div id="statsDashboard"></div>
+      </div>
+
+      <!-- [복기 학습] 실패 유형 분포 · 놓친 신호 패턴 · 자동 규칙 · 개선 전/후 -->
+      <div class="panel-card">
+        <h2>📚 복기 학습 현황</h2>
+        <div class="cfg-row">
+          <button id="failReviewRefresh" class="btn btn-primary">🔄 복기 통계 새로고침</button>
+        </div>
+        <div id="failReviewDashboard" style="margin-top:10px"><p class="hint">[복기 통계 새로고침]을 누르세요. 미적중 경주가 쌓이면 실패 유형이 자동 분류됩니다.</p></div>
+      </div>
+
+      <!-- [5번] 고배당 적중 명예의 전당 -->
+      <div class="panel-card">
+        <h2>🏆 고배당 적중 명예의 전당</h2>
+        <div class="cfg-row">
+          <button id="hallRefresh" class="btn btn-primary">🔄 새로고침</button>
+          <span class="hint">복승 30배+ / 삼복승 100배+ 적중이 자동 등록됩니다.</span>
+        </div>
+        <div id="hallOfFame" style="margin-top:10px"></div>
       </div>
 
       <!-- [5번] 한국경마 경주별 분석 히스토리 (data/korea_history) -->
