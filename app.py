@@ -4523,6 +4523,68 @@ def _analysis_log_git_backup(label):
         return {"committed": False, "msg": str(e)}
 
 
+# ══════════════ [데이터 보호] 학습 코퍼스 자동 GitHub 백업 (결과 입력마다) ══════════════
+#   [1번] race_results·analysis_log·ai_training 등 추적 코퍼스를 결과 입력 시 자동 커밋+푸시.
+#   [2번] 5초 디바운스로 연속 입력(일괄 등록)을 1회 커밋으로 묶어 git index.lock 충돌 방지.
+#   ⚠ commit은 지정 경로(pathspec)만 대상 → 개발 중 스테이징된 코드 변경을 쓸어담지 않는다.
+DATA_BACKUP_PATHS = [
+    "data/race_results", "data/analysis_log", "data/ai_training",
+    "data/pattern_learning.json", "data/discovered_patterns.json",
+    "data/daily_summary", "data/race_report",
+    "data/korea_history", "data/prerace",
+]
+_data_backup_lock = threading.Lock()        # git 작업 직렬화(index.lock 충돌 방지)
+_data_backup_timer = None                   # 디바운스 타이머
+_data_backup_timer_lock = threading.Lock()
+
+
+def _run_data_git_backup(label):
+    """[데이터 보호] 추적 데이터 경로만 git add + commit(pathspec) + push. 실패는 조용히 로그."""
+    if not _data_backup_lock.acquire(blocking=False):
+        # 이미 백업 진행 중 → 이번 트리거는 건너뜀(진행 중 백업이 최신 디스크 상태를 담음)
+        return
+    try:
+        root = os.path.dirname(os.path.abspath(__file__))
+        paths = [p for p in DATA_BACKUP_PATHS if os.path.exists(os.path.join(root, p))]
+        if not paths:
+            return
+        subprocess.run(["git", "add"] + paths, cwd=root, timeout=60, capture_output=True)
+        msg = (label or "데이터 자동 백업").strip()
+        # pathspec commit: 지정 경로 변경만 커밋(다른 스테이징 변경 미포함) → 안전
+        r = subprocess.run(["git", "commit", "-m", msg, "--"] + paths,
+                           cwd=root, timeout=60, capture_output=True, text=True)
+        out = ((r.stdout or "") + (r.stderr or "")).strip()
+        if r.returncode != 0:
+            if any(k in out for k in ("nothing to commit", "no changes", "변경 사항", "커밋할", "working tree clean")):
+                return   # 변경 없음(정상)
+            print("[데이터백업] commit 건너뜀:", out[:200])
+            return
+        pr = subprocess.run(["git", "push"], cwd=root, timeout=120, capture_output=True, text=True)
+        if pr.returncode != 0:
+            print("[데이터백업] ⚠ push 실패(원격/인증/분기 diverge?):", (pr.stderr or "").strip()[:200])
+        else:
+            print(f"[데이터백업] ✅ GitHub 반영: {msg}")
+    except Exception as e:
+        print("[데이터백업] 예외:", e)
+    finally:
+        _data_backup_lock.release()
+
+
+def _data_git_backup(label, delay=5.0):
+    """[2번] 결과 입력마다 호출 — delay초 디바운스 후 1회 백업(연속 입력 묶음·응답 지연 없음).
+    데몬 타이머라 결과 입력 API를 블로킹하지 않는다. 새 호출이 오면 이전 타이머를 취소·재예약."""
+    global _data_backup_timer
+    try:
+        with _data_backup_timer_lock:
+            if _data_backup_timer is not None:
+                _data_backup_timer.cancel()
+            _data_backup_timer = threading.Timer(max(0.5, float(delay)), _run_data_git_backup, args=[label])
+            _data_backup_timer.daemon = True
+            _data_backup_timer.start()
+    except Exception as e:
+        print("[데이터백업] 예약 실패:", e)
+
+
 def _learning_load():
     try:
         return json.load(open(LEARNING_FILE, encoding="utf-8"))
@@ -5810,6 +5872,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         print("[실패복기] 분류/학습 실패:", e)
     print(f"[자동학습] {rk} 결과 {top3} → 추천적중 {was_hit}, 급락적중 {anomaly_correct}, "
           f"전적유력마 {form_pick}({'적중' if form_pick_hit else '실패'}), 제거적중 {elimination_correct}")
+    # [데이터 보호·2번] 결과 입력마다 학습 코퍼스를 GitHub에 자동 백업(5초 디바운스·비동기)
+    try:
+        _data_git_backup(f"결과 자동백업: {rk} {'-'.join(map(str, top3))}")
+    except Exception as e:
+        print("[데이터백업] 트리거 실패:", e)
     return record, L["stats"]
 
 
@@ -6956,6 +7023,44 @@ def analysis_log_backup():
     label = ((request.json or {}).get("label") or f"분석 로그 백업 {time.strftime('%Y-%m-%d', time.localtime())}").strip()
     res = _analysis_log_git_backup(label)
     return jsonify({"ok": True, **res})
+
+
+@app.route("/api/data/backup", methods=["POST"])
+def data_backup():
+    """[데이터 보호] 학습 코퍼스(결과·분석로그·AI학습·패턴 등) 즉시 GitHub 백업.
+    body: {label?, sync?} — sync=true면 완료까지 대기(기본 비동기 디바운스)."""
+    body = request.json or {}
+    label = (body.get("label") or f"데이터 수동 백업 {time.strftime('%Y-%m-%d %H:%M', time.localtime())}").strip()
+    if body.get("sync"):
+        _run_data_git_backup(label)
+        return jsonify({"ok": True, "mode": "sync", "label": label})
+    _data_git_backup(label, delay=0.5)   # 즉시(0.5초 후) 1회 백업 트리거
+    return jsonify({"ok": True, "mode": "async", "label": label,
+                    "paths": [p for p in DATA_BACKUP_PATHS
+                              if os.path.exists(os.path.join(os.path.dirname(__file__), p))]})
+
+
+@app.route("/api/data/status", methods=["GET"])
+def data_status():
+    """[데이터 보호] 추적 코퍼스 경로별 파일 수 + git 추적/미추적 요약(보호 현황 표시)."""
+    root = os.path.dirname(os.path.abspath(__file__))
+    out = []
+    for p in DATA_BACKUP_PATHS:
+        full = os.path.join(root, p)
+        if p.endswith(".json"):
+            out.append({"path": p, "exists": os.path.exists(full), "files": 1 if os.path.exists(full) else 0})
+        elif os.path.isdir(full):
+            out.append({"path": p, "exists": True,
+                        "files": len([f for f in os.listdir(full) if f.endswith(".json")])})
+        else:
+            out.append({"path": p, "exists": False, "files": 0})
+    try:
+        tracked = subprocess.run(["git", "ls-files", "data/"], cwd=root, timeout=20,
+                                 capture_output=True, text=True)
+        tracked_n = len([l for l in (tracked.stdout or "").splitlines() if l.strip()])
+    except Exception:
+        tracked_n = None
+    return jsonify({"paths": out, "trackedFiles": tracked_n})
 
 
 # ───────── KRA 공공데이터: API 키 저장 + 마필 과거기록 조회 ─────────

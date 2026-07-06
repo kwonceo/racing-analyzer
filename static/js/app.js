@@ -905,6 +905,38 @@
   function initFailureReview() {
     { const b = $('#failReviewRefresh'); if (b) b.addEventListener('click', loadFailureReview); }
     { const b = $('#hallRefresh'); if (b) b.addEventListener('click', loadHallOfFame); }
+    initDataProtect();   // [데이터 보호] 자동/수동 GitHub 백업
+  }
+
+  // ══════════ [데이터 보호] 학습 코퍼스 자동/수동 GitHub 백업 ══════════
+  function initDataProtect() {
+    { const b = $('#dataBackupBtn'); if (b) b.addEventListener('click', runDataBackup); }
+    { const b = $('#dataStatusBtn'); if (b) b.addEventListener('click', loadDataStatus); }
+  }
+
+  async function runDataBackup() {
+    const msg = $('#dataBackupMsg'); if (msg) { msg.style.color = ''; msg.textContent = '⏳ GitHub 백업 요청 중…'; }
+    try {
+      const d = await (await fetch('/api/data/backup', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label: '수동 백업(통계 탭)' }),
+      })).json();
+      if (msg) { msg.style.color = '#38d39f'; msg.textContent = `✅ 백업 예약됨(${(d.paths || []).length}개 경로) — 잠시 후 GitHub 반영`; }
+    } catch (e) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '실패: ' + esc(e.message); } }
+    setTimeout(loadDataStatus, 1500);
+  }
+
+  async function loadDataStatus() {
+    const el = $('#dataStatusView'); if (!el) return;
+    el.innerHTML = '<p class="hint">⏳ 보호 현황 확인 중…</p>';
+    let d; try { d = await (await fetch('/api/data/status')).json(); }
+    catch (e) { el.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+    const rows = (d.paths || []).map((p) =>
+      `<tr><td>${esc(p.path)}</td><td style="text-align:right">${p.exists ? p.files + '개' : '<span class="hint">없음</span>'}</td>
+        <td>${p.exists ? '<span style="color:#38d39f">✅ 보호</span>' : '<span class="hint">-</span>'}</td></tr>`).join('');
+    el.innerHTML = `<div style="margin-bottom:4px">GitHub 추적 데이터 파일: <b>${d.trackedFiles != null ? d.trackedFiles : '?'}</b>개</div>
+      <table class="data-table" style="max-width:520px"><thead><tr><th>코퍼스 경로</th><th>파일</th><th>백업</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="hint" style="margin-top:4px">🛡️ 결과 입력마다 자동 백업 · 위험한 <code>git reset --hard</code>는 <code>scripts\\safe_reset.bat</code>로 실행하세요(자동 물리 백업).</p>`;
   }
 
   async function loadFailureReview() {

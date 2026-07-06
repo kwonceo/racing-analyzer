@@ -21,3 +21,6 @@ data/korea_session.json.tmp
 data/highlight_wins.json
 data/alerts/
 data/failure_review.json
+# [데이터 보호] 물리 스냅샷 백업(로컬 안전망) — git reset 전 자동 생성, 원격 커밋 안 함
+backups/
+data/backup_log.txt

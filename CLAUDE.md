@@ -192,7 +192,7 @@ cd chrome-extension && python -c "import zipfile,os; zf=zipfile.ZipFile('../chro
 
 ### 데이터 커밋 정책 (churn 운영 규칙)
 - **워킹트리 churn은 정상**: 라이브 분석 중 서버가 데이터 파일(`analysis_log/`·`korea_session.json`·`discovered_patterns.json`·`prerace/` 등)을 30초 주기로 갱신 → `git status`가 상시 dirty. 이는 **의도된 동작**이며 매 변경마다 커밋하지 않는다.
-- **커밋 시점 = 명시적 백업만**: 서버 백업 함수(`_analysis_log_git_backup`·`_korea_git_backup`, 버튼/엔드포인트) 또는 `#백업`/마일스톤 커밋에서만 데이터 스토어를 커밋한다(자동 30초 커밋 없음).
+- **커밋 시점 = 명시적 백업 + 결과 입력 자동 백업**: 서버 백업 함수(`_analysis_log_git_backup`·`_korea_git_backup`, 버튼/엔드포인트) 또는 `#백업`/마일스톤 커밋 외에, **결과 입력마다 `_data_git_backup`(5초 디바운스·pathspec 커밋)이 코퍼스만 자동 add+commit+push**(데몬 스레드·비블로킹). 30초 churn은 여전히 자동 커밋 안 함(결과 입력이라는 명시적 이벤트에만 트리거). 수동 즉시: `POST /api/data/backup` / 통계 탭 `🛡️ 데이터 보호`. ⚠ 위험한 `git reset --hard`는 `scripts/safe_reset.bat`로 실행(실행 전 `backups/data_<ts>/`에 data\ 물리 스냅샷 자동 생성, `backups/`는 gitignore).
 - **추적 유지(백업 대상)**: `analysis_log/`(패턴학습 코퍼스)·`race_results/`(경주별 완전 저장)·`race_report/`(고배당 적중 재현 리포트)·`ai_training/`(AI 학습 완전 데이터·품질점수)·`korea_session.json`·`korea_history/`·`prerace/`·`discovered_patterns.json`·`pattern_learning.json`. **`dist/`(내보내기 출력)·`highlight_wins.json`은 gitignore.**
 - **gitignore(고빈도 임시)**: `triple_store.json`·`starters_store.json`·`results_store.json`·`odds_store.json`·`learning.json`·`odds_history/`·`kra_history.json`·`.claude/`.
 
