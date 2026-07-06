@@ -2533,15 +2533,21 @@
       const rows = ins.combos.map((c) => {
         const stake = budget > 0 ? won(c.ratio * budget) : Math.round(c.ratio * 100) + '%';
         const pay = budget > 0 && c.payoutRatio != null ? won(c.payoutRatio * budget) : (c.payoutRatio != null ? c.payoutRatio + 'x' : '-');
-        const diff = budget > 0 && c.payoutRatio != null ? ` <span style="color:${c.payoutRatio >= 1 ? '#38d39f' : '#f87171'}">(${sign(c.payoutRatio * budget - budget)})</span>` : '';
-        return `<div style="margin:2px 0"><b style="color:#c4b5fd">${c.label}</b> ${c.combo[0]}+${c.combo[1]}(${c.odds}배): <b>${stake}${budget > 0 ? '원' : ''}</b> → 적중 시 ${pay}${budget > 0 ? '원' : ''}${diff}</div>`;
+        // [2번] 배당별 손익률(%) = 총원금 대비 (적중 시 회수/원금 − 1)
+        const pct = c.payoutRatio != null ? Math.round((c.payoutRatio - 1) * 100) : null;
+        const pctTxt = pct != null ? ` <span style="color:${pct >= 0 ? '#38d39f' : '#f87171'}">(${pct >= 0 ? '+' : ''}${pct}%)</span>` : '';
+        // [3번] 원금보전 가능 여부 — 이 조합만 적중해도 총원금 이상 회수되면 ✅, 아니면 ❌(손실 N원)
+        const preserved = c.preserved != null ? c.preserved : (c.payoutRatio != null && c.payoutRatio >= 1);
+        const lossTxt = (!preserved && budget > 0 && c.payoutRatio != null) ? ` (손실 ${won((1 - c.payoutRatio) * budget)}원)` : '';
+        const presTxt = c.payoutRatio == null ? '' : (preserved
+          ? ' · <span style="color:#38d39f">원금보전 ✅</span>'
+          : ` · <span style="color:#f87171">원금보전 ❌${lossTxt}</span>`);
+        return `<div style="margin:3px 0"><b style="color:#c4b5fd">${c.label}</b> ${c.combo[0]}+${c.combo[1]}(${c.odds}배): <b>${stake}${budget > 0 ? '원' : ''}</b> → 적중 시 ${pay}${budget > 0 ? '원' : ''}${pctTxt}${presTxt}</div>`;
       }).join('');
-      // [보완#2] 시나리오 손익 표기 정정:
-      //  · 최선/중간/최소는 "커버 조합 중 하나가 적중했을 때"의 손익(모두 +일 수 있음).
-      //  · 진짜 최악은 "커버 조합 전부 미적중 = 전액 손실"(allMissRatio=0) → 별도로 명확히 표기.
+      // [2번] 시나리오 자동 표시: 최선(가장 좋은 조합 적중) · 평균(커버 조합 균등 적중 가정) + 전부 미적중.
       const pnl = (ratio) => (ratio == null ? '<span class="hint">-</span>' : sign((ratio - 1) * budget));
-      const sc = budget > 0 ? `<div class="hint" style="margin-top:4px">
-        적중 시 최선 <b style="color:#38d39f">${pnl(ins.bestRatio)}</b> · 중간 ${pnl(ins.midRatio)} · 최소 ${pnl(ins.worstRatio)}<br>
+      const sc = budget > 0 ? `<div class="hint" style="margin-top:5px">
+        최선 <b style="color:#38d39f">${pnl(ins.bestRatio)}</b> · 평균 <b style="color:${(ins.avgRatio || 0) >= 1 ? '#38d39f' : '#f87171'}">${pnl(ins.avgRatio)}</b><br>
         <b style="color:#f87171">전부 미적중 시 ${sign(-budget)}원(전액 손실)</b> · 기대환수 ${ins.expectedReturn != null ? ins.expectedReturn + '%' : '-'}</div>` : '';
       insBlock = `<div style="margin-top:8px;padding:8px;border:1px dashed #a78bfa;border-radius:7px;background:rgba(167,139,250,.08)">
         <div style="font-weight:800;color:#c4b5fd">🛡️ 보험용 추천 (BMED 보험형 · ${esc(ins.band || '')})</div>

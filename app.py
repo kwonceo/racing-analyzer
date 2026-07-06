@@ -2654,27 +2654,23 @@ def _bmed_insurance(key_horses, curQ, signal_confidence, inverse):
             o = curQ.get(pair)
             if o and o > 0:
                 combos.append({"combo": list(pair), "odds": round(o, 1), "label": lbl})
+    # [배당구간별 자동배분] 1+2위 / 1+3위 / 1+4위 고정 비율(합 100%).
+    #   저배당(<3배): 70/20/10 · 중배당(3~7배): 50/30/20 · 고배당(≥7배): 40/35/25.
     if ab_odds < 3:
-        band, ratios = "저배당", [0.60, 0.25, 0.15]
+        band, ratios = "저배당", [0.70, 0.20, 0.10]
     elif ab_odds < 7:
-        band, ratios = "중배당", None   # 원금보전 역산
+        band, ratios = "중배당", [0.50, 0.30, 0.20]
     else:
         band, ratios = "고배당", [0.40, 0.35, 0.25]
-    if ratios is None:   # 중배당 = 원금보전 자동 계산
-        plan, _pres, _rr = _capital_preservation(combos)
-        by = {tuple(p["combo"]): p for p in plan}
-        for c in combos:
-            p = by.get(tuple(c["combo"]))
-            c["ratio"] = p["ratio"] if p else None
-            c["payoutRatio"] = p["payoutRatio"] if p else None
-    else:                # 저/고배당 = 고정 비율(합 100%)
-        # [수정#2] 3두(2조합)면 앞 2개 비율만 쓰이므로 합이 100% 미만 → 조합 수만큼 재정규화.
-        rr = ratios[:len(combos)]
-        rsum = sum(rr) or 1.0
-        rr = [round(x / rsum, 3) for x in rr]
-        for c, r in zip(combos, rr):
-            c["ratio"] = r
-            c["payoutRatio"] = round(r * c["odds"], 3)
+    # 3두(2조합)면 앞 2개 비율만 쓰이므로 합이 100% 미만 → 조합 수만큼 재정규화.
+    rr = ratios[:len(combos)]
+    rsum = sum(rr) or 1.0
+    rr = [round(x / rsum, 3) for x in rr]
+    for c, r in zip(combos, rr):
+        c["ratio"] = r
+        c["payoutRatio"] = round(r * c["odds"], 3)
+        # [원금보전 가능 여부] 이 조합만 적중해도 총원금 이상 회수되면 True(✅), 아니면 손실(❌).
+        c["preserved"] = bool(c["payoutRatio"] >= 1.0)
     payouts = [c["payoutRatio"] for c in combos if c.get("payoutRatio") is not None]
     # [보완#2 BUG A] 중간값 = 정확한 중앙값. 조합 2개(짝수)일 때 sorted[n//2]는 최댓값과 같아져
     #   '최선==중간'으로 중복 표기되던 버그 → 짝수 개수면 가운데 두 값의 평균으로 산출.
@@ -2688,6 +2684,8 @@ def _bmed_insurance(key_horses, curQ, signal_confidence, inverse):
         "bestRatio": max(payouts) if payouts else None,
         "midRatio": _median(payouts),
         "worstRatio": min(payouts) if payouts else None,
+        # [평균 시나리오] 커버 조합 중 하나가 적중(균등 가정) 시 평균 회수 비율.
+        "avgRatio": round(sum(payouts) / len(payouts), 3) if payouts else None,
         # [보완#2 BUG B] 실제 최악 = 커버 조합 전부 미적중 = 전액 손실(-100%).
         #   worstRatio(적중 조합 중 최소 회수)를 '최악'으로 오인 표기하던 것을 프론트에서 구분하도록
         #   allMissRatio(=0, 전액손실) 필드를 명시 제공한다.
