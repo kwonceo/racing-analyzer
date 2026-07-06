@@ -77,8 +77,8 @@ function loadState() {
       if (v.tripleProgress && !v.tripleProgress.done) renderTripleProgress(v.tripleProgress);
       renderAutoClosed(v.autoCollectStatus);   // [수정2] 경기 마감 시 중단 안내(팝업 재오픈에도 유지)
       renderResultTimer(v.resultAutoStatus);
-      // [3번] 창을 닫았다 다시 열어도 마지막 즉시분석 결과를 복원
-      if (v.analyzeStatus && v.analyzeStatus.data) renderAnalyze(v.analyzeStatus.data, v.analyzeStatus.at);
+      // [3번] 창을 닫았다 다시 열어도 마지막 즉시분석 결과를 복원(수동 결과면 고정 유지)
+      if (v.analyzeStatus && v.analyzeStatus.data) applyAnalyzeStatus(v.analyzeStatus, !!v.analyzeStatus.manual);
     }
   );
 }
@@ -419,6 +419,21 @@ function renderAnalyze(a, at) {
   analyzeDetail.textContent = lines.join('\n');
 }
 
+// [실시간 분석 유지 버그수정] 즉시분석(수동) 결과를 현재 경주에 '고정' →
+//   백그라운드 재분석이 '초반(기준값 설정/재설정·직전없음)' 결과로 덮어써 되돌리던 문제 방지.
+//   경주 전환(raceKey 변경) 시에만 고정 해제. 같은 경주의 '더 풍부한' 갱신은 그대로 반영.
+let _pinnedAnalyzeRk = null;
+function applyAnalyzeStatus(av, fromManual) {
+  if (!av || !av.data) return;
+  const d = av.data, rk = d.raceKey || '';
+  const isBaseline = !!(d.baselineSet || d.baselineReset || d.hasPrev === false);
+  // 백그라운드 갱신이 '같은 경주의 초반 결과'면 무시(수동 고정 유지 → 되돌이 방지)
+  if (!fromManual && _pinnedAnalyzeRk && rk === _pinnedAnalyzeRk && isBaseline) return;
+  if (fromManual) _pinnedAnalyzeRk = rk;                            // 수동 분석 → 이 경주 고정
+  else if (rk && rk !== _pinnedAnalyzeRk) _pinnedAnalyzeRk = null;  // 경주 전환 → 고정 해제
+  renderAnalyze(d, av.at);
+}
+
 btnInstant.addEventListener('click', async () => {
   btnInstant.disabled = true; btnInstant.textContent = '수집 중…';
   analyzeCard.style.display = 'block';
@@ -447,9 +462,10 @@ btnInstant.addEventListener('click', async () => {
       analyzeSummary.textContent = res.error || '분석 실패';
     } else {
       const at = Date.now();
-      renderAnalyze(res.data, at);
+      // [실시간 분석 유지] 수동 즉시분석 = manual 플래그로 저장 → 이 경주에 고정(백그라운드 되돌이 방지)
+      applyAnalyzeStatus({ data: res.data, at, manual: true }, true);
       // [3번] 즉시분석 결과를 저장 → 팝업을 닫았다 열어도 자동 복원
-      chrome.storage.local.set({ analyzeStatus: { data: res.data, at } });
+      chrome.storage.local.set({ analyzeStatus: { data: res.data, at, manual: true } });
     }
     btnInstant.disabled = false; btnInstant.textContent = '🚨 즉시 분석 (수집→이상감지)';
   });
@@ -466,7 +482,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes.autoSend) els.autoSend.checked = !!changes.autoSend.newValue;   // [수정2] 마감 시 자동 OFF 반영
   if (changes.resultAutoStatus) renderResultTimer(changes.resultAutoStatus.newValue);
   if (changes.analyzeStatus && changes.analyzeStatus.newValue) {
-    const av = changes.analyzeStatus.newValue; renderAnalyze(av.data, av.at);
+    const av = changes.analyzeStatus.newValue; applyAnalyzeStatus(av, !!av.manual);
   }
 });
 
