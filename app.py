@@ -4563,6 +4563,246 @@ def _highlight_save(entry):
     json.dump(arr[-500:], open(HIGHLIGHT_FILE, "w", encoding="utf-8"), ensure_ascii=False)
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  [신규] 고배당 적중 상세 분석 리포트 시스템 (삭제 없이 추가)
+#   [1번] 경주별 완전 재현 리포트(data/race_report/) · [2번] 명예의 전당(highlight_wins)
+#   [3번] 추천 근거 재현(프론트) · [4번] 신호조합 학습 태깅(win_tags)
+# ═══════════════════════════════════════════════════════════════════
+RACE_REPORT_DIR = os.path.join(os.path.dirname(__file__), "data", "race_report")
+
+
+def _combo_timeline(doc, combo):
+    """스냅샷들에서 특정 복승 조합(combo=[a,b])의 배당 변화 타임라인 추출.
+    반환 [{time, minutes_before, odds, change}] — change=직전 대비 %(첫 항목 None)."""
+    key = "+".join(str(int(x)) for x in sorted(combo))
+    tl, prev = [], None
+    for s in (doc.get("snapshots") or []):
+        q = s.get("quinella") or {}
+        o = q.get(key)
+        if o is None:
+            # 역순 키('b+a')도 방어
+            alt = "+".join(str(int(x)) for x in list(sorted(combo))[::-1])
+            o = q.get(alt)
+        if o is None:
+            continue
+        try:
+            o = round(float(o), 1)
+        except (TypeError, ValueError):
+            continue
+        chg = (round((o - prev) / prev * 100, 1) if (prev and prev > 0) else None)
+        tl.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
+                   "odds": o, "change": chg})
+        prev = o
+    return tl
+
+
+def _signal_win_tags(an, top3):
+    """[4번] 어떤 신호가 실제 입상마를 맞혔는지 태깅.
+      초과급락_적중 / 쌍승역전_적중 / 복승불일치_적중 / 전적보조_적중.
+    반환 {tags:[...], combo:bool(2개+ 동시), detail:{...}}."""
+    top3 = [int(x) for x in top3 if x is not None]
+    sq = an.get("signalQuality") or {}
+    excess = sq.get("excess") or {}
+    tags, detail = [], {}
+    # 초과급락_적중: 🔴 집중급락(concentrated)말이 입상
+    conc = [int(h) for h in (excess.get("concentrated") or [])]
+    hit_conc = [h for h in conc if h in top3]
+    if hit_conc:
+        tags.append("초과급락_적중")
+        detail["excess_hit_horses"] = hit_conc
+    # 쌍승역전_적중: 역전 challenger(실질 상위지목마)가 입상
+    rev_ch = [int(r["challenger"]) for r in (sq.get("winExactaReversals") or []) if r.get("challenger") is not None]
+    hit_rev = [h for h in rev_ch if h in top3]
+    if hit_rev:
+        tags.append("쌍승역전_적중")
+        detail["reversal_hit_horses"] = hit_rev
+    # 복승불일치_적중: 집중 자금유입(focus)말이 입상
+    mm = sq.get("quinellaMismatch") or {}
+    foc = [int(h) for h in (mm.get("focusHorses") or [])]
+    hit_foc = [h for h in foc if h in top3]
+    if hit_foc:
+        tags.append("복승불일치_적중")
+        detail["mismatch_hit_horses"] = hit_foc
+    # 전적보조_적중: 전적 최고점 말이 입상
+    form = an.get("form") or []
+    if form:
+        top_form = max(form, key=lambda h: (h.get("totalScore") or 0))
+        if (top_form.get("totalScore") or 0) > 0 and int(top_form.get("no")) in top3:
+            tags.append("전적보조_적중")
+            detail["form_hit_horse"] = int(top_form.get("no"))
+    return {"tags": tags, "combo": len(tags) >= 2, "detail": detail}
+
+
+def _report_odds_band(odds):
+    if not odds or odds <= 0:
+        return "미상"
+    return "고배당" if odds >= 20 else ("중배당" if odds >= 7 else "저배당")
+
+
+def _build_race_report(rk, an, record, result, doc):
+    """[1번] 경주별 완전 재현 리포트를 조립해 data/race_report/에 저장하고 dict 반환.
+    기존 데이터(an·record·doc.snapshots)만 소비 — 새 계산 없음(재현·설명 전용)."""
+    path, date, race = _hist_path(rk)          # 슬러그·날짜 규칙 재사용
+    safe = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
+    top3 = [int(x) for x in (record.get("top3") or []) if x is not None]
+    sq = an.get("signalQuality") or {}
+    excess = sq.get("excess") or {}
+    ex_h = excess.get("horses") or {}
+    conf_h = (sq.get("signalConfidence") or {}).get("horses") or {}
+    reversals = sq.get("winExactaReversals") or []
+    rev_by_ch = {}
+    for r in reversals:
+        try:
+            rev_by_ch[int(r["challenger"])] = r
+        except (KeyError, TypeError, ValueError):
+            continue
+    form_map = {int(h.get("no")): h for h in (an.get("form") or []) if h.get("no") is not None}
+    drops = an.get("drops") or []
+    bet_rec = an.get("betRecommend") or []
+
+    def _rep_combo_for(no):
+        """말 no 를 포함하는 대표 복승 조합(급락 가장 큰 것 → 없으면 추천 조합)."""
+        best = None
+        for d in drops:
+            if d.get("pct") is not None and d["pct"] < 0 and no in [int(x) for x in d.get("combo", [])]:
+                if best is None or d["pct"] < best["pct"]:
+                    best = d
+        if best:
+            return [int(x) for x in best["combo"]]
+        for b in bet_rec:
+            cc = [int(x) for x in b.get("combo", [])]
+            if no in cc and len(cc) >= 2:
+                return sorted(cc[:2])
+        return None
+
+    # ── why_recommended: 입상마 + 유력마 각각의 신호 근거 ──
+    focus = []
+    for h in top3 + [int(x) for x in (an.get("keyHorses") or [])]:
+        if h not in focus:
+            focus.append(h)
+    why = {}
+    for no in focus:
+        eh = ex_h.get(no) or ex_h.get(str(no)) or {}
+        ch = conf_h.get(no) or conf_h.get(str(no)) or {}
+        rv = rev_by_ch.get(no)
+        combo = _rep_combo_for(no)
+        tl = _combo_timeline(doc, combo) if combo else []
+        reasons = []
+        if eh.get("grade") == "🔴":
+            reasons.append("초과급락")
+        elif eh.get("grade") == "🟡":
+            reasons.append("약한급락")
+        if rv:
+            reasons.append("쌍승역전")
+        fs = (form_map.get(no) or {}).get("totalScore")
+        why["signal_%d" % no] = {
+            "horse": no,
+            "placed": no in top3,
+            "place_rank": (top3.index(no) + 1 if no in top3 else None),
+            "excess_drop": eh.get("excess"),
+            "avg_drop": eh.get("avg"),
+            "grade": eh.get("grade"),
+            "rep_combo": combo,
+            "drop_timeline": tl,
+            "exacta_reversal": bool(rv),
+            "reversal_ratio": (rv.get("ratio") if rv else None),
+            "record_score": fs,
+            "confidence": ch.get("confidence"),
+            "reason": " + ".join(reasons) if reasons else ("전적상위" if (fs or 0) >= 60 else "일반"),
+        }
+
+    # ── confidence_breakdown: 1착마(없으면 최고신뢰 유력마) 기준 신뢰도 분해 ──
+    win_no = top3[0] if top3 else (an.get("keyHorses") or [None])[0]
+    wc = conf_h.get(win_no) or conf_h.get(str(win_no)) or {}
+    ex_s = round(0.40 * (wc.get("excessScore") or 0.0))
+    rv_s = round(0.35 * (wc.get("reversalScore") or 0.0))
+    mm_s = round(0.25 * (wc.get("mismatchScore") or 0.0))
+    total = wc.get("confidence")
+    if total is None:
+        total = ex_s + rv_s + mm_s
+    grade = "상" if total >= 70 else ("중" if total >= 40 else "하")
+    conf_break = {
+        "horse": win_no,
+        "excess_drop_score": ex_s, "exacta_reversal_score": rv_s, "quinella_mismatch_score": mm_s,
+        "record_score": (form_map.get(win_no) or {}).get("totalScore"),
+        "total": total, "grade": grade,
+    }
+
+    # ── recommendation_process: 스토리형 단계 ──
+    snaps = doc.get("snapshots") or []
+    t_start = snaps[0].get("time") if snaps else None
+    t_last = snaps[-1].get("time") if snaps else None
+    steps = []
+    if win_no is not None:
+        _wf = (form_map.get(win_no) or {}).get("totalScore")
+        steps.append("1. 전적 분석: %s번 %s" % (win_no, ("%s점" % _wf if _wf is not None else "전적 정보 제한")))
+    if t_start:
+        steps.append("2. 배당 수집 시작 %s" % t_start)
+    conc = [int(h) for h in (excess.get("concentrated") or [])]
+    if conc:
+        _c0 = conc[0]
+        _ce = (ex_h.get(_c0) or ex_h.get(str(_c0)) or {}).get("excess")
+        steps.append("3. 초과급락 감지: %s번 초과급락 %s%%p (전체평균 %s%%)"
+                     % (_c0, _ce, excess.get("overall")))
+    for r in reversals[:2]:
+        steps.append("4. 쌍승 역전: %s→%s(%s) < %s→%s(%s) → %s번 실질 상위 신호"
+                     % (r.get("challenger"), r.get("favorite"), r.get("reverseExacta"),
+                        r.get("favorite"), r.get("challenger"), r.get("favoredExacta"), r.get("challenger")))
+    if total is not None:
+        steps.append("5. 종합 신뢰도 %s점(%s) 판정" % (total, grade))
+    bmed = (an.get("bmed") or {})
+    if bmed.get("strategy"):
+        steps.append("6. BMED 전략: %s 적용" % bmed.get("strategy"))
+    main_bet = next((b for b in bet_rec if b.get("label") in ("복승 메인", "삼복승 메인")), (bet_rec[0] if bet_rec else None))
+    if main_bet:
+        steps.append("7. 최종 추천: %s %s"
+                     % (main_bet.get("label"), "+".join(str(x) for x in main_bet.get("combo", []))))
+
+    # ── hit_type: 어떤 베팅이 적중했나 ──
+    top2 = sorted(top3[:2]) if len(top3) >= 2 else []
+    top3s = sorted(top3[:3]) if len(top3) >= 3 else []
+    hit_type = None
+    for b in bet_rec:
+        cc = sorted(int(x) for x in b.get("combo", []))
+        if b.get("kind") == "복승" and top2 and cc == top2:
+            hit_type = b.get("label") or "복승"
+            break
+        if b.get("kind") == "삼복승" and top3s and cc == top3s:
+            hit_type = b.get("label") or "삼복승"
+            break
+
+    payouts = record.get("payouts") or {}
+    win_odds = payouts.get("trifecta") or payouts.get("quinella") or 0
+    win_tags = _signal_win_tags(an, top3)
+
+    report = {
+        "race": race, "raceKey": rk, "date": date,
+        "result": {"1st": (top3[0] if len(top3) > 0 else None),
+                   "2nd": (top3[1] if len(top3) > 1 else None),
+                   "3rd": (top3[2] if len(top3) > 2 else None),
+                   "4th": record.get("top4")},
+        "hit": bool(record.get("was_hit")),
+        "hit_type": hit_type,
+        "odds": _report_odds_band(win_odds), "win_odds": win_odds,
+        "why_recommended": why,
+        "recommendation_process": steps,
+        "confidence_breakdown": conf_break,
+        "win_tags": win_tags.get("tags"),
+        "combo_tags": win_tags.get("combo"),
+        "hit_basis": record.get("hit_basis"),
+        "pnl": record.get("pnl"), "stake": record.get("stake"),
+        "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    try:
+        os.makedirs(RACE_REPORT_DIR, exist_ok=True)
+        json.dump(report, open(os.path.join(RACE_REPORT_DIR, safe + ".json"), "w", encoding="utf-8"),
+                  ensure_ascii=False, indent=1)
+        report["_slug"] = safe
+    except Exception as e:
+        print("[경주리포트] 저장 실패:", e)
+    return report
+
+
 def _rate(records, sel, cond):
     s = [r for r in records if sel(r)]
     hit = sum(1 for r in s if cond(r))
@@ -4657,7 +4897,33 @@ def _recompute_learning_stats(records):
         for d in bucket.values():
             d["rate"] = round(d["hit"] / d["n"] * 100, 1) if d["n"] else None
 
+    # [신규 4번] 신호조합 학습: 어떤 신호(조합)가 실제 입상마를 맞혔고, 그 중 고배당 적중 비율.
+    #   win_tags = 그 경주에서 실제 입상마를 정확히 지목한 신호들(초과급락/쌍승역전/복승불일치/전적보조).
+    #   n=태그 발생 경주 · hit=베팅 적중 · high=고배당(복승30배+/삼복승100배+) 적중.
+    def _is_high_hit(r):
+        p = r.get("payouts") or {}
+        return bool((r.get("quinella_hit") and (p.get("quinella") or 0) >= 30)
+                    or (r.get("trifecta_hit") and (p.get("trifecta") or 0) >= 100))
+    win_tag_stats = {}
+    for r in records:
+        tags = r.get("win_tags") or []
+        hit = bool(r.get("was_hit"))
+        high = _is_high_hit(r)
+        buckets = list(tags)
+        if len(tags) >= 2:
+            buckets.append("+".join(sorted(tags)))            # 동시 조합 버킷
+            buckets.append("동시(2개+)")
+        for b in set(buckets):
+            d = win_tag_stats.setdefault(b, {"n": 0, "hit": 0, "high": 0})
+            d["n"] += 1
+            d["hit"] += 1 if hit else 0
+            d["high"] += 1 if high else 0
+    for d in win_tag_stats.values():
+        d["rate"] = round(d["hit"] / d["n"] * 100, 1) if d["n"] else None
+        d["high_rate"] = round(d["high"] / d["n"] * 100, 1) if d["n"] else None
+
     return {
+        "win_tag_stats": win_tag_stats,   # [신규 4번] 신호조합별 적중률·고배당 적중률
         "total": len(records),
         "by_track": by_track, "by_month": by_month, "by_strategy": by_strategy,   # [5번]·[전략성과]
         "profit_summary": profit_summary,
@@ -4681,6 +4947,57 @@ def _recompute_learning_stats(records):
         "near_miss": {"n": sum(1 for r in records if r.get("near_miss")),
                       "trio_near": sum(1 for r in records if r.get("trio_near_miss"))},
     }
+
+
+@app.route("/api/race-report/list", methods=["GET"])
+def race_report_list():
+    """[신규 1번] 저장된 경주 재현 리포트 목록 → [{slug,race,date,hit,hit_type,odds,win_tags}]."""
+    out = []
+    if os.path.isdir(RACE_REPORT_DIR):
+        for fn in sorted(os.listdir(RACE_REPORT_DIR), reverse=True):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(RACE_REPORT_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            out.append({"slug": fn[:-5], "race": d.get("race"), "date": d.get("date"),
+                        "raceKey": d.get("raceKey"), "hit": d.get("hit"), "hit_type": d.get("hit_type"),
+                        "odds": d.get("odds"), "win_odds": d.get("win_odds"),
+                        "win_tags": d.get("win_tags"), "combo_tags": d.get("combo_tags")})
+    return jsonify({"reports": out, "count": len(out)})
+
+
+@app.route("/api/race-report/get", methods=["GET"])
+def race_report_get():
+    """[신규 1·3번] 단일 리포트 전체(추천근거·타임라인·신뢰도 분해). query: slug 또는 raceKey."""
+    slug = (request.args.get("slug") or "").strip()
+    rk = (request.args.get("raceKey") or "").strip()
+    if not slug and rk:
+        _p, _d, _r = _hist_path(rk)
+        slug = re.sub(r"[^\w가-힣]+", "_", f"{_d}_{_r}").strip("_")
+    # 경로조작 방어: 슬러그는 파일명 basename 으로만
+    slug = os.path.basename(slug)
+    if not slug:
+        return jsonify({"error": "slug 또는 raceKey 필요"}), 400
+    path = os.path.join(RACE_REPORT_DIR, slug + ".json")
+    if not os.path.isfile(path):
+        return jsonify({"error": "리포트 없음", "slug": slug}), 404
+    try:
+        return jsonify(json.load(open(path, encoding="utf-8")))
+    except Exception as e:
+        return jsonify({"error": f"읽기 실패: {e}"}), 500
+
+
+@app.route("/api/highlights", methods=["GET"])
+def highlights_list():
+    """[신규 2번] 고배당 명예의 전당(highlight_wins.json) — 최신순."""
+    try:
+        arr = json.load(open(HIGHLIGHT_FILE, encoding="utf-8"))
+    except Exception:
+        arr = []
+    arr = list(reversed(arr))[:100]
+    return jsonify({"highlights": arr, "count": len(arr)})
 
 
 @app.route("/api/history/list", methods=["GET", "POST"])
@@ -4803,9 +5120,16 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
                "trifecta": (t_odds if trifecta_hit and t_odds else 0)}
     try:
         if (quinella_hit and q_odds and q_odds >= 30) or (trifecta_hit and t_odds and t_odds >= 100):
+            # [2번] 명예의 전당: 적중 근거(초과급락·역전·전적)·태깅·리포트 슬러그 포함(리치)
+            _hp, _hd, _hr = _hist_path(rk)
+            _slug = re.sub(r"[^\w가-힣]+", "_", f"{_hd}_{_hr}").strip("_")
+            _wt2 = _signal_win_tags(an, top3)
             _highlight_save({"raceKey": rk, "top3": top3,
                              "quinella_hit": quinella_hit, "quinella_odds": q_odds,
-                             "trifecta_hit": trifecta_hit, "trifecta_odds": t_odds, "t": time.time()})
+                             "trifecta_hit": trifecta_hit, "trifecta_odds": t_odds,
+                             "date": _hd, "race": _hr, "report_slug": _slug,
+                             "win_tags": _wt2.get("tags"), "combo_tags": _wt2.get("combo"),
+                             "t": time.time()})
     except Exception as e:
         print("[하이라이트] 저장 실패:", e)
 
@@ -4906,6 +5230,10 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         "reason": " · ".join(_basis) or ("적중" if was_hit else "추천 미적중"),
     }
 
+    # [4번] 신호조합 학습 태깅(초과급락_적중/쌍승역전_적중/복승불일치_적중/전적보조_적중)
+    _wt = _signal_win_tags(an, top3)
+    win_tags = _wt.get("tags") or []
+
     record = {
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
         "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
@@ -4932,6 +5260,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         # [전략 성과 학습] 적용된 BMED 전략·역배열 여부(전략별 적중률 집계 근거)
         "bmed_strategy": ((an.get("bmed") or {}).get("strategy")),
         "inverse_detected": bool((an.get("inverse") or {}).get("detected")),
+        # [4번] 신호조합 적중 태깅(초과급락/쌍승역전/복승불일치/전적보조 + 동시)
+        "win_tags": win_tags, "win_tags_combo": bool(len(win_tags) >= 2),
         "t": time.time(),
     }
     L = _learning_load()
@@ -4962,6 +5292,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     except Exception as e:
         print("[복기저장] 결과 요약 실패:", e)
+    # [신규 1번] 경주별 완전 재현 리포트(data/race_report/) 저장 — 추천 근거·타임라인·신뢰도 분해
+    try:
+        _rep = _build_race_report(rk, an, record, result, doc)
+        record["report_slug"] = _rep.get("_slug")
+        record["win_odds"] = _rep.get("win_odds")
+    except Exception as e:
+        print("[경주리포트] 생성 실패:", e)
     # [분석 로그] 결과 입력 시 로그에 실제 결과·적중 반영
     _analysis_log_save(rk)
     # [결과 완전 저장] 경주별 완전 파일(data/race_results/) 저장 + 검증(AI 학습용)

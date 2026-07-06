@@ -478,3 +478,36 @@ table.odds-matrix td.rec-x { outline: 3px solid var(--accent-2); outline-offset:
 .odds-toast .ot-head { font-weight: 700; margin-bottom: 4px; color: #ffd24f; }
 .odds-toast .ot-line { line-height: 1.5; }
 .tl-row:hover { background: rgba(255,255,255,.05); }
+
+/* ── [신규] 고배당 적중 상세 리포트 시스템 ── */
+.hl-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+.hl-card { background:linear-gradient(145deg,#2a2415,#1c1a12); border:1px solid #6b5a1e;
+  border-radius:10px; padding:12px; cursor:pointer; transition:transform .12s,box-shadow .12s; }
+.hl-card:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(255,210,79,.18); }
+.hl-card .hl-odds { font-size:22px; font-weight:800; color:#ffd24f; }
+.hl-card .hl-race { font-weight:700; margin:2px 0; }
+.hl-card .hl-tags { margin-top:6px; display:flex; flex-wrap:wrap; gap:4px; }
+.hl-tag { font-size:11px; background:#3a3320; border:1px solid #6b5a1e; color:#ffe08a;
+  border-radius:10px; padding:1px 7px; }
+.hl-empty { color:#94a3b8; padding:10px; }
+.rpt-tabs { display:flex; gap:4px; border-bottom:1px solid #334155; margin-bottom:10px; flex-wrap:wrap; }
+.rpt-tab { padding:7px 14px; cursor:pointer; border:none; background:transparent; color:#94a3b8;
+  font-weight:600; border-bottom:2px solid transparent; }
+.rpt-tab.active { color:#ffd24f; border-bottom-color:#ffd24f; }
+.rpt-pane { display:none; } .rpt-pane.active { display:block; }
+.rpt-head { font-size:18px; font-weight:800; margin-bottom:2px; }
+.rpt-sub { color:#94a3b8; margin-bottom:10px; }
+.rpt-story { list-style:none; padding:0; margin:0; }
+.rpt-story li { padding:8px 12px; margin:6px 0; background:rgba(255,255,255,.03);
+  border-left:3px solid #ffd24f; border-radius:0 6px 6px 0; line-height:1.5; }
+.rpt-tl { width:100%; border-collapse:collapse; margin-top:6px; }
+.rpt-tl th,.rpt-tl td { padding:5px 8px; border-bottom:1px solid #263243; text-align:right; font-variant-numeric:tabular-nums; }
+.rpt-tl th:first-child,.rpt-tl td:first-child { text-align:left; }
+.rpt-tl .down { color:#ff6b6b; } .rpt-tl .flat { color:#94a3b8; }
+.rpt-signal { border:1px solid #334155; border-radius:8px; padding:10px; margin:8px 0; }
+.rpt-signal.placed { border-color:#3fae5a; background:rgba(63,174,90,.06); }
+.rpt-conf { display:flex; gap:12px; flex-wrap:wrap; margin:8px 0; }
+.rpt-conf .cf { background:rgba(255,255,255,.04); border-radius:8px; padding:8px 12px; text-align:center; }
+.rpt-conf .cf b { display:block; font-size:20px; color:#ffd24f; }
+.rpt-bar { height:10px; background:#263243; border-radius:5px; overflow:hidden; margin-top:4px; }
+.rpt-bar > span { display:block; height:100%; background:linear-gradient(90deg,#ffd24f,#ff9f43); }

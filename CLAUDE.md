@@ -42,6 +42,7 @@ data/
 ├── ai_training/     ← AI 학습 핵심(완전 데이터 + 품질점수)  [추적]
 ├── analysis_log/    ← 분석 로그(패턴학습 코퍼스)            [추적]
 ├── race_results/    ← 경주 결과 완전 저장                   [추적]
+├── race_report/     ← 고배당 적중 재현 리포트(추천근거·타임라인) [추적]
 ├── daily_summary/   ← 일별 자동 요약(YYYY-MM-DD.json)       [추적]
 ├── pattern_learning.json / discovered_patterns.json ← 패턴 통계 [추적]
 ├── prerace/ · korea_history/ · korea_session.json ← 한국 PDF/결과 [추적]
@@ -119,6 +120,7 @@ data/
 - **결과 4착 + 삼복승 near-miss 학습**(v2.3.0): 결과 입력 폼(recordResult·saveJapanResult·saveResult) 4착 필드 추가. `_apply_result_learning`이 추천 삼복승 2두 top3 + 1두 4착이면 `near_miss`/`near_miss_horse`/`trio_near_miss` 기록 → `_record_near_miss`가 `data/near_miss.json`(gitignore) 누적. `_near_miss_frequent`(2회+) 말이 출전 시 `_triple_analyze`가 `삼복승 보험(4착빈번)` 픽 자동 추가(마감 전만). `GET /api/learning/near-miss`, 통계 `renderNearMissStats` 카드. 적중 판정 기준(복승 1+2·삼복승 1+2+3)은 불변.
 - **이상감지 vs 추천 비교 학습**(v2.3.0, `_triple_analyze` 반환 `compareRecommend`/`integratedWeights`): `_compare_recommend`가 이상감지 기반(집중급락→급락조합→배당인기)·전적 기반(전적 총점)·최종(betRecommend) 추천 조합 3종 산출. `_apply_result_learning`이 결과와 각 조합 비교 → 레코드 `cmp_anomaly_hit`/`cmp_form_hit`/`cmp_final_hit` → `_recompute_learning_stats`의 `compare_stats`(적중률) + `integrated_weights`(50경주+ 자동 조정). `_integrated_grades(weights)`가 `_learned_integrated_weights()`로 가중치 자동 반영(기본 40/60). 프론트 `renderCompareStats` 카드(통계 탭). 분석 로그 `compare_recommendation` 저장.
 - **마감 후 신호 처리**(v2.3.0, 확장 v2.1.8): `_history_append`가 스냅샷에 `mb_signed`(부호 포함 발주전분)·`after_close` 기록(마감 후=음수). `_triple_analyze`가 현재 스냅샷 `after_close` 시 급락을 삼복승 보험(`anomaly_horse`)·대규모급락 전략에서 제외(추천 미반영)하고 모든 신호에 `phase`("마감 N분전"/"마감 후")·`afterClose`·`note`("참고만") 태깅, 반환 `afterClose`/`minutesBefore`. 프론트: 마감 후 배너 + 신호 회색·소리/플래시 생략(`updateOddsAlert`). 확장 수집 간격 단계 단축(T-3분 15초/T-1분 10초/T-30초 5초, `background.js autoTick`). `_record_after_close_case`가 `data/after_close_cases.json`에 케이스 저장(`GET /api/after-close/cases`, gitignore).
+- **🏆 고배당 적중 상세 분석 리포트**(신규, `_build_race_report`/`_signal_win_tags`/`_combo_timeline`): 결과 입력 시 `_apply_result_learning`이 `data/race_report/<날짜>_<경마장>_<경주>.json` 자동 생성 — `why_recommended`(입상마·유력마별 초과급락·대표조합 배당 타임라인·쌍승역전 비율·전적점수·신뢰도), `recommendation_process`(스토리 단계), `confidence_breakdown`(초과40+역전35+불일치25 가중 + 상/중/하), `win_tags`. 기존 `an`(분석 반환)·스냅샷만 소비(재계산 없음). 명예의 전당은 기존 `_highlight_save`(복승30배+/삼복승100배+) 확장(리치 필드). 학습은 레코드 `win_tags` + `_recompute_learning_stats.win_tag_stats`(신호·동시조합별 적중률·고배당 적중률). 엔드포인트 `GET /api/race-report/list·get`, `GET /api/highlights`. 프론트 결과기록 탭 `🏆 명예의 전당` 카드 + `📄 경주 재현 리포트`(4탭). 검증 `tests/run_report.py`. **삭제 없이 확장만**.
 - **신호 품질 필터링**(v2.3.0, `_triple_analyze` 반환 `signalQuality`): `_excess_drop_analysis`(초과급락=말평균-전체평균, 5%p+ 🔴/0~5%p 🟡/노이즈 제거) → `_signal_situation`(상황별 가중치 일반50:50/이상감지다수40:60/대규모30:70/대규모+집중20:80, 대규모 시 신호소스=집중도) → `_integrated_adaptive`(상황 가중 통합등급, 기존 `_integrated_grades` 40/60은 유지) + `_combo_signal_quality`(추천 조합 상/중/하+근거). 대규모 급락 시 개별 급락 신호 `lowConfidence`↓ + 집중급락 말 `🔴 집중급락` 신호 승격. 프론트 `renderSignalQuality` 카드 + 베팅표 신호품질 컬럼.
 
 ### Chrome 확장 (`chrome-extension/`, MV3)
@@ -150,6 +152,7 @@ node tests/run_stats.js
 python tests/run_flow.py
 python tests/run_formula.py          # 유력마/제거마 공식 정합성
 python tests/run_reversal.py         # 쌍승 역전 다중순위·flip 다중조합
+python tests/run_report.py           # 고배당 적중 재현 리포트·신호조합 태깅
 python tests/run_prerace.py          # 한국 PDF 전경주 사전분석
 # 확장 ZIP 재빌드 (확장 코드 변경 시에만, manifest 버전 bump 후)
 cd chrome-extension && python -c "import zipfile,os; zf=zipfile.ZipFile('../chrome-extension.zip','w',zipfile.ZIP_DEFLATED); [zf.write(os.path.join(r,f),os.path.relpath(os.path.join(r,f),'.')) for r,_,fs in os.walk('.') for f in fs]; zf.close()"
@@ -182,7 +185,7 @@ cd chrome-extension && python -c "import zipfile,os; zf=zipfile.ZipFile('../chro
 ### 데이터 커밋 정책 (churn 운영 규칙)
 - **워킹트리 churn은 정상**: 라이브 분석 중 서버가 데이터 파일(`analysis_log/`·`korea_session.json`·`discovered_patterns.json`·`prerace/` 등)을 30초 주기로 갱신 → `git status`가 상시 dirty. 이는 **의도된 동작**이며 매 변경마다 커밋하지 않는다.
 - **커밋 시점 = 명시적 백업만**: 서버 백업 함수(`_analysis_log_git_backup`·`_korea_git_backup`, 버튼/엔드포인트) 또는 `#백업`/마일스톤 커밋에서만 데이터 스토어를 커밋한다(자동 30초 커밋 없음).
-- **추적 유지(백업 대상)**: `analysis_log/`(패턴학습 코퍼스)·`race_results/`(경주별 완전 저장)·`ai_training/`(AI 학습 완전 데이터·품질점수)·`korea_session.json`·`korea_history/`·`prerace/`·`discovered_patterns.json`·`pattern_learning.json`. **`dist/`(내보내기 출력)은 gitignore.**
+- **추적 유지(백업 대상)**: `analysis_log/`(패턴학습 코퍼스)·`race_results/`(경주별 완전 저장)·`race_report/`(고배당 적중 재현 리포트)·`ai_training/`(AI 학습 완전 데이터·품질점수)·`korea_session.json`·`korea_history/`·`prerace/`·`discovered_patterns.json`·`pattern_learning.json`. **`dist/`(내보내기 출력)·`highlight_wins.json`은 gitignore.**
 - **gitignore(고빈도 임시)**: `triple_store.json`·`starters_store.json`·`results_store.json`·`odds_store.json`·`learning.json`·`odds_history/`·`kra_history.json`·`.claude/`.
 
 ## PDF 전경주 사전분석 (한국)

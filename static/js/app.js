@@ -62,7 +62,7 @@
         btn.classList.add('active');
         $('#tab-' + btn.dataset.tab).classList.add('active');
         if (btn.dataset.tab === 'stats') renderStats();
-        if (btn.dataset.tab === 'result') renderResultForm();
+        if (btn.dataset.tab === 'result') { renderResultForm(); loadHighlights(); loadReportList(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
         if (btn.dataset.tab === 'jp') { startJapanOddsWatch(); loadJapanReviewList(); }   // [5번] 일본경마: 실시간 배당 연동 + 분석 내역 복기 목록
       });
@@ -4228,6 +4228,146 @@
 
   // ---------- escape ----------
   function esc(str) { return String(str == null ? '' : str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  // ══════════ [신규] 고배당 적중 상세 분석 리포트 시스템 (프론트) ══════════
+  let _reportWired = false;
+  function wireReportButtons() {
+    if (_reportWired) return;
+    _reportWired = true;
+    const bL = $('#reportLoad'); if (bL) bL.addEventListener('click', () => {
+      const sel = $('#reportSelect'); if (sel && sel.value) openRaceReport(sel.value);
+    });
+    const bR = $('#reportRefresh'); if (bR) bR.addEventListener('click', loadReportList);
+  }
+
+  // [2번] 고배당 명예의 전당 — /api/highlights 카드형 표시
+  async function loadHighlights() {
+    const box = $('#highlightWins'); if (!box) return;
+    let d = null;
+    try { d = await (await fetch('/api/highlights')).json(); } catch (_) { /* */ }
+    const arr = (d && d.highlights) || [];
+    if (!arr.length) { box.innerHTML = '<div class="hl-empty">아직 고배당 적중 기록이 없습니다. 결과를 입력하면 복승 30배+ / 삼복승 100배+ 적중이 자동 등록됩니다.</div>'; return; }
+    box.innerHTML = arr.map((h) => {
+      const odds = h.trifecta_hit ? h.trifecta_odds : h.quinella_odds;
+      const kind = h.trifecta_hit ? '삼복승' : '복승';
+      const combo = (h.top3 || []).join('+');
+      const tags = (h.win_tags || []).map((t) => `<span class="hl-tag">${esc(t.replace('_적중', ''))}</span>`).join('');
+      const slug = h.report_slug || '';
+      return `<div class="hl-card" data-slug="${esc(slug)}">
+        <div class="hl-odds">${odds ? odds + '배' : '고배당'}</div>
+        <div class="hl-race">🏆 ${esc(h.race || h.raceKey || '')}</div>
+        <div class="hint">${kind} ${esc(combo)}${h.date ? ' · ' + esc(h.date) : ''}</div>
+        <div class="hl-tags">${tags}</div>
+      </div>`;
+    }).join('');
+    box.querySelectorAll('.hl-card').forEach((c) => c.addEventListener('click', () => {
+      const s = c.dataset.slug; if (s) openRaceReport(s);
+    }));
+  }
+
+  // [1번] 리포트 목록 → 셀렉트 채우기
+  async function loadReportList() {
+    wireReportButtons();
+    const sel = $('#reportSelect'); if (!sel) return;
+    let d = null;
+    try { d = await (await fetch('/api/race-report/list')).json(); } catch (_) { /* */ }
+    const arr = (d && d.reports) || [];
+    if (!arr.length) { sel.innerHTML = '<option value="">(리포트 없음 — 결과를 입력하면 생성됩니다)</option>'; return; }
+    sel.innerHTML = arr.map((r) => {
+      const mark = r.hit ? '✅' : '·';
+      const od = r.win_odds ? ` ${r.win_odds}배` : '';
+      return `<option value="${esc(r.slug)}">${mark} ${esc(r.race || r.slug)}${od} (${esc(r.date || '')})</option>`;
+    }).join('');
+  }
+
+  // [3번] 단일 리포트 열기 → 4탭 재현 화면
+  async function openRaceReport(slug) {
+    const view = $('#raceReportView'); if (!view) return;
+    view.innerHTML = '<p class="hint">리포트 불러오는 중…</p>';
+    let rep = null;
+    try { rep = await (await fetch('/api/race-report/get?slug=' + encodeURIComponent(slug))).json(); } catch (_) { /* */ }
+    if (!rep || rep.error) { view.innerHTML = `<p class="hint">리포트를 불러오지 못했습니다${rep && rep.error ? ' (' + esc(rep.error) + ')' : ''}.</p>`; return; }
+    renderRaceReport(rep, view);
+    const sel = $('#reportSelect'); if (sel && rep._slug) sel.value = rep._slug;
+  }
+
+  function renderRaceReport(rep, view) {
+    const res = rep.result || {};
+    const cb = rep.confidence_breakdown || {};
+    const resultStr = [res['1st'], res['2nd'], res['3rd']].filter((x) => x != null).join('-') + (res['4th'] != null ? ' (4착 ' + res['4th'] + ')' : '');
+    const hitBadge = rep.hit ? `<span style="color:#3fae5a">✅ 적중 · ${esc(rep.hit_type || '')}</span>` : '<span class="hint">미적중</span>';
+    const oddsBadge = rep.win_odds ? ` · <b style="color:#ffd24f">${rep.win_odds}배 (${esc(rep.odds || '')})</b>` : '';
+    const tagsHtml = (rep.win_tags || []).map((t) => `<span class="hl-tag">${esc(t.replace('_적중', ''))} 적중</span>`).join(' ');
+
+    // 탭1: 추천 근거(스토리)
+    const story = (rep.recommendation_process || []).map((s) => `<li>${esc(s)}</li>`).join('') || '<li class="hint">스토리 정보 없음</li>';
+    const pane1 = `<div class="rpt-pane active" data-pane="story">
+      <h3>📖 추천 스토리</h3>
+      <ul class="rpt-story">${story}</ul>
+      <div class="rpt-conf">
+        <div class="cf">초과급락<b>${cb.excess_drop_score != null ? cb.excess_drop_score : '-'}</b></div>
+        <div class="cf">쌍승역전<b>${cb.exacta_reversal_score != null ? cb.exacta_reversal_score : '-'}</b></div>
+        <div class="cf">복승불일치<b>${cb.quinella_mismatch_score != null ? cb.quinella_mismatch_score : '-'}</b></div>
+        <div class="cf">종합신뢰도<b>${cb.total != null ? cb.total : '-'}</b><span class="hint">${esc(cb.grade || '')}</span></div>
+        <div class="cf">전적점수<b>${cb.record_score != null ? cb.record_score : '-'}</b></div>
+      </div>
+      <div class="rpt-bar"><span style="width:${Math.max(0, Math.min(100, cb.total || 0))}%"></span></div>
+    </div>`;
+
+    // 탭2: 배당 타임라인(입상마 신호 각각의 대표 조합 변화)
+    const why = rep.why_recommended || {};
+    const tlBlocks = Object.keys(why).map((k) => {
+      const s = why[k];
+      if (!s.drop_timeline || !s.drop_timeline.length) return '';
+      const rows = s.drop_timeline.map((p) => {
+        const cls = p.change == null ? 'flat' : (p.change < 0 ? 'down' : '');
+        const chg = p.change == null ? '—' : (p.change > 0 ? '+' : '') + p.change + '%';
+        return `<tr><td>${esc(p.time || '')}${p.minutes_before != null ? ' (T-' + p.minutes_before + '분)' : ''}</td><td>${p.odds}배</td><td class="${cls}">${chg}</td></tr>`;
+      }).join('');
+      return `<div class="rpt-signal ${s.placed ? 'placed' : ''}">
+        <b>${s.horse}번 ${s.placed ? '(' + s.place_rank + '착 입상)' : ''}</b> · 대표조합 ${(s.rep_combo || []).join('+')}
+        <table class="rpt-tl"><thead><tr><th>시각</th><th>복승배당</th><th>변화</th></tr></thead><tbody>${rows}</tbody></table>
+      </div>`;
+    }).filter(Boolean).join('') || '<p class="hint">타임라인 데이터가 없습니다.</p>';
+    const pane2 = `<div class="rpt-pane" data-pane="timeline"><h3>📉 배당 타임라인</h3>${tlBlocks}</div>`;
+
+    // 탭3: 전적 분석
+    const formRows = Object.keys(why).map((k) => {
+      const s = why[k];
+      return `<tr><td>${s.horse}번</td><td>${s.record_score != null ? s.record_score + '점' : '-'}</td><td>${s.placed ? '✅ ' + s.place_rank + '착' : '—'}</td></tr>`;
+    }).join('') || '<tr><td colspan="3" class="hint">전적 정보 없음</td></tr>';
+    const pane3 = `<div class="rpt-pane" data-pane="form"><h3>📊 전적 분석</h3>
+      <table class="rpt-tl"><thead><tr><th>말</th><th>전적점수</th><th>결과</th></tr></thead><tbody>${formRows}</tbody></table></div>`;
+
+    // 탭4: 이상감지 내역(신호별 근거)
+    const anomRows = Object.keys(why).map((k) => {
+      const s = why[k];
+      const bits = [];
+      if (s.excess_drop != null) bits.push(`초과급락 ${s.excess_drop}%p`);
+      if (s.exacta_reversal) bits.push(`쌍승역전(비율 ${s.reversal_ratio})`);
+      if (!bits.length) return '';
+      return `<div class="rpt-signal ${s.placed ? 'placed' : ''}"><b>${s.grade || ''} ${s.horse}번</b> ${s.placed ? '(' + s.place_rank + '착)' : ''} — ${esc(bits.join(' + '))} <span class="hint">${esc(s.reason || '')}</span></div>`;
+    }).filter(Boolean).join('') || '<p class="hint">감지된 이상신호가 없습니다.</p>';
+    const pane4 = `<div class="rpt-pane" data-pane="anomaly"><h3>🔴 이상감지 내역</h3>${anomRows}</div>`;
+
+    view.innerHTML = `
+      <div class="rpt-head">${esc(rep.race || '')} · ${esc(resultStr)}</div>
+      <div class="rpt-sub">${hitBadge}${oddsBadge} ${tagsHtml}</div>
+      <div class="rpt-tabs">
+        <button class="rpt-tab active" data-pane="story">추천 근거</button>
+        <button class="rpt-tab" data-pane="timeline">배당 타임라인</button>
+        <button class="rpt-tab" data-pane="form">전적 분석</button>
+        <button class="rpt-tab" data-pane="anomaly">이상감지 내역</button>
+      </div>
+      ${pane1}${pane2}${pane3}${pane4}`;
+    view.querySelectorAll('.rpt-tab').forEach((tb) => tb.addEventListener('click', () => {
+      view.querySelectorAll('.rpt-tab').forEach((x) => x.classList.remove('active'));
+      view.querySelectorAll('.rpt-pane').forEach((x) => x.classList.remove('active'));
+      tb.classList.add('active');
+      const p = view.querySelector('.rpt-pane[data-pane="' + tb.dataset.pane + '"]');
+      if (p) p.classList.add('active');
+    }));
+  }
 
   // [v2.0.0] 자동수집 상태바 — 확장 백그라운드 엔진 상태를 서버 브리지(/api/auto/status)로
   //   폴링해 "🟢 자동수집 중 | 마지막 | 다음 | 발주까지" 를 화면 하단에 항상 표시.

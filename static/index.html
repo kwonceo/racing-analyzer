@@ -209,6 +209,23 @@
         <p class="hint">실제 착순을 입력하면 누적 학습 DB에 반영됩니다.</p>
         <div id="resultForm"></div>
       </div>
+
+      <!-- [신규] 고배당 적중 상세 분석 리포트 시스템 -->
+      <div class="panel-card">
+        <h2>🏆 고배당 명예의 전당</h2>
+        <p class="hint">복승 30배+ / 삼복승 100배+ 적중이 자동 등록됩니다. 카드를 누르면 추천 근거·배당 타임라인을 재현합니다.</p>
+        <div id="highlightWins" class="hl-grid"></div>
+      </div>
+      <div class="panel-card">
+        <h2>📄 경주 재현 리포트</h2>
+        <p class="hint">결과 입력한 경주의 "왜 추천했는지"를 단계별 스토리·배당 타임라인·전적·이상감지로 재현합니다.</p>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="reportSelect" class="cfg-input" style="flex:1;min-width:240px"></select>
+          <button id="reportLoad" class="btn btn-primary">리포트 열기</button>
+          <button id="reportRefresh" class="btn">목록 새로고침</button>
+        </div>
+        <div id="raceReportView" style="margin-top:12px"></div>
+      </div>
     </section>
 
     <!-- [6번] 기수 DB -->
