@@ -4282,7 +4282,8 @@
     } catch (_) { /* 오디오 미지원 무시 */ }
   }
 
-  const _closing = { firedRk: null, fired: new Set(), tick: 0, lastEvents: [], panelRk: null, historyMode: false };
+  const _closing = { firedRk: null, fired: new Set(), tick: 0, lastEvents: [], panelRk: null, historyMode: false,
+    manualDeadlineMs: 0, manualRk: null };   // [보완] 수동 발주시각(한국 PDF 등 서버 deadline 없을 때 폴백)
 
   /** raceKey → 짧은 라벨(예: '2026-07-05_서울_5' → '2026-07-05 서울 5R') */
   function _rkLabel(rk) {
@@ -4424,9 +4425,15 @@
     if (!rk) { try { const d = await (await fetch('/api/odds/triple/latest')).json(); rk = d && d.raceKey; if (rk) _closing.panelRk = rk; } catch (_) { /* */ } }
     if (rk && !_closing.historyMode && _closing.tick % 3 === 0) refreshAnomalyFeed(rk);   // 현재 보기일 때만 3초 갱신
     let s = null;
-    try { s = await (await fetch('/api/auto/status')).json(); } catch (_) { return; }
-    const dl = s && s.deadline; if (!dl) return;
-    const dlMs = dl > 1e12 ? dl : dl * 1000;
+    try { s = await (await fetch('/api/auto/status')).json(); } catch (_) { /* 서버 상태 없어도 수동 폴백은 진행 */ }
+    const dl = s && s.deadline;
+    let dlMs = dl ? (dl > 1e12 ? dl : dl * 1000) : 0;
+    // [보완] 서버 발주시각 없으면(한국 PDF 사전분석 등) 현재 경주에 설정된 수동 발주시각으로 폴백
+    if (!dlMs && _closing.manualDeadlineMs > Date.now()
+        && (!_closing.manualRk || _closing.manualRk === (rk || _closing.panelRk))) {
+      dlMs = _closing.manualDeadlineMs;
+    }
+    if (!dlMs) return;
     const left = dlMs - Date.now();
     const key = rk || String(dlMs);
     if (_closing.firedRk !== key) {   // 경주 바뀌면 리셋 + 이미 지난 단계는 조용히 소진(늦게 열어도 스팸 방지)
@@ -4439,6 +4446,41 @@
         fireClosingAlert(st, rk);
       }
     }
+  }
+
+  /** 'HH:MM' → 오늘(지났으면 다음날) 발주시각 epoch ms. 0=미설정/오류. */
+  function _timeToDeadlineMs(hhmm) {
+    if (!hhmm) return 0;
+    const [h, m] = String(hhmm).split(':').map(Number);
+    if (isNaN(h)) return 0;
+    const d = new Date(); d.setHours(h, m || 0, 0, 0);
+    let ms = d.getTime();
+    if (ms < Date.now() - 60000) ms += 24 * 3600 * 1000;   // 이미 지난 시각이면 다음날
+    return ms;
+  }
+
+  /** [보완] 한국 수동 발주시각 설정 → 현재 경주에 마감 전 3단계 알림 발동(서버 deadline 없을 때 폴백) */
+  function setKoreaManualDeadline() {
+    const inp = document.getElementById('koreaDeadline');
+    const st = document.getElementById('koreaDeadlineStatus');
+    const clr = document.getElementById('koreaDeadlineClear');
+    const ms = _timeToDeadlineMs(inp && inp.value);
+    if (!ms) { if (st) st.textContent = '⚠️ 발주시각(HH:MM)을 입력하세요.'; return; }
+    _closing.manualDeadlineMs = ms;
+    _closing.manualRk = _closing.panelRk || getActiveRaceKey() || null;
+    _closing.firedRk = null;   // 새 발주시각 → 단계 알림 재무장
+    const left = Math.max(0, Math.round((ms - Date.now()) / 60000));
+    if (st) st.textContent = `✅ 발주 ${inp.value} 설정 · 약 ${left}분 후 · 마감 전 알림 활성${_closing.manualRk ? ' (' + _rkLabel(_closing.manualRk) + ')' : ''}`;
+    if (clr) clr.style.display = '';
+    try { closingTick(); } catch (_) { /* */ }
+  }
+
+  function clearKoreaManualDeadline() {
+    _closing.manualDeadlineMs = 0; _closing.manualRk = null; _closing.firedRk = null;
+    const st = document.getElementById('koreaDeadlineStatus');
+    const clr = document.getElementById('koreaDeadlineClear');
+    if (st) st.textContent = '해제됨. 배당판 없이 PDF만 볼 때 발주시각을 입력하면 마감 전 알림이 뜹니다.';
+    if (clr) clr.style.display = 'none';
   }
 
   function initClosingWatch() {
@@ -4456,6 +4498,10 @@
       + 'font:700 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;cursor:pointer';
     overlay.addEventListener('click', () => { overlay.style.display = 'none'; });
     document.body.appendChild(overlay);
+    // [보완] 한국 수동 발주시각 컨트롤 배선
+    { const b = document.getElementById('koreaDeadlineSet'); if (b) b.addEventListener('click', setKoreaManualDeadline); }
+    { const b = document.getElementById('koreaDeadlineClear'); if (b) b.addEventListener('click', clearKoreaManualDeadline); }
+    { const i = document.getElementById('koreaDeadline'); if (i) i.addEventListener('keydown', (e) => { if (e.key === 'Enter') setKoreaManualDeadline(); }); }
     setInterval(closingTick, 1000);
     closingTick();
   }

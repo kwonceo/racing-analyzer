@@ -115,6 +115,16 @@
       </div>
       <div id="koreaReport" class="report-area"></div>
       <div id="koreaOddsStatus" style="margin:10px 0"></div>
+      <!-- [보완] 수동 발주시각: 라이브 배당판 없이 PDF 사전분석만 볼 때도 마감 전 3단계 알림 발동 -->
+      <div class="cfg-row" style="margin:6px 0">
+        <label class="hint">⏰ 발주시각(수동)
+          <input id="koreaDeadline" type="time"
+                 style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:110px" />
+        </label>
+        <button id="koreaDeadlineSet" class="btn" type="button">설정</button>
+        <button id="koreaDeadlineClear" class="btn" type="button" style="display:none">해제</button>
+        <span class="hint" id="koreaDeadlineStatus">배당판 없이 PDF만 볼 때 발주시각을 입력하면 마감 1분30초·1분·30초 전 알림이 뜹니다.</span>
+      </div>
       <!-- [1번] 베팅 예산: 통합분석의 베팅 추천 표에 복승/삼복승 배분 금액을 자동 계산 -->
       <div class="cfg-row" style="margin:6px 0">
         <label class="hint">💰 베팅 예산(원)
