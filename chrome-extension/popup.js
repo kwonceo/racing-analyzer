@@ -17,7 +17,8 @@ const els = {
   overlayEnabled: $('overlayEnabled'),   // [보완#1] 배당판 오버레이 ON/OFF
   interval: $('interval'),
   autoMode: $('autoMode'),
-  sport: $('sport'),           // [수정#3] 종목: horse|cycle|boat
+  sport: $('sport'),           // [수정#3] 종목: horse|cycle|boat|bike
+  detectedCategory: $('detectedCategory'),   // [탭분리] 배당판 자동 감지 종목 표시
   market: $('market'),
   marketRow: $('marketRow'),
   japanTypeRow: $('japanTypeRow'),
@@ -65,9 +66,10 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', sport: 'horse', market: 'auto', japanType: 'local', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null, overlayEnabled: false },
+    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', sport: 'horse', market: 'auto', japanType: 'local', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null, overlayEnabled: false, detectedCategory: '', detectedAt: 0 },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
+      renderDetectedCategory(v.detectedCategory, v.detectedAt);   // [탭분리] 자동 감지 종목 복원
       if (els.overlayEnabled) els.overlayEnabled.checked = !!v.overlayEnabled;   // [보완#1] 오버레이 상태 복원
       els.interval.value = String(v.intervalSec || 30);
       els.autoMode.value = v.autoMode || 'triple';
@@ -158,6 +160,19 @@ function syncSportUI() {
   const isHorse = !els.sport || els.sport.value === 'horse';
   if (els.marketRow) els.marketRow.style.display = isHorse ? '' : 'none';
   if (els.japanTypeRow && !isHorse) els.japanTypeRow.style.display = 'none';
+}
+// [탭분리] 배당판에서 자동 감지된 종목 표시: "현재: 일본 경륜 감지됨"
+const CATEGORY_LABEL = {
+  korea: '한국경마', japan_local: '일본 지방경마', japan_central: '일본 중앙경마',
+  boat: '일본 경정', cycle: '일본 경륜', bike: '일본 바이크',
+};
+function renderDetectedCategory(cat, at) {
+  const el = els.detectedCategory; if (!el) return;
+  if (!cat || !CATEGORY_LABEL[cat]) { el.textContent = '감지 대기…'; el.style.color = '#94a3b8'; return; }
+  // 5분 이상 지난 감지는 흐리게(오래된 값)
+  const stale = at && (Date.now() - at > 5 * 60 * 1000);
+  el.textContent = `현재: ${CATEGORY_LABEL[cat]} 감지됨`;
+  el.style.color = stale ? '#94a3b8' : '#38d39f';
 }
 
 // [1번] 일본 중앙(JRA)/지방(NAR) 선택 — 중앙=배당만·마감1분30초전, 지방=전적+배당
@@ -507,6 +522,9 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes.resultAutoStatus) renderResultTimer(changes.resultAutoStatus.newValue);
   if (changes.analyzeStatus && changes.analyzeStatus.newValue) {
     const av = changes.analyzeStatus.newValue; applyAnalyzeStatus(av, !!av.manual);
+  }
+  if (changes.detectedCategory) {   // [탭분리] 배당판 자동 감지 종목 실시간 반영
+    chrome.storage.local.get({ detectedAt: 0 }, (v) => renderDetectedCategory(changes.detectedCategory.newValue, v.detectedAt));
   }
 });
 

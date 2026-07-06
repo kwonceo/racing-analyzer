@@ -59,14 +59,20 @@
       <label>발주시각</label>
       <span id="postTime" style="font-weight:700;color:#38d39f">자동 감지 대기…</span>
     </div>
-    <!-- [수정#3] 종목 선택: 경마/경륜/경정. 경륜·경정은 6명 출전·복승+쌍승만. -->
+    <!-- [수정#3] 종목 선택: 경마/경륜/경정/바이크. 경륜·경정·바이크는 6명 출전·복승+쌍승만. -->
     <div class="row">
       <label>종목</label>
       <select id="sport">
         <option value="horse">🏇 경마</option>
         <option value="cycle">🚴 경륜</option>
         <option value="boat">🚤 경정</option>
+        <option value="bike">🏍 바이크</option>
       </select>
+    </div>
+    <!-- [탭분리] 배당판에서 자동 감지된 현재 종목 표시 -->
+    <div class="row">
+      <label>자동 감지</label>
+      <span id="detectedCategory" style="font-weight:700;color:#38d39f">감지 대기…</span>
     </div>
     <div class="row" id="marketRow">
       <label>경마 지역</label>

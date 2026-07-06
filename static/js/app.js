@@ -65,7 +65,17 @@
         if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
         if (btn.dataset.tab === 'jp') { startJapanOddsWatch(); loadJapanReviewList(); }   // [5번] 일본경마: 실시간 배당 연동 + 분석 내역 복기 목록
+        // [탭분리] 경정/경륜/바이크/중앙경마 탭 → 라이브 배당 폴링 시작 + 마지막 분석 즉시 반영
+        if (['boat', 'cycle', 'bike', 'central'].includes(btn.dataset.tab)) {
+          startJapanOddsWatch();
+          if (_lastSportAnalyze) mirrorSportAnalysis(_lastSportAnalyze);
+        }
       });
+    });
+    // [탭분리] 스포츠 탭 예산 입력 → 해당 탭 분석 즉시 재계산(마지막 분석 기준)
+    ['boat', 'cycle', 'bike', 'central'].forEach((tab) => {
+      const b = document.getElementById('sportBudget-' + tab);
+      if (b) b.addEventListener('input', () => { if (_lastSportAnalyze) mirrorSportAnalysis(_lastSportAnalyze); });
     });
   }
 
@@ -2510,9 +2520,9 @@
   let _lastTripleAnalyze = null, _prevBetKey = null, _betUpdatedFlag = false;
   let _elimRaceKey = null;
   // [BMED 전략] 5전략 자동선택 + 기대환수율 + 보험용 매트릭스(정상 추천과 함께 선택)
-  function renderBMED(b) {
+  function renderBMED(b, budgetSel) {
     if (!b) return '';
-    const bEl = document.querySelector('#tripleBudget');
+    const bEl = document.querySelector(budgetSel || '#tripleBudget');
     const budget = Math.max(0, parseInt((bEl && bEl.value) || '0', 10) || 0);
     const won = (n) => (Math.round(n / 100) * 100).toLocaleString();
     const sign = (n) => (n >= 0 ? '+' : '') + won(n);
@@ -4254,6 +4264,34 @@
     setJpOddsStatus('linked', rk);
     renderJapanIntegrated(a);
     onJapanOddsUpdate(rk, a);
+    mirrorSportAnalysis(a);   // [탭분리] 경정/경륜/바이크/중앙경마 탭에 종목별 라이브 분석 미러링
+  }
+
+  // [탭분리] category → 분석기 스포츠 탭(1:1). 현재 경주 종목과 일치하는 탭만 채운다.
+  const SPORT_TAB_CAT = { boat: 'boat', cycle: 'cycle', bike: 'bike', central: 'japan_central' };
+  let _lastSportAnalyze = null;
+  function mirrorSportAnalysis(a) {
+    if (!a || a.error || a.waiting) return;
+    _lastSportAnalyze = a;
+    for (const [tab, cat] of Object.entries(SPORT_TAB_CAT)) {
+      if (cat !== a.category) continue;
+      const el = document.getElementById('sportReport-' + tab); if (!el) continue;
+      el.innerHTML = sportAnalysisHTML(a, '#sportBudget-' + tab);
+    }
+  }
+  // 순수 렌더 헬퍼만 조합(사이드이펙트 없는 문자열 반환) → 스포츠 탭 컨테이너에 안전하게 주입.
+  function sportAnalysisHTML(a, bsel) {
+    const six = a.bmed && a.bmed.sixRacer;
+    const parts = [];
+    parts.push(`<div class="matrix-title">🚨 실시간 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${six ? ' · 6명 출전' : ''}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>`);
+    if (a.summary) parts.push(`<div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary)}</div>`);
+    parts.push(renderAlertSignal(a.alertSignal, _horseRoleMap(a)));
+    parts.push(renderInverse(a.inverse));
+    parts.push(renderIntegratedGrades(a));
+    parts.push(renderJapanSignals(a.signals));
+    parts.push(renderBetRecommend(a, bsel));
+    parts.push(renderBMED(a.bmed, bsel));
+    return parts.join('');
   }
 
   /** [6번] 신규 변동 감지 → 토스트+소리(복승/쌍승 급락·역전) / 타임라인 누적

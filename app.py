@@ -1208,10 +1208,13 @@ def triple_ingest():
     hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주) 배당 완전 제거
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
     hist = hist[-12:]
-    # [수정#3 경륜/경정] 종목 태그 저장(horse|cycle|boat). 기본 horse(경마) → 기존 동작 불변.
+    # [수정#3 경륜/경정] 종목 태그 저장(horse|cycle|boat|bike). 기본 horse(경마) → 기존 동작 불변.
     sport = (body.get("sport") or prev.get("sport") or "horse")
+    # [탭분리] 분석기 탭 라우팅용 카테고리(korea|japan_local|japan_central|boat|cycle|bike).
+    category = (body.get("category") or prev.get("category")
+                or {"cycle": "cycle", "boat": "boat", "bike": "bike"}.get(sport, "japan_local"))
     db[rk] = {"quinella": q, "exacta": x, "trio": tr, "win": win, "history": hist,
-              "source": body.get("source"), "sport": sport, "t": now}
+              "source": body.get("source"), "sport": sport, "category": category, "t": now}
     # [경주전환 잔존 방어] 30분+ 미갱신된 '끝난 직전 경주'를 활성 캐시에서 정리(히스토리는 보존)
     #   → max-t 폴백이 직전 경주 배당을 계속 끌어오던 문제 차단.
     pruned = _triple_prune_stale(db, keep_rk=rk)
@@ -2608,7 +2611,7 @@ def _expected_return(plan, curQ):
     return round(exp * 100, 1), round(max(x["payoutRatio"] for x in plan), 3), round(covered * 100, 1)
 
 
-def _bmed_insurance(key_horses, curQ, signal_confidence, inverse):
+def _bmed_insurance(key_horses, curQ, signal_confidence, inverse, sport="horse"):
     """[보험용 추천] BMED 보험형 매트릭스 — 1착 유력마 축 + 2·3·4위 상대 3조합.
        1+2(최다 베팅·수익 극대)·1+3(중간·준수익)·1+4(최소·손실 최소).
        배당별 자동 비율: 저배당(A+B<3) 60/25/15 · 중배당(3~7) 원금보전 역산 · 고배당(≥7) 40/35/25.
@@ -2640,6 +2643,7 @@ def _bmed_insurance(key_horses, curQ, signal_confidence, inverse):
     active = cond_compress and not inv_det and (ab_odds is not None)
     res = {"active": active, "conditions": conditions, "favConf": fav_conf,
            "anchor": h4[0] if h4 else None, "horses": h4, "abOdds": ab_odds,
+           "sixRacer": sport in ("cycle", "boat", "bike"),   # [탭분리] 6명 출전 종목 표기
            "usage": "유력마 압축 + 1착 확실 (역배열 아님)"}
     if not active:
         res["alternate"] = "역배열형" if inv_det else ("분산형" if len(horses) < 3 else "정상 추천")
@@ -2696,13 +2700,15 @@ def _bmed_insurance(key_horses, curQ, signal_confidence, inverse):
     return res
 
 
-def _bmed_strategy(curQ, key_horses, excess, inverse, mass_drop, signal_confidence, after_close):
+def _bmed_strategy(curQ, key_horses, excess, inverse, mass_drop, signal_confidence, after_close, sport="horse"):
     """[1·4번] 현재 상황 자동 분석 → BMED 5전략 중 최적 선택 + 근거 + 원금보전 배분 + 기대환수율.
     5전략: 보험형(이상감지 없음+유력마 명확)·압축형(2두 강한신호)·역배열형(쌍승역전)
           ·분산형(대규모 급락 노이즈)·고배당도전형(강한 신호+고배당).
-    + 보험용 매트릭스(_bmed_insurance)를 함께 산출 → 정상 추천과 나란히 제시(조건 충족 시)."""
+    + 보험용 매트릭스(_bmed_insurance)를 함께 산출 → 정상 추천과 나란히 제시(조건 충족 시).
+    [탭분리] sport in {cycle,boat,bike} = 6명 출전 종목 → BMED 저배당(원금보전) 집중을 기본 권장."""
     if not curQ:
         return None
+    six_racer = sport in ("cycle", "boat", "bike")   # [탭분리] 6명 출전 종목
     strong = list(signal_confidence.get("strong") or [])
     concentrated = list((excess or {}).get("concentrated") or [])
     inv_det = bool(inverse and inverse.get("detected"))
@@ -2752,17 +2758,22 @@ def _bmed_strategy(curQ, key_horses, excess, inverse, mass_drop, signal_confiden
 
     plan, preserved, return_rate = _capital_preservation(combos)
     expected, best_ratio, covered = _expected_return(plan, curQ)
-    insurance = _bmed_insurance(key_horses, curQ, signal_confidence, inverse)
+    insurance = _bmed_insurance(key_horses, curQ, signal_confidence, inverse, sport=sport)
+    # [탭분리] 6명 출전 종목(경정·경륜·바이크)은 저배당 원금보전 집중이 기본 → 근거·안내에 명시.
+    if six_racer:
+        reason = f"6명 출전 종목 · 저배당(원금보전) 집중 기본 — {reason}"
     return {
         "strategy": name, "emoji": emoji, "label": f"BMED {name}", "reason": reason,
         "afterClose": bool(after_close),
+        "sixRacer": six_racer,               # [탭분리] 6명 출전 종목(경정·경륜·바이크)
         "plan": plan, "preserved": preserved,
         "returnRate": return_rate,          # 보장 환수율%(모든 적중 동일/최소)
         "expectedReturn": expected,          # 기대 환수율%(시장확률 가중)
         "bestCaseRatio": best_ratio,         # 최선 수령 비율(×예산) — 최선 시나리오
         "worstCaseRatio": -1.0,              # 최악(커버 조합 모두 미적중) = 예산 전액 손실
         "coveredProb": covered,              # 커버 조합 시장 적중확률 합%
-        "note": "예산 입력 시 각 조합 베팅액·수령액 자동 계산" if plan else "복승 배당 부족 — 배분 계산 불가",
+        "note": ("6명 출전 · 저배당 집중 · 예산 입력 시 조합별 자동 계산" if six_racer and plan
+                 else "예산 입력 시 각 조합 베팅액·수령액 자동 계산") if plan else "복승 배당 부족 — 배분 계산 불가",
         # [보험용 추천] 정상 추천과 함께 제시(조건 충족 시만 active) → 사용자가 보고 선택
         "insurance": insurance,
     }
@@ -3412,7 +3423,8 @@ def _triple_analyze(rk, rec):
     # [BMED 전략] 상황 자동판별 5전략 + 원금보전 배분 + 기대환수율 + 보험용 매트릭스 추천
     #   보험용은 유력마 4두가 필요 → ranked(전체 인기순위) 전달(전략 조합은 내부에서 상위만 사용)
     try:
-        bmed = _bmed_strategy(curQ, ranked, excess, inverse, mass_drop, signal_confidence, after_close)
+        bmed = _bmed_strategy(curQ, ranked, excess, inverse, mass_drop, signal_confidence, after_close,
+                              sport=(rec.get("sport") or "horse"))
     except Exception as _e:
         print("[BMED] 실패:", _e)
         bmed = None
@@ -3461,7 +3473,8 @@ def _triple_analyze(rk, rec):
 
     return {
         "raceKey": rk, "hasPrev": bool(prev),
-        "sport": rec.get("sport") or "horse",   # [수정#3] 종목(horse|cycle|boat) → 프론트 배지
+        "sport": rec.get("sport") or "horse",   # [수정#3] 종목(horse|cycle|boat|bike) → 프론트 배지
+        "category": rec.get("category") or "japan_local",   # [탭분리] 분석기 탭 라우팅
         "alertSignal": alert_signal,   # [신규 3번] 경고 신호 감지 요약(배너)
         "signalTimeline": signal_timeline,   # [신규 3·4·5번] 신호말 변경이력·안정화·유효시점
         "nextRaceBlocked": bool(signal_timeline and signal_timeline.get("excluded", {}).get("next_race")),

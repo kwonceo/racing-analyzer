@@ -25,6 +25,11 @@
   <nav class="tabs">
     <button class="tab-btn active" data-tab="korea">🇰🇷 한국경마</button>
     <button class="tab-btn" data-tab="jp">🇯🇵 일본경마</button>
+    <!-- [탭분리] asyukk34 종목별 분석 탭 — 경정/경륜/바이크(6명)·중앙경마(배당 전용) -->
+    <button class="tab-btn" data-tab="boat">🚤 경정</button>
+    <button class="tab-btn" data-tab="cycle">🚴 경륜</button>
+    <button class="tab-btn" data-tab="bike">🏍 바이크</button>
+    <button class="tab-btn" data-tab="central">🏇 중앙경마</button>
     <!-- [개편] 배당판 캡처·통합분석 탭 제거: 캡처 방식 폐지, 배당은 Chrome 확장 실시간 수집으로 통일.
          통합분석은 한국/일본 탭에 자동 표시됨.
     <button class="tab-btn" data-tab="japan">🎰 배당판 캡처</button>
@@ -180,6 +185,54 @@
         <div id="jpReviewList"><p class="hint">불러오는 중…</p></div>
         <div id="jpReviewDetail" style="margin-top:10px"></div>
       </div>
+    </section>
+
+    <!-- [탭분리] 일본 경정 (6명 출전) -->
+    <section id="tab-boat" class="tab-panel">
+      <div class="panel-card">
+        <h2>🚤 일본 경정 <span class="hint" style="font-weight:400">6명 출전 · 복승+쌍승</span></h2>
+        <p class="hint">Chrome 확장 종목을 <b>🚤 경정</b>으로 설정하거나 경정 배당판을 열면 자동 감지됩니다. 6명 전용 로직 + <b>BMED 저배당(원금보전) 집중</b> 전략이 기본입니다. (전적·삼복승 없음)</p>
+        <div class="cfg-row" style="margin:6px 0">
+          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-boat" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+        </div>
+      </div>
+      <div id="sportReport-boat" class="report-area"><p class="hint">🚤 경정 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
+    </section>
+
+    <!-- [탭분리] 일본 경륜 (6명 출전) -->
+    <section id="tab-cycle" class="tab-panel">
+      <div class="panel-card">
+        <h2>🚴 일본 경륜 <span class="hint" style="font-weight:400">6명 출전 · 복승+쌍승</span></h2>
+        <p class="hint">Chrome 확장 종목을 <b>🚴 경륜</b>으로 설정하거나 경륜 배당판을 열면 자동 감지됩니다. 6명 전용 로직 + <b>BMED 저배당(원금보전) 집중</b> 전략이 기본입니다. (전적·삼복승 없음)</p>
+        <div class="cfg-row" style="margin:6px 0">
+          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-cycle" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+        </div>
+      </div>
+      <div id="sportReport-cycle" class="report-area"><p class="hint">🚴 경륜 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
+    </section>
+
+    <!-- [탭분리] 일본 바이크(오토레이스) (6명 출전) -->
+    <section id="tab-bike" class="tab-panel">
+      <div class="panel-card">
+        <h2>🏍 일본 바이크 <span class="hint" style="font-weight:400">6명 출전 · 복승+쌍승</span></h2>
+        <p class="hint">Chrome 확장 종목을 <b>🏍 바이크</b>로 설정하거나 오토레이스 배당판을 열면 자동 감지됩니다. 6명 전용 로직 + <b>BMED 저배당(원금보전) 집중</b> 전략이 기본입니다. (전적·삼복승 없음)</p>
+        <div class="cfg-row" style="margin:6px 0">
+          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-bike" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+        </div>
+      </div>
+      <div id="sportReport-bike" class="report-area"><p class="hint">🏍 바이크 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
+    </section>
+
+    <!-- [탭분리] 일본 중앙경마(JRA) — 배당 전용 -->
+    <section id="tab-central" class="tab-panel">
+      <div class="panel-card">
+        <h2>🏇 일본 중앙경마 (JRA) <span class="hint" style="font-weight:400">배당 전용 · 복승+쌍승</span></h2>
+        <p class="hint">Chrome 확장에서 <b>일본 종류 = 🏇 중앙(JRA)</b>로 두거나 중앙경마 배당판을 열면 자동 감지됩니다. 중앙경마는 전적표가 없어 <b>복승·쌍승 배당 이상감지 중심</b>으로 분석합니다. (삼복승·전적 없음)</p>
+        <div class="cfg-row" style="margin:6px 0">
+          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-central" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+        </div>
+      </div>
+      <div id="sportReport-central" class="report-area"><p class="hint">🏇 중앙경마 배당판에서 수집이 시작되면 실시간 배당 이상감지가 표시됩니다.</p></div>
     </section>
 
     <!-- 결과입력 -->
