@@ -177,11 +177,12 @@
   //     헤더: 枠 | 馬番 | 馬名 | 単勝オッズ | 複勝オッズ(3着払い) | [複勝上限] | 性齢 | …
   //     주의: 枠 와 馬番 이 별도 컬럼이고, 複勝 는 "4.3-" + "13.6" 두 셀로 나뉜다.
   //   → 위치 추측이 아니라 헤더 라벨로 컬럼 인덱스를 찾는다(방어적).
-  function extractHorses() {
+  function extractHorses(doc) {
+    doc = doc || document;   // [2번] 인자로 받은 fetch 문서에서도 단승/복승 추출 가능
     const horses = {};
     const tables = [
-      ...document.querySelectorAll('table.odd_popular_table_02'),
-      ...document.querySelectorAll('table'),
+      ...doc.querySelectorAll('table.odd_popular_table_02'),
+      ...doc.querySelectorAll('table'),
     ];
     for (const table of tables) {
       const trs = [...table.querySelectorAll('tr')];
@@ -787,6 +788,27 @@
         setTripleProgress(`${st.label} 수집중…`);        // "복승 수집중…" → "쌍승 수집중…" → …
         const doc = await fetchOddsDoc(st.oper, q);
         payload[st.key] = clean(parseRankingCombos(doc).filter((c) => c.combo.length === st.len), st.cap);
+      }
+      // [2번] 단승(単勝) 배당 수집 — 단승 급락 = 가장 강한 신호. 한국모드 제외(복승만).
+      //   ① 単勝複勝 표를 fetch(여러 oper 후보 시도) → ② 실패 시 현재 화면 DOM 폴백. 실패해도 무시(무해).
+      if (!isKorea) {
+        try {
+          let winHorses = [];
+          for (const oper of ['OddsTanFuku', 'OddsTanpuku', 'OddsTan']) {
+            try {
+              const wd = await fetchOddsDoc(oper, q);
+              winHorses = extractHorses(wd).filter((h) => h.win != null && h.win >= 1.0);
+              if (winHorses.length) break;
+            } catch (_) { /* 다음 후보 */ }
+          }
+          if (!winHorses.length) winHorses = extractHorses().filter((h) => h.win != null && h.win >= 1.0);
+          if (winHorses.length) {
+            const win = {};
+            for (const h of winHorses) win[String(h.no)] = h.win;
+            payload.win = win;   // 서버 triple_ingest 가 단승 시계열로 저장 → 단승급락 감지
+            console.log('[단승수집] 단승 배당', Object.keys(win).length, '두');
+          }
+        } catch (e) { console.warn('[단승수집] 실패(무시)', e); }
       }
       if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length) {
         setTripleProgress('❌ 3종 배당 없음(발매 시간 확인)', true);

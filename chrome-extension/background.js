@@ -536,17 +536,16 @@ async function autoTick(reason) {
 
   // [4번] T-3분 이상감지 자동 시작 — 수집 간격 단축 + 1회 안내
   if (left != null && left <= 180000 && left > 120000 && !(await _stageFiredOnce(cfg.timerDeadline, 't3'))) {
-    _notify('t3', '🔔 마감 3분 · 이상감지 집중 감시 시작', '수집 간격 단축: T-3분 15초 · T-1분 10초 · T-30초 5초', false);
+    _notify('t3', '🔔 마감 3분 · 이상감지 집중 감시 시작', '수집 간격 단축: T-3분 10초 · T-1분 5초', false);
   }
   // 수집(due 시각에만 실제 수집 — fine 5초 점검이지만 간격은 지킴)
-  const baseMs = Math.max(10, Number(cfg.intervalSec) || 30) * 1000;
-  // [2번] 마감 임박 수집 간격 단계 단축 — 마감 전 신호를 놓치지 않게
-  //   T-3분(≤180s) 15초 · T-1분(≤60s) 10초 · T-30초(≤30s) 5초 · 평상시 기본(30초)
+  const baseMs = Math.max(5, Number(cfg.intervalSec) || 30) * 1000;
+  // [수집속도 개선] 마감 임박 수집 간격 단계 단축 — 마감 전 급락 신호를 놓치지 않게
+  //   T-3분(≤180s) 10초 · T-1분(≤60s) 5초 · 평상시 기본(30초). (이전: T-3분 15초·T-1분 10초)
   let intervalMs = baseMs;
   if (left != null) {
-    if (left <= 30000) intervalMs = 5000;
-    else if (left <= 60000) intervalMs = 10000;
-    else if (left <= 180000) intervalMs = 15000;
+    if (left <= 60000) intervalMs = 5000;         // 마감 1분전부터 5초 간격
+    else if (left <= 180000) intervalMs = 10000;  // 마감 3분전부터 10초 간격
   }
   if ((reason === 'start' || now >= _nextDueAt) && !_collecting) {
     _collecting = true;

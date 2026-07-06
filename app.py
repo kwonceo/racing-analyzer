@@ -2488,15 +2488,75 @@ def _advanced_anomaly(hist, curQ, drops):
                 out["streaks"][key] = {"combo": list(k), "type": "연속하락", "confAdj": 20}
                 _adj(k, 20)
 
-    # ④ 복승 환급률(역수 합) + 상위 조합 집중도. top3 조합이 전체 자금의 90%+ → 특정 조합 집중
+    # [4번] 말별 연속 하락 횟수 추적 (단승 우선, 없으면 그 말이 낀 최저 복승 조합)
+    #   1회=후보(⚪) / 2회 연속=약한신호(🟡) / 3회+ 연속=확정신호(🔴) / 급락후 반등=페이크의심(🟠)
+    out["horseStreaks"] = {}
+    recent = (hist or [])[-5:]
+
+    def _horse_series(no):
+        s = []
+        for h in recent:
+            o = None
+            wv = (h.get("win") or {}).get(str(no))
+            if wv not in (None, ""):
+                try:
+                    o = float(wv)
+                except (TypeError, ValueError):
+                    o = None
+            if o is None:   # 단승 없으면 그 말이 낀 최저 복승 조합
+                mm = _odds_map_un(h.get("quinella"))
+                cand = [v for k, v in mm.items() if no in k and v > 0]
+                o = min(cand) if cand else None
+            if o and o > 0:
+                s.append(round(o, 1))
+        return s
+    horse_nos = set()
+    for m in maps[-5:]:
+        for k in m:
+            horse_nos.update(k)
+    for h in recent:
+        for k in (h.get("win") or {}):
+            try:
+                horse_nos.add(int(k))
+            except (TypeError, ValueError):
+                pass
+    for no in horse_nos:
+        s = _horse_series(no)
+        if len(s) < 2:
+            continue
+        cons = 0   # 뒤에서부터 '직전보다 낮음' 연속 횟수
+        for i in range(len(s) - 1, 0, -1):
+            if s[i] < s[i - 1]:
+                cons += 1
+            else:
+                break
+        lo = min(s)
+        lo_i = s.index(lo)
+        pre_max = max(s[:lo_i + 1]) if lo_i >= 0 else s[0]
+        rebounded = (lo_i < len(s) - 1 and lo > 0 and s[-1] >= lo * 1.10
+                     and pre_max > 0 and (pre_max - lo) / pre_max >= 0.10)
+        if rebounded:
+            lvl, label = "🟠", "페이크의심"
+        elif cons >= 3:
+            lvl, label = "🔴", "확정신호"
+        elif cons == 2:
+            lvl, label = "🟡", "약한신호"
+        elif cons == 1:
+            lvl, label = "⚪", "후보"
+        else:
+            continue
+        out["horseStreaks"][no] = {"no": no, "count": cons, "level": lvl,
+                                   "label": label, "rebounded": rebounded, "series": s}
+
+    # ④ [3번] 복승 환급률(역수 합) + 상위 조합 집중도. top3 조합이 전체 자금의 90%+ → 특정 조합 집중
     if curQ:
         inv = [1.0 / o for o in curQ.values() if o > 0]
         inv_sum = round(sum(inv), 3)
         if inv_sum > 0:
             top = sorted(inv, reverse=True)
             top3_share = round(sum(top[:3]) / inv_sum, 3)
-            out["overround"] = {"invSum": inv_sum, "top3Share": top3_share,
-                                "concentrated": top3_share >= 0.90}
+            out["overround"] = {"invSum": inv_sum, "refundRate": inv_sum,   # 환급률=Σ(1/각조합배당)
+                                "top3Share": top3_share, "concentrated": top3_share >= 0.90}
     return out
 
 
@@ -3013,7 +3073,14 @@ def _triple_analyze(rk, rec):
         def _push_sig(h):
             if h is not None and int(h) not in _sh_order:
                 _sh_order.append(int(h))
-        # [5번] 종합 신뢰도 기반 우선 반영 — 강력(70+)·참고(40~69) 신호말을 최우선 순위로
+        # [2번] 단승 급락 = 가장 강한 신호 → 추천 우선순위 최상단에 먼저 반영(다른 신호보다 우선)
+        for _d in single_drops:
+            _push_sig(_d.get("no"))
+        # [4번] 말별 연속 하락 '확정신호(3회+)'도 최상위 우선 반영(반등=페이크는 제외)
+        for _hs in sorted((advanced.get("horseStreaks") or {}).values(), key=lambda x: -x["count"]):
+            if _hs["count"] >= 3 and not _hs["rebounded"]:
+                _push_sig(_hs["no"])
+        # [5번] 종합 신뢰도 기반 우선 반영 — 강력(70+)·참고(40~69) 신호말을 우선 순위로
         for _h in (signal_confidence.get("strong") or []):
             _push_sig(_h)
         for _h in (signal_confidence.get("refer") or []):
@@ -3024,8 +3091,6 @@ def _triple_analyze(rk, rec):
             _push_sig(_h)
         for _h in (excess.get("concentrated") or []):
             _push_sig(_h)
-        for _d in single_drops:
-            _push_sig(_d.get("no"))
         for _d in drops:
             for _h in _d.get("combo", []):
                 _push_sig(_h)
@@ -3234,7 +3299,23 @@ def _triple_analyze(rk, rec):
     if _ov and _ov.get("concentrated"):
         signals.append({"level": "🟠", "type": "자금집중",
                         "text": f"복승 자금 집중 — 상위 3개 조합이 전체의 {int(_ov['top3Share']*100)}% 점유",
-                        "detail": f"복승 역수합 {_ov['invSum']} · 소수 조합 편중 = 특정 결과에 자금 쏠림(이변 시 고배당)"})
+                        "detail": f"복승 역수합(환급률) {_ov['invSum']} · 소수 조합 편중 = 특정 결과에 자금 쏠림(이변 시 고배당)"})
+    # [4번] 말별 연속 하락 신호 — 확정(3회+)·약한(2회)·페이크(반등)을 신호로 노출(확정신호부터)
+    _hstreaks = sorted((advanced.get("horseStreaks") or {}).values(),
+                       key=lambda x: (-x["count"], not x["rebounded"]))
+    for _hs in _hstreaks:
+        if _hs["rebounded"]:
+            signals.append({"level": "🟠", "type": "페이크의심", "horse": _hs["no"],
+                            "text": f"⚠️ {_hs['no']}번 급락 후 반등 (페이크 의심) — {'→'.join(map(str, _hs['series']))}",
+                            "detail": "연속 하락 신호로 유인 후 배당 회복 → 신뢰도 하향(허수 베팅 가능성)"})
+        elif _hs["count"] >= 3:
+            signals.append({"level": "🔴", "type": "연속하락", "horse": _hs["no"],
+                            "text": f"🔴 {_hs['no']}번 {_hs['count']}회 연속 하락 (확정신호) — {'→'.join(map(str, _hs['series']))}",
+                            "detail": "지속 자금 유입 = 강한 매수 신호(추천 우선 반영)"})
+        elif _hs["count"] == 2:
+            signals.append({"level": "🟡", "type": "연속하락", "horse": _hs["no"],
+                            "text": f"🟡 {_hs['no']}번 2회 연속 하락 (약한신호) — {'→'.join(map(str, _hs['series']))}",
+                            "detail": "자금 유입 초기 → 다음 수집에서 확정 여부 관찰"})
 
     # 최근 스냅샷 시각·발주전분(히스토리 파일에서)
     last_snap = None
