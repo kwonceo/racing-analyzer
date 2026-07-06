@@ -180,9 +180,16 @@ ok(11 in _ch, "아웃사이더 역전 challenger(11) 감지")
 ok(any(11 in (b.get("combo") or []) for b in tri_bets), "역전 challenger가 삼복승 조합에 편성됨")
 _ta = sum(b.get("alloc", 0) for b in tri_bets)
 ok(_ta <= 18.5, f"삼복승 총 배분 ≤18% 소액 유지(실제 {round(_ta,1)}%)")
-# 삼복승 메인은 구성 복승 3쌍이 모두 있어 추정배당 채워짐(아웃사이더 조합은 미수집 쌍 있으면 None 허용)
+# 삼복승 메인은 구성 복승 3쌍이 모두 있어 추정배당 채워짐
 _main_t = next((b for b in tri_bets if b.get("label") == "삼복승 메인"), None)
 ok(_main_t and (_main_t.get("expOdds") is not None or _main_t.get("expOddsEst") is not None), "삼복승 메인 추정배당 채움")
+# [보완] 아웃사이더 조합(구성 복승 1쌍 미수집)도 거친 추정배당 표시 + estRough 플래그
+_out = [b for b in tri_bets if 11 in (b.get("combo") or [])]
+ok(_out and all(b.get("expOdds") is not None or b.get("expOddsEst") is not None for b in _out),
+   "아웃사이더 삼복승도 배당 표시(부분추정 포함, None 아님)")
+ok(any(b.get("estRough") for b in _out), "1쌍 미수집 조합에 estRough(거친추정) 플래그")
+# [보완] 역배열 challenger(11) 낀 삼복승에 reversalPick 플래그
+ok(all(b.get("reversalPick") for b in _out), "역배열 challenger 낀 삼복승에 reversalPick 플래그")
 
 print("[7] 실시간 분석 유지 — baseline 확립 가드")
 _stable = [{"combo": [1, 2], "odds": 10}, {"combo": [1, 3], "odds": 12}, {"combo": [2, 3], "odds": 15},

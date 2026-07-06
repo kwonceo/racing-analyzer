@@ -2912,15 +2912,36 @@ def _triple_analyze(rk, rec):
                 _rev_added += 1
 
     # [3번] 삼복승 실배당 미수집 시: 구성 복승 3쌍의 기하평균×2 로 추정(라벨=추정)
+    #   [보완] 1쌍 미수집(아웃사이더/역배열 조합)이면 그 쌍을 보수적으로 max(known)로 근사해
+    #   '거친 추정(estRough)'이라도 배당을 표시(항상 편성한 삼복승의 판단 근거 제공). 2쌍+ 미수집=None.
     def _trio_est(cc):
         ps = [_q(cc[0], cc[1]), _q(cc[0], cc[2]), _q(cc[1], cc[2])]
-        if any(p is None or p <= 0 for p in ps):
-            return None
-        gm = (ps[0] * ps[1] * ps[2]) ** (1.0 / 3.0)
-        return round(gm * 2, 1)
+        present = [p for p in ps if p is not None and p > 0]
+        if len(present) == 3:
+            gm = (present[0] * present[1] * present[2]) ** (1.0 / 3.0)
+            return round(gm * 2, 1), False
+        if len(present) == 2:
+            est_missing = max(present)   # 미수집 쌍 = 고배당(비인기) 가능성↑ → 보수적 상향 근사
+            gm = (present[0] * present[1] * est_missing) ** (1.0 / 3.0)
+            return round(gm * 2, 1), True
+        return None, False
     for r in bet_rec:
         if r["kind"] == "삼복승" and r["expOdds"] is None:
-            r["expOddsEst"] = _trio_est(r["combo"])
+            _ev, _rough = _trio_est(r["combo"])
+            r["expOddsEst"] = _ev
+            if _rough:
+                r["estRough"] = True
+
+    # [보완·역배열 표시] 쌍승역전 challenger 를 낀 삼복승 픽에 플래그 → 프론트 🔄 배지(보험 라벨이어도 가시화)
+    _rev_ch = set()
+    for _r in (wx_reversals or []):
+        _c = _r.get("challenger")
+        if _c is not None:
+            _rev_ch.add(int(_c))
+    if _rev_ch:
+        for b in bet_rec:
+            if b.get("kind") == "삼복승" and any(int(h) in _rev_ch for h in b.get("combo", [])):
+                b["reversalPick"] = True
 
     # [대규모급락 전략] 삼복승 보험 8→15% 확대·중배당 복승 보험 추가·최저배당 신뢰도 하락(기존 조합 유지)
     # [1번] 마감 후에는 대규모급락 전략도 추천에 반영하지 않음(참고만)

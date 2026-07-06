@@ -2528,13 +2528,14 @@
         ? ` <span class="hint" style="color:${/고배당/.test(r.signalTier) ? '#ffd24f' : /낮은/.test(r.signalTier) ? '#4ea1ff' : '#8a94a6'};font-weight:700">${esc(r.signalTier)}</span>`
         : '';
       const odTxt = (r.expOdds != null ? r.expOdds + '배'
-        : (r.expOddsEst != null ? r.expOddsEst + '배<span class="hint">(추정)</span>' : '<span class="hint">미수집</span>')) + tierTxt;
+        : (r.expOddsEst != null ? r.expOddsEst + `배<span class="hint">(${r.estRough ? '거친추정' : '추정'})</span>` : '<span class="hint">미수집</span>')) + tierTxt;
       const qTxt = r.signalQuality
         ? `<b style="color:${qc[r.signalQuality] || '#8a94a6'}">${esc(r.signalQuality)}</b>${r.signalReason ? `<br><span class="hint" style="font-size:10px">${esc(r.signalReason)}</span>` : ''}`
         : '<span class="hint">-</span>';
       const estBadge = r.estimated ? ' <span class="hint" style="font-size:10px;color:#a855f7">추정보험</span>' : '';
+      const revBadge = r.reversalPick ? ' <span class="hint" style="font-size:10px;color:#f59e0b;font-weight:700">🔄역배열</span>' : '';
       return `<tr>
-        <td><b style="color:${kindColor}">${esc(r.label)}</b>${estBadge}</td>
+        <td><b style="color:${kindColor}">${esc(r.label)}</b>${estBadge}${revBadge}</td>
         <td style="font-weight:700">${r.combo.join('+')}</td>
         <td>${qTxt}</td>
         <td>${odTxt}</td>
