@@ -184,77 +184,97 @@
 
     <!-- 결과입력 -->
     <section id="tab-result" class="tab-panel">
-      <!-- [결과기록 UI 개선] 최근 7일 결과·복기 (요약 카드 + 날짜별 그룹 + 클릭 복기) -->
+      <!-- [결과기록 전면정리] 1. 최상단: 최근 결과 요약 카드 -->
       <div class="panel-card" id="recentResultsCard">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-          <h2 style="margin:0">📅 최근 7일 결과 · 복기</h2>
+          <h2 style="margin:0">📅 최근 결과 요약</h2>
           <button id="recentResultsRefresh" class="btn btn-small">🔄 새로고침</button>
         </div>
-        <p class="hint">최근 7일 입력된 결과만 날짜별로 모아 보여줍니다. 경주를 클릭하면 적중은 "왜 맞았는지", 미적중은 "왜 놓쳤는지" 복기가 열립니다.</p>
         <div id="recentSummary" style="margin-top:8px"></div>
-        <div id="recentResultsList" style="margin-top:10px"></div>
-      </div>
-      <!-- [신규] 분석/수집된 경주 자동 결과 입력 대기 목록 -->
-      <div class="panel-card">
-        <h2 id="pendingResultsTitle">📋 결과 입력 대기</h2>
-        <p class="hint">분석·배당 수집된 경주가 자동으로 여기 뜹니다. [결과 입력]으로 착순·배당만 넣으면 적중판정·수익·학습이 즉시 반영되고 목록에서 사라집니다.</p>
-        <div id="pendingResultsList"></div>
-      </div>
-      <!-- [일괄 결과 등록] 경기 마감 후 결과 페이지 전체를 한 번에 등록 -->
-      <div class="panel-card">
-        <h2>📋 일괄 결과 등록</h2>
-        <p class="hint">결과 페이지(asyukk34 등)의 URL을 넣거나 결과표 HTML을 붙여넣으면, 모든 경주의 1~3착·확정배당을 한 번에 파싱해 분석한 경주와 자동 매칭·적중판정·학습합니다.</p>
-        <div class="cfg-row">
-          <button id="bulkResultToggle" class="btn btn-primary">📋 일괄 등록 열기</button>
-        </div>
-        <div id="bulkResultPanel" style="display:none;margin-top:10px">
-          <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
-            <input id="bulkResultUrl" class="cfg-input" style="flex:1;min-width:280px" placeholder="결과 페이지 URL (예: https://asyukk34.../bet/result?id=123)" />
-            <label class="hint">정액 가정<br><input id="bulkStake" class="cfg-input" type="number" value="1000" style="width:90px" />원</label>
-            <button id="bulkResultLoad" class="btn btn-primary">불러와 등록</button>
-          </div>
-          <p class="hint" style="margin:6px 0 2px">URL은 <b>Chrome 확장(로그인 세션)</b>을 경유해 가져옵니다(확장 설치 + 배당판 로그인 필요). 실패하면 결과 페이지에서 <b>전체 선택(Ctrl+A)→복사→아래에 붙여넣기</b> 후 [붙여넣기 등록].</p>
-          <textarea id="bulkResultHtml" class="cfg-input" style="width:100%;height:110px;font-family:monospace;font-size:12px" placeholder="결과 페이지 HTML 또는 표 전체를 여기에 붙여넣기"></textarea>
-          <div class="cfg-row" style="margin-top:6px">
-            <button id="bulkResultParse" class="btn btn-primary">붙여넣기 등록</button>
-          </div>
-          <div id="bulkResultSummary" style="margin-top:10px"></div>
-        </div>
-      </div>
-      <!-- [2번-방법3] 순서대로 빠른 입력 — 분석 경주를 시간순으로 나열, 1~3착만 순서대로 입력 -->
-      <div class="panel-card">
-        <h2>⚡ 순서대로 빠른 입력</h2>
-        <p class="hint">분석한 경주를 <b>시간순</b>으로 나열합니다. 경주명은 자동 매칭되므로 <b>1~3착(+4착·배당)만</b> 순서대로 입력하고 [저장]하면 즉시 적중판정·복기가 실행됩니다.</p>
-        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
-          <label class="hint">날짜 <input id="quickDate" class="cfg-input" type="date" style="width:150px" /></label>
-          <label class="hint"><input id="quickPendingOnly" type="checkbox" checked /> 미입력만</label>
-          <button id="quickLoad" class="btn btn-primary">🔄 경주 불러오기</button>
-          <button id="quickSaveAll" class="btn">💾 입력한 경주 전체 저장</button>
-          <span id="quickMsg" class="hint"></span>
-        </div>
-        <div id="quickEntryList" style="margin-top:10px"></div>
-      </div>
-      <div class="panel-card">
-        <h2>경주 결과 입력</h2>
-        <p class="hint">실제 착순을 입력하면 누적 학습 DB에 반영됩니다.</p>
-        <div id="resultForm"></div>
       </div>
 
-      <!-- [신규] 고배당 적중 상세 분석 리포트 시스템 -->
-      <div class="panel-card">
-        <h2>🏆 고배당 명예의 전당</h2>
-        <p class="hint">복승 30배+ / 삼복승 100배+ 적중이 자동 등록됩니다. 카드를 누르면 추천 근거·배당 타임라인을 재현합니다.</p>
-        <div id="highlightWins" class="hl-grid"></div>
-      </div>
-      <div class="panel-card">
-        <h2>📄 경주 재현 리포트</h2>
-        <p class="hint">결과 입력한 경주의 "왜 추천했는지"를 단계별 스토리·배당 타임라인·전적·이상감지로 재현합니다.</p>
-        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
-          <select id="reportSelect" class="cfg-input" style="flex:1;min-width:240px"></select>
-          <button id="reportLoad" class="btn btn-primary">리포트 열기</button>
-          <button id="reportRefresh" class="btn">목록 새로고침</button>
+      <!-- 2. 결과 입력 대기 (가장 눈에 띄게) + 경주별 직접 입력(기본 접힘) -->
+      <div class="panel-card" id="pendingCard" style="border:2px solid #4ea1ff;box-shadow:0 0 0 3px rgba(78,161,255,.08)">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <h2 id="pendingResultsTitle" style="margin:0">📋 결과 입력 대기</h2>
+          <button id="toggleResultForm" class="btn btn-small">✏️ 경주별 직접 입력 펼치기</button>
         </div>
-        <div id="raceReportView" style="margin-top:12px"></div>
+        <p class="hint">분석·배당 수집된 경주가 자동으로 여기 뜹니다. [결과 입력]을 누르면 팝업에서 착순·배당만 넣어 즉시 적중판정·학습됩니다.</p>
+        <div id="pendingResultsList"></div>
+        <!-- [2번] 경주별 직접 입력 — 기본 접힘, 위 버튼으로 펼치기 -->
+        <div id="resultFormWrap" style="display:none;margin-top:12px;border-top:1px solid #2b3648;padding-top:12px">
+          <h3 style="font-size:14px;margin:0 0 4px">✏️ 경주 결과 직접 입력</h3>
+          <p class="hint">실제 착순을 입력하면 누적 학습 DB에 반영됩니다.</p>
+          <div id="resultForm"></div>
+        </div>
+      </div>
+
+      <!-- 3. 서브탭: 복기 / 일괄등록 / 명예의전당 / 리포트 -->
+      <div class="panel-card">
+        <div class="subtab-bar" id="resultSubtabs">
+          <button type="button" class="subtab-btn active" data-sub="review">📋 복기</button>
+          <button type="button" class="subtab-btn" data-sub="bulk">📥 일괄등록</button>
+          <button type="button" class="subtab-btn" data-sub="hall">🏆 명예의전당</button>
+          <button type="button" class="subtab-btn" data-sub="report">📄 리포트</button>
+        </div>
+
+        <!-- 복기: 최근 결과 날짜별 그룹 + 클릭 복기 -->
+        <div class="subtab-panel" data-sub="review">
+          <p class="hint">최근 결과를 날짜별로 모아 보여줍니다. 경주를 클릭하면 적중은 "왜 맞았는지", 미적중은 "왜 놓쳤는지" 복기가 열립니다.</p>
+          <div id="recentResultsList" style="margin-top:8px"></div>
+        </div>
+
+        <!-- 일괄등록: 일괄 결과 등록 + 순서대로 빠른 입력 -->
+        <div class="subtab-panel" data-sub="bulk" style="display:none">
+          <h3 style="font-size:15px;margin-top:0">📋 일괄 결과 등록</h3>
+          <p class="hint">결과 페이지(asyukk34 등)의 URL을 넣거나 결과표 HTML을 붙여넣으면, 모든 경주의 1~3착·확정배당을 한 번에 파싱해 분석한 경주와 자동 매칭·적중판정·학습합니다.</p>
+          <div class="cfg-row">
+            <button id="bulkResultToggle" class="btn btn-primary">📋 일괄 등록 열기</button>
+          </div>
+          <div id="bulkResultPanel" style="display:none;margin-top:10px">
+            <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
+              <input id="bulkResultUrl" class="cfg-input" style="flex:1;min-width:280px" placeholder="결과 페이지 URL (예: https://asyukk34.../bet/result?id=123)" />
+              <label class="hint">정액 가정<br><input id="bulkStake" class="cfg-input" type="number" value="1000" style="width:90px" />원</label>
+              <button id="bulkResultLoad" class="btn btn-primary">불러와 등록</button>
+            </div>
+            <p class="hint" style="margin:6px 0 2px">URL은 <b>Chrome 확장(로그인 세션)</b>을 경유해 가져옵니다(확장 설치 + 배당판 로그인 필요). 실패하면 결과 페이지에서 <b>전체 선택(Ctrl+A)→복사→아래에 붙여넣기</b> 후 [붙여넣기 등록].</p>
+            <textarea id="bulkResultHtml" class="cfg-input" style="width:100%;height:110px;font-family:monospace;font-size:12px" placeholder="결과 페이지 HTML 또는 표 전체를 여기에 붙여넣기"></textarea>
+            <div class="cfg-row" style="margin-top:6px">
+              <button id="bulkResultParse" class="btn btn-primary">붙여넣기 등록</button>
+            </div>
+            <div id="bulkResultSummary" style="margin-top:10px"></div>
+          </div>
+          <hr style="border:none;border-top:1px solid #2b3648;margin:16px 0" />
+          <h3 style="font-size:15px">⚡ 순서대로 빠른 입력</h3>
+          <p class="hint">분석한 경주를 <b>시간순</b>으로 나열합니다. 경주명은 자동 매칭되므로 <b>1~3착(+4착·배당)만</b> 순서대로 입력하고 [저장]하면 즉시 적중판정·복기가 실행됩니다.</p>
+          <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
+            <label class="hint">날짜 <input id="quickDate" class="cfg-input" type="date" style="width:150px" /></label>
+            <label class="hint"><input id="quickPendingOnly" type="checkbox" checked /> 미입력만</label>
+            <button id="quickLoad" class="btn btn-primary">🔄 경주 불러오기</button>
+            <button id="quickSaveAll" class="btn">💾 입력한 경주 전체 저장</button>
+            <span id="quickMsg" class="hint"></span>
+          </div>
+          <div id="quickEntryList" style="margin-top:10px"></div>
+        </div>
+
+        <!-- 명예의전당 -->
+        <div class="subtab-panel" data-sub="hall" style="display:none">
+          <h3 style="font-size:15px;margin-top:0">🏆 고배당 명예의 전당</h3>
+          <p class="hint">복승 30배+ / 삼복승 100배+ 적중이 자동 등록됩니다. 카드를 누르면 추천 근거·배당 타임라인을 재현합니다.</p>
+          <div id="highlightWins" class="hl-grid"></div>
+        </div>
+
+        <!-- 리포트 -->
+        <div class="subtab-panel" data-sub="report" style="display:none">
+          <h3 style="font-size:15px;margin-top:0">📄 경주 재현 리포트</h3>
+          <p class="hint">결과 입력한 경주의 "왜 추천했는지"를 단계별 스토리·배당 타임라인·전적·이상감지로 재현합니다.</p>
+          <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="reportSelect" class="cfg-input" style="flex:1;min-width:240px"></select>
+            <button id="reportLoad" class="btn btn-primary">리포트 열기</button>
+            <button id="reportRefresh" class="btn">목록 새로고침</button>
+          </div>
+          <div id="raceReportView" style="margin-top:12px"></div>
+        </div>
       </div>
     </section>
 

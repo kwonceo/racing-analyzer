@@ -778,9 +778,41 @@
     }); }
     initQuickEntry();      // [2번-방법3] 순서대로 빠른 입력
     initFailureReview();   // [복기 학습] 실패 대시보드 + 명예의 전당
-    // [결과기록 UI 개선] 최근 7일 결과·복기 뷰 — 새로고침 버튼 + 초기 렌더
+    // [결과기록 UI 개선] 최근 결과·복기 뷰 — 새로고침 버튼 + 초기 렌더
     { const b = document.getElementById('recentResultsRefresh'); if (b) b.addEventListener('click', renderRecentResults); }
     try { renderRecentResults(); } catch (_) { /* */ }
+    initResultSubtabs();   // [결과기록 전면정리] 서브탭 전환 + 직접입력 접기
+  }
+
+  // [결과기록 전면정리] 결과기록 탭 서브탭 전환 + 경주별 직접입력 접기/펼치기
+  function initResultSubtabs() {
+    const bar = document.getElementById('resultSubtabs');
+    if (bar && !bar._wired) {
+      bar._wired = true;
+      bar.querySelectorAll('.subtab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const sub = btn.dataset.sub;
+          bar.querySelectorAll('.subtab-btn').forEach((b) => b.classList.toggle('active', b === btn));
+          document.querySelectorAll('#tab-result .subtab-panel').forEach((p) => {
+            p.style.display = (p.dataset.sub === sub) ? '' : 'none';
+          });
+          if (sub === 'hall') { try { loadHighlights(); } catch (_) { /* */ } }
+          if (sub === 'report') { try { loadReportList(); } catch (_) { /* */ } }
+        });
+      });
+    }
+    const tf = document.getElementById('toggleResultForm');
+    if (tf && !tf._wired) {
+      tf._wired = true;
+      tf.addEventListener('click', () => {
+        const wrap = document.getElementById('resultFormWrap');
+        if (!wrap) return;
+        const open = (wrap.style.display === 'none' || !wrap.style.display);
+        wrap.style.display = open ? 'block' : 'none';
+        tf.textContent = open ? '✏️ 경주별 직접 입력 접기' : '✏️ 경주별 직접 입력 펼치기';
+        if (open) { try { renderResultForm(); } catch (_) { /* */ } }   // 펼칠 때 최신 렌더
+      });
+    }
   }
 
   // ══════════ [2번-방법3] 순서대로 빠른 입력 (경주 시간순 나열 → 1~3착만 입력) ══════════
@@ -1031,7 +1063,16 @@
   }
 
   function renderHallOfFame(d) {
-    const wins = (d && d.wins) || [];
+    const rawWins = (d && d.wins) || [];
+    // [3번] 같은 경주 중복 제거 — 경주별 1개(가장 높은 배당) 유지
+    const _seen = new Map();
+    rawWins.forEach((w) => {
+      const key = w.raceKey || w.race || JSON.stringify(w.top3 || []);
+      const od = Math.max((w.trifecta_hit && w.trifecta_odds) || 0, (w.quinella_hit && w.quinella_odds) || 0);
+      const prev = _seen.get(key);
+      if (!prev || od > (prev._od || 0)) { w._od = od; _seen.set(key, w); }
+    });
+    const wins = [..._seen.values()];
     if (!wins.length) return '<p class="hint">아직 고배당 적중 기록이 없습니다. 복승 30배+ / 삼복승 100배+ 적중 시 자동 등록됩니다.</p>';
     return wins.slice(0, 30).map((w) => {
       const bigQ = w.quinella_hit && w.quinella_odds;
@@ -4926,7 +4967,16 @@
     const box = $('#highlightWins'); if (!box) return;
     let d = null;
     try { d = await (await fetch('/api/highlights')).json(); } catch (_) { /* */ }
-    const arr = (d && d.highlights) || [];
+    const rawArr = (d && d.highlights) || [];
+    // [3번] 같은 경주 중복 제거 — 경주별 1개(가장 높은 배당) 유지
+    const _seen = new Map();
+    rawArr.forEach((h) => {
+      const key = h.raceKey || h.race || h.report_slug || JSON.stringify(h.top3 || []);
+      const od = (h.trifecta_hit ? h.trifecta_odds : h.quinella_odds) || 0;
+      const prev = _seen.get(key);
+      if (!prev || od > (prev._od || 0)) { h._od = od; _seen.set(key, h); }
+    });
+    const arr = [..._seen.values()];
     if (!arr.length) { box.innerHTML = '<div class="hl-empty">아직 고배당 적중 기록이 없습니다. 결과를 입력하면 복승 30배+ / 삼복승 100배+ 적중이 자동 등록됩니다.</div>'; return; }
     box.innerHTML = arr.map((h) => {
       const odds = h.trifecta_hit ? h.trifecta_odds : h.quinella_odds;
