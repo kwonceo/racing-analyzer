@@ -511,3 +511,28 @@ table.odds-matrix td.rec-x { outline: 3px solid var(--accent-2); outline-offset:
 .rpt-conf .cf b { display:block; font-size:20px; color:#ffd24f; }
 .rpt-bar { height:10px; background:#263243; border-radius:5px; overflow:hidden; margin-top:4px; }
 .rpt-bar > span { display:block; height:100%; background:linear-gradient(90deg,#ffd24f,#ff9f43); }
+
+/* ── [신규] 결과 입력 대기 목록 + 간단 입력 팝업 ── */
+.pend-item { display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:10px 12px; margin:6px 0; background:rgba(255,255,255,.03); border:1px solid #334155;
+  border-radius:8px; }
+.pend-item.anom { border-color:#8a3b3b; background:rgba(220,60,60,.06); }
+.pend-item .pi-main { flex:1; min-width:0; }
+.pend-item .pi-race { font-weight:700; }
+.pend-item .pi-rec { color:#94a3b8; font-size:13px; margin-top:2px; }
+.pend-item .pi-btn { flex:none; }
+.pend-empty { color:#94a3b8; padding:8px; }
+.pend-warn { margin:6px 0 2px; color:#ffb020; font-weight:600; }
+.qr-mask { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:100000;
+  display:flex; align-items:center; justify-content:center; }
+.qr-modal { background:#111827; border:1px solid #334155; border-radius:12px; padding:18px 20px;
+  width:min(440px,92vw); box-shadow:0 20px 60px rgba(0,0,0,.5); }
+.qr-modal h3 { margin:0 0 4px; }
+.qr-modal .qr-sub { color:#94a3b8; font-size:13px; margin-bottom:12px; }
+.qr-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
+.qr-grid label, .qr-odds label { font-size:12px; color:#94a3b8; display:block; }
+.qr-grid input, .qr-odds input { width:100%; padding:7px; background:#0f172a; border:1px solid #334155;
+  border-radius:6px; color:#e2e8f0; font-size:15px; text-align:center; }
+.qr-odds { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+.qr-actions { display:flex; gap:8px; justify-content:flex-end; }
+.qr-msg { min-height:18px; font-size:13px; margin-top:8px; }

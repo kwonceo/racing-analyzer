@@ -127,6 +127,39 @@ ok(wts[combo_key]["n"] == 2, "동시 조합 버킷 n=2")
 ok(wts[combo_key]["high_rate"] == 50.0, "동시 조합 고배당 적중률 50%(1/2: 삼복승 121배만)")
 ok("동시(2개+)" in wts, "동시(2개+) 버킷 존재")
 
+print("[5] _missing_results 보강(추천요약·이상감지·정렬)")
+mdir = os.path.join(tmp, "alog")
+rdir = os.path.join(tmp, "rres")
+os.makedirs(mdir, exist_ok=True)
+os.makedirs(rdir, exist_ok=True)
+app.ANALYSIS_LOG_DIR = mdir
+app.RACE_RESULTS_DIR = rdir
+D = "2026-07-06"
+# 결과 없는 분석 2건(추천·이상감지 상이) + 결과 있는 1건 + TEST 1건
+json.dump({"date": D, "raceKey": "2026-07-06 모리오카 5경주", "race": "모리오카 5경주",
+           "analyzed_at": "11:00:00", "updated_at": "11:30:00",
+           "final_recommendation": {"trifecta_main": {"combo": "5+7+9"}, "quinella_main": {"combo": "5+7"}},
+           "signals_detected": [{"severity": "🔴"}]},
+          open(os.path.join(mdir, "a1.json"), "w", encoding="utf-8"), ensure_ascii=False)
+json.dump({"date": D, "raceKey": "2026-07-06 모리오카 3경주", "race": "모리오카 3경주",
+           "analyzed_at": "10:00:00", "updated_at": "10:20:00",
+           "final_recommendation": {"quinella_main": {"combo": "3+7"}},
+           "signals_detected": [{"severity": "🟡"}]},
+          open(os.path.join(mdir, "a2.json"), "w", encoding="utf-8"), ensure_ascii=False)
+json.dump({"date": D, "raceKey": "2026-07-06 모리오카 1경주", "race": "모리오카 1경주",
+           "result": {"1st": 1}, "final_recommendation": {"quinella_main": {"combo": "1+2"}}},
+          open(os.path.join(mdir, "a3.json"), "w", encoding="utf-8"), ensure_ascii=False)
+json.dump({"date": D, "raceKey": "2026-07-06 TEST검증 9경주", "race": "TEST검증 9경주",
+           "final_recommendation": {"quinella_main": {"combo": "1+2"}}},
+          open(os.path.join(mdir, "a4.json"), "w", encoding="utf-8"), ensure_ascii=False)
+mr = app._missing_results(D)
+ok(mr["count"] == 2, "결과 있는 경주·TEST 제외 → 2건")
+first = mr["missing"][0]
+ok(first["race"] == "모리오카 5경주", "갱신시각 내림차순 정렬(11:30 먼저)")
+ok(first["recommend"] == "삼복승 5+7+9", "삼복승 우선 추천 요약")
+ok(first["hadAnomaly"] is True, "🔴 이상감지 플래그")
+ok(mr["missing"][1]["recommend"] == "복승 3+7" and mr["missing"][1]["hadAnomaly"] is False, "복승 요약 + 이상감지 없음")
+
 print("=" * 56)
 print(f"결과: 통과 {PASS} / 실패 {FAIL}")
 print("=" * 56)

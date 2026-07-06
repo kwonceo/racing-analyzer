@@ -3920,8 +3920,17 @@ def _missing_results(date=None):
         rid, _ = _race_result_id(rk) if rk else (os.path.splitext(fn)[0], date)
         has_result = bool(d.get("result")) or (rid in done)
         if not has_result and rk and "TEST" not in (rk or "").upper():
+            # [신규] 추천 요약(삼복승 우선→복승) + 이상감지 여부 + 마지막 갱신시각(발주 근접 알림용)
+            fr = d.get("final_recommendation") or {}
+            _tm = (fr.get("trifecta_main") or {}).get("combo")
+            _qm = (fr.get("quinella_main") or {}).get("combo")
+            recommend = ("삼복승 " + str(_tm)) if _tm else (("복승 " + str(_qm)) if _qm else "추천 없음")
+            had_anomaly = any((s or {}).get("severity") == "🔴" for s in (d.get("signals_detected") or []))
             missing.append({"raceKey": rk, "race": d.get("race"), "race_id": rid,
-                            "analyzed_at": d.get("analyzed_at")})
+                            "analyzed_at": d.get("analyzed_at"), "updated_at": d.get("updated_at"),
+                            "recommend": recommend, "hadAnomaly": had_anomaly})
+    # 최근 분석 순(갱신시각 내림차순)
+    missing.sort(key=lambda m: (m.get("updated_at") or m.get("analyzed_at") or ""), reverse=True)
     return {"date": date, "missing": missing, "count": len(missing)}
 
 

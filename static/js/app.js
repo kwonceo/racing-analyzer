@@ -62,7 +62,7 @@
         btn.classList.add('active');
         $('#tab-' + btn.dataset.tab).classList.add('active');
         if (btn.dataset.tab === 'stats') renderStats();
-        if (btn.dataset.tab === 'result') { renderResultForm(); loadHighlights(); loadReportList(); }
+        if (btn.dataset.tab === 'result') { renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
         if (btn.dataset.tab === 'jp') { startJapanOddsWatch(); loadJapanReviewList(); }   // [5번] 일본경마: 실시간 배당 연동 + 분석 내역 복기 목록
       });
@@ -4369,6 +4369,134 @@
     }));
   }
 
+  // ══════════ [신규] 경주별 결과 입력 시스템 (대기목록·간단팝업·알림·미입력추적) ══════════
+  let _pendingTimer = null;
+  const _notifiedRaces = () => { try { return JSON.parse(localStorage.getItem('bmed_result_notified') || '{}'); } catch (_) { return {}; } };
+  const _markNotified = (rk) => { try { const m = _notifiedRaces(); m[rk] = Date.now(); localStorage.setItem('bmed_result_notified', JSON.stringify(m)); } catch (_) { /* */ } };
+
+  // [1·4번] 결과 입력 대기 목록 로드 + 미입력 추적 배너 + [3번] 알림 체크
+  async function loadPendingResults() {
+    const box = $('#pendingResultsList'); if (!box) return;
+    let d = null;
+    try { d = await (await fetch('/api/race-results/missing')).json(); } catch (_) { /* */ }
+    const list = (d && d.missing) || [];
+    const titleEl = $('#pendingResultsTitle');
+    if (titleEl) titleEl.textContent = `📋 결과 입력 대기 (${list.length}경주)`;
+    if (!list.length) { box.innerHTML = '<div class="pend-empty">✅ 모든 분석 경주의 결과가 입력되었습니다.</div>'; return; }
+    // [4번] 미입력 추적 안내
+    const warn = `<div class="pend-warn">⚠️ 결과 미입력 ${list.length}경주 — 지금 입력하면 AI 학습에 즉시 반영됩니다.</div>`;
+    box.innerHTML = warn + list.map((m) => {
+      const anom = m.hadAnomaly ? ' anom' : '';
+      const mark = m.hadAnomaly ? '🔴' : '·';
+      return `<div class="pend-item${anom}" data-rk="${esc(m.raceKey)}" data-rec="${esc(m.recommend || '')}">
+        <div class="pi-main">
+          <div class="pi-race">${mark} ${esc(m.race || m.raceKey)}</div>
+          <div class="pi-rec">추천: ${esc(m.recommend || '추천 없음')}${m.updated_at ? ' · 갱신 ' + esc(m.updated_at) : ''}</div>
+        </div>
+        <button class="btn btn-primary pi-btn">결과 입력</button>
+      </div>`;
+    }).join('');
+    box.querySelectorAll('.pend-item').forEach((it) => {
+      it.querySelector('.pi-btn').addEventListener('click', () => openQuickResult(it.dataset.rk, it.dataset.rec));
+    });
+    checkResultNotify(list);
+  }
+
+  // [3번] 발주 후 ~30분 경과(마지막 갱신 기준) 미입력 경주 → 1회 알림(중복 방지)
+  function checkResultNotify(list) {
+    const now = Date.now();
+    const done = _notifiedRaces();
+    list.forEach((m) => {
+      if (done[m.raceKey]) return;
+      const hhmmss = m.updated_at || m.analyzed_at;
+      if (!hhmmss) return;
+      const parts = String(hhmmss).split(':').map((x) => parseInt(x, 10));
+      if (parts.length < 2 || parts.some(isNaN)) return;
+      const upd = new Date(); upd.setHours(parts[0], parts[1], parts[2] || 0, 0);
+      if (now - upd.getTime() >= 30 * 60 * 1000) {   // 마지막 수집 30분 경과 = 경주 종료 추정
+        _markNotified(m.raceKey);
+        const msg = `🔔 ${m.race || m.raceKey} 결과를 입력하세요`;
+        try { toast(msg); } catch (_) { /* */ }
+        try {
+          if (window.Notification && Notification.permission === 'granted') new Notification('경마 BMED', { body: msg });
+          else if (window.Notification && Notification.permission !== 'denied') Notification.requestPermission();
+        } catch (_) { /* */ }
+      }
+    });
+  }
+
+  // [2번] 경주별 간단 결과 입력 팝업 (1~4착 + 복승/삼복승 배당 → 저장)
+  function openQuickResult(rk, recommend) {
+    const old = document.querySelector('.qr-mask'); if (old) old.remove();
+    const mask = document.createElement('div'); mask.className = 'qr-mask';
+    mask.innerHTML = `<div class="qr-modal">
+      <h3>결과 입력</h3>
+      <div class="qr-sub">${esc(rk)}${recommend ? ' · 추천 ' + esc(recommend) : ''}</div>
+      <div class="qr-grid">
+        <div><label>1착</label><input id="qr1" type="number" min="1" max="18" inputmode="numeric"></div>
+        <div><label>2착</label><input id="qr2" type="number" min="1" max="18" inputmode="numeric"></div>
+        <div><label>3착</label><input id="qr3" type="number" min="1" max="18" inputmode="numeric"></div>
+        <div><label>4착</label><input id="qr4" type="number" min="1" max="18" inputmode="numeric"></div>
+      </div>
+      <div class="qr-odds">
+        <div><label>복승 확정배당</label><input id="qrQO" type="number" min="0" step="0.1" placeholder="예: 5.8"></div>
+        <div><label>삼복승 확정배당</label><input id="qrTO" type="number" min="0" step="0.1" placeholder="예: 22.1"></div>
+      </div>
+      <div class="qr-odds">
+        <div><label>투자금액(원)</label><input id="qrStake" type="number" min="0" step="100" placeholder="예: 10000"></div>
+        <div><label>실수령 배당금(원)</label><input id="qrPayout" type="number" min="0" step="100" placeholder="공란=확정배당 추정"></div>
+      </div>
+      <div class="qr-msg" id="qrMsg"></div>
+      <div class="qr-actions">
+        <button class="btn" id="qrCancel">취소</button>
+        <button class="btn btn-primary" id="qrSave">저장</button>
+      </div>
+    </div>`;
+    document.body.appendChild(mask);
+    const close = () => mask.remove();
+    mask.addEventListener('click', (e) => { if (e.target === mask) close(); });
+    mask.querySelector('#qrCancel').addEventListener('click', close);
+    mask.querySelector('#qrSave').addEventListener('click', () => saveQuickResult(rk, mask));
+    const f1 = mask.querySelector('#qr1'); if (f1) f1.focus();
+    mask.querySelectorAll('input').forEach((inp) => inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveQuickResult(rk, mask); }));
+  }
+
+  async function saveQuickResult(rk, mask) {
+    const g = (id) => { const e = mask.querySelector(id); return e ? e.value.trim() : ''; };
+    const msg = mask.querySelector('#qrMsg');
+    const n1 = g('#qr1');
+    if (!n1) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '최소 1착은 입력하세요.'; } return; }
+    const result = { '1st': parseInt(n1, 10) };
+    ['2', '3', '4'].forEach((k) => { const v = g('#qr' + k); if (v) result[k + (k === '2' ? 'nd' : k === '3' ? 'rd' : 'th')] = parseInt(v, 10); });
+    const payload = { raceKey: rk, result };
+    const qo = g('#qrQO'), to = g('#qrTO'), stake = g('#qrStake'), payout = g('#qrPayout');
+    if (qo) payload.quinellaOdds = parseFloat(qo);
+    if (to) payload.trifectaOdds = parseFloat(to);
+    if (qo || to) payload.finalOdds = { quinella: qo ? parseFloat(qo) : undefined, trifecta: to ? parseFloat(to) : undefined };
+    if (stake) { payload.stake = parseInt(stake, 10); payload.budget = parseInt(stake, 10); }
+    if (payout) payload.payout = parseInt(payout, 10);
+    if (msg) { msg.style.color = ''; msg.textContent = '저장·판정 중…'; }
+    let d;
+    try { d = await (await fetch('/api/history/record-result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
+    catch (e) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '실패: ' + e.message; } return; }
+    if (d.error) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = d.error; } return; }
+    const rec = d.record || {};
+    const bits = [];
+    if (rec.quinella_hit) bits.push('복승 적중');
+    if (rec.trifecta_hit) bits.push('삼복승 적중');
+    if (!bits.length) bits.push('미적중');
+    if (rec.pnl != null) bits.push((rec.pnl >= 0 ? '+' : '') + Number(rec.pnl).toLocaleString() + '원');
+    _markNotified(rk);   // 입력 완료 → 알림 대상 제거
+    if (msg) { msg.style.color = '#38d39f'; msg.textContent = '✅ ' + bits.join(' · ') + ' — 학습 반영됨'; }
+    // 목록·통계·리포트·명예의전당 즉시 갱신 후 팝업 닫기
+    setTimeout(() => { mask.remove(); }, 900);
+    try { loadPendingResults(); } catch (_) { /* */ }
+    try { loadHighlights(); loadReportList(); } catch (_) { /* */ }
+    try { loadLearningStats(); } catch (_) { /* */ }
+    try { renderStats(); } catch (_) { /* */ }
+    try { if (typeof loadHistoryList === 'function') loadHistoryList(); } catch (_) { /* */ }
+  }
+
   // [v2.0.0] 자동수집 상태바 — 확장 백그라운드 엔진 상태를 서버 브리지(/api/auto/status)로
   //   폴링해 "🟢 자동수집 중 | 마지막 | 다음 | 발주까지" 를 화면 하단에 항상 표시.
   function initAutoStatusBar() {
@@ -4986,6 +5114,8 @@
     initPopout();          // [별도 창] 분석기 팝업 창 열기 + 위치 기억
     initAnalysisLog();     // [분석 로그] 완전 기록 섹션
     initJapanReview();     // [일본경마 복기] 분석 내역 목록 + 결과 입력 + 자동 판정 리포트
+    // [신규] 결과 입력 대기 목록 초기 로드 + 60초 폴링(탭 무관 알림 위해 전역)
+    try { loadPendingResults(); if (_pendingTimer) clearInterval(_pendingTimer); _pendingTimer = setInterval(loadPendingResults, 60000); } catch (_) { /* */ }
     // [개편] initCombined() 제거 — 통합분석 탭 폐지(한국/일본 탭에 자동 표시).
     checkServerHealth();
     try { await JockeyDB.load(); rebuildJockeyStats(); } catch (e) { console.warn('기수 DB 로드 실패:', e); }
