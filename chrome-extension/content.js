@@ -687,7 +687,8 @@
     });
     if (res && res.ok) {
       const d = res.data || {};
-      return { ok: true, raceKey, top3: d.top3 || results.map((r) => r.no), hit: d.hit || null };
+      // [스펙5] finalOdds(확정 복승/삼복승 배당)도 함께 반환 → background 알림에 "복승 7+4: 12.3배" 표시
+      return { ok: true, raceKey, top3: d.top3 || results.map((r) => r.no), hit: d.hit || null, finalOdds };
     }
     return { ok: false, error: (res && res.error) || '서버 전송 실패' };
   }

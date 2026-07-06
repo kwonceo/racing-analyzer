@@ -295,8 +295,8 @@ if (chrome.windows.onBoundsChanged) {
 }
 chrome.windows.onRemoved.addListener((id) => { if (id === _analyzerWinId) _analyzerWinId = null; });
 
-// ── [1번] 결과 자동수집 타이머 (발주 후 10/12/14분 = 종료 7분후 + 재시도 2회) ──
-const RESULT_CHECK_OFFSETS = [10, 12, 14]; // 발주시각 기준 분
+// ── [1번] 결과 자동수집 타이머 (발주 후 5/7/10분 = 자동 결과수집 + 재시도 2회, 탭클릭 방식 보조 경로) ──
+const RESULT_CHECK_OFFSETS = [5, 7, 10]; // 발주시각 기준 분(스펙: T+5 시도·T+7·T+10 재시도)
 
 async function scheduleResultTimer(raceKey, deadline) {
   if (!deadline) return { ok: false, error: '발주시각(타이머)을 먼저 설정하세요.' };
@@ -411,12 +411,13 @@ async function syncAutoEngine() {
       if (cfg.timerDeadline - 30000 > now) chrome.alarms.create('stageT30', { when: cfg.timerDeadline - 30000 });
       if (cfg.timerDeadline > now) chrome.alarms.create('stageT0', { when: cfg.timerDeadline });
     }
-    // [v2.0.1] 발주 후 결과 자동수집(7/9/11분) 예약 — 이미 수집 성공했으면 재예약 안 함
+    // [일본 결과 자동수집] 발주 후 5/7/10분 예약(스펙: T+5 시도·실패 시 T+7·T+10 재시도, 최대 3회)
+    //   — 이미 수집 성공했으면 재예약 안 함
     ['resFetch0', 'resFetch1', 'resFetch2'].forEach((n) => chrome.alarms.clear(n));
     const { resultCollected } = await chrome.storage.local.get({ resultCollected: null });
     if (!(resultCollected && resultCollected.deadline === cfg.timerDeadline)) {
-      [7, 9, 11].forEach((min, i) => { const at = cfg.timerDeadline + min * 60000; if (at > now) chrome.alarms.create('resFetch' + i, { when: at }); });
-      const firstAt = cfg.timerDeadline + 7 * 60000;
+      [5, 7, 10].forEach((min, i) => { const at = cfg.timerDeadline + min * 60000; if (at > now) chrome.alarms.create('resFetch' + i, { when: at }); });
+      const firstAt = cfg.timerDeadline + 5 * 60000;
       if (firstAt > now) chrome.storage.local.set({ resultAutoStatus: { state: 'scheduled', raceKey: '', nextAt: firstAt, t: Date.now() } });
     }
   }
@@ -456,7 +457,7 @@ async function _collectOnce() {
 
 // [마감 처리] 확정 마감(DOM 발매마감)만 완전 정지, 무변동(추정)은 자동 재개되는 소프트 일시중지.
 //   [버그수정] 예전엔 무변동 추정에도 autoSend 를 꺼버려, 한 번 오검출되면 수집이 꺼진 채 배너가 안 사라졌다.
-//   결과 자동수집(발주 후 7/9/11분 resFetch 알람)은 어느 경우든 유지된다.
+//   결과 자동수집(발주 후 5/7/10분 resFetch 알람)은 어느 경우든 유지된다.
 async function _onRaceClosed(reason) {
   const definitive = /DOM|발매\s*마감|발매\s*종료|투표|접수|締|販売|受付|終了/.test(reason || '');
   stopAutoEngine();
@@ -590,7 +591,7 @@ async function autoTick(reason) {
   }
 }
 
-// [v2.0.1] 발주 후 결과 자동수집(fetch 방식). attempt 0/1/2 = 발주+7/9/11분.
+// [v2.0.1] 발주 후 결과 자동수집(fetch 방식). attempt 0/1/2 = 발주+5/7/10분.
 async function doResultFetch(attempt) {
   const cfg = await _autoCfg();
   const { resultCollected } = await chrome.storage.local.get({ resultCollected: null });
@@ -604,21 +605,29 @@ async function doResultFetch(attempt) {
     const hit = res.hit || {};
     const win = hit.quinella || hit.trifecta || hit.was_hit;
     const top3 = res.top3 || [];
-    chrome.storage.local.set({ resultAutoStatus: { state: 'done', raceKey: res.raceKey, top3, hit, t: Date.now() } });
+    const fo = res.finalOdds || {};   // [스펙5] 확정 복승/삼복승 배당(content.js가 함께 반환)
+    chrome.storage.local.set({ resultAutoStatus: { state: 'done', raceKey: res.raceKey, top3, hit, finalOdds: fo, t: Date.now() } });
+    // 스펙5 알림 형식:
+    //  ✅ 모리오카 3경주 결과 수집
+    //   1착 7번 / 2착 4번 / 3착 9번
+    //   복승 7+4: 12.3배
+    //   추천 7+4 ✅ 적중!
     const t3 = top3.slice(0, 3).map((n, i) => `${i + 1}착 ${n}번`).join(' / ');
-    // 스펙: "✅ 서울 5R 결과 수집 · 복승 3+7 적중!" — 복승 적중 시 조합 표시
     const q = top3.slice(0, 2);
-    const hitMsg = hit.quinella ? ` · 복승 ${q.join('+')} 적중!`
-      : hit.trifecta ? ` · 삼복승 ${top3.slice(0, 3).join('+')} 적중!`
-      : win ? ' · 적중!' : ' · 미적중';
-    _notify('result', `✅ ${res.raceKey || '경주'} 결과 수집`, `${t3}${hitMsg}`, false);
+    const qCombo = (fo.quinella && fo.quinella.combo && fo.quinella.combo.length) ? fo.quinella.combo : q;
+    const qOddsLine = (fo.quinella && fo.quinella.odds) ? `\n복승 ${qCombo.join('+')}: ${fo.quinella.odds}배` : '';
+    const recLine = hit.quinella ? `\n추천 ${q.join('+')} ✅ 적중!`
+      : hit.trifecta ? `\n추천 ${top3.slice(0, 3).join('+')} ✅ 적중!`
+      : win ? '\n✅ 적중!' : '\n❌ 미적중';
+    _notify('result', `✅ ${res.raceKey || '경주'} 결과 수집`, `${t3}${qOddsLine}${recLine}`, false);
     setBadge(true, '✓');
   } else {
     const last = attempt >= 2;
-    const nextMin = attempt === 0 ? 9 : 11;
+    const nextMin = attempt === 0 ? 7 : 10;   // 다음 재시도 시각(발주+7 / 발주+10분)
     const nextAt = (!last && cfg.timerDeadline) ? cfg.timerDeadline + nextMin * 60000 : null;
     chrome.storage.local.set({ resultAutoStatus: { state: last ? 'manual' : 'retry', attempt: attempt + 2, nextAt, raceKey: '', t: Date.now() } });
-    if (last) _notify('resultFail', '❌ 결과 수집 실패', '수동 확인이 필요합니다.', false);
+    // [스펙4·5] T+10분까지 실패 → 수동 입력 안내(해당 경주는 결과 미입력으로 남아 결과기록 탭 '미입력' 목록에 표시됨)
+    if (last) _notify('resultFail', '❌ 결과 수집 실패', '수동 입력하세요. (결과기록 탭에서 착순 입력)', false);
   }
 }
 
