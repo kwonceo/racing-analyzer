@@ -209,6 +209,37 @@ def _guard(prev_hist_len, prev_q, cur_q):
 ok(_guard(1, _stable, _blip) is True, "미확립(1스냅샷)+블립 → 초기화(잔존배당 방어)")
 ok(_guard(5, _stable, _blip) is False, "확립(5스냅샷)+블립 → 초기화 안 함(초반 되돌이 제거)")
 
+print("[8] 고배당 경고 신호 완전 기록 시스템")
+app.ALERTS_DIR = os.path.join(tmp, "alerts")
+# 카와사키 2경주 재현: 6+8 -49.5% 급락(경고), 현재추천은 1+5(경고말 미포함) → 결과 8-6-5
+rk_a = "2026-07-06 카와사키 2경주"
+an_a = {
+    "drops": [{"combo": [6, 8], "pct": -49.5, "prev": 74.0, "cur": 37.4},
+              {"combo": [1, 8], "pct": -46.3, "prev": 31.3, "cur": 16.8},
+              {"combo": [1, 6], "pct": -45.3, "prev": 22.3, "cur": 12.2}],
+    "betRecommend": [{"kind": "복승", "label": "복승 메인", "combo": [1, 5], "alloc": 40, "expOdds": 8.0}],
+    "minutesBefore": 2,
+}
+e1 = app._record_alert(rk_a, an_a)
+ok(e1 is not None and e1["alert_pair"] == "6+8", "경고 저장 — 최상위 급락 6+8")
+ok(e1["odds_snapshot"].get("6+8") == {"before": 74.0, "after": 37.4}, "odds_snapshot before→after 기록")
+ok(set(e1["alert_horses"]) >= {6, 8, 1}, "경고말=급락 조합 구성마 집계")
+ok(e1["current_recommend"] == "1+5", "당시 복승 메인 추천(1+5) 기록")
+ok(app._record_alert(rk_a, an_a) is None, "동일 조합쌍 재저장 안 함(중복 방지)")
+ok(app._record_alert(rk_a, dict(an_a, afterClose=True)) is None, "마감 후 상태는 경고 저장 제외")
+# 결과 매칭: 8-6-5 → 경고말 6·8 입상, 추천(1,5)엔 없음 → 무시 후 놓침
+_al = app._match_alerts_to_result(rk_a, [8, 6, 5], an_a)
+ok(_al and _al["hit"] is True, "경고→결과 매칭: 경고말 입상(hit)")
+ok(_al["ignored"] is True, "경고 무시 판정(추천 1+5에 경고말 없음)")
+# 통계 집계
+_recs = [{"alert_fired": True, "alert_hit": True, "alert_ignored": True},
+         {"alert_fired": True, "alert_hit": False, "alert_ignored": False},
+         {"was_hit": True}]
+_as = app._recompute_learning_stats(_recs)["alert_stats"]
+ok(_as["n"] == 2 and _as["hit"] == 1, "경고 통계 n=2 hit=1(경고 없는 레코드 제외)")
+ok(_as["hit_rate"] == 50.0 and _as["ignored_miss"] == 1, "적중률 50% · 무시후미적중 1")
+ok(_as["advice"] and "포함 권장" in _as["advice"], "적중률 40%+ → 경고말 포함 권장 조언")
+
 print("=" * 56)
 print(f"결과: 통과 {PASS} / 실패 {FAIL}")
 print("=" * 56)

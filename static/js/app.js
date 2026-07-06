@@ -2202,6 +2202,23 @@
   }
 
   // [역배열 감지] 단승≠복승/쌍승 순서 → 추천 상단 특별 표시(4유형 + 역배열 감지말·조합)
+  // [신규 경고시스템 3번] 경고 신호 감지 배너 — 급변 말 + 추천에 편입된 급변 조합
+  function renderAlertSignal(al) {
+    if (!al || !(al.horses || []).length) return '';
+    const horses = al.horses.map((h) => `<b style="color:#ffd24f">${h}번</b>`).join('+');
+    const drops = (al.drops || []).map((d) =>
+      `<div style="margin:2px 0"><span class="chip chip-red">${d.combo.join('+')}</span> <span class="hint">${d.before}→${d.after}배 (▼${Math.abs(d.pct)}%)</span></div>`).join('');
+    const picks = (al.picks || []).map((p) => {
+      const od = p.expOdds != null ? `${p.expOdds}배` : (p.expOddsEst != null ? `추정 ${p.expOddsEst}배` : '');
+      return `<span class="chip chip-red">${p.kind} ${p.combo.join('+')}${od ? ` <span class="hint">${od}</span>` : ''}</span>`;
+    }).join(' ');
+    return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #ffb020;border-radius:8px;background:rgba(255,176,32,.1)">
+      <div style="font-size:15px;font-weight:800;color:#ffd24f">⚠️ 경고 신호 감지!</div>
+      <div class="hint" style="margin:3px 0 5px">${horses} 배당 급변 (${esc(al.topDrop || '')}) → <b style="color:#ffd24f">해당 말 조합을 추천에 포함</b>(고배당 대비)</div>
+      ${drops ? `<div style="margin:4px 0">${drops}</div>` : ''}
+      ${picks ? `<div style="margin:5px 0 0"><span class="hint">추천 업데이트</span><br>${picks}</div>` : ''}</div>`;
+  }
+
   function renderInverse(inv) {
     if (!inv || !inv.detected) return '';
     const b = inv.banner || {};
@@ -2248,6 +2265,7 @@
       ${a.afterClose ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #8a94a6;background:rgba(138,148,166,.14);border-radius:6px;color:#b8c0cc">⚠️ <b>마감 후 수집</b> — 발주(T-0) 이후 신호는 <b>참고만</b> 하세요. 급락이 있어도 <b>추천 조합·보험에는 반영되지 않습니다</b>(마감 전 기준 유지).</div>` : ''}
       ${a.marketCheck && a.marketCheck.diverged ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ff5c5c;background:rgba(255,92,92,.12);border-radius:6px;color:#ff8a8a">⚠️ <b>배당판 불일치</b> — 추천 복승(${(a.marketCheck.mainPair || []).join('+')}=${a.marketCheck.mainOdds}배)이 <b>배당판 최저 인기 조합(${a.marketCheck.favPair.join('+')}=${a.marketCheck.favOdds}배)</b>과 다릅니다. 배당판을 초반에 못 끌어왔거나 전적 편중일 수 있어요 → <b>배당판 인기 조합을 추천에 추가</b>했습니다. 배당 재확인 권장.</div>` : ''}
       ${a.marketCheck && a.marketCheck.stale ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffb020;background:rgba(255,176,32,.12);border-radius:6px;color:#ffc862">⚠️ <b>배당 불안정</b> — 최저 복승도 ${a.marketCheck.favOdds}배(실자금 미형성/초반 미수집 의심). <b>배당판 새로고침 후 재수집</b> 권장. 현재 추천은 참고만.</div>` : ''}
+      ${renderAlertSignal(a.alertSignal)}
       ${renderInverse(a.inverse)}
       <div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary || '')}</div>
       ${drops ? `<div style="margin:6px 0"><span class="hint">📉 급락/변동</span><br>${drops}</div>` : ''}
@@ -2724,6 +2742,7 @@
       ${card('전적 유력마 적중률', s.form_pick)}
       ${card('제거 판정 적중률', s.elimination)}
       ${renderNearMissStats(s.near_miss, nm)}
+      ${renderAlertStats(s.alert_stats)}
       ${renderTrackMonthStats(s.by_track, s.by_month, s.by_strategy)}
       ${renderDiscoveredPatterns(disc)}
       ${renderPatternStats(s.pattern_stats)}
@@ -2804,6 +2823,19 @@
       <b>🟡 삼복승 아깝게 4착 (거의 적중)</b> <span class="hint" style="font-weight:400">추천 말이 4착으로 아깝게 미적중한 케이스</span><br>
       <span style="font-size:18px;color:#ffd24f;font-weight:700">${cnt}건</span>${(nmStat && nmStat.trio_near) ? ` <span class="hint">(삼복승 근접 ${nmStat.trio_near}건)</span>` : ''}
       <div class="hint" style="margin-top:6px">🎯 <b>4착 빈번 말</b>(다음 경주 삼복승 보험픽 우선 고려): ${freqTxt}</div>
+    </div>`;
+  }
+
+  /** [경고 시스템 5번] 고배당 경고 신호 적중률 통계 카드. */
+  function renderAlertStats(as) {
+    if (!as || !as.n) return '';
+    const rate = as.hit_rate != null ? as.hit_rate : (as.n ? Math.round((as.hit / as.n) * 1000) / 10 : 0);
+    const color = rate >= 60 ? '#ff8a3d' : rate >= 40 ? '#ffd24f' : '#8a94a6';
+    return `<div class="bet-box" style="display:block;margin:4px 0 10px;border-color:#ffb020">
+      <b>⚠️ 경고 신호 분석 <span class="hint" style="font-weight:400">(배당 30%↑ 급락 = 고배당 이상감지)</span></b><br>
+      <div style="margin-top:4px">경고 발생: <b style="font-size:18px">${as.n}회</b> · 경고 말 입상: <b style="font-size:18px;color:${color}">${as.hit}회 (${rate}%)</b></div>
+      <div class="hint" style="margin-top:3px">경고 무시 후 미적중: <b style="color:#ff6b6b">${as.ignored_miss || 0}회</b> <span style="font-weight:400">(경고 말을 넣었으면 적중했을 케이스)</span></div>
+      <div style="margin-top:5px;color:#ffd24f">결론: ${esc(as.advice || '데이터 축적 중')}</div>
     </div>`;
   }
 

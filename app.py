@@ -3274,8 +3274,29 @@ def _triple_analyze(rk, rec):
     except Exception as _e:
         print("[패턴매칭] 실패:", _e)
 
+    # [신규 3번] 경고 신호 요약(alertSignal) — 30%+ 급변 말 + 추천에 편입된 급변 조합(신호 배너용).
+    #   추천 반영 자체는 위 _signal_combo_bets(신호 조합)로 이미 완료 → 여기선 요약만 노출.
+    alert_signal = None
+    _sig_drops = [d for d in drops if d.get("pct") is not None and d["pct"] <= ALERT_DROP_THRESH]
+    if _sig_drops and not after_close:
+        _ah = []
+        for _d in _sig_drops[:4]:
+            for _h in _d["combo"]:
+                if int(_h) not in _ah:
+                    _ah.append(int(_h))
+        _picks = [{"combo": b["combo"], "kind": b["kind"], "expOdds": b.get("expOdds"), "expOddsEst": b.get("expOddsEst")}
+                  for b in bet_rec if b.get("signalCombo")][:6]
+        alert_signal = {
+            "horses": _ah,
+            "topDrop": f"{_sig_drops[0]['combo'][0]}+{_sig_drops[0]['combo'][1]} {_sig_drops[0]['pct']}%",
+            "drops": [{"combo": d["combo"], "before": d.get("prev"), "after": d.get("cur"), "pct": d["pct"]} for d in _sig_drops[:6]],
+            "picks": _picks,
+            "note": "경고 신호 감지 — 급변 말 조합을 추천에 포함(고배당 대비)",
+        }
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
+        "alertSignal": alert_signal,   # [신규 3번] 경고 신호 감지 요약(배너)
         "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio),
                    "win": len(curWin), "history": len(hist)},
         "drops": drops[:15], "singleDrops": single_drops[:15], "rankChanges": rank_changes, "reversals": reversals,
@@ -3445,6 +3466,94 @@ def triple_match():
                     "analysis": _triple_analyze(match, db.get(match) or {})})
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  [신규] 고배당 경고 신호 완전 기록 시스템 (삭제 없이 추가)
+#   [1]경고 완전저장(data/alerts/) [2]결과 자동매칭 [4]고배당 경고학습 [5]경고 적중률
+#   ※ [3]경고 신호 추천 반영은 기존 _signal_combo_bets(급락 조합 말 추천)로 이미 동작 →
+#      alertSignal 요약을 _triple_analyze 반환에 추가(프론트 배너).
+# ═══════════════════════════════════════════════════════════════════
+ALERTS_DIR = os.path.join(os.path.dirname(__file__), "data", "alerts")
+ALERT_DROP_THRESH = -30.0   # 경고 저장/신호 기준(복승 30%+ 급락)
+
+
+def _alert_meta(rk):
+    m = re.search(r"(\d{4}-\d{2}-\d{2})", rk or "")
+    date = m.group(1) if m else time.strftime("%Y-%m-%d", time.localtime())
+    race = re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip() or (rk or "race")
+    slug = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
+    return slug, date, race
+
+
+def _record_alert(rk, an):
+    """[1번] 유의미한 배당급변 경고를 data/alerts/<race>.json 에 완전 기록.
+    odds_snapshot(before/after)·경고말·현재추천 저장. 같은 조합쌍은 1회만(중복 방지).
+    마감 후·기준값(설정/재설정) 상태는 제외(가짜 급락)."""
+    if not an or an.get("afterClose") or an.get("baselineSet") or an.get("baselineReset"):
+        return None
+    drops = [d for d in (an.get("drops") or [])
+             if d.get("pct") is not None and d["pct"] <= ALERT_DROP_THRESH]
+    if not drops:
+        return None
+    slug, date, race = _alert_meta(rk)
+    os.makedirs(ALERTS_DIR, exist_ok=True)
+    path = os.path.join(ALERTS_DIR, slug + ".json")
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        doc = {"race": race, "date": date, "raceKey": rk, "alerts": [], "result": None}
+    top = drops[0]
+    pair_key = "+".join(str(x) for x in sorted(int(y) for y in top["combo"]))
+    if pair_key in {a.get("alert_pair") for a in doc.get("alerts", [])}:
+        return None   # 이 조합쌍 경고는 이미 기록됨
+    snapshot, horses = {}, []
+    for d in drops[:6]:
+        snapshot["+".join(str(x) for x in d["combo"])] = {"before": d.get("prev"), "after": d.get("cur")}
+        for h in d["combo"]:
+            if int(h) not in horses:
+                horses.append(int(h))
+    main = next((b for b in (an.get("betRecommend") or []) if b.get("label") == "복승 메인"), None)
+    cur_rec = "+".join(str(x) for x in main["combo"]) if main else None
+    entry = {"time": time.strftime("%H:%M:%S", time.localtime()), "race": race,
+             "alert_type": "배당급변", "alert_content": f"{top['combo'][0]}+{top['combo'][1]} {top['pct']}%",
+             "alert_pair": pair_key, "odds_snapshot": snapshot, "alert_horses": horses,
+             "current_recommend": cur_rec, "minutes_before": an.get("minutesBefore"),
+             "result": None, "alert_correct": None}
+    doc["alerts"].append(entry)
+    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    return entry
+
+
+def _match_alerts_to_result(rk, top3, an):
+    """[2번] 결과 입력 시 경고 내역과 자동 매칭 — 경고말 입상 여부·경고 무시(추천 누락) 판정.
+    반환 {fired, horses, hit, ignored} (학습 레코드/[5]통계·[4]하이라이트 근거)."""
+    slug, _, _ = _alert_meta(rk)
+    path = os.path.join(ALERTS_DIR, slug + ".json")
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return None
+    top3 = [int(x) for x in top3 if x is not None]
+    all_h, any_correct = set(), False
+    for a in doc.get("alerts", []):
+        ah = [int(h) for h in (a.get("alert_horses") or [])]
+        placed = [h for h in ah if h in top3]
+        a["result"] = top3
+        a["alert_correct"] = bool(placed)
+        a["placed_horses"] = placed
+        rec_set = set(int(x) for x in re.findall(r"\d+", a.get("current_recommend") or ""))
+        a["ignored_miss"] = bool(placed) and not any(h in rec_set for h in placed)
+        all_h.update(ah)
+        if placed:
+            any_correct = True
+    doc["result"] = top3
+    try:
+        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[경고매칭] 저장 실패:", e)
+    return {"fired": bool(doc.get("alerts")), "horses": sorted(all_h), "hit": any_correct,
+            "ignored": any(a.get("ignored_miss") for a in doc.get("alerts", []))}
+
+
 @app.route("/api/odds/triple/analyze", methods=["GET", "POST"])
 def triple_analyze():
     """규칙기반 즉시 분석(Claude 미사용): 급락·순위변동·쌍승역전·유력마·삼복승추천.
@@ -3469,6 +3578,11 @@ def triple_analyze():
         print("[복기저장] 실패:", e)
     # [분석 로그] 배당 수집·이상감지·추천이 갱신될 때마다 완전 로그 갱신(추적 가능 기록)
     _analysis_log_save(rk, an)
+    # [신규 1번] 유의미한 배당급변 경고를 data/alerts/ 에 완전 기록(중복 제외)
+    try:
+        _record_alert(rk, an)
+    except Exception as e:
+        print("[경고기록] 실패:", e)
     return jsonify(an)
 
 
@@ -4998,7 +5112,17 @@ def _recompute_learning_stats(records):
         d["rate"] = round(d["hit"] / d["n"] * 100, 1) if d["n"] else None
         d["high_rate"] = round(d["high"] / d["n"] * 100, 1) if d["n"] else None
 
+    # [신규 경고시스템 5번] 경고 신호 적중률 — 경고 발생 N / 경고말 입상 N(%) / 경고 무시 후 미적중 N
+    _af = [r for r in records if r.get("alert_fired")]
+    _ah = sum(1 for r in _af if r.get("alert_hit"))
+    _aig = sum(1 for r in _af if r.get("alert_ignored"))
+    alert_stats = {"n": len(_af), "hit": _ah,
+                   "hit_rate": (round(_ah / len(_af) * 100, 1) if _af else None),
+                   "ignored_miss": _aig,
+                   "advice": ("경고 발생 시 해당 말 추천 포함 권장" if (_af and _ah / len(_af) >= 0.4) else None)}
+
     return {
+        "alert_stats": alert_stats,       # [신규 5번] 경고 신호 발생·적중·무시 통계
         "win_tag_stats": win_tag_stats,   # [신규 4번] 신호조합별 적중률·고배당 적중률
         "total": len(records),
         "by_track": by_track, "by_month": by_month, "by_strategy": by_strategy,   # [5번]·[전략성과]
@@ -5076,6 +5200,45 @@ def highlights_list():
     return jsonify({"highlights": arr, "count": len(arr)})
 
 
+@app.route("/api/alerts/list", methods=["GET"])
+def alerts_list():
+    """[신규 경고시스템] 경고 발생 경주 목록(최신순) → [{slug,race,date,count,result,anyHit}]."""
+    out = []
+    if os.path.isdir(ALERTS_DIR):
+        for fn in sorted(os.listdir(ALERTS_DIR), reverse=True):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(ALERTS_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            alerts = d.get("alerts") or []
+            out.append({"slug": fn[:-5], "race": d.get("race"), "date": d.get("date"),
+                        "raceKey": d.get("raceKey"), "count": len(alerts), "result": d.get("result"),
+                        "anyHit": any(a.get("alert_correct") for a in alerts),
+                        "horses": sorted({int(h) for a in alerts for h in (a.get("alert_horses") or [])})})
+    return jsonify({"alerts": out, "count": len(out)})
+
+
+@app.route("/api/alerts/get", methods=["GET"])
+def alerts_get():
+    """[신규 경고시스템] 단일 경주 경고 전체(odds_snapshot·경고말·판정). query: slug 또는 raceKey."""
+    slug = (request.args.get("slug") or "").strip()
+    rk = (request.args.get("raceKey") or "").strip()
+    if not slug and rk:
+        slug, _, _ = _alert_meta(rk)
+    slug = os.path.basename(slug)
+    if not slug:
+        return jsonify({"error": "slug 또는 raceKey 필요"}), 400
+    path = os.path.join(ALERTS_DIR, slug + ".json")
+    if not os.path.isfile(path):
+        return jsonify({"error": "경고 없음", "slug": slug}), 404
+    try:
+        return jsonify(json.load(open(path, encoding="utf-8")))
+    except Exception as e:
+        return jsonify({"error": f"읽기 실패: {e}"}), 500
+
+
 @app.route("/api/history/list", methods=["GET", "POST"])
 def history_list():
     """저장된 경주 히스토리 목록 → [{file,date,race,raceKey,snaps,hasResult}]."""
@@ -5139,6 +5302,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         return all(x in top3 for x in combo)
     was_hit = any(in3(r["combo"]) for r in an.get("betRecommend", []))
 
+    # [신규 경고시스템 2번] 결과 → 경고 내역 자동 매칭(경고말 입상·경고 무시 판정)
+    try:
+        _al = _match_alerts_to_result(rk, top3, an)
+    except Exception as e:
+        print("[경고매칭] 실패:", e)
+        _al = None
+
     # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
     rec_bets = an.get("betRecommend", [])
     top2 = sorted(top3[:2]) if len(top3) >= 2 else []
@@ -5200,11 +5370,20 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             _hp, _hd, _hr = _hist_path(rk)
             _slug = re.sub(r"[^\w가-힣]+", "_", f"{_hd}_{_hr}").strip("_")
             _wt2 = _signal_win_tags(an, top3)
+            # [신규 경고시스템 4번] 고배당 경고 패턴: 경고 발생 + 경고말 입상 시 교훈 기록
+            _alert_fired = bool(_al and _al.get("fired"))
+            _alert_hit = bool(_al and _al.get("hit"))
+            _lesson = None
+            if _alert_fired and _alert_hit:
+                _lesson = "경고 말이 실제 입상 — 경고 신호를 추천에 반영했어야" if (_al or {}).get("ignored") \
+                    else "경고 말이 실제 입상 — 경고 신호 추천 반영이 적중"
             _highlight_save({"raceKey": rk, "top3": top3,
                              "quinella_hit": quinella_hit, "quinella_odds": q_odds,
                              "trifecta_hit": trifecta_hit, "trifecta_odds": t_odds,
                              "date": _hd, "race": _hr, "report_slug": _slug,
                              "win_tags": _wt2.get("tags"), "combo_tags": _wt2.get("combo"),
+                             "alert_triggered": _alert_fired, "alert_horses": (_al or {}).get("horses") or [],
+                             "alert_ignored": bool(_al and _al.get("ignored")), "lesson": _lesson,
                              "t": time.time()})
     except Exception as e:
         print("[하이라이트] 저장 실패:", e)
@@ -5338,6 +5517,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         "inverse_detected": bool((an.get("inverse") or {}).get("detected")),
         # [4번] 신호조합 적중 태깅(초과급락/쌍승역전/복승불일치/전적보조 + 동시)
         "win_tags": win_tags, "win_tags_combo": bool(len(win_tags) >= 2),
+        # [신규 경고시스템 2·5번] 경고 발생·경고말 입상·경고 무시(추천 누락) 판정
+        "alert_fired": bool(_al and _al.get("fired")), "alert_horses": (_al or {}).get("horses") or [],
+        "alert_hit": bool(_al and _al.get("hit")), "alert_ignored": bool(_al and _al.get("ignored")),
         "t": time.time(),
     }
     L = _learning_load()
