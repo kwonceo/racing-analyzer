@@ -4303,6 +4303,9 @@ def _missing_results(date=None):
 # ───────── [AI 분석 Phase1] AI 학습용 완전 데이터(data/ai_training/) + 품질검증 + 현황 ─────────
 AI_TRAINING_DIR = os.path.join(os.path.dirname(__file__), "data", "ai_training")
 AI_TARGET_RACES = 500   # [3번] 목표 경주 수
+# [AI 데이터 정비] 학습 데이터 스키마 버전 — 구조 변경 시 올려서 하위호환/마이그레이션 판단에 사용.
+#   변경 이력은 chrome-extension 밖 docs/AI_DATA_SCHEMA.md 참조.
+AI_SCHEMA_VERSION = "1.0"
 
 
 def _ai_training_path(rk):
@@ -4415,6 +4418,7 @@ def _build_ai_training(rk, an, record, result, top4, inputs=None):
         "odds_range": _odds_range_label(q_odds),
     }
     data = {
+        "schema_version": AI_SCHEMA_VERSION,   # [AI 데이터 정비] 스키마 버전 명시(마이그레이션 대비)
         "race_id": rid,
         "race_info": {
             "date": date, "track": track, "round": rnd,
@@ -4514,6 +4518,7 @@ def _save_ai_training(rk, an, record, result, top4, inputs=None):
 def _ai_data_status():
     """[3·7번] AI 학습 데이터 현황 — 수집/고품질/평균품질·목표 진행률·마일스톤(100/500) 예상 일정."""
     total, high_q, score_sum, days = 0, 0, 0, set()
+    schema_counts = {}   # [AI 데이터 정비] 스키마 버전별 개수(구버전=마이그레이션 대상 파악)
     if os.path.isdir(AI_TRAINING_DIR):
         for fn in os.listdir(AI_TRAINING_DIR):
             if not fn.endswith(".json"):
@@ -4523,6 +4528,8 @@ def _ai_data_status():
             except Exception:
                 continue
             total += 1
+            sv = d.get("schema_version") or "legacy"   # 버전 없는 구파일 = legacy
+            schema_counts[sv] = schema_counts.get(sv, 0) + 1
             q = d.get("quality") or {}
             score_sum += q.get("score") or 0
             if q.get("ai_ready") or q.get("complete"):   # 80점+ AI학습용(고품질)
@@ -4540,6 +4547,7 @@ def _ai_data_status():
         "collected": total, "complete": high_q, "high_quality": high_q,
         "complete_pct": round(high_q / total * 100, 1) if total else 0,
         "avg_quality": round(score_sum / total, 1) if total else 0,
+        "schema_version": AI_SCHEMA_VERSION, "schema_counts": schema_counts,   # [AI 데이터 정비]
         "target": AI_TARGET_RACES, "progress": progress,
         "remaining": max(0, AI_TARGET_RACES - total),
         "days_collected": len(days), "per_day": round(per_day, 1),
@@ -4675,6 +4683,33 @@ def _data_git_backup(label, delay=5.0):
             _data_backup_timer.start()
     except Exception as e:
         print("[데이터백업] 예약 실패:", e)
+
+
+# [데이터 자동백업 완성] 결과 입력이 없어도 주기적으로 안전 백업.
+#   기존 백업은 결과 입력 시에만 트리거 → 장시간 분석만 하고 결과 미입력이면 분석로그가 백업 안 됨.
+#   주기(기본 6시간) 데몬 스레드가 _run_data_git_backup 을 호출(변경 없으면 no-op).
+_PERIODIC_BACKUP_INTERVAL = 6 * 3600
+_periodic_backup_started = False
+
+
+def _start_periodic_backup(interval=None):
+    global _periodic_backup_started
+    if _periodic_backup_started:
+        return
+    _periodic_backup_started = True
+    iv = int(interval or _PERIODIC_BACKUP_INTERVAL)
+
+    def _loop():
+        while True:
+            try:
+                time.sleep(iv)
+                _run_data_git_backup(f"주기적 안전 백업({iv // 3600}시간)")
+            except Exception as e:
+                print("[주기백업] 예외:", e)
+
+    t = threading.Thread(target=_loop, daemon=True)
+    t.start()
+    print(f"[주기백업] {iv // 3600}시간 주기 데이터 안전 백업 스레드 시작")
 
 
 def _learning_load():
@@ -6321,6 +6356,25 @@ def _failure_report_text(rk, top3, recommended, was_hit, fail, timelines):
             pctstr = f" ({p['pct']:+d}%)" if p.get("pct") is not None else ""
             lines.append(f"  {tstr}: {p['odds']}배{pctstr} — {p.get('signal', '')}")
         lines.append(f"  → {fail.get('reason', '')}")
+        lines.append("")
+    # [복기 완성] 1·2·3착 정답말 배당 역추적 전체를 텍스트 리포트에도 포함(프론트 카드와 동일 수준).
+    #   기존엔 focus(놓친 1마)만 텍스트에 있어 복사/내보내기 시 정보가 빠졌다.
+    if timelines:
+        lines.append("📈 정답말 역추적(1·2·3착):")
+        rank_label = {0: "1착", 1: "2착", 2: "3착"}
+        for i, h in enumerate(top3):
+            lines.append(f"  [{rank_label.get(i, str(i + 1) + '착')} {h}번]")
+            tl = timelines.get(str(h)) or []
+            if not tl:
+                lines.append("    (타임라인 없음)")
+                continue
+            for p in tl:
+                mb = p.get("mb")
+                tstr = (f"T-{mb}분" if isinstance(mb, (int, float)) and mb >= 0
+                        else (f"마감후{abs(mb)}분" if isinstance(mb, (int, float)) else (p.get("src") or "")))
+                pv = p.get("pct")
+                pctstr = f" ({'+' if isinstance(pv, (int, float)) and pv > 0 else ''}{pv}%)" if pv is not None else ""
+                lines.append(f"    {tstr}: {p.get('odds')}배{pctstr} {p.get('signal', '')}".rstrip())
         lines.append("")
     lines.append(f"🔍 개선점: {(fail or {}).get('improvement', '상위 3신호 말 전부 추천 포함')}")
     return "\n".join(lines)
@@ -8315,4 +8369,5 @@ if __name__ == "__main__":
     # 재개는 리로더의 실제 작업 프로세스(WERKZEUG_RUN_MAIN)에서만 1회 수행.
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         _korea_maybe_resume()
+        _start_periodic_backup()   # [데이터 자동백업 완성] 6시간 주기 안전 백업(결과 미입력이어도 백업)
     app.run(host="127.0.0.1", port=8011, debug=True, threaded=True)

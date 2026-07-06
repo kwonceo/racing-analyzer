@@ -4537,11 +4537,12 @@
         <td>${key ? '✅ ' + esc(key) : '⚠️ 없음'}</td>
         <td>${hitCell}</td>
         <td><input class="cfg-input batch-stake" type="number" min="0" step="100" value="${c.budget || 0}" style="width:100px" /></td>
+        <td><input class="cfg-input batch-odds" type="number" min="0" step="0.1" placeholder="배당" style="width:78px" title="확정배당 입력 시 투자×배당=수익 자동계산" /></td>
         <td><input class="cfg-input batch-payout" type="number" min="0" step="100" value="0" style="width:100px" /></td>
       </tr>`;
     }).join('');
     host.innerHTML = `
-      <table class="data-table"><thead><tr><th>경주</th><th>착순</th><th>매칭</th><th>적중</th><th>투자(원)</th><th>수익(원)</th></tr></thead><tbody>${rows}</tbody></table>
+      <table class="data-table"><thead><tr><th>경주</th><th>착순</th><th>매칭</th><th>적중</th><th>투자(원)</th><th>확정배당</th><th>수익(원)</th></tr></thead><tbody>${rows}</tbody></table>
       <div class="bet-line" style="margin-top:8px"><span class="bet-type">당일 합계</span><span id="batchSum">-</span></div>
       <button class="btn btn-primary" id="batchSaveBtn" style="margin-top:8px">전체 저장 → 학습 DB</button>`;
     const recalc = () => {
@@ -4553,6 +4554,19 @@
       $('#batchSum').textContent = `투자 ${st.toLocaleString()} · 수익 ${po.toLocaleString()} · 손익 ${(po - st).toLocaleString()}원`;
     };
     host.querySelectorAll('.batch-stake,.batch-payout').forEach((inp) => inp.addEventListener('input', recalc));
+    // [보완#2] 일괄표 자동계산 — 확정배당 입력 시 그 행의 투자×배당=수익 자동 입력(수동계산 부담 제거).
+    host.querySelectorAll('.batch-odds').forEach((inp) => inp.addEventListener('input', () => {
+      const tr = inp.closest('tr'); if (!tr) return;
+      const stake = parseInt(tr.querySelector('.batch-stake').value, 10) || 0;
+      const odds = parseFloat(inp.value) || 0;
+      if (stake > 0 && odds > 0) {
+        const pay = tr.querySelector('.batch-payout');
+        pay.value = Math.round(stake * odds / 100) * 100;   // 100원 단위 반올림
+        pay.style.background = 'rgba(56,211,159,.15)';
+        setTimeout(() => { pay.style.background = ''; }, 600);
+        recalc();
+      }
+    }));
     recalc();
     $('#batchSaveBtn').addEventListener('click', () => saveBatch(results, host));
   }
