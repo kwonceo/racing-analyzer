@@ -6339,6 +6339,14 @@ def _failure_report(rk):
                               "after": p["after"], "src": p["src"],
                               "signal": _timeline_signal_label(p["pct"])} for p in tl]
 
+    # [복기 상세 강화] 정답말 전적 점수 + 이상감지 요약(적중/미적중 공통 근거)
+    scores = {}
+    for f in (an.get("form") or []):
+        if f.get("no") in top3 and f.get("totalScore") is not None:
+            scores[str(f["no"])] = f.get("totalScore")
+    anomaly_horse = an.get("anomalyHorse")
+    key_horses = an.get("keyHorses") or []
+
     # [복기 UI 통합] 적중=왜 맞았는지 / 미적중=왜 놓쳤는지, 한 리포트로.
     if was_hit:
         text = _success_report_text(rk, top3, hit_combos, timelines)
@@ -6346,7 +6354,8 @@ def _failure_report(rk):
         text = _failure_report_text(rk, top3, recommended, was_hit, fail, timelines)
     return {"ok": True, "raceKey": rk, "top3": top3, "recommended": recommended,
             "was_hit": was_hit, "hit_combos": hit_combos, "failure": fail,
-            "timelines": timelines, "text": text}
+            "timelines": timelines, "scores": scores,
+            "anomaly_horse": anomaly_horse, "key_horses": key_horses, "text": text}
 
 
 def _success_report_text(rk, top3, hit_combos, timelines):

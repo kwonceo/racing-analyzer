@@ -184,6 +184,16 @@
 
     <!-- 결과입력 -->
     <section id="tab-result" class="tab-panel">
+      <!-- [결과기록 UI 개선] 최근 7일 결과·복기 (요약 카드 + 날짜별 그룹 + 클릭 복기) -->
+      <div class="panel-card" id="recentResultsCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <h2 style="margin:0">📅 최근 7일 결과 · 복기</h2>
+          <button id="recentResultsRefresh" class="btn btn-small">🔄 새로고침</button>
+        </div>
+        <p class="hint">최근 7일 입력된 결과만 날짜별로 모아 보여줍니다. 경주를 클릭하면 적중은 "왜 맞았는지", 미적중은 "왜 놓쳤는지" 복기가 열립니다.</p>
+        <div id="recentSummary" style="margin-top:8px"></div>
+        <div id="recentResultsList" style="margin-top:10px"></div>
+      </div>
       <!-- [신규] 분석/수집된 경주 자동 결과 입력 대기 목록 -->
       <div class="panel-card">
         <h2 id="pendingResultsTitle">📋 결과 입력 대기</h2>

@@ -62,7 +62,7 @@
         btn.classList.add('active');
         $('#tab-' + btn.dataset.tab).classList.add('active');
         if (btn.dataset.tab === 'stats') renderStats();
-        if (btn.dataset.tab === 'result') { renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); }
+        if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
         if (btn.dataset.tab === 'jp') { startJapanOddsWatch(); loadJapanReviewList(); }   // [5번] 일본경마: 실시간 배당 연동 + 분석 내역 복기 목록
       });
@@ -778,6 +778,9 @@
     }); }
     initQuickEntry();      // [2번-방법3] 순서대로 빠른 입력
     initFailureReview();   // [복기 학습] 실패 대시보드 + 명예의 전당
+    // [결과기록 UI 개선] 최근 7일 결과·복기 뷰 — 새로고침 버튼 + 초기 렌더
+    { const b = document.getElementById('recentResultsRefresh'); if (b) b.addEventListener('click', renderRecentResults); }
+    try { renderRecentResults(); } catch (_) { /* */ }
   }
 
   // ══════════ [2번-방법3] 순서대로 빠른 입력 (경주 시간순 나열 → 1~3착만 입력) ══════════
@@ -871,7 +874,10 @@
     let d; try { d = await (await fetch(`/api/failure/report?raceKey=${encodeURIComponent(rk)}`)).json(); }
     catch (e) { const l = $('#fr-loading'); if (l) l.remove(); return; }
     const l = $('#fr-loading'); if (l) l.remove();
-    if (!d.ok) return;   // [복기 통합] 적중(was_hit)도 이제 표시 — 조기 종료 제거
+    if (!d.ok) {   // [복기 통합] 데이터 없으면 조용히 넘기지 않고 사유 안내
+      out.insertAdjacentHTML('afterbegin', `<div class="hint" style="font-size:12px;padding:4px 0">복기 데이터 없음 — ${esc(d.error || '당시 배당 히스토리가 없는 경주')}</div>`);
+      return;
+    }
     out.insertAdjacentHTML('afterbegin', renderFailureReport(d));
   }
 
@@ -886,31 +892,40 @@
       const pct = p.pct != null ? ` <b style="color:${p.pct <= -8 ? '#f87171' : (p.pct >= 8 ? '#8a94a6' : '#cdd6e3')}">${p.pct > 0 ? '+' : ''}${p.pct}%</b>` : '';
       return `<div style="margin:1px 0;font-size:12px">${tstr}: ${p.odds}배${pct} <span style="color:${sigColor(p.signal)}">${esc(p.signal || '')}</span></div>`;
     }).join('') || '<div class="hint" style="font-size:12px">타임라인 없음</div>';
+    // [복기 상세 강화] 정답말 전적 점수 + 이상감지말(적중/미적중 공통 근거)
+    const scores = d.scores || {};
+    const scoreTag = (no) => (scores[String(no)] != null ? ` <span class="hint">전적 ${scores[String(no)]}점</span>` : '');
+    const rankOf = (h) => (h === (d.top3 || [])[0] ? '1착' : h === (d.top3 || [])[1] ? '2착' : '3착');
+    const anomalyLine = (d.anomaly_horse != null)
+      ? `<div style="margin:3px 0;font-size:12px"><span class="hint">🚨 당시 이상감지말:</span> <b style="color:#ff5c5c">${d.anomaly_horse}번</b>${(d.key_horses || []).length ? ` · <span class="hint">유력마</span> <b style="color:#4ea1ff">${(d.key_horses || []).join('·')}</b>` : ''}</div>`
+      : ((d.key_horses || []).length ? `<div style="margin:3px 0;font-size:12px"><span class="hint">⭐ 당시 유력마:</span> <b style="color:#4ea1ff">${(d.key_horses || []).join('·')}</b></div>` : '');
     // [복기 통합] 적중 경주 → "왜 맞았는지" 녹색 카드(정답말 신호 근거)
     if (d.was_hit) {
       const winners = (d.top3 || []).map((h, i) =>
-        `<div style="margin-top:4px"><span class="chip" style="border-color:#38d39f;color:#38d39f">${h}번(${i === 0 ? '1착' : i === 1 ? '2착' : '3착'})</span></div>${tlRows(h)}`).join('');
+        `<div style="margin-top:4px"><span class="chip" style="border-color:#38d39f;color:#38d39f">${h}번(${i === 0 ? '1착' : i === 1 ? '2착' : '3착'})</span>${scoreTag(h)}</div>${tlRows(h)}`).join('');
       return `<div style="border:1px solid #38d39f;border-radius:8px;padding:10px;margin-bottom:8px;background:rgba(56,211,159,.06)">
         <div class="matrix-title" style="color:#38d39f">✅ 적중 복기 — ${esc(d.raceKey)}</div>
         <div>실제 정답: <b>${(d.top3 || []).join('-')}</b> · 적중 추천: <b style="color:#38d39f">${(d.hit_combos || []).join(' / ') || '(추천 조합 적중)'}</b></div>
-        <div class="matrix-title" style="font-size:12px;margin-top:8px">💡 왜 맞았나 — 정답말 신호 근거(1·2·3착)</div>${winners}
+        ${anomalyLine}
+        <div class="matrix-title" style="font-size:12px;margin-top:8px">💡 왜 맞았나 — 정답말 신호·전적·배당 타임라인(1·2·3착)</div>${winners}
         <div style="margin-top:8px;padding:6px 8px;background:rgba(56,211,159,.08);border-radius:6px">
           <b style="color:#38d39f">🔁 재현 포인트:</b> 이 신호 패턴을 다음 경주에서도 우선 반영</div>
       </div>`;
     }
     const focusBlock = (f.focus != null)
-      ? `<div class="matrix-title" style="font-size:12px;margin-top:6px">❓ 왜 ${f.focus}번을 놓쳤나</div>${tlRows(f.focus)}
+      ? `<div class="matrix-title" style="font-size:12px;margin-top:6px">❓ 왜 ${f.focus}번을 놓쳤나${scoreTag(f.focus)}</div>${tlRows(f.focus)}
          <div style="margin-top:3px;font-size:12px">→ ${esc(f.reason || '')}</div>` : '';
     const others = (d.top3 || []).filter((h) => h !== f.focus).map((h) =>
-      `<div style="margin-top:4px"><span class="chip">${h}번(${h === d.top3[0] ? '1착' : (h === d.top3[1] ? '2착' : '3착')})</span></div>${tlRows(h)}`).join('');
+      `<div style="margin-top:4px"><span class="chip">${h}번(${rankOf(h)})</span>${scoreTag(h)}</div>${tlRows(h)}`).join('');
     return `<div style="border:1px solid #f87171;border-radius:8px;padding:10px;margin-bottom:8px;background:rgba(248,113,113,.06)">
       <div class="matrix-title" style="color:#ff8a8a">❌ 복기 리포트 — ${esc(d.raceKey)}</div>
       ${f.label ? `<div style="margin:2px 0"><b>실패 유형:</b> <span style="color:#ffd24f">${esc(f.label)}</span></div>` : ''}
       <div>실제 정답: <b>${(d.top3 || []).join('-')}</b> · 우리 추천: <b>${(d.recommended || []).join(' / ') || '없음'}</b></div>
+      ${anomalyLine}
       ${focusBlock}
-      <div class="matrix-title" style="font-size:12px;margin-top:8px">📈 정답말 역추적(1·2·3착)</div>${others}
+      <div class="matrix-title" style="font-size:12px;margin-top:8px">📈 정답말 역추적 · 전적(1·2·3착)</div>${others}
       <div style="margin-top:8px;padding:6px 8px;background:rgba(56,211,159,.08);border-radius:6px">
-        <b style="color:#38d39f">🔍 개선점:</b> ${esc(f.improvement || '상위 3신호 말 전부 추천 포함')}</div>
+        <b style="color:#38d39f">🔍 개선점 · 다음 대응:</b> ${esc(f.improvement || '상위 3신호 말 전부 추천 포함')}</div>
     </div>`;
   }
 
@@ -4395,6 +4410,86 @@
     return rep ? flattenBets(rep) : [];
   }
 
+  // ══════════ [결과기록 UI 개선] 최근 7일 결과·복기 뷰 ══════════
+  //   History(로컬 결과기록)에서 최근 7일만 날짜별 그룹으로 표시 + 요약 카드 + 클릭 복기.
+  //   기존 섹션(대기목록·빠른입력·재현리포트)은 그대로 두고 최상단에 요약 뷰만 추가.
+  function _dateGroupLabel(dateStr) {
+    try {
+      const t = new Date(todayStr() + 'T00:00:00');
+      const d = new Date(dateStr + 'T00:00:00');
+      const diff = Math.round((t - d) / 86400000);
+      if (diff <= 0) return '오늘';
+      if (diff === 1) return '어제';
+      return `${diff}일 전`;
+    } catch (_) { return dateStr; }
+  }
+
+  function renderRecentResults() {
+    const host = document.getElementById('recentResultsList');
+    const sum = document.getElementById('recentSummary');
+    if (!host || !sum) return;
+    let all = [];
+    try { all = History.all(); } catch (_) { all = []; }
+    // 최근 7일(오늘 포함): date >= today-6
+    const today = new Date(todayStr() + 'T00:00:00');
+    const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - 6);
+    const recent = all.filter((r) => {
+      if (!r.date) return false;
+      const d = new Date(r.date + 'T00:00:00');
+      return !isNaN(d.getTime()) && d >= cutoff && d <= today;
+    });
+    // [4] 요약 카드
+    const n = recent.length;
+    const hits = recent.filter((r) => r.hit).length;
+    const rate = n ? Math.round(hits / n * 1000) / 10 : 0;
+    const net = recent.reduce((s, r) => s + ((r.payout || 0) - (r.stake || 0)), 0);
+    const netColor = net >= 0 ? '#38d39f' : '#f87171';
+    sum.innerHTML = `<div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card"><div class="num">${n}</div><div class="label">기록</div></div>
+      <div class="stat-card"><div class="num">${hits}</div><div class="label">적중</div></div>
+      <div class="stat-card"><div class="num">${rate}%</div><div class="label">적중률</div></div>
+      <div class="stat-card"><div class="num" style="color:${netColor};font-size:19px">${net >= 0 ? '+' : ''}${net.toLocaleString()}원</div><div class="label">손익</div></div>
+    </div>`;
+    // [3] 빈 화면
+    if (!n) {
+      host.innerHTML = `<div style="text-align:center;padding:22px 10px;color:#8a94a6">
+        <div style="font-size:15px;margin-bottom:4px">최근 분석한 경주가 없습니다</div>
+        <div class="hint">배당판에서 분석을 시작하세요. 경주가 끝나면 아래 [결과 입력 대기]에서 착순을 입력하면 여기에 쌓입니다.</div>
+      </div>`;
+      return;
+    }
+    // [1] 날짜별 그룹(최신순) · 오늘/어제/N일 전
+    const byDate = {};
+    recent.forEach((r) => { (byDate[r.date] = byDate[r.date] || []).push(r); });
+    const dates = Object.keys(byDate).sort().reverse();
+    host.innerHTML = dates.map((date) => {
+      const rows = byDate[date].slice().reverse().map((r) => {
+        const rk = r.raceTitle || '';
+        const net2 = (r.payout || 0) - (r.stake || 0);
+        const netStr = (r.stake || r.payout) ? ` <span style="color:${net2 >= 0 ? '#38d39f' : '#f87171'}">${net2 >= 0 ? '+' : ''}${net2.toLocaleString()}원</span>` : '';
+        const badge = r.hit ? '<span style="color:#38d39f;font-weight:700">✅ 적중</span>' : '<span style="color:#f87171;font-weight:700">❌ 미적중</span>';
+        const resStr = (r.result || []).length ? ` <span class="hint">${(r.result || []).slice(0, 3).join('-')}</span>` : '';
+        const detailId = 'rr-det-' + r.id;
+        return `<div class="rr-race" data-rk="${esc(rk)}" data-detail="${detailId}" style="cursor:pointer;padding:6px 9px;margin:3px 0;border:1px solid #2b3648;border-radius:7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-weight:600">${esc(rk)}</span>${resStr} ${badge}${netStr}
+          <span class="hint" style="margin-left:auto">▼ 복기</span>
+        </div><div id="${detailId}" style="margin:0 0 4px"></div>`;
+      }).join('');
+      return `<div style="margin-bottom:12px">
+        <div class="matrix-title" style="font-size:13px">${_dateGroupLabel(date)} <span class="hint" style="font-weight:400">${date} · ${byDate[date].length}경주</span></div>
+        ${rows}</div>`;
+    }).join('');
+    // 클릭 → 복기 토글(적중=왜 맞았는지 / 미적중=왜 놓쳤는지)
+    host.querySelectorAll('.rr-race').forEach((el) => {
+      el.addEventListener('click', () => {
+        const det = document.getElementById(el.dataset.detail);
+        if (!det) return;
+        if (det.innerHTML.trim()) { det.innerHTML = ''; return; }   // 다시 클릭 → 접기
+        showFailureReport(el.dataset.rk, '#' + el.dataset.detail);
+      });
+    });
+  }
+
   function renderResultForm() {
     const wrap = $('#resultForm');
     const titles = Object.keys(state.lastReports);
@@ -4610,6 +4705,7 @@
     });
     toast(`저장 ${saved}건 · 분석매칭 ${matched} · 적중 ${hits} · 당일손익 ${(po - st).toLocaleString()}원`);
     renderStats();
+    try { renderRecentResults(); } catch (_) { /* */ }   // [결과기록 UI] 최근 7일 뷰 갱신
   }
 
   function saveResult(btn) {
@@ -4634,6 +4730,7 @@
     refreshRaceChipStatus();                   // [기능3] 진행상황 칩 갱신 (이 경주 → 🏁)
     toast(`저장됨 — ${hit ? '✅ 적중!' : '❌ 미적중'} (투자 ${stake.toLocaleString()} / 수익 ${payout.toLocaleString()})`);
     renderStats();
+    try { renderRecentResults(); } catch (_) { /* */ }   // [결과기록 UI] 최근 7일 뷰 갱신
   }
 
   // ---------- 통계 대시보드 (Phase 5-2) ----------
@@ -5111,6 +5208,7 @@
     const typing = focused && focused.closest && focused.closest('.res-block');
     try { loadPendingResults(); } catch (_) { /* */ }
     try { renderStats(); } catch (_) { /* */ }
+    try { renderRecentResults(); } catch (_) { /* */ }   // [결과기록 UI] 최근 7일 뷰 갱신
     try { loadReportList(); } catch (_) { /* */ }
     try { loadHighlights(); } catch (_) { /* */ }
     if (!typing) { try { renderResultForm(); } catch (_) { /* */ } }
