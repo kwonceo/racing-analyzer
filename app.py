@@ -4687,8 +4687,17 @@ def _data_git_backup(label, delay=5.0):
 
 # [데이터 자동백업 완성] 결과 입력이 없어도 주기적으로 안전 백업.
 #   기존 백업은 결과 입력 시에만 트리거 → 장시간 분석만 하고 결과 미입력이면 분석로그가 백업 안 됨.
-#   주기(기본 6시간) 데몬 스레드가 _run_data_git_backup 을 호출(변경 없으면 no-op).
-_PERIODIC_BACKUP_INTERVAL = 6 * 3600
+#   주기 데몬 스레드가 _run_data_git_backup 을 호출(변경 없으면 no-op).
+#   [설정화] .env 의 BACKUP_INTERVAL_HOURS 로 조정(기본 6시간·최소 0.5시간). 잘못된 값은 기본으로 폴백.
+def _backup_interval_seconds():
+    try:
+        hours = float(os.environ.get("BACKUP_INTERVAL_HOURS", "") or 6)
+    except (TypeError, ValueError):
+        hours = 6.0
+    return int(max(0.5, hours) * 3600)   # 최소 0.5시간(1800초) 클램프 — 폭주 방지
+
+
+_PERIODIC_BACKUP_INTERVAL = _backup_interval_seconds()
 _periodic_backup_started = False
 
 
@@ -6312,15 +6321,17 @@ def _failure_report(rk):
     recommended = ["+".join(map(str, b.get("combo") or [])) for b in rec_bets[:6]]
 
     def _in3(combo):
-        return all(int(x) in top3 for x in combo)
+        return combo and all(int(x) in top3 for x in combo)
     was_hit = any(_in3(b.get("combo") or []) for b in rec_bets)
+    # [복기 UI 통합] 적중한 추천 조합(왜 맞았는지 표시용)
+    hit_combos = ["+".join(map(str, b.get("combo") or [])) for b in rec_bets if _in3(b.get("combo") or [])]
 
     # [저장된 분류 우선, 없으면 즉석 재분류]
     fail = ((doc.get("review") or {}).get("failure")) if not was_hit else None
     if not was_hit and not fail:
         fail = _classify_failure(rk, an, top3, doc)
 
-    # [3번] 1·2·3착 정답말 배당 역추적(각 말 타임라인 + 신호 라벨)
+    # [3번] 1·2·3착 정답말 배당 역추적(각 말 타임라인 + 신호 라벨) — 적중/미적중 공통
     timelines = {}
     for h in top3:
         tl = _horse_repr_timeline(doc, h)
@@ -6328,10 +6339,45 @@ def _failure_report(rk):
                               "after": p["after"], "src": p["src"],
                               "signal": _timeline_signal_label(p["pct"])} for p in tl]
 
-    # [2번] 텍스트 리포트 생성
-    text = _failure_report_text(rk, top3, recommended, was_hit, fail, timelines)
+    # [복기 UI 통합] 적중=왜 맞았는지 / 미적중=왜 놓쳤는지, 한 리포트로.
+    if was_hit:
+        text = _success_report_text(rk, top3, hit_combos, timelines)
+    else:
+        text = _failure_report_text(rk, top3, recommended, was_hit, fail, timelines)
     return {"ok": True, "raceKey": rk, "top3": top3, "recommended": recommended,
-            "was_hit": was_hit, "failure": fail, "timelines": timelines, "text": text}
+            "was_hit": was_hit, "hit_combos": hit_combos, "failure": fail,
+            "timelines": timelines, "text": text}
+
+
+def _success_report_text(rk, top3, hit_combos, timelines):
+    """[복기 UI 통합] 적중 경주 '왜 맞았는지' 텍스트 리포트(정답말 신호 근거 포함)."""
+    lines = [f"✅ 적중 복기 - {rk}", ""]
+    lines.append(f"실제 정답: {'-'.join(map(str, top3))}")
+    lines.append(f"적중 추천: {' / '.join(hit_combos) if hit_combos else '(추천 조합 적중)'}")
+    lines.append("")
+    lines.append("💡 왜 맞았나 — 정답말 신호 근거:")
+    rank_label = {0: "1착", 1: "2착", 2: "3착"}
+    for i, h in enumerate(top3):
+        tl = timelines.get(str(h)) or []
+        # 가장 강한 신호(급락 큰 순)를 요약
+        sig = ""
+        strong = [p for p in tl if p.get("pct") is not None and p["pct"] <= -8]
+        if strong:
+            best = min(strong, key=lambda p: p["pct"])
+            sig = f" — 최대 {best['pct']}% 급락({best.get('signal', '')})"
+        elif tl:
+            sig = " — 뚜렷한 급락 없음(전적/인기 기반)"
+        lines.append(f"  [{rank_label.get(i, str(i + 1) + '착')} {h}번]{sig}")
+        for p in tl:
+            mb = p.get("mb")
+            tstr = (f"T-{mb}분" if isinstance(mb, (int, float)) and mb >= 0
+                    else (f"마감후{abs(mb)}분" if isinstance(mb, (int, float)) else (p.get("src") or "")))
+            pv = p.get("pct")
+            pctstr = f" ({'+' if isinstance(pv, (int, float)) and pv > 0 else ''}{pv}%)" if pv is not None else ""
+            lines.append(f"    {tstr}: {p.get('odds')}배{pctstr} {p.get('signal', '')}".rstrip())
+    lines.append("")
+    lines.append("🔁 재현 포인트: 이 신호 패턴을 다음 경주에서도 우선 반영")
+    return "\n".join(lines)
 
 
 def _failure_report_text(rk, top3, recommended, was_hit, fail, timelines):

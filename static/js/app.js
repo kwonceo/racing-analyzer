@@ -848,8 +848,8 @@
     const rec = d.record || {};
     const hit = rec.was_hit;
     if (stat) stat.innerHTML = hit ? '<span style="color:#38d39f;font-weight:700">✅ 적중</span>' : '<span style="color:#f87171;font-weight:700">❌ 미적중</span>';
-    // 미적중 → 복기 리포트 자동 표시
-    if (!hit) showFailureReport(rk);
+    // [복기 통합] 적중/미적중 모두 복기 리포트 자동 표시(적중=왜 맞았는지 / 미적중=왜 놓쳤는지)
+    showFailureReport(rk);
     try { loadLearningStats(); } catch (_) { /* */ }
   }
 
@@ -863,18 +863,19 @@
     if (msg) { msg.style.color = '#38d39f'; msg.textContent = `${n}개 경주 저장 완료`; }
   }
 
-  /** [3번-B] 미적중 경주 복기 리포트를 서버에서 받아 표시(순서대로 빠른입력 하단 공용). */
+  /** [복기 UI 통합] 적중/미적중 경주 복기 리포트를 서버에서 받아 표시(순서대로 빠른입력 하단 공용).
+   *   ✅ 적중 → "왜 맞았는지" 녹색 카드 · ❌ 미적중 → "왜 놓쳤는지" 빨강 카드 (한 곳에서 학습). */
   async function showFailureReport(rk, targetSel) {
     const out = $(targetSel || '#quickReviewOut'); if (!out) return;
     out.insertAdjacentHTML('afterbegin', `<div id="fr-loading" class="hint">⏳ ${esc(rk)} 복기 생성 중…</div>`);
     let d; try { d = await (await fetch(`/api/failure/report?raceKey=${encodeURIComponent(rk)}`)).json(); }
     catch (e) { const l = $('#fr-loading'); if (l) l.remove(); return; }
     const l = $('#fr-loading'); if (l) l.remove();
-    if (!d.ok || d.was_hit) return;
+    if (!d.ok) return;   // [복기 통합] 적중(was_hit)도 이제 표시 — 조기 종료 제거
     out.insertAdjacentHTML('afterbegin', renderFailureReport(d));
   }
 
-  /** [2·3번] 복기 리포트 카드(실패 유형 + 정답말 역추적 타임라인 + 개선점). */
+  /** [복기 UI 통합] 복기 리포트 카드 — 적중=왜 맞았는지(녹색) / 미적중=왜 놓쳤는지(빨강). */
   function renderFailureReport(d) {
     const f = d.failure || {};
     const tl = (d.timelines || {});
@@ -885,6 +886,18 @@
       const pct = p.pct != null ? ` <b style="color:${p.pct <= -8 ? '#f87171' : (p.pct >= 8 ? '#8a94a6' : '#cdd6e3')}">${p.pct > 0 ? '+' : ''}${p.pct}%</b>` : '';
       return `<div style="margin:1px 0;font-size:12px">${tstr}: ${p.odds}배${pct} <span style="color:${sigColor(p.signal)}">${esc(p.signal || '')}</span></div>`;
     }).join('') || '<div class="hint" style="font-size:12px">타임라인 없음</div>';
+    // [복기 통합] 적중 경주 → "왜 맞았는지" 녹색 카드(정답말 신호 근거)
+    if (d.was_hit) {
+      const winners = (d.top3 || []).map((h, i) =>
+        `<div style="margin-top:4px"><span class="chip" style="border-color:#38d39f;color:#38d39f">${h}번(${i === 0 ? '1착' : i === 1 ? '2착' : '3착'})</span></div>${tlRows(h)}`).join('');
+      return `<div style="border:1px solid #38d39f;border-radius:8px;padding:10px;margin-bottom:8px;background:rgba(56,211,159,.06)">
+        <div class="matrix-title" style="color:#38d39f">✅ 적중 복기 — ${esc(d.raceKey)}</div>
+        <div>실제 정답: <b>${(d.top3 || []).join('-')}</b> · 적중 추천: <b style="color:#38d39f">${(d.hit_combos || []).join(' / ') || '(추천 조합 적중)'}</b></div>
+        <div class="matrix-title" style="font-size:12px;margin-top:8px">💡 왜 맞았나 — 정답말 신호 근거(1·2·3착)</div>${winners}
+        <div style="margin-top:8px;padding:6px 8px;background:rgba(56,211,159,.08);border-radius:6px">
+          <b style="color:#38d39f">🔁 재현 포인트:</b> 이 신호 패턴을 다음 경주에서도 우선 반영</div>
+      </div>`;
+    }
     const focusBlock = (f.focus != null)
       ? `<div class="matrix-title" style="font-size:12px;margin-top:6px">❓ 왜 ${f.focus}번을 놓쳤나</div>${tlRows(f.focus)}
          <div style="margin-top:3px;font-size:12px">→ ${esc(f.reason || '')}</div>` : '';
@@ -5567,8 +5580,8 @@
     el.innerHTML = renderJapanReview(d, rk, file);
     const btn = document.querySelector('#jpResSave');
     if (btn) btn.addEventListener('click', () => saveJapanResult(rk, file, jpRecSummary(d.final_recommendation)));
-    // [3번-B] 이미 결과가 있고 미적중이면 복기 리포트 자동 표시(재조회 시)
-    try { const hit = d.hit || {}; if (d.result && !(hit.quinella_hit || hit.trifecta_hit)) showFailureReport(rk, '#jpFailReport'); } catch (_) { /* */ }
+    // [복기 통합] 결과가 있으면 적중/미적중 모두 복기 리포트 자동 표시(재조회 시)
+    try { if (d.result) showFailureReport(rk, '#jpFailReport'); } catch (_) { /* */ }
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
@@ -5709,8 +5722,8 @@
       hit_basis: rec.hit_basis,   // [1번] 적중 근거 요약
     };
     const rc = document.querySelector('#jpReport'); if (rc) rc.innerHTML = renderJapanReviewReport(rep, rk);
-    // [3번-B] 미적중 시 복기 리포트(정답말 역추적) 자동 표시
-    try { if (!rec.was_hit) showFailureReport(rk, '#jpFailReport'); } catch (_) { /* */ }
+    // [복기 통합] 적중/미적중 모두 복기 리포트(정답말 역추적) 자동 표시
+    try { showFailureReport(rk, '#jpFailReport'); } catch (_) { /* */ }
     // [4번] 통계 자동 업데이트(적중률·이상감지 패턴·손익)
     try { loadLearningStats(); } catch (_) { /* */ }
     try { if (typeof loadHistoryList === 'function') loadHistoryList(); } catch (_) { /* */ }
