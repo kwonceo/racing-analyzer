@@ -2865,6 +2865,45 @@ def _triple_analyze(rk, rec):
                     trio_map.get(tuple(sorted([h1, h2, anomaly_horse]))))
             _addbet("삼복승", "삼복승 보험2", [h1, h3, anomaly_horse], 4,
                     trio_map.get(tuple(sorted([h1, h3, anomaly_horse]))))
+
+    # [삼복승 무조건 편성] 배당판(실배당) 유무·유력마 3두 미만과 무관하게 삼복승을 항상 추천에 포함.
+    #   유력마가 3두 미만이면 선호순 풀(ranked→단승순→복승조합 등장마)로 3두를 채워 메인 생성.
+    #   [역배열 대비] 쌍승역전 challenger(실질 상위 지목 아웃사이더)를 낀 조합을 추가(이변 대비).
+    #   배분은 아래 삼복승 ≤18% 캡(추정 미수집 시)으로 소액 유지 → 복승 중심 그대로.
+    _pool = []
+    for _src in (ranked, single_rank):
+        for _h in _src:
+            if int(_h) not in _pool:
+                _pool.append(int(_h))
+    for _k in curQ:                       # 복승 조합에 등장하는 말도 후보 풀에 포함
+        for _h in _k:
+            if int(_h) not in _pool:
+                _pool.append(int(_h))
+    if len(_pool) >= 3:
+        p1, p2, p3 = _pool[0], _pool[1], _pool[2]
+        _addbet("삼복승", "삼복승 메인", [p1, p2, p3], 29, trio_map.get(tuple(sorted([p1, p2, p3]))))
+        if anomaly_horse is not None and anomaly_horse not in (p1, p2, p3):
+            _addbet("삼복승", "삼복승 보험1", [p1, p2, anomaly_horse], 4,
+                    trio_map.get(tuple(sorted([p1, p2, anomaly_horse]))))
+            _addbet("삼복승", "삼복승 보험2", [p1, p3, anomaly_horse], 4,
+                    trio_map.get(tuple(sorted([p1, p3, anomaly_horse]))))
+        # 역배열 challenger(상위 2명) 중 메인 미포함(아웃사이더)만 낀 조합 추가(마감 전만)
+        if not after_close:
+            _chs = []
+            for _r in (wx_reversals or [])[:3]:
+                _c = _r.get("challenger")
+                if _c is not None and int(_c) not in _chs:
+                    _chs.append(int(_c))
+            _rev_added = 0
+            for _c in _chs:
+                if _c in (p1, p2, p3) or _rev_added >= 3:
+                    continue          # 메인에 이미 포함이면 스킵(중복)
+                _addbet("삼복승", "삼복승 역배열", sorted([p1, p2, _c]), 4,
+                        trio_map.get(tuple(sorted([p1, p2, _c]))))
+                _addbet("삼복승", "삼복승 역배열", sorted([p1, p3, _c]), 4,
+                        trio_map.get(tuple(sorted([p1, p3, _c]))))
+                _rev_added += 1
+
     # [3번] 삼복승 실배당 미수집 시: 구성 복승 3쌍의 기하평균×2 로 추정(라벨=추정)
     def _trio_est(cc):
         ps = [_q(cc[0], cc[1]), _q(cc[0], cc[2]), _q(cc[1], cc[2])]

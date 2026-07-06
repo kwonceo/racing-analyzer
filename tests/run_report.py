@@ -160,6 +160,30 @@ ok(first["recommend"] == "삼복승 5+7+9", "삼복승 우선 추천 요약")
 ok(first["hadAnomaly"] is True, "🔴 이상감지 플래그")
 ok(mr["missing"][1]["recommend"] == "복승 3+7" and mr["missing"][1]["hadAnomaly"] is False, "복승 요약 + 이상감지 없음")
 
+print("[6] 삼복승 무조건 편성 + 역배열 challenger 커버")
+# 유력 3,7,5 / 11번은 단승 하위(안 낌)지만 쌍승 11→상위 저배당 = 역전 challenger(아웃사이더)
+rec_t = {"quinella": [{"combo": [3, 7], "odds": 3.0}, {"combo": [3, 5], "odds": 4.0}, {"combo": [5, 7], "odds": 6.0},
+                      {"combo": [3, 11], "odds": 40}, {"combo": [7, 11], "odds": 45}],
+         "exacta": [{"combo": [11, 3], "odds": 8.0}, {"combo": [3, 11], "odds": 60}, {"combo": [11, 7], "odds": 9.0},
+                    {"combo": [7, 11], "odds": 70}, {"combo": [3, 7], "odds": 6}, {"combo": [7, 3], "odds": 7},
+                    {"combo": [3, 5], "odds": 8}, {"combo": [5, 3], "odds": 9}],
+         "win": {"3": 2.0, "7": 3.0, "5": 4.0, "11": 30.0},
+         "history": [{"t": 1, "quinella": {"3+7": 4, "3+5": 5, "5+7": 7}, "win": {"3": 3, "7": 4, "5": 5, "11": 32},
+                      "exacta": {"11+3": 10, "3+11": 60, "11+7": 11}},
+                     {"t": 2, "quinella": {"3+7": 3, "3+5": 4, "5+7": 6}, "win": {"3": 2, "7": 3, "5": 4, "11": 30},
+                      "exacta": {"11+3": 8, "3+11": 60, "11+7": 9}}]}
+an_t = app._triple_analyze("2026-07-06 삼복검증 3경주", rec_t)
+tri_bets = [b for b in an_t.get("betRecommend", []) if b.get("kind") == "삼복승"]
+ok(any(b.get("label") == "삼복승 메인" for b in tri_bets), "삼복승 메인 항상 생성(실배당 미수집)")
+_ch = [r.get("challenger") for r in (an_t.get("signalQuality", {}).get("winExactaReversals") or [])]
+ok(11 in _ch, "아웃사이더 역전 challenger(11) 감지")
+ok(any(11 in (b.get("combo") or []) for b in tri_bets), "역전 challenger가 삼복승 조합에 편성됨")
+_ta = sum(b.get("alloc", 0) for b in tri_bets)
+ok(_ta <= 18.5, f"삼복승 총 배분 ≤18% 소액 유지(실제 {round(_ta,1)}%)")
+# 삼복승 메인은 구성 복승 3쌍이 모두 있어 추정배당 채워짐(아웃사이더 조합은 미수집 쌍 있으면 None 허용)
+_main_t = next((b for b in tri_bets if b.get("label") == "삼복승 메인"), None)
+ok(_main_t and (_main_t.get("expOdds") is not None or _main_t.get("expOddsEst") is not None), "삼복승 메인 추정배당 채움")
+
 print("=" * 56)
 print(f"결과: 통과 {PASS} / 실패 {FAIL}")
 print("=" * 56)
