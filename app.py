@@ -7030,6 +7030,57 @@ def auto_status():
     return jsonify(_AUTO_STATUS)
 
 
+# [스펙2·3] 결과 자동수집(발주 후 5/7/10분) 성공/실패 이벤트 브리지.
+#   확장 background 가 결과 수집 성공(done)/최종 실패(manual)을 POST 하고,
+#   분석기(웹)가 GET 으로 폴링해 ①실패 → 상단 배너("자동수집 실패 → 수동입력")
+#   ②성공(seq 증가) → 결과기록 탭 자동 갱신(새로고침 불필요)에 사용한다.
+_RESULT_AUTO_EVENTS = {}    # raceKey -> {state, top3, hit, finalOdds, serverAt, seq, ...}
+_RESULT_AUTO_SEQ = 0        # 이벤트 순번(분석기가 '새 성공' 감지에 사용)
+_RESULT_AUTO_LAST_DONE = None   # {raceKey, seq, t, top3, hit}
+
+
+@app.route("/api/results/auto-status", methods=["GET", "POST"])
+def results_auto_status():
+    global _RESULT_AUTO_SEQ, _RESULT_AUTO_LAST_DONE
+    if request.method == "POST":
+        s = request.json or {}
+        rk = (s.get("raceKey") or "").strip()
+        state = s.get("state") or ""
+        _RESULT_AUTO_SEQ += 1
+        s["serverAt"] = time.time()
+        s["seq"] = _RESULT_AUTO_SEQ
+        # raceKey 없으면 순번키로 저장(실패이벤트도 유실 없이 남김)
+        _RESULT_AUTO_EVENTS[rk or f"__seq{_RESULT_AUTO_SEQ}"] = s
+        if state == "done":
+            _RESULT_AUTO_LAST_DONE = {"raceKey": rk, "seq": _RESULT_AUTO_SEQ,
+                                      "t": s["serverAt"], "top3": s.get("top3"), "hit": s.get("hit")}
+        # 오래된 이벤트 정리(최근 40개만 유지)
+        if len(_RESULT_AUTO_EVENTS) > 40:
+            for k in sorted(_RESULT_AUTO_EVENTS, key=lambda k: _RESULT_AUTO_EVENTS[k].get("serverAt", 0))[:-40]:
+                _RESULT_AUTO_EVENTS.pop(k, None)
+        return jsonify({"ok": True, "seq": _RESULT_AUTO_SEQ})
+    # GET: 최근 1시간 이내 '수동입력 필요(manual)' 목록 + 마지막 성공 + 현재 seq.
+    #   이미 결과가 저장된(수동 입력 완료) 경주는 실패 목록에서 자동 제외.
+    now = time.time()
+    saved = set()
+    try:
+        saved = set(_results_load().keys())
+    except Exception:
+        saved = set()
+    failures = []
+    for k, v in _RESULT_AUTO_EVENTS.items():
+        if v.get("state") != "manual":
+            continue
+        if (now - v.get("serverAt", 0)) >= 3600:
+            continue
+        rk = v.get("raceKey") or ""
+        if rk and rk in saved:      # 이미 입력됨 → 배너에서 제외
+            continue
+        failures.append({"raceKey": rk, "t": v.get("serverAt"), "attempt": v.get("attempt")})
+    failures.sort(key=lambda x: x.get("t") or 0, reverse=True)
+    return jsonify({"seq": _RESULT_AUTO_SEQ, "failures": failures, "lastDone": _RESULT_AUTO_LAST_DONE})
+
+
 # ══════════════ [분석 로그] 목록/조회/메모/백필/백업 API ══════════════
 @app.route("/api/analysis-log/list", methods=["GET", "POST"])
 def analysis_log_list():

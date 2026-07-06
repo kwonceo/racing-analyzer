@@ -11,6 +11,17 @@
 const SERVER = 'http://127.0.0.1:8011';
 const SNAPSHOT_URL = `${SERVER}/api/odds/snapshot`;
 const RESULTS_URL = `${SERVER}/api/results/auto`;
+// [스펙2·3] 결과 자동수집 성공/실패 상태를 분석기(웹)로 흘려보내는 브리지.
+//   웹페이지는 chrome.storage 를 못 읽으므로, 서버에 상태를 남겨 분석기가 폴링한다.
+const RESULT_AUTO_STATUS_URL = `${SERVER}/api/results/auto-status`;
+function _postResultAutoStatus(obj) {
+  try {
+    fetch(RESULT_AUTO_STATUS_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ t: Date.now() }, obj)),
+    });
+  } catch (_) { /* 서버 꺼져 있어도 무시(로컬 알림은 별개로 동작) */ }
+}
 const TRIPLE_URL = `${SERVER}/api/odds/triple/ingest`;
 const ANALYZE_URL = `${SERVER}/api/odds/triple/analyze`;
 const JAPAN_URL = `${SERVER}/api/extract/japan`;
@@ -614,20 +625,33 @@ async function doResultFetch(attempt) {
     //   추천 7+4 ✅ 적중!
     const t3 = top3.slice(0, 3).map((n, i) => `${i + 1}착 ${n}번`).join(' / ');
     const q = top3.slice(0, 2);
+    const t3combo = top3.slice(0, 3);
     const qCombo = (fo.quinella && fo.quinella.combo && fo.quinella.combo.length) ? fo.quinella.combo : q;
     const qOddsLine = (fo.quinella && fo.quinella.odds) ? `\n복승 ${qCombo.join('+')}: ${fo.quinella.odds}배` : '';
+    // [스펙1] 삼복승 확정배당도 조건부 표시("삼복승 7+4+9: 88.5배 ✅ 적중!")
+    const tCombo = (fo.trio && fo.trio.combo && fo.trio.combo.length) ? fo.trio.combo : t3combo;
+    const tOddsLine = (fo.trio && fo.trio.odds)
+      ? `\n삼복승 ${tCombo.join('+')}: ${fo.trio.odds}배${hit.trifecta ? ' ✅ 적중!' : ''}` : '';
     const recLine = hit.quinella ? `\n추천 ${q.join('+')} ✅ 적중!`
-      : hit.trifecta ? `\n추천 ${top3.slice(0, 3).join('+')} ✅ 적중!`
+      : hit.trifecta ? `\n추천 ${t3combo.join('+')} ✅ 적중!`
       : win ? '\n✅ 적중!' : '\n❌ 미적중';
-    _notify('result', `✅ ${res.raceKey || '경주'} 결과 수집`, `${t3}${qOddsLine}${recLine}`, false);
+    _notify('result', `✅ ${res.raceKey || '경주'} 결과 수집`, `${t3}${qOddsLine}${tOddsLine}${recLine}`, false);
     setBadge(true, '✓');
+    // [스펙3] 성공 이벤트를 서버로도 전송 → 분석기 결과기록 탭 자동 갱신(새로고침 불필요)
+    _postResultAutoStatus({ state: 'done', raceKey: res.raceKey || '', top3, hit, finalOdds: fo });
   } else {
     const last = attempt >= 2;
     const nextMin = attempt === 0 ? 7 : 10;   // 다음 재시도 시각(발주+7 / 발주+10분)
     const nextAt = (!last && cfg.timerDeadline) ? cfg.timerDeadline + nextMin * 60000 : null;
-    chrome.storage.local.set({ resultAutoStatus: { state: last ? 'manual' : 'retry', attempt: attempt + 2, nextAt, raceKey: '', t: Date.now() } });
+    // 실패 시엔 res 에 raceKey 가 없으므로 현재 설정된 raceKey 를 가져와 표시/전송에 사용
+    const { raceKey: curRaceKey } = await chrome.storage.local.get({ raceKey: '' });
+    chrome.storage.local.set({ resultAutoStatus: { state: last ? 'manual' : 'retry', attempt: attempt + 2, nextAt, raceKey: curRaceKey || '', t: Date.now() } });
     // [스펙4·5] T+10분까지 실패 → 수동 입력 안내(해당 경주는 결과 미입력으로 남아 결과기록 탭 '미입력' 목록에 표시됨)
-    if (last) _notify('resultFail', '❌ 결과 수집 실패', '수동 입력하세요. (결과기록 탭에서 착순 입력)', false);
+    if (last) {
+      _notify('resultFail', '❌ 결과 수집 실패', `${curRaceKey ? curRaceKey + ' · ' : ''}수동 입력하세요. (결과기록 탭에서 착순 입력)`, false);
+      // [스펙2] 실패 상태를 서버로 전송 → 분석기 상단에 "⚠️ N경주 자동수집 실패 → 수동입력" 배너 표시
+      _postResultAutoStatus({ state: 'manual', raceKey: curRaceKey || '', attempt: attempt + 2 });
+    }
   }
 }
 

@@ -5074,6 +5074,61 @@
     setInterval(tick, 2000);
   }
 
+  // [스펙2·3] 결과 자동수집 이벤트 감시 — 서버 브리지(/api/results/auto-status) 폴링.
+  //   ① 실패(manual) → 상단 배너 "⚠️ N경주 자동수집 실패 → 수동입력"(클릭 시 결과기록 탭)
+  //   ② 성공(lastDone.seq 증가) → 결과기록 탭 자동 갱신(새로고침 없이 반영) + 토스트
+  let _lastResultDoneSeq = -1, _resultWatchInit = false;
+  function _refreshResultTab() {
+    // 사용자가 결과 입력칸에 타이핑 중이면 폼 재렌더는 건너뜀(입력 유실 방지)
+    const focused = document.activeElement;
+    const typing = focused && focused.closest && focused.closest('.res-block');
+    try { loadPendingResults(); } catch (_) { /* */ }
+    try { renderStats(); } catch (_) { /* */ }
+    try { loadReportList(); } catch (_) { /* */ }
+    try { loadHighlights(); } catch (_) { /* */ }
+    if (!typing) { try { renderResultForm(); } catch (_) { /* */ } }
+  }
+  function initResultAutoWatch() {
+    if (_resultWatchInit) return; _resultWatchInit = true;
+    const bar = document.createElement('div');
+    bar.id = 'resultAutoFailBar';
+    bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99999;padding:7px 12px;'
+      + 'font:700 13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
+      + 'color:#1a1a1a;background:#ffb020;border-bottom:1px solid #c67f00;display:none;'
+      + 'text-align:center;cursor:pointer;letter-spacing:.2px';
+    bar.title = '클릭하면 결과기록 탭으로 이동해 수동 입력할 수 있습니다.';
+    bar.addEventListener('click', () => {
+      const rb = [...document.querySelectorAll('.tab-btn, [data-tab]')].find((b) => b.dataset && b.dataset.tab === 'result');
+      if (rb) rb.click();
+    });
+    document.body.appendChild(bar);
+    async function tick() {
+      let s = null;
+      try { s = await (await fetch('/api/results/auto-status')).json(); } catch (_) { return; }
+      if (!s) return;
+      // ① 실패 배너(수동입력 필요)
+      const fails = s.failures || [];
+      if (fails.length) {
+        const names = fails.map((f) => f.raceKey || '경주').slice(0, 4).join(', ');
+        bar.textContent = `⚠️ ${fails.length}경주 자동수집 실패 → 수동입력 필요: ${names}${fails.length > 4 ? ' 외' : ''} (클릭)`;
+        bar.style.display = 'block';
+      } else {
+        bar.style.display = 'none';
+      }
+      // ② 새 성공(lastDone.seq 증가) → 결과기록 탭 자동 갱신
+      const doneSeq = (s.lastDone && s.lastDone.seq) || 0;
+      if (_lastResultDoneSeq < 0) { _lastResultDoneSeq = doneSeq; return; }  // 첫 폴링은 기준만 설정
+      if (doneSeq > _lastResultDoneSeq) {
+        _lastResultDoneSeq = doneSeq;
+        const rk = (s.lastDone && s.lastDone.raceKey) || '경주';
+        _refreshResultTab();
+        try { toast(`✅ ${rk} 결과 자동수집 반영됨`); } catch (_) { /* */ }
+      }
+    }
+    tick();
+    setInterval(tick, 5000);
+  }
+
   // ══════════ [보완] 이상감지 누적 피드 + 마감 전 단계 알림 (T-1:30 / T-1:00 / T-30초) ══════════
   //  · 이상감지: 서버 스냅샷(영구)에서 누적·중복제거 → 새 수집/마감 후에도 유지(기존 감지 삭제 안 함)
   //  · 단계 알림: /api/auto/status 의 deadline 으로 남은시간 계산 → 소리 + 화면 강조 + 누적이상 + 베팅요약
@@ -5658,6 +5713,7 @@
   async function boot() {
     initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initKoreaHistory();
     initAutoStatusBar();   // [v2.0.0] 자동수집 상태바
+    initResultAutoWatch(); // [스펙2·3] 결과 자동수집 실패 배너 + 성공 시 결과탭 자동갱신
     initClosingWatch();    // [보완] 이상감지 누적 피드 + 마감 전 단계 알림
     initRaceRefresh();     // [경주 자동 업데이트] 상단 새로고침 바 + 30초 자동 감지
     initPopout();          // [별도 창] 분석기 팝업 창 열기 + 위치 기억
