@@ -148,6 +148,9 @@ node -e "new Function(require('fs').readFileSync('static/js/app.js','utf8'))"  #
 # 테스트
 node tests/run_stats.js
 python tests/run_flow.py
+python tests/run_formula.py          # 유력마/제거마 공식 정합성
+python tests/run_reversal.py         # 쌍승 역전 다중순위·flip 다중조합
+python tests/run_prerace.py          # 한국 PDF 전경주 사전분석
 # 확장 ZIP 재빌드 (확장 코드 변경 시에만, manifest 버전 bump 후)
 cd chrome-extension && python -c "import zipfile,os; zf=zipfile.ZipFile('../chrome-extension.zip','w',zipfile.ZIP_DEFLATED); [zf.write(os.path.join(r,f),os.path.relpath(os.path.join(r,f),'.')) for r,_,fs in os.walk('.') for f in fs]; zf.close()"
 ```
