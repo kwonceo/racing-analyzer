@@ -4410,9 +4410,13 @@
     return rep ? flattenBets(rep) : [];
   }
 
-  // ══════════ [결과기록 UI 개선] 최근 7일 결과·복기 뷰 ══════════
-  //   History(로컬 결과기록)에서 최근 7일만 날짜별 그룹으로 표시 + 요약 카드 + 클릭 복기.
+  // ══════════ [결과기록 UI 개선] 최근 결과·복기 뷰 (기간 선택 + 경마장 필터) ══════════
+  //   History(로컬 결과기록)에서 선택 기간만 날짜별 그룹으로 표시 + 요약 카드 + 클릭 복기.
   //   기존 섹션(대기목록·빠른입력·재현리포트)은 그대로 두고 최상단에 요약 뷰만 추가.
+  let _recentPeriod = 7;        // [보완#1] 기간(일). 0=전체. localStorage 유지
+  let _recentTrack = '';        // [보완#3] 경마장 필터('' = 전체)
+  try { const p = parseInt(localStorage.getItem('bmed_recent_period'), 10); if (!isNaN(p)) _recentPeriod = p; } catch (_) { /* */ }
+
   function _dateGroupLabel(dateStr) {
     try {
       const t = new Date(todayStr() + 'T00:00:00');
@@ -4423,6 +4427,13 @@
       return `${diff}일 전`;
     } catch (_) { return dateStr; }
   }
+  // 경주명에서 경마장명 추출(첫 토큰) — "모리오카 3경주"→"모리오카", "일본경마"→"일본경마"
+  function _trackOf(title) {
+    const t = String(title || '').trim();
+    if (!t) return '기타';
+    const m = t.split(/\s+/)[0];
+    return m.replace(/\d.*$/, '') || m || '기타';
+  }
 
   function renderRecentResults() {
     const host = document.getElementById('recentResultsList');
@@ -4430,30 +4441,58 @@
     if (!host || !sum) return;
     let all = [];
     try { all = History.all(); } catch (_) { all = []; }
-    // 최근 7일(오늘 포함): date >= today-6
-    const today = new Date(todayStr() + 'T00:00:00');
-    const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - 6);
-    const recent = all.filter((r) => {
-      if (!r.date) return false;
-      const d = new Date(r.date + 'T00:00:00');
-      return !isNaN(d.getTime()) && d >= cutoff && d <= today;
-    });
-    // [4] 요약 카드
+    // [보완#1] 기간 필터(0=전체)
+    let inPeriod = all.filter((r) => !!r.date);
+    if (_recentPeriod > 0) {
+      const today = new Date(todayStr() + 'T00:00:00');
+      const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - (_recentPeriod - 1));
+      inPeriod = inPeriod.filter((r) => {
+        const d = new Date(r.date + 'T00:00:00');
+        return !isNaN(d.getTime()) && d >= cutoff && d <= today;
+      });
+    }
+    // [보완#3] 경마장 목록(기간 내) → 필터 칩
+    const trackCounts = {};
+    inPeriod.forEach((r) => { const tk = _trackOf(r.raceTitle); trackCounts[tk] = (trackCounts[tk] || 0) + 1; });
+    const tracks = Object.keys(trackCounts).sort();
+    if (_recentTrack && !trackCounts[_recentTrack]) _recentTrack = '';   // 사라진 필터 초기화
+    const recent = _recentTrack ? inPeriod.filter((r) => _trackOf(r.raceTitle) === _recentTrack) : inPeriod;
+
+    // 컨트롤 바(기간 + 경마장 필터) + 요약 카드
+    const periodBtn = (val, label) => `<button class="btn btn-small rr-period" data-p="${val}" style="${_recentPeriod === val ? 'background:#4ea1ff;color:#0b1220' : ''}">${label}</button>`;
+    const trackChip = (name, label) => `<span class="chip rr-track" data-t="${esc(name)}" style="cursor:pointer;${(_recentTrack === name) ? 'border-color:#4ea1ff;color:#4ea1ff;font-weight:700' : ''}">${esc(label)}</span>`;
+    const trackBar = tracks.length > 1
+      ? `<div style="margin:8px 0 2px;display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+          <span class="hint">경마장:</span>${trackChip('', '전체')}${tracks.map((tk) => trackChip(tk, `${tk}(${trackCounts[tk]})`)).join('')}</div>`
+      : '';
     const n = recent.length;
     const hits = recent.filter((r) => r.hit).length;
     const rate = n ? Math.round(hits / n * 1000) / 10 : 0;
     const net = recent.reduce((s, r) => s + ((r.payout || 0) - (r.stake || 0)), 0);
     const netColor = net >= 0 ? '#38d39f' : '#f87171';
-    sum.innerHTML = `<div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+    const periodLabel = _recentPeriod > 0 ? `최근 ${_recentPeriod}일` : '전체';
+    sum.innerHTML = `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+        <span class="hint">기간:</span>${periodBtn(7, '7일')}${periodBtn(30, '30일')}${periodBtn(0, '전체')}
+        <span class="hint" style="margin-left:auto">${periodLabel}${_recentTrack ? ' · ' + esc(_recentTrack) : ''} 기준</span>
+      </div>${trackBar}
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-top:8px">
       <div class="stat-card"><div class="num">${n}</div><div class="label">기록</div></div>
       <div class="stat-card"><div class="num">${hits}</div><div class="label">적중</div></div>
       <div class="stat-card"><div class="num">${rate}%</div><div class="label">적중률</div></div>
       <div class="stat-card"><div class="num" style="color:${netColor};font-size:19px">${net >= 0 ? '+' : ''}${net.toLocaleString()}원</div><div class="label">손익</div></div>
     </div>`;
+    // 컨트롤 리스너
+    sum.querySelectorAll('.rr-period').forEach((b) => b.addEventListener('click', () => {
+      _recentPeriod = parseInt(b.dataset.p, 10) || 0;
+      try { localStorage.setItem('bmed_recent_period', String(_recentPeriod)); } catch (_) { /* */ }
+      renderRecentResults();
+    }));
+    sum.querySelectorAll('.rr-track').forEach((c) => c.addEventListener('click', () => { _recentTrack = c.dataset.t || ''; renderRecentResults(); }));
+
     // [3] 빈 화면
     if (!n) {
       host.innerHTML = `<div style="text-align:center;padding:22px 10px;color:#8a94a6">
-        <div style="font-size:15px;margin-bottom:4px">최근 분석한 경주가 없습니다</div>
+        <div style="font-size:15px;margin-bottom:4px">${_recentTrack ? esc(_recentTrack) + ' 경주가 없습니다' : '최근 분석한 경주가 없습니다'}</div>
         <div class="hint">배당판에서 분석을 시작하세요. 경주가 끝나면 아래 [결과 입력 대기]에서 착순을 입력하면 여기에 쌓입니다.</div>
       </div>`;
       return;
@@ -4464,14 +4503,14 @@
     const dates = Object.keys(byDate).sort().reverse();
     host.innerHTML = dates.map((date) => {
       const rows = byDate[date].slice().reverse().map((r) => {
-        const rk = r.raceTitle || '';
+        const rk = r.raceKey || r.raceTitle || '';   // [보완#2] 복기 매칭은 raceKey 우선
         const net2 = (r.payout || 0) - (r.stake || 0);
         const netStr = (r.stake || r.payout) ? ` <span style="color:${net2 >= 0 ? '#38d39f' : '#f87171'}">${net2 >= 0 ? '+' : ''}${net2.toLocaleString()}원</span>` : '';
         const badge = r.hit ? '<span style="color:#38d39f;font-weight:700">✅ 적중</span>' : '<span style="color:#f87171;font-weight:700">❌ 미적중</span>';
         const resStr = (r.result || []).length ? ` <span class="hint">${(r.result || []).slice(0, 3).join('-')}</span>` : '';
         const detailId = 'rr-det-' + r.id;
         return `<div class="rr-race" data-rk="${esc(rk)}" data-detail="${detailId}" style="cursor:pointer;padding:6px 9px;margin:3px 0;border:1px solid #2b3648;border-radius:7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span style="font-weight:600">${esc(rk)}</span>${resStr} ${badge}${netStr}
+          <span style="font-weight:600">${esc(r.raceTitle || rk)}</span>${resStr} ${badge}${netStr}
           <span class="hint" style="margin-left:auto">▼ 복기</span>
         </div><div id="${detailId}" style="margin:0 0 4px"></div>`;
       }).join('');
@@ -4697,6 +4736,7 @@
       History.addResult({
         date: todayStr(), region: r.venue === '일본' ? '일본' : '한국',
         raceTitle: key || `${r.venue || ''} ${r.raceNo}경주`,
+        raceKey: key || '',   // [보완#2] 복기 매칭용 raceKey(분석 히스토리 키) 저장
         bets, result: placing, hit, stake, payout,
         hadAnomaly: !!c.hadAnomaly, recOdds: c.recOdds == null ? null : c.recOdds,
         signals: signalsFor(c),
@@ -4722,7 +4762,8 @@
     const bets = betsForRace(title);
     const hit = bets.some((b) => History.judgeHit(b, result));
     History.addResult({
-      date, region, raceTitle: title, bets, result, hit, stake, payout,
+      date, region, raceTitle: title, raceKey: title,   // [보완#2] 복기 매칭용 raceKey 저장
+      bets, result, hit, stake, payout,
       hadAnomaly: !!c.hadAnomaly, recOdds: c.recOdds == null ? null : c.recOdds,
       signals: signalsFor(c),
     });
