@@ -1138,6 +1138,36 @@ def _baseline_reset_needed(prev_q, cur_q, thresh=-90.0, min_ratio=0.6, min_combo
     return (opening / len(common)) >= min_ratio
 
 
+def _as_qmap(x):
+    """복승 배당을 {정렬튜플: 최저배당} 맵으로 정규화 — 리스트([{combo,odds}])와
+    저장 딕셔너리({'1+2': 배당}) 두 형식 모두 지원(스냅샷 저장형식 혼용 방어)."""
+    if isinstance(x, dict):
+        m = {}
+        for k, v in x.items():
+            try:
+                kk = tuple(sorted(int(y) for y in str(k).split("+")))
+                o = float(v)
+            except (ValueError, TypeError):
+                continue
+            if o > 0 and (kk not in m or o < m[kk]):
+                m[kk] = o
+        return m
+    return _odds_map_un(x)
+
+
+def _next_race_surge(prev_q, cur_q, thresh=200.0, min_ratio=0.6, min_combos=4):
+    """[2번 다음경주 혼입 방어] 직전 대비 공통 복승 조합의 다수(60%+)가 200%+ 급등하면
+    현재 경주가 끝나고 다음 경주(초기 고배당) 배당이 섞인 것으로 판단 → 이후 데이터 차단.
+    정상 경주는 배당이 내려가거나(자금유입) 소폭만 오르므로 대규모 동시 급등만 걸린다.
+    (급락 방향은 _baseline_reset_needed 가 담당 — 이건 급등 방향 전용.)"""
+    pm, cm = _as_qmap(prev_q), _as_qmap(cur_q)
+    common = [k for k in cm if k in pm and pm[k] > 0 and cm[k] > 0]
+    if len(common) < min_combos:
+        return False
+    big = sum(1 for k in common if (cm[k] - pm[k]) / pm[k] * 100 >= thresh)
+    return (big / len(common)) >= min_ratio
+
+
 @app.route("/api/odds/triple/ingest", methods=["POST"])
 def triple_ingest():
     """확장 [전체 자동 수집]: {raceKey, quinella[], exacta[], trio[]} 저장 → {ok, counts}"""
@@ -3294,9 +3324,18 @@ def _triple_analyze(rk, rec):
             "note": "경고 신호 감지 — 급변 말 조합을 추천에 포함(고배당 대비)",
         }
 
+    # [신규 3·4·5번] 이상감지 말 변경 이력 + 신호 안정화(2연속 확정) + 최종 유효 신호 시점
+    try:
+        signal_timeline = _signal_timeline(rk)
+    except Exception as _e:
+        print("[신호타임라인] 실패:", _e)
+        signal_timeline = None
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
         "alertSignal": alert_signal,   # [신규 3번] 경고 신호 감지 요약(배너)
+        "signalTimeline": signal_timeline,   # [신규 3·4·5번] 신호말 변경이력·안정화·유효시점
+        "nextRaceBlocked": bool(signal_timeline and signal_timeline.get("excluded", {}).get("next_race")),
         "counts": {"quinella": len(quin), "exacta": len(exa), "trio": len(trio),
                    "win": len(curWin), "history": len(hist)},
         "drops": drops[:15], "singleDrops": single_drops[:15], "rankChanges": rank_changes, "reversals": reversals,
@@ -3675,10 +3714,20 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
     curQ = _odds_map_un(quinella)
     curWin = _win_map_int(_win_map_clean(win))
     anomalies = []
+    q_drops = []           # [3번] 구조화 복승 급락(신호말 산출용)
+    signal_horse = None    # [3번] 이 스냅샷의 대표 이상감지 말(집중급락 1순위)
+    signal_reason = None
+    # [2번 다음경주 혼입 방어] 직전 대비 다수 조합 200%+ 급등 = 경주 종료/다음 경주 배당 유입 → 차단.
+    #   차단 스냅샷은 이상감지·신호말 계산을 생략하고 next_race_blocked 표기(타임라인·분석에서 제외).
+    next_race_blocked = False
+    if doc["snapshots"] and not baseline_reset:
+        _lastq = doc["snapshots"][-1].get("quinella")
+        if _lastq and _next_race_surge(_lastq, quinella):
+            next_race_blocked = True
     # [경주전환 방어] 기준값 재설정이면 직전 스냅샷과 비교하지 않음(다른 경주 잔존 → 오검출 방지)
     # [첫수집 방어] 첫 비교(스냅샷 1건뿐)는 첫 수집 배당이 불안정(못 가져옴/시장 형성 초기 고배당)해
     #   가짜 급락(-90%대)이 뜬다. 스냅샷 2건 이상(2번째 수집을 기준)일 때부터 이상감지 기록.
-    if len(doc["snapshots"]) >= 2 and not baseline_reset:
+    if len(doc["snapshots"]) >= 2 and not baseline_reset and not next_race_blocked:
         last = doc["snapshots"][-1]
         # [단승] 급락 감지 — 가장 강한 신호이므로 먼저 기록
         prevWin = {}
@@ -3709,6 +3758,18 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
                     continue
                 if pct <= -20:
                     anomalies.append(f"급락감지: {'+'.join(map(str, k))} {pct}%")
+                if pct <= -8:      # [3번] 신호말 산출용 구조화 급락(집중도 계산)
+                    q_drops.append({"combo": list(k), "pct": pct})
+        # [3번] 이 스냅샷의 대표 이상감지 말 = 집중급락(초과급락) 1순위(재계산 없이 _excess_drop_analysis 재사용)
+        try:
+            _exc = _excess_drop_analysis(q_drops, curQ)
+            _conc = _exc.get("concentrated") or []
+            if _conc:
+                signal_horse = int(_conc[0])
+                _hi = (_exc.get("horses") or {}).get(signal_horse) or {}
+                signal_reason = f"{signal_horse}번 집중급락(평균 {_hi.get('avg')}%)"
+        except Exception:
+            signal_horse, signal_reason = None, None
         # [이상감지 누적] 쌍승(exacta) 방향 역전 → 영구 기록(마감 후에도 유지).
         #   [다중조합] 상위 EXA_REVERSAL_TOPN개 저배당(유력) 조합 각각의 유력방향이
         #   (a,b)→(b,a)로 뒤집히면 1·2착 예측 역전으로 기록(기존 '최저 1조합'만 → 다중 확장).
@@ -3725,6 +3786,9 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
         "minutes_before": minutes_before,
         "mb_signed": mb_signed, "after_close": after_close,   # [마감후] 부호 포함·마감 후 여부
         "baseline_reset": bool(baseline_reset),   # [경주전환] 기준값 재설정 시점(변동 계산 제외)
+        "next_race_blocked": next_race_blocked,   # [2번] 다음 경주 배당 유입(200%+ 급등) 차단 시점
+        "signal_horse": signal_horse,             # [3번] 이 스냅샷 대표 이상감지 말(신호 변경 이력·안정화용)
+        "signal_reason": signal_reason,
         "quinella": _combo_dict(quinella), "exacta": _combo_dict(exacta),
         "win": {str(k): v for k, v in curWin.items()},
         "anomalies": anomalies, "t": now,
@@ -4763,7 +4827,8 @@ RACE_REPORT_DIR = os.path.join(os.path.dirname(__file__), "data", "race_report")
 
 def _combo_timeline(doc, combo):
     """스냅샷들에서 특정 복승 조합(combo=[a,b])의 배당 변화 타임라인 추출.
-    반환 [{time, minutes_before, odds, change}] — change=직전 대비 %(첫 항목 None)."""
+    반환 [{time, minutes_before, odds, change, excluded, exclReason}] — change=직전 유효 대비 %.
+    [1·2번] 마감 후·다음경주 유입(200%+ 급등) 스냅샷은 excluded 표기(데이터 보존, 변동 계산 제외)."""
     key = "+".join(str(int(x)) for x in sorted(combo))
     tl, prev = [], None
     for s in (doc.get("snapshots") or []):
@@ -4779,11 +4844,100 @@ def _combo_timeline(doc, combo):
             o = round(float(o), 1)
         except (TypeError, ValueError):
             continue
-        chg = (round((o - prev) / prev * 100, 1) if (prev and prev > 0) else None)
+        # [1·2번] 마감 후 / 다음 경주 유입 = 제외(변동 계산에서 배제, 데이터는 표시만)
+        excl = bool(s.get("after_close") or s.get("next_race_blocked"))
+        excl_reason = ("마감 후 데이터 - 제외됨" if s.get("after_close")
+                       else ("다음 경주 혼입 - 제외됨" if s.get("next_race_blocked") else None))
+        chg = None if excl else (round((o - prev) / prev * 100, 1) if (prev and prev > 0) else None)
         tl.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
-                   "odds": o, "change": chg})
-        prev = o
+                   "odds": o, "change": chg, "excluded": excl, "exclReason": excl_reason})
+        if not excl:      # 제외 스냅샷은 기준(prev) 갱신 안 함 → 다음 유효값과 정상 비교
+            prev = o
     return tl
+
+
+def _signal_timeline_from_doc(doc):
+    """[3·4·5번] 스냅샷의 signal_horse 시퀀스에서 이상감지 말 변경 이력 + 신호 안정화(2연속 확정)
+    + 최종 유효 신호 시점을 도출. 재계산 없이 기록된 signal_horse 만 소비.
+    마감후·다음경주차단·기준재설정 스냅샷은 제외. 반환:
+      {changes[], confirmed[], candidates[], events{no:{first,last,confirmed,count}},
+       finalSignal, finalConfirmed, excluded{after_close,next_race}, validCount}."""
+    snaps = doc.get("snapshots") or []
+    excl_after = sum(1 for s in snaps if s.get("after_close"))
+    excl_next = sum(1 for s in snaps if s.get("next_race_blocked"))
+    valid = [s for s in snaps
+             if not (s.get("after_close") or s.get("next_race_blocked") or s.get("baseline_reset"))]
+    changes, events = [], {}
+    prev_sig, streak = None, 0
+    confirmed, order_conf = set(), []
+    for s in valid:
+        sig = s.get("signal_horse")
+        t, mb, reason = s.get("time"), s.get("minutes_before"), s.get("signal_reason")
+        if sig is None:       # 신호 소멸(감지 없음) — 연속 끊김
+            if prev_sig is not None:
+                events.setdefault(prev_sig, {}).setdefault("vanished", {"time": t, "minutes_before": mb})
+            prev_sig, streak = None, 0
+            continue
+        sig = int(sig)
+        ev = events.setdefault(sig, {"first": {"time": t, "minutes_before": mb}, "count": 0})
+        ev["count"] = ev.get("count", 0) + 1
+        ev["last"] = {"time": t, "minutes_before": mb}
+        if sig == prev_sig:
+            streak += 1
+        else:
+            if prev_sig is not None:   # [3번] 신호말 변경 이력
+                # [4번] 직전 신호말이 1회만 감지 후 소멸했는지(후보 소멸) 판별
+                prev_once = events.get(prev_sig, {}).get("count", 0) <= 1
+                changes.append({
+                    "time": t, "minutes_before": mb,
+                    "previous_signal": "%d번" % prev_sig, "new_signal": "%d번" % sig,
+                    "reason": reason or ("%d번 추가 급락" % sig),
+                    "prev_was_candidate": bool(prev_once),
+                })
+            streak = 1
+        if streak >= 2 and sig not in confirmed:   # [4번] 2연속 = 확정 신호
+            confirmed.add(sig)
+            order_conf.append(sig)
+            ev["confirmed"] = {"time": t, "minutes_before": mb}
+        prev_sig = sig
+    candidates = sorted(h for h in events if h not in confirmed and events[h].get("count"))
+    final_sig = None
+    for s in reversed(valid):
+        if s.get("signal_horse") is not None:
+            final_sig = int(s["signal_horse"])
+            break
+    return {
+        "changes": changes,
+        "confirmed": order_conf,
+        "candidates": candidates,
+        "events": {str(k): v for k, v in events.items()},
+        "finalSignal": final_sig,
+        "finalConfirmed": (final_sig is not None and final_sig in confirmed),
+        "excluded": {"after_close": excl_after, "next_race": excl_next},
+        "validCount": len(valid),
+    }
+
+
+def _signal_timeline(rk):
+    """경주 히스토리 파일을 읽어 _signal_timeline_from_doc 도출(없으면 None)."""
+    path, _, _ = _hist_path(rk)
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return None
+    return _signal_timeline_from_doc(doc)
+
+
+@app.route("/api/odds/signal-timeline", methods=["GET", "POST"])
+def signal_timeline_api():
+    """[3·4·5번] 이상감지 말 변경 이력 + 신호 안정화 + 최종 유효 신호 시점(경주별)."""
+    if request.method == "POST":
+        rk = ((request.json or {}).get("raceKey") or "").strip()
+    else:
+        rk = (request.args.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"raceKey": rk, "timeline": None})
+    return jsonify({"raceKey": rk, "timeline": _signal_timeline(rk)})
 
 
 def _signal_win_tags(an, top3):
@@ -4980,6 +5134,8 @@ def _build_race_report(rk, an, record, result, doc):
         "win_tags": win_tags.get("tags"),
         "combo_tags": win_tags.get("combo"),
         "hit_basis": record.get("hit_basis"),
+        # [신규 5번] 이상감지 말 변경 이력 + 신호 안정화 + 최초/소멸/확정 시점(재현용)
+        "signal_change_history": _signal_timeline_from_doc(doc),
         "pnl": record.get("pnl"), "stake": record.get("stake"),
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
     }

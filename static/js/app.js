@@ -2219,6 +2219,54 @@
       ${picks ? `<div style="margin:5px 0 0"><span class="hint">추천 업데이트</span><br>${picks}</div>` : ''}</div>`;
   }
 
+  // [신규 3·4·5번] 이상감지 말 변경 이력 + 신호 안정화(2연속 확정) + 최종 유효 신호 시점
+  function renderSignalTimeline(st) {
+    if (!st) return '';
+    const changes = st.changes || [];
+    const confirmed = st.confirmed || [];
+    const candidates = st.candidates || [];
+    const excl = st.excluded || {};
+    const events = st.events || {};
+    // 변경 이력 없고 확정/후보도 없으면(신호 자체가 없음) 생략
+    if (!changes.length && !confirmed.length && !candidates.length && !(excl.after_close || excl.next_race)) return '';
+    const mb = (o) => (o && o.minutes_before != null ? `T-${o.minutes_before}분` : (o && o.time ? o.time : '—'));
+    // [3번] 변경 이력
+    const chLines = changes.map((c) =>
+      `<div style="margin:2px 0"><span class="hint">${mb(c)}</span> <b style="color:#ffd24f">${c.previous_signal}→${c.new_signal}</b>`
+      + `${c.prev_was_candidate ? ` <span class="chip" style="border-color:#8a94a6;color:#b8c0cc">${c.previous_signal} 1회 감지 후 소멸</span>` : ''}`
+      + `<br><span class="hint" style="font-size:11px">↳ ${esc(c.reason || '')}</span></div>`).join('');
+    // [4번] 확정/후보 신호
+    const confChips = confirmed.map((h) => {
+      const cf = (events[String(h)] || {}).confirmed;
+      return `<span class="chip chip-red">✅ ${h}번 확정${cf ? ` <span class="hint">(${mb(cf)})</span>` : ''}</span>`;
+    }).join(' ');
+    const candChips = candidates.map((h) =>
+      `<span class="chip" style="border-color:#8a94a6;color:#b8c0cc">${h}번 후보(1회)</span>`).join(' ');
+    // [5번] 최종 유효 신호 시점(말별 최초/소멸/확정)
+    const timeLines = Object.keys(events).map((h) => {
+      const e = events[h] || {};
+      const parts = [];
+      if (e.first) parts.push(`최초 ${mb(e.first)}`);
+      if (e.confirmed) parts.push(`<b style="color:#ff8a3d">확정 ${mb(e.confirmed)}</b>`);
+      else if ((e.count || 0) <= 1) parts.push('<span style="color:#8a94a6">1회 감지(미확정)</span>');
+      if (e.vanished) parts.push(`소멸 ${mb(e.vanished)}`);
+      return `<div style="margin:1px 0"><b>${h}번</b>: ${parts.join(' · ')}</div>`;
+    }).join('');
+    const finalTxt = st.finalSignal != null
+      ? `<b style="color:${st.finalConfirmed ? '#ff5c5c' : '#ffd24f'}">${st.finalSignal}번</b> ${st.finalConfirmed ? '(2연속 확정)' : '(후보)'}`
+      : '<span class="hint">감지 없음</span>';
+    const exclTxt = (excl.after_close || excl.next_race)
+      ? `<div class="hint" style="margin-top:4px;font-size:11px">🗑️ 제외된 데이터: ${excl.after_close ? `마감 후 ${excl.after_close}건` : ''}${(excl.after_close && excl.next_race) ? ' · ' : ''}${excl.next_race ? `다음 경주 혼입 ${excl.next_race}건` : ''} (분석·타임라인에서 제외됨)</div>`
+      : '';
+    return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #7dd3fc;border-radius:8px;background:rgba(125,211,252,.08)">
+      <div style="font-size:14px;font-weight:800;color:#7dd3fc">🎯 이상감지 신호 안정화 · 변경 이력</div>
+      <div style="margin:4px 0">최종 유효 신호: ${finalTxt}</div>
+      ${(confChips || candChips) ? `<div style="margin:4px 0">${confChips}${confChips && candChips ? ' ' : ''}${candChips}</div>` : ''}
+      ${chLines ? `<div style="margin:5px 0"><span class="hint">🔀 신호 변경 이력</span>${chLines}</div>` : ''}
+      ${timeLines ? `<div style="margin:5px 0"><span class="hint">⏱️ 유효 신호 시점</span><div style="font-size:12px;margin-top:2px">${timeLines}</div></div>` : ''}
+      ${exclTxt}</div>`;
+  }
+
   function renderInverse(inv) {
     if (!inv || !inv.detected) return '';
     const b = inv.banner || {};
@@ -2267,6 +2315,7 @@
       ${a.marketCheck && a.marketCheck.stale ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffb020;background:rgba(255,176,32,.12);border-radius:6px;color:#ffc862">⚠️ <b>배당 불안정</b> — 최저 복승도 ${a.marketCheck.favOdds}배(실자금 미형성/초반 미수집 의심). <b>배당판 새로고침 후 재수집</b> 권장. 현재 추천은 참고만.</div>` : ''}
       ${renderAlertSignal(a.alertSignal)}
       ${renderInverse(a.inverse)}
+      ${renderSignalTimeline(a.signalTimeline)}
       <div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary || '')}</div>
       ${drops ? `<div style="margin:6px 0"><span class="hint">📉 급락/변동</span><br>${drops}</div>` : ''}
       ${flips ? `<div style="margin:6px 0"><span class="hint">🔀 쌍승 역전</span><br>${flips}</div>` : ''}
@@ -4370,6 +4419,9 @@
       const s = why[k];
       if (!s.drop_timeline || !s.drop_timeline.length) return '';
       const rows = s.drop_timeline.map((p) => {
+        if (p.excluded) {   // [1·2번] 마감 후 / 다음 경주 혼입 = 제외됨(회색 표시, 변동 계산 제외)
+          return `<tr style="opacity:.5"><td>${esc(p.time || '')}${p.minutes_before != null ? ' (T-' + p.minutes_before + '분)' : ''}</td><td>${p.odds}배</td><td class="hint">🗑️ ${esc(p.exclReason || '제외됨')}</td></tr>`;
+        }
         const cls = p.change == null ? 'flat' : (p.change < 0 ? 'down' : '');
         const chg = p.change == null ? '—' : (p.change > 0 ? '+' : '') + p.change + '%';
         return `<tr><td>${esc(p.time || '')}${p.minutes_before != null ? ' (T-' + p.minutes_before + '분)' : ''}</td><td>${p.odds}배</td><td class="${cls}">${chg}</td></tr>`;
@@ -4400,6 +4452,30 @@
     }).filter(Boolean).join('') || '<p class="hint">감지된 이상신호가 없습니다.</p>';
     const pane4 = `<div class="rpt-pane" data-pane="anomaly"><h3>🔴 이상감지 내역</h3>${anomRows}</div>`;
 
+    // 탭5: [신규 5번] 이상감지 신호 변경 이력·안정화·유효 시점
+    const st = rep.signal_change_history || {};
+    const mb = (o) => (o && o.minutes_before != null ? 'T-' + o.minutes_before + '분' : (o && o.time ? o.time : '—'));
+    const stEvents = st.events || {};
+    const chgRows = (st.changes || []).map((c) =>
+      `<div class="rpt-signal"><b style="color:#ffd24f">${esc(c.previous_signal)}→${esc(c.new_signal)}</b> <span class="hint">${mb(c)}</span>${c.prev_was_candidate ? ' <span class="hint">(직전은 1회 감지 후 소멸)</span>' : ''}<br><span class="hint">↳ ${esc(c.reason || '')}</span></div>`).join('');
+    const timeRows = Object.keys(stEvents).map((h) => {
+      const e = stEvents[h] || {};
+      const bits = [];
+      if (e.first) bits.push('최초 감지 ' + mb(e.first));
+      if (e.confirmed) bits.push('확정 ' + mb(e.confirmed) + ' (2연속)');
+      else if ((e.count || 0) <= 1) bits.push('1회 감지 (미확정)');
+      if (e.vanished) bits.push('소멸 ' + mb(e.vanished));
+      return `<tr><td>${h}번</td><td>${esc(bits.join(' · '))}</td></tr>`;
+    }).join('') || '<tr><td colspan="2" class="hint">신호 시점 데이터 없음</td></tr>';
+    const finalTxt = st.finalSignal != null ? `${st.finalSignal}번 ${st.finalConfirmed ? '(2연속 확정)' : '(후보)'}` : '감지 없음';
+    const exc = st.excluded || {};
+    const excTxt = (exc.after_close || exc.next_race) ? `<p class="hint">🗑️ 제외 데이터: ${exc.after_close ? '마감 후 ' + exc.after_close + '건 ' : ''}${exc.next_race ? '다음경주 혼입 ' + exc.next_race + '건' : ''}</p>` : '';
+    const pane5 = `<div class="rpt-pane" data-pane="sigtime"><h3>🎯 신호 변경 이력 · 안정화</h3>
+      <p>최종 유효 신호: <b style="color:#ffd24f">${finalTxt}</b> · 확정 ${(st.confirmed || []).length}두 · 후보 ${(st.candidates || []).length}두</p>
+      ${chgRows ? `<div style="margin:6px 0"><b class="hint">🔀 변경 이력</b>${chgRows}</div>` : '<p class="hint">신호 변경 없음(일관 신호)</p>'}
+      <table class="rpt-tl"><thead><tr><th>말</th><th>유효 신호 시점</th></tr></thead><tbody>${timeRows}</tbody></table>
+      ${excTxt}</div>`;
+
     view.innerHTML = `
       <div class="rpt-head">${esc(rep.race || '')} · ${esc(resultStr)}</div>
       <div class="rpt-sub">${hitBadge}${oddsBadge} ${tagsHtml}</div>
@@ -4408,8 +4484,9 @@
         <button class="rpt-tab" data-pane="timeline">배당 타임라인</button>
         <button class="rpt-tab" data-pane="form">전적 분석</button>
         <button class="rpt-tab" data-pane="anomaly">이상감지 내역</button>
+        <button class="rpt-tab" data-pane="sigtime">신호 이력</button>
       </div>
-      ${pane1}${pane2}${pane3}${pane4}`;
+      ${pane1}${pane2}${pane3}${pane4}${pane5}`;
     view.querySelectorAll('.rpt-tab').forEach((tb) => tb.addEventListener('click', () => {
       view.querySelectorAll('.rpt-tab').forEach((x) => x.classList.remove('active'));
       view.querySelectorAll('.rpt-pane').forEach((x) => x.classList.remove('active'));

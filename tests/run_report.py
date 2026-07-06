@@ -240,6 +240,43 @@ ok(_as["n"] == 2 and _as["hit"] == 1, "경고 통계 n=2 hit=1(경고 없는 레
 ok(_as["hit_rate"] == 50.0 and _as["ignored_miss"] == 1, "적중률 50% · 무시후미적중 1")
 ok(_as["advice"] and "포함 권장" in _as["advice"], "적중률 40%+ → 경고말 포함 권장 조언")
 
+print("[9] 타임라인 데이터 정제 + 신호 안정화")
+# [2번] 다음 경주 급등(200%+) 감지
+_prevq = [{"combo": [1, 2], "odds": 5.0}, {"combo": [1, 3], "odds": 6.0}, {"combo": [2, 3], "odds": 7.0}, {"combo": [1, 4], "odds": 8.0}]
+_surge = [{"combo": [1, 2], "odds": 20.0}, {"combo": [1, 3], "odds": 24.0}, {"combo": [2, 3], "odds": 28.0}, {"combo": [1, 4], "odds": 30.0}]
+_small = [{"combo": [1, 2], "odds": 4.5}, {"combo": [1, 3], "odds": 6.2}, {"combo": [2, 3], "odds": 7.1}, {"combo": [1, 4], "odds": 7.8}]
+ok(app._next_race_surge(_prevq, _surge) is True, "200%+ 다수 급등 → 다음 경주 유입 감지")
+ok(app._next_race_surge(_prevq, _small) is False, "정상 소폭 변동은 급등 아님")
+# [3·4·5번] 신호 타임라인 도출 — 4번 1회 감지 후 3번 2연속 확정, 마감후/다음경주 제외
+_doc = {"snapshots": [
+    {"time": "15:40:00", "minutes_before": 6, "signal_horse": None, "quinella": {"1+2": 10.0}},
+    {"time": "15:42:00", "minutes_before": 4, "signal_horse": 4, "signal_reason": "4번 집중급락(평균 -18%)", "quinella": {"1+2": 8.0}},
+    {"time": "15:44:00", "minutes_before": 3, "signal_horse": 3, "signal_reason": "4번 배당 반등 / 3번 추가 급락", "quinella": {"1+2": 7.0}},
+    {"time": "15:45:00", "minutes_before": 2, "signal_horse": 3, "signal_reason": "3번 집중급락(평균 -22%)", "quinella": {"1+2": 6.0}},
+    {"time": "15:47:00", "minutes_before": -1, "after_close": True, "signal_horse": 3, "quinella": {"1+2": 5.5}},
+    {"time": "15:48:00", "minutes_before": None, "next_race_blocked": True, "quinella": {"1+2": 40.0}},
+]}
+st = app._signal_timeline_from_doc(_doc)
+ok(st["excluded"]["after_close"] == 1 and st["excluded"]["next_race"] == 1, "마감후 1·다음경주 1 제외 집계")
+ok(st["validCount"] == 4, "유효 스냅샷 4건(제외 2건 뺌)")
+ok(len(st["changes"]) == 1 and st["changes"][0]["previous_signal"] == "4번" and st["changes"][0]["new_signal"] == "3번",
+   "[3번] 신호 변경 이력 4번→3번")
+ok(st["changes"][0]["prev_was_candidate"] is True, "[4번] 직전 4번=1회 감지 후 소멸(후보)")
+ok(st["changes"][0]["reason"] == "4번 배당 반등 / 3번 추가 급락", "변경 사유 기록")
+ok(st["confirmed"] == [3], "[4번] 3번 2연속 → 확정")
+ok(st["candidates"] == [4], "[4번] 4번은 1회만 → 후보")
+ok(st["finalSignal"] == 3 and st["finalConfirmed"] is True, "[5번] 최종 유효 신호=3번(확정)")
+_e3 = st["events"]["3"]
+ok(_e3["first"]["minutes_before"] == 3 and _e3["confirmed"]["minutes_before"] == 2, "[5번] 3번 최초 T-3분·확정 T-2분")
+ok(st["events"]["4"]["count"] == 1, "[5번] 4번 감지 횟수 1")
+# [1번] _combo_timeline 제외 표기 — 마감후/다음경주 포인트 excluded + 변동 계산 제외
+_tl = app._combo_timeline(_doc, [1, 2])
+ok(len(_tl) == 6, "타임라인 6포인트(제외 포함 표시)")
+ok(_tl[4]["excluded"] is True and _tl[4]["exclReason"] == "마감 후 데이터 - 제외됨", "[1번] 마감후 포인트 제외 표기")
+ok(_tl[5]["excluded"] is True and _tl[5]["exclReason"] == "다음 경주 혼입 - 제외됨", "[2번] 다음경주 포인트 제외 표기")
+ok(_tl[4]["change"] is None and _tl[5]["change"] is None, "제외 포인트는 변동 계산 안 함")
+ok(_tl[3]["change"] is not None and _tl[3]["change"] < 0, "유효 포인트는 직전 유효값 대비 변동 계산")
+
 print("=" * 56)
 print(f"결과: 통과 {PASS} / 실패 {FAIL}")
 print("=" * 56)
