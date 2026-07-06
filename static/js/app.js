@@ -4459,19 +4459,34 @@
     return ms;
   }
 
+  const KOREA_DL_KEY = 'bmed_korea_deadline';   // [보완] 수동 발주시각 새로고침 유지
+
+  /** epoch ms → 'HH:MM' (input[type=time] 복원용) */
+  function _msToHHMM(ms) {
+    const d = new Date(ms);
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  /** 상태 텍스트 + 해제버튼 갱신(설정/복원 공용) */
+  function _renderKoreaDeadlineStatus(hhmm, ms) {
+    const st = document.getElementById('koreaDeadlineStatus');
+    const clr = document.getElementById('koreaDeadlineClear');
+    const left = Math.max(0, Math.round((ms - Date.now()) / 60000));
+    if (st) st.textContent = `✅ 발주 ${hhmm} 설정 · 약 ${left}분 후 · 마감 전 알림 활성${_closing.manualRk ? ' (' + _rkLabel(_closing.manualRk) + ')' : ''}`;
+    if (clr) clr.style.display = '';
+  }
+
   /** [보완] 한국 수동 발주시각 설정 → 현재 경주에 마감 전 3단계 알림 발동(서버 deadline 없을 때 폴백) */
   function setKoreaManualDeadline() {
     const inp = document.getElementById('koreaDeadline');
     const st = document.getElementById('koreaDeadlineStatus');
-    const clr = document.getElementById('koreaDeadlineClear');
     const ms = _timeToDeadlineMs(inp && inp.value);
     if (!ms) { if (st) st.textContent = '⚠️ 발주시각(HH:MM)을 입력하세요.'; return; }
     _closing.manualDeadlineMs = ms;
     _closing.manualRk = _closing.panelRk || getActiveRaceKey() || null;
     _closing.firedRk = null;   // 새 발주시각 → 단계 알림 재무장
-    const left = Math.max(0, Math.round((ms - Date.now()) / 60000));
-    if (st) st.textContent = `✅ 발주 ${inp.value} 설정 · 약 ${left}분 후 · 마감 전 알림 활성${_closing.manualRk ? ' (' + _rkLabel(_closing.manualRk) + ')' : ''}`;
-    if (clr) clr.style.display = '';
+    _renderKoreaDeadlineStatus(inp.value, ms);
+    try { localStorage.setItem(KOREA_DL_KEY, JSON.stringify({ ms, rk: _closing.manualRk })); } catch (_) { /* */ }
     try { closingTick(); } catch (_) { /* */ }
   }
 
@@ -4481,6 +4496,21 @@
     const clr = document.getElementById('koreaDeadlineClear');
     if (st) st.textContent = '해제됨. 배당판 없이 PDF만 볼 때 발주시각을 입력하면 마감 전 알림이 뜹니다.';
     if (clr) clr.style.display = 'none';
+    try { localStorage.removeItem(KOREA_DL_KEY); } catch (_) { /* */ }
+  }
+
+  /** [보완] 새로고침 시 저장된 수동 발주시각 복원(미래 시각만; 지났으면 정리) */
+  function restoreKoreaManualDeadline() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(KOREA_DL_KEY) || 'null'); } catch (_) { saved = null; }
+    if (!saved || !saved.ms) return;
+    if (saved.ms <= Date.now()) { try { localStorage.removeItem(KOREA_DL_KEY); } catch (_) { /* */ } return; }
+    _closing.manualDeadlineMs = saved.ms;
+    _closing.manualRk = saved.rk || null;
+    _closing.firedRk = null;
+    const inp = document.getElementById('koreaDeadline');
+    if (inp) inp.value = _msToHHMM(saved.ms);
+    _renderKoreaDeadlineStatus(_msToHHMM(saved.ms), saved.ms);
   }
 
   function initClosingWatch() {
@@ -4502,6 +4532,7 @@
     { const b = document.getElementById('koreaDeadlineSet'); if (b) b.addEventListener('click', setKoreaManualDeadline); }
     { const b = document.getElementById('koreaDeadlineClear'); if (b) b.addEventListener('click', clearKoreaManualDeadline); }
     { const i = document.getElementById('koreaDeadline'); if (i) i.addEventListener('keydown', (e) => { if (e.key === 'Enter') setKoreaManualDeadline(); }); }
+    restoreKoreaManualDeadline();   // [보완] 새로고침 시 저장된 발주시각 복원
     setInterval(closingTick, 1000);
     closingTick();
   }
