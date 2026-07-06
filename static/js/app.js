@@ -2467,10 +2467,16 @@
         const diff = budget > 0 && c.payoutRatio != null ? ` <span style="color:${c.payoutRatio >= 1 ? '#38d39f' : '#f87171'}">(${sign(c.payoutRatio * budget - budget)})</span>` : '';
         return `<div style="margin:2px 0"><b style="color:#c4b5fd">${c.label}</b> ${c.combo[0]}+${c.combo[1]}(${c.odds}배): <b>${stake}${budget > 0 ? '원' : ''}</b> → 적중 시 ${pay}${budget > 0 ? '원' : ''}${diff}</div>`;
       }).join('');
-      const sc = budget > 0 ? `<div class="hint" style="margin-top:4px">최선 <b style="color:#38d39f">${sign((ins.bestRatio - 1) * budget)}</b> · 중간 ${sign((ins.midRatio - 1) * budget)} · 최악 <b style="color:#f87171">${sign((ins.worstRatio - 1) * budget)}</b> · 기대환수 ${ins.expectedReturn != null ? ins.expectedReturn + '%' : '-'}</div>` : '';
+      // [보완#2] 시나리오 손익 표기 정정:
+      //  · 최선/중간/최소는 "커버 조합 중 하나가 적중했을 때"의 손익(모두 +일 수 있음).
+      //  · 진짜 최악은 "커버 조합 전부 미적중 = 전액 손실"(allMissRatio=0) → 별도로 명확히 표기.
+      const pnl = (ratio) => (ratio == null ? '<span class="hint">-</span>' : sign((ratio - 1) * budget));
+      const sc = budget > 0 ? `<div class="hint" style="margin-top:4px">
+        적중 시 최선 <b style="color:#38d39f">${pnl(ins.bestRatio)}</b> · 중간 ${pnl(ins.midRatio)} · 최소 ${pnl(ins.worstRatio)}<br>
+        <b style="color:#f87171">전부 미적중 시 ${sign(-budget)}원(전액 손실)</b> · 기대환수 ${ins.expectedReturn != null ? ins.expectedReturn + '%' : '-'}</div>` : '';
       insBlock = `<div style="margin-top:8px;padding:8px;border:1px dashed #a78bfa;border-radius:7px;background:rgba(167,139,250,.08)">
         <div style="font-weight:800;color:#c4b5fd">🛡️ 보험용 추천 (BMED 보험형 · ${esc(ins.band || '')})</div>
-        <div class="hint" style="margin:2px 0 5px">1착축 ${ins.anchor}번 · 1+2 최다 / 1+3 중간 / 1+4 최소 ${ins.preserved ? '<span style="color:#38d39f">· 원금 보전</span>' : '<span style="color:#ffb020">· 저배당(원금보전 제한)</span>'}</div>
+        <div class="hint" style="margin:2px 0 5px">1착축 ${ins.anchor}번 · ${ins.combos.map((c) => c.label).join(' / ')} 순 배분 ${ins.preserved ? '<span style="color:#38d39f">· 원금 보전</span>' : '<span style="color:#ffb020">· 저배당(원금보전 제한)</span>'}</div>
         ${rows}${sc}
         <div class="hint" style="margin-top:4px;font-size:11px">✅ 정상 추천과 <b>둘 다 확인 후 선택</b>하세요. 보험용은 손실 최소화형입니다.</div></div>`;
     } else if (ins.conditions) {
@@ -2872,9 +2878,35 @@
   }
 
   // [버그2·3] 복승/삼복승 추천 + 예산 배분 금액 표
+  // [보완#1] 복승 배당판 유력/제거 색상 — 말 번호를 유력마(녹색)/제거마(빨강·회색)로 채색.
+  //   유력 = keyHorses ∪ 제거패널 후보(keep/override) · 제거 = 제거패널 eliminated(verdict 🔴/🟠).
+  function _horseRoleMap(a) {
+    const map = {};
+    (a.keyHorses || []).forEach((h) => { map[+h] = 'fav'; });
+    const e = a.elimination || {};
+    (e.horses || []).forEach((h) => {
+      const keep = h.keep || h.override;
+      if (keep) { if (map[+h.no] == null) map[+h.no] = 'fav'; }
+      else { map[+h.no] = (h.verdict === '🔴' ? 'cut' : 'weakcut'); }
+    });
+    return map;
+  }
+  const _ROLE_COLOR = { fav: '#38d39f', cut: '#ef4444', weakcut: '#ff9f43' };
+  // 조합(예 [8,6])을 말별 색상으로 렌더. 유력=녹색굵게 · 확실제거=빨강취소선 · 제거권장=주황
+  function _colorCombo(combo, roleMap) {
+    return (combo || []).map((n) => {
+      const role = roleMap[+n];
+      if (role === 'fav') return `<b style="color:${_ROLE_COLOR.fav}">${n}</b>`;
+      if (role === 'cut') return `<span style="color:${_ROLE_COLOR.cut};text-decoration:line-through">${n}</span>`;
+      if (role === 'weakcut') return `<span style="color:${_ROLE_COLOR.weakcut}">${n}</span>`;
+      return `${n}`;
+    }).join('<span style="color:#8a94a6">+</span>');
+  }
+
   function renderBetRecommend(a, budgetSel) {
     const recs = a.betRecommend || [];
     if (!recs.length) return '';
+    const roleMap = _horseRoleMap(a);   // [보완#1] 유력/제거 색상 맵
     const bEl = document.querySelector(budgetSel || '#tripleBudget');
     const budget = Math.max(0, parseInt((bEl && bEl.value) || '0', 10) || 0);
     const won = (n) => Math.round(n / 100) * 100; // 100원 단위 반올림
@@ -2894,7 +2926,7 @@
       const revBadge = r.reversalPick ? ' <span class="hint" style="font-size:10px;color:#f59e0b;font-weight:700">🔄역배열</span>' : '';
       return `<tr>
         <td><b style="color:${kindColor}">${esc(r.label)}</b>${estBadge}${revBadge}</td>
-        <td style="font-weight:700">${r.combo.join('+')}</td>
+        <td style="font-weight:700">${_colorCombo(r.combo, roleMap)}</td>
         <td>${qTxt}</td>
         <td>${odTxt}</td>
         <td>${r.alloc || 0}%</td>
@@ -2904,7 +2936,10 @@
     const totalAlloc = recs.reduce((s, r) => s + (r.alloc || 0), 0);
     const totalAmt = budget > 0 ? won(budget * totalAlloc / 100) : null;
     const upd = _betUpdatedFlag ? ' <span style="color:#38d39f">⚡ 업데이트됨</span>' : '';
+    // [보완#1] 색상 범례 — 조합 속 말 번호가 유력/제거 어느 쪽인지 한눈에.
+    const legend = `<div class="hint" style="font-size:10px;margin-top:2px">조합 색상: <b style="color:${_ROLE_COLOR.fav}">유력마</b> · <span style="color:${_ROLE_COLOR.weakcut}">제거권장</span> · <span style="color:${_ROLE_COLOR.cut};text-decoration:line-through">확실제거</span></div>`;
     return `<div class="matrix-title" style="font-size:13px">🎯 베팅 추천${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
+      ${legend}
       <table class="data-table" style="margin-top:4px">
         <thead><tr><th>종류</th><th>조합</th><th>신호품질</th><th>예상배당</th><th>배분</th><th>금액</th></tr></thead>
         <tbody>${rows}</tbody>
@@ -4346,18 +4381,24 @@
     const perRace = titles.length
       ? titles.map((t) => {
         const c = state.lastCombined[t] || {};
-        const betTxt = betsForRace(t).map((b) => `${b.type} ${b.combo.join('-')}`).join(' / ') || '추천 없음';
+        const bets = betsForRace(t);
+        const betTxt = bets.map((b) => `${b.type} ${b.combo.join('-')}`).join(' / ') || '추천 없음';
+        // [보완#3] 추천에 포함된 말 번호 집합 — 착순 입력 시 '추천 적중' 여부를 색으로 즉시 표시
+        const recNos = new Set();
+        bets.forEach((b) => (b.combo || []).forEach((n) => recNos.add(+n)));
         return `
-        <div class="bet-box res-block" data-title="${esc(t)}" style="margin-bottom:12px">
+        <div class="bet-box res-block" data-title="${esc(t)}" style="margin-bottom:12px" data-recnos="${[...recNos].join(',')}">
           <h3>${esc(t)} ${c.hadAnomaly ? '<span class="flag flag-must">🔴 이상감지</span>' : ''}</h3>
           <div class="hint">추천: ${esc(betTxt)}</div>
           <div class="cfg-row" style="margin-top:8px">
             <label class="hint">날짜<br><input class="cfg-input res-date" type="date" value="${todayStr()}" /></label>
             <label class="hint">투자금액(원)<br><input class="cfg-input res-stake" type="number" min="0" step="100" value="${c.budget || 0}" style="width:120px" /></label>
-            <label class="hint">1·2·3·4착(콤마)<br><input class="cfg-input res-place" placeholder="3,7,1,5" style="width:130px" /></label>
+            <label class="hint">1·2·3·4착(콤마)<br><input class="cfg-input res-place" placeholder="3,7,1,5" style="width:130px" inputmode="numeric" /></label>
             <label class="hint">수익금액(원)<br><input class="cfg-input res-payout" type="number" min="0" step="100" value="0" style="width:120px" /></label>
-            <button class="btn btn-primary save-result-btn">결과 저장</button>
+            <button class="btn btn-primary save-result-btn" disabled title="착순을 먼저 입력하세요">결과 저장</button>
           </div>
+          <!-- [보완#3] 착순 입력 즉시 미리보기: 착순 칩 + 추천 적중 판정 -->
+          <div class="res-preview hint" style="margin-top:6px;min-height:18px"></div>
         </div>`;
       }).join('')
       : '<p class="hint">분석한 경주가 여기 표시됩니다.</p>';
@@ -4373,6 +4414,49 @@
     $('#resultImgBtn').addEventListener('click', () => $('#resultImgInput').click());
     $('#resultImgInput').addEventListener('change', () => { if ($('#resultImgInput').files[0]) handleResultImage($('#resultImgInput').files[0]); });
     $$('.save-result-btn').forEach((btn) => btn.addEventListener('click', () => saveResult(btn)));
+
+    // [보완#3] 착순 입력 즉시 미리보기 — 각 경주 블록에 라이브 검증/적중판정 연결.
+    //   · 착순을 파싱해 칩으로 표시(추천 포함 말=녹색)
+    //   · 추천 베팅별 ✅적중/❌미적중을 저장 전에 미리 보여줌 → 입력 실수 방지
+    //   · 중복 마번 경고 · 착순 비어있으면 저장 버튼 비활성
+    $$('.res-block').forEach((block) => {
+      const title = block.dataset.title;
+      const placeInp = block.querySelector('.res-place');
+      const preview = block.querySelector('.res-preview');
+      const saveBtn = block.querySelector('.save-result-btn');
+      const recNos = new Set((block.dataset.recnos || '').split(',').filter(Boolean).map(Number));
+      const update = () => {
+        const raw = String(placeInp.value || '').split(/[,\s]+/).map((x) => parseInt(x, 10)).filter((n) => n > 0);
+        if (!raw.length) {
+          preview.innerHTML = '<span class="hint">착순을 입력하면 추천 적중 여부가 여기 표시됩니다.</span>';
+          saveBtn.disabled = true; saveBtn.title = '착순을 먼저 입력하세요';
+          return;
+        }
+        saveBtn.disabled = false; saveBtn.removeAttribute('title');
+        const dup = raw.length !== new Set(raw).size;
+        // 착순 칩: 추천에 포함된 말은 녹색 강조
+        const chips = raw.map((n, i) => {
+          const inRec = recNos.has(n);
+          const col = inRec ? '#38d39f' : '#8a94a6';
+          const wt = inRec ? '700' : '400';
+          return `<span class="chip" style="border-color:${col};color:${col};font-weight:${wt}">${i + 1}착 ${n}${inRec ? ' ⭐' : ''}</span>`;
+        }).join(' ');
+        // 추천 베팅별 적중 판정
+        const bets = betsForRace(title);
+        const judged = bets.map((b) => {
+          const hit = History.judgeHit(b, raw);
+          return `<span class="chip" style="border-color:${hit ? '#38d39f' : '#f87171'};color:${hit ? '#38d39f' : '#f87171'}">${hit ? '✅' : '❌'} ${b.type} ${(b.combo || []).join('-')}</span>`;
+        }).join(' ');
+        const anyHit = bets.some((b) => History.judgeHit(b, raw));
+        const verdict = !bets.length ? '<span class="hint">추천 없음(참고 저장)</span>'
+          : (anyHit ? '<b style="color:#38d39f">🎯 적중! 수익금액을 입력하세요</b>' : '<b style="color:#f87171">미적중</b>');
+        preview.innerHTML = `<div style="margin-bottom:3px">${chips}${dup ? ' <span style="color:#ffb020">⚠️ 중복 마번</span>' : ''}</div>`
+          + (bets.length ? `<div style="margin-bottom:3px">${judged}</div>` : '')
+          + `<div>${verdict}</div>`;
+      };
+      placeInp.addEventListener('input', update);
+      update();
+    });
 
     // [기능2] 분석 리포트의 [결과 입력]으로 넘어온 경우 해당 경주 블록에 포커스
     if (state.pendingResultTitle) {
@@ -4468,7 +4552,8 @@
   function saveResult(btn) {
     const block = btn.closest('.res-block');
     const title = block.dataset.title;
-    const result = (block.querySelector('.res-place').value || '').split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n));
+    // [보완#3] 콤마·공백 모두 허용(미리보기와 동일 파싱) + 0/음수 제외
+    const result = (block.querySelector('.res-place').value || '').split(/[,\s]+/).map((s) => parseInt(s, 10)).filter((n) => n > 0);
     if (!result.length) { toast('착순(1·2·3착)을 입력하세요.'); return; }
     const stake = parseInt(block.querySelector('.res-stake').value, 10) || 0;
     const payout = parseInt(block.querySelector('.res-payout').value, 10) || 0;

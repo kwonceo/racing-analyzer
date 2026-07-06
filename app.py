@@ -2667,11 +2667,22 @@ def _bmed_insurance(key_horses, curQ, signal_confidence, inverse):
             c["ratio"] = r
             c["payoutRatio"] = round(r * c["odds"], 3)
     payouts = [c["payoutRatio"] for c in combos if c.get("payoutRatio") is not None]
+    # [보완#2 BUG A] 중간값 = 정확한 중앙값. 조합 2개(짝수)일 때 sorted[n//2]는 최댓값과 같아져
+    #   '최선==중간'으로 중복 표기되던 버그 → 짝수 개수면 가운데 두 값의 평균으로 산출.
+    def _median(vals):
+        s = sorted(vals); n = len(s)
+        if not n:
+            return None
+        return s[n // 2] if n % 2 else round((s[n // 2 - 1] + s[n // 2]) / 2, 3)
     res.update({
         "band": band, "combos": combos,
         "bestRatio": max(payouts) if payouts else None,
-        "midRatio": sorted(payouts)[len(payouts) // 2] if payouts else None,
+        "midRatio": _median(payouts),
         "worstRatio": min(payouts) if payouts else None,
+        # [보완#2 BUG B] 실제 최악 = 커버 조합 전부 미적중 = 전액 손실(-100%).
+        #   worstRatio(적중 조합 중 최소 회수)를 '최악'으로 오인 표기하던 것을 프론트에서 구분하도록
+        #   allMissRatio(=0, 전액손실) 필드를 명시 제공한다.
+        "allMissRatio": 0.0 if combos else None,
         "preserved": bool(payouts and all(p >= 1.0 for p in payouts)),   # 모든 조합 적중 시 원금 이상
         "expectedReturn": _expected_return(combos, curQ)[0] if combos else None,
     })
