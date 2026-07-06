@@ -19,6 +19,7 @@
   try {
     var ID_CHIP = 'kbOvToggle', ID_PANEL = 'kbOvPanel';
     var enabled = false, killed = false, timer = null;
+    var savedPos = null;   // [보완#2] 사용자가 드래그해 옮긴 패널 위치({left,top}) — chrome.storage 에 저장/복원
 
     // 안전한 요소 생성 헬퍼 (div/span/button 만 사용)
     function mk(tag, css, text) {
@@ -45,6 +46,46 @@
       var m = Math.floor(s / 60);
       var ss = String(s % 60).padStart(2, '0');
       return m + '분 ' + ss + '초';
+    }
+
+    // [보완#2] 저장된 위치를 패널에 적용(없으면 기본 우측상단 유지)
+    function applyPos(panel) {
+      try {
+        if (savedPos && typeof savedPos.left === 'number' && typeof savedPos.top === 'number') {
+          panel.style.left = savedPos.left + 'px';
+          panel.style.top = savedPos.top + 'px';
+          panel.style.right = 'auto';
+        }
+      } catch (_) { /* */ }
+    }
+
+    // [보완#2] 헤더 드래그로 패널 이동 + 종료 시 위치 저장. (닫기 ✕ 버튼 클릭은 드래그 제외)
+    function startDrag(e) {
+      try {
+        if (e.target && e.target.tagName === 'BUTTON') return;   // ✕ 버튼은 드래그 아님
+        e.preventDefault();
+        var panel = byId(ID_PANEL);
+        if (!panel) return;
+        var rect = panel.getBoundingClientRect();
+        var offX = e.clientX - rect.left, offY = e.clientY - rect.top;
+        function move(ev) {
+          try {
+            var left = Math.max(0, Math.min((window.innerWidth || 1200) - 40, ev.clientX - offX));
+            var top = Math.max(0, Math.min((window.innerHeight || 800) - 20, ev.clientY - offY));
+            panel.style.left = left + 'px';
+            panel.style.top = top + 'px';
+            panel.style.right = 'auto';
+            savedPos = { left: left, top: top };
+          } catch (_) { /* */ }
+        }
+        function up() {
+          try { document.removeEventListener('mousemove', move); } catch (_) { /* */ }
+          try { document.removeEventListener('mouseup', up); } catch (_) { /* */ }
+          try { chrome.storage.local.set({ overlayPos: savedPos }); } catch (_) { /* */ }
+        }
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+      } catch (_) { /* 드래그 실패는 무시 */ }
     }
 
     // chrome.storage 읽기(오류 시 빈 객체)
@@ -89,8 +130,10 @@
         var d = (st.analyzeStatus && st.analyzeStatus.data) || null;
         var deadline = st.timerDeadline || 0;
 
-        // 헤더 + 닫기(✕)
-        var head = mk('div', 'display:flex;align-items:center;justify-content:space-between;margin-bottom:6px');
+        // 헤더 + 닫기(✕) — [보완#2] 헤더를 잡고 드래그하면 패널 이동
+        var head = mk('div', 'display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;cursor:move');
+        head.title = '드래그하여 위치 이동';
+        head.addEventListener('mousedown', startDrag);
         head.appendChild(mk('span', 'font-weight:800;color:#c4b5fd', '📊 실시간 분석'));
         var x = mk('button', 'all:unset;cursor:pointer;color:#94a3b8;font:700 14px sans-serif;padding:0 2px', '✕');
         x.title = '오버레이 끄기';
@@ -177,7 +220,7 @@
           if (timer) { clearInterval(timer); timer = null; }
           return;
         }
-        if (!panel) { panel = mk('div', PANEL_CSS); panel.id = ID_PANEL; root().appendChild(panel); }
+        if (!panel) { panel = mk('div', PANEL_CSS); panel.id = ID_PANEL; root().appendChild(panel); applyPos(panel); }
         readData().then(function (st) { var p = byId(ID_PANEL); if (p && enabled && !killed) updatePanel(p, st); });
         // 2초 주기 경량 갱신(카운트다운/데이터) — storage 읽기만
         if (!timer) {
@@ -193,10 +236,11 @@
 
     // ── 초기화 ──────────────────────────────────────────────────────────
     try {
-      chrome.storage.local.get({ overlayEnabled: false, overlayKill: false }, function (v) {
+      chrome.storage.local.get({ overlayEnabled: false, overlayKill: false, overlayPos: null }, function (v) {
         try {
           killed = !!(v && v.overlayKill);
           enabled = !!(v && v.overlayEnabled);
+          savedPos = (v && v.overlayPos) || null;   // [보완#2] 저장된 위치 복원
           if (killed) { removeAll(); return; }
           render();
         } catch (_) { /* */ }
@@ -206,6 +250,7 @@
         try {
           if (area !== 'local') return;
           if (ch.overlayKill) { killed = !!ch.overlayKill.newValue; if (killed) removeAll(); else render(); return; }
+          if (ch.overlayPos) { savedPos = ch.overlayPos.newValue || null; }   // [보완#2] 위치 동기화(다른 탭 반영)
           if (ch.overlayEnabled) { enabled = !!ch.overlayEnabled.newValue; render(); }
           if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline) && enabled && !killed) render();
         } catch (_) { /* */ }

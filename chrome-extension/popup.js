@@ -14,6 +14,7 @@ const els = {
   srvText: $('srvText'),
   raceKey: $('raceKey'),
   autoSend: $('autoSend'),
+  overlayEnabled: $('overlayEnabled'),   // [보완#1] 배당판 오버레이 ON/OFF
   interval: $('interval'),
   autoMode: $('autoMode'),
   market: $('market'),
@@ -62,9 +63,10 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', market: 'auto', japanType: 'local', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null },
+    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', market: 'auto', japanType: 'local', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null, overlayEnabled: false },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
+      if (els.overlayEnabled) els.overlayEnabled.checked = !!v.overlayEnabled;   // [보완#1] 오버레이 상태 복원
       els.interval.value = String(v.intervalSec || 30);
       els.autoMode.value = v.autoMode || 'triple';
       if (els.market) els.market.value = v.market || 'auto';
@@ -124,6 +126,11 @@ async function activeKeibaTab() {
 }
 
 // ── 이벤트 바인딩 ───────────────────────────────────────────────────
+// [보완#1] 오버레이 토글 — chrome.storage 에 저장하면 overlay.js 가 onChanged 로 즉시 반영.
+//   배당판을 열지 않아도 미리 ON/OFF 설정 가능(수집 로직과 무관).
+if (els.overlayEnabled) els.overlayEnabled.addEventListener('change', () => {
+  chrome.storage.local.set({ overlayEnabled: els.overlayEnabled.checked });
+});
 els.autoSend.addEventListener('change', () => {
   chrome.storage.local.set({ autoSend: els.autoSend.checked });
 });
