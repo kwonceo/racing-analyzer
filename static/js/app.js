@@ -2492,8 +2492,9 @@
       + confRows.slice(0, 8).map((h) => `<tr><td><b style="color:${h.grade === '🔴' ? '#ef4444' : '#ffd24f'}">${h.grade} ${h.confidence}</b></td><td>${h.no}번</td><td>${h.excessScore}</td><td>${h.reversalScore}</td><td>${h.mismatchScore}</td></tr>`).join('')
       + `</tbody></table>` : '';
     const wx = sq.winExactaReversals || [];
-    const wxHtml = wx.length ? `<div class="hint" style="margin:8px 0 2px">🔄 <b>쌍승 역전 감지</b>(단승 유력마 vs 쌍승 방향) — 역전비율 &lt;0.95 🟡 · &lt;0.80 🔴 · &lt;0.60 🔴🔴</div>`
-      + wx.slice(0, 5).map((r) => `<div style="margin:2px 0"><span class="chip ${/🔴/.test(r.level) ? 'chip-red' : ''}">${r.level} ${r.challenger}번</span> <span class="hint">${esc(r.text)}</span></div>`).join('') : '';
+    const wxMulti = wx.some((r) => r.multiRank);
+    const wxHtml = wx.length ? `<div class="hint" style="margin:8px 0 2px">🔄 <b>쌍승 역전 감지</b>(단승 유력마 vs 쌍승 방향) — 역전비율 &lt;0.95 🟡 · &lt;0.80 🔴 · &lt;0.60 🔴🔴${wxMulti ? ' · <b>상위권 순위쌍 역전 포함</b>(강한 역전만)' : ''}</div>`
+      + wx.slice(0, 5).map((r) => `<div style="margin:2px 0"><span class="chip ${/🔴/.test(r.level) ? 'chip-red' : ''}">${r.level} ${r.challenger}번</span>${r.multiRank ? ` <span class="chip" style="border-color:#a78bfa;color:#a78bfa">${r.favRank}·${r.chalRank}위간</span>` : ''} <span class="hint">${esc(r.text)}</span></div>`).join('') : '';
     const mm = sq.quinellaMismatch;
     const mmHtml = mm ? `<div class="hint" style="margin:8px 0 2px">⚠️ <b>복승 불일치 감지</b>(단승 예상 vs 실제 최저) — 1.2+ 🟡 · 1.5+ 🔴 · 2.0+ 🔴🔴</div>`
       + `<div style="margin:2px 0"><span class="chip ${/🔴/.test(mm.level) ? 'chip-red' : ''}">${mm.level} 불일치 ${mm.ratio}</span> <span class="hint">${esc(mm.text)}</span></div>` : '';

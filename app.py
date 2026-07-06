@@ -2148,34 +2148,70 @@ def _combo_signal_quality(combo, excess):
 
 
 # ───────── [핵심 이상감지 수학 공식] 쌍승역전·복승불일치·종합신뢰도 ─────────
-def _win_exacta_reversal(fav_rank, curD):
+def _reversal_level(ratio):
+    """역전비율(<1)을 등급으로. <0.60 압도적 / <0.80 강한 / <0.95 역전 / 그 외 신호없음(None)."""
+    if ratio < 0.60:
+        return "🔴🔴", "압도적 역전"
+    if ratio < 0.80:
+        return "🔴", "강한 역전"
+    if ratio < 0.95:
+        return "🟡", "역전 신호"
+    return None, None
+
+
+def _win_exacta_reversal(fav_rank, curD, max_rank=4):
     """[1번] 쌍승 역전 감지 공식. 단승 유력마 A vs 다른 말 B 방향 비교.
       역전비율 = 쌍승(B→A) / 쌍승(A→B).  A가 유력한데 B→A가 더 싸면(비율<1) 시장은 B를 실질 1착으로 봄.
         <0.95 🟡 역전 / <0.80 🔴 강한역전 / <0.60 🔴🔴 압도적역전.
-      (단승 미수집(일본)이면 복승인기 순위를 유력마 순위로 대체.)"""
+      (단승 미수집(일본)이면 복승인기 순위를 유력마 순위로 대체.)
+      [다중순위 확장] 1위(primary) 기준 역전을 먼저(강한 순) 반환하고,
+        상위권(최대 max_rank위) 다른 순위쌍(2·3·4위 간) 역전을 뒤에 덧붙인다(multiRank=True).
+        하위 순위쌍은 노이즈가 크므로 강한 역전(<0.80)만 채택. primary가 항상 앞이라
+        wx[0]·[:3]·[:5] 을 쓰는 기존 소비처 동작은 그대로 유지된다."""
     out = []
     if not fav_rank or not curD:
         return out
-    a = fav_rank[0]                     # 최유력마(단승 1위 또는 복승인기 1위)
-    for b in fav_rank[1:]:
+
+    def _mk(a, b, ai, bi, multi):
         ab, ba = curD.get((a, b)), curD.get((b, a))
         if not ab or not ba or ab <= 0:
-            continue
+            return None
         ratio = round(ba / ab, 3)      # <1 = B→A(=B 1착)가 더 쌈 = 역전
-        if ratio < 0.60:
-            lvl, tag = "🔴🔴", "압도적 역전"
-        elif ratio < 0.80:
-            lvl, tag = "🔴", "강한 역전"
-        elif ratio < 0.95:
-            lvl, tag = "🟡", "역전 신호"
-        else:
-            continue
-        out.append({"favorite": a, "challenger": b, "ratio": ratio, "level": lvl, "tag": tag,
-                    "favoredExacta": ab, "reverseExacta": ba,
-                    "text": f"🔄 역전감지: 단승 {a}번 유력이나 쌍승에서 {b}번 1착({ba})이 "
-                            f"{a}번 1착({ab})보다 낮음 → 실질 1착: {b}번 가능성 ({tag} {ratio})"})
-    out.sort(key=lambda r: r["ratio"])   # 가장 강한 역전(비율 작은) 먼저
-    return out
+        if multi and ratio >= 0.80:    # 다중순위(하위)는 강한 역전만 — 노이즈 억제
+            return None
+        lvl, tag = _reversal_level(ratio)
+        if lvl is None:
+            return None
+        base = {"favorite": a, "challenger": b, "ratio": ratio, "level": lvl, "tag": tag,
+                "favoredExacta": ab, "reverseExacta": ba,
+                "favRank": ai + 1, "chalRank": bi + 1, "multiRank": multi}
+        if multi:
+            base["text"] = (f"🔄 역전감지[{ai + 1}·{bi + 1}위 간]: 단승 {a}번({ai + 1}위) vs {b}번({bi + 1}위) — "
+                            f"쌍승 {b}→{a}({ba})가 {a}→{b}({ab})보다 낮음 → 상위권 실질순위 역전: {b}번 우세 ({tag} {ratio})")
+        else:                          # 기존 primary 문구 그대로 보존
+            base["text"] = (f"🔄 역전감지: 단승 {a}번 유력이나 쌍승에서 {b}번 1착({ba})이 "
+                            f"{a}번 1착({ab})보다 낮음 → 실질 1착: {b}번 가능성 ({tag} {ratio})")
+        return base
+
+    # primary: 최유력마(1위) vs 나머지 — 기존 동작(임계 0.95)
+    primary = []
+    for bi, b in enumerate(fav_rank[1:], start=1):
+        it = _mk(fav_rank[0], b, 0, bi, False)
+        if it:
+            primary.append(it)
+    primary.sort(key=lambda r: r["ratio"])
+
+    # multiRank: 상위권 다른 순위쌍(ai>=1, ai<bi) 역전 — 강한 역전(<0.80)만
+    multi = []
+    top = fav_rank[:max_rank]
+    for ai in range(1, len(top)):
+        for bi in range(ai + 1, len(top)):
+            it = _mk(top[ai], top[bi], ai, bi, True)
+            if it:
+                multi.append(it)
+    multi.sort(key=lambda r: r["ratio"])
+
+    return primary + multi
 
 
 def _quinella_mismatch(fav_rank, curQ):
