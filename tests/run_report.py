@@ -184,6 +184,24 @@ ok(_ta <= 18.5, f"삼복승 총 배분 ≤18% 소액 유지(실제 {round(_ta,1)
 _main_t = next((b for b in tri_bets if b.get("label") == "삼복승 메인"), None)
 ok(_main_t and (_main_t.get("expOdds") is not None or _main_t.get("expOddsEst") is not None), "삼복승 메인 추정배당 채움")
 
+print("[7] 실시간 분석 유지 — baseline 확립 가드")
+_stable = [{"combo": [1, 2], "odds": 10}, {"combo": [1, 3], "odds": 12}, {"combo": [2, 3], "odds": 15},
+           {"combo": [1, 4], "odds": 20}, {"combo": [2, 4], "odds": 22}]
+_blip = [{"combo": [1, 2], "odds": 0.5}, {"combo": [1, 3], "odds": 0.5}, {"combo": [2, 3], "odds": 0.6},
+         {"combo": [1, 4], "odds": 0.7}, {"combo": [2, 4], "odds": 0.6}]
+ok(app._baseline_reset_needed(_stable, _blip) is True, "블립(다수 90%+ 급락) divergence 감지")
+ok(app._baseline_reset_needed(_stable, _stable) is False, "안정 배당은 divergence 아님")
+# ingest 확립 가드 재현: baseline_reset = (미확립) and divergence
+
+
+def _guard(prev_hist_len, prev_q, cur_q):
+    _est = prev_hist_len >= 4
+    return (not _est) and bool(prev_q and app._baseline_reset_needed(prev_q, cur_q))
+
+
+ok(_guard(1, _stable, _blip) is True, "미확립(1스냅샷)+블립 → 초기화(잔존배당 방어)")
+ok(_guard(5, _stable, _blip) is False, "확립(5스냅샷)+블립 → 초기화 안 함(초반 되돌이 제거)")
+
 print("=" * 56)
 print(f"결과: 통과 {PASS} / 실패 {FAIL}")
 print("=" * 56)

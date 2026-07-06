@@ -1153,7 +1153,12 @@ def triple_ingest():
     # 변동 추적용 히스토리(최근 12회) — 직전 대비 급락/순위/역전 계산에 사용
     prev_hist = prev.get("history") or []
     # [1·3번] 경주 전환 방어: 직전 배당 대비 다수 조합 95%+ 급락 = 다른 경주 잔존 → 기준값 재설정
-    baseline_reset = bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q))
+    #   [실시간 분석 유지 버그수정] 확립된 baseline(4+스냅샷)은 배당 휴리스틱으로 초기화하지 않는다.
+    #   초반(미확립·다른 경주 잔존 배당)만 즉시 초기화하고, 확립 후 경주 전환은 raceKey 변경으로 처리
+    #   (확장이 경주 바뀌면 새 rk → 새 레코드로 자연히 fresh 시작). 변동성 큰 배당의 단발 블립으로
+    #   분석이 '초반(기준값 재설정)'으로 되돌아가던 버그 제거.
+    _established = len(prev_hist) >= 4
+    baseline_reset = (not _established) and bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q))
     hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주) 배당 완전 제거
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
     hist = hist[-12:]
@@ -2681,7 +2686,9 @@ def _triple_analyze(rk, rec):
     prevQ = _odds_map_un(prev.get("quinella")) if prev else {}
 
     # [경주전환 방어] 직전 대비 다수 조합 95%+ 급락 = 다른 경주 배당 잔존 → 기준값 재설정(변동 계산 안 함)
-    baseline_reset = bool(prev and _baseline_reset_needed(prev.get("quinella"), quin))
+    #   [실시간 분석 유지 버그수정] 확립된 baseline(5+스냅샷)은 단발 블립으로 '재설정' 표시하지 않음
+    #   (분석이 초반으로 되돌아가는 현상 방지). 개별 95%+ 급락은 아래 필터가 이미 제외.
+    baseline_reset = bool(prev and _baseline_reset_needed(prev.get("quinella"), quin) and len(hist) <= 4)
     # [첫수집 방어] 첫 비교(수집 2건뿐)는 첫 수집 배당이 불안정(못 가져옴/시장 형성 초기 고배당)해
     #   가짜 급락(-90%대)이 뜬다 → 1틱 워밍업: 2번째 수집을 기준으로만 두고 급락 계산 보류(3번째부터 계산).
     market_forming = (len(hist) == 2)

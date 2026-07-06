@@ -3718,10 +3718,27 @@
     onJapanOddsUpdate(rk, a);
   }
 
-  /** [6번] 신규 변동 감지 → 토스트+소리(복승/쌍승 급락·역전) / 타임라인 누적 */
+  /** [6번] 신규 변동 감지 → 토스트+소리(복승/쌍승 급락·역전) / 타임라인 누적
+   *  [실시간 분석 유지 버그수정] ①경주 전환(raceKey 변경) 시에만 경고 상태 초기화.
+   *  ②기준값 설정/재설정 상태(변동 계산 안 함)에서는 경고·prev 갱신 생략 → 초반 되돌이·중복 경고 방지. */
   function onJapanOddsUpdate(rk, a) {
-    const firstLink = !state.jpTimeline || !state.jpTimeline.length;
+    // [3번] 경주 전환 시에만 초기화 — raceKey 가 바뀌면 이전 경주 경고/타임라인 리셋
+    if (state.jpCurrentRk && state.jpCurrentRk !== rk) {
+      state.jpOddsPrev = new Set();
+      state.jpTimeline = [];
+    }
+    state.jpCurrentRk = rk;
     const hhmmss = new Date().toTimeString().slice(0, 8);
+    // [1·2번] 기준값 설정/재설정 = 변동 계산 안 함 → 경고·prev 갱신 생략(신호 유지, 되돌이 방지)
+    if (a.baselineSet || a.baselineReset) {
+      const tl0 = state.jpTimeline || (state.jpTimeline = []);
+      tl0.push({ time: hhmmss, raceKey: rk, changed: false, baseline: true,
+        signals: [{ level: '🎯', type: '기준', text: a.baselineReset ? '기준값 재설정' : '기준값 설정', detail: '' }] });
+      if (tl0.length > 200) tl0.splice(0, tl0.length - 200);
+      renderJapanTimeline();
+      return;   // prev(jpOddsPrev) 유지 → 신호 복귀 시 재경고 안 함
+    }
+    const firstLink = !state.jpTimeline || !state.jpTimeline.length;
     // 일본: 복승/쌍승 급락·역전 이상감지 (단승 제거)
     const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '역전' || s.type === '대규모급락');
     const prev = state.jpOddsPrev || new Set();
