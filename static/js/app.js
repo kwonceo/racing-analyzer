@@ -2854,8 +2854,16 @@
     (adv.velocity || []).slice(0, 3).forEach((v) => advParts.push(`<div style="margin:2px 0"><span class="chip ${v.level === '🔴' ? 'chip-red' : ''}">${v.level} 급락속도</span> <span class="hint">${v.combo[0]}+${v.combo[1]} 분당 <b>${v.speed}%</b> (${Math.abs(v.pct)}%/${v.minutes}분)</span></div>`));
     Object.values(adv.streaks || {}).forEach((s) => advParts.push(`<div style="margin:2px 0"><span class="chip ${s.type === '연속하락' ? 'chip-red' : ''}">${s.type === '연속하락' ? '🔴 연속하락 +20' : '🟡 단발반등 −15'}</span> <span class="hint">${s.combo[0]}+${s.combo[1]}</span></div>`));
     (adv.fakes || []).forEach((f) => advParts.push(`<div style="margin:2px 0"><span class="chip chip-yellow">⚠️ 페이크 의심</span> <span class="hint">${f.combo[0]}+${f.combo[1]} 급락후반등 (${f.seq.join('→')})</span></div>`));
-    if (adv.overround && adv.overround.concentrated) advParts.push(`<div style="margin:2px 0"><span class="chip" style="border-color:#ff9f43;color:#ff9f43">🟠 자금집중</span> <span class="hint">상위 3조합이 전체의 <b>${Math.round(adv.overround.top3Share * 100)}%</b> 점유 (역수합 ${adv.overround.invSum})</span></div>`);
-    const advHtml = advParts.length ? `<div class="hint" style="margin:8px 0 2px">⚡ <b>실시간 이상감지 고도화</b>(급락속도·연속성·페이크·자금집중)</div>${advParts.join('')}` : '';
+    // [4번] 말별 연속 하락 등급 — 확정신호(3회+)·약한신호(2회) 우선, 반등=페이크 · 후보(1회)는 생략
+    Object.values(adv.horseStreaks || {})
+      .filter((h) => h.rebounded || h.count >= 2)
+      .sort((a, b) => (b.count - a.count))
+      .forEach((h) => {
+        const red = h.count >= 3 && !h.rebounded;
+        advParts.push(`<div style="margin:2px 0"><span class="chip ${red ? 'chip-red' : (h.rebounded ? '' : 'chip-yellow')}" ${h.rebounded ? 'style="border-color:#fb923c;color:#fb923c"' : ''}>${h.level} ${h.rebounded ? '페이크의심' : h.count + '회연속하락'}</span> <span class="hint"><b>${h.no}번</b> ${esc(h.label)} (${(h.series || []).join('→')})</span></div>`);
+      });
+    if (adv.overround && adv.overround.concentrated) advParts.push(`<div style="margin:2px 0"><span class="chip" style="border-color:#ff9f43;color:#ff9f43">🟠 자금집중</span> <span class="hint">상위 3조합이 전체의 <b>${Math.round(adv.overround.top3Share * 100)}%</b> 점유 (환급률 ${adv.overround.refundRate != null ? adv.overround.refundRate : adv.overround.invSum})</span></div>`);
+    const advHtml = advParts.length ? `<div class="hint" style="margin:8px 0 2px">⚡ <b>실시간 이상감지 고도화</b>(급락속도·연속하락·페이크·자금집중)</div>${advParts.join('')}` : '';
     return `<div style="margin:8px 0;border:1px solid var(--border);border-radius:8px;padding:8px">
       <div class="matrix-title" style="font-size:14px">🎯 신호 품질 분석 <span class="hint" style="font-weight:400">노이즈 제거 · 자금 집중 감지</span></div>
       <div style="margin:3px 0"><span class="chip" style="border-color:${stColor};color:${stColor}">${esc(st.name || '일반')}</span> <span class="hint">가중치 전적 <b>${Math.round((st.formW || 0.5) * 100)}%</b> · 신호 <b>${Math.round((st.signalW || 0.5) * 100)}%</b> · ${esc(st.note || '')}</span></div>
@@ -3733,7 +3741,7 @@
   function onKoreaOddsUpdate(title, race, raceKey, a, firstLink) {
     const now = new Date();
     const hhmmss = now.toTimeString().slice(0, 8);
-    const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '역전' || s.type === '대규모급락');
+    const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '단승급락' || s.type === '역전' || s.type === '대규모급락');
     const prev = state.koreaOddsPrev[title] || new Set();
     const fresh = signals.filter((s) => !prev.has(s.text));   // 직전에 없던 신규 변동만
 
@@ -4110,7 +4118,7 @@
     }
     const firstLink = !state.jpTimeline || !state.jpTimeline.length;
     // 일본: 복승/쌍승 급락·역전 이상감지 (단승 제거)
-    const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '역전' || s.type === '대규모급락');
+    const signals = (a.signals || []).filter((s) => s.type === '급락' || s.type === '단승급락' || s.type === '역전' || s.type === '대규모급락');
     const prev = state.jpOddsPrev || new Set();
     const fresh = signals.filter((s) => !prev.has(s.text));
 
@@ -4144,7 +4152,7 @@
 
   /** 복승/쌍승 급락·역전 이상감지 신호 렌더 (단승 제거) — [3번] 🔴상/🟡중/🟢하 단순화 */
   function renderJapanSignals(signals) {
-    return renderSignalsSimple(signals, '⚠️ 이상감지 (복승·쌍승·삼복승)', (s) => s.type === '급락' || s.type === '역전');
+    return renderSignalsSimple(signals, '⚠️ 이상감지 (복승·쌍승·삼복승)', (s) => s.type === '급락' || s.type === '단승급락' || s.type === '역전');
   }
 
   /** 실시간 배당 통합분석 결과 렌더(유력마·이상감지·베팅) — 단승 제거 */
