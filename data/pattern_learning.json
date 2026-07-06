@@ -132,6 +132,19 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1783258003.4891813
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사세보 1경주",
+      "total_combos_dropped": 10,
+      "drop_ratio": 0.667,
+      "result": "1+2",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": "-28.3%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783381031.9536397
     }
   ],
   "condition_stats": {
@@ -144,11 +157,11 @@
       "hit": 2
     },
     "대규모급락": {
-      "count": 9,
+      "count": 10,
       "high_odds": 0,
       "recommended_hit": 1,
       "high_odds_rate": 0.0,
-      "hit_rate": 11.1
+      "hit_rate": 10.0
     }
   }
 }

@@ -1,0 +1,179 @@
+{
+ "race_id": "2026_07_07_사세보_1경주",
+ "raceKey": "사세보 1경주",
+ "date": "2026-07-07",
+ "track": "사세보",
+ "round": 1,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 10,
+ "result": {
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 4
+ },
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    4,
+    5
+   ],
+   "horse": 4,
+   "drop_rate": -80.6,
+   "excess_drop": -17.5
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    3,
+    4
+   ],
+   "horse": 3,
+   "drop_rate": -77.5,
+   "excess_drop": -7.4
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    4,
+    6
+   ],
+   "horse": 4,
+   "drop_rate": -75.0,
+   "excess_drop": -17.5
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    3,
+    6
+   ],
+   "horse": 3,
+   "drop_rate": -64.7,
+   "excess_drop": -7.4
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    5,
+    6
+   ],
+   "horse": 5,
+   "drop_rate": -58.8,
+   "excess_drop": -1.7
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    2,
+    6
+   ],
+   "horse": 2,
+   "drop_rate": -50.9,
+   "excess_drop": 9.8
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    3,
+    5
+   ],
+   "horse": 3,
+   "drop_rate": -50.2,
+   "excess_drop": -7.4
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    2,
+    5
+   ],
+   "horse": 2,
+   "drop_rate": -45.0,
+   "excess_drop": 9.8
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    1,
+    3
+   ],
+   "horse": 1,
+   "drop_rate": -36.7,
+   "excess_drop": 22.7
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    2,
+    4
+   ],
+   "horse": 2,
+   "drop_rate": -36.4,
+   "excess_drop": 9.8
+  }
+ ],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   10
+  ],
+  "eliminated": [
+   8,
+   9
+  ],
+  "recommend_main": "1+4",
+  "recommend_sub": "1+6",
+  "strategy": "BMED_분산형",
+  "signal_quality": "상",
+  "confidence": 75.0,
+  "inverse": true
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중 · 4+5 복승 급락(-80.6%) → 4번 입상 적중 · 역배열 감지말 4번 입상 · 제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [
+   "급락50+",
+   "복승불일치"
+  ],
+  "anomaly_correct": true,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 1000.0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 2.7,
+  "trifecta_odds": 3.8,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-07 08:37:11",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
