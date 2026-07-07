@@ -1368,6 +1368,15 @@
     for (const a of document.querySelectorAll('a[href*="keiba.go.jp"], a[href*="k_raceDate"]')) {
       const p = debaParamsFromUrl(a.getAttribute('href') || ''); if (p) return p;
     }
+    // [출마표 버튼] asyukk 지방경마의 [출마표]는 <input onclick="window.open('...DebaTable?k_raceDate=..&k_raceNo=..&k_babaCode=..')">
+    //   형태라 a[href] 스캔에 안 잡힘 → onclick 속성에서 keiba DebaTable URL 을 직접 추출(사용자 요청).
+    //   (출마표2=rakuten 은 k_raceDate 가 없어 자연히 제외됨)
+    for (const el of document.querySelectorAll('[onclick]')) {
+      const oc = el.getAttribute('onclick') || '';
+      if (!/k_raceDate/i.test(oc)) continue;
+      const m = oc.match(/https?:\/\/[^'"\\)\s]*k_raceDate[^'"\\)\s]*/i);
+      if (m) { const p = debaParamsFromUrl(m[0].replace(/&amp;/g, '&')); if (p) { console.log('[전적수집] 출마표 버튼 onclick에서 DebaTable 파라미터 추출:', p); return p; } }
+    }
     // 마지막 수단: keiba DebaTable 방문 시 저장해 둔 파라미터
     return new Promise((resolve) => {
       try { chrome.storage.local.get({ lastDebaParams: null }, (v) => resolve(v.lastDebaParams || null)); }
