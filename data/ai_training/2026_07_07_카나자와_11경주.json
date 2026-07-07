@@ -1,0 +1,257 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_07_카나자와_11경주",
+ "race_info": {
+  "date": "2026-07-07",
+  "track": "카나자와",
+  "round": 11,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 10,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 2,
+   "name": "フジエース",
+   "jockey": "中村太（ばんえい）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    1,
+    2,
+    1,
+    6
+   ],
+   "record_score": 100.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "サクラジェームス",
+   "jockey": "今井千（ばんえい）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    2,
+    4,
+    4,
+    2
+   ],
+   "record_score": 82.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "サトノプリンス",
+   "jockey": "金田利（ばんえい）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    2,
+    2,
+    2
+   ],
+   "record_score": 53.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "マツサンブラック",
+   "jockey": "鈴木恵（ばんえい）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    1,
+    1,
+    6,
+    5
+   ],
+   "record_score": 50.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "コウイッテン",
+   "jockey": "西謙一（ばんえい）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    5,
+    1,
+    1,
+    5
+   ],
+   "record_score": 35.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "トカチリキ",
+   "jockey": "西将太（ばんえい）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    2,
+    8,
+    8,
+    5
+   ],
+   "record_score": 22.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "サカノキンショウ",
+   "jockey": "船山蔵（ばんえい）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    4,
+    3,
+    3,
+    6
+   ],
+   "record_score": 20.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "ミストレンタ",
+   "jockey": "菊池一（ばんえい）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    7,
+    6,
+    1,
+    1
+   ],
+   "record_score": 10.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "トップギヤ",
+   "jockey": "長澤幸（ばんえい）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    10,
+    9,
+    2,
+    3
+   ],
+   "record_score": 6.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 10,
+   "name": "ニジイロアオゾラ",
+   "jockey": "島津新（ばんえい）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    8,
+    7,
+    8,
+    7
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": null,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   5,
+   6,
+   7,
+   9
+  ],
+  "eliminated": [
+   4,
+   8,
+   10
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 5,
+  "2nd": 9,
+  "3rd": 3,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 5,
+  "second": 9,
+  "odds_range": null
+ },
+ "saved_at": "2026-07-07 23:23:57",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

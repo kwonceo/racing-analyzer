@@ -13,25 +13,68 @@
  },
  "horses": [],
  "odds_features": {
-  "timeline": [],
+  "timeline": [
+   {
+    "time": "14:08:10",
+    "quinella": {
+     "2+4": 2.1,
+     "3+4": 6.7,
+     "4+8": 8.9,
+     "2+3": 9.6,
+     "4+5": 10.0,
+     "3+5": 14.9,
+     "2+8": 15.4,
+     "2+5": 19.8,
+     "4+7": 25.7,
+     "3+8": 29.5,
+     "5+8": 45.3,
+     "2+7": 56.0,
+     "4+6": 58.8,
+     "7+8": 61.3,
+     "3+7": 62.4,
+     "5+7": 109.6,
+     "1+4": 118.4,
+     "2+6": 165.4,
+     "3+6": 170.8,
+     "5+6": 231.5,
+     "6+8": 254.1,
+     "6+7": 267.2,
+     "1+3": 306.5,
+     "1+2": 347.3,
+     "1+7": 385.9,
+     "1+6": 434.2,
+     "1+5": 521.0,
+     "1+8": 744.3
+    }
+   }
+  ],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
-  "exacta_reversal": false,
-  "reversal_ratio": null,
+  "exacta_reversal": true,
+  "reversal_ratio": 0.376,
   "quinella_mismatch": null,
-  "refund_rate": null,
+  "refund_rate": 0.745,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
  },
  "prediction": {
-  "candidates": [],
+  "candidates": [
+   2,
+   3,
+   4,
+   5,
+   7,
+   8,
+   6,
+   1
+  ],
   "eliminated": [],
-  "recommend": null,
-  "strategy": null,
-  "confidence": 0,
-  "signal_quality": null
+  "recommend": "2+4",
+  "strategy": "BMED_역배열형",
+  "confidence": 35.0,
+  "signal_quality": "하"
  },
  "result": {
   "1st": 4,
@@ -40,24 +83,23 @@
   "4th": null,
   "quinella_odds": null,
   "exacta_odds": null,
-  "hit": false,
-  "hit_pattern": null
+  "hit": true,
+  "hit_pattern": "전적유력마 2번 적중 · 역배열 감지말 3·2번 입상"
  },
  "labels": {
-  "quinella_hit": false,
+  "quinella_hit": true,
   "winner": 4,
   "second": 2,
   "odds_range": null
  },
- "saved_at": "2026-07-07 16:43:34",
+ "saved_at": "2026-07-07 23:23:52",
  "quality": {
-  "score": 20,
+  "score": 40,
   "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
-   "이상감지 결과",
    "전적 데이터",
    "확정 배당"
   ],

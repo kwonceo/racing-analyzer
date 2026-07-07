@@ -182,23 +182,100 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1783390772.124346
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "카나자와 2경주",
+      "total_combos_dropped": 39,
+      "drop_ratio": 0.709,
+      "result": "4+11",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783434231.9800532
+    },
+    {
+      "race": "모리오카 11경주",
+      "horse_no": 8,
+      "recent_avg": 7.8,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-07"
+    },
+    {
+      "race": "모리오카 11경주",
+      "horse_no": 7,
+      "recent_avg": 7.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-07"
+    },
+    {
+      "race": "모리오카 11경주",
+      "horse_no": 3,
+      "recent_avg": 7.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-07"
+    },
+    {
+      "race": "카나자와 10경주",
+      "horse_no": 2,
+      "recent_avg": 5.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-07"
+    },
+    {
+      "race": "카나자와 10경주",
+      "horse_no": 4,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-07"
+    },
+    {
+      "race": "카나자와 10경주",
+      "horse_no": 8,
+      "recent_avg": 9.4,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-07"
+    },
+    {
+      "race": "카나자와 11경주",
+      "horse_no": 3,
+      "recent_avg": 4.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-07"
+    },
+    {
+      "race": "카와사키 12경주",
+      "horse_no": 6,
+      "recent_avg": 5.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-07"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 18,
-      "hit": 5
+      "count": 53,
+      "hit": 13
     },
     "전체부진마": {
-      "count": 18,
-      "hit": 5
+      "count": 53,
+      "hit": 13
     },
     "대규모급락": {
-      "count": 11,
+      "count": 12,
       "high_odds": 0,
       "recommended_hit": 1,
       "high_odds_rate": 0.0,
-      "hit_rate": 9.1
+      "hit_rate": 8.3
     }
   }
 }

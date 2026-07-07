@@ -8,10 +8,10 @@
   "3rd": 1,
   "4th": null
  },
- "hit": true,
- "hit_type": "복승 메인",
- "odds": "고배당",
- "win_odds": 40.5,
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
  "why_recommended": {
   "signal_6": {
    "horse": 6,
@@ -20,33 +20,13 @@
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    6,
-    7
-   ],
-   "drop_timeline": [
-    {
-     "time": "16:29:25",
-     "minutes_before": 1,
-     "odds": 4.6,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "16:29:51",
-     "minutes_before": 1,
-     "odds": 4.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    }
-   ],
-   "exacta_reversal": true,
-   "reversal_ratio": 0.487,
-   "record_score": 7.5,
-   "confidence": 35.0,
-   "reason": "쌍승역전"
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_7": {
    "horse": 7,
@@ -55,31 +35,11 @@
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    6,
-    7
-   ],
-   "drop_timeline": [
-    {
-     "time": "16:29:25",
-     "minutes_before": 1,
-     "odds": 4.6,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "16:29:51",
-     "minutes_before": 1,
-     "odds": 4.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    }
-   ],
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 40.0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -90,105 +50,39 @@
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    1,
-    6
-   ],
-   "drop_timeline": [
-    {
-     "time": "16:29:25",
-     "minutes_before": 1,
-     "odds": 12.9,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "16:29:51",
-     "minutes_before": 1,
-     "odds": 12.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    }
-   ],
-   "exacta_reversal": true,
-   "reversal_ratio": 0.462,
-   "record_score": 5.0,
-   "confidence": 35.0,
-   "reason": "쌍승역전"
-  },
-  "signal_8": {
-   "horse": 8,
-   "placed": false,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": [
-    7,
-    8
-   ],
-   "drop_timeline": [
-    {
-     "time": "16:29:25",
-     "minutes_before": 1,
-     "odds": 5.7,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "16:29:51",
-     "minutes_before": 1,
-     "odds": 5.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    }
-   ],
-   "exacta_reversal": true,
-   "reversal_ratio": 0.402,
-   "record_score": 40.0,
-   "confidence": 35.0,
-   "reason": "쌍승역전"
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   }
  },
  "recommendation_process": [
-  "1. 전적 분석: 6번 7.5점",
-  "2. 배당 수집 시작 16:29:25",
-  "4. 쌍승 역전: 4→7(35.8) < 7→4(100.0) → 4번 실질 상위 신호",
-  "4. 쌍승 역전: 3→7(13.6) < 7→3(34.7) → 3번 실질 상위 신호",
-  "5. 종합 신뢰도 35.0점(하) 판정",
-  "6. BMED 전략: 역배열형 적용",
-  "7. 최종 추천: 복승 메인 6+7"
+  "1. 전적 분석: 6번 전적 정보 제한",
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 6,
   "excess_drop_score": 0,
-  "exacta_reversal_score": 35,
+  "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 7.5,
-  "total": 35.0,
+  "record_score": null,
+  "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "쌍승역전_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 7.5,
+  "formScore": null,
   "dropAmt": null,
-  "dropScore": 0.0,
-  "inverse": true,
-  "inverseHorses": [
-   4,
-   3,
-   8
-  ],
+  "dropScore": 0,
+  "inverse": false,
+  "inverseHorses": [],
   "inverseHit": [],
-  "confidence": 35.0,
-  "reason": "전적유력마 7번 적중 · 제거 적중"
+  "confidence": 0,
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -201,9 +95,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 2
+  "validCount": 0
  },
- "pnl": 3800,
+ "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-07 16:43:12"
+ "generated_at": "2026-07-07 23:23:54"
 }

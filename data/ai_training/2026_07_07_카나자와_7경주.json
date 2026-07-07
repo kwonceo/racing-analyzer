@@ -8,313 +8,30 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 11,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "브라운루",
-   "jockey": "은경",
-   "jockey_winrate": null,
-   "recent_results": [
-    3,
-    1,
-    3,
-    7,
-    2
-   ],
-   "record_score": 73.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "리치트리",
-   "jockey": "재이",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    8,
-    2,
-    5,
-    3
-   ],
-   "record_score": 67.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "대길히어",
-   "jockey": "경윤",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    4,
-    2,
-    7,
-    4
-   ],
-   "record_score": 63.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "월드블루",
-   "jockey": "인권",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    1,
-    7,
-    1,
-    3
-   ],
-   "record_score": 47.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "오아시스",
-   "jockey": "형석",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    1,
-    4,
-    3,
-    2
-   ],
-   "record_score": 41.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "베가스전",
-   "jockey": "실바",
-   "jockey_winrate": null,
-   "recent_results": [
-    9,
-    3,
-    7,
-    9,
-    2
-   ],
-   "record_score": 18.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "국대히어",
-   "jockey": "성재",
-   "jockey_winrate": null,
-   "recent_results": [
-    7,
-    5,
-    2,
-    4,
-    5
-   ],
-   "record_score": 16.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "서귀레이",
-   "jockey": "진겸",
-   "jockey_winrate": 32.9,
-   "recent_results": [],
-   "record_score": 15,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 11,
-   "name": "스마트사",
-   "jockey": "시대",
-   "jockey_winrate": null,
-   "recent_results": [
-    8,
-    5,
-    2,
-    7,
-    6
-   ],
-   "record_score": 15,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "퀸야라",
-   "jockey": "효식",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    8,
-    7,
-    5,
-    2
-   ],
-   "record_score": 3.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "보령몰트",
-   "jockey": "강주",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
-  "timeline": [
-   {
-    "time": "15:54:21",
-    "quinella": {
-     "6+9": 3.5,
-     "2+9": 7.5,
-     "1+9": 10.4,
-     "2+6": 10.7,
-     "1+6": 14.3,
-     "7+9": 15.1,
-     "6+7": 20.2,
-     "1+2": 23.5,
-     "3+6": 23.6,
-     "1+3": 27.5,
-     "8+9": 27.6,
-     "6+8": 27.8,
-     "3+8": 30.1,
-     "3+9": 33.6,
-     "2+7": 42.7,
-     "2+8": 43.7,
-     "2+3": 47.0,
-     "5+6": 48.3,
-     "4+9": 48.5,
-     "1+7": 48.9,
-     "5+9": 49.7,
-     "4+6": 68.6,
-     "5+8": 68.6,
-     "2+5": 73.4,
-     "1+8": 78.5,
-     "2+4": 81.8,
-     "3+7": 91.2,
-     "7+8": 93.1,
-     "4+8": 106.2,
-     "3+5": 118.2,
-     "4+7": 131.9,
-     "1+5": 147.7,
-     "1+4": 149.3,
-     "5+7": 176.5,
-     "4+5": 197.0,
-     "3+4": 261.4
-    }
-   },
-   {
-    "time": "15:54:21",
-    "quinella": {
-     "6+9": 3.5,
-     "2+9": 7.5,
-     "1+9": 10.4,
-     "2+6": 10.7,
-     "1+6": 14.3,
-     "7+9": 15.1,
-     "6+7": 20.2,
-     "1+2": 23.5,
-     "3+6": 23.6,
-     "1+3": 27.5,
-     "8+9": 27.6,
-     "6+8": 27.8,
-     "3+8": 30.1,
-     "3+9": 33.6,
-     "2+7": 42.7,
-     "2+8": 43.7,
-     "2+3": 47.0,
-     "5+6": 48.3,
-     "4+9": 48.5,
-     "1+7": 48.9,
-     "5+9": 49.7,
-     "4+6": 68.6,
-     "5+8": 68.6,
-     "2+5": 73.4,
-     "1+8": 78.5,
-     "2+4": 81.8,
-     "3+7": 91.2,
-     "7+8": 93.1,
-     "4+8": 106.2,
-     "3+5": 118.2,
-     "4+7": 131.9,
-     "1+5": 147.7,
-     "1+4": 149.3,
-     "5+7": 176.5,
-     "4+5": 197.0,
-     "3+4": 261.4
-    }
-   }
-  ],
+  "timeline": [],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
-  "exacta_reversal": true,
-  "reversal_ratio": 0.43,
+  "exacta_reversal": false,
+  "reversal_ratio": null,
   "quinella_mismatch": null,
-  "refund_rate": 0.745,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   6,
-   3,
-   4,
-   5,
-   8,
-   7,
-   9,
-   10
-  ],
-  "eliminated": [
-   11
-  ],
-  "recommend": "6+9",
-  "strategy": "BMED_역배열형",
-  "confidence": 35.0,
-  "signal_quality": "하"
+  "candidates": [],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
  },
  "result": {
   "1st": 9,
@@ -323,8 +40,8 @@
   "4th": null,
   "quinella_odds": null,
   "exacta_odds": null,
-  "hit": true,
-  "hit_pattern": "역배열 감지말 2번 입상 · 제거 적중"
+  "hit": false,
+  "hit_pattern": null
  },
  "labels": {
   "quinella_hit": false,
@@ -332,13 +49,16 @@
   "second": 2,
   "odds_range": null
  },
- "saved_at": "2026-07-07 16:43:11",
+ "saved_at": "2026-07-07 23:23:54",
  "quality": {
-  "score": 80,
-  "grade": "AI학습용",
-  "complete": true,
-  "ai_ready": true,
+  "score": 20,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
   "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "전적 데이터",
    "확정 배당"
   ],
   "errors": []
