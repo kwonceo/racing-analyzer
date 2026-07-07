@@ -2725,15 +2725,31 @@
     if (bsel) { const el = document.querySelector(bsel); budget = el ? (parseInt((el.value || '').replace(/[^0-9]/g, ''), 10) || 0) : 0; }
     const al = j.alloc || {};
     const won = (v) => v.toLocaleString('ko-KR') + '원';
+    // [배팅 배분 실반영] 유형별 배분비율(main/sub/trio)을 실제 추천 조합(betRecommend)에 매핑.
+    //   ⚠ betRecommend 로직은 읽기만(무수정). 조합·배당은 그대로 쓰고 금액만 유형별 비율로 제안.
+    const br = a.betRecommend || [];
+    const quins = br.filter((b) => b.kind === '복승');
+    const trios = br.filter((b) => b.kind === '삼복승');
+    const mainQ = quins.find((b) => (b.label || '').includes('메인')) || quins[0] || null;
+    const subQs = quins.filter((b) => b !== mainQ).slice(0, 2);
+    const trioPick = trios.slice(0, 3);
+    const comboTxt = (b) => {
+      if (!b) return '-';
+      const o = b.expOdds != null ? `${b.expOdds}배` : (b.expOddsEst != null ? `${b.expOddsEst}배 추정` : '');
+      return `${(b.combo || []).join('+')}${o ? ` (${o})` : ''}`;
+    };
+    const amt = (pct, n) => won(Math.round(budget * pct / 100 / Math.max(1, n)));
     let allocHtml;
-    if (budget > 0 && (al.main || al.sub || al.trio)) {
-      allocHtml = `<div style="margin-top:6px;font-size:12px;line-height:1.7">
-        <div>💰 복승 메인 <b>${al.main}%</b> → <b style="color:${col}">${won(Math.round(budget * al.main / 100))}</b></div>
-        ${al.sub ? `<div>복승 보조 <b>${al.sub}%</b> → <b>${won(Math.round(budget * al.sub / 100))}</b></div>` : ''}
-        ${al.trio ? `<div>삼복승 보험 <b>${al.trio}%</b> → <b>${won(Math.round(budget * al.trio / 100))}</b></div>` : ''}
-      </div>`;
-    } else if (budget > 0 && (j.type === 'wait' || j.type === '패스형')) {
+    if (budget > 0 && (j.type === 'wait' || j.type === '패스형')) {
       allocHtml = '<div class="hint" style="margin-top:4px;color:#ef4444;font-weight:600">배팅 금액 0원 — 이번 경주 건너뛰세요</div>';
+    } else if (budget > 0 && (al.main || al.sub || al.trio)) {
+      const rows = [];
+      if (al.main) rows.push(`<div>💰 복승 메인 ${mainQ ? `<b>${esc(comboTxt(mainQ))}</b>` : '<span class="hint">조합 대기</span>'} — ${al.main}% → <b style="color:${col}">${amt(al.main, 1)}</b></div>`);
+      if (al.sub && subQs.length) subQs.forEach((b) => rows.push(`<div>복승 보조 <b>${esc(comboTxt(b))}</b> — ${al.sub}%${subQs.length > 1 ? ' 분할' : ''} → <b>${amt(al.sub, subQs.length)}</b></div>`));
+      else if (al.sub) rows.push(`<div>복승 보조 ${al.sub}% → <b>${amt(al.sub, 1)}</b> <span class="hint">(조합 대기)</span></div>`);
+      if (al.trio && trioPick.length) trioPick.forEach((b) => rows.push(`<div>삼복승 보험 <b>${esc(comboTxt(b))}</b> — ${al.trio}%${trioPick.length > 1 ? ' 분할' : ''} → <b>${amt(al.trio, trioPick.length)}</b></div>`));
+      else if (al.trio) rows.push(`<div>삼복승 보험 ${al.trio}% → <b>${amt(al.trio, 1)}</b> <span class="hint">(조합 대기)</span></div>`);
+      allocHtml = `<div style="margin-top:6px;font-size:12px;line-height:1.75">${rows.join('')}<div class="hint" style="margin-top:2px">※ 총 예산 ${won(budget)} 기준 · 조합은 아래 추천표와 동일</div></div>`;
     } else {
       allocHtml = '<div class="hint" style="margin-top:4px">예산 입력 시 유형별 배분 금액이 표시됩니다</div>';
     }
