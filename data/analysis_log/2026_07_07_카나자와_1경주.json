@@ -6,7 +6,7 @@
  "date": "2026-07-07",
  "race": "카나자와 1경주",
  "analyzed_at": "12:15:53",
- "updated_at": "12:44:13",
+ "updated_at": "12:57:43",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -685,79 +685,29 @@
    "detail": "3+7 복승 42.9→37.5 (2분전 대비 -12.6%)",
    "severity": "🔴",
    "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "12:25:21",
-   "type": "반등",
-   "detail": "7+9 급락 후 반등 (20.5→14.4→16.6)",
-   "severity": "🟡",
-   "reason": "페이크 베팅 의심 / 해당말 신뢰도 하락"
-  },
-  {
-   "time": "12:25:21",
-   "type": "연속하락",
-   "detail": "8+9 3회 연속 하락 → 신뢰도 +20",
-   "severity": "🔴",
-   "reason": "지속적 자금 유입(단발 아님) → 신호 신뢰도 상향"
-  },
-  {
-   "time": "12:25:21",
-   "type": "연속하락",
-   "detail": "3+9 3회 연속 하락 → 신뢰도 +20",
-   "severity": "🔴",
-   "reason": "지속적 자금 유입(단발 아님) → 신호 신뢰도 상향"
-  },
-  {
-   "time": "12:25:21",
-   "type": "연속하락",
-   "detail": "5+8 3회 연속 하락 → 신뢰도 +20",
-   "severity": "🔴",
-   "reason": "지속적 자금 유입(단발 아님) → 신호 신뢰도 상향"
-  },
-  {
-   "time": "12:25:21",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 7+9 급락 후 반등 (20.5→14.4→16.7→16.6)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "12:25:21",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 4+7 급락 후 반등 (53.9→34.3→38.8→39.5)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "12:25:21",
-   "type": "연속하락",
-   "detail": "🟡 5번 2회 연속 하락 (약한신호) — 4.8→4.8→5.2→4.8→4.7",
-   "severity": "🟡",
-   "reason": "자금 유입 초기 → 다음 수집에서 확정 여부 관찰"
-  },
-  {
-   "time": "12:25:21",
-   "type": "연속하락",
-   "detail": "🟡 8번 2회 연속 하락 (약한신호) — 4.5→4.5→5.0→4.6→4.5",
-   "severity": "🟡",
-   "reason": "자금 유입 초기 → 다음 수집에서 확정 여부 관찰"
-  },
-  {
-   "time": "12:25:21",
-   "type": "연속하락",
-   "detail": "🟡 9번 2회 연속 하락 (약한신호) — 4.5→4.5→5.0→4.6→4.5",
-   "severity": "🟡",
-   "reason": "자금 유입 초기 → 다음 수집에서 확정 여부 관찰"
-  },
-  {
-   "time": "12:25:21",
-   "type": "페이크의심",
-   "detail": "⚠️ 7번 급락 후 반등 (페이크 의심) — 11.5→11.5→8.3→9.2→9.3",
-   "severity": "🟠",
-   "reason": "연속 하락 신호로 유인 후 배당 회복 → 신뢰도 하향(허수 베팅 가능성)"
   }
  ],
  "horses": [
+  {
+   "no": 1,
+   "name": "판타스틱",
+   "jockey": "실바",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 2,
+   "name": "대길환호",
+   "jockey": "경윤",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
   {
    "no": 6,
    "name": "두바이캔",
@@ -765,8 +715,8 @@
    "record_score": 85,
    "record_detail": "최근 2",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 49배 · 감점 없음 = 100점"
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 7,
@@ -776,7 +726,7 @@
    "record_detail": "최근 3",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 9.3배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 8,
@@ -785,68 +735,8 @@
    "record_score": 25,
    "record_detail": "최근 4",
    "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 4.5배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 1,
-   "name": "판타스틱",
-   "jockey": "실바",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 93.6배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 2,
-   "name": "대길환호",
-   "jockey": "경윤",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 131.1배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 3,
-   "name": "로지스트",
-   "jockey": "효식",
-   "record_score": 0,
-   "record_detail": "최근 5",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 9.6배 · 최근평균 5.0착 -30 = 70점"
-  },
-  {
-   "no": 4,
-   "name": "동남석세",
-   "jockey": "형석",
-   "record_score": 0,
-   "record_detail": "최근 6",
-   "odds": null,
    "grade": "B",
-   "grade_reason": "배당 16.4배 · 최근평균 6.0착 -30 = 70점"
-  },
-  {
-   "no": 5,
-   "name": "와일드신",
-   "jockey": "나카",
-   "record_score": 0,
-   "record_detail": "최근 7",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 4.7배 · 최근평균 7.0착 -30 = 70점"
-  },
-  {
-   "no": 9,
-   "name": "럭서리초",
-   "jockey": "경민",
-   "record_score": 0,
-   "record_detail": "최근 8",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 4.5배 · 최근평균 8.0착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 10,
@@ -855,70 +745,79 @@
    "record_score": 125,
    "record_detail": "최근 1",
    "odds": null,
-   "grade": "C",
+   "grade": "A",
    "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 3,
+   "name": "로지스트",
+   "jockey": "효식",
+   "record_score": 0,
+   "record_detail": "최근 5",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+  },
+  {
+   "no": 4,
+   "name": "동남석세",
+   "jockey": "형석",
+   "record_score": 0,
+   "record_detail": "최근 6",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
+  },
+  {
+   "no": 5,
+   "name": "와일드신",
+   "jockey": "나카",
+   "record_score": 0,
+   "record_detail": "최근 7",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
+  },
+  {
+   "no": 9,
+   "name": "럭서리초",
+   "jockey": "경민",
+   "record_score": 0,
+   "record_detail": "최근 8",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
+   1,
+   2,
    6,
    7,
    8,
-   1,
-   2,
+   10
+  ],
+  "eliminated": [
    3,
    4,
    5,
-   9,
-   10
+   9
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "elimination_reasons": {
+   "3": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점",
+   "4": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점",
+   "5": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점",
+   "9": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
+  }
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "8+9",
-   "odds": 4.5,
-   "reason": "8번(A)·9번(C)"
-  },
-  "quinella_sub": {
-   "combo": "5+8",
-   "odds": 4.7,
-   "reason": "5번(B)·8번(A)"
-  },
-  "trifecta_main": {
-   "combo": "5+8+9",
-   "odds": 5.2,
-   "reason": "5번(B)·8번(A)·9번(C)"
-  },
-  "trifecta_insurance1": {
-   "combo": "7+8+9",
-   "odds": 9.7,
-   "reason": "7번(A)·8번(A)·9번(C)"
-  },
-  "trifecta_insurance2": {
-   "combo": "5+7+8",
-   "odds": 9.9,
-   "reason": "5번(B)·7번(A)·8번(A)"
-  },
-  "budget_allocation": {
-   "quinella_main": "43%",
-   "quinella_sub": "20%",
-   "trifecta_main": "29%",
-   "trifecta_insurance": "4%"
-  }
+  "budget_allocation": {}
  },
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    8,
-    9
-   ],
-   "trio": [
-    5,
-    8,
-    9
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
    "quinella": [
@@ -932,23 +831,12 @@
    ]
   },
   "final": {
-   "quinella": [
-    8,
-    9
-   ],
-   "trio": [
-    5,
-    8,
-    9
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
- "summary": "유력마 8·9·5 / 복승 8+9",
- "keyHorses": [
-  8,
-  9,
-  5
- ],
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
  "result": {
   "1st": 8,
   "2nd": 5,
