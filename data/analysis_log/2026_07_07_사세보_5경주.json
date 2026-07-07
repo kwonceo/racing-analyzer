@@ -1,0 +1,320 @@
+{
+ "race_id": "2026_07_07_사세보_5경주",
+ "raceKey": "사세보 5경주",
+ "sport": "cycle",
+ "category": "cycle",
+ "date": "2026-07-07",
+ "race": "사세보 5경주",
+ "analyzed_at": "09:40:20",
+ "updated_at": "10:00:56",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ },
+ "odds_timeline": [
+  {
+   "time": "09:40:10",
+   "minutes_before": 13,
+   "quinella": {
+    "1+4": 4.3,
+    "1+7": 4.7,
+    "3+7": 8.3,
+    "4+7": 10.4,
+    "6+7": 10.9,
+    "2+7": 13.1,
+    "5+7": 13.6,
+    "1+5": 15.5,
+    "1+3": 16.3,
+    "4+5": 16.8,
+    "1+2": 22.3,
+    "3+4": 28.3,
+    "2+5": 35.3,
+    "3+5": 39.5,
+    "2+3": 44.7,
+    "1+6": 45.9,
+    "2+4": 54.7,
+    "5+6": 60.6,
+    "2+6": 65.3,
+    "3+6": 65.3,
+    "4+6": 121.3
+   }
+  },
+  {
+   "time": "09:50:05",
+   "minutes_before": 2,
+   "quinella": {
+    "1+4": 4.9,
+    "1+7": 6.9,
+    "6+7": 10.8,
+    "2+7": 11.4,
+    "3+7": 15.2,
+    "4+7": 18.9,
+    "4+5": 20.0,
+    "1+2": 27.8,
+    "5+7": 32.6,
+    "1+3": 33.8,
+    "1+5": 40.9,
+    "3+4": 43.7,
+    "3+6": 98.3,
+    "3+5": 102.6,
+    "2+4": 106.3,
+    "4+6": 120.4,
+    "1+6": 124.2,
+    "2+3": 126.9,
+    "2+5": 138.8,
+    "5+6": 214.6,
+    "2+6": 302.6
+   }
+  }
+ ],
+ "signals_detected": [
+  {
+   "time": "09:50:05",
+   "type": "마감급락",
+   "detail": "2+7 복승 13.1→11.4 (2분전 대비 -13.0%)",
+   "severity": "🔴",
+   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
+  },
+  {
+   "time": "09:50:05",
+   "type": "복승불일치공식",
+   "detail": "⚠️ 복승 불일치: 단승 기준 예상 1+7(6.9) / 실제 최저 1+4(4.9) → 4번 집중 자금 유입 (🟡 1.408)",
+   "severity": "🟡",
+   "reason": "불일치점수 = 예상최저복승 6.9 / 실제최저복승 4.9 = 1.408"
+  }
+ ],
+ "horses": [
+  {
+   "no": 1,
+   "name": "스위트파",
+   "jockey": "인권",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 4.9배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 2,
+   "name": "오아시스",
+   "jockey": "승운",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 11.4배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 3,
+   "name": "스토미데",
+   "jockey": "성재",
+   "record_score": 52.8,
+   "record_detail": "최근 4-2-2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 15.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 4,
+   "name": "레몬킹이",
+   "jockey": "경민",
+   "record_score": 36.1,
+   "record_detail": "최근 5-2-3",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 4.9배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 5,
+   "name": "모어앤드",
+   "jockey": "성현",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 20배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 6,
+   "name": "키스더레",
+   "jockey": "살바",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 10.8배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 7,
+   "name": "파이널어",
+   "jockey": "상현",
+   "record_score": 40,
+   "record_detail": "최근 2-6-6-6-6",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 6.9배 · 최근평균 5.2착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+  },
+  {
+   "no": 8,
+   "name": "커널플라",
+   "jockey": "강주",
+   "record_score": 88.8,
+   "record_detail": "최근 3-1-1-1-2",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 9,
+   "name": "팬 텀 킹",
+   "jockey": "홍락",
+   "record_score": 72.5,
+   "record_detail": "최근 1-3-4-4-4",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 10,
+   "name": "남도일등",
+   "jockey": "은경",
+   "record_score": 5,
+   "record_detail": "최근 6-5-5-5-1",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "quinella_main": {
+   "combo": "1+7",
+   "odds": 6.9,
+   "reason": "1번(B)·7번(A)"
+  },
+  "quinella_sub": {
+   "combo": "4+7",
+   "odds": 18.9,
+   "reason": "4번(A)·7번(A)"
+  },
+  "trifecta_main": {
+   "combo": "1+4+7",
+   "odds": 5.0,
+   "reason": "1번(B)·4번(A)·7번(A)"
+  },
+  "trifecta_insurance1": {
+   "combo": "1+2+7",
+   "odds": 7.5,
+   "reason": "1번(B)·2번(B)·7번(A)"
+  },
+  "trifecta_insurance2": {
+   "combo": "2+4+7",
+   "odds": 31.1,
+   "reason": "2번(B)·4번(A)·7번(A)"
+  },
+  "budget_allocation": {
+   "quinella_main": "40.0%",
+   "quinella_sub": "20%",
+   "trifecta_main": "29%",
+   "trifecta_insurance": "4%"
+  }
+ },
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    1,
+    7
+   ],
+   "trio": [
+    1,
+    4,
+    7
+   ]
+  },
+  "form": {
+   "quinella": [
+    8,
+    9
+   ],
+   "trio": [
+    3,
+    8,
+    9
+   ]
+  },
+  "final": {
+   "quinella": [
+    1,
+    7
+   ],
+   "trio": [
+    1,
+    4,
+    7
+   ]
+  }
+ },
+ "summary": "유력마 7·1·4 / 복승 1+7",
+ "keyHorses": [
+  7,
+  1,
+  4
+ ],
+ "result": {
+  "1st": 3,
+  "2nd": 4,
+  "3rd": 1
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "hit_basis": {
+   "formScore": 52.8,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": true,
+   "inverseHorses": [
+    4
+   ],
+   "inverseHit": [
+    4
+   ],
+   "confidence": 6.5,
+   "reason": "전적유력마 1번 적중 · 역배열 감지말 4번 입상"
+  }
+ },
+ "profit": null,
+ "review": null
+}

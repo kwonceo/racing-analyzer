@@ -1,0 +1,278 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_07_사세보_5경주",
+ "race_info": {
+  "date": "2026-07-07",
+  "track": "사세보",
+  "round": 5,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 10,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 8,
+   "name": "커널플라",
+   "jockey": "강주",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    1,
+    1,
+    1,
+    2
+   ],
+   "record_score": 88.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "팬 텀 킹",
+   "jockey": "홍락",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    3,
+    4,
+    4,
+    4
+   ],
+   "record_score": 72.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "스토미데",
+   "jockey": "성재",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    2,
+    2
+   ],
+   "record_score": 52.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "파이널어",
+   "jockey": "상현",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    6,
+    6,
+    6,
+    6
+   ],
+   "record_score": 40,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "레몬킹이",
+   "jockey": "경민",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    2,
+    3
+   ],
+   "record_score": 36.1,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 10,
+   "name": "남도일등",
+   "jockey": "은경",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    5,
+    5,
+    5,
+    1
+   ],
+   "record_score": 5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "스위트파",
+   "jockey": "인권",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "오아시스",
+   "jockey": "승운",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "모어앤드",
+   "jockey": "성현",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "키스더레",
+   "jockey": "살바",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "09:40:10",
+    "quinella": {
+     "1+4": 4.3,
+     "1+7": 4.7,
+     "3+7": 8.3,
+     "4+7": 10.4,
+     "6+7": 10.9,
+     "2+7": 13.1,
+     "5+7": 13.6,
+     "1+5": 15.5,
+     "1+3": 16.3,
+     "4+5": 16.8,
+     "1+2": 22.3,
+     "3+4": 28.3,
+     "2+5": 35.3,
+     "3+5": 39.5,
+     "2+3": 44.7,
+     "1+6": 45.9,
+     "2+4": 54.7,
+     "5+6": 60.6,
+     "2+6": 65.3,
+     "3+6": 65.3,
+     "4+6": 121.3
+    }
+   },
+   {
+    "time": "09:50:05",
+    "quinella": {
+     "1+4": 4.9,
+     "1+7": 6.9,
+     "6+7": 10.8,
+     "2+7": 11.4,
+     "3+7": 15.2,
+     "4+7": 18.9,
+     "4+5": 20.0,
+     "1+2": 27.8,
+     "5+7": 32.6,
+     "1+3": 33.8,
+     "1+5": 40.9,
+     "3+4": 43.7,
+     "3+6": 98.3,
+     "3+5": 102.6,
+     "2+4": 106.3,
+     "4+6": 120.4,
+     "1+6": 124.2,
+     "2+3": 126.9,
+     "2+5": 138.8,
+     "5+6": 214.6,
+     "2+6": 302.6
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": 1.408,
+  "refund_rate": 0.91,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "eliminated": [],
+  "recommend": "1+7",
+  "strategy": "BMED_보험형",
+  "confidence": 6.5,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 3,
+  "2nd": 4,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": 34.0,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 3,
+  "second": 4,
+  "odds_range": "고배당"
+ },
+ "saved_at": "2026-07-07 10:00:56",
+ "quality": {
+  "score": 100,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
+  "missing": [],
+  "errors": []
+ }
+}
