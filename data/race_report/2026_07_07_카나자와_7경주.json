@@ -1,0 +1,212 @@
+{
+ "race": "카나자와 7경주",
+ "raceKey": "카나자와 7경주",
+ "date": "2026-07-07",
+ "result": {
+  "1st": 9,
+  "2nd": 2,
+  "3rd": 6,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": "삼복승 보험1",
+ "odds": "고배당",
+ "win_odds": 37.1,
+ "why_recommended": {
+  "signal_9": {
+   "horse": 9,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    6,
+    9
+   ],
+   "drop_timeline": [
+    {
+     "time": "15:54:21",
+     "minutes_before": 2,
+     "odds": 3.5,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "15:54:21",
+     "minutes_before": 2,
+     "odds": 3.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 3.8,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    2,
+    6
+   ],
+   "drop_timeline": [
+    {
+     "time": "15:54:21",
+     "minutes_before": 2,
+     "odds": 10.7,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "15:54:21",
+     "minutes_before": 2,
+     "odds": 10.7,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.43,
+   "record_score": 73.8,
+   "confidence": 35.0,
+   "reason": "쌍승역전"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    6,
+    9
+   ],
+   "drop_timeline": [
+    {
+     "time": "15:54:21",
+     "minutes_before": 2,
+     "odds": 3.5,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "15:54:21",
+     "minutes_before": 2,
+     "odds": 3.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 0,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    6
+   ],
+   "drop_timeline": [
+    {
+     "time": "15:54:21",
+     "minutes_before": 2,
+     "odds": 14.3,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "15:54:21",
+     "minutes_before": 2,
+     "odds": 14.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.386,
+   "record_score": 41.2,
+   "confidence": 35.0,
+   "reason": "쌍승역전"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 9번 3.8점",
+  "2. 배당 수집 시작 15:54:21",
+  "4. 쌍승 역전: 2→6(20.8) < 6→2(48.4) → 2번 실질 상위 신호",
+  "4. 쌍승 역전: 3→6(71.9) < 6→3(152.9) → 3번 실질 상위 신호",
+  "5. 종합 신뢰도 0점(하) 판정",
+  "6. BMED 전략: 역배열형 적용",
+  "7. 최종 추천: 복승 메인 6+9"
+ ],
+ "confidence_breakdown": {
+  "horse": 9,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 3.8,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 3.8,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": true,
+  "inverseHorses": [
+   2,
+   3,
+   1
+  ],
+  "inverseHit": [
+   2
+  ],
+  "confidence": 35.0,
+  "reason": "역배열 감지말 2번 입상 · 제거 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 2
+ },
+ "pnl": 36100,
+ "stake": 1000,
+ "generated_at": "2026-07-07 16:43:11"
+}
