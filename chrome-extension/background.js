@@ -26,6 +26,16 @@ const TRIPLE_URL = `${SERVER}/api/odds/triple/ingest`;
 const ANALYZE_URL = `${SERVER}/api/odds/triple/analyze`;
 const JAPAN_URL = `${SERVER}/api/extract/japan`;
 
+// [보완] fetch 실패 원인 친절 변환: "Failed to fetch"(연결 거부=서버 꺼짐)를
+//   명확한 안내로 바꿔 팝업/오버레이 상태에 그대로 노출 → 원인 즉시 파악.
+function svrErr(err) {
+  const m = String((err && err.message) || err || '');
+  if (/Failed to fetch|NetworkError|ERR_CONNECTION|load failed/i.test(m)) {
+    return '분석 서버 꺼짐(127.0.0.1:8011 응답 없음) — 서버(경마분석기)를 실행하세요';
+  }
+  return m || '전송 실패';
+}
+
 /** 아이콘 배지: 성공=초록(카운트/✓), 실패=빨강(!). 잠시 후 자동 소거. */
 function setBadge(ok, count) {
   try {
@@ -87,7 +97,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         const status = {
           lastSend: Date.now(),
           lastOk: false,
-          lastError: String(err.message || err),
+          lastError: svrErr(err),
           lastRaceKey: msg.payload?.raceKey || '',
           lastReason: msg.reason || '',
         };
@@ -120,7 +130,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       })
       .catch((err) => {
         const resultStatus = {
-          lastResult: Date.now(), lastResultOk: false, lastResultError: String(err.message || err),
+          lastResult: Date.now(), lastResultOk: false, lastResultError: svrErr(err),
           lastResultRaceKey: msg.payload?.raceKey || '',
         };
         chrome.storage.local.set({ resultStatus });
@@ -153,7 +163,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       })
       .catch((err) => {
         const tripleStatus = {
-          lastTriple: Date.now(), lastTripleOk: false, lastTripleError: String(err.message || err),
+          lastTriple: Date.now(), lastTripleOk: false, lastTripleError: svrErr(err),
           lastTripleRaceKey: msg.payload?.raceKey || '',
         };
         chrome.storage.local.set({ tripleStatus });
@@ -179,7 +189,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         chrome.storage.local.set({ japanStatus: { t: Date.now(), ok: true, raceKey: msg.payload.raceKey, horses: (msg.payload.horses || []).length } });
         sendResponse({ ok: true, data });
       })
-      .catch((err) => sendResponse({ ok: false, error: String(err.message || err) }));
+      .catch((err) => sendResponse({ ok: false, error: svrErr(err) }));
     return true; // async
   }
 
@@ -196,7 +206,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         return d;
       })
       .then((data) => sendResponse({ ok: true, data }))
-      .catch((err) => sendResponse({ ok: false, error: String(err.message || err) }));
+      .catch((err) => sendResponse({ ok: false, error: svrErr(err) }));
     return true; // async
   }
 
