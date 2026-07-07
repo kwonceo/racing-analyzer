@@ -4,7 +4,7 @@
  "date": "2026-07-07",
  "race": "사세보 3경주",
  "analyzed_at": "08:56:00",
- "updated_at": "09:13:39",
+ "updated_at": "09:18:26",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -329,8 +329,49 @@
   3,
   5
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 3,
+  "2nd": 4,
+  "3rd": 1
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   8
+  ],
+  "form_pick": 4,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "hit_basis": {
+   "formScore": 0,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [
+    5,
+    1,
+    4
+   ],
+   "inverseHit": [
+    1,
+    4
+   ],
+   "confidence": 35.0,
+   "reason": "전적유력마 4번 적중 · 역배열 감지말 1·4번 입상 · 제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }
