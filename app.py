@@ -2511,8 +2511,9 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
     inv_detail.sort(key=lambda x: x["odds"])      # 배당 낮은(실질 유력) 순
     for i, d in enumerate(inv_detail):
         d["lowest"] = (i == 0)                     # 최저 배당 = '← 낮음' 표식
-    # 팝업 요약: 인기 낮은데 배당 최저인 말이 실질 유력
-    inv_lead = next((d for d in inv_detail if d.get("popRank") and d["popRank"] >= 3), inv_detail[0] if inv_detail else None)
+    # 팝업 요약: 인기 낮은데(순위 3위+) 배당 최저인 말이 실질 유력.
+    #   [보완] 인기1~2위(정상 최유력)를 '실질 유력'으로 오표기하지 않도록 fallback 제거 → 없으면 None.
+    inv_lead = next((d for d in inv_detail if d.get("popRank") and d["popRank"] >= 3), None)
 
     top_rev = (wx_reversals or [None])[0]
     banner = {
@@ -2957,20 +2958,29 @@ def _confidence_engine(signal_confidence, form, advanced, key_horses):
             nos.add(int(k))
         except (ValueError, TypeError):
             pass
+    # [보완] 전적 미수집(지방 다수) 경주는 전적 가중치(30%)가 죽어 확신도가 최대 70에 갇혀
+    #   확실형(80+)·전적60+ 조건이 무력화됨 → 전적 데이터가 아예 없으면 그 30%를
+    #   이상감지·급락지속에 비례 재분배(0.40:0.30 → 0.57:0.43)해 신호만으로도 확신도 산출.
+    has_form = any(h.get("totalScore") is not None for h in (form or []))
+    if has_form:
+        w_a, w_f, w_p = 0.40, 0.30, 0.30
+    else:
+        w_a, w_f, w_p = 0.57, 0.0, 0.43
     out = {}
     for no in nos:
         anom = float((sc_h.get(no) or sc_h.get(str(no)) or {}).get("confidence") or 0.0)   # 이상감지강도 0~100
         fh = fmap.get(no)
         fscore = max(0.0, min(100.0, float((fh or {}).get("totalScore") or 0.0))) if fh else 0.0
         pers = _drop_persistence(advanced, no)
-        conf = round(0.40 * anom + 0.30 * fscore + 0.30 * pers, 1)
+        conf = round(w_a * anom + w_f * fscore + w_p * pers, 1)
         band = "강력" if conf >= 65 else ("주목" if conf >= 45 else ("관찰" if conf >= 25 else "약함"))
         out[no] = {"no": no, "anomaly": round(anom, 1), "form": round(fscore, 1),
                    "persistence": round(pers, 1), "confidence": conf, "band": band}
     ranked = sorted(out.keys(), key=lambda n: -out[n]["confidence"])
     best = out[ranked[0]]["confidence"] if ranked else 0.0
     ov_band = "강력" if best >= 65 else ("주목" if best >= 45 else ("관찰" if best >= 25 else "약함"))
-    return {"horses": out, "ranked": ranked, "top": ranked[:5],
+    return {"horses": out, "ranked": ranked, "top": ranked[:5], "formAvailable": has_form,
+            "weights": {"anomaly": w_a, "form": w_f, "persistence": w_p},
             "overall": {"best": best, "band": ov_band, "bestHorse": ranked[0] if ranked else None}}
 
 
@@ -2991,6 +3001,7 @@ def _bet_judgment(conf_engine, excess, advanced, wx_reversals, form, mass_drop, 
     min_ratio = min(ratios) if ratios else None                       # 최강 쌍승역전(낮을수록 강)
     fscores = [h["totalScore"] for h in (form or []) if h.get("totalScore") is not None]
     max_form = round(max(fscores), 1) if fscores else 0.0
+    has_form = len(fscores) > 0        # 전적 미수집이면 확실형 전적조건 완화(확신도로 대체)
     mass = bool(mass_drop)
 
     reasons = []
@@ -3007,7 +3018,7 @@ def _bet_judgment(conf_engine, excess, advanced, wx_reversals, form, mass_drop, 
     if mass:
         reasons.append("대규모 급락(노이즈 주의)")
 
-    strong = (max_ex >= 15 and max_streak >= 3 and (min_ratio is not None and min_ratio < 0.80) and max_form >= 60)
+    strong = (max_ex >= 15 and max_streak >= 3 and (min_ratio is not None and min_ratio < 0.80) and (max_form >= 60 or not has_form))
     moderate = ((5 <= max_ex < 15) or max_streak == 2 or (min_ratio is not None and 0.80 <= min_ratio <= 0.95))
 
     if not signal_ready and not after_close:
