@@ -188,9 +188,27 @@
     function computeCritical(d, deadline) {
       try {
         if (d && d.inverse && d.inverse.detected) {
-          var ih = (d.inverse.invHorses || []).slice(0, 2).join('·');
-          return { key: 'inv:' + ih, level: 'red', icon: '🔄', title: '역배열 감지',
-            msg: '실질 유력마 ' + (ih || '변경') + '번 — 배당 순서와 다름(주목)' };
+          // [역배열 팝업 재정의] 인기순위(단승)보다 조합 배당이 낮은 말을 상세 표시(<30배만)
+          var det = (d.inverse.invDetail || []).slice(0, 4);
+          var lead = d.inverse.invLead;
+          var lines = det.map(function (x) {
+            return x.no + '번 인기' + (x.popRank || '?') + '위 · 쌍승 ' + x.odds + '배' + (x.lowest ? ' ← 낮음' : '');
+          });
+          if (lead) {
+            lines.push('→ 인기 낮은 ' + lead.no + '번이 쌍승 더 낮음');
+            lines.push('→ ' + lead.no + '번 실질 유력 가능성');
+          }
+          // 강도: 유형 레벨 최댓값(🔴 압도적 / 🟠 강한 / 🟡)
+          var lv = '🟡';
+          (d.inverse.types || []).forEach(function (t) {
+            if (t.level === '🔴') lv = '🔴'; else if (t.level === '🟠' && lv !== '🔴') lv = '🟠';
+          });
+          var sTxt = (lv === '🔴' ? '🔴 압도적 역배열' : (lv === '🟠' ? '🟠 강한 역배열' : '🟡 역배열'));
+          if (lines.length) lines.push('강도: ' + sTxt);
+          var ihKey = det.length ? det.map(function (x) { return x.no; }).join('·') : (d.inverse.invHorses || []).slice(0, 2).join('·');
+          return { key: 'inv:' + ihKey, level: 'red', icon: '🔄', title: '역배열 감지',
+            lines: lines.length ? lines : null,
+            msg: '실질 유력마 ' + ((lead && lead.no) || ihKey || '변경') + '번 — 배당 순서와 다름(주목)' };
         }
         var strong = ((d && d.drops) || []).filter(function (x) { return x && x.pct <= -50 && x.combo; })
           .sort(function (a, b) { return a.pct - b.pct; });
@@ -274,7 +292,17 @@
         ctrls.appendChild(x);
         head.appendChild(ctrls);
         el.appendChild(head);
-        el.appendChild(mk('div', 'margin-top:4px;font-size:13px;font-weight:700', crit.msg));
+        // [역배열 상세] crit.lines 있으면 여러 줄로(마번·인기순위·쌍승배당·강도), 없으면 단일 msg
+        if (crit.lines && crit.lines.length) {
+          var box = mk('div', 'margin-top:5px;font-size:13px;font-weight:700;line-height:1.5');
+          crit.lines.forEach(function (ln) {
+            var sep = (ln.indexOf('→') === 0 || ln.indexOf('강도:') === 0);
+            box.appendChild(mk('div', sep ? 'margin-top:4px;font-weight:800' : '', ln));
+          });
+          el.appendChild(box);
+        } else {
+          el.appendChild(mk('div', 'margin-top:4px;font-size:13px;font-weight:700', crit.msg));
+        }
         startBlink();
       } catch (_) { /* 강조 팝업 실패는 무시 */ }
     }
@@ -354,12 +382,19 @@
           });
         }
 
-        // [강화] 역배열 감지 라인(강조)
+        // [강화] 역배열 감지 라인(강조) — 인기순위·쌍승배당 상세(<30배)
         if (d.inverse && d.inverse.detected) {
-          var ih2 = (d.inverse.invHorses || []).slice(0, 2).join('·');
-          var ivr = mk('div', 'margin:5px 0 2px;padding:3px 6px;background:rgba(168,85,247,.16);border-radius:6px');
-          ivr.appendChild(mk('span', 'color:#c4b5fd;font-weight:700', '🔄 역배열 '));
-          ivr.appendChild(mk('span', 'color:#e9d5ff', ih2 ? ('실질 유력마 ' + ih2 + '번') : '감지'));
+          var det2 = (d.inverse.invDetail || []).slice(0, 3);
+          var lead2 = d.inverse.invLead;
+          var ivr = mk('div', 'margin:5px 0 2px;padding:4px 7px;background:rgba(168,85,247,.16);border-radius:6px');
+          ivr.appendChild(mk('div', 'color:#c4b5fd;font-weight:700', '🔄 역배열 감지'));
+          det2.forEach(function (x) {
+            var r = mk('div', 'color:#e9d5ff;font-size:11px');
+            r.textContent = x.no + '번 인기' + (x.popRank || '?') + '위 · 쌍승 ' + x.odds + '배' + (x.lowest ? ' ← 낮음' : '');
+            ivr.appendChild(r);
+          });
+          if (lead2) ivr.appendChild(mk('div', 'color:#f0abfc;font-size:11px;font-weight:700;margin-top:2px', '→ ' + lead2.no + '번 실질 유력'));
+          else if (!det2.length) ivr.appendChild(mk('span', 'color:#e9d5ff', '감지'));
           panel.appendChild(ivr);
         }
 

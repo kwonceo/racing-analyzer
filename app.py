@@ -2496,6 +2496,24 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
     inv_combos.sort(key=lambda c: c["odds"])
     inv_combos = inv_combos[:6]
 
+    # [역배열 팝업 재정의] 인기순위(단승 배당 기준)보다 조합 배당이 낮게 형성된 말 상세.
+    #   각 역배열 말: 마번·인기순위·최저 조합배당(<30배만) → 인기 낮은데 배당 낮으면 실질 유력.
+    rank_of = {int(n): i + 1 for i, n in enumerate(fav_rank or [])}
+    inv_detail = []
+    for h in inv_horses:
+        best = None
+        for k, o in (curQ or {}).items():
+            if h in k and o and 0 < o < 30 and (best is None or o < best):
+                best = o
+        if best is None:      # <30배 조합만 표시(사용자 요청)
+            continue
+        inv_detail.append({"no": int(h), "popRank": rank_of.get(int(h)), "odds": round(best, 1)})
+    inv_detail.sort(key=lambda x: x["odds"])      # 배당 낮은(실질 유력) 순
+    for i, d in enumerate(inv_detail):
+        d["lowest"] = (i == 0)                     # 최저 배당 = '← 낮음' 표식
+    # 팝업 요약: 인기 낮은데 배당 최저인 말이 실질 유력
+    inv_lead = next((d for d in inv_detail if d.get("popRank") and d["popRank"] >= 3), inv_detail[0] if inv_detail else None)
+
     top_rev = (wx_reversals or [None])[0]
     banner = {
         "refLabel": "단승 1위" if has_win else "복승인기 1위",
@@ -2508,7 +2526,9 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
     } if detected else None
 
     return {"detected": detected, "types": types, "invHorses": inv_horses,
-            "invCombos": inv_combos, "banner": banner}
+            "invCombos": inv_combos, "banner": banner,
+            "invDetail": inv_detail,          # [팝업] 마번·인기순위·최저조합배당(<30배)
+            "invLead": inv_lead}              # [팝업] 인기 낮은데 배당 최저 = 실질 유력 후보
 
 
 def _advanced_anomaly(hist, curQ, drops):
