@@ -4082,12 +4082,46 @@ def _analysis_log_path(rk):
     return os.path.join(ANALYSIS_LOG_DIR, safe + ".json"), date, race
 
 
+def _canonical_log_key(rk):
+    """[중복 key 근본 방지] 같은 경주가 다른 표기(한글 '모리오카 1경주' / 한자 '2026-07-07 盛岡 1R')로
+    이미 오늘 로그가 있으면 **그 기존 key를 재사용**해 한 파일에 합친다(중복 로그·미입력 중복 제거).
+    - 자기 파일이 이미 있으면 그대로(rk).
+    - 없을 때만 오늘·(트랙+라운드) 일치하는 기존 로그를 파일명으로 스캔(경량, doc 1개만 읽음)."""
+    try:
+        exact, _, _ = _analysis_log_path(rk)
+        if os.path.exists(exact):
+            return rk
+        area, num = _area_num(rk)
+        if num is None or not area or not os.path.isdir(ANALYSIS_LOG_DIR):
+            return rk
+        today_us = time.strftime("%Y_%m_%d", time.localtime())
+        cands = []
+        for fn in os.listdir(ANALYSIS_LOG_DIR):
+            if not fn.endswith(".json") or not fn.startswith(today_us):
+                continue
+            race = fn[len(today_us):-5].strip("_").replace("_", " ")
+            fa, fnum = _area_num(race)
+            if fnum == num and fa and (area in fa or fa in area):
+                cands.append(fn)
+        if cands:
+            cands.sort()   # 가장 이른(먼저 생성된) 파일을 canonical 로
+            doc = json.load(open(os.path.join(ANALYSIS_LOG_DIR, cands[0]), encoding="utf-8"))
+            ck = doc.get("raceKey") or doc.get("race")
+            if ck and ck != rk:
+                print(f"[중복방지] '{rk}' → 기존 로그 '{ck}' 에 병합(같은 경주)")
+            return ck or rk
+    except Exception:
+        pass
+    return rk
+
+
 def _build_analysis_log(rk, an=None):
     """_triple_analyze 결과 + odds_history(타임라인/결과) + 전적을 종합해 리치 로그를 만들고 저장.
     기존 로그가 있으면 사용자 입력(analyzed_at·복기 메모·profit)은 보존한다."""
     rec = _triple_load().get(rk) or {}
     if an is None:
         an = _triple_analyze(rk, rec)
+    rk = _canonical_log_key(rk)   # [중복 key 근본 방지] 같은 경주면 기존 로그 key 재사용
     path, date, race = _analysis_log_path(rk)
     try:
         doc = json.load(open(path, encoding="utf-8"))
