@@ -510,6 +510,50 @@ def extract_results():
     return jsonify(out)
 
 
+# [캡쳐+OCR] 경주결과 화면 캡쳐 1장 → 1·2·3착 판독(경륜/경정/바이크/경마 공통)
+RESULT_OCR_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "placing": {"type": "array", "items": {"type": "integer"}},
+        "raceNo": {"type": ["integer", "null"]},
+        "venue": {"type": ["string", "null"]},
+        "note": {"type": "string"},
+    },
+    "required": ["placing"],
+    "additionalProperties": False,
+}
+
+
+def _img_from_dataurl(img):
+    """dataURL 문자열('data:image/png;base64,...') 또는 {media_type,data} → image_block 입력형."""
+    if isinstance(img, str) and img.startswith("data:"):
+        m = re.match(r"data:([^;]+);base64,(.*)$", img, re.S)
+        if m:
+            return {"media_type": m.group(1), "data": m.group(2)}
+    return img if isinstance(img, dict) else None
+
+
+@app.route("/api/result/ocr", methods=["POST"])
+def result_ocr():
+    """경주결과 화면 캡쳐 이미지 → 1·2·3착 자동 판독.
+    body: {image: dataURL | {media_type,data}, api_key?}. 확장이 captureVisibleTab 이미지를 보냄."""
+    body = request.json or {}
+    img = _img_from_dataurl(body.get("image"))
+    if not img or not img.get("data"):
+        return jsonify({"error": "image(base64 dataURL 또는 {media_type,data})가 필요합니다."}), 400
+    prompt = (
+        "이 이미지는 경주(경륜/경정/바이크/경마) '결과' 화면입니다.\n"
+        "확정 착순의 선수번호(車番)/말번호를 1착→2착→3착(있으면 4착) 순서대로 placing 배열에 정수로 넣으세요.\n"
+        "예: 1착 3번, 2착 4번, 3착 1번 → placing:[3,4,1].\n"
+        "가능하면 raceNo(경주번호), venue(경주장명)도 채우세요.\n"
+        "아직 확정 결과가 아니거나 결과 화면이 아니면 placing=[] 로.\n"
+        "숫자만 정확히(배당·금액·시간과 혼동 금지)."
+    )
+    out = call_claude([{"type": "text", "text": prompt}, image_block(img)],
+                      RESULT_OCR_SCHEMA, 1024, body.get("api_key"))
+    return jsonify(out)
+
+
 def _do_detect(imgs, api_key=None):
     content = [{"type": "text", "text": (
         "여러 장의 KRA 출주표 페이지 썸네일이 '페이지 인덱스' 라벨과 함께 순서대로 주어집니다.\n"
