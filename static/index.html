@@ -197,6 +197,12 @@
         </div>
       </div>
       <div id="sportReport-boat" class="report-area"><p class="hint">🚤 경정 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
+      <div class="panel-card" style="margin-top:12px">
+        <h3>📋 이 종목 분석 기록 <span class="hint" style="font-weight:400">과거 분석·배팅 복기</span></h3>
+        <p class="hint">🚤 경정으로 분석했던 경주입니다. 클릭하면 <b>당시 유력마·이상감지·추천·결과</b>를 복기할 수 있습니다.</p>
+        <div id="sportRec-boat"><p class="hint">탭을 열면 기록을 불러옵니다.</p></div>
+        <div id="sportRecDetail-boat" style="margin-top:10px"></div>
+      </div>
     </section>
 
     <!-- [탭분리] 일본 경륜 (6명 출전) -->
@@ -209,6 +215,12 @@
         </div>
       </div>
       <div id="sportReport-cycle" class="report-area"><p class="hint">🚴 경륜 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
+      <div class="panel-card" style="margin-top:12px">
+        <h3>📋 이 종목 분석 기록 <span class="hint" style="font-weight:400">과거 분석·배팅 복기</span></h3>
+        <p class="hint">🚴 경륜으로 분석했던 경주입니다. 클릭하면 <b>당시 유력마·이상감지·추천·결과</b>를 복기할 수 있습니다.</p>
+        <div id="sportRec-cycle"><p class="hint">탭을 열면 기록을 불러옵니다.</p></div>
+        <div id="sportRecDetail-cycle" style="margin-top:10px"></div>
+      </div>
     </section>
 
     <!-- [탭분리] 일본 바이크(오토레이스) (6명 출전) -->
@@ -221,6 +233,12 @@
         </div>
       </div>
       <div id="sportReport-bike" class="report-area"><p class="hint">🏍 바이크 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
+      <div class="panel-card" style="margin-top:12px">
+        <h3>📋 이 종목 분석 기록 <span class="hint" style="font-weight:400">과거 분석·배팅 복기</span></h3>
+        <p class="hint">🏍 바이크로 분석했던 경주입니다. 클릭하면 <b>당시 유력마·이상감지·추천·결과</b>를 복기할 수 있습니다.</p>
+        <div id="sportRec-bike"><p class="hint">탭을 열면 기록을 불러옵니다.</p></div>
+        <div id="sportRecDetail-bike" style="margin-top:10px"></div>
+      </div>
     </section>
 
     <!-- [탭분리] 일본 중앙경마(JRA) — 배당 전용 -->
@@ -233,6 +251,12 @@
         </div>
       </div>
       <div id="sportReport-central" class="report-area"><p class="hint">🏇 중앙경마 배당판에서 수집이 시작되면 실시간 배당 이상감지가 표시됩니다.</p></div>
+      <div class="panel-card" style="margin-top:12px">
+        <h3>📋 이 종목 분석 기록 <span class="hint" style="font-weight:400">과거 분석·배팅 복기</span></h3>
+        <p class="hint">🏇 중앙경마로 분석했던 경주입니다. 클릭하면 <b>당시 유력마·이상감지·추천·결과</b>를 복기할 수 있습니다.</p>
+        <div id="sportRec-central"><p class="hint">탭을 열면 기록을 불러옵니다.</p></div>
+        <div id="sportRecDetail-central" style="margin-top:10px"></div>
+      </div>
     </section>
 
     <!-- 결과입력 -->
@@ -269,6 +293,7 @@
           <button type="button" class="subtab-btn" data-sub="bulk">📥 일괄등록</button>
           <button type="button" class="subtab-btn" data-sub="hall">🏆 명예의전당</button>
           <button type="button" class="subtab-btn" data-sub="report">📄 리포트</button>
+          <button type="button" class="subtab-btn" data-sub="records">🔎 분석기록</button>
         </div>
 
         <!-- 복기: 최근 결과 날짜별 그룹 + 클릭 복기 -->
@@ -327,6 +352,29 @@
             <button id="reportRefresh" class="btn">목록 새로고침</button>
           </div>
           <div id="raceReportView" style="margin-top:12px"></div>
+        </div>
+        <!-- [분석기록] 검색 가능한 전 종목 분석/배팅 기록 -->
+        <div class="subtab-panel" data-sub="records" style="display:none">
+          <h3 style="font-size:15px;margin-top:0">🔎 분석 기록 검색 <span class="hint" style="font-weight:400">전 종목(경마·경륜·경정·바이크·한국)</span></h3>
+          <p class="hint">배당을 수집·분석한 모든 경주가 자동으로 쌓입니다. <b>어떻게 분석했는지(유력마·이상감지·추천)와 결과·적중</b>을 검색해 복기하세요.</p>
+          <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
+            <input id="recSearchInput" class="cfg-input" type="text" placeholder="🔎 경주명·날짜·유력마·요약 검색" style="flex:1;min-width:240px" />
+            <button id="recRefreshBtn" class="btn">목록 새로고침</button>
+          </div>
+          <div id="recCatChips" style="display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px">
+            <button type="button" class="rec-cat-chip active" data-cat="all">전체</button>
+            <button type="button" class="rec-cat-chip" data-cat="horse">🏇 경마</button>
+            <button type="button" class="rec-cat-chip" data-cat="japan_local">🇯🇵 지방</button>
+            <button type="button" class="rec-cat-chip" data-cat="japan_central">🏇 중앙</button>
+            <button type="button" class="rec-cat-chip" data-cat="cycle">🚴 경륜</button>
+            <button type="button" class="rec-cat-chip" data-cat="boat">🚤 경정</button>
+            <button type="button" class="rec-cat-chip" data-cat="bike">🏍 바이크</button>
+            <button type="button" class="rec-cat-chip" data-cat="korea">🇰🇷 한국</button>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+            <div id="recAnalysisList" style="flex:1;min-width:280px;max-height:70vh;overflow:auto"><p class="hint">불러오는 중…</p></div>
+            <div id="recAnalysisDetail" style="flex:1.4;min-width:300px"></div>
+          </div>
         </div>
       </div>
     </section>

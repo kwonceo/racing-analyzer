@@ -4091,6 +4091,9 @@ def _build_analysis_log(rk, an=None):
     log = {
         "race_id": os.path.splitext(os.path.basename(path))[0],
         "raceKey": rk,   # [일본경마 복기] 결과 입력 시 record-result 로 그대로 전달(정확 매칭)
+        # [분석기록] 종목 태그 저장 → 기록 페이지에서 종목별 검색·필터. 기존 값 보존(재분석 시).
+        "sport": rec.get("sport") or (doc.get("sport") if doc else None) or "horse",
+        "category": rec.get("category") or (doc.get("category") if doc else None) or "japan_local",
         "date": date, "race": race,
         "analyzed_at": (doc.get("analyzed_at") if doc else None) or time.strftime("%H:%M:%S", time.localtime()),
         "updated_at": time.strftime("%H:%M:%S", time.localtime()),
@@ -7224,12 +7227,21 @@ def analysis_log_list():
                 d = json.load(open(os.path.join(ANALYSIS_LOG_DIR, fn), encoding="utf-8"))
             except Exception:
                 continue
+            res = d.get("result") or {}
+            hit = d.get("hit") or {}
+            # [분석기록] 적중 여부(복승/삼복승 중 하나라도 적중) — 목록에서 배지 표시용
+            won = bool(hit.get("quinella_hit") or hit.get("trifecta_hit") or hit.get("was_hit"))
             out.append({"file": fn, "race_id": d.get("race_id"), "date": d.get("date"),
                         "race": d.get("race"), "raceKey": d.get("raceKey") or d.get("race"),
+                        "sport": d.get("sport") or "horse",
+                        "category": d.get("category") or "japan_local",
+                        "summary": d.get("summary") or "",
+                        "keyHorses": d.get("keyHorses") or [],
                         "analyzed_at": d.get("analyzed_at"),
                         "snaps": len(d.get("odds_timeline") or []),
                         "signals": len(d.get("signals_detected") or []),
-                        "hasResult": bool(d.get("result"))})
+                        "top3": [res.get("1st"), res.get("2nd"), res.get("3rd")] if res else [],
+                        "hasResult": bool(d.get("result")), "won": won})
     return jsonify({"logs": out})
 
 

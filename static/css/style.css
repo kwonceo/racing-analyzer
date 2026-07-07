@@ -97,6 +97,15 @@ body {
 .subtab-btn:hover { color: var(--text); background: rgba(255,255,255,.03); }
 .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+/* [분석기록] 종목 필터 칩 */
+.rec-cat-chip {
+  background: transparent; border: 1px solid #334155; color: var(--text-dim);
+  padding: 4px 10px; cursor: pointer; font-size: 12px; font-weight: 600;
+  font-family: var(--font); border-radius: 14px; transition: all .15s;
+}
+.rec-cat-chip:hover { color: var(--text); border-color: #4b5b74; }
+.rec-cat-chip.active { color: #04210f; background: var(--accent, #38d39f); border-color: var(--accent, #38d39f); }
+
 /* ===== 메인 / 패널 ===== */
 .app-main { padding: 20px; max-width: 1100px; margin: 0 auto; }
 .tab-panel { display: none; }

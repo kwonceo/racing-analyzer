@@ -69,6 +69,7 @@
         if (['boat', 'cycle', 'bike', 'central'].includes(btn.dataset.tab)) {
           startJapanOddsWatch();
           if (_lastSportAnalyze) mirrorSportAnalysis(_lastSportAnalyze);
+          loadSportRecords(btn.dataset.tab);   // [분석기록] 이 종목 과거 분석 기록
         }
       });
     });
@@ -808,6 +809,7 @@
           });
           if (sub === 'hall') { try { loadHighlights(); } catch (_) { /* */ } }
           if (sub === 'report') { try { loadReportList(); } catch (_) { /* */ } }
+          if (sub === 'records') { try { loadAnalysisRecordsAll(); } catch (_) { /* */ } }   // [분석기록] 검색 기록
         });
       });
     }
@@ -5821,6 +5823,125 @@
         ⚠️ <b>오늘 결과 미입력: ${m.count}경주</b><br><span class="hint" style="color:#ffb0b0">${names}</span>
         <div class="hint" style="margin-top:3px;font-size:11px">아래 목록에서 경주를 눌러 결과를 입력하세요 (완전 저장 → AI 학습 반영).</div></div>`;
     } catch (_) { return ''; }
+  }
+
+  // ══════════ [분석기록] 검색 가능한 통합 분석/배팅 기록 (전 종목) ══════════
+  //   모든 종목(경마 지방/중앙·경륜·경정·바이크·한국)의 "어떻게 분석했는지"를 검색·복기.
+  const REC_CAT_LABEL = { horse: '🏇 경마', japan_local: '🇯🇵 지방', japan_central: '🏇 중앙',
+    boat: '🚤 경정', cycle: '🚴 경륜', bike: '🏍 바이크', korea: '🇰🇷 한국' };
+  let _recCache = null;
+  const _recAllCfg = { listSel: '#recAnalysisList', detailSel: '#recAnalysisDetail', category: 'all', query: '' };
+
+  async function loadRecCache(force) {
+    if (_recCache && !force) return _recCache;
+    try { _recCache = (await (await fetch('/api/analysis-log/list')).json()).logs || []; }
+    catch (_) { _recCache = []; }
+    return _recCache;
+  }
+
+  // cfg = {listSel, detailSel, category('all'|종목), query}
+  function renderRecList(cfg) {
+    const listEl = document.querySelector(cfg.listSel); if (!listEl) return;
+    let logs = _recCache || [];
+    if (cfg.category && cfg.category !== 'all') logs = logs.filter((l) => (l.category || '') === cfg.category);
+    const q = (cfg.query || '').trim().toLowerCase();
+    if (q) logs = logs.filter((l) => ((l.race || '') + ' ' + (l.raceKey || '') + ' ' + (l.date || '')
+      + ' ' + (l.summary || '') + ' ' + (l.keyHorses || []).join(' ') + ' ' + (REC_CAT_LABEL[l.category] || '')).toLowerCase().includes(q));
+    if (!logs.length) {
+      listEl.innerHTML = `<p class="hint">${q || (cfg.category && cfg.category !== 'all') ? '조건에 맞는 기록이 없습니다.' : '분석 기록이 없습니다. 배당을 수집·분석하면 자동으로 쌓입니다.'}</p>`;
+      return;
+    }
+    const byDate = {};
+    logs.forEach((l) => { (byDate[l.date || '?'] = byDate[l.date || '?'] || []).push(l); });
+    listEl.innerHTML = `<div class="hint" style="margin:2px 0 6px">총 ${logs.length}건</div>` + Object.keys(byDate).sort().reverse().map((date) =>
+      `<div style="margin-bottom:8px"><div class="hint" style="font-weight:700;margin:4px 0">${esc(date)} · ${byDate[date].length}건</div>`
+      + byDate[date].map((l) => {
+        const badge = l.hasResult ? (l.won ? '✅ 적중' : '❌ 미적중') : '⬜ 결과대기';
+        const bc = l.hasResult ? (l.won ? '#38d39f' : '#f87171') : '#94a3b8';
+        const catB = REC_CAT_LABEL[l.category] || '';
+        const kh = (l.keyHorses || []).length ? ' · 유력마 ' + l.keyHorses.join('·') : '';
+        const t3 = (l.top3 || []).filter((x) => x != null && x !== '').join('-');
+        return `<div class="rec-item" data-file="${esc(l.file)}" data-rk="${esc(l.raceKey || l.race || '')}" data-detail="${esc(cfg.detailSel)}" style="cursor:pointer;margin:3px 0;padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+            <b>${esc(l.race || l.race_id || '')}</b><span style="font-size:11px;color:${bc};font-weight:700">${badge}</span></div>
+          <div class="hint" style="font-size:11px;margin-top:2px">${catB ? catB + ' · ' : ''}${esc(l.analyzed_at || '')} · 신호 ${l.signals || 0}${kh}${t3 ? ' · 착순 ' + esc(t3) : ''}</div>
+          ${l.summary ? `<div class="hint" style="font-size:11px;margin-top:1px">${esc(l.summary)}</div>` : ''}</div>`;
+      }).join('') + '</div>').join('');
+    listEl.querySelectorAll('.rec-item').forEach((c) => c.addEventListener('click',
+      () => openAnalysisRecord(c.dataset.file, c.dataset.rk, c.dataset.detail)));
+  }
+
+  async function openAnalysisRecord(file, rk, detailSel) {
+    const el = document.querySelector(detailSel); if (!el) return;
+    el.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/analysis-log/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file }) })).json(); }
+    catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">${esc(e.message)}</p>`; return; }
+    if (d.error) { el.innerHTML = `<p class="hint">${esc(d.error)}</p>`; return; }
+    el.innerHTML = renderAnalysisDetail(d, rk || d.raceKey || d.race || '');
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // 읽기 전용 복기 상세(어떻게 분석했는지) — 입력폼 없이 당시 분석·추천·결과·적중을 보여줌.
+  function renderAnalysisDetail(d, rk) {
+    const sig = d.signals_detected || [], fr = d.final_recommendation || {}, elim = d.elimination || {};
+    const horses = d.horses || [];
+    const gradeOf = {}; horses.forEach((h) => { gradeOf[h.no] = h.grade; });
+    const cand = elim.candidates || [], elimNo = elim.eliminated || [];
+    const catB = REC_CAT_LABEL[d.category] || '';
+    const candHtml = cand.length ? cand.map((n) => `<span class="chip">${n}번${gradeOf[n] ? '(' + esc(String(gradeOf[n])) + ')' : ''}</span>`).join(' ') : '<span class="hint">없음</span>';
+    const elimHtml = elimNo.length ? elimNo.map((n) => `<span class="chip chip-red">${n}번</span>`).join(' ') : '<span class="hint">없음</span>';
+    const sev = (s) => /🔴|🚨|🌊/.test(s || '') ? 'chip-red' : '';
+    const sigHtml = sig.length ? sig.slice(0, 14).map((s) => `<div style="margin:2px 0"><span class="chip ${sev(s.severity)}">${esc(s.severity || '')} ${esc(s.type || '')}</span> ${esc(s.detail || '')}${s.reason ? ` <span class="hint">— ${esc(s.reason)}</span>` : ''}</div>`).join('') : '<div class="hint">감지된 이상신호 없음</div>';
+    const recRow = (k, label) => { const r = fr[k]; return r ? `<tr><td>${label}</td><td style="font-weight:700">${esc(r.combo)}</td><td>${r.odds != null ? r.odds + '배' : '-'}</td><td class="hint">${esc(r.reason || '')}</td></tr>` : ''; };
+    const frBody = recRow('quinella_main', '복승 메인') + recRow('quinella_sub', '복승 보조') + recRow('trifecta_main', '삼복승 메인') + recRow('trifecta_insurance1', '삼복승 보험1') + recRow('trifecta_insurance2', '삼복승 보험2');
+    const frHtml = frBody ? `<table class="data-table"><thead><tr><th>종류</th><th>조합</th><th>배당</th><th>근거</th></tr></thead><tbody>${frBody}</tbody></table>` : '<div class="hint">추천 조합 기록 없음</div>';
+    let resHtml;
+    const res = d.result || null, hit = d.hit || null;
+    if (res) {
+      const top3 = [res['1st'], res['2nd'], res['3rd']].filter((x) => x != null && x !== '').join('-');
+      const yn = (b) => b ? '<span style="color:#38d39f;font-weight:700">✅적중</span>' : '<span style="color:#f87171;font-weight:700">❌미적중</span>';
+      resHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🏁 결과 & 적중</div>
+        <div style="margin:2px 0">실제 착순: <b>${esc(top3) || '-'}</b></div>
+        ${hit ? `<div style="margin:2px 0">복승 ${yn(hit.quinella_hit)} · 삼복승 ${yn(hit.trifecta_hit)}${hit.pnl != null ? ` · 손익 <b style="color:${hit.pnl >= 0 ? '#38d39f' : '#f87171'}">${(hit.pnl >= 0 ? '+' : '') + Number(hit.pnl).toLocaleString('ko-KR')}원</b>` : ''}</div>` : ''}`;
+    } else {
+      resHtml = `<div class="hint" style="margin-top:8px">⬜ 결과 미입력 — <b>결과기록 탭</b> 또는 <b>일본경마 복기</b>에서 착순을 입력하면 적중·손익이 계산됩니다.</div>`;
+    }
+    const memoHtml = d.review ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">📝 복기 메모</div><div class="hint">${esc(d.review)}</div>` : '';
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px">
+      <div class="matrix-title">${esc(d.race || rk)} <span class="hint" style="font-weight:400">${catB ? catB + ' · ' : ''}${esc(d.date || '')} · 분석 ${esc(d.analyzed_at || '')}</span></div>
+      <div class="matrix-title" style="font-size:13px;margin-top:6px">🏇 유력마 / 제거마</div>
+      <div style="margin:2px 0"><b>유력마:</b> ${candHtml}</div>
+      <div style="margin:2px 0"><b>제거마:</b> ${elimHtml}</div>
+      <div class="matrix-title" style="font-size:13px;margin-top:8px">🚨 이상감지 내역</div>${sigHtml}
+      <div class="matrix-title" style="font-size:13px;margin-top:8px">🎯 추천 조합 (당시)</div>${frHtml}
+      ${resHtml}${memoHtml}</div>`;
+  }
+
+  // 결과기록 탭 '분석기록' 서브탭 진입 → 캐시 로드 + 검색/필터 UI 배선(1회)
+  let _recAllWired = false;
+  async function loadAnalysisRecordsAll() {
+    await loadRecCache(true);
+    renderRecList(_recAllCfg);
+    if (_recAllWired) return;
+    _recAllWired = true;
+    const s = document.querySelector('#recSearchInput');
+    if (s) s.addEventListener('input', () => { _recAllCfg.query = s.value; renderRecList(_recAllCfg); });
+    document.querySelectorAll('#recCatChips .rec-cat-chip').forEach((chip) => chip.addEventListener('click', () => {
+      _recAllCfg.category = chip.dataset.cat || 'all';
+      document.querySelectorAll('#recCatChips .rec-cat-chip').forEach((c) => c.classList.toggle('active', c === chip));
+      renderRecList(_recAllCfg);
+    }));
+    const rf = document.querySelector('#recRefreshBtn');
+    if (rf) rf.addEventListener('click', async () => { await loadRecCache(true); renderRecList(_recAllCfg); });
+  }
+
+  // 스포츠 탭(경정/경륜/바이크/중앙)의 '분석 기록' 섹션 로드(해당 종목만)
+  //   탭 키(boat/cycle/bike/central) → category(central은 japan_central) 매핑.
+  const SPORT_TAB_TO_CAT = { boat: 'boat', cycle: 'cycle', bike: 'bike', central: 'japan_central' };
+  async function loadSportRecords(tabKey) {
+    await loadRecCache();
+    renderRecList({ listSel: '#sportRec-' + tabKey, detailSel: '#sportRecDetail-' + tabKey,
+      category: SPORT_TAB_TO_CAT[tabKey] || tabKey, query: '' });
   }
 
   async function loadJapanReviewList() {
