@@ -510,16 +510,28 @@ def extract_results():
     return jsonify(out)
 
 
-# [캡쳐+OCR] 경주결과 화면 캡쳐 1장 → 1·2·3착 판독(경륜/경정/바이크/경마 공통)
+# [캡쳐+OCR] 경주결과 화면 캡쳐 → 결과표(여러 경주) 판독.
+#   asyukk '경주결과'는 [경주지역·라운드·1착·2착·3착·단승·복승·쌍승·…] 다중 경주 표.
 RESULT_OCR_SCHEMA = {
     "type": "object",
     "properties": {
-        "placing": {"type": "array", "items": {"type": "integer"}},
-        "raceNo": {"type": ["integer", "null"]},
-        "venue": {"type": ["string", "null"]},
-        "note": {"type": "string"},
+        "results": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "venue": {"type": ["string", "null"]},
+                    "raceNo": {"type": ["integer", "null"]},
+                    "placing": {"type": "array", "items": {"type": "integer"}},
+                    "quinellaOdds": {"type": ["number", "null"]},
+                    "trioOdds": {"type": ["number", "null"]},
+                },
+                "required": ["placing"],
+                "additionalProperties": False,
+            },
+        },
     },
-    "required": ["placing"],
+    "required": ["results"],
     "additionalProperties": False,
 }
 
@@ -535,23 +547,44 @@ def _img_from_dataurl(img):
 
 @app.route("/api/result/ocr", methods=["POST"])
 def result_ocr():
-    """경주결과 화면 캡쳐 이미지 → 1·2·3착 자동 판독.
-    body: {image: dataURL | {media_type,data}, api_key?}. 확장이 captureVisibleTab 이미지를 보냄."""
+    """경주결과 화면 캡쳐 이미지 → 결과표(여러 경주) 판독 → 분석경주 자동매칭·등록·학습.
+    body: {image: dataURL | {media_type,data}, stake?, api_key?}.
+    → {ok, registered, hits, profit, matched, unmatched, parsed}"""
     body = request.json or {}
     img = _img_from_dataurl(body.get("image"))
     if not img or not img.get("data"):
         return jsonify({"error": "image(base64 dataURL 또는 {media_type,data})가 필요합니다."}), 400
     prompt = (
-        "이 이미지는 경주(경륜/경정/바이크/경마) '결과' 화면입니다.\n"
-        "확정 착순의 선수번호(車番)/말번호를 1착→2착→3착(있으면 4착) 순서대로 placing 배열에 정수로 넣으세요.\n"
-        "예: 1착 3번, 2착 4번, 3착 1번 → placing:[3,4,1].\n"
-        "가능하면 raceNo(경주번호), venue(경주장명)도 채우세요.\n"
-        "아직 확정 결과가 아니거나 결과 화면이 아니면 placing=[] 로.\n"
-        "숫자만 정확히(배당·금액·시간과 혼동 금지)."
+        "이 이미지는 경주(경륜/경정/바이크/경마) '경주결과' 화면입니다.\n"
+        "표의 각 행이 한 경주이며, 보통 컬럼은 [경주지역, 라운드, 1착, 2착, 3착, 단승, 복승, 쌍승, 연승, 복연승, 삼복승, 삼쌍승] 입니다.\n"
+        "확정된 각 경주 행을 results 배열에 하나씩 넣으세요:\n"
+        "- venue: 경주지역(예 '사세보','호후','광명').\n"
+        "- raceNo: 라운드(경주 번호) 정수.\n"
+        "- placing: [1착, 2착, 3착] 선수번호(車番)/말번호 정수 순서대로.\n"
+        "- quinellaOdds: '복승' 배당(숫자), trioOdds: '삼복승' 배당(숫자). 없으면 null.\n"
+        "착순이 비었거나 아직 미확정인 행은 제외. 결과 화면이 아니면 results=[].\n"
+        "배당(복승/삼복승 등)과 착순(1·2·3착)을 절대 혼동하지 마세요."
     )
     out = call_claude([{"type": "text", "text": prompt}, image_block(img)],
-                      RESULT_OCR_SCHEMA, 1024, body.get("api_key"))
-    return jsonify(out)
+                      RESULT_OCR_SCHEMA, 2048, body.get("api_key"))
+    results = (out or {}).get("results") or []
+    rows = []
+    for r in results:
+        p = [x for x in (r.get("placing") or []) if isinstance(x, int) and x >= 1]
+        if not p:
+            continue
+        rows.append({"area": r.get("venue"), "round": r.get("raceNo"),
+                     "no1": p[0], "no2": p[1] if len(p) > 1 else None,
+                     "no3": p[2] if len(p) > 2 else None,
+                     "qOdds": _safe_num(r.get("quinellaOdds")),
+                     "tOdds": _safe_num(r.get("trioOdds"))})
+    if not rows:
+        return jsonify({"ok": True, "registered": 0, "hits": 0, "profit": 0,
+                        "matched": [], "unmatched": [], "parsed": results,
+                        "note": "결과 행을 읽지 못했습니다(결과 화면이 선명한지 확인)."})
+    summary = _register_result_rows(rows, _safe_num(body.get("stake")) or 1000)
+    summary["parsed"] = results
+    return jsonify(summary)
 
 
 def _do_detect(imgs, api_key=None):
@@ -7021,29 +7054,32 @@ def _match_row_to_key(row, analyzed_keys):
     return matched if matched in analyzed_keys else None
 
 
-@app.route("/api/results/bulk", methods=["POST"])
-def results_bulk():
-    """[일괄 결과 등록] 결과 페이지 전체를 한 번에 파싱→분석경주 자동매칭→적중판정·학습→요약.
-    body: {html?} 또는 {url?} 또는 {rows?}, stake?(정액 베팅 가정, 기본 1000).
-    → {ok, registered, hits, profit, matched:[...], unmatched:[...], errors:[...]}"""
-    body = request.json or {}
-    stake = _safe_num(body.get("stake")) or 1000
-    rows = body.get("rows")
-    if not rows:
-        html = body.get("html") or ""
-        if not html and body.get("url"):
-            try:
-                req = Request(body["url"], headers={"User-Agent": "Mozilla/5.0"})
-                html = urlopen(req, timeout=10).read().decode("utf-8", "replace")
-            except Exception as e:
-                return jsonify({"error": f"URL 로드 실패({e}). 결과 페이지 HTML을 붙여넣어 주세요.",
-                                "needPaste": True}), 200
-        rows = _parse_result_rows(html)
-    if not rows:
-        return jsonify({"error": "결과표를 파싱하지 못했습니다. (경주지역·라운드·1~3착 컬럼이 있는 결과 페이지 HTML인지 확인)",
-                        "needPaste": True}), 200
+def _all_analyzed_keys():
+    """매칭 후보 raceKey 전체 — triple_store(현재 캐시) + analysis_log(과거 분석·프룬됨 포함)."""
+    keys = set(_triple_load().keys())
+    try:
+        if os.path.isdir(ANALYSIS_LOG_DIR):
+            for fn in os.listdir(ANALYSIS_LOG_DIR):
+                if not fn.endswith(".json"):
+                    continue
+                try:
+                    d = json.load(open(os.path.join(ANALYSIS_LOG_DIR, fn), encoding="utf-8"))
+                    k = d.get("raceKey") or d.get("race")
+                    if k:
+                        keys.add(k)
+                except Exception:
+                    continue
+    except Exception:
+        pass
+    return list(keys)
 
-    analyzed_keys = list(_triple_load().keys())
+
+def _register_result_rows(rows, stake=1000, analyzed_keys=None):
+    """결과행 리스트 → 분석경주 자동매칭 → 적중판정·학습 → 요약.
+    일괄등록(HTML)·캡쳐OCR(이미지) 공통 등록 경로. row={area,round,no1,no2,no3,qOdds?,tOdds?}."""
+    stake = int(stake) if (stake and int(stake) > 0) else 1000
+    if analyzed_keys is None:
+        analyzed_keys = _all_analyzed_keys()
     matched, unmatched, errors = [], [], []
     hits = 0
     profit = 0
@@ -7080,13 +7116,33 @@ def results_bulk():
                         "stake": stake, "payouts": rec.get("payouts"),
                         "payout_actual": rec.get("payout_actual"),
                         "had_bet": bool(rec.get("bet_type"))})
+    print(f"[결과등록] 등록 {len(matched)}건 · 적중 {hits} · 손익 {profit}원 · 매칭실패 {len(unmatched)}건")
+    return {"ok": True, "registered": len(matched), "hits": hits, "profit": profit,
+            "stake": stake, "matched": matched, "unmatched": unmatched, "errors": errors,
+            "parsedRows": len(rows)}
 
-    print(f"[일괄결과] 등록 {len(matched)}건 · 적중 {hits} · 손익 {profit}원 · 매칭실패 {len(unmatched)}건")
-    return jsonify({
-        "ok": True, "registered": len(matched), "hits": hits, "profit": profit,
-        "stake": stake, "matched": matched, "unmatched": unmatched, "errors": errors,
-        "parsedRows": len(rows),
-    })
+
+@app.route("/api/results/bulk", methods=["POST"])
+def results_bulk():
+    """[일괄 결과 등록] 결과 페이지 전체를 한 번에 파싱→분석경주 자동매칭→적중판정·학습→요약.
+    body: {html?} 또는 {url?} 또는 {rows?}, stake?(정액 베팅 가정, 기본 1000)."""
+    body = request.json or {}
+    stake = _safe_num(body.get("stake")) or 1000
+    rows = body.get("rows")
+    if not rows:
+        html = body.get("html") or ""
+        if not html and body.get("url"):
+            try:
+                req = Request(body["url"], headers={"User-Agent": "Mozilla/5.0"})
+                html = urlopen(req, timeout=10).read().decode("utf-8", "replace")
+            except Exception as e:
+                return jsonify({"error": f"URL 로드 실패({e}). 결과 페이지 HTML을 붙여넣어 주세요.",
+                                "needPaste": True}), 200
+        rows = _parse_result_rows(html)
+    if not rows:
+        return jsonify({"error": "결과표를 파싱하지 못했습니다. (경주지역·라운드·1~3착 컬럼이 있는 결과 페이지 HTML인지 확인)",
+                        "needPaste": True}), 200
+    return jsonify(_register_result_rows(rows, stake))
 
 
 def _recompute_pnl(rec, stake, payout):
