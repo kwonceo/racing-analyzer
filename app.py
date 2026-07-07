@@ -2900,6 +2900,198 @@ def _learned_integrated_weights():
     return fw, ow
 
 
+# ════════════ [추천 로직 전면 개편] 확신도 엔진 + 경주유형 + 단계별 추천 + 강화제거 ════════════
+#   ⚠ 기존 함수(_signal_confidence·_elimination·_bmed_strategy·_integrated_grades 등)는 그대로 두고,
+#   그 결과를 '소비'해서 새 지표만 파생한다(삭제·수정 없음). _triple_analyze 반환 dict에 필드만 추가.
+
+def _drop_persistence(advanced, no):
+    """[2번] 시세급락지속성(0~100). 연속하락 확정=높음, 페이크(반등)=낮음.
+      기존 _advanced_anomaly의 horseStreaks[no]{count,rebounded}를 재사용."""
+    hs = (advanced or {}).get("horseStreaks") or {}
+    s = hs.get(no)
+    if s is None:
+        s = hs.get(int(no)) if str(no).lstrip("-").isdigit() else None
+    if s is None:
+        s = hs.get(str(no))
+    if not s:
+        return 0.0
+    if s.get("rebounded"):
+        return 15.0                       # 반등=페이크 → 지속성 매우 낮음
+    cnt = int(s.get("count") or 0)
+    return float(min(100.0, {0: 0, 1: 40, 2: 70}.get(cnt, 90 + min(10, (cnt - 3) * 3))))
+
+
+def _confidence_engine(signal_confidence, form, advanced, key_horses):
+    """[2번] BMED 확신도 = 이상감지강도(40%) + 전적점수(30%) + 시세급락지속성(30%).
+      기존 '저배당 우선'이 아니라 신호 기반 확신도로 유력마를 재랭킹.
+      반환 {horses:{no:{anomaly,form,persistence,confidence,band}}, ranked:[no], top:[no],
+            overall:{best,band,bestHorse}}. band=강력(≥65)/주목(≥45)/관찰(≥25)/약함."""
+    fmap = {int(h["no"]): h for h in (form or []) if h.get("no") is not None}
+    sc_h = (signal_confidence or {}).get("horses") or {}
+    hs = (advanced or {}).get("horseStreaks") or {}
+    nos = set(fmap.keys())
+    nos |= set(int(n) for n in sc_h.keys())
+    nos |= set(int(n) for n in (key_horses or []))
+    for k in hs.keys():
+        try:
+            nos.add(int(k))
+        except (ValueError, TypeError):
+            pass
+    out = {}
+    for no in nos:
+        anom = float((sc_h.get(no) or sc_h.get(str(no)) or {}).get("confidence") or 0.0)   # 이상감지강도 0~100
+        fh = fmap.get(no)
+        fscore = max(0.0, min(100.0, float((fh or {}).get("totalScore") or 0.0))) if fh else 0.0
+        pers = _drop_persistence(advanced, no)
+        conf = round(0.40 * anom + 0.30 * fscore + 0.30 * pers, 1)
+        band = "강력" if conf >= 65 else ("주목" if conf >= 45 else ("관찰" if conf >= 25 else "약함"))
+        out[no] = {"no": no, "anomaly": round(anom, 1), "form": round(fscore, 1),
+                   "persistence": round(pers, 1), "confidence": conf, "band": band}
+    ranked = sorted(out.keys(), key=lambda n: -out[n]["confidence"])
+    best = out[ranked[0]]["confidence"] if ranked else 0.0
+    ov_band = "강력" if best >= 65 else ("주목" if best >= 45 else ("관찰" if best >= 25 else "약함"))
+    return {"horses": out, "ranked": ranked, "top": ranked[:5],
+            "overall": {"best": best, "band": ov_band, "bestHorse": ranked[0] if ranked else None}}
+
+
+def _bet_judgment(conf_engine, excess, advanced, wx_reversals, form, mass_drop, after_close, signal_ready):
+    """[개편·실전] 경주 유형 자동 판정 + 배팅 배분 비율.
+      유형: 확실형/신중형/애매형/패스형/wait(수집중). 조건(초과급락·연속하락·쌍승역전·전적·확신도)
+      으로 분류하고 예산 배분(복승메인/보조/삼복승보험)을 제공. 저배당 무조건 추천 방지([5번]).
+      반환 {type,emoji,label,message,confidence,reasons[],metrics{},alloc{main,sub,trio},exactaSignal}."""
+    best = round(((conf_engine or {}).get("overall") or {}).get("best", 0.0), 1)
+    ex_h = (excess or {}).get("horses") or {}
+    mags = [-v["strength"] for v in ex_h.values()
+            if isinstance(v.get("strength"), (int, float)) and v["strength"] < 0]
+    max_ex = round(max(mags), 1) if mags else 0.0                      # 최강 초과급락 크기(%p, +값)
+    streaks = list(((advanced or {}).get("horseStreaks") or {}).values())
+    max_streak = max([int(s.get("count") or 0) for s in streaks], default=0)   # 최다 연속하락
+    fake_any = any(s.get("rebounded") for s in streaks)
+    ratios = [r["ratio"] for r in (wx_reversals or []) if r.get("ratio") is not None]
+    min_ratio = min(ratios) if ratios else None                       # 최강 쌍승역전(낮을수록 강)
+    fscores = [h["totalScore"] for h in (form or []) if h.get("totalScore") is not None]
+    max_form = round(max(fscores), 1) if fscores else 0.0
+    mass = bool(mass_drop)
+
+    reasons = []
+    if max_ex >= 5:
+        reasons.append(f"초과급락 {max_ex}%p")
+    if max_streak >= 1:
+        reasons.append(f"연속하락 {max_streak}회")
+    if min_ratio is not None:
+        reasons.append(f"쌍승역전 {min_ratio}")
+    if max_form >= 1:
+        reasons.append(f"전적 {max_form}")
+    if fake_any:
+        reasons.append("페이크 반등 의심")
+    if mass:
+        reasons.append("대규모 급락(노이즈 주의)")
+
+    strong = (max_ex >= 15 and max_streak >= 3 and (min_ratio is not None and min_ratio < 0.80) and max_form >= 60)
+    moderate = ((5 <= max_ex < 15) or max_streak == 2 or (min_ratio is not None and 0.80 <= min_ratio <= 0.95))
+
+    if not signal_ready and not after_close:
+        typ, emoji, label = "wait", "⏳", "신호 대기"
+        msg = "배당 수집 중 — 신호 형성 후 추천(저배당 무조건 추천 안 함)"
+        alloc = {"main": 0, "sub": 0, "trio": 0}
+    elif strong or best >= 80:
+        typ, emoji, label = "확실형", "✅", "확실형 — 자신있게 배팅"
+        msg = "✅ 이번 경주 자신있음"
+        alloc = {"main": 60, "sub": 30, "trio": 10}
+    elif moderate and best >= 40:
+        typ, emoji, label = "신중형", "⚠️", "신중형 — 소액 추천"
+        msg = "⚠️ 신중하게 소액만 (삼복승 보험 상향)"
+        alloc = {"main": 40, "sub": 20, "trio": 40}
+    elif (max_ex < 5 and max_streak < 1 and not ratios and best < 20) and not after_close:
+        typ, emoji, label = "패스형", "⛔", "패스 권고 — 이번 경주 보류"
+        msg = "⛔ 이번 경주 패스 권고 · 신호 없음 — 돈 아끼세요"
+        alloc = {"main": 0, "sub": 0, "trio": 0}
+    else:
+        typ, emoji, label = "애매형", "🛡", "애매형 — 보험 중심 소액"
+        msg = "🛡 애매함 — 보험(삼복승) 중심 소액 · 고배당 조합 위주"
+        alloc = {"main": 20, "sub": 0, "trio": 80}
+
+    # [3번] 쌍승 강신호: 역전<0.70 + 초과급락15+ + 연속3+ + 확신도80+ 모두 충족 시에만
+    exacta_signal = None
+    if min_ratio is not None and min_ratio < 0.70 and max_ex >= 15 and max_streak >= 3 and best >= 80:
+        r0 = min((r for r in (wx_reversals or []) if r.get("ratio") == min_ratio),
+                 key=lambda r: r["ratio"], default=None)
+        if r0:
+            a, b = int(r0["challenger"]), int(r0["favorite"])
+            exacta_signal = {"combo": [a, b], "ratio": min_ratio,
+                             "text": f"⚡ 쌍승 강신호! {a}→{b} — 역전+급락 동시 · 소액 도전"}
+
+    return {"type": typ, "emoji": emoji, "label": label, "message": msg,
+            "confidence": best, "reasons": reasons,
+            "metrics": {"maxExcess": max_ex, "maxStreak": max_streak, "minRatio": min_ratio,
+                        "maxForm": max_form, "fake": fake_any, "mass": mass},
+            "alloc": alloc, "exactaSignal": exacta_signal}
+
+
+def _stage_guide(cur_mb, after_close, judgment, inverse, advanced):
+    """[3번] 발주 전 시점(T-3/T-2/T-1/T-30초)별 단계 추천 + 최종 등급.
+      cur_mb=발주까지 분. 등급은 경주유형(_bet_judgment)에서 유도. 반환 {stage,phase,title,grade,lines[],minutesBefore}."""
+    typ = (judgment or {}).get("type")
+    grade = {"확실형": "강력추천", "신중형": "일반추천", "애매형": "보험",
+             "패스형": "패스", "wait": "대기"}.get(typ, "일반추천")
+    if after_close or cur_mb is None:
+        return {"stage": "closed", "phase": "마감 후", "title": "발주 후 · 참고만", "grade": grade,
+                "minutesBefore": cur_mb, "lines": ["발주(T-0) 이후 신호는 참고만 하세요(추천 미반영)."]}
+    if cur_mb >= 2.5:
+        return {"stage": "t3", "phase": "T-3분", "title": "1차 추천 (전적40+배당60)", "grade": grade,
+                "minutesBefore": cur_mb, "lines": ["전적 40% + 배당 60% 가중 1차 조합", "급락 말 강조 · 제거 말 표시"]}
+    if cur_mb >= 1.5:
+        fakes = [s.get("no") for s in ((advanced or {}).get("horseStreaks") or {}).values() if s.get("rebounded")]
+        return {"stage": "t2", "phase": "T-2분", "title": "2차 업데이트 (급락 지속·페이크)", "grade": grade,
+                "minutesBefore": cur_mb,
+                "lines": ["급락 지속 여부 확인",
+                          ("페이크 반등 제거: " + ", ".join(f"{n}번" for n in fakes)) if fakes else "페이크 반등 없음",
+                          "역배열 최종 확인" + (" · 감지됨" if inverse and inverse.get("detected") else "")]}
+    if cur_mb >= 0.5:
+        return {"stage": "t1", "phase": "T-1분", "title": "3차 업데이트 (환수율·자금집중·확정)", "grade": grade,
+                "minutesBefore": cur_mb, "lines": ["환수율·자금집중도 확인", "최종 조합 확정", "배팅 금액 배분"]}
+    _fin = {"강력추천": "💪 강력추천 — 확신도 최상", "일반추천": "👍 일반추천 — 확신도 양호",
+            "보험": "🛡️ 보험 위주 — 소액 분산", "패스": "⚠️ 신호 약함 — 이번 경주 패스 권고"}
+    return {"stage": "t30", "phase": "T-30초", "title": "최종 알림", "grade": grade,
+            "minutesBefore": cur_mb, "lines": [_fin.get(grade, "")]}
+
+
+def _elimination_strong(elimination, form, drops):
+    """[5번] 과감한 제거마 목록(기존 _elimination 판정 유지, 강화 파생만).
+      대상=제거판정(🔴확실/🟠권장) + 근거 표기: ①전적 하위30% ②급락·변동 없음."""
+    horses = (elimination or {}).get("horses") or []
+    if not horses:
+        return []
+    fmap = {int(h["no"]): h for h in (form or []) if h.get("no") is not None}
+    fscores = sorted([h["totalScore"] for h in (form or []) if h.get("totalScore") is not None])
+    p30 = fscores[max(0, int(len(fscores) * 0.3) - 1)] if fscores else None
+    dropped = set()
+    for d in (drops or []):
+        if d.get("pct") is not None and d["pct"] <= -15:
+            for p in d.get("combo", []):
+                dropped.add(int(p))
+    out = []
+    for h in horses:
+        try:
+            no = int(h["no"])
+        except (KeyError, ValueError, TypeError):
+            continue
+        if h.get("verdict") not in ("🔴", "🟠"):      # 이미 제거권장/확실제거만 강화 표기
+            continue
+        reasons = []
+        fh = fmap.get(no)
+        fs = (fh or {}).get("totalScore")
+        if fs is not None and p30 is not None and fs <= p30:
+            reasons.append("전적 하위30%")
+        if no not in dropped:
+            reasons.append("급락·변동 없음")
+        out.append({"no": no, "name": (fh or {}).get("name") or h.get("name") or "",
+                    "odds": h.get("oddsRepr"), "formScore": fs, "verdict": h.get("verdict"),
+                    "total": h.get("total"), "reasons": reasons or ["배당+전적 복합 제거"]})
+    out.sort(key=lambda x: (x["total"] if x.get("total") is not None else 999))
+    return out[:6]
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -3548,8 +3740,27 @@ def _triple_analyze(rk, rec):
         print("[신호타임라인] 실패:", _e)
         signal_timeline = None
 
+    # ═══ [추천 로직 전면 개편] 확신도·경주유형·단계추천·강화제거 파생(기존 필드 무영향) ═══
+    #   신호 준비 여부: 첫 수집(기준값 설정)/재설정/스냅샷 2건 미만이면 '저배당 무조건 추천' 방지([5번]).
+    confidence = race_judgment = stage_guide = None
+    elimination_strong = []
+    try:
+        signal_ready = (not baseline_set) and (not baseline_reset) and (len(hist) >= 2)
+        confidence = _confidence_engine(signal_confidence, form, advanced, key_horses)
+        race_judgment = _bet_judgment(confidence, excess, advanced, wx_reversals, form,
+                                      mass_drop, after_close, signal_ready)
+        stage_guide = _stage_guide(cur_mb, after_close, race_judgment, inverse, advanced)
+        elimination_strong = _elimination_strong(elimination, form, drops)
+    except Exception as _e:
+        print("[추천개편] 파생 실패:", _e)
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
+        # [추천 로직 전면 개편] BMED 확신도 엔진 + 실전 경주유형 판정 + 단계별 추천 + 강화 제거마
+        "confidence": confidence,          # [2번] 이상감지40+전적30+급락지속30 → 말별 확신도·랭킹
+        "raceJudgment": race_judgment,     # [1·4번] 확실/신중/애매/패스형 + 근거 + 배분비율 + 쌍승강신호
+        "stageGuide": stage_guide,         # [3번] T-3/T-2/T-1/T-30초 단계 추천 + 최종등급
+        "eliminationStrong": elimination_strong,   # [5번] 과감한 제거마 목록(근거 포함)
         "sport": rec.get("sport") or "horse",   # [수정#3] 종목(horse|cycle|boat|bike) → 프론트 배지
         "category": rec.get("category") or "japan_local",   # [탭분리] 분석기 탭 라우팅
         "alertSignal": alert_signal,   # [신규 3번] 경고 신호 감지 요약(배너)

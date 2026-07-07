@@ -2708,6 +2708,48 @@
     if (info.ex && info.ex.grade) c.push(`<span class="chip ${info.ex.grade === '🔴' ? 'chip-red' : ''}">${info.ex.grade} 집중 ${info.ex.excess}%p</span>`);
     return c.join(' ');
   }
+  // ── [1·2·4번] 경주 판정 크게 표시 + 배팅 금액 자동배분 + 쌍승 강신호 ─────────────
+  //  실전 경주유형(확실/신중/애매/패스/대기)을 화면 최상단에 크게, 근거·확신도·예산배분과 함께.
+  //  bsel=예산 입력 선택자(#jpBudget·#sportBudget-*) → 예산 × 배분비율로 금액 제안([2번]).
+  function renderRaceJudgment(a, bsel) {
+    const j = a.raceJudgment; if (!j) return '';
+    const sg = a.stageGuide || {};
+    const COL = { '확실형': '#38d39f', '신중형': '#ffd24f', '애매형': '#c084fc', '패스형': '#ef4444', 'wait': '#8a94a6' };
+    const col = COL[j.type] || '#4ea1ff';
+    let budget = 0;
+    if (bsel) { const el = document.querySelector(bsel); budget = el ? (parseInt((el.value || '').replace(/[^0-9]/g, ''), 10) || 0) : 0; }
+    const al = j.alloc || {};
+    const won = (v) => v.toLocaleString('ko-KR') + '원';
+    let allocHtml;
+    if (budget > 0 && (al.main || al.sub || al.trio)) {
+      allocHtml = `<div style="margin-top:6px;font-size:12px;line-height:1.7">
+        <div>💰 복승 메인 <b>${al.main}%</b> → <b style="color:${col}">${won(Math.round(budget * al.main / 100))}</b></div>
+        ${al.sub ? `<div>복승 보조 <b>${al.sub}%</b> → <b>${won(Math.round(budget * al.sub / 100))}</b></div>` : ''}
+        ${al.trio ? `<div>삼복승 보험 <b>${al.trio}%</b> → <b>${won(Math.round(budget * al.trio / 100))}</b></div>` : ''}
+      </div>`;
+    } else if (budget > 0 && (j.type === 'wait' || j.type === '패스형')) {
+      allocHtml = '<div class="hint" style="margin-top:4px;color:#ef4444;font-weight:600">배팅 금액 0원 — 이번 경주 건너뛰세요</div>';
+    } else {
+      allocHtml = '<div class="hint" style="margin-top:4px">예산 입력 시 유형별 배분 금액이 표시됩니다</div>';
+    }
+    const exSig = j.exactaSignal
+      ? `<div style="margin-top:6px;padding:6px 9px;background:rgba(168,85,247,.16);border-left:3px solid #a855f7;border-radius:6px;color:#d8b4fe;font-weight:700">${esc(j.exactaSignal.text)} <span class="hint" style="font-weight:400">(역전비 ${j.exactaSignal.ratio})</span></div>`
+      : '';
+    const stageBadge = sg.phase ? `<span class="chip" style="border-color:${col};color:${col}">${esc(sg.phase)}${sg.grade ? ' · ' + esc(sg.grade) : ''}</span>` : '';
+    return `<div style="margin:0 0 10px;border:2px solid ${col};border-radius:12px;padding:11px 13px;background:linear-gradient(180deg,${col}22,rgba(20,28,43,.97));box-shadow:0 4px 16px rgba(0,0,0,.35)">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:20px;font-weight:800;color:${col}">${j.emoji} ${esc(j.label)}</span>
+        ${stageBadge}
+        <span style="margin-left:auto;font-size:13px">확신도 <b style="color:${col};font-size:19px">${j.confidence}</b>점</span>
+      </div>
+      <div style="margin-top:5px;font-size:14px;font-weight:600">${esc(j.message)}</div>
+      ${(j.reasons && j.reasons.length) ? `<div class="hint" style="margin-top:3px">근거: ${j.reasons.map(esc).join(' · ')}</div>` : ''}
+      ${exSig}
+      ${allocHtml}
+      ${(sg.lines && sg.lines.length) ? `<div class="hint" style="margin-top:7px;border-top:1px solid rgba(255,255,255,.12);padding-top:5px">🕒 ${esc(sg.title || '')} — ${sg.lines.map(esc).join(' / ')}</div>` : ''}
+    </div>`;
+  }
+
   function renderTopHorses(a) {
     _topAnalysisForClick = a;       // 클릭 상세/타임라인용 최신 분석 보관
     _ensureTopHorseDelegation();    // 클릭 위임 1회 설치(다중 패널 안전)
@@ -2732,9 +2774,12 @@
       });
     }
     if (!horses.length) return '';
-    // 통합점수 순: 통합확률 → 제거점수 → 전적점수
+    // [2번] 확신도 우선 랭킹(있으면). 확신도=이상감지40+전적30+급락지속30 → 신호 기반 유력마.
+    const confMap = (a.confidence && a.confidence.horses) ? a.confidence.horses : null;
+    if (confMap) horses.forEach((h) => { const c = confMap[h.no] || confMap[String(h.no)]; if (c) { h.conf = c.confidence; h.band = c.band; } });
+    // 통합점수 순(폴백): 통합확률 → 제거점수 → 전적점수
     const scoreOf = (h) => (h.prob != null ? h.prob * 1000 : 0) + (h.total != null ? h.total : 0) + (h.formScore != null ? h.formScore / 100 : 0);
-    horses.sort((x, y) => scoreOf(y) - scoreOf(x) || (x.no - y.no));
+    horses.sort((x, y) => (confMap ? ((y.conf || -1) - (x.conf || -1)) : 0) || scoreOf(y) - scoreOf(x) || (x.no - y.no));
     const top = horses.slice(0, 5);
 
     // 복병/이상감지 2두: TOP5 밖 + (이상감지·급락·집중신호) 보유, 신호강도순
@@ -2779,6 +2824,9 @@
         : `<b style="color:#ffd24f;min-width:30px;display:inline-block">${rank}위</b>`;
       const oddsTxt = h.odds != null ? `${h.odds}배` : '미수집';
       const formTxt = h.formScore != null ? `전적 ${h.formScore}` : '전적-';
+      const BAND_COL = { '강력': '#38d39f', '주목': '#ffd24f', '관찰': '#c084fc', '약함': '#8a94a6' };
+      const confChip = (!isDark && h.conf != null)
+        ? `<span class="chip" style="border-color:${BAND_COL[h.band] || '#4ea1ff'};color:${BAND_COL[h.band] || '#4ea1ff'}">확신 ${h.conf}</span>` : '';
       const sig = _signalChips(info) || (isFiller
         ? '<span class="chip" style="border-color:#c084fc;color:#c084fc">🔎 고배당 복병</span>'
         : '<span class="hint">신호없음</span>');
@@ -2788,6 +2836,7 @@
         <b style="min-width:32px;color:#4ea1ff">${h.no}번</b>
         <span style="font-weight:600">${esc(h.name) || '-'}</span>
         <span class="hint">${formTxt} · <b style="color:#e2e8f0">${oddsTxt}</b></span>
+        ${confChip}
         ${move}
         <span style="margin-left:auto">${sig}</span>
       </div>
@@ -2806,6 +2855,14 @@
       ${topRows}
       <div class="matrix-title" style="font-size:13px;color:#c084fc;margin-top:6px">🐎 복병 · 이상감지 <span class="hint" style="font-weight:400">유력마 밖 강한 신호 2두</span></div>
       ${darkRows}
+      ${(a.eliminationStrong && a.eliminationStrong.length) ? `
+      <div class="matrix-title" style="font-size:13px;color:#ef4444;margin-top:6px">🚫 제거마 <span class="hint" style="font-weight:400">과감히 제외 ${a.eliminationStrong.length}두</span></div>
+      ${a.eliminationStrong.map((e) => `<div style="display:flex;gap:6px;align-items:center;padding:3px 8px;font-size:12px;opacity:.85">
+        <b style="min-width:26px;color:#ef4444">${e.verdict || '🔴'}</b>
+        <b style="min-width:32px">${e.no}번</b>
+        <span>${esc(e.name) || '-'}</span>
+        <span class="hint" style="margin-left:auto;text-align:right">${e.odds != null ? e.odds + '배' : ''}${(e.reasons && e.reasons.length) ? ' · ' + e.reasons.map(esc).join(', ') : ''}</span>
+      </div>`).join('')}` : ''}
     </div>`;
   }
   function _topHorseDetailHtml(no, a) {
@@ -4494,7 +4551,8 @@
   function sportAnalysisHTML(a, bsel) {
     const six = a.bmed && a.bmed.sixRacer;
     const parts = [];
-    parts.push(renderTopHorses(a));   // ⭐ 유력마 TOP5 + 복병/이상감지 상단 고정 카드
+    parts.push(renderRaceJudgment(a, bsel));   // [1·2·4번] 경주 판정 크게 + 배팅 배분
+    parts.push(renderTopHorses(a));   // ⭐ 유력마 TOP5 + 복병/이상감지 + 제거마 카드
     parts.push(`<div class="matrix-title">🚨 실시간 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${six ? ' · 6명 출전' : ''}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>`);
     if (a.summary) parts.push(`<div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary)}</div>`);
     parts.push(renderAlertSignal(a.alertSignal, _horseRoleMap(a)));
@@ -4575,6 +4633,7 @@
     const formHtml = renderFormGrades(a.form);
     const elimHtml = renderEliminationHTML(a.elimination, new Set()).replace('id="elimPanel"', 'id="jpElimPanel"');
     host.innerHTML = `<div class="panel-card">
+      ${renderRaceJudgment(a, '#jpBudget')}
       ${renderTopHorses(a)}
       <h3>🔗 실시간 배당 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
