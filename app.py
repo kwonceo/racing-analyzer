@@ -1852,7 +1852,10 @@ def _time_based_drop_signals(rk):
                "🔴": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"}
     out = [{"level": d["level"], "type": "마감급락", "combo": list(k),
             "text": f"{k[0]}+{k[1]} 복승 {d['prev']}→{d['cur']} ({d['band']}분전 대비 {d['pct']}%)",
-            "detail": reasons.get(d["level"], "")}
+            "detail": reasons.get(d["level"], ""),
+            # [저/고배당 분리] 고배당(직전 50배+)은 절대값 아닌 %로만 판단·하단 참고 노출
+            "oddsBefore": d["prev"], "oddsAfter": d["cur"], "dropPct": d["pct"],
+            "highOdds": (d["prev"] or 0) >= 50}
            for k, d in best.items()]
     out.sort(key=lambda s: _TIER_RANK.get(s["level"], 0), reverse=True)
     return out
@@ -3609,13 +3612,18 @@ def _triple_analyze(rk, rec):
         if lvl:
             signals.append({"level": lvl, "type": "단승급락", "horse": d["no"],
                             "text": f"{d['no']}번 단승 {d['prev']}→{d['cur']} ({d['pct']}%)",
-                            "detail": reason})
+                            "detail": reason,
+                            "oddsBefore": d["prev"], "oddsAfter": d["cur"], "dropPct": d["pct"],
+                            "highOdds": (d["prev"] or 0) >= 50})
     for d in drops:
         lvl, reason = _drop_reason(d["pct"])
         if lvl:
             _sig = {"level": lvl, "type": "급락",
                     "text": f"{d['combo'][0]}+{d['combo'][1]} 복승 {d['prev']}→{d['cur']} ({d['pct']}%)",
-                    "detail": reason}
+                    "detail": reason,
+                    # [저/고배당 분리] 고배당(직전 50배+)은 %로만 판단·하단 참고 노출
+                    "oddsBefore": d["prev"], "oddsAfter": d["cur"], "dropPct": d["pct"],
+                    "highOdds": (d["prev"] or 0) >= 50}
             # [2번] 대규모 급락 중이면 개별 신호는 신뢰도 하향(초과급락 분석으로 판단 전환)
             if mass_drop:
                 _sig["lowConfidence"] = True

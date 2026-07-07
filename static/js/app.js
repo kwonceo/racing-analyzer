@@ -2752,7 +2752,10 @@
       else if (al.sub) rows.push(`<div>복승 보조 ${al.sub}% → <b>${amt(al.sub, 1)}</b> <span class="hint">(조합 대기)</span></div>`);
       if (al.trio && trioPick.length) trioPick.forEach((b) => rows.push(`<div>삼복승 보험 <b>${esc(comboTxt(b))}</b> — ${al.trio}%${trioPick.length > 1 ? ' 분할' : ''} → <b>${amt(al.trio, trioPick.length)}</b></div>`));
       else if (al.trio) rows.push(`<div>삼복승 보험 ${al.trio}% → <b>${amt(al.trio, 1)}</b> <span class="hint">(조합 대기)</span></div>`);
-      allocHtml = `<div style="margin-top:6px;font-size:12px;line-height:1.75">${rows.join('')}<div class="hint" style="margin-top:2px">※ 총 예산 ${won(budget)} 기준 · 조합은 아래 추천표와 동일</div></div>`;
+      const exRow = j.exactaSignal ? `<div>⚡ 쌍승(강신호) <b>${esc((j.exactaSignal.combo || []).join('→'))}</b> — 소액 도전</div>` : '';
+      allocHtml = `<div style="margin-top:6px;font-size:12px;line-height:1.75">
+        <div style="font-weight:700;color:${col};margin-bottom:2px">🎯 핵심 추천 (3~4개)</div>
+        ${rows.join('')}${exRow}<div class="hint" style="margin-top:2px">※ 총 예산 ${won(budget)} 기준 · 삼복승은 보험(소액) · 상세는 아래 추천표</div></div>`;
     } else {
       allocHtml = '<div class="hint" style="margin-top:4px">예산 입력 시 유형별 배분 금액이 표시됩니다</div>';
     }
@@ -4475,20 +4478,39 @@
   function renderSignalsSimple(signals, title, filterFn) {
     const rel = (signals || []).filter(filterFn);
     if (!rel.length) return '';
-    const cnt = { 상: 0, 중: 0, 하: 0 };
-    rel.forEach((s) => { cnt[_signalTier(s.level).key]++; });
-    const chip = (k, icon, color) => cnt[k] ? `<b style="color:${color}">${icon} ${k} ${cnt[k]}</b>` : '';
-    const summary = ['상', '중', '하'].map((k) => {
-      const t = _signalTier(k === '상' ? '🔴' : k === '중' ? '🟠' : '🟡');
-      return chip(k, t.icon, t.color);
-    }).filter(Boolean).join(' · ') || '<span class="hint">없음</span>';
-    const sorted = rel.slice().sort((a, b) => _signalTier(b.level).rank - _signalTier(a.level).rank);
-    const shown = sorted.slice(0, 3).map((s) => {
-      const t = _signalTier(s.level);
-      return `<div style="margin:2px 0" title="${esc(s.detail || '')}"><b style="color:${t.color}">${t.icon}</b> ${esc(s.text)}</div>`;
-    }).join('');
-    const more = sorted.length > 3 ? `<div class="hint">외 ${sorted.length - 3}건 (마우스 올리면 사유 표시)</div>` : '';
-    return `<div class="matrix-title" style="font-size:13px;margin-top:8px">${title} · 종합 ${summary}</div>${shown}${more}`;
+    // [저/고배당 분리] 고배당(직전 50배+) 급락은 절대값이 아닌 %로만 판단 → 하단 '참고' 블록.
+    //   저배당 급락·비급락 신호는 상단(기존). 30배 이상 제외는 적용 안 함(모든 급락 유지).
+    const low = rel.filter((s) => !s.highOdds);
+    const high = rel.filter((s) => s.highOdds);
+    let mainHtml = '';
+    if (low.length) {
+      const cnt = { 상: 0, 중: 0, 하: 0 };
+      low.forEach((s) => { cnt[_signalTier(s.level).key]++; });
+      const chip = (k, icon, color) => cnt[k] ? `<b style="color:${color}">${icon} ${k} ${cnt[k]}</b>` : '';
+      const summary = ['상', '중', '하'].map((k) => {
+        const t = _signalTier(k === '상' ? '🔴' : k === '중' ? '🟠' : '🟡');
+        return chip(k, t.icon, t.color);
+      }).filter(Boolean).join(' · ') || '<span class="hint">없음</span>';
+      const sorted = low.slice().sort((a, b) => _signalTier(b.level).rank - _signalTier(a.level).rank);
+      const shown = sorted.slice(0, 3).map((s) => {
+        const t = _signalTier(s.level);
+        return `<div style="margin:2px 0" title="${esc(s.detail || '')}"><b style="color:${t.color}">${t.icon}</b> ${esc(s.text)}</div>`;
+      }).join('');
+      const more = sorted.length > 3 ? `<div class="hint">외 ${sorted.length - 3}건 (마우스 올리면 사유 표시)</div>` : '';
+      mainHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">${title} · 종합 ${summary}</div>${shown}${more}`;
+    }
+    let highHtml = '';
+    if (high.length) {
+      const hs = high.slice().sort((a, b) => (a.dropPct || 0) - (b.dropPct || 0));   // 급락폭 큰(음수 작은) 순
+      const rows = hs.slice(0, 4).map((s) => {
+        const strong = (s.dropPct != null && s.dropPct <= -40);
+        const tag = strong ? '<span style="color:#ffd24f;font-weight:700">주목</span>' : '<span class="hint">약한</span>';
+        const combo = (s.combo || []).join('+');
+        return `<div style="margin:2px 0;font-size:12px;opacity:${strong ? 1 : 0.7}">${combo} ${s.oddsBefore}배→${s.oddsAfter}배 (${s.dropPct}%) ${tag}</div>`;
+      }).join('');
+      highHtml = `<div class="matrix-title" style="font-size:12px;margin-top:8px;color:#8a94a6">📊 고배당 급락 신호 (참고) <span class="hint" style="font-weight:400">50배+ · %로 판단</span></div>${rows}`;
+    }
+    return mainHtml + highHtml;
   }
 
   function renderKoreaSignals(signals) {
