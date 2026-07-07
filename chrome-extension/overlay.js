@@ -486,6 +486,22 @@
           if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline) && enabled && !killed) render();
         } catch (_) { /* */ }
       });
+      // [캡쳐 대비] 경주결과 캡쳐 순간 오버레이가 결과를 가리지 않게 잠깐 숨김(visibility만·상태 보존).
+      //   background 가 캡쳐 직전/직후 KB_CAPTURE_PREP{hide} 를 보냄. 읽기전용 원칙 유지(자체 요소 표시만 토글).
+      try {
+        chrome.runtime.onMessage.addListener(function (msg, _s, sendResp) {
+          try {
+            if (msg && msg.type === 'KB_CAPTURE_PREP') {
+              var vis = msg.hide ? 'hidden' : '';
+              ['kbOvPanel', 'kbOvToggle', 'kbOvAlert'].forEach(function (id) {
+                var e = byId(id); if (e) e.style.visibility = vis;
+              });
+              if (typeof sendResp === 'function') sendResp({ ok: true });
+            }
+          } catch (_) { /* */ }
+          return false;
+        });
+      } catch (_) { /* */ }
     } catch (_) { /* storage 접근 실패해도 페이지/수집 영향 없음 */ }
   } catch (_) {
     /* 최상위 보호막 — 어떤 예외도 페이지/수집 엔진에 전파되지 않는다. */

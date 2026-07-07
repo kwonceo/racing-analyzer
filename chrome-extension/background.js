@@ -213,16 +213,30 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 
   // [캡쳐+OCR] 현재 보이는 탭(경주결과 화면) 캡쳐 → dataURL 반환.
+  //   캡쳐 직전 오버레이를 잠깐 숨겨(결과를 가리지 않게) 찍고 바로 복원한다.
   if (msg?.type === 'CAPTURE_TAB') {
-    try {
-      chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
-        if (chrome.runtime.lastError || !dataUrl) {
-          sendResponse({ ok: false, error: (chrome.runtime.lastError && chrome.runtime.lastError.message) || '캡쳐 실패' });
-        } else {
-          sendResponse({ ok: true, dataUrl });
-        }
-      });
-    } catch (e) { sendResponse({ ok: false, error: String(e.message || e) }); }
+    (async () => {
+      let tabId = null;
+      try {
+        const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+        tabId = tabs && tabs[0] && tabs[0].id;
+        // 오버레이(패널·칩·강조팝업) 잠깐 숨김 → 결과 가림 방지
+        if (tabId != null) { try { await chrome.tabs.sendMessage(tabId, { type: 'KB_CAPTURE_PREP', hide: true }); } catch (_) { /* 오버레이 없을 수도 */ } }
+        await new Promise((r) => setTimeout(r, 180));   // 리페인트 대기
+        chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
+          // 캡쳐 후 즉시 오버레이 복원
+          if (tabId != null) { try { chrome.tabs.sendMessage(tabId, { type: 'KB_CAPTURE_PREP', hide: false }); } catch (_) { /* */ } }
+          if (chrome.runtime.lastError || !dataUrl) {
+            sendResponse({ ok: false, error: (chrome.runtime.lastError && chrome.runtime.lastError.message) || '캡쳐 실패' });
+          } else {
+            sendResponse({ ok: true, dataUrl });
+          }
+        });
+      } catch (e) {
+        if (tabId != null) { try { chrome.tabs.sendMessage(tabId, { type: 'KB_CAPTURE_PREP', hide: false }); } catch (_) { /* */ } }
+        sendResponse({ ok: false, error: String(e.message || e) });
+      }
+    })();
     return true; // async
   }
 
