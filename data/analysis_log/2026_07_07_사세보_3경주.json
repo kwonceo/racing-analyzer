@@ -1,10 +1,12 @@
 {
  "race_id": "2026_07_07_사세보_3경주",
  "raceKey": "사세보 3경주",
+ "sport": "boat",
+ "category": "boat",
  "date": "2026-07-07",
  "race": "사세보 3경주",
  "analyzed_at": "08:56:00",
- "updated_at": "09:18:26",
+ "updated_at": "11:19:31",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -108,41 +110,6 @@
    "detail": "3+6 복승 34.4→27.5 (10분전 대비 -20.1%)",
    "severity": "🟡",
    "reason": "마감 10분전 대비 급락 → 자금 유입 초기(관찰)"
-  },
-  {
-   "time": "09:02:58",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 5번 1착(10.9)이 7번 1착(35.5)보다 낮음 → 실질 1착: 5번 가능성 (압도적 역전 0.307)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(5→7) 10.9 / 쌍승(7→5) 35.5 = 0.307 (압도적 역전)"
-  },
-  {
-   "time": "09:02:58",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 1번 1착(43.4)이 7번 1착(126.6)보다 낮음 → 실질 1착: 1번 가능성 (압도적 역전 0.343)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(1→7) 43.4 / 쌍승(7→1) 126.6 = 0.343 (압도적 역전)"
-  },
-  {
-   "time": "09:02:58",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 4번 1착(25.0)이 7번 1착(69.3)보다 낮음 → 실질 1착: 4번 가능성 (압도적 역전 0.361)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(4→7) 25.0 / 쌍승(7→4) 69.3 = 0.361 (압도적 역전)"
-  },
-  {
-   "time": "09:02:58",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 3번 1착(2.1)이 7번 1착(5.0)보다 낮음 → 실질 1착: 3번 가능성 (압도적 역전 0.42)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(3→7) 2.1 / 쌍승(7→3) 5.0 = 0.42 (압도적 역전)"
-  },
-  {
-   "time": "09:02:58",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 6번 1착(33.6)이 7번 1착(46.9)보다 낮음 → 실질 1착: 6번 가능성 (강한 역전 0.716)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(6→7) 33.6 / 쌍승(7→6) 46.9 = 0.716 (강한 역전)"
   }
  ],
  "horses": [
@@ -153,8 +120,8 @@
    "record_score": 60,
    "record_detail": "최근 3",
    "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 11.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 5,
@@ -164,7 +131,7 @@
    "record_detail": "최근 1",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 7.1배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 6,
@@ -174,7 +141,7 @@
    "record_detail": "최근 3",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 7.1배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 7,
@@ -184,17 +151,17 @@
    "record_detail": "최근 1",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 1.9배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 3,
-   "name": "벌교의봄",
-   "jockey": "효식",
-   "record_score": 0,
-   "record_detail": "최근 5",
+   "no": 9,
+   "name": "대길의꿈",
+   "jockey": "경운",
+   "record_score": 85,
+   "record_detail": "최근 2",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 1.9배 · 최근평균 5.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 1,
@@ -203,8 +170,8 @@
    "record_score": 0,
    "record_detail": "최근 8",
    "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 21.6배 · 최근평균 8.0착 -30 = 70점"
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
   },
   {
    "no": 2,
@@ -214,17 +181,17 @@
    "record_detail": "최근 7",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 35.7배 · 최근평균 7.0착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
   },
   {
-   "no": 9,
-   "name": "대길의꿈",
-   "jockey": "경운",
-   "record_score": 85,
-   "record_detail": "최근 2",
+   "no": 3,
+   "name": "벌교의봄",
+   "jockey": "효식",
+   "record_score": 0,
+   "record_detail": "최근 5",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   },
   {
    "no": 8,
@@ -243,62 +210,28 @@
    5,
    6,
    7,
-   3,
-   1,
-   2,
    9
   ],
   "eliminated": [
+   1,
+   2,
+   3,
    8
   ],
   "elimination_reasons": {
+   "1": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점",
+   "2": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점",
+   "3": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점",
    "8": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   }
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "3+7",
-   "odds": 1.9,
-   "reason": "3번(C)·7번(A)"
-  },
-  "quinella_sub": {
-   "combo": "5+7",
-   "odds": 8.3,
-   "reason": "5번(A)·7번(A)"
-  },
-  "trifecta_main": {
-   "combo": "3+5+7",
-   "odds": 12.9,
-   "reason": "3번(C)·5번(A)·7번(A)"
-  },
-  "trifecta_insurance1": {
-   "combo": "3+6+7",
-   "odds": 20.1,
-   "reason": "3번(C)·6번(B)·7번(A)"
-  },
-  "trifecta_insurance2": {
-   "combo": "5+6+7",
-   "odds": 20.9,
-   "reason": "5번(A)·6번(B)·7번(A)"
-  },
-  "budget_allocation": {
-   "quinella_main": "62.8%",
-   "quinella_sub": "20%",
-   "trifecta_main": "9.8%",
-   "trifecta_insurance": "1.4%"
-  }
+  "budget_allocation": {}
  },
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    3,
-    7
-   ],
-   "trio": [
-    3,
-    5,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
    "quinella": [
@@ -312,23 +245,12 @@
    ]
   },
   "final": {
-   "quinella": [
-    3,
-    7
-   ],
-   "trio": [
-    3,
-    5,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
- "summary": "유력마 7·3·5 / 복승 3+7",
- "keyHorses": [
-  7,
-  3,
-  5
- ],
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
  "result": {
   "1st": 3,
   "2nd": 4,
@@ -373,7 +295,5 @@
   }
  },
  "profit": null,
- "review": null,
- "category": "boat",
- "sport": "boat"
+ "review": null
 }

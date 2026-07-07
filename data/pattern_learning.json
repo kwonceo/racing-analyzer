@@ -145,23 +145,60 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1783381031.9536397
+    },
+    {
+      "race": "사세보 1경주",
+      "horse_no": 1,
+      "recent_avg": 6.4,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-07"
+    },
+    {
+      "race": "사세보 1경주",
+      "horse_no": 4,
+      "recent_avg": 7.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-07"
+    },
+    {
+      "race": "사세보 1경주",
+      "horse_no": 2,
+      "recent_avg": 5.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-07"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "사세보 5경주",
+      "total_combos_dropped": 12,
+      "drop_ratio": 0.571,
+      "result": "1+3",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": "-40.2%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783390772.124346
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 9,
-      "hit": 2
+      "count": 18,
+      "hit": 5
     },
     "전체부진마": {
-      "count": 9,
-      "hit": 2
+      "count": 18,
+      "hit": 5
     },
     "대규모급락": {
-      "count": 10,
+      "count": 11,
       "high_odds": 0,
       "recommended_hit": 1,
       "high_odds_rate": 0.0,
-      "hit_rate": 10.0
+      "hit_rate": 9.1
     }
   }
 }

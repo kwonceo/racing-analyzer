@@ -255,7 +255,7 @@
   "2nd": 4,
   "3rd": 1,
   "4th": null,
-  "quinella_odds": 13.0,
+  "quinella_odds": null,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "전적유력마 4번 적중 · 역배열 감지말 1·4번 입상 · 제거 적중"
@@ -264,15 +264,17 @@
   "quinella_hit": false,
   "winner": 3,
   "second": 4,
-  "odds_range": "고배당"
+  "odds_range": null
  },
- "saved_at": "2026-07-07 09:18:26",
+ "saved_at": "2026-07-07 11:19:31",
  "quality": {
-  "score": 100,
+  "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
-  "missing": [],
+  "missing": [
+   "확정 배당"
+  ],
   "errors": []
  }
 }

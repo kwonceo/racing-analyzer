@@ -1,10 +1,12 @@
 {
  "race_id": "2026_07_07_사세보_1경주",
  "raceKey": "사세보 1경주",
+ "sport": "boat",
+ "category": "boat",
  "date": "2026-07-07",
  "race": "사세보 1경주",
  "analyzed_at": "00:14:25",
- "updated_at": "08:37:11",
+ "updated_at": "11:19:31",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -12,300 +14,8 @@
   "odds_source": "https://asyukk34.qwqwd25.net/game"
  },
  "odds_timeline": [],
- "signals_detected": [
-  {
-   "time": null,
-   "type": "대규모급락",
-   "detail": "대규모 자금 분산 — 10/15조합(66%) 동시 30%+ 급락",
-   "severity": "🌊",
-   "reason": "🌊 대규모 자금 분산 패턴 — 특정 유력마 없음 · 이변 가능성↑ · 중배당 조합 병행 체크 권장"
-  },
-  {
-   "time": null,
-   "type": "집중급락",
-   "detail": "4번 급락 -67.4% (절대 10%+ 자금집중·추천 필수)",
-   "severity": "🔴",
-   "reason": "시장 전체 급락에 묻혀도 절대 10%+ 급락은 특정 말 자금집중 확정 → 노이즈 아님(집중신호 승격)"
-  },
-  {
-   "time": null,
-   "type": "집중급락",
-   "detail": "3번 급락 -57.3% (절대 10%+ 자금집중·추천 필수)",
-   "severity": "🔴",
-   "reason": "시장 전체 급락에 묻혀도 절대 10%+ 급락은 특정 말 자금집중 확정 → 노이즈 아님(집중신호 승격)"
-  },
-  {
-   "time": null,
-   "type": "집중급락",
-   "detail": "6번 급락 -54.0% (절대 10%+ 자금집중·추천 필수)",
-   "severity": "🔴",
-   "reason": "시장 전체 급락에 묻혀도 절대 10%+ 급락은 특정 말 자금집중 확정 → 노이즈 아님(집중신호 승격)"
-  },
-  {
-   "time": null,
-   "type": "집중급락",
-   "detail": "5번 급락 -51.6% (절대 10%+ 자금집중·추천 필수)",
-   "severity": "🔴",
-   "reason": "시장 전체 급락에 묻혀도 절대 10%+ 급락은 특정 말 자금집중 확정 → 노이즈 아님(집중신호 승격)"
-  },
-  {
-   "time": null,
-   "type": "집중급락",
-   "detail": "2번 급락 -40.1% (절대 10%+ 자금집중·추천 필수)",
-   "severity": "🔴",
-   "reason": "시장 전체 급락에 묻혀도 절대 10%+ 급락은 특정 말 자금집중 확정 → 노이즈 아님(집중신호 승격)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "4+5 복승 67.7→13.1 (-80.6%)",
-   "severity": "🔴",
-   "reason": "단기간 대량 자금 유입 → 내부 정보성 베팅 가능성 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "3+4 복승 268.3→60.4 (-77.5%)",
-   "severity": "🔴",
-   "reason": "단기간 대량 자금 유입 → 내부 정보성 베팅 가능성 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "4+6 복승 44.4→11.1 (-75.0%)",
-   "severity": "🔴",
-   "reason": "단기간 대량 자금 유입 → 내부 정보성 베팅 가능성 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "3+6 복승 185.8→65.6 (-64.7%)",
-   "severity": "🔴",
-   "reason": "단기간 대량 자금 유입 → 내부 정보성 베팅 가능성 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "5+6 복승 61.4→25.3 (-58.8%)",
-   "severity": "🔴",
-   "reason": "단기간 대량 자금 유입 → 내부 정보성 베팅 가능성 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "2+6 복승 51.3→25.2 (-50.9%)",
-   "severity": "🔴",
-   "reason": "단기간 대량 자금 유입 → 내부 정보성 베팅 가능성 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "3+5 복승 201.2→100.1 (-50.2%)",
-   "severity": "🔴",
-   "reason": "단기간 대량 자금 유입 → 내부 정보성 베팅 가능성 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "2+5 복승 63.5→34.9 (-45.0%)",
-   "severity": "🟠",
-   "reason": "자금 유입 감지 → 주목 필요 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "1+3 복승 44.1→27.9 (-36.7%)",
-   "severity": "🟠",
-   "reason": "자금 유입 감지 → 주목 필요 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "2+4 복승 34.1→21.7 (-36.4%)",
-   "severity": "🟠",
-   "reason": "자금 유입 감지 → 주목 필요 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "1+2 복승 4.6→3.3 (-28.3%)",
-   "severity": "🟡",
-   "reason": "자금 유입 초기 → 관찰 필요 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "1+5 복승 14.0→10.7 (-23.6%)",
-   "severity": "🟡",
-   "reason": "자금 유입 초기 → 관찰 필요 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "detail": "1+6 복승 4.9→3.9 (-20.4%)",
-   "severity": "🟡",
-   "reason": "자금 유입 초기 → 관찰 필요 · ⚠️ 대규모 급락 중 — 개별 신뢰도↓(초과급락 분석 참고)"
-  },
-  {
-   "time": null,
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 1번 유력이나 쌍승에서 4번 1착(3.5)이 1번 1착(13.9)보다 낮음 → 실질 1착: 4번 가능성 (압도적 역전 0.252)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(4→1) 3.5 / 쌍승(1→4) 13.9 = 0.252 (압도적 역전)"
-  },
-  {
-   "time": null,
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 1번 유력이나 쌍승에서 6번 1착(4.9)이 1번 1착(12.6)보다 낮음 → 실질 1착: 6번 가능성 (압도적 역전 0.389)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(6→1) 4.9 / 쌍승(1→6) 12.6 = 0.389 (압도적 역전)"
-  },
-  {
-   "time": null,
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 1번 유력이나 쌍승에서 5번 1착(14.0)이 1번 1착(29.9)보다 낮음 → 실질 1착: 5번 가능성 (압도적 역전 0.468)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(5→1) 14.0 / 쌍승(1→5) 29.9 = 0.468 (압도적 역전)"
-  },
-  {
-   "time": null,
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 1번 유력이나 쌍승에서 2번 1착(4.6)이 1번 1착(9.7)보다 낮음 → 실질 1착: 2번 가능성 (압도적 역전 0.474)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(2→1) 4.6 / 쌍승(1→2) 9.7 = 0.474 (압도적 역전)"
-  },
-  {
-   "time": null,
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 1번 유력이나 쌍승에서 3번 1착(44.1)이 1번 1착(92.9)보다 낮음 → 실질 1착: 3번 가능성 (압도적 역전 0.475)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(3→1) 44.1 / 쌍승(1→3) 92.9 = 0.475 (압도적 역전)"
-  },
-  {
-   "time": null,
-   "type": "종합신뢰도",
-   "detail": "4번 종합 신뢰도 75.0 → 🔴 강력 신호",
-   "severity": "🔴",
-   "reason": "초과급락 100.0×0.4 + 쌍승역전 100.0×0.35 + 복승불일치 0.0×0.25 = 75.0"
-  },
-  {
-   "time": null,
-   "type": "종합신뢰도",
-   "detail": "5번 종합 신뢰도 75.0 → 🔴 강력 신호",
-   "severity": "🔴",
-   "reason": "초과급락 100.0×0.4 + 쌍승역전 100.0×0.35 + 복승불일치 0.0×0.25 = 75.0"
-  },
-  {
-   "time": null,
-   "type": "종합신뢰도",
-   "detail": "3번 종합 신뢰도 75.0 → 🔴 강력 신호",
-   "severity": "🔴",
-   "reason": "초과급락 100.0×0.4 + 쌍승역전 100.0×0.35 + 복승불일치 0.0×0.25 = 75.0"
-  },
-  {
-   "time": null,
-   "type": "종합신뢰도",
-   "detail": "6번 종합 신뢰도 75.0 → 🔴 강력 신호",
-   "severity": "🔴",
-   "reason": "초과급락 100.0×0.4 + 쌍승역전 100.0×0.35 + 복승불일치 0.0×0.25 = 75.0"
-  },
-  {
-   "time": null,
-   "type": "종합신뢰도",
-   "detail": "2번 종합 신뢰도 75.0 → 🔴 강력 신호",
-   "severity": "🔴",
-   "reason": "초과급락 100.0×0.4 + 쌍승역전 100.0×0.35 + 복승불일치 0.0×0.25 = 75.0"
-  },
-  {
-   "time": null,
-   "type": "급락속도",
-   "detail": "4+5 급락 속도 분당 322.4% (80.6% / 0.25분)",
-   "severity": "🔴",
-   "reason": "분당 10%+ = 단시간 집중 자금(강한 신호)"
-  },
-  {
-   "time": null,
-   "type": "급락속도",
-   "detail": "3+4 급락 속도 분당 310.0% (77.5% / 0.25분)",
-   "severity": "🔴",
-   "reason": "분당 10%+ = 단시간 집중 자금(강한 신호)"
-  },
-  {
-   "time": null,
-   "type": "급락속도",
-   "detail": "4+6 급락 속도 분당 300.0% (75.0% / 0.25분)",
-   "severity": "🔴",
-   "reason": "분당 10%+ = 단시간 집중 자금(강한 신호)"
-  },
-  {
-   "time": null,
-   "type": "급락속도",
-   "detail": "3+6 급락 속도 분당 258.8% (64.7% / 0.25분)",
-   "severity": "🔴",
-   "reason": "분당 10%+ = 단시간 집중 자금(강한 신호)"
-  }
- ],
+ "signals_detected": [],
  "horses": [
-  {
-   "no": 1,
-   "name": "イナノミツヒメ",
-   "jockey": "中山直（ばんえい）",
-   "record_score": 10.0,
-   "record_detail": "최근 4-5-9-6-8",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 3.3배 · 최근평균 6.4착 -30 / 배당 급락 30%+ +30(제거 보류) / 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "ヤマトテンショウ",
-   "jockey": "中村太（ばんえい）",
-   "record_score": 7.5,
-   "record_detail": "최근 5-8-8-1-3",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 3.3배 · 최근평균 5.0착 -30 / 배당 급락 30%+ +30(제거 보류) / 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "ジェイメジャー",
-   "jockey": "西謙一（ばんえい）",
-   "record_score": 27.5,
-   "record_detail": "최근 5-2-4-9-9",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 27.9배 · 최근평균 5.8착 -30 / 배당 급락 30%+ +30(제거 보류) / 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "メトーフウマ",
-   "jockey": "村上章（ばんえい）",
-   "record_score": 10.0,
-   "record_detail": "최근 8-9-3-9-9",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 3.5배 · 최근평균 7.6착 -30 / 배당 급락 30%+ +30(제거 보류) / 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "マゴ",
-   "jockey": "吉田理（ばんえい）",
-   "record_score": 25.0,
-   "record_detail": "최근 10-3-3-8-5",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 10.7배 · 최근평균 5.8착 -30 / 배당 급락 30%+ +30(제거 보류) / 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "イワキオーカン",
-   "jockey": "金田利（ばんえい）",
-   "record_score": 10.0,
-   "record_detail": "최근 4-6-5-6-5",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 3.9배 · 최근평균 5.2착 -30 / 배당 급락 30%+ +30(제거 보류) / 쌍승 상위 +20(제거 보류) = 120점"
-  },
   {
    "no": 7,
    "name": "ジェイノミキ",
@@ -313,7 +23,7 @@
    "record_score": 80.0,
    "record_detail": "최근 1-1-6-6-5",
    "odds": null,
-   "grade": "C",
+   "grade": "A",
    "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
@@ -323,8 +33,68 @@
    "record_score": 65.0,
    "record_detail": "최근 3-3-1-9-8",
    "odds": null,
-   "grade": "C",
+   "grade": "A",
    "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 1,
+   "name": "イナノミツヒメ",
+   "jockey": "中山直（ばんえい）",
+   "record_score": 10.0,
+   "record_detail": "최근 4-5-9-6-8",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.4착 -30 = 30점"
+  },
+  {
+   "no": 2,
+   "name": "ヤマトテンショウ",
+   "jockey": "中村太（ばんえい）",
+   "record_score": 7.5,
+   "record_detail": "최근 5-8-8-1-3",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+  },
+  {
+   "no": 3,
+   "name": "ジェイメジャー",
+   "jockey": "西謙一（ばんえい）",
+   "record_score": 27.5,
+   "record_detail": "최근 5-2-4-9-9",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
+  },
+  {
+   "no": 4,
+   "name": "メトーフウマ",
+   "jockey": "村上章（ばんえい）",
+   "record_score": 10.0,
+   "record_detail": "최근 8-9-3-9-9",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.6착 -30 = 30점"
+  },
+  {
+   "no": 5,
+   "name": "マゴ",
+   "jockey": "吉田理（ばんえい）",
+   "record_score": 25.0,
+   "record_detail": "최근 10-3-3-8-5",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
+  },
+  {
+   "no": 6,
+   "name": "イワキオーカン",
+   "jockey": "金田利（ばんえい）",
+   "record_score": 10.0,
+   "record_detail": "최근 4-6-5-6-5",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.2착 -30 = 30점"
   },
   {
    "no": 8,
@@ -349,68 +119,37 @@
  ],
  "elimination": {
   "candidates": [
+   7,
+   10
+  ],
+  "eliminated": [
    1,
    2,
    3,
    4,
    5,
    6,
-   7,
-   10
-  ],
-  "eliminated": [
    8,
    9
   ],
   "elimination_reasons": {
+   "1": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.4착 -30 = 30점",
+   "2": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점",
+   "3": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점",
+   "4": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.6착 -30 = 30점",
+   "5": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점",
+   "6": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.2착 -30 = 30점",
    "8": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.6착 -30 = 30점",
    "9": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.6착 -30 = 30점"
   }
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "1+4",
-   "odds": 3.5,
-   "reason": "1번(A)·4번(B) · 급락감지"
-  },
-  "quinella_sub": {
-   "combo": "1+6",
-   "odds": 3.9,
-   "reason": "1번(A)·6번(B) · 급락감지"
-  },
-  "trifecta_main": {
-   "combo": "1+4+6",
-   "odds": 10.7,
-   "reason": "1번(A)·4번(B)·6번(B) · 급락감지"
-  },
-  "trifecta_insurance1": {
-   "combo": "1+4+5",
-   "odds": 15.8,
-   "reason": "1번(A)·4번(B)·5번(A) · 급락감지"
-  },
-  "trifecta_insurance2": {
-   "combo": "1+5+6",
-   "odds": 20.4,
-   "reason": "1번(A)·5번(A)·6번(B) · 급락감지"
-  },
-  "budget_allocation": {
-   "quinella_main": "50%",
-   "quinella_sub": "17%",
-   "trifecta_main": "10%",
-   "trifecta_insurance": "3%"
-  }
+  "budget_allocation": {}
  },
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    3,
-    4
-   ],
-   "trio": [
-    3,
-    4,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
    "quinella": [
@@ -424,73 +163,55 @@
    ]
   },
   "final": {
-   "quinella": [
-    1,
-    4
-   ],
-   "trio": [
-    1,
-    4,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
- "summary": "급락 4-5 ▼80.6% / 유력마 1·4·6 / 복승 1+4",
- "keyHorses": [
-  1,
-  4,
-  6
- ],
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
  "result": {
   "1st": 1,
   "2nd": 2,
   "3rd": 4
  },
  "hit": {
-  "was_hit": true,
+  "was_hit": false,
   "quinella_hit": false,
   "trifecta_hit": false,
   "payouts": {
    "quinella": 0,
    "trifecta": 0
   },
-  "anomaly_was_correct": true,
-  "signal_correct": [
-   "4+5 복승 급락(-80.6%) → 4번 입상 적중",
-   "3+4 복승 급락(-77.5%) → 4번 입상 적중",
-   "4+6 복승 급락(-75.0%) → 4번 입상 적중"
-  ],
-  "elimination_correct": true,
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
   "eliminated": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
    8,
    9
   ],
-  "form_pick": 1,
-  "form_pick_hit": true,
-  "pnl": -1000,
+  "form_pick": 7,
+  "form_pick_hit": false,
+  "pnl": 0,
   "stake": 1000,
   "near_miss": false,
   "near_miss_horse": null,
   "hit_basis": {
    "formScore": 10.0,
-   "dropAmt": -80.6,
-   "dropScore": 100.0,
-   "inverse": true,
-   "inverseHorses": [
-    4,
-    6,
-    5,
-    3
-   ],
-   "inverseHit": [
-    4
-   ],
-   "confidence": 75.0,
-   "reason": "전적유력마 1번 적중 · 4+5 복승 급락(-80.6%) → 4번 입상 적중 · 역배열 감지말 4번 입상 · 제거 적중"
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "추천 미적중"
   }
  },
  "profit": null,
- "review": null,
- "category": "boat",
- "sport": "boat"
+ "review": null
 }

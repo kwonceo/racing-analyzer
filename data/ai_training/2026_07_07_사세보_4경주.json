@@ -1,21 +1,21 @@
 {
  "schema_version": "1.0",
- "race_id": "2026_07_07_사세보_2경주",
+ "race_id": "2026_07_07_사세보_4경주",
  "race_info": {
   "date": "2026-07-07",
   "track": "사세보",
-  "round": 2,
+  "round": 4,
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": 11,
   "grade": null
  },
  "horses": [
   {
-   "no": 7,
-   "name": "크루엘라",
-   "jockey": "여수",
+   "no": 5,
+   "name": "워너비위",
+   "jockey": "은경",
    "jockey_winrate": null,
    "recent_results": [
     1
@@ -27,14 +27,14 @@
    "odds": null
   },
   {
-   "no": 8,
-   "name": "트리플제",
-   "jockey": "성재",
+   "no": 6,
+   "name": "리 먼 트",
+   "jockey": "여수",
    "jockey_winrate": null,
    "recent_results": [
-    1
+    2
    ],
-   "record_score": 110,
+   "record_score": 85,
    "distance_score": null,
    "interval_days": null,
    "weight_change": null,
@@ -42,8 +42,8 @@
   },
   {
    "no": 9,
-   "name": "최강루이",
-   "jockey": "인권",
+   "name": "승리깃발",
+   "jockey": "재이",
    "jockey_winrate": null,
    "recent_results": [
     3
@@ -56,13 +56,14 @@
   },
   {
    "no": 2,
-   "name": "로드투파",
-   "jockey": "효식",
+   "name": "투투플라",
+   "jockey": "형철",
    "jockey_winrate": null,
    "recent_results": [
-    4
+    4,
+    1
    ],
-   "record_score": 25,
+   "record_score": 57.1,
    "distance_score": null,
    "interval_days": null,
    "weight_change": null,
@@ -70,11 +71,11 @@
   },
   {
    "no": 1,
-   "name": "비케이매",
-   "jockey": "형석",
+   "name": "아리온의",
+   "jockey": "상현",
    "jockey_winrate": null,
    "recent_results": [
-    7
+    10
    ],
    "record_score": 0,
    "distance_score": null,
@@ -84,8 +85,22 @@
   },
   {
    "no": 3,
-   "name": "퓨어마린",
-   "jockey": "은경",
+   "name": "바빌론폭",
+   "jockey": "윤섭",
+   "jockey_winrate": null,
+   "recent_results": [
+    9
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "원더풀팀",
+   "jockey": "효식",
    "jockey_winrate": null,
    "recent_results": [
     5
@@ -97,9 +112,35 @@
    "odds": null
   },
   {
-   "no": 4,
-   "name": "서부이글",
+   "no": 7,
+   "name": "용비샤크",
    "jockey": "상현",
+   "jockey_winrate": null,
+   "recent_results": [
+    7
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "챔프의시",
+   "jockey": "실바",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 10,
+   "name": "희망군주",
+   "jockey": "나카",
    "jockey_winrate": null,
    "recent_results": [
     6
@@ -111,21 +152,9 @@
    "odds": null
   },
   {
-   "no": 5,
-   "name": "제이드팰",
-   "jockey": "살바",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "다이아나",
-   "jockey": "성현",
+   "no": 11,
+   "name": "하이골드",
+   "jockey": "강주",
    "jockey_winrate": null,
    "recent_results": [
     8
@@ -140,63 +169,85 @@
  "odds_features": {
   "timeline": [
    {
-    "time": "08:31:52",
+    "time": "09:15:22",
     "quinella": {
-     "3+5": 1.2,
-     "2+5": 8.8,
-     "2+3": 15.4,
-     "1+3": 17.3,
-     "1+5": 19.4,
-     "4+5": 22.7,
-     "2+4": 23.4,
-     "3+4": 23.4,
-     "5+6": 35.5,
-     "1+2": 42.8,
-     "1+4": 53.9,
-     "3+6": 55.9,
-     "1+6": 111.9,
-     "2+6": 111.9,
-     "4+6": 181.9
+     "4+7": 1.9,
+     "1+4": 9.7,
+     "2+7": 9.8,
+     "1+7": 10.6,
+     "1+5": 13.4,
+     "3+6": 14.8,
+     "2+4": 24.2,
+     "3+4": 27.4,
+     "5+7": 30.8,
+     "1+6": 33.3,
+     "1+2": 35.2,
+     "3+7": 35.2,
+     "4+5": 36.3,
+     "6+7": 37.4,
+     "1+3": 38.6,
+     "4+6": 44.1,
+     "3+5": 49.4,
+     "5+6": 56.1,
+     "2+5": 58.8,
+     "2+6": 82.3,
+     "2+3": 137.2
     }
    },
    {
-    "time": "08:41:03",
+    "time": "09:28:09",
+    "quinella": {}
+   },
+   {
+    "time": "09:28:36",
     "quinella": {
-     "3+5": 1.3,
-     "2+5": 6.9,
-     "2+3": 13.3,
-     "1+3": 15.4,
-     "1+5": 16.9,
-     "4+5": 19.4,
-     "2+4": 23.5,
-     "3+4": 24.5,
-     "5+6": 34.5,
-     "1+2": 37.6,
-     "3+6": 56.1,
-     "1+4": 66.4,
-     "1+6": 97.0,
-     "2+6": 109.7,
-     "4+6": 148.5
+     "4+7": 1.9,
+     "2+7": 6.0,
+     "1+4": 9.0,
+     "1+7": 9.8,
+     "1+5": 14.6,
+     "3+6": 15.6,
+     "3+4": 22.8,
+     "3+7": 24.5,
+     "2+4": 26.9,
+     "5+7": 36.4,
+     "1+2": 41.4,
+     "1+3": 46.2,
+     "6+7": 47.1,
+     "4+6": 49.5,
+     "4+5": 53.8,
+     "1+6": 56.4,
+     "3+5": 77.3,
+     "2+5": 91.8,
+     "5+6": 101.2,
+     "2+6": 127.5,
+     "2+3": 137.7
     }
    },
    {
-    "time": "08:41:42",
+    "time": "09:29:03",
     "quinella": {
-     "3+5": 1.3,
-     "2+5": 6.9,
-     "2+3": 13.3,
-     "1+3": 15.4,
-     "1+5": 16.9,
-     "4+5": 19.4,
-     "2+4": 23.5,
-     "3+4": 24.5,
-     "5+6": 34.5,
-     "1+2": 37.6,
-     "3+6": 56.1,
-     "1+4": 66.4,
-     "1+6": 97.0,
-     "2+6": 109.7,
-     "4+6": 148.5
+     "4+7": 1.9,
+     "2+7": 6.0,
+     "1+4": 9.0,
+     "1+7": 9.8,
+     "1+5": 14.6,
+     "3+6": 15.6,
+     "3+4": 22.8,
+     "3+7": 24.5,
+     "2+4": 26.9,
+     "5+7": 36.4,
+     "1+2": 41.4,
+     "1+3": 46.2,
+     "6+7": 47.1,
+     "4+6": 49.5,
+     "4+5": 53.8,
+     "1+6": 56.4,
+     "3+5": 77.3,
+     "2+5": 91.8,
+     "5+6": 101.2,
+     "2+6": 127.5,
+     "2+3": 137.7
     }
    }
   ],
@@ -204,9 +255,9 @@
   "excess_drops": {},
   "drop_speed": {},
   "exacta_reversal": true,
-  "reversal_ratio": 0.27,
+  "reversal_ratio": 0.21,
   "quinella_mismatch": null,
-  "refund_rate": 0.734,
+  "refund_rate": 0.735,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -215,34 +266,37 @@
   "candidates": [
    2,
    5,
+   6,
    1,
    3,
    4,
-   6,
    7,
    8,
    9
   ],
-  "eliminated": [],
-  "recommend": "3+5",
+  "eliminated": [
+   10,
+   11
+  ],
+  "recommend": "4+7",
   "strategy": "BMED_역배열형",
   "confidence": 35.0,
   "signal_quality": "하"
  },
  "result": {
-  "1st": 5,
-  "2nd": 3,
-  "3rd": 4,
+  "1st": 4,
+  "2nd": 7,
+  "3rd": 2,
   "4th": null,
   "quinella_odds": null,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "역배열 감지말 4번 입상"
+  "hit_pattern": "전적유력마 2번 적중 · 역배열 감지말 2·4번 입상 · 제거 적중"
  },
  "labels": {
   "quinella_hit": true,
-  "winner": 5,
-  "second": 3,
+  "winner": 4,
+  "second": 7,
   "odds_range": null
  },
  "saved_at": "2026-07-07 11:19:31",
