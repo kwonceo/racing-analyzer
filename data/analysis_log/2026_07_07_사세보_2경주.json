@@ -4,7 +4,7 @@
  "date": "2026-07-07",
  "race": "사세보 2경주",
  "analyzed_at": "08:32:10",
- "updated_at": "08:36:58",
+ "updated_at": "09:14:04",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -32,115 +32,197 @@
     "2+6": 111.9,
     "4+6": 181.9
    }
+  },
+  {
+   "time": "08:41:03",
+   "minutes_before": 8,
+   "quinella": {
+    "3+5": 1.3,
+    "2+5": 6.9,
+    "2+3": 13.3,
+    "1+3": 15.4,
+    "1+5": 16.9,
+    "4+5": 19.4,
+    "2+4": 23.5,
+    "3+4": 24.5,
+    "5+6": 34.5,
+    "1+2": 37.6,
+    "3+6": 56.1,
+    "1+4": 66.4,
+    "1+6": 97.0,
+    "2+6": 109.7,
+    "4+6": 148.5
+   }
+  },
+  {
+   "time": "08:41:42",
+   "minutes_before": 8,
+   "quinella": {
+    "3+5": 1.3,
+    "2+5": 6.9,
+    "2+3": 13.3,
+    "1+3": 15.4,
+    "1+5": 16.9,
+    "4+5": 19.4,
+    "2+4": 23.5,
+    "3+4": 24.5,
+    "5+6": 34.5,
+    "1+2": 37.6,
+    "3+6": 56.1,
+    "1+4": 66.4,
+    "1+6": 97.0,
+    "2+6": 109.7,
+    "4+6": 148.5
+   }
   }
  ],
  "signals_detected": [
   {
-   "time": "08:31:52",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 6번 1착(46.1)이 5번 1착(168.1)보다 낮음 → 실질 1착: 6번 가능성 (압도적 역전 0.274)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(6→5) 46.1 / 쌍승(5→6) 168.1 = 0.274 (압도적 역전)"
+   "time": "08:41:42",
+   "type": "마감급락",
+   "detail": "2+5 복승 8.8→6.9 (10분전 대비 -21.6%)",
+   "severity": "🟡",
+   "reason": "마감 10분전 대비 급락 → 자금 유입 초기(관찰)"
   },
   {
-   "time": "08:31:52",
+   "time": "08:41:42",
    "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 1번 1착(26.1)이 5번 1착(54.7)보다 낮음 → 실질 1착: 1번 가능성 (압도적 역전 0.477)",
+   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 1번 1착(20.9)이 5번 1착(77.5)보다 낮음 → 실질 1착: 1번 가능성 (압도적 역전 0.27)",
    "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(1→5) 26.1 / 쌍승(5→1) 54.7 = 0.477 (압도적 역전)"
+   "reason": "역전비율 = 쌍승(1→5) 20.9 / 쌍승(5→1) 77.5 = 0.27 (압도적 역전)"
   },
   {
-   "time": "08:31:52",
+   "time": "08:41:42",
    "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 4번 1착(25.5)이 5번 1착(52.3)보다 낮음 → 실질 1착: 4번 가능성 (압도적 역전 0.488)",
+   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 6번 1착(67.3)이 5번 1착(222.6)보다 낮음 → 실질 1착: 6번 가능성 (압도적 역전 0.302)",
    "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(4→5) 25.5 / 쌍승(5→4) 52.3 = 0.488 (압도적 역전)"
+   "reason": "역전비율 = 쌍승(6→5) 67.3 / 쌍승(5→6) 222.6 = 0.302 (압도적 역전)"
   },
   {
-   "time": "08:31:52",
+   "time": "08:41:42",
    "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 2번 1착(9.5)이 5번 1착(19.1)보다 낮음 → 실질 1착: 2번 가능성 (압도적 역전 0.497)",
+   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 4번 1착(31.8)이 5번 1착(75.3)보다 낮음 → 실질 1착: 4번 가능성 (압도적 역전 0.422)",
    "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(2→5) 9.5 / 쌍승(5→2) 19.1 = 0.497 (압도적 역전)"
+   "reason": "역전비율 = 쌍승(4→5) 31.8 / 쌍승(5→4) 75.3 = 0.422 (압도적 역전)"
   },
   {
-   "time": "08:31:52",
+   "time": "08:41:42",
    "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 3번 1착(2.5)이 5번 1착(4.4)보다 낮음 → 실질 1착: 3번 가능성 (압도적 역전 0.568)",
+   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 2번 1착(8.3)이 5번 1착(18.4)보다 낮음 → 실질 1착: 2번 가능성 (압도적 역전 0.451)",
    "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(3→5) 2.5 / 쌍승(5→3) 4.4 = 0.568 (압도적 역전)"
+   "reason": "역전비율 = 쌍승(2→5) 8.3 / 쌍승(5→2) 18.4 = 0.451 (압도적 역전)"
+  },
+  {
+   "time": "08:41:42",
+   "type": "쌍승역전공식",
+   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 3번 1착(2.0)이 5번 1착(4.2)보다 낮음 → 실질 1착: 3번 가능성 (압도적 역전 0.476)",
+   "severity": "🔴🔴",
+   "reason": "역전비율 = 쌍승(3→5) 2.0 / 쌍승(5→3) 4.2 = 0.476 (압도적 역전)"
   }
  ],
  "horses": [
   {
-   "no": 1,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 17.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
    "no": 2,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
+   "name": "로드투파",
+   "jockey": "효식",
+   "record_score": 25,
+   "record_detail": "최근 4",
    "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 8.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 1.2배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 22.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade": "A",
+   "grade_reason": "배당 6.9배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 5,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
+   "name": "제이드팰",
+   "jockey": "살바",
+   "record_score": 0,
    "record_detail": "",
    "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 1.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade": "B",
+   "grade_reason": "배당 1.3배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 1,
+   "name": "비케이매",
+   "jockey": "형석",
+   "record_score": 0,
+   "record_detail": "최근 7",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 15.4배 · 최근평균 7.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+  },
+  {
+   "no": 3,
+   "name": "퓨어마린",
+   "jockey": "은경",
+   "record_score": 0,
+   "record_detail": "최근 5",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 1.3배 · 최근평균 5.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+  },
+  {
+   "no": 4,
+   "name": "서부이글",
+   "jockey": "상현",
+   "record_score": 0,
+   "record_detail": "최근 6",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 19.4배 · 최근평균 6.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
   },
   {
    "no": 6,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
+   "name": "다이아나",
+   "jockey": "성현",
+   "record_score": 0,
+   "record_detail": "최근 8",
    "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 35.5배 · 감점 없음 = 100점"
+   "grade": "C",
+   "grade_reason": "배당 34.5배 · 최근평균 8.0착 -30 = 70점"
+  },
+  {
+   "no": 7,
+   "name": "크루엘라",
+   "jockey": "여수",
+   "record_score": 110,
+   "record_detail": "최근 1",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 8,
+   "name": "트리플제",
+   "jockey": "성재",
+   "record_score": 110,
+   "record_detail": "최근 1",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 9,
+   "name": "최강루이",
+   "jockey": "인권",
+   "record_score": 60,
+   "record_detail": "최근 3",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   }
  ],
  "elimination": {
   "candidates": [
-   1,
    2,
+   5,
+   1,
    3,
    4,
-   5,
-   6
+   6,
+   7,
+   8,
+   9
   ],
   "eliminated": [],
   "elimination_reasons": {}
@@ -148,28 +230,28 @@
  "final_recommendation": {
   "quinella_main": {
    "combo": "3+5",
-   "odds": 1.2,
-   "reason": "3번(?)·5번(?)"
+   "odds": 1.3,
+   "reason": "3번(A)·5번(B)"
   },
   "quinella_sub": {
    "combo": "2+5",
-   "odds": 8.8,
-   "reason": "2번(?)·5번(?)"
+   "odds": 6.9,
+   "reason": "2번(A)·5번(B)"
   },
   "trifecta_main": {
    "combo": "2+3+5",
-   "odds": 10.9,
-   "reason": "2번(?)·3번(?)·5번(?)"
+   "odds": 9.8,
+   "reason": "2번(A)·3번(A)·5번(B)"
   },
   "trifecta_insurance1": {
    "combo": "1+3+5",
-   "odds": 14.8,
-   "reason": "1번(?)·3번(?)·5번(?)"
+   "odds": 13.9,
+   "reason": "1번(A)·3번(A)·5번(B)"
   },
   "trifecta_insurance2": {
    "combo": "1+2+5",
-   "odds": 38.8,
-   "reason": "1번(?)·2번(?)·5번(?)"
+   "odds": 32.7,
+   "reason": "1번(A)·2번(A)·5번(B)"
   },
   "budget_allocation": {
    "quinella_main": "62.8%",
@@ -191,8 +273,15 @@
    ]
   },
   "form": {
-   "quinella": null,
-   "trio": null
+   "quinella": [
+    7,
+    8
+   ],
+   "trio": [
+    7,
+    8,
+    9
+   ]
   },
   "final": {
    "quinella": [
@@ -212,8 +301,46 @@
   3,
   2
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 5,
+  "2nd": 3,
+  "3rd": 4
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": true,
+  "payouts": {
+   "quinella": 1.7,
+   "trifecta": 6.0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 2,
+  "form_pick_hit": false,
+  "pnl": 700,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "hit_basis": {
+   "formScore": 0,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": true,
+   "inverseHorses": [
+    1,
+    6,
+    4
+   ],
+   "inverseHit": [
+    4
+   ],
+   "confidence": 35.0,
+   "reason": "역배열 감지말 4번 입상"
+  }
+ },
  "profit": null,
  "review": null
 }
