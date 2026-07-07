@@ -34,6 +34,8 @@
     function removeAll() {
       try { var a = byId(ID_CHIP); if (a) a.remove(); } catch (_) { /* */ }
       try { var b = byId(ID_PANEL); if (b) b.remove(); } catch (_) { /* */ }
+      try { var c = byId('kbOvAlert'); if (c) c.remove(); } catch (_) { /* */ }   // [강조] 팝업 제거
+      try { stopBlink(); } catch (_) { /* */ }
       if (timer) { try { clearInterval(timer); } catch (_) { /* */ } timer = null; }
     }
 
@@ -118,10 +120,129 @@
     }
 
     var PANEL_CSS =
-      'position:fixed;right:12px;top:96px;z-index:2147482900;width:230px;max-height:64vh;overflow:auto;' +
+      'position:fixed;right:12px;top:96px;z-index:2147482900;width:252px;max-height:70vh;overflow:auto;' +
       'background:rgba(17,24,39,.96);color:#e5e7eb;border:1px solid #4c1d95;border-radius:10px;' +
       'padding:10px 11px;font:500 12px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;' +
       'box-shadow:0 6px 20px rgba(0,0,0,.4)';
+
+    // ── [강화] 종목 라벨 + 등급 색 ─────────────────────────────────────
+    var CAT_LABEL = { boat: '🚤 경정', cycle: '🚴 경륜', bike: '🏍 바이크',
+      japan_central: '🏇 중앙', japan_local: '🇯🇵 지방', korea: '🇰🇷 한국' };
+    var GRADE_COLOR = { A: '#38d39f', B: '#4ea1ff', C: '#fbbf24', D: '#94a3b8' };
+
+    // [강화] 통합 등급 상위 3두(전적등급 + 배당유력마 병합) — vanilla 버전
+    function topGrades(d) {
+      try {
+        var form = d.form || [], keys = (d.keyHorses || []).map(Number);
+        var anom = d.anomalyHorse != null ? +d.anomalyHorse : null;
+        var fmap = {}; form.forEach(function (h) { fmap[h.no] = h; });
+        var nos = {}; form.forEach(function (h) { nos[h.no] = 1; }); keys.forEach(function (n) { nos[n] = 1; });
+        var arr = Object.keys(nos).map(function (n) {
+          n = +n; var f = fmap[n] || null;
+          return { no: n, grade: f ? f.grade : null, score: f ? f.totalScore : null,
+            key: keys.indexOf(n) >= 0, anom: anom === n };
+        });
+        arr.sort(function (a, b) { return (b.key - a.key) || ((b.score || 0) - (a.score || 0)) || (a.no - b.no); });
+        return arr.slice(0, 3);
+      } catch (_) { return []; }
+    }
+
+    // [강화] BMED 저배당 배분(보험형 combos 우선 → plan 폴백)
+    function bmedRows(d) {
+      try {
+        var b = d.bmed; if (!b) return null;
+        var ins = b.insurance || {};
+        if (ins.active && ins.combos && ins.combos.length) {
+          return { band: ins.band, six: !!b.sixRacer, anchor: ins.anchor,
+            rows: ins.combos.map(function (c) { return { combo: c.combo, odds: c.odds, ratio: c.ratio, preserved: c.preserved }; }) };
+        }
+        var plan = b.plan || [];
+        return { band: null, six: !!b.sixRacer, strategy: b.strategy,
+          rows: plan.slice(0, 3).map(function (p) { return { combo: p.combo, odds: p.odds, ratio: p.ratio }; }) };
+      } catch (_) { return null; }
+    }
+
+    // ── [강조 팝업] 중요 신호를 큰 팝업으로 강조(역배열·강한급락·경고·마감임박) ──
+    var ID_ALERT = 'kbOvAlert';
+    var alertBlink = null, blinkOn = false, alertDismissed = '';
+
+    // 현재 가장 중요한 신호 1건 산출(우선순위: 역배열 > 강한급락 > 경고 > 마감임박)
+    function computeCritical(d, deadline) {
+      try {
+        if (d && d.inverse && d.inverse.detected) {
+          var ih = (d.inverse.invHorses || []).slice(0, 2).join('·');
+          return { key: 'inv:' + ih, level: 'red', icon: '🔄', title: '역배열 감지',
+            msg: '실질 유력마 ' + (ih || '변경') + '번 — 배당 순서와 다름(주목)' };
+        }
+        var strong = ((d && d.drops) || []).filter(function (x) { return x && x.pct <= -50 && x.combo; })
+          .sort(function (a, b) { return a.pct - b.pct; });
+        if (strong.length) {
+          var s0 = strong[0];
+          return { key: 'drop:' + s0.combo.join('+') + ':' + s0.pct, level: 'red', icon: '🔴', title: '강한 급락',
+            msg: s0.combo[0] + '+' + s0.combo[1] + ' ▼' + Math.abs(s0.pct) + '% — 자금 집중' };
+        }
+        if (d && d.alertSignal && (d.alertSignal.horses || []).length) {
+          var hs = d.alertSignal.horses.join('+');
+          return { key: 'alert:' + hs, level: 'orange', icon: '⚠️', title: '경고 신호',
+            msg: hs + '번 배당 급변 — 추천 포함 권장' };
+        }
+        if (deadline) {
+          var ms = deadline - Date.now();
+          if (ms > 0 && ms <= 60000) return { key: 'close', level: 'orange', icon: '⏰', title: '마감 임박',
+            msg: '발주까지 1분 이내 — 베팅 마감 준비' };
+        }
+      } catch (_) { /* */ }
+      return null;
+    }
+
+    function stopBlink() { if (alertBlink) { try { clearInterval(alertBlink); } catch (_) { /* */ } alertBlink = null; } }
+    function startBlink() {
+      if (alertBlink) return;
+      alertBlink = setInterval(function () {
+        try {
+          var el = byId(ID_ALERT); if (!el) { stopBlink(); return; }
+          blinkOn = !blinkOn;
+          el.style.boxShadow = blinkOn
+            ? '0 0 0 4px rgba(255,255,255,.55), 0 8px 24px rgba(0,0,0,.55)'
+            : '0 8px 24px rgba(0,0,0,.55)';
+        } catch (_) { /* */ }
+      }, 550);
+    }
+
+    // 강조 팝업 렌더(중요 신호 있을 때만 · 상단 중앙 · 깜빡임 · ✕로 이 신호 닫기)
+    function renderAlertPopup(crit) {
+      try {
+        var el = byId(ID_ALERT);
+        if (!crit || !enabled || killed || alertDismissed === crit.key) {
+          if (el) el.remove(); stopBlink(); return;
+        }
+        var bg = crit.level === 'red'
+          ? 'linear-gradient(135deg,#dc2626,#991b1b)' : 'linear-gradient(135deg,#f59e0b,#b45309)';
+        if (!el) {
+          el = mk('div',
+            'position:fixed;left:50%;margin-left:-168px;top:58px;z-index:2147483100;width:336px;' +
+            'color:#fff;border:2px solid rgba(255,255,255,.85);border-radius:12px;' +
+            'padding:11px 14px;font:600 13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;' +
+            'box-shadow:0 8px 24px rgba(0,0,0,.55)');
+          el.id = ID_ALERT;
+          root().appendChild(el);
+        }
+        el.style.background = bg;
+        while (el.firstChild) el.removeChild(el.firstChild);
+        var head = mk('div', 'display:flex;align-items:center;justify-content:space-between;gap:8px');
+        head.appendChild(mk('span', 'font-weight:900;font-size:15px', crit.icon + ' ' + crit.title));
+        var x = mk('button', 'all:unset;cursor:pointer;color:#fff;font:900 16px sans-serif;padding:0 2px', '✕');
+        x.title = '이 알림 닫기(다른 신호가 오면 다시 표시)';
+        x.addEventListener('click', function () {
+          alertDismissed = crit.key;
+          var e2 = byId(ID_ALERT); if (e2) e2.remove(); stopBlink();
+        });
+        head.appendChild(x);
+        el.appendChild(head);
+        el.appendChild(mk('div', 'margin-top:4px;font-size:13px;font-weight:700', crit.msg));
+        startBlink();
+      } catch (_) { /* 강조 팝업 실패는 무시 */ }
+    }
 
     // 패널 내용 갱신 (div/span 만 사용 · textContent 기반)
     function updatePanel(panel, st) {
@@ -130,11 +251,15 @@
         var d = (st.analyzeStatus && st.analyzeStatus.data) || null;
         var deadline = st.timerDeadline || 0;
 
-        // 헤더 + 닫기(✕) — [보완#2] 헤더를 잡고 드래그하면 패널 이동
+        // 헤더 + 종목 배지 + 닫기(✕) — [보완#2] 헤더를 잡고 드래그하면 패널 이동
         var head = mk('div', 'display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;cursor:move');
         head.title = '드래그하여 위치 이동';
         head.addEventListener('mousedown', startDrag);
-        head.appendChild(mk('span', 'font-weight:800;color:#c4b5fd', '📊 실시간 분석'));
+        var hL = mk('div', 'display:flex;align-items:center;gap:6px');
+        hL.appendChild(mk('span', 'font-weight:800;color:#c4b5fd', '📊 실시간 분석'));
+        var cat = d && d.category && CAT_LABEL[d.category];
+        if (cat) hL.appendChild(mk('span', 'font-size:10px;font-weight:700;color:#c4b5fd;border:1px solid #6d28d9;border-radius:8px;padding:1px 6px', cat));
+        head.appendChild(hL);
         var x = mk('button', 'all:unset;cursor:pointer;color:#94a3b8;font:700 14px sans-serif;padding:0 2px', '✕');
         x.title = '오버레이 끄기';
         x.addEventListener('click', function () {
@@ -144,6 +269,18 @@
         });
         head.appendChild(x);
         panel.appendChild(head);
+
+        // [강조] 중요 신호 팝업(상단 중앙) 갱신 + 패널 상단 배너
+        var crit = computeCritical(d, deadline);
+        renderAlertPopup(crit);
+        if (crit) {
+          var bnBg = crit.level === 'red' ? 'rgba(220,38,38,.22)' : 'rgba(245,158,11,.2)';
+          var bnBd = crit.level === 'red' ? '#f87171' : '#fbbf24';
+          var bn = mk('div', 'margin:2px 0 7px;padding:6px 8px;border-left:3px solid ' + bnBd + ';background:' + bnBg + ';border-radius:6px');
+          bn.appendChild(mk('div', 'font-weight:800;color:' + bnBd, crit.icon + ' ' + crit.title));
+          bn.appendChild(mk('div', 'color:#e5e7eb;font-size:11px;margin-top:1px', crit.msg));
+          panel.appendChild(bn);
+        }
 
         // 마감 카운트다운
         var cd = countdown(deadline);
@@ -182,6 +319,31 @@
           });
         }
 
+        // [강화] 역배열 감지 라인(강조)
+        if (d.inverse && d.inverse.detected) {
+          var ih2 = (d.inverse.invHorses || []).slice(0, 2).join('·');
+          var ivr = mk('div', 'margin:5px 0 2px;padding:3px 6px;background:rgba(168,85,247,.16);border-radius:6px');
+          ivr.appendChild(mk('span', 'color:#c4b5fd;font-weight:700', '🔄 역배열 '));
+          ivr.appendChild(mk('span', 'color:#e9d5ff', ih2 ? ('실질 유력마 ' + ih2 + '번') : '감지'));
+          panel.appendChild(ivr);
+        }
+
+        // [강화] 통합 등급 상위 3두(전적 + 배당유력)
+        var tg = topGrades(d);
+        if (tg.length) {
+          panel.appendChild(mk('div', 'margin:6px 0 2px;color:#94a3b8', '🎖️ 통합 등급'));
+          tg.forEach(function (g) {
+            var gr = mk('div', 'margin:1px 0');
+            gr.appendChild(mk('span', 'font-weight:800;color:#4ea1ff', g.no + '번'));
+            if (g.grade) gr.appendChild(mk('span', 'margin-left:5px;font-weight:700;color:' + (GRADE_COLOR[g.grade] || '#e5e7eb'), g.grade));
+            var tagTxt = (g.score != null ? ('전적' + g.score) : '') +
+              (g.key ? (g.score != null ? '·배당유력' : '배당유력') : '') +
+              (g.anom ? ' 🚨' : '');
+            if (tagTxt) gr.appendChild(mk('span', 'margin-left:5px;color:#94a3b8;font-size:11px', '(' + tagTxt + ')'));
+            panel.appendChild(gr);
+          });
+        }
+
         // 추천 조합(복승 메인 우선, 없으면 첫 추천)
         var recs = (d.betRecommend || []);
         var main = null;
@@ -192,6 +354,24 @@
           var rr = mk('div', 'font-weight:800;color:#38d39f');
           rr.textContent = (main.label ? main.label + ' ' : '') + main.combo.join('+');
           panel.appendChild(rr);
+        }
+
+        // [강화] BMED 저배당 배분(보험형 combos 우선)
+        var bm = bmedRows(d);
+        if (bm && bm.rows && bm.rows.length) {
+          var bmHead = mk('div', 'margin:7px 0 2px;color:#94a3b8');
+          bmHead.textContent = '🛡️ BMED' + (bm.band ? (' ' + bm.band) : (bm.strategy ? (' ' + bm.strategy) : '')) + (bm.six ? ' · 6명' : '');
+          panel.appendChild(bmHead);
+          bm.rows.forEach(function (r) {
+            var row = mk('div', 'margin:1px 0');
+            row.appendChild(mk('span', 'display:inline-block;background:#4c1d95;color:#e9d5ff;border-radius:6px;padding:1px 6px;font-weight:700',
+              r.combo[0] + '+' + r.combo[1]));
+            if (r.odds != null) row.appendChild(mk('span', 'margin-left:5px;color:#94a3b8;font-size:11px', r.odds + '배'));
+            if (r.ratio != null) row.appendChild(mk('span', 'margin-left:5px;font-weight:700;color:#c4b5fd', Math.round(r.ratio * 100) + '%'));
+            if (r.preserved === true) row.appendChild(mk('span', 'margin-left:4px;color:#38d39f;font-size:11px', '✅'));
+            else if (r.preserved === false) row.appendChild(mk('span', 'margin-left:4px;color:#f87171;font-size:11px', '❌'));
+            panel.appendChild(row);
+          });
         }
 
         // 최근 이상감지 알림(collectAlert)
@@ -217,6 +397,8 @@
         var panel = byId(ID_PANEL);
         if (!enabled) {
           if (panel) panel.remove();
+          try { var al = byId('kbOvAlert'); if (al) al.remove(); } catch (_) { /* */ }   // [강조] 팝업도 제거
+          stopBlink();
           if (timer) { clearInterval(timer); timer = null; }
           return;
         }
