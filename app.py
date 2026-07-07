@@ -7054,6 +7054,54 @@ def _match_row_to_key(row, analyzed_keys):
     return matched if matched in analyzed_keys else None
 
 
+def _match_row_to_all_keys(row, analyzed_keys):
+    """결과행 → (경마장+경주번호) 일치하는 **모든** 분석 key.
+    같은 경주가 한글('모리오카 1경주')·한자('2026-07-07 盛岡 1R') 등 중복 저장돼 있어도
+    전부 반환 → 결과를 모든 중복 로그에 반영(하나만 등록되고 나머지가 미입력으로 남는 문제 방지)."""
+    pseudo = f"{row.get('area') or ''} {row.get('round') or ''}".strip()
+    r_area, r_num = _area_num(pseudo)
+    if r_num is None:
+        return []
+    today = time.strftime("%Y-%m-%d")
+    keys = [k for k in analyzed_keys
+            if _area_num(k)[1] == r_num and r_area and _area_num(k)[0]
+            and (r_area in _area_num(k)[0] or _area_num(k)[0] in r_area)]
+    # 다른 날짜(명시된 과거 날짜) key 제외 — 오늘 결과를 과거 경주 로그에 쓰지 않음.
+    #   (날짜 없는 key는 _analysis_log_path 가 오늘 파일로 매핑하므로 안전하게 유지)
+    keys = [k for k in keys if not (re.search(r"\d{4}-\d{2}-\d{2}", k) and today not in k)]
+    keys = list(dict.fromkeys(keys))
+    keys.sort(key=lambda k: (today not in k, k))
+    return keys
+
+
+def _log_has_recommendation(rk):
+    """해당 raceKey 로그가 추천/유력마 데이터를 가졌는지(적중판정 기준 primary 선택용)."""
+    try:
+        path, _, _ = _analysis_log_path(rk)
+        doc = json.load(open(path, encoding="utf-8"))
+        return bool(doc.get("final_recommendation") or doc.get("betRecommend") or doc.get("keyHorses"))
+    except Exception:
+        return False
+
+
+def _mark_result_in_log(rk, result):
+    """중복 로그(추천 없는 쪽)에 결과만 기록해 미입력 목록에서 제거(전체 학습은 primary에서만)."""
+    try:
+        path, _, _ = _analysis_log_path(rk)
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return False
+    if doc.get("result"):
+        return False
+    doc["result"] = result
+    doc["result_via"] = "duplicate_sync"   # primary 로그에서 동기화됨 표시
+    try:
+        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        return True
+    except Exception:
+        return False
+
+
 def _all_analyzed_keys():
     """매칭 후보 raceKey 전체 — triple_store(현재 캐시) + analysis_log(과거 분석·프룬됨 포함)."""
     keys = set(_triple_load().keys())
@@ -7088,10 +7136,12 @@ def _register_result_rows(rows, stake=1000, analyzed_keys=None):
         top3 = [int(x) for x in top3 if isinstance(x, int) and x >= 1]
         if not top3:
             continue
-        rk = _match_row_to_key(row, analyzed_keys)
-        if not rk:
+        keys = _match_row_to_all_keys(row, analyzed_keys)
+        if not keys:
             unmatched.append({"area": row.get("area"), "round": row.get("round"), "top3": top3})
             continue
+        # 중복 로그 중 추천이 있는 로그를 primary(전체 적중판정·학습 기준)로 선택
+        primary = next((k for k in keys if _log_has_recommendation(k)), keys[0])
         final_odds = {}
         if row.get("qOdds"):
             final_odds["quinella"] = {"combo": top3[:2], "odds": row["qOdds"]}
@@ -7101,21 +7151,24 @@ def _register_result_rows(rows, stake=1000, analyzed_keys=None):
         for i, no in enumerate(top3[:3]):
             result[["1st", "2nd", "3rd"][i]] = no
         try:
-            rec, _ = _apply_result_learning(rk, result, top3, final_odds or None, stake=stake)
+            rec, _ = _apply_result_learning(primary, result, top3, final_odds or None, stake=stake)
         except Exception as e:
-            errors.append({"raceKey": rk, "error": str(e)})
+            errors.append({"raceKey": primary, "error": str(e)})
             continue
+        # 나머지 중복 로그에도 결과 기록 → 미입력 목록에서 함께 제거(학습 중복 방지 위해 결과만)
+        dup_synced = [k for k in keys if k != primary and _mark_result_in_log(k, result)]
         q_hit, t_hit = bool(rec.get("quinella_hit")), bool(rec.get("trifecta_hit"))
         won = q_hit or t_hit or bool(rec.get("was_hit"))
         pnl = int(rec.get("pnl") or 0)   # [#5] 손익은 학습 레코드에서 단일 계산
         if won:
             hits += 1
         profit += pnl
-        matched.append({"raceKey": rk, "top3": top3, "quinella_hit": q_hit,
+        matched.append({"raceKey": primary, "top3": top3, "quinella_hit": q_hit,
                         "trifecta_hit": t_hit, "won": won, "pnl": pnl,
                         "stake": stake, "payouts": rec.get("payouts"),
                         "payout_actual": rec.get("payout_actual"),
-                        "had_bet": bool(rec.get("bet_type"))})
+                        "had_bet": bool(rec.get("bet_type")),
+                        "dupSynced": dup_synced})
     print(f"[결과등록] 등록 {len(matched)}건 · 적중 {hits} · 손익 {profit}원 · 매칭실패 {len(unmatched)}건")
     return {"ok": True, "registered": len(matched), "hits": hits, "profit": profit,
             "stake": stake, "matched": matched, "unmatched": unmatched, "errors": errors,
