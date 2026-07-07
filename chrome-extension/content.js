@@ -1528,32 +1528,47 @@
         console.log(`[배당수집] 전적 추출: ${starters.length}두`);
       }
 
-      // 4) [수정#1 삼복승 복구] 일본경마: 삼복승 탭 클릭 + 유력마 3두 축마 버튼 자동 클릭 → 3종 수집.
-      //    한국경마는 복승만이므로 생략. 삼복승은 불안정할 수 있어 독립 try/catch로 격리(실패해도 복승·쌍승은 유지).
+      // 4) [수정#1 삼복승 복구 · 강화] 삼복승 탭 클릭 → ①직접 목록(currentTrios, 6명 소규모 보드)
+      //    + ②유력마 3두 축마 버튼 클릭(collectTrioByAxis) 을 함께 시도해 병합(같은 조합 최저배당 유지).
+      //    한국·중앙경마만 생략. 경륜·경정·바이크(6명)도 삼복승 탭을 눌러 수집한다(기존 미클릭 문제 해결).
+      //    삼복승은 불안정할 수 있어 독립 try/catch로 격리(실패해도 복승·쌍승은 유지).
       let trio = [];
       if (isKorea) {
         console.log('[한국모드] 삼복승 수집 생략(복승만)');
-      } else if (isCycleBoat) {
-        console.log(`[${SPORT_LABEL[effSport]}] 삼복승 수집 생략(복승+쌍승만)`);
       } else if (isCentral) {
         console.log('[중앙경마] 삼복승 수집 생략(복승+쌍승만·배당 전용)');
       } else {
         try {
-          setTripleProgress('삼복승 수집중…(유력마 축마 클릭)');
+          const sportTag = isCycleBoat ? SPORT_LABEL[effSport] : '일본경마';
+          setTripleProgress(`삼복승 수집중…(${sportTag} · 탭 클릭)`);
           const keyH = localKeyHorses(quinella);   // 상위 복승조합 등장빈도+인기가중 유력마 3두
-          console.log('[삼복승수집] 유력마(축) 후보:', keyH.join('·') || '(없음)');
+          console.log(`[삼복승수집] ${sportTag} 유력마(축) 후보:`, keyH.join('·') || '(없음)');
+          // 삼복승 탭 클릭(라벨: 삼복승/三連複/3連複 등 · '삼복승조합'은 마권선택 탭이라 배당탭 우선)
+          const rt = await clickTabAndWait(['삼복승', '삼복', '三連複', '3連複', '３連複', '삼연복'], sig, '삼복승', true, 5000);
+          console.log(`[삼복승수집] 탭 클릭 결과: ${rt.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${rt.changed ? '변경 확인' : '⚠ 변화 없음'}`);
+          sig = rt.sig || oddsSignature();
+          // ① 직접 목록(화면에 "a-b-c 배당" 나열 — 6명 종목 등 소규모 보드에서 유효)
+          let direct = [];
+          try { direct = currentTrios(); } catch (_) { /* */ }
+          if (direct.length) console.log(`[삼복승수집] 직접 목록 ${direct.length}개 추출`);
+          // ② 유력마 축 클릭 매트릭스(일본 지방경마 등 매트릭스형 보드)
+          let byAxis = [];
           if (keyH.length) {
-            const rt = await clickTabAndWait(['삼복승', '삼복', '三連複', '3連複', '３連複', '삼연복'], sig, '삼복승', true, 5000);
-            console.log(`[삼복승수집] 탭 클릭 결과: ${rt.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${rt.changed ? '변경 확인' : '⚠ 변화 없음(복승 화면 그대로일 수 있음)'}`);
-            sig = rt.sig || oddsSignature();
-            trio = await collectTrioByAxis(keyH, oddsClass);   // 유력마 각각을 축으로 클릭 → 3두 조합
-            console.log(`[삼복승수집] 추출된 조합 수: ${trio.length}개`);
-            if (!trio.length) console.warn('[삼복승수집] ⚠ 삼복승 미수집 — 복승/쌍승만으로 분석 진행');
-            // 복승으로 복귀(다음 수집 사이클 안정화)
-            await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false);
-          } else {
-            console.warn('[삼복승수집] 유력마 산출 불가(복승 조합 부족) → 삼복승 생략');
+            try { byAxis = await collectTrioByAxis(keyH, oddsClass); } catch (_) { /* */ }
+            if (byAxis.length) console.log(`[삼복승수집] 축 클릭 ${byAxis.length}개 추출`);
           }
+          // 병합(같은 3두 조합은 최저 배당 유지)
+          const tmap = {};
+          for (const t of direct.concat(byAxis)) {
+            if (!t || !t.combo || t.combo.length !== 3 || t.odds == null || t.odds <= 0) continue;
+            const key = [...t.combo].sort((a, b) => a - b).join('-');
+            if (tmap[key] == null || t.odds < tmap[key]) tmap[key] = t.odds;
+          }
+          trio = Object.entries(tmap).map(([k, o]) => ({ combo: k.split('-').map(Number), odds: o }));
+          console.log(`[삼복승수집] 병합 결과 ${trio.length}개 (직접 ${direct.length}·축 ${byAxis.length})`);
+          if (!trio.length) console.warn('[삼복승수집] ⚠ 삼복승 미수집 — 복승/쌍승만으로 분석 진행');
+          // 복승으로 복귀(다음 수집 사이클 안정화)
+          await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false);
         } catch (e) { console.warn('[삼복승수집] 실패 — 복승/쌍승만으로 진행', e); }
       }
 
