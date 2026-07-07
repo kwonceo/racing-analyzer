@@ -373,6 +373,68 @@ btnResults.addEventListener('click', async () => {
   btnResults.disabled = false; btnResults.textContent = '🏁 결과(1~3착) 전송';
 });
 
+// ── [캡쳐+OCR] 경주결과 화면 캡쳐 → Vision 판독 → 착순 저장 ──────────
+const btnCapture = document.getElementById('captureResult');
+const captureCard = document.getElementById('captureCard');
+const captureRow = document.getElementById('captureRow');
+const captureDetail = document.getElementById('captureDetail');
+const captureSave = document.getElementById('captureSave');
+let _ocrPlacing = null;
+
+if (btnCapture) btnCapture.addEventListener('click', () => {
+  captureCard.style.display = '';
+  captureSave.style.display = 'none';
+  _ocrPlacing = null;
+  captureRow.textContent = '📸 캡쳐 중…';
+  captureDetail.textContent = '';
+  chrome.runtime.sendMessage({ type: 'CAPTURE_TAB' }, (cap) => {
+    if (chrome.runtime.lastError || !cap || !cap.ok) {
+      captureRow.innerHTML = `<span class="err">캡쳐 실패: ${(cap && cap.error) || (chrome.runtime.lastError && chrome.runtime.lastError.message) || ''}</span>`;
+      return;
+    }
+    captureRow.textContent = '🔍 결과 판독 중… (Vision)';
+    chrome.runtime.sendMessage({ type: 'POST_RESULT_OCR', dataUrl: cap.dataUrl }, (r) => {
+      if (chrome.runtime.lastError || !r || !r.ok) {
+        captureRow.innerHTML = `<span class="err">판독 실패: ${(r && r.error) || '응답 없음'}</span>`;
+        return;
+      }
+      const d = r.data || {};
+      const p = (d.placing || []).filter((x) => x != null);
+      if (!p.length) {
+        captureRow.innerHTML = '<span class="err">착순을 못 읽었습니다. 결과 화면이 선명하게 보이는지 확인 후 재시도.</span>';
+        return;
+      }
+      _ocrPlacing = p;
+      captureRow.innerHTML = `판독: <span class="ok">1착 ${p[0]} · 2착 ${p[1] != null ? p[1] : '?'} · 3착 ${p[2] != null ? p[2] : '?'}</span>`;
+      captureDetail.textContent = `${d.venue || ''} ${d.raceNo != null ? d.raceNo + 'R' : ''}`.trim() + ' — 착순 확인 후 저장하세요';
+      captureSave.style.display = '';
+    });
+  });
+});
+
+if (captureSave) captureSave.addEventListener('click', () => {
+  if (!_ocrPlacing || !_ocrPlacing.length) return;
+  const rk = (els.raceKey.value || '').trim();
+  if (!rk) { captureRow.innerHTML = '<span class="err">raceKey가 없습니다(팝업 상단 raceKey 확인·입력).</span>'; return; }
+  const result = { '1st': _ocrPlacing[0] };
+  if (_ocrPlacing[1] != null) result['2nd'] = _ocrPlacing[1];
+  if (_ocrPlacing[2] != null) result['3rd'] = _ocrPlacing[2];
+  if (_ocrPlacing[3] != null) result['4th'] = _ocrPlacing[3];
+  captureSave.disabled = true; captureSave.textContent = '저장 중…';
+  chrome.runtime.sendMessage({ type: 'POST_RECORD_RESULT', payload: { raceKey: rk, result } }, (r) => {
+    captureSave.disabled = false; captureSave.textContent = '✅ 판독 착순 저장';
+    if (chrome.runtime.lastError || !r || !r.ok) {
+      captureRow.innerHTML = `<span class="err">저장 실패: ${(r && r.error) || '응답 없음'}</span>`;
+      return;
+    }
+    const rec = (r.data && r.data.record) || {};
+    const hit = (rec.quinella_hit || rec.trifecta_hit) ? '✅ 적중' : '❌ 미적중';
+    captureRow.innerHTML = `<span class="ok">저장 완료 · ${hit}</span>`;
+    captureDetail.textContent = `${rk} · 착순 ${_ocrPlacing.join('-')}`;
+    captureSave.style.display = 'none';
+  });
+});
+
 // ── [전체 자동 수집] 복승·쌍승·삼복승 3종 ────────────────────────────
 const btnTriple = document.getElementById('collectTriple');
 const tripleRow = document.getElementById('tripleRow');

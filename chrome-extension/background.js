@@ -25,6 +25,8 @@ function _postResultAutoStatus(obj) {
 const TRIPLE_URL = `${SERVER}/api/odds/triple/ingest`;
 const ANALYZE_URL = `${SERVER}/api/odds/triple/analyze`;
 const JAPAN_URL = `${SERVER}/api/extract/japan`;
+const RESULT_OCR_URL = `${SERVER}/api/result/ocr`;             // [캡쳐+OCR] 결과 화면 판독
+const RECORD_RESULT_URL = `${SERVER}/api/history/record-result`; // [캡쳐+OCR] 판독 착순 저장
 
 // [보완] fetch 실패 원인 친절 변환: "Failed to fetch"(연결 거부=서버 꺼짐)를
 //   명확한 안내로 바꿔 팝업/오버레이 상태에 그대로 노출 → 원인 즉시 파악.
@@ -199,6 +201,52 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ raceKey: msg.raceKey || '' }),
+    })
+      .then(async (res) => {
+        let d = null; try { d = await res.json(); } catch (_) { /* noop */ }
+        if (!res.ok) throw new Error((d && d.error) || `HTTP ${res.status}`);
+        return d;
+      })
+      .then((data) => sendResponse({ ok: true, data }))
+      .catch((err) => sendResponse({ ok: false, error: svrErr(err) }));
+    return true; // async
+  }
+
+  // [캡쳐+OCR] 현재 보이는 탭(경주결과 화면) 캡쳐 → dataURL 반환.
+  if (msg?.type === 'CAPTURE_TAB') {
+    try {
+      chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
+        if (chrome.runtime.lastError || !dataUrl) {
+          sendResponse({ ok: false, error: (chrome.runtime.lastError && chrome.runtime.lastError.message) || '캡쳐 실패' });
+        } else {
+          sendResponse({ ok: true, dataUrl });
+        }
+      });
+    } catch (e) { sendResponse({ ok: false, error: String(e.message || e) }); }
+    return true; // async
+  }
+
+  // [캡쳐+OCR] 캡쳐 이미지 → 서버 Vision 판독(/api/result/ocr) → 1·2·3착.
+  if (msg?.type === 'POST_RESULT_OCR') {
+    fetch(RESULT_OCR_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: msg.dataUrl }),
+    })
+      .then(async (res) => {
+        let d = null; try { d = await res.json(); } catch (_) { /* noop */ }
+        if (!res.ok) throw new Error((d && d.error) || `HTTP ${res.status}`);
+        return d;
+      })
+      .then((data) => sendResponse({ ok: true, data }))
+      .catch((err) => sendResponse({ ok: false, error: svrErr(err) }));
+    return true; // async
+  }
+
+  // [캡쳐+OCR] 판독한 착순을 결과로 저장(기존 record-result 재사용, 적중판정·학습 동일).
+  if (msg?.type === 'POST_RECORD_RESULT') {
+    fetch(RECORD_RESULT_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg.payload),
     })
       .then(async (res) => {
         let d = null; try { d = await res.json(); } catch (_) { /* noop */ }
@@ -658,7 +706,9 @@ async function doResultFetch(attempt) {
     chrome.storage.local.set({ resultAutoStatus: { state: last ? 'manual' : 'retry', attempt: attempt + 2, nextAt, raceKey: curRaceKey || '', t: Date.now() } });
     // [스펙4·5] T+10분까지 실패 → 수동 입력 안내(해당 경주는 결과 미입력으로 남아 결과기록 탭 '미입력' 목록에 표시됨)
     if (last) {
-      _notify('resultFail', '❌ 결과 수집 실패', `${curRaceKey ? curRaceKey + ' · ' : ''}수동 입력하세요. (결과기록 탭에서 착순 입력)`, false);
+      // [캡쳐+OCR] 자동수집 실패 시: 경주결과 화면을 열고 확장의 '📸 경주결과 캡쳐→판독'을 누르라고 안내.
+      _notify('resultFail', '❌ 결과 자동수집 실패 — 캡쳐로 입력하세요',
+        `${curRaceKey ? curRaceKey + ' · ' : ''}경주결과 화면을 띄운 뒤 확장 팝업의 [📸 경주결과 캡쳐→판독]을 누르면 착순이 자동 입력됩니다. (또는 결과기록 탭에서 수동 입력)`, false);
       // [스펙2] 실패 상태를 서버로 전송 → 분석기 상단에 "⚠️ N경주 자동수집 실패 → 수동입력" 배너 표시
       _postResultAutoStatus({ state: 'manual', raceKey: curRaceKey || '', attempt: attempt + 2 });
     }
