@@ -2668,11 +2668,14 @@
     const invBlock = (inv.invHorses && inv.invHorses.length) ? `<div style="margin:6px 0 2px;padding:6px 8px;background:rgba(255,92,92,.08);border-radius:6px">
       <div>⭐ <b style="color:#ff8a8a">역배열 감지말</b>: ${invH} <span class="hint">(배당 높아도 우선 노출)</span></div>
       ${invC ? `<div style="margin-top:4px"><span class="hint">복승 역배열</span> ${invC}</div>` : ''}</div>` : '';
-    // [역배열 재정의] 인기순위(단승)보다 조합 배당이 낮은 말 상세(<30배만) + 실질 유력 요약
+    // [역배열 정확화] 인기순위 vs 쌍승 배당순위 역전(2단계+) 말 상세 + 대조마 + 실질 유력 요약
     const det = (inv.invDetail || []);
+    const lead = inv.invLead;
     const detBlock = det.length ? `<div style="margin:6px 0 2px;padding:7px 9px;background:rgba(168,85,247,.12);border-left:3px solid #a855f7;border-radius:6px">
-      ${det.map((x) => `<div style="font-size:13px${x.lowest ? ';font-weight:700' : ''}"><b style="color:#c084fc">${x.no}번</b> 인기${x.popRank || '?'}위 · 쌍승 <b>${x.odds}배</b>${x.lowest ? ' <span style="color:#f0abfc">← 낮음</span>' : ''}</div>`).join('')}
-      ${inv.invLead ? `<div style="margin-top:4px;color:#f0abfc;font-weight:700">→ 인기 낮은 ${inv.invLead.no}번이 쌍승 더 낮음 → ${inv.invLead.no}번 실질 유력 가능성</div>` : ''}</div>` : '';
+      ${det.map((x) => `<div style="font-size:13px${x.lowest ? ';font-weight:700' : ''}">인기${x.popRank}위 <b style="color:#c084fc">${x.no}번</b> · 쌍승 <b>${x.odds}배</b>${x.lowest ? ' <span style="color:#f0abfc">← 낮음</span>' : ''}</div>`).join('')}
+      ${lead && lead.vs ? `<div style="font-size:13px">인기${lead.vs.popRank}위 <b>${lead.vs.no}번</b> · 쌍승 <b>${lead.vs.odds}배</b></div>
+      <div style="margin-top:3px;color:#e9d5ff">→ 인기 ${lead.popRank}위가 ${lead.vs.popRank}위보다 배당 낮음</div>` : ''}
+      ${lead ? `<div style="margin-top:2px;color:#f0abfc;font-weight:700">→ ${lead.no}번 실질 유력!${lead.gap ? ` <span class="hint" style="font-weight:400">(순위 ${lead.gap}단계 역전)</span>` : ''}</div>` : ''}</div>` : '';
     return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #ff5c5c;border-radius:8px;background:rgba(255,92,92,.1)">
       <div style="font-size:15px;font-weight:800;color:#ff8a8a">🔄 역배열 감지!</div>
       <div class="hint" style="margin:3px 0 5px;line-height:1.7">${lines.join('<br>')}<br>→ <b style="color:#ffd24f">실질 유력마가 바뀌었을 가능성</b></div>

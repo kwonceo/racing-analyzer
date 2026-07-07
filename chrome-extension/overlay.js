@@ -187,28 +187,23 @@
     // 현재 가장 중요한 신호 1건 산출(우선순위: 역배열 > 강한급락 > 경고 > 마감임박)
     function computeCritical(d, deadline) {
       try {
-        if (d && d.inverse && d.inverse.detected) {
-          // [역배열 팝업 재정의] 인기순위(단승)보다 조합 배당이 낮은 말을 상세 표시(<30배만)
-          var det = (d.inverse.invDetail || []).slice(0, 4);
+        if (d && d.inverse && d.inverse.detected && (d.inverse.invDetail || []).length) {
+          // [역배열 정확화] 인기순위(단승/복승) vs 쌍승 배당순위 비교 → 2단계+ 역전 말만 표시.
+          var det = d.inverse.invDetail.slice(0, 3);
           var lead = d.inverse.invLead;
           var lines = det.map(function (x) {
-            return x.no + '번 인기' + (x.popRank || '?') + '위 · 쌍승 ' + x.odds + '배' + (x.lowest ? ' ← 낮음' : '');
+            return '인기' + x.popRank + '위 ' + x.no + '번 · 쌍승 ' + x.odds + '배' + (x.lowest ? ' ← 낮음' : '');
           });
-          if (lead) {
-            lines.push('→ 인기 낮은 ' + lead.no + '번이 쌍승 더 낮음');
-            lines.push('→ ' + lead.no + '번 실질 유력 가능성');
+          if (lead && lead.vs) {
+            lines.push('인기' + lead.vs.popRank + '위 ' + lead.vs.no + '번 · 쌍승 ' + lead.vs.odds + '배');
+            lines.push('→ 인기 ' + lead.popRank + '위가 ' + lead.vs.popRank + '위보다 배당 낮음');
           }
-          // 강도: 유형 레벨 최댓값(🔴 압도적 / 🟠 강한 / 🟡)
-          var lv = '🟡';
-          (d.inverse.types || []).forEach(function (t) {
-            if (t.level === '🔴') lv = '🔴'; else if (t.level === '🟠' && lv !== '🔴') lv = '🟠';
-          });
-          var sTxt = (lv === '🔴' ? '🔴 압도적 역배열' : (lv === '🟠' ? '🟠 강한 역배열' : '🟡 역배열'));
-          if (lines.length) lines.push('강도: ' + sTxt);
-          var ihKey = det.length ? det.map(function (x) { return x.no; }).join('·') : (d.inverse.invHorses || []).slice(0, 2).join('·');
-          return { key: 'inv:' + ihKey, level: 'red', icon: '🔄', title: '역배열 감지',
-            lines: lines.length ? lines : null,
-            msg: '실질 유력마 ' + ((lead && lead.no) || ihKey || '변경') + '번 — 배당 순서와 다름(주목)' };
+          if (lead) lines.push('→ ' + lead.no + '번 실질 유력!');
+          var g = (lead && lead.gap) ? lead.gap : 2;   // 역전폭 → 강도
+          lines.push('강도: ' + (g >= 3 ? '🔴 압도적 역배열' : '🟠 강한 역배열'));
+          var ihKey = det.map(function (x) { return x.no; }).join('·');
+          return { key: 'inv:' + ihKey + ':' + (lead ? lead.odds : ''), level: 'red', icon: '🔄', title: '역배열 감지',
+            lines: lines, msg: '실질 유력마 ' + ((lead && lead.no) || ihKey) + '번 — 인기순위와 쌍승순위 역전' };
         }
         var strong = ((d && d.drops) || []).filter(function (x) { return x && x.pct <= -50 && x.combo; })
           .sort(function (a, b) { return a.pct - b.pct; });
@@ -382,19 +377,23 @@
           });
         }
 
-        // [강화] 역배열 감지 라인(강조) — 인기순위·쌍승배당 상세(<30배)
-        if (d.inverse && d.inverse.detected) {
-          var det2 = (d.inverse.invDetail || []).slice(0, 3);
+        // [강화] 역배열 감지 라인 — 인기순위 vs 쌍승 배당순위 역전(2단계+)
+        if (d.inverse && d.inverse.detected && (d.inverse.invDetail || []).length) {
+          var det2 = d.inverse.invDetail.slice(0, 3);
           var lead2 = d.inverse.invLead;
           var ivr = mk('div', 'margin:5px 0 2px;padding:4px 7px;background:rgba(168,85,247,.16);border-radius:6px');
           ivr.appendChild(mk('div', 'color:#c4b5fd;font-weight:700', '🔄 역배열 감지'));
           det2.forEach(function (x) {
             var r = mk('div', 'color:#e9d5ff;font-size:11px');
-            r.textContent = x.no + '번 인기' + (x.popRank || '?') + '위 · 쌍승 ' + x.odds + '배' + (x.lowest ? ' ← 낮음' : '');
+            r.textContent = '인기' + x.popRank + '위 ' + x.no + '번 · 쌍승 ' + x.odds + '배' + (x.lowest ? ' ← 낮음' : '');
             ivr.appendChild(r);
           });
-          if (lead2) ivr.appendChild(mk('div', 'color:#f0abfc;font-size:11px;font-weight:700;margin-top:2px', '→ ' + lead2.no + '번 실질 유력'));
-          else if (!det2.length) ivr.appendChild(mk('span', 'color:#e9d5ff', '감지'));
+          if (lead2 && lead2.vs) {
+            var rv = mk('div', 'color:#e9d5ff;font-size:11px');
+            rv.textContent = '인기' + lead2.vs.popRank + '위 ' + lead2.vs.no + '번 · 쌍승 ' + lead2.vs.odds + '배';
+            ivr.appendChild(rv);
+          }
+          if (lead2) ivr.appendChild(mk('div', 'color:#f0abfc;font-size:11px;font-weight:700;margin-top:2px', '→ ' + lead2.no + '번 실질 유력!'));
           panel.appendChild(ivr);
         }
 

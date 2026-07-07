@@ -2429,6 +2429,63 @@ def _signal_confidence(excess, wx_reversals, mismatch):
     return {"horses": out, "strong": strong, "refer": refer}
 
 
+def _rank_inversion_detail(curWin, curQ, curD):
+    """[역배열 정확화] 인기순위(단승 우선·없으면 복승) vs 쌍승 배당순위(쌍승 우선·없으면 복승)를
+      비교해 **인기순위보다 쌍승 배당순위가 2단계 이상 높은 말**만 역배열로 판정(단순 저배당 표시 금지).
+      반환 (detail[{no,popRank,oddsRank,gap,odds,lowest}], lead{...,vs}, source{popSrc,oddsSrc}).
+      두 순위 산출원이 같으면(단승·쌍승 없이 복승뿐 → 비교 불가) ([], None, None)."""
+    def _best_per_horse(m):
+        best = {}
+        for k, o in (m or {}).items():
+            if not o or o <= 0:
+                continue
+            for h in k:
+                h = int(h)
+                if h not in best or o < best[h]:
+                    best[h] = o
+        return best
+
+    # 인기순위 산출원: 단승 우선(없으면 복승)
+    if curWin:
+        pop_src, pop_name = {int(n): v for n, v in curWin.items() if v and v > 0}, "단승"
+    else:
+        pop_src, pop_name = _best_per_horse(curQ), "복승"
+    # 쌍승 배당순위 산출원: 쌍승 우선(없으면 복승 — 단, 인기도 복승이면 비교 불가)
+    if curD:
+        odds_src, odds_name = _best_per_horse(curD), "쌍승"
+    elif pop_name != "복승":
+        odds_src, odds_name = _best_per_horse(curQ), "복승"
+    else:
+        return [], None, None
+    if not pop_src or not odds_src:
+        return [], None, None
+
+    pop_rank = {n: i + 1 for i, n in enumerate(sorted(pop_src, key=lambda x: pop_src[x]))}
+    odds_rank = {n: i + 1 for i, n in enumerate(sorted(odds_src, key=lambda x: odds_src[x]))}
+    detail = []
+    for n in odds_src:
+        pr, orr = pop_rank.get(n), odds_rank.get(n)
+        if pr is None or orr is None:
+            continue
+        gap = pr - orr                       # 인기순위 - 배당순위 (양수=배당순위가 더 높음=역배열)
+        if gap >= 2 and odds_src[n] < 30:    # 2단계+ 역전 & 30배 미만만
+            detail.append({"no": n, "popRank": pr, "oddsRank": orr, "gap": gap,
+                           "odds": round(odds_src[n], 1)})
+    detail.sort(key=lambda x: (-x["gap"], x["odds"]))    # 역전폭 큰 순 → 배당 낮은 순
+    for i, d in enumerate(detail):
+        d["lowest"] = (i == 0)
+    lead = None
+    if detail:
+        L = detail[0]
+        vs = None                            # 대조마: 인기 더 높은데(순위 작음) 배당은 더 비싼 말
+        for n in sorted(pop_src, key=lambda x: pop_rank[x]):
+            if pop_rank[n] < L["popRank"] and odds_src.get(n, 0) > L["odds"]:
+                vs = {"no": n, "popRank": pop_rank[n], "odds": round(odds_src[n], 1)}
+                break
+        lead = dict(L, vs=vs)
+    return detail, lead, {"popSrc": pop_name, "oddsSrc": odds_name}
+
+
 def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mismatch, excess):
     """[역배열 감지] 단승 유력마 순서 ≠ 복승/쌍승 배당 순서 = 실질 유력마 변경 가능성.
     4유형(①쌍승역전 ②복승불일치 ③배당압축 ④초과급락)을 하나로 통합.
@@ -3257,6 +3314,17 @@ def _triple_analyze(rk, rec):
     # [역배열 감지] 단승 순서 ≠ 복승/쌍승 순서 → 4유형 통합(쌍승역전·복승불일치·배당압축·초과급락)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
                                    wx_reversals, quin_mismatch, excess)
+    # [역배열 정확화] 인기순위(단승/복승) vs 쌍승 배당순위 비교 → 2단계+ 역전 말만 팝업 상세로 교체.
+    #   비교 가능(단승 또는 쌍승 데이터 존재)할 때만 rank 기반으로 덮어쓰고, 아니면 기존 복승기반 유지.
+    try:
+        _rid, _rlead, _rsrc = _rank_inversion_detail(curWin, curQ, curD)
+        if _rsrc is not None:
+            inverse["invDetail"] = _rid
+            inverse["invLead"] = _rlead
+            inverse["invSource"] = _rsrc
+            inverse["detected"] = bool(inverse.get("detected") or _rid)
+    except Exception as _e:
+        print("[역배열 정확화] 실패:", _e)
     # [2번 고도화] 급락속도·연속하락/단발반등·페이크베팅·복승 환급률(역수합)
     advanced = _advanced_anomaly(hist, curQ, drops)
     # 연속하락(+20)/단발반등(-15) → 종합 신뢰도 점수 보정(0~100 재클램프)
