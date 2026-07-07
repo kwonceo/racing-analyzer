@@ -2674,6 +2674,213 @@
       ${typeHtml}${invBlock}</div>`;
   }
 
+  // ── ⭐ 유력마 TOP5 + 복병/이상감지 상단 고정 카드 ─────────────────────
+  //  [요청] 실시간 배당 이상감지 화면 최상단에 유력마 5두 + 복병/이상감지 2두를
+  //  한 줄 요약(마번·마명·전적·배당·주요신호)으로 고정 표시. 30초 폴링마다
+  //  renderTripleAnalyze가 재호출되어 자동 갱신. 순위 변동은 직전 순위와 비교해 강조.
+  //  클릭 시 해당 말의 전체 분석 + 배당 타임라인(스냅샷 최저 복승) 펼침.
+  //  ※ 기존 통합등급/제거분석 패널은 그대로 두고 상단 요약 카드만 추가.
+  let _topRankPrev = {};          // { 마번: 순위 } 직전 순위(같은 경주 내)
+  let _topRaceKey = null;
+  let _lastTimelineSnaps = null;  // loadOddsTimeline이 저장 → 말별 배당 타임라인 재사용
+  let _lastTopData = null;        // 클릭 상세용 { top:[], dark:[], byNo:{} }
+  let _topAnalysisForClick = null;// 위임 클릭 핸들러가 참조할 최신 분석 dict
+  let _topDelegationInstalled = false;
+  const _topExpanded = new Set();
+
+  function _horseSignalInfo(a, no) {
+    // 해당 마번의 주요 신호(급락/집중급락/이상감지) 요약
+    const drops = (a.drops || []).filter((d) => d.combo && (d.combo[0] === no || d.combo[1] === no) && d.pct < 0);
+    let bigDrop = null;
+    drops.forEach((d) => { if (!bigDrop || d.pct < bigDrop.pct) bigDrop = d; });
+    const ex = a.signalQuality && a.signalQuality.excess && a.signalQuality.excess.horses
+      ? a.signalQuality.excess.horses[no] : null;
+    const isAnom = a.anomalyHorse != null && +a.anomalyHorse === no;
+    return { bigDrop, ex, isAnom };
+  }
+  function _signalChips(info) {
+    const c = [];
+    if (info.isAnom) c.push('<span class="chip chip-red">🚨이상감지</span>');
+    if (info.bigDrop) {
+      const p = Math.abs(info.bigDrop.pct);
+      c.push(`<span class="chip ${p >= 50 ? 'chip-red' : 'chip-yellow'}">${p >= 50 ? '🔴' : '🟠'} 급락 ${p}%</span>`);
+    }
+    if (info.ex && info.ex.grade) c.push(`<span class="chip ${info.ex.grade === '🔴' ? 'chip-red' : ''}">${info.ex.grade} 집중 ${info.ex.excess}%p</span>`);
+    return c.join(' ');
+  }
+  function renderTopHorses(a) {
+    _topAnalysisForClick = a;       // 클릭 상세/타임라인용 최신 분석 보관
+    _ensureTopHorseDelegation();    // 클릭 위임 1회 설치(다중 패널 안전)
+    // 순위 데이터 소스: 제거분석(가장 풍부) → 없으면 전적+배당유력마 폴백
+    let horses = [];
+    const eh = a.elimination && a.elimination.horses ? a.elimination.horses : null;
+    if (eh && eh.length) {
+      horses = eh.map((h) => ({
+        no: h.no, name: h.name || '', formScore: h.formScore, odds: h.oddsRepr,
+        prob: h.combinedProb, total: h.total, tier: h.tier, ev: h.ev, favScore: h.favScore,
+      }));
+    } else {
+      const fmap = {}; (a.form || []).forEach((h) => { fmap[h.no] = h; });
+      const keys = (a.keyHorses || []).map(Number);
+      const nos = Array.from(new Set([...(a.form || []).map((h) => h.no), ...keys]));
+      horses = nos.map((no) => {
+        const f = fmap[no];
+        return {
+          no, name: f ? (f.name || '') : '', formScore: f ? f.totalScore : null, odds: null,
+          prob: null, total: keys.includes(no) ? 1 : 0, tier: keys.includes(no) ? '★' : null,
+        };
+      });
+    }
+    if (!horses.length) return '';
+    // 통합점수 순: 통합확률 → 제거점수 → 전적점수
+    const scoreOf = (h) => (h.prob != null ? h.prob * 1000 : 0) + (h.total != null ? h.total : 0) + (h.formScore != null ? h.formScore / 100 : 0);
+    horses.sort((x, y) => scoreOf(y) - scoreOf(x) || (x.no - y.no));
+    const top = horses.slice(0, 5);
+
+    // 복병/이상감지 2두: TOP5 밖 + (이상감지·급락·집중신호) 보유, 신호강도순
+    const topNos = new Set(top.map((h) => h.no));
+    const rest = horses.filter((h) => !topNos.has(h.no));
+    const scored = rest.map((h) => {
+      const info = _horseSignalInfo(a, h.no);
+      let s = 0;
+      if (info.isAnom) s += 100;
+      if (info.bigDrop) s += Math.abs(info.bigDrop.pct);
+      if (info.ex && info.ex.grade) s += (info.ex.grade === '🔴' ? 50 : 20) + Math.abs(info.ex.excess || 0);  // 초과급락은 음수일수록 강함 → 크기로 반영
+      return { h, info, s };
+    }).filter((x) => x.s > 0).sort((x, y) => y.s - x.s);
+    let dark = scored.slice(0, 2);
+    // 신호 복병이 2두 미만이면 TOP5 밖 최고배당(시장 저평가=잠재복병)으로 채워 항상 2두 표시
+    if (dark.length < 2) {
+      const used = new Set(dark.map((d) => d.h.no));
+      const fillers = rest.filter((h) => !used.has(h.no) && h.odds != null)
+        .sort((x, y) => (y.odds || 0) - (x.odds || 0))
+        .slice(0, 2 - dark.length)
+        .map((h) => ({ h, info: _horseSignalInfo(a, h.no), s: 0, filler: true }));
+      dark = dark.concat(fillers);
+    }
+
+    // 순위 변동(같은 경주 내에서만 비교)
+    if (a.raceKey !== _topRaceKey) { _topRankPrev = {}; _topRaceKey = a.raceKey; _topExpanded.clear(); }
+    const curRank = {}; top.forEach((h, i) => { curRank[h.no] = i + 1; });
+
+    _lastTopData = { top, dark, byNo: {} };
+    top.forEach((h) => { _lastTopData.byNo[h.no] = { h, info: _horseSignalInfo(a, h.no), rank: curRank[h.no] }; });
+    dark.forEach((d) => { _lastTopData.byNo[d.h.no] = { h: d.h, info: d.info, dark: true }; });
+
+    const rowHtml = (h, rank, info, isDark, isFiller) => {
+      const prev = _topRankPrev[h.no];
+      let move = '';
+      if (!isDark) {
+        if (prev == null) move = '<span class="chip" style="border-color:#38d39f;color:#38d39f">🆕 신규</span>';
+        else if (prev > rank) move = `<span class="chip" style="border-color:#38d39f;color:#38d39f;font-weight:700">↑ ${prev}위→${rank}위 상승</span>`;
+        else if (prev < rank) move = `<span class="chip" style="border-color:#ff9f43;color:#ff9f43">↓ ${prev}위→${rank}위</span>`;
+      }
+      const rankBadge = isDark ? '<b style="color:#c084fc;min-width:30px;display:inline-block">복병</b>'
+        : `<b style="color:#ffd24f;min-width:30px;display:inline-block">${rank}위</b>`;
+      const oddsTxt = h.odds != null ? `${h.odds}배` : '미수집';
+      const formTxt = h.formScore != null ? `전적 ${h.formScore}` : '전적-';
+      const sig = _signalChips(info) || (isFiller
+        ? '<span class="chip" style="border-color:#c084fc;color:#c084fc">🔎 고배당 복병</span>'
+        : '<span class="hint">신호없음</span>');
+      const open = _topExpanded.has(h.no);
+      return `<div class="top-horse-row" data-no="${h.no}" title="클릭 → 상세+배당 타임라인" style="cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(255,255,255,${isDark ? '.02' : '.05'});border-left:3px solid ${isDark ? '#c084fc' : '#ffd24f'}">
+        ${rankBadge}
+        <b style="min-width:32px;color:#4ea1ff">${h.no}번</b>
+        <span style="font-weight:600">${esc(h.name) || '-'}</span>
+        <span class="hint">${formTxt} · <b style="color:#e2e8f0">${oddsTxt}</b></span>
+        ${move}
+        <span style="margin-left:auto">${sig}</span>
+      </div>
+      <div id="top-detail-${h.no}" style="display:${open ? 'block' : 'none'}"></div>`;
+    };
+
+    const topRows = top.map((h) => rowHtml(h, curRank[h.no], _horseSignalInfo(a, h.no), false)).join('');
+    const darkRows = dark.length
+      ? dark.map((d) => rowHtml(d.h, null, d.info, true, d.filler)).join('')
+      : '<div class="hint" style="padding:4px 8px">복병·이상감지 신호 없음</div>';
+
+    _topRankPrev = curRank;   // 다음 갱신 비교용(행 생성 후 저장)
+
+    return `<div id="topHorsesCard" style="position:sticky;top:0;z-index:6;margin:0 0 8px;border:2px solid #ffd24f;border-radius:10px;padding:8px 10px;background:linear-gradient(180deg,rgba(255,210,79,.12),rgba(20,28,43,.97));box-shadow:0 4px 16px rgba(0,0,0,.4)">
+      <div class="matrix-title" style="font-size:14px;color:#ffd24f">⭐ 유력마 TOP 5 <span class="hint" style="font-weight:400">실시간 · 30초 자동갱신 · 클릭 시 상세+타임라인</span></div>
+      ${topRows}
+      <div class="matrix-title" style="font-size:13px;color:#c084fc;margin-top:6px">🐎 복병 · 이상감지 <span class="hint" style="font-weight:400">유력마 밖 강한 신호 2두</span></div>
+      ${darkRows}
+    </div>`;
+  }
+  function _topHorseDetailHtml(no, a) {
+    const d = _lastTopData && _lastTopData.byNo[no];
+    const h = d ? d.h : { no };
+    const info = d ? d.info : _horseSignalInfo(a, no);
+    const fmap = {}; (a.form || []).forEach((f) => { fmap[f.no] = f; });
+    const f = fmap[no];
+    const rows = [];
+    if (h.formScore != null) rows.push(`전적점수 <b>${h.formScore}</b>`);
+    if (f && f.grade) rows.push(`전적등급 <b>${f.grade}</b>`);
+    if (f && (f.recentPlacings || []).length) rows.push(`최근착순 ${f.recentPlacings.join('-')}`);
+    if (f && f.jockey) rows.push(`기수 ${esc(f.jockey)}`);
+    if (h.odds != null) rows.push(`대표배당 <b>${h.odds}배</b>`);
+    if (h.prob != null) rows.push(`통합확률 <b>${h.prob}%</b>`);
+    if (h.favScore != null) rows.push(`유력점수 ${h.favScore}`);
+    if (h.ev != null) rows.push(`기대값 <b style="color:${h.ev >= 0 ? '#38d39f' : '#ff6b6b'}">${h.ev >= 0 ? '+' : ''}${h.ev}%</b>`);
+    const flags = f && (f.flags || []).length ? f.flags.map((x) => `<span class="chip ${x.level === 'must' ? 'chip-red' : ''}">${esc(x.msg)}</span>`).join(' ') : '';
+    const sig = _signalChips(info) || '<span class="hint">신호없음</span>';
+    return `<div style="margin:2px 0 8px 6px;padding:8px 10px;border-left:2px solid #4ea1ff;background:rgba(78,161,255,.06);border-radius:6px">
+      <div style="font-size:12px;margin-bottom:4px">${rows.join(' · ') || '<span class="hint">상세 정보 없음</span>'}</div>
+      <div style="margin:3px 0">신호: ${sig}</div>
+      ${flags ? `<div style="margin:3px 0">${flags}</div>` : ''}
+      <div class="hint" style="margin-top:4px">📉 배당 타임라인(이 말 포함 최저 복승)</div>
+      <div class="top-detail-tl hint" style="font-size:11px;line-height:1.9">불러오는 중…</div>
+    </div>`;
+  }
+  async function _horseOddsTimeline(raceKey, no) {
+    let snaps = _lastTimelineSnaps;
+    if (!snaps) {
+      try {
+        const d = await (await fetch('/api/history/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey }) })).json();
+        snaps = (d && d.snapshots) || [];
+      } catch (_) { snaps = []; }
+    }
+    if (!snaps.length) return '타임라인 데이터 없음';
+    const pts = snaps.map((s) => {
+      const q = s.quinella || {};
+      let mn = null;
+      Object.entries(q).forEach(([k, v]) => {
+        const pr = String(k).split(/[-+]/).map(Number);
+        if (pr.includes(no) && (mn == null || v < mn)) mn = v;
+      });
+      return { t: s.time || '', v: mn };
+    }).filter((p) => p.v != null);
+    if (!pts.length) return '이 말이 포함된 복승 배당 없음';
+    return pts.map((p, i) => {
+      let arrow = '';
+      if (i > 0 && pts[i - 1].v != null) {
+        const dv = p.v - pts[i - 1].v;
+        arrow = dv < 0 ? `<span style="color:#ef4444">▼${Math.abs(dv).toFixed(1)}</span>` : dv > 0 ? `<span style="color:#38d39f">▲${dv.toFixed(1)}</span>` : '';
+      }
+      return `<span style="margin-right:8px;white-space:nowrap">${esc(p.t)} <b>${p.v}</b>${arrow ? ' ' + arrow : ''}</span>`;
+    }).join('');
+  }
+  // 클릭 위임: 어느 패널(#jpIntegrated·#sportReport-*)의 TOP5 카드든 1개 핸들러로 처리.
+  //  행의 다음 형제(#top-detail-N)를 상세 컨테이너로 사용해 패널이 여러 개여도 정확히 토글.
+  function _ensureTopHorseDelegation() {
+    if (_topDelegationInstalled) return;
+    _topDelegationInstalled = true;
+    document.addEventListener('click', async (ev) => {
+      const row = ev.target.closest ? ev.target.closest('.top-horse-row') : null;
+      if (!row || !row.closest('#topHorsesCard')) return;
+      const box = row.nextElementSibling;
+      if (!box || !box.id || box.id.indexOf('top-detail-') !== 0) return;
+      const no = +row.dataset.no;
+      const a = _topAnalysisForClick || {};
+      if (box.style.display === 'block') { box.style.display = 'none'; _topExpanded.delete(no); return; }
+      _topExpanded.add(no); box.style.display = 'block';
+      box.innerHTML = _topHorseDetailHtml(no, a);
+      const tl = await _horseOddsTimeline(a.raceKey, no);
+      const tlEl = box.querySelector('.top-detail-tl'); if (tlEl) tlEl.innerHTML = tl;
+    });
+  }
+
   function renderTripleAnalyze(a) {
     const el = $('#tripleAnalyzeReport'); if (!el) return;
     _lastTripleAnalyze = a;
@@ -2690,6 +2897,7 @@
       `<span class="chip">${r.combo[0]}-${r.combo[1]} ${r.prevRank}위→${r.curRank}위 (${r.delta > 0 ? '▲' : '▼'}${Math.abs(r.delta)})</span>`).join(' ');
     const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     el.innerHTML = `
+      ${renderTopHorses(a)}
       <div class="matrix-title">🚨 이상감지 ${a.sport && a.sport !== 'horse' ? `<span class="chip" style="border-color:#a855f7;color:#c4b5fd">${a.sport === 'cycle' ? '🚴 경륜' : '🚤 경정'}</span> ` : ''}<span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.baselineReset ? '⚠️ 기준값 재설정됨' : a.baselineSet ? '🎯 기준값 설정됨' : a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>
       ${a.baselineReset ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffd24f;background:rgba(255,210,79,.12);border-radius:6px;color:#ffd24f">⚠️ <b>비정상 변동폭 감지 → 기준값 재설정</b> — 이전 경주 배당 잔존 의심(95%+ 급락 다수). 이번 수집을 새 기준값으로 설정했습니다. <b>다음 수집부터 변동을 계산</b>합니다.</div>`
         : a.baselineSet ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.1);border-radius:6px;color:#7dd3fc">🎯 <b>기준값 설정됨</b> — 새 경주 첫 수집입니다. 변동폭은 <b>다음 수집부터</b> 계산됩니다.</div>` : ''}
@@ -2875,10 +3083,11 @@
   async function loadOddsTimeline(raceKey) {
     const el = $('#oddsTimeline'); if (!el || !raceKey) return;
     let d; try { d = await (await fetch('/api/history/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey }) })).json(); }
-    catch (e) { el.innerHTML = ''; return; }   // 조회 실패 시 이전 경주 타임라인 잔상 제거
-    if (!d || d.error || !(d.snapshots || []).length) { el.innerHTML = ''; return; }
+    catch (e) { el.innerHTML = ''; _lastTimelineSnaps = null; return; }   // 조회 실패 시 이전 경주 타임라인 잔상 제거
+    if (!d || d.error || !(d.snapshots || []).length) { el.innerHTML = ''; _lastTimelineSnaps = null; return; }
     if (raceKey !== _tlRaceKey) { _tlExpanded.clear(); _tlRaceKey = raceKey; }
     const snaps = d.snapshots;
+    _lastTimelineSnaps = snaps;   // ⭐ TOP5 카드 말별 배당 타임라인 재사용
     const rows = snaps.map((s, i) => {
       const anom = (s.anomalies || []).map((x) => `<span class="chip chip-red">${esc(x)}</span>`).join(' ') || '<span class="hint">정상 범위</span>';
       const mb = s.minutes_before != null ? `(${s.minutes_before}분전)` : '';
@@ -4285,6 +4494,7 @@
   function sportAnalysisHTML(a, bsel) {
     const six = a.bmed && a.bmed.sixRacer;
     const parts = [];
+    parts.push(renderTopHorses(a));   // ⭐ 유력마 TOP5 + 복병/이상감지 상단 고정 카드
     parts.push(`<div class="matrix-title">🚨 실시간 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${six ? ' · 6명 출전' : ''}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>`);
     if (a.summary) parts.push(`<div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary)}</div>`);
     parts.push(renderAlertSignal(a.alertSignal, _horseRoleMap(a)));
@@ -4365,6 +4575,7 @@
     const formHtml = renderFormGrades(a.form);
     const elimHtml = renderEliminationHTML(a.elimination, new Set()).replace('id="elimPanel"', 'id="jpElimPanel"');
     host.innerHTML = `<div class="panel-card">
+      ${renderTopHorses(a)}
       <h3>🔗 실시간 배당 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
       ${formHtml}
