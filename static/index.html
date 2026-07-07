@@ -371,6 +371,22 @@
             <button type="button" class="rec-cat-chip" data-cat="bike">🏍 바이크</button>
             <button type="button" class="rec-cat-chip" data-cat="korea">🇰🇷 한국</button>
           </div>
+          <div class="cfg-row" style="gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 8px">
+            <label class="hint">정렬
+              <select id="recSortSel" class="cfg-input" style="width:auto">
+                <option value="latest">최신순</option>
+                <option value="won">적중순</option>
+                <option value="pnl">손익순</option>
+              </select>
+            </label>
+            <label class="hint">기간
+              <select id="recPeriodSel" class="cfg-input" style="width:auto">
+                <option value="all">전체</option>
+                <option value="7d">최근 7일</option>
+                <option value="30d">최근 30일</option>
+              </select>
+            </label>
+          </div>
           <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
             <div id="recAnalysisList" style="flex:1;min-width:280px;max-height:70vh;overflow:auto"><p class="hint">불러오는 중…</p></div>
             <div id="recAnalysisDetail" style="flex:1.4;min-width:300px"></div>

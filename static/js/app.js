@@ -5830,7 +5830,18 @@
   const REC_CAT_LABEL = { horse: '🏇 경마', japan_local: '🇯🇵 지방', japan_central: '🏇 중앙',
     boat: '🚤 경정', cycle: '🚴 경륜', bike: '🏍 바이크', korea: '🇰🇷 한국' };
   let _recCache = null;
-  const _recAllCfg = { listSel: '#recAnalysisList', detailSel: '#recAnalysisDetail', category: 'all', query: '' };
+  const _recAllCfg = { listSel: '#recAnalysisList', detailSel: '#recAnalysisDetail', category: 'all', query: '', sort: 'latest', period: 'all' };
+
+  // [보완3] 기간 필터: date 문자열(YYYY-MM-DD)이 최근 N일 이내인지. period='all'이면 전체.
+  function _recWithinPeriod(dateStr, period) {
+    if (!period || period === 'all') return true;
+    const days = period === '7d' ? 7 : period === '30d' ? 30 : 0;
+    if (!days || !dateStr) return true;
+    const d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return true;   // 파싱 실패 시 제외하지 않음
+    const cutoff = new Date(); cutoff.setHours(0, 0, 0, 0); cutoff.setDate(cutoff.getDate() - (days - 1));
+    return d.getTime() >= cutoff.getTime();
+  }
 
   async function loadRecCache(force) {
     if (_recCache && !force) return _recCache;
@@ -5839,34 +5850,59 @@
     return _recCache;
   }
 
-  // cfg = {listSel, detailSel, category('all'|종목), query}
+  // 기록 1건 → 카드 HTML(정렬/그룹 공통). sort='pnl'일 때 손익 배지 표시.
+  function _recItemHtml(l, detailSel, showPnl) {
+    const badge = l.hasResult ? (l.won ? '✅ 적중' : '❌ 미적중') : '⬜ 결과대기';
+    const bc = l.hasResult ? (l.won ? '#38d39f' : '#f87171') : '#94a3b8';
+    const catB = REC_CAT_LABEL[l.category] || '';
+    const kh = (l.keyHorses || []).length ? ' · 유력마 ' + l.keyHorses.join('·') : '';
+    const t3 = (l.top3 || []).filter((x) => x != null && x !== '').join('-');
+    const pnlB = (showPnl && l.pnl != null && l.pnl !== '')
+      ? `<span style="font-size:11px;font-weight:700;color:${l.pnl >= 0 ? '#38d39f' : '#f87171'}">${l.pnl >= 0 ? '+' : ''}${Number(l.pnl).toLocaleString('ko-KR')}원</span>` : '';
+    const revB = l.reviewed ? '<span title="복기완료" style="font-size:11px;color:#c4b5fd;font-weight:700">🧠</span>' : '';
+    return `<div class="rec-item" data-file="${esc(l.file)}" data-rk="${esc(l.raceKey || l.race || '')}" data-detail="${esc(detailSel)}" style="cursor:pointer;margin:3px 0;padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+        <b>${esc(l.race || l.race_id || '')}</b><span style="display:flex;gap:6px;align-items:center">${revB}${pnlB}<span style="font-size:11px;color:${bc};font-weight:700">${badge}</span></span></div>
+      <div class="hint" style="font-size:11px;margin-top:2px">${catB ? catB + ' · ' : ''}${esc(l.date || '')} ${esc(l.analyzed_at || '')} · 신호 ${l.signals || 0}${kh}${t3 ? ' · 착순 ' + esc(t3) : ''}</div>
+      ${l.summary ? `<div class="hint" style="font-size:11px;margin-top:1px">${esc(l.summary)}</div>` : ''}</div>`;
+  }
+
+  // cfg = {listSel, detailSel, category('all'|종목), query, sort('latest'|'won'|'pnl'), period('all'|'7d'|'30d')}
   function renderRecList(cfg) {
     const listEl = document.querySelector(cfg.listSel); if (!listEl) return;
     let logs = _recCache || [];
     if (cfg.category && cfg.category !== 'all') logs = logs.filter((l) => (l.category || '') === cfg.category);
+    logs = logs.filter((l) => _recWithinPeriod(l.date, cfg.period));   // [보완3] 기간 필터
     const q = (cfg.query || '').trim().toLowerCase();
     if (q) logs = logs.filter((l) => ((l.race || '') + ' ' + (l.raceKey || '') + ' ' + (l.date || '')
       + ' ' + (l.summary || '') + ' ' + (l.keyHorses || []).join(' ') + ' ' + (REC_CAT_LABEL[l.category] || '')).toLowerCase().includes(q));
     if (!logs.length) {
-      listEl.innerHTML = `<p class="hint">${q || (cfg.category && cfg.category !== 'all') ? '조건에 맞는 기록이 없습니다.' : '분석 기록이 없습니다. 배당을 수집·분석하면 자동으로 쌓입니다.'}</p>`;
+      listEl.innerHTML = `<p class="hint">${q || (cfg.category && cfg.category !== 'all') || (cfg.period && cfg.period !== 'all') ? '조건에 맞는 기록이 없습니다.' : '분석 기록이 없습니다. 배당을 수집·분석하면 자동으로 쌓입니다.'}</p>`;
       return;
     }
-    const byDate = {};
-    logs.forEach((l) => { (byDate[l.date || '?'] = byDate[l.date || '?'] || []).push(l); });
-    listEl.innerHTML = `<div class="hint" style="margin:2px 0 6px">총 ${logs.length}건</div>` + Object.keys(byDate).sort().reverse().map((date) =>
-      `<div style="margin-bottom:8px"><div class="hint" style="font-weight:700;margin:4px 0">${esc(date)} · ${byDate[date].length}건</div>`
-      + byDate[date].map((l) => {
-        const badge = l.hasResult ? (l.won ? '✅ 적중' : '❌ 미적중') : '⬜ 결과대기';
-        const bc = l.hasResult ? (l.won ? '#38d39f' : '#f87171') : '#94a3b8';
-        const catB = REC_CAT_LABEL[l.category] || '';
-        const kh = (l.keyHorses || []).length ? ' · 유력마 ' + l.keyHorses.join('·') : '';
-        const t3 = (l.top3 || []).filter((x) => x != null && x !== '').join('-');
-        return `<div class="rec-item" data-file="${esc(l.file)}" data-rk="${esc(l.raceKey || l.race || '')}" data-detail="${esc(cfg.detailSel)}" style="cursor:pointer;margin:3px 0;padding:6px 8px;border:1px solid var(--border);border-radius:6px">
-          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
-            <b>${esc(l.race || l.race_id || '')}</b><span style="font-size:11px;color:${bc};font-weight:700">${badge}</span></div>
-          <div class="hint" style="font-size:11px;margin-top:2px">${catB ? catB + ' · ' : ''}${esc(l.analyzed_at || '')} · 신호 ${l.signals || 0}${kh}${t3 ? ' · 착순 ' + esc(t3) : ''}</div>
-          ${l.summary ? `<div class="hint" style="font-size:11px;margin-top:1px">${esc(l.summary)}</div>` : ''}</div>`;
-      }).join('') + '</div>').join('');
+    const sort = cfg.sort || 'latest';
+    const head = `<div class="hint" style="margin:2px 0 6px">총 ${logs.length}건</div>`;
+    if (sort === 'won' || sort === 'pnl') {
+      // [보완3] 적중순/손익순 — 날짜 그룹 없이 평면 정렬 리스트(순위가 의미 있도록).
+      const arr = logs.slice();
+      if (sort === 'won') {
+        // 적중 → 미적중 → 결과대기, 동순위는 최신순
+        const rank = (l) => l.hasResult ? (l.won ? 0 : 1) : 2;
+        arr.sort((a, b) => (rank(a) - rank(b)) || String(b.date || '').localeCompare(String(a.date || '')) || String(b.analyzed_at || '').localeCompare(String(a.analyzed_at || '')));
+      } else {
+        // 손익 큰 순, 결과 없는 건(null)은 뒤로
+        const pv = (l) => (l.pnl == null || l.pnl === '') ? null : Number(l.pnl);
+        arr.sort((a, b) => { const x = pv(a), y = pv(b); if (x == null && y == null) return String(b.date || '').localeCompare(String(a.date || '')); if (x == null) return 1; if (y == null) return -1; return y - x; });
+      }
+      listEl.innerHTML = head + arr.map((l) => _recItemHtml(l, cfg.detailSel, sort === 'pnl')).join('');
+    } else {
+      // 최신순 — 날짜별 그룹
+      const byDate = {};
+      logs.forEach((l) => { (byDate[l.date || '?'] = byDate[l.date || '?'] || []).push(l); });
+      listEl.innerHTML = head + Object.keys(byDate).sort().reverse().map((date) =>
+        `<div style="margin-bottom:8px"><div class="hint" style="font-weight:700;margin:4px 0">${esc(date)} · ${byDate[date].length}건</div>`
+        + byDate[date].map((l) => _recItemHtml(l, cfg.detailSel, false)).join('') + '</div>').join('');
+    }
     listEl.querySelectorAll('.rec-item').forEach((c) => c.addEventListener('click',
       () => openAnalysisRecord(c.dataset.file, c.dataset.rk, c.dataset.detail)));
   }
@@ -5877,12 +5913,42 @@
     let d; try { d = await (await fetch('/api/analysis-log/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file }) })).json(); }
     catch (e) { el.innerHTML = `<p class="hint" style="color:var(--red)">${esc(e.message)}</p>`; return; }
     if (d.error) { el.innerHTML = `<p class="hint">${esc(d.error)}</p>`; return; }
-    el.innerHTML = renderAnalysisDetail(d, rk || d.raceKey || d.race || '');
+    const erk = rk || d.raceKey || d.race || '';
+    el.innerHTML = renderAnalysisDetail(d, erk, file);
+    // [보완2] 결과 입력 폼 토글 + 저장 배선
+    const form = el.querySelector('.recResultForm');
+    if (form) {
+      const tog = form.querySelector('.recResToggle'), body = form.querySelector('.recResBody');
+      if (tog && body) tog.addEventListener('click', () => { body.style.display = body.style.display === 'none' ? 'block' : 'none'; });
+      const sv = form.querySelector('.recResSave');
+      if (sv) sv.addEventListener('click', () => saveRecResult(form, file, erk, detailSel));
+    }
+    // [복기 표식] 복기 메모 저장 배선
+    const rbox = el.querySelector('.reviewNoteBox');
+    if (rbox) {
+      const rsv = rbox.querySelector('.reviewNoteSave');
+      if (rsv) rsv.addEventListener('click', () => saveReviewNote(rbox, file, erk, detailSel));
+    }
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
-  // 읽기 전용 복기 상세(어떻게 분석했는지) — 입력폼 없이 당시 분석·추천·결과·적중을 보여줌.
-  function renderAnalysisDetail(d, rk) {
+  // [복기 표식·학습] 복기 메모 저장 → 서버가 reviewed 마킹 + 학습 코퍼스 축적. 저장 후 상세 재조회로 배지 표시.
+  async function saveReviewNote(box, file, rk, detailSel) {
+    const msg = box.querySelector('.reviewNoteMsg');
+    const ta = box.querySelector('.reviewNoteInput');
+    const review = ta ? ta.value.trim() : '';
+    if (!review) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '메모를 입력하세요'; } return; }
+    if (msg) { msg.style.color = ''; msg.textContent = '저장 중…'; }
+    let d; try { d = await (await fetch('/api/analysis-log/memo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file, raceKey: rk, review }) })).json(); }
+    catch (e) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '실패: ' + e.message; } return; }
+    if (d.error) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = d.error; } return; }
+    if (msg) { msg.style.color = '#c4b5fd'; msg.textContent = '🧠 복기 저장 완료 · 기억됨'; }
+    try { await loadRecCache(true); renderRecList(_recAllCfg); } catch (_) { /* */ }
+    setTimeout(() => { try { openAnalysisRecord(file, rk, detailSel); } catch (_) { /* */ } }, 400);
+  }
+
+  // 복기 상세(어떻게 분석했는지) + [보완2] 결과 입력/수정 폼.
+  function renderAnalysisDetail(d, rk, file) {
     const sig = d.signals_detected || [], fr = d.final_recommendation || {}, elim = d.elimination || {};
     const horses = d.horses || [];
     const gradeOf = {}; horses.forEach((h) => { gradeOf[h.no] = h.grade; });
@@ -5906,7 +5972,44 @@
     } else {
       resHtml = `<div class="hint" style="margin-top:8px">⬜ 결과 미입력 — <b>결과기록 탭</b> 또는 <b>일본경마 복기</b>에서 착순을 입력하면 적중·손익이 계산됩니다.</div>`;
     }
-    const memoHtml = d.review ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">📝 복기 메모</div><div class="hint">${esc(d.review)}</div>` : '';
+    // [복기 표식·학습] 복기 메모 입력/저장 + "복기완료" 배지. 저장 시 서버가 reviewed 마킹 + 학습 코퍼스 축적.
+    const revBadge = d.reviewed ? `<span class="chip" style="border-color:#a78bfa;color:#c4b5fd">🧠 복기완료${d.reviewed_at ? ' · ' + esc(d.reviewed_at) : ''}</span>` : '';
+    const memoHtml = `<div class="reviewNoteBox" data-file="${esc(file || d.file || '')}" data-rk="${esc(rk)}" style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px">
+      <div class="matrix-title" style="font-size:13px">📝 복기 메모 ${revBadge}</div>
+      <textarea class="cfg-input reviewNoteInput" rows="2" style="width:100%;max-width:420px;resize:vertical" placeholder="이 경주에서 배운 점·놓친 신호·판단 근거를 남기면 종목·적중과 함께 기억됩니다.">${esc(d.review || '')}</textarea>
+      <div class="cfg-row" style="margin-top:4px">
+        <button class="btn btn-primary reviewNoteSave" style="font-size:12px">🧠 복기 저장 · 기억</button>
+        <span class="hint reviewNoteMsg" style="margin-left:6px"></span>
+      </div></div>`;
+    // [보완2] 결과 입력/수정 폼 — /api/history/record-result 재사용. 패널별 클래스로 스코프(ID 충돌 방지).
+    const rv = (x) => (x != null && x !== '') ? x : '';
+    const resObj = res || {};
+    const formHtml = `<div class="recResultForm" data-file="${esc(file || d.file || '')}" data-rk="${esc(rk)}" style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px">
+      <button class="btn recResToggle" style="font-size:12px">${res ? '✏️ 결과 수정' : '✍️ 결과 입력'}</button>
+      <div class="recResBody" style="display:none;margin-top:8px">
+        <div class="cfg-row" style="gap:6px;align-items:center;flex-wrap:wrap">
+          <label class="hint">1착 <input class="cfg-input recRes1" type="number" min="1" style="width:58px" value="${rv(resObj['1st'])}"></label>
+          <label class="hint">2착 <input class="cfg-input recRes2" type="number" min="1" style="width:58px" value="${rv(resObj['2nd'])}"></label>
+          <label class="hint">3착 <input class="cfg-input recRes3" type="number" min="1" style="width:58px" value="${rv(resObj['3rd'])}"></label>
+          <label class="hint">4착 <input class="cfg-input recRes4" type="number" min="1" style="width:58px" value="${rv(resObj['4th'])}" title="추천 말이 4착이면 '아깝게 미적중' 학습"></label>
+        </div>
+        <div class="cfg-row" style="gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px">
+          <label class="hint">투자금액 <input class="cfg-input recStake" type="number" min="0" step="1000" style="width:96px" value="${rv((hit || {}).stake || 1000)}">원</label>
+          <label class="hint">실수령 배당금(선택) <input class="cfg-input recPayout" type="number" min="0" style="width:116px" placeholder="적중 시 총 수령액">원</label>
+        </div>
+        <div class="cfg-row" style="gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px">
+          <label class="hint">확정 복승배당 <input class="cfg-input recQOdds" type="number" min="1" step="0.1" style="width:78px" placeholder="배">배</label>
+          <label class="hint">확정 삼복승배당 <input class="cfg-input recTOdds" type="number" min="1" step="0.1" style="width:78px" placeholder="배">배</label>
+        </div>
+        <div class="cfg-row" style="margin-top:4px">
+          <label class="hint" style="flex:1">메모 <input class="cfg-input recMemo" type="text" style="width:100%;max-width:320px" placeholder="예: 선행마 도주 성공 / 인기마 출발 지연"></label>
+        </div>
+        <div class="cfg-row" style="margin-top:6px">
+          <button class="btn btn-primary recResSave">💾 결과 저장 · 자동 판정</button>
+          <span class="hint recResMsg" style="margin-left:6px"></span>
+        </div>
+        <p class="hint" style="margin:4px 0 0">실수령 배당금 입력 시 정확한 손익 계산. 저장하면 적중·손익·학습 통계가 즉시 갱신됩니다.</p>
+      </div></div>`;
     return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px">
       <div class="matrix-title">${esc(d.race || rk)} <span class="hint" style="font-weight:400">${catB ? catB + ' · ' : ''}${esc(d.date || '')} · 분석 ${esc(d.analyzed_at || '')}</span></div>
       <div class="matrix-title" style="font-size:13px;margin-top:6px">🏇 유력마 / 제거마</div>
@@ -5914,7 +6017,38 @@
       <div style="margin:2px 0"><b>제거마:</b> ${elimHtml}</div>
       <div class="matrix-title" style="font-size:13px;margin-top:8px">🚨 이상감지 내역</div>${sigHtml}
       <div class="matrix-title" style="font-size:13px;margin-top:8px">🎯 추천 조합 (당시)</div>${frHtml}
-      ${resHtml}${memoHtml}</div>`;
+      ${resHtml}${memoHtml}${formHtml}</div>`;
+  }
+
+  // [보완2] 분석기록 상세의 결과 입력 폼 저장 — 패널 스코프(container)로 입력값 읽기.
+  async function saveRecResult(container, file, rk, detailSel) {
+    const msg = container.querySelector('.recResMsg');
+    const g = (cls) => { const e = container.querySelector('.' + cls); return e ? e.value.trim() : ''; };
+    const n1 = g('recRes1');
+    if (!n1) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '최소 1착은 입력하세요'; } return; }
+    const result = { '1st': parseInt(n1, 10) };
+    const n2 = g('recRes2'), n3 = g('recRes3'), n4 = g('recRes4');
+    if (n2) result['2nd'] = parseInt(n2, 10);
+    if (n3) result['3rd'] = parseInt(n3, 10);
+    if (n4) result['4th'] = parseInt(n4, 10);
+    const stake = g('recStake'), payout = g('recPayout'), qo = g('recQOdds'), to = g('recTOdds'), memo = g('recMemo');
+    const payload = { raceKey: rk, result };
+    if (stake) { payload.stake = parseInt(stake, 10); payload.budget = parseInt(stake, 10); }
+    if (payout) payload.payout = parseInt(payout, 10);
+    if (qo) payload.quinellaOdds = parseFloat(qo);
+    if (to) payload.trifectaOdds = parseFloat(to);
+    if (memo) payload.memo = memo;
+    if (msg) { msg.style.color = ''; msg.textContent = '저장·판정 중…'; }
+    let d; try { d = await (await fetch('/api/history/record-result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
+    catch (e) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '실패: ' + e.message; } return; }
+    if (d.error) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = d.error; } return; }
+    const derr = d.dataErrors || [];
+    if (msg) { msg.style.color = derr.length ? '#ffb020' : '#38d39f'; msg.textContent = derr.length ? '✅ 저장(⚠️ ' + derr.join(', ') + ')' : '✅ 저장·판정 완료'; }
+    // 통계/캐시 갱신 후 상세 재조회(결과·적중·손익 반영)
+    try { loadLearningStats(); } catch (_) { /* */ }
+    try { renderStats(); } catch (_) { /* */ }
+    try { await loadRecCache(true); } catch (_) { /* */ }
+    setTimeout(() => { try { openAnalysisRecord(file, rk, detailSel); } catch (_) { /* */ } }, 400);
   }
 
   // 결과기록 탭 '분석기록' 서브탭 진입 → 캐시 로드 + 검색/필터 UI 배선(1회)
@@ -5933,6 +6067,10 @@
     }));
     const rf = document.querySelector('#recRefreshBtn');
     if (rf) rf.addEventListener('click', async () => { await loadRecCache(true); renderRecList(_recAllCfg); });
+    const ss = document.querySelector('#recSortSel');
+    if (ss) ss.addEventListener('change', () => { _recAllCfg.sort = ss.value || 'latest'; renderRecList(_recAllCfg); });
+    const ps = document.querySelector('#recPeriodSel');
+    if (ps) ps.addEventListener('change', () => { _recAllCfg.period = ps.value || 'all'; renderRecList(_recAllCfg); });
   }
 
   // 스포츠 탭(경정/경륜/바이크/중앙)의 '분석 기록' 섹션 로드(해당 종목만)

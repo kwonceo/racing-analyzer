@@ -7241,6 +7241,9 @@ def analysis_log_list():
                         "snaps": len(d.get("odds_timeline") or []),
                         "signals": len(d.get("signals_detected") or []),
                         "top3": [res.get("1st"), res.get("2nd"), res.get("3rd")] if res else [],
+                        "pnl": hit.get("pnl"),   # [보완3] 손익(정렬용) — 결과 미입력이면 None
+                        "reviewed": bool(d.get("reviewed")),   # [복기 표식] 복기 완료 여부
+                        "reviewed_at": d.get("reviewed_at"),
                         "hasResult": bool(d.get("result")), "won": won})
     return jsonify({"logs": out})
 
@@ -7260,9 +7263,46 @@ def analysis_log_get():
         return jsonify({"error": "분석 로그가 없습니다."}), 404
 
 
+REVIEW_NOTES_FILE = os.path.join(os.path.dirname(__file__), "data", "review_notes.json")
+
+
+def _review_notes_load():
+    """복기 메모 학습 코퍼스(리스트) 로드."""
+    try:
+        return json.load(open(REVIEW_NOTES_FILE, encoding="utf-8"))
+    except Exception:
+        return []
+
+
+def _review_note_append(doc, note, file):
+    """복기 메모를 학습 코퍼스에 축적(경주/종목/적중 태그 포함) → 나중에 패턴 마이닝·검색.
+    같은 경주(raceKey)는 최신 메모로 갱신(중복 방지)."""
+    if not (note or "").strip():
+        return
+    rk = doc.get("raceKey") or doc.get("race") or file
+    hit = doc.get("hit") or {}
+    won = bool(hit.get("quinella_hit") or hit.get("trifecta_hit") or hit.get("was_hit"))
+    entry = {
+        "raceKey": rk, "race": doc.get("race"), "file": file,
+        "category": doc.get("category") or "japan_local",
+        "sport": doc.get("sport") or "horse",
+        "date": doc.get("date"), "won": won,
+        "pnl": hit.get("pnl"), "note": note.strip(),
+        "ts": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+    }
+    notes = _review_notes_load()
+    notes = [n for n in notes if n.get("raceKey") != rk]   # 같은 경주 이전 메모 제거
+    notes.append(entry)
+    try:
+        json.dump(notes, open(REVIEW_NOTES_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception:
+        pass
+
+
 @app.route("/api/analysis-log/memo", methods=["POST"])
 def analysis_log_memo():
-    """복기 메모 저장: {file|raceKey, review} → 로그 파일의 review 필드 갱신."""
+    """복기 메모 저장 + 복기 표식: {file|raceKey, review} → review 저장 + reviewed=True 표식
+    + 학습 코퍼스(review_notes.json) 축적."""
     body = request.json or {}
     fn = body.get("file")
     if fn:
@@ -7273,10 +7313,24 @@ def analysis_log_memo():
         doc = json.load(open(path, encoding="utf-8"))
     except Exception:
         return jsonify({"error": "분석 로그가 없습니다."}), 404
-    doc["review"] = body.get("review", "")
+    review = body.get("review", "")
+    doc["review"] = review
     doc["profit"] = body.get("profit", doc.get("profit"))
+    # [복기 표식] 복기 완료 마킹 + 시각 기록 → 목록/상세에서 "🧠 복기완료" 배지
+    doc["reviewed"] = True
+    doc["reviewed_at"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    return jsonify({"ok": True})
+    # [복기 학습] 메모를 종목·적중 태그와 함께 코퍼스에 축적(검색·패턴화용)
+    _review_note_append(doc, review, os.path.basename(path))
+    return jsonify({"ok": True, "reviewed": True, "reviewed_at": doc["reviewed_at"]})
+
+
+@app.route("/api/review-notes/list", methods=["GET"])
+def review_notes_list():
+    """복기 메모 학습 코퍼스 목록(최신순) — 검색·복기 기억용."""
+    notes = _review_notes_load()
+    notes = sorted(notes, key=lambda n: n.get("ts") or "", reverse=True)
+    return jsonify({"notes": notes, "count": len(notes)})
 
 
 @app.route("/api/analysis-log/backfill", methods=["POST"])
