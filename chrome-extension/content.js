@@ -949,6 +949,21 @@
     return null;
   }
 
+  // [삼복승 강화] asyukk34 사설 배당판 마권종류 탭(span.bet_type_btn)을 '정확 텍스트'로 클릭.
+  //   DevTools 확인: <span class="bet_type_btn" bet_mode="11" combine_mode="triple">삼복승</span>
+  //   '삼복승조합'(bet_mode=12)이 '삼복승'을 포함하므로, 반드시 정확 일치로 클릭해 혼동을 방지한다.
+  function clickAsyukkBetTab(exactText) {
+    try {
+      const btns = queryAllDocs('.bet_type_btn');
+      for (const b of btns) {
+        const t = (b.textContent || '').replace(/\s+/g, '').trim();
+        const vis = b.offsetParent !== null || (b.getClientRects && b.getClientRects().length > 0);
+        if (t === exactText && vis) { try { b.click(); } catch (_) { /* */ } return b; }
+      }
+    } catch (_) { /* */ }
+    return null;
+  }
+
   // 현재 표 상태의 시그니처(배당 셀 값) — 탭 전환 여부 감지용
   function oddsSignature() {
     const cells = [...document.querySelectorAll('.odds_content')].slice(0, 40)
@@ -1543,10 +1558,17 @@
           setTripleProgress(`삼복승 수집중…(${sportTag} · 탭 클릭)`);
           const keyH = localKeyHorses(quinella);   // 상위 복승조합 등장빈도+인기가중 유력마 3두
           console.log(`[삼복승수집] ${sportTag} 유력마(축) 후보:`, keyH.join('·') || '(없음)');
-          // 삼복승 탭 클릭(라벨: 삼복승/三連複/3連複 등 · '삼복승조합'은 마권선택 탭이라 배당탭 우선)
-          const rt = await clickTabAndWait(['삼복승', '삼복', '三連複', '3連複', '３連複', '삼연복'], sig, '삼복승', true, 5000);
-          console.log(`[삼복승수집] 탭 클릭 결과: ${rt.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${rt.changed ? '변경 확인' : '⚠ 변화 없음'}`);
-          sig = rt.sig || oddsSignature();
+          // [삼복승 강화] ① asyukk34: span.bet_type_btn '삼복승'(정확) 클릭(삼복승조합 혼동 방지)
+          const betTab = clickAsyukkBetTab('삼복승');
+          if (betTab) {
+            console.log('[삼복승수집] ✅ .bet_type_btn "삼복승" 정확 클릭 (bet_mode=' + (betTab.getAttribute('bet_mode') || '?') + ')');
+            await wait(2000); sig = oddsSignature();
+          } else {
+            // ② 폴백: 일반 텍스트 탭 탐색(keiba·기타 보드)
+            const rt = await clickTabAndWait(['삼복승', '삼복', '三連複', '3連複', '３連複', '삼연복'], sig, '삼복승', true, 5000);
+            console.log(`[삼복승수집] 폴백 탭 클릭: ${rt.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${rt.changed ? '변경 확인' : '⚠ 변화 없음'}`);
+            sig = rt.sig || oddsSignature();
+          }
           // ① 직접 목록(화면에 "a-b-c 배당" 나열 — 6명 종목 등 소규모 보드에서 유효)
           let direct = [];
           try { direct = currentTrios(); } catch (_) { /* */ }
@@ -1566,7 +1588,18 @@
           }
           trio = Object.entries(tmap).map(([k, o]) => ({ combo: k.split('-').map(Number), odds: o }));
           console.log(`[삼복승수집] 병합 결과 ${trio.length}개 (직접 ${direct.length}·축 ${byAxis.length})`);
-          if (!trio.length) console.warn('[삼복승수집] ⚠ 삼복승 미수집 — 복승/쌍승만으로 분석 진행');
+          if (!trio.length) {
+            console.warn('[삼복승수집] ⚠ 삼복승 미수집 — 복승/쌍승만으로 분석 진행');
+            // [진단] 실제 삼복승 배당이 화면 어디에 있는지 파악용 raw 덤프(현재 배당 셀/텍스트 일부)
+            try {
+              const cells = [...document.querySelectorAll('.odds_content')].slice(0, 25).map((c) => (c.textContent || '').trim()).filter(Boolean);
+              console.log('[삼복승진단] .odds_content 셀 샘플:', cells.join(' | ') || '(없음)');
+              const trioTxt = [...document.querySelectorAll('td,span,div,li')]
+                .map((e) => (e.textContent || '').trim())
+                .filter((t) => /^\d{1,2}\s*[-–—ー]\s*\d{1,2}\s*[-–—ー]\s*\d{1,2}/.test(t)).slice(0, 8);
+              console.log('[삼복승진단] "a-b-c" 형태 텍스트 샘플:', trioTxt.join(' | ') || '(없음)');
+            } catch (_) { /* */ }
+          }
           // 복승으로 복귀(다음 수집 사이클 안정화)
           await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false);
         } catch (e) { console.warn('[삼복승수집] 실패 — 복승/쌍승만으로 진행', e); }

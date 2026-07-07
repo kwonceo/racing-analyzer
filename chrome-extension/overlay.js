@@ -20,6 +20,24 @@
     var ID_CHIP = 'kbOvToggle', ID_PANEL = 'kbOvPanel';
     var enabled = false, killed = false, timer = null;
     var savedPos = null;   // [보완#2] 사용자가 드래그해 옮긴 패널 위치({left,top}) — chrome.storage 에 저장/복원
+    var soundOn = false, lastSoundKey = '';   // [보완#3] 강조 팝업 알림음 옵션(기본 off) + 중복 방지
+
+    // [보완#3] 중요 신호 강조 알림음 — 짧은 2단 삑(Web Audio). 실패는 무시(무해).
+    function beep() {
+      try {
+        var Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return;
+        var ac = beep._ac || (beep._ac = new Ctx());
+        if (ac.state === 'suspended') { try { ac.resume(); } catch (_) { /* */ } }
+        var t = ac.currentTime;
+        function tone(freq, start, dur) {
+          var o = ac.createOscillator(), g = ac.createGain();
+          o.type = 'sine'; o.frequency.value = freq; g.gain.value = 0.07;
+          o.connect(g); g.connect(ac.destination);
+          o.start(t + start); o.stop(t + start + dur);
+        }
+        tone(880, 0, 0.16); tone(1180, 0.2, 0.18);
+      } catch (_) { /* */ }
+    }
 
     // 안전한 요소 생성 헬퍼 (div/span/button 만 사용)
     function mk(tag, css, text) {
@@ -214,8 +232,13 @@
       try {
         var el = byId(ID_ALERT);
         if (!crit || !enabled || killed || alertDismissed === crit.key) {
-          if (el) el.remove(); stopBlink(); return;
+          if (el) el.remove(); stopBlink();
+          if (!crit) lastSoundKey = '';   // [보완#3] 신호 해제 → 다음 신호에 다시 알림음
+          return;
         }
+        // [보완#3] 새 중요 신호(키 변경) + 소리 옵션 ON → 알림음 1회
+        if (soundOn && crit.key !== lastSoundKey) { beep(); }
+        lastSoundKey = crit.key;
         var bg = crit.level === 'red'
           ? 'linear-gradient(135deg,#dc2626,#991b1b)' : 'linear-gradient(135deg,#f59e0b,#b45309)';
         if (!el) {
@@ -231,13 +254,25 @@
         while (el.firstChild) el.removeChild(el.firstChild);
         var head = mk('div', 'display:flex;align-items:center;justify-content:space-between;gap:8px');
         head.appendChild(mk('span', 'font-weight:900;font-size:15px', crit.icon + ' ' + crit.title));
+        var ctrls = mk('div', 'display:flex;align-items:center;gap:6px');
+        // [보완#3] 알림음 ON/OFF 토글(🔔/🔕)
+        var snd = mk('button', 'all:unset;cursor:pointer;color:#fff;font-size:15px;padding:0 2px', soundOn ? '🔔' : '🔕');
+        snd.title = soundOn ? '알림음 끄기' : '알림음 켜기';
+        snd.addEventListener('click', function () {
+          soundOn = !soundOn;
+          try { chrome.storage.local.set({ overlaySound: soundOn }); } catch (_) { /* */ }
+          if (soundOn) beep();   // 켤 때 확인음 + 오디오 컨텍스트 활성화(사용자 제스처)
+          var s2 = byId(ID_ALERT); if (s2 && crit) renderAlertPopup(crit);
+        });
+        ctrls.appendChild(snd);
         var x = mk('button', 'all:unset;cursor:pointer;color:#fff;font:900 16px sans-serif;padding:0 2px', '✕');
         x.title = '이 알림 닫기(다른 신호가 오면 다시 표시)';
         x.addEventListener('click', function () {
           alertDismissed = crit.key;
           var e2 = byId(ID_ALERT); if (e2) e2.remove(); stopBlink();
         });
-        head.appendChild(x);
+        ctrls.appendChild(x);
+        head.appendChild(ctrls);
         el.appendChild(head);
         el.appendChild(mk('div', 'margin-top:4px;font-size:13px;font-weight:700', crit.msg));
         startBlink();
@@ -356,6 +391,18 @@
           panel.appendChild(rr);
         }
 
+        // [강화] 🎲 삼복승 추천(trioRecommend 최상위 1건 · 실배당/추정 표기)
+        var trios = (d.trioRecommend || []).filter(function (t) { return t && t.combo && t.combo.length === 3; });
+        if (trios.length) {
+          var t0 = trios[0];
+          var od = (t0.expOdds != null) ? (t0.expOdds + '배')
+            : (t0.expOddsEst != null ? ('추정 ' + t0.expOddsEst + '배') : '');
+          panel.appendChild(mk('div', 'margin:6px 0 2px;color:#94a3b8', '🎲 삼복승'));
+          var tr = mk('div', 'font-weight:800;color:#a78bfa');
+          tr.textContent = t0.combo.join('+') + (od ? ('  ' + od) : '');
+          panel.appendChild(tr);
+        }
+
         // [강화] BMED 저배당 배분(보험형 combos 우선)
         var bm = bmedRows(d);
         if (bm && bm.rows && bm.rows.length) {
@@ -418,11 +465,12 @@
 
     // ── 초기화 ──────────────────────────────────────────────────────────
     try {
-      chrome.storage.local.get({ overlayEnabled: false, overlayKill: false, overlayPos: null }, function (v) {
+      chrome.storage.local.get({ overlayEnabled: false, overlayKill: false, overlayPos: null, overlaySound: false }, function (v) {
         try {
           killed = !!(v && v.overlayKill);
           enabled = !!(v && v.overlayEnabled);
           savedPos = (v && v.overlayPos) || null;   // [보완#2] 저장된 위치 복원
+          soundOn = !!(v && v.overlaySound);         // [보완#3] 알림음 옵션 복원
           if (killed) { removeAll(); return; }
           render();
         } catch (_) { /* */ }
@@ -433,6 +481,7 @@
           if (area !== 'local') return;
           if (ch.overlayKill) { killed = !!ch.overlayKill.newValue; if (killed) removeAll(); else render(); return; }
           if (ch.overlayPos) { savedPos = ch.overlayPos.newValue || null; }   // [보완#2] 위치 동기화(다른 탭 반영)
+          if (ch.overlaySound) { soundOn = !!ch.overlaySound.newValue; }      // [보완#3] 알림음 옵션 동기화
           if (ch.overlayEnabled) { enabled = !!ch.overlayEnabled.newValue; render(); }
           if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline) && enabled && !killed) render();
         } catch (_) { /* */ }
