@@ -7333,6 +7333,220 @@ def review_notes_list():
     return jsonify({"notes": notes, "count": len(notes)})
 
 
+# ══════════════ [경륜 출마표] oddspark 전적 자동 수집·분석 ══════════════
+#   oddspark.com/keirin/RaceList.do?joCode=XX&kaisaiBi=YYYYMMDD&raceNo=N 를 서버가 직접
+#   fetch(공개 페이지·확장 불필요)해서 선수 전적(競走得点·착순·결정타·각질·전장소)을 분석.
+KEIRIN_STYLE_LABEL = {"逃": "도주(선행)", "捲": "젖히기", "追": "추입(마크)",
+                      "差": "차입", "両": "자재(양각)", "自": "자재"}
+# joCode → 경륜장명(참고·표시용, 주요 장만)
+KEIRIN_JO = {"85": "사세보", "83": "구루메", "81": "고쿠라", "31": "마쓰도",
+             "45": "히라쓰카", "48": "가와사키", "62": "나고야", "73": "기시와다"}
+
+
+def _kstrip(s):
+    s = re.sub(r"<[^>]+>", " ", s or "")
+    s = s.replace("&nbsp;", " ").replace("　", " ")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _keirin_style_label(ch):
+    for k, v in KEIRIN_STYLE_LABEL.items():
+        if k in (ch or ""):
+            return v
+    return ch or ""
+
+
+def _keirin_grade(score):
+    """競走得点 → 전적 등급(스펙: 85+ A / 75~84 B / 65~74 C / <65 D)."""
+    if score is None:
+        return "?"
+    if score >= 85:
+        return "A"
+    if score >= 75:
+        return "B"
+    if score >= 65:
+        return "C"
+    return "D"
+
+
+def _keirin_style_bonus(r):
+    """결정수 보정: 차입(差)·마크(マ) 우세→추입형 +5 / 도주(逃) 우세→선행형 +3 / 젖히기(捲)→+4."""
+    km = r.get("kimarite")
+    style = r.get("style") or ""
+    dominant = None
+    if km and sum(km) > 0:
+        dominant = ["逃", "捲", "差", "マ"][km.index(max(km))]
+    if dominant in ("差", "マ") or (not dominant and ("追" in style or "差" in style)):
+        return "추입형", 5
+    if dominant == "逃" or (not dominant and "逃" in style):
+        return "선행형", 3
+    if dominant == "捲":
+        return "젖히기형", 4
+    if "追" in style or "差" in style:
+        return "추입형", 5
+    if "逃" in style:
+        return "선행형", 3
+    return "", 0
+
+
+def _keirin_parse_card(html):
+    """oddspark 경륜 출마표 HTML → {venue,race_no,dist,post,tendency,riders,line,comment}."""
+    out = {"venue": "", "race_no": None, "race_name": "", "dist": "", "post": "",
+           "tendency": {}, "riders": [], "line": [], "comment": ""}
+    mt = re.search(r"<title>(.*?)</title>", html, re.S)
+    if mt:
+        title = _kstrip(mt.group(1))
+        out["race_name"] = title
+        mv = re.search(r"(\S+競輪)", title)
+        if mv:
+            out["venue"] = mv.group(1).replace("競輪", "").strip()
+        mr = re.search(r"(\d+)R", title)
+        if mr:
+            out["race_no"] = int(mr.group(1))
+    mpos = html.find("発走時間")
+    if mpos > 0:
+        seg = _kstrip(html[mpos - 200:mpos + 120])
+        md = re.search(r"(\d+)m", seg)
+        if md:
+            out["dist"] = md.group(1) + "m"
+        mp = re.search(r"発走時間\s*([\d:]+)", seg)
+        if mp:
+            out["post"] = mp.group(1)
+    # 경륜장 결정타 경향(직근1년): 逃げ/捲り/差し %
+    mk = re.search(r'kimariteTable.*?</table>', html, re.S)
+    if mk:
+        pcts = re.findall(r'([\d.]+)%', mk.group(0))
+        if len(pcts) >= 3:
+            out["tendency"] = {"도주": float(pcts[0]), "젖히기": float(pcts[1]), "차입": float(pcts[2])}
+    # 선수 테이블
+    mtab = re.search(r'<table class="tb60 h100pr".*?</table>', html, re.S)
+    if mtab:
+        for tr in re.findall(r'<tr[^>]*>.*?</tr>', mtab.group(0), re.S):
+            if "競走得点" not in tr:
+                continue
+            cells = re.findall(r'<td[^>]*>(.*?)</td>', tr, re.S)
+            nidx = next((i for i, c in enumerate(cells) if "PlayerDetail" in c), None)
+            if nidx is None:
+                continue
+            mcar = re.search(r'class="no(\d+)"', tr)
+            car = int(mcar.group(1)) if mcar else None
+            mn = re.search(r'playerCd=\d+"\s*>([^<]+)</a>', cells[nidx])
+            name = _kstrip(mn.group(1)) if mn else ""
+            mage = re.search(r'(\d+)歳／(\d+)期', _kstrip(cells[nidx]))
+            age = int(mage.group(1)) if mage else None
+            ki = int(mage.group(2)) if mage else None
+            fuken = _kstrip(cells[nidx + 1]) if nidx + 1 < len(cells) else ""
+            kyu = _kstrip(cells[nidx + 2]) if nidx + 2 < len(cells) else ""
+            gcell = _kstrip(cells[nidx + 3]) if nidx + 3 < len(cells) else ""
+            mg = re.search(r'([\d.]+)', gcell)
+            gear = float(mg.group(1)) if mg else None
+            ms = re.search(r'([逃捲追差両自]+)\s*$', gcell)
+            style = ms.group(1) if ms else ""
+            scell = _kstrip(cells[nidx + 4]) if nidx + 4 < len(cells) else ""
+            msc = re.search(r'競走得点：\s*([\d.]+)', scell)
+            score = float(msc.group(1)) if msc else None
+            mo = re.search(r'着\s*順\s*：\s*(\d+)-\s*(\d+)-\s*(\d+)-\s*(\d+)', scell)
+            chaku = [int(x) for x in mo.groups()] if mo else None
+            mkm = re.search(r'決まり手：\s*(\d+)-\s*(\d+)-\s*(\d+)-\s*(\d+)', scell)
+            kimarite = [int(x) for x in mkm.groups()] if mkm else None
+            recent = _kstrip(cells[nidx + 5]) if nidx + 5 < len(cells) else ""
+            prev1 = _kstrip(cells[nidx + 6]) if nidx + 6 < len(cells) else ""
+            prev2 = _kstrip(cells[nidx + 7]) if nidx + 7 < len(cells) else ""
+            rentai = None
+            if chaku and sum(chaku) > 0:
+                rentai = round((chaku[0] + chaku[1]) / sum(chaku) * 100, 1)
+            out["riders"].append({
+                "car": car, "name": name, "age": age, "ki": ki, "area": fuken,
+                "classGrade": kyu, "gear": gear, "style": style,
+                "styleLabel": _keirin_style_label(style), "score": score,
+                "chaku": chaku, "kimarite": kimarite, "rentai": rentai,
+                "recent": recent, "prev1": prev1, "prev2": prev2,
+            })
+    ml = re.search(r'<ul class="keirinRyosouline">.*?</ul>', html, re.S)
+    if ml:
+        out["line"] = [int(x) for x in re.findall(r'class="no([1-9])"', ml.group(0))]
+    mc = re.search(r'keirinRyosousouhyo"\s*>\s*([^<]+)', html)
+    if mc:
+        out["comment"] = _kstrip(mc.group(1))
+    return out
+
+
+def _keirin_analyze(card):
+    """파싱된 출마표 → 등급·결정수 보정·경향 반영 랭킹."""
+    riders = [r for r in card.get("riders") or [] if r.get("score") is not None]
+    for r in riders:
+        r["grade"] = _keirin_grade(r["score"])
+        typ, bonus = _keirin_style_bonus(r)
+        r["styleType"] = typ
+        r["styleBonus"] = bonus
+        r["adjScore"] = round(r["score"] + bonus, 3)
+        km = r.get("kimarite")
+        if km and sum(km) > 0:
+            tot = sum(km)
+            r["kimariteRatio"] = {"도주": round(km[0] / tot * 100, 1),
+                                  "젖히기": round(km[1] / tot * 100, 1),
+                                  "차입": round(km[2] / tot * 100, 1),
+                                  "마크": round(km[3] / tot * 100, 1)}
+    ranked = sorted(riders, key=lambda r: r["adjScore"], reverse=True)
+    for i, r in enumerate(ranked):
+        r["rank"] = i + 1
+    tendency = card.get("tendency") or {}
+    fav_style = max(tendency, key=tendency.get) if tendency else None
+    top = ranked[:3]
+    summary = " · ".join(
+        f"{r['car']}번 {r['name']}({r['grade']}·득점{r['score']}{'+' + str(r['styleBonus']) + ' ' + r['styleType'] if r['styleBonus'] else ''})"
+        for r in top)
+    tips = []
+    if fav_style:
+        tips.append(f"이 경륜장은 최근 1년 '{fav_style}' 결정 비율이 가장 높음({tendency[fav_style]}%)")
+    for r in ranked:
+        if fav_style and r.get("styleType") and (
+                (fav_style == "차입" and r["styleType"] == "추입형")
+                or (fav_style == "도주" and r["styleType"] == "선행형")
+                or (fav_style == "젖히기" and r["styleType"] == "젖히기형")):
+            tips.append(f"{r['car']}번 {r['name']}: 경륜장 유리 각질({r['styleType']}) · 득점 {r['score']}")
+    return {"ranked": ranked, "top": top, "favStyle": fav_style, "tendency": tendency,
+            "summary": summary, "tips": tips, "line": card.get("line") or [],
+            "comment": card.get("comment") or "",
+            "venue": card.get("venue"), "raceNo": card.get("race_no"),
+            "dist": card.get("dist"), "post": card.get("post")}
+
+
+def _keirin_url(jo, ymd, race):
+    return ("https://www.oddspark.com/keirin/RaceList.do"
+            "?joCode=%s&kaisaiBi=%s&raceNo=%s" % (jo, ymd, race))
+
+
+@app.route("/api/keirin/card", methods=["POST"])
+def keirin_card():
+    """경륜 출마표 수집·분석: {joCode,kaisaiBi,raceNo} 또는 {url} 또는 {html}
+    → oddspark를 서버가 직접 fetch·파싱·분석해 반환."""
+    body = request.json or {}
+    html = body.get("html")
+    url = body.get("url")
+    if not html:
+        if not url:
+            jo, ymd, race = body.get("joCode"), body.get("kaisaiBi"), body.get("raceNo")
+            if jo and ymd and race:
+                url = _keirin_url(jo, ymd, race)
+        # url 에서 파라미터만 있으면 정규화(사용자가 RaceList.do 전체 URL 붙여넣기 허용)
+        if url and "oddspark.com" not in url:
+            return jsonify({"error": "oddspark.com 경륜 출마표 URL이 아닙니다."}), 400
+        if url:
+            try:
+                req = Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+                html = urlopen(req, timeout=15).read().decode("utf-8", "ignore")
+            except Exception as e:
+                return jsonify({"error": "출마표 수집 실패: %s" % e}), 502
+    if not html:
+        return jsonify({"error": "joCode/kaisaiBi/raceNo 또는 url 또는 html 중 하나가 필요합니다."}), 400
+    card = _keirin_parse_card(html)
+    if not card.get("riders"):
+        return jsonify({"error": "선수 정보를 찾지 못했습니다(경주 번호/개최일 확인)."}), 422
+    an = _keirin_analyze(card)
+    return jsonify({"ok": True, "url": url, "card": card, "analysis": an})
+
+
 @app.route("/api/analysis-log/backfill", methods=["POST"])
 def analysis_log_backfill():
     """[4번] 지금까지 수집/분석된 경주들의 로그를 즉시 생성(없으면 생성, 있으면 최신화).

@@ -215,6 +215,21 @@
         </div>
       </div>
       <div id="sportReport-cycle" class="report-area"><p class="hint">🚴 경륜 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
+      <!-- [경륜 출마표 분석] oddspark 선수 전적 자동 수집·분석 -->
+      <div class="panel-card" style="margin-top:12px">
+        <h3>🚴 출마표 분석 <span class="hint" style="font-weight:400">oddspark 선수 전적(競走得点·각질·결정타) 자동 수집</span></h3>
+        <p class="hint">개최일·경륜장·경주번호를 넣거나 <b>oddspark 출마표 URL</b>을 붙여넣으면 선수 전적을 가져와 <b>등급(A/B/C/D)·결정수 보정·라인 예상</b>을 분석합니다. (서버가 직접 조회 — 확장 불필요)</p>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
+          <label class="hint">경륜장코드 <input id="keirinJo" class="cfg-input" type="text" placeholder="예: 85(사세보)" style="width:110px"></label>
+          <label class="hint">개최일 <input id="keirinYmd" class="cfg-input" type="text" placeholder="YYYYMMDD" style="width:110px"></label>
+          <label class="hint">경주 <input id="keirinRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
+          <button id="keirinFetchBtn" class="btn btn-primary">🚴 출마표 분석</button>
+        </div>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
+          <label class="hint" style="flex:1">또는 URL <input id="keirinUrl" class="cfg-input" type="text" placeholder="https://www.oddspark.com/keirin/RaceList.do?joCode=85&kaisaiBi=...&raceNo=6" style="width:100%;max-width:520px"></label>
+        </div>
+        <div id="keirinCardResult"></div>
+      </div>
       <div class="panel-card" style="margin-top:12px">
         <h3>📋 이 종목 분석 기록 <span class="hint" style="font-weight:400">과거 분석·배팅 복기</span></h3>
         <p class="hint">🚴 경륜으로 분석했던 경주입니다. 클릭하면 <b>당시 유력마·이상감지·추천·결과</b>를 복기할 수 있습니다.</p>

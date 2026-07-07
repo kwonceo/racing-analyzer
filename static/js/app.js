@@ -6082,6 +6082,62 @@
       category: SPORT_TAB_TO_CAT[tabKey] || tabKey, query: '' });
   }
 
+  // ══════════ [경륜 출마표 분석] oddspark 선수 전적 자동 수집 ══════════
+  function initKeirinCard() {
+    const btn = document.querySelector('#keirinFetchBtn');
+    if (btn) btn.addEventListener('click', fetchKeirinCard);
+  }
+
+  async function fetchKeirinCard() {
+    const out = document.querySelector('#keirinCardResult'); if (!out) return;
+    const g = (id) => { const e = document.querySelector(id); return e ? e.value.trim() : ''; };
+    const url = g('#keirinUrl'), jo = g('#keirinJo'), ymd = g('#keirinYmd'), race = g('#keirinRace');
+    const payload = {};
+    if (url) payload.url = url;
+    else if (jo && ymd && race) { payload.joCode = jo; payload.kaisaiBi = ymd; payload.raceNo = race; }
+    else { out.innerHTML = '<p class="hint" style="color:var(--red)">경륜장코드+개최일+경주 또는 URL을 입력하세요.</p>'; return; }
+    out.innerHTML = '<p class="hint">🚴 oddspark에서 출마표를 가져오는 중…</p>';
+    let d; try { d = await (await fetch('/api/keirin/card', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
+    catch (e) { out.innerHTML = `<p class="hint" style="color:var(--red)">실패: ${esc(e.message)}</p>`; return; }
+    if (d.error) { out.innerHTML = `<p class="hint" style="color:var(--red)">${esc(d.error)}</p>`; return; }
+    out.innerHTML = renderKeirinCard(d);
+  }
+
+  function renderKeirinCard(d) {
+    const a = d.analysis || {}, c = d.card || {};
+    const gbadge = (g) => { const col = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#94a3b8' }[g] || '#94a3b8'; return `<span class="chip" style="border-color:${col};color:${col}">${g}등급</span>`; };
+    const rows = (a.ranked || []).map((r) => {
+      const kr = r.kimariteRatio || {};
+      const krTxt = Object.keys(kr).length ? `逃${kr['도주']}/捲${kr['젖히기']}/差${kr['차입']}/マ${kr['마크']}` : '-';
+      const bonus = r.styleBonus ? `<span style="color:#ffb26b">+${r.styleBonus} ${esc(r.styleType)}</span>` : '';
+      const ch = r.chaku ? r.chaku.join('-') : '-';
+      return `<tr>
+        <td style="text-align:center;font-weight:700">${r.rank}</td>
+        <td style="text-align:center;font-weight:700">${r.car}</td>
+        <td>${esc(r.name || '')} <span class="hint" style="font-size:10px">${esc(r.area || '')} ${esc(r.classGrade || '')}</span></td>
+        <td style="text-align:center">${gbadge(r.grade)}</td>
+        <td style="text-align:right">${r.score != null ? r.score : '-'} ${bonus}${r.styleBonus ? ` <b>→${r.adjScore}</b>` : ''}</td>
+        <td style="text-align:center" title="각질">${esc(r.styleLabel || '')}</td>
+        <td style="text-align:center" title="1-2-3-외 착순">${ch}${r.rentai != null ? `<br><span class="hint" style="font-size:10px">2연대 ${r.rentai}%</span>` : ''}</td>
+        <td class="hint" style="font-size:10px" title="결정수 비율">${krTxt}</td></tr>`;
+    }).join('');
+    const tend = c.tendency || {};
+    const tendTxt = Object.keys(tend).length ? Object.entries(tend).map(([k, v]) => `${k} ${v}%`).join(' · ') : '';
+    const lineTxt = (a.line || []).length ? a.line.join(' → ') : '';
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px">
+      <div class="matrix-title">🚴 ${esc(c.venue || '')} ${c.race_no != null ? c.race_no + 'R' : ''} <span class="hint" style="font-weight:400">${esc(c.dist || '')} ${esc(c.post || '')} 발주 · 선수 ${(c.riders || []).length}명</span></div>
+      ${a.summary ? `<div style="margin:4px 0"><b>득점 상위:</b> ${esc(a.summary)}</div>` : ''}
+      ${tendTxt ? `<div class="hint" style="margin:2px 0">🏁 경륜장 결정타 경향(최근1년): ${esc(tendTxt)}${a.favStyle ? ` · 유리 각질 <b>${esc(a.favStyle)}</b>` : ''}</div>` : ''}
+      ${lineTxt ? `<div class="hint" style="margin:2px 0">🔗 라인(隊列) 예상 앞→뒤: <b>${esc(lineTxt)}</b></div>` : ''}
+      <table class="data-table" style="margin-top:6px">
+        <thead><tr><th>순</th><th>차</th><th>선수</th><th>등급</th><th>득점(보정)</th><th>각질</th><th>착순</th><th>결정수</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      ${(a.tips || []).length ? `<div class="matrix-title" style="font-size:12px;margin-top:8px">💡 분석 팁</div>` + a.tips.map((t) => `<div class="hint" style="margin:1px 0">· ${esc(t)}</div>`).join('') : ''}
+      ${a.comment ? `<div class="hint" style="margin-top:6px">📝 oddspark 예상: ${esc(a.comment)}</div>` : ''}
+      <p class="hint" style="font-size:11px;margin-top:6px">등급 기준: 競走得点 85+ A · 75~84 B · 65~74 C · &lt;65 D. 걸즈(L급)는 득점 스케일이 낮아 대부분 D로 표시될 수 있습니다(상대 랭킹·보정 점수로 비교하세요).</p>
+    </div>`;
+  }
+
   async function loadJapanReviewList() {
     const el = document.querySelector('#jpReviewList'); if (!el) return;
     el.innerHTML = '<p class="hint">불러오는 중…</p>';
@@ -6281,6 +6337,7 @@
     initPopout();          // [별도 창] 분석기 팝업 창 열기 + 위치 기억
     initAnalysisLog();     // [분석 로그] 완전 기록 섹션
     initJapanReview();     // [일본경마 복기] 분석 내역 목록 + 결과 입력 + 자동 판정 리포트
+    initKeirinCard();      // [경륜 출마표] oddspark 선수 전적 자동 수집·분석
     // [신규] 결과 입력 대기 목록 초기 로드 + 60초 폴링(탭 무관 알림 위해 전역)
     try { loadPendingResults(); if (_pendingTimer) clearInterval(_pendingTimer); _pendingTimer = setInterval(loadPendingResults, 60000); } catch (_) { /* */ }
     // [개편] initCombined() 제거 — 통합분석 탭 폐지(한국/일본 탭에 자동 표시).
