@@ -1506,7 +1506,11 @@
         const exMap = {};
         for (const p of currentMatrixPairs(oddsClass)) {
           if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
-          const k = `${p.a}>${p.b}`;
+          // [쌍승 방향 긴급수정] asyukk 쌍승 매트릭스는 **열(헤더)=1착(선착)·행=2착(후착)**.
+          //   예: 행3·열5 셀 = "5번(열) 1착, 3번(행) 2착". parseMatrixTable은 {a:행, b:열}이므로
+          //   선착=열=p.b, 후착=행=p.a → combo=[p.b, p.a]. (기존 [p.a,p.b]는 방향이 반대라
+          //   역전 오판을 일으켰음: 5→3 저배당을 3→5로 잘못 저장.)
+          const k = `${p.b}>${p.a}`;
           if (exMap[k] == null || p.odds < exMap[k]) exMap[k] = p.odds;
         }
         exacta = Object.entries(exMap).map(([k, o]) => {
