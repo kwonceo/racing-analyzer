@@ -1,11 +1,11 @@
 {
- "race": "盛岡 2R",
- "raceKey": "盛岡 2R",
+ "race": "카나자와 3경주",
+ "raceKey": "카나자와 3경주",
  "date": "2026-07-07",
  "result": {
-  "1st": 7,
-  "2nd": 9,
-  "3rd": 1,
+  "1st": 4,
+  "2nd": 1,
+  "3rd": 3,
   "4th": null
  },
  "hit": false,
@@ -13,8 +13,8 @@
  "odds": "미상",
  "win_odds": 0,
  "why_recommended": {
-  "signal_7": {
-   "horse": 7,
+  "signal_4": {
+   "horse": 4,
    "placed": true,
    "place_rank": 1,
    "excess_drop": null,
@@ -28,8 +28,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_9": {
-   "horse": 9,
+  "signal_1": {
+   "horse": 1,
    "placed": true,
    "place_rank": 2,
    "excess_drop": null,
@@ -43,8 +43,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_1": {
-   "horse": 1,
+  "signal_3": {
+   "horse": 3,
    "placed": true,
    "place_rank": 3,
    "excess_drop": null,
@@ -60,11 +60,11 @@
   }
  },
  "recommendation_process": [
-  "1. 전적 분석: 7번 전적 정보 제한",
+  "1. 전적 분석: 4번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
-  "horse": 7,
+  "horse": 4,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
@@ -99,5 +99,5 @@
  },
  "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-07 16:43:33"
+ "generated_at": "2026-07-07 16:43:34"
 }
