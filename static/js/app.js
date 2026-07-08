@@ -4909,6 +4909,10 @@
     parts.push(renderInverse(a.inverse));
     parts.push(renderIntegratedGrades(a));
     parts.push(renderJapanSignals(a.signals));
+    // [경륜/경정 근거 표시] 일본경마 뷰에만 있던 '왜 추천했는지' 근거 카드·패턴매칭을 6명 종목 뷰에도 추가.
+    //   경륜은 전적이 없어 배당(급락·쌍승역전·연속하락)·이상감지 기반 근거가 표시된다.
+    parts.push(renderPatternMatch(a.patternMatch));
+    parts.push(renderRecommendBasis(a.recommendBasis));
     parts.push(renderBetRecommend(a, bsel));
     parts.push((a.raceJudgment && a.raceJudgment.type === 'wait') ? '' : renderBMED(a.bmed, bsel));
     return parts.join('');
