@@ -1430,6 +1430,12 @@ def after_close_cases():
                     "note": "마감 후 감지된 신호(베팅 반영 불가) — 수집 간격 단축의 필요성 근거 데이터"})
 
 
+@app.route("/api/after-close/stats", methods=["GET"])
+def after_close_stats_api():
+    """[3번] 마감 후 대급락(50%+) → 실제 입상률 통계(패턴 신뢰도 측정)."""
+    return jsonify(_after_close_stats())
+
+
 @app.route("/api/learning/signal-lessons", methods=["GET", "POST"])
 def learning_signal_lessons():
     """초과급락 신호말이 입상했으나 노이즈 판정으로 추천 누락된 사례(집중신호 오판 학습).
@@ -2138,21 +2144,83 @@ def _after_close_save(d):
     json.dump(d, open(AFTER_CLOSE_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 
-def _record_after_close_case(rk, date, mb_signed, anomalies):
-    """[4번] 마감 후 신호로 베팅 반영 불가했던 케이스 저장. 경주별 1건(신호 최다 시점)으로 갱신."""
+def _record_after_close_case(rk, date, mb_signed, anomalies, surge=None):
+    """[4번] 마감 후 신호로 베팅 반영 불가했던 케이스 저장. 경주별 1건(신호 최다 시점)으로 갱신.
+    surge = {"combos":[{"combo":[a,b],"pct":-99}], "horses":[3,7]} = 마감 후 대급락(50%+) 구조."""
     d = _after_close_load()
     cases = d.setdefault("cases", [])
     mins_after = abs(mb_signed) if mb_signed is not None else None
     payload = {"raceKey": rk, "date": date, "minutes_after_close": mins_after,
                "signal_count": len(anomalies), "signals": list(anomalies)[:6], "t": time.time()}
+    if surge and surge.get("horses"):
+        # [마감후 대급락] 별도 필드로 보존 → 결과 입상 매칭·입상률 학습·다음경주 참고
+        payload["surge_horses"] = surge.get("horses")
+        payload["surge_combos"] = surge.get("combos")
+        payload["surge_hit"] = None   # 결과 입력 시 _after_close_learn_result 가 채움
     existing = next((c for c in cases if c.get("raceKey") == rk and c.get("date") == date), None)
     if existing:
+        # 신호 최다 시점으로 갱신하되, 이미 기록된 surge/결과판정은 보존
         if len(anomalies) >= (existing.get("signal_count") or 0):
+            keep = {k: existing.get(k) for k in ("surge_horses", "surge_combos", "surge_hit") if existing.get(k) is not None}
             existing.update(payload)
+            for k, v in keep.items():
+                if payload.get(k) is None:
+                    existing[k] = v
     else:
         cases.append(payload)
     d["cases"] = cases[-500:]
     _after_close_save(d)
+
+
+def _after_close_learn_result(rk, date, result):
+    """[3번] 마감 후 대급락말이 실제 입상(1~3착)했는지 판정 → surge_hit 갱신(입상률 학습)."""
+    if not result:
+        return
+    placed = set()
+    for k in ("1st", "2nd", "3rd"):
+        v = result.get(k)
+        if v is not None:
+            try:
+                placed.add(int(v))
+            except (TypeError, ValueError):
+                pass
+    if not placed:
+        return
+    d = _after_close_load()
+    changed = False
+    for c in d.get("cases", []):
+        if c.get("raceKey") != rk:
+            continue
+        sh = c.get("surge_horses")
+        if not sh:
+            continue
+        hit = any(int(h) in placed for h in sh if h is not None)
+        hit_horses = [int(h) for h in sh if h is not None and int(h) in placed]
+        if c.get("surge_hit") != hit or c.get("surge_hit_horses") != hit_horses:
+            c["surge_hit"] = hit
+            c["surge_hit_horses"] = hit_horses
+            c["result_placed"] = sorted(placed)
+            changed = True
+    if changed:
+        _after_close_save(d)
+
+
+def _after_close_stats():
+    """[3번] 마감 후 대급락 → 실제 입상률 통계(신뢰도 측정)."""
+    d = _after_close_load()
+    judged = [c for c in d.get("cases", []) if c.get("surge_horses") and c.get("surge_hit") is not None]
+    total = len(judged)
+    hits = sum(1 for c in judged if c.get("surge_hit"))
+    rate = round(hits / total * 100) if total else None
+    recent = sorted(judged, key=lambda c: c.get("t") or 0, reverse=True)[:10]
+    return {
+        "total_judged": total, "hits": hits, "hit_rate": rate,
+        "pending": sum(1 for c in d.get("cases", []) if c.get("surge_horses") and c.get("surge_hit") is None),
+        "recent": [{"raceKey": c.get("raceKey"), "horses": c.get("surge_horses"),
+                    "hit": c.get("surge_hit"), "hitHorses": c.get("surge_hit_horses"),
+                    "combos": (c.get("surge_combos") or [])[:3]} for c in recent],
+        "reliable": bool(total >= 5 and rate is not None and rate >= 50),
+    }
 
 
 # ───────── [4착 near-miss] 삼복승 아깝게 미적중(추천 말 4착) 학습 ─────────
@@ -4139,6 +4207,33 @@ def _triple_analyze(rk, rec):
     except Exception as _e:
         print("[혼전] 파생 실패:", _e)
 
+    # [1번] 마감 후 대급락(50%+) 별도 감지 → "⚡ 마감 후 대급락 감지!" 배너용(추천 미반영·참고만).
+    #   [4번] 학습된 '마감 후 대급락 → 입상률'이 신뢰 수준(표본5+·50%+)이면 다음경주 참고 신뢰도 첨부.
+    after_close_surge = None
+    try:
+        if after_close:
+            _big = [d for d in (drops or []) if (d.get("pct") or 0) <= -50]
+            if _big:
+                _hc = {}
+                for _d in _big:
+                    for _h in (_d.get("combo") or []):
+                        _hc[int(_h)] = _hc.get(int(_h), 0) + 1
+                _sh = sorted(_hc, key=lambda h: -_hc[h])[:4]
+                _acs = _after_close_stats()
+                after_close_surge = {
+                    "detected": True,
+                    "horses": _sh,
+                    "drops": [{"combo": _d.get("combo"), "before": _d.get("prev"),
+                               "after": _d.get("cur"), "pct": _d.get("pct")}
+                              for _d in sorted(_big, key=lambda x: (x.get("pct") or 0))[:6]],
+                    "note": "마감 후 대급락 — 추천 미반영, 학습·다음경주 참고 신호로 저장",
+                    "learnedHitRate": _acs.get("hit_rate"),
+                    "learnedSample": _acs.get("total_judged"),
+                    "reliable": _acs.get("reliable"),
+                }
+    except Exception as _e:
+        print("[마감후대급락] 파생 실패:", _e)
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
         # [추천 로직 전면 개편] BMED 확신도 엔진 + 실전 경주유형 판정 + 단계별 추천 + 강화 제거마
@@ -4177,6 +4272,8 @@ def _triple_analyze(rk, rec):
                           "advanced": advanced},
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
+        "afterCloseSurge": after_close_surge,   # [1·4번] 마감 후 대급락(50%+) 배너 + 학습 입상률
+
         # [경주전환 방어] 첫 수집(기준값 설정)/비정상 변동폭(기준값 재설정) 여부
         "baselineSet": baseline_set, "baselineReset": baseline_reset,
         # [배당판 일치 검증] 추천↔배당판 인기 조합 불일치·배당 불안정(초반 미수집) 경고
@@ -4614,9 +4711,21 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
     })
     doc["snapshots"] = doc["snapshots"][-300:]
     # [4번] 마감 후 신호로 베팅 반영 불가했던 케이스 저장(수집 간격 단축 필요성 근거)
+    #   [1번] 마감 후 대급락(50%+) = surge → 별도 구조 저장(입상률 학습·다음경주 참고)
     if after_close and anomalies:
         try:
-            _record_after_close_case(rk, date, mb_signed, anomalies)
+            _surge = None
+            _big = [d for d in q_drops if (d.get("pct") or 0) <= -50]
+            if _big:
+                _hc = {}
+                for _d in _big:
+                    for _h in (_d.get("combo") or []):
+                        _hc[_h] = _hc.get(_h, 0) + 1
+                _sh = sorted(_hc, key=lambda h: -_hc[h])[:4]
+                _surge = {"horses": _sh,
+                          "combos": [{"combo": _d.get("combo"), "pct": _d.get("pct")}
+                                     for _d in sorted(_big, key=lambda x: (x.get("pct") or 0))[:6]]}
+            _record_after_close_case(rk, date, mb_signed, anomalies, _surge)
         except Exception as e:
             print("[마감후학습] 케이스 저장 실패:", e)
     json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
@@ -6492,6 +6601,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     except Exception as e:
         print("[경고매칭] 실패:", e)
         _al = None
+
+    # [1·3번] 마감 후 대급락말이 실제 입상(1~3착)했는지 판정 → 입상률 학습(surge_hit 갱신)
+    try:
+        _after_close_learn_result(rk, doc.get("date"), result)
+    except Exception as e:
+        print("[마감후대급락] 결과학습 실패:", e)
 
     # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
     rec_bets = an.get("betRecommend", [])

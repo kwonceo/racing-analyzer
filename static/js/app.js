@@ -2660,6 +2660,23 @@
       <div class="hint" style="margin:3px 0 0;line-height:1.6">${items}<br>→ <b style="color:#dbeafe">역배열 아님</b> — 전적은 우수하나 배당은 비인기(시장이 아직 안 밀어줌). 참고만.</div></div>`;
   }
 
+  // [1·4번] 마감 후 대급락(50%+) 배너 — 추천 미반영·참고만 + 학습된 입상률(신뢰 시 강조).
+  function renderAfterCloseSurge(s) {
+    if (!s || !s.detected) return '';
+    const horses = (s.horses || []).map((n) => `<b style="color:#ffd24f">${n}번</b>`).join(' · ');
+    const drops = (s.drops || []).slice(0, 4).map((d) =>
+      `<div style="margin:2px 0"><span class="chip chip-red">${(d.combo || []).join('+')}</span> <span class="hint">${d.before}→${d.after}배 (▼${Math.abs(d.pct)}%)</span></div>`).join('');
+    const learned = (s.learnedSample >= 1 && s.learnedHitRate != null)
+      ? `<div style="margin-top:5px;padding:5px 7px;border-radius:6px;background:${s.reliable ? 'rgba(56,211,159,.12)' : 'rgba(138,148,166,.12)'}">
+          🧠 학습: <b style="color:${s.reliable ? '#38d39f' : '#b8c0cc'}">마감 후 대급락 → 실제 입상률 ${s.learnedHitRate}%</b> <span class="hint">(표본 ${s.learnedSample}건${s.reliable ? ' · 신뢰 가능' : ' · 표본 부족'})</span>${s.reliable ? '<br><span style="color:#38d39f">→ 다음 경주에서 같은 패턴 발생 시 참고하세요</span>' : ''}</div>` : '';
+    return `<div style="margin:6px 0;padding:8px 10px;border:2px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,.1)">
+      <div style="font-size:15px;font-weight:800;color:#fbbf24">⚡ 마감 후 대급락 감지!</div>
+      <div style="margin:3px 0"><span class="hint">대급락 말:</span> ${horses || '-'}</div>
+      ${drops}
+      <div class="hint" style="margin-top:3px">${esc(s.note || '')}</div>
+      ${learned}</div>`;
+  }
+
   function renderInverse(inv) {
     if (!inv) return '';
     // 역배열(쌍승역전) 아니면 → 전적 우수·시장 비인기만(있으면) 표시
@@ -3062,6 +3079,7 @@
       ${a.baselineReset ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffd24f;background:rgba(255,210,79,.12);border-radius:6px;color:#ffd24f">⚠️ <b>비정상 변동폭 감지 → 기준값 재설정</b> — 이전 경주 배당 잔존 의심(95%+ 급락 다수). 이번 수집을 새 기준값으로 설정했습니다. <b>다음 수집부터 변동을 계산</b>합니다.</div>`
         : a.baselineSet ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.1);border-radius:6px;color:#7dd3fc">🎯 <b>기준값 설정됨</b> — 새 경주 첫 수집입니다. 변동폭은 <b>다음 수집부터</b> 계산됩니다.</div>` : ''}
       ${a.afterClose ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #8a94a6;background:rgba(138,148,166,.14);border-radius:6px;color:#b8c0cc">⚠️ <b>마감 후 수집</b> — 발주(T-0) 이후 신호는 <b>참고만</b> 하세요. 급락이 있어도 <b>추천 조합·보험에는 반영되지 않습니다</b>(마감 전 기준 유지).</div>` : ''}
+      ${renderAfterCloseSurge(a.afterCloseSurge)}
       ${a.marketCheck && a.marketCheck.diverged ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ff5c5c;background:rgba(255,92,92,.12);border-radius:6px;color:#ff8a8a">⚠️ <b>배당판 불일치</b> — 추천 복승(${(a.marketCheck.mainPair || []).join('+')}=${a.marketCheck.mainOdds}배)이 <b>배당판 최저 인기 조합(${a.marketCheck.favPair.join('+')}=${a.marketCheck.favOdds}배)</b>과 다릅니다. 배당판을 초반에 못 끌어왔거나 전적 편중일 수 있어요 → <b>배당판 인기 조합을 추천에 추가</b>했습니다. 배당 재확인 권장.</div>` : ''}
       ${a.marketCheck && a.marketCheck.stale ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffb020;background:rgba(255,176,32,.12);border-radius:6px;color:#ffc862">⚠️ <b>배당 불안정</b> — 최저 복승도 ${a.marketCheck.favOdds}배(실자금 미형성/초반 미수집 의심). <b>배당판 새로고침 후 재수집</b> 권장. 현재 추천은 참고만.</div>` : ''}
       ${renderAlertSignal(a.alertSignal, _horseRoleMap(a))}
@@ -3619,6 +3637,8 @@
     let nm = null; try { nm = await (await fetch('/api/learning/near-miss')).json(); } catch (_) { /* */ }
     // [전체데이터·패턴발견] 적중 경주 공통점 자동 발견 + 데이터 충분도
     let disc = null; try { disc = await (await fetch('/api/patterns/discovered')).json(); } catch (_) { /* */ }
+    // [마감 후 대급락] 실제 입상률 통계(패턴 신뢰도)
+    let acs = null; try { acs = await (await fetch('/api/after-close/stats')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     // [AI Phase1] AI 학습 데이터 현황 대시보드
     let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
@@ -3634,6 +3654,7 @@
       ${card('제거 판정 적중률', s.elimination)}
       ${renderNearMissStats(s.near_miss, nm)}
       ${renderAlertStats(s.alert_stats)}
+      ${renderAfterCloseStats(acs)}
       ${renderTrackMonthStats(s.by_track, s.by_month, s.by_strategy)}
       ${renderDiscoveredPatterns(disc)}
       ${renderPatternStats(s.pattern_stats)}
@@ -3738,6 +3759,26 @@
       <div style="margin-top:4px">경고 발생: <b style="font-size:18px">${as.n}회</b> · 경고 말 입상: <b style="font-size:18px;color:${color}">${as.hit}회 (${rate}%)</b></div>
       <div class="hint" style="margin-top:3px">경고 무시 후 미적중: <b style="color:#ff6b6b">${as.ignored_miss || 0}회</b> <span style="font-weight:400">(경고 말을 넣었으면 적중했을 케이스)</span></div>
       <div style="margin-top:5px;color:#ffd24f">결론: ${esc(as.advice || '데이터 축적 중')}</div>
+    </div>`;
+  }
+
+  /** [3번] 마감 후 대급락 → 실제 입상률 통계 카드(패턴 신뢰도 측정). */
+  function renderAfterCloseStats(acs) {
+    if (!acs || !acs.total_judged) {
+      if (acs && acs.pending) return `<div class="bet-box" style="display:block;margin:4px 0 10px;border-color:#f59e0b"><b>⚡ 마감 후 대급락 패턴</b><br><span class="hint">판정 대기 ${acs.pending}건 — 결과가 입력되면 입상률이 집계됩니다.</span></div>`;
+      return '';
+    }
+    const rate = acs.hit_rate;
+    const color = acs.reliable ? '#38d39f' : rate >= 40 ? '#ffd24f' : '#8a94a6';
+    const recent = (acs.recent || []).slice(0, 5).map((c) => {
+      const hit = c.hit ? `<span style="color:#38d39f">✅ ${(c.hitHorses || []).join('·')}번 입상</span>` : '<span class="hint">미입상</span>';
+      return `<div style="margin:2px 0;font-size:13px">${esc(c.raceKey || '')} · 대급락 ${(c.horses || []).join('·')}번 → ${hit}</div>`;
+    }).join('');
+    return `<div class="bet-box" style="display:block;margin:4px 0 10px;border-color:#f59e0b">
+      <b>⚡ 마감 후 대급락 → 실제 입상률 <span class="hint" style="font-weight:400">(발주 후 50%+ 급락말의 신뢰도)</span></b><br>
+      <div style="margin-top:4px">판정 <b style="font-size:18px">${acs.total_judged}건</b> · 입상률 <b style="font-size:20px;color:${color}">${rate}%</b> <span class="hint">(${acs.hits}건 적중)</span>${acs.pending ? ` · <span class="hint">대기 ${acs.pending}건</span>` : ''}</div>
+      ${acs.reliable ? '<div style="margin-top:4px;color:#38d39f;font-weight:700">→ 신뢰 가능 패턴(표본 5+·50%+) — 다음 경주 같은 패턴 발생 시 참고</div>' : '<div class="hint" style="margin-top:4px">표본 5건 이상 쌓이면 신뢰도 판정</div>'}
+      ${recent ? `<div style="margin-top:5px;border-top:1px dashed var(--border);padding-top:4px">${recent}</div>` : ''}
     </div>`;
   }
 
@@ -4698,6 +4739,7 @@
     parts.push(`<div class="matrix-title">🚨 실시간 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${six ? ' · 6명 출전' : ''}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>`);
     if (a.summary) parts.push(`<div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary)}</div>`);
     parts.push(renderAlertSignal(a.alertSignal, _horseRoleMap(a)));
+    parts.push(renderAfterCloseSurge(a.afterCloseSurge));
     parts.push(renderInverse(a.inverse));
     parts.push(renderIntegratedGrades(a));
     parts.push(renderJapanSignals(a.signals));
@@ -4777,6 +4819,7 @@
     host.innerHTML = `<div class="panel-card">
       ${renderRaceJudgment(a, '#jpBudget')}
       ${renderChaotic(a, '#jpBudget')}
+      ${renderAfterCloseSurge(a.afterCloseSurge)}
       ${renderInverse(a.inverse)}
       ${renderTopHorses(a)}
       <h3>🔗 실시간 배당 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
