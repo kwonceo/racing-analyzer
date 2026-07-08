@@ -1,0 +1,190 @@
+{
+ "date": "2026-07-08",
+ "results_summary": {
+  "total_races": 31,
+  "hits": 16,
+  "hit_rate": 51.6,
+  "profit": {
+   "net": 120900,
+   "settled": 31
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 81,
+  "quality_score": 54,
+  "ai_ready_races": 7,
+  "patterns_tagged": [
+   "마감급락_적중",
+   "중배당_성공",
+   "저배당제외_성공",
+   "전적배당_이중수렴",
+   "스마트머니_급락"
+  ]
+ },
+ "bigdata": {
+  "by_track": {
+   "소노다": {
+    "n": 9,
+    "hits": 6,
+    "hit_rate": 66.7
+   },
+   "카사마츠": {
+    "n": 8,
+    "hits": 4,
+    "hit_rate": 50.0
+   },
+   "몬베츠": {
+    "n": 7,
+    "hits": 3,
+    "hit_rate": 42.9
+   },
+   "카와사키": {
+    "n": 6,
+    "hits": 3,
+    "hit_rate": 50.0
+   },
+   "히로시마": {
+    "n": 1,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_field_size": {
+   "미상": {
+    "n": 18,
+    "hits": 10,
+    "hit_rate": 55.6
+   },
+   "중두수(9~12)": {
+    "n": 13,
+    "hits": 6,
+    "hit_rate": 46.2
+   }
+  },
+  "by_time_zone": {
+   "저녁": {
+    "n": 30,
+    "hits": 16,
+    "hit_rate": 53.3
+   },
+   "오전": {
+    "n": 1,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_grade": {
+   "미수집": {
+    "n": 31,
+    "hits": 16,
+    "hit_rate": 51.6
+   }
+  },
+  "by_condition": {
+   "미수집": {
+    "n": 31,
+    "hits": 16,
+    "hit_rate": 51.6
+   }
+  },
+  "by_weather": {
+   "미수집": {
+    "n": 31,
+    "hits": 16,
+    "hit_rate": 51.6
+   }
+  },
+  "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
+ },
+ "cumulative_pattern_reliability": {
+  "마감급락": {
+   "label": "급락 감지 적중",
+   "hit": 29,
+   "n": 30,
+   "rate": 96.7
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 4,
+   "n": 19,
+   "rate": 21.1
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 39,
+   "n": 93,
+   "rate": 41.9
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 57,
+   "n": 132,
+   "rate": 43.2
+  }
+ },
+ "key_learnings": [
+  {
+   "race": "카와사키 9경주",
+   "type": "성공",
+   "pattern": "전적+배당 이중수렴",
+   "detail": "7번 전적92.5점 + 마감직전 -18.7% 급락 = 중배당 적중",
+   "lesson": "전적과 배당이 같은 말 지목할 때 신뢰도 높음"
+  },
+  {
+   "race": "소노다 11경주",
+   "type": "성공",
+   "detail": "쌍승역전 3번 감지 → 3착 적중",
+   "lesson": "마감 후 신호도 다음 경주 참고 가치 있음"
+  }
+ ],
+ "missed_opportunities": [
+  {
+   "race": "카와사키 3경주",
+   "result": "7-9-3",
+   "our_recommend": "9+10",
+   "correct_signal": "3+7 -99.3% 마감후 급락",
+   "reason_missed": "마감 후 신호라 추천 미반영",
+   "improvement": "마감 직전 수집 간격 단축 필요"
+  },
+  {
+   "race": "카와사키 7경주",
+   "result": "7-5-6",
+   "our_recommend": "9번 → 7번 변경 늦음",
+   "reason_missed": "추천 변경이 마감 20초 전",
+   "improvement": "T-2분 최종 추천 확정 필요"
+  }
+ ],
+ "pattern_discoveries": [
+  {
+   "pattern": "죽은인기 배제",
+   "detail": "2+9 2.9배 변동없음 → 신뢰 낮음",
+   "result": "7+9 18.7배 적중",
+   "reliability": "높음"
+  },
+  {
+   "pattern": "마감직전 스마트머니",
+   "detail": "14분 상승 후 마감직전 -18.7% 급락 락인",
+   "result": "적중",
+   "reliability": "높음"
+  },
+  {
+   "pattern": "대규모급락 절대폭",
+   "detail": "초과급락에 묻혔던 3번 -70% 절대폭으로 감지",
+   "result": "소노다 11경주 적중",
+   "reliability": "높음"
+  }
+ ],
+ "system_improvements": [
+  "절대급락폭 병행 감지 추가 (v2.1.37)",
+  "timer.js 능동 수집 SW절전 무관 (v2.1.37)",
+  "추천 변경 이력 누적 저장",
+  "마감후 대급락 별도 추적"
+ ],
+ "tomorrow_focus": [
+  "출마표 전적 자동 수집 안정화",
+  "마감 T-2분 최종 추천 확정 강화",
+  "죽은인기 배제 로직 고도화",
+  "경정 삼복승 수집 차단"
+ ],
+ "generated_at": "2026-07-08 23:29:46"
+}
