@@ -27,6 +27,26 @@
 
   let deadline = 0;      // ms epoch (발주 시각)
   let fired = new Set(); // 이미 알린 단계(min)
+
+  // [근본해결1] SW 절전 무관 능동 수집 — 배당판 탭에서 timer.js(페이지 1초 틱)가 직접 수집 트리거.
+  //   MV3 서비스워커가 절전돼 background 알람(최소 30초)만으로 부활하면 실측 간격이 40~67초로 늘던 문제 해결.
+  //   페이지 setInterval(1초)은 스로틀되지 않으므로, 마감 임박에 스케줄대로 FORCE_COLLECT를 발사해 SW를 깨운다.
+  let _lastForceCollect = 0;
+  const _isOddsPage = /keiba\.go\.jp|qwqwd25\.net/.test(location.host);   // 배당판만(분석기 탭 제외)
+  function _activeCollectTick(left) {
+    if (!_isOddsPage || left == null || left <= 0 || left > 300000) return;   // T-5분 이내에서만
+    // background.autoTick 과 동일한 5단계 스케줄: T-30초3초·T-1·2분5초·T-3분10초·T-5분15초
+    const iv = left <= 30000 ? 3000 : left <= 120000 ? 5000 : left <= 180000 ? 10000 : 15000;
+    const now = Date.now();
+    if (now - _lastForceCollect < iv) return;
+    _lastForceCollect = now;
+    try {
+      chrome.storage.local.get({ autoSend: false }, (c) => {
+        if (!c || !c.autoSend) return;   // 자동수집 ON일 때만(임의 수집 방지)
+        try { chrome.runtime.sendMessage({ type: 'FORCE_COLLECT', reason: 'timer-active' }); } catch (_) { /* */ }
+      });
+    } catch (_) { /* */ }
+  }
   let msgUntil = 0;      // 문구 표시 만료 시각
 
   // ── 바 DOM (arbitrary 사이트 CSS 간섭 피하려 인라인 스타일) ──
@@ -111,6 +131,9 @@
     elCount.textContent = (h > 0 ? `${h}:${String(m).padStart(2, '0')}` : String(m)) + ':' + String(s).padStart(2, '0');
     elCount.style.color = left <= 60000 ? '#f87171' : left <= 300000 ? '#fbbf24' : '#e2e8f0';
     elStatus.textContent = '🟢 베팅가능'; elStatus.style.background = '#14532d';
+
+    // [근본해결1] 마감 임박 능동 수집(SW 절전 무관·페이지 틱 기반)
+    _activeCollectTick(left);
 
     // 단계 알림 (임계 진입 시 1회)
     for (const st of STAGES) {

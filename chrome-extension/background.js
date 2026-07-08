@@ -322,8 +322,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   //   자동수집 ON/OFF 와 무관하게 1회 강제 수집한다(엔진 상태는 건드리지 않음).
   if (msg?.type === 'FORCE_COLLECT') {
     (async () => {
+      // [근본해결1] timer.js 능동 수집과 background autoTick 이 겹치지 않게 가드(중복 수집 방지)
+      if (_collecting) { sendResponse({ ok: true, skipped: 'collecting' }); return; }
+      _collecting = true;
       try { await _collectOnce(); await _forceAnalyze(); sendResponse({ ok: true }); }
       catch (e) { sendResponse({ ok: false, error: String(e.message || e) }); }
+      finally { _collecting = false; }
     })();
     return true; // async
   }

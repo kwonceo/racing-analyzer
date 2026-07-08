@@ -2036,8 +2036,12 @@ def _excess_drop_analysis(drops, curQ):
       excess<=-5 → 🔴 진짜신호 / -5<excess<0 → 🟡 약한신호 / excess>=0 → 노이즈(시장 전체 급락).
     [긴급수정] 절대 급락 10%+(avg<=-10)는 시장평균과 무관하게 🔴 집중신호로 승격 —
       대규모 급락 때 시장평균에 묻혀 노이즈로 버려지던 실입상마 방어
-      (카나자와 10R 5-3-6: 3번 -17% 2착이 노이즈 판정으로 추천 누락된 3번째 동일 패턴)."""
-    ABS_STRONG = -10.0   # 절대 급락 임계(집중신호 승격 · 노이즈 기준 완화)
+      (카나자와 10R 5-3-6: 3번 -17% 2착이 노이즈 판정으로 추천 누락된 3번째 동일 패턴).
+    [근본해결2] 절대 단일급락폭(maxDrop<=-50) 병행 — 대규모 급락 시 개별 조합 -70%가 평균에
+      희석돼(avg>-10·excess 양수) 누락되던 실입상마 방어(소노다 11R: 3+9 -70%·3+6 -68% → 3번).
+      초과급락(상대) 또는 절대단일급락폭(절대) 둘 중 하나라도 걸리면 신호말로 채택."""
+    ABS_STRONG = -10.0   # 절대 평균급락 임계(집중신호 승격 · 노이즈 기준 완화)
+    ABS_BIG = -50.0      # [근본해결2] 절대 단일급락폭 임계 — 대규모 급락 평균에 안 묻히는 자금집중
     dd = [d for d in (drops or []) if d.get("pct") is not None and d["pct"] < 0]
     if not dd:
         return {"overall": None, "horses": {}, "concentrated": [], "count": 0}
@@ -2050,18 +2054,28 @@ def _excess_drop_analysis(drops, curQ):
     for h, pcts in by_horse.items():
         avg = round(sum(pcts) / len(pcts), 1)
         excess = round(avg - overall, 1)   # 음수 = 평균보다 더 급락(집중)
+        mx = round(min(pcts), 1)           # [근본해결2] 절대 단일급락폭(가장 큰 급락 조합)
         grade = "🔴" if excess <= -5 else ("🟡" if excess < 0 else None)
         abs_strong = avg <= ABS_STRONG
+        abs_big = mx <= ABS_BIG            # 단일 조합 절대급락 50%+ = 자금집중(평균 희석 무관)
+        if abs_strong or abs_big:
+            grade = "🔴"   # 절대(평균 or 단일) 급락 = 자금집중 확정 → 집중신호 승격(시장평균 무관)
+        # 신호강도(%p, 음수) = 초과급락(상대)·절대평균급락·절대단일급락 중 가장 강한(음수 큰) 쪽
+        cand = [excess]
         if abs_strong:
-            grade = "🔴"   # 절대 10%+ 급락 = 자금집중 확정 → 집중신호 승격(시장평균 무관)
-        # 신호강도(%p, 음수) = 초과급락·절대급락 중 더 강한 쪽 → 점수/정렬 일관 사용
-        strength = min(excess, avg) if abs_strong else excess
-        horses[h] = {"avg": avg, "excess": excess, "grade": grade,
-                     "combos": len(pcts), "absStrong": abs_strong, "strength": strength}
+            cand.append(avg)
+        if abs_big:
+            cand.append(mx)
+        strength = min(cand)
+        horses[h] = {"avg": avg, "excess": excess, "grade": grade, "combos": len(pcts),
+                     "absStrong": abs_strong, "absBig": abs_big, "maxDrop": mx, "strength": strength}
         if grade == "🔴":
             concentrated.append(h)
-    concentrated.sort(key=lambda n: horses[n]["strength"])   # 가장 집중된 말 먼저
-    return {"overall": overall, "horses": horses, "concentrated": concentrated, "count": len(dd)}
+    concentrated.sort(key=lambda n: horses[n]["strength"])   # 가장 집중된 말 먼저(절대·상대 통합)
+    # [근본해결2] 절대 단일급락폭만으로 잡힌 말(초과급락 노이즈였던 말) 별도 표기 → 배너·복기용
+    abs_only = [h for h in concentrated if horses[h]["absBig"] and horses[h]["excess"] >= 0]
+    return {"overall": overall, "horses": horses, "concentrated": concentrated,
+            "count": len(dd), "absConcentrated": abs_only}
 
 
 def _concentration_score(excess_val):
