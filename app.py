@@ -1914,7 +1914,7 @@ def _pattern_timing_bucket(mb):
     return "T-10분+"
 
 
-def _extract_patterns(drops, reversals, signals, curQ, bet_rec):
+def _extract_patterns(drops, reversals, signals, curQ, bet_rec, advanced=None):
     """[1·5번] 분석 결과에서 이상감지 패턴 태그 추출."""
     pats = []
     min_pct = min((d.get("pct") for d in (drops or []) if d.get("pct") is not None), default=0)
@@ -1926,6 +1926,10 @@ def _extract_patterns(drops, reversals, signals, curQ, bet_rec):
         pats.append("쌍승역전")
     if any(s.get("type") == "압축" for s in (signals or [])):
         pats.append("배당압축")
+    # [연속하락] 말별 배당이 2회+ 연속 하락(horseStreaks count>=2·level 🟡/🔴) → 자금 지속유입 신호
+    streaks = (advanced or {}).get("horseStreaks") or {}
+    if any((v or {}).get("count", 0) >= 2 for v in streaks.values()):
+        pats.append("연속하락")
     # 복승불일치: 추천 복승메인 조합 vs 시장 최저배당 복승 조합이 다를 때(전적유력마 ↔ 배당인기 불일치)
     if curQ and bet_rec:
         market_top = min(curQ.items(), key=lambda kv: kv[1])[0]
@@ -4187,7 +4191,7 @@ def _triple_analyze(rk, rec):
     # [5번] 현재 경주 패턴 매칭 + [4번] 신뢰도 기반 베팅 비중 자동 조정
     pattern_match = None
     try:
-        cur_patterns = _extract_patterns(drops, reversals, signals, curQ, bet_rec)
+        cur_patterns = _extract_patterns(drops, reversals, signals, curQ, bet_rec, advanced)
         if cur_patterns:
             _pstats = (_learning_load().get("stats", {}) or {}).get("pattern_stats") or {}
             matched = [dict({"pattern": p}, **(_pstats.get(p) or {})) for p in cur_patterns]
