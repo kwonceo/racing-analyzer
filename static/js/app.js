@@ -3716,11 +3716,14 @@
     let disc = null; try { disc = await (await fetch('/api/patterns/discovered')).json(); } catch (_) { /* */ }
     // [마감 후 대급락] 실제 입상률 통계(패턴 신뢰도)
     let acs = null; try { acs = await (await fetch('/api/after-close/stats')).json(); } catch (_) { /* */ }
+    // [학습일지] 오늘 배운 것 대시보드(성공/실패/새패턴/개선 + 내일 집중 + 누적 패턴 신뢰도)
+    let dl = null; try { dl = await (await fetch('/api/daily-learning')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     // [AI Phase1] AI 학습 데이터 현황 대시보드
     let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
+      ${renderDailyLearning(dl)}
       ${renderAiDataStatus(ai)}
       ${renderProfitSummary(s.profit_summary)}
       ${renderCompareStats(s.compare_stats, s.integrated_weights, s.basis_weights)}
@@ -3739,6 +3742,50 @@
       ${renderUpsetStats(up)}`;
     // [복기 학습] 실패 대시보드 + 명예의 전당도 함께 갱신
     try { loadFailureReview(); loadHallOfFame(); } catch (_) { /* */ }
+  }
+
+  // [학습일지] 오늘 배운 것 대시보드 — 성공/실패/새패턴/개선 카운트 + 내일 집중 + 누적 패턴 신뢰도
+  function renderDailyLearning(dl) {
+    if (!dl || dl.error) return '';
+    const rs = dl.results_summary || {};
+    const prof = rs.profit || {};
+    const kl = (dl.key_learnings || []).length;
+    const mo = (dl.missed_opportunities || []).length;
+    const pd = (dl.pattern_discoveries || []).length;
+    const si = (dl.system_improvements || []).length;
+    const focus = dl.tomorrow_focus || [];
+    const rel = dl.cumulative_pattern_reliability || {};
+    const relRow = (label, r) => {
+      r = r || {};
+      const has = r.n != null && r.hit != null;
+      const color = (r.rate || 0) >= 60 ? '#38d39f' : ((r.rate || 0) >= 40 ? '#f5c451' : '#ff6b6b');
+      return `<div style="display:flex;justify-content:space-between;gap:12px;padding:3px 0">
+        <span>${esc(label)}</span>
+        <span>${has ? `적중 <b>${r.hit}/${r.n}</b> <span style="color:${color};font-weight:700">(${r.rate}%)</span>` : '<span class="hint">데이터 없음</span>'}</span></div>`;
+    };
+    const net = prof.net;
+    const netColor = (net || 0) > 0 ? '#38d39f' : ((net || 0) < 0 ? '#ff6b6b' : '#9aa4b2');
+    const cnt = (icon, label, n) => `<div class="bet-box" style="display:inline-block;min-width:120px;margin:4px;text-align:center;vertical-align:top">
+      <div style="font-size:22px;font-weight:700">${n}</div><div class="hint">${icon} ${label}</div></div>`;
+    return `<div class="bet-box" style="margin:6px 0;padding:12px 14px;border:1px solid #334155;border-radius:10px">
+      <div style="font-weight:700;font-size:15px;margin-bottom:8px">📔 오늘 배운 것 <span class="hint" style="font-weight:400">(${esc(dl.date || '')})</span></div>
+      <div style="margin-bottom:8px">
+        오늘 경주 <b>${rs.total_races || 0}</b> · 적중 <b>${rs.hits || 0}</b>
+        <span style="color:#38d39f">(${rs.hit_rate || 0}%)</span> · 손익
+        <b style="color:${netColor}">${net != null ? (net > 0 ? '+' : '') + net.toLocaleString() + '원' : '-'}</b>
+        ${prof.settled != null ? `<span class="hint">(${prof.settled}경주 정산)</span>` : ''}
+      </div>
+      <div style="margin-bottom:6px">
+        ${cnt('✅', '성공 패턴', kl)}${cnt('❌', '실패 원인', mo)}${cnt('💡', '새 패턴', pd)}${cnt('🔧', '시스템 개선', si)}
+      </div>
+      ${focus.length ? `<div style="margin:8px 0 4px"><b>🎯 내일 집중할 것</b><ul style="margin:4px 0 0 18px;padding:0">${focus.map((f) => `<li>${esc(f)}</li>`).join('')}</ul></div>` : ''}
+      <div style="margin-top:8px"><b>📊 누적 패턴 신뢰도</b>
+        ${relRow('마감급락', rel['마감급락'])}
+        ${relRow('쌍승역전', rel['쌍승역전'])}
+        ${relRow('전적이중수렴', rel['전적이중수렴'])}
+        ${relRow('추천종합', rel['추천종합'])}
+      </div>
+    </div>`;
   }
 
   // [AI Phase1·3·7번] AI 학습 준비 현황 대시보드(수집/고품질/목표 진행률/마일스톤/예상 일정)

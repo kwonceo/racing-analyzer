@@ -5550,6 +5550,7 @@ DATA_BACKUP_PATHS = [
     "data/pattern_learning.json", "data/discovered_patterns.json",
     "data/daily_summary", "data/race_report",
     "data/korea_history", "data/prerace",
+    "data/daily_learning",
 ]
 _data_backup_lock = threading.Lock()        # git 작업 직렬화(index.lock 충돌 방지)
 _data_backup_timer = None                   # 디바운스 타이머
@@ -5637,6 +5638,239 @@ def _start_periodic_backup(interval=None):
     t = threading.Thread(target=_loop, daemon=True)
     t.start()
     print(f"[주기백업] {iv // 3600}시간 주기 데이터 안전 백업 스레드 시작")
+
+
+# ═════════ [학습일지] 일별 학습 일지 + 빅데이터 집계(data/daily_learning/YYYY-MM-DD.json) ═════════
+#   기존 daily_summary(수치 요약)·learning.json(통계)은 그대로 두고, 그 위에 '학습 일지'를 별도 저장:
+#     · results_summary: 총경주·적중·적중률·손익  (_build_daily_summary + 결과파일 investment.profit 재사용)
+#     · key_learnings / missed_opportunities / pattern_discoveries / system_improvements / tomorrow_focus (정성)
+#     · bigdata: 경마장별·출전두수별·마감시간대별·경주등급별·주로/날씨별 집계  ([2번] 빅데이터)
+#     · cumulative_pattern_reliability: 마감급락·쌍승역전·전적유력마 누적 적중률  ([3번] 대시보드)
+#   ⚠ 재생성해도 정성/수동 내용은 병합 보존(삭제 금지). extra(수동/API 입력)가 있으면 해당 항목만 갱신.
+DAILY_LEARNING_DIR = os.path.join(os.path.dirname(__file__), "data", "daily_learning")
+
+
+def _dl_time_zone(saved_at):
+    """'YYYY-MM-DD HH:MM:SS' → 오전(≤11)/오후(12~16)/저녁(17~)/미상. 마감 시간대 근사."""
+    try:
+        h = int(str(saved_at).split(" ")[1].split(":")[0])
+    except Exception:
+        return "미상"
+    return "오전" if h < 12 else ("오후" if h < 17 else "저녁")
+
+
+def _dl_hc_bucket(n):
+    """출전 두수 → 버킷."""
+    try:
+        n = int(n)
+    except (TypeError, ValueError):
+        return "미상"
+    return "소두수(≤8)" if n <= 8 else ("중두수(9~12)" if n <= 12 else "다두수(13+)")
+
+
+def _dl_bucket_add(agg, key, hit):
+    """집계 헬퍼: agg[key] = {n, hits}. hit 가 None(미판정)이면 n만 증가."""
+    b = agg.setdefault(str(key if key not in (None, "") else "미수집"), {"n": 0, "hits": 0})
+    b["n"] += 1
+    if hit:
+        b["hits"] += 1
+
+
+def _dl_finalize(agg):
+    """{key:{n,hits}} → {key:{n,hits,hit_rate}} (내림차순 n)."""
+    out = {}
+    for k, b in sorted(agg.items(), key=lambda kv: kv[1]["n"], reverse=True):
+        out[k] = {"n": b["n"], "hits": b["hits"],
+                  "hit_rate": round(b["hits"] / b["n"] * 100, 1) if b["n"] else 0.0}
+    return out
+
+
+def _daily_bigdata(date):
+    """[2번] 오늘 경주를 ai_training/ 에서 스캔해 빅데이터 집계.
+    경마장·두수·시간대·등급·주로·날씨별 {n,hits,hit_rate}. 미수집 필드는 '미수집' 버킷으로 슬롯 유지."""
+    by_track, by_field, by_zone, by_grade, by_cond, by_weather = {}, {}, {}, {}, {}, {}
+    if os.path.isdir(AI_TRAINING_DIR):
+        for fn in os.listdir(AI_TRAINING_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(AI_TRAINING_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            ri = d.get("race_info") or {}
+            if ri.get("date") != date:
+                continue
+            hit = bool((d.get("result") or {}).get("hit"))
+            _dl_bucket_add(by_track, ri.get("track"), hit)
+            _dl_bucket_add(by_field, _dl_hc_bucket(ri.get("horse_count")), hit)
+            _dl_bucket_add(by_zone, _dl_time_zone(d.get("saved_at")), hit)
+            _dl_bucket_add(by_grade, ri.get("grade"), hit)
+            _dl_bucket_add(by_cond, ri.get("condition"), hit)
+            _dl_bucket_add(by_weather, ri.get("weather"), hit)
+    return {
+        "by_track": _dl_finalize(by_track),       # 경마장별 이변 패턴
+        "by_field_size": _dl_finalize(by_field),  # 출전 두수별 배당 패턴
+        "by_time_zone": _dl_finalize(by_zone),    # 시간대별 신호 신뢰도(근사)
+        "by_grade": _dl_finalize(by_grade),       # 등급별 이변 확률(미수집 시 '미수집')
+        "by_condition": _dl_finalize(by_cond),    # 주로 상태별 적중률(미수집)
+        "by_weather": _dl_finalize(by_weather),   # 날씨별 적중률(미수집)
+        "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계.",
+    }
+
+
+def _daily_profit(date):
+    """오늘 결과 입력된 경주의 손익 합(race_results/ investment.profit)."""
+    total, n = 0, 0
+    if os.path.isdir(RACE_RESULTS_DIR):
+        for fn in os.listdir(RACE_RESULTS_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            if d.get("date") != date:
+                continue
+            p = ((d.get("investment") or {}).get("profit"))
+            if p is not None:
+                total += int(p)
+                n += 1
+    return {"net": total, "settled": n}
+
+
+def _daily_tags(date):
+    """오늘 analysis_log/ 파일들의 pattern_tags 를 모아 유니크 태그 목록(데이터 기반)."""
+    tags = []
+    if os.path.isdir(ANALYSIS_LOG_DIR):
+        for fn in os.listdir(ANALYSIS_LOG_DIR):
+            if not fn.endswith(".json") or date.replace("-", "_") not in fn:
+                continue
+            try:
+                d = json.load(open(os.path.join(ANALYSIS_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            for t in (d.get("pattern_tags") or []):
+                if t not in tags:
+                    tags.append(t)
+    return tags
+
+
+def _dl_reliability():
+    """[3번] 누적 패턴 신뢰도 — learning.json 통계에서 파생(마감급락·쌍승역전·전적유력마·추천종합)."""
+    try:
+        L = _learning_load()
+        s = L.get("stats") or _recompute_learning_stats(L.get("records") or [])
+    except Exception:
+        s = {}
+
+    def _pick(st, label):
+        st = st or {}
+        return {"label": label, "hit": st.get("hit"), "n": st.get("n"), "rate": st.get("rate")}
+
+    return {
+        "마감급락": _pick(s.get("drop_anomaly"), "급락 감지 적중"),
+        "쌍승역전": _pick(s.get("reversal"), "쌍승 역전 적중"),
+        "전적이중수렴": _pick(s.get("form_pick"), "전적 유력마 적중(이중수렴 근사)"),
+        "추천종합": _pick(s.get("recommend_hit"), "추천 종합 적중"),
+    }
+
+
+# 정성 항목(재생성 시 병합 보존 대상) — 삭제 금지 원칙의 핵심.
+_DL_QUAL_KEYS = ("key_learnings", "missed_opportunities", "pattern_discoveries",
+                 "system_improvements", "tomorrow_focus")
+
+
+def _daily_learning_generate(date=None, extra=None):
+    """[1번] 일별 학습 일지 생성/갱신 → data/daily_learning/<date>.json.
+    수치(results_summary·bigdata·reliability·ai_training_data)는 매번 실데이터로 재계산하되,
+    정성 항목·태그는 기존 파일 + extra 를 병합 보존한다(재생성이 수동 기록을 지우지 않음)."""
+    date = date or time.strftime("%Y-%m-%d", time.localtime())
+    base = _build_daily_summary(date)   # 재사용: total_races·hits·hit_rate·data_quality·cumulative_total
+    # 기존 파일 로드(정성 내용 보존)
+    path = os.path.join(DAILY_LEARNING_DIR, date + ".json")
+    existing = {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            existing = json.load(f) or {}
+    except Exception:
+        existing = {}
+    extra = extra or {}
+
+    journal = dict(existing)   # 기존 내용에서 출발 → 삭제 없음
+    journal["date"] = date
+    journal["results_summary"] = {
+        "total_races": base.get("total_races", 0),
+        "hits": base.get("hits", 0),
+        "hit_rate": base.get("hit_rate", 0.0),
+        "profit": _daily_profit(date),
+    }
+    # 태그: 기존 ∪ extra ∪ 오늘 analysis_log 태그(데이터 기반)
+    tagged = list(existing.get("ai_training_data", {}).get("patterns_tagged") or [])
+    for t in ((extra.get("ai_training_data") or {}).get("patterns_tagged") or []) + _daily_tags(date):
+        if t not in tagged:
+            tagged.append(t)
+    journal["ai_training_data"] = {
+        "races_collected": base.get("cumulative_total", 0),
+        "quality_score": base.get("data_quality", 0),
+        "ai_ready_races": base.get("ai_ready_races", 0),
+        "patterns_tagged": tagged,
+    }
+    journal["bigdata"] = _daily_bigdata(date)                      # [2번]
+    journal["cumulative_pattern_reliability"] = _dl_reliability()  # [3번]
+    # 정성 항목: extra 로 오면 해당 항목만 갱신(수동 우선), 아니면 기존 보존, 둘 다 없으면 빈 배열 유지
+    for k in _DL_QUAL_KEYS:
+        if extra.get(k) is not None:
+            journal[k] = extra[k]
+        else:
+            journal.setdefault(k, existing.get(k, []))
+    journal["generated_at"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    try:
+        os.makedirs(DAILY_LEARNING_DIR, exist_ok=True)
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(journal, f, ensure_ascii=False, indent=1)
+        os.replace(tmp, path)
+    except Exception as e:
+        print("[학습일지] 저장 실패:", e)
+    return journal
+
+
+# [4번] 매일 22:00 자동 생성 트리거 — 오늘 결과 집계 → 학습일지 생성 → GitHub 백업.
+#   기존 _start_periodic_backup 데몬 패턴 재사용. .env DAILY_LEARNING_HOUR 로 시각 조정(기본 22).
+_daily_learning_sched_started = False
+
+
+def _daily_learning_hour():
+    try:
+        return int(max(0, min(23, int(os.environ.get("DAILY_LEARNING_HOUR", "") or 22))))
+    except (TypeError, ValueError):
+        return 22
+
+
+def _start_daily_learning_scheduler():
+    global _daily_learning_sched_started
+    if _daily_learning_sched_started:
+        return
+    _daily_learning_sched_started = True
+    hour = _daily_learning_hour()
+
+    def _loop():
+        last_done = None
+        while True:
+            try:
+                time.sleep(60)
+                now = time.localtime()
+                today = time.strftime("%Y-%m-%d", now)
+                if now.tm_hour >= hour and last_done != today:
+                    _daily_learning_generate(today)   # 정성 내용은 기존 파일 병합 보존
+                    _run_data_git_backup(f"학습일지 자동 생성 {today}")
+                    last_done = today
+                    print(f"[학습일지] {today} {hour}:00 자동 생성·백업 완료")
+            except Exception as e:
+                print("[학습일지] 스케줄러 예외:", e)
+
+    threading.Thread(target=_loop, daemon=True).start()
+    print(f"[학습일지] 매일 {hour}:00 학습 일지 자동 생성 스케줄러 시작")
 
 
 def _learning_load():
@@ -7635,6 +7869,40 @@ def daily_summary():
         return jsonify(json.load(open(path, encoding="utf-8")))
     except Exception:
         return jsonify(_build_daily_summary(d))
+
+
+@app.route("/api/daily-learning", methods=["GET", "POST"])
+def daily_learning():
+    """[학습일지] 일별 학습 일지 조회/생성.
+      GET ?date=YYYY-MM-DD(없으면 오늘) → 저장본 있으면 반환, 없으면 즉석 생성.
+      GET ?list=1 → 저장된 학습일지 목록(최신순, 경량 요약).
+      POST (body=extra JSON) → 강제 재생성 + 정성 항목 병합(수동 기록 저장). extra 없으면 수치만 갱신."""
+    if request.args.get("list"):
+        out = []
+        if os.path.isdir(DAILY_LEARNING_DIR):
+            for fn in sorted(os.listdir(DAILY_LEARNING_DIR), reverse=True):
+                if not fn.endswith(".json"):
+                    continue
+                try:
+                    j = json.load(open(os.path.join(DAILY_LEARNING_DIR, fn), encoding="utf-8"))
+                except Exception:
+                    continue
+                out.append({"date": j.get("date"), "results_summary": j.get("results_summary"),
+                            "key_learnings": len(j.get("key_learnings") or []),
+                            "missed_opportunities": len(j.get("missed_opportunities") or []),
+                            "pattern_discoveries": len(j.get("pattern_discoveries") or []),
+                            "generated_at": j.get("generated_at")})
+        return jsonify({"journals": out, "count": len(out)})
+    date = (request.args.get("date") or "").strip() or None
+    if request.method == "POST":
+        extra = request.get_json(silent=True) or None
+        return jsonify(_daily_learning_generate(date, extra))
+    d = date or time.strftime("%Y-%m-%d", time.localtime())
+    path = os.path.join(DAILY_LEARNING_DIR, d + ".json")
+    try:
+        return jsonify(json.load(open(path, encoding="utf-8")))
+    except Exception:
+        return jsonify(_daily_learning_generate(d))
 
 
 # ── [일괄 결과 등록] 결과 페이지(HTML/URL) 전체 파싱 → 분석경주 자동매칭·학습 ──
@@ -9755,4 +10023,5 @@ if __name__ == "__main__":
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         _korea_maybe_resume()
         _start_periodic_backup()   # [데이터 자동백업 완성] 6시간 주기 안전 백업(결과 미입력이어도 백업)
+        _start_daily_learning_scheduler()   # [학습일지] 매일 22:00 학습 일지 자동 생성·백업
     app.run(host="127.0.0.1", port=8011, debug=True, threaded=True)
