@@ -9214,7 +9214,24 @@ def keirin_card():
     if not card.get("riders"):
         return jsonify({"error": "선수 정보를 찾지 못했습니다(경주 번호/개최일 확인)."}), 422
     an = _keirin_analyze(card)
-    return jsonify({"ok": True, "url": url, "card": card, "analysis": an})
+    # [live 통합] raceKey 가 오면 출마표 전적(競走得点)을 STARTERS_STORE 에 저장 →
+    #   같은 raceKey로 배당(복승·쌍승·삼복승)이 수집되면 _triple_analyze 가 전적+배당(역배열·급락)을
+    #   통합해 유력마 등급·📋추천 근거·통합등급에 반영(경륜 '전적없음' 해소).
+    rk = (body.get("raceKey") or "").strip()
+    linked = None
+    if rk and an.get("ranked"):
+        horses = [{
+            "no": r.get("car"), "name": r.get("name", ""), "jockey": "",
+            "totalScore": round(float(r.get("adjScore") or r.get("score") or 0), 1),
+            "recentPlacings": [], "rentai": r.get("rentai"), "styleType": r.get("styleType"),
+        } for r in an["ranked"] if r.get("car") is not None and r.get("score") is not None]
+        if horses:
+            sdb = _starters_load()
+            sdb[rk] = {"horses": horses, "t": time.time(), "source": "keirin"}
+            _starters_save(sdb)
+            linked = rk
+            print(f"[경륜 전적] {rk}: {len(horses)}두 live 분석 반영(競走得点)")
+    return jsonify({"ok": True, "url": url, "card": card, "analysis": an, "linkedRaceKey": linked})
 
 
 @app.route("/api/analysis-log/backfill", methods=["POST"])

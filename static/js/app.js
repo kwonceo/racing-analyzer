@@ -6765,11 +6765,15 @@
     if (url) payload.url = url;
     else if (jo && ymd && race) { payload.joCode = jo; payload.kaisaiBi = ymd; payload.raceNo = race; }
     else { out.innerHTML = '<p class="hint" style="color:var(--red)">경륜장코드+개최일+경주 또는 URL을 입력하세요.</p>'; return; }
+    // [live 통합] raceKey 입력값 우선 → 없으면 현재 경주(패널/활성) 자동 → 전적을 live 분석에 연동
+    payload.raceKey = g('#keirinRaceKey') || (_closing && _closing.panelRk) || getActiveRaceKey() || '';
     out.innerHTML = '<p class="hint">🚴 oddspark에서 출마표를 가져오는 중…</p>';
     let d; try { d = await (await fetch('/api/keirin/card', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
     catch (e) { out.innerHTML = `<p class="hint" style="color:var(--red)">실패: ${esc(e.message)}</p>`; return; }
     if (d.error) { out.innerHTML = `<p class="hint" style="color:var(--red)">${esc(d.error)}</p>`; return; }
     out.innerHTML = renderKeirinCard(d);
+    // 연동 성공 시 현재 라이브 분석 즉시 재조회(전적 반영된 유력마·근거 표시)
+    if (d.linkedRaceKey) { try { refreshCurrentRace(); } catch (_) { /* */ } }
   }
 
   function renderKeirinCard(d) {
@@ -6793,7 +6797,11 @@
     const tend = c.tendency || {};
     const tendTxt = Object.keys(tend).length ? Object.entries(tend).map(([k, v]) => `${k} ${v}%`).join(' · ') : '';
     const lineTxt = (a.line || []).length ? a.line.join(' → ') : '';
+    const linked = d.linkedRaceKey
+      ? `<div class="hint" style="margin:2px 0 8px;padding:6px 9px;background:rgba(56,211,159,.14);border-left:3px solid #38d39f;border-radius:6px;color:#38d39f">✅ <b>live 분석 연동됨</b> — <b>${esc(d.linkedRaceKey)}</b> 의 유력마·📋추천 근거·통합등급에 이 전적(競走得点)이 배당(역배열·급락)과 통합 반영됩니다.</div>`
+      : `<div class="hint" style="margin:2px 0 8px;padding:6px 9px;background:rgba(245,158,11,.12);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b">⚠️ live 연동 안 됨(raceKey 미지정) — 전적만 표시. 상단 <b>raceKey</b> 칸에 현재 경주(예: 히로시마 2경주)를 넣으면 배당 분석에 통합됩니다.</div>`;
     return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px">
+      ${linked}
       <div class="matrix-title">🚴 ${esc(c.venue || '')} ${c.race_no != null ? c.race_no + 'R' : ''} <span class="hint" style="font-weight:400">${esc(c.dist || '')} ${esc(c.post || '')} 발주 · 선수 ${(c.riders || []).length}명</span></div>
       ${a.summary ? `<div style="margin:4px 0"><b>득점 상위:</b> ${esc(a.summary)}</div>` : ''}
       ${tendTxt ? `<div class="hint" style="margin:2px 0">🏁 경륜장 결정타 경향(최근1년): ${esc(tendTxt)}${a.favStyle ? ` · 유리 각질 <b>${esc(a.favStyle)}</b>` : ''}</div>` : ''}
