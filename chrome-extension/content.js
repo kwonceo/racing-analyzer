@@ -1318,18 +1318,25 @@
   }
 
   // ── [출마표2 = keiba.go.jp DebaTable 별도 페이지] 전적 fetch·추출 ──────────
-  //  DebaTable URL 예: /KeibaWeb/TodayRaceInfo/DebaTable?k_raceNo=9&k_raceDate=2026/07/02&k_babaCode=20&odds_flg=4
-  const DEBA_PATH = 'https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable';
+  //  DebaTable URL 예: https://www2.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026/07/02&k_raceNo=9&k_babaCode=20&odds_flg=4
+  //  [수정] 실제 라이브 호스트는 www2.keiba.go.jp (사용자 확인). 파라미터만 있을 때의 기본 폴백 호스트.
+  const DEBA_PATH = 'https://www2.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable';
   function debaParamsFromUrl(url) {
     try {
-      const sp = new URLSearchParams(new URL(url, location.href).search);
+      const u = new URL(url, location.href);
+      const sp = u.searchParams;
       const d = sp.get('k_raceDate'), n = sp.get('k_raceNo'), b = sp.get('k_babaCode');
-      if (d && n && b) return { k_raceDate: d, k_raceNo: n, k_babaCode: b };
+      if (d && n && b) {
+        // [수정] keiba.go.jp 원본 URL이면 호스트+경로(base)를 보존 → www2 등 실제 호스트로 fetch(재조립 시 www 로 뭉개지던 버그 방지)
+        const base = /(^|\.)keiba\.go\.jp$/i.test(u.host) ? (u.origin + u.pathname) : null;
+        return { k_raceDate: d, k_raceNo: n, k_babaCode: b, base };
+      }
     } catch (_) { /* */ }
     return null;
   }
   function buildDebaUrl(p) {
-    return `${DEBA_PATH}?k_raceNo=${encodeURIComponent(p.k_raceNo)}`
+    const base = (p && p.base) || DEBA_PATH;   // [수정] 원본 호스트(www2) 보존, 없으면 기본 폴백
+    return `${base}?k_raceNo=${encodeURIComponent(p.k_raceNo)}`
       + `&k_raceDate=${encodeURIComponent(p.k_raceDate)}`
       + `&k_babaCode=${encodeURIComponent(p.k_babaCode)}&odds_flg=4`;
   }
@@ -1381,14 +1388,28 @@
     for (const a of document.querySelectorAll('a[href*="keiba.go.jp"], a[href*="k_raceDate"]')) {
       const p = debaParamsFromUrl(a.getAttribute('href') || ''); if (p) return p;
     }
-    // [출마표 버튼] asyukk 지방경마의 [출마표]는 <input onclick="window.open('...DebaTable?k_raceDate=..&k_raceNo=..&k_babaCode=..')">
-    //   형태라 a[href] 스캔에 안 잡힘 → onclick 속성에서 keiba DebaTable URL 을 직접 추출(사용자 요청).
+    // [출마표 버튼] asyukk 지방경마의 [출마표]는 <input value="출마표" onclick="window.open('...DebaTable?k_raceDate=..&k_raceNo=..&k_babaCode=..')">
+    //   형태라 a[href] 스캔에 안 잡힘 → onclick 속성에서 keiba DebaTable URL 을 직접 추출(사용자 확인 패턴).
     //   (출마표2=rakuten 은 k_raceDate 가 없어 자연히 제외됨)
-    for (const el of document.querySelectorAll('[onclick]')) {
-      const oc = el.getAttribute('onclick') || '';
-      if (!/k_raceDate/i.test(oc)) continue;
+    // [수정] ①입력버튼(input[value=출마표]) 우선 스캔 ②따옴표 안 URL(상대/절대·www2 호스트) 우선 추출 → 호스트 보존
+    const debaUrlFromOnclick = (oc) => {
+      if (!/k_raceDate/i.test(oc)) return null;
+      // window.open('URL')·location.href='URL' 등 따옴표 안 URL(상대·절대 모두) 우선
+      const q = oc.match(/['"]([^'"]*k_raceDate[^'"]*)['"]/i);
+      if (q && q[1]) return q[1].replace(/&amp;/g, '&');
+      // 폴백: 절대 URL 패턴
       const m = oc.match(/https?:\/\/[^'"\\)\s]*k_raceDate[^'"\\)\s]*/i);
-      if (m) { const p = debaParamsFromUrl(m[0].replace(/&amp;/g, '&')); if (p) { console.log('[전적수집] 출마표 버튼 onclick에서 DebaTable 파라미터 추출:', p); return p; } }
+      return m ? m[0].replace(/&amp;/g, '&') : null;
+    };
+    // ① 명시적 [출마표] 입력버튼 먼저(사용자 지정 selector)
+    const btns = [
+      ...document.querySelectorAll('input[value*="출마표"], input[value*="出馬表"], button'),
+      ...document.querySelectorAll('[onclick]'),
+    ];
+    for (const el of btns) {
+      const oc = el.getAttribute('onclick') || '';
+      const u = debaUrlFromOnclick(oc);
+      if (u) { const p = debaParamsFromUrl(u); if (p) { console.log('[전적수집] 출마표 버튼 onclick에서 DebaTable URL 추출:', u, p); return p; } }
     }
     // 마지막 수단: keiba DebaTable 방문 시 저장해 둔 파라미터
     return new Promise((resolve) => {
@@ -1403,11 +1424,14 @@
     const url = buildDebaUrl(p);
     console.log('[전적수집] DebaTable fetch:', url);
     // [안정화] 네트워크 전송 실패 시 1회 재시도(일시적 오류 대응)
+    // [수정] 동일출처는 host 가 '정확히' 일치할 때만 → www 페이지에서 www2 로 fetch 시 CORS 차단되던 문제 방지(호스트 다르면 background 경유)
+    let sameOrigin = false;
+    try { sameOrigin = new URL(url, location.href).host === location.host; } catch (_) { /* */ }
     const fetchHtml = async () => {
-      if (/(^|\.)keiba\.go\.jp$/.test(location.host)) {
+      if (sameOrigin) {
         return await fetch(url, { credentials: 'same-origin' }).then((r) => r.text());     // 동일출처
       }
-      const res = await chrome.runtime.sendMessage({ type: 'FETCH_URL', url });             // 교차출처 → background
+      const res = await chrome.runtime.sendMessage({ type: 'FETCH_URL', url });             // 교차출처(www→www2 포함) → background
       if (!res || !res.ok) throw new Error((res && res.error) || 'FETCH_URL 실패');
       return res.html;
     };
