@@ -2650,8 +2650,20 @@
       ${exclTxt}</div>`;
   }
 
+  // [신규] 전적 우수하나 시장 비인기 배너(역배열 아님) — 전적은 좋은데 배당이 비인기인 말
+  function _strongUnpopularBlock(inv) {
+    const su = (inv && inv.strongUnpopular) || [];
+    if (!su.length) return '';
+    const items = su.map((h) => `<b style="color:#93c5fd">${h.no}번</b> <span class="hint">(전적 ${h.formScore} · 시장 ${h.reprOdds}배${h.popRank ? ` · 인기 ${h.popRank}위` : ''})</span>`).join(' · ');
+    return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #3b82f6;border-radius:8px;background:rgba(59,130,246,.1)">
+      <div style="font-size:14px;font-weight:800;color:#93c5fd">📈 전적 우수하나 시장 비인기</div>
+      <div class="hint" style="margin:3px 0 0;line-height:1.6">${items}<br>→ <b style="color:#dbeafe">역배열 아님</b> — 전적은 우수하나 배당은 비인기(시장이 아직 안 밀어줌). 참고만.</div></div>`;
+  }
+
   function renderInverse(inv) {
-    if (!inv || !inv.detected) return '';
+    if (!inv) return '';
+    // 역배열(쌍승역전) 아니면 → 전적 우수·시장 비인기만(있으면) 표시
+    if (!inv.detected) return _strongUnpopularBlock(inv);
     const b = inv.banner || {};
     const kindColor = { '쌍승역전': '#ff8a8a', '복승불일치': '#ffd24f', '배당압축': '#7dd3fc', '초과급락': '#ff5c5c' };
     // 배너 상단부: 단승 1위 · 복승 최저 · 쌍승 역전
@@ -2679,7 +2691,7 @@
     return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #ff5c5c;border-radius:8px;background:rgba(255,92,92,.1)">
       <div style="font-size:15px;font-weight:800;color:#ff8a8a">🔄 역배열 감지!</div>
       <div class="hint" style="margin:3px 0 5px;line-height:1.7">${lines.join('<br>')}<br>→ <b style="color:#ffd24f">실질 유력마가 바뀌었을 가능성</b></div>
-      ${detBlock}${typeHtml}${invBlock}</div>`;
+      ${detBlock}${typeHtml}${invBlock}</div>${_strongUnpopularBlock(inv)}`;
   }
 
   // ── ⭐ 유력마 TOP5 + 복병/이상감지 상단 고정 카드 ─────────────────────

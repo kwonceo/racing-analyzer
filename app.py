@@ -2489,10 +2489,14 @@ def _rank_inversion_detail(curWin, curQ, curD):
     return detail, lead, {"popSrc": pop_name, "oddsSrc": odds_name}
 
 
-def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mismatch, excess):
-    """[역배열 감지] 단승 유력마 순서 ≠ 복승/쌍승 배당 순서 = 실질 유력마 변경 가능성.
-    4유형(①쌍승역전 ②복승불일치 ③배당압축 ④초과급락)을 하나로 통합.
-    반환 {detected, types:[{kind,level,text,horses}], invHorses:[no], invCombos:[{combo,odds}], banner}."""
+def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mismatch, excess, form=None):
+    """[역배열 감지] 진짜 역배열 = 시장 인기 순위(배당 낮은 순) ≠ 쌍승 배당 순위가 역전될 때만.
+    ⚠️ [기준 수정] 역배열(detected)은 **쌍승역전(wx_reversals)** 이 있을 때만 True.
+       (예: 단승 1위 2번인데 쌍승에서 4→2가 2→4보다 낮으면 → 4번이 실질 1착 = 진짜 역배열.)
+       전적이 좋아도 배당이 높기만 한 경우는 역배열이 아니라 '전적 우수하나 시장 비인기'로 별도 분류.
+    보조 유형(복승불일치·배당압축·초과급락)은 참고용으로 types 에 계속 담되 역배열 판정 트리거로 쓰지 않음(삭제 아님).
+    반환 {detected, types, invHorses, invCombos, banner, invDetail, invLead,
+          strongUnpopular:[{no,formScore,reprOdds,popRank}]}."""
     types, inv_horses = [], []
 
     def _add_inv(h):
@@ -2540,9 +2544,51 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
                       "detail": f"평균급락 {e['avg']}% (시장평균 {excess.get('overall')}% 대비)", "horses": [h]})
         _add_inv(h)
 
-    # 역배열 판정: 유형 존재 또는 복승 최저 조합이 단승 1위를 미포함(단승≠복승 순서)
+    # [기준 수정] 역배열 판정 = 쌍승역전(시장 인기순위 ↔ 쌍승 배당순위 역전)이 있을 때만.
+    #   기존의 "유형 존재/단승1위가 복승최저에 빠짐"만으로 True 하던 조건 제거
+    #   → 전적 좋고 배당만 높은 말이 역배열로 오탐되던 문제 해결.
     fav_normal = (ref_no is not None and fav_pair is not None and ref_no in fav_pair)
-    detected = bool(types) or (has_win and ref_no is not None and fav_pair is not None and not fav_normal)
+    has_reversal = any(t.get("kind") == "쌍승역전" for t in types)
+    detected = bool(has_reversal)
+
+    # [신규 분류] 전적 우수하나 시장 비인기: 전적 상위(총점 60+)인데 배당은 비인기(대표 복승배당 높음/인기 하위).
+    #   역배열(쌍승역전) 대상 말은 제외 — 그건 별도 역배열 신호이므로 중복 표시 방지.
+    strong_unpopular = []
+    try:
+        form_map = {}
+        for f in (form or []):
+            _no, _ts = f.get("no"), f.get("totalScore")
+            if _no is not None and isinstance(_ts, (int, float)):
+                form_map[int(_no)] = float(_ts)
+        if form_map and curQ:
+            repr_odds = {}
+            for k, o in curQ.items():
+                if not o or o <= 0:
+                    continue
+                for h in k:
+                    if h not in repr_odds or o < repr_odds[h]:
+                        repr_odds[h] = o
+            pop_sorted = [h for h, _ in sorted(repr_odds.items(), key=lambda kv: kv[1])]
+            pop_rank = {h: i + 1 for i, h in enumerate(pop_sorted)}
+            n_pop = len(pop_sorted)
+            rev_horses = {int(r["challenger"]) for r in (wx_reversals or [])} | \
+                         {int(r["favorite"]) for r in (wx_reversals or [])}
+            form_sorted = [no for no, _ in sorted(form_map.items(), key=lambda kv: -kv[1])]
+            for no in form_sorted[:3]:                       # 전적 상위 3두만 검사
+                ts = form_map[no]
+                if ts < 60:                                  # 전적 우수 기준(good_form 근사)
+                    continue
+                if no in rev_horses:                         # 쌍승역전 대상이면 역배열 신호로 처리(중복 제외)
+                    continue
+                pr, ro = pop_rank.get(no), repr_odds.get(no)
+                if pr is None or ro is None:
+                    continue
+                # 시장 비인기 = 인기 하위 절반 밖 이거나 대표 복승배당 15배+ (전적은 좋은데 돈은 안 붙음)
+                if pr > max(3, n_pop // 2) or ro >= 15:
+                    strong_unpopular.append({"no": int(no), "formScore": round(ts, 1),
+                                             "reprOdds": ro, "popRank": pr})
+    except Exception:
+        strong_unpopular = []
 
     # 복승 역배열 조합: 역배열 감지말이 낀 복승 조합(배당 있는 것, 저배당순)
     inv_combos, seen_c = [], set()
@@ -2589,7 +2635,8 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
     return {"detected": detected, "types": types, "invHorses": inv_horses,
             "invCombos": inv_combos, "banner": banner,
             "invDetail": inv_detail,          # [팝업] 마번·인기순위·최저조합배당(<30배)
-            "invLead": inv_lead}              # [팝업] 인기 낮은데 배당 최저 = 실질 유력 후보
+            "invLead": inv_lead,              # [팝업] 인기 낮은데 배당 최저 = 실질 유력 후보
+            "strongUnpopular": strong_unpopular}   # [신규] 전적 우수하나 시장 비인기(역배열 아님)
 
 
 def _advanced_anomaly(hist, curQ, drops):
@@ -3081,9 +3128,23 @@ def _bet_judgment(conf_engine, excess, advanced, wx_reversals, form, mass_drop, 
     strong = (max_ex >= 15 and max_streak >= 3 and (min_ratio is not None and min_ratio < 0.80) and (max_form >= 60 or not has_form))
     moderate = ((5 <= max_ex < 15) or max_streak == 2 or (min_ratio is not None and 0.80 <= min_ratio <= 0.95))
 
+    # [1번·추천 신중화] 시장 신호 4종(전적 제외) 중 2개+ 확인 시에만 추천.
+    #   ①초과급락 절대10%+ ②쌍승역전 ③연속하락 2회+ ④환수율 이상(top3 90%+).  전적은 시장 신호가 아니므로 카운트 제외.
+    sig_excess = any(v.get("absStrong") for v in ex_h.values())
+    sig_reversal = min_ratio is not None
+    sig_streak = max_streak >= 2
+    _ov = (advanced or {}).get("overround") or {}
+    sig_overround = bool(_ov.get("concentrated"))
+    market_signal_count = int(sig_excess) + int(sig_reversal) + int(sig_streak) + int(sig_overround)
+
     if not signal_ready and not after_close:
         typ, emoji, label = "wait", "⏳", "신호 대기"
         msg = "배당 수집 중 — 신호 형성 후 추천(저배당 무조건 추천 안 함)"
+        alloc = {"main": 0, "sub": 0, "trio": 0}
+    elif market_signal_count < 2 and not after_close:
+        # [1번] 시장 신호 4종 중 2개 미만 → 추천 보류(전적만 좋아도 추천 안 함)
+        typ, emoji, label = "wait", "⏳", "신호 대기"
+        msg = f"아직 뚜렷한 신호 없음 — 시장 신호 {market_signal_count}/2 (급락10%+·쌍승역전·연속하락2회+·환수율이상 중 2개+ 확인 후 추천)"
         alloc = {"main": 0, "sub": 0, "trio": 0}
     elif strong or best >= 80:
         typ, emoji, label = "확실형", "✅", "확실형 — 자신있게 배팅"
@@ -3115,7 +3176,8 @@ def _bet_judgment(conf_engine, excess, advanced, wx_reversals, form, mass_drop, 
     return {"type": typ, "emoji": emoji, "label": label, "message": msg,
             "confidence": best, "reasons": reasons,
             "metrics": {"maxExcess": max_ex, "maxStreak": max_streak, "minRatio": min_ratio,
-                        "maxForm": max_form, "fake": fake_any, "mass": mass},
+                        "maxForm": max_form, "fake": fake_any, "mass": mass,
+                        "signalCount": market_signal_count},
             "alloc": alloc, "exactaSignal": exacta_signal}
 
 
@@ -3429,9 +3491,12 @@ def _triple_analyze(rk, rec):
     wx_reversals = _win_exacta_reversal(fav_rank, curD)
     quin_mismatch = _quinella_mismatch(fav_rank, curQ)
     signal_confidence = _signal_confidence(excess, wx_reversals, quin_mismatch)
-    # [역배열 감지] 단승 순서 ≠ 복승/쌍승 순서 → 4유형 통합(쌍승역전·복승불일치·배당압축·초과급락)
+    # [역배열/추천게이트 공유] 전적 등급을 여기서 미리 계산 → 역배열 '전적 우수·시장 비인기' 판정에 재사용
+    #   (기존엔 아래에서 계산했으나 앞당겨 재사용. 삭제 아님·계산 위치만 이동)
+    form = _form_from_starters(rk, drops)  # 출마표2/KRA/PDF 전적 등급(있으면)
+    # [역배열 감지] 진짜 역배열 = 쌍승역전만 · 전적 우수하나 시장 비인기는 별도 분류(form 전달)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
-                                   wx_reversals, quin_mismatch, excess)
+                                   wx_reversals, quin_mismatch, excess, form)
     # [역배열 정확화] 인기순위(단승/복승) vs 쌍승 배당순위 비교 → 2단계+ 역전 말만 팝업 상세로 교체.
     #   비교 가능(단승 또는 쌍승 데이터 존재)할 때만 rank 기반으로 덮어쓰고, 아니면 기존 복승기반 유지.
     try:
@@ -3848,7 +3913,7 @@ def _triple_analyze(rk, rec):
     except Exception:
         last_snap = None
 
-    form = _form_from_starters(rk, drops)  # 출마표2/KRA/PDF 전적 등급(있으면)
+    # form 은 위(역배열 호출 앞)에서 이미 계산됨 — 재사용(역배열·추천게이트와 공유)
     elimination = _elimination(curQ, curD, exa, drops, form, trio_map)  # 배당+전적 복합 제거
 
     # [한국경마] 시간대별(발주 10/5/2분전 대비) 마감 임박 급락 신호를 앞쪽에 병합
@@ -3967,7 +4032,8 @@ def _triple_analyze(rk, rec):
     confidence = race_judgment = stage_guide = None
     elimination_strong = []
     try:
-        signal_ready = (not baseline_set) and (not baseline_reset) and (len(hist) >= 2)
+        # [5번] 첫 수집 직후 추천 금지 — 최소 3회(≈90초) 관찰 후 신호 판단(기존 2→3 상향)
+        signal_ready = (not baseline_set) and (not baseline_reset) and (len(hist) >= 3)
         confidence = _confidence_engine(signal_confidence, form, advanced, key_horses)
         race_judgment = _bet_judgment(confidence, excess, advanced, wx_reversals, form,
                                       mass_drop, after_close, signal_ready)

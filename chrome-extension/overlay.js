@@ -396,6 +396,17 @@
           if (lead2) ivr.appendChild(mk('div', 'color:#f0abfc;font-size:11px;font-weight:700;margin-top:2px', '→ ' + lead2.no + '번 실질 유력!'));
           panel.appendChild(ivr);
         }
+        // [신규] 전적 우수하나 시장 비인기 (역배열 아님) — 전적 좋은데 배당 안 붙은 말
+        if (d.inverse && (d.inverse.strongUnpopular || []).length) {
+          var su = d.inverse.strongUnpopular.slice(0, 2);
+          var sur = mk('div', 'margin:5px 0 2px;padding:4px 7px;background:rgba(59,130,246,.14);border-radius:6px');
+          sur.appendChild(mk('div', 'color:#93c5fd;font-weight:700', '📈 전적 우수·시장 비인기 (역배열 아님)'));
+          su.forEach(function (h) {
+            sur.appendChild(mk('div', 'color:#dbeafe;font-size:11px',
+              h.no + '번 · 전적 ' + h.formScore + ' · 시장 ' + h.reprOdds + '배'));
+          });
+          panel.appendChild(sur);
+        }
 
         // [강화] 통합 등급 상위 3두(전적 + 배당유력)
         var tg = topGrades(d);
