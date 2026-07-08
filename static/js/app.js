@@ -219,6 +219,21 @@
     const chip = $$('#koreaRaceList .race-chip')[idx];
     await analyzeKoreaRace(idx, chip);
     if (chip && chip.scrollIntoView) chip.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // [보완] PDF에서 추출된 발주시각을 수동입력 없이 자동 채움 → 마감 전 3단계 알림 자동 활성
+    //        (배당판 없이 PDF 사전분석만 볼 때. 이미 지난 경주면 값만 채우고 알림은 생략)
+    if (d.postTime) {
+      const inp = document.getElementById('koreaDeadline');
+      if (inp) inp.value = d.postTime;
+      const [ph, pm] = String(d.postTime).split(':').map(Number);
+      const td = new Date(); td.setHours(ph, pm || 0, 0, 0);
+      if (!isNaN(ph) && td.getTime() > Date.now() + 30000) {
+        _closing.panelRk = title;        // 알림을 이 경주로 귀속
+        setKoreaManualDeadline();        // 기존 검증 흐름 재사용(입력값 + panelRk)
+        toast(`⏰ 발주 ${d.postTime} 자동 설정 · 마감 전 알림 활성`);
+      } else if (!isNaN(ph)) {
+        toast(`⏰ 발주시각 ${d.postTime} (이미 지남 · 알림 미설정)`);
+      }
+    }
     toast(`📄 ${title} 사전분석 로드 완료`);
   }
 
