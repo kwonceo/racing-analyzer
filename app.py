@@ -3005,9 +3005,71 @@ def _compare_recommend(form, key_horses, excess, drops, bet_rec):
             anom_order.append(int(h))
     fq = next((sorted(b["combo"]) for b in (bet_rec or []) if b.get("label") == "복승 메인"), None)
     ft = next((sorted(b["combo"]) for b in (bet_rec or []) if b.get("label") == "삼복승 메인"), None)
+    # [기수 근거] 기수 복승률 상위 순 조합(전적·배당과 독립된 3번째 근거)
+    jk_order = [h.get("no") for h in sorted(
+        (form or []),
+        key=lambda x: -((_jockey_place_rate(x.get("jockey")) or 0)))
+        if h.get("no") is not None and _jockey_place_rate(h.get("jockey")) is not None]
     return {"anomaly": pt(anom_order),
             "form": (pt(form_order) if len(form_order) >= 2 else {"quinella": None, "trio": None}),
+            "jockey": (pt(jk_order) if len(jk_order) >= 2 else {"quinella": None, "trio": None}),
             "final": {"quinella": fq, "trio": ft}}
+
+
+def _recommend_basis(top_horses, form, elimination, drops, wx_reversals, advanced, signal_confidence, basis_weights=None):
+    """[추천 근거 상세 카드] 상위 추천마(최대 3두)별 근거: 전적·배당·기수·종합확신도.
+    조립 가능한 데이터만 채우고, 미수집(당거리·주로상태·날씨별 성적·기수-말 조합성적)은 명시(missing).
+    반환 [{rank,no,name, form{}, odds{}, jockey{}, confidence{}}]. basis_weights=근거별 신뢰 가중치(있으면 첨부)."""
+    form_map = {int(h["no"]): h for h in (form or []) if h.get("no") is not None}
+    elim_map = {int(h["no"]): h for h in ((elimination or {}).get("horses") or []) if h.get("no") is not None}
+    streaks = (advanced or {}).get("horseStreaks") or {}
+    sconf = (signal_confidence or {}).get("horses") or {}
+    rev_by = {}
+    for r in (wx_reversals or []):
+        rev_by.setdefault(int(r["challenger"]), r)
+
+    def _g(m, no):
+        return m.get(no) or m.get(str(no)) or {}
+    cards = []
+    for i, no in enumerate([int(x) for x in (top_horses or [])][:3]):
+        f, e = form_map.get(no) or {}, elim_map.get(no) or {}
+        # ① 전적 근거 (당거리·주로상태·날씨별은 데이터 미수집)
+        recent = (f.get("recentPlacings") or f.get("recent") or [])[:5]
+        form_basis = {"score": f.get("totalScore") if f.get("totalScore") is not None else e.get("formScore"),
+                      "recent": recent, "avgPlacing": e.get("avgPlacing"),
+                      "missing": ["당거리 성적", "주로상태별 성적", "날씨별 성적"]}
+        # ② 배당 근거 (급락·쌍승역전·연속하락·변화시점 시퀀스)
+        my_drops = sorted([d for d in (drops or []) if no in (d.get("combo") or []) and (d.get("pct") or 0) < 0],
+                          key=lambda d: d["pct"])
+        st = _g(streaks, no)
+        rv = rev_by.get(no)
+        odds_basis = {"drop": (my_drops[0]["pct"] if my_drops else None), "dropCount": len(my_drops),
+                      "reversal": ({"favorite": rv["favorite"], "ratio": rv["ratio"]} if rv else None),
+                      "streak": (st.get("count") or 0), "streakLabel": st.get("label"),
+                      "series": st.get("series")}
+        # ③ 기수 근거 (복승률 O · 이 말과 조합성적은 미수집)
+        jockey_basis = {"name": f.get("jockey") or e.get("jockey"), "placeRate": e.get("jockeyPlaceRate"),
+                        "comboNote": None, "missing": ["이 말과 조합 성적"]}
+        # ④ 종합 확신도 + 왜 이 점수인지
+        sc = _g(sconf, no)
+        reasons = []
+        if sc.get("excessScore"):
+            reasons.append(f"초과급락 {sc['excessScore']}점")
+        if sc.get("reversalScore"):
+            reasons.append(f"쌍승역전 {sc['reversalScore']}점")
+        if sc.get("mismatchScore"):
+            reasons.append(f"복승불일치 {sc['mismatchScore']}점")
+        if e.get("formScore") is not None:
+            reasons.append(f"전적 {e['formScore']}점")
+        if e.get("jockeyPlaceRate") is not None:
+            reasons.append(f"기수복승률 {e['jockeyPlaceRate']}%")
+        conf = {"score": (sc.get("confidence") if sc.get("confidence") is not None else e.get("confidence")),
+                "grade": sc.get("grade"), "combinedProb": e.get("combinedProb"),
+                "reasons": reasons or ["뚜렷한 이상감지 신호 없음(전적·배당 인기 기준)"]}
+        cards.append({"rank": i + 1, "no": no, "name": f.get("name") or e.get("name") or "",
+                      "form": form_basis, "odds": odds_basis, "jockey": jockey_basis, "confidence": conf})
+    return {"cards": cards, "basisWeights": basis_weights or {},
+            "dataNote": "당거리·주로상태·날씨별 성적, 기수-말 조합성적은 현재 미수집(수집 연동 시 자동 반영)"}
 
 
 def _learned_integrated_weights():
@@ -3976,6 +4038,15 @@ def _triple_analyze(rk, rec):
     compare_recommend = _compare_recommend(form, key_horses, excess, drops, bet_rec)
     _iw_fw, _iw_ow = _learned_integrated_weights()
 
+    # [추천 근거 상세 카드] 상위 추천마 3두별 전적·배당·기수·종합확신도 근거 조립(근거별 신뢰 가중치 첨부)
+    try:
+        _bw = ((_learning_load().get("stats") or {}).get("basis_weights")) or {}
+        recommend_basis = _recommend_basis(key_horses, form, elimination, drops,
+                                           wx_reversals, advanced, signal_confidence, _bw)
+    except Exception as _rbe:
+        print("[추천근거] 실패:", _rbe)
+        recommend_basis = None
+
     # [BMED 전략] 상황 자동판별 5전략 + 원금보전 배분 + 기대환수율 + 보험용 매트릭스 추천
     #   보험용은 유력마 4두가 필요 → ranked(전체 인기순위) 전달(전략 조합은 내부에서 상위만 사용)
     try:
@@ -4098,6 +4169,8 @@ def _triple_analyze(rk, rec):
         "bmed": bmed,
         # [비교학습] 이상감지/전적/최종 추천 3종 + 통합 가중치(전적/이상감지, 학습 조정 반영)
         "compareRecommend": compare_recommend,
+        "recommendBasis": recommend_basis,   # [추천 근거 카드] 말별 전적·배당·기수·확신도 근거
+
         "integratedWeights": {"form": _iw_fw, "anomaly": _iw_ow},
     }
 
@@ -6095,15 +6168,27 @@ def _recompute_learning_stats(records):
         "wins": sum(1 for r in bet_recs if (r.get("pnl") or 0) > 0),
     }
 
-    # [비교학습] 이상감지/전적/최종 추천별 적중률(비교 기록 있는 경주만) + 현재 통합 가중치
+    # [비교학습] 이상감지/전적/기수/최종 추천별 적중률(비교 기록 있는 경주만) + 현재 통합 가중치
     compare_stats = {
         "anomaly": _rate(records, lambda r: r.get("cmp_anomaly_hit") is not None,
                          lambda r: r.get("cmp_anomaly_hit")),
         "form": _rate(records, lambda r: r.get("cmp_form_hit") is not None,
                       lambda r: r.get("cmp_form_hit")),
+        "jockey": _rate(records, lambda r: r.get("cmp_jockey_hit") is not None,
+                        lambda r: r.get("cmp_jockey_hit")),
         "final": _rate(records, lambda r: r.get("cmp_final_hit") is not None,
                        lambda r: r.get("cmp_final_hit")),
     }
+    # [3번·근거별 가중치] 전적/배당(이상감지)/기수 3근거 적중률 → 신뢰도 비례 정규화 가중치.
+    #   표본 있는 근거만 사용(rate None 제외). 가장 신뢰할 근거에 더 높은 가중치.
+    _bw_src = {"form": compare_stats["form"], "anomaly": compare_stats["anomaly"], "jockey": compare_stats["jockey"]}
+    _bw_rates = {k: v.get("rate") for k, v in _bw_src.items() if v.get("rate") is not None and (v.get("n") or 0) > 0}
+    _bw_total = sum(_bw_rates.values())
+    basis_weights = ({k: round(val / _bw_total, 3) for k, val in _bw_rates.items()} if _bw_total > 0 else {})
+    if basis_weights:
+        basis_weights["top"] = max(_bw_rates, key=lambda k: _bw_rates[k])   # 가장 신뢰할 근거
+        basis_weights["rates"] = {k: v.get("rate") for k, v in _bw_src.items()}
+        basis_weights["samples"] = {k: (v.get("n") or 0) for k, v in _bw_src.items()}
     _a, _f = compare_stats["anomaly"], compare_stats["form"]
     _fw, _ow, _adjusted = 0.4, 0.6, False
     if (_a.get("n") or 0) >= 50 and (_f.get("n") or 0) >= 50 \
@@ -6192,6 +6277,7 @@ def _recompute_learning_stats(records):
         "drop_timing": drop_timing,
         # [비교학습] 이상감지/전적/최종 추천별 적중률 + 현재 통합 가중치(50경주+ 자동 조정)
         "compare_stats": compare_stats,
+        "basis_weights": basis_weights,   # [3번] 전적/배당/기수 근거별 적중률 → 신뢰 비례 가중치
         "integrated_weights": integrated_weights,
         # [4착] 아깝게 미적중(추천 말 4착) 건수 + 삼복승 근접 건수
         "near_miss": {"n": sum(1 for r in records if r.get("near_miss")),
@@ -6376,6 +6462,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         return bool((q and top2 and sorted(q) == top2) or (t and top3s and sorted(t) == top3s))
     cmp_anomaly_hit = _cmp_hit(cmp_rec.get("anomaly"))
     cmp_form_hit = _cmp_hit(cmp_rec.get("form"))
+    cmp_jockey_hit = _cmp_hit(cmp_rec.get("jockey"))   # [기수 근거] 기수 복승률 상위 조합 적중 여부
     cmp_final_hit = _cmp_hit(cmp_rec.get("final"))
 
     # [2·3번] 4착 near-miss: 추천 말(삼복승 조합)이 4착 → '아깝게 미적중' 별도 기록
@@ -6557,7 +6644,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         # [1번] 패턴 학습 필드
         "patterns": _patterns, "pattern_timing": _pattern_timing, "bet_type": _bet_type,
         # [비교학습] 이상감지/전적/최종 추천별 적중 여부 + 조합(통계 누적·가중치 조정 근거)
-        "cmp_anomaly_hit": cmp_anomaly_hit, "cmp_form_hit": cmp_form_hit, "cmp_final_hit": cmp_final_hit,
+        "cmp_anomaly_hit": cmp_anomaly_hit, "cmp_form_hit": cmp_form_hit,
+        "cmp_jockey_hit": cmp_jockey_hit, "cmp_final_hit": cmp_final_hit,
         "cmp_recommend": cmp_rec,
         # [2·3번] 4착 near-miss(추천 말 4착=아깝게 미적중) — 통계·보험픽 학습 근거
         "top4": top4, "near_miss": near_miss, "near_miss_horse": near_miss_horse,

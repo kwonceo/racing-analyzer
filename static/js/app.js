@@ -3008,6 +3008,37 @@
     });
   }
 
+  // [추천 근거 상세 카드] 상위 추천마 3두별 전적·배당·기수·종합확신도 근거
+  function renderRecommendBasis(rb) {
+    if (!rb || !(rb.cards || []).length) return '';
+    const bw = rb.basisWeights || {};
+    const topLabel = { form: '전적', anomaly: '배당', jockey: '기수' };
+    const cards = rb.cards.map((c) => {
+      const f = c.form || {}, o = c.odds || {}, jk = c.jockey || {}, cf = c.confidence || {};
+      const recent = (f.recent || []).length ? f.recent.join('-') : '미수집';
+      const op = [];
+      if (o.drop != null) op.push(`급락 ▼${Math.abs(o.drop)}%`);
+      if (o.reversal) op.push(`쌍승역전(vs ${o.reversal.favorite}번)`);
+      if (o.streak) op.push(`연속하락 ${o.streak}회${o.streakLabel ? `(${o.streakLabel})` : ''}`);
+      const oddsTxt = op.length ? op.join(' · ') : '뚜렷한 배당 신호 없음';
+      const seriesTxt = (o.series && o.series.length > 1) ? ` <span class="hint">[${o.series.join('→')}]</span>` : '';
+      const reasons = (cf.reasons || []).join(' · ');
+      const ccol = cf.score >= 70 ? '#38d39f' : (cf.score >= 40 ? '#ffd24f' : '#8a94a6');
+      return `<div class="bet-box" style="display:block;margin:5px 0">
+        <div style="font-weight:800;font-size:14px">${c.rank}위 <b style="color:#4ea1ff">${c.no}번</b>${c.name ? ` ${esc(c.name)}` : ''}${cf.score != null ? `<span style="float:right;color:${ccol};font-weight:800">확신도 ${cf.score}${cf.grade ? ` ${cf.grade}` : ''}</span>` : ''}</div>
+        <div style="font-size:12px;margin-top:3px">🏇 <b>전적</b>: 점수 ${f.score != null ? f.score : '-'} · 최근5착 ${recent}${f.avgPlacing != null ? ` · 평균 ${f.avgPlacing}착` : ''} <span class="hint">(당거리·주로·날씨별: 미수집)</span></div>
+        <div style="font-size:12px;margin-top:2px">📉 <b>배당</b>: ${oddsTxt}${seriesTxt}</div>
+        <div style="font-size:12px;margin-top:2px">🧑‍💼 <b>기수</b>: ${jk.name ? esc(jk.name) : '-'}${jk.placeRate != null ? ` · 복승률 ${jk.placeRate}%` : ' · 복승률 미상'} <span class="hint">(조합성적: 미수집)</span></div>
+        ${reasons ? `<div class="hint" style="font-size:11px;margin-top:2px">→ 확신도 근거: ${esc(reasons)}</div>` : ''}
+      </div>`;
+    }).join('');
+    const bwTxt = bw.top ? ` <span class="hint" style="font-weight:400">· 가장 신뢰 근거: ${topLabel[bw.top] || bw.top}</span>` : '';
+    return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #6366f1;border-radius:8px;background:rgba(99,102,241,.08)">
+      <div style="font-size:15px;font-weight:800;color:#a5b4fc">📋 추천 근거 (상위 ${rb.cards.length}두)${bwTxt}</div>
+      ${cards}
+      <div class="hint" style="font-size:11px;margin-top:4px">${esc(rb.dataNote || '')}</div></div>`;
+  }
+
   function renderTripleAnalyze(a) {
     const el = $('#tripleAnalyzeReport'); if (!el) return;
     _lastTripleAnalyze = a;
@@ -3042,6 +3073,7 @@
       ${renderIntegratedGrades(a)}
       ${renderSignalQuality(a.signalQuality)}
       ${renderEliminationHTML(a.elimination)}
+      ${renderRecommendBasis(a.recommendBasis)}
       ${renderBetRecommend(a)}
       ${renderBMED(a.bmed)}
       ${renderFormGrades(a.form)}`;
@@ -3583,7 +3615,7 @@
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
       ${renderAiDataStatus(ai)}
       ${renderProfitSummary(s.profit_summary)}
-      ${renderCompareStats(s.compare_stats, s.integrated_weights)}
+      ${renderCompareStats(s.compare_stats, s.integrated_weights, s.basis_weights)}
       ${card('추천 적중률', s.recommend_hit)}
       ${card('급락 감지 적중률', s.drop_anomaly)}
       ${card('쌍승 역전 적중률', s.reversal)}
@@ -3633,9 +3665,9 @@
   }
 
   /** [비교학습] 이상감지 vs 전적 vs 최종 추천 적중률 + 통합 가중치 자동 조정 상태. */
-  function renderCompareStats(cs, iw) {
+  function renderCompareStats(cs, iw, bw) {
     if (!cs) return '';
-    const any = ['anomaly', 'form', 'final'].some((k) => cs[k] && cs[k].n);
+    const any = ['anomaly', 'form', 'jockey', 'final'].some((k) => cs[k] && cs[k].n);
     if (!any) return '';
     const cell = (title, st, color) => `<div class="bet-box" style="display:inline-block;min-width:180px;margin:4px;vertical-align:top">
       <b>${title}</b><br>${(st && st.rate != null)
@@ -3651,12 +3683,21 @@
         wNote = `<div class="hint" style="margin:4px 0 8px">⚙️ 통합 가중치 이상감지 <b>${ap}%</b> + 전적 <b>${fp}%</b> <span style="color:#8a94a6">(기본값 · ${iw.sample || 0}/${iw.need || 50}경주 쌓이면 적중률 우세 쪽으로 자동 조정)</span></div>`;
       }
     }
+    // [3번] 근거별 신뢰 가중치(전적/배당/기수 적중률 → 정규화). 가장 신뢰할 근거 강조.
+    let bwNote = '';
+    if (bw && bw.top) {
+      const label = { form: '🏇 전적', anomaly: '🚨 배당(이상감지)', jockey: '🧑‍💼 기수' };
+      const parts = ['form', 'anomaly', 'jockey'].filter((k) => bw[k] != null)
+        .map((k) => `${label[k]} <b>${Math.round(bw[k] * 100)}%</b>${(bw.rates && bw.rates[k] != null) ? ` <span class="hint">(적중 ${bw.rates[k]}%)</span>` : ''}`);
+      bwNote = `<div class="hint" style="margin:4px 0 8px;color:#38d39f">🧠 <b>근거별 신뢰 가중치</b> — ${parts.join(' · ')} → 가장 신뢰: <b>${label[bw.top] || bw.top}</b> (근거별 적중률로 자동 조정)</div>`;
+    }
     return `<div class="bet-box" style="display:block;margin:4px 0 10px">
-      <b>🆚 이상감지 vs 전적 추천 적중률 비교</b> <span class="hint" style="font-weight:400">(복승 top2 정확 또는 삼복승 top3 정확 기준)</span>
-      ${wNote}
+      <b>🆚 근거별 추천 적중률 비교 (전적 · 배당 · 기수)</b> <span class="hint" style="font-weight:400">(복승 top2 정확 또는 삼복승 top3 정확 기준)</span>
+      ${wNote}${bwNote}
       <div style="margin-top:2px">
-        ${cell('🚨 이상감지 기반 추천', cs.anomaly, '#ff9f43')}
-        ${cell('🏇 전적 기반 추천', cs.form, '#4ea1ff')}
+        ${cell('🚨 이상감지(배당) 기반', cs.anomaly, '#ff9f43')}
+        ${cell('🏇 전적 기반', cs.form, '#4ea1ff')}
+        ${cell('🧑‍💼 기수 기반', cs.jockey, '#c084fc')}
         ${cell('🎯 최종 추천(블렌드)', cs.final, '#38d39f')}
       </div></div>`;
   }
