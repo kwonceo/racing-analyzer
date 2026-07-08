@@ -1,18 +1,18 @@
 {
  "date": "2026-07-08",
  "results_summary": {
-  "total_races": 31,
-  "hits": 16,
-  "hit_rate": 51.6,
+  "total_races": 32,
+  "hits": 17,
+  "hit_rate": 53.1,
   "profit": {
-   "net": 120900,
-   "settled": 31
+   "net": 138600,
+   "settled": 32
   }
  },
  "ai_training_data": {
-  "races_collected": 81,
-  "quality_score": 54,
-  "ai_ready_races": 7,
+  "races_collected": 82,
+  "quality_score": 55,
+  "ai_ready_races": 8,
   "patterns_tagged": [
    "마감급락_적중",
    "중배당_성공",
@@ -39,9 +39,9 @@
     "hit_rate": 42.9
    },
    "카와사키": {
-    "n": 6,
-    "hits": 3,
-    "hit_rate": 50.0
+    "n": 7,
+    "hits": 4,
+    "hit_rate": 57.1
    },
    "히로시마": {
     "n": 1,
@@ -56,16 +56,16 @@
     "hit_rate": 55.6
    },
    "중두수(9~12)": {
-    "n": 13,
-    "hits": 6,
-    "hit_rate": 46.2
+    "n": 14,
+    "hits": 7,
+    "hit_rate": 50.0
    }
   },
   "by_time_zone": {
    "저녁": {
-    "n": 30,
-    "hits": 16,
-    "hit_rate": 53.3
+    "n": 31,
+    "hits": 17,
+    "hit_rate": 54.8
    },
    "오전": {
     "n": 1,
@@ -75,23 +75,23 @@
   },
   "by_grade": {
    "미수집": {
-    "n": 31,
-    "hits": 16,
-    "hit_rate": 51.6
+    "n": 32,
+    "hits": 17,
+    "hit_rate": 53.1
    }
   },
   "by_condition": {
    "미수집": {
-    "n": 31,
-    "hits": 16,
-    "hit_rate": 51.6
+    "n": 32,
+    "hits": 17,
+    "hit_rate": 53.1
    }
   },
   "by_weather": {
    "미수집": {
-    "n": 31,
-    "hits": 16,
-    "hit_rate": 51.6
+    "n": 32,
+    "hits": 17,
+    "hit_rate": 53.1
    }
   },
   "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
@@ -186,5 +186,5 @@
   "죽은인기 배제 로직 고도화",
   "경정 삼복승 수집 차단"
  ],
- "generated_at": "2026-07-08 23:31:27"
+ "generated_at": "2026-07-08 23:41:06"
 }
