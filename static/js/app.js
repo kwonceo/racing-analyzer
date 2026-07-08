@@ -2792,6 +2792,8 @@
   /** [혼전 경주] 상위 배당 근접 → 이변 가능성 → 고배당 포함 삼복승 전략(별도 배너, 기존 판정카드와 병행). */
   function renderChaotic(a, bsel) {
     const c = a.chaotic; if (!c || !c.detected) return '';
+    // [추천 신중화] 신호 대기면 혼전 고배당 조합 추천도 보류(추천 조합 표시 안 함)
+    if (a.raceJudgment && a.raceJudgment.type === 'wait') return '';
     const col = '#ff9f43';   // 혼전 = 주황 경고
     let budget = 0;
     if (bsel) { const el = document.querySelector(bsel); budget = el ? (parseInt((el.value || '').replace(/[^0-9]/g, ''), 10) || 0) : 0; }
@@ -3075,7 +3077,7 @@
       ${renderEliminationHTML(a.elimination)}
       ${renderRecommendBasis(a.recommendBasis)}
       ${renderBetRecommend(a)}
-      ${renderBMED(a.bmed)}
+      ${(a.raceJudgment && a.raceJudgment.type === 'wait') ? '' : renderBMED(a.bmed)}
       ${renderFormGrades(a.form)}`;
     _attachElimHandlers();       // 제거↔후보 클릭 토글
     drawTripleChart(a.chart);
@@ -3410,6 +3412,15 @@
 
   function renderBetRecommend(a, budgetSel) {
     const recs = a.betRecommend || [];
+    // [추천 신중화] 신호 대기(시장 신호 4종 중 2개 미만)면 추천 조합을 표시하지 않음(저배당 무조건 추천 방지).
+    //   복기/리포트 등 raceJudgment 없는 뷰는 영향 없음.
+    if (a.raceJudgment && a.raceJudgment.type === 'wait') {
+      const m = a.raceJudgment.message || '뚜렷한 신호 2개+ 확인 후 추천 조합이 표시됩니다';
+      return `<div class="bet-box" style="display:block;margin:6px 0;border-left:3px solid #8a94a6;background:rgba(138,148,166,.08)">
+        <b style="color:#cbd5e1">⏳ 신호 대기 — 추천 보류</b>
+        <div class="hint" style="margin-top:3px">${esc(m)}</div>
+        <div class="hint" style="font-size:11px;margin-top:2px">저배당 무조건 추천 방지 — 급락10%+·쌍승역전·연속하락2회+·환수율이상 중 <b>2개+ 확인 시</b> 추천 조합 표시</div></div>`;
+    }
     if (!recs.length) return '';
     const roleMap = _horseRoleMap(a);   // [보완#1] 유력/제거 색상 맵
     const bEl = document.querySelector(budgetSel || '#tripleBudget');
@@ -4691,7 +4702,7 @@
     parts.push(renderIntegratedGrades(a));
     parts.push(renderJapanSignals(a.signals));
     parts.push(renderBetRecommend(a, bsel));
-    parts.push(renderBMED(a.bmed, bsel));
+    parts.push((a.raceJudgment && a.raceJudgment.type === 'wait') ? '' : renderBMED(a.bmed, bsel));
     return parts.join('');
   }
 
@@ -4766,6 +4777,7 @@
     host.innerHTML = `<div class="panel-card">
       ${renderRaceJudgment(a, '#jpBudget')}
       ${renderChaotic(a, '#jpBudget')}
+      ${renderInverse(a.inverse)}
       ${renderTopHorses(a)}
       <h3>🔗 실시간 배당 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
@@ -4773,6 +4785,7 @@
       ${elimHtml}
       ${renderJapanSignals(a.signals)}
       ${renderPatternMatch(a.patternMatch)}
+      ${renderRecommendBasis(a.recommendBasis)}
       ${renderBetRecommend(a, '#jpBudget')}
     </div>`;
     _bindBudgetInput('#jpBudget', () => { if (state.jpLastInteg) renderJapanIntegrated(state.jpLastInteg); });
