@@ -1430,6 +1430,12 @@ def after_close_cases():
                     "note": "마감 후 감지된 신호(베팅 반영 불가) — 수집 간격 단축의 필요성 근거 데이터"})
 
 
+@app.route("/api/after-close/stats", methods=["GET"])
+def after_close_stats_api():
+    """[3번] 마감 후 대급락(50%+) → 실제 입상률 통계(패턴 신뢰도 측정)."""
+    return jsonify(_after_close_stats())
+
+
 @app.route("/api/learning/signal-lessons", methods=["GET", "POST"])
 def learning_signal_lessons():
     """초과급락 신호말이 입상했으나 노이즈 판정으로 추천 누락된 사례(집중신호 오판 학습).
@@ -2030,8 +2036,12 @@ def _excess_drop_analysis(drops, curQ):
       excess<=-5 → 🔴 진짜신호 / -5<excess<0 → 🟡 약한신호 / excess>=0 → 노이즈(시장 전체 급락).
     [긴급수정] 절대 급락 10%+(avg<=-10)는 시장평균과 무관하게 🔴 집중신호로 승격 —
       대규모 급락 때 시장평균에 묻혀 노이즈로 버려지던 실입상마 방어
-      (카나자와 10R 5-3-6: 3번 -17% 2착이 노이즈 판정으로 추천 누락된 3번째 동일 패턴)."""
-    ABS_STRONG = -10.0   # 절대 급락 임계(집중신호 승격 · 노이즈 기준 완화)
+      (카나자와 10R 5-3-6: 3번 -17% 2착이 노이즈 판정으로 추천 누락된 3번째 동일 패턴).
+    [근본해결2] 절대 단일급락폭(maxDrop<=-50) 병행 — 대규모 급락 시 개별 조합 -70%가 평균에
+      희석돼(avg>-10·excess 양수) 누락되던 실입상마 방어(소노다 11R: 3+9 -70%·3+6 -68% → 3번).
+      초과급락(상대) 또는 절대단일급락폭(절대) 둘 중 하나라도 걸리면 신호말로 채택."""
+    ABS_STRONG = -10.0   # 절대 평균급락 임계(집중신호 승격 · 노이즈 기준 완화)
+    ABS_BIG = -50.0      # [근본해결2] 절대 단일급락폭 임계 — 대규모 급락 평균에 안 묻히는 자금집중
     dd = [d for d in (drops or []) if d.get("pct") is not None and d["pct"] < 0]
     if not dd:
         return {"overall": None, "horses": {}, "concentrated": [], "count": 0}
@@ -2044,18 +2054,28 @@ def _excess_drop_analysis(drops, curQ):
     for h, pcts in by_horse.items():
         avg = round(sum(pcts) / len(pcts), 1)
         excess = round(avg - overall, 1)   # 음수 = 평균보다 더 급락(집중)
+        mx = round(min(pcts), 1)           # [근본해결2] 절대 단일급락폭(가장 큰 급락 조합)
         grade = "🔴" if excess <= -5 else ("🟡" if excess < 0 else None)
         abs_strong = avg <= ABS_STRONG
+        abs_big = mx <= ABS_BIG            # 단일 조합 절대급락 50%+ = 자금집중(평균 희석 무관)
+        if abs_strong or abs_big:
+            grade = "🔴"   # 절대(평균 or 단일) 급락 = 자금집중 확정 → 집중신호 승격(시장평균 무관)
+        # 신호강도(%p, 음수) = 초과급락(상대)·절대평균급락·절대단일급락 중 가장 강한(음수 큰) 쪽
+        cand = [excess]
         if abs_strong:
-            grade = "🔴"   # 절대 10%+ 급락 = 자금집중 확정 → 집중신호 승격(시장평균 무관)
-        # 신호강도(%p, 음수) = 초과급락·절대급락 중 더 강한 쪽 → 점수/정렬 일관 사용
-        strength = min(excess, avg) if abs_strong else excess
-        horses[h] = {"avg": avg, "excess": excess, "grade": grade,
-                     "combos": len(pcts), "absStrong": abs_strong, "strength": strength}
+            cand.append(avg)
+        if abs_big:
+            cand.append(mx)
+        strength = min(cand)
+        horses[h] = {"avg": avg, "excess": excess, "grade": grade, "combos": len(pcts),
+                     "absStrong": abs_strong, "absBig": abs_big, "maxDrop": mx, "strength": strength}
         if grade == "🔴":
             concentrated.append(h)
-    concentrated.sort(key=lambda n: horses[n]["strength"])   # 가장 집중된 말 먼저
-    return {"overall": overall, "horses": horses, "concentrated": concentrated, "count": len(dd)}
+    concentrated.sort(key=lambda n: horses[n]["strength"])   # 가장 집중된 말 먼저(절대·상대 통합)
+    # [근본해결2] 절대 단일급락폭만으로 잡힌 말(초과급락 노이즈였던 말) 별도 표기 → 배너·복기용
+    abs_only = [h for h in concentrated if horses[h]["absBig"] and horses[h]["excess"] >= 0]
+    return {"overall": overall, "horses": horses, "concentrated": concentrated,
+            "count": len(dd), "absConcentrated": abs_only}
 
 
 def _concentration_score(excess_val):
@@ -2138,21 +2158,83 @@ def _after_close_save(d):
     json.dump(d, open(AFTER_CLOSE_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 
-def _record_after_close_case(rk, date, mb_signed, anomalies):
-    """[4번] 마감 후 신호로 베팅 반영 불가했던 케이스 저장. 경주별 1건(신호 최다 시점)으로 갱신."""
+def _record_after_close_case(rk, date, mb_signed, anomalies, surge=None):
+    """[4번] 마감 후 신호로 베팅 반영 불가했던 케이스 저장. 경주별 1건(신호 최다 시점)으로 갱신.
+    surge = {"combos":[{"combo":[a,b],"pct":-99}], "horses":[3,7]} = 마감 후 대급락(50%+) 구조."""
     d = _after_close_load()
     cases = d.setdefault("cases", [])
     mins_after = abs(mb_signed) if mb_signed is not None else None
     payload = {"raceKey": rk, "date": date, "minutes_after_close": mins_after,
                "signal_count": len(anomalies), "signals": list(anomalies)[:6], "t": time.time()}
+    if surge and surge.get("horses"):
+        # [마감후 대급락] 별도 필드로 보존 → 결과 입상 매칭·입상률 학습·다음경주 참고
+        payload["surge_horses"] = surge.get("horses")
+        payload["surge_combos"] = surge.get("combos")
+        payload["surge_hit"] = None   # 결과 입력 시 _after_close_learn_result 가 채움
     existing = next((c for c in cases if c.get("raceKey") == rk and c.get("date") == date), None)
     if existing:
+        # 신호 최다 시점으로 갱신하되, 이미 기록된 surge/결과판정은 보존
         if len(anomalies) >= (existing.get("signal_count") or 0):
+            keep = {k: existing.get(k) for k in ("surge_horses", "surge_combos", "surge_hit") if existing.get(k) is not None}
             existing.update(payload)
+            for k, v in keep.items():
+                if payload.get(k) is None:
+                    existing[k] = v
     else:
         cases.append(payload)
     d["cases"] = cases[-500:]
     _after_close_save(d)
+
+
+def _after_close_learn_result(rk, date, result):
+    """[3번] 마감 후 대급락말이 실제 입상(1~3착)했는지 판정 → surge_hit 갱신(입상률 학습)."""
+    if not result:
+        return
+    placed = set()
+    for k in ("1st", "2nd", "3rd"):
+        v = result.get(k)
+        if v is not None:
+            try:
+                placed.add(int(v))
+            except (TypeError, ValueError):
+                pass
+    if not placed:
+        return
+    d = _after_close_load()
+    changed = False
+    for c in d.get("cases", []):
+        if c.get("raceKey") != rk:
+            continue
+        sh = c.get("surge_horses")
+        if not sh:
+            continue
+        hit = any(int(h) in placed for h in sh if h is not None)
+        hit_horses = [int(h) for h in sh if h is not None and int(h) in placed]
+        if c.get("surge_hit") != hit or c.get("surge_hit_horses") != hit_horses:
+            c["surge_hit"] = hit
+            c["surge_hit_horses"] = hit_horses
+            c["result_placed"] = sorted(placed)
+            changed = True
+    if changed:
+        _after_close_save(d)
+
+
+def _after_close_stats():
+    """[3번] 마감 후 대급락 → 실제 입상률 통계(신뢰도 측정)."""
+    d = _after_close_load()
+    judged = [c for c in d.get("cases", []) if c.get("surge_horses") and c.get("surge_hit") is not None]
+    total = len(judged)
+    hits = sum(1 for c in judged if c.get("surge_hit"))
+    rate = round(hits / total * 100) if total else None
+    recent = sorted(judged, key=lambda c: c.get("t") or 0, reverse=True)[:10]
+    return {
+        "total_judged": total, "hits": hits, "hit_rate": rate,
+        "pending": sum(1 for c in d.get("cases", []) if c.get("surge_horses") and c.get("surge_hit") is None),
+        "recent": [{"raceKey": c.get("raceKey"), "horses": c.get("surge_horses"),
+                    "hit": c.get("surge_hit"), "hitHorses": c.get("surge_hit_horses"),
+                    "combos": (c.get("surge_combos") or [])[:3]} for c in recent],
+        "reliable": bool(total >= 5 and rate is not None and rate >= 50),
+    }
 
 
 # ───────── [4착 near-miss] 삼복승 아깝게 미적중(추천 말 4착) 학습 ─────────
@@ -2489,10 +2571,14 @@ def _rank_inversion_detail(curWin, curQ, curD):
     return detail, lead, {"popSrc": pop_name, "oddsSrc": odds_name}
 
 
-def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mismatch, excess):
-    """[역배열 감지] 단승 유력마 순서 ≠ 복승/쌍승 배당 순서 = 실질 유력마 변경 가능성.
-    4유형(①쌍승역전 ②복승불일치 ③배당압축 ④초과급락)을 하나로 통합.
-    반환 {detected, types:[{kind,level,text,horses}], invHorses:[no], invCombos:[{combo,odds}], banner}."""
+def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mismatch, excess, form=None):
+    """[역배열 감지] 진짜 역배열 = 시장 인기 순위(배당 낮은 순) ≠ 쌍승 배당 순위가 역전될 때만.
+    ⚠️ [기준 수정] 역배열(detected)은 **쌍승역전(wx_reversals)** 이 있을 때만 True.
+       (예: 단승 1위 2번인데 쌍승에서 4→2가 2→4보다 낮으면 → 4번이 실질 1착 = 진짜 역배열.)
+       전적이 좋아도 배당이 높기만 한 경우는 역배열이 아니라 '전적 우수하나 시장 비인기'로 별도 분류.
+    보조 유형(복승불일치·배당압축·초과급락)은 참고용으로 types 에 계속 담되 역배열 판정 트리거로 쓰지 않음(삭제 아님).
+    반환 {detected, types, invHorses, invCombos, banner, invDetail, invLead,
+          strongUnpopular:[{no,formScore,reprOdds,popRank}]}."""
     types, inv_horses = [], []
 
     def _add_inv(h):
@@ -2540,9 +2626,51 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
                       "detail": f"평균급락 {e['avg']}% (시장평균 {excess.get('overall')}% 대비)", "horses": [h]})
         _add_inv(h)
 
-    # 역배열 판정: 유형 존재 또는 복승 최저 조합이 단승 1위를 미포함(단승≠복승 순서)
+    # [기준 수정] 역배열 판정 = 쌍승역전(시장 인기순위 ↔ 쌍승 배당순위 역전)이 있을 때만.
+    #   기존의 "유형 존재/단승1위가 복승최저에 빠짐"만으로 True 하던 조건 제거
+    #   → 전적 좋고 배당만 높은 말이 역배열로 오탐되던 문제 해결.
     fav_normal = (ref_no is not None and fav_pair is not None and ref_no in fav_pair)
-    detected = bool(types) or (has_win and ref_no is not None and fav_pair is not None and not fav_normal)
+    has_reversal = any(t.get("kind") == "쌍승역전" for t in types)
+    detected = bool(has_reversal)
+
+    # [신규 분류] 전적 우수하나 시장 비인기: 전적 상위(총점 60+)인데 배당은 비인기(대표 복승배당 높음/인기 하위).
+    #   역배열(쌍승역전) 대상 말은 제외 — 그건 별도 역배열 신호이므로 중복 표시 방지.
+    strong_unpopular = []
+    try:
+        form_map = {}
+        for f in (form or []):
+            _no, _ts = f.get("no"), f.get("totalScore")
+            if _no is not None and isinstance(_ts, (int, float)):
+                form_map[int(_no)] = float(_ts)
+        if form_map and curQ:
+            repr_odds = {}
+            for k, o in curQ.items():
+                if not o or o <= 0:
+                    continue
+                for h in k:
+                    if h not in repr_odds or o < repr_odds[h]:
+                        repr_odds[h] = o
+            pop_sorted = [h for h, _ in sorted(repr_odds.items(), key=lambda kv: kv[1])]
+            pop_rank = {h: i + 1 for i, h in enumerate(pop_sorted)}
+            n_pop = len(pop_sorted)
+            rev_horses = {int(r["challenger"]) for r in (wx_reversals or [])} | \
+                         {int(r["favorite"]) for r in (wx_reversals or [])}
+            form_sorted = [no for no, _ in sorted(form_map.items(), key=lambda kv: -kv[1])]
+            for no in form_sorted[:3]:                       # 전적 상위 3두만 검사
+                ts = form_map[no]
+                if ts < 60:                                  # 전적 우수 기준(good_form 근사)
+                    continue
+                if no in rev_horses:                         # 쌍승역전 대상이면 역배열 신호로 처리(중복 제외)
+                    continue
+                pr, ro = pop_rank.get(no), repr_odds.get(no)
+                if pr is None or ro is None:
+                    continue
+                # 시장 비인기 = 인기 하위 절반 밖 이거나 대표 복승배당 15배+ (전적은 좋은데 돈은 안 붙음)
+                if pr > max(3, n_pop // 2) or ro >= 15:
+                    strong_unpopular.append({"no": int(no), "formScore": round(ts, 1),
+                                             "reprOdds": ro, "popRank": pr})
+    except Exception:
+        strong_unpopular = []
 
     # 복승 역배열 조합: 역배열 감지말이 낀 복승 조합(배당 있는 것, 저배당순)
     inv_combos, seen_c = [], set()
@@ -2589,7 +2717,8 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
     return {"detected": detected, "types": types, "invHorses": inv_horses,
             "invCombos": inv_combos, "banner": banner,
             "invDetail": inv_detail,          # [팝업] 마번·인기순위·최저조합배당(<30배)
-            "invLead": inv_lead}              # [팝업] 인기 낮은데 배당 최저 = 실질 유력 후보
+            "invLead": inv_lead,              # [팝업] 인기 낮은데 배당 최저 = 실질 유력 후보
+            "strongUnpopular": strong_unpopular}   # [신규] 전적 우수하나 시장 비인기(역배열 아님)
 
 
 def _advanced_anomaly(hist, curQ, drops):
@@ -2958,9 +3087,71 @@ def _compare_recommend(form, key_horses, excess, drops, bet_rec):
             anom_order.append(int(h))
     fq = next((sorted(b["combo"]) for b in (bet_rec or []) if b.get("label") == "복승 메인"), None)
     ft = next((sorted(b["combo"]) for b in (bet_rec or []) if b.get("label") == "삼복승 메인"), None)
+    # [기수 근거] 기수 복승률 상위 순 조합(전적·배당과 독립된 3번째 근거)
+    jk_order = [h.get("no") for h in sorted(
+        (form or []),
+        key=lambda x: -((_jockey_place_rate(x.get("jockey")) or 0)))
+        if h.get("no") is not None and _jockey_place_rate(h.get("jockey")) is not None]
     return {"anomaly": pt(anom_order),
             "form": (pt(form_order) if len(form_order) >= 2 else {"quinella": None, "trio": None}),
+            "jockey": (pt(jk_order) if len(jk_order) >= 2 else {"quinella": None, "trio": None}),
             "final": {"quinella": fq, "trio": ft}}
+
+
+def _recommend_basis(top_horses, form, elimination, drops, wx_reversals, advanced, signal_confidence, basis_weights=None):
+    """[추천 근거 상세 카드] 상위 추천마(최대 3두)별 근거: 전적·배당·기수·종합확신도.
+    조립 가능한 데이터만 채우고, 미수집(당거리·주로상태·날씨별 성적·기수-말 조합성적)은 명시(missing).
+    반환 [{rank,no,name, form{}, odds{}, jockey{}, confidence{}}]. basis_weights=근거별 신뢰 가중치(있으면 첨부)."""
+    form_map = {int(h["no"]): h for h in (form or []) if h.get("no") is not None}
+    elim_map = {int(h["no"]): h for h in ((elimination or {}).get("horses") or []) if h.get("no") is not None}
+    streaks = (advanced or {}).get("horseStreaks") or {}
+    sconf = (signal_confidence or {}).get("horses") or {}
+    rev_by = {}
+    for r in (wx_reversals or []):
+        rev_by.setdefault(int(r["challenger"]), r)
+
+    def _g(m, no):
+        return m.get(no) or m.get(str(no)) or {}
+    cards = []
+    for i, no in enumerate([int(x) for x in (top_horses or [])][:3]):
+        f, e = form_map.get(no) or {}, elim_map.get(no) or {}
+        # ① 전적 근거 (당거리·주로상태·날씨별은 데이터 미수집)
+        recent = (f.get("recentPlacings") or f.get("recent") or [])[:5]
+        form_basis = {"score": f.get("totalScore") if f.get("totalScore") is not None else e.get("formScore"),
+                      "recent": recent, "avgPlacing": e.get("avgPlacing"),
+                      "missing": ["당거리 성적", "주로상태별 성적", "날씨별 성적"]}
+        # ② 배당 근거 (급락·쌍승역전·연속하락·변화시점 시퀀스)
+        my_drops = sorted([d for d in (drops or []) if no in (d.get("combo") or []) and (d.get("pct") or 0) < 0],
+                          key=lambda d: d["pct"])
+        st = _g(streaks, no)
+        rv = rev_by.get(no)
+        odds_basis = {"drop": (my_drops[0]["pct"] if my_drops else None), "dropCount": len(my_drops),
+                      "reversal": ({"favorite": rv["favorite"], "ratio": rv["ratio"]} if rv else None),
+                      "streak": (st.get("count") or 0), "streakLabel": st.get("label"),
+                      "series": st.get("series")}
+        # ③ 기수 근거 (복승률 O · 이 말과 조합성적은 미수집)
+        jockey_basis = {"name": f.get("jockey") or e.get("jockey"), "placeRate": e.get("jockeyPlaceRate"),
+                        "comboNote": None, "missing": ["이 말과 조합 성적"]}
+        # ④ 종합 확신도 + 왜 이 점수인지
+        sc = _g(sconf, no)
+        reasons = []
+        if sc.get("excessScore"):
+            reasons.append(f"초과급락 {sc['excessScore']}점")
+        if sc.get("reversalScore"):
+            reasons.append(f"쌍승역전 {sc['reversalScore']}점")
+        if sc.get("mismatchScore"):
+            reasons.append(f"복승불일치 {sc['mismatchScore']}점")
+        if e.get("formScore") is not None:
+            reasons.append(f"전적 {e['formScore']}점")
+        if e.get("jockeyPlaceRate") is not None:
+            reasons.append(f"기수복승률 {e['jockeyPlaceRate']}%")
+        conf = {"score": (sc.get("confidence") if sc.get("confidence") is not None else e.get("confidence")),
+                "grade": sc.get("grade"), "combinedProb": e.get("combinedProb"),
+                "reasons": reasons or ["뚜렷한 이상감지 신호 없음(전적·배당 인기 기준)"]}
+        cards.append({"rank": i + 1, "no": no, "name": f.get("name") or e.get("name") or "",
+                      "form": form_basis, "odds": odds_basis, "jockey": jockey_basis, "confidence": conf})
+    return {"cards": cards, "basisWeights": basis_weights or {},
+            "dataNote": "당거리·주로상태·날씨별 성적, 기수-말 조합성적은 현재 미수집(수집 연동 시 자동 반영)"}
 
 
 def _learned_integrated_weights():
@@ -3081,9 +3272,23 @@ def _bet_judgment(conf_engine, excess, advanced, wx_reversals, form, mass_drop, 
     strong = (max_ex >= 15 and max_streak >= 3 and (min_ratio is not None and min_ratio < 0.80) and (max_form >= 60 or not has_form))
     moderate = ((5 <= max_ex < 15) or max_streak == 2 or (min_ratio is not None and 0.80 <= min_ratio <= 0.95))
 
+    # [1번·추천 신중화] 시장 신호 4종(전적 제외) 중 2개+ 확인 시에만 추천.
+    #   ①초과급락 절대10%+ ②쌍승역전 ③연속하락 2회+ ④환수율 이상(top3 90%+).  전적은 시장 신호가 아니므로 카운트 제외.
+    sig_excess = any(v.get("absStrong") for v in ex_h.values())
+    sig_reversal = min_ratio is not None
+    sig_streak = max_streak >= 2
+    _ov = (advanced or {}).get("overround") or {}
+    sig_overround = bool(_ov.get("concentrated"))
+    market_signal_count = int(sig_excess) + int(sig_reversal) + int(sig_streak) + int(sig_overround)
+
     if not signal_ready and not after_close:
         typ, emoji, label = "wait", "⏳", "신호 대기"
         msg = "배당 수집 중 — 신호 형성 후 추천(저배당 무조건 추천 안 함)"
+        alloc = {"main": 0, "sub": 0, "trio": 0}
+    elif market_signal_count < 2 and not after_close:
+        # [1번] 시장 신호 4종 중 2개 미만 → 추천 보류(전적만 좋아도 추천 안 함)
+        typ, emoji, label = "wait", "⏳", "신호 대기"
+        msg = f"아직 뚜렷한 신호 없음 — 시장 신호 {market_signal_count}/2 (급락10%+·쌍승역전·연속하락2회+·환수율이상 중 2개+ 확인 후 추천)"
         alloc = {"main": 0, "sub": 0, "trio": 0}
     elif strong or best >= 80:
         typ, emoji, label = "확실형", "✅", "확실형 — 자신있게 배팅"
@@ -3115,7 +3320,8 @@ def _bet_judgment(conf_engine, excess, advanced, wx_reversals, form, mass_drop, 
     return {"type": typ, "emoji": emoji, "label": label, "message": msg,
             "confidence": best, "reasons": reasons,
             "metrics": {"maxExcess": max_ex, "maxStreak": max_streak, "minRatio": min_ratio,
-                        "maxForm": max_form, "fake": fake_any, "mass": mass},
+                        "maxForm": max_form, "fake": fake_any, "mass": mass,
+                        "signalCount": market_signal_count},
             "alloc": alloc, "exactaSignal": exacta_signal}
 
 
@@ -3429,9 +3635,12 @@ def _triple_analyze(rk, rec):
     wx_reversals = _win_exacta_reversal(fav_rank, curD)
     quin_mismatch = _quinella_mismatch(fav_rank, curQ)
     signal_confidence = _signal_confidence(excess, wx_reversals, quin_mismatch)
-    # [역배열 감지] 단승 순서 ≠ 복승/쌍승 순서 → 4유형 통합(쌍승역전·복승불일치·배당압축·초과급락)
+    # [역배열/추천게이트 공유] 전적 등급을 여기서 미리 계산 → 역배열 '전적 우수·시장 비인기' 판정에 재사용
+    #   (기존엔 아래에서 계산했으나 앞당겨 재사용. 삭제 아님·계산 위치만 이동)
+    form = _form_from_starters(rk, drops)  # 출마표2/KRA/PDF 전적 등급(있으면)
+    # [역배열 감지] 진짜 역배열 = 쌍승역전만 · 전적 우수하나 시장 비인기는 별도 분류(form 전달)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
-                                   wx_reversals, quin_mismatch, excess)
+                                   wx_reversals, quin_mismatch, excess, form)
     # [역배열 정확화] 인기순위(단승/복승) vs 쌍승 배당순위 비교 → 2단계+ 역전 말만 팝업 상세로 교체.
     #   비교 가능(단승 또는 쌍승 데이터 존재)할 때만 rank 기반으로 덮어쓰고, 아니면 기존 복승기반 유지.
     try:
@@ -3461,6 +3670,52 @@ def _triple_analyze(rk, rec):
                                              key=lambda n: -_sc_h[n]["confidence"])
         signal_confidence["refer"] = sorted([n for n, v in _sc_h.items() if 40 <= v["confidence"] < 70],
                                             key=lambda n: -_sc_h[n]["confidence"])
+
+    # [유력마-베팅추천 정합] 전적이 있으면 베팅 추천도 '유력마 TOP5'(전적+배당 통합)와 같은 순서로 만든다.
+    #   기존 문제: key_horses = 복승/단승 배당 인기순 → 전적 좋은 말이 TOP5엔 있는데 추천엔 빠지고,
+    #             전적 나쁜 저배당 인기마가 추천에 들어가 TOP5와 딴판이 되던 불일치.
+    #   수정: elimination(전적40+배당60 통합)의 통합점수 순 = renderTopHorses(TOP5) 정렬식과 동일하게
+    #        상위 3두로 key_horses 재정렬(전적 수집된 경우만; 전적 없으면 기존 배당 인기 유지).
+    try:
+        _elim_pre = _elimination(curQ, curD, exa, drops, form, _odds_map_un(trio))
+        if _elim_pre and _elim_pre.get("formAvailable"):
+            _integ = sorted((_elim_pre.get("horses") or []),
+                            key=lambda h: -(((h.get("combinedProb") or 0) * 1000)
+                                            + (h.get("total") or 0) + ((h.get("formScore") or 0) / 100.0)))
+            _io = [int(h["no"]) for h in _integ if h.get("no") is not None]
+            if len(_io) >= 2:
+                key_horses = _io[:3]                          # 베팅 추천 근간을 통합 유력마로 정렬
+                ranked = _io + [h for h in ranked if h not in _io]   # 삼복승 편성 풀도 통합순 우선
+    except Exception as _ke:
+        print("[유력마정합] 실패:", _ke)
+
+    # [근본해결3] raw 쌍승역전 → 마감 전 '예비 유력마' 즉시 반영(정식 win-exacta 확정 전에도).
+    #   카와사키 7R: raw 쌍승역전(11↔7) T-3분 감지됐으나 정식 공식(단승 대비)은 마감 후에야 7번 확정 →
+    #   복승 인기 기반 wx_reversals(단승 불필요)의 강한 역전(ratio<0.80) challenger(실질 1착 후보)를
+    #   마감 전에 한해 key_horses 상위로 조기 승격(기존 유력마는 뒤로 보존·삭제 아님). 마감 후엔 미적용.
+    pre_reversal = []
+    if not after_close and wx_reversals:
+        def _repr_odds(h):
+            if curWin.get(h):
+                return curWin[h]                         # 단승 있으면 그 값
+            best = None
+            for (a, b), o in curQ.items():               # 없으면 그 말 포함 최저 복승
+                if h in (a, b) and o > 0 and (best is None or o < best):
+                    best = o
+            return best
+        for _r in wx_reversals:
+            if (_r.get("ratio") or 1) < 0.80:            # 강한 역전만(노이즈 억제)
+                _ch = _r.get("challenger")
+                if _ch is None:
+                    continue
+                _ch = int(_ch)
+                _ro = _repr_odds(_ch)
+                # 아웃사이더(고배당)는 기존 reversalPick(소액 삼복승 보험)으로 유지 → contender만 조기 승격
+                if _ch not in pre_reversal and _ro is not None and _ro <= 15:
+                    pre_reversal.append(_ch)
+        if pre_reversal:
+            key_horses = (pre_reversal + [h for h in key_horses if h not in pre_reversal])[:3]
+            ranked = pre_reversal + [h for h in ranked if h not in pre_reversal]
 
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
@@ -3848,7 +4103,7 @@ def _triple_analyze(rk, rec):
     except Exception:
         last_snap = None
 
-    form = _form_from_starters(rk, drops)  # 출마표2/KRA/PDF 전적 등급(있으면)
+    # form 은 위(역배열 호출 앞)에서 이미 계산됨 — 재사용(역배열·추천게이트와 공유)
     elimination = _elimination(curQ, curD, exa, drops, form, trio_map)  # 배당+전적 복합 제거
 
     # [한국경마] 시간대별(발주 10/5/2분전 대비) 마감 임박 급락 신호를 앞쪽에 병합
@@ -3911,6 +4166,15 @@ def _triple_analyze(rk, rec):
     compare_recommend = _compare_recommend(form, key_horses, excess, drops, bet_rec)
     _iw_fw, _iw_ow = _learned_integrated_weights()
 
+    # [추천 근거 상세 카드] 상위 추천마 3두별 전적·배당·기수·종합확신도 근거 조립(근거별 신뢰 가중치 첨부)
+    try:
+        _bw = ((_learning_load().get("stats") or {}).get("basis_weights")) or {}
+        recommend_basis = _recommend_basis(key_horses, form, elimination, drops,
+                                           wx_reversals, advanced, signal_confidence, _bw)
+    except Exception as _rbe:
+        print("[추천근거] 실패:", _rbe)
+        recommend_basis = None
+
     # [BMED 전략] 상황 자동판별 5전략 + 원금보전 배분 + 기대환수율 + 보험용 매트릭스 추천
     #   보험용은 유력마 4두가 필요 → ranked(전체 인기순위) 전달(전략 조합은 내부에서 상위만 사용)
     try:
@@ -3967,7 +4231,8 @@ def _triple_analyze(rk, rec):
     confidence = race_judgment = stage_guide = None
     elimination_strong = []
     try:
-        signal_ready = (not baseline_set) and (not baseline_reset) and (len(hist) >= 2)
+        # [5번] 첫 수집 직후 추천 금지 — 최소 3회(≈90초) 관찰 후 신호 판단(기존 2→3 상향)
+        signal_ready = (not baseline_set) and (not baseline_reset) and (len(hist) >= 3)
         confidence = _confidence_engine(signal_confidence, form, advanced, key_horses)
         race_judgment = _bet_judgment(confidence, excess, advanced, wx_reversals, form,
                                       mass_drop, after_close, signal_ready)
@@ -3983,6 +4248,33 @@ def _triple_analyze(rk, rec):
             chaotic = _chaotic_race(curQ, curWin, key_horses, anomaly_horse, drops)
     except Exception as _e:
         print("[혼전] 파생 실패:", _e)
+
+    # [1번] 마감 후 대급락(50%+) 별도 감지 → "⚡ 마감 후 대급락 감지!" 배너용(추천 미반영·참고만).
+    #   [4번] 학습된 '마감 후 대급락 → 입상률'이 신뢰 수준(표본5+·50%+)이면 다음경주 참고 신뢰도 첨부.
+    after_close_surge = None
+    try:
+        if after_close:
+            _big = [d for d in (drops or []) if (d.get("pct") or 0) <= -50]
+            if _big:
+                _hc = {}
+                for _d in _big:
+                    for _h in (_d.get("combo") or []):
+                        _hc[int(_h)] = _hc.get(int(_h), 0) + 1
+                _sh = sorted(_hc, key=lambda h: -_hc[h])[:4]
+                _acs = _after_close_stats()
+                after_close_surge = {
+                    "detected": True,
+                    "horses": _sh,
+                    "drops": [{"combo": _d.get("combo"), "before": _d.get("prev"),
+                               "after": _d.get("cur"), "pct": _d.get("pct")}
+                              for _d in sorted(_big, key=lambda x: (x.get("pct") or 0))[:6]],
+                    "note": "마감 후 대급락 — 추천 미반영, 학습·다음경주 참고 신호로 저장",
+                    "learnedHitRate": _acs.get("hit_rate"),
+                    "learnedSample": _acs.get("total_judged"),
+                    "reliable": _acs.get("reliable"),
+                }
+    except Exception as _e:
+        print("[마감후대급락] 파생 실패:", _e)
 
     return {
         "raceKey": rk, "hasPrev": bool(prev),
@@ -4002,6 +4294,8 @@ def _triple_analyze(rk, rec):
                    "win": len(curWin), "history": len(hist)},
         "drops": drops[:15], "singleDrops": single_drops[:15], "rankChanges": rank_changes, "reversals": reversals,
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
+        "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
+
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
         "summary": summary, "chart": chart,
@@ -4022,6 +4316,8 @@ def _triple_analyze(rk, rec):
                           "advanced": advanced},
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
+        "afterCloseSurge": after_close_surge,   # [1·4번] 마감 후 대급락(50%+) 배너 + 학습 입상률
+
         # [경주전환 방어] 첫 수집(기준값 설정)/비정상 변동폭(기준값 재설정) 여부
         "baselineSet": baseline_set, "baselineReset": baseline_reset,
         # [배당판 일치 검증] 추천↔배당판 인기 조합 불일치·배당 불안정(초반 미수집) 경고
@@ -4032,6 +4328,8 @@ def _triple_analyze(rk, rec):
         "bmed": bmed,
         # [비교학습] 이상감지/전적/최종 추천 3종 + 통합 가중치(전적/이상감지, 학습 조정 반영)
         "compareRecommend": compare_recommend,
+        "recommendBasis": recommend_basis,   # [추천 근거 카드] 말별 전적·배당·기수·확신도 근거
+
         "integratedWeights": {"form": _iw_fw, "anomaly": _iw_ow},
     }
 
@@ -4457,9 +4755,21 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
     })
     doc["snapshots"] = doc["snapshots"][-300:]
     # [4번] 마감 후 신호로 베팅 반영 불가했던 케이스 저장(수집 간격 단축 필요성 근거)
+    #   [1번] 마감 후 대급락(50%+) = surge → 별도 구조 저장(입상률 학습·다음경주 참고)
     if after_close and anomalies:
         try:
-            _record_after_close_case(rk, date, mb_signed, anomalies)
+            _surge = None
+            _big = [d for d in q_drops if (d.get("pct") or 0) <= -50]
+            if _big:
+                _hc = {}
+                for _d in _big:
+                    for _h in (_d.get("combo") or []):
+                        _hc[_h] = _hc.get(_h, 0) + 1
+                _sh = sorted(_hc, key=lambda h: -_hc[h])[:4]
+                _surge = {"horses": _sh,
+                          "combos": [{"combo": _d.get("combo"), "pct": _d.get("pct")}
+                                     for _d in sorted(_big, key=lambda x: (x.get("pct") or 0))[:6]]}
+            _record_after_close_case(rk, date, mb_signed, anomalies, _surge)
         except Exception as e:
             print("[마감후학습] 케이스 저장 실패:", e)
     json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
@@ -4642,6 +4952,35 @@ def _build_analysis_log(rk, an=None):
         "odds_source": rec.get("source") or "asyukk34 Chrome확장 자동수집",
     }
 
+    # [추천 히스토리 보존] 추천이 바뀔 때마다 이전 추천을 덮어쓰지 않고 누적 저장.
+    #   조합/유력마 시그니처가 바뀔 때만 append(같은 추천 반복은 무시) → 6+9→3+7 같은 변경 경위 추적.
+    prev_hist = (doc.get("recommendation_history") if doc else None) or []
+    now_hms = time.strftime("%H:%M:%S", time.localtime())
+
+    def _rec_sig(fr, kh):
+        parts = ["-".join(str(x) for x in sorted(kh or []))]
+        for k in ("quinella_main", "quinella_sub", "trifecta_main"):
+            parts.append(str((fr.get(k) or {}).get("combo")))
+        return "|".join(parts)
+
+    new_sig = _rec_sig(final, an.get("keyHorses"))
+    last_sig = prev_hist[-1].get("sig") if prev_hist else None
+    rec_history = list(prev_hist)
+    # 실질 추천이 있을 때만(빈 추천/워밍업 제외) + 시그니처 변경 시에만 이력 추가
+    if final.get("quinella_main") and new_sig != last_sig:
+        rec_history.append({
+            "time": now_hms,
+            "minutes_before": (an.get("lastSnapshot") or {}).get("minutesBefore"),
+            "sig": new_sig,
+            "keyHorses": an.get("keyHorses"),
+            "summary": an.get("summary"),
+            "quinella_main": (final.get("quinella_main") or {}).get("combo"),
+            "quinella_sub": (final.get("quinella_sub") or {}).get("combo"),
+            "trifecta_main": (final.get("trifecta_main") or {}).get("combo"),
+            "top_signals": [s.get("detail") for s in signals[:3] if s.get("detail")],
+        })
+    rec_history = rec_history[-50:]   # 무한 증가 방지(최근 50회)
+
     log = {
         "race_id": os.path.splitext(os.path.basename(path))[0],
         "raceKey": rk,   # [일본경마 복기] 결과 입력 시 record-result 로 그대로 전달(정확 매칭)
@@ -4657,6 +4996,7 @@ def _build_analysis_log(rk, an=None):
         "horses": horses,
         "elimination": {"candidates": cand, "eliminated": elim_no, "elimination_reasons": elim_reasons},
         "final_recommendation": final,
+        "recommendation_history": rec_history,   # [추천 이력 보존] 변경마다 누적(덮어쓰지 않음)
         "compare_recommendation": an.get("compareRecommend"),   # [비교학습] 이상감지/전적/최종 3종
         "summary": an.get("summary"),
         "keyHorses": an.get("keyHorses"),
@@ -6029,15 +6369,27 @@ def _recompute_learning_stats(records):
         "wins": sum(1 for r in bet_recs if (r.get("pnl") or 0) > 0),
     }
 
-    # [비교학습] 이상감지/전적/최종 추천별 적중률(비교 기록 있는 경주만) + 현재 통합 가중치
+    # [비교학습] 이상감지/전적/기수/최종 추천별 적중률(비교 기록 있는 경주만) + 현재 통합 가중치
     compare_stats = {
         "anomaly": _rate(records, lambda r: r.get("cmp_anomaly_hit") is not None,
                          lambda r: r.get("cmp_anomaly_hit")),
         "form": _rate(records, lambda r: r.get("cmp_form_hit") is not None,
                       lambda r: r.get("cmp_form_hit")),
+        "jockey": _rate(records, lambda r: r.get("cmp_jockey_hit") is not None,
+                        lambda r: r.get("cmp_jockey_hit")),
         "final": _rate(records, lambda r: r.get("cmp_final_hit") is not None,
                        lambda r: r.get("cmp_final_hit")),
     }
+    # [3번·근거별 가중치] 전적/배당(이상감지)/기수 3근거 적중률 → 신뢰도 비례 정규화 가중치.
+    #   표본 있는 근거만 사용(rate None 제외). 가장 신뢰할 근거에 더 높은 가중치.
+    _bw_src = {"form": compare_stats["form"], "anomaly": compare_stats["anomaly"], "jockey": compare_stats["jockey"]}
+    _bw_rates = {k: v.get("rate") for k, v in _bw_src.items() if v.get("rate") is not None and (v.get("n") or 0) > 0}
+    _bw_total = sum(_bw_rates.values())
+    basis_weights = ({k: round(val / _bw_total, 3) for k, val in _bw_rates.items()} if _bw_total > 0 else {})
+    if basis_weights:
+        basis_weights["top"] = max(_bw_rates, key=lambda k: _bw_rates[k])   # 가장 신뢰할 근거
+        basis_weights["rates"] = {k: v.get("rate") for k, v in _bw_src.items()}
+        basis_weights["samples"] = {k: (v.get("n") or 0) for k, v in _bw_src.items()}
     _a, _f = compare_stats["anomaly"], compare_stats["form"]
     _fw, _ow, _adjusted = 0.4, 0.6, False
     if (_a.get("n") or 0) >= 50 and (_f.get("n") or 0) >= 50 \
@@ -6126,6 +6478,7 @@ def _recompute_learning_stats(records):
         "drop_timing": drop_timing,
         # [비교학습] 이상감지/전적/최종 추천별 적중률 + 현재 통합 가중치(50경주+ 자동 조정)
         "compare_stats": compare_stats,
+        "basis_weights": basis_weights,   # [3번] 전적/배당/기수 근거별 적중률 → 신뢰 비례 가중치
         "integrated_weights": integrated_weights,
         # [4착] 아깝게 미적중(추천 말 4착) 건수 + 삼복승 근접 건수
         "near_miss": {"n": sum(1 for r in records if r.get("near_miss")),
@@ -6293,6 +6646,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         print("[경고매칭] 실패:", e)
         _al = None
 
+    # [1·3번] 마감 후 대급락말이 실제 입상(1~3착)했는지 판정 → 입상률 학습(surge_hit 갱신)
+    try:
+        _after_close_learn_result(rk, doc.get("date"), result)
+    except Exception as e:
+        print("[마감후대급락] 결과학습 실패:", e)
+
     # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
     rec_bets = an.get("betRecommend", [])
     top2 = sorted(top3[:2]) if len(top3) >= 2 else []
@@ -6310,6 +6669,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         return bool((q and top2 and sorted(q) == top2) or (t and top3s and sorted(t) == top3s))
     cmp_anomaly_hit = _cmp_hit(cmp_rec.get("anomaly"))
     cmp_form_hit = _cmp_hit(cmp_rec.get("form"))
+    cmp_jockey_hit = _cmp_hit(cmp_rec.get("jockey"))   # [기수 근거] 기수 복승률 상위 조합 적중 여부
     cmp_final_hit = _cmp_hit(cmp_rec.get("final"))
 
     # [2·3번] 4착 near-miss: 추천 말(삼복승 조합)이 4착 → '아깝게 미적중' 별도 기록
@@ -6491,7 +6851,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         # [1번] 패턴 학습 필드
         "patterns": _patterns, "pattern_timing": _pattern_timing, "bet_type": _bet_type,
         # [비교학습] 이상감지/전적/최종 추천별 적중 여부 + 조합(통계 누적·가중치 조정 근거)
-        "cmp_anomaly_hit": cmp_anomaly_hit, "cmp_form_hit": cmp_form_hit, "cmp_final_hit": cmp_final_hit,
+        "cmp_anomaly_hit": cmp_anomaly_hit, "cmp_form_hit": cmp_form_hit,
+        "cmp_jockey_hit": cmp_jockey_hit, "cmp_final_hit": cmp_final_hit,
         "cmp_recommend": cmp_rec,
         # [2·3번] 4착 near-miss(추천 말 4착=아깝게 미적중) — 통계·보험픽 학습 근거
         "top4": top4, "near_miss": near_miss, "near_miss_horse": near_miss_horse,

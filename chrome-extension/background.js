@@ -322,8 +322,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   //   자동수집 ON/OFF 와 무관하게 1회 강제 수집한다(엔진 상태는 건드리지 않음).
   if (msg?.type === 'FORCE_COLLECT') {
     (async () => {
+      // [근본해결1] timer.js 능동 수집과 background autoTick 이 겹치지 않게 가드(중복 수집 방지)
+      if (_collecting) { sendResponse({ ok: true, skipped: 'collecting' }); return; }
+      _collecting = true;
       try { await _collectOnce(); await _forceAnalyze(); sendResponse({ ok: true }); }
       catch (e) { sendResponse({ ok: false, error: String(e.message || e) }); }
+      finally { _collecting = false; }
     })();
     return true; // async
   }
@@ -649,12 +653,15 @@ async function autoTick(reason) {
   }
   // 수집(due 시각에만 실제 수집 — fine 5초 점검이지만 간격은 지킴)
   const baseMs = Math.max(5, Number(cfg.intervalSec) || 30) * 1000;
-  // [수집속도 개선] 마감 임박 수집 간격 단계 단축 — 마감 전 급락 신호를 놓치지 않게
-  //   T-3분(≤180s) 10초 · T-1분(≤60s) 5초 · 평상시 기본(30초). (이전: T-3분 15초·T-1분 10초)
+  // [수집속도 개선] 마감 임박 수집 간격 단계 단축 — 마감 전 급락 신호를 놓치지 않게(사용자 [2번] 스케줄)
+  //   T-30초(≤30s) 3초 · T-1·2분(≤120s) 5초 · T-3분(≤180s) 10초 · T-5분(≤300s) 15초 · 평상시 기본(30초).
+  //   ⚠ MV3 서비스워커 절전 시 fine setInterval(5초)이 억제될 수 있어 실측 간격이 늘 수 있음(keepalive 보강).
   let intervalMs = baseMs;
   if (left != null) {
-    if (left <= 60000) intervalMs = 5000;         // 마감 1분전부터 5초 간격
+    if (left <= 30000) intervalMs = 3000;         // 마감 30초전부터 3초 간격
+    else if (left <= 120000) intervalMs = 5000;   // 마감 2분전부터 5초 간격(T-1분 포함)
     else if (left <= 180000) intervalMs = 10000;  // 마감 3분전부터 10초 간격
+    else if (left <= 300000) intervalMs = 15000;  // 마감 5분전부터 15초 간격
   }
   if ((reason === 'start' || now >= _nextDueAt) && !_collecting) {
     _collecting = true;

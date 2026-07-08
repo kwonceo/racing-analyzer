@@ -1,0 +1,64 @@
+{
+ "race_id": "2026_07_08_소노다_7경주",
+ "raceKey": "소노다 7경주",
+ "date": "2026-07-08",
+ "track": "소노다",
+ "round": 7,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 9,
+ "result": {
+  "1st": 5,
+  "2nd": 1,
+  "3rd": 6
+ },
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   5
+  ],
+  "eliminated": [
+   2,
+   3,
+   4,
+   6,
+   7,
+   8,
+   9
+  ],
+  "recommend_main": "1+5",
+  "recommend_sub": "1+8",
+  "strategy": null,
+  "signal_quality": "하",
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 600
+ },
+ "memo": null,
+ "saved_at": "2026-07-08 18:25:52",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

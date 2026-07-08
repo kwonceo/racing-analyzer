@@ -1,0 +1,231 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_08_몬베츠_6경주",
+ "race_info": {
+  "date": "2026-07-08",
+  "track": "몬베츠",
+  "round": 6,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 9,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 4,
+   "name": "サラサゴーサイン",
+   "jockey": "井上瑛（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    2,
+    4,
+    4,
+    1
+   ],
+   "record_score": 73.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "サクラキングリー",
+   "jockey": "小川悠（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    2,
+    4,
+    10,
+    11
+   ],
+   "record_score": 57.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "グロリアスアスペン",
+   "jockey": "桑村真（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    7,
+    11,
+    8,
+    8
+   ],
+   "record_score": 40.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "ラジャアンパット",
+   "jockey": "阿岸潤（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    3
+   ],
+   "record_score": 21.4,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "サクラストリーム",
+   "jockey": "井上俊（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    6,
+    1,
+    12,
+    6
+   ],
+   "record_score": 20.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "ウナトライオン",
+   "jockey": "宮内勇（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    4,
+    5,
+    7,
+    7
+   ],
+   "record_score": 7.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "ジャスパークロス",
+   "jockey": "阿部龍（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "ジェンティール",
+   "jockey": "渡邊準（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    9,
+    7,
+    6
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "タイガーハート",
+   "jockey": "若杉朝（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    8,
+    9,
+    7,
+    10
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": null,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "prediction": {
+  "candidates": [
+   4,
+   7
+  ],
+  "eliminated": [
+   1,
+   2,
+   3,
+   5,
+   6,
+   8,
+   9
+  ],
+  "recommend": "4+7",
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 8,
+  "2nd": 3,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 8,
+  "second": 3,
+  "odds_range": null
+ },
+ "saved_at": "2026-07-08 18:25:58",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

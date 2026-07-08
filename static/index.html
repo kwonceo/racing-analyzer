@@ -338,6 +338,16 @@
             <div id="bulkResultSummary" style="margin-top:10px"></div>
           </div>
           <hr style="border:none;border-top:1px solid #2b3648;margin:16px 0" />
+          <h3 style="font-size:15px">📸 결과 사진 첨부 → 자동 반영</h3>
+          <p class="hint">경주결과 화면 <b>사진(스크린샷)</b>을 첨부하면 표의 모든 경주(1~3착·복승/삼복승 배당)를 자동 판독해 분석한 경주와 매칭·적중판정·학습합니다. <b>확장·로그인 불필요</b>.</p>
+          <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="resultPhotoFile" type="file" accept="image/*" class="cfg-input" style="flex:1;min-width:240px" />
+            <label class="hint">정액 가정<br><input id="resultPhotoStake" class="cfg-input" type="number" value="1000" style="width:90px" />원</label>
+            <button id="resultPhotoSubmit" class="btn btn-primary">📸 사진 판독·자동 반영</button>
+          </div>
+          <div id="resultPhotoPreview" style="margin-top:6px"></div>
+          <div id="resultPhotoSummary" style="margin-top:10px"></div>
+          <hr style="border:none;border-top:1px solid #2b3648;margin:16px 0" />
           <h3 style="font-size:15px">⚡ 순서대로 빠른 입력</h3>
           <p class="hint">분석한 경주를 <b>시간순</b>으로 나열합니다. 경주명은 자동 매칭되므로 <b>1~3착(+4착·배당)만</b> 순서대로 입력하고 [저장]하면 즉시 적중판정·복기가 실행됩니다.</p>
           <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
