@@ -4799,6 +4799,35 @@ def _build_analysis_log(rk, an=None):
         "odds_source": rec.get("source") or "asyukk34 Chrome확장 자동수집",
     }
 
+    # [추천 히스토리 보존] 추천이 바뀔 때마다 이전 추천을 덮어쓰지 않고 누적 저장.
+    #   조합/유력마 시그니처가 바뀔 때만 append(같은 추천 반복은 무시) → 6+9→3+7 같은 변경 경위 추적.
+    prev_hist = (doc.get("recommendation_history") if doc else None) or []
+    now_hms = time.strftime("%H:%M:%S", time.localtime())
+
+    def _rec_sig(fr, kh):
+        parts = ["-".join(str(x) for x in sorted(kh or []))]
+        for k in ("quinella_main", "quinella_sub", "trifecta_main"):
+            parts.append(str((fr.get(k) or {}).get("combo")))
+        return "|".join(parts)
+
+    new_sig = _rec_sig(final, an.get("keyHorses"))
+    last_sig = prev_hist[-1].get("sig") if prev_hist else None
+    rec_history = list(prev_hist)
+    # 실질 추천이 있을 때만(빈 추천/워밍업 제외) + 시그니처 변경 시에만 이력 추가
+    if final.get("quinella_main") and new_sig != last_sig:
+        rec_history.append({
+            "time": now_hms,
+            "minutes_before": (an.get("lastSnapshot") or {}).get("minutesBefore"),
+            "sig": new_sig,
+            "keyHorses": an.get("keyHorses"),
+            "summary": an.get("summary"),
+            "quinella_main": (final.get("quinella_main") or {}).get("combo"),
+            "quinella_sub": (final.get("quinella_sub") or {}).get("combo"),
+            "trifecta_main": (final.get("trifecta_main") or {}).get("combo"),
+            "top_signals": [s.get("detail") for s in signals[:3] if s.get("detail")],
+        })
+    rec_history = rec_history[-50:]   # 무한 증가 방지(최근 50회)
+
     log = {
         "race_id": os.path.splitext(os.path.basename(path))[0],
         "raceKey": rk,   # [일본경마 복기] 결과 입력 시 record-result 로 그대로 전달(정확 매칭)
@@ -4814,6 +4843,7 @@ def _build_analysis_log(rk, an=None):
         "horses": horses,
         "elimination": {"candidates": cand, "eliminated": elim_no, "elimination_reasons": elim_reasons},
         "final_recommendation": final,
+        "recommendation_history": rec_history,   # [추천 이력 보존] 변경마다 누적(덮어쓰지 않음)
         "compare_recommendation": an.get("compareRecommend"),   # [비교학습] 이상감지/전적/최종 3종
         "summary": an.get("summary"),
         "keyHorses": an.get("keyHorses"),

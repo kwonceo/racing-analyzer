@@ -6464,7 +6464,7 @@
       <div style="margin:2px 0"><b>유력마:</b> ${candHtml}</div>
       <div style="margin:2px 0"><b>제거마:</b> ${elimHtml}</div>
       <div class="matrix-title" style="font-size:13px;margin-top:8px">🚨 이상감지 내역</div>${sigHtml}
-      <div class="matrix-title" style="font-size:13px;margin-top:8px">🎯 추천 조합 (당시)</div>${frHtml}</div>`;
+      <div class="matrix-title" style="font-size:13px;margin-top:8px">🎯 추천 조합 (당시)</div>${frHtml}${_recHistoryBlock(d)}</div>`;
     const postBlock = `<div style="flex:1;min-width:300px;border:1px solid #38d39f55;border-radius:8px;padding:10px;background:rgba(56,189,248,.05)">
       <div class="matrix-title" style="color:#38d39f">🏁 경기 후 분석 <span class="hint" style="font-weight:400">(실제 결과·복기)</span></div>
       ${resHtml}</div>`;
@@ -6631,6 +6631,26 @@
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
+  // [추천 이력] 추천이 시간에 따라 어떻게 바뀌었는지(6+9→3+7 등) 누적 표시. 덮어쓰기 방지 이력.
+  function _recHistoryBlock(d) {
+    const hist = (d && d.recommendation_history) || [];
+    if (hist.length < 2) return '';   // 변경이 있었을 때만(1건이면 변화 없음)
+    const rows = hist.map((h, i) => {
+      const mb = h.minutes_before != null ? ` <span class="hint">(T-${h.minutes_before}분)</span>` : '';
+      const combos = [h.quinella_main && ('복승 ' + h.quinella_main), h.trifecta_main && ('삼복승 ' + h.trifecta_main)].filter(Boolean).join(' · ');
+      const kh = (h.keyHorses || []).join('·');
+      const isLast = i === hist.length - 1;
+      const sig = (h.top_signals || [])[0];
+      return `<div style="margin:3px 0;padding:4px 6px;border-left:2px solid ${isLast ? '#ffd24f' : '#5a6172'};background:${isLast ? 'rgba(255,210,79,.08)' : 'transparent'}">
+        <b>${esc(h.time || '')}</b>${mb} ${isLast ? '<span class="chip" style="border-color:#ffd24f;color:#ffd24f">최종</span>' : ''}
+        <div style="margin-top:1px"><b style="color:#ffd24f">${esc(combos || '-')}</b>${kh ? ` <span class="hint">유력 ${esc(kh)}</span>` : ''}</div>
+        ${sig ? `<div class="hint" style="font-size:11px">↳ ${esc(sig)}</div>` : ''}</div>`;
+    }).join('');
+    return `<div style="margin:8px 0;padding:8px 10px;border:1px solid #ffd24f55;border-radius:8px;background:rgba(255,210,79,.05)">
+      <div class="matrix-title" style="font-size:13px;color:#ffd24f">🕓 추천 변경 이력 <span class="hint" style="font-weight:400">(${hist.length}회 · 덮어쓰지 않고 누적)</span></div>
+      ${rows}</div>`;
+  }
+
   // [복기 시각화] 경기 전 예측 vs 경기 후 실제 대조 블록(결과 입력된 경주만).
   //  삭제 없이 순수 파생 — d.elimination(예측)·d.result(실제)만 소비.
   function _reviewCompareBlock(d) {
@@ -6726,7 +6746,7 @@
     // 경기 전 분석 패널(예측): 유력마·이상감지·추천조합
     const preBlock = `<div style="flex:1;min-width:300px;border:1px solid #4ea1ff55;border-radius:8px;padding:10px;background:rgba(78,161,255,.05)">
       <div class="matrix-title" style="color:#4ea1ff">🔮 경기 전 분석 <span class="hint" style="font-weight:400">(배당·전적 기반 예측)</span></div>
-      ${keyBlock}${sigHtml}${frHtml}</div>`;
+      ${keyBlock}${sigHtml}${frHtml}${_recHistoryBlock(d)}</div>`;
     // 경기 후 분석 패널(실제·복기): #jpReport는 항상 존재해야 함(saveJapanResult가 참조)
     const postInner = resultExists ? reportHtml : '<div class="hint" style="padding:24px 8px;text-align:center;line-height:1.7">아래 <b>실제 결과</b>를 입력하면<br>경기 후 복기가 이 칸에 표시됩니다.</div>';
     const postBlock = `<div style="flex:1;min-width:300px;border:1px solid #38d39f55;border-radius:8px;padding:10px;background:rgba(56,189,248,.05)">
