@@ -3689,6 +3689,34 @@ def _triple_analyze(rk, rec):
     except Exception as _ke:
         print("[유력마정합] 실패:", _ke)
 
+    # [근본해결3] raw 쌍승역전 → 마감 전 '예비 유력마' 즉시 반영(정식 win-exacta 확정 전에도).
+    #   카와사키 7R: raw 쌍승역전(11↔7) T-3분 감지됐으나 정식 공식(단승 대비)은 마감 후에야 7번 확정 →
+    #   복승 인기 기반 wx_reversals(단승 불필요)의 강한 역전(ratio<0.80) challenger(실질 1착 후보)를
+    #   마감 전에 한해 key_horses 상위로 조기 승격(기존 유력마는 뒤로 보존·삭제 아님). 마감 후엔 미적용.
+    pre_reversal = []
+    if not after_close and wx_reversals:
+        def _repr_odds(h):
+            if curWin.get(h):
+                return curWin[h]                         # 단승 있으면 그 값
+            best = None
+            for (a, b), o in curQ.items():               # 없으면 그 말 포함 최저 복승
+                if h in (a, b) and o > 0 and (best is None or o < best):
+                    best = o
+            return best
+        for _r in wx_reversals:
+            if (_r.get("ratio") or 1) < 0.80:            # 강한 역전만(노이즈 억제)
+                _ch = _r.get("challenger")
+                if _ch is None:
+                    continue
+                _ch = int(_ch)
+                _ro = _repr_odds(_ch)
+                # 아웃사이더(고배당)는 기존 reversalPick(소액 삼복승 보험)으로 유지 → contender만 조기 승격
+                if _ch not in pre_reversal and _ro is not None and _ro <= 15:
+                    pre_reversal.append(_ch)
+        if pre_reversal:
+            key_horses = (pre_reversal + [h for h in key_horses if h not in pre_reversal])[:3]
+            ranked = pre_reversal + [h for h in ranked if h not in pre_reversal]
+
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
     anomaly_horse = None
@@ -4266,6 +4294,8 @@ def _triple_analyze(rk, rec):
                    "win": len(curWin), "history": len(hist)},
         "drops": drops[:15], "singleDrops": single_drops[:15], "rankChanges": rank_changes, "reversals": reversals,
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
+        "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
+
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
         "summary": summary, "chart": chart,
