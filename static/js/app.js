@@ -787,6 +787,7 @@
       if (!html.trim()) { $('#bulkResultSummary').innerHTML = '<p class="err">결과표 HTML을 붙여넣으세요.</p>'; return; }
       run({ html });
     }); }
+    initResultPhoto();     // [사진 첨부] 결과 사진 → OCR → 자동 반영
     initQuickEntry();      // [2번-방법3] 순서대로 빠른 입력
     initFailureReview();   // [복기 학습] 실패 대시보드 + 명예의 전당
     // [결과기록 UI 개선] 최근 결과·복기 뷰 — 새로고침 버튼 + 초기 렌더
@@ -1117,8 +1118,59 @@
   }
 
   /** 일괄 등록 결과 요약: 경주별 투자금/실수령 편집 → 정확 손익 조정 + 매칭실패 목록 */
-  function renderBulkSummary(d) {
-    const box = $('#bulkResultSummary'); if (!box) return;
+  // [사진 첨부] 파일 → dataURL
+  function _fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(new Error('파일 읽기 오류'));
+      r.readAsDataURL(file);
+    });
+  }
+
+  // [사진 첨부] 결과 사진 → /api/result/ocr(Vision 판독) → 다중경주 자동 매칭·적중판정·학습.
+  function initResultPhoto() {
+    const btn = $('#resultPhotoSubmit'); if (!btn) return;
+    const fi = $('#resultPhotoFile');
+    { const st = $('#resultPhotoStake'); if (st) st.value = _defaultStake(); }
+    // 파일 선택 시 미리보기
+    if (fi) fi.addEventListener('change', async () => {
+      const f = fi.files && fi.files[0]; const pv = $('#resultPhotoPreview');
+      if (!f || !pv) return;
+      try { pv.innerHTML = `<img src="${await _fileToDataUrl(f)}" style="max-width:100%;max-height:220px;border:1px solid var(--border);border-radius:6px" />`; } catch (_) { /* */ }
+    });
+    btn.addEventListener('click', async () => {
+      const box = $('#resultPhotoSummary');
+      const f = fi && fi.files && fi.files[0];
+      if (!f) { box.innerHTML = '<p class="err">결과 사진 파일을 먼저 선택하세요.</p>'; return; }
+      const stake = parseInt(($('#resultPhotoStake') && $('#resultPhotoStake').value) || '1000', 10) || 1000;
+      if (stake > 0) localStorage.setItem('bmed_default_stake', String(stake));
+      box.innerHTML = '<p class="hint">⏳ 사진 판독·매칭·학습 중… (Vision OCR — 표의 모든 경주 자동 인식)</p>';
+      let dataUrl;
+      try { dataUrl = await _fileToDataUrl(f); }
+      catch (e) { box.innerHTML = `<p class="err">파일 읽기 실패: ${esc(e.message)}</p>`; return; }
+      let d;
+      try {
+        d = await (await fetch('/api/result/ocr', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: dataUrl, stake }),
+        })).json();
+      } catch (e) { box.innerHTML = `<p class="err">요청 실패: ${esc(e.message)}</p>`; return; }
+      if (d.error) { box.innerHTML = `<p class="err">${esc(d.error)}</p>`; return; }
+      if (!d.registered) {
+        box.innerHTML = `<p class="hint">⚠️ ${esc(d.note || '등록된 경주가 없습니다.')} ${d.parsed && d.parsed.length ? `(판독 ${d.parsed.length}행이나 분석한 경주와 매칭 실패 — 경주명/날짜 확인)` : '(결과표가 선명한지 확인)'}</p>`;
+      } else {
+        renderBulkSummary(d, '#resultPhotoSummary');
+      }
+      // 통계·히스토리·대기목록 자동 갱신
+      try { loadLearningStats(); } catch (_) { /* */ }
+      try { loadHistoryList(); } catch (_) { /* */ }
+      try { if (typeof loadPendingResults === 'function') loadPendingResults(); } catch (_) { /* */ }
+    });
+  }
+
+  function renderBulkSummary(d, boxSel) {
+    const box = $(boxSel || '#bulkResultSummary'); if (!box) return;
     const profit = d.profit || 0;
     const pnlTxt = profit >= 0
       ? `<span style="color:#38d39f">수익: +${profit.toLocaleString()}원</span>`
