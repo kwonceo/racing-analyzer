@@ -2363,7 +2363,7 @@
     if (hasX) {
       const vals = Object.values(ex).map(lastNum).filter((v) => v > 0);
       const lo = Math.min(...vals), hi = Math.max(...vals);
-      let head = '<tr><th class="corner">쌍승 ↓→</th>' + nos.map((n) => `<th>${n}</th>`).join('') + '</tr>';
+      let head = '<tr><th class="corner">1착↓ / 2착→</th>' + nos.map((n) => `<th>${n}</th>`).join('') + '</tr>';
       let body = '';
       for (const rowNo of nos) {
         let tds = '';
@@ -2372,12 +2372,12 @@
           const v = lastNum(ex[`${rowNo}>${colNo}`]);
           if (v > 0) {
             const rec = recX.has(`${rowNo}>${colNo}`) ? ' rec-x' : '';
-            tds += `<td class="cell${rec}" style="background:${heatColor(v, lo, hi)}" title="${rowNo}→${colNo}">${v}</td>`;
+            tds += `<td class="cell${rec}" style="background:${heatColor(v, lo, hi)}" title="${rowNo}번 1착·${colNo}번 2착 = ${v}배">${v}</td>`;
           } else tds += '<td class="empty">·</td>';
         }
         body += `<tr><th>${rowNo}</th>${tds}</tr>`;
       }
-      html += `<div class="matrix-title">🔀 쌍승 매트릭스 <span class="hint" style="font-weight:400">행→열 순서 · ${vals.length}쌍</span></div>
+      html += `<div class="matrix-title">🔀 쌍승 매트릭스 <span class="hint" style="font-weight:400">행=1착·열=2착 · ${vals.length}쌍</span></div>
         <div class="matrix-legend"><span>낮은 배당</span><span class="legend-grad"></span><span>높은 배당</span><span style="margin-left:10px">🟠 추천 조합</span></div>
         <div class="matrix-wrap"><table class="odds-matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
     }
@@ -2670,7 +2670,7 @@
     const lines = [];
     if (b.refNo != null) lines.push(`${b.refLabel}: <b>${b.refNo}번</b>${b.refOdds != null ? ` (${b.refOdds}배)` : ''}`);
     if (b.favPair) lines.push(`복승 최저: <b>${b.favPair.join('+')}</b> (${b.favOdds}배) → ${b.favNormal ? '정상(단승1위 포함)' : '<span style="color:#ff8a8a">불일치(단승1위 빠짐)</span>'}`);
-    if (b.reversal) { const r = b.reversal; lines.push(`쌍승 역전: <span style="color:#ff8a8a">${r.challenger}→${r.favorite} (${r.reverseExacta}) &lt; ${r.favorite}→${r.challenger} (${r.favoredExacta}) → 비정상</span>`); }
+    if (b.reversal) { const r = b.reversal; lines.push(`쌍승 역전: <span style="color:#ff8a8a"><b>${r.challenger}번 1착·${r.favorite}번 2착</b> ${r.reverseExacta}배 &lt; ${r.favorite}번 1착·${r.challenger}번 2착 ${r.favoredExacta}배</span> <span class="hint">→ 인기마 ${r.favorite}번보다 <b style="color:#ff8a8a">${r.challenger}번을 1착으로 더 밀어줌</b>(비정상)</span>`); }
     // 유형별 목록
     const typeHtml = (inv.types || []).map((t) =>
       `<div style="margin:3px 0"><span class="chip" style="border-color:${kindColor[t.kind] || '#8a94a6'};color:${kindColor[t.kind] || '#ccc'}">${t.level} ${t.kind}</span> <span class="hint">${esc(t.text)}</span></div>`).join('');
@@ -3991,11 +3991,11 @@
     }
     if (Object.keys(x).length) {
       const vals = Object.values(x).filter((v) => v > 0); const lo = Math.min(...vals), hi = Math.max(...vals);
-      let head = '<tr><th class="corner">쌍승 ↓→</th>' + nos.map((n) => `<th>${n}</th>`).join('') + '</tr>';
+      let head = '<tr><th class="corner">1착↓ / 2착→</th>' + nos.map((n) => `<th>${n}</th>`).join('') + '</tr>';
       let body = '';
       for (const rn of nos) {
         let tds = '';
-        for (const cn of nos) { if (rn === cn) { tds += '<td class="diag">—</td>'; continue; } const v = x[`${rn}>${cn}`]; tds += v > 0 ? `<td class="cell" style="background:${heatColor(v, lo, hi)}" title="${rn}→${cn}">${v}</td>` : '<td class="empty">·</td>'; }
+        for (const cn of nos) { if (rn === cn) { tds += '<td class="diag">—</td>'; continue; } const v = x[`${rn}>${cn}`]; tds += v > 0 ? `<td class="cell" style="background:${heatColor(v, lo, hi)}" title="${rn}번 1착·${cn}번 2착 = ${v}배">${v}</td>` : '<td class="empty">·</td>'; }
         body += `<tr><th>${rn}</th>${tds}</tr>`;
       }
       html += `<div class="matrix-title" style="font-size:13px">🔀 쌍승 매트릭스</div><div class="matrix-wrap"><table class="odds-matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
@@ -6591,6 +6591,45 @@
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
+  // [복기 시각화] 경기 전 예측 vs 경기 후 실제 대조 블록(결과 입력된 경주만).
+  //  삭제 없이 순수 파생 — d.elimination(예측)·d.result(실제)만 소비.
+  function _reviewCompareBlock(d) {
+    const res = d.result || {};
+    if (res['1st'] == null) return '';   // 결과 없으면 대조 생략
+    const elim = d.elimination || {};
+    const cand = (elim.candidates || []).map(Number);
+    const elimNo = (elim.eliminated || []).map(Number);
+    const placed = ['1st', '2nd', '3rd'].map((k) => res[k]).filter((v) => v != null).map(Number);
+    const placedSet = new Set(placed);
+    const candCmp = cand.length ? cand.map((n) => {
+      const inHit = placedSet.has(n);
+      return `<span class="chip" style="border-color:${inHit ? '#38d39f' : '#5a6172'};color:${inHit ? '#38d39f' : '#8a94a6'}">${n}번 ${inHit ? '✅입상' : '✗'}</span>`;
+    }).join(' ') : '<span class="hint">예측 유력마 없음</span>';
+    const placeCmp = placed.map((n, i) => {
+      const label = ['1착', '2착', '3착'][i];
+      let tag, col;
+      if (cand.includes(n)) { tag = '유력마 예측 ✅'; col = '#38d39f'; }
+      else if (elimNo.includes(n)) { tag = '제거마였음 ⚠️'; col = '#f87171'; }
+      else { tag = '미분류(놓침)'; col = '#ffb020'; }
+      return `<div style="margin:2px 0"><b>${label} ${n}번</b> <span class="chip" style="border-color:${col};color:${col}">${tag}</span></div>`;
+    }).join('');
+    const hitCand = cand.filter((n) => placedSet.has(n)).length;
+    const hitRate = cand.length ? Math.round((hitCand / cand.length) * 100) : 0;
+    const missed = placed.filter((n) => !cand.includes(n) && !elimNo.includes(n));
+    const elimFail = placed.filter((n) => elimNo.includes(n));
+    const verdict = elimFail.length ? `<span style="color:#f87171">제거마 ${elimFail.join('·')}번 입상 — 제거 판정 실패</span>`
+      : missed.length ? `<span style="color:#ffb020">${missed.join('·')}번을 사전에 못 짚음</span>`
+        : `<span style="color:#38d39f">입상마 전부 예측 범위 안</span>`;
+    return `<div style="margin:8px 0;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:linear-gradient(90deg,rgba(78,161,255,.1),rgba(56,189,248,.1))">
+      <div class="matrix-title" style="font-size:13px">🔍 예측 vs 실제 <span class="hint" style="font-weight:400">복기 핵심 대조</span></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px"><div class="hint" style="margin-bottom:2px">경기 전 유력마 적중</div>${candCmp}
+          <div class="hint" style="margin-top:4px">유력마 <b style="color:${hitRate >= 50 ? '#38d39f' : '#ffb020'}">${hitCand}/${cand.length}두 입상 (${hitRate}%)</b></div></div>
+        <div style="flex:1;min-width:200px"><div class="hint" style="margin-bottom:2px">실제 입상마 → 예측 분류</div>${placeCmp}</div>
+      </div>
+      <div style="margin-top:6px;font-size:13px;font-weight:700">📌 총평: ${verdict}</div></div>`;
+  }
+
   function renderJapanReview(d, rk, file) {
     const sig = d.signals_detected || [], fr = d.final_recommendation || {}, elim = d.elimination || {};
     const horses = d.horses || [];
@@ -6642,9 +6681,22 @@
       near_miss: hit.near_miss, near_miss_horse: hit.near_miss_horse, result4: (d.result || {})['4th'],
       hit_basis: hit.hit_basis,   // [1번] 적중 근거 요약(재조회)
     }, rk);
+    const resultExists = !!(d.result && d.hit);
+    const compareBlock = _reviewCompareBlock(d);
+    // 경기 전 분석 패널(예측): 유력마·이상감지·추천조합
+    const preBlock = `<div style="flex:1;min-width:300px;border:1px solid #4ea1ff55;border-radius:8px;padding:10px;background:rgba(78,161,255,.05)">
+      <div class="matrix-title" style="color:#4ea1ff">🔮 경기 전 분석 <span class="hint" style="font-weight:400">(배당·전적 기반 예측)</span></div>
+      ${keyBlock}${sigHtml}${frHtml}</div>`;
+    // 경기 후 분석 패널(실제·복기): #jpReport는 항상 존재해야 함(saveJapanResult가 참조)
+    const postInner = resultExists ? reportHtml : '<div class="hint" style="padding:24px 8px;text-align:center;line-height:1.7">아래 <b>실제 결과</b>를 입력하면<br>경기 후 복기가 이 칸에 표시됩니다.</div>';
+    const postBlock = `<div style="flex:1;min-width:300px;border:1px solid #38d39f55;border-radius:8px;padding:10px;background:rgba(56,189,248,.05)">
+      <div class="matrix-title" style="color:#38d39f">🏁 경기 후 분석 <span class="hint" style="font-weight:400">(실제 결과·복기)</span></div>
+      <div id="jpReport">${postInner}</div></div>`;
     return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px">
       <div class="matrix-title">${esc(d.race || rk)} <span class="hint" style="font-weight:400">${esc(d.date || '')} · 분석 ${esc(d.analyzed_at || '')}</span></div>
-      ${keyBlock}${sigHtml}${frHtml}${formHtml}<div id="jpReport">${reportHtml}</div></div>`;
+      ${compareBlock}
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;align-items:stretch">${preBlock}${postBlock}</div>
+      ${formHtml}</div>`;
   }
 
   function renderJapanReviewReport(rep, rk) {
@@ -6735,6 +6787,8 @@
     try { if (typeof loadHistoryList === 'function') loadHistoryList(); } catch (_) { /* */ }
     try { renderStats(); } catch (_) { /* */ }
     try { loadJapanReviewList(); } catch (_) { /* */ }
+    // [복기 시각화] 결과 저장 후 전체 재조회 → 경기전/경기후 2단 + 예측vs실제 대조 블록 갱신
+    try { if (file) openJapanReview(file, rk); } catch (_) { /* */ }
   }
 
   function initJapanReview() {
