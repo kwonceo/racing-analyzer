@@ -5526,6 +5526,37 @@
     const sel = $('#reportSelect'); if (sel && rep._slug) sel.value = rep._slug;
   }
 
+  // [복기 시각화] 고배당 재현 리포트용 예측vs실제 요약 스트립(why_recommended 기반·elimination 없음).
+  function _reportCompareStrip(rep) {
+    const res = rep.result || {};
+    if (res['1st'] == null) return '';
+    const why = rep.why_recommended || {};
+    const preNos = Object.keys(why).map((k) => why[k]).filter((s) => s && s.horse != null).map((s) => Number(s.horse));
+    const placed = ['1st', '2nd', '3rd'].map((k) => res[k]).filter((v) => v != null).map(Number);
+    const placedSet = new Set(placed);
+    const preCmp = preNos.length ? preNos.map((n) => {
+      const inHit = placedSet.has(n);
+      return `<span class="chip" style="border-color:${inHit ? '#38d39f' : '#5a6172'};color:${inHit ? '#38d39f' : '#8a94a6'}">${n}번 ${inHit ? '✅입상' : '✗'}</span>`;
+    }).join(' ') : '<span class="hint">추천마 기록 없음</span>';
+    const placeCmp = placed.map((n, i) => {
+      const label = ['1착', '2착', '3착'][i];
+      const pred = preNos.includes(n);
+      return `<div style="margin:2px 0"><b>${label} ${n}번</b> <span class="chip" style="border-color:${pred ? '#38d39f' : '#ffb020'};color:${pred ? '#38d39f' : '#ffb020'}">${pred ? '추천마 예측 ✅' : '미분류(놓침)'}</span></div>`;
+    }).join('');
+    const hit = preNos.filter((n) => placedSet.has(n)).length;
+    const rate = preNos.length ? Math.round((hit / preNos.length) * 100) : 0;
+    const missed = placed.filter((n) => !preNos.includes(n));
+    const verdict = missed.length ? `<span style="color:#ffb020">${missed.join('·')}번을 사전에 못 짚음</span>` : `<span style="color:#38d39f">입상마 전부 추천 범위 안</span>`;
+    return `<div style="margin:8px 0;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:linear-gradient(90deg,rgba(78,161,255,.1),rgba(56,189,248,.1))">
+      <div class="matrix-title" style="font-size:13px">🔍 예측 vs 실제 <span class="hint" style="font-weight:400">복기 핵심 대조</span></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px"><div class="hint" style="margin-bottom:2px">🔮 경기 전 추천마 적중</div>${preCmp}
+          <div class="hint" style="margin-top:4px">추천마 <b style="color:${rate >= 50 ? '#38d39f' : '#ffb020'}">${hit}/${preNos.length}두 입상 (${rate}%)</b></div></div>
+        <div style="flex:1;min-width:200px"><div class="hint" style="margin-bottom:2px">🏁 실제 입상마 → 예측 분류</div>${placeCmp}</div>
+      </div>
+      <div style="margin-top:6px;font-size:13px;font-weight:700">📌 총평: ${verdict}</div></div>`;
+  }
+
   function renderRaceReport(rep, view) {
     const res = rep.result || {};
     const cb = rep.confidence_breakdown || {};
@@ -5615,6 +5646,7 @@
     view.innerHTML = `
       <div class="rpt-head">${esc(rep.race || '')} · ${esc(resultStr)}</div>
       <div class="rpt-sub">${hitBadge}${oddsBadge} ${tagsHtml}</div>
+      ${_reportCompareStrip(rep)}
       <div class="rpt-tabs">
         <button class="rpt-tab active" data-pane="story">추천 근거</button>
         <button class="rpt-tab" data-pane="timeline">배당 타임라인</button>
@@ -6381,11 +6413,10 @@
     if (res) {
       const top3 = [res['1st'], res['2nd'], res['3rd']].filter((x) => x != null && x !== '').join('-');
       const yn = (b) => b ? '<span style="color:#38d39f;font-weight:700">✅적중</span>' : '<span style="color:#f87171;font-weight:700">❌미적중</span>';
-      resHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🏁 결과 & 적중</div>
-        <div style="margin:2px 0">실제 착순: <b>${esc(top3) || '-'}</b></div>
+      resHtml = `<div style="margin:2px 0">실제 착순: <b>${esc(top3) || '-'}</b></div>
         ${hit ? `<div style="margin:2px 0">복승 ${yn(hit.quinella_hit)} · 삼복승 ${yn(hit.trifecta_hit)}${hit.pnl != null ? ` · 손익 <b style="color:${hit.pnl >= 0 ? '#38d39f' : '#f87171'}">${(hit.pnl >= 0 ? '+' : '') + Number(hit.pnl).toLocaleString('ko-KR')}원</b>` : ''}</div>` : ''}`;
     } else {
-      resHtml = `<div class="hint" style="margin-top:8px">⬜ 결과 미입력 — <b>결과기록 탭</b> 또는 <b>일본경마 복기</b>에서 착순을 입력하면 적중·손익이 계산됩니다.</div>`;
+      resHtml = `<div class="hint" style="padding:20px 4px;text-align:center;line-height:1.7">⬜ 결과 미입력<br>아래 <b>결과 입력</b> 또는 <b>결과기록 탭</b>에서 착순을 넣으면<br>적중·손익·복기 대조가 표시됩니다.</div>`;
     }
     // [복기 표식·학습] 복기 메모 입력/저장 + "복기완료" 배지. 저장 시 서버가 reviewed 마킹 + 학습 코퍼스 축적.
     const revBadge = d.reviewed ? `<span class="chip" style="border-color:#a78bfa;color:#c4b5fd">🧠 복기완료${d.reviewed_at ? ' · ' + esc(d.reviewed_at) : ''}</span>` : '';
@@ -6425,14 +6456,23 @@
         </div>
         <p class="hint" style="margin:4px 0 0">실수령 배당금 입력 시 정확한 손익 계산. 저장하면 적중·손익·학습 통계가 즉시 갱신됩니다.</p>
       </div></div>`;
-    return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px">
-      <div class="matrix-title">${esc(d.race || rk)} <span class="hint" style="font-weight:400">${catB ? catB + ' · ' : ''}${esc(d.date || '')} · 분석 ${esc(d.analyzed_at || '')}</span></div>
+    // [복기 시각화] 경기 전(예측) / 경기 후(실제) 2단 분리 — 전 종목·한국 공통
+    const compareBlock = _reviewCompareBlock(d);
+    const preBlock = `<div style="flex:1;min-width:300px;border:1px solid #4ea1ff55;border-radius:8px;padding:10px;background:rgba(78,161,255,.05)">
+      <div class="matrix-title" style="color:#4ea1ff">🔮 경기 전 분석 <span class="hint" style="font-weight:400">(배당·전적 기반 예측)</span></div>
       <div class="matrix-title" style="font-size:13px;margin-top:6px">🏇 유력마 / 제거마</div>
       <div style="margin:2px 0"><b>유력마:</b> ${candHtml}</div>
       <div style="margin:2px 0"><b>제거마:</b> ${elimHtml}</div>
       <div class="matrix-title" style="font-size:13px;margin-top:8px">🚨 이상감지 내역</div>${sigHtml}
-      <div class="matrix-title" style="font-size:13px;margin-top:8px">🎯 추천 조합 (당시)</div>${frHtml}
-      ${resHtml}${memoHtml}${formHtml}</div>`;
+      <div class="matrix-title" style="font-size:13px;margin-top:8px">🎯 추천 조합 (당시)</div>${frHtml}</div>`;
+    const postBlock = `<div style="flex:1;min-width:300px;border:1px solid #38d39f55;border-radius:8px;padding:10px;background:rgba(56,189,248,.05)">
+      <div class="matrix-title" style="color:#38d39f">🏁 경기 후 분석 <span class="hint" style="font-weight:400">(실제 결과·복기)</span></div>
+      ${resHtml}</div>`;
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px">
+      <div class="matrix-title">${esc(d.race || rk)} <span class="hint" style="font-weight:400">${catB ? catB + ' · ' : ''}${esc(d.date || '')} · 분석 ${esc(d.analyzed_at || '')}</span></div>
+      ${compareBlock}
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;align-items:stretch">${preBlock}${postBlock}</div>
+      ${memoHtml}${formHtml}</div>`;
   }
 
   // [보완2] 분석기록 상세의 결과 입력 폼 저장 — 패널 스코프(container)로 입력값 읽기.
