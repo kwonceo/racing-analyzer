@@ -9218,9 +9218,46 @@ def _merge_jockey(stats, j):
     stats[name] = base
 
 
+_KOREA_TIME_RE = re.compile(r'(?:[01]?\d|2[0-3]):[0-5]\d')
+
+
+def _extract_korea_post_time(text):
+    """한국 PDF 요약 페이지 텍스트에서 발주시각 'HH:MM'(24h·2자리 정규화) 추출. 실패 시 None.
+    우선순위: ①경주 제목줄의 '...경마 N경주 ... (HH:MM)' 괄호 ②'발주'/'시각' 라벨 뒤 첫 HH:MM.
+    Vision 추가 호출 없이 텍스트 레이어만 사용(검증: 17경주 전건 정확). PDF에 표기 없으면 None."""
+    if not text:
+        return None
+
+    def _norm(t):
+        h, m = t.split(":")
+        return f"{int(h):02d}:{m}"
+
+    lines = [l.strip() for l in text.splitlines()]
+    # ① 제목줄: '경마 N경주 ... (HH:MM)'
+    for l in lines:
+        if "경주" in l and "경마" in l and re.search(r"경마\s*\d+\s*경주", l):
+            paren = re.findall(r"\(((?:[01]?\d|2[0-3]):[0-5]\d)\)", l)
+            if paren:
+                return _norm(paren[-1])
+    # ② '발주'/'시각' 라벨 근처 첫 HH:MM
+    for i, l in enumerate(lines):
+        if l.startswith("발주") or l in ("시각", "발주시각"):
+            for j in range(i, min(i + 5, len(lines))):
+                if _KOREA_TIME_RE.fullmatch(lines[j]):
+                    return _norm(lines[j])
+    return None
+
+
 def _korea_extract_race(doc, race, api_key=None):
-    """요약 페이지 1장에서 메인표+조교표를 추출·병합해 출전마 리스트 반환 (app.js extractRaceFull)."""
+    """요약 페이지 1장에서 메인표+조교표를 추출·병합해 출전마 리스트 반환 (app.js extractRaceFull).
+    부수적으로 요약 페이지 텍스트에서 발주시각을 추출해 race['postTime']에 채운다(추후 마감 알림 자동화)."""
     pg = doc[race["summaryPage"] - 1]   # summaryPage 는 1-based
+    try:
+        pt = _extract_korea_post_time(pg.get_text())
+        if pt:
+            race["postTime"] = pt
+    except Exception as e:
+        print("[한국] 발주시각 추출 실패:", e)
     sheet = _do_extract_race(_render_band(pg), api_key)
     horses = sheet.get("horses") or []
     try:
@@ -9279,6 +9316,7 @@ def _prerace_save_race(date, race):
             "raceNo": race.get("raceNo"), "distance": race.get("distance", ""),
             "title": race.get("title", ""), "horses": race.get("horses") or [],
             "report": race.get("report"), "status": race.get("status", "done"),
+            "postTime": race.get("postTime"),   # 발주시각 'HH:MM'(PDF 텍스트 추출) — 마감 알림 자동화용
             "savedAt": time.time(),
         }
         path = os.path.join(KOREA_PRERACE_DIR, key + ".json")
