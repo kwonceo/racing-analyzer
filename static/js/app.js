@@ -2777,6 +2777,37 @@
     </div>`;
   }
 
+  /** [혼전 경주] 상위 배당 근접 → 이변 가능성 → 고배당 포함 삼복승 전략(별도 배너, 기존 판정카드와 병행). */
+  function renderChaotic(a, bsel) {
+    const c = a.chaotic; if (!c || !c.detected) return '';
+    const col = '#ff9f43';   // 혼전 = 주황 경고
+    let budget = 0;
+    if (bsel) { const el = document.querySelector(bsel); budget = el ? (parseInt((el.value || '').replace(/[^0-9]/g, ''), 10) || 0) : 0; }
+    const won = (v) => v.toLocaleString('ko-KR') + '원';
+    const comboTxt = (p) => {
+      const o = p.expOdds != null ? `${p.expOdds}배` : (p.expOddsEst != null ? `${p.expOddsEst}배 추정` : '');
+      return `${(p.combo || []).join('+')}${o ? ` (${o})` : ''}`;
+    };
+    const picks = c.picks || [];
+    const rows = picks.map((p) => {
+      const amtTxt = budget > 0 ? ` → <b style="color:${col}">${won(Math.round(budget * (p.alloc || 0) / 100))}</b>` : '';
+      const hi = p.highReturn ? ' <span class="chip" style="border-color:#a855f7;color:#d8b4fe">고배당</span>' : '';
+      const icon = p.kind === '복승' ? '💰' : '🎲';
+      return `<div style="margin-top:2px">${icon} <b>${esc(p.label)}</b> ${esc(comboTxt(p))} — ${p.alloc}%${amtTxt}${hi}</div>`;
+    }).join('');
+    const totalAlloc = picks.reduce((s, p) => s + (p.alloc || 0), 0);
+    return `<div style="margin:0 0 10px;border:2px solid ${col};border-radius:12px;padding:11px 13px;background:linear-gradient(180deg,${col}22,rgba(20,28,43,.97));box-shadow:0 4px 16px rgba(0,0,0,.35)">
+      <div style="font-size:18px;font-weight:800;color:${col}">⚠️ 혼전 경주 감지</div>
+      <div style="margin-top:3px;font-size:13px;font-weight:600">이변 가능성 있음 · 고배당 포함 삼복승 권장</div>
+      ${c.reason ? `<div class="hint" style="margin-top:3px">감지 근거: ${esc(c.reason)}</div>` : ''}
+      <div style="margin-top:6px;font-size:12px;line-height:1.7">
+        <div style="font-weight:700;color:${col};margin-bottom:2px">🎯 혼전 전략 (고배당 비중↑)</div>
+        ${rows || '<div class="hint">조합 대기</div>'}
+        <div class="hint" style="margin-top:3px">${budget > 0 ? `※ 총 예산 ${won(budget)} 기준 (합 ${totalAlloc}%)` : '예산 입력 시 금액 자동계산'}${c.note ? ' · ' + esc(c.note) : ''}</div>
+      </div>
+    </div>`;
+  }
+
   function renderTopHorses(a) {
     _topAnalysisForClick = a;       // 클릭 상세/타임라인용 최신 분석 보관
     _ensureTopHorseDelegation();    // 클릭 위임 1회 설치(다중 패널 안전)
@@ -4598,6 +4629,7 @@
     const six = a.bmed && a.bmed.sixRacer;
     const parts = [];
     parts.push(renderRaceJudgment(a, bsel));   // [1·2·4번] 경주 판정 크게 + 배팅 배분
+    parts.push(renderChaotic(a, bsel));   // [혼전] 상위 배당 근접 시 고배당 포함 삼복승 전략 배너
     parts.push(renderTopHorses(a));   // ⭐ 유력마 TOP5 + 복병/이상감지 + 제거마 카드
     parts.push(`<div class="matrix-title">🚨 실시간 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${six ? ' · 6명 출전' : ''}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>`);
     if (a.summary) parts.push(`<div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary)}</div>`);
@@ -4680,6 +4712,7 @@
     const elimHtml = renderEliminationHTML(a.elimination, new Set()).replace('id="elimPanel"', 'id="jpElimPanel"');
     host.innerHTML = `<div class="panel-card">
       ${renderRaceJudgment(a, '#jpBudget')}
+      ${renderChaotic(a, '#jpBudget')}
       ${renderTopHorses(a)}
       <h3>🔗 실시간 배당 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>

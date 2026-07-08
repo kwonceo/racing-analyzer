@@ -3183,6 +3183,121 @@ def _elimination_strong(elimination, form, drops):
     return out[:6]
 
 
+def _chaotic_race(curQ, curWin, key_horses, anomaly_horse, drops):
+    """[혼전 경주] 상위 배당이 근접해 이변 가능성이 큰 경주를 감지하고 고배당 포함 삼복승 전략을 편성.
+      감지: ①상위 3두 배당 차이 20% 미만  또는  ②저배당 3두 이상 비슷한 배당(최저 대비 25% 이내).
+      전략: 복승 저배당 메인(30%) + 삼복승 저배당3두(10%) + 저배당2두+이상감지말(30%) + 저배당2두+고배당복병(30%).
+      ⚠ 기존 추천(betRecommend)·판정 로직 무영향 — 별도 chaotic 필드로만 파생."""
+    # 1) 말별 대표 배당(인기): 단승 우선, 없으면 그 말 포함 최저 복승으로 근사.
+    horse_odds = {}
+    if curWin:
+        for no, o in curWin.items():
+            if o and o > 0:
+                horse_odds[int(no)] = float(o)
+    if not horse_odds and curQ:
+        for (a, b), o in curQ.items():
+            if not o or o <= 0:
+                continue
+            for h in (a, b):
+                h = int(h)
+                if h not in horse_odds or o < horse_odds[h]:
+                    horse_odds[h] = float(o)
+    if len(horse_odds) < 3:
+        return None
+    ordered = sorted(horse_odds.items(), key=lambda kv: kv[1])   # [(no, odds)] 오름차순(낮을수록 인기)
+    nums = [no for no, _ in ordered]
+    od = [o for _, o in ordered]
+    o1 = od[0]
+    if o1 <= 0:
+        return None
+    # 2) 혼전 감지 조건
+    spread3 = (od[2] - o1) / o1 if len(od) >= 3 else 999.0   # 상위 3두 배당 확산율
+    cond_a = spread3 < 0.20
+    near = [no for (no, o) in ordered if o / o1 <= 1.25]     # 최저 대비 25% 이내(저배당 근접군)
+    cond_b = len(near) >= 3
+    if not (cond_a or cond_b):
+        return None
+    reasons = []
+    if cond_a:
+        reasons.append(f"상위 3두 배당 근접({od[0]}·{od[1]}·{od[2]}, 차이 {round(spread3 * 100)}%)")
+    if cond_b:
+        reasons.append(f"저배당 {len(near)}두 비슷({'·'.join(str(n) for n in near[:5])})")
+
+    low3 = nums[:3]
+    low2 = nums[:2]
+    an = int(anomaly_horse) if anomaly_horse is not None else None
+    # 3) 고배당 복병: 급락(자금유입) 있는 말 중 최고배당(저배당3두·이상감지말 제외), 없으면 최고배당 아웃사이더.
+    drop_horses = []
+    for d in (drops or []):
+        for h in d.get("combo", []):
+            hh = int(h)
+            if hh not in drop_horses:
+                drop_horses.append(hh)
+    excl = set(low3) | ({an} if an is not None else set())
+    dark_cands = [h for h in drop_horses if h in horse_odds and h not in excl]
+    if dark_cands:
+        dark = max(dark_cands, key=lambda h: horse_odds[h])
+    else:
+        outs = [no for (no, _) in ordered if no not in excl]
+        dark = outs[-1] if outs else None   # 최고배당 아웃사이더
+
+    def _q(a, b):
+        return curQ.get(tuple(sorted((int(a), int(b)))))
+
+    def _trio_est(cc):
+        """삼복승 실배당 미수집 → 구성 복승 3쌍 기하평균×2 추정. (odds, is_estimate)."""
+        ps = [_q(cc[0], cc[1]), _q(cc[0], cc[2]), _q(cc[1], cc[2])]
+        present = [p for p in ps if p and p > 0]
+        if len(present) == 3:
+            gm = (present[0] * present[1] * present[2]) ** (1.0 / 3.0)
+            return round(gm * 2, 1), True
+        return None, False
+
+    def _mk_trio(label, cc, alloc, high_return):
+        cc = sorted(set(int(x) for x in cc))
+        if len(cc) != 3:
+            return None
+        ev, est = _trio_est(cc)
+        pick = {"kind": "삼복승", "label": label, "combo": cc, "alloc": alloc,
+                "expOdds": None if est else ev, "highReturn": high_return}
+        if est:
+            pick["expOddsEst"] = ev
+        return pick
+
+    picks = []
+    # 복승 저배당 메인 (30% — 사용자 20~30% 범위)
+    if len(low2) == 2:
+        picks.append({"kind": "복승", "label": "저배당 메인", "combo": sorted(low2),
+                      "alloc": 30, "expOdds": _q(low2[0], low2[1]), "highReturn": False})
+    # 삼복승 저배당 3두 조합 (10%)
+    if len(low3) == 3:
+        p = _mk_trio("저배당 3두", low3, 10, False)
+        if p:
+            picks.append(p)
+    # 삼복승 저배당 2두 + 이상감지말 (30% — 고배당 포함)
+    if len(low2) == 2 and an is not None and an not in low2:
+        p = _mk_trio("저배당 2두+이상감지말", low2 + [an], 30, True)
+        if p:
+            picks.append(p)
+    # 삼복승 저배당 2두 + 고배당 복병 (30% — 고배당 포함)
+    if len(low2) == 2 and dark is not None and dark not in low2 and dark != an:
+        p = _mk_trio("저배당 2두+고배당 복병", low2 + [dark], 30, True)
+        if p:
+            picks.append(p)
+
+    return {
+        "detected": True,
+        "conditions": {"top3Close": cond_a, "lowCluster": cond_b},
+        "reason": " · ".join(reasons),
+        "spread3Pct": round(spread3 * 100, 1) if spread3 < 900 else None,
+        "low3": low3, "anomalyHorse": an, "darkHorse": dark,
+        "horseOdds": {str(no): round(o, 1) for no, o in ordered[:8]},
+        "picks": picks,
+        "banner": "⚠️ 혼전 경주 감지 · 이변 가능성 있음 · 고배당 포함 삼복승 권장",
+        "note": "고배당 포함 조합 비중을 높였습니다(이변 대비).",
+    }
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -3861,6 +3976,14 @@ def _triple_analyze(rk, rec):
     except Exception as _e:
         print("[추천개편] 파생 실패:", _e)
 
+    # [혼전 경주] 상위 배당 근접 → 이변 가능성 → 고배당 포함 삼복승 전략(기존 추천 무영향, 별도 필드).
+    chaotic = None
+    try:
+        if signal_ready:
+            chaotic = _chaotic_race(curQ, curWin, key_horses, anomaly_horse, drops)
+    except Exception as _e:
+        print("[혼전] 파생 실패:", _e)
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
         # [추천 로직 전면 개편] BMED 확신도 엔진 + 실전 경주유형 판정 + 단계별 추천 + 강화 제거마
@@ -3868,6 +3991,8 @@ def _triple_analyze(rk, rec):
         "raceJudgment": race_judgment,     # [1·4번] 확실/신중/애매/패스형 + 근거 + 배분비율 + 쌍승강신호
         "stageGuide": stage_guide,         # [3번] T-3/T-2/T-1/T-30초 단계 추천 + 최종등급
         "eliminationStrong": elimination_strong,   # [5번] 과감한 제거마 목록(근거 포함)
+        "chaotic": chaotic,                # [혼전] 상위 배당 근접 감지 + 고배당 포함 삼복승 전략
+
         "sport": rec.get("sport") or "horse",   # [수정#3] 종목(horse|cycle|boat|bike) → 프론트 배지
         "category": rec.get("category") or "japan_local",   # [탭분리] 분석기 탭 라우팅
         "alertSignal": alert_signal,   # [신규 3번] 경고 신호 감지 요약(배너)
