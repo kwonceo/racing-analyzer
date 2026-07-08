@@ -3589,6 +3589,24 @@ def _triple_analyze(rk, rec):
         signal_confidence["refer"] = sorted([n for n, v in _sc_h.items() if 40 <= v["confidence"] < 70],
                                             key=lambda n: -_sc_h[n]["confidence"])
 
+    # [유력마-베팅추천 정합] 전적이 있으면 베팅 추천도 '유력마 TOP5'(전적+배당 통합)와 같은 순서로 만든다.
+    #   기존 문제: key_horses = 복승/단승 배당 인기순 → 전적 좋은 말이 TOP5엔 있는데 추천엔 빠지고,
+    #             전적 나쁜 저배당 인기마가 추천에 들어가 TOP5와 딴판이 되던 불일치.
+    #   수정: elimination(전적40+배당60 통합)의 통합점수 순 = renderTopHorses(TOP5) 정렬식과 동일하게
+    #        상위 3두로 key_horses 재정렬(전적 수집된 경우만; 전적 없으면 기존 배당 인기 유지).
+    try:
+        _elim_pre = _elimination(curQ, curD, exa, drops, form, _odds_map_un(trio))
+        if _elim_pre and _elim_pre.get("formAvailable"):
+            _integ = sorted((_elim_pre.get("horses") or []),
+                            key=lambda h: -(((h.get("combinedProb") or 0) * 1000)
+                                            + (h.get("total") or 0) + ((h.get("formScore") or 0) / 100.0)))
+            _io = [int(h["no"]) for h in _integ if h.get("no") is not None]
+            if len(_io) >= 2:
+                key_horses = _io[:3]                          # 베팅 추천 근간을 통합 유력마로 정렬
+                ranked = _io + [h for h in ranked if h not in _io]   # 삼복승 편성 풀도 통합순 우선
+    except Exception as _ke:
+        print("[유력마정합] 실패:", _ke)
+
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
     anomaly_horse = None
