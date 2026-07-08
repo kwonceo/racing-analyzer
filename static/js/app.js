@@ -3718,12 +3718,15 @@
     let acs = null; try { acs = await (await fetch('/api/after-close/stats')).json(); } catch (_) { /* */ }
     // [학습일지] 오늘 배운 것 대시보드(성공/실패/새패턴/개선 + 내일 집중 + 누적 패턴 신뢰도)
     let dl = null; try { dl = await (await fetch('/api/daily-learning')).json(); } catch (_) { /* */ }
+    // [고배당 심층분석] 복승30+/삼복승100+ 미적중 분석 통계(A/B/C 유형·개선 후 예상)
+    let ho = null; try { ho = await (await fetch('/api/high-odds-review?stats=1')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     // [AI Phase1] AI 학습 데이터 현황 대시보드
     let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
       ${renderDailyLearning(dl)}
+      ${renderHighOddsReview(ho)}
       ${renderAiDataStatus(ai)}
       ${renderProfitSummary(s.profit_summary)}
       ${renderCompareStats(s.compare_stats, s.integrated_weights, s.basis_weights)}
@@ -3785,6 +3788,44 @@
         ${relRow('전적이중수렴', rel['전적이중수렴'])}
         ${relRow('추천종합', rel['추천종합'])}
       </div>
+    </div>`;
+  }
+
+  // [고배당 심층분석] 복승30+/삼복승100+ 미적중 A/B/C 분류 + 개선 후 예상 적중
+  function renderHighOddsReview(ho) {
+    if (!ho || ho.error || !ho.total) return '';
+    const abc = ho.abc || {};
+    const abcColor = { A: '#9aa4b2', B: '#f5c451', C: '#ff8a5c' };
+    const bar = (k) => {
+      const g = abc[k] || {};
+      return `<div style="display:flex;align-items:center;gap:8px;padding:2px 0">
+        <span style="min-width:74px">유형${k}</span>
+        <span style="flex:1;height:14px;background:#1e293b;border-radius:7px;overflow:hidden">
+          <span style="display:block;height:100%;width:${g.pct || 0}%;background:${abcColor[k]}"></span></span>
+        <span style="min-width:120px;text-align:right"><b>${g.count || 0}건</b> (${g.pct || 0}%) <span class="hint">${esc(g.label || '')}</span></span>
+      </div>`;
+    };
+    const misses = (ho.recent_misses || []).slice(0, 8).map((m) => {
+      const tag = m.catchable ? '<span style="color:#38d39f">개선가능</span>' : '<span class="hint">구조적</span>';
+      const od = (m.odds && m.odds.quinella) ? `복승 ${m.odds.quinella}배` : '';
+      return `<div style="padding:3px 0;border-top:1px solid #222c3c">
+        <b>${esc(m.race || '')}</b> <span class="hint">${esc(m.date || '')}</span> = ${esc(m.result || '')}
+        · <span style="color:${abcColor[m.abc] || '#9aa4b2'}">유형${esc(m.abc || '?')}</span> ${esc(m.fail || '')} · ${od} · ${tag}</div>`;
+    }).join('');
+    return `<div class="bet-box" style="margin:6px 0;padding:12px 14px;border:1px solid #3a4a2a;border-radius:10px">
+      <div style="font-weight:700;font-size:15px;margin-bottom:8px">💎 고배당 미적중 심층 분석 <span class="hint" style="font-weight:400">(복승30배+/삼복승100배+)</span></div>
+      <div style="margin-bottom:8px">
+        총 <b>${ho.total}</b>경주 · 적중 <b style="color:#38d39f">${ho.hits}</b> · 미적중 <b style="color:#ff6b6b">${ho.misses}</b>
+        <span class="hint">(적중률 ${ho.hit_rate}%)</span>
+      </div>
+      <div style="margin-bottom:6px"><b>못 잡은 이유 분류</b>
+        ${bar('A')}${bar('B')}${bar('C')}
+      </div>
+      <div style="margin:8px 0;padding:8px 10px;background:rgba(56,211,159,.1);border-radius:7px">
+        🔧 <b>개선 후 예상 추가 적중: +${ho.expected_additional_hits || 0}경주</b>
+        <span class="hint">(유형B+C 해결 시)</span> → 예상 적중률 <b style="color:#38d39f">${ho.projected_hit_rate}%</b>
+      </div>
+      ${misses ? `<div style="margin-top:6px"><b>최근 미적중 고배당</b>${misses}</div>` : ''}
     </div>`;
   }
 
