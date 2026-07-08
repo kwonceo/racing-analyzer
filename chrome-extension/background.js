@@ -399,6 +399,10 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'resumeCheck') { syncAutoEngine(); return; }
   // [v2.0.1] 발주 후 결과 자동수집 알람
   if (/^resFetch\d/.test(alarm.name)) { doResultFetch(parseInt(alarm.name.replace('resFetch', ''), 10)); return; }
+  // [다음경주 자동전환] T+3분 새로고침 · T+3분30초 재수집 · T+4분 분석+알림
+  if (alarm.name === 'nextRefresh') { _nextRaceRefresh(); return; }
+  if (alarm.name === 'nextCollect') { _nextRaceCollect(); return; }
+  if (alarm.name === 'nextAnalyze') { _nextRaceAnalyze(); return; }
   if (alarm.name !== 'resultCheck') return;
   const { resultTimer } = await chrome.storage.local.get({ resultTimer: null });
   if (!resultTimer) return;
@@ -458,7 +462,7 @@ let _fineTimer = null, _keepaliveTimer = null, _collecting = false, _nextDueAt =
 
 function _autoCfg() {
   return new Promise((r) => chrome.storage.local.get(
-    { autoSend: false, intervalSec: 30, autoMode: 'triple', timerDeadline: 0, market: 'auto', japanType: 'local' }, r));
+    { autoSend: false, intervalSec: 30, autoMode: 'triple', timerDeadline: 0, market: 'auto', japanType: 'local', autoNextRace: true }, r));
 }
 function _setAutoStatus(s) {
   const st = Object.assign({ t: Date.now() }, s);
@@ -479,7 +483,13 @@ async function _stageFiredOnce(deadline, key) {
 
 async function syncAutoEngine() {
   const cfg = await _autoCfg();
-  if (!cfg.autoSend) { stopAutoEngine(); return; }
+  if (!cfg.autoSend) {
+    stopAutoEngine();
+    // [다음경주 자동전환] 자동수집을 끄면 다음경주 전환 알람도 함께 취소(임의 새로고침 방지).
+    //   자연 종료(T-0)에선 autoSend 가 유지되므로 이 분기를 안 타고 전환 알람이 살아남는다.
+    ['nextRefresh', 'nextCollect', 'nextAnalyze'].forEach((n) => chrome.alarms.clear(n));
+    return;
+  }
   chrome.alarms.create(AUTO_ALARM, { periodInMinutes: 0.5 });   // 30초 하트비트
   ['stageT1', 'stageT30', 'stageT0', 'stageTjra2', 'stageTjraClose'].forEach((n) => chrome.alarms.clear(n));
   const now = Date.now();
@@ -503,6 +513,21 @@ async function syncAutoEngine() {
       const firstAt = cfg.timerDeadline + 5 * 60000;
       if (firstAt > now) chrome.storage.local.set({ resultAutoStatus: { state: 'scheduled', raceKey: '', nextAt: firstAt, t: Date.now() } });
     }
+  }
+  // [다음경주 자동전환] 발주 후 T+3분 배당판 새로고침 → T+3분30초 재수집 → T+4분 분석+알림.
+  //   경주 종료(T-0)로 엔진이 멈춰도 이 알람들은 살아남아(stopAutoEngine 이 안 지움) 다음 경주로
+  //   자동 전환한다. autoSend OFF 시엔 위 조기분기에서 함께 취소된다.
+  //   nextRaceDone(발주시각) 표식이 있으면 재스케줄하지 않아, 이미 예약된 알람을 지워버리지 않는다.
+  const { nextRaceDone } = await chrome.storage.local.get({ nextRaceDone: null });
+  if (cfg.timerDeadline && cfg.autoNextRace !== false
+      && !(nextRaceDone && nextRaceDone.deadline === cfg.timerDeadline)) {
+    ['nextRefresh', 'nextCollect', 'nextAnalyze'].forEach((n) => chrome.alarms.clear(n));
+    const nrT3 = cfg.timerDeadline + 180000;    // T+3분: 배당판 새로고침
+    const nrT3h = cfg.timerDeadline + 210000;   // T+3분30초: 재수집 + 새 raceKey 감지
+    const nrT4 = cfg.timerDeadline + 240000;    // T+4분: 분석 + 전환 알림
+    if (nrT3 > now) chrome.alarms.create('nextRefresh', { when: nrT3 });
+    if (nrT3h > now) chrome.alarms.create('nextCollect', { when: nrT3h });
+    if (nrT4 > now) chrome.alarms.create('nextAnalyze', { when: nrT4 });
   }
   _ensureFineLoop();
   autoTick('start');
@@ -727,6 +752,55 @@ async function doResultFetch(attempt) {
       _postResultAutoStatus({ state: 'manual', raceKey: curRaceKey || '', attempt: attempt + 2 });
     }
   }
+}
+
+/* ═══════════ [다음경주 자동전환] 발주 후 자동 새로고침 → 재수집 → 분석 ═══════════
+ * 경주가 끝나면(T-0) 수집 엔진은 멈춘다. 사람이 배당판을 새로고침하지 않으면 다음 경주
+ * 배당이 안 들어온다. → 아래 3단계 알람으로 자동 전환한다.
+ *   T+3분    : 배당판 탭 새로고침(chrome.tabs.reload). 그 전에 끝난 경주 결과 1회 확보 시도.
+ *   T+3분30초: 새로고침된 페이지에서 강제 1회 수집 + 새 raceKey/발주시각 자동 감지.
+ *   T+4분    : 분석 실행 + "🔄 다음 경주로 전환" 알림. autoSend 유지 시 새 발주시각 감지로
+ *              syncAutoEngine 이 재가동되어 연속 수집이 이어진다.
+ * autoSend OFF 시엔 syncAutoEngine 이 이 알람들을 함께 취소한다(임의 새로고침 방지).
+ * ===================================================================== */
+async function _nextRaceRefresh() {
+  const cfg = await _autoCfg();
+  if (!cfg.autoSend || cfg.autoNextRace === false) return;
+  // 같은 발주시각엔 1회만 실행(syncAutoEngine 재스케줄 중단 표식).
+  await chrome.storage.local.set({ nextRaceDone: { deadline: cfg.timerDeadline, t: Date.now() } });
+  // [결과보존] 다음 경주로 넘어가기 전에 끝난 경주 결과를 먼저 1회 수집 시도.
+  //   실패해도 기존 T+5/7/10분(resFetch) 재시도가 백업으로 남는다.
+  try {
+    const { resultCollected } = await chrome.storage.local.get({ resultCollected: null });
+    if (cfg.timerDeadline && !(resultCollected && resultCollected.deadline === cfg.timerDeadline)) {
+      await doResultFetch(0);
+    }
+  } catch (_) { /* 결과 미준비면 기존 재시도에 맡김 */ }
+  const tab = await _findOddsTab();
+  if (!tab) { _setAutoStatus({ running: false, nextRace: 'no-tab', warn: '다음경주 새로고침: 배당판 탭 없음' }); return; }
+  try { await chrome.tabs.reload(tab.id); } catch (_) { /* */ }
+  _setAutoStatus({ running: false, nextRace: 'refreshing', deadline: cfg.timerDeadline, t: Date.now() });
+  _notify('nextRefresh', '🔄 다음 경주 준비 중', '배당판을 새로고침했습니다. 곧 자동 수집을 시작합니다.', false);
+}
+
+async function _nextRaceCollect() {
+  const cfg = await _autoCfg();
+  if (!cfg.autoSend || cfg.autoNextRace === false) return;
+  // 새로고침된 페이지에서 강제 1회 수집(콘텐츠 스크립트가 새 raceKey/발주시각도 함께 갱신).
+  try { await _collectOnce(); } catch (_) { /* */ }
+  try { await _forceAnalyze(); } catch (_) { /* */ }
+  _setAutoStatus({ running: true, nextRace: 'collecting', t: Date.now() });
+}
+
+async function _nextRaceAnalyze() {
+  const cfg = await _autoCfg();
+  if (!cfg.autoSend || cfg.autoNextRace === false) return;
+  await _forceAnalyze();
+  const { raceKey } = await chrome.storage.local.get({ raceKey: '' });
+  _notify('nextRace', '🔄 다음 경주로 전환',
+    `새 경주: ${raceKey || '감지 중…'}\n자동 수집 시작`, false);
+  // 새 발주시각이 감지됐으면 storage 변경으로 이미 재가동됐지만, 미검출 대비 한 번 깨워준다.
+  syncAutoEngine();
 }
 
 chrome.notifications.onButtonClicked.addListener(() => { chrome.tabs.create({ url: `${SERVER}/` }); });
