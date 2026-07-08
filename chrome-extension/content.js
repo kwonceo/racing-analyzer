@@ -793,6 +793,19 @@
     return isCentral ? 'japan_central' : 'japan_local';
   }
 
+  // [경주 자동추종] 자동 수집(auto·race-change·bg)은 '지금 배당판에 표시된 경주'(extractRaceKey)를
+  //   우선한다 — 저장된 raceKey(override)가 이전 경주로 굳어, 배당판이 다음 경주로 넘어가도 자동
+  //   엔진이 계속 이전 경주를 수집하던 버그를 막는다(수동 버튼만 되던 증상의 원인).
+  //   수동 수집('manual')·그 외는 기존대로 저장값(override)을 우선해 명시 입력을 존중한다.
+  //   두 경우 모두 한쪽이 비면 다른 쪽으로 폴백한다(자동 감지 실패 시 수동값 사용).
+  function _resolveRaceKey(reason, override) {
+    let detected = '';
+    try { detected = extractRaceKey() || ''; } catch (_) { detected = ''; }
+    const ov = (override && override.trim()) || '';
+    const followBoard = (reason === 'auto' || reason === 'race-change' || reason === 'bg');
+    return followBoard ? (detected || ov) : (ov || detected);
+  }
+
   async function collectTripleKeiba(reason) {
     if (!isKeibaOddsPage()) {
       setTripleProgress('❌ 배당판 페이지 아님', true);
@@ -802,7 +815,7 @@
     const q = ['k_raceDate', 'k_babaCode', 'k_raceNo']
       .filter((k) => sp.get(k)).map((k) => `${k}=${encodeURIComponent(sp.get(k))}`).join('&');
     const { raceKey: override, market, japanType } = await getSettings();
-    const raceKey = (override && override.trim()) || extractRaceKey();
+    const raceKey = _resolveRaceKey(reason, override);   // [경주 자동추종] 자동수집은 배당판 표시 경주 우선
     // [2번][한국모드 강화] 종목=한국 이거나 raceKey/페이지에서 KRA(서울/부산/제주/과천) 감지 시 → 복승만(쌍승·삼복승 완전 제외).
     const isKorea = isKoreaMode(raceKey, market);
     if (isKorea && market !== 'korea') console.log('[한국모드] KRA 경마장 감지(raceKey/페이지) → 복승만 수집:', raceKey || '(raceKey 미상)');
@@ -1438,7 +1451,7 @@
     const site = detectSite();
     const oddsClass = site === 'asyukk' ? 'odds_content' : null;
     const { raceKey: override, timerDeadline, sport, market, japanType } = await getSettings();
-    const raceKey = (override && override.trim()) || extractRaceKey();
+    const raceKey = _resolveRaceKey(reason, override);   // [경주 자동추종] 자동수집은 배당판 표시 경주 우선
     // [수정#3/탭분리] 종목 결정: 팝업 선택(수동)이 우선, '경마'인데 페이지가 경륜/경정/바이크면 자동 감지값 사용.
     const effSport = (sport && sport !== 'horse') ? sport : (detectSport() || 'horse');
     const isCycleBoat = (effSport === 'cycle' || effSport === 'boat' || effSport === 'bike');   // 6명 종목: 복승+쌍승만·전적 없음
@@ -1959,12 +1972,17 @@
     setTripleProgress(`🆕 경주 자동 감지: ${rk} — 수집합니다…`, false);
     // [발주감지] 경주가 바뀌면 발주시각도 새 경주 기준으로 자동 갱신(수동값보다 우선)
     try { await autoDetectPostTime(rk); } catch (_) { /* */ }
-    if (!_autoRunning) { collectTriple('race-change').catch(() => { /* */ }); }   // 서버에 자동 전송
+    // 서버에 자동 전송. storage.raceKey 는 위에서 이미 갱신됐고(팝업/분석기용) 자동엔진은 board-first
+    //   로 배당판을 따라가므로, 진행중이면 다음 tick 에 맡긴다. 직접 수집이 실패하면 _lastWatchedRace 를
+    //   비워 다음 tick 에 재시도(수집이 한 번은 반드시 반영되도록).
+    if (!_autoRunning) {
+      collectTriple('race-change').catch(() => { _lastWatchedRace = ''; });
+    }
   }
   function startRaceWatch() {
     if (_raceWatchTimer) clearInterval(_raceWatchTimer);
     setTimeout(watchRaceChange, 1500);                 // 로드 직후 1회
-    _raceWatchTimer = setInterval(watchRaceChange, 30000);
+    _raceWatchTimer = setInterval(watchRaceChange, 15000);   // 15초마다 경주 변경 감지(자동추종 반응성)
   }
 
   restartLoop();
