@@ -6,7 +6,7 @@
  "date": "2026-07-08",
  "race": "카사마츠 5경주",
  "analyzed_at": "12:50:41",
- "updated_at": "13:03:53",
+ "updated_at": "14:07:30",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -87,252 +87,70 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "12:58:19",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 5번 1착(51.5)이 7번 1착(99.1)보다 낮음 → 실질 1착: 5번 가능성 (압도적 역전 0.52)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(5→7) 51.5 / 쌍승(7→5) 99.1 = 0.52 (압도적 역전)"
-  },
-  {
-   "time": "12:58:19",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 8번 1착(23.4)이 7번 1착(38.8)보다 낮음 → 실질 1착: 8번 가능성 (강한 역전 0.603)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(8→7) 23.4 / 쌍승(7→8) 38.8 = 0.603 (강한 역전)"
-  },
-  {
-   "time": "12:58:19",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 12번 1착(34.2)이 7번 1착(52.7)보다 낮음 → 실질 1착: 12번 가능성 (강한 역전 0.649)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(12→7) 34.2 / 쌍승(7→12) 52.7 = 0.649 (강한 역전)"
-  },
-  {
-   "time": "12:58:19",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 2번 1착(9.6)이 7번 1착(10.2)보다 낮음 → 실질 1착: 2번 가능성 (역전 신호 0.941)",
-   "severity": "🟡",
-   "reason": "역전비율 = 쌍승(2→7) 9.6 / 쌍승(7→2) 10.2 = 0.941 (역전 신호)"
-  },
-  {
-   "time": "12:58:19",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[2·4위 간]: 단승 3번(2위) vs 8번(4위) — 쌍승 8→3(12.3)가 3→8(31.2)보다 낮음 → 상위권 실질순위 역전: 8번 우세 (압도적 역전 0.394)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(8→3) 12.3 / 쌍승(3→8) 31.2 = 0.394 (압도적 역전)"
-  }
- ],
- "horses": [
-  {
-   "no": 2,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 4.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 3.9배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 3.9배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 8,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 9.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 12,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 13.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 27.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 1,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 133.8배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 9,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 90.2배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 4,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 212.2배 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 6,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 343.9배 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 10,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 157배 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 11,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 295.3배 · 배당 150배+ -40 = 60점"
-  }
- ],
+ "signals_detected": [],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   2,
-   3,
-   7,
-   8,
-   12,
-   5,
-   1,
-   9,
-   4,
-   6,
-   10,
-   11
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "3+7",
-   "odds": 3.9,
-   "reason": "3번(?)·7번(?)"
-  },
-  "quinella_sub": {
-   "combo": "2+7",
-   "odds": 4.6,
-   "reason": "2번(?)·7번(?)"
-  },
-  "trifecta_main": {
-   "combo": "2+3+7",
-   "odds": 3.6,
-   "reason": "2번(?)·3번(?)·7번(?)"
-  },
-  "trifecta_insurance1": {
-   "combo": "3+7+8",
-   "odds": 7.1,
-   "reason": "3번(?)·7번(?)·8번(?)"
-  },
-  "trifecta_insurance2": {
-   "combo": "2+7+8",
-   "odds": 13.6,
-   "reason": "2번(?)·7번(?)·8번(?)"
-  },
-  "budget_allocation": {
-   "quinella_main": "43%",
-   "quinella_sub": "20%",
-   "trifecta_main": "29%",
-   "trifecta_insurance": "4%"
-  }
+  "budget_allocation": {}
  },
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    3,
-    7
-   ],
-   "trio": [
-    2,
-    3,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    3,
-    7
-   ],
-   "trio": [
-    2,
-    3,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
- "summary": "유력마 7·3·2 / 복승 3+7",
- "keyHorses": [
-  7,
-  3,
-  2
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 3,
+  "2nd": 2,
+  "3rd": 7
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": true,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 3.6
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 2,
+  "form_pick_hit": true,
+  "pnl": 2600,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": true,
+   "inverseHorses": [
+    5,
+    8,
+    12
+   ],
+   "inverseHit": [],
+   "confidence": 24.1,
+   "reason": "전적유력마 2번 적중"
+  }
+ },
  "profit": null,
  "review": null
 }
