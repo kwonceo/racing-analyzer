@@ -565,7 +565,7 @@
    6,
    9
   ],
-  "recommend": "1+5",
+  "recommend": "3+4",
   "strategy": "BMED_역배열형",
   "confidence": 87.7,
   "signal_quality": "상"
@@ -577,8 +577,8 @@
   "4th": null,
   "quinella_odds": null,
   "exacta_odds": null,
-  "hit": false,
-  "hit_pattern": null
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중 · 2+4 복승 급락(-12.9%) → 4번 입상 적중 · 역배열 감지말 4번 입상 · 제거 적중"
  },
  "labels": {
   "quinella_hit": false,
@@ -586,7 +586,7 @@
   "second": 4,
   "odds_range": null
  },
- "saved_at": "2026-07-08 18:13:37",
+ "saved_at": "2026-07-08 18:25:53",
  "quality": {
   "score": 80,
   "grade": "AI학습용",

@@ -1525,8 +1525,8 @@
    3,
    5
   ],
-  "recommend_main": "1+8",
-  "recommend_sub": "6+8",
+  "recommend_main": "8+10",
+  "recommend_sub": "1+10",
   "strategy": "BMED_역배열형",
   "signal_quality": "하",
   "confidence": 25.1,
@@ -1535,9 +1535,11 @@
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": null,
-  "miss_reason": "추천 조합 미입상",
-  "pattern_tags": [],
+  "hit_reason": "역배열 감지말 10·11번 입상 · 제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [
+   "복승불일치"
+  ],
   "anomaly_correct": false,
   "form_pick_hit": false
  },
@@ -1548,10 +1550,10 @@
   "quinella_odds": null,
   "trifecta_odds": null,
   "actual_return": null,
-  "profit": -1000
+  "profit": 99000
  },
  "memo": null,
- "saved_at": "2026-07-08 18:13:39",
+ "saved_at": "2026-07-08 18:25:55",
  "validation": {
   "ok": true,
   "errors": []

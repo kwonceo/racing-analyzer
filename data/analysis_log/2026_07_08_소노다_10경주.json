@@ -6,7 +6,7 @@
  "date": "2026-07-08",
  "race": "소노다 10경주",
  "analyzed_at": "15:29:31",
- "updated_at": "18:13:39",
+ "updated_at": "18:25:55",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -759,12 +759,12 @@
   "3rd": 10
  },
  "hit": {
-  "was_hit": false,
+  "was_hit": true,
   "quinella_hit": false,
-  "trifecta_hit": false,
+  "trifecta_hit": true,
   "payouts": {
    "quinella": 0,
-   "trifecta": 0
+   "trifecta": 100.0
   },
   "anomaly_was_correct": false,
   "signal_correct": [],
@@ -775,7 +775,7 @@
   ],
   "form_pick": 1,
   "form_pick_hit": false,
-  "pnl": -1000,
+  "pnl": 99000,
   "stake": 1000,
   "near_miss": false,
   "near_miss_horse": null,

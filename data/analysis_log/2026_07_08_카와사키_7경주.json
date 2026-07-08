@@ -6,7 +6,7 @@
  "date": "2026-07-08",
  "race": "카와사키 7경주",
  "analyzed_at": "17:36:56",
- "updated_at": "17:51:49",
+ "updated_at": "18:25:59",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -759,11 +759,25 @@
  ],
  "signals_detected": [
   {
-   "time": "17:51:49",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 7번 1착(3.1)이 5번 1착(3.9)보다 낮음 → 실질 1착: 7번 가능성 (강한 역전 0.795)",
+   "time": "17:45:15",
+   "type": "마감급락",
+   "detail": "1+6 복승 601.8→538.4 (2분전 대비 -10.5%)",
    "severity": "🔴",
-   "reason": "역전비율 = 쌍승(7→5) 3.1 / 쌍승(5→7) 3.9 = 0.795 (강한 역전)"
+   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
+  },
+  {
+   "time": "17:45:15",
+   "type": "마감급락",
+   "detail": "2+9 복승 425.6→321.1 (5분전 대비 -24.6%)",
+   "severity": "🟠",
+   "reason": "마감 5분전 대비 급락 → 자금 유입 가속(주목)"
+  },
+  {
+   "time": "17:45:15",
+   "type": "마감급락",
+   "detail": "8+11 복승 643.0→523.0 (5분전 대비 -18.7%)",
+   "severity": "🟠",
+   "reason": "마감 5분전 대비 급락 → 자금 유입 가속(주목)"
   }
  ],
  "horses": [
@@ -773,9 +787,9 @@
    "jockey": "野畑凌（川崎）",
    "record_score": 46.2,
    "record_detail": "최근 4-2-3-10-2",
-   "odds": 1.9,
+   "odds": null,
    "grade": "A",
-   "grade_reason": "배당 1.8배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 7,
@@ -783,9 +797,9 @@
    "jockey": "本田重（船橋）",
    "record_score": 92.5,
    "record_detail": "최근 1-1-3-3-7",
-   "odds": 1.9,
+   "odds": null,
    "grade": "A",
-   "grade_reason": "배당 1.8배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 11,
@@ -793,69 +807,9 @@
    "jockey": "櫻井光（川崎）",
    "record_score": 30.0,
    "record_detail": "최근 4-6-1-6-5",
-   "odds": 34.6,
+   "odds": null,
    "grade": "B",
-   "grade_reason": "배당 17.2배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "イルフロッタント",
-   "jockey": "和田譲（大井）",
-   "record_score": 7.5,
-   "record_detail": "최근 8-4-8-5-7",
-   "odds": 38.7,
-   "grade": "C",
-   "grade_reason": "배당 24.2배 · 최근평균 6.4착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 3,
-   "name": "ミッドナイトホーク",
-   "jockey": "山本大（船橋）",
-   "record_score": 3.8,
-   "record_detail": "최근 8-6-7-5-2",
-   "odds": 30.5,
-   "grade": "C",
-   "grade_reason": "배당 17.9배 · 최근평균 5.6착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 4,
-   "name": "タケノロイヤル",
-   "jockey": "中山遥（浦和）",
-   "record_score": 15.0,
-   "record_detail": "최근 13-5-2-8-6",
-   "odds": 16.2,
-   "grade": "B",
-   "grade_reason": "배당 10.5배 · 최근평균 6.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 6,
-   "name": "リコーターター",
-   "jockey": "西啓太（大井）",
-   "record_score": 30.0,
-   "record_detail": "최근 3-5-5-9-7",
-   "odds": 34.0,
-   "grade": "B",
-   "grade_reason": "배당 15.3배 · 최근평균 5.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 10,
-   "name": "ショウナンマンテン",
-   "jockey": "岡村裕（川崎）",
-   "record_score": 40.0,
-   "record_detail": "최근 2-11-12-6-5",
-   "odds": 39.1,
-   "grade": "A",
-   "grade_reason": "배당 20.7배 · 최근평균 7.2착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 9,
-   "name": "プレストマーヴェル",
-   "jockey": "山中悠（船橋）",
-   "record_score": 0.0,
-   "record_detail": "최근 5-12-11-11-7",
-   "odds": 83.0,
-   "grade": "C",
-   "grade_reason": "배당 66.4배 · 최근평균 9.2착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 1,
@@ -863,9 +817,49 @@
    "jockey": "佐野遥（川崎）",
    "record_score": 2.5,
    "record_detail": "최근 13-11-7-11-3",
-   "odds": 135.7,
-   "grade": "D",
-   "grade_reason": "배당 93배 · 배당 80~149 -20 / 최근평균 9.0착 -30 = 50점"
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.0착 -30 = 30점"
+  },
+  {
+   "no": 2,
+   "name": "イルフロッタント",
+   "jockey": "和田譲（大井）",
+   "record_score": 7.5,
+   "record_detail": "최근 8-4-8-5-7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.4착 -30 = 30점"
+  },
+  {
+   "no": 3,
+   "name": "ミッドナイトホーク",
+   "jockey": "山本大（船橋）",
+   "record_score": 3.8,
+   "record_detail": "최근 8-6-7-5-2",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.6착 -30 = 30점"
+  },
+  {
+   "no": 4,
+   "name": "タケノロイヤル",
+   "jockey": "中山遥（浦和）",
+   "record_score": 15.0,
+   "record_detail": "최근 13-5-2-8-6",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.8착 -30 = 30점"
+  },
+  {
+   "no": 6,
+   "name": "リコーターター",
+   "jockey": "西啓太（大井）",
+   "record_score": 30.0,
+   "record_detail": "최근 3-5-5-9-7",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
   },
   {
    "no": 8,
@@ -873,59 +867,89 @@
    "jockey": "濱田達（船橋）",
    "record_score": 0.0,
    "record_detail": "최근 9-9-7-7-12",
-   "odds": 175.9,
+   "odds": null,
    "grade": "D",
-   "grade_reason": "배당 110.2배 · 배당 80~149 -20 / 최근평균 8.8착 -30 = 50점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.8착 -30 = 30점"
+  },
+  {
+   "no": 9,
+   "name": "プレストマーヴェル",
+   "jockey": "山中悠（船橋）",
+   "record_score": 0.0,
+   "record_detail": "최근 5-12-11-11-7",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.2착 -30 = 30점"
+  },
+  {
+   "no": 10,
+   "name": "ショウナンマンテン",
+   "jockey": "岡村裕（川崎）",
+   "record_score": 40.0,
+   "record_detail": "최근 2-11-12-6-5",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.2착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
    5,
    7,
-   11,
+   11
+  ],
+  "eliminated": [
+   1,
    2,
    3,
    4,
    6,
-   10,
+   8,
    9,
-   1,
-   8
+   10
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "elimination_reasons": {
+   "1": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.0착 -30 = 30점",
+   "2": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.4착 -30 = 30점",
+   "3": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.6착 -30 = 30점",
+   "4": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.8착 -30 = 30점",
+   "6": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점",
+   "8": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.8착 -30 = 30점",
+   "9": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.2착 -30 = 30점",
+   "10": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.2착 -30 = 30점"
+  }
  },
  "final_recommendation": {
   "quinella_main": {
    "combo": "5+7",
-   "odds": 1.8,
+   "odds": null,
    "reason": "5번(A)·7번(A)"
   },
   "quinella_sub": {
-   "combo": "4+7",
-   "odds": 10.5,
-   "reason": "4번(B)·7번(A)"
+   "combo": "7+11",
+   "odds": null,
+   "reason": "7번(A)·11번(B)"
   },
   "trifecta_main": {
-   "combo": "4+5+7",
-   "odds": 6.1,
-   "reason": "4번(B)·5번(A)·7번(A)"
+   "combo": "5+7+11",
+   "odds": null,
+   "reason": "5번(A)·7번(A)·11번(B)"
   },
   "trifecta_insurance1": {
-   "combo": "5+6+7",
-   "odds": 8.1,
-   "reason": "5번(A)·6번(B)·7번(A)"
+   "combo": "5+7+10",
+   "odds": null,
+   "reason": "5번(A)·7번(A)·10번(A)"
   },
   "trifecta_insurance2": {
-   "combo": "4+6+7",
-   "odds": 31.2,
-   "reason": "4번(B)·6번(B)·7번(A)"
+   "combo": "7+10+11",
+   "odds": null,
+   "reason": "7번(A)·10번(A)·11번(B)"
   },
   "budget_allocation": {
-   "quinella_main": "40.0%",
+   "quinella_main": "62.1%",
    "quinella_sub": "20%",
-   "trifecta_main": "29%",
-   "trifecta_insurance": "4%"
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
   }
  },
  "recommendation_history": [
@@ -994,6 +1018,25 @@
    "top_signals": [
     "🔄 역전감지: 단승 5번 유력이나 쌍승에서 7번 1착(3.1)이 5번 1착(3.9)보다 낮음 → 실질 1착: 7번 가능성 (강한 역전 0.795)"
    ]
+  },
+  {
+   "time": "18:25:59",
+   "minutes_before": null,
+   "sig": "5-7-11|5+7|7+11|5+7+11",
+   "keyHorses": [
+    7,
+    5,
+    11
+   ],
+   "summary": "유력마 7·5·11 / 복승 5+7",
+   "quinella_main": "5+7",
+   "quinella_sub": "7+11",
+   "trifecta_main": "5+7+11",
+   "top_signals": [
+    "1+6 복승 601.8→538.4 (2분전 대비 -10.5%)",
+    "2+9 복승 425.6→321.1 (5분전 대비 -24.6%)",
+    "8+11 복승 643.0→523.0 (5분전 대비 -18.7%)"
+   ]
   }
  ],
  "compare_recommendation": {
@@ -1003,9 +1046,9 @@
     7
    ],
    "trio": [
-    4,
     5,
-    7
+    7,
+    11
    ]
   },
   "form": {
@@ -1029,20 +1072,52 @@
     7
    ],
    "trio": [
-    4,
     5,
-    7
+    7,
+    11
    ]
   }
  },
- "summary": "유력마 7·5·4 / 복승 5+7",
+ "summary": "유력마 7·5·11 / 복승 5+7",
  "keyHorses": [
   7,
   5,
-  4
+  11
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 7,
+  "2nd": 5,
+  "3rd": 6
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": true,
+  "payouts": {
+   "quinella": 1.8,
+   "trifecta": 23.3
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 5,
+  "form_pick_hit": true,
+  "pnl": 800,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "hit_basis": {
+   "formScore": 92.5,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 5번 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

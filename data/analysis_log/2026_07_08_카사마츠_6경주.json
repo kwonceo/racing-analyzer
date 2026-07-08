@@ -6,7 +6,7 @@
  "date": "2026-07-08",
  "race": "카사마츠 6경주",
  "analyzed_at": "13:19:41",
- "updated_at": "14:07:30",
+ "updated_at": "18:25:52",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -356,12 +356,17 @@
  "final_recommendation": {
   "budget_allocation": {}
  },
+ "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
    "quinella": null,
    "trio": null
   },
   "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
    "quinella": null,
    "trio": null
   },
@@ -382,7 +387,7 @@
   "quinella_hit": true,
   "trifecta_hit": false,
   "payouts": {
-   "quinella": 1.8,
+   "quinella": 2.7,
    "trifecta": 0
   },
   "anomaly_was_correct": true,
@@ -395,7 +400,7 @@
   "eliminated": [],
   "form_pick": 1,
   "form_pick_hit": false,
-  "pnl": 800,
+  "pnl": 1700,
   "stake": 1000,
   "near_miss": false,
   "near_miss_horse": null,
@@ -409,13 +414,11 @@
     8,
     2,
     1,
-    9
+    3
    ],
-   "inverseHit": [
-    9
-   ],
+   "inverseHit": [],
    "confidence": 100.0,
-   "reason": "1+9 복승 급락(-47.8%) → 9번 입상 적중 · 역배열 감지말 9번 입상"
+   "reason": "1+9 복승 급락(-47.8%) → 9번 입상 적중"
   }
  },
  "profit": null,

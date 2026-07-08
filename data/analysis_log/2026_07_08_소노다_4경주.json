@@ -6,7 +6,7 @@
  "date": "2026-07-08",
  "race": "소노다 4경주",
  "analyzed_at": "12:02:21",
- "updated_at": "14:06:57",
+ "updated_at": "18:25:51",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -711,12 +711,68 @@
   }
  },
  "final_recommendation": {
-  "budget_allocation": {}
+  "quinella_main": {
+   "combo": "1+2",
+   "odds": null,
+   "reason": "1번(A)·2번(A)"
+  },
+  "quinella_sub": {
+   "combo": "1+8",
+   "odds": null,
+   "reason": "1번(A)·8번(B)"
+  },
+  "trifecta_main": {
+   "combo": "1+2+8",
+   "odds": null,
+   "reason": "1번(A)·2번(A)·8번(B)"
+  },
+  "trifecta_insurance1": {
+   "combo": "1+2+4",
+   "odds": null,
+   "reason": "1번(A)·2번(A)·4번(A)"
+  },
+  "trifecta_insurance2": {
+   "combo": "1+4+8",
+   "odds": null,
+   "reason": "1번(A)·4번(A)·8번(B)"
+  },
+  "budget_allocation": {
+   "quinella_main": "62.1%",
+   "quinella_sub": "20%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
+  }
  },
+ "recommendation_history": [
+  {
+   "time": "18:25:51",
+   "minutes_before": null,
+   "sig": "1-2-8|1+2|1+8|1+2+8",
+   "keyHorses": [
+    1,
+    2,
+    8
+   ],
+   "summary": "유력마 1·2·8 / 복승 1+2",
+   "quinella_main": "1+2",
+   "quinella_sub": "1+8",
+   "trifecta_main": "1+2+8",
+   "top_signals": [
+    "4+11 복승 42.1→33.4 (5분전 대비 -20.7%)"
+   ]
+  }
+ ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": null,
-   "trio": null
+   "quinella": [
+    1,
+    2
+   ],
+   "trio": [
+    1,
+    2,
+    8
+   ]
   },
   "form": {
    "quinella": [
@@ -729,13 +785,28 @@
     4
    ]
   },
-  "final": {
+  "jockey": {
    "quinella": null,
    "trio": null
+  },
+  "final": {
+   "quinella": [
+    1,
+    2
+   ],
+   "trio": [
+    1,
+    2,
+    8
+   ]
   }
  },
- "summary": "데이터 부족 — 복승 수집 필요",
- "keyHorses": [],
+ "summary": "유력마 1·2·8 / 복승 1+2",
+ "keyHorses": [
+  1,
+  2,
+  8
+ ],
  "result": {
   "1st": 8,
   "2nd": 2,
@@ -743,11 +814,11 @@
  },
  "hit": {
   "was_hit": true,
-  "quinella_hit": false,
+  "quinella_hit": true,
   "trifecta_hit": true,
   "payouts": {
-   "quinella": 0,
-   "trifecta": 2.2
+   "quinella": 4.4,
+   "trifecta": 17.8
   },
   "anomaly_was_correct": true,
   "signal_correct": [
@@ -761,7 +832,7 @@
   ],
   "form_pick": 1,
   "form_pick_hit": false,
-  "pnl": 1200,
+  "pnl": 3400,
   "stake": 1000,
   "near_miss": false,
   "near_miss_horse": null,

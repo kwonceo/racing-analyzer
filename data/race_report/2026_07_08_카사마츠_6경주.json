@@ -11,7 +11,7 @@
  "hit": true,
  "hit_type": "복승 메인",
  "odds": "저배당",
- "win_odds": 1.8,
+ "win_odds": 2.7,
  "why_recommended": {
   "signal_6": {
    "horse": 6,
@@ -240,13 +240,11 @@
    8,
    2,
    1,
-   9
+   3
   ],
-  "inverseHit": [
-   9
-  ],
+  "inverseHit": [],
   "confidence": 100.0,
-  "reason": "1+9 복승 급락(-47.8%) → 9번 입상 적중 · 역배열 감지말 9번 입상"
+  "reason": "1+9 복승 급락(-47.8%) → 9번 입상 적중"
  },
  "signal_change_history": {
   "changes": [
@@ -316,7 +314,7 @@
   },
   "validCount": 5
  },
- "pnl": 800,
+ "pnl": 1700,
  "stake": 1000,
- "generated_at": "2026-07-08 14:07:30"
+ "generated_at": "2026-07-08 18:25:52"
 }

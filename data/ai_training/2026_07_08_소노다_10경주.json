@@ -746,7 +746,7 @@
    3,
    5
   ],
-  "recommend": "1+8",
+  "recommend": "8+10",
   "strategy": "BMED_역배열형",
   "confidence": 25.1,
   "signal_quality": "하"
@@ -758,8 +758,8 @@
   "4th": null,
   "quinella_odds": null,
   "exacta_odds": null,
-  "hit": false,
-  "hit_pattern": null
+  "hit": true,
+  "hit_pattern": "역배열 감지말 10·11번 입상 · 제거 적중"
  },
  "labels": {
   "quinella_hit": false,
@@ -767,7 +767,7 @@
   "second": 8,
   "odds_range": null
  },
- "saved_at": "2026-07-08 18:13:39",
+ "saved_at": "2026-07-08 18:25:55",
  "quality": {
   "score": 80,
   "grade": "AI학습용",

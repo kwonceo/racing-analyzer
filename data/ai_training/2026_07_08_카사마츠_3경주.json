@@ -186,7 +186,11 @@
   "large_scale_drop": false
  },
  "prediction": {
-  "candidates": [],
+  "candidates": [
+   1,
+   7,
+   6
+  ],
   "eliminated": [
    1,
    2,
@@ -198,10 +202,10 @@
    8,
    9
   ],
-  "recommend": null,
+  "recommend": "1+7",
   "strategy": null,
   "confidence": 0,
-  "signal_quality": null
+  "signal_quality": "하"
  },
  "result": {
   "1st": 9,
@@ -219,7 +223,7 @@
   "second": 5,
   "odds_range": null
  },
- "saved_at": "2026-07-08 14:07:29",
+ "saved_at": "2026-07-08 18:25:50",
  "quality": {
   "score": 40,
   "grade": "제외",

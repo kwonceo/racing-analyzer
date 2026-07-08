@@ -17,7 +17,11 @@
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [],
+  "candidates": [
+   1,
+   7,
+   6
+  ],
   "eliminated": [
    1,
    2,
@@ -29,10 +33,10 @@
    8,
    9
   ],
-  "recommend_main": null,
-  "recommend_sub": null,
+  "recommend_main": "1+7",
+  "recommend_sub": "1+6",
   "strategy": null,
-  "signal_quality": null,
+  "signal_quality": "하",
   "confidence": 0,
   "inverse": false
  },
@@ -52,10 +56,10 @@
   "quinella_odds": null,
   "trifecta_odds": null,
   "actual_return": null,
-  "profit": 0
+  "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-08 14:07:29",
+ "saved_at": "2026-07-08 18:25:50",
  "validation": {
   "ok": true,
   "errors": []

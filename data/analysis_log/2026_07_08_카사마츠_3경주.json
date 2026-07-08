@@ -6,7 +6,7 @@
  "date": "2026-07-08",
  "race": "카사마츠 3경주",
  "analyzed_at": "11:51:53",
- "updated_at": "14:07:29",
+ "updated_at": "18:25:50",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -133,12 +133,66 @@
   }
  },
  "final_recommendation": {
-  "budget_allocation": {}
+  "quinella_main": {
+   "combo": "1+7",
+   "odds": null,
+   "reason": "1번(A)·7번(A)"
+  },
+  "quinella_sub": {
+   "combo": "1+6",
+   "odds": null,
+   "reason": "1번(A)·6번(B)"
+  },
+  "trifecta_main": {
+   "combo": "1+6+7",
+   "odds": null,
+   "reason": "1번(A)·6번(B)·7번(A)"
+  },
+  "trifecta_insurance1": {
+   "combo": "1+7+8",
+   "odds": null,
+   "reason": "1번(A)·7번(A)·8번(A)"
+  },
+  "trifecta_insurance2": {
+   "combo": "1+6+8",
+   "odds": null,
+   "reason": "1번(A)·6번(B)·8번(A)"
+  },
+  "budget_allocation": {
+   "quinella_main": "62.1%",
+   "quinella_sub": "20%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
+  }
  },
+ "recommendation_history": [
+  {
+   "time": "18:25:50",
+   "minutes_before": null,
+   "sig": "1-6-7|1+7|1+6|1+6+7",
+   "keyHorses": [
+    1,
+    7,
+    6
+   ],
+   "summary": "유력마 1·7·6 / 복승 1+7",
+   "quinella_main": "1+7",
+   "quinella_sub": "1+6",
+   "trifecta_main": "1+6+7",
+   "top_signals": []
+  }
+ ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": null,
-   "trio": null
+   "quinella": [
+    1,
+    7
+   ],
+   "trio": [
+    1,
+    6,
+    7
+   ]
   },
   "form": {
    "quinella": [
@@ -151,13 +205,28 @@
     8
    ]
   },
-  "final": {
+  "jockey": {
    "quinella": null,
    "trio": null
+  },
+  "final": {
+   "quinella": [
+    1,
+    7
+   ],
+   "trio": [
+    1,
+    6,
+    7
+   ]
   }
  },
- "summary": "데이터 부족 — 복승 수집 필요",
- "keyHorses": [],
+ "summary": "유력마 1·7·6 / 복승 1+7",
+ "keyHorses": [
+  1,
+  7,
+  6
+ ],
  "result": {
   "1st": 9,
   "2nd": 5,
@@ -187,7 +256,7 @@
   ],
   "form_pick": null,
   "form_pick_hit": false,
-  "pnl": 0,
+  "pnl": -1000,
   "stake": 1000,
   "near_miss": false,
   "near_miss_horse": null,

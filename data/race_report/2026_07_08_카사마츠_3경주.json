@@ -57,11 +57,66 @@
    "record_score": 0.0,
    "confidence": null,
    "reason": "일반"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    7
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 30.0,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    7
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 27.5,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    6
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 3.8,
+   "confidence": null,
+   "reason": "일반"
   }
  },
  "recommendation_process": [
   "1. 전적 분석: 9번 0.0점",
-  "5. 종합 신뢰도 0점(하) 판정"
+  "5. 종합 신뢰도 0점(하) 판정",
+  "7. 최종 추천: 복승 메인 1+7"
  ],
  "confidence_breakdown": {
   "horse": 9,
@@ -97,7 +152,7 @@
   },
   "validCount": 0
  },
- "pnl": 0,
+ "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-08 14:07:29"
+ "generated_at": "2026-07-08 18:25:50"
 }
