@@ -1,0 +1,144 @@
+{
+ "race_id": "2026_07_09_몬베츠_7경주",
+ "raceKey": "몬베츠 7경주",
+ "date": "2026-07-09",
+ "track": "몬베츠",
+ "round": 7,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": null,
+ "result": {
+  "1st": 12,
+  "2nd": 10,
+  "3rd": 7
+ },
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    1,
+    8
+   ],
+   "horse": 1,
+   "drop_rate": -86.3,
+   "excess_drop": -9.3
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    2,
+    8
+   ],
+   "horse": 2,
+   "drop_rate": -70.4,
+   "excess_drop": -3.5
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    1,
+    2
+   ],
+   "horse": 1,
+   "drop_rate": -67.0,
+   "excess_drop": -9.3
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    7,
+    8
+   ],
+   "horse": 7,
+   "drop_rate": -48.4,
+   "excess_drop": 9.5
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    1,
+    4
+   ],
+   "horse": 1,
+   "drop_rate": -48.4,
+   "excess_drop": -9.3
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    2,
+    4
+   ],
+   "horse": 2,
+   "drop_rate": -46.8,
+   "excess_drop": -3.5
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    4,
+    8
+   ],
+   "horse": 4,
+   "drop_rate": -37.8,
+   "excess_drop": 13.6
+  }
+ ],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   7,
+   8,
+   3,
+   5,
+   6,
+   4
+  ],
+  "eliminated": [],
+  "recommend_main": "1+8",
+  "recommend_sub": "3+8",
+  "strategy": "BMED_압축형",
+  "signal_quality": "상",
+  "confidence": 40.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [
+   "급락50+",
+   "쌍승역전",
+   "복승불일치"
+  ],
+  "anomaly_correct": true,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 10000.0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 5.5,
+  "trifecta_odds": 17.2,
+  "actual_return": null,
+  "profit": -10000
+ },
+ "memo": null,
+ "saved_at": "2026-07-09 17:53:03",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
