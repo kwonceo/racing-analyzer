@@ -1,0 +1,183 @@
+{
+ "race": "몬베츠 3경주",
+ "raceKey": "몬베츠 3경주",
+ "date": "2026-07-09",
+ "result": {
+  "1st": 8,
+  "2nd": 2,
+  "3rd": 7,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": "복승 메인",
+ "odds": "저배당",
+ "win_odds": 2.7,
+ "why_recommended": {
+  "signal_8": {
+   "horse": 8,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": -1.6,
+   "avg_drop": -28.3,
+   "grade": "🔴",
+   "rep_combo": [
+    7,
+    8
+   ],
+   "drop_timeline": [
+    {
+     "time": "15:08:08",
+     "minutes_before": 17,
+     "odds": 7.5,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "15:25:46",
+     "minutes_before": null,
+     "odds": 4.8,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 60.0,
+   "confidence": 40.0,
+   "reason": "초과급락"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": 2.5,
+   "avg_drop": -24.2,
+   "grade": "🔴",
+   "rep_combo": [
+    2,
+    7
+   ],
+   "drop_timeline": [
+    {
+     "time": "15:08:08",
+     "minutes_before": 17,
+     "odds": 9.0,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "15:25:46",
+     "minutes_before": null,
+     "odds": 5.8,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.833,
+   "record_score": 8.8,
+   "confidence": 51.7,
+   "reason": "초과급락 + 쌍승역전"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "place_rank": 3,
+   "excess_drop": -9.1,
+   "avg_drop": -35.8,
+   "grade": "🔴",
+   "rep_combo": [
+    7,
+    8
+   ],
+   "drop_timeline": [
+    {
+     "time": "15:08:08",
+     "minutes_before": 17,
+     "odds": 7.5,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "15:25:46",
+     "minutes_before": null,
+     "odds": 4.8,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 30.0,
+   "confidence": 40.0,
+   "reason": "초과급락"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 8번 60.0점",
+  "2. 배당 수집 시작 15:07:30",
+  "3. 초과급락 감지: 7번 초과급락 -9.1%p (전체평균 -26.7%)",
+  "4. 쌍승 역전: 3→8(28.5) < 8→3(35.6) → 3번 실질 상위 신호",
+  "4. 쌍승 역전: 2→8(4.5) < 8→2(5.4) → 2번 실질 상위 신호",
+  "5. 종합 신뢰도 40.0점(중) 판정",
+  "6. BMED 전략: 역배열형 적용",
+  "7. 최종 추천: 복승 메인 2+8"
+ ],
+ "confidence_breakdown": {
+  "horse": 8,
+  "excess_drop_score": 40,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 60.0,
+  "total": 40.0,
+  "grade": "중"
+ },
+ "win_tags": [
+  "초과급락_적중",
+  "쌍승역전_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 60.0,
+  "dropAmt": -36.0,
+  "dropScore": 100.0,
+  "inverse": true,
+  "inverseHorses": [
+   3,
+   2,
+   7,
+   4,
+   8
+  ],
+  "inverseHit": [
+   2,
+   7,
+   8
+  ],
+  "confidence": 51.7,
+  "reason": "전적유력마 2번 적중 · 7+8 복승 급락(-36.0%) → 7·8번 입상 적중 · 역배열 감지말 2·7·8번 입상 · 제거 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 1,
+   "next_race": 0
+  },
+  "validCount": 2
+ },
+ "pnl": 1400,
+ "stake": 1000,
+ "generated_at": "2026-07-09 15:48:41"
+}

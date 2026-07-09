@@ -1,0 +1,276 @@
+{
+ "race_id": "2026_07_09_소노다_9경주",
+ "raceKey": "소노다 9경주",
+ "sport": "horse",
+ "category": "japan_local",
+ "date": "2026-07-09",
+ "race": "소노다 9경주",
+ "analyzed_at": "15:48:39",
+ "updated_at": "15:48:40",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "asyukk34 Chrome확장 자동수집"
+ },
+ "odds_timeline": [],
+ "signals_detected": [],
+ "horses": [
+  {
+   "no": 1,
+   "name": "リングベルガール",
+   "jockey": "佐々世（兵庫）",
+   "record_score": 51.2,
+   "record_detail": "최근 6-1-1-4-9",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 2,
+   "name": "エクスプロラベスト",
+   "jockey": "塩津璃（兵庫）",
+   "record_score": 21.2,
+   "record_detail": "최근 4-4-5-5-2",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 4,
+   "name": "ヨウタウッドテール",
+   "jockey": "吉村智（兵庫）",
+   "record_score": 46.2,
+   "record_detail": "최근 3-4-5-1-2",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 5,
+   "name": "エルフェニックス",
+   "jockey": "小牧太（兵庫）",
+   "record_score": 80.0,
+   "record_detail": "최근 1-1-8-6-5",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 6,
+   "name": "ヴィータレヴィス",
+   "jockey": "杉浦健（兵庫）",
+   "record_score": 55.0,
+   "record_detail": "최근 1-5-6-1-11",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 9,
+   "name": "ワンダーブレス",
+   "jockey": "小谷周（兵庫）",
+   "record_score": 81.2,
+   "record_detail": "최근 3-1-2-3-2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 10,
+   "name": "サクセスブレイク",
+   "jockey": "永井孝（兵庫）",
+   "record_score": 51.2,
+   "record_detail": "최근 6-1-2-2-3",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 3,
+   "name": "シゲルノヴァ",
+   "jockey": "土方颯（兵庫）",
+   "record_score": 0.0,
+   "record_detail": "최근 8-11-11-10-7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.4착 -30 = 30점"
+  },
+  {
+   "no": 7,
+   "name": "テーオーニコラス",
+   "jockey": "下原理（兵庫）",
+   "record_score": 0.0,
+   "record_detail": "최근 12-11-10-8-9",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 10.0착 -30 = 30점"
+  },
+  {
+   "no": 8,
+   "name": "バーストオブカラー",
+   "jockey": "田野豊（兵庫）",
+   "record_score": 0.0,
+   "record_detail": "최근 9-10-9-5-7",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   2,
+   4,
+   5,
+   6,
+   9,
+   10
+  ],
+  "eliminated": [
+   3,
+   7,
+   8
+  ],
+  "elimination_reasons": {
+   "3": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.4착 -30 = 30점",
+   "7": "배당 미수집 · 배당 150배+ -40 / 최근평균 10.0착 -30 = 30점",
+   "8": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
+  }
+ },
+ "final_recommendation": {
+  "quinella_main": {
+   "combo": "9+10",
+   "odds": null,
+   "reason": "9번(A)·10번(B)"
+  },
+  "quinella_sub": {
+   "combo": "4+9",
+   "odds": null,
+   "reason": "4번(C)·9번(A)"
+  },
+  "trifecta_main": {
+   "combo": "4+9+10",
+   "odds": null,
+   "reason": "4번(C)·9번(A)·10번(B)"
+  },
+  "trifecta_insurance1": {
+   "combo": "5+9+10",
+   "odds": null,
+   "reason": "5번(A)·9번(A)·10번(B)"
+  },
+  "trifecta_insurance2": {
+   "combo": "4+5+9",
+   "odds": null,
+   "reason": "4번(C)·5번(A)·9번(A)"
+  },
+  "budget_allocation": {
+   "quinella_main": "62.1%",
+   "quinella_sub": "20%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
+  }
+ },
+ "recommendation_history": [
+  {
+   "time": "15:48:39",
+   "minutes_before": null,
+   "sig": "4-9-10|9+10|4+9|4+9+10",
+   "keyHorses": [
+    9,
+    10,
+    4
+   ],
+   "summary": "유력마 9·10·4 / 복승 9+10",
+   "quinella_main": "9+10",
+   "quinella_sub": "4+9",
+   "trifecta_main": "4+9+10",
+   "top_signals": []
+  }
+ ],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    9,
+    10
+   ],
+   "trio": [
+    4,
+    9,
+    10
+   ]
+  },
+  "form": {
+   "quinella": [
+    5,
+    9
+   ],
+   "trio": [
+    5,
+    6,
+    9
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    9,
+    10
+   ],
+   "trio": [
+    4,
+    9,
+    10
+   ]
+  }
+ },
+ "summary": "유력마 9·10·4 / 복승 9+10",
+ "keyHorses": [
+  9,
+  10,
+  4
+ ],
+ "result": {
+  "1st": 8,
+  "2nd": 1,
+  "3rd": 9
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [
+   3,
+   7,
+   8
+  ],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "hit_basis": {
+   "formScore": 0.0,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 1번 적중"
+  }
+ },
+ "profit": null,
+ "review": null
+}

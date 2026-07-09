@@ -1,0 +1,285 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_09_몬베츠_3경주",
+ "race_info": {
+  "date": "2026-07-09",
+  "track": "몬베츠",
+  "round": 3,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 8,
+   "name": "テナチュール",
+   "jockey": "若杉朝（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    2,
+    5,
+    2,
+    2
+   ],
+   "record_score": 60.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "オセロ",
+   "jockey": "藤田駕（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    6,
+    6,
+    6,
+    5
+   ],
+   "record_score": 30.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "シルバーコムコム",
+   "jockey": "服部茂（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    7,
+    7,
+    8,
+    8
+   ],
+   "record_score": 10.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "ニシノエンデヴァー",
+   "jockey": "宮内勇（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    5,
+    4,
+    5,
+    2
+   ],
+   "record_score": 8.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "エイシンキャノピー",
+   "jockey": "坂下秀（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    9,
+    11,
+    10,
+    12
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "メテオジュリア",
+   "jockey": "大畑雅（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    8,
+    10,
+    7,
+    6
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "アースカムイ",
+   "jockey": "松井伸（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    8,
+    8,
+    8,
+    10
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "シアーエレガンス",
+   "jockey": "黒澤愛（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    9,
+    11,
+    11
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "15:07:30",
+    "quinella": {}
+   },
+   {
+    "time": "15:08:08",
+    "quinella": {
+     "2+8": 2.0,
+     "7+8": 7.5,
+     "2+7": 9.0,
+     "2+3": 10.0,
+     "2+6": 11.6,
+     "6+8": 11.9,
+     "6+7": 18.5,
+     "3+8": 23.2,
+     "3+7": 27.4,
+     "3+6": 27.7,
+     "2+4": 30.9,
+     "4+7": 40.8,
+     "4+8": 40.8,
+     "3+4": 49.2,
+     "4+6": 80.2,
+     "1+3": 94.1,
+     "1+8": 94.1,
+     "1+6": 98.4,
+     "1+2": 144.4,
+     "1+4": 180.5,
+     "1+7": 216.6
+    }
+   },
+   {
+    "time": "15:25:46",
+    "quinella": {
+     "2+8": 2.4,
+     "7+8": 4.8,
+     "2+7": 5.8,
+     "2+6": 10.1,
+     "6+8": 12.1,
+     "2+3": 15.0,
+     "6+7": 17.7,
+     "3+8": 20.1,
+     "4+8": 26.3,
+     "2+4": 31.1,
+     "3+7": 34.1,
+     "3+6": 40.2,
+     "4+7": 46.7,
+     "4+6": 80.8,
+     "3+4": 91.0,
+     "1+8": 127.6,
+     "1+2": 257.7,
+     "1+4": 303.5,
+     "1+6": 303.5,
+     "1+3": 369.2,
+     "1+7": 487.9
+    }
+   }
+  ],
+  "drop_rates": {
+   "7": -36.0,
+   "8": -36.0,
+   "2": -35.6,
+   "4": -35.5,
+   "3": -13.4,
+   "6": -12.9
+  },
+  "excess_drops": {
+   "7": -9.1,
+   "8": -1.6,
+   "4": -8.8
+  },
+  "drop_speed": {},
+  "exacta_reversal": true,
+  "reversal_ratio": 0.801,
+  "quinella_mismatch": null,
+  "refund_rate": 0.744,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "prediction": {
+  "candidates": [
+   2,
+   8,
+   7,
+   4,
+   3,
+   6,
+   1
+  ],
+  "eliminated": [
+   5
+  ],
+  "recommend": "2+8",
+  "strategy": "BMED_역배열형",
+  "confidence": 51.7,
+  "signal_quality": "상"
+ },
+ "result": {
+  "1st": 8,
+  "2nd": 2,
+  "3rd": 7,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 2번 적중 · 7+8 복승 급락(-36.0%) → 7·8번 입상 적중 · 역배열 감지말 2·7·8번 입상 · 제거 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 8,
+  "second": 2,
+  "odds_range": null
+ },
+ "saved_at": "2026-07-09 15:48:41",
+ "quality": {
+  "score": 80,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
+  "missing": [
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

@@ -1,0 +1,239 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_09_카사마츠_3경주",
+ "race_info": {
+  "date": "2026-07-09",
+  "track": "카사마츠",
+  "round": 3,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 9,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "チュッカ",
+   "jockey": "深澤杏（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    5,
+    9,
+    11,
+    11
+   ],
+   "record_score": 30.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "バンビチャン",
+   "jockey": "筒井勇（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    2,
+    4,
+    7,
+    12
+   ],
+   "record_score": 27.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "スマイリングキング",
+   "jockey": "松本一（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    9,
+    7,
+    11
+   ],
+   "record_score": 10.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "オーケーサイン",
+   "jockey": "森島貴（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    10,
+    10,
+    2,
+    8
+   ],
+   "record_score": 3.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "ヒルノエルニド",
+   "jockey": "東川慎（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    8,
+    9,
+    8,
+    5
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "スペキュレーター",
+   "jockey": "望月洵（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    8,
+    7,
+    8,
+    9
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "スイモアマイモ",
+   "jockey": "細川智（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    11,
+    5,
+    7,
+    8
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "コンストラクション",
+   "jockey": "高木健（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    11,
+    14,
+    14
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "シャトーホークビル",
+   "jockey": "塚本征（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    13,
+    11,
+    18,
+    14,
+    16
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": null,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   7,
+   6
+  ],
+  "eliminated": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "recommend": "1+7",
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 10,
+  "2nd": 8,
+  "3rd": 2,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 10,
+  "second": 8,
+  "odds_range": null
+ },
+ "saved_at": "2026-07-09 15:48:33",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

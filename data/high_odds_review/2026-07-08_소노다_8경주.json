@@ -1,0 +1,94 @@
+{
+ "race": "소노다 8경주",
+ "date": "2026-07-08",
+ "result": "7-2-4",
+ "result_odds": {
+  "quinella": 177.0,
+  "trifecta": null,
+  "quinella_high": true,
+  "trifecta_high": false
+ },
+ "is_high_odds": true,
+ "our_recommend": [
+  "2+10",
+  "3+10"
+ ],
+ "hit": false,
+ "winner_analysis": {
+  "7번": {
+   "rank": "1착",
+   "signal_before_close": "신호 없음(정상 인기)",
+   "timeline": [
+    {
+     "mb": null,
+     "odds": 31.8,
+     "pct": null,
+     "time": "14:24:13",
+     "after": false,
+     "src": "복승",
+     "signal": "기준"
+    }
+   ],
+   "why_missed": "7번은 마감 전 배당 변화 없이 입상 → 배당 정상, 전적 이변(구조적)",
+   "could_we_catch": false,
+   "improvement": "전적 하위라도 최근 컨디션·거리/기수 변경 이변 조건 학습 강화"
+  },
+  "2번": {
+   "rank": "2착",
+   "signal_before_close": "신호 없음(정상 인기)",
+   "timeline": [
+    {
+     "mb": null,
+     "odds": 3.8,
+     "pct": null,
+     "time": "14:24:13",
+     "after": false,
+     "src": "복승",
+     "signal": "기준"
+    }
+   ]
+  },
+  "4번": {
+   "rank": "3착",
+   "signal_before_close": "신호 없음(정상 인기)",
+   "timeline": [
+    {
+     "mb": null,
+     "odds": 15.0,
+     "pct": null,
+     "time": "14:24:13",
+     "after": false,
+     "src": "복승",
+     "signal": "기준"
+    }
+   ]
+  }
+ },
+ "timeline_comparison": [
+  {
+   "time": "복승",
+   "odds": 31.8,
+   "pct": null,
+   "signal": "기준",
+   "our_focus": "2+10"
+  }
+ ],
+ "abc_type": "A",
+ "abc_label": "구조적 불가",
+ "abc_action": "개선 불가(패스)",
+ "fail_type": "전적오판",
+ "fail_label": "유형4 · 전적 오판",
+ "root_cause": "7번은 마감 전 배당 변화 없이 입상 → 배당 정상, 전적 이변(구조적)",
+ "prevention": "전적 하위라도 최근 컨디션·거리/기수 변경 이변 조건 학습 강화",
+ "simulation": {
+  "applicable": false,
+  "improved_logic": "-",
+  "expected": "구조적 한계 — 마감 후 신호/신호 부재라 로직 개선해도 감지 불가",
+  "catchable": false
+ },
+ "next_rules": [
+  "수집 타임라인에 신호 없는 고배당 → 이변 가능성 낮음 → 패스 가중"
+ ],
+ "lesson": "전적 하위라도 최근 컨디션·거리/기수 변경 이변 조건 학습 강화",
+ "generated_at": "2026-07-08 23:45:20"
+}

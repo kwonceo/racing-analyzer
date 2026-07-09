@@ -1602,6 +1602,9 @@
         console.log('[한국모드] 삼복승 수집 생략(복승만)');
       } else if (isCentral) {
         console.log('[중앙경마] 삼복승 수집 생략(복승+쌍승만·배당 전용)');
+      } else if (effSport === 'boat') {
+        // [경정 삼복승 차단] 경정(보트)은 삼복승 배당이 불안정·노이즈 → 복승+쌍승만 수집(사용자 요청).
+        console.log('[경정] 삼복승 수집 차단(복승+쌍승만) — 불안정 노이즈 방지');
       } else {
         try {
           const sportTag = isCycleBoat ? SPORT_LABEL[effSport] : '일본경마';

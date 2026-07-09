@@ -144,10 +144,48 @@
 
     <!-- 일본경마: 배당판 캡처 + 전적표 업로드 통합 -->
     <section id="tab-jp" class="tab-panel">
+      <!-- [경마 oddspark 서버 직접 수집] 탭 최상단 — Chrome 확장 없이 서버가 지방경마 복승·쌍승을
+           직접 조회(30초·마감 3분전 3초). 기존 확장 수집은 폴백으로 유지. -->
+      <div class="panel-card" style="border-left:4px solid #38d39f;background:rgba(56,211,159,.06)">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <label style="font-weight:800;color:#38d39f;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:6px">
+            <input id="keibaOddsAutoChk" type="checkbox" style="width:18px;height:18px;vertical-align:middle;cursor:pointer">
+            🏇 oddspark 서버 수집 <span class="hint" style="font-weight:600;font-size:12px;color:#94a3b8">ON/OFF</span>
+          </label>
+          <button id="keibaOddsOnceBtn" class="btn btn-small" type="button">지금 1회 조회</button>
+        </div>
+        <!-- [경주 지정] 경주가 안 넘어가거나 다른 경주를 볼 때 직접 지정(비우면 현재 경주 자동추종) -->
+        <div class="cfg-row" style="margin:8px 0 0;gap:6px;align-items:center;flex-wrap:wrap">
+          <label class="hint" style="font-size:11px">🎯 경주 지정
+            <input id="keibaOddsRk" type="text" placeholder="예: 소노다 2경주 (비우면 자동)"
+                   style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:4px 8px;font:inherit;font-size:12px;width:180px" />
+          </label>
+          <button id="keibaOddsRkSet" class="btn btn-small" type="button">지정</button>
+          <button id="keibaOddsRkClear" class="btn btn-small" type="button" style="display:none">자동</button>
+          <span class="hint" style="font-size:11px">경주가 안 넘어가면 여기에 현재 경주를 입력하세요</span>
+        </div>
+        <p class="hint" style="margin:6px 0 0;font-size:11px">Chrome 확장 없이 <b>서버가 oddspark에서 복승+쌍승 배당을 자동 수집</b>합니다 · 30초 간격(마감 3분전 3초) · 페이지가 열려 있을 때만 동작 · 기존 확장 수집은 폴백으로 유지</p>
+        <div id="keibaOddsStatus" style="margin-top:8px;font:600 12px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#94a3b8">⬜ 꺼짐 — 토글을 켜면 현재 경주 배당을 자동 수집합니다.</div>
+      </div>
+      <!-- [상단 우선] 실시간 배당 이상감지 + 유력마 TOP5. 전적표 없이 배당만으로도 자동 표시. -->
       <div class="panel-card">
-        <h2>일본경마 통합 분석 (전적표 + 실시간 배당)</h2>
-        <p class="hint">전적표 이미지를 업로드해 분석하고, <b>Chrome 확장(종목=일본)에서 [전체 자동 수집]</b>을 실행하면
-          복승·쌍승 배당이 30초 간격으로 연동되어 통합분석·이상감지가 자동 표시됩니다. (삼복승 미사용 · 화면 캡처 방식 폐지)</p>
+        <h2>⚡ 실시간 배당 분석 (이상감지 · 유력마 TOP5)</h2>
+        <p class="hint">oddspark 서버 수집(위 토글) 또는 Chrome 확장으로 배당이 들어오면 <b>실시간 이상감지·역배열·유력마 TOP5·추천 조합</b>이 자동 표시됩니다. 전적표 없이 배당만으로도 동작하며, 전적표를 넣으면(아래 보조) 통합등급에 반영됩니다.</p>
+        <!-- [1번] 베팅 예산: 통합분석의 베팅 추천 표에 복승/삼복승 배분 금액을 자동 계산 -->
+        <div class="cfg-row" style="margin:6px 0">
+          <label class="hint">💰 베팅 예산(원)
+            <input id="jpBudget" type="number" min="0" step="1000" placeholder="예: 20000"
+                   style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" />
+          </label>
+          <span class="hint">입력 시 통합분석 베팅 추천에 조합별 금액이 표시됩니다</span>
+        </div>
+      </div>
+      <div id="jpIntegrated" class="report-area"></div>
+
+      <!-- [하단·보조] 전적표 업로드 — 배당 분석의 보조. 넣으면 통합등급(전적40+배당60)에 반영. -->
+      <div class="panel-card" style="margin-top:12px;opacity:.96">
+        <h2 style="font-size:15px">📋 전적표 업로드 <span class="hint" style="font-weight:400;font-size:12px">(보조 · 선택)</span></h2>
+        <p class="hint">전적표 이미지를 업로드해 분석하면 유력마 통합등급(전적40+배당60)에 반영됩니다. <b>배당만으로도 상단 실시간 분석은 동작</b>하므로 전적표는 선택 사항입니다.</p>
         <div class="jp-slot" id="jpFormSlot" style="max-width:420px">
           <div class="jp-slot-head"><span>📋 전적표</span><span class="jp-status" id="jpFormStatus">⬜ 미설정</span></div>
           <img id="jpFormPreview" class="jp-preview hidden" alt="" />
@@ -163,15 +201,6 @@
       </div>
       <div id="jpReport" class="report-area"></div>
       <div id="jpOddsStatus" style="margin:10px 0"></div>
-      <!-- [1번] 베팅 예산: 통합분석의 베팅 추천 표에 복승/삼복승 배분 금액을 자동 계산 -->
-      <div class="cfg-row" style="margin:6px 0">
-        <label class="hint">💰 베팅 예산(원)
-          <input id="jpBudget" type="number" min="0" step="1000" placeholder="예: 20000"
-                 style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" />
-        </label>
-        <span class="hint">입력 시 통합분석 베팅 추천에 조합별 금액이 표시됩니다</span>
-      </div>
-      <div id="jpIntegrated" class="report-area"></div>
 
       <!-- [일본경마 복기] 분석했던 경주 목록 → 클릭 → 유력마/제거마·이상감지·추천조합·결과입력·복기 -->
       <div class="panel-card" id="jpReviewCard" style="margin-top:12px">
@@ -224,9 +253,16 @@
           <label class="hint">개최일 <input id="keirinYmd" class="cfg-input" type="text" placeholder="YYYYMMDD" style="width:110px"></label>
           <label class="hint">경주 <input id="keirinRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
           <button id="keirinFetchBtn" class="btn btn-primary">🚴 출마표 분석</button>
+          <button id="keirinOddsBtn" class="btn" title="oddspark 복승·쌍승 배당을 서버가 직접 조회해 역배열·배당변화·이상감지에 반영(확장 불필요)">💰 배당 조회</button>
+          <label class="hint" style="font-size:11px"><input id="keirinOddsPoll" type="checkbox" style="vertical-align:middle"> 30초 자동갱신(배당변화)</label>
         </div>
+        <div id="keirinOddsResult" class="hint" style="margin:0 0 6px"></div>
         <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
           <label class="hint" style="flex:1">또는 URL <input id="keirinUrl" class="cfg-input" type="text" placeholder="https://www.oddspark.com/keirin/RaceList.do?joCode=85&kaisaiBi=...&raceNo=6" style="width:100%;max-width:520px"></label>
+        </div>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
+          <label class="hint" style="flex:1">live 배당 연동 raceKey <input id="keirinRaceKey" class="cfg-input" type="text" placeholder="예: 히로시마 2경주 (비우면 현재 경주 자동)" style="width:100%;max-width:360px"></label>
+          <span class="hint" style="font-size:11px">← 입력 시 이 전적이 유력마·근거·통합등급(전적+배당역배열)에 반영됩니다</span>
         </div>
         <div id="keirinCardResult"></div>
       </div>
