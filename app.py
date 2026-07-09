@@ -1433,11 +1433,45 @@ def _anomaly_pretty(raw):
     return {"text": text, "severity": sev, "pct": pct}
 
 
+def _anomaly_combo(raw):
+    """스냅샷 이상감지 원문 → 조합 문자열(예 '2+3'·'4'·'5→10')."""
+    raw = raw or ""
+    if raw.startswith("급락감지:"):
+        return raw.split(":", 1)[1].strip().split()[0]
+    if raw.startswith("단승급락:"):
+        m = re.search(r"(\d+)번", raw)
+        return m.group(1) if m else ""
+    if raw.startswith("쌍승역전:"):
+        return raw.split(":", 1)[1].strip().split()[0]
+    return ""
+
+
+def _anomaly_events_from_doc(doc):
+    """[이상감지 누적·공용] 스냅샷 doc → 시간순·중복제거 이상감지 이벤트 리스트.
+    anomaly-feed 엔드포인트와 분석로그(anomaly_history)가 동일 규칙으로 공유(경주별 분리)."""
+    events, seen = [], set()
+    for s in (doc.get("snapshots") or []):
+        for raw in (s.get("anomalies") or []):
+            p = _anomaly_pretty(raw)
+            # [초반미수집 방어] opening 배당 정착으로 이미 기록된 가짜 급락(-88%↓)은 숨김
+            #   (복승/단승 급락만 · 쌍승역전은 유지). 물리적으로 정상 시장의 복승 -88%↓는 거의 없음.
+            if p["pct"] is not None and p["pct"] <= -88 and ("복승 급락" in p["text"] or "단승 급락" in p["text"]):
+                continue
+            if p["text"] in seen:      # 최초 감지 시각만 유지(중복 누적 방지)
+                continue
+            seen.add(p["text"])
+            events.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
+                           "text": p["text"], "severity": p["severity"], "pct": p["pct"],
+                           "combo": _anomaly_combo(raw), "t": s.get("t")})
+    events.sort(key=lambda e: e.get("t") or 0)   # 시간순
+    return events
+
+
 @app.route("/api/odds/anomaly-feed", methods=["GET", "POST"])
 def anomaly_feed():
     """[이상감지 누적] 경주별 스냅샷에서 감지된 이상을 시간순·중복제거로 누적 반환.
     스냅샷은 삭제되지 않으므로 마감 후에도, 새 수집 후에도 과거 감지가 유지된다.
-    body/query: {raceKey}. → {raceKey, events:[{time,minutes_before,text,severity,pct,t}]}"""
+    body/query: {raceKey}. → {raceKey, events:[{time,minutes_before,text,severity,pct,combo,t}]}"""
     if request.method == "POST":
         rk = ((request.json or {}).get("raceKey") or "").strip()
     else:
@@ -1449,22 +1483,7 @@ def anomaly_feed():
         doc = json.load(open(path, encoding="utf-8"))
     except Exception:
         return jsonify({"raceKey": rk, "events": []})
-    events, seen = [], set()
-    for s in doc.get("snapshots", []):
-        for raw in (s.get("anomalies") or []):
-            p = _anomaly_pretty(raw)
-            # [초반미수집 방어] opening 배당 정착으로 이미 기록된 가짜 급락(-88%↓)은 피드에서 숨김
-            #   (복승/단승 급락만 · 쌍승역전은 유지). 물리적으로 정상 시장의 복승 -88%↓는 거의 없음.
-            if p["pct"] is not None and p["pct"] <= -88 and ("복승 급락" in p["text"] or "단승 급락" in p["text"]):
-                continue
-            if p["text"] in seen:      # 최초 감지 시각만 유지(중복 누적 방지)
-                continue
-            seen.add(p["text"])
-            events.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
-                           "text": p["text"], "severity": p["severity"], "pct": p["pct"],
-                           "t": s.get("t")})
-    events.sort(key=lambda e: e.get("t") or 0)   # 시간순
-    return jsonify({"raceKey": rk, "events": events})
+    return jsonify({"raceKey": rk, "events": _anomaly_events_from_doc(doc)})
 
 
 @app.route("/api/learning/near-miss", methods=["GET"])
@@ -2464,14 +2483,32 @@ def _combo_signal_quality(combo, excess):
 
 # ───────── [핵심 이상감지 수학 공식] 쌍승역전·복승불일치·종합신뢰도 ─────────
 def _reversal_level(ratio):
-    """역전비율(<1)을 등급으로. <0.60 압도적 / <0.80 강한 / <0.95 역전 / 그 외 신호없음(None)."""
-    if ratio < 0.60:
-        return "🔴🔴", "압도적 역전"
-    if ratio < 0.80:
-        return "🔴", "강한 역전"
-    if ratio < 0.95:
-        return "🟡", "역전 신호"
-    return None, None
+    """[강화] 역전비율(<1)→등급. 배당 차이(=1-ratio) 기준으로 오탐 제거 + 4단계 강도.
+      배당 차이 10% 미만(ratio>0.90) → 역배열 아님(None) · 10~20% 🟡 약한 · 20~35% 🟠 ·
+      35~50% 🔴 강한 · 50%+ 🔴🔴 압도적. (0.1배 수준 미세차 오탐 제거)."""
+    if ratio is None or ratio > 0.90:      # 배당 차이 10% 미만 → 역배열 아님(오탐 제거)
+        return None, None
+    if ratio > 0.80:                        # 배당 차이 10~20%
+        return "🟡", "약한 역배열"
+    if ratio > 0.65:                        # 배당 차이 20~35%
+        return "🟠", "역배열"
+    if ratio > 0.50:                        # 배당 차이 35~50%
+        return "🔴", "강한 역배열"
+    return "🔴🔴", "압도적 역배열"           # 배당 차이 50%+
+
+
+def _inversion_tier(diff_pct):
+    """[역배열 강도] 배당 차이 %(양수) → 등급. 10% 미만 신호없음(None).
+      10~20% 🟡 약한 / 20~35% 🟠 / 35~50% 🔴 강한 / 50%+ 🔴🔴 압도적."""
+    if diff_pct is None or diff_pct < 10:
+        return None, None
+    if diff_pct < 20:
+        return "🟡", "약한 역배열"
+    if diff_pct < 35:
+        return "🟠", "역배열"
+    if diff_pct < 50:
+        return "🔴", "강한 역배열"
+    return "🔴🔴", "압도적 역배열"
 
 
 def _win_exacta_reversal(fav_rank, curD, max_rank=4):
@@ -2557,10 +2594,10 @@ def _quinella_mismatch(fav_rank, curQ):
 
 
 def _reversal_strength_score(ratio):
-    """역전비율(<1)을 0~100 점수(0.60이하=100, 0.95=0 선형)."""
-    if ratio is None or ratio >= 0.95:
+    """역전비율(<1)을 0~100 점수(0.50이하=100, 0.90=0 선형). [강화] 10% 미만 차(ratio>0.90)=0점."""
+    if ratio is None or ratio >= 0.90:
         return 0.0
-    return round(min(100.0, (0.95 - ratio) / (0.95 - 0.60) * 100.0), 1)
+    return round(min(100.0, (0.90 - ratio) / (0.90 - 0.50) * 100.0), 1)
 
 
 def _mismatch_strength_score(ratio):
@@ -2650,10 +2687,24 @@ def _rank_inversion_detail(curWin, curQ, curD):
         if pr is None or orr is None:
             continue
         gap = pr - orr                       # 인기순위 - 배당순위 (양수=배당순위가 더 높음=역배열)
-        if gap >= 2 and odds_src[n] < 30:    # 2단계+ 역전 & 30배 미만만
-            detail.append({"no": n, "popRank": pr, "oddsRank": orr, "gap": gap,
-                           "odds": round(odds_src[n], 1)})
-    detail.sort(key=lambda x: (-x["gap"], x["odds"]))    # 역전폭 큰 순 → 배당 낮은 순
+        if not (gap >= 2 and odds_src[n] < 30):
+            continue
+        # [역배열 강화] 순위 역전 + '배당 차이 10%+' 요구(0.1배 미세차 오탐 제거).
+        #   차이 = n(인기 낮은데 배당 싼 말)이, 인기는 높은데 배당은 비싼 말보다 얼마나 싼지(%).
+        ref = None
+        for m in pop_src:
+            if pop_rank.get(m, 999) < pr and odds_src.get(m, 0) > odds_src[n]:
+                if ref is None or odds_src[m] < ref:
+                    ref = odds_src[m]
+        diff_pct = round((ref - odds_src[n]) / ref * 100, 1) if (ref and ref > 0) else None
+        lvl, tag = _inversion_tier(diff_pct)
+        if lvl is None:                      # 배당 차이 10% 미만 → 역배열 아님
+            continue
+        detail.append({"no": n, "popRank": pr, "oddsRank": orr, "gap": gap,
+                       "odds": round(odds_src[n], 1), "diffPct": diff_pct,
+                       "level": lvl, "tag": tag})
+    # 강도(배당 차이) 큰 순 → 역전폭 → 배당 낮은 순
+    detail.sort(key=lambda x: (-(x.get("diffPct") or 0), -x["gap"], x["odds"]))
     for i, d in enumerate(detail):
         d["lowest"] = (i == 0)
     lead = None
@@ -2818,6 +2869,51 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
             "strongUnpopular": strong_unpopular}   # [신규] 전적 우수하나 시장 비인기(역배열 아님)
 
 
+def _rebound_analyze(seq):
+    """[배당 반등 패턴] 단일 조합의 배당 시퀀스(시간순) → 급락 후 반등/재급락 분류.
+    - drop(급락): 급락 전 고점(pre_max) → 최저(lo). drop_frac<0.10 이면 급락 아님(None).
+    - recovery(회복비율) = 급락폭 대비 되돌린 비율 = (cur-lo)/(pre_max-lo).
+        · recovery ≤ 0.20  → 'valid'  : 원배당 대비 20% 이내 반등 = 자금 유지 → 신호 유효
+        · recovery ≥ 0.80  → 'fake'   : 원배당 80%+ 회복 = 자금 이탈 → 페이크
+        · 그 사이           → 'partial'
+    - 'recrash'(재급락): 급락 → 반등(최저 대비 +10%↑) → 재급락(반등 고점 대비 -10%↓) = 자금 재유입 = 더 강한 신호.
+    반환 {pattern, recovery, orig, low, cur, dropFrac} 또는 None."""
+    seq = [x for x in (seq or []) if isinstance(x, (int, float)) and x > 0]
+    if len(seq) < 3:
+        return None
+    lo = min(seq)
+    lo_i = seq.index(lo)
+    pre_max = max(seq[:lo_i + 1]) if lo_i >= 0 else seq[0]
+    if pre_max <= 0:
+        return None
+    drop_frac = (pre_max - lo) / pre_max
+    if drop_frac < 0.10:      # 의미있는 급락이 없으면 반등 패턴 분석 대상 아님
+        return None
+    cur = seq[-1]
+    recovery = (cur - lo) / (pre_max - lo) if pre_max > lo else 0.0
+    # 재급락: 최저 이후 반등(+10%↑)했다가 다시 그 반등 고점 대비 -10%↓ 재하락
+    recrash = False
+    if lo_i < len(seq) - 1:
+        after = seq[lo_i:]
+        peak_after = max(after)
+        peak_after_i = after.index(peak_after)
+        if peak_after_i > 0 and peak_after >= lo * 1.10:
+            tail = after[peak_after_i:]
+            if tail and min(tail) <= peak_after * 0.90:
+                recrash = True
+    if recrash:
+        pattern = "recrash"
+    elif recovery <= 0.20:
+        pattern = "valid"
+    elif recovery >= 0.80:
+        pattern = "fake"
+    else:
+        pattern = "partial"
+    return {"pattern": pattern, "recovery": round(recovery, 2),
+            "orig": round(pre_max, 1), "low": round(lo, 1), "cur": round(cur, 1),
+            "dropFrac": round(drop_frac, 2)}
+
+
 def _advanced_anomaly(hist, curQ, drops):
     """[2번 고도화] 급락 속도·연속하락/단발반등·페이크베팅·복승 환급률(역수합) 감지.
     hist: 스냅샷 리스트(각 {t, quinella}). 반환:
@@ -2876,6 +2972,30 @@ def _advanced_anomaly(hist, curQ, drops):
             elif consec:
                 out["streaks"][key] = {"combo": list(k), "type": "연속하락", "confAdj": 20}
                 _adj(k, 20)
+
+    # ②-b [배당 반등 패턴] 급락→반등 회복비율 정밀 분류 + 급락→반등→재급락(더 강한 신호).
+    #   전체 히스토리(마지막 4틱 아님)로 판정 → 회복비율(≤20% 유효 / ≥80% 페이크)·재급락 감지.
+    out["rebounds"] = []
+    if len(maps) >= 3:
+        rkeys = set()
+        for m in maps:
+            rkeys.update(m.keys())
+        for k in rkeys:
+            full = [m[k] for m in maps if k in m and m[k] > 0]
+            rb = _rebound_analyze(full)
+            if not rb:
+                continue
+            rb["combo"] = list(k)
+            out["rebounds"].append(rb)
+            # 신호 반영(기존 streaks/fakes 와 별개의 추가 보정): 재급락=더 강한 신호, 유효=보강, 페이크=감점
+            if rb["pattern"] == "recrash":
+                _adj(k, 20)     # 급락→반등→재급락 = 자금 재유입 = 더 강한 신호
+            elif rb["pattern"] == "valid":
+                _adj(k, 8)      # 20% 이내 반등 = 자금 유지 = 신호 유효(소폭 보강)
+            elif rb["pattern"] == "fake":
+                _adj(k, -12)    # 80%+ 회복 = 자금 이탈 = 페이크(감점)
+        order = {"recrash": 0, "valid": 1, "partial": 2, "fake": 3}
+        out["rebounds"].sort(key=lambda r: (order.get(r["pattern"], 9), -r.get("dropFrac", 0)))
 
     # [4번] 말별 연속 하락 횟수 추적 (단승 우선, 없으면 그 말이 낀 최저 복승 조합)
     #   1회=후보(⚪) / 2회 연속=약한신호(🟡) / 3회+ 연속=확정신호(🔴) / 급락후 반등=페이크의심(🟠)
@@ -5056,6 +5176,7 @@ def _build_analysis_log(rk, an=None):
 
     # 배당 타임라인 + 실제 결과/적중(odds_history 에서)
     timeline, result_doc, review_doc = [], None, None
+    anomaly_history = []   # [2번] 경주 전체 이상감지 시계열(결과기록 탭 이상감지 내역용, 경주별 분리)
     try:
         hp, _, _ = _hist_path(rk)
         hist = json.load(open(hp, encoding="utf-8"))
@@ -5063,6 +5184,12 @@ def _build_analysis_log(rk, an=None):
             timeline.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
                              "quinella": s.get("quinella", {})})
         result_doc, review_doc = hist.get("result"), hist.get("review")
+        # [2번] 이 경주의 이상감지 전체를 시간순·중복제거로 저장(anomaly-feed 와 동일 규칙)
+        for e in _anomaly_events_from_doc(hist):
+            anomaly_history.append({"time": e.get("time"), "combo": e.get("combo"),
+                                    "drop": e.get("pct"), "text": e.get("text"),
+                                    "severity": e.get("severity"),
+                                    "minutes_before": e.get("minutes_before")})
     except Exception:
         pass
 
@@ -5166,6 +5293,7 @@ def _build_analysis_log(rk, an=None):
         "input_data": input_data,
         "odds_timeline": timeline,
         "signals_detected": signals,
+        "anomaly_history": anomaly_history,   # [2번] 경주 전체 이상감지 시계열(시간·조합·급락%, 경주별 분리 저장)
         "horses": horses,
         "elimination": {"candidates": cand, "eliminated": elim_no, "elimination_reasons": elim_reasons},
         "final_recommendation": final,

@@ -211,10 +211,13 @@
             lines.push('→ 인기 ' + lead.popRank + '위가 ' + lead.vs.popRank + '위보다 배당 낮음');
           }
           if (lead) lines.push('→ ' + lead.no + '번 실질 유력!');
-          var g = (lead && lead.gap) ? lead.gap : 2;   // 역전폭 → 강도
-          lines.push('강도: ' + (g >= 3 ? '🔴 압도적 역배열' : '🟠 강한 역배열'));
+          // [역배열 강화] 배당 차이 기반 4단계 강도(diffPct·level·tag). 미세차(10%↓)는 서버가 이미 제외.
+          var tier = (lead && lead.tag) ? (lead.level + ' ' + lead.tag) : ((det[0] && det[0].tag) ? det[0].level + ' ' + det[0].tag : '🟠 역배열');
+          var dpv = (lead && lead.diffPct != null) ? lead.diffPct : (det[0] && det[0].diffPct);
+          lines.push('강도: ' + tier + (dpv != null ? ' (배당차 ' + dpv + '%)' : ''));
+          var critLevel = (/🔴/.test(tier)) ? 'red' : 'orange';   // 🔴/🔴🔴=red · 🟡/🟠=orange
           var ihKey = det.map(function (x) { return x.no; }).join('·');
-          return { key: 'inv:' + ihKey + ':' + (lead ? lead.odds : ''), level: 'red', icon: '🔄', title: '역배열 감지',
+          return { key: 'inv:' + ihKey + ':' + (lead ? lead.odds : ''), level: critLevel, icon: '🔄', title: '역배열 감지',
             lines: lines, msg: '실질 유력마 ' + ((lead && lead.no) || ihKey) + '번 — 인기순위와 쌍승순위 역전' };
         }
         var strong = ((d && d.drops) || []).filter(function (x) { return x && x.pct <= -50 && x.combo; })
@@ -405,10 +408,13 @@
           panel.appendChild(kr);
         }
 
-        // [3번] 쌍승 역배열 요약 — "🔄 역배열: N번 주목" (상세 블록은 아래 별도 유지)
+        // [3번] 쌍승 역배열 요약 — "🔄 역배열: N번 주목 · 🔴 강한 역배열 (배당차 40%)"
         if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null) {
+          var lead0 = d.inverse.invLead;
+          var tierTxt = lead0.tag ? (' · ' + lead0.level + ' ' + lead0.tag) : '';
+          var dpTxt = (lead0.diffPct != null) ? (' (배당차 ' + lead0.diffPct + '%)') : '';
           var ivs = mk('div', 'margin:3px 0;font-weight:800;color:#f0abfc');
-          ivs.textContent = '🔄 역배열: ' + d.inverse.invLead.no + '번 주목';
+          ivs.textContent = '🔄 역배열: ' + lead0.no + '번 주목' + tierTxt + dpTxt;
           panel.appendChild(ivs);
         }
 

@@ -1351,6 +1351,7 @@
     state.jpTimeline = [];
     state.jpCurrentRk = null;                 // 현재 경주 기준 초기화
     _rrLastRk = null;
+    try { resetAnomalyPanel(); } catch (_) { /* */ }   // [1번] 이상감지 누적 패널 완전 초기화(경주 전환)
     try { setJpOddsStatus('waiting'); } catch (_) { /* */ }
   }
 
@@ -2779,10 +2780,10 @@
     // [라벨 정확화] 배당 산출원(쌍승 1착방향 / 없으면 복승)을 그대로 표기 — 복승값을 '쌍승'이라 오표기하던 버그 수정.
     const oddsSrc = (inv.invSource && inv.invSource.oddsSrc) || '쌍승';
     const detBlock = det.length ? `<div style="margin:6px 0 2px;padding:7px 9px;background:rgba(168,85,247,.12);border-left:3px solid #a855f7;border-radius:6px">
-      ${det.map((x) => `<div style="font-size:13px${x.lowest ? ';font-weight:700' : ''}">인기${x.popRank}위 <b style="color:#c084fc">${x.no}번</b> · ${oddsSrc} <b>${x.odds}배</b>${oddsSrc === '쌍승' ? '<span class="hint">(1착)</span>' : ''}${x.lowest ? ' <span style="color:#f0abfc">← 낮음</span>' : ''}</div>`).join('')}
+      ${det.map((x) => `<div style="font-size:13px${x.lowest ? ';font-weight:700' : ''}">인기${x.popRank}위 <b style="color:#c084fc">${x.no}번</b> · ${oddsSrc} <b>${x.odds}배</b>${oddsSrc === '쌍승' ? '<span class="hint">(1착)</span>' : ''}${x.tag ? ` <span class="chip" style="border-color:#c084fc;color:#e9d5ff">${x.level} ${x.tag}${x.diffPct != null ? ' ' + x.diffPct + '%' : ''}</span>` : ''}${x.lowest ? ' <span style="color:#f0abfc">← 낮음</span>' : ''}</div>`).join('')}
       ${lead && lead.vs ? `<div style="font-size:13px">인기${lead.vs.popRank}위 <b>${lead.vs.no}번</b> · ${oddsSrc} <b>${lead.vs.odds}배</b></div>
-      <div style="margin-top:3px;color:#e9d5ff">→ 인기 ${lead.popRank}위가 ${lead.vs.popRank}위보다 배당 낮음</div>` : ''}
-      ${lead ? `<div style="margin-top:2px;color:#f0abfc;font-weight:700">→ ${lead.no}번 실질 유력!${lead.gap ? ` <span class="hint" style="font-weight:400">(순위 ${lead.gap}단계 역전)</span>` : ''}</div>` : ''}</div>` : '';
+      <div style="margin-top:3px;color:#e9d5ff">→ 인기 ${lead.popRank}위가 ${lead.vs.popRank}위보다 배당 낮음${lead.diffPct != null ? ` (배당 차이 ${lead.diffPct}%)` : ''}</div>` : ''}
+      ${lead ? `<div style="margin-top:2px;color:#f0abfc;font-weight:700">→ ${lead.no}번 실질 유력!${lead.tag ? ` <span class="hint" style="font-weight:400">(${lead.level} ${lead.tag})</span>` : (lead.gap ? ` <span class="hint" style="font-weight:400">(순위 ${lead.gap}단계 역전)</span>` : '')}</div>` : ''}</div>` : '';
     return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #ff5c5c;border-radius:8px;background:rgba(255,92,92,.1)">
       <div style="font-size:15px;font-weight:800;color:#ff8a8a">🔄 역배열 감지!</div>
       <div class="hint" style="margin:3px 0 5px;line-height:1.7">${lines.join('<br>')}<br>→ <b style="color:#ffd24f">실질 유력마가 바뀌었을 가능성</b></div>
@@ -3475,6 +3476,16 @@
     (adv.velocity || []).slice(0, 3).forEach((v) => advParts.push(`<div style="margin:2px 0"><span class="chip ${v.level === '🔴' ? 'chip-red' : ''}">${v.level} 급락속도</span> <span class="hint">${v.combo[0]}+${v.combo[1]} 분당 <b>${v.speed}%</b> (${Math.abs(v.pct)}%/${v.minutes}분)</span></div>`));
     Object.values(adv.streaks || {}).forEach((s) => advParts.push(`<div style="margin:2px 0"><span class="chip ${s.type === '연속하락' ? 'chip-red' : ''}">${s.type === '연속하락' ? '🔴 연속하락 +20' : '🟡 단발반등 −15'}</span> <span class="hint">${s.combo[0]}+${s.combo[1]}</span></div>`));
     (adv.fakes || []).forEach((f) => advParts.push(`<div style="margin:2px 0"><span class="chip chip-yellow">⚠️ 페이크 의심</span> <span class="hint">${f.combo[0]}+${f.combo[1]} 급락후반등 (${f.seq.join('→')})</span></div>`));
+    // [배당 반등 패턴] 회복비율 분류(유효/페이크) + 재급락(더 강한 신호)
+    const RB_META = {
+      recrash: { chip: 'chip-red', icon: '🔴🔴 재급락(강신호)', desc: '급락→반등→재급락 = 자금 재유입' },
+      valid: { chip: '', icon: '✅ 반등 미미(신호 유효)', desc: '원배당 20% 이내 반등 = 자금 유지', style: 'style="border-color:#38d39f;color:#38d39f"' },
+      fake: { chip: 'chip-yellow', icon: '⚠️ 페이크(자금 이탈)', desc: '원배당 80%+ 회복' },
+    };
+    (adv.rebounds || []).filter((r) => RB_META[r.pattern]).slice(0, 4).forEach((r) => {
+      const m = RB_META[r.pattern];
+      advParts.push(`<div style="margin:2px 0"><span class="chip ${m.chip}" ${m.style || ''}>${m.icon}</span> <span class="hint"><b>${r.combo[0]}+${r.combo[1]}</b> ${m.desc} · 회복 ${Math.round((r.recovery || 0) * 100)}% (${r.orig}→${r.low}→${r.cur}배)</span></div>`);
+    });
     // [4번] 말별 연속 하락 등급 — 확정신호(3회+)·약한신호(2회) 우선, 반등=페이크 · 후보(1회)는 생략
     Object.values(adv.horseStreaks || {})
       .filter((h) => h.rebounded || h.count >= 2)
@@ -6238,12 +6249,26 @@
     return String(rk).replace(/_/g, ' ').replace(/(\d+)\s*경주/, '$1R').trim();
   }
 
-  /** [1번] 패널이 표시할 '현재 경주' 설정 — 한국·일본 흐름 모두 여기로 현재 raceKey를 알려준다 */
+  /** [1번] 패널이 표시할 '현재 경주' 설정 — 한국·일본 흐름 모두 여기로 현재 raceKey를 알려준다.
+   *  새 경주로 바뀌면 이전 경주 이상감지를 즉시 비우고(잔존 방지) 새 경주만 누적한다. */
   function setAnomalyPanelRace(rk) {
     if (!rk || _closing.panelRk === rk) return;
     _closing.panelRk = rk;
     _closing.historyMode = false;   // 새 경주로 전환 시 자동으로 '현재 보기'로 복귀
+    _closing.lastEvents = [];
+    // [1번] 새 경주 이벤트 로드 전까지 패널을 비워 이전 경주 데이터가 섞여 보이지 않게 함
+    const panel = document.getElementById('anomalyFeedPanel');
+    if (panel) { panel.innerHTML = ''; panel.style.display = 'none'; }
     refreshAnomalyFeed(rk);
+  }
+
+  /** [1번] 이상감지 누적 패널 완전 초기화 — 새 경주 시작·하드리셋 시 호출(경주 전환 시 완전 리셋). */
+  function resetAnomalyPanel() {
+    _closing.panelRk = null;
+    _closing.historyMode = false;
+    _closing.lastEvents = [];
+    const panel = document.getElementById('anomalyFeedPanel');
+    if (panel) { panel.innerHTML = ''; panel.style.display = 'none'; }
   }
 
   /** 이상감지 이벤트 배열 → 행 HTML(시각·발주전·심각도색) */
@@ -6281,9 +6306,10 @@
     _closing.lastEvents = ev;
     if (!ev.length) { panel.style.display = 'none'; return; }
     panel.style.display = 'block';
-    panel.innerHTML = _panelHeader(`🚨 이상감지 누적 (${ev.length})`,
-        `<span id="anomalyHistBtn" title="이전 경주 이상감지 보기" style="cursor:pointer;color:#8ab4f8;padding:0 6px;font-weight:600">📜 히스토리</span>`)
-      + `<div style="color:#e2e8f0;font-weight:700;margin:2px 0">[${esc(_rkLabel(rk))}]</div>${_anomalyRows(ev)}`;
+    // [1번] 헤더에 현재 경주명 직접 표기 → "🚨 이상감지 (소노다 11경주)" (경주별 분리 명확화)
+    panel.innerHTML = _panelHeader(`🚨 이상감지 <span style="color:#e2e8f0">(${esc(_rkLabel(rk))})</span> <span style="color:#94a3b8;font-weight:400">${ev.length}건</span>`,
+        `<span id="anomalyHistBtn" title="이전 경주 이상감지 보기(결과기록 탭에서도 확인)" style="cursor:pointer;color:#8ab4f8;padding:0 6px;font-weight:600">📜 히스토리</span>`)
+      + _anomalyRows(ev);
     _wireFeedButtons(panel);
   }
 
@@ -7107,7 +7133,17 @@
     const keyBlock = `<div class="matrix-title" style="font-size:13px">🏇 유력마 / 제거마</div>
       <div style="margin:2px 0"><b>유력마:</b> ${candHtml}</div>
       <div style="margin:2px 0"><b>제거마:</b> ${elimHtml}</div>`;
-    const sigHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🚨 이상감지 내역</div>`
+    // [3번] 경주 전체 이상감지 시계열(anomaly_history) — 결과기록 탭에서 이전 경주 이상감지 확인
+    const ah = d.anomaly_history || [];
+    const ahHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🚨 이상감지 내역 <span class="hint" style="font-weight:400">(경주 전체 · ${ah.length}건)</span></div>`
+      + (ah.length ? `<div style="max-height:220px;overflow:auto">` + ah.slice(0, 60).map((e) => {
+          const col = e.severity === '🔴' ? '#f87171' : '#fbbf24';
+          const label = e.combo ? `${esc(String(e.combo))}${e.drop != null ? ' ' + e.drop + '%' : ''}` : esc(e.text || '');
+          return `<div style="margin:1px 0;font-size:12px"><span class="hint">${esc(e.time || '')}</span>${e.minutes_before != null ? ` <span style="color:#64748b">${e.minutes_before}분전</span>` : ''} <span style="color:${col};font-weight:700">${esc(e.severity || '')} ${label}</span></div>`;
+        }).join('') + `</div>`
+        : '<div class="hint">누적 이상감지 없음</div>');
+    // (기존) 추천 시점 신호(signals_detected) — 근거·이유 포함, 함께 표시(보존)
+    const sigHtml = ahHtml + `<div class="matrix-title" style="font-size:12px;margin-top:8px;color:#94a3b8">🔎 추천 시점 신호</div>`
       + (sig.length ? sig.slice(0, 12).map((s) => `<div style="margin:2px 0"><span class="chip ${sev(s.severity)}">${esc(s.severity || '')} ${esc(s.type || '')}</span> ${esc(s.detail || '')}${s.reason ? ` <span class="hint">— ${esc(s.reason)}</span>` : ''}</div>`).join('') : '<div class="hint">감지된 이상신호 없음</div>');
     const recRow = (k, label) => { const r = fr[k]; return r ? `<tr><td>${label}</td><td style="font-weight:700">${esc(r.combo)}</td><td>${r.odds != null ? r.odds + '배' : '-'}</td></tr>` : ''; };
     const frHtml = `<div class="matrix-title" style="font-size:13px;margin-top:8px">🎯 추천 조합</div>
