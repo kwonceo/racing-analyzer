@@ -6752,9 +6752,39 @@
   }
 
   // ══════════ [경륜 출마표 분석] oddspark 선수 전적 자동 수집 ══════════
+  let _keirinOddsTimer = null;
   function initKeirinCard() {
     const btn = document.querySelector('#keirinFetchBtn');
     if (btn) btn.addEventListener('click', fetchKeirinCard);
+    const ob = document.querySelector('#keirinOddsBtn');
+    if (ob) ob.addEventListener('click', () => fetchKeirinOdds(false));
+    const poll = document.querySelector('#keirinOddsPoll');
+    if (poll) poll.addEventListener('change', () => {
+      if (_keirinOddsTimer) { clearInterval(_keirinOddsTimer); _keirinOddsTimer = null; }
+      if (poll.checked) { fetchKeirinOdds(true); _keirinOddsTimer = setInterval(() => fetchKeirinOdds(true), 30000); }
+    });
+  }
+
+  // [경륜 배당 직접조회] oddspark 복승·쌍승을 서버 경유로 가져와 파이프라인(역배열·배당변화·이상감지) 반영.
+  async function fetchKeirinOdds(silent) {
+    const out = document.querySelector('#keirinOddsResult'); if (!out) return;
+    const g = (id) => { const e = document.querySelector(id); return e ? e.value.trim() : ''; };
+    const url = g('#keirinUrl'), jo = g('#keirinJo'), ymd = g('#keirinYmd'), race = g('#keirinRace');
+    const rk = g('#keirinRaceKey') || (_closing && _closing.panelRk) || getActiveRaceKey() || '';
+    if (!rk) { out.innerHTML = '<span style="color:var(--red)">배당을 연결할 raceKey를 입력하세요(예: 히로시마 2경주).</span>'; return; }
+    const payload = { raceKey: rk };
+    if (url) payload.url = url;
+    else if (jo && ymd && race) { payload.joCode = jo; payload.kaisaiBi = ymd; payload.raceNo = race; }
+    else { out.innerHTML = '<span style="color:var(--red)">경륜장코드+개최일+경주 또는 URL을 입력하세요.</span>'; return; }
+    if (!silent) out.innerHTML = '💰 oddspark 배당을 가져오는 중…';
+    let d; try { d = await (await fetch('/api/keirin/odds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
+    catch (e) { out.innerHTML = `<span style="color:var(--red)">실패: ${esc(e.message)}</span>`; return; }
+    if (d.error) { out.innerHTML = `<span style="color:var(--red)">${esc(d.error)}</span>`; return; }
+    const c = d.counts || {};
+    const t = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    out.innerHTML = `<span style="color:#38d39f">✅ 배당 반영</span> — 복승 <b>${c.quinella || 0}</b>·쌍승 <b>${c.exacta || 0}</b> 조합 (<b>${esc(rk)}</b>, ${t})${_keirinOddsTimer ? ' · 🔄자동갱신중' : ''}`;
+    // 배당이 들어가면 현재 라이브 분석 재조회(역배열·배당변화 반영)
+    try { refreshCurrentRace(); } catch (_) { /* */ }
   }
 
   async function fetchKeirinCard() {

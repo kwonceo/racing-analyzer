@@ -224,7 +224,10 @@
           <label class="hint">개최일 <input id="keirinYmd" class="cfg-input" type="text" placeholder="YYYYMMDD" style="width:110px"></label>
           <label class="hint">경주 <input id="keirinRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
           <button id="keirinFetchBtn" class="btn btn-primary">🚴 출마표 분석</button>
+          <button id="keirinOddsBtn" class="btn" title="oddspark 복승·쌍승 배당을 서버가 직접 조회해 역배열·배당변화·이상감지에 반영(확장 불필요)">💰 배당 조회</button>
+          <label class="hint" style="font-size:11px"><input id="keirinOddsPoll" type="checkbox" style="vertical-align:middle"> 30초 자동갱신(배당변화)</label>
         </div>
+        <div id="keirinOddsResult" class="hint" style="margin:0 0 6px"></div>
         <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
           <label class="hint" style="flex:1">또는 URL <input id="keirinUrl" class="cfg-input" type="text" placeholder="https://www.oddspark.com/keirin/RaceList.do?joCode=85&kaisaiBi=...&raceNo=6" style="width:100%;max-width:520px"></label>
         </div>

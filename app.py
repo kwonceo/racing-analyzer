@@ -1273,8 +1273,15 @@ def triple_ingest():
     rk = (body.get("raceKey") or "").strip()
     if not rk:
         return jsonify({"error": "raceKey가 필요합니다."}), 400
-    q, x, tr = body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or []
-    win = _win_map_clean(body.get("win"))   # [단승] {마번(str): 배당}
+    return jsonify(_do_triple_ingest(
+        rk, body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or [],
+        _win_map_clean(body.get("win")), body.get("sport"), body.get("category"),
+        body.get("source"), body.get("deadline")))
+
+
+def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None):
+    """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
+    확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
     db = _triple_load()
     prev = db.get(rk) or {}
     now = time.time()
@@ -1291,19 +1298,19 @@ def triple_ingest():
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
     hist = hist[-12:]
     # [수정#3 경륜/경정] 종목 태그 저장(horse|cycle|boat|bike). 기본 horse(경마) → 기존 동작 불변.
-    sport = (body.get("sport") or prev.get("sport") or "horse")
+    sport = (sport or prev.get("sport") or "horse")
     # [탭분리] 분석기 탭 라우팅용 카테고리(korea|japan_local|japan_central|boat|cycle|bike).
-    category = (body.get("category") or prev.get("category")
+    category = (category or prev.get("category")
                 or {"cycle": "cycle", "boat": "boat", "bike": "bike"}.get(sport, "japan_local"))
     db[rk] = {"quinella": q, "exacta": x, "trio": tr, "win": win, "history": hist,
-              "source": body.get("source"), "sport": sport, "category": category, "t": now}
+              "source": source, "sport": sport, "category": category, "t": now}
     # [경주전환 잔존 방어] 30분+ 미갱신된 '끝난 직전 경주'를 활성 캐시에서 정리(히스토리는 보존)
     #   → max-t 폴백이 직전 경주 배당을 계속 끌어오던 문제 차단.
     pruned = _triple_prune_stale(db, keep_rk=rk)
     _triple_save(db)
     # 배당 변동 히스토리 파일에 스냅샷 누적 (타임스탬프+발주전분+이상감지)
     try:
-        _history_append(rk, q, x, body.get("deadline"), win, baseline_reset=baseline_reset)
+        _history_append(rk, q, x, deadline, win, baseline_reset=baseline_reset)
     except Exception as e:
         print("[히스토리] 기록 실패:", e)
     counts = {"quinella": len(q), "exacta": len(x), "trio": len(tr), "win": len(win)}
@@ -1312,8 +1319,7 @@ def triple_ingest():
     if pruned:
         print(f"[활성정리] 끝난 경주 {len(pruned)}건 제거(히스토리 보존): {', '.join(pruned)}")
     print(f"[3종 수집] {rk}: {counts} (history {len(hist)}{' · 기준재설정' if baseline_reset else ''})")
-    return jsonify({"ok": True, "counts": counts, "baselineReset": baseline_reset,
-                    "pruned": pruned})
+    return {"ok": True, "counts": counts, "baselineReset": baseline_reset, "pruned": pruned}
 
 
 @app.route("/api/odds/triple/reset", methods=["POST"])
@@ -9192,6 +9198,94 @@ def _keirin_url(jo, ymd, race):
             "?joCode=%s&kaisaiBi=%s&raceNo=%s" % (jo, ymd, race))
 
 
+def _keirin_odds_url(jo, ymd, race, bet_type):
+    """oddspark 경륜 배당 페이지 URL. betType 5=복승(2車複)·6=쌍승(2車単)."""
+    return ("https://www.oddspark.com/keirin/Odds.do"
+            "?joCode=%s&kaisaiBi=%s&raceNo=%s&betType=%s" % (jo, ymd, race, bet_type))
+
+
+def _keirin_table_rows(html):
+    """oddspark 배당 HTML → 표 행 리스트(각 행=셀 텍스트 리스트). 태그 제거·공백 정리."""
+    rows = []
+    for tr in re.findall(r'<tr[^>]*>.*?</tr>', html, re.S):
+        cells = []
+        for m in re.findall(r'<t[dh][^>]*>(.*?)</t[dh]>', tr, re.S):
+            cells.append(_kstrip(re.sub(r'<[^>]+>', '', m)))
+        if cells:
+            rows.append(cells)
+    return rows
+
+
+def _keirin_odds_pairs(cells):
+    """['4','4.5','2','12.7','4', ...] → 선두 정수(축 차번호)와 (배당,순위) 쌍 목록.
+    첫 셀이 차번호가 아니면(예: '2着' 코너 라벨) 건너뛰고 다음 정수를 축으로 사용."""
+    i = 0
+    # 선두의 라벨('2着' 등) 제거 → 첫 정수 셀을 축 차번호로
+    while i < len(cells) and not re.fullmatch(r'\d{1,2}', cells[i]):
+        i += 1
+    if i >= len(cells):
+        return None, []
+    axis = int(cells[i])
+    rest = cells[i + 1:]
+    pairs = []
+    for j in range(0, len(rest), 2):
+        od = rest[j].strip()
+        val = None
+        if re.fullmatch(r'\d+(?:\.\d+)?', od):
+            val = float(od)
+        pairs.append(val)   # 빈칸(대각선)·비배당은 None 으로 자리 유지
+    return axis, pairs
+
+
+def _keirin_parse_quinella(html):
+    """복승(betType=5) 매트릭스 파싱 → [{combo:[a,b], odds}]. 상삼각: 행 축차 k, 쌍 index j → 조합{j+1,k}."""
+    out, seen = [], set()
+    for cells in _keirin_table_rows(html):
+        # 배당(소수)이 하나도 없는 행(헤더 등) 제외
+        if not any(re.fullmatch(r'\d+\.\d+', c) for c in cells):
+            continue
+        axis, pairs = _keirin_odds_pairs(cells)
+        if axis is None:
+            continue
+        for j, od in enumerate(pairs):
+            other = j + 1                       # 상대 차번호(1..axis-1)
+            if od is None or od <= 0 or other >= axis:
+                continue
+            a, b = sorted((other, axis))
+            key = (a, b)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append({"combo": [a, b], "odds": od})
+    return out
+
+
+def _keirin_parse_exacta(html):
+    """쌍승(betType=6) 매트릭스 파싱 → [{combo:[1착,2착], odds}]. 방향성: 행 축차=1착, 쌍 index j → 2착=j+1."""
+    out, seen = [], set()
+    for cells in _keirin_table_rows(html):
+        if not any(re.fullmatch(r'\d+\.\d+', c) for c in cells):
+            continue
+        axis, pairs = _keirin_odds_pairs(cells)   # axis = 1착 차번호
+        if axis is None:
+            continue
+        for j, od in enumerate(pairs):
+            second = j + 1                      # 2착 차번호
+            if od is None or od <= 0 or second == axis:
+                continue
+            key = (axis, second)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append({"combo": [axis, second], "odds": od})
+    return out
+
+
+def _keirin_fetch(url):
+    req = Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+    return urlopen(req, timeout=15).read().decode("utf-8", "ignore")
+
+
 @app.route("/api/keirin/card", methods=["POST"])
 def keirin_card():
     """경륜 출마표 수집·분석: {joCode,kaisaiBi,raceNo} 또는 {url} 또는 {html}
@@ -9237,6 +9331,43 @@ def keirin_card():
             linked = rk
             print(f"[경륜 전적] {rk}: {len(horses)}두 live 분석 반영(競走得点)")
     return jsonify({"ok": True, "url": url, "card": card, "analysis": an, "linkedRaceKey": linked})
+
+
+@app.route("/api/keirin/odds", methods=["POST"])
+def keirin_odds():
+    """[경륜 배당 직접조회] oddspark 복승(2車複)·쌍승(2車単) 배당을 서버가 직접 fetch·파싱해
+    기존 3종 수집 파이프라인(_do_triple_ingest)에 주입 → 같은 raceKey로 역배열·배당변화·이상감지가
+    자동 계산됨(확장 탭수집 불필요). body: {joCode,kaisaiBi,raceNo | url, raceKey}.
+    반복 호출(폴링) 시 히스토리 누적 → 배당변화 감지. 삼복승(3連複)은 oddspark 축선택 필요로 미수집
+    (기존 _trio_est 추정 보험 유지)."""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"error": "raceKey가 필요합니다(배당을 어느 경주에 연결할지)."}), 400
+    jo, ymd, race = body.get("joCode"), body.get("kaisaiBi"), body.get("raceNo")
+    # url 붙여넣기 허용 → 파라미터 추출
+    src_url = (body.get("url") or "").strip()
+    if src_url and not (jo and ymd and race):
+        mj = re.search(r"joCode=(\d+)", src_url)
+        my = re.search(r"kaisaiBi=(\d+)", src_url)
+        mr = re.search(r"raceNo=(\d+)", src_url)
+        jo = jo or (mj.group(1) if mj else None)
+        ymd = ymd or (my.group(1) if my else None)
+        race = race or (mr.group(1) if mr else None)
+    if not (jo and ymd and race):
+        return jsonify({"error": "joCode/kaisaiBi/raceNo(또는 url)가 필요합니다."}), 400
+    try:
+        q = _keirin_parse_quinella(_keirin_fetch(_keirin_odds_url(jo, ymd, race, 5)))
+        x = _keirin_parse_exacta(_keirin_fetch(_keirin_odds_url(jo, ymd, race, 6)))
+    except Exception as e:
+        return jsonify({"error": "배당 수집 실패: %s" % e}), 502
+    if not q and not x:
+        return jsonify({"error": "배당 정보를 찾지 못했습니다(경주 번호/개최일/발매 여부 확인)."}), 422
+    # 기존 파이프라인 주입(sport=cycle) → _triple_analyze 가 역배열·급락·이상감지 계산
+    res = _do_triple_ingest(rk, q, x, [], {}, sport="cycle", category="cycle", source="oddspark")
+    print(f"[경륜 배당] {rk}: 복승 {len(q)}·쌍승 {len(x)} oddspark 직접수집 → 파이프라인 반영")
+    return jsonify({"ok": True, "raceKey": rk, "counts": {"quinella": len(q), "exacta": len(x)},
+                    "quinella": q, "exacta": x, "ingest": res})
 
 
 @app.route("/api/analysis-log/backfill", methods=["POST"])
