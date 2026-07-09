@@ -5805,8 +5805,12 @@ def triple_match():
         kv, kn = _rk_venue_num(k)
         if kn != int(num):
             continue
-        if venue and _is_japan_key(k):
-            continue  # 한국 탭인데 일본 경마장 키 → 스킵
+        # [한국경마 전용 연결] 경마장명 미인식(가라 등) 시에도 일본 경마·경륜/경정/오토바이 키에는 절대 매칭 금지.
+        #   기존엔 venue 인식됐을 때만 일본 키를 걸렀고, _is_japan_key는 일본 '경마' 트랙만 잡아
+        #   히로시마(경륜=cycle) 같은 키가 번호만 같으면 loose 매칭돼 한국 탭에 엉뚱한 분석이 뜨던 문제 수정.
+        _sp = (db.get(k) or {}).get("sport")
+        if _is_japan_key(k) or _sp in ("cycle", "boat", "bike"):
+            continue
         if venue and kv == venue:
             exact = k
             break

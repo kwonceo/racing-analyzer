@@ -4674,6 +4674,10 @@
     if (!m || !m.matched) {
       const noMatch = m && m.reason === 'no_match' && (m.candidates || []).length;
       setKoreaOddsStatus(noMatch ? 'nomatch' : 'waiting', title, m);
+      // [히로시마 오매칭 방어] 매칭 실패 시 이전에 잘못 렌더된 통합분석(엉뚱한 경주)을 제거.
+      //   서버가 일본경마·경륜/경정/오토바이 키를 제외하도록 고쳐 오매칭 자체가 사라지지만,
+      //   직전에 남은 분석이 있으면 지워 한국 탭에 외국 경주 분석이 잔존하지 않게 한다.
+      const _ki = $('#koreaIntegrated'); if (_ki) _ki.innerHTML = '';
       return;
     }
     try {
