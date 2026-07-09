@@ -9463,18 +9463,22 @@ def _keiba_resolve_track(venue, ymd):
     return None
 
 
-@app.route("/api/keiba/odds", methods=["POST"])
+@app.route("/api/keiba/odds", methods=["GET", "POST"])
 def keiba_odds():
     """[경마 서버 직접 수집] oddspark 지방경마 복승(馬連=6)·쌍승(馬単=5)을 서버가 직접 fetch·파싱해
     기존 파이프라인(_do_triple_ingest)에 주입 → 역배열·배당변화·이상감지 자동 계산(Chrome 확장 불필요).
-    body: {raceKey, raceDy?(YYYYMMDD·기본 오늘), raceNo?(기본 raceKey에서 추출),
-           opTrackCd?·sponsorCd?(직접 지정 시 스케줄 조회 생략)}.
+    파라미터(POST=JSON body · GET=쿼리스트링 둘 다 허용):
+      {raceKey, raceDy?(YYYYMMDD·기본 오늘), raceNo?(기본 raceKey에서 추출),
+       opTrackCd?·sponsorCd?(직접 지정 시 스케줄 조회 생략)}.
     반복 호출(마감임박 3초 폴링) 시 히스토리 누적 → 배당변화 감지.
     ⚠ 삼복승(3連複)은 별도 축선택 페이지 필요 → 미수집(_trio_est 추정 보험 유지)."""
-    body = request.json or {}
+    # [GET/POST 공용] GET=쿼리스트링(브라우저·간편 테스트), POST=JSON body(프론트 폴링)
+    body = request.json if request.method == "POST" else None
+    body = body or request.args or {}
     rk = (body.get("raceKey") or "").strip()
     if not rk:
-        return jsonify({"error": "raceKey가 필요합니다."}), 400
+        return jsonify({"error": "raceKey가 필요합니다.",
+                        "usage": "GET /api/keiba/odds?raceKey=소노다%2011경주 또는 POST {raceKey}"}), 400
     ymd = (str(body.get("raceDy") or "").strip()
            or time.strftime("%Y%m%d", time.localtime()))
     # 경주번호: 명시 우선 → raceKey에서 추출
