@@ -9408,6 +9408,90 @@ def _keiba_odds_live(q, x):
     return (frac / len(odds)) >= 0.30
 
 
+# ── oddspark 경마(keiba) 전용 배당 매트릭스 파서 ─────────────────────────────
+#  ⚠ 경마는 경륜과 표 구조가 다르다(경륜 파서 재사용 시 조합 누락·방향 오류).
+#   · 복승(馬連): 행=[axis, 배당, 상대차번호, 배당, 상대차번호, …]. 상대차가 명시적으로 라벨되고
+#       첫 배당은 '전용 행이 없는 최소 차번(=implicit)'과의 조합. 상삼각 전체 = N(N-1)/2.
+#   · 쌍승(馬単): 그리드(행=2着, 열 위치=1着). 한 블록 최대 8열 → 9두+는 뒤에 '꼬리 블록'으로 이어짐.
+#       combo=[1着(열), 2着(행 axis)]. 방향 확정: 단승 압도적 인기마의 1着 조합이 최저(라이브 검증).
+#  경륜 파서(_keirin_parse_*)는 그대로 보존(경륜 전용).
+def _keiba_matrix_rows(html):
+    """배당 매트릭스 행만 추출(선두=차번호·소수배당 포함·마명(가나/한자) 없는 행). 마방리스트 제외."""
+    out = []
+    for r in _keirin_table_rows(html):
+        if not r or not re.fullmatch(r"\d{1,2}", r[0]):
+            continue
+        if any(re.search(r"[ぁ-んァ-ヶ一-龯]", c) for c in r):   # 마명 포함 행(마방리스트) 제외
+            continue
+        if not any(re.fullmatch(r"\d+\.\d+", c) for c in r):
+            continue
+        out.append(r)
+    return out
+
+
+def _keiba_horse_count(html):
+    """출전 두수 추정 = 배당표에 등장하는 최대 차번호."""
+    mx = 0
+    for r in _keirin_table_rows(html):
+        for c in r:
+            if re.fullmatch(r"\d{1,2}", c):
+                mx = max(mx, int(c))
+    return mx
+
+
+def _keiba_parse_quinella(html):
+    """복승(馬連=betType6) 매트릭스 → [{combo:[a,b], odds}]. 상대차 라벨을 따라가는 walking 파싱.
+    행 축(axis) + implicit 최소차번으로 상삼각 전체(N(N-1)/2) 복원."""
+    rows = _keiba_matrix_rows(html)
+    if not rows:
+        return []
+    axes = set(int(r[0]) for r in rows)
+    maxcar = max((int(c) for r in rows for c in r if re.fullmatch(r"\d{1,2}", c)), default=0)
+    implicit = next((c for c in range(1, maxcar + 1) if c not in axes), 1)  # 전용 행 없는 최소 차번
+    out, seen = [], set()
+    for r in rows:
+        axis = int(r[0])
+        partner = implicit                       # 첫 배당의 상대차(라벨 없이 선행)
+        for c in r[1:]:
+            if re.fullmatch(r"\d+\.\d+", c):
+                od = float(c)
+                if od > 0 and axis != partner:
+                    a, b = sorted((axis, partner))
+                    if (a, b) not in seen:
+                        seen.add((a, b))
+                        out.append({"combo": [a, b], "odds": od})
+            elif re.fullmatch(r"\d{1,2}", c) and 1 <= int(c) <= maxcar:
+                partner = int(c)                 # 다음 배당의 상대차 라벨
+    return out
+
+
+def _keiba_parse_exacta(html):
+    """쌍승(馬単=betType5) 그리드 → [{combo:[1着,2着], odds}]. 행=2着(axis)·열 위치=1着.
+    한 블록 8열 초과(9두+)는 축 번호가 리셋되는 '꼬리 블록'으로 이어짐 → block 오프셋으로 1着 복원."""
+    rows = _keiba_matrix_rows(html)
+    out, seen = [], set()
+    block, prev = 0, None
+    for r in rows:
+        axis = int(r[0])                          # 행 = 2着
+        vals = r[1:][0::2]                         # 짝수 위치=배당/빈칸(홀수=축 반복 라벨)
+        if prev is not None and axis <= prev:      # 축 리셋 → 다음 8열 블록
+            block += 1
+        prev = axis
+        for idx, v in enumerate(vals):
+            first = block * 8 + idx + 1            # 열 위치 = 1着(블록 오프셋 반영)
+            if not re.fullmatch(r"\d+\.\d+", v):
+                continue
+            od = float(v)
+            if od <= 0 or first == axis:
+                continue
+            key = (first, axis)                   # combo=[1着, 2着]
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append({"combo": [first, axis], "odds": od})
+    return out
+
+
 def _keiba_schedule(ymd, force=False):
     """그날(ymd=YYYYMMDD) oddspark 지방경마 개최 경마장 → {한자경마장명: (opTrackCd, sponsorCd)}.
     경마장 코드를 하드코딩하지 않고 실제 개최 스케줄에서 런타임 매핑(코드 오류 원천 차단).
@@ -9497,8 +9581,12 @@ def keiba_odds():
                             % (venue or rk, ymd), "scheduled": list(_keiba_schedule(ymd).keys())}), 422
         op_track, sponsor = codes
     try:
-        q = _keirin_parse_quinella(_keirin_fetch(_keiba_odds_url(op_track, sponsor, ymd, race_nb, _KEIBA_BET["quinella"])))
-        x = _keirin_parse_exacta(_keirin_fetch(_keiba_odds_url(op_track, sponsor, ymd, race_nb, _KEIBA_BET["exacta"])))
+        html_q = _keirin_fetch(_keiba_odds_url(op_track, sponsor, ymd, race_nb, _KEIBA_BET["quinella"]))
+        html_x = _keirin_fetch(_keiba_odds_url(op_track, sponsor, ymd, race_nb, _KEIBA_BET["exacta"]))
+        # [경마 전용 파서] 경륜과 표 구조가 달라 경마 전용 walking/grid 파서 사용(조합 누락·방향 오류 방지)
+        q = _keiba_parse_quinella(html_q)
+        x = _keiba_parse_exacta(html_x)
+        n_horses = _keiba_horse_count(html_q)
     except Exception as e:
         return jsonify({"error": "배당 수집 실패: %s" % e}), 502
     # [발매 전·마감 후 방어] oddspark는 발매 중이 아니면 배당 매트릭스 대신 마방리스트·환급표(정수 0.0/착순)를
@@ -9509,9 +9597,21 @@ def keiba_odds():
                         "reason": "발매 중 배당 없음(발매 전·마감 후 추정) — 실배당 대기",
                         "track": {"opTrackCd": op_track, "sponsorCd": sponsor, "raceNb": race_nb},
                         "counts": {"quinella": len(q), "exacta": len(x)}})
+    # [조합 수 검증] N두 출전 → 복승 N(N-1)/2 · 쌍승 N(N-1). 실제 파싱 수와 비교해 불일치 시 경고(파싱 누락 조기 발견).
+    exp_q = n_horses * (n_horses - 1) // 2 if n_horses >= 2 else 0
+    exp_x = n_horses * (n_horses - 1) if n_horses >= 2 else 0
+    warn = None
+    if n_horses >= 2 and (len(q) != exp_q or len(x) != exp_x):
+        warn = (f"⚠️ 조합 수 불일치({n_horses}두): 복승 {len(q)}/{exp_q} · 쌍승 {len(x)}/{exp_x}"
+                " — 배당 매트릭스 일부 누락 의심(파서 확인 필요)")
+        print("[경마 배당 경고]", rk, warn)
     res = _do_triple_ingest(rk, q, x, [], {}, sport="horse", category="japan_local", source="oddspark")
-    print(f"[경마 배당] {rk}: 복승 {len(q)}·쌍승 {len(x)} oddspark 직접수집(op{op_track}/sp{sponsor} R{race_nb}) → 파이프라인 반영")
-    return jsonify({"ok": True, "raceKey": rk, "counts": {"quinella": len(q), "exacta": len(x)},
+    print(f"[경마 배당] {rk}: 복승 {len(q)}/{exp_q}·쌍승 {len(x)}/{exp_x} ({n_horses}두) oddspark 직접수집"
+          f"(op{op_track}/sp{sponsor} R{race_nb}) → 파이프라인 반영")
+    return jsonify({"ok": True, "raceKey": rk,
+                    "counts": {"quinella": len(q), "exacta": len(x)},
+                    "expected": {"horses": n_horses, "quinella": exp_q, "exacta": exp_x},
+                    "warning": warn,
                     "track": {"opTrackCd": op_track, "sponsorCd": sponsor, "raceNb": race_nb},
                     "quinella": q, "exacta": x, "ingest": res})
 
