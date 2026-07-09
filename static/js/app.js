@@ -1341,7 +1341,7 @@
     if (nb) nb.addEventListener('click', newRaceStart);
     refreshCurrentRace(false);
     if (_rrTimer) clearInterval(_rrTimer);
-    _rrTimer = setInterval(() => refreshCurrentRace(false), 30000);   // [4번] 30초마다 경주 변경 확인·자동 전환
+    _rrTimer = setInterval(() => refreshCurrentRace(false), 12000);   // [4번] 12초마다 경주 변경 확인·자동 전환(늦게 넘어감 방지)
   }
 
   /** [1·3번] 활성 배당·이상감지·타임라인·경고 상태를 모두 초기화(새 경주 준비). */
@@ -2776,9 +2776,11 @@
     // [역배열 정확화] 인기순위 vs 쌍승 배당순위 역전(2단계+) 말 상세 + 대조마 + 실질 유력 요약
     const det = (inv.invDetail || []);
     const lead = inv.invLead;
+    // [라벨 정확화] 배당 산출원(쌍승 1착방향 / 없으면 복승)을 그대로 표기 — 복승값을 '쌍승'이라 오표기하던 버그 수정.
+    const oddsSrc = (inv.invSource && inv.invSource.oddsSrc) || '쌍승';
     const detBlock = det.length ? `<div style="margin:6px 0 2px;padding:7px 9px;background:rgba(168,85,247,.12);border-left:3px solid #a855f7;border-radius:6px">
-      ${det.map((x) => `<div style="font-size:13px${x.lowest ? ';font-weight:700' : ''}">인기${x.popRank}위 <b style="color:#c084fc">${x.no}번</b> · 쌍승 <b>${x.odds}배</b>${x.lowest ? ' <span style="color:#f0abfc">← 낮음</span>' : ''}</div>`).join('')}
-      ${lead && lead.vs ? `<div style="font-size:13px">인기${lead.vs.popRank}위 <b>${lead.vs.no}번</b> · 쌍승 <b>${lead.vs.odds}배</b></div>
+      ${det.map((x) => `<div style="font-size:13px${x.lowest ? ';font-weight:700' : ''}">인기${x.popRank}위 <b style="color:#c084fc">${x.no}번</b> · ${oddsSrc} <b>${x.odds}배</b>${oddsSrc === '쌍승' ? '<span class="hint">(1착)</span>' : ''}${x.lowest ? ' <span style="color:#f0abfc">← 낮음</span>' : ''}</div>`).join('')}
+      ${lead && lead.vs ? `<div style="font-size:13px">인기${lead.vs.popRank}위 <b>${lead.vs.no}번</b> · ${oddsSrc} <b>${lead.vs.odds}배</b></div>
       <div style="margin-top:3px;color:#e9d5ff">→ 인기 ${lead.popRank}위가 ${lead.vs.popRank}위보다 배당 낮음</div>` : ''}
       ${lead ? `<div style="margin-top:2px;color:#f0abfc;font-weight:700">→ ${lead.no}번 실질 유력!${lead.gap ? ` <span class="hint" style="font-weight:400">(순위 ${lead.gap}단계 역전)</span>` : ''}</div>` : ''}</div>` : '';
     return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #ff5c5c;border-radius:8px;background:rgba(255,92,92,.1)">
@@ -6160,13 +6162,20 @@
     return d;
   }
 
-  // 적응형 폴링(마감 3분전 3초·평상 30초) — closingTick에서 매초 호출, 자체 스로틀.
+  // 적응형 폴링(마감 3분전 3초·평상 15초) — closingTick에서 매초 호출, 자체 스로틀.
   function keibaOddsAutoPoll(rk, left) {
     if (!_keibaOdds.enabled || _keibaOdds.busy) return;
     rk = _keibaOdds.pinnedRk || rk;                      // 경주 지정(pin) 우선
     if (!rk) return;
     if (jpIsKoreaName(rk)) return;                       // 한국 경주는 oddspark 대상 아님(확장/PDF 유지)
-    const interval = (left <= 180000) ? 3000 : 30000;    // 마감 3분전 3초 · 평상 30초
+    // [stale 루프 차단] 마감 90초+ 지난(=끝난) 경주는 폴링 중단 — oddspark가 확정배당을 계속 재수집해
+    //   그 경주가 계속 '최신'으로 남고 다음 경주로 못 넘어가던 자기강화 루프 제거(pin 지정 시엔 유지).
+    if (!_keibaOdds.pinnedRk && left !== Infinity && left < -90000) {
+      _keibaOdds.lastMsg = '⏹️ 이 경주 마감됨 — 다음 경주 자동 대기(끝난 경주 재수집 중단)';
+      _keibaOdds.lastCounts = null; _renderKeibaStatus();
+      return;
+    }
+    const interval = (left <= 180000) ? 3000 : 15000;    // 마감 3분전 3초 · 평상 15초
     const now = Date.now();
     if (_keibaOdds.lastRk === rk && (now - _keibaOdds.lastPoll) < interval - 250) return;
     _keibaOdds.lastPoll = now; _keibaOdds.lastRk = rk; _keibaOdds.busy = true;

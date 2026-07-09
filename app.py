@@ -1470,6 +1470,24 @@ def current_race():
     if not db:
         return jsonify({"raceKey": None})
     rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
+    # [stale 루프 backstop] oddspark가 끝난 경주(예: 카사마츠 3R) 확정배당을 계속 재수집해 그 경주가
+    #   영원히 '최신(max-t)'으로 남아 다음 경주로 못 넘어가던 문제 방어. 같은 경마장에서 최근(10분내)
+    #   갱신된 '더 높은 경주번호'가 있으면 그쪽을 현재 경주로 우선(경주는 번호순 진행 → 뒤 경주가 현재).
+    #   다른 경마장(소노다·카사마츠 동시)은 영향 없음(경마장 토큰 일치 시에만 비교).
+    try:
+        _now = time.time()
+        _area, _num = _area_num(rk)
+        if _area and _num is not None:
+            for _k, _r in db.items():
+                if _k == rk:
+                    continue
+                if (_now - (_r.get("t") or 0)) > 600:      # 10분 넘게 미갱신은 후보 아님
+                    continue
+                _a2, _n2 = _area_num(_k)
+                if _a2 == _area and _n2 is not None and _n2 > _num:
+                    rk, _num = _k, _n2                     # 같은 장·더 높은 번호 = 현재 경주
+    except Exception:
+        pass
     rec = db.get(rk) or {}
     # [경주전환 잔존 방어] 최신 경주도 30분+ 미갱신이면 '끝난 경주' → stale 표기(프론트가 표시 억제)
     age = time.time() - (rec.get("t") or 0)
@@ -2545,14 +2563,27 @@ def _rank_inversion_detail(curWin, curQ, curD):
                     best[h] = o
         return best
 
+    def _best_first_place(m):
+        """쌍승(방향성) 전용: 각 말이 **1착**일 때의 최저 배당(=시장이 그 말을 승자로 미는 정도).
+          curD 키는 (1착, 2착) → k[0]==말 인 조합만 채택. 방향 무관 최저를 쓰면
+          '4→3'(3번이 4번 뒤 2착)을 '3번 저배당=유력'으로 오독하는 버그가 생김(1착 방향만 사용)."""
+        best = {}
+        for k, o in (m or {}).items():
+            if not o or o <= 0 or len(k) < 2:
+                continue
+            h = int(k[0])                     # k=(1착,2착) → 1착만
+            if h not in best or o < best[h]:
+                best[h] = o
+        return best
+
     # 인기순위 산출원: 단승 우선(없으면 복승)
     if curWin:
         pop_src, pop_name = {int(n): v for n, v in curWin.items() if v and v > 0}, "단승"
     else:
         pop_src, pop_name = _best_per_horse(curQ), "복승"
-    # 쌍승 배당순위 산출원: 쌍승 우선(없으면 복승 — 단, 인기도 복승이면 비교 불가)
+    # 쌍승 배당순위 산출원: 쌍승 우선(1착 방향만·없으면 복승 — 단, 인기도 복승이면 비교 불가)
     if curD:
-        odds_src, odds_name = _best_per_horse(curD), "쌍승"
+        odds_src, odds_name = _best_first_place(curD), "쌍승"
     elif pop_name != "복승":
         odds_src, odds_name = _best_per_horse(curQ), "복승"
     else:
