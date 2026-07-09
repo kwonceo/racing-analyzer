@@ -70,6 +70,10 @@
     `<span id="kbTimerMsg" style="flex:1;color:#fbbf24;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>` +
     `<button id="kbTimerClose" title="이 탭에서 숨기기" style="all:initial;color:#94a3b8;cursor:pointer;font:16px sans-serif;padding:0 4px">✕</button>`;
   (document.body || document.documentElement).appendChild(bar);
+  // [사용자 요청] 상단 카운트다운 바는 화면에 표시하지 않는다(불필요한 UI).
+  //   단, timer.js의 핵심 기능(분석기↔확장 메시지 중계·마감 임박 능동수집·발주 카운트다운
+  //   내부 계산)은 그대로 유지해야 하므로 DOM은 남기고 display만 none 처리(요소 참조·틱 정상 동작).
+  bar.style.display = 'none';
 
   const $ = (id) => bar.querySelector('#' + id);
   const elLabel = $('kbTimerLabel'), elTime = $('kbTimerTime'),
