@@ -3607,6 +3607,68 @@ def _third_place_hunt(compression_pattern, strong_signals, anomaly_horse, wx_rev
         return {"active": False}
 
 
+# ───────── [새 규칙·카와사키11R 학습] 막판 급락+역배열 동시 감지 말 → 삼복승 강제 편성 ─────────
+#   카와사키 11경주(2026-07-09, 결과 6-1-5) 복기 결과 도출된 규칙:
+#     6번이 T-1분 4+6 -33% 급락 + 역배열 감지였으나 유력마 TOP3(1·8·5) 밖이라 복승/삼복승 미편성 → 6번 1착 놓침.
+#   ⇒ [규칙] T-2분 이내(마감 임박)에 '급락'과 '역배열'이 **동시에** 감지된 말은 유력마 순위와 무관하게
+#           삼복승 보험에 **강제 편성**(유력마 상위 2두와 묶어)하고 오버레이에 강조 표시한다.
+#   ⚠ 기존 삼복승 편성·third_place_hunt·strong_signals 무삭제 — 별도 '강제보험' 블록만 추가.
+def _forced_trifecta_insurance(cur_mb, after_close, drops, wx_reversals, inverse,
+                               strong_signals, key_horses, drop_thresh=-30):
+    """T-2분 이내 급락(강급락 pct<=drop_thresh)과 역배열을 동시에 보인 말을 찾아
+      유력마 상위 2두와 묶은 삼복승 강제보험 조합을 만든다.
+    반환 {active, minutesBefore, horses:[{no,dropPct,revTag,note}], combos:[[a,b,c]], note}."""
+    try:
+        if after_close or cur_mb is None or not (0 <= cur_mb <= 2):
+            return {"active": False}
+        # ① 강급락 말(마감 임박 현재 스냅샷 drops) — 조합 최저 pct 기록
+        drop_pct = {}
+        for d in (drops or []):
+            p = d.get("pct")
+            if p is None or p > drop_thresh:
+                continue
+            for h in (d.get("combo") or []):
+                h = int(h)
+                if h not in drop_pct or p < drop_pct[h]:
+                    drop_pct[h] = p
+        if not drop_pct:
+            return {"active": False}
+        # ② 역배열 말 — 쌍승역전 challenger + 역배열 감지말(invLead/invHorses)
+        rev = {}
+        for r in (wx_reversals or []):
+            c = r.get("challenger")
+            if c is not None:
+                rev[int(c)] = "쌍승역전"
+        inv = inverse or {}
+        if inv.get("detected"):
+            lead = inv.get("invLead") or {}
+            if lead.get("no") is not None:
+                rev.setdefault(int(lead["no"]), "역배열 실질유력")
+            for h in (inv.get("invHorses") or []):
+                rev.setdefault(int(h), "역배열 감지")
+        # ③ 동시 감지(급락 ∩ 역배열) = 강제 편성 대상
+        forced = sorted(set(drop_pct) & set(rev), key=lambda h: drop_pct[h])
+        if not forced:
+            return {"active": False}
+        axis = [int(h) for h in (key_horses or [])[:2] if h is not None]
+        horses, combos, seen = [], [], set()
+        for hf in forced:
+            note = "막판 급락 " + str(drop_pct[hf]) + "% + " + rev[hf] + " 동시 → 삼복승 강제 편성"
+            horses.append({"no": hf, "dropPct": drop_pct[hf], "revTag": rev[hf], "note": note})
+            base = [a for a in axis if a != hf][:2]        # 유력마 상위 2두(자기 제외)
+            if len(base) >= 2:
+                cc = tuple(sorted([base[0], base[1], hf]))
+                if len(set(cc)) == 3 and cc not in seen:
+                    seen.add(cc)
+                    combos.append(list(cc))
+        return {"active": bool(horses), "minutesBefore": cur_mb,
+                "horses": horses, "combos": combos,
+                "note": "T-" + str(cur_mb) + "분 급락+역배열 동시 감지 말 → 유력마 순위 무관 삼복승 강제 편성"}
+    except Exception as _e:
+        print("[강제삼복승] 실패:", _e)
+        return {"active": False}
+
+
 # ───────── [BMED 매트릭스 베팅 전략] 상황별 5전략 자동선택 + 원금보전 배분 + 기대환수율 ─────────
 def _capital_preservation(combos):
     """[2번] 원금 보전 자동 계산(예산 무관 '비율' 산출 → 프론트가 예산 곱함).
@@ -4648,6 +4710,15 @@ def _triple_analyze(rk, rec):
                         trio_map.get(tuple(sorted([p1, p3, _c]))))
                 _rev_added += 1
 
+    # [새 규칙·카와사키11R 학습] 막판(T-2분 이내) 급락+역배열 동시 감지 말 → 삼복승 강제보험(유력마 순위 무관).
+    #   TOP3 밖이어도 강제 편성 → 카와사키 11R 6번(4+6 -33%·역배열, TOP3 밖) 같은 케이스 놓침 방지. 마감 후 미적용.
+    forced_trifecta = _forced_trifecta_insurance(cur_mb, after_close, drops, wx_reversals,
+                                                 inverse, strong_signals, key_horses)
+    if forced_trifecta.get("active"):
+        for _cc in forced_trifecta.get("combos", []):
+            _addbet("삼복승", "삼복승 강제보험(막판급락+역배열)", _cc, 5,
+                    trio_map.get(tuple(sorted(_cc))))
+
     # [3번] 삼복승 실배당 미수집 시: 구성 복승 3쌍의 기하평균×2 로 추정(라벨=추정)
     #   [보완] 1쌍 미수집(아웃사이더/역배열 조합)이면 그 쌍을 보수적으로 max(known)로 근사해
     #   '거친 추정(estRough)'이라도 배당을 표시(항상 편성한 삼복승의 판단 근거 제공). 2쌍+ 미수집=None.
@@ -4679,6 +4750,12 @@ def _triple_analyze(rk, rec):
         for b in bet_rec:
             if b.get("kind") == "삼복승" and any(int(h) in _rev_ch for h in b.get("combo", [])):
                 b["reversalPick"] = True
+    # [새 규칙·카와사키11R] 강제보험 픽에 flag → 프론트/오버레이 강조(라벨 기반 판별 보강)
+    if forced_trifecta.get("active"):
+        _forced_set = {tuple(sorted(c)) for c in forced_trifecta.get("combos", [])}
+        for b in bet_rec:
+            if b.get("kind") == "삼복승" and tuple(sorted(b.get("combo", []))) in _forced_set:
+                b["forcedPick"] = True
 
     # [대규모급락 전략] 삼복승 보험 8→15% 확대·중배당 복승 보험 추가·최저배당 신뢰도 하락(기존 조합 유지)
     # [1번] 마감 후에는 대규모급락 전략도 추천에 반영하지 않음(참고만)
@@ -5180,6 +5257,7 @@ def _triple_analyze(rk, rec):
         "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용
         "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
+        "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
 
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
@@ -8983,13 +9061,47 @@ def failure_rules():
     return jsonify({"rules": d.get("rules") or []})
 
 
+def _high_odds_case_save(case):
+    """[수동 케이스 학습] 사용자가 짚어준 놓친 케이스(카와사키 11R 등)를 data/high_odds_review/에 저장.
+      자동 생성 복기(_high_odds_review_one)와 파일명 충돌 안 나게 '_case' 접미사 사용. manual_case=True 태깅.
+      반환 저장 경로."""
+    os.makedirs(HIGH_ODDS_REVIEW_DIR, exist_ok=True)
+    c = dict(case or {})
+    c["manual_case"] = True
+    c.setdefault("saved_at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    safe = re.sub(r"[^0-9A-Za-z가-힣]", "_", str(c.get("race") or "case"))
+    p = os.path.join(HIGH_ODDS_REVIEW_DIR, (c.get("date") or "nodate") + "_" + safe + "_case.json")
+    tmp = p + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(c, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, p)
+    return p
+
+
+def _high_odds_cases_load():
+    """저장된 수동 케이스(manual_case=True) 목록(최신순)."""
+    out = []
+    if os.path.isdir(HIGH_ODDS_REVIEW_DIR):
+        for fn in sorted(os.listdir(HIGH_ODDS_REVIEW_DIR), reverse=True):
+            if not fn.endswith("_case.json"):
+                continue
+            try:
+                out.append(json.load(open(os.path.join(HIGH_ODDS_REVIEW_DIR, fn), encoding="utf-8")))
+            except Exception:
+                continue
+    return out
+
+
 @app.route("/api/high-odds-review", methods=["GET", "POST"])
 def high_odds_review():
     """[고배당 심층분석] 복승30배+/삼복승100배+ 경주 복기.
       GET ?raceKey=      → 해당 경주 심층 분석(고배당 아니면 is_high_odds:False)
       GET ?list=1        → 저장된 고배당 복기 목록(최신순 경량)
+      GET ?cases=1       → 수동 학습 케이스(카와사키 11R 등) 목록
       GET ?stats=1       → [7번] 누적 통계(총/적중/미적중·A/B/C·개선 후 예상)
-      POST body{date?}   → [1번] 스캔·저장(오늘/전체) 후 요약 반환"""
+      POST body{case}    → 수동 케이스 저장 / body{date?} → [1번] 스캔·저장"""
+    if request.args.get("cases"):
+        return jsonify({"cases": _high_odds_cases_load()})
     if request.args.get("stats"):
         return jsonify(_high_odds_stats())
     if request.args.get("list"):
@@ -9007,7 +9119,14 @@ def high_odds_review():
                             "fail_label": r.get("fail_label"), "result_odds": r.get("result_odds")})
         return jsonify({"reviews": out, "count": len(out)})
     if request.method == "POST":
-        date = (request.get_json(silent=True) or {}).get("date") or None
+        body = request.get_json(silent=True) or {}
+        if body.get("case"):                       # [수동 케이스 저장]
+            try:
+                p = _high_odds_case_save(body["case"])
+                return jsonify({"ok": True, "saved": os.path.basename(p)})
+            except Exception as e:
+                return jsonify({"ok": False, "error": str(e)}), 500
+        date = body.get("date") or None
         found = _high_odds_scan(date)
         return jsonify({"scanned_high_odds": len(found),
                         "hits": sum(1 for r in found if r.get("hit")),

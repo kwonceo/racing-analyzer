@@ -2728,6 +2728,21 @@
       <div class="hint" style="margin:3px 0 0;line-height:1.6">${items}<br>→ <b style="color:#dbeafe">역배열 아님</b> — 전적은 우수하나 배당은 비인기(시장이 아직 안 밀어줌). 참고만.</div></div>`;
   }
 
+  // [새 규칙·카와사키11R] 막판 급락+역배열 동시 감지 말 → 삼복승 강제보험 배너(유력마 순위 무관).
+  function renderForcedTrifecta(a) {
+    const ft = (a && a.forcedTrifecta) || {};
+    if (!ft.active || !(ft.horses || []).length) return '';
+    const horses = ft.horses.map((h) =>
+      `<div style="margin:2px 0"><b style="color:#fca5a5">${h.no}번</b> <span class="hint">${esc(h.note || '')}</span></div>`).join('');
+    const combos = (ft.combos || []).map((c) =>
+      `<span class="chip chip-red">${c.join('+')} <span class="hint">강제</span></span>`).join(' ');
+    return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #ef4444;border-radius:8px;background:rgba(239,68,68,.12)">
+      <div style="font-size:15px;font-weight:800;color:#fca5a5">🚨 삼복승 강제보험 (막판 급락+역배열)</div>
+      <div class="hint" style="margin:3px 0 4px">${esc(ft.note || '')} — <b style="color:#fecaca">TOP3 밖이어도 강제 편성</b> (카와사키 11R 학습 규칙)</div>
+      ${horses}
+      ${combos ? `<div style="margin-top:4px">${combos}</div>` : ''}</div>`;
+  }
+
   // [근본해결3] raw 쌍승역전 조기 반영 — 마감 전 예비 유력마 배너(정식 공식 확정 전 조기 포착).
   function renderPreReversal(a) {
     const pr = (a && a.preReversal) || [];
@@ -3169,6 +3184,7 @@
       ${a.baselineReset ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffd24f;background:rgba(255,210,79,.12);border-radius:6px;color:#ffd24f">⚠️ <b>비정상 변동폭 감지 → 기준값 재설정</b> — 이전 경주 배당 잔존 의심(95%+ 급락 다수). 이번 수집을 새 기준값으로 설정했습니다. <b>다음 수집부터 변동을 계산</b>합니다.</div>`
         : a.baselineSet ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.1);border-radius:6px;color:#7dd3fc">🎯 <b>기준값 설정됨</b> — 새 경주 첫 수집입니다. 변동폭은 <b>다음 수집부터</b> 계산됩니다.</div>` : ''}
       ${a.afterClose ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #8a94a6;background:rgba(138,148,166,.14);border-radius:6px;color:#b8c0cc">⚠️ <b>마감 후 수집</b> — 발주(T-0) 이후 신호는 <b>참고만</b> 하세요. 급락이 있어도 <b>추천 조합·보험에는 반영되지 않습니다</b>(마감 전 기준 유지).</div>` : ''}
+      ${renderForcedTrifecta(a)}
       ${renderPreReversal(a)}
       ${renderAfterCloseSurge(a.afterCloseSurge)}
       ${a.marketCheck && a.marketCheck.diverged ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ff5c5c;background:rgba(255,92,92,.12);border-radius:6px;color:#ff8a8a">⚠️ <b>배당판 불일치</b> — 추천 복승(${(a.marketCheck.mainPair || []).join('+')}=${a.marketCheck.mainOdds}배)이 <b>배당판 최저 인기 조합(${a.marketCheck.favPair.join('+')}=${a.marketCheck.favOdds}배)</b>과 다릅니다. 배당판을 초반에 못 끌어왔거나 전적 편중일 수 있어요 → <b>배당판 인기 조합을 추천에 추가</b>했습니다. 배당 재확인 권장.</div>` : ''}
@@ -3745,12 +3761,15 @@
     let dl = null; try { dl = await (await fetch('/api/daily-learning')).json(); } catch (_) { /* */ }
     // [고배당 심층분석] 복승30+/삼복승100+ 미적중 분석 통계(A/B/C 유형·개선 후 예상)
     let ho = null; try { ho = await (await fetch('/api/high-odds-review?stats=1')).json(); } catch (_) { /* */ }
+    // [수동 케이스 학습] 카와사키 11R 등 사용자 지정 놓친 케이스 상세 복기
+    let hocases = null; try { hocases = await (await fetch('/api/high-odds-review?cases=1')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     // [AI Phase1] AI 학습 데이터 현황 대시보드
     let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
       ${renderDailyLearning(dl)}
+      ${renderHighOddsCases(hocases)}
       ${renderHighOddsReview(ho)}
       ${renderAiDataStatus(ai)}
       ${renderProfitSummary(s.profit_summary)}
@@ -3817,6 +3836,32 @@
   }
 
   // [고배당 심층분석] 복승30+/삼복승100+ 미적중 A/B/C 분류 + 개선 후 예상 적중
+  // [수동 케이스 학습 복기] 카와사키 11R 등 사용자 지정 놓친 케이스를 추천근거·왜 놓쳤나·새 규칙으로 상세 표시.
+  function renderHighOddsCases(hc) {
+    const cases = (hc && hc.cases) || [];
+    if (!cases.length) return '';
+    const nl2br = (t) => esc(t || '').replace(/\n/g, '<br>');
+    const cards = cases.map((c) => {
+      const rd = c.review_detail || {};
+      const block = (title, body, color) => body ? `<div style="margin:5px 0;padding:6px 9px;background:rgba(255,255,255,.03);border-left:3px solid ${color};border-radius:6px">
+        <div style="font-weight:700;color:${color};font-size:12px;margin-bottom:2px">${title}</div>
+        <div class="hint" style="line-height:1.6">${nl2br(body)}</div></div>` : '';
+      return `<div style="margin:8px 0;padding:10px 12px;border:1px solid #4a3a2a;border-radius:9px;background:rgba(239,68,68,.05)">
+        <div style="font-weight:800;font-size:14px;color:#fca5a5">🚨 ${esc(c.race || '')} <span class="hint" style="font-weight:400">${esc(c.date || '')} · 결과 ${esc(c.result || '')}</span></div>
+        <div style="margin:3px 0;font-size:12px">놓친 말 <b style="color:#fca5a5">${c.missed_horse != null ? c.missed_horse + '번' : '-'}</b> · 신호 <b>${esc(c.signal_type || '')}</b> (${esc(c.signal_time || '')} · ${esc(c.signal_detail || '')})</div>
+        ${block('📋 추천 근거 상세', rd.recommend_basis, '#38d39f')}
+        ${block('❓ 왜 5번을 삼복승에 넣었나', rd.why_trifecta_5, '#7dd3fc')}
+        ${block('⚠️ 왜 놓쳤나', rd.why_missed_detail || c.why_missed, '#fbbf24')}
+        <div style="margin:6px 0 0;padding:6px 9px;background:rgba(56,211,159,.1);border-radius:6px">
+          <b style="color:#38d39f">✅ 새 규칙 적용됨</b>: ${esc(c.new_rule || '')}${c.rule_applied ? ' <span class="chip" style="border-color:#38d39f;color:#38d39f">코드 반영</span>' : ''}
+          <div class="hint" style="font-size:11px;margin-top:2px">💡 교훈: ${esc(c.lesson || '')}</div></div>
+      </div>`;
+    }).join('');
+    return `<div class="bet-box" style="margin:6px 0;padding:12px 14px;border:1px solid #5a2a2a;border-radius:10px">
+      <div style="font-weight:700;font-size:15px;margin-bottom:6px">🎓 놓친 케이스 학습 복기 <span class="hint" style="font-weight:400">(사용자 지정 · 새 규칙 도출)</span></div>
+      ${cards}</div>`;
+  }
+
   function renderHighOddsReview(ho) {
     if (!ho || ho.error || !ho.total) return '';
     const abc = ho.abc || {};
@@ -4928,6 +4973,7 @@
     parts.push(renderTopHorses(a));   // ⭐ 유력마 TOP5 + 복병/이상감지 + 제거마 카드
     parts.push(`<div class="matrix-title">🚨 실시간 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${six ? ' · 6명 출전' : ''}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>`);
     if (a.summary) parts.push(`<div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary)}</div>`);
+    parts.push(renderForcedTrifecta(a));
     parts.push(renderAlertSignal(a.alertSignal, _horseRoleMap(a)));
     parts.push(renderPreReversal(a));
     parts.push(renderAfterCloseSurge(a.afterCloseSurge));
@@ -5014,6 +5060,7 @@
     host.innerHTML = `<div class="panel-card">
       ${renderRaceJudgment(a, '#jpBudget')}
       ${renderChaotic(a, '#jpBudget')}
+      ${renderForcedTrifecta(a)}
       ${renderPreReversal(a)}
       ${renderAfterCloseSurge(a.afterCloseSurge)}
       ${renderInverse(a.inverse)}

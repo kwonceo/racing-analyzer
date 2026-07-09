@@ -377,6 +377,24 @@
         }
         if (hasLive) appendStrongBox(panel, ss, false, '');       // 라이브 강신호
         else if (preservedSig) appendStrongBox(panel, preservedSig, true, preservedLabel);  // 경주 종료 후 보존
+        // [새 규칙·카와사키11R] 막판 급락+역배열 동시말 → 삼복승 강제보험 강조(유력마 순위 무관)
+        var ft = d && d.forcedTrifecta;
+        if (ft && ft.active && (ft.horses || []).length) {
+          var fb = mk('div', 'margin:5px 0;padding:6px 9px;border:2px solid #ef4444;border-radius:8px;background:rgba(239,68,68,.16)');
+          fb.appendChild(mk('div', 'font-weight:800;color:#fca5a5', '🚨 삼복승 강제보험 (막판 급락+역배열)'));
+          (ft.horses || []).forEach(function (h) {
+            var row = mk('div', 'margin:1px 0;font-size:11px;color:#fecaca');
+            row.appendChild(mk('span', 'font-weight:800;color:#fca5a5', h.no + '번'));
+            row.appendChild(mk('span', 'margin-left:5px;color:#fecaca', h.note || ''));
+            fb.appendChild(row);
+          });
+          (ft.combos || []).forEach(function (c) {
+            fb.appendChild(mk('div', 'margin:1px 0;font-weight:800;color:#fca5a5;font-size:11px',
+              '삼복승: ' + c.join('+') + ' (강제 편성)'));
+          });
+          fb.appendChild(mk('div', 'margin-top:2px;font-size:10px;color:#94a3b8', 'TOP3 밖이어도 강제 편성 · 카와사키 11R 학습 규칙'));
+          panel.appendChild(fb);
+        }
       } catch (_) { /* */ }
     }
     // [저배당 압축 패턴] 유력마 TOP3 중 저배당 밀집(축 패턴) 강조 박스
