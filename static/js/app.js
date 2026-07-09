@@ -6122,7 +6122,11 @@
   // [경마 oddspark 서버 수집] Chrome 확장 없이 서버가 지방경마 복승·쌍승을 직접 조회.
   //   마감 3분전 3초·평상 30초 적응형 폴링(closingTick에서 구동). 페이지 열려 있을 때만 동작.
   const _keibaOdds = { enabled: false, lastPoll: 0, lastRk: null, busy: false,
-    lastCounts: null, lastTime: '', lastMsg: '', lastRkShown: '' };
+    lastCounts: null, lastTime: '', lastMsg: '', lastRkShown: '', pinnedRk: '' };
+  // 경주 지정(pin)이 있으면 그 경주, 없으면 현재 경주 자동추종
+  function _keibaTargetRk() {
+    return _keibaOdds.pinnedRk || _closing.panelRk || getActiveRaceKey() || '';
+  }
   function _setKeibaStatusHtml(html) { const el = document.getElementById('keibaOddsStatus'); if (el) el.innerHTML = html; }
 
   /** 요청 형식 3줄 상태 렌더: "✅ oddspark 수집 중 / 복승 N조합·쌍승 N조합 / 마지막 수집: HH:MM:SS" */
@@ -6158,7 +6162,9 @@
 
   // 적응형 폴링(마감 3분전 3초·평상 30초) — closingTick에서 매초 호출, 자체 스로틀.
   function keibaOddsAutoPoll(rk, left) {
-    if (!_keibaOdds.enabled || !rk || _keibaOdds.busy) return;
+    if (!_keibaOdds.enabled || _keibaOdds.busy) return;
+    rk = _keibaOdds.pinnedRk || rk;                      // 경주 지정(pin) 우선
+    if (!rk) return;
     if (jpIsKoreaName(rk)) return;                       // 한국 경주는 oddspark 대상 아님(확장/PDF 유지)
     const interval = (left <= 180000) ? 3000 : 30000;    // 마감 3분전 3초 · 평상 30초
     const now = Date.now();
@@ -6435,7 +6441,23 @@
       }
     }
     { const b = document.getElementById('keibaOddsOnceBtn');
-      if (b) b.addEventListener('click', () => fetchKeibaOdds(_closing.panelRk || getActiveRaceKey(), false)); }
+      if (b) b.addEventListener('click', () => fetchKeibaOdds(_keibaTargetRk(), false)); }
+    // [경주 지정] pin/자동 토글 — 경주가 안 넘어갈 때 현재 경주를 직접 지정
+    { const setb = document.getElementById('keibaOddsRkSet'), clrb = document.getElementById('keibaOddsRkClear'),
+          inp = document.getElementById('keibaOddsRk');
+      if (setb && inp) setb.addEventListener('click', () => {
+        _keibaOdds.pinnedRk = (inp.value || '').trim();
+        _keibaOdds.lastPoll = 0; _keibaOdds.lastCounts = null;
+        if (clrb) clrb.style.display = _keibaOdds.pinnedRk ? '' : 'none';
+        _keibaOdds.lastMsg = _keibaOdds.pinnedRk ? ('경주 지정: ' + _keibaOdds.pinnedRk) : '자동추종';
+        _renderKeibaStatus();
+        if (_keibaOdds.pinnedRk) fetchKeibaOdds(_keibaOdds.pinnedRk, false);
+      });
+      if (clrb && inp) clrb.addEventListener('click', () => {
+        _keibaOdds.pinnedRk = ''; inp.value = ''; clrb.style.display = 'none';
+        _keibaOdds.lastMsg = '자동추종'; _renderKeibaStatus();
+      });
+    }
     setInterval(closingTick, 1000);
     closingTick();
   }

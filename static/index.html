@@ -154,6 +154,16 @@
           </label>
           <button id="keibaOddsOnceBtn" class="btn btn-small" type="button">지금 1회 조회</button>
         </div>
+        <!-- [경주 지정] 경주가 안 넘어가거나 다른 경주를 볼 때 직접 지정(비우면 현재 경주 자동추종) -->
+        <div class="cfg-row" style="margin:8px 0 0;gap:6px;align-items:center;flex-wrap:wrap">
+          <label class="hint" style="font-size:11px">🎯 경주 지정
+            <input id="keibaOddsRk" type="text" placeholder="예: 소노다 2경주 (비우면 자동)"
+                   style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:4px 8px;font:inherit;font-size:12px;width:180px" />
+          </label>
+          <button id="keibaOddsRkSet" class="btn btn-small" type="button">지정</button>
+          <button id="keibaOddsRkClear" class="btn btn-small" type="button" style="display:none">자동</button>
+          <span class="hint" style="font-size:11px">경주가 안 넘어가면 여기에 현재 경주를 입력하세요</span>
+        </div>
         <p class="hint" style="margin:6px 0 0;font-size:11px">Chrome 확장 없이 <b>서버가 oddspark에서 복승+쌍승 배당을 자동 수집</b>합니다 · 30초 간격(마감 3분전 3초) · 페이지가 열려 있을 때만 동작 · 기존 확장 수집은 폴백으로 유지</p>
         <div id="keibaOddsStatus" style="margin-top:8px;font:600 12px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#94a3b8">⬜ 꺼짐 — 토글을 켜면 현재 경주 배당을 자동 수집합니다.</div>
       </div>
