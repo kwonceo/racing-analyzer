@@ -118,5 +118,32 @@ ok(rates.get(5, {}).get("rate") == 100, "유형5 100%")
 ok(rates.get(2, {}).get("fired") == 2 and rates[2]["rate"] == 50, "유형2 2회 중 1회 입상 → 50%(멱등 확인)")
 ok(7 not in rates, "유형7(신호말 없음) 판정불가 → 집계 제외")
 
+print("[12] 저배당 압축 패턴(축 패턴) 감지 + 구간 기준")
+cp = app._compression_pattern([3, 9, 2], {3: 3.2, 9: 3.8, 2: 6.0}, {}, {"types": [3, 5]})
+ok(cp["detected"] and cp["level"] == "강력", "4배↓ 2두(3.2·3.8) → 강력 압축")
+ok(cp["combo"] == [3, 9], "복승 메인 = 저배당 2두(3+9)")
+ok(cp["withDrop"] and "급락" in (cp["note"] or ""), "급락 신호 결합 → 최강 note")
+cp2 = app._compression_pattern([1, 2, 3], {1: 4.5, 2: 4.8, 3: 4.9}, {}, {"types": [2]})
+ok(cp2["level"] == "중간", "5배↓ 3두 → 중간 압축")
+ok(cp2["withReversal"] and "역배열" in (cp2["note"] or ""), "역배열 결합 → 삼복승 보험 note")
+cp3 = app._compression_pattern([1, 2, 3], {1: 3.0, 2: 8.0, 3: 12.0}, {}, {})
+ok(not cp3["detected"], "저배당 1두뿐 → 압축 미감지")
+cp4 = app._compression_pattern([1, 2, 3], {}, {(1, 2): 3.5, (1, 3): 3.9, (2, 3): 10}, {})
+ok(cp4["detected"] and cp4["level"] == "강력", "단승 없을 때 최저 복승으로 대표배당 산출(1·2번 4배↓)")
+
+print("[13] 압축 패턴 복승 적중률 학습 + 멱등")
+tmp2 = tempfile.mkdtemp()
+app.COMPRESSION_STATS_FILE = os.path.join(tmp2, "c.json")
+an_c = {"compressionPattern": {"detected": True, "level": "강력", "combo": [3, 9], "withDrop": True}}
+app._learn_compression("R9", "2026-07-09", an_c, [3, 9, 5])
+app._learn_compression("R9", "2026-07-09", an_c, [3, 9, 5])   # 멱등
+app._learn_compression("R8", "2026-07-09",
+                       {"compressionPattern": {"detected": True, "level": "강력", "combo": [1, 2], "withDrop": False}},
+                       [1, 7, 2])   # 1만 입상 → partial
+hr = app._compression_hitrate()
+ok(hr["all"]["fired"] == 2 and hr["all"]["hit"] == 1, "2경주 중 1경주 복승 적중(멱등 확인)")
+ok(hr["all"]["partial"] == 2, "부분 적중(1두 입상) 2건")
+ok(hr["strong"]["rate"] == 50, "강력 압축 복승 적중률 50%")
+
 print("\n결과: 통과 %d / 실패 %d" % (_p, _f))
 sys.exit(1 if _f else 0)

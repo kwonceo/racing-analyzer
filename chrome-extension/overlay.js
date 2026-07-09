@@ -379,6 +379,33 @@
         else if (preservedSig) appendStrongBox(panel, preservedSig, true, preservedLabel);  // 경주 종료 후 보존
       } catch (_) { /* */ }
     }
+    // [저배당 압축 패턴] 유력마 TOP3 중 저배당 밀집(축 패턴) 강조 박스
+    function renderCompression(panel, d) {
+      try {
+        var cp = d && d.compressionPattern;
+        if (!cp || !cp.detected) return;
+        var strong = cp.level === '강력';
+        var accent = strong ? '#f59e0b' : '#4ea1ff';
+        var box = mk('div', 'margin:4px 0 6px;padding:6px 9px;border:1px solid ' + accent +
+          ';border-radius:8px;background:rgba(245,158,11,' + (strong ? '.16' : '.10') + ')');
+        box.appendChild(mk('div', 'font-weight:800;color:' + accent,
+          '🎯 저배당 압축 패턴 (' + (cp.level || '') + ')'));
+        if (cp.band) box.appendChild(mk('div', 'color:#94a3b8;font-size:10px', cp.band));
+        (cp.reprs || []).forEach(function (r) {
+          var lo = r.odds <= 4.0;
+          var row = mk('div', 'margin:1px 0;font-size:11px');
+          row.appendChild(mk('span', 'font-weight:700;color:' + (lo ? '#fbbf24' : '#e5e7eb'), r.no + '번'));
+          row.appendChild(mk('span', 'margin-left:5px;color:#cbd5e1', r.odds + '배' + (lo ? ' ◀ 저배당' : '')));
+          box.appendChild(row);
+        });
+        if (cp.combo && cp.combo.length === 2) {
+          box.appendChild(mk('div', 'margin-top:2px;font-weight:800;color:#38d39f',
+            '복승: ' + cp.combo[0] + '+' + cp.combo[1] + ' 자신있게'));
+        }
+        if (cp.note) box.appendChild(mk('div', 'margin-top:2px;font-size:11px;font-weight:700;color:' + accent, '✅ ' + cp.note));
+        panel.appendChild(box);
+      } catch (_) { /* */ }
+    }
 
     // 패널 내용 갱신 (div/span 만 사용 · textContent 기반)
     function updatePanel(panel, st) {
@@ -442,6 +469,7 @@
 
         // [강한 신호 8유형 · 막판 보존] 라이브 강신호 + 경주 종료 후 보존 박스(d 없어도 유지)
         renderStrongSignals(panel, d, deadline);
+        renderCompression(panel, d);   // [저배당 압축 패턴] 축 패턴 강조
 
         if (!d) {
           panel.appendChild(mk('div', 'color:#94a3b8', '분석 대기 중 — 배당 수집·이상감지가 실행되면 표시됩니다.'));

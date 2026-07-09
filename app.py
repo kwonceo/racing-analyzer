@@ -1512,6 +1512,15 @@ def signal_types_stats():
                     "note": "유형별 신호말이 1~3착 입상한 비율. 표본이 쌓일수록 적중률 높은 유형을 강조합니다."})
 
 
+@app.route("/api/compression/stats", methods=["GET"])
+def compression_stats():
+    """[저배당 압축 패턴 4번] 압축 패턴(4배↓2두+/5배↓3두+) 발생 시 실제 복승 적중률."""
+    hr = _compression_hitrate()
+    total = len(_compression_stats_load().get("races", {}))
+    return jsonify({"hitRate": hr, "raceCount": total,
+                    "note": "유력마 TOP3 중 저배당 밀집(축 패턴) 발생 경주의 복승(2두 정확) 적중률. 급락 결합 시 최강."})
+
+
 @app.route("/api/after-close/cases", methods=["GET"])
 def after_close_cases():
     """[4번] 마감(T-0) 후 감지되어 베팅 반영 불가했던 신호 케이스 목록 → 수집 간격 단축 필요성 근거."""
@@ -2472,6 +2481,69 @@ def _signal_type_hitrates():
         return {}
 
 
+# ───────── [저배당 압축 패턴 4번] 압축 패턴 발생 시 실제 복승 적중률 누적 ─────────
+COMPRESSION_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "compression_stats.json")
+
+
+def _compression_stats_load():
+    try:
+        return json.load(open(COMPRESSION_STATS_FILE, encoding="utf-8"))
+    except Exception:
+        return {"races": {}}
+
+
+def _compression_stats_save(d):
+    os.makedirs(os.path.dirname(COMPRESSION_STATS_FILE), exist_ok=True)
+    json.dump(d, open(COMPRESSION_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _learn_compression(rk, date, an, top3):
+    """[4번] 저배당 압축 패턴 발생 경주 → 압축 2두가 실제 복승 적중(둘 다 1~2착)했는지 누적. 경주별 멱등."""
+    try:
+        cp = (an or {}).get("compressionPattern") or {}
+        if not cp.get("detected"):
+            return
+        top2 = set(int(x) for x in (top3 or [])[:2] if x is not None)
+        combo = [int(x) for x in (cp.get("combo") or [])]
+        # 복승 적중 = 압축 2두가 정확히 1·2착 / 부분 적중(1두 입상)도 집계
+        hit = bool(combo and len(combo) == 2 and set(combo) == top2)
+        partial = bool(combo and (set(combo) & set(int(x) for x in (top3 or [])[:3] if x is not None)))
+        d = _compression_stats_load()
+        races = d.setdefault("races", {})
+        rid = (date or "") + "|" + rk
+        races[rid] = {"raceKey": rk, "date": date, "level": cp.get("level"),
+                      "combo": combo, "hit": hit, "partial": partial,
+                      "withDrop": bool(cp.get("withDrop")), "withReversal": bool(cp.get("withReversal")),
+                      "t": time.time()}
+        if len(races) > 5000:
+            for k in sorted(races, key=lambda k: races[k].get("t", 0))[:len(races) - 5000]:
+                races.pop(k, None)
+        _compression_stats_save(d)
+    except Exception as e:
+        print("[압축패턴학습] 실패:", e)
+
+
+def _compression_hitrate():
+    """압축 패턴 복승 적중률(강력/중간·급락결합 별) 집계."""
+    try:
+        races = list(_compression_stats_load().get("races", {}).values())
+        def agg(rows):
+            n = len(rows)
+            h = sum(1 for r in rows if r.get("hit"))
+            p = sum(1 for r in rows if r.get("partial"))
+            return {"fired": n, "hit": h, "partial": p,
+                    "rate": round(h / n * 100) if n else None,
+                    "partialRate": round(p / n * 100) if n else None}
+        return {
+            "all": agg(races),
+            "strong": agg([r for r in races if r.get("level") == "강력"]),
+            "mid": agg([r for r in races if r.get("level") == "중간"]),
+            "withDrop": agg([r for r in races if r.get("withDrop")]),
+        }
+    except Exception:
+        return {}
+
+
 # ───────── [집중신호 오판 학습] 초과급락 신호말이 입상했는데 노이즈 판정으로 추천 누락된 사례 ─────────
 SIGNAL_LESSON_FILE = os.path.join(os.path.dirname(__file__), "data", "signal_lessons.json")
 
@@ -3301,6 +3373,62 @@ def _strong_signals(advanced, inverse, drops, cur_mb, hist, curQ, after_close):
         rec_level = None
     return {"signals": sigs, "count": count, "recommendLevel": rec_level,
             "dualConverge": dual, "types": sorted(by_type.keys())}
+
+
+# ───────── [저배당 압축 패턴] 유력마 TOP3 중 저배당 말 밀집(축 패턴) 감지 + 신호 결합 ─────────
+def _horse_repr_odds(h, curWin, curQ):
+    """말 대표 배당 = 단승 우선, 없으면 그 말 포함 최저 복승."""
+    try:
+        if curWin.get(h):
+            return curWin[h]
+        best = None
+        for k, o in (curQ or {}).items():
+            pair = k if isinstance(k, (tuple, list, frozenset)) else None
+            if pair and h in pair and o and o > 0 and (best is None or o < best):
+                best = o
+        return best
+    except Exception:
+        return None
+
+
+def _compression_pattern(key_horses, curWin, curQ, strong_signals=None):
+    """[1·2번] 유력마 TOP3 중 저배당 말이 몰린 축 패턴 감지.
+      4배 이하 2두+ = 강력 압축(복승 메인 자신있게) / 5배 이하 3두+ = 중간 압축.
+    [3번] 급락 신호 결합 → 최강(복승 메인 강력) / 역배열 결합 → 고배당 보험 추가.
+    반환 {detected, level, band, horses[], combo[2], reprs[], withDrop, withReversal, note}."""
+    try:
+        top = [int(h) for h in (key_horses or [])[:3] if h is not None]
+        reprs = []
+        for h in top:
+            o = _horse_repr_odds(h, curWin, curQ)
+            if o is not None:
+                reprs.append((h, round(float(o), 1)))
+        le4 = [(h, o) for h, o in reprs if o <= 4.0]
+        le5 = [(h, o) for h, o in reprs if o <= 5.0]
+        level = band = None
+        horses = []
+        if len(le4) >= 2:
+            level, band, horses = "강력", "4배 이하 2두+", [h for h, _ in le4]
+        elif len(le5) >= 3:
+            level, band, horses = "중간", "5배 이하 3두+", [h for h, _ in le5]
+        if not level:
+            return {"detected": False}
+        horses = horses[:3]
+        combo = sorted(horses[:2]) if len(horses) >= 2 else []
+        types = set((strong_signals or {}).get("types") or [])
+        with_drop = bool(types & {1, 3, 4, 5, 6})   # 연속하락/마감급락/재급락/동시급락/이중수렴
+        with_rev = bool(types & {2, 6})              # 역배열/이중수렴
+        if with_drop:
+            note = "압축 + 급락 동시 → 복승 메인 강력 추천"
+        elif with_rev:
+            note = "압축 + 역배열 → 복승 메인 + 삼복승 보험"
+        else:
+            note = "저배당 압축(축 패턴) → 복승 메인 자신있게"
+        return {"detected": True, "level": level, "band": band, "horses": horses,
+                "reprs": [{"no": h, "odds": o} for h, o in reprs], "combo": combo,
+                "withDrop": with_drop, "withReversal": with_rev, "note": note}
+    except Exception:
+        return {"detected": False}
 
 
 # ───────── [BMED 매트릭스 베팅 전략] 상황별 5전략 자동선택 + 원금보전 배분 + 기대환수율 ─────────
@@ -4246,6 +4374,9 @@ def _triple_analyze(rk, rec):
             key_horses = (surge_promote + [h for h in key_horses if h not in surge_promote])[:3]
             ranked = surge_promote + [h for h in ranked if h not in surge_promote]
 
+    # [저배당 압축 패턴] 최종 유력마 TOP3 중 저배당 밀집(4배 이하 2두+ 강력 / 5배 이하 3두+ 중간) → 축 패턴
+    compression_pattern = _compression_pattern(key_horses, curWin, curQ, strong_signals)
+
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
     anomaly_horse = None
@@ -4859,6 +4990,7 @@ def _triple_analyze(rk, rec):
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
         "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용
+        "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
 
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
@@ -5566,6 +5698,7 @@ def _build_analysis_log(rk, an=None):
         "signals_detected": signals,
         "anomaly_history": anomaly_history,   # [2번] 경주 전체 이상감지 시계열(시간·조합·급락%, 경주별 분리 저장)
         "strong_signals": an.get("strongSignals"),   # [강한 신호 8유형] 유형별 학습(적중률 누적)용 스냅샷
+        "compression_pattern": an.get("compressionPattern"),   # [저배당 압축 패턴] 축 패턴 스냅샷
         "horses": horses,
         "elimination": {"candidates": cand, "eliminated": elim_no, "elimination_reasons": elim_reasons},
         "final_recommendation": final,
@@ -7480,6 +7613,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _learn_strong_signals(rk, doc.get("date"), an, top3)
     except Exception as e:
         print("[강한신호학습] 실패:", e)
+
+    # [저배당 압축 패턴 4번] 압축 2두 복승 적중률 누적(경주별 멱등)
+    try:
+        _learn_compression(rk, doc.get("date"), an, top3)
+    except Exception as e:
+        print("[압축패턴학습] 실패:", e)
 
     # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
     rec_bets = an.get("betRecommend", [])
