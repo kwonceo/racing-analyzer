@@ -21,6 +21,8 @@
     var enabled = false, killed = false, timer = null;
     var savedPos = null;   // [보완#2] 사용자가 드래그해 옮긴 패널 위치({left,top}) — chrome.storage 에 저장/복원
     var soundOn = false, lastSoundKey = '';   // [보완#3] 강조 팝업 알림음 옵션(기본 off) + 중복 방지
+    // [강한 신호 8유형·막판 보존] T-2분 이후 감지된 강신호를 경주 종료 후에도 유지(새 경주 rk 변경 시에만 초기화)
+    var preservedSig = null, preservedRk = '', preservedLabel = '';
 
     // [보완#3] 중요 신호 강조 알림음 — 짧은 2단 삑(Web Audio). 실패는 무시(무해).
     function beep() {
@@ -54,6 +56,7 @@
       try { var b = byId(ID_PANEL); if (b) b.remove(); } catch (_) { /* */ }
       try { var c = byId('kbOvAlert'); if (c) c.remove(); } catch (_) { /* */ }   // [강조] 팝업 제거
       try { stopBlink(); } catch (_) { /* */ }
+      try { stopCdBlink(); } catch (_) { /* */ }   // [3번] 카운트다운 깜빡임 정리
       if (timer) { try { clearInterval(timer); } catch (_) { /* */ } timer = null; }
     }
 
@@ -148,10 +151,21 @@
       japan_central: '🏇 중앙', japan_local: '🇯🇵 지방', korea: '🇰🇷 한국' };
     var GRADE_COLOR = { A: '#38d39f', B: '#4ea1ff', C: '#fbbf24', D: '#94a3b8' };
 
+    // [2번] 배당 수집된 마번 집합(validHorses) — 없으면 null(필터 안 함)
+    function validSet(d) {
+      try {
+        return (d && Array.isArray(d.validHorses) && d.validHorses.length) ? new Set(d.validHorses.map(Number)) : null;
+      } catch (_) { return null; }
+    }
+
     // [강화] 통합 등급 상위 3두(전적등급 + 배당유력마 병합) — vanilla 버전
     function topGrades(d) {
       try {
-        var form = d.form || [], keys = (d.keyHorses || []).map(Number);
+        // [2번] 배당 없는 잔존마(이전 경주 말)는 제외 — 6두 경주면 1~6번만
+        var vset = validSet(d);
+        var inV = function (n) { return !vset || vset.has(Number(n)); };
+        var form = (d.form || []).filter(function (h) { return inV(h.no); });
+        var keys = (d.keyHorses || []).map(Number).filter(inV);
         var anom = d.anomalyHorse != null ? +d.anomalyHorse : null;
         var fmap = {}; form.forEach(function (h) { fmap[h.no] = h; });
         var nos = {}; form.forEach(function (h) { nos[h.no] = 1; }); keys.forEach(function (n) { nos[n] = 1; });
@@ -199,10 +213,13 @@
             lines.push('→ 인기 ' + lead.popRank + '위가 ' + lead.vs.popRank + '위보다 배당 낮음');
           }
           if (lead) lines.push('→ ' + lead.no + '번 실질 유력!');
-          var g = (lead && lead.gap) ? lead.gap : 2;   // 역전폭 → 강도
-          lines.push('강도: ' + (g >= 3 ? '🔴 압도적 역배열' : '🟠 강한 역배열'));
+          // [역배열 강화] 배당 차이 기반 4단계 강도(diffPct·level·tag). 미세차(10%↓)는 서버가 이미 제외.
+          var tier = (lead && lead.tag) ? (lead.level + ' ' + lead.tag) : ((det[0] && det[0].tag) ? det[0].level + ' ' + det[0].tag : '🟠 역배열');
+          var dpv = (lead && lead.diffPct != null) ? lead.diffPct : (det[0] && det[0].diffPct);
+          lines.push('강도: ' + tier + (dpv != null ? ' (배당차 ' + dpv + '%)' : ''));
+          var critLevel = (/🔴/.test(tier)) ? 'red' : 'orange';   // 🔴/🔴🔴=red · 🟡/🟠=orange
           var ihKey = det.map(function (x) { return x.no; }).join('·');
-          return { key: 'inv:' + ihKey + ':' + (lead ? lead.odds : ''), level: 'red', icon: '🔄', title: '역배열 감지',
+          return { key: 'inv:' + ihKey + ':' + (lead ? lead.odds : ''), level: critLevel, icon: '🔄', title: '역배열 감지',
             lines: lines, msg: '실질 유력마 ' + ((lead && lead.no) || ihKey) + '번 — 인기순위와 쌍승순위 역전' };
         }
         var strong = ((d && d.drops) || []).filter(function (x) { return x && x.pct <= -50 && x.combo; })
@@ -224,6 +241,21 @@
         }
       } catch (_) { /* */ }
       return null;
+    }
+
+    // [3번] 마감 T-30초 카운트다운 깜빡임(빨강↔반투명) — 패널의 kbOvCd 행 전용
+    var cdBlink = null, cdBlinkOn = false;
+    function stopCdBlink() { if (cdBlink) { try { clearInterval(cdBlink); } catch (_) { /* */ } cdBlink = null; } }
+    function startCdBlink() {
+      if (cdBlink) return;
+      cdBlink = setInterval(function () {
+        try {
+          var el = byId('kbOvCd'); if (!el) { stopCdBlink(); return; }
+          cdBlinkOn = !cdBlinkOn;
+          el.style.background = cdBlinkOn ? 'rgba(220,38,38,.55)' : 'rgba(220,38,38,.18)';
+          el.style.boxShadow = cdBlinkOn ? '0 0 0 2px rgba(248,113,113,.7)' : 'none';
+        } catch (_) { /* */ }
+      }, 500);
     }
 
     function stopBlink() { if (alertBlink) { try { clearInterval(alertBlink); } catch (_) { /* */ } alertBlink = null; } }
@@ -302,6 +334,97 @@
       } catch (_) { /* 강조 팝업 실패는 무시 */ }
     }
 
+    // ── [강한 신호 8유형] 강조 박스 + 막판 보존(경주 종료 후 유지) ──────────
+    var STRONG_LEVEL_COLOR = { '강력': '#dc2626', '복승': '#f59e0b', '보조': '#3b82f6' };
+    function appendStrongBox(panel, ss, preserved, label) {
+      try {
+        if (!ss || !ss.signals || !ss.signals.length) return;
+        var lvl = ss.recommendLevel || '';
+        var accent = preserved ? '#38d39f' : (STRONG_LEVEL_COLOR[lvl] || '#dc2626');
+        var box = mk('div', 'margin:4px 0 7px;padding:7px 9px;border:2px solid ' + accent +
+          ';border-radius:8px;background:rgba(220,38,38,' + (preserved ? '.10' : '.16') + ')');
+        box.appendChild(mk('div', 'font-weight:900;font-size:13px;color:' + accent,
+          preserved ? '📌 마감 전 주요 신호 (보존)' : '🔴 강한 신호 감지!'));
+        if (label) box.appendChild(mk('div', 'color:#94a3b8;font-size:10px;margin-bottom:2px', label));
+        ss.signals.slice(0, 6).forEach(function (s) {
+          var dot = s.level === 'red' ? '🔴' : '🟠';
+          var row = mk('div', 'margin:2px 0');
+          row.appendChild(mk('span', 'font-weight:700;font-size:11px;color:' + (s.level === 'red' ? '#fca5a5' : '#fbbf24'),
+            dot + ' 유형' + s.type + ' ' + s.label));
+          if (s.detail) row.appendChild(mk('div', 'color:#cbd5e1;font-size:11px;margin-left:14px', s.detail));
+          box.appendChild(row);
+        });
+        if (lvl) {
+          var recTxt = ss.dualConverge ? '→ 이중수렴 · 강력 추천'
+            : (lvl === '강력' ? '→ 강력 추천' : (lvl === '복승' ? '→ 복승 추천' : '→ 보조 추천'));
+          box.appendChild(mk('div', 'margin-top:3px;font-weight:800;color:' + accent, recTxt + ' (' + ss.count + '개 신호)'));
+        }
+        panel.appendChild(box);
+      } catch (_) { /* */ }
+    }
+    // 라이브 강신호 표시 + T-2분 이후 감지분 보존(경주 종료·데이터 소멸 후에도 유지)
+    function renderStrongSignals(panel, d, deadline) {
+      try {
+        var ss = d && d.strongSignals;
+        var rk = (d && d.raceKey) || '';
+        if (rk && rk !== preservedRk) { preservedRk = rk; preservedSig = null; preservedLabel = ''; }   // 새 경주만 초기화
+        var leftMs = deadline ? (deadline - Date.now()) : null;
+        var hasLive = !!(ss && ss.signals && ss.signals.length);
+        // [4번] T-2분 이내 강신호 → 보존(막판 신호 사라짐 방지 · 유형3 마감직전 대급락 포함)
+        if (hasLive && leftMs != null && leftMs <= 120000) {
+          preservedSig = ss;
+          preservedLabel = leftMs > 0 ? ('T-' + Math.max(1, Math.round(leftMs / 60000)) + '분경 감지 · 보존') : '마감 직전 감지 · 보존';
+        }
+        if (hasLive) appendStrongBox(panel, ss, false, '');       // 라이브 강신호
+        else if (preservedSig) appendStrongBox(panel, preservedSig, true, preservedLabel);  // 경주 종료 후 보존
+      } catch (_) { /* */ }
+    }
+    // [저배당 압축 패턴] 유력마 TOP3 중 저배당 밀집(축 패턴) 강조 박스
+    function renderCompression(panel, d) {
+      try {
+        var cp = d && d.compressionPattern;
+        if (!cp || !cp.detected) return;
+        var strong = cp.level === '강력';
+        var accent = strong ? '#f59e0b' : '#4ea1ff';
+        var box = mk('div', 'margin:4px 0 6px;padding:6px 9px;border:1px solid ' + accent +
+          ';border-radius:8px;background:rgba(245,158,11,' + (strong ? '.16' : '.10') + ')');
+        box.appendChild(mk('div', 'font-weight:800;color:' + accent,
+          '🎯 저배당 압축 패턴 (' + (cp.level || '') + ')'));
+        if (cp.band) box.appendChild(mk('div', 'color:#94a3b8;font-size:10px', cp.band));
+        (cp.reprs || []).forEach(function (r) {
+          var lo = r.odds <= 4.0;
+          var row = mk('div', 'margin:1px 0;font-size:11px');
+          row.appendChild(mk('span', 'font-weight:700;color:' + (lo ? '#fbbf24' : '#e5e7eb'), r.no + '번'));
+          row.appendChild(mk('span', 'margin-left:5px;color:#cbd5e1', r.odds + '배' + (lo ? ' ◀ 저배당' : '')));
+          box.appendChild(row);
+        });
+        if (cp.combo && cp.combo.length === 2) {
+          box.appendChild(mk('div', 'margin-top:2px;font-weight:800;color:#38d39f',
+            '복승: ' + cp.combo[0] + '+' + cp.combo[1] + ' 자신있게'));
+        }
+        if (cp.note) box.appendChild(mk('div', 'margin-top:2px;font-size:11px;font-weight:700;color:' + accent, '✅ ' + cp.note));
+        // [배당 3착 자동 발굴] 축 2두 + 고배당 3착 후보 → 삼복승 보험
+        var tp = d && d.thirdPlaceHunt;
+        if (tp && tp.active && (tp.candidates || []).length) {
+          box.appendChild(mk('div', 'margin-top:5px;color:#c4b5fd;font-weight:700;font-size:11px', '🎯 삼복승 3착 후보'));
+          tp.candidates.forEach(function (c, i) {
+            var row = mk('div', 'margin:1px 0;font-size:11px');
+            row.appendChild(mk('span', 'color:#94a3b8', (i + 1) + '순위 '));
+            row.appendChild(mk('span', 'font-weight:800;color:#a78bfa', c.no + '번'));
+            row.appendChild(mk('span', 'margin-left:4px;color:#cbd5e1', '(' + c.odds + '배)'));
+            row.appendChild(mk('span', 'margin-left:5px;color:#fbbf24', (c.icon || '') + ' ' + c.reason + ' (신뢰 ' + c.conf + ')'));
+            box.appendChild(row);
+          });
+          (tp.trios || []).forEach(function (t) {
+            var od = (t.expOddsEst != null) ? ('  추정 ' + t.expOddsEst + '배') : '';
+            box.appendChild(mk('div', 'margin:1px 0;font-weight:800;color:#a78bfa;font-size:11px',
+              '삼복승: ' + t.combo.join('+') + od));
+          });
+        }
+        panel.appendChild(box);
+      } catch (_) { /* */ }
+    }
+
     // 패널 내용 갱신 (div/span 만 사용 · textContent 기반)
     function updatePanel(panel, st) {
       try {
@@ -340,27 +463,88 @@
           panel.appendChild(bn);
         }
 
-        // 마감 카운트다운
+        // 마감 카운트다운 — [3번] T-2분 주황 · T-1분 빨강 · T-30초 깜빡임
         var cd = countdown(deadline);
         if (cd) {
-          var cdRow = mk('div', 'margin:2px 0 6px');
-          cdRow.appendChild(mk('span', 'color:#94a3b8', '마감까지 '));
-          cdRow.appendChild(mk('span', 'font-weight:800;color:' + (cd === '마감' ? '#f87171' : '#fbbf24'), cd));
+          var leftMs = deadline ? (deadline - Date.now()) : 0;
+          var phase = (leftMs > 0 && leftMs <= 30000) ? 'blink'
+            : (leftMs > 0 && leftMs <= 60000) ? 'red'
+            : (leftMs > 0 && leftMs <= 120000) ? 'orange' : '';
+          var isRed = (phase === 'red' || phase === 'blink');
+          var cdBg = isRed ? 'rgba(220,38,38,.28)' : (phase === 'orange' ? 'rgba(245,158,11,.24)' : '');
+          var cdBd = isRed ? '#f87171' : (phase === 'orange' ? '#fbbf24' : '');
+          var cdRow = mk('div', 'margin:2px 0 6px;' + (phase ? 'padding:5px 8px;border-radius:6px;' : '') +
+            (cdBg ? ('background:' + cdBg + ';') : '') + (cdBd ? ('border:1px solid ' + cdBd + ';') : ''));
+          cdRow.id = 'kbOvCd';
+          cdRow.appendChild(mk('span', 'color:#94a3b8', '⏰ 마감까지 '));
+          cdRow.appendChild(mk('span', 'font-weight:800;color:' + (cd === '마감' ? '#f87171' : (cdBd || '#fbbf24')), cd));
+          if (phase === 'orange') cdRow.appendChild(mk('span', 'margin-left:6px;font-size:11px;font-weight:700;color:#fbbf24', 'T-2분'));
+          if (phase === 'red') cdRow.appendChild(mk('span', 'margin-left:6px;font-size:11px;font-weight:800;color:#fecaca', 'T-1분 마감 임박!'));
+          if (phase === 'blink') cdRow.appendChild(mk('span', 'margin-left:6px;font-size:11px;font-weight:800;color:#fecaca', '⚡ 30초!'));
           panel.appendChild(cdRow);
-        }
+          if (phase === 'blink') startCdBlink(); else stopCdBlink();   // T-30초 깜빡임
+        } else { stopCdBlink(); }
+
+        // [강한 신호 8유형 · 막판 보존] 라이브 강신호 + 경주 종료 후 보존 박스(d 없어도 유지)
+        renderStrongSignals(panel, d, deadline);
+        renderCompression(panel, d);   // [저배당 압축 패턴] 축 패턴 강조
 
         if (!d) {
           panel.appendChild(mk('div', 'color:#94a3b8', '분석 대기 중 — 배당 수집·이상감지가 실행되면 표시됩니다.'));
           return;
         }
 
-        // 유력마
-        var keys = (d.keyHorses || []);
+        // 유력마 — [2번] 배당 없는 잔존마 제외
+        var vset = validSet(d);
+        var inV = function (n) { return !vset || vset.has(Number(n)); };
+        var keys = (d.keyHorses || []).filter(inV);
         if (keys.length) {
           var kr = mk('div', 'margin:3px 0');
           kr.appendChild(mk('span', 'color:#94a3b8', '⭐ 유력마 '));
           kr.appendChild(mk('span', 'font-weight:700;color:#4ea1ff', keys.join(' · ')));
           panel.appendChild(kr);
+        }
+
+        // [3번] 쌍승 역배열 요약 — "🔄 역배열: N번 주목 · 🔴 강한 역배열 (배당차 40%)"
+        if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null) {
+          var lead0 = d.inverse.invLead;
+          var tierTxt = lead0.tag ? (' · ' + lead0.level + ' ' + lead0.tag) : '';
+          var dpTxt = (lead0.diffPct != null) ? (' (배당차 ' + lead0.diffPct + '%)') : '';
+          var ivs = mk('div', 'margin:3px 0;font-weight:800;color:#f0abfc');
+          ivs.textContent = '🔄 역배열: ' + lead0.no + '번 주목' + tierTxt + dpTxt;
+          panel.appendChild(ivs);
+        }
+
+        // [3번] 단승 인기 순위 top3 — "1위 4번 (3.2배)"
+        var sroll = (d.singleRanking || []).filter(inV);
+        var smap = d.single || {};
+        if (sroll.length) {
+          panel.appendChild(mk('div', 'margin:5px 0 2px;color:#94a3b8', '🥇 단승 인기'));
+          sroll.slice(0, 3).forEach(function (no, i) {
+            var od = smap[no] != null ? smap[no] : smap[String(no)];
+            var row = mk('div', 'margin:1px 0');
+            row.appendChild(mk('span', 'color:#94a3b8', (i + 1) + '위 '));
+            row.appendChild(mk('span', 'font-weight:800;color:#4ea1ff', no + '번'));
+            if (od != null) row.appendChild(mk('span', 'margin-left:5px;color:#e5e7eb', '(' + od + '배)'));
+            panel.appendChild(row);
+          });
+        }
+
+        // [3번] 환수율 + 자금 집중도 — advanced.overround(역수합=invSum, 상위3조합 집중)
+        var ov = d.signalQuality && d.signalQuality.advanced && d.signalQuality.advanced.overround;
+        if (ov && ov.invSum) {
+          var refund = ov.invSum > 1 ? (1 / ov.invSum) : ov.invSum;   // 환수율 = 1/역수합(캡 100%)
+          var refundPct = Math.round(Math.min(1, refund) * 100);
+          var share = ov.top3Share != null ? Math.round(ov.top3Share * 100) : null;
+          var conc = !!ov.concentrated;   // 상위3조합 90%+
+          var rr = mk('div', 'margin:5px 0 2px;padding:4px 7px;border-radius:6px;background:' +
+            (conc ? 'rgba(245,158,11,.18)' : 'rgba(148,163,184,.12)'));
+          rr.appendChild(mk('span', 'color:#94a3b8', '💰 환수율 '));
+          rr.appendChild(mk('span', 'font-weight:800;color:' + (conc ? '#fbbf24' : '#e5e7eb'), refundPct + '%'));
+          rr.appendChild(mk('span', 'margin-left:6px;font-size:11px;color:' + (conc ? '#fbbf24' : '#94a3b8'),
+            conc ? ('→ 특정 조합 집중!' + (share != null ? ' (상위3 ' + share + '%)' : ''))
+                 : ('(자금 집중도 낮음' + (share != null ? ' · 상위3 ' + share + '%' : '') + ')')));
+          panel.appendChild(rr);
         }
 
         // 급락 신호(상위 2개)
@@ -491,6 +675,7 @@
           if (panel) panel.remove();
           try { var al = byId('kbOvAlert'); if (al) al.remove(); } catch (_) { /* */ }   // [강조] 팝업도 제거
           stopBlink();
+          stopCdBlink();   // [3번] 카운트다운 깜빡임 정리
           if (timer) { clearInterval(timer); timer = null; }
           return;
         }

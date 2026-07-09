@@ -759,16 +759,32 @@
     return market === 'korea' || isKoreaByRaceKey(raceKey) || pageLooksKorean();
   }
 
+  // [1번] 일본 경마장(지방 NAR + 중앙 JRA) — 한글·한자 병기. raceKey/페이지에 이 이름이 있으면 '경마' 확정.
+  //   사설 배당판(asyukk) 네비 메뉴에 '경정/경륜' 링크가 있어 경마 경주도 경정으로 오탐되던 문제 차단.
+  const HORSE_TRACKS = /(帯広|門別|盛岡|水沢|浦和|船橋|大井|川崎|金沢|笠松|名古屋|園田|姫路|高知|佐賀|札幌|函館|福島|新潟|東京|中山|中京|京都|阪神|小倉|오비히로|반에이|몬베츠|몬베쓰|모리오카|미즈사와|우라와|후나바시|오오이|오이|카와사키|가와사키|카나자와|가나자와|카사마츠|나고야|소노다|히메지|고치|사가|삿포로|하코다테|히코다테|후쿠시마|후크시마|니가타|도쿄|나카야마|주쿄|교토|한신|고쿠라)/;
+
   // [수정#3/탭분리] 종목 자동 감지 — asyukk34 사설 배당판의 탭/본문 텍스트로 종목을 구분.
   //   팝업 종목이 '경마'인데 페이지가 경륜/경정/바이크로 보이면 이 감지값을 사용(수동 선택이 우선).
   //   반환: 'boat'(경정) | 'cycle'(경륜) | 'bike'(바이크) | null(경마/불명).
-  function detectSport() {
+  //   [1번 수정] ①raceKey/페이지에 경마장명 있으면 무조건 경마(null) ②경정/경륜은 URL·제목에 명시적일 때만
+  //   확정(네비 메뉴 단어 오탐 방지) → 본문은 명확한 종목어(競艇/競輪 등)만 보조 판정.
+  function detectSport(raceKey) {
     try {
-      const body = (((document.body && document.body.innerText) || '') + ' ' + location.href);
-      // 경정(보트) → 바이크(오토레이스) → 경륜 → 없으면 null(경마)
-      if (/(경정|競艇|보트|모터보트|미사리|경정장|보트경주)/.test(body)) return 'boat';
-      if (/(바이크|오토레이스|オートレース|모터사이클|autorace|경륜경정바이크)/.test(body)) return 'bike';
-      if (/(경륜|競輪|사이클|자전거|벨로드롬|velodrome|경륜장|광명돔|선수경주)/.test(body)) return 'cycle';
+      const rk = raceKey || '';
+      // [1번·핵심] raceKey에 일본 경마장명이 있으면 무조건 경마 → 경정/경륜 오탐 차단
+      if (HORSE_TRACKS.test(rk)) return null;
+      const href = location.href, title = (document.title || '');
+      const strong = (re) => re.test(href) || re.test(title);   // URL·제목 = 명시적 신호(네비 메뉴 아님)
+      // [경정/경륜 강화] URL 또는 탭 제목에 명시적으로 있을 때만 확정
+      if (strong(/(경정|競艇)/)) return 'boat';
+      if (strong(/(오토레이스|オートレース|autorace|바이크경주)/)) return 'bike';
+      if (strong(/(경륜|競輪)/)) return 'cycle';
+      // 본문 보조 판정 — 단, 경마장명이 본문에 있으면 경마(경정/경륜 페이지에 경마장 링크 있는 경우 오탐 방지)
+      const body = ((document.body && document.body.innerText) || '');
+      if (HORSE_TRACKS.test(body)) return null;
+      if (/(競艇|경정장|모터보트|미사리)/.test(body)) return 'boat';
+      if (/(オートレース|오토레이스|오토레이스장)/.test(body)) return 'bike';
+      if (/(競輪|경륜장|벨로드롬|광명돔)/.test(body)) return 'cycle';
     } catch (_) { /* */ }
     return null;
   }
@@ -1477,7 +1493,7 @@
     const { raceKey: override, timerDeadline, sport, market, japanType } = await getSettings();
     const raceKey = _resolveRaceKey(reason, override);   // [경주 자동추종] 자동수집은 배당판 표시 경주 우선
     // [수정#3/탭분리] 종목 결정: 팝업 선택(수동)이 우선, '경마'인데 페이지가 경륜/경정/바이크면 자동 감지값 사용.
-    const effSport = (sport && sport !== 'horse') ? sport : (detectSport() || 'horse');
+    const effSport = (sport && sport !== 'horse') ? sport : (detectSport(raceKey) || 'horse');
     const isCycleBoat = (effSport === 'cycle' || effSport === 'boat' || effSport === 'bike');   // 6명 종목: 복승+쌍승만·전적 없음
     if (isCycleBoat) console.log(`[${SPORT_LABEL[effSport]}] 종목=${SPORT_LABEL[effSport]} → 복승+쌍승만 수집(삼복승·전적 생략, 6명)`, (sport === 'horse' ? '(자동 감지)' : '(수동 선택)'));
     // [5번][한국모드 강화] 종목=한국 이거나 raceKey/페이지에서 KRA(서울/부산/제주/과천) 감지 시 → 무조건 복승만.

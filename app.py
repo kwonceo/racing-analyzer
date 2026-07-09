@@ -1132,12 +1132,13 @@ def _sanitize_starters(horses):
     return [by_no[k] for k in sorted(by_no)]
 
 
-def _form_from_starters(rk, drops, sport=None):
+def _form_from_starters(rk, drops, sport=None, valid_nos=None):
     """저장된 전적으로 마필 점수·등급 계산. 배당 급락마는 이상감지 상향 반영.
     - 일본(출마표2): recent 착순으로 점수 재계산
     - 한국(PDF): 프론트에서 이미 계산한 formScore/totalScore를 그대로 사용(마명·기수 한글 유지).
     - 경륜/경정/바이크(6명 종목): 한국경마(source=korea) 전적은 오매칭이므로 무시(전적없음이 정상).
-      경륜 전적은 oddspark 출마표 분석(source=keirin)으로만 채운다."""
+      경륜 전적은 oddspark 출마표 분석(source=keirin)으로만 채운다.
+    - valid_nos(현재 배당에 등장하는 마번 집합) 지정 시: 이전 경주 잔존마(배당 없는 마번)를 자동 제외."""
     rec = _starters_load().get(rk)
     if not rec or not rec.get("horses"):
         return None
@@ -1152,6 +1153,20 @@ def _form_from_starters(rk, drops, sport=None):
                     "signalScore": min(100, 50 + int(abs(d["pct"]))),
                     "drop": abs(d["pct"]) / 100.0})
     raw = rec["horses"]
+    # [잔존마 필터·1번] 현재 수집된 배당에 실제 등장하는 마번만 사용 → 이전 경주 잔존마(배당 없는 마번) 자동 제외.
+    #   배당 매칭 말이 하나라도 있을 때만 적용(전무하면 마명 기반 종목 등 오검출 방지로 필터 보류).
+    if valid_nos:
+        def _hno(h):
+            try:
+                return int(h.get("no"))
+            except (TypeError, ValueError):
+                return None
+        filtered = [h for h in raw if _hno(h) in valid_nos]
+        if filtered:
+            if len(filtered) != len(raw):
+                dropped = sorted({_hno(h) for h in raw if _hno(h) is not None and _hno(h) not in valid_nos})
+                print(f"[잔존마 필터] {rk}: 전적 {len(raw)}두 → 배당 출전마 {len(filtered)}두 (배당 없는 마번 제외: {dropped})")
+            raw = filtered
     # [한국경마] 사전 계산된 전적점수가 있으면 그대로 통과(PDF Vision 한글 데이터)
     prescored = any(h.get("formScore") is not None or h.get("totalScore") is not None for h in raw)
     if rec.get("source") == "korea" or prescored:
@@ -1322,12 +1337,33 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     return {"ok": True, "counts": counts, "baselineReset": baseline_reset, "pruned": pruned}
 
 
+def _starters_prune(keep_rk=None):
+    """[잔존마 방어·3번] starters_store(전적)에서 이전 경주 데이터 제거.
+    keep_rk 주면 그 경주만 남기고 전부 삭제(새 경주 데이터만 유지), 없으면 전체 비움.
+    한국 PDF 사전분석 전적(source=korea)은 아침 일괄 저장분이라 보존(경주별 재사용)."""
+    sdb = _starters_load()
+    if not sdb:
+        return 0
+    removed, kept = 0, {}
+    for k, v in sdb.items():
+        if k == keep_rk or (v or {}).get("source") == "korea":
+            kept[k] = v            # 현재 경주 + 한국 PDF 사전분석분은 유지
+        else:
+            removed += 1
+    _starters_save(kept)
+    if removed:
+        print(f"[잔존마 방어] starters 정리: {removed}건 제거(유지: {keep_rk or '없음'} + 한국PDF)")
+    return removed
+
+
 @app.route("/api/odds/triple/reset", methods=["POST"])
 def triple_reset():
     """[🔄 새 경주 시작] 활성 3종 배당(triple_store)을 비워 새 경주로 전환.
     경주별 히스토리 파일(data/odds_history)은 그대로 보존(=[히스토리 보기]).
-    body: {raceKey?} — 주면 그 경주만, 없으면 전체 활성 초기화."""
-    rk = ((request.json or {}).get("raceKey") or "").strip()
+    body: {raceKey?, pruneStarters?} — raceKey 주면 그 경주만, 없으면 전체 활성 초기화.
+    pruneStarters=true(기본): 이전 경주 전적(starters)도 함께 정리(잔존마 방지)."""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
     db = _triple_load()
     if rk:
         removed = 1 if db.pop(rk, None) is not None else 0
@@ -1335,8 +1371,23 @@ def triple_reset():
         removed = len(db)
         db = {}
     _triple_save(db)
+    # [3번] 이전 경주 starters 정리(새 경주 raceKey만 유지 → 잔존마 원천 차단). 명시적으로 끄지 않는 한 수행.
+    starters_removed = 0
+    if body.get("pruneStarters", True):
+        starters_removed = _starters_prune(keep_rk=rk or None)
     print(f"[새 경주] 활성 3종 초기화: {rk or '전체'} ({removed}건). 히스토리 파일은 보존.")
-    return jsonify({"ok": True, "cleared": rk or "all", "removed": removed})
+    return jsonify({"ok": True, "cleared": rk or "all", "removed": removed,
+                    "startersRemoved": starters_removed})
+
+
+@app.route("/api/starters/reset", methods=["POST"])
+def starters_reset():
+    """[잔존마 방어·3번] 경주 전환 시 이전 경주 전적(starters) 정리.
+    body: {keepRaceKey?} — 주면 그 경주(+한국 PDF)만 유지, 없으면 한국 PDF 외 전부 삭제.
+    triple_store(배당)는 건드리지 않음(전적만) → 방금 전환한 새 경주 배당은 보존."""
+    keep = ((request.json or {}).get("keepRaceKey") or "").strip() or None
+    removed = _starters_prune(keep_rk=keep)
+    return jsonify({"ok": True, "startersRemoved": removed, "kept": keep or "korea만"})
 
 
 @app.route("/api/odds/triple/latest", methods=["GET", "POST"])
@@ -1382,11 +1433,45 @@ def _anomaly_pretty(raw):
     return {"text": text, "severity": sev, "pct": pct}
 
 
+def _anomaly_combo(raw):
+    """스냅샷 이상감지 원문 → 조합 문자열(예 '2+3'·'4'·'5→10')."""
+    raw = raw or ""
+    if raw.startswith("급락감지:"):
+        return raw.split(":", 1)[1].strip().split()[0]
+    if raw.startswith("단승급락:"):
+        m = re.search(r"(\d+)번", raw)
+        return m.group(1) if m else ""
+    if raw.startswith("쌍승역전:"):
+        return raw.split(":", 1)[1].strip().split()[0]
+    return ""
+
+
+def _anomaly_events_from_doc(doc):
+    """[이상감지 누적·공용] 스냅샷 doc → 시간순·중복제거 이상감지 이벤트 리스트.
+    anomaly-feed 엔드포인트와 분석로그(anomaly_history)가 동일 규칙으로 공유(경주별 분리)."""
+    events, seen = [], set()
+    for s in (doc.get("snapshots") or []):
+        for raw in (s.get("anomalies") or []):
+            p = _anomaly_pretty(raw)
+            # [초반미수집 방어] opening 배당 정착으로 이미 기록된 가짜 급락(-88%↓)은 숨김
+            #   (복승/단승 급락만 · 쌍승역전은 유지). 물리적으로 정상 시장의 복승 -88%↓는 거의 없음.
+            if p["pct"] is not None and p["pct"] <= -88 and ("복승 급락" in p["text"] or "단승 급락" in p["text"]):
+                continue
+            if p["text"] in seen:      # 최초 감지 시각만 유지(중복 누적 방지)
+                continue
+            seen.add(p["text"])
+            events.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
+                           "text": p["text"], "severity": p["severity"], "pct": p["pct"],
+                           "combo": _anomaly_combo(raw), "t": s.get("t")})
+    events.sort(key=lambda e: e.get("t") or 0)   # 시간순
+    return events
+
+
 @app.route("/api/odds/anomaly-feed", methods=["GET", "POST"])
 def anomaly_feed():
     """[이상감지 누적] 경주별 스냅샷에서 감지된 이상을 시간순·중복제거로 누적 반환.
     스냅샷은 삭제되지 않으므로 마감 후에도, 새 수집 후에도 과거 감지가 유지된다.
-    body/query: {raceKey}. → {raceKey, events:[{time,minutes_before,text,severity,pct,t}]}"""
+    body/query: {raceKey}. → {raceKey, events:[{time,minutes_before,text,severity,pct,combo,t}]}"""
     if request.method == "POST":
         rk = ((request.json or {}).get("raceKey") or "").strip()
     else:
@@ -1398,22 +1483,7 @@ def anomaly_feed():
         doc = json.load(open(path, encoding="utf-8"))
     except Exception:
         return jsonify({"raceKey": rk, "events": []})
-    events, seen = [], set()
-    for s in doc.get("snapshots", []):
-        for raw in (s.get("anomalies") or []):
-            p = _anomaly_pretty(raw)
-            # [초반미수집 방어] opening 배당 정착으로 이미 기록된 가짜 급락(-88%↓)은 피드에서 숨김
-            #   (복승/단승 급락만 · 쌍승역전은 유지). 물리적으로 정상 시장의 복승 -88%↓는 거의 없음.
-            if p["pct"] is not None and p["pct"] <= -88 and ("복승 급락" in p["text"] or "단승 급락" in p["text"]):
-                continue
-            if p["text"] in seen:      # 최초 감지 시각만 유지(중복 누적 방지)
-                continue
-            seen.add(p["text"])
-            events.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
-                           "text": p["text"], "severity": p["severity"], "pct": p["pct"],
-                           "t": s.get("t")})
-    events.sort(key=lambda e: e.get("t") or 0)   # 시간순
-    return jsonify({"raceKey": rk, "events": events})
+    return jsonify({"raceKey": rk, "events": _anomaly_events_from_doc(doc)})
 
 
 @app.route("/api/learning/near-miss", methods=["GET"])
@@ -1430,6 +1500,35 @@ def learning_near_miss():
                       key=lambda x: -x["count"])
     return jsonify({"cases": cases, "count": len(cases), "frequent": frequent,
                     "note": "추천 말이 4착(아깝게 미적중)한 경주 — 4착 빈번 말은 삼복승 보험픽 우선 고려"})
+
+
+@app.route("/api/signal-types/stats", methods=["GET"])
+def signal_types_stats():
+    """[강한 신호 8유형 5번] 유형별 발생/적중/적중률(입상 기준) — 적중률 높은 유형 가중치 상향 근거."""
+    rates = _signal_type_hitrates()
+    total = len(_signal_type_stats_load().get("races", {}))
+    rows = sorted(rates.values(), key=lambda r: (-(r.get("rate") or -1), -(r.get("fired") or 0)))
+    return jsonify({"types": rows, "raceCount": total,
+                    "note": "유형별 신호말이 1~3착 입상한 비율. 표본이 쌓일수록 적중률 높은 유형을 강조합니다."})
+
+
+@app.route("/api/compression/stats", methods=["GET"])
+def compression_stats():
+    """[저배당 압축 패턴 4번] 압축 패턴(4배↓2두+/5배↓3두+) 발생 시 실제 복승 적중률."""
+    hr = _compression_hitrate()
+    total = len(_compression_stats_load().get("races", {}))
+    return jsonify({"hitRate": hr, "raceCount": total,
+                    "note": "유력마 TOP3 중 저배당 밀집(축 패턴) 발생 경주의 복승(2두 정확) 적중률. 급락 결합 시 최강."})
+
+
+@app.route("/api/third-place/stats", methods=["GET"])
+def third_place_stats():
+    """[배당 3착 자동 발굴 5번] 신호 유형별 고배당 3착 후보의 입상·정확3착 적중률."""
+    hr = _third_place_hitrate()
+    total = len(_third_place_stats_load().get("races", {}))
+    rows = sorted(hr.values(), key=lambda r: (-(r.get("exact3rdRate") or -1), -(r.get("fired") or 0)))
+    return jsonify({"buckets": rows, "raceCount": total,
+                    "note": "저배당 압축 축 2두 확정 후 고배당 3착 후보(급락/역배열/전적/연속하락)의 3착·입상 적중률."})
 
 
 @app.route("/api/after-close/cases", methods=["GET"])
@@ -2313,6 +2412,228 @@ def _near_miss_frequent(min_count=2):
         return set()
 
 
+# ───────── [강한 신호 8유형 · 적중률 누적 학습] 유형별 발생/적중 → 가중치 상향 ─────────
+# 경주별 1건(rk+date 키)으로 저장 → 결과 재입력 시 멱등(덮어쓰기). 유형별 입상(1~3착) 적중률 집계.
+SIGNAL_TYPE_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "signal_type_stats.json")
+
+
+def _signal_type_stats_load():
+    try:
+        return json.load(open(SIGNAL_TYPE_STATS_FILE, encoding="utf-8"))
+    except Exception:
+        return {"races": {}}
+
+
+def _signal_type_stats_save(d):
+    os.makedirs(os.path.dirname(SIGNAL_TYPE_STATS_FILE), exist_ok=True)
+    json.dump(d, open(SIGNAL_TYPE_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _learn_strong_signals(rk, date, an, top3):
+    """[5번] 결과 → 강한 신호 8유형별 적중(신호말이 1~3착 입상) 누적. 경주별 멱등 저장."""
+    try:
+        ss = (an or {}).get("strongSignals") or {}
+        sigs = ss.get("signals") or []
+        if not sigs:
+            return
+        top3set = set(int(x) for x in (top3 or []) if x is not None)
+        by_type = {}
+        for s in sigs:
+            t = s.get("type")
+            if t is None:
+                continue
+            hs = set(int(h) for h in (s.get("horses") or []))
+            hit = bool(hs & top3set) if hs else None   # 신호말 없는 유형(환수율 등)은 판정 불가(None → 분모 제외)
+            cur = by_type.get(t)
+            if cur is None:
+                by_type[t] = {"horses": sorted(hs), "hit": hit}
+            else:
+                cur["horses"] = sorted(set(cur["horses"]) | hs)
+                if hit is True or cur["hit"] is True:
+                    cur["hit"] = True
+                elif cur["hit"] is None:
+                    cur["hit"] = hit
+        d = _signal_type_stats_load()
+        races = d.setdefault("races", {})
+        rid = (date or "") + "|" + rk
+        races[rid] = {"raceKey": rk, "date": date,
+                      "types": {str(t): v for t, v in by_type.items()},
+                      "recommendLevel": ss.get("recommendLevel"), "dual": bool(ss.get("dualConverge")),
+                      "t": time.time()}
+        if len(races) > 5000:   # 오래된 것부터 정리(백스톱)
+            for k in sorted(races, key=lambda k: races[k].get("t", 0))[:len(races) - 5000]:
+                races.pop(k, None)
+        _signal_type_stats_save(d)
+    except Exception as e:
+        print("[강한신호학습] 실패:", e)
+
+
+def _signal_type_hitrates():
+    """유형별 발생/적중/적중률 집계 → 가중치 상향 근거. 판정불가(None)는 분모 제외."""
+    try:
+        agg = {}
+        for r in _signal_type_stats_load().get("races", {}).values():
+            for t, v in (r.get("types") or {}).items():
+                h = v.get("hit")
+                if h is None:
+                    continue
+                a = agg.setdefault(int(t), {"fired": 0, "hit": 0})
+                a["fired"] += 1
+                if h:
+                    a["hit"] += 1
+        out = {}
+        for t, a in agg.items():
+            out[t] = {"type": t, "label": _STRONG_SIGNAL_META.get(t, ""),
+                      "fired": a["fired"], "hit": a["hit"],
+                      "rate": round(a["hit"] / a["fired"] * 100) if a["fired"] else None}
+        return out
+    except Exception:
+        return {}
+
+
+# ───────── [저배당 압축 패턴 4번] 압축 패턴 발생 시 실제 복승 적중률 누적 ─────────
+COMPRESSION_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "compression_stats.json")
+
+
+def _compression_stats_load():
+    try:
+        return json.load(open(COMPRESSION_STATS_FILE, encoding="utf-8"))
+    except Exception:
+        return {"races": {}}
+
+
+def _compression_stats_save(d):
+    os.makedirs(os.path.dirname(COMPRESSION_STATS_FILE), exist_ok=True)
+    json.dump(d, open(COMPRESSION_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _learn_compression(rk, date, an, top3):
+    """[4번] 저배당 압축 패턴 발생 경주 → 압축 2두가 실제 복승 적중(둘 다 1~2착)했는지 누적. 경주별 멱등."""
+    try:
+        cp = (an or {}).get("compressionPattern") or {}
+        if not cp.get("detected"):
+            return
+        top2 = set(int(x) for x in (top3 or [])[:2] if x is not None)
+        combo = [int(x) for x in (cp.get("combo") or [])]
+        # 복승 적중 = 압축 2두가 정확히 1·2착 / 부분 적중(1두 입상)도 집계
+        hit = bool(combo and len(combo) == 2 and set(combo) == top2)
+        partial = bool(combo and (set(combo) & set(int(x) for x in (top3 or [])[:3] if x is not None)))
+        d = _compression_stats_load()
+        races = d.setdefault("races", {})
+        rid = (date or "") + "|" + rk
+        races[rid] = {"raceKey": rk, "date": date, "level": cp.get("level"),
+                      "combo": combo, "hit": hit, "partial": partial,
+                      "withDrop": bool(cp.get("withDrop")), "withReversal": bool(cp.get("withReversal")),
+                      "t": time.time()}
+        if len(races) > 5000:
+            for k in sorted(races, key=lambda k: races[k].get("t", 0))[:len(races) - 5000]:
+                races.pop(k, None)
+        _compression_stats_save(d)
+    except Exception as e:
+        print("[압축패턴학습] 실패:", e)
+
+
+def _compression_hitrate():
+    """압축 패턴 복승 적중률(강력/중간·급락결합 별) 집계."""
+    try:
+        races = list(_compression_stats_load().get("races", {}).values())
+        def agg(rows):
+            n = len(rows)
+            h = sum(1 for r in rows if r.get("hit"))
+            p = sum(1 for r in rows if r.get("partial"))
+            return {"fired": n, "hit": h, "partial": p,
+                    "rate": round(h / n * 100) if n else None,
+                    "partialRate": round(p / n * 100) if n else None}
+        return {
+            "all": agg(races),
+            "strong": agg([r for r in races if r.get("level") == "강력"]),
+            "mid": agg([r for r in races if r.get("level") == "중간"]),
+            "withDrop": agg([r for r in races if r.get("withDrop")]),
+        }
+    except Exception:
+        return {}
+
+
+# ───────── [배당 3착 자동 발굴 5번] 고배당 3착 후보 신호 유형별 3착/입상 적중률 누적 ─────────
+THIRD_PLACE_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "third_place_stats.json")
+
+
+def _third_place_stats_load():
+    try:
+        return json.load(open(THIRD_PLACE_STATS_FILE, encoding="utf-8"))
+    except Exception:
+        return {"races": {}}
+
+
+def _third_place_stats_save(d):
+    os.makedirs(os.path.dirname(THIRD_PLACE_STATS_FILE), exist_ok=True)
+    json.dump(d, open(THIRD_PLACE_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _tp_reason_bucket(reason):
+    """근거 문자열 → 신호 유형 버킷(급락/역배열/전적/연속하락/이상감지)."""
+    r = reason or ""
+    if "급락" in r:
+        return "급락"
+    if "역배열" in r:
+        return "역배열"
+    if "전적" in r:
+        return "전적우수"
+    if "연속하락" in r:
+        return "연속하락"
+    return "이상감지"
+
+
+def _learn_third_place(rk, date, an, top3):
+    """[5번] 3착 발굴 후보가 실제 3착/입상했는지 신호 유형별 누적. 경주별 멱등."""
+    try:
+        tp = (an or {}).get("thirdPlaceHunt") or {}
+        cands = tp.get("candidates") or []
+        if not cands:
+            return
+        top3list = [int(x) for x in (top3 or [])[:3] if x is not None]
+        top3set = set(top3list)
+        third = top3list[2] if len(top3list) >= 3 else None
+        recs = []
+        for c in cands:
+            no = int(c.get("no"))
+            recs.append({"no": no, "bucket": _tp_reason_bucket(c.get("reason")),
+                         "place": (no in top3set), "exact3rd": (third is not None and no == third)})
+        d = _third_place_stats_load()
+        races = d.setdefault("races", {})
+        rid = (date or "") + "|" + rk
+        races[rid] = {"raceKey": rk, "date": date, "cands": recs, "t": time.time()}
+        if len(races) > 5000:
+            for k in sorted(races, key=lambda k: races[k].get("t", 0))[:len(races) - 5000]:
+                races.pop(k, None)
+        _third_place_stats_save(d)
+    except Exception as e:
+        print("[3착발굴학습] 실패:", e)
+
+
+def _third_place_hitrate():
+    """신호 유형별 3착 후보의 입상(1~3착)·정확3착 적중률 집계."""
+    try:
+        agg = {}
+        for r in _third_place_stats_load().get("races", {}).values():
+            for c in (r.get("cands") or []):
+                b = c.get("bucket") or "기타"
+                a = agg.setdefault(b, {"fired": 0, "place": 0, "exact3rd": 0})
+                a["fired"] += 1
+                if c.get("place"):
+                    a["place"] += 1
+                if c.get("exact3rd"):
+                    a["exact3rd"] += 1
+        out = {}
+        for b, a in agg.items():
+            out[b] = {"bucket": b, "fired": a["fired"], "place": a["place"], "exact3rd": a["exact3rd"],
+                      "placeRate": round(a["place"] / a["fired"] * 100) if a["fired"] else None,
+                      "exact3rdRate": round(a["exact3rd"] / a["fired"] * 100) if a["fired"] else None}
+        return out
+    except Exception:
+        return {}
+
+
 # ───────── [집중신호 오판 학습] 초과급락 신호말이 입상했는데 노이즈 판정으로 추천 누락된 사례 ─────────
 SIGNAL_LESSON_FILE = os.path.join(os.path.dirname(__file__), "data", "signal_lessons.json")
 
@@ -2413,14 +2734,32 @@ def _combo_signal_quality(combo, excess):
 
 # ───────── [핵심 이상감지 수학 공식] 쌍승역전·복승불일치·종합신뢰도 ─────────
 def _reversal_level(ratio):
-    """역전비율(<1)을 등급으로. <0.60 압도적 / <0.80 강한 / <0.95 역전 / 그 외 신호없음(None)."""
-    if ratio < 0.60:
-        return "🔴🔴", "압도적 역전"
-    if ratio < 0.80:
-        return "🔴", "강한 역전"
-    if ratio < 0.95:
-        return "🟡", "역전 신호"
-    return None, None
+    """[강화] 역전비율(<1)→등급. 배당 차이(=1-ratio) 기준으로 오탐 제거 + 4단계 강도.
+      배당 차이 10% 미만(ratio>0.90) → 역배열 아님(None) · 10~20% 🟡 약한 · 20~35% 🟠 ·
+      35~50% 🔴 강한 · 50%+ 🔴🔴 압도적. (0.1배 수준 미세차 오탐 제거)."""
+    if ratio is None or ratio > 0.90:      # 배당 차이 10% 미만 → 역배열 아님(오탐 제거)
+        return None, None
+    if ratio > 0.80:                        # 배당 차이 10~20%
+        return "🟡", "약한 역배열"
+    if ratio > 0.65:                        # 배당 차이 20~35%
+        return "🟠", "역배열"
+    if ratio > 0.50:                        # 배당 차이 35~50%
+        return "🔴", "강한 역배열"
+    return "🔴🔴", "압도적 역배열"           # 배당 차이 50%+
+
+
+def _inversion_tier(diff_pct):
+    """[역배열 강도] 배당 차이 %(양수) → 등급. 10% 미만 신호없음(None).
+      10~20% 🟡 약한 / 20~35% 🟠 / 35~50% 🔴 강한 / 50%+ 🔴🔴 압도적."""
+    if diff_pct is None or diff_pct < 10:
+        return None, None
+    if diff_pct < 20:
+        return "🟡", "약한 역배열"
+    if diff_pct < 35:
+        return "🟠", "역배열"
+    if diff_pct < 50:
+        return "🔴", "강한 역배열"
+    return "🔴🔴", "압도적 역배열"
 
 
 def _win_exacta_reversal(fav_rank, curD, max_rank=4):
@@ -2506,10 +2845,10 @@ def _quinella_mismatch(fav_rank, curQ):
 
 
 def _reversal_strength_score(ratio):
-    """역전비율(<1)을 0~100 점수(0.60이하=100, 0.95=0 선형)."""
-    if ratio is None or ratio >= 0.95:
+    """역전비율(<1)을 0~100 점수(0.50이하=100, 0.90=0 선형). [강화] 10% 미만 차(ratio>0.90)=0점."""
+    if ratio is None or ratio >= 0.90:
         return 0.0
-    return round(min(100.0, (0.95 - ratio) / (0.95 - 0.60) * 100.0), 1)
+    return round(min(100.0, (0.90 - ratio) / (0.90 - 0.50) * 100.0), 1)
 
 
 def _mismatch_strength_score(ratio):
@@ -2599,10 +2938,24 @@ def _rank_inversion_detail(curWin, curQ, curD):
         if pr is None or orr is None:
             continue
         gap = pr - orr                       # 인기순위 - 배당순위 (양수=배당순위가 더 높음=역배열)
-        if gap >= 2 and odds_src[n] < 30:    # 2단계+ 역전 & 30배 미만만
-            detail.append({"no": n, "popRank": pr, "oddsRank": orr, "gap": gap,
-                           "odds": round(odds_src[n], 1)})
-    detail.sort(key=lambda x: (-x["gap"], x["odds"]))    # 역전폭 큰 순 → 배당 낮은 순
+        if not (gap >= 2 and odds_src[n] < 30):
+            continue
+        # [역배열 강화] 순위 역전 + '배당 차이 10%+' 요구(0.1배 미세차 오탐 제거).
+        #   차이 = n(인기 낮은데 배당 싼 말)이, 인기는 높은데 배당은 비싼 말보다 얼마나 싼지(%).
+        ref = None
+        for m in pop_src:
+            if pop_rank.get(m, 999) < pr and odds_src.get(m, 0) > odds_src[n]:
+                if ref is None or odds_src[m] < ref:
+                    ref = odds_src[m]
+        diff_pct = round((ref - odds_src[n]) / ref * 100, 1) if (ref and ref > 0) else None
+        lvl, tag = _inversion_tier(diff_pct)
+        if lvl is None:                      # 배당 차이 10% 미만 → 역배열 아님
+            continue
+        detail.append({"no": n, "popRank": pr, "oddsRank": orr, "gap": gap,
+                       "odds": round(odds_src[n], 1), "diffPct": diff_pct,
+                       "level": lvl, "tag": tag})
+    # 강도(배당 차이) 큰 순 → 역전폭 → 배당 낮은 순
+    detail.sort(key=lambda x: (-(x.get("diffPct") or 0), -x["gap"], x["odds"]))
     for i, d in enumerate(detail):
         d["lowest"] = (i == 0)
     lead = None
@@ -2767,6 +3120,51 @@ def _inverse_arrangement(fav_rank, has_win, curWin, curQ, wx_reversals, quin_mis
             "strongUnpopular": strong_unpopular}   # [신규] 전적 우수하나 시장 비인기(역배열 아님)
 
 
+def _rebound_analyze(seq):
+    """[배당 반등 패턴] 단일 조합의 배당 시퀀스(시간순) → 급락 후 반등/재급락 분류.
+    - drop(급락): 급락 전 고점(pre_max) → 최저(lo). drop_frac<0.10 이면 급락 아님(None).
+    - recovery(회복비율) = 급락폭 대비 되돌린 비율 = (cur-lo)/(pre_max-lo).
+        · recovery ≤ 0.20  → 'valid'  : 원배당 대비 20% 이내 반등 = 자금 유지 → 신호 유효
+        · recovery ≥ 0.80  → 'fake'   : 원배당 80%+ 회복 = 자금 이탈 → 페이크
+        · 그 사이           → 'partial'
+    - 'recrash'(재급락): 급락 → 반등(최저 대비 +10%↑) → 재급락(반등 고점 대비 -10%↓) = 자금 재유입 = 더 강한 신호.
+    반환 {pattern, recovery, orig, low, cur, dropFrac} 또는 None."""
+    seq = [x for x in (seq or []) if isinstance(x, (int, float)) and x > 0]
+    if len(seq) < 3:
+        return None
+    lo = min(seq)
+    lo_i = seq.index(lo)
+    pre_max = max(seq[:lo_i + 1]) if lo_i >= 0 else seq[0]
+    if pre_max <= 0:
+        return None
+    drop_frac = (pre_max - lo) / pre_max
+    if drop_frac < 0.10:      # 의미있는 급락이 없으면 반등 패턴 분석 대상 아님
+        return None
+    cur = seq[-1]
+    recovery = (cur - lo) / (pre_max - lo) if pre_max > lo else 0.0
+    # 재급락: 최저 이후 반등(+10%↑)했다가 다시 그 반등 고점 대비 -10%↓ 재하락
+    recrash = False
+    if lo_i < len(seq) - 1:
+        after = seq[lo_i:]
+        peak_after = max(after)
+        peak_after_i = after.index(peak_after)
+        if peak_after_i > 0 and peak_after >= lo * 1.10:
+            tail = after[peak_after_i:]
+            if tail and min(tail) <= peak_after * 0.90:
+                recrash = True
+    if recrash:
+        pattern = "recrash"
+    elif recovery <= 0.20:
+        pattern = "valid"
+    elif recovery >= 0.80:
+        pattern = "fake"
+    else:
+        pattern = "partial"
+    return {"pattern": pattern, "recovery": round(recovery, 2),
+            "orig": round(pre_max, 1), "low": round(lo, 1), "cur": round(cur, 1),
+            "dropFrac": round(drop_frac, 2)}
+
+
 def _advanced_anomaly(hist, curQ, drops):
     """[2번 고도화] 급락 속도·연속하락/단발반등·페이크베팅·복승 환급률(역수합) 감지.
     hist: 스냅샷 리스트(각 {t, quinella}). 반환:
@@ -2825,6 +3223,30 @@ def _advanced_anomaly(hist, curQ, drops):
             elif consec:
                 out["streaks"][key] = {"combo": list(k), "type": "연속하락", "confAdj": 20}
                 _adj(k, 20)
+
+    # ②-b [배당 반등 패턴] 급락→반등 회복비율 정밀 분류 + 급락→반등→재급락(더 강한 신호).
+    #   전체 히스토리(마지막 4틱 아님)로 판정 → 회복비율(≤20% 유효 / ≥80% 페이크)·재급락 감지.
+    out["rebounds"] = []
+    if len(maps) >= 3:
+        rkeys = set()
+        for m in maps:
+            rkeys.update(m.keys())
+        for k in rkeys:
+            full = [m[k] for m in maps if k in m and m[k] > 0]
+            rb = _rebound_analyze(full)
+            if not rb:
+                continue
+            rb["combo"] = list(k)
+            out["rebounds"].append(rb)
+            # 신호 반영(기존 streaks/fakes 와 별개의 추가 보정): 재급락=더 강한 신호, 유효=보강, 페이크=감점
+            if rb["pattern"] == "recrash":
+                _adj(k, 20)     # 급락→반등→재급락 = 자금 재유입 = 더 강한 신호
+            elif rb["pattern"] == "valid":
+                _adj(k, 8)      # 20% 이내 반등 = 자금 유지 = 신호 유효(소폭 보강)
+            elif rb["pattern"] == "fake":
+                _adj(k, -12)    # 80%+ 회복 = 자금 이탈 = 페이크(감점)
+        order = {"recrash": 0, "valid": 1, "partial": 2, "fake": 3}
+        out["rebounds"].sort(key=lambda r: (order.get(r["pattern"], 9), -r.get("dropFrac", 0)))
 
     # [4번] 말별 연속 하락 횟수 추적 (단승 우선, 없으면 그 말이 낀 최저 복승 조합)
     #   1회=후보(⚪) / 2회 연속=약한신호(🟡) / 3회+ 연속=확정신호(🔴) / 급락후 반등=페이크의심(🟠)
@@ -2896,6 +3318,293 @@ def _advanced_anomaly(hist, curQ, drops):
             out["overround"] = {"invSum": inv_sum, "refundRate": inv_sum,   # 환급률=Σ(1/각조합배당)
                                 "top3Share": top3_share, "concentrated": top3_share >= 0.90}
     return out
+
+
+def _smart_money_combos(hist, curQ, min_rise=0.15, min_drop=0.25):
+    """[유형8] 상승 후 급락(스마트머니) — 조합 배당이 초반에 상승(인기 이탈)했다가
+    마감 직전 급락(자금 재유입). hist=[{quinella:{...} 또는 [...]}]. 반환 [(combo[2], {rise,drop})] 급락순."""
+    try:
+        series = {}
+        for snap in (hist or []):
+            q = snap.get("quinella") or {}
+            if isinstance(q, list):
+                qq = {}
+                for it in q:
+                    cb = it.get("combo") if isinstance(it, dict) else None
+                    od = it.get("odds") if isinstance(it, dict) else None
+                    if cb and od:
+                        qq["+".join(str(x) for x in cb)] = od
+                q = qq
+            if not isinstance(q, dict):
+                continue
+            for k, od in q.items():
+                try:
+                    od = float(od)
+                except Exception:
+                    continue
+                if od > 0:
+                    series.setdefault(k, []).append(od)
+        out = []
+        for k, seq in series.items():
+            if len(seq) < 3:
+                continue
+            first = seq[0]
+            peak = max(seq)
+            cur = seq[-1]
+            peak_i = max(range(len(seq)), key=lambda i: seq[i])
+            rise = (peak - first) / first if first > 0 else 0
+            drop = (peak - cur) / peak if peak > 0 else 0
+            # peak가 초반 이후 발생(상승 구간)하고 현재가 peak보다 크게 낮음(급락)
+            if rise >= min_rise and drop >= min_drop and peak_i > 0 and cur < peak:
+                nums = [int(x) for x in k.replace("-", "+").split("+") if x.strip().isdigit()]
+                if len(nums) == 2:
+                    out.append((nums, {"rise": round(rise * 100), "drop": round(drop * 100)}))
+        out.sort(key=lambda t: -t[1]["drop"])
+        return out
+    except Exception:
+        return []
+
+
+# ───────── [강한 신호 8유형 자동 감지] 기존 계산 신호 재사용 → 오버레이 강조·학습용 파생 ─────────
+# 유형1 연속하락3회+ · 유형2 역배열10%+ · 유형3 마감직전대급락(T-2분30%+) · 유형4 재급락
+# 유형5 복수조합동시급락2개+ · 유형6 역배열+급락(이중수렴·단독강력) · 유형7 환수율90%+집중 · 유형8 상승후급락
+_STRONG_SIGNAL_META = {
+    1: "연속하락 3회+", 2: "역배열 10%+", 3: "마감직전 대급락", 4: "재급락",
+    5: "복수조합 동시급락", 6: "역배열+급락(이중수렴)", 7: "환수율 90%+ 집중", 8: "상승후급락(스마트머니)",
+}
+
+
+def _strong_signals(advanced, inverse, drops, cur_mb, hist, curQ, after_close):
+    """8유형 강신호 산출(무삭제 — 표시/학습용 파생 뷰). 기존 advanced·inverse·drops·history만 소비.
+    반환 {signals:[{type,label,horses,detail,level}], count(서로다른유형수), recommendLevel, dualConverge, types[]}."""
+    adv = advanced or {}
+    inv = inverse or {}
+    sigs = []
+
+    def add(t, horses, detail, level):
+        hs = sorted(set(int(h) for h in (horses or []) if h is not None))
+        sigs.append({"type": t, "label": _STRONG_SIGNAL_META.get(t, ""), "horses": hs,
+                     "detail": detail, "level": level})
+
+    # 강한 급락 조합(pct<=-30) + 급락 말별 조합 수
+    strong_drops = [d for d in (drops or []) if d.get("combo") and (d.get("pct") or 0) <= -30]
+    drop_horse_cnt = {}
+    for d in strong_drops:
+        for h in (d.get("combo") or []):
+            try:
+                drop_horse_cnt[int(h)] = drop_horse_cnt.get(int(h), 0) + 1
+            except Exception:
+                pass
+
+    # 유형1: 연속하락 3회+
+    for no, s in (adv.get("horseStreaks") or {}).items():
+        if (s.get("count") or 0) >= 3 and not s.get("rebounded"):
+            add(1, [no], str(no) + "번 " + str(s.get("count")) + "연속 하락", "red")
+
+    # 유형2: 역배열 10%+
+    lead = inv.get("invLead") if inv.get("detected") else None
+    lead_no = lead.get("no") if lead else None
+    lead_diff = (lead.get("diffPct") or 0) if lead else 0
+    if lead_no is not None and lead_diff >= 10:
+        lvl = "red" if ("🔴" in (lead.get("level") or "")) else "orange"
+        add(2, [lead_no], str(lead_no) + "번 " + (lead.get("tag") or "역배열") + " (배당차 " + str(lead_diff) + "%)", lvl)
+
+    # 유형3: 마감직전 대급락(T-2분 이내 30%+)
+    if cur_mb is not None and 0 <= cur_mb <= 2 and not after_close and strong_drops:
+        top = sorted(strong_drops, key=lambda x: x.get("pct", 0))[:2]
+        hs = []
+        for d in top:
+            hs += (d.get("combo") or [])
+        det = " / ".join(str(d["combo"][0]) + "+" + str(d["combo"][1]) + " " + str(d.get("pct")) + "%" for d in top)
+        add(3, hs, "T-" + str(cur_mb) + "분 " + det, "red")
+
+    # 유형4: 재급락(급락→반등→재급락)
+    for rb in (adv.get("rebounds") or []):
+        if rb.get("pattern") == "recrash" and rb.get("combo"):
+            c = rb["combo"]
+            add(4, c, str(c[0]) + "+" + str(c[1]) + " 급락→반등→재급락(강)", "red")
+
+    # 유형5: 복수조합 동시급락 2개+
+    multi = sorted([h for h, c in drop_horse_cnt.items() if c >= 2], key=lambda h: -drop_horse_cnt[h])
+    if multi:
+        det = ", ".join(str(h) + "번(" + str(drop_horse_cnt[h]) + "조합)" for h in multi[:3])
+        add(5, multi[:3], det + " → 자금 집중", "red")
+
+    # 유형6: 역배열+급락 동시(이중수렴) — 단독으로도 강력
+    dual = False
+    if lead_no is not None and lead_diff >= 10 and drop_horse_cnt.get(lead_no, 0) >= 1:
+        dual = True
+        _mx = min([d.get("pct", 0) for d in strong_drops if lead_no in (d.get("combo") or [])] or [0])
+        add(6, [lead_no], str(lead_no) + "번 역배열 " + str(lead_diff) + "% + 급락 " + str(_mx) + "%", "red")
+
+    # 유형7: 환수율 90%+ 집중
+    ov = adv.get("overround") or {}
+    if ov.get("concentrated"):
+        inv_sum = ov.get("invSum") or 0
+        refund = round((1.0 / inv_sum if inv_sum > 1 else inv_sum) * 100) if inv_sum else None
+        share = round((ov.get("top3Share") or 0) * 100)
+        add(7, [], "상위3조합 " + str(share) + "% 집중" + ((" · 환수율 " + str(refund) + "%") if refund is not None else ""), "orange")
+
+    # 유형8: 상승 후 급락(스마트머니)
+    for c, info in _smart_money_combos(hist, curQ)[:2]:
+        add(8, c, str(c[0]) + "+" + str(c[1]) + " 상승 " + str(info["rise"]) + "% 후 급락 " + str(info["drop"]) + "%", "orange")
+
+    by_type = {}
+    for s in sigs:
+        by_type.setdefault(s["type"], []).append(s)
+    count = len(by_type)
+    if dual or count >= 3:
+        rec_level = "강력"
+    elif count == 2:
+        rec_level = "복승"
+    elif count == 1:
+        rec_level = "보조"
+    else:
+        rec_level = None
+    return {"signals": sigs, "count": count, "recommendLevel": rec_level,
+            "dualConverge": dual, "types": sorted(by_type.keys())}
+
+
+# ───────── [저배당 압축 패턴] 유력마 TOP3 중 저배당 말 밀집(축 패턴) 감지 + 신호 결합 ─────────
+def _horse_repr_odds(h, curWin, curQ):
+    """말 대표 배당 = 단승 우선, 없으면 그 말 포함 최저 복승."""
+    try:
+        if curWin.get(h):
+            return curWin[h]
+        best = None
+        for k, o in (curQ or {}).items():
+            pair = k if isinstance(k, (tuple, list, frozenset)) else None
+            if pair and h in pair and o and o > 0 and (best is None or o < best):
+                best = o
+        return best
+    except Exception:
+        return None
+
+
+def _compression_pattern(key_horses, curWin, curQ, strong_signals=None):
+    """[1·2번] 유력마 TOP3 중 저배당 말이 몰린 축 패턴 감지.
+      4배 이하 2두+ = 강력 압축(복승 메인 자신있게) / 5배 이하 3두+ = 중간 압축.
+    [3번] 급락 신호 결합 → 최강(복승 메인 강력) / 역배열 결합 → 고배당 보험 추가.
+    반환 {detected, level, band, horses[], combo[2], reprs[], withDrop, withReversal, note}."""
+    try:
+        top = [int(h) for h in (key_horses or [])[:3] if h is not None]
+        reprs = []
+        for h in top:
+            o = _horse_repr_odds(h, curWin, curQ)
+            if o is not None:
+                reprs.append((h, round(float(o), 1)))
+        le4 = [(h, o) for h, o in reprs if o <= 4.0]
+        le5 = [(h, o) for h, o in reprs if o <= 5.0]
+        level = band = None
+        horses = []
+        if len(le4) >= 2:
+            level, band, horses = "강력", "4배 이하 2두+", [h for h, _ in le4]
+        elif len(le5) >= 3:
+            level, band, horses = "중간", "5배 이하 3두+", [h for h, _ in le5]
+        if not level:
+            return {"detected": False}
+        horses = horses[:3]
+        combo = sorted(horses[:2]) if len(horses) >= 2 else []
+        types = set((strong_signals or {}).get("types") or [])
+        with_drop = bool(types & {1, 3, 4, 5, 6})   # 연속하락/마감급락/재급락/동시급락/이중수렴
+        with_rev = bool(types & {2, 6})              # 역배열/이중수렴
+        if with_drop:
+            note = "압축 + 급락 동시 → 복승 메인 강력 추천"
+        elif with_rev:
+            note = "압축 + 역배열 → 복승 메인 + 삼복승 보험"
+        else:
+            note = "저배당 압축(축 패턴) → 복승 메인 자신있게"
+        return {"detected": True, "level": level, "band": band, "horses": horses,
+                "reprs": [{"no": h, "odds": o} for h, o in reprs], "combo": combo,
+                "withDrop": with_drop, "withReversal": with_rev, "note": note}
+    except Exception:
+        return {"detected": False}
+
+
+# ───────── [배당 3착 자동 발굴] 저배당 압축(축 2두) 확정 시 삼복승 3착 자리를 고배당 말에서 발굴 ─────────
+# 우선순위: ①급락 감지 고배당(유형3·5) ②역배열 감지 고배당 ③전적 우수+고배당 ④연속하락 고배당.
+# 배당 7~50배(고배당) 우선, 상위 2~3두 → 삼복승 보험(축2두+후보) 편성.
+_TP_CONF = {1: "높음", 2: "중", 3: "중", 4: "중", 5: "중"}
+_TP_ICON = {1: "\U0001f534", 2: "\U0001f504", 3: "\U0001f4ca", 4: "\U0001f4c9", 5: "\U0001f6a8"}
+
+
+def _third_place_hunt(compression_pattern, strong_signals, anomaly_horse, wx_reversals,
+                      form, curWin, curQ, drops=None, valid_nos=None):
+    """[배당 3착 자동 발굴] 압축 축 2두 + 고배당 3착 후보 → 삼복승 보험 편성. 추정배당은 호출부에서 채움."""
+    try:
+        cp = compression_pattern or {}
+        if not cp.get("detected"):
+            return {"active": False}
+        axis = [int(x) for x in (cp.get("combo") or [])]
+        if len(axis) != 2:
+            return {"active": False}
+        axis_set = set(axis)
+        sigs = (strong_signals or {}).get("signals") or []
+
+        def horses_of(*types):
+            s = set()
+            for x in sigs:
+                if x.get("type") in types:
+                    for h in (x.get("horses") or []):
+                        s.add(int(h))
+            return s
+        drop_horses = horses_of(3, 5)                 # ① 급락 계열
+        rev_sig_horses = horses_of(2, 6)              # ② 역배열 신호
+        streak_horses = horses_of(1)                  # ④ 연속하락
+        rev_challengers = set(int(r["challenger"]) for r in (wx_reversals or []) if r.get("challenger") is not None)
+        form_map = {int(h.get("no")): h for h in (form or []) if h.get("no") is not None}
+        # 말별 최대 급락폭(표시용)
+        drop_pct = {}
+        for d in (drops or []):
+            for h in (d.get("combo") or []):
+                p = d.get("pct")
+                if p is not None:
+                    h = int(h)
+                    if h not in drop_pct or p < drop_pct[h]:
+                        drop_pct[h] = p
+
+        cand = {}
+
+        def consider(no, priority, reason):
+            no = int(no)
+            if no in axis_set:
+                return
+            if valid_nos and no not in valid_nos:
+                return
+            od = _horse_repr_odds(no, curWin, curQ)
+            if od is None:
+                return
+            od = round(float(od), 1)
+            if od < 5:                                # 저배당(축 후보)은 3착 발굴 대상 아님
+                return
+            cur = cand.get(no)
+            if cur is None or priority < cur["priority"]:
+                cand[no] = {"no": no, "odds": od, "priority": priority, "reason": reason,
+                            "conf": _TP_CONF.get(priority, "중"), "icon": _TP_ICON.get(priority, ""),
+                            "inBand": 7 <= od <= 50, "dropPct": drop_pct.get(no)}
+        for no in drop_horses:                        # ① 급락 감지 고배당
+            consider(no, 1, "급락 감지" + ((" " + str(drop_pct[no]) + "%") if drop_pct.get(no) is not None else ""))
+        for no in (rev_sig_horses | rev_challengers):  # ② 역배열 감지 고배당
+            consider(no, 2, "역배열 감지")
+        for no, h in form_map.items():                # ③ 전적 우수 + 고배당
+            fs = h.get("totalScore")
+            if fs is None:
+                fs = h.get("formScore")
+            if fs is not None and fs >= 60:
+                consider(no, 3, "전적 우수(" + str(round(fs)) + ")")
+        for no in streak_horses:                      # ④ 연속하락 고배당
+            consider(no, 4, "연속하락")
+        if anomaly_horse is not None:                 # 폴백: 이상감지말
+            consider(anomaly_horse, 5, "이상감지말")
+
+        ranked = sorted(cand.values(), key=lambda c: (0 if c["inBand"] else 1, c["priority"], c["odds"]))
+        top = ranked[:3]
+        trios = [{"combo": sorted(axis + [c["no"]]), "cand": c["no"], "reason": c["reason"],
+                  "conf": c["conf"], "expOddsEst": None} for c in top]
+        return {"active": bool(top), "axis": axis, "mainCombo": sorted(axis),
+                "candidates": top, "trios": trios}
+    except Exception:
+        return {"active": False}
 
 
 # ───────── [BMED 매트릭스 베팅 전략] 상황별 5전략 자동선택 + 원금보전 배분 + 기대환수율 ─────────
@@ -3672,6 +4381,27 @@ def _triple_analyze(rk, rec):
                                   -(r["otherOdds"] / max(r["favoredOdds"], 0.1))))
     reversals = reversals[:10]
 
+    # [잔존마 필터·1번] 현재 수집된 배당(복승·쌍승·단승)에 실제 등장하는 마번 집합 = 실제 출전마.
+    #   이 집합 밖 마번(전적 잔존마·이전 경주 말)은 유력마·전적·추천에서 자동 제외.
+    valid_nos = set()
+    for _k in curQ:
+        for _h in _k:
+            try:
+                valid_nos.add(int(_h))
+            except (TypeError, ValueError):
+                pass
+    for _k in curD:
+        for _h in _k:
+            try:
+                valid_nos.add(int(_h))
+            except (TypeError, ValueError):
+                pass
+    for _n in curWin:
+        try:
+            valid_nos.add(int(_n))
+        except (TypeError, ValueError):
+            pass
+
     # 4) 유력마 3마리 (상위 10개 복승 조합 등장 빈도 + 인기가중). 복승 없으면 쌍승 무순.
     base = curQ if curQ else {k: min(curD[k2] for k2 in (k, (k[1], k[0])) if k2 in curD)
                               for k in {tuple(sorted(p)) for p in curD}}
@@ -3686,6 +4416,9 @@ def _triple_analyze(rk, rec):
     if single_rank:
         merged = single_rank + [h for h in ranked if h not in single_rank]
         ranked = merged
+    # [잔존마 필터·1번] 유력마도 배당에 등장하는 마번만(배당 없는 잔존마 제외)
+    if valid_nos:
+        ranked = [h for h in ranked if h in valid_nos]
     key_horses = ranked[:3]
 
     # [1·2·4번] 핵심 이상감지 공식: 쌍승역전·복승불일치·종합신뢰도
@@ -3696,7 +4429,7 @@ def _triple_analyze(rk, rec):
     signal_confidence = _signal_confidence(excess, wx_reversals, quin_mismatch)
     # [역배열/추천게이트 공유] 전적 등급을 여기서 미리 계산 → 역배열 '전적 우수·시장 비인기' 판정에 재사용
     #   (기존엔 아래에서 계산했으나 앞당겨 재사용. 삭제 아님·계산 위치만 이동)
-    form = _form_from_starters(rk, drops, rec.get("sport"))  # 출마표2/KRA/PDF/경륜 전적(종목 오매칭 차단)
+    form = _form_from_starters(rk, drops, rec.get("sport"), valid_nos)  # 출마표2/KRA/PDF/경륜 전적(종목 오매칭 차단 + 잔존마 필터)
     # [역배열 감지] 진짜 역배열 = 쌍승역전만 · 전적 우수하나 시장 비인기는 별도 분류(form 전달)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
                                    wx_reversals, quin_mismatch, excess, form)
@@ -3713,6 +4446,20 @@ def _triple_analyze(rk, rec):
         print("[역배열 정확화] 실패:", _e)
     # [2번 고도화] 급락속도·연속하락/단발반등·페이크베팅·복승 환급률(역수합)
     advanced = _advanced_anomaly(hist, curQ, drops)
+    # [강한 신호 8유형] 기존 advanced·inverse·drops·history 재사용 → 오버레이 강조·학습용 파생 뷰
+    strong_signals = _strong_signals(advanced, inverse, drops, cur_mb, hist, curQ, after_close)
+    # [5번] 유형별 학습 적중률을 각 신호에 부착(가중치 상향 근거) — 적중률 높은 유형 강조
+    try:
+        _sig_rates = _signal_type_hitrates()
+        if _sig_rates and strong_signals.get("signals"):
+            for _s in strong_signals["signals"]:
+                _r = _sig_rates.get(_s.get("type"))
+                if _r and _r.get("rate") is not None:
+                    _s["hitRate"] = _r["rate"]
+                    _s["hitSample"] = _r["fired"]
+            strong_signals["hitRates"] = _sig_rates
+    except Exception:
+        pass
     # 연속하락(+20)/단발반등(-15) → 종합 신뢰도 점수 보정(0~100 재클램프)
     if advanced.get("horseConfAdj"):
         _sc_h = signal_confidence.get("horses") or {}
@@ -3803,6 +4550,9 @@ def _triple_analyze(rk, rec):
             key_horses = (surge_promote + [h for h in key_horses if h not in surge_promote])[:3]
             ranked = surge_promote + [h for h in ranked if h not in surge_promote]
 
+    # [저배당 압축 패턴] 최종 유력마 TOP3 중 저배당 밀집(4배 이하 2두+ 강력 / 5배 이하 3두+ 중간) → 축 패턴
+    compression_pattern = _compression_pattern(key_horses, curWin, curQ, strong_signals)
+
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
     anomaly_horse = None
@@ -3815,6 +4565,18 @@ def _triple_analyze(rk, rec):
             break
     if anomaly_horse is None:
         anomaly_horse = ranked[3] if len(ranked) > 3 else (key_horses[-1] if key_horses else None)
+
+    # [배당 3착 자동 발굴] 저배당 압축(축 2두) 확정 시 삼복승 3착 자리를 고배당 말에서 발굴(마감 전만)
+    third_place_hunt = _third_place_hunt(compression_pattern, strong_signals,
+                                         (None if after_close else anomaly_horse), wx_reversals,
+                                         form, curWin, curQ, drops, valid_nos)
+    if third_place_hunt.get("active"):
+        for _tr in third_place_hunt.get("trios", []):
+            try:
+                _ev, _ = _trio_est(_tr["combo"])   # 구성 복승 3쌍 기하평균×2 추정
+                _tr["expOddsEst"] = round(_ev, 1) if _ev else None
+            except Exception:
+                _tr["expOddsEst"] = None
 
     # 5) 베팅 추천: 복승 메인/보조 + 삼복승 메인/보험1/보험2 + 예산 배분율(alloc %)
     trio_map = _odds_map_un(trio)
@@ -4317,8 +5079,17 @@ def _triple_analyze(rk, rec):
     confidence = race_judgment = stage_guide = None
     elimination_strong = []
     try:
-        # [5번] 첫 수집 직후 추천 금지 — 최소 3회(≈90초) 관찰 후 신호 판단(기존 2→3 상향)
-        signal_ready = (not baseline_set) and (not baseline_reset) and (len(hist) >= 3)
+        # [2번·90초 관찰 의무화] 첫 수집 후 90초 미만이면 신호가 있어도 추천 금지(배당 변화 관찰만).
+        #   관찰시간 = 현재 − 첫 스냅샷(t). 측정 불가 시 스냅샷 4건으로 폴백(초반 저배당 무조건 추천 방지).
+        observed_sec = None
+        try:
+            if hist and hist[0].get("t"):
+                observed_sec = time.time() - hist[0]["t"]
+        except Exception:
+            observed_sec = None
+        obs_ok = (observed_sec >= 90) if (observed_sec is not None) else (len(hist) >= 4)
+        # [5번] 첫 수집 직후 추천 금지 — 최소 3회 관찰 + 90초 경과 후에만 신호 판단(기존 2→3 + 90초 하한)
+        signal_ready = (not baseline_set) and (not baseline_reset) and (len(hist) >= 3) and obs_ok
         confidence = _confidence_engine(signal_confidence, form, advanced, key_horses)
         race_judgment = _bet_judgment(confidence, excess, advanced, wx_reversals, form,
                                       mass_drop, after_close, signal_ready)
@@ -4372,8 +5143,21 @@ def _triple_analyze(rk, rec):
     except Exception as _e:
         print("[마감후대급락] 파생 실패:", _e)
 
+    # ═══ [1·2·3번 근본해결] 신호 미충족 시 '저배당 무조건 추천' 완전 비움 ═══
+    #   조건: race_judgment 유형이 wait(90초 미달 또는 시장신호 4종 중 2개 미만) 또는 패스형(신호 없음).
+    #   생성 코드(_addbet 등)는 모두 보존(무삭제) → 결과 리스트만 비워 모든 소비처(웹·오버레이·복기)가 공통으로
+    #   '추천 없음'을 본다. 마감 후(after_close)는 참고 신호이므로 제외(기존 동작 유지).
+    recommend_gated = bool(race_judgment and race_judgment.get("type") in ("wait", "패스형") and not after_close)
+    if recommend_gated:
+        bet_rec = []          # 복승·삼복승 추천 조합 완전 비움
+        trio_rec = []         # 삼복승 추천 비움
+        main_bet = None
+        bmed = None           # BMED 배분 표도 비움(신호 대기 상태에선 배분 없음)
+        mass_drop_strategy = None
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
+        "recommendGated": recommend_gated,   # [3번] 저배당 무조건 추천 차단(신호 대기) 여부 → 프론트 '⏳ 신호 대기 중'
         # [추천 로직 전면 개편] BMED 확신도 엔진 + 실전 경주유형 판정 + 단계별 추천 + 강화 제거마
         "confidence": confidence,          # [2번] 이상감지40+전적30+급락지속30 → 말별 확신도·랭킹
         "raceJudgment": race_judgment,     # [1·4번] 확실/신중/애매/패스형 + 근거 + 배분비율 + 쌍승강신호
@@ -4390,8 +5174,12 @@ def _triple_analyze(rk, rec):
                    "win": len(curWin), "history": len(hist)},
         "drops": drops[:15], "singleDrops": single_drops[:15], "rankChanges": rank_changes, "reversals": reversals,
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
+        "validHorses": sorted(valid_nos),   # [잔존마 필터·2번] 현재 배당 등장 마번(프론트 TOP5 필터 기준)
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
+        "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용
+        "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
+        "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
 
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
@@ -4980,6 +5768,7 @@ def _build_analysis_log(rk, an=None):
 
     # 배당 타임라인 + 실제 결과/적중(odds_history 에서)
     timeline, result_doc, review_doc = [], None, None
+    anomaly_history = []   # [2번] 경주 전체 이상감지 시계열(결과기록 탭 이상감지 내역용, 경주별 분리)
     try:
         hp, _, _ = _hist_path(rk)
         hist = json.load(open(hp, encoding="utf-8"))
@@ -4987,6 +5776,12 @@ def _build_analysis_log(rk, an=None):
             timeline.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
                              "quinella": s.get("quinella", {})})
         result_doc, review_doc = hist.get("result"), hist.get("review")
+        # [2번] 이 경주의 이상감지 전체를 시간순·중복제거로 저장(anomaly-feed 와 동일 규칙)
+        for e in _anomaly_events_from_doc(hist):
+            anomaly_history.append({"time": e.get("time"), "combo": e.get("combo"),
+                                    "drop": e.get("pct"), "text": e.get("text"),
+                                    "severity": e.get("severity"),
+                                    "minutes_before": e.get("minutes_before")})
     except Exception:
         pass
 
@@ -5090,6 +5885,10 @@ def _build_analysis_log(rk, an=None):
         "input_data": input_data,
         "odds_timeline": timeline,
         "signals_detected": signals,
+        "anomaly_history": anomaly_history,   # [2번] 경주 전체 이상감지 시계열(시간·조합·급락%, 경주별 분리 저장)
+        "strong_signals": an.get("strongSignals"),   # [강한 신호 8유형] 유형별 학습(적중률 누적)용 스냅샷
+        "compression_pattern": an.get("compressionPattern"),   # [저배당 압축 패턴] 축 패턴 스냅샷
+        "third_place_hunt": an.get("thirdPlaceHunt"),   # [배당 3착 자동 발굴] 3착 후보 스냅샷
         "horses": horses,
         "elimination": {"candidates": cand, "eliminated": elim_no, "elimination_reasons": elim_reasons},
         "final_recommendation": final,
@@ -6998,6 +7797,24 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _after_close_learn_result(rk, doc.get("date"), result)
     except Exception as e:
         print("[마감후대급락] 결과학습 실패:", e)
+
+    # [강한 신호 8유형 5번] 유형별 신호말 입상 적중률 누적(경주별 멱등) → 가중치 상향 근거
+    try:
+        _learn_strong_signals(rk, doc.get("date"), an, top3)
+    except Exception as e:
+        print("[강한신호학습] 실패:", e)
+
+    # [저배당 압축 패턴 4번] 압축 2두 복승 적중률 누적(경주별 멱등)
+    try:
+        _learn_compression(rk, doc.get("date"), an, top3)
+    except Exception as e:
+        print("[압축패턴학습] 실패:", e)
+
+    # [배당 3착 자동 발굴 5번] 3착 후보 신호 유형별 입상/정확3착 적중률 누적(경주별 멱등)
+    try:
+        _learn_third_place(rk, doc.get("date"), an, top3)
+    except Exception as e:
+        print("[3착발굴학습] 실패:", e)
 
     # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
     rec_bets = an.get("betRecommend", [])

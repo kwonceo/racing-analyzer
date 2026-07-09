@@ -31,11 +31,20 @@ print("쌍승 역전 감지 정합성 검증")
 print("=" * 60)
 
 # ── [A] _reversal_level ─────────────────────────────────────────────
-print("[A] 역전 등급 컷")
-chk("0.5 → 압도적(🔴🔴)", app._reversal_level(0.5) == ("🔴🔴", "압도적 역전"))
-chk("0.7 → 강한(🔴)", app._reversal_level(0.7) == ("🔴", "강한 역전"))
-chk("0.9 → 역전신호(🟡)", app._reversal_level(0.9) == ("🟡", "역전 신호"))
+#   [강화] 배당 차이 기준: 10%↓ 없음 / 10~20% 🟡 / 20~35% 🟠 / 35~50% 🔴 / 50%+ 🔴🔴
+print("[A] 역전 등급 컷(강화: 배당 차이 10% 최소 + 4단계)")
+chk("0.5 → 압도적(🔴🔴, 차이50%)", app._reversal_level(0.5) == ("🔴🔴", "압도적 역배열"))
+chk("0.6 → 강한(🔴, 차이40%)", app._reversal_level(0.6) == ("🔴", "강한 역배열"))
+chk("0.7 → 역배열(🟠, 차이30%)", app._reversal_level(0.7) == ("🟠", "역배열"))
+chk("0.85 → 약한(🟡, 차이15%)", app._reversal_level(0.85) == ("🟡", "약한 역배열"))
+chk("0.92 → 신호없음(차이8%<10%)", app._reversal_level(0.92)[0] is None)
 chk("0.95 → 신호없음(None)", app._reversal_level(0.95)[0] is None)
+# [강화] _inversion_tier(배당 차이 %)
+chk("차이 8% → None", app._inversion_tier(8)[0] is None)
+chk("차이 15% → 🟡", app._inversion_tier(15) == ("🟡", "약한 역배열"))
+chk("차이 28% → 🟠", app._inversion_tier(28) == ("🟠", "역배열"))
+chk("차이 40% → 🔴", app._inversion_tier(40) == ("🔴", "강한 역배열"))
+chk("차이 60% → 🔴🔴", app._inversion_tier(60) == ("🔴🔴", "압도적 역배열"))
 
 # ── [B] _win_exacta_reversal 다중순위 ───────────────────────────────
 wx = app._win_exacta_reversal
