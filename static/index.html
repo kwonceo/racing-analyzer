@@ -171,6 +171,14 @@
         </label>
         <span class="hint">입력 시 통합분석 베팅 추천에 조합별 금액이 표시됩니다</span>
       </div>
+      <!-- [경마 oddspark 서버 직접 수집] Chrome 확장 없이 서버가 oddspark 지방경마 복승·쌍승 배당을
+           직접 조회(마감 3분전 3초 간격). 기존 확장 수집은 폴백으로 유지. -->
+      <div class="cfg-row" style="margin:6px 0;padding:8px 10px;background:rgba(56,211,159,.08);border-left:3px solid #38d39f;border-radius:6px;flex-wrap:wrap;gap:8px;align-items:center">
+        <label class="hint" style="font-weight:700;color:#38d39f"><input id="keibaOddsAutoChk" type="checkbox" style="vertical-align:middle"> 🏇 경마 oddspark 서버 수집(확장 불필요)</label>
+        <span class="hint" style="font-size:11px">현재 경주 지방경마 복승·쌍승을 서버가 직접 조회 · 마감 3분전 3초/평상 30초 · 페이지 열려 있을 때만</span>
+        <button id="keibaOddsOnceBtn" class="btn btn-small" type="button">지금 1회 조회</button>
+        <span id="keibaOddsStatus" class="hint" style="font-size:11px"></span>
+      </div>
       <div id="jpIntegrated" class="report-area"></div>
 
       <!-- [일본경마 복기] 분석했던 경주 목록 → 클릭 → 유력마/제거마·이상감지·추천조합·결과입력·복기 -->

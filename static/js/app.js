@@ -3144,8 +3144,9 @@
     _prevBetKey = betKey;
     const drops = (a.drops || []).slice(0, 8).map((d) =>
       `<span class="chip ${d.pct < 0 ? 'chip-red' : 'chip-yellow'}">${d.combo[0]}-${d.combo[1]} ${d.prev}→${d.cur} ${d.pct < 0 ? '▼' : '▲'}${Math.abs(d.pct)}%</span>`).join(' ');
-    const flips = (a.reversals || []).filter((r) => r.flipped).slice(0, 6).map((r) =>
-      `<span class="chip chip-red">🔴 ${r.favored[0]}→${r.favored[1]} (${r.favoredOdds}&lt;${r.otherOdds})</span>`).join(' ');
+    // 단발 flip(🔴) + 누적 recentFlip(🟠 마감임박 서서히 뒤집힘) 모두 표시 → 마감 직전 역전 놓치지 않음
+    const flips = (a.reversals || []).filter((r) => r.flipped || r.recentFlip).slice(0, 6).map((r) =>
+      `<span class="chip ${r.flipped ? 'chip-red' : 'chip-yellow'}" title="${r.flipped ? '직전 대비 방향 전환' : '누적(서서히) 역전 — 마감 임박'}">${r.flipped ? '🔴' : '🟠누적'} ${r.favored[0]}→${r.favored[1]} (${r.favoredOdds}&lt;${r.otherOdds})</span>`).join(' ');
     const ranks = (a.rankChanges || []).slice(0, 6).map((r) =>
       `<span class="chip">${r.combo[0]}-${r.combo[1]} ${r.prevRank}위→${r.curRank}위 (${r.delta > 0 ? '▲' : '▼'}${Math.abs(r.delta)})</span>`).join(' ');
     const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
@@ -6118,6 +6119,36 @@
   const _closing = { firedRk: null, fired: new Set(), tick: 0, lastEvents: [], panelRk: null, historyMode: false,
     manualDeadlineMs: 0, manualRk: null };   // [보완] 수동 발주시각(한국 PDF 등 서버 deadline 없을 때 폴백)
 
+  // [경마 oddspark 서버 수집] Chrome 확장 없이 서버가 지방경마 복승·쌍승을 직접 조회.
+  //   마감 3분전 3초·평상 30초 적응형 폴링(closingTick에서 구동). 페이지 열려 있을 때만 동작.
+  const _keibaOdds = { enabled: false, lastPoll: 0, lastRk: null, busy: false };
+  function _keibaOddsStatus(msg) { const el = document.getElementById('keibaOddsStatus'); if (el) el.innerHTML = msg; }
+
+  async function fetchKeibaOdds(rk, silent) {
+    if (!rk) { if (!silent) _keibaOddsStatus('<span style="color:var(--red)">현재 경주(raceKey)가 없습니다.</span>'); return null; }
+    if (!silent) _keibaOddsStatus('🏇 oddspark 배당 조회 중…');
+    let d; try { d = await (await fetch('/api/keiba/odds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }) })).json(); }
+    catch (e) { _keibaOddsStatus(`<span style="color:var(--red)">실패: ${esc(e.message)}</span>`); return null; }
+    const t = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    if (d.error) { _keibaOddsStatus(`<span style="color:#f59e0b">${esc(d.error)}</span> <span style="opacity:.6">${t}</span>`); return d; }
+    if (d.waiting) { _keibaOddsStatus(`⏳ ${esc(d.reason || '실배당 대기')} <span style="opacity:.6">${t}</span>`); return d; }
+    const c = d.counts || {};
+    _keibaOddsStatus(`<span style="color:#38d39f">✅ 반영</span> 복승 <b>${c.quinella || 0}</b>·쌍승 <b>${c.exacta || 0}</b> <span style="opacity:.6">${esc(rk)} ${t}</span>`);
+    try { refreshCurrentRace(); } catch (_) { /* */ }
+    return d;
+  }
+
+  // 적응형 폴링(마감 3분전 3초·평상 30초) — closingTick에서 매초 호출, 자체 스로틀.
+  function keibaOddsAutoPoll(rk, left) {
+    if (!_keibaOdds.enabled || !rk || _keibaOdds.busy) return;
+    if (jpIsKoreaName(rk)) return;                       // 한국 경주는 oddspark 대상 아님(확장/PDF 유지)
+    const interval = (left <= 180000) ? 3000 : 30000;    // 마감 3분전 3초 · 평상 30초
+    const now = Date.now();
+    if (_keibaOdds.lastRk === rk && (now - _keibaOdds.lastPoll) < interval - 250) return;
+    _keibaOdds.lastPoll = now; _keibaOdds.lastRk = rk; _keibaOdds.busy = true;
+    Promise.resolve(fetchKeibaOdds(rk, true)).finally(() => { _keibaOdds.busy = false; });
+  }
+
   /** raceKey → 짧은 라벨(예: '2026-07-05_서울_5' → '2026-07-05 서울 5R') */
   function _rkLabel(rk) {
     if (!rk) return '';
@@ -6266,6 +6297,8 @@
         && (!_closing.manualRk || _closing.manualRk === (rk || _closing.panelRk))) {
       dlMs = _closing.manualDeadlineMs;
     }
+    // [경마 oddspark 서버 수집] 마감시각 유무와 무관하게 적응형 폴링(없으면 평상 30초). 확장 없이 동작.
+    try { keibaOddsAutoPoll(rk, dlMs ? (dlMs - Date.now()) : Infinity); } catch (_) { /* */ }
     if (!dlMs) return;
     const left = dlMs - Date.now();
     const key = rk || String(dlMs);
@@ -6366,6 +6399,21 @@
     { const b = document.getElementById('koreaDeadlineClear'); if (b) b.addEventListener('click', clearKoreaManualDeadline); }
     { const i = document.getElementById('koreaDeadline'); if (i) i.addEventListener('keydown', (e) => { if (e.key === 'Enter') setKoreaManualDeadline(); }); }
     restoreKoreaManualDeadline();   // [보완] 새로고침 시 저장된 발주시각 복원
+    // [경마 oddspark 서버 수집] 토글 + 즉시 1회 조회 배선(설정 localStorage 유지)
+    { const chk = document.getElementById('keibaOddsAutoChk');
+      if (chk) {
+        try { chk.checked = localStorage.getItem('keibaOddsAuto') === '1'; } catch (_) { /* */ }
+        _keibaOdds.enabled = chk.checked;
+        chk.addEventListener('change', () => {
+          _keibaOdds.enabled = chk.checked;
+          try { localStorage.setItem('keibaOddsAuto', chk.checked ? '1' : '0'); } catch (_) { /* */ }
+          if (chk.checked) { _keibaOdds.lastPoll = 0; _keibaOddsStatus('🏇 서버 수집 켜짐 — 현재 경주 배당을 자동 조회합니다.'); }
+          else _keibaOddsStatus('서버 수집 꺼짐(확장 수집은 계속 동작).');
+        });
+      }
+    }
+    { const b = document.getElementById('keibaOddsOnceBtn');
+      if (b) b.addEventListener('click', () => fetchKeibaOdds(_closing.panelRk || getActiveRaceKey(), false)); }
     setInterval(closingTick, 1000);
     closingTick();
   }

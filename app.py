@@ -3607,6 +3607,10 @@ def _triple_analyze(rk, rec):
     # 3) 쌍승 역전 (A→B vs B→A)
     curD = _odds_map_dir(exa)
     prevD = _odds_map_dir(prev.get("exacta")) if prev else {}
+    # [마감 직전 놓치지 않음] 직전(3초) 스냅샷뿐 아니라 보관된 '가장 이른 스냅샷'과도 방향을 비교 →
+    #   여러 틱에 걸쳐 서서히 뒤집힌 역전(단발 flipped로는 안 잡히는)을 recentFlip 으로 포착.
+    early = next((h for h in hist[:-1] if h.get("exacta")), None)   # 보관 창의 최이른 쌍승 스냅샷
+    earlyD = _odds_map_dir(early.get("exacta")) if early else {}
     reversals, seen = [], set()
     for (a, b), o in curD.items():
         pair = tuple(sorted((a, b)))
@@ -3618,14 +3622,23 @@ def _triple_analyze(rk, rec):
         seen.add(pair)
         favored = [a, b] if o <= rev else [b, a]
         info = {"pair": list(pair), "favored": favored,
-                "favoredOdds": min(o, rev), "otherOdds": max(o, rev), "flipped": False}
+                "favoredOdds": min(o, rev), "otherOdds": max(o, rev),
+                "flipped": False, "recentFlip": False}
         if prev:
             pa, pb = prevD.get((a, b)), prevD.get((b, a))
             if pa is not None and pb is not None:
                 prev_fav = [a, b] if pa <= pb else [b, a]
                 info["flipped"] = (prev_fav != favored)
+        if earlyD:
+            ea, eb = earlyD.get((a, b)), earlyD.get((b, a))
+            if ea is not None and eb is not None:
+                early_fav = [a, b] if ea <= eb else [b, a]
+                # 초기 대비 방향이 바뀌었고(누적 역전) 직전 단발 flipped 와 별개일 때만 표기
+                info["recentFlip"] = (early_fav != favored)
         reversals.append(info)
-    reversals.sort(key=lambda r: (not r["flipped"], -(r["otherOdds"] / max(r["favoredOdds"], 0.1))))
+    # flipped(단발) 또는 recentFlip(누적)인 역전을 우선 노출 → 마감 임박 역전이 [:10] 컷에 밀리지 않음
+    reversals.sort(key=lambda r: (not (r["flipped"] or r.get("recentFlip")),
+                                  -(r["otherOdds"] / max(r["favoredOdds"], 0.1))))
     reversals = reversals[:10]
 
     # 4) 유력마 3마리 (상위 10개 복승 조합 등장 빈도 + 인기가중). 복승 없으면 쌍승 무순.
@@ -9368,6 +9381,145 @@ def keirin_odds():
     print(f"[경륜 배당] {rk}: 복승 {len(q)}·쌍승 {len(x)} oddspark 직접수집 → 파이프라인 반영")
     return jsonify({"ok": True, "raceKey": rk, "counts": {"quinella": len(q), "exacta": len(x)},
                     "quinella": q, "exacta": x, "ingest": res})
+
+
+# ══════════ [경마 oddspark 서버 직접 수집] 지방경마(NAR) 복승·쌍승 배당 ══════════
+# oddspark keiba 는 경륜(joCode)과 URL 체계가 다름 → opTrackCd + sponsorCd + raceNb 사용.
+# betType(실측 확정): 6=복승(馬連·순서무관) · 5=쌍승(馬単·순서있음). ⚠ 경륜(5/6)과 반대이므로 주의.
+_KEIBA_BET = {"quinella": 6, "exacta": 5}   # 복승=馬連=6 · 쌍승=馬単=5
+_KEIBA_SCHED_CACHE = {}                     # {ymd: {한자경마장명: (opTrackCd, sponsorCd)}} 당일 캐시
+
+
+def _keiba_odds_url(op_track, sponsor, ymd, race_nb, bet_type):
+    """oddspark 지방경마 배당 URL. betType 6=복승(馬連)·5=쌍승(馬単)."""
+    return ("https://www.oddspark.com/keiba/Odds.do"
+            "?sponsorCd=%s&opTrackCd=%s&raceDy=%s&raceNb=%s&viewType=0&betType=%s"
+            % (sponsor, op_track, ymd, race_nb, bet_type))
+
+
+def _keiba_odds_live(q, x):
+    """파싱된 복승·쌍승이 '발매 중 실배당'인지 판정(마감 후·발매 전 가짜값 차단).
+    실배당은 대부분 소수부가 있음(4.5·12.7·2.7). 마감 후 oddspark가 주는 마방리스트·환급표는
+    정수(2.0·3.0·0.0)만 → 소수부 비율이 낮으면 라이브 아님. 조합 최소 3개 + 소수부 30%+ 요구."""
+    odds = [c.get("odds") for c in (list(q) + list(x)) if isinstance(c.get("odds"), (int, float)) and c.get("odds") > 0]
+    if len(odds) < 3:
+        return False
+    frac = sum(1 for o in odds if abs(o - round(o)) > 1e-9)
+    return (frac / len(odds)) >= 0.30
+
+
+def _keiba_schedule(ymd, force=False):
+    """그날(ymd=YYYYMMDD) oddspark 지방경마 개최 경마장 → {한자경마장명: (opTrackCd, sponsorCd)}.
+    경마장 코드를 하드코딩하지 않고 실제 개최 스케줄에서 런타임 매핑(코드 오류 원천 차단).
+    당일 메모리 캐시(6시간). 홈에서 RaceList 링크의 (opTrackCd,sponsorCd) 추출 후 각 제목에서 경마장명 파싱."""
+    ck = _KEIBA_SCHED_CACHE.get(ymd)
+    if ck and not force and (time.time() - ck.get("t", 0) < 21600):
+        return ck["map"]
+    out = {}
+    try:
+        home = _keirin_fetch("https://www.oddspark.com/keiba/")
+        pairs = set()
+        for m in re.finditer(r'RaceList\.do\?[^"\'>]*', home):
+            seg = m.group(0).replace("&amp;", "&")
+            mo = re.search(r'opTrackCd=(\d+)', seg)
+            ms = re.search(r'sponsorCd=(\d+)', seg)
+            md = re.search(r'raceDy=(\d+)', seg)
+            if mo and ms and (not md or md.group(1) == ymd):
+                pairs.add((mo.group(1), ms.group(1)))
+        for op, sp in pairs:
+            try:
+                rl = _keirin_fetch("https://www.oddspark.com/keiba/RaceList.do"
+                                   "?raceDy=%s&opTrackCd=%s&sponsorCd=%s" % (ymd, op, sp))
+                mt = re.search(r'<title>(.*?)</title>', rl, re.S)
+                title = _kstrip(mt.group(1)) if mt else ""
+                mv = re.search(r'([一-龯]{2,4})競馬', title)   # '…園田競馬 1R…'
+                if mv:
+                    out[mv.group(1)] = (op, sp)
+            except Exception:
+                continue
+    except Exception as e:
+        print("[경마 스케줄] 조회 실패:", e)
+    _KEIBA_SCHED_CACHE[ymd] = {"t": time.time(), "map": out}
+    return out
+
+
+def _keiba_resolve_track(venue, ymd):
+    """raceKey 경마장명(한/일/영) → 그날 oddspark 개최 코드 (opTrackCd, sponsorCd) 또는 None.
+    _track_norm 으로 표준화 후 한자명(_TRACK_GROUPS 첫 별칭)으로 스케줄 매칭."""
+    if not venue:
+        return None
+    std = _track_norm(venue)                       # 예: 소노다/園田/sonoda → 소노다
+    kanji = None
+    als = _TRACK_GROUPS.get(std)
+    if als:
+        kanji = next((a for a in als if re.fullmatch(r'[一-龯]+', a)), None)
+    sched = _keiba_schedule(ymd)
+    if kanji and kanji in sched:
+        return sched[kanji]
+    # 폴백: 스케줄 한자명이 venue/표준명에 직접 포함되는지
+    for kn, codes in sched.items():
+        if kn == kanji or kn in (venue or ""):
+            return codes
+    return None
+
+
+@app.route("/api/keiba/odds", methods=["POST"])
+def keiba_odds():
+    """[경마 서버 직접 수집] oddspark 지방경마 복승(馬連=6)·쌍승(馬単=5)을 서버가 직접 fetch·파싱해
+    기존 파이프라인(_do_triple_ingest)에 주입 → 역배열·배당변화·이상감지 자동 계산(Chrome 확장 불필요).
+    body: {raceKey, raceDy?(YYYYMMDD·기본 오늘), raceNo?(기본 raceKey에서 추출),
+           opTrackCd?·sponsorCd?(직접 지정 시 스케줄 조회 생략)}.
+    반복 호출(마감임박 3초 폴링) 시 히스토리 누적 → 배당변화 감지.
+    ⚠ 삼복승(3連複)은 별도 축선택 페이지 필요 → 미수집(_trio_est 추정 보험 유지)."""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"error": "raceKey가 필요합니다."}), 400
+    ymd = (str(body.get("raceDy") or "").strip()
+           or time.strftime("%Y%m%d", time.localtime()))
+    # 경주번호: 명시 우선 → raceKey에서 추출
+    race_nb = body.get("raceNo")
+    venue = None
+    if not race_nb or not (body.get("opTrackCd") and body.get("sponsorCd")):
+        venue, num = _area_num(rk)
+        race_nb = race_nb or num
+    if not race_nb:
+        return jsonify({"error": "경주번호를 확인할 수 없습니다(raceKey에 'N경주' 포함 또는 raceNo 지정)."}), 400
+    op_track, sponsor = body.get("opTrackCd"), body.get("sponsorCd")
+    if not (op_track and sponsor):
+        codes = _keiba_resolve_track(venue, ymd)
+        if not codes:
+            return jsonify({"error": "경마장 '%s' 이(가) %s 오늘 oddspark 개최 목록에 없습니다(개최일·경마장명 확인)."
+                            % (venue or rk, ymd), "scheduled": list(_keiba_schedule(ymd).keys())}), 422
+        op_track, sponsor = codes
+    try:
+        q = _keirin_parse_quinella(_keirin_fetch(_keiba_odds_url(op_track, sponsor, ymd, race_nb, _KEIBA_BET["quinella"])))
+        x = _keirin_parse_exacta(_keirin_fetch(_keiba_odds_url(op_track, sponsor, ymd, race_nb, _KEIBA_BET["exacta"])))
+    except Exception as e:
+        return jsonify({"error": "배당 수집 실패: %s" % e}), 502
+    # [발매 전·마감 후 방어] oddspark는 발매 중이 아니면 배당 매트릭스 대신 마방리스트·환급표(정수 0.0/착순)를
+    #   제공 → 파서가 가짜 정수값을 뽑아 파이프라인을 오염시킴. 실배당은 소수부(4.5·12.7 등)가 대부분이므로
+    #   '소수부 있는 배당 비율'로 라이브 여부 판정(마감 후 가짜값은 전부 X.0 → 차단).
+    if not _keiba_odds_live(q, x):
+        return jsonify({"ok": True, "waiting": True, "raceKey": rk,
+                        "reason": "발매 중 배당 없음(발매 전·마감 후 추정) — 실배당 대기",
+                        "track": {"opTrackCd": op_track, "sponsorCd": sponsor, "raceNb": race_nb},
+                        "counts": {"quinella": len(q), "exacta": len(x)}})
+    res = _do_triple_ingest(rk, q, x, [], {}, sport="horse", category="japan_local", source="oddspark")
+    print(f"[경마 배당] {rk}: 복승 {len(q)}·쌍승 {len(x)} oddspark 직접수집(op{op_track}/sp{sponsor} R{race_nb}) → 파이프라인 반영")
+    return jsonify({"ok": True, "raceKey": rk, "counts": {"quinella": len(q), "exacta": len(x)},
+                    "track": {"opTrackCd": op_track, "sponsorCd": sponsor, "raceNb": race_nb},
+                    "quinella": q, "exacta": x, "ingest": res})
+
+
+@app.route("/api/keiba/schedule", methods=["GET", "POST"])
+def keiba_schedule_ep():
+    """그날 oddspark 지방경마 개최 경마장·코드 목록(디버그·프론트 확인용)."""
+    ymd = ((request.json or {}).get("raceDy") if request.method == "POST"
+           else request.args.get("raceDy")) or time.strftime("%Y%m%d", time.localtime())
+    sched = _keiba_schedule(str(ymd).strip(), force=bool((request.args.get("force") or "")))
+    return jsonify({"raceDy": ymd, "tracks": [{"venue": k, "opTrackCd": v[0], "sponsorCd": v[1]}
+                                              for k, v in sched.items()]})
 
 
 @app.route("/api/analysis-log/backfill", methods=["POST"])
