@@ -3745,6 +3745,33 @@ def _triple_analyze(rk, rec):
             key_horses = (pre_reversal + [h for h in key_horses if h not in pre_reversal])[:3]
             ranked = pre_reversal + [h for h in ranked if h not in pre_reversal]
 
+    # [보완·복승 메인 승격] 마감 임박, 같은 말이 2개+ 복승 조합에서 동시 30%+ 급락 = 자금 집중 → 실질 유력마.
+    #   → 유력마 TOP3 최상위로 조기 승격(복승 메인에 자동 편성). 마감 후는 미적용(기존 마감후 정책 유지).
+    #   예) 카사마츠 1R: 3+6 ▼61%·3+4 ▼41%·2+3 ▼48% → 3번이 3개 조합 동시 급락 → 유력마 1위 승격.
+    surge_promote = []
+    if not after_close and drops:
+        def _rep_o(h):                                 # 대표배당(단승 우선·없으면 최저 복승)
+            if curWin.get(h):
+                return curWin[h]
+            best = None
+            for (a, b), o in curQ.items():
+                if h in (a, b) and o > 0 and (best is None or o < best):
+                    best = o
+            return best
+        _sc = {}
+        for _d in drops:
+            if (_d.get("pct") or 0) <= -30:            # 30%+ 급락 조합만
+                for _h in (_d.get("combo") or []):
+                    _sc.setdefault(int(_h), []).append(_d.get("pct") or 0)
+        # 2개+ 조합 동시 급락 + 대표배당 20배 이하(실제 경쟁마·롱샷 노이즈 제외).
+        #   급락 조합 수 많은 순 → 급락폭 큰 순. 노이즈 방지 위해 최대 2두만 승격.
+        _cand = [(h, len(v), sum(v)) for h, v in _sc.items()
+                 if len(v) >= 2 and (_rep_o(h) or 999) <= 20]
+        surge_promote = [h for h, _c, _s in sorted(_cand, key=lambda t: (-t[1], t[2]))][:2]
+        if surge_promote:
+            key_horses = (surge_promote + [h for h in key_horses if h not in surge_promote])[:3]
+            ranked = surge_promote + [h for h in ranked if h not in surge_promote]
+
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
     anomaly_horse = None
@@ -4277,6 +4304,16 @@ def _triple_analyze(rk, rec):
     except Exception as _e:
         print("[혼전] 파생 실패:", _e)
 
+    # [보완·혼전 복승 박스] 혼전(압축) 경주 감지 시 복승 메인 2두 고정 → 상위 3두 박스로 확대.
+    #   기존 복승 메인(h1+h2)·보조(h1+h3)에 h2+h3 조합을 추가 → 상위 3두 3조합 전부 커버(이변 대비).
+    #   예) 4·6·3 유력 시 4+6·4+3·6+3 모두 추천 → 3+6 같은 조합을 놓치지 않음.
+    try:
+        if chaotic and chaotic.get("detected") and len(key_horses) >= 3:
+            _b1, _b2, _b3 = key_horses[0], key_horses[1], key_horses[2]
+            _addbet("복승", "복승 박스(혼전)", [_b2, _b3], 13, _q(_b2, _b3))
+    except Exception as _e:
+        print("[혼전복승박스] 실패:", _e)
+
     # [1번] 마감 후 대급락(50%+) 별도 감지 → "⚡ 마감 후 대급락 감지!" 배너용(추천 미반영·참고만).
     #   [4번] 학습된 '마감 후 대급락 → 입상률'이 신뢰 수준(표본5+·50%+)이면 다음경주 참고 신뢰도 첨부.
     after_close_surge = None
@@ -4323,6 +4360,7 @@ def _triple_analyze(rk, rec):
         "drops": drops[:15], "singleDrops": single_drops[:15], "rankChanges": rank_changes, "reversals": reversals,
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
+        "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
 
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
@@ -7132,6 +7170,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         "t": time.time(),
     }
     L = _learning_load()
+    # [결과 수정 지원] 같은 경주 기존 레코드 제거 후 추가 → 결과 재입력(수정) 시 이중집계 방지(멱등).
+    #   결과를 잘못 입력했거나 착순을 정정할 때 record-result 를 다시 호출하면 깨끗이 덮어써진다.
+    _before = len(L.get("records") or [])
+    L["records"] = [r for r in (L.get("records") or []) if r.get("race") != rk]
+    if len(L["records"]) != _before:
+        print(f"[결과 수정] {rk}: 기존 레코드 교체(재입력)")
     L["records"].append(record)
     L["stats"] = _recompute_learning_stats(L["records"])
     _learning_save(L)
