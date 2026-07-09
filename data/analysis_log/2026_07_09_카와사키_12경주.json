@@ -6,7 +6,7 @@
  "date": "2026-07-09",
  "race": "카와사키 12경주",
  "analyzed_at": "20:43:02",
- "updated_at": "22:33:06",
+ "updated_at": "22:40:36",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -348,6 +348,31 @@
    "time": "22:33:03",
    "minutes_before": 5,
    "quinella": {}
+  },
+  {
+   "time": "22:34:16",
+   "minutes_before": 4,
+   "quinella": {}
+  },
+  {
+   "time": "22:35:16",
+   "minutes_before": 3,
+   "quinella": {}
+  },
+  {
+   "time": "22:36:16",
+   "minutes_before": 2,
+   "quinella": {}
+  },
+  {
+   "time": "22:37:16",
+   "minutes_before": 1,
+   "quinella": {}
+  },
+  {
+   "time": "22:38:16",
+   "minutes_before": 0,
+   "quinella": {}
   }
  ],
  "signals_detected": [],
@@ -361,6 +386,9 @@
  },
  "compression_pattern": {
   "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
  },
  "horses": [
   {
