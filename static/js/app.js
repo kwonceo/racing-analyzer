@@ -3823,12 +3823,15 @@
     let ho = null; try { ho = await (await fetch('/api/high-odds-review?stats=1')).json(); } catch (_) { /* */ }
     // [수동 케이스 학습] 카와사키 11R 등 사용자 지정 놓친 케이스 상세 복기
     let hocases = null; try { hocases = await (await fetch('/api/high-odds-review?cases=1')).json(); } catch (_) { /* */ }
+    // [복기 학습 재설계] 패턴별 신뢰도(표본 50회 게이팅) — 공식 수정은 수동
+    let pconf = null; try { pconf = await (await fetch('/api/learning/pattern-confidence')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     // [AI Phase1] AI 학습 데이터 현황 대시보드
     let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
       ${renderDailyLearning(dl)}
+      ${renderPatternConfidence(pconf)}
       ${renderHighOddsCases(hocases)}
       ${renderHighOddsReview(ho)}
       ${renderAiDataStatus(ai)}
@@ -3852,6 +3855,25 @@
   }
 
   // [학습일지] 오늘 배운 것 대시보드 — 성공/실패/새패턴/개선 카운트 + 내일 집중 + 누적 패턴 신뢰도
+  // [복기 학습 재설계 4번] 🧠 학습 현황 — 패턴별 신뢰도(표본 50회 게이팅). 공식 수정은 수동.
+  function renderPatternConfidence(pc) {
+    const pats = (pc && pc.patterns) || [];
+    if (!pats.length) return '';
+    const stColor = { '유의': '#38d39f', '신뢰': '#38d39f', '경고': '#f87171', '표본부족': '#fbbf24' };
+    const rows = pats.map((p) => {
+      const col = stColor[p.status] || '#8a94a6';
+      const rateTxt = (p.rate != null) ? `${p.rate}%` : '-';
+      return `<div style="margin:3px 0;padding:5px 8px;border-left:3px solid ${col};background:rgba(255,255,255,.03);border-radius:5px">
+        <b>${esc(p.label)}</b>: <b style="color:${col}">${rateTxt}</b> <span class="hint">(${p.hit || 0}/${p.fired || 0}회)</span> ${p.icon || ''}
+        <div class="hint" style="font-size:11px">${esc(p.note || '')}</div></div>`;
+    }).join('');
+    return `<div class="bet-box" style="margin:6px 0;padding:12px 14px;border:1px solid #3a3a5a;border-radius:10px">
+      <div style="font-weight:700;font-size:15px;margin-bottom:6px">🧠 학습 현황 <span class="hint" style="font-weight:400">(패턴별 신뢰도 · 표본 ${pc.sampleMin || 50}회 게이팅)</span></div>
+      ${rows}
+      <div style="margin-top:6px;padding:6px 9px;background:rgba(251,191,36,.1);border-radius:6px;color:#fbbf24;font-size:12px">
+        ⚠️ 주의: 표본 <b>${pc.sampleMin || 50}회 미만</b>은 참고만 · <b>공식 수정은 수동</b>으로 (1회 실패로 기준 변경 금지)</div></div>`;
+  }
+
   function renderDailyLearning(dl) {
     if (!dl || dl.error) return '';
     const rs = dl.results_summary || {};

@@ -1531,6 +1531,12 @@ def third_place_stats():
                     "note": "저배당 압축 축 2두 확정 후 고배당 3착 후보(급락/역배열/전적/연속하락)의 3착·입상 적중률."})
 
 
+@app.route("/api/learning/pattern-confidence", methods=["GET"])
+def pattern_confidence():
+    """[복기 학습 재설계 2·4번] 신호 유형별 발생/적중/적중률 + 통계 신뢰도(표본 50회 게이팅). 공식 수정 없음."""
+    return jsonify(_pattern_confidence())
+
+
 @app.route("/api/high-odds-companion/stats", methods=["GET"])
 def high_odds_companion_stats():
     """[고배당 동반 패턴 4번] 고배당(7배+) 1착 경주 중 3착 내 다른 고배당 포함 비율."""
@@ -2508,6 +2514,59 @@ def _learn_strong_signals(rk, date, an, top3):
         _signal_type_stats_save(d)
     except Exception as e:
         print("[강한신호학습] 실패:", e)
+
+
+# ───────── [복기 학습 재설계] 통계 유의성 기준 — 1회 실패로 공식 수정 금지, 표본 확보 후에만 조정 ─────────
+#   50회 미만 → 판단 보류(참고만) / 50회+ 적중률 40% 미만 → 경고(수정은 수동) / 100회+ → 소폭 자동조정 검토.
+PATTERN_SAMPLE_MIN = 50     # 이 표본 미만은 '판단 보류'(신뢰 불가)
+PATTERN_SAMPLE_SIG = 100    # 이 표본 이상 + 통계 유의 → 가중치 소폭 자동조정 검토(최대 5%p)
+PATTERN_WARN_RATE = 40      # 표본 충족 + 적중률 이 값 미만 → 경고
+
+
+def _pattern_status(fired, rate):
+    """표본수·적중률 → 신뢰도 상태. 반환 (status, icon, note)."""
+    if fired is None or fired < PATTERN_SAMPLE_MIN:
+        need = PATTERN_SAMPLE_MIN - (fired or 0)
+        return "표본부족", "⚠️", f"표본 부족 (판단 보류 · {PATTERN_SAMPLE_MIN}회 필요, {need}회 남음)"
+    if rate is not None and rate < PATTERN_WARN_RATE:
+        return "경고", "🔴", f"적중률 {rate}% (< {PATTERN_WARN_RATE}%) — 경고 · 수정은 수동으로"
+    if fired >= PATTERN_SAMPLE_SIG:
+        return "유의", "✅", f"통계 유의 ({fired}회) — 신뢰 · 소폭 자동조정 검토 가능"
+    return "신뢰", "✅", f"신뢰 가능 ({fired}회 기준, 계속 관찰 중)"
+
+
+def _pattern_confidence():
+    """[2·4번] 신호 유형별 발생/적중/적중률 + 통계 신뢰도 상태(표본 50회 게이팅) 통합.
+      강신호 8유형 + 저배당압축 + 고배당동반을 한 뷰로. ⚠ 공식 수정은 안 함 — 데이터 표시만."""
+    out = []
+    try:
+        for t, v in sorted(_signal_type_hitrates().items()):
+            st, icon, note = _pattern_status(v.get("fired"), v.get("rate"))
+            out.append({"key": "signal_" + str(t), "label": v.get("label") or ("유형" + str(t)),
+                        "fired": v.get("fired"), "hit": v.get("hit"), "rate": v.get("rate"),
+                        "status": st, "icon": icon, "note": note})
+    except Exception:
+        pass
+    try:
+        cp = _compression_hitrate().get("all") or {}
+        st, icon, note = _pattern_status(cp.get("fired"), cp.get("rate"))
+        out.append({"key": "compression", "label": "저배당 압축(축 패턴)",
+                    "fired": cp.get("fired"), "hit": cp.get("hit"), "rate": cp.get("rate"),
+                    "status": st, "icon": icon, "note": note})
+    except Exception:
+        pass
+    try:
+        hc = _high_odds_companion_hitrate()
+        st, icon, note = _pattern_status(hc.get("races"), hc.get("rate"))
+        out.append({"key": "high_odds_companion", "label": "고배당 동반(1착시 3착내 고배당)",
+                    "fired": hc.get("races"), "hit": hc.get("hits"), "rate": hc.get("rate"),
+                    "status": st, "icon": icon, "note": note})
+    except Exception:
+        pass
+    out.sort(key=lambda x: -((x.get("fired") or 0)))
+    return {"patterns": out, "sampleMin": PATTERN_SAMPLE_MIN, "sampleSig": PATTERN_SAMPLE_SIG,
+            "warnRate": PATTERN_WARN_RATE,
+            "note": "표본 50회 미만은 참고만 · 공식 수정은 수동으로 (1회 실패로 기준 변경 금지)"}
 
 
 def _signal_type_hitrates():
@@ -8515,7 +8574,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
 #   놓친 신호 패턴을 누적한다. 같은 패턴이 임계치(기본 10건) 이상 반복되면 개선 규칙을 자동 생성.
 #   ⚠ 기존 학습(learning.json·pattern_learning 등)과 독립된 별도 저장소 → 기존 기능 영향 없음.
 FAILURE_FILE = os.path.join(os.path.dirname(__file__), "data", "failure_review.json")
-FAIL_RULE_THRESHOLD = 3   # 같은 실패 패턴 N건+ 반복 시 규칙 자동 생성(반복 실패 조기 감지)
+# [복기 학습 재설계] 1회~소수 실패로 규칙(공식 변경)을 만들지 않는다. 통계 유의성(50회+) 확보 후에만
+#   '검토 후보' 규칙을 생성하고, 실제 적용은 수동. (기존 3회 즉시 생성 → 50회 게이팅으로 엄격화)
+FAIL_RULE_THRESHOLD = PATTERN_SAMPLE_MIN   # 50 — 이 표본 미만은 판단 보류(규칙 미생성)
 
 # 실패 유형 정의(번호 → 코드 → 표시라벨)
 FAIL_TYPE_LABEL = {
@@ -8786,12 +8847,15 @@ def _failure_autorule(d, mpat, ftype, rk, stats):
         before_rate = ((stats or {}).get("recommend_hit") or {}).get("rate")
     except Exception:
         before_rate = None
+    # [재설계] 50회+여도 자동으로 공식을 바꾸지 않는다 — '수동 검토 후보'로만 등록(status·manual_only).
+    status = "검토후보" if cnt >= PATTERN_SAMPLE_SIG else "관찰누적"
     d["rules"].append({
         "pattern": mpat, "type": ftype, "text": rule_text,
         "basis": f"{cnt}건 반복 분석", "sample": cnt,
+        "status": status, "manual_only": True,
         "before_rate": before_rate, "created_t": time.time(), "created": time.strftime("%Y-%m-%d"),
     })
-    print(f"[실패복기] 🔔 새 규칙 학습: {rule_text} (근거: {cnt}건)")
+    print(f"[실패복기] 📋 검토 후보 규칙(수동): {rule_text} (근거: {cnt}건, 표본 {PATTERN_SAMPLE_MIN}+ 충족)")
 
 
 def _failure_report(rk):
