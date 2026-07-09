@@ -1132,12 +1132,13 @@ def _sanitize_starters(horses):
     return [by_no[k] for k in sorted(by_no)]
 
 
-def _form_from_starters(rk, drops, sport=None):
+def _form_from_starters(rk, drops, sport=None, valid_nos=None):
     """저장된 전적으로 마필 점수·등급 계산. 배당 급락마는 이상감지 상향 반영.
     - 일본(출마표2): recent 착순으로 점수 재계산
     - 한국(PDF): 프론트에서 이미 계산한 formScore/totalScore를 그대로 사용(마명·기수 한글 유지).
     - 경륜/경정/바이크(6명 종목): 한국경마(source=korea) 전적은 오매칭이므로 무시(전적없음이 정상).
-      경륜 전적은 oddspark 출마표 분석(source=keirin)으로만 채운다."""
+      경륜 전적은 oddspark 출마표 분석(source=keirin)으로만 채운다.
+    - valid_nos(현재 배당에 등장하는 마번 집합) 지정 시: 이전 경주 잔존마(배당 없는 마번)를 자동 제외."""
     rec = _starters_load().get(rk)
     if not rec or not rec.get("horses"):
         return None
@@ -1152,6 +1153,20 @@ def _form_from_starters(rk, drops, sport=None):
                     "signalScore": min(100, 50 + int(abs(d["pct"]))),
                     "drop": abs(d["pct"]) / 100.0})
     raw = rec["horses"]
+    # [잔존마 필터·1번] 현재 수집된 배당에 실제 등장하는 마번만 사용 → 이전 경주 잔존마(배당 없는 마번) 자동 제외.
+    #   배당 매칭 말이 하나라도 있을 때만 적용(전무하면 마명 기반 종목 등 오검출 방지로 필터 보류).
+    if valid_nos:
+        def _hno(h):
+            try:
+                return int(h.get("no"))
+            except (TypeError, ValueError):
+                return None
+        filtered = [h for h in raw if _hno(h) in valid_nos]
+        if filtered:
+            if len(filtered) != len(raw):
+                dropped = sorted({_hno(h) for h in raw if _hno(h) is not None and _hno(h) not in valid_nos})
+                print(f"[잔존마 필터] {rk}: 전적 {len(raw)}두 → 배당 출전마 {len(filtered)}두 (배당 없는 마번 제외: {dropped})")
+            raw = filtered
     # [한국경마] 사전 계산된 전적점수가 있으면 그대로 통과(PDF Vision 한글 데이터)
     prescored = any(h.get("formScore") is not None or h.get("totalScore") is not None for h in raw)
     if rec.get("source") == "korea" or prescored:
@@ -1322,12 +1337,33 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     return {"ok": True, "counts": counts, "baselineReset": baseline_reset, "pruned": pruned}
 
 
+def _starters_prune(keep_rk=None):
+    """[잔존마 방어·3번] starters_store(전적)에서 이전 경주 데이터 제거.
+    keep_rk 주면 그 경주만 남기고 전부 삭제(새 경주 데이터만 유지), 없으면 전체 비움.
+    한국 PDF 사전분석 전적(source=korea)은 아침 일괄 저장분이라 보존(경주별 재사용)."""
+    sdb = _starters_load()
+    if not sdb:
+        return 0
+    removed, kept = 0, {}
+    for k, v in sdb.items():
+        if k == keep_rk or (v or {}).get("source") == "korea":
+            kept[k] = v            # 현재 경주 + 한국 PDF 사전분석분은 유지
+        else:
+            removed += 1
+    _starters_save(kept)
+    if removed:
+        print(f"[잔존마 방어] starters 정리: {removed}건 제거(유지: {keep_rk or '없음'} + 한국PDF)")
+    return removed
+
+
 @app.route("/api/odds/triple/reset", methods=["POST"])
 def triple_reset():
     """[🔄 새 경주 시작] 활성 3종 배당(triple_store)을 비워 새 경주로 전환.
     경주별 히스토리 파일(data/odds_history)은 그대로 보존(=[히스토리 보기]).
-    body: {raceKey?} — 주면 그 경주만, 없으면 전체 활성 초기화."""
-    rk = ((request.json or {}).get("raceKey") or "").strip()
+    body: {raceKey?, pruneStarters?} — raceKey 주면 그 경주만, 없으면 전체 활성 초기화.
+    pruneStarters=true(기본): 이전 경주 전적(starters)도 함께 정리(잔존마 방지)."""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
     db = _triple_load()
     if rk:
         removed = 1 if db.pop(rk, None) is not None else 0
@@ -1335,8 +1371,23 @@ def triple_reset():
         removed = len(db)
         db = {}
     _triple_save(db)
+    # [3번] 이전 경주 starters 정리(새 경주 raceKey만 유지 → 잔존마 원천 차단). 명시적으로 끄지 않는 한 수행.
+    starters_removed = 0
+    if body.get("pruneStarters", True):
+        starters_removed = _starters_prune(keep_rk=rk or None)
     print(f"[새 경주] 활성 3종 초기화: {rk or '전체'} ({removed}건). 히스토리 파일은 보존.")
-    return jsonify({"ok": True, "cleared": rk or "all", "removed": removed})
+    return jsonify({"ok": True, "cleared": rk or "all", "removed": removed,
+                    "startersRemoved": starters_removed})
+
+
+@app.route("/api/starters/reset", methods=["POST"])
+def starters_reset():
+    """[잔존마 방어·3번] 경주 전환 시 이전 경주 전적(starters) 정리.
+    body: {keepRaceKey?} — 주면 그 경주(+한국 PDF)만 유지, 없으면 한국 PDF 외 전부 삭제.
+    triple_store(배당)는 건드리지 않음(전적만) → 방금 전환한 새 경주 배당은 보존."""
+    keep = ((request.json or {}).get("keepRaceKey") or "").strip() or None
+    removed = _starters_prune(keep_rk=keep)
+    return jsonify({"ok": True, "startersRemoved": removed, "kept": keep or "korea만"})
 
 
 @app.route("/api/odds/triple/latest", methods=["GET", "POST"])
@@ -3672,6 +3723,27 @@ def _triple_analyze(rk, rec):
                                   -(r["otherOdds"] / max(r["favoredOdds"], 0.1))))
     reversals = reversals[:10]
 
+    # [잔존마 필터·1번] 현재 수집된 배당(복승·쌍승·단승)에 실제 등장하는 마번 집합 = 실제 출전마.
+    #   이 집합 밖 마번(전적 잔존마·이전 경주 말)은 유력마·전적·추천에서 자동 제외.
+    valid_nos = set()
+    for _k in curQ:
+        for _h in _k:
+            try:
+                valid_nos.add(int(_h))
+            except (TypeError, ValueError):
+                pass
+    for _k in curD:
+        for _h in _k:
+            try:
+                valid_nos.add(int(_h))
+            except (TypeError, ValueError):
+                pass
+    for _n in curWin:
+        try:
+            valid_nos.add(int(_n))
+        except (TypeError, ValueError):
+            pass
+
     # 4) 유력마 3마리 (상위 10개 복승 조합 등장 빈도 + 인기가중). 복승 없으면 쌍승 무순.
     base = curQ if curQ else {k: min(curD[k2] for k2 in (k, (k[1], k[0])) if k2 in curD)
                               for k in {tuple(sorted(p)) for p in curD}}
@@ -3686,6 +3758,9 @@ def _triple_analyze(rk, rec):
     if single_rank:
         merged = single_rank + [h for h in ranked if h not in single_rank]
         ranked = merged
+    # [잔존마 필터·1번] 유력마도 배당에 등장하는 마번만(배당 없는 잔존마 제외)
+    if valid_nos:
+        ranked = [h for h in ranked if h in valid_nos]
     key_horses = ranked[:3]
 
     # [1·2·4번] 핵심 이상감지 공식: 쌍승역전·복승불일치·종합신뢰도
@@ -3696,7 +3771,7 @@ def _triple_analyze(rk, rec):
     signal_confidence = _signal_confidence(excess, wx_reversals, quin_mismatch)
     # [역배열/추천게이트 공유] 전적 등급을 여기서 미리 계산 → 역배열 '전적 우수·시장 비인기' 판정에 재사용
     #   (기존엔 아래에서 계산했으나 앞당겨 재사용. 삭제 아님·계산 위치만 이동)
-    form = _form_from_starters(rk, drops, rec.get("sport"))  # 출마표2/KRA/PDF/경륜 전적(종목 오매칭 차단)
+    form = _form_from_starters(rk, drops, rec.get("sport"), valid_nos)  # 출마표2/KRA/PDF/경륜 전적(종목 오매칭 차단 + 잔존마 필터)
     # [역배열 감지] 진짜 역배열 = 쌍승역전만 · 전적 우수하나 시장 비인기는 별도 분류(form 전달)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
                                    wx_reversals, quin_mismatch, excess, form)
@@ -4390,6 +4465,7 @@ def _triple_analyze(rk, rec):
                    "win": len(curWin), "history": len(hist)},
         "drops": drops[:15], "singleDrops": single_drops[:15], "rankChanges": rank_changes, "reversals": reversals,
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
+        "validHorses": sorted(valid_nos),   # [잔존마 필터·2번] 현재 배당 등장 마번(프론트 TOP5 필터 기준)
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
 

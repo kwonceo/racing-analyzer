@@ -2940,6 +2940,16 @@
         };
       });
     }
+    // [잔존마 필터·2번] 서버가 준 현재 배당 등장 마번(validHorses)에 없는 잔존마(이전 경주 말)는 유력마 TOP5에서 제외.
+    //   validHorses가 비어있으면(배당 미수집) 필터 안 함(오검출 방지). 매칭이 전무하면 원본 유지(안전가드).
+    if (Array.isArray(a.validHorses) && a.validHorses.length && horses.length) {
+      const vset = new Set(a.validHorses.map(Number));
+      const filtered = horses.filter((h) => vset.has(Number(h.no)));
+      if (filtered.length && filtered.length !== horses.length) {
+        console.log('[잔존마 필터] TOP5: 배당 없는 마번 ' + (horses.length - filtered.length) + '두 제외');
+      }
+      if (filtered.length) horses = filtered;
+    }
     if (!horses.length) return '';
     // [2번] 확신도 우선 랭킹(있으면). 확신도=이상감지40+전적30+급락지속30 → 신호 기반 유력마.
     const confMap = (a.confidence && a.confidence.horses) ? a.confidence.horses : null;
@@ -6208,6 +6218,8 @@
         // ① 이전 경주 캐시·타임라인 즉시 초기화(잔존 방지)
         hardResetRaceState();
         _keibaOdds.lastRk = null; _keibaOdds.lastPoll = 0; _keibaOdds.lastCounts = null; _keibaOdds.lastWaiting = false;
+        // [잔존마 방어·3번] 이전 경주 전적(starters) 삭제 — 새 경주(+한국PDF)만 유지(7번/10번 잔존마 원천 차단)
+        try { fetch('/api/starters/reset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keepRaceKey: d.raceKey }) }); } catch (_) { /* */ }
         // ② 새 경주로 raceKey 갱신(패널·활성·이상감지 피드 일괄 전환)
         setActiveRaceKey(d.raceKey);
         setAnomalyPanelRace(d.raceKey);
