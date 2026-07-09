@@ -6124,7 +6124,8 @@
   // [경마 oddspark 서버 수집] Chrome 확장 없이 서버가 지방경마 복승·쌍승을 직접 조회.
   //   마감 3분전 3초·평상 30초 적응형 폴링(closingTick에서 구동). 페이지 열려 있을 때만 동작.
   const _keibaOdds = { enabled: false, lastPoll: 0, lastRk: null, busy: false,
-    lastCounts: null, lastTime: '', lastMsg: '', lastRkShown: '', pinnedRk: '' };
+    lastCounts: null, lastTime: '', lastMsg: '', lastRkShown: '', pinnedRk: '',
+    lastDetect: 0, detecting: false, lastWaiting: false };   // [경주 자동추종] 현재 경주번호 감지 상태
   // 경주 지정(pin)이 있으면 그 경주, 없으면 현재 경주 자동추종
   function _keibaTargetRk() {
     return _keibaOdds.pinnedRk || _closing.panelRk || getActiveRaceKey() || '';
@@ -6155,7 +6156,8 @@
     catch (e) { _keibaOdds.lastMsg = '조회 실패: ' + e.message; _keibaOdds.lastCounts = null; _renderKeibaStatus(); return null; }
     _keibaOdds.lastTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
     if (d.error) { _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '⚠️ ' + (d.error || ''); _renderKeibaStatus(); return d; }
-    if (d.waiting) { _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '⏳ ' + (d.reason || '실배당 대기(발매 전·마감 후)'); _renderKeibaStatus(); return d; }
+    if (d.waiting) { _keibaOdds.lastWaiting = true; _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '⏳ ' + (d.reason || '실배당 대기(발매 전·마감 후)'); _renderKeibaStatus(); return d; }
+    _keibaOdds.lastWaiting = false;
     _keibaOdds.lastCounts = d.counts || { quinella: 0, exacta: 0 };
     _renderKeibaStatus();
     try { refreshCurrentRace(); } catch (_) { /* */ }
@@ -6175,11 +6177,47 @@
       _keibaOdds.lastCounts = null; _renderKeibaStatus();
       return;
     }
-    const interval = (left <= 180000) ? 3000 : 15000;    // 마감 3분전 3초 · 평상 15초
+    // [수집 간격 단축] 마감 1분전 2초 · 3분전 3초 · 평상 15초
+    const interval = (left <= 60000) ? 2000 : (left <= 180000) ? 3000 : 15000;
     const now = Date.now();
     if (_keibaOdds.lastRk === rk && (now - _keibaOdds.lastPoll) < interval - 250) return;
     _keibaOdds.lastPoll = now; _keibaOdds.lastRk = rk; _keibaOdds.busy = true;
     Promise.resolve(fetchKeibaOdds(rk, true)).finally(() => { _keibaOdds.busy = false; });
+  }
+
+  /** [경주 자동추종] oddspark '현재 발매중 경주번호'를 감지해 경주 전환 시 raceKey 즉시 갱신 + 데이터 초기화.
+   *  원인 교정: ①경주 전환 감지 없음 ②raceKey 자동 갱신 지연 ③이전 경주 캐시 잔존.
+   *  - 경주 지정(pin)·한국경주는 자동추종 제외(명시 선택 존중). 전진(번호↑) 전환만 반영(역주행·블립 방지).
+   *  - 감지 주기: 마감 3분내/실배당 대기중 8초 · 평상 25초(oddspark 과호출 방지, 서버 15초 캐시와 병행). */
+  async function keibaDetectCurrentRace(rk, left) {
+    if (!_keibaOdds.enabled || _keibaOdds.detecting) return;
+    if (_keibaOdds.pinnedRk) return;                     // 경주 지정 시 자동추종 안 함
+    if (!rk || jpIsKoreaName(rk)) return;                // 한국 경주는 oddspark 대상 아님
+    if (!/\d+\s*경주/.test(rk)) return;                  // 경주번호 없는 raceKey 제외
+    const detIv = (left <= 180000 || _keibaOdds.lastWaiting) ? 8000 : 25000;
+    const now = Date.now();
+    if ((now - _keibaOdds.lastDetect) < detIv) return;
+    _keibaOdds.lastDetect = now; _keibaOdds.detecting = true;
+    try {
+      const d = await (await fetch('/api/keiba/current', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }),
+      })).json();
+      // 전진 전환만 반영(현재번호 > 이전번호). 감지 실패·동일·역주행은 무시.
+      if (d && d.ok && d.changed && d.raceKey && d.currentRace > (d.prevRace || 0) && d.raceKey !== rk) {
+        console.log('[경주 자동추종] 전환 감지: ' + rk + ' → ' + d.raceKey + ' (발매중 R' + d.currentRace + ')');
+        // ① 이전 경주 캐시·타임라인 즉시 초기화(잔존 방지)
+        hardResetRaceState();
+        _keibaOdds.lastRk = null; _keibaOdds.lastPoll = 0; _keibaOdds.lastCounts = null; _keibaOdds.lastWaiting = false;
+        // ② 새 경주로 raceKey 갱신(패널·활성·이상감지 피드 일괄 전환)
+        setActiveRaceKey(d.raceKey);
+        setAnomalyPanelRace(d.raceKey);
+        _keibaOdds.lastMsg = '🔄 경주 전환: ' + d.raceKey + ' (자동추종)';
+        try { notify('🔄 경주 전환 감지 → ' + d.raceKey + ' 자동 추종', true); } catch (_) { /* */ }
+        // ③ 새 경주 배당 즉시 1회 수집(전환 지연 제거)
+        Promise.resolve(fetchKeibaOdds(d.raceKey, false)).catch(() => { /* */ });
+      }
+    } catch (_) { /* 감지 실패는 조용히(다음 주기 재시도) */ }
+    finally { _keibaOdds.detecting = false; }
   }
 
   /** raceKey → 짧은 라벨(예: '2026-07-05_서울_5' → '2026-07-05 서울 5R') */
@@ -6331,7 +6369,10 @@
       dlMs = _closing.manualDeadlineMs;
     }
     // [경마 oddspark 서버 수집] 마감시각 유무와 무관하게 적응형 폴링(없으면 평상 30초). 확장 없이 동작.
-    try { keibaOddsAutoPoll(rk, dlMs ? (dlMs - Date.now()) : Infinity); } catch (_) { /* */ }
+    const _keibaLeft = dlMs ? (dlMs - Date.now()) : Infinity;
+    // [경주 자동추종] 현재 발매중 경주번호 감지 → 전환 시 raceKey 즉시 갱신(폴링보다 먼저 실행해 새 경주로 수집)
+    try { keibaDetectCurrentRace(rk, _keibaLeft); } catch (_) { /* */ }
+    try { keibaOddsAutoPoll(_closing.panelRk || rk, _keibaLeft); } catch (_) { /* */ }
     if (!dlMs) return;
     const left = dlMs - Date.now();
     const key = rk || String(dlMs);

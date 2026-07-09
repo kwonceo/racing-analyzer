@@ -9707,6 +9707,68 @@ def keiba_odds():
                     "quinella": q, "exacta": x, "ingest": res})
 
 
+_KEIBA_CURRENT_CACHE = {}   # {(op,sp,ymd): (t, race_no)} — 현재 발매중 경주번호 단기 캐시(15초)
+
+
+def _keiba_current_raceno(op_track, sponsor, ymd, ttl=15):
+    """[경주 자동추종] oddspark RaceList.do(raceNb 미지정) 응답 <title>이 '현재 발매중 경주'로 자동 포커스됨
+    (예: '…園田競馬 11R…' → 11). 이 신호로 현재 경주번호를 단일 요청으로 감지(개최장별 독립).
+    라이브 검증: 園田=11R·笠松=10R 동시 확인. 15초 메모리 캐시(oddspark 과호출 방지)."""
+    key = (str(op_track), str(sponsor), str(ymd))
+    ck = _KEIBA_CURRENT_CACHE.get(key)
+    if ck and (time.time() - ck[0]) < ttl:
+        return ck[1]
+    race = None
+    try:
+        html = _keirin_fetch("https://www.oddspark.com/keiba/RaceList.do"
+                             "?raceDy=%s&opTrackCd=%s&sponsorCd=%s" % (ymd, op_track, sponsor))
+        mt = re.search(r"<title>(.*?)</title>", html, re.S)
+        title = mt.group(1) if mt else ""
+        m = re.search(r"競馬[\s　]*(\d+)\s*R", title) or re.search(r"(\d+)\s*R", title)
+        if m:
+            n = int(m.group(1))
+            if 1 <= n <= 12:
+                race = n
+    except Exception as e:
+        print("[경주 자동추종] 현재 경주 감지 실패:", e)
+    _KEIBA_CURRENT_CACHE[key] = (time.time(), race)
+    return race
+
+
+@app.route("/api/keiba/current", methods=["GET", "POST"])
+def keiba_current():
+    """[경주 자동추종] 지정 경마장의 '현재 발매중 경주번호'를 oddspark에서 감지해 반환.
+    프론트가 폴링해 경주 전환 시 raceKey를 즉시 갱신(이전 경주 배당 잔존·지연 방지).
+    body: {raceKey | venue, raceDy?(YYYYMMDD·기본 오늘), opTrackCd?·sponsorCd?}.
+    반환: {ok, venue, currentRace, raceKey(현재번호로 재구성), track}."""
+    body = request.json if request.method == "POST" else None
+    body = body or request.args or {}
+    rk = (body.get("raceKey") or "").strip()
+    venue = (body.get("venue") or "").strip()
+    num = None
+    if rk and not venue:
+        venue, num = _area_num(rk)
+    ymd = (str(body.get("raceDy") or "").strip() or time.strftime("%Y%m%d", time.localtime()))
+    op_track, sponsor = body.get("opTrackCd"), body.get("sponsorCd")
+    if not (op_track and sponsor):
+        codes = _keiba_resolve_track(venue, ymd)
+        if not codes:
+            return jsonify({"ok": False, "error": "경마장 '%s' 이(가) %s oddspark 개최 목록에 없습니다."
+                            % (venue or rk, ymd), "scheduled": list(_keiba_schedule(ymd).keys())}), 422
+        op_track, sponsor = codes
+    cur = _keiba_current_raceno(op_track, sponsor, ymd)
+    if not cur:
+        return jsonify({"ok": False, "error": "현재 발매중 경주를 감지하지 못했습니다.", "venue": venue}), 422
+    # raceKey 를 현재 경주번호로 재구성(경마장명·날짜 유지, 'N경주' 숫자만 교체)
+    new_rk = rk
+    if rk and num:
+        new_rk = re.sub(r"\d+(\s*경주)", "%d\\1" % cur, rk, count=1)
+    return jsonify({"ok": True, "venue": venue, "currentRace": cur,
+                    "prevRace": num, "changed": bool(num and num != cur),
+                    "raceKey": new_rk,
+                    "track": {"opTrackCd": op_track, "sponsorCd": sponsor}})
+
+
 @app.route("/api/keiba/schedule", methods=["GET", "POST"])
 def keiba_schedule_ep():
     """그날 oddspark 지방경마 개최 경마장·코드 목록(디버그·프론트 확인용)."""
