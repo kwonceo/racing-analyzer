@@ -6034,9 +6034,25 @@ def _learn_upset(rk, an, top3, date_str=None):
     if not form:
         return None
     drops = an.get("drops") or []
-    single_nos = {d.get("no") for d in (an.get("singleDrops") or [])}
-    key_nos = {h.get("no") for h in (an.get("keyHorses") or [])}
-    anom_no = (an.get("anomalyHorse") or {}).get("no")
+
+    def _hno(x):
+        # [타입 가드] 말번호를 int/str/dict 어느 형태든 안전 추출. keyHorses·anomalyHorse가
+        #   정수 리스트/정수(딕셔너리 아님)로 와도 'int object has no attribute get' 방지.
+        if isinstance(x, dict):
+            return x.get("no")
+        if isinstance(x, bool):
+            return None
+        if isinstance(x, (int, float)):
+            return int(x)
+        if isinstance(x, str) and x.lstrip("-").isdigit():
+            return int(x)
+        return None
+
+    single_nos = {_hno(d) for d in (an.get("singleDrops") or [])}
+    single_nos.discard(None)
+    key_nos = {_hno(h) for h in (an.get("keyHorses") or [])}
+    key_nos.discard(None)
+    anom_no = _hno(an.get("anomalyHorse"))
     top3 = [int(x) for x in (top3 or []) if str(x).lstrip("-").isdigit()]
     d = _upset_load()
     stats = d["condition_stats"]
