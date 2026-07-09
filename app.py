@@ -1132,12 +1132,17 @@ def _sanitize_starters(horses):
     return [by_no[k] for k in sorted(by_no)]
 
 
-def _form_from_starters(rk, drops):
+def _form_from_starters(rk, drops, sport=None):
     """저장된 전적으로 마필 점수·등급 계산. 배당 급락마는 이상감지 상향 반영.
     - 일본(출마표2): recent 착순으로 점수 재계산
-    - 한국(PDF): 프론트에서 이미 계산한 formScore/totalScore를 그대로 사용(마명·기수 한글 유지)."""
+    - 한국(PDF): 프론트에서 이미 계산한 formScore/totalScore를 그대로 사용(마명·기수 한글 유지).
+    - 경륜/경정/바이크(6명 종목): 한국경마(source=korea) 전적은 오매칭이므로 무시(전적없음이 정상).
+      경륜 전적은 oddspark 출마표 분석(source=keirin)으로만 채운다."""
     rec = _starters_load().get(rk)
     if not rec or not rec.get("horses"):
+        return None
+    # [오매칭 차단] 6명 종목(경륜·경정·바이크)에 한국경마 전적이 raceKey 충돌로 들어간 경우 사용 금지.
+    if sport in ("cycle", "boat", "bike") and rec.get("source") == "korea":
         return None
     anomaly_by_no = {}
     for d in drops or []:
@@ -3641,7 +3646,7 @@ def _triple_analyze(rk, rec):
     signal_confidence = _signal_confidence(excess, wx_reversals, quin_mismatch)
     # [역배열/추천게이트 공유] 전적 등급을 여기서 미리 계산 → 역배열 '전적 우수·시장 비인기' 판정에 재사용
     #   (기존엔 아래에서 계산했으나 앞당겨 재사용. 삭제 아님·계산 위치만 이동)
-    form = _form_from_starters(rk, drops)  # 출마표2/KRA/PDF 전적 등급(있으면)
+    form = _form_from_starters(rk, drops, rec.get("sport"))  # 출마표2/KRA/PDF/경륜 전적(종목 오매칭 차단)
     # [역배열 감지] 진짜 역배열 = 쌍승역전만 · 전적 우수하나 시장 비인기는 별도 분류(form 전달)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
                                    wx_reversals, quin_mismatch, excess, form)
