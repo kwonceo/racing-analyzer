@@ -4576,6 +4576,14 @@
     add(el, 'bet-box', `<h3>💰 베팅 추천 (복승 / 삼복승 · 단승 없음)</h3>
       ${betLines(bd.quinella, '복승')}${betLines(bd.trifecta, '삼복승')}`);
 
+    // [결정론] pastRaces 기반 강제 편성(2착패턴) — 있을 때만
+    const det = report.deterministic;
+    if (det && (det.mustTrifecta || []).length) {
+      add(el, 'bet-box', `<h3>🔒 결정론 강제 편성 (전적 기반)</h3>
+        ${det.mustTrifecta.map((m) => `<div class="bet-line"><span class="bet-type">${m.no}번 ${esc(m.name)}</span><span>${esc(m.msg)}</span></div>`).join('')}
+        <p class="hint">동일 거리/코스 2착 2회↑ 마필을 삼복승에 결정론적으로 강제 포함했습니다(AI 추천과 별개 보험).</p>`);
+    }
+
     // 종합 분석
     if (report.analysis) add(el, 'panel-card', `<h3>종합 분석</h3><p class="hint">${esc(report.analysis)}</p>`);
   }
@@ -4586,11 +4594,17 @@
   /** 추출된 출전마 → /api/score 호출 → 점수·등급 패널 렌더 */
   async function renderFormScores(race, sheet) {
     const raceCtx = { distance: (race && race.distance) || '', course: '', grade: '' };
-    const horses = (sheet.horses || []).map((h) => ({
-      no: h.horseNum, name: h.horseName, jockey: h.jockey,
-      recentPlacings: h.recentPlacings || [],
-      jockey3mPlaceRate: (state.jockeyStats[h.jockey] || {}).placeRate,
-    }));
+    const horses = (sheet.horses || []).map((h) => {
+      const pr = h.pastRaces || [];
+      return {
+        no: h.horseNum, name: h.horseName, jockey: h.jockey, weight: h.weight,
+        recentPlacings: h.recentPlacings || [],
+        pastRaces: pr,                                    // [2~6] 거리/기수/부담중량/2착패턴 활성화
+        lastJockey: pr[0] && pr[0].jockey,
+        lastWeight: pr[0] && pr[0].weight,
+        jockey3mPlaceRate: (state.jockeyStats[h.jockey] || {}).placeRate,
+      };
+    });
     if (!horses.length) return null;
     const res = await Analysis.scoreHorses(raceCtx, horses);
     renderFormScorePanel(res.horses || []);
@@ -4608,6 +4622,10 @@
         <td>${(h.recentPlacings || []).join('·') || '-'}</td>
         <td>${h.baseScore}</td><td>${h.courseBonus ? '+' + h.courseBonus : '-'}</td>
         <td>${h.jockeyBonus ? '+' + h.jockeyBonus : '-'}</td>
+        <td>${h.distanceBonus ? (h.distanceBonus > 0 ? '+' : '') + h.distanceBonus : '-'}</td>
+        <td>${h.jockeyChangeBonus ? (h.jockeyChangeBonus > 0 ? '+' : '') + h.jockeyChangeBonus : '-'}</td>
+        <td>${h.weightBonus ? (h.weightBonus > 0 ? '+' : '') + h.weightBonus : '-'}</td>
+        <td>${esc(h.runningStyle || '-')}</td>
         <td><b>${h.totalScore}</b></td>
         <td>${badge(h.grade)}${up}</td>
         <td>${flags || ''}</td>
@@ -4616,9 +4634,9 @@
     const el = document.createElement('div');
     el.className = 'panel-card';
     el.innerHTML = `<h3>📊 전적 자동 점수 · 등급 (Phase 3)</h3>
-      <p class="hint">전적 가중평균(3-1) + 코스적성(3-2) + 기수보너스(3-3) → 총점 · 사분위 등급(3-5, 이상감지 보정 포함) · 특수플래그(3-4)</p>
+      <p class="hint">전적 가중평균(3-1) + 코스적성(3-2) + 기수보너스(3-3) + 거리변화·기수교체·부담중량(pastRaces) → 총점 · 사분위 등급(3-5, 이상감지 보정 포함) · 특수플래그(3-4)</p>
       <table class="data-table">
-        <thead><tr><th>마번</th><th>마명</th><th>기수</th><th>최근착순</th><th>전적</th><th>코스</th><th>기수</th><th>총점</th><th>등급</th><th>플래그</th></tr></thead>
+        <thead><tr><th>마번</th><th>마명</th><th>기수</th><th>최근착순</th><th>전적</th><th>코스</th><th>기수</th><th>거리</th><th>기수교체</th><th>부담</th><th>각질</th><th>총점</th><th>등급</th><th>플래그</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
     host.appendChild(el);
