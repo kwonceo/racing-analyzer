@@ -1521,6 +1521,16 @@ def compression_stats():
                     "note": "유력마 TOP3 중 저배당 밀집(축 패턴) 발생 경주의 복승(2두 정확) 적중률. 급락 결합 시 최강."})
 
 
+@app.route("/api/third-place/stats", methods=["GET"])
+def third_place_stats():
+    """[배당 3착 자동 발굴 5번] 신호 유형별 고배당 3착 후보의 입상·정확3착 적중률."""
+    hr = _third_place_hitrate()
+    total = len(_third_place_stats_load().get("races", {}))
+    rows = sorted(hr.values(), key=lambda r: (-(r.get("exact3rdRate") or -1), -(r.get("fired") or 0)))
+    return jsonify({"buckets": rows, "raceCount": total,
+                    "note": "저배당 압축 축 2두 확정 후 고배당 3착 후보(급락/역배열/전적/연속하락)의 3착·입상 적중률."})
+
+
 @app.route("/api/after-close/cases", methods=["GET"])
 def after_close_cases():
     """[4번] 마감(T-0) 후 감지되어 베팅 반영 불가했던 신호 케이스 목록 → 수집 간격 단축 필요성 근거."""
@@ -2544,6 +2554,86 @@ def _compression_hitrate():
         return {}
 
 
+# ───────── [배당 3착 자동 발굴 5번] 고배당 3착 후보 신호 유형별 3착/입상 적중률 누적 ─────────
+THIRD_PLACE_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "third_place_stats.json")
+
+
+def _third_place_stats_load():
+    try:
+        return json.load(open(THIRD_PLACE_STATS_FILE, encoding="utf-8"))
+    except Exception:
+        return {"races": {}}
+
+
+def _third_place_stats_save(d):
+    os.makedirs(os.path.dirname(THIRD_PLACE_STATS_FILE), exist_ok=True)
+    json.dump(d, open(THIRD_PLACE_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _tp_reason_bucket(reason):
+    """근거 문자열 → 신호 유형 버킷(급락/역배열/전적/연속하락/이상감지)."""
+    r = reason or ""
+    if "급락" in r:
+        return "급락"
+    if "역배열" in r:
+        return "역배열"
+    if "전적" in r:
+        return "전적우수"
+    if "연속하락" in r:
+        return "연속하락"
+    return "이상감지"
+
+
+def _learn_third_place(rk, date, an, top3):
+    """[5번] 3착 발굴 후보가 실제 3착/입상했는지 신호 유형별 누적. 경주별 멱등."""
+    try:
+        tp = (an or {}).get("thirdPlaceHunt") or {}
+        cands = tp.get("candidates") or []
+        if not cands:
+            return
+        top3list = [int(x) for x in (top3 or [])[:3] if x is not None]
+        top3set = set(top3list)
+        third = top3list[2] if len(top3list) >= 3 else None
+        recs = []
+        for c in cands:
+            no = int(c.get("no"))
+            recs.append({"no": no, "bucket": _tp_reason_bucket(c.get("reason")),
+                         "place": (no in top3set), "exact3rd": (third is not None and no == third)})
+        d = _third_place_stats_load()
+        races = d.setdefault("races", {})
+        rid = (date or "") + "|" + rk
+        races[rid] = {"raceKey": rk, "date": date, "cands": recs, "t": time.time()}
+        if len(races) > 5000:
+            for k in sorted(races, key=lambda k: races[k].get("t", 0))[:len(races) - 5000]:
+                races.pop(k, None)
+        _third_place_stats_save(d)
+    except Exception as e:
+        print("[3착발굴학습] 실패:", e)
+
+
+def _third_place_hitrate():
+    """신호 유형별 3착 후보의 입상(1~3착)·정확3착 적중률 집계."""
+    try:
+        agg = {}
+        for r in _third_place_stats_load().get("races", {}).values():
+            for c in (r.get("cands") or []):
+                b = c.get("bucket") or "기타"
+                a = agg.setdefault(b, {"fired": 0, "place": 0, "exact3rd": 0})
+                a["fired"] += 1
+                if c.get("place"):
+                    a["place"] += 1
+                if c.get("exact3rd"):
+                    a["exact3rd"] += 1
+        out = {}
+        for b, a in agg.items():
+            out[b] = {"bucket": b, "fired": a["fired"], "place": a["place"], "exact3rd": a["exact3rd"],
+                      "placeRate": round(a["place"] / a["fired"] * 100) if a["fired"] else None,
+                      "exact3rdRate": round(a["exact3rd"] / a["fired"] * 100) if a["fired"] else None}
+        return out
+    except Exception:
+        return {}
+
+
 # ───────── [집중신호 오판 학습] 초과급락 신호말이 입상했는데 노이즈 판정으로 추천 누락된 사례 ─────────
 SIGNAL_LESSON_FILE = os.path.join(os.path.dirname(__file__), "data", "signal_lessons.json")
 
@@ -3429,6 +3519,92 @@ def _compression_pattern(key_horses, curWin, curQ, strong_signals=None):
                 "withDrop": with_drop, "withReversal": with_rev, "note": note}
     except Exception:
         return {"detected": False}
+
+
+# ───────── [배당 3착 자동 발굴] 저배당 압축(축 2두) 확정 시 삼복승 3착 자리를 고배당 말에서 발굴 ─────────
+# 우선순위: ①급락 감지 고배당(유형3·5) ②역배열 감지 고배당 ③전적 우수+고배당 ④연속하락 고배당.
+# 배당 7~50배(고배당) 우선, 상위 2~3두 → 삼복승 보험(축2두+후보) 편성.
+_TP_CONF = {1: "높음", 2: "중", 3: "중", 4: "중", 5: "중"}
+_TP_ICON = {1: "\U0001f534", 2: "\U0001f504", 3: "\U0001f4ca", 4: "\U0001f4c9", 5: "\U0001f6a8"}
+
+
+def _third_place_hunt(compression_pattern, strong_signals, anomaly_horse, wx_reversals,
+                      form, curWin, curQ, drops=None, valid_nos=None):
+    """[배당 3착 자동 발굴] 압축 축 2두 + 고배당 3착 후보 → 삼복승 보험 편성. 추정배당은 호출부에서 채움."""
+    try:
+        cp = compression_pattern or {}
+        if not cp.get("detected"):
+            return {"active": False}
+        axis = [int(x) for x in (cp.get("combo") or [])]
+        if len(axis) != 2:
+            return {"active": False}
+        axis_set = set(axis)
+        sigs = (strong_signals or {}).get("signals") or []
+
+        def horses_of(*types):
+            s = set()
+            for x in sigs:
+                if x.get("type") in types:
+                    for h in (x.get("horses") or []):
+                        s.add(int(h))
+            return s
+        drop_horses = horses_of(3, 5)                 # ① 급락 계열
+        rev_sig_horses = horses_of(2, 6)              # ② 역배열 신호
+        streak_horses = horses_of(1)                  # ④ 연속하락
+        rev_challengers = set(int(r["challenger"]) for r in (wx_reversals or []) if r.get("challenger") is not None)
+        form_map = {int(h.get("no")): h for h in (form or []) if h.get("no") is not None}
+        # 말별 최대 급락폭(표시용)
+        drop_pct = {}
+        for d in (drops or []):
+            for h in (d.get("combo") or []):
+                p = d.get("pct")
+                if p is not None:
+                    h = int(h)
+                    if h not in drop_pct or p < drop_pct[h]:
+                        drop_pct[h] = p
+
+        cand = {}
+
+        def consider(no, priority, reason):
+            no = int(no)
+            if no in axis_set:
+                return
+            if valid_nos and no not in valid_nos:
+                return
+            od = _horse_repr_odds(no, curWin, curQ)
+            if od is None:
+                return
+            od = round(float(od), 1)
+            if od < 5:                                # 저배당(축 후보)은 3착 발굴 대상 아님
+                return
+            cur = cand.get(no)
+            if cur is None or priority < cur["priority"]:
+                cand[no] = {"no": no, "odds": od, "priority": priority, "reason": reason,
+                            "conf": _TP_CONF.get(priority, "중"), "icon": _TP_ICON.get(priority, ""),
+                            "inBand": 7 <= od <= 50, "dropPct": drop_pct.get(no)}
+        for no in drop_horses:                        # ① 급락 감지 고배당
+            consider(no, 1, "급락 감지" + ((" " + str(drop_pct[no]) + "%") if drop_pct.get(no) is not None else ""))
+        for no in (rev_sig_horses | rev_challengers):  # ② 역배열 감지 고배당
+            consider(no, 2, "역배열 감지")
+        for no, h in form_map.items():                # ③ 전적 우수 + 고배당
+            fs = h.get("totalScore")
+            if fs is None:
+                fs = h.get("formScore")
+            if fs is not None and fs >= 60:
+                consider(no, 3, "전적 우수(" + str(round(fs)) + ")")
+        for no in streak_horses:                      # ④ 연속하락 고배당
+            consider(no, 4, "연속하락")
+        if anomaly_horse is not None:                 # 폴백: 이상감지말
+            consider(anomaly_horse, 5, "이상감지말")
+
+        ranked = sorted(cand.values(), key=lambda c: (0 if c["inBand"] else 1, c["priority"], c["odds"]))
+        top = ranked[:3]
+        trios = [{"combo": sorted(axis + [c["no"]]), "cand": c["no"], "reason": c["reason"],
+                  "conf": c["conf"], "expOddsEst": None} for c in top]
+        return {"active": bool(top), "axis": axis, "mainCombo": sorted(axis),
+                "candidates": top, "trios": trios}
+    except Exception:
+        return {"active": False}
 
 
 # ───────── [BMED 매트릭스 베팅 전략] 상황별 5전략 자동선택 + 원금보전 배분 + 기대환수율 ─────────
@@ -4390,6 +4566,18 @@ def _triple_analyze(rk, rec):
     if anomaly_horse is None:
         anomaly_horse = ranked[3] if len(ranked) > 3 else (key_horses[-1] if key_horses else None)
 
+    # [배당 3착 자동 발굴] 저배당 압축(축 2두) 확정 시 삼복승 3착 자리를 고배당 말에서 발굴(마감 전만)
+    third_place_hunt = _third_place_hunt(compression_pattern, strong_signals,
+                                         (None if after_close else anomaly_horse), wx_reversals,
+                                         form, curWin, curQ, drops, valid_nos)
+    if third_place_hunt.get("active"):
+        for _tr in third_place_hunt.get("trios", []):
+            try:
+                _ev, _ = _trio_est(_tr["combo"])   # 구성 복승 3쌍 기하평균×2 추정
+                _tr["expOddsEst"] = round(_ev, 1) if _ev else None
+            except Exception:
+                _tr["expOddsEst"] = None
+
     # 5) 베팅 추천: 복승 메인/보조 + 삼복승 메인/보험1/보험2 + 예산 배분율(alloc %)
     trio_map = _odds_map_un(trio)
 
@@ -4991,6 +5179,7 @@ def _triple_analyze(rk, rec):
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
         "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용
         "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
+        "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
 
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
@@ -5699,6 +5888,7 @@ def _build_analysis_log(rk, an=None):
         "anomaly_history": anomaly_history,   # [2번] 경주 전체 이상감지 시계열(시간·조합·급락%, 경주별 분리 저장)
         "strong_signals": an.get("strongSignals"),   # [강한 신호 8유형] 유형별 학습(적중률 누적)용 스냅샷
         "compression_pattern": an.get("compressionPattern"),   # [저배당 압축 패턴] 축 패턴 스냅샷
+        "third_place_hunt": an.get("thirdPlaceHunt"),   # [배당 3착 자동 발굴] 3착 후보 스냅샷
         "horses": horses,
         "elimination": {"candidates": cand, "eliminated": elim_no, "elimination_reasons": elim_reasons},
         "final_recommendation": final,
@@ -7619,6 +7809,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _learn_compression(rk, doc.get("date"), an, top3)
     except Exception as e:
         print("[압축패턴학습] 실패:", e)
+
+    # [배당 3착 자동 발굴 5번] 3착 후보 신호 유형별 입상/정확3착 적중률 누적(경주별 멱등)
+    try:
+        _learn_third_place(rk, doc.get("date"), an, top3)
+    except Exception as e:
+        print("[3착발굴학습] 실패:", e)
 
     # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
     rec_bets = an.get("betRecommend", [])

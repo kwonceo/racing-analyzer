@@ -403,6 +403,24 @@
             '복승: ' + cp.combo[0] + '+' + cp.combo[1] + ' 자신있게'));
         }
         if (cp.note) box.appendChild(mk('div', 'margin-top:2px;font-size:11px;font-weight:700;color:' + accent, '✅ ' + cp.note));
+        // [배당 3착 자동 발굴] 축 2두 + 고배당 3착 후보 → 삼복승 보험
+        var tp = d && d.thirdPlaceHunt;
+        if (tp && tp.active && (tp.candidates || []).length) {
+          box.appendChild(mk('div', 'margin-top:5px;color:#c4b5fd;font-weight:700;font-size:11px', '🎯 삼복승 3착 후보'));
+          tp.candidates.forEach(function (c, i) {
+            var row = mk('div', 'margin:1px 0;font-size:11px');
+            row.appendChild(mk('span', 'color:#94a3b8', (i + 1) + '순위 '));
+            row.appendChild(mk('span', 'font-weight:800;color:#a78bfa', c.no + '번'));
+            row.appendChild(mk('span', 'margin-left:4px;color:#cbd5e1', '(' + c.odds + '배)'));
+            row.appendChild(mk('span', 'margin-left:5px;color:#fbbf24', (c.icon || '') + ' ' + c.reason + ' (신뢰 ' + c.conf + ')'));
+            box.appendChild(row);
+          });
+          (tp.trios || []).forEach(function (t) {
+            var od = (t.expOddsEst != null) ? ('  추정 ' + t.expOddsEst + '배') : '';
+            box.appendChild(mk('div', 'margin:1px 0;font-weight:800;color:#a78bfa;font-size:11px',
+              '삼복승: ' + t.combo.join('+') + od));
+          });
+        }
         panel.appendChild(box);
       } catch (_) { /* */ }
     }
