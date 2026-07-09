@@ -21,6 +21,8 @@
     var enabled = false, killed = false, timer = null;
     var savedPos = null;   // [보완#2] 사용자가 드래그해 옮긴 패널 위치({left,top}) — chrome.storage 에 저장/복원
     var soundOn = false, lastSoundKey = '';   // [보완#3] 강조 팝업 알림음 옵션(기본 off) + 중복 방지
+    // [강한 신호 8유형·막판 보존] T-2분 이후 감지된 강신호를 경주 종료 후에도 유지(새 경주 rk 변경 시에만 초기화)
+    var preservedSig = null, preservedRk = '', preservedLabel = '';
 
     // [보완#3] 중요 신호 강조 알림음 — 짧은 2단 삑(Web Audio). 실패는 무시(무해).
     function beep() {
@@ -332,6 +334,52 @@
       } catch (_) { /* 강조 팝업 실패는 무시 */ }
     }
 
+    // ── [강한 신호 8유형] 강조 박스 + 막판 보존(경주 종료 후 유지) ──────────
+    var STRONG_LEVEL_COLOR = { '강력': '#dc2626', '복승': '#f59e0b', '보조': '#3b82f6' };
+    function appendStrongBox(panel, ss, preserved, label) {
+      try {
+        if (!ss || !ss.signals || !ss.signals.length) return;
+        var lvl = ss.recommendLevel || '';
+        var accent = preserved ? '#38d39f' : (STRONG_LEVEL_COLOR[lvl] || '#dc2626');
+        var box = mk('div', 'margin:4px 0 7px;padding:7px 9px;border:2px solid ' + accent +
+          ';border-radius:8px;background:rgba(220,38,38,' + (preserved ? '.10' : '.16') + ')');
+        box.appendChild(mk('div', 'font-weight:900;font-size:13px;color:' + accent,
+          preserved ? '📌 마감 전 주요 신호 (보존)' : '🔴 강한 신호 감지!'));
+        if (label) box.appendChild(mk('div', 'color:#94a3b8;font-size:10px;margin-bottom:2px', label));
+        ss.signals.slice(0, 6).forEach(function (s) {
+          var dot = s.level === 'red' ? '🔴' : '🟠';
+          var row = mk('div', 'margin:2px 0');
+          row.appendChild(mk('span', 'font-weight:700;font-size:11px;color:' + (s.level === 'red' ? '#fca5a5' : '#fbbf24'),
+            dot + ' 유형' + s.type + ' ' + s.label));
+          if (s.detail) row.appendChild(mk('div', 'color:#cbd5e1;font-size:11px;margin-left:14px', s.detail));
+          box.appendChild(row);
+        });
+        if (lvl) {
+          var recTxt = ss.dualConverge ? '→ 이중수렴 · 강력 추천'
+            : (lvl === '강력' ? '→ 강력 추천' : (lvl === '복승' ? '→ 복승 추천' : '→ 보조 추천'));
+          box.appendChild(mk('div', 'margin-top:3px;font-weight:800;color:' + accent, recTxt + ' (' + ss.count + '개 신호)'));
+        }
+        panel.appendChild(box);
+      } catch (_) { /* */ }
+    }
+    // 라이브 강신호 표시 + T-2분 이후 감지분 보존(경주 종료·데이터 소멸 후에도 유지)
+    function renderStrongSignals(panel, d, deadline) {
+      try {
+        var ss = d && d.strongSignals;
+        var rk = (d && d.raceKey) || '';
+        if (rk && rk !== preservedRk) { preservedRk = rk; preservedSig = null; preservedLabel = ''; }   // 새 경주만 초기화
+        var leftMs = deadline ? (deadline - Date.now()) : null;
+        var hasLive = !!(ss && ss.signals && ss.signals.length);
+        // [4번] T-2분 이내 강신호 → 보존(막판 신호 사라짐 방지 · 유형3 마감직전 대급락 포함)
+        if (hasLive && leftMs != null && leftMs <= 120000) {
+          preservedSig = ss;
+          preservedLabel = leftMs > 0 ? ('T-' + Math.max(1, Math.round(leftMs / 60000)) + '분경 감지 · 보존') : '마감 직전 감지 · 보존';
+        }
+        if (hasLive) appendStrongBox(panel, ss, false, '');       // 라이브 강신호
+        else if (preservedSig) appendStrongBox(panel, preservedSig, true, preservedLabel);  // 경주 종료 후 보존
+      } catch (_) { /* */ }
+    }
+
     // 패널 내용 갱신 (div/span 만 사용 · textContent 기반)
     function updatePanel(panel, st) {
       try {
@@ -391,6 +439,9 @@
           panel.appendChild(cdRow);
           if (phase === 'blink') startCdBlink(); else stopCdBlink();   // T-30초 깜빡임
         } else { stopCdBlink(); }
+
+        // [강한 신호 8유형 · 막판 보존] 라이브 강신호 + 경주 종료 후 보존 박스(d 없어도 유지)
+        renderStrongSignals(panel, d, deadline);
 
         if (!d) {
           panel.appendChild(mk('div', 'color:#94a3b8', '분석 대기 중 — 배당 수집·이상감지가 실행되면 표시됩니다.'));
