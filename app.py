@@ -1531,6 +1531,14 @@ def third_place_stats():
                     "note": "저배당 압축 축 2두 확정 후 고배당 3착 후보(급락/역배열/전적/연속하락)의 3착·입상 적중률."})
 
 
+@app.route("/api/high-odds-companion/stats", methods=["GET"])
+def high_odds_companion_stats():
+    """[고배당 동반 패턴 4번] 고배당(7배+) 1착 경주 중 3착 내 다른 고배당 포함 비율."""
+    hr = _high_odds_companion_hitrate()
+    return jsonify({**hr,
+                    "note": "고배당(7배+) 1착 경주만 분모. 3착 내 다른 고배당 포함 비율 → 참고 추천 신뢰도."})
+
+
 @app.route("/api/after-close/cases", methods=["GET"])
 def after_close_cases():
     """[4번] 마감(T-0) 후 감지되어 베팅 반영 불가했던 신호 케이스 목록 → 수집 간격 단축 필요성 근거."""
@@ -2552,6 +2560,62 @@ def _compression_hitrate():
         }
     except Exception:
         return {}
+
+
+# ───────── [고배당 동반 패턴 4번] 고배당 1착 경주 중 3착 내 다른 고배당 포함 비율 누적 ─────────
+HIGH_ODDS_COMPANION_FILE = os.path.join(os.path.dirname(__file__), "data", "high_odds_companion_stats.json")
+HIGH_ODDS_COMPANION_THRESH = 7.0   # 고배당 기준(대표배당 7배+)
+
+
+def _high_odds_companion_stats_load():
+    try:
+        return json.load(open(HIGH_ODDS_COMPANION_FILE, encoding="utf-8"))
+    except Exception:
+        return {"races": {}}
+
+
+def _high_odds_companion_stats_save(d):
+    os.makedirs(os.path.dirname(HIGH_ODDS_COMPANION_FILE), exist_ok=True)
+    json.dump(d, open(HIGH_ODDS_COMPANION_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _learn_high_odds_companion(rk, date, top3, rec, high_thresh=HIGH_ODDS_COMPANION_THRESH):
+    """[4번] 1착이 고배당(7배+)인 경주만 분모로, 2·3착에 다른 고배당(7배+)이 있었는지 누적. 경주별 멱등.
+      → '고배당 1착 시 3착 내 고배당 포함 비율' 산출(참고 추천 신뢰도 근거)."""
+    try:
+        top3i = [int(x) for x in (top3 or [])[:3] if x is not None]
+        if not top3i:
+            return
+        repr_map, _, _ = _repr_odds_from_rec(rec or {})
+        first = top3i[0]
+        fo = repr_map.get(first)
+        if not fo or fo < high_thresh:
+            return                      # 고배당 1착 경주만 분모(저배당 1착은 대상 아님)
+        others = top3i[1:3]
+        comp = [h for h in others if (repr_map.get(h) or 0) >= high_thresh]
+        d = _high_odds_companion_stats_load()
+        races = d.setdefault("races", {})
+        rid = (date or "") + "|" + rk
+        races[rid] = {"raceKey": rk, "date": date, "firstOdds": round(float(fo), 1),
+                      "companion": bool(comp), "companions": comp, "t": time.time()}
+        if len(races) > 5000:
+            for k in sorted(races, key=lambda k: races[k].get("t", 0))[:len(races) - 5000]:
+                races.pop(k, None)
+        _high_odds_companion_stats_save(d)
+    except Exception as e:
+        print("[고배당동반학습] 실패:", e)
+
+
+def _high_odds_companion_hitrate():
+    """고배당 1착 경주 중 3착 내 다른 고배당 포함 비율. 반환 {races,hits,rate,reliable}."""
+    try:
+        races = list(_high_odds_companion_stats_load().get("races", {}).values())
+        n = len(races)
+        h = sum(1 for r in races if r.get("companion"))
+        return {"races": n, "hits": h, "rate": (round(h / n * 100) if n else None),
+                "reliable": n >= 10}
+    except Exception:
+        return {"races": 0, "hits": 0, "rate": None, "reliable": False}
 
 
 # ───────── [배당 3착 자동 발굴 5번] 고배당 3착 후보 신호 유형별 3착/입상 적중률 누적 ─────────
@@ -3669,6 +3733,136 @@ def _forced_trifecta_insurance(cur_mb, after_close, drops, wx_reversals, inverse
         return {"active": False}
 
 
+# ───────── [추천 말 수 유연화] 신호 강도(강신호 유형 수)에 따라 추천 말 수 범위 안내 ─────────
+def _recommend_flex(strong_signals, signal_confidence, after_close):
+    """신호 강도별 추천 말 수 가이드(강제 아님·안내).
+      신호 3개+ → 3~4두 / 2개 → 2~3두 / 1개 → 1~2두 / 0개 → 추천 보류.
+      strong_signals.count(서로 다른 강신호 유형 수) 기준, 강신호말 존재 시 최소 1로 보정."""
+    cnt = int((strong_signals or {}).get("count") or 0)
+    strong_horses = len((signal_confidence or {}).get("strong") or [])
+    eff = max(cnt, 1 if strong_horses >= 1 else 0)
+    if after_close:
+        return {"signalCount": cnt, "minHorses": 0, "maxHorses": 0,
+                "recommend": True, "note": "마감 후 — 참고만"}
+    if eff >= 3:
+        return {"signalCount": cnt, "minHorses": 3, "maxHorses": 4, "recommend": True,
+                "note": "강신호 " + str(eff) + "개 → 3~4두 추천"}
+    if eff == 2:
+        return {"signalCount": cnt, "minHorses": 2, "maxHorses": 3, "recommend": True,
+                "note": "신호 2개 → 2~3두 추천"}
+    if eff == 1:
+        return {"signalCount": cnt, "minHorses": 1, "maxHorses": 2, "recommend": True,
+                "note": "신호 1개 → 1~2두 추천"}
+    return {"signalCount": 0, "minHorses": 0, "maxHorses": 0, "recommend": False,
+            "note": "신호 없음 → 추천 보류(신호 대기)"}
+
+
+# ───────── [고배당 동반 패턴·참고] 고배당 신호말과 배당 낮게 묶인 다른 고배당 말 탐색(메인과 별도) ─────────
+def _repr_odds_from_rec(rec):
+    """rec(단승/복승)에서 말별 대표배당 맵 + curWin/curQ 재구성(학습·분석 공용)."""
+    curWin = {}
+    for k, v in (rec.get("single") or {}).items():
+        try:
+            curWin[int(k)] = float(v)
+        except (TypeError, ValueError):
+            pass
+    curQ = {}
+    for c in (rec.get("quinella") or []):
+        combo, o = c.get("combo"), c.get("odds")
+        if combo and len(combo) == 2 and o:
+            try:
+                curQ[tuple(sorted(int(x) for x in combo))] = float(o)
+            except (TypeError, ValueError):
+                pass
+    repr_map = {}
+    for h in set([x for k in curQ for x in k] + list(curWin)):
+        repr_map[h] = _horse_repr_odds(h, curWin, curQ)
+    return repr_map, curWin, curQ
+
+
+def _high_odds_companion(drops, wx_reversals, inverse, curWin, curQ, key_horses,
+                         learned=None, after_close=False, high_thresh=7.0):
+    """[참고 추천] 고배당(7배+) 신호말 감지 시 그 말과 복승 배당 낮게 묶인 다른 고배당 말 탐색.
+      참고 삼복승(유력마1 + 고배당신호말 + 동반고배당) 제시. ⚠ 강제 아님 — 메인 추천과 별도 참고용.
+    반환 {active, axis, items:[{no,odds,signal,partners:[{no,odds,linkOdds}],trios:[[..]]}], learned, note}."""
+    try:
+        if after_close:
+            return {"active": False}
+
+        def repr_odds(h):
+            return _horse_repr_odds(int(h), curWin, curQ)
+
+        # 신호 고배당말: 급락(≤-30%) / 역배열(쌍승역전 challenger·역배열 감지말)
+        sig = {}
+        for d in (drops or []):
+            if (d.get("pct") or 0) <= -30:
+                for h in (d.get("combo") or []):
+                    p = d.get("pct")
+                    sig.setdefault(int(h), "급락")
+                    # 최대 급락폭 표기용
+        drop_pct = {}
+        for d in (drops or []):
+            for h in (d.get("combo") or []):
+                p = d.get("pct")
+                if p is not None:
+                    h = int(h)
+                    if h not in drop_pct or p < drop_pct[h]:
+                        drop_pct[h] = p
+        for r in (wx_reversals or []):
+            c = r.get("challenger")
+            if c is not None:
+                sig.setdefault(int(c), "역배열")
+        inv = inverse or {}
+        if inv.get("detected"):
+            for h in (inv.get("invHorses") or []):
+                sig.setdefault(int(h), "역배열")
+        # 고배당(7배+) 신호말만
+        hi = []
+        for h, tag in sig.items():
+            o = repr_odds(h)
+            if o and o >= high_thresh:
+                hi.append((h, round(float(o), 1), tag))
+        if not hi:
+            return {"active": False}
+        hi.sort(key=lambda t: -t[1])
+        axis = int(key_horses[0]) if key_horses else None
+        items = []
+        for h, o, tag in hi[:2]:
+            partners = []
+            seen = set()
+            for k, qo in (curQ or {}).items():
+                if h not in k or not qo or qo <= 0:
+                    continue
+                other = [x for x in k if x != h]
+                if not other:
+                    continue
+                p = int(other[0])
+                if p == axis or p in seen:
+                    continue
+                po = repr_odds(p)
+                if po and po >= high_thresh:
+                    seen.add(p)
+                    partners.append({"no": p, "odds": round(float(po), 1), "linkOdds": round(float(qo), 1)})
+            partners.sort(key=lambda x: x["linkOdds"])   # 묶임(복승) 배당 낮은 순 = 함께 들어올 가능성↑
+            partners = partners[:2]
+            trios = []
+            for pt in partners:
+                base = [axis, h, pt["no"]] if axis is not None else [h, pt["no"]]
+                cc = sorted(set(int(x) for x in base if x is not None))
+                if len(cc) == 3:
+                    trios.append(cc)
+            det = tag + ((" " + str(drop_pct[h]) + "%") if (tag == "급락" and drop_pct.get(h) is not None) else "")
+            items.append({"no": h, "odds": o, "signal": det, "partners": partners, "trios": trios})
+        items = [it for it in items if it["partners"]]
+        if not items:
+            return {"active": False}
+        return {"active": True, "axis": axis, "items": items, "learned": learned,
+                "note": "고배당 신호말과 배당 낮게 묶인 다른 고배당 말 → 함께 들어올 가능성(참고용·메인과 별도)"}
+    except Exception as _e:
+        print("[고배당동반] 실패:", _e)
+        return {"active": False}
+
+
 # ───────── [BMED 매트릭스 베팅 전략] 상황별 5전략 자동선택 + 원금보전 배분 + 기대환수율 ─────────
 def _capital_preservation(combos):
     """[2번] 원금 보전 자동 계산(예산 무관 '비율' 산출 → 프론트가 예산 곱함).
@@ -4719,6 +4913,15 @@ def _triple_analyze(rk, rec):
             _addbet("삼복승", "삼복승 강제보험(막판급락+역배열)", _cc, 5,
                     trio_map.get(tuple(sorted(_cc))))
 
+    # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드(강제 아님·안내)
+    recommend_flex = _recommend_flex(strong_signals, signal_confidence, after_close)
+
+    # [고배당 동반 패턴·참고] 고배당 신호말 + 배당 낮게 묶인 다른 고배당 말 → 참고 삼복승(메인과 별도)
+    #   추정배당은 아래 _trio_est 정의 후 채운다(표시용·추천 배분엔 미포함).
+    high_odds_companion = _high_odds_companion(
+        drops, wx_reversals, inverse, curWin, curQ, key_horses,
+        learned=_high_odds_companion_hitrate(), after_close=after_close)
+
     # [3번] 삼복승 실배당 미수집 시: 구성 복승 3쌍의 기하평균×2 로 추정(라벨=추정)
     #   [보완] 1쌍 미수집(아웃사이더/역배열 조합)이면 그 쌍을 보수적으로 max(known)로 근사해
     #   '거친 추정(estRough)'이라도 배당을 표시(항상 편성한 삼복승의 판단 근거 제공). 2쌍+ 미수집=None.
@@ -4739,6 +4942,15 @@ def _triple_analyze(rk, rec):
             r["expOddsEst"] = _ev
             if _rough:
                 r["estRough"] = True
+
+    # [고배당 동반 참고] 참고 삼복승 추정배당 채움(_trio_est 재사용·표시용·추천 배분엔 미포함)
+    if high_odds_companion.get("active"):
+        for _it in high_odds_companion.get("items", []):
+            _tb = []
+            for _cc in _it.get("trios", []):
+                _ev, _ = _trio_est(_cc)
+                _tb.append({"combo": _cc, "expOddsEst": (round(_ev, 1) if _ev else None)})
+            _it["trioBets"] = _tb
 
     # [보완·역배열 표시] 쌍승역전 challenger 를 낀 삼복승 픽에 플래그 → 프론트 🔄 배지(보험 라벨이어도 가시화)
     _rev_ch = set()
@@ -5258,6 +5470,8 @@ def _triple_analyze(rk, rec):
         "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
+        "recommendFlex": recommend_flex,      # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드
+        "highOddsCompanion": high_odds_companion,  # [고배당 동반 패턴·참고] 메인과 별도 참고 추천
 
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
@@ -7893,6 +8107,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _learn_third_place(rk, doc.get("date"), an, top3)
     except Exception as e:
         print("[3착발굴학습] 실패:", e)
+
+    # [고배당 동반 패턴 4번] 고배당 1착 경주 중 3착 내 다른 고배당 포함 비율 누적(경주별 멱등)
+    try:
+        _learn_high_odds_companion(rk, doc.get("date"), top3, rec)
+    except Exception as e:
+        print("[고배당동반학습] 실패:", e)
 
     # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
     rec_bets = an.get("betRecommend", [])

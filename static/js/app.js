@@ -2743,6 +2743,47 @@
       ${combos ? `<div style="margin-top:4px">${combos}</div>` : ''}</div>`;
   }
 
+  // [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드(강제 아님·안내 배지).
+  function renderRecommendFlex(a) {
+    const rf = a && a.recommendFlex;
+    if (!rf) return '';
+    if (!rf.recommend && rf.maxHorses === 0 && rf.signalCount === 0) {
+      return `<div style="margin:6px 0;padding:6px 9px;border-left:3px solid #8a94a6;background:rgba(138,148,166,.12);border-radius:6px;color:#b8c0cc">
+        🎯 <b>추천 말 수</b>: <b>신호 없음 → 추천 보류</b> <span class="hint">(신호 강도가 오르면 자동으로 추천 말 수 안내)</span></div>`;
+    }
+    const range = rf.minHorses === rf.maxHorses ? `${rf.maxHorses}두` : `${rf.minHorses}~${rf.maxHorses}두`;
+    return `<div style="margin:6px 0;padding:6px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.1);border-radius:6px;color:#7dd3fc">
+      🎯 <b>추천 말 수 가이드</b>: 신호 <b>${rf.signalCount}개</b> → <b style="color:#38d39f">${range}</b> <span class="hint">${esc(rf.note || '')}</span></div>`;
+  }
+
+  // [고배당 동반 패턴·참고] 메인과 별도의 참고 추천 — 고배당 신호말과 함께 들어올 다른 고배당 말.
+  function renderHighOddsCompanion(a) {
+    const hc = a && a.highOddsCompanion;
+    if (!hc || !hc.active || !(hc.items || []).length) return '';
+    const lr = hc.learned || {};
+    const learnedTxt = (lr.rate != null)
+      ? `데이터 기반 패턴: <b>고배당 1착 시 3착 내 고배당 포함 ${lr.rate}%</b> <span class="hint">(${lr.hits}/${lr.races}건${lr.reliable ? ' · 신뢰 가능' : ' · 표본 부족'})</span>`
+      : `데이터 기반 패턴: <span class="hint">표본 수집 중(결과 입력 쌓이면 자동 신뢰도 표시)</span>`;
+    const items = hc.items.map((it) => {
+      const partners = (it.partners || []).map((p) =>
+        `<b style="color:#fbbf24">${p.no}번</b><span class="hint">(${p.odds}배)</span>`).join(' · ');
+      const trios = (it.trioBets || it.trios || []).map((t) => {
+        const combo = t.combo || t;
+        const od = (t.expOddsEst != null) ? ` <span class="hint">추정 ${t.expOddsEst}배</span>` : '';
+        return `<span class="chip" style="border-color:#a78bfa;color:#c4b5fd">${combo.join('+')}${od}</span>`;
+      }).join(' ');
+      return `<div style="margin:5px 0;padding:6px 9px;background:rgba(255,255,255,.03);border-radius:6px">
+        <div><b style="color:#fbbf24">${it.no}번</b><span class="hint">(${it.odds}배)</span> <span class="hint">${esc(it.signal || '')}</span> 감지 시 함께 들어올 가능성:</div>
+        <div style="margin:2px 0">${partners || '<span class="hint">동반 후보 없음</span>'}</div>
+        ${trios ? `<div style="margin-top:3px"><span class="hint">참고 삼복승:</span> ${trios}</div>` : ''}</div>`;
+    }).join('');
+    return `<div style="margin:8px 0;padding:9px 11px;border:2px dashed #a78bfa;border-radius:8px;background:rgba(168,85,247,.07)">
+      <div style="font-size:14px;font-weight:800;color:#c4b5fd">💡 참고 추천 (고배당 동반 패턴)</div>
+      <div class="hint" style="margin:2px 0 4px">${learnedTxt}</div>
+      ${items}
+      <div class="hint" style="font-size:11px;margin-top:3px">⚠ 메인 추천과 <b>별도 참고용</b>입니다(강제 편성 아님).</div></div>`;
+  }
+
   // [근본해결3] raw 쌍승역전 조기 반영 — 마감 전 예비 유력마 배너(정식 공식 확정 전 조기 포착).
   function renderPreReversal(a) {
     const pr = (a && a.preReversal) || [];
@@ -3201,7 +3242,9 @@
       ${renderSignalQuality(a.signalQuality)}
       ${renderEliminationHTML(a.elimination)}
       ${renderRecommendBasis(a.recommendBasis)}
+      ${renderRecommendFlex(a)}
       ${renderBetRecommend(a)}
+      ${renderHighOddsCompanion(a)}
       ${(a.raceJudgment && a.raceJudgment.type === 'wait') ? '' : renderBMED(a.bmed)}
       ${renderFormGrades(a.form)}`;
     _attachElimHandlers();       // 제거↔후보 클릭 토글
@@ -3590,7 +3633,7 @@
     const upd = _betUpdatedFlag ? ' <span style="color:#38d39f">⚡ 업데이트됨</span>' : '';
     // [보완#1] 색상 범례 — 조합 속 말 번호가 유력/제거 어느 쪽인지 한눈에.
     const legend = `<div class="hint" style="font-size:10px;margin-top:2px">조합 색상: <b style="color:${_ROLE_COLOR.fav}">유력마</b> · <span style="color:${_ROLE_COLOR.weakcut}">제거권장</span> · <span style="color:${_ROLE_COLOR.cut};text-decoration:line-through">확실제거</span></div>`;
-    return `<div class="matrix-title" style="font-size:13px">🎯 베팅 추천${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
+    return `<div class="matrix-title" style="font-size:13px">🎯 메인 추천 <span class="hint" style="font-weight:400">(신호 기반)</span>${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
       ${legend}
       <table class="data-table" style="margin-top:4px">
         <thead><tr><th>종류</th><th>조합</th><th>신호품질</th><th>예상배당</th><th>배분</th><th>금액</th></tr></thead>
@@ -4984,7 +5027,9 @@
     //   경륜은 전적이 없어 배당(급락·쌍승역전·연속하락)·이상감지 기반 근거가 표시된다.
     parts.push(renderPatternMatch(a.patternMatch));
     parts.push(renderRecommendBasis(a.recommendBasis));
+    parts.push(renderRecommendFlex(a));
     parts.push(renderBetRecommend(a, bsel));
+    parts.push(renderHighOddsCompanion(a));
     parts.push((a.raceJudgment && a.raceJudgment.type === 'wait') ? '' : renderBMED(a.bmed, bsel));
     return parts.join('');
   }
@@ -5072,7 +5117,9 @@
       ${renderJapanSignals(a.signals)}
       ${renderPatternMatch(a.patternMatch)}
       ${renderRecommendBasis(a.recommendBasis)}
+      ${renderRecommendFlex(a)}
       ${renderBetRecommend(a, '#jpBudget')}
+      ${renderHighOddsCompanion(a)}
     </div>`;
     _bindBudgetInput('#jpBudget', () => { if (state.jpLastInteg) renderJapanIntegrated(state.jpLastInteg); });
   }
