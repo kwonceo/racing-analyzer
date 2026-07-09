@@ -307,16 +307,42 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-07-08"
+    },
+    {
+      "race": "소노다 1경주",
+      "horse_no": 7,
+      "recent_avg": 6.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-09"
+    },
+    {
+      "race": "소노다 1경주",
+      "horse_no": 9,
+      "recent_avg": 5.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-09"
+    },
+    {
+      "race": "소노다 1경주",
+      "horse_no": 8,
+      "recent_avg": 8.2,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-09"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 71,
-      "hit": 19
+      "count": 76,
+      "hit": 21
     },
     "전체부진마": {
-      "count": 71,
-      "hit": 19
+      "count": 80,
+      "hit": 23
     },
     "대규모급락": {
       "count": 12,
@@ -324,6 +350,14 @@
       "recommended_hit": 1,
       "high_odds_rate": 0.0,
       "hit_rate": 8.3
+    },
+    "이상감지동반": {
+      "count": 4,
+      "hit": 2
+    },
+    "급락동반": {
+      "count": 1,
+      "hit": 1
     }
   }
 }
