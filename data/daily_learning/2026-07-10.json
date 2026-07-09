@@ -1,0 +1,115 @@
+{
+ "date": "2026-07-10",
+ "results_summary": {
+  "total_races": 20,
+  "hits": 0,
+  "hit_rate": 0.0,
+  "profit": {
+   "net": 0,
+   "settled": 20
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 126,
+  "quality_score": 25,
+  "ai_ready_races": 0,
+  "patterns_tagged": []
+ },
+ "bigdata": {
+  "by_track": {
+   "소노다": {
+    "n": 9,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "카사마츠": {
+    "n": 8,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "몬베츠": {
+    "n": 3,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_field_size": {
+   "미상": {
+    "n": 16,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "중두수(9~12)": {
+    "n": 2,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "소두수(≤8)": {
+    "n": 2,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_time_zone": {
+   "오전": {
+    "n": 20,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_grade": {
+   "미수집": {
+    "n": 20,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_condition": {
+   "미수집": {
+    "n": 20,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_weather": {
+   "미수집": {
+    "n": 20,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
+ },
+ "cumulative_pattern_reliability": {
+  "마감급락": {
+   "label": "급락 감지 적중",
+   "hit": 29,
+   "n": 30,
+   "rate": 96.7
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 4,
+   "n": 19,
+   "rate": 21.1
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 41,
+   "n": 97,
+   "rate": 42.3
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 56,
+   "n": 151,
+   "rate": 37.1
+  }
+ },
+ "key_learnings": [],
+ "missed_opportunities": [],
+ "pattern_discoveries": [],
+ "system_improvements": [],
+ "tomorrow_focus": [],
+ "generated_at": "2026-07-10 00:48:45"
+}

@@ -801,16 +801,50 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-09"
+    },
+    {
+      "race": "소노다 1경주",
+      "horse_no": 9,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-10"
+    },
+    {
+      "race": "소노다 1경주",
+      "horse_no": 3,
+      "recent_avg": 7.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-10"
+    },
+    {
+      "race": "카사마츠 2경주",
+      "horse_no": 3,
+      "recent_avg": 4.2,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-10"
+    },
+    {
+      "race": "카사마츠 2경주",
+      "horse_no": 6,
+      "recent_avg": 11.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-10"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 178,
-      "hit": 46
+      "count": 189,
+      "hit": 49
     },
     "전체부진마": {
-      "count": 251,
-      "hit": 74
+      "count": 266,
+      "hit": 78
     },
     "대규모급락": {
       "count": 12,
@@ -820,8 +854,8 @@
       "hit_rate": 8.3
     },
     "이상감지동반": {
-      "count": 73,
-      "hit": 28
+      "count": 77,
+      "hit": 29
     },
     "급락동반": {
       "count": 17,
