@@ -1,0 +1,364 @@
+{
+ "race_id": "2026_07_10_히로시마_2경주",
+ "raceKey": "히로시마 2경주",
+ "sport": "cycle",
+ "category": "cycle",
+ "date": "2026-07-10",
+ "race": "히로시마 2경주",
+ "analyzed_at": "08:47:11",
+ "updated_at": "08:57:12",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ },
+ "odds_timeline": [
+  {
+   "time": "08:47:06",
+   "minutes_before": 2,
+   "quinella": {
+    "1+4": 1.9,
+    "3+7": 3.8,
+    "4+7": 6.6,
+    "1+7": 8.7,
+    "1+5": 11.7,
+    "4+5": 28.5,
+    "1+3": 34.6,
+    "5+7": 39.2,
+    "3+4": 49.6,
+    "1+6": 63.6,
+    "2+3": 69.2,
+    "2+7": 78.5,
+    "6+7": 100.2,
+    "4+6": 124.0,
+    "1+2": 130.8,
+    "3+5": 147.2,
+    "2+5": 157.0,
+    "2+4": 162.4,
+    "5+6": 196.3,
+    "2+6": 224.3,
+    "3+6": 261.7
+   }
+  },
+  {
+   "time": "08:47:08",
+   "minutes_before": 2,
+   "quinella": {
+    "1+4": 1.9,
+    "3+7": 3.8,
+    "4+7": 6.6,
+    "1+7": 8.7,
+    "1+5": 11.7,
+    "4+5": 28.5,
+    "1+3": 34.6,
+    "5+7": 39.2,
+    "3+4": 49.6,
+    "1+6": 63.6,
+    "2+3": 69.2,
+    "2+7": 78.5,
+    "6+7": 100.2,
+    "4+6": 124.0,
+    "1+2": 130.8,
+    "3+5": 147.2,
+    "2+5": 157.0,
+    "2+4": 162.4,
+    "5+6": 196.3,
+    "2+6": 224.3,
+    "3+6": 261.7
+   }
+  },
+  {
+   "time": "08:47:44",
+   "minutes_before": 2,
+   "quinella": {
+    "1+4": 1.9,
+    "3+7": 3.8,
+    "4+7": 6.6,
+    "1+7": 8.7,
+    "1+5": 11.7,
+    "4+5": 28.5,
+    "1+3": 34.6,
+    "5+7": 39.2,
+    "3+4": 49.6,
+    "1+6": 63.6,
+    "2+3": 69.2,
+    "2+7": 78.5,
+    "6+7": 100.2,
+    "4+6": 124.0,
+    "1+2": 130.8,
+    "3+5": 147.2,
+    "2+5": 157.0,
+    "2+4": 162.4,
+    "5+6": 196.3,
+    "2+6": 224.3,
+    "3+6": 261.7
+   }
+  }
+ ],
+ "signals_detected": [
+  {
+   "time": "08:47:44",
+   "type": "배당불일치",
+   "detail": "추천 복승(1+7=8.7배)이 배당판 인기 조합(1+4=1.9배)과 다름",
+   "severity": "⚠️",
+   "reason": "유력마가 배당판 최저(인기)와 동떨어짐 = 초반 배당 미수집/전적 편중 의심. 배당판 인기 조합을 추천에 추가함 — 배당 재확인 권장."
+  },
+  {
+   "time": "08:47:44",
+   "type": "쌍승역전공식",
+   "detail": "🔄 역전감지: 단승 1번 유력이나 쌍승에서 7번 1착(8.1)이 1번 1착(21.5)보다 낮음 → 실질 1착: 7번 가능성 (압도적 역배열 0.377)",
+   "severity": "🔴🔴",
+   "reason": "역전비율 = 쌍승(7→1) 8.1 / 쌍승(1→7) 21.5 = 0.377 (압도적 역배열)"
+  },
+  {
+   "time": "08:47:44",
+   "type": "쌍승역전공식",
+   "detail": "🔄 역전감지[2·3위 간]: 단승 4번(2위) vs 7번(3위) — 쌍승 7→4(11.1)가 4→7(14.8)보다 낮음 → 상위권 실질순위 역전: 7번 우세 (역배열 0.75)",
+   "severity": "🟠",
+   "reason": "역전비율 = 쌍승(7→4) 11.1 / 쌍승(4→7) 14.8 = 0.75 (역배열)"
+  }
+ ],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [
+   {
+    "type": 2,
+    "label": "역배열 10%+",
+    "horses": [
+     7
+    ],
+    "detail": "7번 역배열 (배당차 33.3%)",
+    "level": "orange",
+    "hitRate": 50,
+    "hitSample": 2
+   }
+  ],
+  "count": 1,
+  "recommendLevel": "보조",
+  "dualConverge": false,
+  "types": [
+   2
+  ],
+  "hitRates": {
+   "2": {
+    "type": 2,
+    "label": "역배열 10%+",
+    "fired": 2,
+    "hit": 1,
+    "rate": 50
+   }
+  }
+ },
+ "compression_pattern": {
+  "detected": true,
+  "level": "강력",
+  "band": "4배 이하 2두+",
+  "horses": [
+   7,
+   1,
+   4
+  ],
+  "reprs": [
+   {
+    "no": 7,
+    "odds": 3.8
+   },
+   {
+    "no": 1,
+    "odds": 1.9
+   },
+   {
+    "no": 4,
+    "odds": 1.9
+   }
+  ],
+  "combo": [
+   1,
+   7
+  ],
+  "withDrop": false,
+  "withReversal": true,
+  "note": "압축 + 역배열 → 복승 메인 + 삼복승 보험"
+ },
+ "third_place_hunt": {
+  "active": false,
+  "axis": [
+   1,
+   7
+  ],
+  "mainCombo": [
+   1,
+   7
+  ],
+  "candidates": [],
+  "trios": []
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 1.9배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 3,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 3.8배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 4,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 1.9배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 5,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 11.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 7,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 3.8배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 2,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 69.2배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 6,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 63.6배 · 감점 없음 = 100점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   3,
+   4,
+   5,
+   7,
+   2,
+   6
+  ],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    1,
+    7
+   ],
+   "trio": [
+    1,
+    4,
+    7
+   ]
+  },
+  "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    1,
+    7
+   ],
+   "trio": [
+    1,
+    4,
+    7
+   ]
+  }
+ },
+ "summary": "유력마 7·1·4 / 복승 1+7",
+ "keyHorses": [
+  7,
+  1,
+  4
+ ],
+ "result": {
+  "1st": 7,
+  "2nd": 4,
+  "3rd": 1
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [
+    7
+   ],
+   "inverseHit": [
+    7
+   ],
+   "confidence": 35.0,
+   "reason": "전적유력마 1번 적중 · 역배열 감지말 7번 입상"
+  }
+ },
+ "profit": null,
+ "review": null
+}
