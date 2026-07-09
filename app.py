@@ -1537,6 +1537,43 @@ def pattern_confidence():
     return jsonify(_pattern_confidence())
 
 
+@app.route("/api/thresholds/optimize", methods=["GET"])
+def thresholds_optimize():
+    """[기준치 도출 2·3·5번] 누적 데이터로 신호 기준치별 적중률·최적 기준치 추천(자동 적용 안 함)."""
+    return jsonify(_threshold_candidates())
+
+
+@app.route("/api/thresholds/config", methods=["GET"])
+def thresholds_config():
+    """[기준치 도출 4번] 현재 적용된 기준치 + 변경 이력."""
+    c = _threshold_config_load()
+    return jsonify({"current": {k: c.get(k) for k in _THRESHOLD_DEFAULTS}, "history": c.get("history")})
+
+
+@app.route("/api/thresholds/apply", methods=["POST"])
+def thresholds_apply():
+    """[기준치 도출 4번] 사람이 승인한 기준치를 config에 반영(이전값 자동 백업). body{key,value} 또는 body{current:{...}}."""
+    body = request.get_json(silent=True) or {}
+    cur = _threshold_config_load()
+    new = {k: cur.get(k) for k in _THRESHOLD_DEFAULTS}
+    prev = dict(new)
+    if body.get("current"):
+        for k, v in body["current"].items():
+            if k in _THRESHOLD_DEFAULTS:
+                new[k] = v
+    elif body.get("key") in _THRESHOLD_DEFAULTS:
+        try:
+            new[body["key"]] = float(body.get("value"))
+        except (TypeError, ValueError):
+            return jsonify({"ok": False, "error": "value 숫자 필요"}), 400
+    else:
+        return jsonify({"ok": False, "error": "key/value 또는 current 필요"}), 400
+    if new == prev:
+        return jsonify({"ok": True, "changed": False, "current": new})
+    _threshold_config_save(new, applied_note=body.get("note") or "수동 승인", prev=prev)
+    return jsonify({"ok": True, "changed": True, "current": new, "backup": prev})
+
+
 @app.route("/api/high-odds-companion/stats", methods=["GET"])
 def high_odds_companion_stats():
     """[고배당 동반 패턴 4번] 고배당(7배+) 1착 경주 중 3착 내 다른 고배당 포함 비율."""
@@ -6663,6 +6700,26 @@ def _build_ai_training(rk, an, record, result, top4, inputs=None):
         "winner": result.get("1st"), "second": result.get("2nd"),
         "odds_range": _odds_range_label(q_odds),
     }
+    # [기준치 도출용] 신호별 대표말이 실제 입상(1~3착)했는지 — 기준치별 적중률 계산의 재료.
+    _top3 = set(int(x) for x in (result.get("1st"), result.get("2nd"), result.get("3rd")) if x not in (None, ""))
+
+    def _placed(h):
+        try:
+            return int(h) in _top3
+        except (TypeError, ValueError):
+            return False
+    _ex_horse = None
+    if excess_drops:
+        _ex_horse = min(excess_drops.items(), key=lambda kv: kv[1])[0]   # 가장 큰 초과급락 말
+    _rev_horse = (wx[0].get("challenger") if wx else None)
+    _con_horse = next((h for h, c in consecutive.items() if c >= 3), None)
+    signal_hit = {
+        "excess_drop_horse": _ex_horse, "excess_drop_horse_placed": (_placed(_ex_horse) if _ex_horse else None),
+        "excess_drop_value": (excess_drops.get(_ex_horse) if _ex_horse else None),
+        "reversal_horse": _rev_horse, "reversal_horse_placed": (_placed(_rev_horse) if _rev_horse is not None else None),
+        "reversal_ratio": (wx[0]["ratio"] if wx else None),
+        "consecutive_horse": _con_horse, "consecutive_horse_placed": (_placed(_con_horse) if _con_horse else None),
+    }
     data = {
         "schema_version": AI_SCHEMA_VERSION,   # [AI 데이터 정비] 스키마 버전 명시(마이그레이션 대비)
         "race_id": rid,
@@ -6674,9 +6731,14 @@ def _build_ai_training(rk, an, record, result, top4, inputs=None):
         },
         "horses": horses,
         "odds_features": odds_features,
+        "thresholds_used": {                    # [기준치 도출] 이 경주 판정에 쓴 현재 기준치 스냅샷
+            "excess_drop_min": abs(ABS_STRONG), "reversal_ratio_max": 0.95,
+            "consecutive_min": 3, "pre_close_min": 30,
+        },
         "prediction": prediction,
         "result": result_block,
         "labels": labels,
+        "signal_hit": signal_hit,               # [기준치 도출] 신호말 입상 여부(기준치별 적중률 재료)
         "saved_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
     }
     data["quality"] = _ai_quality_score(data)
@@ -6759,6 +6821,124 @@ def _save_ai_training(rk, an, record, result, top4, inputs=None):
     q = data.get("quality") or {}
     return {"ok": True, "race_id": rid, "score": q.get("score"),
             "grade": q.get("grade"), "complete": q.get("complete")}
+
+
+# ───────── [기준치 도출 시스템] 누적 ai_training 데이터 → 신호 기준치별 적중률 → 최적 기준치 추천 ─────────
+#   ⚠ 자동 적용 금지 — 사람이 검토 후 승인(버튼)해야 config에 반영. 기존 기준치는 백업 보관.
+THRESHOLD_CONFIG_FILE = os.path.join(os.path.dirname(__file__), "data", "thresholds_config.json")
+THRESHOLD_SAMPLE_MIN = 50   # 이 표본 미만은 '표본 부족'(적용 검토 불가)
+_THRESHOLD_DEFAULTS = {"excess_drop_min": 10, "reversal_ratio_max": 0.90,
+                       "consecutive_min": 2, "pre_close_min": 30}
+
+
+def _threshold_config_load():
+    try:
+        cfg = json.load(open(THRESHOLD_CONFIG_FILE, encoding="utf-8"))
+    except Exception:
+        cfg = {}
+    return {**_THRESHOLD_DEFAULTS, **(cfg.get("current") or {}),
+            "history": cfg.get("history") or [], "_raw": cfg}
+
+
+def _threshold_config_save(current, applied_note=None, prev=None):
+    """current 기준치 저장 + 이전값 history 백업(감사·롤백용)."""
+    os.makedirs(os.path.dirname(THRESHOLD_CONFIG_FILE), exist_ok=True)
+    cfg = _threshold_config_load().get("_raw") or {}
+    hist = cfg.get("history") or []
+    if prev is not None:
+        hist.append({"current": prev, "replaced_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+                     "note": applied_note})
+    cfg["current"] = current
+    cfg["history"] = hist[-50:]
+    cfg["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    json.dump(cfg, open(THRESHOLD_CONFIG_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    return cfg
+
+
+def _ai_rows_for_thresholds():
+    """ai_training 파일에서 기준치 계산에 필요한 필드만 추출(결과 입력된 경주만)."""
+    rows = []
+    if not os.path.isdir(AI_TRAINING_DIR):
+        return rows
+    for fn in os.listdir(AI_TRAINING_DIR):
+        if not fn.endswith(".json"):
+            continue
+        try:
+            d = json.load(open(os.path.join(AI_TRAINING_DIR, fn), encoding="utf-8"))
+        except Exception:
+            continue
+        of = d.get("odds_features") or {}
+        sh = d.get("signal_hit") or {}
+        lb = d.get("labels") or {}
+        res = d.get("result") or {}
+        top3 = set(int(x) for x in (res.get("1st"), res.get("2nd"), res.get("3rd")) if x not in (None, ""))
+        # [기존 파일 폴백] signal_hit 없으면 excess_drops 최대말 + result 로 입상 여부 역산.
+        ex_val = sh.get("excess_drop_value")
+        ex_placed = sh.get("excess_drop_horse_placed")
+        if ex_val is None and (of.get("excess_drops")):
+            _eh, ex_val = min((of["excess_drops"]).items(), key=lambda kv: kv[1])
+            try:
+                ex_placed = int(_eh) in top3
+            except (TypeError, ValueError):
+                ex_placed = None
+        rows.append({
+            "excess": ex_val, "excess_placed": ex_placed,
+            "reversal_ratio": sh.get("reversal_ratio") or of.get("reversal_ratio"),
+            "reversal_placed": sh.get("reversal_horse_placed"),
+            "quinella_hit": lb.get("quinella_hit"),
+        })
+    return rows
+
+
+def _threshold_candidates():
+    """[2·3·5번] 누적 데이터로 신호 기준치별 적중률 계산 → 최적 기준치 추천 + 현재 대비 개선폭.
+      초과급락(5/10/12/15/20%+)·역배열(0.95/0.90/0.85/0.80/0.70 미만) 각각 테스트."""
+    rows = _ai_rows_for_thresholds()
+    cur = _threshold_config_load()
+    n = len(rows)
+
+    def _rate(fired_placed):
+        f = len(fired_placed)
+        h = sum(1 for p in fired_placed if p)
+        return (f, h, (round(h / f * 100) if f else None))
+
+    # 초과급락: excess 값(음수)이 -X 이하이면 발화 → 그 말 입상률
+    ex_out = []
+    for x in (5, 10, 12, 15, 20):
+        fp = [r["excess_placed"] for r in rows
+              if r.get("excess") is not None and r["excess"] <= -x and r.get("excess_placed") is not None]
+        f, h, rate = _rate(fp)
+        ex_out.append({"threshold": x, "fired": f, "hit": h, "rate": rate})
+    # 역배열: reversal_ratio < X 이면 발화 → 그 말 입상률
+    rv_out = []
+    for x in (0.95, 0.90, 0.85, 0.80, 0.70):
+        fp = [r["reversal_placed"] for r in rows
+              if r.get("reversal_ratio") is not None and r["reversal_ratio"] < x and r.get("reversal_placed") is not None]
+        f, h, rate = _rate(fp)
+        rv_out.append({"threshold": x, "fired": f, "hit": h, "rate": rate})
+
+    def _best(cands, cur_val, key_name):
+        # 표본 THRESHOLD_SAMPLE_MIN+ 인 후보 중 적중률 최고. 현재값 적중률과 비교.
+        elig = [c for c in cands if (c["fired"] or 0) >= THRESHOLD_SAMPLE_MIN and c["rate"] is not None]
+        best = max(elig, key=lambda c: c["rate"]) if elig else None
+        cur_c = next((c for c in cands if abs(c["threshold"] - cur_val) < 1e-9), None)
+        cur_rate = cur_c["rate"] if cur_c else None
+        status = "표본부족"
+        if best and best["fired"] >= THRESHOLD_SAMPLE_MIN:
+            status = "검토가능"
+        improve = (best["rate"] - cur_rate) if (best and cur_rate is not None) else None
+        return {"key": key_name, "current": cur_val, "currentRate": cur_rate,
+                "recommended": (best["threshold"] if best else None),
+                "recommendedRate": (best["rate"] if best else None),
+                "improve": improve, "status": status, "candidates": cands,
+                "sampleMin": THRESHOLD_SAMPLE_MIN}
+    return {
+        "raceCount": n,
+        "excess_drop": _best(ex_out, cur.get("excess_drop_min", 10), "excess_drop_min"),
+        "reversal": _best(rv_out, cur.get("reversal_ratio_max", 0.90), "reversal_ratio_max"),
+        "current": {k: cur.get(k) for k in _THRESHOLD_DEFAULTS},
+        "note": "표본 " + str(THRESHOLD_SAMPLE_MIN) + "회 미만은 참고만 · 적용은 수동 승인(버튼)",
+    }
 
 
 def _ai_data_status():

@@ -3825,6 +3825,8 @@
     let hocases = null; try { hocases = await (await fetch('/api/high-odds-review?cases=1')).json(); } catch (_) { /* */ }
     // [복기 학습 재설계] 패턴별 신뢰도(표본 50회 게이팅) — 공식 수정은 수동
     let pconf = null; try { pconf = await (await fetch('/api/learning/pattern-confidence')).json(); } catch (_) { /* */ }
+    // [기준치 도출] 누적 데이터 기반 최적 기준치 추천(자동 적용 안 함·수동 승인)
+    let thopt = null; try { thopt = await (await fetch('/api/thresholds/optimize')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     // [AI Phase1] AI 학습 데이터 현황 대시보드
     let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
@@ -3832,6 +3834,7 @@
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
       ${renderDailyLearning(dl)}
       ${renderPatternConfidence(pconf)}
+      ${renderThresholdOptimize(thopt)}
       ${renderHighOddsCases(hocases)}
       ${renderHighOddsReview(ho)}
       ${renderAiDataStatus(ai)}
@@ -3855,6 +3858,44 @@
   }
 
   // [학습일지] 오늘 배운 것 대시보드 — 성공/실패/새패턴/개선 카운트 + 내일 집중 + 누적 패턴 신뢰도
+  // [기준치 도출 3·4·5번] 📊 기준치 최적화 분석 — 데이터 추천 기준치 + 수동 승인 버튼.
+  function renderThresholdOptimize(to) {
+    if (!to || to.error) return '';
+    const block = (t, unit, dir) => {
+      if (!t) return '';
+      const statusColor = t.status === '검토가능' ? '#38d39f' : '#fbbf24';
+      const rec = (t.recommended != null)
+        ? `데이터 추천: <b style="color:#38d39f">${t.recommended}${unit}</b>` : '데이터 추천: <span class="hint">표본 부족</span>';
+      const basis = (t.recommendedRate != null && t.currentRate != null)
+        ? `근거: ${t.recommended}${unit} 시 적중률 <b>${t.recommendedRate}%</b> / 현재 ${t.current}${unit} 시 <b>${t.currentRate}%</b>${t.improve != null ? ` (개선 <b style="color:${t.improve >= 0 ? '#38d39f' : '#f87171'}">${t.improve >= 0 ? '+' : ''}${t.improve}%p</b>)` : ''}`
+        : '근거: <span class="hint">표본 축적 중</span>';
+      const canApply = t.status === '검토가능' && t.recommended != null && t.recommended !== t.current;
+      const btn = canApply
+        ? `<button class="btn btn-primary" style="font-size:11px;padding:2px 8px" onclick="window._applyThreshold&&window._applyThreshold('${t.key}',${t.recommended})">✅ 적용</button> <button class="btn" style="font-size:11px;padding:2px 8px" onclick="this.closest('div').style.opacity=.5">❌ 유지</button>`
+        : '';
+      return `<div style="margin:6px 0;padding:7px 10px;border-left:3px solid ${statusColor};background:rgba(255,255,255,.03);border-radius:6px">
+        <div style="font-weight:700">${t.key === 'excess_drop_min' ? '초과급락' : '역배열'} 최적 기준치 <span class="hint">현재: ${t.current}${unit}</span></div>
+        <div style="margin:2px 0">${rec}</div>
+        <div class="hint" style="font-size:12px">${basis}</div>
+        <div style="margin-top:3px">상태: <b style="color:${statusColor}">${t.status === '검토가능' ? `✅ 적용 검토 가능 (${(t.candidates || []).reduce((m, c) => Math.max(m, c.fired || 0), 0)}회)` : `⚠️ 표본 부족 (${to.excess_drop.sampleMin || 50}회 필요)`}</b> ${btn}</div></div>`;
+    };
+    return `<div class="bet-box" style="margin:6px 0;padding:12px 14px;border:1px solid #2a4a4a;border-radius:10px">
+      <div style="font-weight:700;font-size:15px;margin-bottom:4px">📊 기준치 최적화 분석 <span class="hint" style="font-weight:400">(현재 ${to.raceCount || 0}경주 기준)</span></div>
+      ${block(to.excess_drop, '%+', 'ge')}
+      ${block(to.reversal, ' 미만', 'lt')}
+      <div class="hint" style="font-size:11px;margin-top:5px">⚠️ ${esc(to.note || '')} · 적용 시 이전 기준치는 자동 백업됩니다.</div></div>`;
+  }
+
+  // [기준치 도출 4번] 수동 승인 → 서버 config 반영(이전값 백업). 전역 노출(onclick).
+  window._applyThreshold = async function (key, value) {
+    if (!confirm(`기준치를 적용할까요?\n${key} = ${value}\n(이전 값은 백업되며, 이후 경주부터 반영)`)) return;
+    try {
+      const r = await (await fetch('/api/thresholds/apply', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, value }) })).json();
+      if (r.ok) { toast(`✅ 기준치 적용됨: ${key}=${value}`); loadLearningStats(); }
+      else toast('적용 실패: ' + (r.error || ''));
+    } catch (e) { toast('적용 실패: ' + e.message); }
+  };
+
   // [복기 학습 재설계 4번] 🧠 학습 현황 — 패턴별 신뢰도(표본 50회 게이팅). 공식 수정은 수동.
   function renderPatternConfidence(pc) {
     const pats = (pc && pc.patterns) || [];
