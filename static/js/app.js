@@ -6121,19 +6121,37 @@
 
   // [경마 oddspark 서버 수집] Chrome 확장 없이 서버가 지방경마 복승·쌍승을 직접 조회.
   //   마감 3분전 3초·평상 30초 적응형 폴링(closingTick에서 구동). 페이지 열려 있을 때만 동작.
-  const _keibaOdds = { enabled: false, lastPoll: 0, lastRk: null, busy: false };
-  function _keibaOddsStatus(msg) { const el = document.getElementById('keibaOddsStatus'); if (el) el.innerHTML = msg; }
+  const _keibaOdds = { enabled: false, lastPoll: 0, lastRk: null, busy: false,
+    lastCounts: null, lastTime: '', lastMsg: '', lastRkShown: '' };
+  function _setKeibaStatusHtml(html) { const el = document.getElementById('keibaOddsStatus'); if (el) el.innerHTML = html; }
+
+  /** 요청 형식 3줄 상태 렌더: "✅ oddspark 수집 중 / 복승 N조합·쌍승 N조합 / 마지막 수집: HH:MM:SS" */
+  function _renderKeibaStatus() {
+    if (!_keibaOdds.enabled) { _setKeibaStatusHtml('⬜ 꺼짐 — 토글을 켜면 현재 경주 배당을 자동 수집합니다.'); return; }
+    const head = '<div style="color:#38d39f;font-weight:800">✅ oddspark 수집 중</div>';
+    const rkLine = _keibaOdds.lastRkShown ? `<div style="color:#94a3b8;font-size:11px">현재 경주: ${esc(_keibaOdds.lastRkShown)}</div>` : '';
+    let body;
+    if (_keibaOdds.lastCounts) {
+      const c = _keibaOdds.lastCounts;
+      body = `<div>복승 <b style="color:#e2e8f0">${c.quinella || 0}</b>조합 · 쌍승 <b style="color:#e2e8f0">${c.exacta || 0}</b>조합</div>`;
+    } else {
+      body = `<div style="color:#94a3b8">${esc(_keibaOdds.lastMsg || '현재 경주 배당 대기 중…')}</div>`;
+    }
+    const foot = _keibaOdds.lastTime ? `<div style="color:#64748b;font-size:11px">마지막 수집: ${esc(_keibaOdds.lastTime)}</div>` : '';
+    _setKeibaStatusHtml(head + rkLine + body + foot);
+  }
 
   async function fetchKeibaOdds(rk, silent) {
-    if (!rk) { if (!silent) _keibaOddsStatus('<span style="color:var(--red)">현재 경주(raceKey)가 없습니다.</span>'); return null; }
-    if (!silent) _keibaOddsStatus('🏇 oddspark 배당 조회 중…');
+    if (!rk) { _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '현재 경주(raceKey)가 없습니다.'; _renderKeibaStatus(); return null; }
+    _keibaOdds.lastRkShown = rk;
+    if (!silent && !_keibaOdds.enabled) _setKeibaStatusHtml('🏇 oddspark 배당 조회 중…');
     let d; try { d = await (await fetch('/api/keiba/odds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }) })).json(); }
-    catch (e) { _keibaOddsStatus(`<span style="color:var(--red)">실패: ${esc(e.message)}</span>`); return null; }
-    const t = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    if (d.error) { _keibaOddsStatus(`<span style="color:#f59e0b">${esc(d.error)}</span> <span style="opacity:.6">${t}</span>`); return d; }
-    if (d.waiting) { _keibaOddsStatus(`⏳ ${esc(d.reason || '실배당 대기')} <span style="opacity:.6">${t}</span>`); return d; }
-    const c = d.counts || {};
-    _keibaOddsStatus(`<span style="color:#38d39f">✅ 반영</span> 복승 <b>${c.quinella || 0}</b>·쌍승 <b>${c.exacta || 0}</b> <span style="opacity:.6">${esc(rk)} ${t}</span>`);
+    catch (e) { _keibaOdds.lastMsg = '조회 실패: ' + e.message; _keibaOdds.lastCounts = null; _renderKeibaStatus(); return null; }
+    _keibaOdds.lastTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    if (d.error) { _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '⚠️ ' + (d.error || ''); _renderKeibaStatus(); return d; }
+    if (d.waiting) { _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '⏳ ' + (d.reason || '실배당 대기(발매 전·마감 후)'); _renderKeibaStatus(); return d; }
+    _keibaOdds.lastCounts = d.counts || { quinella: 0, exacta: 0 };
+    _renderKeibaStatus();
     try { refreshCurrentRace(); } catch (_) { /* */ }
     return d;
   }
@@ -6404,11 +6422,15 @@
       if (chk) {
         try { chk.checked = localStorage.getItem('keibaOddsAuto') === '1'; } catch (_) { /* */ }
         _keibaOdds.enabled = chk.checked;
+        _renderKeibaStatus();
         chk.addEventListener('change', () => {
           _keibaOdds.enabled = chk.checked;
           try { localStorage.setItem('keibaOddsAuto', chk.checked ? '1' : '0'); } catch (_) { /* */ }
-          if (chk.checked) { _keibaOdds.lastPoll = 0; _keibaOddsStatus('🏇 서버 수집 켜짐 — 현재 경주 배당을 자동 조회합니다.'); }
-          else _keibaOddsStatus('서버 수집 꺼짐(확장 수집은 계속 동작).');
+          if (chk.checked) {   // 켜면 즉시 1회 수집 + 이후 적응형 폴링
+            _keibaOdds.lastPoll = 0; _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '현재 경주 조회 중…'; _renderKeibaStatus();
+            const rk = _closing.panelRk || getActiveRaceKey();
+            if (rk && !jpIsKoreaName(rk)) fetchKeibaOdds(rk, true);
+          } else _renderKeibaStatus();
         });
       }
     }
