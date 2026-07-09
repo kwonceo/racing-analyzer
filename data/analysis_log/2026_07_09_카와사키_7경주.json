@@ -6,7 +6,7 @@
  "date": "2026-07-09",
  "race": "카와사키 7경주",
  "analyzed_at": "17:49:26",
- "updated_at": "17:53:06",
+ "updated_at": "18:07:19",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -217,45 +217,43 @@
     "2+4": 253.3,
     "4+7": 253.3
    }
+  },
+  {
+   "time": "17:54:14",
+   "minutes_before": 6,
+   "quinella": {
+    "3+8": 5.9,
+    "1+8": 7.0,
+    "1+3": 7.7,
+    "5+8": 9.6,
+    "6+8": 11.2,
+    "1+6": 12.1,
+    "1+5": 12.5,
+    "3+6": 12.6,
+    "3+5": 14.5,
+    "5+6": 17.4,
+    "7+8": 23.3,
+    "2+6": 26.6,
+    "1+2": 26.7,
+    "2+8": 27.0,
+    "2+3": 27.7,
+    "3+7": 36.9,
+    "2+5": 41.8,
+    "1+7": 57.1,
+    "6+7": 62.0,
+    "5+7": 86.8,
+    "2+7": 93.0,
+    "4+8": 123.6,
+    "1+4": 127.6,
+    "3+4": 176.1,
+    "4+6": 206.1,
+    "4+5": 207.4,
+    "2+4": 260.6,
+    "4+7": 267.2
+   }
   }
  ],
- "signals_detected": [
-  {
-   "time": "17:53:06",
-   "type": "급락속도",
-   "detail": "4+7 급락 속도 분당 7.5% (8.4% / 1.12분)",
-   "severity": "🟡",
-   "reason": "분당 5%+ = 자금 유입 가속(주의)"
-  },
-  {
-   "time": "17:53:06",
-   "type": "연속하락",
-   "detail": "5+8 3회 연속 하락 → 신뢰도 +20",
-   "severity": "🔴",
-   "reason": "지속적 자금 유입(단발 아님) → 신호 신뢰도 상향"
-  },
-  {
-   "time": "17:53:06",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 3+4 급락 후 반등 (219.6→157.2→177.3→185.6)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "17:53:06",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 2+7 급락 후 반등 (139.7→67.4→78.4→79.9)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "17:53:06",
-   "type": "연속하락",
-   "detail": "🔴 5번 3회 연속 하락 (확정신호) — 11.4→17.3→11.4→10.2→10.1",
-   "severity": "🔴",
-   "reason": "지속 자금 유입 = 강한 매수 신호(추천 우선 반영)"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [
   {
    "time": "17:49:54",
@@ -493,83 +491,83 @@
  "horses": [
   {
    "no": 1,
-   "name": "全 0- 0- 0- 0 左 0- 0- 0- 0 右 0- 0- 0- 0 場 0- 0- 0- 0 距 0- 0- 0- 0 － 良－",
-   "jockey": "",
-   "record_score": 0.0,
-   "record_detail": "",
-   "odds": null,
+   "name": "フィリグラン",
+   "jockey": "本田重（船橋）",
+   "record_score": 72.5,
+   "record_detail": "최근 1-3-5-2-2",
+   "odds": 4.6,
    "grade": "A",
-   "grade_reason": "배당 7.3배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 5.7배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 3,
-   "name": "全 0- 0- 0- 0 左 0- 0- 0- 0 右 0- 0- 0- 0 場 0- 0- 0- 0 距 0- 0- 0- 0 － 良－",
-   "jockey": "",
-   "record_score": 0.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 6.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "name": "アムリタ",
+   "jockey": "和田譲（大井）",
+   "record_score": 37.5,
+   "record_detail": "최근 4-8-1-2-2",
+   "odds": 5.7,
+   "grade": "C",
+   "grade_reason": "배당 5배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 5,
-   "name": "全 0- 0- 0- 0 左 0- 0- 0- 0 右 0- 0- 0- 0 場 0- 0- 0- 0 距 0- 0- 0- 0 － 良－",
-   "jockey": "",
-   "record_score": 0.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 10.1배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "name": "オリコウパラダイス",
+   "jockey": "伊藤裕（川崎）",
+   "record_score": 75.0,
+   "record_detail": "최근 3-1-2-9-5",
+   "odds": 7.9,
+   "grade": "A",
+   "grade_reason": "배당 6.9배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 6,
-   "name": "全 0- 0- 0- 0 左 0- 0- 0- 0 右 0- 0- 0- 0 場 0- 0- 0- 0 距 0- 0- 0- 0 － 良－",
-   "jockey": "",
-   "record_score": 0.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 12.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "name": "ヒソカ",
+   "jockey": "安藤洋（大井）",
+   "record_score": 43.8,
+   "record_detail": "최근 5-1-4-1-2",
+   "odds": 7.9,
+   "grade": "B",
+   "grade_reason": "배당 9.5배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 8,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 6.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "name": "コルネットロッソ",
+   "jockey": "新原周（川崎）",
+   "record_score": 41.7,
+   "record_detail": "최근 8-2-2",
+   "odds": 1.8,
+   "grade": "B",
+   "grade_reason": "배당 5배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 2,
-   "name": "全 0- 0- 0- 0 左 0- 0- 0- 0 右 0- 0- 0- 0 場 0- 0- 0- 0 距 0- 0- 0- 0 － 良－",
-   "jockey": "",
-   "record_score": 0.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 24.5배 · 감점 없음 = 100점"
+   "name": "ウロボロス",
+   "jockey": "矢野貴（大井）",
+   "record_score": 30.0,
+   "record_detail": "최근 3-6-10-9-13",
+   "odds": 24.4,
+   "grade": "C",
+   "grade_reason": "배당 29.8배 · 최근평균 8.2착 -30 = 70점"
   },
   {
    "no": 7,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 24.7배 · 감점 없음 = 100점"
+   "name": "ヨルノチョウ",
+   "jockey": "小杉亮（船橋）",
+   "record_score": 23.7,
+   "record_detail": "최근 8-4-2-13",
+   "odds": 37.4,
+   "grade": "D",
+   "grade_reason": "배당 29.5배 · 최근평균 6.8착 -30 = 70점"
   },
   {
    "no": 4,
-   "name": "全 0- 0- 0- 0 左 0- 0- 0- 0 右 0- 0- 0- 0 場 0- 0- 0- 0 距 0- 0- 0- 0 － 良－",
-   "jockey": "",
+   "name": "ブレイブルイーズ",
+   "jockey": "及川烈（浦和）",
    "record_score": 0.0,
-   "record_detail": "",
-   "odds": null,
+   "record_detail": "최근 7-14-12-9-9",
+   "odds": 134.1,
    "grade": "D",
-   "grade_reason": "배당 121.5배 · 배당 80~149 -20 = 80점"
+   "grade_reason": "배당 151배 · 배당 150배+ -40 / 최근평균 10.2착 -30 = 30점"
   }
  ],
  "elimination": {
@@ -580,40 +578,43 @@
    6,
    8,
    2,
-   7,
+   7
+  ],
+  "eliminated": [
    4
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "elimination_reasons": {
+   "4": "배당 151배 · 배당 150배+ -40 / 최근평균 10.2착 -30 = 30점"
+  }
  },
  "final_recommendation": {
   "quinella_main": {
-   "combo": "3+8",
-   "odds": 6.2,
-   "reason": "3번(B)·8번(?)"
+   "combo": "1+8",
+   "odds": 5.7,
+   "reason": "1번(A)·8번(B)"
   },
   "quinella_sub": {
    "combo": "1+3",
-   "odds": 7.4,
-   "reason": "1번(A)·3번(B)"
+   "odds": 9.0,
+   "reason": "1번(A)·3번(C)"
   },
   "trifecta_main": {
    "combo": "1+3+8",
-   "odds": 7.6,
-   "reason": "1번(A)·3번(B)·8번(?)"
+   "odds": 7.3,
+   "reason": "1번(A)·3번(C)·8번(B)"
   },
   "trifecta_insurance1": {
-   "combo": "3+4+8",
-   "odds": 102.1,
-   "reason": "3번(B)·4번(D)·8번(?) · 급락감지"
+   "combo": "1+5+8",
+   "odds": 8.5,
+   "reason": "1번(A)·5번(A)·8번(B)"
   },
   "trifecta_insurance2": {
-   "combo": "1+3+4",
-   "odds": 108.6,
-   "reason": "1번(A)·3번(B)·4번(D) · 급락감지"
+   "combo": "1+3+5",
+   "odds": 11.4,
+   "reason": "1번(A)·3번(C)·5번(A)"
   },
   "budget_allocation": {
-   "quinella_main": "34.0%",
+   "quinella_main": "43%",
    "quinella_sub": "20%",
    "trifecta_main": "29%",
    "trifecta_insurance": "4%"
@@ -687,29 +688,44 @@
     "5번 급락 -10.5% (절대 10%+ 자금집중·추천 필수)",
     "8번 급락 -10.5% (절대 10%+ 자금집중·추천 필수)"
    ]
+  },
+  {
+   "time": "17:53:50",
+   "minutes_before": null,
+   "sig": "1-3-8|1+8|1+3|1+3+8",
+   "keyHorses": [
+    1,
+    8,
+    3
+   ],
+   "summary": "유력마 1·8·3 / 복승 1+8",
+   "quinella_main": "1+8",
+   "quinella_sub": "1+3",
+   "trifecta_main": "1+3+8",
+   "top_signals": []
   }
  ],
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    4,
-    7
+    1,
+    8
    ],
    "trio": [
+    1,
     3,
-    4,
-    7
+    8
    ]
   },
   "form": {
    "quinella": [
     1,
-    2
+    5
    ],
    "trio": [
     1,
-    2,
-    3
+    5,
+    6
    ]
   },
   "jockey": {
@@ -718,7 +734,7 @@
   },
   "final": {
    "quinella": [
-    3,
+    1,
     8
    ],
    "trio": [
@@ -728,11 +744,11 @@
    ]
   }
  },
- "summary": "급락 4-7 ▼8.4% / 유력마 3·8·1 / 복승 3+8",
+ "summary": "유력마 1·8·3 / 복승 1+8",
  "keyHorses": [
-  3,
+  1,
   8,
-  1
+  3
  ],
  "result": null,
  "hit": null,
