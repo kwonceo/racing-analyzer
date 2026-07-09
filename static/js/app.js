@@ -3531,10 +3531,11 @@
 
   function renderBetRecommend(a, budgetSel) {
     const recs = a.betRecommend || [];
-    // [추천 신중화] 신호 대기(시장 신호 4종 중 2개 미만)면 추천 조합을 표시하지 않음(저배당 무조건 추천 방지).
+    // [추천 신중화·근본해결] 신호 대기(wait)·추천 차단(recommendGated: 90초 미달·시장신호 2개 미만·패스형)이면
+    //   추천 조합을 표시하지 않고 "⏳ 신호 대기 중"만 표시(저배당 무조건 추천 방지).
     //   복기/리포트 등 raceJudgment 없는 뷰는 영향 없음.
-    if (a.raceJudgment && a.raceJudgment.type === 'wait') {
-      const m = a.raceJudgment.message || '뚜렷한 신호 2개+ 확인 후 추천 조합이 표시됩니다';
+    if (a.recommendGated || (a.raceJudgment && a.raceJudgment.type === 'wait')) {
+      const m = (a.raceJudgment && a.raceJudgment.message) || '뚜렷한 신호 2개+ 확인 후 추천 조합이 표시됩니다';
       return `<div class="bet-box" style="display:block;margin:6px 0;border-left:3px solid #8a94a6;background:rgba(138,148,166,.08)">
         <b style="color:#cbd5e1">⏳ 신호 대기 — 추천 보류</b>
         <div class="hint" style="margin-top:3px">${esc(m)}</div>

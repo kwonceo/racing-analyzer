@@ -4512,8 +4512,17 @@ def _triple_analyze(rk, rec):
     confidence = race_judgment = stage_guide = None
     elimination_strong = []
     try:
-        # [5번] 첫 수집 직후 추천 금지 — 최소 3회(≈90초) 관찰 후 신호 판단(기존 2→3 상향)
-        signal_ready = (not baseline_set) and (not baseline_reset) and (len(hist) >= 3)
+        # [2번·90초 관찰 의무화] 첫 수집 후 90초 미만이면 신호가 있어도 추천 금지(배당 변화 관찰만).
+        #   관찰시간 = 현재 − 첫 스냅샷(t). 측정 불가 시 스냅샷 4건으로 폴백(초반 저배당 무조건 추천 방지).
+        observed_sec = None
+        try:
+            if hist and hist[0].get("t"):
+                observed_sec = time.time() - hist[0]["t"]
+        except Exception:
+            observed_sec = None
+        obs_ok = (observed_sec >= 90) if (observed_sec is not None) else (len(hist) >= 4)
+        # [5번] 첫 수집 직후 추천 금지 — 최소 3회 관찰 + 90초 경과 후에만 신호 판단(기존 2→3 + 90초 하한)
+        signal_ready = (not baseline_set) and (not baseline_reset) and (len(hist) >= 3) and obs_ok
         confidence = _confidence_engine(signal_confidence, form, advanced, key_horses)
         race_judgment = _bet_judgment(confidence, excess, advanced, wx_reversals, form,
                                       mass_drop, after_close, signal_ready)
@@ -4567,8 +4576,21 @@ def _triple_analyze(rk, rec):
     except Exception as _e:
         print("[마감후대급락] 파생 실패:", _e)
 
+    # ═══ [1·2·3번 근본해결] 신호 미충족 시 '저배당 무조건 추천' 완전 비움 ═══
+    #   조건: race_judgment 유형이 wait(90초 미달 또는 시장신호 4종 중 2개 미만) 또는 패스형(신호 없음).
+    #   생성 코드(_addbet 등)는 모두 보존(무삭제) → 결과 리스트만 비워 모든 소비처(웹·오버레이·복기)가 공통으로
+    #   '추천 없음'을 본다. 마감 후(after_close)는 참고 신호이므로 제외(기존 동작 유지).
+    recommend_gated = bool(race_judgment and race_judgment.get("type") in ("wait", "패스형") and not after_close)
+    if recommend_gated:
+        bet_rec = []          # 복승·삼복승 추천 조합 완전 비움
+        trio_rec = []         # 삼복승 추천 비움
+        main_bet = None
+        bmed = None           # BMED 배분 표도 비움(신호 대기 상태에선 배분 없음)
+        mass_drop_strategy = None
+
     return {
         "raceKey": rk, "hasPrev": bool(prev),
+        "recommendGated": recommend_gated,   # [3번] 저배당 무조건 추천 차단(신호 대기) 여부 → 프론트 '⏳ 신호 대기 중'
         # [추천 로직 전면 개편] BMED 확신도 엔진 + 실전 경주유형 판정 + 단계별 추천 + 강화 제거마
         "confidence": confidence,          # [2번] 이상감지40+전적30+급락지속30 → 말별 확신도·랭킹
         "raceJudgment": race_judgment,     # [1·4번] 확실/신중/애매/패스형 + 근거 + 배분비율 + 쌍승강신호
