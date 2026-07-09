@@ -2756,6 +2756,22 @@
       🎯 <b>추천 말 수 가이드</b>: 신호 <b>${rf.signalCount}개</b> → <b style="color:#38d39f">${range}</b> <span class="hint">${esc(rf.note || '')}</span></div>`;
   }
 
+  // [유력마 1마리] 축+배당 낮은 2마리 최소 복승 + 패스·소액 경고 배너.
+  function renderSingleFavorite(a) {
+    const sf = a && a.singleFavorite;
+    if (!sf || sf.axis == null) return '';
+    const parts = (sf.partners || []).map((p) => {
+      const od = (sf.partnerOdds && sf.partnerOdds[p] != null) ? `(${sf.partnerOdds[p]}배)` : '';
+      return `<b style="color:#fbbf24">${p}번</b><span class="hint">${od}</span>`;
+    }).join(' · ');
+    const combos = (sf.partners || []).map((p) => `<span class="chip" style="border-color:#f59e0b;color:#fbbf24">${[sf.axis, p].sort((x, y) => x - y).join('+')}</span>`).join(' ');
+    return `<div style="margin:8px 0;padding:9px 11px;border:2px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,.1)">
+      <div style="font-size:15px;font-weight:800;color:#fbbf24">⚠️ 유력마 1마리 — 패스 또는 소액만 권장</div>
+      <div class="hint" style="margin:3px 0 4px">유력마가 <b style="color:#38d39f">${sf.axis}번</b> 1마리뿐입니다. 축 + 배당 낮은 2마리로 최소 복승만 구성했습니다(소액).</div>
+      <div style="margin:2px 0">동반 후보: ${parts || '<span class="hint">없음</span>'}</div>
+      ${combos ? `<div style="margin-top:3px"><span class="hint">최소 복승:</span> ${combos}</div>` : ''}</div>`;
+  }
+
   // [고배당 동반 패턴·참고] 메인과 별도의 참고 추천 — 고배당 신호말과 함께 들어올 다른 고배당 말.
   function renderHighOddsCompanion(a) {
     const hc = a && a.highOddsCompanion;
@@ -3242,6 +3258,7 @@
       ${renderSignalQuality(a.signalQuality)}
       ${renderEliminationHTML(a.elimination)}
       ${renderRecommendBasis(a.recommendBasis)}
+      ${renderSingleFavorite(a)}
       ${renderRecommendFlex(a)}
       ${renderBetRecommend(a)}
       ${renderHighOddsCompanion(a)}
@@ -5027,6 +5044,7 @@
     //   경륜은 전적이 없어 배당(급락·쌍승역전·연속하락)·이상감지 기반 근거가 표시된다.
     parts.push(renderPatternMatch(a.patternMatch));
     parts.push(renderRecommendBasis(a.recommendBasis));
+    parts.push(renderSingleFavorite(a));
     parts.push(renderRecommendFlex(a));
     parts.push(renderBetRecommend(a, bsel));
     parts.push(renderHighOddsCompanion(a));
@@ -5117,6 +5135,7 @@
       ${renderJapanSignals(a.signals)}
       ${renderPatternMatch(a.patternMatch)}
       ${renderRecommendBasis(a.recommendBasis)}
+      ${renderSingleFavorite(a)}
       ${renderRecommendFlex(a)}
       ${renderBetRecommend(a, '#jpBudget')}
       ${renderHighOddsCompanion(a)}

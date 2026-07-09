@@ -1911,6 +1911,40 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None):
             "reason": reason,
         })
 
+    # [2번·제거 완화] 과다 제거 방지(1마리 빼고 전부 제거는 비정상).
+    #   확실 제거 = '전적 D등급(또는 전적정보 없음) + 배당 150배+' 인 말만. 전적 C등급 이상은 신호 없어도 후보 유지.
+    #   ⚠ 기존 _elim_score/verdict(30/50/70)는 참고 점수로 보존 — 최종 keep에만 완화 게이트를 덧씌운다.
+    graded = [h for h in horses if h.get("formScore") is not None]
+    fgrade = {}
+    if graded:
+        gs = sorted(graded, key=lambda h: -(h["formScore"] or 0))
+        ng = len(gs)
+        for i, h in enumerate(gs):
+            frac = i / ng
+            fgrade[h["no"]] = "A" if frac < 0.25 else "B" if frac < 0.50 else "C" if frac < 0.75 else "D"
+    for h in horses:
+        h["formGrade"] = fgrade.get(h["no"])
+        g = h["formGrade"]
+        o = h.get("oddsRepr")
+        high_odds = (o is None or o >= 150)
+        # 확실 제거 = 전적 D등급(또는 전적없음) + 배당 150배+ + 이변신호 없음(급락/쌍승상위=override) → 그 외 전부 유지.
+        hard_cut = high_odds and (g in (None, "D")) and not h["override"]
+        if hard_cut:
+            if h["keep"]:                              # 원래 유지였어도 규칙상 확실 제거로 확정
+                h["keep"] = False
+                h["softCut"] = True
+                h["verdict"], h["verdictLabel"] = "🔴", "확실 제거(전적D+150배+)"
+        else:
+            if not h["keep"] and not h["override"]:    # 원래 제거였으면 완화 유지
+                h["keep"] = True
+                h["softKept"] = True
+                if g in ("A", "B", "C"):
+                    h["softKeepReason"] = "전적 " + g + "등급 → 유지(신호 없어도)"
+                else:
+                    h["softKeepReason"] = "배당 " + (("%g배" % o) if o is not None else "미수집") + " (150배 미만) → 유지"
+                if h["verdict"] in ("🔴", "🟠"):
+                    h["verdict"], h["verdictLabel"] = "🟡", "관찰(완화 유지)"
+
     horses.sort(key=lambda h: -h["total"])
     kept = [h for h in horses if h["keep"] or h["override"]]
     elim = [h for h in horses if not (h["keep"] or h["override"])]
@@ -3733,6 +3767,25 @@ def _forced_trifecta_insurance(cur_mb, after_close, drops, wx_reversals, inverse
         return {"active": False}
 
 
+# ───────── [패스 권고 경주] 추천 없음/전적없음+신호없음 = 손익·적중률 집계 제외 ─────────
+def _is_pass_race(an):
+    """패스 권고 경주 판정: ①추천 게이트(신호 대기·패스형) 또는 ②전적없음+강신호없음.
+      → 손익 계산·추천 적중률 집계에서 제외(추천을 안 했으므로 미적중이 아니라 '패스가 맞음')."""
+    try:
+        if not an:
+            return False
+        if an.get("recommendGated"):
+            return True
+        rj = an.get("raceJudgment") or {}
+        if rj.get("type") in ("wait", "패스형"):
+            return True
+        no_form = not (an.get("form") or [])
+        no_signal = not int((an.get("strongSignals") or {}).get("count") or 0)
+        return bool(no_form and no_signal)
+    except Exception:
+        return False
+
+
 # ───────── [추천 말 수 유연화] 신호 강도(강신호 유형 수)에 따라 추천 말 수 범위 안내 ─────────
 def _recommend_flex(strong_signals, signal_confidence, after_close):
     """신호 강도별 추천 말 수 가이드(강제 아님·안내).
@@ -4738,6 +4791,7 @@ def _triple_analyze(rk, rec):
     #             전적 나쁜 저배당 인기마가 추천에 들어가 TOP5와 딴판이 되던 불일치.
     #   수정: elimination(전적40+배당60 통합)의 통합점수 순 = renderTopHorses(TOP5) 정렬식과 동일하게
     #        상위 3두로 key_horses 재정렬(전적 수집된 경우만; 전적 없으면 기존 배당 인기 유지).
+    _elim_pre = None
     try:
         _elim_pre = _elimination(curQ, curD, exa, drops, form, _odds_map_un(trio))
         if _elim_pre and _elim_pre.get("formAvailable"):
@@ -4750,6 +4804,26 @@ def _triple_analyze(rk, rec):
                 ranked = _io + [h for h in ranked if h not in _io]   # 삼복승 편성 풀도 통합순 우선
     except Exception as _ke:
         print("[유력마정합] 실패:", _ke)
+
+    # [1번·유력마 1마리] 제거 완화 후에도 유력 후보가 1마리뿐이면 → 축 + 배당 낮은 2마리 자동 추가(최소 복승) + 경고.
+    single_favorite = None
+    try:
+        if _elim_pre:
+            _cands = [int(h["no"]) for h in (_elim_pre.get("horses") or [])
+                      if (h.get("keep") or h.get("override")) and h.get("no") is not None]
+            if len(_cands) == 1:
+                _ax = _cands[0]
+                _rep = {}
+                for (a, b), o in curQ.items():
+                    for hh in (a, b):
+                        if o and o > 0 and (hh not in _rep or o < _rep[hh]):
+                            _rep[hh] = o
+                _others = sorted([h for h in _rep if h != _ax], key=lambda h: _rep[h])[:2]
+                single_favorite = {"axis": _ax, "partners": _others,
+                                   "partnerOdds": {h: _rep[h] for h in _others},
+                                   "note": "유력마 1마리 — 축 + 배당 낮은 2마리로 최소 복승 구성(또는 패스·소액만 권장)"}
+    except Exception as _sfe:
+        print("[유력마1마리] 실패:", _sfe)
 
     # [근본해결3] raw 쌍승역전 → 마감 전 '예비 유력마' 즉시 반영(정식 win-exacta 확정 전에도).
     #   카와사키 7R: raw 쌍승역전(11↔7) T-3분 감지됐으나 정식 공식(단승 대비)은 마감 후에야 7번 확정 →
@@ -4852,6 +4926,12 @@ def _triple_analyze(rk, rec):
             return
         seen_rec.add(key)
         bet_rec.append({"kind": kind, "label": label, "combo": cc, "alloc": alloc, "expOdds": odds})
+
+    # [1번·유력마 1마리] 축 + 배당 낮은 2마리로 최소 복승 자동 편성(소액·경고 동반)
+    if single_favorite and single_favorite.get("partners"):
+        _sax = single_favorite["axis"]
+        for _sp in single_favorite["partners"]:
+            _addbet("복승", "복승(유력1축·소액)", [_sax, _sp], 10, _q(_sax, _sp))
 
     if len(key_horses) >= 2:
         h1, h2 = key_horses[0], key_horses[1]
@@ -5472,6 +5552,7 @@ def _triple_analyze(rk, rec):
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
         "recommendFlex": recommend_flex,      # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드
         "highOddsCompanion": high_odds_companion,  # [고배당 동반 패턴·참고] 메인과 별도 참고 추천
+        "singleFavorite": single_favorite,    # [유력마 1마리] 축+배당낮은2마리 최소복승 + 패스/소액 경고
 
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
@@ -7798,13 +7879,17 @@ def _recompute_learning_stats(records):
         d["rate"] = round(d["hit"] / d["n"] * 100, 1) if d["n"] else None
 
     # [#5] 누적 손익(pnl) 집계 — 베팅 참여(추천 있던) 경주 기준 순손익·투자합·ROI.
-    bet_recs = [r for r in records if r.get("pnl") is not None and (r.get("bet_type") or r.get("stake"))]
+    #   [3번·패스 처리] 패스 권고 경주(추천 없음/전적없음+신호없음)는 손익 집계 제외(추천 안 했으므로).
+    bet_recs = [r for r in records if r.get("pnl") is not None and (r.get("bet_type") or r.get("stake")) and not r.get("passed")]
+    passed_races = [r for r in records if r.get("passed")]
+    pass_correct_n = sum(1 for r in passed_races if r.get("pass_correct"))
     net_profit = sum(int(r.get("pnl") or 0) for r in bet_recs)
     total_staked = sum(int(r.get("stake") or 0) for r in bet_recs if r.get("bet_type"))
     profit_summary = {
         "net": net_profit, "bets": len(bet_recs), "staked": total_staked,
         "roi": round(net_profit / total_staked * 100, 1) if total_staked else None,
         "wins": sum(1 for r in bet_recs if (r.get("pnl") or 0) > 0),
+        "passed": len(passed_races), "passCorrect": pass_correct_n,   # [3번] 패스 경주(손익 제외)·패스 적중
     }
 
     # [비교학습] 이상감지/전적/기수/최종 추천별 적중률(비교 기록 있는 경주만) + 현재 통합 가중치
@@ -8329,6 +8414,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         # [신규 경고시스템 2·5번] 경고 발생·경고말 입상·경고 무시(추천 누락) 판정
         "alert_fired": bool(_al and _al.get("fired")), "alert_horses": (_al or {}).get("horses") or [],
         "alert_hit": bool(_al and _al.get("hit")), "alert_ignored": bool(_al and _al.get("ignored")),
+        # [3번·패스 처리] 추천 없음(신호 대기/패스형) 또는 전적없음+신호없음 = 패스 권고 경주 → 손익·적중률 집계 제외.
+        "passed": _is_pass_race(an), "pass_correct": bool(_is_pass_race(an) and not quinella_hit and not trifecta_hit),
         "t": time.time(),
     }
     L = _learning_load()
