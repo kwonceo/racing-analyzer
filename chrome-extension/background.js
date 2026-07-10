@@ -765,10 +765,10 @@ async function doResultFetch(attempt) {
     chrome.storage.local.set({ resultAutoStatus: { state: last ? 'manual' : 'retry', attempt: attempt + 2, nextAt, raceKey: curRaceKey || '', t: Date.now() } });
     // [스펙4·5] T+10분까지 실패 → 수동 입력 안내(해당 경주는 결과 미입력으로 남아 결과기록 탭 '미입력' 목록에 표시됨)
     if (last) {
-      // [캡쳐+OCR] 자동수집 실패 시: 경주결과 화면을 열고 확장의 '📸 경주결과 캡쳐→판독'을 누르라고 안내.
-      _notify('resultFail', '❌ 결과 자동수집 실패 — 캡쳐로 입력하세요',
-        `${curRaceKey ? curRaceKey + ' · ' : ''}경주결과 화면을 띄운 뒤 확장 팝업의 [📸 경주결과 캡쳐→판독]을 누르면 착순이 자동 입력됩니다. (또는 결과기록 탭에서 수동 입력)`, false);
-      // [스펙2] 실패 상태를 서버로 전송 → 분석기 상단에 "⚠️ N경주 자동수집 실패 → 수동입력" 배너 표시
+      // [자동 팝업 제거] 결과 자동수집 실패 시 '캡쳐로 입력하세요' Chrome 알림은 띄우지 않는다(사용자 요청).
+      //   → 해당 경주는 결과 미입력으로 남아 분석기 '결과기록 탭 > 📋 결과 입력 대기' 목록에만 조용히 표시된다.
+      //   (캡쳐→판독·수동입력 기능 자체는 확장 팝업/결과기록 탭에 그대로 보존 — 안내 팝업만 제거)
+      // [상태 전송 유지] 실패 상태는 서버로만 전송(팝업/배너 없이) → 결과기록 탭 대기 목록 정확성 유지.
       _postResultAutoStatus({ state: 'manual', raceKey: curRaceKey || '', attempt: attempt + 2 });
     }
   }

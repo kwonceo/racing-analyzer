@@ -6371,23 +6371,15 @@
       let s = null;
       try { s = await (await fetch('/api/results/auto-status')).json(); } catch (_) { return; }
       if (!s) return;
-      // ① 실패 배너(수동입력 필요)
-      const fails = s.failures || [];
-      if (fails.length) {
-        const names = fails.map((f) => f.raceKey || '경주').slice(0, 4).join(', ');
-        bar.textContent = `⚠️ ${fails.length}경주 자동수집 실패 → 수동입력 필요: ${names}${fails.length > 4 ? ' 외' : ''} (클릭)`;
-        bar.style.display = 'block';
-      } else {
-        bar.style.display = 'none';
-      }
-      // ② 새 성공(lastDone.seq 증가) → 결과기록 탭 자동 갱신
+      // ① [자동 표시 제거] 전역 상단 '자동수집 실패 → 수동입력 필요' 배너는 표시하지 않음(사용자 요청).
+      //    미입력·실패 경주 안내는 결과기록 탭의 [📋 결과 입력 대기] 목록에서만 확인(전역 배너/팝업 없음).
+      bar.style.display = 'none';
+      // ② 새 성공(lastDone.seq 증가) → 결과기록 탭만 조용히 자동 갱신(팝업 없이).
       const doneSeq = (s.lastDone && s.lastDone.seq) || 0;
       if (_lastResultDoneSeq < 0) { _lastResultDoneSeq = doneSeq; return; }  // 첫 폴링은 기준만 설정
       if (doneSeq > _lastResultDoneSeq) {
         _lastResultDoneSeq = doneSeq;
-        const rk = (s.lastDone && s.lastDone.raceKey) || '경주';
-        _refreshResultTab();
-        try { toast(`✅ ${rk} 결과 자동수집 반영됨`); } catch (_) { /* */ }
+        _refreshResultTab();   // 결과기록 탭 자동 갱신(성공 alert 팝업 제거)
       }
     }
     tick();
