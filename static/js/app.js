@@ -2743,6 +2743,21 @@
       ${combos ? `<div style="margin-top:4px">${combos}</div>` : ''}</div>`;
   }
 
+  // [히로시마 2R 학습] 역배열 실질유력마 축 받치기 복승 — 실질유력마+다른유력마 조합 놓침 방지.
+  function renderReversalBacking(a) {
+    const rb = (a && a.reversalBacking) || [];
+    if (!rb.length) return '';
+    const lead = rb[0] && rb[0].lead;
+    const lines = rb.map((b) => {
+      const o = (b.odds != null) ? `<span class="hint">복승 ${b.odds}배</span>` : '<span class="hint">배당 미수집</span>';
+      return `<div style="margin:2px 0"><span class="chip" style="background:rgba(168,85,247,.18);border:1px solid #a855f7;color:#e9d5ff">${(b.combo || []).join('+')}</span> ${o} <span class="hint">${esc(b.note || '')}</span></div>`;
+    }).join('');
+    return `<div style="margin:8px 0;padding:9px 11px;border:1.5px solid #a855f7;border-radius:8px;background:rgba(168,85,247,.1)">
+      <div style="font-size:14px;font-weight:800;color:#d8b4fe">🎯 복승 받치기 (역배열 실질유력 ${lead != null ? lead + '번' : ''} 축)</div>
+      <div class="hint" style="margin:3px 0 4px">고배당인데 시장이 실질 승자로 미는 말을 축으로, <b style="color:#e9d5ff">다른 유력마와 받치기</b> — 실질유력마+다른유력마(예: 7+4) 조합 놓침 방지 <span class="hint">(히로시마 2R 학습)</span></div>
+      ${lines}</div>`;
+  }
+
   // [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드(강제 아님·안내 배지).
   function renderRecommendFlex(a) {
     const rf = a && a.recommendFlex;
@@ -3242,6 +3257,7 @@
         : a.baselineSet ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.1);border-radius:6px;color:#7dd3fc">🎯 <b>기준값 설정됨</b> — 새 경주 첫 수집입니다. 변동폭은 <b>다음 수집부터</b> 계산됩니다.</div>` : ''}
       ${a.afterClose ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #8a94a6;background:rgba(138,148,166,.14);border-radius:6px;color:#b8c0cc">⚠️ <b>마감 후 수집</b> — 발주(T-0) 이후 신호는 <b>참고만</b> 하세요. 급락이 있어도 <b>추천 조합·보험에는 반영되지 않습니다</b>(마감 전 기준 유지).</div>` : ''}
       ${renderForcedTrifecta(a)}
+      ${renderReversalBacking(a)}
       ${renderPreReversal(a)}
       ${renderAfterCloseSurge(a.afterCloseSurge)}
       ${a.marketCheck && a.marketCheck.diverged ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ff5c5c;background:rgba(255,92,92,.12);border-radius:6px;color:#ff8a8a">⚠️ <b>배당판 불일치</b> — 추천 복승(${(a.marketCheck.mainPair || []).join('+')}=${a.marketCheck.mainOdds}배)이 <b>배당판 최저 인기 조합(${a.marketCheck.favPair.join('+')}=${a.marketCheck.favOdds}배)</b>과 다릅니다. 배당판을 초반에 못 끌어왔거나 전적 편중일 수 있어요 → <b>배당판 인기 조합을 추천에 추가</b>했습니다. 배당 재확인 권장.</div>` : ''}
@@ -5119,6 +5135,7 @@
     parts.push(`<div class="matrix-title">🚨 실시간 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${six ? ' · 6명 출전' : ''}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>`);
     if (a.summary) parts.push(`<div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary)}</div>`);
     parts.push(renderForcedTrifecta(a));
+    parts.push(renderReversalBacking(a));
     parts.push(renderAlertSignal(a.alertSignal, _horseRoleMap(a)));
     parts.push(renderPreReversal(a));
     parts.push(renderAfterCloseSurge(a.afterCloseSurge));
@@ -5209,6 +5226,7 @@
       ${renderRaceJudgment(a, '#jpBudget')}
       ${renderChaotic(a, '#jpBudget')}
       ${renderForcedTrifecta(a)}
+      ${renderReversalBacking(a)}
       ${renderPreReversal(a)}
       ${renderAfterCloseSurge(a.afterCloseSurge)}
       ${renderInverse(a.inverse)}
@@ -7461,6 +7479,9 @@
       <div>결과: <b>1착 ${r['1st'] != null ? r['1st'] : '?'}번 / 2착 ${r['2nd'] != null ? r['2nd'] : '?'}번 / 3착 ${r['3rd'] != null ? r['3rd'] : '?'}번${(r['4th'] != null || rep.result4 != null) ? ` / 4착 ${r['4th'] != null ? r['4th'] : rep.result4}번` : ''}</b></div>
       <div style="margin-top:4px">판정: 복승 ${yn(rep.quinella_hit)} · 삼복승 ${yn(rep.trifecta_hit)}</div>
       ${rep.near_miss ? `<div style="margin-top:4px;color:#ffd24f">🟡 <b>아깝게 4착 - 거의 적중</b>${rep.near_miss_horse != null ? ` (추천 ${rep.near_miss_horse}번이 4착)` : ''} → 삼복승 보험픽 학습 반영</div>` : ''}
+      ${rep.pairing_miss ? `<div style="margin-top:4px;padding:6px 8px;border-left:3px solid #a855f7;background:rgba(168,85,247,.1);border-radius:6px;color:#d8b4fe">
+        🎯 <b>아쉬운 복승조합 엇갈림</b> — 유력마·삼복승 판단은 정확했으나 <b>복승 상대 페어링만 어긋남</b> (실제 복승 ${(rep.pairing_miss.top2 || []).join('+')})<br>
+        <span class="hint">유력마 ${(rep.pairing_miss.keyHorses || []).join('·')}번 중 실제 1·2착은 ${(rep.pairing_miss.top2 || []).join('·')}번인데 복승 메인은 다른 조합이었습니다. ${rep.pairing_miss.wouldBackingCover ? '→ ✅ <b>역배열 실질유력마 받치기 복승</b>이 있었다면 커버됐을 케이스(학습 반영).' : '→ 유력마 간 받치기 복승 강화 대상.'}</span></div>` : ''}
       ${renderHitBasis(rep.hit_basis)}
       <div class="matrix-title" style="font-size:12px;margin-top:8px">이상감지 분석</div>${anomalyLines}
       ${formLine}${pnlHtml}

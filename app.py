@@ -4018,6 +4018,39 @@ def _third_place_hunt(compression_pattern, strong_signals, anomaly_horse, wx_rev
 #   ⇒ [규칙] T-2분 이내(마감 임박)에 '급락'과 '역배열'이 **동시에** 감지된 말은 유력마 순위와 무관하게
 #           삼복승 보험에 **강제 편성**(유력마 상위 2두와 묶어)하고 오버레이에 강조 표시한다.
 #   ⚠ 기존 삼복승 편성·third_place_hunt·strong_signals 무삭제 — 별도 '강제보험' 블록만 추가.
+def _reversal_backing_bets(inverse, key_horses, curQ, after_close):
+    """[히로시마 2R 학습] 역배열이 지목한 '실질 유력마'(invLead: 인기 낮은데 조합배당 최저 = 고배당인데
+    시장이 실질 승자로 미는 말)를 복승 축으로, 다른 유력마들과 '받치기 복승'을 편성한다.
+    복승 메인이 실질유력마를 특정 1두와만 묶어(예: 1+7), 실제 결과가 실질유력마+다른유력마(7+4)면
+    놓치던 문제 방지 → 실질유력마 축으로 모든 유력마와 받치기(7+1·7+4)해 복승 적중 폭을 넓힘.
+    반환 [{combo:[lead,other], odds, note}] (마감 후엔 빈 리스트 = 참고만)."""
+    if after_close:
+        return []
+    inv = inverse or {}
+    lead = inv.get("invLead") if inv.get("detected") else None
+    if not lead or lead.get("no") is None:
+        return []
+    try:
+        lead_no = int(lead["no"])
+    except (TypeError, ValueError):
+        return []
+    out, seen = [], set()
+    for h in (key_horses or []):
+        try:
+            h = int(h)
+        except (TypeError, ValueError):
+            continue
+        if h == lead_no or h in seen:
+            continue
+        seen.add(h)
+        cc = tuple(sorted((lead_no, h)))
+        o = (curQ or {}).get(cc)
+        out.append({"combo": list(cc), "odds": (round(o, 1) if isinstance(o, (int, float)) else None),
+                    "lead": lead_no, "partner": h,
+                    "note": f"역배열 실질유력 {lead_no}번(고배당) 축 + 유력마 {h}번 받치기"})
+    return out[:3]
+
+
 def _forced_trifecta_insurance(cur_mb, after_close, drops, wx_reversals, inverse,
                                strong_signals, key_horses, drop_thresh=-30):
     """T-2분 이내 급락(강급락 pct<=drop_thresh)과 역배열을 동시에 보인 말을 찾아
@@ -5253,6 +5286,13 @@ def _triple_analyze(rk, rec):
             _addbet("삼복승", "삼복승 보험2", [h1, h3, anomaly_horse], 4,
                     trio_map.get(tuple(sorted([h1, h3, anomaly_horse]))))
 
+    # [히로시마 2R 학습·복승 받치기] 역배열 실질유력마(고배당인데 시장이 실질 승자로 미는 말)를 축으로
+    #   다른 유력마들과 받치기 복승을 소액 추가 → 실질유력마+다른유력마(7+4) 조합 놓침 방지.
+    #   _addbet 이 복승 메인/보조와 중복되면 자동 dedup(같은 조합은 스킵).
+    reversal_backing = _reversal_backing_bets(inverse, key_horses, curQ, after_close)
+    for _rb in reversal_backing:
+        _addbet("복승", "복승 받치기(역배열 실질유력)", _rb["combo"], 8, _rb["odds"])
+
     # [삼복승 무조건 편성] 배당판(실배당) 유무·유력마 3두 미만과 무관하게 삼복승을 항상 추천에 포함.
     #   유력마가 3두 미만이면 선호순 풀(ranked→단승순→복승조합 등장마)로 3두를 채워 메인 생성.
     #   [역배열 대비] 쌍승역전 challenger(실질 상위 지목 아웃사이더)를 낀 조합을 추가(이변 대비).
@@ -5857,6 +5897,7 @@ def _triple_analyze(rk, rec):
         "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
+        "reversalBacking": reversal_backing,  # [히로시마2R] 역배열 실질유력마 축 받치기 복승
         "recommendFlex": recommend_flex,      # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드
         "highOddsCompanion": high_odds_companion,  # [고배당 동반 패턴·참고] 메인과 별도 참고 추천
         "singleFavorite": single_favorite,    # [유력마 1마리] 축+배당낮은2마리 최소복승 + 패스/소액 경고
@@ -8460,6 +8501,12 @@ def _recompute_learning_stats(records):
         # [4착] 아깝게 미적중(추천 말 4착) 건수 + 삼복승 근접 건수
         "near_miss": {"n": sum(1 for r in records if r.get("near_miss")),
                       "trio_near": sum(1 for r in records if r.get("trio_near_miss"))},
+        # [히로시마2R] 복승조합엇갈림(유력마는 맞음·복승 상대만 어긋남) 건수 + 받치기로 커버 가능했던 건수
+        "pairing_miss": {
+            "n": sum(1 for r in records if r.get("pairing_miss")),
+            "would_cover": sum(1 for r in records
+                               if (r.get("pairing_miss_detail") or {}).get("wouldBackingCover")),
+        },
     }
 
 
@@ -8701,6 +8748,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             _record_near_miss(rk, time.strftime("%Y-%m-%d"), near_miss_horse, near_miss_name)
         except Exception as e:
             print("[4착학습] near-miss 저장 실패:", e)
+    # [히로시마 2R 학습·복기] 복승조합엇갈림 near-miss: 유력마는 맞았으나 복승 상대 페어링만 어긋나 복승 놓침.
+    pairing_miss = None
+    if not quinella_hit:
+        try:
+            pairing_miss = _pairing_miss_review(an, top3)
+        except Exception as e:
+            print("[복승조합엇갈림] 판정 실패:", e)
     fo = final_odds if isinstance(final_odds, dict) else {}
 
     def _odds_val(x):  # 확장은 {combo,odds} 중첩, 수동입력은 숫자 → 둘 다 허용
@@ -8858,6 +8912,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         # [2·3번] 4착 near-miss(추천 말 4착=아깝게 미적중) — 통계·보험픽 학습 근거
         "top4": top4, "near_miss": near_miss, "near_miss_horse": near_miss_horse,
         "near_miss_name": near_miss_name, "trio_near_miss": trio_near,
+        # [히로시마 2R] 복승조합엇갈림 near-miss(유력마는 맞음·복승 상대만 어긋남) — 받치기 복승 학습 근거
+        "pairing_miss": bool(pairing_miss), "pairing_miss_detail": pairing_miss,
         # [1번] 적중 근거 요약(전적점수·급락점수+폭·역배열·최종신뢰도·한줄근거)
         "hit_basis": hit_basis,
         # [전략 성과 학습] 적용된 BMED 전략·역배열 여부(전략별 적중률 집계 근거)
@@ -8901,6 +8957,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             "eliminated": eliminated_nos, "form_pick": form_pick, "form_pick_hit": form_pick_hit,
             "pnl": pnl, "stake": stake,   # [일본경마 복기] 재조회 시 손익 그대로 표시
             "near_miss": near_miss, "near_miss_horse": near_miss_horse,  # [4착] 아깝게 미적중
+            "pairing_miss": pairing_miss,   # [히로시마2R] 복승조합엇갈림(유력마는 맞음·복승 상대 어긋남)
             "hit_basis": hit_basis,   # [1번] 적중 근거 요약
         }
         json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
@@ -9067,6 +9124,36 @@ def _timeline_signal_label(pct):
     if pct >= 8:
         return "반등(자금 이탈)"
     return "신호 없음"
+
+
+def _pairing_miss_review(an, top3):
+    """[히로시마 2R 학습·복기] '유력마는 맞았으나 복승 상대 조합이 엇갈려' 복승을 놓친 아쉬운 near-miss.
+    조건: ①추천 복승 어느 것도 실제 top2와 불일치 ②실제 1·2착이 둘 다 유력마(keyHorses)에 포함.
+    → 삼복승/유력마 판단은 옳았고 복승 상대 페어링만 어긋난 경우 → 받치기 복승으로 커버 가능.
+    반환 dict(detected 등) 또는 None."""
+    top3 = [int(x) for x in top3 if x not in (None, "")]
+    if len(top3) < 2:
+        return None
+    top2 = sorted(top3[:2])
+    key = [int(x) for x in (an.get("keyHorses") or []) if x not in (None, "")]
+    if not (top2[0] in key and top2[1] in key):
+        return None                      # top2 중 유력마가 아닌 말이 있으면 다른 유형(전적오판 등)
+    q_combos = [sorted(int(x) for x in (b.get("combo") or []))
+                for b in (an.get("betRecommend") or []) if b.get("kind") == "복승"]
+    if top2 in q_combos:
+        return None                      # 복승이 이미 top2를 커버(적중) → near-miss 아님
+    lead = ((an.get("inverse") or {}).get("invLead") or {})
+    lead_no = lead.get("no")
+    backing = [sorted(int(x) for x in (b.get("combo") or []))
+               for b in (an.get("reversalBacking") or [])]
+    return {
+        "detected": True, "top2": top2, "keyHorses": key, "recQuinella": q_combos,
+        "leadNo": (int(lead_no) if lead_no is not None else None),
+        "backingCovered": bool(top2 in backing),           # 받치기가 top2를 이미 커버했나
+        "wouldBackingCover": bool(lead_no is not None and int(lead_no) in top2),
+        "lesson": ("유력마·삼복승 판단은 정확했으나 복승 메인이 실질유력마와 '다른' 유력마 받치기를 놓쳐 "
+                   "복승 top2를 놓침 → 역배열 실질유력마 축 받치기 복승으로 커버."),
+    }
 
 
 def _classify_failure(rk, an, top3, doc):
