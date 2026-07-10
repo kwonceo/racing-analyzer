@@ -2002,12 +2002,30 @@
   // [1번] 경주 자동 읽기: 30초마다 배당판에서 현재 경주를 감지 → raceKey 자동 업데이트 + 서버 전송.
   //   배당판에서 '이전/다음'으로 경주를 바꾸면(예: 제주 3경주 → 제주 4경주) 자동으로 따라간다.
   let _raceWatchTimer = null, _lastWatchedRace = '';
+  // [다음경주 자동전환·마감 감지] 카운트다운(남은시간)이 있었다가 사라지면(=경주 마감)
+  //   background 에 RACE_FINISHED 를 통지 → 발주시각 없이도 다음경주 전환 체인 가동.
+  let _hadCountdown = false, _finishNotifiedRk = '';
+  function _finishWatchdog() {
+    let rk = '';
+    try { rk = extractRaceKey(); } catch (_) { return; }
+    let rem = null;
+    try { rem = detectRemainingMs(); } catch (_) { rem = null; }
+    if (rem != null && rem > 5000) { _hadCountdown = true; return; }  // 아직 진행중(카운트다운 살아있음)
+    // 카운트다운이 있었다가 소멸/≤5초 → 이 경주 마감으로 판단(경주당 1회 통지).
+    if (_hadCountdown && rk && _finishNotifiedRk !== rk) {
+      _finishNotifiedRk = rk;
+      _hadCountdown = false;
+      try { chrome.runtime.sendMessage({ type: 'RACE_FINISHED', raceKey: rk }, () => void chrome.runtime.lastError); } catch (_) { /* */ }
+      console.log(`[경주마감] 카운트다운 소멸 → 다음경주 전환 통지: "${rk}"`);
+    }
+  }
   async function watchRaceChange() {
     let rk = '';
     try { rk = extractRaceKey(); } catch (_) { return; }
     if (!rk) return;                                   // 감지 실패 → 기존(수동) raceKey 유지
     if (rk === _lastWatchedRace) return;               // 이번 페이지에서 변경 없음
     _lastWatchedRace = rk;
+    _hadCountdown = false; _finishNotifiedRk = '';      // 새 경주 → 마감 감지 상태 초기화
     const { raceKey: cur } = await getSettings();
     if (rk === (cur || '').trim()) return;             // 저장된 raceKey 와 이미 동일
     await new Promise((r) => chrome.storage.local.set({ raceKey: rk }, r));
@@ -2025,7 +2043,10 @@
   function startRaceWatch() {
     if (_raceWatchTimer) clearInterval(_raceWatchTimer);
     setTimeout(watchRaceChange, 1500);                 // 로드 직후 1회
-    _raceWatchTimer = setInterval(watchRaceChange, 15000);   // 15초마다 경주 변경 감지(자동추종 반응성)
+    _raceWatchTimer = setInterval(() => {              // 10초마다 경주 변경 감지 + 마감 감지(자동추종 반응성)
+      watchRaceChange();
+      _finishWatchdog();                               // [다음경주 자동전환] 카운트다운 소멸 = 마감 통지
+    }, 10000);
   }
 
   restartLoop();

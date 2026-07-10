@@ -6239,13 +6239,55 @@
       + 'font:600 12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
       + 'color:#e2e8f0;border-top:1px solid #334155;display:none;text-align:center;letter-spacing:.2px';
     document.body.appendChild(bar);
+    // [4번] 다음 경주 자동전환 상태 배너(상단 중앙) — 발주 마감 후 새 경주로 넘어가는 과정을 명확히 표시.
+    const nb = document.createElement('div');
+    nb.id = 'nextRaceBanner';
+    nb.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:8px;z-index:99999;'
+      + 'padding:8px 18px;border-radius:10px;font:700 13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
+      + 'text-align:center;display:none;box-shadow:0 4px 14px rgba(0,0,0,.35);white-space:pre-line';
+    document.body.appendChild(nb);
     const two = (n) => String(n).padStart(2, '0');
     const hms = (ms) => { const d = new Date(ms); return two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds()); };
+    const hm = (ms) => { const d = new Date(ms); return two(d.getHours()) + ':' + two(d.getMinutes()); };
     const cd = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + '분 ' + two(s % 60) + '초'; };
+    let _nrDoneUntil = 0;   // '✅ 전환됨' 배너를 잠깐만 노출
+    function renderNextRace(s, now) {
+      const nr = s && s.nextRace;
+      // 전환 진행(waiting/refreshing/collecting) → 🔄 대기 배너
+      if (nr === 'waiting' || nr === 'refreshing' || nr === 'collecting') {
+        const eta = (s.deadline && s.deadline > now) ? `\n예상 시작: ${hm(s.deadline)}` : '';
+        const rk = s.raceKey || s.newRaceKey || '';
+        nb.style.background = '#1e3a5f'; nb.style.border = '1px solid #3b82f6'; nb.style.color = '#dbeafe';
+        nb.textContent = `🔄 다음 경주 대기 중${rk ? ' — ' + rk : ''}${eta}`;
+        nb.style.display = 'block';
+        return true;
+      }
+      // 전환 완료(done) → ✅ 배너 12초 노출 후 숨김
+      if (nr === 'done') {
+        if (!_nrDoneUntil || (s.t && s.t > now - 3000)) _nrDoneUntil = now + 12000;
+        if (now < _nrDoneUntil) {
+          const rk = s.newRaceKey || s.raceKey || '';
+          nb.style.background = '#14432a'; nb.style.border = '1px solid #22c55e'; nb.style.color = '#dcfce7';
+          nb.textContent = `✅ ${rk || '새 경주'} 자동 전환됨`;
+          nb.style.display = 'block';
+          return true;
+        }
+      }
+      // 탭 없음 경고
+      if (nr === 'no-tab') {
+        nb.style.background = '#4a2b12'; nb.style.border = '1px solid #f59e0b'; nb.style.color = '#fef3c7';
+        nb.textContent = '⚠ 배당판 탭이 없어 자동 전환 불가 — 배당판을 열어주세요';
+        nb.style.display = 'block';
+        return true;
+      }
+      nb.style.display = 'none';
+      return false;
+    }
     async function tick() {
       let s = null;
       try { s = await (await fetch('/api/auto/status')).json(); } catch (_) { /* */ }
       const now = Date.now();
+      renderNextRace(s, now);   // [4번] 전환 배너(상태와 독립적으로 항상 평가)
       if (!s || (!s.running && !s.stopped)) { bar.style.display = 'none'; return; }
       bar.style.display = 'block';
       if (s.stopped) { bar.style.background = '#1e293b'; bar.textContent = '⏹ 자동수집 중지됨 (발주 마감)'; return; }

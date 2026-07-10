@@ -332,6 +332,16 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true; // async
   }
 
+  // [다음경주 자동전환·발주시각 독립] content.js 가 카운트다운 소멸(=경주 마감)을 감지하면 통지.
+  //   발주시각(timerDeadline)이 안 잡힌 사설 모의배당판에서도 전환 체인을 가동하는 핵심 경로.
+  if (msg?.type === 'RACE_FINISHED') {
+    (async () => {
+      try { await _armNextRaceChain(msg.raceKey || '', 'finished'); } catch (_) { /* */ }
+      sendResponse({ ok: true });
+    })();
+    return true; // async
+  }
+
   // [4번] 배당판의 '📊 분석기 열기' → 분석기를 별도 '일반 창'으로 열기(이미 있으면 포커스).
   //   msg.force=true 면 재사용하지 않고 항상 새 창을 만든다(분석기 안의 '별도 창으로 열기'용).
   if (msg?.type === 'OPEN_ANALYZER') {
@@ -582,6 +592,9 @@ async function _onRaceClosed(reason) {
     // 무변동(추정) — autoSend 유지, 소프트 일시중지. 60초 뒤 재점검(배당 변동/새 경주면 자동 재개).
     _setAutoStatus({ running: false, paused: true, closeReason: reason });
     chrome.alarms.create('resumeCheck', { when: Date.now() + 60000 });
+    // [발주시각 독립 전환] 무변동=경주 마감 신호 → 발주시각 없어도 다음경주 전환 체인 가동(경주당 1회).
+    //   진짜 진행중 경주면 새로고침해도 같은 경주라 무해(수집 계속). 발주시각 있으면 T+3 체인이 이미 걸려 스킵.
+    try { const { raceKey } = await chrome.storage.local.get({ raceKey: '' }); await _armNextRaceChain(raceKey, 'no-change'); } catch (_) { /* */ }
   }
 }
 async function _forceAnalyze() {
@@ -770,6 +783,29 @@ async function doResultFetch(attempt) {
  *              syncAutoEngine 이 재가동되어 연속 수집이 이어진다.
  * autoSend OFF 시엔 syncAutoEngine 이 이 알람들을 함께 취소한다(임의 새로고침 방지).
  * ===================================================================== */
+/* [발주시각 독립 자동전환] 발주시각(timerDeadline)이 없어도 '경주 마감'이 확인되면
+ *   지금 시각 기준 +12초 새로고침 → +42초 재수집 → +72초 분석 체인을 가동한다.
+ *   같은 경주(raceKey)에 대해선 1회만(nextChainRk 가드) → 루프/불필요 새로고침 방지.
+ *   호출처: ① content.js RACE_FINISHED(카운트다운 소멸) ② _onRaceClosed 소프트 마감(무변동). */
+async function _armNextRaceChain(raceKey, why) {
+  const cfg = await _autoCfg();
+  if (!cfg.autoSend || cfg.autoNextRace === false) return;
+  const rk = (raceKey || '').trim() || (await chrome.storage.local.get({ raceKey: '' })).raceKey || '';
+  const { nextChainRk } = await chrome.storage.local.get({ nextChainRk: '' });
+  if (rk && nextChainRk === rk) return;                 // 이 경주는 이미 전환 체인 가동함
+  // 발주시각 기반 T+3 체인이 이미 예약돼 있으면(정상 경로) 중복 가동 안 함.
+  const armed = await chrome.alarms.get('nextRefresh');
+  if (armed) return;
+  await chrome.storage.local.set({ nextChainRk: rk });
+  const now = Date.now();
+  ['nextRefresh', 'nextCollect', 'nextAnalyze'].forEach((n) => chrome.alarms.clear(n));
+  chrome.alarms.create('nextRefresh', { when: now + 12000 });   // +12초: 배당판 새로고침
+  chrome.alarms.create('nextCollect', { when: now + 42000 });   // +42초: 재수집 + 새 raceKey 감지
+  chrome.alarms.create('nextAnalyze', { when: now + 72000 });   // +72초: 분석 + 전환 알림
+  _setAutoStatus({ running: false, nextRace: 'waiting', why: why || '', raceKey: rk, t: now });
+  console.log(`[다음경주] 발주시각 독립 전환 체인 가동(${why}) rk="${rk}"`);
+}
+
 async function _nextRaceRefresh() {
   const cfg = await _autoCfg();
   if (!cfg.autoSend || cfg.autoNextRace === false) return;
@@ -804,6 +840,9 @@ async function _nextRaceAnalyze() {
   if (!cfg.autoSend || cfg.autoNextRace === false) return;
   await _forceAnalyze();
   const { raceKey } = await chrome.storage.local.get({ raceKey: '' });
+  // [4번] 분석기 배너용: 전환 완료 상태 + 새 경주키를 서버 상태로 흘려보냄(deadline 있으면 예상 시작).
+  _setAutoStatus({ running: true, nextRace: 'done', newRaceKey: raceKey || '',
+    deadline: cfg.timerDeadline || 0, t: Date.now() });
   _notify('nextRace', '🔄 다음 경주로 전환',
     `새 경주: ${raceKey || '감지 중…'}\n자동 수집 시작`, false);
   // 새 발주시각이 감지됐으면 storage 변경으로 이미 재가동됐지만, 미검출 대비 한 번 깨워준다.
