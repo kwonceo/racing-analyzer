@@ -4687,7 +4687,7 @@
     state.koreaOddsPrev[title] = state.koreaOddsPrev[title] || new Set();
     state.koreaTimeline[title] = state.koreaTimeline[title] || [];
     setKoreaOddsStatus('waiting', title);
-    $('#koreaIntegrated').innerHTML = '';
+    renderKoreaFormDraft(title);   // [복구] 배당 연동 전에도 전적 기준 통합 초안(유력마 TOP5·조합)을 즉시 표시
     renderKoreaTimeline(title);
     const tick = () => pollKoreaOdds(title, race, form);
     await tick();
@@ -4708,10 +4708,9 @@
     if (!m || !m.matched) {
       const noMatch = m && m.reason === 'no_match' && (m.candidates || []).length;
       setKoreaOddsStatus(noMatch ? 'nomatch' : 'waiting', title, m);
-      // [히로시마 오매칭 방어] 매칭 실패 시 이전에 잘못 렌더된 통합분석(엉뚱한 경주)을 제거.
-      //   서버가 일본경마·경륜/경정/오토바이 키를 제외하도록 고쳐 오매칭 자체가 사라지지만,
-      //   직전에 남은 분석이 있으면 지워 한국 탭에 외국 경주 분석이 잔존하지 않게 한다.
-      const _ki = $('#koreaIntegrated'); if (_ki) _ki.innerHTML = '';
+      // [복구·오매칭 방어] 매칭 실패 시 통합영역을 빈칸으로 지우는 대신 '전적 기준 초안'으로 되돌린다.
+      //   → 한국 탭에 외국 경주 분석이 잔존하지 않으면서(초안은 이 경주 PDF 전적만 사용) 통합 화면은 항상 유지.
+      renderKoreaFormDraft(title);
       return;
     }
     try {
@@ -5047,6 +5046,40 @@
 
   function renderKoreaSignals(signals) {
     return renderSignalsSimple(signals, '⏱ 마감 임박 급락', (s) => s.type === '마감급락');
+  }
+
+  /** [배당 연동 전·복구] PDF 전적 기준 통합 초안 — 유력마 TOP5 + 조합 + 2착패턴을 즉시 표시.
+   *  배당이 매칭되기 전에도 '한 화면 통합 분석'이 항상 보이게 한다(배당 연동 시 renderKoreaIntegrated 로 고도화). */
+  function renderKoreaFormDraft(title) {
+    const host = $('#koreaIntegrated'); if (!host) return;
+    const sc = state.koreaScored[title];
+    const report = state.lastReports[title];
+    if (!sc || !sc.form || !sc.form.length) { host.innerHTML = ''; return; }
+    const gc = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#8a94a6' };
+    const gradeBy = {};
+    ((report && report.horses) || []).forEach((h) => { gradeBy[h.no] = h.grade; });
+    const top = sc.form.slice().sort((a, b) => (b.formScore || 0) - (a.formScore || 0)).slice(0, 5);
+    const rows = top.map((h, i) => {
+      const g = gradeBy[h.no] || (i === 0 ? 'A' : i < 2 ? 'B' : i < 4 ? 'C' : 'D');
+      return `<tr><td><b style="color:${gc[g] || '#fff'}">${g}</b></td><td>${h.no}</td><td>${esc(h.name || '')}</td>
+        <td>${esc(h.jockey || '')}</td><td><b>${h.formScore != null ? h.formScore : '-'}</b></td>
+        <td>${(h.recentPlacings || []).join('·') || '-'}</td></tr>`;
+    }).join('');
+    const bd = (report && report.betting_recommend) || {};
+    const betLine = (arr, label) => (arr || []).map((b) =>
+      `<div class="bet-line"><span><span class="bet-type">${label}</span> ${(b.combo || []).join('-')}</span><span class="hint">신뢰도 ${b.confidence != null ? b.confidence + '%' : '-'} · ${esc(b.note || '')}</span></div>`).join('');
+    const bets = betLine(bd.quinella, '복승') + betLine(bd.trifecta, '삼복승');
+    const p2 = (report && report.pattern2_horses) || [];
+    host.innerHTML = `<div class="panel-card">
+      <h3>🔗 통합 분석 (전적 기준 초안) <span class="hint" style="font-weight:400">배당 연동 대기 중</span></h3>
+      <div class="hint" style="padding:6px 9px;background:rgba(245,158,11,.1);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b;margin-bottom:8px">⏳ 배당판을 수집·매칭하면 <b>이상감지·역배열·통합등급(전적40%+배당60%)</b>으로 이 화면이 자동 고도화됩니다.</div>
+      <div class="matrix-title" style="font-size:13px">⭐ 유력마 TOP5 (전적 기준)</div>
+      <table class="data-table" style="margin-top:4px">
+        <thead><tr><th>등급</th><th>마번</th><th>마명</th><th>기수</th><th>전적점수</th><th>최근착순</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      ${p2.length ? `<div style="margin:6px 0"><span class="hint">🎯 2착패턴</span> ${p2.map(esc).join(', ')}</div>` : ''}
+      ${bets ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">💰 추천 조합 (전적 기준)</div>${bets}` : '<div class="hint" style="margin-top:6px">추천 조합: PDF 분석 리포트 참고</div>'}
+    </div>`;
   }
 
   /** 통합분석 결과(제거분석·유력마·통합등급·베팅·마감급락) 렌더 — 한글 데이터 그대로 */
