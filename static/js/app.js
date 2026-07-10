@@ -4622,7 +4622,7 @@
       };
     });
     if (!horses.length) return null;
-    const res = await Analysis.scoreHorses(raceCtx, horses);
+    const res = await Analysis.scoreHorses(raceCtx, horses, state.jockeyStats || {});   // [보완] 기수교체 보너스 활성
     renderFormScorePanel(res.horses || []);
     return res.horses || [];
   }

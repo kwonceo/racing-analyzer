@@ -23,6 +23,7 @@ import re
 import json
 import time
 import base64
+import random
 import hashlib
 import threading
 import subprocess
@@ -457,8 +458,44 @@ def _log_api_usage(usage, model, label=""):
 # ─────────────────────────────────────────
 # Claude 호출
 # ─────────────────────────────────────────
+# [보완·재시도] 병렬 Vision 호출(한국 PDF 4워커)이 429/과부하/일시장애로 조용히 실패하지 않게
+#   지수 백오프 재시도. 재시도 대상 = RateLimitError·과부하(529)·5xx·연결오류. 최대 _API_MAX_RETRY회.
+_API_MAX_RETRY = 4
+_API_RETRY_STATUS = {429, 500, 502, 503, 529}
+
+
+def _api_should_retry(e):
+    """이 예외가 재시도 가치가 있는 일시적 오류인지."""
+    if isinstance(e, getattr(anthropic, "APIConnectionError", ())):
+        return True
+    if isinstance(e, getattr(anthropic, "RateLimitError", ())):
+        return True
+    sc = getattr(e, "status_code", None)
+    if sc is None:
+        sc = getattr(getattr(e, "response", None), "status_code", None)
+    return sc in _API_RETRY_STATUS
+
+
+def _messages_create_retry(cli, **kwargs):
+    """messages.create 를 지수 백오프로 재시도(2·4·8·16초 + 지터). 마지막 실패는 그대로 raise."""
+    last = None
+    for attempt in range(_API_MAX_RETRY + 1):
+        try:
+            return cli.messages.create(**kwargs)
+        except Exception as e:  # noqa: BLE001 — 재시도 여부는 _api_should_retry 로 판별
+            last = e
+            if attempt >= _API_MAX_RETRY or not _api_should_retry(e):
+                raise
+            wait = min(30.0, 2.0 * (2 ** attempt)) + random.uniform(0, 1.0)
+            print(f"[AI재시도] {type(e).__name__}({getattr(e, 'status_code', '')}) — "
+                  f"{attempt + 1}/{_API_MAX_RETRY} {round(wait, 1)}초 후 재시도")
+            time.sleep(wait)
+    raise last   # 이론상 도달 안 함
+
+
 def call_claude(content, schema, max_tokens=4096, api_key=None):
-    msg = client(api_key).messages.create(
+    msg = _messages_create_retry(
+        client(api_key),
         model=MODEL,
         max_tokens=max_tokens,
         messages=[{"role": "user", "content": content}],
@@ -12075,10 +12112,13 @@ def score_form():
 
 @app.route("/api/score", methods=["POST"])
 def score():
-    """{race:{distance,course,grade}, horses:[{...전적/기수/마체중/이상감지...}]}
-    → 3-1~3-5 통합 점수 + 등급 + 플래그."""
+    """{race:{distance,course,grade}, horses:[{...전적/기수/마체중/이상감지...}], jockeyStats?}
+    → 3-1~3-5 통합 점수 + 등급 + 플래그.
+    jockeyStats(이름→통계) 주면 [4] 기수교체 보너스(리딩기수 판별)까지 활성화."""
     body = request.json or {}
-    scored = compute_horse_scores(body.get("race") or {}, body.get("horses") or [])
+    leaders = _leader_jockeys(body.get("jockeyStats"))   # [보완] 리딩기수 → 기수교체 보너스 활성
+    scored = compute_horse_scores(body.get("race") or {}, body.get("horses") or [],
+                                  leader_names=leaders)
     return jsonify({"horses": scored})
 
 
