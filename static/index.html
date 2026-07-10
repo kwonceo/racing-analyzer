@@ -202,6 +202,23 @@
       <div id="jpReport" class="report-area"></div>
       <div id="jpOddsStatus" style="margin:10px 0"></div>
 
+      <!-- [지방경마 출주표 전적] oddspark 出走表 + 전5경주(각질·거리변화·상3F) 서버 직접 수집 -->
+      <div class="panel-card" style="margin-top:12px">
+        <h3>🏇 지방경마 전적 분석 <span class="hint" style="font-weight:400">oddspark 출주표·전5경주(각질·거리변화·상3F) 자동 수집</span></h3>
+        <p class="hint">경마장·개최일·경주번호(또는 raceKey)를 넣으면 oddspark 출주표와 각 말의 <b>전5경주</b>를 가져와 <b>착순·통과순위(각질)·거리변화·상3F(막판스피드)</b>로 전적 점수를 계산합니다. raceKey 연동 시 <b>유력마·통합등급</b>(전적+배당역배열)에 자동 반영됩니다. (keiba.go.jp 대신 oddspark 메인 전적 소스)</p>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
+          <label class="hint">경마장 <input id="narVenue" class="cfg-input" type="text" placeholder="예: 소노다 / 園田" style="width:120px"></label>
+          <label class="hint">개최일 <input id="narYmd" class="cfg-input" type="text" placeholder="YYYYMMDD(기본 오늘)" style="width:130px"></label>
+          <label class="hint">경주 <input id="narRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
+          <button id="narFetchBtn" class="btn btn-primary">🏇 전적 분석</button>
+        </div>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
+          <label class="hint" style="flex:1">live 연동 raceKey <input id="narRaceKey" class="cfg-input" type="text" placeholder="예: 소노다 5경주 (비우면 현재 경주 자동)" style="width:100%;max-width:360px"></label>
+          <span class="hint" style="font-size:11px">← 입력 시 전적이 통합등급(전적+배당)에 반영</span>
+        </div>
+        <div id="narCardResult"></div>
+      </div>
+
       <!-- [일본경마 복기] 분석했던 경주 목록 → 클릭 → 유력마/제거마·이상감지·추천조합·결과입력·복기 -->
       <div class="panel-card" id="jpReviewCard" style="margin-top:12px">
         <h2>📒 일본경마 분석 내역 · 결과 복기</h2>

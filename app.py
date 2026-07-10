@@ -27,6 +27,7 @@ import random
 import hashlib
 import threading
 import subprocess
+import html as _htmllib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from itertools import permutations
 from html.parser import HTMLParser
@@ -10949,9 +10950,12 @@ def review_notes_list():
 #   fetch(공개 페이지·확장 불필요)해서 선수 전적(競走得点·착순·결정타·각질·전장소)을 분석.
 KEIRIN_STYLE_LABEL = {"逃": "도주(선행)", "捲": "젖히기", "追": "추입(마크)",
                       "差": "차입", "両": "자재(양각)", "自": "자재"}
-# joCode → 경륜장명(참고·표시용, 주요 장만)
-KEIRIN_JO = {"85": "사세보", "83": "구루메", "81": "고쿠라", "31": "마쓰도",
-             "45": "히라쓰카", "48": "가와사키", "62": "나고야", "73": "기시와다"}
+# joCode → 경륜장명(입력 힌트·폴백용). ⚠ 실제 경기장명은 출마표 <title>에서 파싱(권위 소스)하므로
+#   여기 없는 joCode도 '기타 경륜장 자동 탐색'으로 정상 표시됨(_keirin_parse_card 가 title 우선).
+#   [확정·live fetch 검증] 36=오다와라(小田原) · 62=히로시마(広島). 그 외 라벨은 미검증(참고만).
+KEIRIN_JO = {"36": "오다와라", "62": "히로시마",
+             "85": "사세보", "83": "구루메", "81": "고쿠라", "31": "마쓰도",
+             "45": "히라쓰카", "48": "가와사키", "73": "기시와다"}
 
 
 def _kstrip(s):
@@ -10968,14 +10972,14 @@ def _keirin_style_label(ch):
 
 
 def _keirin_grade(score):
-    """競走得点 → 전적 등급(스펙: 85+ A / 75~84 B / 65~74 C / <65 D)."""
+    """競走得点 → 전적 등급(스펙: 95+ A / 85~94 B / 75~84 C / <75 D). 예: 99.9점=A."""
     if score is None:
         return "?"
-    if score >= 85:
+    if score >= 95:
         return "A"
-    if score >= 75:
+    if score >= 85:
         return "B"
-    if score >= 65:
+    if score >= 75:
         return "C"
     return "D"
 
@@ -11217,9 +11221,11 @@ def _keirin_fetch(url):
 
 
 @app.route("/api/keirin/card", methods=["POST"])
+@app.route("/api/keirin/starters", methods=["POST"])   # [별칭] 동일 기능(선수 전적 수집·분석)
 def keirin_card():
-    """경륜 출마표 수집·분석: {joCode,kaisaiBi,raceNo} 또는 {url} 또는 {html}
-    → oddspark를 서버가 직접 fetch·파싱·분석해 반환."""
+    """경륜 출마표(선수 전적) 수집·분석: {joCode,kaisaiBi,raceNo} 또는 {url} 또는 {html}
+    → oddspark를 서버가 직접 fetch·파싱·분석해 반환.
+    선수번호·선수명·競走得点·최근착순·결정수(逃/捲/差/マ)·각질(逃/追)·직근2장소·A/B/C/D등급 포함."""
     body = request.json or {}
     html = body.get("html")
     url = body.get("url")
@@ -11242,6 +11248,14 @@ def keirin_card():
     card = _keirin_parse_card(html)
     if not card.get("riders"):
         return jsonify({"error": "선수 정보를 찾지 못했습니다(경주 번호/개최일 확인)."}), 422
+    # [기타 경륜장 자동 탐색] title에서 경기장명을 못 읽었으면 joCode 매핑으로 폴백 표기.
+    if not card.get("venue"):
+        _jo = str(body.get("joCode") or "")
+        if not _jo and url:
+            _mj = re.search(r"joCode=(\d+)", url)
+            _jo = _mj.group(1) if _mj else ""
+        if _jo and KEIRIN_JO.get(_jo):
+            card["venue"] = KEIRIN_JO[_jo]
     an = _keirin_analyze(card)
     # [live 통합] raceKey 가 오면 출마표 전적(競走得点)을 STARTERS_STORE 에 저장 →
     #   같은 raceKey로 배당(복승·쌍승·삼복승)이 수집되면 _triple_analyze 가 전적+배당(역배열·급락)을
@@ -11603,6 +11617,268 @@ def keiba_schedule_ep():
     sched = _keiba_schedule(str(ymd).strip(), force=bool((request.args.get("force") or "")))
     return jsonify({"raceDy": ymd, "tracks": [{"venue": k, "opTrackCd": v[0], "sponsorCd": v[1]}
                                               for k, v in sched.items()]})
+
+
+# ══════════ [지방경마 출주표 전적] oddspark RaceList.do(出走表) + HorseDetail(전5경주) ══════════
+#   keiba.go.jp 대신 oddspark 를 메인 전적 소스로 사용. RaceList.do=현재 출전마(마번·마명·기수·부담중량·
+#   거리·마장), HorseDetail.do=말별 전5경주(착순·경마장·거리·마장·통과순위=각질·상3F=막판스피드·기수·부담중량).
+def _keiba_cells(tr):
+    # HTML 엔티티(&#40;=( · &nbsp; 등)까지 디코딩해야 기수/소속/부담중량 셀 파싱이 됨.
+    return [re.sub(r"\s+", " ", _htmllib.unescape(re.sub(r"<[^>]+>", "", c))).strip()
+            for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", tr, re.S)]
+
+
+def _keiba_dist_of(s):
+    """'ダ1230'·'芝1400'·'1230m' → (surface, dist_int). 못 읽으면 (surface, None)."""
+    s = s or ""
+    surface = "더트" if "ダ" in s else "잔디" if "芝" in s else ""
+    m = re.search(r"(\d{3,4})", s.replace(",", ""))
+    return surface, (int(m.group(1)) if m else None)
+
+
+def _keiba_parse_shutsuba(html):
+    """oddspark 지방경마 출주표(RaceList.do) → {venue,raceNo,distance,surface,trackCond,horses:[...]}.
+    horses[]: {no(마번=행순서), name, sexAge, jockey, weight(부담중량), winOdds, pop, lineageNb, detailUrl}."""
+    out = {"venue": "", "raceNo": None, "distance": None, "surface": "", "trackCond": "", "horses": []}
+    mt = re.search(r"<title>(.*?)</title>", html, re.S)
+    if mt:
+        t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", mt.group(1)))
+        mv = re.search(r"(\S+?)競馬", t)
+        if mv:
+            out["venue"] = mv.group(1).strip()[-6:]
+        mr = re.search(r"(\d+)R", t)
+        if mr:
+            out["raceNo"] = int(mr.group(1))
+    # 레이스 헤더(거리·마장): HorseDetail 등장 이전 구간에서 'ダ1230'·마장상태 추출
+    head = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html[:html.find("HorseDetail")] if "HorseDetail" in html else html[:4000]))
+    md = re.search(r"([ダ芝])\s*(\d{3,4})\s*m?", head)
+    if md:
+        out["surface"] = "더트" if md.group(1) == "ダ" else "잔디"
+        out["distance"] = int(md.group(2))
+    mc = re.search(r"(良|稍重|重|不良)", head)
+    if mc:
+        out["trackCond"] = mc.group(1)
+    # 출전마 행(HorseDetail 링크 보유) — 출주표는 馬番 순서
+    trs = [t for t in re.findall(r"<tr[^>]*>.*?</tr>", html, re.S) if "HorseDetail" in t]
+    for i, tr in enumerate(trs):
+        cells = [c for c in _keiba_cells(tr) if c]
+        mln = re.search(r"lineageNb=(\d+)", tr)
+        lineage = mln.group(1) if mln else None
+        # 마명 셀: 가타카나 이름 + 성별(牡/牝/セ) 포함. 없으면 가타카나 가장 긴 셀로 폴백.
+        name_cell = next((c for c in cells if re.search(r"[ァ-ヶ]{2,}", c) and re.search(r"[牡牝セ]", c)), "")
+        if not name_cell:
+            kata = [c for c in cells if re.search(r"[ァ-ヶ]{3,}", c)]
+            name_cell = max(kata, key=len) if kata else ""
+        name = ""
+        sex_age = ""
+        if name_cell:
+            name = re.split(r"[\s　]", name_cell.strip())[0]
+            msa = re.search(r"([牡牝セ]\s*\d+)", name_cell)
+            sex_age = re.sub(r"\s+", "", msa.group(1)) if msa else ""
+        # 기수 셀: '福原杏 (兵庫) 57.0 …' — (소속) + 부담중량. 부담중량은 소수/정수 모두 허용.
+        jockey_cell = next((c for c in cells if re.search(r"[（(][^）)]*[）)]", c) and re.search(r"\d{2}(?:\.\d)?", c)), "")
+        jockey = ""
+        weight = None
+        if jockey_cell:
+            jockey = re.split(r"[\s　（(]", jockey_cell.strip())[0]
+            mw = re.search(r"(\d{2}(?:\.\d)?)\b", jockey_cell)
+            weight = float(mw.group(1)) if mw else None
+        # 단승배당·인기: '52.4 6人気'
+        pop = None
+        win_odds = None
+        oc = next((c for c in cells if re.search(r"\d+\.\d+\s*\d*人気", c) or re.search(r"\d+人気", c)), "")
+        if oc:
+            mo = re.search(r"(\d+\.\d+)", oc)
+            win_odds = float(mo.group(1)) if mo else None
+            mp = re.search(r"(\d+)人気", oc)
+            pop = int(mp.group(1)) if mp else None
+        out["horses"].append({
+            "no": i + 1, "name": name, "sexAge": sex_age, "jockey": jockey,
+            "weight": weight, "winOdds": win_odds, "pop": pop, "lineageNb": lineage,
+            "detailUrl": ("https://www.oddspark.com/keiba/HorseDetail.do?lineageNb=%s" % lineage) if lineage else None,
+        })
+    return out
+
+
+def _keiba_parse_horse_past(html, max_n=5):
+    """HorseDetail.do → 전적 리스트(최근순 최대 max_n). 各: {date,venue,distance,surface,trackCond,
+    fieldSize,placing,jockey,weight,bodyWeight,time,last3f,corner(통과순위),winner}."""
+    mtab = re.search(r"<table[^>]*>(?:(?!</table>).)*通過.*?</table>", html, re.S)
+    if not mtab:
+        return []
+    past = []
+    for tr in re.findall(r"<tr[^>]*>.*?</tr>", mtab.group(0), re.S):
+        r = _keiba_cells(tr)
+        if len(r) < 17 or not re.match(r"20\d\d", r[0] or ""):
+            continue
+        surface, dist = _keiba_dist_of(r[3])
+        mcond = re.search(r"(良|稍重|重|不良)", r[4] or "")
+        past.append({
+            "date": r[0], "venue": r[1], "distance": dist, "surface": surface,
+            "trackCond": (mcond.group(1) if mcond else ""),
+            "fieldSize": _to_int(r[5]), "placing": _to_int(r[9]),
+            "jockey": r[10], "weight": _safe_num(r[11]), "bodyWeight": r[12],
+            "time": r[13], "last3f": _safe_num(r[15]), "corner": (r[16] or "").strip(),
+            "winner": (r[17] if len(r) > 17 else ""),
+        })
+        if len(past) >= max_n:
+            break
+    return past
+
+
+def _keiba_corner_style(past):
+    """전5경주의 통과순위(通過)로 각질 추정. 코너 초반 순위가 두수 대비 앞이면 선행형, 뒤면 추격형.
+    반환 (styleType, styleBonus, detail). 각질 판단 근거: 코너통과 앞→선행, 뒤→추격."""
+    fronts, backs = 0, 0
+    used = 0
+    for pr in (past or [])[:3]:
+        corner = pr.get("corner") or ""
+        nums = [int(x) for x in re.findall(r"\d+", corner)]
+        if not nums:
+            continue
+        field = pr.get("fieldSize") or max(nums + [8])
+        first = nums[0]                      # 첫 코너 통과순위
+        used += 1
+        if first <= max(2, field * 0.30):    # 상위 30%권 = 선두권
+            fronts += 1
+        elif first >= field * 0.60:           # 하위 40%권 = 후미
+            backs += 1
+    if not used:
+        return "", 0, []
+    if fronts > backs and fronts >= 2:
+        return "선행형", 3, [f"코너통과 선두권 {fronts}회 → 선행형(+3)"]
+    if backs > fronts and backs >= 2:
+        return "추격형", 5, [f"코너통과 후미 {backs}회 → 추격형(막판 추입·+5)"]
+    if fronts > backs:
+        return "선행형", 3, ["코너통과 앞선 편 → 선행형(+3)"]
+    if backs > fronts:
+        return "추격형", 5, ["코너통과 뒤선 편 → 추격형(+5)"]
+    return "평지형", 0, []
+
+
+def _keiba_last3f_note(past):
+    """전5경주 상3F(막판 스피드) 평균. 빠를수록 추격형 강점. 반환 (avg, note)."""
+    vals = [pr.get("last3f") for pr in (past or []) if isinstance(pr.get("last3f"), (int, float)) and pr["last3f"] > 0]
+    if not vals:
+        return None, ""
+    avg = round(sum(vals) / len(vals), 1)
+    tag = " (막판 스피드 우수)" if avg <= 38.5 else ""
+    return avg, f"상3F 평균 {avg}초{tag}"
+
+
+def _keiba_build_form(shutsuba, details):
+    """출주표 + 말별 전적 → 통합 전적 점수. base_form_score(착순 가중평균) + 각질/거리변화/상3F 보정.
+    STARTERS_STORE 저장·통합등급용 horses[] 반환."""
+    cur_dist = shutsuba.get("distance")
+    horses = []
+    for h in shutsuba.get("horses", []):
+        past = (details or {}).get(h.get("lineageNb")) or []
+        placings = [pr.get("placing") for pr in past if pr.get("placing")]
+        base = base_form_score(placings)
+        style, sbonus, sdetail = _keiba_corner_style(past)
+        # 거리 변화: 직전 경주 거리 vs 이번 거리(재사용: distance_change_bonus)
+        nh = {"pastRaces": [{"distance": pr.get("distance")} for pr in past], "weight": h.get("weight")}
+        dbonus, ddetail = distance_change_bonus(nh, {"distance": cur_dist}, style)
+        # 부담중량 변화(직전 대비)
+        nh2 = {"weight": h.get("weight"),
+               "pastRaces": [{"weight": pr.get("weight")} for pr in past]}
+        wbonus, wdetail = weight_change_bonus(nh2)
+        last3f, l3note = _keiba_last3f_note(past)
+        total = round(base + sbonus + dbonus + wbonus, 1)
+        horses.append({
+            "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
+            "weight": h.get("weight"), "winOdds": h.get("winOdds"), "pop": h.get("pop"),
+            "recentPlacings": placings[:5], "baseScore": base,
+            "styleType": style, "styleBonus": sbonus,
+            "distanceBonus": dbonus, "weightBonus": wbonus, "last3f": last3f,
+            "totalScore": total,
+            "detail": sdetail + ddetail + wdetail + ([l3note] if l3note else []),
+            "past": past,
+        })
+    horses.sort(key=lambda x: x["totalScore"], reverse=True)
+    n = len(horses)
+    for i, h in enumerate(horses):
+        h["rank"] = i + 1
+        frac = i / n if n else 0                # 사분위 상대등급(전적점수 절대값이 낮게 뭉치는 NAR 대응)
+        h["grade"] = "A" if frac < 0.25 else "B" if frac < 0.50 else "C" if frac < 0.75 else "D"
+    return horses
+
+
+def _keiba_fetch_details(shutsuba, api_key=None):
+    """출전마별 HorseDetail 을 ThreadPool(동시 4)로 병렬 fetch·파싱 → {lineageNb: past[]}."""
+    targets = [(h["lineageNb"], h["detailUrl"]) for h in shutsuba.get("horses", [])
+               if h.get("lineageNb") and h.get("detailUrl")]
+    out = {}
+
+    def _one(item):
+        ln, url = item
+        try:
+            return ln, _keiba_parse_horse_past(_keirin_fetch(url))
+        except Exception as e:
+            print(f"[지방경마 전적] HorseDetail {ln} 실패:", e)
+            return ln, []
+    if targets:
+        with ThreadPoolExecutor(max_workers=4) as ex:
+            for ln, past in ex.map(_one, targets):
+                out[ln] = past
+    return out
+
+
+@app.route("/api/keiba/starters", methods=["POST"])
+def keiba_starters():
+    """[지방경마 출주표 전적] oddspark 出走表 + 전5경주(HorseDetail)를 서버가 직접 fetch·파싱해
+    각질(통과순위)·거리변화·상3F(막판스피드) 포함 전적 점수를 산출하고, raceKey로 live 통합등급에 연동.
+    body: {raceKey | venue, raceDy?(YYYYMMDD·기본 오늘), opTrackCd?·sponsorCd?, raceNb, withDetail?(기본 true)}."""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
+    venue = (body.get("venue") or "").strip()
+    ymd = (str(body.get("raceDy") or "").strip() or time.strftime("%Y%m%d", time.localtime()))
+    race_nb = body.get("raceNb")
+    # raceKey에서 경마장명·경주번호 추출(명시값 우선)
+    rk_venue, rk_num = _area_num(rk) if rk else (None, None)
+    if not venue:
+        venue = rk_venue or ""
+    if not race_nb:
+        race_nb = rk_num
+    if not race_nb:
+        return jsonify({"error": "raceNb(경주번호)가 필요합니다(raceKey에 'N경주' 포함 또는 raceNb 지정)."}), 400
+    op_track, sponsor = body.get("opTrackCd"), body.get("sponsorCd")
+    if not (op_track and sponsor):
+        code = _keiba_resolve_track(venue, ymd)
+        if not code:
+            return jsonify({"error": "경마장 '%s' 이(가) %s oddspark 개최 목록에 없습니다(개최일·경마장명 확인)."
+                            % (venue or rk, ymd), "scheduled": list(_keiba_schedule(ymd).keys())}), 422
+        op_track, sponsor = code
+    url = ("https://www.oddspark.com/keiba/RaceList.do?raceDy=%s&opTrackCd=%s&sponsorCd=%s&raceNb=%s"
+           % (ymd, op_track, sponsor, race_nb))
+    try:
+        html = _keirin_fetch(url)
+    except Exception as e:
+        return jsonify({"error": "출주표 수집 실패: %s" % e}), 502
+    shutsuba = _keiba_parse_shutsuba(html)
+    if not shutsuba.get("horses"):
+        return jsonify({"error": "출전마를 못 읽었습니다(경주번호/개최일 확인)."}), 422
+    details = {}
+    if body.get("withDetail", True):
+        details = _keiba_fetch_details(shutsuba)
+    horses = _keiba_build_form(shutsuba, details)
+    # [live 통합] raceKey 오면 STARTERS_STORE 저장(source=oddspark) → _triple_analyze 통합등급 반영
+    linked = None
+    if rk and horses:
+        store = [{"no": h["no"], "name": h["name"], "jockey": h.get("jockey", ""),
+                  "totalScore": h["totalScore"], "recentPlacings": h.get("recentPlacings") or [],
+                  "styleType": h.get("styleType"), "grade": h.get("grade")}
+                 for h in horses if h.get("no") is not None]
+        sdb = _starters_load()
+        sdb[rk] = {"horses": store, "t": time.time(), "source": "oddspark"}
+        _starters_save(sdb)
+        linked = rk
+        print(f"[지방경마 전적] {rk}: {len(store)}두 oddspark 전적 반영(각질·거리변화·상3F)")
+    return jsonify({"ok": True, "url": url, "linkedRaceKey": linked,
+                    "race": {"venue": shutsuba.get("venue"), "raceNo": shutsuba.get("raceNo"),
+                             "distance": shutsuba.get("distance"), "surface": shutsuba.get("surface"),
+                             "trackCond": shutsuba.get("trackCond")},
+                    "horses": horses})
 
 
 @app.route("/api/analysis-log/backfill", methods=["POST"])

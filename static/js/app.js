@@ -7202,6 +7202,9 @@
       if (_keirinOddsTimer) { clearInterval(_keirinOddsTimer); _keirinOddsTimer = null; }
       if (poll.checked) { fetchKeirinOdds(true); _keirinOddsTimer = setInterval(() => fetchKeirinOdds(true), 30000); }
     });
+    // [지방경마 출주표 전적] oddspark 出走表 분석 버튼
+    const nb = document.querySelector('#narFetchBtn');
+    if (nb) nb.addEventListener('click', fetchKeibaStarters);
   }
 
   // [경륜 배당 직접조회] oddspark 복승·쌍승을 서버 경유로 가져와 파이프라인(역배열·배당변화·이상감지) 반영.
@@ -7280,7 +7283,53 @@
         <tbody>${rows}</tbody></table>
       ${(a.tips || []).length ? `<div class="matrix-title" style="font-size:12px;margin-top:8px">💡 분석 팁</div>` + a.tips.map((t) => `<div class="hint" style="margin:1px 0">· ${esc(t)}</div>`).join('') : ''}
       ${a.comment ? `<div class="hint" style="margin-top:6px">📝 oddspark 예상: ${esc(a.comment)}</div>` : ''}
-      <p class="hint" style="font-size:11px;margin-top:6px">등급 기준: 競走得点 85+ A · 75~84 B · 65~74 C · &lt;65 D. 걸즈(L급)는 득점 스케일이 낮아 대부분 D로 표시될 수 있습니다(상대 랭킹·보정 점수로 비교하세요).</p>
+      <p class="hint" style="font-size:11px;margin-top:6px">등급 기준: 競走得点 95+ A · 85~94 B · 75~84 C · &lt;75 D. 걸즈(L급)는 득점 스케일이 낮아 대부분 D로 표시될 수 있습니다(상대 랭킹·보정 점수로 비교하세요).</p>
+    </div>`;
+  }
+
+  // [지방경마 출주표 전적] oddspark 出走表 + 전5경주(각질·거리변화·상3F)를 서버 경유 수집·표시.
+  async function fetchKeibaStarters() {
+    const out = document.querySelector('#narCardResult'); if (!out) return;
+    const g = (id) => { const e = document.querySelector(id); return e ? e.value.trim() : ''; };
+    const venue = g('#narVenue'), ymd = g('#narYmd'), race = g('#narRace');
+    const rk = g('#narRaceKey') || (_closing && _closing.panelRk) || getActiveRaceKey() || '';
+    const payload = { withDetail: true };
+    if (rk) payload.raceKey = rk;
+    if (venue) payload.venue = venue;
+    if (ymd) payload.raceDy = ymd;
+    if (race) payload.raceNb = race;
+    if (!rk && !(venue && race)) { out.innerHTML = '<p class="hint" style="color:var(--red)">경마장+경주(또는 raceKey)를 입력하세요.</p>'; return; }
+    out.innerHTML = '<p class="hint">🏇 oddspark에서 출주표·전적을 가져오는 중… (전5경주 병렬 수집)</p>';
+    let d; try { d = await (await fetch('/api/keiba/starters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
+    catch (e) { out.innerHTML = `<p class="hint" style="color:var(--red)">실패: ${esc(e.message)}</p>`; return; }
+    if (d.error) { out.innerHTML = `<p class="hint" style="color:var(--red)">${esc(d.error)}${d.scheduled ? ' · 오늘 개최: ' + d.scheduled.map(esc).join(', ') : ''}</p>`; return; }
+    out.innerHTML = renderKeibaStarters(d);
+    if (d.linkedRaceKey) { try { refreshCurrentRace(); } catch (_) { /* */ } }
+  }
+
+  function renderKeibaStarters(d) {
+    const r = d.race || {}, hs = d.horses || [];
+    const gbadge = (g) => { const col = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#94a3b8' }[g] || '#94a3b8'; return `<span class="chip" style="border-color:${col};color:${col}">${g}</span>`; };
+    const rows = hs.map((h) => `<tr>
+      <td style="text-align:center;font-weight:700">${h.rank}</td>
+      <td style="text-align:center;font-weight:700">${h.no}</td>
+      <td>${esc(h.name || '')} <span class="hint" style="font-size:10px">${esc(h.jockey || '')} ${h.weight != null ? h.weight + 'kg' : ''}</span></td>
+      <td style="text-align:center">${gbadge(h.grade)}</td>
+      <td style="text-align:right"><b>${h.totalScore}</b></td>
+      <td style="text-align:center" title="각질(통과순위)">${esc(h.styleType || '-')}</td>
+      <td style="text-align:center" title="최근5착순">${(h.recentPlacings || []).join('·') || '-'}</td>
+      <td style="text-align:center" title="상3F 평균(막판스피드)">${h.last3f != null ? h.last3f : '-'}</td>
+      <td class="hint" style="font-size:10px">${(h.detail || []).map(esc).join(' · ')}</td></tr>`).join('');
+    const linked = d.linkedRaceKey
+      ? `<div class="hint" style="margin:2px 0 8px;padding:6px 9px;background:rgba(56,211,159,.14);border-left:3px solid #38d39f;border-radius:6px;color:#38d39f">✅ <b>live 통합 연동됨</b> — <b>${esc(d.linkedRaceKey)}</b> 유력마·통합등급(전적+배당역배열)에 이 전적이 반영됩니다.</div>`
+      : `<div class="hint" style="margin:2px 0 8px;padding:6px 9px;background:rgba(245,158,11,.12);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b">⚠️ live 연동 안 됨(raceKey 미지정) — 전적만 표시.</div>`;
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px">
+      ${linked}
+      <div class="matrix-title">🏇 ${esc(r.venue || '')} ${r.raceNo != null ? r.raceNo + 'R' : ''} <span class="hint" style="font-weight:400">${esc(r.surface || '')}${r.distance != null ? r.distance + 'm' : ''} 마장 ${esc(r.trackCond || '?')} · ${hs.length}두</span></div>
+      <table class="data-table" style="margin-top:6px">
+        <thead><tr><th>순</th><th>마번</th><th>마명(기수·부담)</th><th>등급</th><th>총점</th><th>각질</th><th>최근착순</th><th>상3F</th><th>근거</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      <p class="hint" style="font-size:11px;margin-top:6px">전적점수 = 최근5착순 가중평균 + 각질(통과순위: 선행+3/추격+5) + 거리변화(단축+5) + 부담중량(감소+5). 등급=이 경주 내 사분위 상대(A 상위25%). 상3F↓=막판 스피드 우수.</p>
     </div>`;
   }
 
