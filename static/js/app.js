@@ -6185,28 +6185,11 @@
     checkResultNotify(list);
   }
 
-  // [3번] 발주 후 ~30분 경과(마지막 갱신 기준) 미입력 경주 → 1회 알림(중복 방지)
-  function checkResultNotify(list) {
-    const now = Date.now();
-    const done = _notifiedRaces();
-    list.forEach((m) => {
-      if (done[m.raceKey]) return;
-      const hhmmss = m.updated_at || m.analyzed_at;
-      if (!hhmmss) return;
-      const parts = String(hhmmss).split(':').map((x) => parseInt(x, 10));
-      if (parts.length < 2 || parts.some(isNaN)) return;
-      const upd = new Date(); upd.setHours(parts[0], parts[1], parts[2] || 0, 0);
-      if (now - upd.getTime() >= 30 * 60 * 1000) {   // 마지막 수집 30분 경과 = 경주 종료 추정
-        _markNotified(m.raceKey);
-        const msg = `🔔 ${m.race || m.raceKey} 결과를 입력하세요`;
-        try { toast(msg); } catch (_) { /* */ }
-        try {
-          if (window.Notification && Notification.permission === 'granted') new Notification('경마 BMED', { body: msg });
-          else if (window.Notification && Notification.permission !== 'denied') Notification.requestPermission();
-        } catch (_) { /* */ }
-      }
-    });
-  }
+  // [자동 팝업 제거] 경주 종료 후 '결과를 입력하세요' 자동 alert/Notification 팝업은 제거함(사용자 요청 — 불편).
+  //   미입력 경주 안내는 결과기록 탭의 [📋 결과 입력 대기] 목록(loadPendingResults)에서만 표시하고,
+  //   결과 입력 기능(대기 목록·클릭 시 openQuickResult 팝업·결과기록 탭 입력폼)은 그대로 유지한다.
+  //   함수는 호출부(loadPendingResults) 호환을 위해 남기되, 자동 팝업/알림은 띄우지 않는다(no-op).
+  function checkResultNotify(_list) { /* 자동 팝업 제거됨 — 결과기록 탭 대기 목록으로 대체 */ }
 
   // [2번] 경주별 간단 결과 입력 팝업 (1~4착 + 복승/삼복승 배당 → 저장)
   function openQuickResult(rk, recommend) {
