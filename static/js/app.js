@@ -7213,6 +7213,9 @@
     // [지방경마 출주표 전적] oddspark 出走表 분석 버튼
     const nb = document.querySelector('#narFetchBtn');
     if (nb) nb.addEventListener('click', fetchKeibaStarters);
+    // [중앙경마(JRA) 출주표 전적] netkeiba 馬柱 분석 버튼
+    const jb = document.querySelector('#jraFetchBtn');
+    if (jb) jb.addEventListener('click', fetchJraStarters);
   }
 
   // [경륜 배당 직접조회] oddspark 복승·쌍승을 서버 경유로 가져와 파이프라인(역배열·배당변화·이상감지) 반영.
@@ -7339,6 +7342,27 @@
         <tbody>${rows}</tbody></table>
       <p class="hint" style="font-size:11px;margin-top:6px">전적점수 = 최근5착순 가중평균 + 각질(통과순위: 선행+3/추격+5) + 거리변화(단축+5) + 부담중량(감소+5). 등급=이 경주 내 사분위 상대(A 상위25%). 상3F↓=막판 스피드 우수.</p>
     </div>`;
+  }
+
+  // [중앙경마(JRA) 출주표 전적] netkeiba 馬柱 전5주(각질·거리변화·상3F)를 서버 경유 수집·표시.
+  //   말 데이터 구조가 지방경마와 동일 → 표시는 renderKeibaStarters 재사용(각질 소스만 netkeiba 표기 우선).
+  async function fetchJraStarters() {
+    const out = document.querySelector('#jraCardResult'); if (!out) return;
+    const g = (id) => { const e = document.querySelector(id); return e ? e.value.trim() : ''; };
+    const venue = g('#jraVenue'), ymd = g('#jraYmd'), race = g('#jraRace');
+    const rk = g('#jraRaceKey') || (_closing && _closing.panelRk) || getActiveRaceKey() || '';
+    const payload = {};
+    if (rk) payload.raceKey = rk;
+    if (venue) payload.venue = venue;
+    if (ymd) payload.raceDy = ymd;
+    if (race) payload.raceNb = race;
+    if (!rk && !(venue && race)) { out.innerHTML = '<p class="hint" style="color:var(--red)">경마장+경주(또는 raceKey)를 입력하세요.</p>'; return; }
+    out.innerHTML = '<p class="hint">🏇 netkeiba 馬柱에서 출주표·전5주를 가져오는 중…</p>';
+    let d; try { d = await (await fetch('/api/jra/starters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
+    catch (e) { out.innerHTML = `<p class="hint" style="color:var(--red)">실패: ${esc(e.message)}</p>`; return; }
+    if (d.error) { out.innerHTML = `<p class="hint" style="color:var(--red)">${esc(d.error)}${d.scheduled ? ' · 오늘 개최 race_id: ' + d.scheduled.slice(0, 12).map(esc).join(', ') : ''}</p>`; return; }
+    out.innerHTML = renderKeibaStarters(d);   // 동일 구조 → 재사용
+    if (d.linkedRaceKey) { try { refreshCurrentRace(); } catch (_) { /* */ } }
   }
 
   async function loadJapanReviewList() {

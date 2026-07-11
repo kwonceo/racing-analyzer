@@ -11881,6 +11881,234 @@ def keiba_starters():
                     "horses": horses})
 
 
+# ════════════ [중앙경마(JRA) 전적] netkeiba 馬柱(shutuba_past) 서버 fetch·파싱 ════════════
+# 중앙경마는 keiba.go.jp(지방 전용)에 없고 JRA 공식은 POST세션이라 스크래핑 난해 → netkeiba 馬柱
+# 페이지(서버렌더 HTML)를 소스로 사용. 한 페이지에 마번·기수·부담중량 + 과거5주(착순·거리·통과순위
+# =각질·상3F=막판스피드·마체중)가 모두 담겨 지방경마(HorseDetail 개별 fetch)보다 오히려 단순.
+# race_id 12자리에 場코드(4:6)·경주번호(10:12) 내장 → race_list_sub 로 그날 race_id 목록만 받으면 매핑.
+_JRA_TRACK = {   # netkeiba 場코드 → (한글, 한자)
+    "01": ("삿포로", "札幌"), "02": ("하코다테", "函館"), "03": ("후쿠시마", "福島"),
+    "04": ("니가타", "新潟"), "05": ("도쿄", "東京"), "06": ("나카야마", "中山"),
+    "07": ("주쿄", "中京"), "08": ("교토", "京都"), "09": ("한신", "阪神"), "10": ("고쿠라", "小倉"),
+}
+_JRA_SCHED_CACHE = {}   # {ymd: {"t":epoch, "ids":set(race_id)}}
+
+
+def _jra_venue_code(venue):
+    """경마장명(한/일/영) → netkeiba 場코드('05' 등) 또는 None."""
+    if not venue:
+        return None
+    v = str(venue).strip()
+    for code, (kr, kanji) in _JRA_TRACK.items():
+        if v == kr or v == kanji or kanji in v or (len(kr) >= 2 and kr in v):
+            return code
+    std = _track_norm(v)                       # 표준화 폴백(소노다/園田 류와 동일 경로)
+    for code, (kr, kanji) in _JRA_TRACK.items():
+        if std == kr or std == kanji:
+            return code
+    return None
+
+
+def _jra_race_list(ymd, force=False):
+    """그날(ymd=YYYYMMDD) netkeiba 개최 race_id 집합. race_list_sub(서버렌더 fragment)에서 추출.
+    당일 메모리 캐시(6시간)."""
+    ck = _JRA_SCHED_CACHE.get(ymd)
+    if ck and not force and (time.time() - ck.get("t", 0) < 21600):
+        return ck["ids"]
+    ids = set()
+    try:
+        h = _keirin_fetch("https://race.netkeiba.com/top/race_list_sub.html?kaisai_date=%s" % ymd)
+        ids = set(re.findall(r"race_id=(\d{12})", h))
+    except Exception as e:
+        print("[JRA 스케줄] 조회 실패:", e)
+    _JRA_SCHED_CACHE[ymd] = {"t": time.time(), "ids": ids}
+    return ids
+
+
+def _jra_resolve_raceid(venue, ymd, race_no):
+    """경마장+개최일+경주번호 → netkeiba race_id(12자리) 또는 None. race_id에 場코드·경주번호가 내장."""
+    code = _jra_venue_code(venue)
+    if not code or not race_no:
+        return None
+    rr = "%02d" % int(race_no)
+    for rid in _jra_race_list(ymd):
+        if len(rid) == 12 and rid[4:6] == code and rid[10:12] == rr:
+            return rid
+    return None
+
+
+def _jra_past_cell(cell):
+    """馬柱 Past 셀(과거 1경주) → {date,venue,placing,distance,surface,trackCond,fieldSize,
+    jockey,weight,corner(통과순위),last3f(상3F),bodyWeight}. Data01=날짜·착순 / Data05=코스·마장 /
+    Data03=두수·인기·기수·부담 / Data06=통과-상3F-마체중."""
+    def g(cls):
+        m = re.search(r'<div[^>]*class="' + cls + r'"[^>]*>(.*?)</div>', cell, re.S)
+        return re.sub(r"\s+", " ", _htmllib.unescape(re.sub(r"<[^>]+>", " ", m.group(1)))).strip() if m else ""
+    d01, d05, d03, d06 = g("Data01"), g("Data05"), g("Data03"), g("Data06")
+    if not d01:
+        return None
+    mnum = re.search(r'<span[^>]*class="Num"[^>]*>\s*(\d+)', cell)
+    placing = int(mnum.group(1)) if mnum else None
+    md = re.search(r"(\d{4}\.\d{2}\.\d{2})\s*(\S+)?", d01)
+    date = md.group(1) if md else ""
+    venue = (md.group(2) if md and md.group(2) else "")
+    surface, dist = _keiba_dist_of(d05)
+    mc = re.search(r"(良|稍重|重|不良)", d05)
+    cond = mc.group(1) if mc else ""
+    mf = re.search(r"(\d+)頭", d03)
+    field = int(mf.group(1)) if mf else None
+    mj = re.search(r"\d+人\s*(\S+?)\s+(\d{2}(?:\.\d)?)\b", d03)
+    jockey = mj.group(1) if mj else ""
+    weight = float(mj.group(2)) if mj else None
+    mcorner = re.search(r"(\d+(?:-\d+){1,3})", d06)   # 통과순위(코너별): '15-13' · '8-7-8'
+    corner = mcorner.group(1) if mcorner else ""
+    ml3 = re.search(r"\((\d{2}\.\d)\)", d06)          # 상3F: '(33.0)'
+    last3f = float(ml3.group(1)) if ml3 else None
+    mbw = re.search(r"(\d{3})\s*\(", d06)             # 마체중: '480(+2)'
+    bodyw = mbw.group(1) if mbw else ""
+    return {"date": date, "venue": venue, "placing": placing, "distance": dist, "surface": surface,
+            "trackCond": cond, "fieldSize": field, "jockey": jockey, "weight": weight,
+            "corner": corner, "last3f": last3f, "bodyWeight": bodyw}
+
+
+def _jra_parse_shutuba_past(html):
+    """netkeiba 馬柱(shutuba_past) → {venue,raceNo,distance,surface,trackCond,horses:[...]}.
+    horses[]: {no(馬番),name,jockey,weight(부담중량),nkStyle(netkeiba 각질 逃/先/差/追/自),past:[전5주]}.
+    범례(placeholder '馬名') 행은 제외."""
+    out = {"venue": "", "raceNo": None, "distance": None, "surface": "", "trackCond": "", "horses": []}
+    mrid = re.search(r"race_id=(\d{12})", html)
+    if mrid:
+        rid = mrid.group(1)
+        out["raceNo"] = int(rid[10:12])
+        vt = _JRA_TRACK.get(rid[4:6])
+        out["venue"] = vt[0] if vt else ""
+    mrd = re.search(r'class="RaceData01"[^>]*>(.*?)</div>', html, re.S)
+    if mrd:
+        rdt = re.sub(r"<[^>]+>", " ", mrd.group(1))
+        s, d = _keiba_dist_of(rdt)
+        out["surface"], out["distance"] = s, d
+        mc = re.search(r"(良|稍重|重|不良)", rdt)
+        if mc:
+            out["trackCond"] = mc.group(1)
+    for blk in re.findall(r'<tr[^>]*class="[^"]*HorseList[^"]*"[^>]*>.*?</tr>', html, re.S):
+        def cellraw(cls):
+            m = re.search(r'<td[^>]*class="' + cls + r'"[^>]*>(.*?)</td>', blk, re.S)
+            return m.group(1) if m else ""
+        mno = re.search(r'<td[^>]*class="Waku"[^>]*>\s*(\d+)', blk)
+        info, jk = cellraw("Horse_Info"), cellraw("Jockey")
+        mname = re.search(r'class="Horse02"[^>]*>.*?<a[^>]*>(?:<[^>]+>)*\s*([^<]+)</a>', info, re.S)
+        name = mname.group(1).strip() if mname else ""
+        if not mno or not name or name == "馬名":     # 범례/빈 행 제외
+            continue
+        mstyle = re.search(r'class="kyakusitu"[^>]*>\s*([逃先差追自マ])', info)
+        nk_style = mstyle.group(1) if mstyle else ""
+        mjk = re.search(r"/jockey/[^>]*>\s*([^<]+)</a>", jk)
+        jockey = mjk.group(1).strip() if mjk else ""
+        mw = re.search(r"<span>\s*(\d{2}(?:\.\d)?)\s*</span>", jk)
+        weight = float(mw.group(1)) if mw else None
+        past = [p for p in (_jra_past_cell(pc)
+                            for pc in re.findall(r'<td[^>]*class="Past[^"]*"[^>]*>(.*?)</td>', blk, re.S)) if p]
+        out["horses"].append({"no": int(mno.group(1)), "name": name, "jockey": jockey,
+                              "weight": weight, "nkStyle": nk_style, "past": past})
+    return out
+
+
+def _jra_style(h):
+    """각질 판정: netkeiba 표기(逃/先=선행+3 · 差/追=추격+5 · 自=평지) 우선, 없으면 통과순위 폴백."""
+    s = h.get("nkStyle")
+    if s in ("逃", "先"):
+        return "선행형", 3, ["netkeiba 각질 %s → 선행형(+3)" % s]
+    if s in ("差", "追", "マ"):
+        return "추격형", 5, ["netkeiba 각질 %s → 추격형(막판 추입·+5)" % s]
+    if s == "自":
+        return "평지형", 0, ["netkeiba 각질 自 → 평지형(자재)"]
+    return _keiba_corner_style(h.get("past"))          # 통과순위 기반 폴백(지방경마와 동일 로직)
+
+
+def _jra_build_form(shutuba):
+    """馬柱 파싱 결과 → 통합 전적 점수. base_form_score(착순 가중평균) + 각질/거리변화/부담/상3F 보정.
+    지방경마 _keiba_build_form 과 동일한 채점식(각질 소스만 netkeiba 표기 우선)."""
+    cur_dist = shutuba.get("distance")
+    horses = []
+    for h in shutuba.get("horses", []):
+        past = h.get("past") or []
+        placings = [pr.get("placing") for pr in past if pr.get("placing")]
+        base = base_form_score(placings)
+        style, sbonus, sdetail = _jra_style(h)
+        nh = {"pastRaces": [{"distance": pr.get("distance")} for pr in past], "weight": h.get("weight")}
+        dbonus, ddetail = distance_change_bonus(nh, {"distance": cur_dist}, style)
+        nh2 = {"weight": h.get("weight"), "pastRaces": [{"weight": pr.get("weight")} for pr in past]}
+        wbonus, wdetail = weight_change_bonus(nh2)
+        last3f, l3note = _keiba_last3f_note(past)
+        total = round(base + sbonus + dbonus + wbonus, 1)
+        horses.append({
+            "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
+            "weight": h.get("weight"), "recentPlacings": placings[:5], "baseScore": base,
+            "styleType": style, "styleBonus": sbonus, "distanceBonus": dbonus, "weightBonus": wbonus,
+            "last3f": last3f, "totalScore": total,
+            "detail": sdetail + ddetail + wdetail + ([l3note] if l3note else []),
+            "past": past,
+        })
+    horses.sort(key=lambda x: x["totalScore"], reverse=True)
+    n = len(horses)
+    for i, h in enumerate(horses):
+        h["rank"] = i + 1
+        frac = i / n if n else 0                        # 사분위 상대등급(중앙 JRA도 착순 뭉침 대응)
+        h["grade"] = "A" if frac < 0.25 else "B" if frac < 0.50 else "C" if frac < 0.75 else "D"
+    return horses
+
+
+@app.route("/api/jra/starters", methods=["POST"])
+def jra_starters():
+    """[중앙경마(JRA) 전적] netkeiba 馬柱(shutuba_past)를 서버가 직접 fetch·파싱해 각질(netkeiba 표기)·
+    거리변화·부담중량·상3F 포함 전적 점수를 산출하고, raceKey로 live 통합등급(전적+배당역배열)에 연동.
+    body: {raceKey | venue, raceDy?(YYYYMMDD·기본 오늘), raceNb, raceId?(직접 지정 시 매핑 생략)}."""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
+    venue = (body.get("venue") or "").strip()
+    ymd = (str(body.get("raceDy") or body.get("kaisaiDate") or "").strip()
+           or time.strftime("%Y%m%d", time.localtime()))
+    race_nb = body.get("raceNb")
+    rk_venue, rk_num = _area_num(rk) if rk else (None, None)
+    if not venue:
+        venue = rk_venue or ""
+    if not race_nb:
+        race_nb = rk_num
+    race_id = (body.get("raceId") or "").strip()
+    if not race_id:
+        if not race_nb:
+            return jsonify({"error": "raceNb(경주번호)가 필요합니다(raceKey에 'N경주' 포함 또는 raceNb 지정)."}), 400
+        race_id = _jra_resolve_raceid(venue, ymd, race_nb)
+        if not race_id:
+            return jsonify({"error": "경마장 '%s' %s R%s 이(가) netkeiba 개최 목록에 없습니다(개최일·경마장명 확인)."
+                            % (venue or rk, ymd, race_nb),
+                            "scheduled": sorted(_jra_race_list(ymd))[:40]}), 422
+    try:
+        html = _keirin_fetch("https://race.netkeiba.com/race/shutuba_past.html?race_id=%s" % race_id)
+    except Exception as e:
+        return jsonify({"error": "출주표 수집 실패: %s" % e}), 502
+    shutuba = _jra_parse_shutuba_past(html)
+    if not shutuba.get("horses"):
+        return jsonify({"error": "출전마를 못 읽었습니다(race_id/개최일 확인)."}), 422
+    horses = _jra_build_form(shutuba)
+    linked = None
+    if rk and horses:
+        store = [{"no": h["no"], "name": h["name"], "jockey": h.get("jockey", ""),
+                  "totalScore": h["totalScore"], "recentPlacings": h.get("recentPlacings") or [],
+                  "styleType": h.get("styleType"), "grade": h.get("grade")}
+                 for h in horses if h.get("no") is not None]
+        sdb = _starters_load()
+        sdb[rk] = {"horses": store, "t": time.time(), "source": "jra"}
+        _starters_save(sdb)
+        linked = rk
+        print(f"[중앙경마 전적] {rk}: {len(store)}두 netkeiba 馬柱 전적 반영(각질·거리변화·상3F)")
+    return jsonify({"ok": True, "raceId": race_id, "linkedRaceKey": linked,
+                    "race": {"venue": shutuba.get("venue"), "raceNo": shutuba.get("raceNo"),
+                             "distance": shutuba.get("distance"), "surface": shutuba.get("surface"),
+                             "trackCond": shutuba.get("trackCond")},
+                    "horses": horses})
+
+
 @app.route("/api/analysis-log/backfill", methods=["POST"])
 def analysis_log_backfill():
     """[4번] 지금까지 수집/분석된 경주들의 로그를 즉시 생성(없으면 생성, 있으면 최신화).

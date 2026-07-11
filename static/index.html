@@ -219,6 +219,23 @@
         <div id="narCardResult"></div>
       </div>
 
+      <!-- [중앙경마(JRA) 출주표 전적] netkeiba 馬柱 서버 직접 수집(각질·거리변화·상3F) -->
+      <div class="panel-card" style="margin-top:12px">
+        <h3>🏇 중앙경마(JRA) 전적 분석 <span class="hint" style="font-weight:400">netkeiba 馬柱·전5주(각질·거리변화·상3F) 자동 수집</span></h3>
+        <p class="hint">중앙경마(도쿄·나카야마·한신·교토·주쿄·니가타·후쿠시마·고쿠라·삿포로·하코다테)는 배당 전용이었으나, 경마장·개최일·경주번호(또는 raceKey)를 넣으면 netkeiba <b>馬柱(출주표+과거5주)</b>를 서버가 직접 가져와 <b>착순·통과순위(각질)·거리변화·상3F(막판스피드)</b>로 전적 점수를 계산합니다. netkeiba 각질 표기(逃/先/差/追)를 우선 사용합니다. raceKey 연동 시 <b>유력마·통합등급</b>(전적+배당역배열)에 자동 반영됩니다. (기존 배당 이상감지는 그대로 유지)</p>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
+          <label class="hint">경마장 <input id="jraVenue" class="cfg-input" type="text" placeholder="예: 도쿄 / 東京" style="width:120px"></label>
+          <label class="hint">개최일 <input id="jraYmd" class="cfg-input" type="text" placeholder="YYYYMMDD(기본 오늘)" style="width:130px"></label>
+          <label class="hint">경주 <input id="jraRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
+          <button id="jraFetchBtn" class="btn btn-primary">🏇 전적 분석</button>
+        </div>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
+          <label class="hint" style="flex:1">live 연동 raceKey <input id="jraRaceKey" class="cfg-input" type="text" placeholder="예: 도쿄 11경주 (비우면 현재 경주 자동)" style="width:100%;max-width:360px"></label>
+          <span class="hint" style="font-size:11px">← 입력 시 전적이 통합등급(전적+배당)에 반영</span>
+        </div>
+        <div id="jraCardResult"></div>
+      </div>
+
       <!-- [일본경마 복기] 분석했던 경주 목록 → 클릭 → 유력마/제거마·이상감지·추천조합·결과입력·복기 -->
       <div class="panel-card" id="jpReviewCard" style="margin-top:12px">
         <h2>📒 일본경마 분석 내역 · 결과 복기</h2>
