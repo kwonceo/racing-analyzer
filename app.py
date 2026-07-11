@@ -5601,12 +5601,19 @@ def _triple_analyze(rk, rec):
         for _sp in single_favorite["partners"]:
             _addbet("복승", "복승(유력1축·소액)", [_sax, _sp], 10, _q(_sax, _sp))
 
-    if len(key_horses) >= 2:
+    if len(key_horses) == 2:
         h1, h2 = key_horses[0], key_horses[1]
         _addbet("복승", "복승 메인", [h1, h2], 43, _q(h1, h2))
     if len(key_horses) >= 3:
         h1, h2, h3 = key_horses[0], key_horses[1], key_horses[2]
-        _addbet("복승", "복승 보조", [h1, h3], 20, _q(h1, h3))
+        # [삼복승 구성 복승 자동 편성] 삼복승 3두의 복승 3쌍(1+3·1+7·3+7)을 모두 추천에 포함(하코다테 11R 학습).
+        #   배당 차이 반영: 가장 낮은 복승을 메인, 나머지는 보조. 기존 '메인=상위2유력마' → '메인=최저배당쌍'.
+        _tri_pairs = list(dict.fromkeys(tuple(sorted(p)) for p in [(h1, h2), (h1, h3), (h2, h3)]))
+        _tri_pairs.sort(key=lambda p: (_q(p[0], p[1]) if _q(p[0], p[1]) is not None else 9e9))
+        _p_alloc = [43, 20, 12]
+        for _pi, _pp in enumerate(_tri_pairs):
+            _plabel = "복승 메인" if _pi == 0 else "복승 보조(삼복승 구성)"
+            _addbet("복승", _plabel, list(_pp), _p_alloc[min(_pi, 2)], _q(_pp[0], _pp[1]))
         _addbet("삼복승", "삼복승 메인", [h1, h2, h3], 29, trio_map.get(tuple(sorted([h1, h2, h3]))))
         if anomaly_horse is not None:
             _addbet("삼복승", "삼복승 보험1", [h1, h2, anomaly_horse], 4,
