@@ -1538,6 +1538,16 @@ def _triple_prune_stale(db, keep_rk=None, max_age=STALE_ACTIVE_SEC):
     return stale
 
 
+# [마번 범위 검증] 종목별 최대 마번(선수 번호). 이 값을 넘는 마번은 이전 경주 잔존·오검출로 간주해 제외.
+#   경륜(cycle)=최대 9명 / 경정(boat)=6정 / 오토레이스(bike)=8차 / 경마(horse)=최대 18두(넉넉히 허용).
+_SPORT_MAX_NO = {"cycle": 9, "boat": 6, "bike": 8, "horse": 18}
+
+
+def _sport_max_no(sport):
+    """종목별 유효 최대 마번 반환(모르는 종목은 경마 기준 18로 관대 처리)."""
+    return _SPORT_MAX_NO.get((sport or "horse"), 18)
+
+
 @app.route("/api/odds/triple/ingest", methods=["POST"])
 def triple_ingest():
     """확장 [전체 자동 수집]: {raceKey, quinella[], exacta[], trio[]} 저장 → {ok, counts}"""
@@ -1564,13 +1574,29 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     #   초반(미확립·다른 경주 잔존 배당)만 즉시 초기화하고, 확립 후 경주 전환은 raceKey 변경으로 처리
     #   (확장이 경주 바뀌면 새 rk → 새 레코드로 자연히 fresh 시작). 변동성 큰 배당의 단발 블립으로
     #   분석이 '초반(기준값 재설정)'으로 되돌아가던 버그 제거.
+    # [종목 전환 완전 초기화] 같은 raceKey에서 종목이 바뀌면(경마→경륜 등) 이전 종목 배당/전적은
+    #   완전히 다른 경주이므로 확립 여부와 무관하게 강제 초기화(잔존 배당·잔존마 원천 차단).
+    _prev_sport = prev.get("sport")
+    _new_sport = sport or _prev_sport or "horse"
+    sport_changed = bool(_prev_sport and _new_sport and _prev_sport != _new_sport)
     _established = len(prev_hist) >= 4
-    baseline_reset = (not _established) and bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q))
-    hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주) 배당 완전 제거
+    baseline_reset = sport_changed or ((not _established) and bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q)))
+    hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주·다른 종목) 배당 완전 제거
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
     hist = hist[-12:]
     # [수정#3 경륜/경정] 종목 태그 저장(horse|cycle|boat|bike). 기본 horse(경마) → 기존 동작 불변.
-    sport = (sport or prev.get("sport") or "horse")
+    #   ⚠ 종목 전환 시엔 새 종목을 우선(이전 sport 상속 금지) → 경마→경륜 전환이 sport 상속으로 묻히지 않게.
+    sport = _new_sport
+    if sport_changed:
+        # 이전 종목 전적(경마 11두 등)을 완전 제거 → 잔존마 추천 차단.
+        #   같은 raceKey 아래 남은 '이전 종목' starters도 삭제(한국 PDF 사전분석분은 아침 일괄이라 보존).
+        _sdb = _starters_load()
+        _srec = _sdb.get(rk)
+        if _srec and (_srec or {}).get("source") != "korea":
+            _sdb.pop(rk, None)
+            _starters_save(_sdb)
+            print(f"[종목 전환] {rk}: 이전 종목 전적(source={_srec.get('source')}) 제거")
+        _starters_prune(keep_rk=rk)   # 그 외 다른 경주 잔존 전적도 정리
     # [탭분리] 분석기 탭 라우팅용 카테고리(korea|japan_local|japan_central|boat|cycle|bike).
     category = (category or prev.get("category")
                 or {"cycle": "cycle", "boat": "boat", "bike": "bike"}.get(sport, "japan_local"))
@@ -1586,12 +1612,15 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     except Exception as e:
         print("[히스토리] 기록 실패:", e)
     counts = {"quinella": len(q), "exacta": len(x), "trio": len(tr), "win": len(win)}
-    if baseline_reset:
+    if sport_changed:
+        print(f"[종목 전환] {rk}: {_prev_sport}→{_new_sport} → 배당·히스토리·전적 완전 초기화(잔존 데이터 제거)")
+    elif baseline_reset:
         print(f"[경주전환 감지] {rk}: 비정상 변동폭(95%+ 다수) → 기준값 재설정(이전 배당 초기화)")
     if pruned:
         print(f"[활성정리] 끝난 경주 {len(pruned)}건 제거(히스토리 보존): {', '.join(pruned)}")
     print(f"[3종 수집] {rk}: {counts} (history {len(hist)}{' · 기준재설정' if baseline_reset else ''})")
-    return {"ok": True, "counts": counts, "baselineReset": baseline_reset, "pruned": pruned}
+    return {"ok": True, "counts": counts, "baselineReset": baseline_reset,
+            "sportChanged": sport_changed, "pruned": pruned}
 
 
 def _starters_prune(keep_rk=None):
@@ -5111,9 +5140,10 @@ def _horse_rep_series(hist, no, n=6):
             except (TypeError, ValueError):
                 o = None
         if o is None:
-            # ⚠ 히스토리 스냅샷의 quinella는 dict('1+4':1.4) 포맷 → _parse_combo_map로 파싱
-            #   (_odds_map_un은 [{combo,odds}] 리스트 전용이라 dict엔 빈 결과 → 시퀀스 유실 버그).
-            mm = _parse_combo_map(h.get("quinella"))
+            # ⚠ hist의 quinella는 소스별로 형식이 다름:
+            #   triple_store(history)=리스트[{combo,odds}] · odds_history 스냅샷=딕셔너리{'1+4':1.4}.
+            #   → 두 형식 모두 지원하는 _as_qmap 사용(list 전용 _odds_map_un·dict 전용 _parse_combo_map 혼용 방지).
+            mm = _as_qmap(h.get("quinella"))
             cand = [v for k, v in mm.items() if no in k and v > 0]
             o = min(cand) if cand else None
         if o and o > 0:
@@ -5367,22 +5397,31 @@ def _triple_analyze(rk, rec):
 
     # [잔존마 필터·1번] 현재 수집된 배당(복승·쌍승·단승)에 실제 등장하는 마번 집합 = 실제 출전마.
     #   이 집합 밖 마번(전적 잔존마·이전 경주 말)은 유력마·전적·추천에서 자동 제외.
+    # [마번 범위 검증] 종목별 최대 마번(경륜 9·경정 6·오토 8·경마 18) 초과 마번은 이전 경주(경마 11~18두 등)
+    #   잔존·오검출로 간주해 배당에 있어도 제외 → "7명 경륜에 11번 추천" 방지.
+    _max_no = _sport_max_no(rec.get("sport"))
     valid_nos = set()
     for _k in curQ:
         for _h in _k:
             try:
-                valid_nos.add(int(_h))
+                _hi = int(_h)
+                if 1 <= _hi <= _max_no:
+                    valid_nos.add(_hi)
             except (TypeError, ValueError):
                 pass
     for _k in curD:
         for _h in _k:
             try:
-                valid_nos.add(int(_h))
+                _hi = int(_h)
+                if 1 <= _hi <= _max_no:
+                    valid_nos.add(_hi)
             except (TypeError, ValueError):
                 pass
     for _n in curWin:
         try:
-            valid_nos.add(int(_n))
+            _hi = int(_n)
+            if 1 <= _hi <= _max_no:
+                valid_nos.add(_hi)
         except (TypeError, ValueError):
             pass
 
@@ -5683,6 +5722,19 @@ def _triple_analyze(rk, rec):
             if _r["no"] not in key_horses:
                 key_horses = key_horses + [_r["no"]]
 
+    # [마번 범위 검증·최종 게이트] pre_reversal·surge_promote·realtime_added가 역전/급락 조합에서
+    #   유력마에 주입한 마번 중 유효범위(valid_nos = 배당 등장 + 종목 최대마번) 밖은 완전 제외.
+    #   → "7명 경륜에 11번 추천" 같은 잔존마 추천을 추천 조립 직전에 원천 차단(기존 유력마 로직 무손상).
+    if valid_nos:
+        _kh_before = list(key_horses)
+        key_horses = [h for h in key_horses if h in valid_nos]
+        realtime_added = [r for r in realtime_added if r["no"] in valid_nos]
+        pre_reversal = [h for h in pre_reversal if h in valid_nos]
+        surge_promote = [h for h in surge_promote if h in valid_nos]
+        if len(key_horses) != len(_kh_before):
+            _dropped_kh = [h for h in _kh_before if h not in valid_nos]
+            print(f"[마번 범위 검증] {rk}: 유력마에서 범위밖 마번 제외 {_dropped_kh} (최대 {_max_no}번·출전 {sorted(valid_nos)})")
+
     # [저배당 압축 패턴] 최종 유력마 TOP3 중 저배당 밀집(4배 이하 2두+ 강력 / 5배 이하 3두+ 중간) → 축 패턴
     #   [2번 개선] 경마만 적용(경륜/경정/바이크 비활성) + 명확한 축(배당차 30%+)일 때만.
     compression_pattern = _compression_pattern(key_horses, curWin, curQ, strong_signals, rec.get("sport"))
@@ -5700,7 +5752,8 @@ def _triple_analyze(rk, rec):
     anomaly_horse = None
     for d in (drops if not after_close else []):
         for h in d["combo"]:
-            if h not in key_horses:
+            # [마번 범위 검증] 배당에 등장하는 유효 마번(valid_nos)만 이상감지말 후보 → 잔존마(범위밖) 제외
+            if h not in key_horses and (not valid_nos or h in valid_nos):
                 anomaly_horse = h
                 break
         if anomaly_horse is not None:
