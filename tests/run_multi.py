@@ -49,22 +49,33 @@ ok("HH:MM+ymd → epoch", isinstance(ep, float) and ep > 0)
 ok("잘못된 형식 → None", m._post_time_epoch("bad", "20260711") is None)
 ok("빈 ymd → None", m._post_time_epoch("15:30", "") is None)
 
-print("=== [1번] RaceList 발주시각 파싱(모의 HTML) ===")
+print("=== [1번] RaceList 경주번호+発走時間 파싱(모의 HTML·경주별 fetch) ===")
 _orig_fetch = m._keirin_fetch
-mock_html = (
-    '<tr><a href="RaceList.do?raceNb=1">1R</a> 発走 14:05</tr>'
-    '<tr><a href="RaceList.do?raceNb=2">2R</a> 発走時刻 14:35</tr>'
-    '<tr><a href="RaceList.do?raceNb=9">9R</a> 発走 17:20</tr>'
-)
-m._keirin_fetch = lambda url: mock_html
+m._MULTI_POST_CACHE = {}   # 캐시 격리
+_PT = {1: "14:05", 2: "14:35", 9: "17:20"}
+_LIST_HTML = ('<a href="RaceList.do?raceNb=1">1R</a>'
+              '<a href="RaceList.do?raceNb=2">2R</a>'
+              '<a href="RaceList.do?raceNb=9">9R</a>')
+
+
+def _mock_fetch(url):
+    mm = m.re.search(r"raceNb=(\d+)", url)
+    if mm:   # 경주별 페이지 → 그 경주의 発走時間(実 oddspark 라벨)
+        return "발주정보 発走時間 %s 그외" % _PT.get(int(mm.group(1)), "00:00")
+    return _LIST_HTML   # 목록 페이지 → raceNb 링크만
+
+
+m._keirin_fetch = _mock_fetch
 try:
     races = m._multi_race_list("30", "26", "20260711")
     ok("경주 3개 파싱", len(races) == 3)
-    ok("1R 발주 14:05", races[0]["raceNo"] == 1 and races[0]["postTime"] == "14:05")
-    ok("9R 발주 17:20", races[-1]["raceNo"] == 9 and races[-1]["postTime"] == "17:20")
+    ok("1R 発走時間 14:05", races[0]["raceNo"] == 1 and races[0]["postTime"] == "14:05")
+    ok("9R 発走時間 17:20", races[-1]["raceNo"] == 9 and races[-1]["postTime"] == "17:20")
     ok("postEpoch 산출", races[0]["postEpoch"] is not None)
+    ok("발주시각 캐시 동작", (("20260711", "30", "26", 1) in m._MULTI_POST_CACHE))
 finally:
     m._keirin_fetch = _orig_fetch
+    m._MULTI_POST_CACHE = {}
 
 print("=== [3번] 카드 요약(_triple_analyze 재사용·읽기전용) ===")
 # 최소 rec 구성(복승 배당) → 카드 생성

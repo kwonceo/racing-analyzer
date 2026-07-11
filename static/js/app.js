@@ -1561,7 +1561,8 @@
     try { d = await (await fetch('/api/multi/dashboard')).json(); }
     catch (_) { if (status) status.textContent = '대시보드 로드 실패'; return; }
     const cards = (d && d.cards) || [];
-    if (status) status.textContent = `수집된 경주 ${cards.length}개 · 30초 자동 갱신${cards.length ? '' : ' (발주 10분전부터 자동 수집됩니다 · 스케줄 갱신을 눌러보세요)'}`;
+    const nColl = (d && d.collected) || 0, nSched = cards.length - nColl;
+    if (status) status.textContent = `오늘 ${cards.length}경주 (수집·분석 ${nColl} · 예정 ${nSched}) · 30초 자동 갱신${cards.length ? '' : ' (스케줄 갱신을 눌러 오늘 개최를 불러오세요)'}`;
     // [5번] T-3분 마감 임박 알림(소리+배너, 경주당 1회)
     const urgent = (d && d.urgent) || [];
     const banner = $('#multiUrgentBanner');
@@ -1586,6 +1587,18 @@
     const col = c.urgency === 'urgent' ? '#ef4444' : (c.urgency === 'warn' ? '#f59e0b' : '#334155');
     const bg = c.urgency === 'urgent' ? 'rgba(239,68,68,.10)' : (c.urgency === 'warn' ? 'rgba(245,158,11,.08)' : 'rgba(255,255,255,.03)');
     const leftTxt = c.afterClose ? '마감' : _multiFmtLeft(c.secondsLeft);
+    // [예정 경주] 아직 배당 수집 전이면 카운트다운만 표시(발주 10분전부터 자동 수집→분석)
+    if (c.scheduled) {
+      return `<div data-mkey="${esc(c.raceKey)}" title="발주 10분전부터 자동 수집됩니다" style="cursor:pointer;border:2px dashed ${col};border-radius:10px;padding:10px;background:${bg};opacity:.85">
+        <div style="display:flex;align-items:center;gap:6px">
+          <b style="font-size:15px;color:#e2e8f0">${esc(c.venue || '')} ${c.raceNo}R</b>
+          <span style="flex:1"></span>
+          <b style="color:${col};font-size:13px">${c.urgency === 'urgent' ? '⚡ ' : ''}${leftTxt}</b>
+        </div>
+        <div class="hint" style="font-size:11px;margin:2px 0">발주 ${esc(c.postTime || '?')}</div>
+        <div class="hint" style="font-size:11px">⏳ 수집 대기 (발주 10분전 자동 시작)</div>
+      </div>`;
+    }
     const sigs = (c.signals || []).map((s) => `<div style="font-size:12px;font-weight:700;margin:1px 0">${esc(s.text)}</div>`).join('') || '<div class="hint" style="font-size:11px">신호 없음</div>';
     const keyH = (c.keyHorses || []).join(' · ') || '-';
     return `<div data-mkey="${esc(c.raceKey)}" title="클릭 → 상세 분석" style="cursor:pointer;border:2px solid ${col};border-radius:10px;padding:10px;background:${bg}">

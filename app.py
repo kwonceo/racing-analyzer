@@ -15005,23 +15005,52 @@ def _post_time_epoch(hhmm, ymd):
         return None
 
 
+_MULTI_POST_CACHE = {}   # {(ymd,op,sp,rno): "HH:MM"} 발주시각 당일 캐시(시각은 하루 불변 → 재fetch 방지)
+
+
+def _multi_post_time(op, sp, ymd, rno):
+    """[1번] 특정 경주 RaceList.do?raceNb=N 페이지에서 発走時間(HH:MM) 추출. 당일 캐시·실패 시 None(격리)."""
+    ck = (ymd, op, sp, rno)
+    if ck in _MULTI_POST_CACHE:
+        return _MULTI_POST_CACHE[ck]
+    try:
+        url = ("https://www.oddspark.com/keiba/RaceList.do?raceDy=%s&opTrackCd=%s&sponsorCd=%s&raceNb=%s"
+               % (ymd, op, sp, rno))
+        html = _keirin_fetch(url)
+        # oddspark 실제 라벨: '発走時間 14:30'(時間) — 発走時刻/締切 아님. 방어적으로 발走 계열 다 허용.
+        m = (re.search(r"発走時間\s*(\d{1,2}:\d{2})", html)
+             or re.search(r"(?:発走時刻|発走|締切)\s*(\d{1,2}:\d{2})", html))
+        pt = m.group(1) if m else None
+        if pt:
+            _MULTI_POST_CACHE[ck] = pt        # 성공만 캐시(실패는 다음 갱신 때 재시도)
+        return pt
+    except Exception:
+        return None
+
+
 def _multi_race_list(op, sp, ymd):
-    """[1번] oddspark RaceList.do(경마장 전체) → [{raceNo, postTime, postEpoch}]. 발주시각 파싱(방어적)."""
+    """[1번] oddspark RaceList.do → [{raceNo, postTime, postEpoch}]. 경주번호는 목록 페이지에서, 発走時間은 경주별 페이지에서 병렬 취득.
+      ⚠ KaisaiRaceList.do·목록 페이지엔 発走時間이 없어(각 경주 페이지에만 '発走時間 HH:MM' 존재) 경주별 fetch 필요."""
     url = ("https://www.oddspark.com/keiba/RaceList.do?raceDy=%s&opTrackCd=%s&sponsorCd=%s" % (ymd, op, sp))
     html = _keirin_fetch(url)
-    races = {}
-    # 경주별 링크(raceNb=N)와 그 부근 発走 HH:MM 을 함께 수집(행 단위 근사).
-    for seg in re.split(r"</tr>|</li>|<tr[ >]|<li[ >]", html):
-        mn = re.search(r"raceNb=(\d{1,2})", seg)
-        if not mn:
-            continue
-        rno = int(mn.group(1))
-        if rno < 1 or rno > 12 or rno in races:
-            continue
-        mt = re.search(r"(?:発走|発走時刻|締切)[^\d]{0,6}(\d{1,2}:\d{2})", seg) or re.search(r"\b(\d{1,2}:\d{2})\b", seg)
-        pt = mt.group(1) if mt else None
-        races[rno] = {"raceNo": rno, "postTime": pt, "postEpoch": _post_time_epoch(pt, ymd)}
-    return [races[k] for k in sorted(races)]
+    # 경주번호 집합(raceNb 링크)
+    nums = sorted({int(x) for x in re.findall(r"raceNb=(\d{1,2})", html) if 1 <= int(x) <= 12})
+    if not nums:
+        nums = list(range(1, 13))          # 링크 못 찾으면 1~12 시도(발주시각 없으면 자동 제외됨)
+    # 発走時間 경주별 병렬 취득(부하·차단 방지 위해 소량 동시성)
+    times = {}
+    try:
+        with ThreadPoolExecutor(max_workers=4) as ex:
+            fut = {ex.submit(_multi_post_time, op, sp, ymd, n): n for n in nums}
+            for f in as_completed(fut):
+                times[fut[f]] = f.result()
+    except Exception as e:
+        print("[스케줄] 発走時間 병렬취득 오류(무시):", e)
+    out = []
+    for n in nums:
+        pt = times.get(n)
+        out.append({"raceNo": n, "postTime": pt, "postEpoch": _post_time_epoch(pt, ymd)})
+    return out
 
 
 def _multi_schedule_fetch():
@@ -15153,17 +15182,37 @@ def multi_collect_now():
 
 @app.route("/api/multi/dashboard", methods=["GET"])
 def multi_dashboard():
-    """[3번] 다중 경주 대시보드 카드 목록 — 마감 임박 순 정렬."""
+    """[3번] 다중 경주 대시보드 카드 — 배당 수집된 경주(분석 카드) + 아직 수집 전인 예정 경주(카운트다운) 병합.
+      수집 전 경주도 스케줄에서 카운트다운 카드로 표시 → 발주 10분전 이전에도 오늘 전체 경주가 보임."""
     db = _multi_store_load()
     cards = []
+    collected_keys = set()
     for key, rec in db.items():
         c = _multi_card(key, rec)
         if c:
             cards.append(c)
-    # 마감 임박(secondsLeft 오름차순, None은 뒤로) 정렬
+            collected_keys.add(key)
+    # [예정 경주] today_schedule의 발주 전 경주(아직 미수집·마감 안 지남)를 카운트다운 카드로 추가
+    now = time.time()
+    sched = _schedule_load()
+    for tr in sched.get("tracks", []):
+        for rc in tr.get("races", []):
+            pe = rc.get("postEpoch")
+            key = _multi_key(tr.get("venue"), rc.get("raceNo")) if rc.get("raceNo") else None
+            if not key or key in collected_keys or not pe:
+                continue
+            left = int(pe - now)
+            if left < -120:                 # 이미 마감 2분+ 지난 경주는 제외
+                continue
+            urg = "urgent" if left <= MULTI_URGENT_SEC else ("warn" if left <= MULTI_WARN_SEC else "normal")
+            cards.append({"raceKey": key, "venue": tr.get("venue"), "raceNo": rc.get("raceNo"),
+                          "postTime": rc.get("postTime"), "secondsLeft": left, "urgency": urg,
+                          "keyHorses": [], "signals": [], "confidence": None,
+                          "quinellaMain": None, "afterClose": False, "scheduled": True})
     cards.sort(key=lambda c: (c.get("secondsLeft") if c.get("secondsLeft") is not None else 9e9))
     urgent = [c["raceKey"] for c in cards if c.get("urgency") == "urgent" and not c.get("afterClose")]
-    return jsonify({"cards": cards, "urgent": urgent, "count": len(cards)})
+    return jsonify({"cards": cards, "urgent": urgent, "count": len(cards),
+                    "collected": len(collected_keys)})
 
 
 @app.route("/api/multi/race/<path:key>", methods=["GET"])
