@@ -1357,15 +1357,23 @@
     return latestRk;                                 // 같은 경마장 다음 경주 → 전환 허용
   }
 
-  /** [3번] 📌 현재 경주 고정 토글 — 자동 전환 on/off. 버튼 라벨·상태 갱신. */
-  function toggleRacePin() {
+  /** [3번] 📌 현재 경주 고정 토글 — 자동 전환 on/off. 서버측 잠금(POST /api/race/pin)까지 반영. */
+  async function toggleRacePin() {
     _racePinned = !_racePinned;
     try { localStorage.setItem('racePinned', _racePinned ? '1' : '0'); } catch (_) { /* */ }
     _updatePinButton();
     const status = $('#rrStatus');
+    // [서버측 잠금] 프론트뿐 아니라 서버에도 고정 → oddspark 자동수집이 다른 경주를 최신 저장해도 current_race가 고정 경주 유지.
+    try {
+      if (_racePinned && _rrLastRk) {
+        await fetch('/api/race/pin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: _rrLastRk }) });
+      } else {
+        await fetch('/api/race/pin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clear: true }) });
+      }
+    } catch (_) { /* */ }
     if (_racePinned) {
-      if (status) status.textContent = `📌 고정됨: ${_rrLastRk || '현재 경주'} — 자동 전환 중단(새로고침·다음 경주로만 전환)`;
-      notify(`📌 현재 경주 고정: ${_rrLastRk || ''} · 자동 전환 중단`, true);
+      if (status) status.textContent = `📌 고정됨(서버 잠금): ${_rrLastRk || '현재 경주'} — 자동 전환 중단`;
+      notify(`📌 현재 경주 고정: ${_rrLastRk || ''} · 서버측 잠금(재시작에도 유지)`, true);
     } else {
       if (status) status.textContent = '📌 고정 해제 — 자동 전환 재개';
       notify('📌 고정 해제: 자동 전환 재개', true);
@@ -1393,8 +1401,15 @@
     if (pb) pb.addEventListener('click', toggleRacePin);
     const nb = $('#rrNewRaceBtn');           // [3번] 강제 초기화 버튼
     if (nb) nb.addEventListener('click', newRaceStart);
-    _updatePinButton();
-    refreshCurrentRace(false);
+    // [서버측 잠금 동기화] 서버에 고정된 경주가 있으면(재시작 후에도) 프론트 상태 복원 → 자동 전환 차단 유지.
+    (async () => {
+      try {
+        const d = await (await fetch('/api/race/pin')).json();
+        if (d && d.pinned) { _racePinned = true; _rrLastRk = d.pinned; try { localStorage.setItem('racePinned', '1'); } catch (_) { /* */ } }
+      } catch (_) { /* */ }
+      _updatePinButton();
+      refreshCurrentRace(false);
+    })();
     if (_rrTimer) clearInterval(_rrTimer);
     _rrTimer = setInterval(() => refreshCurrentRace(false), 12000);   // [4번] 12초마다 경주 변경 확인·자동 전환(늦게 넘어감 방지)
   }
@@ -1419,6 +1434,10 @@
       await fetch('/api/odds/triple/reset', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
       });
+      // [서버측 잠금] 새 경주 시작 = 고정 해제(이전 고정 경주에 묶이지 않게)
+      await fetch('/api/race/pin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clear: true }) });
+      _racePinned = false; try { localStorage.setItem('racePinned', '0'); } catch (_) { /* */ }
+      _updatePinButton();
     } catch (_) { /* */ }
     hardResetRaceState();
     { const el = $('#rrCurrentRace'); if (el) el.textContent = '— (새 경주 수집 대기)'; }

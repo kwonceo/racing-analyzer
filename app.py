@@ -1676,10 +1676,60 @@ def starters_reset():
     return jsonify({"ok": True, "startersRemoved": removed, "kept": keep or "korea만"})
 
 
+# ══════════════ [경주 고정·서버측 raceKey 잠금] ══════════════
+#   사용자가 경주를 고정하면 서버가 current_race/triple_latest에서 '항상 그 경주'를 반환한다.
+#   → oddspark 자동수집이 다른 경주(오비히로)를 최신으로 저장해도 분석기는 고정 경주(사가)를 유지.
+#   파일에 저장(서버 재시작에도 고정 유지) → "서버 재시작해도 반복" 문제 근본 차단.
+RACE_PIN_FILE = os.path.join(os.path.dirname(__file__), "data", "race_pin.json")
+
+
+def _race_pin_load():
+    """고정된 raceKey 반환(없으면 None). 파일 기반 → 서버 재시작에도 유지."""
+    try:
+        d = json.load(open(RACE_PIN_FILE, encoding="utf-8"))
+        rk = (d.get("raceKey") or "").strip()
+        return rk or None
+    except Exception:
+        return None
+
+
+def _race_pin_save(rk):
+    os.makedirs(os.path.dirname(RACE_PIN_FILE), exist_ok=True)
+    json.dump({"raceKey": (rk or "").strip(), "pinnedAt": time.time()},
+              open(RACE_PIN_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+
+
+def _race_pin_clear():
+    try:
+        os.remove(RACE_PIN_FILE)
+    except OSError:
+        pass
+
+
+@app.route("/api/race/pin", methods=["GET", "POST"])
+def race_pin():
+    """[경주 고정] GET → 현재 고정 경주 조회. POST {raceKey} → 고정 / POST {clear:true} → 해제.
+    고정 시 current_race·triple_latest가 명시 요청 없으면 항상 고정 경주를 반환(서버측 잠금)."""
+    if request.method == "POST":
+        body = request.json or {}
+        if body.get("clear"):
+            _race_pin_clear()
+            print("[경주 고정] 해제 → 자동 전환 재개")
+            return jsonify({"ok": True, "pinned": None})
+        rk = (body.get("raceKey") or "").strip()
+        if not rk:
+            return jsonify({"error": "raceKey가 필요합니다."}), 400
+        _race_pin_save(rk)
+        print(f"[경주 고정] 서버측 잠금: {rk} (자동 전환 차단·재시작에도 유지)")
+        return jsonify({"ok": True, "pinned": rk})
+    return jsonify({"pinned": _race_pin_load()})
+
+
 @app.route("/api/odds/triple/latest", methods=["GET", "POST"])
 def triple_latest():
     """최근(또는 지정 raceKey) 3종 배당 조회 → {raceKey, quinella, exacta, trio}.
-    raceKey 명시 & 데이터 없으면 빈 결과(waiting) — 이전 경주로 폴백하지 않음."""
+    raceKey 명시 & 데이터 없으면 빈 결과(waiting) — 이전 경주로 폴백하지 않음.
+    [경주 고정] 명시 요청이 없고 서버 고정이 걸려 있으면 항상 고정 경주를 반환(자동 전환 차단)."""
     rk, explicit = None, False
     if request.method == "POST":
         rk = ((request.json or {}).get("raceKey") or "").strip() or None
@@ -1690,7 +1740,12 @@ def triple_latest():
     if rk not in db:
         if explicit:
             return jsonify({"raceKey": rk, "quinella": [], "exacta": [], "trio": [], "waiting": True})
-        rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
+        # [경주 고정] 명시 요청 없을 때: 서버 고정 경주가 있고 데이터가 있으면 그걸 우선(자동 전환 차단)
+        _pin = _race_pin_load()
+        if _pin and _pin in db:
+            rk = _pin
+        else:
+            rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
     rec = db.get(rk) or {}
     # [경주전환 잔존 방어] 30분+ 미갱신 최신 경주 = 끝난 경주 → stale 표기(프론트가 표시 억제)
     age = time.time() - (rec.get("t") or 0)
@@ -1921,6 +1976,20 @@ def current_race():
     db = _triple_load()
     if not db:
         return jsonify({"raceKey": None})
+    # [경주 고정·서버측 잠금] 고정 경주가 있으면 max-t/번호진행 폴백을 건너뛰고 항상 고정 경주 반환.
+    #   → oddspark가 오비히로를 최신 저장해도 분석기는 고정한 사가를 유지(자동 전환 원천 차단).
+    _pin = _race_pin_load()
+    if _pin:
+        _prec = db.get(_pin) or {}
+        _page = time.time() - (_prec.get("t") or 0)
+        return jsonify({
+            "raceKey": _pin, "pinned": True,
+            "updatedAt": _prec.get("t"), "ageSeconds": round(_page),
+            "stale": bool(_prec) and _page > STALE_ACTIVE_SEC,
+            "counts": {"quinella": len(_prec.get("quinella") or []),
+                       "exacta": len(_prec.get("exacta") or []),
+                       "trio": len(_prec.get("trio") or [])},
+        })
     rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
     # [stale 루프 backstop] oddspark가 끝난 경주(예: 카사마츠 3R) 확정배당을 계속 재수집해 그 경주가
     #   영원히 '최신(max-t)'으로 남아 다음 경주로 못 넘어가던 문제 방어. 같은 경마장에서 최근(10분내)
