@@ -1,0 +1,134 @@
+{
+ "race": "나고야 1경주",
+ "raceKey": "나고야 1경주",
+ "date": "2026-07-11",
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 3,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": "삼복승 보험1",
+ "odds": "저배당",
+ "win_odds": 1.5,
+ "why_recommended": {
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    2,
+    3
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 92.5,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    2
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 68.8,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    2,
+    3
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 61.2,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    3,
+    6
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 70.0,
+   "confidence": null,
+   "reason": "전적상위"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 2번 92.5점",
+  "2. 배당 수집 시작 20:40:08",
+  "5. 종합 신뢰도 0점(하) 판정",
+  "7. 최종 추천: 복승 메인 2+3"
+ ],
+ "confidence_breakdown": {
+  "horse": 2,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 92.5,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "전적보조_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 92.5,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "전적유력마 1번 적중 · 제거 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 4,
+   "next_race": 0
+  },
+  "validCount": 0
+ },
+ "pnl": 500,
+ "stake": 1000,
+ "generated_at": "2026-07-11 21:26:59"
+}

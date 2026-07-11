@@ -6,7 +6,7 @@
  "date": "2026-07-11",
  "race": "마에바시 6경주",
  "analyzed_at": "13:13:35",
- "updated_at": "13:22:12",
+ "updated_at": "21:26:48",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -468,76 +468,6 @@
    "detail": "4+7 복승 5.5→4.8 (2분전 대비 -12.7%)",
    "severity": "🔴",
    "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "13:21:28",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 4+6 급락 후 반등 (153.3→5.6→153.3→153.3)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "13:21:28",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 1+6 급락 후 반등 (229.9→81.5→229.9→229.9)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "13:21:28",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 6+8 급락 후 반등 (49.5→11.5→49.5→49.5)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "13:21:28",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 4+5 급락 후 반등 (169.0→10.0→169.0→169.0)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "13:21:28",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 5+6 급락 후 반등 (338.1→15.9→338.1→338.1)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "13:21:28",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 4+8 급락 후 반등 (24.9→7.8→24.9→24.9)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "13:21:28",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 1+5 급락 후 반등 (216.9→123.5→216.9→216.9)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "13:21:28",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 5+8 급락 후 반등 (85.8→24.7→85.8→85.8)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "13:21:28",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 1+4 급락 후 반등 (133.7→53.6→133.7→133.7)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  },
-  {
-   "time": "13:21:28",
-   "type": "페이크의심",
-   "detail": "⚠️ 6번 급락 후 반등 (페이크 의심) — 49.5→49.5→5.6→49.5→49.5",
-   "severity": "🟠",
-   "reason": "연속 하락 신호로 유인 후 배당 회복 → 신뢰도 하향(허수 베팅 가능성)"
   }
  ],
  "anomaly_history": [
@@ -671,258 +601,26 @@
   }
  ],
  "strong_signals": {
-  "signals": [
-   {
-    "type": 2,
-    "label": "역배열 10%+",
-    "horses": [
-     3
-    ],
-    "detail": "3번 강한 역배열 (배당차 35.3%)",
-    "level": "red",
-    "hitRate": 50,
-    "hitSample": 2
-   },
-   {
-    "type": 4,
-    "label": "재급락",
-    "horses": [
-     5,
-     7
-    ],
-    "detail": "5+7 급락→반등→재급락(강)",
-    "level": "red"
-   },
-   {
-    "type": 4,
-    "label": "재급락",
-    "horses": [
-     4,
-     7
-    ],
-    "detail": "4+7 급락→반등→재급락(강)",
-    "level": "red"
-   },
-   {
-    "type": 4,
-    "label": "재급락",
-    "horses": [
-     1,
-     7
-    ],
-    "detail": "1+7 급락→반등→재급락(강)",
-    "level": "red"
-   },
-   {
-    "type": 4,
-    "label": "재급락",
-    "horses": [
-     2,
-     4
-    ],
-    "detail": "2+4 급락→반등→재급락(강)",
-    "level": "red"
-   },
-   {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "horses": [
-     2,
-     7
-    ],
-    "detail": "2+7 상승 17489% 후 급락 99%",
-    "level": "orange",
-    "hitRate": 100,
-    "hitSample": 1
-   },
-   {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "horses": [
-     2,
-     8
-    ],
-    "detail": "2+8 상승 6865% 후 급락 99%",
-    "level": "orange",
-    "hitRate": 100,
-    "hitSample": 1
-   }
-  ],
-  "count": 3,
-  "recommendLevel": "강력",
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
   "dualConverge": false,
-  "types": [
-   2,
-   4,
-   8
-  ],
-  "hitRates": {
-   "2": {
-    "type": 2,
-    "label": "역배열 10%+",
-    "fired": 2,
-    "hit": 1,
-    "rate": 50
-   },
-   "1": {
-    "type": 1,
-    "label": "연속하락 3회+",
-    "fired": 1,
-    "hit": 1,
-    "rate": 100
-   },
-   "5": {
-    "type": 5,
-    "label": "복수조합 동시급락",
-    "fired": 1,
-    "hit": 1,
-    "rate": 100
-   },
-   "8": {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "fired": 1,
-    "hit": 1,
-    "rate": 100
-   }
-  }
+  "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 19.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 8.1배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 4.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 10.2배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 4.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 8,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 49.5배 · 감점 없음 = 100점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   7,
-   8,
-   6
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "2+7",
-   "odds": 5.2,
-   "reason": "2번(?)·7번(?)"
-  },
-  "quinella_sub": {
-   "combo": "3+7",
-   "odds": 8.1,
-   "reason": "3번(?)·7번(?)"
-  },
-  "trifecta_main": {
-   "combo": "2+3+7",
-   "odds": 10.2,
-   "reason": "2번(?)·3번(?)·7번(?)"
-  },
-  "trifecta_insurance1": {
-   "combo": "2+7+8",
-   "odds": 6.9,
-   "reason": "2번(?)·7번(?)·8번(?)"
-  },
-  "trifecta_insurance2": {
-   "combo": "3+7+8",
-   "odds": 23.5,
-   "reason": "3번(?)·7번(?)·8번(?)"
-  },
-  "budget_allocation": {
-   "quinella_main": "43%",
-   "quinella_sub": "20%",
-   "trifecta_main": "29%",
-   "trifecta_insurance": "4%"
-  }
+  "budget_allocation": {}
  },
  "recommendation_history": [
   {
@@ -1008,15 +706,8 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    2,
-    7
-   ],
-   "trio": [
-    2,
-    3,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
    "quinella": null,
@@ -1027,27 +718,47 @@
    "trio": null
   },
   "final": {
-   "quinella": [
-    2,
-    7
-   ],
-   "trio": [
-    2,
-    3,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
- "summary": "유력마 7·2·3·4·8 / 복승 2+7",
- "keyHorses": [
-  7,
-  2,
-  3,
-  4,
-  8
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 7,
+  "2nd": 1,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 60.0,
+   "reason": "전적유력마 1번 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

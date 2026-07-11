@@ -6,7 +6,7 @@
  "date": "2026-07-11",
  "race": "이토 5경주",
  "analyzed_at": "17:22:35",
- "updated_at": "17:22:46",
+ "updated_at": "21:26:55",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -42,22 +42,7 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "17:22:35",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 1번 유력이나 쌍승에서 6번 1착(13.4)이 1번 1착(15.0)보다 낮음 → 실질 1착: 6번 가능성 (약한 역배열 0.893)",
-   "severity": "🟡",
-   "reason": "역전비율 = 쌍승(6→1) 13.4 / 쌍승(1→6) 15.0 = 0.893 (약한 역배열)"
-  },
-  {
-   "time": "17:22:35",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[2·3위 간]: 단승 7번(2위) vs 6번(3위) — 쌍승 6→7(19.8)가 7→6(25.7)보다 낮음 → 상위권 실질순위 역전: 6번 우세 (역배열 0.77)",
-   "severity": "🟠",
-   "reason": "역전비율 = 쌍승(6→7) 19.8 / 쌍승(7→6) 25.7 = 0.77 (역배열)"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
   "signals": [],
@@ -67,26 +52,7 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "noAxis": true,
-  "level": "강력",
-  "band": "4배 이하 2두+",
-  "reprs": [
-   {
-    "no": 6,
-    "odds": 8.6
-   },
-   {
-    "no": 7,
-    "odds": 1.1
-   },
-   {
-    "no": 1,
-    "odds": 1.1
-   }
-  ],
-  "axisGap": 0.0,
-  "note": "저배당 2두 배당 비슷(축 불명확·차이 0%) → 추천 보류"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
@@ -99,8 +65,18 @@
    "record_score": 57.5,
    "record_detail": "최근 8-7-1-5-3",
    "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 3,
+   "name": "색달최고",
+   "jockey": "명일",
+   "record_score": 90,
+   "record_detail": "최근 1-3-4-5-8",
+   "odds": null,
    "grade": "A",
-   "grade_reason": "배당 1.1배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 5,
@@ -109,8 +85,8 @@
    "record_score": 0,
    "record_detail": "",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 18배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 7,
@@ -120,17 +96,27 @@
    "record_detail": "최근 3-1-8-3-5",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 1.1배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 3,
-   "name": "색달최고",
-   "jockey": "명일",
-   "record_score": 90,
-   "record_detail": "최근 1-3-4-5-8",
+   "no": 9,
+   "name": "달의울림",
+   "jockey": "현준",
+   "record_score": 76.2,
+   "record_detail": "최근 2-3-6-4-8",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 10,
+   "name": "달의여신",
+   "jockey": "민재",
+   "record_score": 37.5,
+   "record_detail": "최근 4-5-6-2-2",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 45.7배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 2,
@@ -140,17 +126,7 @@
    "record_detail": "최근 9-3-4-7-2",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 24.2배 · 최근평균 5.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 6,
-   "name": "한라공주",
-   "jockey": "홍권",
-   "record_score": 28.8,
-   "record_detail": "최근 6-4-9-5-4",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 8.6배 · 최근평균 5.6착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   },
   {
    "no": 4,
@@ -159,22 +135,49 @@
    "record_score": 37.5,
    "record_detail": "최근 7-6-2-8-3",
    "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.2착 -30 = 30점"
+  },
+  {
+   "no": 6,
+   "name": "한라공주",
+   "jockey": "홍권",
+   "record_score": 28.8,
+   "record_detail": "최근 6-4-9-5-4",
+   "odds": null,
    "grade": "D",
-   "grade_reason": "배당 62.8배 · 최근평균 5.2착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.6착 -30 = 30점"
+  },
+  {
+   "no": 8,
+   "name": "청풍위너",
+   "jockey": "준호",
+   "record_score": 35,
+   "record_detail": "최근 4-8-5-7-1",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
    1,
-   5,
-   7,
    3,
+   7,
+   9,
+   10,
    2,
-   6,
-   4
+   4,
+   8
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "eliminated": [
+   5,
+   6
+  ],
+  "elimination_reasons": {
+   "5": "배당 미수집 · 배당 150배+ -40 = 60점",
+   "6": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.6착 -30 = 30점"
+  }
  },
  "final_recommendation": {
   "budget_allocation": {}
@@ -183,13 +186,13 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    6,
+    3,
     7
    ],
    "trio": [
-    1,
-    6,
-    7
+    3,
+    7,
+    9
    ]
   },
   "form": {
@@ -198,9 +201,9 @@
     7
    ],
    "trio": [
-    1,
     3,
-    7
+    7,
+    9
    ]
   },
   "jockey": {
@@ -209,24 +212,75 @@
   },
   "final": {
    "quinella": [
-    1,
+    3,
     7
    ],
    "trio": [
-    1,
-    6,
-    7
+    3,
+    7,
+    9
    ]
   }
  },
- "summary": "유력마 6·7·1 / 복승 1+7",
+ "summary": "유력마 7·3·9 / 복승 3+7",
  "keyHorses": [
-  6,
   7,
-  1
+  3,
+  9
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 1,
+  "2nd": 7,
+  "3rd": 2
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": {
+   "detected": true,
+   "top2": [
+    1,
+    7
+   ],
+   "keyHorses": [
+    7,
+    1,
+    2
+   ],
+   "recQuinella": [],
+   "leadNo": null,
+   "backingCovered": false,
+   "wouldBackingCover": false,
+   "lesson": "유력마·삼복승 판단은 정확했으나 복승 메인이 실질유력마와 '다른' 유력마 받치기를 놓쳐 복승 top2를 놓침 → 역배열 실질유력마 축 받치기 복승으로 커버."
+  },
+  "hit_basis": {
+   "formScore": 57.5,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": true,
+   "inverseHorses": [
+    6
+   ],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 1번 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

@@ -6,7 +6,7 @@
  "date": "2026-07-11",
  "race": "나고야 1경주",
  "analyzed_at": "20:30:06",
- "updated_at": "20:43:31",
+ "updated_at": "21:26:59",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -303,8 +303,45 @@
   2,
   6
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": true,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 1.5
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   8,
+   10,
+   12
+  ],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": 500,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 92.5,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 1번 적중 · 제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

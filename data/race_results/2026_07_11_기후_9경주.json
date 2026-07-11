@@ -7,11 +7,10 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": null,
+ "horse_count": 7,
  "result": {
   "1st": 1,
-  "2nd": 7,
-  "3rd": 5
+  "2nd": 5
  },
  "odds_at_start": {
   "quinella": {
@@ -397,18 +396,18 @@
    5
   ],
   "eliminated": [],
-  "recommend_main": "1+7",
-  "recommend_sub": "1+2",
+  "recommend_main": "1+2",
+  "recommend_sub": null,
   "strategy": "BMED_보험형",
   "signal_quality": "하",
   "confidence": 15.4,
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": true,
+  "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "전적유력마 1번 적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": true
@@ -417,13 +416,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 4.4,
+  "quinella_odds": null,
   "trifecta_odds": null,
   "actual_return": null,
   "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-11 14:43:39",
+ "saved_at": "2026-07-11 21:26:51",
  "validation": {
   "ok": true,
   "errors": []

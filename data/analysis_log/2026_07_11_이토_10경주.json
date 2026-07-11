@@ -6,7 +6,7 @@
  "date": "2026-07-11",
  "race": "이토 10경주",
  "analyzed_at": "19:31:18",
- "updated_at": "19:31:31",
+ "updated_at": "21:26:58",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -42,15 +42,7 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "19:31:11",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 2번 유력이나 쌍승에서 6번 1착(3.4)이 2번 1착(4.1)보다 낮음 → 실질 1착: 6번 가능성 (약한 역배열 0.829)",
-   "severity": "🟡",
-   "reason": "역전비율 = 쌍승(6→2) 3.4 / 쌍승(2→6) 4.1 = 0.829 (약한 역배열)"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
   "signals": [],
@@ -60,95 +52,14 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 7.7배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 1.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 8.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 10.9배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 9.7배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 1.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 19.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
@@ -158,15 +69,8 @@
  "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    2,
-    6
-   ],
-   "trio": [
-    1,
-    2,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
    "quinella": null,
@@ -177,25 +81,67 @@
    "trio": null
   },
   "final": {
-   "quinella": [
+   "quinella": null,
+   "trio": null
+  }
+ },
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 6,
+  "2nd": 2,
+  "3rd": 5
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": {
+   "detected": true,
+   "top2": [
     2,
     6
    ],
-   "trio": [
-    1,
+   "keyHorses": [
     2,
+    6,
+    1
+   ],
+   "recQuinella": [],
+   "leadNo": null,
+   "backingCovered": false,
+   "wouldBackingCover": false,
+   "lesson": "유력마·삼복승 판단은 정확했으나 복승 메인이 실질유력마와 '다른' 유력마 받치기를 놓쳐 복승 top2를 놓침 → 역배열 실질유력마 축 받치기 복승으로 커버."
+  },
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [
     6
-   ]
+   ],
+   "inverseHit": [
+    6
+   ],
+   "confidence": 6.2,
+   "reason": "역배열 감지말 6번 입상"
   }
  },
- "summary": "유력마 2·6·1 / 복승 2+6",
- "keyHorses": [
-  2,
-  6,
-  1
- ],
- "result": null,
- "hit": null,
  "profit": null,
  "review": null
 }
