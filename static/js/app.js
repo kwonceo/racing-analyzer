@@ -5737,88 +5737,138 @@
     return `<div style="margin:4px 0"><span class="hint" style="font-size:11px">📊 이 경주 활성 신호 과거 성적: </span>${rows}</div>`;
   }
 
-  // ═══ [네덜란드식(더칭) 계산기] 별도 패널·참고용 — 기존 추천은 손대지 않음(무삭제) ═══
-  //  🟢 메인(더칭: 어느 게 맞아도 동일 수익) + 🟡 보험(적중 시 예산 본전 보전). 배당 변경 시 자동 재계산(30초).
-  let _dutchState = {};   // rk -> {sel:{comboKey:'main'|'ins'}, budget, inited}
+  // ═══ [네덜란드식 계산기·매트릭스판] 축/주력/복병/제거 상태 + 삼복승 매트릭스 + 자금분배 엔진(참고용·무삭제) ═══
+  //  샘플(네덜란드.txt) 로직 통합: 삼복승 배당(실시간)·기존 추천 자동 반영(복승메인→AXIS+MAIN·복병/스마트머니→DARK·제거마→DROP).
+  let _dutchState = {};   // rk -> {states:{no:'AXIS'|'MAIN'|'DARK'|'DROP'|'NONE'}, budget, inited}
   let _dutchLastA = null;
+  const _DUTCH_CYCLE = ['NONE', 'AXIS', 'MAIN', 'DARK', 'DROP'];
+  const _DUTCH_COL = { AXIS: '#e74c3c', MAIN: '#2ecc71', DARK: '#f1c40f', DROP: '#95a5a6', NONE: '#4a4a5a' };
   function _dutchDefaultBudget() {
     for (const sel of ['#jpBudget', '#tripleBudget', '#koreaBudget']) {
-      const el = document.querySelector(sel);
-      const v = el && parseInt(el.value || '0', 10);
+      const el = document.querySelector(sel); const v = el && parseInt(el.value || '0', 10);
       if (v > 0) return v;
     }
-    return 10000;
+    return 100000;
   }
-  function _dutchCombos(a) {
-    const out = [];
+  function _dutchHorseNos(a) {
+    let nos = (a.validHorses || []).map(Number);
+    if (!nos.length) nos = [...new Set((a.betRecommend || []).flatMap((b) => (b.combo || []).map(Number)))];
+    return nos.filter((n) => !isNaN(n)).sort((x, y) => x - y);
+  }
+  function _dutchTripleOdds(a) {
+    const m = {};
     (a.betRecommend || []).forEach((b) => {
-      const combo = (b.combo || []).map(Number).filter((x) => !isNaN(x));
-      if (!combo.length) return;
-      const key = b.kind + ':' + combo.slice().sort((x, y) => x - y).join('+');
-      if (out.some((o) => o.key === key)) return;
-      out.push({ key, kind: b.kind, combo, odds: (b.expOdds && b.expOdds > 0) ? b.expOdds : null, label: b.label || '' });
+      if (b.kind === '삼복승') { const c = (b.combo || []).map(Number); if (c.length === 3 && b.expOdds) m[c.slice().sort((x, y) => x - y).join('-')] = b.expOdds; }
     });
-    return out;
+    (a.trio || []).forEach((t) => { const c = (t.combo || t.pair || []).map(Number); const o = t.odds || t.expOdds; if (c.length === 3 && o) m[c.slice().sort((x, y) => x - y).join('-')] = o; });
+    return m;
+  }
+  function _dutchExactaOdds(a) {
+    const m = {};
+    (a.exacta || []).forEach((x) => { const c = (x.combo || []).map(Number); const o = x.odds; if (c.length === 2 && o) m[c[0] + '➔' + c[1]] = o; });
+    return m;
+  }
+  function _dutchInitStates(a, nos) {
+    const st = {}; nos.forEach((n) => { st[n] = 'NONE'; });
+    const kh = (a.keyHorses || []).map(Number);
+    if (kh[0] != null && st[kh[0]] !== undefined) st[kh[0]] = 'AXIS';               // 복승 메인 첫째 → 축
+    kh.slice(1).forEach((n) => { if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'MAIN'; });   // 나머지 유력마 → 주력
+    (a.darkHorses || []).forEach((h) => { const n = Number(h.no); if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'DARK'; });   // 복병/스마트머니 → 복병
+    (a.midHighFavorites || []).forEach((h) => { const n = Number(h.no); if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'DARK'; });
+    (a.eliminationStrong || []).forEach((e) => { const n = Number(e.no); if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'DROP'; });   // 제거마 → 제거
+    return st;
   }
   function renderDutchCalc(a) {
     _dutchLastA = a;
     const rk = a.raceKey || '';
-    const combos = _dutchCombos(a);
-    if (!combos.length) return '';
+    const nos = _dutchHorseNos(a);
+    if (nos.length < 3) return '';
     _ensureDutchDelegation();
     let st = _dutchState[rk];
-    if (!st) st = _dutchState[rk] = { sel: {}, budget: _dutchDefaultBudget(), inited: false };
-    if (!st.inited) {   // [4번] 자동 연동: 복승 메인/보조 → 🟢 메인 · 삼복승/보험 → 🟡 보험
-      combos.forEach((c) => { st.sel[c.key] = (c.kind === '복승') ? 'main' : 'ins'; });
-      st.inited = true;
-    }
-    return `<div id="dutchCalcPanel">${_dutchHtml(rk, combos, st)}</div>`;
+    if (!st) st = _dutchState[rk] = { states: {}, budget: _dutchDefaultBudget(), inited: false };
+    if (!st.inited) { st.states = _dutchInitStates(a, nos); st.inited = true; }   // [연동] 기존 추천 자동 반영(1회)
+    nos.forEach((n) => { if (st.states[n] === undefined) st.states[n] = 'NONE'; });
+    return `<div id="dutchCalcPanel">${_dutchHtml(rk, a, nos, st)}</div>`;
   }
-  function _dutchHtml(rk, combos, st) {
+  function _dutchEngine(budget, nos, states, tripleOdds, twinOdds) {
+    const axis = nos.find((n) => states[n] === 'AXIS');
+    const mains = nos.filter((n) => states[n] === 'MAIN');
+    const darks = nos.filter((n) => states[n] === 'DARK');
+    const won = (n) => Math.round(n / 1000) * 1000;
+    const portfolio = []; let insCost = 0;
+    if (!axis || !mains.length) return { portfolio: [], warn: '축마(AXIS)+주력마(MAIN)를 최소 1마리씩 지정하세요.', ok: false, insCost: 0 };
+    // [1단계] 복병(DARK) 삼복승 보험 — 축+주력+복병, 예산÷배당(본전 보전)
+    darks.forEach((d) => mains.forEach((mn) => {
+      const key = [axis, mn, d].sort((x, y) => x - y).join('-');
+      if (tripleOdds[key]) { const o = tripleOdds[key]; const bet = won(budget / o); portfolio.push({ type: '복병보험(삼복)', code: '삼복 ' + key, odds: o, bet }); insCost += bet; }
+    }));
+    // [1단계] 쌍승 원금보험 — 축 포함 저배당 방향 최대 2건
+    const twinCands = Object.entries(twinOdds).filter(([k]) => k.split('➔').map(Number).indexOf(axis) >= 0).sort((a2, b2) => a2[1] - b2[1]).slice(0, 2);
+    twinCands.forEach(([code, o]) => { const bet = won(budget / o); portfolio.push({ type: '원금보험(쌍승)', code, odds: o, bet }); insCost += bet; });
+    // [2단계] 오버플로우 방지
+    if (insCost >= budget && insCost > 0) return { portfolio, warn: `보험 베팅금 합계(${insCost.toLocaleString()}원)가 예산 이상 — 배당 낮아 주력/본전 불가.`, ok: false, insCost };
+    const remain = Math.max(0, budget - insCost);
+    // [3단계] 잔액 → 핵심 메인 삼복승(축+주력2), 없으면 잔액 표기
+    if (mains.length >= 2) {
+      const key = [axis, mains[0], mains[1]].sort((x, y) => x - y).join('-');
+      if (tripleOdds[key]) portfolio.push({ type: '🔥 핵심메인(삼복)', code: '삼복 ' + key, odds: tripleOdds[key], bet: remain });
+      else portfolio.push({ type: '🔥 핵심메인(잔액)', code: `축${axis}+주력 ${mains[0]}·${mains[1]}`, odds: null, bet: remain });
+    } else {
+      portfolio.push({ type: '🔥 핵심메인(잔액)', code: `축${axis}+주력 ${mains[0]}`, odds: null, bet: remain });
+    }
+    return { portfolio, warn: '', ok: true, insCost, remain };
+  }
+  function _dutchHtml(rk, a, nos, st) {
     const budget = Math.max(0, st.budget || 0);
-    const won = (n) => Math.round(n / 100) * 100;
-    const mains = combos.filter((c) => st.sel[c.key] === 'main' && c.odds > 0);
-    const inss = combos.filter((c) => st.sel[c.key] === 'ins' && c.odds > 0);
-    const insList = inss.map((c) => ({ ...c, stake: won(budget / c.odds) }));
-    const insTotal = insList.reduce((s, c) => s + c.stake, 0);
-    const warning = inss.length > 0 && insTotal >= budget;
-    const mainBudget = Math.max(0, budget - insTotal);
-    const sumInv = mains.reduce((s, c) => s + 1 / c.odds, 0);
-    const mainPayout = (mainBudget && sumInv) ? Math.round(mainBudget / sumInv) : 0;
-    const mainList = mains.map((c) => ({ ...c, stake: sumInv ? won(mainBudget * (1 / c.odds) / sumInv) : 0, payout: mainPayout }));
-    const stakedTotal = insTotal + mainList.reduce((s, c) => s + c.stake, 0);
-    const stateBtn = (c) => {
-      const s = st.sel[c.key];
-      const bg = s === 'main' ? '#16a34a' : s === 'ins' ? '#ca8a04' : 'transparent';
-      const mark = s === 'main' ? '🟢 메인' : s === 'ins' ? '🟡 보험' : '⬜ 해제';
-      return `<button class="dutch-toggle" data-dutch-key="${esc(c.key)}" style="cursor:pointer;border:1px solid #475569;background:${bg};color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700">${mark}</button>`;
-    };
-    const comboRows = combos.map((c) => {
-      const oddsTxt = c.odds ? `${c.odds}배` : '배당-';
-      const st2 = st.sel[c.key];
-      let calc = '';
-      if (st2 === 'main') { const m = mainList.find((x) => x.key === c.key); if (m) calc = `<b style="color:#4ade80">${m.stake.toLocaleString()}원</b> <span class="hint">→ 적중 시 ${m.payout.toLocaleString()}원</span>`; }
-      else if (st2 === 'ins') { const m = insList.find((x) => x.key === c.key); if (m) calc = `<b style="color:#fbbf24">${m.stake.toLocaleString()}원</b> <span class="hint">→ 본전 보전 ${budget.toLocaleString()}원</span>`; }
-      return `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.05)">
-        ${stateBtn(c)}
-        <b style="color:#e2e8f0">${esc(c.kind)} ${c.combo.join('+')}</b>
-        <span class="hint">${oddsTxt}</span>
-        <span style="margin-left:auto;font-size:12px">${calc}</span>
+    const tripleOdds = _dutchTripleOdds(a);
+    const twinOdds = _dutchExactaOdds(a);
+    const axis = nos.find((n) => st.states[n] === 'AXIS');
+    const btns = nos.map((n) => `<button class="dutch-horse" data-dh="${n}" style="padding:6px 10px;margin:3px;border:none;border-radius:4px;cursor:pointer;font-weight:700;color:${st.states[n] === 'DARK' ? '#000' : '#fff'};background:${_DUTCH_COL[st.states[n]]};${st.states[n] === 'DROP' ? 'opacity:.45' : ''}">${n}번 (${st.states[n]})</button>`).join('');
+    let matrix;
+    if (!axis) matrix = `<p style="color:#ff6b6b">축마(AXIS)를 1마리 지정하면 삼복승 매트릭스가 활성화됩니다.</p>`;
+    else {
+      let h = `<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;margin-top:6px"><tr><th style="border:1px solid #444;padding:5px;background:#333">축${axis}</th>`;
+      nos.forEach((c) => { h += `<th style="border:1px solid #444;padding:5px;background:#333">${c}</th>`; });
+      h += '</tr>';
+      nos.forEach((r) => {
+        h += `<tr><th style="border:1px solid #444;padding:5px;background:#333">${r}</th>`;
+        nos.forEach((c) => {
+          if (r === c) { h += `<td style="border:1px solid #444;padding:5px;background:#3a2222">${r}</td>`; return; }
+          if (r > c || r === axis || c === axis) { h += `<td style="border:1px solid #444;padding:5px;background:#111;color:#333">-</td>`; return; }
+          if (st.states[r] === 'DROP' || st.states[c] === 'DROP') { h += `<td style="border:1px solid #444;padding:5px;background:#111;color:#666">DROP</td>`; return; }
+          const key = [axis, r, c].sort((x, y) => x - y).join('-');
+          const o = tripleOdds[key];
+          let col = ''; if (st.states[r] === 'MAIN' && st.states[c] === 'MAIN') col = 'color:#2ecc71;font-weight:800'; if (st.states[r] === 'DARK' || st.states[c] === 'DARK') col = 'color:#f1c40f;font-weight:800';
+          h += `<td style="border:1px solid #444;padding:5px;${col}">${o ? o + '배' : '-'}</td>`;
+        });
+        h += '</tr>';
+      });
+      h += '</table></div>';
+      matrix = `<p style="color:#2ecc71;font-weight:700;margin:6px 0 0">[${axis}번] 축 고정 · 삼복승 우상단 매트릭스</p>${h}`;
+    }
+    const eng = _dutchEngine(budget, nos, st.states, tripleOdds, twinOdds);
+    const results = (eng.portfolio || []).map((it) => {
+      const payout = it.odds ? Math.floor(it.bet * it.odds) : null;
+      const net = payout != null ? payout - budget : null;
+      const pc = (net != null && net >= 0) ? '#2ecc71' : '#ff6b6b';
+      return `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;padding:6px 10px;margin:3px 0;border-radius:6px;background:rgba(52,73,94,.5)">
+        <span><b>[${esc(it.type)}]</b> ${esc(it.code)} ${it.odds ? '(' + it.odds + '배)' : ''}</span>
+        <span>추천 <b>${it.bet.toLocaleString()}원</b>${payout != null ? ` → 적중 ${payout.toLocaleString()}원 <span style="color:${pc}">(${net >= 0 ? '+' : ''}${net.toLocaleString()})</span>` : ''}</span>
       </div>`;
     }).join('');
-    const warnHtml = warning
-      ? `<div style="margin:6px 0;padding:6px 10px;border:2px solid #ef4444;border-radius:6px;background:rgba(239,68,68,.12);color:#fca5a5;font-weight:700">⚠️ 보험금 합(${insTotal.toLocaleString()}원) ≥ 예산 — 배당 낮아 본전 불가</div>`
-      : '';
+    const warnHtml = eng.warn ? `<div style="margin:6px 0;padding:6px 10px;border:2px solid #ef4444;border-radius:6px;background:rgba(239,68,68,.12);color:#fca5a5;font-weight:700">⚠️ ${esc(eng.warn)}</div>` : '';
     return `<div style="margin:8px 0;padding:10px;border:2px solid #a855f7;border-radius:10px;background:linear-gradient(180deg,rgba(168,85,247,.08),rgba(20,28,43,.5))">
-      <div style="font-size:15px;font-weight:800;color:#c084fc">💰 네덜란드식 계산기 <span class="hint" style="font-weight:400;font-size:11px">(참고용 · 기존 추천과 별개)</span></div>
+      <div style="font-size:15px;font-weight:800;color:#c084fc">💰 네덜란드식 계산기 <span class="hint" style="font-weight:400;font-size:11px">(참고용 · 기존 추천과 별개 · 마번 클릭: 일반→축→주력→복병→제거)</span></div>
+      <div style="margin:6px 0">${btns}</div>
       <div style="display:flex;gap:8px;align-items:center;margin:6px 0">
         <span class="hint">예산</span>
-        <input class="dutch-budget cfg-input" type="number" min="0" step="1000" value="${budget}" style="width:120px;padding:3px 6px">
-        <span class="hint">원 · 조합 클릭으로 🟢메인/🟡보험/⬜해제</span>
+        <input class="dutch-budget cfg-input" type="number" min="0" step="10000" value="${budget}" style="width:130px;padding:3px 6px"> <span class="hint">원</span>
       </div>
-      ${comboRows}
+      ${matrix}
+      <div style="margin-top:8px;font-weight:700;color:#c084fc">📊 자금 분배 포트폴리오</div>
+      ${results || '<p class="hint">축마+주력마 지정 시 계산됩니다.</p>'}
       ${warnHtml}
-      <div class="hint" style="margin-top:6px;font-size:11px">🟢 메인 ${mainList.length}조합(더칭·동일수익 ${mainPayout.toLocaleString()}원) · 🟡 보험 ${insList.length}조합 · 투입 합계 <b>${stakedTotal.toLocaleString()}원</b>/${budget.toLocaleString()}원</div>
+      <div class="hint" style="font-size:11px;margin-top:4px">보험(복병 삼복·쌍승)=예산÷배당(본전 보전) · 잔액=핵심 메인(축+주력2). ⚠ 삼복승 실배당 미수집 시 '-'(추정배당만 표시).</div>
     </div>`;
   }
   function _dutchRefresh() {
@@ -5826,19 +5876,22 @@
     if (!panel || !_dutchLastA) return;
     const rk = _dutchLastA.raceKey || '';
     const st = _dutchState[rk]; if (!st) return;
-    panel.innerHTML = _dutchHtml(rk, _dutchCombos(_dutchLastA), st);
+    panel.innerHTML = _dutchHtml(rk, _dutchLastA, _dutchHorseNos(_dutchLastA), st);
   }
   let _dutchDelegated = false;
   function _ensureDutchDelegation() {
     if (_dutchDelegated) return;
     _dutchDelegated = true;
     document.addEventListener('click', (e) => {
-      const btn = e.target.closest && e.target.closest('.dutch-toggle');
+      const btn = e.target.closest && e.target.closest('.dutch-horse');
       if (!btn || !_dutchLastA) return;
-      const rk = _dutchLastA.raceKey || '', key = btn.dataset.dutchKey;
+      const rk = _dutchLastA.raceKey || '', no = parseInt(btn.dataset.dh, 10);
       const st = _dutchState[rk]; if (!st) return;
-      const cur = st.sel[key];
-      st.sel[key] = cur === 'main' ? 'ins' : cur === 'ins' ? null : 'main';   // 🟢→🟡→⬜ 순환
+      let idx = _DUTCH_CYCLE.indexOf(st.states[no] || 'NONE');
+      let nx = (idx + 1) % _DUTCH_CYCLE.length;
+      // [축 유일] 축(AXIS)은 1마리만 — 이미 다른 축이 있으면 건너뜀
+      if (_DUTCH_CYCLE[nx] === 'AXIS' && Object.keys(st.states).some((k) => st.states[k] === 'AXIS' && Number(k) !== no)) nx = (nx + 1) % _DUTCH_CYCLE.length;
+      st.states[no] = _DUTCH_CYCLE[nx];
       _dutchRefresh();
     });
     document.addEventListener('input', (e) => {
