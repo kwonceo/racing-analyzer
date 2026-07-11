@@ -4201,12 +4201,15 @@
     let pconf = null; try { pconf = await (await fetch('/api/learning/pattern-confidence')).json(); } catch (_) { /* */ }
     // [기준치 도출] 누적 데이터 기반 최적 기준치 추천(자동 적용 안 함·수동 승인)
     let thopt = null; try { thopt = await (await fetch('/api/thresholds/optimize')).json(); } catch (_) { /* */ }
+    // [신호별 적중률·4번] 유력마 기반 신호별 복승/삼복승 적중률
+    let sigstat = null; try { sigstat = await (await fetch('/api/learning/signal-stats')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     // [AI Phase1] AI 학습 데이터 현황 대시보드
     let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
       ${renderDailyLearning(dl)}
+      ${renderSignalStats(sigstat)}
       ${renderPatternConfidence(pconf)}
       ${renderThresholdOptimize(thopt)}
       ${renderHighOddsCases(hocases)}
@@ -4269,6 +4272,28 @@
       else toast('적용 실패: ' + (r.error || ''));
     } catch (e) { toast('적용 실패: ' + e.message); }
   };
+
+  // [신호별 적중률·4번] 📊 신호별 적중률 — 유력마 기반(복승 2/3·삼복승 유력마2+복병1) 신호별 복승/삼복승 적중률.
+  function renderSignalStats(ss) {
+    const rows = (ss && ss.signals) || [];
+    if (!rows.length) return '';
+    const minN = (ss && ss.minSample) || 50;
+    const barsHtml = rows.map((r) => {
+      const relColor = r.reliable ? (r.rate_quinella >= 50 ? '#38d39f' : '#f87171') : '#fbbf24';
+      const relTxt = r.reliable ? (r.rate_quinella >= 50 ? '✅ 신뢰(50+)' : '🔴 낮음') : `⚠️ 표본부족(${r.count}/${minN})`;
+      return `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(255,255,255,.03);border-left:3px solid ${relColor}">
+        <b style="min-width:96px;color:#e2e8f0">${esc(r.signal)}</b>
+        <span class="hint">복승 <b style="color:#4ea1ff">${r.rate_quinella}%</b> · 삼복승 <b style="color:#c084fc">${r.rate_trifecta}%</b></span>
+        <span class="hint">(${r.hit_quinella}/${r.count}복 · ${r.hit_trifecta}/${r.count}삼)</span>
+        <span style="margin-left:auto;font-size:11px;font-weight:700;color:${relColor}">${relTxt}</span>
+      </div>`;
+    }).join('');
+    return `<div class="panel-card" style="margin:8px 0">
+      <div class="matrix-title" style="color:#38d39f">📊 신호별 적중률 <span class="hint" style="font-weight:400">유력마 기반(복승=유력마 2/3 입상·삼복승=유력마2+복병1) · 50경주+ 신뢰</span></div>
+      ${barsHtml}
+      <div class="hint" style="margin-top:4px;font-size:11px">※ 기존 정확 적중(복승 1+2·삼복승 1+2+3)과 별개 지표입니다. 50경주+ 표본이면 추천 시 '신뢰도 높음' 강조에 반영됩니다.</div>
+    </div>`;
+  }
 
   // [복기 학습 재설계 4번] 🧠 학습 현황 — 패턴별 신뢰도(표본 50회 게이팅). 공식 수정은 수동.
   function renderPatternConfidence(pc) {
@@ -5540,12 +5565,24 @@
     }
   }
   // 순수 렌더 헬퍼만 조합(사이드이펙트 없는 문자열 반환) → 스포츠 탭 컨테이너에 안전하게 주입.
+  // [5번] 활성 신호별 과거 적중률 강조 — "이 신호(스마트머니) 과거 적중률 72% → 신뢰도 높음"
+  function renderSignalReliability(a) {
+    const rel = a && a.signalReliability;
+    if (!rel || !Object.keys(rel).length) return '';
+    const rows = Object.entries(rel).map(([name, e]) => {
+      const col = (e.reliable && e.rate_quinella >= 50) ? '#38d39f' : (e.reliable ? '#f87171' : '#fbbf24');
+      return `<span class="chip" style="border-color:${col};color:${col};font-weight:700" title="복승 ${e.rate_quinella}% · 삼복승 ${e.rate_trifecta}% (${e.count}건)">${esc(name)} 적중률 ${e.rate_quinella}% · ${esc(e.note || '')}</span>`;
+    }).join(' ');
+    return `<div style="margin:4px 0"><span class="hint" style="font-size:11px">📊 이 경주 활성 신호 과거 성적: </span>${rows}</div>`;
+  }
+
   function sportAnalysisHTML(a, bsel) {
     const six = a.bmed && a.bmed.sixRacer;
     const parts = [];
     parts.push(renderRaceJudgment(a, bsel));   // [1·2·4번] 경주 판정 크게 + 배팅 배분
     parts.push(renderChaotic(a, bsel));   // [혼전] 상위 배당 근접 시 고배당 포함 삼복승 전략 배너
     parts.push(renderTopHorses(a));   // ⭐ 유력마 TOP5 + 복병/이상감지 + 제거마 카드
+    parts.push(renderSignalReliability(a));   // [5번] 활성 신호별 과거 적중률(50경주+ 신뢰도 강조)
     parts.push(`<div class="matrix-title">🚨 실시간 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${six ? ' · 6명 출전' : ''}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>`);
     if (a.summary) parts.push(`<div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary)}</div>`);
     parts.push(renderForcedTrifecta(a));

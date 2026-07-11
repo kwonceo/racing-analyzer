@@ -6677,6 +6677,7 @@ def _triple_analyze(rk, rec):
         "marketFavorites": market_favorites,   # [전적 과가중 해결] 저배당(5배↓) 시장유력마(전적 미수집도 유력마 편입)
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
         "reversalRoles": reversal_roles,   # [역배열 강도별 처리] challenger별 축/보조/보험 역할 + 지속성(확정/후보)
+        "signalReliability": _signal_reliability_for(strong_signals, dark_horses, inverse, compression_pattern),   # [5번] 활성 신호별 과거 적중률(50경주+ 신뢰)
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
         "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용
         "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
@@ -8574,6 +8575,165 @@ def _learn_smart_money(rk, an, top3, payouts=None, date_str=None):
     return sm
 
 
+# ══════════ [적중 판정 기준 개선 + 신호별 학습] 유력마 기반 적중(기존 정확 적중과 병행·무삭제) ══════════
+SIGNAL_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "signal_stats.json")
+SIGNAL_STATS_MIN = 50   # [5번] 50경주+ 표본이면 신뢰도 판정(가중치 상향·강조)
+
+
+def _keyhorse_hit(an, top3):
+    """[1·2번·유력마 기반 적중] 기존 정확 적중(복승 1+2·삼복승 1+2+3)과 별개 병행 지표.
+      복승: 유력마 상위3 중 2마리+ 입상(1~3착).  삼복승: 유력마 2+ 입상 AND 유력마·복병 합쳐 top3 3자리 커버(유력마2+복병1)."""
+    key = [int(x) for x in (an.get("keyHorses") or [])[:3] if x is not None]
+    darks = [int(h["no"]) for h in (an.get("darkHorses") or []) if h.get("no") is not None]
+    t3 = set(int(x) for x in (top3 or []) if x is not None)
+    key_in = [k for k in key if k in t3]
+    dark_in = [d for d in darks if d in t3 and d not in key_in]
+    q_hit = len(key_in) >= 2
+    t_hit = (len(key_in) >= 2) and (len(key_in) + len(dark_in) >= 3)
+    return {"quinella_hit": q_hit, "trifecta_hit": t_hit, "keyPlaced": key_in, "darkPlaced": dark_in}
+
+
+def _active_signal_horses(an):
+    """[3번] 이 경주에서 각 신호 유형이 선정한 유력마/복병 마번 → {신호명: [마번]}(빈 신호는 제외)."""
+    out = {}
+    darks = an.get("darkHorses") or []
+    sm = [int(h["no"]) for h in darks if h.get("smartMoney") and h.get("no") is not None]
+    if sm:
+        out["스마트머니"] = sm
+    cj = [int(h["no"]) for h in darks if h.get("forced") and h.get("no") is not None]
+    if cj:
+        out["집중급락"] = cj
+    rev = []
+    for r in (an.get("reversalRoles") or []):
+        if r.get("no") is not None and int(r["no"]) not in rev:
+            rev.append(int(r["no"]))
+    _inv = (an.get("inverse") or {}).get("invLead") or {}
+    if _inv.get("no") is not None and int(_inv["no"]) not in rev:
+        rev.append(int(_inv["no"]))
+    if rev:
+        out["역배열"] = rev
+    drp = []
+    for r in (an.get("realtimeAdded") or []):
+        if r.get("type") == "drop" and r.get("no") is not None and int(r["no"]) not in drp:
+            drp.append(int(r["no"]))
+    for h in (an.get("surgePromote") or []):
+        if int(h) not in drp:
+            drp.append(int(h))
+    if an.get("anomalyHorse") is not None and int(an["anomalyHorse"]) not in drp:
+        drp.append(int(an["anomalyHorse"]))
+    if drp:
+        out["급락"] = drp
+    dc = [int(h["no"]) for h in ((an.get("elimination") or {}).get("horses") or [])
+          if h.get("dualConverge") and h.get("no") is not None]
+    if dc:
+        out["전적이중수렴"] = dc
+    cp = an.get("compressionPattern") or {}
+    if cp.get("detected") and cp.get("combo"):
+        out["저배당압축"] = [int(x) for x in cp["combo"]]
+    return out
+
+
+def _signal_stats_load():
+    try:
+        with open(SIGNAL_STATS_FILE, encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        print("[신호통계] 손상 → 자동 초기화:", e)
+        try:
+            os.remove(SIGNAL_STATS_FILE)
+        except OSError:
+            pass
+        return {}
+
+
+def _signal_stats_save(d):
+    try:
+        os.makedirs(os.path.dirname(SIGNAL_STATS_FILE), exist_ok=True)
+        tmp = SIGNAL_STATS_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(d, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, SIGNAL_STATS_FILE)
+    except Exception as e:
+        print("[신호통계] 저장 실패:", e)
+
+
+def _learn_signal_stats(rk, an, top3, date_str=None):
+    """[3번] 결과 입력 시 신호별 적중(유력마 기반) 자동 태깅·저장 → signal_stats.json. 경주별 멱등(재입력 시 교체)."""
+    sig_horses = _active_signal_horses(an)
+    kh = _keyhorse_hit(an, top3)
+    t3 = set(int(x) for x in (top3 or []) if x is not None)
+    S = _signal_stats_load()
+    date_str = date_str or time.strftime("%Y-%m-%d")
+    # 멱등: 모든 신호에서 이 경주(rk) 기존 케이스 제거 후, 활성 신호에만 재기록
+    for name in list(S.keys()):
+        S[name]["cases"] = [c for c in (S[name].get("cases") or []) if c.get("race") != rk]
+    for name, horses in sig_horses.items():
+        e = S.setdefault(name, {"cases": []})
+        placed = [h for h in horses if h in t3]
+        e["cases"].append({"race": rk, "date": date_str, "horses": horses, "placed": placed,
+                           "quinella_hit": kh["quinella_hit"], "trifecta_hit": kh["trifecta_hit"]})
+    # cases 기반 통계 재계산(멱등·상한 500)
+    for name, e in S.items():
+        cs = (e.get("cases") or [])[-500:]
+        e["cases"] = cs
+        e["count"] = len(cs)
+        e["hit_quinella"] = sum(1 for c in cs if c.get("quinella_hit"))
+        e["hit_trifecta"] = sum(1 for c in cs if c.get("trifecta_hit"))
+        e["rate_quinella"] = round(e["hit_quinella"] / e["count"] * 100, 1) if e["count"] else 0.0
+        e["rate_trifecta"] = round(e["hit_trifecta"] / e["count"] * 100, 1) if e["count"] else 0.0
+        e["reliable"] = e["count"] >= SIGNAL_STATS_MIN
+    _signal_stats_save(S)
+    print(f"[신호별학습] {rk} · 활성신호 {list(sig_horses.keys())} · 유력마적중 복승={kh['quinella_hit']} 삼복승={kh['trifecta_hit']}")
+    return {"signalStats": S, "keyhorseHit": kh}
+
+
+def _signal_reliability():
+    """[5번] 신호별 신뢰도 요약(50경주+ 표본이면 신뢰) → {신호명: {rate_quinella, rate_trifecta, count, reliable}}."""
+    S = _signal_stats_load()
+    out = {}
+    for name, e in S.items():
+        out[name] = {"rate_quinella": e.get("rate_quinella", 0), "rate_trifecta": e.get("rate_trifecta", 0),
+                     "count": e.get("count", 0), "reliable": bool(e.get("reliable"))}
+    return out
+
+
+def _signal_reliability_for(strong_signals, dark_horses, inverse, compression_pattern):
+    """[5번] 현재 분석에서 활성인 신호별 과거 적중률(50경주+ 신뢰) → 프론트 강조 표시용.
+      반환 {신호명: {rate_quinella, rate_trifecta, count, reliable, note}} (활성 신호만)."""
+    try:
+        rel = _signal_reliability()
+    except Exception:
+        return {}
+    active = set()
+    darks = dark_horses or []
+    if any(h.get("smartMoney") for h in darks):
+        active.add("스마트머니")
+    if any(h.get("forced") for h in darks):
+        active.add("집중급락")
+    if (inverse or {}).get("detected"):
+        active.add("역배열")
+    if (compression_pattern or {}).get("detected"):
+        active.add("저배당압축")
+    for _s in ((strong_signals or {}).get("signals") or []):
+        _t = _s.get("type")
+        if _t in (1, 2, 3):           # 급락 계열(단승/복승 급락·연속하락)
+            active.add("급락")
+    out = {}
+    for name in active:
+        e = rel.get(name)
+        if not e:
+            continue
+        _r = e.get("rate_quinella", 0)
+        e = dict(e)
+        e["note"] = ("신뢰도 높음" if (e.get("reliable") and _r >= 50) else
+                     ("표본 부족(참고만)" if not e.get("reliable") else "적중률 낮음(주의)"))
+        out[name] = e
+    return out
+
+
 def _learn_upset(rk, an, top3, date_str=None):
     """부진마(최근5경주 평균착순≥4.0)의 입상 여부 + 동반 조건을 학습.
     반환: 갱신된 pattern_learning dict(없으면 None)."""
@@ -9556,6 +9716,14 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     quinella_hit = bool(top2 and any(r.get("kind") == "복승" and sorted(r["combo"]) == top2 for r in rec_bets))
     trifecta_hit = bool(top3s and any(r.get("kind") == "삼복승" and sorted(r["combo"]) == top3s for r in rec_bets))
 
+    # [적중 기준 개선·1·2·3번] 유력마 기반 적중(기존 정확 적중과 병행·무삭제) + 신호별 적중 자동 태깅·저장.
+    #   ⚠ 기존 quinella_hit/trifecta_hit(정확 조합)은 손익·기존 통계에 그대로 사용 — 새 지표는 별도.
+    keyhorse_hit = _keyhorse_hit(an, top3)
+    try:
+        _learn_signal_stats(rk, an, top3, doc.get("date"))
+    except Exception as e:
+        print("[신호별학습] 실패:", e)
+
     # [비교학습] 이상감지/전적/최종 추천 조합 각각의 적중 판정(복승 top2 정확 또는 삼복승 top3 정확)
     cmp_rec = an.get("compareRecommend") or {}
 
@@ -9806,6 +9974,10 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     try:
         doc["review"] = {
             "was_hit": was_hit, "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit,
+            # [적중 기준 개선] 유력마 기반 적중(별도 지표·기존 정확 적중과 병행)
+            "keyhorse_quinella_hit": keyhorse_hit["quinella_hit"],
+            "keyhorse_trifecta_hit": keyhorse_hit["trifecta_hit"],
+            "keyhorse_placed": keyhorse_hit["keyPlaced"], "dark_placed": keyhorse_hit["darkPlaced"],
             "payouts": payouts, "anomaly_was_correct": anomaly_correct,
             "signal_correct": signal_correct, "elimination_correct": elimination_correct,
             "eliminated": eliminated_nos, "form_pick": form_pick, "form_pick_hit": form_pick_hit,
@@ -11719,6 +11891,26 @@ def _reversal_strength_stats():
     return {"by_band": stats, "sample_cases": cases[-60:], "total_cases": len(cases),
             "note": "역배열 challenger 강도별 실제 입상/1착률(경주당 최강 역전 1건). 표본 적으면 참고만(50+ 유의).",
             "updated": time.strftime("%Y-%m-%d")}
+
+
+@app.route("/api/learning/signal-stats", methods=["GET"])
+def learning_signal_stats():
+    """[4번] 신호별 적중률(유력마 기반) 조회 → 통계 탭 '신호별 적중률' 카드용.
+    각 신호: 복승/삼복승 적중률·표본·신뢰(50경주+) 여부 + 최근 케이스."""
+    S = _signal_stats_load()
+    order = ["스마트머니", "역배열", "급락", "전적이중수렴", "저배당압축", "집중급락"]
+    rows = []
+    for name in order + [k for k in S.keys() if k not in order]:
+        e = S.get(name)
+        if not e:
+            continue
+        rows.append({
+            "signal": name, "count": e.get("count", 0),
+            "hit_quinella": e.get("hit_quinella", 0), "hit_trifecta": e.get("hit_trifecta", 0),
+            "rate_quinella": e.get("rate_quinella", 0), "rate_trifecta": e.get("rate_trifecta", 0),
+            "reliable": bool(e.get("reliable")), "recent": (e.get("cases") or [])[-5:][::-1],
+        })
+    return jsonify({"signals": rows, "minSample": SIGNAL_STATS_MIN})
 
 
 @app.route("/api/learning/reversal-stats", methods=["GET", "POST"])
