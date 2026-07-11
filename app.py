@@ -7804,7 +7804,8 @@ def _build_ai_training(rk, an, record, result, top4, inputs=None):
         "horses": horses,
         "odds_features": odds_features,
         "thresholds_used": {                    # [기준치 도출] 이 경주 판정에 쓴 현재 기준치 스냅샷
-            "excess_drop_min": abs(ABS_STRONG), "reversal_ratio_max": 0.95,
+            # ⚠ ABS_STRONG(-10.0)은 _excess_drop_analysis 지역 상수라 이 스코프에서 접근 불가(NameError) → 리터럴 사용.
+            "excess_drop_min": 10.0, "reversal_ratio_max": 0.95,
             "consecutive_min": 3, "pre_close_min": 30,
         },
         "prediction": prediction,
@@ -11125,18 +11126,19 @@ def _parse_result_tsv(text):
         return []
     heads = [ns(h) for h in _split(lines[hi])]
 
-    def idx(pat):
+    def idx(pat, default=-1):
         for k, h in enumerate(heads):
             if re.search(pat, h):
                 return k
-        return -1
-    iArea = idx(r"^경주지역$|경주지역|^경마장$|^지역$")
-    iRound = idx(r"^라운드$|^회차$|^경주번호$|^경주$|^R$")
-    i1, i2, i3 = idx(r"^1착$|1착|1위"), idx(r"^2착$|2착|2위"), idx(r"^3착$|3착|3위")
-    iS = idx(r"^단승$")
-    iQ = idx(r"^복승$")               # 복연승·삼복승 오매칭 방지(정확 매칭)
-    iX = idx(r"^쌍승$")               # 삼쌍승 오매칭 방지
-    iT = idx(r"^삼복승$|^삼복$")
+        return default   # [사용자 스펙] 헤더 라벨 못 찾으면 고정 인덱스로 폴백
+    # [하이브리드 매핑] 헤더 라벨 우선, 실패 시 사용자 지정 고정 인덱스(0구분/1경주지역/2라운드/3~5착/6단승/7복승/8쌍승/11삼복승)
+    iArea = idx(r"^경주지역$|경주지역|^경마장$|^지역$", 1)
+    iRound = idx(r"^라운드$|^회차$|^경주번호$|^경주$|^R$", 2)
+    i1, i2, i3 = idx(r"^1착$|1착|1위", 3), idx(r"^2착$|2착|2위", 4), idx(r"^3착$|3착|3위", 5)
+    iS = idx(r"^단승$", 6)
+    iQ = idx(r"^복승$", 7)               # 복연승·삼복승 오매칭 방지(정확 매칭)
+    iX = idx(r"^쌍승$", 8)               # 삼쌍승 오매칭 방지
+    iT = idx(r"^삼복승$|^삼복$", 11)
     if iArea < 0 or (i1 < 0 and i2 < 0 and i3 < 0):
         return []
 

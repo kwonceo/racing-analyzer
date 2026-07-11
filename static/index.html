@@ -402,7 +402,8 @@
               <button id="bulkResultLoad" class="btn btn-primary">불러와 등록</button>
             </div>
             <p class="hint" style="margin:6px 0 2px">URL은 <b>Chrome 확장(로그인 세션)</b>을 경유해 가져옵니다(확장 설치 + 배당판 로그인 필요). 실패하면 결과 페이지에서 <b>전체 선택(Ctrl+A)→복사→아래에 붙여넣기</b> 후 [붙여넣기 등록].</p>
-            <textarea id="bulkResultHtml" class="cfg-input" style="width:100%;height:110px;font-family:monospace;font-size:12px" placeholder="결과 페이지 HTML 또는 표 전체를 여기에 붙여넣기"></textarea>
+            <p class="hint" style="margin:6px 0 2px">📋 <b>엑셀/스프레드시트 표를 그대로 복사</b>해 붙여넣어도 됩니다(탭 구분 텍스트). 첫 줄이 헤더(구분/경주지역/라운드/1착/2착/3착/단승/복승/…/삼복승)면 자동 인식 → 경마장+경주번호로 분석 로그와 매칭.</p>
+            <textarea id="bulkResultHtml" class="cfg-input" style="width:100%;height:110px;font-family:monospace;font-size:12px" placeholder="결과 페이지 HTML, 또는 엑셀 표(탭 구분) 전체를 붙여넣기&#10;예) 구분⇥경주지역⇥라운드⇥1착⇥2착⇥3착⇥단승⇥복승⇥…⇥삼복승"></textarea>
             <div class="cfg-row" style="margin-top:6px">
               <button id="bulkResultParse" class="btn btn-primary">붙여넣기 등록</button>
             </div>
