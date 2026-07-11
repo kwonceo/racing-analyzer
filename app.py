@@ -1724,6 +1724,22 @@ def _anomaly_events_from_doc(doc):
     return events
 
 
+def _concentration_counts(doc):
+    """[복병_집중급락] 경주 이상감지 이벤트에서 말별 등장 횟수(급락/역전 조합에 낀 횟수).
+    마에바시 8R 복기: 8번이 낀 조합 다수가 동시 급락 → 15회 최다 = 자금 집중 복병 신호.
+    반환 {말번호(int): 등장횟수}."""
+    counts = {}
+    for e in _anomaly_events_from_doc(doc):
+        combo = e.get("combo")
+        nos = combo if isinstance(combo, (list, tuple)) else re.split(r"[+\-↔→]", str(combo or ""))
+        for h in nos:
+            try:
+                counts[int(str(h).strip())] = counts.get(int(str(h).strip()), 0) + 1
+            except (TypeError, ValueError):
+                pass
+    return counts
+
+
 @app.route("/api/odds/anomaly-feed", methods=["GET", "POST"])
 def anomaly_feed():
     """[이상감지 누적] 경주별 스냅샷에서 감지된 이상을 시간순·중복제거로 누적 반환.
@@ -5231,6 +5247,52 @@ def _triple_analyze(rk, rec):
     advanced = _advanced_anomaly(hist, curQ, drops)
     # [강한 신호 8유형] 기존 advanced·inverse·drops·history 재사용 → 오버레이 강조·학습용 파생 뷰
     strong_signals = _strong_signals(advanced, inverse, drops, cur_mb, hist, curQ, after_close)
+
+    # ═══ [복병_집중급락 패턴·즉시적용] 마에바시 8R 복기 학습 ═══
+    #   ① 집중급락 10회+ 말 → 배당 순위 무관 복병 자동 편입(시장 중하위권이어도).
+    #   ② 스마트머니(상승후급락 strong_signals Type 8) 감지 말 → 복병 신뢰도 '높음'.
+    #   ⚠ 기존 복병(역배열/급락) 산출 무삭제 — 별도 darkHorses 리스트로 파생(프론트가 복병 섹션에 합류).
+    dark_horses = []
+    try:
+        _hdoc = None
+        try:
+            _hpD, _, _ = _hist_path(rk)
+            _hdoc = json.load(open(_hpD, encoding="utf-8"))
+        except Exception:
+            _hdoc = None
+        _cc = _concentration_counts(_hdoc) if _hdoc else {}
+        _sm = set()          # 스마트머니(상승후급락 Type 8) 말
+        for _sg in ((strong_signals or {}).get("signals") or []):
+            if _sg.get("type") == 8:
+                for _h in (_sg.get("horses") or []):
+                    try:
+                        _sm.add(int(_h))
+                    except (TypeError, ValueError):
+                        pass
+
+        def _rep_o_dark(h):
+            if curWin.get(h):
+                return curWin[h]
+            best = None
+            for (a, b), o in curQ.items():
+                if h in (a, b) and o > 0 and (best is None or o < best):
+                    best = o
+            return best
+        for _h, _cnt in sorted(_cc.items(), key=lambda kv: -kv[1]):
+            if valid_nos and _h not in valid_nos:
+                continue
+            _sm_hit = _h in _sm
+            _forced = (_cnt >= 10)                       # 집중급락 10회+ = 복병 무조건 편입
+            if _forced or _sm_hit:
+                _conf = "높음" if (_forced and _sm_hit) or _sm_hit else "중"
+                dark_horses.append({
+                    "no": _h, "anomCount": _cnt, "smartMoney": _sm_hit,
+                    "oddsRepr": _rep_o_dark(_h), "forced": _forced, "confidence": _conf,
+                    "note": ("🔥 집중급락 %d회" % _cnt) + (" · 💰 스마트머니(상승후급락)" if _sm_hit else ""),
+                })
+    except Exception as _de:
+        print("[복병집중급락] 실패:", _de)
+
     # [5번] 유형별 학습 적중률을 각 신호에 부착(가중치 상향 근거) — 적중률 높은 유형 강조
     try:
         _sig_rates = _signal_type_hitrates()
@@ -6148,6 +6210,7 @@ def _triple_analyze(rk, rec):
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
         "validHorses": sorted(valid_nos),   # [잔존마 필터·2번] 현재 배당 등장 마번(프론트 TOP5 필터 기준)
         "realtimeAdded": realtime_added,   # [3번] 실시간 급락/역배열로 유력마에 추가된 말(오버레이 '⚡ 실시간 추가')
+        "darkHorses": dark_horses,   # [복병_집중급락] 집중급락 10회+/스마트머니 → 배당순위 무관 복병 자동 편입
         "marketFavorites": market_favorites,   # [전적 과가중 해결] 저배당(5배↓) 시장유력마(전적 미수집도 유력마 편입)
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)

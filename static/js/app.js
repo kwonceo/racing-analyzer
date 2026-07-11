@@ -3025,6 +3025,27 @@
     </div>`;
   }
 
+  // [복병_집중급락 패턴] 집중급락 10회+/스마트머니 말 → 배당순위 무관 복병 자동 편입(마에바시 8R 학습).
+  function renderDarkHorses(a) {
+    const keys = new Set((a.keyHorses || []).map(Number));       // 유력마는 복병 아님(중복 제거)
+    const dh = ((a && a.darkHorses) || []).filter((h) => !keys.has(Number(h.no))).slice(0, 4);
+    if (!dh.length) return '';
+    return dh.map((h) => {
+      const hi = h.confidence === '높음';
+      const col = hi ? '#f472b6' : '#c084fc';
+      const conf = hi ? '<span class="chip" style="border-color:#f472b6;color:#f472b6;font-weight:700">신뢰 높음</span>' : '';
+      const sm = h.smartMoney ? '<span class="chip" style="border-color:#fbbf24;color:#fcd34d;font-weight:700">💰 스마트머니</span>' : '';
+      const forced = h.forced ? `<span class="chip" style="border-color:#f472b6;color:#f472b6">🔥 집중급락 ${h.anomCount}회</span>` : '';
+      return `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(244,114,182,.08);border-left:3px solid ${col}">
+        <b style="min-width:30px;color:${col}">복병</b>
+        <b style="min-width:32px;color:#4ea1ff">${h.no}번</b>
+        <span class="hint"><b style="color:#e2e8f0">${h.oddsRepr != null ? h.oddsRepr + '배' : '배당-'}</b></span>
+        ${forced}${sm}${conf}
+        <span class="hint" style="margin-left:auto;color:${col}">${esc(h.note || '')}</span>
+      </div>`;
+    }).join('');
+  }
+
   // [유력마 통일] 복승 대표배당 낮은 순 + 이상감지 상위 노출 — TOP5·⭐유력마 라인 공통 정렬 기준.
   //   TOP5(확신도 기반)와 분석기 유력마(복승배당 기반)가 서로 다르던 혼란 해소.
   function _marketReprOdds(a) {
@@ -3197,7 +3218,8 @@
       ${renderMarketFavorites(a)}
       ${renderRealtimeAdded(a)}
       ${topRows}
-      <div class="matrix-title" style="font-size:13px;color:#c084fc;margin-top:6px">🐎 복병 · 이상감지 <span class="hint" style="font-weight:400">유력마 밖 강한 신호 2두</span></div>
+      <div class="matrix-title" style="font-size:13px;color:#c084fc;margin-top:6px">🐎 복병 · 이상감지 <span class="hint" style="font-weight:400">유력마 밖 강한 신호 · 집중급락/스마트머니 자동 편입</span></div>
+      ${renderDarkHorses(a)}
       ${darkRows}
       ${(a.eliminationStrong && a.eliminationStrong.length) ? `
       <div class="matrix-title" style="font-size:13px;color:#ef4444;margin-top:6px">🚫 제거마 <span class="hint" style="font-weight:400">과감히 제외 ${a.eliminationStrong.length}두</span></div>

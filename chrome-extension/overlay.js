@@ -637,6 +637,17 @@
           db.appendChild(mk('span', 'font-weight:700;color:' + col, no + '번 (' + tag + ')'));
           panel.appendChild(db);
         };
+        // [복병_집중급락 패턴] 집중급락 10회+/스마트머니 → 배당순위 무관 복병 자동 편입(신뢰 높음 강조)
+        (d.darkHorses || []).forEach(function (h) {
+          if (h.no == null || !inV(h.no) || baseKeys.indexOf(Number(h.no)) >= 0 || darkShown[h.no]) return;
+          darkShown[h.no] = 1;
+          var col = (h.confidence === '높음') ? '#f472b6' : '#c084fc';
+          var db = mk('div', 'margin:2px 0');
+          db.appendChild(mk('span', 'color:#94a3b8', '🐎 복병 '));
+          db.appendChild(mk('span', 'font-weight:800;color:' + col, h.no + '번 '));
+          db.appendChild(mk('span', 'font-size:11px;font-weight:700;color:' + col, (h.note || '') + (h.confidence === '높음' ? ' · 신뢰↑' : '')));
+          panel.appendChild(db);
+        });
         // 역배열 복병
         if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null) {
           addDark(Number(d.inverse.invLead.no), '역배열', '#f0abfc');

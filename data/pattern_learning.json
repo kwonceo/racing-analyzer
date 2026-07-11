@@ -861,5 +861,22 @@
       "count": 17,
       "hit": 9
     }
-  }
+  },
+  "bokbyeong_patterns": [
+    {
+      "pattern": "복병_집중급락",
+      "race": "마에바시 8경주",
+      "date": "2026-07-11",
+      "signal": "집중급락 15회 + 스마트머니(상승후급락)",
+      "horse_no": 8,
+      "horse_odds": "중하위권 12~16배(7위)",
+      "result": "복병 적중",
+      "lesson": "시장 중하위권이어도 집중급락 최다 + 스마트머니 → 복병으로 무조건 편입",
+      "rule": {
+        "concentration_min": 10,
+        "smart_money": true,
+        "action": "배당순위 무관 복병 자동 편입"
+      }
+    }
+  ]
 }
