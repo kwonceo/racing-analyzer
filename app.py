@@ -5417,6 +5417,58 @@ def _high_odds_candidates(flow, removed_nos, key_horses, min_odds=10.0):
     return out
 
 
+def _mid_high_odds_favorites(valid_nos, curWin, curQ, drops, dark_horses, reversal_roles, form, min_odds=10.0):
+    """[중고배당 유력마·1번] 복승 10배+ 인데 강한 신호 1개+ 보유 → 💎 중고배당 유력마.
+      신호: 급락 -30%+ · 역배열 10%+ · 스마트머니 · 집중급락 10회+ · 전적 A/B등급(고배당).
+      반환 [{no, odds, signals[{type,text}], sigTypes[], note}] (신호 많은 순)."""
+    def _rep(no):
+        if curWin.get(no):
+            return curWin[no]
+        best = None
+        for (a, b), o in (curQ or {}).items():
+            if no in (a, b) and o > 0 and (best is None or o < best):
+                best = o
+        return best
+    # 신호원별 마번 집계
+    drop_nos = {}
+    for d in (drops or []):
+        if (d.get("pct") or 0) <= -30:
+            for h in (d.get("combo") or []):
+                drop_nos[int(h)] = min(drop_nos.get(int(h), 0), d.get("pct") or 0)
+    rev_nos = {int(r["no"]): (r.get("diffPct") or 0) for r in (reversal_roles or [])
+               if r.get("no") is not None and (r.get("diffPct") or 0) >= 10}
+    smart_nos = {int(h["no"]) for h in (dark_horses or []) if h.get("smartMoney") and h.get("no") is not None}
+    conc_nos = {int(h["no"]): (h.get("anomCount") or 0) for h in (dark_horses or [])
+                if h.get("forced") and h.get("no") is not None}
+    grade_nos = {}
+    for f in (form or []):
+        g = f.get("grade") or f.get("tier")
+        if g in ("A", "B") and f.get("no") is not None:
+            grade_nos[int(f["no"])] = g
+    out = []
+    for no in sorted(int(x) for x in (valid_nos or [])):
+        rep = _rep(no)
+        if rep is None or rep < min_odds:
+            continue                                   # 복승 10배 미만은 대상 아님
+        sigs = []
+        if no in drop_nos:
+            sigs.append({"type": "급락", "text": "급락 %d%%" % round(drop_nos[no])})
+        if no in rev_nos:
+            sigs.append({"type": "역배열", "text": "역배열 %g%%" % rev_nos[no]})
+        if no in smart_nos:
+            sigs.append({"type": "스마트머니", "text": "스마트머니"})
+        if no in conc_nos:
+            sigs.append({"type": "집중급락", "text": "집중급락 %d회" % conc_nos[no]})
+        if no in grade_nos:
+            sigs.append({"type": "전적A/B", "text": "전적 %s등급(고배당)" % grade_nos[no]})
+        if sigs:
+            _stypes = [s["type"] for s in sigs]
+            out.append({"no": no, "odds": round(float(rep), 1), "signals": sigs, "sigTypes": _stypes,
+                        "note": "%g배 · %s → 삼복승 보험 필수" % (rep, "·".join(_stypes))})
+    out.sort(key=lambda x: (-len(x["signals"]), x["odds"]))    # 신호 많은 순 → 저배당 순
+    return out
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -5902,6 +5954,11 @@ def _triple_analyze(rk, rec):
     _removed_nos = set(r["no"] for r in flow_removal)
     high_odds_candidates = _high_odds_candidates(flow_scores, _removed_nos, key_horses)
 
+    # [중고배당 유력마·1번] 복승 10배+ 인데 강한 신호(급락/역배열/스마트머니/집중급락/전적A·B) 1개+ → 💎 중고배당 유력마.
+    #   마감 후엔 미표시(추천 반영 없음). 삼복승 보험 자동 편성·오버레이/대시보드 알림·학습에 사용.
+    mid_high_favorites = ([] if after_close else
+                          _mid_high_odds_favorites(valid_nos, curWin, curQ, drops, dark_horses, reversal_roles, form))
+
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
     anomaly_horse = None
@@ -6082,6 +6139,19 @@ def _triple_analyze(rk, rec):
                 if len(_hcc) == 3:
                     _addbet("삼복승", "삼복승 보험(💎고배당 흐름 %g배)" % _hc["odds"], _hcc, 4,
                             trio_map.get(tuple(_hcc)))
+
+    # [4번·중고배당 유력마 자동 편성] 복승10배+ & 강한신호 말 → 저배당 축2두 + 그 말 삼복승 '대박 보험'.
+    #   축2두 중고배당3착 = 저배당 축 안정성 + 고배당 3착 대박. high_odds_candidates와 dedup(같은 조합 자동 스킵).
+    if not after_close and mid_high_favorites and len(key_horses) >= 2:
+        _mhax = [int(h) for h in key_horses[:2] if h is not None]
+        if len(_mhax) >= 2:
+            for _mf in mid_high_favorites[:2]:
+                if int(_mf["no"]) in _mhax:
+                    continue
+                _mcc = sorted(set(_mhax + [int(_mf["no"])]))
+                if len(_mcc) == 3:
+                    _addbet("삼복승", "삼복승 보험(💎중고배당 %g배·%s)" % (_mf["odds"], "·".join(_mf.get("sigTypes") or [])),
+                            _mcc, 4, trio_map.get(tuple(_mcc)))
 
     # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드(강제 아님·안내)
     recommend_flex = _recommend_flex(strong_signals, signal_confidence, after_close)
@@ -6685,6 +6755,7 @@ def _triple_analyze(rk, rec):
         "flowScores": flow_scores,   # [배당 흐름 점수] 말별 흐름점수(상승-10/무변동-5/하락+10/급락+20/스마트머니+30)
         "flowRemoval": flow_removal,   # [흐름 기반 제거] 죽은인기/3연속상승/페이크/역배열반대 → 제거 대상
         "highOddsCandidates": high_odds_candidates,   # [고배당 후보 발굴] 흐름 좋은 고배당(10배+ 하락) 말 → 삼복승 보험
+        "midHighFavorites": mid_high_favorites,   # [💎 중고배당 유력마] 복승10배+ & 강한신호1개+ → 삼복승 보험·알림·학습
         "smartQuinella": smart_quinella,   # [스마트머니 복승 보조] 스마트머니 복병 → 축과 복승 보조 자동 추가
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
@@ -8691,6 +8762,73 @@ def _learn_signal_stats(rk, an, top3, date_str=None):
     return {"signalStats": S, "keyhorseHit": kh}
 
 
+MID_HIGH_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "mid_high_odds_stats.json")
+
+
+def _mid_high_stats_load():
+    try:
+        with open(MID_HIGH_STATS_FILE, encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except FileNotFoundError:
+        return {"count": 0, "placed": 0, "cases": [], "by_signal": {}}
+    except Exception:
+        try:
+            os.remove(MID_HIGH_STATS_FILE)
+        except OSError:
+            pass
+        return {"count": 0, "placed": 0, "cases": [], "by_signal": {}}
+
+
+def _mid_high_stats_save(d):
+    try:
+        os.makedirs(os.path.dirname(MID_HIGH_STATS_FILE), exist_ok=True)
+        tmp = MID_HIGH_STATS_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(d, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, MID_HIGH_STATS_FILE)
+    except Exception as e:
+        print("[중고배당학습] 저장 실패:", e)
+
+
+def _learn_mid_high_odds(rk, an, top3, payouts=None, date_str=None):
+    """[5번] 중고배당 유력마(💎) 감지 시 어떤 신호로 감지했나·실제 입상했나·배당·누적 적중률 저장(경주별 멱등)."""
+    mhs = an.get("midHighFavorites") or []
+    if not mhs:
+        return None
+    t3 = set(int(x) for x in (top3 or []) if x is not None)
+    S = _mid_high_stats_load()
+    S.setdefault("cases", [])
+    S["cases"] = [c for c in S["cases"] if c.get("race") != rk]      # 멱등(재입력 교체)
+    date_str = date_str or time.strftime("%Y-%m-%d")
+    for mf in mhs:
+        no = int(mf["no"])
+        placed = no in t3
+        won = bool(top3) and int(top3[0]) == no
+        S["cases"].append({"race": rk, "date": date_str, "no": no, "odds": mf.get("odds"),
+                           "signals": mf.get("sigTypes") or [], "placed": placed, "won": won})
+    S["cases"] = S["cases"][-300:]
+    # 재계산(cases 기반·멱등)
+    cs = S["cases"]
+    S["count"] = len(cs)
+    S["placed"] = sum(1 for c in cs if c.get("placed"))
+    S["rate"] = round(S["placed"] / S["count"] * 100, 1) if S["count"] else 0.0
+    bysig = {}
+    for c in cs:
+        for sg in (c.get("signals") or []):
+            e = bysig.setdefault(sg, {"count": 0, "placed": 0})
+            e["count"] += 1
+            if c.get("placed"):
+                e["placed"] += 1
+    for sg, e in bysig.items():
+        e["rate"] = round(e["placed"] / e["count"] * 100, 1) if e["count"] else 0.0
+    S["by_signal"] = bysig
+    S["note"] = "중고배당 유력마(복승10배+&강한신호) 실제 입상 자동 집계. 표본 적으면 참고만(50+ 유의)."
+    _mid_high_stats_save(S)
+    print(f"[중고배당학습] {rk} · 💎 {[m['no'] for m in mhs]} · 입상 {[int(m['no']) for m in mhs if int(m['no']) in t3] or '없음'} · 누적 {S['count']}건({S['rate']}%)")
+    return S
+
+
 def _signal_reliability():
     """[5번] 신호별 신뢰도 요약(50경주+ 표본이면 신뢰) → {신호명: {rate_quinella, rate_trifecta, count, reliable}}."""
     S = _signal_stats_load()
@@ -9724,6 +9862,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _learn_signal_stats(rk, an, top3, doc.get("date"))
     except Exception as e:
         print("[신호별학습] 실패:", e)
+    # [5번·중고배당 유력마 학습] 💎 감지 말의 실제 입상·배당·신호별 적중률 자동 집계.
+    #   배당은 midHighFavorites 각 말의 odds를 쓰므로 payouts 불필요(이 시점 payouts 미정의) → None 전달.
+    try:
+        _learn_mid_high_odds(rk, an, top3, None, doc.get("date"))
+    except Exception as e:
+        print("[중고배당학습] 실패:", e)
 
     # [비교학습] 이상감지/전적/최종 추천 조합 각각의 적중 판정(복승 top2 정확 또는 삼복승 top3 정확)
     cmp_rec = an.get("compareRecommend") or {}
@@ -11949,6 +12093,18 @@ def stats_today():
         "rate_trifecta": round(hit_t / total * 100, 1) if total else 0.0,
         "profit": profit, "by_track": by_track, "by_signal": by_signal, "timeline": timeline,
     })
+
+
+@app.route("/api/learning/mid-high-odds", methods=["GET"])
+def learning_mid_high_odds():
+    """[5번] 중고배당 유력마(💎) 누적 적중률 조회 — 통계 탭 카드용."""
+    S = _mid_high_stats_load()
+    rows = []
+    for sg, e in (S.get("by_signal") or {}).items():
+        rows.append({"signal": sg, "count": e.get("count", 0), "placed": e.get("placed", 0), "rate": e.get("rate", 0)})
+    rows.sort(key=lambda r: -r["count"])
+    return jsonify({"count": S.get("count", 0), "placed": S.get("placed", 0), "rate": S.get("rate", 0),
+                    "bySignal": rows, "recent": (S.get("cases") or [])[-8:][::-1]})
 
 
 @app.route("/api/learning/signal-stats", methods=["GET"])
@@ -15139,11 +15295,15 @@ def _multi_card(key, rec):
     if smart:
         signals.append({"type": "스마트머니", "text": "💰 %s번 스마트머니" % smart[0].get("no")})
     conf = an.get("confidence") or {}
+    # [3번·중고배당 유력마] 있으면 카드에 💎 배지 + 요약
+    _mhf = an.get("midHighFavorites") or []
+    mid_high = [{"no": m["no"], "odds": m["odds"], "sigTypes": m.get("sigTypes") or []} for m in _mhf[:3]]
     return {
         "raceKey": key, "venue": rec.get("venue"), "raceNo": rec.get("raceNo"),
         "postTime": rec.get("postTime"), "secondsLeft": left, "urgency": urgency,
         "keyHorses": (an.get("keyHorses") or [])[:3],
         "signals": signals[:3],
+        "midHigh": mid_high,   # [3번] 💎 중고배당 유력마(있으면 카드 배지·별도 강조)
         "confidence": conf.get("overall") or conf.get("level"),
         "quinellaMain": next((b.get("combo") for b in (an.get("betRecommend") or []) if b.get("label") == "복승 메인"), None),
         "afterClose": bool(an.get("afterClose")),

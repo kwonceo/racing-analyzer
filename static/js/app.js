@@ -1601,12 +1601,19 @@
     }
     const sigs = (c.signals || []).map((s) => `<div style="font-size:12px;font-weight:700;margin:1px 0">${esc(s.text)}</div>`).join('') || '<div class="hint" style="font-size:11px">신호 없음</div>';
     const keyH = (c.keyHorses || []).join(' · ') || '-';
-    return `<div data-mkey="${esc(c.raceKey)}" title="클릭 → 상세 분석" style="cursor:pointer;border:2px solid ${col};border-radius:10px;padding:10px;background:${bg}">
+    // [3번·💎 중고배당 유력마] 있으면 카드에 💎 배지 + 요약(별도 강조)
+    const mh = (c.midHigh || []);
+    const mhBadge = mh.length ? '<span style="background:#f0abfc;color:#1a1a1a;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">💎 고배당</span>' : '';
+    const mhLine = mh.length ? `<div style="margin:3px 0;font-size:12px;color:#f0abfc;font-weight:700">💎 ${mh.map((m) => `${m.no}번(${m.odds}배)`).join(' · ')}</div>` : '';
+    const borderW = mh.length ? '3px' : '2px';
+    return `<div data-mkey="${esc(c.raceKey)}" title="클릭 → 상세 분석" style="cursor:pointer;border:${borderW} solid ${mh.length ? '#f0abfc' : col};border-radius:10px;padding:10px;background:${mh.length ? 'rgba(240,171,252,.08)' : bg}">
       <div style="display:flex;align-items:center;gap:6px">
         <b style="font-size:15px;color:#e2e8f0">${esc(c.venue || '')} ${c.raceNo}R</b>
+        ${mhBadge}
         <span style="flex:1"></span>
         <b style="color:${col};font-size:13px">${c.urgency === 'urgent' ? '⚡ ' : ''}${leftTxt}</b>
       </div>
+      ${mhLine}
       <div class="hint" style="font-size:11px;margin:2px 0">발주 ${esc(c.postTime || '?')}${c.confidence != null ? ' · 확신도 ' + esc(String(c.confidence)) : ''}</div>
       <div style="margin:4px 0"><span class="hint" style="font-size:11px">⭐ 유력마 </span><b style="color:#4ea1ff">${esc(keyH)}</b></div>
       ${sigs}
@@ -4218,12 +4225,15 @@
     let sigstat = null; try { sigstat = await (await fetch('/api/learning/signal-stats')).json(); } catch (_) { /* */ }
     // [오늘 결과 통계 대시보드] 오늘 등록 경주 집계(요약·경마장별·신호별·타임라인)
     let today = null; try { today = await (await fetch('/api/stats/today')).json(); } catch (_) { /* */ }
+    // [💎 중고배당 유력마·5번] 누적 적중률
+    let midhigh = null; try { midhigh = await (await fetch('/api/learning/mid-high-odds')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     // [AI Phase1] AI 학습 데이터 현황 대시보드
     let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
       ${renderTodayStats(today)}
+      ${renderMidHighStats(midhigh)}
       ${renderDailyLearning(dl)}
       ${renderSignalStats(sigstat)}
       ${renderPatternConfidence(pconf)}
@@ -4288,6 +4298,20 @@
       else toast('적용 실패: ' + (r.error || ''));
     } catch (e) { toast('적용 실패: ' + e.message); }
   };
+
+  // [💎 중고배당 유력마·5번] 누적 적중률 카드(신호별 입상률 포함).
+  function renderMidHighStats(mh) {
+    if (!mh || !mh.count) return '';
+    const rate = mh.rate || 0;
+    const rc = rate >= 40 ? '#38d39f' : (rate >= 20 ? '#fbbf24' : '#f87171');
+    const bysig = (mh.bySignal || []).map((r) => `<span style="display:inline-block;margin:2px 8px 2px 0;font-size:12px"><b style="color:#f0abfc">${esc(r.signal)}</b> <span class="hint">${r.placed}/${r.count}</span> <b style="color:${r.rate >= 40 ? '#38d39f' : '#b8c0cc'}">(${r.rate}%)</b></span>`).join('');
+    return `<div class="panel-card" style="margin:8px 0;border:1px solid #f0abfc">
+      <div class="matrix-title" style="color:#f0abfc">💎 중고배당 유력마 적중률 <span class="hint" style="font-weight:400">복승 10배+ & 강한 신호 → 실제 입상률</span></div>
+      <div style="margin:4px 0">누적 <b style="font-size:20px;color:${rc}">${rate}%</b> <span class="hint">(입상 ${mh.placed}/${mh.count}건)</span></div>
+      ${bysig ? `<div style="margin-top:4px"><b style="font-size:12px">신호별 입상률: </b>${bysig}</div>` : ''}
+      <div class="hint" style="font-size:11px;margin-top:4px">※ 50경주+ 쌓이면 신뢰도 판정. 저배당 축 + 💎 고배당 = 삼복승 대박 보험 자동 편성.</div>
+    </div>`;
+  }
 
   // [오늘 결과 통계 대시보드] 오늘 요약 카드 + 경마장별 + 신호별 + 타임라인.
   function renderTodayStats(t) {
@@ -5613,6 +5637,53 @@
     }
   }
   // 순수 렌더 헬퍼만 조합(사이드이펙트 없는 문자열 반환) → 스포츠 탭 컨테이너에 안전하게 주입.
+  // [💎 중고배당 유력마·2번] 감지 시 상단 강조 배너 + 소리/깜빡임(경고음과 다른 소리·경주당 1회).
+  let _midHighAlerted = {};
+  function renderMidHighFavorites(a) {
+    const mh = (a && a.midHighFavorites) || [];
+    if (!mh.length) return '';
+    // 새 감지 알림(경주+마번 조합 1회) — 소리(고배당 전용)+화면 깜빡임
+    const rk = a.raceKey || '';
+    const fresh = mh.filter((m) => !_midHighAlerted[rk + '#' + m.no]);
+    if (fresh.length && !a.afterClose) {
+      fresh.forEach((m) => { _midHighAlerted[rk + '#' + m.no] = 1; });
+      try { _playMidHighAlert(); } catch (_) { /* */ }
+      try { _flashScreen('#f0abfc'); } catch (_) { /* */ }
+    }
+    const rows = mh.map((m) => `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:6px 10px;border-radius:8px;margin:3px 0;background:rgba(240,171,252,.12);border-left:4px solid #f0abfc">
+      <b style="font-size:15px;color:#f0abfc">💎 ${m.no}번</b>
+      <b style="color:#e2e8f0">${m.odds}배</b>
+      ${(m.signals || []).map((s) => `<span class="chip" style="border-color:#f0abfc;color:#f0abfc;font-weight:700">${esc(s.text)}</span>`).join('')}
+      <span class="hint" style="margin-left:auto;color:#f0abfc">→ 삼복승 보험 필수</span>
+    </div>`).join('');
+    return `<div style="margin:6px 0;padding:8px 10px;border:2px solid #f0abfc;border-radius:10px;background:linear-gradient(180deg,rgba(240,171,252,.10),rgba(20,28,43,.6))">
+      <div style="font-size:15px;font-weight:800;color:#f0abfc">💎 고배당 유력마 감지! <span class="hint" style="font-weight:400;font-size:11px">복승 10배+ & 강한 신호</span></div>
+      ${rows}
+    </div>`;
+  }
+  // [2번] 중고배당 전용 알림음(기존 경고음과 다른 톤) — 상승 아르페지오
+  function _playMidHighAlert() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [880, 1174, 1568].forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'triangle'; o.frequency.value = f;
+        o.connect(g); g.connect(ctx.destination);
+        const t = ctx.currentTime + i * 0.12;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+        o.start(t); o.stop(t + 0.16);
+      });
+    } catch (_) { /* */ }
+  }
+  function _flashScreen(color) {
+    const ov = document.createElement('div');
+    ov.style.cssText = `position:fixed;inset:0;background:${color};opacity:.35;z-index:99999;pointer-events:none;transition:opacity .5s`;
+    document.body.appendChild(ov);
+    setTimeout(() => { ov.style.opacity = '0'; }, 120);
+    setTimeout(() => { try { ov.remove(); } catch (_) { /* */ } }, 700);
+  }
+
   // [5번] 활성 신호별 과거 적중률 강조 — "이 신호(스마트머니) 과거 적중률 72% → 신뢰도 높음"
   function renderSignalReliability(a) {
     const rel = a && a.signalReliability;
@@ -5629,6 +5700,7 @@
     const parts = [];
     parts.push(renderRaceJudgment(a, bsel));   // [1·2·4번] 경주 판정 크게 + 배팅 배분
     parts.push(renderChaotic(a, bsel));   // [혼전] 상위 배당 근접 시 고배당 포함 삼복승 전략 배너
+    parts.push(renderMidHighFavorites(a));   // [💎 2번] 중고배당 유력마 감지 상단 강조 배너(소리·깜빡임)
     parts.push(renderTopHorses(a));   // ⭐ 유력마 TOP5 + 복병/이상감지 + 제거마 카드
     parts.push(renderSignalReliability(a));   // [5번] 활성 신호별 과거 적중률(50경주+ 신뢰도 강조)
     parts.push(`<div class="matrix-title">🚨 실시간 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${six ? ' · 6명 출전' : ''}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>`);

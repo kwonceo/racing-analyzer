@@ -551,6 +551,19 @@
         panel.appendChild(head);
 
         // ═══ [정보 순서 정리] 1.결론박스 → 2.카운트다운 → 3.유력마 → 4.이상감지 → 5.나머지 ═══
+        // [💎 중고배당 유력마·2번] 감지 시 최상단 강조(복승10배+ & 강한신호 → 삼복승 보험 필수)
+        var mhf = d.midHighFavorites || [];
+        if (mhf.length) {
+          var mhBox = mk('div', 'margin:0 0 6px;padding:7px 10px;border:2px solid #f0abfc;border-radius:8px;background:rgba(240,171,252,.16)');
+          mhBox.appendChild(mk('div', 'font-weight:800;color:#f0abfc;font-size:14px', '💎 고배당 유력마 감지!'));
+          mhf.slice(0, 3).forEach(function (m) {
+            var line = mk('div', 'font-weight:700;color:#f5d0fe;font-size:13px;margin-top:2px');
+            line.textContent = m.no + '번 (' + m.odds + '배) ' + ((m.sigTypes || []).join('·')) + ' → 삼복승 보험 필수';
+            mhBox.appendChild(line);
+          });
+          panel.appendChild(mhBox);
+        }
+
         // [1번] 최종 결론 박스 — 최상단·가장 크게(모든 종목 공통: 경마/경륜/경정)
         renderConclusion(panel, d, deadline);
 
