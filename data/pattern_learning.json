@@ -944,6 +944,25 @@
         "quinella": "10+3(미적중·추천 10+12)",
         "trifecta": "3+10+12(미적중·추천 7+10+12)"
       }
+    },
+    {
+      "pattern": "스마트머니_복병_삼복승_적중",
+      "race": "오비히로 11경주",
+      "date": "2026-07-11",
+      "sport": "horse(반에이)",
+      "signal": "스마트머니(상승후급락) 7번 → 복병 편입",
+      "horse_no": 7,
+      "result": "2착 입상(결과 1-7-6)",
+      "recommended": true,
+      "result_combos": {
+        "quinella": "1+7",
+        "trifecta": "1+6+7(32배·적중)"
+      },
+      "lesson": "스마트머니 감지 말을 복병으로 편입 → 삼복승 32배 고배당 적중. 스마트머니 복승/삼복승 보조 편성이 유효.",
+      "pattern_tags": [
+        "스마트머니_적중",
+        "복병_삼복승_고배당"
+      ]
     }
   ],
   "reversal_stats": {
@@ -1199,5 +1218,22 @@
     "total_cases": 28,
     "note": "역배열 challenger 강도별 실제 입상/1착률(analysis_log 결과 집계·경주당 최강 역전 1건). 표본 적으면 참고만.",
     "updated": "2026-07-11"
+  },
+  "smart_money_stats": {
+    "count": 1,
+    "hit": 1,
+    "cases": [
+      {
+        "race": "오비히로 11경주",
+        "date": "2026-07-11",
+        "horse_no": 7,
+        "result": "2착",
+        "trifecta": "1+6+7",
+        "trifecta_odds": 32,
+        "hit": true
+      }
+    ],
+    "rate": 100.0,
+    "note": "스마트머니(상승후급락) 감지 말 복병 편입 적중 통계. 표본 적으면 참고만(50+ 유의)."
   }
 }
