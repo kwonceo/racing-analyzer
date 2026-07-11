@@ -8541,6 +8541,38 @@ def _learn_mass_drop(rk, an, top3, payouts=None):
     return entry
 
 
+def _learn_smart_money(rk, an, top3, payouts=None, date_str=None):
+    """[스마트머니 자동 학습] 결과 입력 시 darkHorses 중 스마트머니(상승후급락) 감지 말이 실제 입상(1~3착)했는지
+    자동 집계 → pattern_learning.json 의 smart_money_stats(count·hit·rate·cases) 갱신.
+    수동 저장(오비히로 11R)과 동일 저장소를 자동으로 누적 → 표본이 쌓이면 신뢰도 산출."""
+    darks = an.get("darkHorses") or []
+    smart_nos = [int(h["no"]) for h in darks if h.get("smartMoney") and h.get("no") is not None]
+    if not smart_nos:
+        return None
+    top3set = set(int(x) for x in (top3 or []) if x is not None)
+    hit_nos = [n for n in smart_nos if n in top3set]
+    hit = bool(hit_nos)
+    q_odds = ((payouts or {}).get("quinella") or 0) or 0
+    t_odds = ((payouts or {}).get("trifecta") or 0) or 0
+    P = _upset_load()
+    sm = P.setdefault("smart_money_stats", {"count": 0, "hit": 0, "cases": []})
+    sm["count"] = int(sm.get("count", 0)) + 1
+    if hit:
+        sm["hit"] = int(sm.get("hit", 0)) + 1
+    sm["rate"] = round(sm["hit"] / sm["count"] * 100, 1) if sm["count"] else 0.0
+    sm.setdefault("cases", []).append({
+        "race": rk, "date": date_str or time.strftime("%Y-%m-%d"),
+        "smart_horses": smart_nos, "placed": hit_nos, "hit": hit,
+        "trifecta_odds": t_odds or None, "quinella_odds": q_odds or None,
+        "high_odds": bool(t_odds >= 20 or q_odds >= 20),
+    })
+    sm["cases"] = sm["cases"][-100:]        # 최근 100건만 보존(무한 증가 방지)
+    sm["note"] = "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
+    _upset_save(P)
+    print(f"[스마트머니학습] {rk} · 스마트머니 {smart_nos} → 입상 {hit_nos or '없음'} · 누적 {sm['count']}건(적중률 {sm['rate']}%)")
+    return sm
+
+
 def _learn_upset(rk, an, top3, date_str=None):
     """부진마(최근5경주 평균착순≥4.0)의 입상 여부 + 동반 조건을 학습.
     반환: 갱신된 pattern_learning dict(없으면 None)."""
@@ -9764,6 +9796,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _learn_mass_drop(rk, an, top3, payouts)
     except Exception as e:
         print("[대규모급락학습] 실패:", e)
+    # [스마트머니 자동 학습·보완점3] darkHorses 스마트머니 감지 말의 실제 입상 여부 자동 집계
+    try:
+        _learn_smart_money(rk, an, top3, payouts, time.strftime("%Y-%m-%d"))
+    except Exception as e:
+        print("[스마트머니학습] 실패:", e)
     # [복기] 결과 적중/판정 요약을 히스토리 파일에도 저장 → 통계 탭에서 재계산 없이 표시
     try:
         doc["review"] = {
@@ -11602,6 +11639,7 @@ def learning_upset():
         "conditionRows": rows,
         "patterns": (d.get("patterns") or [])[-30:][::-1],   # 최근 30건(최신 우선)
         "total": len(d.get("patterns") or []),
+        "smartMoneyStats": d.get("smart_money_stats"),       # [보완점3] 스마트머니 자동 학습 집계
     })
 
 
