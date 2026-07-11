@@ -835,16 +835,38 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-10"
+    },
+    {
+      "race": "하코다테 10경주",
+      "horse_no": 6,
+      "recent_avg": 4.7,
+      "win_place": 3,
+      "conditions": [
+        "급락77%",
+        "복승이상감지"
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "race": "하코다테 10경주",
+      "horse_no": 7,
+      "recent_avg": 6.3,
+      "win_place": 2,
+      "conditions": [
+        "급락51%",
+        "복승이상감지"
+      ],
+      "date": "2026-07-11"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 189,
+      "count": 191,
       "hit": 49
     },
     "전체부진마": {
-      "count": 266,
-      "hit": 78
+      "count": 270,
+      "hit": 80
     },
     "대규모급락": {
       "count": 12,
@@ -854,12 +876,12 @@
       "hit_rate": 8.3
     },
     "이상감지동반": {
-      "count": 77,
-      "hit": 29
+      "count": 79,
+      "hit": 31
     },
     "급락동반": {
-      "count": 17,
-      "hit": 9
+      "count": 19,
+      "hit": 11
     }
   },
   "bokbyeong_patterns": [
@@ -876,6 +898,24 @@
         "concentration_min": 10,
         "smart_money": true,
         "action": "배당순위 무관 복병 자동 편입"
+      }
+    },
+    {
+      "pattern": "복병_집중급락",
+      "race": "하코다테 10경주",
+      "date": "2026-07-11",
+      "category": "japan_central",
+      "signal": "6번 집중급락 29회(낀 조합 12개 T-4분 동시 -39~-71%)",
+      "horse_no": 6,
+      "horse_odds": "하위권 40~48배(2+6)",
+      "result": "3착 입상 → 복승 2+7 적중·삼복승 2+6+7 적중(검증됨)",
+      "lesson": "대량급락 속에서도 유력마(2·7) 밖 집중급락 최다권 말(6번)이 3착 → 삼복승 보험(축2+7 + 6) 필수",
+      "verified": true,
+      "winning_quinella": "2+7",
+      "winning_trifecta": "2+6+7",
+      "rule": {
+        "concentration_min": 10,
+        "action": "유력마 밖 집중급락말 복병 편입 + 축조합 삼복승 보험"
       }
     }
   ]
