@@ -1333,12 +1333,55 @@
   //  분석기는 이 바에서 (1) 새로고침 버튼으로 즉시, (2) 30초마다 자동으로 최신 경주를 조회해
   //  상단에 "제주 3경주" 처럼 표시하고, 경주가 바뀌면 화면을 자동 갱신한다. (기존 기능은 유지)
   let _rrTimer = null, _rrLastRk = null;
+  // [경주 고정] 자동 전환 중단 상태(사용자가 보고 있는 경주 유지). localStorage로 새로고침에도 유지.
+  let _racePinned = false;
+  try { _racePinned = (localStorage.getItem('racePinned') === '1'); } catch (_) { /* */ }
+
+  /** [2번] raceKey에서 경마장명(경주번호 앞 토큰) 추출 — 자동 전환 시 같은 경마장인지 확인용. */
+  function _raceVenue(rk) {
+    if (!rk) return '';
+    // "사가 5경주" / "오비히로 8R" / "帯広 3レース" → 앞 토큰(공백 전 또는 숫자 전)
+    const m = String(rk).trim().match(/^([^\d]+?)\s*\d/);
+    return (m ? m[1] : String(rk)).replace(/[\s·]+$/, '').trim();
+  }
+
+  /** [3번] 📌 현재 경주 고정 토글 — 자동 전환 on/off. 버튼 라벨·상태 갱신. */
+  function toggleRacePin() {
+    _racePinned = !_racePinned;
+    try { localStorage.setItem('racePinned', _racePinned ? '1' : '0'); } catch (_) { /* */ }
+    _updatePinButton();
+    const status = $('#rrStatus');
+    if (_racePinned) {
+      if (status) status.textContent = `📌 고정됨: ${_rrLastRk || '현재 경주'} — 자동 전환 중단(새로고침·다음 경주로만 전환)`;
+      notify(`📌 현재 경주 고정: ${_rrLastRk || ''} · 자동 전환 중단`, true);
+    } else {
+      if (status) status.textContent = '📌 고정 해제 — 자동 전환 재개';
+      notify('📌 고정 해제: 자동 전환 재개', true);
+      refreshCurrentRace(false);   // 해제 즉시 최신 경주 반영
+    }
+  }
+  function _updatePinButton() {
+    const pb = $('#rrPinBtn');
+    if (!pb) return;
+    if (_racePinned) {
+      pb.textContent = '📌 고정 해제';
+      pb.style.background = '#f59e0b';
+      pb.style.color = '#1a1a1a';
+    } else {
+      pb.textContent = '📌 현재 경주 고정';
+      pb.style.background = '';
+      pb.style.color = '';
+    }
+  }
 
   function initRaceRefresh() {
     const btn = $('#rrRefreshBtn');
     if (btn) btn.addEventListener('click', () => refreshCurrentRace(true));
+    const pb = $('#rrPinBtn');               // [3번] 현재 경주 고정 버튼
+    if (pb) pb.addEventListener('click', toggleRacePin);
     const nb = $('#rrNewRaceBtn');           // [3번] 강제 초기화 버튼
     if (nb) nb.addEventListener('click', newRaceStart);
+    _updatePinButton();
     refreshCurrentRace(false);
     if (_rrTimer) clearInterval(_rrTimer);
     _rrTimer = setInterval(() => refreshCurrentRace(false), 12000);   // [4번] 12초마다 경주 변경 확인·자동 전환(늦게 넘어감 방지)
@@ -1392,21 +1435,38 @@
       if (stale) _rrLastRk = null;   // 다음에 새 경주가 오면 '변경'으로 감지
       return;
     }
-    if (label) label.textContent = rk;
     const changed = rk !== _rrLastRk;
 
     if (manual) {
       // [수동 새로고침] 완전 갱신: 화면 업데이트 + 배당 타임라인 초기화 + 성공 메시지
+      //   수동 전환은 명시적 사용자 행동이므로 고정 상태여도 전환(고정 대상을 새 경주로 갱신).
+      if (label) label.textContent = rk;
       if (changed) hardResetRaceState();              // 경주 바뀌었으면 이전 상태 완전 초기화
       _rrLastRk = rk;
       resetOddsTimeline();                            // [1번] 배당 타임라인 초기화(새 경주 시작)
       refreshActiveView(rk);                          // 분석기 화면 자동 업데이트
-      if (status) status.textContent = '✅ 업데이트 완료';
+      if (status) status.textContent = _racePinned ? `✅ ${rk} 업데이트(고정 유지)` : '✅ 업데이트 완료';
       notify(`✅ ${rk} 업데이트 완료`, true);          // 예: "✅ 제주 3경주 업데이트 완료"
       return;
     }
-    // [4번] 자동 감지·30초: 경주가 바뀌면 자동 초기화 + 새 경주로 화면 전환(직전 경주 잔존 방지)
+    // [경주 자동 전환 버그 수정] 자동 감지 경로 — 고정/다른 경마장 시 자동 전환 차단.
+    //   [3번 고정] 📌 고정 중이면 다른 경주가 수집돼도 화면 전환 안 함(라벨엔 감지된 경주 힌트만).
+    if (_racePinned && changed && _rrLastRk != null) {
+      if (label) label.textContent = `${_rrLastRk}  📌`;   // 보고 있는(고정) 경주 유지 표시
+      if (status) status.textContent = `📌 고정 중 · 다른 경주 감지(${rk}) — 전환하려면 고정 해제/새로고침`;
+      return;                                          // _rrLastRk 갱신 안 함(고정 유지)
+    }
+    // [2번 종목/경마장 혼재 방지] 고정 안 했어도 '다른 경마장'으로의 자동 전환은 차단(사가↔오비히로 혼재).
+    //   같은 경마장의 다음 경주(사가 5R→6R)는 기존대로 자동 전환 허용(정상 진행).
     if (changed && _rrLastRk != null) {
+      const prevVenue = _raceVenue(_rrLastRk), newVenue = _raceVenue(rk);
+      if (prevVenue && newVenue && prevVenue !== newVenue) {
+        if (label) label.textContent = `${_rrLastRk}`;   // 현재 경마장 경주 유지
+        if (status) status.textContent = `🔀 다른 경마장 경주 감지(${rk}) — 전환하려면 새로고침(자동 혼재 방지)`;
+        return;                                        // 다른 경마장으로 자동 전환하지 않음
+      }
+      if (label) label.textContent = rk;
+      // 같은 경마장 다음 경주 → 자동 초기화 + 새 경주 화면 전환(직전 경주 잔존 방지)
       _rrLastRk = rk;
       hardResetRaceState();                           // [1번] 직전 경주 스냅샷·이상감지·타임라인·경고 초기화
       _rrLastRk = rk;                                 // hardReset이 null로 만든 값 복원(현재 경주로 고정)
@@ -1415,6 +1475,7 @@
       notify(`🔄 새 경주 자동 전환: ${rk}`, true);
       return;
     }
+    if (label) label.textContent = rk;
     _rrLastRk = rk;
   }
 
