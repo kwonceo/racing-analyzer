@@ -5090,14 +5090,20 @@
     const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     // [1번] 제거분석 패널 재사용: id 충돌 방지 위해 패널 id 치환. 아래에서 클릭 토글 핸들러 연결.
     const elimHtml = renderEliminationHTML(a.elimination).replace('id="elimPanel"', 'id="koreaElimPanel"');
+    // [실시간 배당 분석·편의] 일본 탭에만 있던 실시간 표시(마감 N분전 배지·급락 경고 배너·추천 근거)를
+    //   한국 탭 통합 뷰에도 표시 → 한국경마 실시간 배당 분석을 한 화면에서 편하게 확인.
+    const closeTag = a.afterClose ? ' · <b style="color:#8a94a6">마감 후(참고만)</b>'
+      : (a.minutesBefore != null ? ` · <b style="color:#ffd24f">마감 ${a.minutesBefore}분전</b>` : '');
     host.innerHTML = `<div class="panel-card">
-      <h3>🔗 통합 분석 결과 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
+      <h3>🔗 통합 분석 결과 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${closeTag}</span></h3>
+      ${renderAlertSignal(a.alertSignal, _horseRoleMap(a))}
       ${renderKoreaIntegratedTable(a.integrated)}
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
       ${elimHtml}
       ${renderKoreaSignals(a.signals)}
       ${renderPatternMatch(a.patternMatch)}
       ${renderBetRecommend(a, '#koreaBudget')}
+      ${renderRecommendBasis(a.recommendBasis)}
     </div>`;
     _attachElimHandlers('koreaElimPanel', a.elimination);   // [1번] 제거↔후보 클릭 전환 복원
     _bindBudgetInput('#koreaBudget', () => { if (state.koreaLastInteg) renderKoreaIntegrated(state.koreaLastInteg); });
@@ -5131,6 +5137,9 @@
     const rk = latest && latest.raceKey;
     // [경주전환 잔존 방어] 수집 경주 없음 또는 30분+ 미갱신(끝난 경주) → 직전 배당 표시 안 함
     if (!rk || latest.stale) { setJpOddsStatus('waiting'); return; }
+    // [탭분리·제주케이스] 한국경마(서울/부산/부경/제주/과천)는 한국경마 탭에서 실시간 배당 분석을 표시한다.
+    //   → 일본경마 탭에서는 한국 경주를 렌더하지 않는다(같은 경주가 양 탭에 중복 표시되던 문제 방지).
+    if (jpIsKoreaName(rk)) { setJpOddsStatus('waiting'); return; }
     let a;
     try {
       a = await (await fetch('/api/odds/triple/analyze', {

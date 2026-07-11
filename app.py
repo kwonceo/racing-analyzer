@@ -187,7 +187,7 @@ DETECT_SCHEMA = {
                 "properties": {
                     "index": {"type": "integer"},
                     "type": {"type": "string", "enum": ["race", "jockey", "other"]},
-                    "venue": {"type": "string", "enum": ["서울", "부산", "기타", ""]},
+                    "venue": {"type": "string", "enum": ["서울", "부산", "제주", "기타", ""]},
                     "raceNo": {"type": "integer"},
                     "distance": {"type": "string"},
                     "layout": {"type": "string", "enum": ["summary", "detail", ""]},
@@ -651,7 +651,7 @@ def extract_results():
     body = request.json or {}
     prompt = (
         "이 이미지는 경마 경주 결과(착순)표입니다. 경주별 착순을 추출하세요.\n"
-        "results 각 항목: venue(경마장 '서울'/'부산'/'일본'/''), raceNo(경주 번호), "
+        "results 각 항목: venue(경마장 '서울'/'부산'/'제주'/'일본'/''), raceNo(경주 번호), "
         "placing(1착부터 순서대로 마번 정수 배열).\n"
         "결과표가 아니면 results=[]."
     )
@@ -745,7 +745,7 @@ def _do_detect(imgs, api_key=None):
         "- type='jockey': 기수 기승현황(기수별 성적) 표 페이지.\n"
         "- type='other': 그 외.\n"
         "type가 'race'이면:\n"
-        "  venue: 헤더의 경마장(서울경마→'서울', 부산경마→'부산', 그 외 '기타').\n"
+        "  venue: 헤더의 경마장(서울경마→'서울', 부산경마→'부산', 제주경마→'제주', 그 외 '기타').\n"
         "  raceNo: 경주 번호 정수. distance: 예 '1000M'.\n"
         "  layout: 'summary'=한 장에 출전마 전체가 한 표로 정리되고 상단에 예상전개도/전문위원 예상이 있는 요약 페이지, "
         "'detail'=말별 상세 카드가 격자로 배열된 페이지.\n"
