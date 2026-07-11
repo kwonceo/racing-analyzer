@@ -529,7 +529,7 @@
   ],
   "eliminated": [],
   "recommend_main": "3+7",
-  "recommend_sub": "3+6",
+  "recommend_sub": null,
   "strategy": "BMED_보험형",
   "signal_quality": "하",
   "confidence": 0,
@@ -537,7 +537,7 @@
  },
  "result_analysis": {
   "main_hit": true,
-  "sub_hit": true,
+  "sub_hit": false,
   "hit_reason": "적중",
   "miss_reason": null,
   "pattern_tags": [],
@@ -551,10 +551,10 @@
   "quinella_odds": null,
   "trifecta_odds": null,
   "actual_return": null,
-  "profit": 6400
+  "profit": 6600
  },
  "memo": null,
- "saved_at": "2026-07-11 10:41:16",
+ "saved_at": "2026-07-11 21:29:21",
  "validation": {
   "ok": true,
   "errors": []

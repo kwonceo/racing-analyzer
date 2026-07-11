@@ -1005,16 +1005,105 @@
         "복승이상감지"
       ],
       "date": "2026-07-11"
+    },
+    {
+      "race": "후쿠시마 2경주",
+      "horse_no": 2,
+      "recent_avg": 5.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-11"
+    },
+    {
+      "race": "후쿠시마 2경주",
+      "horse_no": 5,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "race": "고쿠라 5경주",
+      "horse_no": 9,
+      "recent_avg": 4.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "race": "고쿠라 5경주",
+      "horse_no": 1,
+      "recent_avg": 4.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "race": "후쿠시마 5경주",
+      "horse_no": 1,
+      "recent_avg": 4.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "race": "후쿠시마 5경주",
+      "horse_no": 4,
+      "recent_avg": 5.2,
+      "win_place": 3,
+      "conditions": [
+        "급락50%",
+        "복승이상감지"
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "race": "하코다테 10경주",
+      "horse_no": 6,
+      "recent_avg": 4.7,
+      "win_place": 3,
+      "conditions": [
+        "급락77%",
+        "복승이상감지"
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "race": "하코다테 10경주",
+      "horse_no": 7,
+      "recent_avg": 6.3,
+      "win_place": 1,
+      "conditions": [
+        "급락51%",
+        "복승이상감지"
+      ],
+      "date": "2026-07-11"
+    },
+    {
+      "race": "고쿠라 10경주",
+      "horse_no": 3,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-11"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 229,
-      "hit": 54
+      "count": 240,
+      "hit": 56
     },
     "전체부진마": {
-      "count": 327,
-      "hit": 93
+      "count": 355,
+      "hit": 102
     },
     "대규모급락": {
       "count": 14,
@@ -1024,12 +1113,12 @@
       "hit_rate": 21.4
     },
     "이상감지동반": {
-      "count": 98,
-      "hit": 39
+      "count": 115,
+      "hit": 46
     },
     "급락동반": {
-      "count": 27,
-      "hit": 13
+      "count": 31,
+      "hit": 16
     }
   },
   "bokbyeong_patterns": [
@@ -1368,8 +1457,8 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 27,
-    "hit": 20,
+    "count": 38,
+    "hit": 23,
     "cases": [
       {
         "race": "오비히로 11경주",
@@ -1787,9 +1876,173 @@
         "trifecta_odds": 7.0,
         "quinella_odds": 8.5,
         "high_odds": false
+      },
+      {
+        "race": "하코다테 2경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          3,
+          5,
+          4,
+          2
+        ],
+        "placed": [
+          3,
+          4
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "후쿠시마 2경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          10,
+          15,
+          11,
+          8
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "하코다테 4경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          3,
+          13,
+          8
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "고쿠라 4경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          12,
+          10,
+          8,
+          13
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "하코다테 5경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          1,
+          10,
+          4
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "하코다테 6경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          1,
+          8,
+          5
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": 6.9,
+        "high_odds": false
+      },
+      {
+        "race": "고쿠라 6경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          8,
+          3,
+          15
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "후쿠시마 7경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          6,
+          1,
+          3
+        ],
+        "placed": [
+          6
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "하코다테 8경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          3,
+          7,
+          5
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "하코다테 10경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          14,
+          5,
+          8
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "하코다테 11경주",
+        "date": "2026-07-11",
+        "smart_horses": [
+          8,
+          1,
+          4
+        ],
+        "placed": [
+          1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 11.1,
+        "high_odds": false
       }
     ],
-    "rate": 74.1,
+    "rate": 60.5,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
