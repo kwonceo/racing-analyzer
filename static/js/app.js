@@ -6681,7 +6681,8 @@
 
   /** 이상감지 이벤트 배열 → 행 HTML(시각·발주전·심각도색) */
   function _anomalyRows(ev) {
-    return (ev || []).map((e) => {
+    // [순서 변경] 최신 감지 내역이 맨 위 — 서버는 시간순(오래된→최신)으로 주므로 복사본을 reverse.
+    return (ev || []).slice().reverse().map((e) => {
       const mb = e.minutes_before != null ? ` <span style="color:#64748b">${e.minutes_before}분전</span>` : '';
       const col = e.severity === '🔴' ? '#f87171' : '#fbbf24';
       return `<div style="padding:1px 0 1px 8px"><span style="color:#94a3b8">${esc(e.time || '')}</span>${mb} <span style="color:${col};font-weight:700">${e.severity} ${esc(e.text)}</span></div>`;

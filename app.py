@@ -4246,6 +4246,55 @@ def _forced_trifecta_insurance(cur_mb, after_close, drops, wx_reversals, inverse
         return {"active": False}
 
 
+def _closing_drop_insurance(cur_mb, drops, key_horses, valid_nos=None, mass_drop=None, drop_thresh=-30):
+    """[마감 순간 급락 삼복승 보험] T-0(마감) 전후 급락 말 → 축(유력마 상위2) + 급락말 삼복승 보험 자동 편성.
+    역배열 불필요(급락만으로) — _forced_trifecta_insurance(급락∩역배열)가 놓치는 급락 전용 말을 담당.
+    기후 9R 복기: 1+7 축 + 5·6번 마감 순간 급락 → 1+7+5·1+7+6 삼복승 보험 자동.
+    ⚠ 대규모 급락(시장 전체 재설정·노이즈, 예: 하코다테 10R 163건 동시 급락)은 제외 — 특정 말 자금집중이 아님.
+    반환 {active, minutesBefore, axis, horses:[{no,dropPct,dropCombos,note}], combos:[[a,b,c]], note}."""
+    try:
+        # 마감 순간 = T-1분~마감 직후(cur_mb<=1). 마감 훨씬 전은 미적용(기존 forced_trifecta 담당).
+        if cur_mb is None or cur_mb > 1:
+            return {"active": False}
+        # [대규모 급락 가드] 시장 전체가 동시 급락 = 배당 재설정 노이즈 → 특정 복병 아님, 보험 미편성.
+        if mass_drop and mass_drop.get("detected"):
+            return {"active": False, "skipped": "massDrop"}
+        cnt, worst = {}, {}
+        for d in (drops or []):
+            p = d.get("pct")
+            if p is None or p > drop_thresh:
+                continue
+            for h in (d.get("combo") or []):
+                h = int(h)
+                cnt[h] = cnt.get(h, 0) + 1
+                worst[h] = min(worst.get(h, 0), p)
+        if not cnt:
+            return {"active": False}
+        # [대규모 급락 가드 2] 급락 말이 전체 출전의 60%+ = 시장 전반 붕괴(노이즈) → 미편성.
+        _field = len(valid_nos) if valid_nos else 0
+        if _field >= 6 and len(cnt) >= _field * 0.6:
+            return {"active": False, "skipped": "marketWide"}
+        axis = [int(h) for h in (key_horses or [])[:2] if h is not None]
+        if len(axis) < 2:
+            return {"active": False}
+        # 급락 말 중 축 아닌 말 → 조합 수 많은 순(자금 집중)·급락폭 큰 순, 최대 3두 보험.
+        cand = sorted([h for h in cnt if h not in axis], key=lambda h: (-cnt[h], worst[h]))
+        horses, combos, seen = [], [], set()
+        for hf in cand[:3]:
+            cc = tuple(sorted([axis[0], axis[1], hf]))
+            if len(set(cc)) == 3 and cc not in seen:
+                seen.add(cc)
+                combos.append(list(cc))
+                horses.append({"no": hf, "dropPct": worst[hf], "dropCombos": cnt[hf],
+                               "note": "마감 순간 급락 %d%%(%d개 조합) → 삼복승 보험" % (worst[hf], cnt[hf])})
+        return {"active": bool(combos), "minutesBefore": cur_mb, "axis": axis,
+                "horses": horses, "combos": combos,
+                "note": "마감(T-0) 순간 급락 말 → 축 %d+%d + 급락말 삼복승 보험 자동 편성" % (axis[0], axis[1])}
+    except Exception as _e:
+        print("[마감급락보험] 실패:", _e)
+        return {"active": False}
+
+
 # ───────── [패스 권고 경주] 추천 없음/전적없음+신호없음 = 손익·적중률 집계 제외 ─────────
 def _is_pass_race(an):
     """패스 권고 경주 판정: ①추천 게이트(신호 대기·패스형) 또는 ②전적없음+강신호없음.
@@ -5619,6 +5668,15 @@ def _triple_analyze(rk, rec):
             _addbet("삼복승", "삼복승 강제보험(막판급락+역배열)", _cc, 5,
                     trio_map.get(tuple(sorted(_cc))))
 
+    # [마감 순간 급락 삼복승 보험] T-0 마감 순간 급락 말(역배열 없어도) → 축 + 급락말 삼복승 보험 자동.
+    #   기후 9R: 1+7 축 + 5·6번 마감급락 → 1+7+5·1+7+6. 대규모 급락(하코다테 10R 163건 노이즈)은 가드로 제외.
+    closing_drop_insurance = _closing_drop_insurance(cur_mb, drops, key_horses,
+                                                     valid_nos=valid_nos, mass_drop=mass_drop)
+    if closing_drop_insurance.get("active"):
+        for _cc in closing_drop_insurance.get("combos", []):
+            _addbet("삼복승", "삼복승 보험(마감순간 급락)", _cc, 4,
+                    trio_map.get(tuple(sorted(_cc))))
+
     # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드(강제 아님·안내)
     recommend_flex = _recommend_flex(strong_signals, signal_confidence, after_close)
 
@@ -6218,6 +6276,7 @@ def _triple_analyze(rk, rec):
         "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
+        "closingDropInsurance": closing_drop_insurance,   # [마감순간 급락 보험] 축+마감급락말 삼복승(대규모급락 제외)
         "reversalBacking": reversal_backing,  # [히로시마2R] 역배열 실질유력마 축 받치기 복승
         "recommendFlex": recommend_flex,      # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드
         "highOddsCompanion": high_odds_companion,  # [고배당 동반 패턴·참고] 메인과 별도 참고 추천
