@@ -5096,6 +5096,140 @@ def _chaotic_race(curQ, curWin, key_horses, anomaly_horse, drops):
     }
 
 
+# ══════════ [배당 흐름 기반 제거 시스템] "들어올 말 찾기" → "안 들어올 말 제거" ══════════
+#   철학: 배당 흐름(자금 유입/이탈)으로 말별 흐름 점수를 매겨, 흐름 없는 말은 저배당이어도 제거하고
+#         흐름 좋은 말은 고배당이어도 추천에 편입한다. 기존 _elimination(배당+전적)과 별개의 파생 레이어(무삭제).
+def _horse_rep_series(hist, no, n=6):
+    """최근 n스냅샷의 말별 대표배당(단승 우선·없으면 최저 복승) 시퀀스."""
+    s = []
+    for h in (hist or [])[-n:]:
+        o = None
+        wv = (h.get("win") or {}).get(str(no))
+        if wv not in (None, ""):
+            try:
+                o = float(wv)
+            except (TypeError, ValueError):
+                o = None
+        if o is None:
+            mm = _odds_map_un(h.get("quinella"))
+            cand = [v for k, v in mm.items() if no in k and v > 0]
+            o = min(cand) if cand else None
+        if o and o > 0:
+            s.append(round(float(o), 1))
+    return s
+
+
+def _flow_scores(hist, valid_nos, strong_signals, advanced, curQ, curWin, inverse):
+    """[3번] 말별 배당 흐름 점수: 상승-10·변동없음-5·하락+10·급락+20·스마트머니+30.
+    [1번] 제거 플래그: 죽은인기(변동없음)·연속상승(3회+)·페이크(급락후 반등)·역배열반대.
+    반환 {no:{score,trend,label,rep,dead,rising3,fake,revOpp,removeReasons[]}}."""
+    streaks = (advanced or {}).get("horseStreaks") or {}
+    smart = set()
+    for _sg in ((strong_signals or {}).get("signals") or []):
+        if _sg.get("type") == 8:                      # 상승후급락(스마트머니)
+            for _h in (_sg.get("horses") or []):
+                try:
+                    smart.add(int(_h))
+                except (TypeError, ValueError):
+                    pass
+    # [1번 역배열 반대] 역배열(쌍승역전)이 감지되면, 실제로는 밀려나는 '원인기마'(banner.reversal.favorite)를 제거 대상.
+    #   ⚠ 오제거(실제 승자 제거) 방지 위해 보수적: (a)쌍승역전이 실제 detected일 때만, (b)challenger(실질 유력마)는 절대 제거 안 함.
+    rev_opp = set()
+    inv = inverse or {}
+    if inv.get("detected"):
+        _rev = (inv.get("banner") or {}).get("reversal") or {}
+        _fav, _cha = _rev.get("favorite"), _rev.get("challenger")
+        try:
+            if _fav is not None and int(_fav) != int(_cha):
+                rev_opp.add(int(_fav))   # 시장 인기이나 쌍승역전으로 실제 밀려나는 원인기마 → 제거
+        except (TypeError, ValueError):
+            pass
+    def _rep(no):
+        if curWin.get(no):
+            return curWin[no]
+        best = None
+        for (a, b), o in curQ.items():
+            if no in (a, b) and o > 0 and (best is None or o < best):
+                best = o
+        return best
+    out = {}
+    for no in sorted(valid_nos or []):
+        s = _horse_rep_series(hist, no)
+        rep = _rep(no)
+        st = streaks.get(no) or streaks.get(str(no)) or {}
+        fake = bool(st.get("rebounded"))
+        cons_down = int(st.get("count") or 0)          # 연속 하락 횟수
+        # 연속 상승 횟수(시퀀스 뒤에서부터 직전보다 높음)
+        rising = 0
+        for i in range(len(s) - 1, 0, -1):
+            if s[i] > s[i - 1]:
+                rising += 1
+            else:
+                break
+        rising3 = rising >= 3
+        change = ((s[-1] - s[0]) / s[0]) if len(s) >= 2 and s[0] > 0 else 0.0
+        # 카테고리(강한 것 우선): 스마트머니 → 급락 → 하락 → 변동없음 → 상승
+        dead = False
+        if no in smart:
+            score, trend = 30, "스마트머니"
+        elif change <= -0.30 or cons_down >= 3:
+            score, trend = 20, "급락"
+        elif change <= -0.05 or cons_down >= 1:
+            score, trend = 10, "하락"
+        elif abs(change) <= 0.03:
+            score, trend = -5, "변동없음"
+            dead = (len(s) >= 3)                        # T-5~T-1 무변동 = 죽은 인기
+        else:
+            score, trend = -10, "상승"
+        if fake:
+            score -= 15                                 # 페이크 반등 = 감점
+        reasons = []
+        if dead:
+            reasons.append("죽은 인기(무변동)")
+        if rising3:
+            reasons.append("3회 연속 상승(자금 이탈)")
+        if fake:
+            reasons.append("급락 후 반등(페이크)")
+        if no in rev_opp:
+            reasons.append("역배열 반대 방향")
+        out[int(no)] = {"no": int(no), "score": score, "trend": trend, "label": trend,
+                        "rep": rep, "dead": dead, "rising3": rising3, "fake": fake,
+                        "revOpp": (no in rev_opp), "removeReasons": reasons,
+                        "smartMoney": (no in smart), "series": s}
+    return out
+
+
+def _flow_removal(flow, key_horses):
+    """[1번] 흐름 기반 제거 대상: 죽은인기/3연속상승/페이크/역배열반대. 유력마 축(상위2)은 제외(안전)."""
+    axis = set(int(h) for h in (key_horses or [])[:2] if h is not None)
+    rem = []
+    for no, f in flow.items():
+        if no in axis:
+            continue
+        if f.get("removeReasons"):
+            rem.append({"no": no, "rep": f.get("rep"), "trend": f.get("trend"),
+                        "reasons": f["removeReasons"], "score": f.get("score")})
+    rem.sort(key=lambda x: (x.get("score") or 0))       # 점수 낮은(제거 확실) 순
+    return rem
+
+
+def _high_odds_candidates(flow, removed_nos, key_horses, min_odds=10.0):
+    """[2번] 제거 후 남은 말 중 배당 10배+ 인데 하락/급락(흐름 좋음) → 고배당 후보 자동 편입."""
+    key = set(int(h) for h in (key_horses or []) if h is not None)
+    out = []
+    for no, f in flow.items():
+        if no in removed_nos or no in key:
+            continue
+        rep = f.get("rep")
+        if rep is not None and rep >= min_odds and f.get("trend") in ("급락", "하락", "스마트머니"):
+            _sm_note = (" · 스마트머니" if (f.get("smartMoney") and f.get("trend") != "스마트머니") else "")
+            out.append({"no": no, "odds": round(float(rep), 1), "trend": f.get("trend"),
+                        "score": f.get("score"),
+                        "note": "%g배 · %s%s → 삼복승 보험 후보" % (rep, f.get("trend"), _sm_note)})
+    out.sort(key=lambda x: (-(x.get("score") or 0), x.get("odds") or 999))
+    return out
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -5551,6 +5685,14 @@ def _triple_analyze(rk, rec):
     #   [2번 개선] 경마만 적용(경륜/경정/바이크 비활성) + 명확한 축(배당차 30%+)일 때만.
     compression_pattern = _compression_pattern(key_horses, curWin, curQ, strong_signals, rec.get("sport"))
 
+    # ═══ [배당 흐름 기반 제거 시스템] 흐름 점수 + 흐름 제거 + 고배당 후보 발굴 ═══
+    #   "들어올 말 찾기 → 안 들어올 말 제거". 흐름 없는 말(죽은인기/연속상승/페이크/역배열반대)은 저배당이어도 제거,
+    #   흐름 좋은 고배당(10배+ 하락중) 말은 삼복승 보험 후보로 편입. 기존 유력마/제거 로직과 별개 파생(무삭제).
+    flow_scores = _flow_scores(hist, valid_nos, strong_signals, advanced, curQ, curWin, inverse)
+    flow_removal = _flow_removal(flow_scores, key_horses)
+    _removed_nos = set(r["no"] for r in flow_removal)
+    high_odds_candidates = _high_odds_candidates(flow_scores, _removed_nos, key_horses)
+
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
     anomaly_horse = None
@@ -5683,6 +5825,17 @@ def _triple_analyze(rk, rec):
         for _cc in closing_drop_insurance.get("combos", []):
             _addbet("삼복승", "삼복승 보험(마감순간 급락)", _cc, 4,
                     trio_map.get(tuple(sorted(_cc))))
+
+    # [2번 고배당 후보 발굴] 흐름 좋은 고배당(10배+ 하락/급락/스마트머니) 말 → 축2두 + 그 말 삼복승 보험.
+    #   흐름 점수 상위 최대 2두. 마감 후는 미적용(기존 정책).
+    if not after_close and high_odds_candidates and len(key_horses) >= 2:
+        _hax = [int(h) for h in key_horses[:2] if h is not None]
+        if len(_hax) >= 2:
+            for _hc in high_odds_candidates[:2]:
+                _hcc = sorted(set(_hax + [_hc["no"]]))
+                if len(_hcc) == 3:
+                    _addbet("삼복승", "삼복승 보험(💎고배당 흐름 %g배)" % _hc["odds"], _hcc, 4,
+                            trio_map.get(tuple(_hcc)))
 
     # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드(강제 아님·안내)
     recommend_flex = _recommend_flex(strong_signals, signal_confidence, after_close)
@@ -6281,6 +6434,9 @@ def _triple_analyze(rk, rec):
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
         "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용
         "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
+        "flowScores": flow_scores,   # [배당 흐름 점수] 말별 흐름점수(상승-10/무변동-5/하락+10/급락+20/스마트머니+30)
+        "flowRemoval": flow_removal,   # [흐름 기반 제거] 죽은인기/3연속상승/페이크/역배열반대 → 제거 대상
+        "highOddsCandidates": high_odds_candidates,   # [고배당 후보 발굴] 흐름 좋은 고배당(10배+ 하락) 말 → 삼복승 보험
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
         "closingDropInsurance": closing_drop_insurance,   # [마감순간 급락 보험] 축+마감급락말 삼복승(대규모급락 제외)

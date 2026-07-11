@@ -3068,6 +3068,16 @@
     let disc = 1.0;
     if (info.isAnom || (info.ex && info.ex.grade === '🔴') || (info.bigDrop && Math.abs(info.bigDrop.pct) >= 40)) disc = 0.5;
     else if (info.bigDrop || (info.ex && info.ex.grade)) disc = 0.7;
+    // [배당 흐름 점수·4번] 저배당 순 → 흐름 점수 순: 흐름 좋은 말 상위·흐름 없는(죽은인기/상승) 말 하위.
+    //   기존 시장배당·이상감지 할인은 유지하고 흐름 계수만 곱해 반영(무삭제).
+    const fl = a.flowScores && (a.flowScores[Number(no)] || a.flowScores[String(no)]);
+    if (fl && fl.score != null) {
+      if (fl.score >= 30) disc *= 0.6;         // 스마트머니 → 최상위
+      else if (fl.score >= 20) disc *= 0.75;   // 급락
+      else if (fl.score >= 10) disc *= 0.9;    // 하락
+      else if (fl.score <= -10) disc *= 1.4;   // 상승(자금 이탈) → 하위
+      else if (fl.score < 0) disc *= 1.2;      // 무변동(죽은 인기) → 하위
+    }
     return o * disc;
   }
   function _marketOrderNos(a, nos) {
@@ -3075,6 +3085,43 @@
     return nos.slice().sort((x, y) => _marketEffOdds(a, x, reprMap) - _marketEffOdds(a, y, reprMap)
       || ((reprMap[Number(x)] == null ? 1e9 : reprMap[Number(x)]) - (reprMap[Number(y)] == null ? 1e9 : reprMap[Number(y)]))
       || (Number(x) - Number(y)));
+  }
+
+  // [배당 흐름 기반 제거·2/4번] 흐름 좋은 고배당 추천(💎) + 흐름 없는 말 제거(🔴).
+  //   "들어올 말 찾기 → 안 들어올 말 제거". 서버 flowScores/flowRemoval/highOddsCandidates 소비.
+  function renderFlowSection(a) {
+    const hoc = (a && a.highOddsCandidates) || [];
+    const rem = (a && a.flowRemoval) || [];
+    const flow = (a && a.flowScores) || {};
+    if (!hoc.length && !rem.length) return '';
+    let html = '';
+    if (hoc.length) {
+      html += `<div class="matrix-title" style="font-size:13px;color:#f0abfc;margin-top:6px">💎 고배당 추천(흐름 기반) <span class="hint" style="font-weight:400">배당 높아도 하락/급락 흐름 → 삼복승 보험 편입</span></div>`;
+      html += hoc.slice(0, 3).map((c) => {
+        const f = flow[c.no] || flow[String(c.no)] || {};
+        const sc = f.score != null ? f.score : c.score;
+        return `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(240,171,252,.08);border-left:3px solid #f0abfc">
+          <b style="min-width:30px;color:#f0abfc">💎추천</b>
+          <b style="min-width:32px;color:#4ea1ff">${c.no}번</b>
+          <span class="hint"><b style="color:#e2e8f0">${c.odds}배</b></span>
+          <span class="chip" style="border-color:#f0abfc;color:#f0abfc;font-weight:700">흐름점수 ${sc != null ? sc : '-'}점</span>
+          <span class="chip" style="border-color:#f472b6;color:#f472b6">${esc(c.trend || '')}</span>
+          ${f.smartMoney ? '<span class="chip" style="border-color:#fbbf24;color:#fcd34d;font-weight:700">💰 스마트머니</span>' : ''}
+          <span class="hint" style="margin-left:auto;color:#f0abfc">→ 삼복승 보험 포함</span>
+        </div>`;
+      }).join('');
+    }
+    if (rem.length) {
+      html += `<div class="matrix-title" style="font-size:13px;color:#f87171;margin-top:6px">🔴 제거(흐름 없음) <span class="hint" style="font-weight:400">저배당이어도 흐름 없으면 제거 · 죽은인기/연속상승/페이크/역배열반대</span></div>`;
+      html += rem.slice(0, 5).map((r) => `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:4px 8px;font-size:12px;border-radius:6px;margin:2px 0;background:rgba(248,113,113,.06);border-left:3px solid #f87171">
+          <b style="min-width:30px;color:#f87171">🔴제거</b>
+          <b style="min-width:32px">${r.no}번</b>
+          <span class="hint">${r.rep != null ? r.rep + '배' : '배당-'}</span>
+          <span class="chip" style="border-color:#f87171;color:#f87171">흐름점수 ${r.score != null ? r.score : '-'}점</span>
+          <span class="hint" style="margin-left:auto;color:#f87171">${(r.reasons || []).map(esc).join(', ')}</span>
+        </div>`).join('');
+    }
+    return html;
   }
 
   function renderTopHorses(a) {
@@ -3175,6 +3222,13 @@
       const _isAnom = !!(info && (info.isAnom || info.bigDrop || (info.ex && info.ex.grade)));
       const anomChip = (!isDark && _isAnom)
         ? '<span class="chip" style="border-color:#ff5c5c;color:#ff5c5c;font-weight:700">🚨 이상감지</span>' : '';
+      // [배당 흐름 점수·3번] 말별 흐름점수 칩(상승-10/무변동-5/하락+10/급락+20/스마트머니+30).
+      let flowChip = '';
+      const _fl = (a.flowScores && (a.flowScores[h.no] || a.flowScores[String(h.no)]));
+      if (_fl && _fl.score != null) {
+        const _fc = _fl.score >= 20 ? '#38d39f' : (_fl.score > 0 ? '#4ea1ff' : (_fl.score <= -10 ? '#f87171' : '#94a3b8'));
+        flowChip = `<span class="chip" style="border-color:${_fc};color:${_fc}" title="배당 흐름: ${esc(_fl.trend || '')}">흐름 ${_fl.score >= 0 ? '+' : ''}${_fl.score}점 ${esc(_fl.trend || '')}</span>`;
+      }
       // [배당 우선 전환·3번] 배당 기반 상태 배지
       let mktChip = '';
       let warnLine = '';
@@ -3197,6 +3251,7 @@
         <span style="font-weight:600">${esc(h.name) || '-'}</span>
         <span class="hint">${formTxt} · <b style="color:#e2e8f0">${oddsTxt}</b></span>
         ${anomChip}
+        ${flowChip}
         ${mktChip}
         ${confChip}
         ${move}
@@ -3229,6 +3284,7 @@
         <span>${esc(e.name) || '-'}</span>
         <span class="hint" style="margin-left:auto;text-align:right">${e.odds != null ? e.odds + '배' : ''}${(e.reasons && e.reasons.length) ? ' · ' + e.reasons.map(esc).join(', ') : ''}</span>
       </div>`).join('')}` : ''}
+      ${renderFlowSection(a)}
     </div>`;
   }
   function _topHorseDetailHtml(no, a) {
