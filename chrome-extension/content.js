@@ -39,14 +39,67 @@
   const BABA_CODE = { 19: '船橋', 20: '大井', 24: '名古屋', 27: '園田', 31: '高知' };
   const TRACKS = /(帯広|門別|盛岡|水沢|浦和|船橋|大井|川崎|金沢|笠松|名古屋|園田|姫路|高知|佐賀)/;
 
+  // [raceKey 오검출 수정] 현재 '활성화된 경주 탭' 또는 두드러진 경주 헤더에서 경주번호를 읽는다.
+  //   증상: URL k_raceNo(또는 본문 첫 第N競走)가 stale/목록 첫 항목이라 실제 표시 경주(9R)를 4R로 오검출.
+  //   → 화면에 실제 표시 중인 경주 = 활성 탭(current/active/selected)·selected option·강조 헤더가 진실.
+  function _activeRaceNo() {
+    const _n = (t) => {
+      const m = String(t || '').replace(/[\s　]/g, '').match(/(?:第)?(\d{1,2})(?:競走|R|レース|경주)?/);
+      if (!m) return null;
+      const n = parseInt(m[1], 10);
+      return (n >= 1 && n <= 12) ? n : null;
+    };
+    // 1) 활성/선택된 경주 탭·링크(사이트별 클래스 후보 — 하나라도 걸리면 그 번호가 현재 경주)
+    const tabSels = [
+      'li.current a', 'li.active a', 'li.selected a', 'li.on a', 'a.current', 'a.active', 'a.selected',
+      '.current a', '.active a', '.selected a', '[aria-current] ', '[aria-current="true"]',
+      '[aria-selected="true"]', '.raceNavi .current', '.race-nav .current', '.raceNo.current',
+      '.nowRace', '.now-race', '.race-tab.active', '.tab.active', 'li[class*="current"] a',
+    ];
+    for (const sel of tabSels) {
+      try {
+        for (const el of document.querySelectorAll(sel)) {
+          const n = _n(el.textContent);
+          if (n) return n;
+        }
+      } catch (_) { /* 잘못된 선택자 무시 */ }
+    }
+    // 2) select(경주 드롭다운)의 선택된 option
+    try {
+      for (const sel of document.querySelectorAll('select')) {
+        const opt = sel.options && sel.options[sel.selectedIndex];
+        if (opt && /R|競走|レース|경주|race/i.test(opt.textContent + (sel.name || '') + (sel.id || ''))) {
+          const n = _n(opt.textContent);
+          if (n) return n;
+        }
+      }
+    } catch (_) { /* */ }
+    // 3) 두드러진 경주 헤더(h1~h3·타이틀 계열) — 목록 본문보다 우선
+    try {
+      for (const h of document.querySelectorAll('h1,h2,h3,.raceTitle,.race-title,.raceHead,.race_head,.raceNumber,.race_no')) {
+        const n = _n(h.textContent);
+        if (n && /第\s*\d|R|レース|競走/.test(h.textContent)) return n;
+      }
+    } catch (_) { /* */ }
+    return null;
+  }
+
   function extractRaceKey() {
     const q = new URLSearchParams(location.search);
     let date = '', track = '', raceNo = '';
 
     const rd = (q.get('k_raceDate') || '').match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/);
     if (rd) date = `${rd[1]}-${rd[2].padStart(2, '0')}-${rd[3].padStart(2, '0')}`;
+    // [오검출 수정·최우선] 활성 경주 탭/헤더의 번호 = 실제 표시 경주 → URL/본문보다 우선.
+    const activeNo = _activeRaceNo();
     const rn = q.get('k_raceNo');
-    if (rn) raceNo = `${parseInt(rn, 10)}R`;
+    if (activeNo) {
+      raceNo = `${activeNo}R`;
+      if (rn && parseInt(rn, 10) !== activeNo) {
+        console.log(`[raceKey 오검출 방지] 활성 경주 탭=${activeNo}R ≠ URL k_raceNo=${rn}R → 활성 탭(${activeNo}R) 채택`);
+      }
+    }
+    if (!raceNo && rn) raceNo = `${parseInt(rn, 10)}R`;   // 활성 탭 못 읽었을 때만 URL 파라미터
     const bc = parseInt(q.get('k_babaCode'), 10);
     if (BABA_CODE[bc]) track = BABA_CODE[bc];
 
