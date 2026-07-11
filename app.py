@@ -11059,8 +11059,89 @@ class _TableRowCollector(HTMLParser):
             self._cur = None
 
 
+def _parse_result_tsv(text):
+    """[일괄등록·탭구분 텍스트] 헤더+탭(\\t) 구분 결과 붙여넣기 파싱(스프레드시트/엑셀 복사 대응).
+    헤더 예: 구분 / 경주지역 / 라운드 / 1착 / 2착 / 3착 / 단승 / 복승 / 쌍승 / 연승 / 복연승 / 삼복승 / 삼쌍승.
+    헤더 라벨로 컬럼 인덱스를 찾아 매핑(순서·컬럼수 달라도 대응). 탭 없으면 2칸+ 공백 분리 폴백.
+    반환 [{area,round,no1,no2,no3,sOdds,qOdds,xOdds,tOdds}] (HTML 파서와 호환 + 단승/쌍승 추가)."""
+    if not text:
+        return []
+    lines = [ln for ln in (text or "").replace("\r", "").split("\n") if ln.strip()]
+    if not lines:
+        return []
+
+    def _split(ln):
+        if "\t" in ln:
+            return [c.strip() for c in ln.split("\t")]
+        return [c for c in re.split(r"\s{2,}", ln.strip()) if c != ""]   # 탭 없으면 2칸+ 공백 분리
+
+    def ns(s):
+        return re.sub(r"\s+", "", s or "")
+    # 헤더 라인 탐색(구분/경주지역 + 라운드/경주 포함)
+    hi = None
+    for i, ln in enumerate(lines):
+        j = ns(ln)
+        if ("경주지역" in j or "경마장" in j or "구분" in j) and ("라운드" in j or "경주" in j or "회차" in j):
+            hi = i
+            break
+    if hi is None:
+        return []
+    heads = [ns(h) for h in _split(lines[hi])]
+
+    def idx(pat):
+        for k, h in enumerate(heads):
+            if re.search(pat, h):
+                return k
+        return -1
+    iArea = idx(r"^경주지역$|경주지역|^경마장$|^지역$")
+    iRound = idx(r"^라운드$|^회차$|^경주번호$|^경주$|^R$")
+    i1, i2, i3 = idx(r"^1착$|1착|1위"), idx(r"^2착$|2착|2위"), idx(r"^3착$|3착|3위")
+    iS = idx(r"^단승$")
+    iQ = idx(r"^복승$")               # 복연승·삼복승 오매칭 방지(정확 매칭)
+    iX = idx(r"^쌍승$")               # 삼쌍승 오매칭 방지
+    iT = idx(r"^삼복승$|^삼복$")
+    if iArea < 0 or (i1 < 0 and i2 < 0 and i3 < 0):
+        return []
+
+    def _fw(s):
+        return (s or "").translate({0xFF10 + i: 0x30 + i for i in range(10)})
+
+    def num(cells, k):
+        if k < 0 or k >= len(cells):
+            return None
+        m = re.search(r"\d+", _fw(cells[k]))
+        return int(m.group()) if m else None
+
+    def fnum(cells, k):
+        return _safe_num(_fw(cells[k])) if (0 <= k < len(cells)) else None
+    out = []
+    for ln in lines[hi + 1:]:
+        cells = _split(ln)
+        if len(cells) < 3:
+            continue
+        area = cells[iArea].strip() if 0 <= iArea < len(cells) else ""
+        rnd = cells[iRound].strip() if 0 <= iRound < len(cells) else ""
+        if not area and not rnd:
+            continue
+        if ns(area) in ("경주지역", "경마장", "구분"):   # 중복 헤더 라인 스킵
+            continue
+        out.append({
+            "area": area, "round": rnd,
+            "no1": num(cells, i1), "no2": num(cells, i2), "no3": num(cells, i3),
+            "sOdds": fnum(cells, iS), "qOdds": fnum(cells, iQ),
+            "xOdds": fnum(cells, iX), "tOdds": fnum(cells, iT),
+        })
+    return out
+
+
 def _parse_result_rows(html):
-    """결과 페이지 HTML → [{area,round,no1,no2,no3,qOdds,tOdds}]. 헤더 라벨로 컬럼 판별."""
+    """결과 페이지 HTML → [{area,round,no1,no2,no3,qOdds,tOdds}]. 헤더 라벨로 컬럼 판별.
+    [일괄등록 유연화] HTML 표가 아니면(탭구분 붙여넣기) _parse_result_tsv 로 자동 폴백."""
+    # [탭구분 텍스트 우선 폴백] HTML 표 태그가 없고 탭/헤더가 있으면 TSV 파서로 처리(엑셀 복사 붙여넣기).
+    if html and not re.search(r"<t[rd]\b|<table\b", html, re.I):
+        tsv = _parse_result_tsv(html)
+        if tsv:
+            return tsv
     p = _TableRowCollector()
     try:
         p.feed(html or "")
