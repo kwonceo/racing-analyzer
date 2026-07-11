@@ -6,7 +6,7 @@
  "date": "2026-07-11",
  "race": "서울 1경주",
  "analyzed_at": "10:39:00",
- "updated_at": "10:39:42",
+ "updated_at": "10:50:06",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -99,7 +99,15 @@
    }
   }
  ],
- "signals_detected": [],
+ "signals_detected": [
+  {
+   "time": "10:39:00",
+   "type": "배당불일치",
+   "detail": "추천 복승(3+4=100.0배)이 배당판 인기 조합(6+7=1.9배)과 다름",
+   "severity": "⚠️",
+   "reason": "유력마가 배당판 최저(인기)와 동떨어짐 = 초반 배당 미수집/전적 편중 의심. 배당판 인기 조합을 추천에 추가함 — 배당 재확인 권장."
+  }
+ ],
  "anomaly_history": [],
  "strong_signals": {
   "signals": [],
@@ -109,195 +117,114 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": true,
-  "level": "강력",
-  "band": "4배 이하 2두+",
-  "horses": [
-   6,
-   7
-  ],
-  "reprs": [
-   {
-    "no": 6,
-    "odds": 1.9
-   },
-   {
-    "no": 7,
-    "odds": 1.9
-   },
-   {
-    "no": 8,
-    "odds": 16.2
-   }
-  ],
-  "combo": [
-   6,
-   7
-  ],
-  "withDrop": false,
-  "withReversal": false,
-  "note": "저배당 압축(축 패턴) → 복승 메인 자신있게"
+  "detected": false
  },
  "third_place_hunt": {
-  "active": true,
-  "axis": [
-   6,
-   7
-  ],
-  "mainCombo": [
-   6,
-   7
-  ],
-  "candidates": [
-   {
-    "no": 8,
-    "odds": 16.2,
-    "priority": 3,
-    "reason": "전적 우수(110)",
-    "conf": "중",
-    "icon": "📊",
-    "inBand": true,
-    "dropPct": null
-   },
-   {
-    "no": 9,
-    "odds": 6.4,
-    "priority": 5,
-    "reason": "이상감지말",
-    "conf": "중",
-    "icon": "🚨",
-    "inBand": false,
-    "dropPct": null
-   }
-  ],
-  "trios": [
-   {
-    "combo": [
-     6,
-     7,
-     8
-    ],
-    "cand": 8,
-    "reason": "전적 우수(110)",
-    "conf": "중",
-    "expOddsEst": null
-   },
-   {
-    "combo": [
-     6,
-     7,
-     9
-    ],
-    "cand": 9,
-    "reason": "이상감지말",
-    "conf": "중",
-    "expOddsEst": null
-   }
-  ]
+  "active": false
  },
  "horses": [
   {
    "no": 2,
-   "name": "세기선물",
-   "jockey": "현진",
-   "record_score": 25,
-   "record_detail": "최근 4",
+   "name": "거승파워",
+   "jockey": "강원돈",
+   "record_score": 36.1,
+   "record_detail": "최근 4-2-6",
    "odds": null,
    "grade": "C",
    "grade_reason": "배당 49.1배 · 감점 없음 = 100점"
   },
   {
    "no": 3,
-   "name": "동명황후",
-   "jockey": "영민",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 17.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 5,
-   "name": "순식간",
-   "jockey": "곽석",
-   "record_score": 15,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 28.5배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 6,
-   "name": "천지장군",
-   "jockey": "다영",
+   "name": "색달최고",
+   "jockey": "나종용",
    "record_score": 85,
    "record_detail": "최근 2",
    "odds": null,
    "grade": "A",
+   "grade_reason": "배당 17.9배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 4,
+   "name": "천년여왕",
+   "jockey": "한성택",
+   "record_score": 85,
+   "record_detail": "최근 2",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 72.5배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 5,
+   "name": "한가누리",
+   "jockey": "김귀리",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 28.5배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 6,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
    "grade_reason": "배당 1.9배 · 감점 없음 = 100점"
   },
   {
    "no": 7,
-   "name": "흑룡챔프",
-   "jockey": "준호",
-   "record_score": 60,
-   "record_detail": "최근 3",
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
    "odds": null,
-   "grade": "A",
+   "grade": "△",
    "grade_reason": "배당 1.9배 · 감점 없음 = 100점"
   },
   {
    "no": 8,
-   "name": "가온파워",
-   "jockey": "홍권",
-   "record_score": 110,
-   "record_detail": "최근 1",
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
    "odds": null,
-   "grade": "A",
+   "grade": "△",
    "grade_reason": "배당 16.2배 · 감점 없음 = 100점"
   },
   {
+   "no": 9,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 6.4배 · 감점 없음 = 100점"
+  },
+  {
    "no": 1,
-   "name": "용달이",
-   "jockey": "민재",
+   "name": "원더풀대",
+   "jockey": "김영구",
    "record_score": 0,
    "record_detail": "",
    "odds": null,
    "grade": "D",
    "grade_reason": "배당 80.4배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 4,
-   "name": "불꽃천하",
-   "jockey": "재광",
-   "record_score": 0,
-   "record_detail": "최근 5",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 72.5배 · 최근평균 5.0착 -30 = 70점"
-  },
-  {
-   "no": 9,
-   "name": "광명용사",
-   "jockey": "동준",
-   "record_score": 0,
-   "record_detail": "최근 6",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 6.4배 · 최근평균 6.0착 -30 = 70점"
   }
  ],
  "elimination": {
   "candidates": [
    2,
    3,
+   4,
    5,
    6,
    7,
    8,
-   1,
-   4,
-   9
+   9,
+   1
   ],
   "eliminated": [],
   "elimination_reasons": {}
@@ -309,24 +236,24 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    6,
-    7
+    3,
+    4
    ],
    "trio": [
-    6,
-    7,
-    8
+    3,
+    4,
+    6
    ]
   },
   "form": {
    "quinella": [
-    6,
-    8
+    3,
+    4
    ],
    "trio": [
-    6,
-    7,
-    8
+    2,
+    3,
+    4
    ]
   },
   "jockey": {
@@ -335,21 +262,21 @@
   },
   "final": {
    "quinella": [
-    6,
-    7
+    3,
+    4
    ],
    "trio": [
-    6,
-    7,
-    8
+    3,
+    4,
+    6
    ]
   }
  },
- "summary": "유력마 6·7·8 / 복승 6+7",
+ "summary": "유력마 3·4·6 / 복승 3+4",
  "keyHorses": [
-  6,
-  7,
-  8
+  3,
+  4,
+  6
  ],
  "result": null,
  "hit": null,
