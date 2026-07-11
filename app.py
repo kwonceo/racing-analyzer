@@ -3954,12 +3954,16 @@ def _horse_repr_odds(h, curWin, curQ):
         return None
 
 
-def _compression_pattern(key_horses, curWin, curQ, strong_signals=None):
+def _compression_pattern(key_horses, curWin, curQ, strong_signals=None, sport=None):
     """[1·2번] 유력마 TOP3 중 저배당 말이 몰린 축 패턴 감지.
       4배 이하 2두+ = 강력 압축(복승 메인 자신있게) / 5배 이하 3두+ = 중간 압축.
     [3번] 급락 신호 결합 → 최강(복승 메인 강력) / 역배열 결합 → 고배당 보험 추가.
-    반환 {detected, level, band, horses[], combo[2], reprs[], withDrop, withReversal, note}."""
+    [개선·경마전용] 경륜/경정/바이크는 저배당 압축 비활성(배당 신호 기반만) + 명확한 축(배당차 30%+)일 때만 추천.
+    반환 {detected, level, band, horses[], combo[2], axis, axisGap, reprs[], withDrop, withReversal, note}."""
     try:
+        # [2번 개선] 경륜/경정/바이크는 저배당 압축 공식 비활성화 → 배당 신호 기반 추천만 사용.
+        if sport in ("cycle", "boat", "bike"):
+            return {"detected": False, "disabled": True, "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"}
         top = [int(h) for h in (key_horses or [])[:3] if h is not None]
         reprs = []
         for h in top:
@@ -3977,17 +3981,30 @@ def _compression_pattern(key_horses, curWin, curQ, strong_signals=None):
         if not level:
             return {"detected": False}
         horses = horses[:3]
-        combo = sorted(horses[:2]) if len(horses) >= 2 else []
+        # [2번 개선·축 판정] 저배당 밀집이어도 '명확한 1순위 축'(최저배당이 2순위보다 30%+ 낮음)일 때만 추천.
+        #   둘 다 저배당인데 배당이 비슷(차이<30%)하면 축 불명확 → 추천 보류(둘 중 누가 이길지 불확실).
+        low = sorted([(h, o) for h, o in reprs if h in horses], key=lambda t: t[1])
+        if len(low) < 2:
+            return {"detected": False}
+        o1, o2 = low[0][1], low[1][1]
+        axis_gap = round((o2 - o1) / o2 * 100, 1) if o2 else 0.0   # 2순위 대비 1순위가 몇 % 낮은가
+        if o1 > o2 * 0.70:                                          # 30% 미만 차이 = 축 불명확
+            return {"detected": False, "noAxis": True, "level": level, "band": band,
+                    "reprs": [{"no": h, "odds": o} for h, o in reprs], "axisGap": axis_gap,
+                    "note": "저배당 2두 배당 비슷(축 불명확·차이 %g%%) → 추천 보류" % axis_gap}
+        axis = low[0][0]                                            # 명확한 1순위 축
+        combo = sorted([low[0][0], low[1][0]])
         types = set((strong_signals or {}).get("types") or [])
         with_drop = bool(types & {1, 3, 4, 5, 6})   # 연속하락/마감급락/재급락/동시급락/이중수렴
         with_rev = bool(types & {2, 6})              # 역배열/이중수렴
         if with_drop:
-            note = "압축 + 급락 동시 → 복승 메인 강력 추천"
+            note = "압축 + 급락 동시 → 복승 메인 강력 추천 (축 %d번·배당차 %g%%)" % (axis, axis_gap)
         elif with_rev:
-            note = "압축 + 역배열 → 복승 메인 + 삼복승 보험"
+            note = "압축 + 역배열 → 복승 메인 + 삼복승 보험 (축 %d번)" % axis
         else:
-            note = "저배당 압축(축 패턴) → 복승 메인 자신있게"
+            note = "저배당 압축(명확한 축 %d번·배당차 %g%%) → 복승 메인 자신있게" % (axis, axis_gap)
         return {"detected": True, "level": level, "band": band, "horses": horses,
+                "axis": axis, "axisGap": axis_gap,
                 "reprs": [{"no": h, "odds": o} for h, o in reprs], "combo": combo,
                 "withDrop": with_drop, "withReversal": with_rev, "note": note}
     except Exception:
@@ -5288,8 +5305,43 @@ def _triple_analyze(rk, rec):
             key_horses = (surge_promote + [h for h in key_horses if h not in surge_promote])[:3]
             ranked = surge_promote + [h for h in ranked if h not in surge_promote]
 
+    # [3번] 유력마 실시간 추가 — 초반 유력마 고정 후, 실시간 급락/역배열 감지 말을 유력마에 '추가'(기존 유지).
+    #   후쿠시마 2R 교훈: 6번(복승 4.9배 시장 최강+6+11 급락 -29.9%)이 전적 0 → 유력마 제외됐다가
+    #   급락 신호가 와도 재편입 안 됐다. → 급락(마감 임박 -25%+·평상 -30%+)·역배열 감지 말을 유력마에 추가.
+    realtime_added = []
+    if not after_close:
+        def _rt_rep(h):
+            if curWin.get(h):
+                return curWin[h]
+            best = None
+            for (a, b), o in curQ.items():
+                if h in (a, b) and o > 0 and (best is None or o < best):
+                    best = o
+            return best
+        _rt_thresh = -25 if (cur_mb is not None and cur_mb <= 3) else -30   # 마감 임박(T-3분내)엔 완화
+        _rt_drop = {}
+        for _d in (drops or []):
+            if (_d.get("pct") or 0) <= _rt_thresh:
+                for _h in (_d.get("combo") or []):
+                    _rt_drop[int(_h)] = min(_rt_drop.get(int(_h), 0), _d.get("pct") or 0)
+        for _h, _pct in sorted(_rt_drop.items(), key=lambda kv: kv[1]):
+            if _h not in key_horses and (_rt_rep(_h) or 999) <= 30:      # 실경쟁마(30배 이하)만·롱샷 제외
+                realtime_added.append({"no": _h, "type": "drop", "pct": round(_pct),
+                                       "reason": "급락 %d%%" % round(_pct)})
+        _il = (inverse or {}).get("invLead")                            # 역배열 실질유력마
+        if _il and _il.get("no") is not None:
+            _iln = int(_il["no"])
+            if _iln not in key_horses and not any(r["no"] == _iln for r in realtime_added):
+                _dp = _il.get("diffPct")
+                realtime_added.append({"no": _iln, "type": "reversal",
+                                       "reason": "역배열" + (" %g%%" % _dp if _dp is not None else "")})
+        for _r in realtime_added[:2]:                                   # 최대 2두 추가(기존 유력마 유지)
+            if _r["no"] not in key_horses:
+                key_horses = key_horses + [_r["no"]]
+
     # [저배당 압축 패턴] 최종 유력마 TOP3 중 저배당 밀집(4배 이하 2두+ 강력 / 5배 이하 3두+ 중간) → 축 패턴
-    compression_pattern = _compression_pattern(key_horses, curWin, curQ, strong_signals)
+    #   [2번 개선] 경마만 적용(경륜/경정/바이크 비활성) + 명확한 축(배당차 30%+)일 때만.
+    compression_pattern = _compression_pattern(key_horses, curWin, curQ, strong_signals, rec.get("sport"))
 
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
@@ -5959,6 +6011,7 @@ def _triple_analyze(rk, rec):
         "drops": drops[:15], "singleDrops": single_drops[:15], "rankChanges": rank_changes, "reversals": reversals,
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
         "validHorses": sorted(valid_nos),   # [잔존마 필터·2번] 현재 배당 등장 마번(프론트 TOP5 필터 기준)
+        "realtimeAdded": realtime_added,   # [3번] 실시간 급락/역배열로 유력마에 추가된 말(오버레이 '⚡ 실시간 추가')
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
         "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용

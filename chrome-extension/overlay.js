@@ -493,7 +493,7 @@
         box.style.background = afterClose ? 'rgba(148,163,184,.14)' : 'rgba(34,197,94,.18)';
         line(afterClose ? '⏱ 마감 후 · 참고만' : '🎯 지금 사세요!', 'font-weight:900;font-size:18px;color:' + goCol);
         if (quinella) line('복승: ' + quinella, 'margin-top:5px;font-weight:800;font-size:15px;color:#e5e7eb');
-        if (trio) line('삼복승: ' + trio, 'margin-top:2px;font-weight:800;font-size:15px;color:#e5e7eb');
+        if (trio) line('삼복승: ' + trio + ' (보험)', 'margin-top:2px;font-weight:800;font-size:15px;color:#e5e7eb');
         if (revAdd) line('역배열 추가: ' + revAdd, 'margin-top:2px;font-weight:700;font-size:13px;color:#f0abfc');
       } else if (state === 'go1') {
         box.style.borderColor = '#4ea1ff';
@@ -574,32 +574,61 @@
           return;
         }
 
-        // [3번] 유력마 3마리 — 배당 없는 잔존마 제외
-        var vset = validSet(d);
-        var inV = function (n) { return !vset || vset.has(Number(n)); };
-        var keys = (d.keyHorses || []).filter(inV);
-        if (keys.length) {
-          var kr = mk('div', 'margin:3px 0');
-          kr.appendChild(mk('span', 'color:#94a3b8', '⭐ 유력마 '));
-          kr.appendChild(mk('span', 'font-weight:700;color:#4ea1ff', keys.slice(0, 3).join(' · ')));
-          panel.appendChild(kr);
+        // [5번] T-30초 마감 임박: 결론 박스(최종 조합)+카운트다운만 표시하고 상세는 생략(집중).
+        var _leftMs = deadline ? (deadline - Date.now()) : 0;
+        if (_leftMs > 0 && _leftMs <= 30000) {
+          panel.appendChild(mk('div', 'margin-top:8px;color:#fca5a5;font-size:11px;font-weight:700', '⚡ 마감 임박 — 최종 조합만 표시'));
+          return;
         }
 
-        // [4번] 핵심 신호 2줄만 — 🔴 급락 top1 · 🔄 역배열 top1 (환수율·인기순위·상세박스 제거로 단순화)
+        // [4번] 유력마 3마리 + 복병 — 배당 없는 잔존마 제외
+        var vset = validSet(d);
+        var inV = function (n) { return !vset || vset.has(Number(n)); };
+        var rtNos = (d.realtimeAdded || []).map(function (r) { return Number(r.no); });
+        var baseKeys = (d.keyHorses || []).filter(inV).filter(function (n) { return rtNos.indexOf(Number(n)) < 0; });
+        if (baseKeys.length) {
+          var kr = mk('div', 'margin:3px 0');
+          kr.appendChild(mk('span', 'color:#94a3b8', '⭐ 유력마 '));
+          kr.appendChild(mk('span', 'font-weight:700;color:#4ea1ff', baseKeys.slice(0, 3).join(' · ')));
+          panel.appendChild(kr);
+        }
+        // 복병 — 역배열 실질유력마(유력마 아닌 말)
+        if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null
+            && baseKeys.indexOf(Number(d.inverse.invLead.no)) < 0 && inV(d.inverse.invLead.no)) {
+          var db = mk('div', 'margin:2px 0');
+          db.appendChild(mk('span', 'color:#94a3b8', '🐎 복병 '));
+          db.appendChild(mk('span', 'font-weight:700;color:#f0abfc', d.inverse.invLead.no + '번 (역배열)'));
+          panel.appendChild(db);
+        }
+
+        // [3번-실시간] ⚡ 실시간 추가 — 초반 유력마 고정 후 급락/역배열 감지로 편입된 말
+        (d.realtimeAdded || []).forEach(function (r) {
+          if (!inV(r.no)) return;
+          var ra = mk('div', 'margin:3px 0;padding:4px 8px;border-left:3px solid #22c55e;background:rgba(34,197,94,.15);border-radius:6px');
+          ra.appendChild(mk('span', 'font-weight:800;color:#4ade80', '⚡ ' + r.no + '번 실시간 추가!'));
+          ra.appendChild(mk('span', 'margin-left:6px;font-size:11px;color:#bbf7d0', (r.reason || '') + ' 감지'));
+          panel.appendChild(ra);
+        });
+
+        // [3번] 핵심 신호 3~4줄 — 🔄 역배열 · 🔴 급락 · 💡 저배당 압축
         var sig = [];
+        if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null) {
+          var L = d.inverse.invLead;
+          sig.push({ t: '🔄 ' + L.no + '번 역배열' + (L.diffPct != null ? ' ' + L.diffPct + '%' : ''), c: '#f0abfc' });
+        }
         var topDrop = (d.drops || []).filter(function (x) { return x && x.pct <= -30 && x.combo; })
           .sort(function (a, b) { return a.pct - b.pct; })[0];
         if (topDrop) {
           var dh = (d.anomalyHorse != null) ? (d.anomalyHorse + '번') : topDrop.combo.join('+');
           sig.push({ t: '🔴 ' + dh + ' 급락 -' + Math.abs(Math.round(topDrop.pct)) + '%', c: '#f87171' });
         }
-        if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null) {
-          var L = d.inverse.invLead;
-          sig.push({ t: '🔄 ' + L.no + '번 역배열' + (L.diffPct != null ? ' ' + L.diffPct + '%' : ''), c: '#f0abfc' });
+        var cp = d.compressionPattern;
+        if (cp && cp.detected && cp.combo && cp.combo.length === 2) {
+          sig.push({ t: '💡 저배당 압축: ' + cp.combo.join('+') + (cp.axis != null ? ' (축 ' + cp.axis + '번)' : ''), c: '#38d39f' });
         }
         if (sig.length) {
           panel.appendChild(mk('div', 'margin:6px 0 2px;color:#94a3b8;font-size:11px', '핵심 신호'));
-          sig.slice(0, 2).forEach(function (s) {
+          sig.slice(0, 4).forEach(function (s) {
             var row = mk('div', 'margin:1px 0;font-weight:800;font-size:13px;color:' + s.c);
             row.textContent = s.t;
             panel.appendChild(row);
