@@ -4084,14 +4084,72 @@
       : a.recommendForced
         ? `<div style="margin:4px 0;padding:5px 9px;border-left:3px solid #fbbf24;background:rgba(245,158,11,.14);border-radius:6px;color:#fcd34d;font-weight:800">⚡ T-2분 · 강제 추천 — 신호 약해도 저배당(시장 유력) 기준 편성</div>`
         : '';
-    return `<div class="matrix-title" style="font-size:13px">🎯 메인 추천 <span class="hint" style="font-weight:400">(신호 기반)</span>${a.recommendLocked ? ' <span style="color:#ef4444">🔒 확정</span>' : ''}${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
-      ${phaseBanner}
-      ${legend}
-      <table class="data-table" style="margin-top:4px">
+    // [핵심만 임팩트] 복승 최대 3 + 삼복승 최대 2 = 총 5개를 큰 카드로. 나머지는 접기(무삭제).
+    const impactCard = _renderImpactCard(recs, roleMap);
+    const shownKeys = _impactShownKeys(recs);
+    const extraN = recs.length - shownKeys.size;
+    const fullTable = `<table class="data-table" style="margin-top:4px">
         <thead><tr><th>종류</th><th>조합</th><th>신호품질</th><th>예상배당</th><th>배분</th><th>금액</th></tr></thead>
         <tbody>${rows}</tbody>
         ${totalAmt != null ? `<tfoot><tr><td colspan="4"></td><td><b>${totalAlloc}%</b></td><td><b>${totalAmt.toLocaleString('ko-KR')}원</b></td></tr></tfoot>` : ''}
       </table>`;
+    // 접기: 전체 조합·배분·금액 상세(추가 참고 조합 N개). 5개 이하여도 배분/금액 상세는 접어서 보존.
+    const detailsSummary = extraN > 0 ? `＋ 추가 참고 조합 ${extraN}개 · 배분/금액 상세 보기` : '＋ 배분·금액 상세 보기';
+    const collapse = `<details style="margin-top:6px"><summary style="cursor:pointer;color:#94a3b8;font-size:12px">${detailsSummary}</summary>${legend}${fullTable}</details>`;
+    return `<div class="matrix-title" style="font-size:13px">🎯 메인 추천 <span class="hint" style="font-weight:400">(신호 기반)</span>${a.recommendLocked ? ' <span style="color:#ef4444">🔒 확정</span>' : ''}${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
+      ${phaseBanner}
+      ${impactCard}
+      ${collapse}`;
+  }
+
+  // [핵심만 임팩트] 별점: ★★★ 신호 강함(상) · ★★ 중간 · ★ 참고용. signalQuality 우선, 없으면 라벨/배분 폴백.
+  function _betStars(r) {
+    const q = r.signalQuality;
+    if (q === '상') return '★★★';
+    if (q === '중') return '★★';
+    if (q === '하') return '★';
+    if (/메인/.test(r.label || '') || (r.alloc || 0) >= 30) return '★★★';
+    if (/보조|받치기|승격/.test(r.label || '') || (r.alloc || 0) >= 12) return '★★';
+    return '★';
+  }
+  function _betOddsTxt(r) {
+    if (r.expOdds != null) return r.expOdds + '배';
+    if (r.expOddsEst != null) return '추정 ' + r.expOddsEst + '배';
+    return '미수집';
+  }
+  // 임팩트 카드에 표시할 조합 선택: 복승 최대 3(배분 높은 순) + 삼복승 최대 2.
+  function _impactPick(recs) {
+    const boks = recs.filter((r) => r.kind === '복승').slice().sort((a, b) => (b.alloc || 0) - (a.alloc || 0)).slice(0, 3);
+    const sams = recs.filter((r) => r.kind === '삼복승').slice().sort((a, b) => (b.alloc || 0) - (a.alloc || 0)).slice(0, 2);
+    return { boks, sams };
+  }
+  function _impactShownKeys(recs) {
+    const { boks, sams } = _impactPick(recs);
+    const keys = new Set();
+    [...boks, ...sams].forEach((r) => keys.add(r.kind + ':' + (r.combo || []).join('+')));
+    return keys;
+  }
+  function _renderImpactCard(recs, roleMap) {
+    const { boks, sams } = _impactPick(recs);
+    if (!boks.length && !sams.length) return '';
+    const row = (r, isSam) => {
+      const stars = _betStars(r);
+      const starHtml = `<span style="color:#ffd24f;letter-spacing:1px;font-size:14px">${stars}</span><span style="color:#3a3f4b;font-size:14px">${'★'.repeat(3 - stars.length)}</span>`;
+      const tag = isSam ? `<span class="hint" style="color:#a855f7;font-weight:700;font-size:11px">${/보험/.test(r.label || '') ? '보험' : '메인'}</span>` : starHtml;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.05)">
+        <b style="min-width:52px;color:${isSam ? '#38d39f' : '#4ea1ff'}">${isSam ? '삼복승' : '복승'}</b>
+        <b style="min-width:78px;font-size:15px">${_colorCombo(r.combo, roleMap)}</b>
+        <b style="min-width:64px;color:#e2e8f0">${esc(_betOddsTxt(r))}</b>
+        <span style="margin-left:auto">${tag}</span>
+      </div>`;
+    };
+    return `<div style="margin:6px 0;padding:10px 12px;border:2px solid #38d39f;border-radius:10px;background:linear-gradient(180deg,rgba(56,211,159,.10),rgba(20,28,43,.85))">
+      <div style="font-size:17px;font-weight:800;color:#38d39f;margin-bottom:4px">🎯 지금 사세요!</div>
+      ${boks.map((r) => row(r, false)).join('')}
+      ${sams.length ? `<div style="height:4px"></div>` : ''}
+      ${sams.map((r) => row(r, true)).join('')}
+      <div class="hint" style="font-size:10px;margin-top:5px">★★★ 신호 강함 · ★★ 중간 · ★ 참고용 · 삼복승은 보험/메인</div>
+    </div>`;
   }
 
   // [1번] 예산 입력칸에 재계산 리스너를 1회만 연결(중복 방지). 값 입력 시 통합패널 재렌더 → 금액 갱신.
