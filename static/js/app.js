@@ -64,6 +64,8 @@
         if (btn.dataset.tab === 'stats') renderStats();
         if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
+        if (btn.dataset.tab === 'multi') startMultiRaceWatch();   // [다중 경주] 전체 경주 대시보드 시작
+        else stopMultiRaceWatch();                                // 다른 탭 이동 시 폴링 중단(자원 절약)
         if (btn.dataset.tab === 'jp') { startJapanOddsWatch(); loadJapanReviewList(); }   // [5번] 일본경마: 실시간 배당 연동 + 분석 내역 복기 목록
         // [탭분리] 경정/경륜/바이크/중앙경마 탭 → 라이브 배당 폴링 시작 + 마지막 분석 즉시 반영
         if (['boat', 'cycle', 'bike', 'central'].includes(btn.dataset.tab)) {
@@ -1533,6 +1535,86 @@
     const tab = activeBtn ? activeBtn.dataset.tab : '';
     if (tab === 'jp') { try { pollJapanOdds(); } catch (_) { /* */ } return; }
     try { autoSelectKoreaRace(rk); } catch (_) { /* */ }
+  }
+
+  // ═══ [다중 경주 동시 배당판] 별도 추가 기능(기존 단일 경주 분석 무영향) ═══
+  let _multiTimer = null, _multiAlerted = {};
+  function initMultiRace() {
+    const rb = $('#multiRefreshBtn'); if (rb) rb.addEventListener('click', renderMultiDashboard);
+    const sb = $('#multiScheduleBtn'); if (sb) sb.addEventListener('click', async () => {
+      const st = $('#multiStatus'); if (st) st.textContent = '📅 오늘 스케줄 수집 중…';
+      try { await fetch('/api/multi/schedule', { method: 'POST' }); } catch (_) { /* */ }
+      renderMultiDashboard();
+    });
+    const cb = $('#multiDetailClose'); if (cb) cb.addEventListener('click', () => { const c = $('#multiDetailCard'); if (c) c.style.display = 'none'; });
+  }
+  function startMultiRaceWatch() {
+    renderMultiDashboard();
+    if (_multiTimer) clearInterval(_multiTimer);
+    _multiTimer = setInterval(renderMultiDashboard, 30000);   // 30초 폴링
+  }
+  function stopMultiRaceWatch() { if (_multiTimer) { clearInterval(_multiTimer); _multiTimer = null; } }
+
+  async function renderMultiDashboard() {
+    const box = $('#multiCards'), status = $('#multiStatus'); if (!box) return;
+    let d;
+    try { d = await (await fetch('/api/multi/dashboard')).json(); }
+    catch (_) { if (status) status.textContent = '대시보드 로드 실패'; return; }
+    const cards = (d && d.cards) || [];
+    if (status) status.textContent = `수집된 경주 ${cards.length}개 · 30초 자동 갱신${cards.length ? '' : ' (발주 10분전부터 자동 수집됩니다 · 스케줄 갱신을 눌러보세요)'}`;
+    // [5번] T-3분 마감 임박 알림(소리+배너, 경주당 1회)
+    const urgent = (d && d.urgent) || [];
+    const banner = $('#multiUrgentBanner');
+    const fresh = urgent.filter((k) => !_multiAlerted[k]);
+    if (fresh.length && banner) {
+      fresh.forEach((k) => { _multiAlerted[k] = 1; });
+      banner.style.display = 'block';
+      banner.innerHTML = fresh.map((k) => `<div style="padding:8px 12px;background:#7f1d1d;border:2px solid #ef4444;border-radius:8px;color:#fecaca;font-weight:800;font-size:15px;margin:2px 0">⚡ ${esc(k)} 마감 3분전!</div>`).join('');
+      try { playAlert('🔴'); } catch (_) { /* */ }
+      setTimeout(() => { if (banner) banner.style.display = 'none'; }, 30000);
+    } else if (!urgent.length && banner) { banner.style.display = 'none'; }
+    box.innerHTML = cards.map(_multiCardHtml).join('') || '<p class="hint">아직 수집된 경주가 없습니다. 발주 10분전부터 자동으로 채워집니다.</p>';
+    box.querySelectorAll('[data-mkey]').forEach((el) => el.addEventListener('click', () => openMultiDetail(el.dataset.mkey)));
+  }
+  function _multiFmtLeft(s) {
+    if (s == null) return '—';
+    if (s < 0) return '마감';
+    const m = Math.floor(s / 60), ss = s % 60;
+    return m > 0 ? `${m}분 ${ss}초` : `${ss}초`;
+  }
+  function _multiCardHtml(c) {
+    const col = c.urgency === 'urgent' ? '#ef4444' : (c.urgency === 'warn' ? '#f59e0b' : '#334155');
+    const bg = c.urgency === 'urgent' ? 'rgba(239,68,68,.10)' : (c.urgency === 'warn' ? 'rgba(245,158,11,.08)' : 'rgba(255,255,255,.03)');
+    const leftTxt = c.afterClose ? '마감' : _multiFmtLeft(c.secondsLeft);
+    const sigs = (c.signals || []).map((s) => `<div style="font-size:12px;font-weight:700;margin:1px 0">${esc(s.text)}</div>`).join('') || '<div class="hint" style="font-size:11px">신호 없음</div>';
+    const keyH = (c.keyHorses || []).join(' · ') || '-';
+    return `<div data-mkey="${esc(c.raceKey)}" title="클릭 → 상세 분석" style="cursor:pointer;border:2px solid ${col};border-radius:10px;padding:10px;background:${bg}">
+      <div style="display:flex;align-items:center;gap:6px">
+        <b style="font-size:15px;color:#e2e8f0">${esc(c.venue || '')} ${c.raceNo}R</b>
+        <span style="flex:1"></span>
+        <b style="color:${col};font-size:13px">${c.urgency === 'urgent' ? '⚡ ' : ''}${leftTxt}</b>
+      </div>
+      <div class="hint" style="font-size:11px;margin:2px 0">발주 ${esc(c.postTime || '?')}${c.confidence != null ? ' · 확신도 ' + esc(String(c.confidence)) : ''}</div>
+      <div style="margin:4px 0"><span class="hint" style="font-size:11px">⭐ 유력마 </span><b style="color:#4ea1ff">${esc(keyH)}</b></div>
+      ${sigs}
+    </div>`;
+  }
+  async function openMultiDetail(key) {
+    const card = $('#multiDetailCard'), title = $('#multiDetailTitle'), bodyEl = $('#multiDetailBody');
+    if (!card) return;
+    card.style.display = 'block';
+    if (title) title.textContent = `${key} 상세 분석`;
+    if (bodyEl) bodyEl.innerHTML = '<p class="hint">⏳ 분석 로드 중…</p>';
+    try { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) { /* */ }
+    let a;
+    try { a = await (await fetch('/api/multi/race/' + encodeURIComponent(key))).json(); }
+    catch (_) { if (bodyEl) bodyEl.innerHTML = '<p class="err">분석 로드 실패</p>'; return; }
+    if (!a || a.error || a.waiting) { if (bodyEl) bodyEl.innerHTML = `<p class="hint">${esc((a && (a.error || (a.waiting && '배당 수집 대기 중'))) || '데이터 없음')}</p>`; return; }
+    // [4번] 기존 분석 렌더 재사용(복승 매트릭스·핵심 신호·추천 조합) + 결과 입력 버튼
+    let html = '';
+    try { html = sportAnalysisHTML(a); } catch (_) { html = '<p class="hint">렌더 오류</p>'; }
+    html += `<div style="margin-top:10px"><button class="btn btn-primary" onclick="document.querySelector('.tab-btn[data-tab=&quot;result&quot;]').click()">📝 결과 입력하러 가기</button></div>`;
+    if (bodyEl) bodyEl.innerHTML = html;
   }
 
   /** raceKey(예 "2026-07-04 제주 3R" / "제주 3경주")에서 회장·경주번호를 뽑아 한국 칩 자동 선택 */
@@ -7960,6 +8042,7 @@
     initResultAutoWatch(); // [스펙2·3] 결과 자동수집 실패 배너 + 성공 시 결과탭 자동갱신
     initClosingWatch();    // [보완] 이상감지 누적 피드 + 마감 전 단계 알림
     initRaceRefresh();     // [경주 자동 업데이트] 상단 새로고침 바 + 30초 자동 감지
+    initMultiRace();       // [다중 경주 동시 배당판] 전체 경주 탭 버튼 바인딩
     initPopout();          // [별도 창] 분석기 팝업 창 열기 + 위치 기억
     initAnalysisLog();     // [분석 로그] 완전 기록 섹션
     initJapanReview();     // [일본경마 복기] 분석 내역 목록 + 결과 입력 + 자동 판정 리포트

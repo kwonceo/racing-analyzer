@@ -14682,6 +14682,285 @@ def on_error(e):
     return jsonify({"error": str(e)}), 500
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# [다중 경주 동시 배당판] — 별도 추가 기능(기존 단일 경주 분석 완전 유지·무영향)
+#   ⚠ 핵심 원칙: triple_store.json 절대 미접근. multi_race_store.json / today_schedule.json 전용 저장소.
+#   실패 격리(6번): fetch 실패 경주만 건너뜀 · 스케줄 실패 시 단일 모드 유지 · 저장소 손상 시 자동 초기화.
+# ═══════════════════════════════════════════════════════════════════════════
+MULTI_STORE_FILE = os.path.join(os.path.dirname(__file__), "data", "multi_race_store.json")
+SCHEDULE_FILE = os.path.join(os.path.dirname(__file__), "data", "today_schedule.json")
+_multi_lock = threading.Lock()
+MULTI_COLLECT_LEAD_SEC = 600      # [2번] 발주 10분전부터 수집 시작
+MULTI_URGENT_SEC = 180            # [3·5번] T-3분 이내 = 긴급(빨강)
+MULTI_WARN_SEC = 600             # [3번] T-10분 이내 = 주의(주황)
+
+
+def _multi_store_load():
+    """multi_race_store.json 로드. 손상 시 자동 초기화(6번·기존 기능 영향 없음)."""
+    try:
+        with open(MULTI_STORE_FILE, encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        print("[다중경주] 저장소 손상 → 자동 초기화:", e)
+        try:
+            os.remove(MULTI_STORE_FILE)
+        except OSError:
+            pass
+        return {}
+
+
+def _multi_store_save(db):
+    """원자적 쓰기(tmp→replace)로 저장소 손상 방지."""
+    try:
+        os.makedirs(os.path.dirname(MULTI_STORE_FILE), exist_ok=True)
+        tmp = MULTI_STORE_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(db, f, ensure_ascii=False)
+        os.replace(tmp, MULTI_STORE_FILE)
+    except Exception as e:
+        print("[다중경주] 저장 실패:", e)
+
+
+def _schedule_load():
+    try:
+        with open(SCHEDULE_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _schedule_save(sched):
+    try:
+        os.makedirs(os.path.dirname(SCHEDULE_FILE), exist_ok=True)
+        tmp = SCHEDULE_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(sched, f, ensure_ascii=False)
+        os.replace(tmp, SCHEDULE_FILE)
+    except Exception as e:
+        print("[스케줄] 저장 실패:", e)
+
+
+def _post_time_epoch(hhmm, ymd):
+    """'HH:MM' + ymd(YYYYMMDD) → 발주 epoch(서버 로컬). 실패 시 None."""
+    try:
+        m = re.match(r"(\d{1,2}):(\d{2})", (hhmm or "").strip())
+        if not m or len(ymd or "") != 8:
+            return None
+        st = time.struct_time((int(ymd[:4]), int(ymd[4:6]), int(ymd[6:8]),
+                               int(m.group(1)), int(m.group(2)), 0, 0, 0, -1))
+        return time.mktime(st)
+    except (ValueError, TypeError):
+        return None
+
+
+def _multi_race_list(op, sp, ymd):
+    """[1번] oddspark RaceList.do(경마장 전체) → [{raceNo, postTime, postEpoch}]. 발주시각 파싱(방어적)."""
+    url = ("https://www.oddspark.com/keiba/RaceList.do?raceDy=%s&opTrackCd=%s&sponsorCd=%s" % (ymd, op, sp))
+    html = _keirin_fetch(url)
+    races = {}
+    # 경주별 링크(raceNb=N)와 그 부근 発走 HH:MM 을 함께 수집(행 단위 근사).
+    for seg in re.split(r"</tr>|</li>|<tr[ >]|<li[ >]", html):
+        mn = re.search(r"raceNb=(\d{1,2})", seg)
+        if not mn:
+            continue
+        rno = int(mn.group(1))
+        if rno < 1 or rno > 12 or rno in races:
+            continue
+        mt = re.search(r"(?:発走|発走時刻|締切)[^\d]{0,6}(\d{1,2}:\d{2})", seg) or re.search(r"\b(\d{1,2}:\d{2})\b", seg)
+        pt = mt.group(1) if mt else None
+        races[rno] = {"raceNo": rno, "postTime": pt, "postEpoch": _post_time_epoch(pt, ymd)}
+    return [races[k] for k in sorted(races)]
+
+
+def _multi_schedule_fetch():
+    """[1번] 오늘 개최 경주 스케줄(경마장+경주번호+발주시각) → today_schedule.json. 실패해도 예외 전파 안 함."""
+    ymd = time.strftime("%Y%m%d")
+    sched = {"ymd": ymd, "updated": time.time(), "tracks": []}
+    try:
+        tracks = _keiba_schedule(ymd)         # {한자경마장명: (opTrackCd, sponsorCd)}
+    except Exception as e:
+        print("[스케줄] 개최 목록 실패(단일 모드 유지):", e)
+        tracks = {}
+    for kanji, codes in (tracks or {}).items():
+        try:
+            op, sp = codes
+            races = _multi_race_list(op, sp, ymd)
+            sched["tracks"].append({"venue": _track_norm(kanji), "kanji": kanji,
+                                    "opTrackCd": op, "sponsorCd": sp, "races": races})
+        except Exception as e:
+            print("[스케줄]", kanji, "경주목록 실패(건너뜀):", e)
+            continue
+    _schedule_save(sched)
+    print("[다중경주 스케줄] %s: 경마장 %d곳 · 경주 %d개"
+          % (ymd, len(sched["tracks"]), sum(len(t["races"]) for t in sched["tracks"])))
+    return sched
+
+
+def _multi_key(venue, race_no):
+    return "%s %d경주" % (venue, int(race_no))
+
+
+def _multi_collect_one(track, race, ymd):
+    """[2번] 한 경주 배당 수집 → multi_race_store 저장(실패 격리·triple_store 미접근). 반환 raceKey 또는 None."""
+    try:
+        op, sp = track["opTrackCd"], track["sponsorCd"]
+        rno = race["raceNo"]
+        q = _keiba_parse_quinella(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["quinella"])))
+        x = _keiba_parse_exacta(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["exacta"])))
+        if not _keiba_odds_live(q, x):
+            return None                        # 발매 전·마감 후(가짜값) → 저장 안 함
+        key = _multi_key(track["venue"], rno)
+        with _multi_lock:
+            db = _multi_store_load()
+            prev = db.get(key) or {}
+            hist = list(prev.get("history") or [])
+            hist.append({"t": time.time(), "quinella": q, "exacta": x, "trio": [], "win": {}})
+            hist = hist[-12:]
+            db[key] = {"quinella": q, "exacta": x, "trio": [], "win": {}, "history": hist,
+                       "sport": "horse", "category": "japan_local",
+                       "venue": track["venue"], "raceNo": rno,
+                       "postTime": race.get("postTime"), "postEpoch": race.get("postEpoch"),
+                       "t": time.time()}
+            _multi_store_save(db)
+        return key
+    except Exception as e:
+        print("[다중경주] 수집 실패 %s %s: %s" % (track.get("venue"), race.get("raceNo"), e))
+        return None
+
+
+def _multi_card(key, rec):
+    """[3번] 카드 요약: analyze(기존 _triple_analyze 재사용·읽기전용) → 유력마TOP3·핵심신호·확신도·마감남은초·색상."""
+    try:
+        an = _triple_analyze(key, rec)
+    except Exception as e:
+        print("[다중경주] 분석 실패", key, e)
+        return None
+    now = time.time()
+    pe = rec.get("postEpoch")
+    left = int(pe - now) if pe else None
+    urgency = "normal"
+    if left is not None:
+        if left <= MULTI_URGENT_SEC:
+            urgency = "urgent"                 # T-3분 이내 빨강
+        elif left <= MULTI_WARN_SEC:
+            urgency = "warn"                   # T-10분 이내 주황
+    # 핵심 신호(급락/역배열/스마트머니) 요약
+    signals = []
+    drops = [d for d in (an.get("drops") or []) if (d.get("pct") or 0) <= -30]
+    if drops:
+        d0 = min(drops, key=lambda d: d.get("pct") or 0)
+        signals.append({"type": "급락", "text": "🔴 %s 급락 %d%%" % ("+".join(str(x) for x in d0.get("combo") or []), round(d0.get("pct") or 0))})
+    inv = an.get("inverse") or {}
+    if inv.get("detected") and (inv.get("invLead") or {}).get("no") is not None:
+        signals.append({"type": "역배열", "text": "🔄 %s번 역배열" % inv["invLead"]["no"]})
+    smart = [h for h in (an.get("darkHorses") or []) if h.get("smartMoney")]
+    if smart:
+        signals.append({"type": "스마트머니", "text": "💰 %s번 스마트머니" % smart[0].get("no")})
+    conf = an.get("confidence") or {}
+    return {
+        "raceKey": key, "venue": rec.get("venue"), "raceNo": rec.get("raceNo"),
+        "postTime": rec.get("postTime"), "secondsLeft": left, "urgency": urgency,
+        "keyHorses": (an.get("keyHorses") or [])[:3],
+        "signals": signals[:3],
+        "confidence": conf.get("overall") or conf.get("level"),
+        "quinellaMain": next((b.get("combo") for b in (an.get("betRecommend") or []) if b.get("label") == "복승 메인"), None),
+        "afterClose": bool(an.get("afterClose")),
+        "updatedSecondsAgo": int(now - (rec.get("t") or now)),
+    }
+
+
+@app.route("/api/multi/schedule", methods=["GET", "POST"])
+def multi_schedule():
+    """[1번] 오늘 개최 스케줄 조회(GET) / 강제 재수집(POST)."""
+    if request.method == "POST":
+        return jsonify(_multi_schedule_fetch())
+    sched = _schedule_load()
+    if not sched:                              # 없으면 1회 시도(비어도 단일 모드 안전)
+        sched = _multi_schedule_fetch()
+    return jsonify(sched)
+
+
+@app.route("/api/multi/collect", methods=["POST"])
+def multi_collect_now():
+    """[2번] 지금 발주 임박(T-10분 이내) 경주 배당 즉시 수집(수동 트리거). 실패 격리."""
+    sched = _schedule_load() or _multi_schedule_fetch()
+    ymd = sched.get("ymd") or time.strftime("%Y%m%d")
+    now = time.time()
+    collected, skipped = [], 0
+    for tr in sched.get("tracks", []):
+        for rc in tr.get("races", []):
+            pe = rc.get("postEpoch")
+            if pe and (pe - now) <= MULTI_COLLECT_LEAD_SEC and (pe - now) > -300:   # 발주 10분전~5분후
+                k = _multi_collect_one(tr, rc, ymd)
+                if k:
+                    collected.append(k)
+                else:
+                    skipped += 1
+    return jsonify({"ok": True, "collected": collected, "skipped": skipped})
+
+
+@app.route("/api/multi/dashboard", methods=["GET"])
+def multi_dashboard():
+    """[3번] 다중 경주 대시보드 카드 목록 — 마감 임박 순 정렬."""
+    db = _multi_store_load()
+    cards = []
+    for key, rec in db.items():
+        c = _multi_card(key, rec)
+        if c:
+            cards.append(c)
+    # 마감 임박(secondsLeft 오름차순, None은 뒤로) 정렬
+    cards.sort(key=lambda c: (c.get("secondsLeft") if c.get("secondsLeft") is not None else 9e9))
+    urgent = [c["raceKey"] for c in cards if c.get("urgency") == "urgent" and not c.get("afterClose")]
+    return jsonify({"cards": cards, "urgent": urgent, "count": len(cards)})
+
+
+@app.route("/api/multi/race/<path:key>", methods=["GET"])
+def multi_race_detail(key):
+    """[4번] 카드 클릭 → 해당 경주 전체 분석(기존 _triple_analyze 재사용). 결과입력은 기존 엔드포인트 사용."""
+    db = _multi_store_load()
+    rec = db.get(key)
+    if not rec:
+        return jsonify({"error": "해당 경주 배당이 아직 수집되지 않았습니다.", "waiting": True}), 200
+    try:
+        an = _triple_analyze(key, rec)
+    except Exception as e:
+        return jsonify({"error": "분석 실패: %s" % e}), 200
+    return jsonify(an)
+
+
+def _multi_bg_loop():
+    """[1·2번] 백그라운드: 스케줄 30분 갱신 + 발주 임박 경주 배당 주기 수집(실패 격리·서버 죽지 않음)."""
+    last_sched = 0
+    while True:
+        try:
+            now = time.time()
+            if now - last_sched >= 1800:       # 30분마다 스케줄 갱신
+                _multi_schedule_fetch()
+                last_sched = now
+            sched = _schedule_load()
+            ymd = sched.get("ymd") or time.strftime("%Y%m%d")
+            for tr in sched.get("tracks", []):
+                for rc in tr.get("races", []):
+                    pe = rc.get("postEpoch")
+                    if pe and -120 <= (pe - now) <= MULTI_COLLECT_LEAD_SEC:   # 발주 10분전~2분후
+                        _multi_collect_one(tr, rc, ymd)
+        except Exception as e:
+            print("[다중경주] 백그라운드 오류(무시·서버 유지):", e)
+        time.sleep(30)
+
+
+def _start_multi_race_bg():
+    """[6번] 다중 경주 백그라운드 시작(실패해도 서버·단일 모드 무영향)."""
+    try:
+        threading.Thread(target=_multi_bg_loop, daemon=True).start()
+        print("[다중경주] 백그라운드 시작(스케줄 30분·수집 30초·실패격리)")
+    except Exception as e:
+        print("[다중경주] 백그라운드 시작 실패(단일 모드 유지):", e)
+
+
 if __name__ == "__main__":
     print("서버 시작: http://127.0.0.1:8011 (자동 리로드 ON, 코드 수정이 바로 반영됩니다)")
     # debug=True: 코드 저장 시 자동 재기동(stale 서버로 인한 405 재발 방지). 로컬 전용(127.0.0.1).
@@ -14691,4 +14970,5 @@ if __name__ == "__main__":
         _korea_maybe_resume()
         _start_periodic_backup()   # [데이터 자동백업 완성] 6시간 주기 안전 백업(결과 미입력이어도 백업)
         _start_daily_learning_scheduler()   # [학습일지] 매일 22:00 학습 일지 자동 생성·백업
+        _start_multi_race_bg()     # [다중 경주 동시 배당판] 별도 저장소·실패격리·단일모드 무영향
     app.run(host="127.0.0.1", port=8011, debug=True, threaded=True)
