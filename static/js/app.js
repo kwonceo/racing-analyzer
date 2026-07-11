@@ -5602,6 +5602,7 @@
       ${renderKoreaSignals(a.signals)}
       ${renderPatternMatch(a.patternMatch)}
       ${renderBetRecommend(a, '#koreaBudget')}
+      ${renderDutchCalc(a)}
       ${renderRecommendBasis(a.recommendBasis)}
     </div>`;
     _attachElimHandlers('koreaElimPanel', a.elimination);   // [1번] 제거↔후보 클릭 전환 복원
@@ -5736,6 +5737,118 @@
     return `<div style="margin:4px 0"><span class="hint" style="font-size:11px">📊 이 경주 활성 신호 과거 성적: </span>${rows}</div>`;
   }
 
+  // ═══ [네덜란드식(더칭) 계산기] 별도 패널·참고용 — 기존 추천은 손대지 않음(무삭제) ═══
+  //  🟢 메인(더칭: 어느 게 맞아도 동일 수익) + 🟡 보험(적중 시 예산 본전 보전). 배당 변경 시 자동 재계산(30초).
+  let _dutchState = {};   // rk -> {sel:{comboKey:'main'|'ins'}, budget, inited}
+  let _dutchLastA = null;
+  function _dutchDefaultBudget() {
+    for (const sel of ['#jpBudget', '#tripleBudget', '#koreaBudget']) {
+      const el = document.querySelector(sel);
+      const v = el && parseInt(el.value || '0', 10);
+      if (v > 0) return v;
+    }
+    return 10000;
+  }
+  function _dutchCombos(a) {
+    const out = [];
+    (a.betRecommend || []).forEach((b) => {
+      const combo = (b.combo || []).map(Number).filter((x) => !isNaN(x));
+      if (!combo.length) return;
+      const key = b.kind + ':' + combo.slice().sort((x, y) => x - y).join('+');
+      if (out.some((o) => o.key === key)) return;
+      out.push({ key, kind: b.kind, combo, odds: (b.expOdds && b.expOdds > 0) ? b.expOdds : null, label: b.label || '' });
+    });
+    return out;
+  }
+  function renderDutchCalc(a) {
+    _dutchLastA = a;
+    const rk = a.raceKey || '';
+    const combos = _dutchCombos(a);
+    if (!combos.length) return '';
+    _ensureDutchDelegation();
+    let st = _dutchState[rk];
+    if (!st) st = _dutchState[rk] = { sel: {}, budget: _dutchDefaultBudget(), inited: false };
+    if (!st.inited) {   // [4번] 자동 연동: 복승 메인/보조 → 🟢 메인 · 삼복승/보험 → 🟡 보험
+      combos.forEach((c) => { st.sel[c.key] = (c.kind === '복승') ? 'main' : 'ins'; });
+      st.inited = true;
+    }
+    return `<div id="dutchCalcPanel">${_dutchHtml(rk, combos, st)}</div>`;
+  }
+  function _dutchHtml(rk, combos, st) {
+    const budget = Math.max(0, st.budget || 0);
+    const won = (n) => Math.round(n / 100) * 100;
+    const mains = combos.filter((c) => st.sel[c.key] === 'main' && c.odds > 0);
+    const inss = combos.filter((c) => st.sel[c.key] === 'ins' && c.odds > 0);
+    const insList = inss.map((c) => ({ ...c, stake: won(budget / c.odds) }));
+    const insTotal = insList.reduce((s, c) => s + c.stake, 0);
+    const warning = inss.length > 0 && insTotal >= budget;
+    const mainBudget = Math.max(0, budget - insTotal);
+    const sumInv = mains.reduce((s, c) => s + 1 / c.odds, 0);
+    const mainPayout = (mainBudget && sumInv) ? Math.round(mainBudget / sumInv) : 0;
+    const mainList = mains.map((c) => ({ ...c, stake: sumInv ? won(mainBudget * (1 / c.odds) / sumInv) : 0, payout: mainPayout }));
+    const stakedTotal = insTotal + mainList.reduce((s, c) => s + c.stake, 0);
+    const stateBtn = (c) => {
+      const s = st.sel[c.key];
+      const bg = s === 'main' ? '#16a34a' : s === 'ins' ? '#ca8a04' : 'transparent';
+      const mark = s === 'main' ? '🟢 메인' : s === 'ins' ? '🟡 보험' : '⬜ 해제';
+      return `<button class="dutch-toggle" data-dutch-key="${esc(c.key)}" style="cursor:pointer;border:1px solid #475569;background:${bg};color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700">${mark}</button>`;
+    };
+    const comboRows = combos.map((c) => {
+      const oddsTxt = c.odds ? `${c.odds}배` : '배당-';
+      const st2 = st.sel[c.key];
+      let calc = '';
+      if (st2 === 'main') { const m = mainList.find((x) => x.key === c.key); if (m) calc = `<b style="color:#4ade80">${m.stake.toLocaleString()}원</b> <span class="hint">→ 적중 시 ${m.payout.toLocaleString()}원</span>`; }
+      else if (st2 === 'ins') { const m = insList.find((x) => x.key === c.key); if (m) calc = `<b style="color:#fbbf24">${m.stake.toLocaleString()}원</b> <span class="hint">→ 본전 보전 ${budget.toLocaleString()}원</span>`; }
+      return `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.05)">
+        ${stateBtn(c)}
+        <b style="color:#e2e8f0">${esc(c.kind)} ${c.combo.join('+')}</b>
+        <span class="hint">${oddsTxt}</span>
+        <span style="margin-left:auto;font-size:12px">${calc}</span>
+      </div>`;
+    }).join('');
+    const warnHtml = warning
+      ? `<div style="margin:6px 0;padding:6px 10px;border:2px solid #ef4444;border-radius:6px;background:rgba(239,68,68,.12);color:#fca5a5;font-weight:700">⚠️ 보험금 합(${insTotal.toLocaleString()}원) ≥ 예산 — 배당 낮아 본전 불가</div>`
+      : '';
+    return `<div style="margin:8px 0;padding:10px;border:2px solid #a855f7;border-radius:10px;background:linear-gradient(180deg,rgba(168,85,247,.08),rgba(20,28,43,.5))">
+      <div style="font-size:15px;font-weight:800;color:#c084fc">💰 네덜란드식 계산기 <span class="hint" style="font-weight:400;font-size:11px">(참고용 · 기존 추천과 별개)</span></div>
+      <div style="display:flex;gap:8px;align-items:center;margin:6px 0">
+        <span class="hint">예산</span>
+        <input class="dutch-budget cfg-input" type="number" min="0" step="1000" value="${budget}" style="width:120px;padding:3px 6px">
+        <span class="hint">원 · 조합 클릭으로 🟢메인/🟡보험/⬜해제</span>
+      </div>
+      ${comboRows}
+      ${warnHtml}
+      <div class="hint" style="margin-top:6px;font-size:11px">🟢 메인 ${mainList.length}조합(더칭·동일수익 ${mainPayout.toLocaleString()}원) · 🟡 보험 ${insList.length}조합 · 투입 합계 <b>${stakedTotal.toLocaleString()}원</b>/${budget.toLocaleString()}원</div>
+    </div>`;
+  }
+  function _dutchRefresh() {
+    const panel = document.getElementById('dutchCalcPanel');
+    if (!panel || !_dutchLastA) return;
+    const rk = _dutchLastA.raceKey || '';
+    const st = _dutchState[rk]; if (!st) return;
+    panel.innerHTML = _dutchHtml(rk, _dutchCombos(_dutchLastA), st);
+  }
+  let _dutchDelegated = false;
+  function _ensureDutchDelegation() {
+    if (_dutchDelegated) return;
+    _dutchDelegated = true;
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest && e.target.closest('.dutch-toggle');
+      if (!btn || !_dutchLastA) return;
+      const rk = _dutchLastA.raceKey || '', key = btn.dataset.dutchKey;
+      const st = _dutchState[rk]; if (!st) return;
+      const cur = st.sel[key];
+      st.sel[key] = cur === 'main' ? 'ins' : cur === 'ins' ? null : 'main';   // 🟢→🟡→⬜ 순환
+      _dutchRefresh();
+    });
+    document.addEventListener('input', (e) => {
+      if (!e.target.classList || !e.target.classList.contains('dutch-budget') || !_dutchLastA) return;
+      const rk = _dutchLastA.raceKey || '', st = _dutchState[rk]; if (!st) return;
+      st.budget = Math.max(0, parseInt(e.target.value || '0', 10) || 0);
+      _dutchRefresh();
+    });
+  }
+
   function sportAnalysisHTML(a, bsel) {
     const six = a.bmed && a.bmed.sixRacer;
     const parts = [];
@@ -5761,6 +5874,7 @@
     parts.push(renderSingleFavorite(a));
     parts.push(renderRecommendFlex(a));
     parts.push(renderBetRecommend(a, bsel));
+    parts.push(renderDutchCalc(a));   // [네덜란드식 계산기] 별도 패널·참고용(기존 추천과 별개)
     parts.push(renderHighOddsCompanion(a));
     parts.push((a.raceJudgment && a.raceJudgment.type === 'wait') ? '' : renderBMED(a.bmed, bsel));
     return parts.join('');
@@ -5854,6 +5968,7 @@
       ${renderSingleFavorite(a)}
       ${renderRecommendFlex(a)}
       ${renderBetRecommend(a, '#jpBudget')}
+      ${renderDutchCalc(a)}
       ${renderHighOddsCompanion(a)}
     </div>`;
     _bindBudgetInput('#jpBudget', () => { if (state.jpLastInteg) renderJapanIntegrated(state.jpLastInteg); });
