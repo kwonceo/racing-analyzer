@@ -3035,6 +3035,8 @@
       horses = eh.map((h) => ({
         no: h.no, name: h.name || '', formScore: h.formScore, odds: h.oddsRepr,
         prob: h.combinedProb, total: h.total, tier: h.tier, ev: h.ev, favScore: h.favScore,
+        insuranceDemote: h.insuranceDemote, dualConverge: h.dualConverge,
+        formScoreAdj: h.formScoreAdj, marketFavorite: h.marketFavorite,
       }));
     } else {
       const fmap = {}; (a.form || []).forEach((h) => { fmap[h.no] = h; });
@@ -3062,8 +3064,11 @@
     // [2번] 확신도 우선 랭킹(있으면). 확신도=이상감지40+전적30+급락지속30 → 신호 기반 유력마.
     const confMap = (a.confidence && a.confidence.horses) ? a.confidence.horses : null;
     if (confMap) horses.forEach((h) => { const c = confMap[h.no] || confMap[String(h.no)]; if (c) { h.conf = c.confidence; h.band = c.band; } });
-    // 통합점수 순(폴백): 통합확률 → 제거점수 → 전적점수
-    const scoreOf = (h) => (h.prob != null ? h.prob * 1000 : 0) + (h.total != null ? h.total : 0) + (h.formScore != null ? h.formScore / 100 : 0);
+    // 통합점수 순(폴백): 통합확률(배당 우선 70/30) → 제거점수 → 전적점수
+    //   [배당 우선 전환·3번] 저배당 시장유력마 상향(+30)·고배당 보험하향마 하향(-40)으로 '저배당 우선 표시'.
+    const scoreOf = (h) => (h.prob != null ? h.prob * 1000 : 0) + (h.total != null ? h.total : 0)
+      + (h.formScore != null ? h.formScore / 100 : 0)
+      + (h.marketFavorite ? 30 : 0) + (h.insuranceDemote ? -40 : 0);
     horses.sort((x, y) => (confMap ? ((y.conf || -1) - (x.conf || -1)) : 0) || scoreOf(y) - scoreOf(x) || (x.no - y.no));
     const top = horses.slice(0, 5);
 
@@ -3115,15 +3120,32 @@
       const sig = _signalChips(info) || (isFiller
         ? '<span class="chip" style="border-color:#c084fc;color:#c084fc">🔎 고배당 복병</span>'
         : '<span class="hint">신호없음</span>');
+      // [배당 우선 전환·3번] 배당 기반 상태 배지
+      let mktChip = '';
+      let warnLine = '';
+      if (!isDark) {
+        if (h.dualConverge) {
+          mktChip = '<span class="chip" style="border-color:#38d39f;color:#38d39f;font-weight:700">💥 이중수렴 강력추천</span>';
+        } else if (h.marketFavorite) {
+          mktChip = '<span class="chip" style="border-color:#4ea1ff;color:#4ea1ff">📊 시장 유력(저배당)</span>';
+        }
+        // 배당 20배+ 말이 TOP5 상위 = 전적 우수하나 시장 비인기 → 고배당 보험으로만 활용 경고
+        if (h.insuranceDemote || (h.odds != null && h.odds >= 20)) {
+          mktChip += '<span class="chip" style="border-color:#ff9f43;color:#ff9f43;font-weight:700">⚠️ 고배당 보험용</span>';
+          warnLine = `<div class="hint" style="width:100%;margin:2px 0 0;color:#ff9f43">⚠️ 전적 우수하나 시장 비인기 · 고배당 보험으로만 활용 권장</div>`;
+        }
+      }
       const open = _topExpanded.has(h.no);
-      return `<div class="top-horse-row" data-no="${h.no}" title="클릭 → 상세+배당 타임라인" style="cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(255,255,255,${isDark ? '.02' : '.05'});border-left:3px solid ${isDark ? '#c084fc' : '#ffd24f'}">
+      return `<div class="top-horse-row" data-no="${h.no}" title="클릭 → 상세+배당 타임라인" style="cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(255,255,255,${isDark ? '.02' : '.05'});border-left:3px solid ${isDark ? '#c084fc' : (h.dualConverge ? '#38d39f' : (warnLine ? '#ff9f43' : '#ffd24f'))}">
         ${rankBadge}
         <b style="min-width:32px;color:#4ea1ff">${h.no}번</b>
         <span style="font-weight:600">${esc(h.name) || '-'}</span>
         <span class="hint">${formTxt} · <b style="color:#e2e8f0">${oddsTxt}</b></span>
+        ${mktChip}
         ${confChip}
         ${move}
         <span style="margin-left:auto">${sig}</span>
+        ${warnLine}
       </div>
       <div id="top-detail-${h.no}" style="display:${open ? 'block' : 'none'}"></div>`;
     };

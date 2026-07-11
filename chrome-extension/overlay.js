@@ -592,13 +592,36 @@
           kr.appendChild(mk('span', 'font-weight:700;color:#4ea1ff', baseKeys.slice(0, 3).join(' · ')));
           panel.appendChild(kr);
         }
-        // 복병 — 역배열 실질유력마(유력마 아닌 말)
-        if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null
-            && baseKeys.indexOf(Number(d.inverse.invLead.no)) < 0 && inV(d.inverse.invLead.no)) {
+        // [3번] 복병 — 유력마 밖 강한 신호말(역배열 실질유력마 + 급락 이상감지말). 최대 2두.
+        var darkShown = {};
+        var addDark = function (no, tag, col) {
+          if (no == null || !inV(no)) return;
+          if (baseKeys.indexOf(Number(no)) >= 0) return;         // 이미 유력마면 복병 아님
+          if (darkShown[no]) return;
+          darkShown[no] = 1;
           var db = mk('div', 'margin:2px 0');
           db.appendChild(mk('span', 'color:#94a3b8', '🐎 복병 '));
-          db.appendChild(mk('span', 'font-weight:700;color:#f0abfc', d.inverse.invLead.no + '번 (역배열)'));
+          db.appendChild(mk('span', 'font-weight:700;color:' + col, no + '번 (' + tag + ')'));
           panel.appendChild(db);
+        };
+        // 역배열 복병
+        if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null) {
+          addDark(Number(d.inverse.invLead.no), '역배열', '#f0abfc');
+        }
+        // 급락 복병 — 이상감지말(anomalyHorse) 우선, 없으면 최대 급락 조합 중 유력마 아닌 말
+        if (Object.keys(darkShown).length < 2) {
+          var dropDark = (d.anomalyHorse != null) ? Number(d.anomalyHorse) : null;
+          if (dropDark == null) {
+            var td = (d.drops || []).filter(function (x) { return x && x.pct <= -30 && x.combo; })
+              .sort(function (a, b) { return a.pct - b.pct; })[0];
+            if (td) {
+              for (var di = 0; di < td.combo.length; di++) {
+                var cno = Number(td.combo[di]);
+                if (baseKeys.indexOf(cno) < 0 && inV(cno)) { dropDark = cno; break; }
+              }
+            }
+          }
+          if (dropDark != null) addDark(dropDark, '급락', '#f87171');
         }
 
         // [전적 과가중 해결] 📊 시장 유력(전적 미수집) — 저배당(5배↓)이라 유력마 편입된 말

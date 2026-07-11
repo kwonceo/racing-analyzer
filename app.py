@@ -2040,11 +2040,19 @@ def _avg_placing(placings):
 
 
 def _prob_ev(o, placings):
-    """[3번] 시장확률=1/배당×0.75 · 전적확률=최근입상수/경주수 · 통합=시장0.6+전적0.4 · 기대값=통합×배당-1."""
+    """[배당 우선 전환] 시장확률=1/배당×0.75 · 전적확률=최근입상수/경주수 · 통합=시장0.7+전적0.3 · 기대값=통합×배당-1.
+    시장(배당)을 우선하되 전적은 배당 기반으로 가감한다:
+      배당 10배+ = 시장이 비인기로 봄 → 전적확률 × 0.7(30% 감점)
+      배당 5배↓  = 시장이 유력하게 봄 → 전적확률 × 1.1(10% 보정)
+    (v2.2.0 이전: 시장0.6+전적0.4 · 가감 없음 — 전적 과가중으로 고배당 전적마가 저배당 시장마를 눌렀음)."""
     market = (1.0 / o * 0.75) if (o and o > 0) else 0.0
     ps = _placings_list(placings)
     form = (sum(1 for p in ps if p <= 3) / len(ps)) if ps else 0.0
-    combined = market * 0.6 + form * 0.4
+    if o is not None and o >= 10:
+        form *= 0.7        # 시장 비인기 → 전적 감가
+    elif o is not None and o <= 5:
+        form = min(1.0, form * 1.1)   # 시장 유력 → 전적 보정(상한 1.0)
+    combined = market * 0.7 + form * 0.3
     ev = (combined * o - 1) if (o and o > 0) else None
     return (round(market * 100, 1), round(form * 100, 1), round(combined * 100, 1),
             (round(ev * 100, 1) if ev is not None else None))
@@ -2159,6 +2167,22 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None, curWin=None):
         if market_favorite and (ftotal is None or ftotal < 30):
             ftotal = 30.0
             form_floored = True
+        # [배당 우선 전환] 전적 점수 배당 기반 가감(랭킹용 formScoreAdj, 원본 formScore는 표시·등급용 보존):
+        #   대표배당 10배+ = 시장 비인기 → 전적 × 0.7(30% 감점)
+        #   대표배당 5배↓  = 시장 유력   → 전적 × 1.1(10% 보정, 상한 100)
+        form_odds_mult = 1.0
+        ftotal_ranked = ftotal
+        if ftotal is not None and _mkt_odds is not None:
+            if _mkt_odds >= 10:
+                form_odds_mult = 0.7
+            elif _mkt_odds <= 5:
+                form_odds_mult = 1.1
+            ftotal_ranked = round(min(100.0, ftotal * form_odds_mult), 1)
+        # 이중수렴 = 저배당(시장 유력) + 전적 우수(≥61) → 확신도 대폭 상승 → 강력 추천
+        dual_converge = (market_favorite and ftotal is not None and ftotal >= 61 and not form_floored)
+        # 전적 우수하나 배당 높음(15배+) → 자동 보험 등급 하향(유력마 풀엔 두되 '보험용'으로 취급·경고)
+        insurance_demote = (ftotal is not None and ftotal >= 61
+                            and _mkt_odds is not None and _mkt_odds >= 15)
         placings = (fh or {}).get("recentPlacings") or []
         avg_place = _avg_placing(placings)
         jk_rate = _jockey_place_rate((fh or {}).get("jockey"))
@@ -2229,6 +2253,8 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None, curWin=None):
             "overrideReason": " · ".join(ov_reasons), "anomalySig": anomaly_sig,
             "winOdds": wo, "highOddsCut": ho_cut, "highOddsReason": ho_reason,
             "marketFavorite": market_favorite, "formFloored": form_floored,
+            "formScoreAdj": ftotal_ranked, "formOddsMult": form_odds_mult,
+            "dualConverge": dual_converge, "insuranceDemote": insurance_demote,
             "reason": reason,
         })
 
@@ -2372,7 +2398,7 @@ def _time_based_drop_signals(rk):
 
 
 def _integrated_grades(form, curQ, curD, weights=None):
-    """[통합분석] 전적 + 배당(이상감지) 결합 점수 → A/B/C/D 재부여. 기본 전적 40% + 배당 60%.
+    """[통합분석] 전적 + 배당(이상감지) 결합 점수 → A/B/C/D 재부여. 기본 전적 30% + 배당 70%(배당 우선).
     [3번] weights=(fw,ow) 미지정 시 학습 가중치 자동 적용(50경주+ 누적 시 적중률 비교로 조정).
     form=[{no,name,jockey,totalScore}]. 배당 대표값=해당 말이 낀 최저 복승(없으면 쌍승)배당."""
     if not form:
@@ -4656,20 +4682,20 @@ def _recommend_basis(top_horses, form, elimination, drops, wx_reversals, advance
 
 
 def _learned_integrated_weights():
-    """[3번] 50경주+ 누적 시 이상감지/전적 적중률 비교로 통합 가중치 자동 조정.
-    기본 전적0.4 + 이상감지(배당)0.6. 데이터 부족(각 50경주 미만) 시 기본값 유지.
-    이상감지 적중률>전적이면 이상감지 비중↑, 반대면 전적 비중↑(±15%p, 이상감지 0.45~0.75)."""
-    fw, ow = 0.4, 0.6
+    """[배당 우선 전환] 50경주+ 누적 시 이상감지/전적 적중률 비교로 통합 가중치 자동 조정.
+    기본 전적0.3 + 이상감지(배당)0.7(배당 우선). 데이터 부족(각 50경주 미만) 시 기본값 유지.
+    이상감지 적중률>전적이면 이상감지 비중↑, 반대면 전적 비중↑(±15%p, 이상감지 0.55~0.85)."""
+    fw, ow = 0.3, 0.7
     try:
         cs = (_learning_load().get("stats", {}) or {}).get("compare_stats") or {}
         a, f = cs.get("anomaly") or {}, cs.get("form") or {}
         if (a.get("n") or 0) >= 50 and (f.get("n") or 0) >= 50 \
                 and a.get("rate") is not None and f.get("rate") is not None:
             shift = max(-0.15, min(0.15, (a["rate"] - f["rate"]) / 100.0))
-            ow = round(max(0.45, min(0.75, 0.6 + shift)), 3)
+            ow = round(max(0.55, min(0.85, 0.7 + shift)), 3)
             fw = round(1 - ow, 3)
     except Exception:
-        fw, ow = 0.4, 0.6
+        fw, ow = 0.3, 0.7
     return fw, ow
 
 
@@ -5232,12 +5258,26 @@ def _triple_analyze(rk, rec):
     try:
         _elim_pre = _elimination(curQ, curD, exa, drops, form, _odds_map_un(trio), curWin=curWin)
         if _elim_pre and _elim_pre.get("formAvailable"):
+            # [배당 우선 전환] 랭킹은 combinedProb(시장0.7+전적0.3) 우선 + 배당 가감된 formScoreAdj 미세반영.
+            #   이중수렴(저배당+전적우수)은 +50 가점으로 강력 추천 상위 고정.
+            def _rank_form(h):
+                _fa = h.get("formScoreAdj")
+                return (_fa if _fa is not None else (h.get("formScore") or 0)) / 100.0
             _integ = sorted((_elim_pre.get("horses") or []),
                             key=lambda h: -(((h.get("combinedProb") or 0) * 1000)
-                                            + (h.get("total") or 0) + ((h.get("formScore") or 0) / 100.0)))
-            _io = [int(h["no"]) for h in _integ if h.get("no") is not None]
+                                            + (h.get("total") or 0) + _rank_form(h)
+                                            + (50 if h.get("dualConverge") else 0)))
+            # [배당 우선 전환] '전적 우수하나 배당 높음(보험 하향)' 말은 메인 유력마에서 뒤로 밀어
+            #   저배당(시장 유력)·이중수렴 말을 우선. 삭제가 아니라 순서만 후순위(보험용으로 편성 유지).
+            _demote = {int(h["no"]) for h in _integ
+                       if h.get("insuranceDemote") and h.get("no") is not None}
+            _main = [int(h["no"]) for h in _integ
+                     if h.get("no") is not None and int(h["no"]) not in _demote]
+            _ins = [int(h["no"]) for h in _integ
+                    if h.get("no") is not None and int(h["no"]) in _demote]
+            _io = _main + _ins
             if len(_io) >= 2:
-                key_horses = _io[:3]                          # 베팅 추천 근간을 통합 유력마로 정렬
+                key_horses = _io[:3]                          # 베팅 추천 근간을 통합 유력마로 정렬(보험하향 후순위)
                 ranked = _io + [h for h in ranked if h not in _io]   # 삼복승 편성 풀도 통합순 우선
     except Exception as _ke:
         print("[유력마정합] 실패:", _ke)
