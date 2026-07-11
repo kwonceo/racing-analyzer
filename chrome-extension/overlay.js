@@ -575,6 +575,14 @@
           if (phase === 'blink') startCdBlink(); else stopCdBlink();   // T-30초 깜빡임
         } else { stopCdBlink(); }
 
+        // [중앙경마 마감 특성] JRA 배당판은 T-2분에 닫힘 → 실질 마감 경고
+        if (d && d.centralClosing) {
+          var ccRow = mk('div', 'margin:2px 0 6px;padding:6px 9px;border-radius:6px;border:1px solid #f87171;background:rgba(220,38,38,.18)');
+          ccRow.appendChild(mk('div', 'font-weight:800;font-size:12px;color:#fca5a5', '⚠️ 중앙경마 배당판 T-2분에 닫힘'));
+          ccRow.appendChild(mk('div', 'font-weight:800;font-size:12px;color:#fecaca', '지금이 마지막 신호!'));
+          panel.appendChild(ccRow);
+        }
+
         // 중요 신호 팝업(상단 중앙)은 항상 갱신 · 배너는 아래 [4번 이상감지] 그룹에 표시
         var crit = computeCritical(d, deadline);
         renderAlertPopup(crit);

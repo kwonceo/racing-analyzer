@@ -3336,6 +3336,8 @@
       ${a.baselineReset ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffd24f;background:rgba(255,210,79,.12);border-radius:6px;color:#ffd24f">⚠️ <b>비정상 변동폭 감지 → 기준값 재설정</b> — 이전 경주 배당 잔존 의심(95%+ 급락 다수). 이번 수집을 새 기준값으로 설정했습니다. <b>다음 수집부터 변동을 계산</b>합니다.</div>`
         : a.baselineSet ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.1);border-radius:6px;color:#7dd3fc">🎯 <b>기준값 설정됨</b> — 새 경주 첫 수집입니다. 변동폭은 <b>다음 수집부터</b> 계산됩니다.</div>` : ''}
       ${a.afterClose ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #8a94a6;background:rgba(138,148,166,.14);border-radius:6px;color:#b8c0cc">⚠️ <b>마감 후 수집</b> — 발주(T-0) 이후 신호는 <b>참고만</b> 하세요. 급락이 있어도 <b>추천 조합·보험에는 반영되지 않습니다</b>(마감 전 기준 유지).</div>` : ''}
+      ${a.deadlineCorrected ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.12);border-radius:6px;color:#7dd3fc">🛠️ <b>발주시각 오검출 정정</b> — 발주시각이 뒤로 이동(예: T-1분→T-7분)해 이전의 잘못된 <b>마감 판정을 무효화</b>하고 올바른 발주시각으로 재설정했습니다. 실시간 급락/역배열 편입이 정상 재개됩니다.</div>` : ''}
+      ${a.centralClosing ? `<div style="margin:6px 0;padding:8px 10px;border-left:4px solid #f87171;background:rgba(220,38,38,.16);border-radius:6px;color:#fecaca;font-weight:800">⚠️ 중앙경마 배당판 T-2분에 닫힘 — <span style="color:#fca5a5">지금이 마지막 신호!</span><div class="hint" style="font-weight:400;margin-top:2px;color:#fca5a5">JRA는 실제 발주 2분 전에 배당판이 닫힙니다. T-2분을 실질 마감으로 보고 지금 데이터로 추천을 확정하세요.</div></div>` : ''}
       ${renderForcedTrifecta(a)}
       ${renderReversalBacking(a)}
       ${renderPreReversal(a)}

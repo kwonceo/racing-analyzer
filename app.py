@@ -5090,6 +5090,7 @@ def _triple_analyze(rk, rec):
     situation = _signal_situation(drops, mass_drop, excess)
     # [1번] 마감 후(T-0 이후) 감지 여부 — 현재 스냅샷의 부호 포함 발주전분(mb_signed<0)
     cur_mb, after_close = None, False
+    deadline_corrected = False   # [1번] 발주시각 오검출 정정 발생 여부(최근 스냅샷 기준)
     try:
         _hp0, _, _ = _hist_path(rk)
         _hd0 = json.load(open(_hp0, encoding="utf-8"))
@@ -5099,6 +5100,8 @@ def _triple_analyze(rk, rec):
             if cur_mb is None:
                 cur_mb = _s0.get("minutes_before")
             after_close = bool(_s0.get("after_close")) or (cur_mb is not None and cur_mb < 0)
+            # 최근 5스냅샷 내 오검출 정정이 있었으면 배너 표시용으로 노출
+            deadline_corrected = any(_s.get("deadline_corrected") for _s in _hd0["snapshots"][-5:])
     except Exception:
         cur_mb, after_close = None, False
 
@@ -6075,16 +6078,29 @@ def _triple_analyze(rk, rec):
     #   - locked: 최종 확정(프론트 🔒 표시 · 조합 안정).
     #   - closed: 마감 후 추천 금지 → 프론트·오버레이에서 추천 조합 숨김(참고만).
     #     ⚠ 서버 betRecommend 데이터는 결과 학습(_apply_result_learning)이 재사용하므로 비우지 않고 유지.
+    # [중앙경마(JRA) 마감 특성] JRA는 실제 발주 2분 전에 배당판이 닫힌다(실질 마감=T-2분).
+    #   → 중앙 모드에선 강제 추천을 T-3분으로 앞당기고, T-2분을 최종 확정(실질 마감)으로 처리.
+    is_central = (rec.get("category") == "japan_central")
     recommend_phase = "normal"
-    if after_close:
-        recommend_phase = "closed"
-    elif cur_mb is not None and cur_mb <= 1.5:
-        recommend_phase = "locked"
-    elif cur_mb is not None and cur_mb <= 2.5:
-        recommend_phase = "forced"
+    if is_central:
+        if after_close:
+            recommend_phase = "closed"
+        elif cur_mb is not None and cur_mb <= 2.5:      # T-2분 이내 = 실질 마감 → 최종 확정
+            recommend_phase = "locked"
+        elif cur_mb is not None and cur_mb <= 3.5:      # T-3분 이내 = 강제 추천(앞당김)
+            recommend_phase = "forced"
+    else:
+        if after_close:
+            recommend_phase = "closed"
+        elif cur_mb is not None and cur_mb <= 1.5:      # T-1분 이내 = 최종 확정
+            recommend_phase = "locked"
+        elif cur_mb is not None and cur_mb <= 2.5:      # T-2분 이내 = 강제 추천
+            recommend_phase = "forced"
     recommend_forced = recommend_phase in ("forced", "locked")
     recommend_locked = (recommend_phase == "locked")
     recommend_closed = (recommend_phase == "closed")
+    # [중앙경마] 배당판 닫힘 임박(T-2.5분~마감 전) → "지금이 마지막 신호" 경고 표시용
+    central_closing = bool(is_central and cur_mb is not None and 0 <= cur_mb <= 2.5 and not after_close)
 
     # 기존 게이팅(wait/패스형 → 추천 비움) — 단 T-2분 이내(forced)면 강제 추천으로 게이트 해제.
     recommend_gated = bool(race_judgment and race_judgment.get("type") in ("wait", "패스형")
@@ -6104,6 +6120,8 @@ def _triple_analyze(rk, rec):
         "recommendForced": recommend_forced, # T-2분 이내 강제 추천(신호 약해도 저배당 기준 편성)
         "recommendLocked": recommend_locked, # T-1분 이내 최종 확정(🔒)
         "recommendClosed": recommend_closed, # 마감 후 → 추천 조합 숨김(참고만)
+        "isCentral": is_central,             # [중앙경마] JRA 여부(배당판 T-2분 조기 마감)
+        "centralClosing": central_closing,   # [중앙경마] 배당판 닫힘 임박(T-2.5분~) → 마지막 신호 경고
         # [추천 로직 전면 개편] BMED 확신도 엔진 + 실전 경주유형 판정 + 단계별 추천 + 강화 제거마
         "confidence": confidence,          # [2번] 이상감지40+전적30+급락지속30 → 말별 확신도·랭킹
         "raceJudgment": race_judgment,     # [1·4번] 확실/신중/애매/패스형 + 근거 + 배분비율 + 쌍승강신호
@@ -6154,6 +6172,7 @@ def _triple_analyze(rk, rec):
                           "advanced": advanced},
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
+        "deadlineCorrected": deadline_corrected,   # [1번] 발주시각 오검출 정정(과거 마감상태 무효화) 발생
         "afterCloseSurge": after_close_surge,   # [1·4번] 마감 후 대급락(50%+) 배너 + 학습 입상률
 
         # [경주전환 방어] 첫 수집(기준값 설정)/비정상 변동폭(기준값 재설정) 여부
@@ -6515,6 +6534,20 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
         after_close = False
     curQ = _odds_map_un(quinella)
     curWin = _win_map_int(_win_map_clean(win))
+    # ═══ [1번·발주시각 오검출 방어] deadline 역행 감지 ═══
+    #   직전 스냅샷보다 발주까지 분(mb_signed)이 3분+ 뒤로 이동(발주시각이 늦춰짐)했고, 직전이 T-2분 이내
+    #   (마감 임박/마감 후)로 판정됐던 경우 → 발주시각 오검출로 보고, 과거의 잘못된 마감 상태를 무효화하고
+    #   현재(늦은)의 올바른 발주시각으로 재설정. 하코다테 8R: T-1분/마감으로 오판 후 T-7분으로 정정된 케이스.
+    #   ⚠ realtime_added·마감후 처리가 오검출된 after_close로 무력화되던 문제까지 함께 해소.
+    deadline_corrected = False
+    if mb_signed is not None and doc["snapshots"]:
+        _prev_mb = doc["snapshots"][-1].get("mb_signed")
+        if _prev_mb is not None and (mb_signed - _prev_mb) >= 3 and _prev_mb <= 2:
+            deadline_corrected = True
+            for _s in doc["snapshots"]:          # 과거 오검출 마감 상태 전부 무효화(실제 발주는 더 뒤)
+                if _s.get("after_close"):
+                    _s["after_close"] = False
+                    _s["deadline_corrected"] = True
     anomalies = []
     q_drops = []           # [3번] 구조화 복승 급락(신호말 산출용)
     signal_horse = None    # [3번] 이 스냅샷의 대표 이상감지 말(집중급락 1순위)
@@ -6587,6 +6620,7 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
         "time": time.strftime("%H:%M:%S", time.localtime(now)),
         "minutes_before": minutes_before,
         "mb_signed": mb_signed, "after_close": after_close,   # [마감후] 부호 포함·마감 후 여부
+        "deadline_corrected": deadline_corrected,   # [1번] 발주시각 오검출 정정 시점(과거 마감상태 무효화)
         "baseline_reset": bool(baseline_reset),   # [경주전환] 기준값 재설정 시점(변동 계산 제외)
         "next_race_blocked": next_race_blocked,   # [2번] 다음 경주 배당 유입(200%+ 급등) 차단 시점
         "signal_horse": signal_horse,             # [3번] 이 스냅샷 대표 이상감지 말(신호 변경 이력·안정화용)
@@ -6815,12 +6849,20 @@ def _build_analysis_log(rk, an=None):
     new_sig = _rec_sig(final, an.get("keyHorses"))
     last_sig = prev_hist[-1].get("sig") if prev_hist else None
     rec_history = list(prev_hist)
-    # 실질 추천이 있을 때만(빈 추천/워밍업 제외) + 시그니처 변경 시에만 이력 추가
-    if final.get("quinella_main") and new_sig != last_sig:
+    # [2번·급락 후 추천 재산출 지속] 추천 sig가 그대로여도, 마지막 추천 이후 새 급락/역전이 감지되면
+    #   이력을 갱신한다(하코다테 8R: 13:38 이후 추천 로그가 멈춘 문제 해결). 이상감지 누적 개수가
+    #   증가 = 새 신호 유입 → 추천 재계산 결과를 재저장(신호↔추천 관계 추적 유지).
+    _anom_count = len(anomaly_history or [])
+    _last_anom_count = prev_hist[-1].get("anomCount") if prev_hist else 0
+    _new_anomaly = _anom_count > (_last_anom_count or 0)
+    # 실질 추천이 있을 때만(빈 추천/워밍업 제외) + (시그니처 변경 OR 새 이상감지 유입) 시 이력 추가
+    if final.get("quinella_main") and (new_sig != last_sig or _new_anomaly):
         rec_history.append({
             "time": now_hms,
             "minutes_before": (an.get("lastSnapshot") or {}).get("minutesBefore"),
             "sig": new_sig,
+            "anomCount": _anom_count,   # [2번] 이 시점까지 누적 이상감지 수(신규 신호 유입 판별)
+            "sigChanged": bool(new_sig != last_sig),   # 추천 조합이 실제로 바뀌었는지(신호만 추가면 False)
             "keyHorses": an.get("keyHorses"),
             "summary": an.get("summary"),
             "quinella_main": (final.get("quinella_main") or {}).get("combo"),
