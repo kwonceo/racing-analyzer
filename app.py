@@ -120,6 +120,9 @@ RACE_SHEET_SCHEMA = {
                     "jockey": {"type": "string"},
                     "weight": {"type": "string"},
                     "rating": {"type": "string"},
+                    "grade": {"type": "string",
+                              "description": ("이 말의 이번 출전 경주 등급/조건(예 G1/G2/G3/오픈/국1군~국6군). "
+                                              "헤더/전적에서 안 보이면 ''")},
                     "recentRecord": {"type": "string"},
                     "recentPlacings": {"type": "array", "items": {"type": "integer"},
                                        "description": "최근 경주부터 착순(정수) 배열, 최대 5. 못 읽으면 []"},
@@ -135,18 +138,20 @@ RACE_SHEET_SCHEMA = {
                                 "jockey": {"type": "string", "description": "그 경주 기수명. 모르면 ''"},
                                 "weight": {"type": "string", "description": "그 경주 부담중량(kg 숫자). 모르면 ''"},
                                 "placing": {"type": "integer", "description": "그 경주 착순(정수). 모르면 0"},
+                                "grade": {"type": "string",
+                                          "description": "그 경주 등급/조건(G1/G2/G3/오픈/국1군~국6군 등). 모르면 ''"},
                                 "position": {"type": "string",
                                              "description": ("초반 레이스 포지션: 선행/중단/후방 중 하나. "
                                                              "타임·통과순위로 추정. 모르면 ''")},
                             },
-                            "required": ["distance", "condition", "jockey", "weight", "placing", "position"],
+                            "required": ["distance", "condition", "jockey", "weight", "placing", "grade", "position"],
                             "additionalProperties": False,
                         },
                     },
                     "health": {"type": "string"},
                     "training": {"type": "string"},
                 },
-                "required": ["horseNum", "horseName", "jockey", "weight", "rating",
+                "required": ["horseNum", "horseName", "jockey", "weight", "rating", "grade",
                              "recentRecord", "recentPlacings", "pastRaces", "health", "training"],
                 "additionalProperties": False,
             },
@@ -605,9 +610,11 @@ def _do_extract_race(img, api_key=None):
         "- recentRecord: 최근/최종 출전기록(날짜+구간기록). 기록이 없으면 '해당거리 첫 출주'.\n"
         "- recentPlacings: 최근 경주부터(가장 최근이 맨 앞) 착순만 정수로 모은 배열, 최대 5개. "
         "예 최근 3·1·5착 → [3,1,5]. 못 읽으면 [].\n"
+        "- grade: 이 말의 이번 경주 등급/조건(예 G1/G2/G3/오픈/국1군~국6군). 헤더나 전적에서 안 보이면 ''.\n"
         "- pastRaces: 전적표에 과거 경주 상세가 있으면 직전 경주부터(가장 최근이 맨 앞) 최대 5경주를 각각 "
         "{distance(그 경주 거리 m 숫자), condition(주로 양호/무거움/불량), jockey(그 경주 기수명), "
-        "weight(그 경주 부담중량 kg), placing(착순 정수), position(초반위치 선행/중단/후방)} 로 채우세요. "
+        "weight(그 경주 부담중량 kg), placing(착순 정수), grade(그 경주 등급/조건 G1~G3/오픈/국1~6군 등), "
+        "position(초반위치 선행/중단/후방)} 로 채우세요. "
         "position은 통과순위나 기록으로 추정 — 초반 선두권이면 '선행', 중위권이면 '중단', 후미면 '후방'. "
         "모르는 칸은 '' (placing만 0). 전적 상세가 표에 없으면 pastRaces=[].\n"
         "- health: 마체중/건강 메모가 있으면, 없으면 ''.\n"
@@ -773,6 +780,7 @@ def _norm_korea_horse(h, jstats):
     return {
         "no": h.get("horseNum"), "name": h.get("horseName", ""),
         "jockey": h.get("jockey", ""), "weight": h.get("weight"), "rating": h.get("rating"),
+        "grade": h.get("grade", ""),                    # [2번] 등급 체계 보정용(이번 경주 등급)
         "recentPlacings": h.get("recentPlacings") or [],
         "pastRaces": prs,
         "lastJockey": (prs[0].get("jockey") if prs else None),
@@ -2102,9 +2110,12 @@ def _elim_score(o, avg_place, jk_rate, has_drop30, in_top_exa, no_dist_exp=False
     return max(0, min(130, score)), reasons
 
 
-def _elimination(curQ, curD, exa, drops, form, trio_map=None):
-    """배당+전적 복합 제거 판정. 반환: {horses:[...], counts, autoBets}."""
+def _elimination(curQ, curD, exa, drops, form, trio_map=None, curWin=None):
+    """배당+전적 복합 제거 판정. 반환: {horses:[...], counts, autoBets}.
+    curWin(단승 배당 맵) 주면 [1·5번] 고배당 자동 제거(999/100+ 무조건·50~99 권장·30~49 관찰)."""
     trio_map = trio_map or {}
+    win_odds = {int(k): v for k, v in (curWin or {}).items()
+                if isinstance(v, (int, float)) and v > 0}   # [1·5번] 단승 고배당 제거용
     # 1) 출전마 집합 + 대표 복승배당(각 말이 낀 조합 중 최저)
     repr_odds = {}
     for (a, b), o in curQ.items():
@@ -2150,6 +2161,11 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None):
         #   (현재 거리 이력 미수집 → fh.noDistExp 부재 시 None→False, 감점 미적용)
         no_dist_exp = bool(fh.get("noDistExp")) if fh else False
         total, elim_reasons = _elim_score(o, avg_place, jk_rate, has_drop30, in_top_exa, no_dist_exp)
+        # [1·5번] 단승 고배당 자동 제거 판정(신호 있으면 30~99배는 보류·999/100+는 무조건)
+        wo = win_odds.get(no)
+        ho_cut, ho_reason = _high_odds_verdict(wo, has_drop30 or in_top_exa)
+        if ho_reason:
+            elim_reasons.append(ho_reason)
         if total < 30:
             verdict, label, keep = "🔴", "확실 제거", False
         elif total < 50:
@@ -2200,6 +2216,7 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None):
             "verdict": verdict, "verdictLabel": label, "keep": keep,
             "tier": tier, "override": override, "strongCount": strong_cnt,
             "overrideReason": " · ".join(ov_reasons), "anomalySig": anomaly_sig,
+            "winOdds": wo, "highOddsCut": ho_cut, "highOddsReason": ho_reason,
             "reason": reason,
         })
 
@@ -2218,6 +2235,19 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None):
         h["formGrade"] = fgrade.get(h["no"])
         g = h["formGrade"]
         o = h.get("oddsRepr")
+        # [1·5번] 단승 고배당 강제 제거 — 완화 게이트보다 우선.
+        #   999/100배+ = 전적·이변신호 무관 확실 제거(제주케이스: 착순 좋아도 무시).
+        #   50~99·30~49배 = 이변신호 없을 때만 제거(_high_odds_verdict 가 has_signal 반영).
+        if h.get("highOddsCut"):
+            wo_ = h.get("winOdds")
+            force = (isinstance(wo_, (int, float)) and wo_ >= 100)
+            if force or not h["override"]:
+                h["keep"] = False
+                h["softCut"] = True
+                if force:
+                    h["override"] = False
+                h["verdict"], h["verdictLabel"] = "🔴", "확실 제거(" + (h.get("highOddsReason") or "고배당") + ")"
+                continue
         high_odds = (o is None or o >= 150)
         # 확실 제거 = 전적 D등급(또는 전적없음) + 배당 150배+ + 이변신호 없음(급락/쌍승상위=override) → 그 외 전부 유지.
         hard_cut = high_odds and (g in (None, "D")) and not h["override"]
@@ -5171,7 +5201,7 @@ def _triple_analyze(rk, rec):
     #        상위 3두로 key_horses 재정렬(전적 수집된 경우만; 전적 없으면 기존 배당 인기 유지).
     _elim_pre = None
     try:
-        _elim_pre = _elimination(curQ, curD, exa, drops, form, _odds_map_un(trio))
+        _elim_pre = _elimination(curQ, curD, exa, drops, form, _odds_map_un(trio), curWin=curWin)
         if _elim_pre and _elim_pre.get("formAvailable"):
             _integ = sorted((_elim_pre.get("horses") or []),
                             key=lambda h: -(((h.get("combinedProb") or 0) * 1000)
@@ -5706,7 +5736,7 @@ def _triple_analyze(rk, rec):
         last_snap = None
 
     # form 은 위(역배열 호출 앞)에서 이미 계산됨 — 재사용(역배열·추천게이트와 공유)
-    elimination = _elimination(curQ, curD, exa, drops, form, trio_map)  # 배당+전적 복합 제거
+    elimination = _elimination(curQ, curD, exa, drops, form, trio_map, curWin=curWin)  # 배당+전적 복합 제거(+단승 고배당)
 
     # [한국경마] 시간대별(발주 10/5/2분전 대비) 마감 임박 급락 신호를 앞쪽에 병합
     time_drops = _time_based_drop_signals(rk)
@@ -11713,9 +11743,11 @@ def _keiba_parse_horse_past(html, max_n=5):
             continue
         surface, dist = _keiba_dist_of(r[3])
         mcond = re.search(r"(良|稍重|重|不良)", r[4] or "")
+        mgrade = re.search(r"(A1|A2|B1|B2|B3|C1|C2|C3|オープン|OPEN|OP)", r[2] or "")  # [2번] NAR 등급(레이스명)
         past.append({
             "date": r[0], "venue": r[1], "distance": dist, "surface": surface,
             "trackCond": (mcond.group(1) if mcond else ""),
+            "raceName": (r[2] or "").strip(), "grade": (mgrade.group(1) if mgrade else ""),
             "fieldSize": _to_int(r[5]), "placing": _to_int(r[9]),
             "jockey": r[10], "weight": _safe_num(r[11]), "bodyWeight": r[12],
             "time": r[13], "last3f": _safe_num(r[15]), "corner": (r[16] or "").strip(),
@@ -11784,17 +11816,21 @@ def _keiba_build_form(shutsuba, details):
                "pastRaces": [{"weight": pr.get("weight")} for pr in past]}
         wbonus, wdetail = weight_change_bonus(nh2)
         last3f, l3note = _keiba_last3f_note(past)
-        total = round(base + sbonus + dbonus + wbonus, 1)
+        gbonus, gdetail = grade_bonus(None, [pr.get("grade") for pr in past])          # [2번] 등급 경험/하락강자
+        debonus, dedetail, dexp = dist_exp_bonus(past, cur_dist)                       # [3번] 당거리 경험
+        total = round(base + sbonus + dbonus + wbonus + gbonus + debonus, 1)
         horses.append({
             "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "weight": h.get("weight"), "winOdds": h.get("winOdds"), "pop": h.get("pop"),
             "recentPlacings": placings[:5], "baseScore": base,
             "styleType": style, "styleBonus": sbonus,
             "distanceBonus": dbonus, "weightBonus": wbonus, "last3f": last3f,
+            "gradeBonus": gbonus, "distExpBonus": debonus, "distExperienced": dexp,
             "totalScore": total,
-            "detail": sdetail + ddetail + wdetail + ([l3note] if l3note else []),
+            "detail": sdetail + ddetail + wdetail + gdetail + dedetail + ([l3note] if l3note else []),
             "past": past,
         })
+    _apply_back_power(horses)                     # [3번] 뒷힘(상3F 상대) 보정 + 거리미경험·뒷힘강점 플래그
     horses.sort(key=lambda x: x["totalScore"], reverse=True)
     n = len(horses)
     for i, h in enumerate(horses):
@@ -11802,6 +11838,23 @@ def _keiba_build_form(shutsuba, details):
         frac = i / n if n else 0                # 사분위 상대등급(전적점수 절대값이 낮게 뭉치는 NAR 대응)
         h["grade"] = "A" if frac < 0.25 else "B" if frac < 0.50 else "C" if frac < 0.75 else "D"
     return horses
+
+
+def _apply_back_power(horses):
+    """[3번] 경주 내 상3F 상대 뒷힘 보정(상위30% +15·하위 -5) + '⚡ 거리 미경험이나 뒷힘 강점' 플래그.
+    horses[] 각 항목에 backPower(강/보통/약)·backPowerBonus 부여하고 totalScore·detail 갱신(멱등)."""
+    all_l3 = [h.get("last3f") for h in horses]
+    for h in horses:
+        bp, bpdetail, level = back_power_bonus(h.get("last3f"), all_l3)
+        h["backPower"] = level
+        h["backPowerBonus"] = bp
+        if bp:
+            h["totalScore"] = round((h.get("totalScore") or 0) + bp, 1)
+            h.setdefault("detail", []).extend(bpdetail)
+        # 거리 미경험 + 뒷힘 강함 → 삼복승 보험 후보 플래그
+        if h.get("distExperienced") is False and level == "강":
+            h["backPowerInsurance"] = True
+            h.setdefault("detail", []).append("⚡ 거리 미경험이나 뒷힘 강점 → 막판 뒤집기 가능(삼복승 보험)")
 
 
 def _keiba_fetch_details(shutsuba, api_key=None):
@@ -11947,6 +12000,10 @@ def _jra_past_cell(cell):
     d01, d05, d03, d06 = g("Data01"), g("Data05"), g("Data03"), g("Data06")
     if not d01:
         return None
+    # [2번] 등급: Data02 의 Icon_GradeType(OP/G1/G2/G3/L) 우선, 없으면 레이스명에서 조건(未勝利/1勝~3勝/新馬)
+    d02 = g("Data02")
+    mg = re.search(r"(G1|G2|G3|GⅠ|GⅡ|GⅢ|OP|L|オープン|リステッド|3勝|2勝|1勝|未勝利|新馬)", d02)
+    grade = mg.group(1) if mg else ""
     mnum = re.search(r'<span[^>]*class="Num"[^>]*>\s*(\d+)', cell)
     placing = int(mnum.group(1)) if mnum else None
     md = re.search(r"(\d{4}\.\d{2}\.\d{2})\s*(\S+)?", d01)
@@ -11968,7 +12025,7 @@ def _jra_past_cell(cell):
     bodyw = mbw.group(1) if mbw else ""
     return {"date": date, "venue": venue, "placing": placing, "distance": dist, "surface": surface,
             "trackCond": cond, "fieldSize": field, "jockey": jockey, "weight": weight,
-            "corner": corner, "last3f": last3f, "bodyWeight": bodyw}
+            "corner": corner, "last3f": last3f, "bodyWeight": bodyw, "grade": grade}
 
 
 def _jra_parse_shutuba_past(html):
@@ -11990,6 +12047,12 @@ def _jra_parse_shutuba_past(html):
         mc = re.search(r"(良|稍重|重|不良)", rdt)
         if mc:
             out["trackCond"] = mc.group(1)
+    # [2번] 현재 경주 등급: RaceName 영역 Icon_GradeType(G1/G2/G3/L/OP) 또는 조건(3勝~1勝/未勝利/新馬)
+    mrn = re.search(r'class="RaceName"[^>]*>(.*?)</div>', html, re.S)
+    if mrn:
+        rnt = re.sub(r"<[^>]+>", " ", mrn.group(1))
+        mg = re.search(r"(G1|G2|G3|GⅠ|GⅡ|GⅢ|OP|L|オープン|リステッド|3勝|2勝|1勝|未勝利|新馬)", rnt)
+        out["grade"] = mg.group(1) if mg else ""
     for blk in re.findall(r'<tr[^>]*class="[^"]*HorseList[^"]*"[^>]*>.*?</tr>', html, re.S):
         def cellraw(cls):
             m = re.search(r'<td[^>]*class="' + cls + r'"[^>]*>(.*?)</td>', blk, re.S)
@@ -12029,6 +12092,7 @@ def _jra_build_form(shutuba):
     """馬柱 파싱 결과 → 통합 전적 점수. base_form_score(착순 가중평균) + 각질/거리변화/부담/상3F 보정.
     지방경마 _keiba_build_form 과 동일한 채점식(각질 소스만 netkeiba 표기 우선)."""
     cur_dist = shutuba.get("distance")
+    cur_grade = shutuba.get("grade")
     horses = []
     for h in shutuba.get("horses", []):
         past = h.get("past") or []
@@ -12040,15 +12104,19 @@ def _jra_build_form(shutuba):
         nh2 = {"weight": h.get("weight"), "pastRaces": [{"weight": pr.get("weight")} for pr in past]}
         wbonus, wdetail = weight_change_bonus(nh2)
         last3f, l3note = _keiba_last3f_note(past)
-        total = round(base + sbonus + dbonus + wbonus, 1)
+        gbonus, gdetail = grade_bonus(cur_grade, [pr.get("grade") for pr in past])   # [2번] 등급(G1~G3/OP·하락강자)
+        debonus, dedetail, dexp = dist_exp_bonus(past, cur_dist)                     # [3번] 당거리 경험
+        total = round(base + sbonus + dbonus + wbonus + gbonus + debonus, 1)
         horses.append({
             "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "weight": h.get("weight"), "recentPlacings": placings[:5], "baseScore": base,
             "styleType": style, "styleBonus": sbonus, "distanceBonus": dbonus, "weightBonus": wbonus,
-            "last3f": last3f, "totalScore": total,
-            "detail": sdetail + ddetail + wdetail + ([l3note] if l3note else []),
+            "last3f": last3f, "gradeBonus": gbonus, "distExpBonus": debonus, "distExperienced": dexp,
+            "totalScore": total,
+            "detail": sdetail + ddetail + wdetail + gdetail + dedetail + ([l3note] if l3note else []),
             "past": past,
         })
+    _apply_back_power(horses)                     # [3번] 뒷힘(상3F 상대) + 거리미경험·뒷힘강점 플래그
     horses.sort(key=lambda x: x["totalScore"], reverse=True)
     n = len(horses)
     for i, h in enumerate(horses):
@@ -12501,6 +12569,130 @@ def weight_change_bonus(horse):
     return 5, [f"부담중량 감소({last_w}→{cur}kg)+5"]
 
 
+# ── 3-3c 경마 등급 체계 보정 [2번] ──────────────
+def _norm_grade(g):
+    """등급명 정규화: 로마숫자→아라비아, 공백 제거, 대문자. 'GⅢ'/'G III'→'G3'."""
+    s = str(g or "").upper().replace(" ", "").replace("　", "")
+    s = s.replace("GⅢ", "G3").replace("GⅡ", "G2").replace("GⅠ", "G1")
+    s = s.replace("GIII", "G3").replace("GII", "G2").replace("GI", "G1")
+    s = s.replace("ＧⅢ", "G3").replace("ＧⅡ", "G2").replace("ＧⅠ", "G1")
+    return s
+
+
+# 등급 경험 보너스: 문자열에 토큰 포함 시 해당 보너스(최상위 하나만 적용). 상위→하위 순.
+_GRADE_EXP_TIERS = [
+    (("G1", "G2", "G3"), 20, "그레이드(G1~G3) 경험"),   # JRA 중상금 / KRA 그레이드 대상경주
+    (("A1",), 20, "A1 경험"),                             # NAR A1
+    (("A2",), 15, "A2 경험"),                             # NAR A2
+    (("오픈", "OP", "オープン", "リステッド", "LISTED", "L"), 10, "오픈/리스티드 경험"),
+    (("B1", "B2"), 10, "B급 경험"),                       # NAR B
+    (("C1",), 5, "C1 경험"),                              # NAR C1
+]
+# 등급 랭크(작을수록 상위·강함) — 하락/상승 판정용. 상위 토큰 먼저.
+_GRADE_RANK_TIERS = [
+    ("G1", 1), ("G2", 2), ("G3", 3),
+    ("A1", 2), ("A2", 3),
+    ("오픈", 4), ("OP", 4), ("オープン", 4), ("リステッド", 4), ("LISTED", 4), ("L", 4),
+    ("B1", 5), ("B2", 6),
+    ("국1군", 5), ("1군", 5), ("국2군", 6), ("2군", 6), ("국3군", 7), ("3군", 7),
+    ("국4군", 8), ("4군", 8), ("국5군", 9), ("5군", 9), ("국6군", 9), ("6군", 9),
+    ("3勝", 5), ("2勝", 6), ("1勝", 7), ("未勝", 9), ("新馬", 9),
+    ("C1", 7), ("C2", 8), ("C3", 8),
+]
+
+
+def _grade_exp_bonus_of(g):
+    s = _norm_grade(g)
+    if not s:
+        return 0, ""
+    for toks, bonus, label in _GRADE_EXP_TIERS:
+        if any(_norm_grade(t) in s for t in toks):
+            return bonus, label
+    return 0, ""
+
+
+def _grade_rank(g):
+    s = _norm_grade(g)
+    if not s:
+        return None
+    for tok, rk in _GRADE_RANK_TIERS:
+        if _norm_grade(tok) in s:
+            return rk
+    return None
+
+
+def grade_bonus(cur_grade, past_grades):
+    """[2번] 등급 경험(최상위 하나) + 하락(상위→하위·강자 +15)/상승(하위→상위·적응중 -5).
+    한국경마 G1~G3 +20·오픈 +10 / 지방 A1 +20·A2 +15·B +10·C1 +5. 반환 (bonus, detail)."""
+    past = [g for g in (past_grades or []) if g]
+    bonus, detail = 0, []
+    exps = [_grade_exp_bonus_of(g) for g in past]
+    best = max(exps, key=lambda x: x[0]) if exps else (0, "")
+    if best[0] > 0:
+        bonus += best[0]
+        detail.append(f"{best[1]} +{best[0]}")
+    cr = _grade_rank(cur_grade)
+    lr = _grade_rank(past[0]) if past else None
+    if cr is not None and lr is not None and cr != lr:
+        if cr > lr:                      # rank 커짐 = 하위 등급으로 하락 = 상위에서 내려온 강자
+            bonus += 15
+            detail.append("등급 하락(상위→하위·강자) +15")
+        else:                            # 상위 등급으로 상승 = 적응 중
+            bonus -= 5
+            detail.append("등급 상승(하위→상위·적응중) -5")
+    return bonus, detail
+
+
+# ── 3-3d 당거리 경험 [3번] ──────────────────
+def dist_exp_bonus(past_races, cur_dist):
+    """[3번] 당거리(정확히 같은 거리) 출전 경험. 있음 +10, 없음 0. 반환 (bonus, detail, experienced)."""
+    cd = _to_int(cur_dist)
+    if cd is None:
+        return 0, [], None
+    dists = [_to_int(pr.get("distance")) for pr in (past_races or [])]
+    cnt = sum(1 for d in dists if d == cd)
+    if cnt > 0:
+        return 10, [f"당거리({cd}m) 경험 {cnt}회 +10"], True
+    if any(d is not None for d in dists):
+        return 0, [f"당거리({cd}m) 미경험"], False
+    return 0, [], None
+
+
+# ── 3-3e 뒷힘(상승3F) [3번] ──────────────────
+def back_power_bonus(my_last3f, all_last3f):
+    """[3번] 상승3F(막판 뒷힘). 경주 내 상대: 상위30%(빠름) +15, 하위30%(느림) -5, 보통 0.
+    상3F는 작을수록 빠름(강함). 반환 (bonus, detail, level: 강/보통/약/None)."""
+    if not isinstance(my_last3f, (int, float)) or my_last3f <= 0:
+        return 0, [], None
+    vals = sorted(v for v in (all_last3f or []) if isinstance(v, (int, float)) and v > 0)
+    if len(vals) < 3:
+        return 0, [], None
+    p30 = vals[max(0, int(0.3 * (len(vals) - 1)))]        # 빠른 쪽 30% 경계
+    p70 = vals[min(len(vals) - 1, int(0.7 * (len(vals) - 1)))]
+    if my_last3f <= p30:
+        return 15, [f"뒷힘 강점(상3F {my_last3f}초·상위30%) +15"], "강"
+    if my_last3f >= p70:
+        return -5, [f"막판 둔화(상3F {my_last3f}초·하위30%) -5"], "약"
+    return 0, [f"상3F {my_last3f}초(보통)"], "보통"
+
+
+# ── 2-1 고배당 말 자동 제거 [1·5번] ──────────────
+def _high_odds_verdict(win_odds, has_signal):
+    """[1·5번] 단승 배당 기준 고배당 제거. 999=무조건 / 100배+=확실 / 50~99=권장 / 30~49=신호없으면 제거.
+    반환 (force_cut, reason). 이변 신호(급락·쌍승상위) 있으면 30~99배 구간은 제거 보류(999·100+는 무조건)."""
+    if not isinstance(win_odds, (int, float)) or win_odds <= 0:
+        return False, ""
+    if win_odds >= 999:
+        return True, "단승 999배 → 무조건 제거(전적 무관)"
+    if win_odds >= 100:
+        return True, "단승 100배+ → 확실 제거"
+    if win_odds >= 50:
+        return (not has_signal), "단승 50~99배 → 제거 권장"
+    if win_odds >= 30:
+        return (not has_signal), "단승 30~49배 → 관찰(신호 없으면 제거)"
+    return False, ""
+
+
 # ── 3-4 특수 플래그 ──────────────────────
 def special_flags(horse, race):
     """동일거리 2착 2회↑ → 삼복승필수 / 마체중 ±10kg↑ 경고 / 출전간격 3주↑ 주의 / 연속출전 피로도."""
@@ -12577,15 +12769,20 @@ def score_horses_raw(race, horses, jockey_threshold=None, leader_names=None):
         db_, dd = distance_change_bonus(h, race, style)        # [3] 거리 변화
         kb, kd = jockey_change_bonus(h, leader_names)          # [4] 기수 교체
         wb, wd = weight_change_bonus(h)                        # [5] 부담중량 변화
+        # [등급/당거리 보정] 등급 경험·하락강자 + 당거리 정확경험(뒷힘은 상3F 있는 지방/중앙 build_form 에서)
+        past_grades = [pr.get("grade") for pr in (h.get("pastRaces") or [])]
+        gb, gd = grade_bonus(h.get("grade") or race.get("grade"), past_grades)   # [2] 등급 체계
+        deb, ded, dexp = dist_exp_bonus(h.get("pastRaces"), race.get("distance"))  # [3] 당거리 경험
         flags = special_flags(h, race)
         scored.append({
             "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "recentPlacings": placings[:5],
             "baseScore": base, "courseBonus": cb, "jockeyBonus": jb,
             "distanceBonus": db_, "jockeyChangeBonus": kb, "weightBonus": wb,
+            "gradeBonus": gb, "distExpBonus": deb, "distExperienced": dexp,
             "runningStyle": style,
-            "totalScore": round(base + cb + jb + db_ + kb + wb, 1),
-            "detail": cd + jd + dd + kd + wd, "flags": flags,
+            "totalScore": round(base + cb + jb + db_ + kb + wb + gb + deb, 1),
+            "detail": cd + jd + dd + kd + wd + gd + ded, "flags": flags,
             "anomaly": h.get("anomaly"),
         })
     return scored, jockey_threshold

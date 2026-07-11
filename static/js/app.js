@@ -7330,26 +7330,37 @@
   function renderKeibaStarters(d) {
     const r = d.race || {}, hs = d.horses || [];
     const gbadge = (g) => { const col = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#94a3b8' }[g] || '#94a3b8'; return `<span class="chip" style="border-color:${col};color:${col}">${g}</span>`; };
-    const rows = hs.map((h) => `<tr>
+    const rows = hs.map((h) => {
+      const bp = h.backPower === '강' ? ' <span title="뒷힘 강점(상3F 상위30%)">💪</span>' : '';
+      const ins = h.backPowerInsurance ? ' <span class="hint" style="color:#ffd24f" title="거리 미경험이나 뒷힘 강점 → 삼복승 보험">⚡</span>' : '';
+      return `<tr>
       <td style="text-align:center;font-weight:700">${h.rank}</td>
       <td style="text-align:center;font-weight:700">${h.no}</td>
-      <td>${esc(h.name || '')} <span class="hint" style="font-size:10px">${esc(h.jockey || '')} ${h.weight != null ? h.weight + 'kg' : ''}</span></td>
+      <td>${esc(h.name || '')}${bp}${ins} <span class="hint" style="font-size:10px">${esc(h.jockey || '')} ${h.weight != null ? h.weight + 'kg' : ''}</span></td>
       <td style="text-align:center">${gbadge(h.grade)}</td>
-      <td style="text-align:right"><b>${h.totalScore}</b></td>
+      <td style="text-align:right"><b>${h.totalScore}</b>${h.gradeBonus ? ` <span class="hint" style="font-size:9px;color:#4ea1ff">등급${h.gradeBonus > 0 ? '+' : ''}${h.gradeBonus}</span>` : ''}</td>
       <td style="text-align:center" title="각질(통과순위)">${esc(h.styleType || '-')}</td>
       <td style="text-align:center" title="최근5착순">${(h.recentPlacings || []).join('·') || '-'}</td>
-      <td style="text-align:center" title="상3F 평균(막판스피드)">${h.last3f != null ? h.last3f : '-'}</td>
-      <td class="hint" style="font-size:10px">${(h.detail || []).map(esc).join(' · ')}</td></tr>`).join('');
+      <td style="text-align:center" title="상3F 평균(막판스피드)">${h.last3f != null ? h.last3f : '-'}${h.backPower === '강' ? ' 💪' : ''}</td>
+      <td class="hint" style="font-size:10px">${(h.detail || []).map(esc).join(' · ')}</td></tr>`;
+    }).join('');
+    // [3번] 💪 뒷힘 강점 말 요약(상3F 상위30%) — 거리 미경험이나 막판 뒤집기 후보 강조
+    const strongBack = hs.filter((h) => h.backPower === '강');
+    const backBox = strongBack.length ? `<div style="margin:8px 0;padding:8px 10px;background:rgba(56,211,159,.1);border-left:3px solid #38d39f;border-radius:6px">
+      <div style="font-weight:700;color:#38d39f">💪 뒷힘 강점 말 <span class="hint" style="font-weight:400">(상3F 상위30% · 막판 뒤집기 가능)</span></div>
+      ${strongBack.map((h) => `<div class="hint" style="margin-top:2px">· <b>${h.no}번 ${esc(h.name || '')}</b> — 상승3F ${h.last3f != null ? h.last3f + '초' : '-'}${h.distExperienced === false ? ' · <span style="color:#ffd24f">⚡ 거리 미경험이나 막판 뒤집기 가능(삼복승 보험)</span>' : ''}</div>`).join('')}
+    </div>` : '';
     const linked = d.linkedRaceKey
       ? `<div class="hint" style="margin:2px 0 8px;padding:6px 9px;background:rgba(56,211,159,.14);border-left:3px solid #38d39f;border-radius:6px;color:#38d39f">✅ <b>live 통합 연동됨</b> — <b>${esc(d.linkedRaceKey)}</b> 유력마·통합등급(전적+배당역배열)에 이 전적이 반영됩니다.</div>`
       : `<div class="hint" style="margin:2px 0 8px;padding:6px 9px;background:rgba(245,158,11,.12);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b">⚠️ live 연동 안 됨(raceKey 미지정) — 전적만 표시.</div>`;
     return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px">
       ${linked}
       <div class="matrix-title">🏇 ${esc(r.venue || '')} ${r.raceNo != null ? r.raceNo + 'R' : ''} <span class="hint" style="font-weight:400">${esc(r.surface || '')}${r.distance != null ? r.distance + 'm' : ''} 마장 ${esc(r.trackCond || '?')} · ${hs.length}두</span></div>
+      ${backBox}
       <table class="data-table" style="margin-top:6px">
         <thead><tr><th>순</th><th>마번</th><th>마명(기수·부담)</th><th>등급</th><th>총점</th><th>각질</th><th>최근착순</th><th>상3F</th><th>근거</th></tr></thead>
         <tbody>${rows}</tbody></table>
-      <p class="hint" style="font-size:11px;margin-top:6px">전적점수 = 최근5착순 가중평균 + 각질(통과순위: 선행+3/추격+5) + 거리변화(단축+5) + 부담중량(감소+5). 등급=이 경주 내 사분위 상대(A 상위25%). 상3F↓=막판 스피드 우수.</p>
+      <p class="hint" style="font-size:11px;margin-top:6px">전적점수 = 최근5착순 가중평균 + 각질(선행+3/추격+5) + 거리변화(단축+5) + 부담(감소+5) + <b>등급경험(G1~G3/A1 +20·오픈 +10)</b> + <b>당거리경험(+10)</b> + <b>뒷힘(상3F 상위30% +15)</b>. 등급=경주 내 사분위 상대. 💪=뒷힘 강점 · ⚡=거리 미경험이나 뒷힘 강점(삼복승 보험).</p>
     </div>`;
   }
 
