@@ -1695,7 +1695,8 @@ def _race_pin_load():
 
 def _race_pin_save(rk):
     os.makedirs(os.path.dirname(RACE_PIN_FILE), exist_ok=True)
-    json.dump({"raceKey": (rk or "").strip(), "pinnedAt": time.time()},
+    json.dump({"raceKey": (rk or "").strip(), "pinnedAt": time.time(),
+               "date": time.strftime("%Y-%m-%d")},   # [날짜 초기화] 고정 날짜 기록 → 어제 고정 자동 해제 판정
               open(RACE_PIN_FILE, "w", encoding="utf-8"), ensure_ascii=False)
 
 
@@ -15232,9 +15233,16 @@ def multi_race_detail(key):
 def _multi_bg_loop():
     """[1·2번] 백그라운드: 스케줄 30분 갱신 + 발주 임박 경주 배당 주기 수집(실패 격리·서버 죽지 않음)."""
     last_sched = 0
+    last_day = time.strftime("%Y%m%d")
     while True:
         try:
             now = time.time()
+            # [날짜 자동 초기화] 자정 넘어 날짜 바뀌면 어제 데이터 정리 + 스케줄 즉시 재수집(새 날짜 경주로 재시작)
+            _cur_day = time.strftime("%Y%m%d")
+            if _cur_day != last_day:
+                print(f"[날짜초기화] 날짜 변경 {last_day}→{_cur_day} → 어제 데이터 자동 정리")
+                _startup_date_reset()
+                last_day, last_sched = _cur_day, 0
             if now - last_sched >= 1800:       # 30분마다 스케줄 갱신
                 _multi_schedule_fetch()
                 last_sched = now
@@ -15259,6 +15267,51 @@ def _start_multi_race_bg():
         print("[다중경주] 백그라운드 시작 실패(단일 모드 유지):", e)
 
 
+def _startup_date_reset():
+    """[서버 시작 시 날짜 자동 초기화] 어제(오늘 아닌 날짜) 데이터를 자동 정리 → '어제 경주 잔존' 방지.
+      ⚠ 학습 데이터(odds_history·learning·pattern 등)는 절대 건드리지 않음 — 활성 캐시/고정만 정리(기존 기능 무영향)."""
+    today = time.strftime("%Y-%m-%d")
+    today_ymd = time.strftime("%Y%m%d")
+
+    def _dstr(t):
+        return time.strftime("%Y-%m-%d", time.localtime(t or 0))
+    # 1) race_pin.json — 어제 고정 경주면 자동 해제(오늘 아닌 고정 초기화)
+    try:
+        d = json.load(open(RACE_PIN_FILE, encoding="utf-8"))
+        pdate = d.get("date") or _dstr(d.get("pinnedAt"))
+        if pdate != today:
+            _race_pin_clear()
+            print(f"[날짜초기화] 고정 경주({pdate}, 어제) → 자동 해제")
+    except Exception:
+        pass
+    # 2) multi_race_store — 오늘 아닌 경주 제거(oddspark 다중 수집 날짜 초기화)
+    try:
+        mdb = _multi_store_load()
+        keep = {k: v for k, v in mdb.items() if _dstr(v.get("t")) == today}
+        if len(keep) != len(mdb):
+            _multi_store_save(keep)
+            print(f"[날짜초기화] 다중경주 저장소: 어제 경주 {len(mdb) - len(keep)}건 제거(새 날짜로 재시작)")
+    except Exception:
+        pass
+    # 3) today_schedule — 어제 날짜면 비움(백그라운드가 오늘 스케줄로 재생성)
+    try:
+        sched = _schedule_load()
+        if sched.get("ymd") and sched["ymd"] != today_ymd:
+            _schedule_save({})
+            print(f"[날짜초기화] 스케줄({sched['ymd']}, 어제) → 초기화(오늘 재수집 대기)")
+    except Exception:
+        pass
+    # 4) triple_store(단일 경주 활성 캐시) — 어제 경주 제거(오늘 것만 유지). ⚠ odds_history 학습 파일은 보존.
+    try:
+        tdb = _triple_load()
+        keep = {k: v for k, v in tdb.items() if _dstr(v.get("t")) == today}
+        if len(keep) != len(tdb):
+            _triple_save(keep)
+            print(f"[날짜초기화] 단일 배당 활성캐시: 어제 경주 {len(tdb) - len(keep)}건 제거(히스토리 파일 보존)")
+    except Exception:
+        pass
+
+
 if __name__ == "__main__":
     print("서버 시작: http://127.0.0.1:8011 (자동 리로드 ON, 코드 수정이 바로 반영됩니다)")
     # debug=True: 코드 저장 시 자동 재기동(stale 서버로 인한 405 재발 방지). 로컬 전용(127.0.0.1).
@@ -15268,5 +15321,6 @@ if __name__ == "__main__":
         _korea_maybe_resume()
         _start_periodic_backup()   # [데이터 자동백업 완성] 6시간 주기 안전 백업(결과 미입력이어도 백업)
         _start_daily_learning_scheduler()   # [학습일지] 매일 22:00 학습 일지 자동 생성·백업
+        _startup_date_reset()      # [날짜 초기화] 서버 시작 시 어제 고정·수집 데이터 자동 정리(학습 데이터 보존)
         _start_multi_race_bg()     # [다중 경주 동시 배당판] 별도 저장소·실패격리·단일모드 무영향
     app.run(host="127.0.0.1", port=8011, debug=True, threaded=True)
