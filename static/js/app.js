@@ -1345,6 +1345,18 @@
     return (m ? m[1] : String(rk)).replace(/[\s·]+$/, '').trim();
   }
 
+  /** [자동 전환 게이트] 최신 수집 경주(latestRk)를 보고, 지금 화면에 표시해야 할 경주를 결정.
+   *  고정 중이거나 '다른 경마장'이면 현재 보고 있는 경주(_rrLastRk)를 유지 → 강제 전환 차단.
+   *  refreshCurrentRace·pollJapanOdds 두 자동 경로가 이 규칙을 공유(한 곳만 고치면 딴 경로가 전환시키던 문제 해결). */
+  function _targetRaceKey(latestRk) {
+    if (!latestRk) return _rrLastRk || null;
+    if (!_rrLastRk) return latestRk;                 // 최초 로드 = 최신 따름
+    if (latestRk === _rrLastRk) return latestRk;
+    if (_racePinned) return _rrLastRk;               // [2번] 고정 중 → 무조건 현재 경주 유지
+    if (_raceVenue(latestRk) !== _raceVenue(_rrLastRk)) return _rrLastRk;  // [3번] 다른 경마장 → 전환 안 함
+    return latestRk;                                 // 같은 경마장 다음 경주 → 전환 허용
+  }
+
   /** [3번] 📌 현재 경주 고정 토글 — 자동 전환 on/off. 버튼 라벨·상태 갱신. */
   function toggleRacePin() {
     _racePinned = !_racePinned;
@@ -5382,9 +5394,20 @@
     let latest;
     try { latest = await (await fetch('/api/odds/triple/latest')).json(); }
     catch (_) { return; }
-    const rk = latest && latest.raceKey;
+    const latestRk = latest && latest.raceKey;
     // [경주전환 잔존 방어] 수집 경주 없음 또는 30분+ 미갱신(끝난 경주) → 직전 배당 표시 안 함
-    if (!rk || latest.stale) { setJpOddsStatus('waiting'); return; }
+    if (!latestRk || latest.stale) { setJpOddsStatus('waiting'); return; }
+    // [경주 자동 전환 긴급 수정] 고정/다른 경마장이면 현재 보고 있는 경주(_rrLastRk) 유지 → 오비히로로 강제 전환 차단.
+    //   30초 폴링(pollJapanOdds)이 전역 최신 경주를 무조건 렌더하던 게 '계속 전환'의 진짜 원인.
+    const rk = _targetRaceKey(latestRk);
+    if (!rk) { setJpOddsStatus('waiting'); return; }
+    if (rk !== latestRk) {
+      // 최신은 다른 경주지만 고정/다른장이라 전환 안 함 — 상단 바에 감지만 표시(화면은 현재 경주 유지).
+      const st = $('#rrStatus');
+      if (st) st.textContent = _racePinned
+        ? `📌 고정 중 · 다른 경주 감지(${latestRk}) — 전환하려면 고정 해제`
+        : `🔀 다른 경마장 경주 감지(${latestRk}) — 전환하려면 새로고침`;
+    }
     // [탭분리·제주케이스] 한국경마(서울/부산/부경/제주/과천)는 한국경마 탭에서 실시간 배당 분석을 표시한다.
     //   → 일본경마 탭에서는 한국 경주를 렌더하지 않는다(같은 경주가 양 탭에 중복 표시되던 문제 방지).
     if (jpIsKoreaName(rk)) { setJpOddsStatus('waiting'); return; }
