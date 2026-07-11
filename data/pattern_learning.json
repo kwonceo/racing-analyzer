@@ -945,5 +945,259 @@
         "trifecta": "3+10+12(미적중·추천 7+10+12)"
       }
     }
-  ]
+  ],
+  "reversal_stats": {
+    "by_band": {
+      "축(35%+)": {
+        "n": 21,
+        "placed": 5,
+        "won": 2,
+        "place_rate": 23.8,
+        "win_rate": 9.5
+      },
+      "보험(10~20%)": {
+        "n": 6,
+        "placed": 1,
+        "won": 0,
+        "place_rate": 16.7,
+        "win_rate": 0.0
+      },
+      "보조(20~35%)": {
+        "n": 1,
+        "placed": 0,
+        "won": 0,
+        "place_rate": 0.0,
+        "win_rate": 0.0
+      }
+    },
+    "sample_cases": [
+      {
+        "race": "2026-07-05 佐賀 10R",
+        "challenger": 1,
+        "diffPct": 84.0,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "2026-07-05 高知 11R",
+        "challenger": 3,
+        "diffPct": 37.4,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "사가 10경주",
+        "challenger": 6,
+        "diffPct": 73.1,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "사가 3경주",
+        "challenger": 8,
+        "diffPct": 67.5,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "사가 8경주",
+        "challenger": 9,
+        "diffPct": 16.0,
+        "band": "보험(10~20%)",
+        "placed": true,
+        "won": false
+      },
+      {
+        "race": "사가 9경주",
+        "challenger": 8,
+        "diffPct": 73.0,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "오비히로 10경주",
+        "challenger": 9,
+        "diffPct": 16.0,
+        "band": "보험(10~20%)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "오비히로 11경주",
+        "challenger": 5,
+        "diffPct": 59.6,
+        "band": "축(35%+)",
+        "placed": true,
+        "won": true
+      },
+      {
+        "race": "오비히로 12경주",
+        "challenger": 4,
+        "diffPct": 67.2,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "오비히로 6경주",
+        "challenger": 8,
+        "diffPct": 41.6,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "코치 10경주",
+        "challenger": 8,
+        "diffPct": 83.2,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "코치 11경주",
+        "challenger": 6,
+        "diffPct": 48.1,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "하코다테 10경주",
+        "challenger": 1,
+        "diffPct": 88.6,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "도리데 1경주",
+        "challenger": 2,
+        "diffPct": 81.6,
+        "band": "축(35%+)",
+        "placed": true,
+        "won": false
+      },
+      {
+        "race": "모리오카 1경주",
+        "challenger": 8,
+        "diffPct": 59.0,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "모리오카 3경주",
+        "challenger": 1,
+        "diffPct": 38.5,
+        "band": "축(35%+)",
+        "placed": true,
+        "won": false
+      },
+      {
+        "race": "모리오카 6경주",
+        "challenger": 7,
+        "diffPct": 34.9,
+        "band": "보조(20~35%)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "몬베츠 1경주",
+        "challenger": 1,
+        "diffPct": 75.2,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "카나자와 4경주",
+        "challenger": 5,
+        "diffPct": 62.4,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "호후 2경주",
+        "challenger": 7,
+        "diffPct": 81.4,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "히로시마 1경주",
+        "challenger": 3,
+        "diffPct": 80.3,
+        "band": "축(35%+)",
+        "placed": true,
+        "won": false
+      },
+      {
+        "race": "몬베츠 3경주",
+        "challenger": 3,
+        "diffPct": 19.9,
+        "band": "보험(10~20%)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "몬베츠 7경주",
+        "challenger": 1,
+        "diffPct": 40.6,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "2026-07-09 카와사키 1경주",
+        "challenger": 3,
+        "diffPct": 19.9,
+        "band": "보험(10~20%)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "카와사키 6경주",
+        "challenger": 4,
+        "diffPct": 12.3,
+        "band": "보험(10~20%)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "오다와라 1경주",
+        "challenger": 6,
+        "diffPct": 10.9,
+        "band": "보험(10~20%)",
+        "placed": false,
+        "won": false
+      },
+      {
+        "race": "히로시마 2경주",
+        "challenger": 7,
+        "diffPct": 62.3,
+        "band": "축(35%+)",
+        "placed": true,
+        "won": true
+      },
+      {
+        "race": "하코다테 10경주",
+        "challenger": 14,
+        "diffPct": 63.7,
+        "band": "축(35%+)",
+        "placed": false,
+        "won": false
+      }
+    ],
+    "total_cases": 28,
+    "note": "역배열 challenger 강도별 실제 입상/1착률(analysis_log 결과 집계·경주당 최강 역전 1건). 표본 적으면 참고만.",
+    "updated": "2026-07-11"
+  }
 }

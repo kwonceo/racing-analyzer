@@ -3318,6 +3318,86 @@ def _inversion_tier(diff_pct):
     return "🔴🔴", "압도적 역배열"
 
 
+def _reversal_role(diff_pct, confirmed):
+    """[역배열 강도별 축 역할·사용자 요청] 배당 차이%(양수) + 지속성(2회+ 확정) → 역할.
+      35%+ → 축(복승 메인) / 20~35% → 보조(복승 보조) / 10~20% → 보험(삼복승) / 10% 미만 → 무시(None).
+      [지속성] 1회만 감지된 축(35%+)은 '후보'로 보조 강등(마감 전 2회+ 연속만 확정 축)."""
+    if diff_pct is None or diff_pct < 10:
+        return None
+    if diff_pct >= 35:
+        return "축" if confirmed else "보조"     # 1회만이면 후보 → 보조 강등
+    if diff_pct >= 20:
+        return "보조"
+    return "보험"                                # 10~20%
+
+
+def _exacta_map_any(x):
+    """exacta(리스트 [{combo,odds}] 또는 딕셔너리 {'1>2':배당·'1-2'·'1→2'}) → {(선,후):배당} 방향 맵."""
+    if isinstance(x, dict):
+        m = {}
+        for k, v in x.items():
+            try:
+                parts = [int(y) for y in re.split(r"[>\-→]", str(k)) if y.strip().lstrip("-").isdigit()]
+                o = float(v)
+            except (ValueError, TypeError):
+                continue
+            if len(parts) == 2 and o > 0 and ((parts[0], parts[1]) not in m or o < m[(parts[0], parts[1])]):
+                m[(parts[0], parts[1])] = o
+        return m
+    return _odds_map_dir(x)
+
+
+def _reversal_persistence(hist, fav_rank, lookback=5):
+    """[역배열 지속성] 최근 스냅샷들에서 각 challenger가 역배열(ratio<0.90)로 몇 회 감지됐는지 집계.
+      현재 fav_rank 기준으로 과거 exacta에 역전 재계산(근사). 반환 {challenger_no: 감지횟수}."""
+    counts = {}
+    for h in (hist or [])[-lookback:]:
+        exm = _exacta_map_any(h.get("exacta"))
+        if not exm:
+            continue
+        for r in _win_exacta_reversal(fav_rank, exm):
+            ch = r.get("challenger")
+            if ch is not None:
+                counts[int(ch)] = counts.get(int(ch), 0) + 1
+    return counts
+
+
+def _reversal_axis_roles(wx_reversals, hist, fav_rank, curWin, curQ):
+    """[역배열 강도별 처리] challenger별 역할(축/보조/보험) + 지속성(확정/후보) 산출.
+      반환 [{no, diffPct, ratio, role, persistence, confirmed, reprOdds}] (강도 높은 순)."""
+    if not wx_reversals:
+        return []
+    persist = _reversal_persistence(hist, fav_rank)
+
+    def _rep(h):
+        if curWin.get(h):
+            return curWin[h]
+        best = None
+        for (a, b), o in (curQ or {}).items():
+            if h in (a, b) and o > 0 and (best is None or o < best):
+                best = o
+        return best
+
+    seen, out = set(), []
+    for r in wx_reversals:
+        ch = r.get("challenger")
+        if ch is None or int(ch) in seen:
+            continue
+        ch = int(ch)
+        seen.add(ch)
+        ratio = r.get("ratio") or 1.0
+        diff_pct = round((1 - ratio) * 100, 1)
+        cnt = max(persist.get(ch, 0), 1)          # 현재 감지분 최소 1 보장(hist에 현재 스냅샷 미포함 대비)
+        confirmed = cnt >= 2                        # [2번] 마감 전 2회+ 연속 = 확정 축
+        role = _reversal_role(diff_pct, confirmed)
+        if role is None:
+            continue
+        out.append({"no": ch, "diffPct": diff_pct, "ratio": ratio, "role": role,
+                    "persistence": cnt, "confirmed": confirmed, "reprOdds": _rep(ch)})
+    out.sort(key=lambda x: -x["diffPct"])
+    return out
+
+
 def _win_exacta_reversal(fav_rank, curD, max_rank=4):
     """[1번] 쌍승 역전 감지 공식. 단승 유력마 A vs 다른 말 B 방향 비교.
       역전비율 = 쌍승(B→A) / 쌍승(A→B).  A가 유력한데 B→A가 더 싸면(비율<1) 시장은 B를 실질 1착으로 봄.
@@ -5231,15 +5311,20 @@ def _flow_scores(hist, valid_nos, strong_signals, advanced, curQ, curWin, invers
     return out
 
 
-def _flow_removal(flow, key_horses):
-    """[1번] 흐름 기반 제거 대상: 죽은인기/3연속상승/페이크/역배열반대. 유력마 축(상위2)은 제외(안전)."""
+def _flow_removal(flow, key_horses, keep_low_odds=3.0):
+    """[1번] 흐름 기반 제거 대상: 죽은인기/3연속상승/페이크/역배열반대. 유력마 축(상위2)은 제외(안전).
+      [3번·저배당 보조 유지] 흐름이 없어도 저배당(대표배당 keep_low_odds=3배 이하) 말은 제거하지 않고
+      '보조'로 유지(시장 최상위권은 흐름 무관 실전력 있음 → 완전 제거 금지). 반환에 keptLowOdds 표시."""
     axis = set(int(h) for h in (key_horses or [])[:2] if h is not None)
     rem = []
     for no, f in flow.items():
         if no in axis:
             continue
         if f.get("removeReasons"):
-            rem.append({"no": no, "rep": f.get("rep"), "trend": f.get("trend"),
+            _rep = f.get("rep")
+            if _rep is not None and _rep <= keep_low_odds:
+                continue                                # [3번] 3배 이하 저배당 = 제거 대신 보조 유지(제거 목록서 제외)
+            rem.append({"no": no, "rep": _rep, "trend": f.get("trend"),
                         "reasons": f["removeReasons"], "score": f.get("score")})
     rem.sort(key=lambda x: (x.get("score") or 0))       # 점수 낮은(제거 확실) 순
     return rem
@@ -5637,26 +5722,26 @@ def _triple_analyze(rk, rec):
     #   카와사키 7R: raw 쌍승역전(11↔7) T-3분 감지됐으나 정식 공식(단승 대비)은 마감 후에야 7번 확정 →
     #   복승 인기 기반 wx_reversals(단승 불필요)의 강한 역전(ratio<0.80) challenger(실질 1착 후보)를
     #   마감 전에 한해 key_horses 상위로 조기 승격(기존 유력마는 뒤로 보존·삭제 아님). 마감 후엔 미적용.
+    # [역배열 강도별 처리·사용자 요청] 강도(배당차%)+지속성으로 역할 분리(기존 pre_reversal 확장·무삭제):
+    #   35%+ 확정(2회+) → 축(복승 메인 승격) / 20~35% → 복승 보조 / 10~20% → 삼복승 보험 / 10%미만 무시.
+    #   1회만 감지된 35%+는 '후보'로 보조 강등(마감 전 2회+ 연속만 확정 축).
     pre_reversal = []
-    if not after_close and wx_reversals:
-        def _repr_odds(h):
-            if curWin.get(h):
-                return curWin[h]                         # 단승 있으면 그 값
-            best = None
-            for (a, b), o in curQ.items():               # 없으면 그 말 포함 최저 복승
-                if h in (a, b) and o > 0 and (best is None or o < best):
-                    best = o
-            return best
-        for _r in wx_reversals:
-            if (_r.get("ratio") or 1) < 0.80:            # 강한 역전만(노이즈 억제)
-                _ch = _r.get("challenger")
-                if _ch is None:
-                    continue
-                _ch = int(_ch)
-                _ro = _repr_odds(_ch)
-                # 아웃사이더(고배당)는 기존 reversalPick(소액 삼복승 보험)으로 유지 → contender만 조기 승격
-                if _ch not in pre_reversal and _ro is not None and _ro <= 15:
+    reversal_sub = []            # [보조] 20~35% 또는 후보(1회 축) → 복승 보조
+    reversal_insurance = []      # [보험] 10~20% → 삼복승 보험
+    reversal_roles = _reversal_axis_roles(wx_reversals, hist, fav_rank, curWin, curQ) if (not after_close and wx_reversals) else []
+    if reversal_roles:
+        for _rr in reversal_roles:
+            _ch, _ro, _role = _rr["no"], _rr.get("reprOdds"), _rr["role"]
+            if _role == "축":
+                # 축은 실경쟁마(≤15배)만 key_horses 승격(롱샷 오탐 방지) — 기존 조건 유지
+                if _ro is not None and _ro <= 15 and _ch not in pre_reversal:
                     pre_reversal.append(_ch)
+            elif _role == "보조":
+                if _ro is not None and _ro <= 20 and _ch not in reversal_sub:
+                    reversal_sub.append(_ch)
+            elif _role == "보험":
+                if _ch not in reversal_insurance:
+                    reversal_insurance.append(_ch)
         if pre_reversal:
             key_horses = (pre_reversal + [h for h in key_horses if h not in pre_reversal])[:3]
             ranked = pre_reversal + [h for h in ranked if h not in pre_reversal]
@@ -5844,6 +5929,22 @@ def _triple_analyze(rk, rec):
             smart_quinella.append({"no": _sm_no, "combo": _sm_combo, "axis": _sm_axis, "odds": _sm_odds})
             if len(smart_quinella) >= 2:
                 break
+
+    # [역배열 강도별 보조·보험] 20~35% 역배열 → 복승 보조 / 10~20% → 삼복승 보험(축 승격은 위 pre_reversal에서 이미 처리).
+    if not after_close and key_horses:
+        _rvx = int(key_horses[0])
+        for _rs in reversal_sub[:2]:
+            if int(_rs) not in [int(k) for k in key_horses]:
+                _rsc = sorted({_rvx, int(_rs)})
+                if len(_rsc) == 2:
+                    _addbet("복승", "복승 보조(역배열 20~35%)", _rsc, 8, _q(_rsc[0], _rsc[1]))
+        if len(key_horses) >= 2:
+            _rv2 = [int(key_horses[0]), int(key_horses[1])]
+            for _ri in reversal_insurance[:2]:
+                if int(_ri) not in _rv2:
+                    _ric = sorted(set(_rv2 + [int(_ri)]))
+                    if len(_ric) == 3:
+                        _addbet("삼복승", "삼복승 보험(역배열 10~20%)", _ric, 4, trio_map.get(tuple(_ric)))
 
     # [삼복승 무조건 편성] 배당판(실배당) 유무·유력마 3두 미만과 무관하게 삼복승을 항상 추천에 포함.
     #   유력마가 3두 미만이면 선호순 풀(ranked→단승순→복승조합 등장마)로 3두를 채워 메인 생성.
@@ -6506,6 +6607,7 @@ def _triple_analyze(rk, rec):
         "darkHorses": dark_horses,   # [복병_집중급락] 집중급락 10회+/스마트머니 → 배당순위 무관 복병 자동 편입
         "marketFavorites": market_favorites,   # [전적 과가중 해결] 저배당(5배↓) 시장유력마(전적 미수집도 유력마 편입)
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
+        "reversalRoles": reversal_roles,   # [역배열 강도별 처리] challenger별 축/보조/보험 역할 + 지속성(확정/후보)
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
         "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용
         "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
@@ -11351,6 +11453,95 @@ def learning_upset():
         "patterns": (d.get("patterns") or [])[-30:][::-1],   # 최근 30건(최신 우선)
         "total": len(d.get("patterns") or []),
     })
+
+
+def _parse_reversal_signal(s):
+    """[4번] analysis_log signals_detected 의 역배열 신호 → (challenger, ratio) 추출(두 포맷 지원)."""
+    typ, det, rea = str(s.get("type", "")), str(s.get("detail", "")), str(s.get("reason", ""))
+    try:
+        if typ == "쌍승역전공식":
+            mch = re.search(r"실질 1착: (\d+)번", det)
+            mr = re.search(r"([01]\.\d{2,3})", det)
+            if mch and mr:
+                return int(mch.group(1)), float(mr.group(1))
+        elif typ == "역전":
+            mch = re.search(r"시장이 (\d+)번", rea)
+            mo = re.findall(r"\(([\d.]+)\)", det)
+            if mch and len(mo) >= 2 and float(mo[1]) > 0:
+                return int(mch.group(1)), round(float(mo[0]) / float(mo[1]), 3)
+    except (ValueError, TypeError):
+        pass
+    return None, None
+
+
+def _reversal_strength_stats():
+    """[4번] 역배열 강도별 실제 적중률 집계 — analysis_log 결과 있는 경주에서 경주당 최강 역전 1건을
+    강도(배당차%)로 버킷(축35%+/보조20~35%/보험10~20%)해 입상률·1착률 계산. pattern_learning.json 갱신용."""
+    def _band(diff):
+        if diff is None or diff < 10:
+            return None
+        if diff >= 35:
+            return "축(35%+)"
+        if diff >= 20:
+            return "보조(20~35%)"
+        return "보험(10~20%)"
+    stats, cases = {}, []
+    if not os.path.isdir(ANALYSIS_LOG_DIR):
+        return {"by_band": {}, "sample_cases": [], "total_cases": 0}
+    for fn in os.listdir(ANALYSIS_LOG_DIR):
+        if not fn.endswith(".json"):
+            continue
+        try:
+            d = json.load(open(os.path.join(ANALYSIS_LOG_DIR, fn), encoding="utf-8"))
+        except Exception:
+            continue
+        res = d.get("result")
+        if not isinstance(res, dict):
+            continue
+        top = [int(x) for x in [res.get("1st"), res.get("2nd"), res.get("3rd")] if x is not None]
+        if not top:
+            continue
+        best = None
+        for s in (d.get("signals_detected") or []):
+            ch, ratio = _parse_reversal_signal(s)
+            if ch is None:
+                continue
+            if best is None or ratio < best[1]:
+                best = (ch, ratio)
+        if not best:
+            continue
+        ch, ratio = best
+        diff = round((1 - ratio) * 100, 1)
+        band = _band(diff)
+        if not band:
+            continue
+        placed = 1 if ch in top else 0
+        won = 1 if ch == top[0] else 0
+        x = stats.setdefault(band, {"n": 0, "placed": 0, "won": 0})
+        x["n"] += 1
+        x["placed"] += placed
+        x["won"] += won
+        cases.append({"race": d.get("raceKey"), "challenger": ch, "diffPct": diff,
+                      "band": band, "placed": bool(placed), "won": bool(won)})
+    for band, x in stats.items():
+        x["place_rate"] = round(x["placed"] / x["n"] * 100, 1) if x["n"] else 0.0
+        x["win_rate"] = round(x["won"] / x["n"] * 100, 1) if x["n"] else 0.0
+    return {"by_band": stats, "sample_cases": cases[-60:], "total_cases": len(cases),
+            "note": "역배열 challenger 강도별 실제 입상/1착률(경주당 최강 역전 1건). 표본 적으면 참고만(50+ 유의).",
+            "updated": time.strftime("%Y-%m-%d")}
+
+
+@app.route("/api/learning/reversal-stats", methods=["GET", "POST"])
+def learning_reversal_stats():
+    """[4번] 역배열 강도별 적중률 조회 + (POST) pattern_learning.json 재집계 갱신."""
+    if request.method == "POST":
+        rs = _reversal_strength_stats()
+        d = _upset_load()
+        d["reversal_stats"] = rs
+        _upset_save(d)
+        return jsonify({"ok": True, "reversal_stats": rs})
+    d = _upset_load()
+    return jsonify(d.get("reversal_stats") or _reversal_strength_stats())
 
 
 @app.route("/api/patterns/discovered", methods=["GET", "POST"])
