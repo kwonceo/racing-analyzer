@@ -53,7 +53,72 @@ chrome.runtime.onInstalled.addListener(() => {
     { autoSend: false, intervalSec: 30, raceKey: '' },
     (v) => { chrome.storage.local.set(v); syncAutoEngine(); }
   );
+  scheduleKeirinDaily();   // [경륜 스케줄] 매일 08:00 자동 수집 알람 등록
 });
+
+// ═══ [확장 경유 경륜 스케줄 자동 수집] oddspark 경륜은 로그인 필요 → 로그인 세션 보유한 확장이
+//   KaisaiRaceList를 fetch·파싱해 서버로 POST(FETCH_RESULT_HTML과 동일 패턴). 하루 1회(오전 8시). ═══
+const KEIRIN_JO_MAP = {   // joCode → 경륜장(한글). 없으면 title에서 파싱·폴백
+  '36': '오다와라', '62': '히로시마', '01': '마에바시', '04': '기후', '85': '사세보',
+  '83': '구루메', '81': '고쿠라', '31': '마쓰도', '45': '히라쓰카', '48': '가와사키', '73': '기시와다',
+};
+function _todayYmd() {
+  const d = new Date();
+  return '' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+}
+async function _oddsparkFetch(url) {
+  const res = await fetch(url, { credentials: 'include' });   // 로그인 세션(쿠키) 포함
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.text();
+}
+async function fetchKeirinSchedule() {
+  try {
+    const ymd = _todayYmd();
+    const listHtml = await _oddsparkFetch('https://www.oddspark.com/keirin/KaisaiRaceList.do?kaisaiBi=' + ymd);
+    // 개최 경륜장 joCode 추출(중복 제거)
+    const jos = [...new Set([...listHtml.matchAll(/joCode=(\d{1,3})/g)].map((m) => m[1]))];
+    const tracks = [];
+    for (const jo of jos) {
+      try {
+        const rlHtml = await _oddsparkFetch('https://www.oddspark.com/keirin/RaceList.do?joCode=' + jo + '&kaisaiBi=' + ymd);
+        // 경륜장명: title '…〇〇競輪…' 에서, 없으면 매핑/폴백
+        let venue = KEIRIN_JO_MAP[jo] || '';
+        if (!venue) { const tm = rlHtml.match(/<title>[^<]*?([가-힣]{2,6}|[一-龯]{2,5})\s*(?:競輪|경륜)/); if (tm) venue = tm[1]; }
+        if (!venue) venue = '경륜' + jo;
+        // 경주번호 + 発走時刻(HH:MM) 파싱(방어적) — raceNo 링크 + 부근 시각
+        const races = {};
+        for (const seg of rlHtml.split(/<\/tr>|<\/li>|<tr[ >]|<li[ >]/)) {
+          const mn = seg.match(/raceNo=(\d{1,2})/);
+          if (!mn) continue;
+          const rno = parseInt(mn[1], 10);
+          if (rno < 1 || rno > 12 || races[rno]) continue;
+          const mt = seg.match(/(?:発走時刻|発走時間|発走|締切)[^\d]{0,6}(\d{1,2}:\d{2})/) || seg.match(/\b(\d{1,2}:\d{2})\b/);
+          races[rno] = { raceNo: rno, postTime: mt ? mt[1] : null };
+        }
+        const raceList = Object.keys(races).map((k) => races[k]).sort((a, b) => a.raceNo - b.raceNo);
+        if (raceList.length) tracks.push({ joCode: jo, venue: venue, races: raceList });
+      } catch (e) { console.log('[경륜스케줄]', jo, '실패(건너뜀):', e.message || e); }
+    }
+    if (tracks.length) {
+      await fetch(SERVER + '/api/multi/keirin-schedule', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ymd: ymd, tracks: tracks }),
+      });
+      console.log('[경륜스케줄] 서버 전송 완료:', tracks.length, '개 경륜장');
+    } else {
+      console.log('[경륜스케줄] 개최 없음 또는 미로그인(로그인 필요)');
+    }
+  } catch (e) {
+    console.log('[경륜스케줄] 실패(로그인/네트워크?):', e.message || e);
+  }
+}
+function scheduleKeirinDaily() {
+  // 다음 오전 8시로 알람 예약(이미 지났으면 내일 8시) + 24시간 주기
+  const now = new Date();
+  const next = new Date(now); next.setHours(8, 0, 0, 0);
+  if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 1);
+  chrome.alarms.create('keirinSchedule', { when: next.getTime(), periodInMinutes: 1440 });
+}
 
 async function postSnapshot(payload) {
   const res = await fetch(SNAPSHOT_URL, {
@@ -413,6 +478,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'resumeCheck') { syncAutoEngine(); return; }
   // [v2.0.1] 발주 후 결과 자동수집 알람
   if (/^resFetch\d/.test(alarm.name)) { doResultFetch(parseInt(alarm.name.replace('resFetch', ''), 10)); return; }
+  // [확장 경유 경륜 스케줄] 매일 08:00 → oddspark 경륜 스케줄 fetch(로그인 세션)·서버 전송
+  if (alarm.name === 'keirinSchedule') { fetchKeirinSchedule(); return; }
   // [다음경주 자동전환] T+3분 새로고침 · T+3분30초 재수집 · T+4분 분석+알림
   if (alarm.name === 'nextRefresh') { _nextRaceRefresh(); return; }
   if (alarm.name === 'nextCollect') { _nextRaceCollect(); return; }
@@ -867,6 +934,6 @@ chrome.storage.onChanged.addListener((ch, area) => {
   if (ch.autoSend || ch.intervalSec || ch.autoMode || ch.timerDeadline || ch.market || ch.japanType) syncAutoEngine();
 });
 // 브라우저 시작/서비스워커 부활 시 엔진 복원
-chrome.runtime.onStartup.addListener(syncAutoEngine);
+chrome.runtime.onStartup.addListener(() => { syncAutoEngine(); scheduleKeirinDaily(); });
 // 로드 즉시 1회 동기화(이미 autoSend 켜져 있으면 바로 재개)
 syncAutoEngine();

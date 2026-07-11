@@ -15239,12 +15239,22 @@ def _multi_key(venue, race_no):
 
 
 def _multi_collect_one(track, race, ymd):
-    """[2번] 한 경주 배당 수집 → multi_race_store 저장(실패 격리·triple_store 미접근). 반환 raceKey 또는 None."""
+    """[2번] 한 경주 배당 수집 → multi_race_store 저장(실패 격리·triple_store 미접근). 반환 raceKey 또는 None.
+      종목 라우팅: opTrackCd=경마(keiba) · joCode=경륜(keirin·배당은 공개라 서버 수집 가능·스케줄만 로그인 필요)."""
     try:
-        op, sp = track["opTrackCd"], track["sponsorCd"]
         rno = race["raceNo"]
-        q = _keiba_parse_quinella(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["quinella"])))
-        x = _keiba_parse_exacta(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["exacta"])))
+        is_cycle = bool(track.get("joCode")) and (track.get("sport") == "cycle" or not track.get("opTrackCd"))
+        if is_cycle:
+            jo = track["joCode"]
+            # 경륜: betType 5=복승(2車複)·6=쌍승(2車単) (경마와 반대)
+            q = _keirin_parse_quinella(_keirin_fetch(_keirin_odds_url(jo, ymd, rno, 5)))
+            x = _keirin_parse_exacta(_keirin_fetch(_keirin_odds_url(jo, ymd, rno, 6)))
+            sport, category = "cycle", "cycle"
+        else:
+            op, sp = track["opTrackCd"], track["sponsorCd"]
+            q = _keiba_parse_quinella(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["quinella"])))
+            x = _keiba_parse_exacta(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["exacta"])))
+            sport, category = "horse", "japan_local"
         if not _keiba_odds_live(q, x):
             return None                        # 발매 전·마감 후(가짜값) → 저장 안 함
         key = _multi_key(track["venue"], rno)
@@ -15255,7 +15265,7 @@ def _multi_collect_one(track, race, ymd):
             hist.append({"t": time.time(), "quinella": q, "exacta": x, "trio": [], "win": {}})
             hist = hist[-12:]
             db[key] = {"quinella": q, "exacta": x, "trio": [], "win": {}, "history": hist,
-                       "sport": "horse", "category": "japan_local",
+                       "sport": sport, "category": category,
                        "venue": track["venue"], "raceNo": rno,
                        "postTime": race.get("postTime"), "postEpoch": race.get("postEpoch"),
                        "t": time.time()}
@@ -15327,6 +15337,40 @@ def _multi_card(key, rec):
         "afterClose": bool(an.get("afterClose")),
         "updatedSecondsAgo": int(now - (rec.get("t") or now)),
     }
+
+
+@app.route("/api/multi/keirin-schedule", methods=["POST"])
+def multi_keirin_schedule():
+    """[확장 경유 경륜 스케줄] 확장(로그인 세션)이 oddspark 경륜 KaisaiRaceList를 fetch·파싱해 전송 →
+    today_schedule.json에 sport=cycle 트랙으로 병합(기존 경마 트랙 보존·멱등). 로그인 벽 우회.
+    body: {ymd, tracks:[{joCode, venue, races:[{raceNo, postTime}]}]}."""
+    body = request.json or {}
+    ymd = (body.get("ymd") or time.strftime("%Y%m%d")).strip()
+    tracks = body.get("tracks") or []
+    sched = _schedule_load()
+    if not isinstance(sched, dict) or sched.get("ymd") != ymd:
+        sched = {"ymd": ymd, "updated": time.time(), "tracks": []}
+    # 기존 cycle 트랙 제거 후 재삽입(멱등) — 경마(horse) 트랙은 그대로 보존
+    sched["tracks"] = [t for t in sched.get("tracks", []) if (t.get("sport") or "horse") != "cycle"]
+    added = 0
+    for t in tracks:
+        races = []
+        for r in (t.get("races") or []):
+            pt = r.get("postTime")
+            try:
+                rno = int(r.get("raceNo"))
+            except (TypeError, ValueError):
+                continue
+            races.append({"raceNo": rno, "postTime": pt, "postEpoch": _post_time_epoch(pt, ymd)})
+        if not races:
+            continue
+        sched["tracks"].append({"venue": t.get("venue") or ("경륜%s" % t.get("joCode")),
+                                "joCode": str(t.get("joCode") or ""), "sport": "cycle", "races": races})
+        added += 1
+    sched["updated"] = time.time()
+    _schedule_save(sched)
+    print("[경륜 스케줄·확장경유] %s: 경륜장 %d곳 병합" % (ymd, added))
+    return jsonify({"ok": True, "tracks": added, "ymd": ymd})
 
 
 @app.route("/api/multi/schedule", methods=["GET", "POST"])
