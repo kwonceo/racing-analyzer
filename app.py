@@ -5825,6 +5825,26 @@ def _triple_analyze(rk, rec):
     for _rb in reversal_backing:
         _addbet("복승", "복승 받치기(역배열 실질유력)", _rb["combo"], 8, _rb["odds"])
 
+    # [2번·스마트머니 복승 보조] 스마트머니(상승후급락=세력 진입) 복병 → 유력마 축과 복승 보조 자동 편성.
+    #   "복승 추가: 2+10 (스마트머니)" — 세력이 붙은 복병을 복승으로 커버(마감 전만·소액 8%). 최대 2두.
+    smart_quinella = []
+    if not after_close and key_horses:
+        _sm_axis = int(key_horses[0])
+        for _dh in (dark_horses or []):
+            if not _dh.get("smartMoney") or _dh.get("no") is None:
+                continue
+            _sm_no = int(_dh["no"])
+            if _sm_no in [int(k) for k in key_horses]:
+                continue                                   # 이미 유력마면 복승 메인/보조에 이미 있음
+            _sm_combo = sorted({_sm_axis, _sm_no})
+            if len(_sm_combo) != 2:
+                continue
+            _sm_odds = _q(_sm_combo[0], _sm_combo[1])
+            _addbet("복승", "복승 보조(스마트머니 복병)", _sm_combo, 8, _sm_odds)
+            smart_quinella.append({"no": _sm_no, "combo": _sm_combo, "axis": _sm_axis, "odds": _sm_odds})
+            if len(smart_quinella) >= 2:
+                break
+
     # [삼복승 무조건 편성] 배당판(실배당) 유무·유력마 3두 미만과 무관하게 삼복승을 항상 추천에 포함.
     #   유력마가 3두 미만이면 선호순 풀(ranked→단승순→복승조합 등장마)로 3두를 채워 메인 생성.
     #   [역배열 대비] 쌍승역전 challenger(실질 상위 지목 아웃사이더)를 낀 조합을 추가(이변 대비).
@@ -6492,6 +6512,7 @@ def _triple_analyze(rk, rec):
         "flowScores": flow_scores,   # [배당 흐름 점수] 말별 흐름점수(상승-10/무변동-5/하락+10/급락+20/스마트머니+30)
         "flowRemoval": flow_removal,   # [흐름 기반 제거] 죽은인기/3연속상승/페이크/역배열반대 → 제거 대상
         "highOddsCandidates": high_odds_candidates,   # [고배당 후보 발굴] 흐름 좋은 고배당(10배+ 하락) 말 → 삼복승 보험
+        "smartQuinella": smart_quinella,   # [스마트머니 복승 보조] 스마트머니 복병 → 축과 복승 보조 자동 추가
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
         "closingDropInsurance": closing_drop_insurance,   # [마감순간 급락 보험] 축+마감급락말 삼복승(대규모급락 제외)

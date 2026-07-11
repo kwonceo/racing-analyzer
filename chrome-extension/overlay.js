@@ -625,35 +625,28 @@
           kr.appendChild(mk('span', 'font-weight:700;color:#4ea1ff', baseKeys.slice(0, 3).join(' · ')));
           panel.appendChild(kr);
         }
-        // [3번] 복병 — 유력마 밖 강한 신호말(역배열 실질유력마 + 급락 이상감지말). 최대 2두.
-        var darkShown = {};
-        var addDark = function (no, tag, col) {
-          if (no == null || !inV(no)) return;
-          if (baseKeys.indexOf(Number(no)) >= 0) return;         // 이미 유력마면 복병 아님
-          if (darkShown[no]) return;
-          darkShown[no] = 1;
-          var db = mk('div', 'margin:2px 0');
-          db.appendChild(mk('span', 'color:#94a3b8', '🐎 복병 '));
-          db.appendChild(mk('span', 'font-weight:700;color:' + col, no + '번 (' + tag + ')'));
-          panel.appendChild(db);
-        };
-        // [복병_집중급락 패턴] 집중급락 10회+/스마트머니 → 배당순위 무관 복병 자동 편입(신뢰 높음 강조)
+        // [1번·복병 정리] 복병 최대 3두 + 우선순위: ①스마트머니+집중급락 동시 ②집중급락 횟수 많은 순 ③역배열 감지 말.
+        //   기존 6두 나열 → 상위 3두만(가장 강한 신호). 후보를 점수화해 정렬 후 상위 3두 렌더.
+        var darkCands = [], darkSeen = {};
         (d.darkHorses || []).forEach(function (h) {
-          if (h.no == null || !inV(h.no) || baseKeys.indexOf(Number(h.no)) >= 0 || darkShown[h.no]) return;
-          darkShown[h.no] = 1;
-          var col = (h.confidence === '높음') ? '#f472b6' : '#c084fc';
-          var db = mk('div', 'margin:2px 0');
-          db.appendChild(mk('span', 'color:#94a3b8', '🐎 복병 '));
-          db.appendChild(mk('span', 'font-weight:800;color:' + col, h.no + '번 '));
-          db.appendChild(mk('span', 'font-size:11px;font-weight:700;color:' + col, (h.note || '') + (h.confidence === '높음' ? ' · 신뢰↑' : '')));
-          panel.appendChild(db);
+          if (h.no == null || !inV(h.no) || baseKeys.indexOf(Number(h.no)) >= 0 || darkSeen[h.no]) return;
+          darkSeen[h.no] = 1;
+          var anom = Number(h.anomCount || 0), smart = !!h.smartMoney, forced = !!h.forced;
+          var pr = (smart && (forced || anom >= 10)) ? 3 : (forced || anom >= 10) ? 2 : smart ? 2 : 1;  // ①동시=3 ②집중급락=2
+          darkCands.push({ no: Number(h.no), pr: pr, anom: anom, smart: smart,
+            tag: (h.note || '집중급락'), conf: h.confidence,
+            col: (h.confidence === '높음') ? '#f472b6' : '#c084fc' });
         });
-        // 역배열 복병
+        // ③ 역배열 감지 말(우선순위 최하)
         if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null) {
-          addDark(Number(d.inverse.invLead.no), '역배열', '#f0abfc');
+          var ino = Number(d.inverse.invLead.no);
+          if (inV(ino) && baseKeys.indexOf(ino) < 0 && !darkSeen[ino]) {
+            darkSeen[ino] = 1;
+            darkCands.push({ no: ino, pr: 1, anom: 0, smart: false, tag: '역배열', col: '#f0abfc' });
+          }
         }
-        // 급락 복병 — 이상감지말(anomalyHorse) 우선, 없으면 최대 급락 조합 중 유력마 아닌 말
-        if (Object.keys(darkShown).length < 2) {
+        // 급락 복병(후보 3두 미만일 때만 보충) — 이상감지말/최대급락 조합 중 유력마 아닌 말
+        if (darkCands.length < 3) {
           var dropDark = (d.anomalyHorse != null) ? Number(d.anomalyHorse) : null;
           if (dropDark == null) {
             var td = (d.drops || []).filter(function (x) { return x && x.pct <= -30 && x.combo; })
@@ -665,11 +658,37 @@
               }
             }
           }
-          if (dropDark != null) addDark(dropDark, '급락', '#f87171');
+          if (dropDark != null && !darkSeen[dropDark]) {
+            darkSeen[dropDark] = 1;
+            darkCands.push({ no: dropDark, pr: 1, anom: 0, smart: false, tag: '급락', col: '#f87171' });
+          }
         }
+        // 정렬: 우선순위 desc → 집중급락 횟수 desc → 마번 asc. 상위 3두만 표시.
+        darkCands.sort(function (a, b) { return (b.pr - a.pr) || (b.anom - a.anom) || (a.no - b.no); });
+        var darkTop = darkCands.slice(0, 3);
+        darkTop.forEach(function (h) {
+          var db = mk('div', 'margin:2px 0');
+          db.appendChild(mk('span', 'color:#94a3b8', '🐎 복병 '));
+          db.appendChild(mk('span', 'font-weight:800;color:' + h.col, h.no + '번 '));
+          var note = h.tag + (h.smart ? '' : '') + (h.conf === '높음' ? ' · 신뢰↑' : '');
+          db.appendChild(mk('span', 'font-size:11px;font-weight:700;color:' + h.col, note));
+          panel.appendChild(db);
+        });
 
-        // [전적 과가중 해결] 📊 시장 유력(전적 미수집) — 저배당(5배↓)이라 유력마 편입된 말
-        (d.marketFavorites || []).filter(function (m) { return m.formMissing && inV(m.no); }).forEach(function (m) {
+        // [2번·스마트머니 복승 보조] 서버가 편성한 스마트머니 복승 보조를 강조 표시("복승 추가: 2+10 (스마트머니)").
+        (d.smartQuinella || []).forEach(function (sq) {
+          if (!sq || !sq.combo || sq.combo.length !== 2) return;
+          var sr = mk('div', 'margin:3px 0;padding:4px 8px;border-left:3px solid #fbbf24;background:rgba(251,191,36,.15);border-radius:6px');
+          sr.appendChild(mk('span', 'font-weight:800;color:#fcd34d', '💰 복승 추가: ' + sq.combo.join('+')));
+          sr.appendChild(mk('span', 'margin-left:6px;font-size:11px;color:#fde68a', '(스마트머니' + (sq.odds != null ? ' · ' + sq.odds + '배' : '') + ')'));
+          panel.appendChild(sr);
+        });
+
+        // [3번·중복 제거] 📊 시장 유력(전적 미수집) — 저배당(5배↓)이라 유력마 편입된 말.
+        //   이미 유력마(baseKeys)/복병(darkSeen)에 있으면 제외(중복 표시 방지).
+        (d.marketFavorites || []).filter(function (m) {
+          return m.formMissing && inV(m.no) && baseKeys.indexOf(Number(m.no)) < 0 && !darkSeen[m.no];
+        }).forEach(function (m) {
           var mf = mk('div', 'margin:2px 0;padding:3px 8px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.12);border-radius:6px;font-size:11px');
           mf.appendChild(mk('span', 'font-weight:800;color:#38bdf8', '📊 ' + m.no + '번 시장 유력'));
           mf.appendChild(mk('span', 'margin-left:5px;color:#7dd3fc', '배당 ' + m.odds + '배 (전적 미수집)'));
