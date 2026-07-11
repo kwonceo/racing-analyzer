@@ -477,29 +477,40 @@
         }
       }
       var sc = signalCount(d);
+      // [타이밍 추천 정책] 마감 후 추천 금지(closed) · T-1분 최종 확정(locked) · T-2분 강제 추천(forced)
+      var closed = !!(d && d.recommendClosed) || afterClose;
+      var locked = !!(d && d.recommendLocked);
+      var forced = !!(d && d.recommendForced);
       // 상태 판정
       var state;
       if (!d) state = 'wait';
-      else if (rj.type === '패스형') state = 'pass';
+      else if (closed) state = 'closed';                       // 마감 후 → 추천 금지(조합 숨김)
+      else if (rj.type === '패스형' && !forced) state = 'pass';
       else if (sc >= 2 && (quinella || trio)) state = 'go2';
-      else if (sc >= 1 && quinella && !d.recommendGated) state = 'go1';
+      else if ((sc >= 1 || forced) && quinella && !(d.recommendGated && !forced)) state = 'go1';
       else state = 'wait';
 
       var box = mk('div', 'margin:2px 0 9px;padding:11px 12px;border-radius:10px;text-align:center;border:2px solid #334155');
       var line = function (txt, css) { var e = mk('div', css); e.textContent = txt; box.appendChild(e); };
-      if (state === 'go2') {
-        var goCol = afterClose ? '#94a3b8' : '#22c55e';
+      if (state === 'closed') {
+        box.style.borderColor = '#94a3b8';
+        box.style.background = 'rgba(148,163,184,.14)';
+        line('🔒 마감 — 추천 종료', 'font-weight:900;font-size:18px;color:#94a3b8');
+        line('발주 후에는 추천하지 않습니다 (참고만)', 'margin-top:4px;font-size:12px;color:#cbd5e1');
+      } else if (state === 'go2') {
+        var goCol = locked ? '#ef4444' : '#22c55e';
         box.style.borderColor = goCol;
-        box.style.background = afterClose ? 'rgba(148,163,184,.14)' : 'rgba(34,197,94,.18)';
-        line(afterClose ? '⏱ 마감 후 · 참고만' : '🎯 지금 사세요!', 'font-weight:900;font-size:18px;color:' + goCol);
+        box.style.background = locked ? 'rgba(239,68,68,.15)' : 'rgba(34,197,94,.18)';
+        line(locked ? '🔒 최종 확정 · 지금 사세요!' : (forced ? '⚡ 지금 사세요! (T-2분 강제)' : '🎯 지금 사세요!'), 'font-weight:900;font-size:18px;color:' + goCol);
         if (quinella) line('복승: ' + quinella, 'margin-top:5px;font-weight:800;font-size:15px;color:#e5e7eb');
         if (trio) line('삼복승: ' + trio + ' (보험)', 'margin-top:2px;font-weight:800;font-size:15px;color:#e5e7eb');
         if (revAdd) line('역배열 추가: ' + revAdd, 'margin-top:2px;font-weight:700;font-size:13px;color:#f0abfc');
       } else if (state === 'go1') {
-        box.style.borderColor = '#4ea1ff';
-        box.style.background = 'rgba(78,161,255,.15)';
-        line('💡 참고 추천', 'font-weight:900;font-size:18px;color:#4ea1ff');
-        if (quinella) line('복승: ' + quinella + ' (소액)', 'margin-top:5px;font-weight:800;font-size:15px;color:#e5e7eb');
+        box.style.borderColor = locked ? '#ef4444' : '#4ea1ff';
+        box.style.background = locked ? 'rgba(239,68,68,.13)' : 'rgba(78,161,255,.15)';
+        line(locked ? '🔒 최종 확정' : (forced ? '⚡ T-2분 강제 추천' : '💡 참고 추천'), 'font-weight:900;font-size:18px;color:' + (locked ? '#f87171' : '#4ea1ff'));
+        if (quinella) line('복승: ' + quinella + (forced && !locked ? ' (저배당 기준)' : ' (소액)'), 'margin-top:5px;font-weight:800;font-size:15px;color:#e5e7eb');
+        if (trio && (forced || locked)) line('삼복승: ' + trio + ' (보험)', 'margin-top:2px;font-weight:800;font-size:14px;color:#e5e7eb');
       } else if (state === 'pass') {
         box.style.borderColor = '#f87171';
         box.style.background = 'rgba(220,38,38,.16)';

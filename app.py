@@ -6069,7 +6069,26 @@ def _triple_analyze(rk, rec):
     #   조건: race_judgment 유형이 wait(90초 미달 또는 시장신호 4종 중 2개 미만) 또는 패스형(신호 없음).
     #   생성 코드(_addbet 등)는 모두 보존(무삭제) → 결과 리스트만 비워 모든 소비처(웹·오버레이·복기)가 공통으로
     #   '추천 없음'을 본다. 마감 후(after_close)는 참고 신호이므로 제외(기존 동작 유지).
-    recommend_gated = bool(race_judgment and race_judgment.get("type") in ("wait", "패스형") and not after_close)
+    # ═══ [타이밍 추천 정책] T-2분 강제 추천 · T-1분 최종 확정 · 마감 후 추천 금지 ═══
+    #   recommend_phase: normal(3분+) / forced(T-2분 이내) / locked(T-1분 이내) / closed(마감 후)
+    #   - forced/locked: 신호 약해도(wait/패스형) 저배당 시장유력마 기준으로 강제 추천(게이트 해제).
+    #   - locked: 최종 확정(프론트 🔒 표시 · 조합 안정).
+    #   - closed: 마감 후 추천 금지 → 프론트·오버레이에서 추천 조합 숨김(참고만).
+    #     ⚠ 서버 betRecommend 데이터는 결과 학습(_apply_result_learning)이 재사용하므로 비우지 않고 유지.
+    recommend_phase = "normal"
+    if after_close:
+        recommend_phase = "closed"
+    elif cur_mb is not None and cur_mb <= 1.5:
+        recommend_phase = "locked"
+    elif cur_mb is not None and cur_mb <= 2.5:
+        recommend_phase = "forced"
+    recommend_forced = recommend_phase in ("forced", "locked")
+    recommend_locked = (recommend_phase == "locked")
+    recommend_closed = (recommend_phase == "closed")
+
+    # 기존 게이팅(wait/패스형 → 추천 비움) — 단 T-2분 이내(forced)면 강제 추천으로 게이트 해제.
+    recommend_gated = bool(race_judgment and race_judgment.get("type") in ("wait", "패스형")
+                           and not after_close and not recommend_forced)
     if recommend_gated:
         bet_rec = []          # 복승·삼복승 추천 조합 완전 비움
         trio_rec = []         # 삼복승 추천 비움
@@ -6080,6 +6099,11 @@ def _triple_analyze(rk, rec):
     return {
         "raceKey": rk, "hasPrev": bool(prev),
         "recommendGated": recommend_gated,   # [3번] 저배당 무조건 추천 차단(신호 대기) 여부 → 프론트 '⏳ 신호 대기 중'
+        # [타이밍 추천 정책] T-2분 강제 추천 · T-1분 최종 확정 · 마감 후 추천 금지(표시 차단·학습 데이터는 보존)
+        "recommendPhase": recommend_phase,   # normal|forced|locked|closed
+        "recommendForced": recommend_forced, # T-2분 이내 강제 추천(신호 약해도 저배당 기준 편성)
+        "recommendLocked": recommend_locked, # T-1분 이내 최종 확정(🔒)
+        "recommendClosed": recommend_closed, # 마감 후 → 추천 조합 숨김(참고만)
         # [추천 로직 전면 개편] BMED 확신도 엔진 + 실전 경주유형 판정 + 단계별 추천 + 강화 제거마
         "confidence": confidence,          # [2번] 이상감지40+전적30+급락지속30 → 말별 확신도·랭킹
         "raceJudgment": race_judgment,     # [1·4번] 확실/신중/애매/패스형 + 근거 + 배분비율 + 쌍승강신호

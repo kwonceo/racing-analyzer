@@ -3703,10 +3703,17 @@
 
   function renderBetRecommend(a, budgetSel) {
     const recs = a.betRecommend || [];
+    // [타이밍 추천 정책·마감 후 추천 금지] 발주(T-0) 이후엔 추천 조합을 표시하지 않는다(참고만).
+    if (a.recommendClosed) {
+      return `<div class="bet-box" style="display:block;margin:6px 0;border-left:3px solid #8a94a6;background:rgba(138,148,166,.1)">
+        <b style="color:#cbd5e1">🔒 마감 — 추천 종료</b>
+        <div class="hint" style="margin-top:3px">발주(T-0) 이후입니다. 마감 후에는 추천을 하지 않습니다(급락이 있어도 참고만).</div></div>`;
+    }
     // [추천 신중화·근본해결] 신호 대기(wait)·추천 차단(recommendGated: 90초 미달·시장신호 2개 미만·패스형)이면
     //   추천 조합을 표시하지 않고 "⏳ 신호 대기 중"만 표시(저배당 무조건 추천 방지).
+    //   단 [T-2분 강제 추천] recommendForced면 신호 약해도 저배당 기준으로 강제 추천(게이트 무시).
     //   복기/리포트 등 raceJudgment 없는 뷰는 영향 없음.
-    if (a.recommendGated || (a.raceJudgment && a.raceJudgment.type === 'wait')) {
+    if (!a.recommendForced && (a.recommendGated || (a.raceJudgment && a.raceJudgment.type === 'wait'))) {
       const m = (a.raceJudgment && a.raceJudgment.message) || '뚜렷한 신호 2개+ 확인 후 추천 조합이 표시됩니다';
       return `<div class="bet-box" style="display:block;margin:6px 0;border-left:3px solid #8a94a6;background:rgba(138,148,166,.08)">
         <b style="color:#cbd5e1">⏳ 신호 대기 — 추천 보류</b>
@@ -3746,7 +3753,14 @@
     const upd = _betUpdatedFlag ? ' <span style="color:#38d39f">⚡ 업데이트됨</span>' : '';
     // [보완#1] 색상 범례 — 조합 속 말 번호가 유력/제거 어느 쪽인지 한눈에.
     const legend = `<div class="hint" style="font-size:10px;margin-top:2px">조합 색상: <b style="color:${_ROLE_COLOR.fav}">유력마</b> · <span style="color:${_ROLE_COLOR.weakcut}">제거권장</span> · <span style="color:${_ROLE_COLOR.cut};text-decoration:line-through">확실제거</span></div>`;
-    return `<div class="matrix-title" style="font-size:13px">🎯 메인 추천 <span class="hint" style="font-weight:400">(신호 기반)</span>${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
+    // [타이밍 추천 정책] T-1분 최종 확정(🔒) · T-2분 강제 추천(⚡) 배너
+    const phaseBanner = a.recommendLocked
+      ? `<div style="margin:4px 0;padding:5px 9px;border-left:3px solid #ef4444;background:rgba(239,68,68,.14);border-radius:6px;color:#fca5a5;font-weight:800">🔒 T-1분 · 최종 확정 — 이 조합으로 마감까지 확정</div>`
+      : a.recommendForced
+        ? `<div style="margin:4px 0;padding:5px 9px;border-left:3px solid #fbbf24;background:rgba(245,158,11,.14);border-radius:6px;color:#fcd34d;font-weight:800">⚡ T-2분 · 강제 추천 — 신호 약해도 저배당(시장 유력) 기준 편성</div>`
+        : '';
+    return `<div class="matrix-title" style="font-size:13px">🎯 메인 추천 <span class="hint" style="font-weight:400">(신호 기반)</span>${a.recommendLocked ? ' <span style="color:#ef4444">🔒 확정</span>' : ''}${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
+      ${phaseBanner}
       ${legend}
       <table class="data-table" style="margin-top:4px">
         <thead><tr><th>종류</th><th>조합</th><th>신호품질</th><th>예상배당</th><th>배분</th><th>금액</th></tr></thead>
