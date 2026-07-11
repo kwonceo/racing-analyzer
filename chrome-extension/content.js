@@ -2167,6 +2167,26 @@
   restartLoop();
   startRaceWatch();   // [1번] 경주 자동 감지 시작
 
+  // [경륜 배당판 자동 수집 트리거] 경륜 배당판 로드 시 자동전송(autoSend) ON이면 수동 버튼 없이 즉시 수집 시작.
+  //   ①종목=경륜 감지 ②autoSend ON → collectTriple('auto') 1회 킥스타트(백그라운드 첫 틱 대기 없이 바로 수집).
+  //   경마·경정 등 다른 종목은 기존 동작 유지(경륜만 즉시 킥스타트). 실패해도 무시(기존 수집 흐름 무영향).
+  async function _keirinAutoKickstart() {
+    try {
+      const { autoSend, sport } = await getSettings();
+      if (!autoSend) return;                          // 자동전송 OFF면 존중(수동)
+      let rk = '';
+      try { rk = extractRaceKey(); } catch (_) { /* */ }
+      const eff = resolveSport(sport, rk);            // URL·탭텍스트로 종목 확정
+      if (eff !== 'cycle') return;                    // 경륜 배당판일 때만 즉시 킥스타트
+      if (_autoRunning) return;                       // 이미 수집 중이면 스킵
+      console.log('[경륜 자동수집] 배당판 감지 + 자동전송 ON → 즉시 수집 시작(수동 버튼 불필요)');
+      _autoRunning = true;
+      try { await collectTriple('auto'); } catch (e) { console.warn('[경륜 자동수집] 킥스타트 오류', e); }
+      finally { _autoRunning = false; }
+    } catch (_) { /* */ }
+  }
+  setTimeout(_keirinAutoKickstart, 1300);   // 로드 직후 1회(종목 감지 안정화 대기)
+
   // [2번] 결과 페이지면 로드 직후 1회 자동 전송 (URL result/성적표 감지)
   if (isResultPage()) {
     setTimeout(() => { sendResults('auto-result').catch(() => {}); }, 800);
