@@ -6,7 +6,7 @@
  "date": "2026-07-11",
  "race": "고쿠라 10경주",
  "analyzed_at": "14:52:45",
- "updated_at": "14:55:12",
+ "updated_at": "14:56:42",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -16,49 +16,49 @@
  "odds_timeline": [],
  "signals_detected": [
   {
-   "time": "14:53:36",
+   "time": null,
    "type": "배당불일치",
    "detail": "추천 복승(6+17=25.0배)이 배당판 인기 조합(16+17=6.9배)과 다름",
    "severity": "⚠️",
    "reason": "유력마가 배당판 최저(인기)와 동떨어짐 = 초반 배당 미수집/전적 편중 의심. 배당판 인기 조합을 추천에 추가함 — 배당 재확인 권장."
   },
   {
-   "time": "14:53:36",
+   "time": null,
    "type": "쌍승역전공식",
    "detail": "🔄 역전감지: 단승 16번 유력이나 쌍승에서 17번 1착(11.6)이 16번 1착(14.6)보다 낮음 → 실질 1착: 17번 가능성 (역배열 0.795)",
    "severity": "🟠",
    "reason": "역전비율 = 쌍승(17→16) 11.6 / 쌍승(16→17) 14.6 = 0.795 (역배열)"
   },
   {
-   "time": "14:53:36",
+   "time": null,
    "type": "종합신뢰도",
    "detail": "17번 종합 신뢰도 100.0 → 🔴 강력 신호",
    "severity": "🔴",
    "reason": "초과급락 0.0×0.4 + 쌍승역전 26.2×0.35 + 복승불일치 0.0×0.25 = 100.0"
   },
   {
-   "time": "14:53:36",
+   "time": null,
    "type": "종합신뢰도",
    "detail": "6번 종합 신뢰도 100.0 → 🔴 강력 신호",
    "severity": "🔴",
    "reason": "초과급락 0.0×0.4 + 쌍승역전 0.0×0.35 + 복승불일치 0.0×0.25 = 100.0"
   },
   {
-   "time": "14:53:36",
+   "time": null,
    "type": "종합신뢰도",
    "detail": "18번 종합 신뢰도 100.0 → 🔴 강력 신호",
    "severity": "🔴",
    "reason": "초과급락 0.0×0.4 + 쌍승역전 0.0×0.35 + 복승불일치 0.0×0.25 = 100.0"
   },
   {
-   "time": "14:53:36",
+   "time": null,
    "type": "종합신뢰도",
    "detail": "7번 종합 신뢰도 100.0 → 🔴 강력 신호",
    "severity": "🔴",
    "reason": "초과급락 0.0×0.4 + 쌍승역전 0.0×0.35 + 복승불일치 0.0×0.25 = 100.0"
   },
   {
-   "time": "14:53:36",
+   "time": null,
    "type": "종합신뢰도",
    "detail": "4번 종합 신뢰도 100.0 → 🔴 강력 신호",
    "severity": "🔴",
@@ -286,37 +286,7 @@
   "elimination_reasons": {}
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "6+17",
-   "odds": 25.0,
-   "reason": "6번(A)·17번(?)"
-  },
-  "quinella_sub": {
-   "combo": "2+17",
-   "odds": 34.4,
-   "reason": "2번(A)·17번(?)"
-  },
-  "trifecta_main": {
-   "combo": "2+6+17",
-   "odds": 87.7,
-   "reason": "2번(A)·6번(A)·17번(?)"
-  },
-  "trifecta_insurance1": {
-   "combo": "1+6+17",
-   "odds": 126.2,
-   "reason": "1번(B)·6번(A)·17번(?)"
-  },
-  "trifecta_insurance2": {
-   "combo": "1+2+17",
-   "odds": 134.7,
-   "reason": "1번(B)·2번(A)·17번(?)"
-  },
-  "budget_allocation": {
-   "quinella_main": "47.1%",
-   "quinella_sub": "20%",
-   "trifecta_main": "14.1%",
-   "trifecta_insurance": "1.9%"
-  }
+  "budget_allocation": {}
  },
  "recommendation_history": [
   {
