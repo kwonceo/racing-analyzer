@@ -1,17 +1,58 @@
 {
  "race_id": "2026_07_11_서울_2경주",
  "raceKey": "서울 2경주",
- "sport": "horse",
- "category": "korea",
  "date": "2026-07-11",
- "race": "서울 2경주",
- "analyzed_at": "11:19:23",
- "updated_at": "21:32:58",
- "input_data": {
-  "source": "Chrome확장 자동수집(배당) + 전적표",
-  "pdf_file": null,
-  "image_file": null,
-  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ "track": "서울",
+ "round": 2,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": null,
+ "result": {
+  "1st": 5,
+  "2nd": 8,
+  "3rd": 9
+ },
+ "odds_at_start": {
+  "quinella": {
+   "7+8": 2.9,
+   "6+8": 4.9,
+   "5+8": 5.1,
+   "6+7": 9.0,
+   "5+7": 10.2,
+   "5+6": 13.6,
+   "1+8": 18.1,
+   "2+8": 30.8,
+   "1+7": 36.5,
+   "4+8": 40.7,
+   "8+9": 47.1,
+   "1+6": 59.1,
+   "1+5": 63.0,
+   "2+5": 64.6,
+   "2+7": 66.7,
+   "2+6": 73.6,
+   "4+7": 88.7,
+   "3+8": 98.0,
+   "1+2": 100.0,
+   "1+3": 100.0,
+   "1+4": 100.0,
+   "1+9": 100.0,
+   "2+3": 100.0,
+   "2+4": 100.0,
+   "2+9": 100.0,
+   "3+4": 100.0,
+   "3+5": 100.0,
+   "3+6": 100.0,
+   "3+7": 100.0,
+   "3+9": 100.0,
+   "4+5": 100.0,
+   "4+6": 100.0,
+   "4+9": 100.0,
+   "5+9": 100.0,
+   "6+9": 100.0,
+   "7+9": 100.0
+  },
+  "exacta": {}
  },
  "odds_timeline": [
   {
@@ -54,7 +95,8 @@
     "5+9": 100.0,
     "6+9": 100.0,
     "7+9": 100.0
-   }
+   },
+   "exacta": {}
   },
   {
    "time": "11:26:11",
@@ -96,7 +138,8 @@
     "5+9": 100.0,
     "6+9": 100.0,
     "7+9": 100.0
-   }
+   },
+   "exacta": {}
   },
   {
    "time": "11:29:01",
@@ -138,105 +181,53 @@
     "5+9": 100.0,
     "6+9": 100.0,
     "7+9": 100.0
-   }
+   },
+   "exacta": {}
   }
  ],
- "signals_detected": [],
- "anomaly_history": [],
- "strong_signals": {
-  "signals": [],
-  "count": 0,
-  "recommendLevel": null,
-  "dualConverge": false,
-  "types": []
- },
- "compression_pattern": {
-  "detected": false
- },
- "third_place_hunt": {
-  "active": false
- },
- "horses": [],
- "elimination": {
-  "candidates": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   3
+  ],
   "eliminated": [],
-  "elimination_reasons": {}
+  "recommend_main": "7+8",
+  "recommend_sub": null,
+  "strategy": "BMED_보험형",
+  "signal_quality": "하",
+  "confidence": 0,
+  "inverse": false
  },
- "final_recommendation": {
-  "budget_allocation": {}
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
  },
- "recommendation_history": [
-  {
-   "time": "11:29:12",
-   "minutes_before": null,
-   "sig": "6-7-8|7+8|6+8|6+7+8",
-   "keyHorses": [
-    8,
-    7,
-    6
-   ],
-   "summary": "유력마 8·7·6 / 복승 7+8",
-   "quinella_main": "7+8",
-   "quinella_sub": "6+8",
-   "trifecta_main": "6+7+8",
-   "top_signals": []
-  }
- ],
- "compare_recommendation": {
-  "anomaly": {
-   "quinella": null,
-   "trio": null
-  },
-  "form": {
-   "quinella": null,
-   "trio": null
-  },
-  "jockey": {
-   "quinella": null,
-   "trio": null
-  },
-  "final": {
-   "quinella": null,
-   "trio": null
-  }
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
  },
- "summary": "데이터 부족 — 복승 수집 필요",
- "keyHorses": [],
- "result": {
-  "1st": 5,
-  "2nd": 8,
-  "3rd": 9
- },
- "hit": {
-  "was_hit": false,
-  "quinella_hit": false,
-  "trifecta_hit": false,
-  "payouts": {
-   "quinella": 0,
-   "trifecta": 0
-  },
-  "anomaly_was_correct": false,
-  "signal_correct": [],
-  "elimination_correct": false,
-  "eliminated": [],
-  "form_pick": 1,
-  "form_pick_hit": false,
-  "pnl": -1000,
-  "stake": 1000,
-  "near_miss": false,
-  "near_miss_horse": null,
-  "pairing_miss": null,
-  "hit_basis": {
-   "formScore": null,
-   "dropAmt": null,
-   "dropScore": 0,
-   "inverse": false,
-   "inverseHorses": [],
-   "inverseHit": [],
-   "confidence": 0,
-   "reason": "추천 미적중"
-  }
- },
- "profit": null,
- "review": null
+ "memo": null,
+ "saved_at": "2026-07-11 21:32:58",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
 }

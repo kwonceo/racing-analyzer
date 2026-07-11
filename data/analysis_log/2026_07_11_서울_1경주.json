@@ -6,7 +6,7 @@
  "date": "2026-07-11",
  "race": "서울 1경주",
  "analyzed_at": "10:39:00",
- "updated_at": "10:50:06",
+ "updated_at": "21:32:57",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -99,15 +99,7 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "10:39:00",
-   "type": "배당불일치",
-   "detail": "추천 복승(3+4=100.0배)이 배당판 인기 조합(6+7=1.9배)과 다름",
-   "severity": "⚠️",
-   "reason": "유력마가 배당판 최저(인기)와 동떨어짐 = 초반 배당 미수집/전적 편중 의심. 배당판 인기 조합을 추천에 추가함 — 배당 재확인 권장."
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
   "signals": [],
@@ -124,14 +116,24 @@
  },
  "horses": [
   {
+   "no": 1,
+   "name": "원더풀대",
+   "jockey": "김영구",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
    "no": 2,
    "name": "거승파워",
    "jockey": "강원돈",
    "record_score": 36.1,
    "record_detail": "최근 4-2-6",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 49.1배 · 감점 없음 = 100점"
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 3,
@@ -141,7 +143,7 @@
    "record_detail": "최근 2",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 17.9배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 4,
@@ -150,8 +152,8 @@
    "record_score": 85,
    "record_detail": "최근 2",
    "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 72.5배 · 감점 없음 = 100점"
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 5,
@@ -160,74 +162,23 @@
    "record_score": 0,
    "record_detail": "",
    "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 28.5배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 6,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 1.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 7,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 1.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 8,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 16.2배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 9,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 6.4배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 1,
-   "name": "원더풀대",
-   "jockey": "김영구",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": null,
    "grade": "D",
-   "grade_reason": "배당 80.4배 · 배당 80~149 -20 = 80점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   }
  ],
  "elimination": {
   "candidates": [
+   1,
    2,
    3,
-   4,
-   5,
-   6,
-   7,
-   8,
-   9,
-   1
+   4
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "eliminated": [
+   5
+  ],
+  "elimination_reasons": {
+   "5": "배당 미수집 · 배당 150배+ -40 = 60점"
+  }
  },
  "final_recommendation": {
   "budget_allocation": {}
@@ -240,9 +191,9 @@
     4
    ],
    "trio": [
+    2,
     3,
-    4,
-    6
+    4
    ]
   },
   "form": {
@@ -266,20 +217,69 @@
     4
    ],
    "trio": [
+    2,
     3,
-    4,
-    6
+    4
    ]
   }
  },
- "summary": "유력마 3·4·6 / 복승 3+4",
+ "summary": "유력마 3·4·2 / 복승 3+4",
  "keyHorses": [
   3,
   4,
-  6
+  2
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 6,
+  "2nd": 7,
+  "3rd": 9
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 2,
+  "form_pick_hit": false,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": {
+   "detected": true,
+   "top2": [
+    6,
+    7
+   ],
+   "keyHorses": [
+    6,
+    7,
+    9
+   ],
+   "recQuinella": [],
+   "leadNo": null,
+   "backingCovered": false,
+   "wouldBackingCover": false,
+   "lesson": "유력마·삼복승 판단은 정확했으나 복승 메인이 실질유력마와 '다른' 유력마 받치기를 놓쳐 복승 top2를 놓침 → 역배열 실질유력마 축 받치기 복승으로 커버."
+  },
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "추천 미적중"
+  }
+ },
  "profit": null,
  "review": null
 }
