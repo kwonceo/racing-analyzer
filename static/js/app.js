@@ -3025,6 +3025,37 @@
     </div>`;
   }
 
+  // [유력마 통일] 복승 대표배당 낮은 순 + 이상감지 상위 노출 — TOP5·⭐유력마 라인 공통 정렬 기준.
+  //   TOP5(확신도 기반)와 분석기 유력마(복승배당 기반)가 서로 다르던 혼란 해소.
+  function _marketReprOdds(a) {
+    const m = {};
+    const eh = (a.elimination && a.elimination.horses) || [];
+    eh.forEach((h) => { if (h.no != null && h.oddsRepr != null) m[Number(h.no)] = h.oddsRepr; });
+    if (Array.isArray(a.quinella)) {   // 폴백/보강: 복승 배당에서 각 말 최저
+      a.quinella.forEach((q) => {
+        const c = q.combo || q.pair, o = q.odds;
+        if (c && c.length === 2 && o > 0) c.forEach((n) => { const k = Number(n); if (m[k] == null || o < m[k]) m[k] = o; });
+      });
+    }
+    return m;
+  }
+  // 이상감지 말은 배당 할인(강한 신호 ×0.5·약한 신호 ×0.7)으로 상위로 끌어올림 — 저배당 시장유력은 유지.
+  function _marketEffOdds(a, no, reprMap) {
+    const o = reprMap[Number(no)];
+    if (o == null) return Infinity;    // 배당 미수집 → 최하위
+    const info = _horseSignalInfo(a, no);
+    let disc = 1.0;
+    if (info.isAnom || (info.ex && info.ex.grade === '🔴') || (info.bigDrop && Math.abs(info.bigDrop.pct) >= 40)) disc = 0.5;
+    else if (info.bigDrop || (info.ex && info.ex.grade)) disc = 0.7;
+    return o * disc;
+  }
+  function _marketOrderNos(a, nos) {
+    const reprMap = _marketReprOdds(a);
+    return nos.slice().sort((x, y) => _marketEffOdds(a, x, reprMap) - _marketEffOdds(a, y, reprMap)
+      || ((reprMap[Number(x)] == null ? 1e9 : reprMap[Number(x)]) - (reprMap[Number(y)] == null ? 1e9 : reprMap[Number(y)]))
+      || (Number(x) - Number(y)));
+  }
+
   function renderTopHorses(a) {
     _topAnalysisForClick = a;       // 클릭 상세/타임라인용 최신 분석 보관
     _ensureTopHorseDelegation();    // 클릭 위임 1회 설치(다중 패널 안전)
@@ -3061,15 +3092,14 @@
       if (filtered.length) horses = filtered;
     }
     if (!horses.length) return '';
-    // [2번] 확신도 우선 랭킹(있으면). 확신도=이상감지40+전적30+급락지속30 → 신호 기반 유력마.
+    // 확신도(있으면)는 칩 표시용으로만 보관 — 정렬 기준으로는 쓰지 않는다(유력마 라인과 통일).
     const confMap = (a.confidence && a.confidence.horses) ? a.confidence.horses : null;
     if (confMap) horses.forEach((h) => { const c = confMap[h.no] || confMap[String(h.no)]; if (c) { h.conf = c.confidence; h.band = c.band; } });
-    // 통합점수 순(폴백): 통합확률(배당 우선 70/30) → 제거점수 → 전적점수
-    //   [배당 우선 전환·3번] 저배당 시장유력마 상향(+30)·고배당 보험하향마 하향(-40)으로 '저배당 우선 표시'.
-    const scoreOf = (h) => (h.prob != null ? h.prob * 1000 : 0) + (h.total != null ? h.total : 0)
-      + (h.formScore != null ? h.formScore / 100 : 0)
-      + (h.marketFavorite ? 30 : 0) + (h.insuranceDemote ? -40 : 0);
-    horses.sort((x, y) => (confMap ? ((y.conf || -1) - (x.conf || -1)) : 0) || scoreOf(y) - scoreOf(x) || (x.no - y.no));
+    // [유력마 통일] 정렬 기준 = 복승 대표배당 낮은 순(시장 기준) + 이상감지 상위 노출.
+    //   분석기 ⭐유력마 라인과 동일 기준 → 두 화면이 어긋나던 혼란 제거.
+    const _repr = _marketReprOdds(a);
+    horses.sort((x, y) => _marketEffOdds(a, x.no, _repr) - _marketEffOdds(a, y.no, _repr)
+      || ((x.odds == null ? 1e9 : x.odds) - (y.odds == null ? 1e9 : y.odds)) || (x.no - y.no));
     const top = horses.slice(0, 5);
 
     // 복병/이상감지 2두: TOP5 밖 + (이상감지·급락·집중신호) 보유, 신호강도순
@@ -3120,6 +3150,10 @@
       const sig = _signalChips(info) || (isFiller
         ? '<span class="chip" style="border-color:#c084fc;color:#c084fc">🔎 고배당 복병</span>'
         : '<span class="hint">신호없음</span>');
+      // [유력마 통일] 🚨 이상감지 말 구분 — TOP5에 포함하되 별도 표시(급락/집중신호 보유마).
+      const _isAnom = !!(info && (info.isAnom || info.bigDrop || (info.ex && info.ex.grade)));
+      const anomChip = (!isDark && _isAnom)
+        ? '<span class="chip" style="border-color:#ff5c5c;color:#ff5c5c;font-weight:700">🚨 이상감지</span>' : '';
       // [배당 우선 전환·3번] 배당 기반 상태 배지
       let mktChip = '';
       let warnLine = '';
@@ -3141,6 +3175,7 @@
         <b style="min-width:32px;color:#4ea1ff">${h.no}번</b>
         <span style="font-weight:600">${esc(h.name) || '-'}</span>
         <span class="hint">${formTxt} · <b style="color:#e2e8f0">${oddsTxt}</b></span>
+        ${anomChip}
         ${mktChip}
         ${confChip}
         ${move}
@@ -3157,8 +3192,8 @@
 
     _topRankPrev = curRank;   // 다음 갱신 비교용(행 생성 후 저장)
 
-    return `<div id="topHorsesCard" style="position:sticky;top:0;z-index:6;margin:0 0 8px;border:2px solid #ffd24f;border-radius:10px;padding:8px 10px;background:linear-gradient(180deg,rgba(255,210,79,.12),rgba(20,28,43,.97));box-shadow:0 4px 16px rgba(0,0,0,.4)">
-      <div class="matrix-title" style="font-size:14px;color:#ffd24f">⭐ 유력마 TOP 5 <span class="hint" style="font-weight:400">실시간 · 30초 자동갱신 · 클릭 시 상세+타임라인</span></div>
+    return `<div id="topHorsesCard" style="position:relative;margin:0 0 8px;border:2px solid #ffd24f;border-radius:10px;padding:8px 10px;background:linear-gradient(180deg,rgba(255,210,79,.12),rgba(20,28,43,.97));box-shadow:0 4px 16px rgba(0,0,0,.4)">
+      <div class="matrix-title" style="font-size:14px;color:#ffd24f">⭐ 시장 유력마 TOP 5 <span class="hint" style="font-weight:400">복승배당 기준 · 이상감지 상위 · 30초 자동갱신 · 클릭 시 상세</span></div>
       ${renderMarketFavorites(a)}
       ${renderRealtimeAdded(a)}
       ${topRows}
@@ -3293,7 +3328,8 @@
       `<span class="chip ${r.flipped ? 'chip-red' : 'chip-yellow'}" title="${r.flipped ? '직전 대비 방향 전환' : '누적(서서히) 역전 — 마감 임박'}">${r.flipped ? '🔴' : '🟠누적'} ${r.favored[0]}→${r.favored[1]} (${r.favoredOdds}&lt;${r.otherOdds})</span>`).join(' ');
     const ranks = (a.rankChanges || []).slice(0, 6).map((r) =>
       `<span class="chip">${r.combo[0]}-${r.combo[1]} ${r.prevRank}위→${r.curRank}위 (${r.delta > 0 ? '▲' : '▼'}${Math.abs(r.delta)})</span>`).join(' ');
-    const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    // [유력마 통일] ⭐유력마 라인도 TOP5와 동일 기준(복승 대표배당 낮은 순 + 이상감지 상위)으로 정렬 표시.
+    const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     el.innerHTML = `
       ${renderTopHorses(a)}
       <div class="matrix-title">🚨 이상감지 ${a.sport && a.sport !== 'horse' ? `<span class="chip" style="border-color:#a855f7;color:#c4b5fd">${a.sport === 'cycle' ? '🚴 경륜' : '🚤 경정'}</span> ` : ''}<span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.baselineReset ? '⚠️ 기준값 재설정됨' : a.baselineSet ? '🎯 기준값 설정됨' : a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>
@@ -5131,7 +5167,8 @@
     const host = $('#koreaIntegrated'); if (!host) return;
     if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
     state.koreaLastInteg = a;   // [1번] 예산 변경 시 베팅 금액 재계산용
-    const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    // [유력마 통일] ⭐유력마 라인도 TOP5와 동일 기준(복승 대표배당 낮은 순 + 이상감지 상위)으로 정렬 표시.
+    const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     // [1번] 제거분석 패널 재사용: id 충돌 방지 위해 패널 id 치환. 아래에서 클릭 토글 핸들러 연결.
     const elimHtml = renderEliminationHTML(a.elimination).replace('id="elimPanel"', 'id="koreaElimPanel"');
     // [실시간 배당 분석·편의] 일본 탭에만 있던 실시간 표시(마감 N분전 배지·급락 경고 배너·추천 근거)를
@@ -5306,7 +5343,8 @@
     const host = $('#jpIntegrated'); if (!host) return;
     if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
     state.jpLastInteg = a;   // [1번] 예산 변경 시 베팅 금액 재계산용
-    const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    // [유력마 통일] ⭐유력마 라인도 TOP5와 동일 기준(복승 대표배당 낮은 순 + 이상감지 상위)으로 정렬 표시.
+    const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     // [1번] 전적 점수별 말 목록(출마표2 등급표) + 제거 분석(읽기전용) 복원
     const formHtml = renderFormGrades(a.form);
     const elimHtml = renderEliminationHTML(a.elimination, new Set()).replace('id="elimPanel"', 'id="jpElimPanel"');
