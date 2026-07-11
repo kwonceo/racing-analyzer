@@ -1104,6 +1104,19 @@
         "복승이상감지"
       ],
       "date": "2026-07-11"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "오다와라 1경주",
+      "total_combos_dropped": 9,
+      "drop_ratio": 0.9,
+      "result": "1+2",
+      "result_odds": "저배당",
+      "result_quinella_odds": 4.4,
+      "signal_result_combo": null,
+      "recommended_hit": true,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1783812956.7920084
     }
   ],
   "condition_stats": {
@@ -1112,22 +1125,22 @@
       "hit": 56
     },
     "전체부진마": {
-      "count": 363,
+      "count": 365,
       "hit": 103
     },
     "대규모급락": {
-      "count": 14,
+      "count": 15,
       "high_odds": 0,
-      "recommended_hit": 3,
+      "recommended_hit": 4,
       "high_odds_rate": 0.0,
-      "hit_rate": 21.4
+      "hit_rate": 26.7
     },
     "이상감지동반": {
-      "count": 118,
+      "count": 120,
       "hit": 47
     },
     "급락동반": {
-      "count": 31,
+      "count": 33,
       "hit": 16
     }
   },
@@ -1467,8 +1480,8 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 42,
-    "hit": 26,
+    "count": 43,
+    "hit": 27,
     "cases": [
       {
         "race": "오비히로 11경주",
@@ -2112,9 +2125,25 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "오다와라 1경주",
+        "date": "2026-07-12",
+        "smart_horses": [
+          3,
+          2,
+          5
+        ],
+        "placed": [
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 4.4,
+        "high_odds": false
       }
     ],
-    "rate": 61.9,
+    "rate": 62.8,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
