@@ -473,6 +473,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 const AUTO_ALARM = 'autoCollectTick';           // 30초 하트비트(서비스워커 부활)
 const AUTO_STATUS_URL = `${SERVER}/api/auto/status`;
 let _fineTimer = null, _keepaliveTimer = null, _collecting = false, _nextDueAt = 0;
+let _lastCollectAt = 0;   // [수집 조기 중단 방어] 마지막 수집 성공 시각(발주 전 2분+ 미수집 self-heal용)
 
 function _autoCfg() {
   return new Promise((r) => chrome.storage.local.get(
@@ -676,6 +677,10 @@ async function autoTick(reason) {
     else if (left <= 180000) intervalMs = 10000;  // 마감 3분전부터 10초 간격
     else if (left <= 300000) intervalMs = 15000;  // 마감 5분전부터 15초 간격
   }
+  // [수집 조기 중단 방어] 발주 전(left>0)인데 마지막 수집 성공 후 2분+ 경과 → 중단으로 보고 즉시 재수집(due 무시).
+  //   고쿠라 8R: T-8분에 수집이 멈춰 JRA 마감구간을 놓친 케이스 방어. 백그라운드 전용 모드에서도 self-heal.
+  const _stalled = (left != null && left > 0 && _lastCollectAt > 0 && (now - _lastCollectAt) >= 120000);
+  if (_stalled) _nextDueAt = 0;   // 즉시 재수집 유도
   if ((reason === 'start' || now >= _nextDueAt) && !_collecting) {
     _collecting = true;
     let r = null;
@@ -683,8 +688,9 @@ async function autoTick(reason) {
     _collecting = false;
     // [수정2] 경기 마감 감지 → 엔진이 이미 정지됨. 상태를 running:true 로 덮어쓰지 않고 종료.
     if (r && r.closed) return;
+    if (r && !r.closed) _lastCollectAt = Date.now();   // 수집 성공 시각 기록
     _nextDueAt = Date.now() + intervalMs;
-    _setAutoStatus({ running: true, last: Date.now(), next: _nextDueAt, deadline: cfg.timerDeadline || 0, intervalMs });
+    _setAutoStatus({ running: true, last: Date.now(), next: _nextDueAt, deadline: cfg.timerDeadline || 0, intervalMs, stalled: _stalled });
     // [4번] 수집 직후 이상감지 재실행 → 화면 갱신 + '새로' 발생한 급락만 즉시 알림
     _forceAnalyze().then((a) => _notifyNewDrops(a, cfg.timerDeadline || 0));
   }

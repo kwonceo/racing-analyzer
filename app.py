@@ -5091,6 +5091,8 @@ def _triple_analyze(rk, rec):
     # [1번] 마감 후(T-0 이후) 감지 여부 — 현재 스냅샷의 부호 포함 발주전분(mb_signed<0)
     cur_mb, after_close = None, False
     deadline_corrected = False   # [1번] 발주시각 오검출 정정 발생 여부(최근 스냅샷 기준)
+    collection_stalled = False   # [수집 조기 중단 방어] 발주 전인데 마지막 수집이 2분+ 경과
+    secs_since_collect = None
     try:
         _hp0, _, _ = _hist_path(rk)
         _hd0 = json.load(open(_hp0, encoding="utf-8"))
@@ -5102,6 +5104,12 @@ def _triple_analyze(rk, rec):
             after_close = bool(_s0.get("after_close")) or (cur_mb is not None and cur_mb < 0)
             # 최근 5스냅샷 내 오검출 정정이 있었으면 배너 표시용으로 노출
             deadline_corrected = any(_s.get("deadline_corrected") for _s in _hd0["snapshots"][-5:])
+            # [수집 조기 중단 방어] 발주시각 감지됨(cur_mb>0) + 마지막 수집 2분+ 경과 + 마감 전 → 중단 감지
+            _lt = _s0.get("t")
+            if _lt:
+                secs_since_collect = int(time.time() - _lt)
+                if cur_mb is not None and cur_mb > 0 and secs_since_collect >= 120 and not after_close:
+                    collection_stalled = True
     except Exception:
         cur_mb, after_close = None, False
 
@@ -6173,6 +6181,8 @@ def _triple_analyze(rk, rec):
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
         "deadlineCorrected": deadline_corrected,   # [1번] 발주시각 오검출 정정(과거 마감상태 무효화) 발생
+        "collectionStalled": collection_stalled,   # [수집 조기 중단 방어] 발주 전 2분+ 미수집 → 재수집 필요
+        "secsSinceCollect": secs_since_collect,     # 마지막 수집 후 경과초
         "afterCloseSurge": after_close_surge,   # [1·4번] 마감 후 대급락(50%+) 배너 + 학습 입상률
 
         # [경주전환 방어] 첫 수집(기준값 설정)/비정상 변동폭(기준값 재설정) 여부

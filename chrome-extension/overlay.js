@@ -19,6 +19,7 @@
   try {
     var ID_CHIP = 'kbOvToggle', ID_PANEL = 'kbOvPanel';
     var enabled = false, killed = false, timer = null;
+    var stallNudgeAt = 0;   // [수집 조기 중단 방어] 재수집 트리거 throttle(30초)
     var savedPos = null;   // [보완#2] 사용자가 드래그해 옮긴 패널 위치({left,top}) — chrome.storage 에 저장/복원
     var soundOn = false, lastSoundKey = '';   // [보완#3] 강조 팝업 알림음 옵션(기본 off) + 중복 방지
     // [강한 신호 8유형·막판 보존] T-2분 이후 감지된 강신호를 경주 종료 후에도 유지(새 경주 rk 변경 시에만 초기화)
@@ -581,6 +582,19 @@
           ccRow.appendChild(mk('div', 'font-weight:800;font-size:12px;color:#fca5a5', '⚠️ 중앙경마 배당판 T-2분에 닫힘'));
           ccRow.appendChild(mk('div', 'font-weight:800;font-size:12px;color:#fecaca', '지금이 마지막 신호!'));
           panel.appendChild(ccRow);
+        }
+
+        // [수집 조기 중단 방어] 발주 전인데 2분+ 미수집 → 경고 + 확장 재수집 트리거(30초 1회 throttle)
+        if (d && d.collectionStalled) {
+          var stRow = mk('div', 'margin:2px 0 6px;padding:6px 9px;border-radius:6px;border:1px solid #fbbf24;background:rgba(245,158,11,.18)');
+          stRow.appendChild(mk('div', 'font-weight:800;font-size:12px;color:#fcd34d', '⚠️ 수집 중단 감지'));
+          stRow.appendChild(mk('div', 'font-weight:700;font-size:11px;color:#fde68a', '자동 재수집 시도 중...'));
+          panel.appendChild(stRow);
+          var _sn = Date.now();
+          if (!stallNudgeAt || _sn - stallNudgeAt > 30000) {
+            stallNudgeAt = _sn;
+            try { chrome.runtime.sendMessage({ type: 'FORCE_COLLECT', reason: 'stall' }); } catch (_) { /* */ }
+          }
         }
 
         // 중요 신호 팝업(상단 중앙)은 항상 갱신 · 배너는 아래 [4번 이상감지] 그룹에 표시
