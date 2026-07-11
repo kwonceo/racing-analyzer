@@ -601,6 +601,14 @@
           panel.appendChild(db);
         }
 
+        // [전적 과가중 해결] 📊 시장 유력(전적 미수집) — 저배당(5배↓)이라 유력마 편입된 말
+        (d.marketFavorites || []).filter(function (m) { return m.formMissing && inV(m.no); }).forEach(function (m) {
+          var mf = mk('div', 'margin:2px 0;padding:3px 8px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.12);border-radius:6px;font-size:11px');
+          mf.appendChild(mk('span', 'font-weight:800;color:#38bdf8', '📊 ' + m.no + '번 시장 유력'));
+          mf.appendChild(mk('span', 'margin-left:5px;color:#7dd3fc', '배당 ' + m.odds + '배 (전적 미수집)'));
+          panel.appendChild(mf);
+        });
+
         // [3번-실시간] ⚡ 실시간 추가 — 초반 유력마 고정 후 급락/역배열 감지로 편입된 말
         (d.realtimeAdded || []).forEach(function (r) {
           if (!inV(r.no)) return;

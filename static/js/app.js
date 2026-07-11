@@ -3005,6 +3005,16 @@
     </div>`;
   }
 
+  // [전적 과가중 해결] 저배당(5배↓) 시장 유력마 — 전적 미수집이어도 유력마 편입.
+  function renderMarketFavorites(a) {
+    const mf = ((a && a.marketFavorites) || []).filter((m) => m.formMissing);
+    if (!mf.length) return '';
+    return `<div style="margin:6px 0;padding:7px 10px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.12);border-radius:6px">
+      <div style="font-weight:800;color:#38bdf8">📊 시장 유력 (전적 미수집)</div>
+      ${mf.map((m) => `<div class="hint" style="margin-top:2px;color:#7dd3fc">· <b>${m.no}번</b> 배당 ${m.odds}배 → 유력마 편입 <span style="color:#94a3b8">(배당이 낮아 시장이 유력하다고 판단)</span></div>`).join('')}
+    </div>`;
+  }
+
   // [3번] 실시간 유력마 추가 배너 — 초반 유력마 고정 후 급락/역배열 감지로 편입된 말.
   function renderRealtimeAdded(a) {
     const ra = (a && a.realtimeAdded) || [];
@@ -3127,6 +3137,7 @@
 
     return `<div id="topHorsesCard" style="position:sticky;top:0;z-index:6;margin:0 0 8px;border:2px solid #ffd24f;border-radius:10px;padding:8px 10px;background:linear-gradient(180deg,rgba(255,210,79,.12),rgba(20,28,43,.97));box-shadow:0 4px 16px rgba(0,0,0,.4)">
       <div class="matrix-title" style="font-size:14px;color:#ffd24f">⭐ 유력마 TOP 5 <span class="hint" style="font-weight:400">실시간 · 30초 자동갱신 · 클릭 시 상세+타임라인</span></div>
+      ${renderMarketFavorites(a)}
       ${renderRealtimeAdded(a)}
       ${topRows}
       <div class="matrix-title" style="font-size:13px;color:#c084fc;margin-top:6px">🐎 복병 · 이상감지 <span class="hint" style="font-weight:400">유력마 밖 강한 신호 2두</span></div>
@@ -5108,6 +5119,7 @@
     host.innerHTML = `<div class="panel-card">
       <h3>🔗 통합 분석 결과 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${closeTag}</span></h3>
       ${renderAlertSignal(a.alertSignal, _horseRoleMap(a))}
+      ${renderMarketFavorites(a)}
       ${renderRealtimeAdded(a)}
       ${renderKoreaIntegratedTable(a.integrated)}
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>

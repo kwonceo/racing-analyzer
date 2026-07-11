@@ -2148,6 +2148,17 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None, curWin=None):
         o = repr_odds.get(no)
         fh = form_by_no.get(no)
         ftotal = fh.get("totalScore") if fh else None
+        # [전적 과가중 근본 해결] 저배당(단승/복승 대표 5배 이하) = 시장이 유력하다고 봄 →
+        #   전적 미수집/저조해도 전적 점수 최소 30점 보장(유력마 제외 방지). 후쿠시마 2R 6번(4.9배·전적0) 케이스.
+        _mkt_odds = o
+        _wo = win_odds.get(no)
+        if _wo is not None and (_mkt_odds is None or _wo < _mkt_odds):
+            _mkt_odds = _wo
+        market_favorite = (_mkt_odds is not None and _mkt_odds <= 5.0)
+        form_floored = False
+        if market_favorite and (ftotal is None or ftotal < 30):
+            ftotal = 30.0
+            form_floored = True
         placings = (fh or {}).get("recentPlacings") or []
         avg_place = _avg_placing(placings)
         jk_rate = _jockey_place_rate((fh or {}).get("jockey"))
@@ -2217,6 +2228,7 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None, curWin=None):
             "tier": tier, "override": override, "strongCount": strong_cnt,
             "overrideReason": " · ".join(ov_reasons), "anomalySig": anomaly_sig,
             "winOdds": wo, "highOddsCut": ho_cut, "highOddsReason": ho_reason,
+            "marketFavorite": market_favorite, "formFloored": form_floored,
             "reason": reason,
         })
 
@@ -5230,6 +5242,40 @@ def _triple_analyze(rk, rec):
     except Exception as _ke:
         print("[유력마정합] 실패:", _ke)
 
+    # [전적 과가중 근본 해결] 저배당(단승/복승 대표 5배 이하) = 시장이 유력하다고 봄 → 전적 미수집/저조라도
+    #   유력마에서 절대 제외하지 않는다(유력마 후보 보장). 후쿠시마 2R: 6번(복승 4.9배 시장최강·전적0)이
+    #   통합정렬(전적 비중)에서 밀려 유력마 제외됐던 문제 근본 수정. 배당 낮은 순으로 유력마 상위 편입.
+    market_favorites = []
+    try:
+        def _mkt_repr(h):
+            best = curWin.get(h)
+            for (a, b), o in curQ.items():
+                if h in (a, b) and o and o > 0 and (best is None or o < best):
+                    best = o
+            return best
+        _mf = []
+        for h in sorted(valid_nos or []):
+            ro = _mkt_repr(h)
+            if ro is not None and ro <= 5.0:
+                _mf.append((int(h), round(float(ro), 1)))
+        _mf.sort(key=lambda t: t[1])                          # 배당 낮은 순(가장 유력한 시장)
+        # 전적 수집 여부(형태점수 유무)로 '전적 미수집' 표시
+        _form_by = {int(f.get("no")): f for f in (form or []) if f.get("no") is not None}
+        for h, ro in _mf:
+            _fs = (_form_by.get(h) or {}).get("totalScore")
+            market_favorites.append({"no": h, "odds": ro,
+                                     "formMissing": (_fs is None or _fs <= 0),
+                                     "note": "시장 유력(배당 %g배)%s" % (ro, " · 전적 미수집" if (_fs is None or _fs <= 0) else "")})
+        # 유력마에 없는 저배당 시장유력마를 상위(배당 낮은 순)로 편입 — 기존 유력마 유지, 총 5두 이내.
+        _mf_nos = [h for h, _ in _mf]
+        _added = [h for h in _mf_nos if h not in key_horses]
+        if _added:
+            key_horses = key_horses + _added
+            key_horses = key_horses[:5]
+            ranked = _mf_nos + [h for h in ranked if h not in _mf_nos]   # 조합 편성 풀도 시장유력 우선
+    except Exception as _mfe:
+        print("[시장유력마] 실패:", _mfe)
+
     # [1번·유력마 1마리] 제거 완화 후에도 유력 후보가 1마리뿐이면 → 축 + 배당 낮은 2마리 자동 추가(최소 복승) + 경고.
     single_favorite = None
     try:
@@ -6012,6 +6058,7 @@ def _triple_analyze(rk, rec):
         "keyHorses": key_horses, "anomalyHorse": anomaly_horse,
         "validHorses": sorted(valid_nos),   # [잔존마 필터·2번] 현재 배당 등장 마번(프론트 TOP5 필터 기준)
         "realtimeAdded": realtime_added,   # [3번] 실시간 급락/역배열로 유력마에 추가된 말(오버레이 '⚡ 실시간 추가')
+        "marketFavorites": market_favorites,   # [전적 과가중 해결] 저배당(5배↓) 시장유력마(전적 미수집도 유력마 편입)
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
         "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용
