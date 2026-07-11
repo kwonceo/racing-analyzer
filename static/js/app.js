@@ -4203,11 +4203,14 @@
     let thopt = null; try { thopt = await (await fetch('/api/thresholds/optimize')).json(); } catch (_) { /* */ }
     // [신호별 적중률·4번] 유력마 기반 신호별 복승/삼복승 적중률
     let sigstat = null; try { sigstat = await (await fetch('/api/learning/signal-stats')).json(); } catch (_) { /* */ }
+    // [오늘 결과 통계 대시보드] 오늘 등록 경주 집계(요약·경마장별·신호별·타임라인)
+    let today = null; try { today = await (await fetch('/api/stats/today')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     // [AI Phase1] AI 학습 데이터 현황 대시보드
     let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
+      ${renderTodayStats(today)}
       ${renderDailyLearning(dl)}
       ${renderSignalStats(sigstat)}
       ${renderPatternConfidence(pconf)}
@@ -4272,6 +4275,38 @@
       else toast('적용 실패: ' + (r.error || ''));
     } catch (e) { toast('적용 실패: ' + e.message); }
   };
+
+  // [오늘 결과 통계 대시보드] 오늘 요약 카드 + 경마장별 + 신호별 + 타임라인.
+  function renderTodayStats(t) {
+    if (!t || t.error) return '';
+    if (!t.total) return `<div class="panel-card" style="margin:8px 0"><div class="matrix-title" style="color:#ffd24f">📅 오늘 ${esc(t.date || '')} 요약</div><p class="hint">아직 등록된 결과가 없습니다.</p></div>`;
+    const pcol = (t.profit || 0) >= 0 ? '#38d39f' : '#ff6b6b';
+    const psign = (t.profit || 0) >= 0 ? '+' : '';
+    // [2번] 상단 큰 요약 박스
+    const summary = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:6px 0">
+      <div style="padding:10px;border-radius:8px;background:rgba(78,161,255,.10);border:1px solid #4ea1ff;text-align:center"><div class="hint" style="font-size:11px">등록</div><b style="font-size:22px;color:#e2e8f0">${t.total}<span style="font-size:12px">경주</span></b></div>
+      <div style="padding:10px;border-radius:8px;background:rgba(56,211,159,.10);border:1px solid #38d39f;text-align:center"><div class="hint" style="font-size:11px">복승 적중</div><b style="font-size:22px;color:#38d39f">${t.hit_quinella}<span style="font-size:12px">건 (${t.rate_quinella}%)</span></b></div>
+      <div style="padding:10px;border-radius:8px;background:rgba(192,132,252,.10);border:1px solid #c084fc;text-align:center"><div class="hint" style="font-size:11px">삼복승 적중</div><b style="font-size:22px;color:#c084fc">${t.hit_trifecta}<span style="font-size:12px">건 (${t.rate_trifecta}%)</span></b></div>
+      <div style="padding:10px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid ${pcol};text-align:center"><div class="hint" style="font-size:11px">손익</div><b style="font-size:22px;color:${pcol}">${psign}${(t.profit || 0).toLocaleString()}<span style="font-size:12px">원</span></b></div>
+    </div>`;
+    // [3번] 경마장별 적중률
+    const tracks = Object.entries(t.by_track || {}).sort((a, b) => b[1].total - a[1].total);
+    const trackHtml = tracks.length ? `<div style="margin-top:6px"><b style="font-size:13px">🏇 경마장별</b>${tracks.map(([v, e]) => `<div style="display:inline-block;margin:3px 8px 3px 0;font-size:12px"><b>${esc(v)}</b> <span class="hint">${e.hit}/${e.total}</span> <b style="color:${e.rate >= 50 ? '#38d39f' : '#b8c0cc'}">(${e.rate}%)</b></div>`).join('')}</div>` : '';
+    // [4번] 신호별 적중률
+    const sigs = Object.entries(t.by_signal || {}).sort((a, b) => b[1].total - a[1].total);
+    const sigHtml = sigs.length ? `<div style="margin-top:6px"><b style="font-size:13px">📊 신호별</b>${sigs.map(([n, e]) => `<div style="display:inline-block;margin:3px 8px 3px 0;font-size:12px"><b>${esc(n)}</b> <span class="hint">${e.hit}/${e.total}</span> <b style="color:${e.rate >= 50 ? '#38d39f' : '#b8c0cc'}">(${e.rate}%)</b></div>`).join('')}</div>` : '';
+    // [5번] 오늘 경주 타임라인
+    const tl = (t.timeline || []).map((r) => {
+      const mark = r.hit ? '✅' : '❌';
+      const odds = r.hit && r.quinella_odds ? ` 복승 <b style="color:#38d39f">${r.quinella_odds}배</b>` : (r.hit ? '' : ' 미적중');
+      return `<div style="font-size:12px;padding:2px 0"><span class="hint">${esc(r.time)}</span> ${esc(r.race)} ${mark}${odds}</div>`;
+    }).join('');
+    const tlHtml = tl ? `<div style="margin-top:8px"><b style="font-size:13px">🕐 오늘 경주 타임라인</b><div style="margin-top:2px">${tl}</div></div>` : '';
+    return `<div class="panel-card" style="margin:8px 0;border:2px solid #ffd24f">
+      <div class="matrix-title" style="color:#ffd24f;font-size:15px">📅 오늘 ${esc(t.date || '')} 요약</div>
+      ${summary}${trackHtml}${sigHtml}${tlHtml}
+    </div>`;
+  }
 
   // [신호별 적중률·4번] 📊 신호별 적중률 — 유력마 기반(복승 2/3·삼복승 유력마2+복병1) 신호별 복승/삼복승 적중률.
   function renderSignalStats(ss) {

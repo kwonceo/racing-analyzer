@@ -9910,6 +9910,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     record = {
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
         "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
+        # [오늘 통계 대시보드] 날짜·경마장·유력마 기반 적중(집계·경마장별·타임라인용)
+        "date": doc.get("date"), "venue": (_area_num(rk)[0] or None),
+        "keyhorse_quinella_hit": keyhorse_hit["quinella_hit"], "keyhorse_trifecta_hit": keyhorse_hit["trifecta_hit"],
         "stake": stake, "pnl": pnl, "payout_actual": actual_payout,
         "anomalies_detected": anomalies_detected, "anomaly_was_correct": anomaly_correct,
         "signal_correct": signal_correct,
@@ -11891,6 +11894,60 @@ def _reversal_strength_stats():
     return {"by_band": stats, "sample_cases": cases[-60:], "total_cases": len(cases),
             "note": "역배열 challenger 강도별 실제 입상/1착률(경주당 최강 역전 1건). 표본 적으면 참고만(50+ 유의).",
             "updated": time.strftime("%Y-%m-%d")}
+
+
+@app.route("/api/stats/today", methods=["GET"])
+def stats_today():
+    """[오늘 결과 통계 대시보드] 오늘(또는 ?date=YYYY-MM-DD) 등록 경주 집계 →
+    총·복승/삼복승 적중·패스·손익·경마장별·신호별·타임라인. 기존 정확 적중 우선·없으면 유력마 기반 병행."""
+    date = (request.args.get("date") or time.strftime("%Y-%m-%d")).strip()
+    L = _learning_load()
+    recs = [r for r in (L.get("records") or []) if r.get("date") == date]
+
+    def _qhit(r):
+        return bool(r.get("quinella_hit") or r.get("keyhorse_quinella_hit"))
+
+    def _thit(r):
+        return bool(r.get("trifecta_hit") or r.get("keyhorse_trifecta_hit"))
+    total = len(recs)
+    hit_q = sum(1 for r in recs if _qhit(r))
+    hit_t = sum(1 for r in recs if _thit(r))
+    passed = sum(1 for r in recs if r.get("passed"))
+    profit = sum(int(r.get("pnl") or 0) for r in recs)
+    by_track = {}
+    for r in recs:
+        v = r.get("venue") or (_area_num(r.get("race") or "")[0]) or "기타"
+        e = by_track.setdefault(v, {"total": 0, "hit": 0})
+        e["total"] += 1
+        if _qhit(r):
+            e["hit"] += 1
+    for v, e in by_track.items():
+        e["rate"] = round(e["hit"] / e["total"] * 100, 1) if e["total"] else 0.0
+    # [신호별] signal_stats.json 케이스에서 오늘 날짜만 집계(신호별 학습 재사용)
+    by_signal = {}
+    S = _signal_stats_load()
+    for name, e in S.items():
+        cs = [c for c in (e.get("cases") or []) if c.get("date") == date]
+        if cs:
+            hq = sum(1 for c in cs if c.get("quinella_hit"))
+            by_signal[name] = {"total": len(cs), "hit": hq,
+                               "rate": round(hq / len(cs) * 100, 1) if cs else 0.0}
+    # [타임라인] 시간순(등록 t 기준)
+    timeline = []
+    for r in recs:
+        t = r.get("t")
+        hhmm = time.strftime("%H:%M", time.localtime(t)) if t else "--:--"
+        timeline.append({"time": hhmm, "race": r.get("race"), "hit": _qhit(r),
+                         "quinella_odds": (r.get("payouts") or {}).get("quinella"),
+                         "trifecta_odds": (r.get("payouts") or {}).get("trifecta"),
+                         "pnl": r.get("pnl"), "t": t or 0})
+    timeline.sort(key=lambda x: x["t"])
+    return jsonify({
+        "date": date, "total": total, "hit_quinella": hit_q, "hit_trifecta": hit_t, "pass": passed,
+        "rate_quinella": round(hit_q / total * 100, 1) if total else 0.0,
+        "rate_trifecta": round(hit_t / total * 100, 1) if total else 0.0,
+        "profit": profit, "by_track": by_track, "by_signal": by_signal, "timeline": timeline,
+    })
 
 
 @app.route("/api/learning/signal-stats", methods=["GET"])
