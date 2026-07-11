@@ -5111,7 +5111,9 @@ def _horse_rep_series(hist, no, n=6):
             except (TypeError, ValueError):
                 o = None
         if o is None:
-            mm = _odds_map_un(h.get("quinella"))
+            # ⚠ 히스토리 스냅샷의 quinella는 dict('1+4':1.4) 포맷 → _parse_combo_map로 파싱
+            #   (_odds_map_un은 [{combo,odds}] 리스트 전용이라 dict엔 빈 결과 → 시퀀스 유실 버그).
+            mm = _parse_combo_map(h.get("quinella"))
             cand = [v for k, v in mm.items() if no in k and v > 0]
             o = min(cand) if cand else None
         if o and o > 0:
