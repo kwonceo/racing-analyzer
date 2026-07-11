@@ -15266,6 +15266,19 @@ def _multi_collect_one(track, race, ymd):
         return None
 
 
+def _multi_sport_of(rec):
+    """[통합·4번] rec의 sport/category → 대시보드 종목 그룹(horse|cycle|boat|korea)."""
+    cat = (rec.get("category") or "").lower()
+    sp = (rec.get("sport") or "").lower()
+    if sp == "cycle" or cat == "cycle":
+        return "cycle"
+    if sp == "boat" or cat == "boat":
+        return "boat"
+    if cat == "korea" or _area_num(rec.get("venue") or "")[0] in ("서울", "부산", "부경", "제주", "과천"):
+        return "korea"
+    return "horse"
+
+
 def _multi_card(key, rec):
     """[3번] 카드 요약: analyze(기존 _triple_analyze 재사용·읽기전용) → 유력마TOP3·핵심신호·확신도·마감남은초·색상."""
     try:
@@ -15276,6 +15289,8 @@ def _multi_card(key, rec):
     now = time.time()
     pe = rec.get("postEpoch")
     left = int(pe - now) if pe else None
+    if left is None and not an.get("afterClose") and an.get("minutesBefore") is not None:
+        left = int(an["minutesBefore"] * 60)   # [통합] postEpoch 없는 확장수집(경륜/한국)은 분석의 발주전분으로 카운트다운
     urgency = "normal"
     if left is not None:
         if left <= MULTI_URGENT_SEC:
@@ -15298,11 +15313,14 @@ def _multi_card(key, rec):
     # [3번·중고배당 유력마] 있으면 카드에 💎 배지 + 요약
     _mhf = an.get("midHighFavorites") or []
     mid_high = [{"no": m["no"], "odds": m["odds"], "sigTypes": m.get("sigTypes") or []} for m in _mhf[:3]]
+    # [4번·⚡ 이상감지 배지] 급락/역배열/스마트머니 신호 하나라도 있으면 anomaly=True
+    anomaly = bool(signals)
     return {
         "raceKey": key, "venue": rec.get("venue"), "raceNo": rec.get("raceNo"),
+        "sport": _multi_sport_of(rec),   # [통합·4번] 종목 그룹(horse|cycle|korea)
         "postTime": rec.get("postTime"), "secondsLeft": left, "urgency": urgency,
         "keyHorses": (an.get("keyHorses") or [])[:3],
-        "signals": signals[:3],
+        "signals": signals[:3], "anomaly": anomaly,   # [4번] ⚡ 이상감지 배지
         "midHigh": mid_high,   # [3번] 💎 중고배당 유력마(있으면 카드 배지·별도 강조)
         "confidence": conf.get("overall") or conf.get("level"),
         "quinellaMain": next((b.get("combo") for b in (an.get("betRecommend") or []) if b.get("label") == "복승 메인"), None),
@@ -15353,6 +15371,28 @@ def multi_dashboard():
         if c:
             cards.append(c)
             collected_keys.add(key)
+    # [통합·1·3번] 확장이 수집한 경주(triple_store)도 읽기 전용으로 포함 → 경륜·한국경마·일본경마 통합.
+    #   ⚠ triple_store는 절대 쓰지 않고 읽기만(로그인 필요한 경륜 스케줄 서버fetch 대체). 30분+ 미갱신·마감 후는 제외.
+    try:
+        tdb = _triple_load()
+        for key, rec in tdb.items():
+            if key in collected_keys:
+                continue                              # multi_race_store 우선(중복 제거)
+            if (time.time() - (rec.get("t") or 0)) > STALE_ACTIVE_SEC:
+                continue                              # 끝난 경주(30분+ 미갱신) 제외
+            _sp = _multi_sport_of(rec)
+            if _sp == "boat":                         # 경정은 우선 제외(사용자 요청)
+                continue
+            _va, _nu = _area_num(key)
+            _rec2 = dict(rec)
+            _rec2.setdefault("venue", _va)
+            _rec2.setdefault("raceNo", _nu)
+            c = _multi_card(key, _rec2)
+            if c and (c.get("secondsLeft") is None or c["secondsLeft"] > -300):
+                cards.append(c)
+                collected_keys.add(key)
+    except Exception as e:
+        print("[다중경주] triple_store 병합 오류(무시):", e)
     # [예정 경주] today_schedule의 발주 전 경주(아직 미수집·마감 안 지남)를 카운트다운 카드로 추가
     now = time.time()
     sched = _schedule_load()
@@ -15367,13 +15407,17 @@ def multi_dashboard():
                 continue
             urg = "urgent" if left <= MULTI_URGENT_SEC else ("warn" if left <= MULTI_WARN_SEC else "normal")
             cards.append({"raceKey": key, "venue": tr.get("venue"), "raceNo": rc.get("raceNo"),
-                          "postTime": rc.get("postTime"), "secondsLeft": left, "urgency": urg,
-                          "keyHorses": [], "signals": [], "confidence": None,
+                          "sport": "horse", "postTime": rc.get("postTime"), "secondsLeft": left, "urgency": urg,
+                          "keyHorses": [], "signals": [], "anomaly": False, "confidence": None,
                           "quinellaMain": None, "afterClose": False, "scheduled": True})
     cards.sort(key=lambda c: (c.get("secondsLeft") if c.get("secondsLeft") is not None else 9e9))
     urgent = [c["raceKey"] for c in cards if c.get("urgency") == "urgent" and not c.get("afterClose")]
+    # [5번] 종목별 카운트(토글 UI용)
+    by_sport = {}
+    for c in cards:
+        by_sport[c.get("sport") or "horse"] = by_sport.get(c.get("sport") or "horse", 0) + 1
     return jsonify({"cards": cards, "urgent": urgent, "count": len(cards),
-                    "collected": len(collected_keys)})
+                    "collected": len(collected_keys), "bySport": by_sport})
 
 
 @app.route("/api/multi/race/<path:key>", methods=["GET"])
@@ -15381,6 +15425,8 @@ def multi_race_detail(key):
     """[4번] 카드 클릭 → 해당 경주 전체 분석(기존 _triple_analyze 재사용). 결과입력은 기존 엔드포인트 사용."""
     db = _multi_store_load()
     rec = db.get(key)
+    if not rec:
+        rec = _triple_load().get(key)   # [통합] 확장 수집(경륜/한국/일본) 읽기 전용 폴백
     if not rec:
         return jsonify({"error": "해당 경주 배당이 아직 수집되지 않았습니다.", "waiting": True}), 200
     try:

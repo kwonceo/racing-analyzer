@@ -1574,8 +1574,46 @@
       try { playAlert('🔴'); } catch (_) { /* */ }
       setTimeout(() => { if (banner) banner.style.display = 'none'; }, 30000);
     } else if (!urgent.length && banner) { banner.style.display = 'none'; }
-    box.innerHTML = cards.map(_multiCardHtml).join('') || '<p class="hint">아직 수집된 경주가 없습니다. 발주 10분전부터 자동으로 채워집니다.</p>';
+    // [5번] 종목별 토글 + [4번] 종목별 그룹핑
+    const bySport = (d && d.bySport) || {};
+    _renderMultiToggles(bySport);
+    const shown = cards.filter((c) => _multiSportOn(c.sport || 'horse'));
+    // 종목 그룹 순서(경정 제외): 일본경마 → 경륜 → 한국경마
+    const order = ['horse', 'cycle', 'korea'];
+    let html = '';
+    order.forEach((sp) => {
+      const g = shown.filter((c) => (c.sport || 'horse') === sp);
+      if (!g.length) return;
+      html += `<div style="grid-column:1/-1;margin:6px 0 2px;font-weight:800;color:#94a3b8">${_multiSportLabel(sp)} <span class="hint" style="font-weight:400">${g.length}경주</span></div>`;
+      html += g.map(_multiCardHtml).join('');
+    });
+    box.innerHTML = html || '<p class="hint">표시할 경주가 없습니다. (종목 토글 확인 · 발주 10분전부터 자동 수집)</p>';
     box.querySelectorAll('[data-mkey]').forEach((el) => el.addEventListener('click', () => openMultiDetail(el.dataset.mkey)));
+  }
+  // [5번] 종목 토글 상태(localStorage) — 경정 기본 제외
+  const _multiSportKey = 'multiSportsOn';
+  function _multiSportOn(sp) {
+    let on; try { on = JSON.parse(localStorage.getItem(_multiSportKey) || 'null'); } catch (_) { on = null; }
+    if (!on) return sp !== 'boat';   // 기본: 경정 외 전부 켜짐
+    return !!on[sp];
+  }
+  function _multiSportLabel(sp) {
+    return ({ horse: '🇯🇵 일본경마', cycle: '🚴 경륜', boat: '🚤 경정', korea: '🇰🇷 한국경마' })[sp] || '🏇 경마';
+  }
+  function _renderMultiToggles(bySport) {
+    const bar = $('#multiSportToggles'); if (!bar) return;
+    const sports = ['horse', 'cycle', 'korea'];   // 경정 제외
+    bar.innerHTML = sports.map((sp) => {
+      const on = _multiSportOn(sp), n = bySport[sp] || 0;
+      return `<label style="cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid ${on ? '#38d39f' : '#334155'};color:${on ? '#38d39f' : '#94a3b8'}"><input type="checkbox" data-sp="${sp}" ${on ? 'checked' : ''} style="vertical-align:middle"> ${_multiSportLabel(sp)} (${n})</label>`;
+    }).join(' ');
+    bar.querySelectorAll('input[data-sp]').forEach((cb) => cb.addEventListener('change', () => {
+      let on; try { on = JSON.parse(localStorage.getItem(_multiSportKey) || 'null'); } catch (_) { on = null; }
+      if (!on) on = { horse: true, cycle: true, korea: true, boat: false };
+      on[cb.dataset.sp] = cb.checked;
+      try { localStorage.setItem(_multiSportKey, JSON.stringify(on)); } catch (_) { /* */ }
+      renderMultiDashboard();
+    }));
   }
   function _multiFmtLeft(s) {
     if (s == null) return '—';
@@ -1604,12 +1642,15 @@
     // [3번·💎 중고배당 유력마] 있으면 카드에 💎 배지 + 요약(별도 강조)
     const mh = (c.midHigh || []);
     const mhBadge = mh.length ? '<span style="background:#f0abfc;color:#1a1a1a;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">💎 고배당</span>' : '';
+    const anBadge = (c.anomaly && !mh.length) ? '<span style="background:#ef4444;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">⚡ 이상감지</span>' : '';
     const mhLine = mh.length ? `<div style="margin:3px 0;font-size:12px;color:#f0abfc;font-weight:700">💎 ${mh.map((m) => `${m.no}번(${m.odds}배)`).join(' · ')}</div>` : '';
     const borderW = mh.length ? '3px' : '2px';
+    const spLabel = _multiSportLabel(c.sport);
     return `<div data-mkey="${esc(c.raceKey)}" title="클릭 → 상세 분석" style="cursor:pointer;border:${borderW} solid ${mh.length ? '#f0abfc' : col};border-radius:10px;padding:10px;background:${mh.length ? 'rgba(240,171,252,.08)' : bg}">
       <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px">${spLabel}</span>
         <b style="font-size:15px;color:#e2e8f0">${esc(c.venue || '')} ${c.raceNo}R</b>
-        ${mhBadge}
+        ${mhBadge}${anBadge}
         <span style="flex:1"></span>
         <b style="color:${col};font-size:13px">${c.urgency === 'urgent' ? '⚡ ' : ''}${leftTxt}</b>
       </div>
