@@ -100,3 +100,50 @@ bmed-public(공개 프론트) 연동 기준. 응답은 모두 `application/json`
 # localhost:8012 오리진에서 8011 호출 시 CORS 헤더 확인
 curl -i -H "Origin: http://localhost:8012" http://127.0.0.1:8011/api/health | grep -i access-control
 ```
+
+---
+
+## 경륜·일본경마·다중경주 API (내일 테스트 연동)
+
+> 이 엔드포인트들은 모두 `/api/*` → **CORS 허용 오리진**에서 호출 가능(브라우저 직접) + **bmed-public 프록시**(`/api/public/*`) 경유 가능.
+> ⚠ `keirin/keiba/odds`·`*/starters`·`multi/collect` 는 oddspark 를 **실시간 fetch**(부수효과)하므로 남용 주의.
+
+### 경륜 (keirin)
+| 엔드포인트 | 메서드 | 요청 | 응답 주요 필드 |
+|---|---|---|---|
+| `/api/keirin/card` (별칭 `/api/keirin/starters`) | POST | `{joCode,kaisaiBi,raceNo}` \| `{url}` \| `{html}`, `raceKey?` | `{ok, url, card, analysis, linkedRaceKey}` |
+| `/api/keirin/odds` | POST | `{joCode,kaisaiBi,raceNo}`\|`{url}`, `raceKey`(필수) | `{ok, raceKey, counts{quinella,exacta}, quinella[], exacta[], ingest}` |
+
+- `card`: `{venue, riders[], ...}` / `analysis.ranked[]`: 차번·선수명·競走得点·조정점수·각질(styleType)·등급.
+- `keirin/odds`: 복승(2車複)·쌍승(2車単)을 파이프라인 주입 → 같은 raceKey로 역배열·급락 자동 계산. 삼복승은 미수집(추정보험).
+
+### 일본경마 (keiba, 지방 NAR · oddspark)
+| 엔드포인트 | 메서드 | 요청 | 응답 주요 필드 |
+|---|---|---|---|
+| `/api/keiba/odds` | GET/POST | `{raceKey, raceDy?, raceNo?, opTrackCd?, sponsorCd?}` | `{ok, raceKey, counts, expected, warning, track, quinella[], exacta[], ingest}` 또는 `{ok, waiting:true, reason, track, counts}` |
+| `/api/keiba/current` | GET/POST | `{raceKey\|venue, raceDy?, opTrackCd?, sponsorCd?}` | `{ok, venue, currentRace, prevRace, changed, raceKey, track}` |
+| `/api/keiba/schedule` | GET/POST | `{raceDy?}` | `{raceDy, tracks:[{venue, opTrackCd, sponsorCd}]}` |
+| `/api/keiba/starters` | POST | `{raceKey\|venue, raceDy?, raceNb, opTrackCd?, sponsorCd?, withDetail?}` | `{ok, url, linkedRaceKey, race{venue,raceNo,distance,surface,trackCond}, horses[]}` |
+
+- `keiba/odds` 는 `_keiba_odds_live` 로 발매 중 실배당만 주입(발매 전·마감 후 가짜값은 `waiting:true`).
+- `keiba/current` 로 현재 발매중 경주번호 자동추종(경주 전환 감지 → raceKey 갱신).
+
+### 다중경주 (multi)
+| 엔드포인트 | 메서드 | 요청 | 응답 주요 필드 |
+|---|---|---|---|
+| `/api/multi/schedule` | GET/POST | GET=조회 / POST=강제 재수집 | `{ymd, tracks[], updated}` |
+| `/api/multi/collect` | POST | (없음) | `{ok, collected[], skipped}` |
+| `/api/multi/dashboard` | GET | (없음) | `{cards[], urgent[], count, collected, bySport}` |
+| `/api/multi/race/<key>` | GET | 경로에 raceKey | 경주 전체 분석(_triple_analyze) |
+
+- **경륜·일본경마 데이터 포함**: `multi/dashboard` 는 `triple_store` 를 읽기전용 병합 → **경륜·한국·일본경마 카드 통합**(경정=boat 만 제외). `cards[].sport`(horse/cycle) 로 구분, `bySport` 로 종목별 카운트.
+- `multi/schedule`·`multi/collect` 는 지방경마(NAR) 스케줄 기반. **경륜 스케줄은 별도** `POST /api/multi/keirin-schedule`.
+
+## bmed-public 프록시 매핑
+| 공개(bmed-public) | 업스트림(기존 서버) |
+|---|---|
+| `/api/public/keirin/<sub>` | `/api/keirin/<sub>` |
+| `/api/public/keiba/<sub>` | `/api/keiba/<sub>` |
+| `/api/public/multi/<sub>` | `/api/multi/<sub>` |
+
+- GET=쿼리스트링 전달 · POST=JSON 본문 전달(메서드 미러링). 예: `GET /api/public/multi/dashboard`, `POST /api/public/keirin/odds {raceKey,...}`.
