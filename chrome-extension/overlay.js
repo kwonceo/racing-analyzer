@@ -833,9 +833,9 @@
         boardItems.push({ el: cell.el, span: span });
       });
 
-      // [1번] 헤더 마번 강조 — 상위 유력마(⭐)·스마트머니(💰)·역배열(🔄)·확실제거(❌)만. 나머지: 숫자만(오버레이 없음).
-      var favTop = (d.keyHorses || []).slice(0, 3).map(Number);
-      var favSet = {}; favTop.forEach(function (n) { favSet[n] = 1; });
+      // [1·3번] 헤더 마번 강조 — 유력마(⭐)·스마트머니(💰)·역배열(🔄)·확실제거(❌)만. 나머지: 숫자만.
+      //   유력마 목록(keyHorses) 전체를 별표 대상으로 → 1번 등 어떤 마번이든 유력마면 헤더에 ⭐ 반드시 표시.
+      var favSet = {}; (d.keyHorses || []).map(Number).forEach(function (n) { favSet[n] = 1; });
       info.hdrEls.forEach(function (h) {
         var n = h.no, r0 = role[n];
         var isFav = favSet[n], isSmart = smartSet[n], isInv = invSet[n], isCut = (r0 === 'cut');
@@ -973,7 +973,8 @@
               '삼복승: ' + t.combo.join('+') + (t.odds != null ? '  (' + t.odds + '배)' : '')));
           });
           if (cp.confTop1 != null) {
-            cpBox.appendChild(mk('div', 'font-weight:400;color:#94a3b8;font-size:11px;margin-top:6px',
+            // [2번] 확신도1위 글씨 키움(16px)
+            cpBox.appendChild(mk('div', 'font-weight:800;color:#cbd5e1;font-size:16px;margin-top:7px',
               '확신도1위 ' + cp.confTop1 + '번' + (cp.confTop1High ? '🔺고배당' : '')));
           }
           panel.appendChild(cpBox);
@@ -1010,24 +1011,30 @@
         // [1번] 최종 결론 박스 — 최상단·가장 크게(모든 종목 공통: 경마/경륜/경정)
         renderConclusion(panel, d, deadline);
 
-        // [2번] 마감 카운트다운 — T-2분 주황 · T-1분 빨강 · T-30초 깜빡임
+        // [1번] 마감 카운트다운 — 마감 3분 이내 빨강배경+24px↑ · 5분 이내 노랑배경+20px · 그 외 기본. T-30초 깜빡임.
         var cd = countdown(deadline);
         if (cd) {
           var leftMs = deadline ? (deadline - Date.now()) : 0;
+          var within3 = leftMs > 0 && leftMs <= 180000;   // 마감 3분 이내
+          var within5 = leftMs > 0 && leftMs <= 300000;   // 마감 5분 이내
           var phase = (leftMs > 0 && leftMs <= 30000) ? 'blink'
             : (leftMs > 0 && leftMs <= 60000) ? 'red'
             : (leftMs > 0 && leftMs <= 120000) ? 'orange' : '';
-          var isRed = (phase === 'red' || phase === 'blink');
-          var cdBg = isRed ? 'rgba(220,38,38,.28)' : (phase === 'orange' ? 'rgba(245,158,11,.24)' : '');
-          var cdBd = isRed ? '#f87171' : (phase === 'orange' ? '#fbbf24' : '');
-          var cdRow = mk('div', 'margin:2px 0 6px;' + (phase ? 'padding:5px 8px;border-radius:6px;' : '') +
-            (cdBg ? ('background:' + cdBg + ';') : '') + (cdBd ? ('border:1px solid ' + cdBd + ';') : ''));
+          // 크기·색상 — 3분↓ 26px 빨강 / 5분↓ 20px 노랑 / 그외 14px 기본
+          var cdFs = within3 ? 26 : (within5 ? 20 : 14);
+          var numCol = (cd === '마감') ? '#fecaca' : within3 ? '#fee2e2' : within5 ? '#fde68a' : '#fbbf24';
+          var cdBg = within3 ? 'rgba(220,38,38,.38)' : (within5 ? 'rgba(245,158,11,.30)' : '');
+          var cdBd = within3 ? '#ef4444' : (within5 ? '#fbbf24' : '');
+          var boxed = within5 || phase;
+          var cdRow = mk('div', 'margin:2px 0 6px;display:flex;align-items:center;flex-wrap:wrap;' +
+            (boxed ? 'padding:7px 10px;border-radius:8px;' : '') +
+            (cdBg ? ('background:' + cdBg + ';') : '') + (cdBd ? ('border:2px solid ' + cdBd + ';') : ''));
           cdRow.id = 'kbOvCd';
-          cdRow.appendChild(mk('span', 'color:#94a3b8', '⏰ 마감까지 '));
-          cdRow.appendChild(mk('span', 'font-weight:800;color:' + (cd === '마감' ? '#f87171' : (cdBd || '#fbbf24')), cd));
-          if (phase === 'orange') cdRow.appendChild(mk('span', 'margin-left:6px;font-size:11px;font-weight:700;color:#fbbf24', 'T-2분'));
-          if (phase === 'red') cdRow.appendChild(mk('span', 'margin-left:6px;font-size:11px;font-weight:800;color:#fecaca', 'T-1분 마감 임박!'));
-          if (phase === 'blink') cdRow.appendChild(mk('span', 'margin-left:6px;font-size:11px;font-weight:800;color:#fecaca', '⚡ 30초!'));
+          cdRow.appendChild(mk('span', 'color:#cbd5e1;font-size:' + (within3 ? 15 : 13) + 'px', '⏰ 마감까지 '));
+          cdRow.appendChild(mk('span', 'font-weight:900;font-size:' + cdFs + 'px;line-height:1.1;color:' + numCol, cd));
+          if (phase === 'orange') cdRow.appendChild(mk('span', 'margin-left:8px;font-size:13px;font-weight:800;color:#fbbf24', 'T-2분'));
+          if (phase === 'red') cdRow.appendChild(mk('span', 'margin-left:8px;font-size:13px;font-weight:800;color:#fecaca', 'T-1분 임박!'));
+          if (phase === 'blink') cdRow.appendChild(mk('span', 'margin-left:8px;font-size:13px;font-weight:900;color:#fecaca', '⚡ 30초!'));
           panel.appendChild(cdRow);
           if (phase === 'blink') startCdBlink(); else stopCdBlink();   // T-30초 깜빡임
         } else { stopCdBlink(); }
@@ -1076,9 +1083,10 @@
         var rtNos = (d.realtimeAdded || []).map(function (r) { return Number(r.no); });
         var baseKeys = (d.keyHorses || []).filter(inV).filter(function (n) { return rtNos.indexOf(Number(n)) < 0; });
         if (baseKeys.length) {
-          var kr = mk('div', 'margin:3px 0');
-          kr.appendChild(mk('span', 'color:#94a3b8', '⭐ 유력마 '));
-          kr.appendChild(mk('span', 'font-weight:700;color:#4ea1ff', baseKeys.slice(0, 3).join(' · ')));
+          // [2번] 유력마 글씨 키움(18px)
+          var kr = mk('div', 'margin:4px 0;display:flex;align-items:baseline;gap:4px');
+          kr.appendChild(mk('span', 'color:#94a3b8;font-size:14px', '⭐ 유력마 '));
+          kr.appendChild(mk('span', 'font-weight:800;font-size:18px;color:#4ea1ff', baseKeys.slice(0, 3).join(' · ')));
           panel.appendChild(kr);
         }
         // [1번·복병 정리] 복병 최대 3두 + 우선순위: ①스마트머니+집중급락 동시 ②집중급락 횟수 많은 순 ③역배열 감지 말.
@@ -1124,12 +1132,13 @@
         darkCands.sort(function (a, b) { return (b.pr - a.pr) || (b.anom - a.anom) || (a.no - b.no); });
         var darkTop = darkCands.slice(0, 3);
         darkTop.forEach(function (h) {
-          var db = mk('div', 'margin:2px 0');
-          db.appendChild(mk('span', 'color:#94a3b8', '🐎 복병 '));
-          if (h.tierLabel) db.appendChild(mk('span', 'font-weight:800;font-size:11px;color:' + h.col, h.tierLabel + ' '));   // [복병 등급] ★★★/★★/★
-          db.appendChild(mk('span', 'font-weight:800;color:' + h.col, h.no + '번 '));
+          // [2번] 복병 글씨 키움(마번·급락 18px)
+          var db = mk('div', 'margin:3px 0;display:flex;align-items:baseline;gap:3px;flex-wrap:wrap');
+          db.appendChild(mk('span', 'color:#94a3b8;font-size:14px', '🐎 복병 '));
+          if (h.tierLabel) db.appendChild(mk('span', 'font-weight:800;font-size:13px;color:' + h.col, h.tierLabel + ' '));   // [복병 등급] ★★★/★★/★
+          db.appendChild(mk('span', 'font-weight:900;font-size:18px;color:' + h.col, h.no + '번'));
           var note = h.tag + (h.conf === '높음' ? ' · 신뢰↑' : '');
-          db.appendChild(mk('span', 'font-size:11px;font-weight:700;color:' + h.col, note));
+          db.appendChild(mk('span', 'font-size:14px;font-weight:800;color:' + h.col, note));
           panel.appendChild(db);
         });
 
