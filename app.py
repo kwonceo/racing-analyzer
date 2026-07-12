@@ -16684,7 +16684,11 @@ def _startup_date_reset():
 
 
 if __name__ == "__main__":
-    print("서버 시작: http://127.0.0.1:8011 (자동 리로드 ON, 코드 수정이 바로 반영됩니다)")
+    # [Railway/배포] PORT 환경변수 우선(미설정 시 로컬 8011). PORT 있으면 외부바인드(0.0.0.0)·FLASK_ENV=production 이면 debug OFF.
+    _port = int(os.environ.get("PORT", 8011))
+    _host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
+    _debug = os.environ.get("FLASK_ENV") != "production"
+    print(f"서버 시작: http://{_host}:{_port} (debug={_debug}, 로컬은 자동 리로드 ON)")
     # debug=True: 코드 저장 시 자동 재기동(stale 서버로 인한 405 재발 방지). 로컬 전용(127.0.0.1).
     # threaded=True: 브라우저의 다중 keep-alive 연결을 동시 처리(단일 스레드 멈춤 방지).
     # 재개는 리로더의 실제 작업 프로세스(WERKZEUG_RUN_MAIN)에서만 1회 수행.
@@ -16698,4 +16702,4 @@ if __name__ == "__main__":
             _archive_compress_old(7)   # [영구보존·4번] 7일+ 경주 배당 .gz 압축 보관(데이터 삭제 없음·용량 관리)
         except Exception as _e:
             print("[아카이브 압축] 시작 시 실패:", _e)
-    app.run(host="127.0.0.1", port=8011, debug=True, threaded=True)
+    app.run(host=_host, port=_port, debug=_debug, threaded=True)
