@@ -1117,16 +1117,26 @@
       "recommended_hit": true,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1783812956.7920084
+    },
+    {
+      "race": "고쿠라 4경주",
+      "horse_no": 4,
+      "recent_avg": 4.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-12"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 245,
+      "count": 247,
       "hit": 56
     },
     "전체부진마": {
-      "count": 366,
-      "hit": 103
+      "count": 372,
+      "hit": 104
     },
     "대규모급락": {
       "count": 15,
@@ -1136,8 +1146,8 @@
       "hit_rate": 26.7
     },
     "이상감지동반": {
-      "count": 121,
-      "hit": 47
+      "count": 125,
+      "hit": 48
     },
     "급락동반": {
       "count": 34,
@@ -1514,8 +1524,8 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 45,
-    "hit": 28,
+    "count": 46,
+    "hit": 29,
     "cases": [
       {
         "race": "오비히로 11경주",
@@ -2205,9 +2215,25 @@
         "trifecta_odds": 22.0,
         "quinella_odds": null,
         "high_odds": true
+      },
+      {
+        "race": "고쿠라 4경주",
+        "date": "2026-07-12",
+        "smart_horses": [
+          5,
+          2,
+          3
+        ],
+        "placed": [
+          3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 62.2,
+    "rate": 63.0,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
