@@ -14942,6 +14942,137 @@ def alerts_premium():
                     "generated": time.strftime("%H:%M:%S")})
 
 
+# ══════════════ [BMED 사전분석] B(사전)·M(신호)·E(해석)·D(결론) 통합 뷰 ══════════════
+#   발주 10~30분 전에 이미 완성된 분석 제공 → 사용자는 보고 바로 베팅.
+#   기존 _triple_analyze(배당 분석)·starters(전적)·_premium_alert(알림)를 조립(재계산 최소).
+def _race_post_epoch(rk):
+    """스케줄(today_schedule)에서 raceKey 의 발주 epoch 찾기(없으면 None)."""
+    try:
+        sched = _schedule_load()
+        va, num = _area_num(rk)
+        for tr in sched.get("tracks", []):
+            for rc in tr.get("races", []):
+                if rc.get("raceNo") == num and (_track_norm(tr.get("venue") or "") == _track_norm(va or "")):
+                    return rc.get("postEpoch")
+    except Exception:
+        pass
+    return None
+
+
+def _bmed_before_card(rk, form):
+    """[B·사전분석] 배당 전 전적/기수 기반 주목마 TOP + 사전예상복승(전적 이중수렴)."""
+    horses = sorted([h for h in (form or []) if h.get("no") is not None],
+                    key=lambda h: -(h.get("totalScore") or h.get("formScore") or 0))
+    watch = []
+    for h in horses[:3]:
+        watch.append({
+            "no": h.get("no"), "name": h.get("name"), "jockey": h.get("jockey"),
+            "score": h.get("totalScore") or h.get("formScore"),
+            "grade": h.get("grade") or h.get("absGrade"),
+            "recentPlacings": (h.get("recentPlacings") or [])[:6],
+            "styleType": h.get("styleType"),
+        })
+    pre_q = None
+    if len(horses) >= 2 and horses[0].get("no") and horses[1].get("no"):
+        pre_q = sorted([int(horses[0]["no"]), int(horses[1]["no"])])
+    return {"watch": watch, "preQuinella": pre_q,
+            "basis": ("전적 이중수렴(상위 2두)" if pre_q else "전적 데이터 부족"),
+            "horseCount": len(horses)}
+
+
+def _bmed_no_map(lst):
+    """[BMED] 리스트[{no,...}] → {int(no): item}. dict/비정형 입력도 안전 무시."""
+    out = {}
+    for it in (lst or []):
+        if isinstance(it, dict) and it.get("no") is not None:
+            try:
+                out[int(it["no"])] = it
+            except (TypeError, ValueError):
+                continue
+    return out
+
+
+def _bmed_expert_cards(an):
+    """[E·전문가 해석] 각 말 상세: 전적등급·각질·기수·현재배당·흐름."""
+    form = _bmed_no_map(an.get("form"))
+    single = an.get("single") or {}
+    flow = _bmed_no_map(an.get("flowScores"))
+    integ = _bmed_no_map(an.get("integrated"))
+    cards = []
+    for no in sorted(form.keys()):
+        h = form[no]
+        fl = flow.get(no) or {}
+        cards.append({
+            "no": no, "name": h.get("name"), "jockey": h.get("jockey"),
+            "score": h.get("totalScore") or h.get("formScore"),
+            "grade": (integ.get(no) or {}).get("grade") or h.get("grade") or h.get("absGrade"),
+            "styleType": h.get("styleType"),
+            "recentPlacings": (h.get("recentPlacings") or [])[:6],
+            "currentOdds": single.get(str(no)),
+            "flowScore": fl.get("score"), "flowText": fl.get("text") or fl.get("label"),
+        })
+    return cards
+
+
+@app.route("/api/bmed/<path:key>", methods=["GET"])
+def bmed_view(key):
+    """[BMED 통합] 한 경주의 B(사전)·M(신호)·E(해석)·D(결론)을 한 번에.
+    배당 수집 전이면 B(전적)만, 수집 후면 M/E/D까지 채움. 발주 남은분으로 phase 결정."""
+    rk = key
+    rec = _triple_load().get(rk) or _multi_store_load().get(rk)
+    an = None
+    if rec:
+        try:
+            an = _triple_analyze(rk, rec)
+        except Exception as e:
+            print("[BMED] 분석 실패", rk, e)
+    form = (an.get("form") if an else None) or (_starters_load().get(rk) or {}).get("horses") or []
+    # 발주 남은분: 분석 우선, 없으면 스케줄 epoch
+    mb = an.get("minutesBefore") if an else None
+    if mb is None:
+        pe = _race_post_epoch(rk)
+        mb = round((pe - time.time()) / 60, 1) if pe else None
+    after_close = bool(an.get("afterClose")) if an else (mb is not None and mb < 0)
+    # phase: before(배당전/T-10분+) → market(수집중) → decision(T-3분내)
+    if not rec:
+        phase = "before"
+    elif after_close:
+        phase = "closed"
+    elif mb is not None and mb <= 3:
+        phase = "decision"
+    elif mb is not None and mb <= 10:
+        phase = "market"
+    else:
+        phase = "before"
+
+    before = _bmed_before_card(rk, form)
+    market = expert = decision = None
+    if an:
+        drops = [d for d in (an.get("drops") or []) if (d.get("pct") or 0) <= -20]
+        sig = []
+        if drops:
+            d0 = min(drops, key=lambda d: d.get("pct") or 0)
+            sig.append("🔴 %s 급락 %d%%" % ("+".join(str(x) for x in d0.get("combo") or []), round(d0.get("pct") or 0)))
+        inv = an.get("inverse") or {}
+        if inv.get("detected") and (inv.get("invLead") or {}).get("no") is not None:
+            sig.append("🔄 %s번 역배열" % inv["invLead"]["no"])
+        smart = [h for h in (an.get("darkHorses") or []) if h.get("smartMoney")]
+        if smart:
+            sig.append("💰 %s번 스마트머니" % smart[0].get("no"))
+        market = {"signals": sig, "anomaly": bool(sig),
+                  "strategy": (an.get("bmed") or {}).get("strategy")}
+        expert = {"horses": _bmed_expert_cards(an)}
+        cp = an.get("corePicks") or {}
+        decision = {"quinellas": (cp.get("finalQuinellas") or [])[:2],
+                    "trifectas": (cp.get("finalTrifectas") or [])[:2],
+                    "alert": _premium_alert(rk, an)}
+    return jsonify({
+        "raceKey": rk, "phase": phase, "minutesBefore": mb, "afterClose": after_close,
+        "hasOdds": bool(rec),
+        "before": before, "market": market, "expert": expert, "decision": decision,
+    })
+
+
 # ════════════ [중앙경마(JRA) 전적] netkeiba 馬柱(shutuba_past) 서버 fetch·파싱 ════════════
 # 중앙경마는 keiba.go.jp(지방 전용)에 없고 JRA 공식은 POST세션이라 스크래핑 난해 → netkeiba 馬柱
 # 페이지(서버렌더 HTML)를 소스로 사용. 한 페이지에 마번·기수·부담중량 + 과거5주(착순·거리·통과순위
