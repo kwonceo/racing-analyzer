@@ -2033,7 +2033,7 @@ def third_place_stats():
 @app.route("/api/learning/pattern-confidence", methods=["GET"])
 def pattern_confidence():
     """[복기 학습 재설계 2·4번] 신호 유형별 발생/적중/적중률 + 통계 신뢰도(표본 50회 게이팅). 공식 수정 없음."""
-    return jsonify(_pattern_confidence())
+    return jsonify(_pattern_confidence_view())
 
 
 @app.route("/api/thresholds/optimize", methods=["GET"])
@@ -3145,8 +3145,10 @@ def _pattern_status(fired, rate):
     return "신뢰", "✅", f"신뢰 가능 ({fired}회 기준, 계속 관찰 중)"
 
 
-def _pattern_confidence():
+def _pattern_confidence_view():
     """[2·4번] 신호 유형별 발생/적중/적중률 + 통계 신뢰도 상태(표본 50회 게이팅) 통합.
+      ⚠ 이름 충돌 수정(v2.3.0): 베팅용 _pattern_confidence(cur_patterns, pstats)(2인자)와
+        동명이라 뒤 정의가 앞을 덮어써 2인자 호출이 깨지던 버그 → 뷰 함수는 _pattern_confidence_view 로 분리.
       강신호 8유형 + 저배당압축 + 고배당동반을 한 뷰로. ⚠ 공식 수정은 안 함 — 데이터 표시만."""
     out = []
     try:
