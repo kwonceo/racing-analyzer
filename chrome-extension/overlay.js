@@ -711,14 +711,14 @@
       return best;
     }
 
-    // 조합(a-b) 색상/강조 판정 — 추천>급락>유력>주의 우선순위.
+    // [6번] 조합(a-b) 강조 판정 — 한 셀에 색 하나만. 우선순위: 빨강(급락)>초록(확정)>파랑(유력)>노랑(주의).
+    //   해당 없으면 null → [7번] 완전 투명(실제 배당 그대로).
     function boardCellStyle(a, b, ctx) {
       var key = Math.min(a, b) + '|' + Math.max(a, b);
-      if (ctx.recSet[key]) return { col: BCOL.rec, tag: '추천', emph: true };
       if (ctx.dropMap[key] != null) return { col: BCOL.drop, tag: '급락 ' + ctx.dropMap[key] + '%', emph: true };
-      if (ctx.role[a] === 'fav' || ctx.role[b] === 'fav') return { col: BCOL.fav, tag: '유력', emph: true };
-      if (ctx.invSet[a] || ctx.invSet[b] || ctx.role[a] === 'dark' || ctx.role[b] === 'dark'
-          || ctx.role[a] === 'weakcut' || ctx.role[b] === 'weakcut') return { col: BCOL.warn, tag: '주의', emph: false };
+      if (ctx.greenSet[key]) return { col: BCOL.rec, tag: '오늘의 최종 답', emph: true, lock: true };   // [5번] 최종 확정
+      if (ctx.blueSet[key]) return { col: BCOL.fav, tag: '유력(저배당)', emph: true };
+      if (ctx.yellowSet[key]) return { col: BCOL.warn, tag: '주의', emph: false };
       return null;
     }
 
@@ -763,61 +763,86 @@
       var info = locateBoardMatrix();
       if (!info) { removeBoardMatrix(); return false; }
       removeBoardMatrix();
-      // 컨텍스트: 역할·급락·추천·역배열
       var role = matrixRoles(d);
       var invSet = {}; (((d.inverse || {}).invHorses) || []).forEach(function (n) { invSet[+n] = 1; });
+      var smartSet = {}; (d.darkHorses || []).forEach(function (h) { if (h.smartMoney && h.no != null) smartSet[+h.no] = 1; });
+
+      function ckey(a, b) { return Math.min(a, b) + '|' + Math.max(a, b); }
+
+      // [빨강·급락] 실제 감지된 것만(-20%↓)
       var dropMap = {};
       (d.drops || []).forEach(function (dd) {
         var c = (dd.combo || []).map(Number);
-        if (c.length === 2 && (dd.pct || 0) <= -20) dropMap[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = Math.round(dd.pct);
+        if (c.length === 2 && (dd.pct || 0) <= -20) dropMap[ckey(c[0], c[1])] = Math.round(dd.pct);
       });
-      var recSet = {};
+      // [초록·최종 확정] finalQuinellas 만(1~2개) = "오늘의 최종 답"
+      var greenSet = {};
       ((d.corePicks && d.corePicks.finalQuinellas) || []).forEach(function (q) {
         var c = (q.combo || []).map(Number);
-        if (c.length === 2) recSet[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = 1;
+        if (c.length === 2) greenSet[ckey(c[0], c[1])] = 1;
       });
-      (d.betRecommend || []).forEach(function (b) {
-        var c = (b.combo || []).map(Number);
-        if (c.length === 2 && /복/.test(b.kind || b.label || '')) recSet[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = 1;
+      // [2·3번 파랑·유력] 복승 배당 하위 20% 셀만(자기제한) — 낮은 배당 = 유력. 이미 급락/확정인 셀 제외.
+      var blueSet = {};
+      var sortedOdds = info.cells.map(function (c) { return c.odds; }).sort(function (x, y) { return x - y; });
+      var blueN = Math.max(1, Math.floor(sortedOdds.length * 0.2));
+      var blueThresh = sortedOdds.length ? sortedOdds[Math.min(blueN - 1, sortedOdds.length - 1)] : 0;
+      info.cells.forEach(function (c) {
+        var k = ckey(c.a, c.b);
+        if (c.odds <= blueThresh && !greenSet[k] && dropMap[k] == null) blueSet[k] = 1;
       });
-      var ctx = { role: role, invSet: invSet, dropMap: dropMap, recSet: recSet };
+      // [3번 노랑·주의] 스마트머니/역배열 말이 낀 조합만 · 최대 3개(저배당순) · 이미 색 있는 셀 제외
+      var yellowSet = {}, warnHorse = {};
+      (((d.inverse || {}).invHorses) || []).forEach(function (n) { warnHorse[+n] = 1; });
+      Object.keys(smartSet).forEach(function (n) { warnHorse[+n] = 1; });
+      info.cells.filter(function (c) {
+        var k = ckey(c.a, c.b);
+        return (warnHorse[c.a] || warnHorse[c.b]) && !greenSet[k] && dropMap[k] == null && !blueSet[k];
+      }).sort(function (x, y) { return x.odds - y.odds; }).slice(0, 3)
+        .forEach(function (c) { yellowSet[ckey(c.a, c.b)] = 1; });
+
+      var ctx = { dropMap: dropMap, greenSet: greenSet, blueSet: blueSet, yellowSet: yellowSet };
 
       // 오버레이 레이어(뷰포트 고정·클릭 통과)
       var layer = mk('div', 'position:fixed;left:0;top:0;width:0;height:0;z-index:2147482800;pointer-events:none');
       layer.id = BOARD_ID;
       root().appendChild(layer);
 
-      // 셀 강조 — 색상 있는(중요) 조합만 실제 셀 위에 큰 글씨로 겹침
+      // [7번] 강조 대상 셀만 겹침 — 나머지는 완전 투명(실제 배당 그대로).
       info.cells.forEach(function (cell) {
         var stl = boardCellStyle(cell.a, cell.b, ctx);
-        if (!stl) return;   // 중요 신호 없는 셀은 실제 배당 그대로 보이게(덮지 않음)
+        if (!stl) return;
         var emph = stl.emph;
         var fs = emph ? 18 : 14;
-        var bg = 'rgba(' + hexRgb(stl.col) + ',' + (emph ? '0.30' : '0.20') + ')';
-        var bw = emph ? 3 : 2;
-        var css = 'position:fixed;box-sizing:border-box;display:flex;align-items:center;justify-content:center;'
+        var bg = 'rgba(' + hexRgb(stl.col) + ',' + (emph ? '0.30' : '0.18') + ')';
+        var bw = stl.lock ? 4 : (emph ? 3 : 2);   // [5번] 최종 확정 4px 굵은 테두리
+        var css = 'position:fixed;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:1px;'
           + 'font:800 ' + fs + 'px/1 -apple-system,BlinkMacSystemFont,sans-serif;'
           + 'color:#fff;background:' + bg + ';border:' + bw + 'px solid ' + stl.col + ';border-radius:4px;'
           + 'text-shadow:0 1px 2px rgba(0,0,0,.8);overflow:hidden';
-        var span = mk('span', css, String(cell.odds));
+        var span = mk('span', css, (stl.lock ? '🔒' : '') + String(cell.odds));   // [5번] 🔒 오늘의 최종 답
         span.title = cell.a + '-' + cell.b + ' = ' + cell.odds + '배 · ' + stl.tag;
         layer.appendChild(span);
         boardItems.push({ el: cell.el, span: span });
       });
 
-      // 헤더(마번) 강조 — 유력⭐파랑 · 복병🟣 · 제거❌ · 역배열 노랑테
+      // [1번] 헤더 마번 강조 — 상위 유력마(⭐)·스마트머니(💰)·역배열(🔄)·확실제거(❌)만. 나머지: 숫자만(오버레이 없음).
+      var favTop = (d.keyHorses || []).slice(0, 3).map(Number);
+      var favSet = {}; favTop.forEach(function (n) { favSet[n] = 1; });
       info.hdrEls.forEach(function (h) {
-        var r0 = role[h.no];
-        var col = r0 === 'fav' ? BCOL.fav : r0 === 'cut' ? BCOL.drop : r0 === 'dark' ? '#c084fc' : r0 === 'weakcut' ? BCOL.warn : null;
-        if (!col && !invSet[h.no]) return;   // 역할 없고 역배열도 아니면 헤더는 그대로
-        var mark = r0 === 'fav' ? '⭐' : r0 === 'cut' ? '❌' : r0 === 'dark' ? '🟣' : r0 === 'weakcut' ? '△' : '';
-        var bc = col || BCOL.warn;
+        var n = h.no, r0 = role[n];
+        var isFav = favSet[n], isSmart = smartSet[n], isInv = invSet[n], isCut = (r0 === 'cut');
+        if (!isFav && !isSmart && !isInv && !isCut) return;   // [1번] 나머지: 숫자만
+        var mark, bc, lbl;
+        if (isFav) { mark = '⭐'; bc = BCOL.fav; lbl = '유력'; }
+        else if (isSmart) { mark = '💰'; bc = '#c084fc'; lbl = '스마트머니'; }
+        else if (isInv) { mark = '🔄'; bc = BCOL.warn; lbl = '역배열'; }
+        else { mark = '❌'; bc = BCOL.drop; lbl = '확실제거'; }
         var css = 'position:fixed;box-sizing:border-box;display:flex;align-items:center;justify-content:center;'
           + 'font:900 18px/1 -apple-system,BlinkMacSystemFont,sans-serif;color:#fff;'
-          + 'background:rgba(' + hexRgb(bc) + ',0.85);border:3px solid ' + (invSet[h.no] ? BCOL.warn : bc) + ';border-radius:5px;'
+          + 'background:rgba(' + hexRgb(bc) + ',0.85);border:3px solid ' + bc + ';border-radius:5px;'
           + 'text-shadow:0 1px 2px rgba(0,0,0,.9);overflow:hidden';
-        var span = mk('span', css, mark + h.no);
-        span.title = h.no + '번' + (r0 ? ' · ' + ({ fav: '유력', cut: '확실제거', weakcut: '제거권장', dark: '복병' }[r0] || '') : '') + (invSet[h.no] ? ' · 역배열' : '');
+        var span = mk('span', css, mark + n);
+        span.title = n + '번 · ' + lbl;
         layer.appendChild(span);
         boardHdrItems.push({ el: h.el, span: span });
       });
@@ -855,7 +880,7 @@
         // 실제 배당판 위에 정렬 오버레이가 떠 있으면(boardActive) 패널 안 격자는 생략하고 안내만 표시.
         if (boardActive) {
           panel.appendChild(mk('div', 'font-size:11px;color:#7dd3fc;margin:3px 0 2px;padding:5px 8px;border:1px dashed #38bdf8;border-radius:6px;background:rgba(56,189,248,.08)',
-            '📊 실제 배당판 위에 강조 표시 중 (파랑=유력·빨강=급락·초록=추천·노랑=주의)'));
+            '📊 실제 배당판 위 핵심 강조 중 · 🔒초록=오늘의 최종 답 · 빨강=급락 · 파랑=유력(저배당) · 노랑=주의'));
         } else {
           var mx = buildMatrix(d);
           if (mx) panel.appendChild(mx);
