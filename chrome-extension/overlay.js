@@ -590,6 +590,16 @@
                 '🎯 자동삼복승: ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '') + ' (초기급락 보존 조합)'));
             });
           }
+          // [마감급락 보존] 마감 2분 이내 뒤늦게 잡힌 급락말을 10초 flip-flop 재편에도 삼복승 보험으로 유지.
+          var _cdh = cp.closingDropHorses || [];
+          if (_cdh.length) {
+            cpBox.appendChild(mk('div', 'font-weight:700;font-size:13px;margin-top:3px;color:#f97316',
+              '⏱ 마감급락 보존: ' + _cdh.map(function (e) { return e.no; }).join('·') + '번 | 마감임박 감지·재편에도 유지'));
+            (cp.closingDropTrifectas || []).forEach(function (t) {
+              cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:1px;color:#fdba74',
+                '🎯 자동삼복승: ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '') + ' (마감급락 보존 조합)'));
+            });
+          }
           // [Bug1·복병 삼복승 자동 편성] 복병(집중급락/스마트머니) 말은 제거 취소 + 삼복승 강제 편성.
           var _dhp = cp.darkHorsePicks || [];
           if (_dhp.length) {
