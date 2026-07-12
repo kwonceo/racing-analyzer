@@ -6905,7 +6905,7 @@ def _triple_analyze(rk, rec):
         "marketFavorites": market_favorites,   # [전적 과가중 해결] 저배당(5배↓) 시장유력마(전적 미수집도 유력마 편입)
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
         "reversalRoles": reversal_roles,   # [역배열 강도별 처리] challenger별 축/보조/보험 역할 + 지속성(확정/후보)
-        "signalReliability": _signal_reliability_for(strong_signals, dark_horses, inverse, compression_pattern),   # [5번] 활성 신호별 과거 적중률(50경주+ 신뢰)
+        "signalReliability": _signal_reliability_for(strong_signals, dark_horses, inverse, compression_pattern, cross_reversal),   # [5번] 활성 신호별 과거 적중률(50경주+ 신뢰)
         "surgePromote": surge_promote,   # [보완] 여러 조합 동시 30%+ 급락 → 복승 메인 승격말(마감 전)
         "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용
         "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
@@ -8869,6 +8869,11 @@ def _active_signal_horses(an):
     cp = an.get("compressionPattern") or {}
     if cp.get("detected") and cp.get("combo"):
         out["저배당압축"] = [int(x) for x in cp["combo"]]
+    # [복승 크로스 역배열·적중률 학습] 강한(0.5+) 크로스 역배열 말 → 실질 강세(2착 유력) 입상 추적
+    cx = [int(c["no"]) for c in (an.get("crossReversal") or [])
+          if c.get("no") is not None and (c.get("score") or 0) >= 0.5]
+    if cx:
+        out["크로스역배열"] = cx
     return out
 
 
@@ -9006,7 +9011,7 @@ def _signal_reliability():
     return out
 
 
-def _signal_reliability_for(strong_signals, dark_horses, inverse, compression_pattern):
+def _signal_reliability_for(strong_signals, dark_horses, inverse, compression_pattern, cross_reversal=None):
     """[5번] 현재 분석에서 활성인 신호별 과거 적중률(50경주+ 신뢰) → 프론트 강조 표시용.
       반환 {신호명: {rate_quinella, rate_trifecta, count, reliable, note}} (활성 신호만)."""
     try:
@@ -9023,6 +9028,8 @@ def _signal_reliability_for(strong_signals, dark_horses, inverse, compression_pa
         active.add("역배열")
     if (compression_pattern or {}).get("detected"):
         active.add("저배당압축")
+    if any((c.get("score") or 0) >= 0.5 for c in (cross_reversal or [])):
+        active.add("크로스역배열")
     for _s in ((strong_signals or {}).get("signals") or []):
         _t = _s.get("type")
         if _t in (1, 2, 3):           # 급락 계열(단승/복승 급락·연속하락)
@@ -12347,7 +12354,7 @@ def learning_signal_stats():
     """[4번] 신호별 적중률(유력마 기반) 조회 → 통계 탭 '신호별 적중률' 카드용.
     각 신호: 복승/삼복승 적중률·표본·신뢰(50경주+) 여부 + 최근 케이스."""
     S = _signal_stats_load()
-    order = ["스마트머니", "역배열", "급락", "전적이중수렴", "저배당압축", "집중급락"]
+    order = ["스마트머니", "역배열", "크로스역배열", "급락", "전적이중수렴", "저배당압축", "집중급락"]
     rows = []
     for name in order + [k for k in S.keys() if k not in order]:
         e = S.get(name)
