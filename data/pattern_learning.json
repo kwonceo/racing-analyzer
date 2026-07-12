@@ -1125,7 +1125,7 @@
       "hit": 56
     },
     "전체부진마": {
-      "count": 365,
+      "count": 366,
       "hit": 103
     },
     "대규모급락": {
@@ -1136,11 +1136,11 @@
       "hit_rate": 26.7
     },
     "이상감지동반": {
-      "count": 120,
+      "count": 121,
       "hit": 47
     },
     "급락동반": {
-      "count": 33,
+      "count": 34,
       "hit": 16
     }
   },
@@ -1514,7 +1514,7 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 44,
+    "count": 45,
     "hit": 28,
     "cases": [
       {
@@ -2193,9 +2193,21 @@
         "trifecta_odds": 1.6,
         "quinella_odds": 1.3,
         "high_odds": false
+      },
+      {
+        "race": "서울 1경주",
+        "date": "2026-07-12",
+        "smart_horses": [
+          8
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": 22.0,
+        "quinella_odds": null,
+        "high_odds": true
       }
     ],
-    "rate": 63.6,
+    "rate": 62.2,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
