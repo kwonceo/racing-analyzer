@@ -3653,6 +3653,7 @@
     // [유력마 통일] ⭐유력마 라인도 TOP5와 동일 기준(복승 대표배당 낮은 순 + 이상감지 상위)으로 정렬 표시.
     const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     el.innerHTML = `
+      ${renderCorePicks(a)}
       ${renderTopHorses(a)}
       <div class="matrix-title">🚨 이상감지 ${a.sport && a.sport !== 'horse' ? `<span class="chip" style="border-color:#a855f7;color:#c4b5fd">${a.sport === 'cycle' ? '🚴 경륜' : '🚤 경정'}</span> ` : ''}<span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.baselineReset ? '⚠️ 기준값 재설정됨' : a.baselineSet ? '🎯 기준값 설정됨' : a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>
       ${a.baselineReset ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffd24f;background:rgba(255,210,79,.12);border-radius:6px;color:#ffd24f">⚠️ <b>비정상 변동폭 감지 → 기준값 재설정</b> — 이전 경주 배당 잔존 의심(95%+ 급락 다수). 이번 수집을 새 기준값으로 설정했습니다. <b>다음 수집부터 변동을 계산</b>합니다.</div>`
@@ -5964,9 +5965,26 @@
     });
   }
 
+  // [핵심 추천·추천 과다 근본 해결] 엄격 우선순위 축2두 → 복승 X+Y·삼복승 X+Y+Z (딱 이것만·최상단 크게).
+  function renderCorePicks(a) {
+    const cp = a && a.corePicks;
+    if (!cp || !cp.quinella || cp.quinella.length !== 2 || a.recommendClosed) return '';
+    const q = cp.quinella, t = cp.trifecta;
+    const qo = cp.quinellaOdds != null ? `<span class="hint" style="font-size:13px">${cp.quinellaOdds}배</span>` : '';
+    const to = cp.trifectaOdds != null ? `<span class="hint" style="font-size:13px">${cp.trifectaOdds}배</span>` : '';
+    const reasons = (cp.picks || []).map((p) => `${p.no}번 ${esc(p.reason)}`).join(' · ');
+    return `<div style="margin:6px 0;padding:12px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
+      <div style="font-size:17px;font-weight:900;color:#38d39f;margin-bottom:6px">🎯 핵심 추천 <span class="hint" style="font-weight:400;font-size:11px">(엄격 우선순위 · 딱 이것만)</span></div>
+      <div style="font-size:20px;font-weight:800;margin:4px 0">🎯 복승: <span style="color:#4ea1ff">${q.join('+')}</span> ${qo}</div>
+      ${t ? `<div style="font-size:20px;font-weight:800;margin:4px 0">🛡 삼복승: <span style="color:#c084fc">${t.join('+')}</span> ${to}</div>` : ''}
+      <div class="hint" style="font-size:11px;margin-top:6px">축 근거: ${reasons}</div>
+    </div>`;
+  }
+
   function sportAnalysisHTML(a, bsel) {
     const six = a.bmed && a.bmed.sixRacer;
     const parts = [];
+    parts.push(renderCorePicks(a));   // [핵심 추천] 딱 이것만(복승 X+Y·삼복승 X+Y+Z) 최상단
     parts.push(renderRaceJudgment(a, bsel));   // [1·2·4번] 경주 판정 크게 + 배팅 배분
     parts.push(renderChaotic(a, bsel));   // [혼전] 상위 배당 근접 시 고배당 포함 삼복승 전략 배너
     parts.push(renderMidHighFavorites(a));   // [💎 2번] 중고배당 유력마 감지 상단 강조 배너(소리·깜빡임)
@@ -6065,6 +6083,7 @@
     const formHtml = renderFormGrades(a.form);
     const elimHtml = renderEliminationHTML(a.elimination, new Set()).replace('id="elimPanel"', 'id="jpElimPanel"');
     host.innerHTML = `<div class="panel-card">
+      ${renderCorePicks(a)}
       ${renderRaceJudgment(a, '#jpBudget')}
       ${renderChaotic(a, '#jpBudget')}
       ${renderForcedTrifecta(a)}

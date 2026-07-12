@@ -5488,6 +5488,53 @@ def _mid_high_odds_favorites(valid_nos, curWin, curQ, drops, dark_horses, revers
     return out
 
 
+def _core_picks(key_horses, dark_horses, reversal_roles, drops, curWin, curQ, valid_nos):
+    """[핵심 추천·추천 과다 근본 해결] 엄격 우선순위로 축 2마리만 선정 → 복승 X+Y · 삼복승 X+Y+Z(딱 이것만).
+      우선순위: 1역배열+급락 동시 / 2스마트머니 / 3집중급락 최다 / 4유력마 저배당. 상위 2두=축, 3위=삼복승 3착.
+      반환 {axis, third, quinella, trifecta, picks[{no,tier,reason,rep}]} 또는 None(축 2두 미확보 시)."""
+    def _rep(no):
+        if curWin.get(no):
+            return curWin[no]
+        best = None
+        for (a, b), o in (curQ or {}).items():
+            if no in (a, b) and o > 0 and (best is None or o < best):
+                best = o
+        return best
+    rev = {int(r["no"]) for r in (reversal_roles or []) if r.get("no") is not None and (r.get("diffPct") or 0) >= 10}
+    drop_nos = {}
+    for d in (drops or []):
+        if (d.get("pct") or 0) <= -30:
+            for h in (d.get("combo") or []):
+                drop_nos[int(h)] = min(drop_nos.get(int(h), 0), d.get("pct") or 0)
+    smart = {int(h["no"]) for h in (dark_horses or []) if h.get("smartMoney") and h.get("no") is not None}
+    conc = {int(h["no"]): (h.get("anomCount") or 0) for h in (dark_horses or []) if h.get("forced") and h.get("no") is not None}
+    keyset = [int(k) for k in (key_horses or []) if k is not None]
+    scored = []
+    for no in sorted(int(x) for x in (valid_nos or [])):
+        rep = _rep(no) or 999.0
+        tier, reason = 0, ""
+        if no in rev and no in drop_nos:
+            tier, reason = 4, "역배열+급락"
+        elif no in smart:
+            tier, reason = 3, "스마트머니"
+        elif no in conc:
+            tier, reason = 2, "집중급락 %d회" % conc[no]
+        elif no in keyset:
+            tier, reason = 1, "유력마 저배당 %g배" % rep
+        if tier:
+            sub = conc.get(no, 0) if tier == 2 else -rep      # 3순위=집중급락 최다·그 외=저배당 우선
+            scored.append({"no": no, "tier": tier, "sub": sub, "rep": rep, "reason": reason})
+    scored.sort(key=lambda x: (-x["tier"], -x["sub"]))
+    if len(scored) < 2:
+        return None                                            # 축 2두 미확보 → 핵심추천 없음(기존 추천 유지)
+    axis = [scored[0]["no"], scored[1]["no"]]
+    third = scored[2]["no"] if len(scored) >= 3 else None
+    return {"axis": axis, "third": third,
+            "quinella": sorted(axis),
+            "trifecta": (sorted(axis + [third]) if third is not None else None),
+            "picks": scored[:3]}
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -5978,6 +6025,13 @@ def _triple_analyze(rk, rec):
     mid_high_favorites = ([] if after_close else
                           _mid_high_odds_favorites(valid_nos, curWin, curQ, drops, dark_horses, reversal_roles, form))
 
+    # [핵심 추천·추천 과다 근본 해결] 엄격 우선순위로 축 2두만 선정 → 복승 X+Y·삼복승 X+Y+Z(딱 이것만). 마감 후 미표시.
+    core_picks = (None if after_close else
+                  _core_picks(key_horses, dark_horses, reversal_roles, drops, curWin, curQ, valid_nos))
+    if core_picks:
+        _cq = core_picks["quinella"]
+        core_picks["quinellaOdds"] = curQ.get((min(_cq), max(_cq))) if len(_cq) == 2 else None
+
     # 이상감지말: 최대 급락 조합 중 유력마 아닌 말, 없으면 4순위 유력마
     # [1번] 마감 후 급락은 추천에 반영하지 않음(보험 픽·전략에서 제외) → 마감 전 기준 유지
     anomaly_horse = None
@@ -6006,6 +6060,17 @@ def _triple_analyze(rk, rec):
 
     # 5) 베팅 추천: 복승 메인/보조 + 삼복승 메인/보험1/보험2 + 예산 배분율(alloc %)
     trio_map = _odds_map_un(trio)
+    # [핵심 추천] 삼복승 배당 채우기(실배당 없으면 _trio_est 추정)
+    if core_picks and core_picks.get("trifecta"):
+        _ct = tuple(sorted(core_picks["trifecta"]))
+        _to = trio_map.get(_ct)
+        if _to is None:
+            try:
+                _ev, _ = _trio_est(list(_ct))
+                _to = round(_ev, 1) if _ev else None
+            except Exception:
+                _to = None
+        core_picks["trifectaOdds"] = _to
 
     def _q(a, b):
         return curQ.get(tuple(sorted((a, b))))
@@ -6775,6 +6840,7 @@ def _triple_analyze(rk, rec):
         "flowRemoval": flow_removal,   # [흐름 기반 제거] 죽은인기/3연속상승/페이크/역배열반대 → 제거 대상
         "highOddsCandidates": high_odds_candidates,   # [고배당 후보 발굴] 흐름 좋은 고배당(10배+ 하락) 말 → 삼복승 보험
         "midHighFavorites": mid_high_favorites,   # [💎 중고배당 유력마] 복승10배+ & 강한신호1개+ → 삼복승 보험·알림·학습
+        "corePicks": core_picks,   # [핵심 추천·추천 과다 해결] 엄격 우선순위 축2두 → 복승 X+Y·삼복승 X+Y+Z(딱 이것만)
         "smartQuinella": smart_quinella,   # [스마트머니 복승 보조] 스마트머니 복병 → 축과 복승 보조 자동 추가
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승

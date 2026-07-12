@@ -551,6 +551,19 @@
         panel.appendChild(head);
 
         // ═══ [정보 순서 정리] 1.결론박스 → 2.카운트다운 → 3.유력마 → 4.이상감지 → 5.나머지 ═══
+        // [핵심 추천·추천 과다 해결] 딱 이것만 — 🎯 복승 X+Y · 🛡 삼복승 X+Y+Z (엄격 우선순위 축2두). 최상단 크게.
+        var cp = d.corePicks;
+        if (cp && cp.quinella && cp.quinella.length === 2 && !d.recommendClosed) {
+          var cpBox = mk('div', 'margin:0 0 6px;padding:8px 11px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
+          cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:15px', '🎯 핵심 추천 (딱 이것만)'));
+          cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:3px;color:#e2e8f0',
+            '🎯 복승: ' + cp.quinella.join('+') + (cp.quinellaOdds != null ? '  ' + cp.quinellaOdds + '배' : '')));
+          if (cp.trifecta) {
+            cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:2px;color:#e2e8f0',
+              '🛡 삼복승: ' + cp.trifecta.join('+') + (cp.trifectaOdds != null ? '  ' + cp.trifectaOdds + '배' : '')));
+          }
+          panel.appendChild(cpBox);
+        }
         // [💎 중고배당 유력마·2번] 감지 시 최상단 강조(복승10배+ & 강한신호 → 삼복승 보험 필수)
         var mhf = d.midHighFavorites || [];
         if (mhf.length) {
