@@ -6189,6 +6189,30 @@ def _triple_analyze(rk, rec):
             _dropped_kh = [h for h in _kh_before if h not in valid_nos]
             print(f"[마번 범위 검증] {rk}: 유력마에서 범위밖 마번 제외 {_dropped_kh} (최대 {_max_no}번·출전 {sorted(valid_nos)})")
 
+    # [B·복승불일치 축 교정] 복승불일치 🔴/🔴🔴 = 단승 기준 예상 조합보다 실제 최저복승이 훨씬 저배당(시장이 강력 지목).
+    #   이때 단승 인기로 축이 된 '자금이탈 고배당말'(예상엔 있으나 실제 최저복승엔 없는 말)을 축(상위2)에서 강등하고,
+    #   시장 최저복승 조합(actual)을 복승 축으로 강제. 경마·경정(boat)·경륜 전 종목 동일 적용.
+    #   코치 7R 복기: 단승 예상 3+6(31.4)·실제 최저 3+10(3.3) 🔴🔴 9.5 → 축을 3+6이 아닌 3+10으로 교정(10번 2착).
+    try:
+        if quin_mismatch and quin_mismatch.get("level") in ("🔴", "🔴🔴") and key_horses:
+            _act = [int(x) for x in (quin_mismatch.get("actual") or []) if x is not None]
+            _act = [h for h in _act if (not valid_nos or h in valid_nos)]
+            if len(_act) == 2:
+                _expp = [int(x) for x in (quin_mismatch.get("expected") or [])]
+                _dropout = [h for h in _expp if h not in _act]      # 예상엔 있으나 실제 최저복승엔 없는 자금이탈 고배당말 → 축 강등
+                _rest = [h for h in key_horses if h not in _act and h not in _dropout]
+                _seen, _fin = set(), []
+                for h in (_act + _rest + _dropout):                 # 시장 최저복승 2두를 축 최우선, 자금이탈말은 맨 뒤로
+                    if h not in _seen and (not valid_nos or h in valid_nos):
+                        _seen.add(h); _fin.append(h)
+                if _fin[:2] != key_horses[:2]:                      # 축이 실제로 바뀔 때만 교정·표식
+                    key_horses = _fin[:5]
+                    quin_mismatch["axisCorrected"] = {"axis": _act, "demoted": _dropout,
+                                                      "focus": quin_mismatch.get("focusHorses") or []}
+                    print(f"[복승불일치 축교정] {rk}: 축 {key_horses[:2]}로 교정(자금이탈 강등 {_dropout}·{quin_mismatch.get('level')})")
+    except Exception as _e:
+        print("[복승불일치 축교정] 실패:", _e)
+
     # [저배당 압축 패턴] 최종 유력마 TOP3 중 저배당 밀집(4배 이하 2두+ 강력 / 5배 이하 3두+ 중간) → 축 패턴
     #   [2번 개선] 경마만 적용(경륜/경정/바이크 비활성) + 명확한 축(배당차 30%+)일 때만.
     compression_pattern = _compression_pattern(key_horses, curWin, curQ, strong_signals, rec.get("sport"))

@@ -3971,8 +3971,9 @@
     const wxHtml = wx.length ? `<div class="hint" style="margin:8px 0 2px">🔄 <b>쌍승 역전 감지</b>(단승 유력마 vs 쌍승 방향) — 역전비율 &lt;0.95 🟡 · &lt;0.80 🔴 · &lt;0.60 🔴🔴${wxMulti ? ' · <b>상위권 순위쌍 역전 포함</b>(강한 역전만)' : ''}</div>`
       + wx.slice(0, 5).map((r) => `<div style="margin:2px 0"><span class="chip ${/🔴/.test(r.level) ? 'chip-red' : ''}">${r.level} ${r.challenger}번</span>${r.multiRank ? ` <span class="chip" style="border-color:#a78bfa;color:#a78bfa">${r.favRank}·${r.chalRank}위간</span>` : ''} <span class="hint">${esc(r.text)}</span></div>`).join('') : '';
     const mm = sq.quinellaMismatch;
+    const mmAxis = (mm && mm.axisCorrected) ? `<div style="margin:2px 0;font-weight:700;color:#38d39f">🔧 복승 축 교정: <b>${(mm.axisCorrected.axis || []).join('+')}</b> <span class="hint" style="font-weight:400">(자금이탈 ${(mm.axisCorrected.demoted || []).join('·')}번 축 강등 → 시장 최저복승으로 축 변경)</span></div>` : '';
     const mmHtml = mm ? `<div class="hint" style="margin:8px 0 2px">⚠️ <b>복승 불일치 감지</b>(단승 예상 vs 실제 최저) — 1.2+ 🟡 · 1.5+ 🔴 · 2.0+ 🔴🔴</div>`
-      + `<div style="margin:2px 0"><span class="chip ${/🔴/.test(mm.level) ? 'chip-red' : ''}">${mm.level} 불일치 ${mm.ratio}</span> <span class="hint">${esc(mm.text)}</span></div>` : '';
+      + `<div style="margin:2px 0"><span class="chip ${/🔴/.test(mm.level) ? 'chip-red' : ''}">${mm.level} 불일치 ${mm.ratio}</span> <span class="hint">${esc(mm.text)}</span></div>${mmAxis}` : '';
     // [2번 고도화] 급락속도·연속하락/반등·페이크·환급률
     const adv = sq.advanced || {};
     const advParts = [];
