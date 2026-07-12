@@ -800,9 +800,9 @@
     return /(^|\.)keiba\.go\.jp$/.test(location.host) && !!sp.get('k_raceDate') && !!sp.get('k_raceNo');
   }
 
-  // [한국모드 강화] raceKey 에 KRA 경마장명(서울/부산/제주/과천, 부경/부산경남 변형 포함)이 있으면
+  // [한국모드 강화] raceKey 에 KRA 경마장명(서울/부산/제주/과천, 부경/부산경남 변형 + 렛츠런/마사회/KRA)이 있으면
   //   market 토글과 무관하게 무조건 한국경마로 판단 → 복승만 수집 · 쌍승/삼복승 탭 클릭 완전 차단.
-  const KRA_TRACK_RE = /(서울|부산경남|부경|부산|제주|과천)/;
+  const KRA_TRACK_RE = /(서울|부산경남|부경|부산|제주|과천|렛츠런|렛츠런파크|한국마사회|경마공원|KRA)/;
   function isKoreaByRaceKey(raceKey) {
     return !!(raceKey && KRA_TRACK_RE.test(String(raceKey)));
   }
@@ -816,9 +816,26 @@
       return /(경주|경마|복승|배당|발주|출주|마번)/.test(body);   // 경마장명 + 경마 맥락 동시 존재 시만
     } catch (_) { return false; }
   }
-  // [한국모드 최종 판정] 종목=한국(팝업) 이거나 raceKey/페이지에서 KRA 감지되면 true.
-  function isKoreaMode(raceKey, market) {
-    return market === 'korea' || isKoreaByRaceKey(raceKey) || pageLooksKorean();
+  // [한국모드 강화3·사용자요청 2번] 배당판 마권종류 탭(bet_type)에 '복승'은 있고 '쌍승/삼복승'이 전혀 없으면
+  //   → 한국경마로 확정(한국은 복승만 발매·일본은 쌍승/삼복승 탭 존재). raceKey에 경마장명이 없어도 감지.
+  function koreanByBetTabs() {
+    try {
+      const btns = Array.prototype.slice.call(
+        document.querySelectorAll('.bet_type_btn, span[bet_mode], [class*="bet_type"], .odds_menu a, .odds_menu span'));
+      if (!btns.length) return false;                       // 탭 UI 미로드 → 판단 보류(오탐 방지)
+      const txt = btns.map((e) => (e.textContent || '')).join(' ');
+      const hasBok = /복승|복연/.test(txt);
+      const hasJp = /쌍승|마단|쌍승식|삼복승|삼복|삼연복|馬単|三連複|３連複|3連複|三連/.test(txt);
+      return hasBok && !hasJp;                               // 복승 탭만 있고 쌍승/삼복승 탭 없음 → 한국경마
+    } catch (_) { return false; }
+  }
+  // [한국모드 최종 판정·사용자요청 1~4번] 종목=한국(팝업) OR raceKey(감지·수동입력 둘 다) KRA OR 페이지 KRA
+  //   OR 배당판 탭이 복승만(쌍승 없음). override=팝업에 직접 입력한 raceKey(자동수집이 배당판 raceKey를
+  //   우선해 '서울'이 누락돼도 사용자가 입력한 '서울 N경주'로 한국 확정 — 자동 감지 실패 근본 해결).
+  function isKoreaMode(raceKey, market, override) {
+    return market === 'korea'
+      || isKoreaByRaceKey(raceKey) || isKoreaByRaceKey(override)
+      || pageLooksKorean() || koreanByBetTabs();
   }
 
   // [1번] 일본 경마장(지방 NAR + 중앙 JRA) — 한글·한자 병기. raceKey/페이지에 이 이름이 있으면 '경마' 확정.
@@ -917,8 +934,8 @@
       .filter((k) => sp.get(k)).map((k) => `${k}=${encodeURIComponent(sp.get(k))}`).join('&');
     const { raceKey: override, market, japanType } = await getSettings();
     const raceKey = _resolveRaceKey(reason, override);   // [경주 자동추종] 자동수집은 배당판 표시 경주 우선
-    // [2번][한국모드 강화] 종목=한국 이거나 raceKey/페이지에서 KRA(서울/부산/제주/과천) 감지 시 → 복승만(쌍승·삼복승 완전 제외).
-    const isKorea = isKoreaMode(raceKey, market);
+    // [2번][한국모드 강화] 종목=한국 이거나 raceKey(감지·수동입력)/페이지/탭에서 KRA 감지 시 → 복승만(쌍승·삼복승 완전 제외).
+    const isKorea = isKoreaMode(raceKey, market, override);
     if (isKorea && market !== 'korea') console.log('[한국모드] KRA 경마장 감지(raceKey/페이지) → 복승만 수집:', raceKey || '(raceKey 미상)');
     // [탭분리] keiba 는 경마 전용 → 한국/중앙/지방 카테고리 산출(팝업 japanType 우선).
     const kCategory = isKorea ? 'korea' : ((japanType === 'central' || detectCentralHint()) ? 'japan_central' : 'japan_local');
@@ -1585,8 +1602,8 @@
     // [5번][한국모드 강화] 종목=한국 이거나 raceKey/페이지에서 KRA(서울/부산/제주/과천) 감지 시 → 무조건 복승만.
     //   한국경마: 출마표2(keiba DebaTable) 수집 생략(전적은 PDF에서) + 쌍승·삼복승 탭 클릭 완전 차단.
     //   [수정#3] 경륜/경정/바이크는 한국경마 판정을 하지 않는다(경마장명 오탐 방지).
-    const isKorea = !isCycleBoat && isKoreaMode(raceKey, market);
-    if (isKorea) console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원)', market !== 'korea' ? '(감지: raceKey/페이지, raceKey=' + (raceKey || '미상') + ')' : '(종목=한국)');
+    const isKorea = !isCycleBoat && isKoreaMode(raceKey, market, override);
+    if (isKorea) console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원)', market !== 'korea' ? '(감지: raceKey/입력/탭, raceKey=' + (raceKey || '미상') + ' · 입력=' + (override || '없음') + ')' : '(종목=한국)');
     // [탭분리] 중앙경마(JRA): 팝업 japanType='central' 이거나 페이지가 중앙으로 보이면 → 복승+쌍승만(삼복승·전적 제외).
     const isCentral = !isKorea && !isCycleBoat && (japanType === 'central' || detectCentralHint());
     // [탭분리] 종목 카테고리 산출 + 팝업 실시간 표시용 storage 기록.
