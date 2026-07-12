@@ -937,7 +937,7 @@
       : isCentralK
         ? TRIPLE_STEPS.filter((s) => s.key !== 'trio')   // 중앙: 복승+쌍승(삼복승 제외)
         : TRIPLE_STEPS;   // 지방: 복승+쌍승+삼복승 3종
-    if (isKorea) console.log('[한국모드] 복승만 수집 - 쌍승/삼복승 생략');
+    if (isKorea) console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원)');
     else if (isCentralK) console.log('[중앙경마] 복승+쌍승만 수집(삼복승·단승·전적 제외·배당 전용)');
     else console.log('[삼복승 복구] 일본 지방경마 복승+쌍승+삼복승 3종 수집');
     try {
@@ -1586,7 +1586,7 @@
     //   한국경마: 출마표2(keiba DebaTable) 수집 생략(전적은 PDF에서) + 쌍승·삼복승 탭 클릭 완전 차단.
     //   [수정#3] 경륜/경정/바이크는 한국경마 판정을 하지 않는다(경마장명 오탐 방지).
     const isKorea = !isCycleBoat && isKoreaMode(raceKey, market);
-    if (isKorea) console.log('[한국모드] 복승만 수집 - 쌍승/삼복승 생략', market !== 'korea' ? '(감지: raceKey/페이지, raceKey=' + (raceKey || '미상') + ')' : '(종목=한국)');
+    if (isKorea) console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원)', market !== 'korea' ? '(감지: raceKey/페이지, raceKey=' + (raceKey || '미상') + ')' : '(종목=한국)');
     // [탭분리] 중앙경마(JRA): 팝업 japanType='central' 이거나 페이지가 중앙으로 보이면 → 복승+쌍승만(삼복승·전적 제외).
     const isCentral = !isKorea && !isCycleBoat && (japanType === 'central' || detectCentralHint());
     // [탭분리] 종목 카테고리 산출 + 팝업 실시간 표시용 storage 기록.
@@ -1632,7 +1632,7 @@
       // 2) 쌍승 — [일본 전용]. 한국경마는 쌍승을 수집하지 않는다(복승만).
       let exacta = [];
       if (isKorea) {
-        console.log('[한국모드] 쌍승 수집 생략');
+        console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원) → 쌍승 탭 클릭 차단');
         console.log('[쌍승수집] 한국경마 모드 → 쌍승 수집 생략(복승만).');
       } else {
         //  [디버그 강화] 쌍승 탭이 실제로 전환·로드됐는지, 조합이 뽑혔는지 상세 로그.
@@ -1701,7 +1701,7 @@
       //    삼복승은 불안정할 수 있어 독립 try/catch로 격리(실패해도 복승·쌍승은 유지).
       let trio = [];
       if (isKorea) {
-        console.log('[한국모드] 삼복승 수집 생략(복승만)');
+        console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원) → 삼복승 탭 클릭 차단');
       } else if (isCentral) {
         console.log('[중앙경마] 삼복승 수집 생략(복승+쌍승만·배당 전용)');
       } else if (effSport === 'boat') {
