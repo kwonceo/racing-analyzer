@@ -5992,6 +5992,8 @@
       ${qLines}
       ${t ? `<div style="font-size:20px;font-weight:800;margin:4px 0">🛡 삼복승: <span style="color:#c084fc">${t.join('+')}</span> ${to}</div>` : ''}
       ${triIns ? `<div style="font-size:16px;font-weight:700;margin:2px 0"><span class="hint" style="font-weight:400;font-size:12px">🛡 삼복승 보험(확신도+이상감지):</span> <span style="color:#c084fc">${triIns.join('+')}</span>${cp.confTrifectaInsOdds != null ? ` <span class="hint" style="font-size:12px">${cp.confTrifectaInsOdds}배(추정)</span>` : ''}</div>` : ''}
+      ${(cp.earlyDropHorses || []).length ? `<div style="font-size:13px;font-weight:700;margin:4px 0 1px;color:#fbbf24">📌 초기급락 보존: ${(cp.earlyDropHorses || []).map((e) => e.no + '번').join('·')} <span class="hint" style="font-weight:400;font-size:11px">(마감 5분+ 전 급락 · 후반 재편에도 유지)</span></div>` : ''}
+      ${(cp.earlyDropTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:600;margin:1px 0;color:#fde68a">🛡 삼복승 보험(초기급락): ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''}</div>`).join('')}
       <div class="hint" style="font-size:11px;margin-top:6px">축 근거: ${reasons}</div>
     </div>`;
   }

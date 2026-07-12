@@ -5765,9 +5765,11 @@ def _triple_analyze(rk, rec):
     deadline_corrected = False   # [1번] 발주시각 오검출 정정 발생 여부(최근 스냅샷 기준)
     collection_stalled = False   # [수집 조기 중단 방어] 발주 전인데 마지막 수집이 2분+ 경과
     secs_since_collect = None
+    early_drop_horses = {}       # [초기 급락마 보존] 마감 5분+ 전 절대10%+ 급락 등록말(후반 재편에도 삼복승 보험 유지)
     try:
         _hp0, _, _ = _hist_path(rk)
         _hd0 = json.load(open(_hp0, encoding="utf-8"))
+        early_drop_horses = _hd0.get("early_drop_horses") or {}
         if _hd0.get("snapshots"):
             _s0 = _hd0["snapshots"][-1]
             cur_mb = _s0.get("mb_signed")
@@ -6935,6 +6937,44 @@ def _triple_analyze(rk, rec):
     except Exception as _e:
         print("[확신도복승] 파생 실패:", _e)
 
+    # [초기 급락마 보존] 마감 5분+ 전 절대10%+ 급락 등록말(early_drop_horses)을 마감까지 삼복승 보험으로 강제 유지.
+    #   후반 다른 말 대급락으로 유력마·추천이 재편돼도 폐기 금지(카나자와 8R 6번 1착 놓침 패턴 해결).
+    try:
+        if early_drop_horses and core_picks and not after_close:
+            _vs = set(int(v) for v in (valid_nos or []))
+            _axis = (core_picks.get("favAxis") or core_picks.get("quinella") or [])[:2]
+            _axis = [int(x) for x in _axis if x is not None]
+            def _edtri_odds(cc):
+                _o = trio_map.get(tuple(sorted(cc)))
+                if _o is not None:
+                    return _o
+                try:
+                    _ev, _ = _trio_est(list(cc)); return round(_ev, 1) if _ev else None
+                except Exception:
+                    return None
+            _edlist, _edtris, _edseen = [], [], set()
+            for _k, _meta in early_drop_horses.items():
+                try:
+                    _no = int(_k)
+                except (TypeError, ValueError):
+                    continue
+                if _no not in _vs:
+                    continue
+                _edlist.append({"no": _no, "firstTime": _meta.get("firstTime"),
+                                "firstMb": _meta.get("firstMb"), "firstPct": _meta.get("firstPct")})
+                # 삼복승 보험 = 복승 축 2두 + 초기급락 보존말 (축과 다를 때만)
+                if len(_axis) >= 2 and _no not in _axis:
+                    _cc = sorted(_axis[:2] + [_no])
+                    _ckey = tuple(_cc)
+                    if len(set(_cc)) == 3 and _ckey not in _edseen:
+                        _edseen.add(_ckey)
+                        _edtris.append({"combo": _cc, "odds": _edtri_odds(_cc), "horse": _no})
+            if _edlist:
+                core_picks["earlyDropHorses"] = _edlist          # 초기급락 보존말(오버레이·학습용)
+                core_picks["earlyDropTrifectas"] = _edtris        # 강제 유지 삼복승 보험 조합
+    except Exception as _e:
+        print("[초기급락보존] 파생 실패:", _e)
+
     # [혼전 경주] 상위 배당 근접 → 이변 가능성 → 고배당 포함 삼복승 전략(기존 추천 무영향, 별도 필드).
     chaotic = None
     try:
@@ -7601,6 +7641,19 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
                 signal_reason = f"{signal_horse}번 집중급락(평균 {_hi.get('avg')}%)"
         except Exception:
             signal_horse, signal_reason = None, None
+        # [초기 급락마 보존] 마감 5분+ 전에 절대 10%+ 급락(자금집중)된 말을 등록 → 마감까지 삼복승 보험 유지
+        #   (후반 다른 말 대급락 재편에도 폐기 금지). 대규모 급락(노이즈)·마감후 제외, 최대 4두.
+        try:
+            _massish = len(q_drops) >= 30   # 대규모 동시급락(노이즈) 프록시 → 초기급락 보존 제외
+            if (minutes_before is not None and minutes_before >= 5 and not after_close and not _massish):
+                _edh = doc.setdefault("early_drop_horses", {})
+                for _no in (_exc.get("concentrated") or [])[:4]:
+                    _hh = (_exc.get("horses") or {}).get(_no) or (_exc.get("horses") or {}).get(str(_no)) or {}
+                    if _hh.get("absStrong") and len(_edh) < 4 and str(_no) not in _edh:
+                        _edh[str(_no)] = {"firstTime": time.strftime("%H:%M:%S", time.localtime(now)),
+                                          "firstMb": minutes_before, "firstPct": _hh.get("avg")}
+        except Exception:
+            pass
         # [이상감지 누적] 쌍승(exacta) 방향 역전 → 영구 기록(마감 후에도 유지).
         #   [다중조합] 상위 EXA_REVERSAL_TOPN개 저배당(유력) 조합 각각의 유력방향이
         #   (a,b)→(b,a)로 뒤집히면 1·2착 예측 역전으로 기록(기존 '최저 1조합'만 → 다중 확장).
@@ -10035,6 +10088,8 @@ def _recompute_learning_stats(records):
             "상향(확신도 1위 입상률 낮음)" if (_t1_rate is not None and _t1_n >= 10 and _t1_rate < 40)
             else ("유지·확대(확신도 1위 입상률 우수)" if (_t1_rate is not None and _t1_n >= 10 and _t1_rate >= 70)
                   else "표본 축적 중")),
+        # [초기 급락마 보존] 보존말 실제 입상률(마감 5분+ 전 급락 감지 → 보존 → 입상 비율)
+        "early_drop": _rate(records, lambda r: r.get("early_drop_fired"), lambda r: r.get("early_drop_placed")),
     }
     return {
         "alert_stats": alert_stats,       # [신규 5번] 경고 신호 발생·적중·무시 통계
@@ -10452,6 +10507,24 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
                 conf_forced_placed = any(int(n) in top3 for n in _forced)   # 확신도 70+ 말 중 입상
     except Exception as e:
         print("[확신도복승학습] 판정 실패:", e)
+    # [초기 급락마 보존 학습] 보존한 초기급락말이 실제 입상(1~3착)했는지 판정 → 보존 로직 실효성 누적 통계.
+    early_drop_fired = early_drop_placed = None
+    early_drop_nos = []
+    try:
+        _cp2 = an.get("corePicks") or {}
+        _edh2 = _cp2.get("earlyDropHorses") or []
+        if not _edh2:                                     # 재분석 공백 → 저장 로그 폴백
+            try:
+                _p2, _, _ = _analysis_log_path(_canonical_log_key(rk))
+                _edh2 = (json.load(open(_p2, encoding="utf-8")).get("corePicks") or {}).get("earlyDropHorses") or []
+            except Exception:
+                _edh2 = []
+        early_drop_nos = [int(e.get("no")) for e in _edh2 if e.get("no") is not None]
+        if early_drop_nos:
+            early_drop_fired = True
+            early_drop_placed = any(n in top3 for n in early_drop_nos)   # 보존말 중 1두라도 입상
+    except Exception as e:
+        print("[초기급락보존학습] 판정 실패:", e)
     try:
         _learn_signal_stats(rk, an, top3, doc.get("date"))
     except Exception as e:
@@ -10659,6 +10732,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         "conf_quinella_hit": conf_quinella_hit, "conf_trifecta_hit": conf_trifecta_hit,
         "conf_trifecta_ins_hit": conf_trifecta_ins_hit, "conf_top1_placed": conf_top1_placed,
         "conf_forced_placed": conf_forced_placed,
+        # [초기 급락마 보존 학습] 보존말 등록·입상 여부(보존 로직 실효성 통계)
+        "early_drop_fired": early_drop_fired, "early_drop_placed": early_drop_placed,
+        "early_drop_nos": early_drop_nos,
         # [오늘 통계 대시보드] 날짜·경마장·유력마 기반 적중(집계·경마장별·타임라인용)
         "date": doc.get("date"), "venue": (_area_num(rk)[0] or None),
         "keyhorse_quinella_hit": keyhorse_hit["quinella_hit"], "keyhorse_trifecta_hit": keyhorse_hit["trifecta_hit"],

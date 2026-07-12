@@ -579,6 +579,17 @@
             cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:2px;color:#c4b5fd',
               '🛡 삼복승 보험(확신도+이상감지): ' + cp.confTrifectaIns.join('+') + (cp.confTrifectaInsOdds != null ? '  ' + cp.confTrifectaInsOdds + '배(추정)' : '')));
           }
+          // [초기 급락마 보존] 마감 5분+ 전 급락 감지말을 후반 재편에도 삼복승 보험으로 유지.
+          var _edh = cp.earlyDropHorses || [];
+          if (_edh.length) {
+            var _ednos = _edh.map(function (e) { return e.no; }).join('·');
+            cpBox.appendChild(mk('div', 'font-weight:700;font-size:13px;margin-top:3px;color:#fbbf24',
+              '📌 초기급락 보존: ' + _ednos + '번 (후반 재편에도 유지)'));
+            (cp.earlyDropTrifectas || []).forEach(function (t) {
+              cpBox.appendChild(mk('div', 'font-weight:600;font-size:13px;margin-top:1px;color:#fde68a',
+                '🛡 삼복승 보험(초기급락): ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '')));
+            });
+          }
           panel.appendChild(cpBox);
         }
         // [💎 중고배당 유력마·2번] 감지 시 최상단 강조(복승10배+ & 강한신호 → 삼복승 보험 필수)
