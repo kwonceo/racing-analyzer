@@ -7386,6 +7386,63 @@ def _hist_path(rk):
     return os.path.join(ODDS_HISTORY_DIR, safe + ".json"), date, race
 
 
+def _hist_read_any(json_path):
+    """[영구보존·4번] odds_history 파일 읽기 — .json 우선, 없으면 7일+ 압축본(.json.gz) 투명 해제.
+    미존재 시 None."""
+    import gzip
+    try:
+        if os.path.exists(json_path):
+            return json.load(open(json_path, encoding="utf-8"))
+        gz = json_path + ".gz"
+        if os.path.exists(gz):
+            with gzip.open(gz, "rt", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception as e:
+        print("[아카이브 읽기] 실패:", json_path, e)
+    return None
+
+
+def _archive_compress_old(days=7):
+    """[영구보존·4번] 7일+ 지난 odds_history .json 을 .json.gz 로 압축(데이터 삭제 없이 메모리·용량 관리).
+    파일명 날짜(YYYY_MM_DD) 우선, 없으면 mtime 기준. 반환 압축 파일 수."""
+    import gzip
+    cutoff = time.time() - days * 86400
+    n = 0
+    try:
+        if not os.path.isdir(ODDS_HISTORY_DIR):
+            return 0
+        for fn in os.listdir(ODDS_HISTORY_DIR):
+            if not fn.endswith(".json"):
+                continue
+            fp = os.path.join(ODDS_HISTORY_DIR, fn)
+            old = False
+            m = re.match(r"(\d{4})_(\d{2})_(\d{2})", fn)
+            if m:
+                try:
+                    ft = time.mktime(time.strptime("-".join(m.groups()), "%Y-%m-%d"))
+                    old = ft < cutoff
+                except (ValueError, OverflowError):
+                    old = False
+            if not old:
+                try:
+                    old = os.path.getmtime(fp) < cutoff
+                except OSError:
+                    old = False
+            if old:
+                try:
+                    with open(fp, "rb") as f_in, gzip.open(fp + ".gz", "wb") as f_out:
+                        f_out.writelines(f_in)
+                    os.remove(fp)     # 원본 .json 제거(데이터는 .gz에 그대로 보존 — 삭제 아님, 압축 보관)
+                    n += 1
+                except Exception as e:
+                    print("[아카이브 압축] 파일 실패:", fn, e)
+        if n:
+            print(f"[아카이브 압축] {days}일+ 경주 배당 {n}건 .gz 압축 보관(데이터 유지)")
+    except Exception as e:
+        print("[아카이브 압축] 실패:", e)
+    return n
+
+
 def _combo_dict(arr):
     """[{combo,odds}] → {'1+2': 45.2, ...}."""
     d = {}
@@ -7443,6 +7500,9 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
     except Exception:
         doc = {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None}
     now = time.time()
+    # [영구보존] raceKey별 append-only 아카이브 — 분석용 snapshots(오염방어로 리셋/300캡)와 별개로
+    #   모든 수집 배당을 절대 삭제·초기화 없이 영구 누적(탭 전환·경주 전환·마감 후에도 유지 → 복기 소스).
+    doc.setdefault("archive_snapshots", [])
     # [경주 전환 잔존 방어·시간 간격] 히스토리 파일의 마지막 스냅샷이 20분+ 전이면 이전 경주 종료 → 새 경주로 간주.
     #   이전 경주 스냅샷·이상감지(anomaly_history)를 완전 제거하고 이 스냅샷을 새 기준값으로만 저장(급락 계산 생략).
     if doc.get("snapshots") and not doc.get("result"):
@@ -7451,6 +7511,9 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
             print(f"[경주전환·시간간격] {rk}: 직전 스냅샷 {round((now - _last_snap_t) / 60)}분 전 → 이전 경주 잔존 {len(doc['snapshots'])}건 제거·새 기준값")
             doc["snapshots"] = []
             baseline_reset = True   # 이 스냅샷 = 새 기준값(이상감지 계산 생략)
+            # [영구보존] 아카이브는 삭제하지 않고 세션 경계만 표기(20분+ 갭=발주지연/재수집 구분용).
+            if doc["archive_snapshots"]:
+                doc["archive_snapshots"].append({"t": now, "boundary": True, "reason": "gap_20min"})
     minutes_before = None
     mb_signed = None       # [마감후] 부호 포함(음수=마감 후) — after_close 판별용
     after_close = False
@@ -7563,6 +7626,15 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
         "anomalies": anomalies, "t": now,
     })
     doc["snapshots"] = doc["snapshots"][-300:]
+    # [영구보존·1·2번] append-only 아카이브에 이 수집 배당을 영구 누적(리셋/캡/탭전환과 무관·절대 삭제 안 함).
+    doc["archive_snapshots"].append({
+        "time": time.strftime("%H:%M:%S", time.localtime(now)), "t": now,
+        "minutes_before": minutes_before, "mb_signed": mb_signed, "after_close": after_close,
+        "baseline_reset": bool(baseline_reset), "next_race_blocked": next_race_blocked,
+        "quinella": _combo_dict(quinella), "exacta": _combo_dict(exacta),
+        "win": {str(k): v for k, v in curWin.items()}, "anomalies": anomalies,
+    })
+    doc["archive_snapshots"] = doc["archive_snapshots"][-5000:]   # 안전 상한(단일 경주 실사용<150·8시간 연속수집도 미달)
     # [4번] 마감 후 신호로 베팅 반영 불가했던 케이스 저장(수집 간격 단축 필요성 근거)
     #   [1번] 마감 후 대급락(50%+) = surge → 별도 구조 저장(입상률 학습·다음경주 참고)
     if after_close and anomalies:
@@ -10088,6 +10160,73 @@ def alerts_get():
         return jsonify(json.load(open(path, encoding="utf-8")))
     except Exception as e:
         return jsonify({"error": f"읽기 실패: {e}"}), 500
+
+
+@app.route("/api/odds/archive/list", methods=["GET"])
+def odds_archive_list():
+    """[영구보존·3번] 저장된 모든 경주 배당 아카이브 목록(복기용) — .json + 압축(.json.gz) 모두 포함.
+    반환 {races:[{raceKey,date,race,count,snapshotCount,hasResult,result,lastTime,compressed}]}."""
+    out, seen = [], set()
+    try:
+        if os.path.isdir(ODDS_HISTORY_DIR):
+            for fn in sorted(os.listdir(ODDS_HISTORY_DIR), reverse=True):
+                if fn.endswith(".json"):
+                    base = os.path.join(ODDS_HISTORY_DIR, fn)
+                    comp = False
+                elif fn.endswith(".json.gz"):
+                    base = os.path.join(ODDS_HISTORY_DIR, fn[:-3])
+                    comp = True
+                else:
+                    continue
+                if base in seen:      # .json 우선(같은 경주 .json/.gz 중복 방지)
+                    continue
+                seen.add(base)
+                doc = _hist_read_any(base)
+                if not doc:
+                    continue
+                arch = doc.get("archive_snapshots") or []
+                snaps = arch or (doc.get("snapshots") or [])
+                if not snaps:
+                    continue
+                out.append({
+                    "raceKey": doc.get("raceKey"), "date": doc.get("date"), "race": doc.get("race"),
+                    "count": len(snaps),   # 표시용 유효 스냅샷 수(아카이브 우선, 구파일은 snapshots 폴백)
+                    "archiveCount": len(arch), "snapshotCount": len(doc.get("snapshots") or []),
+                    "hasResult": bool(doc.get("result")), "result": doc.get("result"),
+                    "lastTime": (snaps[-1].get("time") if snaps else None), "compressed": comp,
+                })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)})
+    out.sort(key=lambda x: (x.get("date") or "", x.get("race") or ""), reverse=True)
+    return jsonify({"ok": True, "races": out, "total": len(out)})
+
+
+@app.route("/api/odds/archive/get", methods=["GET"])
+def odds_archive_get():
+    """[영구보존·3번] 단일 경주 배당 아카이브 전체 스냅샷(복기 타임라인). archive_snapshots 우선."""
+    rk = request.args.get("raceKey") or ""
+    if not rk:
+        return jsonify({"ok": False, "error": "raceKey 필요"})
+    path, _, _ = _hist_path(rk)
+    doc = _hist_read_any(path)
+    if not doc:
+        return jsonify({"ok": False, "error": "해당 경주 아카이브 없음"})
+    arch = doc.get("archive_snapshots") or doc.get("snapshots") or []
+    return jsonify({"ok": True, "raceKey": doc.get("raceKey"), "date": doc.get("date"),
+                    "race": doc.get("race"), "result": doc.get("result"),
+                    "count": len(arch), "snapshots": arch})
+
+
+@app.route("/api/odds/archive/compress", methods=["POST"])
+def odds_archive_compress():
+    """[영구보존·4번] 7일+ 경주 배당을 .gz 압축 보관(수동 트리거·데이터 삭제 없음)."""
+    days = 7
+    try:
+        days = int((request.get_json(silent=True) or {}).get("days") or 7)
+    except (TypeError, ValueError):
+        days = 7
+    n = _archive_compress_old(days)
+    return jsonify({"ok": True, "compressed": n, "days": days})
 
 
 @app.route("/api/history/list", methods=["GET", "POST"])
@@ -16106,4 +16245,8 @@ if __name__ == "__main__":
         _start_daily_learning_scheduler()   # [학습일지] 매일 22:00 학습 일지 자동 생성·백업
         _startup_date_reset()      # [날짜 초기화] 서버 시작 시 어제 고정·수집 데이터 자동 정리(학습 데이터 보존)
         _start_multi_race_bg()     # [다중 경주 동시 배당판] 별도 저장소·실패격리·단일모드 무영향
+        try:
+            _archive_compress_old(7)   # [영구보존·4번] 7일+ 경주 배당 .gz 압축 보관(데이터 삭제 없음·용량 관리)
+        except Exception as _e:
+            print("[아카이브 압축] 시작 시 실패:", _e)
     app.run(host="127.0.0.1", port=8011, debug=True, threaded=True)

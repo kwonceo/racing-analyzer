@@ -8533,6 +8533,64 @@
   function initJapanReview() {
     const rb = document.querySelector('#jpReviewRefresh'); if (rb) rb.addEventListener('click', loadJapanReviewList);
     const ad = document.querySelector('#jpReviewAllDates'); if (ad) ad.addEventListener('change', loadJapanReviewList);
+    const ar = document.querySelector('#oddsArchiveRefresh'); if (ar) ar.addEventListener('click', loadOddsArchiveList);
+    const ac = document.querySelector('#oddsArchiveCompress'); if (ac) ac.addEventListener('click', compressOddsArchive);
+  }
+
+  // [영구보존·3번] 배당 히스토리 보관함 — 저장된 모든 경주 배당 아카이브 목록·복기.
+  async function loadOddsArchiveList() {
+    const box = document.querySelector('#oddsArchiveList');
+    const msg = document.querySelector('#oddsArchiveMsg');
+    if (box) box.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/odds/archive/list')).json(); }
+    catch (_) { if (box) box.innerHTML = '<p class="hint">불러오기 실패</p>'; return; }
+    const races = (d && d.races) || [];
+    if (msg) msg.textContent = `총 ${races.length}개 경주 보존됨`;
+    if (!races.length) { if (box) box.innerHTML = '<p class="hint">보관된 경주가 없습니다.</p>'; return; }
+    const rows = races.map((r) => {
+      const res = r.result ? ` · 결과 ${esc([r.result['1st'], r.result['2nd'], r.result['3rd']].filter((x) => x != null).join('-'))}` : '';
+      const comp = r.compressed ? ' 🗜' : '';
+      return `<div class="cfg-row" style="justify-content:space-between;padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.06)">
+        <span><b>${esc(r.raceKey || r.race || '')}</b>${comp} <span class="hint">${esc(r.date || '')} · ${r.count}스냅샷${res}</span></span>
+        <button class="btn btn-small" onclick="window._openOddsArchive('${encodeURIComponent(r.raceKey || '')}')">복기 보기</button>
+      </div>`;
+    }).join('');
+    if (box) box.innerHTML = rows;
+  }
+
+  async function openOddsArchive(rk) {
+    try { rk = decodeURIComponent(rk); } catch (_) { /* 이미 디코드됨 */ }
+    const box = document.querySelector('#oddsArchiveDetail');
+    if (box) box.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/odds/archive/get?raceKey=' + encodeURIComponent(rk))).json(); }
+    catch (_) { if (box) box.innerHTML = '<p class="hint">불러오기 실패</p>'; return; }
+    if (!d || !d.ok) { if (box) box.innerHTML = '<p class="hint">' + esc((d && d.error) || '없음') + '</p>'; return; }
+    const snaps = d.snapshots || [];
+    // 배당이 존재하는 상위 조합을 열로(마지막 스냅샷 최저배당 6개 기준)
+    const last = [...snaps].reverse().find((s) => s.quinella && Object.keys(s.quinella).length) || {};
+    const cols = Object.entries(last.quinella || {}).sort((a, b) => a[1] - b[1]).slice(0, 6).map((e) => e[0]);
+    const head = ['시각', '마감', ...cols, '이상감지'];
+    const trows = snaps.map((s) => {
+      if (s.boundary) return `<tr><td colspan="${head.length}" style="color:#fbbf24;font-size:11px">— 세션 경계(${esc(s.reason || '')}) —</td></tr>`;
+      const mb = s.after_close ? '마감후' : (s.minutes_before != null ? s.minutes_before + '분' : '-');
+      const cells = cols.map((c) => `<td style="text-align:right">${(s.quinella && s.quinella[c] != null) ? s.quinella[c] : '-'}</td>`).join('');
+      const an = (s.anomalies || []).length ? `<td class="hint" style="font-size:11px">${esc((s.anomalies || []).slice(0, 2).join(' · '))}</td>` : '<td></td>';
+      return `<tr><td>${esc(s.time || '')}</td><td style="text-align:center">${esc(mb)}</td>${cells}${an}</tr>`;
+    }).join('');
+    const resTxt = d.result ? ` · 결과 ${esc([d.result['1st'], d.result['2nd'], d.result['3rd']].filter((x) => x != null).join('-'))}` : '';
+    if (box) box.innerHTML = `<div class="matrix-title" style="font-size:13px">📚 ${esc(d.raceKey || '')} <span class="hint" style="font-weight:400">${d.count}스냅샷${resTxt}</span></div>
+      <div style="overflow-x:auto"><table class="odds-table" style="font-size:12px"><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${trows}</tbody></table></div>`;
+  }
+  window._openOddsArchive = openOddsArchive;
+
+  async function compressOddsArchive() {
+    const msg = document.querySelector('#oddsArchiveMsg');
+    if (msg) msg.textContent = '압축 중…';
+    try {
+      const d = await (await fetch('/api/odds/archive/compress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ days: 7 }) })).json();
+      if (msg) msg.textContent = `7일+ ${(d && d.compressed) || 0}건 압축 보관 완료`;
+    } catch (_) { if (msg) msg.textContent = '압축 실패'; }
+    loadOddsArchiveList();
   }
 
   // ---------- 부트 ----------

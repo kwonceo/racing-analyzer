@@ -250,6 +250,18 @@
         <div id="jpReviewList"><p class="hint">불러오는 중…</p></div>
         <div id="jpReviewDetail" style="margin-top:10px"></div>
       </div>
+      <!-- [영구보존·3번] 저장된 모든 경주 배당 아카이브 복기(탭 전환·마감 후에도 유지) -->
+      <div class="panel-card" style="margin-top:12px">
+        <h2>📚 배당 히스토리 보관함 <span class="hint" style="font-weight:400">모든 경주 배당 영구 보존 · 복기</span></h2>
+        <p class="hint">수집된 모든 경주의 배당 타임라인이 raceKey별로 영구 저장됩니다(탭 전환·마감·경주 전환에도 삭제 안 함). 7일+ 지난 데이터는 자동 압축 보관됩니다. 경주를 누르면 전체 배당 변화를 복기할 수 있습니다.</p>
+        <div class="cfg-row" style="margin:4px 0 8px">
+          <button id="oddsArchiveRefresh" class="btn btn-primary btn-small">🔄 보관함 새로고침</button>
+          <button id="oddsArchiveCompress" class="btn btn-small">🗜 7일+ 압축 정리</button>
+          <span id="oddsArchiveMsg" class="hint" style="margin-left:8px"></span>
+        </div>
+        <div id="oddsArchiveList"><p class="hint">🔄 새로고침을 눌러 보관된 경주를 불러오세요.</p></div>
+        <div id="oddsArchiveDetail" style="margin-top:10px"></div>
+      </div>
     </section>
 
     <!-- [탭분리] 일본 경정 (6명 출전) -->
