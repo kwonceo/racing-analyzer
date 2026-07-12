@@ -5712,6 +5712,55 @@ def _confidence_picks(confidence, curWin, curQ, key_horses, single_rank, anomaly
             "trifecta": trifecta, "trifectaIns": trifecta_ins}
 
 
+def _dense_no_signal_box(key_horses, valid_nos, curWin, curQ, trio_map,
+                         drops, wx_reversals, dark_horses, strong_signals,
+                         dense_odds=15.0, strong_drop=-30.0):
+    """[무신호 저배당밀집] 급락(≤-30%)·쌍승역전·복병·강신호가 전부 0건이고 상위 배당이 밀집(대표배당 15배 이내)이면,
+      삼복승 축을 3두 → 4~5두로 확대(근소 4·5위 저배당말도 박스에 포함). 코치 8R 복기: 유력마 5·6·2인데
+      5번(시장최저 5.7배) 붕괴·1번(4위 9.2배)이 2착 → 4두 박스면 1+2+6 삼복승 커버. 신호 있으면 기존 3두 유지.
+      반환 {active, horses:[...], trifectas:[{combo,odds}], note} 또는 {active:False}."""
+    try:
+        # [무신호 판정] 강한 급락(≤-30%)·쌍승역전·복병·강신호 어느 하나라도 있으면 비활성(기존 로직에 맡김)
+        if (any((d.get("pct") or 0) <= strong_drop for d in (drops or []))
+                or bool(wx_reversals) or bool(dark_horses) or bool((strong_signals or {}).get("count"))):
+            return {"active": False}
+
+        def _rep(no):                                     # 대표배당 = 단승 우선, 없으면 최저 복승
+            if curWin.get(no):
+                return curWin[no]
+            best = None
+            for (a, b), o in (curQ or {}).items():
+                if no in (a, b) and o and o > 0 and (best is None or o < best):
+                    best = o
+            return best
+        scored = [(no, _rep(no)) for no in sorted(int(x) for x in (valid_nos or []))]
+        scored = sorted([(no, r) for no, r in scored if r is not None], key=lambda kv: kv[1])
+        # [저배당 밀집] 대표배당 dense_odds(15배) 이내 말만 박스(최소 4·최대 5두). 4두 미만이면 밀집 아님 → 비활성.
+        box = [no for no, r in scored if r <= dense_odds][:5]
+        if len(box) < 4:
+            return {"active": False}
+        # 삼복승 박스 = 박스 3두 조합 전체(추정배당 낮은 순·최대 6개). 기존 축(key_horses 상위) 조합 우선 포함.
+        _box = sorted(box)
+        tris = []
+        for i in range(len(_box)):
+            for j in range(i + 1, len(_box)):
+                for k in range(j + 1, len(_box)):
+                    cc = [_box[i], _box[j], _box[k]]
+                    o = trio_map.get(tuple(cc))
+                    if o is None:
+                        try:
+                            _ev, _ = _trio_est(list(cc)); o = round(_ev, 1) if _ev else None
+                        except Exception:
+                            o = None
+                    tris.append({"combo": cc, "odds": o})
+        tris.sort(key=lambda t: (t["odds"] is None, t["odds"] or 9e9))
+        return {"active": True, "horses": box, "trifectas": tris[:6],
+                "note": "무신호·저배당 밀집(상위 %d두 ≤%g배) → 삼복승 박스 %d두 확대" % (len(box), dense_odds, len(box))}
+    except Exception as _e:
+        print("[무신호밀집박스] 실패:", _e)
+        return {"active": False}
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -7131,6 +7180,21 @@ def _triple_analyze(rk, rec):
     except Exception as _e:
         print("[Bug1·복병삼복승] 파생 실패:", _e)
 
+    # [B·무신호 저배당밀집 삼복승 박스 확대] 급락·역배열·복병·강신호 0건 + 상위 배당 밀집(대표 15배 이내)일 때
+    #   삼복승 축을 3두 → 4~5두로 확대(근소 4·5위 저배당말 포함). 코치 8R 복기: 유력마 5·6·2인데 4위 1번(9.2배)
+    #   미포함 → 정답 삼복승 1+2+6 놓침(5번 시장최저 붕괴·1번 2착). 신호 있으면 비활성(기존 3두 축 유지·무삭제).
+    dense_box = {"active": False}
+    try:
+        if core_picks and not after_close:
+            dense_box = _dense_no_signal_box(key_horses, valid_nos, curWin, curQ, trio_map,
+                                             drops, wx_reversals, dark_horses, strong_signals)
+            if dense_box.get("active"):
+                core_picks["denseBoxHorses"] = dense_box.get("horses") or []
+                core_picks["denseBoxTrifectas"] = dense_box.get("trifectas") or []
+                core_picks["denseBoxNote"] = dense_box.get("note")
+    except Exception as _e:
+        print("[무신호밀집박스] 파생 실패:", _e)
+
     # [혼전 경주] 상위 배당 근접 → 이변 가능성 → 고배당 포함 삼복승 전략(기존 추천 무영향, 별도 필드).
     chaotic = None
     try:
@@ -7266,6 +7330,7 @@ def _triple_analyze(rk, rec):
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
         "closingDropInsurance": closing_drop_insurance,   # [마감순간 급락 보험] 축+마감급락말 삼복승(대규모급락 제외)
+        "denseNoSignalBox": dense_box,                    # [무신호 저배당밀집] 삼복승 박스 4~5두 확대(신호 0건·밀집 시)
         "reversalBacking": reversal_backing,  # [히로시마2R] 역배열 실질유력마 축 받치기 복승
         "recommendFlex": recommend_flex,      # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드
         "highOddsCompanion": high_odds_companion,  # [고배당 동반 패턴·참고] 메인과 별도 참고 추천

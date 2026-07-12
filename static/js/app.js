@@ -5999,6 +5999,8 @@
       ${(cp.closingDropTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:700;margin:1px 0;color:#fdba74">🎯 자동삼복승: ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''} <span class="hint" style="font-weight:400;font-size:11px">(마감급락 보존 조합)</span></div>`).join('')}
       ${(cp.darkHorsePicks || []).length ? `<div style="font-size:13px;font-weight:700;margin:4px 0 1px;color:#f0abfc">🐎 복병 편성(제거 금지): ${(cp.darkHorsePicks || []).map((e) => e.no + '번').join('·')}</div>` : ''}
       ${(cp.darkTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:700;margin:1px 0;color:#f5d0fe">🎯 자동삼복승: ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''} <span class="hint" style="font-weight:400;font-size:11px">(복병 편성)</span></div>`).join('')}
+      ${(cp.denseBoxHorses || []).length ? `<div style="font-size:13px;font-weight:700;margin:4px 0 1px;color:#fbbf24">⚠️ 무신호 밀집 경주 → 삼복승 박스 확대 <span class="hint" style="font-weight:400;font-size:11px">(${(cp.denseBoxHorses || []).join('·')}번 · 급락/역배열/복병 0건·저배당 밀집)</span></div>` : ''}
+      ${(cp.denseBoxTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:700;margin:1px 0;color:#fde68a">🎯 삼복승: ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''}</div>`).join('')}
       <div class="hint" style="font-size:11px;margin-top:6px">축 근거: ${reasons}</div>
     </div>`;
   }

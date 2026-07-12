@@ -610,6 +610,16 @@
                 '🎯 자동삼복승: ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '') + ' (복병 편성)'));
             });
           }
+          // [B·무신호 저배당밀집] 급락·역배열·복병 신호 0건 + 상위배당 밀집 → 삼복승 박스 4~5두 확대.
+          var _dbh = cp.denseBoxHorses || [];
+          if (_dbh.length) {
+            cpBox.appendChild(mk('div', 'font-weight:700;font-size:13px;margin-top:3px;color:#fbbf24',
+              '⚠️ 무신호 밀집 경주 → 삼복승 박스 확대(' + _dbh.join('·') + '번)'));
+            (cp.denseBoxTrifectas || []).forEach(function (t) {
+              cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:1px;color:#fde68a',
+                '🎯 삼복승: ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '')));
+            });
+          }
           panel.appendChild(cpBox);
         }
         // [💎 중고배당 유력마·2번] 감지 시 최상단 강조(복승10배+ & 강한신호 → 삼복승 보험 필수)
