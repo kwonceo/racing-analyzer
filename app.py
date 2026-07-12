@@ -32,6 +32,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from itertools import permutations
 from html.parser import HTMLParser
 from urllib.request import urlopen, Request
+import urllib.parse
+import urllib.error
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.exceptions import HTTPException
 import anthropic
@@ -14542,6 +14544,246 @@ def keiba_starters():
                              "distance": shutsuba.get("distance"), "surface": shutsuba.get("surface"),
                              "trackCond": shutsuba.get("trackCond")},
                     "horses": horses})
+
+
+# ══════════════ [KRA 공공API] 한국마사회 확정배당율 통합(B551015/API160_1) ══════════════
+#   단승(WIN)·복승(QNL)·쌍승(EXA)·삼복승(TLA)을 data.go.kr 에서 서버가 직접 수집 → 파이프라인 주입.
+#   ⚠ 기존 Chrome 확장(한국경마 배당) 수집은 폴백으로 그대로 유지. KRA는 '추가 소스'.
+#   키: .env KRA_API_KEY(gitignore·커밋 금지). 30초 자동수집(watch 등록 경주만).
+#   승식코드: WIN=단승·PLC=연승·QPL=복연승·QNL=복승·EXA=쌍승·TLA=삼복승·TRI=삼쌍승.
+KRA_API_BASE = "https://apis.data.go.kr/B551015/API160_1"
+KRA_MEET_NAME = {"1": "서울", "2": "제주", "3": "부산경남"}
+KRA_MEET_CODE = {"서울": "1", "제주": "2", "부산": "3", "부경": "3", "부산경남": "3", "경남": "3"}
+_KRA_WATCH = {}          # {raceKey: {"meet","rc_date","rc_no","t"}} 30초 자동수집 대상
+_KRA_WATCH_LOCK = threading.Lock()
+_kra_auto_started = False
+
+
+def _kra_api_key():
+    return (os.environ.get("KRA_API_KEY") or "").strip()
+
+
+def _kra_meet_code(venue):
+    """경마장명(서울/제주/부산경남/부경) → KRA meet 코드('1'/'2'/'3'). 숫자면 그대로."""
+    if venue is None:
+        return None
+    v = str(venue).strip()
+    if v in ("1", "2", "3"):
+        return v
+    return KRA_MEET_CODE.get(v) or KRA_MEET_CODE.get(v.replace("경마공원", "").strip())
+
+
+def _kra_fetch(meet, rc_date, rc_no, num_rows=300):
+    """API160_1 호출 → (items[list], meta[dict], err[str|None]). read-only 조회.
+    응답은 표준 data.go.kr 구조 response.body.items.item(단일이면 dict) 가정."""
+    key = _kra_api_key()
+    if not key:
+        return [], {}, "KRA_API_KEY 미설정(.env 확인)"
+    params = {"serviceKey": key, "numOfRows": str(num_rows), "pageNo": "1",
+              "meet": str(meet), "rc_date": str(rc_date), "rc_no": str(rc_no), "_type": "json"}
+    url = KRA_API_BASE + "?" + urllib.parse.urlencode(params)
+    try:
+        req = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        raw = urlopen(req, timeout=15).read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:  # noqa: F821
+        body = ""
+        try:
+            body = e.read().decode("utf-8", "replace")[:300]
+        except Exception:
+            pass
+        return [], {"http": e.code, "body": body}, "HTTP %d(키 미활성·서비스오류 가능)" % e.code
+    except Exception as e:
+        return [], {}, "요청 실패: %s" % e
+    try:
+        data = json.loads(raw)
+    except Exception:
+        return [], {"raw": raw[:400]}, "JSON 아님(XML 에러응답 가능)"
+    body = (((data or {}).get("response") or {}).get("body") or {})
+    items = (body.get("items") or {}).get("item")
+    if items is None:
+        # 헤더 결과코드 확인(00=정상)
+        hdr = (((data or {}).get("response") or {}).get("header") or {})
+        return [], {"header": hdr}, (None if hdr.get("resultCode") in ("00", "0", None)
+                                     else "결과코드 %s %s" % (hdr.get("resultCode"), hdr.get("resultMsg")))
+    if isinstance(items, dict):
+        items = [items]
+    return items, {k: body.get(k) for k in ("numOfRows", "pageNo", "totalCount")}, None
+
+
+def _kra_g(item, *names):
+    """item 에서 여러 후보 필드명 중 첫 유효값(대소문자·변형 방어)."""
+    low = {str(k).lower(): v for k, v in item.items()}
+    for n in names:
+        v = low.get(n.lower())
+        if v not in (None, "", "0", 0, "-"):
+            return v
+    return None
+
+
+def _kra_num(v):
+    try:
+        return float(str(v).replace(",", ""))
+    except (TypeError, ValueError):
+        return None
+
+
+def _kra_int(v):
+    try:
+        return int(float(str(v).replace(",", "")))
+    except (TypeError, ValueError):
+        return None
+
+
+def _kra_parse_items(items):
+    """KRA API160 items → 파이프라인 포맷 (win[dict], q[list], x[list], tr[list]).
+    ⚠ 확정배당율 통합 응답의 정확한 필드명은 라이브 검증 후 확정 — 다양한 관례 필드명을 방어적으로 흡수.
+    승식코드(WIN/QNL/EXA/TLA) 또는 마번 개수로 승식을 판별."""
+    win, q, x, tr = {}, [], [], []
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        code = (_kra_g(it, "bettype", "betType", "ssMark", "ss_mark", "ssFlag", "ss_flag", "winFlag") or "")
+        code = str(code).upper()
+        n1 = _kra_int(_kra_g(it, "chulNo1", "chulNo", "hrNo1", "hrNo", "no1", "no"))
+        n2 = _kra_int(_kra_g(it, "chulNo2", "hrNo2", "no2"))
+        n3 = _kra_int(_kra_g(it, "chulNo3", "hrNo3", "no3"))
+        od = _kra_num(_kra_g(it, "divRate", "divideRate", "odds", "rcOdds", "winOdds",
+                             "expectOdds", "payRate", "drwtRate"))
+        nums = [n for n in (n1, n2, n3) if n]
+        # 승식 판별: 코드 우선, 없으면 마번 개수
+        kind = None
+        if code in ("WIN",) or (not code and len(nums) == 1):
+            kind = "win"
+        elif code in ("QNL", "QPL") or (not code and len(nums) == 2 and code not in ("EXA",)):
+            kind = "quinella"
+        elif code in ("EXA",):
+            kind = "exacta"
+        elif code in ("TLA", "TRI") or (not code and len(nums) == 3):
+            kind = "trio"
+        if od is None:
+            continue
+        if kind == "win" and n1:
+            win[str(n1)] = od
+        elif kind == "quinella" and len(nums) >= 2:
+            q.append({"combo": sorted(nums[:2]), "odds": od})
+        elif kind == "exacta" and len(nums) >= 2:
+            x.append({"combo": nums[:2], "odds": od})
+        elif kind == "trio" and len(nums) >= 3:
+            tr.append({"combo": sorted(nums[:3]), "odds": od})
+    return win, q, x, tr
+
+
+def _kra_collect_one(rk, meet, rc_date, rc_no):
+    """KRA 1경주 배당 수집 → 파이프라인 주입. (ok, info) 반환. 실패해도 확장 폴백에 무영향."""
+    items, meta, err = _kra_fetch(meet, rc_date, rc_no)
+    if err:
+        return False, {"error": err, "meta": meta}
+    if not items:
+        return False, {"error": "데이터 없음(발매 전·비경주일 가능)", "meta": meta}
+    win, q, x, tr = _kra_parse_items(items)
+    if not (win or q or x or tr):
+        # 파싱 0건 → 필드명 불일치 진단용으로 첫 item 키 로그
+        sample = list(items[0].keys()) if items and isinstance(items[0], dict) else []
+        print("[KRA] 파싱 0건 — item 필드 확인 필요:", sample[:20])
+        return False, {"error": "배당 파싱 0건(필드명 검증 필요)", "sampleKeys": sample}
+    _do_triple_ingest(rk, q, x, tr, win, sport="horse", category="korea", source="kra_api")
+    print("[KRA] %s: 단승 %d·복승 %d·쌍승 %d·삼복승 %d 수집→파이프라인(역배열·삼복승 활성)"
+          % (rk, len(win), len(q), len(x), len(tr)))
+    return True, {"counts": {"win": len(win), "quinella": len(q), "exacta": len(x), "trio": len(tr)}}
+
+
+def _kra_auto_loop():
+    """30초 간격으로 watch 등록된 KRA 경주 배당 자동수집(데몬)."""
+    while True:
+        try:
+            with _KRA_WATCH_LOCK:
+                targets = list(_KRA_WATCH.items())
+            for rk, w in targets:
+                try:
+                    _kra_collect_one(rk, w["meet"], w["rc_date"], w["rc_no"])
+                except Exception as e:
+                    print("[KRA 자동수집] %s 실패(무시):" % rk, e)
+        except Exception as e:
+            print("[KRA 자동수집] 루프 오류(무시):", e)
+        time.sleep(30)
+
+
+def _kra_auto_start():
+    """KRA 30초 자동수집 데몬 1회 기동(멱등)."""
+    global _kra_auto_started
+    if _kra_auto_started:
+        return
+    _kra_auto_started = True
+    threading.Thread(target=_kra_auto_loop, daemon=True, name="kra-auto").start()
+    print("[KRA] 30초 자동수집 데몬 시작(watch 등록 경주만 대상)")
+
+
+@app.route("/api/kra/test", methods=["GET", "POST"])
+def kra_test():
+    """[KRA 진단] 원시 응답·파싱 결과 확인용. 키 활성화 후 실제 필드 검증에 사용.
+    params: {meet, rc_date, rc_no}."""
+    b = request.json if request.method == "POST" else None
+    b = b or request.args or {}
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "1")
+    rc_date = str(b.get("rc_date") or b.get("rcDate") or time.strftime("%Y%m%d"))
+    rc_no = str(b.get("rc_no") or b.get("rcNo") or "1")
+    items, meta, err = _kra_fetch(meet, rc_date, rc_no)
+    win, q, x, tr = _kra_parse_items(items) if items else ({}, [], [], [])
+    return jsonify({"ok": err is None, "error": err, "meta": meta,
+                    "keySet": bool(_kra_api_key()),
+                    "itemCount": len(items),
+                    "sampleKeys": (list(items[0].keys()) if items and isinstance(items[0], dict) else []),
+                    "sampleItem": (items[0] if items else None),
+                    "parsed": {"win": win, "quinella": q[:10], "exacta": x[:10], "trio": tr[:10]}})
+
+
+@app.route("/api/kra/collect", methods=["POST"])
+def kra_collect():
+    """[KRA 1회 수집] 지정 경주 배당을 즉시 수집·파이프라인 주입. params: {raceKey?, meet, rc_date, rc_no}."""
+    b = request.json or {}
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "")
+    rc_date = str(b.get("rc_date") or b.get("rcDate") or time.strftime("%Y%m%d"))
+    rc_no = str(b.get("rc_no") or b.get("rcNo") or "")
+    if not (meet and rc_no):
+        return jsonify({"error": "meet, rc_no 가 필요합니다."}), 400
+    rk = (b.get("raceKey") or "%s %s경주" % (KRA_MEET_NAME.get(meet, meet), rc_no)).strip()
+    ok, info = _kra_collect_one(rk, meet, rc_date, rc_no)
+    return jsonify({"ok": ok, "raceKey": rk, **info})
+
+
+@app.route("/api/kra/watch", methods=["POST"])
+def kra_watch():
+    """[KRA 30초 자동수집 등록] params: {raceKey?, meet, rc_date, rc_no}. 등록 후 데몬이 30초마다 수집."""
+    b = request.json or {}
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "")
+    rc_date = str(b.get("rc_date") or b.get("rcDate") or time.strftime("%Y%m%d"))
+    rc_no = str(b.get("rc_no") or b.get("rcNo") or "")
+    if not (meet and rc_no):
+        return jsonify({"error": "meet, rc_no 가 필요합니다."}), 400
+    rk = (b.get("raceKey") or "%s %s경주" % (KRA_MEET_NAME.get(meet, meet), rc_no)).strip()
+    with _KRA_WATCH_LOCK:
+        _KRA_WATCH[rk] = {"meet": meet, "rc_date": rc_date, "rc_no": rc_no, "t": time.time()}
+    _kra_auto_start()
+    return jsonify({"ok": True, "raceKey": rk, "watching": len(_KRA_WATCH)})
+
+
+@app.route("/api/kra/unwatch", methods=["POST"])
+def kra_unwatch():
+    """[KRA 자동수집 해제] params: {raceKey}."""
+    rk = ((request.json or {}).get("raceKey") or "").strip()
+    with _KRA_WATCH_LOCK:
+        _KRA_WATCH.pop(rk, None)
+        n = len(_KRA_WATCH)
+    return jsonify({"ok": True, "watching": n})
+
+
+@app.route("/api/kra/status", methods=["GET"])
+def kra_status():
+    """[KRA 상태] 키 설정 여부·자동수집 대상 목록."""
+    with _KRA_WATCH_LOCK:
+        watch = {k: v for k, v in _KRA_WATCH.items()}
+    return jsonify({"keySet": bool(_kra_api_key()), "autoRunning": _kra_auto_started,
+                    "watching": list(watch.keys()), "count": len(watch)})
 
 
 # ════════════ [중앙경마(JRA) 전적] netkeiba 馬柱(shutuba_past) 서버 fetch·파싱 ════════════
