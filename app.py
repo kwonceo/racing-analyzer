@@ -15276,16 +15276,24 @@ def _multi_collect_one(track, race, ymd):
         return None
 
 
+_JRA_TRACKS = ("삿포로", "하코다테", "후쿠시마", "니가타", "도쿄", "나카야마", "주쿄", "쿄토", "교토", "한신", "고쿠라", "코쿠라")
+
+
 def _multi_sport_of(rec):
-    """[통합·4번] rec의 sport/category → 대시보드 종목 그룹(horse|cycle|boat|korea)."""
+    """[통합·4번] rec의 sport/category → 대시보드 종목 그룹(horse|central|cycle|boat|korea).
+      중앙경마(JRA)는 category=japan_central 또는 JRA 경마장명으로 'central' 분류(지방경마 horse와 구분)."""
     cat = (rec.get("category") or "").lower()
     sp = (rec.get("sport") or "").lower()
     if sp == "cycle" or cat == "cycle":
         return "cycle"
     if sp == "boat" or cat == "boat":
         return "boat"
-    if cat == "korea" or _area_num(rec.get("venue") or "")[0] in ("서울", "부산", "부경", "제주", "과천"):
+    _venue = rec.get("venue") or ""
+    _area = _area_num(_venue)[0] or _area_num(rec.get("raceKey") or "")[0] or ""
+    if cat == "korea" or _area in ("서울", "부산", "부경", "제주", "과천"):
         return "korea"
+    if cat == "japan_central" or _area in _JRA_TRACKS or _venue in _JRA_TRACKS:
+        return "central"                        # [중앙경마·JRA] 지방경마와 별도 그룹
     return "horse"
 
 

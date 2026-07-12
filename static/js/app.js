@@ -1579,7 +1579,7 @@
     _renderMultiToggles(bySport);
     const shown = cards.filter((c) => _multiSportOn(c.sport || 'horse'));
     // 종목 그룹 순서(경정 제외): 일본경마 → 경륜 → 한국경마
-    const order = ['horse', 'cycle', 'korea'];
+    const order = ['horse', 'central', 'cycle', 'korea'];
     let html = '';
     order.forEach((sp) => {
       const g = shown.filter((c) => (c.sport || 'horse') === sp);
@@ -1598,18 +1598,18 @@
     return !!on[sp];
   }
   function _multiSportLabel(sp) {
-    return ({ horse: '🇯🇵 일본경마', cycle: '🚴 경륜', boat: '🚤 경정', korea: '🇰🇷 한국경마' })[sp] || '🏇 경마';
+    return ({ horse: '🇯🇵 일본경마', central: '🏇 중앙경마', cycle: '🚴 경륜', boat: '🚤 경정', korea: '🇰🇷 한국경마' })[sp] || '🏇 경마';
   }
   function _renderMultiToggles(bySport) {
     const bar = $('#multiSportToggles'); if (!bar) return;
-    const sports = ['horse', 'cycle', 'korea'];   // 경정 제외
+    const sports = ['horse', 'central', 'cycle', 'korea'];   // 경정 제외
     bar.innerHTML = sports.map((sp) => {
       const on = _multiSportOn(sp), n = bySport[sp] || 0;
       return `<label style="cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid ${on ? '#38d39f' : '#334155'};color:${on ? '#38d39f' : '#94a3b8'}"><input type="checkbox" data-sp="${sp}" ${on ? 'checked' : ''} style="vertical-align:middle"> ${_multiSportLabel(sp)} (${n})</label>`;
     }).join(' ');
     bar.querySelectorAll('input[data-sp]').forEach((cb) => cb.addEventListener('change', () => {
       let on; try { on = JSON.parse(localStorage.getItem(_multiSportKey) || 'null'); } catch (_) { on = null; }
-      if (!on) on = { horse: true, cycle: true, korea: true, boat: false };
+      if (!on) on = { horse: true, central: true, cycle: true, korea: true, boat: false };
       on[cb.dataset.sp] = cb.checked;
       try { localStorage.setItem(_multiSportKey, JSON.stringify(on)); } catch (_) { /* */ }
       renderMultiDashboard();
