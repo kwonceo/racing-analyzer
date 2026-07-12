@@ -9814,6 +9814,63 @@ def history_get():
         return jsonify({"error": "히스토리가 없습니다."}), 404
 
 
+def _rec_combos_from_analysis_log(rk):
+    """[적중 판정 폴백] 결과 입력 시 재분석 betRecommend가 비었을 때(경주 종료·활성 rec 소실)
+    저장된 analysis_log의 recommendation_history(마지막 확정 추천)·final_recommendation으로 복승/삼복승
+    조합을 복원해 판정한다. 순서 무관(정렬) 조합. 반환 [{kind, combo}] (betRecommend 호환).
+    → 라이브에서 추천했던 4+5/1+4+5가 결과입력 재분석 공백으로 '미적중' 오판되던 문제 해결."""
+    try:
+        path, _, _ = _analysis_log_path(_canonical_log_key(rk))
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return []
+
+    def _parse(s):
+        return sorted(int(x) for x in re.split(r"[+\-]", str(s or "")) if str(x).strip().isdigit())
+    out, seen = [], set()
+
+    def _add(kind, combo, need):
+        if len(combo) == need:
+            key = (kind, tuple(combo))
+            if key not in seen:
+                seen.add(key)
+                out.append({"kind": kind, "combo": combo})
+    rh = doc.get("recommendation_history") or []
+    if rh:
+        last = rh[-1]                              # 마지막(가장 확정) 추천
+        _add("복승", _parse(last.get("quinella_main")), 2)
+        _add("복승", _parse(last.get("quinella_sub")), 2)
+        _add("삼복승", _parse(last.get("trifecta_main")), 3)
+    fr = doc.get("final_recommendation") or {}
+    for _k, _v in fr.items():
+        if isinstance(_v, dict) and _v.get("combo"):
+            _c = _parse(_v.get("combo"))
+            if len(_c) == 2:
+                _add("복승", _c, 2)
+            elif len(_c) == 3:
+                _add("삼복승", _c, 3)
+    return out
+
+
+def _winning_quinella_odds(rk, top2):
+    """[수익 자동 계산·추정] 실배당 미입력 시 승자 복승 조합(top2)의 마지막 시장배당을 analysis_log
+    odds_timeline에서 조회(순서 무관). 확정배당이 아닌 시장 추정치. 없으면 None."""
+    if not top2 or len(top2) != 2:
+        return None
+    try:
+        path, _, _ = _analysis_log_path(_canonical_log_key(rk))
+        doc = json.load(open(path, encoding="utf-8"))
+        for s in reversed(doc.get("odds_timeline") or []):
+            q = s.get("quinella") or {}
+            for k, v in q.items():
+                nums = sorted(int(x) for x in re.split(r"[+\-]", str(k)) if str(x).strip().isdigit())
+                if nums == sorted(top2) and v and float(v) > 0:
+                    return round(float(v), 1)
+    except Exception:
+        pass
+    return None
+
+
 def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout=None, inputs=None):
     """경주 결과 → 히스토리 기록 + 자동학습 레코드/통계 갱신(공용).
     keiba/asyukk 결과 자동수집(results_auto)과 수동 입력(record-result)이 함께 사용.
@@ -9834,9 +9891,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         rec = _rec_from_history(rk) or rec
     an = _triple_analyze(rk, rec)
 
+    # [적중 판정 버그 수정] 결과 입력 시 재분석 betRecommend가 비면(경주 종료·활성 rec 소실) 저장 추천이력으로 폴백.
+    #   was_hit·복승/삼복승 판정 모두 이 폴백 조합을 사용(라이브 추천이 재분석 공백으로 미적중 오판되던 문제 해결).
+    _bet_for_judge = an.get("betRecommend") or _rec_combos_from_analysis_log(rk)
+
     def in3(combo):
         return all(x in top3 for x in combo)
-    was_hit = any(in3(r["combo"]) for r in an.get("betRecommend", []))
+    was_hit = any(in3(r["combo"]) for r in _bet_for_judge)
 
     # [신규 경고시스템 2번] 결과 → 경고 내역 자동 매칭(경고말 입상·경고 무시 판정)
     try:
@@ -9876,9 +9937,10 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         print("[고배당동반학습] 실패:", e)
 
     # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
-    rec_bets = an.get("betRecommend", [])
+    rec_bets = _bet_for_judge   # [적중 판정 버그 수정] 재분석 공백 시 저장 추천이력 폴백(위에서 계산)
     top2 = sorted(top3[:2]) if len(top3) >= 2 else []
     top3s = sorted(top3[:3]) if len(top3) >= 3 else []
+    # ⚠ 순서 무관 집합 비교: sorted(combo) == sorted(top2/top3) → 4+5==5+4, {1,4,5}=={5,4,1} 동일 처리
     quinella_hit = bool(top2 and any(r.get("kind") == "복승" and sorted(r["combo"]) == top2 for r in rec_bets))
     trifecta_hit = bool(top3s and any(r.get("kind") == "삼복승" and sorted(r["combo"]) == top3s for r in rec_bets))
 
@@ -9950,6 +10012,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         return _safe_num(x.get("odds")) if isinstance(x, dict) else _safe_num(x)
     q_odds = _odds_val(fo.get("quinella"))
     t_odds = _odds_val(fo.get("trifecta") or fo.get("trio"))
+    # [수익 자동 계산·추정] 복승 적중인데 실배당 미입력이면 승자 조합의 시장배당으로 추정(확정배당 입력 시 정정).
+    if quinella_hit and not q_odds:
+        _eq = _winning_quinella_odds(rk, sorted(top3[:2]) if len(top3) >= 2 else [])
+        if _eq:
+            q_odds = _eq
+            print(f"[수익 추정] {rk}: 복승 실배당 미입력 → 시장배당 {_eq}배로 추정(확정배당 입력 시 정정)")
     payouts = {"quinella": (q_odds if quinella_hit and q_odds else 0),
                "trifecta": (t_odds if trifecta_hit and t_odds else 0)}
     try:
