@@ -152,23 +152,26 @@
     <div class="muted" id="lastDetail"></div>
   </div>
 
-  <button id="armResultTimer" style="background:#b45309;color:#fff;">⏱ 결과 자동수집 예약 (발주시각 기준)</button>
-  <div class="card" id="resultTimerCard" style="margin-top:8px; display:none;">
-    <div class="status-line" id="resultTimerRow"></div>
-    <div class="muted" id="resultTimerDetail" style="margin-top:2px;"></div>
+  <!-- [결과 입력] 경주마다 간단히 1~3착 입력 → 서버 전송 + 분석기 결과기록 자동 반영 -->
+  <div class="card" id="resultInputCard" style="margin-top:10px;border:1px solid #334155;">
+    <div class="status-line" style="margin-bottom:8px;font-weight:700">📝 결과 입력</div>
+    <div class="row" style="gap:6px;justify-content:flex-start;align-items:center">
+      <label style="min-width:34px">1착</label>
+      <input id="res1" type="text" inputmode="numeric" placeholder="번호" style="width:50px;text-align:center" />
+      <label style="min-width:34px">2착</label>
+      <input id="res2" type="text" inputmode="numeric" placeholder="번호" style="width:50px;text-align:center" />
+      <label style="min-width:34px">3착</label>
+      <input id="res3" type="text" inputmode="numeric" placeholder="번호" style="width:50px;text-align:center" />
+    </div>
+    <button id="saveResultInput" class="primary" style="margin-top:8px;">저장</button>
+    <div class="muted" id="resultInputMsg" style="margin-top:6px;white-space:pre-line;line-height:1.5"></div>
   </div>
 
-  <button id="sendResults" style="background:#334155;color:#e2e8f0;">🏁 결과(1~3착) 전송</button>
-  <div class="card" style="margin-top:8px;">
-    <div class="status-line" id="lastResultRow">결과 전송: — <span class="muted">(성적 페이지에서 자동)</span></div>
-    <div class="muted" id="lastResultDetail"></div>
-  </div>
-
-  <button id="captureResult" style="background:#0891b2;color:#fff;">📸 경주결과 캡쳐→판독</button>
-  <div class="card" id="captureCard" style="margin-top:8px; display:none;">
-    <div class="status-line" id="captureRow">경주결과 화면을 띄우고 눌러주세요</div>
-    <div class="muted" id="captureDetail" style="margin-top:2px;"></div>
-    <button id="captureSave" class="primary" style="margin-top:8px; display:none;">✅ 판독 착순 저장</button>
+  <!-- [로그 보기] 중요 신호 있을 때 🔴 표시 + 클릭 시 신호 로그 펼침 -->
+  <button id="viewLogBtn" style="background:#334155;color:#e2e8f0;">📋 로그 보기 <span id="logAlertDot" style="display:none;color:#f87171">🔴</span></button>
+  <div class="card" id="logCard" style="margin-top:8px; display:none;">
+    <div class="status-line" id="logHead" style="font-weight:700"></div>
+    <div class="muted" id="logBody" style="margin-top:6px;white-space:pre-line;line-height:1.6"></div>
   </div>
 
   <button id="collectTriple" style="background:#1d4ed8;color:#fff;">⚡ 전체 자동 수집 (복승·쌍승)</button>
@@ -181,6 +184,12 @@
   <div class="card" id="analyzeCard" style="margin-top:8px; display:none;">
     <div class="status-line" id="analyzeSummary"></div>
     <div class="muted" id="analyzeDetail" style="margin-top:4px; white-space:pre-line; line-height:1.5;"></div>
+  </div>
+
+  <!-- [복기 저장] 경주 종료 후 중요 신호 + 결과를 묶어 저장 → 패턴 학습 반영 → 분석기 복기 탭에서 확인 -->
+  <button id="reviewSaveBtn" style="background:#7c3aed;color:#fff;margin-top:6px;">🧠 복기 저장 (신호+결과)</button>
+  <div class="card" id="reviewCard" style="margin-top:8px; display:none;">
+    <div class="status-line" id="reviewMsg" style="white-space:pre-line;line-height:1.5"></div>
   </div>
 
   <script src="popup.js"></script>

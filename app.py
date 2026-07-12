@@ -12574,6 +12574,125 @@ def history_record_result():
                     "dataErrors": record.get("race_result_errors") or []})
 
 
+# ─────────────────────────────────────────────────────────────────────
+# [복기 저장] 확장 팝업 🧠 복기 저장 — 중요 신호(분석 스냅샷) + 결과를 묶어 저장.
+#   결과가 있으면 record-result 와 동일한 학습(_apply_result_learning)까지 수행.
+#   저장본은 결과기록 탭 재현 리포트와 별개로 data/review_log/ 에 누적(복기용).
+# ─────────────────────────────────────────────────────────────────────
+REVIEW_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "review_log")
+
+
+def _review_extract_signals(sig):
+    """확장 analyzeStatus.data 에서 중요 신호만 압축 요약(급락·역배열·스마트머니·경고·확신도)."""
+    sig = sig or {}
+    out = {"drops": [], "reversals": [], "smartMoney": [], "keyHorses": [],
+           "alerts": [], "confidence": [], "recommend": [],
+           "minutesBefore": sig.get("minutesBefore"), "afterClose": bool(sig.get("afterClose"))}
+    for d in (sig.get("drops") or [])[:8]:
+        try:
+            out["drops"].append({"combo": d.get("combo"), "prev": d.get("prev"),
+                                 "cur": d.get("cur"), "pct": d.get("pct")})
+        except Exception:
+            pass
+    for r in (sig.get("reversals") or []):
+        if r.get("flipped"):
+            out["reversals"].append({"favored": r.get("favored"), "ratio": r.get("ratio")})
+    for h in (sig.get("darkHorses") or []):
+        if h.get("smartMoney"):
+            out["smartMoney"].append({"no": h.get("no"), "stars": h.get("stars"),
+                                      "oddsRepr": h.get("oddsRepr"), "tierLabel": h.get("tierLabel")})
+    out["keyHorses"] = sig.get("keyHorses") or []
+    al = sig.get("alertSignal") or {}
+    for x in (al.get("alerts") or [])[:6]:
+        out["alerts"].append({"combo": x.get("combo"), "before": x.get("before"), "after": x.get("after")})
+    conf = ((sig.get("signalQuality") or {}).get("signalConfidence") or {})
+    horses = conf.get("horses") or {}
+    scored = []
+    for no, v in horses.items():
+        c = (v or {}).get("confidence")
+        if c is not None:
+            scored.append({"no": no, "confidence": c})
+    scored.sort(key=lambda x: -x["confidence"])
+    out["confidence"] = scored[:6]
+    for r in (sig.get("betRecommend") or [])[:6]:
+        out["recommend"].append({"label": r.get("label"), "combo": r.get("combo")})
+    out["count"] = len(out["drops"]) + len(out["reversals"]) + len(out["smartMoney"]) + len(out["alerts"])
+    return out
+
+
+@app.route("/api/review/save", methods=["POST"])
+def review_save():
+    """[복기 저장] body: {raceKey, signals(analyzeStatus.data), result:{1st,2nd,3rd}?, finalOdds?, stake?, payout?}"""
+    body = request.json or {}
+    rk_in = (body.get("raceKey") or "").strip()
+    if not rk_in:
+        return jsonify({"error": "raceKey가 필요합니다."}), 400
+    rk = _resolve_race_key(rk_in) or rk_in
+    sig = _review_extract_signals(body.get("signals"))
+    result = body.get("result") or {}
+    top3 = [result.get("1st"), result.get("2nd"), result.get("3rd")]
+    top3 = [int(x) for x in top3 if x not in (None, "")]
+    has_result = len(top3) >= 1
+    hit = None
+    if has_result:
+        # 결과가 있으면 기존 학습 파이프라인 재사용(record-result 와 동일 — 재호출 시 깨끗이 덮어씀)
+        try:
+            record, _stats = _apply_result_learning(rk, result, top3, body.get("finalOdds"),
+                                                     stake=body.get("stake"), payout=body.get("payout"))
+            hit = record.get("hit")
+        except Exception as e:
+            print("[복기저장] 학습 실패:", e)
+    os.makedirs(REVIEW_LOG_DIR, exist_ok=True)
+    rid, date = _race_result_id(rk)
+    rec = {"raceKey": rk, "race_id": rid, "date": date,
+           "savedAt": int(time.time() * 1000), "signals": sig,
+           "result": {"top3": top3} if has_result else None, "hit": hit}
+    try:
+        with open(os.path.join(REVIEW_LOG_DIR, rid + ".json"), "w", encoding="utf-8") as f:
+            json.dump(rec, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        return jsonify({"error": f"저장 실패: {e}"}), 500
+    return jsonify({"ok": True, "raceKey": rk, "race_id": rid,
+                    "signalCount": sig.get("count", 0), "hasResult": has_result, "hit": hit})
+
+
+@app.route("/api/review/list", methods=["GET"])
+def review_list():
+    """[복기 저장] 저장된 복기 목록(최신순)."""
+    out = []
+    if os.path.isdir(REVIEW_LOG_DIR):
+        for fn in sorted(os.listdir(REVIEW_LOG_DIR), reverse=True):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(REVIEW_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            sig = d.get("signals") or {}
+            out.append({"race_id": d.get("race_id"), "raceKey": d.get("raceKey"),
+                        "date": d.get("date"), "savedAt": d.get("savedAt"),
+                        "signalCount": sig.get("count", 0),
+                        "keyHorses": sig.get("keyHorses") or [],
+                        "result": d.get("result"), "hit": d.get("hit")})
+    return jsonify({"reviews": out, "count": len(out)})
+
+
+@app.route("/api/review/get", methods=["GET"])
+def review_get():
+    """[복기 저장] 복기 1건 전체 조회. ?race_id= 또는 ?raceKey="""
+    rid = request.args.get("race_id")
+    rk = request.args.get("raceKey")
+    if not rid and rk:
+        rid, _ = _race_result_id(_resolve_race_key(rk) or rk)
+    if not rid:
+        return jsonify({"error": "race_id 또는 raceKey가 필요합니다."}), 400
+    path = os.path.join(REVIEW_LOG_DIR, os.path.basename(rid) + ".json")
+    try:
+        return jsonify(json.load(open(path, encoding="utf-8")))
+    except Exception:
+        return jsonify({"error": "복기 기록이 없습니다.", "race_id": rid}), 404
+
+
 @app.route("/api/race-results/list", methods=["GET"])
 def race_results_list():
     """[1번] 완전 저장된 경주 결과 목록(최신순) → 요약 리스트."""

@@ -27,6 +27,7 @@ const ANALYZE_URL = `${SERVER}/api/odds/triple/analyze`;
 const JAPAN_URL = `${SERVER}/api/extract/japan`;
 const RESULT_OCR_URL = `${SERVER}/api/result/ocr`;             // [캡쳐+OCR] 결과 화면 판독
 const RECORD_RESULT_URL = `${SERVER}/api/history/record-result`; // [캡쳐+OCR] 판독 착순 저장
+const REVIEW_SAVE_URL = `${SERVER}/api/review/save`;             // [복기 저장] 중요신호+결과 묶음 저장
 
 // [보완] fetch 실패 원인 친절 변환: "Failed to fetch"(연결 거부=서버 꺼짐)를
 //   명확한 안내로 바꿔 팝업/오버레이 상태에 그대로 노출 → 원인 즉시 파악.
@@ -324,6 +325,22 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   // [캡쳐+OCR] 판독한 착순을 결과로 저장(기존 record-result 재사용, 적중판정·학습 동일).
   if (msg?.type === 'POST_RECORD_RESULT') {
     fetch(RECORD_RESULT_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg.payload),
+    })
+      .then(async (res) => {
+        let d = null; try { d = await res.json(); } catch (_) { /* noop */ }
+        if (!res.ok) throw new Error((d && d.error) || `HTTP ${res.status}`);
+        return d;
+      })
+      .then((data) => sendResponse({ ok: true, data }))
+      .catch((err) => sendResponse({ ok: false, error: svrErr(err) }));
+    return true; // async
+  }
+
+  // [복기 저장] 중요 신호(analyzeStatus.data) + 결과(1~3착)를 묶어 서버에 저장 → 패턴학습·복기.
+  if (msg?.type === 'SAVE_REVIEW') {
+    fetch(REVIEW_SAVE_URL, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(msg.payload),
     })

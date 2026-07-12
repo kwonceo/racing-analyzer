@@ -84,11 +84,9 @@ function loadState() {
       syncJapanTypeUI();
       els.raceKey.value = v.raceKey || '';
       renderStatus(v.status);
-      renderResultStatus(v.resultStatus);
       renderTripleStatus(v.tripleStatus);
       if (v.tripleProgress && !v.tripleProgress.done) renderTripleProgress(v.tripleProgress);
       renderAutoClosed(v.autoCollectStatus);   // [수정2] 경기 마감 시 중단 안내(팝업 재오픈에도 유지)
-      renderResultTimer(v.resultAutoStatus);
       // [3번] 창을 닫았다 다시 열어도 마지막 즉시분석 결과를 복원(수동 결과면 고정 유지)
       if (v.analyzeStatus && v.analyzeStatus.data) applyAnalyzeStatus(v.analyzeStatus, !!v.analyzeStatus.manual);
     }
@@ -320,127 +318,154 @@ previewSend.addEventListener('click', async () => {
   previewSend.disabled = false; previewSend.textContent = '✅ 확인 후 전송';
 });
 
-// ── [1·5번] 결과 자동수집 타이머 예약 + 상태 표시 ────────────────────
-const btnArmTimer = document.getElementById('armResultTimer');
-const timerCard = document.getElementById('resultTimerCard');
-const timerRow = document.getElementById('resultTimerRow');
-const timerDetail = document.getElementById('resultTimerDetail');
-
-function renderResultTimer(st) {
-  if (!st || !st.state) { timerCard.style.display = 'none'; return; }
-  timerCard.style.display = 'block';
-  const at = st.nextAt ? new Date(st.nextAt).toLocaleTimeString('ko-KR', { hour12: false }) : '';
-  if (st.state === 'scheduled') { timerRow.innerHTML = `<span class="ok">🔄 결과 수집 예약됨</span> ${esc(st.raceKey || '')}`; timerDetail.textContent = at ? `첫 체크 ${at} (발주 후 7분)` : '발주 후 7분'; }
-  else if (st.state === 'retry') { timerRow.innerHTML = `<span>🔄 결과 수집 재시도 ${st.attempt || ''}/3</span>`; timerDetail.textContent = at ? `다음 체크 ${at}` : ''; }
-  else if (st.state === 'done') {
-    const h = st.hit || {};
-    const win = h.quinella || h.trifecta || h.was_hit;
-    timerRow.innerHTML = win ? '<span class="ok">✅ 결과 수집 완료 · 적중!</span>' : '<span class="err">✅ 결과 수집 완료 · 미적중</span>';
-    const parts = [];
-    if (st.top3) parts.push(`실제 ${(st.top3 || []).join('-')}`);
-    if (h.quinella) parts.push(`복승 적중${h.payouts && h.payouts.quinella ? ' ' + h.payouts.quinella + '배' : ''}`);
-    if (h.trifecta) parts.push(`삼복승 적중${h.payouts && h.payouts.trifecta ? ' ' + h.payouts.trifecta + '배' : ''}`);
-    if (!h.quinella && !h.trifecta) parts.push('추천 조합 미적중');
-    timerDetail.textContent = parts.join(' · ');
-  } else if (st.state === 'manual') { timerRow.innerHTML = '<span class="err">❌ 결과 수집 실패 - 수동 확인 필요</span>'; timerDetail.textContent = '(발주 후 7/9/11분 재시도 실패)'; }
-  else if (st.state === 'cancelled') { timerRow.textContent = '예약 취소됨'; timerDetail.textContent = ''; }
-}
-
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
-btnArmTimer.addEventListener('click', () => {
-  btnArmTimer.disabled = true; btnArmTimer.textContent = '예약 중…';
-  chrome.storage.local.get({ raceKey: '', timerDeadline: 0 }, ({ raceKey, timerDeadline }) => {
-    if (!timerDeadline) {
-      timerCard.style.display = 'block';
-      timerRow.innerHTML = '<span class="err">먼저 상단 타이머에 발주시각을 설정하세요.</span>';
-      timerDetail.textContent = '';
-      btnArmTimer.disabled = false; btnArmTimer.textContent = '⏱ 결과 자동수집 예약 (발주시각 기준)';
+// ── [결과 입력] 1~3착 → 서버 record-result → 분석기 결과기록 자동 반영 ──
+//   기존 record-result 재사용(적중판정·수익·학습·재현리포트 그대로). raceKey는 상단 자동감지/직접입력.
+const btnSaveResult = document.getElementById('saveResultInput');
+const resMsg = document.getElementById('resultInputMsg');
+function _resNum(id) { const v = (document.getElementById(id).value || '').trim(); return v === '' ? null : parseInt(v, 10); }
+
+if (btnSaveResult) btnSaveResult.addEventListener('click', () => {
+  const raceKey = (els.raceKey.value || '').trim();
+  const r1 = _resNum('res1'), r2 = _resNum('res2'), r3 = _resNum('res3');
+  if (!raceKey) { resMsg.className = 'muted err'; resMsg.textContent = '먼저 상단 raceKey를 입력/감지하세요.'; return; }
+  if (r1 == null) { resMsg.className = 'muted err'; resMsg.textContent = '최소 1착 번호를 입력하세요.'; return; }
+  const result = { '1st': r1 };
+  if (r2 != null) result['2nd'] = r2;
+  if (r3 != null) result['3rd'] = r3;
+  btnSaveResult.disabled = true; btnSaveResult.textContent = '저장 중…';
+  resMsg.className = 'muted'; resMsg.textContent = '서버 전송 중…';
+  chrome.runtime.sendMessage({ type: 'POST_RECORD_RESULT', payload: { raceKey, result } }, (res) => {
+    btnSaveResult.disabled = false; btnSaveResult.textContent = '저장';
+    if (chrome.runtime.lastError || !res || !res.ok) {
+      resMsg.className = 'muted err';
+      resMsg.textContent = '저장 실패: ' + ((res && res.error) || (chrome.runtime.lastError && chrome.runtime.lastError.message) || '서버 응답 없음');
       return;
     }
-    chrome.runtime.sendMessage({ type: 'SCHEDULE_RESULT_TIMER', raceKey, deadline: timerDeadline }, (res) => {
-      if (!res || !res.ok) { timerCard.style.display = 'block'; timerRow.innerHTML = `<span class="err">${(res && res.error) || '예약 실패'}</span>`; }
-      btnArmTimer.disabled = false; btnArmTimer.textContent = '⏱ 결과 자동수집 예약 (발주시각 기준)';
-    });
+    const rec = (res.data && res.data.record) || {};
+    const hit = rec.hit || {};
+    const parts = [`✅ 저장됨 · ${(res.data && res.data.raceKey) || raceKey}`];
+    parts.push(`착순 ${[r1, r2, r3].filter((x) => x != null).join('-')}`);
+    if (hit.quinella) parts.push('복승 적중' + (hit.payouts && hit.payouts.quinella ? ` ${hit.payouts.quinella}배` : ''));
+    if (hit.trifecta) parts.push('삼복승 적중' + (hit.payouts && hit.payouts.trifecta ? ` ${hit.payouts.trifecta}배` : ''));
+    if (!hit.quinella && !hit.trifecta) parts.push('추천 미적중');
+    parts.push('→ 분석기 결과기록·재현 리포트에 반영됨');
+    resMsg.className = 'muted ok';
+    resMsg.textContent = parts.join(' · ');
   });
 });
 
-// ── [2번] 결과(1~3착) 전송 ──────────────────────────────────────────
-const btnResults = document.getElementById('sendResults');
-const resultRow = document.getElementById('lastResultRow');
-const resultDetail = document.getElementById('lastResultDetail');
+// ── [로그 보기] 중요 신호(급락·역배열·스마트머니·경고·확신도) 로그 표시 ──
+//   즉시분석/백그라운드 분석이 저장한 analyzeStatus.data 를 그대로 읽어 요약(추가 서버호출 없음).
+const btnViewLog = document.getElementById('viewLogBtn');
+const logCard = document.getElementById('logCard');
+const logHead = document.getElementById('logHead');
+const logBody = document.getElementById('logBody');
+const logAlertDot = document.getElementById('logAlertDot');
+let _lastAnalyze = null;
 
-function renderResultStatus(rs) {
-  if (!rs || !rs.lastResult) return;
-  const when = fmtTime(rs.lastResult);
-  if (rs.lastResultOk) {
-    resultRow.innerHTML = `결과 전송: <span class="ok">성공 ${when}</span>`;
-    resultDetail.textContent = `${rs.lastResultRaceKey || ''} · 1~3착 ${(rs.lastTop3 || []).join('-')}`;
-  } else {
-    resultRow.innerHTML = `결과 전송: <span class="err">실패 ${when}</span>`;
-    resultDetail.textContent = rs.lastResultError || '';
-  }
+function hasImportantSignal(a) {
+  if (!a) return false;
+  const flips = (a.reversals || []).filter((r) => r.flipped).length;
+  const smart = (a.darkHorses || []).filter((h) => h.smartMoney).length;
+  const alertFired = !!(a.alertSignal && (a.alertSignal.fired || (a.alertSignal.alerts || []).length));
+  const strong = (((a.signalQuality || {}).signalConfidence || {}).strong || []).length;
+  return (a.drops || []).length > 0 || flips > 0 || smart > 0 || alertFired || strong > 0;
 }
 
-btnResults.addEventListener('click', async () => {
-  btnResults.disabled = true; btnResults.textContent = '전송 중…';
-  const tab = await activeKeibaTab();
-  if (!tab) {
-    resultRow.innerHTML = '<span class="err">keiba.go.jp 결과(성적) 페이지에서 눌러주세요.</span>';
-  } else {
-    chrome.tabs.sendMessage(tab.id, { type: 'MANUAL_SEND_RESULTS' }, (res) => {
-      if (chrome.runtime.lastError || !res) {
-        resultRow.innerHTML = '<span class="err">페이지 응답 없음. 새로고침 후 재시도.</span>';
-      } else {
-        renderResultStatus(res.status || null);
-        if (!res.ok && res.error) resultRow.innerHTML = `<span class="err">${res.error}</span>`;
-      }
-    });
+// 중요 신호 유무 → 버튼 옆 🔴 표시
+function updateLogAlert(a) {
+  if (a) _lastAnalyze = a;
+  if (logAlertDot) logAlertDot.style.display = hasImportantSignal(_lastAnalyze) ? '' : 'none';
+}
+
+function renderLog(a) {
+  logCard.style.display = 'block';
+  if (!a) {
+    logHead.innerHTML = '<span class="muted">분석 데이터 없음</span>';
+    logBody.textContent = '먼저 🚨 즉시 분석을 실행하면 신호 로그가 표시됩니다.';
+    return;
   }
-  btnResults.disabled = false; btnResults.textContent = '🏁 결과(1~3착) 전송';
+  const phase = a.afterClose ? '마감 후' : (a.minutesBefore != null ? `마감 ${a.minutesBefore}분전` : '');
+  const when = a._at ? fmtTime(a._at) : '';
+  logHead.innerHTML = hasImportantSignal(a)
+    ? `<span class="err">🔴 중요 신호 감지</span> <span class="muted">${phase}${when ? ' · ' + when : ''}</span>`
+    : `<span class="ok">신호 없음(안정)</span> <span class="muted">${phase}${when ? ' · ' + when : ''}</span>`;
+  const lines = [];
+  // 배당 급락
+  (a.drops || []).slice(0, 5).forEach((d) => {
+    const c = (d.combo || []).join('-');
+    lines.push(`📉 급락  ${c}  ${d.prev}→${d.cur} (${d.pct > 0 ? '▲' : '▼'}${Math.abs(d.pct)}%)`);
+  });
+  // 쌍승 역배열
+  (a.reversals || []).filter((r) => r.flipped).slice(0, 3).forEach((r) => {
+    lines.push(`🔄 역배열  ${(r.favored || []).join('→')}${r.ratio != null ? ` (비율 ${r.ratio})` : ''}`);
+  });
+  // 스마트머니 복병
+  (a.darkHorses || []).filter((h) => h.smartMoney).slice(0, 3).forEach((h) => {
+    const st = h.stars ? '★'.repeat(h.stars) : '';
+    lines.push(`💰 스마트머니  ${h.no}번 ${st}${h.oddsRepr ? ' · ' + h.oddsRepr : ''}`);
+  });
+  // 경고 신호
+  const al = a.alertSignal;
+  if (al && (al.fired || (al.alerts || []).length)) {
+    (al.alerts || []).slice(0, 3).forEach((x) => {
+      lines.push(`⚠️ 경고  ${(x.combo || []).join('-')} ${x.before}→${x.after}`);
+    });
+    if (!(al.alerts || []).length && al.message) lines.push(`⚠️ 경고  ${al.message}`);
+  }
+  // 확신도 점수(신호 종합 신뢰도)
+  const sc = ((a.signalQuality || {}).signalConfidence) || {};
+  const horses = sc.horses || {};
+  const scored = Object.keys(horses).map((no) => ({ no, c: horses[no] && horses[no].confidence }))
+    .filter((x) => x.c != null).sort((a, b) => b.c - a.c).slice(0, 4);
+  if (scored.length) {
+    lines.push('🎯 확신도  ' + scored.map((x) => `${x.no}번 ${Math.round(x.c)}점`).join(', '));
+  }
+  logBody.textContent = lines.length ? lines.join('\n') : '감지된 신호가 없습니다(배당 안정).';
+}
+
+if (btnViewLog) btnViewLog.addEventListener('click', () => {
+  if (logCard.style.display === 'block') { logCard.style.display = 'none'; return; }
+  // 저장된 최신 분석 로드
+  chrome.storage.local.get({ analyzeStatus: null }, (v) => {
+    const a = v.analyzeStatus && v.analyzeStatus.data ? Object.assign({}, v.analyzeStatus.data, { _at: v.analyzeStatus.at }) : _lastAnalyze;
+    renderLog(a);
+  });
 });
 
-// ── [캡쳐+OCR] 경주결과 화면 캡쳐 → Vision 판독 → 착순 저장 ──────────
-const btnCapture = document.getElementById('captureResult');
-const captureCard = document.getElementById('captureCard');
-const captureRow = document.getElementById('captureRow');
-const captureDetail = document.getElementById('captureDetail');
-const captureSave = document.getElementById('captureSave');
+// ── [복기 저장] 경주 종료 후 중요 신호 + 결과 묶어 저장 → 패턴학습·복기 탭 반영 ──
+const btnReviewSave = document.getElementById('reviewSaveBtn');
+const reviewCard = document.getElementById('reviewCard');
+const reviewMsg = document.getElementById('reviewMsg');
 
-if (btnCapture) btnCapture.addEventListener('click', () => {
-  captureCard.style.display = '';
-  if (captureSave) captureSave.style.display = 'none';
-  captureRow.textContent = '📸 캡쳐 중…';
-  captureDetail.textContent = '';
-  chrome.runtime.sendMessage({ type: 'CAPTURE_TAB' }, (cap) => {
-    if (chrome.runtime.lastError || !cap || !cap.ok) {
-      captureRow.innerHTML = `<span class="err">캡쳐 실패: ${(cap && cap.error) || (chrome.runtime.lastError && chrome.runtime.lastError.message) || ''}</span>`;
-      return;
-    }
-    captureRow.textContent = '🔍 결과표 판독·등록 중… (Vision)';
-    // 서버가 결과표(여러 경주)를 판독→분석경주 자동매칭→적중판정·학습까지 처리하고 요약 반환.
-    chrome.runtime.sendMessage({ type: 'POST_RESULT_OCR', dataUrl: cap.dataUrl }, (r) => {
-      if (chrome.runtime.lastError || !r || !r.ok) {
-        captureRow.innerHTML = `<span class="err">판독 실패: ${(r && r.error) || '응답 없음'}</span>`;
+if (btnReviewSave) btnReviewSave.addEventListener('click', () => {
+  const raceKey = (els.raceKey.value || '').trim();
+  if (!raceKey) { reviewCard.style.display = 'block'; reviewMsg.className = 'status-line err'; reviewMsg.textContent = '먼저 상단 raceKey를 입력/감지하세요.'; return; }
+  const r1 = _resNum('res1'), r2 = _resNum('res2'), r3 = _resNum('res3');
+  const result = {};
+  if (r1 != null) result['1st'] = r1;
+  if (r2 != null) result['2nd'] = r2;
+  if (r3 != null) result['3rd'] = r3;
+  btnReviewSave.disabled = true; btnReviewSave.textContent = '저장 중…';
+  reviewCard.style.display = 'block'; reviewMsg.className = 'status-line'; reviewMsg.textContent = '신호+결과 저장 중…';
+  chrome.storage.local.get({ analyzeStatus: null }, (v) => {
+    const signals = (v.analyzeStatus && v.analyzeStatus.data) || _lastAnalyze || null;
+    chrome.runtime.sendMessage({ type: 'SAVE_REVIEW', payload: { raceKey, result, signals } }, (res) => {
+      btnReviewSave.disabled = false; btnReviewSave.textContent = '🧠 복기 저장 (신호+결과)';
+      if (chrome.runtime.lastError || !res || !res.ok) {
+        reviewMsg.className = 'status-line err';
+        reviewMsg.textContent = '복기 저장 실패: ' + ((res && res.error) || (chrome.runtime.lastError && chrome.runtime.lastError.message) || '서버 응답 없음');
         return;
       }
-      const d = r.data || {};
-      const matched = d.matched || [], unmatched = d.unmatched || [];
-      const parsed = d.parsed || [];
-      if (!d.registered && !parsed.length) {
-        captureRow.innerHTML = '<span class="err">결과를 못 읽었습니다. 경주결과(성적) 화면이 선명하게 보이는지 확인 후 재시도.</span>';
-        return;
-      }
-      if (!d.registered) {
-        captureRow.innerHTML = `<span class="err">판독 ${parsed.length}경주 · 등록 0건</span>`;
-        captureDetail.textContent = '분석·수집된 경주와 매칭이 안 됐습니다(경주지역·라운드 확인).';
-        return;
-      }
-      captureRow.innerHTML = `<span class="ok">✅ ${d.registered}경주 등록 · 적중 ${d.hits} · 손익 ${(d.profit >= 0 ? '+' : '') + Number(d.profit || 0).toLocaleString()}원</span>`;
-      const lines = matched.map((m) => `${m.raceKey} → ${(m.top3 || []).join('-')} ${m.won ? '✅' : '❌'}`);
-      if (unmatched.length) lines.push(`(매칭실패 ${unmatched.length}: ${unmatched.slice(0, 3).map((u) => (u.area || '') + (u.round || '')).join(', ')})`);
-      captureDetail.textContent = lines.join('\n');
-      captureDetail.style.whiteSpace = 'pre-line';
+      const d = res.data || {};
+      const parts = [`✅ 복기 저장됨 · ${d.raceKey || raceKey}`];
+      if (d.signalCount != null) parts.push(`중요신호 ${d.signalCount}건`);
+      if (d.hasResult) parts.push('결과 포함·학습 반영');
+      parts.push('→ 분석기 결과기록 탭에서 확인');
+      reviewMsg.className = 'status-line ok';
+      reviewMsg.textContent = parts.join(' · ');
     });
   });
 });
@@ -543,6 +568,9 @@ function applyAnalyzeStatus(av, fromManual) {
   if (fromManual) _pinnedAnalyzeRk = rk;                            // 수동 분석 → 이 경주 고정
   else if (rk && rk !== _pinnedAnalyzeRk) _pinnedAnalyzeRk = null;  // 경주 전환 → 고정 해제
   renderAnalyze(d, av.at);
+  // [로그 보기] 최신 분석 → 중요신호 🔴 표시 갱신 + 열린 로그 카드 실시간 재렌더
+  updateLogAlert(Object.assign({}, d, { _at: av.at }));
+  if (logCard && logCard.style.display === 'block') renderLog(Object.assign({}, d, { _at: av.at }));
 }
 
 btnInstant.addEventListener('click', async () => {
@@ -586,12 +614,10 @@ btnInstant.addEventListener('click', async () => {
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
   if (changes.status) renderStatus(changes.status.newValue);
-  if (changes.resultStatus) renderResultStatus(changes.resultStatus.newValue);
   if (changes.tripleStatus) renderTripleStatus(changes.tripleStatus.newValue);
   if (changes.tripleProgress) renderTripleProgress(changes.tripleProgress.newValue);
   if (changes.autoCollectStatus) renderAutoClosed(changes.autoCollectStatus.newValue);
   if (changes.autoSend) els.autoSend.checked = !!changes.autoSend.newValue;   // [수정2] 마감 시 자동 OFF 반영
-  if (changes.resultAutoStatus) renderResultTimer(changes.resultAutoStatus.newValue);
   if (changes.analyzeStatus && changes.analyzeStatus.newValue) {
     const av = changes.analyzeStatus.newValue; applyAnalyzeStatus(av, !!av.manual);
   }

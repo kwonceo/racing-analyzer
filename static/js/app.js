@@ -6959,6 +6959,33 @@
       const sel = $('#reportSelect'); if (sel && sel.value) openRaceReport(sel.value);
     });
     const bR = $('#reportRefresh'); if (bR) bR.addEventListener('click', loadReportList);
+    const bV = $('#reviewLogRefresh'); if (bV) bV.addEventListener('click', loadReviewLog);
+    loadReviewLog();   // [복기 저장] 리포트 서브탭 진입 시 자동 로드
+  }
+
+  // [복기 저장] 확장 팝업 🧠 복기 저장 목록 — /api/review/list
+  async function loadReviewLog() {
+    const view = $('#reviewLogView'); if (!view) return;
+    let d = null;
+    try { d = await (await fetch('/api/review/list')).json(); } catch (_) { /* */ }
+    const arr = (d && d.reviews) || [];
+    if (!arr.length) { view.innerHTML = '<p class="hint">저장된 복기가 없습니다. 확장 팝업에서 🧠 복기 저장을 누르면 여기에 쌓입니다.</p>'; return; }
+    view.innerHTML = arr.slice(0, 30).map((r) => {
+      const when = r.savedAt ? new Date(r.savedAt).toLocaleString('ko-KR', { hour12: false }) : '';
+      const top3 = (r.result && r.result.top3 || []).join('-');
+      const hit = r.hit || {};
+      const badge = (hit.quinella || hit.trifecta)
+        ? '<span style="color:#22c55e;font-weight:700">✅ 적중</span>'
+        : (top3 ? '<span style="color:#ef4444">미적중</span>' : '<span class="hint">결과 미입력</span>');
+      const keys = (r.keyHorses || []).length ? ' · 유력마 ' + r.keyHorses.join('·') : '';
+      return `<div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+          <b>${esc(r.raceKey || r.race_id || '')}</b>
+          <span class="hint">${esc(when)}</span>
+        </div>
+        <div style="margin-top:4px;font-size:13px">🔔 중요신호 ${r.signalCount || 0}건${esc(keys)}${top3 ? ' · 결과 ' + esc(top3) : ''} · ${badge}</div>
+      </div>`;
+    }).join('');
   }
 
   // [2번] 고배당 명예의 전당 — /api/highlights 카드형 표시
