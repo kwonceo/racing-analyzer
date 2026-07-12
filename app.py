@@ -1579,9 +1579,14 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     _prev_sport = prev.get("sport")
     _new_sport = sport or _prev_sport or "horse"
     sport_changed = bool(_prev_sport and _new_sport and _prev_sport != _new_sport)
+    # [경주 전환 잔존 방어·시간 간격] 직전 수집 후 20분+ 경과 = 이전 경주 종료 → 새 경주(같은 rk 재사용·발주 지연)로
+    #   간주해 확립 여부와 무관하게 강제 초기화(이전 급락/배당 완전 제거·이 수집 = 새 기준값). 오다와라 1R 발주지연 케이스 방어.
+    _last_t = (prev_hist[-1].get("t") if prev_hist else None) or prev.get("t")
+    stale_gap = bool(_last_t and (now - _last_t) > 1200)
     _established = len(prev_hist) >= 4
-    baseline_reset = sport_changed or ((not _established) and bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q)))
-    hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주·다른 종목) 배당 완전 제거
+    baseline_reset = (sport_changed or stale_gap
+                      or ((not _established) and bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q))))
+    hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주·다른 종목·오래된) 배당 완전 제거
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
     hist = hist[-12:]
     # [수정#3 경륜/경정] 종목 태그 저장(horse|cycle|boat|bike). 기본 horse(경마) → 기존 동작 불변.
@@ -1614,6 +1619,8 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     counts = {"quinella": len(q), "exacta": len(x), "trio": len(tr), "win": len(win)}
     if sport_changed:
         print(f"[종목 전환] {rk}: {_prev_sport}→{_new_sport} → 배당·히스토리·전적 완전 초기화(잔존 데이터 제거)")
+    elif stale_gap:
+        print(f"[경주전환·시간간격] {rk}: 직전 수집 20분+ 경과 → 이전 경주 종료로 간주·기준값 재설정(급락 데이터 초기화)")
     elif baseline_reset:
         print(f"[경주전환 감지] {rk}: 비정상 변동폭(95%+ 다수) → 기준값 재설정(이전 배당 초기화)")
     if pruned:
@@ -7133,6 +7140,14 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
     except Exception:
         doc = {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None}
     now = time.time()
+    # [경주 전환 잔존 방어·시간 간격] 히스토리 파일의 마지막 스냅샷이 20분+ 전이면 이전 경주 종료 → 새 경주로 간주.
+    #   이전 경주 스냅샷·이상감지(anomaly_history)를 완전 제거하고 이 스냅샷을 새 기준값으로만 저장(급락 계산 생략).
+    if doc.get("snapshots") and not doc.get("result"):
+        _last_snap_t = doc["snapshots"][-1].get("t")
+        if _last_snap_t and (now - _last_snap_t) > 1200:
+            print(f"[경주전환·시간간격] {rk}: 직전 스냅샷 {round((now - _last_snap_t) / 60)}분 전 → 이전 경주 잔존 {len(doc['snapshots'])}건 제거·새 기준값")
+            doc["snapshots"] = []
+            baseline_reset = True   # 이 스냅샷 = 새 기준값(이상감지 계산 생략)
     minutes_before = None
     mb_signed = None       # [마감후] 부호 포함(음수=마감 후) — after_close 판별용
     after_close = False
