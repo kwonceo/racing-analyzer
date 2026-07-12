@@ -6,7 +6,7 @@
  "date": "2026-07-12",
  "race": "코치 7경주",
  "analyzed_at": "19:11:56",
- "updated_at": "19:25:34",
+ "updated_at": "19:40:38",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -1623,6 +1623,185 @@
    ],
    "confidence": 65.0,
    "reason": "전적유력마 3번 적중 · 제거 적중"
+  },
+  "failure": {
+   "type": "신호미반영",
+   "label": "유형1 · 신호 미반영",
+   "focus": 2,
+   "winner": 3,
+   "missed": [
+    2
+   ],
+   "reason": "2번은 급락 신호(-27%)가 있었으나 추천에서 제외됨",
+   "improvement": "상위 3개 신호 말 전부 추천에 포함 · 배당 높아도 신호 있으면 표시",
+   "missed_signal": "연속 하락 미감지",
+   "timeline": [
+    {
+     "mb": 3,
+     "odds": 73.3,
+     "pct": null,
+     "time": "19:11:56",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 3,
+     "odds": 73.3,
+     "pct": 0,
+     "time": "19:12:06",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 3,
+     "odds": 73.5,
+     "pct": 0,
+     "time": "19:12:16",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 3,
+     "odds": 73.5,
+     "pct": 0,
+     "time": "19:12:24",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 2,
+     "odds": 74.8,
+     "pct": 2,
+     "time": "19:12:37",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 2,
+     "odds": 74.8,
+     "pct": 0,
+     "time": "19:12:48",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 2,
+     "odds": 74.8,
+     "pct": 0,
+     "time": "19:12:58",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 2,
+     "odds": 74.8,
+     "pct": 0,
+     "time": "19:13:09",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 2,
+     "odds": 75.1,
+     "pct": 0,
+     "time": "19:13:19",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 2,
+     "odds": 75.1,
+     "pct": 0,
+     "time": "19:13:30",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 1,
+     "odds": 55.1,
+     "pct": -27,
+     "time": "19:13:39",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 1,
+     "odds": 55.1,
+     "pct": 0,
+     "time": "19:13:52",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 1,
+     "odds": 55.1,
+     "pct": 0,
+     "time": "19:14:02",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 1,
+     "odds": 55.1,
+     "pct": 0,
+     "time": "19:14:13",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 1,
+     "odds": 51.9,
+     "pct": -6,
+     "time": "19:14:24",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 0,
+     "odds": 51.9,
+     "pct": 0,
+     "time": "19:14:34",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 0,
+     "odds": 51.9,
+     "pct": 0,
+     "time": "19:14:43",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 0,
+     "odds": 51.9,
+     "pct": 0,
+     "time": "19:14:54",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": 0,
+     "odds": 51.9,
+     "pct": 0,
+     "time": "19:15:04",
+     "after": false,
+     "src": "복승"
+    },
+    {
+     "mb": -4,
+     "odds": 51.9,
+     "pct": 0,
+     "time": "19:18:45",
+     "after": true,
+     "src": "복승"
+    }
+   ],
+   "maxDrop": -27,
+   "buriedBy": null,
+   "afterClose": true,
+   "massDrop": false,
+   "winnerSignal": false
   }
  },
  "profit": null,

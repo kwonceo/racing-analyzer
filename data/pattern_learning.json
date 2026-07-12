@@ -1554,8 +1554,8 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 48,
-    "hit": 31,
+    "count": 49,
+    "hit": 32,
     "cases": [
       {
         "race": "오비히로 11경주",
@@ -2295,9 +2295,26 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "오비히로 10경주",
+        "date": "2026-07-12",
+        "smart_horses": [
+          8,
+          2,
+          9
+        ],
+        "placed": [
+          8,
+          9
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 64.6,
+    "rate": 65.3,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
