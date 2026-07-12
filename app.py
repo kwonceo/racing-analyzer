@@ -7557,6 +7557,8 @@ def _triple_analyze(rk, rec):
         "singleFavorite": single_favorite,    # [유력마 1마리] 축+배당낮은2마리 최소복승 + 패스/소액 경고
 
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
+        # [배당 매트릭스] 복승 배당(정규화 {(a,b):odds} → [{combo,odds}]) — 프론트·오버레이 매트릭스 소비용
+        "quinella": [{"combo": [k[0], k[1]], "odds": v} for k, v in curQ.items() if isinstance(k, tuple) and len(k) == 2],
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
         "summary": summary, "chart": chart,
         "form": form,

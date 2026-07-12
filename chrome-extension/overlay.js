@@ -22,6 +22,7 @@
     var stallNudgeAt = 0;   // [수집 조기 중단 방어] 재수집 트리거 throttle(30초)
     var savedPos = null;   // [보완#2] 사용자가 드래그해 옮긴 패널 위치({left,top}) — chrome.storage 에 저장/복원
     var soundOn = false, lastSoundKey = '';   // [보완#3] 강조 팝업 알림음 옵션(기본 off) + 중복 방지
+    var matrixOpen = false;   // [배당 매트릭스] 오버레이 간략 매트릭스 열림 상태(30초 재렌더에도 유지)
     // [강한 신호 8유형·막판 보존] T-2분 이후 감지된 강신호를 경주 종료 후에도 유지(새 경주 rk 변경 시에만 초기화)
     var preservedSig = null, preservedRk = '', preservedLabel = '';
 
@@ -525,6 +526,121 @@
       panel.appendChild(box);
     }
 
+    // ═══ [배당 매트릭스] 오버레이 간략 매트릭스 (div/span 만·table 금지) ═══
+    var MX_COL = { fav: '#38d39f', cut: '#ef4444', weakcut: '#ff9f43', dark: '#c084fc', inv: '#fbbf24' };
+
+    // 말별 역할: 유력(fav)/제거(cut·weakcut)/복병(dark)
+    function matrixRoles(d) {
+      var role = {};
+      (d.keyHorses || []).forEach(function (h) { role[+h] = 'fav'; });
+      var e = d.elimination || {};
+      (e.horses || []).forEach(function (h) {
+        var keep = h.keep || h.override;
+        if (keep) { if (role[+h.no] == null) role[+h.no] = 'fav'; }
+        else { role[+h.no] = (h.verdict === '🔴' ? 'cut' : 'weakcut'); }
+      });
+      var keys = {}; (d.keyHorses || []).forEach(function (h) { keys[+h] = 1; });
+      (d.darkHorses || []).forEach(function (h) {
+        var n = +h.no; if (!keys[n] && role[n] !== 'cut' && role[n] !== 'weakcut') role[n] = 'dark';
+      });
+      return role;
+    }
+
+    function mxHeat(v, lo, hi) {
+      if (!(v > 0)) return 'transparent';
+      var l = Math.log(v), a0 = Math.log(lo), a1 = Math.log(hi);
+      var f = a1 > a0 ? (l - a0) / (a1 - a0) : 0;
+      return 'rgba(37,99,235,' + (0.82 - 0.66 * f).toFixed(2) + ')';
+    }
+
+    // 간략 복승 삼각 매트릭스 DOM(div 격자) 반환. 없으면 null.
+    function buildMatrix(d) {
+      var q = (d && Array.isArray(d.quinella)) ? d.quinella : [];
+      var om = {}, nosSet = {};
+      q.forEach(function (x) {
+        var c = (x.combo || x.pair || []).map(Number);
+        if (c.length === 2 && x.odds > 0) {
+          var k = Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1]);
+          om[k] = x.odds; nosSet[c[0]] = 1; nosSet[c[1]] = 1;
+        }
+      });
+      var nos = Object.keys(nosSet).map(Number).filter(function (n) { return n > 0; }).sort(function (a, b) { return a - b; });
+      if (!nos.length) return null;
+      var vals = Object.keys(om).map(function (k) { return om[k]; });
+      var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+      var role = matrixRoles(d);
+      var invSet = {}; (((d.inverse || {}).invHorses) || []).forEach(function (n) { invSet[+n] = 1; });
+      var dropMap = {};
+      (d.drops || []).forEach(function (dd) {
+        var c = (dd.combo || []).map(Number);
+        if (c.length === 2 && (dd.pct || 0) <= -20) dropMap[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = Math.round(dd.pct);
+      });
+      var recSet = {};
+      (d.betRecommend || []).forEach(function (b) {
+        var c = (b.combo || []).map(Number);
+        if (c.length === 2 && /복/.test(b.kind || b.label || '')) recSet[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = 1;
+      });
+      var CW = '26px';
+      function cellBase(extra) { return 'min-width:' + CW + ';height:20px;line-height:20px;text-align:center;font-size:10px;box-sizing:border-box;' + (extra || ''); }
+      function hdrCell(n) {
+        var r = role[n], col = MX_COL[r] || '#cbd5e1';
+        var mark = r === 'fav' ? '⭐' : r === 'cut' ? '❌' : r === 'dark' ? '🟣' : r === 'weakcut' ? '△' : '';
+        var css = cellBase('font-weight:800;color:' + col + ';' + (invSet[n] ? 'box-shadow:inset 0 0 0 2px ' + MX_COL.inv + ';' : ''));
+        var s = mk('span', css, mark + n);
+        s.title = n + '번' + (r ? ' · ' + ({ fav: '유력', cut: '확실제거', weakcut: '제거권장', dark: '복병' }[r]) : '') + (invSet[n] ? ' · 역배열' : '');
+        return s;
+      }
+      var wrap = mk('div', 'overflow:auto;max-height:200px;max-width:100%;margin-top:5px;border-top:1px solid #334155;padding-top:5px');
+      var grid = mk('div', 'display:inline-block;font-family:monospace');
+      // 헤더 행
+      var hRow = mk('div', 'display:flex');
+      hRow.appendChild(mk('span', cellBase('color:#64748b'), '복승'));
+      for (var ci0 = 0; ci0 < nos.length - 1; ci0++) hRow.appendChild(hdrCell(nos[ci0]));
+      grid.appendChild(hRow);
+      // 본문 삼각
+      for (var ri = 1; ri < nos.length; ri++) {
+        var row = mk('div', 'display:flex');
+        row.appendChild(hdrCell(nos[ri]));
+        for (var ci = 0; ci < ri; ci++) {
+          var key = Math.min(nos[ri], nos[ci]) + '|' + Math.max(nos[ri], nos[ci]);
+          var v = om[key];
+          if (v > 0) {
+            var bd = '';
+            if (dropMap[key] != null) bd = 'box-shadow:inset 0 0 0 2px #ef4444;';
+            else if (recSet[key]) bd = 'box-shadow:inset 0 0 0 2px #ffd24f;';
+            else if (role[nos[ri]] === 'fav' && role[nos[ci]] === 'fav') bd = 'box-shadow:inset 0 0 0 2px #38d39f;';
+            var inv = (invSet[nos[ri]] || invSet[nos[ci]]) ? 'outline:2px solid ' + MX_COL.inv + ';outline-offset:-3px;' : '';
+            var cell = mk('span', cellBase('color:#e2e8f0;background:' + mxHeat(v, lo, hi) + ';' + bd + inv), v + (dropMap[key] != null ? '▼' : ''));
+            cell.title = nos[ri] + '-' + nos[ci] + ' = ' + v + '배' + (dropMap[key] != null ? ' · 급락 ' + dropMap[key] + '%' : '') + (recSet[key] ? ' · 추천' : '');
+            row.appendChild(cell);
+          } else row.appendChild(mk('span', cellBase('color:#475569'), '·'));
+        }
+        row.appendChild(mk('span', cellBase('color:#475569'), '—'));
+        grid.appendChild(row);
+      }
+      wrap.appendChild(grid);
+      // 범례
+      wrap.appendChild(mk('div', 'font-size:9px;color:#94a3b8;margin-top:3px',
+        '⭐유력 · 🟣복병 · ❌제거 · 역배열(노랑테) · ▼급락(빨강테) · 추천(금색테)'));
+      return wrap;
+    }
+
+    // 매트릭스 토글 버튼 + 박스를 패널에 추가
+    function renderMatrix(panel, d) {
+      if (!d || !Array.isArray(d.quinella) || !d.quinella.length) return;
+      var btn = mk('button', 'all:unset;cursor:pointer;display:block;width:100%;box-sizing:border-box;margin:4px 0;padding:5px 8px;border:1px solid #475569;border-radius:7px;color:#7dd3fc;font-weight:700;font-size:12px;text-align:center;background:rgba(56,189,248,.08)',
+        (matrixOpen ? '📊 배당 매트릭스 접기 ▲' : '📊 배당 매트릭스 펼치기 ▼'));
+      btn.addEventListener('click', function () {
+        matrixOpen = !matrixOpen;
+        render();   // 재렌더 → 상태 반영
+      });
+      panel.appendChild(btn);
+      if (matrixOpen) {
+        var mx = buildMatrix(d);
+        if (mx) panel.appendChild(mx);
+      }
+    }
+
     function updatePanel(panel, st) {
       try {
         while (panel.firstChild) panel.removeChild(panel.firstChild);
@@ -595,6 +711,8 @@
           });
           panel.appendChild(mhBox);
         }
+        // [배당 매트릭스] 간략 매트릭스 토글 버튼 + 박스(경마·경륜 공통·복승 배당 있을 때만)
+        renderMatrix(panel, d);
 
         // [1번] 최종 결론 박스 — 최상단·가장 크게(모든 종목 공통: 경마/경륜/경정)
         renderConclusion(panel, d, deadline);
