@@ -701,6 +701,14 @@
           panel.appendChild(db);
         });
 
+        // [복승 크로스 역배열] 강한(0.5+) 크로스 역배열 말 강조: "🔴 크로스 역배열 13번 0.72 → 6·11번 1착 시 2착 강력".
+        (d.crossReversal || []).filter(function (c) { return c.score >= 0.5; }).slice(0, 2).forEach(function (c) {
+          var col = c.level === '🔴' ? '#f87171' : '#fbbf24';
+          var cx = mk('div', 'margin:3px 0;padding:4px 8px;border-left:3px solid ' + col + ';background:rgba(250,204,21,.12);border-radius:6px');
+          cx.appendChild(mk('span', 'font-weight:800;color:' + col, c.level + ' 크로스 역배열 ' + c.no + '번 ' + c.score));
+          if ((c.refs || []).length) cx.appendChild(mk('span', 'margin-left:6px;font-size:11px;color:#fde68a', '→ ' + c.refs.join('·') + '번 1착 시 2착 강력'));
+          panel.appendChild(cx);
+        });
         // [2번·스마트머니 복승 보조] 서버가 편성한 스마트머니 복승 보조를 강조 표시("복승 추가: 2+10 (스마트머니)").
         (d.smartQuinella || []).forEach(function (sq) {
           if (!sq || !sq.combo || sq.combo.length !== 2) return;

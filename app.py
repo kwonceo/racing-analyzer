@@ -5488,6 +5488,64 @@ def _mid_high_odds_favorites(valid_nos, curWin, curQ, drops, dark_horses, revers
     return out
 
 
+def _cross_reversal(curQ, curD, fav_rank, valid_nos, max_rank=5):
+    """[복승 크로스 역배열·전체 말 쌍 비교] 각 말 X에 대해 인기 상위쌍(A인기>B, 상위 max_rank위) 조합에서
+      복승(A+X) > 복승(B+X) = X가 '덜 인기있는 말(B)'과 더 싸게 붙음 → X 실질 강세(그 말 1착 시 X 2착 유력).
+      편차%(min 1.0 캡) × 가중치 합산 후 정규화. 가중치: 1·2위쌍 ×3 / 1·3·2·3위쌍 ×2 / 기타 ×1.
+      쌍승(A→X vs B→X, X→A vs X→B)도 보조 가중(×0.5). 점수 0.3🟡/0.5🟠/0.7🔴.
+      반환 [{no, score, level, refs:[상위쌍 마번]}] (0.3+ · 점수순)."""
+    if not curQ or not fav_rank:
+        return []
+    top = [int(h) for h in fav_rank[:max_rank] if h is not None]
+    rank = {h: i + 1 for i, h in enumerate(top)}
+
+    def _w(ra, rb):
+        if (ra, rb) == (1, 2):
+            return 3
+        if (ra, rb) in ((1, 3), (2, 3)):
+            return 2
+        return 1
+
+    def _qo(a, b):
+        return curQ.get(tuple(sorted((int(a), int(b)))))
+
+    def _xo(a, b):                                     # 쌍승 방향(a→b)
+        return (curD or {}).get((int(a), int(b)))
+    out = []
+    for X in sorted(int(x) for x in (valid_nos or [])):
+        acc, wsum, ref_score = 0.0, 0.0, {}
+        for i in range(len(top)):
+            for j in range(i + 1, len(top)):
+                A, B = top[i], top[j]                  # A 인기 높음(rank 작음)
+                if X in (A, B):
+                    continue
+                w = _w(rank[A], rank[B])
+                qa, qb = _qo(A, X), _qo(B, X)          # 복승: q(A+X) vs q(B+X)
+                if qa and qb:
+                    wsum += w
+                    if qa > qb:
+                        _c = min((qa - qb) / qb, 1.0) * w
+                        acc += _c
+                        ref_score[B] = ref_score.get(B, 0.0) + _c
+                for (pa, pb) in (((A, X), (B, X)), ((X, A), (X, B))):   # 쌍승(보조 ×0.5)
+                    xa, xb = _xo(*pa), _xo(*pb)
+                    if xa and xb:
+                        wsum += w * 0.5
+                        if xa > xb:
+                            _c = min((xa - xb) / xb, 1.0) * (w * 0.5)
+                            acc += _c
+                            ref_score[B] = ref_score.get(B, 0.0) + _c
+        if wsum <= 0:
+            continue
+        score = round(acc / wsum, 2)
+        if score >= 0.3:
+            lvl = "🔴" if score >= 0.7 else ("🟠" if score >= 0.5 else "🟡")
+            refs = [b for b, _ in sorted(ref_score.items(), key=lambda kv: -kv[1])][:3]   # 기여 큰 순
+            out.append({"no": X, "score": score, "level": lvl, "refs": refs})
+    out.sort(key=lambda x: -x["score"])
+    return out
+
+
 def _core_picks(key_horses, dark_horses, reversal_roles, drops, curWin, curQ, valid_nos):
     """[핵심 추천·추천 과다 근본 해결] 엄격 우선순위로 축 2마리만 선정 → 복승 X+Y · 삼복승 X+Y+Z(딱 이것만).
       우선순위: 1역배열+급락 동시 / 2스마트머니 / 3집중급락 최다 / 4유력마 저배당. 상위 2두=축, 3위=삼복승 3착.
@@ -6025,6 +6083,9 @@ def _triple_analyze(rk, rec):
     mid_high_favorites = ([] if after_close else
                           _mid_high_odds_favorites(valid_nos, curWin, curQ, drops, dark_horses, reversal_roles, form))
 
+    # [복승 크로스 역배열] 인기 상위쌍과의 복승/쌍승 조합 편차로 각 말의 실질 강세(2착 유력) 점수화(전체 말 쌍 비교).
+    cross_reversal = _cross_reversal(curQ, curD, fav_rank, valid_nos)
+
     # [핵심 추천·추천 과다 근본 해결] 엄격 우선순위로 축 2두만 선정 → 복승 X+Y·삼복승 X+Y+Z(딱 이것만). 마감 후 미표시.
     core_picks = (None if after_close else
                   _core_picks(key_horses, dark_horses, reversal_roles, drops, curWin, curQ, valid_nos))
@@ -6156,6 +6217,18 @@ def _triple_analyze(rk, rec):
                     _ric = sorted(set(_rv2 + [int(_ri)]))
                     if len(_ric) == 3:
                         _addbet("삼복승", "삼복승 보험(역배열 10~20%)", _ric, 4, trio_map.get(tuple(_ric)))
+
+    # [복승 크로스 역배열 삼복승 자동 편성] 인기 상위2두(fav_rank) + 크로스역배열 강세말(0.5+) → 삼복승 보험.
+    #   크로스역배열말은 인기상위말 1착 시 2착 유력이므로 상위2두와 묶어 커버(마감 전만·최대 2두).
+    if not after_close and cross_reversal:
+        _pop2 = [int(h) for h in fav_rank[:2] if h is not None]
+        if len(_pop2) == 2:
+            for _cr in cross_reversal[:2]:
+                if _cr["score"] >= 0.5 and int(_cr["no"]) not in _pop2:
+                    _crc = sorted(set(_pop2 + [int(_cr["no"])]))
+                    if len(_crc) == 3:
+                        _addbet("삼복승", "삼복승 보험(크로스역배열 %s %.2f)" % (_cr["level"], _cr["score"]),
+                                _crc, 4, trio_map.get(tuple(_crc)))
 
     # [삼복승 무조건 편성] 배당판(실배당) 유무·유력마 3두 미만과 무관하게 삼복승을 항상 추천에 포함.
     #   유력마가 3두 미만이면 선호순 풀(ranked→단승순→복승조합 등장마)로 3두를 채워 메인 생성.
@@ -6841,6 +6914,7 @@ def _triple_analyze(rk, rec):
         "highOddsCandidates": high_odds_candidates,   # [고배당 후보 발굴] 흐름 좋은 고배당(10배+ 하락) 말 → 삼복승 보험
         "midHighFavorites": mid_high_favorites,   # [💎 중고배당 유력마] 복승10배+ & 강한신호1개+ → 삼복승 보험·알림·학습
         "corePicks": core_picks,   # [핵심 추천·추천 과다 해결] 엄격 우선순위 축2두 → 복승 X+Y·삼복승 X+Y+Z(딱 이것만)
+        "crossReversal": cross_reversal,   # [복승 크로스 역배열] 각 말 실질 강세 점수(인기상위쌍 편차)·삼복승 편성
         "smartQuinella": smart_quinella,   # [스마트머니 복승 보조] 스마트머니 복병 → 축과 복승 보조 자동 추가
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
         "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승

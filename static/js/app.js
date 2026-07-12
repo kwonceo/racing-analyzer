@@ -3670,6 +3670,7 @@
       ${a.marketCheck && a.marketCheck.stale ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffb020;background:rgba(255,176,32,.12);border-radius:6px;color:#ffc862">⚠️ <b>배당 불안정</b> — 최저 복승도 ${a.marketCheck.favOdds}배(실자금 미형성/초반 미수집 의심). <b>배당판 새로고침 후 재수집</b> 권장. 현재 추천은 참고만.</div>` : ''}
       ${renderAlertSignal(a.alertSignal, _horseRoleMap(a))}
       ${renderInverse(a.inverse)}
+      ${renderCrossReversal(a)}
       ${renderSignalTimeline(a.signalTimeline)}
       <div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary || '')}</div>
       ${drops ? `<div style="margin:6px 0"><span class="hint">📉 급락/변동</span><br>${drops}</div>` : ''}
@@ -5981,6 +5982,22 @@
     </div>`;
   }
 
+  // [복승 크로스 역배열] 각 말이 인기 상위쌍과의 조합 편차로 산출한 실질 강세(2착 유력) 점수 표시.
+  function renderCrossReversal(a) {
+    const cr = (a && a.crossReversal) || [];
+    if (!cr.length) return '';
+    const rows = cr.slice(0, 4).map((c) => {
+      const col = c.level === '🔴' ? '#f87171' : (c.level === '🟠' ? '#fbbf24' : '#facc15');
+      const refs = (c.refs || []).map((r) => r + '번').join('·');
+      return `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:4px 8px;border-radius:6px;margin:2px 0;background:rgba(250,204,21,.06);border-left:3px solid ${col}">
+        <b style="color:${col}">${c.level} ${c.no}번</b>
+        <span class="hint">크로스 점수 <b style="color:${col}">${c.score}</b></span>
+        ${refs ? `<span class="hint" style="margin-left:auto">→ ${esc(refs)} 1착 시 2착 강력</span>` : ''}
+      </div>`;
+    }).join('');
+    return `<div class="matrix-title" style="font-size:13px;color:#facc15">🔀 복승 크로스 역배열 <span class="hint" style="font-weight:400">인기 상위쌍 편차 · 0.3🟡/0.5🟠/0.7🔴</span></div>${rows}`;
+  }
+
   function sportAnalysisHTML(a, bsel) {
     const six = a.bmed && a.bmed.sixRacer;
     const parts = [];
@@ -5998,6 +6015,7 @@
     parts.push(renderPreReversal(a));
     parts.push(renderAfterCloseSurge(a.afterCloseSurge));
     parts.push(renderInverse(a.inverse));
+    parts.push(renderCrossReversal(a));
     parts.push(renderIntegratedGrades(a));
     parts.push(renderJapanSignals(a.signals));
     // [경륜/경정 근거 표시] 일본경마 뷰에만 있던 '왜 추천했는지' 근거 카드·패턴매칭을 6명 종목 뷰에도 추가.
@@ -6091,6 +6109,7 @@
       ${renderPreReversal(a)}
       ${renderAfterCloseSurge(a.afterCloseSurge)}
       ${renderInverse(a.inverse)}
+      ${renderCrossReversal(a)}
       ${renderTopHorses(a)}
       <h3>🔗 실시간 배당 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
