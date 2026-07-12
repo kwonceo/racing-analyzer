@@ -1328,7 +1328,7 @@
   "2nd": 7,
   "3rd": 3,
   "4th": null,
-  "quinella_odds": 5.5,
+  "quinella_odds": null,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "3+10 복승 급락(-49.8%) → 3번 입상 적중 · 제거 적중"
@@ -1337,7 +1337,7 @@
   "quinella_hit": false,
   "winner": 4,
   "second": 7,
-  "odds_range": "중배당"
+  "odds_range": null
  },
  "signal_hit": {
   "excess_drop_horse": "9",
@@ -1349,13 +1349,15 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-12 10:41:52",
+ "saved_at": "2026-07-12 21:20:19",
  "quality": {
-  "score": 100,
+  "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
-  "missing": [],
+  "missing": [
+   "확정 배당"
+  ],
   "errors": []
  }
 }
