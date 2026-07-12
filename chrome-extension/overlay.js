@@ -117,7 +117,8 @@
     function readData() {
       return new Promise(function (resolve) {
         try {
-          chrome.storage.local.get({ analyzeStatus: null, timerDeadline: 0, collectAlert: null }, function (v) {
+          chrome.storage.local.get({ analyzeStatus: null, timerDeadline: 0, collectAlert: null,
+            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false }, function (v) {
             resolve(v || {});
           });
         } catch (_) { resolve({}); }
@@ -625,20 +626,44 @@
       return wrap;
     }
 
-    // 매트릭스 토글 버튼 + 박스를 패널에 추가
-    function renderMatrix(panel, d) {
+    // 매트릭스 토글 버튼 + 박스를 패널에 추가. open = 팝업/오버레이 플래그(ovShowMatrix).
+    function renderMatrix(panel, d, open) {
       if (!d || !Array.isArray(d.quinella) || !d.quinella.length) return;
       var btn = mk('button', 'all:unset;cursor:pointer;display:block;width:100%;box-sizing:border-box;margin:4px 0;padding:5px 8px;border:1px solid #475569;border-radius:7px;color:#7dd3fc;font-weight:700;font-size:12px;text-align:center;background:rgba(56,189,248,.08)',
-        (matrixOpen ? '📊 배당 매트릭스 접기 ▲' : '📊 배당 매트릭스 펼치기 ▼'));
+        (open ? '📊 배당 매트릭스 접기 ▲' : '📊 배당 매트릭스 펼치기 ▼'));
       btn.addEventListener('click', function () {
-        matrixOpen = !matrixOpen;
+        matrixOpen = !open;
+        try { chrome.storage.local.set({ ovShowMatrix: !open }); } catch (_) { /* */ }   // 팝업 버튼과 동기화
         render();   // 재렌더 → 상태 반영
       });
       panel.appendChild(btn);
-      if (matrixOpen) {
+      if (open) {
         var mx = buildMatrix(d);
         if (mx) panel.appendChild(mx);
       }
+    }
+
+    // [⏱ 타임라인] 간략 신호 타임라인(시간순 신호 이력) — signalTimeline.changes 우선, 없으면 signals.
+    function renderOvTimeline(panel, d) {
+      if (!d) return;
+      var tl = d.signalTimeline || {};
+      var items = [];
+      (tl.changes || []).slice(-6).forEach(function (c) {
+        items.push((c.reason || '신호 변경') + (c.new_signal != null ? ' → ' + c.new_signal + '번' : ''));
+      });
+      if (!items.length) {
+        (d.signals || []).slice(0, 8).forEach(function (s) {
+          items.push((s.type ? '[' + s.type + '] ' : '') + (s.text || ''));
+        });
+      }
+      if (!items.length) return;
+      var box = mk('div', 'margin:5px 0;padding:6px 9px;border:1px solid #334155;border-radius:7px;background:rgba(56,189,248,.06)');
+      box.appendChild(mk('div', 'font-weight:800;color:#7dd3fc;font-size:12px', '⏱ 신호 타임라인'));
+      if (tl.finalSignal != null) {
+        box.appendChild(mk('div', 'font-size:11px;color:#38d39f;font-weight:700;margin-top:2px', '현재 신호: ' + tl.finalSignal + '번' + (tl.finalConfirmed ? ' ✅확정' : '')));
+      }
+      items.forEach(function (t) { box.appendChild(mk('div', 'font-size:11px;color:#cbd5e1;margin-top:2px', '· ' + t)); });
+      panel.appendChild(box);
     }
 
     function updatePanel(panel, st) {
@@ -682,7 +707,7 @@
           var _t0 = cp.confTrifecta || cp.trifecta;
           if (_t0) _ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds }];
         }
-        if (_fq.length && !d.recommendClosed) {
+        if (_fq.length && !d.recommendClosed && st.ovShowPicks !== false) {   // [🎯 추천] 팝업 토글(기본 표시)
           var cpBox = mk('div', 'margin:0 0 6px;padding:9px 12px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
           cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:16px', '🎯 지금 사세요!'));
           _fq.slice(0, 2).forEach(function (q) {
@@ -711,8 +736,10 @@
           });
           panel.appendChild(mhBox);
         }
-        // [배당 매트릭스] 간략 매트릭스 토글 버튼 + 박스(경마·경륜 공통·복승 배당 있을 때만)
-        renderMatrix(panel, d);
+        // [📊 배당 매트릭스] 간략 매트릭스 토글(팝업 [📊 매트릭스] 버튼·오버레이 버튼 동기화·경마·경륜 공통)
+        renderMatrix(panel, d, !!st.ovShowMatrix);
+        // [⏱ 타임라인] 팝업 [⏱ 타임라인] 버튼 켜짐 시 신호 타임라인 표시
+        if (st.ovShowTimeline) renderOvTimeline(panel, d);
 
         // [1번] 최종 결론 박스 — 최상단·가장 크게(모든 종목 공통: 경마/경륜/경정)
         renderConclusion(panel, d, deadline);
@@ -959,6 +986,8 @@
           if (ch.overlayPos) { savedPos = ch.overlayPos.newValue || null; }   // [보완#2] 위치 동기화(다른 탭 반영)
           if (ch.overlaySound) { soundOn = !!ch.overlaySound.newValue; }      // [보완#3] 알림음 옵션 동기화
           if (ch.overlayEnabled) { enabled = !!ch.overlayEnabled.newValue; render(); }
+          // [오버레이 표시 제어] 팝업 📊/🎯/⏱ 버튼 변경 시 즉시 재렌더
+          if ((ch.ovShowMatrix || ch.ovShowPicks || ch.ovShowTimeline) && enabled && !killed) render();
           if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline) && enabled && !killed) render();
         } catch (_) { /* */ }
       });

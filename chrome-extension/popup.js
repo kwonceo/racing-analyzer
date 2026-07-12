@@ -15,6 +15,7 @@ const els = {
   raceKey: $('raceKey'),
   autoSend: $('autoSend'),
   overlayEnabled: $('overlayEnabled'),   // [보완#1] 배당판 오버레이 ON/OFF
+  ovMatrixBtn: $('ovMatrixBtn'), ovPicksBtn: $('ovPicksBtn'), ovTimelineBtn: $('ovTimelineBtn'),   // [오버레이 표시 제어]
   interval: $('interval'),
   autoMode: $('autoMode'),
   sport: $('sport'),           // [수정#3] 종목: horse|cycle|boat|bike
@@ -66,11 +67,14 @@ function fmtTime(ts) {
 // ── 저장된 설정/상태 로드 → UI 반영 ─────────────────────────────────
 function loadState() {
   chrome.storage.local.get(
-    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', sport: 'horse', market: 'auto', japanType: 'local', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null, overlayEnabled: false, detectedCategory: '', detectedAt: 0 },
+    { autoSend: false, intervalSec: 30, raceKey: '', autoMode: 'triple', sport: 'horse', market: 'auto', japanType: 'local', status: null, resultStatus: null, tripleStatus: null, tripleProgress: null, resultAutoStatus: null, analyzeStatus: null, autoCollectStatus: null, overlayEnabled: false, detectedCategory: '', detectedAt: 0, ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false },
     (v) => {
       els.autoSend.checked = !!v.autoSend;
       renderDetectedCategory(v.detectedCategory, v.detectedAt);   // [탭분리] 자동 감지 종목 복원
       if (els.overlayEnabled) els.overlayEnabled.checked = !!v.overlayEnabled;   // [보완#1] 오버레이 상태 복원
+      _setOvBtn(els.ovMatrixBtn, !!v.ovShowMatrix);   // [오버레이 표시 제어] 버튼 활성 상태 복원
+      _setOvBtn(els.ovPicksBtn, v.ovShowPicks !== false);
+      _setOvBtn(els.ovTimelineBtn, !!v.ovShowTimeline);
       els.interval.value = String(v.intervalSec || 30);
       els.autoMode.value = v.autoMode || 'triple';
       if (els.sport) els.sport.value = v.sport || 'horse';   // [수정#3] 종목 복원
@@ -137,6 +141,29 @@ async function activeKeibaTab() {
 if (els.overlayEnabled) els.overlayEnabled.addEventListener('change', () => {
   chrome.storage.local.set({ overlayEnabled: els.overlayEnabled.checked });
 });
+
+// [오버레이 표시 제어] 📊 매트릭스 · 🎯 추천 · ⏱ 타임라인 버튼 — 켜면 오버레이 자동 ON + 해당 정보 표시.
+function _setOvBtn(btn, on) {
+  if (!btn) return;
+  btn.dataset.on = on ? '1' : '0';
+  btn.style.background = on ? '#0e7490' : '#1e293b';
+  btn.style.borderColor = on ? '#22d3ee' : '#334155';
+  btn.style.color = on ? '#e0f2fe' : (btn.id === 'ovPicksBtn' ? '#38d39f' : btn.id === 'ovTimelineBtn' ? '#c4b5fd' : '#7dd3fc');
+}
+function _wireOvBtn(btn, key) {
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const on = btn.dataset.on !== '1';
+    _setOvBtn(btn, on);
+    const patch = {}; patch[key] = on;
+    // 표시 버튼을 켜면 오버레이도 자동 ON(끄지는 않음 — 다른 정보 볼 수 있으니)
+    if (on && els.overlayEnabled && !els.overlayEnabled.checked) { els.overlayEnabled.checked = true; patch.overlayEnabled = true; }
+    chrome.storage.local.set(patch);
+  });
+}
+_wireOvBtn(els.ovMatrixBtn, 'ovShowMatrix');
+_wireOvBtn(els.ovPicksBtn, 'ovShowPicks');
+_wireOvBtn(els.ovTimelineBtn, 'ovShowTimeline');
 els.autoSend.addEventListener('change', () => {
   chrome.storage.local.set({ autoSend: els.autoSend.checked });
 });
