@@ -553,14 +553,30 @@
         // ═══ [정보 순서 정리] 1.결론박스 → 2.카운트다운 → 3.유력마 → 4.이상감지 → 5.나머지 ═══
         // [핵심 추천·추천 과다 해결] 딱 이것만 — 🎯 복승 X+Y · 🛡 삼복승 X+Y+Z (엄격 우선순위 축2두). 최상단 크게.
         var cp = d.corePicks;
-        if (cp && cp.quinella && cp.quinella.length === 2 && !d.recommendClosed) {
+        var _confQ = (cp && cp.confQuinellas) || [];
+        var _hasQ = cp && (_confQ.length || (cp.quinella && cp.quinella.length === 2));
+        if (_hasQ && !d.recommendClosed) {
           var cpBox = mk('div', 'margin:0 0 6px;padding:8px 11px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
-          cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:15px', '🎯 핵심 추천 (딱 이것만)'));
-          cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:3px;color:#e2e8f0',
-            '🎯 복승: ' + cp.quinella.join('+') + (cp.quinellaOdds != null ? '  ' + cp.quinellaOdds + '배' : '')));
-          if (cp.trifecta) {
+          var _hdTxt = '🎯 핵심 추천 (딱 이것만)' + (cp.confTop1 != null ? '  확신도1위 ' + cp.confTop1 + '번' : '');
+          cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:15px', _hdTxt));
+          // [확신도 복승 필수] 확신도 1위 말이 반드시 포함된 복승 라인(확신도1위+2위·확신도1위+시장유력·70+ 필수)
+          if (_confQ.length) {
+            _confQ.forEach(function (cq) {
+              cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:3px;color:#e2e8f0',
+                '🎯 복승: ' + cq.combo.join('+') + (cq.odds != null ? '  ' + cq.odds + '배' : '') + (cq.reason ? '  (' + cq.reason + ')' : '')));
+            });
+          } else {
+            cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:3px;color:#e2e8f0',
+              '🎯 복승: ' + cp.quinella.join('+') + (cp.quinellaOdds != null ? '  ' + cp.quinellaOdds + '배' : '')));
+          }
+          var _tri = cp.confTrifecta || cp.trifecta;
+          if (_tri) {
             cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:2px;color:#e2e8f0',
-              '🛡 삼복승: ' + cp.trifecta.join('+') + (cp.trifectaOdds != null ? '  ' + cp.trifectaOdds + '배' : '')));
+              '🛡 삼복승: ' + _tri.join('+') + (cp.trifectaOdds != null ? '  ' + cp.trifectaOdds + '배' : '')));
+          }
+          if (cp.confTrifectaIns) {
+            cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:2px;color:#c4b5fd',
+              '🛡 삼복승 보험(확신도+이상감지): ' + cp.confTrifectaIns.join('+')));
           }
           panel.appendChild(cpBox);
         }

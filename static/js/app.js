@@ -5969,15 +5969,28 @@
   // [핵심 추천·추천 과다 근본 해결] 엄격 우선순위 축2두 → 복승 X+Y·삼복승 X+Y+Z (딱 이것만·최상단 크게).
   function renderCorePicks(a) {
     const cp = a && a.corePicks;
-    if (!cp || !cp.quinella || cp.quinella.length !== 2 || a.recommendClosed) return '';
-    const q = cp.quinella, t = cp.trifecta;
+    if (!cp || a.recommendClosed) return '';
+    const confQ = cp.confQuinellas || [];
+    const hasQ = confQ.length || (cp.quinella && cp.quinella.length === 2);
+    if (!hasQ) return '';
+    const q = cp.quinella, t = cp.confTrifecta || cp.trifecta;
     const qo = cp.quinellaOdds != null ? `<span class="hint" style="font-size:13px">${cp.quinellaOdds}배</span>` : '';
     const to = cp.trifectaOdds != null ? `<span class="hint" style="font-size:13px">${cp.trifectaOdds}배</span>` : '';
     const reasons = (cp.picks || []).map((p) => `${p.no}번 ${esc(p.reason)}`).join(' · ');
+    // [확신도 복승 필수] 확신도 1위 말이 반드시 포함된 복승 라인(확신도1위+2위·확신도1위+시장유력·70+ 필수)
+    const qLines = confQ.length
+      ? confQ.map((cq) => {
+        const oo = cq.odds != null ? `<span class="hint" style="font-size:13px">${cq.odds}배</span>` : '';
+        return `<div style="font-size:20px;font-weight:800;margin:4px 0">🎯 복승: <span style="color:#4ea1ff">${cq.combo.join('+')}</span> ${oo} <span class="hint" style="font-size:11px;font-weight:400">(${esc(cq.reason || '')})</span></div>`;
+      }).join('')
+      : `<div style="font-size:20px;font-weight:800;margin:4px 0">🎯 복승: <span style="color:#4ea1ff">${q.join('+')}</span> ${qo}</div>`;
+    const triIns = cp.confTrifectaIns;
+    const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번(${cp.confTop1Conf})</span>` : '';
     return `<div style="margin:6px 0;padding:12px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
-      <div style="font-size:17px;font-weight:900;color:#38d39f;margin-bottom:6px">🎯 핵심 추천 <span class="hint" style="font-weight:400;font-size:11px">(엄격 우선순위 · 딱 이것만)</span></div>
-      <div style="font-size:20px;font-weight:800;margin:4px 0">🎯 복승: <span style="color:#4ea1ff">${q.join('+')}</span> ${qo}</div>
+      <div style="font-size:17px;font-weight:900;color:#38d39f;margin-bottom:6px">🎯 핵심 추천 <span class="hint" style="font-weight:400;font-size:11px">(엄격 우선순위 · 딱 이것만)</span> ${confHead}</div>
+      ${qLines}
       ${t ? `<div style="font-size:20px;font-weight:800;margin:4px 0">🛡 삼복승: <span style="color:#c084fc">${t.join('+')}</span> ${to}</div>` : ''}
+      ${triIns ? `<div style="font-size:16px;font-weight:700;margin:2px 0"><span class="hint" style="font-weight:400;font-size:12px">🛡 삼복승 보험(확신도+이상감지):</span> <span style="color:#c084fc">${triIns.join('+')}</span></div>` : ''}
       <div class="hint" style="font-size:11px;margin-top:6px">축 근거: ${reasons}</div>
     </div>`;
   }
