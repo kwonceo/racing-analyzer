@@ -5974,8 +5974,9 @@
     const hasQ = confQ.length || (cp.quinella && cp.quinella.length === 2);
     if (!hasQ) return '';
     const q = cp.quinella, t = cp.confTrifecta || cp.trifecta;
+    const _toVal = cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds;
     const qo = cp.quinellaOdds != null ? `<span class="hint" style="font-size:13px">${cp.quinellaOdds}배</span>` : '';
-    const to = cp.trifectaOdds != null ? `<span class="hint" style="font-size:13px">${cp.trifectaOdds}배</span>` : '';
+    const to = _toVal != null ? `<span class="hint" style="font-size:13px">${_toVal}배(추정)</span>` : '';
     const reasons = (cp.picks || []).map((p) => `${p.no}번 ${esc(p.reason)}`).join(' · ');
     // [확신도 복승 필수] 확신도 1위 말이 반드시 포함된 복승 라인(확신도1위+2위·확신도1위+시장유력·70+ 필수)
     const qLines = confQ.length
@@ -5990,7 +5991,7 @@
       <div style="font-size:17px;font-weight:900;color:#38d39f;margin-bottom:6px">🎯 핵심 추천 <span class="hint" style="font-weight:400;font-size:11px">(엄격 우선순위 · 딱 이것만)</span> ${confHead}</div>
       ${qLines}
       ${t ? `<div style="font-size:20px;font-weight:800;margin:4px 0">🛡 삼복승: <span style="color:#c084fc">${t.join('+')}</span> ${to}</div>` : ''}
-      ${triIns ? `<div style="font-size:16px;font-weight:700;margin:2px 0"><span class="hint" style="font-weight:400;font-size:12px">🛡 삼복승 보험(확신도+이상감지):</span> <span style="color:#c084fc">${triIns.join('+')}</span></div>` : ''}
+      ${triIns ? `<div style="font-size:16px;font-weight:700;margin:2px 0"><span class="hint" style="font-weight:400;font-size:12px">🛡 삼복승 보험(확신도+이상감지):</span> <span style="color:#c084fc">${triIns.join('+')}</span>${cp.confTrifectaInsOdds != null ? ` <span class="hint" style="font-size:12px">${cp.confTrifectaInsOdds}배(추정)</span>` : ''}</div>` : ''}
       <div class="hint" style="font-size:11px;margin-top:6px">축 근거: ${reasons}</div>
     </div>`;
   }

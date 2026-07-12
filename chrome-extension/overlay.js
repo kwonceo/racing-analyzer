@@ -570,13 +570,14 @@
               '🎯 복승: ' + cp.quinella.join('+') + (cp.quinellaOdds != null ? '  ' + cp.quinellaOdds + '배' : '')));
           }
           var _tri = cp.confTrifecta || cp.trifecta;
+          var _triO = cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds;
           if (_tri) {
             cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:2px;color:#e2e8f0',
-              '🛡 삼복승: ' + _tri.join('+') + (cp.trifectaOdds != null ? '  ' + cp.trifectaOdds + '배' : '')));
+              '🛡 삼복승: ' + _tri.join('+') + (_triO != null ? '  ' + _triO + '배(추정)' : '')));
           }
           if (cp.confTrifectaIns) {
             cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:2px;color:#c4b5fd',
-              '🛡 삼복승 보험(확신도+이상감지): ' + cp.confTrifectaIns.join('+')));
+              '🛡 삼복승 보험(확신도+이상감지): ' + cp.confTrifectaIns.join('+') + (cp.confTrifectaInsOdds != null ? '  ' + cp.confTrifectaInsOdds + '배(추정)' : '')));
           }
           panel.appendChild(cpBox);
         }

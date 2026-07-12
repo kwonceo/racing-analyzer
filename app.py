@@ -6882,10 +6882,26 @@ def _triple_analyze(rk, rec):
             core_picks["forcedHorses"] = conf_q.get("forced") or []
             core_picks["confTop1"] = conf_q["top1"]
             core_picks["confTop1Conf"] = conf_q["top1Conf"]
+
+            # [보완②] 삼복승 예상배당 표기 — 실배당(trio_map) 우선, 없으면 _trio_est 추정.
+            def _tri_odds(cc):
+                if not cc or len(cc) != 3:
+                    return None
+                _o = trio_map.get(tuple(sorted(cc)))
+                if _o is not None:
+                    return _o
+                try:
+                    _ev, _ = _trio_est(list(cc))
+                    return round(_ev, 1) if _ev else None
+                except Exception:
+                    return None
+
             if conf_q.get("trifecta"):
                 core_picks["confTrifecta"] = conf_q["trifecta"]
+                core_picks["confTrifectaOdds"] = _tri_odds(conf_q["trifecta"])
             if conf_q.get("trifectaIns"):
                 core_picks["confTrifectaIns"] = conf_q["trifectaIns"]
+                core_picks["confTrifectaInsOdds"] = _tri_odds(conf_q["trifectaIns"])
     except Exception as _e:
         print("[확신도복승] 파생 실패:", _e)
 
@@ -7780,6 +7796,7 @@ def _build_analysis_log(rk, an=None):
         "final_recommendation": final,
         "recommendation_history": rec_history,   # [추천 이력 보존] 변경마다 누적(덮어쓰지 않음)
         "compare_recommendation": an.get("compareRecommend"),   # [비교학습] 이상감지/전적/최종 3종
+        "corePicks": an.get("corePicks"),   # [확신도 복승 학습] confQuinellas·confTrifecta 결과 판정용 보존
         "summary": an.get("summary"),
         "keyHorses": an.get("keyHorses"),
         "result": result_doc,
@@ -9902,8 +9919,24 @@ def _recompute_learning_stats(records):
                    "ignored_miss": _aig,
                    "advice": ("경고 발생 시 해당 말 추천 포함 권장" if (_af and _ah / len(_af) >= 0.4) else None)}
 
+    # [보완①·확신도 복승 학습] 확신도 1위 필수 포함 복승/삼복승 적중률 + 확신도 1위 입상률 → 임계값(현재 70) 자동 조정 근거.
+    _t1 = _rate(records, lambda r: r.get("conf_top1_placed") is not None, lambda r: r.get("conf_top1_placed"))
+    _t1_rate, _t1_n = _t1.get("rate"), _t1.get("n")
+    conf_pick_stats = {
+        "quinella": _rate(records, lambda r: r.get("conf_quinella_hit") is not None, lambda r: r.get("conf_quinella_hit")),
+        "trifecta": _rate(records, lambda r: r.get("conf_trifecta_hit") is not None, lambda r: r.get("conf_trifecta_hit")),
+        "trifecta_ins": _rate(records, lambda r: r.get("conf_trifecta_ins_hit") is not None, lambda r: r.get("conf_trifecta_ins_hit")),
+        "top1_placed": _t1,
+        "forced_placed": _rate(records, lambda r: r.get("conf_forced_placed") is not None, lambda r: r.get("conf_forced_placed")),
+        # 임계값 권고(표본 10+): 확신도 1위 입상률 <40% → 상향 / ≥70% → 유지·확대 / 그 외 축적 중
+        "threshold_advice": (
+            "상향(확신도 1위 입상률 낮음)" if (_t1_rate is not None and _t1_n >= 10 and _t1_rate < 40)
+            else ("유지·확대(확신도 1위 입상률 우수)" if (_t1_rate is not None and _t1_n >= 10 and _t1_rate >= 70)
+                  else "표본 축적 중")),
+    }
     return {
         "alert_stats": alert_stats,       # [신규 5번] 경고 신호 발생·적중·무시 통계
+        "conf_pick_stats": conf_pick_stats,   # [보완①] 확신도 1위 필수 복승 학습(적중률·입상률·임계값 권고)
         "win_tag_stats": win_tag_stats,   # [신규 4번] 신호조합별 적중률·고배당 적중률
         "total": len(records),
         "by_track": by_track, "by_month": by_month, "by_strategy": by_strategy,   # [5번]·[전략성과]
@@ -10104,6 +10137,26 @@ def _rec_combos_from_analysis_log(rk):
     return out
 
 
+def _conf_picks_from_log(rk):
+    """[확신도 복승 학습] analysis_log에 보존한 corePicks에서 확신도 복승/삼복승 조합 복원.
+    반환 {quinellas:[[a,b]], trifecta:[a,b,c]|None, trifectaIns:[...]|None, forced:[no], top1:no} 또는 None."""
+    try:
+        path, _, _ = _analysis_log_path(_canonical_log_key(rk))
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return None
+    cp = doc.get("corePicks") or {}
+    cq = cp.get("confQuinellas") or []
+    quinellas = [sorted(int(x) for x in (q.get("combo") or [])) for q in cq if len(q.get("combo") or []) == 2]
+    if not quinellas and not cp.get("confTrifecta"):
+        return None
+    def _s(v):
+        return sorted(int(x) for x in v) if v else None
+    return {"quinellas": quinellas, "trifecta": _s(cp.get("confTrifecta")),
+            "trifectaIns": _s(cp.get("confTrifectaIns")), "forced": cp.get("forcedHorses") or [],
+            "top1": cp.get("confTop1")}
+
+
 def _winning_quinella_odds(rk, top2):
     """[수익 자동 계산·추정] 실배당 미입력 시 승자 복승 조합(top2)의 마지막 시장배당을 analysis_log
     odds_timeline에서 조회(순서 무관). 확정배당이 아닌 시장 추정치. 없으면 None."""
@@ -10199,6 +10252,37 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     # [적중 기준 개선·1·2·3번] 유력마 기반 적중(기존 정확 적중과 병행·무삭제) + 신호별 적중 자동 태깅·저장.
     #   ⚠ 기존 quinella_hit/trifecta_hit(정확 조합)은 손익·기존 통계에 그대로 사용 — 새 지표는 별도.
     keyhorse_hit = _keyhorse_hit(an, top3)
+    # [보완①·확신도 복승 학습] 확신도 1위 필수 포함 복승/삼복승이 실제 적중했는지 판정 → 임계값 자동 조정 근거.
+    #   재분석 an.corePicks 우선, 경주 종료로 비면 저장 로그(_conf_picks_from_log) 폴백.
+    conf_quinella_hit = conf_trifecta_hit = conf_trifecta_ins_hit = None
+    conf_top1_placed = conf_forced_placed = None
+    try:
+        _cp = an.get("corePicks") or {}
+        _cq = [sorted(int(x) for x in (q.get("combo") or [])) for q in (_cp.get("confQuinellas") or []) if len(q.get("combo") or []) == 2]
+        _ctri = sorted(int(x) for x in _cp["confTrifecta"]) if _cp.get("confTrifecta") else None
+        _ctri_ins = sorted(int(x) for x in _cp["confTrifectaIns"]) if _cp.get("confTrifectaIns") else None
+        _forced = _cp.get("forcedHorses") or []
+        _top1 = _cp.get("confTop1")
+        if not _cq and not _ctri:                         # 재분석 공백 → 저장 로그 폴백
+            _saved = _conf_picks_from_log(rk)
+            if _saved:
+                _cq = _saved.get("quinellas") or []
+                _ctri = _saved.get("trifecta")
+                _ctri_ins = _saved.get("trifectaIns")
+                _forced = _saved.get("forced") or []
+                _top1 = _saved.get("top1")
+        if _cq or _ctri:
+            conf_quinella_hit = bool(top2 and any(c == top2 for c in _cq))
+            if _ctri:
+                conf_trifecta_hit = bool(top3s and _ctri == top3s)
+            if _ctri_ins:
+                conf_trifecta_ins_hit = bool(top3s and _ctri_ins == top3s)
+            if _top1 is not None:
+                conf_top1_placed = int(_top1) in top3       # 확신도 1위 말 입상(1~3착) 여부
+            if _forced:
+                conf_forced_placed = any(int(n) in top3 for n in _forced)   # 확신도 70+ 말 중 입상
+    except Exception as e:
+        print("[확신도복승학습] 판정 실패:", e)
     try:
         _learn_signal_stats(rk, an, top3, doc.get("date"))
     except Exception as e:
@@ -10402,6 +10486,10 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     record = {
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
         "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
+        # [보완①·확신도 복승 학습] 확신도 1위 필수 포함 복승/삼복승 적중·확신도 1위 입상 여부(임계값 자동 조정 근거)
+        "conf_quinella_hit": conf_quinella_hit, "conf_trifecta_hit": conf_trifecta_hit,
+        "conf_trifecta_ins_hit": conf_trifecta_ins_hit, "conf_top1_placed": conf_top1_placed,
+        "conf_forced_placed": conf_forced_placed,
         # [오늘 통계 대시보드] 날짜·경마장·유력마 기반 적중(집계·경마장별·타임라인용)
         "date": doc.get("date"), "venue": (_area_num(rk)[0] or None),
         "keyhorse_quinella_hit": keyhorse_hit["quinella_hit"], "keyhorse_trifecta_hit": keyhorse_hit["trifecta_hit"],
