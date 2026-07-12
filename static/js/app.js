@@ -5986,7 +5986,7 @@
       }).join('')
       : `<div style="font-size:20px;font-weight:800;margin:4px 0">🎯 복승: <span style="color:#4ea1ff">${q.join('+')}</span> ${qo}</div>`;
     const triIns = cp.confTrifectaIns;
-    const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번(${cp.confTop1Conf})</span>` : '';
+    const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번(${cp.confTop1Conf})${cp.confTop1High ? ' 🔺고배당→삼복승 보험' : ''}</span>` : '';
     return `<div style="margin:6px 0;padding:12px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
       <div style="font-size:17px;font-weight:900;color:#38d39f;margin-bottom:6px">🎯 핵심 추천 <span class="hint" style="font-weight:400;font-size:11px">(엄격 우선순위 · 딱 이것만)</span> ${confHead}</div>
       ${qLines}

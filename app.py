@@ -5594,85 +5594,113 @@ def _core_picks(key_horses, dark_horses, reversal_roles, drops, curWin, curQ, va
 
 
 def _confidence_picks(confidence, curWin, curQ, key_horses, single_rank, anomaly_horse, valid_nos):
-    """[확신도 복승 필수 포함] 확신도(BMED confidence engine) 1위 말을 반드시 복승 메인에 편성.
-      - 확신도 70점+ 말: 무조건 복승 메인에 포함(빠지면 놓침 방지 — 후쿠시마 6번 96.2 케이스)
-      - 확신도 1위+2위 조합, 확신도 1위+시장유력(단승 최저) 조합을 복승 자동 편성
-      - 삼복승 메인=시장유력+확신도1·2위, 보험=확신도1·2위+이상감지 말(TOP5 이상감지 자동 포함)
-      반환 {top1,top1Conf,quinellas:[{combo,odds,reason}],forced:[no],trifecta,trifectaIns} 또는 None.
+    """[복승 축 = 시장 유력마 저배당 기준] 확신도 1위가 고배당(30배+)이면 복승 축으로 쓰지 않고 삼복승 보험으로만.
+      복승 메인 축 우선순위: ①시장 유력마 상위 2두(저배당) ②급락/역배열 저배당 신호말 ③전적/확신도 저배당 말.
+      ⚠ 고배당(30배+) 말은 복승 축 금지(엉뚱한 873배 복승 방지) → 삼복승 보험 전용.
+      삼복승 메인=시장 유력마 3두 / 보험=고배당 확신도 말(또는 이상감지) + 유력마 2두.
+      반환 {favAxis,top1,top1Conf,top1High,quinellas:[{combo,odds,reason}],forced,trifecta,trifectaIns} 또는 None.
       ⚠ 기존 _core_picks·betRecommend는 그대로 두고 별도 필드로만 부가(무삭제)."""
+    HIGH = 30.0            # 고배당 기준(복승 축 금지)
     hmap = (confidence or {}).get("horses") or {}
     vset = set(int(v) for v in (valid_nos or []))
     ranked = [int(n) for n in ((confidence or {}).get("ranked") or []) if int(n) in vset]
-    if not ranked:
-        return None
 
     def _conf(no):
         return float((hmap.get(no) or hmap.get(str(no)) or {}).get("confidence") or 0.0)
+
+    def _rep(no):        # 대표배당: 단승 우선, 없으면 최저 참여 복승(중앙 JRA=단승 미수집 대비)
+        if curWin.get(no):
+            return curWin[no]
+        best = None
+        for (a, b), o in (curQ or {}).items():
+            if no in (a, b) and o > 0 and (best is None or o < best):
+                best = o
+        return best
+
+    def _high(no):
+        r = _rep(no)
+        return (r is not None and r >= HIGH)
 
     def _q(a, b):
         if a is None or b is None or a == b:
             return None
         return (curQ or {}).get((min(a, b), max(a, b)))
 
-    top1 = ranked[0]
-    top1c = _conf(top1)
-    if top1c < 25:      # 확신도 1위가 '관찰' 미만이면 신호 부족 → 억지 추천 방지
+    # 시장 유력마(저배당) 순위 — 계산된 유력마(key_horses) 우선, 나머지는 대표배당 최저순 보충.
+    order = []
+    for no in (key_horses or []):
+        if int(no) in vset and int(no) not in order:
+            order.append(int(no))
+    order += sorted([no for no in vset if no not in order and _rep(no) is not None], key=lambda n: _rep(n))
+    fav = [no for no in order if not _high(no)]          # 복승 축 후보 = 저배당만(고배당 제외)
+    if len(fav) < 2:                                      # 저배당 2두 미확보 → 유력마 순서로 보충
+        for no in order:
+            if no not in fav:
+                fav.append(no)
+    if len(fav) < 2:
         return None
+    fav1, fav2 = fav[0], fav[1]
+    fav3 = fav[2] if len(fav) >= 3 else None
+
+    top1 = ranked[0] if ranked else None
+    top1c = _conf(top1) if top1 is not None else 0.0
+    top1_high = _high(top1) if top1 is not None else False
     top2 = ranked[1] if len(ranked) >= 2 else None
-    # 시장유력 = 확신도 1위와 다른 시장 최고인기(단승 최저배당). 확신도 1위가 시장 인기이기도 하면 다음 인기마.
-    market = None
-    for no in (single_rank or []):
-        if int(no) != top1:
-            market = int(no)
-            break
-    if market is None and key_horses:
-        for no in key_horses:
-            if int(no) != top1:
-                market = int(no)
-                break
 
     quinellas, seen = [], set()
 
+    COMBO_HIGH = 50.0     # 복승 조합 자체가 고배당이면 축으로 부적합(단승 미수집 중앙 JRA 대비)
     def _add(a, b, reason):
         if a is None or b is None or a == b:
+            return
+        if _high(a) or _high(b):        # [핵심] 고배당(30배+) 말은 복승 축 금지
+            return
+        _o = _q(a, b)
+        if _o is not None and _o >= COMBO_HIGH:   # [핵심2] 조합 배당이 고배당(50배+)이면 축 금지(873배 복승 방지)
             return
         key = (min(a, b), max(a, b))
         if key in seen:
             return
         seen.add(key)
-        quinellas.append({"combo": [min(a, b), max(a, b)], "odds": _q(a, b), "reason": reason})
+        quinellas.append({"combo": [min(a, b), max(a, b)], "odds": _o, "reason": reason})
 
-    _add(top1, top2, "확신도1위+2위")                                   # ① 확신도 1위+2위
-    if market is not None and market not in (top1, top2):
-        _add(top1, market, "확신도1위+시장유력")                         # ② 확신도 1위+시장유력
-    # ③ 확신도 70+ 말은 무조건 복승 메인에 포함(아직 조합에 없으면 확신도 1위와 페어)
-    forced = [no for no in ranked if _conf(no) >= 70]
+    # ① 복승 메인 = 시장 유력마 1위+2두(저배당) — 항상
+    _add(fav1, fav2, "시장유력")
+    # ② 확신도 1위가 저배당이면 확신도 조합도 추가(후쿠시마 6번 저배당 케이스 보존)
+    if top1 is not None and not top1_high and _conf(top1) >= 25:
+        if top2 is not None and not _high(top2):
+            _add(top1, top2, "확신도1위+2위")
+        _add(top1, fav1, "확신도1위+시장유력")
+    # ③ 급락/역배열 저배당 신호말(이상감지)이 있으면 시장유력과 페어(2순위)
+    if anomaly_horse is not None and not _high(int(anomaly_horse)) and int(anomaly_horse) not in (fav1, fav2):
+        _add(fav1, int(anomaly_horse), "시장유력+급락")
+    # ④ 확신도 70+ '저배당' 말은 복승 필수 포함(고배당은 제외 → 삼복승 보험으로)
+    forced = [no for no in ranked if _conf(no) >= 70 and not _high(no)]
     covered = set()
     for qq in quinellas:
         covered.update(qq["combo"])
     for no in forced:
         if no not in covered:
-            partner = top1 if no != top1 else (top2 if top2 is not None else market)
-            _add(partner, no, "확신도70+ 필수포함")
+            _add(fav1 if no != fav1 else fav2, no, "확신도70+ 필수포함")
             covered.add(no)
     if not quinellas:
         return None
 
-    # ④ 삼복승 — 메인=시장유력+확신도1·2위 / 보험=확신도1·2위+이상감지(TOP5 이상감지 말 자동 포함)
-    trifecta = trifecta_ins = None
-    if top2 is not None:
-        if market is not None and market not in (top1, top2):
-            trifecta = sorted([market, top1, top2])
-        ah = int(anomaly_horse) if anomaly_horse is not None else None
-        if ah is not None and ah not in (top1, top2):
-            trifecta_ins = sorted([top1, top2, ah])
-        if trifecta is None:                                            # 시장유력이 이미 확신도 상위면 3위로 보완
-            for no in ranked[2:]:
-                trifecta = sorted([top1, top2, no])
-                break
+    # ⑤ 삼복승 메인 = 시장 유력마 3두 / 보험 = 고배당 확신도 말(또는 이상감지) + 유력마 2두
+    trifecta = sorted([fav1, fav2, fav3]) if fav3 is not None else None
+    trifecta_ins = None
+    if top1 is not None and top1_high and top1 not in (fav1, fav2):
+        trifecta_ins = sorted([top1, fav1, fav2])                       # 고배당 확신도 말 → 유력마 2두와 보험
+    elif top1 is not None and not top1_high and top2 is not None and anomaly_horse is not None:
+        _cand = [top1, top2, int(anomaly_horse)]                        # 확신도 저배당: 1·2위+이상감지(후쿠시마 5+6+8)
+        if len(set(_cand)) == 3 and not any(_high(x) for x in _cand):
+            trifecta_ins = sorted(_cand)
+    if trifecta_ins is None and anomaly_horse is not None and int(anomaly_horse) not in (fav1, fav2):
+        trifecta_ins = sorted([fav1, fav2, int(anomaly_horse)])         # 폴백: 유력마 2두 + 이상감지
 
-    return {"top1": top1, "top1Conf": round(top1c, 1), "quinellas": quinellas[:3],
-            "forced": forced, "trifecta": trifecta, "trifectaIns": trifecta_ins}
+    return {"favAxis": [fav1, fav2], "top1": top1, "top1Conf": round(top1c, 1),
+            "top1High": top1_high, "quinellas": quinellas[:3], "forced": forced,
+            "trifecta": trifecta, "trifectaIns": trifecta_ins}
 
 
 def _triple_analyze(rk, rec):
@@ -6882,6 +6910,8 @@ def _triple_analyze(rk, rec):
             core_picks["forcedHorses"] = conf_q.get("forced") or []
             core_picks["confTop1"] = conf_q["top1"]
             core_picks["confTop1Conf"] = conf_q["top1Conf"]
+            core_picks["confTop1High"] = conf_q.get("top1High")   # 확신도 1위 고배당(30배+) → 복승 축 제외·삼복승 보험 표기용
+            core_picks["favAxis"] = conf_q.get("favAxis")         # 시장 유력마 복승 축 2두
 
             # [보완②] 삼복승 예상배당 표기 — 실배당(trio_map) 우선, 없으면 _trio_est 추정.
             def _tri_odds(cc):

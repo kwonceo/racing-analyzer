@@ -557,7 +557,7 @@
         var _hasQ = cp && (_confQ.length || (cp.quinella && cp.quinella.length === 2));
         if (_hasQ && !d.recommendClosed) {
           var cpBox = mk('div', 'margin:0 0 6px;padding:8px 11px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
-          var _hdTxt = '🎯 핵심 추천 (딱 이것만)' + (cp.confTop1 != null ? '  확신도1위 ' + cp.confTop1 + '번' : '');
+          var _hdTxt = '🎯 핵심 추천 (딱 이것만)' + (cp.confTop1 != null ? '  확신도1위 ' + cp.confTop1 + '번' + (cp.confTop1High ? '🔺고배당→삼복승보험' : '') : '');
           cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:15px', _hdTxt));
           // [확신도 복승 필수] 확신도 1위 말이 반드시 포함된 복승 라인(확신도1위+2위·확신도1위+시장유력·70+ 필수)
           if (_confQ.length) {
