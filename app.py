@@ -5963,6 +5963,85 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None):
     return {"quinellas": final_q, "trifectas": final_t}
 
 
+DARK_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_cases.json")
+
+
+def _dark_cases_load():
+    try:
+        return json.load(open(DARK_CASES_FILE, encoding="utf-8"))
+    except Exception:
+        return {"cases": [], "stats": {"total": 0, "hit": 0, "byStars": {}}}
+
+
+def _dark_cases_save(d):
+    try:
+        os.makedirs(os.path.dirname(DARK_CASES_FILE), exist_ok=True)
+        json.dump(d, open(DARK_CASES_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[복병케이스] 저장 실패:", e)
+
+
+def _dark_case_similar(dh):
+    """현재 복병(dh)과 유사한 과거 복병 고배당 '적중' 사례 수(등급 이상·배당대 근접)."""
+    try:
+        db = _dark_cases_load()
+        stars = dh.get("stars") or 0
+        odds = dh.get("oddsRepr") or 0
+        n = 0
+        for c in (db.get("cases") or []):
+            if c.get("hit") and (c.get("stars") or 0) >= stars \
+                    and abs((c.get("oddsRepr") or 0) - odds) <= max(5, odds * 0.5):
+                n += 1
+        return n
+    except Exception:
+        return 0
+
+
+def _dark_case_record(rk, an, top3):
+    """[3번·복병 케이스 학습] 결과 입력 시 복병(darkHorses)의 입상 여부를 케이스로 저장.
+    오비히로·마에바시·모리오카·카나자와·하코다테 등 복병 고배당 패턴 축적 → _dark_case_similar 로 유사강조."""
+    try:
+        darks = an.get("darkHorses") or []
+        if not darks:
+            return
+        db = _dark_cases_load()
+        top3s = set(int(x) for x in (top3 or []) if x is not None)
+        venue = _area_num(rk)[0] or rk
+        for d in darks:
+            no = d.get("no")
+            if no is None:
+                continue
+            hit = int(no) in top3s
+            place = None
+            if hit:
+                for i, x in enumerate(top3 or []):
+                    if int(x) == int(no):
+                        place = i + 1
+                        break
+            db.setdefault("cases", []).append({
+                "raceKey": rk, "venue": venue, "no": int(no),
+                "stars": d.get("stars"), "tier": d.get("tier"), "tierReason": d.get("tierReason"),
+                "smartMoney": bool(d.get("smartMoney")), "oddsRepr": d.get("oddsRepr"),
+                "hit": hit, "place": place, "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            })
+        db["cases"] = db["cases"][-500:]
+        st = {"total": 0, "hit": 0, "byStars": {}}
+        for c in db["cases"]:
+            st["total"] += 1
+            s = str(c.get("stars") or 0)
+            bs = st["byStars"].setdefault(s, {"total": 0, "hit": 0})
+            bs["total"] += 1
+            if c.get("hit"):
+                st["hit"] += 1
+                bs["hit"] += 1
+        db["stats"] = st
+        _dark_cases_save(db)
+        _nhit = sum(1 for d in darks if int(d.get("no") or -1) in top3s)
+        print("[복병케이스] %s: 복병 %d두 저장(입상 %d)" % (rk, len(darks), _nhit))
+    except Exception as e:
+        print("[복병케이스] 기록 실패:", e)
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -6483,6 +6562,58 @@ def _triple_analyze(rk, rec):
 
     # [복승 크로스 역배열] 인기 상위쌍과의 복승/쌍승 조합 편차로 각 말의 실질 강세(2착 유력) 점수화(전체 말 쌍 비교).
     cross_reversal = _cross_reversal(curQ, curD, fav_rank, valid_nos)
+
+    # ═══ [복병 신뢰도 등급] ★★★ 스마트머니 / ★★ 초기급락보존·크로스역배열 / ★ 집중급락10회+ ═══
+    #   실전 케이스(오비히로·마에바시·모리오카·카나자와·하코다테): 복병 고배당 입상 다수 → 등급화·강조.
+    dark_highlight = None
+    try:
+        _edrop = set(int(k) for k in (early_drop_horses or {}).keys())
+        _crev = set(int(c.get("no")) for c in (cross_reversal or []) if c.get("no") is not None)
+
+        def _dark_repr2(h):
+            if curWin.get(h):
+                return curWin[h]
+            best = None
+            for (a, b), o in curQ.items():
+                if h in (a, b) and o > 0 and (best is None or o < best):
+                    best = o
+            return best
+        _existing = {d.get("no") for d in dark_horses}
+        # ★★ 후보(초기급락 보존·크로스역배열)를 복병에 추가(미존재 시·마감 전만 의미)
+        for _no in sorted(_edrop | _crev):
+            if _no in _existing or (valid_nos and _no not in valid_nos):
+                continue
+            dark_horses.append({"no": _no, "anomCount": 0, "smartMoney": False, "forced": False,
+                                "oddsRepr": _dark_repr2(_no), "confidence": "중",
+                                "note": ("📉 초기급락 보존(T-5분+)" if _no in _edrop else "🔄 크로스역배열")})
+            _existing.add(_no)
+        # 등급 태깅(★★★/★★/★)
+        for _dh in dark_horses:
+            _no = _dh.get("no")
+            if _dh.get("smartMoney"):
+                _dh["stars"], _dh["tier"], _dh["tierReason"] = 3, "최강", "스마트머니(상승후급락)"
+            elif _no in _edrop or _no in _crev:
+                _dh["stars"], _dh["tier"] = 2, "강함"
+                _dh["tierReason"] = "초기급락 보존(T-5분+)" if _no in _edrop else "크로스역배열"
+            else:
+                _dh["stars"], _dh["tier"] = 1, "참고"
+                _dh["tierReason"] = "집중급락 %d회" % (_dh.get("anomCount") or 0)
+            _dh["tierLabel"] = ("★" * _dh["stars"]) + ("☆" * (3 - _dh["stars"])) + " " + _dh["tier"]
+        # 등급(별) 우선 정렬 → 집중급락 횟수
+        dark_horses.sort(key=lambda d: (-(d.get("stars") or 0), -(d.get("anomCount") or 0)))
+        # [darkHighlight] 최강(★★★) 복병 = 오버레이 고배당 강조 + 유력마 복승 조합(유력1+복병)
+        _top_dark = next((d for d in dark_horses if (d.get("stars") or 0) >= 3), None)
+        if _top_dark and key_horses:
+            _kh0 = int(key_horses[0])
+            _dno = int(_top_dark["no"])
+            _combo = sorted([_kh0, _dno]) if _kh0 != _dno else None
+            _codds = curQ.get((min(_combo), max(_combo))) if _combo else None
+            dark_highlight = {"no": _dno, "stars": 3, "oddsRepr": _top_dark.get("oddsRepr"),
+                              "quinella": _combo, "quinellaOdds": _codds,
+                              "message": "💰 스마트머니 복병 포함 → 고배당 가능!",
+                              "cases": _dark_case_similar(_top_dark)}
+    except Exception as _te:
+        print("[복병 등급] 실패:", _te)
 
     # [핵심 추천·추천 과다 근본 해결] 엄격 우선순위로 축 2두만 선정 → 복승 X+Y·삼복승 X+Y+Z(딱 이것만). 마감 후 미표시.
     core_picks = (None if after_close else
@@ -7533,6 +7664,7 @@ def _triple_analyze(rk, rec):
         "validHorses": sorted(valid_nos),   # [잔존마 필터·2번] 현재 배당 등장 마번(프론트 TOP5 필터 기준)
         "realtimeAdded": realtime_added,   # [3번] 실시간 급락/역배열로 유력마에 추가된 말(오버레이 '⚡ 실시간 추가')
         "darkHorses": dark_horses,   # [복병_집중급락] 집중급락 10회+/스마트머니 → 배당순위 무관 복병 자동 편입
+        "darkHighlight": dark_highlight,   # [복병 등급] ★★★ 최강 복병(스마트머니)+유력마 복승 조합·유사케이스(오버레이 강조)
         "marketFavorites": market_favorites,   # [전적 과가중 해결] 저배당(5배↓) 시장유력마(전적 미수집도 유력마 편입)
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
         "reversalRoles": reversal_roles,   # [역배열 강도별 처리] challenger별 축/보조/보험 역할 + 지속성(확정/후보)
@@ -11314,6 +11446,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _learn_smart_money(rk, an, top3, payouts, time.strftime("%Y-%m-%d"))
     except Exception as e:
         print("[스마트머니학습] 실패:", e)
+    # [복병 케이스 학습·3번] darkHorses(★★★/★★/★)의 입상 여부를 케이스로 저장(고배당 패턴 축적)
+    try:
+        _dark_case_record(rk, an, top3)
+    except Exception as e:
+        print("[복병케이스학습] 실패:", e)
     # [복기] 결과 적중/판정 요약을 히스토리 파일에도 저장 → 통계 탭에서 재계산 없이 표시
     try:
         doc["review"] = {

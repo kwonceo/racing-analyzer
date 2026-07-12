@@ -3266,19 +3266,33 @@
     const dh = ((a && a.darkHorses) || []).filter((h) => !keys.has(Number(h.no))).slice(0, 4);
     if (!dh.length) return '';
     return dh.map((h) => {
-      const hi = h.confidence === '높음';
-      const col = hi ? '#f472b6' : '#c084fc';
-      const conf = hi ? '<span class="chip" style="border-color:#f472b6;color:#f472b6;font-weight:700">신뢰 높음</span>' : '';
+      const stars = h.stars || (h.smartMoney ? 3 : h.forced ? 1 : 2);
+      // ★★★ 최강=핑크 / ★★ 강함=보라 / ★ 참고=연보라
+      const col = stars >= 3 ? '#f472b6' : stars === 2 ? '#c084fc' : '#a78bfa';
+      const tierBadge = h.tierLabel ? `<span class="chip" style="border-color:${col};color:${col};font-weight:800">${esc(h.tierLabel)}</span>` : '';
       const sm = h.smartMoney ? '<span class="chip" style="border-color:#fbbf24;color:#fcd34d;font-weight:700">💰 스마트머니</span>' : '';
       const forced = h.forced ? `<span class="chip" style="border-color:#f472b6;color:#f472b6">🔥 집중급락 ${h.anomCount}회</span>` : '';
+      const reason = h.tierReason ? `<span class="hint" style="margin-left:auto;color:${col}">${esc(h.tierReason)}</span>` : `<span class="hint" style="margin-left:auto;color:${col}">${esc(h.note || '')}</span>`;
       return `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(244,114,182,.08);border-left:3px solid ${col}">
         <b style="min-width:30px;color:${col}">복병</b>
         <b style="min-width:32px;color:#4ea1ff">${h.no}번</b>
         <span class="hint"><b style="color:#e2e8f0">${h.oddsRepr != null ? h.oddsRepr + '배' : '배당-'}</b></span>
-        ${forced}${sm}${conf}
-        <span class="hint" style="margin-left:auto;color:${col}">${esc(h.note || '')}</span>
+        ${tierBadge}${sm}${forced}
+        ${reason}
       </div>`;
     }).join('');
+  }
+
+  // [복병 등급·2번] ★★★ 최강 복병(스마트머니) 감지 → 고배당 복승 강조 배너(유력1+복병 + 유사케이스)
+  function renderDarkHighlight(a) {
+    const dh = a && a.darkHighlight;
+    if (!dh || !dh.quinella) return '';
+    const cases = dh.cases > 0 ? `<span class="hint" style="color:#fcd34d;margin-left:8px">유사 복병 고배당 <b>${dh.cases}회</b> 적중</span>` : '';
+    const odds = dh.quinellaOdds != null ? ` <b style="color:#ffd24f">(${dh.quinellaOdds}배)</b>` : (dh.oddsRepr != null ? ` <span class="hint">복병 ${dh.oddsRepr}배</span>` : '');
+    return `<div style="margin:6px 0;padding:9px 12px;border:2px solid #f472b6;border-radius:9px;background:linear-gradient(90deg,rgba(244,114,182,.18),rgba(251,191,36,.12))">
+      <div style="font-weight:900;color:#f9a8d4;font-size:15px">${esc(dh.message || '💰 스마트머니 복병 포함 → 고배당 가능!')}</div>
+      <div style="font-weight:800;font-size:16px;margin-top:4px;color:#e2e8f0">복승: ${dh.quinella.join('+')}${odds}${cases}</div>
+    </div>`;
   }
 
   // [유력마 통일] 복승 대표배당 낮은 순 + 이상감지 상위 노출 — TOP5·⭐유력마 라인 공통 정렬 기준.
@@ -3654,6 +3668,7 @@
     const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     el.innerHTML = `
       ${renderCorePicks(a)}
+      ${renderDarkHighlight(a)}
       ${renderTopHorses(a)}
       ${renderBmedMatrixPanel(a)}
       <div class="matrix-title">🚨 이상감지 ${a.sport && a.sport !== 'horse' ? `<span class="chip" style="border-color:#a855f7;color:#c4b5fd">${a.sport === 'cycle' ? '🚴 경륜' : '🚤 경정'}</span> ` : ''}<span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.baselineReset ? '⚠️ 기준값 재설정됨' : a.baselineSet ? '🎯 기준값 설정됨' : a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>
@@ -5781,6 +5796,7 @@
       ${renderAlertSignal(a.alertSignal, _horseRoleMap(a))}
       ${renderMarketFavorites(a)}
       ${renderRealtimeAdded(a)}
+      ${renderDarkHighlight(a)}
       ${renderKoreaIntegratedTable(a.integrated)}
       ${renderBmedMatrixPanel(a)}
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>

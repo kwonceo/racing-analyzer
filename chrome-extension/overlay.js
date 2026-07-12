@@ -736,6 +736,16 @@
           });
           panel.appendChild(mhBox);
         }
+        // [복병 등급·2번] ★★★ 스마트머니 복병 → 고배당 복승 강조 배너
+        var dhH = d.darkHighlight;
+        if (dhH && dhH.quinella && !d.recommendClosed) {
+          var dhb = mk('div', 'margin:0 0 6px;padding:8px 11px;border:2px solid #f472b6;border-radius:9px;background:rgba(244,114,182,.18)');
+          dhb.appendChild(mk('div', 'font-weight:900;color:#f9a8d4;font-size:14px', dhH.message || '💰 스마트머니 복병 → 고배당 가능!'));
+          var dq = mk('div', 'font-weight:800;font-size:16px;margin-top:3px;color:#e2e8f0');
+          dq.textContent = '복승: ' + dhH.quinella.join('+') + (dhH.quinellaOdds != null ? ' (' + dhH.quinellaOdds + '배)' : '') + (dhH.cases > 0 ? '  · 유사 ' + dhH.cases + '회 적중' : '');
+          dhb.appendChild(dq);
+          panel.appendChild(dhb);
+        }
         // [📊 배당 매트릭스] 간략 매트릭스 토글(팝업 [📊 매트릭스] 버튼·오버레이 버튼 동기화·경마·경륜 공통)
         renderMatrix(panel, d, !!st.ovShowMatrix);
         // [⏱ 타임라인] 팝업 [⏱ 타임라인] 버튼 켜짐 시 신호 타임라인 표시
@@ -823,9 +833,10 @@
           darkSeen[h.no] = 1;
           var anom = Number(h.anomCount || 0), smart = !!h.smartMoney, forced = !!h.forced;
           var pr = (smart && (forced || anom >= 10)) ? 3 : (forced || anom >= 10) ? 2 : smart ? 2 : 1;  // ①동시=3 ②집중급락=2
-          darkCands.push({ no: Number(h.no), pr: pr, anom: anom, smart: smart,
-            tag: (h.note || '집중급락'), conf: h.confidence,
-            col: (h.confidence === '높음') ? '#f472b6' : '#c084fc' });
+          var st = h.stars || pr;   // [복병 등급] 서버 ★ 등급 우선
+          darkCands.push({ no: Number(h.no), pr: st, stars: st, tierLabel: h.tierLabel, anom: anom, smart: smart,
+            tag: (h.tierReason || h.note || '집중급락'), conf: h.confidence,
+            col: (st >= 3) ? '#f472b6' : (st === 2 ? '#c084fc' : '#a78bfa') });
         });
         // ③ 역배열 감지 말(우선순위 최하)
         if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null) {
@@ -859,8 +870,9 @@
         darkTop.forEach(function (h) {
           var db = mk('div', 'margin:2px 0');
           db.appendChild(mk('span', 'color:#94a3b8', '🐎 복병 '));
+          if (h.tierLabel) db.appendChild(mk('span', 'font-weight:800;font-size:11px;color:' + h.col, h.tierLabel + ' '));   // [복병 등급] ★★★/★★/★
           db.appendChild(mk('span', 'font-weight:800;color:' + h.col, h.no + '번 '));
-          var note = h.tag + (h.smart ? '' : '') + (h.conf === '높음' ? ' · 신뢰↑' : '');
+          var note = h.tag + (h.conf === '높음' ? ' · 신뢰↑' : '');
           db.appendChild(mk('span', 'font-size:11px;font-weight:700;color:' + h.col, note));
           panel.appendChild(db);
         });
