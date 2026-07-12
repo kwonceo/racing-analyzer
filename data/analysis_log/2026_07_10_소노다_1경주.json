@@ -1,0 +1,243 @@
+{
+ "race_id": "2026_07_10_소노다_1경주",
+ "raceKey": "소노다 1경주",
+ "sport": "horse",
+ "category": "japan_local",
+ "date": "2026-07-10",
+ "race": "소노다 1경주",
+ "analyzed_at": "00:48:37",
+ "updated_at": "00:48:37",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "asyukk34 Chrome확장 자동수집"
+ },
+ "odds_timeline": [],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 2,
+   "name": "ナリタゲッコウ",
+   "jockey": "井上幹（兵庫）",
+   "record_score": 70.7,
+   "record_detail": "최근 3-2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 1,
+   "name": "シュガーラッシュ",
+   "jockey": "高橋洸（兵庫）",
+   "record_score": 10.0,
+   "record_detail": "최근 7-8-3-11-12",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.2착 -30 = 30점"
+  },
+  {
+   "no": 3,
+   "name": "シトロネット",
+   "jockey": "永井孝（兵庫）",
+   "record_score": 0.0,
+   "record_detail": "최근 5-6-7-8-9",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
+  },
+  {
+   "no": 4,
+   "name": "オメガジェットマン",
+   "jockey": "大山真（兵庫）",
+   "record_score": 0.0,
+   "record_detail": "최근 7-7-6-9-7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.2착 -30 = 30점"
+  },
+  {
+   "no": 5,
+   "name": "シームレス",
+   "jockey": "塩津璃（兵庫）",
+   "record_score": 0.0,
+   "record_detail": "최근 8-9-6-10-7",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
+  },
+  {
+   "no": 6,
+   "name": "エイシンシャルマン",
+   "jockey": "渡瀬和（兵庫）",
+   "record_score": 2.5,
+   "record_detail": "최근 10-8-9-6-3",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.2착 -30 = 30점"
+  },
+  {
+   "no": 7,
+   "name": "ビップピュアエース",
+   "jockey": "高畑皓（兵庫）",
+   "record_score": 10.0,
+   "record_detail": "최근 4-8-8-8-6",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.8착 -30 = 30점"
+  },
+  {
+   "no": 8,
+   "name": "バイアスペクター",
+   "jockey": "長尾翼（兵庫）",
+   "record_score": 0.0,
+   "record_detail": "최근 7-9-9-7-9",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.2착 -30 = 30점"
+  },
+  {
+   "no": 9,
+   "name": "ライトブラーヴ",
+   "jockey": "山本太（兵庫）",
+   "record_score": 2.5,
+   "record_detail": "최근 6-5-6-3-5",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   2
+  ],
+  "eliminated": [
+   1,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "elimination_reasons": {
+   "1": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.2착 -30 = 30점",
+   "3": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점",
+   "4": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.2착 -30 = 30점",
+   "5": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점",
+   "6": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.2착 -30 = 30점",
+   "7": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.8착 -30 = 30점",
+   "8": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.2착 -30 = 30점",
+   "9": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+  }
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    1,
+    2
+   ],
+   "trio": [
+    1,
+    2,
+    6
+   ]
+  },
+  "form": {
+   "quinella": [
+    1,
+    2
+   ],
+   "trio": [
+    1,
+    2,
+    7
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    1,
+    2
+   ],
+   "trio": [
+    1,
+    2,
+    6
+   ]
+  }
+ },
+ "summary": "유력마 2·1·6 / 복승 1+2",
+ "keyHorses": [
+  2,
+  1,
+  6
+ ],
+ "result": {
+  "1st": 2,
+  "2nd": 3,
+  "3rd": 9
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [
+   1,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "form_pick": 2,
+  "form_pick_hit": true,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "hit_basis": {
+   "formScore": 70.7,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 2번 적중"
+  }
+ },
+ "profit": null,
+ "review": null
+}

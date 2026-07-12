@@ -1,0 +1,59 @@
+{
+ "date": "2026-07-11",
+ "results_summary": {
+  "total_races": 0,
+  "hits": 0,
+  "hit_rate": 0.0,
+  "profit": {
+   "net": 0,
+   "settled": 0
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 126,
+  "quality_score": 0,
+  "ai_ready_races": 0,
+  "patterns_tagged": []
+ },
+ "bigdata": {
+  "by_track": {},
+  "by_field_size": {},
+  "by_time_zone": {},
+  "by_grade": {},
+  "by_condition": {},
+  "by_weather": {},
+  "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
+ },
+ "cumulative_pattern_reliability": {
+  "마감급락": {
+   "label": "급락 감지 적중",
+   "hit": 22,
+   "n": 22,
+   "rate": 100.0
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 6,
+   "n": 15,
+   "rate": 40.0
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 21,
+   "n": 42,
+   "rate": 50.0
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 33,
+   "n": 89,
+   "rate": 37.1
+  }
+ },
+ "key_learnings": [],
+ "missed_opportunities": [],
+ "pattern_discoveries": [],
+ "system_improvements": [],
+ "tomorrow_focus": [],
+ "generated_at": "2026-07-11 22:00:15"
+}

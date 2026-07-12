@@ -1,0 +1,22 @@
+{
+ "race": "카와사키 11경주",
+ "date": "2026-07-09",
+ "result": "6-1-5",
+ "missed_horse": 6,
+ "signal_existed": true,
+ "signal_type": "마감급락+역배열",
+ "signal_time": "T-1분",
+ "signal_detail": "4+6 -33%",
+ "why_missed": "유력마 TOP3 밖이라 추천 제외",
+ "lesson": "막판 급락+역배열 말은 TOP3 밖이어도 삼복승 보험 필수",
+ "new_rule": "T-2분 이내 급락+역배열 동시 감지 말 → 삼복승 강제 편성",
+ "review_detail": {
+  "recommend_basis": "20:15 복승 1+6 추천:\n 1번: 전적 A등급·인기1위·연속하락\n 6번: 역배열 감지·4+6 -33% 급락\n 신뢰도: 72점",
+  "why_trifecta_5": "5번: 전적 A등급 보조 후보\n 배당 신호 없지만 전적 우수\n 삼복승 보험으로 편성",
+  "why_missed_detail": "6번 T-1분 급락 감지됐지만\n 유력마 TOP3(1·8·5) 밖이라\n 복승 메인 미편성\n → 새 규칙: 막판 급락+역배열 말\n   TOP3 밖이어도 삼복승 강제 편성"
+ },
+ "rule_applied": true,
+ "rule_impl": "_forced_trifecta_insurance (app.py) — T-2분 이내 급락(≤-30%)+역배열 동시말 → 삼복승 강제보험",
+ "manual_case": true,
+ "saved_at": "2026-07-10 00:32:37"
+}

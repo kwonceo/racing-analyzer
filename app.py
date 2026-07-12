@@ -1531,6 +1531,57 @@ def third_place_stats():
                     "note": "저배당 압축 축 2두 확정 후 고배당 3착 후보(급락/역배열/전적/연속하락)의 3착·입상 적중률."})
 
 
+@app.route("/api/learning/pattern-confidence", methods=["GET"])
+def pattern_confidence():
+    """[복기 학습 재설계 2·4번] 신호 유형별 발생/적중/적중률 + 통계 신뢰도(표본 50회 게이팅). 공식 수정 없음."""
+    return jsonify(_pattern_confidence())
+
+
+@app.route("/api/thresholds/optimize", methods=["GET"])
+def thresholds_optimize():
+    """[기준치 도출 2·3·5번] 누적 데이터로 신호 기준치별 적중률·최적 기준치 추천(자동 적용 안 함)."""
+    return jsonify(_threshold_candidates())
+
+
+@app.route("/api/thresholds/config", methods=["GET"])
+def thresholds_config():
+    """[기준치 도출 4번] 현재 적용된 기준치 + 변경 이력."""
+    c = _threshold_config_load()
+    return jsonify({"current": {k: c.get(k) for k in _THRESHOLD_DEFAULTS}, "history": c.get("history")})
+
+
+@app.route("/api/thresholds/apply", methods=["POST"])
+def thresholds_apply():
+    """[기준치 도출 4번] 사람이 승인한 기준치를 config에 반영(이전값 자동 백업). body{key,value} 또는 body{current:{...}}."""
+    body = request.get_json(silent=True) or {}
+    cur = _threshold_config_load()
+    new = {k: cur.get(k) for k in _THRESHOLD_DEFAULTS}
+    prev = dict(new)
+    if body.get("current"):
+        for k, v in body["current"].items():
+            if k in _THRESHOLD_DEFAULTS:
+                new[k] = v
+    elif body.get("key") in _THRESHOLD_DEFAULTS:
+        try:
+            new[body["key"]] = float(body.get("value"))
+        except (TypeError, ValueError):
+            return jsonify({"ok": False, "error": "value 숫자 필요"}), 400
+    else:
+        return jsonify({"ok": False, "error": "key/value 또는 current 필요"}), 400
+    if new == prev:
+        return jsonify({"ok": True, "changed": False, "current": new})
+    _threshold_config_save(new, applied_note=body.get("note") or "수동 승인", prev=prev)
+    return jsonify({"ok": True, "changed": True, "current": new, "backup": prev})
+
+
+@app.route("/api/high-odds-companion/stats", methods=["GET"])
+def high_odds_companion_stats():
+    """[고배당 동반 패턴 4번] 고배당(7배+) 1착 경주 중 3착 내 다른 고배당 포함 비율."""
+    hr = _high_odds_companion_hitrate()
+    return jsonify({**hr,
+                    "note": "고배당(7배+) 1착 경주만 분모. 3착 내 다른 고배당 포함 비율 → 참고 추천 신뢰도."})
+
+
 @app.route("/api/after-close/cases", methods=["GET"])
 def after_close_cases():
     """[4번] 마감(T-0) 후 감지되어 베팅 반영 불가했던 신호 케이스 목록 → 수집 간격 단축 필요성 근거."""
@@ -1902,6 +1953,40 @@ def _elimination(curQ, curD, exa, drops, form, trio_map=None):
             "overrideReason": " · ".join(ov_reasons), "anomalySig": anomaly_sig,
             "reason": reason,
         })
+
+    # [2번·제거 완화] 과다 제거 방지(1마리 빼고 전부 제거는 비정상).
+    #   확실 제거 = '전적 D등급(또는 전적정보 없음) + 배당 150배+' 인 말만. 전적 C등급 이상은 신호 없어도 후보 유지.
+    #   ⚠ 기존 _elim_score/verdict(30/50/70)는 참고 점수로 보존 — 최종 keep에만 완화 게이트를 덧씌운다.
+    graded = [h for h in horses if h.get("formScore") is not None]
+    fgrade = {}
+    if graded:
+        gs = sorted(graded, key=lambda h: -(h["formScore"] or 0))
+        ng = len(gs)
+        for i, h in enumerate(gs):
+            frac = i / ng
+            fgrade[h["no"]] = "A" if frac < 0.25 else "B" if frac < 0.50 else "C" if frac < 0.75 else "D"
+    for h in horses:
+        h["formGrade"] = fgrade.get(h["no"])
+        g = h["formGrade"]
+        o = h.get("oddsRepr")
+        high_odds = (o is None or o >= 150)
+        # 확실 제거 = 전적 D등급(또는 전적없음) + 배당 150배+ + 이변신호 없음(급락/쌍승상위=override) → 그 외 전부 유지.
+        hard_cut = high_odds and (g in (None, "D")) and not h["override"]
+        if hard_cut:
+            if h["keep"]:                              # 원래 유지였어도 규칙상 확실 제거로 확정
+                h["keep"] = False
+                h["softCut"] = True
+                h["verdict"], h["verdictLabel"] = "🔴", "확실 제거(전적D+150배+)"
+        else:
+            if not h["keep"] and not h["override"]:    # 원래 제거였으면 완화 유지
+                h["keep"] = True
+                h["softKept"] = True
+                if g in ("A", "B", "C"):
+                    h["softKeepReason"] = "전적 " + g + "등급 → 유지(신호 없어도)"
+                else:
+                    h["softKeepReason"] = "배당 " + (("%g배" % o) if o is not None else "미수집") + " (150배 미만) → 유지"
+                if h["verdict"] in ("🔴", "🟠"):
+                    h["verdict"], h["verdictLabel"] = "🟡", "관찰(완화 유지)"
 
     horses.sort(key=lambda h: -h["total"])
     kept = [h for h in horses if h["keep"] or h["override"]]
@@ -2468,6 +2553,59 @@ def _learn_strong_signals(rk, date, an, top3):
         print("[강한신호학습] 실패:", e)
 
 
+# ───────── [복기 학습 재설계] 통계 유의성 기준 — 1회 실패로 공식 수정 금지, 표본 확보 후에만 조정 ─────────
+#   50회 미만 → 판단 보류(참고만) / 50회+ 적중률 40% 미만 → 경고(수정은 수동) / 100회+ → 소폭 자동조정 검토.
+PATTERN_SAMPLE_MIN = 50     # 이 표본 미만은 '판단 보류'(신뢰 불가)
+PATTERN_SAMPLE_SIG = 100    # 이 표본 이상 + 통계 유의 → 가중치 소폭 자동조정 검토(최대 5%p)
+PATTERN_WARN_RATE = 40      # 표본 충족 + 적중률 이 값 미만 → 경고
+
+
+def _pattern_status(fired, rate):
+    """표본수·적중률 → 신뢰도 상태. 반환 (status, icon, note)."""
+    if fired is None or fired < PATTERN_SAMPLE_MIN:
+        need = PATTERN_SAMPLE_MIN - (fired or 0)
+        return "표본부족", "⚠️", f"표본 부족 (판단 보류 · {PATTERN_SAMPLE_MIN}회 필요, {need}회 남음)"
+    if rate is not None and rate < PATTERN_WARN_RATE:
+        return "경고", "🔴", f"적중률 {rate}% (< {PATTERN_WARN_RATE}%) — 경고 · 수정은 수동으로"
+    if fired >= PATTERN_SAMPLE_SIG:
+        return "유의", "✅", f"통계 유의 ({fired}회) — 신뢰 · 소폭 자동조정 검토 가능"
+    return "신뢰", "✅", f"신뢰 가능 ({fired}회 기준, 계속 관찰 중)"
+
+
+def _pattern_confidence():
+    """[2·4번] 신호 유형별 발생/적중/적중률 + 통계 신뢰도 상태(표본 50회 게이팅) 통합.
+      강신호 8유형 + 저배당압축 + 고배당동반을 한 뷰로. ⚠ 공식 수정은 안 함 — 데이터 표시만."""
+    out = []
+    try:
+        for t, v in sorted(_signal_type_hitrates().items()):
+            st, icon, note = _pattern_status(v.get("fired"), v.get("rate"))
+            out.append({"key": "signal_" + str(t), "label": v.get("label") or ("유형" + str(t)),
+                        "fired": v.get("fired"), "hit": v.get("hit"), "rate": v.get("rate"),
+                        "status": st, "icon": icon, "note": note})
+    except Exception:
+        pass
+    try:
+        cp = _compression_hitrate().get("all") or {}
+        st, icon, note = _pattern_status(cp.get("fired"), cp.get("rate"))
+        out.append({"key": "compression", "label": "저배당 압축(축 패턴)",
+                    "fired": cp.get("fired"), "hit": cp.get("hit"), "rate": cp.get("rate"),
+                    "status": st, "icon": icon, "note": note})
+    except Exception:
+        pass
+    try:
+        hc = _high_odds_companion_hitrate()
+        st, icon, note = _pattern_status(hc.get("races"), hc.get("rate"))
+        out.append({"key": "high_odds_companion", "label": "고배당 동반(1착시 3착내 고배당)",
+                    "fired": hc.get("races"), "hit": hc.get("hits"), "rate": hc.get("rate"),
+                    "status": st, "icon": icon, "note": note})
+    except Exception:
+        pass
+    out.sort(key=lambda x: -((x.get("fired") or 0)))
+    return {"patterns": out, "sampleMin": PATTERN_SAMPLE_MIN, "sampleSig": PATTERN_SAMPLE_SIG,
+            "warnRate": PATTERN_WARN_RATE,
+            "note": "표본 50회 미만은 참고만 · 공식 수정은 수동으로 (1회 실패로 기준 변경 금지)"}
+
+
 def _signal_type_hitrates():
     """유형별 발생/적중/적중률 집계 → 가중치 상향 근거. 판정불가(None)는 분모 제외."""
     try:
@@ -2552,6 +2690,62 @@ def _compression_hitrate():
         }
     except Exception:
         return {}
+
+
+# ───────── [고배당 동반 패턴 4번] 고배당 1착 경주 중 3착 내 다른 고배당 포함 비율 누적 ─────────
+HIGH_ODDS_COMPANION_FILE = os.path.join(os.path.dirname(__file__), "data", "high_odds_companion_stats.json")
+HIGH_ODDS_COMPANION_THRESH = 7.0   # 고배당 기준(대표배당 7배+)
+
+
+def _high_odds_companion_stats_load():
+    try:
+        return json.load(open(HIGH_ODDS_COMPANION_FILE, encoding="utf-8"))
+    except Exception:
+        return {"races": {}}
+
+
+def _high_odds_companion_stats_save(d):
+    os.makedirs(os.path.dirname(HIGH_ODDS_COMPANION_FILE), exist_ok=True)
+    json.dump(d, open(HIGH_ODDS_COMPANION_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def _learn_high_odds_companion(rk, date, top3, rec, high_thresh=HIGH_ODDS_COMPANION_THRESH):
+    """[4번] 1착이 고배당(7배+)인 경주만 분모로, 2·3착에 다른 고배당(7배+)이 있었는지 누적. 경주별 멱등.
+      → '고배당 1착 시 3착 내 고배당 포함 비율' 산출(참고 추천 신뢰도 근거)."""
+    try:
+        top3i = [int(x) for x in (top3 or [])[:3] if x is not None]
+        if not top3i:
+            return
+        repr_map, _, _ = _repr_odds_from_rec(rec or {})
+        first = top3i[0]
+        fo = repr_map.get(first)
+        if not fo or fo < high_thresh:
+            return                      # 고배당 1착 경주만 분모(저배당 1착은 대상 아님)
+        others = top3i[1:3]
+        comp = [h for h in others if (repr_map.get(h) or 0) >= high_thresh]
+        d = _high_odds_companion_stats_load()
+        races = d.setdefault("races", {})
+        rid = (date or "") + "|" + rk
+        races[rid] = {"raceKey": rk, "date": date, "firstOdds": round(float(fo), 1),
+                      "companion": bool(comp), "companions": comp, "t": time.time()}
+        if len(races) > 5000:
+            for k in sorted(races, key=lambda k: races[k].get("t", 0))[:len(races) - 5000]:
+                races.pop(k, None)
+        _high_odds_companion_stats_save(d)
+    except Exception as e:
+        print("[고배당동반학습] 실패:", e)
+
+
+def _high_odds_companion_hitrate():
+    """고배당 1착 경주 중 3착 내 다른 고배당 포함 비율. 반환 {races,hits,rate,reliable}."""
+    try:
+        races = list(_high_odds_companion_stats_load().get("races", {}).values())
+        n = len(races)
+        h = sum(1 for r in races if r.get("companion"))
+        return {"races": n, "hits": h, "rate": (round(h / n * 100) if n else None),
+                "reliable": n >= 10}
+    except Exception:
+        return {"races": 0, "hits": 0, "rate": None, "reliable": False}
 
 
 # ───────── [배당 3착 자동 발굴 5번] 고배당 3착 후보 신호 유형별 3착/입상 적중률 누적 ─────────
@@ -3607,6 +3801,217 @@ def _third_place_hunt(compression_pattern, strong_signals, anomaly_horse, wx_rev
         return {"active": False}
 
 
+# ───────── [새 규칙·카와사키11R 학습] 막판 급락+역배열 동시 감지 말 → 삼복승 강제 편성 ─────────
+#   카와사키 11경주(2026-07-09, 결과 6-1-5) 복기 결과 도출된 규칙:
+#     6번이 T-1분 4+6 -33% 급락 + 역배열 감지였으나 유력마 TOP3(1·8·5) 밖이라 복승/삼복승 미편성 → 6번 1착 놓침.
+#   ⇒ [규칙] T-2분 이내(마감 임박)에 '급락'과 '역배열'이 **동시에** 감지된 말은 유력마 순위와 무관하게
+#           삼복승 보험에 **강제 편성**(유력마 상위 2두와 묶어)하고 오버레이에 강조 표시한다.
+#   ⚠ 기존 삼복승 편성·third_place_hunt·strong_signals 무삭제 — 별도 '강제보험' 블록만 추가.
+def _forced_trifecta_insurance(cur_mb, after_close, drops, wx_reversals, inverse,
+                               strong_signals, key_horses, drop_thresh=-30):
+    """T-2분 이내 급락(강급락 pct<=drop_thresh)과 역배열을 동시에 보인 말을 찾아
+      유력마 상위 2두와 묶은 삼복승 강제보험 조합을 만든다.
+    반환 {active, minutesBefore, horses:[{no,dropPct,revTag,note}], combos:[[a,b,c]], note}."""
+    try:
+        if after_close or cur_mb is None or not (0 <= cur_mb <= 2):
+            return {"active": False}
+        # ① 강급락 말(마감 임박 현재 스냅샷 drops) — 조합 최저 pct 기록
+        drop_pct = {}
+        for d in (drops or []):
+            p = d.get("pct")
+            if p is None or p > drop_thresh:
+                continue
+            for h in (d.get("combo") or []):
+                h = int(h)
+                if h not in drop_pct or p < drop_pct[h]:
+                    drop_pct[h] = p
+        if not drop_pct:
+            return {"active": False}
+        # ② 역배열 말 — 쌍승역전 challenger + 역배열 감지말(invLead/invHorses)
+        rev = {}
+        for r in (wx_reversals or []):
+            c = r.get("challenger")
+            if c is not None:
+                rev[int(c)] = "쌍승역전"
+        inv = inverse or {}
+        if inv.get("detected"):
+            lead = inv.get("invLead") or {}
+            if lead.get("no") is not None:
+                rev.setdefault(int(lead["no"]), "역배열 실질유력")
+            for h in (inv.get("invHorses") or []):
+                rev.setdefault(int(h), "역배열 감지")
+        # ③ 동시 감지(급락 ∩ 역배열) = 강제 편성 대상
+        forced = sorted(set(drop_pct) & set(rev), key=lambda h: drop_pct[h])
+        if not forced:
+            return {"active": False}
+        axis = [int(h) for h in (key_horses or [])[:2] if h is not None]
+        horses, combos, seen = [], [], set()
+        for hf in forced:
+            note = "막판 급락 " + str(drop_pct[hf]) + "% + " + rev[hf] + " 동시 → 삼복승 강제 편성"
+            horses.append({"no": hf, "dropPct": drop_pct[hf], "revTag": rev[hf], "note": note})
+            base = [a for a in axis if a != hf][:2]        # 유력마 상위 2두(자기 제외)
+            if len(base) >= 2:
+                cc = tuple(sorted([base[0], base[1], hf]))
+                if len(set(cc)) == 3 and cc not in seen:
+                    seen.add(cc)
+                    combos.append(list(cc))
+        return {"active": bool(horses), "minutesBefore": cur_mb,
+                "horses": horses, "combos": combos,
+                "note": "T-" + str(cur_mb) + "분 급락+역배열 동시 감지 말 → 유력마 순위 무관 삼복승 강제 편성"}
+    except Exception as _e:
+        print("[강제삼복승] 실패:", _e)
+        return {"active": False}
+
+
+# ───────── [패스 권고 경주] 추천 없음/전적없음+신호없음 = 손익·적중률 집계 제외 ─────────
+def _is_pass_race(an):
+    """패스 권고 경주 판정: ①추천 게이트(신호 대기·패스형) 또는 ②전적없음+강신호없음.
+      → 손익 계산·추천 적중률 집계에서 제외(추천을 안 했으므로 미적중이 아니라 '패스가 맞음')."""
+    try:
+        if not an:
+            return False
+        if an.get("recommendGated"):
+            return True
+        rj = an.get("raceJudgment") or {}
+        if rj.get("type") in ("wait", "패스형"):
+            return True
+        no_form = not (an.get("form") or [])
+        no_signal = not int((an.get("strongSignals") or {}).get("count") or 0)
+        return bool(no_form and no_signal)
+    except Exception:
+        return False
+
+
+# ───────── [추천 말 수 유연화] 신호 강도(강신호 유형 수)에 따라 추천 말 수 범위 안내 ─────────
+def _recommend_flex(strong_signals, signal_confidence, after_close):
+    """신호 강도별 추천 말 수 가이드(강제 아님·안내).
+      신호 3개+ → 3~4두 / 2개 → 2~3두 / 1개 → 1~2두 / 0개 → 추천 보류.
+      strong_signals.count(서로 다른 강신호 유형 수) 기준, 강신호말 존재 시 최소 1로 보정."""
+    cnt = int((strong_signals or {}).get("count") or 0)
+    strong_horses = len((signal_confidence or {}).get("strong") or [])
+    eff = max(cnt, 1 if strong_horses >= 1 else 0)
+    if after_close:
+        return {"signalCount": cnt, "minHorses": 0, "maxHorses": 0,
+                "recommend": True, "note": "마감 후 — 참고만"}
+    if eff >= 3:
+        return {"signalCount": cnt, "minHorses": 3, "maxHorses": 4, "recommend": True,
+                "note": "강신호 " + str(eff) + "개 → 3~4두 추천"}
+    if eff == 2:
+        return {"signalCount": cnt, "minHorses": 2, "maxHorses": 3, "recommend": True,
+                "note": "신호 2개 → 2~3두 추천"}
+    if eff == 1:
+        return {"signalCount": cnt, "minHorses": 1, "maxHorses": 2, "recommend": True,
+                "note": "신호 1개 → 1~2두 추천"}
+    return {"signalCount": 0, "minHorses": 0, "maxHorses": 0, "recommend": False,
+            "note": "신호 없음 → 추천 보류(신호 대기)"}
+
+
+# ───────── [고배당 동반 패턴·참고] 고배당 신호말과 배당 낮게 묶인 다른 고배당 말 탐색(메인과 별도) ─────────
+def _repr_odds_from_rec(rec):
+    """rec(단승/복승)에서 말별 대표배당 맵 + curWin/curQ 재구성(학습·분석 공용)."""
+    curWin = {}
+    for k, v in (rec.get("single") or {}).items():
+        try:
+            curWin[int(k)] = float(v)
+        except (TypeError, ValueError):
+            pass
+    curQ = {}
+    for c in (rec.get("quinella") or []):
+        combo, o = c.get("combo"), c.get("odds")
+        if combo and len(combo) == 2 and o:
+            try:
+                curQ[tuple(sorted(int(x) for x in combo))] = float(o)
+            except (TypeError, ValueError):
+                pass
+    repr_map = {}
+    for h in set([x for k in curQ for x in k] + list(curWin)):
+        repr_map[h] = _horse_repr_odds(h, curWin, curQ)
+    return repr_map, curWin, curQ
+
+
+def _high_odds_companion(drops, wx_reversals, inverse, curWin, curQ, key_horses,
+                         learned=None, after_close=False, high_thresh=7.0):
+    """[참고 추천] 고배당(7배+) 신호말 감지 시 그 말과 복승 배당 낮게 묶인 다른 고배당 말 탐색.
+      참고 삼복승(유력마1 + 고배당신호말 + 동반고배당) 제시. ⚠ 강제 아님 — 메인 추천과 별도 참고용.
+    반환 {active, axis, items:[{no,odds,signal,partners:[{no,odds,linkOdds}],trios:[[..]]}], learned, note}."""
+    try:
+        if after_close:
+            return {"active": False}
+
+        def repr_odds(h):
+            return _horse_repr_odds(int(h), curWin, curQ)
+
+        # 신호 고배당말: 급락(≤-30%) / 역배열(쌍승역전 challenger·역배열 감지말)
+        sig = {}
+        for d in (drops or []):
+            if (d.get("pct") or 0) <= -30:
+                for h in (d.get("combo") or []):
+                    p = d.get("pct")
+                    sig.setdefault(int(h), "급락")
+                    # 최대 급락폭 표기용
+        drop_pct = {}
+        for d in (drops or []):
+            for h in (d.get("combo") or []):
+                p = d.get("pct")
+                if p is not None:
+                    h = int(h)
+                    if h not in drop_pct or p < drop_pct[h]:
+                        drop_pct[h] = p
+        for r in (wx_reversals or []):
+            c = r.get("challenger")
+            if c is not None:
+                sig.setdefault(int(c), "역배열")
+        inv = inverse or {}
+        if inv.get("detected"):
+            for h in (inv.get("invHorses") or []):
+                sig.setdefault(int(h), "역배열")
+        # 고배당(7배+) 신호말만
+        hi = []
+        for h, tag in sig.items():
+            o = repr_odds(h)
+            if o and o >= high_thresh:
+                hi.append((h, round(float(o), 1), tag))
+        if not hi:
+            return {"active": False}
+        hi.sort(key=lambda t: -t[1])
+        axis = int(key_horses[0]) if key_horses else None
+        items = []
+        for h, o, tag in hi[:2]:
+            partners = []
+            seen = set()
+            for k, qo in (curQ or {}).items():
+                if h not in k or not qo or qo <= 0:
+                    continue
+                other = [x for x in k if x != h]
+                if not other:
+                    continue
+                p = int(other[0])
+                if p == axis or p in seen:
+                    continue
+                po = repr_odds(p)
+                if po and po >= high_thresh:
+                    seen.add(p)
+                    partners.append({"no": p, "odds": round(float(po), 1), "linkOdds": round(float(qo), 1)})
+            partners.sort(key=lambda x: x["linkOdds"])   # 묶임(복승) 배당 낮은 순 = 함께 들어올 가능성↑
+            partners = partners[:2]
+            trios = []
+            for pt in partners:
+                base = [axis, h, pt["no"]] if axis is not None else [h, pt["no"]]
+                cc = sorted(set(int(x) for x in base if x is not None))
+                if len(cc) == 3:
+                    trios.append(cc)
+            det = tag + ((" " + str(drop_pct[h]) + "%") if (tag == "급락" and drop_pct.get(h) is not None) else "")
+            items.append({"no": h, "odds": o, "signal": det, "partners": partners, "trios": trios})
+        items = [it for it in items if it["partners"]]
+        if not items:
+            return {"active": False}
+        return {"active": True, "axis": axis, "items": items, "learned": learned,
+                "note": "고배당 신호말과 배당 낮게 묶인 다른 고배당 말 → 함께 들어올 가능성(참고용·메인과 별도)"}
+    except Exception as _e:
+        print("[고배당동반] 실패:", _e)
+        return {"active": False}
+
+
 # ───────── [BMED 매트릭스 베팅 전략] 상황별 5전략 자동선택 + 원금보전 배분 + 기대환수율 ─────────
 def _capital_preservation(combos):
     """[2번] 원금 보전 자동 계산(예산 무관 '비율' 산출 → 프론트가 예산 곱함).
@@ -4482,6 +4887,7 @@ def _triple_analyze(rk, rec):
     #             전적 나쁜 저배당 인기마가 추천에 들어가 TOP5와 딴판이 되던 불일치.
     #   수정: elimination(전적40+배당60 통합)의 통합점수 순 = renderTopHorses(TOP5) 정렬식과 동일하게
     #        상위 3두로 key_horses 재정렬(전적 수집된 경우만; 전적 없으면 기존 배당 인기 유지).
+    _elim_pre = None
     try:
         _elim_pre = _elimination(curQ, curD, exa, drops, form, _odds_map_un(trio))
         if _elim_pre and _elim_pre.get("formAvailable"):
@@ -4494,6 +4900,26 @@ def _triple_analyze(rk, rec):
                 ranked = _io + [h for h in ranked if h not in _io]   # 삼복승 편성 풀도 통합순 우선
     except Exception as _ke:
         print("[유력마정합] 실패:", _ke)
+
+    # [1번·유력마 1마리] 제거 완화 후에도 유력 후보가 1마리뿐이면 → 축 + 배당 낮은 2마리 자동 추가(최소 복승) + 경고.
+    single_favorite = None
+    try:
+        if _elim_pre:
+            _cands = [int(h["no"]) for h in (_elim_pre.get("horses") or [])
+                      if (h.get("keep") or h.get("override")) and h.get("no") is not None]
+            if len(_cands) == 1:
+                _ax = _cands[0]
+                _rep = {}
+                for (a, b), o in curQ.items():
+                    for hh in (a, b):
+                        if o and o > 0 and (hh not in _rep or o < _rep[hh]):
+                            _rep[hh] = o
+                _others = sorted([h for h in _rep if h != _ax], key=lambda h: _rep[h])[:2]
+                single_favorite = {"axis": _ax, "partners": _others,
+                                   "partnerOdds": {h: _rep[h] for h in _others},
+                                   "note": "유력마 1마리 — 축 + 배당 낮은 2마리로 최소 복승 구성(또는 패스·소액만 권장)"}
+    except Exception as _sfe:
+        print("[유력마1마리] 실패:", _sfe)
 
     # [근본해결3] raw 쌍승역전 → 마감 전 '예비 유력마' 즉시 반영(정식 win-exacta 확정 전에도).
     #   카와사키 7R: raw 쌍승역전(11↔7) T-3분 감지됐으나 정식 공식(단승 대비)은 마감 후에야 7번 확정 →
@@ -4597,6 +5023,12 @@ def _triple_analyze(rk, rec):
         seen_rec.add(key)
         bet_rec.append({"kind": kind, "label": label, "combo": cc, "alloc": alloc, "expOdds": odds})
 
+    # [1번·유력마 1마리] 축 + 배당 낮은 2마리로 최소 복승 자동 편성(소액·경고 동반)
+    if single_favorite and single_favorite.get("partners"):
+        _sax = single_favorite["axis"]
+        for _sp in single_favorite["partners"]:
+            _addbet("복승", "복승(유력1축·소액)", [_sax, _sp], 10, _q(_sax, _sp))
+
     if len(key_horses) >= 2:
         h1, h2 = key_horses[0], key_horses[1]
         _addbet("복승", "복승 메인", [h1, h2], 43, _q(h1, h2))
@@ -4648,6 +5080,24 @@ def _triple_analyze(rk, rec):
                         trio_map.get(tuple(sorted([p1, p3, _c]))))
                 _rev_added += 1
 
+    # [새 규칙·카와사키11R 학습] 막판(T-2분 이내) 급락+역배열 동시 감지 말 → 삼복승 강제보험(유력마 순위 무관).
+    #   TOP3 밖이어도 강제 편성 → 카와사키 11R 6번(4+6 -33%·역배열, TOP3 밖) 같은 케이스 놓침 방지. 마감 후 미적용.
+    forced_trifecta = _forced_trifecta_insurance(cur_mb, after_close, drops, wx_reversals,
+                                                 inverse, strong_signals, key_horses)
+    if forced_trifecta.get("active"):
+        for _cc in forced_trifecta.get("combos", []):
+            _addbet("삼복승", "삼복승 강제보험(막판급락+역배열)", _cc, 5,
+                    trio_map.get(tuple(sorted(_cc))))
+
+    # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드(강제 아님·안내)
+    recommend_flex = _recommend_flex(strong_signals, signal_confidence, after_close)
+
+    # [고배당 동반 패턴·참고] 고배당 신호말 + 배당 낮게 묶인 다른 고배당 말 → 참고 삼복승(메인과 별도)
+    #   추정배당은 아래 _trio_est 정의 후 채운다(표시용·추천 배분엔 미포함).
+    high_odds_companion = _high_odds_companion(
+        drops, wx_reversals, inverse, curWin, curQ, key_horses,
+        learned=_high_odds_companion_hitrate(), after_close=after_close)
+
     # [3번] 삼복승 실배당 미수집 시: 구성 복승 3쌍의 기하평균×2 로 추정(라벨=추정)
     #   [보완] 1쌍 미수집(아웃사이더/역배열 조합)이면 그 쌍을 보수적으로 max(known)로 근사해
     #   '거친 추정(estRough)'이라도 배당을 표시(항상 편성한 삼복승의 판단 근거 제공). 2쌍+ 미수집=None.
@@ -4669,6 +5119,15 @@ def _triple_analyze(rk, rec):
             if _rough:
                 r["estRough"] = True
 
+    # [고배당 동반 참고] 참고 삼복승 추정배당 채움(_trio_est 재사용·표시용·추천 배분엔 미포함)
+    if high_odds_companion.get("active"):
+        for _it in high_odds_companion.get("items", []):
+            _tb = []
+            for _cc in _it.get("trios", []):
+                _ev, _ = _trio_est(_cc)
+                _tb.append({"combo": _cc, "expOddsEst": (round(_ev, 1) if _ev else None)})
+            _it["trioBets"] = _tb
+
     # [보완·역배열 표시] 쌍승역전 challenger 를 낀 삼복승 픽에 플래그 → 프론트 🔄 배지(보험 라벨이어도 가시화)
     _rev_ch = set()
     for _r in (wx_reversals or []):
@@ -4679,6 +5138,12 @@ def _triple_analyze(rk, rec):
         for b in bet_rec:
             if b.get("kind") == "삼복승" and any(int(h) in _rev_ch for h in b.get("combo", [])):
                 b["reversalPick"] = True
+    # [새 규칙·카와사키11R] 강제보험 픽에 flag → 프론트/오버레이 강조(라벨 기반 판별 보강)
+    if forced_trifecta.get("active"):
+        _forced_set = {tuple(sorted(c)) for c in forced_trifecta.get("combos", [])}
+        for b in bet_rec:
+            if b.get("kind") == "삼복승" and tuple(sorted(b.get("combo", []))) in _forced_set:
+                b["forcedPick"] = True
 
     # [대규모급락 전략] 삼복승 보험 8→15% 확대·중배당 복승 보험 추가·최저배당 신뢰도 하락(기존 조합 유지)
     # [1번] 마감 후에는 대규모급락 전략도 추천에 반영하지 않음(참고만)
@@ -5180,6 +5645,10 @@ def _triple_analyze(rk, rec):
         "strongSignals": strong_signals,   # [강한 신호 8유형] 오버레이 강조·막판 보존·유형별 학습용
         "compressionPattern": compression_pattern,   # [저배당 압축 패턴] 축 패턴(4배↓2두+/5배↓3두+)+신호결합
         "thirdPlaceHunt": third_place_hunt,   # [배당 3착 자동 발굴] 축2두+고배당 3착 후보 삼복승 보험
+        "forcedTrifecta": forced_trifecta,    # [새 규칙·카와사키11R] 막판 급락+역배열 동시말 강제 삼복승
+        "recommendFlex": recommend_flex,      # [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드
+        "highOddsCompanion": high_odds_companion,  # [고배당 동반 패턴·참고] 메인과 별도 참고 추천
+        "singleFavorite": single_favorite,    # [유력마 1마리] 축+배당낮은2마리 최소복승 + 패스/소액 경고
 
         "single": {str(k): v for k, v in curWin.items()}, "singleRanking": single_rank,
         "trioRecommend": trio_rec, "betRecommend": bet_rec,
@@ -6231,6 +6700,26 @@ def _build_ai_training(rk, an, record, result, top4, inputs=None):
         "winner": result.get("1st"), "second": result.get("2nd"),
         "odds_range": _odds_range_label(q_odds),
     }
+    # [기준치 도출용] 신호별 대표말이 실제 입상(1~3착)했는지 — 기준치별 적중률 계산의 재료.
+    _top3 = set(int(x) for x in (result.get("1st"), result.get("2nd"), result.get("3rd")) if x not in (None, ""))
+
+    def _placed(h):
+        try:
+            return int(h) in _top3
+        except (TypeError, ValueError):
+            return False
+    _ex_horse = None
+    if excess_drops:
+        _ex_horse = min(excess_drops.items(), key=lambda kv: kv[1])[0]   # 가장 큰 초과급락 말
+    _rev_horse = (wx[0].get("challenger") if wx else None)
+    _con_horse = next((h for h, c in consecutive.items() if c >= 3), None)
+    signal_hit = {
+        "excess_drop_horse": _ex_horse, "excess_drop_horse_placed": (_placed(_ex_horse) if _ex_horse else None),
+        "excess_drop_value": (excess_drops.get(_ex_horse) if _ex_horse else None),
+        "reversal_horse": _rev_horse, "reversal_horse_placed": (_placed(_rev_horse) if _rev_horse is not None else None),
+        "reversal_ratio": (wx[0]["ratio"] if wx else None),
+        "consecutive_horse": _con_horse, "consecutive_horse_placed": (_placed(_con_horse) if _con_horse else None),
+    }
     data = {
         "schema_version": AI_SCHEMA_VERSION,   # [AI 데이터 정비] 스키마 버전 명시(마이그레이션 대비)
         "race_id": rid,
@@ -6242,9 +6731,14 @@ def _build_ai_training(rk, an, record, result, top4, inputs=None):
         },
         "horses": horses,
         "odds_features": odds_features,
+        "thresholds_used": {                    # [기준치 도출] 이 경주 판정에 쓴 현재 기준치 스냅샷
+            "excess_drop_min": abs(ABS_STRONG), "reversal_ratio_max": 0.95,
+            "consecutive_min": 3, "pre_close_min": 30,
+        },
         "prediction": prediction,
         "result": result_block,
         "labels": labels,
+        "signal_hit": signal_hit,               # [기준치 도출] 신호말 입상 여부(기준치별 적중률 재료)
         "saved_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
     }
     data["quality"] = _ai_quality_score(data)
@@ -6327,6 +6821,124 @@ def _save_ai_training(rk, an, record, result, top4, inputs=None):
     q = data.get("quality") or {}
     return {"ok": True, "race_id": rid, "score": q.get("score"),
             "grade": q.get("grade"), "complete": q.get("complete")}
+
+
+# ───────── [기준치 도출 시스템] 누적 ai_training 데이터 → 신호 기준치별 적중률 → 최적 기준치 추천 ─────────
+#   ⚠ 자동 적용 금지 — 사람이 검토 후 승인(버튼)해야 config에 반영. 기존 기준치는 백업 보관.
+THRESHOLD_CONFIG_FILE = os.path.join(os.path.dirname(__file__), "data", "thresholds_config.json")
+THRESHOLD_SAMPLE_MIN = 50   # 이 표본 미만은 '표본 부족'(적용 검토 불가)
+_THRESHOLD_DEFAULTS = {"excess_drop_min": 10, "reversal_ratio_max": 0.90,
+                       "consecutive_min": 2, "pre_close_min": 30}
+
+
+def _threshold_config_load():
+    try:
+        cfg = json.load(open(THRESHOLD_CONFIG_FILE, encoding="utf-8"))
+    except Exception:
+        cfg = {}
+    return {**_THRESHOLD_DEFAULTS, **(cfg.get("current") or {}),
+            "history": cfg.get("history") or [], "_raw": cfg}
+
+
+def _threshold_config_save(current, applied_note=None, prev=None):
+    """current 기준치 저장 + 이전값 history 백업(감사·롤백용)."""
+    os.makedirs(os.path.dirname(THRESHOLD_CONFIG_FILE), exist_ok=True)
+    cfg = _threshold_config_load().get("_raw") or {}
+    hist = cfg.get("history") or []
+    if prev is not None:
+        hist.append({"current": prev, "replaced_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+                     "note": applied_note})
+    cfg["current"] = current
+    cfg["history"] = hist[-50:]
+    cfg["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    json.dump(cfg, open(THRESHOLD_CONFIG_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    return cfg
+
+
+def _ai_rows_for_thresholds():
+    """ai_training 파일에서 기준치 계산에 필요한 필드만 추출(결과 입력된 경주만)."""
+    rows = []
+    if not os.path.isdir(AI_TRAINING_DIR):
+        return rows
+    for fn in os.listdir(AI_TRAINING_DIR):
+        if not fn.endswith(".json"):
+            continue
+        try:
+            d = json.load(open(os.path.join(AI_TRAINING_DIR, fn), encoding="utf-8"))
+        except Exception:
+            continue
+        of = d.get("odds_features") or {}
+        sh = d.get("signal_hit") or {}
+        lb = d.get("labels") or {}
+        res = d.get("result") or {}
+        top3 = set(int(x) for x in (res.get("1st"), res.get("2nd"), res.get("3rd")) if x not in (None, ""))
+        # [기존 파일 폴백] signal_hit 없으면 excess_drops 최대말 + result 로 입상 여부 역산.
+        ex_val = sh.get("excess_drop_value")
+        ex_placed = sh.get("excess_drop_horse_placed")
+        if ex_val is None and (of.get("excess_drops")):
+            _eh, ex_val = min((of["excess_drops"]).items(), key=lambda kv: kv[1])
+            try:
+                ex_placed = int(_eh) in top3
+            except (TypeError, ValueError):
+                ex_placed = None
+        rows.append({
+            "excess": ex_val, "excess_placed": ex_placed,
+            "reversal_ratio": sh.get("reversal_ratio") or of.get("reversal_ratio"),
+            "reversal_placed": sh.get("reversal_horse_placed"),
+            "quinella_hit": lb.get("quinella_hit"),
+        })
+    return rows
+
+
+def _threshold_candidates():
+    """[2·3·5번] 누적 데이터로 신호 기준치별 적중률 계산 → 최적 기준치 추천 + 현재 대비 개선폭.
+      초과급락(5/10/12/15/20%+)·역배열(0.95/0.90/0.85/0.80/0.70 미만) 각각 테스트."""
+    rows = _ai_rows_for_thresholds()
+    cur = _threshold_config_load()
+    n = len(rows)
+
+    def _rate(fired_placed):
+        f = len(fired_placed)
+        h = sum(1 for p in fired_placed if p)
+        return (f, h, (round(h / f * 100) if f else None))
+
+    # 초과급락: excess 값(음수)이 -X 이하이면 발화 → 그 말 입상률
+    ex_out = []
+    for x in (5, 10, 12, 15, 20):
+        fp = [r["excess_placed"] for r in rows
+              if r.get("excess") is not None and r["excess"] <= -x and r.get("excess_placed") is not None]
+        f, h, rate = _rate(fp)
+        ex_out.append({"threshold": x, "fired": f, "hit": h, "rate": rate})
+    # 역배열: reversal_ratio < X 이면 발화 → 그 말 입상률
+    rv_out = []
+    for x in (0.95, 0.90, 0.85, 0.80, 0.70):
+        fp = [r["reversal_placed"] for r in rows
+              if r.get("reversal_ratio") is not None and r["reversal_ratio"] < x and r.get("reversal_placed") is not None]
+        f, h, rate = _rate(fp)
+        rv_out.append({"threshold": x, "fired": f, "hit": h, "rate": rate})
+
+    def _best(cands, cur_val, key_name):
+        # 표본 THRESHOLD_SAMPLE_MIN+ 인 후보 중 적중률 최고. 현재값 적중률과 비교.
+        elig = [c for c in cands if (c["fired"] or 0) >= THRESHOLD_SAMPLE_MIN and c["rate"] is not None]
+        best = max(elig, key=lambda c: c["rate"]) if elig else None
+        cur_c = next((c for c in cands if abs(c["threshold"] - cur_val) < 1e-9), None)
+        cur_rate = cur_c["rate"] if cur_c else None
+        status = "표본부족"
+        if best and best["fired"] >= THRESHOLD_SAMPLE_MIN:
+            status = "검토가능"
+        improve = (best["rate"] - cur_rate) if (best and cur_rate is not None) else None
+        return {"key": key_name, "current": cur_val, "currentRate": cur_rate,
+                "recommended": (best["threshold"] if best else None),
+                "recommendedRate": (best["rate"] if best else None),
+                "improve": improve, "status": status, "candidates": cands,
+                "sampleMin": THRESHOLD_SAMPLE_MIN}
+    return {
+        "raceCount": n,
+        "excess_drop": _best(ex_out, cur.get("excess_drop_min", 10), "excess_drop_min"),
+        "reversal": _best(rv_out, cur.get("reversal_ratio_max", 0.90), "reversal_ratio_max"),
+        "current": {k: cur.get(k) for k in _THRESHOLD_DEFAULTS},
+        "note": "표본 " + str(THRESHOLD_SAMPLE_MIN) + "회 미만은 참고만 · 적용은 수동 승인(버튼)",
+    }
 
 
 def _ai_data_status():
@@ -7506,13 +8118,17 @@ def _recompute_learning_stats(records):
         d["rate"] = round(d["hit"] / d["n"] * 100, 1) if d["n"] else None
 
     # [#5] 누적 손익(pnl) 집계 — 베팅 참여(추천 있던) 경주 기준 순손익·투자합·ROI.
-    bet_recs = [r for r in records if r.get("pnl") is not None and (r.get("bet_type") or r.get("stake"))]
+    #   [3번·패스 처리] 패스 권고 경주(추천 없음/전적없음+신호없음)는 손익 집계 제외(추천 안 했으므로).
+    bet_recs = [r for r in records if r.get("pnl") is not None and (r.get("bet_type") or r.get("stake")) and not r.get("passed")]
+    passed_races = [r for r in records if r.get("passed")]
+    pass_correct_n = sum(1 for r in passed_races if r.get("pass_correct"))
     net_profit = sum(int(r.get("pnl") or 0) for r in bet_recs)
     total_staked = sum(int(r.get("stake") or 0) for r in bet_recs if r.get("bet_type"))
     profit_summary = {
         "net": net_profit, "bets": len(bet_recs), "staked": total_staked,
         "roi": round(net_profit / total_staked * 100, 1) if total_staked else None,
         "wins": sum(1 for r in bet_recs if (r.get("pnl") or 0) > 0),
+        "passed": len(passed_races), "passCorrect": pass_correct_n,   # [3번] 패스 경주(손익 제외)·패스 적중
     }
 
     # [비교학습] 이상감지/전적/기수/최종 추천별 적중률(비교 기록 있는 경주만) + 현재 통합 가중치
@@ -7816,6 +8432,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     except Exception as e:
         print("[3착발굴학습] 실패:", e)
 
+    # [고배당 동반 패턴 4번] 고배당 1착 경주 중 3착 내 다른 고배당 포함 비율 누적(경주별 멱등)
+    try:
+        _learn_high_odds_companion(rk, doc.get("date"), top3, rec)
+    except Exception as e:
+        print("[고배당동반학습] 실패:", e)
+
     # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
     rec_bets = an.get("betRecommend", [])
     top2 = sorted(top3[:2]) if len(top3) >= 2 else []
@@ -8031,6 +8653,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         # [신규 경고시스템 2·5번] 경고 발생·경고말 입상·경고 무시(추천 누락) 판정
         "alert_fired": bool(_al and _al.get("fired")), "alert_horses": (_al or {}).get("horses") or [],
         "alert_hit": bool(_al and _al.get("hit")), "alert_ignored": bool(_al and _al.get("ignored")),
+        # [3번·패스 처리] 추천 없음(신호 대기/패스형) 또는 전적없음+신호없음 = 패스 권고 경주 → 손익·적중률 집계 제외.
+        "passed": _is_pass_race(an), "pass_correct": bool(_is_pass_race(an) and not quinella_hit and not trifecta_hit),
         "t": time.time(),
     }
     L = _learning_load()
@@ -8130,7 +8754,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
 #   놓친 신호 패턴을 누적한다. 같은 패턴이 임계치(기본 10건) 이상 반복되면 개선 규칙을 자동 생성.
 #   ⚠ 기존 학습(learning.json·pattern_learning 등)과 독립된 별도 저장소 → 기존 기능 영향 없음.
 FAILURE_FILE = os.path.join(os.path.dirname(__file__), "data", "failure_review.json")
-FAIL_RULE_THRESHOLD = 3   # 같은 실패 패턴 N건+ 반복 시 규칙 자동 생성(반복 실패 조기 감지)
+# [복기 학습 재설계] 1회~소수 실패로 규칙(공식 변경)을 만들지 않는다. 통계 유의성(50회+) 확보 후에만
+#   '검토 후보' 규칙을 생성하고, 실제 적용은 수동. (기존 3회 즉시 생성 → 50회 게이팅으로 엄격화)
+FAIL_RULE_THRESHOLD = PATTERN_SAMPLE_MIN   # 50 — 이 표본 미만은 판단 보류(규칙 미생성)
 
 # 실패 유형 정의(번호 → 코드 → 표시라벨)
 FAIL_TYPE_LABEL = {
@@ -8401,12 +9027,15 @@ def _failure_autorule(d, mpat, ftype, rk, stats):
         before_rate = ((stats or {}).get("recommend_hit") or {}).get("rate")
     except Exception:
         before_rate = None
+    # [재설계] 50회+여도 자동으로 공식을 바꾸지 않는다 — '수동 검토 후보'로만 등록(status·manual_only).
+    status = "검토후보" if cnt >= PATTERN_SAMPLE_SIG else "관찰누적"
     d["rules"].append({
         "pattern": mpat, "type": ftype, "text": rule_text,
         "basis": f"{cnt}건 반복 분석", "sample": cnt,
+        "status": status, "manual_only": True,
         "before_rate": before_rate, "created_t": time.time(), "created": time.strftime("%Y-%m-%d"),
     })
-    print(f"[실패복기] 🔔 새 규칙 학습: {rule_text} (근거: {cnt}건)")
+    print(f"[실패복기] 📋 검토 후보 규칙(수동): {rule_text} (근거: {cnt}건, 표본 {PATTERN_SAMPLE_MIN}+ 충족)")
 
 
 def _failure_report(rk):
@@ -8983,13 +9612,47 @@ def failure_rules():
     return jsonify({"rules": d.get("rules") or []})
 
 
+def _high_odds_case_save(case):
+    """[수동 케이스 학습] 사용자가 짚어준 놓친 케이스(카와사키 11R 등)를 data/high_odds_review/에 저장.
+      자동 생성 복기(_high_odds_review_one)와 파일명 충돌 안 나게 '_case' 접미사 사용. manual_case=True 태깅.
+      반환 저장 경로."""
+    os.makedirs(HIGH_ODDS_REVIEW_DIR, exist_ok=True)
+    c = dict(case or {})
+    c["manual_case"] = True
+    c.setdefault("saved_at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    safe = re.sub(r"[^0-9A-Za-z가-힣]", "_", str(c.get("race") or "case"))
+    p = os.path.join(HIGH_ODDS_REVIEW_DIR, (c.get("date") or "nodate") + "_" + safe + "_case.json")
+    tmp = p + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(c, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, p)
+    return p
+
+
+def _high_odds_cases_load():
+    """저장된 수동 케이스(manual_case=True) 목록(최신순)."""
+    out = []
+    if os.path.isdir(HIGH_ODDS_REVIEW_DIR):
+        for fn in sorted(os.listdir(HIGH_ODDS_REVIEW_DIR), reverse=True):
+            if not fn.endswith("_case.json"):
+                continue
+            try:
+                out.append(json.load(open(os.path.join(HIGH_ODDS_REVIEW_DIR, fn), encoding="utf-8")))
+            except Exception:
+                continue
+    return out
+
+
 @app.route("/api/high-odds-review", methods=["GET", "POST"])
 def high_odds_review():
     """[고배당 심층분석] 복승30배+/삼복승100배+ 경주 복기.
       GET ?raceKey=      → 해당 경주 심층 분석(고배당 아니면 is_high_odds:False)
       GET ?list=1        → 저장된 고배당 복기 목록(최신순 경량)
+      GET ?cases=1       → 수동 학습 케이스(카와사키 11R 등) 목록
       GET ?stats=1       → [7번] 누적 통계(총/적중/미적중·A/B/C·개선 후 예상)
-      POST body{date?}   → [1번] 스캔·저장(오늘/전체) 후 요약 반환"""
+      POST body{case}    → 수동 케이스 저장 / body{date?} → [1번] 스캔·저장"""
+    if request.args.get("cases"):
+        return jsonify({"cases": _high_odds_cases_load()})
     if request.args.get("stats"):
         return jsonify(_high_odds_stats())
     if request.args.get("list"):
@@ -9007,7 +9670,14 @@ def high_odds_review():
                             "fail_label": r.get("fail_label"), "result_odds": r.get("result_odds")})
         return jsonify({"reviews": out, "count": len(out)})
     if request.method == "POST":
-        date = (request.get_json(silent=True) or {}).get("date") or None
+        body = request.get_json(silent=True) or {}
+        if body.get("case"):                       # [수동 케이스 저장]
+            try:
+                p = _high_odds_case_save(body["case"])
+                return jsonify({"ok": True, "saved": os.path.basename(p)})
+            except Exception as e:
+                return jsonify({"ok": False, "error": str(e)}), 500
+        date = body.get("date") or None
         found = _high_odds_scan(date)
         return jsonify({"scanned_high_odds": len(found),
                         "hits": sum(1 for r in found if r.get("hit")),

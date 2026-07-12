@@ -16,7 +16,9 @@
 (() => {
   'use strict';
   if (window.top !== window) return;                 // 최상위 프레임만
-  if (document.getElementById('kbTimerBar')) return; // 중복 주입 방지
+  if (document.getElementById('kbTimerBar')) return; // 중복 주입 방지(구방식)
+  if (window.__kbTimerInit) return;                  // [강화] 바를 DOM에 안 붙이므로 window 플래그로 중복 방지
+  window.__kbTimerInit = true;
 
   const STAGES = [
     { min: 10, msg: '📤 배당판 전송 시작하세요' },
@@ -69,7 +71,13 @@
     `<span id="kbTimerStatus" style="padding:2px 9px;border-radius:6px;font-size:12px;background:#334155">대기</span>` +
     `<span id="kbTimerMsg" style="flex:1;color:#fbbf24;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>` +
     `<button id="kbTimerClose" title="이 탭에서 숨기기" style="all:initial;color:#94a3b8;cursor:pointer;font:16px sans-serif;padding:0 4px">✕</button>`;
-  (document.body || document.documentElement).appendChild(bar);
+  // [사용자 요청] 상단 카운트다운 바를 화면에 표시하지 않는다 — DOM에 append 하지 않는다(가장 확실한 제거).
+  //   timer.js의 핵심 헤드리스 기능(분석기↔확장 메시지 중계·마감 임박 능동수집·발주 카운트다운 내부계산·
+  //   storage 동기화)은 유지해야 하므로, 바 요소(elLabel 등 참조용)는 생성하되 body 에 붙이지 않는다.
+  //   요소는 분리(detached) 상태로 남아 tick()의 textContent 갱신·querySelector 참조가 정상 동작하고,
+  //   화면에는 절대 나타나지 않는다. (display:none 도 이중 안전장치로 유지)
+  bar.style.display = 'none';
+  // ⚠ 의도적으로 appendChild 생략 — display:none 방식이 확장 리로드 전이면 바가 남던 문제를 이 방식으로 강화.
 
   const $ = (id) => bar.querySelector('#' + id);
   const elLabel = $('kbTimerLabel'), elTime = $('kbTimerTime'),
