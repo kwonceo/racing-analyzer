@@ -3655,6 +3655,7 @@
     el.innerHTML = `
       ${renderCorePicks(a)}
       ${renderTopHorses(a)}
+      ${renderBmedMatrixPanel(a)}
       <div class="matrix-title">🚨 이상감지 ${a.sport && a.sport !== 'horse' ? `<span class="chip" style="border-color:#a855f7;color:#c4b5fd">${a.sport === 'cycle' ? '🚴 경륜' : '🚤 경정'}</span> ` : ''}<span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.baselineReset ? '⚠️ 기준값 재설정됨' : a.baselineSet ? '🎯 기준값 설정됨' : a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>
       ${a.baselineReset ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffd24f;background:rgba(255,210,79,.12);border-radius:6px;color:#ffd24f">⚠️ <b>비정상 변동폭 감지 → 기준값 재설정</b> — 이전 경주 배당 잔존 의심(95%+ 급락 다수). 이번 수집을 새 기준값으로 설정했습니다. <b>다음 수집부터 변동을 계산</b>합니다.</div>`
         : a.baselineSet ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.1);border-radius:6px;color:#7dd3fc">🎯 <b>기준값 설정됨</b> — 새 경주 첫 수집입니다. 변동폭은 <b>다음 수집부터</b> 계산됩니다.</div>` : ''}
@@ -4031,6 +4032,125 @@
       if (role === 'weakcut') return `<span style="color:${_ROLE_COLOR.weakcut}">${n}</span>`;
       return `${n}`;
     }).join('<span style="color:#8a94a6">+</span>');
+  }
+
+  // ═══════════ [배당 매트릭스·전종목] _triple_analyze 데이터로 복승 매트릭스 + 색상/호버/예산/타임라인 ═══════════
+  const _MATRIX_COLOR = { fav: '#38d39f', cut: '#ef4444', weakcut: '#ff9f43', dark: '#c084fc', inv: '#fbbf24' };
+  const _MATRIX_LABEL = { fav: '유력마', cut: '확실제거', weakcut: '제거권장', dark: '복병', inv: '역배열' };
+
+  // 말별 역할(유력/제거/복병/역배열) — 기존 _horseRoleMap(유력·제거) + 복병(darkHorses) 확장
+  function _matrixRoleMap(a) {
+    const map = _horseRoleMap(a);                 // fav / cut / weakcut
+    const keys = new Set((a.keyHorses || []).map(Number));
+    ((a && a.darkHorses) || []).forEach((h) => {
+      const n = Number(h.no);
+      if (!keys.has(n) && map[n] !== 'cut' && map[n] !== 'weakcut') map[n] = 'dark';
+    });
+    return map;
+  }
+
+  // 복승 배당 heat (낮을수록 진한 파랑) — renderOddsMatrix와 동일 스케일감
+  function _mHeat(v, lo, hi) {
+    if (!(v > 0)) return 'transparent';
+    const l = Math.log(v), a0 = Math.log(lo), a1 = Math.log(hi);
+    const f = a1 > a0 ? (l - a0) / (a1 - a0) : 0;
+    return `rgba(37,99,235,${(0.85 - 0.7 * f).toFixed(2)})`;
+  }
+
+  /** [배당 매트릭스] a.quinella(복승)로 삼각 매트릭스 + 유력/제거/복병/역배열 색상 + 급락 강조 + 호버 근거. */
+  function renderBmedMatrix(a) {
+    const q = Array.isArray(a.quinella) ? a.quinella : [];
+    const om = {};                                 // "min|max" → odds
+    const nosSet = new Set();
+    q.forEach((x) => {
+      const c = (x.combo || x.pair || []).map(Number);
+      if (c.length === 2 && x.odds > 0) {
+        const k = Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1]);
+        om[k] = x.odds; nosSet.add(c[0]); nosSet.add(c[1]);
+      }
+    });
+    const nos = [...nosSet].filter((n) => n > 0).sort((x, y) => x - y);
+    if (!nos.length) return '<p class="hint">복승 배당이 아직 수집되지 않았습니다. 수집되면 매트릭스가 표시됩니다.</p>';
+    const vals = Object.values(om); const lo = Math.min(...vals), hi = Math.max(...vals);
+    const role = _matrixRoleMap(a);
+    const invSet = new Set(((a.inverse || {}).invHorses || []).map(Number));
+    const isCycle = a.sport === 'cycle';
+    const formMap = {}; (a.form || []).forEach((h) => { if (h.no != null) formMap[Number(h.no)] = h; });
+    // 급락 셀 (직전/1차 대비 20%+ 하락) · 추천 복승 조합
+    const dropMap = {};
+    (a.drops || []).forEach((d) => {
+      const c = (d.combo || []).map(Number);
+      if (c.length === 2 && (d.pct || 0) <= -20) dropMap[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = Math.round(d.pct);
+    });
+    const recSet = new Set();
+    (a.betRecommend || []).forEach((b) => {
+      const c = (b.combo || []).map(Number);
+      if (c.length === 2 && /복/.test(b.kind || b.label || '')) recSet.add(Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1]));
+    });
+    const hdr = (n) => {
+      const r = role[n]; const inv = invSet.has(n); const col = _MATRIX_COLOR[r] || '#cbd5e1';
+      const mark = r === 'fav' ? '⭐' : r === 'cut' ? '❌' : r === 'weakcut' ? '△' : r === 'dark' ? '🟣' : '';
+      let sub = '';
+      if (isCycle && formMap[n]) {                 // [2번] 경륜: 각질 + 경쟁점수 등급
+        const f = formMap[n];
+        sub = `<div style="font-size:9px;color:#94a3b8">${esc(f.styleType || '')}${f.absGrade ? ' ' + f.absGrade : (f.competScore ? ' ' + f.competScore : '')}</div>`;
+      }
+      const tip = `${n}번${r ? ' · ' + _MATRIX_LABEL[r] : ''}${inv ? ' · 역배열' : ''}`;
+      return `<th style="color:${col};${inv ? 'box-shadow:inset 0 0 0 2px ' + _MATRIX_COLOR.inv + ';' : ''}" title="${tip}">${mark}${n}${sub}</th>`;
+    };
+    // 삼각 매트릭스(행 r > 열 c)
+    let head = '<tr><th class="corner" style="font-size:10px">복승</th>' + nos.slice(0, -1).map(hdr).join('') + '</tr>';
+    let body = '';
+    for (let ri = 1; ri < nos.length; ri++) {
+      const rowNo = nos[ri]; let tds = '';
+      for (let ci = 0; ci < ri; ci++) {
+        const colNo = nos[ci];
+        const key = Math.min(rowNo, colNo) + '|' + Math.max(rowNo, colNo);
+        const v = om[key];
+        if (v > 0) {
+          const rec = recSet.has(key); const dp = dropMap[key];
+          const rr = role[rowNo], rc = role[colNo];
+          // 셀 강조: 급락(빨강테두리 애니메이션)·추천(금색테두리)·유력×유력(녹색테두리)
+          let bd = '';
+          if (dp != null) bd = 'box-shadow:inset 0 0 0 2px #ef4444;';
+          else if (rec) bd = 'box-shadow:inset 0 0 0 2px #ffd24f;';
+          else if (rr === 'fav' && rc === 'fav') bd = 'box-shadow:inset 0 0 0 2px #38d39f;';
+          const inv = (invSet.has(rowNo) || invSet.has(colNo)) ? 'outline:2px solid ' + _MATRIX_COLOR.inv + ';outline-offset:-3px;' : '';
+          const tags = [rr ? _MATRIX_LABEL[rr] + rowNo : '', rc ? _MATRIX_LABEL[rc] + colNo : '', dp != null ? '급락 ' + dp + '%' : '', rec ? '추천' : ''].filter(Boolean).join(' · ');
+          const tip = `${rowNo}-${colNo} = ${v}배${tags ? ' | ' + tags : ''}`;
+          tds += `<td class="cell" style="background:${_mHeat(v, lo, hi)};${bd}${inv}" title="${tip}">${v}${dp != null ? `<sup style="color:#fecaca;font-size:8px">▼</sup>` : ''}</td>`;
+        } else tds += '<td class="empty">·</td>';
+      }
+      tds += '<td class="diag">—</td>';
+      body += `<tr>${hdr(rowNo)}${tds}</tr>`;
+    }
+    // [7번] 유사케이스 적중률
+    const pm = a.patternMatch || {}; const conf = pm.confidence || {};
+    const hit = (conf.rate != null) ? `<div class="hint" style="margin-top:4px">🎯 유사케이스 적중률 <b style="color:${conf.rate >= 50 ? '#38d39f' : '#ffd24f'}">${conf.rate}%</b>${conf.n ? ` (표본 ${conf.n})` : ''}${conf.level ? ` · ${esc(conf.level)}` : ''}</div>` : '';
+    // [5번] 예산(네덜란드식 배분) 요약 — 기존 betRecommend alloc 재사용
+    const bEl = document.querySelector('#tripleBudget');
+    const budget = Math.max(0, parseInt((bEl && bEl.value) || '0', 10) || 0);
+    const won = (n) => Math.round(n / 100) * 100;
+    const budRows = (a.betRecommend || []).filter((r) => (r.alloc || 0) > 0).slice(0, 6).map((r) => {
+      const amt = budget > 0 ? won(budget * (r.alloc || 0) / 100).toLocaleString('ko-KR') + '원' : '-';
+      return `<span class="chip" title="${esc(r.label || '')}">${_colorCombo(r.combo, role)} <b>${r.alloc}%</b>${budget > 0 ? ' · ' + amt : ''}</span>`;
+    }).join(' ');
+    const legend = `<div class="hint" style="font-size:10px;margin-top:4px">
+      <b style="color:${_MATRIX_COLOR.fav}">⭐유력마</b> · <span style="color:${_MATRIX_COLOR.dark}">🟣복병</span> · <span style="color:${_MATRIX_COLOR.weakcut}">△제거권장</span> · <span style="color:${_MATRIX_COLOR.cut}">❌확실제거</span> · <span style="box-shadow:inset 0 0 0 2px ${_MATRIX_COLOR.inv};padding:0 3px">역배열</span> · <span style="box-shadow:inset 0 0 0 2px #ef4444;padding:0 3px">▼급락</span> · <span style="box-shadow:inset 0 0 0 2px #ffd24f;padding:0 3px">추천</span></div>`;
+    return `<div class="matrix-legend"><span>낮은 배당</span><span class="legend-grad"></span><span>높은 배당</span></div>
+      <div class="matrix-wrap"><table class="odds-matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div>
+      ${legend}${hit}
+      ${budRows ? `<div style="margin-top:6px"><span class="hint">💰 예산 배분(네덜란드식)</span><br>${budRows}</div>` : ''}`;
+  }
+
+  /** [배당 매트릭스] 토글 패널(30초 재렌더에도 열림상태 유지). */
+  function renderBmedMatrixPanel(a) {
+    if (!Array.isArray(a.quinella) || !a.quinella.length) return '';
+    const open = window._bmedMatrixOpen ? ' open' : '';
+    return `<details class="bmed-matrix-panel" style="margin:6px 0;border:1px solid var(--border);border-radius:8px;padding:4px 8px"${open} ontoggle="window._bmedMatrixOpen=this.open">
+      <summary style="cursor:pointer;font-weight:700;color:#7dd3fc;padding:5px 0">📊 배당 매트릭스 <span class="hint" style="font-weight:400">유력/제거/복병/역배열 색상 · 급락 강조 · 예산</span></summary>
+      <div style="padding-top:6px">${renderBmedMatrix(a)}</div>
+    </details>`;
   }
 
   function renderBetRecommend(a, budgetSel) {
@@ -5662,6 +5782,7 @@
       ${renderMarketFavorites(a)}
       ${renderRealtimeAdded(a)}
       ${renderKoreaIntegratedTable(a.integrated)}
+      ${renderBmedMatrixPanel(a)}
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
       ${elimHtml}
       ${renderKoreaSignals(a.signals)}
