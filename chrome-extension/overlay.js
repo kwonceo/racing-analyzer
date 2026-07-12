@@ -23,6 +23,7 @@
     var savedPos = null;   // [보완#2] 사용자가 드래그해 옮긴 패널 위치({left,top}) — chrome.storage 에 저장/복원
     var soundOn = false, lastSoundKey = '';   // [보완#3] 강조 팝업 알림음 옵션(기본 off) + 중복 방지
     var matrixOpen = false;   // [배당 매트릭스] 오버레이 간략 매트릭스 열림 상태(30초 재렌더에도 유지)
+    var boardActive = false;  // [배당판 위 정렬 오버레이] 실제 배당판 위 강조 렌더 성공 여부(패널 격자 생략 판단)
     // [강한 신호 8유형·막판 보존] T-2분 이후 감지된 강신호를 경주 종료 후에도 유지(새 경주 rk 변경 시에만 초기화)
     var preservedSig = null, preservedRk = '', preservedLabel = '';
 
@@ -57,6 +58,7 @@
       try { var a = byId(ID_CHIP); if (a) a.remove(); } catch (_) { /* */ }
       try { var b = byId(ID_PANEL); if (b) b.remove(); } catch (_) { /* */ }
       try { var c = byId('kbOvAlert'); if (c) c.remove(); } catch (_) { /* */ }   // [강조] 팝업 제거
+      try { removeBoardMatrix(); } catch (_) { /* */ }   // [배당판 위 정렬 오버레이] 정리
       try { stopBlink(); } catch (_) { /* */ }
       try { stopCdBlink(); } catch (_) { /* */ }   // [3번] 카운트다운 깜빡임 정리
       if (timer) { try { clearInterval(timer); } catch (_) { /* */ } timer = null; }
@@ -626,6 +628,218 @@
       return wrap;
     }
 
+    // ═══════════════════════════════════════════════════════════════════
+    // [배당판 위 정렬 오버레이] 실제 배당판 셀을 getBoundingClientRect 로 측정 →
+    //   같은 크기·위치의 강조 셀을 그 위에 1:1로 겹쳐 표시(노안 대비 큰 글씨·3중 강조).
+    //   ⚠ 실제 표는 읽기만(위치 측정) — DOM 수정 없음. 자체 레이어(kbOvBoard)만 주입.
+    //   색상 통일: 파랑=유력마(낮은배당) · 빨강=이상감지 급락 · 초록=추천 조합 · 노랑=주의(중간신호)
+    // ═══════════════════════════════════════════════════════════════════
+    var BOARD_ID = 'kbOvBoard';
+    var boardItems = [];      // [{el, span}] 배당 셀 ↔ 오버레이 셀 매핑(재배치용)
+    var boardHdrItems = [];   // [{el, span}] 헤더(마번) ↔ 오버레이 매핑
+    var boardBound = false, boardRaf = 0;
+    var BCOL = { fav: '#3b82f6', drop: '#ef4444', rec: '#22c55e', warn: '#eab308' };
+
+    function pureIntT(s) { s = (s == null ? '' : String(s)).trim(); return /^\d{1,2}$/.test(s) ? parseInt(s, 10) : null; }
+    function numT(s) { var m = (s == null ? '' : String(s)).replace(/[, ]/g, '').match(/\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; }
+
+    // 실제 배당판(복승 매트릭스) 표 + 셀 요소 위치 매핑. content.js parseMatrixTable 과 동일 휴리스틱(읽기전용).
+    function mapBoardTable(table, oddsClass) {
+      var rows; try { rows = [].slice.call(table.rows); } catch (_) { return null; }
+      if (rows.length < 2) return null;
+      var headerRow = null, best = 1;
+      rows.slice(0, 3).forEach(function (r) {
+        var c = [].slice.call(r.cells).filter(function (td) { return pureIntT(td.textContent) != null; }).length;
+        if (c > best) { best = c; headerRow = r; }
+      });
+      if (!headerRow) return null;
+      var headerNos = [], hdrEls = [], colByIdx = {};
+      [].slice.call(headerRow.cells).forEach(function (cell) {
+        var n = pureIntT(cell.textContent);
+        if (n != null) { headerNos.push(n); hdrEls.push({ no: n, el: cell }); colByIdx[cell.cellIndex] = n; }
+      });
+      if (headerNos.length < 2) return null;
+      var isOdds = oddsClass
+        ? function (td) { return td.classList && td.classList.contains(oddsClass); }
+        : function (td) { return /^\d+\.\d+$/.test((td.textContent || '').trim()); };
+      var cells = [];
+      rows.forEach(function (r) {
+        if (r === headerRow) return;
+        var rc = [].slice.call(r.cells), rowNo = null;
+        for (var i = 0; i < rc.length; i++) { var n = pureIntT(rc[i].textContent); if (n != null) { rowNo = n; break; } }
+        if (rowNo == null) return;
+        var oddsCells = rc.filter(isOdds);
+        if (!oddsCells.length) return;
+        var all = headerNos.filter(function (n) { return n !== rowNo; });
+        var upper = headerNos.filter(function (n) { return n > rowNo; });
+        var lower = headerNos.filter(function (n) { return n < rowNo; });
+        var cols = null;
+        if (oddsCells.length === all.length) cols = all;
+        else if (oddsCells.length === upper.length) cols = upper;
+        else if (oddsCells.length === lower.length) cols = lower;
+        if (cols) {
+          oddsCells.forEach(function (oc, i) {
+            var colNo = cols[i], val = numT(oc.textContent);
+            if (colNo != null && colNo !== rowNo && val != null && val >= 1.0) cells.push({ a: rowNo, b: colNo, odds: val, el: oc });
+          });
+        } else {
+          oddsCells.forEach(function (oc) {
+            var colNo = colByIdx[oc.cellIndex], val = numT(oc.textContent);
+            if (colNo != null && colNo !== rowNo && val != null && val >= 1.0) cells.push({ a: rowNo, b: colNo, odds: val, el: oc });
+          });
+        }
+      });
+      if (cells.length < 3) return null;
+      return { table: table, headerRow: headerRow, headerNos: headerNos, hdrEls: hdrEls, cells: cells };
+    }
+
+    function locateBoardMatrix() {
+      var oddsClass = /asyukk|qwqwd/i.test(location.host) ? 'odds_content' : null;
+      var best = null, tables;
+      try { tables = document.querySelectorAll('table'); } catch (_) { return null; }
+      for (var ti = 0; ti < tables.length; ti++) {
+        var info = mapBoardTable(tables[ti], oddsClass);
+        if (info && (!best || info.cells.length > best.cells.length)) best = info;
+      }
+      // 사설(asyukk) class 로 못 찾으면 소수점 숫자 폴백으로 재시도
+      if (!best && oddsClass) {
+        for (var tj = 0; tj < tables.length; tj++) {
+          var info2 = mapBoardTable(tables[tj], null);
+          if (info2 && (!best || info2.cells.length > best.cells.length)) best = info2;
+        }
+      }
+      return best;
+    }
+
+    // 조합(a-b) 색상/강조 판정 — 추천>급락>유력>주의 우선순위.
+    function boardCellStyle(a, b, ctx) {
+      var key = Math.min(a, b) + '|' + Math.max(a, b);
+      if (ctx.recSet[key]) return { col: BCOL.rec, tag: '추천', emph: true };
+      if (ctx.dropMap[key] != null) return { col: BCOL.drop, tag: '급락 ' + ctx.dropMap[key] + '%', emph: true };
+      if (ctx.role[a] === 'fav' || ctx.role[b] === 'fav') return { col: BCOL.fav, tag: '유력', emph: true };
+      if (ctx.invSet[a] || ctx.invSet[b] || ctx.role[a] === 'dark' || ctx.role[b] === 'dark'
+          || ctx.role[a] === 'weakcut' || ctx.role[b] === 'weakcut') return { col: BCOL.warn, tag: '주의', emph: false };
+      return null;
+    }
+
+    function removeBoardMatrix() {
+      try { var b = byId(BOARD_ID); if (b) b.remove(); } catch (_) { /* */ }
+      boardItems = []; boardHdrItems = [];
+    }
+
+    // 각 오버레이 셀을 실제 배당판 셀의 현재 화면 좌표(fixed)로 재배치.
+    function positionBoard() {
+      var i, it, r;
+      for (i = 0; i < boardItems.length; i++) {
+        it = boardItems[i];
+        try { r = it.el.getBoundingClientRect(); } catch (_) { continue; }
+        if (!r || (r.width === 0 && r.height === 0)) { it.span.style.display = 'none'; continue; }
+        it.span.style.display = 'flex';
+        it.span.style.left = r.left + 'px'; it.span.style.top = r.top + 'px';
+        it.span.style.width = r.width + 'px'; it.span.style.height = r.height + 'px';
+      }
+      for (i = 0; i < boardHdrItems.length; i++) {
+        it = boardHdrItems[i];
+        try { r = it.el.getBoundingClientRect(); } catch (_) { continue; }
+        if (!r || (r.width === 0 && r.height === 0)) { it.span.style.display = 'none'; continue; }
+        it.span.style.display = 'flex';
+        it.span.style.left = r.left + 'px'; it.span.style.top = r.top + 'px';
+        it.span.style.width = r.width + 'px'; it.span.style.height = r.height + 'px';
+      }
+    }
+    function schedulePosition() {
+      if (boardRaf) return;
+      boardRaf = requestAnimationFrame(function () { boardRaf = 0; try { positionBoard(); } catch (_) { /* */ } });
+    }
+    function bindBoardReposition() {
+      if (boardBound) return; boardBound = true;
+      try { window.addEventListener('scroll', schedulePosition, true); } catch (_) { /* */ }
+      try { window.addEventListener('resize', schedulePosition); } catch (_) { /* */ }
+    }
+
+    // 실제 배당판 위에 정렬된 강조 오버레이를 그린다. 성공 시 true(→패널 격자 생략).
+    function renderBoardMatrix(d, st) {
+      if (!st || !st.ovShowMatrix || !d || !enabled || killed) { removeBoardMatrix(); return false; }
+      var info = locateBoardMatrix();
+      if (!info) { removeBoardMatrix(); return false; }
+      removeBoardMatrix();
+      // 컨텍스트: 역할·급락·추천·역배열
+      var role = matrixRoles(d);
+      var invSet = {}; (((d.inverse || {}).invHorses) || []).forEach(function (n) { invSet[+n] = 1; });
+      var dropMap = {};
+      (d.drops || []).forEach(function (dd) {
+        var c = (dd.combo || []).map(Number);
+        if (c.length === 2 && (dd.pct || 0) <= -20) dropMap[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = Math.round(dd.pct);
+      });
+      var recSet = {};
+      ((d.corePicks && d.corePicks.finalQuinellas) || []).forEach(function (q) {
+        var c = (q.combo || []).map(Number);
+        if (c.length === 2) recSet[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = 1;
+      });
+      (d.betRecommend || []).forEach(function (b) {
+        var c = (b.combo || []).map(Number);
+        if (c.length === 2 && /복/.test(b.kind || b.label || '')) recSet[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = 1;
+      });
+      var ctx = { role: role, invSet: invSet, dropMap: dropMap, recSet: recSet };
+
+      // 오버레이 레이어(뷰포트 고정·클릭 통과)
+      var layer = mk('div', 'position:fixed;left:0;top:0;width:0;height:0;z-index:2147482800;pointer-events:none');
+      layer.id = BOARD_ID;
+      root().appendChild(layer);
+
+      // 셀 강조 — 색상 있는(중요) 조합만 실제 셀 위에 큰 글씨로 겹침
+      info.cells.forEach(function (cell) {
+        var stl = boardCellStyle(cell.a, cell.b, ctx);
+        if (!stl) return;   // 중요 신호 없는 셀은 실제 배당 그대로 보이게(덮지 않음)
+        var emph = stl.emph;
+        var fs = emph ? 18 : 14;
+        var bg = 'rgba(' + hexRgb(stl.col) + ',' + (emph ? '0.30' : '0.20') + ')';
+        var bw = emph ? 3 : 2;
+        var css = 'position:fixed;box-sizing:border-box;display:flex;align-items:center;justify-content:center;'
+          + 'font:800 ' + fs + 'px/1 -apple-system,BlinkMacSystemFont,sans-serif;'
+          + 'color:#fff;background:' + bg + ';border:' + bw + 'px solid ' + stl.col + ';border-radius:4px;'
+          + 'text-shadow:0 1px 2px rgba(0,0,0,.8);overflow:hidden';
+        var span = mk('span', css, String(cell.odds));
+        span.title = cell.a + '-' + cell.b + ' = ' + cell.odds + '배 · ' + stl.tag;
+        layer.appendChild(span);
+        boardItems.push({ el: cell.el, span: span });
+      });
+
+      // 헤더(마번) 강조 — 유력⭐파랑 · 복병🟣 · 제거❌ · 역배열 노랑테
+      info.hdrEls.forEach(function (h) {
+        var r0 = role[h.no];
+        var col = r0 === 'fav' ? BCOL.fav : r0 === 'cut' ? BCOL.drop : r0 === 'dark' ? '#c084fc' : r0 === 'weakcut' ? BCOL.warn : null;
+        if (!col && !invSet[h.no]) return;   // 역할 없고 역배열도 아니면 헤더는 그대로
+        var mark = r0 === 'fav' ? '⭐' : r0 === 'cut' ? '❌' : r0 === 'dark' ? '🟣' : r0 === 'weakcut' ? '△' : '';
+        var bc = col || BCOL.warn;
+        var css = 'position:fixed;box-sizing:border-box;display:flex;align-items:center;justify-content:center;'
+          + 'font:900 18px/1 -apple-system,BlinkMacSystemFont,sans-serif;color:#fff;'
+          + 'background:rgba(' + hexRgb(bc) + ',0.85);border:3px solid ' + (invSet[h.no] ? BCOL.warn : bc) + ';border-radius:5px;'
+          + 'text-shadow:0 1px 2px rgba(0,0,0,.9);overflow:hidden';
+        var span = mk('span', css, mark + h.no);
+        span.title = h.no + '번' + (r0 ? ' · ' + ({ fav: '유력', cut: '확실제거', weakcut: '제거권장', dark: '복병' }[r0] || '') : '') + (invSet[h.no] ? ' · 역배열' : '');
+        layer.appendChild(span);
+        boardHdrItems.push({ el: h.el, span: span });
+      });
+
+      positionBoard();
+      bindBoardReposition();
+      try {
+        if (window.ResizeObserver) {
+          if (!renderBoardMatrix._ro) renderBoardMatrix._ro = new ResizeObserver(schedulePosition);
+          renderBoardMatrix._ro.disconnect();
+          renderBoardMatrix._ro.observe(info.table);
+        }
+      } catch (_) { /* */ }
+      return (boardItems.length + boardHdrItems.length) > 0;
+    }
+
+    // #rrggbb → "r,g,b" (rgba 배경용)
+    function hexRgb(hex) {
+      var m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || '');
+      return m ? (parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16)) : '59,130,246';
+    }
+
     // 매트릭스 토글 버튼 + 박스를 패널에 추가. open = 팝업/오버레이 플래그(ovShowMatrix).
     function renderMatrix(panel, d, open) {
       if (!d || !Array.isArray(d.quinella) || !d.quinella.length) return;
@@ -638,8 +852,14 @@
       });
       panel.appendChild(btn);
       if (open) {
-        var mx = buildMatrix(d);
-        if (mx) panel.appendChild(mx);
+        // 실제 배당판 위에 정렬 오버레이가 떠 있으면(boardActive) 패널 안 격자는 생략하고 안내만 표시.
+        if (boardActive) {
+          panel.appendChild(mk('div', 'font-size:11px;color:#7dd3fc;margin:3px 0 2px;padding:5px 8px;border:1px dashed #38bdf8;border-radius:6px;background:rgba(56,189,248,.08)',
+            '📊 실제 배당판 위에 강조 표시 중 (파랑=유력·빨강=급락·초록=추천·노랑=주의)'));
+        } else {
+          var mx = buildMatrix(d);
+          if (mx) panel.appendChild(mx);
+        }
       }
     }
 
@@ -746,7 +966,9 @@
           dhb.appendChild(dq);
           panel.appendChild(dhb);
         }
-        // [📊 배당 매트릭스] 간략 매트릭스 토글(팝업 [📊 매트릭스] 버튼·오버레이 버튼 동기화·경마·경륜 공통)
+        // [📊 배당 매트릭스] ① 실제 배당판 위 정렬 오버레이(1:1 겹침·큰글씨·3중강조) 우선 시도
+        boardActive = renderBoardMatrix(d, st);
+        //  ② 패널 토글 버튼(+ 배당판 못 찾으면 패널 안 간략 격자 폴백)
         renderMatrix(panel, d, !!st.ovShowMatrix);
         // [⏱ 타임라인] 팝업 [⏱ 타임라인] 버튼 켜짐 시 신호 타임라인 표시
         if (st.ovShowTimeline) renderOvTimeline(panel, d);
@@ -959,6 +1181,8 @@
         if (!enabled) {
           if (panel) panel.remove();
           try { var al = byId('kbOvAlert'); if (al) al.remove(); } catch (_) { /* */ }   // [강조] 팝업도 제거
+          try { removeBoardMatrix(); } catch (_) { /* */ }   // [배당판 위 정렬 오버레이] 정리
+          boardActive = false;
           stopBlink();
           stopCdBlink();   // [3번] 카운트다운 깜빡임 정리
           if (timer) { clearInterval(timer); timer = null; }
