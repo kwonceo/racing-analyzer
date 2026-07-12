@@ -7232,6 +7232,15 @@
 
   /** 요청 형식 3줄 상태 렌더: "✅ oddspark 수집 중 / 복승 N조합·쌍승 N조합 / 마지막 수집: HH:MM:SS" */
   function _renderKeibaStatus() {
+    // [중앙경마 자동 비활성화] 현재 경주가 JRA면 토글 비활성화 + 안내(oddspark 미지원).
+    const _curRk = _keibaTargetRk();
+    const _chk = document.getElementById('keibaOddsAutoChk');
+    if (jpIsCentralName(_curRk)) {
+      if (_chk) { _chk.checked = false; _chk.disabled = true; }
+      _setKeibaStatusHtml('<div style="color:#c084fc;font-weight:800">🏇 중앙경마(JRA)</div><div style="color:#94a3b8;font-size:12px">oddspark 서버 수집 미지원 — <b>Chrome 확장으로만 수집</b>됩니다.</div>');
+      return;
+    }
+    if (_chk && _chk.disabled) { _chk.disabled = false; try { _chk.checked = localStorage.getItem('keibaOddsAuto') === '1'; } catch (_) { /* */ } _keibaOdds.enabled = _chk.checked; }
     if (!_keibaOdds.enabled) { _setKeibaStatusHtml('⬜ 꺼짐 — 토글을 켜면 현재 경주 배당을 자동 수집합니다.'); return; }
     const head = '<div style="color:#38d39f;font-weight:800">✅ oddspark 수집 중</div>';
     const rkLine = _keibaOdds.lastRkShown ? `<div style="color:#94a3b8;font-size:11px">현재 경주: ${esc(_keibaOdds.lastRkShown)}</div>` : '';
@@ -7248,6 +7257,12 @@
 
   async function fetchKeibaOdds(rk, silent) {
     if (!rk) { _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '현재 경주(raceKey)가 없습니다.'; _renderKeibaStatus(); return null; }
+    // [중앙경마 자동 비활성화] JRA는 oddspark 미지원 → 서버 수집 시도 안 함(Failed to fetch 방지). Chrome 확장으로만.
+    if (jpIsCentralName(rk)) {
+      _keibaOdds.lastRkShown = rk; _keibaOdds.lastCounts = null;
+      _keibaOdds.lastMsg = '🏇 중앙경마(JRA)는 oddspark 미지원 — Chrome 확장으로만 수집됩니다.';
+      _renderKeibaStatus(); return { central: true };
+    }
     _keibaOdds.lastRkShown = rk;
     if (!silent && !_keibaOdds.enabled) _setKeibaStatusHtml('🏇 oddspark 배당 조회 중…');
     let d; try { d = await (await fetch('/api/keiba/odds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }) })).json(); }
@@ -7268,6 +7283,7 @@
     rk = _keibaOdds.pinnedRk || rk;                      // 경주 지정(pin) 우선
     if (!rk) return;
     if (jpIsKoreaName(rk)) return;                       // 한국 경주는 oddspark 대상 아님(확장/PDF 유지)
+    if (jpIsCentralName(rk)) return;                     // [중앙경마] JRA는 oddspark 미지원 → 자동 폴링 안 함
     // [stale 루프 차단] 마감 90초+ 지난(=끝난) 경주는 폴링 중단 — oddspark가 확정배당을 계속 재수집해
     //   그 경주가 계속 '최신'으로 남고 다음 경주로 못 넘어가던 자기강화 루프 제거(pin 지정 시엔 유지).
     if (!_keibaOdds.pinnedRk && left !== Infinity && left < -90000) {
@@ -7290,7 +7306,7 @@
   async function keibaDetectCurrentRace(rk, left) {
     if (!_keibaOdds.enabled || _keibaOdds.detecting) return;
     if (_keibaOdds.pinnedRk) return;                     // 경주 지정 시 자동추종 안 함
-    if (!rk || jpIsKoreaName(rk)) return;                // 한국 경주는 oddspark 대상 아님
+    if (!rk || jpIsKoreaName(rk) || jpIsCentralName(rk)) return;   // 한국·중앙경마는 oddspark 대상 아님
     if (!/\d+\s*경주/.test(rk)) return;                  // 경주번호 없는 raceKey 제외
     const detIv = (left <= 180000 || _keibaOdds.lastWaiting) ? 8000 : 25000;
     const now = Date.now();
@@ -7601,7 +7617,7 @@
           if (chk.checked) {   // 켜면 즉시 1회 수집 + 이후 적응형 폴링
             _keibaOdds.lastPoll = 0; _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '현재 경주 조회 중…'; _renderKeibaStatus();
             const rk = _closing.panelRk || getActiveRaceKey();
-            if (rk && !jpIsKoreaName(rk)) fetchKeibaOdds(rk, true);
+            if (rk && !jpIsKoreaName(rk) && !jpIsCentralName(rk)) fetchKeibaOdds(rk, true);
           } else _renderKeibaStatus();
         });
       }
@@ -7723,6 +7739,10 @@
   // ══════════ [일본경마 복기] 분석 내역 목록 + 결과 입력 + 자동 판정 리포트 ══════════
   const JP_KR_TRACKS = ['서울', '부산', '부경', '제주', '과천'];
   function jpIsKoreaName(s) { return JP_KR_TRACKS.some((t) => (s || '').indexOf(t) >= 0); }
+  // [중앙경마 oddspark 미지원] JRA 경마장 = oddspark 서버 수집 대상 아님(로그인/POST 필요) → Chrome 확장으로만 수집.
+  const JP_CENTRAL_TRACKS = ['도쿄', '나카야마', '한신', '쿄토', '교토', '삿포로', '하코다테', '후쿠시마', '니가타', '주쿄', '고쿠라', '코쿠라',
+    '東京', '中山', '阪神', '京都', '札幌', '函館', '福島', '新潟', '中京', '小倉'];
+  function jpIsCentralName(s) { return JP_CENTRAL_TRACKS.some((t) => (s || '').indexOf(t) >= 0); }
   function jpIsJapanName(s) { s = (s || '').trim(); return !!s && !jpIsKoreaName(s) && !/TEST/i.test(s); }
   function jpTodayStr() { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; }
   function jpRecSummary(fr) {
