@@ -8,119 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 6,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "ミッキージェントル",
-   "jockey": "金山昇（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    2,
-    2,
-    1,
-    5
-   ],
-   "record_score": 92.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "マリエッティ",
-   "jockey": "山田貴（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    2,
-    6,
-    6,
-    10
-   ],
-   "record_score": 72.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "リヴァイデント",
-   "jockey": "山口勲（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    3,
-    4,
-    1,
-    1
-   ],
-   "record_score": 70.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ナンゴクキャンドル",
-   "jockey": "長谷蓮（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    3,
-    3,
-    1,
-    4,
-    3
-   ],
-   "record_score": 68.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "カシノメンコチャン",
-   "jockey": "飛田愛（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    3,
-    3,
-    3,
-    2,
-    3
-   ],
-   "record_score": 61.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "バロックパール",
-   "jockey": "和田譲（大井）",
-   "jockey_winrate": null,
-   "recent_results": [
-    11,
-    1,
-    1,
-    7,
-    6
-   ],
-   "record_score": 50.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -479,13 +370,13 @@
   "candidates": [
    2,
    3,
-   6,
-   1,
    4,
-   5
+   5,
+   6,
+   1
   ],
   "eliminated": [],
-  "recommend": "2+3",
+  "recommend": "2+5",
   "strategy": "BMED_분산형",
   "confidence": 100.0,
   "signal_quality": "상"
@@ -495,16 +386,16 @@
   "2nd": 2,
   "3rd": 6,
   "4th": null,
-  "quinella_odds": 4.4,
+  "quinella_odds": null,
   "exacta_odds": null,
-  "hit": true,
-  "hit_pattern": "전적유력마 2번 적중 · 2+5 복승 급락(-89.3%) → 2번 입상 적중 · 역배열 감지말 6·2번 입상"
+  "hit": false,
+  "hit_pattern": null
  },
  "labels": {
-  "quinella_hit": true,
+  "quinella_hit": false,
   "winner": 1,
   "second": 2,
-  "odds_range": "중배당"
+  "odds_range": null
  },
  "signal_hit": {
   "excess_drop_horse": "5",
@@ -516,13 +407,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-12 08:35:56",
+ "saved_at": "2026-07-12 21:25:36",
  "quality": {
-  "score": 100,
-  "grade": "AI학습용",
-  "complete": true,
-  "ai_ready": true,
-  "missing": [],
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "전적 데이터",
+   "확정 배당"
+  ],
   "errors": []
  }
 }

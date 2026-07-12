@@ -6,7 +6,7 @@
  "date": "2026-07-12",
  "race": "마에바시 3경주",
  "analyzed_at": "11:51:15",
- "updated_at": "12:04:13",
+ "updated_at": "21:25:46",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -322,29 +322,7 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "12:01:24",
-   "type": "배당불일치",
-   "detail": "추천 복승(6+7=12.3배)이 배당판 인기 조합(2+7=2.9배)과 다름",
-   "severity": "⚠️",
-   "reason": "유력마가 배당판 최저(인기)와 동떨어짐 = 초반 배당 미수집/전적 편중 의심. 배당판 인기 조합을 추천에 추가함 — 배당 재확인 권장."
-  },
-  {
-   "time": "12:01:24",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[2·4위 간]: 단승 7번(2위) vs 2번(4위) — 쌍승 2→7(5.4)가 7→2(7.0)보다 낮음 → 상위권 실질순위 역전: 2번 우세 (역배열 0.771)",
-   "severity": "🟠",
-   "reason": "역전비율 = 쌍승(2→7) 5.4 / 쌍승(7→2) 7.0 = 0.771 (역배열)"
-  },
-  {
-   "time": "12:01:24",
-   "type": "복승불일치공식",
-   "detail": "⚠️ 복승 불일치: 단승 기준 예상 1+7(15.4) / 실제 최저 2+7(2.9) → 2번 집중 자금 유입 (🔴🔴 5.31)",
-   "severity": "🔴🔴",
-   "reason": "불일치점수 = 예상최저복승 15.4 / 실제최저복승 2.9 = 5.31"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [
   {
    "time": "11:51:51",
@@ -508,173 +486,21 @@
   }
  ],
  "strong_signals": {
-  "signals": [
-   {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "horses": [
-     2,
-     6
-    ],
-    "detail": "2+6 상승 116% 후 급락 54%",
-    "level": "orange",
-    "hitRate": 63,
-    "hitSample": 41
-   },
-   {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "horses": [
-     5,
-     6
-    ],
-    "detail": "5+6 상승 114% 후 급락 54%",
-    "level": "orange",
-    "hitRate": 63,
-    "hitSample": 41
-   }
-  ],
-  "count": 1,
-  "recommendLevel": "보조",
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
   "dualConverge": false,
-  "types": [
-   8
-  ],
-  "hitRates": {
-   "2": {
-    "type": 2,
-    "label": "역배열 10%+",
-    "fired": 14,
-    "hit": 7,
-    "rate": 50
-   },
-   "1": {
-    "type": 1,
-    "label": "연속하락 3회+",
-    "fired": 3,
-    "hit": 3,
-    "rate": 100
-   },
-   "5": {
-    "type": 5,
-    "label": "복수조합 동시급락",
-    "fired": 18,
-    "hit": 11,
-    "rate": 61
-   },
-   "8": {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "fired": 41,
-    "hit": 26,
-    "rate": 63
-   },
-   "3": {
-    "type": 3,
-    "label": "마감직전 대급락",
-    "fired": 3,
-    "hit": 3,
-    "rate": 100
-   },
-   "4": {
-    "type": 4,
-    "label": "재급락",
-    "fired": 17,
-    "hit": 16,
-    "rate": 94
-   }
-  }
+  "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 8.1배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 2.9배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 12.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 8.1배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 7.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 2.9배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 20.6배 · 감점 없음 = 100점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   2,
-   3,
-   5,
-   6,
-   7,
-   4
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
@@ -767,15 +593,8 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    1,
-    7
-   ],
-   "trio": [
-    1,
-    6,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
    "quinella": null,
@@ -786,90 +605,13 @@
    "trio": null
   },
   "final": {
-   "quinella": [
-    6,
-    7
-   ],
-   "trio": [
-    1,
-    6,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
- "corePicks": {
-  "axis": [
-   2,
-   6
-  ],
-  "third": 5,
-  "quinella": [
-   2,
-   6
-  ],
-  "trifecta": [
-   2,
-   5,
-   6
-  ],
-  "picks": [
-   {
-    "no": 2,
-    "tier": 3,
-    "sub": -2.9,
-    "rep": 2.9,
-    "reason": "스마트머니"
-   },
-   {
-    "no": 6,
-    "tier": 3,
-    "sub": -7.4,
-    "rep": 7.4,
-    "reason": "스마트머니"
-   },
-   {
-    "no": 5,
-    "tier": 3,
-    "sub": -8.1,
-    "rep": 8.1,
-    "reason": "스마트머니"
-   }
-  ],
-  "quinellaOdds": 7.4,
-  "trifectaOdds": 6.8,
-  "confQuinellas": [
-   {
-    "combo": [
-     1,
-     2
-    ],
-    "odds": 11.4,
-    "reason": "확신도1위+2위"
-   }
-  ],
-  "forcedHorses": [],
-  "confTop1": 2,
-  "confTop1Conf": 29.8,
-  "confTrifecta": [
-   1,
-   2,
-   3
-  ],
-  "confTrifectaOdds": 57.2,
-  "confTrifectaIns": [
-   1,
-   2,
-   6
-  ],
-  "confTrifectaInsOdds": 6.1
- },
- "summary": "유력마 1·7·6·2 / 복승 6+7",
- "keyHorses": [
-  1,
-  7,
-  6,
-  2
- ],
+ "corePicks": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
  "result": {
   "1st": 1,
   "2nd": 2,
@@ -880,14 +622,12 @@
   "quinella_hit": false,
   "trifecta_hit": false,
   "keyhorse_quinella_hit": true,
-  "keyhorse_trifecta_hit": true,
+  "keyhorse_trifecta_hit": false,
   "keyhorse_placed": [
-   1,
+   2,
    6
   ],
-  "dark_placed": [
-   2
-  ],
+  "dark_placed": [],
   "payouts": {
    "quinella": 0,
    "trifecta": 0
@@ -909,10 +649,10 @@
     2
    ],
    "keyHorses": [
-    1,
+    2,
     7,
     6,
-    2
+    1
    ],
    "recQuinella": [],
    "leadNo": null,

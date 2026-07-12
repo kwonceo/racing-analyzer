@@ -6,7 +6,7 @@
  "date": "2026-07-12",
  "race": "이토 11경주",
  "analyzed_at": "19:56:31",
- "updated_at": "20:05:48",
+ "updated_at": "21:26:09",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -338,15 +338,7 @@
    "quinella": {}
   }
  ],
- "signals_detected": [
-  {
-   "time": "20:05:48",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[2·3위 간]: 단승 4번(2위) vs 1번(3위) — 쌍승 1→4(11.7)가 4→1(19.1)보다 낮음 → 상위권 실질순위 역전: 1번 우세 (강한 역배열 0.613)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(1→4) 11.7 / 쌍승(4→1) 19.1 = 0.613 (강한 역배열)"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [
   {
    "time": "19:57:20",
@@ -445,100 +437,16 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 3.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 39.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 2.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 2.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 19.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 54.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 182.7배 · 배당 150배+ -40 = 60점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
-  "eliminated": [
-   2
-  ],
-  "elimination_reasons": {
-   "2": "배당 182.7배 · 배당 150배+ -40 = 60점"
-  }
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
  },
  "final_recommendation": {
   "budget_allocation": {}
@@ -568,15 +476,8 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    4,
-    5
-   ],
-   "trio": [
-    1,
-    4,
-    5
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
    "quinella": null,
@@ -587,171 +488,62 @@
    "trio": null
   },
   "final": {
-   "quinella": [
-    4,
-    5
-   ],
-   "trio": [
-    1,
-    4,
-    5
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
- "corePicks": {
-  "axis": [
-   1,
-   4
-  ],
-  "third": 5,
-  "quinella": [
-   1,
-   4
-  ],
-  "trifecta": [
-   1,
-   4,
-   5
-  ],
-  "picks": [
-   {
-    "no": 1,
-    "tier": 1,
-    "sub": -999.0,
-    "rep": 999.0,
-    "reason": "유력마 저배당 999배"
-   },
-   {
-    "no": 4,
-    "tier": 1,
-    "sub": -999.0,
-    "rep": 999.0,
-    "reason": "유력마 저배당 999배"
-   },
-   {
-    "no": 5,
-    "tier": 1,
-    "sub": -999.0,
-    "rep": 999.0,
-    "reason": "유력마 저배당 999배"
-   }
-  ],
-  "quinellaOdds": null,
-  "trifectaOdds": null,
-  "confQuinellas": [
-   {
-    "combo": [
-     4,
-     5
-    ],
-    "odds": null,
-    "reason": "시장유력"
-   },
-   {
-    "combo": [
-     5,
-     6
-    ],
-    "odds": null,
-    "reason": "시장유력+급락"
-   }
-  ],
-  "forcedHorses": [],
-  "confTop1": 1,
-  "confTop1Conf": 14.3,
-  "confTop1High": false,
-  "favAxis": [
-   5,
-   4
-  ],
-  "confTrifecta": [
-   1,
-   4,
-   5
-  ],
-  "confTrifectaOdds": null,
-  "confTrifectaIns": [
-   1,
-   4,
-   6
-  ],
-  "confTrifectaInsOdds": null,
-  "earlyDropHorses": [
-   {
-    "no": 1,
-    "firstTime": "20:05:48",
-    "firstMb": 10,
-    "firstPct": -77.0
-   },
-   {
-    "no": 5,
-    "firstTime": "20:05:48",
-    "firstMb": 10,
-    "firstPct": -65.7
-   },
-   {
-    "no": 4,
-    "firstTime": "20:05:48",
-    "firstMb": 10,
-    "firstPct": -54.5
-   },
-   {
-    "no": 6,
-    "firstTime": "20:05:48",
-    "firstMb": 10,
-    "firstPct": -79.0
-   }
-  ],
-  "earlyDropTrifectas": [
-   {
-    "combo": [
-     1,
-     4,
-     5
-    ],
-    "odds": null,
-    "horse": 1
-   },
-   {
-    "combo": [
-     4,
-     5,
-     6
-    ],
-    "odds": null,
-    "horse": 6
-   }
-  ],
-  "closingDropHorses": [
-   {
-    "no": 5,
-    "firstTime": "20:00:38",
-    "firstMb": 1,
-    "firstPct": -11.0
-   },
-   {
-    "no": 4,
-    "firstTime": "20:00:38",
-    "firstMb": 1,
-    "firstPct": -10.0
-   },
-   {
-    "no": 1,
-    "firstTime": "20:01:17",
-    "firstMb": 0,
-    "firstPct": -13.0
-   }
-  ],
-  "closingDropTrifectas": []
+ "corePicks": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 5,
+  "2nd": 4,
+  "3rd": 1
  },
- "summary": "유력마 5·4·1 / 복승 4+5",
- "keyHorses": [
-  5,
-  4,
-  1
- ],
- "result": null,
- "hit": null,
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": true,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": true,
+  "keyhorse_placed": [
+   5,
+   4,
+   1
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 1.7,
+   "trifecta": 1.3
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   2
+  ],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": 700,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [
+    1
+   ],
+   "inverseHit": [
+    1
+   ],
+   "confidence": 100.0,
+   "reason": "전적유력마 1번 적중 · 역배열 감지말 1번 입상 · 제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

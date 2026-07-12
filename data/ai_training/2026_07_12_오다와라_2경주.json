@@ -495,7 +495,7 @@
   "eliminated": [],
   "recommend": "4+7",
   "strategy": "BMED_보험형",
-  "confidence": 16.0,
+  "confidence": 40.0,
   "signal_quality": "하"
  },
  "result": {
@@ -503,7 +503,7 @@
   "2nd": 4,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": 1.3,
+  "quinella_odds": null,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "적중"
@@ -512,7 +512,7 @@
   "quinella_hit": true,
   "winner": 7,
   "second": 4,
-  "odds_range": "저배당"
+  "odds_range": null
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -524,15 +524,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-12 08:54:55",
+ "saved_at": "2026-07-12 21:25:37",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
+  "score": 40,
+  "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "전적 데이터"
+   "전적 데이터",
+   "확정 배당"
   ],
   "errors": []
  }

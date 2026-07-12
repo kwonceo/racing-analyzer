@@ -1,0 +1,819 @@
+{
+ "race": "이토 6경주",
+ "raceKey": "이토 6경주",
+ "date": "2026-07-12",
+ "result": {
+  "1st": 2,
+  "2nd": 6,
+  "3rd": 4,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    4,
+    6
+   ],
+   "drop_timeline": [
+    {
+     "time": "17:46:39",
+     "minutes_before": 7,
+     "odds": 11.2,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:46:39",
+     "minutes_before": 7,
+     "odds": 23.9,
+     "change": 113.4,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:47:21",
+     "minutes_before": 6,
+     "odds": 11.2,
+     "change": -53.1,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:48:21",
+     "minutes_before": 5,
+     "odds": 11.3,
+     "change": 0.9,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:48:54",
+     "minutes_before": 5,
+     "odds": 10.9,
+     "change": -3.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:49:26",
+     "minutes_before": 4,
+     "odds": 10.9,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:49:59",
+     "minutes_before": 4,
+     "odds": 11.4,
+     "change": 4.6,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:50:29",
+     "minutes_before": 3,
+     "odds": 13.5,
+     "change": 18.4,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:50:58",
+     "minutes_before": 3,
+     "odds": 13.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:51:26",
+     "minutes_before": 2,
+     "odds": 13.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:51:58",
+     "minutes_before": 2,
+     "odds": 13.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:52:26",
+     "minutes_before": 1,
+     "odds": 13.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:52:55",
+     "minutes_before": 1,
+     "odds": 12.7,
+     "change": -5.9,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:53:26",
+     "minutes_before": 0,
+     "odds": 12.7,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:53:55",
+     "minutes_before": 0,
+     "odds": 12.7,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:55:21",
+     "minutes_before": null,
+     "odds": 12.7,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    },
+    {
+     "time": "17:56:59",
+     "minutes_before": null,
+     "odds": 12.7,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    },
+    {
+     "time": "17:57:28",
+     "minutes_before": null,
+     "odds": 12.7,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.833,
+   "record_score": null,
+   "confidence": 13.9,
+   "reason": "쌍승역전"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    4,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "17:46:39",
+     "minutes_before": 7,
+     "odds": 3.4,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:46:39",
+     "minutes_before": 7,
+     "odds": 4.3,
+     "change": 26.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:47:21",
+     "minutes_before": 6,
+     "odds": 3.3,
+     "change": -23.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:48:21",
+     "minutes_before": 5,
+     "odds": 3.2,
+     "change": -3.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:48:54",
+     "minutes_before": 5,
+     "odds": 3.1,
+     "change": -3.1,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:49:26",
+     "minutes_before": 4,
+     "odds": 3.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:49:59",
+     "minutes_before": 4,
+     "odds": 3.0,
+     "change": -3.2,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:50:29",
+     "minutes_before": 3,
+     "odds": 2.0,
+     "change": -33.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:50:58",
+     "minutes_before": 3,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:51:26",
+     "minutes_before": 2,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:51:58",
+     "minutes_before": 2,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:52:26",
+     "minutes_before": 1,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:52:55",
+     "minutes_before": 1,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:53:26",
+     "minutes_before": 0,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:53:55",
+     "minutes_before": 0,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:55:21",
+     "minutes_before": null,
+     "odds": 2.0,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    },
+    {
+     "time": "17:56:59",
+     "minutes_before": null,
+     "odds": 2.0,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    },
+    {
+     "time": "17:57:28",
+     "minutes_before": null,
+     "odds": 2.0,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 16.0,
+   "reason": "일반"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    4,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "17:46:39",
+     "minutes_before": 7,
+     "odds": 3.4,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:46:39",
+     "minutes_before": 7,
+     "odds": 4.3,
+     "change": 26.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:47:21",
+     "minutes_before": 6,
+     "odds": 3.3,
+     "change": -23.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:48:21",
+     "minutes_before": 5,
+     "odds": 3.2,
+     "change": -3.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:48:54",
+     "minutes_before": 5,
+     "odds": 3.1,
+     "change": -3.1,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:49:26",
+     "minutes_before": 4,
+     "odds": 3.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:49:59",
+     "minutes_before": 4,
+     "odds": 3.0,
+     "change": -3.2,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:50:29",
+     "minutes_before": 3,
+     "odds": 2.0,
+     "change": -33.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:50:58",
+     "minutes_before": 3,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:51:26",
+     "minutes_before": 2,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:51:58",
+     "minutes_before": 2,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:52:26",
+     "minutes_before": 1,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:52:55",
+     "minutes_before": 1,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:53:26",
+     "minutes_before": 0,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:53:55",
+     "minutes_before": 0,
+     "odds": 2.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:55:21",
+     "minutes_before": null,
+     "odds": 2.0,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    },
+    {
+     "time": "17:56:59",
+     "minutes_before": null,
+     "odds": 2.0,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    },
+    {
+     "time": "17:57:28",
+     "minutes_before": null,
+     "odds": 2.0,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 33.0,
+   "reason": "일반"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    3,
+    4
+   ],
+   "drop_timeline": [
+    {
+     "time": "17:46:39",
+     "minutes_before": 7,
+     "odds": 4.7,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:46:39",
+     "minutes_before": 7,
+     "odds": 10.5,
+     "change": 123.4,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:47:21",
+     "minutes_before": 6,
+     "odds": 4.8,
+     "change": -54.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:48:21",
+     "minutes_before": 5,
+     "odds": 4.9,
+     "change": 2.1,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:48:54",
+     "minutes_before": 5,
+     "odds": 5.1,
+     "change": 4.1,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:49:26",
+     "minutes_before": 4,
+     "odds": 5.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:49:59",
+     "minutes_before": 4,
+     "odds": 5.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:50:29",
+     "minutes_before": 3,
+     "odds": 5.6,
+     "change": 9.8,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:50:58",
+     "minutes_before": 3,
+     "odds": 5.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:51:26",
+     "minutes_before": 2,
+     "odds": 5.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:51:58",
+     "minutes_before": 2,
+     "odds": 5.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:52:26",
+     "minutes_before": 1,
+     "odds": 5.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:52:55",
+     "minutes_before": 1,
+     "odds": 5.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:53:26",
+     "minutes_before": 0,
+     "odds": 5.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:53:55",
+     "minutes_before": 0,
+     "odds": 5.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "17:55:21",
+     "minutes_before": null,
+     "odds": 5.6,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    },
+    {
+     "time": "17:56:59",
+     "minutes_before": null,
+     "odds": 5.6,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    },
+    {
+     "time": "17:57:28",
+     "minutes_before": null,
+     "odds": 5.6,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 2번 전적 정보 제한",
+  "2. 배당 수집 시작 17:45:51",
+  "4. 쌍승 역전: 6→4(27.0) < 4→6(32.4) → 6번 실질 상위 신호",
+  "5. 종합 신뢰도 0점(하) 판정",
+  "6. BMED 전략: 역배열형 적용",
+  "7. 최종 추천: 복승 메인 4+5"
+ ],
+ "confidence_breakdown": {
+  "horse": 2,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": null,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": true,
+  "inverseHorses": [
+   6,
+   5
+  ],
+  "inverseHit": [
+   6
+  ],
+  "confidence": 16.0,
+  "reason": "역배열 감지말 6번 입상"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "17:48:21",
+    "minutes_before": 5,
+    "previous_signal": "5번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -18.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "17:48:54",
+    "minutes_before": 5,
+    "previous_signal": "7번",
+    "new_signal": "2번",
+    "reason": "2번 집중급락(평균 -13.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "17:50:29",
+    "minutes_before": 3,
+    "previous_signal": "2번",
+    "new_signal": "4번",
+    "reason": "4번 집중급락(평균 -33.0%)",
+    "prev_was_candidate": false
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   2,
+   4,
+   5,
+   7
+  ],
+  "events": {
+   "5": {
+    "first": {
+     "time": "17:47:21",
+     "minutes_before": 6
+    },
+    "count": 1,
+    "last": {
+     "time": "17:47:21",
+     "minutes_before": 6
+    }
+   },
+   "7": {
+    "first": {
+     "time": "17:48:21",
+     "minutes_before": 5
+    },
+    "count": 1,
+    "last": {
+     "time": "17:48:21",
+     "minutes_before": 5
+    }
+   },
+   "2": {
+    "first": {
+     "time": "17:48:54",
+     "minutes_before": 5
+    },
+    "count": 2,
+    "last": {
+     "time": "17:49:59",
+     "minutes_before": 4
+    },
+    "vanished": {
+     "time": "17:49:26",
+     "minutes_before": 4
+    }
+   },
+   "4": {
+    "first": {
+     "time": "17:50:29",
+     "minutes_before": 3
+    },
+    "count": 1,
+    "last": {
+     "time": "17:50:29",
+     "minutes_before": 3
+    },
+    "vanished": {
+     "time": "17:50:58",
+     "minutes_before": 3
+    }
+   }
+  },
+  "finalSignal": 4,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 3,
+   "next_race": 0
+  },
+  "validCount": 16
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-12 21:26:04"
+}

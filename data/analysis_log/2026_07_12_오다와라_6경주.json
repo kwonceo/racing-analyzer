@@ -6,7 +6,7 @@
  "date": "2026-07-12",
  "race": "오다와라 6경주",
  "analyzed_at": "09:59:11",
- "updated_at": "10:21:46",
+ "updated_at": "21:25:40",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -125,263 +125,26 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "10:02:57",
-   "type": "반등",
-   "detail": "3+6 급락 후 반등 (50.9→37.5→46.1)",
-   "severity": "🟡",
-   "reason": "페이크 베팅 의심 / 해당말 신뢰도 하락"
-  },
-  {
-   "time": "10:02:57",
-   "type": "페이크베팅",
-   "detail": "⚠️ 페이크 베팅 의심: 3+6 급락 후 반등 (50.9→37.5→46.1)",
-   "severity": "⚠️",
-   "reason": "급락으로 유인 후 배당 회복 → 신뢰도 -15(허수 베팅 가능성)"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
-  "signals": [
-   {
-    "type": 2,
-    "label": "역배열 10%+",
-    "horses": [
-     8
-    ],
-    "detail": "8번 강한 역배열 (배당차 48.2%)",
-    "level": "red",
-    "hitRate": 54,
-    "hitSample": 13
-   }
-  ],
-  "count": 1,
-  "recommendLevel": "보조",
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
   "dualConverge": false,
-  "types": [
-   2
-  ],
-  "hitRates": {
-   "2": {
-    "type": 2,
-    "label": "역배열 10%+",
-    "fired": 13,
-    "hit": 7,
-    "rate": 54
-   },
-   "1": {
-    "type": 1,
-    "label": "연속하락 3회+",
-    "fired": 3,
-    "hit": 3,
-    "rate": 100
-   },
-   "5": {
-    "type": 5,
-    "label": "복수조합 동시급락",
-    "fired": 17,
-    "hit": 11,
-    "rate": 65
-   },
-   "8": {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "fired": 38,
-    "hit": 24,
-    "rate": 63
-   },
-   "3": {
-    "type": 3,
-    "label": "마감직전 대급락",
-    "fired": 3,
-    "hit": 3,
-    "rate": 100
-   },
-   "4": {
-    "type": 4,
-    "label": "재급락",
-    "fired": 17,
-    "hit": 16,
-    "rate": 94
-   }
-  }
+  "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 3,
-   "name": "高橋 朋恵",
-   "jockey": "",
-   "record_score": 54.6,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 46.1배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "日野 友葵",
-   "jockey": "",
-   "record_score": 50.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 46.1배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 14,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 66.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 1,
-   "name": "新井 美菜",
-   "jockey": "",
-   "record_score": 49.8,
-   "record_detail": "",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 41.7배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 5,
-   "name": "野寺 楓",
-   "jockey": "",
-   "record_score": 56.3,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 129배 · 배당 80~149 -20 / 쌍승 상위 +20(제거 보류) = 100점"
-  },
-  {
-   "no": 8,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 122.6배 · 배당 80~149 -20 / 쌍승 상위 +20(제거 보류) = 100점"
-  },
-  {
-   "no": 10,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 118.6배 · 배당 80~149 -20 / 쌍승 상위 +20(제거 보류) = 100점"
-  },
-  {
-   "no": 11,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 111.9배 · 배당 80~149 -20 / 쌍승 상위 +20(제거 보류) = 100점"
-  },
-  {
-   "no": 2,
-   "name": "森 この芽",
-   "jockey": "",
-   "record_score": 43.4,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 133.8배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 4,
-   "name": "清水 美海",
-   "jockey": "",
-   "record_score": 54.9,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 1351.4배 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 7,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 1485.3배 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 9,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 1425.4배 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 12,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 2208.1배 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 13,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 645.7배 · 배당 150배+ -40 = 60점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   3,
-   6,
-   14,
-   1,
-   5,
-   8,
-   10,
-   11,
-   2,
-   4
-  ],
-  "eliminated": [
-   7,
-   9,
-   12,
-   13
-  ],
-  "elimination_reasons": {
-   "7": "배당 1485.3배 · 배당 150배+ -40 = 60점",
-   "9": "배당 1425.4배 · 배당 150배+ -40 = 60점",
-   "12": "배당 2208.1배 · 배당 150배+ -40 = 60점",
-   "13": "배당 645.7배 · 배당 150배+ -40 = 60점"
-  }
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
  },
  "final_recommendation": {
   "budget_allocation": {}
@@ -389,52 +152,72 @@
  "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    1,
-    3
-   ],
-   "trio": [
-    1,
-    3,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    4,
-    5
-   ],
-   "trio": [
-    3,
-    4,
-    5
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    3,
-    6
-   ],
-   "trio": [
-    1,
-    3,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
- "summary": "유력마 1·3·6·8 / 복승 3+6",
- "keyHorses": [
-  1,
-  3,
-  6,
-  8
- ],
- "result": null,
- "hit": null,
+ "corePicks": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   3
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   4,
+   7,
+   9,
+   12,
+   13
+  ],
+  "form_pick": 3,
+  "form_pick_hit": true,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": true,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 3번 적중 · 제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

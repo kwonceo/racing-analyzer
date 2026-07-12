@@ -7,7 +7,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 6,
+ "horse_count": null,
  "result": {
   "1st": 1,
   "2nd": 2,
@@ -1062,13 +1062,13 @@
   "candidates": [
    2,
    3,
-   6,
-   1,
    4,
-   5
+   5,
+   6,
+   1
   ],
   "eliminated": [],
-  "recommend_main": "2+3",
+  "recommend_main": "2+5",
   "recommend_sub": null,
   "strategy": "BMED_분산형",
   "signal_quality": "상",
@@ -1076,10 +1076,10 @@
   "inverse": true
  },
  "result_analysis": {
-  "main_hit": true,
+  "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "전적유력마 2번 적중 · 2+5 복승 급락(-89.3%) → 2번 입상 적중 · 역배열 감지말 6·2번 입상",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": true,
   "form_pick_hit": true
@@ -1088,13 +1088,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 4.4,
-  "trifecta_odds": 12.0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
   "actual_return": null,
-  "profit": 3400
+  "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-12 08:35:56",
+ "saved_at": "2026-07-12 21:25:36",
  "validation": {
   "ok": true,
   "errors": []
