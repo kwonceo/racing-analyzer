@@ -10107,9 +10107,22 @@ def _build_race_report(rk, an, record, result, doc):
                 return sorted(cc[:2])
         return None
 
-    # ── why_recommended: 입상마 + 유력마 각각의 신호 근거 ──
+    # ── 실제 추천마 집합(유력마 기준) — "경기 전 추천마"는 이 집합만으로 표시(입상마 혼입 방지) ──
+    #    우선순위: keyHorses(유력마) → 없으면 betRecommend 메인 복승/삼복승 조합의 말.
+    key_horses = [int(x) for x in (an.get("keyHorses") or [])]
+    rec_nos = list(key_horses)
+    if not rec_nos:
+        for b in bet_rec:
+            if b.get("label") in ("복승 메인", "삼복승 메인"):
+                for x in (b.get("combo") or []):
+                    xi = int(x)
+                    if xi not in rec_nos:
+                        rec_nos.append(xi)
+    rec_set = set(rec_nos)
+
+    # ── why_recommended: 입상마 + 유력마 각각의 신호 근거(신호 분석은 입상마도 포함, 표시는 recommended 플래그로 구분) ──
     focus = []
-    for h in top3 + [int(x) for x in (an.get("keyHorses") or [])]:
+    for h in top3 + key_horses:
         if h not in focus:
             focus.append(h)
     why = {}
@@ -10130,6 +10143,7 @@ def _build_race_report(rk, an, record, result, doc):
         why["signal_%d" % no] = {
             "horse": no,
             "placed": no in top3,
+            "recommended": no in rec_set,   # 우리가 실제 추천한 유력마인지(입상마 혼입 구분용)
             "place_rank": (top3.index(no) + 1 if no in top3 else None),
             "excess_drop": eh.get("excess"),
             "avg_drop": eh.get("avg"),
@@ -10217,6 +10231,7 @@ def _build_race_report(rk, an, record, result, doc):
         "hit_type": hit_type,
         "odds": _report_odds_band(win_odds), "win_odds": win_odds,
         "why_recommended": why,
+        "recommended_horses": rec_nos,   # 실제 추천한 유력마 집합(경기 전 추천마 표시 기준)
         "recommendation_process": steps,
         "confidence_breakdown": conf_break,
         "win_tags": win_tags.get("tags"),

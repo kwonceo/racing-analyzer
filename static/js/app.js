@@ -6889,7 +6889,18 @@
     const res = rep.result || {};
     if (res['1st'] == null) return '';
     const why = rep.why_recommended || {};
-    const preNos = Object.keys(why).map((k) => why[k]).filter((s) => s && s.horse != null).map((s) => Number(s.horse));
+    // 경기 전 추천마 = 우리가 실제 추천한 유력마만(입상마 혼입 방지).
+    // 우선순위: recommended_horses(신규 리포트) → why 항목 recommended 플래그 → (구 리포트) why 전체 폴백.
+    let preNos = Array.isArray(rep.recommended_horses)
+      ? rep.recommended_horses.map(Number).filter((n) => !isNaN(n))
+      : [];
+    if (!preNos.length) {
+      const recFlagged = Object.keys(why).map((k) => why[k])
+        .filter((s) => s && s.horse != null && s.recommended === true).map((s) => Number(s.horse));
+      preNos = recFlagged.length
+        ? recFlagged
+        : Object.keys(why).map((k) => why[k]).filter((s) => s && s.horse != null).map((s) => Number(s.horse));
+    }
     const placed = ['1st', '2nd', '3rd'].map((k) => res[k]).filter((v) => v != null).map(Number);
     const placedSet = new Set(placed);
     const preCmp = preNos.length ? preNos.map((n) => {
