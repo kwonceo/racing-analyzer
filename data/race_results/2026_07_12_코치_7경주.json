@@ -3897,18 +3897,18 @@
    1,
    4
   ],
-  "recommend_main": "3+6",
+  "recommend_main": "3+10",
   "recommend_sub": null,
   "strategy": "BMED_보험형",
   "signal_quality": "하",
-  "confidence": 65.0,
+  "confidence": 40.0,
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": false,
+  "main_hit": true,
   "sub_hit": false,
-  "hit_reason": null,
-  "miss_reason": "추천 조합 미입상",
+  "hit_reason": "전적유력마 3번 적중 · 제거 적중",
+  "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": true
@@ -3917,13 +3917,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 3.3,
+  "quinella_odds": null,
   "trifecta_odds": null,
   "actual_return": null,
-  "profit": -1000
+  "profit": 2300
  },
- "memo": "복승 3+6 미적중(정답 3+10=3.3배 시장1위). 복승불일치 RR(9.515)로 10번 자금유입 강경고했으나 복승축은 3+6(고배당 자금이탈). 2번 3착=마감급락 RR(2+10 -30.6%) 감지됐으나 고배당 미편입.",
- "saved_at": "2026-07-12 19:25:34",
+ "memo": null,
+ "saved_at": "2026-07-12 21:24:55",
  "validation": {
   "ok": true,
   "errors": []

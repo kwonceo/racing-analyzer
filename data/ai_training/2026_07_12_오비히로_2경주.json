@@ -483,20 +483,20 @@
   "signal_quality": null
  },
  "result": {
-  "1st": 4,
-  "2nd": 9,
-  "3rd": null,
+  "1st": 9,
+  "2nd": 4,
+  "3rd": 6,
   "4th": null,
-  "quinella_odds": 11.5,
+  "quinella_odds": null,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
  },
  "labels": {
   "quinella_hit": false,
-  "winner": 4,
-  "second": 9,
-  "odds_range": "고배당"
+  "winner": 9,
+  "second": 4,
+  "odds_range": null
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -508,7 +508,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-12 15:13:22",
+ "saved_at": "2026-07-12 21:24:34",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -517,7 +517,7 @@
   "missing": [
    "이상감지 결과",
    "전적 데이터",
-   "결과(1~3착)"
+   "확정 배당"
   ],
   "errors": []
  }

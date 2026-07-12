@@ -1228,7 +1228,7 @@
   "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
-  "quinella_mismatch": 9.515,
+  "quinella_mismatch": null,
   "refund_rate": 0.746,
   "consecutive_drops": {},
   "fake_betting": false,
@@ -1256,9 +1256,9 @@
    1,
    4
   ],
-  "recommend": "3+6",
+  "recommend": "3+10",
   "strategy": "BMED_보험형",
-  "confidence": 65.0,
+  "confidence": 40.0,
   "signal_quality": "하"
  },
  "result": {
@@ -1266,16 +1266,16 @@
   "2nd": 10,
   "3rd": 2,
   "4th": null,
-  "quinella_odds": 3.3,
+  "quinella_odds": null,
   "exacta_odds": null,
-  "hit": false,
-  "hit_pattern": null
+  "hit": true,
+  "hit_pattern": "전적유력마 3번 적중 · 제거 적중"
  },
  "labels": {
-  "quinella_hit": false,
+  "quinella_hit": true,
   "winner": 3,
   "second": 10,
-  "odds_range": "중배당"
+  "odds_range": null
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1287,14 +1287,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-12 19:25:34",
+ "saved_at": "2026-07-12 21:24:55",
  "quality": {
-  "score": 80,
-  "grade": "AI학습용",
-  "complete": true,
-  "ai_ready": true,
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
   "missing": [
-   "전적 데이터"
+   "이상감지 결과",
+   "전적 데이터",
+   "확정 배당"
   ],
   "errors": []
  }

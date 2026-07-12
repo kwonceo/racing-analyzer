@@ -6,7 +6,7 @@
  "date": "2026-07-12",
  "race": "모리오카 11경주",
  "analyzed_at": "18:04:21",
- "updated_at": "18:10:37",
+ "updated_at": "21:24:48",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -450,174 +450,19 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "noAxis": true,
-  "level": "강력",
-  "band": "4배 이하 2두+",
-  "reprs": [
-   {
-    "no": 6,
-    "odds": 2.4
-   },
-   {
-    "no": 2,
-    "odds": 2.4
-   },
-   {
-    "no": 9,
-    "odds": 2.4
-   }
-  ],
-  "axisGap": 0.0,
-  "note": "저배당 2두 배당 비슷(축 불명확·차이 0%) → 추천 보류"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "レノヴァティオ",
-   "jockey": "大坪慎（岩手）",
-   "record_score": 47.5,
-   "record_detail": "최근 7-1-3-2-2",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 31.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "レジェンドバローズ",
-   "jockey": "山本聡（岩手）",
-   "record_score": 80.0,
-   "record_detail": "최근 1-5-1-1-1",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 2.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "セイウォリアー",
-   "jockey": "高橋悠（岩手）",
-   "record_score": 25.0,
-   "record_detail": "최근 9-5-1-7-1",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 29.2배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "サスケベラ",
-   "jockey": "菅原辰（岩手）",
-   "record_score": 91.2,
-   "record_detail": "최근 1-2-2-3-4",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 9.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "ベアコルム",
-   "jockey": "山本紀（岩手）",
-   "record_score": 110.0,
-   "record_detail": "최근 1-1-1-1-1",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 2.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 9,
-   "name": "ブライオン",
-   "jockey": "村上忍（岩手）",
-   "record_score": 32.5,
-   "record_detail": "최근 5-3-2-3-11",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 2.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 10,
-   "name": "グローラヴェンコ",
-   "jockey": "佐々志（岩手）",
-   "record_score": 50.0,
-   "record_detail": "최근 2-7-7-1-1",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 8.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "トレモロ",
-   "jockey": "山本政（岩手）",
-   "record_score": 10.0,
-   "record_detail": "최근 10-10-3-9-8",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 44.1배 · 최근평균 8.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 4,
-   "name": "ロジータサンライズ",
-   "jockey": "鈴木祐（岩手）",
-   "record_score": 2.5,
-   "record_detail": "최근 6-6-5-3-5",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 51배 · 최근평균 5.0착 -30 = 70점"
-  },
-  {
-   "no": 8,
-   "name": "セローム",
-   "jockey": "塚本涼（岩手）",
-   "record_score": 7.5,
-   "record_detail": "최근 12-9-4-8-3",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 69.7배 · 최근평균 7.2착 -30 = 70점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   2,
-   3,
-   5,
-   6,
-   9,
-   10,
-   7,
-   4,
-   8
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "2+6",
-   "odds": 2.4,
-   "reason": "2번(A)·6번(A)"
-  },
-  "trifecta_main": {
-   "combo": "2+6+9",
-   "odds": 11.4,
-   "reason": "2번(A)·6번(A)·9번(B)"
-  },
-  "trifecta_insurance1": {
-   "combo": "2+5+6",
-   "odds": 18.9,
-   "reason": "2번(A)·5번(A)·6번(A)"
-  },
-  "trifecta_insurance2": {
-   "combo": "5+6+9",
-   "odds": 82.6,
-   "reason": "5번(A)·6번(A)·9번(B)"
-  },
-  "budget_allocation": {
-   "quinella_main": "62.1%",
-   "trifecta_main": "14.1%",
-   "trifecta_insurance": "1.9%"
-  }
+  "budget_allocation": {}
  },
  "recommendation_history": [
   {
@@ -657,52 +502,67 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    2,
-    6
-   ],
-   "trio": [
-    2,
-    6,
-    9
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    5,
-    6
-   ],
-   "trio": [
-    2,
-    5,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    2,
-    6
-   ],
-   "trio": [
-    2,
-    6,
-    9
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": null,
- "summary": "유력마 6·2·9 / 복승 2+6",
- "keyHorses": [
-  6,
-  2,
-  9
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 9
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   2,
+   9
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 1번 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

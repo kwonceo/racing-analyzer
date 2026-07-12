@@ -2065,7 +2065,7 @@
   "2nd": 10,
   "3rd": 9,
   "4th": null,
-  "quinella_odds": 12.4,
+  "quinella_odds": null,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "역배열 감지말 8번 입상 · 제거 적중"
@@ -2074,7 +2074,7 @@
   "quinella_hit": false,
   "winner": 8,
   "second": 10,
-  "odds_range": "고배당"
+  "odds_range": null
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -2086,14 +2086,15 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-12 19:45:50",
+ "saved_at": "2026-07-12 21:24:56",
  "quality": {
-  "score": 80,
-  "grade": "AI학습용",
-  "complete": true,
-  "ai_ready": true,
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
   "missing": [
-   "전적 데이터"
+   "전적 데이터",
+   "확정 배당"
   ],
   "errors": []
  }
