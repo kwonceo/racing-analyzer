@@ -14786,6 +14786,162 @@ def kra_status():
                     "watching": list(watch.keys()), "count": len(watch)})
 
 
+# ══════════════ [프리미엄 알림] 등급별 실시간 알림(🔴즉시/🟠예고/🟡사전) ══════════════
+#   361경주 분석 근거: 신호성숙 T-10분+ 57%·전략별 보험형48.9%·역배열형46.6% / 전략없음 2.8%.
+#   → 전략/신호 있는 경주만 알림(오알림 방지). 마감까지 남은 분(minutesBefore)으로 등급 판정.
+_STRAT_HITRATE_CACHE = {"t": 0.0, "map": {}}
+
+
+def _strategy_hitrate():
+    """data/race_results 스캔 → {strategy: {races, hits, rate}}. 1시간 캐시. 알림 '유사케이스 적중률'용."""
+    if _STRAT_HITRATE_CACHE["map"] and (time.time() - _STRAT_HITRATE_CACHE["t"] < 3600):
+        return _STRAT_HITRATE_CACHE["map"]
+    agg = {}
+    try:
+        for fn in os.listdir(RACE_RESULTS_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            pred = d.get("prediction") or {}
+            ra = d.get("result_analysis") or {}
+            st = pred.get("strategy") or "?"
+            a = agg.setdefault(st, [0, 0])
+            a[0] += 1
+            a[1] += 1 if (ra.get("main_hit") or ra.get("sub_hit")) else 0
+    except Exception as e:
+        print("[프리미엄 알림] 전략 적중률 집계 실패:", e)
+    out = {k: {"races": v[0], "hits": v[1], "rate": (round(100 * v[1] / v[0]) if v[0] else None)}
+           for k, v in agg.items()}
+    _STRAT_HITRATE_CACHE.update({"t": time.time(), "map": out})
+    return out
+
+
+_ALERT_GRADE_META = {
+    "immediate": {"emoji": "🔴", "name": "즉시", "headline": "지금 사세요!"},
+    "preview": {"emoji": "🟠", "name": "예고", "headline": "주목하세요"},
+    "early": {"emoji": "🟡", "name": "사전", "headline": "관심 경주"},
+}
+
+
+def _premium_alert(rk, an):
+    """[프리미엄 알림] 활성 경주 분석(an) → 등급별 알림 dict 또는 None(신호/타이밍 미충족).
+    등급: 🔴즉시(T-3분·강한신호) / 🟠예고(T-5분·형성중) / 🟡사전(T-10분·초기급락·정답조합권)."""
+    if not an or an.get("afterClose"):
+        return None
+    mb = an.get("minutesBefore")
+    if mb is None or mb < 0:
+        return None
+    drops = an.get("drops") or []
+    strong_drop = min([(d.get("pct") or 0) for d in drops], default=0)   # 가장 큰 급락(음수)
+    inv = an.get("inverse") or {}
+    inv_det = bool(inv.get("detected"))
+    smart = [h for h in (an.get("darkHorses") or []) if h.get("smartMoney")]
+    strategy = (an.get("bmed") or {}).get("strategy")
+    cp = an.get("corePicks") or {}
+    fq = cp.get("finalQuinellas") or []
+    ft = cp.get("finalTrifectas") or []
+    # 알림 게이팅(분석 근거): 전략/신호 없으면 발송 안 함(전략없음 적중률 2.8%)
+    if not (strategy or strong_drop <= -20 or inv_det or smart or fq):
+        return None
+    # 등급 판정(마감 남은분 + 신호강도)
+    grade = None
+    if mb <= 3 and (strong_drop <= -30 or inv_det or smart):
+        grade = "immediate"
+    elif mb <= 5 and (strong_drop <= -20 or inv_det):
+        grade = "preview"
+    elif mb <= 10 and (strong_drop <= -15 or fq):
+        grade = "early"
+    if not grade:
+        return None
+    # 신호 요약 텍스트
+    sig = []
+    if strong_drop <= -15 and drops:
+        d0 = min(drops, key=lambda d: d.get("pct") or 0)
+        sig.append("%s번 급락 %d%%" % ("+".join(str(x) for x in (d0.get("combo") or [])), round(d0.get("pct") or 0)))
+    if inv_det and (inv.get("invLead") or {}).get("no") is not None:
+        sig.append("%s번 역배열" % inv["invLead"]["no"])
+    if smart:
+        sig.append("%s번 스마트머니 감지" % smart[0].get("no"))
+    # 전략 적중률 lookup — race_results 는 'BMED_역배열형', an.bmed.strategy 는 '역배열형' 이라 접두어 방어
+    _srm = _strategy_hitrate()
+    sr = (_srm.get(strategy) or _srm.get("BMED_%s" % strategy)
+          or _srm.get((strategy or "").replace("BMED_", "")) or {}) if strategy else {}
+    meta = _ALERT_GRADE_META[grade]
+    q0 = fq[0] if fq else None
+    return {
+        "raceKey": rk, "grade": grade, "gradeEmoji": meta["emoji"], "gradeName": meta["name"],
+        "headline": meta["headline"],
+        "minutesBefore": round(mb, 1), "secondsLeft": max(0, int(mb * 60)),
+        "signals": sig,
+        "quinellas": [{"combo": q.get("combo"), "odds": q.get("odds")} for q in fq[:2]],
+        "trifectas": [{"combo": t.get("combo"), "odds": t.get("odds")} for t in ft[:2]],
+        "mainOdds": (q0.get("odds") if q0 else None),
+        "strategy": strategy,
+        "similarHitRate": sr.get("rate"), "similarSample": sr.get("races"),
+    }
+
+
+def _premium_alert_format(a):
+    """알림 dict → 카카오톡/푸시용 텍스트 포맷([4번] 명세)."""
+    ss = a.get("secondsLeft") or 0
+    tleft = "%d분 %02d초" % (ss // 60, ss % 60)
+    lines = ["%s [%s] %s" % (a["gradeEmoji"], a["gradeName"], a["raceKey"]),
+             "마감 %s!" % tleft, ""]
+    lines += a.get("signals") or []
+    if a.get("signals"):
+        lines.append("")
+    for q in a.get("quinellas") or []:
+        lines.append("✅ 복승: %s%s" % ("+".join(str(x) for x in (q.get("combo") or [])),
+                                        (" (%s배)" % q["odds"] if q.get("odds") else "")))
+    for t in a.get("trifectas") or []:
+        lines.append("✅ 삼복승: %s%s" % ("+".join(str(x) for x in (t.get("combo") or [])),
+                                          (" (%s배)" % t["odds"] if t.get("odds") else "")))
+    if a.get("similarHitRate") is not None:
+        lines.append("적중률: 유사케이스 %d%%(%s전략 %s경주)"
+                     % (a["similarHitRate"], a.get("strategy") or "-", a.get("similarSample") or 0))
+    return "\n".join(lines)
+
+
+@app.route("/api/alerts/premium", methods=["GET"])
+def alerts_premium():
+    """[프리미엄 알림] 현재 활성 경주 중 등급 조건 충족 경주의 알림 목록(폴링/푸시연동용).
+    ?format=text 면 각 알림에 카카오/푸시용 텍스트 포함. ?grade=immediate 로 등급 필터."""
+    want_text = (request.args.get("format") == "text")
+    want_grade = request.args.get("grade")
+    alerts, seen = [], set()
+    for loader in (_triple_load, _multi_store_load):
+        try:
+            db = loader()
+        except Exception:
+            continue
+        for rk, rec in list(db.items()):
+            if rk in seen:
+                continue
+            if (time.time() - (rec.get("t") or 0)) > STALE_ACTIVE_SEC:
+                continue
+            try:
+                an = _triple_analyze(rk, rec)
+            except Exception:
+                continue
+            a = _premium_alert(rk, an)
+            if not a:
+                continue
+            if want_grade and a["grade"] != want_grade:
+                continue
+            if want_text:
+                a["text"] = _premium_alert_format(a)
+            alerts.append(a)
+            seen.add(rk)
+    order = {"immediate": 0, "preview": 1, "early": 2}
+    alerts.sort(key=lambda a: (order.get(a["grade"], 9), a.get("secondsLeft") or 9e9))
+    return jsonify({"alerts": alerts, "count": len(alerts),
+                    "byGrade": {g: sum(1 for a in alerts if a["grade"] == g) for g in _ALERT_GRADE_META},
+                    "generated": time.strftime("%H:%M:%S")})
+
+
 # ════════════ [중앙경마(JRA) 전적] netkeiba 馬柱(shutuba_past) 서버 fetch·파싱 ════════════
 # 중앙경마는 keiba.go.jp(지방 전용)에 없고 JRA 공식은 POST세션이라 스크래핑 난해 → netkeiba 馬柱
 # 페이지(서버렌더 HTML)를 소스로 사용. 한 페이지에 마번·기수·부담중량 + 과거5주(착순·거리·통과순위
