@@ -3877,16 +3877,20 @@
   function renderFormGrades(form) {
     if (!form || !form.length) return '';
     const gc = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#8a94a6' };
+    // [보완1·경륜] 競走得点 절대등급(95+A/85+B/75+C/<75D)이 있으면 별도 컬럼 표시(통합 사분위 등급과 함께).
+    const hasAbs = form.some((h) => h.absGrade);
+    const isKeirin = form.some((h) => h.styleType);
     const rows = form.map((h) => `<tr>
       <td><b style="color:${gc[h.grade] || '#fff'}">${h.grade}</b></td>
-      <td>${h.no}</td><td>${esc(h.name || '')}</td><td>${esc(h.jockey || '')}</td>
+      ${hasAbs ? `<td><b style="color:${gc[h.absGrade] || '#8a94a6'}">${esc(h.absGrade || '-')}</b>${h.competScore != null ? ` <span class="hint" style="font-size:10px">${h.competScore}</span>` : ''}</td>` : ''}
+      <td>${h.no}</td><td>${esc(h.name || '')}</td>${isKeirin ? `<td>${esc(h.styleType || '-')}</td>` : `<td>${esc(h.jockey || '')}</td>`}
       <td>${(h.recentPlacings || []).join('-') || '-'}</td>
       <td>${h.totalScore}</td>
       <td>${(h.flags || []).map((f) => `<span class="chip ${f.level === 'must' ? 'chip-red' : ''}">${esc(f.msg)}</span>`).join(' ')}</td>
     </tr>`).join('');
-    return `<div class="matrix-title" style="font-size:13px">🏇 전적 등급 (출마표2)</div>
+    return `<div class="matrix-title" style="font-size:13px">🏇 전적 등급 ${isKeirin ? '(경륜 출마표·競走得点)' : '(출마표2)'}</div>
       <table class="data-table" style="margin-top:4px">
-        <thead><tr><th>등급</th><th>마번</th><th>마명</th><th>기수</th><th>최근착순</th><th>점수</th><th>플래그</th></tr></thead>
+        <thead><tr><th>등급${hasAbs ? '<br><span class="hint" style="font-size:9px">상대</span>' : ''}</th>${hasAbs ? '<th>絶対<br><span class="hint" style="font-size:9px">競走得点</span></th>' : ''}<th>${isKeirin ? '차번' : '마번'}</th><th>${isKeirin ? '선수' : '마명'}</th><th>${isKeirin ? '각질' : '기수'}</th><th>최근착순</th><th>점수</th><th>플래그</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
   }

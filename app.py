@@ -1446,6 +1446,9 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
                 "recentPlacings": rp,
                 "baseScore": round(ts or 0, 1), "courseBonus": 0, "jockeyBonus": 0,
                 "totalScore": round(ts or 0, 1), "detail": [], "flags": [], "anomaly": an,
+                # [보완1·경륜] 競走得点 절대등급 함께 전달(통합 사분위 grade와 별개)
+                "competScore": h.get("competScore"), "absGrade": h.get("absGrade"),
+                "styleType": h.get("styleType"),
             })
         classify_grades(scored)
         scored.sort(key=lambda x: -x["totalScore"])
@@ -12729,11 +12732,13 @@ def _keirin_autocollect_form(rk, jo, ymd, race):
             "no": r.get("car"), "name": r.get("name", ""), "jockey": "",
             "totalScore": round(float(r.get("adjScore") or r.get("score") or 0), 1),
             "recentPlacings": [], "rentai": r.get("rentai"), "styleType": r.get("styleType"),
+            # [보완1] 競走得点 절대등급(95+ A/85+ B/75+ C/<75 D) — 통합 사분위 등급과 별개로 함께 표시
+            "competScore": round(float(r.get("score") or 0), 1), "absGrade": _keirin_grade(r.get("score")),
         } for r in (an.get("ranked") or []) if r.get("car") is not None and r.get("score") is not None]
         if horses:
             sdb[rk] = {"horses": horses, "t": time.time(), "source": "keirin"}
             _starters_save(sdb)
-            print(f"[경륜 전적·자동] {rk}: {len(horses)}두 수집(競走得点·A/B/C/D등급) → 통합등급 자동 반영")
+            print(f"[경륜 전적·자동] {rk}: {len(horses)}두 수집(競走得点·절대등급 A/B/C/D) → 통합등급 자동 반영")
         return horses
     except Exception as e:
         print(f"[경륜 전적·자동] {rk} 실패(무시·배당 무영향): {e}")
