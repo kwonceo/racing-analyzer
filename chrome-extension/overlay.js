@@ -551,74 +551,35 @@
         panel.appendChild(head);
 
         // ═══ [정보 순서 정리] 1.결론박스 → 2.카운트다운 → 3.유력마 → 4.이상감지 → 5.나머지 ═══
-        // [핵심 추천·추천 과다 해결] 딱 이것만 — 🎯 복승 X+Y · 🛡 삼복승 X+Y+Z (엄격 우선순위 축2두). 최상단 크게.
+        // [핵심 추천·추천 과다 근본정리] 딱 이것만 — 최종 복승 ≤2 · 삼복승 ≤2 (총 4개)만 크게 표시.
+        //   서버 _final_picks가 모든 파생추천(확신도·복병·급락보존·스마트머니·밀집박스)을 4개로 압축(나머지는 숨김).
         var cp = d.corePicks;
-        var _confQ = (cp && cp.confQuinellas) || [];
-        var _hasQ = cp && (_confQ.length || (cp.quinella && cp.quinella.length === 2));
-        if (_hasQ && !d.recommendClosed) {
-          var cpBox = mk('div', 'margin:0 0 6px;padding:8px 11px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
-          var _hdTxt = '🎯 핵심 추천 (딱 이것만)' + (cp.confTop1 != null ? '  확신도1위 ' + cp.confTop1 + '번' + (cp.confTop1High ? '🔺고배당→삼복승보험' : '') : '');
-          cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:15px', _hdTxt));
-          // [확신도 복승 필수] 확신도 1위 말이 반드시 포함된 복승 라인(확신도1위+2위·확신도1위+시장유력·70+ 필수)
-          if (_confQ.length) {
-            _confQ.forEach(function (cq) {
-              cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:3px;color:#e2e8f0',
-                '🎯 복승: ' + cq.combo.join('+') + (cq.odds != null ? '  ' + cq.odds + '배' : '') + (cq.reason ? '  (' + cq.reason + ')' : '')));
-            });
-          } else {
-            cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:3px;color:#e2e8f0',
-              '🎯 복승: ' + cp.quinella.join('+') + (cp.quinellaOdds != null ? '  ' + cp.quinellaOdds + '배' : '')));
-          }
-          var _tri = cp.confTrifecta || cp.trifecta;
-          var _triO = cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds;
-          if (_tri) {
-            cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:2px;color:#e2e8f0',
-              '🛡 삼복승: ' + _tri.join('+') + (_triO != null ? '  ' + _triO + '배(추정)' : '')));
-          }
-          if (cp.confTrifectaIns) {
-            cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:2px;color:#c4b5fd',
-              '🛡 삼복승 보험(확신도+이상감지): ' + cp.confTrifectaIns.join('+') + (cp.confTrifectaInsOdds != null ? '  ' + cp.confTrifectaInsOdds + '배(추정)' : '')));
-          }
-          // [초기 급락마 보존] 마감 5분+ 전 급락 감지말을 후반 재편에도 삼복승 보험으로 유지.
-          var _edh = cp.earlyDropHorses || [];
-          if (_edh.length) {
-            var _ednos = _edh.map(function (e) { return e.no; }).join('·');
-            cpBox.appendChild(mk('div', 'font-weight:700;font-size:13px;margin-top:3px;color:#fbbf24',
-              '📌 초기급락 보존: ' + _ednos + '번 | 후반 재편에도 유지'));
-            (cp.earlyDropTrifectas || []).forEach(function (t) {
-              cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:1px;color:#fde68a',
-                '🎯 자동삼복승: ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '') + ' (초기급락 보존 조합)'));
-            });
-          }
-          // [마감급락 보존] 마감 2분 이내 뒤늦게 잡힌 급락말을 10초 flip-flop 재편에도 삼복승 보험으로 유지.
-          var _cdh = cp.closingDropHorses || [];
-          if (_cdh.length) {
-            cpBox.appendChild(mk('div', 'font-weight:700;font-size:13px;margin-top:3px;color:#f97316',
-              '⏱ 마감급락 보존: ' + _cdh.map(function (e) { return e.no; }).join('·') + '번 | 마감임박 감지·재편에도 유지'));
-            (cp.closingDropTrifectas || []).forEach(function (t) {
-              cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:1px;color:#fdba74',
-                '🎯 자동삼복승: ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '') + ' (마감급락 보존 조합)'));
-            });
-          }
-          // [Bug1·복병 삼복승 자동 편성] 복병(집중급락/스마트머니) 말은 제거 취소 + 삼복승 강제 편성.
-          var _dhp = cp.darkHorsePicks || [];
-          if (_dhp.length) {
-            cpBox.appendChild(mk('div', 'font-weight:700;font-size:13px;margin-top:3px;color:#f0abfc',
-              '🐎 복병 편성(제거 금지): ' + _dhp.map(function (e) { return e.no; }).join('·') + '번'));
-            (cp.darkTrifectas || []).forEach(function (t) {
-              cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:1px;color:#f5d0fe',
-                '🎯 자동삼복승: ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '') + ' (복병 편성)'));
-            });
-          }
-          // [B·무신호 저배당밀집] 급락·역배열·복병 신호 0건 + 상위배당 밀집 → 삼복승 박스 4~5두 확대.
-          var _dbh = cp.denseBoxHorses || [];
-          if (_dbh.length) {
-            cpBox.appendChild(mk('div', 'font-weight:700;font-size:13px;margin-top:3px;color:#fbbf24',
-              '⚠️ 무신호 밀집 경주 → 삼복승 박스 확대(' + _dbh.join('·') + '번)'));
-            (cp.denseBoxTrifectas || []).forEach(function (t) {
-              cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:1px;color:#fde68a',
-                '🎯 삼복승: ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '')));
-            });
+        var _fq = (cp && cp.finalQuinellas) || [];
+        var _ft = (cp && cp.finalTrifectas) || [];
+        // [폴백·구데이터] finalQuinellas 미보유(구 캐시)면 기존 confQuinellas/quinella·삼복승으로 대체
+        if (!_fq.length && cp) {
+          var _cq0 = cp.confQuinellas || [];
+          if (_cq0.length) _fq = _cq0.slice(0, 2);
+          else if (cp.quinella && cp.quinella.length === 2) _fq = [{ combo: cp.quinella, odds: cp.quinellaOdds }];
+        }
+        if (!_ft.length && cp) {
+          var _t0 = cp.confTrifecta || cp.trifecta;
+          if (_t0) _ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds }];
+        }
+        if (_fq.length && !d.recommendClosed) {
+          var cpBox = mk('div', 'margin:0 0 6px;padding:9px 12px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
+          cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:16px', '🎯 지금 사세요!'));
+          _fq.slice(0, 2).forEach(function (q) {
+            cpBox.appendChild(mk('div', 'font-weight:800;font-size:18px;margin-top:5px;color:#e2e8f0',
+              '복승: ' + q.combo.join('+') + (q.odds != null ? '  (' + q.odds + '배)' : '')));
+          });
+          _ft.slice(0, 2).forEach(function (t) {
+            cpBox.appendChild(mk('div', 'font-weight:800;font-size:18px;margin-top:5px;color:#c4b5fd',
+              '삼복승: ' + t.combo.join('+') + (t.odds != null ? '  (' + t.odds + '배)' : '')));
+          });
+          if (cp.confTop1 != null) {
+            cpBox.appendChild(mk('div', 'font-weight:400;color:#94a3b8;font-size:11px;margin-top:6px',
+              '확신도1위 ' + cp.confTop1 + '번' + (cp.confTop1High ? '🔺고배당' : '')));
           }
           panel.appendChild(cpBox);
         }

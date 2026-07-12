@@ -5967,41 +5967,36 @@
     });
   }
 
-  // [핵심 추천·추천 과다 근본 해결] 엄격 우선순위 축2두 → 복승 X+Y·삼복승 X+Y+Z (딱 이것만·최상단 크게).
+  // [핵심 추천·추천 과다 근본정리] 최종 복승 ≤2 · 삼복승 ≤2 (총 4개)만 크게 표시 — 딱 이것만.
+  //   서버 _final_picks가 모든 파생추천(확신도·복병·급락보존·스마트머니·밀집박스)을 4개로 압축(나머지 숨김·데이터는 보존).
   function renderCorePicks(a) {
     const cp = a && a.corePicks;
     if (!cp || a.recommendClosed) return '';
-    const confQ = cp.confQuinellas || [];
-    const hasQ = confQ.length || (cp.quinella && cp.quinella.length === 2);
-    if (!hasQ) return '';
-    const q = cp.quinella, t = cp.confTrifecta || cp.trifecta;
-    const _toVal = cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds;
-    const qo = cp.quinellaOdds != null ? `<span class="hint" style="font-size:13px">${cp.quinellaOdds}배</span>` : '';
-    const to = _toVal != null ? `<span class="hint" style="font-size:13px">${_toVal}배(추정)</span>` : '';
-    const reasons = (cp.picks || []).map((p) => `${p.no}번 ${esc(p.reason)}`).join(' · ');
-    // [확신도 복승 필수] 확신도 1위 말이 반드시 포함된 복승 라인(확신도1위+2위·확신도1위+시장유력·70+ 필수)
-    const qLines = confQ.length
-      ? confQ.map((cq) => {
-        const oo = cq.odds != null ? `<span class="hint" style="font-size:13px">${cq.odds}배</span>` : '';
-        return `<div style="font-size:20px;font-weight:800;margin:4px 0">🎯 복승: <span style="color:#4ea1ff">${cq.combo.join('+')}</span> ${oo} <span class="hint" style="font-size:11px;font-weight:400">(${esc(cq.reason || '')})</span></div>`;
-      }).join('')
-      : `<div style="font-size:20px;font-weight:800;margin:4px 0">🎯 복승: <span style="color:#4ea1ff">${q.join('+')}</span> ${qo}</div>`;
-    const triIns = cp.confTrifectaIns;
-    const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번(${cp.confTop1Conf})${cp.confTop1High ? ' 🔺고배당→삼복승 보험' : ''}</span>` : '';
-    return `<div style="margin:6px 0;padding:12px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
-      <div style="font-size:17px;font-weight:900;color:#38d39f;margin-bottom:6px">🎯 핵심 추천 <span class="hint" style="font-weight:400;font-size:11px">(엄격 우선순위 · 딱 이것만)</span> ${confHead}</div>
+    let fq = cp.finalQuinellas || [];
+    let ft = cp.finalTrifectas || [];
+    // [폴백·구데이터] finalQuinellas 미보유 시 기존 confQuinellas/quinella·삼복승으로 대체
+    if (!fq.length) {
+      if ((cp.confQuinellas || []).length) fq = cp.confQuinellas.slice(0, 2);
+      else if (cp.quinella && cp.quinella.length === 2) fq = [{ combo: cp.quinella, odds: cp.quinellaOdds }];
+    }
+    if (!ft.length) {
+      const _t0 = cp.confTrifecta || cp.trifecta;
+      if (_t0) ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds }];
+    }
+    if (!fq.length) return '';
+    const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번${cp.confTop1High ? ' 🔺고배당' : ''}</span>` : '';
+    const qLines = fq.slice(0, 2).map((q) => {
+      const oo = q.odds != null ? `<span class="hint" style="font-size:14px">(${q.odds}배)</span>` : '';
+      return `<div style="font-size:21px;font-weight:800;margin:5px 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}</div>`;
+    }).join('');
+    const tLines = ft.slice(0, 2).map((t) => {
+      const oo = t.odds != null ? `<span class="hint" style="font-size:14px">(${t.odds}배)</span>` : '';
+      return `<div style="font-size:21px;font-weight:800;margin:5px 0">삼복승: <span style="color:#c084fc">${t.combo.join('+')}</span> ${oo}</div>`;
+    }).join('');
+    return `<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
+      <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(딱 이것만)</span> ${confHead}</div>
       ${qLines}
-      ${t ? `<div style="font-size:20px;font-weight:800;margin:4px 0">🛡 삼복승: <span style="color:#c084fc">${t.join('+')}</span> ${to}</div>` : ''}
-      ${triIns ? `<div style="font-size:16px;font-weight:700;margin:2px 0"><span class="hint" style="font-weight:400;font-size:12px">🛡 삼복승 보험(확신도+이상감지):</span> <span style="color:#c084fc">${triIns.join('+')}</span>${cp.confTrifectaInsOdds != null ? ` <span class="hint" style="font-size:12px">${cp.confTrifectaInsOdds}배(추정)</span>` : ''}</div>` : ''}
-      ${(cp.earlyDropHorses || []).length ? `<div style="font-size:13px;font-weight:700;margin:4px 0 1px;color:#fbbf24">📌 초기급락 보존: ${(cp.earlyDropHorses || []).map((e) => e.no + '번').join('·')} <span class="hint" style="font-weight:400;font-size:11px">| 후반 재편에도 유지</span></div>` : ''}
-      ${(cp.earlyDropTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:700;margin:1px 0;color:#fde68a">🎯 자동삼복승: ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''} <span class="hint" style="font-weight:400;font-size:11px">(초기급락 보존 조합)</span></div>`).join('')}
-      ${(cp.closingDropHorses || []).length ? `<div style="font-size:13px;font-weight:700;margin:4px 0 1px;color:#f97316">⏱ 마감급락 보존: ${(cp.closingDropHorses || []).map((e) => e.no + '번').join('·')} <span class="hint" style="font-weight:400;font-size:11px">| 마감임박 감지·재편에도 유지</span></div>` : ''}
-      ${(cp.closingDropTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:700;margin:1px 0;color:#fdba74">🎯 자동삼복승: ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''} <span class="hint" style="font-weight:400;font-size:11px">(마감급락 보존 조합)</span></div>`).join('')}
-      ${(cp.darkHorsePicks || []).length ? `<div style="font-size:13px;font-weight:700;margin:4px 0 1px;color:#f0abfc">🐎 복병 편성(제거 금지): ${(cp.darkHorsePicks || []).map((e) => e.no + '번').join('·')}</div>` : ''}
-      ${(cp.darkTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:700;margin:1px 0;color:#f5d0fe">🎯 자동삼복승: ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''} <span class="hint" style="font-weight:400;font-size:11px">(복병 편성)</span></div>`).join('')}
-      ${(cp.denseBoxHorses || []).length ? `<div style="font-size:13px;font-weight:700;margin:4px 0 1px;color:#fbbf24">⚠️ 무신호 밀집 경주 → 삼복승 박스 확대 <span class="hint" style="font-weight:400;font-size:11px">(${(cp.denseBoxHorses || []).join('·')}번 · 급락/역배열/복병 0건·저배당 밀집)</span></div>` : ''}
-      ${(cp.denseBoxTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:700;margin:1px 0;color:#fde68a">🎯 삼복승: ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''}</div>`).join('')}
-      <div class="hint" style="font-size:11px;margin-top:6px">축 근거: ${reasons}</div>
+      ${tLines}
     </div>`;
   }
 

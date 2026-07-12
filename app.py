@@ -5761,6 +5761,82 @@ def _dense_no_signal_box(key_horses, valid_nos, curWin, curQ, trio_map,
         return {"active": False}
 
 
+def _final_picks(cp, curQ, valid_nos, smart_quinella=None):
+    """[추천 과다 근본 정리] 여러 파생 추천(확신도·복병·급락보존·스마트머니·밀집박스…)을
+      최종 복승 ≤2 · 삼복승 ≤2 (총 4개)로 엄격 압축. 오버레이·핵심추천 카드는 이것만 표시(기존 파생 필드 무삭제).
+      복승 우선순위: ①시장 최저복승 ②확신도1위+시장유력 ③스마트머니+시장유력.
+      삼복승 우선순위: ①삼복승 메인(확신도/축) ②가장 강한 자동 1개(마감급락>복병>초기급락>밀집박스>확신도보험).
+      반환 {quinellas:[{combo,odds,reason}](≤2), trifectas:[{combo,odds,reason}](≤2)}."""
+    cp = cp or {}
+    vs = set(int(x) for x in (valid_nos or []))
+
+    def _vpair(cc):
+        cc = [int(x) for x in (cc or [])]
+        return len(cc) == 2 and len(set(cc)) == 2 and (not vs or all(h in vs for h in cc))
+
+    def _vtri(cc):
+        cc = [int(x) for x in (cc or [])]
+        return len(cc) == 3 and len(set(cc)) == 3 and (not vs or all(h in vs for h in cc))
+
+    # ── 복승 후보(우선순위) ──
+    q_cands = []
+    if curQ:                                              # 1순위: 시장 최저복승
+        _low = None
+        for (a, b), o in curQ.items():
+            if o and o > 0 and (not vs or (int(a) in vs and int(b) in vs)):
+                if _low is None or o < _low[1]:
+                    _low = ([int(a), int(b)], o)
+        if _low:
+            q_cands.append({"combo": sorted(_low[0]), "odds": _low[1], "reason": "시장 최저복승"})
+    for cq in (cp.get("confQuinellas") or []):            # 2순위: 확신도1위 + 시장유력
+        q_cands.append({"combo": sorted(int(x) for x in (cq.get("combo") or [])),
+                        "odds": cq.get("odds"), "reason": cq.get("reason") or "확신도"})
+    for sq in (smart_quinella or []):                     # 3순위: 스마트머니 + 시장유력
+        q_cands.append({"combo": sorted(int(x) for x in (sq.get("combo") or [])),
+                        "odds": sq.get("odds"), "reason": "스마트머니"})
+    if cp.get("quinella"):                                # 폴백: 기존 core 복승 축
+        q_cands.append({"combo": sorted(int(x) for x in cp["quinella"]),
+                        "odds": cp.get("quinellaOdds"), "reason": "복승 축"})
+    final_q, seen_q = [], set()
+    for c in q_cands:
+        if not _vpair(c["combo"]):
+            continue
+        k = tuple(c["combo"])
+        if k in seen_q:
+            continue
+        seen_q.add(k); final_q.append(c)
+        if len(final_q) >= 2:
+            break
+
+    # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
+    _main = None
+    if cp.get("confTrifecta"):
+        _main = {"combo": cp["confTrifecta"], "odds": cp.get("confTrifectaOdds"), "reason": "삼복승 메인"}
+    elif cp.get("trifecta"):
+        _main = {"combo": cp["trifecta"], "odds": cp.get("trifectaOdds"), "reason": "삼복승 메인"}
+    autos = []                                            # 복병·급락보존·밀집박스·확신도보험 자동 삼복승 전부 수집
+    for _src, _lab in [("closingDropTrifectas", "마감급락 보존"), ("darkTrifectas", "복병"),
+                       ("earlyDropTrifectas", "초기급락 보존"), ("denseBoxTrifectas", "무신호밀집")]:
+        for t in (cp.get(_src) or []):
+            autos.append({"combo": t.get("combo"), "odds": t.get("odds"), "reason": _lab})
+    if cp.get("confTrifectaIns"):
+        autos.append({"combo": cp["confTrifectaIns"], "odds": cp.get("confTrifectaInsOdds"), "reason": "확신도 보험"})
+    autos.sort(key=lambda c: (c.get("odds") is None, c.get("odds") or 9e9))   # 추정배당 낮은 순 = 가장 강한(확률 높은) 것
+    final_t, seen_t = [], set()
+    for c in ([_main] if _main else []) + autos:          # 메인 먼저, 그다음 가장 강한 자동
+        cc = sorted(int(x) for x in (c.get("combo") or [])) if c and c.get("combo") else []
+        if not _vtri(cc):
+            continue
+        k = tuple(cc)
+        if k in seen_t:
+            continue
+        seen_t.add(k); final_t.append({"combo": cc, "odds": c.get("odds"), "reason": c.get("reason")})
+        if len(final_t) >= 2:
+            break
+
+    return {"quinellas": final_q, "trifectas": final_t}
+
+
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
@@ -7202,6 +7278,16 @@ def _triple_analyze(rk, rec):
                         _addbet("삼복승", "삼복승 박스(무신호밀집)", _t.get("combo"), _per, _t.get("odds"))
     except Exception as _e:
         print("[무신호밀집박스] 파생 실패:", _e)
+
+    # [추천 과다 근본 정리] 모든 파생 추천(확신도·복병·급락보존·스마트머니·밀집박스…)을 최종 복승 ≤2·삼복승 ≤2
+    #   (총 4개)로 엄격 압축 → 오버레이·핵심추천 카드는 이것만 표시. ⚠ 기존 파생 필드/betRecommend 전부 보존(무삭제).
+    try:
+        if core_picks and not after_close:
+            _fp = _final_picks(core_picks, curQ, valid_nos, smart_quinella)
+            core_picks["finalQuinellas"] = _fp["quinellas"]
+            core_picks["finalTrifectas"] = _fp["trifectas"]
+    except Exception as _e:
+        print("[최종추천정리] 실패:", _e)
 
     # [혼전 경주] 상위 배당 근접 → 이변 가능성 → 고배당 포함 삼복승 전략(기존 추천 무영향, 별도 필드).
     chaotic = None
