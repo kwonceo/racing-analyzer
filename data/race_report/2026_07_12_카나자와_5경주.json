@@ -1,0 +1,128 @@
+{
+ "race": "카나자와 5경주",
+ "raceKey": "카나자와 5경주",
+ "date": "2026-07-12",
+ "result": {
+  "1st": 4,
+  "2nd": 1,
+  "3rd": 5,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.599,
+   "record_score": 77.5,
+   "confidence": 33.4,
+   "reason": "쌍승역전"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 116.2,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 120,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 83.8,
+   "confidence": null,
+   "reason": "전적상위"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 4번 77.5점",
+  "2. 배당 수집 시작 15:19:31",
+  "4. 쌍승 역전: 4→5(2.6) < 5→4(4.3) → 4번 실질 상위 신호",
+  "4. 쌍승 역전: 4→1(8.6) < 1→4(16.6) → 4번 실질 상위 신호",
+  "5. 종합 신뢰도 33.4점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 4,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 33,
+  "quinella_mismatch_score": 0,
+  "record_score": 77.5,
+  "total": 33.4,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 77.5,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   4
+  ],
+  "inverseHit": [
+   4
+  ],
+  "confidence": 33.4,
+  "reason": "전적유력마 1번 적중 · 역배열 감지말 4번 입상"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 6
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-12 21:24:35"
+}

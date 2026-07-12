@@ -64,6 +64,8 @@
         if (btn.dataset.tab === 'stats') renderStats();
         if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
+        if (btn.dataset.tab === 'multi') startMultiRaceWatch();   // [다중 경주] 전체 경주 대시보드 시작
+        else stopMultiRaceWatch();                                // 다른 탭 이동 시 폴링 중단(자원 절약)
         if (btn.dataset.tab === 'jp') { startJapanOddsWatch(); loadJapanReviewList(); }   // [5번] 일본경마: 실시간 배당 연동 + 분석 내역 복기 목록
         // [탭분리] 경정/경륜/바이크/중앙경마 탭 → 라이브 배당 폴링 시작 + 마지막 분석 즉시 반영
         if (['boat', 'cycle', 'bike', 'central'].includes(btn.dataset.tab)) {
@@ -1333,13 +1335,83 @@
   //  분석기는 이 바에서 (1) 새로고침 버튼으로 즉시, (2) 30초마다 자동으로 최신 경주를 조회해
   //  상단에 "제주 3경주" 처럼 표시하고, 경주가 바뀌면 화면을 자동 갱신한다. (기존 기능은 유지)
   let _rrTimer = null, _rrLastRk = null;
+  // [경주 고정] 자동 전환 중단 상태(사용자가 보고 있는 경주 유지). localStorage로 새로고침에도 유지.
+  let _racePinned = false;
+  try { _racePinned = (localStorage.getItem('racePinned') === '1'); } catch (_) { /* */ }
+
+  /** [2번] raceKey에서 경마장명(경주번호 앞 토큰) 추출 — 자동 전환 시 같은 경마장인지 확인용. */
+  function _raceVenue(rk) {
+    if (!rk) return '';
+    // "사가 5경주" / "오비히로 8R" / "帯広 3レース" → 앞 토큰(공백 전 또는 숫자 전)
+    const m = String(rk).trim().match(/^([^\d]+?)\s*\d/);
+    return (m ? m[1] : String(rk)).replace(/[\s·]+$/, '').trim();
+  }
+
+  /** [자동 전환 게이트] 최신 수집 경주(latestRk)를 보고, 지금 화면에 표시해야 할 경주를 결정.
+   *  고정 중이거나 '다른 경마장'이면 현재 보고 있는 경주(_rrLastRk)를 유지 → 강제 전환 차단.
+   *  refreshCurrentRace·pollJapanOdds 두 자동 경로가 이 규칙을 공유(한 곳만 고치면 딴 경로가 전환시키던 문제 해결). */
+  function _targetRaceKey(latestRk) {
+    if (!latestRk) return _rrLastRk || null;
+    if (!_rrLastRk) return latestRk;                 // 최초 로드 = 최신 따름
+    if (latestRk === _rrLastRk) return latestRk;
+    if (_racePinned) return _rrLastRk;               // [2번] 고정 중 → 무조건 현재 경주 유지
+    if (_raceVenue(latestRk) !== _raceVenue(_rrLastRk)) return _rrLastRk;  // [3번] 다른 경마장 → 전환 안 함
+    return latestRk;                                 // 같은 경마장 다음 경주 → 전환 허용
+  }
+
+  /** [3번] 📌 현재 경주 고정 토글 — 자동 전환 on/off. 서버측 잠금(POST /api/race/pin)까지 반영. */
+  async function toggleRacePin() {
+    _racePinned = !_racePinned;
+    try { localStorage.setItem('racePinned', _racePinned ? '1' : '0'); } catch (_) { /* */ }
+    _updatePinButton();
+    const status = $('#rrStatus');
+    // [서버측 잠금] 프론트뿐 아니라 서버에도 고정 → oddspark 자동수집이 다른 경주를 최신 저장해도 current_race가 고정 경주 유지.
+    try {
+      if (_racePinned && _rrLastRk) {
+        await fetch('/api/race/pin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: _rrLastRk }) });
+      } else {
+        await fetch('/api/race/pin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clear: true }) });
+      }
+    } catch (_) { /* */ }
+    if (_racePinned) {
+      if (status) status.textContent = `📌 고정됨(서버 잠금): ${_rrLastRk || '현재 경주'} — 자동 전환 중단`;
+      notify(`📌 현재 경주 고정: ${_rrLastRk || ''} · 서버측 잠금(재시작에도 유지)`, true);
+    } else {
+      if (status) status.textContent = '📌 고정 해제 — 자동 전환 재개';
+      notify('📌 고정 해제: 자동 전환 재개', true);
+      refreshCurrentRace(false);   // 해제 즉시 최신 경주 반영
+    }
+  }
+  function _updatePinButton() {
+    const pb = $('#rrPinBtn');
+    if (!pb) return;
+    if (_racePinned) {
+      pb.textContent = '📌 고정 해제';
+      pb.style.background = '#f59e0b';
+      pb.style.color = '#1a1a1a';
+    } else {
+      pb.textContent = '📌 현재 경주 고정';
+      pb.style.background = '';
+      pb.style.color = '';
+    }
+  }
 
   function initRaceRefresh() {
     const btn = $('#rrRefreshBtn');
     if (btn) btn.addEventListener('click', () => refreshCurrentRace(true));
+    const pb = $('#rrPinBtn');               // [3번] 현재 경주 고정 버튼
+    if (pb) pb.addEventListener('click', toggleRacePin);
     const nb = $('#rrNewRaceBtn');           // [3번] 강제 초기화 버튼
     if (nb) nb.addEventListener('click', newRaceStart);
-    refreshCurrentRace(false);
+    // [서버측 잠금 동기화] 서버에 고정된 경주가 있으면(재시작 후에도) 프론트 상태 복원 → 자동 전환 차단 유지.
+    (async () => {
+      try {
+        const d = await (await fetch('/api/race/pin')).json();
+        if (d && d.pinned) { _racePinned = true; _rrLastRk = d.pinned; try { localStorage.setItem('racePinned', '1'); } catch (_) { /* */ } }
+      } catch (_) { /* */ }
+      _updatePinButton();
+      refreshCurrentRace(false);
+    })();
     if (_rrTimer) clearInterval(_rrTimer);
     _rrTimer = setInterval(() => refreshCurrentRace(false), 12000);   // [4번] 12초마다 경주 변경 확인·자동 전환(늦게 넘어감 방지)
   }
@@ -1364,6 +1436,10 @@
       await fetch('/api/odds/triple/reset', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
       });
+      // [서버측 잠금] 새 경주 시작 = 고정 해제(이전 고정 경주에 묶이지 않게)
+      await fetch('/api/race/pin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clear: true }) });
+      _racePinned = false; try { localStorage.setItem('racePinned', '0'); } catch (_) { /* */ }
+      _updatePinButton();
     } catch (_) { /* */ }
     hardResetRaceState();
     { const el = $('#rrCurrentRace'); if (el) el.textContent = '— (새 경주 수집 대기)'; }
@@ -1392,21 +1468,38 @@
       if (stale) _rrLastRk = null;   // 다음에 새 경주가 오면 '변경'으로 감지
       return;
     }
-    if (label) label.textContent = rk;
     const changed = rk !== _rrLastRk;
 
     if (manual) {
       // [수동 새로고침] 완전 갱신: 화면 업데이트 + 배당 타임라인 초기화 + 성공 메시지
+      //   수동 전환은 명시적 사용자 행동이므로 고정 상태여도 전환(고정 대상을 새 경주로 갱신).
+      if (label) label.textContent = rk;
       if (changed) hardResetRaceState();              // 경주 바뀌었으면 이전 상태 완전 초기화
       _rrLastRk = rk;
       resetOddsTimeline();                            // [1번] 배당 타임라인 초기화(새 경주 시작)
       refreshActiveView(rk);                          // 분석기 화면 자동 업데이트
-      if (status) status.textContent = '✅ 업데이트 완료';
+      if (status) status.textContent = _racePinned ? `✅ ${rk} 업데이트(고정 유지)` : '✅ 업데이트 완료';
       notify(`✅ ${rk} 업데이트 완료`, true);          // 예: "✅ 제주 3경주 업데이트 완료"
       return;
     }
-    // [4번] 자동 감지·30초: 경주가 바뀌면 자동 초기화 + 새 경주로 화면 전환(직전 경주 잔존 방지)
+    // [경주 자동 전환 버그 수정] 자동 감지 경로 — 고정/다른 경마장 시 자동 전환 차단.
+    //   [3번 고정] 📌 고정 중이면 다른 경주가 수집돼도 화면 전환 안 함(라벨엔 감지된 경주 힌트만).
+    if (_racePinned && changed && _rrLastRk != null) {
+      if (label) label.textContent = `${_rrLastRk}  📌`;   // 보고 있는(고정) 경주 유지 표시
+      if (status) status.textContent = `📌 고정 중 · 다른 경주 감지(${rk}) — 전환하려면 고정 해제/새로고침`;
+      return;                                          // _rrLastRk 갱신 안 함(고정 유지)
+    }
+    // [2번 종목/경마장 혼재 방지] 고정 안 했어도 '다른 경마장'으로의 자동 전환은 차단(사가↔오비히로 혼재).
+    //   같은 경마장의 다음 경주(사가 5R→6R)는 기존대로 자동 전환 허용(정상 진행).
     if (changed && _rrLastRk != null) {
+      const prevVenue = _raceVenue(_rrLastRk), newVenue = _raceVenue(rk);
+      if (prevVenue && newVenue && prevVenue !== newVenue) {
+        if (label) label.textContent = `${_rrLastRk}`;   // 현재 경마장 경주 유지
+        if (status) status.textContent = `🔀 다른 경마장 경주 감지(${rk}) — 전환하려면 새로고침(자동 혼재 방지)`;
+        return;                                        // 다른 경마장으로 자동 전환하지 않음
+      }
+      if (label) label.textContent = rk;
+      // 같은 경마장 다음 경주 → 자동 초기화 + 새 경주 화면 전환(직전 경주 잔존 방지)
       _rrLastRk = rk;
       hardResetRaceState();                           // [1번] 직전 경주 스냅샷·이상감지·타임라인·경고 초기화
       _rrLastRk = rk;                                 // hardReset이 null로 만든 값 복원(현재 경주로 고정)
@@ -1415,6 +1508,7 @@
       notify(`🔄 새 경주 자동 전환: ${rk}`, true);
       return;
     }
+    if (label) label.textContent = rk;
     _rrLastRk = rk;
   }
 
@@ -1441,6 +1535,147 @@
     const tab = activeBtn ? activeBtn.dataset.tab : '';
     if (tab === 'jp') { try { pollJapanOdds(); } catch (_) { /* */ } return; }
     try { autoSelectKoreaRace(rk); } catch (_) { /* */ }
+  }
+
+  // ═══ [다중 경주 동시 배당판] 별도 추가 기능(기존 단일 경주 분석 무영향) ═══
+  let _multiTimer = null, _multiAlerted = {};
+  function initMultiRace() {
+    const rb = $('#multiRefreshBtn'); if (rb) rb.addEventListener('click', renderMultiDashboard);
+    const sb = $('#multiScheduleBtn'); if (sb) sb.addEventListener('click', async () => {
+      const st = $('#multiStatus'); if (st) st.textContent = '📅 오늘 스케줄 수집 중…';
+      try { await fetch('/api/multi/schedule', { method: 'POST' }); } catch (_) { /* */ }
+      renderMultiDashboard();
+    });
+    const cb = $('#multiDetailClose'); if (cb) cb.addEventListener('click', () => { const c = $('#multiDetailCard'); if (c) c.style.display = 'none'; });
+  }
+  function startMultiRaceWatch() {
+    renderMultiDashboard();
+    if (_multiTimer) clearInterval(_multiTimer);
+    _multiTimer = setInterval(renderMultiDashboard, 30000);   // 30초 폴링
+  }
+  function stopMultiRaceWatch() { if (_multiTimer) { clearInterval(_multiTimer); _multiTimer = null; } }
+
+  async function renderMultiDashboard() {
+    const box = $('#multiCards'), status = $('#multiStatus'); if (!box) return;
+    let d;
+    try { d = await (await fetch('/api/multi/dashboard')).json(); }
+    catch (_) { if (status) status.textContent = '대시보드 로드 실패'; return; }
+    const cards = (d && d.cards) || [];
+    const nColl = (d && d.collected) || 0, nSched = cards.length - nColl;
+    if (status) status.textContent = `오늘 ${cards.length}경주 (수집·분석 ${nColl} · 예정 ${nSched}) · 30초 자동 갱신${cards.length ? '' : ' (스케줄 갱신을 눌러 오늘 개최를 불러오세요)'}`;
+    // [5번] T-3분 마감 임박 알림(소리+배너, 경주당 1회)
+    const urgent = (d && d.urgent) || [];
+    const banner = $('#multiUrgentBanner');
+    const fresh = urgent.filter((k) => !_multiAlerted[k]);
+    if (fresh.length && banner) {
+      fresh.forEach((k) => { _multiAlerted[k] = 1; });
+      banner.style.display = 'block';
+      banner.innerHTML = fresh.map((k) => `<div style="padding:8px 12px;background:#7f1d1d;border:2px solid #ef4444;border-radius:8px;color:#fecaca;font-weight:800;font-size:15px;margin:2px 0">⚡ ${esc(k)} 마감 3분전!</div>`).join('');
+      try { playAlert('🔴'); } catch (_) { /* */ }
+      setTimeout(() => { if (banner) banner.style.display = 'none'; }, 30000);
+    } else if (!urgent.length && banner) { banner.style.display = 'none'; }
+    // [5번] 종목별 토글 + [4번] 종목별 그룹핑
+    const bySport = (d && d.bySport) || {};
+    _renderMultiToggles(bySport);
+    const shown = cards.filter((c) => _multiSportOn(c.sport || 'horse'));
+    // 종목 그룹 순서(경정 제외): 일본경마 → 경륜 → 한국경마
+    const order = ['horse', 'central', 'cycle', 'korea'];
+    let html = '';
+    order.forEach((sp) => {
+      const g = shown.filter((c) => (c.sport || 'horse') === sp);
+      if (!g.length) return;
+      html += `<div style="grid-column:1/-1;margin:6px 0 2px;font-weight:800;color:#94a3b8">${_multiSportLabel(sp)} <span class="hint" style="font-weight:400">${g.length}경주</span></div>`;
+      html += g.map(_multiCardHtml).join('');
+    });
+    box.innerHTML = html || '<p class="hint">표시할 경주가 없습니다. (종목 토글 확인 · 발주 10분전부터 자동 수집)</p>';
+    box.querySelectorAll('[data-mkey]').forEach((el) => el.addEventListener('click', () => openMultiDetail(el.dataset.mkey)));
+  }
+  // [5번] 종목 토글 상태(localStorage) — 경정 기본 제외
+  const _multiSportKey = 'multiSportsOn';
+  function _multiSportOn(sp) {
+    let on; try { on = JSON.parse(localStorage.getItem(_multiSportKey) || 'null'); } catch (_) { on = null; }
+    if (!on) return sp !== 'boat';   // 기본: 경정 외 전부 켜짐
+    return !!on[sp];
+  }
+  function _multiSportLabel(sp) {
+    return ({ horse: '🇯🇵 일본경마', central: '🏇 중앙경마', cycle: '🚴 경륜', boat: '🚤 경정', korea: '🇰🇷 한국경마' })[sp] || '🏇 경마';
+  }
+  function _renderMultiToggles(bySport) {
+    const bar = $('#multiSportToggles'); if (!bar) return;
+    const sports = ['horse', 'central', 'cycle', 'korea'];   // 경정 제외
+    bar.innerHTML = sports.map((sp) => {
+      const on = _multiSportOn(sp), n = bySport[sp] || 0;
+      return `<label style="cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid ${on ? '#38d39f' : '#334155'};color:${on ? '#38d39f' : '#94a3b8'}"><input type="checkbox" data-sp="${sp}" ${on ? 'checked' : ''} style="vertical-align:middle"> ${_multiSportLabel(sp)} (${n})</label>`;
+    }).join(' ');
+    bar.querySelectorAll('input[data-sp]').forEach((cb) => cb.addEventListener('change', () => {
+      let on; try { on = JSON.parse(localStorage.getItem(_multiSportKey) || 'null'); } catch (_) { on = null; }
+      if (!on) on = { horse: true, central: true, cycle: true, korea: true, boat: false };
+      on[cb.dataset.sp] = cb.checked;
+      try { localStorage.setItem(_multiSportKey, JSON.stringify(on)); } catch (_) { /* */ }
+      renderMultiDashboard();
+    }));
+  }
+  function _multiFmtLeft(s) {
+    if (s == null) return '—';
+    if (s < 0) return '마감';
+    const m = Math.floor(s / 60), ss = s % 60;
+    return m > 0 ? `${m}분 ${ss}초` : `${ss}초`;
+  }
+  function _multiCardHtml(c) {
+    const col = c.urgency === 'urgent' ? '#ef4444' : (c.urgency === 'warn' ? '#f59e0b' : '#334155');
+    const bg = c.urgency === 'urgent' ? 'rgba(239,68,68,.10)' : (c.urgency === 'warn' ? 'rgba(245,158,11,.08)' : 'rgba(255,255,255,.03)');
+    const leftTxt = c.afterClose ? '마감' : _multiFmtLeft(c.secondsLeft);
+    // [예정 경주] 아직 배당 수집 전이면 카운트다운만 표시(발주 10분전부터 자동 수집→분석)
+    if (c.scheduled) {
+      return `<div data-mkey="${esc(c.raceKey)}" title="발주 10분전부터 자동 수집됩니다" style="cursor:pointer;border:2px dashed ${col};border-radius:10px;padding:10px;background:${bg};opacity:.85">
+        <div style="display:flex;align-items:center;gap:6px">
+          <b style="font-size:15px;color:#e2e8f0">${esc(c.venue || '')} ${c.raceNo}R</b>
+          <span style="flex:1"></span>
+          <b style="color:${col};font-size:13px">${c.urgency === 'urgent' ? '⚡ ' : ''}${leftTxt}</b>
+        </div>
+        <div class="hint" style="font-size:11px;margin:2px 0">발주 ${esc(c.postTime || '?')}</div>
+        <div class="hint" style="font-size:11px">⏳ 수집 대기 (발주 10분전 자동 시작)</div>
+      </div>`;
+    }
+    const sigs = (c.signals || []).map((s) => `<div style="font-size:12px;font-weight:700;margin:1px 0">${esc(s.text)}</div>`).join('') || '<div class="hint" style="font-size:11px">신호 없음</div>';
+    const keyH = (c.keyHorses || []).join(' · ') || '-';
+    // [3번·💎 중고배당 유력마] 있으면 카드에 💎 배지 + 요약(별도 강조)
+    const mh = (c.midHigh || []);
+    const mhBadge = mh.length ? '<span style="background:#f0abfc;color:#1a1a1a;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">💎 고배당</span>' : '';
+    const anBadge = (c.anomaly && !mh.length) ? '<span style="background:#ef4444;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">⚡ 이상감지</span>' : '';
+    const mhLine = mh.length ? `<div style="margin:3px 0;font-size:12px;color:#f0abfc;font-weight:700">💎 ${mh.map((m) => `${m.no}번(${m.odds}배)`).join(' · ')}</div>` : '';
+    const borderW = mh.length ? '3px' : '2px';
+    const spLabel = _multiSportLabel(c.sport);
+    return `<div data-mkey="${esc(c.raceKey)}" title="클릭 → 상세 분석" style="cursor:pointer;border:${borderW} solid ${mh.length ? '#f0abfc' : col};border-radius:10px;padding:10px;background:${mh.length ? 'rgba(240,171,252,.08)' : bg}">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px">${spLabel}</span>
+        <b style="font-size:15px;color:#e2e8f0">${esc(c.venue || '')} ${c.raceNo}R</b>
+        ${mhBadge}${anBadge}
+        <span style="flex:1"></span>
+        <b style="color:${col};font-size:13px">${c.urgency === 'urgent' ? '⚡ ' : ''}${leftTxt}</b>
+      </div>
+      ${mhLine}
+      <div class="hint" style="font-size:11px;margin:2px 0">발주 ${esc(c.postTime || '?')}${c.confidence != null ? ' · 확신도 ' + esc(String(c.confidence)) : ''}</div>
+      <div style="margin:4px 0"><span class="hint" style="font-size:11px">⭐ 유력마 </span><b style="color:#4ea1ff">${esc(keyH)}</b></div>
+      ${sigs}
+    </div>`;
+  }
+  async function openMultiDetail(key) {
+    const card = $('#multiDetailCard'), title = $('#multiDetailTitle'), bodyEl = $('#multiDetailBody');
+    if (!card) return;
+    card.style.display = 'block';
+    if (title) title.textContent = `${key} 상세 분석`;
+    if (bodyEl) bodyEl.innerHTML = '<p class="hint">⏳ 분석 로드 중…</p>';
+    try { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) { /* */ }
+    let a;
+    try { a = await (await fetch('/api/multi/race/' + encodeURIComponent(key))).json(); }
+    catch (_) { if (bodyEl) bodyEl.innerHTML = '<p class="err">분석 로드 실패</p>'; return; }
+    if (!a || a.error || a.waiting) { if (bodyEl) bodyEl.innerHTML = `<p class="hint">${esc((a && (a.error || (a.waiting && '배당 수집 대기 중'))) || '데이터 없음')}</p>`; return; }
+    // [4번] 기존 분석 렌더 재사용(복승 매트릭스·핵심 신호·추천 조합) + 결과 입력 버튼
+    let html = '';
+    try { html = sportAnalysisHTML(a); } catch (_) { html = '<p class="hint">렌더 오류</p>'; }
+    html += `<div style="margin-top:10px"><button class="btn btn-primary" onclick="document.querySelector('.tab-btn[data-tab=&quot;result&quot;]').click()">📝 결과 입력하러 가기</button></div>`;
+    if (bodyEl) bodyEl.innerHTML = html;
   }
 
   /** raceKey(예 "2026-07-04 제주 3R" / "제주 3경주")에서 회장·경주번호를 뽑아 한국 칩 자동 선택 */
@@ -2743,6 +2978,21 @@
       ${combos ? `<div style="margin-top:4px">${combos}</div>` : ''}</div>`;
   }
 
+  // [히로시마 2R 학습] 역배열 실질유력마 축 받치기 복승 — 실질유력마+다른유력마 조합 놓침 방지.
+  function renderReversalBacking(a) {
+    const rb = (a && a.reversalBacking) || [];
+    if (!rb.length) return '';
+    const lead = rb[0] && rb[0].lead;
+    const lines = rb.map((b) => {
+      const o = (b.odds != null) ? `<span class="hint">복승 ${b.odds}배</span>` : '<span class="hint">배당 미수집</span>';
+      return `<div style="margin:2px 0"><span class="chip" style="background:rgba(168,85,247,.18);border:1px solid #a855f7;color:#e9d5ff">${(b.combo || []).join('+')}</span> ${o} <span class="hint">${esc(b.note || '')}</span></div>`;
+    }).join('');
+    return `<div style="margin:8px 0;padding:9px 11px;border:1.5px solid #a855f7;border-radius:8px;background:rgba(168,85,247,.1)">
+      <div style="font-size:14px;font-weight:800;color:#d8b4fe">🎯 복승 받치기 (역배열 실질유력 ${lead != null ? lead + '번' : ''} 축)</div>
+      <div class="hint" style="margin:3px 0 4px">고배당인데 시장이 실질 승자로 미는 말을 축으로, <b style="color:#e9d5ff">다른 유력마와 받치기</b> — 실질유력마+다른유력마(예: 7+4) 조합 놓침 방지 <span class="hint">(히로시마 2R 학습)</span></div>
+      ${lines}</div>`;
+  }
+
   // [추천 말 수 유연화] 신호 강도별 추천 말 수 가이드(강제 아님·안내 배지).
   function renderRecommendFlex(a) {
     const rf = a && a.recommendFlex;
@@ -2990,6 +3240,125 @@
     </div>`;
   }
 
+  // [전적 과가중 해결] 저배당(5배↓) 시장 유력마 — 전적 미수집이어도 유력마 편입.
+  function renderMarketFavorites(a) {
+    const mf = ((a && a.marketFavorites) || []).filter((m) => m.formMissing);
+    if (!mf.length) return '';
+    return `<div style="margin:6px 0;padding:7px 10px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.12);border-radius:6px">
+      <div style="font-weight:800;color:#38bdf8">📊 시장 유력 (전적 미수집)</div>
+      ${mf.map((m) => `<div class="hint" style="margin-top:2px;color:#7dd3fc">· <b>${m.no}번</b> 배당 ${m.odds}배 → 유력마 편입 <span style="color:#94a3b8">(배당이 낮아 시장이 유력하다고 판단)</span></div>`).join('')}
+    </div>`;
+  }
+
+  // [3번] 실시간 유력마 추가 배너 — 초반 유력마 고정 후 급락/역배열 감지로 편입된 말.
+  function renderRealtimeAdded(a) {
+    const ra = (a && a.realtimeAdded) || [];
+    if (!ra.length) return '';
+    return `<div style="margin:6px 0;padding:7px 10px;border-left:3px solid #22c55e;background:rgba(34,197,94,.13);border-radius:6px">
+      <div style="font-weight:800;color:#22c55e">⚡ 실시간 유력마 추가</div>
+      ${ra.map((r) => `<div class="hint" style="margin-top:2px;color:#4ade80">· <b>${r.no}번</b> — ${esc(r.reason || '')} 감지 → 유력마·추천 조합에 추가</div>`).join('')}
+    </div>`;
+  }
+
+  // [복병_집중급락 패턴] 집중급락 10회+/스마트머니 말 → 배당순위 무관 복병 자동 편입(마에바시 8R 학습).
+  function renderDarkHorses(a) {
+    const keys = new Set((a.keyHorses || []).map(Number));       // 유력마는 복병 아님(중복 제거)
+    const dh = ((a && a.darkHorses) || []).filter((h) => !keys.has(Number(h.no))).slice(0, 4);
+    if (!dh.length) return '';
+    return dh.map((h) => {
+      const hi = h.confidence === '높음';
+      const col = hi ? '#f472b6' : '#c084fc';
+      const conf = hi ? '<span class="chip" style="border-color:#f472b6;color:#f472b6;font-weight:700">신뢰 높음</span>' : '';
+      const sm = h.smartMoney ? '<span class="chip" style="border-color:#fbbf24;color:#fcd34d;font-weight:700">💰 스마트머니</span>' : '';
+      const forced = h.forced ? `<span class="chip" style="border-color:#f472b6;color:#f472b6">🔥 집중급락 ${h.anomCount}회</span>` : '';
+      return `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(244,114,182,.08);border-left:3px solid ${col}">
+        <b style="min-width:30px;color:${col}">복병</b>
+        <b style="min-width:32px;color:#4ea1ff">${h.no}번</b>
+        <span class="hint"><b style="color:#e2e8f0">${h.oddsRepr != null ? h.oddsRepr + '배' : '배당-'}</b></span>
+        ${forced}${sm}${conf}
+        <span class="hint" style="margin-left:auto;color:${col}">${esc(h.note || '')}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // [유력마 통일] 복승 대표배당 낮은 순 + 이상감지 상위 노출 — TOP5·⭐유력마 라인 공통 정렬 기준.
+  //   TOP5(확신도 기반)와 분석기 유력마(복승배당 기반)가 서로 다르던 혼란 해소.
+  function _marketReprOdds(a) {
+    const m = {};
+    const eh = (a.elimination && a.elimination.horses) || [];
+    eh.forEach((h) => { if (h.no != null && h.oddsRepr != null) m[Number(h.no)] = h.oddsRepr; });
+    if (Array.isArray(a.quinella)) {   // 폴백/보강: 복승 배당에서 각 말 최저
+      a.quinella.forEach((q) => {
+        const c = q.combo || q.pair, o = q.odds;
+        if (c && c.length === 2 && o > 0) c.forEach((n) => { const k = Number(n); if (m[k] == null || o < m[k]) m[k] = o; });
+      });
+    }
+    return m;
+  }
+  // 이상감지 말은 배당 할인(강한 신호 ×0.5·약한 신호 ×0.7)으로 상위로 끌어올림 — 저배당 시장유력은 유지.
+  function _marketEffOdds(a, no, reprMap) {
+    const o = reprMap[Number(no)];
+    if (o == null) return Infinity;    // 배당 미수집 → 최하위
+    const info = _horseSignalInfo(a, no);
+    let disc = 1.0;
+    if (info.isAnom || (info.ex && info.ex.grade === '🔴') || (info.bigDrop && Math.abs(info.bigDrop.pct) >= 40)) disc = 0.5;
+    else if (info.bigDrop || (info.ex && info.ex.grade)) disc = 0.7;
+    // [배당 흐름 점수·4번] 저배당 순 → 흐름 점수 순: 흐름 좋은 말 상위·흐름 없는(죽은인기/상승) 말 하위.
+    //   기존 시장배당·이상감지 할인은 유지하고 흐름 계수만 곱해 반영(무삭제).
+    const fl = a.flowScores && (a.flowScores[Number(no)] || a.flowScores[String(no)]);
+    if (fl && fl.score != null) {
+      if (fl.score >= 30) disc *= 0.6;         // 스마트머니 → 최상위
+      else if (fl.score >= 20) disc *= 0.75;   // 급락
+      else if (fl.score >= 10) disc *= 0.9;    // 하락
+      else if (fl.score <= -10) disc *= 1.4;   // 상승(자금 이탈) → 하위
+      else if (fl.score < 0) disc *= 1.2;      // 무변동(죽은 인기) → 하위
+    }
+    return o * disc;
+  }
+  function _marketOrderNos(a, nos) {
+    const reprMap = _marketReprOdds(a);
+    return nos.slice().sort((x, y) => _marketEffOdds(a, x, reprMap) - _marketEffOdds(a, y, reprMap)
+      || ((reprMap[Number(x)] == null ? 1e9 : reprMap[Number(x)]) - (reprMap[Number(y)] == null ? 1e9 : reprMap[Number(y)]))
+      || (Number(x) - Number(y)));
+  }
+
+  // [배당 흐름 기반 제거·2/4번] 흐름 좋은 고배당 추천(💎) + 흐름 없는 말 제거(🔴).
+  //   "들어올 말 찾기 → 안 들어올 말 제거". 서버 flowScores/flowRemoval/highOddsCandidates 소비.
+  function renderFlowSection(a) {
+    const hoc = (a && a.highOddsCandidates) || [];
+    const rem = (a && a.flowRemoval) || [];
+    const flow = (a && a.flowScores) || {};
+    if (!hoc.length && !rem.length) return '';
+    let html = '';
+    if (hoc.length) {
+      html += `<div class="matrix-title" style="font-size:13px;color:#f0abfc;margin-top:6px">💎 고배당 추천(흐름 기반) <span class="hint" style="font-weight:400">배당 높아도 하락/급락 흐름 → 삼복승 보험 편입</span></div>`;
+      html += hoc.slice(0, 3).map((c) => {
+        const f = flow[c.no] || flow[String(c.no)] || {};
+        const sc = f.score != null ? f.score : c.score;
+        return `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(240,171,252,.08);border-left:3px solid #f0abfc">
+          <b style="min-width:30px;color:#f0abfc">💎추천</b>
+          <b style="min-width:32px;color:#4ea1ff">${c.no}번</b>
+          <span class="hint"><b style="color:#e2e8f0">${c.odds}배</b></span>
+          <span class="chip" style="border-color:#f0abfc;color:#f0abfc;font-weight:700">흐름점수 ${sc != null ? sc : '-'}점</span>
+          <span class="chip" style="border-color:#f472b6;color:#f472b6">${esc(c.trend || '')}</span>
+          ${f.smartMoney ? '<span class="chip" style="border-color:#fbbf24;color:#fcd34d;font-weight:700">💰 스마트머니</span>' : ''}
+          <span class="hint" style="margin-left:auto;color:#f0abfc">→ 삼복승 보험 포함</span>
+        </div>`;
+      }).join('');
+    }
+    if (rem.length) {
+      html += `<div class="matrix-title" style="font-size:13px;color:#f87171;margin-top:6px">🔴 제거(흐름 없음) <span class="hint" style="font-weight:400">저배당이어도 흐름 없으면 제거 · 죽은인기/연속상승/페이크/역배열반대</span></div>`;
+      html += rem.slice(0, 5).map((r) => `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:4px 8px;font-size:12px;border-radius:6px;margin:2px 0;background:rgba(248,113,113,.06);border-left:3px solid #f87171">
+          <b style="min-width:30px;color:#f87171">🔴제거</b>
+          <b style="min-width:32px">${r.no}번</b>
+          <span class="hint">${r.rep != null ? r.rep + '배' : '배당-'}</span>
+          <span class="chip" style="border-color:#f87171;color:#f87171">흐름점수 ${r.score != null ? r.score : '-'}점</span>
+          <span class="hint" style="margin-left:auto;color:#f87171">${(r.reasons || []).map(esc).join(', ')}</span>
+        </div>`).join('');
+    }
+    return html;
+  }
+
   function renderTopHorses(a) {
     _topAnalysisForClick = a;       // 클릭 상세/타임라인용 최신 분석 보관
     _ensureTopHorseDelegation();    // 클릭 위임 1회 설치(다중 패널 안전)
@@ -3000,6 +3369,8 @@
       horses = eh.map((h) => ({
         no: h.no, name: h.name || '', formScore: h.formScore, odds: h.oddsRepr,
         prob: h.combinedProb, total: h.total, tier: h.tier, ev: h.ev, favScore: h.favScore,
+        insuranceDemote: h.insuranceDemote, dualConverge: h.dualConverge,
+        formScoreAdj: h.formScoreAdj, marketFavorite: h.marketFavorite,
       }));
     } else {
       const fmap = {}; (a.form || []).forEach((h) => { fmap[h.no] = h; });
@@ -3024,12 +3395,14 @@
       if (filtered.length) horses = filtered;
     }
     if (!horses.length) return '';
-    // [2번] 확신도 우선 랭킹(있으면). 확신도=이상감지40+전적30+급락지속30 → 신호 기반 유력마.
+    // 확신도(있으면)는 칩 표시용으로만 보관 — 정렬 기준으로는 쓰지 않는다(유력마 라인과 통일).
     const confMap = (a.confidence && a.confidence.horses) ? a.confidence.horses : null;
     if (confMap) horses.forEach((h) => { const c = confMap[h.no] || confMap[String(h.no)]; if (c) { h.conf = c.confidence; h.band = c.band; } });
-    // 통합점수 순(폴백): 통합확률 → 제거점수 → 전적점수
-    const scoreOf = (h) => (h.prob != null ? h.prob * 1000 : 0) + (h.total != null ? h.total : 0) + (h.formScore != null ? h.formScore / 100 : 0);
-    horses.sort((x, y) => (confMap ? ((y.conf || -1) - (x.conf || -1)) : 0) || scoreOf(y) - scoreOf(x) || (x.no - y.no));
+    // [유력마 통일] 정렬 기준 = 복승 대표배당 낮은 순(시장 기준) + 이상감지 상위 노출.
+    //   분석기 ⭐유력마 라인과 동일 기준 → 두 화면이 어긋나던 혼란 제거.
+    const _repr = _marketReprOdds(a);
+    horses.sort((x, y) => _marketEffOdds(a, x.no, _repr) - _marketEffOdds(a, y.no, _repr)
+      || ((x.odds == null ? 1e9 : x.odds) - (y.odds == null ? 1e9 : y.odds)) || (x.no - y.no));
     const top = horses.slice(0, 5);
 
     // 복병/이상감지 2두: TOP5 밖 + (이상감지·급락·집중신호) 보유, 신호강도순
@@ -3080,15 +3453,45 @@
       const sig = _signalChips(info) || (isFiller
         ? '<span class="chip" style="border-color:#c084fc;color:#c084fc">🔎 고배당 복병</span>'
         : '<span class="hint">신호없음</span>');
+      // [유력마 통일] 🚨 이상감지 말 구분 — TOP5에 포함하되 별도 표시(급락/집중신호 보유마).
+      const _isAnom = !!(info && (info.isAnom || info.bigDrop || (info.ex && info.ex.grade)));
+      const anomChip = (!isDark && _isAnom)
+        ? '<span class="chip" style="border-color:#ff5c5c;color:#ff5c5c;font-weight:700">🚨 이상감지</span>' : '';
+      // [배당 흐름 점수·3번] 말별 흐름점수 칩(상승-10/무변동-5/하락+10/급락+20/스마트머니+30).
+      let flowChip = '';
+      const _fl = (a.flowScores && (a.flowScores[h.no] || a.flowScores[String(h.no)]));
+      if (_fl && _fl.score != null) {
+        const _fc = _fl.score >= 20 ? '#38d39f' : (_fl.score > 0 ? '#4ea1ff' : (_fl.score <= -10 ? '#f87171' : '#94a3b8'));
+        flowChip = `<span class="chip" style="border-color:${_fc};color:${_fc}" title="배당 흐름: ${esc(_fl.trend || '')}">흐름 ${_fl.score >= 0 ? '+' : ''}${_fl.score}점 ${esc(_fl.trend || '')}</span>`;
+      }
+      // [배당 우선 전환·3번] 배당 기반 상태 배지
+      let mktChip = '';
+      let warnLine = '';
+      if (!isDark) {
+        if (h.dualConverge) {
+          mktChip = '<span class="chip" style="border-color:#38d39f;color:#38d39f;font-weight:700">💥 이중수렴 강력추천</span>';
+        } else if (h.marketFavorite) {
+          mktChip = '<span class="chip" style="border-color:#4ea1ff;color:#4ea1ff">📊 시장 유력(저배당)</span>';
+        }
+        // 배당 20배+ 말이 TOP5 상위 = 전적 우수하나 시장 비인기 → 고배당 보험으로만 활용 경고
+        if (h.insuranceDemote || (h.odds != null && h.odds >= 20)) {
+          mktChip += '<span class="chip" style="border-color:#ff9f43;color:#ff9f43;font-weight:700">⚠️ 고배당 보험용</span>';
+          warnLine = `<div class="hint" style="width:100%;margin:2px 0 0;color:#ff9f43">⚠️ 전적 우수하나 시장 비인기 · 고배당 보험으로만 활용 권장</div>`;
+        }
+      }
       const open = _topExpanded.has(h.no);
-      return `<div class="top-horse-row" data-no="${h.no}" title="클릭 → 상세+배당 타임라인" style="cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(255,255,255,${isDark ? '.02' : '.05'});border-left:3px solid ${isDark ? '#c084fc' : '#ffd24f'}">
+      return `<div class="top-horse-row" data-no="${h.no}" title="클릭 → 상세+배당 타임라인" style="cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(255,255,255,${isDark ? '.02' : '.05'});border-left:3px solid ${isDark ? '#c084fc' : (h.dualConverge ? '#38d39f' : (warnLine ? '#ff9f43' : '#ffd24f'))}">
         ${rankBadge}
         <b style="min-width:32px;color:#4ea1ff">${h.no}번</b>
         <span style="font-weight:600">${esc(h.name) || '-'}</span>
         <span class="hint">${formTxt} · <b style="color:#e2e8f0">${oddsTxt}</b></span>
+        ${anomChip}
+        ${flowChip}
+        ${mktChip}
         ${confChip}
         ${move}
         <span style="margin-left:auto">${sig}</span>
+        ${warnLine}
       </div>
       <div id="top-detail-${h.no}" style="display:${open ? 'block' : 'none'}"></div>`;
     };
@@ -3100,10 +3503,13 @@
 
     _topRankPrev = curRank;   // 다음 갱신 비교용(행 생성 후 저장)
 
-    return `<div id="topHorsesCard" style="position:sticky;top:0;z-index:6;margin:0 0 8px;border:2px solid #ffd24f;border-radius:10px;padding:8px 10px;background:linear-gradient(180deg,rgba(255,210,79,.12),rgba(20,28,43,.97));box-shadow:0 4px 16px rgba(0,0,0,.4)">
-      <div class="matrix-title" style="font-size:14px;color:#ffd24f">⭐ 유력마 TOP 5 <span class="hint" style="font-weight:400">실시간 · 30초 자동갱신 · 클릭 시 상세+타임라인</span></div>
+    return `<div id="topHorsesCard" style="position:relative;margin:0 0 8px;border:2px solid #ffd24f;border-radius:10px;padding:8px 10px;background:linear-gradient(180deg,rgba(255,210,79,.12),rgba(20,28,43,.97));box-shadow:0 4px 16px rgba(0,0,0,.4)">
+      <div class="matrix-title" style="font-size:14px;color:#ffd24f">⭐ 시장 유력마 TOP 5 <span class="hint" style="font-weight:400">복승배당 기준 · 이상감지 상위 · 30초 자동갱신 · 클릭 시 상세</span></div>
+      ${renderMarketFavorites(a)}
+      ${renderRealtimeAdded(a)}
       ${topRows}
-      <div class="matrix-title" style="font-size:13px;color:#c084fc;margin-top:6px">🐎 복병 · 이상감지 <span class="hint" style="font-weight:400">유력마 밖 강한 신호 2두</span></div>
+      <div class="matrix-title" style="font-size:13px;color:#c084fc;margin-top:6px">🐎 복병 · 이상감지 <span class="hint" style="font-weight:400">유력마 밖 강한 신호 · 집중급락/스마트머니 자동 편입</span></div>
+      ${renderDarkHorses(a)}
       ${darkRows}
       ${(a.eliminationStrong && a.eliminationStrong.length) ? `
       <div class="matrix-title" style="font-size:13px;color:#ef4444;margin-top:6px">🚫 제거마 <span class="hint" style="font-weight:400">과감히 제외 ${a.eliminationStrong.length}두</span></div>
@@ -3113,6 +3519,7 @@
         <span>${esc(e.name) || '-'}</span>
         <span class="hint" style="margin-left:auto;text-align:right">${e.odds != null ? e.odds + '배' : ''}${(e.reasons && e.reasons.length) ? ' · ' + e.reasons.map(esc).join(', ') : ''}</span>
       </div>`).join('')}` : ''}
+      ${renderFlowSection(a)}
     </div>`;
   }
   function _topHorseDetailHtml(no, a) {
@@ -3222,6 +3629,15 @@
   function renderTripleAnalyze(a) {
     const el = $('#tripleAnalyzeReport'); if (!el) return;
     _lastTripleAnalyze = a;
+    // [수집 조기 중단 방어] 서버가 수집 중단(발주 전 2분+ 미수집) 감지 시 → 확장에 즉시 재수집 릴레이(30초 1회 throttle).
+    if (a.collectionStalled) {
+      const _now = Date.now();
+      if (!window._lastStallNudge || _now - window._lastStallNudge > 30000) {
+        window._lastStallNudge = _now;
+        try { nudgeExtensionCollect(); } catch (_) { /* */ }
+        console.log('[수집중단] 발주 전 미수집 감지 → 확장 재수집 트리거');
+      }
+    }
     if (a.raceKey !== _elimRaceKey) { _elimToggle.clear(); _elimRaceKey = a.raceKey; } // 경주 바뀌면 수동 토글 초기화
     // [5번] 추천 조합 변경 감지
     const betKey = JSON.stringify((a.betRecommend || []).map((r) => r.combo));
@@ -3234,20 +3650,27 @@
       `<span class="chip ${r.flipped ? 'chip-red' : 'chip-yellow'}" title="${r.flipped ? '직전 대비 방향 전환' : '누적(서서히) 역전 — 마감 임박'}">${r.flipped ? '🔴' : '🟠누적'} ${r.favored[0]}→${r.favored[1]} (${r.favoredOdds}&lt;${r.otherOdds})</span>`).join(' ');
     const ranks = (a.rankChanges || []).slice(0, 6).map((r) =>
       `<span class="chip">${r.combo[0]}-${r.combo[1]} ${r.prevRank}위→${r.curRank}위 (${r.delta > 0 ? '▲' : '▼'}${Math.abs(r.delta)})</span>`).join(' ');
-    const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    // [유력마 통일] ⭐유력마 라인도 TOP5와 동일 기준(복승 대표배당 낮은 순 + 이상감지 상위)으로 정렬 표시.
+    const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     el.innerHTML = `
+      ${renderCorePicks(a)}
       ${renderTopHorses(a)}
       <div class="matrix-title">🚨 이상감지 ${a.sport && a.sport !== 'horse' ? `<span class="chip" style="border-color:#a855f7;color:#c4b5fd">${a.sport === 'cycle' ? '🚴 경륜' : '🚤 경정'}</span> ` : ''}<span class="hint" style="font-weight:400">${esc(a.raceKey)} · ${a.baselineReset ? '⚠️ 기준값 재설정됨' : a.baselineSet ? '🎯 기준값 설정됨' : a.hasPrev ? '직전 대비' : '첫 수집(변동 없음)'}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>
       ${a.baselineReset ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffd24f;background:rgba(255,210,79,.12);border-radius:6px;color:#ffd24f">⚠️ <b>비정상 변동폭 감지 → 기준값 재설정</b> — 이전 경주 배당 잔존 의심(95%+ 급락 다수). 이번 수집을 새 기준값으로 설정했습니다. <b>다음 수집부터 변동을 계산</b>합니다.</div>`
         : a.baselineSet ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.1);border-radius:6px;color:#7dd3fc">🎯 <b>기준값 설정됨</b> — 새 경주 첫 수집입니다. 변동폭은 <b>다음 수집부터</b> 계산됩니다.</div>` : ''}
       ${a.afterClose ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #8a94a6;background:rgba(138,148,166,.14);border-radius:6px;color:#b8c0cc">⚠️ <b>마감 후 수집</b> — 발주(T-0) 이후 신호는 <b>참고만</b> 하세요. 급락이 있어도 <b>추천 조합·보험에는 반영되지 않습니다</b>(마감 전 기준 유지).</div>` : ''}
+      ${a.deadlineCorrected ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #38bdf8;background:rgba(56,189,248,.12);border-radius:6px;color:#7dd3fc">🛠️ <b>발주시각 오검출 정정</b> — 발주시각이 뒤로 이동(예: T-1분→T-7분)해 이전의 잘못된 <b>마감 판정을 무효화</b>하고 올바른 발주시각으로 재설정했습니다. 실시간 급락/역배열 편입이 정상 재개됩니다.</div>` : ''}
+      ${a.centralClosing ? `<div style="margin:6px 0;padding:8px 10px;border-left:4px solid #f87171;background:rgba(220,38,38,.16);border-radius:6px;color:#fecaca;font-weight:800">⚠️ 중앙경마 배당판 T-2분에 닫힘 — <span style="color:#fca5a5">지금이 마지막 신호!</span><div class="hint" style="font-weight:400;margin-top:2px;color:#fca5a5">JRA는 실제 발주 2분 전에 배당판이 닫힙니다. T-2분을 실질 마감으로 보고 지금 데이터로 추천을 확정하세요.</div></div>` : ''}
+      ${a.collectionStalled ? `<div style="margin:6px 0;padding:8px 10px;border-left:4px solid #fbbf24;background:rgba(245,158,11,.16);border-radius:6px;color:#fcd34d;font-weight:800">⚠️ 수집 중단 감지 — 자동 재수집 시도 중...<div class="hint" style="font-weight:400;margin-top:2px;color:#fcd34d">발주 전인데 ${a.secsSinceCollect != null ? Math.floor(a.secsSinceCollect / 60) + '분 ' + (a.secsSinceCollect % 60) + '초' : '2분+'} 동안 배당이 갱신되지 않았습니다. 배당판 탭을 확인하세요(닫혔으면 다시 열기).</div></div>` : ''}
       ${renderForcedTrifecta(a)}
+      ${renderReversalBacking(a)}
       ${renderPreReversal(a)}
       ${renderAfterCloseSurge(a.afterCloseSurge)}
       ${a.marketCheck && a.marketCheck.diverged ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ff5c5c;background:rgba(255,92,92,.12);border-radius:6px;color:#ff8a8a">⚠️ <b>배당판 불일치</b> — 추천 복승(${(a.marketCheck.mainPair || []).join('+')}=${a.marketCheck.mainOdds}배)이 <b>배당판 최저 인기 조합(${a.marketCheck.favPair.join('+')}=${a.marketCheck.favOdds}배)</b>과 다릅니다. 배당판을 초반에 못 끌어왔거나 전적 편중일 수 있어요 → <b>배당판 인기 조합을 추천에 추가</b>했습니다. 배당 재확인 권장.</div>` : ''}
       ${a.marketCheck && a.marketCheck.stale ? `<div style="margin:6px 0;padding:7px 9px;border-left:3px solid #ffb020;background:rgba(255,176,32,.12);border-radius:6px;color:#ffc862">⚠️ <b>배당 불안정</b> — 최저 복승도 ${a.marketCheck.favOdds}배(실자금 미형성/초반 미수집 의심). <b>배당판 새로고침 후 재수집</b> 권장. 현재 추천은 참고만.</div>` : ''}
       ${renderAlertSignal(a.alertSignal, _horseRoleMap(a))}
       ${renderInverse(a.inverse)}
+      ${renderCrossReversal(a)}
       ${renderSignalTimeline(a.signalTimeline)}
       <div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary || '')}</div>
       ${drops ? `<div style="margin:6px 0"><span class="hint">📉 급락/변동</span><br>${drops}</div>` : ''}
@@ -3456,16 +3879,20 @@
   function renderFormGrades(form) {
     if (!form || !form.length) return '';
     const gc = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#8a94a6' };
+    // [보완1·경륜] 競走得点 절대등급(95+A/85+B/75+C/<75D)이 있으면 별도 컬럼 표시(통합 사분위 등급과 함께).
+    const hasAbs = form.some((h) => h.absGrade);
+    const isKeirin = form.some((h) => h.styleType);
     const rows = form.map((h) => `<tr>
       <td><b style="color:${gc[h.grade] || '#fff'}">${h.grade}</b></td>
-      <td>${h.no}</td><td>${esc(h.name || '')}</td><td>${esc(h.jockey || '')}</td>
+      ${hasAbs ? `<td><b style="color:${gc[h.absGrade] || '#8a94a6'}">${esc(h.absGrade || '-')}</b>${h.competScore != null ? ` <span class="hint" style="font-size:10px">${h.competScore}</span>` : ''}</td>` : ''}
+      <td>${h.no}</td><td>${esc(h.name || '')}</td>${isKeirin ? `<td>${esc(h.styleType || '-')}</td>` : `<td>${esc(h.jockey || '')}</td>`}
       <td>${(h.recentPlacings || []).join('-') || '-'}</td>
-      <td>${h.totalScore}</td>
+      <td>${h.totalScore}${(h.styleBonus != null && h.styleBonus !== 0 && h.competScore != null) ? ` <span class="hint" style="font-size:10px">(${h.competScore}+각질${h.styleBonus > 0 ? '+' : ''}${h.styleBonus})</span>` : ''}</td>
       <td>${(h.flags || []).map((f) => `<span class="chip ${f.level === 'must' ? 'chip-red' : ''}">${esc(f.msg)}</span>`).join(' ')}</td>
     </tr>`).join('');
-    return `<div class="matrix-title" style="font-size:13px">🏇 전적 등급 (출마표2)</div>
+    return `<div class="matrix-title" style="font-size:13px">🏇 전적 등급 ${isKeirin ? '(경륜 출마표·競走得点)' : '(출마표2)'}</div>
       <table class="data-table" style="margin-top:4px">
-        <thead><tr><th>등급</th><th>마번</th><th>마명</th><th>기수</th><th>최근착순</th><th>점수</th><th>플래그</th></tr></thead>
+        <thead><tr><th>등급${hasAbs ? '<br><span class="hint" style="font-size:9px">상대</span>' : ''}</th>${hasAbs ? '<th>絶対<br><span class="hint" style="font-size:9px">競走得点</span></th>' : ''}<th>${isKeirin ? '차번' : '마번'}</th><th>${isKeirin ? '선수' : '마명'}</th><th>${isKeirin ? '각질' : '기수'}</th><th>최근착순</th><th>점수</th><th>플래그</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
   }
@@ -3544,8 +3971,9 @@
     const wxHtml = wx.length ? `<div class="hint" style="margin:8px 0 2px">🔄 <b>쌍승 역전 감지</b>(단승 유력마 vs 쌍승 방향) — 역전비율 &lt;0.95 🟡 · &lt;0.80 🔴 · &lt;0.60 🔴🔴${wxMulti ? ' · <b>상위권 순위쌍 역전 포함</b>(강한 역전만)' : ''}</div>`
       + wx.slice(0, 5).map((r) => `<div style="margin:2px 0"><span class="chip ${/🔴/.test(r.level) ? 'chip-red' : ''}">${r.level} ${r.challenger}번</span>${r.multiRank ? ` <span class="chip" style="border-color:#a78bfa;color:#a78bfa">${r.favRank}·${r.chalRank}위간</span>` : ''} <span class="hint">${esc(r.text)}</span></div>`).join('') : '';
     const mm = sq.quinellaMismatch;
+    const mmAxis = (mm && mm.axisCorrected) ? `<div style="margin:2px 0;font-weight:700;color:#38d39f">🔧 복승 축 교정: <b>${(mm.axisCorrected.axis || []).join('+')}</b> <span class="hint" style="font-weight:400">(자금이탈 ${(mm.axisCorrected.demoted || []).join('·')}번 축 강등 → 시장 최저복승으로 축 변경)</span></div>` : '';
     const mmHtml = mm ? `<div class="hint" style="margin:8px 0 2px">⚠️ <b>복승 불일치 감지</b>(단승 예상 vs 실제 최저) — 1.2+ 🟡 · 1.5+ 🔴 · 2.0+ 🔴🔴</div>`
-      + `<div style="margin:2px 0"><span class="chip ${/🔴/.test(mm.level) ? 'chip-red' : ''}">${mm.level} 불일치 ${mm.ratio}</span> <span class="hint">${esc(mm.text)}</span></div>` : '';
+      + `<div style="margin:2px 0"><span class="chip ${/🔴/.test(mm.level) ? 'chip-red' : ''}">${mm.level} 불일치 ${mm.ratio}</span> <span class="hint">${esc(mm.text)}</span></div>${mmAxis}` : '';
     // [2번 고도화] 급락속도·연속하락/반등·페이크·환급률
     const adv = sq.advanced || {};
     const advParts = [];
@@ -3607,10 +4035,17 @@
 
   function renderBetRecommend(a, budgetSel) {
     const recs = a.betRecommend || [];
+    // [타이밍 추천 정책·마감 후 추천 금지] 발주(T-0) 이후엔 추천 조합을 표시하지 않는다(참고만).
+    if (a.recommendClosed) {
+      return `<div class="bet-box" style="display:block;margin:6px 0;border-left:3px solid #8a94a6;background:rgba(138,148,166,.1)">
+        <b style="color:#cbd5e1">🔒 마감 — 추천 종료</b>
+        <div class="hint" style="margin-top:3px">발주(T-0) 이후입니다. 마감 후에는 추천을 하지 않습니다(급락이 있어도 참고만).</div></div>`;
+    }
     // [추천 신중화·근본해결] 신호 대기(wait)·추천 차단(recommendGated: 90초 미달·시장신호 2개 미만·패스형)이면
     //   추천 조합을 표시하지 않고 "⏳ 신호 대기 중"만 표시(저배당 무조건 추천 방지).
+    //   단 [T-2분 강제 추천] recommendForced면 신호 약해도 저배당 기준으로 강제 추천(게이트 무시).
     //   복기/리포트 등 raceJudgment 없는 뷰는 영향 없음.
-    if (a.recommendGated || (a.raceJudgment && a.raceJudgment.type === 'wait')) {
+    if (!a.recommendForced && (a.recommendGated || (a.raceJudgment && a.raceJudgment.type === 'wait'))) {
       const m = (a.raceJudgment && a.raceJudgment.message) || '뚜렷한 신호 2개+ 확인 후 추천 조합이 표시됩니다';
       return `<div class="bet-box" style="display:block;margin:6px 0;border-left:3px solid #8a94a6;background:rgba(138,148,166,.08)">
         <b style="color:#cbd5e1">⏳ 신호 대기 — 추천 보류</b>
@@ -3650,13 +4085,78 @@
     const upd = _betUpdatedFlag ? ' <span style="color:#38d39f">⚡ 업데이트됨</span>' : '';
     // [보완#1] 색상 범례 — 조합 속 말 번호가 유력/제거 어느 쪽인지 한눈에.
     const legend = `<div class="hint" style="font-size:10px;margin-top:2px">조합 색상: <b style="color:${_ROLE_COLOR.fav}">유력마</b> · <span style="color:${_ROLE_COLOR.weakcut}">제거권장</span> · <span style="color:${_ROLE_COLOR.cut};text-decoration:line-through">확실제거</span></div>`;
-    return `<div class="matrix-title" style="font-size:13px">🎯 메인 추천 <span class="hint" style="font-weight:400">(신호 기반)</span>${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
-      ${legend}
-      <table class="data-table" style="margin-top:4px">
+    // [타이밍 추천 정책] T-1분 최종 확정(🔒) · T-2분 강제 추천(⚡) 배너
+    const phaseBanner = a.recommendLocked
+      ? `<div style="margin:4px 0;padding:5px 9px;border-left:3px solid #ef4444;background:rgba(239,68,68,.14);border-radius:6px;color:#fca5a5;font-weight:800">🔒 T-1분 · 최종 확정 — 이 조합으로 마감까지 확정</div>`
+      : a.recommendForced
+        ? `<div style="margin:4px 0;padding:5px 9px;border-left:3px solid #fbbf24;background:rgba(245,158,11,.14);border-radius:6px;color:#fcd34d;font-weight:800">⚡ T-2분 · 강제 추천 — 신호 약해도 저배당(시장 유력) 기준 편성</div>`
+        : '';
+    // [핵심만 임팩트] 복승 최대 3 + 삼복승 최대 2 = 총 5개를 큰 카드로. 나머지는 접기(무삭제).
+    const impactCard = _renderImpactCard(recs, roleMap);
+    const shownKeys = _impactShownKeys(recs);
+    const extraN = recs.length - shownKeys.size;
+    const fullTable = `<table class="data-table" style="margin-top:4px">
         <thead><tr><th>종류</th><th>조합</th><th>신호품질</th><th>예상배당</th><th>배분</th><th>금액</th></tr></thead>
         <tbody>${rows}</tbody>
         ${totalAmt != null ? `<tfoot><tr><td colspan="4"></td><td><b>${totalAlloc}%</b></td><td><b>${totalAmt.toLocaleString('ko-KR')}원</b></td></tr></tfoot>` : ''}
       </table>`;
+    // 접기: 전체 조합·배분·금액 상세(추가 참고 조합 N개). 5개 이하여도 배분/금액 상세는 접어서 보존.
+    const detailsSummary = extraN > 0 ? `＋ 추가 참고 조합 ${extraN}개 · 배분/금액 상세 보기` : '＋ 배분·금액 상세 보기';
+    const collapse = `<details style="margin-top:6px"><summary style="cursor:pointer;color:#94a3b8;font-size:12px">${detailsSummary}</summary>${legend}${fullTable}</details>`;
+    return `<div class="matrix-title" style="font-size:13px">🎯 메인 추천 <span class="hint" style="font-weight:400">(신호 기반)</span>${a.recommendLocked ? ' <span style="color:#ef4444">🔒 확정</span>' : ''}${upd} ${budget > 0 ? `<span class="hint" style="font-weight:400">예산 ${budget.toLocaleString('ko-KR')}원 배분</span>` : '<span class="hint" style="font-weight:400">(예산 입력 시 금액 자동계산)</span>'}</div>
+      ${phaseBanner}
+      ${impactCard}
+      ${collapse}`;
+  }
+
+  // [핵심만 임팩트] 별점: ★★★ 신호 강함(상) · ★★ 중간 · ★ 참고용. signalQuality 우선, 없으면 라벨/배분 폴백.
+  function _betStars(r) {
+    const q = r.signalQuality;
+    if (q === '상') return '★★★';
+    if (q === '중') return '★★';
+    if (q === '하') return '★';
+    if (/메인/.test(r.label || '') || (r.alloc || 0) >= 30) return '★★★';
+    if (/보조|받치기|승격/.test(r.label || '') || (r.alloc || 0) >= 12) return '★★';
+    return '★';
+  }
+  function _betOddsTxt(r) {
+    if (r.expOdds != null) return r.expOdds + '배';
+    if (r.expOddsEst != null) return '추정 ' + r.expOddsEst + '배';
+    return '미수집';
+  }
+  // 임팩트 카드에 표시할 조합 선택: 복승 최대 3(배분 높은 순) + 삼복승 최대 2.
+  function _impactPick(recs) {
+    const boks = recs.filter((r) => r.kind === '복승').slice().sort((a, b) => (b.alloc || 0) - (a.alloc || 0)).slice(0, 3);
+    const sams = recs.filter((r) => r.kind === '삼복승').slice().sort((a, b) => (b.alloc || 0) - (a.alloc || 0)).slice(0, 2);
+    return { boks, sams };
+  }
+  function _impactShownKeys(recs) {
+    const { boks, sams } = _impactPick(recs);
+    const keys = new Set();
+    [...boks, ...sams].forEach((r) => keys.add(r.kind + ':' + (r.combo || []).join('+')));
+    return keys;
+  }
+  function _renderImpactCard(recs, roleMap) {
+    const { boks, sams } = _impactPick(recs);
+    if (!boks.length && !sams.length) return '';
+    const row = (r, isSam) => {
+      const stars = _betStars(r);
+      const starHtml = `<span style="color:#ffd24f;letter-spacing:1px;font-size:14px">${stars}</span><span style="color:#3a3f4b;font-size:14px">${'★'.repeat(3 - stars.length)}</span>`;
+      const tag = isSam ? `<span class="hint" style="color:#a855f7;font-weight:700;font-size:11px">${/보험/.test(r.label || '') ? '보험' : '메인'}</span>` : starHtml;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.05)">
+        <b style="min-width:52px;color:${isSam ? '#38d39f' : '#4ea1ff'}">${isSam ? '삼복승' : '복승'}</b>
+        <b style="min-width:78px;font-size:15px">${_colorCombo(r.combo, roleMap)}</b>
+        <b style="min-width:64px;color:#e2e8f0">${esc(_betOddsTxt(r))}</b>
+        <span style="margin-left:auto">${tag}</span>
+      </div>`;
+    };
+    return `<div style="margin:6px 0;padding:10px 12px;border:2px solid #38d39f;border-radius:10px;background:linear-gradient(180deg,rgba(56,211,159,.10),rgba(20,28,43,.85))">
+      <div style="font-size:17px;font-weight:800;color:#38d39f;margin-bottom:4px">🎯 지금 사세요!</div>
+      ${boks.map((r) => row(r, false)).join('')}
+      ${sams.length ? `<div style="height:4px"></div>` : ''}
+      ${sams.map((r) => row(r, true)).join('')}
+      <div class="hint" style="font-size:10px;margin-top:5px">★★★ 신호 강함 · ★★ 중간 · ★ 참고용 · 삼복승은 보험/메인</div>
+    </div>`;
   }
 
   // [1번] 예산 입력칸에 재계산 리스너를 1회만 연결(중복 방지). 값 입력 시 통합패널 재렌더 → 금액 갱신.
@@ -3827,12 +4327,21 @@
     let pconf = null; try { pconf = await (await fetch('/api/learning/pattern-confidence')).json(); } catch (_) { /* */ }
     // [기준치 도출] 누적 데이터 기반 최적 기준치 추천(자동 적용 안 함·수동 승인)
     let thopt = null; try { thopt = await (await fetch('/api/thresholds/optimize')).json(); } catch (_) { /* */ }
+    // [신호별 적중률·4번] 유력마 기반 신호별 복승/삼복승 적중률
+    let sigstat = null; try { sigstat = await (await fetch('/api/learning/signal-stats')).json(); } catch (_) { /* */ }
+    // [오늘 결과 통계 대시보드] 오늘 등록 경주 집계(요약·경마장별·신호별·타임라인)
+    let today = null; try { today = await (await fetch('/api/stats/today')).json(); } catch (_) { /* */ }
+    // [💎 중고배당 유력마·5번] 누적 적중률
+    let midhigh = null; try { midhigh = await (await fetch('/api/learning/mid-high-odds')).json(); } catch (_) { /* */ }
     const s = d.stats || {};
     // [AI Phase1] AI 학습 데이터 현황 대시보드
     let ai = null; try { ai = await (await fetch('/api/ai-training/status')).json(); } catch (_) { /* */ }
     const card = (title, st) => `<div class="bet-box" style="display:inline-block;min-width:170px;margin:4px;vertical-align:top"><b>${title}</b><br>${(st && st.rate != null) ? `<span style="font-size:20px;color:#38d39f">${st.rate}%</span> <span class="hint">(${st.hit}/${st.n})</span>` : '<span class="hint">데이터 없음</span>'}</div>`;
     el.innerHTML = `<div style="margin-bottom:6px">학습 경주 수: <b>${d.count || 0}</b></div>
+      ${renderTodayStats(today)}
+      ${renderMidHighStats(midhigh)}
       ${renderDailyLearning(dl)}
+      ${renderSignalStats(sigstat)}
       ${renderPatternConfidence(pconf)}
       ${renderThresholdOptimize(thopt)}
       ${renderHighOddsCases(hocases)}
@@ -3895,6 +4404,74 @@
       else toast('적용 실패: ' + (r.error || ''));
     } catch (e) { toast('적용 실패: ' + e.message); }
   };
+
+  // [💎 중고배당 유력마·5번] 누적 적중률 카드(신호별 입상률 포함).
+  function renderMidHighStats(mh) {
+    if (!mh || !mh.count) return '';
+    const rate = mh.rate || 0;
+    const rc = rate >= 40 ? '#38d39f' : (rate >= 20 ? '#fbbf24' : '#f87171');
+    const bysig = (mh.bySignal || []).map((r) => `<span style="display:inline-block;margin:2px 8px 2px 0;font-size:12px"><b style="color:#f0abfc">${esc(r.signal)}</b> <span class="hint">${r.placed}/${r.count}</span> <b style="color:${r.rate >= 40 ? '#38d39f' : '#b8c0cc'}">(${r.rate}%)</b></span>`).join('');
+    return `<div class="panel-card" style="margin:8px 0;border:1px solid #f0abfc">
+      <div class="matrix-title" style="color:#f0abfc">💎 중고배당 유력마 적중률 <span class="hint" style="font-weight:400">복승 10배+ & 강한 신호 → 실제 입상률</span></div>
+      <div style="margin:4px 0">누적 <b style="font-size:20px;color:${rc}">${rate}%</b> <span class="hint">(입상 ${mh.placed}/${mh.count}건)</span></div>
+      ${bysig ? `<div style="margin-top:4px"><b style="font-size:12px">신호별 입상률: </b>${bysig}</div>` : ''}
+      <div class="hint" style="font-size:11px;margin-top:4px">※ 50경주+ 쌓이면 신뢰도 판정. 저배당 축 + 💎 고배당 = 삼복승 대박 보험 자동 편성.</div>
+    </div>`;
+  }
+
+  // [오늘 결과 통계 대시보드] 오늘 요약 카드 + 경마장별 + 신호별 + 타임라인.
+  function renderTodayStats(t) {
+    if (!t || t.error) return '';
+    if (!t.total) return `<div class="panel-card" style="margin:8px 0"><div class="matrix-title" style="color:#ffd24f">📅 오늘 ${esc(t.date || '')} 요약</div><p class="hint">아직 등록된 결과가 없습니다.</p></div>`;
+    const pcol = (t.profit || 0) >= 0 ? '#38d39f' : '#ff6b6b';
+    const psign = (t.profit || 0) >= 0 ? '+' : '';
+    // [2번] 상단 큰 요약 박스
+    const summary = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:6px 0">
+      <div style="padding:10px;border-radius:8px;background:rgba(78,161,255,.10);border:1px solid #4ea1ff;text-align:center"><div class="hint" style="font-size:11px">등록</div><b style="font-size:22px;color:#e2e8f0">${t.total}<span style="font-size:12px">경주</span></b></div>
+      <div style="padding:10px;border-radius:8px;background:rgba(56,211,159,.10);border:1px solid #38d39f;text-align:center"><div class="hint" style="font-size:11px">복승 적중</div><b style="font-size:22px;color:#38d39f">${t.hit_quinella}<span style="font-size:12px">건 (${t.rate_quinella}%)</span></b></div>
+      <div style="padding:10px;border-radius:8px;background:rgba(192,132,252,.10);border:1px solid #c084fc;text-align:center"><div class="hint" style="font-size:11px">삼복승 적중</div><b style="font-size:22px;color:#c084fc">${t.hit_trifecta}<span style="font-size:12px">건 (${t.rate_trifecta}%)</span></b></div>
+      <div style="padding:10px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid ${pcol};text-align:center"><div class="hint" style="font-size:11px">손익</div><b style="font-size:22px;color:${pcol}">${psign}${(t.profit || 0).toLocaleString()}<span style="font-size:12px">원</span></b></div>
+    </div>`;
+    // [3번] 경마장별 적중률
+    const tracks = Object.entries(t.by_track || {}).sort((a, b) => b[1].total - a[1].total);
+    const trackHtml = tracks.length ? `<div style="margin-top:6px"><b style="font-size:13px">🏇 경마장별</b>${tracks.map(([v, e]) => `<div style="display:inline-block;margin:3px 8px 3px 0;font-size:12px"><b>${esc(v)}</b> <span class="hint">${e.hit}/${e.total}</span> <b style="color:${e.rate >= 50 ? '#38d39f' : '#b8c0cc'}">(${e.rate}%)</b></div>`).join('')}</div>` : '';
+    // [4번] 신호별 적중률
+    const sigs = Object.entries(t.by_signal || {}).sort((a, b) => b[1].total - a[1].total);
+    const sigHtml = sigs.length ? `<div style="margin-top:6px"><b style="font-size:13px">📊 신호별</b>${sigs.map(([n, e]) => `<div style="display:inline-block;margin:3px 8px 3px 0;font-size:12px"><b>${esc(n)}</b> <span class="hint">${e.hit}/${e.total}</span> <b style="color:${e.rate >= 50 ? '#38d39f' : '#b8c0cc'}">(${e.rate}%)</b></div>`).join('')}</div>` : '';
+    // [5번] 오늘 경주 타임라인
+    const tl = (t.timeline || []).map((r) => {
+      const mark = r.hit ? '✅' : '❌';
+      const odds = r.hit && r.quinella_odds ? ` 복승 <b style="color:#38d39f">${r.quinella_odds}배</b>` : (r.hit ? '' : ' 미적중');
+      return `<div style="font-size:12px;padding:2px 0"><span class="hint">${esc(r.time)}</span> ${esc(r.race)} ${mark}${odds}</div>`;
+    }).join('');
+    const tlHtml = tl ? `<div style="margin-top:8px"><b style="font-size:13px">🕐 오늘 경주 타임라인</b><div style="margin-top:2px">${tl}</div></div>` : '';
+    return `<div class="panel-card" style="margin:8px 0;border:2px solid #ffd24f">
+      <div class="matrix-title" style="color:#ffd24f;font-size:15px">📅 오늘 ${esc(t.date || '')} 요약</div>
+      ${summary}${trackHtml}${sigHtml}${tlHtml}
+    </div>`;
+  }
+
+  // [신호별 적중률·4번] 📊 신호별 적중률 — 유력마 기반(복승 2/3·삼복승 유력마2+복병1) 신호별 복승/삼복승 적중률.
+  function renderSignalStats(ss) {
+    const rows = (ss && ss.signals) || [];
+    if (!rows.length) return '';
+    const minN = (ss && ss.minSample) || 50;
+    const barsHtml = rows.map((r) => {
+      const relColor = r.reliable ? (r.rate_quinella >= 50 ? '#38d39f' : '#f87171') : '#fbbf24';
+      const relTxt = r.reliable ? (r.rate_quinella >= 50 ? '✅ 신뢰(50+)' : '🔴 낮음') : `⚠️ 표본부족(${r.count}/${minN})`;
+      return `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:5px 8px;border-radius:6px;margin:2px 0;background:rgba(255,255,255,.03);border-left:3px solid ${relColor}">
+        <b style="min-width:96px;color:#e2e8f0">${esc(r.signal)}</b>
+        <span class="hint">복승 <b style="color:#4ea1ff">${r.rate_quinella}%</b> · 삼복승 <b style="color:#c084fc">${r.rate_trifecta}%</b></span>
+        <span class="hint">(${r.hit_quinella}/${r.count}복 · ${r.hit_trifecta}/${r.count}삼)</span>
+        <span style="margin-left:auto;font-size:11px;font-weight:700;color:${relColor}">${relTxt}</span>
+      </div>`;
+    }).join('');
+    return `<div class="panel-card" style="margin:8px 0">
+      <div class="matrix-title" style="color:#38d39f">📊 신호별 적중률 <span class="hint" style="font-weight:400">유력마 기반(복승=유력마 2/3 입상·삼복승=유력마2+복병1) · 50경주+ 신뢰</span></div>
+      ${barsHtml}
+      <div class="hint" style="margin-top:4px;font-size:11px">※ 기존 정확 적중(복승 1+2·삼복승 1+2+3)과 별개 지표입니다. 50경주+ 표본이면 추천 시 '신뢰도 높음' 강조에 반영됩니다.</div>
+    </div>`;
+  }
 
   // [복기 학습 재설계 4번] 🧠 학습 현황 — 패턴별 신뢰도(표본 50회 게이팅). 공식 수정은 수동.
   function renderPatternConfidence(pc) {
@@ -4576,6 +5153,14 @@
     add(el, 'bet-box', `<h3>💰 베팅 추천 (복승 / 삼복승 · 단승 없음)</h3>
       ${betLines(bd.quinella, '복승')}${betLines(bd.trifecta, '삼복승')}`);
 
+    // [결정론] pastRaces 기반 강제 편성(2착패턴) — 있을 때만
+    const det = report.deterministic;
+    if (det && (det.mustTrifecta || []).length) {
+      add(el, 'bet-box', `<h3>🔒 결정론 강제 편성 (전적 기반)</h3>
+        ${det.mustTrifecta.map((m) => `<div class="bet-line"><span class="bet-type">${m.no}번 ${esc(m.name)}</span><span>${esc(m.msg)}</span></div>`).join('')}
+        <p class="hint">동일 거리/코스 2착 2회↑ 마필을 삼복승에 결정론적으로 강제 포함했습니다(AI 추천과 별개 보험).</p>`);
+    }
+
     // 종합 분석
     if (report.analysis) add(el, 'panel-card', `<h3>종합 분석</h3><p class="hint">${esc(report.analysis)}</p>`);
   }
@@ -4586,13 +5171,19 @@
   /** 추출된 출전마 → /api/score 호출 → 점수·등급 패널 렌더 */
   async function renderFormScores(race, sheet) {
     const raceCtx = { distance: (race && race.distance) || '', course: '', grade: '' };
-    const horses = (sheet.horses || []).map((h) => ({
-      no: h.horseNum, name: h.horseName, jockey: h.jockey,
-      recentPlacings: h.recentPlacings || [],
-      jockey3mPlaceRate: (state.jockeyStats[h.jockey] || {}).placeRate,
-    }));
+    const horses = (sheet.horses || []).map((h) => {
+      const pr = h.pastRaces || [];
+      return {
+        no: h.horseNum, name: h.horseName, jockey: h.jockey, weight: h.weight,
+        recentPlacings: h.recentPlacings || [],
+        pastRaces: pr,                                    // [2~6] 거리/기수/부담중량/2착패턴 활성화
+        lastJockey: pr[0] && pr[0].jockey,
+        lastWeight: pr[0] && pr[0].weight,
+        jockey3mPlaceRate: (state.jockeyStats[h.jockey] || {}).placeRate,
+      };
+    });
     if (!horses.length) return null;
-    const res = await Analysis.scoreHorses(raceCtx, horses);
+    const res = await Analysis.scoreHorses(raceCtx, horses, state.jockeyStats || {});   // [보완] 기수교체 보너스 활성
     renderFormScorePanel(res.horses || []);
     return res.horses || [];
   }
@@ -4608,6 +5199,10 @@
         <td>${(h.recentPlacings || []).join('·') || '-'}</td>
         <td>${h.baseScore}</td><td>${h.courseBonus ? '+' + h.courseBonus : '-'}</td>
         <td>${h.jockeyBonus ? '+' + h.jockeyBonus : '-'}</td>
+        <td>${h.distanceBonus ? (h.distanceBonus > 0 ? '+' : '') + h.distanceBonus : '-'}</td>
+        <td>${h.jockeyChangeBonus ? (h.jockeyChangeBonus > 0 ? '+' : '') + h.jockeyChangeBonus : '-'}</td>
+        <td>${h.weightBonus ? (h.weightBonus > 0 ? '+' : '') + h.weightBonus : '-'}</td>
+        <td>${esc(h.runningStyle || '-')}</td>
         <td><b>${h.totalScore}</b></td>
         <td>${badge(h.grade)}${up}</td>
         <td>${flags || ''}</td>
@@ -4616,9 +5211,9 @@
     const el = document.createElement('div');
     el.className = 'panel-card';
     el.innerHTML = `<h3>📊 전적 자동 점수 · 등급 (Phase 3)</h3>
-      <p class="hint">전적 가중평균(3-1) + 코스적성(3-2) + 기수보너스(3-3) → 총점 · 사분위 등급(3-5, 이상감지 보정 포함) · 특수플래그(3-4)</p>
+      <p class="hint">전적 가중평균(3-1) + 코스적성(3-2) + 기수보너스(3-3) + 거리변화·기수교체·부담중량(pastRaces) → 총점 · 사분위 등급(3-5, 이상감지 보정 포함) · 특수플래그(3-4)</p>
       <table class="data-table">
-        <thead><tr><th>마번</th><th>마명</th><th>기수</th><th>최근착순</th><th>전적</th><th>코스</th><th>기수</th><th>총점</th><th>등급</th><th>플래그</th></tr></thead>
+        <thead><tr><th>마번</th><th>마명</th><th>기수</th><th>최근착순</th><th>전적</th><th>코스</th><th>기수</th><th>거리</th><th>기수교체</th><th>부담</th><th>각질</th><th>총점</th><th>등급</th><th>플래그</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
     host.appendChild(el);
@@ -4653,7 +5248,7 @@
     state.koreaOddsPrev[title] = state.koreaOddsPrev[title] || new Set();
     state.koreaTimeline[title] = state.koreaTimeline[title] || [];
     setKoreaOddsStatus('waiting', title);
-    $('#koreaIntegrated').innerHTML = '';
+    renderKoreaFormDraft(title);   // [복구] 배당 연동 전에도 전적 기준 통합 초안(유력마 TOP5·조합)을 즉시 표시
     renderKoreaTimeline(title);
     const tick = () => pollKoreaOdds(title, race, form);
     await tick();
@@ -4674,6 +5269,9 @@
     if (!m || !m.matched) {
       const noMatch = m && m.reason === 'no_match' && (m.candidates || []).length;
       setKoreaOddsStatus(noMatch ? 'nomatch' : 'waiting', title, m);
+      // [복구·오매칭 방어] 매칭 실패 시 통합영역을 빈칸으로 지우는 대신 '전적 기준 초안'으로 되돌린다.
+      //   → 한국 탭에 외국 경주 분석이 잔존하지 않으면서(초안은 이 경주 PDF 전적만 사용) 통합 화면은 항상 유지.
+      renderKoreaFormDraft(title);
       return;
     }
     try {
@@ -5011,22 +5609,66 @@
     return renderSignalsSimple(signals, '⏱ 마감 임박 급락', (s) => s.type === '마감급락');
   }
 
+  /** [배당 연동 전·복구] PDF 전적 기준 통합 초안 — 유력마 TOP5 + 조합 + 2착패턴을 즉시 표시.
+   *  배당이 매칭되기 전에도 '한 화면 통합 분석'이 항상 보이게 한다(배당 연동 시 renderKoreaIntegrated 로 고도화). */
+  function renderKoreaFormDraft(title) {
+    const host = $('#koreaIntegrated'); if (!host) return;
+    const sc = state.koreaScored[title];
+    const report = state.lastReports[title];
+    if (!sc || !sc.form || !sc.form.length) { host.innerHTML = ''; return; }
+    const gc = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#8a94a6' };
+    const gradeBy = {};
+    ((report && report.horses) || []).forEach((h) => { gradeBy[h.no] = h.grade; });
+    const top = sc.form.slice().sort((a, b) => (b.formScore || 0) - (a.formScore || 0)).slice(0, 5);
+    const rows = top.map((h, i) => {
+      const g = gradeBy[h.no] || (i === 0 ? 'A' : i < 2 ? 'B' : i < 4 ? 'C' : 'D');
+      return `<tr><td><b style="color:${gc[g] || '#fff'}">${g}</b></td><td>${h.no}</td><td>${esc(h.name || '')}</td>
+        <td>${esc(h.jockey || '')}</td><td><b>${h.formScore != null ? h.formScore : '-'}</b></td>
+        <td>${(h.recentPlacings || []).join('·') || '-'}</td></tr>`;
+    }).join('');
+    const bd = (report && report.betting_recommend) || {};
+    const betLine = (arr, label) => (arr || []).map((b) =>
+      `<div class="bet-line"><span><span class="bet-type">${label}</span> ${(b.combo || []).join('-')}</span><span class="hint">신뢰도 ${b.confidence != null ? b.confidence + '%' : '-'} · ${esc(b.note || '')}</span></div>`).join('');
+    const bets = betLine(bd.quinella, '복승') + betLine(bd.trifecta, '삼복승');
+    const p2 = (report && report.pattern2_horses) || [];
+    host.innerHTML = `<div class="panel-card">
+      <h3>🔗 통합 분석 (전적 기준 초안) <span class="hint" style="font-weight:400">배당 연동 대기 중</span></h3>
+      <div class="hint" style="padding:6px 9px;background:rgba(245,158,11,.1);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b;margin-bottom:8px">⏳ 배당판을 수집·매칭하면 <b>이상감지·역배열·통합등급(전적40%+배당60%)</b>으로 이 화면이 자동 고도화됩니다.</div>
+      <div class="matrix-title" style="font-size:13px">⭐ 유력마 TOP5 (전적 기준)</div>
+      <table class="data-table" style="margin-top:4px">
+        <thead><tr><th>등급</th><th>마번</th><th>마명</th><th>기수</th><th>전적점수</th><th>최근착순</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      ${p2.length ? `<div style="margin:6px 0"><span class="hint">🎯 2착패턴</span> ${p2.map(esc).join(', ')}</div>` : ''}
+      ${bets ? `<div class="matrix-title" style="font-size:13px;margin-top:8px">💰 추천 조합 (전적 기준)</div>${bets}` : '<div class="hint" style="margin-top:6px">추천 조합: PDF 분석 리포트 참고</div>'}
+    </div>`;
+  }
+
   /** 통합분석 결과(제거분석·유력마·통합등급·베팅·마감급락) 렌더 — 한글 데이터 그대로 */
   function renderKoreaIntegrated(a) {
     const host = $('#koreaIntegrated'); if (!host) return;
     if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
     state.koreaLastInteg = a;   // [1번] 예산 변경 시 베팅 금액 재계산용
-    const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    // [유력마 통일] ⭐유력마 라인도 TOP5와 동일 기준(복승 대표배당 낮은 순 + 이상감지 상위)으로 정렬 표시.
+    const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     // [1번] 제거분석 패널 재사용: id 충돌 방지 위해 패널 id 치환. 아래에서 클릭 토글 핸들러 연결.
     const elimHtml = renderEliminationHTML(a.elimination).replace('id="elimPanel"', 'id="koreaElimPanel"');
+    // [실시간 배당 분석·편의] 일본 탭에만 있던 실시간 표시(마감 N분전 배지·급락 경고 배너·추천 근거)를
+    //   한국 탭 통합 뷰에도 표시 → 한국경마 실시간 배당 분석을 한 화면에서 편하게 확인.
+    const closeTag = a.afterClose ? ' · <b style="color:#8a94a6">마감 후(참고만)</b>'
+      : (a.minutesBefore != null ? ` · <b style="color:#ffd24f">마감 ${a.minutesBefore}분전</b>` : '');
     host.innerHTML = `<div class="panel-card">
-      <h3>🔗 통합 분석 결과 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
+      <h3>🔗 통합 분석 결과 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${closeTag}</span></h3>
+      ${renderAlertSignal(a.alertSignal, _horseRoleMap(a))}
+      ${renderMarketFavorites(a)}
+      ${renderRealtimeAdded(a)}
       ${renderKoreaIntegratedTable(a.integrated)}
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
       ${elimHtml}
       ${renderKoreaSignals(a.signals)}
       ${renderPatternMatch(a.patternMatch)}
       ${renderBetRecommend(a, '#koreaBudget')}
+      ${renderDutchCalc(a)}
+      ${renderRecommendBasis(a.recommendBasis)}
     </div>`;
     _attachElimHandlers('koreaElimPanel', a.elimination);   // [1번] 제거↔후보 클릭 전환 복원
     _bindBudgetInput('#koreaBudget', () => { if (state.koreaLastInteg) renderKoreaIntegrated(state.koreaLastInteg); });
@@ -5057,9 +5699,23 @@
     let latest;
     try { latest = await (await fetch('/api/odds/triple/latest')).json(); }
     catch (_) { return; }
-    const rk = latest && latest.raceKey;
+    const latestRk = latest && latest.raceKey;
     // [경주전환 잔존 방어] 수집 경주 없음 또는 30분+ 미갱신(끝난 경주) → 직전 배당 표시 안 함
-    if (!rk || latest.stale) { setJpOddsStatus('waiting'); return; }
+    if (!latestRk || latest.stale) { setJpOddsStatus('waiting'); return; }
+    // [경주 자동 전환 긴급 수정] 고정/다른 경마장이면 현재 보고 있는 경주(_rrLastRk) 유지 → 오비히로로 강제 전환 차단.
+    //   30초 폴링(pollJapanOdds)이 전역 최신 경주를 무조건 렌더하던 게 '계속 전환'의 진짜 원인.
+    const rk = _targetRaceKey(latestRk);
+    if (!rk) { setJpOddsStatus('waiting'); return; }
+    if (rk !== latestRk) {
+      // 최신은 다른 경주지만 고정/다른장이라 전환 안 함 — 상단 바에 감지만 표시(화면은 현재 경주 유지).
+      const st = $('#rrStatus');
+      if (st) st.textContent = _racePinned
+        ? `📌 고정 중 · 다른 경주 감지(${latestRk}) — 전환하려면 고정 해제`
+        : `🔀 다른 경마장 경주 감지(${latestRk}) — 전환하려면 새로고침`;
+    }
+    // [탭분리·제주케이스] 한국경마(서울/부산/부경/제주/과천)는 한국경마 탭에서 실시간 배당 분석을 표시한다.
+    //   → 일본경마 탭에서는 한국 경주를 렌더하지 않는다(같은 경주가 양 탭에 중복 표시되던 문제 방지).
+    if (jpIsKoreaName(rk)) { setJpOddsStatus('waiting'); return; }
     let a;
     try {
       a = await (await fetch('/api/odds/triple/analyze', {
@@ -5088,19 +5744,300 @@
     }
   }
   // 순수 렌더 헬퍼만 조합(사이드이펙트 없는 문자열 반환) → 스포츠 탭 컨테이너에 안전하게 주입.
+  // [💎 중고배당 유력마·2번] 감지 시 상단 강조 배너 + 소리/깜빡임(경고음과 다른 소리·경주당 1회).
+  let _midHighAlerted = {};
+  function renderMidHighFavorites(a) {
+    const mh = (a && a.midHighFavorites) || [];
+    if (!mh.length) return '';
+    // 새 감지 알림(경주+마번 조합 1회) — 소리(고배당 전용)+화면 깜빡임
+    const rk = a.raceKey || '';
+    const fresh = mh.filter((m) => !_midHighAlerted[rk + '#' + m.no]);
+    if (fresh.length && !a.afterClose) {
+      fresh.forEach((m) => { _midHighAlerted[rk + '#' + m.no] = 1; });
+      try { _playMidHighAlert(); } catch (_) { /* */ }
+      try { _flashScreen('#f0abfc'); } catch (_) { /* */ }
+    }
+    const rows = mh.map((m) => `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:6px 10px;border-radius:8px;margin:3px 0;background:rgba(240,171,252,.12);border-left:4px solid #f0abfc">
+      <b style="font-size:15px;color:#f0abfc">💎 ${m.no}번</b>
+      <b style="color:#e2e8f0">${m.odds}배</b>
+      ${(m.signals || []).map((s) => `<span class="chip" style="border-color:#f0abfc;color:#f0abfc;font-weight:700">${esc(s.text)}</span>`).join('')}
+      <span class="hint" style="margin-left:auto;color:#f0abfc">→ 삼복승 보험 필수</span>
+    </div>`).join('');
+    return `<div style="margin:6px 0;padding:8px 10px;border:2px solid #f0abfc;border-radius:10px;background:linear-gradient(180deg,rgba(240,171,252,.10),rgba(20,28,43,.6))">
+      <div style="font-size:15px;font-weight:800;color:#f0abfc">💎 고배당 유력마 감지! <span class="hint" style="font-weight:400;font-size:11px">복승 10배+ & 강한 신호</span></div>
+      ${rows}
+    </div>`;
+  }
+  // [2번] 중고배당 전용 알림음(기존 경고음과 다른 톤) — 상승 아르페지오
+  function _playMidHighAlert() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [880, 1174, 1568].forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'triangle'; o.frequency.value = f;
+        o.connect(g); g.connect(ctx.destination);
+        const t = ctx.currentTime + i * 0.12;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+        o.start(t); o.stop(t + 0.16);
+      });
+    } catch (_) { /* */ }
+  }
+  function _flashScreen(color) {
+    const ov = document.createElement('div');
+    ov.style.cssText = `position:fixed;inset:0;background:${color};opacity:.35;z-index:99999;pointer-events:none;transition:opacity .5s`;
+    document.body.appendChild(ov);
+    setTimeout(() => { ov.style.opacity = '0'; }, 120);
+    setTimeout(() => { try { ov.remove(); } catch (_) { /* */ } }, 700);
+  }
+
+  // [5번] 활성 신호별 과거 적중률 강조 — "이 신호(스마트머니) 과거 적중률 72% → 신뢰도 높음"
+  function renderSignalReliability(a) {
+    const rel = a && a.signalReliability;
+    if (!rel || !Object.keys(rel).length) return '';
+    const rows = Object.entries(rel).map(([name, e]) => {
+      const col = (e.reliable && e.rate_quinella >= 50) ? '#38d39f' : (e.reliable ? '#f87171' : '#fbbf24');
+      return `<span class="chip" style="border-color:${col};color:${col};font-weight:700" title="복승 ${e.rate_quinella}% · 삼복승 ${e.rate_trifecta}% (${e.count}건)">${esc(name)} 적중률 ${e.rate_quinella}% · ${esc(e.note || '')}</span>`;
+    }).join(' ');
+    return `<div style="margin:4px 0"><span class="hint" style="font-size:11px">📊 이 경주 활성 신호 과거 성적: </span>${rows}</div>`;
+  }
+
+  // ═══ [네덜란드식 계산기·매트릭스판] 축/주력/복병/제거 상태 + 삼복승 매트릭스 + 자금분배 엔진(참고용·무삭제) ═══
+  //  샘플(네덜란드.txt) 로직 통합: 삼복승 배당(실시간)·기존 추천 자동 반영(복승메인→AXIS+MAIN·복병/스마트머니→DARK·제거마→DROP).
+  let _dutchState = {};   // rk -> {states:{no:'AXIS'|'MAIN'|'DARK'|'DROP'|'NONE'}, budget, inited}
+  let _dutchLastA = null;
+  const _DUTCH_CYCLE = ['NONE', 'AXIS', 'MAIN', 'DARK', 'DROP'];
+  const _DUTCH_COL = { AXIS: '#e74c3c', MAIN: '#2ecc71', DARK: '#f1c40f', DROP: '#95a5a6', NONE: '#4a4a5a' };
+  function _dutchDefaultBudget() {
+    for (const sel of ['#jpBudget', '#tripleBudget', '#koreaBudget']) {
+      const el = document.querySelector(sel); const v = el && parseInt(el.value || '0', 10);
+      if (v > 0) return v;
+    }
+    return 100000;
+  }
+  function _dutchHorseNos(a) {
+    let nos = (a.validHorses || []).map(Number);
+    if (!nos.length) nos = [...new Set((a.betRecommend || []).flatMap((b) => (b.combo || []).map(Number)))];
+    return nos.filter((n) => !isNaN(n)).sort((x, y) => x - y);
+  }
+  function _dutchTripleOdds(a) {
+    const m = {};
+    (a.betRecommend || []).forEach((b) => {
+      if (b.kind === '삼복승') { const c = (b.combo || []).map(Number); if (c.length === 3 && b.expOdds) m[c.slice().sort((x, y) => x - y).join('-')] = b.expOdds; }
+    });
+    (a.trio || []).forEach((t) => { const c = (t.combo || t.pair || []).map(Number); const o = t.odds || t.expOdds; if (c.length === 3 && o) m[c.slice().sort((x, y) => x - y).join('-')] = o; });
+    return m;
+  }
+  function _dutchExactaOdds(a) {
+    const m = {};
+    (a.exacta || []).forEach((x) => { const c = (x.combo || []).map(Number); const o = x.odds; if (c.length === 2 && o) m[c[0] + '➔' + c[1]] = o; });
+    return m;
+  }
+  function _dutchInitStates(a, nos) {
+    const st = {}; nos.forEach((n) => { st[n] = 'NONE'; });
+    const kh = (a.keyHorses || []).map(Number);
+    if (kh[0] != null && st[kh[0]] !== undefined) st[kh[0]] = 'AXIS';               // 복승 메인 첫째 → 축
+    kh.slice(1).forEach((n) => { if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'MAIN'; });   // 나머지 유력마 → 주력
+    (a.darkHorses || []).forEach((h) => { const n = Number(h.no); if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'DARK'; });   // 복병/스마트머니 → 복병
+    (a.midHighFavorites || []).forEach((h) => { const n = Number(h.no); if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'DARK'; });
+    (a.eliminationStrong || []).forEach((e) => { const n = Number(e.no); if (st[n] !== undefined && st[n] === 'NONE') st[n] = 'DROP'; });   // 제거마 → 제거
+    return st;
+  }
+  function renderDutchCalc(a) {
+    _dutchLastA = a;
+    const rk = a.raceKey || '';
+    const nos = _dutchHorseNos(a);
+    if (nos.length < 3) return '';
+    _ensureDutchDelegation();
+    let st = _dutchState[rk];
+    if (!st) st = _dutchState[rk] = { states: {}, budget: _dutchDefaultBudget(), inited: false };
+    if (!st.inited) { st.states = _dutchInitStates(a, nos); st.inited = true; }   // [연동] 기존 추천 자동 반영(1회)
+    nos.forEach((n) => { if (st.states[n] === undefined) st.states[n] = 'NONE'; });
+    return `<div id="dutchCalcPanel">${_dutchHtml(rk, a, nos, st)}</div>`;
+  }
+  function _dutchEngine(budget, nos, states, tripleOdds, twinOdds) {
+    const axis = nos.find((n) => states[n] === 'AXIS');
+    const mains = nos.filter((n) => states[n] === 'MAIN');
+    const darks = nos.filter((n) => states[n] === 'DARK');
+    const won = (n) => Math.round(n / 1000) * 1000;
+    const portfolio = []; let insCost = 0;
+    if (!axis || !mains.length) return { portfolio: [], warn: '축마(AXIS)+주력마(MAIN)를 최소 1마리씩 지정하세요.', ok: false, insCost: 0 };
+    // [1단계] 복병(DARK) 삼복승 보험 — 축+주력+복병, 예산÷배당(본전 보전)
+    darks.forEach((d) => mains.forEach((mn) => {
+      const key = [axis, mn, d].sort((x, y) => x - y).join('-');
+      if (tripleOdds[key]) { const o = tripleOdds[key]; const bet = won(budget / o); portfolio.push({ type: '복병보험(삼복)', code: '삼복 ' + key, odds: o, bet }); insCost += bet; }
+    }));
+    // [1단계] 쌍승 원금보험 — 축 포함 저배당 방향 최대 2건
+    const twinCands = Object.entries(twinOdds).filter(([k]) => k.split('➔').map(Number).indexOf(axis) >= 0).sort((a2, b2) => a2[1] - b2[1]).slice(0, 2);
+    twinCands.forEach(([code, o]) => { const bet = won(budget / o); portfolio.push({ type: '원금보험(쌍승)', code, odds: o, bet }); insCost += bet; });
+    // [2단계] 오버플로우 방지
+    if (insCost >= budget && insCost > 0) return { portfolio, warn: `보험 베팅금 합계(${insCost.toLocaleString()}원)가 예산 이상 — 배당 낮아 주력/본전 불가.`, ok: false, insCost };
+    const remain = Math.max(0, budget - insCost);
+    // [3단계] 잔액 → 핵심 메인 삼복승(축+주력2), 없으면 잔액 표기
+    if (mains.length >= 2) {
+      const key = [axis, mains[0], mains[1]].sort((x, y) => x - y).join('-');
+      if (tripleOdds[key]) portfolio.push({ type: '🔥 핵심메인(삼복)', code: '삼복 ' + key, odds: tripleOdds[key], bet: remain });
+      else portfolio.push({ type: '🔥 핵심메인(잔액)', code: `축${axis}+주력 ${mains[0]}·${mains[1]}`, odds: null, bet: remain });
+    } else {
+      portfolio.push({ type: '🔥 핵심메인(잔액)', code: `축${axis}+주력 ${mains[0]}`, odds: null, bet: remain });
+    }
+    return { portfolio, warn: '', ok: true, insCost, remain };
+  }
+  function _dutchHtml(rk, a, nos, st) {
+    const budget = Math.max(0, st.budget || 0);
+    const tripleOdds = _dutchTripleOdds(a);
+    const twinOdds = _dutchExactaOdds(a);
+    const axis = nos.find((n) => st.states[n] === 'AXIS');
+    const btns = nos.map((n) => `<button class="dutch-horse" data-dh="${n}" style="padding:6px 10px;margin:3px;border:none;border-radius:4px;cursor:pointer;font-weight:700;color:${st.states[n] === 'DARK' ? '#000' : '#fff'};background:${_DUTCH_COL[st.states[n]]};${st.states[n] === 'DROP' ? 'opacity:.45' : ''}">${n}번 (${st.states[n]})</button>`).join('');
+    let matrix;
+    if (!axis) matrix = `<p style="color:#ff6b6b">축마(AXIS)를 1마리 지정하면 삼복승 매트릭스가 활성화됩니다.</p>`;
+    else {
+      let h = `<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;margin-top:6px"><tr><th style="border:1px solid #444;padding:5px;background:#333">축${axis}</th>`;
+      nos.forEach((c) => { h += `<th style="border:1px solid #444;padding:5px;background:#333">${c}</th>`; });
+      h += '</tr>';
+      nos.forEach((r) => {
+        h += `<tr><th style="border:1px solid #444;padding:5px;background:#333">${r}</th>`;
+        nos.forEach((c) => {
+          if (r === c) { h += `<td style="border:1px solid #444;padding:5px;background:#3a2222">${r}</td>`; return; }
+          if (r > c || r === axis || c === axis) { h += `<td style="border:1px solid #444;padding:5px;background:#111;color:#333">-</td>`; return; }
+          if (st.states[r] === 'DROP' || st.states[c] === 'DROP') { h += `<td style="border:1px solid #444;padding:5px;background:#111;color:#666">DROP</td>`; return; }
+          const key = [axis, r, c].sort((x, y) => x - y).join('-');
+          const o = tripleOdds[key];
+          let col = ''; if (st.states[r] === 'MAIN' && st.states[c] === 'MAIN') col = 'color:#2ecc71;font-weight:800'; if (st.states[r] === 'DARK' || st.states[c] === 'DARK') col = 'color:#f1c40f;font-weight:800';
+          h += `<td style="border:1px solid #444;padding:5px;${col}">${o ? o + '배' : '-'}</td>`;
+        });
+        h += '</tr>';
+      });
+      h += '</table></div>';
+      matrix = `<p style="color:#2ecc71;font-weight:700;margin:6px 0 0">[${axis}번] 축 고정 · 삼복승 우상단 매트릭스</p>${h}`;
+    }
+    const eng = _dutchEngine(budget, nos, st.states, tripleOdds, twinOdds);
+    const results = (eng.portfolio || []).map((it) => {
+      const payout = it.odds ? Math.floor(it.bet * it.odds) : null;
+      const net = payout != null ? payout - budget : null;
+      const pc = (net != null && net >= 0) ? '#2ecc71' : '#ff6b6b';
+      return `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;padding:6px 10px;margin:3px 0;border-radius:6px;background:rgba(52,73,94,.5)">
+        <span><b>[${esc(it.type)}]</b> ${esc(it.code)} ${it.odds ? '(' + it.odds + '배)' : ''}</span>
+        <span>추천 <b>${it.bet.toLocaleString()}원</b>${payout != null ? ` → 적중 ${payout.toLocaleString()}원 <span style="color:${pc}">(${net >= 0 ? '+' : ''}${net.toLocaleString()})</span>` : ''}</span>
+      </div>`;
+    }).join('');
+    const warnHtml = eng.warn ? `<div style="margin:6px 0;padding:6px 10px;border:2px solid #ef4444;border-radius:6px;background:rgba(239,68,68,.12);color:#fca5a5;font-weight:700">⚠️ ${esc(eng.warn)}</div>` : '';
+    return `<div style="margin:8px 0;padding:10px;border:2px solid #a855f7;border-radius:10px;background:linear-gradient(180deg,rgba(168,85,247,.08),rgba(20,28,43,.5))">
+      <div style="font-size:15px;font-weight:800;color:#c084fc">💰 네덜란드식 계산기 <span class="hint" style="font-weight:400;font-size:11px">(참고용 · 기존 추천과 별개 · 마번 클릭: 일반→축→주력→복병→제거)</span></div>
+      <div style="margin:6px 0">${btns}</div>
+      <div style="display:flex;gap:8px;align-items:center;margin:6px 0">
+        <span class="hint">예산</span>
+        <input class="dutch-budget cfg-input" type="number" min="0" step="10000" value="${budget}" style="width:130px;padding:3px 6px"> <span class="hint">원</span>
+      </div>
+      ${matrix}
+      <div style="margin-top:8px;font-weight:700;color:#c084fc">📊 자금 분배 포트폴리오</div>
+      ${results || '<p class="hint">축마+주력마 지정 시 계산됩니다.</p>'}
+      ${warnHtml}
+      <div class="hint" style="font-size:11px;margin-top:4px">보험(복병 삼복·쌍승)=예산÷배당(본전 보전) · 잔액=핵심 메인(축+주력2). ⚠ 삼복승 실배당 미수집 시 '-'(추정배당만 표시).</div>
+    </div>`;
+  }
+  function _dutchRefresh() {
+    const panel = document.getElementById('dutchCalcPanel');
+    if (!panel || !_dutchLastA) return;
+    const rk = _dutchLastA.raceKey || '';
+    const st = _dutchState[rk]; if (!st) return;
+    panel.innerHTML = _dutchHtml(rk, _dutchLastA, _dutchHorseNos(_dutchLastA), st);
+  }
+  let _dutchDelegated = false;
+  function _ensureDutchDelegation() {
+    if (_dutchDelegated) return;
+    _dutchDelegated = true;
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest && e.target.closest('.dutch-horse');
+      if (!btn || !_dutchLastA) return;
+      const rk = _dutchLastA.raceKey || '', no = parseInt(btn.dataset.dh, 10);
+      const st = _dutchState[rk]; if (!st) return;
+      let idx = _DUTCH_CYCLE.indexOf(st.states[no] || 'NONE');
+      let nx = (idx + 1) % _DUTCH_CYCLE.length;
+      // [축 유일] 축(AXIS)은 1마리만 — 이미 다른 축이 있으면 건너뜀
+      if (_DUTCH_CYCLE[nx] === 'AXIS' && Object.keys(st.states).some((k) => st.states[k] === 'AXIS' && Number(k) !== no)) nx = (nx + 1) % _DUTCH_CYCLE.length;
+      st.states[no] = _DUTCH_CYCLE[nx];
+      _dutchRefresh();
+    });
+    document.addEventListener('input', (e) => {
+      if (!e.target.classList || !e.target.classList.contains('dutch-budget') || !_dutchLastA) return;
+      const rk = _dutchLastA.raceKey || '', st = _dutchState[rk]; if (!st) return;
+      st.budget = Math.max(0, parseInt(e.target.value || '0', 10) || 0);
+      _dutchRefresh();
+    });
+  }
+
+  // [핵심 추천·추천 과다 근본정리] 최종 복승 ≤2 · 삼복승 ≤2 (총 4개)만 크게 표시 — 딱 이것만.
+  //   서버 _final_picks가 모든 파생추천(확신도·복병·급락보존·스마트머니·밀집박스)을 4개로 압축(나머지 숨김·데이터는 보존).
+  function renderCorePicks(a) {
+    const cp = a && a.corePicks;
+    if (!cp || a.recommendClosed) return '';
+    let fq = cp.finalQuinellas || [];
+    let ft = cp.finalTrifectas || [];
+    // [폴백·구데이터] finalQuinellas 미보유 시 기존 confQuinellas/quinella·삼복승으로 대체
+    if (!fq.length) {
+      if ((cp.confQuinellas || []).length) fq = cp.confQuinellas.slice(0, 2);
+      else if (cp.quinella && cp.quinella.length === 2) fq = [{ combo: cp.quinella, odds: cp.quinellaOdds }];
+    }
+    if (!ft.length) {
+      const _t0 = cp.confTrifecta || cp.trifecta;
+      if (_t0) ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds }];
+    }
+    if (!fq.length) return '';
+    const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번${cp.confTop1High ? ' 🔺고배당' : ''}</span>` : '';
+    const qLines = fq.slice(0, 2).map((q) => {
+      const oo = q.odds != null ? `<span class="hint" style="font-size:14px">(${q.odds}배)</span>` : '';
+      return `<div style="font-size:21px;font-weight:800;margin:5px 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}</div>`;
+    }).join('');
+    const tLines = ft.slice(0, 2).map((t) => {
+      const oo = t.odds != null ? `<span class="hint" style="font-size:14px">(${t.odds}배)</span>` : '';
+      return `<div style="font-size:21px;font-weight:800;margin:5px 0">삼복승: <span style="color:#c084fc">${t.combo.join('+')}</span> ${oo}</div>`;
+    }).join('');
+    return `<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
+      <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(딱 이것만)</span> ${confHead}</div>
+      ${qLines}
+      ${tLines}
+    </div>`;
+  }
+
+  // [복승 크로스 역배열] 각 말이 인기 상위쌍과의 조합 편차로 산출한 실질 강세(2착 유력) 점수 표시.
+  function renderCrossReversal(a) {
+    const cr = (a && a.crossReversal) || [];
+    if (!cr.length) return '';
+    const rows = cr.slice(0, 4).map((c) => {
+      const col = c.level === '🔴' ? '#f87171' : (c.level === '🟠' ? '#fbbf24' : '#facc15');
+      const refs = (c.refs || []).map((r) => r + '번').join('·');
+      const qx = (c.qScore != null || c.xScore != null)
+        ? `<span class="hint">복승 <b style="color:${col}">${c.qScore != null ? c.qScore : '-'}</b>·쌍승 <b style="color:${col}">${c.xScore != null ? c.xScore : '-'}</b></span>` : '';
+      const both = c.both ? `<span style="font-weight:800;color:#f87171">🔁 양쪽감지</span>` : '';
+      return `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:4px 8px;border-radius:6px;margin:2px 0;background:rgba(250,204,21,.06);border-left:3px solid ${col}">
+        <b style="color:${col}">${c.level} ${c.no}번</b>
+        <span class="hint">크로스 점수 <b style="color:${col}">${c.score}</b></span>
+        ${qx}${both}
+        ${refs ? `<span class="hint" style="margin-left:auto">→ ${esc(refs)} 1착 시 2착 강력</span>` : ''}
+      </div>`;
+    }).join('');
+    return `<div class="matrix-title" style="font-size:13px;color:#facc15">🔀 복승·쌍승 크로스 역배열 <span class="hint" style="font-weight:400">인기1위+X vs 인기2위+X · 0.3🟡/0.5🟠/0.7🔴 · 🔁양쪽=복승+쌍승 동시</span></div>${rows}`;
+  }
+
   function sportAnalysisHTML(a, bsel) {
     const six = a.bmed && a.bmed.sixRacer;
     const parts = [];
+    parts.push(renderCorePicks(a));   // [핵심 추천] 딱 이것만(복승 X+Y·삼복승 X+Y+Z) 최상단
     parts.push(renderRaceJudgment(a, bsel));   // [1·2·4번] 경주 판정 크게 + 배팅 배분
     parts.push(renderChaotic(a, bsel));   // [혼전] 상위 배당 근접 시 고배당 포함 삼복승 전략 배너
+    parts.push(renderMidHighFavorites(a));   // [💎 2번] 중고배당 유력마 감지 상단 강조 배너(소리·깜빡임)
     parts.push(renderTopHorses(a));   // ⭐ 유력마 TOP5 + 복병/이상감지 + 제거마 카드
+    parts.push(renderSignalReliability(a));   // [5번] 활성 신호별 과거 적중률(50경주+ 신뢰도 강조)
     parts.push(`<div class="matrix-title">🚨 실시간 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}${six ? ' · 6명 출전' : ''}${a.minutesBefore != null && !a.afterClose ? ` · 마감 ${a.minutesBefore}분전` : ''}</span></div>`);
     if (a.summary) parts.push(`<div style="font-size:15px;font-weight:700;margin:6px 0;color:#ffd24f">${esc(a.summary)}</div>`);
     parts.push(renderForcedTrifecta(a));
+    parts.push(renderReversalBacking(a));
     parts.push(renderAlertSignal(a.alertSignal, _horseRoleMap(a)));
     parts.push(renderPreReversal(a));
     parts.push(renderAfterCloseSurge(a.afterCloseSurge));
     parts.push(renderInverse(a.inverse));
+    parts.push(renderCrossReversal(a));
     parts.push(renderIntegratedGrades(a));
     parts.push(renderJapanSignals(a.signals));
     // [경륜/경정 근거 표시] 일본경마 뷰에만 있던 '왜 추천했는지' 근거 카드·패턴매칭을 6명 종목 뷰에도 추가.
@@ -5110,6 +6047,7 @@
     parts.push(renderSingleFavorite(a));
     parts.push(renderRecommendFlex(a));
     parts.push(renderBetRecommend(a, bsel));
+    parts.push(renderDutchCalc(a));   // [네덜란드식 계산기] 별도 패널·참고용(기존 추천과 별개)
     parts.push(renderHighOddsCompanion(a));
     parts.push((a.raceJudgment && a.raceJudgment.type === 'wait') ? '' : renderBMED(a.bmed, bsel));
     return parts.join('');
@@ -5179,17 +6117,21 @@
     const host = $('#jpIntegrated'); if (!host) return;
     if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
     state.jpLastInteg = a;   // [1번] 예산 변경 시 베팅 금액 재계산용
-    const keyH = (a.keyHorses || []).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    // [유력마 통일] ⭐유력마 라인도 TOP5와 동일 기준(복승 대표배당 낮은 순 + 이상감지 상위)으로 정렬 표시.
+    const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     // [1번] 전적 점수별 말 목록(출마표2 등급표) + 제거 분석(읽기전용) 복원
     const formHtml = renderFormGrades(a.form);
     const elimHtml = renderEliminationHTML(a.elimination, new Set()).replace('id="elimPanel"', 'id="jpElimPanel"');
     host.innerHTML = `<div class="panel-card">
+      ${renderCorePicks(a)}
       ${renderRaceJudgment(a, '#jpBudget')}
       ${renderChaotic(a, '#jpBudget')}
       ${renderForcedTrifecta(a)}
+      ${renderReversalBacking(a)}
       ${renderPreReversal(a)}
       ${renderAfterCloseSurge(a.afterCloseSurge)}
       ${renderInverse(a.inverse)}
+      ${renderCrossReversal(a)}
       ${renderTopHorses(a)}
       <h3>🔗 실시간 배당 이상감지 <span class="hint" style="font-weight:400">${esc(a.raceKey || '')}</span></h3>
       <div style="margin:8px 0"><span class="hint">⭐ 유력마</span> ${keyH || '—'}${a.anomalyHorse != null ? ` <span class="hint">/ 이상감지말</span> <b style="color:#ff5c5c">${a.anomalyHorse}</b>` : ''}</div>
@@ -5201,6 +6143,7 @@
       ${renderSingleFavorite(a)}
       ${renderRecommendFlex(a)}
       ${renderBetRecommend(a, '#jpBudget')}
+      ${renderDutchCalc(a)}
       ${renderHighOddsCompanion(a)}
     </div>`;
     _bindBudgetInput('#jpBudget', () => { if (state.jpLastInteg) renderJapanIntegrated(state.jpLastInteg); });
@@ -5946,7 +6889,18 @@
     const res = rep.result || {};
     if (res['1st'] == null) return '';
     const why = rep.why_recommended || {};
-    const preNos = Object.keys(why).map((k) => why[k]).filter((s) => s && s.horse != null).map((s) => Number(s.horse));
+    // 경기 전 추천마 = 우리가 실제 추천한 유력마만(입상마 혼입 방지).
+    // 우선순위: recommended_horses(신규 리포트) → why 항목 recommended 플래그 → (구 리포트) why 전체 폴백.
+    let preNos = Array.isArray(rep.recommended_horses)
+      ? rep.recommended_horses.map(Number).filter((n) => !isNaN(n))
+      : [];
+    if (!preNos.length) {
+      const recFlagged = Object.keys(why).map((k) => why[k])
+        .filter((s) => s && s.horse != null && s.recommended === true).map((s) => Number(s.horse));
+      preNos = recFlagged.length
+        ? recFlagged
+        : Object.keys(why).map((k) => why[k]).filter((s) => s && s.horse != null).map((s) => Number(s.horse));
+    }
     const placed = ['1st', '2nd', '3rd'].map((k) => res[k]).filter((v) => v != null).map(Number);
     const placedSet = new Set(placed);
     const preCmp = preNos.length ? preNos.map((n) => {
@@ -6112,28 +7066,11 @@
     checkResultNotify(list);
   }
 
-  // [3번] 발주 후 ~30분 경과(마지막 갱신 기준) 미입력 경주 → 1회 알림(중복 방지)
-  function checkResultNotify(list) {
-    const now = Date.now();
-    const done = _notifiedRaces();
-    list.forEach((m) => {
-      if (done[m.raceKey]) return;
-      const hhmmss = m.updated_at || m.analyzed_at;
-      if (!hhmmss) return;
-      const parts = String(hhmmss).split(':').map((x) => parseInt(x, 10));
-      if (parts.length < 2 || parts.some(isNaN)) return;
-      const upd = new Date(); upd.setHours(parts[0], parts[1], parts[2] || 0, 0);
-      if (now - upd.getTime() >= 30 * 60 * 1000) {   // 마지막 수집 30분 경과 = 경주 종료 추정
-        _markNotified(m.raceKey);
-        const msg = `🔔 ${m.race || m.raceKey} 결과를 입력하세요`;
-        try { toast(msg); } catch (_) { /* */ }
-        try {
-          if (window.Notification && Notification.permission === 'granted') new Notification('경마 BMED', { body: msg });
-          else if (window.Notification && Notification.permission !== 'denied') Notification.requestPermission();
-        } catch (_) { /* */ }
-      }
-    });
-  }
+  // [자동 팝업 제거] 경주 종료 후 '결과를 입력하세요' 자동 alert/Notification 팝업은 제거함(사용자 요청 — 불편).
+  //   미입력 경주 안내는 결과기록 탭의 [📋 결과 입력 대기] 목록(loadPendingResults)에서만 표시하고,
+  //   결과 입력 기능(대기 목록·클릭 시 openQuickResult 팝업·결과기록 탭 입력폼)은 그대로 유지한다.
+  //   함수는 호출부(loadPendingResults) 호환을 위해 남기되, 자동 팝업/알림은 띄우지 않는다(no-op).
+  function checkResultNotify(_list) { /* 자동 팝업 제거됨 — 결과기록 탭 대기 목록으로 대체 */ }
 
   // [2번] 경주별 간단 결과 입력 팝업 (1~4착 + 복승/삼복승 배당 → 저장)
   function openQuickResult(rk, recommend) {
@@ -6217,13 +7154,55 @@
       + 'font:600 12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
       + 'color:#e2e8f0;border-top:1px solid #334155;display:none;text-align:center;letter-spacing:.2px';
     document.body.appendChild(bar);
+    // [4번] 다음 경주 자동전환 상태 배너(상단 중앙) — 발주 마감 후 새 경주로 넘어가는 과정을 명확히 표시.
+    const nb = document.createElement('div');
+    nb.id = 'nextRaceBanner';
+    nb.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:8px;z-index:99999;'
+      + 'padding:8px 18px;border-radius:10px;font:700 13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
+      + 'text-align:center;display:none;box-shadow:0 4px 14px rgba(0,0,0,.35);white-space:pre-line';
+    document.body.appendChild(nb);
     const two = (n) => String(n).padStart(2, '0');
     const hms = (ms) => { const d = new Date(ms); return two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds()); };
+    const hm = (ms) => { const d = new Date(ms); return two(d.getHours()) + ':' + two(d.getMinutes()); };
     const cd = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + '분 ' + two(s % 60) + '초'; };
+    let _nrDoneUntil = 0;   // '✅ 전환됨' 배너를 잠깐만 노출
+    function renderNextRace(s, now) {
+      const nr = s && s.nextRace;
+      // 전환 진행(waiting/refreshing/collecting) → 🔄 대기 배너
+      if (nr === 'waiting' || nr === 'refreshing' || nr === 'collecting') {
+        const eta = (s.deadline && s.deadline > now) ? `\n예상 시작: ${hm(s.deadline)}` : '';
+        const rk = s.raceKey || s.newRaceKey || '';
+        nb.style.background = '#1e3a5f'; nb.style.border = '1px solid #3b82f6'; nb.style.color = '#dbeafe';
+        nb.textContent = `🔄 다음 경주 대기 중${rk ? ' — ' + rk : ''}${eta}`;
+        nb.style.display = 'block';
+        return true;
+      }
+      // 전환 완료(done) → ✅ 배너 12초 노출 후 숨김
+      if (nr === 'done') {
+        if (!_nrDoneUntil || (s.t && s.t > now - 3000)) _nrDoneUntil = now + 12000;
+        if (now < _nrDoneUntil) {
+          const rk = s.newRaceKey || s.raceKey || '';
+          nb.style.background = '#14432a'; nb.style.border = '1px solid #22c55e'; nb.style.color = '#dcfce7';
+          nb.textContent = `✅ ${rk || '새 경주'} 자동 전환됨`;
+          nb.style.display = 'block';
+          return true;
+        }
+      }
+      // 탭 없음 경고
+      if (nr === 'no-tab') {
+        nb.style.background = '#4a2b12'; nb.style.border = '1px solid #f59e0b'; nb.style.color = '#fef3c7';
+        nb.textContent = '⚠ 배당판 탭이 없어 자동 전환 불가 — 배당판을 열어주세요';
+        nb.style.display = 'block';
+        return true;
+      }
+      nb.style.display = 'none';
+      return false;
+    }
     async function tick() {
       let s = null;
       try { s = await (await fetch('/api/auto/status')).json(); } catch (_) { /* */ }
       const now = Date.now();
+      renderNextRace(s, now);   // [4번] 전환 배너(상태와 독립적으로 항상 평가)
       if (!s || (!s.running && !s.stopped)) { bar.style.display = 'none'; return; }
       bar.style.display = 'block';
       if (s.stopped) { bar.style.background = '#1e293b'; bar.textContent = '⏹ 자동수집 중지됨 (발주 마감)'; return; }
@@ -6273,23 +7252,15 @@
       let s = null;
       try { s = await (await fetch('/api/results/auto-status')).json(); } catch (_) { return; }
       if (!s) return;
-      // ① 실패 배너(수동입력 필요)
-      const fails = s.failures || [];
-      if (fails.length) {
-        const names = fails.map((f) => f.raceKey || '경주').slice(0, 4).join(', ');
-        bar.textContent = `⚠️ ${fails.length}경주 자동수집 실패 → 수동입력 필요: ${names}${fails.length > 4 ? ' 외' : ''} (클릭)`;
-        bar.style.display = 'block';
-      } else {
-        bar.style.display = 'none';
-      }
-      // ② 새 성공(lastDone.seq 증가) → 결과기록 탭 자동 갱신
+      // ① [자동 표시 제거] 전역 상단 '자동수집 실패 → 수동입력 필요' 배너는 표시하지 않음(사용자 요청).
+      //    미입력·실패 경주 안내는 결과기록 탭의 [📋 결과 입력 대기] 목록에서만 확인(전역 배너/팝업 없음).
+      bar.style.display = 'none';
+      // ② 새 성공(lastDone.seq 증가) → 결과기록 탭만 조용히 자동 갱신(팝업 없이).
       const doneSeq = (s.lastDone && s.lastDone.seq) || 0;
       if (_lastResultDoneSeq < 0) { _lastResultDoneSeq = doneSeq; return; }  // 첫 폴링은 기준만 설정
       if (doneSeq > _lastResultDoneSeq) {
         _lastResultDoneSeq = doneSeq;
-        const rk = (s.lastDone && s.lastDone.raceKey) || '경주';
-        _refreshResultTab();
-        try { toast(`✅ ${rk} 결과 자동수집 반영됨`); } catch (_) { /* */ }
+        _refreshResultTab();   // 결과기록 탭 자동 갱신(성공 alert 팝업 제거)
       }
     }
     tick();
@@ -6332,6 +7303,15 @@
 
   /** 요청 형식 3줄 상태 렌더: "✅ oddspark 수집 중 / 복승 N조합·쌍승 N조합 / 마지막 수집: HH:MM:SS" */
   function _renderKeibaStatus() {
+    // [중앙경마 자동 비활성화] 현재 경주가 JRA면 토글 비활성화 + 안내(oddspark 미지원).
+    const _curRk = _keibaTargetRk();
+    const _chk = document.getElementById('keibaOddsAutoChk');
+    if (jpIsCentralName(_curRk)) {
+      if (_chk) { _chk.checked = false; _chk.disabled = true; }
+      _setKeibaStatusHtml('<div style="color:#c084fc;font-weight:800">🏇 중앙경마(JRA)</div><div style="color:#94a3b8;font-size:12px">oddspark 서버 수집 미지원 — <b>Chrome 확장으로만 수집</b>됩니다.</div>');
+      return;
+    }
+    if (_chk && _chk.disabled) { _chk.disabled = false; try { _chk.checked = localStorage.getItem('keibaOddsAuto') === '1'; } catch (_) { /* */ } _keibaOdds.enabled = _chk.checked; }
     if (!_keibaOdds.enabled) { _setKeibaStatusHtml('⬜ 꺼짐 — 토글을 켜면 현재 경주 배당을 자동 수집합니다.'); return; }
     const head = '<div style="color:#38d39f;font-weight:800">✅ oddspark 수집 중</div>';
     const rkLine = _keibaOdds.lastRkShown ? `<div style="color:#94a3b8;font-size:11px">현재 경주: ${esc(_keibaOdds.lastRkShown)}</div>` : '';
@@ -6348,6 +7328,12 @@
 
   async function fetchKeibaOdds(rk, silent) {
     if (!rk) { _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '현재 경주(raceKey)가 없습니다.'; _renderKeibaStatus(); return null; }
+    // [중앙경마 자동 비활성화] JRA는 oddspark 미지원 → 서버 수집 시도 안 함(Failed to fetch 방지). Chrome 확장으로만.
+    if (jpIsCentralName(rk)) {
+      _keibaOdds.lastRkShown = rk; _keibaOdds.lastCounts = null;
+      _keibaOdds.lastMsg = '🏇 중앙경마(JRA)는 oddspark 미지원 — Chrome 확장으로만 수집됩니다.';
+      _renderKeibaStatus(); return { central: true };
+    }
     _keibaOdds.lastRkShown = rk;
     if (!silent && !_keibaOdds.enabled) _setKeibaStatusHtml('🏇 oddspark 배당 조회 중…');
     let d; try { d = await (await fetch('/api/keiba/odds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }) })).json(); }
@@ -6368,6 +7354,7 @@
     rk = _keibaOdds.pinnedRk || rk;                      // 경주 지정(pin) 우선
     if (!rk) return;
     if (jpIsKoreaName(rk)) return;                       // 한국 경주는 oddspark 대상 아님(확장/PDF 유지)
+    if (jpIsCentralName(rk)) return;                     // [중앙경마] JRA는 oddspark 미지원 → 자동 폴링 안 함
     // [stale 루프 차단] 마감 90초+ 지난(=끝난) 경주는 폴링 중단 — oddspark가 확정배당을 계속 재수집해
     //   그 경주가 계속 '최신'으로 남고 다음 경주로 못 넘어가던 자기강화 루프 제거(pin 지정 시엔 유지).
     if (!_keibaOdds.pinnedRk && left !== Infinity && left < -90000) {
@@ -6390,7 +7377,7 @@
   async function keibaDetectCurrentRace(rk, left) {
     if (!_keibaOdds.enabled || _keibaOdds.detecting) return;
     if (_keibaOdds.pinnedRk) return;                     // 경주 지정 시 자동추종 안 함
-    if (!rk || jpIsKoreaName(rk)) return;                // 한국 경주는 oddspark 대상 아님
+    if (!rk || jpIsKoreaName(rk) || jpIsCentralName(rk)) return;   // 한국·중앙경마는 oddspark 대상 아님
     if (!/\d+\s*경주/.test(rk)) return;                  // 경주번호 없는 raceKey 제외
     const detIv = (left <= 180000 || _keibaOdds.lastWaiting) ? 8000 : 25000;
     const now = Date.now();
@@ -6450,7 +7437,8 @@
 
   /** 이상감지 이벤트 배열 → 행 HTML(시각·발주전·심각도색) */
   function _anomalyRows(ev) {
-    return (ev || []).map((e) => {
+    // [순서 변경] 최신 감지 내역이 맨 위 — 서버는 시간순(오래된→최신)으로 주므로 복사본을 reverse.
+    return (ev || []).slice().reverse().map((e) => {
       const mb = e.minutes_before != null ? ` <span style="color:#64748b">${e.minutes_before}분전</span>` : '';
       const col = e.severity === '🔴' ? '#f87171' : '#fbbf24';
       return `<div style="padding:1px 0 1px 8px"><span style="color:#94a3b8">${esc(e.time || '')}</span>${mb} <span style="color:${col};font-weight:700">${e.severity} ${esc(e.text)}</span></div>`;
@@ -6700,7 +7688,7 @@
           if (chk.checked) {   // 켜면 즉시 1회 수집 + 이후 적응형 폴링
             _keibaOdds.lastPoll = 0; _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '현재 경주 조회 중…'; _renderKeibaStatus();
             const rk = _closing.panelRk || getActiveRaceKey();
-            if (rk && !jpIsKoreaName(rk)) fetchKeibaOdds(rk, true);
+            if (rk && !jpIsKoreaName(rk) && !jpIsCentralName(rk)) fetchKeibaOdds(rk, true);
           } else _renderKeibaStatus();
         });
       }
@@ -6822,6 +7810,10 @@
   // ══════════ [일본경마 복기] 분석 내역 목록 + 결과 입력 + 자동 판정 리포트 ══════════
   const JP_KR_TRACKS = ['서울', '부산', '부경', '제주', '과천'];
   function jpIsKoreaName(s) { return JP_KR_TRACKS.some((t) => (s || '').indexOf(t) >= 0); }
+  // [중앙경마 oddspark 미지원] JRA 경마장 = oddspark 서버 수집 대상 아님(로그인/POST 필요) → Chrome 확장으로만 수집.
+  const JP_CENTRAL_TRACKS = ['도쿄', '나카야마', '한신', '쿄토', '교토', '삿포로', '하코다테', '후쿠시마', '니가타', '주쿄', '고쿠라', '코쿠라',
+    '東京', '中山', '阪神', '京都', '札幌', '函館', '福島', '新潟', '中京', '小倉'];
+  function jpIsCentralName(s) { return JP_CENTRAL_TRACKS.some((t) => (s || '').indexOf(t) >= 0); }
   function jpIsJapanName(s) { s = (s || '').trim(); return !!s && !jpIsKoreaName(s) && !/TEST/i.test(s); }
   function jpTodayStr() { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; }
   function jpRecSummary(fr) {
@@ -7120,6 +8112,12 @@
       if (_keirinOddsTimer) { clearInterval(_keirinOddsTimer); _keirinOddsTimer = null; }
       if (poll.checked) { fetchKeirinOdds(true); _keirinOddsTimer = setInterval(() => fetchKeirinOdds(true), 30000); }
     });
+    // [지방경마 출주표 전적] oddspark 出走表 분석 버튼
+    const nb = document.querySelector('#narFetchBtn');
+    if (nb) nb.addEventListener('click', fetchKeibaStarters);
+    // [중앙경마(JRA) 출주표 전적] netkeiba 馬柱 분석 버튼
+    const jb = document.querySelector('#jraFetchBtn');
+    if (jb) jb.addEventListener('click', fetchJraStarters);
   }
 
   // [경륜 배당 직접조회] oddspark 복승·쌍승을 서버 경유로 가져와 파이프라인(역배열·배당변화·이상감지) 반영.
@@ -7198,8 +8196,86 @@
         <tbody>${rows}</tbody></table>
       ${(a.tips || []).length ? `<div class="matrix-title" style="font-size:12px;margin-top:8px">💡 분석 팁</div>` + a.tips.map((t) => `<div class="hint" style="margin:1px 0">· ${esc(t)}</div>`).join('') : ''}
       ${a.comment ? `<div class="hint" style="margin-top:6px">📝 oddspark 예상: ${esc(a.comment)}</div>` : ''}
-      <p class="hint" style="font-size:11px;margin-top:6px">등급 기준: 競走得点 85+ A · 75~84 B · 65~74 C · &lt;65 D. 걸즈(L급)는 득점 스케일이 낮아 대부분 D로 표시될 수 있습니다(상대 랭킹·보정 점수로 비교하세요).</p>
+      <p class="hint" style="font-size:11px;margin-top:6px">등급 기준: 競走得点 95+ A · 85~94 B · 75~84 C · &lt;75 D. 걸즈(L급)는 득점 스케일이 낮아 대부분 D로 표시될 수 있습니다(상대 랭킹·보정 점수로 비교하세요).</p>
     </div>`;
+  }
+
+  // [지방경마 출주표 전적] oddspark 出走表 + 전5경주(각질·거리변화·상3F)를 서버 경유 수집·표시.
+  async function fetchKeibaStarters() {
+    const out = document.querySelector('#narCardResult'); if (!out) return;
+    const g = (id) => { const e = document.querySelector(id); return e ? e.value.trim() : ''; };
+    const venue = g('#narVenue'), ymd = g('#narYmd'), race = g('#narRace');
+    const rk = g('#narRaceKey') || (_closing && _closing.panelRk) || getActiveRaceKey() || '';
+    const payload = { withDetail: true };
+    if (rk) payload.raceKey = rk;
+    if (venue) payload.venue = venue;
+    if (ymd) payload.raceDy = ymd;
+    if (race) payload.raceNb = race;
+    if (!rk && !(venue && race)) { out.innerHTML = '<p class="hint" style="color:var(--red)">경마장+경주(또는 raceKey)를 입력하세요.</p>'; return; }
+    out.innerHTML = '<p class="hint">🏇 oddspark에서 출주표·전적을 가져오는 중… (전5경주 병렬 수집)</p>';
+    let d; try { d = await (await fetch('/api/keiba/starters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
+    catch (e) { out.innerHTML = `<p class="hint" style="color:var(--red)">실패: ${esc(e.message)}</p>`; return; }
+    if (d.error) { out.innerHTML = `<p class="hint" style="color:var(--red)">${esc(d.error)}${d.scheduled ? ' · 오늘 개최: ' + d.scheduled.map(esc).join(', ') : ''}</p>`; return; }
+    out.innerHTML = renderKeibaStarters(d);
+    if (d.linkedRaceKey) { try { refreshCurrentRace(); } catch (_) { /* */ } }
+  }
+
+  function renderKeibaStarters(d) {
+    const r = d.race || {}, hs = d.horses || [];
+    const gbadge = (g) => { const col = { A: '#38d39f', B: '#4ea1ff', C: '#ffd24f', D: '#94a3b8' }[g] || '#94a3b8'; return `<span class="chip" style="border-color:${col};color:${col}">${g}</span>`; };
+    const rows = hs.map((h) => {
+      const bp = h.backPower === '강' ? ' <span title="뒷힘 강점(상3F 상위30%)">💪</span>' : '';
+      const ins = h.backPowerInsurance ? ' <span class="hint" style="color:#ffd24f" title="거리 미경험이나 뒷힘 강점 → 삼복승 보험">⚡</span>' : '';
+      return `<tr>
+      <td style="text-align:center;font-weight:700">${h.rank}</td>
+      <td style="text-align:center;font-weight:700">${h.no}</td>
+      <td>${esc(h.name || '')}${bp}${ins} <span class="hint" style="font-size:10px">${esc(h.jockey || '')} ${h.weight != null ? h.weight + 'kg' : ''}</span></td>
+      <td style="text-align:center">${gbadge(h.grade)}</td>
+      <td style="text-align:right"><b>${h.totalScore}</b>${h.gradeBonus ? ` <span class="hint" style="font-size:9px;color:#4ea1ff">등급${h.gradeBonus > 0 ? '+' : ''}${h.gradeBonus}</span>` : ''}</td>
+      <td style="text-align:center" title="각질(통과순위)">${esc(h.styleType || '-')}</td>
+      <td style="text-align:center" title="최근5착순">${(h.recentPlacings || []).join('·') || '-'}</td>
+      <td style="text-align:center" title="상3F 평균(막판스피드)">${h.last3f != null ? h.last3f : '-'}${h.backPower === '강' ? ' 💪' : ''}</td>
+      <td class="hint" style="font-size:10px">${(h.detail || []).map(esc).join(' · ')}</td></tr>`;
+    }).join('');
+    // [3번] 💪 뒷힘 강점 말 요약(상3F 상위30%) — 거리 미경험이나 막판 뒤집기 후보 강조
+    const strongBack = hs.filter((h) => h.backPower === '강');
+    const backBox = strongBack.length ? `<div style="margin:8px 0;padding:8px 10px;background:rgba(56,211,159,.1);border-left:3px solid #38d39f;border-radius:6px">
+      <div style="font-weight:700;color:#38d39f">💪 뒷힘 강점 말 <span class="hint" style="font-weight:400">(상3F 상위30% · 막판 뒤집기 가능)</span></div>
+      ${strongBack.map((h) => `<div class="hint" style="margin-top:2px">· <b>${h.no}번 ${esc(h.name || '')}</b> — 상승3F ${h.last3f != null ? h.last3f + '초' : '-'}${h.distExperienced === false ? ' · <span style="color:#ffd24f">⚡ 거리 미경험이나 막판 뒤집기 가능(삼복승 보험)</span>' : ''}</div>`).join('')}
+    </div>` : '';
+    const linked = d.linkedRaceKey
+      ? `<div class="hint" style="margin:2px 0 8px;padding:6px 9px;background:rgba(56,211,159,.14);border-left:3px solid #38d39f;border-radius:6px;color:#38d39f">✅ <b>live 통합 연동됨</b> — <b>${esc(d.linkedRaceKey)}</b> 유력마·통합등급(전적+배당역배열)에 이 전적이 반영됩니다.</div>`
+      : `<div class="hint" style="margin:2px 0 8px;padding:6px 9px;background:rgba(245,158,11,.12);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b">⚠️ live 연동 안 됨(raceKey 미지정) — 전적만 표시.</div>`;
+    return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px">
+      ${linked}
+      <div class="matrix-title">🏇 ${esc(r.venue || '')} ${r.raceNo != null ? r.raceNo + 'R' : ''} <span class="hint" style="font-weight:400">${esc(r.surface || '')}${r.distance != null ? r.distance + 'm' : ''} 마장 ${esc(r.trackCond || '?')} · ${hs.length}두</span></div>
+      ${backBox}
+      <table class="data-table" style="margin-top:6px">
+        <thead><tr><th>순</th><th>마번</th><th>마명(기수·부담)</th><th>등급</th><th>총점</th><th>각질</th><th>최근착순</th><th>상3F</th><th>근거</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      <p class="hint" style="font-size:11px;margin-top:6px">전적점수 = 최근5착순 가중평균 + 각질(선행+3/추격+5) + 거리변화(단축+5) + 부담(감소+5) + <b>등급경험(G1~G3/A1 +20·오픈 +10)</b> + <b>당거리경험(+10)</b> + <b>뒷힘(상3F 상위30% +15)</b>. 등급=경주 내 사분위 상대. 💪=뒷힘 강점 · ⚡=거리 미경험이나 뒷힘 강점(삼복승 보험).</p>
+    </div>`;
+  }
+
+  // [중앙경마(JRA) 출주표 전적] netkeiba 馬柱 전5주(각질·거리변화·상3F)를 서버 경유 수집·표시.
+  //   말 데이터 구조가 지방경마와 동일 → 표시는 renderKeibaStarters 재사용(각질 소스만 netkeiba 표기 우선).
+  async function fetchJraStarters() {
+    const out = document.querySelector('#jraCardResult'); if (!out) return;
+    const g = (id) => { const e = document.querySelector(id); return e ? e.value.trim() : ''; };
+    const venue = g('#jraVenue'), ymd = g('#jraYmd'), race = g('#jraRace');
+    const rk = g('#jraRaceKey') || (_closing && _closing.panelRk) || getActiveRaceKey() || '';
+    const payload = {};
+    if (rk) payload.raceKey = rk;
+    if (venue) payload.venue = venue;
+    if (ymd) payload.raceDy = ymd;
+    if (race) payload.raceNb = race;
+    if (!rk && !(venue && race)) { out.innerHTML = '<p class="hint" style="color:var(--red)">경마장+경주(또는 raceKey)를 입력하세요.</p>'; return; }
+    out.innerHTML = '<p class="hint">🏇 netkeiba 馬柱에서 출주표·전5주를 가져오는 중…</p>';
+    let d; try { d = await (await fetch('/api/jra/starters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); }
+    catch (e) { out.innerHTML = `<p class="hint" style="color:var(--red)">실패: ${esc(e.message)}</p>`; return; }
+    if (d.error) { out.innerHTML = `<p class="hint" style="color:var(--red)">${esc(d.error)}${d.scheduled ? ' · 오늘 개최 race_id: ' + d.scheduled.slice(0, 12).map(esc).join(', ') : ''}</p>`; return; }
+    out.innerHTML = renderKeibaStarters(d);   // 동일 구조 → 재사용
+    if (d.linkedRaceKey) { try { refreshCurrentRace(); } catch (_) { /* */ } }
   }
 
   async function loadJapanReviewList() {
@@ -7397,6 +8473,9 @@
       <div>결과: <b>1착 ${r['1st'] != null ? r['1st'] : '?'}번 / 2착 ${r['2nd'] != null ? r['2nd'] : '?'}번 / 3착 ${r['3rd'] != null ? r['3rd'] : '?'}번${(r['4th'] != null || rep.result4 != null) ? ` / 4착 ${r['4th'] != null ? r['4th'] : rep.result4}번` : ''}</b></div>
       <div style="margin-top:4px">판정: 복승 ${yn(rep.quinella_hit)} · 삼복승 ${yn(rep.trifecta_hit)}</div>
       ${rep.near_miss ? `<div style="margin-top:4px;color:#ffd24f">🟡 <b>아깝게 4착 - 거의 적중</b>${rep.near_miss_horse != null ? ` (추천 ${rep.near_miss_horse}번이 4착)` : ''} → 삼복승 보험픽 학습 반영</div>` : ''}
+      ${rep.pairing_miss ? `<div style="margin-top:4px;padding:6px 8px;border-left:3px solid #a855f7;background:rgba(168,85,247,.1);border-radius:6px;color:#d8b4fe">
+        🎯 <b>아쉬운 복승조합 엇갈림</b> — 유력마·삼복승 판단은 정확했으나 <b>복승 상대 페어링만 어긋남</b> (실제 복승 ${(rep.pairing_miss.top2 || []).join('+')})<br>
+        <span class="hint">유력마 ${(rep.pairing_miss.keyHorses || []).join('·')}번 중 실제 1·2착은 ${(rep.pairing_miss.top2 || []).join('·')}번인데 복승 메인은 다른 조합이었습니다. ${rep.pairing_miss.wouldBackingCover ? '→ ✅ <b>역배열 실질유력마 받치기 복승</b>이 있었다면 커버됐을 케이스(학습 반영).' : '→ 유력마 간 받치기 복승 강화 대상.'}</span></div>` : ''}
       ${renderHitBasis(rep.hit_basis)}
       <div class="matrix-title" style="font-size:12px;margin-top:8px">이상감지 분석</div>${anomalyLines}
       ${formLine}${pnlHtml}
@@ -7473,6 +8552,64 @@
   function initJapanReview() {
     const rb = document.querySelector('#jpReviewRefresh'); if (rb) rb.addEventListener('click', loadJapanReviewList);
     const ad = document.querySelector('#jpReviewAllDates'); if (ad) ad.addEventListener('change', loadJapanReviewList);
+    const ar = document.querySelector('#oddsArchiveRefresh'); if (ar) ar.addEventListener('click', loadOddsArchiveList);
+    const ac = document.querySelector('#oddsArchiveCompress'); if (ac) ac.addEventListener('click', compressOddsArchive);
+  }
+
+  // [영구보존·3번] 배당 히스토리 보관함 — 저장된 모든 경주 배당 아카이브 목록·복기.
+  async function loadOddsArchiveList() {
+    const box = document.querySelector('#oddsArchiveList');
+    const msg = document.querySelector('#oddsArchiveMsg');
+    if (box) box.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/odds/archive/list')).json(); }
+    catch (_) { if (box) box.innerHTML = '<p class="hint">불러오기 실패</p>'; return; }
+    const races = (d && d.races) || [];
+    if (msg) msg.textContent = `총 ${races.length}개 경주 보존됨`;
+    if (!races.length) { if (box) box.innerHTML = '<p class="hint">보관된 경주가 없습니다.</p>'; return; }
+    const rows = races.map((r) => {
+      const res = r.result ? ` · 결과 ${esc([r.result['1st'], r.result['2nd'], r.result['3rd']].filter((x) => x != null).join('-'))}` : '';
+      const comp = r.compressed ? ' 🗜' : '';
+      return `<div class="cfg-row" style="justify-content:space-between;padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.06)">
+        <span><b>${esc(r.raceKey || r.race || '')}</b>${comp} <span class="hint">${esc(r.date || '')} · ${r.count}스냅샷${res}</span></span>
+        <button class="btn btn-small" onclick="window._openOddsArchive('${encodeURIComponent(r.raceKey || '')}')">복기 보기</button>
+      </div>`;
+    }).join('');
+    if (box) box.innerHTML = rows;
+  }
+
+  async function openOddsArchive(rk) {
+    try { rk = decodeURIComponent(rk); } catch (_) { /* 이미 디코드됨 */ }
+    const box = document.querySelector('#oddsArchiveDetail');
+    if (box) box.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d; try { d = await (await fetch('/api/odds/archive/get?raceKey=' + encodeURIComponent(rk))).json(); }
+    catch (_) { if (box) box.innerHTML = '<p class="hint">불러오기 실패</p>'; return; }
+    if (!d || !d.ok) { if (box) box.innerHTML = '<p class="hint">' + esc((d && d.error) || '없음') + '</p>'; return; }
+    const snaps = d.snapshots || [];
+    // 배당이 존재하는 상위 조합을 열로(마지막 스냅샷 최저배당 6개 기준)
+    const last = [...snaps].reverse().find((s) => s.quinella && Object.keys(s.quinella).length) || {};
+    const cols = Object.entries(last.quinella || {}).sort((a, b) => a[1] - b[1]).slice(0, 6).map((e) => e[0]);
+    const head = ['시각', '마감', ...cols, '이상감지'];
+    const trows = snaps.map((s) => {
+      if (s.boundary) return `<tr><td colspan="${head.length}" style="color:#fbbf24;font-size:11px">— 세션 경계(${esc(s.reason || '')}) —</td></tr>`;
+      const mb = s.after_close ? '마감후' : (s.minutes_before != null ? s.minutes_before + '분' : '-');
+      const cells = cols.map((c) => `<td style="text-align:right">${(s.quinella && s.quinella[c] != null) ? s.quinella[c] : '-'}</td>`).join('');
+      const an = (s.anomalies || []).length ? `<td class="hint" style="font-size:11px">${esc((s.anomalies || []).slice(0, 2).join(' · '))}</td>` : '<td></td>';
+      return `<tr><td>${esc(s.time || '')}</td><td style="text-align:center">${esc(mb)}</td>${cells}${an}</tr>`;
+    }).join('');
+    const resTxt = d.result ? ` · 결과 ${esc([d.result['1st'], d.result['2nd'], d.result['3rd']].filter((x) => x != null).join('-'))}` : '';
+    if (box) box.innerHTML = `<div class="matrix-title" style="font-size:13px">📚 ${esc(d.raceKey || '')} <span class="hint" style="font-weight:400">${d.count}스냅샷${resTxt}</span></div>
+      <div style="overflow-x:auto"><table class="odds-table" style="font-size:12px"><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${trows}</tbody></table></div>`;
+  }
+  window._openOddsArchive = openOddsArchive;
+
+  async function compressOddsArchive() {
+    const msg = document.querySelector('#oddsArchiveMsg');
+    if (msg) msg.textContent = '압축 중…';
+    try {
+      const d = await (await fetch('/api/odds/archive/compress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ days: 7 }) })).json();
+      if (msg) msg.textContent = `7일+ ${(d && d.compressed) || 0}건 압축 보관 완료`;
+    } catch (_) { if (msg) msg.textContent = '압축 실패'; }
+    loadOddsArchiveList();
   }
 
   // ---------- 부트 ----------
@@ -7482,6 +8619,7 @@
     initResultAutoWatch(); // [스펙2·3] 결과 자동수집 실패 배너 + 성공 시 결과탭 자동갱신
     initClosingWatch();    // [보완] 이상감지 누적 피드 + 마감 전 단계 알림
     initRaceRefresh();     // [경주 자동 업데이트] 상단 새로고침 바 + 30초 자동 감지
+    initMultiRace();       // [다중 경주 동시 배당판] 전체 경주 탭 버튼 바인딩
     initPopout();          // [별도 창] 분석기 팝업 창 열기 + 위치 기억
     initAnalysisLog();     // [분석 로그] 완전 기록 섹션
     initJapanReview();     // [일본경마 복기] 분석 내역 목록 + 결과 입력 + 자동 판정 리포트

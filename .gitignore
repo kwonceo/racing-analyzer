@@ -18,6 +18,8 @@ data/signal_lessons.json
 data/high_odds_companion_stats.json
 data/thresholds_config.json
 data/signal_type_stats.json
+data/api_usage.json
+data/korea_pdf_cache/
 data/compression_stats.json
 data/third_place_stats.json
 data/odds_history/
@@ -29,3 +31,6 @@ data/failure_review.json
 # [데이터 보호] 물리 스냅샷 백업(로컬 안전망) — git reset 전 자동 생성, 원격 커밋 안 함
 backups/
 data/backup_log.txt
+data/race_pin.json
+data/multi_race_store.json
+data/today_schedule.json

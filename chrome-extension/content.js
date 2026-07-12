@@ -39,14 +39,67 @@
   const BABA_CODE = { 19: '船橋', 20: '大井', 24: '名古屋', 27: '園田', 31: '高知' };
   const TRACKS = /(帯広|門別|盛岡|水沢|浦和|船橋|大井|川崎|金沢|笠松|名古屋|園田|姫路|高知|佐賀)/;
 
+  // [raceKey 오검출 수정] 현재 '활성화된 경주 탭' 또는 두드러진 경주 헤더에서 경주번호를 읽는다.
+  //   증상: URL k_raceNo(또는 본문 첫 第N競走)가 stale/목록 첫 항목이라 실제 표시 경주(9R)를 4R로 오검출.
+  //   → 화면에 실제 표시 중인 경주 = 활성 탭(current/active/selected)·selected option·강조 헤더가 진실.
+  function _activeRaceNo() {
+    const _n = (t) => {
+      const m = String(t || '').replace(/[\s　]/g, '').match(/(?:第)?(\d{1,2})(?:競走|R|レース|경주)?/);
+      if (!m) return null;
+      const n = parseInt(m[1], 10);
+      return (n >= 1 && n <= 12) ? n : null;
+    };
+    // 1) 활성/선택된 경주 탭·링크(사이트별 클래스 후보 — 하나라도 걸리면 그 번호가 현재 경주)
+    const tabSels = [
+      'li.current a', 'li.active a', 'li.selected a', 'li.on a', 'a.current', 'a.active', 'a.selected',
+      '.current a', '.active a', '.selected a', '[aria-current] ', '[aria-current="true"]',
+      '[aria-selected="true"]', '.raceNavi .current', '.race-nav .current', '.raceNo.current',
+      '.nowRace', '.now-race', '.race-tab.active', '.tab.active', 'li[class*="current"] a',
+    ];
+    for (const sel of tabSels) {
+      try {
+        for (const el of document.querySelectorAll(sel)) {
+          const n = _n(el.textContent);
+          if (n) return n;
+        }
+      } catch (_) { /* 잘못된 선택자 무시 */ }
+    }
+    // 2) select(경주 드롭다운)의 선택된 option
+    try {
+      for (const sel of document.querySelectorAll('select')) {
+        const opt = sel.options && sel.options[sel.selectedIndex];
+        if (opt && /R|競走|レース|경주|race/i.test(opt.textContent + (sel.name || '') + (sel.id || ''))) {
+          const n = _n(opt.textContent);
+          if (n) return n;
+        }
+      }
+    } catch (_) { /* */ }
+    // 3) 두드러진 경주 헤더(h1~h3·타이틀 계열) — 목록 본문보다 우선
+    try {
+      for (const h of document.querySelectorAll('h1,h2,h3,.raceTitle,.race-title,.raceHead,.race_head,.raceNumber,.race_no')) {
+        const n = _n(h.textContent);
+        if (n && /第\s*\d|R|レース|競走/.test(h.textContent)) return n;
+      }
+    } catch (_) { /* */ }
+    return null;
+  }
+
   function extractRaceKey() {
     const q = new URLSearchParams(location.search);
     let date = '', track = '', raceNo = '';
 
     const rd = (q.get('k_raceDate') || '').match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/);
     if (rd) date = `${rd[1]}-${rd[2].padStart(2, '0')}-${rd[3].padStart(2, '0')}`;
+    // [오검출 수정·최우선] 활성 경주 탭/헤더의 번호 = 실제 표시 경주 → URL/본문보다 우선.
+    const activeNo = _activeRaceNo();
     const rn = q.get('k_raceNo');
-    if (rn) raceNo = `${parseInt(rn, 10)}R`;
+    if (activeNo) {
+      raceNo = `${activeNo}R`;
+      if (rn && parseInt(rn, 10) !== activeNo) {
+        console.log(`[raceKey 오검출 방지] 활성 경주 탭=${activeNo}R ≠ URL k_raceNo=${rn}R → 활성 탭(${activeNo}R) 채택`);
+      }
+    }
+    if (!raceNo && rn) raceNo = `${parseInt(rn, 10)}R`;   // 활성 탭 못 읽었을 때만 URL 파라미터
     const bc = parseInt(q.get('k_babaCode'), 10);
     if (BABA_CODE[bc]) track = BABA_CODE[bc];
 
@@ -94,6 +147,8 @@
   const POST_TIME_RES = [
     // 1) 명시 라벨 우선(발주시간/발주시각/発走/締切/발매마감) — 시계 거부
     /(?:발주\s*(?:시각|시간)|출발\s*시각|発走\s*(?:時刻|予定)?|締\s*切|締め切り|発売\s*締切)\s*[:：]?\s*(\d{1,2})\s*[:：]\s*(\d{2})(?![:：]?\d)/,
+    // 1-b) [경륜/경정 조기감지] 投票締切·発走時刻·締切時刻·レース発走 등 일본 공영경기 라벨 — 시계 거부
+    /(?:投票\s*締切|締切\s*時刻|発走\s*時刻|レース\s*発走|次\s*レース)\s*[:：]?\s*(\d{1,2})\s*[:：]\s*(\d{2})(?![:：]?\d)/,
     // 2) 폴백: 바레 "발주 HH:MM"(예정/예상 포함) — 시계 거부
     /(?:발주\s*(?:예정|예상)?)\s*[:：]?\s*(\d{1,2})\s*[:：]\s*(\d{2})(?![:：]?\d)/,
   ];
@@ -118,11 +173,18 @@
   function detectRemainingMs() {
     try {
       const txt = (document.body && document.body.innerText) || '';
-      let m = txt.match(/남은\s*시간[\s\S]{0,16}?(\d{1,2})\s*분\s*(\d{1,2})\s*초/);
-      if (!m) m = txt.match(/(\d{1,2})\s*분\s*(\d{1,2})\s*초/);   // 라벨 소실 폴백
+      // 라벨 인접(남은시간/残り/あと/締切まで) N분 M초 우선
+      let m = txt.match(/(?:남은\s*시간|残り\s*時間?|あと|締切\s*まで)[\s\S]{0,16}?(\d{1,2})\s*(?:분|分)\s*(\d{1,2})\s*(?:초|秒)/);
+      if (!m) m = txt.match(/(\d{1,2})\s*(?:분|分)\s*(\d{1,2})\s*(?:초|秒)/);   // 라벨 소실 폴백(한/일)
       if (m) {
         const ms = (parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) * 1000;
         if (ms > 0 && ms <= 99 * 60 * 1000) return ms;  // 0<~99분(임박 카운트다운)만
+      }
+      // [경륜/경정 조기감지] 초 없이 "あと N分"·"残り N分"·"締切まで N分"만 표기되는 배당판 대응
+      let mm = txt.match(/(?:残り|あと|締切\s*まで|남은\s*시간)[\s\S]{0,10}?(\d{1,2})\s*(?:분|分)(?!\s*\d)/);
+      if (mm) {
+        const ms2 = parseInt(mm[1], 10) * 60 * 1000;
+        if (ms2 > 0 && ms2 <= 99 * 60 * 1000) return ms2;
       }
     } catch (_) { /* noop */ }
     return null;
@@ -738,9 +800,9 @@
     return /(^|\.)keiba\.go\.jp$/.test(location.host) && !!sp.get('k_raceDate') && !!sp.get('k_raceNo');
   }
 
-  // [한국모드 강화] raceKey 에 KRA 경마장명(서울/부산/제주/과천, 부경/부산경남 변형 포함)이 있으면
+  // [한국모드 강화] raceKey 에 KRA 경마장명(서울/부산/제주/과천, 부경/부산경남 변형 + 렛츠런/마사회/KRA)이 있으면
   //   market 토글과 무관하게 무조건 한국경마로 판단 → 복승만 수집 · 쌍승/삼복승 탭 클릭 완전 차단.
-  const KRA_TRACK_RE = /(서울|부산경남|부경|부산|제주|과천)/;
+  const KRA_TRACK_RE = /(서울|부산경남|부경|부산|제주|과천|렛츠런|렛츠런파크|한국마사회|경마공원|KRA)/;
   function isKoreaByRaceKey(raceKey) {
     return !!(raceKey && KRA_TRACK_RE.test(String(raceKey)));
   }
@@ -754,9 +816,26 @@
       return /(경주|경마|복승|배당|발주|출주|마번)/.test(body);   // 경마장명 + 경마 맥락 동시 존재 시만
     } catch (_) { return false; }
   }
-  // [한국모드 최종 판정] 종목=한국(팝업) 이거나 raceKey/페이지에서 KRA 감지되면 true.
-  function isKoreaMode(raceKey, market) {
-    return market === 'korea' || isKoreaByRaceKey(raceKey) || pageLooksKorean();
+  // [한국모드 강화3·사용자요청 2번] 배당판 마권종류 탭(bet_type)에 '복승'은 있고 '쌍승/삼복승'이 전혀 없으면
+  //   → 한국경마로 확정(한국은 복승만 발매·일본은 쌍승/삼복승 탭 존재). raceKey에 경마장명이 없어도 감지.
+  function koreanByBetTabs() {
+    try {
+      const btns = Array.prototype.slice.call(
+        document.querySelectorAll('.bet_type_btn, span[bet_mode], [class*="bet_type"], .odds_menu a, .odds_menu span'));
+      if (!btns.length) return false;                       // 탭 UI 미로드 → 판단 보류(오탐 방지)
+      const txt = btns.map((e) => (e.textContent || '')).join(' ');
+      const hasBok = /복승|복연/.test(txt);
+      const hasJp = /쌍승|마단|쌍승식|삼복승|삼복|삼연복|馬単|三連複|３連複|3連複|三連/.test(txt);
+      return hasBok && !hasJp;                               // 복승 탭만 있고 쌍승/삼복승 탭 없음 → 한국경마
+    } catch (_) { return false; }
+  }
+  // [한국모드 최종 판정·사용자요청 1~4번] 종목=한국(팝업) OR raceKey(감지·수동입력 둘 다) KRA OR 페이지 KRA
+  //   OR 배당판 탭이 복승만(쌍승 없음). override=팝업에 직접 입력한 raceKey(자동수집이 배당판 raceKey를
+  //   우선해 '서울'이 누락돼도 사용자가 입력한 '서울 N경주'로 한국 확정 — 자동 감지 실패 근본 해결).
+  function isKoreaMode(raceKey, market, override) {
+    return market === 'korea'
+      || isKoreaByRaceKey(raceKey) || isKoreaByRaceKey(override)
+      || pageLooksKorean() || koreanByBetTabs();
   }
 
   // [1번] 일본 경마장(지방 NAR + 중앙 JRA) — 한글·한자 병기. raceKey/페이지에 이 이름이 있으면 '경마' 확정.
@@ -779,14 +858,37 @@
       if (strong(/(경정|競艇)/)) return 'boat';
       if (strong(/(오토레이스|オートレース|autorace|바이크경주)/)) return 'bike';
       if (strong(/(경륜|競輪)/)) return 'cycle';
-      // 본문 보조 판정 — 단, 경마장명이 본문에 있으면 경마(경정/경륜 페이지에 경마장 링크 있는 경우 오탐 방지)
+      // [배당판 탭 텍스트 확인] 본문 보조 판정 — 경마장명이 본문에 있으면 경마(경정/경륜 페이지에 경마장 링크 오탐 방지)
       const body = ((document.body && document.body.innerText) || '');
       if (HORSE_TRACKS.test(body)) return null;
-      if (/(競艇|경정장|모터보트|미사리)/.test(body)) return 'boat';
+      if (/(競艇|경정|경정장|모터보트|미사리|ボートレース|보트레이스)/.test(body)) return 'boat';
       if (/(オートレース|오토레이스|오토레이스장)/.test(body)) return 'bike';
-      if (/(競輪|경륜장|벨로드롬|광명돔)/.test(body)) return 'cycle';
+      if (/(競輪|경륜|경륜장|벨로드롬|광명돔|けいりん)/.test(body)) return 'cycle';
     } catch (_) { /* */ }
     return null;
+  }
+  // [종목 자동감지 강화] 팝업(수동) 선택 + 페이지 강한 신호를 종합해 '항상 정확한' sport를 결정.
+  //   우선순위: ①raceKey에 경마장명 → 무조건 경마(팝업이 경륜/경정이어도 정정) ②URL/제목의 명시 종목어(競輪/競艇/
+  //   오토) → 그 종목으로 정정(팝업 stale 방지) ③강한 신호 없으면 팝업 수동선택 존중 ④그것도 없으면 본문 보조감지.
+  //   → 사이트 전환 시 팝업에 남은 이전 종목 태그가 그대로 전송되던 문제(경마↔경륜) 차단.
+  function resolveSport(popupSport, raceKey) {
+    try {
+      const rk = raceKey || '';
+      // ① 경마장명 raceKey = 명백한 경마(가장 강한 신호) → 팝업 경륜/경정 정정
+      if (HORSE_TRACKS.test(rk)) return 'horse';
+      const href = location.href, title = (document.title || '');
+      const strong = (re) => re.test(href) || re.test(title);
+      // ② URL/제목의 명시적 종목어 = 강한 신호 → 팝업 stale 정정
+      if (strong(/(경정|競艇)/)) return 'boat';
+      if (strong(/(오토레이스|オートレース|autorace)/)) return 'bike';
+      if (strong(/(경륜|競輪)/)) return 'cycle';
+      // ③ 강한 신호 없음 → 팝업 수동선택(경마 아님) 존중
+      if (popupSport && popupSport !== 'horse') return popupSport;
+      // ④ 팝업이 경마/미설정 → 본문 보조 감지값(없으면 경마)
+      return detectSport(rk) || 'horse';
+    } catch (_) {
+      return (popupSport && popupSport !== 'horse') ? popupSport : (detectSport(raceKey) || 'horse');
+    }
   }
   // [탭분리] 일본 중앙경마(JRA) 힌트 — 페이지 본문/URL 로 중앙 여부 추정(팝업 japanType 이 우선).
   function detectCentralHint() {
@@ -818,7 +920,7 @@
     let detected = '';
     try { detected = extractRaceKey() || ''; } catch (_) { detected = ''; }
     const ov = (override && override.trim()) || '';
-    const followBoard = (reason === 'auto' || reason === 'race-change' || reason === 'bg');
+    const followBoard = (reason === 'auto' || reason === 'race-change' || reason === 'bg' || reason === 'sport-change');
     return followBoard ? (detected || ov) : (ov || detected);
   }
 
@@ -832,8 +934,8 @@
       .filter((k) => sp.get(k)).map((k) => `${k}=${encodeURIComponent(sp.get(k))}`).join('&');
     const { raceKey: override, market, japanType } = await getSettings();
     const raceKey = _resolveRaceKey(reason, override);   // [경주 자동추종] 자동수집은 배당판 표시 경주 우선
-    // [2번][한국모드 강화] 종목=한국 이거나 raceKey/페이지에서 KRA(서울/부산/제주/과천) 감지 시 → 복승만(쌍승·삼복승 완전 제외).
-    const isKorea = isKoreaMode(raceKey, market);
+    // [2번][한국모드 강화] 종목=한국 이거나 raceKey(감지·수동입력)/페이지/탭에서 KRA 감지 시 → 복승만(쌍승·삼복승 완전 제외).
+    const isKorea = isKoreaMode(raceKey, market, override);
     if (isKorea && market !== 'korea') console.log('[한국모드] KRA 경마장 감지(raceKey/페이지) → 복승만 수집:', raceKey || '(raceKey 미상)');
     // [탭분리] keiba 는 경마 전용 → 한국/중앙/지방 카테고리 산출(팝업 japanType 우선).
     const kCategory = isKorea ? 'korea' : ((japanType === 'central' || detectCentralHint()) ? 'japan_central' : 'japan_local');
@@ -852,7 +954,7 @@
       : isCentralK
         ? TRIPLE_STEPS.filter((s) => s.key !== 'trio')   // 중앙: 복승+쌍승(삼복승 제외)
         : TRIPLE_STEPS;   // 지방: 복승+쌍승+삼복승 3종
-    if (isKorea) console.log('[한국모드] 복승만 수집 - 쌍승/삼복승 생략');
+    if (isKorea) console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원)');
     else if (isCentralK) console.log('[중앙경마] 복승+쌍승만 수집(삼복승·단승·전적 제외·배당 전용)');
     else console.log('[삼복승 복구] 일본 지방경마 복승+쌍승+삼복승 3종 수집');
     try {
@@ -1492,15 +1594,16 @@
     const oddsClass = site === 'asyukk' ? 'odds_content' : null;
     const { raceKey: override, timerDeadline, sport, market, japanType } = await getSettings();
     const raceKey = _resolveRaceKey(reason, override);   // [경주 자동추종] 자동수집은 배당판 표시 경주 우선
-    // [수정#3/탭분리] 종목 결정: 팝업 선택(수동)이 우선, '경마'인데 페이지가 경륜/경정/바이크면 자동 감지값 사용.
-    const effSport = (sport && sport !== 'horse') ? sport : (detectSport(raceKey) || 'horse');
+    // [종목 자동감지 강화] resolveSport: 강한 신호(경마장명 raceKey·URL/제목 종목어)로 팝업 stale 정정 → 항상 정확 전송.
+    const effSport = resolveSport(sport, raceKey);
+    _lastSentSport = effSport;                                   // URL/종목 변경 감지용 최신값 보관
     const isCycleBoat = (effSport === 'cycle' || effSport === 'boat' || effSport === 'bike');   // 6명 종목: 복승+쌍승만·전적 없음
-    if (isCycleBoat) console.log(`[${SPORT_LABEL[effSport]}] 종목=${SPORT_LABEL[effSport]} → 복승+쌍승만 수집(삼복승·전적 생략, 6명)`, (sport === 'horse' ? '(자동 감지)' : '(수동 선택)'));
+    if (isCycleBoat) console.log(`[${SPORT_LABEL[effSport]}] 종목=${SPORT_LABEL[effSport]} → 복승+쌍승만 수집(삼복승·전적 생략, 6명)`, (sport === 'horse' ? '(자동 감지)' : '(수동/정정)'));
     // [5번][한국모드 강화] 종목=한국 이거나 raceKey/페이지에서 KRA(서울/부산/제주/과천) 감지 시 → 무조건 복승만.
     //   한국경마: 출마표2(keiba DebaTable) 수집 생략(전적은 PDF에서) + 쌍승·삼복승 탭 클릭 완전 차단.
     //   [수정#3] 경륜/경정/바이크는 한국경마 판정을 하지 않는다(경마장명 오탐 방지).
-    const isKorea = !isCycleBoat && isKoreaMode(raceKey, market);
-    if (isKorea) console.log('[한국모드] 복승만 수집 - 쌍승/삼복승 생략', market !== 'korea' ? '(감지: raceKey/페이지, raceKey=' + (raceKey || '미상') + ')' : '(종목=한국)');
+    const isKorea = !isCycleBoat && isKoreaMode(raceKey, market, override);
+    if (isKorea) console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원)', market !== 'korea' ? '(감지: raceKey/입력/탭, raceKey=' + (raceKey || '미상') + ' · 입력=' + (override || '없음') + ')' : '(종목=한국)');
     // [탭분리] 중앙경마(JRA): 팝업 japanType='central' 이거나 페이지가 중앙으로 보이면 → 복승+쌍승만(삼복승·전적 제외).
     const isCentral = !isKorea && !isCycleBoat && (japanType === 'central' || detectCentralHint());
     // [탭분리] 종목 카테고리 산출 + 팝업 실시간 표시용 storage 기록.
@@ -1546,7 +1649,7 @@
       // 2) 쌍승 — [일본 전용]. 한국경마는 쌍승을 수집하지 않는다(복승만).
       let exacta = [];
       if (isKorea) {
-        console.log('[한국모드] 쌍승 수집 생략');
+        console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원) → 쌍승 탭 클릭 차단');
         console.log('[쌍승수집] 한국경마 모드 → 쌍승 수집 생략(복승만).');
       } else {
         //  [디버그 강화] 쌍승 탭이 실제로 전환·로드됐는지, 조합이 뽑혔는지 상세 로그.
@@ -1615,7 +1718,7 @@
       //    삼복승은 불안정할 수 있어 독립 try/catch로 격리(실패해도 복승·쌍승은 유지).
       let trio = [];
       if (isKorea) {
-        console.log('[한국모드] 삼복승 수집 생략(복승만)');
+        console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원) → 삼복승 탭 클릭 차단');
       } else if (isCentral) {
         console.log('[중앙경마] 삼복승 수집 생략(복승+쌍승만·배당 전용)');
       } else if (effSport === 'boat') {
@@ -2002,12 +2105,32 @@
   // [1번] 경주 자동 읽기: 30초마다 배당판에서 현재 경주를 감지 → raceKey 자동 업데이트 + 서버 전송.
   //   배당판에서 '이전/다음'으로 경주를 바꾸면(예: 제주 3경주 → 제주 4경주) 자동으로 따라간다.
   let _raceWatchTimer = null, _lastWatchedRace = '';
+  // [종목 자동감지 강화] URL 변경·종목 변경 감지용. sport 태그가 사이트 전환 시 누락/이월되지 않게 재수집 유도.
+  let _lastSportHref = location.href, _lastSentSport = '';
+  // [다음경주 자동전환·마감 감지] 카운트다운(남은시간)이 있었다가 사라지면(=경주 마감)
+  //   background 에 RACE_FINISHED 를 통지 → 발주시각 없이도 다음경주 전환 체인 가동.
+  let _hadCountdown = false, _finishNotifiedRk = '';
+  function _finishWatchdog() {
+    let rk = '';
+    try { rk = extractRaceKey(); } catch (_) { return; }
+    let rem = null;
+    try { rem = detectRemainingMs(); } catch (_) { rem = null; }
+    if (rem != null && rem > 5000) { _hadCountdown = true; return; }  // 아직 진행중(카운트다운 살아있음)
+    // 카운트다운이 있었다가 소멸/≤5초 → 이 경주 마감으로 판단(경주당 1회 통지).
+    if (_hadCountdown && rk && _finishNotifiedRk !== rk) {
+      _finishNotifiedRk = rk;
+      _hadCountdown = false;
+      try { chrome.runtime.sendMessage({ type: 'RACE_FINISHED', raceKey: rk }, () => void chrome.runtime.lastError); } catch (_) { /* */ }
+      console.log(`[경주마감] 카운트다운 소멸 → 다음경주 전환 통지: "${rk}"`);
+    }
+  }
   async function watchRaceChange() {
     let rk = '';
     try { rk = extractRaceKey(); } catch (_) { return; }
     if (!rk) return;                                   // 감지 실패 → 기존(수동) raceKey 유지
     if (rk === _lastWatchedRace) return;               // 이번 페이지에서 변경 없음
     _lastWatchedRace = rk;
+    _hadCountdown = false; _finishNotifiedRk = '';      // 새 경주 → 마감 감지 상태 초기화
     const { raceKey: cur } = await getSettings();
     if (rk === (cur || '').trim()) return;             // 저장된 raceKey 와 이미 동일
     await new Promise((r) => chrome.storage.local.set({ raceKey: rk }, r));
@@ -2022,14 +2145,77 @@
       collectTriple('race-change').catch(() => { _lastWatchedRace = ''; });
     }
   }
+  // [종목 자동감지 강화] URL 변경 또는 페이지 종목이 바뀌면 sport를 재감지하고, 직전 전송 종목과 다르면
+  //   즉시 재수집을 유도 → 새 sport 태그가 서버에 전달되어 서버의 종목 전환 초기화(배당·전적)가 작동.
+  //   (경마 배당판 → 경륜 배당판 전환처럼 사이트가 바뀔 때 이전 종목 태그가 이월되던 문제 차단.)
+  async function watchSportChange() {
+    try {
+      const hrefChanged = (location.href !== _lastSportHref);
+      let rk = '';
+      try { rk = extractRaceKey(); } catch (_) { /* */ }
+      const { sport: popupSport } = await getSettings();
+      const eff = resolveSport(popupSport, rk);
+      // 최초 1회(_lastSentSport 비어있음)는 기준값만 세팅(불필요한 재수집 방지)
+      if (!_lastSentSport) { _lastSentSport = eff; _lastSportHref = location.href; return; }
+      const sportChanged = (eff !== _lastSentSport);
+      if (!hrefChanged && !sportChanged) return;
+      _lastSportHref = location.href;
+      if (sportChanged) {
+        console.log(`[종목 자동감지] 종목 변경 감지: ${SPORT_LABEL[_lastSentSport] || _lastSentSport} → ${SPORT_LABEL[eff] || eff} (URL변경=${hrefChanged}) → 재수집`);
+        _lastSentSport = eff;
+        _lastWatchedRace = '';                          // 경주감지 상태도 리셋 → 다음 tick 확실히 새 수집
+        if (!_autoRunning) {
+          collectTriple('sport-change').catch(() => { /* */ });
+        }
+      }
+    } catch (_) { /* */ }
+  }
   function startRaceWatch() {
     if (_raceWatchTimer) clearInterval(_raceWatchTimer);
     setTimeout(watchRaceChange, 1500);                 // 로드 직후 1회
-    _raceWatchTimer = setInterval(watchRaceChange, 15000);   // 15초마다 경주 변경 감지(자동추종 반응성)
+    setTimeout(watchSportChange, 1800);                // [종목감지] 로드 직후 1회(기준값 세팅)
+    _raceWatchTimer = setInterval(() => {              // 10초마다 경주 변경 감지 + 마감 감지(자동추종 반응성)
+      watchRaceChange();
+      watchSportChange();                              // [종목 자동감지 강화] URL·종목 전환 감지 → 재수집
+      _finishWatchdog();                               // [다음경주 자동전환] 카운트다운 소멸 = 마감 통지
+    }, 10000);
   }
 
   restartLoop();
   startRaceWatch();   // [1번] 경주 자동 감지 시작
+
+  // [경륜 배당판 자동 수집 트리거] 경륜 배당판(asyukk34 등)에서 자동전송(autoSend) ON이면 수동 버튼 없이 즉시 수집.
+  //   발동: ①배당판 로드 ②경륜 탭 클릭(SPA 전환·클릭 디바운스) ③탭 포커스 복귀 — 모두 종목=경륜일 때만.
+  //   경마·경정 등 다른 종목·autoSend OFF는 기존 동작 유지. 4초 쿨다운·재진입 가드로 과호출 방지(기존 수집 무영향).
+  let _lastKeirinKick = 0;
+  async function _maybeKeirinKickstart(reason) {
+    try {
+      const now = Date.now();
+      if (now - _lastKeirinKick < 4000) return;       // 쿨다운(과호출 방지)
+      const { autoSend, sport } = await getSettings();
+      if (!autoSend) return;                          // 자동전송 OFF면 존중(수동)
+      let rk = '';
+      try { rk = extractRaceKey(); } catch (_) { /* */ }
+      // [4번] 경륜·경정·바이크(사설 asyukk 배당판) 전부 즉시 수집 — 배당판 열리는 즉시 조기 수집 시작(T-10분+ 흐름 포착).
+      var _sp = resolveSport(sport, rk);
+      if (_sp !== 'cycle' && _sp !== 'boat' && _sp !== 'bike') return;
+      if (_autoRunning) return;                       // 이미 수집 중이면 스킵
+      _lastKeirinKick = now;
+      console.log('[' + _sp + ' 자동수집] ' + reason + ' + 자동전송 ON → 배당판 열리는 즉시 수집(수동 버튼 불필요)');
+      _autoRunning = true;
+      try { await collectTriple('auto'); } catch (e) { console.warn('[경륜 자동수집] 오류', e); }
+      finally { _autoRunning = false; }
+    } catch (_) { /* */ }
+  }
+  setTimeout(() => _maybeKeirinKickstart('배당판 로드'), 1300);   // 로드 직후(종목 감지 안정화 대기)
+  // [탭 클릭 즉시 트리거] asyukk 경륜·경정·바이크 탭 클릭 등 SPA 전환 시 디바운스 후 재확인(리로드 없이 종목 바뀌는 경우 대응)
+  let _keirinClickTimer = null;
+  document.addEventListener('click', () => {
+    if (_keirinClickTimer) clearTimeout(_keirinClickTimer);
+    _keirinClickTimer = setTimeout(() => _maybeKeirinKickstart('탭 클릭'), 700);
+  }, true);
+  // [탭 포커스 복귀] 다른 탭 갔다 사설 배당판(경륜·경정·바이크)으로 돌아오면 재확인
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) _maybeKeirinKickstart('탭 포커스'); });
 
   // [2번] 결과 페이지면 로드 직후 1회 자동 전송 (URL result/성적표 감지)
   if (isResultPage()) {

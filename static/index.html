@@ -35,6 +35,7 @@
     <button class="tab-btn" data-tab="japan">🎰 배당판 캡처</button>
     <button class="tab-btn" data-tab="combined">🎯 통합분석</button>
     -->
+    <button class="tab-btn" data-tab="multi">🏁 전체 경주</button>
     <button class="tab-btn" data-tab="result">📝 결과기록</button>
     <button class="tab-btn" data-tab="jockeydb">🏇 기수DB</button>
     <button class="tab-btn" data-tab="stats">📊 통계</button>
@@ -46,6 +47,7 @@
     <span class="hint" style="margin:0;color:#94a3b8">현재 배당판 경주</span>
     <b id="rrCurrentRace" style="color:#38d39f;font-size:14px">— (수집 대기)</b>
     <button id="rrRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px" title="확장이 수집한 현재 경주를 즉시 불러와 화면을 갱신합니다">🔄 경주 새로고침</button>
+    <button id="rrPinBtn" class="btn" style="padding:5px 12px;font-size:13px" title="현재 보고 있는 경주를 고정해 자동 전환을 중단합니다. 고정 중에는 다른 경마장·경주가 수집돼도 화면이 바뀌지 않습니다(새로고침·다음 경주로만 전환).">📌 현재 경주 고정</button>
     <button id="rrNewRaceBtn" class="btn" style="padding:5px 12px;font-size:13px;background:#7c3aed" title="활성 배당을 모두 초기화하고 새 경주를 시작합니다(히스토리·학습 보존)">🆕 새 경주 시작</button>
     <span id="rrStatus" class="hint" style="margin:0"></span>
     <span style="flex:1"></span>
@@ -202,6 +204,40 @@
       <div id="jpReport" class="report-area"></div>
       <div id="jpOddsStatus" style="margin:10px 0"></div>
 
+      <!-- [지방경마 출주표 전적] oddspark 出走表 + 전5경주(각질·거리변화·상3F) 서버 직접 수집 -->
+      <div class="panel-card" style="margin-top:12px">
+        <h3>🏇 지방경마 전적 분석 <span class="hint" style="font-weight:400">oddspark 출주표·전5경주(각질·거리변화·상3F) 자동 수집</span></h3>
+        <p class="hint">경마장·개최일·경주번호(또는 raceKey)를 넣으면 oddspark 출주표와 각 말의 <b>전5경주</b>를 가져와 <b>착순·통과순위(각질)·거리변화·상3F(막판스피드)</b>로 전적 점수를 계산합니다. raceKey 연동 시 <b>유력마·통합등급</b>(전적+배당역배열)에 자동 반영됩니다. (keiba.go.jp 대신 oddspark 메인 전적 소스)</p>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
+          <label class="hint">경마장 <input id="narVenue" class="cfg-input" type="text" placeholder="예: 소노다 / 園田" style="width:120px"></label>
+          <label class="hint">개최일 <input id="narYmd" class="cfg-input" type="text" placeholder="YYYYMMDD(기본 오늘)" style="width:130px"></label>
+          <label class="hint">경주 <input id="narRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
+          <button id="narFetchBtn" class="btn btn-primary">🏇 전적 분석</button>
+        </div>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
+          <label class="hint" style="flex:1">live 연동 raceKey <input id="narRaceKey" class="cfg-input" type="text" placeholder="예: 소노다 5경주 (비우면 현재 경주 자동)" style="width:100%;max-width:360px"></label>
+          <span class="hint" style="font-size:11px">← 입력 시 전적이 통합등급(전적+배당)에 반영</span>
+        </div>
+        <div id="narCardResult"></div>
+      </div>
+
+      <!-- [중앙경마(JRA) 출주표 전적] netkeiba 馬柱 서버 직접 수집(각질·거리변화·상3F) -->
+      <div class="panel-card" style="margin-top:12px">
+        <h3>🏇 중앙경마(JRA) 전적 분석 <span class="hint" style="font-weight:400">netkeiba 馬柱·전5주(각질·거리변화·상3F) 자동 수집</span></h3>
+        <p class="hint">중앙경마(도쿄·나카야마·한신·교토·주쿄·니가타·후쿠시마·고쿠라·삿포로·하코다테)는 배당 전용이었으나, 경마장·개최일·경주번호(또는 raceKey)를 넣으면 netkeiba <b>馬柱(출주표+과거5주)</b>를 서버가 직접 가져와 <b>착순·통과순위(각질)·거리변화·상3F(막판스피드)</b>로 전적 점수를 계산합니다. netkeiba 각질 표기(逃/先/差/追)를 우선 사용합니다. raceKey 연동 시 <b>유력마·통합등급</b>(전적+배당역배열)에 자동 반영됩니다. (기존 배당 이상감지는 그대로 유지)</p>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
+          <label class="hint">경마장 <input id="jraVenue" class="cfg-input" type="text" placeholder="예: 도쿄 / 東京" style="width:120px"></label>
+          <label class="hint">개최일 <input id="jraYmd" class="cfg-input" type="text" placeholder="YYYYMMDD(기본 오늘)" style="width:130px"></label>
+          <label class="hint">경주 <input id="jraRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
+          <button id="jraFetchBtn" class="btn btn-primary">🏇 전적 분석</button>
+        </div>
+        <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
+          <label class="hint" style="flex:1">live 연동 raceKey <input id="jraRaceKey" class="cfg-input" type="text" placeholder="예: 도쿄 11경주 (비우면 현재 경주 자동)" style="width:100%;max-width:360px"></label>
+          <span class="hint" style="font-size:11px">← 입력 시 전적이 통합등급(전적+배당)에 반영</span>
+        </div>
+        <div id="jraCardResult"></div>
+      </div>
+
       <!-- [일본경마 복기] 분석했던 경주 목록 → 클릭 → 유력마/제거마·이상감지·추천조합·결과입력·복기 -->
       <div class="panel-card" id="jpReviewCard" style="margin-top:12px">
         <h2>📒 일본경마 분석 내역 · 결과 복기</h2>
@@ -213,6 +249,18 @@
         </div>
         <div id="jpReviewList"><p class="hint">불러오는 중…</p></div>
         <div id="jpReviewDetail" style="margin-top:10px"></div>
+      </div>
+      <!-- [영구보존·3번] 저장된 모든 경주 배당 아카이브 복기(탭 전환·마감 후에도 유지) -->
+      <div class="panel-card" style="margin-top:12px">
+        <h2>📚 배당 히스토리 보관함 <span class="hint" style="font-weight:400">모든 경주 배당 영구 보존 · 복기</span></h2>
+        <p class="hint">수집된 모든 경주의 배당 타임라인이 raceKey별로 영구 저장됩니다(탭 전환·마감·경주 전환에도 삭제 안 함). 7일+ 지난 데이터는 자동 압축 보관됩니다. 경주를 누르면 전체 배당 변화를 복기할 수 있습니다.</p>
+        <div class="cfg-row" style="margin:4px 0 8px">
+          <button id="oddsArchiveRefresh" class="btn btn-primary btn-small">🔄 보관함 새로고침</button>
+          <button id="oddsArchiveCompress" class="btn btn-small">🗜 7일+ 압축 정리</button>
+          <span id="oddsArchiveMsg" class="hint" style="margin-left:8px"></span>
+        </div>
+        <div id="oddsArchiveList"><p class="hint">🔄 새로고침을 눌러 보관된 경주를 불러오세요.</p></div>
+        <div id="oddsArchiveDetail" style="margin-top:10px"></div>
       </div>
     </section>
 
@@ -310,6 +358,30 @@
       </div>
     </section>
 
+    <!-- [다중 경주 동시 배당판] 별도 추가 기능(기존 단일 경주 분석 무영향) -->
+    <section id="tab-multi" class="tab-panel">
+      <div class="panel-card">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h2 style="margin:0">🏁 전체 경주 <span class="hint" style="font-weight:400;font-size:13px">오늘 개최 경주 동시 모니터링 · 발주 10분전부터 자동 수집</span></h2>
+          <span style="flex:1"></span>
+          <button id="multiRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px">🔄 새로고침</button>
+          <button id="multiScheduleBtn" class="btn" style="padding:5px 12px;font-size:13px" title="오늘 개최 스케줄을 다시 수집합니다">📅 스케줄 갱신</button>
+        </div>
+        <div id="multiUrgentBanner" style="display:none;margin-top:8px"></div>
+        <div id="multiSportToggles" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
+        <div id="multiStatus" class="hint" style="margin-top:6px"></div>
+        <div id="multiCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:10px"></div>
+      </div>
+      <div class="panel-card" id="multiDetailCard" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px">
+          <h3 id="multiDetailTitle" style="margin:0">경주 상세</h3>
+          <span style="flex:1"></span>
+          <button id="multiDetailClose" class="btn" style="padding:4px 10px;font-size:12px">✕ 닫기</button>
+        </div>
+        <div id="multiDetailBody" style="margin-top:8px"></div>
+      </div>
+    </section>
+
     <!-- 결과입력 -->
     <section id="tab-result" class="tab-panel">
       <!-- [결과기록 전면정리] 1. 최상단: 최근 결과 요약 카드 -->
@@ -367,7 +439,8 @@
               <button id="bulkResultLoad" class="btn btn-primary">불러와 등록</button>
             </div>
             <p class="hint" style="margin:6px 0 2px">URL은 <b>Chrome 확장(로그인 세션)</b>을 경유해 가져옵니다(확장 설치 + 배당판 로그인 필요). 실패하면 결과 페이지에서 <b>전체 선택(Ctrl+A)→복사→아래에 붙여넣기</b> 후 [붙여넣기 등록].</p>
-            <textarea id="bulkResultHtml" class="cfg-input" style="width:100%;height:110px;font-family:monospace;font-size:12px" placeholder="결과 페이지 HTML 또는 표 전체를 여기에 붙여넣기"></textarea>
+            <p class="hint" style="margin:6px 0 2px">📋 <b>엑셀/스프레드시트 표를 그대로 복사</b>해 붙여넣어도 됩니다(탭 구분 텍스트). 첫 줄이 헤더(구분/경주지역/라운드/1착/2착/3착/단승/복승/…/삼복승)면 자동 인식 → 경마장+경주번호로 분석 로그와 매칭.</p>
+            <textarea id="bulkResultHtml" class="cfg-input" style="width:100%;height:110px;font-family:monospace;font-size:12px" placeholder="결과 페이지 HTML, 또는 엑셀 표(탭 구분) 전체를 붙여넣기&#10;예) 구분⇥경주지역⇥라운드⇥1착⇥2착⇥3착⇥단승⇥복승⇥…⇥삼복승"></textarea>
             <div class="cfg-row" style="margin-top:6px">
               <button id="bulkResultParse" class="btn btn-primary">붙여넣기 등록</button>
             </div>

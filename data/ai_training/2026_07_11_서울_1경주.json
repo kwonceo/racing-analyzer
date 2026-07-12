@@ -1,0 +1,242 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_11_서울_1경주",
+ "race_info": {
+  "date": "2026-07-11",
+  "track": "서울",
+  "round": 1,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 5,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 3,
+   "name": "색달최고",
+   "jockey": "나종용",
+   "jockey_winrate": null,
+   "recent_results": [
+    2
+   ],
+   "record_score": 85,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "천년여왕",
+   "jockey": "한성택",
+   "jockey_winrate": null,
+   "recent_results": [
+    2
+   ],
+   "record_score": 85,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "거승파워",
+   "jockey": "강원돈",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    2,
+    6
+   ],
+   "record_score": 36.1,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "원더풀대",
+   "jockey": "김영구",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "한가누리",
+   "jockey": "김귀리",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "10:39:00",
+    "quinella": {
+     "6+7": 1.9,
+     "6+9": 6.4,
+     "7+9": 7.4,
+     "6+8": 16.2,
+     "3+6": 17.9,
+     "7+8": 18.0,
+     "3+7": 21.1,
+     "5+6": 28.5,
+     "5+7": 30.5,
+     "8+9": 30.5,
+     "3+9": 40.2,
+     "2+6": 49.1,
+     "3+8": 56.7,
+     "2+7": 58.6,
+     "5+9": 67.4,
+     "4+6": 72.5,
+     "4+7": 79.9,
+     "1+6": 80.4,
+     "2+9": 86.0,
+     "5+8": 86.8,
+     "3+5": 89.6,
+     "1+7": 91.2,
+     "1+2": 100.0,
+     "1+3": 100.0,
+     "1+4": 100.0,
+     "1+5": 100.0,
+     "1+8": 100.0,
+     "1+9": 100.0,
+     "2+3": 100.0,
+     "2+4": 100.0,
+     "2+5": 100.0,
+     "2+8": 100.0,
+     "3+4": 100.0,
+     "4+5": 100.0,
+     "4+8": 100.0,
+     "4+9": 100.0
+    }
+   },
+   {
+    "time": "10:39:00",
+    "quinella": {
+     "6+7": 1.9,
+     "6+9": 6.4,
+     "7+9": 7.4,
+     "6+8": 16.2,
+     "3+6": 17.9,
+     "7+8": 18.0,
+     "3+7": 21.1,
+     "5+6": 28.5,
+     "5+7": 30.5,
+     "8+9": 30.5,
+     "3+9": 40.2,
+     "2+6": 49.1,
+     "3+8": 56.7,
+     "2+7": 58.6,
+     "5+9": 67.4,
+     "4+6": 72.5,
+     "4+7": 79.9,
+     "1+6": 80.4,
+     "2+9": 86.0,
+     "5+8": 86.8,
+     "3+5": 89.6,
+     "1+7": 91.2,
+     "1+2": 100.0,
+     "1+3": 100.0,
+     "1+4": 100.0,
+     "1+5": 100.0,
+     "1+8": 100.0,
+     "1+9": 100.0,
+     "2+3": 100.0,
+     "2+4": 100.0,
+     "2+5": 100.0,
+     "2+8": 100.0,
+     "3+4": 100.0,
+     "4+5": 100.0,
+     "4+8": 100.0,
+     "4+9": 100.0
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.686,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   1
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 6,
+  "2nd": 7,
+  "3rd": 9,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 6,
+  "second": 7,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-11 21:32:57",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

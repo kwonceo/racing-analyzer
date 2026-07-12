@@ -49,7 +49,7 @@
   function oddsUndo(raceKey) { return post('/api/odds/undo', { raceKey }); }
 
   // ----- 전적 분석 엔진 (Phase 3) -----
-  function scoreHorses(race, horses) { return post('/api/score', { race, horses }); }
+  function scoreHorses(race, horses, jockeyStats) { return post('/api/score', { race, horses, jockeyStats }); }
 
   // ----- 통합 분석 엔진 (Phase 4) -----
   function analyzeCombined(payload) { return post('/api/analyze/combined', payload); }

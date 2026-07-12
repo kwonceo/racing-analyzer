@@ -1,0 +1,142 @@
+{
+ "race_id": "2026_07_12_코치_5경주",
+ "raceKey": "코치 5경주",
+ "sport": "horse",
+ "category": "japan_local",
+ "date": "2026-07-12",
+ "race": "코치 5경주",
+ "analyzed_at": "21:24:49",
+ "updated_at": "21:24:49",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "asyukk34 Chrome확장 자동수집"
+ },
+ "odds_timeline": [
+  {
+   "time": "18:10:46",
+   "minutes_before": 4,
+   "quinella": {
+    "1+3": 1.5,
+    "3+6": 9.4,
+    "2+3": 11.0,
+    "3+9": 11.3,
+    "3+8": 12.4,
+    "1+6": 20.5,
+    "1+2": 28.8,
+    "1+8": 29.6,
+    "1+9": 30.3,
+    "3+7": 45.8,
+    "3+5": 47.5,
+    "2+6": 65.4,
+    "6+9": 67.7,
+    "8+9": 75.3,
+    "6+8": 80.5,
+    "2+9": 85.8,
+    "2+8": 87.8,
+    "1+7": 107.4,
+    "1+5": 152.7,
+    "5+6": 231.8,
+    "2+7": 251.7,
+    "6+7": 259.1,
+    "7+8": 264.3,
+    "2+5": 278.2,
+    "5+9": 287.3,
+    "5+8": 293.6,
+    "7+9": 362.0,
+    "5+7": 463.7
+   }
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [],
+ "elimination": {
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": null,
+   "trio": null
+  },
+  "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": null,
+   "trio": null
+  }
+ },
+ "corePicks": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 5,
+  "2nd": 3,
+  "3rd": 1
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   3,
+   1
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 1번 적중"
+  }
+ },
+ "profit": null,
+ "review": null
+}

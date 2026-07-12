@@ -1,0 +1,65 @@
+{
+ "race_id": "2026_07_11_고쿠라_5경주",
+ "raceKey": "고쿠라 5경주",
+ "date": "2026-07-11",
+ "track": "고쿠라",
+ "round": 5,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 10,
+ "result": {
+  "1st": 1,
+  "2nd": 5,
+  "3rd": 9
+ },
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   3,
+   7,
+   9,
+   10,
+   2,
+   4,
+   8
+  ],
+  "eliminated": [
+   5,
+   6
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 0
+ },
+ "memo": null,
+ "saved_at": "2026-07-11 21:29:27",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

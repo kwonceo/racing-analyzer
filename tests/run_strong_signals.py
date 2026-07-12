@@ -119,17 +119,22 @@ ok(rates.get(2, {}).get("fired") == 2 and rates[2]["rate"] == 50, "유형2 2회 
 ok(7 not in rates, "유형7(신호말 없음) 판정불가 → 집계 제외")
 
 print("[12] 저배당 압축 패턴(축 패턴) 감지 + 구간 기준")
-cp = app._compression_pattern([3, 9, 2], {3: 3.2, 9: 3.8, 2: 6.0}, {}, {"types": [3, 5]})
-ok(cp["detected"] and cp["level"] == "강력", "4배↓ 2두(3.2·3.8) → 강력 압축")
-ok(cp["combo"] == [3, 9], "복승 메인 = 저배당 2두(3+9)")
+# [개선] 명확한 축(최저배당이 2순위보다 30%+ 낮음)일 때만 압축 추천 · 경마만 적용
+cp = app._compression_pattern([3, 9, 2], {3: 2.5, 9: 3.8, 2: 6.0}, {}, {"types": [3, 5]}, "horse")
+ok(cp["detected"] and cp["level"] == "강력", "4배↓ 2두 + 축 명확(2.5 vs 3.8·34%) → 강력 압축")
+ok(cp["combo"] == [3, 9] and cp["axis"] == 3, "축=3번(최저)·복승 메인 = 저배당 2두(3+9)")
 ok(cp["withDrop"] and "급락" in (cp["note"] or ""), "급락 신호 결합 → 최강 note")
-cp2 = app._compression_pattern([1, 2, 3], {1: 4.5, 2: 4.8, 3: 4.9}, {}, {"types": [2]})
-ok(cp2["level"] == "중간", "5배↓ 3두 → 중간 압축")
+cp2 = app._compression_pattern([1, 2, 3], {1: 3.2, 2: 4.8, 3: 4.9}, {}, {"types": [2]}, "horse")
+ok(cp2["level"] == "중간" and cp2["axis"] == 1, "5배↓ 3두 + 축 명확(3.2 vs 4.8) → 중간 압축·축 1번")
 ok(cp2["withReversal"] and "역배열" in (cp2["note"] or ""), "역배열 결합 → 삼복승 보험 note")
-cp3 = app._compression_pattern([1, 2, 3], {1: 3.0, 2: 8.0, 3: 12.0}, {}, {})
+cp3 = app._compression_pattern([1, 2, 3], {1: 3.0, 2: 8.0, 3: 12.0}, {}, {}, "horse")
 ok(not cp3["detected"], "저배당 1두뿐 → 압축 미감지")
-cp4 = app._compression_pattern([1, 2, 3], {}, {(1, 2): 3.5, (1, 3): 3.9, (2, 3): 10}, {})
-ok(cp4["detected"] and cp4["level"] == "강력", "단승 없을 때 최저 복승으로 대표배당 산출(1·2번 4배↓)")
+# [개선] 저배당 2두 배당 비슷(축 불명확·30% 미만) → 추천 보류
+cp_noaxis = app._compression_pattern([1, 2, 3], {1: 3.0, 2: 3.2, 3: 9.0}, {}, {}, "horse")
+ok(not cp_noaxis["detected"] and cp_noaxis.get("noAxis"), "저배당 2두 배당 비슷(3.0·3.2·6%) → 축 불명확 보류")
+# [개선] 경륜/경정/바이크는 저배당 압축 비활성
+cp_cyc = app._compression_pattern([1, 2, 3], {1: 2.0, 2: 2.5}, {}, {}, "cycle")
+ok(not cp_cyc["detected"] and cp_cyc.get("disabled"), "경륜은 저배당 압축 공식 비활성(배당 신호 기반만)")
 
 print("[13] 압축 패턴 복승 적중률 학습 + 멱등")
 tmp2 = tempfile.mkdtemp()

@@ -53,7 +53,72 @@ chrome.runtime.onInstalled.addListener(() => {
     { autoSend: false, intervalSec: 30, raceKey: '' },
     (v) => { chrome.storage.local.set(v); syncAutoEngine(); }
   );
+  scheduleKeirinDaily();   // [경륜 스케줄] 매일 08:00 자동 수집 알람 등록
 });
+
+// ═══ [확장 경유 경륜 스케줄 자동 수집] oddspark 경륜은 로그인 필요 → 로그인 세션 보유한 확장이
+//   KaisaiRaceList를 fetch·파싱해 서버로 POST(FETCH_RESULT_HTML과 동일 패턴). 하루 1회(오전 8시). ═══
+const KEIRIN_JO_MAP = {   // joCode → 경륜장(한글). 없으면 title에서 파싱·폴백
+  '36': '오다와라', '62': '히로시마', '01': '마에바시', '04': '기후', '85': '사세보',
+  '83': '구루메', '81': '고쿠라', '31': '마쓰도', '45': '히라쓰카', '48': '가와사키', '73': '기시와다',
+};
+function _todayYmd() {
+  const d = new Date();
+  return '' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+}
+async function _oddsparkFetch(url) {
+  const res = await fetch(url, { credentials: 'include' });   // 로그인 세션(쿠키) 포함
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.text();
+}
+async function fetchKeirinSchedule() {
+  try {
+    const ymd = _todayYmd();
+    const listHtml = await _oddsparkFetch('https://www.oddspark.com/keirin/KaisaiRaceList.do?kaisaiBi=' + ymd);
+    // 개최 경륜장 joCode 추출(중복 제거)
+    const jos = [...new Set([...listHtml.matchAll(/joCode=(\d{1,3})/g)].map((m) => m[1]))];
+    const tracks = [];
+    for (const jo of jos) {
+      try {
+        const rlHtml = await _oddsparkFetch('https://www.oddspark.com/keirin/RaceList.do?joCode=' + jo + '&kaisaiBi=' + ymd);
+        // 경륜장명: title '…〇〇競輪…' 에서, 없으면 매핑/폴백
+        let venue = KEIRIN_JO_MAP[jo] || '';
+        if (!venue) { const tm = rlHtml.match(/<title>[^<]*?([가-힣]{2,6}|[一-龯]{2,5})\s*(?:競輪|경륜)/); if (tm) venue = tm[1]; }
+        if (!venue) venue = '경륜' + jo;
+        // 경주번호 + 発走時刻(HH:MM) 파싱(방어적) — raceNo 링크 + 부근 시각
+        const races = {};
+        for (const seg of rlHtml.split(/<\/tr>|<\/li>|<tr[ >]|<li[ >]/)) {
+          const mn = seg.match(/raceNo=(\d{1,2})/);
+          if (!mn) continue;
+          const rno = parseInt(mn[1], 10);
+          if (rno < 1 || rno > 12 || races[rno]) continue;
+          const mt = seg.match(/(?:発走時刻|発走時間|発走|締切)[^\d]{0,6}(\d{1,2}:\d{2})/) || seg.match(/\b(\d{1,2}:\d{2})\b/);
+          races[rno] = { raceNo: rno, postTime: mt ? mt[1] : null };
+        }
+        const raceList = Object.keys(races).map((k) => races[k]).sort((a, b) => a.raceNo - b.raceNo);
+        if (raceList.length) tracks.push({ joCode: jo, venue: venue, races: raceList });
+      } catch (e) { console.log('[경륜스케줄]', jo, '실패(건너뜀):', e.message || e); }
+    }
+    if (tracks.length) {
+      await fetch(SERVER + '/api/multi/keirin-schedule', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ymd: ymd, tracks: tracks }),
+      });
+      console.log('[경륜스케줄] 서버 전송 완료:', tracks.length, '개 경륜장');
+    } else {
+      console.log('[경륜스케줄] 개최 없음 또는 미로그인(로그인 필요)');
+    }
+  } catch (e) {
+    console.log('[경륜스케줄] 실패(로그인/네트워크?):', e.message || e);
+  }
+}
+function scheduleKeirinDaily() {
+  // 다음 오전 8시로 알람 예약(이미 지났으면 내일 8시) + 24시간 주기
+  const now = new Date();
+  const next = new Date(now); next.setHours(8, 0, 0, 0);
+  if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 1);
+  chrome.alarms.create('keirinSchedule', { when: next.getTime(), periodInMinutes: 1440 });
+}
 
 async function postSnapshot(payload) {
   const res = await fetch(SNAPSHOT_URL, {
@@ -332,6 +397,16 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true; // async
   }
 
+  // [다음경주 자동전환·발주시각 독립] content.js 가 카운트다운 소멸(=경주 마감)을 감지하면 통지.
+  //   발주시각(timerDeadline)이 안 잡힌 사설 모의배당판에서도 전환 체인을 가동하는 핵심 경로.
+  if (msg?.type === 'RACE_FINISHED') {
+    (async () => {
+      try { await _armNextRaceChain(msg.raceKey || '', 'finished'); } catch (_) { /* */ }
+      sendResponse({ ok: true });
+    })();
+    return true; // async
+  }
+
   // [4번] 배당판의 '📊 분석기 열기' → 분석기를 별도 '일반 창'으로 열기(이미 있으면 포커스).
   //   msg.force=true 면 재사용하지 않고 항상 새 창을 만든다(분석기 안의 '별도 창으로 열기'용).
   if (msg?.type === 'OPEN_ANALYZER') {
@@ -403,6 +478,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'resumeCheck') { syncAutoEngine(); return; }
   // [v2.0.1] 발주 후 결과 자동수집 알람
   if (/^resFetch\d/.test(alarm.name)) { doResultFetch(parseInt(alarm.name.replace('resFetch', ''), 10)); return; }
+  // [확장 경유 경륜 스케줄] 매일 08:00 → oddspark 경륜 스케줄 fetch(로그인 세션)·서버 전송
+  if (alarm.name === 'keirinSchedule') { fetchKeirinSchedule(); return; }
   // [다음경주 자동전환] T+3분 새로고침 · T+3분30초 재수집 · T+4분 분석+알림
   if (alarm.name === 'nextRefresh') { _nextRaceRefresh(); return; }
   if (alarm.name === 'nextCollect') { _nextRaceCollect(); return; }
@@ -463,6 +540,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 const AUTO_ALARM = 'autoCollectTick';           // 30초 하트비트(서비스워커 부활)
 const AUTO_STATUS_URL = `${SERVER}/api/auto/status`;
 let _fineTimer = null, _keepaliveTimer = null, _collecting = false, _nextDueAt = 0;
+let _lastCollectAt = 0;   // [수집 조기 중단 방어] 마지막 수집 성공 시각(발주 전 2분+ 미수집 self-heal용)
 
 function _autoCfg() {
   return new Promise((r) => chrome.storage.local.get(
@@ -582,6 +660,9 @@ async function _onRaceClosed(reason) {
     // 무변동(추정) — autoSend 유지, 소프트 일시중지. 60초 뒤 재점검(배당 변동/새 경주면 자동 재개).
     _setAutoStatus({ running: false, paused: true, closeReason: reason });
     chrome.alarms.create('resumeCheck', { when: Date.now() + 60000 });
+    // [발주시각 독립 전환] 무변동=경주 마감 신호 → 발주시각 없어도 다음경주 전환 체인 가동(경주당 1회).
+    //   진짜 진행중 경주면 새로고침해도 같은 경주라 무해(수집 계속). 발주시각 있으면 T+3 체인이 이미 걸려 스킵.
+    try { const { raceKey } = await chrome.storage.local.get({ raceKey: '' }); await _armNextRaceChain(raceKey, 'no-change'); } catch (_) { /* */ }
   }
 }
 async function _forceAnalyze() {
@@ -647,6 +728,10 @@ async function autoTick(reason) {
     return;
   }
 
+  // [4번·조기수집] T-10분 조기 배당 감시 시작 안내 — 흐름 조기 포착(발주 10분전부터 30초 간격)
+  if (left != null && left <= 600000 && left > 540000 && !(await _stageFiredOnce(cfg.timerDeadline, 't10'))) {
+    _notify('t10', '🔔 마감 10분 · 조기 배당 감시 시작', '흐름 포착을 위해 30초 간격 수집을 시작합니다.', false);
+  }
   // [4번] T-3분 이상감지 자동 시작 — 수집 간격 단축 + 1회 안내
   if (left != null && left <= 180000 && left > 120000 && !(await _stageFiredOnce(cfg.timerDeadline, 't3'))) {
     _notify('t3', '🔔 마감 3분 · 이상감지 집중 감시 시작', '수집 간격 단축: T-3분 10초 · T-1분 5초', false);
@@ -655,6 +740,7 @@ async function autoTick(reason) {
   const baseMs = Math.max(5, Number(cfg.intervalSec) || 30) * 1000;
   // [수집속도 개선] 마감 임박 수집 간격 단계 단축 — 마감 전 급락 신호를 놓치지 않게(사용자 [2번] 스케줄)
   //   T-30초(≤30s) 3초 · T-1·2분(≤120s) 5초 · T-3분(≤180s) 10초 · T-5분(≤300s) 15초 · 평상시 기본(30초).
+  //   [5번 흐름 포착] 마감 10분전부터 1분 → (7.5분)30초 → (5분)15초 → (3분)10초로 단계 단축 → 배당 흐름 변화 최대 포착.
   //   ⚠ MV3 서비스워커 절전 시 fine setInterval(5초)이 억제될 수 있어 실측 간격이 늘 수 있음(keepalive 보강).
   let intervalMs = baseMs;
   if (left != null) {
@@ -662,7 +748,13 @@ async function autoTick(reason) {
     else if (left <= 120000) intervalMs = 5000;   // 마감 2분전부터 5초 간격(T-1분 포함)
     else if (left <= 180000) intervalMs = 10000;  // 마감 3분전부터 10초 간격
     else if (left <= 300000) intervalMs = 15000;  // 마감 5분전부터 15초 간격
+    else if (left <= 450000) intervalMs = Math.min(baseMs, 30000);  // [5번] 마감 7.5분전부터 30초(설정이 더 빠르면 유지)
+    else if (left <= 600000) intervalMs = Math.min(baseMs, 30000);  // [4번·조기수집] 마감 10분전부터 30초(기존 1분→30초·흐름 조기 포착)
   }
+  // [수집 조기 중단 방어] 발주 전(left>0)인데 마지막 수집 성공 후 2분+ 경과 → 중단으로 보고 즉시 재수집(due 무시).
+  //   고쿠라 8R: T-8분에 수집이 멈춰 JRA 마감구간을 놓친 케이스 방어. 백그라운드 전용 모드에서도 self-heal.
+  const _stalled = (left != null && left > 0 && _lastCollectAt > 0 && (now - _lastCollectAt) >= 120000);
+  if (_stalled) _nextDueAt = 0;   // 즉시 재수집 유도
   if ((reason === 'start' || now >= _nextDueAt) && !_collecting) {
     _collecting = true;
     let r = null;
@@ -670,8 +762,9 @@ async function autoTick(reason) {
     _collecting = false;
     // [수정2] 경기 마감 감지 → 엔진이 이미 정지됨. 상태를 running:true 로 덮어쓰지 않고 종료.
     if (r && r.closed) return;
+    if (r && !r.closed) _lastCollectAt = Date.now();   // 수집 성공 시각 기록
     _nextDueAt = Date.now() + intervalMs;
-    _setAutoStatus({ running: true, last: Date.now(), next: _nextDueAt, deadline: cfg.timerDeadline || 0, intervalMs });
+    _setAutoStatus({ running: true, last: Date.now(), next: _nextDueAt, deadline: cfg.timerDeadline || 0, intervalMs, stalled: _stalled });
     // [4번] 수집 직후 이상감지 재실행 → 화면 갱신 + '새로' 발생한 급락만 즉시 알림
     _forceAnalyze().then((a) => _notifyNewDrops(a, cfg.timerDeadline || 0));
   }
@@ -752,10 +845,10 @@ async function doResultFetch(attempt) {
     chrome.storage.local.set({ resultAutoStatus: { state: last ? 'manual' : 'retry', attempt: attempt + 2, nextAt, raceKey: curRaceKey || '', t: Date.now() } });
     // [스펙4·5] T+10분까지 실패 → 수동 입력 안내(해당 경주는 결과 미입력으로 남아 결과기록 탭 '미입력' 목록에 표시됨)
     if (last) {
-      // [캡쳐+OCR] 자동수집 실패 시: 경주결과 화면을 열고 확장의 '📸 경주결과 캡쳐→판독'을 누르라고 안내.
-      _notify('resultFail', '❌ 결과 자동수집 실패 — 캡쳐로 입력하세요',
-        `${curRaceKey ? curRaceKey + ' · ' : ''}경주결과 화면을 띄운 뒤 확장 팝업의 [📸 경주결과 캡쳐→판독]을 누르면 착순이 자동 입력됩니다. (또는 결과기록 탭에서 수동 입력)`, false);
-      // [스펙2] 실패 상태를 서버로 전송 → 분석기 상단에 "⚠️ N경주 자동수집 실패 → 수동입력" 배너 표시
+      // [자동 팝업 제거] 결과 자동수집 실패 시 '캡쳐로 입력하세요' Chrome 알림은 띄우지 않는다(사용자 요청).
+      //   → 해당 경주는 결과 미입력으로 남아 분석기 '결과기록 탭 > 📋 결과 입력 대기' 목록에만 조용히 표시된다.
+      //   (캡쳐→판독·수동입력 기능 자체는 확장 팝업/결과기록 탭에 그대로 보존 — 안내 팝업만 제거)
+      // [상태 전송 유지] 실패 상태는 서버로만 전송(팝업/배너 없이) → 결과기록 탭 대기 목록 정확성 유지.
       _postResultAutoStatus({ state: 'manual', raceKey: curRaceKey || '', attempt: attempt + 2 });
     }
   }
@@ -770,6 +863,29 @@ async function doResultFetch(attempt) {
  *              syncAutoEngine 이 재가동되어 연속 수집이 이어진다.
  * autoSend OFF 시엔 syncAutoEngine 이 이 알람들을 함께 취소한다(임의 새로고침 방지).
  * ===================================================================== */
+/* [발주시각 독립 자동전환] 발주시각(timerDeadline)이 없어도 '경주 마감'이 확인되면
+ *   지금 시각 기준 +12초 새로고침 → +42초 재수집 → +72초 분석 체인을 가동한다.
+ *   같은 경주(raceKey)에 대해선 1회만(nextChainRk 가드) → 루프/불필요 새로고침 방지.
+ *   호출처: ① content.js RACE_FINISHED(카운트다운 소멸) ② _onRaceClosed 소프트 마감(무변동). */
+async function _armNextRaceChain(raceKey, why) {
+  const cfg = await _autoCfg();
+  if (!cfg.autoSend || cfg.autoNextRace === false) return;
+  const rk = (raceKey || '').trim() || (await chrome.storage.local.get({ raceKey: '' })).raceKey || '';
+  const { nextChainRk } = await chrome.storage.local.get({ nextChainRk: '' });
+  if (rk && nextChainRk === rk) return;                 // 이 경주는 이미 전환 체인 가동함
+  // 발주시각 기반 T+3 체인이 이미 예약돼 있으면(정상 경로) 중복 가동 안 함.
+  const armed = await chrome.alarms.get('nextRefresh');
+  if (armed) return;
+  await chrome.storage.local.set({ nextChainRk: rk });
+  const now = Date.now();
+  ['nextRefresh', 'nextCollect', 'nextAnalyze'].forEach((n) => chrome.alarms.clear(n));
+  chrome.alarms.create('nextRefresh', { when: now + 12000 });   // +12초: 배당판 새로고침
+  chrome.alarms.create('nextCollect', { when: now + 42000 });   // +42초: 재수집 + 새 raceKey 감지
+  chrome.alarms.create('nextAnalyze', { when: now + 72000 });   // +72초: 분석 + 전환 알림
+  _setAutoStatus({ running: false, nextRace: 'waiting', why: why || '', raceKey: rk, t: now });
+  console.log(`[다음경주] 발주시각 독립 전환 체인 가동(${why}) rk="${rk}"`);
+}
+
 async function _nextRaceRefresh() {
   const cfg = await _autoCfg();
   if (!cfg.autoSend || cfg.autoNextRace === false) return;
@@ -804,6 +920,9 @@ async function _nextRaceAnalyze() {
   if (!cfg.autoSend || cfg.autoNextRace === false) return;
   await _forceAnalyze();
   const { raceKey } = await chrome.storage.local.get({ raceKey: '' });
+  // [4번] 분석기 배너용: 전환 완료 상태 + 새 경주키를 서버 상태로 흘려보냄(deadline 있으면 예상 시작).
+  _setAutoStatus({ running: true, nextRace: 'done', newRaceKey: raceKey || '',
+    deadline: cfg.timerDeadline || 0, t: Date.now() });
   _notify('nextRace', '🔄 다음 경주로 전환',
     `새 경주: ${raceKey || '감지 중…'}\n자동 수집 시작`, false);
   // 새 발주시각이 감지됐으면 storage 변경으로 이미 재가동됐지만, 미검출 대비 한 번 깨워준다.
@@ -819,6 +938,6 @@ chrome.storage.onChanged.addListener((ch, area) => {
   if (ch.autoSend || ch.intervalSec || ch.autoMode || ch.timerDeadline || ch.market || ch.japanType) syncAutoEngine();
 });
 // 브라우저 시작/서비스워커 부활 시 엔진 복원
-chrome.runtime.onStartup.addListener(syncAutoEngine);
+chrome.runtime.onStartup.addListener(() => { syncAutoEngine(); scheduleKeirinDaily(); });
 // 로드 즉시 1회 동기화(이미 autoSend 켜져 있으면 바로 재개)
 syncAutoEngine();

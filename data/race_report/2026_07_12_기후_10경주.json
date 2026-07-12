@@ -1,0 +1,168 @@
+{
+ "race": "기후 10경주",
+ "raceKey": "기후 10경주",
+ "date": "2026-07-12",
+ "result": {
+  "1st": 7,
+  "2nd": 4,
+  "3rd": 1,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "일반"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.581,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "쌍승역전"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "일반"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 7번 전적 정보 제한",
+  "2. 배당 수집 시작 14:59:49",
+  "4. 쌍승 역전: 4→7(21.2) < 7→4(36.5) → 4번 실질 상위 신호",
+  "5. 종합 신뢰도 0.0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 7,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": null,
+  "total": 0.0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중",
+  "복승불일치_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   4,
+   1
+  ],
+  "inverseHit": [
+   4,
+   1
+  ],
+  "confidence": 0.0,
+  "reason": "전적유력마 1번 적중 · 역배열 감지말 4·1번 입상"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "15:03:56",
+    "minutes_before": 12,
+    "previous_signal": "4번",
+    "new_signal": "2번",
+    "reason": "2번 집중급락(평균 -57.8%)",
+    "prev_was_candidate": true
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   2,
+   4
+  ],
+  "events": {
+   "4": {
+    "first": {
+     "time": "15:01:22",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "15:01:22",
+     "minutes_before": null
+    }
+   },
+   "2": {
+    "first": {
+     "time": "15:03:56",
+     "minutes_before": 12
+    },
+    "count": 1,
+    "last": {
+     "time": "15:03:56",
+     "minutes_before": 12
+    },
+    "vanished": {
+     "time": "15:05:03",
+     "minutes_before": 10
+    }
+   }
+  },
+  "finalSignal": 2,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 6
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-12 21:25:56"
+}
