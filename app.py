@@ -16464,8 +16464,88 @@ def _multi_race_list(op, sp, ymd):
     return out
 
 
+_KEIRIN_SCHED_CACHE = {}   # {ymd: {"t":.., "tracks":[...]}} 경륜 개최 스케줄 당일 캐시(6시간)
+
+
+def _keirin_post_time(jo, ymd, rno):
+    """[경륜 서버수집] 경주별 RaceList.do 페이지에서 発走時間(HH:MM) 추출. 당일 캐시·실패 None(격리).
+      ⚠ 締切予定(발매마감·23:45 류)은 발주시각이 아니므로 発走時間 계열만 사용."""
+    ck = ("keirin", ymd, str(jo), rno)
+    if ck in _MULTI_POST_CACHE:
+        return _MULTI_POST_CACHE[ck]
+    try:
+        html = _keirin_fetch(_keirin_url(jo, ymd, rno))
+        # 경륜 페이지는 라벨과 시각 사이에 태그가 있어(경마와 구조 차이) 태그 제거 후 매칭
+        body = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
+        m = (re.search(r"発走時間\s*(\d{1,2}:\d{2})", body)
+             or re.search(r"(?:発走予定|発走時刻|発走)\s*(\d{1,2}:\d{2})", body))
+        pt = m.group(1) if m else None
+        if pt:
+            _MULTI_POST_CACHE[ck] = pt        # 성공만 캐시(실패는 다음 갱신 때 재시도)
+        return pt
+    except Exception:
+        return None
+
+
+def _keirin_venue_races(jo, ymd):
+    """[경륜 서버수집] joCode의 경륜장명 + 경주번호 목록. raceNo=1 공개 출주표 title에서 경륜장명,
+      raceNo 링크에서 경주 수(보통 12). 실패 시 (None, [])."""
+    try:
+        html = _keirin_fetch(_keirin_url(jo, ymd, 1))
+    except Exception:
+        return None, []
+    mt = re.search(r"<title>(.*?)</title>", html, re.S)
+    title = _kstrip(mt.group(1)) if mt else ""
+    mv = re.search(r"([一-龯ぁ-んァ-ヶー]{2,6})競輪", title)
+    venue_ja = mv.group(1).strip() if mv else ""
+    nums = sorted({int(x) for x in re.findall(r"raceNo=(\d{1,2})", html) if 1 <= int(x) <= 12})
+    if not nums:
+        nums = list(range(1, 13))          # 링크 못 읽으면 1~12 시도(발주시각 없으면 자동 제외됨)
+    return venue_ja, nums
+
+
+def _keirin_schedule(ymd, force=False):
+    """[경륜 서버 직접 수집] oddspark 경륜 홈(로그인 불필요·공개)에서 오늘 개최 경륜장(joCode) 추출 →
+      경주별 발주시각까지 수집해 today_schedule 병합용 트랙 리스트 반환.
+      반환: [{venue, joCode, sport:'cycle', races:[{raceNo, postTime, postEpoch}]}]. 실패해도 예외 전파 안 함.
+      ⚠ KaisaiRaceList.do 는 로그인 벽 → 홈페이지의 RaceList.do?joCode&kaisaiBi 링크로 개최 감지(공개 경로)."""
+    ck = _KEIRIN_SCHED_CACHE.get(ymd)
+    if ck and not force and (time.time() - ck.get("t", 0) < 21600):
+        return ck["tracks"]
+    tracks = []
+    jos = []
+    try:
+        home = _keirin_fetch("https://www.oddspark.com/keirin/").replace("&amp;", "&")
+        jos = sorted({m.group(1) for m in re.finditer(r"joCode=(\d+)&kaisaiBi=%s" % ymd, home)})
+    except Exception as e:
+        print("[경륜 스케줄] 홈 조회 실패(경륜 생략):", e)
+    for jo in jos:
+        try:
+            venue_ja, nums = _keirin_venue_races(jo, ymd)
+            venue = KEIRIN_JO.get(str(jo)) or venue_ja or ("경륜%s" % jo)
+            times = {}
+            try:
+                with ThreadPoolExecutor(max_workers=4) as ex:
+                    fut = {ex.submit(_keirin_post_time, jo, ymd, n): n for n in nums}
+                    for f in as_completed(fut):
+                        times[fut[f]] = f.result()
+            except Exception as e:
+                print("[경륜 스케줄] 発走시각 병렬취득 오류(무시):", e)
+            races = [{"raceNo": n, "postTime": times.get(n), "postEpoch": _post_time_epoch(times.get(n), ymd)}
+                     for n in nums]
+            tracks.append({"venue": venue, "joCode": str(jo), "sport": "cycle", "races": races})
+        except Exception as e:
+            print("[경륜 스케줄]", jo, "경주목록 실패(건너뜀):", e)
+            continue
+    _KEIRIN_SCHED_CACHE[ymd] = {"t": time.time(), "tracks": tracks}
+    print("[경륜 스케줄] %s: 경륜장 %d곳 · 경주 %d개(서버 직접수집·로그인 불필요)"
+          % (ymd, len(tracks), sum(len(t["races"]) for t in tracks)))
+    return tracks
+
+
 def _multi_schedule_fetch():
-    """[1번] 오늘 개최 경주 스케줄(경마장+경주번호+발주시각) → today_schedule.json. 실패해도 예외 전파 안 함."""
+    """[1번] 오늘 개최 경주 스케줄(경마장+경주번호+발주시각) → today_schedule.json. 실패해도 예외 전파 안 함.
+      [경륜 통합] 지방경마 + 경륜을 서버가 함께 수집(경륜도 oddspark 홈 공개경로 → Chrome 확장 불필요)."""
     ymd = time.strftime("%Y%m%d")
     sched = {"ymd": ymd, "updated": time.time(), "tracks": []}
     try:
@@ -16482,9 +16562,16 @@ def _multi_schedule_fetch():
         except Exception as e:
             print("[스케줄]", kanji, "경주목록 실패(건너뜀):", e)
             continue
+    # [경륜 서버 직접 수집] 지방경마와 동시에 경륜 스케줄도 병합(sport=cycle) → 확장 없이 경륜 자동 수집·표시
+    try:
+        for kt in _keirin_schedule(ymd):
+            sched["tracks"].append(kt)
+    except Exception as e:
+        print("[스케줄] 경륜 병합 실패(무시·경마는 유지):", e)
     _schedule_save(sched)
-    print("[다중경주 스케줄] %s: 경마장 %d곳 · 경주 %d개"
-          % (ymd, len(sched["tracks"]), sum(len(t["races"]) for t in sched["tracks"])))
+    _n_cycle = sum(1 for t in sched["tracks"] if (t.get("sport") == "cycle"))
+    print("[다중경주 스케줄] %s: 트랙 %d곳(경륜 %d곳 포함) · 경주 %d개"
+          % (ymd, len(sched["tracks"]), _n_cycle, sum(len(t["races"]) for t in sched["tracks"])))
     return sched
 
 
