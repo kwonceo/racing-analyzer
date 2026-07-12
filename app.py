@@ -12734,6 +12734,8 @@ def _keirin_autocollect_form(rk, jo, ymd, race):
             "recentPlacings": [], "rentai": r.get("rentai"), "styleType": r.get("styleType"),
             # [보완1] 競走得点 절대등급(95+ A/85+ B/75+ C/<75 D) — 통합 사분위 등급과 별개로 함께 표시
             "competScore": round(float(r.get("score") or 0), 1), "absGrade": _keirin_grade(r.get("score")),
+            # [보완2] 각질 조정 내역: 통합점수 = 競走得点(원) + 각질보너스. 투명하게 분해 표시.
+            "styleBonus": round(float(r.get("adjScore") or r.get("score") or 0) - float(r.get("score") or 0), 1),
         } for r in (an.get("ranked") or []) if r.get("car") is not None and r.get("score") is not None]
         if horses:
             sdb[rk] = {"horses": horses, "t": time.time(), "source": "keirin"}

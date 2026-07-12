@@ -3885,7 +3885,7 @@
       ${hasAbs ? `<td><b style="color:${gc[h.absGrade] || '#8a94a6'}">${esc(h.absGrade || '-')}</b>${h.competScore != null ? ` <span class="hint" style="font-size:10px">${h.competScore}</span>` : ''}</td>` : ''}
       <td>${h.no}</td><td>${esc(h.name || '')}</td>${isKeirin ? `<td>${esc(h.styleType || '-')}</td>` : `<td>${esc(h.jockey || '')}</td>`}
       <td>${(h.recentPlacings || []).join('-') || '-'}</td>
-      <td>${h.totalScore}</td>
+      <td>${h.totalScore}${(h.styleBonus != null && h.styleBonus !== 0 && h.competScore != null) ? ` <span class="hint" style="font-size:10px">(${h.competScore}+각질${h.styleBonus > 0 ? '+' : ''}${h.styleBonus})</span>` : ''}</td>
       <td>${(h.flags || []).map((f) => `<span class="chip ${f.level === 'must' ? 'chip-red' : ''}">${esc(f.msg)}</span>`).join(' ')}</td>
     </tr>`).join('');
     return `<div class="matrix-title" style="font-size:13px">🏇 전적 등급 ${isKeirin ? '(경륜 출마표·競走得点)' : '(출마표2)'}</div>
