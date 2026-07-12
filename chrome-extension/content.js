@@ -2196,23 +2196,25 @@
       if (!autoSend) return;                          // 자동전송 OFF면 존중(수동)
       let rk = '';
       try { rk = extractRaceKey(); } catch (_) { /* */ }
-      if (resolveSport(sport, rk) !== 'cycle') return;   // 경륜일 때만 즉시 수집
+      // [4번] 경륜·경정·바이크(사설 asyukk 배당판) 전부 즉시 수집 — 배당판 열리는 즉시 조기 수집 시작(T-10분+ 흐름 포착).
+      var _sp = resolveSport(sport, rk);
+      if (_sp !== 'cycle' && _sp !== 'boat' && _sp !== 'bike') return;
       if (_autoRunning) return;                       // 이미 수집 중이면 스킵
       _lastKeirinKick = now;
-      console.log('[경륜 자동수집] ' + reason + ' + 자동전송 ON → 즉시 수집(수동 버튼 불필요)');
+      console.log('[' + _sp + ' 자동수집] ' + reason + ' + 자동전송 ON → 배당판 열리는 즉시 수집(수동 버튼 불필요)');
       _autoRunning = true;
       try { await collectTriple('auto'); } catch (e) { console.warn('[경륜 자동수집] 오류', e); }
       finally { _autoRunning = false; }
     } catch (_) { /* */ }
   }
   setTimeout(() => _maybeKeirinKickstart('배당판 로드'), 1300);   // 로드 직후(종목 감지 안정화 대기)
-  // [탭 클릭 즉시 트리거] asyukk 경륜 탭 클릭 등 SPA 전환 시 디바운스 후 재확인(리로드 없이 종목 바뀌는 경우 대응)
+  // [탭 클릭 즉시 트리거] asyukk 경륜·경정·바이크 탭 클릭 등 SPA 전환 시 디바운스 후 재확인(리로드 없이 종목 바뀌는 경우 대응)
   let _keirinClickTimer = null;
   document.addEventListener('click', () => {
     if (_keirinClickTimer) clearTimeout(_keirinClickTimer);
     _keirinClickTimer = setTimeout(() => _maybeKeirinKickstart('탭 클릭'), 700);
   }, true);
-  // [탭 포커스 복귀] 다른 탭 갔다 경륜 배당판으로 돌아오면 재확인
+  // [탭 포커스 복귀] 다른 탭 갔다 사설 배당판(경륜·경정·바이크)으로 돌아오면 재확인
   document.addEventListener('visibilitychange', () => { if (!document.hidden) _maybeKeirinKickstart('탭 포커스'); });
 
   // [2번] 결과 페이지면 로드 직후 1회 자동 전송 (URL result/성적표 감지)

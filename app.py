@@ -7192,6 +7192,14 @@ def _triple_analyze(rk, rec):
                 core_picks["denseBoxHorses"] = dense_box.get("horses") or []
                 core_picks["denseBoxTrifectas"] = dense_box.get("trifectas") or []
                 core_picks["denseBoxNote"] = dense_box.get("note")
+                # [2번·배분] 박스 삼복승 조합을 전체 예산의 20%로 균등 편성(무신호라 혼전블록 미발동 → 이 시점 bet_rec이 사실상 최종).
+                #   box/(기존합+box)=0.2 → box총합=기존합×0.25. 이미 존재하는 조합(_addbet 중복제거)은 기존 배분 유지.
+                _dbtris = dense_box.get("trifectas") or []
+                if _dbtris:
+                    _cur_sum = sum(b.get("alloc", 0) for b in bet_rec) or 20
+                    _per = max(1, round(_cur_sum * 0.25 / len(_dbtris)))
+                    for _t in _dbtris:
+                        _addbet("삼복승", "삼복승 박스(무신호밀집)", _t.get("combo"), _per, _t.get("odds"))
     except Exception as _e:
         print("[무신호밀집박스] 파생 실패:", _e)
 
@@ -10327,6 +10335,7 @@ def _recompute_learning_stats(records):
         # [초기 급락마 보존] 보존말 실제 입상률(마감 5분+ 전 급락 감지 → 보존 → 입상 비율)
         "early_drop": _rate(records, lambda r: r.get("early_drop_fired"), lambda r: r.get("early_drop_placed")),
         "closing_drop": _rate(records, lambda r: r.get("closing_drop_fired"), lambda r: r.get("closing_drop_placed")),
+        "dense_box": _rate(records, lambda r: r.get("dense_box_fired"), lambda r: r.get("dense_box_hit")),
     }
     return {
         "alert_stats": alert_stats,       # [신규 5번] 경고 신호 발생·적중·무시 통계
@@ -10780,6 +10789,25 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             closing_drop_placed = any(n in top3 for n in closing_drop_nos)   # 보존말 중 1두라도 입상
     except Exception as e:
         print("[마감급락보존학습] 판정 실패:", e)
+    # [3번·무신호밀집박스 학습] 무신호 저배당밀집 삼복승 박스(denseBox) 발동/적중 판정
+    dense_box_fired = dense_box_hit = None
+    dense_box_nos = []
+    try:
+        _cp4 = an.get("corePicks") or {}
+        _dbh2 = _cp4.get("denseBoxHorses") or []
+        if not _dbh2:                                     # 재분석 공백 → 저장 로그 폴백
+            try:
+                _p4, _, _ = _analysis_log_path(_canonical_log_key(rk))
+                _dbh2 = (json.load(open(_p4, encoding="utf-8")).get("corePicks") or {}).get("denseBoxHorses") or []
+            except Exception:
+                _dbh2 = []
+        dense_box_nos = [int(x) for x in _dbh2 if x is not None]
+        if dense_box_nos:
+            dense_box_fired = True
+            # 박스 삼복승 적중 = 실제 top3 3두가 모두 박스 안에 포함
+            dense_box_hit = (len(top3) >= 3 and all(n in dense_box_nos for n in top3[:3]))
+    except Exception as e:
+        print("[무신호밀집박스학습] 판정 실패:", e)
     try:
         _learn_signal_stats(rk, an, top3, doc.get("date"))
     except Exception as e:
@@ -10992,6 +11020,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         "early_drop_nos": early_drop_nos,
         "closing_drop_fired": closing_drop_fired, "closing_drop_placed": closing_drop_placed,
         "closing_drop_nos": closing_drop_nos,
+        "dense_box_fired": dense_box_fired, "dense_box_hit": dense_box_hit,
+        "dense_box_nos": dense_box_nos,
         # [오늘 통계 대시보드] 날짜·경마장·유력마 기반 적중(집계·경마장별·타임라인용)
         "date": doc.get("date"), "venue": (_area_num(rk)[0] or None),
         "keyhorse_quinella_hit": keyhorse_hit["quinella_hit"], "keyhorse_trifecta_hit": keyhorse_hit["trifecta_hit"],

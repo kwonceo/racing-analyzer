@@ -728,6 +728,10 @@ async function autoTick(reason) {
     return;
   }
 
+  // [4번·조기수집] T-10분 조기 배당 감시 시작 안내 — 흐름 조기 포착(발주 10분전부터 30초 간격)
+  if (left != null && left <= 600000 && left > 540000 && !(await _stageFiredOnce(cfg.timerDeadline, 't10'))) {
+    _notify('t10', '🔔 마감 10분 · 조기 배당 감시 시작', '흐름 포착을 위해 30초 간격 수집을 시작합니다.', false);
+  }
   // [4번] T-3분 이상감지 자동 시작 — 수집 간격 단축 + 1회 안내
   if (left != null && left <= 180000 && left > 120000 && !(await _stageFiredOnce(cfg.timerDeadline, 't3'))) {
     _notify('t3', '🔔 마감 3분 · 이상감지 집중 감시 시작', '수집 간격 단축: T-3분 10초 · T-1분 5초', false);
@@ -745,7 +749,7 @@ async function autoTick(reason) {
     else if (left <= 180000) intervalMs = 10000;  // 마감 3분전부터 10초 간격
     else if (left <= 300000) intervalMs = 15000;  // 마감 5분전부터 15초 간격
     else if (left <= 450000) intervalMs = Math.min(baseMs, 30000);  // [5번] 마감 7.5분전부터 30초(설정이 더 빠르면 유지)
-    else if (left <= 600000) intervalMs = Math.min(baseMs, 60000);  // [5번] 마감 10분전부터 1분 간격
+    else if (left <= 600000) intervalMs = Math.min(baseMs, 30000);  // [4번·조기수집] 마감 10분전부터 30초(기존 1분→30초·흐름 조기 포착)
   }
   // [수집 조기 중단 방어] 발주 전(left>0)인데 마지막 수집 성공 후 2분+ 경과 → 중단으로 보고 즉시 재수집(due 무시).
   //   고쿠라 8R: T-8분에 수집이 멈춰 JRA 마감구간을 놓친 케이스 방어. 백그라운드 전용 모드에서도 self-heal.
