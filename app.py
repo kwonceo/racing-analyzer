@@ -17159,6 +17159,42 @@ def _startup_date_reset():
         pass
 
 
+_bg_boot_started = False
+
+
+def _boot_background():
+    """[24시간 자동수집·백업·학습] 백그라운드 작업 1회 기동(멱등). 로컬(__main__)·gunicorn(모듈로드) 공용.
+      ⚠ gunicorn 은 `if __name__=='__main__'` 을 실행하지 않으므로, 이 함수를 모듈 로드 시점에도 호출해야
+        Railway 배포에서 다중경주 자동수집·주기백업·학습일지·날짜정리가 정상 기동된다.
+      ⚠ gunicorn 은 반드시 --workers 1 로 실행(워커마다 중복 수집·중복 git 백업 방지)."""
+    global _bg_boot_started
+    if _bg_boot_started:
+        return
+    _bg_boot_started = True
+    try:
+        _korea_maybe_resume()
+    except Exception as e:
+        print("[부팅] 한국 사전분석 재개 실패(무시):", e)
+    _start_periodic_backup()             # 6시간 주기 안전 백업(결과 미입력이어도 백업)
+    _start_daily_learning_scheduler()    # 매일 22:00 학습 일지 자동 생성·백업
+    try:
+        _startup_date_reset()            # 어제 고정·수집 데이터 자동 정리(학습 데이터 보존)
+    except Exception as e:
+        print("[부팅] 날짜 초기화 실패(무시):", e)
+    _start_multi_race_bg()               # [핵심] 다중 경주(지방경마·경륜·한국) 24시간 자동수집
+    try:
+        _archive_compress_old(7)         # 7일+ 경주 배당 .gz 압축 보관(데이터 삭제 없음)
+    except Exception as e:
+        print("[부팅] 아카이브 압축 실패(무시):", e)
+    print("[부팅] 백그라운드 작업 기동 완료(자동수집·백업·학습·날짜정리)")
+
+
+# [Railway/gunicorn] gunicorn 은 __main__ 을 건너뛰므로, 여기서 모듈 로드 시점에 백그라운드 기동.
+#   (SERVER_SOFTWARE 는 gunicorn 이 자동 설정. 로컬 `python app.py` 에선 미설정 → 아래 __main__ 에서 기동)
+if os.environ.get("SERVER_SOFTWARE", "").startswith("gunicorn"):
+    _boot_background()
+
+
 if __name__ == "__main__":
     # [Railway/배포] PORT 환경변수 우선(미설정 시 로컬 8011). PORT 있으면 외부바인드(0.0.0.0)·FLASK_ENV=production 이면 debug OFF.
     _port = int(os.environ.get("PORT", 8011))
@@ -17169,13 +17205,5 @@ if __name__ == "__main__":
     # threaded=True: 브라우저의 다중 keep-alive 연결을 동시 처리(단일 스레드 멈춤 방지).
     # 재개는 리로더의 실제 작업 프로세스(WERKZEUG_RUN_MAIN)에서만 1회 수행.
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-        _korea_maybe_resume()
-        _start_periodic_backup()   # [데이터 자동백업 완성] 6시간 주기 안전 백업(결과 미입력이어도 백업)
-        _start_daily_learning_scheduler()   # [학습일지] 매일 22:00 학습 일지 자동 생성·백업
-        _startup_date_reset()      # [날짜 초기화] 서버 시작 시 어제 고정·수집 데이터 자동 정리(학습 데이터 보존)
-        _start_multi_race_bg()     # [다중 경주 동시 배당판] 별도 저장소·실패격리·단일모드 무영향
-        try:
-            _archive_compress_old(7)   # [영구보존·4번] 7일+ 경주 배당 .gz 압축 보관(데이터 삭제 없음·용량 관리)
-        except Exception as _e:
-            print("[아카이브 압축] 시작 시 실패:", _e)
+        _boot_background()
     app.run(host=_host, port=_port, debug=_debug, threaded=True)
