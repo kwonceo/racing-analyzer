@@ -5514,6 +5514,7 @@ def _cross_reversal(curQ, curD, fav_rank, valid_nos, max_rank=5):
     out = []
     for X in sorted(int(x) for x in (valid_nos or [])):
         acc, wsum, ref_score = 0.0, 0.0, {}
+        qacc, qwsum, xacc, xwsum = 0.0, 0.0, 0.0, 0.0     # [Bug3] 복승·쌍승 측 분리 집계(양쪽 역배열 판정용)
         for i in range(len(top)):
             for j in range(i + 1, len(top)):
                 A, B = top[i], top[j]                  # A 인기 높음(rank 작음)
@@ -5523,26 +5524,34 @@ def _cross_reversal(curQ, curD, fav_rank, valid_nos, max_rank=5):
                 qa, qb = _qo(A, X), _qo(B, X)          # 복승: q(A+X) vs q(B+X)
                 if qa and qb:
                     wsum += w
+                    qwsum += w
                     if qa > qb:
                         _c = min((qa - qb) / qb, 1.0) * w
                         acc += _c
+                        qacc += _c
                         ref_score[B] = ref_score.get(B, 0.0) + _c
-                for (pa, pb) in (((A, X), (B, X)), ((X, A), (X, B))):   # 쌍승(보조 ×0.5)
-                    xa, xb = _xo(*pa), _xo(*pb)
+                for (pa, pb) in (((A, X), (B, X)), ((X, A), (X, B))):   # 쌍승(통합점수엔 ×0.5·쌍승측 점수엔 정배 ×1)
+                    xa, xb = _xo(*pa), _xo(*pb)          # 쌍승: 인기1위→X vs 인기2위→X 방향 비교
                     if xa and xb:
                         wsum += w * 0.5
+                        xwsum += w
                         if xa > xb:
-                            _c = min((xa - xb) / xb, 1.0) * (w * 0.5)
-                            acc += _c
-                            ref_score[B] = ref_score.get(B, 0.0) + _c
+                            _cd = min((xa - xb) / xb, 1.0)
+                            acc += _cd * (w * 0.5)
+                            xacc += _cd * w
+                            ref_score[B] = ref_score.get(B, 0.0) + _cd * (w * 0.5)
         if wsum <= 0:
             continue
         score = round(acc / wsum, 2)
-        if score >= 0.3:
+        qScore = round(qacc / qwsum, 2) if qwsum > 0 else 0.0     # [Bug3] 복승 크로스 역배열 점수
+        xScore = round(xacc / xwsum, 2) if xwsum > 0 else 0.0     # [Bug3] 쌍승 크로스 역배열 점수
+        if score >= 0.3 or qScore >= 0.5 or xScore >= 0.5:       # [Bug3] 복승/쌍승 어느 한쪽만 강해도 포착
             lvl = "🔴" if score >= 0.7 else ("🟠" if score >= 0.5 else "🟡")
             refs = [b for b, _ in sorted(ref_score.items(), key=lambda kv: -kv[1])][:3]   # 기여 큰 순
-            out.append({"no": X, "score": score, "level": lvl, "refs": refs})
-    out.sort(key=lambda x: -x["score"])
+            both = qScore >= 0.5 and xScore >= 0.5               # [Bug3] 복승+쌍승 양쪽 동시 역배열 = 강한 신호
+            out.append({"no": X, "score": score, "level": lvl, "refs": refs,
+                        "qScore": qScore, "xScore": xScore, "both": both})
+    out.sort(key=lambda x: (-(1 if x.get("both") else 0), -max(x["score"], x.get("qScore") or 0, x.get("xScore") or 0)))
     return out
 
 
@@ -6342,6 +6351,35 @@ def _triple_analyze(rk, rec):
                         _addbet("삼복승", "삼복승 보험(크로스역배열 %s %.2f)" % (_cr["level"], _cr["score"]),
                                 _crc, 4, trio_map.get(tuple(_crc)))
 
+    # [Bug3·복승 크로스 역배열 메인] 인기1위+X 복승 > 인기2위+X 복승(역배열) = X 실질 유력마(복승 qScore≥0.5) →
+    #   복승 메인에 인기1위+X·인기2위+X 자동 편성. 쌍승도 인기1위→X vs 인기2위→X 동일 비교(xScore),
+    #   복승+쌍승 양쪽 동시 역배열(both)이면 강한 신호로 배분 상향. 정답마를 신호로 잡고도 놓치던 문제 대응.
+    if not after_close and cross_reversal:
+        _cpop2 = [int(h) for h in fav_rank[:2] if h is not None]
+        _cr_main = 0
+        for _cr in cross_reversal:
+            if _cr_main >= 2:
+                break
+            _qs = _cr.get("qScore") or 0.0
+            _xs = _cr.get("xScore") or 0.0
+            if _qs < 0.5 and _xs < 0.5:
+                continue                                   # 복승·쌍승 어느 쪽도 역배열 강세 아님 → 스킵
+            _crx = int(_cr["no"])
+            _cboth = bool(_cr.get("both"))
+            _added_any = False
+            for _ci, _anchor in enumerate(_cpop2):
+                if _anchor == _crx:
+                    continue
+                _ccc = sorted([_anchor, _crx])
+                if len(_ccc) != 2:
+                    continue
+                _lab = "복승 메인(크로스역배열%s 복승%.2f·쌍승%.2f)" % ("·양쪽감지" if _cboth else "", _qs, _xs)
+                _alloc = (14 if _cboth else 10) if _ci == 0 else (9 if _cboth else 6)
+                _addbet("복승", _lab, _ccc, _alloc, _q(_ccc[0], _ccc[1]))
+                _added_any = True
+            if _added_any:
+                _cr_main += 1
+
     # [삼복승 무조건 편성] 배당판(실배당) 유무·유력마 3두 미만과 무관하게 삼복승을 항상 추천에 포함.
     #   유력마가 3두 미만이면 선호순 풀(ranked→단승순→복승조합 등장마)로 3두를 채워 메인 생성.
     #   [역배열 대비] 쌍승역전 challenger(실질 상위 지목 아웃사이더)를 낀 조합을 추가(이변 대비).
@@ -6751,6 +6789,26 @@ def _triple_analyze(rk, rec):
 
     # form 은 위(역배열 호출 앞)에서 이미 계산됨 — 재사용(역배열·추천게이트와 공유)
     elimination = _elimination(curQ, curD, exa, drops, form, trio_map, curWin=curWin)  # 배당+전적 복합 제거(+단승 고배당)
+    # [Bug1·복병 제거 금지] 복병(dark_horses: 집중급락 10회+/스마트머니)으로 감지된 말은 elimination에서 절대 제거 금지.
+    #   복병 + 제거 동시 판정 시 → 복병 우선, 제거 취소(override). 모리오카 6R 7번 복병=제거 충돌 케이스 해결.
+    try:
+        _dark_set = set(int(h["no"]) for h in (dark_horses or []) if h.get("no") is not None)
+        if _dark_set and elimination and elimination.get("horses"):
+            _spared = []
+            for _eh in elimination["horses"]:
+                if int(_eh.get("no")) in _dark_set and not (_eh.get("keep") or _eh.get("override")):
+                    _eh["override"] = True
+                    _eh["overrideReason"] = "복병 감지(집중급락/스마트머니) → 제거 취소"
+                    _eh["verdict"], _eh["verdictLabel"] = "⭐", "복병(제거 취소)"
+                    _spared.append(int(_eh.get("no")))
+            if _spared:
+                _kept2 = [h for h in elimination["horses"] if h.get("keep") or h.get("override")]
+                elimination["counts"] = {"entrants": len(elimination["horses"]),
+                                         "candidates": len(_kept2),
+                                         "eliminated": len(elimination["horses"]) - len(_kept2)}
+                elimination["darkSpared"] = _spared   # 복병으로 제거 취소된 말(오버레이·학습 표기)
+    except Exception as _e:
+        print("[Bug1·복병제거금지] 실패:", _e)
 
     # [한국경마] 시간대별(발주 10/5/2분전 대비) 마감 임박 급락 신호를 앞쪽에 병합
     time_drops = _time_based_drop_signals(rk)
@@ -6974,6 +7032,40 @@ def _triple_analyze(rk, rec):
                 core_picks["earlyDropTrifectas"] = _edtris        # 강제 유지 삼복승 보험 조합
     except Exception as _e:
         print("[초기급락보존] 파생 실패:", _e)
+
+    # [Bug1·복병 삼복승 자동 편성] 복병(dark_horses)으로 감지된 말은 무조건 삼복승에 편성(제거 취소와 짝).
+    #   삼복승 = 복승 축 2두(시장유력 저배당) + 복병말. 초기급락 보존과 동일 구조(중복 조합은 제거).
+    try:
+        if dark_horses and core_picks and not after_close:
+            _vs2 = set(int(v) for v in (valid_nos or []))
+            _axis2 = [int(x) for x in ((core_picks.get("favAxis") or core_picks.get("quinella") or [])[:2]) if x is not None]
+            _existing = set()
+            for _t in (core_picks.get("earlyDropTrifectas") or []):
+                _existing.add(tuple(sorted(_t.get("combo") or [])))
+            _dktris, _dklist = [], []
+            for _dh in dark_horses:
+                _dno = _dh.get("no")
+                if _dno is None or int(_dno) not in _vs2:
+                    continue
+                _dno = int(_dno)
+                _dklist.append({"no": _dno, "anomCount": _dh.get("anomCount"),
+                                "smartMoney": bool(_dh.get("smartMoney")), "forced": bool(_dh.get("forced"))})
+                if len(_axis2) >= 2 and _dno not in _axis2:
+                    _cc = tuple(sorted(_axis2[:2] + [_dno]))
+                    if len(set(_cc)) == 3 and _cc not in _existing:
+                        _existing.add(_cc)
+                        _do = trio_map.get(_cc)
+                        if _do is None:
+                            try:
+                                _ev, _ = _trio_est(list(_cc)); _do = round(_ev, 1) if _ev else None
+                            except Exception:
+                                _do = None
+                        _dktris.append({"combo": list(_cc), "odds": _do, "horse": _dno})
+            if _dklist:
+                core_picks["darkHorsePicks"] = _dklist            # 복병 삼복승 편성 대상(오버레이·학습)
+                core_picks["darkTrifectas"] = _dktris             # 복병 자동 삼복승 조합
+    except Exception as _e:
+        print("[Bug1·복병삼복승] 파생 실패:", _e)
 
     # [혼전 경주] 상위 배당 근접 → 이변 가능성 → 고배당 포함 삼복승 전략(기존 추천 무영향, 별도 필드).
     chaotic = None

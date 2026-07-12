@@ -5992,8 +5992,10 @@
       ${qLines}
       ${t ? `<div style="font-size:20px;font-weight:800;margin:4px 0">🛡 삼복승: <span style="color:#c084fc">${t.join('+')}</span> ${to}</div>` : ''}
       ${triIns ? `<div style="font-size:16px;font-weight:700;margin:2px 0"><span class="hint" style="font-weight:400;font-size:12px">🛡 삼복승 보험(확신도+이상감지):</span> <span style="color:#c084fc">${triIns.join('+')}</span>${cp.confTrifectaInsOdds != null ? ` <span class="hint" style="font-size:12px">${cp.confTrifectaInsOdds}배(추정)</span>` : ''}</div>` : ''}
-      ${(cp.earlyDropHorses || []).length ? `<div style="font-size:13px;font-weight:700;margin:4px 0 1px;color:#fbbf24">📌 초기급락 보존: ${(cp.earlyDropHorses || []).map((e) => e.no + '번').join('·')} <span class="hint" style="font-weight:400;font-size:11px">(마감 5분+ 전 급락 · 후반 재편에도 유지)</span></div>` : ''}
-      ${(cp.earlyDropTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:600;margin:1px 0;color:#fde68a">🛡 삼복승 보험(초기급락): ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''}</div>`).join('')}
+      ${(cp.earlyDropHorses || []).length ? `<div style="font-size:13px;font-weight:700;margin:4px 0 1px;color:#fbbf24">📌 초기급락 보존: ${(cp.earlyDropHorses || []).map((e) => e.no + '번').join('·')} <span class="hint" style="font-weight:400;font-size:11px">| 후반 재편에도 유지</span></div>` : ''}
+      ${(cp.earlyDropTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:700;margin:1px 0;color:#fde68a">🎯 자동삼복승: ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''} <span class="hint" style="font-weight:400;font-size:11px">(초기급락 보존 조합)</span></div>`).join('')}
+      ${(cp.darkHorsePicks || []).length ? `<div style="font-size:13px;font-weight:700;margin:4px 0 1px;color:#f0abfc">🐎 복병 편성(제거 금지): ${(cp.darkHorsePicks || []).map((e) => e.no + '번').join('·')}</div>` : ''}
+      ${(cp.darkTrifectas || []).map((t) => `<div style="font-size:14px;font-weight:700;margin:1px 0;color:#f5d0fe">🎯 자동삼복승: ${t.combo.join('+')}${t.odds != null ? ` <span class="hint" style="font-size:12px">${t.odds}배(추정)</span>` : ''} <span class="hint" style="font-weight:400;font-size:11px">(복병 편성)</span></div>`).join('')}
       <div class="hint" style="font-size:11px;margin-top:6px">축 근거: ${reasons}</div>
     </div>`;
   }
@@ -6005,13 +6007,17 @@
     const rows = cr.slice(0, 4).map((c) => {
       const col = c.level === '🔴' ? '#f87171' : (c.level === '🟠' ? '#fbbf24' : '#facc15');
       const refs = (c.refs || []).map((r) => r + '번').join('·');
+      const qx = (c.qScore != null || c.xScore != null)
+        ? `<span class="hint">복승 <b style="color:${col}">${c.qScore != null ? c.qScore : '-'}</b>·쌍승 <b style="color:${col}">${c.xScore != null ? c.xScore : '-'}</b></span>` : '';
+      const both = c.both ? `<span style="font-weight:800;color:#f87171">🔁 양쪽감지</span>` : '';
       return `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:4px 8px;border-radius:6px;margin:2px 0;background:rgba(250,204,21,.06);border-left:3px solid ${col}">
         <b style="color:${col}">${c.level} ${c.no}번</b>
         <span class="hint">크로스 점수 <b style="color:${col}">${c.score}</b></span>
+        ${qx}${both}
         ${refs ? `<span class="hint" style="margin-left:auto">→ ${esc(refs)} 1착 시 2착 강력</span>` : ''}
       </div>`;
     }).join('');
-    return `<div class="matrix-title" style="font-size:13px;color:#facc15">🔀 복승 크로스 역배열 <span class="hint" style="font-weight:400">인기 상위쌍 편차 · 0.3🟡/0.5🟠/0.7🔴</span></div>${rows}`;
+    return `<div class="matrix-title" style="font-size:13px;color:#facc15">🔀 복승·쌍승 크로스 역배열 <span class="hint" style="font-weight:400">인기1위+X vs 인기2위+X · 0.3🟡/0.5🟠/0.7🔴 · 🔁양쪽=복승+쌍승 동시</span></div>${rows}`;
   }
 
   function sportAnalysisHTML(a, bsel) {

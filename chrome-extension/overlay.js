@@ -584,10 +584,20 @@
           if (_edh.length) {
             var _ednos = _edh.map(function (e) { return e.no; }).join('·');
             cpBox.appendChild(mk('div', 'font-weight:700;font-size:13px;margin-top:3px;color:#fbbf24',
-              '📌 초기급락 보존: ' + _ednos + '번 (후반 재편에도 유지)'));
+              '📌 초기급락 보존: ' + _ednos + '번 | 후반 재편에도 유지'));
             (cp.earlyDropTrifectas || []).forEach(function (t) {
-              cpBox.appendChild(mk('div', 'font-weight:600;font-size:13px;margin-top:1px;color:#fde68a',
-                '🛡 삼복승 보험(초기급락): ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '')));
+              cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:1px;color:#fde68a',
+                '🎯 자동삼복승: ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '') + ' (초기급락 보존 조합)'));
+            });
+          }
+          // [Bug1·복병 삼복승 자동 편성] 복병(집중급락/스마트머니) 말은 제거 취소 + 삼복승 강제 편성.
+          var _dhp = cp.darkHorsePicks || [];
+          if (_dhp.length) {
+            cpBox.appendChild(mk('div', 'font-weight:700;font-size:13px;margin-top:3px;color:#f0abfc',
+              '🐎 복병 편성(제거 금지): ' + _dhp.map(function (e) { return e.no; }).join('·') + '번'));
+            (cp.darkTrifectas || []).forEach(function (t) {
+              cpBox.appendChild(mk('div', 'font-weight:700;font-size:14px;margin-top:1px;color:#f5d0fe',
+                '🎯 자동삼복승: ' + t.combo.join('+') + (t.odds != null ? '  ' + t.odds + '배(추정)' : '') + ' (복병 편성)'));
             });
           }
           panel.appendChild(cpBox);
@@ -729,11 +739,15 @@
           panel.appendChild(db);
         });
 
-        // [복승 크로스 역배열] 강한(0.5+) 크로스 역배열 말 강조: "🔴 크로스 역배열 13번 0.72 → 6·11번 1착 시 2착 강력".
-        (d.crossReversal || []).filter(function (c) { return c.score >= 0.5; }).slice(0, 2).forEach(function (c) {
-          var col = c.level === '🔴' ? '#f87171' : '#fbbf24';
+        // [복승·쌍승 크로스 역배열] 강한(복승/쌍승 0.5+) 크로스 역배열 말 강조: "🔴 크로스 역배열 13번 복0.72·쌍0.61 🔁양쪽".
+        (d.crossReversal || []).filter(function (c) {
+          return c.score >= 0.5 || (c.qScore || 0) >= 0.5 || (c.xScore || 0) >= 0.5;
+        }).slice(0, 2).forEach(function (c) {
+          var col = (c.level === '🔴' || c.both) ? '#f87171' : '#fbbf24';
           var cx = mk('div', 'margin:3px 0;padding:4px 8px;border-left:3px solid ' + col + ';background:rgba(250,204,21,.12);border-radius:6px');
-          cx.appendChild(mk('span', 'font-weight:800;color:' + col, c.level + ' 크로스 역배열 ' + c.no + '번 ' + c.score));
+          var qx = (c.qScore != null || c.xScore != null)
+            ? ' (복' + (c.qScore != null ? c.qScore : '-') + '·쌍' + (c.xScore != null ? c.xScore : '-') + ')' : (' ' + c.score);
+          cx.appendChild(mk('span', 'font-weight:800;color:' + col, c.level + ' 크로스 역배열 ' + c.no + '번' + qx + (c.both ? ' 🔁양쪽' : '')));
           if ((c.refs || []).length) cx.appendChild(mk('span', 'margin-left:6px;font-size:11px;color:#fde68a', '→ ' + c.refs.join('·') + '번 1착 시 2착 강력'));
           panel.appendChild(cx);
         });
