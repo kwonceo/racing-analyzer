@@ -143,27 +143,27 @@
  "cumulative_pattern_reliability": {
   "마감급락": {
    "label": "급락 감지 적중",
-   "hit": 37,
-   "n": 39,
-   "rate": 94.9
+   "hit": 22,
+   "n": 22,
+   "rate": 100.0
   },
   "쌍승역전": {
    "label": "쌍승 역전 적중",
-   "hit": 7,
-   "n": 22,
-   "rate": 31.8
+   "hit": 6,
+   "n": 15,
+   "rate": 40.0
   },
   "전적이중수렴": {
    "label": "전적 유력마 적중(이중수렴 근사)",
-   "hit": 34,
-   "n": 80,
-   "rate": 42.5
+   "hit": 21,
+   "n": 42,
+   "rate": 50.0
   },
   "추천종합": {
    "label": "추천 종합 적중",
-   "hit": 70,
-   "n": 237,
-   "rate": 29.5
+   "hit": 33,
+   "n": 89,
+   "rate": 37.1
   }
  },
  "key_learnings": [],
@@ -171,5 +171,5 @@
  "pattern_discoveries": [],
  "system_improvements": [],
  "tomorrow_focus": [],
- "generated_at": "2026-07-12 23:14:46"
+ "generated_at": "2026-07-12 22:00:11"
 }

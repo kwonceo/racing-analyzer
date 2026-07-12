@@ -49,6 +49,7 @@ else:
     _FITZ_IMPORT_ERROR = None
 
 MODEL = "claude-sonnet-4-6"
+APP_VERSION = "2.3.0"  # 서버 버전(공개 /api/health 노출용) — CHANGELOG 최신 버전과 동기화
 
 
 # ---------- .env 로더 (dotenv 의존성 없이) ----------
@@ -70,6 +71,124 @@ load_env()
 app = Flask(__name__, static_folder="static", static_url_path="")
 # [1] 대용량 요청 허용 (큰 배당판 이미지/3종 데이터 업로드 시 413 방지)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB
+
+# ─────────────────────────────────────────
+# [공개 서비스 연동] CORS — 허용된 오리진만 교차출처(/api/*) 허용
+#   허용: bmed-public Railway · localhost:8012(공개 프론트) · localhost:8011(자기 자신)
+#         · ngrok 와일드카드(*.ngrok.io / *.ngrok-free.app / *.ngrok.app) · *.up.railway.app
+#   flask_cors 있으면 사용(정식·preflight 자동), 없으면 수동 after_request 로 폴백(서버 기동 보장).
+# ─────────────────────────────────────────
+CORS_ALLOWED_EXACT = {
+    "https://web-production-d4723.up.railway.app",  # bmed-public Railway
+    "http://localhost:8012",
+    "http://127.0.0.1:8012",
+    "http://localhost:8011",
+    "http://127.0.0.1:8011",
+}
+CORS_ALLOWED_PATTERNS = [
+    re.compile(r"^https?://[a-z0-9][a-z0-9-]*\.ngrok(-free)?\.(io|app)$", re.I),  # ngrok 와일드카드
+    re.compile(r"^https?://[a-z0-9][a-z0-9-]*\.up\.railway\.app$", re.I),          # Railway 서브도메인
+]
+
+
+def _cors_origin_allowed(origin):
+    """요청 Origin 이 허용 목록/패턴에 해당하는지."""
+    if not origin:
+        return False
+    if origin in CORS_ALLOWED_EXACT:
+        return True
+    return any(p.match(origin) for p in CORS_ALLOWED_PATTERNS)
+
+
+try:
+    from flask_cors import CORS as _FlaskCORS
+    _FlaskCORS(app, resources={r"/api/*": {"origins": list(CORS_ALLOWED_EXACT) + CORS_ALLOWED_PATTERNS}},
+               supports_credentials=False,
+               methods=["GET", "POST", "OPTIONS"],
+               allow_headers=["Content-Type", "Authorization"])
+    CORS_BACKEND = "flask_cors"
+except Exception as _cors_err:  # flask_cors 미설치 등 — 수동 폴백(기동 우선)
+    CORS_BACKEND = "manual"
+    print("[경고] flask_cors import 실패 — 수동 CORS 폴백 사용:", str(_cors_err))
+
+    @app.before_request
+    def _cors_preflight():
+        # OPTIONS preflight 은 허용 오리진일 때 200 으로 즉시 응답(수동 폴백 경로)
+        if request.method == "OPTIONS" and request.path.startswith("/api/"):
+            origin = request.headers.get("Origin")
+            if _cors_origin_allowed(origin):
+                resp = app.make_default_options_response()
+                resp.headers["Access-Control-Allow-Origin"] = origin
+                resp.headers["Vary"] = "Origin"
+                resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+                resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+                return resp
+
+    @app.after_request
+    def _cors_headers(resp):
+        origin = request.headers.get("Origin")
+        if request.path.startswith("/api/") and _cors_origin_allowed(origin):
+            resp.headers["Access-Control-Allow-Origin"] = origin
+            resp.headers.setdefault("Vary", "Origin")
+            resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+            resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return resp
+
+
+# ─────────────────────────────────────────
+# [공개 서비스 연동] 접근 등급(향후 인증) 구조 — 현재는 전부 오픈
+#   PREMIUM_ENFORCED=False 이면 게이트 완전 통과(현행 유지). True 로 바꾸고
+#   _request_is_authed 를 실제 인증에 연결하면 프리미엄 엔드포인트만 차단됨.
+#   ⚠ 기존 라우트 코드는 전혀 건드리지 않음(before_request 게이트로 비침습 구성).
+# ─────────────────────────────────────────
+PREMIUM_ENFORCED = False  # True 로 승격 시 아래 PREMIUM_ENDPOINTS 에 인증 요구
+
+# 공개(로그인 불필요) — 오늘 경주 목록·결과·현황·최신 배당·상태·통계
+PUBLIC_ENDPOINTS = {
+    "/api/health", "/api/multi/schedule", "/api/multi/dashboard",
+    "/api/odds/triple/latest", "/api/learning/stats",
+    "/api/race-results/missing", "/api/races/list", "/api/history/list",
+    "/api/hall-of-fame", "/api/highlights",
+}
+# 프리미엄(향후 인증 필요) — BMED 신호 상세·복승/삼복승 추천
+PREMIUM_ENDPOINTS = {
+    "/api/odds/triple/analyze",   # 분석 결과(복승/삼복승 추천 + BMED 신호)
+    "/api/odds/signal-timeline",  # 신호 타임라인(BMED 신호 상세)
+}
+
+
+def _access_tier(path):
+    """엔드포인트 접근 등급 반환. 미분류는 공개(현행 유지)."""
+    if path in PREMIUM_ENDPOINTS:
+        return "premium"
+    return "public"
+
+
+def _request_is_authed(req):
+    """향후 실제 인증 연동 지점(현재는 토큰 유무만 확인 — 미강제 상태라 미사용)."""
+    return bool((req.headers.get("Authorization") or "").strip())
+
+
+@app.before_request
+def _premium_gate():
+    # 현재: 전부 오픈(PREMIUM_ENFORCED=False → 즉시 통과). 향후 True 로 승격 시에만 차단.
+    if not PREMIUM_ENFORCED:
+        return
+    p = request.path
+    if p.startswith("/api/") and _access_tier(p) == "premium" and not _request_is_authed(request):
+        return jsonify({"error": "premium_required",
+                        "message": "프리미엄 전용 데이터입니다. 인증이 필요합니다."}), 402
+
+
+@app.route("/api/access/policy", methods=["GET"])
+def access_policy():
+    """공개 프론트(bmed-public)가 어떤 데이터가 공개/프리미엄인지 알 수 있게 등급표 노출."""
+    return jsonify({
+        "enforced": PREMIUM_ENFORCED,
+        "public": sorted(PUBLIC_ENDPOINTS),
+        "premium": sorted(PREMIUM_ENDPOINTS),
+        "note": "현재 전부 오픈. premium 은 향후 인증 뒤로 이동 예정.",
+    })
 
 
 def client(api_key=None):
@@ -546,10 +665,13 @@ def index():
 
 @app.route("/api/health")
 def health():
-    return jsonify({"ok": True, "model": MODEL,
+    # 공개 서버 상태 확인용 — status/version 은 외부 모니터링(bmed-public)용 표준 필드.
+    # 민감정보 미포함(내부 경로·API 키 원문·개인 설정값 노출 안 함).
+    return jsonify({"status": "ok", "version": APP_VERSION,
+                    "ok": True, "model": MODEL,
                     "has_key": bool(os.environ.get("ANTHROPIC_API_KEY", "").strip()),
-                    "pdf_ready": fitz is not None,
-                    "pdf_error": _FITZ_IMPORT_ERROR})
+                    "cors": CORS_BACKEND,
+                    "pdf_ready": fitz is not None})
 
 
 @app.route("/api/usage", methods=["GET"])
@@ -16207,7 +16329,15 @@ def on_error(e):
     # HTTP 예외(404/405 등)는 원래 상태코드를 보존 — 405가 500으로 둔갑하던 버그 수정
     if isinstance(e, HTTPException):
         return jsonify({"error": f"{e.code} {e.name}: {e.description}"}), e.code
-    return jsonify({"error": str(e)}), 500
+    # [공개 서비스·item5] 프로덕션에서는 내부 경로/디버그정보 노출 방지 — 일반 메시지로 응답.
+    #   로컬(debug 또는 FLASK_ENV!=production)에서는 기존대로 str(e) 노출해 디버깅 유지(무삭제).
+    if app.debug or os.environ.get("FLASK_ENV") != "production":
+        return jsonify({"error": str(e)}), 500
+    try:
+        app.logger.exception("internal error")  # 상세 원인은 서버 로그에만 기록
+    except Exception:
+        pass
+    return jsonify({"error": "internal_error", "message": "서버 내부 오류가 발생했습니다."}), 500
 
 
 # ═══════════════════════════════════════════════════════════════════════════
