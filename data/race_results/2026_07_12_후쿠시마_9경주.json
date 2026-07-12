@@ -10,7 +10,8 @@
  "horse_count": 8,
  "result": {
   "1st": 7,
-  "2nd": 4
+  "2nd": 4,
+  "3rd": 11
  },
  "odds_at_start": {
   "quinella": {
@@ -3270,13 +3271,13 @@
   "recommend_sub": null,
   "strategy": "BMED_보험형",
   "signal_quality": "하",
-  "confidence": 0,
+  "confidence": 32.0,
   "inverse": false
  },
  "result_analysis": {
   "main_hit": true,
   "sub_hit": false,
-  "hit_reason": "제거 적중",
+  "hit_reason": "적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
@@ -3286,13 +3287,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 17.3,
+  "quinella_odds": null,
   "trifecta_odds": null,
   "actual_return": null,
   "profit": 16300
  },
  "memo": null,
- "saved_at": "2026-07-12 14:42:48",
+ "saved_at": "2026-07-12 21:23:03",
  "validation": {
   "ok": true,
   "errors": []

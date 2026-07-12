@@ -6,7 +6,7 @@
  "date": "2026-07-12",
  "race": "하코다테 10경주",
  "analyzed_at": "14:34:59",
- "updated_at": "14:35:08",
+ "updated_at": "21:23:04",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -134,64 +134,24 @@
  },
  "horses": [
   {
-   "no": 2,
-   "name": "불타는심",
-   "jockey": "동하",
-   "record_score": 33.8,
-   "record_detail": "최근 5-7-8-2-1",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 10.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "검이불루",
-   "jockey": "정준",
-   "record_score": 41.2,
-   "record_detail": "최근 4-4-6-2-1",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 10.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "엠제이베",
-   "jockey": "성현",
-   "record_score": 62.5,
-   "record_detail": "최근 6-2-3-1-8",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 8.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 8,
-   "name": "위즈파이",
-   "jockey": "다빈",
-   "record_score": 80,
-   "record_detail": "최근 2-7-1-4-2",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 7.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 10,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 7.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
    "no": 1,
    "name": "청룡의칼",
    "jockey": "이혁",
    "record_score": 85,
    "record_detail": "최근 3-3-1-2-4",
    "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 2,
+   "name": "불타는심",
+   "jockey": "동하",
+   "record_score": 33.8,
+   "record_detail": "최근 5-7-8-2-1",
+   "odds": null,
    "grade": "D",
-   "grade_reason": "배당 34.4배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 3,
@@ -200,8 +160,28 @@
    "record_score": 96.2,
    "record_detail": "최근 1-1-5-4-5",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 31.4배 · 감점 없음 = 100점"
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 4,
+   "name": "검이불루",
+   "jockey": "정준",
+   "record_score": 41.2,
+   "record_detail": "최근 4-4-6-2-1",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 6,
+   "name": "엠제이베",
+   "jockey": "성현",
+   "record_score": 62.5,
+   "record_detail": "최근 6-2-3-1-8",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 7,
@@ -210,18 +190,18 @@
    "record_score": 51.2,
    "record_detail": "최근 7-3-1-9-4",
    "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 74.4배 · 감점 없음 = 100점"
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 9,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
+   "no": 8,
+   "name": "위즈파이",
+   "jockey": "다빈",
+   "record_score": 80,
+   "record_detail": "최근 2-7-1-4-2",
    "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 32.9배 · 감점 없음 = 100점"
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 5,
@@ -230,36 +210,27 @@
    "record_score": 51.2,
    "record_detail": "최근 8-8-1-4-7",
    "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 19.3배 · 최근평균 5.6착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 11,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 99.7배 · 배당 80~149 -20 = 80점"
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.6착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
-   2,
-   4,
-   6,
-   8,
-   10,
    1,
    3,
+   6,
    7,
-   9,
-   5,
-   11
+   8,
+   5
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "eliminated": [
+   2,
+   4
+  ],
+  "elimination_reasons": {
+   "2": "배당 미수집 · 배당 150배+ -40 = 60점",
+   "4": "배당 미수집 · 배당 150배+ -40 = 60점"
+  }
  },
  "final_recommendation": {
   "budget_allocation": {}
@@ -268,11 +239,11 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    6,
+    1,
     8
    ],
    "trio": [
-    4,
+    1,
     6,
     8
    ]
@@ -297,111 +268,65 @@
   },
   "final": {
    "quinella": [
-    6,
+    1,
     8
    ],
    "trio": [
-    4,
+    1,
     6,
     8
    ]
   }
  },
- "corePicks": {
-  "axis": [
-   4,
-   6
-  ],
-  "third": 8,
-  "quinella": [
-   4,
-   6
-  ],
-  "trifecta": [
-   4,
-   6,
-   8
-  ],
-  "picks": [
-   {
-    "no": 4,
-    "tier": 1,
-    "sub": -999.0,
-    "rep": 999.0,
-    "reason": "유력마 저배당 999배"
-   },
-   {
-    "no": 6,
-    "tier": 1,
-    "sub": -999.0,
-    "rep": 999.0,
-    "reason": "유력마 저배당 999배"
-   },
-   {
-    "no": 8,
-    "tier": 1,
-    "sub": -999.0,
-    "rep": 999.0,
-    "reason": "유력마 저배당 999배"
-   }
-  ],
-  "quinellaOdds": null,
-  "trifectaOdds": null,
-  "confQuinellas": [
-   {
-    "combo": [
-     6,
-     8
-    ],
-    "odds": null,
-    "reason": "시장유력"
-   },
-   {
-    "combo": [
-     1,
-     3
-    ],
-    "odds": null,
-    "reason": "확신도1위+2위"
-   },
-   {
-    "combo": [
-     3,
-     8
-    ],
-    "odds": null,
-    "reason": "확신도1위+시장유력"
-   }
-  ],
-  "forcedHorses": [],
-  "confTop1": 3,
-  "confTop1Conf": 28.9,
-  "confTop1High": false,
-  "favAxis": [
+ "corePicks": null,
+ "summary": "유력마 1·8·6 / 복승 1+8",
+ "keyHorses": [
+  1,
+  8,
+  6
+ ],
+ "result": {
+  "1st": 6,
+  "2nd": 5,
+  "3rd": 8
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
    8,
    6
   ],
-  "confTrifecta": [
-   4,
-   6,
-   8
-  ],
-  "confTrifectaOdds": null,
-  "confTrifectaIns": [
-   1,
-   2,
-   3
-  ],
-  "confTrifectaInsOdds": null
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 2,
+  "form_pick_hit": false,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 62.5,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "추천 미적중"
+  }
  },
- "summary": "유력마 8·6·4 / 복승 6+8",
- "keyHorses": [
-  8,
-  6,
-  4
- ],
- "result": null,
- "hit": null,
  "profit": null,
  "review": null
 }

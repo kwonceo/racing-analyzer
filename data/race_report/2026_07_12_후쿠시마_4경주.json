@@ -6,7 +6,7 @@
   "1st": 6,
   "2nd": 8,
   "3rd": 5,
-  "4th": 2
+  "4th": null
  },
  "hit": true,
  "hit_type": "복승 보조(삼복승 구성)",
@@ -269,7 +269,7 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": 81.2,
-   "confidence": 96.2,
+   "confidence": 100.0,
    "reason": "초과급락"
   },
   "signal_8": {
@@ -528,7 +528,7 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": 31.2,
-   "confidence": 8.0,
+   "confidence": 52.0,
    "reason": "일반"
   },
   "signal_5": {
@@ -787,7 +787,7 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": 0,
-   "confidence": 90.6,
+   "confidence": 100.0,
    "reason": "초과급락"
   },
   "signal_2": {
@@ -1046,7 +1046,7 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": 32.5,
-   "confidence": 8.0,
+   "confidence": 84.0,
    "reason": "일반"
   }
  },
@@ -1054,8 +1054,8 @@
   "1. 전적 분석: 6번 81.2점",
   "2. 배당 수집 시작 11:30:08",
   "3. 초과급락 감지: 5번 초과급락 -3.1%p (전체평균 -14.2%)",
-  "5. 종합 신뢰도 96.2점(상) 판정",
-  "6. BMED 전략: 압축형 적용",
+  "5. 종합 신뢰도 100.0점(상) 판정",
+  "6. BMED 전략: 고배당도전형 적용",
   "7. 최종 추천: 복승 메인 2+8"
  ],
  "confidence_breakdown": {
@@ -1064,7 +1064,7 @@
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
   "record_score": 81.2,
-  "total": 96.2,
+  "total": 100.0,
   "grade": "상"
  },
  "win_tags": [
@@ -1085,7 +1085,7 @@
    5,
    6
   ],
-  "confidence": 96.2,
+  "confidence": 100.0,
   "reason": "5+6 복승 급락(-17.3%) → 5·6번 입상 적중"
  },
  "signal_change_history": {
@@ -1103,5 +1103,5 @@
  },
  "pnl": 12900,
  "stake": 1000,
- "generated_at": "2026-07-12 11:50:57"
+ "generated_at": "2026-07-12 21:22:50"
 }

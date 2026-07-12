@@ -6,7 +6,7 @@
  "date": "2026-07-12",
  "race": "고쿠라 4경주",
  "analyzed_at": "11:19:49",
- "updated_at": "11:33:12",
+ "updated_at": "21:22:49",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -2177,74 +2177,34 @@
  },
  "horses": [
   {
-   "no": 6,
-   "name": "포트모어",
-   "jockey": "승운",
-   "record_score": 81.2,
-   "record_detail": "최근 1-5-3-5-4",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 6.7배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "퀀퍼펙트",
-   "jockey": "도운",
-   "record_score": 0,
-   "record_detail": "",
+   "no": 1,
+   "name": "화려한순",
+   "jockey": "인권",
+   "record_score": 65,
+   "record_detail": "최근 4-3-2-5-1",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 6.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 8,
-   "name": "배다리보",
-   "jockey": "형철",
-   "record_score": 31.2,
-   "record_detail": "최근 5-4-5-2-6",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 10.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 9,
-   "name": "승리예약",
-   "jockey": "은경",
-   "record_score": 90,
-   "record_detail": "최근 2-1-8-5-5",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 19.2배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 12,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 13.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 13,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 72.6배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 11,
-   "name": "스카이닉",
-   "jockey": "시대",
-   "record_score": 23.8,
-   "record_detail": "최근 8-8-7-2-9",
+   "no": 2,
+   "name": "월드트리",
+   "jockey": "정혁",
+   "record_score": 32.5,
+   "record_detail": "최근 5-9-4-1-3",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 8.5배 · 최근평균 6.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 3,
+   "name": "앨리스마",
+   "jockey": "실바",
+   "record_score": 100,
+   "record_detail": "최근 2-2-2-3-5",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 4,
@@ -2254,7 +2214,7 @@
    "record_detail": "최근 7-2-3-6-2",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 84.6배 · 배당 80~149 -20 = 80점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 5,
@@ -2263,38 +2223,48 @@
    "record_score": 0,
    "record_detail": "",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 109배 · 배당 80~149 -20 = 80점"
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 1,
-   "name": "화려한순",
-   "jockey": "인권",
-   "record_score": 65,
-   "record_detail": "최근 4-3-2-5-1",
+   "no": 6,
+   "name": "포트모어",
+   "jockey": "승운",
+   "record_score": 81.2,
+   "record_detail": "최근 1-5-3-5-4",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 383.9배 · 배당 150배+ -40 = 60점"
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 2,
-   "name": "월드트리",
-   "jockey": "정혁",
-   "record_score": 32.5,
-   "record_detail": "최근 5-9-4-1-3",
+   "no": 7,
+   "name": "퀀퍼펙트",
+   "jockey": "도운",
+   "record_score": 0,
+   "record_detail": "",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 417.3배 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 3,
-   "name": "앨리스마",
-   "jockey": "실바",
-   "record_score": 100,
-   "record_detail": "최근 2-2-2-3-5",
+   "no": 8,
+   "name": "배다리보",
+   "jockey": "형철",
+   "record_score": 31.2,
+   "record_detail": "최근 5-4-5-2-6",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 291.5배 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 9,
+   "name": "승리예약",
+   "jockey": "은경",
+   "record_score": 90,
+   "record_detail": "최근 2-1-8-5-5",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 10,
@@ -2303,28 +2273,39 @@
    "record_score": 26.2,
    "record_detail": "최근 6-7-8-3-2",
    "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 287.7배 · 배당 150배+ -40 / 최근평균 5.2착 -30 = 30점"
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.2착 -30 = 30점"
+  },
+  {
+   "no": 11,
+   "name": "스카이닉",
+   "jockey": "시대",
+   "record_score": 23.8,
+   "record_detail": "최근 8-8-7-2-9",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.8착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
-   6,
-   7,
-   8,
-   9,
-   12,
-   13,
-   11,
-   4,
-   5,
    1,
    2,
    3,
-   10
+   4,
+   5,
+   6,
+   8,
+   9,
+   10,
+   11
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "eliminated": [
+   7
+  ],
+  "elimination_reasons": {
+   "7": "배당 미수집 · 배당 150배+ -40 = 60점"
+  }
  },
  "final_recommendation": {
   "budget_allocation": {}
@@ -2462,13 +2443,13 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    6,
-    11
+    3,
+    4
    ],
    "trio": [
-    6,
-    8,
-    11
+    1,
+    3,
+    4
    ]
   },
   "form": {
@@ -2488,37 +2469,38 @@
   },
   "final": {
    "quinella": [
-    6,
-    11
+    3,
+    4
    ],
    "trio": [
-    6,
-    8,
-    11
+    1,
+    3,
+    4
    ]
   }
  },
- "summary": "유력마 6·11·8 / 복승 6+11",
+ "corePicks": null,
+ "summary": "유력마 3·4·1 / 복승 3+4",
  "keyHorses": [
-  6,
-  11,
-  8
+  3,
+  4,
+  1
  ],
  "result": {
-  "1st": 4,
-  "2nd": 3,
-  "3rd": 1
+  "1st": 7,
+  "2nd": 12,
+  "3rd": 6
  },
  "hit": {
-  "was_hit": true,
+  "was_hit": false,
   "quinella_hit": false,
   "trifecta_hit": false,
   "keyhorse_quinella_hit": false,
   "keyhorse_trifecta_hit": false,
-  "keyhorse_placed": [],
-  "dark_placed": [
-   3
+  "keyhorse_placed": [
+   6
   ],
+  "dark_placed": [],
   "payouts": {
    "quinella": 0,
    "trifecta": 0
@@ -2528,24 +2510,21 @@
   "elimination_correct": false,
   "eliminated": [],
   "form_pick": 6,
-  "form_pick_hit": false,
+  "form_pick_hit": true,
   "pnl": -1000,
   "stake": 1000,
   "near_miss": false,
   "near_miss_horse": null,
   "pairing_miss": null,
   "hit_basis": {
-   "formScore": 71.2,
+   "formScore": 0,
    "dropAmt": null,
    "dropScore": 0.0,
    "inverse": false,
-   "inverseHorses": [
-    5,
-    7
-   ],
+   "inverseHorses": [],
    "inverseHit": [],
-   "confidence": 0.0,
-   "reason": "적중"
+   "confidence": 64.0,
+   "reason": "전적유력마 6번 적중"
   }
  },
  "profit": null,

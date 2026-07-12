@@ -6,7 +6,7 @@
  "date": "2026-07-12",
  "race": "고쿠라 2경주",
  "analyzed_at": "10:26:00",
- "updated_at": "10:33:02",
+ "updated_at": "21:22:43",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -500,15 +500,7 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "10:32:44",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[2·3위 간]: 단승 9번(2위) vs 13번(3위) — 쌍승 13→9(31.4)가 9→13(39.5)보다 낮음 → 상위권 실질순위 역전: 13번 우세 (역배열 0.795)",
-   "severity": "🟠",
-   "reason": "역전비율 = 쌍승(13→9) 31.4 / 쌍승(9→13) 39.5 = 0.795 (역배열)"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
   "signals": [],
@@ -532,7 +524,7 @@
    "record_detail": "최근 1-2-1",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 17.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 3,
@@ -542,47 +534,7 @@
    "record_detail": "최근 2-1-5",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "무림미소",
-   "jockey": "수한",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 6.2배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 8,
-   "name": "곤룡포",
-   "jockey": "성민",
-   "record_score": 25,
-   "record_detail": "최근 5-4-2",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 17.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 9,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 13,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 5.4배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 4,
@@ -591,28 +543,38 @@
    "record_score": 58.3,
    "record_detail": "최근 4-2-1",
    "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 6,
+   "name": "무림미소",
+   "jockey": "수한",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 7,
+   "name": "마패창",
+   "jockey": "홍권",
+   "record_score": 73.9,
+   "record_detail": "최근 3-2-2",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 8,
+   "name": "곤룡포",
+   "jockey": "성민",
+   "record_score": 25,
+   "record_detail": "최근 5-4-2",
+   "odds": null,
    "grade": "C",
-   "grade_reason": "배당 32.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 10,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 23.7배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 12,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 74.5배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 2,
@@ -622,37 +584,7 @@
    "record_detail": "최근 4-4-5-7",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 35.1배 · 최근평균 5.0착 -30 = 70점"
-  },
-  {
-   "no": 7,
-   "name": "마패창",
-   "jockey": "홍권",
-   "record_score": 73.9,
-   "record_detail": "최근 3-2-2",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 397배 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 11,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 172.9배 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 14,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 172.6배 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   },
   {
    "no": 5,
@@ -662,32 +594,25 @@
    "record_detail": "최근 5",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 368.4배 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
    1,
    3,
-   6,
-   8,
-   9,
-   13,
    4,
-   10,
-   12,
-   2,
-   7
+   7,
+   8,
+   2
   ],
   "eliminated": [
-   11,
-   14,
+   6,
    5
   ],
   "elimination_reasons": {
-   "11": "배당 172.9배 · 배당 150배+ -40 = 60점",
-   "14": "배당 172.6배 · 배당 150배+ -40 = 60점",
-   "5": "배당 368.4배 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+   "6": "배당 미수집 · 배당 150배+ -40 = 60점",
+   "5": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   }
  },
  "final_recommendation": {
@@ -846,13 +771,13 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    3,
-    4
+    1,
+    7
    ],
    "trio": [
+    1,
     3,
-    4,
-    9
+    7
    ]
   },
   "form": {
@@ -872,24 +797,70 @@
   },
   "final": {
    "quinella": [
-    3,
-    9
+    1,
+    7
    ],
    "trio": [
+    1,
     3,
-    4,
-    9
+    7
    ]
   }
  },
- "summary": "유력마 3·4·9 / 복승 3+9",
+ "corePicks": null,
+ "summary": "유력마 1·7·3 / 복승 1+7",
  "keyHorses": [
-  3,
-  4,
-  9
+  1,
+  7,
+  3
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 9,
+  "2nd": 6,
+  "3rd": 10
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   9
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   11,
+   14,
+   5
+  ],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [
+    13
+   ],
+   "inverseHit": [],
+   "confidence": 8.0,
+   "reason": "제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }
