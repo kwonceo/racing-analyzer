@@ -14920,6 +14920,94 @@ def kra_jockey():
     return jsonify({"ok": True, "count": len(out), "meet": meet, "jockeys": out})
 
 
+# ── [기수 복승률 자동 주입] 현직기수정보 → 이름별 복승률 맵(캐시) → BMED 카드 주입 ──
+_KRA_JOCKEY_CACHE = {"t": 0.0, "map": {}}
+
+
+def _kra_jockey_map(force=False):
+    """현직기수정보(전 경마장 1·2·3) → {기수명: {quinellaRate(1+2착), placeRate(1+2+3착), winRate(1착), rides, meet}}.
+    6시간 캐시. API 실패 시 static/data/jockeys.json 폴백(winRate=단승률·placeRate=입상률)."""
+    if _KRA_JOCKEY_CACHE["map"] and not force and (time.time() - _KRA_JOCKEY_CACHE["t"] < 21600):
+        return _KRA_JOCKEY_CACHE["map"]
+    m = {}
+    for meet in ("1", "2", "3"):
+        items, err = _kra_api_get("currentjockeyInfo/getcurrentjockeyinfo", {"meet": meet}, num_rows=300)
+        if err:
+            continue
+        for it in items:
+            nm = (it.get("jkName") or "").strip()
+            if not nm:
+                continue
+            q, t = _kra_jockey_winrate(it)
+            rc = _kra_int(it.get("rcCntT")) or 0
+            o1 = _kra_int(it.get("ord1CntT")) or 0
+            m[nm] = {"quinellaRate": q, "placeRate": t,
+                     "winRate": (round(100 * o1 / rc) if rc else None),
+                     "rides": rc, "meet": KRA_MEET_NAME.get(str(meet))}
+    if not m:   # API 전부 실패 → jockeys.json 폴백(복승률 미제공·단승/입상률만)
+        try:
+            jp = os.path.join(os.path.dirname(__file__), "static", "data", "jockeys.json")
+            for j in (json.load(open(jp, encoding="utf-8")).get("jockeys") or []):
+                nm = (j.get("name") or "").strip()
+                if nm:
+                    m[nm] = {"quinellaRate": None, "placeRate": j.get("placeRate"),
+                             "winRate": j.get("winRate"), "rides": j.get("rides"),
+                             "meet": j.get("track"), "fallback": True}
+        except Exception:
+            pass
+    if m:
+        _KRA_JOCKEY_CACHE.update({"t": time.time(), "map": m})
+    return m
+
+
+def _jockey_rate(name):
+    """기수명 → 복승률 dict(정확 매칭 우선, 부분 매칭 폴백). 한국 기수만 매칭(일본 등은 None)."""
+    if not name:
+        return None
+    mp = _kra_jockey_map()
+    nm = str(name).strip()
+    if nm in mp:
+        return mp[nm]
+    for k, v in mp.items():
+        if k and (k in nm or nm in k):
+            return v
+    return None
+
+
+@app.route("/api/kra/ingest-detail", methods=["POST"])
+def kra_ingest_detail():
+    """[KRA 단승 주입·역배열 활성화] 경주별상세성적표의 단승 배당을 파이프라인 주입 →
+    한국경마도 단승 인기순위·복승불일치(역배열) 분석 활성. params: {raceKey?, meet, rc_date, rc_no}.
+    ⚠ 이 API 단승은 확정(경주 후) 배당 → 복기/학습·인기순위 용도(라이브 예상배당은 별도 소스 필요)."""
+    b = request.json or {}
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "")
+    rc_date = str(b.get("rc_date") or b.get("rcDate") or "")
+    rc_no = str(b.get("rc_no") or b.get("rcNo") or "")
+    if not (meet and rc_date and rc_no):
+        return jsonify({"error": "meet, rc_date, rc_no 가 필요합니다."}), 400
+    items, err = _kra_api_get("racedetailresult/getracedetailresult",
+                              {"meet": meet, "rc_date": rc_date, "rc_no": rc_no})
+    if err:
+        return jsonify({"error": err}), 502
+    win = {}
+    for it in items:
+        no = _kra_int(it.get("chulNo"))
+        wo = _kra_num(it.get("win"))
+        if no and wo:
+            win[str(no)] = wo
+    if not win:
+        return jsonify({"error": "단승 배당 없음(경주일/경주번호 확인)"}), 422
+    rk = (b.get("raceKey") or "%s %s경주" % (KRA_MEET_NAME.get(meet, meet), rc_no)).strip()
+    # 기존 복승(quinella) 있으면 보존하며 단승만 갱신
+    prev = _triple_load().get(rk) or {}
+    _do_triple_ingest(rk, prev.get("quinella") or [], prev.get("exacta") or [],
+                      prev.get("trio") or [], win, sport="horse", category="korea", source="kra_detail")
+    fav = sorted(win.items(), key=lambda kv: kv[1])
+    return jsonify({"ok": True, "raceKey": rk, "single": len(win),
+                    "favRank": [{"no": int(k), "winOdds": v, "rank": i + 1} for i, (k, v) in enumerate(fav)],
+                    "note": "확정 단승 주입 — 인기순위·역배열 분석 활성(복기/학습용)"})
+
+
 # ══════════════ [프리미엄 알림] 등급별 실시간 알림(🔴즉시/🟠예고/🟡사전) ══════════════
 #   361경주 분석 근거: 신호성숙 T-10분+ 57%·전략별 보험형48.9%·역배열형46.6% / 전략없음 2.8%.
 #   → 전략/신호 있는 경주만 알림(오알림 방지). 마감까지 남은 분(minutesBefore)으로 등급 판정.
@@ -15099,8 +15187,11 @@ def _bmed_before_card(rk, form):
                     key=lambda h: -(h.get("totalScore") or h.get("formScore") or 0))
     watch = []
     for h in horses[:3]:
+        jr = _jockey_rate(h.get("jockey"))   # [기수 복승률 자동 주입] 한국 기수면 복승률 첨부
         watch.append({
             "no": h.get("no"), "name": h.get("name"), "jockey": h.get("jockey"),
+            "jockeyQuinellaRate": (jr or {}).get("quinellaRate"),
+            "jockeyPlaceRate": (jr or {}).get("placeRate"),
             "score": h.get("totalScore") or h.get("formScore"),
             "grade": h.get("grade") or h.get("absGrade"),
             "recentPlacings": (h.get("recentPlacings") or [])[:6],
@@ -15132,17 +15223,25 @@ def _bmed_expert_cards(an):
     single = an.get("single") or {}
     flow = _bmed_no_map(an.get("flowScores"))
     integ = _bmed_no_map(an.get("integrated"))
+    # [1번] 단승 배당 → 인기순위(단승 있는 경주만·한국경마 포함)
+    fav = {no: i + 1 for i, no in enumerate(sorted(
+        [n for n in form if single.get(str(n)) not in (None, "")],
+        key=lambda n: float(single.get(str(n)) or 9e9)))}
     cards = []
     for no in sorted(form.keys()):
         h = form[no]
         fl = flow.get(no) or {}
+        jr = _jockey_rate(h.get("jockey"))   # [기수 복승률 자동 주입] 전문가 카드에 기수 복승률
         cards.append({
             "no": no, "name": h.get("name"), "jockey": h.get("jockey"),
+            "jockeyQuinellaRate": (jr or {}).get("quinellaRate"),
+            "jockeyPlaceRate": (jr or {}).get("placeRate"),
+            "jockeyRides": (jr or {}).get("rides"),
             "score": h.get("totalScore") or h.get("formScore"),
             "grade": (integ.get(no) or {}).get("grade") or h.get("grade") or h.get("absGrade"),
             "styleType": h.get("styleType"),
             "recentPlacings": (h.get("recentPlacings") or [])[:6],
-            "currentOdds": single.get(str(no)),
+            "currentOdds": single.get(str(no)), "favRank": fav.get(no),
             "flowScore": fl.get("score"), "flowText": fl.get("text") or fl.get("label"),
         })
     return cards
