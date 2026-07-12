@@ -320,39 +320,82 @@ previewSend.addEventListener('click', async () => {
 
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
-// ── [결과 입력] 1~3착 → 서버 record-result → 분석기 결과기록 자동 반영 ──
-//   기존 record-result 재사용(적중판정·수익·학습·재현리포트 그대로). raceKey는 상단 자동감지/직접입력.
+// ── [결과 입력·자유 코멘트] 1~3착 + 코멘트 + 중요도 → /api/review/save(학습+복기) ──
+//   결과는 record-result 와 동일 학습, 코멘트는 원문 그대로 저장·키워드는 참고용 태깅(강제분류 없음).
 const btnSaveResult = document.getElementById('saveResultInput');
 const resMsg = document.getElementById('resultInputMsg');
+const resComment = document.getElementById('resComment');
+const resTagPreview = document.getElementById('resTagPreview');
+let _importance = 1;   // 1일반 / 2중요 / 3최고
 function _resNum(id) { const v = (document.getElementById(id).value || '').trim(); return v === '' ? null : parseInt(v, 10); }
+
+// [3번] 코멘트 키워드 미리보기(서버 _comment_tags 와 동일 규칙·참고용)
+const COMMENT_TAG_RULES = [
+  [['아쉽', '아쉬', '惜'], '아쉬움'], [['놓쳤', '놓침', '못잡', '못 잡', '놓친'], '놓침'],
+  [['주목', '기억', '다음에'], '다음 주목'], [['스마트머니', '스마트 머니'], '스마트머니'],
+  [['역배열', '역배'], '역배열'], [['복병'], '복병'], [['고배당'], '고배당'],
+];
+function previewTags(text) {
+  const c = text || '', out = [];
+  COMMENT_TAG_RULES.forEach(([kws, label]) => { if (out.indexOf(label) < 0 && kws.some((k) => c.indexOf(k) >= 0)) out.push(label); });
+  return out;
+}
+if (resComment) resComment.addEventListener('input', () => {
+  const t = previewTags(resComment.value);
+  resTagPreview.textContent = t.length ? '🏷 키워드: ' + t.join(' · ') : '';
+});
+
+// [4번] 중요도 버튼 — 선택 표시
+function _setImp(v) {
+  _importance = v;
+  [['imp1', 1], ['imp2', 2], ['imp3', 3]].forEach(([id, iv]) => {
+    const b = document.getElementById(id); if (!b) return;
+    const on = iv === v;
+    b.style.background = on ? (iv === 3 ? '#f59e0b' : iv === 2 ? '#7c3aed' : '#334155') : '#1e293b';
+    b.style.borderColor = on ? (iv === 3 ? '#fbbf24' : iv === 2 ? '#a78bfa' : '#64748b') : '#334155';
+    b.style.color = on ? '#fff' : '#e2e8f0';
+  });
+}
+[['imp1', 1], ['imp2', 2], ['imp3', 3]].forEach(([id, iv]) => {
+  const b = document.getElementById(id); if (b) b.addEventListener('click', () => _setImp(iv));
+});
+_setImp(1);
 
 if (btnSaveResult) btnSaveResult.addEventListener('click', () => {
   const raceKey = (els.raceKey.value || '').trim();
   const r1 = _resNum('res1'), r2 = _resNum('res2'), r3 = _resNum('res3');
+  const comment = (resComment && resComment.value || '').trim();
   if (!raceKey) { resMsg.className = 'muted err'; resMsg.textContent = '먼저 상단 raceKey를 입력/감지하세요.'; return; }
-  if (r1 == null) { resMsg.className = 'muted err'; resMsg.textContent = '최소 1착 번호를 입력하세요.'; return; }
-  const result = { '1st': r1 };
+  if (r1 == null && !comment) { resMsg.className = 'muted err'; resMsg.textContent = '착순(1착) 또는 코멘트 중 하나는 입력하세요.'; return; }
+  const result = {};
+  if (r1 != null) result['1st'] = r1;
   if (r2 != null) result['2nd'] = r2;
   if (r3 != null) result['3rd'] = r3;
   btnSaveResult.disabled = true; btnSaveResult.textContent = '저장 중…';
   resMsg.className = 'muted'; resMsg.textContent = '서버 전송 중…';
-  chrome.runtime.sendMessage({ type: 'POST_RECORD_RESULT', payload: { raceKey, result } }, (res) => {
-    btnSaveResult.disabled = false; btnSaveResult.textContent = '저장';
-    if (chrome.runtime.lastError || !res || !res.ok) {
-      resMsg.className = 'muted err';
-      resMsg.textContent = '저장 실패: ' + ((res && res.error) || (chrome.runtime.lastError && chrome.runtime.lastError.message) || '서버 응답 없음');
-      return;
-    }
-    const rec = (res.data && res.data.record) || {};
-    const hit = rec.hit || {};
-    const parts = [`✅ 저장됨 · ${(res.data && res.data.raceKey) || raceKey}`];
-    parts.push(`착순 ${[r1, r2, r3].filter((x) => x != null).join('-')}`);
-    if (hit.quinella) parts.push('복승 적중' + (hit.payouts && hit.payouts.quinella ? ` ${hit.payouts.quinella}배` : ''));
-    if (hit.trifecta) parts.push('삼복승 적중' + (hit.payouts && hit.payouts.trifecta ? ` ${hit.payouts.trifecta}배` : ''));
-    if (!hit.quinella && !hit.trifecta) parts.push('추천 미적중');
-    parts.push('→ 분석기 결과기록·재현 리포트에 반영됨');
-    resMsg.className = 'muted ok';
-    resMsg.textContent = parts.join(' · ');
+  // 현재 분석 신호 스냅샷도 함께 저장(복기용)
+  chrome.storage.local.get({ analyzeStatus: null }, (v) => {
+    const signals = (v.analyzeStatus && v.analyzeStatus.data) || _lastAnalyze || null;
+    chrome.runtime.sendMessage({ type: 'SAVE_REVIEW', payload: { raceKey, result, comment, importance: _importance, signals } }, (res) => {
+      btnSaveResult.disabled = false; btnSaveResult.textContent = '저장 + 학습';
+      if (chrome.runtime.lastError || !res || !res.ok) {
+        resMsg.className = 'muted err';
+        resMsg.textContent = '저장 실패: ' + ((res && res.error) || (chrome.runtime.lastError && chrome.runtime.lastError.message) || '서버 응답 없음');
+        return;
+      }
+      const d = res.data || {};
+      const hit = d.hit || {};
+      const parts = [`✅ 저장+학습 · ${d.raceKey || raceKey}`];
+      if (r1 != null) parts.push(`착순 ${[r1, r2, r3].filter((x) => x != null).join('-')}`);
+      const impLbl = _importance === 3 ? '⭐⭐최고' : _importance === 2 ? '⭐중요' : '일반';
+      parts.push('중요도 ' + impLbl);
+      if ((d.tagLabels || []).length) parts.push('🏷 ' + d.tagLabels.join('·'));
+      if (hit.quinella) parts.push('복승 적중' + (hit.payouts && hit.payouts.quinella ? ` ${hit.payouts.quinella}배` : ''));
+      if (hit.trifecta) parts.push('삼복승 적중' + (hit.payouts && hit.payouts.trifecta ? ` ${hit.payouts.trifecta}배` : ''));
+      parts.push('→ 통계 탭 코멘트 모아보기에 반영');
+      resMsg.className = 'muted ok';
+      resMsg.textContent = parts.join(' · ');
+    });
   });
 });
 

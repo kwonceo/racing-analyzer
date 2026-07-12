@@ -152,18 +152,37 @@
     <div class="muted" id="lastDetail"></div>
   </div>
 
-  <!-- [결과 입력] 경주마다 간단히 1~3착 입력 → 서버 전송 + 분석기 결과기록 자동 반영 -->
+  <!-- [결과 입력·자유 코멘트] 1~3착 + 자유 코멘트 + 중요도 → 저장+학습(record-result 재사용·복기 저장) -->
   <div class="card" id="resultInputCard" style="margin-top:10px;border:1px solid #334155;">
-    <div class="status-line" style="margin-bottom:8px;font-weight:700">📝 결과 입력</div>
+    <div class="status-line" style="margin-bottom:8px;font-weight:700">📝 경주 결과</div>
     <div class="row" style="gap:6px;justify-content:flex-start;align-items:center">
       <label style="min-width:34px">1착</label>
-      <input id="res1" type="text" inputmode="numeric" placeholder="번호" style="width:50px;text-align:center" />
+      <input id="res1" type="text" inputmode="numeric" placeholder="번호" style="width:46px;text-align:center" />
       <label style="min-width:34px">2착</label>
-      <input id="res2" type="text" inputmode="numeric" placeholder="번호" style="width:50px;text-align:center" />
+      <input id="res2" type="text" inputmode="numeric" placeholder="번호" style="width:46px;text-align:center" />
       <label style="min-width:34px">3착</label>
-      <input id="res3" type="text" inputmode="numeric" placeholder="번호" style="width:50px;text-align:center" />
+      <input id="res3" type="text" inputmode="numeric" placeholder="번호" style="width:46px;text-align:center" />
     </div>
-    <button id="saveResultInput" class="primary" style="margin-top:8px;">저장</button>
+    <!-- [2번] 자유 코멘트 — 강제 분석 없음·쓴 그대로 저장 -->
+    <div style="margin-top:8px">
+      <label style="display:block;margin-bottom:3px">💬 자유 코멘트</label>
+      <textarea id="resComment" rows="3" placeholder="아쉬운 말·특이사항 등 자유롭게 입력하세요&#10;예) 5번이 4착 아쉬웠어. 막판에 치고 올라왔는데 다음에 주목"
+        style="width:100%;box-sizing:border-box;background:#0f172a;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:6px 7px;font-size:12px;font-family:inherit;resize:vertical"></textarea>
+      <div id="resTagPreview" class="muted" style="font-size:11px;margin-top:3px;min-height:14px"></div>
+    </div>
+    <!-- [4번] 중요도 — 일반(참고)·중요(패턴강화)·최고(즉시 규칙검토) -->
+    <div style="margin-top:6px">
+      <label style="display:block;margin-bottom:3px">⭐ 중요도</label>
+      <div style="display:flex;gap:6px">
+        <button type="button" class="imp-btn" id="imp1" data-imp="1"
+          style="flex:1;cursor:pointer;border:1px solid #334155;background:#1e293b;color:#e2e8f0;border-radius:6px;padding:5px 4px;font:inherit;font-size:12px;font-weight:700;margin:0">일반</button>
+        <button type="button" class="imp-btn" id="imp2" data-imp="2"
+          style="flex:1;cursor:pointer;border:1px solid #334155;background:#1e293b;color:#e2e8f0;border-radius:6px;padding:5px 4px;font:inherit;font-size:12px;font-weight:700;margin:0">⭐ 중요</button>
+        <button type="button" class="imp-btn" id="imp3" data-imp="3"
+          style="flex:1;cursor:pointer;border:1px solid #334155;background:#1e293b;color:#e2e8f0;border-radius:6px;padding:5px 4px;font:inherit;font-size:12px;font-weight:700;margin:0">⭐⭐ 최고</button>
+      </div>
+    </div>
+    <button id="saveResultInput" class="primary" style="margin-top:10px;">저장 + 학습</button>
     <div class="muted" id="resultInputMsg" style="margin-top:6px;white-space:pre-line;line-height:1.5"></div>
   </div>
 

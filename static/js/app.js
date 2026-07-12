@@ -995,6 +995,8 @@
   function initFailureReview() {
     { const b = $('#failReviewRefresh'); if (b) b.addEventListener('click', loadFailureReview); }
     { const b = $('#hallRefresh'); if (b) b.addEventListener('click', loadHallOfFame); }
+    { const b = $('#reviewStatsRefresh'); if (b) b.addEventListener('click', loadReviewStats); }   // [6번] 코멘트 모아보기
+    try { loadReviewStats(); } catch (_) { /* */ }   // 통계 탭 진입 시 자동 로드(있으면)
     initDataProtect();   // [데이터 보호] 자동/수동 GitHub 백업
   }
 
@@ -6986,6 +6988,54 @@
         <div style="margin-top:4px;font-size:13px">🔔 중요신호 ${r.signalCount || 0}건${esc(keys)}${top3 ? ' · 결과 ' + esc(top3) : ''} · ${badge}</div>
       </div>`;
     }).join('');
+  }
+
+  // [6번] 내 코멘트 모아보기 — /api/review/stats (최고중요·키워드·near_miss)
+  const _IMP_LABEL = { 1: '일반', 2: '⭐중요', 3: '⭐⭐최고' };
+  function _reviewCommentCard(r) {
+    const when = r.savedAt ? new Date(r.savedAt).toLocaleString('ko-KR', { hour12: false }) : '';
+    const top3 = (r.result && r.result.top3 || []).join('-');
+    const tags = (r.tagLabels || []).map((t) => `<span style="display:inline-block;background:#334155;color:#93c5fd;border-radius:10px;padding:1px 8px;font-size:11px;margin:2px 3px 0 0">🏷 ${esc(t)}</span>`).join('');
+    return `<div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <b>${esc(r.raceKey || r.race_id || '')}</b>
+        <span class="hint">${esc(_IMP_LABEL[r.importance] || '일반')}${when ? ' · ' + esc(when) : ''}${top3 ? ' · 결과 ' + esc(top3) : ''}</span>
+      </div>
+      ${r.comment ? `<div style="margin-top:5px;font-size:13px;white-space:pre-line;color:#e2e8f0;border-left:3px solid #64748b;padding-left:8px">${esc(r.comment)}</div>` : ''}
+      ${tags ? `<div style="margin-top:5px">${tags}</div>` : ''}
+    </div>`;
+  }
+  async function loadReviewStats() {
+    const view = $('#reviewStatsView'); if (!view) return;
+    view.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d = null;
+    try { d = await (await fetch('/api/review/stats')).json(); } catch (_) { /* */ }
+    if (!d || !d.total) { view.innerHTML = '<p class="hint">저장된 코멘트가 없습니다. 확장 팝업 결과입력에서 자유 코멘트를 남기면 여기에 모입니다.</p>'; return; }
+    const imp = d.importance || {};
+    let html = '';
+    // 중요도 분포 + 키워드 통계
+    html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <span style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:6px 10px;font-size:13px">전체 <b>${d.total}</b></span>
+      <span style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:6px 10px;font-size:13px">일반 ${imp[1] || 0}</span>
+      <span style="background:#0f172a;border:1px solid #7c3aed;border-radius:8px;padding:6px 10px;font-size:13px;color:#c4b5fd">⭐중요 ${imp[2] || 0}</span>
+      <span style="background:#0f172a;border:1px solid #f59e0b;border-radius:8px;padding:6px 10px;font-size:13px;color:#fbbf24">⭐⭐최고 ${imp[3] || 0}</span>
+    </div>`;
+    if ((d.tags || []).length) {
+      html += `<div style="margin-bottom:12px"><b style="font-size:13px">🏷 자주 언급 키워드</b><div style="margin-top:5px">` +
+        d.tags.map((t) => `<span style="display:inline-block;background:#334155;color:#93c5fd;border-radius:12px;padding:3px 10px;font-size:12px;margin:3px 4px 0 0">${esc(t.label)} <b>${t.count}</b></span>`).join('') +
+        `</div></div>`;
+    }
+    // ⭐⭐최고 중요 경주
+    if ((d.topRaces || []).length) {
+      html += `<h3 style="font-size:14px;margin:12px 0 6px">⭐⭐ 최고 중요 경주 (${d.topRaces.length})</h3>` +
+        d.topRaces.map(_reviewCommentCard).join('');
+    }
+    // near_miss 패턴
+    if ((d.nearMiss || []).length) {
+      html += `<h3 style="font-size:14px;margin:14px 0 6px">😢 아쉬운(near_miss) 경주 (${d.nearMiss.length})</h3>` +
+        d.nearMiss.map(_reviewCommentCard).join('');
+    }
+    view.innerHTML = html;
   }
 
   // [2번] 고배당 명예의 전당 — /api/highlights 카드형 표시

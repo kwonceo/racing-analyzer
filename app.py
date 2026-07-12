@@ -12581,6 +12581,32 @@ def history_record_result():
 # ─────────────────────────────────────────────────────────────────────
 REVIEW_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "review_log")
 
+# [자유 코멘트 키워드 태깅] 사용자가 쓴 코멘트에서 참고용 키워드만 자연스럽게 추출.
+#   ⚠ 강제 분류·분석 없음 — 코멘트는 원문 그대로 저장하고, 태그는 부가 참고용.
+COMMENT_TAG_RULES = [
+    (["아쉽", "아쉬", "惜"], "near_miss"),
+    (["놓쳤", "놓침", "못잡", "못 잡", "놓친"], "missed"),
+    (["주목", "기억", "다음에"], "watch_next"),
+    (["스마트머니", "스마트 머니"], "smart_money"),
+    (["역배열", "역배"], "reversal"),
+    (["복병"], "dark_horse"),
+    (["고배당"], "high_odds"),
+]
+COMMENT_TAG_LABEL = {
+    "near_miss": "아쉬움", "missed": "놓침", "watch_next": "다음 주목",
+    "smart_money": "스마트머니", "reversal": "역배열", "dark_horse": "복병", "high_odds": "고배당",
+}
+
+
+def _comment_tags(comment):
+    """자유 코멘트 → 참고용 키워드 태그 리스트(강제 분류 아님·중복 제거)."""
+    c = comment or ""
+    tags = []
+    for kws, tag in COMMENT_TAG_RULES:
+        if tag not in tags and any(k in c for k in kws):
+            tags.append(tag)
+    return tags
+
 
 def _review_extract_signals(sig):
     """확장 analyzeStatus.data 에서 중요 신호만 압축 요약(급락·역배열·스마트머니·경고·확신도)."""
@@ -12622,7 +12648,8 @@ def _review_extract_signals(sig):
 
 @app.route("/api/review/save", methods=["POST"])
 def review_save():
-    """[복기 저장] body: {raceKey, signals(analyzeStatus.data), result:{1st,2nd,3rd}?, finalOdds?, stake?, payout?}"""
+    """[복기 저장·자유 코멘트] body: {raceKey, signals?, result:{1st,2nd,3rd}?, comment?, importance?(1~3),
+       finalOdds?, stake?, payout?}. 코멘트는 원문 그대로 저장·키워드는 참고용 태깅(강제분류 없음)."""
     body = request.json or {}
     rk_in = (body.get("raceKey") or "").strip()
     if not rk_in:
@@ -12633,6 +12660,14 @@ def review_save():
     top3 = [result.get("1st"), result.get("2nd"), result.get("3rd")]
     top3 = [int(x) for x in top3 if x not in (None, "")]
     has_result = len(top3) >= 1
+    # [자유 코멘트·중요도] 원문 보존 + 참고용 키워드 태깅. 중요도(1일반/2중요/3최고)=학습 가중.
+    comment = (body.get("comment") or "").strip()
+    try:
+        importance = int(body.get("importance") or 1)
+    except (TypeError, ValueError):
+        importance = 1
+    importance = max(1, min(3, importance))
+    tags = _comment_tags(comment)
     hit = None
     if has_result:
         # 결과가 있으면 기존 학습 파이프라인 재사용(record-result 와 동일 — 재호출 시 깨끗이 덮어씀)
@@ -12646,14 +12681,48 @@ def review_save():
     rid, date = _race_result_id(rk)
     rec = {"raceKey": rk, "race_id": rid, "date": date,
            "savedAt": int(time.time() * 1000), "signals": sig,
-           "result": {"top3": top3} if has_result else None, "hit": hit}
+           "result": {"top3": top3} if has_result else None, "hit": hit,
+           # [자유 코멘트 저장 구조] comment(정리본)·raw_comment(원문)·importance·tags·weight
+           "comment": comment, "raw_comment": comment,
+           "importance": importance, "weight": importance, "tags": tags}
     try:
         with open(os.path.join(REVIEW_LOG_DIR, rid + ".json"), "w", encoding="utf-8") as f:
             json.dump(rec, f, ensure_ascii=False, indent=2)
     except Exception as e:
         return jsonify({"error": f"저장 실패: {e}"}), 500
+    # [중요도 학습 반영] ⭐최고(3)는 즉시 규칙 검토 큐에 기록(참고용·비침습)
+    if importance >= 3:
+        try:
+            _review_flag_top_importance(rec)
+        except Exception as e:
+            print("[복기저장] 최고중요 플래그 실패:", e)
     return jsonify({"ok": True, "raceKey": rk, "race_id": rid,
-                    "signalCount": sig.get("count", 0), "hasResult": has_result, "hit": hit})
+                    "signalCount": sig.get("count", 0), "hasResult": has_result, "hit": hit,
+                    "importance": importance, "tags": tags,
+                    "tagLabels": [COMMENT_TAG_LABEL.get(t, t) for t in tags]})
+
+
+REVIEW_TOP_FILE = os.path.join(os.path.dirname(__file__), "data", "review_top_importance.json")
+
+
+def _review_flag_top_importance(rec):
+    """⭐⭐⭐ 최고 중요 경주 → 즉시 규칙 검토 큐(참고용)에 누적(최근 200건)."""
+    try:
+        cur = json.load(open(REVIEW_TOP_FILE, encoding="utf-8")) if os.path.exists(REVIEW_TOP_FILE) else []
+    except Exception:
+        cur = []
+    if not isinstance(cur, list):
+        cur = []
+    cur = [x for x in cur if x.get("race_id") != rec.get("race_id")]   # 같은 경주 중복 제거(최신 유지)
+    cur.insert(0, {"race_id": rec.get("race_id"), "raceKey": rec.get("raceKey"),
+                   "savedAt": rec.get("savedAt"), "comment": rec.get("comment"),
+                   "tags": rec.get("tags") or [], "result": rec.get("result")})
+    cur = cur[:200]
+    try:
+        with open(REVIEW_TOP_FILE, "w", encoding="utf-8") as f:
+            json.dump(cur, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
 
 
 @app.route("/api/review/list", methods=["GET"])
@@ -12673,8 +12742,52 @@ def review_list():
                         "date": d.get("date"), "savedAt": d.get("savedAt"),
                         "signalCount": sig.get("count", 0),
                         "keyHorses": sig.get("keyHorses") or [],
-                        "result": d.get("result"), "hit": d.get("hit")})
+                        "result": d.get("result"), "hit": d.get("hit"),
+                        # [자유 코멘트] 코멘트·중요도·태그 포함
+                        "comment": d.get("comment") or "", "importance": d.get("importance") or 1,
+                        "tags": d.get("tags") or [],
+                        "tagLabels": [COMMENT_TAG_LABEL.get(t, t) for t in (d.get("tags") or [])]})
     return jsonify({"reviews": out, "count": len(out)})
+
+
+@app.route("/api/review/stats", methods=["GET"])
+def review_stats():
+    """[6번 통계] 내 코멘트 모아보기 — 최고중요 경주·키워드 통계·near_miss 패턴."""
+    reviews = []
+    if os.path.isdir(REVIEW_LOG_DIR):
+        for fn in os.listdir(REVIEW_LOG_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(REVIEW_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            if d.get("comment") or d.get("tags"):
+                reviews.append(d)
+    reviews.sort(key=lambda x: x.get("savedAt") or 0, reverse=True)
+    # 중요도 분포
+    imp_counts = {1: 0, 2: 0, 3: 0}
+    tag_counts = {}
+    top_races, near_miss = [], []
+    for d in reviews:
+        imp = d.get("importance") or 1
+        imp_counts[imp] = imp_counts.get(imp, 0) + 1
+        for t in (d.get("tags") or []):
+            tag_counts[t] = tag_counts.get(t, 0) + 1
+        item = {"race_id": d.get("race_id"), "raceKey": d.get("raceKey"),
+                "savedAt": d.get("savedAt"), "comment": d.get("comment") or "",
+                "importance": imp, "tags": d.get("tags") or [],
+                "tagLabels": [COMMENT_TAG_LABEL.get(t, t) for t in (d.get("tags") or [])],
+                "result": d.get("result")}
+        if imp >= 3:
+            top_races.append(item)
+        if "near_miss" in (d.get("tags") or []):
+            near_miss.append(item)
+    tag_list = sorted([{"tag": k, "label": COMMENT_TAG_LABEL.get(k, k), "count": v}
+                       for k, v in tag_counts.items()], key=lambda x: -x["count"])
+    return jsonify({"total": len(reviews), "importance": imp_counts,
+                    "tags": tag_list, "topRaces": top_races[:50],
+                    "nearMiss": near_miss[:50]})
 
 
 @app.route("/api/review/get", methods=["GET"])
