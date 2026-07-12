@@ -807,19 +807,27 @@
       layer.id = BOARD_ID;
       root().appendChild(layer);
 
-      // [7번] 강조 대상 셀만 겹침 — 나머지는 완전 투명(실제 배당 그대로).
+      // [테두리+반투명 방식] 강조 셀은 테두리 + 얇은 반투명 배경만 → 원본 배당 숫자가 항상 보인다.
+      //   미강조 셀은 오버레이 없음(완전 투명). 아이콘은 우측 상단 작은 뱃지로만 표시.
       info.cells.forEach(function (cell) {
         var stl = boardCellStyle(cell.a, cell.b, ctx);
-        if (!stl) return;
-        var emph = stl.emph;
-        var fs = emph ? 18 : 14;
-        var bg = 'rgba(' + hexRgb(stl.col) + ',' + (emph ? '0.30' : '0.18') + ')';
-        var bw = stl.lock ? 4 : (emph ? 3 : 2);   // [5번] 최종 확정 4px 굵은 테두리
-        var css = 'position:fixed;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:1px;'
-          + 'font:800 ' + fs + 'px/1 -apple-system,BlinkMacSystemFont,sans-serif;'
-          + 'color:#fff;background:' + bg + ';border:' + bw + 'px solid ' + stl.col + ';border-radius:4px;'
-          + 'text-shadow:0 1px 2px rgba(0,0,0,.8);overflow:hidden';
-        var span = mk('span', css, (stl.lock ? '🔒' : '') + String(cell.odds));   // [5번] 🔒 오늘의 최종 답
+        if (!stl) return;   // [2번 미강조] 테두리 없음·완전 투명
+        var lock = stl.lock;
+        // [2번] 테두리 두께: 초록(확정)4 · 파랑/빨강3 · 노랑2
+        var bw = lock ? 4 : (stl.col === BCOL.warn ? 2 : 3);
+        // [1·4번] 반투명 배경만: 확정(초록)=15% · 나머지=25% → 원본 숫자 그대로 보임(텍스트 미주입)
+        var op = lock ? 0.15 : 0.25;
+        var css = 'position:fixed;box-sizing:border-box;overflow:visible;border-radius:4px;'
+          + 'background:rgba(' + hexRgb(stl.col) + ',' + op + ');'
+          + 'border:' + bw + 'px solid ' + stl.col + ';';
+        var span = mk('span', css);   // [3번] 텍스트 미주입 → 원본 배당 숫자 유지(색·값 그대로)
+        // [3번] 우측 상단 모서리 작은 뱃지 — 확정🔒 · 급락🔻(색은 테두리로 구분)
+        var badgeTxt = lock ? '🔒' : (stl.col === BCOL.drop ? '🔻' : '');
+        if (badgeTxt) {
+          span.appendChild(mk('span',
+            'position:absolute;top:-8px;right:-6px;font-size:11px;line-height:1;'
+            + 'background:#0f172a;border-radius:6px;padding:1px 2px;box-shadow:0 1px 2px rgba(0,0,0,.5)', badgeTxt));
+        }
         span.title = cell.a + '-' + cell.b + ' = ' + cell.odds + '배 · ' + stl.tag;
         layer.appendChild(span);
         boardItems.push({ el: cell.el, span: span });
@@ -837,10 +845,11 @@
         else if (isSmart) { mark = '💰'; bc = '#c084fc'; lbl = '스마트머니'; }
         else if (isInv) { mark = '🔄'; bc = BCOL.warn; lbl = '역배열'; }
         else { mark = '❌'; bc = BCOL.drop; lbl = '확실제거'; }
+        // [5번] 헤더는 아이콘 기준 유지 · 배경색만 반투명(0.30)으로 조정(테두리 3px·강한 그림자로 가독성 유지)
         var css = 'position:fixed;box-sizing:border-box;display:flex;align-items:center;justify-content:center;'
-          + 'font:900 18px/1 -apple-system,BlinkMacSystemFont,sans-serif;color:#fff;'
-          + 'background:rgba(' + hexRgb(bc) + ',0.85);border:3px solid ' + bc + ';border-radius:5px;'
-          + 'text-shadow:0 1px 2px rgba(0,0,0,.9);overflow:hidden';
+          + 'font:900 17px/1 -apple-system,BlinkMacSystemFont,sans-serif;color:#fff;'
+          + 'background:rgba(' + hexRgb(bc) + ',0.30);border:3px solid ' + bc + ';border-radius:5px;'
+          + 'text-shadow:0 1px 3px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.9);overflow:hidden';
         var span = mk('span', css, mark + n);
         span.title = n + '번 · ' + lbl;
         layer.appendChild(span);
@@ -880,7 +889,7 @@
         // 실제 배당판 위에 정렬 오버레이가 떠 있으면(boardActive) 패널 안 격자는 생략하고 안내만 표시.
         if (boardActive) {
           panel.appendChild(mk('div', 'font-size:11px;color:#7dd3fc;margin:3px 0 2px;padding:5px 8px;border:1px dashed #38bdf8;border-radius:6px;background:rgba(56,189,248,.08)',
-            '📊 실제 배당판 위 핵심 강조 중 · 🔒초록=오늘의 최종 답 · 빨강=급락 · 파랑=유력(저배당) · 노랑=주의'));
+            '📊 실제 배당판 위 테두리 강조(원본 배당 그대로) · 🔒초록=최종 답 · 빨강=급락 · 파랑=유력 · 노랑=주의'));
         } else {
           var mx = buildMatrix(d);
           if (mx) panel.appendChild(mx);
