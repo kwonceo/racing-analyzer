@@ -14786,6 +14786,140 @@ def kra_status():
                     "watching": list(watch.keys()), "count": len(watch)})
 
 
+# ── [KRA 승인 API 연동] 활성 확인된 공공 API(B551015) 서버 조회 ──
+#   ✅ 경주별상세성적표(racedetailresult): 착순·기수·마명·레이팅·기록 → 결과·전적
+#   ✅ 현직기수정보(currentjockeyInfo): 1/2/3착 통산 → 복승률(BMED E카드 '기수 복승률')
+#   ⚠ 경주성적정보·기수통산성적비교: 엔드포인트 미확정(404/500) — 확정 시 KRA_APIS 에 추가
+KRA_API_BASE2 = "http://apis.data.go.kr/B551015"
+KRA_APIS = {
+    "race_detail": {"path": "racedetailresult/getracedetailresult", "name": "경주별상세성적표",
+                    "sample": {"meet": "1", "rc_date": "20260704", "rc_no": "1"}},
+    "jockey": {"path": "currentjockeyInfo/getcurrentjockeyinfo", "name": "현직기수정보",
+               "sample": {"meet": "1"}},
+    # 미확정(참고용·테스트 시 상태 표시)
+    "race_result": {"path": "raceResult/getRaceResult", "name": "경주성적정보(미확정)",
+                    "sample": {"meet": "1", "rc_date": "20260704"}},
+    "jockey_comp": {"path": "jockeyResult/getJockeyResult", "name": "기수통산성적비교(미확정)",
+                    "sample": {"meet": "1"}},
+}
+
+
+def _kra_api_get(path, params, num_rows=100):
+    """B551015 계열 GET → (items[list], err[str|None]). 현재 활성 KRA 키로 조회."""
+    key = _kra_api_key()
+    if not key:
+        return [], "KRA_API_KEY 미설정(.env 확인)"
+    p = dict(params)
+    p.setdefault("_type", "json")
+    p.setdefault("numOfRows", str(num_rows))
+    p.setdefault("pageNo", "1")
+    p["serviceKey"] = key
+    url = KRA_API_BASE2 + "/" + path + "?" + urllib.parse.urlencode(p)
+    try:
+        raw = urlopen(Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=20).read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:
+        return [], "HTTP %d" % e.code
+    except Exception as e:
+        return [], "요청 실패: %s" % e
+    try:
+        d = json.loads(raw)
+    except Exception:
+        return [], "JSON 아님(XML 에러응답 가능)"
+    resp = (d or {}).get("response", {}) or {}
+    hdr = resp.get("header", {}) or {}
+    if hdr.get("resultCode") not in (None, "00", "0"):
+        return [], "코드 %s %s" % (hdr.get("resultCode"), hdr.get("resultMsg"))
+    body = resp.get("body", {}) or {}
+    items = (body.get("items") or {})
+    item = items.get("item") if isinstance(items, dict) else items
+    if item is None:
+        return [], None
+    if isinstance(item, dict):
+        item = [item]
+    return item, None
+
+
+def _kra_jockey_winrate(it):
+    """현직기수 item → (복승률=1+2착%, 삼착률=1+2+3착%). 출주 0이면 (None,None)."""
+    rc = _kra_int(it.get("rcCntT")) or 0
+    if not rc:
+        return None, None
+    o1 = _kra_int(it.get("ord1CntT")) or 0
+    o2 = _kra_int(it.get("ord2CntT")) or 0
+    o3 = _kra_int(it.get("ord3CntT")) or 0
+    return round(100 * (o1 + o2) / rc), round(100 * (o1 + o2 + o3) / rc)
+
+
+@app.route("/api/kra/apis-test", methods=["GET"])
+def kra_apis_test():
+    """[KRA 승인 API 일괄 테스트] 4종 엔드포인트 활성 여부·샘플 반환. ?full=1 이면 첫 item 포함."""
+    full = bool(request.args.get("full"))
+    out = {}
+    for key, spec in KRA_APIS.items():
+        items, err = _kra_api_get(spec["path"], spec["sample"], num_rows=2)
+        out[key] = {"name": spec["name"], "path": spec["path"],
+                    "active": err is None, "error": err, "count": len(items),
+                    "fields": (list(items[0].keys()) if items and isinstance(items[0], dict) else []),
+                    **({"sample": (items[0] if items else None)} if full else {})}
+    return jsonify({"keySet": bool(_kra_api_key()),
+                    "active": [k for k, v in out.items() if v["active"]],
+                    "apis": out})
+
+
+@app.route("/api/kra/race-detail", methods=["GET", "POST"])
+def kra_race_detail():
+    """[KRA 경주별상세성적표] 착순·기수·마명·레이팅·기록 조회. params: {meet, rc_date, rc_no}."""
+    b = request.json if request.method == "POST" else None
+    b = b or request.args or {}
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "1")
+    rc_date = str(b.get("rc_date") or b.get("rcDate") or "")
+    rc_no = str(b.get("rc_no") or b.get("rcNo") or "")
+    if not rc_date:
+        return jsonify({"error": "rc_date(YYYYMMDD) 가 필요합니다."}), 400
+    params = {"meet": meet, "rc_date": rc_date}
+    if rc_no:
+        params["rc_no"] = rc_no
+    items, err = _kra_api_get("racedetailresult/getracedetailresult", params)
+    if err:
+        return jsonify({"error": err}), 502
+    # ⚠ 이 API의 win=단승배당·plc=연승배당(확정), differ=착차, rcTime=기록. (착순 ord 는 미제공)
+    horses = [{"chulNo": _kra_int(it.get("chulNo")), "hrName": it.get("hrName"), "hrNo": it.get("hrNo"),
+               "winOdds": _kra_num(it.get("win")), "plcOdds": _kra_num(it.get("plc")),
+               "jkName": it.get("jkName"), "trName": it.get("trName"),
+               "rcTime": it.get("rcTime"), "differ": it.get("differ"),
+               "wgBudam": it.get("wgBudam"), "wgHr": it.get("wgHr"),
+               "sex": it.get("sex"), "age": _kra_int(it.get("age")),
+               "rcNo": _kra_int(it.get("rcNo")), "rcDate": it.get("rcDate")} for it in items]
+    # 단승 배당 오름차순 → 인기순위(사용자 요청: 단승→인기순위)
+    ranked = sorted([h for h in horses if h["winOdds"]], key=lambda h: h["winOdds"])
+    for i, h in enumerate(ranked):
+        h["favRank"] = i + 1
+    return jsonify({"ok": True, "count": len(horses), "meet": meet, "rc_date": rc_date,
+                    "rc_no": rc_no or None, "horses": horses})
+
+
+@app.route("/api/kra/jockey", methods=["GET", "POST"])
+def kra_jockey():
+    """[KRA 현직기수정보] 기수 복승률(1+2착)·삼착률·통산 성적. params: {meet, name?(필터)}."""
+    b = request.json if request.method == "POST" else None
+    b = b or request.args or {}
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "1")
+    name = (b.get("name") or "").strip()
+    items, err = _kra_api_get("currentjockeyInfo/getcurrentjockeyinfo", {"meet": meet}, num_rows=200)
+    if err:
+        return jsonify({"error": err}), 502
+    out = []
+    for it in items:
+        if name and name not in (it.get("jkName") or ""):
+            continue
+        q, t = _kra_jockey_winrate(it)
+        out.append({"jkName": it.get("jkName"), "jkNo": it.get("jkNo"), "part": it.get("part"),
+                    "rcCntT": _kra_int(it.get("rcCntT")), "ord1CntT": _kra_int(it.get("ord1CntT")),
+                    "quinellaRate": q, "placeRate": t, "debut": it.get("debut")})
+    out.sort(key=lambda j: -(j.get("quinellaRate") or 0))
+    return jsonify({"ok": True, "count": len(out), "meet": meet, "jockeys": out})
+
+
 # ══════════════ [프리미엄 알림] 등급별 실시간 알림(🔴즉시/🟠예고/🟡사전) ══════════════
 #   361경주 분석 근거: 신호성숙 T-10분+ 57%·전략별 보험형48.9%·역배열형46.6% / 전략없음 2.8%.
 #   → 전략/신호 있는 경주만 알림(오알림 방지). 마감까지 남은 분(minutesBefore)으로 등급 판정.
