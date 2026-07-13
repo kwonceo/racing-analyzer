@@ -1465,6 +1465,15 @@ def _triple_save(db):
         json.dump(db, f, ensure_ascii=False)
 
 
+def _sport_match(rec_sport, want):
+    """[종목 분리] 레코드 sport 와 요청 sport 매칭. 레거시(None/'')는 horse 로 간주
+    (triple_store 초기엔 일본경마만 존재). want 없으면 전부 통과.
+    'horse' 요청은 경마(horse)만 — 경륜(cycle)·경정(boat)·바이크(bike)는 절대 매칭 안 됨."""
+    if not want:
+        return True
+    return (rec_sport or "horse") == want
+
+
 # 출마표2 전적 저장소 (raceKey → {horses:[{no,name,jockey,recent,weight}], t})
 STARTERS_STORE = os.path.join(os.path.dirname(__file__), "starters_store.json")
 
@@ -1871,30 +1880,44 @@ def race_pin():
 
 @app.route("/api/odds/triple/latest", methods=["GET", "POST"])
 def triple_latest():
-    """최근(또는 지정 raceKey) 3종 배당 조회 → {raceKey, quinella, exacta, trio}.
+    """최근(또는 지정 raceKey) 3종 배당 조회 → {raceKey, quinella, exacta, trio, sport}.
     raceKey 명시 & 데이터 없으면 빈 결과(waiting) — 이전 경주로 폴백하지 않음.
+    [종목 분리] sport 지정 시(query ?sport=horse 또는 body.sport) 그 종목의 최신만 반환
+    → 일본경마 탭이 sport=horse 로 요청하면 경륜(cycle) 등 타종목이 절대 혼입되지 않는다.
     [경주 고정] 명시 요청이 없고 서버 고정이 걸려 있으면 항상 고정 경주를 반환(자동 전환 차단)."""
-    rk, explicit = None, False
+    rk, explicit, want_sport = None, False, None
     if request.method == "POST":
-        rk = ((request.json or {}).get("raceKey") or "").strip() or None
+        body = request.json or {}
+        rk = (body.get("raceKey") or "").strip() or None
         explicit = rk is not None
+        want_sport = (body.get("sport") or "").strip() or None
+    else:
+        want_sport = (request.args.get("sport") or "").strip() or None
     db = _triple_load()
     if not db:
         return jsonify({})
     if rk not in db:
         if explicit:
             return jsonify({"raceKey": rk, "quinella": [], "exacta": [], "trio": [], "waiting": True})
-        # [경주 고정] 명시 요청 없을 때: 서버 고정 경주가 있고 데이터가 있으면 그걸 우선(자동 전환 차단)
+        # [종목 분리] 종목 지정 시 그 종목 레코드만 후보(레거시 sport 없음=horse 로 간주 — 원래 일본경마만 존재).
+        cand = list(db.keys())
+        if want_sport:
+            cand = [k for k in cand if _sport_match(db[k].get("sport"), want_sport)]
+            if not cand:   # 해당 종목 경주 없음(예: 일본경마 오늘 개최 없음) → 타종목 혼입 없이 대기
+                return jsonify({"raceKey": None, "quinella": [], "exacta": [], "trio": [],
+                                "waiting": True, "noRace": True, "sport": want_sport})
+        # [경주 고정] 명시 요청 없을 때: 서버 고정 경주가 있고(+종목 일치) 데이터가 있으면 우선(자동 전환 차단)
         _pin = _race_pin_load()
-        if _pin and _pin in db:
+        if _pin and _pin in db and (not want_sport or _sport_match(db[_pin].get("sport"), want_sport)):
             rk = _pin
         else:
-            rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
+            rk = max(cand, key=lambda k: db[k].get("t", 0))
     rec = db.get(rk) or {}
     # [경주전환 잔존 방어] 30분+ 미갱신 최신 경주 = 끝난 경주 → stale 표기(프론트가 표시 억제)
     age = time.time() - (rec.get("t") or 0)
     return jsonify({"raceKey": rk, "quinella": rec.get("quinella", []),
                     "exacta": rec.get("exacta", []), "trio": rec.get("trio", []),
+                    "sport": rec.get("sport") or "horse",
                     "ageSeconds": round(age), "stale": (not explicit) and age > STALE_ACTIVE_SEC})
 
 
@@ -2120,10 +2143,12 @@ def current_race():
     db = _triple_load()
     if not db:
         return jsonify({"raceKey": None})
+    # [종목 분리] sport 지정 시 그 종목만 후보(일본경마 탭=horse → 경륜 등 혼입 차단·레거시 None=horse)
+    want_sport = (request.args.get("sport") or "").strip() or None
     # [경주 고정·서버측 잠금] 고정 경주가 있으면 max-t/번호진행 폴백을 건너뛰고 항상 고정 경주 반환.
     #   → oddspark가 오비히로를 최신 저장해도 분석기는 고정한 사가를 유지(자동 전환 원천 차단).
     _pin = _race_pin_load()
-    if _pin:
+    if _pin and (not want_sport or _sport_match((db.get(_pin) or {}).get("sport"), want_sport)):
         _prec = db.get(_pin) or {}
         _page = time.time() - (_prec.get("t") or 0)
         return jsonify({
@@ -2134,7 +2159,12 @@ def current_race():
                        "exacta": len(_prec.get("exacta") or []),
                        "trio": len(_prec.get("trio") or [])},
         })
-    rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
+    _cand = list(db.keys())
+    if want_sport:
+        _cand = [k for k in _cand if _sport_match(db[k].get("sport"), want_sport)]
+        if not _cand:   # 해당 종목 경주 없음(오늘 개최 없음) → 타종목 혼입 없이 대기
+            return jsonify({"raceKey": None, "noRace": True, "sport": want_sport})
+    rk = max(_cand, key=lambda k: db[k].get("t", 0))
     # [stale 루프 backstop] oddspark가 끝난 경주(예: 카사마츠 3R) 확정배당을 계속 재수집해 그 경주가
     #   영원히 '최신(max-t)'으로 남아 다음 경주로 못 넘어가던 문제 방어. 같은 경마장에서 최근(10분내)
     #   갱신된 '더 높은 경주번호'가 있으면 그쪽을 현재 경주로 우선(경주는 번호순 진행 → 뒤 경주가 현재).
@@ -2146,6 +2176,8 @@ def current_race():
             for _k, _r in db.items():
                 if _k == rk:
                     continue
+                if want_sport and not _sport_match(_r.get("sport"), want_sport):
+                    continue                                # [종목 분리] 타종목은 후보 제외
                 if (_now - (_r.get("t") or 0)) > 600:      # 10분 넘게 미갱신은 후보 아님
                     continue
                 _a2, _n2 = _area_num(_k)
@@ -2161,6 +2193,7 @@ def current_race():
         "updatedAt": rec.get("t"),
         "ageSeconds": round(age),
         "stale": age > STALE_ACTIVE_SEC,
+        "sport": rec.get("sport") or "horse",
         "counts": {"quinella": len(rec.get("quinella") or []),
                    "exacta": len(rec.get("exacta") or []),
                    "trio": len(rec.get("trio") or [])},

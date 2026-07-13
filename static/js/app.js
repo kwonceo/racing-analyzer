@@ -5836,9 +5836,12 @@
   /** 최신 수집 raceKey → 통합분석 → 단승 급락 우선 이상감지 렌더 + 변동 알림/타임라인 */
   async function pollJapanOdds() {
     let latest;
-    try { latest = await (await fetch('/api/odds/triple/latest')).json(); }
+    // [종목 혼재 긴급수정] 일본경마 탭은 sport=horse 만 요청 → 경륜(cycle)·경정·바이크 배당 절대 혼입 안 됨.
+    try { latest = await (await fetch('/api/odds/triple/latest?sport=horse')).json(); }
     catch (_) { return; }
     const latestRk = latest && latest.raceKey;
+    // [3번·오늘 개최 없음] 일본경마 경주가 없으면(noRace) 타종목 표시 없이 '개최 없음' 대기(이전 경마 데이터는 서버 보존).
+    if (latest && latest.noRace) { setJpOddsStatus('waiting'); return; }
     // [경주전환 잔존 방어] 수집 경주 없음 또는 30분+ 미갱신(끝난 경주) → 직전 배당 표시 안 함
     if (!latestRk || latest.stale) { setJpOddsStatus('waiting'); return; }
     // [경주 자동 전환 긴급 수정] 고정/다른 경마장이면 현재 보고 있는 경주(_rrLastRk) 유지 → 오비히로로 강제 전환 차단.
@@ -5864,6 +5867,9 @@
     if (!a || a.error || a.waiting) { setJpOddsStatus('waiting'); return; }
     // [2번] raceKey 검증: 분석 응답이 요청한 경주와 다르면(직전 경주 잔존) 무시
     if (a.raceKey && a.raceKey !== rk) { setJpOddsStatus('waiting'); return; }
+    // [종목 혼재 이중가드] 분석 종목이 경마(horse)가 아니면(경륜/경정/바이크) 일본경마 탭에 렌더 안 함.
+    //   → 서버 sport 필터를 통과 못한 예외 데이터도 화면 혼입 원천 차단. 타종목은 mirrorSportAnalysis 로 각 탭 표시.
+    if (a.sport && a.sport !== 'horse') { setJpOddsStatus('waiting'); mirrorSportAnalysis(a); return; }
     setJpOddsStatus('linked', rk);
     renderJapanIntegrated(a);
     onJapanOddsUpdate(rk, a);
