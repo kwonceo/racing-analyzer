@@ -6272,7 +6272,17 @@ def _triple_analyze(rk, rec):
     #   이 집합 밖 마번(전적 잔존마·이전 경주 말)은 유력마·전적·추천에서 자동 제외.
     # [마번 범위 검증] 종목별 최대 마번(경륜 9·경정 6·오토 8·경마 18) 초과 마번은 이전 경주(경마 11~18두 등)
     #   잔존·오검출로 간주해 배당에 있어도 제외 → "7명 경륜에 11번 추천" 방지.
-    _max_no = _sport_max_no(rec.get("sport"))
+    # [경륜 종목 유실 방어] rec.sport 유실(odds_history 재구성 등)이면 raceKey 경륜장명으로 cycle 추론.
+    #   → 미유실 시 기존 그대로. sport=None이면 max_no=18(경마)로 잘못 커져 경륜 유령마번(10·11번 등)이
+    #     valid_nos에 섞이고 두수가 부풀어 복승 추천 개수가 과다(6~8개)해지던 문제 차단.
+    _analyze_sport = rec.get("sport")
+    if not _analyze_sport:
+        try:
+            if _keirin_jo_from_venue(_area_num(rk)[0]):
+                _analyze_sport = "cycle"
+        except Exception:
+            _analyze_sport = None
+    _max_no = _sport_max_no(_analyze_sport)
     valid_nos = set()
     for _k in curQ:
         for _h in _k:
@@ -7677,7 +7687,8 @@ def _triple_analyze(rk, rec):
                             _dark_q.append({"combo": [_axis, int(_dn)], "odds": _qo(_axis, int(_dn)), "reason": "복병 포함"})
             except Exception:
                 pass
-            _nh = len(valid_nos or [])
+            # [경륜 개수 방어] 두수는 종목 최대마번(경륜 9·경정 6·오토 8)으로 캡 → 유령마번 섞여도 개수 과다 방지
+            _nh = min(len(valid_nos or []), _sport_max_no(_analyze_sport))
             _maxq = _quinella_target(_nh, bool(chaotic and chaotic.get("detected")))
             _fp = _final_picks(core_picks, curQ, valid_nos, smart_quinella, max_q=_maxq,
                                reversal_quinellas=_rev_q, dark_quinellas=_dark_q, signal_horses=_sig_h)
