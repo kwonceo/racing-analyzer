@@ -801,11 +801,18 @@
         if (c.length === 2 && (dd.pct || 0) <= -20) dropMap[ckey(c[0], c[1])] = Math.round(dd.pct);
       });
 
-      // [3번 초록·추천] 복승 추천 조합(finalQuinellas)만 · 최대 2개
+      // [오버레이 강조 3마리 제한·두수별] 6두↓=⭐2·초록1·파랑1 / 7두=⭐3·초록1·파랑2 / 8두↑=⭐3·초록1·파랑3.
+      //   "몇 마리를 추천하든 3마리를 넘으면 안 됨"(❌제거마는 상한 밖·유지). ⚠ 복승 추천 리스트(패널)는 불변 — 오버레이 시각강조만 제한.
+      var _boardN = (info.headerNos || []).length;
+      var starMax = _boardN <= 6 ? 2 : 3;
+      var greenMax = 1;
+      var blueMax = _boardN <= 6 ? 1 : (_boardN === 7 ? 2 : 3);
+
+      // [3번 초록·추천] 복승 추천 조합(finalQuinellas) 중 최고 유력 1개(greenMax)만
       var greenSet = {}, gN = 0;
       ((d.corePicks && d.corePicks.finalQuinellas) || []).forEach(function (q) {
         var c = (q.combo || []).map(Number);
-        if (c.length === 2 && gN < 2) { greenSet[ckey(c[0], c[1])] = 1; gN++; }
+        if (c.length === 2 && gN < greenMax) { greenSet[ckey(c[0], c[1])] = 1; gN++; }
       });
 
       // [1번 파랑·유력] 저배당(하위 band) + 긍정신호(급락조합 or 긍정말) 동시만 · 최대 6개. 배당만 낮으면 흰색.
@@ -819,7 +826,7 @@
         if (greenSet[k]) return false;
         if (!(c.odds <= blueGate)) return false;                 // 저배당 게이트(배당만 낮고 신호 없으면 제외=흰색)
         return (dropMap[k] != null) || posHorse(c.a) || posHorse(c.b);
-      }).sort(function (x, y) { return x.odds - y.odds; }).slice(0, 6)
+      }).sort(function (x, y) { return x.odds - y.odds; }).slice(0, blueMax)
         .forEach(function (c) {
           var k = ckey(c.a, c.b);
           blueSet[k] = 1;
@@ -874,18 +881,24 @@
         boardItems.push({ el: cell.el, span: span });
       });
 
-      // [1·3번] 헤더 마번 강조 — 유력마(⭐)·스마트머니(💰)·역배열(🔄)·확실제거(❌)만. 나머지: 숫자만.
-      //   유력마 목록(keyHorses) 전체를 별표 대상으로 → 1번 등 어떤 마번이든 유력마면 헤더에 ⭐ 반드시 표시.
-      var favSet = {}; (d.keyHorses || []).map(Number).forEach(function (n) { favSet[n] = 1; });
+      // [오버레이 강조 3마리 제한] 헤더 강조는 우선순위(유력마⭐→스마트머니💰→역배열🔄)로 starMax개(6두↓2·7두↑3)만.
+      //   ❌제거마는 상한 밖(항상 유지). 스마트머니/역배열이 이미 ⭐ 안이면 별도표시 안 됨(같은 마번 1마커). "3마리 넘지 않음".
+      var _emph = {}, _emphN = 0;
+      function _addEmph(nn, mark, bc, lbl) {
+        nn = +nn;
+        if (_emph[nn] || _emphN >= starMax) return;
+        _emph[nn] = { mark: mark, bc: bc, lbl: lbl }; _emphN++;
+      }
+      (d.keyHorses || []).forEach(function (nn) { _addEmph(nn, '⭐', BCOL.fav, '유력'); });
+      Object.keys(smartSet).forEach(function (nn) { _addEmph(nn, '💰', '#c084fc', '스마트머니'); });
+      Object.keys(invSet).forEach(function (nn) { _addEmph(nn, '🔄', BCOL.warn, '역배열'); });
       info.hdrEls.forEach(function (h) {
         var n = h.no, r0 = role[n];
-        var isFav = favSet[n], isSmart = smartSet[n], isInv = invSet[n], isCut = (r0 === 'cut');
-        if (!isFav && !isSmart && !isInv && !isCut) return;   // [1번] 나머지: 숫자만
+        var e = _emph[n], isCut = (r0 === 'cut');
+        if (!e && !isCut) return;   // 강조 대상 아님: 숫자만
         var mark, bc, lbl;
-        if (isFav) { mark = '⭐'; bc = BCOL.fav; lbl = '유력'; }
-        else if (isSmart) { mark = '💰'; bc = '#c084fc'; lbl = '스마트머니'; }
-        else if (isInv) { mark = '🔄'; bc = BCOL.warn; lbl = '역배열'; }
-        else { mark = '❌'; bc = BCOL.drop; lbl = '확실제거'; }
+        if (e) { mark = e.mark; bc = e.bc; lbl = e.lbl; }        // 강조 상한(2~3마리) 우선
+        else { mark = '❌'; bc = BCOL.drop; lbl = '확실제거'; }   // 제거마(상한 밖·유지)
         // [5번] 헤더는 아이콘 기준 유지 · 배경색만 반투명(0.30)으로 조정(테두리 3px·강한 그림자로 가독성 유지)
         var css = 'position:fixed;box-sizing:border-box;display:flex;align-items:center;justify-content:center;'
           + 'font:900 17px/1 -apple-system,BlinkMacSystemFont,sans-serif;color:#fff;'
