@@ -1,6 +1,6 @@
 {
- "generated_at": 1783939019.382731,
- "races_with_result": 389,
+ "generated_at": 1783943705.9480941,
+ "races_with_result": 390,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -10,7 +10,7 @@
    "key": "timing:T-1분",
    "desc": "급락이 T-1분에 발생한 경주",
    "rate": 53.3,
-   "baseline": 31.9,
+   "baseline": 31.8,
    "lift": 21.5,
    "support": 45,
    "hit": 24
@@ -20,7 +20,7 @@
    "key": "timing:T-2분",
    "desc": "급락이 T-2분에 발생한 경주",
    "rate": 52.6,
-   "baseline": 31.9,
+   "baseline": 31.8,
    "lift": 20.8,
    "support": 19,
    "hit": 10
@@ -30,8 +30,8 @@
    "key": "timing:T-3분",
    "desc": "급락이 T-3분에 발생한 경주",
    "rate": 50.0,
-   "baseline": 31.9,
-   "lift": 18.1,
+   "baseline": 31.8,
+   "lift": 18.2,
    "support": 16,
    "hit": 8
   },
@@ -40,8 +40,8 @@
    "key": "had_reversal",
    "desc": "쌍승 역전 동반 경주",
    "rate": 50.0,
-   "baseline": 31.9,
-   "lift": 18.1,
+   "baseline": 31.8,
+   "lift": 18.2,
    "support": 6,
    "hit": 3
   },
@@ -49,20 +49,20 @@
    "type": "배당변화",
    "key": "had_drop",
    "desc": "급락(자금유입) 동반 경주",
-   "rate": 48.9,
-   "baseline": 31.9,
-   "lift": 17.0,
-   "support": 186,
+   "rate": 48.7,
+   "baseline": 31.8,
+   "lift": 16.9,
+   "support": 187,
    "hit": 91
   },
   {
    "type": "배당변화",
    "key": "strong_drop",
    "desc": "30%+ 강한 급락 동반 경주",
-   "rate": 47.9,
-   "baseline": 31.9,
-   "lift": 16.1,
-   "support": 169,
+   "rate": 47.6,
+   "baseline": 31.8,
+   "lift": 15.9,
+   "support": 170,
    "hit": 81
   },
   {
@@ -70,8 +70,8 @@
    "key": "timing:T-10분",
    "desc": "급락이 T-10분에 발생한 경주",
    "rate": 46.2,
-   "baseline": 31.9,
-   "lift": 14.3,
+   "baseline": 31.8,
+   "lift": 14.4,
    "support": 26,
    "hit": 12
   },
@@ -79,10 +79,10 @@
    "type": "배당변화",
    "key": "very_strong_drop",
    "desc": "50%+ 대량 급락 동반 경주",
-   "rate": 45.5,
-   "baseline": 31.9,
-   "lift": 13.6,
-   "support": 145,
+   "rate": 45.2,
+   "baseline": 31.8,
+   "lift": 13.4,
+   "support": 146,
    "hit": 66
   },
   {
@@ -96,5 +96,5 @@
    "support": 276
   }
  ],
- "baseline_hit_rate": 31.9
+ "baseline_hit_rate": 31.8
 }
