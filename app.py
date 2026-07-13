@@ -14327,6 +14327,76 @@ def keirin_odds():
                     "quinella": q, "exacta": x, "ingest": res})
 
 
+def _keirin_venue_current(jo, ymd):
+    """[경륜 현재경주·단일 경륜장] joCode 한 곳만 조회(가벼움) → 현재 발매중(다음 발주) 경주.
+    '현재경주' = 발주시각이 아직 미래인 것 중 가장 이른 것(발매중), 없으면 마지막 경주."""
+    venue_ja, nums = _keirin_venue_races(jo, ymd)
+    if not nums:
+        return None
+    venue = KEIRIN_JO.get(str(jo)) or venue_ja or ("경륜%s" % jo)
+    times = {}
+    try:
+        with ThreadPoolExecutor(max_workers=6) as ex:
+            fut = {ex.submit(_keirin_post_time, jo, ymd, n): n for n in nums}
+            for f in as_completed(fut):
+                times[fut[f]] = f.result()
+    except Exception:
+        for n in nums:
+            times[n] = _keirin_post_time(jo, ymd, n)
+    now = time.time()
+    races = [{"raceNo": n, "postTime": times.get(n), "postEpoch": _post_time_epoch(times.get(n), ymd)} for n in nums]
+    valid = [r for r in races if r["postEpoch"]]
+    if not valid:                                  # 발주시각 못 읽으면 1경주로 폴백
+        return {"joCode": str(jo), "venue": venue, "raceNo": nums[0], "postTime": None,
+                "raceKey": "%s %s경주" % (venue, nums[0]), "kaisaiBi": ymd, "secToPost": None}
+    future = sorted([r for r in valid if r["postEpoch"] > now - 60], key=lambda r: r["postEpoch"])
+    pick = future[0] if future else sorted(valid, key=lambda r: r["postEpoch"])[-1]
+    return {"joCode": str(jo), "venue": venue, "raceNo": pick["raceNo"], "postTime": pick.get("postTime"),
+            "raceKey": "%s %s경주" % (venue, pick["raceNo"]), "kaisaiBi": ymd,
+            "secToPost": int(pick["postEpoch"] - now)}
+
+
+@app.route("/api/keirin/current", methods=["GET", "POST"])
+def keirin_current():
+    """[경륜 현재경주 자동감지] 지금 발매중(다음 발주)인 경륜 경주를 반환 → 프론트 자동추적용.
+    body/query: {joCode?, kaisaiBi?}. joCode 지정 시 그 경륜장만 가볍게 조회해 현재경주 1건(current),
+    없으면 오늘 전 경륜장의 각 현재경주(races·느림). → 이 값으로 raceKey/joCode/raceNo 를 자동 업데이트하면
+    경주가 바뀌어도 자동수집이 새 경주를 따라간다(고정 입력 반복 fetch 문제 해결)."""
+    if request.method == "POST":
+        body = request.json or {}
+        jo = body.get("joCode"); ymd = body.get("kaisaiBi")
+    else:
+        jo = request.args.get("joCode"); ymd = request.args.get("kaisaiBi")
+    ymd = (ymd or time.strftime("%Y%m%d", time.localtime())).replace("-", "")
+    # joCode 지정 → 단일 경륜장만 조회(가벼움·프론트 자동추적 기본 경로)
+    if jo:
+        try:
+            cur = _keirin_venue_current(str(jo), ymd)
+        except Exception as e:
+            return jsonify({"error": "경륜 현재경주 조회 실패: %s" % e}), 502
+        return jsonify({"ok": True, "current": cur, "kaisaiBi": ymd})
+    # joCode 없음 → 오늘 전 경륜장(스케줄 캐시 사용·느릴 수 있음)
+    try:
+        tracks = _keirin_schedule(ymd)
+    except Exception as e:
+        return jsonify({"error": "경륜 스케줄 조회 실패: %s" % e}), 502
+    now = time.time()
+    out = []
+    for t in tracks:
+        races = [r for r in (t.get("races") or []) if r.get("postEpoch")]
+        if not races:
+            continue
+        future = sorted([r for r in races if r["postEpoch"] > now - 60], key=lambda r: r["postEpoch"])
+        pick = future[0] if future else sorted(races, key=lambda r: r["postEpoch"])[-1]
+        venue = t.get("venue")
+        out.append({"joCode": t.get("joCode"), "venue": venue, "raceNo": pick.get("raceNo"),
+                    "postTime": pick.get("postTime"), "kaisaiBi": ymd,
+                    "raceKey": "%s %s경주" % (venue, pick.get("raceNo")),
+                    "secToPost": int(pick["postEpoch"] - now) if pick.get("postEpoch") else None})
+    out.sort(key=lambda r: (r.get("secToPost") is None, r.get("secToPost") if r.get("secToPost") is not None else 0))
+    return jsonify({"ok": True, "races": out, "count": len(out), "kaisaiBi": ymd})
+
+
 # ══════════ [경마 oddspark 서버 직접 수집] 지방경마(NAR) 복승·쌍승 배당 ══════════
 # oddspark keiba 는 경륜(joCode)과 URL 체계가 다름 → opTrackCd + sponsorCd + raceNb 사용.
 # betType(실측 확정): 6=복승(馬連·순서무관) · 5=쌍승(馬単·순서있음). ⚠ 경륜(5/6)과 반대이므로 주의.

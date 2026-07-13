@@ -8324,7 +8324,9 @@
     const poll = document.querySelector('#keirinOddsPoll');
     if (poll) poll.addEventListener('change', () => {
       if (_keirinOddsTimer) { clearInterval(_keirinOddsTimer); _keirinOddsTimer = null; }
-      if (poll.checked) { fetchKeirinOdds(true); _keirinOddsTimer = setInterval(() => fetchKeirinOdds(true), 30000); }
+      // [자동수집 버그수정] 30초마다 '현재 경주 자동감지' 후 수집 → 경주가 바뀌어도 새 경주를 따라간다.
+      //   기존엔 고정 입력값(joCode/raceNo)만 반복 fetch해 같은 경주만 수집되던 문제 해결.
+      if (poll.checked) { keirinAutoTick(); _keirinOddsTimer = setInterval(keirinAutoTick, 30000); }
     });
     // [지방경마 출주표 전적] oddspark 出走表 분석 버튼
     const nb = document.querySelector('#narFetchBtn');
@@ -8354,6 +8356,34 @@
     out.innerHTML = `<span style="color:#38d39f">✅ 배당 반영</span> — 복승 <b>${c.quinella || 0}</b>·쌍승 <b>${c.exacta || 0}</b> 조합 (<b>${esc(rk)}</b>, ${t})${_keirinOddsTimer ? ' · 🔄자동갱신중' : ''}`;
     // 배당이 들어가면 현재 라이브 분석 재조회(역배열·배당변화 반영)
     try { refreshCurrentRace(); } catch (_) { /* */ }
+  }
+
+  // [자동수집 버그수정] 30초 자동갱신 틱 — '현재 경주 자동감지' 후 입력·raceKey 갱신 → 새 경주 수집.
+  //   joCode 지정 시 /api/keirin/current 로 현재 발매중 경주를 감지해 raceNo/raceKey 를 자동 업데이트한다.
+  //   → 경주가 바뀌어도 자동으로 새 경주를 따라감(기존 고정입력 반복 fetch 문제 해결). joCode 없으면 기존 방식 폴백.
+  let _keirinFollowRace = '';
+  async function keirinAutoTick() {
+    const g = (id) => { const e = document.querySelector(id); return e ? e.value.trim() : ''; };
+    const out = document.querySelector('#keirinOddsResult');
+    const jo = g('#keirinJo');
+    let ymd = g('#keirinYmd');
+    if (!ymd) { const n = new Date(); ymd = `${n.getFullYear()}${String(n.getMonth() + 1).padStart(2, '0')}${String(n.getDate()).padStart(2, '0')}`; }
+    if (!jo) { return fetchKeirinOdds(true); }   // 경륜장코드 없으면 자동추적 불가 → 기존(고정입력) 방식
+    let cur = null;
+    try {
+      const d = await (await fetch(`/api/keirin/current?joCode=${encodeURIComponent(jo)}&kaisaiBi=${encodeURIComponent(ymd)}`)).json();
+      cur = d && d.current;
+    } catch (_) { /* 감지 실패 시 기존 입력값으로 수집 */ }
+    if (cur && cur.raceNo != null) {
+      const rEl = document.querySelector('#keirinRace'); if (rEl) rEl.value = cur.raceNo;
+      const yEl = document.querySelector('#keirinYmd'); if (yEl && cur.kaisaiBi) yEl.value = cur.kaisaiBi;
+      const rkEl = document.querySelector('#keirinRaceKey'); if (rkEl && cur.raceKey) rkEl.value = cur.raceKey;
+      if (cur.raceKey && cur.raceKey !== _keirinFollowRace) {   // 경주 변경 감지 → 타이머 자연 리셋(다음 틱부터 새 경주)
+        _keirinFollowRace = cur.raceKey;
+        if (out) out.innerHTML = `🔄 현재 경주 자동추적: <b>${esc(cur.raceKey)}</b>${cur.postTime ? ` (발주 ${esc(cur.postTime)})` : ''} — 배당 수집 중…`;
+      }
+    }
+    return fetchKeirinOdds(true);
   }
 
   async function fetchKeirinCard() {
