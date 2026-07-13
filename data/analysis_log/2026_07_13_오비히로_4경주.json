@@ -36,7 +36,15 @@
   "elimination_reasons": {}
  },
  "final_recommendation": {
-  "budget_allocation": {}
+  "budget_allocation": {},
+  "mq1": {
+   "combo": "3+4",
+   "reason": "수동 추천"
+  },
+  "mt1": {
+   "combo": "3+4+7",
+   "reason": "수동 추천(보험)"
+  }
  },
  "recommendation_history": [
   {
@@ -124,5 +132,22 @@
   }
  },
  "profit": null,
- "review": null
+ "review": null,
+ "manual_recommendation": {
+  "quinella": [
+   [
+    3,
+    4
+   ]
+  ],
+  "trifecta": [
+   [
+    3,
+    4,
+    7
+   ]
+  ],
+  "note": "전문가 카드: 3번 선행 vs 4번 추격 접전, 복병 7",
+  "at": "2026-07-13 23:26:14"
+ }
 }
