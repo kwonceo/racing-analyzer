@@ -62,6 +62,7 @@ chrome.runtime.onInstalled.addListener(() => {
 const KEIRIN_JO_MAP = {   // joCode → 경륜장(한글). 없으면 title에서 파싱·폴백
   '36': '오다와라', '62': '히로시마', '01': '마에바시', '04': '기후', '85': '사세보',
   '83': '구루메', '81': '고쿠라', '31': '마쓰도', '45': '히라쓰카', '48': '가와사키', '73': '기시와다',
+  '24': '우쓰노미야',   // 宇都宮競輪(oddspark joCode 24·라이브 확인 2026-07-13)
 };
 function _todayYmd() {
   const d = new Date();
