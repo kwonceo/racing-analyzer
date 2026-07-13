@@ -6138,16 +6138,27 @@
     }
     if (!fq.length) return '';
     const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번${cp.confTop1High ? ' 🔺고배당' : ''}</span>` : '';
-    const qLines = fq.slice(0, 2).map((q) => {
-      const oo = q.odds != null ? `<span class="hint" style="font-size:14px">(${q.odds}배)</span>` : '';
-      return `<div style="font-size:21px;font-weight:800;margin:5px 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}</div>`;
+    // [근거 기반 추천·두수별 개수] ★등급(★★★ 이중수렴/★★ 단일강신호/★ 참고) + 근거 + N두·복승개수 헤더
+    const starStr = (n) => '★'.repeat(Math.max(0, Math.min(3, n || 0)));
+    const nH = cp.raceHorseCount || 0;
+    const maxQ = cp.quinellaMax || fq.length;
+    const chaoticTag = cp.chaoticRace ? ' <span style="color:#fbbf24">· ⚠️ 혼전(+2)</span>' : '';
+    const cntHead = nH ? `<div class="hint" style="font-size:12px;margin-bottom:4px">${nH}두 경주 · 복승 ${fq.length}개 추천 <span style="opacity:.7">(상한 ${maxQ})</span>${chaoticTag}</div>` : '';
+    // [두수별 개수] 서버가 이미 상한(3~8)으로 캡 → 전부 표시(구데이터 폴백은 2개)
+    const qLines = fq.map((q) => {
+      const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(${q.odds}배)</span>` : '';
+      const st = q.stars ? ` <span style="color:#fbbf24;font-size:14px">${starStr(q.stars)}</span>` : '';
+      const rs = q.reason ? ` <span class="hint" style="font-size:12px">· ${esc(q.reason)}</span>` : '';
+      return `<div style="font-size:19px;font-weight:800;margin:5px 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>`;
     }).join('');
     const tLines = ft.slice(0, 2).map((t) => {
-      const oo = t.odds != null ? `<span class="hint" style="font-size:14px">(${t.odds}배)</span>` : '';
-      return `<div style="font-size:21px;font-weight:800;margin:5px 0">삼복승: <span style="color:#c084fc">${t.combo.join('+')}</span> ${oo}</div>`;
+      const oo = t.odds != null ? `<span class="hint" style="font-size:13px">(${t.odds}배)</span>` : '';
+      const rs = t.reason ? ` <span class="hint" style="font-size:12px">· ${esc(t.reason)}</span>` : '';
+      return `<div style="font-size:18px;font-weight:800;margin:5px 0">🛡 삼복승 보험: <span style="color:#c084fc">${t.combo.join('+')}</span> ${oo}${rs}</div>`;
     }).join('');
     return `<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
-      <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(딱 이것만)</span> ${confHead}</div>
+      <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(근거 기반)</span> ${confHead}</div>
+      ${cntHead}
       ${qLines}
       ${tLines}
     </div>`;

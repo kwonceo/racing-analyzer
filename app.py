@@ -5933,14 +5933,37 @@ def _dense_no_signal_box(key_horses, valid_nos, curWin, curQ, trio_map,
         return {"active": False}
 
 
-def _final_picks(cp, curQ, valid_nos, smart_quinella=None):
-    """[추천 과다 근본 정리] 여러 파생 추천(확신도·복병·급락보존·스마트머니·밀집박스…)을
-      최종 복승 ≤2 · 삼복승 ≤2 (총 4개)로 엄격 압축. 오버레이·핵심추천 카드는 이것만 표시(기존 파생 필드 무삭제).
-      복승 우선순위: ①시장 최저복승 ②확신도1위+시장유력 ③스마트머니+시장유력.
-      삼복승 우선순위: ①삼복승 메인(확신도/축) ②가장 강한 자동 1개(마감급락>복병>초기급락>밀집박스>확신도보험).
-      반환 {quinellas:[{combo,odds,reason}](≤2), trifectas:[{combo,odds,reason}](≤2)}."""
+def _quinella_target(n_horses, chaotic=False):
+    """[근거 기반 추천·두수별 복승 개수] 출전 두수별 복승 최대 개수 + 혼전 시 +2(상한 8).
+      6두↓=3 · 7~9두=5 · 10~11두=6 · 12두↑=8. n 불명(0) 시 기본 5(안전)."""
+    n = int(n_horses or 0)
+    if n <= 0:
+        base = 5
+    elif n <= 6:
+        base = 3
+    elif n <= 9:
+        base = 5
+    elif n <= 11:
+        base = 6
+    else:
+        base = 8
+    if chaotic:
+        base = min(8, base + 2)
+    return base
+
+
+def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
+                 reversal_quinellas=None, dark_quinellas=None, signal_horses=None):
+    """[추천 근본 개편·근거 기반] 여러 파생 추천을 랭킹·근거게이트·두수별 개수(max_q)로 정리(기존 파생 필드 무삭제).
+      복승 우선순위: ①시장 최저복승(항상) ②확신도=전적+배당 이중수렴(항상) ③역배열 ④스마트머니 ⑤복병.
+      게이트: ①② 외 후보는 신호말(signal_horses) 최소 1두 포함해야 채택 → 저배당 단순 인기 제외(신호 전무 시 게이트 미적용=호환).
+      ★등급: ★★★ 이중수렴(또는 최저복승+신호) / ★★ 단일 강신호 / ★ 참고(복병).
+      max_q: 복승 최대 개수(두수별 3~8·혼전 +2, 호출부 `_quinella_target` 산출). 기본 2=기존 동작 호환.
+      삼복승은 항상 보험 ≤2(불변). 반환 {quinellas:[{combo,odds,reason,stars}](≤max_q), trifectas:[{combo,odds,reason}](≤2)}."""
     cp = cp or {}
     vs = set(int(x) for x in (valid_nos or []))
+    sig = set(int(x) for x in (signal_horses or []))
+    max_q = max(1, int(max_q or 2))
 
     def _vpair(cc):
         cc = [int(x) for x in (cc or [])]
@@ -5950,34 +5973,54 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None):
         cc = [int(x) for x in (cc or [])]
         return len(cc) == 3 and len(set(cc)) == 3 and (not vs or all(h in vs for h in cc))
 
-    # ── 복승 후보(우선순위) ──
+    def _has_sig(combo):
+        return any(int(h) in sig for h in combo)
+
+    # ── 복승 후보(우선순위 + ★등급 + 보호/게이트) ──
     q_cands = []
-    if curQ:                                              # 1순위: 시장 최저복승
+    if curQ:                                              # 1순위: 시장 최저복승 (항상 유지=메인축)
         _low = None
         for (a, b), o in curQ.items():
             if o and o > 0 and (not vs or (int(a) in vs and int(b) in vs)):
                 if _low is None or o < _low[1]:
                     _low = ([int(a), int(b)], o)
         if _low:
-            q_cands.append({"combo": sorted(_low[0]), "odds": _low[1], "reason": "시장 최저복승"})
-    for cq in (cp.get("confQuinellas") or []):            # 2순위: 확신도1위 + 시장유력
-        q_cands.append({"combo": sorted(int(x) for x in (cq.get("combo") or [])),
-                        "odds": cq.get("odds"), "reason": cq.get("reason") or "확신도"})
-    for sq in (smart_quinella or []):                     # 3순위: 스마트머니 + 시장유력
-        q_cands.append({"combo": sorted(int(x) for x in (sq.get("combo") or [])),
-                        "odds": sq.get("odds"), "reason": "스마트머니"})
-    if cp.get("quinella"):                                # 폴백: 기존 core 복승 축
-        q_cands.append({"combo": sorted(int(x) for x in cp["quinella"]),
-                        "odds": cp.get("quinellaOdds"), "reason": "복승 축"})
+            _c = sorted(_low[0])
+            q_cands.append({"combo": _c, "odds": _low[1], "reason": "시장 최저복승",
+                            "stars": 3 if _has_sig(_c) else 2, "protected": True})
+    for cq in (cp.get("confQuinellas") or []):            # 2순위: 확신도=전적+배당 이중수렴 (항상 유지)
+        _c = sorted(int(x) for x in (cq.get("combo") or []))
+        q_cands.append({"combo": _c, "odds": cq.get("odds"),
+                        "reason": cq.get("reason") or "이중수렴(전적+배당)", "stars": 3, "protected": True})
+    for rq in (reversal_quinellas or []):                 # 3순위: 역배열 감지 조합
+        _c = sorted(int(x) for x in (rq.get("combo") or []))
+        q_cands.append({"combo": _c, "odds": rq.get("odds"),
+                        "reason": rq.get("reason") or "역배열", "stars": 2, "protected": False})
+    for sq in (smart_quinella or []):                     # 4순위: 스마트머니 포함
+        _c = sorted(int(x) for x in (sq.get("combo") or []))
+        q_cands.append({"combo": _c, "odds": sq.get("odds"),
+                        "reason": "스마트머니", "stars": 2, "protected": False})
+    for dq in (dark_quinellas or []):                     # 5순위: 복병 포함
+        _c = sorted(int(x) for x in (dq.get("combo") or []))
+        q_cands.append({"combo": _c, "odds": dq.get("odds"),
+                        "reason": dq.get("reason") or "복병 포함", "stars": 1, "protected": False})
+    if cp.get("quinella"):                                # 폴백: 기존 core 복승 축(신호 있을 때만=저배당 단순추천 게이트)
+        _c = sorted(int(x) for x in cp["quinella"])
+        q_cands.append({"combo": _c, "odds": cp.get("quinellaOdds"),
+                        "reason": "복승 축", "stars": 2, "protected": False})
     final_q, seen_q = [], set()
     for c in q_cands:
         if not _vpair(c["combo"]):
             continue
+        # [근거 게이트] 보호(최저복승·이중수렴) 외에는 신호말 최소 1두 포함해야 채택(신호 전무 시 미적용=호환)
+        if not c.get("protected") and sig and not _has_sig(c["combo"]):
+            continue
         k = tuple(c["combo"])
         if k in seen_q:
             continue
-        seen_q.add(k); final_q.append(c)
-        if len(final_q) >= 2:
+        seen_q.add(k)
+        final_q.append({"combo": c["combo"], "odds": c["odds"], "reason": c["reason"], "stars": c.get("stars", 2)})
+        if len(final_q) >= max_q:
             break
 
     # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
@@ -7582,23 +7625,69 @@ def _triple_analyze(rk, rec):
     except Exception as _e:
         print("[무신호밀집박스] 파생 실패:", _e)
 
-    # [추천 과다 근본 정리] 모든 파생 추천(확신도·복병·급락보존·스마트머니·밀집박스…)을 최종 복승 ≤2·삼복승 ≤2
-    #   (총 4개)로 엄격 압축 → 오버레이·핵심추천 카드는 이것만 표시. ⚠ 기존 파생 필드/betRecommend 전부 보존(무삭제).
-    try:
-        if core_picks and not after_close:
-            _fp = _final_picks(core_picks, curQ, valid_nos, smart_quinella)
-            core_picks["finalQuinellas"] = _fp["quinellas"]
-            core_picks["finalTrifectas"] = _fp["trifectas"]
-    except Exception as _e:
-        print("[최종추천정리] 실패:", _e)
-
-    # [혼전 경주] 상위 배당 근접 → 이변 가능성 → 고배당 포함 삼복승 전략(기존 추천 무영향, 별도 필드).
+    # [혼전 경주] 상위 배당 근접 → 이변 가능성(복승 +2·고배당 삼복승). ← 복승 개수 산정에 쓰이므로 최종정리보다 먼저 산출.
     chaotic = None
     try:
         if signal_ready:
             chaotic = _chaotic_race(curQ, curWin, key_horses, anomaly_horse, drops)
     except Exception as _e:
         print("[혼전] 파생 실패:", _e)
+
+    # [추천 근본 개편·근거 기반] 두수별 복승 개수(_quinella_target 3~8·혼전 +2) + 랭킹·근거게이트·★등급으로 최종 정리.
+    #   삼복승은 항상 보험 ≤2(불변). ⚠ 기존 파생 필드/betRecommend 전부 보존(무삭제).
+    try:
+        if core_picks and not after_close:
+            # [근거 게이트용 신호말 집합] 급락(20%+)·역배열·스마트머니·복병·집중급락(anomaly)
+            _sig_h = set()
+            try:
+                for _d in (drops or []):
+                    if abs(_d.get("pct") or 0) >= 20:
+                        if _d.get("no") is not None:
+                            _sig_h.add(int(_d["no"]))
+                        for _h in (_d.get("combo") or []):
+                            _sig_h.add(int(_h))
+                for _r in (wx_reversals or []):
+                    if _r.get("no") is not None:
+                        _sig_h.add(int(_r["no"]))
+                for _sq in (smart_quinella or []):
+                    for _h in (_sq.get("combo") or []):
+                        _sig_h.add(int(_h))
+                for _dh in (dark_horses or []):
+                    if _dh.get("no") is not None:
+                        _sig_h.add(int(_dh["no"]))
+                if anomaly_horse is not None:
+                    _sig_h.add(int(anomaly_horse))
+            except Exception:
+                pass
+            # [역배열·복병 복승 후보] 시장 유력 축(key_horses[0])과 신호말 페어 → curQ 실배당
+            _axis = int(key_horses[0]) if key_horses else None
+
+            def _qo(_x, _y):
+                return (curQ.get((_x, _y)) or curQ.get((_y, _x))) if curQ else None
+            _rev_q, _dark_q = [], []
+            try:
+                if _axis is not None:
+                    for _r in (wx_reversals or []):
+                        _rn = _r.get("no")
+                        if _rn is not None and int(_rn) != _axis:
+                            _rev_q.append({"combo": [_axis, int(_rn)], "odds": _qo(_axis, int(_rn)), "reason": "역배열"})
+                    for _dh in (dark_horses or []):
+                        _dn = _dh.get("no")
+                        if _dn is not None and int(_dn) != _axis:
+                            _dark_q.append({"combo": [_axis, int(_dn)], "odds": _qo(_axis, int(_dn)), "reason": "복병 포함"})
+            except Exception:
+                pass
+            _nh = len(valid_nos or [])
+            _maxq = _quinella_target(_nh, bool(chaotic and chaotic.get("detected")))
+            _fp = _final_picks(core_picks, curQ, valid_nos, smart_quinella, max_q=_maxq,
+                               reversal_quinellas=_rev_q, dark_quinellas=_dark_q, signal_horses=_sig_h)
+            core_picks["finalQuinellas"] = _fp["quinellas"]
+            core_picks["finalTrifectas"] = _fp["trifectas"]
+            core_picks["quinellaMax"] = _maxq                      # [표시] 두수별 복승 상한
+            core_picks["raceHorseCount"] = _nh                     # [표시] 출전 두수
+            core_picks["chaoticRace"] = bool(chaotic and chaotic.get("detected"))   # [표시] 혼전 여부
+    except Exception as _e:
+        print("[최종추천정리] 실패:", _e)
 
     # [보완·혼전 복승 박스] 혼전(압축) 경주 감지 시 복승 메인 2두 고정 → 상위 3두 박스로 확대.
     #   기존 복승 메인(h1+h2)·보조(h1+h3)에 h2+h3 조합을 추가 → 상위 3두 3조합 전부 커버(이변 대비).
