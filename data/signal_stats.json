@@ -644,21 +644,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "기후 8경주",
-        "date": "2026-07-12",
-        "horses": [
-          7,
-          2,
-          5
-        ],
-        "placed": [
-          7,
-          5
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "마에바시 8경주",
         "date": "2026-07-12",
         "horses": [
@@ -753,11 +738,11 @@
         "trifecta_hit": false
       }
     ],
-    "count": 54,
-    "hit_quinella": 26,
+    "count": 53,
+    "hit_quinella": 25,
     "hit_trifecta": 15,
-    "rate_quinella": 48.1,
-    "rate_trifecta": 27.8,
+    "rate_quinella": 47.2,
+    "rate_trifecta": 28.3,
     "reliable": true
   },
   "급락": {
@@ -1768,21 +1753,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "기후 8경주",
-        "date": "2026-07-12",
-        "horses": [
-          2,
-          3,
-          7,
-          6
-        ],
-        "placed": [
-          7
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "마에바시 8경주",
         "date": "2026-07-12",
         "horses": [
@@ -1923,13 +1893,35 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "구마모토 1경주",
+        "date": "2026-07-13",
+        "horses": [
+          1
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "기후 8경주",
+        "date": "2026-07-13",
+        "horses": [
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 102,
-    "hit_quinella": 47,
+    "count": 103,
+    "hit_quinella": 48,
     "hit_trifecta": 19,
-    "rate_quinella": 46.1,
-    "rate_trifecta": 18.6,
+    "rate_quinella": 46.6,
+    "rate_trifecta": 18.4,
     "reliable": true
   },
   "전적이중수렴": {
@@ -2425,16 +2417,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "기후 8경주",
-        "date": "2026-07-12",
-        "horses": [
-          3
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "마에바시 8경주",
         "date": "2026-07-12",
         "horses": [
@@ -2477,6 +2459,18 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "기후 8경주",
+        "date": "2026-07-13",
+        "horses": [
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
     "count": 40,
