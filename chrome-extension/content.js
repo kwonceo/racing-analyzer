@@ -2138,6 +2138,12 @@
     setTripleProgress(`🆕 경주 자동 감지: ${rk} — 수집합니다…`, false);
     // [발주감지] 경주가 바뀌면 발주시각도 새 경주 기준으로 자동 갱신(수동값보다 우선)
     try { await autoDetectPostTime(rk); } catch (_) { /* */ }
+    // [4번·경륜 자동수집 상태] 경륜/경정/바이크면 자동수집 상태 표시(경주 바뀌어도 자동 유지 안내)
+    try {
+      const { sport: _ps } = await getSettings();
+      const _es = resolveSport(_ps, rk);
+      if (_es === 'cycle' || _es === 'boat' || _es === 'bike') _setKeirinAutoStatus(rk, _es, '경주 변경');
+    } catch (_) { /* */ }
     // 서버에 자동 전송. storage.raceKey 는 위에서 이미 갱신됐고(팝업/분석기용) 자동엔진은 board-first
     //   로 배당판을 따라가므로, 진행중이면 다음 tick 에 맡긴다. 직접 수집이 실패하면 _lastWatchedRace 를
     //   비워 다음 tick 에 재시도(수집이 한 번은 반드시 반영되도록).
@@ -2202,9 +2208,25 @@
       if (_autoRunning) return;                       // 이미 수집 중이면 스킵
       _lastKeirinKick = now;
       console.log('[' + _sp + ' 자동수집] ' + reason + ' + 자동전송 ON → 배당판 열리는 즉시 수집(수동 버튼 불필요)');
+      _setKeirinAutoStatus(rk, _sp, reason);          // [4번] 상태 표시(🚴 경륜 자동수집 중 · 경주 · N초 간격)
       _autoRunning = true;
       try { await collectTriple('auto'); } catch (e) { console.warn('[경륜 자동수집] 오류', e); }
       finally { _autoRunning = false; }
+    } catch (_) { /* */ }
+  }
+  // [4번] 경륜·경정·바이크 자동수집 상태 저장 + 팝업 표시("🚴 경륜 자동수집 중 · 오다와라 5경주 · 30초 간격")
+  function _setKeirinAutoStatus(rk, sport, reason) {
+    try {
+      getSettings().then(function (s) {
+        var iv = s.intervalSec || 30;
+        var label = { cycle: '🚴 경륜', boat: '🚤 경정', bike: '🏍 바이크' }[sport] || '자동';
+        try {
+          chrome.storage.local.set({ keirinAutoStatus: {
+            active: true, raceKey: rk || '', sport: sport, label: label,
+            intervalSec: iv, reason: reason || '', t: Date.now() } });
+        } catch (_) { /* */ }
+        setTripleProgress(label + ' 자동수집 중 · ' + (rk || '경주 감지 중') + ' · ' + iv + '초 간격', false);
+      });
     } catch (_) { /* */ }
   }
   setTimeout(() => _maybeKeirinKickstart('배당판 로드'), 1300);   // 로드 직후(종목 감지 안정화 대기)
@@ -2216,6 +2238,27 @@
   }, true);
   // [탭 포커스 복귀] 다른 탭 갔다 사설 배당판(경륜·경정·바이크)으로 돌아오면 재확인
   document.addEventListener('visibilitychange', () => { if (!document.hidden) _maybeKeirinKickstart('탭 포커스'); });
+
+  // ── [경륜 URL 자동감지] 경주(URL) 변경 시 버튼 없이 즉시 재수집 ────────────────────
+  //   문제: 경륜 배당판에서 '다음 경주' 탭 클릭 등으로 URL/경주번호가 바뀌어도 자동 감지가 안 돼
+  //         매 경기 [전체 자동 수집]을 수동으로 눌러야 했음.
+  //   해결: ①popstate/hashchange ②2초 폴링(어떤 방식의 URL 변경도 확실히 포착)로 href 변경을 감지 →
+  //         경주감지 상태를 리셋하고 watchRaceChange + 경륜 킥스타트를 즉시 실행(수동 버튼 불필요).
+  //   경마·지방경마 등 전 종목에 안전(watchRaceChange 는 실제 경주 변경시에만 수집·킥스타트는 경륜/경정/바이크만).
+  let _lastUrlSeen = location.href;
+  function _onUrlChanged(reason) {
+    if (location.href === _lastUrlSeen) return;
+    const prev = _lastUrlSeen;
+    _lastUrlSeen = location.href;
+    console.log('[URL 자동감지] ' + reason + ': 경주 URL 변경 → 즉시 재수집 ("' + prev + '" → "' + location.href + '")');
+    _lastWatchedRace = '';       // 강제 재감지(다음 tick 확실히 새 경주로 인식)
+    _lastKeirinKick = 0;         // 킥스타트 쿨다운 해제(URL 변경 = 확실한 새 경주 신호)
+    // 새 경주 배당판 로드 여유 후 재수집(watchRaceChange 가 전 종목의 실제 경주변경 시 수집·상태갱신).
+    setTimeout(() => { try { watchRaceChange(); } catch (_) { /* */ } }, 500);
+  }
+  window.addEventListener('popstate', () => _onUrlChanged('popstate'));
+  window.addEventListener('hashchange', () => _onUrlChanged('hashchange'));
+  setInterval(() => _onUrlChanged('url-poll'), 2000);   // 폴백 폴링(2초)
 
   // [2번] 결과 페이지면 로드 직후 1회 자동 전송 (URL result/성적표 감지)
   if (isResultPage()) {

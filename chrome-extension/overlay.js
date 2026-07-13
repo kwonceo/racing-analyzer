@@ -120,7 +120,7 @@
       return new Promise(function (resolve) {
         try {
           chrome.storage.local.get({ analyzeStatus: null, timerDeadline: 0, collectAlert: null,
-            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false }, function (v) {
+            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null }, function (v) {
             resolve(v || {});
           });
         } catch (_) { resolve({}); }
@@ -944,6 +944,16 @@
         });
         head.appendChild(x);
         panel.appendChild(head);
+
+        // [4번·경륜 자동수집 상태] 🚴 경륜 자동수집 중 · 오다와라 5경주 · 30초 간격 (content.js 가 storage 에 기록)
+        var kas = st.keirinAutoStatus;
+        if (kas && kas.active && (Date.now() - (kas.t || 0) < 120000)) {   // 2분내 갱신된 경우만(진행중)
+          var ka = mk('div', 'margin:0 0 6px;padding:6px 9px;border-radius:7px;border:1px solid #22d3ee;background:rgba(34,211,238,.14)');
+          ka.appendChild(mk('div', 'font-weight:900;font-size:14px;color:#67e8f9', (kas.label || '🚴 경륜') + ' 자동수집 중'));
+          if (kas.raceKey) ka.appendChild(mk('div', 'font-weight:800;font-size:15px;color:#e2e8f0;margin-top:2px', kas.raceKey));
+          ka.appendChild(mk('div', 'font-size:12px;color:#94a3b8;margin-top:2px', '수집: ' + (kas.intervalSec || 30) + '초 간격 · 경주 바뀌어도 자동 유지'));
+          panel.appendChild(ka);
+        }
 
         // ═══ [정보 순서 정리] 1.결론박스 → 2.카운트다운 → 3.유력마 → 4.이상감지 → 5.나머지 ═══
         // [핵심 추천·추천 과다 근본정리] 딱 이것만 — 최종 복승 ≤2 · 삼복승 ≤2 (총 4개)만 크게 표시.
