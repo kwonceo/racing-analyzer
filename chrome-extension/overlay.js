@@ -1014,14 +1014,24 @@
         }
         if (_fq.length && !d.recommendClosed && st.ovShowPicks !== false) {   // [🎯 추천] 팝업 토글(기본 표시)
           var cpBox = mk('div', 'margin:0 0 6px;padding:9px 12px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
-          cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:16px', '🎯 지금 사세요!'));
-          _fq.slice(0, 2).forEach(function (q) {
-            cpBox.appendChild(mk('div', 'font-weight:800;font-size:18px;margin-top:5px;color:#e2e8f0',
-              '복승: ' + q.combo.join('+') + (q.odds != null ? '  (' + q.odds + '배)' : '')));
+          cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:16px', '🎯 지금 사세요! (근거 기반)'));
+          // [근거 기반·두수별 개수] N두 경주 · 복승 N개(혼전 +2) 헤더 + 조합별 ★등급·근거
+          var _nH = (cp && cp.raceHorseCount) || 0;
+          var _starStr = function (n) { return new Array(Math.max(0, Math.min(3, n || 0)) + 1).join('★'); };
+          if (_nH) {
+            cpBox.appendChild(mk('div', 'color:#9fb3c8;font-size:12px;margin-top:2px',
+              _nH + '두 경주 · 복승 ' + _fq.length + '개 추천' + (cp.chaoticRace ? ' · ⚠️혼전(+2)' : '')));
+          }
+          _fq.forEach(function (q) {   // [두수별] 서버가 상한(3~8)으로 이미 캡 → 전부 표시(구데이터 폴백은 2개)
+            var _st = q.stars ? '  ' + _starStr(q.stars) : '';
+            var _rs = q.reason ? '  · ' + q.reason : '';   // 이 말이 들어오는 이유(근거)
+            cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:5px;color:#e2e8f0',
+              '복승: ' + q.combo.join('+') + (q.odds != null ? '  (' + q.odds + '배)' : '') + _st + _rs));
           });
           _ft.slice(0, 2).forEach(function (t) {
-            cpBox.appendChild(mk('div', 'font-weight:800;font-size:18px;margin-top:5px;color:#c4b5fd',
-              '삼복승: ' + t.combo.join('+') + (t.odds != null ? '  (' + t.odds + '배)' : '')));
+            var _rs = t.reason ? '  · ' + t.reason : '';
+            cpBox.appendChild(mk('div', 'font-weight:800;font-size:16px;margin-top:5px;color:#c4b5fd',
+              '🛡 삼복승 보험: ' + t.combo.join('+') + (t.odds != null ? '  (' + t.odds + '배)' : '') + _rs));
           });
           if (cp.confTop1 != null) {
             // [2번] 확신도1위 글씨 키움(16px)
