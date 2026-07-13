@@ -632,7 +632,8 @@
     // [배당판 위 정렬 오버레이] 실제 배당판 셀을 getBoundingClientRect 로 측정 →
     //   같은 크기·위치의 강조 셀을 그 위에 1:1로 겹쳐 표시(노안 대비 큰 글씨·3중 강조).
     //   ⚠ 실제 표는 읽기만(위치 측정) — DOM 수정 없음. 자체 레이어(kbOvBoard)만 주입.
-    //   색상 통일: 파랑=유력마(낮은배당) · 빨강=이상감지 급락 · 초록=추천 조합 · 노랑=주의(중간신호)
+    //   [색상 근본 재정의] 초록=복승 추천(1~2) · 파랑=유력(저배당+긍정신호:급락/역배열/스마트머니, 5~6) ·
+    //     빨강=경고/회피(죽은인기+고배당·3연속상승·페이크, 3~4) · 나머지=흰색/중립(단순저배당·무변동).
     // ═══════════════════════════════════════════════════════════════════
     var BOARD_ID = 'kbOvBoard';
     var boardItems = [];      // [{el, span}] 배당 셀 ↔ 오버레이 셀 매핑(재배치용)
@@ -714,12 +715,13 @@
     // [6번] 조합(a-b) 강조 판정 — 한 셀에 색 하나만. 우선순위: 빨강(급락)>초록(확정)>파랑(유력)>노랑(주의).
     //   해당 없으면 null → [7번] 완전 투명(실제 배당 그대로).
     function boardCellStyle(a, b, ctx) {
+      // [색상 근본 재정의] 초록=추천(1~2) > 파랑=유력(저배당+긍정신호,5~6) > 빨강=경고(회피,3~4).
+      //   나머지(단순 저배당·무변동 등)는 오버레이 없음 = 흰색/중립. 우선순위: 초록 > 파랑 > 빨강.
       var key = Math.min(a, b) + '|' + Math.max(a, b);
-      if (ctx.dropMap[key] != null) return { col: BCOL.drop, tag: '급락 ' + ctx.dropMap[key] + '%', emph: true };
-      if (ctx.greenSet[key]) return { col: BCOL.rec, tag: '오늘의 최종 답', emph: true, lock: true };   // [5번] 최종 확정
-      if (ctx.blueSet[key]) return { col: BCOL.fav, tag: '유력(저배당)', emph: true };
-      if (ctx.yellowSet[key]) return { col: BCOL.warn, tag: '주의', emph: false };
-      return null;
+      if (ctx.greenSet[key]) return { col: BCOL.rec, tag: '오늘의 추천(복승)', emph: true, lock: true };
+      if (ctx.blueSet[key]) return { col: BCOL.fav, tag: (ctx.blueTag[key] || '유력(저배당+신호)'), emph: true };
+      if (ctx.redSet[key]) return { col: BCOL.drop, tag: '경고 · ' + (ctx.redTag[key] || '회피'), emph: true, warn: true };
+      return null;   // 흰색/중립(무변동·단순저배당 포함) — 테두리·배경 없음(원본 숫자만)
     }
 
     function removeBoardMatrix() {
@@ -766,41 +768,80 @@
       var role = matrixRoles(d);
       var invSet = {}; (((d.inverse || {}).invHorses) || []).forEach(function (n) { invSet[+n] = 1; });
       var smartSet = {}; (d.darkHorses || []).forEach(function (h) { if (h.smartMoney && h.no != null) smartSet[+h.no] = 1; });
+      // [흐름 신호] 말별 배당흐름 플래그(app.py _flow_scores → analyze.flowScores):
+      //   긍정=급락흐름/역배열/스마트머니 · 경고=죽은인기+고배당/3연속상승/페이크. 키는 숫자/문자 혼용 방어.
+      var flow = d.flowScores || {};
+      function flowOf(n) { return flow[n] || flow[String(n)] || {}; }
+      var WARN_HIGH_ODDS = 10;   // 죽은인기 '고배당' 기준(대표배당 10배+ = 무변동인데 인기 없음 → 회피)
 
       function ckey(a, b) { return Math.min(a, b) + '|' + Math.max(a, b); }
 
-      // [빨강·급락] 실제 감지된 것만(-20%↓)
+      // [긍정 신호 말] 역배열 · 스마트머니 · 급락 흐름 → 저배당과 동시일 때만 파랑
+      function posHorse(n) {
+        var f = flowOf(n);
+        return !!(invSet[n] || smartSet[n] || f.smartMoney || f.trend === '급락');
+      }
+      // [경고 신호 말] 죽은인기+고배당 · 3회+연속상승(자금이탈) · 페이크(급락후반등). 단순 무변동은 제외(회색).
+      function warnHorse(n) {
+        var f = flowOf(n);
+        return !!((f.dead && (Number(f.rep) || 0) >= WARN_HIGH_ODDS) || f.rising3 || f.fake);
+      }
+      function warnReason(n) {
+        var f = flowOf(n);
+        if (f.fake) return '페이크(급락후 반등)';
+        if (f.rising3) return '3회+ 연속상승(자금이탈)';
+        if (f.dead && (Number(f.rep) || 0) >= WARN_HIGH_ODDS) return '죽은인기+고배당';
+        return '회피';
+      }
+
+      // [급락 조합] 콤보 단위 급락(-20%↓) — 파랑 판정의 긍정신호 중 하나로 사용(색은 파랑, 별도 빨강 아님)
       var dropMap = {};
       (d.drops || []).forEach(function (dd) {
         var c = (dd.combo || []).map(Number);
         if (c.length === 2 && (dd.pct || 0) <= -20) dropMap[ckey(c[0], c[1])] = Math.round(dd.pct);
       });
-      // [초록·최종 확정] finalQuinellas 만(1~2개) = "오늘의 최종 답"
-      var greenSet = {};
+
+      // [3번 초록·추천] 복승 추천 조합(finalQuinellas)만 · 최대 2개
+      var greenSet = {}, gN = 0;
       ((d.corePicks && d.corePicks.finalQuinellas) || []).forEach(function (q) {
         var c = (q.combo || []).map(Number);
-        if (c.length === 2) greenSet[ckey(c[0], c[1])] = 1;
+        if (c.length === 2 && gN < 2) { greenSet[ckey(c[0], c[1])] = 1; gN++; }
       });
-      // [2·3번 파랑·유력] 복승 배당 하위 20% 셀만(자기제한) — 낮은 배당 = 유력. 이미 급락/확정인 셀 제외.
-      var blueSet = {};
-      var sortedOdds = info.cells.map(function (c) { return c.odds; }).sort(function (x, y) { return x - y; });
-      var blueN = Math.max(1, Math.floor(sortedOdds.length * 0.2));
-      var blueThresh = sortedOdds.length ? sortedOdds[Math.min(blueN - 1, sortedOdds.length - 1)] : 0;
-      info.cells.forEach(function (c) {
-        var k = ckey(c.a, c.b);
-        if (c.odds <= blueThresh && !greenSet[k] && dropMap[k] == null) blueSet[k] = 1;
-      });
-      // [3번 노랑·주의] 스마트머니/역배열 말이 낀 조합만 · 최대 3개(저배당순) · 이미 색 있는 셀 제외
-      var yellowSet = {}, warnHorse = {};
-      (((d.inverse || {}).invHorses) || []).forEach(function (n) { warnHorse[+n] = 1; });
-      Object.keys(smartSet).forEach(function (n) { warnHorse[+n] = 1; });
+
+      // [1번 파랑·유력] 저배당(하위 band) + 긍정신호(급락조합 or 긍정말) 동시만 · 최대 6개. 배당만 낮으면 흰색.
+      //   저배당 게이트=하위 40% 지점(신호 있는 저배당 5~6개 확보). 최종 6개컷 → 결과는 전체의 ~20%.
+      var oddsAsc = info.cells.map(function (c) { return c.odds; }).sort(function (x, y) { return x - y; });
+      var gi = Math.max(0, Math.floor(oddsAsc.length * 0.4) - 1);
+      var blueGate = oddsAsc.length ? oddsAsc[Math.min(gi, oddsAsc.length - 1)] : 0;
+      var blueSet = {}, blueTag = {};
       info.cells.filter(function (c) {
         var k = ckey(c.a, c.b);
-        return (warnHorse[c.a] || warnHorse[c.b]) && !greenSet[k] && dropMap[k] == null && !blueSet[k];
-      }).sort(function (x, y) { return x.odds - y.odds; }).slice(0, 3)
-        .forEach(function (c) { yellowSet[ckey(c.a, c.b)] = 1; });
+        if (greenSet[k]) return false;
+        if (!(c.odds <= blueGate)) return false;                 // 저배당 게이트(배당만 낮고 신호 없으면 제외=흰색)
+        return (dropMap[k] != null) || posHorse(c.a) || posHorse(c.b);
+      }).sort(function (x, y) { return x.odds - y.odds; }).slice(0, 6)
+        .forEach(function (c) {
+          var k = ckey(c.a, c.b);
+          blueSet[k] = 1;
+          blueTag[k] = dropMap[k] != null ? ('유력 · 급락' + dropMap[k] + '%+저배당')
+            : (invSet[c.a] || invSet[c.b]) ? '유력 · 역배열+저배당'
+              : '유력 · 스마트머니+저배당';
+        });
 
-      var ctx = { dropMap: dropMap, greenSet: greenSet, blueSet: blueSet, yellowSet: yellowSet };
+      // [2번 빨강·경고] 경고 말이 낀 조합 · 저배당순(오인베팅 위험 큰 것)부터 최대 4개. 초록/파랑 제외.
+      var redSet = {}, redTag = {};
+      info.cells.filter(function (c) {
+        var k = ckey(c.a, c.b);
+        if (greenSet[k] || blueSet[k]) return false;
+        return warnHorse(c.a) || warnHorse(c.b);
+      }).sort(function (x, y) { return x.odds - y.odds; }).slice(0, 4)
+        .forEach(function (c) {
+          var k = ckey(c.a, c.b);
+          redSet[k] = 1;
+          redTag[k] = warnHorse(c.a) ? warnReason(c.a) : warnReason(c.b);
+        });
+
+      var ctx = { dropMap: dropMap, greenSet: greenSet, blueSet: blueSet, blueTag: blueTag, redSet: redSet, redTag: redTag };
 
       // 오버레이 레이어(뷰포트 고정·클릭 통과)
       var layer = mk('div', 'position:fixed;left:0;top:0;width:0;height:0;z-index:2147482800;pointer-events:none');
@@ -813,16 +854,16 @@
         var stl = boardCellStyle(cell.a, cell.b, ctx);
         if (!stl) return;   // [2번 미강조] 테두리 없음·완전 투명
         var lock = stl.lock;
-        // [2번] 테두리 두께: 초록(확정)4 · 파랑/빨강3 · 노랑2
-        var bw = lock ? 4 : (stl.col === BCOL.warn ? 2 : 3);
-        // [1·4번] 반투명 배경만: 확정(초록)=15% · 나머지=25% → 원본 숫자 그대로 보임(텍스트 미주입)
+        // 테두리 두께: 초록(추천)4 · 파랑(유력)/빨강(경고)3
+        var bw = lock ? 4 : 3;
+        // 반투명 배경만: 추천(초록)=15% · 나머지=25% → 원본 숫자 그대로 보임(텍스트 미주입)
         var op = lock ? 0.15 : 0.25;
         var css = 'position:fixed;box-sizing:border-box;overflow:visible;border-radius:4px;'
           + 'background:rgba(' + hexRgb(stl.col) + ',' + op + ');'
           + 'border:' + bw + 'px solid ' + stl.col + ';';
-        var span = mk('span', css);   // [3번] 텍스트 미주입 → 원본 배당 숫자 유지(색·값 그대로)
-        // [3번] 우측 상단 모서리 작은 뱃지 — 확정🔒 · 급락🔻(색은 테두리로 구분)
-        var badgeTxt = lock ? '🔒' : (stl.col === BCOL.drop ? '🔻' : '');
+        var span = mk('span', css);   // 텍스트 미주입 → 원본 배당 숫자 유지(색·값 그대로)
+        // 우측 상단 모서리 작은 뱃지 — 추천🔒 · 경고⚠️(색은 테두리로 구분·파랑=뱃지없음)
+        var badgeTxt = lock ? '🔒' : (stl.warn ? '⚠️' : '');
         if (badgeTxt) {
           span.appendChild(mk('span',
             'position:absolute;top:-8px;right:-6px;font-size:11px;line-height:1;'
