@@ -912,7 +912,10 @@
     if (d.error) { if (stat) stat.innerHTML = `<span class="err">${esc(d.error)}</span>`; return; }
     const rec = d.record || {};
     const hit = rec.was_hit;
-    if (stat) stat.innerHTML = hit ? '<span style="color:#38d39f;font-weight:700">✅ 적중</span>' : '<span style="color:#f87171;font-weight:700">❌ 미적중</span>';
+    // [유력마 적중 병행 노출] 정확 복승/삼복승(quinella_hit)과 별개로, 유력마 2/3 입상 시 참고 배지 병행 표시(손익·기존통계 불변).
+    const khHit = rec.keyhorse_quinella_hit || rec.keyhorse_trifecta_hit;
+    const khTxt = khHit ? ` <span style="color:#fbbf24;font-weight:600" title="유력마 상위3 중 2마리+ 입상 — 참고 지표(정확 복승/삼복승 판정·손익과 별개)">🔶 유력마 적중(참고)</span>` : '';
+    if (stat) stat.innerHTML = (hit ? '<span style="color:#38d39f;font-weight:700">✅ 적중</span>' : '<span style="color:#f87171;font-weight:700">❌ 미적중</span>') + khTxt;
     // [복기 통합] 적중/미적중 모두 복기 리포트 자동 표시(적중=왜 맞았는지 / 미적중=왜 놓쳤는지)
     showFailureReport(rk);
     try { loadLearningStats(); } catch (_) { /* */ }
@@ -4348,9 +4351,14 @@
       if (rv) {
         const yn = (b) => (b ? '<span style="color:#38d39f">✅ 적중</span>' : '<span style="color:#f87171">❌ 미적중</span>');
         const sc = rv.signal_correct || [];
+        // [유력마 적중 병행 노출] 정확 복승/삼복승 판정과 별개로 유력마 2/3 입상 참고 지표를 함께 표시(손익·기존통계 불변).
+        const khLine = (rv.keyhorse_quinella_hit || rv.keyhorse_trifecta_hit)
+          ? `<div style="margin-top:4px;color:#fbbf24">🔶 유력마 기반 적중(참고): 복승 ${rv.keyhorse_quinella_hit ? '✅' : '—'} · 삼복승 ${rv.keyhorse_trifecta_hit ? '✅' : '—'}${(rv.keyhorse_placed || []).length ? ` <span class="hint">입상 유력마 ${(rv.keyhorse_placed || []).join('·')}</span>` : ''}</div>`
+          : '';
         judge = `<div style="margin-top:6px">
           <div>복승 추천: ${yn(rv.quinella_hit)}${rv.payouts && rv.payouts.quinella ? ` <span class="hint">${rv.payouts.quinella}배</span>` : ''}</div>
           <div>삼복승 추천: ${yn(rv.trifecta_hit)}${rv.payouts && rv.payouts.trifecta ? ` <span class="hint">${rv.payouts.trifecta}배</span>` : ''}</div>
+          ${khLine}
           <div>제거법: ${yn(rv.elimination_correct)}</div>
           <div>전적 유력마: ${yn(rv.form_pick_hit)}${rv.form_pick != null ? ` <span class="hint">(${rv.form_pick}번)</span>` : ''}</div>
           <div style="margin-top:4px"><b>이상감지가 맞았나?</b> ${rv.anomaly_was_correct ? '<span style="color:#38d39f">✅ 예 — 급락 신호가 입상마를 예측</span>' : '<span style="color:#f87171">❌ 아니오</span>'}</div>
