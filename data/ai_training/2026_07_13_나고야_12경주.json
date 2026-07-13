@@ -5453,45 +5453,19 @@
      "1+4": 1654.6,
      "4+10": 2389.9
     }
+   },
+   {
+    "time": "21:10:18",
+    "quinella": {}
    }
   ],
-  "drop_rates": {
-   "11": -79.4,
-   "12": -79.4,
-   "6": -74.1,
-   "8": -70.8,
-   "5": -70.7,
-   "7": -55.7,
-   "3": -45.2,
-   "9": -45.2,
-   "10": -45.0,
-   "2": -17.0,
-   "4": -17.0
-  },
-  "excess_drops": {
-   "11": -29.1,
-   "12": -16.3,
-   "6": -16.3,
-   "5": -1.0,
-   "3": -0.8
-  },
-  "drop_speed": {
-   "11": -44.9,
-   "12": -44.9,
-   "6": -41.9,
-   "8": -40.0,
-   "5": -39.9,
-   "7": -31.5,
-   "3": -25.5,
-   "9": -25.5,
-   "10": -25.4,
-   "2": -9.6,
-   "4": -9.6
-  },
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": null,
-  "refund_rate": 0.748,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -5504,24 +5478,24 @@
  },
  "prediction": {
   "candidates": [
+   4,
    8,
+   1,
+   2,
    3,
    5,
    6,
-   9,
-   11,
-   12,
    7,
+   9,
    10,
-   1,
-   2,
-   4
+   11,
+   12
   ],
   "eliminated": [],
-  "recommend": "5+6",
-  "strategy": "BMED_압축형",
+  "recommend": "4+8",
+  "strategy": null,
   "confidence": 100.0,
-  "signal_quality": "상"
+  "signal_quality": "하"
  },
  "result": {
   "1st": 9,
@@ -5540,22 +5514,23 @@
   "odds_range": null
  },
  "signal_hit": {
-  "excess_drop_horse": "11",
-  "excess_drop_horse_placed": false,
-  "excess_drop_value": -29.1,
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
   "reversal_horse": null,
   "reversal_horse_placed": null,
   "reversal_ratio": null,
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-13 20:55:05",
+ "saved_at": "2026-07-13 21:11:08",
  "quality": {
-  "score": 80,
-  "grade": "AI학습용",
-  "complete": true,
-  "ai_ready": true,
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
   "missing": [
+   "이상감지 결과",
    "확정 배당"
   ],
   "errors": []

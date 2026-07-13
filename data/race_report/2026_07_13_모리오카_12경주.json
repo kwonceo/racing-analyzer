@@ -1,0 +1,173 @@
+{
+ "race": "모리오카 12경주",
+ "raceKey": "모리오카 12경주",
+ "date": "2026-07-13",
+ "result": {
+  "1st": 10,
+  "2nd": 1,
+  "3rd": 8,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_10": {
+   "horse": 10,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "일반"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 32.0,
+   "reason": "일반"
+  },
+  "signal_8": {
+   "horse": 8,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.648,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "쌍승역전"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 37.0,
+   "reason": "일반"
+  },
+  "signal_9": {
+   "horse": 9,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.59,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "쌍승역전"
+  }
+ },
+ "recommended_horses": [
+  3,
+  10,
+  9,
+  8
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 10번 전적 정보 제한",
+  "2. 배당 수집 시작 18:01:23",
+  "4. 쌍승 역전: 8→10(7.0) < 10→8(10.8) → 8번 실질 상위 신호",
+  "4. 쌍승 역전: 9→2(586.3) < 2→9(994.2) → 9번 실질 상위 신호",
+  "5. 종합 신뢰도 0.0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 10,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": null,
+  "total": 0.0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   8,
+   9,
+   3
+  ],
+  "inverseHit": [
+   8
+  ],
+  "confidence": 32.0,
+  "reason": "전적유력마 1번 적중 · 역배열 감지말 8번 입상"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [
+   3
+  ],
+  "events": {
+   "3": {
+    "first": {
+     "time": "18:05:20",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "18:05:20",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "18:06:50",
+     "minutes_before": null
+    }
+   }
+  },
+  "finalSignal": 3,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 2,
+   "next_race": 0
+  },
+  "validCount": 5
+ },
+ "pnl": 0,
+ "stake": 1000,
+ "generated_at": "2026-07-13 21:10:57"
+}

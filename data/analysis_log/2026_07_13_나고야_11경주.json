@@ -6,7 +6,7 @@
  "date": "2026-07-13",
  "race": "나고야 11경주",
  "analyzed_at": "19:39:11",
- "updated_at": "20:24:38",
+ "updated_at": "21:11:05",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -1112,14 +1112,54 @@
  },
  "horses": [
   {
+   "no": 4,
+   "name": "サヨノゴーステッド",
+   "jockey": "木間龍（船橋）",
+   "record_score": 25.0,
+   "record_detail": "최근 6-6-1-2-4",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 8,
+   "name": "ウォーアンセム",
+   "jockey": "笹川翼（大井）",
+   "record_score": 87.5,
+   "record_detail": "최근 1-3-2-3-1",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 1,
+   "name": "ニシノアヤカゼ",
+   "jockey": "秋元耕（浦和）",
+   "record_score": 15.0,
+   "record_detail": "최근 11-10-2-5-12",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
+  },
+  {
+   "no": 2,
+   "name": "ロックフレイバー",
+   "jockey": "野畑凌（川崎）",
+   "record_score": 13.8,
+   "record_detail": "최근 4-6-9-9-2",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
+  },
+  {
    "no": 3,
    "name": "レッドゲート",
    "jockey": "七夕裕（浦和）",
    "record_score": 0.0,
    "record_detail": "최근 7-8-10-11-11",
    "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 6.2배 · 최근평균 9.4착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.4착 -30 = 30점"
   },
   {
    "no": 5,
@@ -1129,7 +1169,7 @@
    "record_detail": "최근 1-5-1-13-13",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 6.2배 · 최근평균 6.6착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.6착 -30 = 30점"
   },
   {
    "no": 6,
@@ -1138,58 +1178,8 @@
    "record_score": 20.0,
    "record_detail": "최근 5-7-1-5-8",
    "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 9.1배 · 최근평균 5.2착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 10,
-   "name": "ロードアスタリスク",
-   "jockey": "藤江渉（川崎）",
-   "record_score": 31.2,
-   "record_detail": "최근 3-10-7-10-4",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 9.7배 · 최근평균 6.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 11,
-   "name": "ジオヴィグラス",
-   "jockey": "室陽一（浦和）",
-   "record_score": 0.0,
-   "record_detail": "최근 7-7-13-9-8",
-   "odds": null,
    "grade": "B",
-   "grade_reason": "배당 8.5배 · 최근평균 8.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 4,
-   "name": "サヨノゴーステッド",
-   "jockey": "木間龍（船橋）",
-   "record_score": 25.0,
-   "record_detail": "최근 6-6-1-2-4",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 116.3배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 8,
-   "name": "ウォーアンセム",
-   "jockey": "笹川翼（大井）",
-   "record_score": 87.5,
-   "record_detail": "최근 1-3-2-3-1",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 145.5배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 2,
-   "name": "ロックフレイバー",
-   "jockey": "野畑凌（川崎）",
-   "record_score": 13.8,
-   "record_detail": "최근 4-6-9-9-2",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 25.4배 · 최근평균 6.0착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.2착 -30 = 30점"
   },
   {
    "no": 7,
@@ -1199,17 +1189,7 @@
    "record_detail": "최근 12-11-8-11-12",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 34.9배 · 최근평균 10.8착 -30 = 70점"
-  },
-  {
-   "no": 1,
-   "name": "ニシノアヤカゼ",
-   "jockey": "秋元耕（浦和）",
-   "record_score": 15.0,
-   "record_detail": "최근 11-10-2-5-12",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 263.6배 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 10.8착 -30 = 30점"
   },
   {
    "no": 9,
@@ -1219,27 +1199,59 @@
    "record_detail": "최근 6-12-10-14-7",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 191.5배 · 배당 150배+ -40 / 최근평균 9.8착 -30 = 30점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.8착 -30 = 30점"
+  },
+  {
+   "no": 10,
+   "name": "ロードアスタリスク",
+   "jockey": "藤江渉（川崎）",
+   "record_score": 31.2,
+   "record_detail": "최근 3-10-7-10-4",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.8착 -30 = 30점"
+  },
+  {
+   "no": 11,
+   "name": "ジオヴィグラス",
+   "jockey": "室陽一（浦和）",
+   "record_score": 0.0,
+   "record_detail": "최근 7-7-13-9-8",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.8착 -30 = 30점"
+  },
+  {
+   "no": 12,
+   "name": "ハクシンドラゴン",
+   "jockey": "櫻井光（川崎）",
+   "record_score": 0.0,
+   "record_detail": "최근 8-12-7-9-8",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.8착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
+   4,
+   8,
+   1,
+   2,
    3,
    5,
    6,
-   10,
-   11,
-   4,
-   8,
-   2,
    7,
-   1
+   10,
+   11
   ],
   "eliminated": [
-   9
+   9,
+   12
   ],
   "elimination_reasons": {
-   "9": "배당 191.5배 · 배당 150배+ -40 / 최근평균 9.8착 -30 = 30점"
+   "9": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.8착 -30 = 30점",
+   "12": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.8착 -30 = 30점"
   }
  },
  "final_recommendation": {
@@ -1639,13 +1651,13 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    5,
-    6
+    4,
+    8
    ],
    "trio": [
+    4,
     5,
-    6,
-    10
+    8
    ]
   },
   "form": {
@@ -1665,233 +1677,67 @@
   },
   "final": {
    "quinella": [
-    5,
-    6
+    4,
+    8
    ],
    "trio": [
+    4,
     5,
-    6,
-    10
+    8
    ]
   }
  },
- "corePicks": {
-  "axis": [
-   5,
-   6
-  ],
-  "third": 10,
-  "quinella": [
-   5,
-   6
-  ],
-  "trifecta": [
-   5,
-   6,
-   10
-  ],
-  "picks": [
-   {
-    "no": 5,
-    "tier": 2,
-    "sub": 11,
-    "rep": 6.2,
-    "reason": "집중급락 11회"
-   },
-   {
-    "no": 6,
-    "tier": 1,
-    "sub": -9.1,
-    "rep": 9.1,
-    "reason": "유력마 저배당 9.1배"
-   },
-   {
-    "no": 10,
-    "tier": 1,
-    "sub": -9.7,
-    "rep": 9.7,
-    "reason": "유력마 저배당 9.7배"
-   }
-  ],
-  "quinellaOdds": 9.1,
-  "trifectaOdds": 17.7,
-  "confQuinellas": [
-   {
-    "combo": [
-     5,
-     6
-    ],
-    "odds": 9.1,
-    "reason": "시장유력"
-   }
-  ],
-  "forcedHorses": [],
-  "confTop1": 8,
-  "confTop1Conf": 26.2,
-  "confTop1High": true,
-  "favAxis": [
-   5,
-   6
-  ],
-  "confTrifecta": [
-   5,
-   6,
-   10
-  ],
-  "confTrifectaOdds": 17.7,
-  "confTrifectaIns": [
-   5,
-   6,
-   8
-  ],
-  "confTrifectaInsOdds": 141.0,
-  "earlyDropHorses": [
-   {
-    "no": 5,
-    "firstTime": "20:11:21",
-    "firstMb": 24,
-    "firstPct": -61.5
-   },
-   {
-    "no": 11,
-    "firstTime": "20:11:21",
-    "firstMb": 24,
-    "firstPct": -58.3
-   },
-   {
-    "no": 6,
-    "firstTime": "20:11:21",
-    "firstMb": 24,
-    "firstPct": -59.5
-   },
-   {
-    "no": 2,
-    "firstTime": "20:11:21",
-    "firstMb": 24,
-    "firstPct": -41.7
-   }
-  ],
-  "earlyDropTrifectas": [
-   {
-    "combo": [
-     5,
-     6,
-     11
-    ],
-    "odds": 20.8,
-    "horse": 11
-   },
-   {
-    "combo": [
-     2,
-     5,
-     6
-    ],
-    "odds": 42.3,
-    "horse": 2
-   }
-  ],
-  "closingDropHorses": [
-   {
-    "no": 5,
-    "firstTime": "20:09:50",
-    "firstMb": 0,
-    "firstPct": -62.2
-   },
-   {
-    "no": 11,
-    "firstTime": "20:09:50",
-    "firstMb": 0,
-    "firstPct": -63.7
-   },
-   {
-    "no": 6,
-    "firstTime": "20:09:50",
-    "firstMb": 0,
-    "firstPct": -76.3
-   },
-   {
-    "no": 2,
-    "firstTime": "20:09:50",
-    "firstMb": 0,
-    "firstPct": -33.7
-   }
-  ],
-  "closingDropTrifectas": [],
-  "darkHorsePicks": [
-   {
-    "no": 5,
-    "anomCount": 11,
-    "smartMoney": false,
-    "forced": true
-   },
-   {
-    "no": 2,
-    "anomCount": 0,
-    "smartMoney": false,
-    "forced": false
-   },
-   {
-    "no": 6,
-    "anomCount": 0,
-    "smartMoney": false,
-    "forced": false
-   },
-   {
-    "no": 11,
-    "anomCount": 0,
-    "smartMoney": false,
-    "forced": false
-   }
-  ],
-  "darkTrifectas": [],
-  "finalQuinellas": [
-   {
-    "combo": [
-     3,
-     5
-    ],
-    "odds": 6.2,
-    "reason": "시장 최저복승"
-   },
-   {
-    "combo": [
-     5,
-     6
-    ],
-    "odds": 9.1,
-    "reason": "시장유력"
-   }
-  ],
-  "finalTrifectas": [
-   {
-    "combo": [
-     5,
-     6,
-     10
-    ],
-    "odds": 17.7,
-    "reason": "삼복승 메인"
-   },
-   {
-    "combo": [
-     5,
-     6,
-     11
-    ],
-    "odds": 20.8,
-    "reason": "초기급락 보존"
-   }
-  ]
- },
- "summary": "유력마 5·6·10 / 복승 5+6",
+ "corePicks": null,
+ "summary": "유력마 8·4·5 / 복승 4+8",
  "keyHorses": [
-  5,
-  6,
-  10
+  8,
+  4,
+  5
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 3,
+  "2nd": 7,
+  "3rd": 11
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [],
+  "dark_placed": [
+   3,
+   11
+  ],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   9
+  ],
+  "form_pick": 3,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 0.0,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 100.0,
+   "reason": "전적유력마 3번 적중 · 제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

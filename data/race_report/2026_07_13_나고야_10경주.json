@@ -1,0 +1,378 @@
+{
+ "race": "나고야 10경주",
+ "raceKey": "나고야 10경주",
+ "date": "2026-07-13",
+ "result": {
+  "1st": 11,
+  "2nd": 12,
+  "3rd": 4,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_11": {
+   "horse": 11,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.636,
+   "record_score": null,
+   "confidence": 100.0,
+   "reason": "쌍승역전"
+  },
+  "signal_12": {
+   "horse": 12,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 100.0,
+   "reason": "일반"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.352,
+   "record_score": null,
+   "confidence": 31.0,
+   "reason": "쌍승역전"
+  }
+ },
+ "recommended_horses": [
+  4,
+  11,
+  12
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 11번 전적 정보 제한",
+  "2. 배당 수집 시작 19:04:47",
+  "4. 쌍승 역전: 4→12(2.5) < 12→4(7.1) → 4번 실질 상위 신호",
+  "4. 쌍승 역전: 11→9(155.8) < 9→11(245.0) → 11번 실질 상위 신호",
+  "5. 종합 신뢰도 100.0점(상) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 11,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 23,
+  "quinella_mismatch_score": 0,
+  "record_score": null,
+  "total": 100.0,
+  "grade": "상"
+ },
+ "win_tags": [
+  "쌍승역전_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   4,
+   11
+  ],
+  "inverseHit": [
+   4,
+   11
+  ],
+  "confidence": 100.0,
+  "reason": "역배열 감지말 4·11번 입상"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "19:16:38",
+    "minutes_before": null,
+    "previous_signal": "7번",
+    "new_signal": "6번",
+    "reason": "6번 집중급락(평균 -10.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "19:16:56",
+    "minutes_before": null,
+    "previous_signal": "6번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -29.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "19:19:37",
+    "minutes_before": null,
+    "previous_signal": "2번",
+    "new_signal": "8번",
+    "reason": "8번 집중급락(평균 -43.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "19:21:36",
+    "minutes_before": null,
+    "previous_signal": "4번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -69.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "19:23:39",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -30.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "19:24:56",
+    "minutes_before": null,
+    "previous_signal": "2번",
+    "new_signal": "5번",
+    "reason": "5번 집중급락(평균 -30.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "19:28:40",
+    "minutes_before": null,
+    "previous_signal": "7번",
+    "new_signal": "8번",
+    "reason": "8번 집중급락(평균 -32.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "19:28:57",
+    "minutes_before": null,
+    "previous_signal": "8번",
+    "new_signal": "2번",
+    "reason": "2번 집중급락(평균 -35.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "19:31:20",
+    "minutes_before": 9,
+    "previous_signal": "7번",
+    "new_signal": "5번",
+    "reason": "5번 집중급락(평균 -62.3%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "19:31:39",
+    "minutes_before": null,
+    "previous_signal": "5번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -74.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "19:37:41",
+    "minutes_before": 2,
+    "previous_signal": "2번",
+    "new_signal": "5번",
+    "reason": "5번 집중급락(평균 -35.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "19:38:20",
+    "minutes_before": 2,
+    "previous_signal": "5번",
+    "new_signal": "2번",
+    "reason": "2번 집중급락(평균 -54.4%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "19:38:36",
+    "minutes_before": null,
+    "previous_signal": "2번",
+    "new_signal": "12번",
+    "reason": "12번 집중급락(평균 -72.0%)",
+    "prev_was_candidate": false
+   }
+  ],
+  "confirmed": [
+   2
+  ],
+  "candidates": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   12
+  ],
+  "events": {
+   "8": {
+    "first": {
+     "time": "19:06:38",
+     "minutes_before": null
+    },
+    "count": 4,
+    "last": {
+     "time": "19:38:55",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "19:07:37",
+     "minutes_before": null
+    }
+   },
+   "5": {
+    "first": {
+     "time": "19:09:38",
+     "minutes_before": null
+    },
+    "count": 4,
+    "last": {
+     "time": "19:37:41",
+     "minutes_before": 2
+    },
+    "vanished": {
+     "time": "19:10:38",
+     "minutes_before": null
+    }
+   },
+   "4": {
+    "first": {
+     "time": "19:13:39",
+     "minutes_before": null
+    },
+    "count": 3,
+    "last": {
+     "time": "19:34:40",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "19:14:39",
+     "minutes_before": null
+    }
+   },
+   "7": {
+    "first": {
+     "time": "19:15:38",
+     "minutes_before": null
+    },
+    "count": 5,
+    "last": {
+     "time": "19:30:36",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "19:17:36",
+     "minutes_before": null
+    }
+   },
+   "6": {
+    "first": {
+     "time": "19:16:38",
+     "minutes_before": null
+    },
+    "count": 2,
+    "last": {
+     "time": "19:35:37",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "19:36:00",
+     "minutes_before": null
+    }
+   },
+   "2": {
+    "first": {
+     "time": "19:18:35",
+     "minutes_before": null
+    },
+    "count": 8,
+    "last": {
+     "time": "19:38:20",
+     "minutes_before": 2
+    },
+    "vanished": {
+     "time": "19:29:39",
+     "minutes_before": null
+    },
+    "confirmed": {
+     "time": "19:37:41",
+     "minutes_before": 2
+    }
+   },
+   "3": {
+    "first": {
+     "time": "19:21:36",
+     "minutes_before": null
+    },
+    "count": 3,
+    "last": {
+     "time": "19:31:39",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "19:21:57",
+     "minutes_before": null
+    }
+   },
+   "9": {
+    "first": {
+     "time": "19:31:58",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "19:31:58",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "19:32:19",
+     "minutes_before": null
+    }
+   },
+   "12": {
+    "first": {
+     "time": "19:38:36",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "19:38:36",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "19:38:39",
+     "minutes_before": null
+    }
+   }
+  },
+  "finalSignal": 8,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 66
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-13 21:11:03"
+}

@@ -18,670 +18,66 @@
    "placed": true,
    "recommended": false,
    "place_rank": 1,
-   "excess_drop": 8.3,
-   "avg_drop": -36.1,
-   "grade": "🔴",
-   "rep_combo": [
-    3,
-    9
-   ],
-   "drop_timeline": [
-    {
-     "time": "20:09:46",
-     "minutes_before": null,
-     "odds": 135.6,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:10:37",
-     "minutes_before": null,
-     "odds": 133.6,
-     "change": -1.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:11:37",
-     "minutes_before": null,
-     "odds": 137.5,
-     "change": 2.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:12:37",
-     "minutes_before": null,
-     "odds": 138.7,
-     "change": 0.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:13:38",
-     "minutes_before": null,
-     "odds": 144.8,
-     "change": 4.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:14:37",
-     "minutes_before": null,
-     "odds": 142.6,
-     "change": -1.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:15:39",
-     "minutes_before": null,
-     "odds": 134.7,
-     "change": -5.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:16:36",
-     "minutes_before": null,
-     "odds": 128.0,
-     "change": -5.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:17:37",
-     "minutes_before": null,
-     "odds": 128.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:18:37",
-     "minutes_before": null,
-     "odds": 129.2,
-     "change": 0.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:19:38",
-     "minutes_before": null,
-     "odds": 135.0,
-     "change": 4.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:19:59",
-     "minutes_before": null,
-     "odds": 135.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:20:20",
-     "minutes_before": null,
-     "odds": 135.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:20:39",
-     "minutes_before": null,
-     "odds": 133.8,
-     "change": -0.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:00",
-     "minutes_before": null,
-     "odds": 133.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:20",
-     "minutes_before": null,
-     "odds": 134.9,
-     "change": 0.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:40",
-     "minutes_before": null,
-     "odds": 134.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:59",
-     "minutes_before": null,
-     "odds": 133.0,
-     "change": -1.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:22:38",
-     "minutes_before": null,
-     "odds": 133.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:23:38",
-     "minutes_before": null,
-     "odds": 136.3,
-     "change": 2.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:24:37",
-     "minutes_before": null,
-     "odds": 136.2,
-     "change": -0.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:25:37",
-     "minutes_before": null,
-     "odds": 126.8,
-     "change": -6.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:26:38",
-     "minutes_before": null,
-     "odds": 126.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:27:37",
-     "minutes_before": null,
-     "odds": 119.5,
-     "change": -5.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:28:40",
-     "minutes_before": null,
-     "odds": 104.3,
-     "change": -12.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:29:36",
-     "minutes_before": null,
-     "odds": 96.5,
-     "change": -7.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:30:38",
-     "minutes_before": null,
-     "odds": 96.5,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:31:36",
-     "minutes_before": null,
-     "odds": 91.3,
-     "change": -5.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:32:37",
-     "minutes_before": null,
-     "odds": 92.3,
-     "change": 1.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:33:36",
-     "minutes_before": null,
-     "odds": 86.1,
-     "change": -6.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:34:39",
-     "minutes_before": null,
-     "odds": 82.7,
-     "change": -3.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:35:38",
-     "minutes_before": null,
-     "odds": 82.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:36:37",
-     "minutes_before": null,
-     "odds": 86.7,
-     "change": 4.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:37:37",
-     "minutes_before": null,
-     "odds": 68.8,
-     "change": -20.6,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:38:39",
-     "minutes_before": null,
-     "odds": 71.5,
-     "change": 3.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:39:38",
-     "minutes_before": null,
-     "odds": 71.6,
-     "change": 0.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:40:36",
-     "minutes_before": null,
-     "odds": 75.5,
-     "change": 5.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:40:48",
-     "minutes_before": null,
-     "odds": 72.9,
-     "change": -3.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:41:07",
-     "minutes_before": null,
-     "odds": 75.5,
-     "change": 3.6,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:41:38",
-     "minutes_before": null,
-     "odds": 75.5,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:30",
-     "minutes_before": null,
-     "odds": 73.0,
-     "change": -3.3,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:33",
-     "minutes_before": null,
-     "odds": 76.2,
-     "change": 4.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:38",
-     "minutes_before": null,
-     "odds": 76.6,
-     "change": 0.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:44",
-     "minutes_before": 7,
-     "odds": 49.5,
-     "change": -35.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:55",
-     "minutes_before": 7,
-     "odds": 49.5,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:58",
-     "minutes_before": 7,
-     "odds": 49.5,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:43:37",
-     "minutes_before": null,
-     "odds": 73.6,
-     "change": 48.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:43:39",
-     "minutes_before": null,
-     "odds": 73.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:43:44",
-     "minutes_before": null,
-     "odds": 73.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:44:39",
-     "minutes_before": null,
-     "odds": 74.4,
-     "change": 1.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:44:47",
-     "minutes_before": null,
-     "odds": 76.4,
-     "change": 2.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:44:51",
-     "minutes_before": null,
-     "odds": 76.4,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:45:39",
-     "minutes_before": null,
-     "odds": 76.5,
-     "change": 0.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:45:58",
-     "minutes_before": null,
-     "odds": 80.5,
-     "change": 5.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:45:59",
-     "minutes_before": null,
-     "odds": 80.5,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:46:39",
-     "minutes_before": null,
-     "odds": 80.5,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:47:07",
-     "minutes_before": null,
-     "odds": 83.9,
-     "change": 4.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:47:10",
-     "minutes_before": null,
-     "odds": 83.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:47:38",
-     "minutes_before": null,
-     "odds": 83.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:18",
-     "minutes_before": null,
-     "odds": 89.0,
-     "change": 6.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:23",
-     "minutes_before": null,
-     "odds": 83.9,
-     "change": -5.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:35",
-     "minutes_before": null,
-     "odds": 90.2,
-     "change": 7.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:56",
-     "minutes_before": null,
-     "odds": 90.2,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:16",
-     "minutes_before": null,
-     "odds": 90.2,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:26",
-     "minutes_before": null,
-     "odds": 102.1,
-     "change": 13.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:33",
-     "minutes_before": null,
-     "odds": 90.2,
-     "change": -11.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:34",
-     "minutes_before": 0,
-     "odds": 56.1,
-     "change": -37.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:35",
-     "minutes_before": null,
-     "odds": 102.3,
-     "change": 82.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:54",
-     "minutes_before": null,
-     "odds": 102.1,
-     "change": -0.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:03",
-     "minutes_before": 0,
-     "odds": 56.1,
-     "change": -45.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:14",
-     "minutes_before": null,
-     "odds": 102.1,
-     "change": 82.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:34",
-     "minutes_before": null,
-     "odds": 102.3,
-     "change": 0.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:38",
-     "minutes_before": null,
-     "odds": 102.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:44",
-     "minutes_before": null,
-     "odds": 102.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:54",
-     "minutes_before": null,
-     "odds": 102.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:51:11",
-     "minutes_before": null,
-     "odds": 102.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:51:33",
-     "minutes_before": null,
-     "odds": 102.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:52:13",
-     "minutes_before": null,
-     "odds": 102.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:53:59",
-     "minutes_before": null,
-     "odds": 56.1,
-     "change": null,
-     "excluded": true,
-     "exclReason": "마감 후 데이터 - 제외됨"
-    }
-   ],
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": 0.0,
-   "confidence": 100.0,
-   "reason": "초과급락"
+   "confidence": 88.0,
+   "reason": "일반"
   },
   "signal_7": {
    "horse": 7,
    "placed": true,
    "recommended": false,
    "place_rank": 2,
-   "excess_drop": 16.4,
-   "avg_drop": -28.0,
-   "grade": "🔴",
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 0.0,
+   "confidence": 68.0,
+   "reason": "일반"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 20.0,
+   "confidence": 100.0,
+   "reason": "일반"
+  },
+  "signal_8": {
+   "horse": 8,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
    "rep_combo": [
-    6,
-    7
+    4,
+    8
    ],
    "drop_timeline": [
     {
      "time": "20:09:46",
      "minutes_before": null,
-     "odds": 73.5,
+     "odds": 33.0,
      "change": null,
      "excluded": false,
      "exclReason": null
@@ -689,63 +85,63 @@
     {
      "time": "20:10:37",
      "minutes_before": null,
-     "odds": 73.8,
-     "change": 0.4,
+     "odds": 33.2,
+     "change": 0.6,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:11:37",
      "minutes_before": null,
-     "odds": 76.5,
-     "change": 3.7,
+     "odds": 34.0,
+     "change": 2.4,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:12:37",
      "minutes_before": null,
-     "odds": 77.2,
-     "change": 0.9,
+     "odds": 34.0,
+     "change": 0.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:13:38",
      "minutes_before": null,
-     "odds": 77.4,
-     "change": 0.3,
+     "odds": 30.6,
+     "change": -10.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:14:37",
      "minutes_before": null,
-     "odds": 79.0,
-     "change": 2.1,
+     "odds": 29.8,
+     "change": -2.6,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:15:39",
      "minutes_before": null,
-     "odds": 80.6,
-     "change": 2.0,
+     "odds": 30.5,
+     "change": 2.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:16:36",
      "minutes_before": null,
-     "odds": 73.7,
-     "change": -8.6,
+     "odds": 30.9,
+     "change": 1.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:17:37",
      "minutes_before": null,
-     "odds": 73.7,
+     "odds": 30.9,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -753,23 +149,23 @@
     {
      "time": "20:18:37",
      "minutes_before": null,
-     "odds": 76.1,
-     "change": 3.3,
+     "odds": 31.4,
+     "change": 1.6,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:19:38",
      "minutes_before": null,
-     "odds": 83.2,
-     "change": 9.3,
+     "odds": 30.5,
+     "change": -2.9,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:19:59",
      "minutes_before": null,
-     "odds": 83.2,
+     "odds": 30.5,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -777,7 +173,7 @@
     {
      "time": "20:20:20",
      "minutes_before": null,
-     "odds": 83.2,
+     "odds": 30.5,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -785,15 +181,15 @@
     {
      "time": "20:20:39",
      "minutes_before": null,
-     "odds": 86.0,
-     "change": 3.4,
+     "odds": 30.3,
+     "change": -0.7,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:21:00",
      "minutes_before": null,
-     "odds": 86.0,
+     "odds": 30.3,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -801,15 +197,15 @@
     {
      "time": "20:21:20",
      "minutes_before": null,
-     "odds": 92.7,
-     "change": 7.8,
+     "odds": 31.5,
+     "change": 4.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:21:40",
      "minutes_before": null,
-     "odds": 92.7,
+     "odds": 31.5,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -817,15 +213,15 @@
     {
      "time": "20:21:59",
      "minutes_before": null,
-     "odds": 92.3,
-     "change": -0.4,
+     "odds": 30.2,
+     "change": -4.1,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:22:38",
      "minutes_before": null,
-     "odds": 92.3,
+     "odds": 30.2,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -833,31 +229,31 @@
     {
      "time": "20:23:38",
      "minutes_before": null,
-     "odds": 92.2,
-     "change": -0.1,
+     "odds": 30.6,
+     "change": 1.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:24:37",
      "minutes_before": null,
-     "odds": 93.2,
-     "change": 1.1,
+     "odds": 30.9,
+     "change": 1.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:25:37",
      "minutes_before": null,
-     "odds": 98.3,
-     "change": 5.5,
+     "odds": 31.9,
+     "change": 3.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:26:38",
      "minutes_before": null,
-     "odds": 98.3,
+     "odds": 31.9,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -865,31 +261,31 @@
     {
      "time": "20:27:37",
      "minutes_before": null,
-     "odds": 98.7,
-     "change": 0.4,
+     "odds": 32.4,
+     "change": 1.6,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:28:40",
      "minutes_before": null,
-     "odds": 97.9,
-     "change": -0.8,
+     "odds": 32.8,
+     "change": 1.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:29:36",
      "minutes_before": null,
-     "odds": 98.5,
-     "change": 0.6,
+     "odds": 32.3,
+     "change": -1.5,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:30:38",
      "minutes_before": null,
-     "odds": 98.5,
+     "odds": 32.3,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -897,7 +293,7 @@
     {
      "time": "20:31:36",
      "minutes_before": null,
-     "odds": 94.3,
+     "odds": 30.9,
      "change": -4.3,
      "excluded": false,
      "exclReason": null
@@ -905,31 +301,31 @@
     {
      "time": "20:32:37",
      "minutes_before": null,
-     "odds": 95.2,
-     "change": 1.0,
+     "odds": 30.9,
+     "change": 0.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:33:36",
      "minutes_before": null,
-     "odds": 94.3,
-     "change": -0.9,
+     "odds": 31.6,
+     "change": 2.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:34:39",
      "minutes_before": null,
-     "odds": 95.5,
-     "change": 1.3,
+     "odds": 31.5,
+     "change": -0.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:35:38",
      "minutes_before": null,
-     "odds": 95.5,
+     "odds": 31.5,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -937,79 +333,63 @@
     {
      "time": "20:36:37",
      "minutes_before": null,
-     "odds": 100.4,
-     "change": 5.1,
+     "odds": 31.5,
+     "change": 0.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:37:37",
      "minutes_before": null,
-     "odds": 100.5,
-     "change": 0.1,
+     "odds": 31.7,
+     "change": 0.6,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:38:39",
      "minutes_before": null,
-     "odds": 103.4,
-     "change": 2.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:39:19",
-     "minutes_before": 11,
-     "odds": 595.0,
-     "change": 475.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:39:21",
-     "minutes_before": 11,
-     "odds": 595.0,
-     "change": 0.0,
+     "odds": 31.3,
+     "change": -1.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:39:38",
      "minutes_before": null,
-     "odds": 103.5,
-     "change": -82.6,
+     "odds": 31.3,
+     "change": 0.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:40:36",
      "minutes_before": null,
-     "odds": 104.0,
-     "change": 0.5,
+     "odds": 32.7,
+     "change": 4.5,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:40:48",
      "minutes_before": null,
-     "odds": 100.7,
-     "change": -3.2,
+     "odds": 32.0,
+     "change": -2.1,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:41:07",
      "minutes_before": null,
-     "odds": 104.0,
-     "change": 3.3,
+     "odds": 32.7,
+     "change": 2.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:41:38",
      "minutes_before": null,
-     "odds": 104.0,
+     "odds": 32.7,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1017,39 +397,39 @@
     {
      "time": "20:42:30",
      "minutes_before": null,
-     "odds": 99.3,
-     "change": -4.5,
+     "odds": 31.0,
+     "change": -5.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:42:33",
      "minutes_before": null,
-     "odds": 94.6,
-     "change": -4.7,
+     "odds": 33.3,
+     "change": 7.4,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:42:38",
      "minutes_before": null,
-     "odds": 95.3,
-     "change": 0.7,
+     "odds": 33.2,
+     "change": -0.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:42:44",
      "minutes_before": 7,
-     "odds": 67.3,
-     "change": -29.4,
+     "odds": 301.0,
+     "change": 806.6,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:42:55",
      "minutes_before": 7,
-     "odds": 67.3,
+     "odds": 301.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1057,7 +437,7 @@
     {
      "time": "20:42:58",
      "minutes_before": 7,
-     "odds": 67.3,
+     "odds": 301.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1065,15 +445,15 @@
     {
      "time": "20:43:37",
      "minutes_before": null,
-     "odds": 103.2,
-     "change": 53.3,
+     "odds": 31.1,
+     "change": -89.7,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:43:39",
      "minutes_before": null,
-     "odds": 103.2,
+     "odds": 31.1,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1081,7 +461,7 @@
     {
      "time": "20:43:44",
      "minutes_before": null,
-     "odds": 103.2,
+     "odds": 31.1,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1089,23 +469,23 @@
     {
      "time": "20:44:39",
      "minutes_before": null,
-     "odds": 104.7,
-     "change": 1.5,
+     "odds": 31.1,
+     "change": 0.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:44:47",
      "minutes_before": null,
-     "odds": 104.4,
-     "change": -0.3,
+     "odds": 31.7,
+     "change": 1.9,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:44:51",
      "minutes_before": null,
-     "odds": 104.4,
+     "odds": 31.7,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1113,23 +493,23 @@
     {
      "time": "20:45:39",
      "minutes_before": null,
-     "odds": 104.6,
-     "change": 0.2,
+     "odds": 31.6,
+     "change": -0.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:45:58",
      "minutes_before": null,
-     "odds": 105.8,
-     "change": 1.1,
+     "odds": 32.4,
+     "change": 2.5,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:45:59",
      "minutes_before": null,
-     "odds": 105.8,
+     "odds": 32.4,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1137,7 +517,7 @@
     {
      "time": "20:46:39",
      "minutes_before": null,
-     "odds": 105.8,
+     "odds": 32.4,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1145,15 +525,15 @@
     {
      "time": "20:47:07",
      "minutes_before": null,
-     "odds": 111.5,
-     "change": 5.4,
+     "odds": 33.0,
+     "change": 1.9,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:47:10",
      "minutes_before": null,
-     "odds": 111.5,
+     "odds": 33.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1161,7 +541,7 @@
     {
      "time": "20:47:38",
      "minutes_before": null,
-     "odds": 111.5,
+     "odds": 33.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1169,31 +549,31 @@
     {
      "time": "20:48:18",
      "minutes_before": null,
-     "odds": 115.7,
-     "change": 3.8,
+     "odds": 34.4,
+     "change": 4.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:48:23",
      "minutes_before": null,
-     "odds": 111.5,
-     "change": -3.6,
+     "odds": 33.0,
+     "change": -4.1,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:48:35",
      "minutes_before": null,
-     "odds": 117.0,
-     "change": 4.9,
+     "odds": 34.4,
+     "change": 4.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:48:56",
      "minutes_before": null,
-     "odds": 117.0,
+     "odds": 34.4,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1201,7 +581,7 @@
     {
      "time": "20:49:16",
      "minutes_before": null,
-     "odds": 117.0,
+     "odds": 34.4,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1209,71 +589,71 @@
     {
      "time": "20:49:26",
      "minutes_before": null,
-     "odds": 149.2,
-     "change": 27.5,
+     "odds": 44.5,
+     "change": 29.4,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:49:33",
      "minutes_before": null,
-     "odds": 117.0,
-     "change": -21.6,
+     "odds": 34.4,
+     "change": -22.7,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:49:34",
      "minutes_before": 0,
-     "odds": 66.3,
-     "change": -43.3,
+     "odds": 539.9,
+     "change": 1469.5,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:49:35",
      "minutes_before": null,
-     "odds": 149.5,
-     "change": 125.5,
+     "odds": 44.3,
+     "change": -91.8,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:49:54",
      "minutes_before": null,
-     "odds": 149.2,
-     "change": -0.2,
+     "odds": 44.5,
+     "change": 0.5,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:50:03",
      "minutes_before": 0,
-     "odds": 66.3,
-     "change": -55.6,
+     "odds": 539.9,
+     "change": 1113.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:50:14",
      "minutes_before": null,
-     "odds": 149.2,
-     "change": 125.0,
+     "odds": 44.5,
+     "change": -91.8,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:50:34",
      "minutes_before": null,
-     "odds": 149.5,
-     "change": 0.2,
+     "odds": 44.3,
+     "change": -0.4,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:50:38",
      "minutes_before": null,
-     "odds": 149.5,
+     "odds": 44.3,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1281,7 +661,7 @@
     {
      "time": "20:50:44",
      "minutes_before": null,
-     "odds": 149.5,
+     "odds": 44.3,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1289,7 +669,7 @@
     {
      "time": "20:50:54",
      "minutes_before": null,
-     "odds": 149.5,
+     "odds": 44.3,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1297,7 +677,7 @@
     {
      "time": "20:51:11",
      "minutes_before": null,
-     "odds": 149.5,
+     "odds": 44.3,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1305,7 +685,7 @@
     {
      "time": "20:51:33",
      "minutes_before": null,
-     "odds": 149.5,
+     "odds": 44.3,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1313,7 +693,7 @@
     {
      "time": "20:52:13",
      "minutes_before": null,
-     "odds": 149.5,
+     "odds": 44.3,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -1321,7 +701,7 @@
     {
      "time": "20:53:59",
      "minutes_before": null,
-     "odds": 66.3,
+     "odds": 537.7,
      "change": null,
      "excluded": true,
      "exclReason": "마감 후 데이터 - 제외됨"
@@ -1329,27 +709,27 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 0.0,
+   "record_score": 87.5,
    "confidence": 100.0,
-   "reason": "초과급락"
+   "reason": "전적상위"
   },
-  "signal_6": {
-   "horse": 6,
-   "placed": true,
+  "signal_4": {
+   "horse": 4,
+   "placed": false,
    "recommended": true,
-   "place_rank": 3,
-   "excess_drop": -16.3,
-   "avg_drop": -60.7,
-   "grade": "🔴",
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
    "rep_combo": [
-    6,
-    12
+    4,
+    8
    ],
    "drop_timeline": [
     {
      "time": "20:09:46",
      "minutes_before": null,
-     "odds": 49.0,
+     "odds": 33.0,
      "change": null,
      "excluded": false,
      "exclReason": null
@@ -1357,23 +737,675 @@
     {
      "time": "20:10:37",
      "minutes_before": null,
-     "odds": 49.2,
-     "change": 0.4,
+     "odds": 33.2,
+     "change": 0.6,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:11:37",
      "minutes_before": null,
-     "odds": 46.1,
-     "change": -6.3,
+     "odds": 34.0,
+     "change": 2.4,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:12:37",
      "minutes_before": null,
-     "odds": 46.5,
+     "odds": 34.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:13:38",
+     "minutes_before": null,
+     "odds": 30.6,
+     "change": -10.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:14:37",
+     "minutes_before": null,
+     "odds": 29.8,
+     "change": -2.6,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:15:39",
+     "minutes_before": null,
+     "odds": 30.5,
+     "change": 2.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:16:36",
+     "minutes_before": null,
+     "odds": 30.9,
+     "change": 1.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:17:37",
+     "minutes_before": null,
+     "odds": 30.9,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:18:37",
+     "minutes_before": null,
+     "odds": 31.4,
+     "change": 1.6,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:19:38",
+     "minutes_before": null,
+     "odds": 30.5,
+     "change": -2.9,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:19:59",
+     "minutes_before": null,
+     "odds": 30.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:20:20",
+     "minutes_before": null,
+     "odds": 30.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:20:39",
+     "minutes_before": null,
+     "odds": 30.3,
+     "change": -0.7,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:21:00",
+     "minutes_before": null,
+     "odds": 30.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:21:20",
+     "minutes_before": null,
+     "odds": 31.5,
+     "change": 4.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:21:40",
+     "minutes_before": null,
+     "odds": 31.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:21:59",
+     "minutes_before": null,
+     "odds": 30.2,
+     "change": -4.1,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:22:38",
+     "minutes_before": null,
+     "odds": 30.2,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:23:38",
+     "minutes_before": null,
+     "odds": 30.6,
+     "change": 1.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:24:37",
+     "minutes_before": null,
+     "odds": 30.9,
+     "change": 1.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:25:37",
+     "minutes_before": null,
+     "odds": 31.9,
+     "change": 3.2,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:26:38",
+     "minutes_before": null,
+     "odds": 31.9,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:27:37",
+     "minutes_before": null,
+     "odds": 32.4,
+     "change": 1.6,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:28:40",
+     "minutes_before": null,
+     "odds": 32.8,
+     "change": 1.2,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:29:36",
+     "minutes_before": null,
+     "odds": 32.3,
+     "change": -1.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:30:38",
+     "minutes_before": null,
+     "odds": 32.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:31:36",
+     "minutes_before": null,
+     "odds": 30.9,
+     "change": -4.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:32:37",
+     "minutes_before": null,
+     "odds": 30.9,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:33:36",
+     "minutes_before": null,
+     "odds": 31.6,
+     "change": 2.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:34:39",
+     "minutes_before": null,
+     "odds": 31.5,
+     "change": -0.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:35:38",
+     "minutes_before": null,
+     "odds": 31.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:36:37",
+     "minutes_before": null,
+     "odds": 31.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:37:37",
+     "minutes_before": null,
+     "odds": 31.7,
+     "change": 0.6,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:38:39",
+     "minutes_before": null,
+     "odds": 31.3,
+     "change": -1.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:39:38",
+     "minutes_before": null,
+     "odds": 31.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:40:36",
+     "minutes_before": null,
+     "odds": 32.7,
+     "change": 4.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:40:48",
+     "minutes_before": null,
+     "odds": 32.0,
+     "change": -2.1,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:41:07",
+     "minutes_before": null,
+     "odds": 32.7,
+     "change": 2.2,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:41:38",
+     "minutes_before": null,
+     "odds": 32.7,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:42:30",
+     "minutes_before": null,
+     "odds": 31.0,
+     "change": -5.2,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:42:33",
+     "minutes_before": null,
+     "odds": 33.3,
+     "change": 7.4,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:42:38",
+     "minutes_before": null,
+     "odds": 33.2,
+     "change": -0.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:42:44",
+     "minutes_before": 7,
+     "odds": 301.0,
+     "change": 806.6,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:42:55",
+     "minutes_before": 7,
+     "odds": 301.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:42:58",
+     "minutes_before": 7,
+     "odds": 301.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:43:37",
+     "minutes_before": null,
+     "odds": 31.1,
+     "change": -89.7,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:43:39",
+     "minutes_before": null,
+     "odds": 31.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:43:44",
+     "minutes_before": null,
+     "odds": 31.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:44:39",
+     "minutes_before": null,
+     "odds": 31.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:44:47",
+     "minutes_before": null,
+     "odds": 31.7,
+     "change": 1.9,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:44:51",
+     "minutes_before": null,
+     "odds": 31.7,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:45:39",
+     "minutes_before": null,
+     "odds": 31.6,
+     "change": -0.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:45:58",
+     "minutes_before": null,
+     "odds": 32.4,
+     "change": 2.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:45:59",
+     "minutes_before": null,
+     "odds": 32.4,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:46:39",
+     "minutes_before": null,
+     "odds": 32.4,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:47:07",
+     "minutes_before": null,
+     "odds": 33.0,
+     "change": 1.9,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:47:10",
+     "minutes_before": null,
+     "odds": 33.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:47:38",
+     "minutes_before": null,
+     "odds": 33.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:48:18",
+     "minutes_before": null,
+     "odds": 34.4,
+     "change": 4.2,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:48:23",
+     "minutes_before": null,
+     "odds": 33.0,
+     "change": -4.1,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:48:35",
+     "minutes_before": null,
+     "odds": 34.4,
+     "change": 4.2,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:48:56",
+     "minutes_before": null,
+     "odds": 34.4,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:49:16",
+     "minutes_before": null,
+     "odds": 34.4,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:49:26",
+     "minutes_before": null,
+     "odds": 44.5,
+     "change": 29.4,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:49:33",
+     "minutes_before": null,
+     "odds": 34.4,
+     "change": -22.7,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:49:34",
+     "minutes_before": 0,
+     "odds": 539.9,
+     "change": 1469.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:49:35",
+     "minutes_before": null,
+     "odds": 44.3,
+     "change": -91.8,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:49:54",
+     "minutes_before": null,
+     "odds": 44.5,
+     "change": 0.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:50:03",
+     "minutes_before": 0,
+     "odds": 539.9,
+     "change": 1113.3,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:50:14",
+     "minutes_before": null,
+     "odds": 44.5,
+     "change": -91.8,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:50:34",
+     "minutes_before": null,
+     "odds": 44.3,
+     "change": -0.4,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:50:38",
+     "minutes_before": null,
+     "odds": 44.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:50:44",
+     "minutes_before": null,
+     "odds": 44.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:50:54",
+     "minutes_before": null,
+     "odds": 44.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:51:11",
+     "minutes_before": null,
+     "odds": 44.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:51:33",
+     "minutes_before": null,
+     "odds": 44.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:52:13",
+     "minutes_before": null,
+     "odds": 44.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:53:59",
+     "minutes_before": null,
+     "odds": 537.7,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 25.0,
+   "confidence": 0.0,
+   "reason": "일반"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    5,
+    8
+   ],
+   "drop_timeline": [
+    {
+     "time": "20:09:46",
+     "minutes_before": null,
+     "odds": 164.6,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:10:37",
+     "minutes_before": null,
+     "odds": 168.7,
+     "change": 2.5,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:11:37",
+     "minutes_before": null,
+     "odds": 172.7,
+     "change": 2.4,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:12:37",
+     "minutes_before": null,
+     "odds": 174.2,
      "change": 0.9,
      "excluded": false,
      "exclReason": null
@@ -1381,691 +1413,39 @@
     {
      "time": "20:13:38",
      "minutes_before": null,
-     "odds": 48.2,
-     "change": 3.7,
+     "odds": 162.9,
+     "change": -6.5,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:14:37",
      "minutes_before": null,
-     "odds": 49.0,
-     "change": 1.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:15:39",
-     "minutes_before": null,
-     "odds": 49.8,
-     "change": 1.6,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:16:36",
-     "minutes_before": null,
-     "odds": 45.8,
-     "change": -8.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:17:37",
-     "minutes_before": null,
-     "odds": 45.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:18:37",
-     "minutes_before": null,
-     "odds": 47.6,
-     "change": 3.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:19:38",
-     "minutes_before": null,
-     "odds": 48.1,
-     "change": 1.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:19:59",
-     "minutes_before": null,
-     "odds": 48.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:20:20",
-     "minutes_before": null,
-     "odds": 48.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:20:39",
-     "minutes_before": null,
-     "odds": 45.2,
-     "change": -6.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:00",
-     "minutes_before": null,
-     "odds": 45.2,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:20",
-     "minutes_before": null,
-     "odds": 47.7,
-     "change": 5.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:40",
-     "minutes_before": null,
-     "odds": 47.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:59",
-     "minutes_before": null,
-     "odds": 46.8,
-     "change": -1.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:22:38",
-     "minutes_before": null,
-     "odds": 46.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:23:38",
-     "minutes_before": null,
-     "odds": 46.4,
-     "change": -0.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:24:37",
-     "minutes_before": null,
-     "odds": 46.9,
-     "change": 1.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:25:37",
-     "minutes_before": null,
-     "odds": 43.9,
-     "change": -6.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:26:38",
-     "minutes_before": null,
-     "odds": 43.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:27:37",
-     "minutes_before": null,
-     "odds": 43.8,
-     "change": -0.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:28:40",
-     "minutes_before": null,
-     "odds": 45.6,
-     "change": 4.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:29:36",
-     "minutes_before": null,
-     "odds": 44.8,
-     "change": -1.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:30:38",
-     "minutes_before": null,
-     "odds": 44.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:31:36",
-     "minutes_before": null,
-     "odds": 43.6,
-     "change": -2.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:32:37",
-     "minutes_before": null,
-     "odds": 42.7,
-     "change": -2.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:33:36",
-     "minutes_before": null,
-     "odds": 42.4,
-     "change": -0.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:34:39",
-     "minutes_before": null,
-     "odds": 42.6,
-     "change": 0.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:35:38",
-     "minutes_before": null,
-     "odds": 42.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:36:37",
-     "minutes_before": null,
-     "odds": 44.0,
-     "change": 3.3,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:37:37",
-     "minutes_before": null,
-     "odds": 43.1,
+     "odds": 159.7,
      "change": -2.0,
      "excluded": false,
      "exclReason": null
     },
     {
-     "time": "20:38:39",
-     "minutes_before": null,
-     "odds": 44.8,
-     "change": 3.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:39:38",
-     "minutes_before": null,
-     "odds": 44.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:40:36",
-     "minutes_before": null,
-     "odds": 45.0,
-     "change": 0.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:40:48",
-     "minutes_before": null,
-     "odds": 45.1,
-     "change": 0.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:41:07",
-     "minutes_before": null,
-     "odds": 45.0,
-     "change": -0.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:41:38",
-     "minutes_before": null,
-     "odds": 45.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:30",
-     "minutes_before": null,
-     "odds": 45.3,
-     "change": 0.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:33",
-     "minutes_before": null,
-     "odds": 44.9,
-     "change": -0.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:38",
-     "minutes_before": null,
-     "odds": 44.7,
-     "change": -0.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:44",
-     "minutes_before": 7,
-     "odds": 15.0,
-     "change": -66.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:55",
-     "minutes_before": 7,
-     "odds": 15.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:58",
-     "minutes_before": 7,
-     "odds": 15.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:43:37",
-     "minutes_before": null,
-     "odds": 45.5,
-     "change": 203.3,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:43:39",
-     "minutes_before": null,
-     "odds": 45.5,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:43:44",
-     "minutes_before": null,
-     "odds": 45.5,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:44:39",
-     "minutes_before": null,
-     "odds": 45.3,
-     "change": -0.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:44:47",
-     "minutes_before": null,
-     "odds": 46.2,
-     "change": 2.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:44:51",
-     "minutes_before": null,
-     "odds": 46.2,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:45:39",
-     "minutes_before": null,
-     "odds": 46.3,
-     "change": 0.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:45:58",
-     "minutes_before": null,
-     "odds": 44.8,
-     "change": -3.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:45:59",
-     "minutes_before": null,
-     "odds": 44.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:46:39",
-     "minutes_before": null,
-     "odds": 44.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:47:07",
-     "minutes_before": null,
-     "odds": 45.3,
-     "change": 1.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:47:10",
-     "minutes_before": null,
-     "odds": 45.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:47:38",
-     "minutes_before": null,
-     "odds": 45.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:18",
-     "minutes_before": null,
-     "odds": 44.5,
-     "change": -1.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:23",
-     "minutes_before": null,
-     "odds": 45.3,
-     "change": 1.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:35",
-     "minutes_before": null,
-     "odds": 44.0,
-     "change": -2.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:56",
-     "minutes_before": null,
-     "odds": 44.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:16",
-     "minutes_before": null,
-     "odds": 44.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:26",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 21.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:33",
-     "minutes_before": null,
-     "odds": 44.0,
-     "change": -17.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:34",
-     "minutes_before": 0,
-     "odds": 13.9,
-     "change": -68.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:35",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 285.6,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:54",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:03",
-     "minutes_before": 0,
-     "odds": 13.9,
-     "change": -74.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:14",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 285.6,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:34",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:38",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:44",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:54",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:51:11",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:51:33",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:52:13",
-     "minutes_before": null,
-     "odds": 53.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:53:59",
-     "minutes_before": null,
-     "odds": 13.9,
-     "change": null,
-     "excluded": true,
-     "exclReason": "마감 후 데이터 - 제외됨"
-    }
-   ],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 20.0,
-   "confidence": 100.0,
-   "reason": "초과급락"
-  },
-  "signal_5": {
-   "horse": 5,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": -1.0,
-   "avg_drop": -45.4,
-   "grade": "🔴",
-   "rep_combo": [
-    5,
-    6
-   ],
-   "drop_timeline": [
-    {
-     "time": "20:09:46",
-     "minutes_before": null,
-     "odds": 44.6,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:10:37",
-     "minutes_before": null,
-     "odds": 42.9,
-     "change": -3.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:11:37",
-     "minutes_before": null,
-     "odds": 43.7,
-     "change": 1.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:12:37",
-     "minutes_before": null,
-     "odds": 41.6,
-     "change": -4.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:13:38",
-     "minutes_before": null,
-     "odds": 42.5,
-     "change": 2.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:14:37",
-     "minutes_before": null,
-     "odds": 43.1,
-     "change": 1.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
      "time": "20:15:39",
      "minutes_before": null,
-     "odds": 42.8,
-     "change": -0.7,
+     "odds": 161.2,
+     "change": 0.9,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:16:36",
      "minutes_before": null,
-     "odds": 45.1,
-     "change": 5.4,
+     "odds": 170.6,
+     "change": 5.8,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:17:37",
      "minutes_before": null,
-     "odds": 45.1,
+     "odds": 170.6,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2073,23 +1453,23 @@
     {
      "time": "20:18:37",
      "minutes_before": null,
-     "odds": 44.7,
-     "change": -0.9,
+     "odds": 154.7,
+     "change": -9.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:19:38",
      "minutes_before": null,
-     "odds": 42.9,
-     "change": -4.0,
+     "odds": 173.0,
+     "change": 11.8,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:19:59",
      "minutes_before": null,
-     "odds": 42.9,
+     "odds": 173.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2097,7 +1477,7 @@
     {
      "time": "20:20:20",
      "minutes_before": null,
-     "odds": 42.9,
+     "odds": 173.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2105,79 +1485,79 @@
     {
      "time": "20:20:39",
      "minutes_before": null,
-     "odds": 44.7,
-     "change": 4.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:00",
-     "minutes_before": null,
-     "odds": 44.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:20",
-     "minutes_before": null,
-     "odds": 46.7,
-     "change": 4.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:40",
-     "minutes_before": null,
-     "odds": 46.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:59",
-     "minutes_before": null,
-     "odds": 47.2,
-     "change": 1.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:22:38",
-     "minutes_before": null,
-     "odds": 47.2,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:23:38",
-     "minutes_before": null,
-     "odds": 46.9,
+     "odds": 172.0,
      "change": -0.6,
      "excluded": false,
      "exclReason": null
     },
     {
+     "time": "20:21:00",
+     "minutes_before": null,
+     "odds": 172.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:21:20",
+     "minutes_before": null,
+     "odds": 190.8,
+     "change": 10.9,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:21:40",
+     "minutes_before": null,
+     "odds": 190.8,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:21:59",
+     "minutes_before": null,
+     "odds": 191.1,
+     "change": 0.2,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:22:38",
+     "minutes_before": null,
+     "odds": 191.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "20:23:38",
+     "minutes_before": null,
+     "odds": 208.2,
+     "change": 8.9,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
      "time": "20:24:37",
      "minutes_before": null,
-     "odds": 44.7,
-     "change": -4.7,
+     "odds": 211.7,
+     "change": 1.7,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:25:37",
      "minutes_before": null,
-     "odds": 43.8,
-     "change": -2.0,
+     "odds": 225.0,
+     "change": 6.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:26:38",
      "minutes_before": null,
-     "odds": 43.8,
+     "odds": 225.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2185,31 +1565,31 @@
     {
      "time": "20:27:37",
      "minutes_before": null,
-     "odds": 41.8,
-     "change": -4.6,
+     "odds": 239.0,
+     "change": 6.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:28:40",
      "minutes_before": null,
-     "odds": 41.4,
-     "change": -1.0,
+     "odds": 237.1,
+     "change": -0.8,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:29:36",
      "minutes_before": null,
-     "odds": 41.8,
-     "change": 1.0,
+     "odds": 238.8,
+     "change": 0.7,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:30:38",
      "minutes_before": null,
-     "odds": 41.8,
+     "odds": 238.8,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2217,39 +1597,39 @@
     {
      "time": "20:31:36",
      "minutes_before": null,
-     "odds": 43.8,
-     "change": 4.8,
+     "odds": 240.1,
+     "change": 0.5,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:32:37",
      "minutes_before": null,
-     "odds": 43.4,
-     "change": -0.9,
+     "odds": 240.5,
+     "change": 0.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:33:36",
      "minutes_before": null,
-     "odds": 42.7,
-     "change": -1.6,
+     "odds": 247.8,
+     "change": 3.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:34:39",
      "minutes_before": null,
-     "odds": 36.3,
-     "change": -15.0,
+     "odds": 258.0,
+     "change": 4.1,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:35:38",
      "minutes_before": null,
-     "odds": 36.3,
+     "odds": 258.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2257,7 +1637,7 @@
     {
      "time": "20:36:37",
      "minutes_before": null,
-     "odds": 37.4,
+     "odds": 265.8,
      "change": 3.0,
      "excluded": false,
      "exclReason": null
@@ -2265,71 +1645,55 @@
     {
      "time": "20:37:37",
      "minutes_before": null,
-     "odds": 36.4,
-     "change": -2.7,
+     "odds": 274.6,
+     "change": 3.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:38:39",
      "minutes_before": null,
-     "odds": 33.4,
-     "change": -8.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:39:19",
-     "minutes_before": 11,
-     "odds": 267.7,
-     "change": 701.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:39:21",
-     "minutes_before": 11,
-     "odds": 267.7,
-     "change": 0.0,
+     "odds": 284.6,
+     "change": 3.6,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:39:38",
      "minutes_before": null,
-     "odds": 33.5,
-     "change": -87.5,
+     "odds": 284.8,
+     "change": 0.1,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:40:36",
      "minutes_before": null,
-     "odds": 32.9,
-     "change": -1.8,
+     "odds": 281.1,
+     "change": -1.3,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:40:48",
      "minutes_before": null,
-     "odds": 32.4,
-     "change": -1.5,
+     "odds": 283.8,
+     "change": 1.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:41:07",
      "minutes_before": null,
-     "odds": 32.9,
-     "change": 1.5,
+     "odds": 281.2,
+     "change": -0.9,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:41:38",
      "minutes_before": null,
-     "odds": 32.9,
+     "odds": 281.2,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2337,23 +1701,23 @@
     {
      "time": "20:42:30",
      "minutes_before": null,
-     "odds": 32.6,
-     "change": -0.9,
+     "odds": 301.0,
+     "change": 7.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:42:33",
      "minutes_before": null,
-     "odds": 32.0,
-     "change": -1.8,
+     "odds": 290.3,
+     "change": -3.6,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:42:38",
      "minutes_before": null,
-     "odds": 32.3,
+     "odds": 292.8,
      "change": 0.9,
      "excluded": false,
      "exclReason": null
@@ -2361,15 +1725,15 @@
     {
      "time": "20:42:44",
      "minutes_before": 7,
-     "odds": 15.5,
-     "change": -52.0,
+     "odds": 31.0,
+     "change": -89.4,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:42:55",
      "minutes_before": 7,
-     "odds": 15.5,
+     "odds": 31.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2377,7 +1741,7 @@
     {
      "time": "20:42:58",
      "minutes_before": 7,
-     "odds": 15.5,
+     "odds": 31.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2385,15 +1749,15 @@
     {
      "time": "20:43:37",
      "minutes_before": null,
-     "odds": 32.7,
-     "change": 111.0,
+     "odds": 318.2,
+     "change": 926.5,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:43:39",
      "minutes_before": null,
-     "odds": 32.7,
+     "odds": 318.2,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2401,7 +1765,7 @@
     {
      "time": "20:43:44",
      "minutes_before": null,
-     "odds": 32.7,
+     "odds": 318.2,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2409,23 +1773,23 @@
     {
      "time": "20:44:39",
      "minutes_before": null,
-     "odds": 33.2,
-     "change": 1.5,
+     "odds": 315.4,
+     "change": -0.9,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:44:47",
      "minutes_before": null,
-     "odds": 32.2,
-     "change": -3.0,
+     "odds": 331.5,
+     "change": 5.1,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:44:51",
      "minutes_before": null,
-     "odds": 32.2,
+     "odds": 331.5,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2433,23 +1797,23 @@
     {
      "time": "20:45:39",
      "minutes_before": null,
-     "odds": 32.1,
-     "change": -0.3,
+     "odds": 331.9,
+     "change": 0.1,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:45:58",
      "minutes_before": null,
-     "odds": 32.7,
-     "change": 1.9,
+     "odds": 342.0,
+     "change": 3.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:45:59",
      "minutes_before": null,
-     "odds": 32.7,
+     "odds": 342.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2457,7 +1821,7 @@
     {
      "time": "20:46:39",
      "minutes_before": null,
-     "odds": 32.7,
+     "odds": 342.0,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2465,15 +1829,15 @@
     {
      "time": "20:47:07",
      "minutes_before": null,
-     "odds": 33.9,
-     "change": 3.7,
+     "odds": 353.5,
+     "change": 3.4,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:47:10",
      "minutes_before": null,
-     "odds": 33.9,
+     "odds": 353.5,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2481,7 +1845,7 @@
     {
      "time": "20:47:38",
      "minutes_before": null,
-     "odds": 33.9,
+     "odds": 353.5,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2489,31 +1853,31 @@
     {
      "time": "20:48:18",
      "minutes_before": null,
-     "odds": 35.4,
-     "change": 4.4,
+     "odds": 380.1,
+     "change": 7.5,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:48:23",
      "minutes_before": null,
-     "odds": 33.9,
-     "change": -4.2,
+     "odds": 353.5,
+     "change": -7.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:48:35",
      "minutes_before": null,
-     "odds": 36.5,
-     "change": 7.7,
+     "odds": 403.3,
+     "change": 14.1,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:48:56",
      "minutes_before": null,
-     "odds": 36.5,
+     "odds": 403.3,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2521,7 +1885,7 @@
     {
      "time": "20:49:16",
      "minutes_before": null,
-     "odds": 36.5,
+     "odds": 403.3,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2529,71 +1893,71 @@
     {
      "time": "20:49:26",
      "minutes_before": null,
-     "odds": 39.8,
-     "change": 9.0,
+     "odds": 539.0,
+     "change": 33.6,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:49:33",
      "minutes_before": null,
-     "odds": 36.5,
-     "change": -8.3,
+     "odds": 403.3,
+     "change": -25.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:49:34",
      "minutes_before": 0,
-     "odds": 11.7,
-     "change": -67.9,
+     "odds": 44.3,
+     "change": -89.0,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:49:35",
      "minutes_before": null,
-     "odds": 39.9,
-     "change": 241.0,
+     "odds": 539.9,
+     "change": 1118.7,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:49:54",
      "minutes_before": null,
-     "odds": 39.8,
-     "change": -0.3,
+     "odds": 539.0,
+     "change": -0.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:50:03",
      "minutes_before": 0,
-     "odds": 11.7,
-     "change": -70.6,
+     "odds": 44.3,
+     "change": -91.8,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:50:14",
      "minutes_before": null,
-     "odds": 39.8,
-     "change": 240.2,
+     "odds": 539.0,
+     "change": 1116.7,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:50:34",
      "minutes_before": null,
-     "odds": 39.9,
-     "change": 0.3,
+     "odds": 537.7,
+     "change": -0.2,
      "excluded": false,
      "exclReason": null
     },
     {
      "time": "20:50:38",
      "minutes_before": null,
-     "odds": 39.9,
+     "odds": 537.7,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2601,7 +1965,7 @@
     {
      "time": "20:50:44",
      "minutes_before": null,
-     "odds": 39.9,
+     "odds": 537.7,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2609,7 +1973,7 @@
     {
      "time": "20:50:54",
      "minutes_before": null,
-     "odds": 39.9,
+     "odds": 537.7,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2617,7 +1981,7 @@
     {
      "time": "20:51:11",
      "minutes_before": null,
-     "odds": 39.9,
+     "odds": 537.7,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2625,7 +1989,7 @@
     {
      "time": "20:51:33",
      "minutes_before": null,
-     "odds": 39.9,
+     "odds": 537.7,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2633,7 +1997,7 @@
     {
      "time": "20:52:13",
      "minutes_before": null,
-     "odds": 39.9,
+     "odds": 537.7,
      "change": 0.0,
      "excluded": false,
      "exclReason": null
@@ -2641,7 +2005,7 @@
     {
      "time": "20:53:59",
      "minutes_before": null,
-     "odds": 11.7,
+     "odds": 44.3,
      "change": null,
      "excluded": true,
      "exclReason": "마감 후 데이터 - 제외됨"
@@ -2651,718 +2015,40 @@
    "reversal_ratio": null,
    "record_score": 70.0,
    "confidence": 100.0,
-   "reason": "초과급락"
-  },
-  "signal_4": {
-   "horse": 4,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": 27.4,
-   "avg_drop": -17.0,
-   "grade": "🔴",
-   "rep_combo": [
-    2,
-    4
-   ],
-   "drop_timeline": [
-    {
-     "time": "20:09:46",
-     "minutes_before": null,
-     "odds": 177.3,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:10:37",
-     "minutes_before": null,
-     "odds": 181.6,
-     "change": 2.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:11:37",
-     "minutes_before": null,
-     "odds": 151.6,
-     "change": -16.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:12:37",
-     "minutes_before": null,
-     "odds": 152.8,
-     "change": 0.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:13:38",
-     "minutes_before": null,
-     "odds": 159.6,
-     "change": 4.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:14:37",
-     "minutes_before": null,
-     "odds": 163.0,
-     "change": 2.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:15:39",
-     "minutes_before": null,
-     "odds": 164.4,
-     "change": 0.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:16:36",
-     "minutes_before": null,
-     "odds": 174.1,
-     "change": 5.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:17:37",
-     "minutes_before": null,
-     "odds": 174.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:18:37",
-     "minutes_before": null,
-     "odds": 188.7,
-     "change": 8.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:19:38",
-     "minutes_before": null,
-     "odds": 194.3,
-     "change": 3.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:19:59",
-     "minutes_before": null,
-     "odds": 194.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:20:20",
-     "minutes_before": null,
-     "odds": 194.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:20:39",
-     "minutes_before": null,
-     "odds": 207.6,
-     "change": 6.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:00",
-     "minutes_before": null,
-     "odds": 207.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:20",
-     "minutes_before": null,
-     "odds": 226.3,
-     "change": 9.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:40",
-     "minutes_before": null,
-     "odds": 226.3,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:21:59",
-     "minutes_before": null,
-     "odds": 230.0,
-     "change": 1.6,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:22:38",
-     "minutes_before": null,
-     "odds": 230.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:23:38",
-     "minutes_before": null,
-     "odds": 248.5,
-     "change": 8.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:24:37",
-     "minutes_before": null,
-     "odds": 252.7,
-     "change": 1.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:25:37",
-     "minutes_before": null,
-     "odds": 268.7,
-     "change": 6.3,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:26:38",
-     "minutes_before": null,
-     "odds": 268.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:27:37",
-     "minutes_before": null,
-     "odds": 280.6,
-     "change": 4.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:28:40",
-     "minutes_before": null,
-     "odds": 250.3,
-     "change": -10.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:29:36",
-     "minutes_before": null,
-     "odds": 256.9,
-     "change": 2.6,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:30:38",
-     "minutes_before": null,
-     "odds": 256.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:31:36",
-     "minutes_before": null,
-     "odds": 273.0,
-     "change": 6.3,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:32:37",
-     "minutes_before": null,
-     "odds": 274.2,
-     "change": 0.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:33:36",
-     "minutes_before": null,
-     "odds": 282.2,
-     "change": 2.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:34:39",
-     "minutes_before": null,
-     "odds": 298.9,
-     "change": 5.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:35:38",
-     "minutes_before": null,
-     "odds": 298.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:36:37",
-     "minutes_before": null,
-     "odds": 297.6,
-     "change": -0.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:37:37",
-     "minutes_before": null,
-     "odds": 288.2,
-     "change": -3.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:38:39",
-     "minutes_before": null,
-     "odds": 298.5,
-     "change": 3.6,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:39:19",
-     "minutes_before": 11,
-     "odds": 10.1,
-     "change": -96.6,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:39:21",
-     "minutes_before": 11,
-     "odds": 10.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:39:38",
-     "minutes_before": null,
-     "odds": 298.7,
-     "change": 2857.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:40:36",
-     "minutes_before": null,
-     "odds": 325.1,
-     "change": 8.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:40:48",
-     "minutes_before": null,
-     "odds": 308.4,
-     "change": -5.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:41:07",
-     "minutes_before": null,
-     "odds": 325.2,
-     "change": 5.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:41:38",
-     "minutes_before": null,
-     "odds": 325.2,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:30",
-     "minutes_before": null,
-     "odds": 357.6,
-     "change": 10.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:33",
-     "minutes_before": null,
-     "odds": 337.2,
-     "change": -5.7,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:38",
-     "minutes_before": null,
-     "odds": 342.4,
-     "change": 1.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:44",
-     "minutes_before": 7,
-     "odds": 310.9,
-     "change": -9.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:55",
-     "minutes_before": 7,
-     "odds": 310.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:42:58",
-     "minutes_before": 7,
-     "odds": 310.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:43:37",
-     "minutes_before": null,
-     "odds": 361.1,
-     "change": 16.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:43:39",
-     "minutes_before": null,
-     "odds": 361.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:43:44",
-     "minutes_before": null,
-     "odds": 361.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:44:39",
-     "minutes_before": null,
-     "odds": 363.9,
-     "change": 0.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:44:47",
-     "minutes_before": null,
-     "odds": 369.1,
-     "change": 1.4,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:44:51",
-     "minutes_before": null,
-     "odds": 369.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:45:39",
-     "minutes_before": null,
-     "odds": 369.6,
-     "change": 0.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:45:58",
-     "minutes_before": null,
-     "odds": 399.0,
-     "change": 8.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:45:59",
-     "minutes_before": null,
-     "odds": 399.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:46:39",
-     "minutes_before": null,
-     "odds": 399.0,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:47:07",
-     "minutes_before": null,
-     "odds": 413.1,
-     "change": 3.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:47:10",
-     "minutes_before": null,
-     "odds": 413.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:47:38",
-     "minutes_before": null,
-     "odds": 413.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:18",
-     "minutes_before": null,
-     "odds": 436.0,
-     "change": 5.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:23",
-     "minutes_before": null,
-     "odds": 413.1,
-     "change": -5.3,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:35",
-     "minutes_before": null,
-     "odds": 470.1,
-     "change": 13.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:48:56",
-     "minutes_before": null,
-     "odds": 470.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:16",
-     "minutes_before": null,
-     "odds": 470.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:26",
-     "minutes_before": null,
-     "odds": 660.7,
-     "change": 40.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:33",
-     "minutes_before": null,
-     "odds": 470.1,
-     "change": -28.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:34",
-     "minutes_before": 0,
-     "odds": 549.1,
-     "change": 16.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:35",
-     "minutes_before": null,
-     "odds": 661.7,
-     "change": 20.5,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:49:54",
-     "minutes_before": null,
-     "odds": 660.7,
-     "change": -0.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:03",
-     "minutes_before": 0,
-     "odds": 549.1,
-     "change": -16.9,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:14",
-     "minutes_before": null,
-     "odds": 660.7,
-     "change": 20.3,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:34",
-     "minutes_before": null,
-     "odds": 661.8,
-     "change": 0.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:38",
-     "minutes_before": null,
-     "odds": 661.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:44",
-     "minutes_before": null,
-     "odds": 661.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:50:54",
-     "minutes_before": null,
-     "odds": 661.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:51:11",
-     "minutes_before": null,
-     "odds": 661.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:51:33",
-     "minutes_before": null,
-     "odds": 661.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:52:13",
-     "minutes_before": null,
-     "odds": 661.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "20:53:59",
-     "minutes_before": null,
-     "odds": 549.1,
-     "change": null,
-     "excluded": true,
-     "exclReason": "마감 후 데이터 - 제외됨"
-    }
-   ],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 25.0,
-   "confidence": 54.0,
-   "reason": "초과급락"
+   "reason": "전적상위"
   }
  },
  "recommended_horses": [
-  5,
-  6,
-  4
+  8,
+  4,
+  5
  ],
  "recommendation_process": [
   "1. 전적 분석: 9번 0.0점",
   "2. 배당 수집 시작 20:09:46",
-  "3. 초과급락 감지: 11번 초과급락 -29.1%p (전체평균 -44.4%)",
-  "5. 종합 신뢰도 100.0점(상) 판정",
-  "6. BMED 전략: 압축형 적용",
-  "7. 최종 추천: 복승 메인 5+6"
+  "5. 종합 신뢰도 88.0점(상) 판정",
+  "7. 최종 추천: 복승 메인 4+8"
  ],
  "confidence_breakdown": {
   "horse": 9,
-  "excess_drop_score": 40,
+  "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
   "record_score": 0.0,
-  "total": 100.0,
+  "total": 88.0,
   "grade": "상"
  },
- "win_tags": [
-  "초과급락_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
   "formScore": 0.0,
-  "dropAmt": -74.1,
-  "dropScore": 100.0,
+  "dropAmt": null,
+  "dropScore": 0.0,
   "inverse": false,
-  "inverseHorses": [
-   11,
-   12,
-   6
-  ],
-  "inverseHit": [
-   6
-  ],
+  "inverseHorses": [],
+  "inverseHit": [],
   "confidence": 100.0,
-  "reason": "6+12 복승 급락(-74.1%) → 6번 입상 적중"
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [
@@ -3652,12 +2338,12 @@
   "finalSignal": 10,
   "finalConfirmed": false,
   "excluded": {
-   "after_close": 1,
+   "after_close": 2,
    "next_race": 0
   },
   "validCount": 80
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-13 20:55:05"
+ "generated_at": "2026-07-13 21:11:08"
 }

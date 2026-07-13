@@ -1,6 +1,6 @@
 {
- "generated_at": 1783943705.9480941,
- "races_with_result": 390,
+ "generated_at": 1783944669.1920216,
+ "races_with_result": 425,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -10,8 +10,8 @@
    "key": "timing:T-1분",
    "desc": "급락이 T-1분에 발생한 경주",
    "rate": 53.3,
-   "baseline": 31.8,
-   "lift": 21.5,
+   "baseline": 31.1,
+   "lift": 22.3,
    "support": 45,
    "hit": 24
   },
@@ -20,8 +20,8 @@
    "key": "timing:T-2분",
    "desc": "급락이 T-2분에 발생한 경주",
    "rate": 52.6,
-   "baseline": 31.8,
-   "lift": 20.8,
+   "baseline": 31.1,
+   "lift": 21.6,
    "support": 19,
    "hit": 10
   },
@@ -30,8 +30,8 @@
    "key": "timing:T-3분",
    "desc": "급락이 T-3분에 발생한 경주",
    "rate": 50.0,
-   "baseline": 31.8,
-   "lift": 18.2,
+   "baseline": 31.1,
+   "lift": 18.9,
    "support": 16,
    "hit": 8
   },
@@ -40,8 +40,8 @@
    "key": "had_reversal",
    "desc": "쌍승 역전 동반 경주",
    "rate": 50.0,
-   "baseline": 31.8,
-   "lift": 18.2,
+   "baseline": 31.1,
+   "lift": 18.9,
    "support": 6,
    "hit": 3
   },
@@ -49,41 +49,41 @@
    "type": "배당변화",
    "key": "had_drop",
    "desc": "급락(자금유입) 동반 경주",
-   "rate": 48.7,
-   "baseline": 31.8,
-   "lift": 16.9,
-   "support": 187,
-   "hit": 91
+   "rate": 47.5,
+   "baseline": 31.1,
+   "lift": 16.4,
+   "support": 198,
+   "hit": 94
   },
   {
    "type": "배당변화",
    "key": "strong_drop",
    "desc": "30%+ 강한 급락 동반 경주",
-   "rate": 47.6,
-   "baseline": 31.8,
-   "lift": 15.9,
-   "support": 170,
-   "hit": 81
+   "rate": 46.4,
+   "baseline": 31.1,
+   "lift": 15.4,
+   "support": 181,
+   "hit": 84
   },
   {
    "type": "시점",
    "key": "timing:T-10분",
    "desc": "급락이 T-10분에 발생한 경주",
-   "rate": 46.2,
-   "baseline": 31.8,
-   "lift": 14.4,
-   "support": 26,
+   "rate": 44.4,
+   "baseline": 31.1,
+   "lift": 13.4,
+   "support": 27,
    "hit": 12
   },
   {
    "type": "배당변화",
    "key": "very_strong_drop",
    "desc": "50%+ 대량 급락 동반 경주",
-   "rate": 45.2,
-   "baseline": 31.8,
-   "lift": 13.4,
-   "support": 146,
-   "hit": 66
+   "rate": 43.9,
+   "baseline": 31.1,
+   "lift": 12.9,
+   "support": 157,
+   "hit": 69
   },
   {
    "type": "전적점수",
@@ -93,8 +93,8 @@
     15.0,
     82.5
    ],
-   "support": 276
+   "support": 282
   }
  ],
- "baseline_hit_rate": 31.8
+ "baseline_hit_rate": 31.1
 }

@@ -16103,140 +16103,35 @@
     "4+1": 5456.8,
     "1+4": 8185.2
    }
+  },
+  {
+   "time": "21:10:18",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
   }
  ],
- "anomalies": [
-  {
-   "time": "20:53:59",
-   "type": "급락",
-   "combo": [
-    11,
-    12
-   ],
-   "horse": 11,
-   "drop_rate": -79.4,
-   "excess_drop": -29.1
-  },
-  {
-   "time": "20:53:59",
-   "type": "급락",
-   "combo": [
-    6,
-    12
-   ],
-   "horse": 6,
-   "drop_rate": -74.1,
-   "excess_drop": -16.3
-  },
-  {
-   "time": "20:53:59",
-   "type": "급락",
-   "combo": [
-    6,
-    8
-   ],
-   "horse": 6,
-   "drop_rate": -70.8,
-   "excess_drop": -16.3
-  },
-  {
-   "time": "20:53:59",
-   "type": "급락",
-   "combo": [
-    5,
-    6
-   ],
-   "horse": 5,
-   "drop_rate": -70.7,
-   "excess_drop": -1.0
-  },
-  {
-   "time": "20:53:59",
-   "type": "급락",
-   "combo": [
-    5,
-    11
-   ],
-   "horse": 5,
-   "drop_rate": -67.5,
-   "excess_drop": -1.0
-  },
-  {
-   "time": "20:53:59",
-   "type": "급락",
-   "combo": [
-    6,
-    7
-   ],
-   "horse": 6,
-   "drop_rate": -55.7,
-   "excess_drop": -16.3
-  },
-  {
-   "time": "20:53:59",
-   "type": "급락",
-   "combo": [
-    3,
-    9
-   ],
-   "horse": 3,
-   "drop_rate": -45.2,
-   "excess_drop": -0.8
-  },
-  {
-   "time": "20:53:59",
-   "type": "급락",
-   "combo": [
-    9,
-    10
-   ],
-   "horse": 9,
-   "drop_rate": -45.0,
-   "excess_drop": 8.3
-  },
-  {
-   "time": "20:53:59",
-   "type": "급락",
-   "combo": [
-    8,
-    10
-   ],
-   "horse": 8,
-   "drop_rate": -33.1,
-   "excess_drop": 10.5
-  },
-  {
-   "time": "20:53:59",
-   "type": "급락",
-   "combo": [
-    6,
-    10
-   ],
-   "horse": 6,
-   "drop_rate": -32.4,
-   "excess_drop": -16.3
-  }
- ],
+ "anomalies": [],
  "prediction": {
   "candidates": [
+   4,
    8,
+   1,
+   2,
    3,
    5,
    6,
-   9,
-   11,
-   12,
    7,
+   9,
    10,
-   1,
-   2,
-   4
+   11,
+   12
   ],
   "eliminated": [],
-  "recommend_main": "5+6",
+  "recommend_main": "4+8",
   "recommend_sub": null,
-  "strategy": "BMED_압축형",
-  "signal_quality": "상",
+  "strategy": null,
+  "signal_quality": "하",
   "confidence": 100.0,
   "inverse": false
  },
@@ -16245,11 +16140,8 @@
   "sub_hit": false,
   "hit_reason": null,
   "miss_reason": "추천 조합 미입상",
-  "pattern_tags": [
-   "급락50+",
-   "복승불일치"
-  ],
-  "anomaly_correct": true,
+  "pattern_tags": [],
+  "anomaly_correct": false,
   "form_pick_hit": false
  },
  "investment": {
@@ -16262,7 +16154,7 @@
   "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-13 20:55:05",
+ "saved_at": "2026-07-13 21:11:08",
  "validation": {
   "ok": true,
   "errors": []
