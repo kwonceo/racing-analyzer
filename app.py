@@ -11103,6 +11103,61 @@ def _rec_combos_from_analysis_log(rk):
     return out
 
 
+@app.route("/api/recommend/manual", methods=["POST"])
+def recommend_manual():
+    """[수동 추천 저장] 라이브 배당 수집이 없어(스냅샷 0) 추천이 자동 생성되지 않는 경주에도
+    전문가 사전추천(복승/삼복승)을 analysis_log의 final_recommendation에 병합 저장 → 결과 입력 시
+    기존 폴백 `_rec_combos_from_analysis_log`가 읽어 적중 판정한다(⚠ 판정 로직·기존 자동추천 무변경).
+    body: {raceKey, quinella:[[3,4],[3,7]] 또는 ["3+4"], trifecta:[[3,4,7]], note, sport, category}."""
+    body = request.json or {}
+    rk = (body.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"error": "raceKey가 필요합니다."}), 400
+
+    def _norm(cc, need):
+        if isinstance(cc, str):
+            nums = [int(x) for x in re.split(r"[+\-\s,]+", cc) if x.strip().isdigit()]
+        else:
+            nums = [int(x) for x in (cc or []) if str(x).strip().lstrip("-").isdigit()]
+        nums = sorted(set(nums))
+        return nums if len(nums) == need else None
+
+    quinellas = [c for c in (_norm(x, 2) for x in (body.get("quinella") or [])) if c][:8]
+    trifectas = [c for c in (_norm(x, 3) for x in (body.get("trifecta") or [])) if c][:2]
+    if not quinellas and not trifectas:
+        return jsonify({"error": "복승(2두) 또는 삼복승(3두) 조합이 최소 1개 필요합니다."}), 400
+
+    path, _, _ = _analysis_log_path(_canonical_log_key(rk))
+    try:
+        doc = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        doc = {"raceKey": rk, "race": rk, "date": time.strftime("%Y-%m-%d")}
+    # [무삭제] 기존 final_recommendation 보존 + 수동 조합을 별도 키(mq*/mt*)로 병합(판정 폴백이 union으로 읽음)
+    fr = doc.get("final_recommendation") or {}
+    for _i, _c in enumerate(quinellas):
+        fr["mq%d" % (_i + 1)] = {"combo": "+".join(map(str, _c)), "reason": "수동 추천"}
+    for _i, _c in enumerate(trifectas):
+        fr["mt%d" % (_i + 1)] = {"combo": "+".join(map(str, _c)), "reason": "수동 추천(보험)"}
+    doc["final_recommendation"] = fr
+    doc["manual_recommendation"] = {"quinella": quinellas, "trifecta": trifectas,
+                                    "note": body.get("note") or "",
+                                    "at": time.strftime("%Y-%m-%d %H:%M:%S")}
+    if body.get("sport"):
+        doc["sport"] = body["sport"]
+    if body.get("category"):
+        doc["category"] = body["category"]
+    if not doc.get("summary"):
+        doc["summary"] = "📝 수동 추천 — 복승 %d · 삼복승 %d" % (len(quinellas), len(trifectas))
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        return jsonify({"error": "저장 실패: %s" % e}), 500
+    return jsonify({"ok": True, "raceKey": rk,
+                    "saved": {"quinella": quinellas, "trifecta": trifectas},
+                    "note": "결과 입력 시 자동 적중 판정됩니다."})
+
+
 def _conf_picks_from_log(rk):
     """[확신도 복승 학습] analysis_log에 보존한 corePicks에서 확신도 복승/삼복승 조합 복원.
     반환 {quinellas:[[a,b]], trifecta:[a,b,c]|None, trifectaIns:[...]|None, forced:[no], top1:no} 또는 None."""

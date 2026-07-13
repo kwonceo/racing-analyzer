@@ -843,6 +843,34 @@
         if (open) { try { renderResultForm(); } catch (_) { /* */ } }   // 펼칠 때 최신 렌더
       });
     }
+    // [수동 추천 저장] 라이브 배당 미수집 경주에도 전문가 추천 저장 → 결과 입력 시 자동 판정(_wired 가드로 멱등)
+    const mr = document.getElementById('mrSave');
+    if (mr && !mr._wired) {
+      mr._wired = true;
+      mr.addEventListener('click', async () => {
+        const msg = document.getElementById('mrMsg');
+        const rk = (document.getElementById('mrRaceKey').value || '').trim();
+        if (!rk) { if (msg) { msg.style.color = '#f87171'; msg.textContent = '경주(raceKey)를 입력하세요.'; } return; }
+        // "3+4, 3+7\n4+7" → ['3+4','3+7','4+7']
+        const parse = (sel) => (document.getElementById(sel).value || '').split(/[,\n]+/).map((s) => s.trim()).filter(Boolean);
+        const quinella = parse('mrQuinella');
+        const trifecta = parse('mrTrifecta');
+        if (!quinella.length && !trifecta.length) { if (msg) { msg.style.color = '#f87171'; msg.textContent = '복승 또는 삼복승 조합을 최소 1개 입력하세요.'; } return; }
+        if (msg) { msg.style.color = ''; msg.textContent = '저장 중…'; }
+        try {
+          const d = await (await fetch('/api/recommend/manual', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ raceKey: rk, quinella, trifecta, note: document.getElementById('mrNote').value || '' }),
+          })).json();
+          if (d.error) { if (msg) { msg.style.color = '#f87171'; msg.textContent = d.error; } return; }
+          const sv = d.saved || {};
+          if (msg) {
+            msg.style.color = '#38d39f';
+            msg.textContent = `✅ 저장 완료 — 복승 ${(sv.quinella || []).length}개 · 삼복승 ${(sv.trifecta || []).length}개. 결과 입력 시 자동 판정됩니다.`;
+          }
+        } catch (e) { if (msg) { msg.style.color = '#f87171'; msg.textContent = String(e.message || e); } }
+      });
+    }
   }
 
   // ══════════ [2번-방법3] 순서대로 빠른 입력 (경주 시간순 나열 → 1~3착만 입력) ══════════
