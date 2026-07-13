@@ -17861,6 +17861,15 @@ def _multi_collect_one(track, race, ymd):
                        "postTime": race.get("postTime"), "postEpoch": race.get("postEpoch"),
                        "t": time.time()}
             _multi_store_save(db)
+        # [단일 탭 배당 공급·근본수정] 백그라운드 수집분을 triple_store 에도 주입 →
+        #   일본경마/경륜/경정 '단일 탭'(/api/odds/triple/latest·analyze)이 Chrome 확장·프론트 토글 없이
+        #   서버만으로 실시간 표시. 기존엔 background→multi_store 만 채우고 triple_store 는 확장/토글에만
+        #   의존해, 둘 다 꺼지면 '배당 수집 안 됨'으로 보이던 문제 해결. 확장 ingest 와 동일 파이프라인(같은
+        #   raceKey 병합·중복 아님)이고 sport 분리 필터가 탭 혼재를 막는다(무삭제·multi_store 경로 유지).
+        try:
+            _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category, source="oddspark_bg")
+        except Exception as _be:
+            print("[다중경주] triple_store 브리지 실패(무시·multi_store 는 정상):", _be)
         # [경륜 전적 자동 수집] 다중 경주 경륜 배당 수집 시 전적도 함께(1회·통합등급 반영)
         if is_cycle:
             try:
