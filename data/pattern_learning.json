@@ -1471,16 +1471,56 @@
         "복승이상감지"
       ],
       "date": "2026-07-12"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 9,
+      "recent_avg": 9.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-13"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 12,
+      "recent_avg": 8.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-13"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 9,
+      "recent_avg": 9.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-13"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 12,
+      "recent_avg": 8.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-13"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 319,
+      "count": 321,
       "hit": 64
     },
     "전체부진마": {
-      "count": 510,
-      "hit": 137
+      "count": 530,
+      "hit": 141
     },
     "대규모급락": {
       "count": 17,
@@ -1490,8 +1530,8 @@
       "hit_rate": 23.5
     },
     "이상감지동반": {
-      "count": 191,
-      "hit": 73
+      "count": 209,
+      "hit": 77
     },
     "급락동반": {
       "count": 50,
