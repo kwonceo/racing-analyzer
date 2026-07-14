@@ -640,7 +640,7 @@
     var boardItems = [];      // [{el, span}] 배당 셀 ↔ 오버레이 셀 매핑(재배치용)
     var boardHdrItems = [];   // [{el, span}] 헤더(마번) ↔ 오버레이 매핑
     var boardBound = false, boardRaf = 0;
-    var BCOL = { fav: '#3b82f6', drop: '#ef4444', rec: '#22c55e', warn: '#eab308' };
+    var BCOL = { fav: '#3b82f6', drop: '#ef4444', rec: '#22c55e', warn: '#eab308', special: '#f0abfc' };
 
     function pureIntT(s) { s = (s == null ? '' : String(s)).trim(); return /^\d{1,2}$/.test(s) ? parseInt(s, 10) : null; }
     function numT(s) { var m = (s == null ? '' : String(s)).replace(/[, ]/g, '').match(/\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; }
@@ -721,6 +721,7 @@
       var key = Math.min(a, b) + '|' + Math.max(a, b);
       if (ctx.greenSet[key]) return { col: BCOL.rec, tag: '오늘의 추천(복승)', emph: true, lock: true };
       if (ctx.blueSet[key]) return { col: BCOL.fav, tag: (ctx.blueTag[key] || '유력(저배당+신호)'), emph: true };
+      if (ctx.specialSet && ctx.specialSet[key]) return { col: BCOL.special, tag: (ctx.specialTag[key] || 'BMED 특별'), emph: true, special: true };
       if (ctx.redSet[key]) return { col: BCOL.drop, tag: '경고 · ' + (ctx.redTag[key] || '회피'), emph: true, warn: true };
       return null;   // 흰색/중립(무변동·단순저배당 포함) — 테두리·배경 없음(원본 숫자만)
     }
@@ -840,11 +841,22 @@
         }
       });
 
-      // [2번 빨강·경고] 경고 말이 낀 조합 · 저배당순(오인베팅 위험 큰 것)부터 최대 4개. 초록/파랑 제외.
+      // [BMED 특별 감지 💎] 고배당+강신호 조합(cp.bmedSpecial) → 배당판에 💎 별도 표시(초록/파랑=메인과 구분)
+      var specialSet = {}, specialTag = {};
+      ((d.corePicks && d.corePicks.bmedSpecial) || []).forEach(function (q) {
+        var c = (q.combo || []).map(Number);
+        if (c.length !== 2) return;
+        var k = ckey(c[0], c[1]);
+        if (greenSet[k] || blueSet[k]) return;
+        specialSet[k] = 1;
+        specialTag[k] = 'BMED 특별' + (q.reason ? ' · ' + q.reason : '') + (q.score != null ? ' · 신호' + q.score + '점' : '');
+      });
+
+      // [2번 빨강·경고] 경고 말이 낀 조합 · 저배당순(오인베팅 위험 큰 것)부터 최대 4개. 초록/파랑/특별 제외.
       var redSet = {}, redTag = {};
       info.cells.filter(function (c) {
         var k = ckey(c.a, c.b);
-        if (greenSet[k] || blueSet[k]) return false;
+        if (greenSet[k] || blueSet[k] || specialSet[k]) return false;
         return warnHorse(c.a) || warnHorse(c.b);
       }).sort(function (x, y) { return x.odds - y.odds; }).slice(0, 4)
         .forEach(function (c) {
@@ -853,7 +865,7 @@
           redTag[k] = warnHorse(c.a) ? warnReason(c.a) : warnReason(c.b);
         });
 
-      var ctx = { dropMap: dropMap, greenSet: greenSet, blueSet: blueSet, blueTag: blueTag, redSet: redSet, redTag: redTag };
+      var ctx = { dropMap: dropMap, greenSet: greenSet, blueSet: blueSet, blueTag: blueTag, redSet: redSet, redTag: redTag, specialSet: specialSet, specialTag: specialTag };
 
       // 오버레이 레이어(뷰포트 고정·클릭 통과)
       var layer = mk('div', 'position:fixed;left:0;top:0;width:0;height:0;z-index:2147482800;pointer-events:none');
@@ -874,8 +886,8 @@
           + 'background:rgba(' + hexRgb(stl.col) + ',' + op + ');'
           + 'border:' + bw + 'px solid ' + stl.col + ';';
         var span = mk('span', css);   // 텍스트 미주입 → 원본 배당 숫자 유지(색·값 그대로)
-        // 우측 상단 모서리 작은 뱃지 — 추천🔒 · 경고⚠️(색은 테두리로 구분·파랑=뱃지없음)
-        var badgeTxt = lock ? '🔒' : (stl.warn ? '⚠️' : '');
+        // 우측 상단 모서리 작은 뱃지 — 추천🔒 · 특별💎 · 경고⚠️(색은 테두리로 구분·파랑=뱃지없음)
+        var badgeTxt = lock ? '🔒' : (stl.special ? '💎' : (stl.warn ? '⚠️' : ''));
         if (badgeTxt) {
           span.appendChild(mk('span',
             'position:absolute;top:-8px;right:-6px;font-size:11px;line-height:1;'
@@ -896,13 +908,17 @@
       }
       Object.keys(greenSet).forEach(function (k) { var p = k.split('|'); _addStar(p[0]); _addStar(p[1]); });  // 추천 조합 말 우선
       Object.keys(blueSet).forEach(function (k) { var p = k.split('|'); _addStar(p[0]); _addStar(p[1]); });   // 그다음 유력 조합 말
+      // [BMED 특별 감지 💎] 특별 조합에 등장하는 말번호 → 헤더에 💎(상한 밖·⭐/❌ 아니면 표시)
+      var _spH = {};
+      Object.keys(specialSet).forEach(function (k) { var p = k.split('|'); _spH[+p[0]] = 1; _spH[+p[1]] = 1; });
       info.hdrEls.forEach(function (h) {
         var n = h.no, r0 = role[n];
-        var e = _emph[n], isCut = (r0 === 'cut');
-        if (!e && !isCut) return;   // 강조 대상 아님: 숫자만
+        var e = _emph[n], isCut = (r0 === 'cut'), isSp = _spH[n];
+        if (!e && !isCut && !isSp) return;   // 강조 대상 아님: 숫자만
         var mark, bc, lbl;
-        if (e) { mark = e.mark; bc = e.bc; lbl = e.lbl; }        // 강조 상한(2~3마리) 우선
-        else { mark = '❌'; bc = BCOL.drop; lbl = '확실제거'; }   // 제거마(상한 밖·유지)
+        if (e) { mark = e.mark; bc = e.bc; lbl = e.lbl; }         // 강조 상한(2~3마리) 우선
+        else if (isCut) { mark = '❌'; bc = BCOL.drop; lbl = '확실제거'; }   // 제거마(상한 밖·유지)
+        else { mark = '💎'; bc = BCOL.special; lbl = 'BMED 특별 감지'; }   // BMED 특별 조합 말
         // [5번] 헤더는 아이콘 기준 유지 · 배경색만 반투명(0.30)으로 조정(테두리 3px·강한 그림자로 가독성 유지)
         var css = 'position:fixed;box-sizing:border-box;display:flex;align-items:center;justify-content:center;'
           + 'font:900 17px/1 -apple-system,BlinkMacSystemFont,sans-serif;color:#fff;'
@@ -1032,6 +1048,12 @@
         if (_fq.length && !d.recommendClosed && st.ovShowPicks !== false) {   // [🎯 추천] 팝업 토글(기본 표시)
           var cpBox = mk('div', 'margin:0 0 6px;padding:9px 12px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
           cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:16px', '🎯 지금 사세요! (근거 기반)'));
+          // [전적 수집 상태] ✅ 전적+배당 / ⚠️ 배당 기반만(formMissing)
+          if (cp && cp.formMissing) {
+            cpBox.appendChild(mk('div', 'font-weight:800;color:#fbbf24;font-size:12.5px;margin-top:2px', '⚠️ 전적 데이터 없음 — 배당 기반 분석 중'));
+          } else {
+            cpBox.appendChild(mk('div', 'font-weight:700;color:#38d39f;font-size:12px;margin-top:2px', '✅ 전적+배당 분석'));
+          }
           // [근거 기반·두수별 개수] N두 경주 · 복승 N개(혼전 +2) 헤더 + 조합별 ★등급·근거
           var _nH = (cp && cp.raceHorseCount) || 0;
           var _starStr = function (n) { return new Array(Math.max(0, Math.min(3, n || 0)) + 1).join('★'); };
@@ -1039,17 +1061,38 @@
             cpBox.appendChild(mk('div', 'color:#9fb3c8;font-size:12px;margin-top:2px',
               _nH + '두 경주 · 복승 ' + _fq.length + '개 추천' + (cp.chaoticRace ? ' · ⚠️혼전(+2)' : '')));
           }
-          _fq.forEach(function (q) {   // [두수별] 서버가 상한(3~8)으로 이미 캡 → 전부 표시(구데이터 폴백은 2개)
+          var _addBasis = function (box, q, col) {   // [근거 문장] 급락%/스마트머니/역배열 + 요약 줄
+            (q.basis || []).forEach(function (b) {
+              box.appendChild(mk('div', 'font-size:12.5px;margin:1px 0 0 14px;color:' + col, '→ ' + b));
+            });
+            if (q.summary) box.appendChild(mk('div', 'font-size:12px;margin:1px 0 0 14px;color:#38d39f', '→ ' + q.summary));
+          };
+          _fq.forEach(function (q) {   // [두수별] 서버가 상한으로 이미 캡 → 전부 표시(구데이터 폴백은 2개)
             var _st = q.stars ? '  ' + _starStr(q.stars) : '';
             var _rs = q.reason ? '  · ' + q.reason : '';   // 이 말이 들어오는 이유(근거)
             cpBox.appendChild(mk('div', 'font-weight:800;font-size:17px;margin-top:5px;color:#e2e8f0',
               '복승: ' + q.combo.join('+') + (q.odds != null ? '  (' + q.odds + '배)' : '') + _st + _rs));
+            _addBasis(cpBox, q, '#7dd3fc');
           });
           _ft.slice(0, 2).forEach(function (t) {
             var _rs = t.reason ? '  · ' + t.reason : '';
             cpBox.appendChild(mk('div', 'font-weight:800;font-size:16px;margin-top:5px;color:#c4b5fd',
               '🛡 삼복승 보험: ' + t.combo.join('+') + (t.odds != null ? '  (' + t.odds + '배)' : '') + _rs));
           });
+          // [BMED 특별 감지 💎] 고배당+강신호 별도 섹션(하단·최대 2개)
+          var _sp = (cp && cp.bmedSpecial) || [];
+          if (_sp.length) {
+            var spBox = mk('div', 'margin-top:8px;padding:7px 9px;border:2px dashed #f0abfc;border-radius:8px;background:rgba(240,171,252,.10)');
+            spBox.appendChild(mk('div', 'font-weight:800;color:#f0abfc;font-size:14px', '💎 BMED 특별 감지'));
+            spBox.appendChild(mk('div', 'color:#c4b5fd;font-size:11px;margin-top:1px', '시장은 저평가 · BMED만 감지한 고배당 기회'));
+            _sp.forEach(function (q) {
+              var _sc = q.score != null ? '  · 신호 ' + q.score + '점' : '';
+              spBox.appendChild(mk('div', 'font-weight:800;font-size:15px;margin-top:4px;color:#f5d0fe',
+                '복승: ' + q.combo.join('+') + (q.odds != null ? '  (' + q.odds + '배)' : '') + '  ★★' + _sc));
+              _addBasis(spBox, q, '#f0abfc');
+            });
+            cpBox.appendChild(spBox);
+          }
           if (cp.confTop1 != null) {
             // [2번] 확신도1위 글씨 키움(16px)
             cpBox.appendChild(mk('div', 'font-weight:800;color:#cbd5e1;font-size:16px;margin-top:7px',

@@ -6210,23 +6210,42 @@
     const maxQ = cp.quinellaMax || fq.length;
     const chaoticTag = cp.chaoticRace ? ' <span style="color:#fbbf24">· ⚠️ 혼전(+2)</span>' : '';
     const cntHead = nH ? `<div class="hint" style="font-size:12px;margin-bottom:4px">${nH}두 경주 · 복승 ${fq.length}개 추천 <span style="opacity:.7">(상한 ${maxQ})</span>${chaoticTag}</div>` : '';
-    // [두수별 개수] 서버가 이미 상한(3~8)으로 캡 → 전부 표시(구데이터 폴백은 2개)
+    // [전적 수집 상태 배지] ✅ 전적+배당 / ⚠️ 배당 기반만(formMissing)
+    const formBadge = cp.formMissing
+      ? `<div style="font-size:12.5px;font-weight:800;color:#fbbf24;margin-bottom:5px">⚠️ 전적 데이터 없음 — 배당 기반 분석 중</div>`
+      : `<div style="font-size:12px;font-weight:700;color:#38d39f;margin-bottom:5px">✅ 전적+배당 분석</div>`;
+    // [메인 추천·근거 문장] 조합별 근거(급락%/스마트머니/역배열) + 요약 줄 표시
+    const basisBlock = (q, col) => (q.basis && q.basis.length)
+      ? `<div style="margin:1px 0 4px 16px">${q.basis.map((b) => `<div class="hint" style="font-size:12.5px;color:${col}">→ ${esc(b)}</div>`).join('')}${q.summary ? `<div class="hint" style="font-size:12px;color:#38d39f">→ ${esc(q.summary)}</div>` : ''}</div>`
+      : '';
     const qLines = fq.map((q) => {
       const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(${q.odds}배)</span>` : '';
       const st = q.stars ? ` <span style="color:#fbbf24;font-size:14px">${starStr(q.stars)}</span>` : '';
       const rs = q.reason ? ` <span class="hint" style="font-size:12px">· ${esc(q.reason)}</span>` : '';
-      return `<div style="font-size:19px;font-weight:800;margin:5px 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>`;
+      return `<div style="font-size:19px;font-weight:800;margin:5px 0 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>${basisBlock(q, '#7dd3fc')}`;
     }).join('');
     const tLines = ft.slice(0, 2).map((t) => {
       const oo = t.odds != null ? `<span class="hint" style="font-size:13px">(${t.odds}배)</span>` : '';
       const rs = t.reason ? ` <span class="hint" style="font-size:12px">· ${esc(t.reason)}</span>` : '';
       return `<div style="font-size:18px;font-weight:800;margin:5px 0">🛡 삼복승 보험: <span style="color:#c084fc">${t.combo.join('+')}</span> ${oo}${rs}</div>`;
     }).join('');
+    // [BMED 특별 감지 💎] 고배당+강신호 별도 섹션(하단·최대 2개) — 시장은 저평가, BMED만 감지
+    const special = cp.bmedSpecial || [];
+    const spBlock = special.length ? `<div style="margin-top:10px;padding:10px 12px;border:2px dashed #f0abfc;border-radius:10px;background:rgba(240,171,252,.08)">
+      <div style="font-size:15px;font-weight:800;color:#f0abfc;margin-bottom:2px">💎 BMED 특별 감지 <span class="hint" style="font-weight:400;font-size:11px">시장은 저평가 · BMED만 감지한 고배당 기회</span></div>
+      ${special.map((q) => {
+      const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(${q.odds}배)</span>` : '';
+      const sc = q.score != null ? ` <span class="hint" style="font-size:11px">· 신호 ${q.score}점</span>` : '';
+      return `<div style="font-size:17px;font-weight:800;margin:4px 0 0">복승: <span style="color:#f0abfc">${q.combo.join('+')}</span> ${oo} <span style="color:#fbbf24;font-size:13px">★★</span>${sc}</div>${basisBlock(q, '#f0abfc')}`;
+    }).join('')}
+    </div>` : '';
     return `<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
       <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(근거 기반)</span> ${confHead}</div>
+      ${formBadge}
       ${cntHead}
       ${qLines}
       ${tLines}
+      ${spBlock}
     </div>`;
   }
 

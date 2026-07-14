@@ -2331,7 +2331,69 @@ def _jockey_place_rate(name):
         except Exception:
             return None
     j = _JOCKEYS_CACHE["byName"].get(name.strip())
-    return (j or {}).get("placeRate")
+    kr = (j or {}).get("placeRate")
+    if kr is not None:
+        return kr
+    return _jp_jockey_place_rate(name)   # [일본 기수 DB] KRA에 없으면 일본 기수 복승률 폴백(유력마/제거마 공식 자동 반영)
+
+
+# ── [일본 기수 DB] oddspark 전적(pastRaces)에서 기수 복승권율(입상률·최근 30경주) 자동 누적 ──
+#   ⚠ 기존 KRA jockeys.json(한국) 무삭제 — 일본 기수는 별도 저장소 + _jockey_place_rate 폴백으로만 반영.
+JP_JOCKEYS_FILE = os.path.join(os.path.dirname(__file__), "data", "jp_jockeys.json")
+_JP_JOCKEYS = {"loaded": False, "byName": {}}
+
+
+def _jp_jockeys_load():
+    if not _JP_JOCKEYS["loaded"]:
+        try:
+            _JP_JOCKEYS["byName"] = json.load(open(JP_JOCKEYS_FILE, encoding="utf-8")).get("byName", {})
+        except Exception:
+            _JP_JOCKEYS["byName"] = {}
+        _JP_JOCKEYS["loaded"] = True
+    return _JP_JOCKEYS["byName"]
+
+
+def _jp_jockeys_save():
+    try:
+        os.makedirs(os.path.dirname(JP_JOCKEYS_FILE), exist_ok=True)
+        json.dump({"byName": _JP_JOCKEYS["byName"], "updated": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())},
+                  open(JP_JOCKEYS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[일본기수DB] 저장 실패:", e)
+
+
+def _jp_jockeys_accumulate(details):
+    """oddspark 전적(details={lineageNb: past[]})의 (기수·착순)을 기수별 누적(중복 시그니처 방지·최근 30경주 유지)."""
+    by = _jp_jockeys_load()
+    changed = False
+    for past in (details or {}).values():
+        for pr in (past or []):
+            nm = (pr.get("jockey") or "").strip()
+            pl = pr.get("placing")
+            if not nm or not isinstance(pl, int) or pl <= 0:
+                continue
+            sig = "|".join(str(pr.get(k) or "") for k in ("date", "venue", "distance")) + "|" + nm + "|" + str(pl)
+            rec = by.setdefault(nm, {"sigs": [], "placings": []})
+            if sig in rec["sigs"]:
+                continue
+            rec["sigs"].insert(0, sig)
+            rec["placings"].insert(0, pl)
+            rec["sigs"] = rec["sigs"][:60]            # 중복방지 시그니처는 여유있게 60개
+            rec["placings"] = rec["placings"][:30]    # 복승권율은 최근 30경주 기준
+            changed = True
+    if changed:
+        _jp_jockeys_save()
+
+
+def _jp_jockey_place_rate(name):
+    """일본 기수 복승권율(%) = 최근 30경주 중 1~3착 비율. 표본 5경주 미만이면 None(불충분·중립 처리)."""
+    if not name:
+        return None
+    rec = _jp_jockeys_load().get(name.strip())
+    ps = (rec or {}).get("placings") or []
+    if len(ps) < 5:
+        return None
+    return round(sum(1 for p in ps if p <= 3) / len(ps) * 100, 1)
 
 
 def _placings_list(placings):
@@ -5953,13 +6015,14 @@ def _quinella_target(n_horses, chaotic=False):
 
 
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
-                 reversal_quinellas=None, dark_quinellas=None, signal_horses=None):
-    """[추천 근본 개편·근거 기반] 여러 파생 추천을 랭킹·근거게이트·두수별 개수(max_q)로 정리(기존 파생 필드 무삭제).
-      복승 우선순위: ①시장 최저복승(항상) ②확신도=전적+배당 이중수렴(항상) ③역배열 ④스마트머니 ⑤복병.
-      게이트: ①② 외 후보는 신호말(signal_horses) 최소 1두 포함해야 채택 → 저배당 단순 인기 제외(신호 전무 시 게이트 미적용=호환).
-      ★등급: ★★★ 이중수렴(또는 최저복승+신호) / ★★ 단일 강신호 / ★ 참고(복병).
-      max_q: 복승 최대 개수(두수별 3~8·혼전 +2, 호출부 `_quinella_target` 산출). 기본 2=기존 동작 호환.
-      삼복승은 항상 보험 ≤2(불변). 반환 {quinellas:[{combo,odds,reason,stars}](≤max_q), trifectas:[{combo,odds,reason}](≤2)}."""
+                 reversal_quinellas=None, dark_quinellas=None, signal_horses=None, sig_meta=None, sport=None):
+    """[추천 구조 개편·종목별 저배당+신호=메인 / 고배당+강신호=BMED특별] 파생 추천을 새 구조로 정리(기존 후보수집·파생필드 무삭제).
+      ▸ 메인 추천(★★★) = 종목별 저배당(경륜 5배↓·경마 10배↓·경정 7배↓) AND 급락·역배열·스마트머니 신호 1개+. 배당 낮은순·개수=max_q.
+      ▸ BMED 특별 감지(★★, 별도 💎) = 종목별 고배당(경륜 10배↑·경마 20배↑·경정 15배↑, 50배 이하) AND 강신호(signalScore 70+ OR 급락15%+ OR 스마트머니+역배열 동시). signalScore 높은순·최대 2개.
+      ▸ 제외 = BMED 신호 없는 저배당 · 배당 50배 초과 · 종목별 저/고 사이 구간(신호만으로 부족).
+      sig_meta: {no:{drop(pct·음수),rev,smart,dark,anomaly,score}} — 조합 근거문장·신호강도 판정용. 미제공/신호전무 시 기존 랭킹(호환).
+      sport: cycle/boat/bike/horse — 종목별 저/고배당 기준. max_q: 메인 최대 개수(두수별). 삼복승은 항상 보험 ≤2(불변).
+      반환 {quinellas:[{combo,odds,reason,stars,basis,summary}](메인≤max_q), bmedSpecial:[...](≤2), trifectas:[{combo,odds,reason}](≤2)}."""
     cp = cp or {}
     vs = set(int(x) for x in (valid_nos or []))
     sig = set(int(x) for x in (signal_horses or []))
@@ -5976,9 +6039,9 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     def _has_sig(combo):
         return any(int(h) in sig for h in combo)
 
-    # ── 복승 후보(우선순위 + ★등급 + 보호/게이트) ──
+    # ── 복승 후보 수집(우선순위 + src) ── (기존 후보 수집 로직 무삭제·src 태그만 가산)
     q_cands = []
-    if curQ:                                              # 1순위: 시장 최저복승 (항상 유지=메인축)
+    if curQ:                                              # 1순위: 시장 최저복승
         _low = None
         for (a, b), o in curQ.items():
             if o and o > 0 and (not vs or (int(a) in vs and int(b) in vs)):
@@ -5987,41 +6050,131 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         if _low:
             _c = sorted(_low[0])
             q_cands.append({"combo": _c, "odds": _low[1], "reason": "시장 최저복승",
-                            "stars": 3 if _has_sig(_c) else 2, "protected": True})
-    for cq in (cp.get("confQuinellas") or []):            # 2순위: 확신도=전적+배당 이중수렴 (항상 유지)
+                            "stars": 3 if _has_sig(_c) else 2, "protected": True, "src": "low"})
+    for cq in (cp.get("confQuinellas") or []):            # 2순위: 확신도=전적+배당 이중수렴
         _c = sorted(int(x) for x in (cq.get("combo") or []))
         q_cands.append({"combo": _c, "odds": cq.get("odds"),
-                        "reason": cq.get("reason") or "이중수렴(전적+배당)", "stars": 3, "protected": True})
+                        "reason": cq.get("reason") or "이중수렴(전적+배당)", "stars": 3, "protected": True, "src": "conf"})
     for rq in (reversal_quinellas or []):                 # 3순위: 역배열 감지 조합
         _c = sorted(int(x) for x in (rq.get("combo") or []))
         q_cands.append({"combo": _c, "odds": rq.get("odds"),
-                        "reason": rq.get("reason") or "역배열", "stars": 2, "protected": False})
+                        "reason": rq.get("reason") or "역배열", "stars": 2, "protected": False, "src": "rev"})
     for sq in (smart_quinella or []):                     # 4순위: 스마트머니 포함
         _c = sorted(int(x) for x in (sq.get("combo") or []))
         q_cands.append({"combo": _c, "odds": sq.get("odds"),
-                        "reason": "스마트머니", "stars": 2, "protected": False})
+                        "reason": "스마트머니", "stars": 2, "protected": False, "src": "smart"})
     for dq in (dark_quinellas or []):                     # 5순위: 복병 포함
         _c = sorted(int(x) for x in (dq.get("combo") or []))
         q_cands.append({"combo": _c, "odds": dq.get("odds"),
-                        "reason": dq.get("reason") or "복병 포함", "stars": 1, "protected": False})
-    if cp.get("quinella"):                                # 폴백: 기존 core 복승 축(신호 있을 때만=저배당 단순추천 게이트)
+                        "reason": dq.get("reason") or "복병 포함", "stars": 1, "protected": False, "src": "dark"})
+    if cp.get("quinella"):                                # 폴백: 기존 core 복승 축
         _c = sorted(int(x) for x in cp["quinella"])
         q_cands.append({"combo": _c, "odds": cp.get("quinellaOdds"),
-                        "reason": "복승 축", "stars": 2, "protected": False})
-    final_q, seen_q = [], set()
-    for c in q_cands:
-        if not _vpair(c["combo"]):
-            continue
-        # [근거 게이트] 보호(최저복승·이중수렴) 외에는 신호말 최소 1두 포함해야 채택(신호 전무 시 미적용=호환)
-        if not c.get("protected") and sig and not _has_sig(c["combo"]):
-            continue
-        k = tuple(c["combo"])
-        if k in seen_q:
-            continue
-        seen_q.add(k)
-        final_q.append({"combo": c["combo"], "odds": c["odds"], "reason": c["reason"], "stars": c.get("stars", 2)})
-        if len(final_q) >= max_q:
-            break
+                        "reason": "복승 축", "stars": 2, "protected": False, "src": "core"})
+
+    # ── [추천 구조 개편·종목별] 저배당+신호=메인(★★★) / 고배당+강신호=BMED특별(★★) / 그 외=제외 ──
+    #   종목별 저배당(메인 상한)·고배당(특별 하한): 경륜 5/10 · 경정 7/15 · 바이크 5/10 · 경마 10/20. 특별 상한=50배(공통).
+    _sp = (sport or "").lower()
+    if _sp == "boat":
+        MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 7.0, 15.0
+    elif _sp in ("cycle", "bike"):
+        MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 5.0, 10.0
+    else:                                             # horse(경마)·기타
+        MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 10.0, 20.0
+    SPECIAL_ODDS_MAX = 50.0       # 특별 상한(50배 초과 제외·근거 약함)
+    DROP_STRONG_PCT = 15.0        # 강신호: 급락 15%+
+    SCORE_STRONG = 70             # 강신호: signalScore 70+
+    meta = sig_meta or {}
+
+    def _mh(no):
+        return meta.get(int(no)) or meta.get(str(no)) or {}
+
+    def _combo_basis(combo):
+        """조합 근거 문장 리스트 — 급락%·스마트머니·역배열·복병·집중급락(말별)."""
+        out = []
+        for no in combo:
+            m = _mh(no)
+            _dp = m.get("drop")
+            if _dp is not None and abs(_dp) >= 1:
+                out.append("%d번: 급락 %s%% 감지" % (int(no), round(_dp, 1)))
+            if m.get("smart"):
+                out.append("%d번: 스마트머니 유입" % int(no))
+            if m.get("rev"):
+                out.append("%d번: 역배열 감지" % int(no))
+            if m.get("anomaly") and _dp is None:
+                out.append("%d번: 집중급락" % int(no))
+            if m.get("dark"):
+                out.append("%d번: 복병" % int(no))
+        return out
+
+    def _combo_score(combo):
+        return max([float(_mh(no).get("score") or 0) for no in combo] or [0])
+
+    def _combo_has_signal(combo):
+        if meta:
+            return any((_mh(no).get("drop") is not None) or _mh(no).get("rev")
+                       or _mh(no).get("smart") or _mh(no).get("anomaly") for no in combo)
+        return _has_sig(combo)
+
+    def _combo_strong(combo):
+        """BMED 특별 강신호: signalScore 70+ OR 급락15%+ OR (스마트머니+역배열 동시)."""
+        has_smart = has_rev = False
+        for no in combo:
+            m = _mh(no)
+            _dp = m.get("drop")
+            if _dp is not None and abs(_dp) >= DROP_STRONG_PCT:
+                return True
+            if float(m.get("score") or 0) >= SCORE_STRONG:
+                return True
+            if m.get("smart"):
+                has_smart = True
+            if m.get("rev"):
+                has_rev = True
+        return has_smart and has_rev
+
+    final_q, special_q, seen_q = [], [], set()
+    if not meta or not sig:
+        # [호환] sig_meta 미제공(구 호출/테스트) 또는 신호 전무 경주 → 기존 랭킹·근거게이트 그대로(개편 미적용)
+        for c in q_cands:
+            if not _vpair(c["combo"]):
+                continue
+            if not c.get("protected") and sig and not _has_sig(c["combo"]):
+                continue
+            k = tuple(c["combo"])
+            if k in seen_q:
+                continue
+            seen_q.add(k)
+            final_q.append({"combo": c["combo"], "odds": c["odds"], "reason": c["reason"],
+                            "stars": c.get("stars", 2), "basis": _combo_basis(c["combo"])})
+            if len(final_q) >= max_q:
+                break
+    else:
+        # [개편] 신호 있는 경주 — 저배당+신호=메인 / 고배당+강신호=BMED특별 / 그 외 제외
+        _main_cand, _spec_cand = [], []
+        for c in q_cands:
+            if not _vpair(c["combo"]):
+                continue
+            k = tuple(c["combo"])
+            if k in seen_q:
+                continue
+            seen_q.add(k)
+            _o = c.get("odds")
+            if _o is None and curQ:                        # 후보에 배당 없으면 배당판 실배당으로 폴백
+                _o = curQ.get((c["combo"][0], c["combo"][1])) or curQ.get((c["combo"][1], c["combo"][0]))
+            if _o is None:
+                continue
+            if _o <= MAIN_ODDS_MAX and _combo_has_signal(c["combo"]):
+                _main_cand.append({"combo": c["combo"], "odds": _o, "reason": c["reason"], "stars": 3,
+                                   "basis": _combo_basis(c["combo"]), "summary": "시장+BMED 동시 유력"})
+            elif SPECIAL_ODDS_MIN <= _o <= SPECIAL_ODDS_MAX and _combo_strong(c["combo"]):
+                _spec_cand.append({"combo": c["combo"], "odds": _o, "reason": c["reason"], "stars": 2,
+                                   "score": round(_combo_score(c["combo"]), 1),
+                                   "basis": _combo_basis(c["combo"]), "summary": "시장 저평가 중 주목"})
+            # 그 외(신호없는 저배당·50배 초과·저/고 사이 구간) → 제외
+        _main_cand.sort(key=lambda x: (x.get("odds") is None, x.get("odds") or 9e9))   # 메인=배당 낮은순
+        _spec_cand.sort(key=lambda x: -(x.get("score") or 0))                          # 특별=signalScore 높은순
+        final_q = _main_cand[:max_q]
+        special_q = _spec_cand[:2]
 
     # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
     _main = None
@@ -6049,7 +6202,7 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         if len(final_t) >= 2:
             break
 
-    return {"quinellas": final_q, "trifectas": final_t}
+    return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q}
 
 
 DARK_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_cases.json")
@@ -7687,16 +7840,71 @@ def _triple_analyze(rk, rec):
                             _dark_q.append({"combo": [_axis, int(_dn)], "odds": _qo(_axis, int(_dn)), "reason": "복병 포함"})
             except Exception:
                 pass
+            # [추천 개편·조합 근거/신호강도] 말별 신호 메타(급락%·역배열·스마트머니·복병·집중급락·signalScore)
+            _sig_meta = {}
+            try:
+                _conf_h = (confidence or {}).get("horses") or {}
+
+                def _hscore(_no):
+                    _dd = _conf_h.get(_no) or _conf_h.get(str(_no)) or {}
+                    return float(_dd.get("signalScore") or _dd.get("confidence") or 0)
+
+                def _sm(_no):
+                    return _sig_meta.setdefault(int(_no), {"drop": None, "rev": False, "smart": False,
+                                                           "dark": False, "anomaly": False, "score": 0.0})
+                for _d in (drops or []):
+                    _p = _d.get("pct")
+                    _ns = ([int(_d["no"])] if _d.get("no") is not None else []) + [int(x) for x in (_d.get("combo") or [])]
+                    for _n in _ns:
+                        _m = _sm(_n)
+                        if _p is not None and (_m["drop"] is None or _p < _m["drop"]):
+                            _m["drop"] = _p
+                for _r in (wx_reversals or []):
+                    if _r.get("no") is not None:
+                        _sm(_r["no"])["rev"] = True
+                for _sq in (smart_quinella or []):
+                    for _h in (_sq.get("combo") or []):
+                        _sm(_h)["smart"] = True
+                for _dh in (dark_horses or []):
+                    if _dh.get("no") is not None:
+                        _sm(_dh["no"])["dark"] = True
+                if anomaly_horse is not None:
+                    _sm(anomaly_horse)["anomaly"] = True
+                for _n in list(_sig_meta.keys()):
+                    _sig_meta[_n]["score"] = _hscore(_n)
+            except Exception:
+                _sig_meta = {}
             # [경륜 개수 방어] 두수는 종목 최대마번(경륜 9·경정 6·오토 8)으로 캡 → 유령마번 섞여도 개수 과다 방지
             _nh = min(len(valid_nos or []), _sport_max_no(_analyze_sport))
-            _maxq = _quinella_target(_nh, bool(chaotic and chaotic.get("detected")))
-            _fp = _final_picks(core_picks, curQ, valid_nos, smart_quinella, max_q=_maxq,
-                               reversal_quinellas=_rev_q, dark_quinellas=_dark_q, signal_horses=_sig_h)
+            # [메인 두수별 상한] 경륜/경정/바이크 3 · 경마 8~9두 3 · 10두 4 · 11~12두 4 · 13~18두 6
+            if _analyze_sport in ("cycle", "boat", "bike"):
+                _mainmax = 3
+            elif _nh <= 9:
+                _mainmax = 3
+            elif _nh == 10:
+                _mainmax = 4
+            elif _nh <= 12:
+                _mainmax = 4
+            else:
+                _mainmax = 6
+            _maxq = _quinella_target(_nh, bool(chaotic and chaotic.get("detected")))   # (기존 산출 보존·삼복승 혼전 참조용)
+            _fp = _final_picks(core_picks, curQ, valid_nos, smart_quinella, max_q=_mainmax,
+                               reversal_quinellas=_rev_q, dark_quinellas=_dark_q,
+                               signal_horses=_sig_h, sig_meta=_sig_meta, sport=_analyze_sport)
             core_picks["finalQuinellas"] = _fp["quinellas"]
             core_picks["finalTrifectas"] = _fp["trifectas"]
-            core_picks["quinellaMax"] = _maxq                      # [표시] 두수별 복승 상한
+            core_picks["bmedSpecial"] = _fp.get("bmedSpecial") or []   # [BMED 특별 감지] 고배당+강신호 별도 섹션(★★)
+            core_picks["quinellaMax"] = _mainmax                   # [표시] 메인 복승 상한(두수별)
             core_picks["raceHorseCount"] = _nh                     # [표시] 출전 두수
             core_picks["chaoticRace"] = bool(chaotic and chaotic.get("detected"))   # [표시] 혼전 여부
+            # [전적 수집 실패 감지] form 없음/formScore 전무 → "배당 기반 분석" 표시(분석기·오버레이 공통)
+            try:
+                _fsl = (form or {}).get("formScores") if isinstance(form, dict) else None
+                _has_form = bool(_fsl) and any(
+                    (h.get("formScore") is not None or h.get("totalScore") is not None) for h in _fsl)
+                core_picks["formMissing"] = (not _has_form)
+            except Exception:
+                core_picks["formMissing"] = False
     except Exception as _e:
         print("[최종추천정리] 실패:", _e)
 
@@ -15124,11 +15332,14 @@ def _keiba_fetch_details(shutsuba, api_key=None):
 
     def _one(item):
         ln, url = item
-        try:
-            return ln, _keiba_parse_horse_past(_keirin_fetch(url))
-        except Exception as e:
-            print(f"[지방경마 전적] HorseDetail {ln} 실패:", e)
-            return ln, []
+        for _try in range(2):   # [전적 수집 안정화] 실패 시 재시도 1회 → 그래도 실패면 [] (form_sub=40 유지)
+            try:
+                return ln, _keiba_parse_horse_past(_keirin_fetch(url))
+            except Exception as e:
+                if _try == 0:
+                    continue          # 1회 재시도
+                print(f"[지방경마 전적] HorseDetail {ln} 실패(재시도 후):", e)   # 실패 원인 로그
+                return ln, []
     if targets:
         with ThreadPoolExecutor(max_workers=4) as ex:
             for ln, past in ex.map(_one, targets):
@@ -15173,6 +15384,10 @@ def keiba_starters():
     details = {}
     if body.get("withDetail", True):
         details = _keiba_fetch_details(shutsuba)
+        try:
+            _jp_jockeys_accumulate(details)   # [일본 기수 DB] 전적의 기수·착순 누적(복승권율 자동 갱신)
+        except Exception as _e:
+            print("[일본기수DB] 누적 실패:", _e)
     horses = _keiba_build_form(shutsuba, details)
     # [live 통합] raceKey 오면 STARTERS_STORE 저장(source=oddspark) → _triple_analyze 통합등급 반영
     linked = None
