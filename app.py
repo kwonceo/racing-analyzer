@@ -7897,11 +7897,15 @@ def _triple_analyze(rk, rec):
             core_picks["quinellaMax"] = _mainmax                   # [표시] 메인 복승 상한(두수별)
             core_picks["raceHorseCount"] = _nh                     # [표시] 출전 두수
             core_picks["chaoticRace"] = bool(chaotic and chaotic.get("detected"))   # [표시] 혼전 여부
-            # [전적 수집 실패 감지] form 없음/formScore 전무 → "배당 기반 분석" 표시(분석기·오버레이 공통)
+            # [전적 수집 실패 감지] form 은 _form_from_starters 반환=마필 점수 '리스트'(None=수집없음).
+            #   ⚠ 버그수정: 이전엔 form 을 dict 로 오검사(isinstance dict)해 데이터가 있어도 항상 formMissing=True.
+            #   실제 전적 유무 = 리스트 중 최근착순(recentPlacings) OR 전적점수(totalScore>0) OR 競走得点(경륜)이 하나라도 있으면 있음.
             try:
-                _fsl = (form or {}).get("formScores") if isinstance(form, dict) else None
-                _has_form = bool(_fsl) and any(
-                    (h.get("formScore") is not None or h.get("totalScore") is not None) for h in _fsl)
+                _has_form = isinstance(form, list) and any(
+                    (h.get("recentPlacings") or h.get("recent"))
+                    or ((h.get("totalScore") or 0) > 0)
+                    or (h.get("competScore") is not None)
+                    for h in form)
                 core_picks["formMissing"] = (not _has_form)
             except Exception:
                 core_picks["formMissing"] = False
