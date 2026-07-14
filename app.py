@@ -18739,6 +18739,171 @@ def multi_race_detail(key):
     return jsonify(an)
 
 
+# ══════════════ [자동 예상] 경기 자동 전환·연속 예상(마감5분전 저장·결과 대조) ══════════════
+AUTO_PRED_DIR = os.path.join(os.path.dirname(__file__), "data", "auto_prediction")
+_AUTO_PRED_ENABLED = True                 # 기본 ON(POST /api/auto-prediction/toggle 로 제어)
+_auto_pred_saved = set()                  # raceKey별 마감5분전 예상 저장 1회
+_auto_pred_scored = set()                 # raceKey별 결과 대조 1회
+_auto_pred_status = {"active": False, "current": None, "currentRk": None,
+                     "next": None, "nextRk": None, "nextInMin": None,
+                     "updatedAt": 0, "savedToday": 0, "day": None}
+
+
+def _auto_pred_fname(rk):
+    """raceKey → YYYY_MM_DD_경주장_경주번호.json (경로조작 방어)."""
+    safe = re.sub(r"[^\w가-힣]+", "_", rk or "race").strip("_")
+    return "%s_%s.json" % (time.strftime("%Y_%m_%d"), safe)
+
+
+def _auto_pred_save(rk, an):
+    """[마감5분전 최종 예상 저장] 분석(corePicks)에서 추천·유력마·단통 요약을 data/auto_prediction/ 에 저장."""
+    try:
+        os.makedirs(AUTO_PRED_DIR, exist_ok=True)
+        cp = an.get("corePicks") or {}
+        doc = {
+            "raceKey": rk, "at": time.strftime("%Y-%m-%d %H:%M:%S"), "phase": "마감5분전",
+            "quinellas": cp.get("finalQuinellas") or [], "trifectas": cp.get("finalTrifectas") or [],
+            "special": cp.get("bmedSpecial") or [], "keyHorses": an.get("keyHorses") or [],
+            "dansung": bool(cp.get("dansung")), "minOdds": cp.get("dansungMinOdds"),
+            "raceHorseCount": cp.get("raceHorseCount"), "result": None, "compared": False,
+        }
+        fn = _auto_pred_fname(rk)
+        json.dump(doc, open(os.path.join(AUTO_PRED_DIR, fn), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("[자동예상] %s 최종예상 저장(%s)" % (rk, fn))
+        return fn
+    except Exception as e:
+        print("[자동예상] 저장 실패:", e)
+        return None
+
+
+def _auto_pred_compare(rk):
+    """[결과 대조] 실제 착순(results_store, 확장/일괄 수집분)이 있으면 예상과 대조해 파일에 기록.
+      ⚠ 서버 단독 oddspark 결과 수집은 로그인 세션 필요 → 기존 결과 입력경로(_apply_result_learning)가 learning 갱신을 담당."""
+    try:
+        res = _snapshot_result_for(rk)
+        if not res or not (res.get("top3") or []):
+            return False
+        path = os.path.join(AUTO_PRED_DIR, _auto_pred_fname(rk))
+        if not os.path.exists(path):
+            return False
+        doc = json.load(open(path, encoding="utf-8"))
+        top3 = [int(x) for x in res["top3"] if x is not None]
+        top2, t3 = set(top3[:2]), set(top3)
+        _qh = any(len(q.get("combo") or []) == 2 and set(int(x) for x in q["combo"]) <= top2 for q in (doc.get("quinellas") or []))
+        _th = any(len(t.get("combo") or []) == 3 and set(int(x) for x in t["combo"]) <= t3 for t in (doc.get("trifectas") or []))
+        _sh = any(len(q.get("combo") or []) == 2 and set(int(x) for x in q["combo"]) <= top2 for q in (doc.get("special") or []))
+        doc["result"] = {"top3": top3, "finalOdds": res.get("finalOdds")}
+        doc["quinellaHit"], doc["trifectaHit"], doc["specialHit"] = _qh, _th, _sh
+        doc["compared"] = True
+        doc["comparedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("[자동예상] %s 결과대조 → 복승%s·삼복승%s" % (rk, _qh, _th))
+        return True
+    except Exception as e:
+        print("[자동예상] 대조 실패:", e)
+        return False
+
+
+def _auto_pred_tick(sched, now):
+    """[자동 예상·연속 전환] bg 루프에서 매 틱 호출 — ①마감5분전 예상 저장 ②결과 대조(+15분) ③현재/다음 상태 갱신.
+      기존 수집 루프(_multi_collect_one)가 이미 배당을 채우므로 여기선 저장·대조·상태만 담당(중복 수집 없음)."""
+    if not _AUTO_PRED_ENABLED:
+        _auto_pred_status["active"] = False
+        return
+    try:
+        _day = time.strftime("%Y-%m-%d")
+        if _auto_pred_status.get("day") != _day:           # 날짜 바뀌면 저장/대조 플래그 초기화
+            _auto_pred_saved.clear(); _auto_pred_scored.clear()
+            _auto_pred_status["day"] = _day
+        races = []
+        for tr in sched.get("tracks", []):
+            for rc in tr.get("races", []):
+                pe = rc.get("postEpoch")
+                if pe:
+                    races.append((pe, tr.get("venue"), rc.get("raceNo"), _multi_key(tr.get("venue"), rc.get("raceNo"))))
+        races.sort(key=lambda x: x[0])
+        # ① 마감 5분 전(0<left≤300)·미저장 → 최종 예상 저장(배당 수집돼 있을 때만)
+        db = None
+        for pe, venue, rno, rk in races:
+            left = pe - now
+            if 0 < left <= 300 and rk not in _auto_pred_saved:
+                if db is None:
+                    db = _triple_load()
+                if rk in db:
+                    try:
+                        _auto_pred_save(rk, _triple_analyze(rk, db.get(rk) or {}))
+                        _auto_pred_saved.add(rk)
+                    except Exception as _se:
+                        print("[자동예상] 분석/저장 실패 %s: %s" % (rk, _se))
+        # ② 발주 +15분 지난 저장 경주 → 결과 대조(결과 있으면)
+        for pe, venue, rno, rk in races:
+            if (now - pe) >= 900 and rk in _auto_pred_saved and rk not in _auto_pred_scored:
+                if _auto_pred_compare(rk):
+                    _auto_pred_scored.add(rk)
+        # ③ 현재(가장 임박)·다음 경주 상태
+        upcoming = [r for r in races if r[0] >= now - 120]
+        cur = upcoming[0] if upcoming else None
+        nxt = upcoming[1] if len(upcoming) > 1 else None
+        _auto_pred_status.update({
+            "active": bool(upcoming),
+            "current": ("%s %d경주" % (cur[1], cur[2])) if cur else None, "currentRk": cur[3] if cur else None,
+            "next": ("%s %d경주" % (nxt[1], nxt[2])) if nxt else None, "nextRk": nxt[3] if nxt else None,
+            "nextInMin": int((nxt[0] - now) / 60) if nxt else None,
+            "updatedAt": now, "savedToday": len(_auto_pred_saved),
+        })
+    except Exception as e:
+        print("[자동예상] tick 오류(무시):", e)
+
+
+@app.route("/api/auto-prediction/status", methods=["GET"])
+def auto_prediction_status():
+    """[자동 예상 상태] 현재 예상 중 경주 + 다음 자동 분석 경주(분·오버레이 상단 표시용)."""
+    return jsonify(dict(_auto_pred_status, enabled=_AUTO_PRED_ENABLED))
+
+
+@app.route("/api/auto-prediction/toggle", methods=["POST"])
+def auto_prediction_toggle():
+    """[자동 예상 ON/OFF] body {enabled:true/false} 없으면 토글."""
+    global _AUTO_PRED_ENABLED
+    body = request.get_json(silent=True) or {}
+    _AUTO_PRED_ENABLED = bool(body["enabled"]) if "enabled" in body else (not _AUTO_PRED_ENABLED)
+    return jsonify({"ok": True, "enabled": _AUTO_PRED_ENABLED})
+
+
+@app.route("/api/auto-prediction/list", methods=["GET"])
+def auto_prediction_list():
+    """[자동 예상 목록] 저장된 최종 예상 + 결과 대조. 최신순."""
+    out = []
+    try:
+        files = os.listdir(AUTO_PRED_DIR)
+    except FileNotFoundError:
+        files = []
+    for fn in files:
+        if not fn.endswith(".json"):
+            continue
+        try:
+            doc = json.load(open(os.path.join(AUTO_PRED_DIR, fn), encoding="utf-8"))
+            doc["filename"] = fn
+            out.append(doc)
+        except Exception:
+            pass
+    out.sort(key=lambda x: x.get("at") or "", reverse=True)
+    return jsonify({"predictions": out[:200], "count": len(out)})
+
+
+@app.route("/api/auto-prediction/get/<path:filename>", methods=["GET"])
+def auto_prediction_get(filename):
+    """[자동 예상 1건] 파일명으로 조회(경로조작 방어)."""
+    fn = os.path.basename(filename or "")
+    path = os.path.join(AUTO_PRED_DIR, fn)
+    if not fn.endswith(".json") or not os.path.exists(path):
+        return jsonify({"ok": False, "error": "not found"}), 404
+    try:
+        return jsonify(json.load(open(path, encoding="utf-8")))
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 def _multi_bg_loop():
     """[1·2번] 백그라운드: 스케줄 30분 갱신 + 발주 임박 경주 배당 주기 수집(실패 격리·서버 죽지 않음)."""
     last_sched = 0
@@ -18762,6 +18927,8 @@ def _multi_bg_loop():
                     pe = rc.get("postEpoch")
                     if pe and -120 <= (pe - now) <= MULTI_COLLECT_LEAD_SEC:   # 발주 10분전~2분후
                         _multi_collect_one(tr, rc, ymd)
+            # [자동 예상] 수집 직후 마감5분전 예상 저장·결과 대조·현재/다음 상태 갱신(연속 자동 전환)
+            _auto_pred_tick(sched, now)
         except Exception as e:
             print("[다중경주] 백그라운드 오류(무시·서버 유지):", e)
         time.sleep(30)

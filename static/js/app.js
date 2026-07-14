@@ -8072,6 +8072,24 @@
     _renderKoreaDeadlineStatus(_msToHHMM(saved.ms), saved.ms);
   }
 
+  // [자동 예상] 연속 자동 전환 상태 배너 — /api/auto-prediction/status 폴링 → "🔄 자동 예상 중: X / 다음: Y (N분 후)"
+  function initAutoPredBanner() {
+    const el = document.getElementById('autoPredBanner');
+    if (!el || el._wired) return;
+    el._wired = true;
+    const poll = async () => {
+      let s;
+      try { s = await (await fetch('/api/auto-prediction/status')).json(); } catch (_) { return; }
+      if (!s || !s.enabled || !s.active || !s.current) { el.style.display = 'none'; return; }
+      const nextTxt = s.next ? ` · 다음 자동 분석: <b>${esc(s.next)}</b>${s.nextInMin != null ? ` <span class="hint">(${s.nextInMin}분 후)</span>` : ''}` : '';
+      const saved = s.savedToday ? ` <span class="hint" style="font-size:11px">· 오늘 ${s.savedToday}건 예상 저장</span>` : '';
+      el.innerHTML = `🔄 <b style="color:#67e8f9">자동 예상 중:</b> <b>${esc(s.current)}</b>${nextTxt}${saved}`;
+      el.style.display = '';
+    };
+    poll();
+    setInterval(poll, 30000);   // 30초 폴링
+  }
+
   function initClosingWatch() {
     if (document.getElementById('anomalyFeedPanel')) return;
     const feed = document.createElement('div');
@@ -9064,6 +9082,7 @@
     initAutoStatusBar();   // [v2.0.0] 자동수집 상태바
     initResultAutoWatch(); // [스펙2·3] 결과 자동수집 실패 배너 + 성공 시 결과탭 자동갱신
     initClosingWatch();    // [보완] 이상감지 누적 피드 + 마감 전 단계 알림
+    initAutoPredBanner();  // [자동 예상] 연속 자동 전환 상태 배너(현재/다음 경주)
     initRaceRefresh();     // [경주 자동 업데이트] 상단 새로고침 바 + 30초 자동 감지
     initMultiRace();       // [다중 경주 동시 배당판] 전체 경주 탭 버튼 바인딩
     initPopout();          // [별도 창] 분석기 팝업 창 열기 + 위치 기억
