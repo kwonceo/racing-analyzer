@@ -1,78 +1,92 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
-<title>오버레이 강조 3마리 제한 · board_demo</title>
+<title>오버레이 강조 종목별·두수별 제한 · board_demo</title>
 <style>
   body{background:#0f172a;color:#e2e8f0;font:14px/1.5 -apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;padding:20px}
-  h1{font-size:18px} h2{font-size:15px;margin:18px 0 6px}
-  .rule{color:#9fb3c8;font-size:13px;margin-bottom:10px}
-  table{border-collapse:collapse;margin:6px 0}
-  td,th{border:1px solid #2b3648;width:56px;height:40px;text-align:center;font-weight:700;position:relative}
-  th{background:#1e293b;font-size:15px}
-  .fav{outline:3px solid #3b82f6;background:rgba(59,130,246,.18)}   /* ⭐ 유력 */
-  .smart{outline:3px solid #c084fc;background:rgba(192,132,252,.18)} /* 💰 */
-  .inv{outline:3px solid #eab308;background:rgba(234,179,8,.18)}    /* 🔄 */
-  .cut{outline:3px solid #ef4444;background:rgba(239,68,68,.14)}    /* ❌ 제거(상한 밖) */
-  .green{background:rgba(34,197,94,.18);border:3px solid #22c55e}   /* 초록 추천조합 */
-  .blue{background:rgba(59,130,246,.18);border:3px solid #3b82f6}   /* 파랑 유력조합 */
-  .badge{position:absolute;top:-9px;right:-6px;font-size:11px}
+  h1{font-size:18px} h2{font-size:15px;margin:16px 0 4px;color:#7dd3fc}
+  h3{font-size:14px;margin:12px 0 4px}
+  .rule{color:#9fb3c8;font-size:13px;margin-bottom:8px}
+  table{border-collapse:collapse;margin:4px 0}
+  td,th{border:1px solid #2b3648;width:44px;height:34px;text-align:center;font-weight:700;position:relative;font-size:12px}
+  th{background:#1e293b;font-size:14px}
+  .fav{outline:3px solid #3b82f6;background:rgba(59,130,246,.18)}
+  .cut{outline:3px solid #ef4444;background:rgba(239,68,68,.14)}
+  .green{background:rgba(34,197,94,.20);border:3px solid #22c55e}
+  .blue{background:rgba(59,130,246,.18);border:3px solid #3b82f6}
+  .badge{position:absolute;top:-8px;right:-5px;font-size:10px}
   .pass{color:#22c55e;font-weight:800} .fail{color:#ef4444;font-weight:800}
-  .legend span{margin-right:14px}
-  .summary{margin:6px 0 2px;font-size:13px}
+  .summary{margin:4px 0 2px;font-size:12.5px}
+  .legend span{margin-right:12px;font-size:12px}
 </style></head>
 <body>
-<h1>🎯 오버레이 강조 3마리 제한 — board_demo</h1>
-<div class="rule">원칙: <b>몇 마리를 추천하든 3마리를 넘지 않음</b> (❌제거마는 상한 밖·유지). 복승 추천 리스트(패널)는 불변 — 배당판 오버레이 시각강조만 제한.<br>
-두수별: 6두↓ = 헤더⭐ 2 + 초록 1 + 파랑 1 · 7두 = ⭐3 + 초록1 + 파랑2 · 8두↑ = ⭐3 + 초록1 + 파랑3</div>
-<div class="legend"><span>⭐유력(파랑테)</span><span>💰스마트머니</span><span>🔄역배열</span><span>❌제거(상한밖)</span><span style="color:#22c55e">■초록=추천조합</span><span style="color:#3b82f6">■파랑=유력조합</span></div>
+<h1>🎯 오버레이 강조 종목별·두수별 제한 — board_demo</h1>
+<div class="rule">색상 우선순위: <b>초록(추천) &gt; 파랑(유력) &gt; 빨강(급락)</b> · 빨강은 초록/파랑 아닌 셀만 · 강조 없는 셀 완전 투명.<br>
+헤더 <b>⭐ = 초록+파랑 셀에 등장하는 말번호만</b>(상한 내) · ❌제거마는 상한 밖(유지).</div>
+<div class="legend"><span>⭐유력(파랑테)</span><span>❌제거(상한밖)</span><span style="color:#22c55e">■초록=추천조합</span><span style="color:#3b82f6">■파랑=유력조합</span></div>
 <div id="out"></div>
 <script>
-// overlay.js 와 동일한 두수별 캡 규칙(검증용 재현)
-function caps(n){ return { starMax: n<=6?2:3, greenMax:1, blueMax: n<=6?1:(n===7?2:3) }; }
-function emph(n, key, smart, inv){
-  var c=caps(n), set={}, order=[], cnt=0;
-  function add(x,m){ x=+x; if(set[x]||cnt>=c.starMax) return; set[x]={mark:m}; order.push(x); cnt++; }
-  key.forEach(function(x){add(x,'⭐');}); smart.forEach(function(x){add(x,'💰');}); inv.forEach(function(x){add(x,'🔄');});
-  return {set:set, order:order};
+// overlay.js 와 동일한 종목별·두수별 캡
+function caps(sport, n){
+  var small=(sport==='cycle'||sport==='boat'||sport==='bike');
+  if(small) return {greenMax:1,blueMax:3,starMax:3};
+  if(n<=9)  return {greenMax:1,blueMax:3,starMax:3};
+  if(n===10)return {greenMax:1,blueMax:4,starMax:3};
+  if(n<=12) return {greenMax:2,blueMax:4,starMax:4};
+  return {greenMax:2,blueMax:6,starMax:5};
 }
-// 시나리오: 유력마를 일부러 많이 줘도 상한으로 잘리는지 확인
-var scenes=[
-  {n:6, key:[3,5,4,1,2], smart:[2], inv:[1], cut:[6], green:[[3,4]], blue:[[1,4]]},
-  {n:7, key:[3,5,4,1],   smart:[2], inv:[6], cut:[7], green:[[3,4]], blue:[[1,4],[2,4]]},
-  {n:8, key:[3,5,4,1,2], smart:[6], inv:[7], cut:[8], green:[[3,4]], blue:[[1,4],[2,4],[5,4]]},
-];
 function ck(a,b){return Math.min(a,b)+'|'+Math.max(a,b);}
+var groups=[
+ {title:'🚴 경륜(cycle) — 두수 무관: 초록1·파랑3·⭐3', scenes:[
+   {sport:'cycle',n:6, green:[[3,4]], blue:[[1,4],[2,4],[5,4]], cut:[6]},
+   {sport:'cycle',n:9, green:[[3,4]], blue:[[1,4],[2,4],[5,4],[6,4]], cut:[9]},
+ ]},
+ {title:'🐎 경마(horse) — 두수별', scenes:[
+   {sport:'horse',n:8,  green:[[3,4]],       blue:[[1,4],[2,4],[5,4]],                 cut:[8]},
+   {sport:'horse',n:10, green:[[3,4]],       blue:[[1,4],[2,4],[5,4],[6,4]],           cut:[10]},
+   {sport:'horse',n:12, green:[[3,4],[5,4]], blue:[[1,4],[2,4],[6,4],[7,4]],           cut:[12]},
+   {sport:'horse',n:16, green:[[3,4],[5,4]], blue:[[1,4],[2,4],[6,4],[7,4],[8,4],[9,4],[10,4]], cut:[16]},
+ ]},
+];
 var out=document.getElementById('out');
-scenes.forEach(function(s){
-  var c=caps(s.n), e=emph(s.n,s.key,s.smart,s.inv);
-  var nums=[]; for(var i=1;i<=s.n;i++) nums.push(i);
-  var cutSet={}; s.cut.forEach(function(x){cutSet[x]=1;});
-  var greenSet={}; s.green.slice(0,c.greenMax).forEach(function(p){greenSet[ck(p[0],p[1])]=1;});
-  var blueSet={}; s.blue.slice(0,c.blueMax).forEach(function(p){blueSet[ck(p[0],p[1])]=1;});
-  var html='<h2>'+s.n+'두 경주 (starMax '+c.starMax+' · 초록 '+c.greenMax+' · 파랑 '+c.blueMax+')</h2>';
-  html+='<table><tr><th>마번</th>';
-  nums.forEach(function(x){
-    var em=e.set[x], cls='', badge='';
-    if(em){ cls=(em.mark==='⭐'?'fav':em.mark==='💰'?'smart':'inv'); badge='<span class="badge">'+em.mark+'</span>'; }
-    else if(cutSet[x]){ cls='cut'; badge='<span class="badge">❌</span>'; }
-    html+='<th class="'+cls+'">'+x+badge+'</th>';
-  });
-  html+='</tr>';
-  nums.forEach(function(r){
-    html+='<tr><th>'+r+'</th>';
-    nums.forEach(function(col){
-      if(col===r){ html+='<td style="background:#1e293b">·</td>'; return; }
-      var k=ck(r,col), cls=greenSet[k]?'green':(blueSet[k]?'blue':'');
-      html+='<td class="'+cls+'">'+(cls==='green'?'🔒':cls==='blue'?'':'')+'</td>';
+groups.forEach(function(g){
+  out.innerHTML+='<h2>'+g.title+'</h2>';
+  g.scenes.forEach(function(s){
+    var c=caps(s.sport,s.n);
+    var green=s.green.slice(0,c.greenMax), blue=s.blue.slice(0,c.blueMax);
+    var greenSet={}; green.forEach(function(p){greenSet[ck(p[0],p[1])]=1;});
+    var blueSet={};  blue.forEach(function(p){blueSet[ck(p[0],p[1])]=1;});
+    // 헤더 ⭐ = 초록→파랑 셀 등장 말, starMax 상한
+    var star={}, order=[];
+    function addStar(x){x=+x; if(star[x]||order.length>=c.starMax)return; star[x]=1; order.push(x);}
+    Object.keys(greenSet).forEach(function(k){var p=k.split('|');addStar(p[0]);addStar(p[1]);});
+    Object.keys(blueSet).forEach(function(k){var p=k.split('|');addStar(p[0]);addStar(p[1]);});
+    var cutSet={}; s.cut.forEach(function(x){cutSet[x]=1;});
+    var nums=[]; for(var i=1;i<=s.n;i++) nums.push(i);
+    var html='<h3>'+(s.sport==='cycle'?'경륜':'경마')+' '+s.n+'마리 (초록 '+c.greenMax+' · 파랑 '+c.blueMax+' · ⭐ '+c.starMax+')</h3>';
+    html+='<table><tr><th>마</th>';
+    nums.forEach(function(x){
+      var cls='',badge='';
+      if(star[x]){cls='fav';badge='<span class="badge">⭐</span>';}
+      else if(cutSet[x]){cls='cut';badge='<span class="badge">❌</span>';}
+      html+='<th class="'+cls+'">'+x+badge+'</th>';
     });
     html+='</tr>';
+    nums.forEach(function(r){
+      html+='<tr><th>'+r+'</th>';
+      nums.forEach(function(col){
+        if(col===r){html+='<td style="background:#1e293b">·</td>';return;}
+        var k=ck(r,col),cls=greenSet[k]?'green':(blueSet[k]?'blue':'');
+        html+='<td class="'+cls+'">'+(cls==='green'?'🔒':'')+'</td>';
+      });
+      html+='</tr>';
+    });
+    html+='</table>';
+    var ok=(order.length<=c.starMax && Object.keys(greenSet).length<=c.greenMax && Object.keys(blueSet).length<=c.blueMax);
+    html+='<div class="summary">강조 ⭐ <b>'+order.length+'마리</b> [<code>'+order.join(',')+'</code>] · 초록 '+Object.keys(greenSet).length+' · 파랑 '+Object.keys(blueSet).length
+        +' → <span class="'+(ok?'pass':'fail')+'">'+(ok?'PASS':'FAIL')+'</span>'
+        +' <span style="color:#9fb3c8">· ⭐는 초록+파랑 셀 말에서만, 상한 '+c.starMax+'</span></div>';
+    out.innerHTML+=html;
   });
-  html+='</table>';
-  var starCnt=e.order.length, gCnt=Object.keys(greenSet).length, bCnt=Object.keys(blueSet).length;
-  var ok=(starCnt<=c.starMax && gCnt<=c.greenMax && bCnt<=c.blueMax);
-  html+='<div class="summary">강조 마번(⭐/💰/🔄): <b>'+starCnt+'개</b> [<code>'+e.order.join(',')+'</code>] · 초록 '+gCnt+' · 파랑 '+bCnt
-      +' → <span class="'+(ok?'pass':'fail')+'">'+(ok?'PASS (3마리 이내)':'FAIL')+'</span>'
-      +' <span style="color:#9fb3c8">· 입력 유력마 '+s.key.length+'마리였어도 '+c.starMax+'로 제한됨</span></div>';
-  out.innerHTML+=html;
 });
 </script>
 </body></html>
