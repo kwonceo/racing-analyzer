@@ -54,6 +54,77 @@
     function byId(id) { try { return document.getElementById(id); } catch (_) { return null; } }
     function root() { return document.body || document.documentElement; }
 
+    // ── [배당판 스냅샷] 마감 1분전 자동 + 수동 📸: 배당판+오버레이+패널 캡처 → 워터마크 합성 → 서버 저장 ──
+    var _snapDone = {};   // raceKey별 자동 캡처 1회 플래그(중복 방지)
+    var _snapBusy = false;
+    function _snapToast(m, ok) {
+      try {
+        var t = mk('div', 'position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:2147483600;'
+          + 'padding:10px 18px;border-radius:10px;font:800 15px/1 -apple-system,BlinkMacSystemFont,sans-serif;color:#fff;'
+          + 'background:' + (ok === false ? '#dc2626' : '#0f766e') + ';box-shadow:0 4px 14px rgba(0,0,0,.55);pointer-events:none', m);
+        root().appendChild(t);
+        setTimeout(function () { try { t.remove(); } catch (_) { /* */ } }, 2600);
+      } catch (_) { /* */ }
+    }
+    function _snap2(n) { return (n < 10 ? '0' : '') + n; }
+    function _snapFilename(rk, trigger) {
+      var now = new Date();
+      var ymd = now.getFullYear() + '_' + _snap2(now.getMonth() + 1) + '_' + _snap2(now.getDate());
+      var name = (rk || '경주').replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '_').slice(0, 40);
+      return ymd + '_' + name + '_' + (trigger === 'auto_t1' ? '마감1분전' : '수동') + '.png';
+    }
+    // 캡처 실행: background(CAPTURE_BOARD)로 화면 캡처 → 캔버스에 워터마크(경주명·날짜·시간) → base64 → SAVE_BOARD_SNAPSHOT
+    function captureBoardSnapshot(d, trigger) {
+      if (_snapBusy || killed) return;
+      _snapBusy = true;
+      var rk = (d && d.raceKey) || '';
+      var silentFail = (trigger === 'auto_t1');   // 자동은 실패 토스트 생략(탭 비활성 시 조용히)
+      try {
+        chrome.runtime.sendMessage({ type: 'CAPTURE_BOARD' }, function (resp) {
+          if (!resp || !resp.ok || !resp.dataUrl) {
+            _snapBusy = false; if (!silentFail) _snapToast('📸 캡처 실패', false); return;
+          }
+          var img = new Image();
+          img.onload = function () {
+            try {
+              var cv = document.createElement('canvas');
+              cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+              var ctx = cv.getContext('2d');
+              ctx.drawImage(img, 0, 0);
+              // [워터마크] 좌하단 반투명 바에 경주명 · 날짜 시간 · 트리거
+              var now = new Date();
+              var stamp = now.getFullYear() + '-' + _snap2(now.getMonth() + 1) + '-' + _snap2(now.getDate())
+                + ' ' + _snap2(now.getHours()) + ':' + _snap2(now.getMinutes());
+              var label = (rk ? rk + '  ·  ' : '') + stamp + (trigger === 'auto_t1' ? '  ·  마감1분전' : '  ·  수동캡처');
+              var fs = Math.max(16, Math.round(cv.width / 55));
+              ctx.font = '700 ' + fs + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+              var tw = ctx.measureText(label).width, pad = Math.round(fs * 0.5);
+              ctx.fillStyle = 'rgba(15,23,42,0.80)';
+              ctx.fillRect(0, cv.height - fs - pad * 2, tw + pad * 2, fs + pad * 2);
+              ctx.fillStyle = '#fde68a'; ctx.textBaseline = 'top';
+              ctx.fillText(label, pad, cv.height - fs - pad);
+              var b64 = cv.toDataURL('image/png');
+              var cp = (d && d.corePicks) || {};
+              chrome.runtime.sendMessage({
+                type: 'SAVE_BOARD_SNAPSHOT',
+                payload: {
+                  filename: _snapFilename(rk, trigger), image: b64, raceKey: rk, trigger: trigger,
+                  quinellas: cp.finalQuinellas || [], trifectas: cp.finalTrifectas || [],
+                  special: cp.bmedSpecial || [], minOdds: cp.dansungMinOdds, dansung: !!cp.dansung
+                }
+              }, function (r2) {
+                _snapBusy = false;
+                if (r2 && r2.ok) _snapToast('📸 저장됨');
+                else if (!silentFail) _snapToast('📸 저장 실패', false);
+              });
+            } catch (e) { _snapBusy = false; if (!silentFail) _snapToast('📸 처리 실패', false); }
+          };
+          img.onerror = function () { _snapBusy = false; if (!silentFail) _snapToast('📸 이미지 오류', false); };
+          img.src = resp.dataUrl;
+        });
+      } catch (e) { _snapBusy = false; }
+    }
+
     function removeAll() {
       try { var a = byId(ID_CHIP); if (a) a.remove(); } catch (_) { /* */ }
       try { var b = byId(ID_PANEL); if (b) b.remove(); } catch (_) { /* */ }
@@ -1062,6 +1133,16 @@
         var cat = d && d.category && CAT_LABEL[d.category];
         if (cat) hL.appendChild(mk('span', 'font-size:10px;font-weight:700;color:#c4b5fd;border:1px solid #6d28d9;border-radius:8px;padding:1px 6px', cat));
         head.appendChild(hL);
+        var hR = mk('div', 'display:flex;align-items:center;gap:8px');
+        // [배당판 스냅샷·수동] 📸 클릭 시 즉시 캡처(배당판+오버레이+패널) → 워터마크 → 서버 저장 → "📸 저장됨" 토스트
+        var snapBtn = mk('button', 'all:unset;cursor:pointer;font-size:15px;line-height:1;padding:0 2px', '📸');
+        snapBtn.title = '배당판 스냅샷 저장(수동 캡처)';
+        snapBtn.addEventListener('mousedown', function (ev) { try { ev.stopPropagation(); } catch (_) { /* */ } });   // 드래그와 분리
+        snapBtn.addEventListener('click', function (ev) {
+          try { ev.stopPropagation(); } catch (_) { /* */ }
+          captureBoardSnapshot(d, 'manual');
+        });
+        hR.appendChild(snapBtn);
         var x = mk('button', 'all:unset;cursor:pointer;color:#94a3b8;font:700 14px sans-serif;padding:0 2px', '✕');
         x.title = '오버레이 끄기';
         x.addEventListener('click', function () {
@@ -1069,8 +1150,20 @@
           try { chrome.storage.local.set({ overlayEnabled: false }); } catch (_) { /* */ }
           render();
         });
-        head.appendChild(x);
+        hR.appendChild(x);
+        head.appendChild(hR);
         panel.appendChild(head);
+
+        // [배당판 스냅샷·자동] 마감 1분 전(최종 추천 확정 시점)에 raceKey별 1회 자동 캡처
+        try {
+          var _snapRk = (d && d.raceKey) || '';
+          var _snapLeft = deadline ? (deadline - Date.now()) : 0;
+          if (_snapRk && deadline && _snapLeft > 0 && _snapLeft <= 60000 && !d.recommendClosed
+              && d.corePicks && !_snapDone[_snapRk]) {
+            _snapDone[_snapRk] = 1;
+            captureBoardSnapshot(d, 'auto_t1');
+          }
+        } catch (_) { /* */ }
 
         // [4번·경륜 자동수집 상태] 🚴 경륜 자동수집 중 · 오다와라 5경주 · 30초 간격 (content.js 가 storage 에 기록)
         var kas = st.keirinAutoStatus;

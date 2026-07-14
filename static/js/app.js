@@ -62,7 +62,7 @@
         btn.classList.add('active');
         $('#tab-' + btn.dataset.tab).classList.add('active');
         if (btn.dataset.tab === 'stats') renderStats();
-        if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); }
+        if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); loadSnapshotGallery(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
         if (btn.dataset.tab === 'multi') startMultiRaceWatch();   // [다중 경주] 전체 경주 대시보드 시작
         else stopMultiRaceWatch();                                // 다른 탭 이동 시 폴링 중단(자원 절약)
@@ -813,7 +813,89 @@
     // [결과기록 UI 개선] 최근 결과·복기 뷰 — 새로고침 버튼 + 초기 렌더
     { const b = document.getElementById('recentResultsRefresh'); if (b) b.addEventListener('click', renderRecentResults); }
     try { renderRecentResults(); } catch (_) { /* */ }
+    { const b = document.getElementById('snapshotRefresh'); if (b) b.addEventListener('click', loadSnapshotGallery); }
+    try { loadSnapshotGallery(); } catch (_) { /* */ }
     initResultSubtabs();   // [결과기록 전면정리] 서브탭 전환 + 직접입력 접기
+  }
+
+  // ── [배당판 스냅샷 갤러리] 마감1분전 자동 + 수동 캡처 이미지 목록 → 날짜별 그룹·썸네일·크게보기·추천vs결과 비교 ──
+  function _snapCombosStr(list) {
+    return (list || []).map((q) => (q.combo || []).join('+')).filter(Boolean).join(', ') || '—';
+  }
+  function _snapResultCompare(meta) {
+    const res = meta.result;
+    if (!res || !(res.top3 || []).length) return '<span class="hint" style="font-size:11px">실제 결과 미입력</span>';
+    const top3 = res.top3.map(Number);
+    const top2 = new Set(top3.slice(0, 2));
+    const top3s = new Set(top3);
+    // 추천 복승(둘 다 1·2착) / 삼복승(셋 다 top3) 적중 여부
+    const qHit = (meta.quinellas || []).some((q) => { const c = (q.combo || []).map(Number); return c.length === 2 && c.every((n) => top2.has(n)); });
+    const tHit = (meta.trifectas || []).some((t) => { const c = (t.combo || []).map(Number); return c.length === 3 && c.every((n) => top3s.has(n)); });
+    const spHit = (meta.special || []).some((q) => { const c = (q.combo || []).map(Number); return c.length === 2 && c.every((n) => top2.has(n)); });
+    const badge = (ok, lbl) => `<span style="font-size:11px;font-weight:800;color:${ok ? '#38d39f' : '#f87171'}">${ok ? '✅' : '❌'} ${lbl}</span>`;
+    return `<div style="font-size:11.5px;margin-top:3px">실제 <b style="color:#fbbf24">${top3.join('-')}</b> · ${badge(qHit, '복승')} ${badge(tHit, '삼복승')}${(meta.special || []).length ? ' ' + badge(spHit, '💎특별') : ''}</div>`;
+  }
+  async function loadSnapshotGallery() {
+    const box = document.getElementById('snapshotGallery');
+    if (!box) return;
+    box.innerHTML = '<span class="hint">불러오는 중…</span>';
+    let data;
+    try { data = await (await fetch('/api/snapshot/list')).json(); } catch (_) { box.innerHTML = '<span class="hint">스냅샷 목록을 불러오지 못했습니다.</span>'; return; }
+    const snaps = (data && data.snapshots) || [];
+    if (!snaps.length) { box.innerHTML = '<span class="hint">저장된 스냅샷이 없습니다. 확장 오버레이의 📸 버튼 또는 마감 1분 전 자동 캡처로 생성됩니다.</span>'; return; }
+    // 날짜별 그룹
+    const byDate = {};
+    snaps.forEach((s) => { const d = s.date || (s.at || '').slice(0, 10) || '기타'; (byDate[d] = byDate[d] || []).push(s); });
+    const dates = Object.keys(byDate).sort().reverse();
+    let html = '';
+    dates.forEach((d) => {
+      html += `<div style="margin:10px 0 4px;font-weight:800;color:#7dd3fc">${esc(d)} <span class="hint" style="font-weight:400">(${byDate[d].length})</span></div>`;
+      html += '<div style="display:flex;flex-wrap:wrap;gap:10px">';
+      byDate[d].forEach((s) => {
+        const url = '/api/snapshot/get/' + encodeURIComponent(s.filename);
+        const trg = s.trigger === 'auto_t1' ? '⏰ 마감1분전' : '📸 수동';
+        const ds = s.dansung ? ' <span style="color:#f59e0b;font-size:10px">⚡단통</span>' : '';
+        html += `<div class="snap-thumb" data-fn="${esc(s.filename)}" style="width:190px;cursor:pointer;border:1px solid #334155;border-radius:9px;overflow:hidden;background:#0f172a">
+          <img src="${url}" style="width:100%;height:120px;object-fit:cover;display:block" loading="lazy">
+          <div style="padding:6px 8px">
+            <div style="font-size:12px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.raceKey || s.filename)}</div>
+            <div class="hint" style="font-size:10.5px">${trg}${ds} · ${esc((s.at || '').slice(11, 16))}</div>
+            <div style="font-size:10.5px;color:#4ea1ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">복승 ${esc(_snapCombosStr(s.quinellas))}</div>
+            ${_snapResultCompare(s)}
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll('.snap-thumb').forEach((el) => {
+      el.addEventListener('click', () => {
+        const s = snaps.find((x) => x.filename === el.dataset.fn);
+        if (s) openSnapshotModal(s);
+      });
+    });
+  }
+  function openSnapshotModal(s) {
+    const url = '/api/snapshot/get/' + encodeURIComponent(s.filename);
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:20px';
+    const trg = s.trigger === 'auto_t1' ? '⏰ 마감 1분 전 자동' : '📸 수동 캡처';
+    ov.innerHTML = `<div style="max-width:96vw;max-height:94vh;overflow:auto;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px">
+        <div><b style="color:#e2e8f0">${esc(s.raceKey || s.filename)}</b> <span class="hint" style="font-size:12px">· ${trg} · ${esc(s.at || '')}</span></div>
+        <button id="snapModalClose" class="btn btn-small">✕ 닫기</button>
+      </div>
+      <div style="font-size:12.5px;margin-bottom:8px;line-height:1.7">
+        <div>🎯 추천 복승: <b style="color:#4ea1ff">${esc(_snapCombosStr(s.quinellas))}</b></div>
+        <div>🛡 삼복승: <b style="color:#c084fc">${esc(_snapCombosStr(s.trifectas))}</b></div>
+        ${(s.special || []).length ? `<div>💎 BMED 특별: <b style="color:#f0abfc">${esc(_snapCombosStr(s.special))}</b></div>` : ''}
+        <div style="margin-top:2px">${_snapResultCompare(s)}</div>
+      </div>
+      <img src="${url}" style="max-width:100%;display:block;border-radius:8px">
+    </div>`;
+    ov.addEventListener('click', (e) => { if (e.target === ov) ov.remove(); });
+    document.body.appendChild(ov);
+    const c = ov.querySelector('#snapModalClose'); if (c) c.addEventListener('click', () => ov.remove());
   }
 
   // [결과기록 전면정리] 결과기록 탭 서브탭 전환 + 경주별 직접입력 접기/펼치기

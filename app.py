@@ -2138,6 +2138,119 @@ def dansung_cases():
                     "note": "단통(복승 최저 ≤1.5배) 경주 복병 적중률 — 저배당 쏠림 회피·복병 집중 전략 효과"})
 
 
+SNAPSHOT_DIR = os.path.join(os.path.dirname(__file__), "data", "snapshots")
+
+
+def _safe_snapshot_name(fn):
+    """[경로조작 방어] 파일명 정규화 — basename·허용문자(한글·영숫자·_-.)·.png 강제·길이 제한."""
+    fn = os.path.basename(str(fn or "")).strip()
+    if not fn:
+        return ""
+    if not fn.lower().endswith(".png"):
+        fn += ".png"
+    fn = re.sub(r"[^0-9A-Za-z가-힣_\-.]", "_", fn)
+    return fn[:160]
+
+
+def _snapshot_meta_path(fn):
+    return os.path.join(SNAPSHOT_DIR, fn.rsplit(".", 1)[0] + ".json")
+
+
+def _snapshot_result_for(rk):
+    """[스냅샷↔결과 비교] raceKey 로 저장된 실제 착순(top3) 조회(유연 매칭). 없으면 None."""
+    try:
+        if not rk:
+            return None
+        db = _results_load()
+        if not db:
+            return None
+        key = rk if rk in db else _resolve_race_key(rk, list(db.keys()))
+        rec = db.get(key) if key else None
+        if not rec:
+            return None
+        return {"top3": rec.get("top3") or [], "finalOdds": rec.get("finalOdds")}
+    except Exception:
+        return None
+
+
+@app.route("/api/snapshot/save", methods=["POST"])
+def snapshot_save():
+    """[배당판 스냅샷 저장] 확장이 캡처한 base64 PNG(배당판+오버레이+패널·워터마크 포함)를 data/snapshots/<파일명>.png 로 저장.
+    body: {filename, image(dataURL 또는 base64), raceKey, trigger(auto_t1/manual), quinellas, trifectas, special, minOdds}.
+    메타(.json 사이드카)를 함께 저장 → 갤러리에서 추천 vs 실제결과 비교."""
+    body = request.get_json(force=True, silent=True) or {}
+    img = body.get("image") or ""
+    fn = _safe_snapshot_name(body.get("filename") or "")
+    if not img or not fn:
+        return jsonify({"ok": False, "error": "image·filename 필수"}), 400
+    if isinstance(img, str) and img.strip().startswith("data:") and "," in img:
+        img = img.split(",", 1)[1]                       # data:image/png;base64, 접두 제거
+    try:
+        raw = base64.b64decode(img)
+    except Exception as e:
+        return jsonify({"ok": False, "error": "base64 디코드 실패: %s" % e}), 400
+    if len(raw) > 15_000_000:
+        return jsonify({"ok": False, "error": "이미지 과대(15MB 초과)"}), 400
+    try:
+        os.makedirs(SNAPSHOT_DIR, exist_ok=True)
+        with open(os.path.join(SNAPSHOT_DIR, fn), "wb") as f:
+            f.write(raw)
+        meta = {
+            "filename": fn, "raceKey": body.get("raceKey") or "",
+            "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "trigger": body.get("trigger") or "manual",   # auto_t1(마감1분전) / manual(수동)
+            "quinellas": body.get("quinellas") or [], "trifectas": body.get("trifectas") or [],
+            "special": body.get("special") or [], "minOdds": body.get("minOdds"),
+            "dansung": bool(body.get("dansung")), "sizeBytes": len(raw),
+        }
+        try:
+            json.dump(meta, open(_snapshot_meta_path(fn), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        except Exception:
+            pass
+    except Exception as e:
+        return jsonify({"ok": False, "error": "저장 실패: %s" % e}), 500
+    print("[스냅샷] 저장: %s (%d KB · %s)" % (fn, len(raw) // 1024, meta["trigger"]))
+    return jsonify({"ok": True, "filename": fn, "sizeBytes": len(raw)})
+
+
+@app.route("/api/snapshot/list", methods=["GET"])
+def snapshot_list():
+    """[스냅샷 갤러리] 저장 스냅샷 목록(메타 + 실제결과 비교). 최신순."""
+    out = []
+    try:
+        files = os.listdir(SNAPSHOT_DIR)
+    except FileNotFoundError:
+        files = []
+    for fn in files:
+        if not fn.lower().endswith(".png"):
+            continue
+        meta = {}
+        try:
+            meta = json.load(open(_snapshot_meta_path(fn), encoding="utf-8"))
+        except Exception:
+            pass
+        rk = meta.get("raceKey") or ""
+        out.append({
+            "filename": fn, "raceKey": rk, "at": meta.get("at"),
+            "date": (meta.get("at") or "")[:10], "trigger": meta.get("trigger"),
+            "quinellas": meta.get("quinellas") or [], "trifectas": meta.get("trifectas") or [],
+            "special": meta.get("special") or [], "minOdds": meta.get("minOdds"),
+            "dansung": bool(meta.get("dansung")), "sizeBytes": meta.get("sizeBytes"),
+            "result": _snapshot_result_for(rk),           # 실제 착순(있으면) → 추천 vs 결과 비교
+        })
+    out.sort(key=lambda x: x.get("at") or "", reverse=True)
+    return jsonify({"snapshots": out, "count": len(out)})
+
+
+@app.route("/api/snapshot/get/<path:filename>", methods=["GET"])
+def snapshot_get(filename):
+    """[스냅샷 이미지] 저장된 PNG 반환(경로조작 방어)."""
+    fn = _safe_snapshot_name(filename)
+    if not fn or not os.path.exists(os.path.join(SNAPSHOT_DIR, fn)):
+        return jsonify({"ok": False, "error": "not found"}), 404
+    return send_from_directory(SNAPSHOT_DIR, fn, mimetype="image/png")
+
+
 @app.route("/api/after-close/stats", methods=["GET"])
 def after_close_stats_api():
     """[3번] 마감 후 대급락(50%+) → 실제 입상률 통계(패턴 신뢰도 측정)."""
