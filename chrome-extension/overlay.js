@@ -958,16 +958,23 @@
         specialTag[k] = 'BMED 특별' + (q.reason ? ' · ' + q.reason : '') + (q.score != null ? ' · 신호' + q.score + '점' : '');
       });
 
+      // [헤더 ⭐ 말 집합 선계산] 초록+파랑 조합에 등장하는 말(starMax 상한) = 실제 헤더에 ⭐ 붙는 말.
+      //   ⚠ role 'fav'(keyHorses)보다 좁음 — 빨강 게이트(유력마=⭐)와 헤더 ⭐ 표시가 100% 일치하도록 공용 집합.
+      var _starHorse = {}, _starN = 0;
+      function _markStar(nn) { nn = +nn; if (_starHorse[nn] || _starN >= starMax) return; _starHorse[nn] = 1; _starN++; }
+      Object.keys(greenSet).forEach(function (k) { var p = k.split('|'); _markStar(p[0]); _markStar(p[1]); });   // 초록(추천) 우선
+      Object.keys(blueSet).forEach(function (k) { var p = k.split('|'); _markStar(p[0]); _markStar(p[1]); });    // 그다음 파랑(유력)
+
       // [빨강 = 진짜 급락만·근본 수정] 콤보 과다 발화 방지 게이트 + 상한 3개.
       //   조건 ①콤보 최근 배당 10%+ 하락(dropMap) AND ②두 말 중 1+ 이 급락 말(dropHorseSet)
-      //   AND ⑤두 말 중 1+ 이 유력마(role 'fav'=keyHorses) — 유력마와 무관한 조합은 급락해도 빨강 금지(사용자 요청).
+      //   AND ⑤두 말 중 1+ 이 유력마(헤더 ⭐ 표시된 말=_starHorse) — ⭐ 무관 조합은 급락해도 빨강 금지(사용자 요청).
       //   ③초록/파랑/특별 겹치면 빨강 금지(우선순위). ④그래도 많으면 가장 큰 급락순 최대 3개만(노이즈 억제).
       var _redCand = [];
       Object.keys(dropMap).forEach(function (k) {
         if (greenSet[k] || blueSet[k] || specialSet[k]) return;   // ③ 초록>파랑>특별>빨강
         var p = k.split('|');
         if (!dropHorseSet[+p[0]] && !dropHorseSet[+p[1]]) return; // ② 급락 말 없는 콤보 = 노이즈 → 완전 투명
-        if (role[+p[0]] !== 'fav' && role[+p[1]] !== 'fav') return; // ⑤ 유력마 무관 조합 = 빨강 금지(급락이어도)
+        if (!_starHorse[+p[0]] && !_starHorse[+p[1]]) return;     // ⑤ 헤더 ⭐(유력마) 무관 조합 = 빨강 금지(급락이어도)
         _redCand.push({ k: k, pct: dropMap[k] });
       });
       _redCand.sort(function (a, b) { return a.pct - b.pct; });   // 가장 큰 하락(음수 작은 값) 먼저
@@ -1010,16 +1017,10 @@
         boardItems.push({ el: cell.el, span: span });
       });
 
-      // [헤더 ⭐ = 초록+파랑 셀에 등장하는 말번호만] 우선순위: 초록(추천조합)→파랑(유력조합), starMax개 상한(6두3/7두3/8두↑4).
+      // [헤더 ⭐ = 초록+파랑 셀에 등장하는 말번호만] 선계산한 _starHorse(빨강 게이트와 공용) 재사용 → ⭐ 표시와 빨강 기준 일치.
       //   ❌제거마는 상한 밖(항상 유지). 스마트머니/역배열은 유력 셀에 들면 ⭐로 커버.
-      var _emph = {}, _emphN = 0;
-      function _addStar(nn) {
-        nn = +nn;
-        if (_emph[nn] || _emphN >= starMax) return;
-        _emph[nn] = { mark: '⭐', bc: BCOL.fav, lbl: '유력(추천·유력 조합)' }; _emphN++;
-      }
-      Object.keys(greenSet).forEach(function (k) { var p = k.split('|'); _addStar(p[0]); _addStar(p[1]); });  // 추천 조합 말 우선
-      Object.keys(blueSet).forEach(function (k) { var p = k.split('|'); _addStar(p[0]); _addStar(p[1]); });   // 그다음 유력 조합 말
+      var _emph = {};
+      Object.keys(_starHorse).forEach(function (nn) { _emph[+nn] = { mark: '⭐', bc: BCOL.fav, lbl: '유력(추천·유력 조합)' }; });
       // [BMED 특별 감지 💎] 특별 조합에 등장하는 말번호 → 헤더에 💎(상한 밖·⭐/❌ 아니면 표시)
       var _spH = {};
       Object.keys(specialSet).forEach(function (k) { var p = k.split('|'); _spH[+p[0]] = 1; _spH[+p[1]] = 1; });
