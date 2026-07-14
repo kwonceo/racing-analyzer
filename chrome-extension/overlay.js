@@ -576,8 +576,23 @@
       var dropMap = {};
       (d.drops || []).forEach(function (dd) {
         var c = (dd.combo || []).map(Number);
-        if (c.length === 2 && (dd.pct || 0) <= -20) dropMap[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = Math.round(dd.pct);
+        if (c.length === 2 && (dd.pct || 0) <= -10) dropMap[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = Math.round(dd.pct);
       });
+      // [빨강 근본 수정·패널격자] 콤보급락(dropMap) AND 급락 말(flow 급락/스마트머니·anomalyHorse) 1+ 포함 → 최대 3개(가장 큰 급락순).
+      //   보드 오버레이와 동일 게이트 — 고배당 노이즈 콤보 빨강 도배 제거.
+      var _pflow = d.flowScores || {};
+      var _pDropH = {};
+      Object.keys(_pflow).forEach(function (n) { var f = _pflow[n] || {}; if (f.trend === '급락' || f.trend === '스마트머니') _pDropH[+n] = 1; });
+      if (d.anomalyHorse != null) _pDropH[+d.anomalyHorse] = 1;
+      var _pRedC = [];
+      Object.keys(dropMap).forEach(function (k) {
+        var pp = k.split('|');
+        if (!_pDropH[+pp[0]] && !_pDropH[+pp[1]]) return;
+        _pRedC.push({ k: k, pct: dropMap[k] });
+      });
+      _pRedC.sort(function (a, b) { return a.pct - b.pct; });
+      var redSet = {};
+      _pRedC.slice(0, 3).forEach(function (c) { redSet[c.k] = 1; });
       var recSet = {};
       (d.betRecommend || []).forEach(function (b) {
         var c = (b.combo || []).map(Number);
@@ -612,9 +627,9 @@
             // [색상 우선순위 초록(추천)>파랑(유력)>빨강(급락)] 추천조합 항상 우선 — 급락이 추천/유력을 덮지 않음
             if (recSet[key]) bd = 'box-shadow:inset 0 0 0 2px #22c55e;';                                       // 초록=추천(최우선)
             else if (role[nos[ri]] === 'fav' && role[nos[ci]] === 'fav') bd = 'box-shadow:inset 0 0 0 2px #3b82f6;'; // 파랑=유력×유력
-            else if (dropMap[key] != null) bd = 'box-shadow:inset 0 0 0 2px #ef4444;';                         // 빨강=급락(추천/유력 아닌 셀만)
+            else if (redSet[key]) bd = 'box-shadow:inset 0 0 0 2px #ef4444;';                                  // 빨강=진짜 급락(급락말 포함·최대3)만
             var inv = (invSet[nos[ri]] || invSet[nos[ci]]) ? 'outline:2px solid ' + MX_COL.inv + ';outline-offset:-3px;' : '';
-            var cell = mk('span', cellBase('color:#e2e8f0;background:' + mxHeat(v, lo, hi) + ';' + bd + inv), v + (dropMap[key] != null ? '▼' : ''));
+            var cell = mk('span', cellBase('color:#e2e8f0;background:' + mxHeat(v, lo, hi) + ';' + bd + inv), v + (redSet[key] ? '▼' : ''));
             cell.title = nos[ri] + '-' + nos[ci] + ' = ' + v + '배' + (dropMap[key] != null ? ' · 급락 ' + dropMap[key] + '%' : '') + (recSet[key] ? ' · 추천' : '');
             row.appendChild(cell);
           } else row.appendChild(mk('span', cellBase('color:#475569'), '·'));
@@ -796,12 +811,21 @@
         return '회피';
       }
 
-      // [급락 조합] 콤보 단위 급락(-20%↓) — 파랑 판정의 긍정신호 중 하나로 사용(색은 파랑, 별도 빨강 아님)
+      // [급락 조합] 콤보 단위 급락(-10%↓) — 빨강 후보. 단, 최종 빨강은 '급락 말 포함' 게이트+상한 3개로 엄격 제한(아래).
       var dropMap = {};
       (d.drops || []).forEach(function (dd) {
         var c = (dd.combo || []).map(Number);
-        if (c.length === 2 && (dd.pct || 0) <= -20) dropMap[ckey(c[0], c[1])] = Math.round(dd.pct);
+        if (c.length === 2 && (dd.pct || 0) <= -10) dropMap[ckey(c[0], c[1])] = Math.round(dd.pct);
       });
+
+      // [급락 말 집합] '진짜 급락 말' = flowScores trend 급락/스마트머니(최근 배당 10%+ 하락) + 집중급락(anomalyHorse).
+      //   빨강은 반드시 이 말 1+ 을 포함한 콤보만 → 고배당 노이즈 콤보(280배가 20% 흔들린 것 등) 빨강 제외.
+      var dropHorseSet = {};
+      Object.keys(flow).forEach(function (n) {
+        var f = flow[n] || {};
+        if (f.trend === '급락' || f.trend === '스마트머니') dropHorseSet[+n] = 1;
+      });
+      if (d.anomalyHorse != null) dropHorseSet[+d.anomalyHorse] = 1;
 
       // [오버레이-패널 통일] 배당판 강조를 패널 추천(corePicks.finalQuinellas)과 동일 소스로 통일.
       //   ★★★(상위 랭킹) → 초록(greenMax), 그다음 랭킹 → 파랑(blueMax). finalQuinellas 순서 = 패널 표시 순서(확신도/근거 랭킹).
@@ -861,13 +885,21 @@
         specialTag[k] = 'BMED 특별' + (q.reason ? ' · ' + q.reason : '') + (q.score != null ? ' · 신호' + q.score + '점' : '');
       });
 
-      // [빨강 = 실제 급락(drop) 감지 셀만] 기존 경고 휴리스틱(죽은인기+고배당)이 고배당 경주에서 과다 발화 →
-      //   사용자 요청대로 '실제 급락 감지된 조합(dropMap: 콤보 -20%↓)'만 빨강으로 제한. 초록/파랑/특별 셀은 제외(우선순위 유지).
-      var redSet = {}, redTag = {};
+      // [빨강 = 진짜 급락만·근본 수정] 콤보 과다 발화 방지 2중 게이트 + 상한 3개.
+      //   조건 ①콤보 최근 배당 10%+ 하락(dropMap) AND ②두 말 중 1+ 이 급락 말(dropHorseSet).
+      //   ③초록/파랑/특별 겹치면 빨강 금지(우선순위). ④그래도 많으면 가장 큰 급락순 최대 3개만(노이즈 억제).
+      var _redCand = [];
       Object.keys(dropMap).forEach(function (k) {
-        if (greenSet[k] || blueSet[k] || specialSet[k]) return;   // 초록>파랑>특별>빨강 — 추천/특별 셀은 빨강 안 함
-        redSet[k] = 1;
-        redTag[k] = '급락 ' + dropMap[k] + '%';
+        if (greenSet[k] || blueSet[k] || specialSet[k]) return;   // ③ 초록>파랑>특별>빨강
+        var p = k.split('|');
+        if (!dropHorseSet[+p[0]] && !dropHorseSet[+p[1]]) return; // ② 급락 말 없는 콤보 = 노이즈 → 완전 투명
+        _redCand.push({ k: k, pct: dropMap[k] });
+      });
+      _redCand.sort(function (a, b) { return a.pct - b.pct; });   // 가장 큰 하락(음수 작은 값) 먼저
+      var redSet = {}, redTag = {};
+      _redCand.slice(0, 3).forEach(function (c) {                 // ④ 최대 3개
+        redSet[c.k] = 1;
+        redTag[c.k] = '급락 ' + c.pct + '%';
       });
 
       var ctx = { dropMap: dropMap, greenSet: greenSet, blueSet: blueSet, blueTag: blueTag, redSet: redSet, redTag: redTag, specialSet: specialSet, specialTag: specialTag };
