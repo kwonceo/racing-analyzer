@@ -1,112 +1,63 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
-<title>오버레이-패널 통일(finalQuinellas) · board_demo</title>
+<title>오버레이 색상 긴급수정 — 초록/파랑=패널추천·빨강=급락만 · board_demo</title>
 <style>
-  body{background:#0f172a;color:#e2e8f0;font:14px/1.5 -apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;padding:20px}
-  h1{font-size:18px} h2{font-size:15px;margin:16px 0 4px;color:#7dd3fc}
-  h3{font-size:14px;margin:12px 0 4px}
+  body{background:#0f172a;color:#e2e8f0;font:14px/1.5 -apple-system,'Malgun Gothic',sans-serif;padding:20px}
+  h1{font-size:17px} h2{font-size:14px;color:#7dd3fc;margin:16px 0 4px} h3{font-size:13px;margin:10px 0 4px}
   .rule{color:#9fb3c8;font-size:13px;margin-bottom:8px}
   .wrap{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
   table{border-collapse:collapse;margin:4px 0}
   td,th{border:1px solid #2b3648;width:44px;height:34px;text-align:center;font-weight:700;position:relative;font-size:11px}
   th{background:#1e293b;font-size:13px}
-  .fav{outline:3px solid #3b82f6;background:rgba(59,130,246,.18)}
   .green{background:rgba(34,197,94,.20);border:3px solid #22c55e}
   .blue{background:rgba(59,130,246,.18);border:3px solid #3b82f6}
-  .badge{position:absolute;top:-8px;right:-5px;font-size:10px}
+  .red{background:rgba(239,68,68,.22);border:3px solid #ef4444}
   .pass{color:#22c55e;font-weight:800} .fail{color:#ef4444;font-weight:800}
-  .summary{margin:4px 0 2px;font-size:12.5px}
-  .panel{min-width:230px;background:#141c2b;border:1px solid #334155;border-radius:10px;padding:10px 12px}
-  .panel .pk{margin:4px 0;font-size:13px}
-  .g{color:#22c55e;font-weight:800} .b{color:#3b82f6;font-weight:800} .x{color:#64748b}
+  .summary{margin:4px 0;font-size:12.5px}
+  .panel{min-width:210px;background:#141c2b;border:1px solid #334155;border-radius:10px;padding:10px 12px}
 </style></head>
 <body>
-<h1>🎯 오버레이-패널 통일 (finalQuinellas 단일 소스) — board_demo</h1>
-<div class="rule">배당판 강조(초록/파랑) = 패널 추천(finalQuinellas)과 <b>같은 조합·같은 순서</b>. 상위 greenMax→초록, 그다음 blueMax→파랑. 패널에 없으면 투명.<br>
-개수: 경륜류 초록1·파랑3 · 경마 8~9두 초록1·파랑3 / 10두 초록1·파랑4 / 11~12두 초록2·파랑4 / 13~18두 초록2·파랑6. 헤더 ⭐=강조 조합 말(starMax 상한).</div>
+<h1>🎯 오버레이 색상 긴급수정 — 초록/파랑=패널추천 · 빨강=급락만 — board_demo</h1>
+<div class="rule">우선순위 <b>초록 &gt; 파랑 &gt; 빨강</b>. 초록/파랑=패널 finalQuinellas(비면 confQuinellas 폴백). <b>빨강=실제 급락(dropMap) 셀만</b>(추천 아닌 셀). 나머지 완전 투명.</div>
 <div id="out"></div>
 <script>
-// overlay.js 와 동일한 종목·두수별 캡
-function caps(sport, n){
-  var small=(sport==='cycle'||sport==='boat'||sport==='bike');
-  if(small)   return {greenMax:1,blueMax:3,starMax:3};
-  if(n<=9)    return {greenMax:1,blueMax:3,starMax:3};
-  if(n===10)  return {greenMax:1,blueMax:4,starMax:3};
-  if(n<=12)   return {greenMax:2,blueMax:4,starMax:4};
-  return {greenMax:2,blueMax:6,starMax:5};
-}
 function ck(a,b){return Math.min(a,b)+'|'+Math.max(a,b);}
+// overlay.js 와 동일한 캡·로직 재현
+function caps(sport,n){var s=(sport==='cycle'||sport==='boat'||sport==='bike');if(s)return{greenMax:1,blueMax:3};if(n<=9)return{greenMax:1,blueMax:3};if(n===10)return{greenMax:1,blueMax:4};if(n<=12)return{greenMax:2,blueMax:4};return{greenMax:2,blueMax:6};}
 var scenes=[
- // ★ 구마모토 6R 실제 케이스: 패널 finalQuinellas = 4+5,2+4,4+6,1+4,3+4 (7번 저배당이 파랑으로 뜨던 버그 검증)
- {title:'🚴 경륜 7두 — 구마모토 6R 실제 케이스 (7번 저배당 파랑 오류 검증)', sport:'cycle', n:7,
-   fq:[{c:[4,5],s:3,r:'시장 최저복승'},{c:[2,4],s:3,r:'확신도1위+2위'},{c:[4,6],s:3,r:'시장유력+급락'},{c:[1,4],s:1,r:'복병 포함'},{c:[3,4],s:1,r:'복병 포함'}],
-   // 배당판 최저배당 조합(7번 중심) — 기존 버그에선 이들이 파랑이었음. 이제 finalQuinellas 밖 → 투명이어야 함.
-   lowOdds:[[5,7],[4,7],[3,7]] },
- {title:'🐎 경마 10두 — 초록1·파랑4', sport:'horse', n:10,
-   fq:[{c:[3,7],s:3,r:'시장 최저복승'},{c:[3,5],s:3,r:'확신도 이중수렴'},{c:[1,3],s:2,r:'역배열'},{c:[3,8],s:2,r:'스마트머니'},{c:[2,3],s:1,r:'복병'},{c:[6,9],s:1,r:'복병'}],
-   lowOdds:[[4,10],[9,10]] },
- {title:'🐎 경마 16두 — 초록2·파랑6', sport:'horse', n:16,
-   fq:[{c:[3,7],s:3,r:'시장 최저복승'},{c:[5,7],s:3,r:'확신도 이중수렴'},{c:[1,7],s:2,r:'역배열'},{c:[7,9],s:2,r:'스마트머니'},{c:[2,7],s:1,r:'복병'},{c:[7,11],s:1,r:'복병'},{c:[6,7],s:1,r:'복병'},{c:[7,13],s:1,r:'복병'}],
-   lowOdds:[[15,16],[14,16]] },
+ // ★ 사용자 케이스: 패널 추천 1+5(3.1배)·1+7(18.5배), finalQuinellas 비어서 confQuinellas 폴백. 급락은 6-8 하나만.
+ {title:'🐎 경마 8두 — 메인 비어 confQuinellas 폴백(1+5·1+7) + 급락 6-8만 빨강', sport:'horse', n:8,
+   finalQuinellas:[], confQuinellas:[{combo:[1,5],odds:3.1},{combo:[1,7],odds:18.5}],
+   dropMap:{'6|8':-27}, // 실제 급락 조합 1개만
+   warnManyCells:['2|3','2|4','3|4','4|6','2|6','3|6'] },  // 예전이면 이들이 warnHorse로 빨강이었음(이제 투명)
+ // 정상 케이스: finalQuinellas 있음 + 급락 2-7
+ {title:'🚴 경륜 7두 — finalQuinellas(3+4·2+4·4+6) + 급락 2-7만 빨강', sport:'cycle', n:7,
+   finalQuinellas:[{combo:[3,4],odds:2.8,stars:3},{combo:[2,4],odds:6.1,stars:2},{combo:[4,6],odds:8.2,stars:2}],
+   confQuinellas:[], dropMap:{'2|7':-33}, warnManyCells:['1|5','5|6','1|6'] },
 ];
 var out=document.getElementById('out');
 scenes.forEach(function(s){
   var c=caps(s.sport,s.n);
-  // overlay.js 와 동일: 상위 greenMax→초록, 그다음 blueMax→파랑
-  var greenSet={}, blueSet={}, gN=0, bN=0, panel=[];
-  s.fq.forEach(function(q){
-    var k=ck(q.c[0],q.c[1]);
-    var cls;
-    if(greenSet[k]||blueSet[k]) return;
-    if(gN<c.greenMax){greenSet[k]=1;gN++;cls='g';}
-    else if(bN<c.blueMax){blueSet[k]=1;bN++;cls='b';}
-    else cls='x';
-    panel.push({c:q.c,s:q.s,r:q.r,cls:cls});
-  });
-  // 헤더 ⭐ = 초록→파랑 셀 말, starMax 상한
-  var star={}, order=[];
-  function addStar(x){x=+x; if(star[x]||order.length>=c.starMax)return; star[x]=1; order.push(x);}
-  Object.keys(greenSet).forEach(function(k){var p=k.split('|');addStar(p[0]);addStar(p[1]);});
-  Object.keys(blueSet).forEach(function(k){var p=k.split('|');addStar(p[0]);addStar(p[1]);});
-  var nums=[]; for(var i=1;i<=s.n;i++) nums.push(i);
-  var html='<h2>'+s.title+'</h2><div class="wrap"><div>';
-  html+='<h3>배당판 오버레이 (초록 '+c.greenMax+' · 파랑 '+c.blueMax+' · ⭐ '+c.starMax+')</h3>';
-  html+='<table><tr><th>마</th>';
-  nums.forEach(function(x){
-    var cls='',badge='';
-    if(star[x]){cls='fav';badge='<span class="badge">⭐</span>';}
-    html+='<th class="'+cls+'">'+x+badge+'</th>';
-  });
-  html+='</tr>';
-  nums.forEach(function(r){
-    html+='<tr><th>'+r+'</th>';
-    nums.forEach(function(col){
-      if(col===r){html+='<td style="background:#1e293b">·</td>';return;}
-      var k=ck(r,col),cls=greenSet[k]?'green':(blueSet[k]?'blue':'');
-      html+='<td class="'+cls+'">'+(cls==='green'?'🔒':'')+'</td>';
-    });
-    html+='</tr>';
-  });
+  // green/blue 소스 = finalQuinellas, 비면 confQuinellas 폴백(overlay.js 동일)
+  var fq=s.finalQuinellas.slice();
+  if(!fq.length && s.confQuinellas.length) fq=s.confQuinellas.slice(0,2);
+  var greenSet={},blueSet={},gN=0,bN=0;
+  fq.forEach(function(q){var k=ck(q.combo[0],q.combo[1]);if(greenSet[k]||blueSet[k])return;if(gN<c.greenMax){greenSet[k]=1;gN++;return;}if(bN<c.blueMax){blueSet[k]=1;bN++;}});
+  // red = dropMap 셀만(초록/파랑 제외)
+  var redSet={};Object.keys(s.dropMap).forEach(function(k){if(greenSet[k]||blueSet[k])return;redSet[k]=1;});
+  var nums=[];for(var i=1;i<=s.n;i++)nums.push(i);
+  var html='<h2>'+s.title+'</h2><div class="wrap"><div><h3>배당판 오버레이</h3><table><tr><th>마</th>';
+  nums.forEach(function(x){html+='<th>'+x+'</th>';});html+='</tr>';
+  nums.forEach(function(r){html+='<tr><th>'+r+'</th>';nums.forEach(function(col){if(col===r){html+='<td style="background:#1e293b">·</td>';return;}var k=ck(r,col);var cls=greenSet[k]?'green':(blueSet[k]?'blue':(redSet[k]?'red':''));var mk=cls==='green'?'🔒':(cls==='red'?'▼':'');html+='<td class="'+cls+'">'+mk+'</td>';});html+='</tr>';});
   html+='</table></div>';
-  // 패널
-  html+='<div class="panel"><h3 style="margin-top:0">오른쪽 패널 추천(finalQuinellas)</h3>';
-  panel.forEach(function(p){
-    var stars='★'.repeat(p.s);
-    var dot=p.cls==='g'?'<span class="g">■초록</span>':(p.cls==='b'?'<span class="b">■파랑</span>':'<span class="x">투명</span>');
-    html+='<div class="pk">복승: <b>'+p.c[0]+'+'+p.c[1]+'</b> '+stars+' · '+p.r+' → '+dot+'</div>';
-  });
-  html+='</div></div>';
-  // 검증: 오버레이 초록/파랑 셀 == 패널 초록/파랑 조합, lowOdds(저배당 오류조합)는 미강조
-  var panelGreen=panel.filter(function(p){return p.cls==='g';}).map(function(p){return ck(p.c[0],p.c[1]);}).sort();
-  var panelBlue=panel.filter(function(p){return p.cls==='b';}).map(function(p){return ck(p.c[0],p.c[1]);}).sort();
-  var ovGreen=Object.keys(greenSet).sort(), ovBlue=Object.keys(blueSet).sort();
-  var matchG=JSON.stringify(panelGreen)===JSON.stringify(ovGreen);
-  var matchB=JSON.stringify(panelBlue)===JSON.stringify(ovBlue);
-  var lowClean=s.lowOdds.every(function(p){var k=ck(p[0],p[1]);return !greenSet[k]&&!blueSet[k];});
-  var ok=matchG&&matchB&&lowClean&&(Object.keys(greenSet).length<=c.greenMax)&&(Object.keys(blueSet).length<=c.blueMax)&&(order.length<=c.starMax);
-  html+='<div class="summary">오버레이=패널 초록 '+(matchG?'✓':'✗')+' · 파랑 '+(matchB?'✓':'✗')
-      +' · 저배당 오류조합['+s.lowOdds.map(function(p){return p[0]+'-'+p[1];}).join(',')+'] 미강조 '+(lowClean?'✓':'✗')
-      +' · ⭐['+order.join(',')+'] → <span class="'+(ok?'pass':'fail')+'">'+(ok?'PASS':'FAIL')+'</span></div>';
+  html+='<div class="panel"><h3 style="margin-top:0">패널 추천</h3>'+fq.map(function(q,i){return '<div>복승: <b>'+q.combo[0]+'+'+q.combo[1]+'</b> ('+q.odds+'배) → '+(i<c.greenMax?'<span style="color:#22c55e">초록</span>':'<span style="color:#3b82f6">파랑</span>')+'</div>';}).join('')+'</div></div>';
+  // 검증: 패널 조합 전부 초록/파랑, 빨강=dropMap 개수, warn 셀들은 투명
+  var panelKeys=fq.map(function(q){return ck(q.combo[0],q.combo[1]);});
+  var allEmph=panelKeys.every(function(k){return greenSet[k]||blueSet[k];});
+  var redOnlyDrops=Object.keys(redSet).every(function(k){return s.dropMap[k]!=null;});
+  var warnClean=s.warnManyCells.every(function(k){return !redSet[k];});
+  var ok=allEmph&&redOnlyDrops&&warnClean&&Object.keys(greenSet).length>=1;
+  html+='<div class="summary">패널 조합 전부 강조 '+(allEmph?'✓':'✗')+' · 빨강=급락만('+Object.keys(redSet).length+'개) '+(redOnlyDrops?'✓':'✗')+' · 옛 warn셀 투명 '+(warnClean?'✓':'✗')+' → <span class="'+(ok?'pass':'fail')+'">'+(ok?'PASS':'FAIL')+'</span></div>';
   out.innerHTML+=html;
 });
 </script>

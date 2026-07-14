@@ -722,7 +722,7 @@
       if (ctx.greenSet[key]) return { col: BCOL.rec, tag: '오늘의 추천(복승)', emph: true, lock: true };
       if (ctx.blueSet[key]) return { col: BCOL.fav, tag: (ctx.blueTag[key] || '유력(저배당+신호)'), emph: true };
       if (ctx.specialSet && ctx.specialSet[key]) return { col: BCOL.special, tag: (ctx.specialTag[key] || 'BMED 특별'), emph: true, special: true };
-      if (ctx.redSet[key]) return { col: BCOL.drop, tag: '경고 · ' + (ctx.redTag[key] || '회피'), emph: true, warn: true };
+      if (ctx.redSet[key]) return { col: BCOL.drop, tag: (ctx.redTag[key] || '급락'), emph: true, warn: true };
       return null;   // 흰색/중립(무변동·단순저배당 포함) — 테두리·배경 없음(원본 숫자만)
     }
 
@@ -827,6 +827,15 @@
       // [초록·파랑 = 패널 finalQuinellas 랭킹順] 상위 greenMax → 초록, 그다음 blueMax → 파랑(패널과 100% 동일 조합).
       //   기존 '저배당+신호 독립 휴리스틱'은 패널과 다른 조합을 뽑아 불일치를 유발 → 사용자 요청대로 패널 소스로 대체.
       var _fq = (d.corePicks && d.corePicks.finalQuinellas) || [];
+      // [패널 일치 폴백] finalQuinellas 가 비면(엄격 게이트로 메인 0) 패널과 동일하게 confQuinellas→quinella 로 강조
+      //   → 패널 추천 조합(1+5·1+7 등)이 배당판에도 반드시 초록/파랑으로 표시됨(불일치 제거).
+      if (!_fq.length && d.corePicks) {
+        var _cq0 = d.corePicks.confQuinellas || [];
+        if (_cq0.length) _fq = _cq0.slice(0, 2);
+        else if (d.corePicks.quinella && d.corePicks.quinella.length === 2) {
+          _fq = [{ combo: d.corePicks.quinella, odds: d.corePicks.quinellaOdds }];
+        }
+      }
       var greenSet = {}, blueSet = {}, blueTag = {}, _gN = 0, _bN = 0;
       _fq.forEach(function (q) {
         var c = (q.combo || []).map(Number);
@@ -852,18 +861,14 @@
         specialTag[k] = 'BMED 특별' + (q.reason ? ' · ' + q.reason : '') + (q.score != null ? ' · 신호' + q.score + '점' : '');
       });
 
-      // [2번 빨강·경고] 경고 말이 낀 조합 · 저배당순(오인베팅 위험 큰 것)부터 최대 4개. 초록/파랑/특별 제외.
+      // [빨강 = 실제 급락(drop) 감지 셀만] 기존 경고 휴리스틱(죽은인기+고배당)이 고배당 경주에서 과다 발화 →
+      //   사용자 요청대로 '실제 급락 감지된 조합(dropMap: 콤보 -20%↓)'만 빨강으로 제한. 초록/파랑/특별 셀은 제외(우선순위 유지).
       var redSet = {}, redTag = {};
-      info.cells.filter(function (c) {
-        var k = ckey(c.a, c.b);
-        if (greenSet[k] || blueSet[k] || specialSet[k]) return false;
-        return warnHorse(c.a) || warnHorse(c.b);
-      }).sort(function (x, y) { return x.odds - y.odds; }).slice(0, 4)
-        .forEach(function (c) {
-          var k = ckey(c.a, c.b);
-          redSet[k] = 1;
-          redTag[k] = warnHorse(c.a) ? warnReason(c.a) : warnReason(c.b);
-        });
+      Object.keys(dropMap).forEach(function (k) {
+        if (greenSet[k] || blueSet[k] || specialSet[k]) return;   // 초록>파랑>특별>빨강 — 추천/특별 셀은 빨강 안 함
+        redSet[k] = 1;
+        redTag[k] = '급락 ' + dropMap[k] + '%';
+      });
 
       var ctx = { dropMap: dropMap, greenSet: greenSet, blueSet: blueSet, blueTag: blueTag, redSet: redSet, redTag: redTag, specialSet: specialSet, specialTag: specialTag };
 
