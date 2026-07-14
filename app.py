@@ -2128,6 +2128,16 @@ def after_close_cases():
                     "note": "마감 후 감지된 신호(베팅 반영 불가) — 수집 간격 단축의 필요성 근거 데이터"})
 
 
+@app.route("/api/dansung/cases", methods=["GET"])
+def dansung_cases():
+    """[단통 학습] 복승 최저 ≤1.5배 쏠림 경주 케이스 + 복병(특별) 적중률 통계.
+    통계 탭에서 '단통 경주 복병 적중률'로 표시 → 저배당 쏠림 회피·복병 집중 전략 효과 검증."""
+    d = _dansung_cases_load()
+    cases = sorted(d.get("cases", []), key=lambda c: c.get("at") or "", reverse=True)
+    return jsonify({"cases": cases[:100], "stats": d.get("stats") or {},
+                    "note": "단통(복승 최저 ≤1.5배) 경주 복병 적중률 — 저배당 쏠림 회피·복병 집중 전략 효과"})
+
+
 @app.route("/api/after-close/stats", methods=["GET"])
 def after_close_stats_api():
     """[3번] 마감 후 대급락(50%+) → 실제 입상률 통계(패턴 신뢰도 측정)."""
@@ -6084,6 +6094,27 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     SPECIAL_ODDS_MAX = 50.0       # 특별 상한(50배 초과 제외·근거 약함)
     DROP_STRONG_PCT = 15.0        # 강신호: 급락 15%+
     SCORE_STRONG = 70             # 강신호: signalScore 70+
+
+    # [단통 경주 감지] 복승 최저배당 ≤ 1.5배 = 시장이 한 방향으로 과도 쏠림 → 저배당 추천 신뢰도↓·복병 집중.
+    #   ▸ 메인 ★★★에서 1.5배↓ 쏠림 조합 제외(너무 당연·가치 낮음) ▸ BMED 특별(복병) 감도 상향 + 최대 3개로 확대.
+    DANSUNG_ODDS = 1.5            # 단통 조합 상한(메인 제외 기준)
+    _min_q = None
+    if curQ:
+        for (_da, _db), _do in curQ.items():
+            try:
+                _do = float(_do)
+            except Exception:
+                continue
+            if _do > 0 and (not vs or (int(_da) in vs and int(_db) in vs)):
+                if _min_q is None or _do < _min_q:
+                    _min_q = _do
+    DANSUNG = (_min_q is not None and _min_q <= DANSUNG_ODDS)
+    if DANSUNG:                  # [단통] 복병 감도 상향(급락 15→10%·signalScore 70→50) + 특별 최대 3개
+        DROP_STRONG_PCT = 10.0
+        SCORE_STRONG = 50
+        _special_max = 3
+    else:
+        _special_max = 2
     meta = sig_meta or {}
 
     def _mh(no):
@@ -6140,6 +6171,15 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 continue
             if not c.get("protected") and sig and not _has_sig(c["combo"]):
                 continue
+            if DANSUNG:                                   # [단통] 1.5배↓ 쏠림 조합은 메인 제외(신호 유무 무관)
+                _oc = c.get("odds")
+                if _oc is None and curQ:
+                    _oc = curQ.get((c["combo"][0], c["combo"][1])) or curQ.get((c["combo"][1], c["combo"][0]))
+                try:
+                    if _oc is not None and float(_oc) <= DANSUNG_ODDS:
+                        continue
+                except Exception:
+                    pass
             k = tuple(c["combo"])
             if k in seen_q:
                 continue
@@ -6164,6 +6204,8 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
             if _o is None:
                 continue
             if _o <= MAIN_ODDS_MAX and _combo_has_signal(c["combo"]):
+                if DANSUNG and _o <= DANSUNG_ODDS:
+                    continue   # [단통] 1.5배↓ 쏠림 조합은 메인 ★★★ 제외(복병에 집중)
                 _main_cand.append({"combo": c["combo"], "odds": _o, "reason": c["reason"], "stars": 3,
                                    "basis": _combo_basis(c["combo"]), "summary": "시장+BMED 동시 유력"})
             elif SPECIAL_ODDS_MIN <= _o <= SPECIAL_ODDS_MAX and _combo_strong(c["combo"]):
@@ -6174,7 +6216,7 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         _main_cand.sort(key=lambda x: (x.get("odds") is None, x.get("odds") or 9e9))   # 메인=배당 낮은순
         _spec_cand.sort(key=lambda x: -(x.get("score") or 0))                          # 특별=signalScore 높은순
         final_q = _main_cand[:max_q]
-        special_q = _spec_cand[:2]
+        special_q = _spec_cand[:_special_max]   # [단통] 3개 / 평시 2개
 
     # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
     _main = None
@@ -6202,7 +6244,8 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         if len(final_t) >= 2:
             break
 
-    return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q}
+    return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
+            "dansung": DANSUNG, "dansungMinOdds": _min_q}
 
 
 DARK_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_cases.json")
@@ -6282,6 +6325,69 @@ def _dark_case_record(rk, an, top3):
         print("[복병케이스] %s: 복병 %d두 저장(입상 %d)" % (rk, len(darks), _nhit))
     except Exception as e:
         print("[복병케이스] 기록 실패:", e)
+
+
+DANSUNG_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dansung_cases.json")
+
+
+def _dansung_cases_load():
+    try:
+        return json.load(open(DANSUNG_CASES_FILE, encoding="utf-8"))
+    except Exception:
+        return {"cases": [], "stats": {"total": 0, "darkHitRaces": 0, "specialHitRaces": 0,
+                                       "darkHitRate": 0, "specialHitRate": 0}}
+
+
+def _dansung_cases_save(d):
+    try:
+        os.makedirs(os.path.dirname(DANSUNG_CASES_FILE), exist_ok=True)
+        json.dump(d, open(DANSUNG_CASES_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[단통케이스] 저장 실패:", e)
+
+
+def _dansung_case_record(rk, an, top3):
+    """[단통 경주 학습·저배당 쏠림] 복승 최저배당 ≤1.5배(시장 과도 쏠림) 경주만 별도 기록 → 복병 적중률 통계.
+    ▸ BMED 특별(복병) 복승 조합 적중(두 말 모두 1·2착) ▸ 복병마 입상(연대 top3) 축적 → 단통 경주에서 복병 전략 효과 검증."""
+    try:
+        cp = an.get("corePicks") or {}
+        if not cp.get("dansung"):
+            return
+        top3s = set(int(x) for x in (top3 or []) if x is not None)
+        top2s = set(int(x) for x in (list(top3 or [])[:2]) if x is not None)
+        venue = _area_num(rk)[0] or rk
+        specials = cp.get("bmedSpecial") or []
+        darks = an.get("darkHorses") or []
+        spec_hits = []
+        for q in specials:                                  # 복병(특별) 복승 조합 적중 = 두 말 모두 1·2착
+            c = [int(x) for x in (q.get("combo") or [])]
+            hit = (len(c) == 2 and set(c) <= top2s)
+            spec_hits.append({"combo": c, "odds": q.get("odds"), "score": q.get("score"), "hit": hit})
+        special_hit = any(s["hit"] for s in spec_hits)
+        dark_hit = any(d.get("no") is not None and int(d.get("no")) in top3s for d in darks)  # 복병마 연대(top3)
+        db = _dansung_cases_load()
+        db.setdefault("cases", []).append({
+            "raceKey": rk, "venue": venue, "minOdds": cp.get("dansungMinOdds"),
+            "top3": [int(x) for x in (top3 or []) if x is not None],
+            "specials": spec_hits, "specialHit": special_hit, "darkHit": dark_hit,
+            "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        })
+        db["cases"] = db["cases"][-500:]
+        st = {"total": 0, "darkHitRaces": 0, "specialHitRaces": 0}
+        for c in db["cases"]:
+            st["total"] += 1
+            if c.get("darkHit"):
+                st["darkHitRaces"] += 1
+            if c.get("specialHit"):
+                st["specialHitRaces"] += 1
+        st["darkHitRate"] = round(st["darkHitRaces"] / st["total"] * 100, 1) if st["total"] else 0
+        st["specialHitRate"] = round(st["specialHitRaces"] / st["total"] * 100, 1) if st["total"] else 0
+        db["stats"] = st
+        _dansung_cases_save(db)
+        print("[단통케이스] %s: 최저%s배 저장(복병특별적중=%s·복병입상=%s·누적 %d경주)"
+              % (rk, cp.get("dansungMinOdds"), special_hit, dark_hit, st["total"]))
+    except Exception as e:
+        print("[단통케이스] 기록 실패:", e)
 
 
 def _triple_analyze(rk, rec):
@@ -7894,6 +8000,8 @@ def _triple_analyze(rk, rec):
             core_picks["finalQuinellas"] = _fp["quinellas"]
             core_picks["finalTrifectas"] = _fp["trifectas"]
             core_picks["bmedSpecial"] = _fp.get("bmedSpecial") or []   # [BMED 특별 감지] 고배당+강신호 별도 섹션(★★)
+            core_picks["dansung"] = bool(_fp.get("dansung"))       # [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
+            core_picks["dansungMinOdds"] = _fp.get("dansungMinOdds")   # [단통] 최저복승 배당(경고 표시용)
             core_picks["quinellaMax"] = _mainmax                   # [표시] 메인 복승 상한(두수별)
             core_picks["raceHorseCount"] = _nh                     # [표시] 출전 두수
             core_picks["chaoticRace"] = bool(chaotic and chaotic.get("detected"))   # [표시] 혼전 여부
@@ -11864,6 +11972,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _dark_case_record(rk, an, top3)
     except Exception as e:
         print("[복병케이스학습] 실패:", e)
+    # [단통 경주 학습] 복승 최저 ≤1.5배 쏠림 경주만 별도 기록 → 복병(특별) 적중률 통계 축적
+    try:
+        _dansung_case_record(rk, an, top3)
+    except Exception as e:
+        print("[단통케이스학습] 실패:", e)
     # [복기] 결과 적중/판정 요약을 히스토리 파일에도 저장 → 통계 탭에서 재계산 없이 표시
     try:
         doc["review"] = {

@@ -762,8 +762,9 @@
         try { r = it.el.getBoundingClientRect(); } catch (_) { continue; }
         if (!r || (r.width === 0 && r.height === 0)) { it.span.style.display = 'none'; continue; }
         it.span.style.display = 'flex';
-        it.span.style.left = r.left + 'px'; it.span.style.top = r.top + 'px';
-        it.span.style.width = r.width + 'px'; it.span.style.height = r.height + 'px';
+        // [단통 배지 등 오프셋 지원] it.dy/it.dx(있으면) 만큼 이동·고정폭(it.fixedW) 지원
+        it.span.style.left = (r.left + (it.dx || 0)) + 'px'; it.span.style.top = (r.top + (it.dy || 0)) + 'px';
+        it.span.style.width = (it.fixedW || r.width) + 'px'; it.span.style.height = (it.fixedH || r.height) + 'px';
       }
     }
     function schedulePosition() {
@@ -967,6 +968,21 @@
         boardHdrItems.push({ el: h.el, span: span });
       });
 
+      // [단통 배지] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림 → 배당판 헤더 좌상단에 "⚡ 단통" 경고 배지(첫 헤더셀 위)
+      if (d.corePicks && d.corePicks.dansung && info.hdrEls.length) {
+        var _dsMin = d.corePicks.dansungMinOdds;
+        var dsBadge = mk('span',
+          'position:fixed;box-sizing:border-box;display:flex;align-items:center;justify-content:center;'
+          + 'font:900 13px/1 -apple-system,BlinkMacSystemFont,sans-serif;color:#0f172a;white-space:nowrap;'
+          + 'background:#f59e0b;border:2px solid #b45309;border-radius:7px;padding:0 6px;'
+          + 'box-shadow:0 2px 6px rgba(0,0,0,.6);z-index:2147482801',
+          '⚡ 단통' + (_dsMin != null ? ' ' + _dsMin + '배' : ''));
+        dsBadge.title = '단통 경주(복승 최저 ' + (_dsMin != null ? _dsMin + '배' : '≤1.5배') + ') · 저배당 신뢰도 낮음 · 복병(💎) 집중';
+        layer.appendChild(dsBadge);
+        // 첫 헤더셀 바로 위(dy=-26)에 고정폭 배지로 정렬
+        boardHdrItems.push({ el: info.hdrEls[0].el, span: dsBadge, dy: -26, fixedW: 76, fixedH: 22 });
+      }
+
       positionBoard();
       bindBoardReposition();
       try {
@@ -1072,8 +1088,10 @@
         var cp = d.corePicks;
         var _fq = (cp && cp.finalQuinellas) || [];
         var _ft = (cp && cp.finalTrifectas) || [];
-        // [폴백·구데이터] finalQuinellas 미보유(구 캐시)면 기존 confQuinellas/quinella·삼복승으로 대체
-        if (!_fq.length && cp) {
+        var _dansung = !!(cp && cp.dansung);   // [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
+        var _spAll = (cp && cp.bmedSpecial) || [];
+        // [폴백·구데이터] finalQuinellas 미보유(구 캐시)면 기존 confQuinellas/quinella·삼복승으로 대체(단, 단통은 폴백 금지=1.5배 재노출 방지)
+        if (!_fq.length && cp && !_dansung) {
           var _cq0 = cp.confQuinellas || [];
           if (_cq0.length) _fq = _cq0.slice(0, 2);
           else if (cp.quinella && cp.quinella.length === 2) _fq = [{ combo: cp.quinella, odds: cp.quinellaOdds }];
@@ -1082,9 +1100,17 @@
           var _t0 = cp.confTrifecta || cp.trifecta;
           if (_t0) _ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds }];
         }
-        if (_fq.length && !d.recommendClosed && st.ovShowPicks !== false) {   // [🎯 추천] 팝업 토글(기본 표시)
+        if ((_fq.length || _dansung || _spAll.length) && !d.recommendClosed && st.ovShowPicks !== false) {   // [🎯 추천] 팝업 토글(기본 표시)
           var cpBox = mk('div', 'margin:0 0 6px;padding:9px 12px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
           cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:16px', '🎯 지금 사세요! (근거 기반)'));
+          // [단통 경고 배너] 저배당 추천 신뢰도 낮음 · 복병 집중
+          if (_dansung) {
+            var dsB = mk('div', 'margin:5px 0 3px;padding:7px 9px;border:2px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,.16)');
+            dsB.appendChild(mk('div', 'font-weight:900;color:#f59e0b;font-size:14px',
+              '⚡ 단통 경주 감지' + (cp.dansungMinOdds != null ? ' (최저 ' + cp.dansungMinOdds + '배)' : '')));
+            dsB.appendChild(mk('div', 'color:#fcd34d;font-size:12px;margin-top:2px', '저배당 추천 신뢰도 낮음 · 복병 감지에 집중하세요 (💎 참고)'));
+            cpBox.appendChild(dsB);
+          }
           // [전적 수집 상태] ✅ 전적+배당 / ⚠️ 배당 기반만(formMissing)
           if (cp && cp.formMissing) {
             cpBox.appendChild(mk('div', 'font-weight:800;color:#fbbf24;font-size:12.5px;margin-top:2px', '⚠️ 전적 데이터 없음 — 배당 기반 분석 중'));

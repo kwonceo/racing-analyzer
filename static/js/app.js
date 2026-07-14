@@ -6193,8 +6193,11 @@
     if (!cp || a.recommendClosed) return '';
     let fq = cp.finalQuinellas || [];
     let ft = cp.finalTrifectas || [];
-    // [폴백·구데이터] finalQuinellas 미보유 시 기존 confQuinellas/quinella·삼복승으로 대체
-    if (!fq.length) {
+    // [단통 경주] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림. 저배당 폴백 금지(1.5배 조합 재노출 방지)·복병 집중 유도.
+    const dansung = !!cp.dansung;
+    const special0 = cp.bmedSpecial || [];
+    // [폴백·구데이터] finalQuinellas 미보유 시 기존 confQuinellas/quinella·삼복승으로 대체(단, 단통 경주는 폴백 안 함)
+    if (!fq.length && !dansung) {
       if ((cp.confQuinellas || []).length) fq = cp.confQuinellas.slice(0, 2);
       else if (cp.quinella && cp.quinella.length === 2) fq = [{ combo: cp.quinella, odds: cp.quinellaOdds }];
     }
@@ -6202,7 +6205,12 @@
       const _t0 = cp.confTrifecta || cp.trifecta;
       if (_t0) ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds }];
     }
-    if (!fq.length) return '';
+    if (!fq.length && !dansung && !special0.length) return '';
+    // [단통 경고 배너] "저배당 추천 신뢰도 낮음 · 복병 감지에 집중"
+    const dansungBanner = dansung ? `<div style="margin:4px 0 8px;padding:9px 11px;border:2px solid #f59e0b;border-radius:9px;background:rgba(245,158,11,.14)">
+      <div style="font-size:14.5px;font-weight:900;color:#f59e0b">⚡ 단통 경주 감지 ${cp.dansungMinOdds != null ? `<span class="hint" style="font-weight:700;font-size:12px">(최저 ${cp.dansungMinOdds}배)</span>` : ''}</div>
+      <div class="hint" style="font-size:12px;margin-top:2px">저배당 추천 신뢰도 낮음 · <b style="color:#f0abfc">복병 감지에 집중</b>하세요 (💎 BMED 특별 참고)</div>
+    </div>` : '';
     const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번${cp.confTop1High ? ' 🔺고배당' : ''}</span>` : '';
     // [근거 기반 추천·두수별 개수] ★등급(★★★ 이중수렴/★★ 단일강신호/★ 참고) + 근거 + N두·복승개수 헤더
     const starStr = (n) => '★'.repeat(Math.max(0, Math.min(3, n || 0)));
@@ -6229,8 +6237,8 @@
       const rs = t.reason ? ` <span class="hint" style="font-size:12px">· ${esc(t.reason)}</span>` : '';
       return `<div style="font-size:18px;font-weight:800;margin:5px 0">🛡 삼복승 보험: <span style="color:#c084fc">${t.combo.join('+')}</span> ${oo}${rs}</div>`;
     }).join('');
-    // [BMED 특별 감지 💎] 고배당+강신호 별도 섹션(하단·최대 2개) — 시장은 저평가, BMED만 감지
-    const special = cp.bmedSpecial || [];
+    // [BMED 특별 감지 💎] 고배당+강신호 별도 섹션(하단·단통 최대 3·평시 2) — 시장은 저평가, BMED만 감지
+    const special = special0;
     const spBlock = special.length ? `<div style="margin-top:10px;padding:10px 12px;border:2px dashed #f0abfc;border-radius:10px;background:rgba(240,171,252,.08)">
       <div style="font-size:15px;font-weight:800;color:#f0abfc;margin-bottom:2px">💎 BMED 특별 감지 <span class="hint" style="font-weight:400;font-size:11px">시장은 저평가 · BMED만 감지한 고배당 기회</span></div>
       ${special.map((q) => {
@@ -6241,6 +6249,7 @@
     </div>` : '';
     return `<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
       <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(근거 기반)</span> ${confHead}</div>
+      ${dansungBanner}
       ${formBadge}
       ${cntHead}
       ${qLines}
