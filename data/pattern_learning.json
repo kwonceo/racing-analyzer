@@ -1728,16 +1728,68 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-14"
+    },
+    {
+      "race": "나고야 1경주",
+      "horse_no": 8,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-14"
+    },
+    {
+      "race": "나고야 1경주",
+      "horse_no": 10,
+      "recent_avg": 6.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-14"
+    },
+    {
+      "race": "나고야 1경주",
+      "horse_no": 2,
+      "recent_avg": 6.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-14"
+    },
+    {
+      "race": "나고야 1경주",
+      "horse_no": 8,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-14"
+    },
+    {
+      "race": "나고야 1경주",
+      "horse_no": 10,
+      "recent_avg": 6.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-14"
+    },
+    {
+      "race": "나고야 1경주",
+      "horse_no": 2,
+      "recent_avg": 6.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-14"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 352,
-      "hit": 74
+      "count": 364,
+      "hit": 78
     },
     "전체부진마": {
-      "count": 602,
-      "hit": 164
+      "count": 620,
+      "hit": 170
     },
     "대규모급락": {
       "count": 17,
@@ -1747,8 +1799,8 @@
       "hit_rate": 23.5
     },
     "이상감지동반": {
-      "count": 250,
-      "hit": 90
+      "count": 256,
+      "hit": 92
     },
     "급락동반": {
       "count": 71,
