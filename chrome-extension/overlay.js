@@ -802,40 +802,43 @@
         if (c.length === 2 && (dd.pct || 0) <= -20) dropMap[ckey(c[0], c[1])] = Math.round(dd.pct);
       });
 
-      // [오버레이 강조 두수별 제한] 색상우선 초록(추천)>파랑(유력)>빨강(급락). 추천조합 항상 우선, 빨강은 초록/파랑 아닌 셀만.
-      //   초록=딱 1개(최고 유력 조합). 파랑=6두↓2 / 7두3 / 8두↑4. ⭐=6두3 / 7두3 / 8두↑4(초록+파랑 셀 말만).
-      //   ⚠ 복승 추천 리스트(패널)는 불변 — 배당판 시각강조 개수만 제한. 출전 두수 = 실제 출주마 수(헤더 마번 수).
+      // [오버레이-패널 통일] 배당판 강조를 패널 추천(corePicks.finalQuinellas)과 동일 소스로 통일.
+      //   ★★★(상위 랭킹) → 초록(greenMax), 그다음 랭킹 → 파랑(blueMax). finalQuinellas 순서 = 패널 표시 순서(확신도/근거 랭킹).
+      //   ⚠ finalQuinellas 에 없는 조합은 강조하지 않음(완전 투명) → "패널엔 4번 중심인데 배당판은 7번 저배당 파랑" 불일치 제거.
+      //   색상우선 초록>파랑>빨강(빨강은 초록/파랑 아닌 셀만). ⚠ 패널 추천 리스트·finalQuinellas 개수는 불변 — 배당판 시각강조 개수만 제한.
+      //   [종목·두수별 개수] 경륜/경정/바이크: 초록1·파랑3. 경마: 8~9두 초록1·파랑3 / 10두 초록1·파랑4 / 11~12두 초록2·파랑4 / 13~18두 초록2·파랑6.
       var _boardN = (info.headerNos || []).length;
-      var greenMax = 1;                                                   // 초록 = 딱 1개
-      var blueMax = (_boardN <= 6) ? 2 : (_boardN === 7 ? 3 : 4);          // 파랑 = 6두↓2 / 7두3 / 8두↑4
-      var starMax = (_boardN <= 6) ? 3 : (_boardN === 7 ? 3 : 4);          // ⭐ = 6두3 / 7두3 / 8두↑4
+      var _sportL = (d.sport || (d.corePicks && d.corePicks.sport) || '').toLowerCase();
+      var _smallField = (_sportL === 'cycle' || _sportL === 'boat' || _sportL === 'bike');   // 경륜/경정/바이크(6~9명)
+      var greenMax, blueMax, starMax;
+      if (_smallField) {                       // 경륜류: 초록1·파랑3
+        greenMax = 1; blueMax = 3; starMax = 3;
+      } else if (_boardN <= 9) {               // 경마 8~9마리: 초록1·파랑3
+        greenMax = 1; blueMax = 3; starMax = 3;
+      } else if (_boardN === 10) {             // 경마 10마리: 초록1·파랑4
+        greenMax = 1; blueMax = 4; starMax = 3;
+      } else if (_boardN <= 12) {              // 경마 11~12마리: 초록2·파랑4
+        greenMax = 2; blueMax = 4; starMax = 4;
+      } else {                                 // 경마 13~18마리: 초록2·파랑6
+        greenMax = 2; blueMax = 6; starMax = 5;
+      }
 
-      // [3번 초록·추천] 복승 추천 조합(finalQuinellas) 중 최고 유력 1개(greenMax)만
-      var greenSet = {}, gN = 0;
-      ((d.corePicks && d.corePicks.finalQuinellas) || []).forEach(function (q) {
+      // [초록·파랑 = 패널 finalQuinellas 랭킹順] 상위 greenMax → 초록, 그다음 blueMax → 파랑(패널과 100% 동일 조합).
+      //   기존 '저배당+신호 독립 휴리스틱'은 패널과 다른 조합을 뽑아 불일치를 유발 → 사용자 요청대로 패널 소스로 대체.
+      var _fq = (d.corePicks && d.corePicks.finalQuinellas) || [];
+      var greenSet = {}, blueSet = {}, blueTag = {}, _gN = 0, _bN = 0;
+      _fq.forEach(function (q) {
         var c = (q.combo || []).map(Number);
-        if (c.length === 2 && gN < greenMax) { greenSet[ckey(c[0], c[1])] = 1; gN++; }
-      });
-
-      // [1번 파랑·유력] 저배당(하위 band) + 긍정신호(급락조합 or 긍정말) 동시만 · 최대 6개. 배당만 낮으면 흰색.
-      //   저배당 게이트=하위 40% 지점(신호 있는 저배당 5~6개 확보). 최종 6개컷 → 결과는 전체의 ~20%.
-      var oddsAsc = info.cells.map(function (c) { return c.odds; }).sort(function (x, y) { return x - y; });
-      var gi = Math.max(0, Math.floor(oddsAsc.length * 0.4) - 1);
-      var blueGate = oddsAsc.length ? oddsAsc[Math.min(gi, oddsAsc.length - 1)] : 0;
-      var blueSet = {}, blueTag = {};
-      info.cells.filter(function (c) {
-        var k = ckey(c.a, c.b);
-        if (greenSet[k]) return false;
-        if (!(c.odds <= blueGate)) return false;                 // 저배당 게이트(배당만 낮고 신호 없으면 제외=흰색)
-        return (dropMap[k] != null) || posHorse(c.a) || posHorse(c.b);
-      }).sort(function (x, y) { return x.odds - y.odds; }).slice(0, blueMax)
-        .forEach(function (c) {
-          var k = ckey(c.a, c.b);
+        if (c.length !== 2) return;
+        var k = ckey(c[0], c[1]);
+        if (greenSet[k] || blueSet[k]) return;                 // 중복 조합 제거
+        if (_gN < greenMax) { greenSet[k] = 1; _gN++; return; }   // ★★★(상위 랭킹) → 초록
+        if (_bN < blueMax) {                                    // 그다음 랭킹 → 파랑
           blueSet[k] = 1;
-          blueTag[k] = dropMap[k] != null ? ('유력 · 급락' + dropMap[k] + '%+저배당')
-            : (invSet[c.a] || invSet[c.b]) ? '유력 · 역배열+저배당'
-              : '유력 · 스마트머니+저배당';
-        });
+          blueTag[k] = ((q.stars || 0) >= 3 ? '추천' : '유력') + (q.reason ? ' · ' + q.reason : '');
+          _bN++;
+        }
+      });
 
       // [2번 빨강·경고] 경고 말이 낀 조합 · 저배당순(오인베팅 위험 큰 것)부터 최대 4개. 초록/파랑 제외.
       var redSet = {}, redTag = {};
