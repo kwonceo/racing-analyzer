@@ -70,8 +70,11 @@
         // [탭분리] 경정/경륜/바이크/중앙경마 탭 → 라이브 배당 폴링 시작 + 마지막 분석 즉시 반영
         if (['boat', 'cycle', 'bike', 'central'].includes(btn.dataset.tab)) {
           startJapanOddsWatch();
+          startSportOddsWatch();   // [화면 복구] 각 종목 배당 독립 폴링 → sportReport-* 실시간 렌더(경마 경주 없어도 표시)
           if (_lastSportAnalyze) mirrorSportAnalysis(_lastSportAnalyze);
           loadSportRecords(btn.dataset.tab);   // [분석기록] 이 종목 과거 분석 기록
+        } else {
+          stopSportOddsWatch();   // 종목 탭 이탈 시 폴링 중단(자원 절약)
         }
       });
     });
@@ -1567,6 +1570,7 @@
     const activeBtn = document.querySelector('.tab-btn.active');
     const tab = activeBtn ? activeBtn.dataset.tab : '';
     if (tab === 'jp') { try { pollJapanOdds(); } catch (_) { /* */ } return; }
+    if (['boat', 'cycle', 'bike', 'central'].includes(tab)) { try { pollSportOdds(); } catch (_) { /* */ } return; }   // [복구] 종목 탭 경주 변경·수동 새로고침 즉시 반영
     try { autoSelectKoreaRace(rk); } catch (_) { /* */ }
   }
 
@@ -5924,6 +5928,40 @@
       el.innerHTML = sportAnalysisHTML(a, '#sportBudget-' + tab);
     }
   }
+
+  // [탭분리·화면 복구] 경륜/경정/바이크 탭은 일본경마(sport=horse) 폴링과 독립적으로 각 종목 배당을 직접 조회해
+  //   실시간 이상감지·유력마·복병·추천·타임라인을 sportReport-<탭>에 렌더한다.
+  //   ⚠ sport=horse 격리(종목 혼재 방지) 이후, mirrorSportAnalysis 를 부르던 유일 경로(pollJapanOdds)가
+  //     경마 경주 없으면 조기 return 하여 경륜/경정/바이크 탭이 플레이스홀더로 비던 문제 복구.
+  //   각 탭이 자기 sport 만 조회 + category 일치 확인하므로 종목 혼재는 재발하지 않는다(기존 격리 원칙 유지).
+  const _SPORT_POLL_LIST = [
+    { sport: 'cycle', cat: 'cycle' },
+    { sport: 'boat', cat: 'boat' },
+    { sport: 'bike', cat: 'bike' },
+  ];
+  let _sportOddsTimer = null;
+  async function pollSportOdds() {
+    for (const s of _SPORT_POLL_LIST) {
+      try {
+        const latest = await (await fetch('/api/odds/triple/latest?sport=' + s.sport)).json();
+        if (!latest || latest.noRace || latest.stale || !latest.raceKey) continue;   // 개최 없음·끝난 경주 스킵
+        const a = await (await fetch('/api/odds/triple/analyze', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ raceKey: latest.raceKey, sport: s.sport }),
+        })).json();
+        if (!a || a.error || a.waiting) continue;
+        if (a.raceKey && a.raceKey !== latest.raceKey) continue;   // 직전 경주 잔존 방어
+        if (a.category && a.category !== s.cat) continue;          // 종목 일치만 렌더(혼재 방지)
+        mirrorSportAnalysis(a);
+      } catch (_) { /* 개별 종목 실패는 조용히 건너뜀(다른 종목 영향 없음) */ }
+    }
+  }
+  function stopSportOddsWatch() { if (_sportOddsTimer) { clearInterval(_sportOddsTimer); _sportOddsTimer = null; } }
+  function startSportOddsWatch() {
+    stopSportOddsWatch();
+    pollSportOdds();                                    // 진입 즉시 1회
+    _sportOddsTimer = setInterval(pollSportOdds, 30000);   // 30초 폴링(확장 주기와 정렬)
+  }
   // 순수 렌더 헬퍼만 조합(사이드이펙트 없는 문자열 반환) → 스포츠 탭 컨테이너에 안전하게 주입.
   // [💎 중고배당 유력마·2번] 감지 시 상단 강조 배너 + 소리/깜빡임(경고음과 다른 소리·경주당 1회).
   let _midHighAlerted = {};
@@ -6232,6 +6270,7 @@
     parts.push(renderCrossReversal(a));
     parts.push(renderIntegratedGrades(a));
     parts.push(renderJapanSignals(a.signals));
+    parts.push(renderSignalTimeline(a.signalTimeline));   // [복구·요청] 신호 타임라인(집중급락 말 변경·안정화 이력) 종목 뷰에도 표시
     // [경륜/경정 근거 표시] 일본경마 뷰에만 있던 '왜 추천했는지' 근거 카드·패턴매칭을 6명 종목 뷰에도 추가.
     //   경륜은 전적이 없어 배당(급락·쌍승역전·연속하락)·이상감지 기반 근거가 표시된다.
     parts.push(renderPatternMatch(a.patternMatch));
