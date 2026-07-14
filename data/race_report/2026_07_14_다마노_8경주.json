@@ -1,0 +1,181 @@
+{
+ "race": "다마노 8경주",
+ "raceKey": "다마노 8경주",
+ "date": "2026-07-14",
+ "result": {
+  "1st": 5,
+  "2nd": 3,
+  "3rd": 7,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 107.1,
+   "confidence": 32.0,
+   "reason": "전적상위"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 104.5,
+   "confidence": 48.0,
+   "reason": "전적상위"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 104.8,
+   "confidence": 8.0,
+   "reason": "전적상위"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 105.2,
+   "confidence": 18.0,
+   "reason": "전적상위"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 110.0,
+   "confidence": 8.0,
+   "reason": "전적상위"
+  }
+ },
+ "recommended_horses": [
+  1,
+  5,
+  2,
+  3
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 5번 107.1점",
+  "2. 배당 수집 시작 13:44:50",
+  "5. 종합 신뢰도 32.0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 5,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 107.1,
+  "total": 32.0,
+  "grade": "하"
+ },
+ "win_tags": [],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 107.1,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": false,
+  "inverseHorses": [
+   1
+  ],
+  "inverseHit": [],
+  "confidence": 48.0,
+  "reason": "추천 미적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [
+   1,
+   5
+  ],
+  "events": {
+   "1": {
+    "first": {
+     "time": "13:46:05",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "13:46:05",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "13:46:08",
+     "minutes_before": null
+    }
+   },
+   "5": {
+    "first": {
+     "time": "13:46:45",
+     "minutes_before": 6
+    },
+    "count": 1,
+    "last": {
+     "time": "13:46:45",
+     "minutes_before": 6
+    },
+    "vanished": {
+     "time": "13:46:48",
+     "minutes_before": 6
+    }
+   }
+  },
+  "finalSignal": 5,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 6
+ },
+ "pnl": 0,
+ "stake": 1000,
+ "generated_at": "2026-07-14 13:47:02"
+}
