@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
-<title>오버레이 강조 종목별·두수별 제한 · board_demo</title>
+<title>오버레이 색상 우선순위·두수별 강조 제한 · board_demo</title>
 <style>
   body{background:#0f172a;color:#e2e8f0;font:14px/1.5 -apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;padding:20px}
   h1{font-size:18px} h2{font-size:15px;margin:16px 0 4px;color:#7dd3fc}
@@ -13,48 +13,67 @@
   .cut{outline:3px solid #ef4444;background:rgba(239,68,68,.14)}
   .green{background:rgba(34,197,94,.20);border:3px solid #22c55e}
   .blue{background:rgba(59,130,246,.18);border:3px solid #3b82f6}
+  .red{background:rgba(239,68,68,.16);border:3px solid #ef4444}
   .badge{position:absolute;top:-8px;right:-5px;font-size:10px}
   .pass{color:#22c55e;font-weight:800} .fail{color:#ef4444;font-weight:800}
   .summary{margin:4px 0 2px;font-size:12.5px}
   .legend span{margin-right:12px;font-size:12px}
 </style></head>
 <body>
-<h1>🎯 오버레이 강조 종목별·두수별 제한 — board_demo</h1>
-<div class="rule">색상 우선순위: <b>초록(추천) &gt; 파랑(유력) &gt; 빨강(급락)</b> · 빨강은 초록/파랑 아닌 셀만 · 강조 없는 셀 완전 투명.<br>
-헤더 <b>⭐ = 초록+파랑 셀에 등장하는 말번호만</b>(상한 내) · ❌제거마는 상한 밖(유지).</div>
-<div class="legend"><span>⭐유력(파랑테)</span><span>❌제거(상한밖)</span><span style="color:#22c55e">■초록=추천조합</span><span style="color:#3b82f6">■파랑=유력조합</span></div>
+<h1>🎯 오버레이 색상 우선순위·두수별 강조 제한 — board_demo</h1>
+<div class="rule">색상 우선순위: <b>초록(추천) &gt; 파랑(유력) &gt; 빨강(급락)</b> · 추천조합은 급락이어도 <b>항상 초록</b> · 빨강은 초록/파랑 아닌 셀만 · 나머지 완전 투명.<br>
+개수: <b>초록 딱 1개</b> · 파랑 <b>6두↓2 / 7두3 / 8두↑4</b> · 헤더 <b>⭐ = 초록+파랑 셀 말</b> (6두3 / 7두3 / 8두↑4) · ❌제거마는 상한 밖(유지).</div>
+<div class="legend"><span style="color:#22c55e">■초록=추천</span><span style="color:#3b82f6">■파랑=유력</span><span style="color:#ef4444">■빨강=급락</span><span>⭐유력</span><span>❌제거</span></div>
 <div id="out"></div>
 <script>
-// overlay.js 와 동일한 종목별·두수별 캡
-function caps(sport, n){
-  var small=(sport==='cycle'||sport==='boat'||sport==='bike');
-  if(small) return {greenMax:1,blueMax:3,starMax:3};
-  if(n<=9)  return {greenMax:1,blueMax:3,starMax:3};
-  if(n===10)return {greenMax:1,blueMax:4,starMax:3};
-  if(n<=12) return {greenMax:2,blueMax:4,starMax:4};
-  return {greenMax:2,blueMax:6,starMax:5};
+// overlay.js 와 동일한 두수별 캡 (두수 기준만)
+function caps(n){
+  return {
+    greenMax: 1,
+    blueMax: (n<=6)?2:(n===7?3:4),
+    starMax: (n<=6)?3:(n===7?3:4)
+  };
 }
 function ck(a,b){return Math.min(a,b)+'|'+Math.max(a,b);}
+// overlay.js 와 동일한 셀 우선순위: 추천(초록) > 유력(파랑) > 급락(빨강)
+function cellCls(k,greenSet,blueSet,redSet){
+  if(greenSet[k]) return 'green';
+  if(blueSet[k])  return 'blue';
+  if(redSet[k])   return 'red';
+  return '';
+}
 var groups=[
- {title:'🚴 경륜(cycle) — 두수 무관: 초록1·파랑3·⭐3', scenes:[
-   {sport:'cycle',n:6, green:[[3,4]], blue:[[1,4],[2,4],[5,4]], cut:[6]},
-   {sport:'cycle',n:9, green:[[3,4]], blue:[[1,4],[2,4],[5,4],[6,4]], cut:[9]},
+ {title:'🚴 경륜 6두 — 초록1·파랑2·⭐3 (★추천+급락 겹침 검증)', scenes:[
+   // 3-4 는 추천(초록)이면서 동시에 급락(red 후보) → 초록이 이겨야 함
+   {n:6, green:[[3,4]], blue:[[1,4],[2,4],[5,4]], red:[[3,4],[1,6],[2,6]], cut:[6]},
  ]},
- {title:'🐎 경마(horse) — 두수별', scenes:[
-   {sport:'horse',n:8,  green:[[3,4]],       blue:[[1,4],[2,4],[5,4]],                 cut:[8]},
-   {sport:'horse',n:10, green:[[3,4]],       blue:[[1,4],[2,4],[5,4],[6,4]],           cut:[10]},
-   {sport:'horse',n:12, green:[[3,4],[5,4]], blue:[[1,4],[2,4],[6,4],[7,4]],           cut:[12]},
-   {sport:'horse',n:16, green:[[3,4],[5,4]], blue:[[1,4],[2,4],[6,4],[7,4],[8,4],[9,4],[10,4]], cut:[16]},
+ {title:'🚴 경륜 7두 — 초록1·파랑3·⭐3', scenes:[
+   {n:7, green:[[3,4]], blue:[[1,4],[2,4],[5,4],[6,4]], red:[[7,1],[7,2]], cut:[7]},
+ ]},
+ {title:'🐎 경마 8두 — 초록1·파랑4·⭐4', scenes:[
+   {n:8, green:[[3,4]], blue:[[1,4],[2,4],[5,4],[6,4],[7,4]], red:[[8,1],[8,2]], cut:[8]},
+ ]},
+ {title:'🐎 경마 12두 — 초록1·파랑4·⭐4', scenes:[
+   {n:12, green:[[3,4]], blue:[[1,4],[2,4],[5,4],[6,4],[7,4],[9,4]], red:[[12,1],[11,2]], cut:[12]},
+ ]},
+ {title:'🐎 경마 16두 — 초록1·파랑4·⭐4', scenes:[
+   {n:16, green:[[3,4]], blue:[[1,4],[2,4],[5,4],[6,4],[7,4],[8,4],[9,4]], red:[[16,1],[15,2]], cut:[16]},
  ]},
 ];
 var out=document.getElementById('out');
 groups.forEach(function(g){
   out.innerHTML+='<h2>'+g.title+'</h2>';
   g.scenes.forEach(function(s){
-    var c=caps(s.sport,s.n);
-    var green=s.green.slice(0,c.greenMax), blue=s.blue.slice(0,c.blueMax);
+    var c=caps(s.n);
+    // 초록 먼저 확정
+    var green=s.green.slice(0,c.greenMax);
     var greenSet={}; green.forEach(function(p){greenSet[ck(p[0],p[1])]=1;});
-    var blueSet={};  blue.forEach(function(p){blueSet[ck(p[0],p[1])]=1;});
+    // 파랑 = 초록 제외 후 상한
+    var blueSet={}, bN=0;
+    s.blue.forEach(function(p){var k=ck(p[0],p[1]); if(!greenSet[k] && bN<c.blueMax){blueSet[k]=1;bN++;}});
+    // 빨강 = 초록/파랑 아닌 셀만 (급락)
+    var redSet={};
+    s.red.forEach(function(p){var k=ck(p[0],p[1]); if(!greenSet[k] && !blueSet[k]) redSet[k]=1;});
     // 헤더 ⭐ = 초록→파랑 셀 등장 말, starMax 상한
     var star={}, order=[];
     function addStar(x){x=+x; if(star[x]||order.length>=c.starMax)return; star[x]=1; order.push(x);}
@@ -62,7 +81,7 @@ groups.forEach(function(g){
     Object.keys(blueSet).forEach(function(k){var p=k.split('|');addStar(p[0]);addStar(p[1]);});
     var cutSet={}; s.cut.forEach(function(x){cutSet[x]=1;});
     var nums=[]; for(var i=1;i<=s.n;i++) nums.push(i);
-    var html='<h3>'+(s.sport==='cycle'?'경륜':'경마')+' '+s.n+'마리 (초록 '+c.greenMax+' · 파랑 '+c.blueMax+' · ⭐ '+c.starMax+')</h3>';
+    var html='<h3>'+s.n+'두 (초록 '+c.greenMax+' · 파랑 '+c.blueMax+' · ⭐ '+c.starMax+')</h3>';
     html+='<table><tr><th>마</th>';
     nums.forEach(function(x){
       var cls='',badge='';
@@ -75,16 +94,24 @@ groups.forEach(function(g){
       html+='<tr><th>'+r+'</th>';
       nums.forEach(function(col){
         if(col===r){html+='<td style="background:#1e293b">·</td>';return;}
-        var k=ck(r,col),cls=greenSet[k]?'green':(blueSet[k]?'blue':'');
-        html+='<td class="'+cls+'">'+(cls==='green'?'🔒':'')+'</td>';
+        var k=ck(r,col),cls=cellCls(k,greenSet,blueSet,redSet);
+        var mark = cls==='green'?'🔒':(cls==='red'?'▼':'');
+        html+='<td class="'+cls+'">'+mark+'</td>';
       });
       html+='</tr>';
     });
     html+='</table>';
-    var ok=(order.length<=c.starMax && Object.keys(greenSet).length<=c.greenMax && Object.keys(blueSet).length<=c.blueMax);
-    html+='<div class="summary">강조 ⭐ <b>'+order.length+'마리</b> [<code>'+order.join(',')+'</code>] · 초록 '+Object.keys(greenSet).length+' · 파랑 '+Object.keys(blueSet).length
-        +' → <span class="'+(ok?'pass':'fail')+'">'+(ok?'PASS':'FAIL')+'</span>'
-        +' <span style="color:#9fb3c8">· ⭐는 초록+파랑 셀 말에서만, 상한 '+c.starMax+'</span></div>';
+    // 검증: 초록 정확히 1, 파랑 상한 이하, ⭐ 상한 이하, 그리고 추천셀(3-4)이 빨강목록에도 있지만 초록으로 표시되는지
+    var recKey=ck(s.green[0][0],s.green[0][1]);
+    var recStaysGreen = (cellCls(recKey,greenSet,blueSet,redSet)==='green');
+    var ok=(Object.keys(greenSet).length===c.greenMax
+         && Object.keys(blueSet).length<=c.blueMax
+         && order.length<=c.starMax
+         && recStaysGreen);
+    html+='<div class="summary">초록 '+Object.keys(greenSet).length+' · 파랑 '+Object.keys(blueSet).length
+        +' · 빨강 '+Object.keys(redSet).length+' · ⭐ <b>'+order.length+'마리</b> [<code>'+order.join(',')+'</code>]'
+        +' · 추천셀 '+s.green[0][0]+'-'+s.green[0][1]+'(급락겹침) → <b>'+cellCls(recKey,greenSet,blueSet,redSet)+'</b>'
+        +' → <span class="'+(ok?'pass':'fail')+'">'+(ok?'PASS':'FAIL')+'</span></div>';
     out.innerHTML+=html;
   });
 });

@@ -609,9 +609,10 @@
           var v = om[key];
           if (v > 0) {
             var bd = '';
-            if (dropMap[key] != null) bd = 'box-shadow:inset 0 0 0 2px #ef4444;';
-            else if (recSet[key]) bd = 'box-shadow:inset 0 0 0 2px #ffd24f;';
-            else if (role[nos[ri]] === 'fav' && role[nos[ci]] === 'fav') bd = 'box-shadow:inset 0 0 0 2px #38d39f;';
+            // [색상 우선순위 초록(추천)>파랑(유력)>빨강(급락)] 추천조합 항상 우선 — 급락이 추천/유력을 덮지 않음
+            if (recSet[key]) bd = 'box-shadow:inset 0 0 0 2px #22c55e;';                                       // 초록=추천(최우선)
+            else if (role[nos[ri]] === 'fav' && role[nos[ci]] === 'fav') bd = 'box-shadow:inset 0 0 0 2px #3b82f6;'; // 파랑=유력×유력
+            else if (dropMap[key] != null) bd = 'box-shadow:inset 0 0 0 2px #ef4444;';                         // 빨강=급락(추천/유력 아닌 셀만)
             var inv = (invSet[nos[ri]] || invSet[nos[ci]]) ? 'outline:2px solid ' + MX_COL.inv + ';outline-offset:-3px;' : '';
             var cell = mk('span', cellBase('color:#e2e8f0;background:' + mxHeat(v, lo, hi) + ';' + bd + inv), v + (dropMap[key] != null ? '▼' : ''));
             cell.title = nos[ri] + '-' + nos[ci] + ' = ' + v + '배' + (dropMap[key] != null ? ' · 급락 ' + dropMap[key] + '%' : '') + (recSet[key] ? ' · 추천' : '');
@@ -624,7 +625,7 @@
       wrap.appendChild(grid);
       // 범례
       wrap.appendChild(mk('div', 'font-size:9px;color:#94a3b8;margin-top:3px',
-        '⭐유력 · 🟣복병 · ❌제거 · 역배열(노랑테) · ▼급락(빨강테) · 추천(금색테)'));
+        '추천(초록테) · 유력×유력(파랑테) · ▼급락(빨강테) · ⭐유력 · 🟣복병 · ❌제거 · 역배열(노랑테)'));
       return wrap;
     }
 
@@ -801,24 +802,13 @@
         if (c.length === 2 && (dd.pct || 0) <= -20) dropMap[ckey(c[0], c[1])] = Math.round(dd.pct);
       });
 
-      // [오버레이 강조 종목별·두수별 제한] 색상우선 초록(추천)>파랑(유력)>빨강(급락). 추천조합 항상 우선, 빨강은 초록/파랑 아닌 셀만.
-      //   경륜(cycle/boat/bike): 두수무관 초록1·파랑3·⭐3.  경마(horse): 두수별.  ⚠ 복승 추천 리스트(패널)는 불변 — 배당판 시각강조만.
-      //   출전 두수 = 실제 출주마 수(헤더 마번 수). 헤더 ⭐ = 초록+파랑 셀에 등장하는 말번호만(상한 내).
+      // [오버레이 강조 두수별 제한] 색상우선 초록(추천)>파랑(유력)>빨강(급락). 추천조합 항상 우선, 빨강은 초록/파랑 아닌 셀만.
+      //   초록=딱 1개(최고 유력 조합). 파랑=6두↓2 / 7두3 / 8두↑4. ⭐=6두3 / 7두3 / 8두↑4(초록+파랑 셀 말만).
+      //   ⚠ 복승 추천 리스트(패널)는 불변 — 배당판 시각강조 개수만 제한. 출전 두수 = 실제 출주마 수(헤더 마번 수).
       var _boardN = (info.headerNos || []).length;
-      var _sportL = (d.sport || (d.corePicks && d.corePicks.sport) || '').toLowerCase();
-      var _smallField = (_sportL === 'cycle' || _sportL === 'boat' || _sportL === 'bike');   // 6~9명 종목=경륜기준
-      var greenMax, blueMax, starMax;
-      if (_smallField) {                       // 경륜 기준(두수 무관)
-        greenMax = 1; blueMax = 3; starMax = 3;
-      } else if (_boardN <= 9) {               // 경마 8~9마리
-        greenMax = 1; blueMax = 3; starMax = 3;
-      } else if (_boardN === 10) {             // 경마 10마리
-        greenMax = 1; blueMax = 4; starMax = 3;
-      } else if (_boardN <= 12) {              // 경마 11~12마리
-        greenMax = 2; blueMax = 4; starMax = 4;
-      } else {                                 // 경마 13~18마리
-        greenMax = 2; blueMax = 6; starMax = 5;
-      }
+      var greenMax = 1;                                                   // 초록 = 딱 1개
+      var blueMax = (_boardN <= 6) ? 2 : (_boardN === 7 ? 3 : 4);          // 파랑 = 6두↓2 / 7두3 / 8두↑4
+      var starMax = (_boardN <= 6) ? 3 : (_boardN === 7 ? 3 : 4);          // ⭐ = 6두3 / 7두3 / 8두↑4
 
       // [3번 초록·추천] 복승 추천 조합(finalQuinellas) 중 최고 유력 1개(greenMax)만
       var greenSet = {}, gN = 0;
@@ -893,8 +883,8 @@
         boardItems.push({ el: cell.el, span: span });
       });
 
-      // [헤더 ⭐ = 초록+파랑 셀에 등장하는 말번호만] 우선순위: 초록(추천조합)→파랑(유력조합), starMax개 상한.
-      //   경륜3 / 경마 8~10=3·11~12=4·13~18=5. ❌제거마는 상한 밖(항상 유지). 스마트머니/역배열은 유력 셀에 들면 ⭐로 커버.
+      // [헤더 ⭐ = 초록+파랑 셀에 등장하는 말번호만] 우선순위: 초록(추천조합)→파랑(유력조합), starMax개 상한(6두3/7두3/8두↑4).
+      //   ❌제거마는 상한 밖(항상 유지). 스마트머니/역배열은 유력 셀에 들면 ⭐로 커버.
       var _emph = {}, _emphN = 0;
       function _addStar(nn) {
         nn = +nn;
