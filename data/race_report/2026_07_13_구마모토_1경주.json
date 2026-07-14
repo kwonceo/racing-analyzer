@@ -16,7 +16,7 @@
   "signal_7": {
    "horse": 7,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -32,7 +32,7 @@
   "signal_2": {
    "horse": 2,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -42,7 +42,7 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": null,
-   "confidence": 25.0,
+   "confidence": null,
    "reason": "일반"
   },
   "signal_4": {
@@ -60,49 +60,11 @@
    "record_score": null,
    "confidence": null,
    "reason": "일반"
-  },
-  "signal_1": {
-   "horse": 1,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_3": {
-   "horse": 3,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
   }
  },
- "recommended_horses": [
-  2,
-  7,
-  1,
-  3
- ],
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 7번 전적 정보 제한",
-  "2. 배당 수집 시작 08:35:06",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -114,22 +76,16 @@
   "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "복승불일치_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
   "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
-  "inverseHorses": [
-   2
-  ],
-  "inverseHit": [
-   2
-  ],
-  "confidence": 25.0,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
   "reason": "적중"
  },
  "signal_change_history": {
@@ -147,5 +103,5 @@
  },
  "pnl": 400,
  "stake": 1000,
- "generated_at": "2026-07-13 08:35:39"
+ "generated_at": "2026-07-13 21:12:28"
 }

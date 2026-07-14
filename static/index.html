@@ -409,6 +409,20 @@
         </div>
       </div>
 
+      <!-- [수동 추천 저장] 라이브 배당 미수집 경주(예: 일부 경륜)에도 전문가 사전추천을 저장 → 결과 입력 시 자동 판정 -->
+      <div class="panel-card" id="manualRecCard">
+        <h2 style="margin:0">📝 수동 추천 저장 <span class="hint" style="font-weight:400;font-size:12px">라이브 배당 없어도 전문가 추천을 기록</span></h2>
+        <p class="hint">배당이 수집 안 된 경주에도 복승/삼복승 추천을 저장하면, 나중에 결과를 입력할 때 자동으로 적중 판정됩니다.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:8px">
+          <label class="hint">경주(raceKey)<br><input id="mrRaceKey" class="cfg-input" type="text" placeholder="예: 우쓰노미야 1경주" style="width:170px"></label>
+          <label class="hint">복승 조합(쉼표/줄바꿈)<br><input id="mrQuinella" class="cfg-input" type="text" placeholder="3+4, 3+7, 4+7" style="width:190px"></label>
+          <label class="hint">삼복승 보험(최대 2)<br><input id="mrTrifecta" class="cfg-input" type="text" placeholder="3+4+7, 3+5+7" style="width:170px"></label>
+          <label class="hint">메모(선택)<br><input id="mrNote" class="cfg-input" type="text" placeholder="근거 메모" style="width:150px"></label>
+          <button id="mrSave" class="btn btn-small">💾 추천 저장</button>
+        </div>
+        <div id="mrMsg" class="hint" style="margin-top:6px"></div>
+      </div>
+
       <!-- 3. 서브탭: 복기 / 일괄등록 / 명예의전당 / 리포트 -->
       <div class="panel-card">
         <div class="subtab-bar" id="resultSubtabs">

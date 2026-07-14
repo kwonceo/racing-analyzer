@@ -70,8 +70,11 @@
         // [탭분리] 경정/경륜/바이크/중앙경마 탭 → 라이브 배당 폴링 시작 + 마지막 분석 즉시 반영
         if (['boat', 'cycle', 'bike', 'central'].includes(btn.dataset.tab)) {
           startJapanOddsWatch();
+          startSportOddsWatch();   // [화면 복구] 각 종목 배당 독립 폴링 → sportReport-* 실시간 렌더(경마 경주 없어도 표시)
           if (_lastSportAnalyze) mirrorSportAnalysis(_lastSportAnalyze);
           loadSportRecords(btn.dataset.tab);   // [분석기록] 이 종목 과거 분석 기록
+        } else {
+          stopSportOddsWatch();   // 종목 탭 이탈 시 폴링 중단(자원 절약)
         }
       });
     });
@@ -843,6 +846,34 @@
         if (open) { try { renderResultForm(); } catch (_) { /* */ } }   // 펼칠 때 최신 렌더
       });
     }
+    // [수동 추천 저장] 라이브 배당 미수집 경주에도 전문가 추천 저장 → 결과 입력 시 자동 판정(_wired 가드로 멱등)
+    const mr = document.getElementById('mrSave');
+    if (mr && !mr._wired) {
+      mr._wired = true;
+      mr.addEventListener('click', async () => {
+        const msg = document.getElementById('mrMsg');
+        const rk = (document.getElementById('mrRaceKey').value || '').trim();
+        if (!rk) { if (msg) { msg.style.color = '#f87171'; msg.textContent = '경주(raceKey)를 입력하세요.'; } return; }
+        // "3+4, 3+7\n4+7" → ['3+4','3+7','4+7']
+        const parse = (sel) => (document.getElementById(sel).value || '').split(/[,\n]+/).map((s) => s.trim()).filter(Boolean);
+        const quinella = parse('mrQuinella');
+        const trifecta = parse('mrTrifecta');
+        if (!quinella.length && !trifecta.length) { if (msg) { msg.style.color = '#f87171'; msg.textContent = '복승 또는 삼복승 조합을 최소 1개 입력하세요.'; } return; }
+        if (msg) { msg.style.color = ''; msg.textContent = '저장 중…'; }
+        try {
+          const d = await (await fetch('/api/recommend/manual', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ raceKey: rk, quinella, trifecta, note: document.getElementById('mrNote').value || '' }),
+          })).json();
+          if (d.error) { if (msg) { msg.style.color = '#f87171'; msg.textContent = d.error; } return; }
+          const sv = d.saved || {};
+          if (msg) {
+            msg.style.color = '#38d39f';
+            msg.textContent = `✅ 저장 완료 — 복승 ${(sv.quinella || []).length}개 · 삼복승 ${(sv.trifecta || []).length}개. 결과 입력 시 자동 판정됩니다.`;
+          }
+        } catch (e) { if (msg) { msg.style.color = '#f87171'; msg.textContent = String(e.message || e); } }
+      });
+    }
   }
 
   // ══════════ [2번-방법3] 순서대로 빠른 입력 (경주 시간순 나열 → 1~3착만 입력) ══════════
@@ -912,7 +943,10 @@
     if (d.error) { if (stat) stat.innerHTML = `<span class="err">${esc(d.error)}</span>`; return; }
     const rec = d.record || {};
     const hit = rec.was_hit;
-    if (stat) stat.innerHTML = hit ? '<span style="color:#38d39f;font-weight:700">✅ 적중</span>' : '<span style="color:#f87171;font-weight:700">❌ 미적중</span>';
+    // [유력마 적중 병행 노출] 정확 복승/삼복승(quinella_hit)과 별개로, 유력마 2/3 입상 시 참고 배지 병행 표시(손익·기존통계 불변).
+    const khHit = rec.keyhorse_quinella_hit || rec.keyhorse_trifecta_hit;
+    const khTxt = khHit ? ` <span style="color:#fbbf24;font-weight:600" title="유력마 상위3 중 2마리+ 입상 — 참고 지표(정확 복승/삼복승 판정·손익과 별개)">🔶 유력마 적중(참고)</span>` : '';
+    if (stat) stat.innerHTML = (hit ? '<span style="color:#38d39f;font-weight:700">✅ 적중</span>' : '<span style="color:#f87171;font-weight:700">❌ 미적중</span>') + khTxt;
     // [복기 통합] 적중/미적중 모두 복기 리포트 자동 표시(적중=왜 맞았는지 / 미적중=왜 놓쳤는지)
     showFailureReport(rk);
     try { loadLearningStats(); } catch (_) { /* */ }
@@ -1536,6 +1570,7 @@
     const activeBtn = document.querySelector('.tab-btn.active');
     const tab = activeBtn ? activeBtn.dataset.tab : '';
     if (tab === 'jp') { try { pollJapanOdds(); } catch (_) { /* */ } return; }
+    if (['boat', 'cycle', 'bike', 'central'].includes(tab)) { try { pollSportOdds(); } catch (_) { /* */ } return; }   // [복구] 종목 탭 경주 변경·수동 새로고침 즉시 반영
     try { autoSelectKoreaRace(rk); } catch (_) { /* */ }
   }
 
@@ -4348,9 +4383,14 @@
       if (rv) {
         const yn = (b) => (b ? '<span style="color:#38d39f">✅ 적중</span>' : '<span style="color:#f87171">❌ 미적중</span>');
         const sc = rv.signal_correct || [];
+        // [유력마 적중 병행 노출] 정확 복승/삼복승 판정과 별개로 유력마 2/3 입상 참고 지표를 함께 표시(손익·기존통계 불변).
+        const khLine = (rv.keyhorse_quinella_hit || rv.keyhorse_trifecta_hit)
+          ? `<div style="margin-top:4px;color:#fbbf24">🔶 유력마 기반 적중(참고): 복승 ${rv.keyhorse_quinella_hit ? '✅' : '—'} · 삼복승 ${rv.keyhorse_trifecta_hit ? '✅' : '—'}${(rv.keyhorse_placed || []).length ? ` <span class="hint">입상 유력마 ${(rv.keyhorse_placed || []).join('·')}</span>` : ''}</div>`
+          : '';
         judge = `<div style="margin-top:6px">
           <div>복승 추천: ${yn(rv.quinella_hit)}${rv.payouts && rv.payouts.quinella ? ` <span class="hint">${rv.payouts.quinella}배</span>` : ''}</div>
           <div>삼복승 추천: ${yn(rv.trifecta_hit)}${rv.payouts && rv.payouts.trifecta ? ` <span class="hint">${rv.payouts.trifecta}배</span>` : ''}</div>
+          ${khLine}
           <div>제거법: ${yn(rv.elimination_correct)}</div>
           <div>전적 유력마: ${yn(rv.form_pick_hit)}${rv.form_pick != null ? ` <span class="hint">(${rv.form_pick}번)</span>` : ''}</div>
           <div style="margin-top:4px"><b>이상감지가 맞았나?</b> ${rv.anomaly_was_correct ? '<span style="color:#38d39f">✅ 예 — 급락 신호가 입상마를 예측</span>' : '<span style="color:#f87171">❌ 아니오</span>'}</div>
@@ -5888,6 +5928,40 @@
       el.innerHTML = sportAnalysisHTML(a, '#sportBudget-' + tab);
     }
   }
+
+  // [탭분리·화면 복구] 경륜/경정/바이크 탭은 일본경마(sport=horse) 폴링과 독립적으로 각 종목 배당을 직접 조회해
+  //   실시간 이상감지·유력마·복병·추천·타임라인을 sportReport-<탭>에 렌더한다.
+  //   ⚠ sport=horse 격리(종목 혼재 방지) 이후, mirrorSportAnalysis 를 부르던 유일 경로(pollJapanOdds)가
+  //     경마 경주 없으면 조기 return 하여 경륜/경정/바이크 탭이 플레이스홀더로 비던 문제 복구.
+  //   각 탭이 자기 sport 만 조회 + category 일치 확인하므로 종목 혼재는 재발하지 않는다(기존 격리 원칙 유지).
+  const _SPORT_POLL_LIST = [
+    { sport: 'cycle', cat: 'cycle' },
+    { sport: 'boat', cat: 'boat' },
+    { sport: 'bike', cat: 'bike' },
+  ];
+  let _sportOddsTimer = null;
+  async function pollSportOdds() {
+    for (const s of _SPORT_POLL_LIST) {
+      try {
+        const latest = await (await fetch('/api/odds/triple/latest?sport=' + s.sport)).json();
+        if (!latest || latest.noRace || latest.stale || !latest.raceKey) continue;   // 개최 없음·끝난 경주 스킵
+        const a = await (await fetch('/api/odds/triple/analyze', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ raceKey: latest.raceKey, sport: s.sport }),
+        })).json();
+        if (!a || a.error || a.waiting) continue;
+        if (a.raceKey && a.raceKey !== latest.raceKey) continue;   // 직전 경주 잔존 방어
+        if (a.category && a.category !== s.cat) continue;          // 종목 일치만 렌더(혼재 방지)
+        mirrorSportAnalysis(a);
+      } catch (_) { /* 개별 종목 실패는 조용히 건너뜀(다른 종목 영향 없음) */ }
+    }
+  }
+  function stopSportOddsWatch() { if (_sportOddsTimer) { clearInterval(_sportOddsTimer); _sportOddsTimer = null; } }
+  function startSportOddsWatch() {
+    stopSportOddsWatch();
+    pollSportOdds();                                    // 진입 즉시 1회
+    _sportOddsTimer = setInterval(pollSportOdds, 30000);   // 30초 폴링(확장 주기와 정렬)
+  }
   // 순수 렌더 헬퍼만 조합(사이드이펙트 없는 문자열 반환) → 스포츠 탭 컨테이너에 안전하게 주입.
   // [💎 중고배당 유력마·2번] 감지 시 상단 강조 배너 + 소리/깜빡임(경고음과 다른 소리·경주당 1회).
   let _midHighAlerted = {};
@@ -6130,16 +6204,27 @@
     }
     if (!fq.length) return '';
     const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번${cp.confTop1High ? ' 🔺고배당' : ''}</span>` : '';
-    const qLines = fq.slice(0, 2).map((q) => {
-      const oo = q.odds != null ? `<span class="hint" style="font-size:14px">(${q.odds}배)</span>` : '';
-      return `<div style="font-size:21px;font-weight:800;margin:5px 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}</div>`;
+    // [근거 기반 추천·두수별 개수] ★등급(★★★ 이중수렴/★★ 단일강신호/★ 참고) + 근거 + N두·복승개수 헤더
+    const starStr = (n) => '★'.repeat(Math.max(0, Math.min(3, n || 0)));
+    const nH = cp.raceHorseCount || 0;
+    const maxQ = cp.quinellaMax || fq.length;
+    const chaoticTag = cp.chaoticRace ? ' <span style="color:#fbbf24">· ⚠️ 혼전(+2)</span>' : '';
+    const cntHead = nH ? `<div class="hint" style="font-size:12px;margin-bottom:4px">${nH}두 경주 · 복승 ${fq.length}개 추천 <span style="opacity:.7">(상한 ${maxQ})</span>${chaoticTag}</div>` : '';
+    // [두수별 개수] 서버가 이미 상한(3~8)으로 캡 → 전부 표시(구데이터 폴백은 2개)
+    const qLines = fq.map((q) => {
+      const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(${q.odds}배)</span>` : '';
+      const st = q.stars ? ` <span style="color:#fbbf24;font-size:14px">${starStr(q.stars)}</span>` : '';
+      const rs = q.reason ? ` <span class="hint" style="font-size:12px">· ${esc(q.reason)}</span>` : '';
+      return `<div style="font-size:19px;font-weight:800;margin:5px 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>`;
     }).join('');
     const tLines = ft.slice(0, 2).map((t) => {
-      const oo = t.odds != null ? `<span class="hint" style="font-size:14px">(${t.odds}배)</span>` : '';
-      return `<div style="font-size:21px;font-weight:800;margin:5px 0">삼복승: <span style="color:#c084fc">${t.combo.join('+')}</span> ${oo}</div>`;
+      const oo = t.odds != null ? `<span class="hint" style="font-size:13px">(${t.odds}배)</span>` : '';
+      const rs = t.reason ? ` <span class="hint" style="font-size:12px">· ${esc(t.reason)}</span>` : '';
+      return `<div style="font-size:18px;font-weight:800;margin:5px 0">🛡 삼복승 보험: <span style="color:#c084fc">${t.combo.join('+')}</span> ${oo}${rs}</div>`;
     }).join('');
     return `<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
-      <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(딱 이것만)</span> ${confHead}</div>
+      <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(근거 기반)</span> ${confHead}</div>
+      ${cntHead}
       ${qLines}
       ${tLines}
     </div>`;
@@ -6185,6 +6270,7 @@
     parts.push(renderCrossReversal(a));
     parts.push(renderIntegratedGrades(a));
     parts.push(renderJapanSignals(a.signals));
+    parts.push(renderSignalTimeline(a.signalTimeline));   // [복구·요청] 신호 타임라인(집중급락 말 변경·안정화 이력) 종목 뷰에도 표시
     // [경륜/경정 근거 표시] 일본경마 뷰에만 있던 '왜 추천했는지' 근거 카드·패턴매칭을 6명 종목 뷰에도 추가.
     //   경륜은 전적이 없어 배당(급락·쌍승역전·연속하락)·이상감지 기반 근거가 표시된다.
     parts.push(renderPatternMatch(a.patternMatch));
