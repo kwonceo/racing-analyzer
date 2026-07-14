@@ -6140,7 +6140,7 @@ def _quinella_target(n_horses, chaotic=False):
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                  reversal_quinellas=None, dark_quinellas=None, signal_horses=None, sig_meta=None, sport=None):
     """[추천 구조 개편·종목별 저배당+신호=메인 / 고배당+강신호=BMED특별] 파생 추천을 새 구조로 정리(기존 후보수집·파생필드 무삭제).
-      ▸ 메인 추천(★★★) = 종목별 저배당(경륜 5배↓·경마 10배↓·경정 7배↓) AND 급락·역배열·스마트머니 신호 1개+. 배당 낮은순·개수=max_q.
+      ▸ 메인 추천(★★★) = 종목별 저배당(경륜 5배↓·경정 7배↓·경마 두수별 8~9두 10배↓·10~12두 15배↓·13~18두 20배↓) AND 급락·역배열·스마트머니 신호 1개+. 배당 낮은순·개수=max_q.
       ▸ BMED 특별 감지(★★, 별도 💎) = 종목별 고배당(경륜 10배↑·경마 20배↑·경정 15배↑, 50배 이하) AND 강신호(signalScore 70+ OR 급락15%+ OR 스마트머니+역배열 동시). signalScore 높은순·최대 2개.
       ▸ 제외 = BMED 신호 없는 저배당 · 배당 50배 초과 · 종목별 저/고 사이 구간(신호만으로 부족).
       sig_meta: {no:{drop(pct·음수),rev,smart,dark,anomaly,score}} — 조합 근거문장·신호강도 판정용. 미제공/신호전무 시 기존 랭킹(호환).
@@ -6203,7 +6203,24 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     elif _sp in ("cycle", "bike"):
         MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 5.0, 10.0
     else:                                             # horse(경마)·기타
-        MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 10.0, 20.0
+        # [두수별 저배당 기준 완화] 두수 많을수록 배당↑ → 상대적 저배당 상향(12두면 15배도 저배당).
+        #   8~9두=10배↓(유지) · 10~12두=15배↓ · 13~18두=20배↓. 신호 동시 조건은 유지(근거 없는 저배당은 여전히 제외).
+        _nh_main = len(vs)
+        if _nh_main <= 0 and curQ:                      # [폴백] valid_nos 유실 시 배당판 조합에서 실제 출주 두수 복원
+            _hset = set()
+            for (_ha, _hb) in curQ.keys():
+                try:
+                    _hset.add(int(_ha)); _hset.add(int(_hb))
+                except Exception:
+                    pass
+            _nh_main = len(_hset)
+        if _nh_main >= 13:
+            MAIN_ODDS_MAX = 20.0
+        elif _nh_main >= 10:
+            MAIN_ODDS_MAX = 15.0
+        else:
+            MAIN_ODDS_MAX = 10.0
+        SPECIAL_ODDS_MIN = 20.0
     SPECIAL_ODDS_MAX = 50.0       # 특별 상한(50배 초과 제외·근거 약함)
     DROP_STRONG_PCT = 15.0        # 강신호: 급락 15%+
     SCORE_STRONG = 70             # 강신호: signalScore 70+
@@ -6275,6 +6292,30 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
             if m.get("rev"):
                 has_rev = True
         return has_smart and has_rev
+
+    # [저배당 미충족 보완·큰 두수] 시장 저배당(≤MAIN_ODDS_MAX)+신호 포함 조합을 메인 후보에 추가.
+    #   기존 후보=시장 '최저 1개'만 담아 12두+ 큰 두수에서 메인이 상한(4)을 못 채우던 문제 → 저배당+신호 조합 전부 후보화.
+    #   ⚠ 신호 없는 저배당은 여전히 제외(_combo_has_signal 게이트 유지) · 메인은 배당 낮은순 max_q 로 캡되어 과다 없음.
+    if curQ and meta:
+        _seen_pairs = set(tuple(sorted(int(x) for x in (c.get("combo") or []))) for c in q_cands if len(c.get("combo") or []) == 2)
+        _extra = []
+        for (_ea, _eb), _eo in curQ.items():
+            try:
+                _ea, _eb, _eo = int(_ea), int(_eb), float(_eo)
+            except Exception:
+                continue
+            if _ea == _eb or _eo <= 0 or _eo > MAIN_ODDS_MAX:
+                continue
+            if vs and (_ea not in vs or _eb not in vs):
+                continue
+            _pc = tuple(sorted((_ea, _eb)))
+            if _pc in _seen_pairs or not _combo_has_signal(list(_pc)):
+                continue
+            _seen_pairs.add(_pc)
+            _extra.append({"combo": list(_pc), "odds": _eo, "reason": "시장 저배당+신호",
+                           "stars": 3, "protected": False, "src": "lowsig"})
+        _extra.sort(key=lambda x: x["odds"])
+        q_cands.extend(_extra)
 
     final_q, special_q, seen_q = [], [], set()
     if not meta or not sig:
