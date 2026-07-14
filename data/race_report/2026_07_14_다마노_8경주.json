@@ -23,11 +23,11 @@
    "grade": null,
    "rep_combo": null,
    "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
+   "exacta_reversal": true,
+   "reversal_ratio": 0.185,
    "record_score": 107.1,
-   "confidence": 32.0,
-   "reason": "전적상위"
+   "confidence": 12.0,
+   "reason": "쌍승역전"
   },
   "signal_3": {
    "horse": 3,
@@ -39,43 +39,27 @@
    "grade": null,
    "rep_combo": null,
    "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
+   "exacta_reversal": true,
+   "reversal_ratio": 0.551,
    "record_score": 104.5,
-   "confidence": 48.0,
-   "reason": "전적상위"
+   "confidence": 0.0,
+   "reason": "쌍승역전"
   },
   "signal_7": {
    "horse": 7,
    "placed": true,
-   "recommended": false,
+   "recommended": true,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
    "rep_combo": null,
    "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
+   "exacta_reversal": true,
+   "reversal_ratio": 0.378,
    "record_score": 104.8,
-   "confidence": 8.0,
-   "reason": "전적상위"
-  },
-  "signal_1": {
-   "horse": 1,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 105.2,
-   "confidence": 18.0,
-   "reason": "전적상위"
+   "confidence": 59.0,
+   "reason": "쌍승역전"
   },
   "signal_2": {
    "horse": 2,
@@ -92,47 +76,76 @@
    "record_score": 110.0,
    "confidence": 8.0,
    "reason": "전적상위"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.419,
+   "record_score": 105.2,
+   "confidence": 27.0,
+   "reason": "쌍승역전"
   }
  },
  "recommended_horses": [
-  1,
-  5,
   2,
-  3
+  5,
+  7,
+  3,
+  1
  ],
  "recommendation_process": [
   "1. 전적 분석: 5번 107.1점",
   "2. 배당 수집 시작 13:44:50",
-  "5. 종합 신뢰도 32.0점(하) 판정"
+  "4. 쌍승 역전: 5→2(2.9) < 2→5(15.7) → 5번 실질 상위 신호",
+  "4. 쌍승 역전: 7→2(10.9) < 2→7(28.8) → 7번 실질 상위 신호",
+  "5. 종합 신뢰도 12.0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 5,
   "excess_drop_score": 0,
-  "exacta_reversal_score": 0,
-  "quinella_mismatch_score": 0,
+  "exacta_reversal_score": 35,
+  "quinella_mismatch_score": 25,
   "record_score": 107.1,
-  "total": 32.0,
+  "total": 12.0,
   "grade": "하"
  },
- "win_tags": [],
- "combo_tags": false,
+ "win_tags": [
+  "쌍승역전_적중",
+  "복승불일치_적중"
+ ],
+ "combo_tags": true,
  "hit_basis": {
   "formScore": 107.1,
   "dropAmt": null,
   "dropScore": 0.0,
-  "inverse": false,
+  "inverse": true,
   "inverseHorses": [
-   1
+   5,
+   7,
+   3
   ],
-  "inverseHit": [],
-  "confidence": 48.0,
-  "reason": "추천 미적중"
+  "inverseHit": [
+   5,
+   7,
+   3
+  ],
+  "confidence": 59.0,
+  "reason": "역배열 감지말 5·7·3번 입상"
  },
  "signal_change_history": {
   "changes": [],
   "confirmed": [],
   "candidates": [
    1,
+   2,
    5
   ],
   "events": {
@@ -165,17 +178,32 @@
      "time": "13:46:48",
      "minutes_before": 6
     }
+   },
+   "2": {
+    "first": {
+     "time": "13:47:14",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "13:47:14",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "13:47:15",
+     "minutes_before": null
+    }
    }
   },
-  "finalSignal": 5,
+  "finalSignal": 2,
   "finalConfirmed": false,
   "excluded": {
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 6
+  "validCount": 11
  },
  "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-14 13:47:02"
+ "generated_at": "2026-07-14 13:48:51"
 }

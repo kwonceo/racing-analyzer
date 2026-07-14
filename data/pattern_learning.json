@@ -2125,26 +2125,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 120,
-    "hit": 84,
+    "count": 121,
+    "hit": 85,
     "cases": [
-      {
-        "race": "기후 4경주",
-        "date": "2026-07-11",
-        "smart_horses": [
-          6,
-          1,
-          3,
-          4
-        ],
-        "placed": [
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "마에바시 6경주",
         "date": "2026-07-11",
@@ -3708,9 +3691,25 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "다마노 8경주",
+        "date": "2026-07-14",
+        "smart_horses": [
+          2,
+          1,
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 70.0,
+    "rate": 70.2,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
