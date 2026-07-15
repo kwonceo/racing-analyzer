@@ -16004,7 +16004,10 @@ def keiba_starters():
 #   ⚠ 기존 Chrome 확장(한국경마 배당) 수집은 폴백으로 그대로 유지. KRA는 '추가 소스'.
 #   키: .env KRA_API_KEY(gitignore·커밋 금지). 30초 자동수집(watch 등록 경주만).
 #   승식코드: WIN=단승·PLC=연승·QPL=복연승·QNL=복승·EXA=쌍승·TLA=삼복승·TRI=삼쌍승.
-KRA_API_BASE = "https://apis.data.go.kr/B551015/API160_1"
+#   [엔드포인트 교정 2026-07·라이브 검증] 오퍼레이션 integratedInfo_1 이 실제 경로(base만 호출 시 HTTP 500).
+#   응답 실측 필드: chulNo/chulNo2/chulNo3(마번)·odds(배당)·pool(한글 승식명)·meet·rcDate·rcNo.
+#   필터 파라미터는 rc_date/rc_no(스네이크)가 정상 필터(캐멀 rcDate/rcNo 는 필터 무시로 전 경주 반환).
+KRA_API_BASE = "https://apis.data.go.kr/B551015/API160_1/integratedInfo_1"
 KRA_MEET_NAME = {"1": "서울", "2": "제주", "3": "부산경남"}
 KRA_MEET_CODE = {"서울": "1", "제주": "2", "부산": "3", "부경": "3", "부산경남": "3", "경남": "3"}
 _KRA_WATCH = {}          # {raceKey: {"meet","rc_date","rc_no","t"}} 30초 자동수집 대상
@@ -16026,9 +16029,11 @@ def _kra_meet_code(venue):
     return KRA_MEET_CODE.get(v) or KRA_MEET_CODE.get(v.replace("경마공원", "").strip())
 
 
-def _kra_fetch(meet, rc_date, rc_no, num_rows=300):
-    """API160_1 호출 → (items[list], meta[dict], err[str|None]). read-only 조회.
-    응답은 표준 data.go.kr 구조 response.body.items.item(단일이면 dict) 가정."""
+def _kra_fetch(meet, rc_date, rc_no, num_rows=1500):
+    """API160_1/integratedInfo_1 호출 → (items[list], meta[dict], err[str|None]). read-only 조회.
+    응답은 표준 data.go.kr 구조 response.body.items.item(단일이면 dict) 가정.
+    ⚠ 한 경주에 단승/연승/복승/쌍승/복연승/삼복승 전 승식이 한 번에 나와(11두=약 1397건),
+      삼복승(C(n,3))까지 완전 수신하려면 numOfRows 를 넉넉히(기본 1500) — 300이면 삼복승이 잘림."""
     key = _kra_api_key()
     if not key:
         return [], {}, "KRA_API_KEY 미설정(.env 확인)"
@@ -16097,15 +16102,28 @@ def _kra_parse_items(items):
             continue
         code = (_kra_g(it, "bettype", "betType", "ssMark", "ss_mark", "ssFlag", "ss_flag", "winFlag") or "")
         code = str(code).upper()
+        pool = str(_kra_g(it, "pool", "ssName", "ss_name") or "")   # [integratedInfo_1] 한글 승식명(단승식/복승식/쌍승식…)
         n1 = _kra_int(_kra_g(it, "chulNo1", "chulNo", "hrNo1", "hrNo", "no1", "no"))
         n2 = _kra_int(_kra_g(it, "chulNo2", "hrNo2", "no2"))
         n3 = _kra_int(_kra_g(it, "chulNo3", "hrNo3", "no3"))
         od = _kra_num(_kra_g(it, "divRate", "divideRate", "odds", "rcOdds", "winOdds",
                              "expectOdds", "payRate", "drwtRate"))
         nums = [n for n in (n1, n2, n3) if n]
-        # 승식 판별: 코드 우선, 없으면 마번 개수
+        # 승식 판별: [integratedInfo_1] pool(한글 승식명) 우선 → 코드 → 마번 개수 순.
+        #   ⚠ 연승식·복연승식·삼쌍승식은 파이프라인(단승/복승/쌍승/삼복승)에 없어 제외 —
+        #     이를 win/quinella 로 잘못 담으면 단승·복승 배당이 오염되므로 kind=None 으로 스킵.
         kind = None
-        if code in ("WIN",) or (not code and len(nums) == 1):
+        if pool:
+            if "삼복" in pool:
+                kind = "trio"                        # 삼복승식
+            elif "쌍승" in pool and "삼" not in pool:
+                kind = "exacta"                      # 쌍승식(1착→2착)
+            elif "복승" in pool:
+                kind = "quinella"                    # 복승식(1·2착)
+            elif "단승" in pool:
+                kind = "win"                         # 단승식
+            # 그 외(연승식·복연승식·삼쌍승식 등)는 kind=None → 스킵(오염 방지)
+        elif code in ("WIN",) or (not code and len(nums) == 1):
             kind = "win"
         elif code in ("QNL", "QPL") or (not code and len(nums) == 2 and code not in ("EXA",)):
             kind = "quinella"
