@@ -18512,7 +18512,10 @@ def _multi_collect_one(track, race, ymd):
         #   의존해, 둘 다 꺼지면 '배당 수집 안 됨'으로 보이던 문제 해결. 확장 ingest 와 동일 파이프라인(같은
         #   raceKey 병합·중복 아님)이고 sport 분리 필터가 탭 혼재를 막는다(무삭제·multi_store 경로 유지).
         try:
-            _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category, source="oddspark_bg")
+            # [자동전환·마감판정] 발주시각(postEpoch) 전달 → analyze 의 minutesBefore/afterClose 가 채워져
+            #   프론트 '경주 종료' 판정(_raceFinished)·자동예상 T-5분 타이밍이 정확해짐(기존엔 deadline 미전달로 None).
+            _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category,
+                              source="oddspark_bg", deadline=race.get("postEpoch"))
         except Exception as _be:
             print("[다중경주] triple_store 브리지 실패(무시·multi_store 는 정상):", _be)
         # [경륜 전적 자동 수집] 다중 경주 경륜 배당 수집 시 전적도 함께(1회·통합등급 반영)

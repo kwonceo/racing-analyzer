@@ -1453,6 +1453,7 @@
   //  분석기는 이 바에서 (1) 새로고침 버튼으로 즉시, (2) 30초마다 자동으로 최신 경주를 조회해
   //  상단에 "제주 3경주" 처럼 표시하고, 경주가 바뀌면 화면을 자동 갱신한다. (기존 기능은 유지)
   let _rrTimer = null, _rrLastRk = null;
+  let _rrLastFinished = false;   // [자동전환] 현재 보던 경주가 종료됐는지(다른 경마장 전환 허용 게이트)
   // [경주 고정] 자동 전환 중단 상태(사용자가 보고 있는 경주 유지). localStorage로 새로고침에도 유지.
   let _racePinned = false;
   try { _racePinned = (localStorage.getItem('racePinned') === '1'); } catch (_) { /* */ }
@@ -1473,8 +1474,24 @@
     if (!_rrLastRk) return latestRk;                 // 최초 로드 = 최신 따름
     if (latestRk === _rrLastRk) return latestRk;
     if (_racePinned) return _rrLastRk;               // [2번] 고정 중 → 무조건 현재 경주 유지
-    if (_raceVenue(latestRk) !== _raceVenue(_rrLastRk)) return _rrLastRk;  // [3번] 다른 경마장 → 전환 안 함
-    return latestRk;                                 // 같은 경마장 다음 경주 → 전환 허용
+    // [3번] 다른 경마장 → 전환 안 함. 단 현재 경주가 이미 끝난 걸로 확인됐으면(_rrLastFinished) 전환 허용(끝난 경주 잔존 방지).
+    if (_raceVenue(latestRk) !== _raceVenue(_rrLastRk) && !_rrLastFinished) return _rrLastRk;
+    return latestRk;                                 // 같은 경마장 다음 경주 · 현재경주 종료 시 → 전환 허용
+  }
+
+  /** [자동전환 버그수정] 경주 종료 여부 판정(발주 후·데이터 없음/정리) — 다른 경마장 자동 전환 허용 조건.
+   *  동시개최(둘 다 라이브)면 false(혼재 방지 차단 유지) · 현재 경주가 끝났으면 true(다른 경마장 전환 허용). */
+  async function _raceFinished(rk) {
+    if (!rk) return true;
+    try {
+      const a = await (await fetch('/api/odds/triple/analyze', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }),
+      })).json();
+      if (!a || a.error || a.waiting) return true;                       // 데이터 없음/정리됨 = 종료
+      if (a.afterClose) return true;                                     // 발주(T-0) 이후
+      if (a.minutesBefore != null && a.minutesBefore < -1) return true;  // 마감 1분+ 경과
+      return false;                                                      // 아직 라이브(동시개최)
+    } catch (_) { return true; }                                        // 조회 실패 → 전환 막지 않음
   }
 
   /** [3번] 📌 현재 경주 고정 토글 — 자동 전환 on/off. 서버측 잠금(POST /api/race/pin)까지 반영. */
@@ -1541,6 +1558,7 @@
     state.jpTimeline = [];
     state.jpCurrentRk = null;                 // 현재 경주 기준 초기화
     _rrLastRk = null;
+    _rrLastFinished = false;                  // [자동전환] 종료 플래그 초기화
     try { resetAnomalyPanel(); } catch (_) { /* */ }   // [1번] 이상감지 누적 패널 완전 초기화(경주 전환)
     try { setJpOddsStatus('waiting'); } catch (_) { /* */ }
   }
@@ -1612,17 +1630,27 @@
     if (changed && _rrLastRk != null) {
       const prevVenue = _raceVenue(_rrLastRk), newVenue = _raceVenue(rk);
       if (prevVenue && newVenue && prevVenue !== newVenue) {
-        if (label) label.textContent = `${_rrLastRk}`;   // 현재 경마장 경주 유지
-        if (status) status.textContent = `🔀 다른 경마장 경주 감지(${rk}) — 전환하려면 새로고침(자동 혼재 방지)`;
-        return;                                        // 다른 경마장으로 자동 전환하지 않음
+        // [자동전환 버그수정] 다른 경마장이라도 '현재 보던 경주가 끝났으면' 전환 허용(끝난 경주에 멈추는 문제).
+        //   둘 다 라이브(동시개최)일 때만 혼재 방지로 차단 유지.
+        const oldLive = !(await _raceFinished(_rrLastRk));
+        if (oldLive) {
+          _rrLastFinished = false;
+          if (label) label.textContent = `${_rrLastRk}`;   // 현재 경마장 경주 유지(동시개최 혼재 방지)
+          if (status) status.textContent = `🔀 다른 경마장 경주 감지(${rk}) — 전환하려면 새로고침(동시개최 혼재 방지)`;
+          return;                                        // 동시 라이브 → 자동 전환하지 않음
+        }
+        _rrLastFinished = true;                          // 현재 경주 종료 확인 → _targetRaceKey 도 전환 허용
+        if (status) status.textContent = `🔄 이전 경주 종료 · 다른 경마장 새 경주로 자동 전환(${rk})`;
+        // (아래 공통 전환 코드로 진행)
       }
       if (label) label.textContent = rk;
-      // 같은 경마장 다음 경주 → 자동 초기화 + 새 경주 화면 전환(직전 경주 잔존 방지)
+      // 같은 경마장 다음 경주 · 이전 경주 종료 후 다른 경마장 → 자동 초기화 + 새 경주 화면 전환(직전 경주 잔존 방지)
       _rrLastRk = rk;
       hardResetRaceState();                           // [1번] 직전 경주 스냅샷·이상감지·타임라인·경고 초기화
       _rrLastRk = rk;                                 // hardReset이 null로 만든 값 복원(현재 경주로 고정)
+      _rrLastFinished = false;                         // 새 경주는 라이브 → 종료 플래그 초기화
       refreshActiveView(rk);                          // 새 경주 첫 수집을 기준값으로 자동 표시
-      if (status) status.textContent = '🔄 새 경주 자동 전환됨';
+      if (status && !status.textContent.startsWith('🔄 이전 경주 종료')) status.textContent = '🔄 새 경주 자동 전환됨';
       notify(`🔄 새 경주 자동 전환: ${rk}`, true);
       return;
     }
