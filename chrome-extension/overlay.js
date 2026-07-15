@@ -219,7 +219,7 @@
       return new Promise(function (resolve) {
         try {
           chrome.storage.local.get({ analyzeStatus: null, timerDeadline: 0, collectAlert: null, raceKey: '',
-            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null }, function (v) {
+            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null, autoFallback: null }, function (v) {
             resolve(v || {});
           });
         } catch (_) { resolve({}); }
@@ -1220,6 +1220,19 @@
           }
         } catch (_) { /* */ }
 
+        // [전체수집 자동폴백 표시] oddspark 미등록 경마장(소노다 등)에서 서버 배당이 없어 확장이 전체수집을
+        //   자동 실행 중이면 배너 표시(content.js 가 storage.autoFallback 에 기록). 40초 내 최근 상태만 표시.
+        try {
+          var _fb = st.autoFallback;
+          if (_fb && _fb.active && (Date.now() - (_fb.at || 0) < 40000)) {
+            var _fbRow = mk('div', 'margin:0 0 6px;padding:6px 9px;border-radius:7px;border:1px solid #f59e0b;background:rgba(245,158,11,.16)');
+            _fbRow.appendChild(mk('div', 'font-weight:800;font-size:12px;color:#fcd34d', '⚡ 전체수집 자동 실행 중...'));
+            _fbRow.appendChild(mk('div', 'font-weight:700;font-size:11px;color:#fde68a',
+              (_fb.raceKey || '') + ' · oddspark 미등록 → 배당판 직접 수집(수동 버튼 불필요)'));
+            panel.appendChild(_fbRow);
+          }
+        } catch (_) { /* */ }
+
         // [경주 전환 클리어] 배당판이 새 경주로 넘어갔는데(st.raceKey) 분석은 이전 경주(d.raceKey)면
         //   = 경주 전환 직후 → 이전 추천(corePicks·유력마·복병) 표시를 즉시 숨기고 "🔄 새 경주 분석 중..." 표시 +
         //   새 경주로 즉시 재분석 트리거. 분석 완료(analyzeStatus 갱신)되면 다음 렌더에서 새 결과가 표시됨.
@@ -1638,7 +1651,7 @@
           if (ch.overlayEnabled) { enabled = !!ch.overlayEnabled.newValue; render(); if (enabled) startOverlayAnalyzePoll(); }
           // [오버레이 표시 제어] 팝업 📊/🎯/⏱ 버튼 변경 시 즉시 재렌더
           if ((ch.ovShowMatrix || ch.ovShowPicks || ch.ovShowTimeline) && enabled && !killed) render();
-          if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline) && enabled && !killed) render();
+          if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline || ch.autoFallback) && enabled && !killed) render();
         } catch (_) { /* */ }
       });
       // [캡쳐 대비] 경주결과 캡쳐 순간 오버레이가 결과를 가리지 않게 잠깐 숨김(visibility만·상태 보존).

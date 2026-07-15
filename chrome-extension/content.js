@@ -2214,14 +2214,76 @@
       }
     } catch (_) { /* */ }
   }
+  // ── [전체수집 자동 폴백] oddspark 미등록 경마장(소노다 등) 자동수집 ───────────────────
+  //   문제: 서버 자동수집(_multi_bg_loop)은 oddspark 등록 경마장만 커버 → 소노다처럼 미등록 경마장은
+  //         서버가 배당을 못 가져와, 매 경주 [전체 자동 수집] 버튼을 수동으로 눌러야 배당이 수집됐다.
+  //   해결: 경주 전환 후 30초 내에 서버에 배당이 안 들어오면(analyze 404 waiting) 전체수집(collectTriple)을
+  //         자동 실행하고 30초마다 반복 → 배당이 들어오면(analyze OK) 자동 중단. 오버레이에 진행 표시.
+  //   안전: 커버 경마장(나고야 등)은 서버가 30초 내 배당 공급 → analyze OK → 폴백 미발동. 설령 발동돼도
+  //         서버 triple_ingest 의 oddspark 커버 가드(v2.1.106)가 확장 중복 전송을 스킵(꼬임 없음).
+  const _FB_WAIT_MS = 30000, _FB_REPEAT_MS = 30000;  // [2·4] 전환 후 30초 대기 + 이후 30초 반복
+  let _fbRk = '', _fbSince = 0, _fbLastTry = 0, _fbActive = false, _fbDoneRk = '';
+  function _setFallbackOverlay(active, rk) {
+    // 오버레이(overlay.js)가 읽어 "⚡ 전체수집 자동 실행 중..." 배너를 표시하도록 storage 에 상태 기록.
+    try { chrome.storage.local.set({ autoFallback: { active: !!active, raceKey: rk || '', at: Date.now() } }); } catch (_) { /* */ }
+  }
+  function _serverHasOddsFor(rk) {
+    // 서버 analyze 로 이 경주 배당 존재 여부 확인. res.ok=true → 배당 있음 / false → 없음(404 waiting) / null → 통신불명.
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: rk || '' }, function (res) {
+          if (chrome.runtime.lastError) { resolve(null); return; }
+          resolve(!!(res && res.ok && res.data));
+        });
+      } catch (_) { resolve(null); }
+    });
+  }
+  async function _autoFallbackWatch() {
+    try {
+      const { autoSend } = await getSettings();
+      if (!autoSend) { if (_fbActive) { _fbActive = false; _setFallbackOverlay(false, ''); } return; }  // 자동전송 OFF=수동 존중
+      let rk = '';
+      try { rk = extractRaceKey(); } catch (_) { rk = ''; }
+      if (!rk) { const s = await getSettings(); rk = (s.raceKey || '').trim(); }
+      if (!rk) return;
+      if (rk !== _fbRk) {                              // [1] 경주 전환 감지 → 30초 대기 타이머 리셋
+        _fbRk = rk; _fbSince = Date.now(); _fbLastTry = 0;
+        if (_fbActive) { _fbActive = false; _setFallbackOverlay(false, ''); }
+        return;
+      }
+      if (rk === _fbDoneRk) return;                    // 이미 배당 확인된 경주 → analyze 반복호출 생략(churn 방지)
+      const has = await _serverHasOddsFor(rk);
+      if (has === true) {                             // [5] 배당 들어옴 → 폴백 중단(분석은 오버레이 20초 폴이 담당)
+        _fbDoneRk = rk;
+        if (_fbActive) { _fbActive = false; _setFallbackOverlay(false, rk); console.log('[전체수집 자동폴백] ' + rk + ' 배당 수신 → 폴백 종료'); }
+        return;
+      }
+      if (has === null) return;                       // 통신 불명 → 이번 tick 보류
+      const now = Date.now();
+      if (now - _fbSince < _FB_WAIT_MS) return;       // [2] 아직 30초 대기 중
+      if (now - _fbLastTry < _FB_REPEAT_MS) return;   // [4] 30초 반복 간격
+      if (_autoRunning) return;                       // 다른 수집 진행중이면 스킵
+      _fbLastTry = now; _fbActive = true;
+      _setFallbackOverlay(true, rk);
+      console.log('[전체수집 자동폴백] ' + rk + ' — 서버 배당 없음 30초+ → 전체수집 자동 실행(30초 반복·수동 버튼 불필요)');
+      setTripleProgress('⚡ 전체수집 자동 실행 중… (' + rk + ')', false);
+      _autoRunning = true;
+      try { await collectTriple('auto-fallback'); }   // [3] 서버 게이트 없는 전체수집 경로(= 전체수집 버튼과 동일)
+      catch (e) { console.warn('[전체수집 자동폴백] 오류', e); }
+      finally { _autoRunning = false; }
+    } catch (_) { /* */ }
+  }
+
   function startRaceWatch() {
     if (_raceWatchTimer) clearInterval(_raceWatchTimer);
     setTimeout(watchRaceChange, 1500);                 // 로드 직후 1회
     setTimeout(watchSportChange, 1800);                // [종목감지] 로드 직후 1회(기준값 세팅)
+    setTimeout(_autoFallbackWatch, 3000);              // [전체수집 자동폴백] 로드 직후 1회(전환 기준 세팅)
     _raceWatchTimer = setInterval(() => {              // 10초마다 경주 변경 감지 + 마감 감지(자동추종 반응성)
       watchRaceChange();
       watchSportChange();                              // [종목 자동감지 강화] URL·종목 전환 감지 → 재수집
       _finishWatchdog();                               // [다음경주 자동전환] 카운트다운 소멸 = 마감 통지
+      _autoFallbackWatch();                            // [전체수집 자동폴백] 30초+ 배당 없으면 전체수집 자동 실행
     }, 10000);
   }
 
