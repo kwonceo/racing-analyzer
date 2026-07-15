@@ -6465,15 +6465,17 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                         "reason": "복승 축", "stars": 2, "protected": False, "src": "core"})
 
     # ── [추천 구조 개편·종목별] 저배당+신호=메인(★★★) / 고배당+강신호=BMED특별(★★) / 그 외=제외 ──
-    #   종목별 저배당(메인 상한)·고배당(특별 하한): 경륜 5/10 · 경정 7/15 · 바이크 5/10 · 경마 10/20. 특별 상한=50배(공통).
+    #   종목별 저배당(메인 상한)·고배당(특별 하한): 경륜 5/10 · 경정 7/15 · 바이크 5/10 ·
+    #   경마=두수별(8~9두 10 · 10~11두 15 · 12~13두 20 · 14~16두 25 · 17~18두 30, 특별 하한=메인 상한). 특별 상한=50배(공통).
     _sp = (sport or "").lower()
     if _sp == "boat":
         MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 7.0, 15.0
     elif _sp in ("cycle", "bike"):
         MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 5.0, 10.0
     else:                                             # horse(경마)·기타
-        # [두수별 저배당 기준 완화] 두수 많을수록 배당↑ → 상대적 저배당 상향(12두면 15배도 저배당).
-        #   8~9두=10배↓(유지) · 10~12두=15배↓ · 13~18두=20배↓. 신호 동시 조건은 유지(근거 없는 저배당은 여전히 제외).
+        # [두수별 저배당 기준 완화·세분화] 두수 많을수록 배당↑ → 상대적 저배당 상향(12두면 20배도 저배당).
+        #   8~9두=10배↓ · 10~11두=15배↓ · 12~13두=20배↓ · 14~16두=25배↓ · 17~18두=30배↓.
+        #   BMED 특별 💎 하한 = 메인 상한(메인이 끝나는 배당부터 특별). 신호 동시 조건은 유지(근거 없는 저배당은 여전히 제외).
         _nh_main = len(vs)
         if _nh_main <= 0 and curQ:                      # [폴백] valid_nos 유실 시 배당판 조합에서 실제 출주 두수 복원
             _hset = set()
@@ -6483,13 +6485,17 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 except Exception:
                     pass
             _nh_main = len(_hset)
-        if _nh_main >= 13:
+        if _nh_main >= 17:
+            MAIN_ODDS_MAX = 30.0
+        elif _nh_main >= 14:
+            MAIN_ODDS_MAX = 25.0
+        elif _nh_main >= 12:
             MAIN_ODDS_MAX = 20.0
         elif _nh_main >= 10:
             MAIN_ODDS_MAX = 15.0
         else:
             MAIN_ODDS_MAX = 10.0
-        SPECIAL_ODDS_MIN = 20.0
+        SPECIAL_ODDS_MIN = MAIN_ODDS_MAX   # 특별 하한 = 메인 상한(메인 끝나는 지점부터 BMED 특별 💎)
     SPECIAL_ODDS_MAX = 50.0       # 특별 상한(50배 초과 제외·근거 약함)
     DROP_STRONG_PCT = 15.0        # 강신호: 급락 15%+
     SCORE_STRONG = 70             # 강신호: signalScore 70+
