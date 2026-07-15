@@ -2178,6 +2178,7 @@
     await new Promise((r) => chrome.storage.local.set({ raceKey: rk }, r));
     console.log(`[경주감지] 현재 경주 자동 감지 → raceKey 업데이트: "${rk}" (이전 "${cur || ''}")`);
     try { _postBoardHint(rk); } catch (_) { /* */ }   // [배당판 추종] 경주 변경 즉시 분석기에 알림(자동 동기화)
+    try { _inRk = ''; setTimeout(_autoInstantWatch, 300); } catch (_) { /* */ }   // [즉시분석 자동화] 경주 전환 감지 즉시 1회 실행(10초 tick 대기 없이)
     setTripleProgress(`🆕 경주 자동 감지: ${rk} — 수집합니다…`, false);
     // [발주감지] 경주가 바뀌면 발주시각도 새 경주 기준으로 자동 갱신(수동값보다 우선)
     try { await autoDetectPostTime(rk); } catch (_) { /* */ }

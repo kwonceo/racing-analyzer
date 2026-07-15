@@ -6628,6 +6628,20 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 has_rev = True
         return has_smart and has_rev
 
+    def _combo_has_signal_relaxed(combo):
+        """[메인 보완·완화] 급락 10%+ OR signalScore 50+ OR 기존 신호(drop/rev/smart/anomaly).
+        12두+ 신호 희소(급락 0 등) 경주에서 메인이 상한 미달일 때 우선 채움용(사용자 요청 기준: 급락10%·score50)."""
+        for no in combo:
+            m = _mh(no)
+            _dp = m.get("drop")
+            if _dp is not None and abs(_dp) >= 10.0:
+                return True
+            if float(m.get("score") or 0) >= 50.0:
+                return True
+            if (m.get("drop") is not None) or m.get("rev") or m.get("smart") or m.get("anomaly"):
+                return True
+        return False
+
     # [저배당 미충족 보완·큰 두수] 시장 저배당(≤MAIN_ODDS_MAX)+신호 포함 조합을 메인 후보에 추가.
     #   기존 후보=시장 '최저 1개'만 담아 12두+ 큰 두수에서 메인이 상한(4)을 못 채우던 문제 → 저배당+신호 조합 전부 후보화.
     #   ⚠ 신호 없는 저배당은 여전히 제외(_combo_has_signal 게이트 유지) · 메인은 배당 낮은순 max_q 로 캡되어 과다 없음.
@@ -6706,6 +6720,39 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         _spec_cand.sort(key=lambda x: -(x.get("score") or 0))                          # 특별=signalScore 높은순
         final_q = _main_cand[:max_q]
         special_q = _spec_cand[:_special_max]   # [단통] 3개 / 평시 2개
+
+    # [메인 보완·큰 두수/신호 희소] 신호 게이트로 뽑힌 메인이 상한(max_q) 미달이면(예: 12두인데 급락 0 → 메인 0~2개)
+    #   시장 저배당(≤MAIN_ODDS_MAX·유력마 조합)으로 상한까지 채운다 — 완화신호(급락10%+/signalScore50+) 우선, 그다음
+    #   순수 시장 저배당. 사용자 요청: 12두에서 추천 3~4개. 신호 없는 저배당도 '메인 보완'으로 허용(과다 방지=max_q 캡).
+    #   ⚠ 신호로 뽑힌 메인은 그대로 유지(우선) · 빈 슬롯만 배당 낮은순 채움 · 특별(고배당)/단통 쏠림은 제외.
+    if len(final_q) < max_q and curQ:
+        _have = set(tuple(sorted(int(x) for x in c["combo"])) for c in final_q)
+        _spec_have = set(tuple(sorted(int(x) for x in c["combo"])) for c in (special_q or []))
+        _fill = []
+        for (_fa, _fb), _fo in curQ.items():
+            try:
+                _fa, _fb, _fo = int(_fa), int(_fb), float(_fo)
+            except Exception:
+                continue
+            if _fa == _fb or _fo <= 0 or _fo > MAIN_ODDS_MAX:
+                continue
+            if not vs or _fa not in vs or _fb not in vs:       # [유령마번 방어] 유효 출전마만
+                continue
+            if DANSUNG and _fo <= DANSUNG_ODDS:                # [단통] 1.5배↓ 쏠림 조합은 메인 제외
+                continue
+            _pk = tuple(sorted((_fa, _fb)))
+            if _pk in _have or _pk in _spec_have:
+                continue
+            _rank = 0 if _combo_has_signal_relaxed([_fa, _fb]) else 1   # 완화신호 우선, 그다음 순수 저배당
+            _fill.append((_rank, _fo, list(_pk)))
+        _fill.sort(key=lambda t: (t[0], t[1]))                 # 완화신호 먼저 → 배당 낮은순
+        for _r, _fo, _cmb in _fill:
+            if len(final_q) >= max_q:
+                break
+            final_q.append({"combo": _cmb, "odds": _fo, "stars": 3,
+                            "reason": ("시장 저배당+완화신호" if _r == 0 else "시장 저배당 보완"),
+                            "basis": _combo_basis(_cmb),
+                            "summary": ("완화신호 유력(메인 보완)" if _r == 0 else "시장 저평가(메인 보완)")})
 
     # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
     _main = None
