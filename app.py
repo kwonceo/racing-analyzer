@@ -9002,6 +9002,13 @@ def triple_analyze():
         _record_alert(rk, an)
     except Exception as e:
         print("[경고기록] 실패:", e)
+    # [배당 소스 표시·즉시분석 자동화] 이 경주를 서버가 oddspark 로 커버 중인지 + 저장 배당 소스 반환 →
+    #   확장 즉시분석 자동화가 커버 경주(oddspark 우선)면 asyukk 수집을 생략(보조로만·불필요한 탭클릭 방지).
+    try:
+        an["oddsparkCovered"] = _oddspark_covered_active(rk)
+        an["oddsSource"] = (db.get(rk) or {}).get("source")
+    except Exception:
+        pass
     return jsonify(an)
 
 

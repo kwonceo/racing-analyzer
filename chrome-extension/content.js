@@ -2301,18 +2301,70 @@
     } catch (_) { /* */ }
   }
 
+  // ── [즉시분석 자동화] 오버레이 ON일 때 asyukk 배당을 주기적 자동 수집 → 서버 전송 → 분석 ──────────
+  //   문제: 즉시분석(asyukk 화면 배당 긁기→서버→분석)이 수동(팝업 🚨 버튼)으로만 실행돼, 사용자가 asyukk 배당판을
+  //         보고 있어도 패널이 갱신 안 됨(배당판·패널 불일치). 해결: 오버레이 켜져있으면 경주 전환 즉시 1회 + 30초마다
+  //         자동으로 collectTriple(asyukk 수집) 실행 → analyzeStatus 자동 갱신(collectTriple 내 수집→분석 연결).
+  //   oddspark 우선: 서버가 이 경주를 oddspark 로 커버 중(analyze.oddsparkCovered=true)이면 asyukk 수집 생략
+  //     (oddspark 가 권위 소스·보조로만·불필요한 탭클릭/덮어쓰기 방지). 미커버(몬베츠 등)만 asyukk 즉시분석 실행.
+  const _INSTANT_MS = 30000;                           // [사용자] 30초 주기
+  let _inRk = '', _inLast = 0;
+  function _analyzeOnce(rk) {
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: rk || '' }, function (res) {
+          if (chrome.runtime.lastError) { resolve(null); return; }
+          resolve(res || null);
+        });
+      } catch (_) { resolve(null); }
+    });
+  }
+  async function _autoInstantWatch() {
+    try {
+      const st = await new Promise((r) => chrome.storage.local.get({ overlayEnabled: false, overlayKill: false }, r));
+      if (!st.overlayEnabled || st.overlayKill) return;   // [사용자] 오버레이 켜져있을 때만
+      let rk = '';
+      try { rk = extractRaceKey(); } catch (_) { rk = ''; }
+      if (!rk) { const s = await getSettings(); rk = (s.raceKey || '').trim(); }
+      if (!rk) return;
+      const now = Date.now();
+      const immediate = (rk !== _inRk);                   // [사용자] 경주 전환 시 즉시 1회
+      if (immediate) { _inRk = rk; _inLast = 0; }
+      if (!immediate && (now - _inLast) < _INSTANT_MS) return;   // [사용자] 이후 30초 주기
+      _inLast = now;
+      if (_autoRunning) return;
+      // [oddspark 우선] 커버리지 확인 겸 패널 최신화 — analyze 1회. 커버 중이면 asyukk 수집 생략(보조로만).
+      const ar = await _analyzeOnce(rk);
+      if (ar && ar.ok && ar.data) {
+        try { chrome.storage.local.set({ analyzeStatus: { data: ar.data, at: now } }); } catch (_) { /* */ }   // 패널 즉시 반영
+        if (ar.data.oddsparkCovered === true) {
+          console.log('[즉시분석 자동] ' + rk + ' — oddspark 커버 중 → asyukk 수집 생략(oddspark 우선·보조로만)');
+          return;
+        }
+      }
+      // oddspark 미커버(또는 아직 데이터 없음) → asyukk 즉시분석(수집→서버→분석) 자동 실행
+      _autoRunning = true;
+      console.log('[즉시분석 자동] ' + rk + ' — asyukk 배당 자동 수집(오버레이 ON·' + (immediate ? '경주전환 즉시' : '30초 주기') + ')');
+      setTripleProgress('🔄 즉시분석 자동 실행 중… (' + rk + ')', false);
+      try { await collectTriple('auto-instant'); } catch (e) { console.warn('[즉시분석 자동] 오류', e); }
+      finally { _autoRunning = false; }
+    } catch (_) { /* */ }
+  }
+
   function startRaceWatch() {
     if (_raceWatchTimer) clearInterval(_raceWatchTimer);
     setTimeout(watchRaceChange, 1500);                 // 로드 직후 1회
     setTimeout(watchSportChange, 1800);                // [종목감지] 로드 직후 1회(기준값 세팅)
     setTimeout(_autoFallbackWatch, 3000);              // [전체수집 자동폴백] 로드 직후 1회(전환 기준 세팅)
     setTimeout(_postBoardHint, 2200);                  // [배당판 추종] 로드 직후 1회(분석기 즉시 동기화)
+    setTimeout(_autoInstantWatch, 3500);               // [즉시분석 자동화] 로드 직후 1회(오버레이 ON이면 asyukk 수집)
     _raceWatchTimer = setInterval(() => {              // 10초마다 경주 변경 감지 + 마감 감지(자동추종 반응성)
       watchRaceChange();
       watchSportChange();                              // [종목 자동감지 강화] URL·종목 전환 감지 → 재수집
       _finishWatchdog();                               // [다음경주 자동전환] 카운트다운 소멸 = 마감 통지
       _autoFallbackWatch();                            // [전체수집 자동폴백] 10초+ 배당 없으면 전체수집 자동 실행
       _postBoardHint();                                // [배당판 추종] 배당판 경주를 분석기에 계속 알림(힌트 TTL 유지)
+      _autoInstantWatch();                             // [즉시분석 자동화] 오버레이 ON·30초 주기 asyukk 수집(커버 경주는 생략)
     }, 10000);
   }
 
