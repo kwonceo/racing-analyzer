@@ -54,6 +54,30 @@
     function byId(id) { try { return document.getElementById(id); } catch (_) { return null; } }
     function root() { return document.body || document.documentElement; }
 
+    // ── [분석 자동화] 자동전송(autoSend) 여부와 무관하게 주기적으로 서버 분석을 요청 → analyzeStatus 갱신 →
+    //    수동 버튼 없이 추천이 자동으로 뜬다. 서버 bg 수집(oddspark)·확장 수집 무엇이든 배당만 있으면 분석 자동.
+    //    마감 후에는 서버가 afterClose 로 처리(추천 미반영). 오버레이 꺼져 있으면 생략(자원 절약).
+    var _ovAnalyzeTimer = null;
+    function pollOverlayAnalyze() {
+      if (killed) return;
+      try {
+        chrome.storage.local.get({ raceKey: '', overlayEnabled: false }, function (v) {
+          if (!v || !v.overlayEnabled) return;
+          chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: (v.raceKey || '') }, function (res) {
+            try {
+              if (chrome.runtime.lastError || !res || !res.ok || !res.data) return;
+              chrome.storage.local.set({ analyzeStatus: { data: res.data, at: Date.now() } });   // → storage.onChanged 로 자동 재렌더
+            } catch (_) { /* */ }
+          });
+        });
+      } catch (_) { /* */ }
+    }
+    function startOverlayAnalyzePoll() {
+      if (_ovAnalyzeTimer) return;
+      pollOverlayAnalyze();                                       // 즉시 1회(첫 수집분 분석)
+      _ovAnalyzeTimer = setInterval(pollOverlayAnalyze, 20000);   // 이후 20초마다 자동 재분석(배당 업데이트 반영)
+    }
+
     // ── [배당판 스냅샷] 마감 1분전 자동 + 수동 📸: 배당판+오버레이+패널 캡처 → 워터마크 합성 → 서버 저장 ──
     var _snapDone = {};   // raceKey별 자동 캡처 1회 플래그(중복 방지)
     var _snapBusy = false;
@@ -1536,6 +1560,7 @@
           soundOn = !!(v && v.overlaySound);         // [보완#3] 알림음 옵션 복원
           if (killed) { removeAll(); return; }
           render();
+          startOverlayAnalyzePoll();   // [분석 자동화] 자동전송 없이도 주기 분석 갱신 시작
         } catch (_) { /* */ }
       });
       // 상태/데이터 변경 → 즉시 반영
@@ -1545,7 +1570,7 @@
           if (ch.overlayKill) { killed = !!ch.overlayKill.newValue; if (killed) removeAll(); else render(); return; }
           if (ch.overlayPos) { savedPos = ch.overlayPos.newValue || null; }   // [보완#2] 위치 동기화(다른 탭 반영)
           if (ch.overlaySound) { soundOn = !!ch.overlaySound.newValue; }      // [보완#3] 알림음 옵션 동기화
-          if (ch.overlayEnabled) { enabled = !!ch.overlayEnabled.newValue; render(); }
+          if (ch.overlayEnabled) { enabled = !!ch.overlayEnabled.newValue; render(); if (enabled) startOverlayAnalyzePoll(); }
           // [오버레이 표시 제어] 팝업 📊/🎯/⏱ 버튼 변경 시 즉시 재렌더
           if ((ch.ovShowMatrix || ch.ovShowPicks || ch.ovShowTimeline) && enabled && !killed) render();
           if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline) && enabled && !killed) render();
