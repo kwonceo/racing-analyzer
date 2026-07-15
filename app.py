@@ -1901,6 +1901,37 @@ def _race_pin_clear():
         pass
 
 
+# ── [배당판 추종·board hint] 확장이 감지한 '현재 배당판 경주'를 분석기가 추종 ──────────────────
+#   문제: oddspark bg 수집(나고야 등)이 30초마다 최신이라 current_race 의 max-t 폴백이 늘 그 경주를 반환 →
+#         배당판은 몬베츠인데 분석기는 나고야/카나자와로 어긋남(특히 배당판 경주가 oddspark 미등록이면 데이터가
+#         없어 max-t 가 다른 경주로 튐). 해결: content.js 가 배당판 raceKey 를 POST → 이 힌트를 max-t 보다 우선.
+#   우선순위: pin(사용자 하드락) > board hint(신선) > max-t 폴백. TTL 지나면 자동 무시(배당판 닫히면 복귀).
+BOARD_HINT_FILE = os.path.join(os.path.dirname(__file__), "data", "board_hint.json")
+_BOARD_HINT_TTL = 90   # 초: 배당판 힌트 신선도(확장이 10초마다 재전송 → 넘으면 배당판 닫힌 것으로 보고 무시)
+
+
+def _board_hint_save(rk, sport=None):
+    try:
+        os.makedirs(os.path.dirname(BOARD_HINT_FILE), exist_ok=True)
+        json.dump({"raceKey": (rk or "").strip(), "sport": (sport or "").strip() or None, "t": time.time()},
+                  open(BOARD_HINT_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+    except Exception as e:
+        print("[배당판 힌트] 저장 실패(무시):", e)
+
+
+def _board_hint_load():
+    """신선한(TTL 내) 배당판 힌트 {raceKey, sport, t} 반환. 없거나 오래되면 None."""
+    try:
+        d = json.load(open(BOARD_HINT_FILE, encoding="utf-8"))
+    except Exception:
+        return None
+    if not d or not d.get("raceKey"):
+        return None
+    if (time.time() - (d.get("t") or 0)) > _BOARD_HINT_TTL:
+        return None
+    return d
+
+
 @app.route("/api/race/pin", methods=["GET", "POST"])
 def race_pin():
     """[경주 고정] GET → 현재 고정 경주 조회. POST {raceKey} → 고정 / POST {clear:true} → 해제.
@@ -2540,11 +2571,21 @@ def learning_signal_lessons():
                             "절대 10%+ 급락은 집중신호로 승격(수정 완료)"})
 
 
-@app.route("/api/current_race", methods=["GET"])
+@app.route("/api/current_race", methods=["GET", "POST"])
 def current_race():
     """확장이 마지막으로 수집한 '현재 경주' 반환 → {raceKey, updatedAt, counts}.
     분석기 상단 '경주 새로고침' 바가 폴링해 현재 경주명을 표시·자동 전환한다.
-    (배당 본문 없이 경주명만 필요하므로 triple/latest 보다 가볍다.)"""
+    (배당 본문 없이 경주명만 필요하므로 triple/latest 보다 가볍다.)
+    [배당판 추종] POST {raceKey, sport?} → board hint 저장(확장이 배당판 경주 변경 시 전달) →
+    이후 GET 이 pin > board hint(신선) > max-t 우선순위로 반환 → 분석기가 배당판 경주를 자동 추종."""
+    if request.method == "POST":
+        body = request.json or {}
+        rk = (body.get("raceKey") or "").strip()
+        sp = (body.get("sport") or "").strip() or None
+        if not rk:
+            return jsonify({"error": "raceKey가 필요합니다."}), 400
+        _board_hint_save(rk, sp)
+        return jsonify({"ok": True, "boardHint": rk, "sport": sp})
     db = _triple_load()
     if not db:
         return jsonify({"raceKey": None})
@@ -2564,6 +2605,25 @@ def current_race():
                        "exacta": len(_prec.get("exacta") or []),
                        "trio": len(_prec.get("trio") or [])},
         })
+    # [배당판 추종·board hint] 확장이 POST 한 '현재 배당판 경주'가 신선(TTL내)하면 max-t 폴백보다 우선 →
+    #   분석기가 배당판(예: 몬베츠)과 항상 같은 경주 표시(oddspark 최신 나고야로 안 튐). pin 은 위에서 이미 우선 처리.
+    _bh = _board_hint_load()
+    if _bh and _bh.get("raceKey") and (not want_sport or _sport_match(_bh.get("sport"), want_sport)):
+        _bhrk = _bh["raceKey"]
+        _brec = db.get(_bhrk)
+        if _brec is not None:                          # 배당 데이터 있음 → 그 경주 반환(배당판 추종)
+            _bage = time.time() - (_brec.get("t") or 0)
+            return jsonify({
+                "raceKey": _bhrk, "boardHint": True,
+                "updatedAt": _brec.get("t"), "ageSeconds": round(_bage),
+                "stale": _bage > STALE_ACTIVE_SEC,
+                "counts": {"quinella": len(_brec.get("quinella") or []),
+                           "exacta": len(_brec.get("exacta") or []),
+                           "trio": len(_brec.get("trio") or [])},
+            })
+        # 배당 아직 없음(oddspark 미등록·폴백 수집 전) → 그래도 배당판 경주를 현재로 안내(분석기 대기·자동 전환)
+        return jsonify({"raceKey": _bhrk, "boardHint": True, "waiting": True,
+                        "counts": {"quinella": 0, "exacta": 0, "trio": 0}})
     _cand = list(db.keys())
     if want_sport:
         _cand = [k for k in _cand if _sport_match(db[k].get("sport"), want_sport)]

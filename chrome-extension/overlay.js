@@ -75,7 +75,7 @@
     function startOverlayAnalyzePoll() {
       if (_ovAnalyzeTimer) return;
       pollOverlayAnalyze();                                       // 즉시 1회(첫 수집분 분석)
-      _ovAnalyzeTimer = setInterval(pollOverlayAnalyze, 20000);   // 이후 20초마다 자동 재분석(배당 업데이트 반영)
+      _ovAnalyzeTimer = setInterval(pollOverlayAnalyze, 10000);   // [수정4] 이후 10초마다 자동 재분석(배당 업데이트 반영·기존 20초→단축)
     }
 
     // ── [배당판 스냅샷] 3단계 자동(T-10·T-2·마감후) + 수동 📸: 배당판+오버레이+패널 캡처 → 워터마크 합성 → 서버 저장 ──

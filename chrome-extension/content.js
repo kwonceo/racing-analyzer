@@ -1835,7 +1835,22 @@
   async function collectTriple(reason) {
     // [발주감지] 수집 때마다 발주시각을 배당판에서 자동 읽어 타이머에 반영(수동 입력 불필요)
     try { await autoDetectPostTime(extractRaceKey()); } catch (_) { /* */ }
-    return detectSite() === 'keiba' ? collectTripleKeiba(reason) : collectTripleByTabs(reason);
+    const _r = await (detectSite() === 'keiba' ? collectTripleKeiba(reason) : collectTripleByTabs(reason));
+    // [수정1·수집→분석 자동연결] 수집 성공 시 즉시 서버 분석을 트리거하고 analyzeStatus 를 갱신 →
+    //   오버레이가 20초 폴을 기다리지 않고 바로 분석 결과를 반영("대기 중" 잔존 방지). overlay.pollOverlayAnalyze 와 동일 경로.
+    try {
+      if (_r && _r.ok) {
+        let _rk = '';
+        try { _rk = extractRaceKey(); } catch (_) { _rk = ''; }
+        if (!_rk) { const _s = await getSettings(); _rk = (_s.raceKey || '').trim(); }
+        const _ar = await chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: _rk });
+        if (_ar && _ar.ok && _ar.data) {
+          await new Promise((res) => chrome.storage.local.set({ analyzeStatus: { data: _ar.data, at: Date.now() } }, res));
+          console.log('[수집→분석] ' + (_rk || '(현재경주)') + ' 분석 자동 갱신 → 오버레이 즉시 반영');
+        }
+      }
+    } catch (_) { /* */ }
+    return _r;
   }
 
   // ── 설정 로드 & 자동전송 루프 ───────────────────────────────────────
@@ -2162,6 +2177,7 @@
     if (rk === (cur || '').trim()) return;             // 저장된 raceKey 와 이미 동일
     await new Promise((r) => chrome.storage.local.set({ raceKey: rk }, r));
     console.log(`[경주감지] 현재 경주 자동 감지 → raceKey 업데이트: "${rk}" (이전 "${cur || ''}")`);
+    try { _postBoardHint(rk); } catch (_) { /* */ }   // [배당판 추종] 경주 변경 즉시 분석기에 알림(자동 동기화)
     setTripleProgress(`🆕 경주 자동 감지: ${rk} — 수집합니다…`, false);
     // [발주감지] 경주가 바뀌면 발주시각도 새 경주 기준으로 자동 갱신(수동값보다 우선)
     try { await autoDetectPostTime(rk); } catch (_) { /* */ }
@@ -2221,8 +2237,19 @@
   //         자동 실행하고 30초마다 반복 → 배당이 들어오면(analyze OK) 자동 중단. 오버레이에 진행 표시.
   //   안전: 커버 경마장(나고야 등)은 서버가 30초 내 배당 공급 → analyze OK → 폴백 미발동. 설령 발동돼도
   //         서버 triple_ingest 의 oddspark 커버 가드(v2.1.106)가 확장 중복 전송을 스킵(꼬임 없음).
-  const _FB_WAIT_MS = 30000, _FB_REPEAT_MS = 30000;  // [2·4] 전환 후 30초 대기 + 이후 30초 반복
+  const _FB_WAIT_MS = 10000, _FB_REPEAT_MS = 10000;  // [수정3] 전환 후 10초 대기 + 이후 10초 반복(빠른 경주 대응·기존 30초→단축)
   let _fbRk = '', _fbSince = 0, _fbLastTry = 0, _fbActive = false, _fbDoneRk = '';
+  // [배당판 추종] 현재 배당판 경주(raceKey)를 서버에 전달 → 분석기가 이 경주를 자동 추종(oddspark 최신 경주로 안 튐).
+  //   경주 변경 즉시(watchRaceChange) + 주기(10초 tick)로 재전송(서버 힌트 TTL 90초 유지). autoSend 무관(수동모드에서도 동기화).
+  async function _postBoardHint(rk) {
+    try {
+      if (!rk) { try { rk = extractRaceKey(); } catch (_) { rk = ''; } }
+      if (!rk) return;
+      var _sp = 'horse';
+      try { var _s = await getSettings(); _sp = resolveSport(_s.sport, rk) || 'horse'; } catch (_) { /* */ }
+      chrome.runtime.sendMessage({ type: 'BOARD_HINT', raceKey: rk, sport: _sp }, function () { void chrome.runtime.lastError; });
+    } catch (_) { /* */ }
+  }
   function _setFallbackOverlay(active, rk) {
     // 오버레이(overlay.js)가 읽어 "⚡ 전체수집 자동 실행 중..." 배너를 표시하도록 storage 에 상태 기록.
     try { chrome.storage.local.set({ autoFallback: { active: !!active, raceKey: rk || '', at: Date.now() } }); } catch (_) { /* */ }
@@ -2279,11 +2306,13 @@
     setTimeout(watchRaceChange, 1500);                 // 로드 직후 1회
     setTimeout(watchSportChange, 1800);                // [종목감지] 로드 직후 1회(기준값 세팅)
     setTimeout(_autoFallbackWatch, 3000);              // [전체수집 자동폴백] 로드 직후 1회(전환 기준 세팅)
+    setTimeout(_postBoardHint, 2200);                  // [배당판 추종] 로드 직후 1회(분석기 즉시 동기화)
     _raceWatchTimer = setInterval(() => {              // 10초마다 경주 변경 감지 + 마감 감지(자동추종 반응성)
       watchRaceChange();
       watchSportChange();                              // [종목 자동감지 강화] URL·종목 전환 감지 → 재수집
       _finishWatchdog();                               // [다음경주 자동전환] 카운트다운 소멸 = 마감 통지
-      _autoFallbackWatch();                            // [전체수집 자동폴백] 30초+ 배당 없으면 전체수집 자동 실행
+      _autoFallbackWatch();                            // [전체수집 자동폴백] 10초+ 배당 없으면 전체수집 자동 실행
+      _postBoardHint();                                // [배당판 추종] 배당판 경주를 분석기에 계속 알림(힌트 TTL 유지)
     }, 10000);
   }
 

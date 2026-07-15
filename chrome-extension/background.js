@@ -461,6 +461,21 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true; // async
   }
 
+  // [배당판 추종·board hint] content.js 가 배당판 경주(raceKey)를 전달 → 서버 current_race 힌트 저장 →
+  //   분석기가 그 경주를 자동 추종(oddspark 최신 나고야로 안 튐). content.js 는 CORS 로 서버 직접 fetch 불가 → background 릴레이.
+  if (msg?.type === 'BOARD_HINT') {
+    (async () => {
+      try {
+        const res = await fetch(`${SERVER}/api/current_race`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ raceKey: msg.raceKey || '', sport: msg.sport || '' }),
+        });
+        sendResponse({ ok: res.ok });
+      } catch (e) { sendResponse({ ok: false, error: String(e.message || e) }); }
+    })();
+    return true; // async
+  }
+
   // [4번] 배당판의 '📊 분석기 열기' → 분석기를 별도 '일반 창'으로 열기(이미 있으면 포커스).
   //   msg.force=true 면 재사용하지 않고 항상 새 창을 만든다(분석기 안의 '별도 창으로 열기'용).
   if (msg?.type === 'OPEN_ANALYZER') {
