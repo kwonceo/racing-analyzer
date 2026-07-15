@@ -6306,7 +6306,7 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 continue
             if _ea == _eb or _eo <= 0 or _eo > MAIN_ODDS_MAX:
                 continue
-            if vs and (_ea not in vs or _eb not in vs):
+            if not vs or _ea not in vs or _eb not in vs:   # [유령마번 방어] 유효 출전마 밖(또는 vs 미상)은 후보에서 제외
                 continue
             _pc = tuple(sorted((_ea, _eb)))
             if _pc in _seen_pairs or not _combo_has_signal(list(_pc)):
@@ -8134,8 +8134,30 @@ def _triple_analyze(rk, rec):
                     _sig_meta[_n]["score"] = _hscore(_n)
             except Exception:
                 _sig_meta = {}
+            # [존재하지 않는 말번호 추천 방어] 실제 출전(starters/출마표) 말번호가 있으면 그 범위 밖(배당 유령·이전 경주 잔존)을
+            #   추천용 valid_nos 에서 제외 → finalQuinellas/특별/삼복승 모두 실제 출전마만(10두면 11번↑ 자동 제거).
+            _rec_valid = set(int(x) for x in (valid_nos or []))
+            try:
+                _srec = _starters_load().get(rk)
+                _skip_starter = (_analyze_sport in ("cycle", "boat", "bike") and (_srec or {}).get("source") == "korea")
+                if _srec and _srec.get("horses") and not _skip_starter:
+                    _starter_nos = set()
+                    for _sh in _srec["horses"]:
+                        try:
+                            _starter_nos.add(int(_sh.get("no")))
+                        except (TypeError, ValueError):
+                            pass
+                    # 출마표가 현재 배당과 대체로 일치(60%+)할 때만 적용 = 이 경주 출전표(이전 경주 잔존 출마표로 유효 배당을 잘못 지우는 것 방지).
+                    _overlap = len(_rec_valid & _starter_nos)
+                    if _starter_nos and _overlap >= max(1, int(len(_rec_valid) * 0.6)):
+                        _ghost = _rec_valid - _starter_nos
+                        if _ghost:
+                            _rec_valid = _rec_valid & _starter_nos
+                            print("[유령마번 제외] %s: 배당엔 있으나 출전 아님 %s → 추천 제외" % (rk, sorted(_ghost)))
+            except Exception as _ge:
+                print("[유령마번 방어] 실패(무시):", _ge)
             # [경륜 개수 방어] 두수는 종목 최대마번(경륜 9·경정 6·오토 8)으로 캡 → 유령마번 섞여도 개수 과다 방지
-            _nh = min(len(valid_nos or []), _sport_max_no(_analyze_sport))
+            _nh = min(len(_rec_valid), _sport_max_no(_analyze_sport))
             # [메인 두수별 상한] 경륜/경정/바이크 3 · 경마 8~9두 3 · 10두 4 · 11~12두 4 · 13~18두 6
             if _analyze_sport in ("cycle", "boat", "bike"):
                 _mainmax = 3
@@ -8148,7 +8170,7 @@ def _triple_analyze(rk, rec):
             else:
                 _mainmax = 6
             _maxq = _quinella_target(_nh, bool(chaotic and chaotic.get("detected")))   # (기존 산출 보존·삼복승 혼전 참조용)
-            _fp = _final_picks(core_picks, curQ, valid_nos, smart_quinella, max_q=_mainmax,
+            _fp = _final_picks(core_picks, curQ, _rec_valid, smart_quinella, max_q=_mainmax,
                                reversal_quinellas=_rev_q, dark_quinellas=_dark_q,
                                signal_horses=_sig_h, sig_meta=_sig_meta, sport=_analyze_sport)
             core_picks["finalQuinellas"] = _fp["quinellas"]
