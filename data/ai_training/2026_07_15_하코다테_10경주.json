@@ -1,0 +1,193 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_15_하코다테_10경주",
+ "race_info": {
+  "date": "2026-07-15",
+  "track": "하코다테",
+  "round": 10,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "19:24:12",
+    "quinella": {
+     "1+2": 18.6,
+     "1+3": 57.7,
+     "2+3": 91.5,
+     "1+4": 13.3,
+     "2+4": 32.8,
+     "3+4": 47.0,
+     "1+5": 3.5,
+     "2+5": 35.9,
+     "3+5": 73.8,
+     "4+5": 13.6,
+     "1+6": 41.8,
+     "2+6": 29.4,
+     "3+6": 163.5,
+     "4+6": 73.8,
+     "5+6": 75.4,
+     "1+7": 7.5,
+     "2+7": 27.8,
+     "3+7": 11.2,
+     "4+7": 3.8,
+     "5+7": 9.9,
+     "6+7": 48.7
+    }
+   },
+   {
+    "time": "19:25:12",
+    "quinella": {
+     "1+2": 18.6,
+     "1+3": 57.7,
+     "2+3": 91.5,
+     "1+4": 13.3,
+     "2+4": 32.8,
+     "3+4": 47.0,
+     "1+5": 3.5,
+     "2+5": 35.9,
+     "3+5": 73.8,
+     "4+5": 13.6,
+     "1+6": 41.8,
+     "2+6": 29.4,
+     "3+6": 163.5,
+     "4+6": 73.8,
+     "5+6": 75.4,
+     "1+7": 7.5,
+     "2+7": 27.8,
+     "3+7": 11.2,
+     "4+7": 3.8,
+     "5+7": 9.9,
+     "6+7": 48.7
+    }
+   },
+   {
+    "time": "19:26:02",
+    "quinella": {
+     "1+2": 18.6,
+     "1+3": 57.7,
+     "2+3": 91.5,
+     "1+4": 13.3,
+     "2+4": 32.8,
+     "3+4": 47.0,
+     "1+5": 3.5,
+     "2+5": 35.9,
+     "3+5": 73.8,
+     "4+5": 13.6,
+     "1+6": 41.8,
+     "2+6": 29.4,
+     "3+6": 163.5,
+     "4+6": 73.8,
+     "5+6": 75.4,
+     "1+7": 7.5,
+     "2+7": 27.8,
+     "3+7": 11.2,
+     "4+7": 3.8,
+     "5+7": 9.9,
+     "6+7": 48.7
+    }
+   },
+   {
+    "time": "19:26:52",
+    "quinella": {
+     "1+2": 18.6,
+     "1+3": 57.7,
+     "2+3": 91.5,
+     "1+4": 13.3,
+     "2+4": 32.8,
+     "3+4": 47.0,
+     "1+5": 3.5,
+     "2+5": 35.9,
+     "3+5": 73.8,
+     "4+5": 13.6,
+     "1+6": 41.8,
+     "2+6": 29.4,
+     "3+6": 163.5,
+     "4+6": 73.8,
+     "5+6": 75.4,
+     "1+7": 7.5,
+     "2+7": 27.8,
+     "3+7": 11.2,
+     "4+7": 3.8,
+     "5+7": 9.9,
+     "6+7": 48.7
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": true,
+  "reversal_ratio": 0.189,
+  "quinella_mismatch": 2.143,
+  "refund_rate": 0.744,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7,
+   6
+  ],
+  "eliminated": [],
+  "recommend": "1+5",
+  "strategy": "BMED_역배열형",
+  "confidence": 46.2,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 4,
+  "2nd": 3,
+  "3rd": 6,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 4,
+  "second": 3,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": 3,
+  "reversal_horse_placed": true,
+  "reversal_ratio": 0.189,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-15 21:02:47",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "전적 데이터",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

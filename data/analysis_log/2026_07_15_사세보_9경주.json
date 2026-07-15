@@ -6,7 +6,7 @@
  "date": "2026-07-15",
  "race": "사세보 9경주",
  "analyzed_at": "19:03:18",
- "updated_at": "19:13:45",
+ "updated_at": "21:02:46",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -310,57 +310,42 @@
     "5+7": 6.2,
     "6+7": 72.8
    }
+  },
+  {
+   "time": "19:13:57",
+   "minutes_before": null,
+   "quinella": {
+    "1+2": 216.2,
+    "1+3": 166.3,
+    "2+3": 124.7,
+    "1+4": 40.7,
+    "2+4": 80.0,
+    "3+4": 24.7,
+    "1+5": 7.8,
+    "2+5": 33.6,
+    "3+5": 33.4,
+    "4+5": 1.6,
+    "1+6": 158.1,
+    "2+6": 158.1,
+    "3+6": 180.1,
+    "4+6": 94.0,
+    "5+6": 35.8,
+    "1+7": 70.5,
+    "2+7": 12.5,
+    "3+7": 18.3,
+    "4+7": 13.8,
+    "5+7": 6.2,
+    "6+7": 72.8
+   }
   }
  ],
  "signals_detected": [
   {
-   "time": "19:12:48",
+   "time": "19:13:57",
    "type": "마감급락",
    "detail": "4+5 복승 2.0→1.6 (5분전 대비 -20.0%)",
    "severity": "🟠",
    "reason": "마감 5분전 대비 급락 → 자금 유입 가속(주목)"
-  },
-  {
-   "time": "19:12:48",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 1번 1착(9.2)이 5번 1착(59.6)보다 낮음 → 실질 1착: 1번 가능성 (압도적 역배열 0.154)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(1→5) 9.2 / 쌍승(5→1) 59.6 = 0.154 (압도적 역배열)"
-  },
-  {
-   "time": "19:12:48",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 6번 1착(62.6)이 5번 1착(183.6)보다 낮음 → 실질 1착: 6번 가능성 (압도적 역배열 0.341)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(6→5) 62.6 / 쌍승(5→6) 183.6 = 0.341 (압도적 역배열)"
-  },
-  {
-   "time": "19:12:48",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 3번 1착(53.2)이 5번 1착(104.9)보다 낮음 → 실질 1착: 3번 가능성 (강한 역배열 0.507)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(3→5) 53.2 / 쌍승(5→3) 104.9 = 0.507 (강한 역배열)"
-  },
-  {
-   "time": "19:12:48",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 2번 1착(60.4)이 5번 1착(111.6)보다 낮음 → 실질 1착: 2번 가능성 (강한 역배열 0.541)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(2→5) 60.4 / 쌍승(5→2) 111.6 = 0.541 (강한 역배열)"
-  },
-  {
-   "time": "19:12:48",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 5번 유력이나 쌍승에서 4번 1착(2.6)이 5번 1착(4.5)보다 낮음 → 실질 1착: 4번 가능성 (강한 역배열 0.578)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(4→5) 2.6 / 쌍승(5→4) 4.5 = 0.578 (강한 역배열)"
-  },
-  {
-   "time": "19:12:48",
-   "type": "복승불일치공식",
-   "detail": "⚠️ 복승 불일치: 단승 기준 예상 5+7(6.2) / 실제 최저 4+5(1.6) → 4번 집중 자금 유입 (🔴🔴 3.875)",
-   "severity": "🔴🔴",
-   "reason": "불일치점수 = 예상최저복승 6.2 / 실제최저복승 1.6 = 3.875"
   }
  ],
  "anomaly_history": [
@@ -405,124 +390,19 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "北村 信明",
-   "jockey": "",
-   "record_score": 104.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 7.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "鈴木 伸之",
-   "jockey": "",
-   "record_score": 105.9,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 12.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "竹内 雄作",
-   "jockey": "",
-   "record_score": 101.7,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 18.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "青柳 靖起",
-   "jockey": "",
-   "record_score": 108.7,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 1.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "山形 一気",
-   "jockey": "",
-   "record_score": 112.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 1.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "横関 裕樹",
-   "jockey": "",
-   "record_score": 107.5,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 6.2배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "長井 妙樹",
-   "jockey": "",
-   "record_score": 96.1,
-   "record_detail": "",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 35.8배 · 감점 없음 = 100점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   7,
-   6
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "4+5",
-   "odds": 1.6,
-   "reason": "4번(A)·5번(A)"
-  },
-  "trifecta_main": {
-   "combo": "4+5+7",
-   "odds": 10.3,
-   "reason": "4번(A)·5번(A)·7번(B)"
-  },
-  "trifecta_insurance1": {
-   "combo": "1+4+5",
-   "odds": 16.0,
-   "reason": "1번(C)·4번(A)·5번(A)"
-  },
-  "trifecta_insurance2": {
-   "combo": "1+4+7",
-   "odds": 68.2,
-   "reason": "1번(C)·4번(A)·7번(B)"
-  },
-  "budget_allocation": {
-   "quinella_main": "62.1%",
-   "trifecta_main": "14.1%",
-   "trifecta_insurance": "1.9%"
-  }
+  "budget_allocation": {}
  },
  "recommendation_history": [
   {
@@ -595,52 +475,77 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    4,
-    5
-   ],
-   "trio": [
-    4,
-    5,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    4,
-    5
-   ],
-   "trio": [
-    4,
-    5,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    4,
-    5
-   ],
-   "trio": [
-    4,
-    5,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": null,
- "summary": "유력마 4·5·7 / 복승 4+5",
- "keyHorses": [
-  4,
-  5,
-  7
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 2,
+  "2nd": 4,
+  "3rd": 6
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   4
+  ],
+  "dark_placed": [
+   2,
+   6
+  ],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [
+    1,
+    6,
+    3,
+    4
+   ],
+   "inverseHit": [
+    6,
+    4
+   ],
+   "confidence": 49.2,
+   "reason": "역배열 감지말 6·4번 입상"
+  }
+ },
  "profit": null,
  "review": null
 }

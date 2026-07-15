@@ -6,7 +6,7 @@
  "date": "2026-07-15",
  "race": "히로시마 1경주",
  "analyzed_at": "20:33:59",
- "updated_at": "20:42:55",
+ "updated_at": "21:02:53",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -360,8 +360,8 @@
     ],
     "detail": "1+6 상승 25% 후 급락 53%",
     "level": "orange",
-    "hitRate": 84,
-    "hitSample": 19
+    "hitRate": 87,
+    "hitSample": 47
    }
   ],
   "count": 1,
@@ -374,29 +374,50 @@
    "2": {
     "type": 2,
     "label": "역배열 10%+",
-    "fired": 11,
-    "hit": 8,
-    "rate": 73
+    "fired": 36,
+    "hit": 21,
+    "rate": 58
    },
    "4": {
     "type": 4,
     "label": "재급락",
-    "fired": 15,
-    "hit": 15,
-    "rate": 100
+    "fired": 31,
+    "hit": 28,
+    "rate": 90
    },
    "8": {
     "type": 8,
     "label": "상승후급락(스마트머니)",
-    "fired": 19,
-    "hit": 16,
-    "rate": 84
+    "fired": 47,
+    "hit": 41,
+    "rate": 87
    },
    "5": {
     "type": 5,
     "label": "복수조합 동시급락",
-    "fired": 3,
-    "hit": 3,
+    "fired": 8,
+    "hit": 6,
+    "rate": 75
+   },
+   "1": {
+    "type": 1,
+    "label": "연속하락 3회+",
+    "fired": 4,
+    "hit": 2,
+    "rate": 50
+   },
+   "6": {
+    "type": 6,
+    "label": "역배열+급락(이중수렴)",
+    "fired": 4,
+    "hit": 1,
+    "rate": 25
+   },
+   "3": {
+    "type": 3,
+    "label": "마감직전 대급락",
+    "fired": 1,
+    "hit": 1,
     "rate": 100
    }
   }
@@ -677,8 +698,56 @@
   2,
   3
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": true,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": true,
+  "keyhorse_placed": [
+   1,
+   2,
+   3
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 2.6,
+   "trifecta": 3.0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": 1600,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 58.1,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [
+    2,
+    6,
+    3
+   ],
+   "inverseHit": [
+    2,
+    3
+   ],
+   "confidence": 51.0,
+   "reason": "전적유력마 1번 적중 · 역배열 감지말 2·3번 입상"
+  }
+ },
  "profit": null,
  "review": null
 }

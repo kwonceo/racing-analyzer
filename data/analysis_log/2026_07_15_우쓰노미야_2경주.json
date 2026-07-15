@@ -6,7 +6,7 @@
  "date": "2026-07-15",
  "race": "우쓰노미야 2경주",
  "analyzed_at": "11:16:18",
- "updated_at": "11:20:18",
+ "updated_at": "21:01:51",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -360,48 +360,6 @@
    "detail": "4+7 복승 20.6→18.3 (2분전 대비 -11.2%)",
    "severity": "🔴",
    "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "11:19:14",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 4번 1착(22.5)이 7번 1착(61.5)보다 낮음 → 실질 1착: 4번 가능성 (압도적 역배열 0.366)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(4→7) 22.5 / 쌍승(7→4) 61.5 = 0.366 (압도적 역배열)"
-  },
-  {
-   "time": "11:19:14",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 2번 1착(18.1)이 7번 1착(28.8)보다 낮음 → 실질 1착: 2번 가능성 (강한 역배열 0.628)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(2→7) 18.1 / 쌍승(7→2) 28.8 = 0.628 (강한 역배열)"
-  },
-  {
-   "time": "11:19:14",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 7번 유력이나 쌍승에서 5번 1착(51.5)이 7번 1착(63.3)보다 낮음 → 실질 1착: 5번 가능성 (약한 역배열 0.814)",
-   "severity": "🟡",
-   "reason": "역전비율 = 쌍승(5→7) 51.5 / 쌍승(7→5) 63.3 = 0.814 (약한 역배열)"
-  },
-  {
-   "time": "11:19:14",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[2·4위 간]: 단승 1번(2위) vs 5번(4위) — 쌍승 5→1(6.3)가 1→5(16.7)보다 낮음 → 상위권 실질순위 역전: 5번 우세 (압도적 역배열 0.377)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(5→1) 6.3 / 쌍승(1→5) 16.7 = 0.377 (압도적 역배열)"
-  },
-  {
-   "time": "11:19:14",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[2·3위 간]: 단승 1번(2위) vs 3번(3위) — 쌍승 3→1(5.7)가 1→3(10.3)보다 낮음 → 상위권 실질순위 역전: 3번 우세 (강한 역배열 0.553)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(3→1) 5.7 / 쌍승(1→3) 10.3 = 0.553 (강한 역배열)"
-  },
-  {
-   "time": "11:19:14",
-   "type": "복승불일치공식",
-   "detail": "⚠️ 복승 불일치: 단승 기준 예상 1+7(4.7) / 실제 최저 1+3(3.0) → 3번 집중 자금 유입 (🔴 1.567)",
-   "severity": "🔴",
-   "reason": "불일치점수 = 예상최저복승 4.7 / 실제최저복승 3.0 = 1.567"
   }
  ],
  "anomaly_history": [
@@ -470,124 +428,19 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "秋本耀太郎",
-   "jockey": "",
-   "record_score": 103.2,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "松岡晋乃介",
-   "jockey": "",
-   "record_score": 85.3,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 11.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "須永 勝太",
-   "jockey": "",
-   "record_score": 89.7,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "本田 拓也",
-   "jockey": "",
-   "record_score": 86.5,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 4.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "宮司 周郎",
-   "jockey": "",
-   "record_score": 92.3,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 4.7배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "有賀 高士",
-   "jockey": "",
-   "record_score": 79.7,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 18.3배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 6,
-   "name": "田中 孝法",
-   "jockey": "",
-   "record_score": 79.4,
-   "record_detail": "",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 37.5배 · 감점 없음 = 100점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   2,
-   3,
-   5,
-   7,
-   4,
-   6
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "1+3",
-   "odds": 3.0,
-   "reason": "1번(A)·3번(B)"
-  },
-  "trifecta_main": {
-   "combo": "1+3+5",
-   "odds": 10.7,
-   "reason": "1번(A)·3번(B)·5번(B)"
-  },
-  "trifecta_insurance1": {
-   "combo": "1+3+7",
-   "odds": 11.8,
-   "reason": "1번(A)·3번(B)·7번(A)"
-  },
-  "trifecta_insurance2": {
-   "combo": "1+5+7",
-   "odds": 18.1,
-   "reason": "1번(A)·5번(B)·7번(A)"
-  },
-  "budget_allocation": {
-   "quinella_main": "62.1%",
-   "trifecta_main": "14.1%",
-   "trifecta_insurance": "1.9%"
-  }
+  "budget_allocation": {}
  },
  "recommendation_history": [
   {
@@ -659,53 +512,75 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    1,
-    3
-   ],
-   "trio": [
-    1,
-    3,
-    5
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    1,
-    7
-   ],
-   "trio": [
-    1,
-    3,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    1,
-    3
-   ],
-   "trio": [
-    1,
-    3,
-    5
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": null,
- "summary": "유력마 1·3·5·7 / 복승 1+3",
- "keyHorses": [
-  1,
-  3,
-  5,
-  7
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 7,
+  "2nd": 2,
+  "3rd": 1
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   1
+  ],
+  "dark_placed": [
+   2
+  ],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [
+    4,
+    2,
+    5,
+    3
+   ],
+   "inverseHit": [
+    2
+   ],
+   "confidence": 20.0,
+   "reason": "전적유력마 1번 적중 · 역배열 감지말 2번 입상"
+  }
+ },
  "profit": null,
  "review": null
 }

@@ -1,0 +1,224 @@
+{
+ "race": "구마모토 4경주",
+ "raceKey": "구마모토 4경주",
+ "date": "2026-07-15",
+ "result": {
+  "1st": 5,
+  "2nd": 7,
+  "3rd": 1,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 48.0,
+   "reason": "일반"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.421,
+   "record_score": null,
+   "confidence": 11.0,
+   "reason": "쌍승역전"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.273,
+   "record_score": null,
+   "confidence": 23.0,
+   "reason": "쌍승역전"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.39,
+   "record_score": null,
+   "confidence": 44.0,
+   "reason": "쌍승역전"
+  }
+ },
+ "recommended_horses": [
+  3,
+  5,
+  1,
+  7
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 5번 전적 정보 제한",
+  "2. 배당 수집 시작 09:20:45",
+  "4. 쌍승 역전: 6→5(22.0) < 5→6(127.0) → 6번 실질 상위 신호",
+  "4. 쌍승 역전: 1→5(10.9) < 5→1(39.9) → 1번 실질 상위 신호",
+  "5. 종합 신뢰도 48.0점(중) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 5,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": null,
+  "total": 48.0,
+  "grade": "중"
+ },
+ "win_tags": [
+  "쌍승역전_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   6,
+   1,
+   7,
+   3
+  ],
+  "inverseHit": [
+   1,
+   7
+  ],
+  "confidence": 48.0,
+  "reason": "전적유력마 1번 적중 · 역배열 감지말 1·7번 입상"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "09:25:17",
+    "minutes_before": null,
+    "previous_signal": "1번",
+    "new_signal": "6번",
+    "reason": "6번 집중급락(평균 -13.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "09:26:06",
+    "minutes_before": null,
+    "previous_signal": "6번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -49.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "09:26:54",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -19.0%)",
+    "prev_was_candidate": true
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   1,
+   3,
+   6,
+   7
+  ],
+  "events": {
+   "1": {
+    "first": {
+     "time": "09:24:28",
+     "minutes_before": null
+    },
+    "count": 2,
+    "last": {
+     "time": "09:29:21",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "09:30:10",
+     "minutes_before": null
+    }
+   },
+   "6": {
+    "first": {
+     "time": "09:25:17",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "09:25:17",
+     "minutes_before": null
+    }
+   },
+   "3": {
+    "first": {
+     "time": "09:26:06",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "09:26:06",
+     "minutes_before": null
+    }
+   },
+   "7": {
+    "first": {
+     "time": "09:26:54",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "09:26:54",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "09:27:42",
+     "minutes_before": null
+    }
+   }
+  },
+  "finalSignal": 1,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 1,
+   "next_race": 0
+  },
+  "validCount": 14
+ },
+ "pnl": 0,
+ "stake": 1000,
+ "generated_at": "2026-07-15 21:01:43"
+}
