@@ -217,7 +217,7 @@
     function readData() {
       return new Promise(function (resolve) {
         try {
-          chrome.storage.local.get({ analyzeStatus: null, timerDeadline: 0, collectAlert: null,
+          chrome.storage.local.get({ analyzeStatus: null, timerDeadline: 0, collectAlert: null, raceKey: '',
             ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null }, function (v) {
             resolve(v || {});
           });
@@ -1184,6 +1184,22 @@
         hR.appendChild(x);
         head.appendChild(hR);
         panel.appendChild(head);
+
+        // [분석기·오버레이 raceKey 동기화] 배당판이 보여주는 경주(st.raceKey)와 실제 분석된 경주(d.raceKey)가
+        //   다르면 = 다른 탭을 보고 있거나 전송이 꼬인 상태 → 빨강 경고 배너("⚠️ 경주 불일치 — 분석기 확인").
+        //   두 raceKey 는 날짜 접두 차이를 무시하고 "경마장 + N경주" 꼬리로 비교(오탐 방지).
+        try {
+          var _rkTail = function (r) { return String(r || '').replace(/\d{4}-\d{2}-\d{2}/g, '').replace(/\s+/g, ' ').trim(); };
+          var _liveRk = _rkTail(st.raceKey);
+          var _anaRk = _rkTail(d && d.raceKey);
+          if (_liveRk && _anaRk && _liveRk !== _anaRk) {
+            var warn = mk('div', 'margin:0 0 6px;padding:6px 9px;border-radius:7px;border:1px solid #ef4444;background:rgba(239,68,68,.16)');
+            warn.appendChild(mk('div', 'font-weight:900;font-size:13px;color:#fca5a5', '⚠️ 경주 불일치 — 분석기 확인'));
+            warn.appendChild(mk('div', 'font-size:11px;color:#fecaca;margin-top:2px', '배당판: ' + _liveRk + '  ·  분석: ' + _anaRk));
+            warn.appendChild(mk('div', 'font-size:11px;color:#fca5a5;margin-top:1px', '아래 추천은 분석된 경주 기준입니다(배당판과 다를 수 있음).'));
+            panel.appendChild(warn);
+          }
+        } catch (_) { /* */ }
 
         // [배당판 스냅샷·자동 3단계] 마감 10분전(T-10·초기배당) → 2분전(T-2·최종추천 확정) → 마감직후(최종배당). 단계별 raceKey당 1회.
         try {

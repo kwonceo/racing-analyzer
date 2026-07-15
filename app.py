@@ -1684,6 +1684,27 @@ def _sport_max_no(sport):
     return _SPORT_MAX_NO.get((sport or "horse"), 18)
 
 
+def _oddspark_covered_active(rk, within=200):
+    """[자동전송 꼬임 방어] 이 raceKey를 서버가 oddspark로 방금(within초 내) 직접 수집 중인가?
+    True면 확장(asyukk 사설 배당판·화면 수집)의 중복 전송은 불필요하고 오히려 유해 —
+    ①탭 전환마다 다른 경주 배당이 서버를 덮어씀 ②사설≠공식 배당 혼입 ③유령 말번호 유입.
+    → ingest 엔드포인트에서 확장 전송만 스킵(서버 oddspark 수집이 권위 소스). oddspark 미커버 경주는 False(확장 유지)."""
+    now = time.time()
+    try:
+        m = _multi_store_load().get(rk)                  # multi_store = 항상 oddspark 서버 직접수집분
+        if m and (now - (m.get("t") or 0)) <= within:
+            return True
+    except Exception:
+        pass
+    try:
+        t = _triple_load().get(rk)                       # triple_store source에 oddspark 태그 + 최근 갱신
+        if t and "oddspark" in (t.get("source") or "") and (now - (t.get("t") or 0)) <= within:
+            return True
+    except Exception:
+        pass
+    return False
+
+
 @app.route("/api/odds/triple/ingest", methods=["POST"])
 def triple_ingest():
     """확장 [전체 자동 수집]: {raceKey, quinella[], exacta[], trio[]} 저장 → {ok, counts}"""
@@ -1691,6 +1712,14 @@ def triple_ingest():
     rk = (body.get("raceKey") or "").strip()
     if not rk:
         return jsonify({"error": "raceKey가 필요합니다."}), 400
+    # [자동전송 raceKey 고정·중복차단] 서버가 이 경주를 oddspark로 직접 수집 중이면 확장(화면 수집) 전송은 스킵.
+    #   → 탭 전환마다 다른 경주가 서버를 덮어써 분석기·오버레이가 꼬이던 문제 근본 차단(oddspark 미커버 경주는 정상 저장).
+    _src = (body.get("source") or "")
+    _is_ext = ("oddspark" not in _src)                   # oddspark_bg/직접수집이 아닌 확장·수동 화면수집분
+    if _is_ext and _oddspark_covered_active(rk):
+        print(f"[자동전송 스킵] {rk}: oddspark 서버 자동수집 중 → 확장 중복 전송 생략(꼬임·유령마번 방지)")
+        return jsonify({"ok": True, "skipped": True, "reason": "oddspark 서버 자동수집 중 — 확장 전송 생략",
+                        "raceKey": rk})
     return jsonify(_do_triple_ingest(
         rk, body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or [],
         _win_map_clean(body.get("win")), body.get("sport"), body.get("category"),
@@ -8396,6 +8425,28 @@ def _triple_analyze(rk, rec):
                             print("[유령마번 제외] %s: 배당엔 있으나 출전 아님 %s → 추천 제외" % (rk, sorted(_ghost)))
             except Exception as _ge:
                 print("[유령마번 방어] 실패(무시):", _ge)
+            # [유령마번 하드캡·근본] 실제 출전 두수 초과 마번은 무조건 제거(7두면 8번↑ 전부·60% 가드 무관·상한만 적용).
+            #   상한 = ①종목 최대마번(경륜9·경정6·오토8·경마18) ②출마표 있으면 최대 출전마번(이 경주 것일 때) 중 작은 값.
+            #   → 이전 경주 잔존·오검출로 들어온 초과 마번을 finalQuinellas/특별/삼복승 생성 전에 원천 차단(시장 최저복승까지 정화).
+            try:
+                _hardcap = _sport_max_no(_analyze_sport)
+                _srec2 = locals().get("_srec") or _starters_load().get(rk)
+                if _srec2 and _srec2.get("horses") and not locals().get("_skip_starter"):
+                    _snos = []
+                    for _sh in _srec2["horses"]:
+                        try:
+                            _snos.append(int(_sh.get("no")))
+                        except (TypeError, ValueError):
+                            pass
+                    # 이 경주 출마표(배당과 60%+ 겹침)일 때만 최대 출전마번으로 상한 강화(이전 경주 작은 출마표 오적용 방지).
+                    if _snos and len(_rec_valid & set(_snos)) >= max(1, int(len(_rec_valid) * 0.6)):
+                        _hardcap = min(_hardcap, max(_snos))
+                _over = {n for n in _rec_valid if n > _hardcap}
+                if _over:
+                    _rec_valid = {n for n in _rec_valid if n <= _hardcap}
+                    print("[유령마번 하드캡] %s: 출전 두수 초과 마번 %s 제거(상한 %d)" % (rk, sorted(_over), _hardcap))
+            except Exception as _hce:
+                print("[유령마번 하드캡] 실패(무시):", _hce)
             # [경륜 개수 방어] 두수는 종목 최대마번(경륜 9·경정 6·오토 8)으로 캡 → 유령마번 섞여도 개수 과다 방지
             _nh = min(len(_rec_valid), _sport_max_no(_analyze_sport))
             # [메인 두수별 상한] 경륜/경정/바이크 3 · 경마 8~9두 3 · 10두 4 · 11~12두 4 · 13~18두 6
