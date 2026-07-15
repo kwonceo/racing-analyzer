@@ -6768,6 +6768,26 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     if cp.get("confTrifectaIns"):
         autos.append({"combo": cp["confTrifectaIns"], "odds": cp.get("confTrifectaInsOdds"), "reason": "확신도 보험"})
     autos.sort(key=lambda c: (c.get("odds") is None, c.get("odds") or 9e9))   # 추정배당 낮은 순 = 가장 강한(확률 높은) 것
+    # [시장유력 보완·나고야12R 복기] 시장 유력마 1위(6번 6.7배)가 BMED 신호 없다고 추천 탈락→실제 2착 놓친 교훈.
+    #   시장 유력마 상위(복승 저배당 지지 기준) top3 박스를 삼복승 '보험'에 자동 포함(신호 없어도·메인 ★★★엔 미포함).
+    #   근거: 시장이 유력하다고 보는 것 자체가 충분한 근거. 표시 "시장유력 보완: N번+M번"(상위 2마리 앵커).
+    _mkt_ins = None
+    if curQ:
+        _ms = {}
+        for (_ma, _mb), _mo in curQ.items():
+            try:
+                _ma, _mb, _mo = int(_ma), int(_mb), float(_mo)
+            except Exception:
+                continue
+            if _mo <= 0 or (vs and (_ma not in vs or _mb not in vs)):
+                continue
+            _ms[_ma] = _ms.get(_ma, 0.0) + 1.0 / _mo        # 저배당 조합 다수 등장 = 시장 지지(가중)
+            _ms[_mb] = _ms.get(_mb, 0.0) + 1.0 / _mo
+        _mrank = [h for h, _ in sorted(_ms.items(), key=lambda kv: -kv[1])]
+        if len(_mrank) >= 3:
+            _mkt_ins = {"combo": sorted(_mrank[:3]), "odds": None,
+                        "reason": "시장유력 보완: %d번+%d번" % (_mrank[0], _mrank[1]),
+                        "marketInsurance": True}
     final_t, seen_t = [], set()
     for c in ([_main] if _main else []) + autos:          # 메인 먼저, 그다음 가장 강한 자동
         cc = sorted(int(x) for x in (c.get("combo") or [])) if c and c.get("combo") else []
@@ -6779,6 +6799,14 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         seen_t.add(k); final_t.append({"combo": cc, "odds": c.get("odds"), "reason": c.get("reason")})
         if len(final_t) >= 2:
             break
+    # [시장유력 보완] 신호기반 삼복승(위 ≤2)과 '별개'로 시장 유력 top3 박스를 보험 1개 추가(중복 아니면).
+    #   메인 ★★★(final_q)에는 미포함 — 신호 없으니 삼복승 보험용으로만. 시장 유력마(6번 유형) 놓침 방지.
+    if _mkt_ins and _vtri(_mkt_ins["combo"]):
+        _mk = tuple(int(x) for x in _mkt_ins["combo"])
+        if _mk not in seen_t:
+            seen_t.add(_mk)
+            final_t.append({"combo": list(_mk), "odds": _mkt_ins.get("odds"),
+                            "reason": _mkt_ins["reason"], "marketInsurance": True})
 
     return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
             "dansung": DANSUNG, "dansungMinOdds": _min_q}
