@@ -2173,11 +2173,201 @@ def _snapshot_result_for(rk):
         return None
 
 
+SNAPSHOT_COMPARE_DIR = os.path.join(os.path.dirname(__file__), "data", "snapshot_compare")
+SNAPSHOT_TIMING_FILE = os.path.join(os.path.dirname(__file__), "data", "snapshot_timing.json")
+
+
+def _snapshot_min_quinella(quinellas):
+    """[비교분석] 추천 복승 조합 중 최저 배당 + 그 조합 반환. 없으면 (None, None)."""
+    best_o, best_c = None, None
+    for q in (quinellas or []):
+        try:
+            o = q.get("odds")
+            if o is None:
+                continue
+            o = float(o)
+            if o <= 0:
+                continue
+            if best_o is None or o < best_o:
+                best_o, best_c = o, q.get("combo")
+        except Exception:
+            continue
+    return best_o, best_c
+
+
+def _snapshot_main_combos(quinellas, cap=5):
+    """[비교분석] 추천 변경 여부 판정용 — 상위 복승 조합을 정규화 문자열 집합으로."""
+    out = set()
+    for q in (quinellas or [])[:cap]:
+        try:
+            c = q.get("combo") or []
+            if len(c) >= 2:
+                out.add("-".join(str(x) for x in sorted(int(v) for v in c[:2])))
+        except Exception:
+            continue
+    return out
+
+
+def _snapshot_signal_first(rk):
+    """[비교분석] odds_history 에서 이 경주의 이상감지 신호(signal_horse)가 처음 잡힌 시점을 'T-N분'으로.
+    없으면 None. 마감 후·다음경주 차단 스냅샷은 제외."""
+    try:
+        path, _d, _r = _hist_path(rk)
+        doc = _hist_read_any(path)
+        if not doc:
+            return None
+        for s in (doc.get("snapshots") or []):
+            if s.get("after_close") or s.get("next_race_blocked"):
+                continue
+            if s.get("signal_horse"):
+                mb = s.get("mb_signed")
+                if mb is None:
+                    mb = s.get("minutes_before")
+                if mb is None:
+                    return "시점미상"
+                return "T-%d분" % int(round(float(mb))) if mb >= 0 else "마감 후"
+    except Exception:
+        pass
+    return None
+
+
+def _snapshot_metas_for_race(rk):
+    """[비교분석] 이 raceKey 로 저장된 스냅샷 메타를 단계(trigger)별로 수집 → {'T-10':meta, 'T-2':meta, 'close':meta}."""
+    stage = {}
+    try:
+        files = os.listdir(SNAPSHOT_DIR)
+    except FileNotFoundError:
+        return stage
+    for fn in files:
+        if not fn.lower().endswith(".png"):
+            continue
+        try:
+            meta = json.load(open(_snapshot_meta_path(fn), encoding="utf-8"))
+        except Exception:
+            continue
+        if (meta.get("raceKey") or "") != (rk or ""):
+            continue
+        tg = meta.get("trigger") or ""
+        if tg in ("T-10", "T-2", "close") and (tg not in stage or (meta.get("at") or "") > (stage[tg].get("at") or "")):
+            stage[tg] = meta
+    return stage
+
+
+def _snapshot_build_compare(rk):
+    """[비교분석 자동 저장] 3단계(T-10/T-2/마감후) 스냅샷이 모이면 배당·추천 변화량을 산출·저장.
+    구조: {"T-10":{최저배당·추천}, "T-2":{최저배당·추천}, "마감후":{최종 최저배당}, "변화량":{...}}."""
+    stage = _snapshot_metas_for_race(rk)
+    if "close" not in stage:                       # 마감후 스냅샷 없으면 아직 미완(추후 재호출)
+        return None
+    t10, t2, close = stage.get("T-10"), stage.get("T-2"), stage["close"]
+
+    def _pack(meta):
+        if not meta:
+            return None
+        mo, mc = _snapshot_min_quinella(meta.get("quinellas"))
+        return {"파일": meta.get("filename"), "시각": meta.get("at"),
+                "최저복승배당": mo, "최저복승조합": mc,
+                "추천수": len(meta.get("quinellas") or []),
+                "단통": bool(meta.get("dansung")),
+                "추천조합": [q.get("combo") for q in (meta.get("quinellas") or [])[:5]]}
+
+    p10, p2, pc = _pack(t10), _pack(t2), _pack(close)
+    # 최저배당 변화(T-10 → 마감후)
+    change_pct = None
+    base = (p10 or {}).get("최저복승배당")
+    fin = (pc or {}).get("최저복승배당")
+    if base and fin and base > 0:
+        change_pct = round((fin - base) / base * 100.0, 1)
+    # 추천 변경 여부(T-10 상위조합 vs T-2 상위조합)
+    rec_changed = None
+    if t10 and t2:
+        rec_changed = _snapshot_main_combos(t10.get("quinellas")) != _snapshot_main_combos(t2.get("quinellas"))
+    compare = {
+        "raceKey": rk, "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "T-10": p10, "T-2": p2, "마감후": pc,
+        "변화량": {
+            "최저배당 변화": ("%+.1f%%" % change_pct) if change_pct is not None else None,
+            "추천 변경 여부": rec_changed,
+            "신호 발생 시점": _snapshot_signal_first(rk),
+        },
+    }
+    try:
+        os.makedirs(SNAPSHOT_COMPARE_DIR, exist_ok=True)
+        safe = re.sub(r"[^\w가-힣]+", "_", rk or "race").strip("_")[:120]
+        json.dump(compare, open(os.path.join(SNAPSHOT_COMPARE_DIR, safe + ".json"), "w", encoding="utf-8"),
+                  ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[스냅샷 비교] 저장 실패:", e)
+    _snapshot_timing_learn(rk, compare, stage)
+    print("[스냅샷 비교] %s · 최저배당 변화 %s · 추천변경 %s · 신호 %s" % (
+        rk, compare["변화량"]["최저배당 변화"], compare["변화량"]["추천 변경 여부"], compare["변화량"]["신호 발생 시점"]))
+    return compare
+
+
+def _snapshot_timing_learn(rk, compare, stage):
+    """[타이밍 학습] T-10 추천 vs T-2 추천을 실제 착순과 비교 → 어느 시점 추천이 더 정확한지 누적.
+    결과(top3) 미입력이면 대기(마감후 결과 저장 시 재판정 안 하고, 결과 있을 때만 집계)."""
+    try:
+        res = _snapshot_result_for(rk)
+        top3 = (res or {}).get("top3") or []
+        if len(top3) < 2:                          # 실제 착순 없으면 학습 보류(정확도 판정 불가)
+            return
+        win2 = set(int(x) for x in top3[:2])       # 복승 적중 기준(1+2착)
+
+        def _hit(meta):
+            if not meta:
+                return None
+            for q in (meta.get("quinellas") or []):
+                c = q.get("combo") or []
+                if len(c) >= 2 and set(int(v) for v in c[:2]) == win2:
+                    return True
+            return False
+
+        h10, h2 = _hit(stage.get("T-10")), _hit(stage.get("T-2"))
+        try:
+            stat = json.load(open(SNAPSHOT_TIMING_FILE, encoding="utf-8"))
+        except Exception:
+            stat = {}
+        stat.setdefault("t10", {"판정수": 0, "적중": 0})
+        stat.setdefault("t2", {"판정수": 0, "적중": 0})
+        stat.setdefault("동시", {"둘다적중": 0, "T-10만": 0, "T-2만": 0, "둘다실패": 0})
+        stat.setdefault("cases", [])
+        if h10 is not None:
+            stat["t10"]["판정수"] += 1
+            stat["t10"]["적중"] += 1 if h10 else 0
+        if h2 is not None:
+            stat["t2"]["판정수"] += 1
+            stat["t2"]["적중"] += 1 if h2 else 0
+        if h10 is not None and h2 is not None:
+            if h10 and h2:
+                stat["동시"]["둘다적중"] += 1
+            elif h10 and not h2:
+                stat["동시"]["T-10만"] += 1
+            elif h2 and not h10:
+                stat["동시"]["T-2만"] += 1
+            else:
+                stat["동시"]["둘다실패"] += 1
+        stat["cases"].append({"raceKey": rk, "at": compare.get("at"),
+                              "T-10적중": h10, "T-2적중": h2, "top2": sorted(win2)})
+        stat["cases"] = stat["cases"][-500:]       # 최근 500경주만 유지
+        # 요약(어느 시점이 더 정확?)
+        r10 = (stat["t10"]["적중"] / stat["t10"]["판정수"]) if stat["t10"]["판정수"] else 0
+        r2 = (stat["t2"]["적중"] / stat["t2"]["판정수"]) if stat["t2"]["판정수"] else 0
+        stat["요약"] = {
+            "T-10 적중률": round(r10 * 100, 1), "T-2 적중률": round(r2 * 100, 1),
+            "더 정확한 시점": ("T-2(마감 2분전)" if r2 > r10 else ("T-10(마감 10분전)" if r10 > r2 else "동률")),
+        }
+        os.makedirs(os.path.dirname(SNAPSHOT_TIMING_FILE), exist_ok=True)
+        json.dump(stat, open(SNAPSHOT_TIMING_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[타이밍 학습] 실패:", e)
+
+
 @app.route("/api/snapshot/save", methods=["POST"])
 def snapshot_save():
     """[배당판 스냅샷 저장] 확장이 캡처한 base64 PNG(배당판+오버레이+패널·워터마크 포함)를 data/snapshots/<파일명>.png 로 저장.
-    body: {filename, image(dataURL 또는 base64), raceKey, trigger(auto_t1/manual), quinellas, trifectas, special, minOdds}.
-    메타(.json 사이드카)를 함께 저장 → 갤러리에서 추천 vs 실제결과 비교."""
+    body: {filename, image(dataURL 또는 base64), raceKey, trigger(T-10/T-2/close/manual), quinellas, trifectas, special, minOdds}.
+    메타(.json 사이드카)를 함께 저장 → 갤러리에서 추천 vs 실제결과 비교. trigger=='close'면 3단계 비교분석 자동 산출."""
     body = request.get_json(force=True, silent=True) or {}
     img = body.get("image") or ""
     fn = _safe_snapshot_name(body.get("filename") or "")
@@ -2195,12 +2385,14 @@ def snapshot_save():
         os.makedirs(SNAPSHOT_DIR, exist_ok=True)
         with open(os.path.join(SNAPSHOT_DIR, fn), "wb") as f:
             f.write(raw)
+        _mqo, _mqc = _snapshot_min_quinella(body.get("quinellas"))
         meta = {
             "filename": fn, "raceKey": body.get("raceKey") or "",
             "at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "trigger": body.get("trigger") or "manual",   # auto_t1(마감1분전) / manual(수동)
+            "trigger": body.get("trigger") or "manual",   # T-10(마감10분전)/T-2(마감2분전)/close(마감직후)/manual(수동)
             "quinellas": body.get("quinellas") or [], "trifectas": body.get("trifectas") or [],
             "special": body.get("special") or [], "minOdds": body.get("minOdds"),
+            "minQuinella": _mqo, "minQuinellaCombo": _mqc,   # [비교분석] 최저 복승 배당·조합
             "dansung": bool(body.get("dansung")), "sizeBytes": len(raw),
         }
         try:
@@ -2210,7 +2402,13 @@ def snapshot_save():
     except Exception as e:
         return jsonify({"ok": False, "error": "저장 실패: %s" % e}), 500
     print("[스냅샷] 저장: %s (%d KB · %s)" % (fn, len(raw) // 1024, meta["trigger"]))
-    return jsonify({"ok": True, "filename": fn, "sizeBytes": len(raw)})
+    compare = None
+    if meta["trigger"] == "close" and meta["raceKey"]:    # [3단계 완료] 마감직후 → 비교분석 자동 산출·저장
+        try:
+            compare = _snapshot_build_compare(meta["raceKey"])
+        except Exception as e:
+            print("[스냅샷 비교] 산출 실패:", e)
+    return jsonify({"ok": True, "filename": fn, "sizeBytes": len(raw), "compare": compare})
 
 
 @app.route("/api/snapshot/list", methods=["GET"])
@@ -2249,6 +2447,48 @@ def snapshot_get(filename):
     if not fn or not os.path.exists(os.path.join(SNAPSHOT_DIR, fn)):
         return jsonify({"ok": False, "error": "not found"}), 404
     return send_from_directory(SNAPSHOT_DIR, fn, mimetype="image/png")
+
+
+@app.route("/api/snapshot/compare", methods=["GET"])
+def snapshot_compare_api():
+    """[3단계 비교분석] raceKey 지정 시 그 경주 비교(?raceKey=...), 없으면 저장된 전 비교 목록(최신순).
+    각 경주의 T-10/T-2/마감후 배당·추천 + 변화량(최저배당 변화·추천 변경 여부·신호 발생 시점)."""
+    rk = (request.args.get("raceKey") or "").strip()
+    if rk:
+        safe = re.sub(r"[^\w가-힣]+", "_", rk).strip("_")[:120]
+        path = os.path.join(SNAPSHOT_COMPARE_DIR, safe + ".json")
+        if os.path.exists(path):
+            try:
+                return jsonify({"ok": True, "compare": json.load(open(path, encoding="utf-8"))})
+            except Exception as e:
+                return jsonify({"ok": False, "error": str(e)}), 500
+        # 아직 저장 전이면 즉석 산출 시도(3단계 미완이면 None)
+        return jsonify({"ok": True, "compare": _snapshot_build_compare(rk)})
+    out = []
+    try:
+        for fn in os.listdir(SNAPSHOT_COMPARE_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                out.append(json.load(open(os.path.join(SNAPSHOT_COMPARE_DIR, fn), encoding="utf-8")))
+            except Exception:
+                pass
+    except FileNotFoundError:
+        pass
+    out.sort(key=lambda x: x.get("at") or "", reverse=True)
+    return jsonify({"ok": True, "compares": out, "count": len(out)})
+
+
+@app.route("/api/snapshot/timing", methods=["GET"])
+def snapshot_timing_api():
+    """[타이밍 학습 통계] T-10 추천 vs T-2 추천 누적 적중률 — 어느 시점 추천이 더 정확한지."""
+    try:
+        stat = json.load(open(SNAPSHOT_TIMING_FILE, encoding="utf-8"))
+    except Exception:
+        stat = {"t10": {"판정수": 0, "적중": 0}, "t2": {"판정수": 0, "적중": 0},
+                "동시": {"둘다적중": 0, "T-10만": 0, "T-2만": 0, "둘다실패": 0},
+                "요약": {"T-10 적중률": 0, "T-2 적중률": 0, "더 정확한 시점": "표본 부족"}}
+    return jsonify({"ok": True, "timing": stat})
 
 
 @app.route("/api/after-close/stats", methods=["GET"])
@@ -11738,6 +11978,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     except Exception as e:
         print("[경고매칭] 실패:", e)
         _al = None
+
+    # [배당판 3단계 캡처] 결과 확정 → T-10 추천 vs T-2 추천 타이밍 학습 재집계(마감직후엔 착순이 없어 보류됐던 것)
+    try:
+        if "close" in _snapshot_metas_for_race(rk):
+            _snapshot_build_compare(rk)
+    except Exception as e:
+        print("[스냅샷 타이밍] 결과학습 실패:", e)
 
     # [1·3번] 마감 후 대급락말이 실제 입상(1~3착)했는지 판정 → 입상률 학습(surge_hit 갱신)
     try:

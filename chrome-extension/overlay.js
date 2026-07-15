@@ -78,9 +78,12 @@
       _ovAnalyzeTimer = setInterval(pollOverlayAnalyze, 20000);   // 이후 20초마다 자동 재분석(배당 업데이트 반영)
     }
 
-    // ── [배당판 스냅샷] 마감 1분전 자동 + 수동 📸: 배당판+오버레이+패널 캡처 → 워터마크 합성 → 서버 저장 ──
-    var _snapDone = {};   // raceKey별 자동 캡처 1회 플래그(중복 방지)
+    // ── [배당판 스냅샷] 3단계 자동(T-10·T-2·마감후) + 수동 📸: 배당판+오버레이+패널 캡처 → 워터마크 합성 → 서버 저장 ──
+    var _snapStage = {};   // raceKey별 단계 캡처 플래그 { t10, t2, close }(단계별 1회)
     var _snapBusy = false;
+    // 단계 트리거 → 파일명 접미 · 워터마크 라벨(스냅샷 캡처 3단계)
+    var _SNAP_SUFFIX = { 'T-10': 'T-10', 'T-2': 'T-2', 'close': '마감후', 'auto_t1': '마감1분전', 'manual': '수동' };
+    var _SNAP_LABEL = { 'T-10': '마감10분전', 'T-2': '마감2분전', 'close': '마감직후', 'auto_t1': '마감1분전', 'manual': '수동캡처' };
     function _snapToast(m, ok) {
       try {
         var t = mk('div', 'position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:2147483600;'
@@ -95,14 +98,14 @@
       var now = new Date();
       var ymd = now.getFullYear() + '_' + _snap2(now.getMonth() + 1) + '_' + _snap2(now.getDate());
       var name = (rk || '경주').replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '_').slice(0, 40);
-      return ymd + '_' + name + '_' + (trigger === 'auto_t1' ? '마감1분전' : '수동') + '.png';
+      return ymd + '_' + name + '_' + (_SNAP_SUFFIX[trigger] || '수동') + '.png';
     }
     // 캡처 실행: background(CAPTURE_BOARD)로 화면 캡처 → 캔버스에 워터마크(경주명·날짜·시간) → base64 → SAVE_BOARD_SNAPSHOT
     function captureBoardSnapshot(d, trigger) {
       if (_snapBusy || killed) return;
       _snapBusy = true;
       var rk = (d && d.raceKey) || '';
-      var silentFail = (trigger === 'auto_t1');   // 자동은 실패 토스트 생략(탭 비활성 시 조용히)
+      var silentFail = (trigger !== 'manual');   // 자동 단계(T-10/T-2/마감후)는 실패 토스트 생략(탭 비활성 시 조용히)
       try {
         chrome.runtime.sendMessage({ type: 'CAPTURE_BOARD' }, function (resp) {
           if (!resp || !resp.ok || !resp.dataUrl) {
@@ -119,7 +122,7 @@
               var now = new Date();
               var stamp = now.getFullYear() + '-' + _snap2(now.getMonth() + 1) + '-' + _snap2(now.getDate())
                 + ' ' + _snap2(now.getHours()) + ':' + _snap2(now.getMinutes());
-              var label = (rk ? rk + '  ·  ' : '') + stamp + (trigger === 'auto_t1' ? '  ·  마감1분전' : '  ·  수동캡처');
+              var label = (rk ? rk + '  ·  ' : '') + stamp + '  ·  ' + (_SNAP_LABEL[trigger] || '수동캡처');
               var fs = Math.max(16, Math.round(cv.width / 55));
               ctx.font = '700 ' + fs + 'px -apple-system,BlinkMacSystemFont,sans-serif';
               var tw = ctx.measureText(label).width, pad = Math.round(fs * 0.5);
@@ -1182,14 +1185,19 @@
         head.appendChild(hR);
         panel.appendChild(head);
 
-        // [배당판 스냅샷·자동] 마감 1분 전(최종 추천 확정 시점)에 raceKey별 1회 자동 캡처
+        // [배당판 스냅샷·자동 3단계] 마감 10분전(T-10·초기배당) → 2분전(T-2·최종추천 확정) → 마감직후(최종배당). 단계별 raceKey당 1회.
         try {
           var _snapRk = (d && d.raceKey) || '';
-          var _snapLeft = deadline ? (deadline - Date.now()) : 0;
-          if (_snapRk && deadline && _snapLeft > 0 && _snapLeft <= 60000 && !d.recommendClosed
-              && d.corePicks && !_snapDone[_snapRk]) {
-            _snapDone[_snapRk] = 1;
-            captureBoardSnapshot(d, 'auto_t1');
+          var _snapLeft = deadline ? (deadline - Date.now()) : null;
+          if (_snapRk && deadline && _snapLeft != null) {
+            var _sd = _snapStage[_snapRk] || (_snapStage[_snapRk] = {});
+            if (!_sd.t10 && _snapLeft <= 600000 && _snapLeft > 120000 && d.corePicks) {
+              _sd.t10 = 1; captureBoardSnapshot(d, 'T-10');                 // 1단계: 마감 10분전(초기 배당 상태)
+            } else if (!_sd.t2 && _snapLeft <= 120000 && _snapLeft > 0 && d.corePicks) {
+              _sd.t2 = 1; captureBoardSnapshot(d, 'T-2');                   // 2단계: 마감 2분전(최종 추천 확정)
+            } else if (!_sd.close && _snapLeft <= 0 && _snapLeft >= -35000) {
+              _sd.close = 1; captureBoardSnapshot(d, 'close');             // 3단계: 마감 직후 30초 이내(최종 배당)
+            }
           }
         } catch (_) { /* */ }
 
