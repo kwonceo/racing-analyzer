@@ -16013,6 +16013,47 @@ def keiba_starters():
                     "horses": horses})
 
 
+_KEIBA_FORM_DONE = set()   # 지방경마 전적 자동수집 완료(rk) — 전적은 불변이라 경주당 1회면 충분(반복 fetch 방지)
+
+
+def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
+    """[지방경마(NAR) 전적 자동수집] 서버 배당 수집(_multi_collect_one) 시 oddspark 出走表+전5경주 전적을 함께 수집·저장(경주당 1회).
+    확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'을 해소 → _triple_analyze 통합등급 반영.
+    keirin(_keirin_autocollect_form)의 경마판. 실패해도 배당 수집엔 무영향(격리)."""
+    try:
+        if not (rk and op_track and sponsor and race_nb):
+            return
+        if rk in _KEIBA_FORM_DONE:
+            return
+        _ex = _starters_load().get(rk)                       # 이미 이 경주 oddspark 전적 있으면 스킵(재시작 대비)
+        if _ex and _ex.get("horses") and _ex.get("source") == "oddspark":
+            _KEIBA_FORM_DONE.add(rk)
+            return
+        url = ("https://www.oddspark.com/keiba/RaceList.do?raceDy=%s&opTrackCd=%s&sponsorCd=%s&raceNb=%s"
+               % (ymd, op_track, sponsor, race_nb))
+        shutsuba = _keiba_parse_shutsuba(_keirin_fetch(url))
+        if not shutsuba.get("horses"):
+            return
+        details = _keiba_fetch_details(shutsuba)
+        try:
+            _jp_jockeys_accumulate(details)                  # 일본 기수 DB 누적(복승권율)
+        except Exception:
+            pass
+        horses = _keiba_build_form(shutsuba, details)
+        store = [{"no": h["no"], "name": h["name"], "jockey": h.get("jockey", ""),
+                  "totalScore": h["totalScore"], "recentPlacings": h.get("recentPlacings") or [],
+                  "styleType": h.get("styleType"), "grade": h.get("grade")}
+                 for h in horses if h.get("no") is not None]
+        if store:
+            sdb = _starters_load()
+            sdb[rk] = {"horses": store, "t": time.time(), "source": "oddspark"}
+            _starters_save(sdb)
+            _KEIBA_FORM_DONE.add(rk)
+            print(f"[지방경마 전적·자동] {rk}: {len(store)}두 oddspark 전적 수집(bg·각질·거리변화·상3F)")
+    except Exception as e:
+        print(f"[지방경마 전적·자동] {rk} 수집 실패(무시):", e)
+
+
 # ══════════════ [KRA 공공API] 한국마사회 확정배당율 통합(B551015/API160_1) ══════════════
 #   단승(WIN)·복승(QNL)·쌍승(EXA)·삼복승(TLA)을 data.go.kr 에서 서버가 직접 수집 → 파이프라인 주입.
 #   ⚠ 기존 Chrome 확장(한국경마 배당) 수집은 폴백으로 그대로 유지. KRA는 '추가 소스'.
@@ -18899,6 +18940,13 @@ def _multi_collect_one(track, race, ymd):
         if is_cycle:
             try:
                 _keirin_autocollect_form(key, track.get("joCode"), ymd, rno)
+            except Exception:
+                pass
+        else:
+            # [지방경마(NAR) 전적 자동 수집] 확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'
+            #   해소 — 배당과 동시에 oddspark 出走表+전적을 수집·저장(경주당 1회·통합등급 반영). keirin 대칭.
+            try:
+                _keiba_autocollect_form(key, track.get("opTrackCd"), track.get("sponsorCd"), ymd, rno)
             except Exception:
                 pass
         return key

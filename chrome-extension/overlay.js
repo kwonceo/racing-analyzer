@@ -954,7 +954,7 @@
       var _fq = (d.corePicks && d.corePicks.finalQuinellas) || [];
       // [패널 일치 폴백] finalQuinellas 가 비면(엄격 게이트로 메인 0) 패널과 동일하게 confQuinellas→quinella 로 강조
       //   → 패널 추천 조합(1+5·1+7 등)이 배당판에도 반드시 초록/파랑으로 표시됨(불일치 제거).
-      if (!_fq.length && d.corePicks) {
+      if (!_fq.length && d.corePicks && !d.corePicks.dansung) {   // [패널 일치] 단통은 폴백 금지(패널 updatePanel과 동일 조건)
         var _cq0 = d.corePicks.confQuinellas || [];
         if (_cq0.length) _fq = _cq0.slice(0, 2);
         else if (d.corePicks.quinella && d.corePicks.quinella.length === 2) {
@@ -984,6 +984,16 @@
         if (greenSet[k] || blueSet[k]) return;
         specialSet[k] = 1;
         specialTag[k] = 'BMED 특별' + (q.reason ? ' · ' + q.reason : '') + (q.score != null ? ' · 신호' + q.score + '점' : '');
+      });
+
+      // [배당 소스 통일] 강조 셀(초록/파랑/💎)에 서버(corePicks) 배당을 배지로 표시 →
+      //   배당판(사설 asyukk) 숫자와 달라도 패널과 '동일 조합·동일 배당(oddspark)'을 셀 위에 직접 보여줌.
+      //   색상 결정은 이미 corePicks combo(greenSet/blueSet/specialSet)로만 함(DOM 배당값 미사용) — 여기서 표시 배당만 서버값으로 통일.
+      var _srvOdds = {};
+      _fq.forEach(function (q) { var c = (q.combo || []).map(Number); if (c.length === 2 && q.odds != null) _srvOdds[ckey(c[0], c[1])] = q.odds; });
+      ((d.corePicks && d.corePicks.bmedSpecial) || []).forEach(function (q) {
+        var c = (q.combo || []).map(Number);
+        if (c.length === 2 && q.odds != null) { var _k = ckey(c[0], c[1]); if (_srvOdds[_k] == null) _srvOdds[_k] = q.odds; }
       });
 
       // [헤더 ⭐ 말 집합 선계산] 초록+파랑 조합에 등장하는 말(starMax 상한) = 실제 헤더에 ⭐ 붙는 말.
@@ -1040,7 +1050,17 @@
             'position:absolute;top:-8px;right:-6px;font-size:11px;line-height:1;'
             + 'background:#0f172a;border-radius:6px;padding:1px 2px;box-shadow:0 1px 2px rgba(0,0,0,.5)', badgeTxt));
         }
-        span.title = cell.a + '-' + cell.b + ' = ' + cell.odds + '배 · ' + stl.tag;
+        // [배당 소스 통일] 강조 셀 좌하단에 서버(corePicks) 배당 배지 → 패널과 동일 배당 표시(배당판 사설 숫자와 달라도).
+        var _so = _srvOdds[ckey(cell.a, cell.b)];
+        if (_so != null && (stl.lock || stl.special || ctx.blueSet[ckey(cell.a, cell.b)])) {
+          span.appendChild(mk('span',
+            'position:absolute;bottom:-7px;left:-4px;font:800 10px/1 sans-serif;color:#0f172a;'
+            + 'background:' + stl.col + ';border-radius:5px;padding:1px 3px;box-shadow:0 1px 2px rgba(0,0,0,.5)',
+            _so + '배'));
+        }
+        span.title = cell.a + '-' + cell.b + (_so != null
+          ? ' · 서버 ' + _so + '배 · ' + stl.tag + ' (배당판 사설 ' + cell.odds + '배)'
+          : ' = ' + cell.odds + '배 · ' + stl.tag);
         layer.appendChild(span);
         boardItems.push({ el: cell.el, span: span });
       });
