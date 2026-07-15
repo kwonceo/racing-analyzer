@@ -81,6 +81,7 @@
     // ── [배당판 스냅샷] 3단계 자동(T-10·T-2·마감후) + 수동 📸: 배당판+오버레이+패널 캡처 → 워터마크 합성 → 서버 저장 ──
     var _snapStage = {};   // raceKey별 단계 캡처 플래그 { t10, t2, close }(단계별 1회)
     var _snapBusy = false;
+    var _lastTransitionRk = '';   // [경주 전환 클리어] 마지막으로 즉시 재분석 트리거한 새 경주(중복 트리거 방지)
     // 단계 트리거 → 파일명 접미 · 워터마크 라벨(스냅샷 캡처 3단계)
     var _SNAP_SUFFIX = { 'T-10': 'T-10', 'T-2': 'T-2', 'close': '마감후', 'auto_t1': '마감1분전', 'manual': '수동' };
     var _SNAP_LABEL = { 'T-10': '마감10분전', 'T-2': '마감2분전', 'close': '마감직후', 'auto_t1': '마감1분전', 'manual': '수동캡처' };
@@ -1185,19 +1186,39 @@
         head.appendChild(hR);
         panel.appendChild(head);
 
-        // [분석기·오버레이 raceKey 동기화] 배당판이 보여주는 경주(st.raceKey)와 실제 분석된 경주(d.raceKey)가
-        //   다르면 = 다른 탭을 보고 있거나 전송이 꼬인 상태 → 빨강 경고 배너("⚠️ 경주 불일치 — 분석기 확인").
+        // [자동전송 역할 재정의·수집모드 배지] NAR 지방경마·경륜 = 서버 oddspark 전담(🔄 서버 자동수집 중),
+        //   JRA 중앙·한국·경정·바이크 = 확장 수집(📡 확장 수집 중). d.category(분석 결과) 기준.
+        try {
+          var _mc = (d && (d.category || (d.corePicks && d.corePicks.category))) || '';
+          var _serverCol = (_mc === 'japan_local' || _mc === 'cycle');
+          if (_mc) {
+            var _cm = mk('div', 'margin:0 0 6px;padding:5px 9px;border-radius:7px;font-size:12px;font-weight:800;' +
+              (_serverCol ? 'border:1px solid #22d3ee;background:rgba(34,211,238,.14);color:#67e8f9'
+                          : 'border:1px solid #a78bfa;background:rgba(167,139,250,.14);color:#c4b5fd'),
+              _serverCol ? '🔄 서버 자동수집 중 (oddspark)' : '📡 확장 수집 중');
+            panel.appendChild(_cm);
+          }
+        } catch (_) { /* */ }
+
+        // [경주 전환 클리어] 배당판이 새 경주로 넘어갔는데(st.raceKey) 분석은 이전 경주(d.raceKey)면
+        //   = 경주 전환 직후 → 이전 추천(corePicks·유력마·복병) 표시를 즉시 숨기고 "🔄 새 경주 분석 중..." 표시 +
+        //   새 경주로 즉시 재분석 트리거. 분석 완료(analyzeStatus 갱신)되면 다음 렌더에서 새 결과가 표시됨.
         //   두 raceKey 는 날짜 접두 차이를 무시하고 "경마장 + N경주" 꼬리로 비교(오탐 방지).
         try {
           var _rkTail = function (r) { return String(r || '').replace(/\d{4}-\d{2}-\d{2}/g, '').replace(/\s+/g, ' ').trim(); };
           var _liveRk = _rkTail(st.raceKey);
           var _anaRk = _rkTail(d && d.raceKey);
           if (_liveRk && _anaRk && _liveRk !== _anaRk) {
-            var warn = mk('div', 'margin:0 0 6px;padding:6px 9px;border-radius:7px;border:1px solid #ef4444;background:rgba(239,68,68,.16)');
-            warn.appendChild(mk('div', 'font-weight:900;font-size:13px;color:#fca5a5', '⚠️ 경주 불일치 — 분석기 확인'));
-            warn.appendChild(mk('div', 'font-size:11px;color:#fecaca;margin-top:2px', '배당판: ' + _liveRk + '  ·  분석: ' + _anaRk));
-            warn.appendChild(mk('div', 'font-size:11px;color:#fca5a5;margin-top:1px', '아래 추천은 분석된 경주 기준입니다(배당판과 다를 수 있음).'));
-            panel.appendChild(warn);
+            var trans = mk('div', 'margin:0 0 6px;padding:8px 10px;border-radius:7px;border:1px solid #38bdf8;background:rgba(56,189,248,.14)');
+            trans.appendChild(mk('div', 'font-weight:900;font-size:14px;color:#7dd3fc', '🔄 새 경주 분석 중...'));
+            trans.appendChild(mk('div', 'font-weight:800;font-size:14px;color:#e2e8f0;margin-top:2px', st.raceKey || _liveRk));
+            trans.appendChild(mk('div', 'font-size:11px;color:#94a3b8;margin-top:2px', '이전 경주 추천을 초기화했습니다 · 잠시만 기다려 주세요'));
+            panel.appendChild(trans);
+            if (_lastTransitionRk !== _liveRk) {   // 새 경주 감지 → 즉시 1회 재분석(중복 트리거 방지)
+              _lastTransitionRk = _liveRk;
+              try { pollOverlayAnalyze(); } catch (_) { /* */ }
+            }
+            return;   // ⬅ 이전 경주 corePicks/유력마/복병/추천 렌더 억제(전환 클리어)
           }
         } catch (_) { /* */ }
 

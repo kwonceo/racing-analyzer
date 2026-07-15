@@ -8441,6 +8441,14 @@ def _triple_analyze(rk, rec):
                     # 이 경주 출마표(배당과 60%+ 겹침)일 때만 최대 출전마번으로 상한 강화(이전 경주 작은 출마표 오적용 방지).
                     if _snos and len(_rec_valid & set(_snos)) >= max(1, int(len(_rec_valid) * 0.6)):
                         _hardcap = min(_hardcap, max(_snos))
+                # [4번 강화] 단승(curWin) = 모든 출전마에 배당이 있는 '출전 두수 정확 지표'(특히 한국 KRA는 단승 완전 수집).
+                #   1..max 의 80%+ 가 채워진 '완전 필드'일 때만 그 최대 마번으로 상한 강화(단승 부분수집 시 오제거 방지).
+                try:
+                    _wnos = sorted(int(k) for k, v in (curWin or {}).items() if v and float(v) > 0)
+                    if len(_wnos) >= 3 and len(_wnos) >= max(1, int(_wnos[-1] * 0.8)):
+                        _hardcap = min(_hardcap, _wnos[-1])
+                except Exception:
+                    pass
                 _over = {n for n in _rec_valid if n > _hardcap}
                 if _over:
                     _rec_valid = {n for n in _rec_valid if n <= _hardcap}
@@ -16164,14 +16172,23 @@ def _kra_collect_one(rk, meet, rc_date, rc_no):
 
 
 def _kra_auto_loop():
-    """30초 간격으로 watch 등록된 KRA 경주 배당 자동수집(데몬)."""
+    """30초 간격으로 watch 등록된 KRA 경주 배당 자동수집(데몬). 수집 결과(시각·건수·성공)를 watch 레코드에 기록."""
     while True:
         try:
             with _KRA_WATCH_LOCK:
                 targets = list(_KRA_WATCH.items())
             for rk, w in targets:
                 try:
-                    _kra_collect_one(rk, w["meet"], w["rc_date"], w["rc_no"])
+                    ok, info = _kra_collect_one(rk, w["meet"], w["rc_date"], w["rc_no"])
+                    # [상태표시] 마지막 수집 시각·성공여부·건수를 watch 레코드에 기록(프론트 "마지막 수집: HH:MM:SS"용)
+                    with _KRA_WATCH_LOCK:
+                        if rk in _KRA_WATCH:
+                            _KRA_WATCH[rk]["lastAt"] = time.time()
+                            _KRA_WATCH[rk]["lastOk"] = bool(ok)
+                            if ok:
+                                _KRA_WATCH[rk]["lastCounts"] = info.get("counts")
+                            else:
+                                _KRA_WATCH[rk]["lastError"] = info.get("error")
                 except Exception as e:
                     print("[KRA 자동수집] %s 실패(무시):" % rk, e)
         except Exception as e:
@@ -16250,11 +16267,27 @@ def kra_unwatch():
 
 @app.route("/api/kra/status", methods=["GET"])
 def kra_status():
-    """[KRA 상태] 키 설정 여부·자동수집 대상 목록."""
+    """[KRA 상태] 키 설정 여부·자동수집 대상·마지막 수집 시각/건수.
+    ?raceKey= 주면 그 경주의 마지막 수집 상세(프론트 '✅ 연결됨 · 마지막 수집: HH:MM:SS')."""
+    rk_q = (request.args.get("raceKey") or "").strip()
     with _KRA_WATCH_LOCK:
-        watch = {k: v for k, v in _KRA_WATCH.items()}
+        watch = {k: dict(v) for k, v in _KRA_WATCH.items()}
+    # 전역 최근 수집 시각(모든 watch 중 가장 최근)
+    last_at = max([w.get("lastAt") or 0 for w in watch.values()] or [0])
+    def _fmt(ts):
+        return time.strftime("%H:%M:%S", time.localtime(ts)) if ts else None
+    detail = None
+    if rk_q:
+        w = watch.get(rk_q) or watch.get(_resolve_race_key(rk_q, list(watch.keys())) or "")
+        if w:
+            detail = {"raceKey": rk_q, "watching": True, "lastAt": _fmt(w.get("lastAt")),
+                      "lastOk": w.get("lastOk"), "lastCounts": w.get("lastCounts"),
+                      "lastError": w.get("lastError")}
+        else:
+            detail = {"raceKey": rk_q, "watching": False}
     return jsonify({"keySet": bool(_kra_api_key()), "autoRunning": _kra_auto_started,
-                    "watching": list(watch.keys()), "count": len(watch)})
+                    "watching": list(watch.keys()), "count": len(watch),
+                    "lastAt": _fmt(last_at), "detail": detail})
 
 
 # ── [KRA 승인 API 연동] 활성 확인된 공공 API(B551015) 서버 조회 ──

@@ -911,6 +911,25 @@
     return isCentral ? 'japan_central' : 'japan_local';
   }
 
+  // [자동전송 역할 재정의] NAR 지방경마(japan_local)·경륜(cycle)은 서버가 oddspark로 직접 자동수집 중 →
+  //   확장 자동전송은 중복·꼬임(다른 경주 덮어씌움·유령마번) 유발이라 auto 경로에서 아예 차단(서버 전담).
+  //   JRA 중앙경마·한국경마(KRA 라이브)·경정·바이크·결과 자동수집은 서버 직접수집이 없어 확장 유지.
+  async function _currentCategory() {
+    try {
+      let rk = ''; try { rk = extractRaceKey() || ''; } catch (_) { rk = ''; }
+      const { sport: popupSport, market, japanType, raceKey: ov } = await getSettings();
+      const eff = resolveSport(popupSport, rk || ov);
+      const isKorea = isKoreaMode(rk || ov, market, ov);
+      const isCentral = (japanType === 'central') || detectCentralHint();
+      return computeCategory(eff, isKorea, isCentral);
+    } catch (_) { return ''; }
+  }
+  function _isServerCollectedCat(cat) { return cat === 'japan_local' || cat === 'cycle'; }
+  // 오버레이/팝업이 읽어 수집 모드 배지 표시("🔄 서버 자동수집 중" vs "📡 확장 수집 중")
+  function _markCollectMode(cat) {
+    try { chrome.storage.local.set({ collectMode: { serverCollected: _isServerCollectedCat(cat), category: cat || '', at: Date.now() } }); } catch (_) { /* */ }
+  }
+
   // [경주 자동추종] 자동 수집(auto·race-change·bg)은 '지금 배당판에 표시된 경주'(extractRaceKey)를
   //   우선한다 — 저장된 raceKey(override)가 이전 경주로 굳어, 배당판이 다음 경주로 넘어가도 자동
   //   엔진이 계속 이전 경주를 수집하던 버그를 막는다(수동 버튼만 되던 증상의 원인).
@@ -2067,6 +2086,14 @@
         //   background 엔진은 autoSend 게이트가 있지만, 끄는 순간 이미 발사된 틱은 여기서 최종 차단.
         const { autoSend: _on } = await getSettings();
         if (!_on) { sendResponse({ ok: false, skipped: true, error: '자동전송 OFF — 수집/탭클릭 생략' }); return; }
+        // [자동전송 역할 재정의] NAR 지방경마·경륜은 서버 oddspark 전담 → 확장 auto 수집 차단(서버로 전송 안 함)
+        const _autoCat = await _currentCategory();
+        _markCollectMode(_autoCat);
+        if (_isServerCollectedCat(_autoCat)) {
+          console.log('[역할재정의] ' + _autoCat + ' → 서버 자동수집 종목이라 확장 자동전송 차단(중복·꼬임 방지)');
+          sendResponse({ ok: false, skipped: true, serverCollected: true, category: _autoCat, error: '서버 자동수집 종목 — 확장 전송 차단' });
+          return;
+        }
         _autoRunning = true;
         try {
           const { timerDeadline } = await getSettings();
@@ -2147,8 +2174,15 @@
     // 서버에 자동 전송. storage.raceKey 는 위에서 이미 갱신됐고(팝업/분석기용) 자동엔진은 board-first
     //   로 배당판을 따라가므로, 진행중이면 다음 tick 에 맡긴다. 직접 수집이 실패하면 _lastWatchedRace 를
     //   비워 다음 tick 에 재시도(수집이 한 번은 반드시 반영되도록).
+    // [자동전송 역할 재정의] NAR·경륜은 서버 전담 → race-change 자동수집도 차단(raceKey 표시 갱신은 위에서 이미 완료).
     if (!_autoRunning) {
-      collectTriple('race-change').catch(() => { _lastWatchedRace = ''; });
+      const _cat = await _currentCategory();
+      _markCollectMode(_cat);
+      if (_isServerCollectedCat(_cat)) {
+        console.log('[역할재정의] ' + _cat + ' → race-change 자동수집 차단(서버 전담)');
+      } else {
+        collectTriple('race-change').catch(() => { _lastWatchedRace = ''; });
+      }
     }
   }
   // [종목 자동감지 강화] URL 변경 또는 페이지 종목이 바뀌면 sport를 재감지하고, 직전 전송 종목과 다르면
@@ -2171,7 +2205,11 @@
         _lastSentSport = eff;
         _lastWatchedRace = '';                          // 경주감지 상태도 리셋 → 다음 tick 확실히 새 수집
         if (!_autoRunning) {
-          collectTriple('sport-change').catch(() => { /* */ });
+          // [자동전송 역할 재정의] 바뀐 종목이 NAR·경륜이면 서버 전담 → sport-change 자동수집 차단
+          const _cat = await _currentCategory();
+          _markCollectMode(_cat);
+          if (!_isServerCollectedCat(_cat)) collectTriple('sport-change').catch(() => { /* */ });
+          else console.log('[역할재정의] ' + _cat + ' → sport-change 자동수집 차단(서버 전담)');
         }
       }
     } catch (_) { /* */ }
@@ -2205,6 +2243,8 @@
       // [4번] 경륜·경정·바이크(사설 asyukk 배당판) 전부 즉시 수집 — 배당판 열리는 즉시 조기 수집 시작(T-10분+ 흐름 포착).
       var _sp = resolveSport(sport, rk);
       if (_sp !== 'cycle' && _sp !== 'boat' && _sp !== 'bike') return;
+      // [자동전송 역할 재정의] 경륜(cycle)은 서버 oddspark 전담 → 확장 즉시수집 차단. 경정·바이크는 서버 미커버라 유지.
+      if (_sp === 'cycle') { _markCollectMode('cycle'); console.log('[역할재정의] 경륜 → 확장 즉시수집 차단(서버 전담)'); return; }
       if (_autoRunning) return;                       // 이미 수집 중이면 스킵
       _lastKeirinKick = now;
       console.log('[' + _sp + ' 자동수집] ' + reason + ' + 자동전송 ON → 배당판 열리는 즉시 수집(수동 버튼 불필요)');

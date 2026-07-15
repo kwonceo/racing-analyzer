@@ -5508,10 +5508,58 @@
 
   // ---------- [통합분석] 한국경마 PDF 전적 + 배당판 자동 연결 ----------
   //  전적 초안(A/B/C/D) → 확장이 같은 경주번호로 배당 수집 → 자동 통합(전적40%+배당60%) 재조정.
-  let _koreaOddsTimer = null, _koreaOddsTitle = null;
+  let _koreaOddsTimer = null, _koreaOddsTitle = null, _kraWatchedTitle = null;
 
   function stopKoreaOddsWatch() {
     if (_koreaOddsTimer) { clearInterval(_koreaOddsTimer); _koreaOddsTimer = null; }
+  }
+
+  // [KRA 공공API 자동 배선] 한국 탭에서 경주 활성화 시 그 경주를 /api/kra/watch 에 등록 →
+  //   서버 데몬이 30초마다 KRA 확정배당(단승·복승·쌍승·삼복승)을 수집·파이프라인 주입.
+  //   경마 당일(금·토·일)엔 확정배당 수집→결과 자동판정·학습, 경마 전엔 확장 실시간 배당이 병행(둘 다 유지).
+  function _ymdToday() {
+    const d = new Date();
+    return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+  }
+  async function registerKraWatch(title) {
+    const { venue, num } = koreaRaceParts(title);
+    if (!venue || num == null) return;                 // 경마장·경주번호 파싱 실패 → 스킵(무해)
+    // 직전 등록 경주는 해제(watch 누적 방지)
+    if (_kraWatchedTitle && _kraWatchedTitle !== title) {
+      try { await fetch('/api/kra/unwatch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: _kraWatchedTitle }) }); } catch (_) { /* */ }
+    }
+    try {
+      await fetch('/api/kra/watch', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raceKey: title, meet: venue, rc_no: num, rc_date: _ymdToday() }),
+      });
+      _kraWatchedTitle = title;
+    } catch (_) { /* 서버 미기동 등 → 무해(확장 폴백 유지) */ }
+  }
+  async function updateKraApiStatus(title) {
+    const host = document.getElementById('koreaOddsStatus');
+    if (!host) return;
+    let box = document.getElementById('kraApiStatus');
+    if (!box) {                                         // koreaOddsStatus 바로 위에 KRA 상태줄 삽입(기존 UI 무변경·가산)
+      box = document.createElement('div'); box.id = 'kraApiStatus'; box.style.marginBottom = '6px';
+      host.parentNode.insertBefore(box, host);
+    }
+    let j = null;
+    try { j = await (await fetch('/api/kra/status?raceKey=' + encodeURIComponent(title || ''))).json(); } catch (_) { box.innerHTML = ''; return; }
+    if (!j || !j.keySet) {
+      box.innerHTML = `<div class="hint" style="padding:6px 9px;background:rgba(148,163,184,.12);border-left:3px solid #94a3b8;border-radius:6px;color:#94a3b8">⚙️ KRA API 키 미설정(.env KRA_API_KEY) — 확장 배당만 사용</div>`;
+      return;
+    }
+    const d = j.detail || {};
+    if (d.watching && d.lastAt) {
+      const c = d.lastCounts || {};
+      box.innerHTML = `<div class="hint" style="padding:6px 9px;background:rgba(56,211,159,.14);border-left:3px solid #38d39f;border-radius:6px;color:#38d39f">
+        ✅ <b>KRA API 연결됨</b> · 마지막 수집: <b>${esc(d.lastAt)}</b> <span style="color:#7dd3fc">(복승 ${c.quinella || 0}·삼복승 ${c.trio || 0})</span></div>`;
+    } else if (d.watching) {
+      box.innerHTML = `<div class="hint" style="padding:6px 9px;background:rgba(245,158,11,.12);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b">🟡 <b>KRA API 등록됨</b> · 수집 대기중(경마 당일·발매 시간에 확정배당 수신)</div>`;
+    } else {
+      box.innerHTML = '';                               // 이 경주는 미등록(파싱 실패 등) → 표시 없음
+    }
   }
 
   function koreaRaceParts(title) {
@@ -5537,9 +5585,10 @@
     setKoreaOddsStatus('waiting', title);
     renderKoreaFormDraft(title);   // [복구] 배당 연동 전에도 전적 기준 통합 초안(유력마 TOP5·조합)을 즉시 표시
     renderKoreaTimeline(title);
-    const tick = () => pollKoreaOdds(title, race, form);
+    registerKraWatch(title);       // [KRA 자동배선] 이 경주를 서버 KRA 30초 자동수집에 등록(확정배당·결과판정)
+    const tick = () => { pollKoreaOdds(title, race, form); updateKraApiStatus(title); };
     await tick();
-    // [2번] 30초 간격 수집·변동 감시 (확장 [전체 자동 수집] 주기와 정렬)
+    // [2번] 30초 간격 수집·변동 감시 (확장 [전체 자동 수집] 주기와 정렬) + KRA API 상태 갱신
     _koreaOddsTimer = setInterval(tick, 30000);
   }
 
