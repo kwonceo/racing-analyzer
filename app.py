@@ -8412,6 +8412,18 @@ def _triple_analyze(rk, rec):
             # [존재하지 않는 말번호 추천 방어] 실제 출전(starters/출마표) 말번호가 있으면 그 범위 밖(배당 유령·이전 경주 잔존)을
             #   추천용 valid_nos 에서 제외 → finalQuinellas/특별/삼복승 모두 실제 출전마만(10두면 11번↑ 자동 제거).
             _rec_valid = set(int(x) for x in (valid_nos or []))
+            # [두수 근본·배당 우선] 복승 배당판에 조합이 충분히(≥3개) 등장하는 마번 = 이 경주 실제 출전마(확정).
+            #   출마표(starters)가 부분수집(예: 실제 12두인데 9두만)이어도 배당이 10·11·12를 명확히 보여주면 배당을 신뢰
+            #   → 아래 유령제거·하드캡이 실제 출전마를 깎지 못하게 보호. 진짜 유령(이전경주 잔존)은 조합이 1~2개뿐이라
+            #   이 집합에 안 들어옴(제거 로직 그대로 유지). 사용자 요청: "배당판 실제 셀 수로 두수 재계산".
+            _qcnt = {}
+            for _kk in curQ:
+                for _hh in _kk:
+                    try:
+                        _qcnt[int(_hh)] = _qcnt.get(int(_hh), 0) + 1
+                    except (TypeError, ValueError):
+                        pass
+            _odds_attested = {n for n in _rec_valid if _qcnt.get(n, 0) >= 3}
             try:
                 _srec = _starters_load().get(rk)
                 _skip_starter = (_analyze_sport in ("cycle", "boat", "bike") and (_srec or {}).get("source") == "korea")
@@ -8425,9 +8437,9 @@ def _triple_analyze(rk, rec):
                     # 출마표가 현재 배당과 대체로 일치(60%+)할 때만 적용 = 이 경주 출전표(이전 경주 잔존 출마표로 유효 배당을 잘못 지우는 것 방지).
                     _overlap = len(_rec_valid & _starter_nos)
                     if _starter_nos and _overlap >= max(1, int(len(_rec_valid) * 0.6)):
-                        _ghost = _rec_valid - _starter_nos
+                        _ghost = (_rec_valid - _starter_nos) - _odds_attested   # 배당 충분등장(≥3조합) 마번은 유령 아님(출마표 부분수집 방어)
                         if _ghost:
-                            _rec_valid = _rec_valid & _starter_nos
+                            _rec_valid = _rec_valid - _ghost                    # 배당 미등장 유령만 제거(실제 출전마 보존)
                             print("[유령마번 제외] %s: 배당엔 있으나 출전 아님 %s → 추천 제외" % (rk, sorted(_ghost)))
             except Exception as _ge:
                 print("[유령마번 방어] 실패(무시):", _ge)
@@ -8455,9 +8467,9 @@ def _triple_analyze(rk, rec):
                         _hardcap = min(_hardcap, _wnos[-1])
                 except Exception:
                     pass
-                _over = {n for n in _rec_valid if n > _hardcap}
+                _over = {n for n in _rec_valid if n > _hardcap and n not in _odds_attested}   # 배당 충분등장 마번은 하드캡 제외(실제 출전마)
                 if _over:
-                    _rec_valid = {n for n in _rec_valid if n <= _hardcap}
+                    _rec_valid = {n for n in _rec_valid if n not in _over}
                     print("[유령마번 하드캡] %s: 출전 두수 초과 마번 %s 제거(상한 %d)" % (rk, sorted(_over), _hardcap))
             except Exception as _hce:
                 print("[유령마번 하드캡] 실패(무시):", _hce)
