@@ -16880,13 +16880,34 @@ def _kra_collect_one(rk, meet, rc_date, rc_no):
     return True, {"counts": {"win": len(win), "quinella": len(q), "exacta": len(x), "trio": len(tr)}}
 
 
+# [KRA 할당량 보호] watch 자동해제 안전장치 — 프론트가 unwatch 를 못 보내도(탭 닫힘·크래시·경주 종료)
+#   종료된 경주를 30초마다 무기한 폴링해 배당 API 일일 할당량을 태우던 문제 방어(할당량 초과=429 근본원인).
+_KRA_WATCH_FAIL_MAX = 20     # 연속 실패 20회(=약 10분) → 자동 해제(마감/종료/키오류로 계속 실패하는 경주 정리)
+_KRA_WATCH_MAX_AGE = 10800   # 등록 후 3시간 경과 → 자동 해제(한 경주 발주~마감은 길어야 수십 분)
+
+
 def _kra_auto_loop():
-    """30초 간격으로 watch 등록된 KRA 경주 배당 자동수집(데몬). 수집 결과(시각·건수·성공)를 watch 레코드에 기록."""
+    """30초 간격으로 watch 등록된 KRA 경주 배당 자동수집(데몬). 수집 결과(시각·건수·성공)를 watch 레코드에 기록.
+    [할당량 보호] 지난 날짜·장기 미해제·연속 실패 watch 는 자동 해제해 배당 API 낭비 호출을 막는다(기존 수집 로직 불변)."""
     while True:
         try:
+            _today = time.strftime("%Y%m%d")
             with _KRA_WATCH_LOCK:
                 targets = list(_KRA_WATCH.items())
             for rk, w in targets:
+                # [자동해제 ①날짜 만료] rc_date 가 오늘보다 이전 = 어제 경주 잔존 → 폴링 중단(할당량 낭비 차단)
+                _rcd = str(w.get("rc_date") or "")
+                if _rcd and _rcd.isdigit() and _rcd < _today:
+                    with _KRA_WATCH_LOCK:
+                        _KRA_WATCH.pop(rk, None)
+                    print("[KRA 자동수집] %s 자동해제(지난 날짜 %s < %s) — 할당량 보호" % (rk, _rcd, _today))
+                    continue
+                # [자동해제 ②장기 미해제] 등록 후 3시간+ → 종료됐는데 unwatch 안 온 것으로 간주
+                if (time.time() - (w.get("t") or 0)) > _KRA_WATCH_MAX_AGE:
+                    with _KRA_WATCH_LOCK:
+                        _KRA_WATCH.pop(rk, None)
+                    print("[KRA 자동수집] %s 자동해제(등록 3시간+ 경과) — 할당량 보호" % rk)
+                    continue
                 try:
                     ok, info = _kra_collect_one(rk, w["meet"], w["rc_date"], w["rc_no"])
                     # [상태표시] 마지막 수집 시각·성공여부·건수를 watch 레코드에 기록(프론트 "마지막 수집: HH:MM:SS"용)
@@ -16896,8 +16917,16 @@ def _kra_auto_loop():
                             _KRA_WATCH[rk]["lastOk"] = bool(ok)
                             if ok:
                                 _KRA_WATCH[rk]["lastCounts"] = info.get("counts")
+                                _KRA_WATCH[rk]["failStreak"] = 0        # 성공 시 실패 카운트 리셋
                             else:
                                 _KRA_WATCH[rk]["lastError"] = info.get("error")
+                                _fs = (_KRA_WATCH[rk].get("failStreak") or 0) + 1
+                                _KRA_WATCH[rk]["failStreak"] = _fs
+                                # [자동해제 ③연속 실패] 20회 연속 실패(마감·키오류·429 지속) → 해제(무한 낭비 호출 차단)
+                                if _fs >= _KRA_WATCH_FAIL_MAX:
+                                    _KRA_WATCH.pop(rk, None)
+                                    print("[KRA 자동수집] %s 자동해제(연속 실패 %d회: %s) — 할당량 보호"
+                                          % (rk, _fs, info.get("error")))
                 except Exception as e:
                     print("[KRA 자동수집] %s 실패(무시):" % rk, e)
         except Exception as e:
