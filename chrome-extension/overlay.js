@@ -760,6 +760,7 @@
     var boardItems = [];      // [{el, span}] 배당 셀 ↔ 오버레이 셀 매핑(재배치용)
     var boardHdrItems = [];   // [{el, span}] 헤더(마번) ↔ 오버레이 매핑
     var boardBound = false, boardRaf = 0;
+    var boardRO = null;       // [밀림 방지] 배당판 표 크기·레이아웃 변화 감시(ResizeObserver)
     var BCOL = { fav: '#3b82f6', drop: '#ef4444', rec: '#22c55e', warn: '#eab308', special: '#f0abfc' };
 
     function pureIntT(s) { s = (s == null ? '' : String(s)).trim(); return /^\d{1,2}$/.test(s) ? parseInt(s, 10) : null; }
@@ -788,6 +789,35 @@
       var isOdds = oddsClass
         ? function (td) { return td.classList && td.classList.contains(oddsClass); }
         : function (td) { return /^\d+\.\d+$/.test((td.textContent || '').trim()); };
+
+      // ═══ [셀 밀림 근본 수정] 열 번호를 '개수 추측'이 아니라 **기하 정렬**로 확정 ═══
+      //   기존 로직은 배당 셀 개수가 all/upper/lower 중 무엇과 같은지로 열을 단정했다.
+      //   그 추측이 한 번 빗나가면 **그 행의 모든 셀이 통째로 밀린다**(빈칸·출주취소·colspan·
+      //   삼각 방향이 예상과 다르면 즉시 발생. upper 를 lower 보다 먼저 검사해 두 개수가 같은
+      //   행에선 무조건 upper 로 단정하는 문제도 있었다).
+      //   → 각 배당 셀의 **가로 중심이 어느 헤더(마번) 셀의 가로 범위에 들어가는지**로 열을 정한다.
+      //     실제 화면 좌표(getBoundingClientRect) 기반이라 두수(7·8·10·18두)·삼각 방향·빈칸과
+      //     무관하게 항상 정확하다. 기하 측정이 불가할 때만 기존 개수 추측으로 폴백(무삭제).
+      var _hdrBox = [];
+      hdrEls.forEach(function (h) {
+        var hr; try { hr = h.el.getBoundingClientRect(); } catch (_) { return; }
+        if (!hr || hr.width <= 0) return;
+        _hdrBox.push({ no: h.no, left: hr.left, right: hr.right, cx: hr.left + hr.width / 2 });
+      });
+      // 헤더가 화면에 안 잡히면(숨김·미렌더) 기하 매핑 불가 → 폴백 사용
+      var _geo = _hdrBox.length >= 2 ? function (td) {
+        var r; try { r = td.getBoundingClientRect(); } catch (_) { return null; }
+        if (!r || r.width <= 0) return null;
+        var cx = r.left + r.width / 2, best = null, bd = 1e9;
+        for (var i = 0; i < _hdrBox.length; i++) {
+          if (cx >= _hdrBox[i].left && cx <= _hdrBox[i].right) return _hdrBox[i].no;   // 헤더 열 범위 안 = 확정
+          var dd = Math.abs(cx - _hdrBox[i].cx);
+          if (dd < bd) { bd = dd; best = _hdrBox[i]; }
+        }
+        // 어떤 헤더 범위에도 안 들면 가장 가까운 헤더 — 단, 셀 폭 이내일 때만(그 이상 어긋나면 매핑 포기)
+        return (best && bd <= r.width) ? best.no : null;
+      } : null;
+
       var cells = [];
       rows.forEach(function (r) {
         if (r === headerRow) return;
@@ -796,6 +826,15 @@
         if (rowNo == null) return;
         var oddsCells = rc.filter(isOdds);
         if (!oddsCells.length) return;
+        if (_geo) {
+          // [1순위] 기하 정렬 — 셀 하나하나를 실제 화면 위치로 헤더 열에 대응(밀림 원천 차단)
+          oddsCells.forEach(function (oc) {
+            var colNo = _geo(oc), val = numT(oc.textContent);
+            if (colNo != null && colNo !== rowNo && val != null && val >= 1.0) cells.push({ a: rowNo, b: colNo, odds: val, el: oc });
+          });
+          return;
+        }
+        // [폴백·기존 로직 보존] 기하 측정 불가 시에만 개수 추측 → cellIndex 순으로 대응
         var all = headerNos.filter(function (n) { return n !== rowNo; });
         var upper = headerNos.filter(function (n) { return n > rowNo; });
         var lower = headerNos.filter(function (n) { return n < rowNo; });
@@ -852,6 +891,7 @@
 
     function removeBoardMatrix() {
       try { var b = byId(BOARD_ID); if (b) b.remove(); } catch (_) { /* */ }
+      try { if (boardRO) { boardRO.disconnect(); boardRO = null; } } catch (_) { /* */ }
       boardItems = []; boardHdrItems = [];
     }
 
@@ -1037,6 +1077,17 @@
       var layer = mk('div', 'position:fixed;left:0;top:0;width:0;height:0;z-index:2147482800;pointer-events:none');
       layer.id = BOARD_ID;
       root().appendChild(layer);
+
+      // [셀 밀림 방지] 배당판 표의 크기·레이아웃 변화에도 즉시 재정렬.
+      //   scroll/resize 이벤트만으론 '표 내부 재렌더(배당 갱신)·배너 노출로 인한 레이아웃 이동'을 못 잡아
+      //   다음 렌더(10초 주기)까지 오버레이가 옛 좌표에 남아 밀려 보였다. 표 자체를 관찰해 즉시 따라간다.
+      try {
+        if (boardRO) { boardRO.disconnect(); boardRO = null; }
+        if (window.ResizeObserver && info.table) {
+          boardRO = new ResizeObserver(function () { schedulePosition(); });
+          boardRO.observe(info.table);
+        }
+      } catch (_) { /* ResizeObserver 미지원 → scroll/resize 폴백만 사용 */ }
 
       // [테두리+반투명 방식] 강조 셀은 테두리 + 얇은 반투명 배경만 → 원본 배당 숫자가 항상 보인다.
       //   미강조 셀은 오버레이 없음(완전 투명). 아이콘은 우측 상단 작은 뱃지로만 표시.
