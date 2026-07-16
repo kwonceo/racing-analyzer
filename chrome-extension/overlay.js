@@ -767,6 +767,10 @@
 
     // 실제 배당판(복승 매트릭스) 표 + 셀 요소 위치 매핑. content.js parseMatrixTable 과 동일 휴리스틱(읽기전용).
     function mapBoardTable(table, oddsClass) {
+      // [자체 배당판 제외] 분석기 페이지(127.0.0.1:8011)에도 overlay.js 가 주입되는데, 거기의 '📊 배당판' 탭
+      //   (matrix_board.js)이 그리는 표는 마번 헤더+소수 배당 구조라 실제 배당판으로 오인된다.
+      //   그 표 위에 (다른 경주의) 강조 셀이 겹쳐 그려지는 것을 막는다. 실제 배당판(asyukk/keiba)엔 이 표식이 없다.
+      try { if (table.getAttribute && table.getAttribute('data-mb-board')) return null; } catch (_) { /* */ }
       var rows; try { rows = [].slice.call(table.rows); } catch (_) { return null; }
       if (rows.length < 2) return null;
       var headerRow = null, best = 1;

@@ -1114,6 +1114,90 @@
     return null;
   }
 
+  // ═══ [보완3] asyukk 배당판 마권종류 탭 상태를 DOM 속성으로 '확정' ═══
+  //   기존엔 활성 탭을 알 방법이 없어 oddsSignature() 변화(=화면이 바뀌었다)로만 추측했다.
+  //   그 시그니처는 "무엇으로 바뀌었는지"는 모르므로, 잘못된 탭으로 바뀌어도 통과한다.
+  //   → `.bet_type_btn` 의 텍스트/bet_mode/combine_mode + 활성표시 클래스를 직접 읽어 확정한다.
+  //   ⚠ 활성표시 방식은 보드마다 다를 수 있어 '판정 불가(null)'를 명확히 구분한다 —
+  //     불가일 때는 기존 동작(시그니처 기반)을 그대로 두고 절대 차단하지 않는다(오탐으로 정상수집 죽이지 않기).
+  const BET_LABEL = { quinella: '복승', exacta: '쌍승', trio: '삼복승' };
+  const _ACTIVE_RE = /(^|[\s_-])(on|active|selected|sel|current|cur|checked)([\s_-]|$)/i;
+
+  function asyukkBetTabs() {
+    const out = [];
+    try {
+      for (const b of queryAllDocs('.bet_type_btn')) {
+        const text = (b.textContent || '').replace(/\s+/g, '').trim();
+        if (!text) continue;
+        const vis = b.offsetParent !== null || (b.getClientRects && b.getClientRects().length > 0);
+        const cls = b.className || '';
+        const aria = (b.getAttribute && (b.getAttribute('aria-selected') || b.getAttribute('data-selected'))) || '';
+        out.push({
+          el: b, text, visible: vis,
+          betMode: (b.getAttribute && b.getAttribute('bet_mode')) || null,
+          combineMode: (b.getAttribute && b.getAttribute('combine_mode')) || null,
+          active: _ACTIVE_RE.test(String(cls)) || aria === 'true',
+        });
+      }
+    } catch (_) { /* */ }
+    return out;
+  }
+
+  // 현재 활성 마권종류 탭. 활성표시를 못 찾으면 null(=판정 불가).
+  function activeAsyukkBetTab() {
+    const tabs = asyukkBetTabs().filter((t) => t.visible);
+    const act = tabs.filter((t) => t.active);
+    return act.length === 1 ? act[0] : null;   // 0개(표시 없음)·2개+(모호) 모두 판정 불가
+  }
+
+  // 기대한 탭이 실제로 활성인지 확정 검증. true=일치 / false=불일치(오염 위험) / null=판정 불가.
+  function verifyActiveBetTab(expectText) {
+    if (detectSite() !== 'asyukk') return null;
+    const a = activeAsyukkBetTab();
+    if (!a) return null;
+    const ok = a.text === expectText;
+    if (!ok) {
+      console.warn(`[탭확정] ⚠ 활성 탭 불일치 — 기대 "${expectText}" / 실제 "${a.text}" `
+        + `(bet_mode=${a.betMode || '?'} · combine_mode=${a.combineMode || '?'})`);
+    } else {
+      console.log(`[탭확정] ✅ 활성 탭 = "${a.text}" (bet_mode=${a.betMode || '?'} · combine_mode=${a.combineMode || '?'})`);
+    }
+    return ok;
+  }
+
+  // [진단] 배당판 탭 구조를 1회 덤프 — 활성표시 클래스/bet_mode 실제값 파악용(사용자가 F12 로 공유 가능).
+  let _betTabDumped = false;
+  function dumpBetTabs() {
+    if (_betTabDumped || detectSite() !== 'asyukk') return;
+    _betTabDumped = true;
+    const tabs = asyukkBetTabs();
+    if (!tabs.length) { console.log('[탭확정·진단] .bet_type_btn 없음(이 보드는 탭확정 미지원 → 기존 시그니처 방식만 사용)'); return; }
+    console.log('[탭확정·진단] 마권종류 탭 목록:', tabs.map((t) =>
+      `"${t.text}"|bet_mode=${t.betMode || '-'}|combine_mode=${t.combineMode || '-'}|class="${t.el.className || '-'}"|active=${t.active}`));
+    if (!tabs.some((t) => t.active)) {
+      console.log('[탭확정·진단] ⚠ 활성표시 클래스를 못 찾았습니다 → 탭 확정 검증은 비활성(기존 방식 유지). '
+        + '위 class 문자열을 공유해주시면 활성 판정 규칙을 추가할 수 있습니다.');
+    }
+  }
+
+  // [보완1] 복승 탭으로 이동 — 사설(asyukk)은 `.bet_type_btn` 정확일치 우선.
+  //   findTabButton 의 3단계 `includes()` 폴백은 '삼복승'/'삼복승조합'이 문자열 '복승'을 포함해 오매칭될 수 있다.
+  //   기타 보드(keiba·generic)는 기존 clickTabAndWait 폴백을 그대로 유지(무삭제).
+  async function gotoQuinellaTab(isKorea) {
+    if (detectSite() === 'asyukk') {
+      const before = oddsSignature();
+      const el = clickAsyukkBetTab('복승');
+      if (el) {
+        await wait(2000);
+        const sig = oddsSignature();
+        console.log('[복승수집] .bet_type_btn "복승" 정확일치 클릭 ✅ (bet_mode=' + (el.getAttribute('bet_mode') || '?') + ')');
+        return { clicked: true, changed: (sig !== before && sig.length > 0), sig };
+      }
+      console.warn('[복승수집] .bet_type_btn "복승" 정확일치 실패 → 일반 탭 탐색 폴백');
+    }
+    return clickTabAndWait(['복승', '복연', '馬連'], isKorea ? '' : oddsSignature(), '복승', !isKorea);
+  }
+
   // [오염방지 4] 복승 탭 복귀 — 사설(asyukk)은 `.bet_type_btn` **정확 일치**로 클릭.
   //   findTabButton 의 3단계 `includes()` 폴백은 '삼복승'/'삼복승조합'이 문자열 '복승'을 포함해 오매칭될 수 있고,
   //   기존 복귀 호출은 requireChange=false 라 **어떤 탭이 눌렸든 성공 처리**됐다. 그 결과 보드가 삼복승에 머문 채
@@ -1681,7 +1765,9 @@
         }
         console.log(`[조합검증] ${kind}: ${ok.length}/${exp}개 (${n}두) ✅`);
       }
-      return ok.map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10 }))
+      // [보완2] betType 명시 — 기존엔 '어느 키에 담겼는가'로만 종류가 암묵 표현돼 서버가 대조할 방법이 없었다.
+      //   이제 각 조합이 스스로 종류를 밝히므로 서버가 키와 직접 대조해 뒤바뀐 데이터를 잡아낼 수 있다.
+      return ok.map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10, betType: kind }))
         .sort((a, b) => a.odds - b.odds).slice(0, cap);
     };
     console.log(`[배당수집] ===== 배당 수집 시작 (탭 클릭 방식, ${isKorea ? '한국:복승' : '일본:복승+쌍승+삼복승'}) =====`);
@@ -1696,14 +1782,18 @@
       let quinella = [];
       try {
         setTripleProgress('복승 수집중…');
-        const r1 = await clickTabAndWait(['복승', '복연', '馬連'], isKorea ? '' : oddsSignature(), '복승', !isKorea);
+        dumpBetTabs();   // [보완3·진단] 탭 구조 1회 덤프(활성표시 클래스·bet_mode 실제값 파악)
+        const r1 = await gotoQuinellaTab(isKorea);   // [보완1] 사설 보드는 정확일치('삼복승' 오매칭 차단)
         sig = oddsSignature();
         // [오염방지 1] 복승 탭 버튼 자체를 못 찾으면(clicked=false) 지금 화면이 어느 탭인지 알 수 없다 → 수집 포기(빈 배열).
         //   ⚠ changed=false 는 게이트하지 않는다 — '이미 복승 탭'이 정상 상태이고 그때는 표가 안 바뀌는 게 당연하다.
-        //      복승 화면 오인(다른 탭을 복승으로 오독)은 아래 [오염방지 2] 조합 수 검증이 2차로 차단한다.
-        if (!r1.clicked) {
-          console.warn('[복승수집] ⚠ 복승 탭 버튼을 찾지 못함 → 복승 수집 포기(빈 배열 전송·다른 탭 데이터 오염 방지)');
-          setTripleProgress('복승 탭 없음 — 수집 생략(오염 방지)');
+        //      복승 화면 오인(다른 탭을 복승으로 오독)은 [보완3] 활성탭 확정 + [오염방지 2] 조합 수 검증이 차단한다.
+        const _v1 = verifyActiveBetTab('복승');   // [보완3] true=확정일치 / false=확정불일치 / null=판정불가
+        if (!r1.clicked || _v1 === false) {
+          console.warn('[복승수집] ⚠ 복승 탭 '
+            + (_v1 === false ? '활성 확정 불일치' : '버튼을 찾지 못함')
+            + ' → 복승 수집 포기(빈 배열 전송·다른 탭 데이터 오염 방지)');
+          setTripleProgress('복승 탭 확보 실패 — 수집 생략(오염 방지)');
         } else {
           const quinMap = {};
           for (const p of currentMatrixPairs(oddsClass)) {
@@ -1737,10 +1827,12 @@
         //   기존 코드는 이 경고를 찍고도 그대로 긁어 **복승 배당을 쌍승으로 전송**했고, 방향까지 뒤집혀(`b>a`)
         //   쌍승역전 공식(_win_exacta_reversal)에 가짜 역전 신호로 주입됐다. → 전환 미확인 시 쌍승은 빈 배열.
         //   복승과 달리 여기서는 changed=false 도 게이트한다(직전이 복승 화면이므로 '무변화 = 전환 실패'가 확실).
-        if (!r2.clicked || !r2.changed) {
+        const _v2 = verifyActiveBetTab('쌍승');   // [보완3] DOM 속성으로 활성 탭 확정
+        if (!r2.clicked || !r2.changed || _v2 === false) {
           exacta = [];
           console.warn('[쌍승수집] ⚠ 쌍승 탭 전환 미확인('
-            + (!r2.clicked ? '버튼 못 찾음' : '표 무변화') + ') → 쌍승 수집 포기(빈 배열 전송·복승 데이터 오염 방지)');
+            + (!r2.clicked ? '버튼 못 찾음' : (_v2 === false ? '활성 확정 불일치' : '표 무변화'))
+            + ') → 쌍승 수집 포기(빈 배열 전송·복승 데이터 오염 방지)');
           setTripleProgress('쌍승 탭 전환 실패 — 수집 생략(오염 방지)');
         } else {
           const exMap = {};
@@ -1831,6 +1923,11 @@
             console.log(`[삼복승수집] 폴백 탭 클릭: ${rt.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${rt.changed ? '변경 확인' : '⚠ 변화 없음'}`);
             sig = rt.sig || oddsSignature();
             trioTabOk = !!(rt.clicked && rt.changed);
+          }
+          // [보완3] DOM 속성으로 활성 탭 확정 — 확정 불일치면 시그니처가 바뀌었어도 전환 실패로 간주.
+          if (verifyActiveBetTab('삼복승') === false) {
+            trioTabOk = false;
+            console.warn('[삼복승수집] ⚠ 활성 탭 확정 불일치 → 전환 실패로 간주');
           }
           // [오염방지 1] 삼복승 탭 전환이 확인되지 않으면 수집 자체를 생략(빈 배열) — 복승/쌍승 화면을
           //   삼복승으로 오독하거나 축 클릭으로 조합을 날조하는 경로를 원천 차단.

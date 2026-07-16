@@ -38,6 +38,7 @@
     <button class="tab-btn" data-tab="japan">🎰 배당판 캡처</button>
     <button class="tab-btn" data-tab="combined">🎯 통합분석</button>
     -->
+    <button class="tab-btn" data-tab="board">📊 배당판</button>
     <button class="tab-btn" data-tab="multi">🏁 전체 경주</button>
     <button class="tab-btn" data-tab="result">📝 결과기록</button>
     <button class="tab-btn" data-tab="jockeydb">🏇 기수DB</button>
@@ -358,6 +359,22 @@
         <p class="hint">🏇 중앙경마로 분석했던 경주입니다. 클릭하면 <b>당시 유력마·이상감지·추천·결과</b>를 복기할 수 있습니다.</p>
         <div id="sportRec-central"><p class="hint">탭을 열면 기록을 불러옵니다.</p></div>
         <div id="sportRecDetail-central" style="margin-top:10px"></div>
+      </div>
+    </section>
+
+    <!-- [공개용 배당판] 3단계 카드 UI + 상세 펼치기. matrix_board.js 공통 컴포넌트가 렌더.
+         기존 텍스트 분석은 '전문가 모드' 토글로 기존 일본경마 탭에 그대로 유지(무삭제). -->
+    <section id="tab-board" class="tab-panel">
+      <div class="panel-card">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h2 style="margin:0">📊 배당판 <span class="hint" style="font-weight:400;font-size:13px">큰 글씨 카드 UI · 30초 자동 갱신</span></h2>
+          <span style="flex:1"></span>
+          <label style="font-size:14px">경주
+            <select id="boardRaceSel" style="min-height:40px;font-size:15px;margin-left:6px"></select>
+          </label>
+          <button id="boardRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px">🔄 새로고침</button>
+        </div>
+        <div id="boardMount" style="margin-top:14px"></div>
       </div>
     </section>
 
@@ -691,6 +708,7 @@
   <!-- [1번] 복승→쌍승 전환 카운트다운 오버레이 -->
   <div id="capCountdown" class="cap-countdown hidden"></div>
 
+  <script src="js/matrix_board.js"></script>
   <script src="js/jockey.js"></script>
   <script src="js/pdf-parser.js"></script>
   <script src="js/analysis.js"></script>

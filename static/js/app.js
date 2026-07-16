@@ -53,6 +53,71 @@
     else { el.textContent = '● 서버 연결 안 됨'; el.classList.remove('ok'); }
   }
 
+  // ---------- [공개용 배당판] 📊 배당판 탭 ----------
+  //   matrix_board.js(두 프로젝트 공통 컴포넌트)를 마운트해 3단계 카드 UI + 상세 펼치기를 렌더.
+  //   분석기(내부용)는 항상 전체 공개(plan='premium') — 무료/블러는 적중왕(bmed-public) 전용.
+  let _board = null, _boardRk = null;
+
+  async function loadBoardRaces() {
+    const sel = $('#boardRaceSel');
+    if (!sel) return null;
+    try {
+      const r = await fetch('/api/public/races');
+      const d = await r.json();
+      const races = (d && d.races) || [];
+      const keep = sel.value;                       // 사용자가 고른 경주는 갱신해도 유지
+      sel.innerHTML = '';
+      if (!races.length) {
+        sel.appendChild(new Option('(수집된 경주 없음)', ''));
+        return null;
+      }
+      races.forEach((x) => {
+        const c = x.counts || {};
+        sel.appendChild(new Option(`${x.race_name} (복승 ${c.quinella || 0})`, x.race_key));
+      });
+      const pick = (keep && races.some((x) => x.race_key === keep)) ? keep : (d.current || races[0].race_key);
+      sel.value = pick;
+      return pick;
+    } catch (e) {
+      console.warn('[배당판] 경주 목록 로드 실패', e);
+      return null;
+    }
+  }
+
+  async function startBoardTab() {
+    const mount = $('#boardMount');
+    if (!mount || !window.MatrixBoard) return;
+    const rk = await loadBoardRaces();
+    if (!rk) {
+      if (_board) { _board.destroy(); _board = null; }
+      mount.innerHTML = '<div style="font-size:16px;color:#475569">아직 수집된 경주가 없습니다. '
+        + 'Chrome 확장에서 배당을 수집하면 여기에 표시됩니다.</div>';
+      return;
+    }
+    if (_board && _boardRk === rk) { _board.refresh(); return; }
+    if (_board) _board.destroy();
+    _boardRk = rk;
+    _board = window.MatrixBoard.mount(mount, { raceKey: rk, apiBase: '', plan: 'premium' });
+  }
+
+  function stopBoardTab() {
+    if (_board) { _board.destroy(); _board = null; _boardRk = null; }
+  }
+
+  function initBoardTab() {
+    const sel = $('#boardRaceSel');
+    if (sel) {
+      sel.addEventListener('change', () => {
+        const rk = sel.value;
+        if (!rk || !_board) { startBoardTab(); return; }
+        _boardRk = rk;
+        _board.setRaceKey(rk);
+      });
+    }
+    const btn = $('#boardRefreshBtn');
+    if (btn) btn.addEventListener('click', () => startBoardTab());
+  }
+
   // ---------- 탭 ----------
   function initTabs() {
     $$('.tab-btn').forEach((btn) => {
@@ -61,6 +126,8 @@
         $$('.tab-panel').forEach((p) => p.classList.remove('active'));
         btn.classList.add('active');
         $('#tab-' + btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'board') startBoardTab();   // [공개용 배당판] 카드 UI 시작
+        else stopBoardTab();                                // 다른 탭 이동 시 30초 폴링 중단(자원 절약)
         if (btn.dataset.tab === 'stats') renderStats();
         if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); loadSnapshotGallery(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
@@ -9156,6 +9223,7 @@
   // ---------- 부트 ----------
   async function boot() {
     initTabs(); initCondBar(); initKorea(); initJapanRace(); initOdds(); initKoreaHistory();
+    initBoardTab();        // [공개용 배당판] 📊 배당판 탭 경주 선택·새로고침 배선
     initAutoStatusBar();   // [v2.0.0] 자동수집 상태바
     initResultAutoWatch(); // [스펙2·3] 결과 자동수집 실패 배너 + 성공 시 결과탭 자동갱신
     initClosingWatch();    // [보완] 이상감지 누적 피드 + 마감 전 단계 알림

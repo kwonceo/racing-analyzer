@@ -1836,9 +1836,34 @@ def _exacta_mirrors_quinella(q, x, source=None):
     return (same / total) >= 0.9
 
 
+def _bettype_guard(kind, combos, label):
+    """[보완2·서버측 대조] 조합이 스스로 밝힌 betType 과 담긴 키가 일치하는지 직접 대조.
+
+    확장 v2.1.114+ 는 각 조합에 `betType`("quinella"|"exacta"|"trio")을 명시한다.
+    탭 전환 실패로 종류가 뒤바뀌면 여기서 즉시 잡힌다(수량/미러 검증보다 확실·저렴).
+    ⚠ 하위 호환: betType 이 없는 구버전 확장·oddspark·KRA 페이로드는 그대로 통과(무삭제).
+    """
+    if not combos:
+        return combos
+    tagged = [c for c in combos if isinstance(c, dict) and c.get("betType")]
+    if not tagged:
+        return combos          # 구버전/신뢰소스 → 대조 생략(기존 동작 유지)
+    bad = [c for c in tagged if c.get("betType") != kind]
+    if not bad:
+        return combos
+    got = sorted({str(c.get("betType")) for c in bad})
+    print(f"⚠️ {label} betType 불일치 - 저장 거부 "
+          f"(기대 '{kind}' · 수신 {got} · {len(bad)}/{len(tagged)}개)")
+    return []
+
+
 def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None):
     """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
     확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
+    # [보완2] betType 직접 대조(가장 확실한 1차 관문) → 뒤바뀐 종류는 여기서 즉시 거부.
+    q = _bettype_guard("quinella", q, "복승")
+    x = _bettype_guard("exacta", x, "쌍승")
+    tr = _bettype_guard("trio", tr, "삼복승")
     # [오염방지 3] 배당판 탭 롤링 실패로 종류가 뒤바뀐 데이터를 저장 전에 종류별로 거부(신뢰 소스는 면제).
     q = _arity_guard("quinella", q, "복승", source)
     x = _arity_guard("exacta", x, "쌍승", source)
@@ -9165,6 +9190,370 @@ def _match_alerts_to_result(rk, top3, an):
         print("[경고매칭] 저장 실패:", e)
     return {"fired": bool(doc.get("alerts")), "horses": sorted(all_h), "hit": any_correct,
             "ignored": any(a.get("ignored_miss") for a in doc.get("alerts", []))}
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# [공개용 배당판/카드 UI] GET /api/public/matrix/<race_key>
+#   기존 `_triple_analyze` 결과만 조립해 공개 UI(적중왕·분석기 배당판 탭)가 소비할 형태로 반환.
+#   ⚠ 재계산·부수효과 없음(읽기 전용). 색상 규칙은 오버레이 `buildMatrix` 와 동일하게 맞춘다:
+#      초록=최종추천(복승) > 파랑=유력×유력 > 빨강=급락(급락말 포함 + 유력마 관련, 최대 3개) > 흰색=일반.
+#   전문용어는 공개 UI 용으로 쉬운 말로 바꿔 내보낸다(quinella→복승, BMED→분석결과 등).
+# ═══════════════════════════════════════════════════════════════════════
+_PUB_RED_MAX = 3          # 빨강(급락) 최대 표시 수 — 오버레이와 동일(고배당 노이즈 도배 방지)
+_PUB_DROP_PCT = -10       # 급락 인정 기준(절대 10%+) — CLAUDE.md 핵심 공식 기준과 동일
+
+
+def _pub_deadline_left(mb):
+    """발주 남은 분(float) → '8분 10초' 표기. 마감 후면 '마감'."""
+    if mb is None:
+        return None
+    if mb < 0:
+        return "마감"
+    total = int(round(mb * 60))
+    return f"{total // 60}분 {total % 60}초"
+
+
+def _pub_grade(an):
+    """공개용 신뢰도 등급 A/B/C — 기존 raceJudgment(확신도)를 그대로 사용(재계산 없음)."""
+    rj = an.get("raceJudgment") or {}
+    conf = rj.get("confidence")
+    conf = float(conf) if isinstance(conf, (int, float)) else 0.0
+    grade = "A" if conf >= 70 else ("B" if conf >= 40 else "C")
+    return {
+        "grade": grade,
+        "score": round(conf, 1),
+        "label": rj.get("label") or "",
+        "emoji": rj.get("emoji") or "",
+        "message": rj.get("message") or "",
+        "reasons": rj.get("reasons") or [],
+    }
+
+
+def _pub_roles(an):
+    """말별 역할(fav/cut/weakcut/dark) — 오버레이 matrixRoles 와 동일 규칙."""
+    role = {}
+    for h in (an.get("keyHorses") or []):
+        try:
+            role[int(h)] = "fav"
+        except (TypeError, ValueError):
+            pass
+    for h in ((an.get("elimination") or {}).get("horses") or []):
+        if h.get("no") is None:
+            continue
+        try:
+            no = int(h["no"])
+        except (TypeError, ValueError):
+            continue
+        if h.get("keep") or h.get("override"):
+            role.setdefault(no, "fav")
+        else:
+            role[no] = "cut" if h.get("verdict") == "🔴" else "weakcut"
+    keys = {int(h) for h in (an.get("keyHorses") or []) if isinstance(h, (int, float, str)) and str(h).isdigit()}
+    for h in (an.get("darkHorses") or []):
+        if h.get("no") is None:
+            continue
+        try:
+            no = int(h["no"])
+        except (TypeError, ValueError):
+            continue
+        if no not in keys and role.get(no) not in ("cut", "weakcut"):
+            role[no] = "dark"
+    return role
+
+
+def _pub_matrix(an, role):
+    """복승 매트릭스 + 조합별 신호색. 키는 배당판 기준 '작은번호-큰번호'."""
+    om, nos = {}, set()
+    for c in (an.get("quinella") or []):
+        cb = c.get("combo") or []
+        if len(cb) != 2 or not (c.get("odds") or 0) > 0:
+            continue
+        a, b = int(min(cb)), int(max(cb))
+        k = f"{a}-{b}"
+        if om.get(k) is None or c["odds"] < om[k]:
+            om[k] = float(c["odds"])
+        nos.add(a); nos.add(b)
+
+    # 초록 = 최종 추천 복승(오버레이 recSet 과 동일: betRecommend 중 '복' 종류)
+    green = set()
+    for b in (an.get("betRecommend") or []):
+        cb = b.get("combo") or []
+        if len(cb) == 2 and "복" in str(b.get("kind") or b.get("label") or ""):
+            green.add(f"{int(min(cb))}-{int(max(cb))}")
+
+    # 빨강 = 진짜 급락만: 조합급락 10%+ AND 급락말 포함 AND 유력마 포함 → 급락폭 큰 순 최대 3개
+    flow = an.get("flowScores") or {}
+    drop_h = {int(n) for n, f in flow.items() if (f or {}).get("trend") in ("급락", "스마트머니")}
+    if an.get("anomalyHorse") is not None:
+        try:
+            drop_h.add(int(an["anomalyHorse"]))
+        except (TypeError, ValueError):
+            pass
+    drop_map, red_cand = {}, []
+    for d in (an.get("drops") or []):
+        cb = d.get("combo") or []
+        if len(cb) != 2 or (d.get("pct") or 0) > _PUB_DROP_PCT:
+            continue
+        a, b = int(min(cb)), int(max(cb))
+        k = f"{a}-{b}"
+        drop_map[k] = round(d["pct"])
+        if (a in drop_h or b in drop_h) and (role.get(a) == "fav" or role.get(b) == "fav"):
+            red_cand.append((d["pct"], k))
+    red = {k for _, k in sorted(red_cand)[:_PUB_RED_MAX]}
+
+    # 파랑 = 유력×유력(초록·빨강이 아닌 것만) — 오버레이 우선순위: 초록 > 파랑 > 빨강
+    matrix = {}
+    for k, odds in om.items():
+        a, b = (int(x) for x in k.split("-"))
+        if k in green:
+            sig = "green"
+        elif role.get(a) == "fav" and role.get(b) == "fav":
+            sig = "blue"
+        elif k in red:
+            sig = "red"
+        else:
+            sig = "none"
+        cell = {"odds": round(odds, 1), "signal": sig}
+        if drop_map.get(k) is not None:
+            cell["drop"] = drop_map[k]
+        matrix[k] = cell
+
+    signals = {
+        "green": sorted(k.replace("-", "+") for k in green if k in om),
+        "blue": sorted(k.replace("-", "+") for k, v in matrix.items() if v["signal"] == "blue"),
+        "red": sorted(k.replace("-", "+") for k in red),
+    }
+    return matrix, signals, sorted(nos)
+
+
+def _pub_flow(an, no):
+    """말별 배당흐름(flowScores) 조회. 키가 int/str 두 형태로 올 수 있어 둘 다 대응."""
+    fs = an.get("flowScores") or {}
+    return fs.get(str(no)) or fs.get(no) or {}
+
+
+def _pub_conf(an, no):
+    """말별 확신도(confidence.horses) 조회. 키 int/str 양쪽 대응."""
+    hs = (an.get("confidence") or {}).get("horses") or {}
+    return hs.get(str(no)) or hs.get(no) or {}
+
+
+def _pub_horse_why(no, an, role):
+    """이 말이 왜 유력/복병/제거인지 — 쉬운 말 한 줄들(기존 신호 재사용·재계산 없음)."""
+    why = []
+    f = _pub_flow(an, no)
+    if f.get("smartMoney"):
+        why.append("큰돈이 조용히 들어옴(스마트머니)")
+    trend = f.get("trend")
+    if trend == "급락":
+        why.append("배당이 빠르게 떨어지는 중")
+    elif trend == "상승":
+        why.append("배당이 오르는 중(인기 이탈)")
+    if f.get("dead"):
+        why.append("인기인데 움직임이 없음(주의)")
+    if f.get("fake"):
+        why.append("내렸다 되돌아옴(속임수 의심)")
+    conf = _pub_conf(an, no)
+    if conf.get("confidence") is not None:
+        why.append(f"신뢰도 {round(float(conf['confidence']), 1)}점({conf.get('band') or '-'})")
+    for d in (an.get("darkHorses") or []):
+        if d.get("no") == no and d.get("reason"):
+            why.append(str(d["reason"]))
+            break
+    if role.get(no) == "cut":
+        why.append("제거 권장(배당·전적 모두 약함)")
+    r = f.get("rep")
+    if r:
+        why.append(f"대표 복승 배당 {r}배")
+    return why
+
+
+def _pub_recommendation(an, role):
+    """카드 2·3용 추천 + '왜 이 조합인지' 부연설명."""
+    locked = bool(an.get("recommendClosed"))
+    main, trifecta, special = [], [], []
+    for b in (an.get("betRecommend") or []):
+        cb = b.get("combo") or []
+        label = str(b.get("label") or "")
+        if len(cb) == 2 and "복" in str(b.get("kind") or label):
+            item = {"combo": "+".join(str(int(x)) for x in sorted(cb)),
+                    "odds": b.get("expOdds"), "label": label,
+                    "why": b.get("signalReason") or "", "quality": b.get("signalQuality") or ""}
+            (special if "특별" in label else main).append(item)
+    for t in (an.get("trioRecommend") or []):
+        cb = t.get("combo") or []
+        if len(cb) != 3:
+            continue
+        trifecta.append({"combo": "+".join(str(int(x)) for x in sorted(cb)),
+                         "odds": t.get("expOdds") if t.get("expOdds") is not None else t.get("expOddsEst"),
+                         "estimated": t.get("expOdds") is None,
+                         "label": str(t.get("label") or "")})
+
+    # 복병마 카드(카드 3) — 없으면 빈 리스트 → 프론트가 카드 자체를 숨김
+    dark = []
+    for d in (an.get("darkHorses") or []):
+        if d.get("no") is None:
+            continue
+        no = int(d["no"])
+        dark.append({
+            "no": no, "name": d.get("name") or "",
+            "why": _pub_horse_why(no, an, role),
+            "use": "삼복승 보험에 포함 추천",
+            "smart_money": bool(d.get("smartMoney")),
+        })
+
+    # "왜 이 조합인지" — 최종 추천에 든 말들의 근거를 쉬운 말로
+    reasons = []
+    picked = set()
+    for it in main[:1] + trifecta[:1]:
+        for n in it["combo"].split("+"):
+            try:
+                picked.add(int(n))
+            except ValueError:
+                pass
+    for no in sorted(picked):
+        w = _pub_horse_why(no, an, role)
+        if w:
+            reasons.append(f"{no}번: " + " · ".join(w[:2]))
+    cp = an.get("corePicks") or {}
+    for p in (cp.get("picks") or []):
+        if p.get("no") in picked and p.get("reason"):
+            reasons.append(f"{p['no']}번: {p['reason']}")
+    # 중복 제거(순서 유지)
+    seen, uniq = set(), []
+    for r in reasons:
+        if r not in seen:
+            seen.add(r)
+            uniq.append(r)
+    return {"main": main, "trifecta": trifecta, "special": special,
+            "dark_horse": dark, "reasons": uniq[:6], "locked": locked}
+
+
+def _pub_horse_cards(an, role, nos):
+    """말별 신호 카드 — 등급·역할·태그·부연설명."""
+    grades = {}
+    for g in ((an.get("integrated") or {}).get("horses") or []):
+        if g.get("no") is not None:
+            grades[int(g["no"])] = g.get("grade")
+    elim = {}
+    for h in ((an.get("elimination") or {}).get("horses") or []):
+        if h.get("no") is not None:
+            elim[int(h["no"])] = h
+    special_nos = set()
+    for b in (an.get("betRecommend") or []):
+        if "특별" in str(b.get("label") or ""):
+            for n in (b.get("combo") or []):
+                special_nos.add(int(n))
+    out = []
+    for no in nos:
+        r = role.get(no)
+        f = _pub_flow(an, no)
+        tags = []
+        if f.get("smartMoney"):
+            tags.append("큰돈 유입")
+        if f.get("trend"):
+            tags.append(str(f["trend"]))
+        if no in special_nos:
+            tags.append("특별 추천")
+        out.append({
+            "no": no,
+            "grade": grades.get(no) or (elim.get(no) or {}).get("verdictLabel") or "",
+            "role": r or "normal",              # fav|dark|cut|weakcut|normal
+            "special": no in special_nos,
+            "odds": f.get("rep"),
+            "tags": tags,
+            "why": _pub_horse_why(no, an, role),
+        })
+    return out
+
+
+def _pub_result(rk):
+    """경주 결과(있으면) — 예상 vs 결과 비교 카드용. 없으면 None."""
+    try:
+        rec = (_results_load() or {}).get(rk) or {}
+        top3 = rec.get("top3") or rec.get("result") or []
+        if top3:
+            return {"top3": [int(x) for x in top3[:3]]}
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        hp, _, _ = _hist_path(rk)
+        doc = json.load(open(hp, encoding="utf-8"))
+        top3 = doc.get("result") or []
+        if top3:
+            return {"top3": [int(x) for x in top3[:3]]}
+    except Exception:  # noqa: BLE001
+        pass
+    return None
+
+
+@app.route("/api/public/races")
+def public_races():
+    """[공개용] 현재 배당이 수집된(활성) 경주 목록 — 배당판 경주 선택용. 최신 갱신순."""
+    db = _triple_load()
+    out = []
+    for rk, rec in (db or {}).items():
+        out.append({
+            "race_key": rk,
+            "race_name": rk.replace("_", " "),
+            "sport": rec.get("sport") or "horse",
+            "category": rec.get("category"),
+            "source": rec.get("source"),
+            "updated_at": rec.get("t"),
+            "counts": {"quinella": len(rec.get("quinella") or []),
+                       "exacta": len(rec.get("exacta") or []),
+                       "trio": len(rec.get("trio") or [])},
+        })
+    out.sort(key=lambda r: r.get("updated_at") or 0, reverse=True)
+    # 기본 선택 경주: 배당판이 실제로 보고 있는 경주(board hint) 우선 → 없으면 최신 갱신 경주
+    cur = None
+    try:
+        hint = _board_hint_load()
+        if hint and hint.get("raceKey") in (db or {}):
+            cur = hint["raceKey"]
+    except Exception:  # noqa: BLE001
+        pass
+    return jsonify({"ok": True, "races": out, "current": cur or (out[0]["race_key"] if out else None)})
+
+
+@app.route("/api/public/matrix/<path:race_key>")
+def public_matrix(race_key):
+    """[공개용] 배당판 매트릭스 + 3단계 카드 UI 데이터. 읽기 전용(재계산·저장 없음)."""
+    rk = (race_key or "").strip()
+    db = _triple_load()
+    if rk not in db:
+        # 유연 매칭(경마장명 별칭·'_' 표기 등) → 기존 _resolve_race_key 재사용
+        try:
+            rk2 = _resolve_race_key(rk, db)
+        except Exception:  # noqa: BLE001
+            rk2 = None
+        if not rk2 or rk2 not in db:
+            return jsonify({"ok": False, "waiting": True, "race_key": rk,
+                            "error": "아직 이 경주의 배당이 수집되지 않았습니다."}), 404
+        rk = rk2
+    an = _triple_analyze(rk, db.get(rk) or {})
+    role = _pub_roles(an)
+    matrix, signals, nos = _pub_matrix(an, role)
+    mb = an.get("minutesBefore")
+    return jsonify({
+        "ok": True,
+        "race_key": rk,
+        "race_name": rk.replace("_", " "),
+        "horses": len(nos),
+        "horse_nos": nos,
+        "deadline_left": _pub_deadline_left(mb),
+        "minutes_before": mb,
+        "after_close": bool(an.get("after_close") or an.get("afterClose")),
+        "phase": an.get("recommendPhase"),
+        "confidence": _pub_grade(an),
+        "matrix": matrix,
+        "signals": signals,
+        "recommendation": _pub_recommendation(an, role),
+        "horse_cards": _pub_horse_cards(an, role, nos),
+        "result": _pub_result(rk),
+        "odds_source": (db.get(rk) or {}).get("source"),
+        "updated_at": (db.get(rk) or {}).get("t"),
+    })
 
 
 @app.route("/api/odds/triple/analyze", methods=["GET", "POST"])
