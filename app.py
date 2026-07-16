@@ -13095,13 +13095,26 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     L = _learning_load()
     # [결과 수정 지원] 같은 경주 기존 레코드 제거 후 추가 → 결과 재입력(수정) 시 이중집계 방지(멱등).
     #   결과를 잘못 입력했거나 착순을 정정할 때 record-result 를 다시 호출하면 깨끗이 덮어써진다.
-    _before = len(L.get("records") or [])
-    L["records"] = [r for r in (L.get("records") or []) if r.get("race") != rk]
-    if len(L["records"]) != _before:
-        print(f"[결과 수정] {rk}: 기존 레코드 교체(재입력)")
-    L["records"].append(record)
-    L["stats"] = _recompute_learning_stats(L["records"])
-    _learning_save(L)
+    # [누락 가드] learning.json 반영을 try 로 감싼다 — 반영이 예외(경합·손상·디스크)로 실패해도
+    #   ①실패를 명확히 로그로 남기고 ②record 에 실패 플래그를 달아 ③이후 race_results 파일 저장은
+    #   계속 진행되도록(파일은 살리고 학습만 재시도 가능하게). 07-15 처럼 파일은 있는데 learning 에
+    #   62건 누락되던 상황을 조용히 넘기지 않고 드러낸다. 정상 경로 동작은 기존과 100% 동일.
+    try:
+        _before = len(L.get("records") or [])
+        L["records"] = [r for r in (L.get("records") or []) if r.get("race") != rk]
+        if len(L["records"]) != _before:
+            print(f"[결과 수정] {rk}: 기존 레코드 교체(재입력)")
+        L["records"].append(record)
+        L["stats"] = _recompute_learning_stats(L["records"])
+        _learning_save(L)
+        record["learning_applied"] = True
+    except Exception as e:
+        record["learning_applied"] = False
+        record["learning_error"] = str(e)
+        print(f"[학습반영 실패·가드] {rk}: learning.json 반영 실패 — 파일 저장은 계속 진행합니다: {e}")
+        # stats 는 마지막 성공값 유지(재계산 실패 시 참조 대비 빈 dict 폴백)
+        if not isinstance(L.get("stats"), dict):
+            L["stats"] = {}
     # [2번] 부진마 역전 학습(전적 있는 경주만 작동) — 급락30%+·복승이상감지 동반 조건별 적중률 누적
     try:
         _learn_upset(rk, an, top3, time.strftime("%Y-%m-%d"))
@@ -16880,6 +16893,88 @@ def _kra_collect_one(rk, meet, rc_date, rc_no):
     return True, {"counts": {"win": len(win), "quinella": len(q), "exacta": len(x), "trio": len(tr)}}
 
 
+def _kra_rctime_sec(t):
+    """KRA rcTime('1:05.0' 또는 '65.0') → 초(float). 파싱 불가·미완주는 None."""
+    if t in (None, "", "-"):
+        return None
+    s = str(t).strip()
+    try:
+        if ":" in s:
+            m, sec = s.split(":", 1)
+            return float(m) * 60 + float(sec)
+        return float(s)
+    except (TypeError, ValueError):
+        return None
+
+
+def _kra_extract_result(meet, rc_date, rc_no):
+    """[KRA 결과 자동 추출] 경주별상세성적표(racedetailresult)의 rcTime(주행기록) 오름차순 정렬로 착순 산출.
+    이 API는 착순(ord) 필드를 안 주지만 rcTime(기록)이 있어 정렬로 1·2·3착을 확정할 수 있다(differ=착차로 교차확인).
+    반환: (top3[list], detail[dict]) 또는 (None, {error}). ⚠ 읽기 전용 조회(부수효과 없음)."""
+    params = {"meet": str(meet), "rc_date": str(rc_date)}
+    if rc_no:
+        params["rc_no"] = str(rc_no)
+    items, err = _kra_api_get("racedetailresult/getracedetailresult", params, num_rows=100)
+    if err:
+        return None, {"error": err}
+    if not items:
+        return None, {"error": "결과 데이터 없음(경주 미종료·비경주일 가능)"}
+    rows = []
+    for it in items:
+        no = _kra_int(it.get("chulNo"))
+        sec = _kra_rctime_sec(it.get("rcTime"))
+        if no is not None and sec is not None:
+            rows.append({"no": no, "sec": sec, "rcTime": it.get("rcTime"),
+                         "differ": it.get("differ"), "hrName": it.get("hrName")})
+    if len(rows) < 3:
+        return None, {"error": "완주 기록 3두 미만(rcTime 부족) — 경주 미종료 가능", "have": len(rows)}
+    rows.sort(key=lambda r: r["sec"])   # 기록 빠른 순 = 착순
+    top3 = [r["no"] for r in rows[:3]]
+    return top3, {"ranked": rows[:5], "total": len(rows)}
+
+
+def _kra_collect_result_one(rk, meet, rc_date, rc_no):
+    """[KRA 결과 자동수집·저장] rcTime 착순 추출 → 기존 결과 학습 경로(_apply_result_learning) 재사용.
+    race_results 저장·learning.json 반영·적중판정 전부 기존 파이프라인 그대로 탄다(신규 저장 로직 없음).
+    반환: (ok, info). ⚠ 이미 결과가 있으면 멱등(같은 raceKey 레코드 교체)."""
+    top3, detail = _kra_extract_result(meet, rc_date, rc_no)
+    if not top3:
+        return False, detail
+    result = {"1st": top3[0], "2nd": top3[1], "3rd": top3[2]}
+    try:
+        # [기존 경로 재사용] 수동 결과입력·확장 자동수집과 동일한 학습 함수 → 별도 저장 로직 없이 통일
+        record, _stats = _apply_result_learning(rk, result, top3)
+        print("[KRA 결과] %s: 착순 %s (rcTime 정렬) → 학습 반영%s"
+              % (rk, "→".join(map(str, top3)),
+                 "" if record.get("learning_applied", True) else " 실패(가드 로그 확인)"))
+        return True, {"top3": top3, "result": result, "detail": detail,
+                      "learning_applied": record.get("learning_applied", True)}
+    except Exception as e:
+        print("[KRA 결과] %s: 학습 반영 실패: %s" % (rk, e))
+        return False, {"error": str(e), "top3": top3}
+
+
+@app.route("/api/kra/result", methods=["GET", "POST"])
+def kra_result():
+    """[KRA 결과 자동수집] rcTime 정렬로 착순 산출 → race_results 저장·learning 반영.
+    params: {raceKey?, meet, rc_date, rc_no}. GET/POST 공용."""
+    b = request.json if request.method == "POST" else None
+    b = b or request.args or {}
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "1")
+    rc_date = str(b.get("rc_date") or b.get("rcDate") or time.strftime("%Y%m%d"))
+    rc_no = str(b.get("rc_no") or b.get("rcNo") or "")
+    if not rc_no:
+        return jsonify({"error": "rc_no(경주번호) 가 필요합니다."}), 400
+    rk = (b.get("raceKey") or "%s %s경주" % (KRA_MEET_NAME.get(meet, meet), rc_no)).strip()
+    # [조회만] apply=false(기본 GET) 이면 착순만 반환하고 저장/학습은 안 함(안전 검증용)
+    apply = str(b.get("apply") or (request.method == "POST")).lower() in ("1", "true", "yes")
+    if not apply:
+        top3, detail = _kra_extract_result(meet, rc_date, rc_no)
+        return jsonify({"ok": bool(top3), "raceKey": rk, "top3": top3, "detail": detail, "applied": False})
+    ok, info = _kra_collect_result_one(rk, meet, rc_date, rc_no)
+    return jsonify({"ok": ok, "raceKey": rk, "applied": ok, **info})
+
+
 # [KRA 할당량 보호] watch 자동해제 안전장치 — 프론트가 unwatch 를 못 보내도(탭 닫힘·크래시·경주 종료)
 #   종료된 경주를 30초마다 무기한 폴링해 배당 API 일일 할당량을 태우던 문제 방어(할당량 초과=429 근본원인).
 _KRA_WATCH_FAIL_MAX = 20     # 연속 실패 20회(=약 10분) → 자동 해제(마감/종료/키오류로 계속 실패하는 경주 정리)
@@ -16929,6 +17024,27 @@ def _kra_auto_loop():
                                           % (rk, _fs, info.get("error")))
                 except Exception as e:
                     print("[KRA 자동수집] %s 실패(무시):" % rk, e)
+                # [KRA 결과 자동수집] 아직 결과를 못 받은 watch 는 매 사이클 결과 추출을 시도한다.
+                #   경주 종료 전이면 rcTime 이 없어 조용히 스킵되고(부수효과 없음), 종료 후 기록이 뜨면
+                #   자동으로 1회 추출→학습 반영→결과 확보 표시. 발주시각 없이도 'T+10분경 종료'를 기록 유무로 판단.
+                #   ⚠ 성공 시 watch 자동해제(할당량 보호 ②③과 동일 취지 — 결과까지 받았으면 폴링 종료).
+                try:
+                    with _KRA_WATCH_LOCK:
+                        _has_result = bool(rk in _KRA_WATCH and _KRA_WATCH[rk].get("resultDone"))
+                    if not _has_result:
+                        _rok, _rinfo = _kra_collect_result_one(rk, w["meet"], w["rc_date"], w["rc_no"])
+                        if _rok:
+                            with _KRA_WATCH_LOCK:
+                                if rk in _KRA_WATCH:
+                                    _KRA_WATCH[rk]["resultDone"] = True
+                                    _KRA_WATCH[rk]["resultTop3"] = _rinfo.get("top3")
+                                    _KRA_WATCH[rk]["resultAt"] = time.time()
+                            print("[KRA 결과 자동수집] %s 결과 확보 %s → watch 해제(폴링 종료)"
+                                  % (rk, "→".join(map(str, _rinfo.get("top3") or []))))
+                            with _KRA_WATCH_LOCK:
+                                _KRA_WATCH.pop(rk, None)
+                except Exception as e:
+                    print("[KRA 결과 자동수집] %s 시도 오류(무시):" % rk, e)
         except Exception as e:
             print("[KRA 자동수집] 루프 오류(무시):", e)
         time.sleep(30)
