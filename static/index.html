@@ -22,6 +22,9 @@
     </div>
   </header>
 
+  <!-- [자동 예상] 연속 자동 전환 상태 배너 — 현재 예상 중 경주 + 다음 자동 분석(분). 활성 시에만 표시 -->
+  <div id="autoPredBanner" style="display:none;margin:6px 12px 0;padding:8px 12px;border-radius:9px;border:1px solid #22d3ee;background:rgba(34,211,238,.12);font-size:13px;color:#e2e8f0"></div>
+
   <nav class="tabs">
     <button class="tab-btn active" data-tab="korea">🇰🇷 한국경마</button>
     <button class="tab-btn" data-tab="jp">🇯🇵 일본경마</button>
@@ -391,6 +394,16 @@
           <button id="recentResultsRefresh" class="btn btn-small">🔄 새로고침</button>
         </div>
         <div id="recentSummary" style="margin-top:8px"></div>
+      </div>
+
+      <!-- [배당판 스냅샷 갤러리] 마감 1분전 자동 + 수동 캡처된 배당판(오버레이·패널·워터마크 포함) 이미지 → 추천 vs 실제결과 비교 -->
+      <div class="panel-card" id="snapshotCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <h2 style="margin:0">📸 배당판 스냅샷 갤러리 <span class="hint" style="font-weight:400;font-size:12px">마감 1분전 자동 + 수동 캡처</span></h2>
+          <button id="snapshotRefresh" class="btn btn-small">🔄 새로고침</button>
+        </div>
+        <p class="hint">확장(오버레이) 📸 버튼 또는 마감 1분 전 자동 캡처로 저장됩니다. 썸네일을 누르면 크게 보이고, 실제 결과가 있으면 추천 조합과 1·2·3착을 비교합니다.</p>
+        <div id="snapshotGallery" style="margin-top:8px"></div>
       </div>
 
       <!-- 2. 결과 입력 대기 (가장 눈에 띄게) + 경주별 직접 입력(기본 접힘) -->

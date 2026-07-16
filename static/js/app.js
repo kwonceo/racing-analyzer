@@ -62,7 +62,7 @@
         btn.classList.add('active');
         $('#tab-' + btn.dataset.tab).classList.add('active');
         if (btn.dataset.tab === 'stats') renderStats();
-        if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); }
+        if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); loadSnapshotGallery(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
         if (btn.dataset.tab === 'multi') startMultiRaceWatch();   // [다중 경주] 전체 경주 대시보드 시작
         else stopMultiRaceWatch();                                // 다른 탭 이동 시 폴링 중단(자원 절약)
@@ -813,7 +813,89 @@
     // [결과기록 UI 개선] 최근 결과·복기 뷰 — 새로고침 버튼 + 초기 렌더
     { const b = document.getElementById('recentResultsRefresh'); if (b) b.addEventListener('click', renderRecentResults); }
     try { renderRecentResults(); } catch (_) { /* */ }
+    { const b = document.getElementById('snapshotRefresh'); if (b) b.addEventListener('click', loadSnapshotGallery); }
+    try { loadSnapshotGallery(); } catch (_) { /* */ }
     initResultSubtabs();   // [결과기록 전면정리] 서브탭 전환 + 직접입력 접기
+  }
+
+  // ── [배당판 스냅샷 갤러리] 마감1분전 자동 + 수동 캡처 이미지 목록 → 날짜별 그룹·썸네일·크게보기·추천vs결과 비교 ──
+  function _snapCombosStr(list) {
+    return (list || []).map((q) => (q.combo || []).join('+')).filter(Boolean).join(', ') || '—';
+  }
+  function _snapResultCompare(meta) {
+    const res = meta.result;
+    if (!res || !(res.top3 || []).length) return '<span class="hint" style="font-size:11px">실제 결과 미입력</span>';
+    const top3 = res.top3.map(Number);
+    const top2 = new Set(top3.slice(0, 2));
+    const top3s = new Set(top3);
+    // 추천 복승(둘 다 1·2착) / 삼복승(셋 다 top3) 적중 여부
+    const qHit = (meta.quinellas || []).some((q) => { const c = (q.combo || []).map(Number); return c.length === 2 && c.every((n) => top2.has(n)); });
+    const tHit = (meta.trifectas || []).some((t) => { const c = (t.combo || []).map(Number); return c.length === 3 && c.every((n) => top3s.has(n)); });
+    const spHit = (meta.special || []).some((q) => { const c = (q.combo || []).map(Number); return c.length === 2 && c.every((n) => top2.has(n)); });
+    const badge = (ok, lbl) => `<span style="font-size:11px;font-weight:800;color:${ok ? '#38d39f' : '#f87171'}">${ok ? '✅' : '❌'} ${lbl}</span>`;
+    return `<div style="font-size:11.5px;margin-top:3px">실제 <b style="color:#fbbf24">${top3.join('-')}</b> · ${badge(qHit, '복승')} ${badge(tHit, '삼복승')}${(meta.special || []).length ? ' ' + badge(spHit, '💎특별') : ''}</div>`;
+  }
+  async function loadSnapshotGallery() {
+    const box = document.getElementById('snapshotGallery');
+    if (!box) return;
+    box.innerHTML = '<span class="hint">불러오는 중…</span>';
+    let data;
+    try { data = await (await fetch('/api/snapshot/list')).json(); } catch (_) { box.innerHTML = '<span class="hint">스냅샷 목록을 불러오지 못했습니다.</span>'; return; }
+    const snaps = (data && data.snapshots) || [];
+    if (!snaps.length) { box.innerHTML = '<span class="hint">저장된 스냅샷이 없습니다. 확장 오버레이의 📸 버튼 또는 마감 1분 전 자동 캡처로 생성됩니다.</span>'; return; }
+    // 날짜별 그룹
+    const byDate = {};
+    snaps.forEach((s) => { const d = s.date || (s.at || '').slice(0, 10) || '기타'; (byDate[d] = byDate[d] || []).push(s); });
+    const dates = Object.keys(byDate).sort().reverse();
+    let html = '';
+    dates.forEach((d) => {
+      html += `<div style="margin:10px 0 4px;font-weight:800;color:#7dd3fc">${esc(d)} <span class="hint" style="font-weight:400">(${byDate[d].length})</span></div>`;
+      html += '<div style="display:flex;flex-wrap:wrap;gap:10px">';
+      byDate[d].forEach((s) => {
+        const url = '/api/snapshot/get/' + encodeURIComponent(s.filename);
+        const trg = s.trigger === 'auto_t1' ? '⏰ 마감1분전' : '📸 수동';
+        const ds = s.dansung ? ' <span style="color:#f59e0b;font-size:10px">⚡단통</span>' : '';
+        html += `<div class="snap-thumb" data-fn="${esc(s.filename)}" style="width:190px;cursor:pointer;border:1px solid #334155;border-radius:9px;overflow:hidden;background:#0f172a">
+          <img src="${url}" style="width:100%;height:120px;object-fit:cover;display:block" loading="lazy">
+          <div style="padding:6px 8px">
+            <div style="font-size:12px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.raceKey || s.filename)}</div>
+            <div class="hint" style="font-size:10.5px">${trg}${ds} · ${esc((s.at || '').slice(11, 16))}</div>
+            <div style="font-size:10.5px;color:#4ea1ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">복승 ${esc(_snapCombosStr(s.quinellas))}</div>
+            ${_snapResultCompare(s)}
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll('.snap-thumb').forEach((el) => {
+      el.addEventListener('click', () => {
+        const s = snaps.find((x) => x.filename === el.dataset.fn);
+        if (s) openSnapshotModal(s);
+      });
+    });
+  }
+  function openSnapshotModal(s) {
+    const url = '/api/snapshot/get/' + encodeURIComponent(s.filename);
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:20px';
+    const trg = s.trigger === 'auto_t1' ? '⏰ 마감 1분 전 자동' : '📸 수동 캡처';
+    ov.innerHTML = `<div style="max-width:96vw;max-height:94vh;overflow:auto;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px">
+        <div><b style="color:#e2e8f0">${esc(s.raceKey || s.filename)}</b> <span class="hint" style="font-size:12px">· ${trg} · ${esc(s.at || '')}</span></div>
+        <button id="snapModalClose" class="btn btn-small">✕ 닫기</button>
+      </div>
+      <div style="font-size:12.5px;margin-bottom:8px;line-height:1.7">
+        <div>🎯 추천 복승: <b style="color:#4ea1ff">${esc(_snapCombosStr(s.quinellas))}</b></div>
+        <div>🛡 삼복승: <b style="color:#c084fc">${esc(_snapCombosStr(s.trifectas))}</b></div>
+        ${(s.special || []).length ? `<div>💎 BMED 특별: <b style="color:#f0abfc">${esc(_snapCombosStr(s.special))}</b></div>` : ''}
+        <div style="margin-top:2px">${_snapResultCompare(s)}</div>
+      </div>
+      <img src="${url}" style="max-width:100%;display:block;border-radius:8px">
+    </div>`;
+    ov.addEventListener('click', (e) => { if (e.target === ov) ov.remove(); });
+    document.body.appendChild(ov);
+    const c = ov.querySelector('#snapModalClose'); if (c) c.addEventListener('click', () => ov.remove());
   }
 
   // [결과기록 전면정리] 결과기록 탭 서브탭 전환 + 경주별 직접입력 접기/펼치기
@@ -1371,6 +1453,7 @@
   //  분석기는 이 바에서 (1) 새로고침 버튼으로 즉시, (2) 30초마다 자동으로 최신 경주를 조회해
   //  상단에 "제주 3경주" 처럼 표시하고, 경주가 바뀌면 화면을 자동 갱신한다. (기존 기능은 유지)
   let _rrTimer = null, _rrLastRk = null;
+  let _rrLastFinished = false;   // [자동전환] 현재 보던 경주가 종료됐는지(다른 경마장 전환 허용 게이트)
   // [경주 고정] 자동 전환 중단 상태(사용자가 보고 있는 경주 유지). localStorage로 새로고침에도 유지.
   let _racePinned = false;
   try { _racePinned = (localStorage.getItem('racePinned') === '1'); } catch (_) { /* */ }
@@ -1391,8 +1474,24 @@
     if (!_rrLastRk) return latestRk;                 // 최초 로드 = 최신 따름
     if (latestRk === _rrLastRk) return latestRk;
     if (_racePinned) return _rrLastRk;               // [2번] 고정 중 → 무조건 현재 경주 유지
-    if (_raceVenue(latestRk) !== _raceVenue(_rrLastRk)) return _rrLastRk;  // [3번] 다른 경마장 → 전환 안 함
-    return latestRk;                                 // 같은 경마장 다음 경주 → 전환 허용
+    // [3번] 다른 경마장 → 전환 안 함. 단 현재 경주가 이미 끝난 걸로 확인됐으면(_rrLastFinished) 전환 허용(끝난 경주 잔존 방지).
+    if (_raceVenue(latestRk) !== _raceVenue(_rrLastRk) && !_rrLastFinished) return _rrLastRk;
+    return latestRk;                                 // 같은 경마장 다음 경주 · 현재경주 종료 시 → 전환 허용
+  }
+
+  /** [자동전환 버그수정] 경주 종료 여부 판정(발주 후·데이터 없음/정리) — 다른 경마장 자동 전환 허용 조건.
+   *  동시개최(둘 다 라이브)면 false(혼재 방지 차단 유지) · 현재 경주가 끝났으면 true(다른 경마장 전환 허용). */
+  async function _raceFinished(rk) {
+    if (!rk) return true;
+    try {
+      const a = await (await fetch('/api/odds/triple/analyze', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }),
+      })).json();
+      if (!a || a.error || a.waiting) return true;                       // 데이터 없음/정리됨 = 종료
+      if (a.afterClose) return true;                                     // 발주(T-0) 이후
+      if (a.minutesBefore != null && a.minutesBefore < -1) return true;  // 마감 1분+ 경과
+      return false;                                                      // 아직 라이브(동시개최)
+    } catch (_) { return true; }                                        // 조회 실패 → 전환 막지 않음
   }
 
   /** [3번] 📌 현재 경주 고정 토글 — 자동 전환 on/off. 서버측 잠금(POST /api/race/pin)까지 반영. */
@@ -1459,6 +1558,7 @@
     state.jpTimeline = [];
     state.jpCurrentRk = null;                 // 현재 경주 기준 초기화
     _rrLastRk = null;
+    _rrLastFinished = false;                  // [자동전환] 종료 플래그 초기화
     try { resetAnomalyPanel(); } catch (_) { /* */ }   // [1번] 이상감지 누적 패널 완전 초기화(경주 전환)
     try { setJpOddsStatus('waiting'); } catch (_) { /* */ }
   }
@@ -1530,17 +1630,27 @@
     if (changed && _rrLastRk != null) {
       const prevVenue = _raceVenue(_rrLastRk), newVenue = _raceVenue(rk);
       if (prevVenue && newVenue && prevVenue !== newVenue) {
-        if (label) label.textContent = `${_rrLastRk}`;   // 현재 경마장 경주 유지
-        if (status) status.textContent = `🔀 다른 경마장 경주 감지(${rk}) — 전환하려면 새로고침(자동 혼재 방지)`;
-        return;                                        // 다른 경마장으로 자동 전환하지 않음
+        // [자동전환 버그수정] 다른 경마장이라도 '현재 보던 경주가 끝났으면' 전환 허용(끝난 경주에 멈추는 문제).
+        //   둘 다 라이브(동시개최)일 때만 혼재 방지로 차단 유지.
+        const oldLive = !(await _raceFinished(_rrLastRk));
+        if (oldLive) {
+          _rrLastFinished = false;
+          if (label) label.textContent = `${_rrLastRk}`;   // 현재 경마장 경주 유지(동시개최 혼재 방지)
+          if (status) status.textContent = `🔀 다른 경마장 경주 감지(${rk}) — 전환하려면 새로고침(동시개최 혼재 방지)`;
+          return;                                        // 동시 라이브 → 자동 전환하지 않음
+        }
+        _rrLastFinished = true;                          // 현재 경주 종료 확인 → _targetRaceKey 도 전환 허용
+        if (status) status.textContent = `🔄 이전 경주 종료 · 다른 경마장 새 경주로 자동 전환(${rk})`;
+        // (아래 공통 전환 코드로 진행)
       }
       if (label) label.textContent = rk;
-      // 같은 경마장 다음 경주 → 자동 초기화 + 새 경주 화면 전환(직전 경주 잔존 방지)
+      // 같은 경마장 다음 경주 · 이전 경주 종료 후 다른 경마장 → 자동 초기화 + 새 경주 화면 전환(직전 경주 잔존 방지)
       _rrLastRk = rk;
       hardResetRaceState();                           // [1번] 직전 경주 스냅샷·이상감지·타임라인·경고 초기화
       _rrLastRk = rk;                                 // hardReset이 null로 만든 값 복원(현재 경주로 고정)
+      _rrLastFinished = false;                         // 새 경주는 라이브 → 종료 플래그 초기화
       refreshActiveView(rk);                          // 새 경주 첫 수집을 기준값으로 자동 표시
-      if (status) status.textContent = '🔄 새 경주 자동 전환됨';
+      if (status && !status.textContent.startsWith('🔄 이전 경주 종료')) status.textContent = '🔄 새 경주 자동 전환됨';
       notify(`🔄 새 경주 자동 전환: ${rk}`, true);
       return;
     }
@@ -5398,10 +5508,58 @@
 
   // ---------- [통합분석] 한국경마 PDF 전적 + 배당판 자동 연결 ----------
   //  전적 초안(A/B/C/D) → 확장이 같은 경주번호로 배당 수집 → 자동 통합(전적40%+배당60%) 재조정.
-  let _koreaOddsTimer = null, _koreaOddsTitle = null;
+  let _koreaOddsTimer = null, _koreaOddsTitle = null, _kraWatchedTitle = null;
 
   function stopKoreaOddsWatch() {
     if (_koreaOddsTimer) { clearInterval(_koreaOddsTimer); _koreaOddsTimer = null; }
+  }
+
+  // [KRA 공공API 자동 배선] 한국 탭에서 경주 활성화 시 그 경주를 /api/kra/watch 에 등록 →
+  //   서버 데몬이 30초마다 KRA 확정배당(단승·복승·쌍승·삼복승)을 수집·파이프라인 주입.
+  //   경마 당일(금·토·일)엔 확정배당 수집→결과 자동판정·학습, 경마 전엔 확장 실시간 배당이 병행(둘 다 유지).
+  function _ymdToday() {
+    const d = new Date();
+    return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+  }
+  async function registerKraWatch(title) {
+    const { venue, num } = koreaRaceParts(title);
+    if (!venue || num == null) return;                 // 경마장·경주번호 파싱 실패 → 스킵(무해)
+    // 직전 등록 경주는 해제(watch 누적 방지)
+    if (_kraWatchedTitle && _kraWatchedTitle !== title) {
+      try { await fetch('/api/kra/unwatch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: _kraWatchedTitle }) }); } catch (_) { /* */ }
+    }
+    try {
+      await fetch('/api/kra/watch', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raceKey: title, meet: venue, rc_no: num, rc_date: _ymdToday() }),
+      });
+      _kraWatchedTitle = title;
+    } catch (_) { /* 서버 미기동 등 → 무해(확장 폴백 유지) */ }
+  }
+  async function updateKraApiStatus(title) {
+    const host = document.getElementById('koreaOddsStatus');
+    if (!host) return;
+    let box = document.getElementById('kraApiStatus');
+    if (!box) {                                         // koreaOddsStatus 바로 위에 KRA 상태줄 삽입(기존 UI 무변경·가산)
+      box = document.createElement('div'); box.id = 'kraApiStatus'; box.style.marginBottom = '6px';
+      host.parentNode.insertBefore(box, host);
+    }
+    let j = null;
+    try { j = await (await fetch('/api/kra/status?raceKey=' + encodeURIComponent(title || ''))).json(); } catch (_) { box.innerHTML = ''; return; }
+    if (!j || !j.keySet) {
+      box.innerHTML = `<div class="hint" style="padding:6px 9px;background:rgba(148,163,184,.12);border-left:3px solid #94a3b8;border-radius:6px;color:#94a3b8">⚙️ KRA API 키 미설정(.env KRA_API_KEY) — 확장 배당만 사용</div>`;
+      return;
+    }
+    const d = j.detail || {};
+    if (d.watching && d.lastAt) {
+      const c = d.lastCounts || {};
+      box.innerHTML = `<div class="hint" style="padding:6px 9px;background:rgba(56,211,159,.14);border-left:3px solid #38d39f;border-radius:6px;color:#38d39f">
+        ✅ <b>KRA API 연결됨</b> · 마지막 수집: <b>${esc(d.lastAt)}</b> <span style="color:#7dd3fc">(복승 ${c.quinella || 0}·삼복승 ${c.trio || 0})</span></div>`;
+    } else if (d.watching) {
+      box.innerHTML = `<div class="hint" style="padding:6px 9px;background:rgba(245,158,11,.12);border-left:3px solid #f59e0b;border-radius:6px;color:#f59e0b">🟡 <b>KRA API 등록됨</b> · 수집 대기중(경마 당일·발매 시간에 확정배당 수신)</div>`;
+    } else {
+      box.innerHTML = '';                               // 이 경주는 미등록(파싱 실패 등) → 표시 없음
+    }
   }
 
   function koreaRaceParts(title) {
@@ -5427,9 +5585,10 @@
     setKoreaOddsStatus('waiting', title);
     renderKoreaFormDraft(title);   // [복구] 배당 연동 전에도 전적 기준 통합 초안(유력마 TOP5·조합)을 즉시 표시
     renderKoreaTimeline(title);
-    const tick = () => pollKoreaOdds(title, race, form);
+    registerKraWatch(title);       // [KRA 자동배선] 이 경주를 서버 KRA 30초 자동수집에 등록(확정배당·결과판정)
+    const tick = () => { pollKoreaOdds(title, race, form); updateKraApiStatus(title); };
     await tick();
-    // [2번] 30초 간격 수집·변동 감시 (확장 [전체 자동 수집] 주기와 정렬)
+    // [2번] 30초 간격 수집·변동 감시 (확장 [전체 자동 수집] 주기와 정렬) + KRA API 상태 갱신
     _koreaOddsTimer = setInterval(tick, 30000);
   }
 
@@ -6193,8 +6352,11 @@
     if (!cp || a.recommendClosed) return '';
     let fq = cp.finalQuinellas || [];
     let ft = cp.finalTrifectas || [];
-    // [폴백·구데이터] finalQuinellas 미보유 시 기존 confQuinellas/quinella·삼복승으로 대체
-    if (!fq.length) {
+    // [단통 경주] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림. 저배당 폴백 금지(1.5배 조합 재노출 방지)·복병 집중 유도.
+    const dansung = !!cp.dansung;
+    const special0 = cp.bmedSpecial || [];
+    // [폴백·구데이터] finalQuinellas 미보유 시 기존 confQuinellas/quinella·삼복승으로 대체(단, 단통 경주는 폴백 안 함)
+    if (!fq.length && !dansung) {
       if ((cp.confQuinellas || []).length) fq = cp.confQuinellas.slice(0, 2);
       else if (cp.quinella && cp.quinella.length === 2) fq = [{ combo: cp.quinella, odds: cp.quinellaOdds }];
     }
@@ -6202,7 +6364,12 @@
       const _t0 = cp.confTrifecta || cp.trifecta;
       if (_t0) ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds }];
     }
-    if (!fq.length) return '';
+    if (!fq.length && !dansung && !special0.length) return '';
+    // [단통 경고 배너] "저배당 추천 신뢰도 낮음 · 복병 감지에 집중"
+    const dansungBanner = dansung ? `<div style="margin:4px 0 8px;padding:9px 11px;border:2px solid #f59e0b;border-radius:9px;background:rgba(245,158,11,.14)">
+      <div style="font-size:14.5px;font-weight:900;color:#f59e0b">⚡ 단통 경주 감지 ${cp.dansungMinOdds != null ? `<span class="hint" style="font-weight:700;font-size:12px">(최저 ${cp.dansungMinOdds}배)</span>` : ''}</div>
+      <div class="hint" style="font-size:12px;margin-top:2px">저배당 추천 신뢰도 낮음 · <b style="color:#f0abfc">복병 감지에 집중</b>하세요 (💎 BMED 특별 참고)</div>
+    </div>` : '';
     const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번${cp.confTop1High ? ' 🔺고배당' : ''}</span>` : '';
     // [근거 기반 추천·두수별 개수] ★등급(★★★ 이중수렴/★★ 단일강신호/★ 참고) + 근거 + N두·복승개수 헤더
     const starStr = (n) => '★'.repeat(Math.max(0, Math.min(3, n || 0)));
@@ -6210,23 +6377,43 @@
     const maxQ = cp.quinellaMax || fq.length;
     const chaoticTag = cp.chaoticRace ? ' <span style="color:#fbbf24">· ⚠️ 혼전(+2)</span>' : '';
     const cntHead = nH ? `<div class="hint" style="font-size:12px;margin-bottom:4px">${nH}두 경주 · 복승 ${fq.length}개 추천 <span style="opacity:.7">(상한 ${maxQ})</span>${chaoticTag}</div>` : '';
-    // [두수별 개수] 서버가 이미 상한(3~8)으로 캡 → 전부 표시(구데이터 폴백은 2개)
+    // [전적 수집 상태 배지] ✅ 전적+배당 / ⚠️ 배당 기반만(formMissing)
+    const formBadge = cp.formMissing
+      ? `<div style="font-size:12.5px;font-weight:800;color:#fbbf24;margin-bottom:5px">⚠️ 전적 데이터 없음 — 배당 기반 분석 중</div>`
+      : `<div style="font-size:12px;font-weight:700;color:#38d39f;margin-bottom:5px">✅ 전적+배당 분석</div>`;
+    // [메인 추천·근거 문장] 조합별 근거(급락%/스마트머니/역배열) + 요약 줄 표시
+    const basisBlock = (q, col) => (q.basis && q.basis.length)
+      ? `<div style="margin:1px 0 4px 16px">${q.basis.map((b) => `<div class="hint" style="font-size:12.5px;color:${col}">→ ${esc(b)}</div>`).join('')}${q.summary ? `<div class="hint" style="font-size:12px;color:#38d39f">→ ${esc(q.summary)}</div>` : ''}</div>`
+      : '';
     const qLines = fq.map((q) => {
       const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(${q.odds}배)</span>` : '';
       const st = q.stars ? ` <span style="color:#fbbf24;font-size:14px">${starStr(q.stars)}</span>` : '';
       const rs = q.reason ? ` <span class="hint" style="font-size:12px">· ${esc(q.reason)}</span>` : '';
-      return `<div style="font-size:19px;font-weight:800;margin:5px 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>`;
+      return `<div style="font-size:19px;font-weight:800;margin:5px 0 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>${basisBlock(q, '#7dd3fc')}`;
     }).join('');
     const tLines = ft.slice(0, 2).map((t) => {
       const oo = t.odds != null ? `<span class="hint" style="font-size:13px">(${t.odds}배)</span>` : '';
       const rs = t.reason ? ` <span class="hint" style="font-size:12px">· ${esc(t.reason)}</span>` : '';
       return `<div style="font-size:18px;font-weight:800;margin:5px 0">🛡 삼복승 보험: <span style="color:#c084fc">${t.combo.join('+')}</span> ${oo}${rs}</div>`;
     }).join('');
+    // [BMED 특별 감지 💎] 고배당+강신호 별도 섹션(하단·단통 최대 3·평시 2) — 시장은 저평가, BMED만 감지
+    const special = special0;
+    const spBlock = special.length ? `<div style="margin-top:10px;padding:10px 12px;border:2px dashed #f0abfc;border-radius:10px;background:rgba(240,171,252,.08)">
+      <div style="font-size:15px;font-weight:800;color:#f0abfc;margin-bottom:2px">💎 BMED 특별 감지 <span class="hint" style="font-weight:400;font-size:11px">시장은 저평가 · BMED만 감지한 고배당 기회</span></div>
+      ${special.map((q) => {
+      const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(${q.odds}배)</span>` : '';
+      const sc = q.score != null ? ` <span class="hint" style="font-size:11px">· 신호 ${q.score}점</span>` : '';
+      return `<div style="font-size:17px;font-weight:800;margin:4px 0 0">복승: <span style="color:#f0abfc">${q.combo.join('+')}</span> ${oo} <span style="color:#fbbf24;font-size:13px">★★</span>${sc}</div>${basisBlock(q, '#f0abfc')}`;
+    }).join('')}
+    </div>` : '';
     return `<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
       <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(근거 기반)</span> ${confHead}</div>
+      ${dansungBanner}
+      ${formBadge}
       ${cntHead}
       ${qLines}
       ${tLines}
+      ${spBlock}
     </div>`;
   }
 
@@ -7962,6 +8149,24 @@
     _renderKoreaDeadlineStatus(_msToHHMM(saved.ms), saved.ms);
   }
 
+  // [자동 예상] 연속 자동 전환 상태 배너 — /api/auto-prediction/status 폴링 → "🔄 자동 예상 중: X / 다음: Y (N분 후)"
+  function initAutoPredBanner() {
+    const el = document.getElementById('autoPredBanner');
+    if (!el || el._wired) return;
+    el._wired = true;
+    const poll = async () => {
+      let s;
+      try { s = await (await fetch('/api/auto-prediction/status')).json(); } catch (_) { return; }
+      if (!s || !s.enabled || !s.active || !s.current) { el.style.display = 'none'; return; }
+      const nextTxt = s.next ? ` · 다음 자동 분석: <b>${esc(s.next)}</b>${s.nextInMin != null ? ` <span class="hint">(${s.nextInMin}분 후)</span>` : ''}` : '';
+      const saved = s.savedToday ? ` <span class="hint" style="font-size:11px">· 오늘 ${s.savedToday}건 예상 저장</span>` : '';
+      el.innerHTML = `🔄 <b style="color:#67e8f9">자동 예상 중:</b> <b>${esc(s.current)}</b>${nextTxt}${saved}`;
+      el.style.display = '';
+    };
+    poll();
+    setInterval(poll, 30000);   // 30초 폴링
+  }
+
   function initClosingWatch() {
     if (document.getElementById('anomalyFeedPanel')) return;
     const feed = document.createElement('div');
@@ -8954,6 +9159,7 @@
     initAutoStatusBar();   // [v2.0.0] 자동수집 상태바
     initResultAutoWatch(); // [스펙2·3] 결과 자동수집 실패 배너 + 성공 시 결과탭 자동갱신
     initClosingWatch();    // [보완] 이상감지 누적 피드 + 마감 전 단계 알림
+    initAutoPredBanner();  // [자동 예상] 연속 자동 전환 상태 배너(현재/다음 경주)
     initRaceRefresh();     // [경주 자동 업데이트] 상단 새로고침 바 + 30초 자동 감지
     initMultiRace();       // [다중 경주 동시 배당판] 전체 경주 탭 버튼 바인딩
     initPopout();          // [별도 창] 분석기 팝업 창 열기 + 위치 기억

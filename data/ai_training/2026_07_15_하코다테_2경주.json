@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_15_하코다테_2경주",
+ "race_info": {
+  "date": "2026-07-15",
+  "track": "하코다테",
+  "round": 2,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "16:13:26",
+    "quinella": {
+     "1+2": 81.5,
+     "1+3": 50.0,
+     "2+3": 129.5,
+     "1+4": 4.0,
+     "2+4": 34.9,
+     "3+4": 27.8,
+     "1+5": 6.0,
+     "2+5": 40.7,
+     "3+5": 44.0,
+     "4+5": 4.9,
+     "1+6": 31.9,
+     "2+6": 95.7,
+     "3+6": 59.5,
+     "4+6": 24.1,
+     "5+6": 19.4,
+     "1+7": 15.0,
+     "2+7": 46.8,
+     "3+7": 81.5,
+     "4+7": 10.9,
+     "5+7": 4.6,
+     "6+7": 73.4
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": true,
+  "reversal_ratio": 0.401,
+  "quinella_mismatch": 1.225,
+  "refund_rate": 0.742,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   4,
+   5,
+   7,
+   2,
+   3,
+   6
+  ],
+  "eliminated": [],
+  "recommend": "1+4",
+  "strategy": "BMED_역배열형",
+  "confidence": 35.0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 4,
+  "2nd": 5,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중 · 역배열 감지말 1번 입상"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 4,
+  "second": 5,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": 3,
+  "reversal_horse_placed": false,
+  "reversal_ratio": 0.401,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-15 21:02:29",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "전적 데이터",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

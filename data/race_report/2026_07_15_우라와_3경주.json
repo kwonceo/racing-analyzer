@@ -1,0 +1,221 @@
+{
+ "race": "우라와 3경주",
+ "raceKey": "우라와 3경주",
+ "date": "2026-07-15",
+ "result": {
+  "1st": 12,
+  "2nd": 11,
+  "3rd": 5,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": "복승 보조(삼복승 구성)",
+ "odds": "중배당",
+ "win_odds": 10.1,
+ "why_recommended": {
+  "signal_12": {
+   "horse": 12,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    11,
+    12
+   ],
+   "drop_timeline": [
+    {
+     "time": "14:19:50",
+     "minutes_before": 11,
+     "odds": 10.8,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "14:21:18",
+     "minutes_before": 10,
+     "odds": 10.8,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "14:33:01",
+     "minutes_before": 0,
+     "odds": 10.1,
+     "change": -6.5,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 32.0,
+   "reason": "일반"
+  },
+  "signal_11": {
+   "horse": 11,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    11
+   ],
+   "drop_timeline": [
+    {
+     "time": "14:19:50",
+     "minutes_before": 11,
+     "odds": 4.3,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "14:21:18",
+     "minutes_before": 10,
+     "odds": 4.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "14:33:01",
+     "minutes_before": 0,
+     "odds": 3.9,
+     "change": -9.3,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.699,
+   "record_score": null,
+   "confidence": 41.6,
+   "reason": "쌍승역전"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 32.0,
+   "reason": "일반"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    11
+   ],
+   "drop_timeline": [
+    {
+     "time": "14:19:50",
+     "minutes_before": 11,
+     "odds": 4.3,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "14:21:18",
+     "minutes_before": 10,
+     "odds": 4.3,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "14:33:01",
+     "minutes_before": 0,
+     "odds": 3.9,
+     "change": -9.3,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 24.0,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  1,
+  11,
+  12
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 12번 전적 정보 제한",
+  "2. 배당 수집 시작 14:19:50",
+  "4. 쌍승 역전: 11→1(6.5) < 1→11(9.3) → 11번 실질 상위 신호",
+  "5. 종합 신뢰도 32.0점(하) 판정",
+  "6. BMED 전략: 역배열형 적용",
+  "7. 최종 추천: 복승 메인 1+11"
+ ],
+ "confidence_breakdown": {
+  "horse": 12,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": null,
+  "total": 32.0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   11
+  ],
+  "inverseHit": [
+   11
+  ],
+  "confidence": 41.6,
+  "reason": "역배열 감지말 11번 입상 · 제거 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 4
+ },
+ "pnl": 9100,
+ "stake": 1000,
+ "generated_at": "2026-07-15 20:58:54"
+}

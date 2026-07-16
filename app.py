@@ -1684,6 +1684,27 @@ def _sport_max_no(sport):
     return _SPORT_MAX_NO.get((sport or "horse"), 18)
 
 
+def _oddspark_covered_active(rk, within=200):
+    """[자동전송 꼬임 방어] 이 raceKey를 서버가 oddspark로 방금(within초 내) 직접 수집 중인가?
+    True면 확장(asyukk 사설 배당판·화면 수집)의 중복 전송은 불필요하고 오히려 유해 —
+    ①탭 전환마다 다른 경주 배당이 서버를 덮어씀 ②사설≠공식 배당 혼입 ③유령 말번호 유입.
+    → ingest 엔드포인트에서 확장 전송만 스킵(서버 oddspark 수집이 권위 소스). oddspark 미커버 경주는 False(확장 유지)."""
+    now = time.time()
+    try:
+        m = _multi_store_load().get(rk)                  # multi_store = 항상 oddspark 서버 직접수집분
+        if m and (now - (m.get("t") or 0)) <= within:
+            return True
+    except Exception:
+        pass
+    try:
+        t = _triple_load().get(rk)                       # triple_store source에 oddspark 태그 + 최근 갱신
+        if t and "oddspark" in (t.get("source") or "") and (now - (t.get("t") or 0)) <= within:
+            return True
+    except Exception:
+        pass
+    return False
+
+
 @app.route("/api/odds/triple/ingest", methods=["POST"])
 def triple_ingest():
     """확장 [전체 자동 수집]: {raceKey, quinella[], exacta[], trio[]} 저장 → {ok, counts}"""
@@ -1691,15 +1712,142 @@ def triple_ingest():
     rk = (body.get("raceKey") or "").strip()
     if not rk:
         return jsonify({"error": "raceKey가 필요합니다."}), 400
+    # [자동전송 raceKey 고정·중복차단] 서버가 이 경주를 oddspark로 직접 수집 중이면 확장(화면 수집) 전송은 스킵.
+    #   → 탭 전환마다 다른 경주가 서버를 덮어써 분석기·오버레이가 꼬이던 문제 근본 차단(oddspark 미커버 경주는 정상 저장).
+    _src = (body.get("source") or "")
+    _is_ext = ("oddspark" not in _src)                   # oddspark_bg/직접수집이 아닌 확장·수동 화면수집분
+    if _is_ext and _oddspark_covered_active(rk):
+        print(f"[자동전송 스킵] {rk}: oddspark 서버 자동수집 중 → 확장 중복 전송 생략(꼬임·유령마번 방지)")
+        return jsonify({"ok": True, "skipped": True, "reason": "oddspark 서버 자동수집 중 — 확장 전송 생략",
+                        "raceKey": rk})
     return jsonify(_do_triple_ingest(
         rk, body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or [],
         _win_map_clean(body.get("win")), body.get("sport"), body.get("category"),
         body.get("source"), body.get("deadline")))
 
 
+_ARITY_MIN, _ARITY_MAX = 0.4, 1.5
+# 서버가 직접 fetch 하는 신뢰 소스(탭 롤링과 무관 → 조합 수 검증 면제).
+#   oddspark = 공식 HTML 직접 크롤링 · kra_api = 한국마사회 API. 이 경로엔 탭 오염이 원천적으로 없고,
+#   수집 범위가 종류별로 달라(예: 한국 복승) 하한 검증을 걸면 정상 수집분까지 거부될 수 있다.
+_ARITY_TRUSTED = ("oddspark", "kra_api")
+
+
+def _combo_horse_count(combos):
+    """조합 목록에 등장하는 서로 다른 마번 수(N)."""
+    nos = set()
+    for c in combos or []:
+        if not isinstance(c, dict):
+            continue
+        for n in (c.get("combo") or []):
+            try:
+                nos.add(int(n))
+            except (TypeError, ValueError):
+                pass
+    return len(nos)
+
+
+def _arity_expect(kind, n):
+    """N두 기준 기대 조합 수. 복승 nC2 · 쌍승 nP2 · 삼복승 nC3."""
+    if n < 3:
+        return 0
+    if kind == "quinella":
+        return n * (n - 1) // 2
+    if kind == "exacta":
+        return n * (n - 1)
+    if kind == "trio":
+        return n * (n - 1) * (n - 2) // 6
+    return 0
+
+
+def _arity_guard(kind, combos, label, source=None):
+    """[오염방지 3·서버측 검증] 조합 수 정합성 검증 → 통과=원본 / 실패=[](그 종류만 저장 거부).
+
+    확장 payload 에는 '이 배당이 복승인지 쌍승인지'를 나타내는 필드가 없다(어느 키에 담겼는가로만 종류를 표현).
+    배당판 탭 전환이 실패하면 복승 매트릭스가 exacta 로 들어오는 등 종류가 뒤바뀐 채 저장될 수 있어,
+    등장 마번 수 N 으로 기대 조합 수를 계산해 정상 범위(40%~150%) 밖이면 그 종류만 거부한다.
+    ⚠ 삼복승(trio)은 하한을 적용하지 않는다 — 확장이 '유력마 축 클릭'으로 전체의 일부만 수집하는 설계라
+       (축 1두면 전체의 ~25%) 하한을 걸면 정상 수집분까지 버려진다. 상한만 적용하고, trio 오염은
+       확장측 [오염방지 1](축 클릭 실패 시 skip)이 원천 차단한다.
+    """
+    if not combos:
+        return combos
+    if source and any(t in str(source) for t in _ARITY_TRUSTED):
+        return combos
+    n = _combo_horse_count(combos)
+    exp = _arity_expect(kind, n)
+    if not exp:
+        return combos
+    ratio = len(combos) / exp
+    too_many = ratio > _ARITY_MAX
+    too_few = (kind != "trio") and (ratio < _ARITY_MIN)
+    if too_many or too_few:
+        print(f"⚠️ {label} 조합 수 이상 - 저장 거부 "
+              f"({len(combos)}개 / 기대 {exp}개 · {n}두 · {ratio * 100:.0f}% · source={source or '확장'})")
+        return []
+    return combos
+
+
+def _exacta_mirrors_quinella(q, x, source=None):
+    """[오염방지 3-b·핵심] 쌍승이 사실상 복승 배당의 복사본인지 판정.
+
+    조합 '수' 검증만으로는 최악의 오염(쌍승 탭 전환 실패 → 복승 매트릭스를 쌍승으로 전송)을 잡을 수 없다.
+    복승 삼각 매트릭스(nC2=66)가 쌍승으로 들어오면 66/132 = 정확히 50% 라 40% 하한을 통과해 버린다.
+    (복승 보드가 정사각이면 nP2=132 로 100% 가 되어 수량 검증은 아예 무의미해진다.)
+    → 값으로 판정한다: 진짜 쌍승은 방향별로 배당이 다르고 복승보다 크지만, 복승을 긁어온 경우
+      같은 말쌍의 쌍승 배당이 복승 배당과 동일해진다. 겹치는 말쌍의 90%+ 가 일치하면 오염으로 본다.
+    """
+    if not q or not x:
+        return False
+    if source and any(t in str(source) for t in _ARITY_TRUSTED):
+        return False
+    qmap = {}
+    for c in q:
+        if not isinstance(c, dict):
+            continue
+        cb = c.get("combo") or []
+        if len(cb) == 2:
+            try:
+                qmap[(min(int(cb[0]), int(cb[1])), max(int(cb[0]), int(cb[1])))] = float(c.get("odds") or 0)
+            except (TypeError, ValueError):
+                pass
+    if not qmap:
+        return False
+    total = same = 0
+    for c in x:
+        if not isinstance(c, dict):
+            continue
+        cb = c.get("combo") or []
+        if len(cb) != 2:
+            continue
+        try:
+            k = (min(int(cb[0]), int(cb[1])), max(int(cb[0]), int(cb[1])))
+            xo = float(c.get("odds") or 0)
+        except (TypeError, ValueError):
+            continue
+        qo = qmap.get(k)
+        if qo is None or qo <= 0:
+            continue
+        total += 1
+        if abs(xo - qo) <= max(0.05, qo * 0.01):   # 배당값이 실질 동일(반올림 오차 허용)
+            same += 1
+    if total < 5:
+        return False
+    return (same / total) >= 0.9
+
+
 def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None):
     """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
     확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
+    # [오염방지 3] 배당판 탭 롤링 실패로 종류가 뒤바뀐 데이터를 저장 전에 종류별로 거부(신뢰 소스는 면제).
+    q = _arity_guard("quinella", q, "복승", source)
+    x = _arity_guard("exacta", x, "쌍승", source)
+    tr = _arity_guard("trio", tr, "삼복승", source)
+    # [오염방지 3-b] 쌍승 = 복승 복사본이면 거부. 이 오염이 통과하면 쌍승역전 공식(_win_exacta_reversal)에
+    #   가짜 역전 신호로 주입되므로, 수량 검증이 못 잡는 이 케이스를 값 비교로 확실히 차단한다.
+    if _exacta_mirrors_quinella(q, x, source):
+        print(f"⚠️ 쌍승 배당이 복승과 동일 - 저장 거부 (탭 전환 실패로 복승 화면을 쌍승으로 수집한 것으로 판단 · rk={rk})")
+        x = []
     db = _triple_load()
     prev = db.get(rk) or {}
     now = time.time()
@@ -1870,6 +2018,37 @@ def _race_pin_clear():
         os.remove(RACE_PIN_FILE)
     except OSError:
         pass
+
+
+# ── [배당판 추종·board hint] 확장이 감지한 '현재 배당판 경주'를 분석기가 추종 ──────────────────
+#   문제: oddspark bg 수집(나고야 등)이 30초마다 최신이라 current_race 의 max-t 폴백이 늘 그 경주를 반환 →
+#         배당판은 몬베츠인데 분석기는 나고야/카나자와로 어긋남(특히 배당판 경주가 oddspark 미등록이면 데이터가
+#         없어 max-t 가 다른 경주로 튐). 해결: content.js 가 배당판 raceKey 를 POST → 이 힌트를 max-t 보다 우선.
+#   우선순위: pin(사용자 하드락) > board hint(신선) > max-t 폴백. TTL 지나면 자동 무시(배당판 닫히면 복귀).
+BOARD_HINT_FILE = os.path.join(os.path.dirname(__file__), "data", "board_hint.json")
+_BOARD_HINT_TTL = 90   # 초: 배당판 힌트 신선도(확장이 10초마다 재전송 → 넘으면 배당판 닫힌 것으로 보고 무시)
+
+
+def _board_hint_save(rk, sport=None):
+    try:
+        os.makedirs(os.path.dirname(BOARD_HINT_FILE), exist_ok=True)
+        json.dump({"raceKey": (rk or "").strip(), "sport": (sport or "").strip() or None, "t": time.time()},
+                  open(BOARD_HINT_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+    except Exception as e:
+        print("[배당판 힌트] 저장 실패(무시):", e)
+
+
+def _board_hint_load():
+    """신선한(TTL 내) 배당판 힌트 {raceKey, sport, t} 반환. 없거나 오래되면 None."""
+    try:
+        d = json.load(open(BOARD_HINT_FILE, encoding="utf-8"))
+    except Exception:
+        return None
+    if not d or not d.get("raceKey"):
+        return None
+    if (time.time() - (d.get("t") or 0)) > _BOARD_HINT_TTL:
+        return None
+    return d
 
 
 @app.route("/api/race/pin", methods=["GET", "POST"])
@@ -2128,6 +2307,369 @@ def after_close_cases():
                     "note": "마감 후 감지된 신호(베팅 반영 불가) — 수집 간격 단축의 필요성 근거 데이터"})
 
 
+@app.route("/api/dansung/cases", methods=["GET"])
+def dansung_cases():
+    """[단통 학습] 복승 최저 ≤1.5배 쏠림 경주 케이스 + 복병(특별) 적중률 통계.
+    통계 탭에서 '단통 경주 복병 적중률'로 표시 → 저배당 쏠림 회피·복병 집중 전략 효과 검증."""
+    d = _dansung_cases_load()
+    cases = sorted(d.get("cases", []), key=lambda c: c.get("at") or "", reverse=True)
+    return jsonify({"cases": cases[:100], "stats": d.get("stats") or {},
+                    "note": "단통(복승 최저 ≤1.5배) 경주 복병 적중률 — 저배당 쏠림 회피·복병 집중 전략 효과"})
+
+
+SNAPSHOT_DIR = os.path.join(os.path.dirname(__file__), "data", "snapshots")
+
+
+def _safe_snapshot_name(fn):
+    """[경로조작 방어] 파일명 정규화 — basename·허용문자(한글·영숫자·_-.)·.png 강제·길이 제한."""
+    fn = os.path.basename(str(fn or "")).strip()
+    if not fn:
+        return ""
+    if not fn.lower().endswith(".png"):
+        fn += ".png"
+    fn = re.sub(r"[^0-9A-Za-z가-힣_\-.]", "_", fn)
+    return fn[:160]
+
+
+def _snapshot_meta_path(fn):
+    return os.path.join(SNAPSHOT_DIR, fn.rsplit(".", 1)[0] + ".json")
+
+
+def _snapshot_result_for(rk):
+    """[스냅샷↔결과 비교] raceKey 로 저장된 실제 착순(top3) 조회(유연 매칭). 없으면 None."""
+    try:
+        if not rk:
+            return None
+        db = _results_load()
+        if not db:
+            return None
+        key = rk if rk in db else _resolve_race_key(rk, list(db.keys()))
+        rec = db.get(key) if key else None
+        if not rec:
+            return None
+        return {"top3": rec.get("top3") or [], "finalOdds": rec.get("finalOdds")}
+    except Exception:
+        return None
+
+
+SNAPSHOT_COMPARE_DIR = os.path.join(os.path.dirname(__file__), "data", "snapshot_compare")
+SNAPSHOT_TIMING_FILE = os.path.join(os.path.dirname(__file__), "data", "snapshot_timing.json")
+
+
+def _snapshot_min_quinella(quinellas):
+    """[비교분석] 추천 복승 조합 중 최저 배당 + 그 조합 반환. 없으면 (None, None)."""
+    best_o, best_c = None, None
+    for q in (quinellas or []):
+        try:
+            o = q.get("odds")
+            if o is None:
+                continue
+            o = float(o)
+            if o <= 0:
+                continue
+            if best_o is None or o < best_o:
+                best_o, best_c = o, q.get("combo")
+        except Exception:
+            continue
+    return best_o, best_c
+
+
+def _snapshot_main_combos(quinellas, cap=5):
+    """[비교분석] 추천 변경 여부 판정용 — 상위 복승 조합을 정규화 문자열 집합으로."""
+    out = set()
+    for q in (quinellas or [])[:cap]:
+        try:
+            c = q.get("combo") or []
+            if len(c) >= 2:
+                out.add("-".join(str(x) for x in sorted(int(v) for v in c[:2])))
+        except Exception:
+            continue
+    return out
+
+
+def _snapshot_signal_first(rk):
+    """[비교분석] odds_history 에서 이 경주의 이상감지 신호(signal_horse)가 처음 잡힌 시점을 'T-N분'으로.
+    없으면 None. 마감 후·다음경주 차단 스냅샷은 제외."""
+    try:
+        path, _d, _r = _hist_path(rk)
+        doc = _hist_read_any(path)
+        if not doc:
+            return None
+        for s in (doc.get("snapshots") or []):
+            if s.get("after_close") or s.get("next_race_blocked"):
+                continue
+            if s.get("signal_horse"):
+                mb = s.get("mb_signed")
+                if mb is None:
+                    mb = s.get("minutes_before")
+                if mb is None:
+                    return "시점미상"
+                return "T-%d분" % int(round(float(mb))) if mb >= 0 else "마감 후"
+    except Exception:
+        pass
+    return None
+
+
+def _snapshot_metas_for_race(rk):
+    """[비교분석] 이 raceKey 로 저장된 스냅샷 메타를 단계(trigger)별로 수집 → {'T-10':meta, 'T-2':meta, 'close':meta}."""
+    stage = {}
+    try:
+        files = os.listdir(SNAPSHOT_DIR)
+    except FileNotFoundError:
+        return stage
+    for fn in files:
+        if not fn.lower().endswith(".png"):
+            continue
+        try:
+            meta = json.load(open(_snapshot_meta_path(fn), encoding="utf-8"))
+        except Exception:
+            continue
+        if (meta.get("raceKey") or "") != (rk or ""):
+            continue
+        tg = meta.get("trigger") or ""
+        if tg in ("T-10", "T-2", "close") and (tg not in stage or (meta.get("at") or "") > (stage[tg].get("at") or "")):
+            stage[tg] = meta
+    return stage
+
+
+def _snapshot_build_compare(rk):
+    """[비교분석 자동 저장] 3단계(T-10/T-2/마감후) 스냅샷이 모이면 배당·추천 변화량을 산출·저장.
+    구조: {"T-10":{최저배당·추천}, "T-2":{최저배당·추천}, "마감후":{최종 최저배당}, "변화량":{...}}."""
+    stage = _snapshot_metas_for_race(rk)
+    if "close" not in stage:                       # 마감후 스냅샷 없으면 아직 미완(추후 재호출)
+        return None
+    t10, t2, close = stage.get("T-10"), stage.get("T-2"), stage["close"]
+
+    def _pack(meta):
+        if not meta:
+            return None
+        mo, mc = _snapshot_min_quinella(meta.get("quinellas"))
+        return {"파일": meta.get("filename"), "시각": meta.get("at"),
+                "최저복승배당": mo, "최저복승조합": mc,
+                "추천수": len(meta.get("quinellas") or []),
+                "단통": bool(meta.get("dansung")),
+                "추천조합": [q.get("combo") for q in (meta.get("quinellas") or [])[:5]]}
+
+    p10, p2, pc = _pack(t10), _pack(t2), _pack(close)
+    # 최저배당 변화(T-10 → 마감후)
+    change_pct = None
+    base = (p10 or {}).get("최저복승배당")
+    fin = (pc or {}).get("최저복승배당")
+    if base and fin and base > 0:
+        change_pct = round((fin - base) / base * 100.0, 1)
+    # 추천 변경 여부(T-10 상위조합 vs T-2 상위조합)
+    rec_changed = None
+    if t10 and t2:
+        rec_changed = _snapshot_main_combos(t10.get("quinellas")) != _snapshot_main_combos(t2.get("quinellas"))
+    compare = {
+        "raceKey": rk, "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "T-10": p10, "T-2": p2, "마감후": pc,
+        "변화량": {
+            "최저배당 변화": ("%+.1f%%" % change_pct) if change_pct is not None else None,
+            "추천 변경 여부": rec_changed,
+            "신호 발생 시점": _snapshot_signal_first(rk),
+        },
+    }
+    try:
+        os.makedirs(SNAPSHOT_COMPARE_DIR, exist_ok=True)
+        safe = re.sub(r"[^\w가-힣]+", "_", rk or "race").strip("_")[:120]
+        json.dump(compare, open(os.path.join(SNAPSHOT_COMPARE_DIR, safe + ".json"), "w", encoding="utf-8"),
+                  ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[스냅샷 비교] 저장 실패:", e)
+    _snapshot_timing_learn(rk, compare, stage)
+    print("[스냅샷 비교] %s · 최저배당 변화 %s · 추천변경 %s · 신호 %s" % (
+        rk, compare["변화량"]["최저배당 변화"], compare["변화량"]["추천 변경 여부"], compare["변화량"]["신호 발생 시점"]))
+    return compare
+
+
+def _snapshot_timing_learn(rk, compare, stage):
+    """[타이밍 학습] T-10 추천 vs T-2 추천을 실제 착순과 비교 → 어느 시점 추천이 더 정확한지 누적.
+    결과(top3) 미입력이면 대기(마감후 결과 저장 시 재판정 안 하고, 결과 있을 때만 집계)."""
+    try:
+        res = _snapshot_result_for(rk)
+        top3 = (res or {}).get("top3") or []
+        if len(top3) < 2:                          # 실제 착순 없으면 학습 보류(정확도 판정 불가)
+            return
+        win2 = set(int(x) for x in top3[:2])       # 복승 적중 기준(1+2착)
+
+        def _hit(meta):
+            if not meta:
+                return None
+            for q in (meta.get("quinellas") or []):
+                c = q.get("combo") or []
+                if len(c) >= 2 and set(int(v) for v in c[:2]) == win2:
+                    return True
+            return False
+
+        h10, h2 = _hit(stage.get("T-10")), _hit(stage.get("T-2"))
+        try:
+            stat = json.load(open(SNAPSHOT_TIMING_FILE, encoding="utf-8"))
+        except Exception:
+            stat = {}
+        stat.setdefault("t10", {"판정수": 0, "적중": 0})
+        stat.setdefault("t2", {"판정수": 0, "적중": 0})
+        stat.setdefault("동시", {"둘다적중": 0, "T-10만": 0, "T-2만": 0, "둘다실패": 0})
+        stat.setdefault("cases", [])
+        if h10 is not None:
+            stat["t10"]["판정수"] += 1
+            stat["t10"]["적중"] += 1 if h10 else 0
+        if h2 is not None:
+            stat["t2"]["판정수"] += 1
+            stat["t2"]["적중"] += 1 if h2 else 0
+        if h10 is not None and h2 is not None:
+            if h10 and h2:
+                stat["동시"]["둘다적중"] += 1
+            elif h10 and not h2:
+                stat["동시"]["T-10만"] += 1
+            elif h2 and not h10:
+                stat["동시"]["T-2만"] += 1
+            else:
+                stat["동시"]["둘다실패"] += 1
+        stat["cases"].append({"raceKey": rk, "at": compare.get("at"),
+                              "T-10적중": h10, "T-2적중": h2, "top2": sorted(win2)})
+        stat["cases"] = stat["cases"][-500:]       # 최근 500경주만 유지
+        # 요약(어느 시점이 더 정확?)
+        r10 = (stat["t10"]["적중"] / stat["t10"]["판정수"]) if stat["t10"]["판정수"] else 0
+        r2 = (stat["t2"]["적중"] / stat["t2"]["판정수"]) if stat["t2"]["판정수"] else 0
+        stat["요약"] = {
+            "T-10 적중률": round(r10 * 100, 1), "T-2 적중률": round(r2 * 100, 1),
+            "더 정확한 시점": ("T-2(마감 2분전)" if r2 > r10 else ("T-10(마감 10분전)" if r10 > r2 else "동률")),
+        }
+        os.makedirs(os.path.dirname(SNAPSHOT_TIMING_FILE), exist_ok=True)
+        json.dump(stat, open(SNAPSHOT_TIMING_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[타이밍 학습] 실패:", e)
+
+
+@app.route("/api/snapshot/save", methods=["POST"])
+def snapshot_save():
+    """[배당판 스냅샷 저장] 확장이 캡처한 base64 PNG(배당판+오버레이+패널·워터마크 포함)를 data/snapshots/<파일명>.png 로 저장.
+    body: {filename, image(dataURL 또는 base64), raceKey, trigger(T-10/T-2/close/manual), quinellas, trifectas, special, minOdds}.
+    메타(.json 사이드카)를 함께 저장 → 갤러리에서 추천 vs 실제결과 비교. trigger=='close'면 3단계 비교분석 자동 산출."""
+    body = request.get_json(force=True, silent=True) or {}
+    img = body.get("image") or ""
+    fn = _safe_snapshot_name(body.get("filename") or "")
+    if not img or not fn:
+        return jsonify({"ok": False, "error": "image·filename 필수"}), 400
+    if isinstance(img, str) and img.strip().startswith("data:") and "," in img:
+        img = img.split(",", 1)[1]                       # data:image/png;base64, 접두 제거
+    try:
+        raw = base64.b64decode(img)
+    except Exception as e:
+        return jsonify({"ok": False, "error": "base64 디코드 실패: %s" % e}), 400
+    if len(raw) > 15_000_000:
+        return jsonify({"ok": False, "error": "이미지 과대(15MB 초과)"}), 400
+    try:
+        os.makedirs(SNAPSHOT_DIR, exist_ok=True)
+        with open(os.path.join(SNAPSHOT_DIR, fn), "wb") as f:
+            f.write(raw)
+        _mqo, _mqc = _snapshot_min_quinella(body.get("quinellas"))
+        meta = {
+            "filename": fn, "raceKey": body.get("raceKey") or "",
+            "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "trigger": body.get("trigger") or "manual",   # T-10(마감10분전)/T-2(마감2분전)/close(마감직후)/manual(수동)
+            "quinellas": body.get("quinellas") or [], "trifectas": body.get("trifectas") or [],
+            "special": body.get("special") or [], "minOdds": body.get("minOdds"),
+            "minQuinella": _mqo, "minQuinellaCombo": _mqc,   # [비교분석] 최저 복승 배당·조합
+            "dansung": bool(body.get("dansung")), "sizeBytes": len(raw),
+        }
+        try:
+            json.dump(meta, open(_snapshot_meta_path(fn), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        except Exception:
+            pass
+    except Exception as e:
+        return jsonify({"ok": False, "error": "저장 실패: %s" % e}), 500
+    print("[스냅샷] 저장: %s (%d KB · %s)" % (fn, len(raw) // 1024, meta["trigger"]))
+    compare = None
+    if meta["trigger"] == "close" and meta["raceKey"]:    # [3단계 완료] 마감직후 → 비교분석 자동 산출·저장
+        try:
+            compare = _snapshot_build_compare(meta["raceKey"])
+        except Exception as e:
+            print("[스냅샷 비교] 산출 실패:", e)
+    return jsonify({"ok": True, "filename": fn, "sizeBytes": len(raw), "compare": compare})
+
+
+@app.route("/api/snapshot/list", methods=["GET"])
+def snapshot_list():
+    """[스냅샷 갤러리] 저장 스냅샷 목록(메타 + 실제결과 비교). 최신순."""
+    out = []
+    try:
+        files = os.listdir(SNAPSHOT_DIR)
+    except FileNotFoundError:
+        files = []
+    for fn in files:
+        if not fn.lower().endswith(".png"):
+            continue
+        meta = {}
+        try:
+            meta = json.load(open(_snapshot_meta_path(fn), encoding="utf-8"))
+        except Exception:
+            pass
+        rk = meta.get("raceKey") or ""
+        out.append({
+            "filename": fn, "raceKey": rk, "at": meta.get("at"),
+            "date": (meta.get("at") or "")[:10], "trigger": meta.get("trigger"),
+            "quinellas": meta.get("quinellas") or [], "trifectas": meta.get("trifectas") or [],
+            "special": meta.get("special") or [], "minOdds": meta.get("minOdds"),
+            "dansung": bool(meta.get("dansung")), "sizeBytes": meta.get("sizeBytes"),
+            "result": _snapshot_result_for(rk),           # 실제 착순(있으면) → 추천 vs 결과 비교
+        })
+    out.sort(key=lambda x: x.get("at") or "", reverse=True)
+    return jsonify({"snapshots": out, "count": len(out)})
+
+
+@app.route("/api/snapshot/get/<path:filename>", methods=["GET"])
+def snapshot_get(filename):
+    """[스냅샷 이미지] 저장된 PNG 반환(경로조작 방어)."""
+    fn = _safe_snapshot_name(filename)
+    if not fn or not os.path.exists(os.path.join(SNAPSHOT_DIR, fn)):
+        return jsonify({"ok": False, "error": "not found"}), 404
+    return send_from_directory(SNAPSHOT_DIR, fn, mimetype="image/png")
+
+
+@app.route("/api/snapshot/compare", methods=["GET"])
+def snapshot_compare_api():
+    """[3단계 비교분석] raceKey 지정 시 그 경주 비교(?raceKey=...), 없으면 저장된 전 비교 목록(최신순).
+    각 경주의 T-10/T-2/마감후 배당·추천 + 변화량(최저배당 변화·추천 변경 여부·신호 발생 시점)."""
+    rk = (request.args.get("raceKey") or "").strip()
+    if rk:
+        safe = re.sub(r"[^\w가-힣]+", "_", rk).strip("_")[:120]
+        path = os.path.join(SNAPSHOT_COMPARE_DIR, safe + ".json")
+        if os.path.exists(path):
+            try:
+                return jsonify({"ok": True, "compare": json.load(open(path, encoding="utf-8"))})
+            except Exception as e:
+                return jsonify({"ok": False, "error": str(e)}), 500
+        # 아직 저장 전이면 즉석 산출 시도(3단계 미완이면 None)
+        return jsonify({"ok": True, "compare": _snapshot_build_compare(rk)})
+    out = []
+    try:
+        for fn in os.listdir(SNAPSHOT_COMPARE_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                out.append(json.load(open(os.path.join(SNAPSHOT_COMPARE_DIR, fn), encoding="utf-8")))
+            except Exception:
+                pass
+    except FileNotFoundError:
+        pass
+    out.sort(key=lambda x: x.get("at") or "", reverse=True)
+    return jsonify({"ok": True, "compares": out, "count": len(out)})
+
+
+@app.route("/api/snapshot/timing", methods=["GET"])
+def snapshot_timing_api():
+    """[타이밍 학습 통계] T-10 추천 vs T-2 추천 누적 적중률 — 어느 시점 추천이 더 정확한지."""
+    try:
+        stat = json.load(open(SNAPSHOT_TIMING_FILE, encoding="utf-8"))
+    except Exception:
+        stat = {"t10": {"판정수": 0, "적중": 0}, "t2": {"판정수": 0, "적중": 0},
+                "동시": {"둘다적중": 0, "T-10만": 0, "T-2만": 0, "둘다실패": 0},
+                "요약": {"T-10 적중률": 0, "T-2 적중률": 0, "더 정확한 시점": "표본 부족"}}
+    return jsonify({"ok": True, "timing": stat})
+
+
 @app.route("/api/after-close/stats", methods=["GET"])
 def after_close_stats_api():
     """[3번] 마감 후 대급락(50%+) → 실제 입상률 통계(패턴 신뢰도 측정)."""
@@ -2148,11 +2690,21 @@ def learning_signal_lessons():
                             "절대 10%+ 급락은 집중신호로 승격(수정 완료)"})
 
 
-@app.route("/api/current_race", methods=["GET"])
+@app.route("/api/current_race", methods=["GET", "POST"])
 def current_race():
     """확장이 마지막으로 수집한 '현재 경주' 반환 → {raceKey, updatedAt, counts}.
     분석기 상단 '경주 새로고침' 바가 폴링해 현재 경주명을 표시·자동 전환한다.
-    (배당 본문 없이 경주명만 필요하므로 triple/latest 보다 가볍다.)"""
+    (배당 본문 없이 경주명만 필요하므로 triple/latest 보다 가볍다.)
+    [배당판 추종] POST {raceKey, sport?} → board hint 저장(확장이 배당판 경주 변경 시 전달) →
+    이후 GET 이 pin > board hint(신선) > max-t 우선순위로 반환 → 분석기가 배당판 경주를 자동 추종."""
+    if request.method == "POST":
+        body = request.json or {}
+        rk = (body.get("raceKey") or "").strip()
+        sp = (body.get("sport") or "").strip() or None
+        if not rk:
+            return jsonify({"error": "raceKey가 필요합니다."}), 400
+        _board_hint_save(rk, sp)
+        return jsonify({"ok": True, "boardHint": rk, "sport": sp})
     db = _triple_load()
     if not db:
         return jsonify({"raceKey": None})
@@ -2172,6 +2724,25 @@ def current_race():
                        "exacta": len(_prec.get("exacta") or []),
                        "trio": len(_prec.get("trio") or [])},
         })
+    # [배당판 추종·board hint] 확장이 POST 한 '현재 배당판 경주'가 신선(TTL내)하면 max-t 폴백보다 우선 →
+    #   분석기가 배당판(예: 몬베츠)과 항상 같은 경주 표시(oddspark 최신 나고야로 안 튐). pin 은 위에서 이미 우선 처리.
+    _bh = _board_hint_load()
+    if _bh and _bh.get("raceKey") and (not want_sport or _sport_match(_bh.get("sport"), want_sport)):
+        _bhrk = _bh["raceKey"]
+        _brec = db.get(_bhrk)
+        if _brec is not None:                          # 배당 데이터 있음 → 그 경주 반환(배당판 추종)
+            _bage = time.time() - (_brec.get("t") or 0)
+            return jsonify({
+                "raceKey": _bhrk, "boardHint": True,
+                "updatedAt": _brec.get("t"), "ageSeconds": round(_bage),
+                "stale": _bage > STALE_ACTIVE_SEC,
+                "counts": {"quinella": len(_brec.get("quinella") or []),
+                           "exacta": len(_brec.get("exacta") or []),
+                           "trio": len(_brec.get("trio") or [])},
+            })
+        # 배당 아직 없음(oddspark 미등록·폴백 수집 전) → 그래도 배당판 경주를 현재로 안내(분석기 대기·자동 전환)
+        return jsonify({"raceKey": _bhrk, "boardHint": True, "waiting": True,
+                        "counts": {"quinella": 0, "exacta": 0, "trio": 0}})
     _cand = list(db.keys())
     if want_sport:
         _cand = [k for k in _cand if _sport_match(db[k].get("sport"), want_sport)]
@@ -2331,7 +2902,69 @@ def _jockey_place_rate(name):
         except Exception:
             return None
     j = _JOCKEYS_CACHE["byName"].get(name.strip())
-    return (j or {}).get("placeRate")
+    kr = (j or {}).get("placeRate")
+    if kr is not None:
+        return kr
+    return _jp_jockey_place_rate(name)   # [일본 기수 DB] KRA에 없으면 일본 기수 복승률 폴백(유력마/제거마 공식 자동 반영)
+
+
+# ── [일본 기수 DB] oddspark 전적(pastRaces)에서 기수 복승권율(입상률·최근 30경주) 자동 누적 ──
+#   ⚠ 기존 KRA jockeys.json(한국) 무삭제 — 일본 기수는 별도 저장소 + _jockey_place_rate 폴백으로만 반영.
+JP_JOCKEYS_FILE = os.path.join(os.path.dirname(__file__), "data", "jp_jockeys.json")
+_JP_JOCKEYS = {"loaded": False, "byName": {}}
+
+
+def _jp_jockeys_load():
+    if not _JP_JOCKEYS["loaded"]:
+        try:
+            _JP_JOCKEYS["byName"] = json.load(open(JP_JOCKEYS_FILE, encoding="utf-8")).get("byName", {})
+        except Exception:
+            _JP_JOCKEYS["byName"] = {}
+        _JP_JOCKEYS["loaded"] = True
+    return _JP_JOCKEYS["byName"]
+
+
+def _jp_jockeys_save():
+    try:
+        os.makedirs(os.path.dirname(JP_JOCKEYS_FILE), exist_ok=True)
+        json.dump({"byName": _JP_JOCKEYS["byName"], "updated": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())},
+                  open(JP_JOCKEYS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[일본기수DB] 저장 실패:", e)
+
+
+def _jp_jockeys_accumulate(details):
+    """oddspark 전적(details={lineageNb: past[]})의 (기수·착순)을 기수별 누적(중복 시그니처 방지·최근 30경주 유지)."""
+    by = _jp_jockeys_load()
+    changed = False
+    for past in (details or {}).values():
+        for pr in (past or []):
+            nm = (pr.get("jockey") or "").strip()
+            pl = pr.get("placing")
+            if not nm or not isinstance(pl, int) or pl <= 0:
+                continue
+            sig = "|".join(str(pr.get(k) or "") for k in ("date", "venue", "distance")) + "|" + nm + "|" + str(pl)
+            rec = by.setdefault(nm, {"sigs": [], "placings": []})
+            if sig in rec["sigs"]:
+                continue
+            rec["sigs"].insert(0, sig)
+            rec["placings"].insert(0, pl)
+            rec["sigs"] = rec["sigs"][:60]            # 중복방지 시그니처는 여유있게 60개
+            rec["placings"] = rec["placings"][:30]    # 복승권율은 최근 30경주 기준
+            changed = True
+    if changed:
+        _jp_jockeys_save()
+
+
+def _jp_jockey_place_rate(name):
+    """일본 기수 복승권율(%) = 최근 30경주 중 1~3착 비율. 표본 5경주 미만이면 None(불충분·중립 처리)."""
+    if not name:
+        return None
+    rec = _jp_jockeys_load().get(name.strip())
+    ps = (rec or {}).get("placings") or []
+    if len(ps) < 5:
+        return None
+    return round(sum(1 for p in ps if p <= 3) / len(ps) * 100, 1)
 
 
 def _placings_list(placings):
@@ -5953,13 +6586,14 @@ def _quinella_target(n_horses, chaotic=False):
 
 
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
-                 reversal_quinellas=None, dark_quinellas=None, signal_horses=None):
-    """[추천 근본 개편·근거 기반] 여러 파생 추천을 랭킹·근거게이트·두수별 개수(max_q)로 정리(기존 파생 필드 무삭제).
-      복승 우선순위: ①시장 최저복승(항상) ②확신도=전적+배당 이중수렴(항상) ③역배열 ④스마트머니 ⑤복병.
-      게이트: ①② 외 후보는 신호말(signal_horses) 최소 1두 포함해야 채택 → 저배당 단순 인기 제외(신호 전무 시 게이트 미적용=호환).
-      ★등급: ★★★ 이중수렴(또는 최저복승+신호) / ★★ 단일 강신호 / ★ 참고(복병).
-      max_q: 복승 최대 개수(두수별 3~8·혼전 +2, 호출부 `_quinella_target` 산출). 기본 2=기존 동작 호환.
-      삼복승은 항상 보험 ≤2(불변). 반환 {quinellas:[{combo,odds,reason,stars}](≤max_q), trifectas:[{combo,odds,reason}](≤2)}."""
+                 reversal_quinellas=None, dark_quinellas=None, signal_horses=None, sig_meta=None, sport=None):
+    """[추천 구조 개편·종목별 저배당+신호=메인 / 고배당+강신호=BMED특별] 파생 추천을 새 구조로 정리(기존 후보수집·파생필드 무삭제).
+      ▸ 메인 추천(★★★) = 종목별 저배당(경륜 5배↓·경정 7배↓·경마 두수별 8~9두 10배↓·10~12두 15배↓·13~18두 20배↓) AND 급락·역배열·스마트머니 신호 1개+. 배당 낮은순·개수=max_q.
+      ▸ BMED 특별 감지(★★, 별도 💎) = 종목별 고배당(경륜 10배↑·경마 20배↑·경정 15배↑, 50배 이하) AND 강신호(signalScore 70+ OR 급락15%+ OR 스마트머니+역배열 동시). signalScore 높은순·최대 2개.
+      ▸ 제외 = BMED 신호 없는 저배당 · 배당 50배 초과 · 종목별 저/고 사이 구간(신호만으로 부족).
+      sig_meta: {no:{drop(pct·음수),rev,smart,dark,anomaly,score}} — 조합 근거문장·신호강도 판정용. 미제공/신호전무 시 기존 랭킹(호환).
+      sport: cycle/boat/bike/horse — 종목별 저/고배당 기준. max_q: 메인 최대 개수(두수별). 삼복승은 항상 보험 ≤2(불변).
+      반환 {quinellas:[{combo,odds,reason,stars,basis,summary}](메인≤max_q), bmedSpecial:[...](≤2), trifectas:[{combo,odds,reason}](≤2)}."""
     cp = cp or {}
     vs = set(int(x) for x in (valid_nos or []))
     sig = set(int(x) for x in (signal_horses or []))
@@ -5976,9 +6610,9 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     def _has_sig(combo):
         return any(int(h) in sig for h in combo)
 
-    # ── 복승 후보(우선순위 + ★등급 + 보호/게이트) ──
+    # ── 복승 후보 수집(우선순위 + src) ── (기존 후보 수집 로직 무삭제·src 태그만 가산)
     q_cands = []
-    if curQ:                                              # 1순위: 시장 최저복승 (항상 유지=메인축)
+    if curQ:                                              # 1순위: 시장 최저복승
         _low = None
         for (a, b), o in curQ.items():
             if o and o > 0 and (not vs or (int(a) in vs and int(b) in vs)):
@@ -5987,41 +6621,257 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         if _low:
             _c = sorted(_low[0])
             q_cands.append({"combo": _c, "odds": _low[1], "reason": "시장 최저복승",
-                            "stars": 3 if _has_sig(_c) else 2, "protected": True})
-    for cq in (cp.get("confQuinellas") or []):            # 2순위: 확신도=전적+배당 이중수렴 (항상 유지)
+                            "stars": 3 if _has_sig(_c) else 2, "protected": True, "src": "low"})
+    for cq in (cp.get("confQuinellas") or []):            # 2순위: 확신도=전적+배당 이중수렴
         _c = sorted(int(x) for x in (cq.get("combo") or []))
         q_cands.append({"combo": _c, "odds": cq.get("odds"),
-                        "reason": cq.get("reason") or "이중수렴(전적+배당)", "stars": 3, "protected": True})
+                        "reason": cq.get("reason") or "이중수렴(전적+배당)", "stars": 3, "protected": True, "src": "conf"})
     for rq in (reversal_quinellas or []):                 # 3순위: 역배열 감지 조합
         _c = sorted(int(x) for x in (rq.get("combo") or []))
         q_cands.append({"combo": _c, "odds": rq.get("odds"),
-                        "reason": rq.get("reason") or "역배열", "stars": 2, "protected": False})
+                        "reason": rq.get("reason") or "역배열", "stars": 2, "protected": False, "src": "rev"})
     for sq in (smart_quinella or []):                     # 4순위: 스마트머니 포함
         _c = sorted(int(x) for x in (sq.get("combo") or []))
         q_cands.append({"combo": _c, "odds": sq.get("odds"),
-                        "reason": "스마트머니", "stars": 2, "protected": False})
+                        "reason": "스마트머니", "stars": 2, "protected": False, "src": "smart"})
     for dq in (dark_quinellas or []):                     # 5순위: 복병 포함
         _c = sorted(int(x) for x in (dq.get("combo") or []))
         q_cands.append({"combo": _c, "odds": dq.get("odds"),
-                        "reason": dq.get("reason") or "복병 포함", "stars": 1, "protected": False})
-    if cp.get("quinella"):                                # 폴백: 기존 core 복승 축(신호 있을 때만=저배당 단순추천 게이트)
+                        "reason": dq.get("reason") or "복병 포함", "stars": 1, "protected": False, "src": "dark"})
+    if cp.get("quinella"):                                # 폴백: 기존 core 복승 축
         _c = sorted(int(x) for x in cp["quinella"])
         q_cands.append({"combo": _c, "odds": cp.get("quinellaOdds"),
-                        "reason": "복승 축", "stars": 2, "protected": False})
-    final_q, seen_q = [], set()
-    for c in q_cands:
-        if not _vpair(c["combo"]):
-            continue
-        # [근거 게이트] 보호(최저복승·이중수렴) 외에는 신호말 최소 1두 포함해야 채택(신호 전무 시 미적용=호환)
-        if not c.get("protected") and sig and not _has_sig(c["combo"]):
-            continue
-        k = tuple(c["combo"])
-        if k in seen_q:
-            continue
-        seen_q.add(k)
-        final_q.append({"combo": c["combo"], "odds": c["odds"], "reason": c["reason"], "stars": c.get("stars", 2)})
-        if len(final_q) >= max_q:
-            break
+                        "reason": "복승 축", "stars": 2, "protected": False, "src": "core"})
+
+    # ── [추천 구조 개편·종목별] 저배당+신호=메인(★★★) / 고배당+강신호=BMED특별(★★) / 그 외=제외 ──
+    #   종목별 저배당(메인 상한)·고배당(특별 하한): 경륜 5/10 · 경정 7/15 · 바이크 5/10 ·
+    #   경마=두수별(8~9두 10 · 10~11두 15 · 12~13두 20 · 14~16두 25 · 17~18두 30, 특별 하한=메인 상한). 특별 상한=50배(공통).
+    _sp = (sport or "").lower()
+    if _sp == "boat":
+        MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 7.0, 15.0
+    elif _sp in ("cycle", "bike"):
+        MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 5.0, 10.0
+    else:                                             # horse(경마)·기타
+        # [두수별 저배당 기준 완화·세분화] 두수 많을수록 배당↑ → 상대적 저배당 상향(12두면 20배도 저배당).
+        #   8~9두=10배↓ · 10~11두=15배↓ · 12~13두=20배↓ · 14~16두=25배↓ · 17~18두=30배↓.
+        #   BMED 특별 💎 하한 = 메인 상한(메인이 끝나는 배당부터 특별). 신호 동시 조건은 유지(근거 없는 저배당은 여전히 제외).
+        _nh_main = len(vs)
+        if _nh_main <= 0 and curQ:                      # [폴백] valid_nos 유실 시 배당판 조합에서 실제 출주 두수 복원
+            _hset = set()
+            for (_ha, _hb) in curQ.keys():
+                try:
+                    _hset.add(int(_ha)); _hset.add(int(_hb))
+                except Exception:
+                    pass
+            _nh_main = len(_hset)
+        if _nh_main >= 17:
+            MAIN_ODDS_MAX = 30.0
+        elif _nh_main >= 14:
+            MAIN_ODDS_MAX = 25.0
+        elif _nh_main >= 12:
+            MAIN_ODDS_MAX = 20.0
+        elif _nh_main >= 10:
+            MAIN_ODDS_MAX = 15.0
+        else:
+            MAIN_ODDS_MAX = 10.0
+        SPECIAL_ODDS_MIN = MAIN_ODDS_MAX   # 특별 하한 = 메인 상한(메인 끝나는 지점부터 BMED 특별 💎)
+    SPECIAL_ODDS_MAX = 50.0       # 특별 상한(50배 초과 제외·근거 약함)
+    DROP_STRONG_PCT = 15.0        # 강신호: 급락 15%+
+    SCORE_STRONG = 70             # 강신호: signalScore 70+
+
+    # [단통 경주 감지] 복승 최저배당 ≤ 1.5배 = 시장이 한 방향으로 과도 쏠림 → 저배당 추천 신뢰도↓·복병 집중.
+    #   ▸ 메인 ★★★에서 1.5배↓ 쏠림 조합 제외(너무 당연·가치 낮음) ▸ BMED 특별(복병) 감도 상향 + 최대 3개로 확대.
+    DANSUNG_ODDS = 1.5            # 단통 조합 상한(메인 제외 기준)
+    _min_q = None
+    if curQ:
+        for (_da, _db), _do in curQ.items():
+            try:
+                _do = float(_do)
+            except Exception:
+                continue
+            if _do > 0 and (not vs or (int(_da) in vs and int(_db) in vs)):
+                if _min_q is None or _do < _min_q:
+                    _min_q = _do
+    DANSUNG = (_min_q is not None and _min_q <= DANSUNG_ODDS)
+    if DANSUNG:                  # [단통] 복병 감도 상향(급락 15→10%·signalScore 70→50) + 특별 최대 3개
+        DROP_STRONG_PCT = 10.0
+        SCORE_STRONG = 50
+        _special_max = 3
+    else:
+        _special_max = 2
+    meta = sig_meta or {}
+
+    def _mh(no):
+        return meta.get(int(no)) or meta.get(str(no)) or {}
+
+    def _combo_basis(combo):
+        """조합 근거 문장 리스트 — 급락%·스마트머니·역배열·복병·집중급락(말별)."""
+        out = []
+        for no in combo:
+            m = _mh(no)
+            _dp = m.get("drop")
+            if _dp is not None and abs(_dp) >= 1:
+                out.append("%d번: 급락 %s%% 감지" % (int(no), round(_dp, 1)))
+            if m.get("smart"):
+                out.append("%d번: 스마트머니 유입" % int(no))
+            if m.get("rev"):
+                out.append("%d번: 역배열 감지" % int(no))
+            if m.get("anomaly") and _dp is None:
+                out.append("%d번: 집중급락" % int(no))
+            if m.get("dark"):
+                out.append("%d번: 복병" % int(no))
+        return out
+
+    def _combo_score(combo):
+        return max([float(_mh(no).get("score") or 0) for no in combo] or [0])
+
+    def _combo_has_signal(combo):
+        if meta:
+            return any((_mh(no).get("drop") is not None) or _mh(no).get("rev")
+                       or _mh(no).get("smart") or _mh(no).get("anomaly") for no in combo)
+        return _has_sig(combo)
+
+    def _combo_strong(combo):
+        """BMED 특별 강신호: signalScore 70+ OR 급락15%+ OR (스마트머니+역배열 동시)."""
+        has_smart = has_rev = False
+        for no in combo:
+            m = _mh(no)
+            _dp = m.get("drop")
+            if _dp is not None and abs(_dp) >= DROP_STRONG_PCT:
+                return True
+            if float(m.get("score") or 0) >= SCORE_STRONG:
+                return True
+            if m.get("smart"):
+                has_smart = True
+            if m.get("rev"):
+                has_rev = True
+        return has_smart and has_rev
+
+    def _combo_has_signal_relaxed(combo):
+        """[메인 보완·완화] 급락 10%+ OR signalScore 50+ OR 기존 신호(drop/rev/smart/anomaly).
+        12두+ 신호 희소(급락 0 등) 경주에서 메인이 상한 미달일 때 우선 채움용(사용자 요청 기준: 급락10%·score50)."""
+        for no in combo:
+            m = _mh(no)
+            _dp = m.get("drop")
+            if _dp is not None and abs(_dp) >= 10.0:
+                return True
+            if float(m.get("score") or 0) >= 50.0:
+                return True
+            if (m.get("drop") is not None) or m.get("rev") or m.get("smart") or m.get("anomaly"):
+                return True
+        return False
+
+    # [저배당 미충족 보완·큰 두수] 시장 저배당(≤MAIN_ODDS_MAX)+신호 포함 조합을 메인 후보에 추가.
+    #   기존 후보=시장 '최저 1개'만 담아 12두+ 큰 두수에서 메인이 상한(4)을 못 채우던 문제 → 저배당+신호 조합 전부 후보화.
+    #   ⚠ 신호 없는 저배당은 여전히 제외(_combo_has_signal 게이트 유지) · 메인은 배당 낮은순 max_q 로 캡되어 과다 없음.
+    if curQ and meta:
+        _seen_pairs = set(tuple(sorted(int(x) for x in (c.get("combo") or []))) for c in q_cands if len(c.get("combo") or []) == 2)
+        _extra = []
+        for (_ea, _eb), _eo in curQ.items():
+            try:
+                _ea, _eb, _eo = int(_ea), int(_eb), float(_eo)
+            except Exception:
+                continue
+            if _ea == _eb or _eo <= 0 or _eo > MAIN_ODDS_MAX:
+                continue
+            if not vs or _ea not in vs or _eb not in vs:   # [유령마번 방어] 유효 출전마 밖(또는 vs 미상)은 후보에서 제외
+                continue
+            _pc = tuple(sorted((_ea, _eb)))
+            if _pc in _seen_pairs or not _combo_has_signal(list(_pc)):
+                continue
+            _seen_pairs.add(_pc)
+            _extra.append({"combo": list(_pc), "odds": _eo, "reason": "시장 저배당+신호",
+                           "stars": 3, "protected": False, "src": "lowsig"})
+        _extra.sort(key=lambda x: x["odds"])
+        q_cands.extend(_extra)
+
+    final_q, special_q, seen_q = [], [], set()
+    if not meta or not sig:
+        # [호환] sig_meta 미제공(구 호출/테스트) 또는 신호 전무 경주 → 기존 랭킹·근거게이트 그대로(개편 미적용)
+        for c in q_cands:
+            if not _vpair(c["combo"]):
+                continue
+            if not c.get("protected") and sig and not _has_sig(c["combo"]):
+                continue
+            if DANSUNG:                                   # [단통] 1.5배↓ 쏠림 조합은 메인 제외(신호 유무 무관)
+                _oc = c.get("odds")
+                if _oc is None and curQ:
+                    _oc = curQ.get((c["combo"][0], c["combo"][1])) or curQ.get((c["combo"][1], c["combo"][0]))
+                try:
+                    if _oc is not None and float(_oc) <= DANSUNG_ODDS:
+                        continue
+                except Exception:
+                    pass
+            k = tuple(c["combo"])
+            if k in seen_q:
+                continue
+            seen_q.add(k)
+            final_q.append({"combo": c["combo"], "odds": c["odds"], "reason": c["reason"],
+                            "stars": c.get("stars", 2), "basis": _combo_basis(c["combo"])})
+            if len(final_q) >= max_q:
+                break
+    else:
+        # [개편] 신호 있는 경주 — 저배당+신호=메인 / 고배당+강신호=BMED특별 / 그 외 제외
+        _main_cand, _spec_cand = [], []
+        for c in q_cands:
+            if not _vpair(c["combo"]):
+                continue
+            k = tuple(c["combo"])
+            if k in seen_q:
+                continue
+            seen_q.add(k)
+            _o = c.get("odds")
+            if _o is None and curQ:                        # 후보에 배당 없으면 배당판 실배당으로 폴백
+                _o = curQ.get((c["combo"][0], c["combo"][1])) or curQ.get((c["combo"][1], c["combo"][0]))
+            if _o is None:
+                continue
+            if _o <= MAIN_ODDS_MAX and _combo_has_signal(c["combo"]):
+                if DANSUNG and _o <= DANSUNG_ODDS:
+                    continue   # [단통] 1.5배↓ 쏠림 조합은 메인 ★★★ 제외(복병에 집중)
+                _main_cand.append({"combo": c["combo"], "odds": _o, "reason": c["reason"], "stars": 3,
+                                   "basis": _combo_basis(c["combo"]), "summary": "시장+BMED 동시 유력"})
+            elif SPECIAL_ODDS_MIN <= _o <= SPECIAL_ODDS_MAX and _combo_strong(c["combo"]):
+                _spec_cand.append({"combo": c["combo"], "odds": _o, "reason": c["reason"], "stars": 2,
+                                   "score": round(_combo_score(c["combo"]), 1),
+                                   "basis": _combo_basis(c["combo"]), "summary": "시장 저평가 중 주목"})
+            # 그 외(신호없는 저배당·50배 초과·저/고 사이 구간) → 제외
+        _main_cand.sort(key=lambda x: (x.get("odds") is None, x.get("odds") or 9e9))   # 메인=배당 낮은순
+        _spec_cand.sort(key=lambda x: -(x.get("score") or 0))                          # 특별=signalScore 높은순
+        final_q = _main_cand[:max_q]
+        special_q = _spec_cand[:_special_max]   # [단통] 3개 / 평시 2개
+
+    # [메인 보완·큰 두수/신호 희소] 신호 게이트로 뽑힌 메인이 상한(max_q) 미달이면(예: 12두인데 급락 0 → 메인 0~2개)
+    #   시장 저배당(≤MAIN_ODDS_MAX·유력마 조합)으로 상한까지 채운다 — 완화신호(급락10%+/signalScore50+) 우선, 그다음
+    #   순수 시장 저배당. 사용자 요청: 12두에서 추천 3~4개. 신호 없는 저배당도 '메인 보완'으로 허용(과다 방지=max_q 캡).
+    #   ⚠ 신호로 뽑힌 메인은 그대로 유지(우선) · 빈 슬롯만 배당 낮은순 채움 · 특별(고배당)/단통 쏠림은 제외.
+    if len(final_q) < max_q and curQ:
+        _have = set(tuple(sorted(int(x) for x in c["combo"])) for c in final_q)
+        _spec_have = set(tuple(sorted(int(x) for x in c["combo"])) for c in (special_q or []))
+        _fill = []
+        for (_fa, _fb), _fo in curQ.items():
+            try:
+                _fa, _fb, _fo = int(_fa), int(_fb), float(_fo)
+            except Exception:
+                continue
+            if _fa == _fb or _fo <= 0 or _fo > MAIN_ODDS_MAX:
+                continue
+            if not vs or _fa not in vs or _fb not in vs:       # [유령마번 방어] 유효 출전마만
+                continue
+            if DANSUNG and _fo <= DANSUNG_ODDS:                # [단통] 1.5배↓ 쏠림 조합은 메인 제외
+                continue
+            _pk = tuple(sorted((_fa, _fb)))
+            if _pk in _have or _pk in _spec_have:
+                continue
+            _rank = 0 if _combo_has_signal_relaxed([_fa, _fb]) else 1   # 완화신호 우선, 그다음 순수 저배당
+            _fill.append((_rank, _fo, list(_pk)))
+        _fill.sort(key=lambda t: (t[0], t[1]))                 # 완화신호 먼저 → 배당 낮은순
+        for _r, _fo, _cmb in _fill:
+            if len(final_q) >= max_q:
+                break
+            final_q.append({"combo": _cmb, "odds": _fo, "stars": 3,
+                            "reason": ("시장 저배당+완화신호" if _r == 0 else "시장 저배당 보완"),
+                            "basis": _combo_basis(_cmb),
+                            "summary": ("완화신호 유력(메인 보완)" if _r == 0 else "시장 저평가(메인 보완)")})
 
     # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
     _main = None
@@ -6037,6 +6887,26 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     if cp.get("confTrifectaIns"):
         autos.append({"combo": cp["confTrifectaIns"], "odds": cp.get("confTrifectaInsOdds"), "reason": "확신도 보험"})
     autos.sort(key=lambda c: (c.get("odds") is None, c.get("odds") or 9e9))   # 추정배당 낮은 순 = 가장 강한(확률 높은) 것
+    # [시장유력 보완·나고야12R 복기] 시장 유력마 1위(6번 6.7배)가 BMED 신호 없다고 추천 탈락→실제 2착 놓친 교훈.
+    #   시장 유력마 상위(복승 저배당 지지 기준) top3 박스를 삼복승 '보험'에 자동 포함(신호 없어도·메인 ★★★엔 미포함).
+    #   근거: 시장이 유력하다고 보는 것 자체가 충분한 근거. 표시 "시장유력 보완: N번+M번"(상위 2마리 앵커).
+    _mkt_ins = None
+    if curQ:
+        _ms = {}
+        for (_ma, _mb), _mo in curQ.items():
+            try:
+                _ma, _mb, _mo = int(_ma), int(_mb), float(_mo)
+            except Exception:
+                continue
+            if _mo <= 0 or (vs and (_ma not in vs or _mb not in vs)):
+                continue
+            _ms[_ma] = _ms.get(_ma, 0.0) + 1.0 / _mo        # 저배당 조합 다수 등장 = 시장 지지(가중)
+            _ms[_mb] = _ms.get(_mb, 0.0) + 1.0 / _mo
+        _mrank = [h for h, _ in sorted(_ms.items(), key=lambda kv: -kv[1])]
+        if len(_mrank) >= 3:
+            _mkt_ins = {"combo": sorted(_mrank[:3]), "odds": None,
+                        "reason": "시장유력 보완: %d번+%d번" % (_mrank[0], _mrank[1]),
+                        "marketInsurance": True}
     final_t, seen_t = [], set()
     for c in ([_main] if _main else []) + autos:          # 메인 먼저, 그다음 가장 강한 자동
         cc = sorted(int(x) for x in (c.get("combo") or [])) if c and c.get("combo") else []
@@ -6048,8 +6918,17 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         seen_t.add(k); final_t.append({"combo": cc, "odds": c.get("odds"), "reason": c.get("reason")})
         if len(final_t) >= 2:
             break
+    # [시장유력 보완] 신호기반 삼복승(위 ≤2)과 '별개'로 시장 유력 top3 박스를 보험 1개 추가(중복 아니면).
+    #   메인 ★★★(final_q)에는 미포함 — 신호 없으니 삼복승 보험용으로만. 시장 유력마(6번 유형) 놓침 방지.
+    if _mkt_ins and _vtri(_mkt_ins["combo"]):
+        _mk = tuple(int(x) for x in _mkt_ins["combo"])
+        if _mk not in seen_t:
+            seen_t.add(_mk)
+            final_t.append({"combo": list(_mk), "odds": _mkt_ins.get("odds"),
+                            "reason": _mkt_ins["reason"], "marketInsurance": True})
 
-    return {"quinellas": final_q, "trifectas": final_t}
+    return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
+            "dansung": DANSUNG, "dansungMinOdds": _min_q}
 
 
 DARK_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_cases.json")
@@ -6129,6 +7008,69 @@ def _dark_case_record(rk, an, top3):
         print("[복병케이스] %s: 복병 %d두 저장(입상 %d)" % (rk, len(darks), _nhit))
     except Exception as e:
         print("[복병케이스] 기록 실패:", e)
+
+
+DANSUNG_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dansung_cases.json")
+
+
+def _dansung_cases_load():
+    try:
+        return json.load(open(DANSUNG_CASES_FILE, encoding="utf-8"))
+    except Exception:
+        return {"cases": [], "stats": {"total": 0, "darkHitRaces": 0, "specialHitRaces": 0,
+                                       "darkHitRate": 0, "specialHitRate": 0}}
+
+
+def _dansung_cases_save(d):
+    try:
+        os.makedirs(os.path.dirname(DANSUNG_CASES_FILE), exist_ok=True)
+        json.dump(d, open(DANSUNG_CASES_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[단통케이스] 저장 실패:", e)
+
+
+def _dansung_case_record(rk, an, top3):
+    """[단통 경주 학습·저배당 쏠림] 복승 최저배당 ≤1.5배(시장 과도 쏠림) 경주만 별도 기록 → 복병 적중률 통계.
+    ▸ BMED 특별(복병) 복승 조합 적중(두 말 모두 1·2착) ▸ 복병마 입상(연대 top3) 축적 → 단통 경주에서 복병 전략 효과 검증."""
+    try:
+        cp = an.get("corePicks") or {}
+        if not cp.get("dansung"):
+            return
+        top3s = set(int(x) for x in (top3 or []) if x is not None)
+        top2s = set(int(x) for x in (list(top3 or [])[:2]) if x is not None)
+        venue = _area_num(rk)[0] or rk
+        specials = cp.get("bmedSpecial") or []
+        darks = an.get("darkHorses") or []
+        spec_hits = []
+        for q in specials:                                  # 복병(특별) 복승 조합 적중 = 두 말 모두 1·2착
+            c = [int(x) for x in (q.get("combo") or [])]
+            hit = (len(c) == 2 and set(c) <= top2s)
+            spec_hits.append({"combo": c, "odds": q.get("odds"), "score": q.get("score"), "hit": hit})
+        special_hit = any(s["hit"] for s in spec_hits)
+        dark_hit = any(d.get("no") is not None and int(d.get("no")) in top3s for d in darks)  # 복병마 연대(top3)
+        db = _dansung_cases_load()
+        db.setdefault("cases", []).append({
+            "raceKey": rk, "venue": venue, "minOdds": cp.get("dansungMinOdds"),
+            "top3": [int(x) for x in (top3 or []) if x is not None],
+            "specials": spec_hits, "specialHit": special_hit, "darkHit": dark_hit,
+            "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        })
+        db["cases"] = db["cases"][-500:]
+        st = {"total": 0, "darkHitRaces": 0, "specialHitRaces": 0}
+        for c in db["cases"]:
+            st["total"] += 1
+            if c.get("darkHit"):
+                st["darkHitRaces"] += 1
+            if c.get("specialHit"):
+                st["specialHitRaces"] += 1
+        st["darkHitRate"] = round(st["darkHitRaces"] / st["total"] * 100, 1) if st["total"] else 0
+        st["specialHitRate"] = round(st["specialHitRaces"] / st["total"] * 100, 1) if st["total"] else 0
+        db["stats"] = st
+        _dansung_cases_save(db)
+        print("[단통케이스] %s: 최저%s배 저장(복병특별적중=%s·복병입상=%s·누적 %d경주)"
+              % (rk, cp.get("dansungMinOdds"), special_hit, dark_hit, st["total"]))
+    except Exception as e:
+        print("[단통케이스] 기록 실패:", e)
 
 
 def _triple_analyze(rk, rec):
@@ -7687,16 +8629,141 @@ def _triple_analyze(rk, rec):
                             _dark_q.append({"combo": [_axis, int(_dn)], "odds": _qo(_axis, int(_dn)), "reason": "복병 포함"})
             except Exception:
                 pass
+            # [추천 개편·조합 근거/신호강도] 말별 신호 메타(급락%·역배열·스마트머니·복병·집중급락·signalScore)
+            _sig_meta = {}
+            try:
+                _conf_h = (confidence or {}).get("horses") or {}
+
+                def _hscore(_no):
+                    _dd = _conf_h.get(_no) or _conf_h.get(str(_no)) or {}
+                    return float(_dd.get("signalScore") or _dd.get("confidence") or 0)
+
+                def _sm(_no):
+                    return _sig_meta.setdefault(int(_no), {"drop": None, "rev": False, "smart": False,
+                                                           "dark": False, "anomaly": False, "score": 0.0})
+                for _d in (drops or []):
+                    _p = _d.get("pct")
+                    _ns = ([int(_d["no"])] if _d.get("no") is not None else []) + [int(x) for x in (_d.get("combo") or [])]
+                    for _n in _ns:
+                        _m = _sm(_n)
+                        if _p is not None and (_m["drop"] is None or _p < _m["drop"]):
+                            _m["drop"] = _p
+                for _r in (wx_reversals or []):
+                    if _r.get("no") is not None:
+                        _sm(_r["no"])["rev"] = True
+                for _sq in (smart_quinella or []):
+                    for _h in (_sq.get("combo") or []):
+                        _sm(_h)["smart"] = True
+                for _dh in (dark_horses or []):
+                    if _dh.get("no") is not None:
+                        _sm(_dh["no"])["dark"] = True
+                if anomaly_horse is not None:
+                    _sm(anomaly_horse)["anomaly"] = True
+                for _n in list(_sig_meta.keys()):
+                    _sig_meta[_n]["score"] = _hscore(_n)
+            except Exception:
+                _sig_meta = {}
+            # [존재하지 않는 말번호 추천 방어] 실제 출전(starters/출마표) 말번호가 있으면 그 범위 밖(배당 유령·이전 경주 잔존)을
+            #   추천용 valid_nos 에서 제외 → finalQuinellas/특별/삼복승 모두 실제 출전마만(10두면 11번↑ 자동 제거).
+            _rec_valid = set(int(x) for x in (valid_nos or []))
+            # [두수 근본·배당 우선] 복승 배당판에 조합이 충분히(≥3개) 등장하는 마번 = 이 경주 실제 출전마(확정).
+            #   출마표(starters)가 부분수집(예: 실제 12두인데 9두만)이어도 배당이 10·11·12를 명확히 보여주면 배당을 신뢰
+            #   → 아래 유령제거·하드캡이 실제 출전마를 깎지 못하게 보호. 진짜 유령(이전경주 잔존)은 조합이 1~2개뿐이라
+            #   이 집합에 안 들어옴(제거 로직 그대로 유지). 사용자 요청: "배당판 실제 셀 수로 두수 재계산".
+            _qcnt = {}
+            for _kk in curQ:
+                for _hh in _kk:
+                    try:
+                        _qcnt[int(_hh)] = _qcnt.get(int(_hh), 0) + 1
+                    except (TypeError, ValueError):
+                        pass
+            _odds_attested = {n for n in _rec_valid if _qcnt.get(n, 0) >= 3}
+            try:
+                _srec = _starters_load().get(rk)
+                _skip_starter = (_analyze_sport in ("cycle", "boat", "bike") and (_srec or {}).get("source") == "korea")
+                if _srec and _srec.get("horses") and not _skip_starter:
+                    _starter_nos = set()
+                    for _sh in _srec["horses"]:
+                        try:
+                            _starter_nos.add(int(_sh.get("no")))
+                        except (TypeError, ValueError):
+                            pass
+                    # 출마표가 현재 배당과 대체로 일치(60%+)할 때만 적용 = 이 경주 출전표(이전 경주 잔존 출마표로 유효 배당을 잘못 지우는 것 방지).
+                    _overlap = len(_rec_valid & _starter_nos)
+                    if _starter_nos and _overlap >= max(1, int(len(_rec_valid) * 0.6)):
+                        _ghost = (_rec_valid - _starter_nos) - _odds_attested   # 배당 충분등장(≥3조합) 마번은 유령 아님(출마표 부분수집 방어)
+                        if _ghost:
+                            _rec_valid = _rec_valid - _ghost                    # 배당 미등장 유령만 제거(실제 출전마 보존)
+                            print("[유령마번 제외] %s: 배당엔 있으나 출전 아님 %s → 추천 제외" % (rk, sorted(_ghost)))
+            except Exception as _ge:
+                print("[유령마번 방어] 실패(무시):", _ge)
+            # [유령마번 하드캡·근본] 실제 출전 두수 초과 마번은 무조건 제거(7두면 8번↑ 전부·60% 가드 무관·상한만 적용).
+            #   상한 = ①종목 최대마번(경륜9·경정6·오토8·경마18) ②출마표 있으면 최대 출전마번(이 경주 것일 때) 중 작은 값.
+            #   → 이전 경주 잔존·오검출로 들어온 초과 마번을 finalQuinellas/특별/삼복승 생성 전에 원천 차단(시장 최저복승까지 정화).
+            try:
+                _hardcap = _sport_max_no(_analyze_sport)
+                _srec2 = locals().get("_srec") or _starters_load().get(rk)
+                if _srec2 and _srec2.get("horses") and not locals().get("_skip_starter"):
+                    _snos = []
+                    for _sh in _srec2["horses"]:
+                        try:
+                            _snos.append(int(_sh.get("no")))
+                        except (TypeError, ValueError):
+                            pass
+                    # 이 경주 출마표(배당과 60%+ 겹침)일 때만 최대 출전마번으로 상한 강화(이전 경주 작은 출마표 오적용 방지).
+                    if _snos and len(_rec_valid & set(_snos)) >= max(1, int(len(_rec_valid) * 0.6)):
+                        _hardcap = min(_hardcap, max(_snos))
+                # [4번 강화] 단승(curWin) = 모든 출전마에 배당이 있는 '출전 두수 정확 지표'(특히 한국 KRA는 단승 완전 수집).
+                #   1..max 의 80%+ 가 채워진 '완전 필드'일 때만 그 최대 마번으로 상한 강화(단승 부분수집 시 오제거 방지).
+                try:
+                    _wnos = sorted(int(k) for k, v in (curWin or {}).items() if v and float(v) > 0)
+                    if len(_wnos) >= 3 and len(_wnos) >= max(1, int(_wnos[-1] * 0.8)):
+                        _hardcap = min(_hardcap, _wnos[-1])
+                except Exception:
+                    pass
+                _over = {n for n in _rec_valid if n > _hardcap and n not in _odds_attested}   # 배당 충분등장 마번은 하드캡 제외(실제 출전마)
+                if _over:
+                    _rec_valid = {n for n in _rec_valid if n not in _over}
+                    print("[유령마번 하드캡] %s: 출전 두수 초과 마번 %s 제거(상한 %d)" % (rk, sorted(_over), _hardcap))
+            except Exception as _hce:
+                print("[유령마번 하드캡] 실패(무시):", _hce)
             # [경륜 개수 방어] 두수는 종목 최대마번(경륜 9·경정 6·오토 8)으로 캡 → 유령마번 섞여도 개수 과다 방지
-            _nh = min(len(valid_nos or []), _sport_max_no(_analyze_sport))
-            _maxq = _quinella_target(_nh, bool(chaotic and chaotic.get("detected")))
-            _fp = _final_picks(core_picks, curQ, valid_nos, smart_quinella, max_q=_maxq,
-                               reversal_quinellas=_rev_q, dark_quinellas=_dark_q, signal_horses=_sig_h)
+            _nh = min(len(_rec_valid), _sport_max_no(_analyze_sport))
+            # [메인 두수별 상한] 경륜/경정/바이크 3 · 경마 8~9두 3 · 10두 4 · 11~12두 4 · 13~18두 6
+            if _analyze_sport in ("cycle", "boat", "bike"):
+                _mainmax = 3
+            elif _nh <= 9:
+                _mainmax = 3
+            elif _nh == 10:
+                _mainmax = 4
+            elif _nh <= 12:
+                _mainmax = 4
+            else:
+                _mainmax = 6
+            _maxq = _quinella_target(_nh, bool(chaotic and chaotic.get("detected")))   # (기존 산출 보존·삼복승 혼전 참조용)
+            _fp = _final_picks(core_picks, curQ, _rec_valid, smart_quinella, max_q=_mainmax,
+                               reversal_quinellas=_rev_q, dark_quinellas=_dark_q,
+                               signal_horses=_sig_h, sig_meta=_sig_meta, sport=_analyze_sport)
             core_picks["finalQuinellas"] = _fp["quinellas"]
             core_picks["finalTrifectas"] = _fp["trifectas"]
-            core_picks["quinellaMax"] = _maxq                      # [표시] 두수별 복승 상한
+            core_picks["bmedSpecial"] = _fp.get("bmedSpecial") or []   # [BMED 특별 감지] 고배당+강신호 별도 섹션(★★)
+            core_picks["dansung"] = bool(_fp.get("dansung"))       # [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
+            core_picks["dansungMinOdds"] = _fp.get("dansungMinOdds")   # [단통] 최저복승 배당(경고 표시용)
+            core_picks["quinellaMax"] = _mainmax                   # [표시] 메인 복승 상한(두수별)
             core_picks["raceHorseCount"] = _nh                     # [표시] 출전 두수
             core_picks["chaoticRace"] = bool(chaotic and chaotic.get("detected"))   # [표시] 혼전 여부
+            # [전적 수집 실패 감지] form 은 _form_from_starters 반환=마필 점수 '리스트'(None=수집없음).
+            #   ⚠ 버그수정: 이전엔 form 을 dict 로 오검사(isinstance dict)해 데이터가 있어도 항상 formMissing=True.
+            #   실제 전적 유무 = 리스트 중 최근착순(recentPlacings) OR 전적점수(totalScore>0) OR 競走得点(경륜)이 하나라도 있으면 있음.
+            try:
+                _has_form = isinstance(form, list) and any(
+                    (h.get("recentPlacings") or h.get("recent"))
+                    or ((h.get("totalScore") or 0) > 0)
+                    or (h.get("competScore") is not None)
+                    for h in form)
+                core_picks["formMissing"] = (not _has_form)
+            except Exception:
+                core_picks["formMissing"] = False
     except Exception as _e:
         print("[최종추천정리] 실패:", _e)
 
@@ -8129,6 +9196,13 @@ def triple_analyze():
         _record_alert(rk, an)
     except Exception as e:
         print("[경고기록] 실패:", e)
+    # [배당 소스 표시·즉시분석 자동화] 이 경주를 서버가 oddspark 로 커버 중인지 + 저장 배당 소스 반환 →
+    #   확장 즉시분석 자동화가 커버 경주(oddspark 우선)면 asyukk 수집을 생략(보조로만·불필요한 탭클릭 방지).
+    try:
+        an["oddsparkCovered"] = _oddspark_covered_active(rk)
+        an["oddsSource"] = (db.get(rk) or {}).get("source")
+    except Exception:
+        pass
     return jsonify(an)
 
 
@@ -11243,6 +12317,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         print("[경고매칭] 실패:", e)
         _al = None
 
+    # [배당판 3단계 캡처] 결과 확정 → T-10 추천 vs T-2 추천 타이밍 학습 재집계(마감직후엔 착순이 없어 보류됐던 것)
+    try:
+        if "close" in _snapshot_metas_for_race(rk):
+            _snapshot_build_compare(rk)
+    except Exception as e:
+        print("[스냅샷 타이밍] 결과학습 실패:", e)
+
     # [1·3번] 마감 후 대급락말이 실제 입상(1~3착)했는지 판정 → 입상률 학습(surge_hit 갱신)
     try:
         _after_close_learn_result(rk, doc.get("date"), result)
@@ -11652,6 +12733,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _dark_case_record(rk, an, top3)
     except Exception as e:
         print("[복병케이스학습] 실패:", e)
+    # [단통 경주 학습] 복승 최저 ≤1.5배 쏠림 경주만 별도 기록 → 복병(특별) 적중률 통계 축적
+    try:
+        _dansung_case_record(rk, an, top3)
+    except Exception as e:
+        print("[단통케이스학습] 실패:", e)
     # [복기] 결과 적중/판정 요약을 히스토리 파일에도 저장 → 통계 탭에서 재계산 없이 표시
     try:
         doc["review"] = {
@@ -15124,11 +16210,14 @@ def _keiba_fetch_details(shutsuba, api_key=None):
 
     def _one(item):
         ln, url = item
-        try:
-            return ln, _keiba_parse_horse_past(_keirin_fetch(url))
-        except Exception as e:
-            print(f"[지방경마 전적] HorseDetail {ln} 실패:", e)
-            return ln, []
+        for _try in range(2):   # [전적 수집 안정화] 실패 시 재시도 1회 → 그래도 실패면 [] (form_sub=40 유지)
+            try:
+                return ln, _keiba_parse_horse_past(_keirin_fetch(url))
+            except Exception as e:
+                if _try == 0:
+                    continue          # 1회 재시도
+                print(f"[지방경마 전적] HorseDetail {ln} 실패(재시도 후):", e)   # 실패 원인 로그
+                return ln, []
     if targets:
         with ThreadPoolExecutor(max_workers=4) as ex:
             for ln, past in ex.map(_one, targets):
@@ -15173,6 +16262,10 @@ def keiba_starters():
     details = {}
     if body.get("withDetail", True):
         details = _keiba_fetch_details(shutsuba)
+        try:
+            _jp_jockeys_accumulate(details)   # [일본 기수 DB] 전적의 기수·착순 누적(복승권율 자동 갱신)
+        except Exception as _e:
+            print("[일본기수DB] 누적 실패:", _e)
     horses = _keiba_build_form(shutsuba, details)
     # [live 통합] raceKey 오면 STARTERS_STORE 저장(source=oddspark) → _triple_analyze 통합등급 반영
     linked = None
@@ -15193,12 +16286,56 @@ def keiba_starters():
                     "horses": horses})
 
 
+_KEIBA_FORM_DONE = set()   # 지방경마 전적 자동수집 완료(rk) — 전적은 불변이라 경주당 1회면 충분(반복 fetch 방지)
+
+
+def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
+    """[지방경마(NAR) 전적 자동수집] 서버 배당 수집(_multi_collect_one) 시 oddspark 出走表+전5경주 전적을 함께 수집·저장(경주당 1회).
+    확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'을 해소 → _triple_analyze 통합등급 반영.
+    keirin(_keirin_autocollect_form)의 경마판. 실패해도 배당 수집엔 무영향(격리)."""
+    try:
+        if not (rk and op_track and sponsor and race_nb):
+            return
+        if rk in _KEIBA_FORM_DONE:
+            return
+        _ex = _starters_load().get(rk)                       # 이미 이 경주 oddspark 전적 있으면 스킵(재시작 대비)
+        if _ex and _ex.get("horses") and _ex.get("source") == "oddspark":
+            _KEIBA_FORM_DONE.add(rk)
+            return
+        url = ("https://www.oddspark.com/keiba/RaceList.do?raceDy=%s&opTrackCd=%s&sponsorCd=%s&raceNb=%s"
+               % (ymd, op_track, sponsor, race_nb))
+        shutsuba = _keiba_parse_shutsuba(_keirin_fetch(url))
+        if not shutsuba.get("horses"):
+            return
+        details = _keiba_fetch_details(shutsuba)
+        try:
+            _jp_jockeys_accumulate(details)                  # 일본 기수 DB 누적(복승권율)
+        except Exception:
+            pass
+        horses = _keiba_build_form(shutsuba, details)
+        store = [{"no": h["no"], "name": h["name"], "jockey": h.get("jockey", ""),
+                  "totalScore": h["totalScore"], "recentPlacings": h.get("recentPlacings") or [],
+                  "styleType": h.get("styleType"), "grade": h.get("grade")}
+                 for h in horses if h.get("no") is not None]
+        if store:
+            sdb = _starters_load()
+            sdb[rk] = {"horses": store, "t": time.time(), "source": "oddspark"}
+            _starters_save(sdb)
+            _KEIBA_FORM_DONE.add(rk)
+            print(f"[지방경마 전적·자동] {rk}: {len(store)}두 oddspark 전적 수집(bg·각질·거리변화·상3F)")
+    except Exception as e:
+        print(f"[지방경마 전적·자동] {rk} 수집 실패(무시):", e)
+
+
 # ══════════════ [KRA 공공API] 한국마사회 확정배당율 통합(B551015/API160_1) ══════════════
 #   단승(WIN)·복승(QNL)·쌍승(EXA)·삼복승(TLA)을 data.go.kr 에서 서버가 직접 수집 → 파이프라인 주입.
 #   ⚠ 기존 Chrome 확장(한국경마 배당) 수집은 폴백으로 그대로 유지. KRA는 '추가 소스'.
 #   키: .env KRA_API_KEY(gitignore·커밋 금지). 30초 자동수집(watch 등록 경주만).
 #   승식코드: WIN=단승·PLC=연승·QPL=복연승·QNL=복승·EXA=쌍승·TLA=삼복승·TRI=삼쌍승.
-KRA_API_BASE = "https://apis.data.go.kr/B551015/API160_1"
+#   [엔드포인트 교정 2026-07·라이브 검증] 오퍼레이션 integratedInfo_1 이 실제 경로(base만 호출 시 HTTP 500).
+#   응답 실측 필드: chulNo/chulNo2/chulNo3(마번)·odds(배당)·pool(한글 승식명)·meet·rcDate·rcNo.
+#   필터 파라미터는 rc_date/rc_no(스네이크)가 정상 필터(캐멀 rcDate/rcNo 는 필터 무시로 전 경주 반환).
+KRA_API_BASE = "https://apis.data.go.kr/B551015/API160_1/integratedInfo_1"
 KRA_MEET_NAME = {"1": "서울", "2": "제주", "3": "부산경남"}
 KRA_MEET_CODE = {"서울": "1", "제주": "2", "부산": "3", "부경": "3", "부산경남": "3", "경남": "3"}
 _KRA_WATCH = {}          # {raceKey: {"meet","rc_date","rc_no","t"}} 30초 자동수집 대상
@@ -15220,9 +16357,11 @@ def _kra_meet_code(venue):
     return KRA_MEET_CODE.get(v) or KRA_MEET_CODE.get(v.replace("경마공원", "").strip())
 
 
-def _kra_fetch(meet, rc_date, rc_no, num_rows=300):
-    """API160_1 호출 → (items[list], meta[dict], err[str|None]). read-only 조회.
-    응답은 표준 data.go.kr 구조 response.body.items.item(단일이면 dict) 가정."""
+def _kra_fetch(meet, rc_date, rc_no, num_rows=1500):
+    """API160_1/integratedInfo_1 호출 → (items[list], meta[dict], err[str|None]). read-only 조회.
+    응답은 표준 data.go.kr 구조 response.body.items.item(단일이면 dict) 가정.
+    ⚠ 한 경주에 단승/연승/복승/쌍승/복연승/삼복승 전 승식이 한 번에 나와(11두=약 1397건),
+      삼복승(C(n,3))까지 완전 수신하려면 numOfRows 를 넉넉히(기본 1500) — 300이면 삼복승이 잘림."""
     key = _kra_api_key()
     if not key:
         return [], {}, "KRA_API_KEY 미설정(.env 확인)"
@@ -15291,15 +16430,28 @@ def _kra_parse_items(items):
             continue
         code = (_kra_g(it, "bettype", "betType", "ssMark", "ss_mark", "ssFlag", "ss_flag", "winFlag") or "")
         code = str(code).upper()
+        pool = str(_kra_g(it, "pool", "ssName", "ss_name") or "")   # [integratedInfo_1] 한글 승식명(단승식/복승식/쌍승식…)
         n1 = _kra_int(_kra_g(it, "chulNo1", "chulNo", "hrNo1", "hrNo", "no1", "no"))
         n2 = _kra_int(_kra_g(it, "chulNo2", "hrNo2", "no2"))
         n3 = _kra_int(_kra_g(it, "chulNo3", "hrNo3", "no3"))
         od = _kra_num(_kra_g(it, "divRate", "divideRate", "odds", "rcOdds", "winOdds",
                              "expectOdds", "payRate", "drwtRate"))
         nums = [n for n in (n1, n2, n3) if n]
-        # 승식 판별: 코드 우선, 없으면 마번 개수
+        # 승식 판별: [integratedInfo_1] pool(한글 승식명) 우선 → 코드 → 마번 개수 순.
+        #   ⚠ 연승식·복연승식·삼쌍승식은 파이프라인(단승/복승/쌍승/삼복승)에 없어 제외 —
+        #     이를 win/quinella 로 잘못 담으면 단승·복승 배당이 오염되므로 kind=None 으로 스킵.
         kind = None
-        if code in ("WIN",) or (not code and len(nums) == 1):
+        if pool:
+            if "삼복" in pool:
+                kind = "trio"                        # 삼복승식
+            elif "쌍승" in pool and "삼" not in pool:
+                kind = "exacta"                      # 쌍승식(1착→2착)
+            elif "복승" in pool:
+                kind = "quinella"                    # 복승식(1·2착)
+            elif "단승" in pool:
+                kind = "win"                         # 단승식
+            # 그 외(연승식·복연승식·삼쌍승식 등)는 kind=None → 스킵(오염 방지)
+        elif code in ("WIN",) or (not code and len(nums) == 1):
             kind = "win"
         elif code in ("QNL", "QPL") or (not code and len(nums) == 2 and code not in ("EXA",)):
             kind = "quinella"
@@ -15340,14 +16492,23 @@ def _kra_collect_one(rk, meet, rc_date, rc_no):
 
 
 def _kra_auto_loop():
-    """30초 간격으로 watch 등록된 KRA 경주 배당 자동수집(데몬)."""
+    """30초 간격으로 watch 등록된 KRA 경주 배당 자동수집(데몬). 수집 결과(시각·건수·성공)를 watch 레코드에 기록."""
     while True:
         try:
             with _KRA_WATCH_LOCK:
                 targets = list(_KRA_WATCH.items())
             for rk, w in targets:
                 try:
-                    _kra_collect_one(rk, w["meet"], w["rc_date"], w["rc_no"])
+                    ok, info = _kra_collect_one(rk, w["meet"], w["rc_date"], w["rc_no"])
+                    # [상태표시] 마지막 수집 시각·성공여부·건수를 watch 레코드에 기록(프론트 "마지막 수집: HH:MM:SS"용)
+                    with _KRA_WATCH_LOCK:
+                        if rk in _KRA_WATCH:
+                            _KRA_WATCH[rk]["lastAt"] = time.time()
+                            _KRA_WATCH[rk]["lastOk"] = bool(ok)
+                            if ok:
+                                _KRA_WATCH[rk]["lastCounts"] = info.get("counts")
+                            else:
+                                _KRA_WATCH[rk]["lastError"] = info.get("error")
                 except Exception as e:
                     print("[KRA 자동수집] %s 실패(무시):" % rk, e)
         except Exception as e:
@@ -15426,11 +16587,27 @@ def kra_unwatch():
 
 @app.route("/api/kra/status", methods=["GET"])
 def kra_status():
-    """[KRA 상태] 키 설정 여부·자동수집 대상 목록."""
+    """[KRA 상태] 키 설정 여부·자동수집 대상·마지막 수집 시각/건수.
+    ?raceKey= 주면 그 경주의 마지막 수집 상세(프론트 '✅ 연결됨 · 마지막 수집: HH:MM:SS')."""
+    rk_q = (request.args.get("raceKey") or "").strip()
     with _KRA_WATCH_LOCK:
-        watch = {k: v for k, v in _KRA_WATCH.items()}
+        watch = {k: dict(v) for k, v in _KRA_WATCH.items()}
+    # 전역 최근 수집 시각(모든 watch 중 가장 최근)
+    last_at = max([w.get("lastAt") or 0 for w in watch.values()] or [0])
+    def _fmt(ts):
+        return time.strftime("%H:%M:%S", time.localtime(ts)) if ts else None
+    detail = None
+    if rk_q:
+        w = watch.get(rk_q) or watch.get(_resolve_race_key(rk_q, list(watch.keys())) or "")
+        if w:
+            detail = {"raceKey": rk_q, "watching": True, "lastAt": _fmt(w.get("lastAt")),
+                      "lastOk": w.get("lastOk"), "lastCounts": w.get("lastCounts"),
+                      "lastError": w.get("lastError")}
+        else:
+            detail = {"raceKey": rk_q, "watching": False}
     return jsonify({"keySet": bool(_kra_api_key()), "autoRunning": _kra_auto_started,
-                    "watching": list(watch.keys()), "count": len(watch)})
+                    "watching": list(watch.keys()), "count": len(watch),
+                    "lastAt": _fmt(last_at), "detail": detail})
 
 
 # ── [KRA 승인 API 연동] 활성 확인된 공공 API(B551015) 서버 조회 ──
@@ -18026,13 +19203,23 @@ def _multi_collect_one(track, race, ymd):
         #   의존해, 둘 다 꺼지면 '배당 수집 안 됨'으로 보이던 문제 해결. 확장 ingest 와 동일 파이프라인(같은
         #   raceKey 병합·중복 아님)이고 sport 분리 필터가 탭 혼재를 막는다(무삭제·multi_store 경로 유지).
         try:
-            _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category, source="oddspark_bg")
+            # [자동전환·마감판정] 발주시각(postEpoch) 전달 → analyze 의 minutesBefore/afterClose 가 채워져
+            #   프론트 '경주 종료' 판정(_raceFinished)·자동예상 T-5분 타이밍이 정확해짐(기존엔 deadline 미전달로 None).
+            _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category,
+                              source="oddspark_bg", deadline=race.get("postEpoch"))
         except Exception as _be:
             print("[다중경주] triple_store 브리지 실패(무시·multi_store 는 정상):", _be)
         # [경륜 전적 자동 수집] 다중 경주 경륜 배당 수집 시 전적도 함께(1회·통합등급 반영)
         if is_cycle:
             try:
                 _keirin_autocollect_form(key, track.get("joCode"), ymd, rno)
+            except Exception:
+                pass
+        else:
+            # [지방경마(NAR) 전적 자동 수집] 확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'
+            #   해소 — 배당과 동시에 oddspark 出走表+전적을 수집·저장(경주당 1회·통합등급 반영). keirin 대칭.
+            try:
+                _keiba_autocollect_form(key, track.get("opTrackCd"), track.get("sponsorCd"), ymd, rno)
             except Exception:
                 pass
         return key
@@ -18253,6 +19440,171 @@ def multi_race_detail(key):
     return jsonify(an)
 
 
+# ══════════════ [자동 예상] 경기 자동 전환·연속 예상(마감5분전 저장·결과 대조) ══════════════
+AUTO_PRED_DIR = os.path.join(os.path.dirname(__file__), "data", "auto_prediction")
+_AUTO_PRED_ENABLED = True                 # 기본 ON(POST /api/auto-prediction/toggle 로 제어)
+_auto_pred_saved = set()                  # raceKey별 마감5분전 예상 저장 1회
+_auto_pred_scored = set()                 # raceKey별 결과 대조 1회
+_auto_pred_status = {"active": False, "current": None, "currentRk": None,
+                     "next": None, "nextRk": None, "nextInMin": None,
+                     "updatedAt": 0, "savedToday": 0, "day": None}
+
+
+def _auto_pred_fname(rk):
+    """raceKey → YYYY_MM_DD_경주장_경주번호.json (경로조작 방어)."""
+    safe = re.sub(r"[^\w가-힣]+", "_", rk or "race").strip("_")
+    return "%s_%s.json" % (time.strftime("%Y_%m_%d"), safe)
+
+
+def _auto_pred_save(rk, an):
+    """[마감5분전 최종 예상 저장] 분석(corePicks)에서 추천·유력마·단통 요약을 data/auto_prediction/ 에 저장."""
+    try:
+        os.makedirs(AUTO_PRED_DIR, exist_ok=True)
+        cp = an.get("corePicks") or {}
+        doc = {
+            "raceKey": rk, "at": time.strftime("%Y-%m-%d %H:%M:%S"), "phase": "마감5분전",
+            "quinellas": cp.get("finalQuinellas") or [], "trifectas": cp.get("finalTrifectas") or [],
+            "special": cp.get("bmedSpecial") or [], "keyHorses": an.get("keyHorses") or [],
+            "dansung": bool(cp.get("dansung")), "minOdds": cp.get("dansungMinOdds"),
+            "raceHorseCount": cp.get("raceHorseCount"), "result": None, "compared": False,
+        }
+        fn = _auto_pred_fname(rk)
+        json.dump(doc, open(os.path.join(AUTO_PRED_DIR, fn), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("[자동예상] %s 최종예상 저장(%s)" % (rk, fn))
+        return fn
+    except Exception as e:
+        print("[자동예상] 저장 실패:", e)
+        return None
+
+
+def _auto_pred_compare(rk):
+    """[결과 대조] 실제 착순(results_store, 확장/일괄 수집분)이 있으면 예상과 대조해 파일에 기록.
+      ⚠ 서버 단독 oddspark 결과 수집은 로그인 세션 필요 → 기존 결과 입력경로(_apply_result_learning)가 learning 갱신을 담당."""
+    try:
+        res = _snapshot_result_for(rk)
+        if not res or not (res.get("top3") or []):
+            return False
+        path = os.path.join(AUTO_PRED_DIR, _auto_pred_fname(rk))
+        if not os.path.exists(path):
+            return False
+        doc = json.load(open(path, encoding="utf-8"))
+        top3 = [int(x) for x in res["top3"] if x is not None]
+        top2, t3 = set(top3[:2]), set(top3)
+        _qh = any(len(q.get("combo") or []) == 2 and set(int(x) for x in q["combo"]) <= top2 for q in (doc.get("quinellas") or []))
+        _th = any(len(t.get("combo") or []) == 3 and set(int(x) for x in t["combo"]) <= t3 for t in (doc.get("trifectas") or []))
+        _sh = any(len(q.get("combo") or []) == 2 and set(int(x) for x in q["combo"]) <= top2 for q in (doc.get("special") or []))
+        doc["result"] = {"top3": top3, "finalOdds": res.get("finalOdds")}
+        doc["quinellaHit"], doc["trifectaHit"], doc["specialHit"] = _qh, _th, _sh
+        doc["compared"] = True
+        doc["comparedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("[자동예상] %s 결과대조 → 복승%s·삼복승%s" % (rk, _qh, _th))
+        return True
+    except Exception as e:
+        print("[자동예상] 대조 실패:", e)
+        return False
+
+
+def _auto_pred_tick(sched, now):
+    """[자동 예상·연속 전환] bg 루프에서 매 틱 호출 — ①마감5분전 예상 저장 ②결과 대조(+15분) ③현재/다음 상태 갱신.
+      기존 수집 루프(_multi_collect_one)가 이미 배당을 채우므로 여기선 저장·대조·상태만 담당(중복 수집 없음)."""
+    if not _AUTO_PRED_ENABLED:
+        _auto_pred_status["active"] = False
+        return
+    try:
+        _day = time.strftime("%Y-%m-%d")
+        if _auto_pred_status.get("day") != _day:           # 날짜 바뀌면 저장/대조 플래그 초기화
+            _auto_pred_saved.clear(); _auto_pred_scored.clear()
+            _auto_pred_status["day"] = _day
+        races = []
+        for tr in sched.get("tracks", []):
+            for rc in tr.get("races", []):
+                pe = rc.get("postEpoch")
+                if pe:
+                    races.append((pe, tr.get("venue"), rc.get("raceNo"), _multi_key(tr.get("venue"), rc.get("raceNo"))))
+        races.sort(key=lambda x: x[0])
+        # ① 마감 5분 전(0<left≤300)·미저장 → 최종 예상 저장(배당 수집돼 있을 때만)
+        db = None
+        for pe, venue, rno, rk in races:
+            left = pe - now
+            if 0 < left <= 300 and rk not in _auto_pred_saved:
+                if db is None:
+                    db = _triple_load()
+                if rk in db:
+                    try:
+                        _auto_pred_save(rk, _triple_analyze(rk, db.get(rk) or {}))
+                        _auto_pred_saved.add(rk)
+                    except Exception as _se:
+                        print("[자동예상] 분석/저장 실패 %s: %s" % (rk, _se))
+        # ② 발주 +15분 지난 저장 경주 → 결과 대조(결과 있으면)
+        for pe, venue, rno, rk in races:
+            if (now - pe) >= 900 and rk in _auto_pred_saved and rk not in _auto_pred_scored:
+                if _auto_pred_compare(rk):
+                    _auto_pred_scored.add(rk)
+        # ③ 현재(가장 임박)·다음 경주 상태
+        upcoming = [r for r in races if r[0] >= now - 120]
+        cur = upcoming[0] if upcoming else None
+        nxt = upcoming[1] if len(upcoming) > 1 else None
+        _auto_pred_status.update({
+            "active": bool(upcoming),
+            "current": ("%s %d경주" % (cur[1], cur[2])) if cur else None, "currentRk": cur[3] if cur else None,
+            "next": ("%s %d경주" % (nxt[1], nxt[2])) if nxt else None, "nextRk": nxt[3] if nxt else None,
+            "nextInMin": int((nxt[0] - now) / 60) if nxt else None,
+            "updatedAt": now, "savedToday": len(_auto_pred_saved),
+        })
+    except Exception as e:
+        print("[자동예상] tick 오류(무시):", e)
+
+
+@app.route("/api/auto-prediction/status", methods=["GET"])
+def auto_prediction_status():
+    """[자동 예상 상태] 현재 예상 중 경주 + 다음 자동 분석 경주(분·오버레이 상단 표시용)."""
+    return jsonify(dict(_auto_pred_status, enabled=_AUTO_PRED_ENABLED))
+
+
+@app.route("/api/auto-prediction/toggle", methods=["POST"])
+def auto_prediction_toggle():
+    """[자동 예상 ON/OFF] body {enabled:true/false} 없으면 토글."""
+    global _AUTO_PRED_ENABLED
+    body = request.get_json(silent=True) or {}
+    _AUTO_PRED_ENABLED = bool(body["enabled"]) if "enabled" in body else (not _AUTO_PRED_ENABLED)
+    return jsonify({"ok": True, "enabled": _AUTO_PRED_ENABLED})
+
+
+@app.route("/api/auto-prediction/list", methods=["GET"])
+def auto_prediction_list():
+    """[자동 예상 목록] 저장된 최종 예상 + 결과 대조. 최신순."""
+    out = []
+    try:
+        files = os.listdir(AUTO_PRED_DIR)
+    except FileNotFoundError:
+        files = []
+    for fn in files:
+        if not fn.endswith(".json"):
+            continue
+        try:
+            doc = json.load(open(os.path.join(AUTO_PRED_DIR, fn), encoding="utf-8"))
+            doc["filename"] = fn
+            out.append(doc)
+        except Exception:
+            pass
+    out.sort(key=lambda x: x.get("at") or "", reverse=True)
+    return jsonify({"predictions": out[:200], "count": len(out)})
+
+
+@app.route("/api/auto-prediction/get/<path:filename>", methods=["GET"])
+def auto_prediction_get(filename):
+    """[자동 예상 1건] 파일명으로 조회(경로조작 방어)."""
+    fn = os.path.basename(filename or "")
+    path = os.path.join(AUTO_PRED_DIR, fn)
+    if not fn.endswith(".json") or not os.path.exists(path):
+        return jsonify({"ok": False, "error": "not found"}), 404
+    try:
+        return jsonify(json.load(open(path, encoding="utf-8")))
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 def _multi_bg_loop():
     """[1·2번] 백그라운드: 스케줄 30분 갱신 + 발주 임박 경주 배당 주기 수집(실패 격리·서버 죽지 않음)."""
     last_sched = 0
@@ -18276,6 +19628,8 @@ def _multi_bg_loop():
                     pe = rc.get("postEpoch")
                     if pe and -120 <= (pe - now) <= MULTI_COLLECT_LEAD_SEC:   # 발주 10분전~2분후
                         _multi_collect_one(tr, rc, ymd)
+            # [자동 예상] 수집 직후 마감5분전 예상 저장·결과 대조·현재/다음 상태 갱신(연속 자동 전환)
+            _auto_pred_tick(sched, now)
         except Exception as e:
             print("[다중경주] 백그라운드 오류(무시·서버 유지):", e)
         time.sleep(30)

@@ -1,6 +1,7 @@
 {
  "date": "2026-07-14",
  "results_summary": {
+<<<<<<< HEAD
   "total_races": 1,
   "hits": 0,
   "hit_rate": 0.0,
@@ -13,24 +14,87 @@
   "races_collected": 436,
   "quality_score": 80,
   "ai_ready_races": 1,
+=======
+  "total_races": 7,
+  "hits": 0,
+  "hit_rate": 0.0,
+  "profit": {
+   "net": -3000,
+   "settled": 7
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 442,
+  "quality_score": 77,
+  "ai_ready_races": 6,
+>>>>>>> 5e974b94725dd00653fcb14b5fbf979dc12d319f
   "patterns_tagged": []
  },
  "bigdata": {
   "by_track": {
+<<<<<<< HEAD
+=======
+   "나고야": {
+    "n": 3,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+>>>>>>> 5e974b94725dd00653fcb14b5fbf979dc12d319f
    "구마모토": {
+    "n": 1,
+    "hits": 0,
+    "hit_rate": 0.0
+<<<<<<< HEAD
+   }
+  },
+  "by_field_size": {
+   "소두수(≤8)": {
+    "n": 1,
+=======
+   },
+   "기시와다": {
+    "n": 1,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "다마노": {
+    "n": 1,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "카나자와": {
     "n": 1,
     "hits": 0,
     "hit_rate": 0.0
    }
   },
   "by_field_size": {
+   "중두수(9~12)": {
+    "n": 4,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
    "소두수(≤8)": {
-    "n": 1,
+    "n": 3,
+>>>>>>> 5e974b94725dd00653fcb14b5fbf979dc12d319f
     "hits": 0,
     "hit_rate": 0.0
    }
   },
   "by_time_zone": {
+<<<<<<< HEAD
+=======
+   "오후": {
+    "n": 4,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "저녁": {
+    "n": 2,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+>>>>>>> 5e974b94725dd00653fcb14b5fbf979dc12d319f
    "오전": {
     "n": 1,
     "hits": 0,
@@ -39,21 +103,33 @@
   },
   "by_grade": {
    "미수집": {
+<<<<<<< HEAD
     "n": 1,
+=======
+    "n": 7,
+>>>>>>> 5e974b94725dd00653fcb14b5fbf979dc12d319f
     "hits": 0,
     "hit_rate": 0.0
    }
   },
   "by_condition": {
    "미수집": {
+<<<<<<< HEAD
     "n": 1,
+=======
+    "n": 7,
+>>>>>>> 5e974b94725dd00653fcb14b5fbf979dc12d319f
     "hits": 0,
     "hit_rate": 0.0
    }
   },
   "by_weather": {
    "미수집": {
+<<<<<<< HEAD
     "n": 1,
+=======
+    "n": 7,
+>>>>>>> 5e974b94725dd00653fcb14b5fbf979dc12d319f
     "hits": 0,
     "hit_rate": 0.0
    }
@@ -63,6 +139,7 @@
  "cumulative_pattern_reliability": {
   "마감급락": {
    "label": "급락 감지 적중",
+<<<<<<< HEAD
    "hit": 36,
    "n": 38,
    "rate": 94.7
@@ -84,6 +161,29 @@
    "hit": 72,
    "n": 240,
    "rate": 30.0
+=======
+   "hit": 22,
+   "n": 22,
+   "rate": 100.0
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 4,
+   "n": 12,
+   "rate": 33.3
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 21,
+   "n": 45,
+   "rate": 46.7
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 43,
+   "n": 149,
+   "rate": 28.9
+>>>>>>> 5e974b94725dd00653fcb14b5fbf979dc12d319f
   }
  },
  "key_learnings": [],
@@ -91,5 +191,9 @@
  "pattern_discoveries": [],
  "system_improvements": [],
  "tomorrow_focus": [],
+<<<<<<< HEAD
  "generated_at": "2026-07-14 22:00:57"
+=======
+ "generated_at": "2026-07-14 22:00:24"
+>>>>>>> 5e974b94725dd00653fcb14b5fbf979dc12d319f
 }

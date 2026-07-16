@@ -309,6 +309,40 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true; // async
   }
 
+  // [배당판 스냅샷] 현재 보이는 탭을 캡처하되 오버레이(강조·패널)를 '유지'한 채 찍는다(CAPTURE_TAB 은 오버레이 숨김=OCR용).
+  if (msg?.type === 'CAPTURE_BOARD') {
+    (async () => {
+      try {
+        chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
+          if (chrome.runtime.lastError || !dataUrl) {
+            sendResponse({ ok: false, error: (chrome.runtime.lastError && chrome.runtime.lastError.message) || '캡처 실패' });
+          } else {
+            sendResponse({ ok: true, dataUrl });
+          }
+        });
+      } catch (e) {
+        sendResponse({ ok: false, error: String(e.message || e) });
+      }
+    })();
+    return true; // async
+  }
+
+  // [배당판 스냅샷] 워터마크 합성된 base64 PNG + 메타를 서버에 저장(POST /api/snapshot/save).
+  if (msg?.type === 'SAVE_BOARD_SNAPSHOT') {
+    fetch(`${SERVER}/api/snapshot/save`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg.payload || {}),
+    })
+      .then(async (res) => {
+        let d = null; try { d = await res.json(); } catch (_) { /* noop */ }
+        if (!res.ok) throw new Error((d && d.error) || `HTTP ${res.status}`);
+        return d;
+      })
+      .then((data) => sendResponse({ ok: true, data }))
+      .catch((err) => sendResponse({ ok: false, error: svrErr(err) }));
+    return true; // async
+  }
+
   // [캡쳐+OCR] 캡쳐 이미지 → 서버 Vision 판독(/api/result/ocr) → 1·2·3착.
   if (msg?.type === 'POST_RESULT_OCR') {
     fetch(RESULT_OCR_URL, {
@@ -423,6 +457,21 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     (async () => {
       try { await _armNextRaceChain(msg.raceKey || '', 'finished'); } catch (_) { /* */ }
       sendResponse({ ok: true });
+    })();
+    return true; // async
+  }
+
+  // [배당판 추종·board hint] content.js 가 배당판 경주(raceKey)를 전달 → 서버 current_race 힌트 저장 →
+  //   분석기가 그 경주를 자동 추종(oddspark 최신 나고야로 안 튐). content.js 는 CORS 로 서버 직접 fetch 불가 → background 릴레이.
+  if (msg?.type === 'BOARD_HINT') {
+    (async () => {
+      try {
+        const res = await fetch(`${SERVER}/api/current_race`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ raceKey: msg.raceKey || '', sport: msg.sport || '' }),
+        });
+        sendResponse({ ok: res.ok });
+      } catch (e) { sendResponse({ ok: false, error: String(e.message || e) }); }
     })();
     return true; // async
   }
