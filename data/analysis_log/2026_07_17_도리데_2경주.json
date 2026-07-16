@@ -6,7 +6,7 @@
  "date": "2026-07-17",
  "race": "도리데 2경주",
  "analyzed_at": "08:33:29",
- "updated_at": "08:37:48",
+ "updated_at": "08:38:48",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -55,22 +55,50 @@
     "5+6": 69.8,
     "3+6": 118.7
    }
+  },
+  {
+   "time": "08:38:48",
+   "minutes_before": 11,
+   "quinella": {
+    "2+4": 1.7,
+    "1+2": 5.9,
+    "2+3": 6.4,
+    "2+5": 12.3,
+    "1+4": 12.7,
+    "3+4": 19.5,
+    "1+6": 22.3,
+    "1+5": 26.5,
+    "2+6": 27.6,
+    "1+3": 35.3,
+    "4+5": 37.4,
+    "4+6": 55.3,
+    "3+5": 60.6,
+    "5+6": 70.7,
+    "3+6": 115.7
+   }
   }
  ],
  "signals_detected": [
   {
-   "time": "08:36:24",
-   "type": "마감급락",
-   "detail": "2+4 복승 1.9→1.7 (2분전 대비 -10.5%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
+   "time": "08:38:48",
+   "type": "역전",
+   "detail": "쌍승 1→4 (23.3) < 4→1 (27.3)",
+   "severity": "🔄",
+   "reason": "시장이 1번을 실질 1착으로 판단"
   },
   {
-   "time": "08:36:24",
+   "time": "08:38:48",
    "type": "복승불일치공식",
-   "detail": "⚠️ 복승 불일치: 단승 기준 예상 1+2(5.8) / 실제 최저 2+4(1.7) → 4번 집중 자금 유입 (🔴🔴 3.412)",
+   "detail": "⚠️ 복승 불일치: 단승 기준 예상 1+2(5.9) / 실제 최저 2+4(1.7) → 4번 집중 자금 유입 (🔴🔴 3.471)",
    "severity": "🔴🔴",
-   "reason": "불일치점수 = 예상최저복승 5.8 / 실제최저복승 1.7 = 3.412"
+   "reason": "불일치점수 = 예상최저복승 5.9 / 실제최저복승 1.7 = 3.471"
+  },
+  {
+   "time": "08:38:48",
+   "type": "연속하락",
+   "detail": "3+4 3회 연속 하락 → 신뢰도 +20",
+   "severity": "🔴",
+   "reason": "지속적 자금 유입(단발 아님) → 신호 신뢰도 상향"
   }
  ],
  "anomaly_history": [],
@@ -98,7 +126,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "△",
-   "grade_reason": "배당 5.8배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 5.9배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 2,
@@ -118,7 +146,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "△",
-   "grade_reason": "배당 6.6배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 6.4배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 4,
@@ -138,7 +166,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "△",
-   "grade_reason": "배당 12.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 12.3배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 6,
@@ -148,7 +176,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "△",
-   "grade_reason": "배당 24.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 22.3배 · 쌍승 상위 +20(제거 보류) = 120점"
   }
  ],
  "elimination": {
@@ -170,13 +198,13 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    2,
-    4
+    4,
+    5
    ],
    "trio": [
-    1,
-    2,
-    4
+    3,
+    4,
+    5
    ]
   },
   "form": {
@@ -232,13 +260,13 @@
    {
     "no": 1,
     "tier": 1,
-    "sub": -5.8,
-    "rep": 5.8,
-    "reason": "유력마 저배당 5.8배"
+    "sub": -5.9,
+    "rep": 5.9,
+    "reason": "유력마 저배당 5.9배"
    }
   ],
   "quinellaOdds": 1.7,
-  "trifectaOdds": 6.7,
+  "trifectaOdds": 6.5,
   "confQuinellas": [
    {
     "combo": [
@@ -250,16 +278,24 @@
    },
    {
     "combo": [
-     2,
-     3
+     3,
+     4
     ],
-    "odds": 6.6,
+    "odds": 19.5,
+    "reason": "확신도1위+2위"
+   },
+   {
+    "combo": [
+     2,
+     5
+    ],
+    "odds": 12.3,
     "reason": "시장유력+급락"
    }
   ],
   "forcedHorses": [],
   "confTop1": 4,
-  "confTop1Conf": 31.4,
+  "confTop1Conf": 34.8,
   "confTop1High": false,
   "favAxis": [
    2,
@@ -270,13 +306,13 @@
    2,
    4
   ],
-  "confTrifectaOdds": 6.7,
+  "confTrifectaOdds": 6.5,
   "confTrifectaIns": [
-   2,
    3,
-   4
+   4,
+   5
   ],
-  "confTrifectaInsOdds": 1.5,
+  "confTrifectaInsOdds": 55.8,
   "darkHorsePicks": [
    {
     "no": 2,
@@ -293,12 +329,13 @@
      4
     ],
     "odds": 1.7,
+    "reason": "시장 최저복승",
     "stars": 3,
-    "reason": "시장 저배당 보완",
     "basis": [
-     "2번: 복병"
+     "2번: 복병",
+     "4번: 급락 -8.6% 감지"
     ],
-    "summary": "시장 저평가(메인 보완)"
+    "summary": "시장+BMED 동시 유력"
    }
   ],
   "finalTrifectas": [
@@ -308,16 +345,16 @@
      2,
      4
     ],
-    "odds": 6.7,
+    "odds": 6.5,
     "reason": "삼복승 메인"
    },
    {
     "combo": [
-     2,
      3,
-     4
+     4,
+     5
     ],
-    "odds": 1.5,
+    "odds": 55.8,
     "reason": "확신도 보험"
    }
   ],
@@ -329,7 +366,7 @@
   "chaoticRace": false,
   "formMissing": true
  },
- "summary": "유력마 2·4·1 / 복승 2+4",
+ "summary": "급락 4-5 ▼8.6% / 🔴쌍승역전 1→4 / 유력마 2·4·1 / 복승 2+4",
  "keyHorses": [
   2,
   4,

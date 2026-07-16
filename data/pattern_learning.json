@@ -2009,16 +2009,58 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-17"
+    },
+    {
+      "race": "하코다테 3경주",
+      "horse_no": 2,
+      "recent_avg": 4.6,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-17"
+    },
+    {
+      "race": "하코다테 5경주",
+      "horse_no": 4,
+      "recent_avg": 4.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-17"
+    },
+    {
+      "race": "하코다테 5경주",
+      "horse_no": 7,
+      "recent_avg": 6.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-17"
+    },
+    {
+      "race": "하코다테 5경주",
+      "horse_no": 3,
+      "recent_avg": 5.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-17"
+    },
+    {
+      "race": "하코다테 7경주",
+      "horse_no": 2,
+      "recent_avg": 7.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-17"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 402,
-      "hit": 87
+      "count": 418,
+      "hit": 91
     },
     "전체부진마": {
-      "count": 700,
-      "hit": 193
+      "count": 718,
+      "hit": 198
     },
     "대규모급락": {
       "count": 18,
@@ -2028,8 +2070,8 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 298,
-      "hit": 106
+      "count": 300,
+      "hit": 107
     },
     "급락동반": {
       "count": 85,
