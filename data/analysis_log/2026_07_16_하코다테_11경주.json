@@ -1,0 +1,264 @@
+{
+ "race_id": "2026_07_16_하코다테_11경주",
+ "raceKey": "하코다테 11경주",
+ "sport": "horse",
+ "category": "japan_local",
+ "date": "2026-07-16",
+ "race": "하코다테 11경주",
+ "analyzed_at": "20:03:34",
+ "updated_at": "20:09:48",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "oddspark_bg"
+ },
+ "odds_timeline": [
+  {
+   "time": "20:09:47",
+   "minutes_before": null,
+   "quinella": {
+    "1+7": 1.2,
+    "1+5": 4.9,
+    "5+7": 11.8,
+    "1+2": 17.0,
+    "2+7": 25.8,
+    "1+6": 27.1,
+    "6+7": 34.4,
+    "1+3": 87.6,
+    "1+4": 90.9,
+    "2+5": 104.3,
+    "4+7": 143.3,
+    "3+7": 164.1,
+    "2+4": 225.5,
+    "5+6": 234.8,
+    "2+6": 277.2,
+    "3+5": 384.3,
+    "4+6": 384.3,
+    "2+3": 412.5,
+    "4+5": 433.6,
+    "3+6": 469.7,
+    "3+4": 563.7
+   }
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false,
+  "noAxis": true,
+  "level": "강력",
+  "band": "4배 이하 2두+",
+  "reprs": [
+   {
+    "no": 7,
+    "odds": 1.2
+   },
+   {
+    "no": 1,
+    "odds": 1.2
+   },
+   {
+    "no": 5,
+    "odds": 4.9
+   }
+  ],
+  "axisGap": 0.0,
+  "note": "저배당 2두 배당 비슷(축 불명확·차이 0%) → 추천 보류"
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 2,
+   "name": "マジックライン",
+   "jockey": "岩橋勇（北海道）",
+   "record_score": 9.2,
+   "record_detail": "최근 5-4-5-4",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 17배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 5,
+   "name": "レーザーベルン",
+   "jockey": "落合玄（北海道）",
+   "record_score": 34.2,
+   "record_detail": "최근 6-1-5-3",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 4.9배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 1,
+   "name": "ブッシュドノエル",
+   "jockey": "小川悠（北海道）",
+   "record_score": 0.0,
+   "record_detail": "최근 10-8-7-8",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 1.2배 · 최근평균 8.2착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+  },
+  {
+   "no": 6,
+   "name": "レッドコート",
+   "jockey": "阿岸潤（北海道）",
+   "record_score": 1.3,
+   "record_detail": "최근 9-7-10-4",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 27.1배 · 최근평균 7.5착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+  },
+  {
+   "no": 7,
+   "name": "グレイトエイト",
+   "jockey": "小野楓（北海道）",
+   "record_score": 67.9,
+   "record_detail": "최근 1-3-8-13",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 1.2배 · 최근평균 6.2착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+  },
+  {
+   "no": 3,
+   "name": "ドクターストップ",
+   "jockey": "服部茂（北海道）",
+   "record_score": 35.0,
+   "record_detail": "최근 3-10-4-10-13",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 87.6배 · 배당 80~149 -20 / 최근평균 8.0착 -30 = 50점"
+  },
+  {
+   "no": 4,
+   "name": "カムイノウタゲ",
+   "jockey": "黒澤愛（北海道）",
+   "record_score": 0.0,
+   "record_detail": "최근 7-5-8-7",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 90.9배 · 배당 80~149 -20 / 최근평균 6.8착 -30 = 50점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   2,
+   5,
+   1,
+   6,
+   7,
+   3,
+   4
+  ],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "quinella_main": {
+   "combo": "1+7",
+   "odds": 1.2,
+   "reason": "1번(C)·7번(A)"
+  },
+  "trifecta_main": {
+   "combo": "1+5+7",
+   "odds": 2.1,
+   "reason": "1번(C)·5번(A)·7번(A)"
+  },
+  "trifecta_insurance1": {
+   "combo": "1+3+7",
+   "odds": 31.0,
+   "reason": "1번(C)·3번(C)·7번(A)"
+  },
+  "trifecta_insurance2": {
+   "combo": "3+5+7",
+   "odds": 154.6,
+   "reason": "3번(C)·5번(A)·7번(A)"
+  },
+  "budget_allocation": {
+   "quinella_main": "43%",
+   "trifecta_main": "29%",
+   "trifecta_insurance": "4%"
+  }
+ },
+ "recommendation_history": [
+  {
+   "time": "20:03:43",
+   "minutes_before": null,
+   "sig": "1-5-7|1+7|None|1+5+7",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    7,
+    5
+   ],
+   "summary": "유력마 1·7·5 / 복승 1+7",
+   "quinella_main": "1+7",
+   "quinella_sub": null,
+   "trifecta_main": "1+5+7",
+   "top_signals": [
+    "🔄 역전감지: 단승 1번 유력이나 쌍승에서 4번 1착(87.3)이 1번 1착(877.8)보다 낮음 → 실질 1착: 4번 가능성 (압도적 역배열 0.099)",
+    "🔄 역전감지: 단승 1번 유력이나 쌍승에서 3번 1착(77.0)이 1번 1착(747.1)보다 낮음 → 실질 1착: 3번 가능성 (압도적 역배열 0.103)",
+    "🔄 역전감지: 단승 1번 유력이나 쌍승에서 2번 1착(15.6)이 1번 1착(116.6)보다 낮음 → 실질 1착: 2번 가능성 (압도적 역배열 0.134)"
+   ]
+  }
+ ],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    1,
+    7
+   ],
+   "trio": [
+    1,
+    5,
+    7
+   ]
+  },
+  "form": {
+   "quinella": [
+    3,
+    7
+   ],
+   "trio": [
+    3,
+    5,
+    7
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    1,
+    7
+   ],
+   "trio": [
+    1,
+    5,
+    7
+   ]
+  }
+ },
+ "corePicks": null,
+ "summary": "유력마 7·1·5 / 복승 1+7",
+ "keyHorses": [
+  7,
+  1,
+  5
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}
