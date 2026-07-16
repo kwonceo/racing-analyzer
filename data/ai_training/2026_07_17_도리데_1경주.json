@@ -1,0 +1,130 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_17_도리데_1경주",
+ "race_info": {
+  "date": "2026-07-17",
+  "track": "도리데",
+  "round": 1,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "08:16:37",
+    "quinella": {
+     "1+5": 2.6,
+     "3+4": 4.4,
+     "2+4": 6.4,
+     "4+5": 8.2,
+     "1+4": 10.2,
+     "3+5": 12.4,
+     "2+5": 13.2,
+     "1+3": 14.3,
+     "2+3": 14.3,
+     "1+2": 14.9
+    }
+   },
+   {
+    "time": "08:32:35",
+    "quinella": {
+     "1+5": 2.8,
+     "3+4": 3.1,
+     "2+4": 5.8,
+     "1+3": 11.9,
+     "4+5": 12.2,
+     "2+5": 12.8,
+     "1+4": 12.9,
+     "3+5": 13.1,
+     "2+3": 17.8,
+     "1+2": 24.2
+    }
+   }
+  ],
+  "drop_rates": {
+   "3": -29.5,
+   "4": -29.5,
+   "1": -16.8,
+   "2": -9.4
+  },
+  "excess_drops": {
+   "3": -4.5,
+   "4": -0.8
+  },
+  "drop_speed": {},
+  "exacta_reversal": true,
+  "reversal_ratio": 0.472,
+  "quinella_mismatch": 4.357,
+  "refund_rate": 0.742,
+  "consecutive_drops": {
+   "2": 3,
+   "4": 3,
+   "1": 3,
+   "3": 3
+  },
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "eliminated": [],
+  "recommend": "1+5",
+  "strategy": "BMED_역배열형",
+  "confidence": 100.0,
+  "signal_quality": "상"
+ },
+ "result": {
+  "1st": 1,
+  "2nd": 7,
+  "3rd": 6,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 1,
+  "second": 7,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": "3",
+  "excess_drop_horse_placed": false,
+  "excess_drop_value": -4.5,
+  "reversal_horse": 1,
+  "reversal_horse_placed": true,
+  "reversal_ratio": 0.472,
+  "consecutive_horse": "2",
+  "consecutive_horse_placed": false
+ },
+ "saved_at": "2026-07-17 08:33:26",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "전적 데이터",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
