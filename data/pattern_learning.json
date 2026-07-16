@@ -1993,16 +1993,32 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-07-16"
+    },
+    {
+      "race": "하코다테 1경주",
+      "horse_no": 1,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-17"
+    },
+    {
+      "race": "하코다테 1경주",
+      "horse_no": 5,
+      "recent_avg": 4.5,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-17"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 398,
-      "hit": 85
+      "count": 402,
+      "hit": 87
     },
     "전체부진마": {
-      "count": 695,
-      "hit": 191
+      "count": 700,
+      "hit": 193
     },
     "대규모급락": {
       "count": 18,
@@ -2012,7 +2028,7 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 297,
+      "count": 298,
       "hit": 106
     },
     "급락동반": {
