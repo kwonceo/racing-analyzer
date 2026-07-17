@@ -374,7 +374,7 @@
       if (c > best) { best = c; headerRow = r; }
     }
     // 헤더의 '열 마번'을 등장 순서(headerNos)와 cellIndex 두 방식으로 수집
-    const headerNos = [];
+    let headerNos = [];
     const colNoByIndex = {};
     if (headerRow) {
       for (const cell of headerRow.cells) {
@@ -385,6 +385,29 @@
     const isOdds = opts.oddsClass
       ? (td) => td.classList.contains(opts.oddsClass)
       : (td) => /^\d+\.\d+$/.test((td.textContent || '').trim()); // 소수점 있는 숫자 = 배당
+
+    // [출전취소 번호 밀림 근본방어] 취소마(競走除外/取消)의 행은 배당셀이 0개다.
+    //   그 마번을 '취소 컬럼'으로 판정해 열 축(headerNos·colNoByIndex)에서 제거한다.
+    //   제거하지 않으면 아래 순서기반 매핑(cols[i])이 취소 컬럼 수만큼 밀려 이후 조합 마번이 전부
+    //   어긋난다(예: 3번 취소 시 4-5 배당이 3-4 로 밀려 저장 → 취소마·유령조합 추천). 취소 없으면 무영향.
+    if (headerNos.length >= 2) {
+      const scratchedCols = new Set();
+      const hset = new Set(headerNos);
+      for (const r of rows) {
+        if (r === headerRow) continue;
+        let rn = null;
+        for (const cell of r.cells) { const n = pureInt(cell.textContent); if (n != null) { rn = n; break; } }
+        if (rn == null || !hset.has(rn)) continue;
+        if ([...r.cells].filter(isOdds).length === 0) scratchedCols.add(rn); // 배당셀 전무 = 취소마 행
+      }
+      if (scratchedCols.size) {
+        headerNos = headerNos.filter((n) => !scratchedCols.has(n));
+        for (const ci of Object.keys(colNoByIndex)) {
+          if (scratchedCols.has(colNoByIndex[ci])) delete colNoByIndex[ci];
+        }
+        try { console.log('[출전취소·밀림방어] 취소 컬럼 제거:', [...scratchedCols].sort((a, b) => a - b)); } catch (_) {}
+      }
+    }
 
     const pairs = [], singles = [];
     for (const r of rows) {

@@ -1892,6 +1892,31 @@ def _bettype_guard(kind, combos, label):
     return []
 
 
+def _combo_max_no(*sources):
+    """[종목 증거판정용] 배당 조합(복승·쌍승·삼복승)에 등장하는 최대 마번을 추출.
+    입력 포맷 무관(리스트 [{combo,odds}]·딕셔너리 {'a+b':odds}·{'a-b':odds}·튜플키) 방어 —
+    조합 표현을 문자열화해 정수 토큰만 스캔한다(마번 1~99만 유효로 간주)."""
+    mx = 0
+    for src in sources:
+        if not src:
+            continue
+        try:
+            if isinstance(src, dict):
+                iterable = list(src.keys())
+            elif isinstance(src, (list, tuple)):
+                iterable = [(it.get("combo") if isinstance(it, dict) else it) for it in src]
+            else:
+                iterable = [src]
+            for combo in iterable:
+                for tok in re.findall(r"\d+", str(combo)):
+                    n = int(tok)
+                    if 1 <= n <= 99 and n > mx:
+                        mx = n
+        except Exception:
+            continue
+    return mx
+
+
 def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None, scratched=None):
     """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
     확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
@@ -1923,6 +1948,28 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                 sport, category = "cycle", "cycle"
     except Exception as _ce:
         print("[종목 정정·경륜] 실패(무시):", _ce)
+    # [종목 오분석·증거기반 근본수정] 배당 조합의 실제 마번으로 경정(boat) 오분류를 최종 차단.
+    #   경정(競艇)은 정확히 6정(마번 1~6)만 존재 → 조합에 7번+ 마번이 있으면 경정이 물리적으로 불가능.
+    #   확장이 asyukk 사설 배당판의 '경정' 네비 링크에 낚여 한국경마(부산 7~16두 등)를 boat 로 보내도,
+    #   raceKey에 경마장명이 없어(위 이름기반 정정 미적용) 새던 케이스를 배당 실측으로 정정한다.
+    #   ⚠ 조합에 7번+ 마번이 있을 때만 발동 → 정상 경정(1~6번만)은 절대 건드리지 않음(무회귀).
+    try:
+        if sport == "boat" or category == "boat":
+            _mx = _combo_max_no(q, x, tr)
+            if _mx > 6:                                          # 경정 불가 확정
+                if _KRA_TRACK_RE.search(str(rk)):
+                    _ns, _nc = "horse", "korea"                  # 한국 경마장명 → 한국경마
+                elif _mx > 9:
+                    _ns, _nc = "horse", (category if category not in (None, "boat") else "japan_local")  # 경륜(≤9)도 초과 → 경마
+                elif _KEIRIN_ONLY_RE.search(str(rk)):
+                    _ns, _nc = "cycle", "cycle"                  # 경륜 전용 지명 → 경륜
+                else:
+                    _ns, _nc = "cycle", "cycle"                  # 7~9두·근거부족: 경정만은 확실히 아님 → 경륜 추정
+                print("[종목 정정·증거기반] %s: 조합 최대마번=%d → 경정(6정) 불가 → sport=%s·cat=%s (기존 boat)"
+                      % (rk, _mx, _ns, _nc))
+                sport, category = _ns, _nc
+    except Exception as _be:
+        print("[종목 정정·증거기반] 실패(무시):", _be)
     # [보완2] betType 직접 대조(가장 확실한 1차 관문) → 뒤바뀐 종류는 여기서 즉시 거부.
     q = _bettype_guard("quinella", q, "복승")
     x = _bettype_guard("exacta", x, "쌍승")
@@ -7686,9 +7733,12 @@ def _dark_combo_section(key_horses, dark_horses, curQ):
         return (curQ or {}).get((a, b)) or (curQ or {}).get((b, a))
     d1, d2 = dnos[0], dnos[1]
     quinella = [{"combo": sorted([fav, d1]), "odds": _od(fav, d1), "label": "유력1+복병1"},
-                {"combo": sorted([fav, d2]), "odds": _od(fav, d2), "label": "유력1+복병2"}]
+                {"combo": sorted([fav, d2]), "odds": _od(fav, d2), "label": "유력1+복병2"},
+                # [복병 복승 페어·추가] 복병1+복병2 끼리 복승(고배당 이변 커버) — 기존 유력+복병 조합 무삭제·추가만.
+                {"combo": sorted([d1, d2]), "odds": _od(d1, d2), "label": "복병1+복병2"}]
     trifecta = [{"combo": sorted([fav, d1, d2]), "label": "유력1+복병1+복병2"}]
     return {"fav": fav, "darks": dnos, "quinella": quinella, "trifecta": trifecta,
+            "darkPair": sorted([d1, d2]),   # [추가] 복병끼리 복승 페어 노출(패널·학습 참조용)
             "title": "🐎 복병 조합: 유력%d+복병%d+복병%d" % (fav, d1, d2)}
 
 
@@ -18757,6 +18807,241 @@ def _kra_auto_start():
     print("[KRA] 30초 자동수집 데몬 시작(watch 등록 경주만 대상)")
 
 
+# ══════════════ [KRA 결과 백필 스윕] 라이브 감시와 무관한 결과 자동수집 ══════════════
+#   문제: 결과 자동수집이 _KRA_WATCH(라이브 배당 감시) 수명에 묶여, 마감 후 배당 API 연속실패로
+#         watch 가 해제되면(할당량 보호) KRA 착순기록(rcTime)이 올라오기 전에 폴링이 끝나 결과 유실.
+#         PDF 사전분석만 하고 라이브 감시를 안 켠 경주는 아예 결과 대상에서 누락.
+#   해결: watch 와 완전히 독립적으로, '당일 분석됐으나 결과 없는 한국 경주'를 주기적으로 KRA API 로
+#         자동 수집→_apply_result_learning(복기·학습·복병·패턴·백업 자동연쇄). 멱등·읽기전용 조회.
+_KRA_BACKFILL_INTERVAL = 1200     # 20분 주기(경주 종료 후 rcTime 이 올라오면 다음 스윕에서 자동 확보)
+_kra_backfill_started = False
+
+
+def _kra_result_backfill_once(date=None, verbose=True):
+    """[KRA 결과 백필·1회] 해당일(기본 오늘) 분석됐으나 결과 없는 '한국' 경주를 KRA rcTime 착순으로
+    자동 수집→학습 반영. watch 등록 여부와 무관. 반환 {date,tried,filled,still_missing,done,failed}.
+    ⚠ 일본 경주는 확장/수동 결과경로라 대상 제외(한국경마장명 raceKey 만)."""
+    date = date or time.strftime("%Y-%m-%d", time.localtime())
+    ymd = date.replace("-", "")
+    try:
+        missing = (_missing_results(date) or {}).get("missing", [])
+    except Exception as e:
+        return {"date": date, "tried": 0, "filled": 0, "error": "missing 조회 실패: %s" % e}
+    tried = filled = 0
+    done_list, fail_list = [], []
+    for m in missing:
+        rk = str(m.get("raceKey") or "")
+        if not rk or not _KRA_TRACK_RE.search(rk):
+            continue                                     # 한국 경주만(일본=확장/수동 경로)
+        try:
+            area, rno = _area_num(rk)
+            meet = _kra_meet_code(area)
+            if not (meet and rno):
+                continue
+            tried += 1
+            ok, res = _kra_collect_result_one(rk, meet, ymd, str(rno))
+            if ok:
+                filled += 1
+                done_list.append({"raceKey": rk, "top3": (res or {}).get("top3")})
+            else:
+                fail_list.append({"raceKey": rk, "error": (res or {}).get("error")})
+        except Exception as e:
+            fail_list.append({"raceKey": rk, "error": str(e)})
+    if verbose and (tried or filled):
+        print("[KRA 결과 백필] %s: 시도 %d · 성공 %d · 남음 %d(경주 미종료·rcTime 미게시 가능)"
+              % (date, tried, filled, tried - filled))
+    return {"date": date, "tried": tried, "filled": filled,
+            "still_missing": tried - filled, "done": done_list, "failed": fail_list}
+
+
+def _kra_backfill_loop():
+    """20분 주기 결과 백필(데몬). KRA 키가 있을 때만 동작. 경주 종료 후 rcTime 게시되면 자동 확보 →
+    라이브 감시 해제 여부와 무관하게 복기·학습·복병 학습이 자동 반영된다(수동 입력 불필요)."""
+    while True:
+        time.sleep(_KRA_BACKFILL_INTERVAL)
+        try:
+            if _kra_api_key():
+                _kra_result_backfill_once()
+        except Exception as e:
+            print("[KRA 결과 백필] 루프 오류(무시):", e)
+        try:
+            _jp_result_backfill_once()        # [일본 NAR] keiba RaceMarkTable 결과 백필(키 불필요·공개페이지)
+        except Exception as e:
+            print("[일본 결과 백필] 루프 오류(무시):", e)
+
+
+def _kra_backfill_start():
+    """KRA 결과 백필 데몬 1회 기동(멱등)."""
+    global _kra_backfill_started
+    if _kra_backfill_started:
+        return
+    _kra_backfill_started = True
+    threading.Thread(target=_kra_backfill_loop, daemon=True, name="kra-backfill").start()
+    print("[결과 백필] 데몬 시작(20분 주기·당일 미입력 자동수집 — 한국:KRA rcTime · 일본NAR:keiba RaceMarkTable·watch 무관)")
+
+
+@app.route("/api/kra/results/backfill", methods=["GET", "POST"])
+def kra_results_backfill():
+    """[KRA 결과 백필] 당일(또는 ?date=YYYY-MM-DD) 분석됐으나 결과 없는 한국 경주를 KRA로 자동 채움.
+    GET=미리보기(대상 목록만·수집 안 함) · POST=실제 수집·학습 반영. 수동 즉시 실행용."""
+    date = (request.args.get("date") if request.method == "GET" else (request.json or {}).get("date"))
+    if request.method == "GET":
+        d = date or time.strftime("%Y-%m-%d")
+        kor = [m for m in (_missing_results(d) or {}).get("missing", [])
+               if _KRA_TRACK_RE.search(str(m.get("raceKey") or ""))]
+        return jsonify({"date": d, "korean_missing": kor, "count": len(kor)})
+    return jsonify(_kra_result_backfill_once(date))
+
+
+# ══════════════ [일본 keiba NAR 결과 백필] 서버측 RaceMarkTable 직접수집 ══════════════
+#   문제: 일본 결과 자동수집이 확장(활성 탭 1경주·T+5/7/10분)에 묶여 '일부만' 등록.
+#   해결: KRA 백필과 동형으로, 당일 분석됐으나 결과 없는 '일본 NAR' 경주를 keiba.go.jp 공개
+#         결과페이지(RaceMarkTable)에서 서버가 직접 fetch→파싱→_apply_result_learning(복기·복병·패턴 자동).
+#         탭·타이밍 무관 전수 커버. ⚠ 완전 방어적(fetch/파싱 실패=조용히 스킵 → 기존 확장수집·학습 무영향).
+#   ⚠ 중앙(JRA)·미지원 경마장·한국(KRA 백필 담당)은 대상 아님. asyukk 확장 결과수집은 그대로 백업 유지.
+KEIBA_RESULT_BASE = "https://www2.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable"
+# NAR 경마장명(한/일 별칭) → keiba.go.jp k_babaCode. 확장 확정분(19·20·24·27·31) + 표준 NAR 코드.
+_JP_BABA_CODE = {
+    "門別": "36", "몬베츠": "36", "몬베쓰": "36",
+    "盛岡": "10", "모리오카": "10", "水沢": "11", "미즈사와": "11",
+    "浦和": "18", "우라와": "18", "船橋": "19", "후나바시": "19",
+    "大井": "20", "오오이": "20", "川崎": "21", "카와사키": "21", "가와사키": "21",
+    "金沢": "22", "카나자와": "22", "가나자와": "22", "笠松": "23", "카사마츠": "23",
+    "名古屋": "24", "나고야": "24", "園田": "27", "소노다": "27",
+    "姫路": "28", "히메지": "28", "高知": "31", "고치": "31", "코치": "31",
+    "佐賀": "32", "사가": "32", "帯広": "65", "오비히로": "65", "반에이": "65",
+}
+
+
+def _jp_baba_code_from_rk(rk):
+    """raceKey 문자열에서 NAR 경마장 별칭을 스캔해 k_babaCode 반환(정규화 무관·방어). 미지원=None."""
+    s = str(rk or "")
+    for key, code in _JP_BABA_CODE.items():
+        if key in s:
+            return code
+    return None
+
+
+def _z2h_digits(s):
+    """전각 숫자(０-９)·전각 공백 → 반각(결과표 전각 대응)."""
+    return (s or "").translate(str.maketrans("０１２３４５６７８９　", "0123456789 "))
+
+
+def _keiba_decode(raw_bytes):
+    """keiba.go.jp 응답 디코드 — 着順/馬番 헤더가 보이는 인코딩 채택(EUC-JP/Shift_JIS/UTF-8)."""
+    for enc in ("euc-jp", "shift_jis", "utf-8"):
+        try:
+            t = raw_bytes.decode(enc, "strict")
+            if ("着順" in t) or ("馬番" in t):
+                return t
+        except (UnicodeDecodeError, LookupError):
+            continue
+    return raw_bytes.decode("utf-8", "replace")   # 최후: 손실 허용(숫자만이라도 파싱)
+
+
+def _keiba_parse_result(html):
+    """RaceMarkTable HTML → 착순 상위3 마번[list] 또는 None. 着順/馬番 컬럼 라벨 기반(방어)."""
+    html = _z2h_digits(html or "")
+    for tbl in re.findall(r"<table[^>]*>(.*?)</table>", html, re.S | re.I):
+        rows = re.findall(r"<tr[^>]*>(.*?)</tr>", tbl, re.S | re.I)
+        if len(rows) < 2:
+            continue
+
+        def _cells(r):
+            return [re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip()
+                    for c in re.findall(r"<t[hd][^>]*>(.*?)</t[hd]>", r, re.S | re.I)]
+        head = [re.sub(r"\s+", "", h) for h in _cells(rows[0])]
+        i_rank = next((k for k, h in enumerate(head) if re.match(r"^(着順|착순|순위|등위)$", h)), -1)
+        i_no = next((k for k, h in enumerate(head) if re.match(r"^(馬番|마번|번호|말번호)$", h)), -1)
+        if i_rank < 0 or i_no < 0:
+            continue
+        got = []
+        for r in rows[1:]:
+            c = _cells(r)
+            if len(c) <= max(i_rank, i_no):
+                continue
+            rk, no = c[i_rank].strip(), c[i_no].strip()
+            if not rk.isdigit() or not no.isdigit():    # 失格/中止/除外 = 착순 비숫자 → 스킵
+                continue
+            got.append((int(rk), int(no)))
+        if len(got) >= 3:
+            got.sort()
+            return [no for _rk, no in got[:3]]
+    return None
+
+
+def _keiba_result_top3(baba, ymd, rno, timeout=15):
+    """keiba.go.jp RaceMarkTable 조회 → 상위3 마번 또는 None. 완전 방어(예외=None)."""
+    try:
+        d = "%s/%s/%s" % (ymd[:4], ymd[4:6], ymd[6:8])
+        url = "%s?k_raceDate=%s&k_raceNo=%s&k_babaCode=%s" % (
+            KEIBA_RESULT_BASE, urllib.parse.quote(d), rno, baba)
+        raw = urlopen(Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=timeout).read()
+        return _keiba_parse_result(_keiba_decode(raw))
+    except Exception:
+        return None
+
+
+def _jp_result_backfill_once(date=None, verbose=True):
+    """[일본 NAR 결과 백필·1회] 당일 분석됐으나 결과 없는 '일본 NAR' 경주를 keiba RaceMarkTable 착순으로
+    자동 수집→_apply_result_learning. 한국(KRA)·중앙(JRA)·미지원장 스킵. 반환 {date,tried,filled,...}."""
+    date = date or time.strftime("%Y-%m-%d", time.localtime())
+    ymd = date.replace("-", "")
+    try:
+        missing = (_missing_results(date) or {}).get("missing", [])
+    except Exception as e:
+        return {"date": date, "tried": 0, "filled": 0, "error": "missing 조회 실패: %s" % e}
+    tried = filled = 0
+    done_list, fail_list = [], []
+    for m in missing:
+        rk = str(m.get("raceKey") or "")
+        if not rk or _KRA_TRACK_RE.search(rk):
+            continue                                     # 한국 경주는 KRA 백필 담당
+        baba = _jp_baba_code_from_rk(rk)
+        if not baba:
+            continue                                     # NAR 미지원(중앙 등) → 스킵
+        try:
+            _area, rno = _area_num(rk)
+            if not rno:
+                continue
+            tried += 1
+            top3 = _keiba_result_top3(baba, ymd, str(rno))
+            if not top3 or len(top3) < 3:
+                fail_list.append({"raceKey": rk, "error": "결과 미게시/파싱 실패"})
+                continue
+            result = {"1st": top3[0], "2nd": top3[1], "3rd": top3[2]}
+            _apply_result_learning(rk, result, top3)
+            filled += 1
+            done_list.append({"raceKey": rk, "top3": top3})
+        except Exception as e:
+            fail_list.append({"raceKey": rk, "error": str(e)})
+    if verbose and (tried or filled):
+        print("[일본 결과 백필] %s: 시도 %d · 성공 %d · 남음 %d(결과 미게시·미지원장 가능)"
+              % (date, tried, filled, tried - filled))
+    return {"date": date, "tried": tried, "filled": filled,
+            "still_missing": tried - filled, "done": done_list, "failed": fail_list}
+
+
+@app.route("/api/jp/results/backfill", methods=["GET", "POST"])
+def jp_results_backfill():
+    """[일본 NAR 결과 백필] 당일(또는 ?date=YYYY-MM-DD) 분석됐으나 결과 없는 일본 NAR 경주를
+    keiba RaceMarkTable로 채움. GET=미리보기(대상 목록) · POST=실제 수집·학습. 수동 즉시실행용."""
+    date = (request.args.get("date") if request.method == "GET" else (request.json or {}).get("date"))
+    if request.method == "GET":
+        d = date or time.strftime("%Y-%m-%d")
+        cand = []
+        for m in (_missing_results(d) or {}).get("missing", []):
+            rk = str(m.get("raceKey") or "")
+            if _KRA_TRACK_RE.search(rk):
+                continue
+            baba = _jp_baba_code_from_rk(rk)
+            _area, rno = _area_num(rk)
+            if baba and rno:
+                cand.append({"raceKey": rk, "babaCode": baba, "raceNo": rno})
+        return jsonify({"date": d, "japan_missing": cand, "count": len(cand)})
+    return jsonify(_jp_result_backfill_once(date))
+
+
 @app.route("/api/kra/test", methods=["GET", "POST"])
 def kra_test():
     """[KRA 진단] 원시 응답·파싱 결과 확인용. 키 활성화 후 실제 필드 검증에 사용.
@@ -18931,12 +19216,116 @@ KRA_APIS = {
                      "sample": {"meet": "1", "rc_date": "20260712", "rc_no": "1"}},    # 코너 통과순위 시퀀스
     # 미확정(참고용·테스트 시 상태 표시)
     "track_info": {"path": "API189/%s" % (os.environ.get("KRA_TRACK_OP", "").strip() or "raceCourseInfo_1"),
-                   "name": "경주로정보·함수율(op 미확정)", "sample": {"meet": "1", "rc_date": "20260712"}},
+                   "name": "경주로정보·함수율(op 런타임 자동탐색·15063953)", "sample": {"meet": "1", "rc_date": "20260712"}},
     "jockey_comp": {"path": "jockeyResult/getJockeyResult", "name": "기수통산성적비교(미확정)",
                     "sample": {"meet": "1"}},
 }
 # 경주로(API189) op명이 확정되면 .env 에 KRA_TRACK_OP=<opName> 설정 → 위 track_info 경로 자동 완성 + 함수율 실측 활성.
 KRA_TRACK_OP = os.environ.get("KRA_TRACK_OP", "").strip()
+
+# ── [API189 경주로/함수율 op명 런타임 자동탐색] ──────────────────────────────
+#   op명 미확정 문제 근본 해결: KRA_TRACK_OP(.env)로 명시하지 않아도, 서버가 KRA API에
+#   실제 접근 가능한 환경(홈서버)에서 후보 경로를 1회 순차 시도해 '함수율 필드가 있는' 경로를
+#   자동 발견·영구 캐시(data/kra_track_op.json)한다. 발견 실패 시 기존 동작(날씨 추정 폴백) 그대로 → 무회귀.
+#   확정 데이터셋: 공공데이터포털 15063953 '한국마사회_경주로정보'
+#     (제공: 경마장명·경주일자·경주번호·함수율·날씨·경주로상태 / REST·JSON / 실시간 갱신).
+KRA_TRACK_OP_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_track_op.json")
+# 후보 op 경로(B551015/ 뒤). 형제 API 명명(API155/raceResult·API10_1/jockeyChangeInfo_1·
+#   API37_1/sectionRecord_1·API6_1/raceDetailSectionRecord_1) + 경주로정보 데이터셋 추정명.
+_KRA_TRACK_OP_CANDIDATES = [
+    "API189_1/raceCourseInfo_1", "API189/raceCourseInfo_1",
+    "API189_1/API189_1", "API189/API189_1",
+    "API189_1/raceCourseInfo", "API189/raceCourseInfo",
+    "API189_1/getRaceCourseInfo", "API189/getRaceCourseInfo",
+    "API189_1/raceCourse_1", "API189/raceCourse_1",
+    "API189_1/trackStateInfo_1", "API189/trackStateInfo_1",
+    "raceCourseInfo/getRaceCourseInfo",
+]
+# 함수율/경주로 판정용 응답 필드 후보(영문/한글 혼용 방어) — 하나라도 값이 있으면 유효 응답으로 인정.
+_KRA_TRACK_WATER_KEYS = ("hamsuYul", "hamsuyul", "waterRatio", "waterContent", "hamsu",
+                         "moistRate", "moisture", "함수율", "hamSuYul")
+_KRA_TRACK_STATE_KEYS = ("trackState", "trackStat", "trStat", "jujoState", "경주로상태", "주로상태", "trackCondition")
+_KRA_TRACK_OP_RESOLVED = None     # 발견/캐시된 op 경로(None=미확정)
+_KRA_TRACK_OP_TRIED = False       # 이번 프로세스에서 탐색 시도했는지
+_KRA_TRACK_OP_LAST_TRY = 0.0      # 마지막 탐색 시각(실패 시 하루 1회로 제한)
+
+
+def _kra_track_op_load():
+    """캐시 파일에서 이미 확정된 op 경로 로드(있으면 탐색 생략)."""
+    try:
+        with open(KRA_TRACK_OP_FILE, encoding="utf-8") as f:
+            d = json.load(f) or {}
+        op = (d.get("op") or "").strip()
+        return op or None
+    except Exception:
+        return None
+
+
+def _kra_track_op_save(op):
+    """확정된 op 경로를 영구 캐시(재시작 후 재탐색 방지)."""
+    try:
+        os.makedirs(os.path.dirname(KRA_TRACK_OP_FILE), exist_ok=True)
+        with open(KRA_TRACK_OP_FILE, "w", encoding="utf-8") as f:
+            json.dump({"op": op, "savedAt": int(time.time())}, f, ensure_ascii=False)
+    except Exception as _e:
+        print("[API189] op 캐시 저장 실패(무시):", _e)
+
+
+def _kra_track_item_has_water(it):
+    """응답 item 에 함수율(또는 경주로상태) 필드가 실제로 담겼는지."""
+    if not isinstance(it, dict):
+        return False
+    for k in _KRA_TRACK_WATER_KEYS:
+        v = it.get(k)
+        if v not in (None, "", "-"):
+            return True
+    for k in _KRA_TRACK_STATE_KEYS:
+        v = it.get(k)
+        if v not in (None, "", "-"):
+            return True
+    return False
+
+
+def _kra_track_op_resolve(meet, rc_date, rc_no):
+    """[핵심] 유효한 API189 op 경로를 반환. 우선순위:
+    ① KRA_TRACK_OP(.env 명시) → "API189/<op>"  ② 캐시 파일  ③ 후보 순차 탐색(1회).
+    탐색은 프로세스당 1회(+실패 시 하루 1회)만. 실패 시 None(→ 날씨 추정 폴백 유지)."""
+    global _KRA_TRACK_OP_RESOLVED, _KRA_TRACK_OP_TRIED, _KRA_TRACK_OP_LAST_TRY
+    if KRA_TRACK_OP:                                  # .env 명시가 최우선(수동 확정)
+        return "API189/%s" % KRA_TRACK_OP
+    if _KRA_TRACK_OP_RESOLVED:
+        return _KRA_TRACK_OP_RESOLVED
+    if not _KRA_TRACK_OP_TRIED:                       # 캐시 파일 우선 로드
+        cached = _kra_track_op_load()
+        if cached:
+            _KRA_TRACK_OP_RESOLVED = cached
+            _KRA_TRACK_OP_TRIED = True
+            print("[API189] 캐시된 경주로 op 경로 사용:", cached)
+            return cached
+    now = time.time()
+    if _KRA_TRACK_OP_TRIED and (now - _KRA_TRACK_OP_LAST_TRY) < 86400:
+        return None                                   # 이미 실패 → 하루 1회만 재시도
+    _KRA_TRACK_OP_TRIED = True
+    _KRA_TRACK_OP_LAST_TRY = now
+    params = {"meet": str(meet), "rc_date": str(rc_date), "rc_no": str(rc_no)}
+    print("[API189] 경주로 op 경로 자동탐색 시작 (%d개 후보)…" % len(_KRA_TRACK_OP_CANDIDATES))
+    for cand in _KRA_TRACK_OP_CANDIDATES:
+        try:
+            items, err = _kra_api_get(cand, params, num_rows=10)
+        except Exception as _e:
+            items, err = [], str(_e)
+        if err:
+            continue
+        if items and any(_kra_track_item_has_water(it) for it in items):
+            _KRA_TRACK_OP_RESOLVED = cand
+            _kra_track_op_save(cand)
+            _keys = sorted((items[0] or {}).keys()) if isinstance(items[0], dict) else []
+            print("[API189] ✅ 경주로 op 경로 발견:", cand, "· 응답필드:", _keys)
+            return cand
+    print("[API189] ⚠ 자동탐색 실패(후보 %d개 모두 무효) → 날씨 추정 폴백 유지. "
+          "정확 op명은 tools/probe_api189.py 로 확인 후 .env KRA_TRACK_OP 설정." % len(_KRA_TRACK_OP_CANDIDATES))
+    return None
+
 
 
 def _kra_api_get(path, params, num_rows=100):
@@ -19241,23 +19630,29 @@ def _track_condition_by_water(water):
 
 
 def _kra_track_info(meet, rc_date, rc_no, force=False):
-    """[API189 경주로·함수율] op명 확정(KRA_TRACK_OP) 시에만 실측 조회. 미확정이면 None(→ 기존 날씨 추정 유지).
-    반환 {water, condition, level, weather, source} 또는 None."""
-    if not KRA_TRACK_OP:
-        return None                              # op 미확정 → 폴백(기존 OpenWeatherMap 추정) 그대로
+    """[API189 경주로·함수율] op 경로를 자동탐색/캐시(.env KRA_TRACK_OP 또는 후보 자동발견)해 실측 조회.
+    발견 실패 시 None(→ 기존 날씨 추정 유지). 반환 {water, condition, level, weather, source} 또는 None."""
+    op_path = _kra_track_op_resolve(meet, rc_date, rc_no)
+    if not op_path:
+        return None                              # op 미확정·자동탐색 실패 → 폴백(기존 OpenWeatherMap 추정) 그대로
     ck = "%s|%s|%s" % (meet, rc_date, rc_no)
     c = _KRA_TRACK_CACHE.get(ck)
     if c and not force and (time.time() - c["t"]) < _KRA_TRACK_TTL:
         return c["data"]
-    items, err = _kra_api_get("API189/%s" % KRA_TRACK_OP,
+    items, err = _kra_api_get(op_path,
                               {"meet": str(meet), "rc_date": str(rc_date), "rc_no": str(rc_no)}, num_rows=10)
     data = None
     if not err and items:
         it = items[0]
-        water = _kra_g(it, "hamsuYul", "waterRatio", "hamsu", "moistRate", "함수율")
+        water = _kra_g(it, *_KRA_TRACK_WATER_KEYS)
         label, level = _track_condition_by_water(water)
+        # [경주로상태 실측 우선] API가 상태 문자열을 직접 주면(건조/양호/다습/포화/불량) 그 값을 우선 사용.
+        state = _kra_g(it, *_KRA_TRACK_STATE_KEYS)
+        if state and not label:
+            label = str(state).strip()
         data = {"water": _kra_num(water), "condition": label, "level": level,
-                "weather": _kra_g(it, "weather", "wthr", "날씨"), "source": "kra_api189"}
+                "trackState": (str(state).strip() if state else None),
+                "weather": _kra_g(it, "weather", "wthr", "날씨"), "source": "kra_api189", "op": op_path}
     _KRA_TRACK_CACHE[ck] = {"t": time.time(), "data": data}
     return data
 
@@ -23235,6 +23630,7 @@ def _boot_background():
         print("[부팅] 날짜 초기화 실패(무시):", e)
     _start_multi_race_bg()               # [핵심] 다중 경주(지방경마·경륜·한국) 24시간 자동수집
     _weather_auto_start()                # [날씨] 경주장별 실시간 날씨·주로 상태 자동수집(30분 캐시)
+    _kra_backfill_start()                # [KRA 결과 백필] 20분 주기·당일 미입력 한국경주 결과 자동수집(watch 무관·복기/학습/복병 자동화)
     try:
         _archive_compress_old(7)         # 7일+ 경주 배당 .gz 압축 보관(데이터 삭제 없음)
     except Exception as e:
