@@ -230,7 +230,12 @@
   }
  ],
  "odds_features": {
-  "timeline": [],
+  "timeline": [
+   {
+    "time": "07:23:45",
+    "quinella": {}
+   }
+  ],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
@@ -265,10 +270,10 @@
    8,
    12
   ],
-  "recommend": null,
+  "recommend": "6+9",
   "strategy": null,
   "confidence": 0,
-  "signal_quality": null
+  "signal_quality": "하"
  },
  "result": {
   "1st": 11,
@@ -296,7 +301,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-18 07:00:47",
+ "saved_at": "2026-07-18 07:23:54",
  "quality": {
   "score": 40,
   "grade": "제외",

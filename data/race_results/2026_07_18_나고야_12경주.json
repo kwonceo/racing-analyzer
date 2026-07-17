@@ -13,8 +13,18 @@
   "2nd": 2,
   "3rd": 12
  },
- "odds_at_start": {},
- "odds_timeline": [],
+ "odds_at_start": {
+  "quinella": {},
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "07:23:45",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  }
+ ],
  "anomalies": [],
  "prediction": {
   "candidates": [
@@ -33,10 +43,10 @@
    8,
    12
   ],
-  "recommend_main": null,
+  "recommend_main": "6+9",
   "recommend_sub": null,
   "strategy": null,
-  "signal_quality": null,
+  "signal_quality": "하",
   "confidence": 0,
   "inverse": false
  },
@@ -56,10 +66,10 @@
   "quinella_odds": null,
   "trifecta_odds": null,
   "actual_return": null,
-  "profit": 0
+  "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-18 07:00:47",
+ "saved_at": "2026-07-18 07:23:54",
  "validation": {
   "ok": true,
   "errors": []
