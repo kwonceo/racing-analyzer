@@ -1,0 +1,144 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_17_제주_5경주",
+ "race_info": {
+  "date": "2026-07-17",
+  "track": "제주",
+  "round": 5,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "14:45:49",
+    "quinella": {
+     "6+10": 4.7,
+     "7+10": 8.4,
+     "2+10": 10.5,
+     "3+10": 10.9,
+     "6+7": 11.3,
+     "2+6": 13.9,
+     "9+10": 16.2,
+     "3+6": 17.9,
+     "1+10": 19.2,
+     "2+3": 25.1,
+     "3+7": 26.0,
+     "1+6": 28.7,
+     "2+7": 28.9,
+     "5+10": 32.4,
+     "6+9": 32.9,
+     "1+3": 42.6,
+     "1+7": 44.1,
+     "4+10": 45.8,
+     "5+6": 47.4,
+     "7+9": 53.7,
+     "1+2": 55.8,
+     "8+10": 58.2,
+     "2+9": 60.4,
+     "3+9": 60.9,
+     "4+6": 70.8,
+     "5+7": 81.7,
+     "3+5": 91.9,
+     "1+4": 100.0,
+     "1+5": 100.0,
+     "1+8": 100.0,
+     "1+9": 100.0,
+     "2+4": 100.0,
+     "2+5": 100.0,
+     "2+8": 100.0,
+     "3+4": 100.0,
+     "3+8": 100.0,
+     "4+5": 100.0,
+     "4+7": 100.0,
+     "4+8": 100.0,
+     "4+9": 100.0,
+     "5+8": 100.0,
+     "5+9": 100.0,
+     "6+8": 100.0,
+     "7+8": 100.0,
+     "8+9": 100.0
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.689,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "eliminated": [],
+  "recommend": "6+10",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 10,
+  "2nd": 6,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 10,
+  "second": 6,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-17 23:56:31",
+ "quality": {
+  "score": 20,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "전적 데이터",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
