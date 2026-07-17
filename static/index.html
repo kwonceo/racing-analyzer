@@ -611,6 +611,14 @@
         <div id="statsDashboard"></div>
       </div>
 
+      <!-- [경쟁 AI 벤치마킹] 저쪽 추천 vs 우리 추천 비교 통계 -->
+      <div class="panel-card">
+        <h2>📊 경쟁 AI 분석 <span class="hint" style="font-weight:400;font-size:13px">저쪽 추천 vs 우리 추천 비교·역추산</span></h2>
+        <p class="hint">경쟁 AI 추천을 <code>py tools\register_competitor.py</code> 로 입력하면 축·연결마·적중을 우리와 비교해 누적합니다. 저쪽이 잘 맞히는 패턴(고배당·축 선정)을 역추산해 개선에 활용하세요.</p>
+        <div class="cfg-row"><button id="competitorRefresh" class="btn btn-primary">🔄 경쟁 분석 새로고침</button></div>
+        <div id="competitorPanel" style="margin-top:10px"><p class="hint">[경쟁 분석 새로고침]을 누르세요.</p></div>
+      </div>
+
       <!-- [6번] 내 코멘트 모아보기 — 최고중요 경주·키워드 통계·near_miss 패턴 -->
       <div class="panel-card">
         <h2>💬 내 코멘트 모아보기 <span class="hint" style="font-weight:400">(확장 팝업 결과입력 코멘트)</span></h2>

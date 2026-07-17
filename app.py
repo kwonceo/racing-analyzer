@@ -11215,25 +11215,55 @@ def _canonical_log_key(rk):
     이미 오늘 로그가 있으면 **그 기존 key를 재사용**해 한 파일에 합친다(중복 로그·미입력 중복 제거).
     - 자기 파일이 이미 있으면 그대로(rk).
     - 없을 때만 오늘·(트랙+라운드) 일치하는 기존 로그를 파일명으로 스캔(경량, doc 1개만 읽음)."""
+    def _doc_has_recs(d):
+        cp = (d or {}).get("corePicks") or {}
+        return bool(cp.get("finalQuinellas") or cp.get("finalTrifectas")
+                    or cp.get("confQuinellas") or cp.get("confTrifecta") or (d or {}).get("recommendation_history"))
     try:
         exact, _, _ = _analysis_log_path(rk)
+        # 오늘 파일이 있고 '추천이 들어있으면' 그대로(정상 당일 케이스). 있어도 비었으면 아래에서 최근 추천파일 탐색.
         if os.path.exists(exact):
-            return rk
+            try:
+                if _doc_has_recs(json.load(open(exact, encoding="utf-8"))):
+                    return rk
+            except Exception:
+                return rk
         area, num = _area_num(rk)
         if num is None or not area or not os.path.isdir(ANALYSIS_LOG_DIR):
             return rk
+        # [날짜 롤오버 방어·근본수정] 자정을 넘겨 결과를 입력하면 raceKey(날짜 없음)가 '오늘' 빈 파일을 가리켜
+        #   어제 분석한 추천을 못 찾아 전부 미적중이 되던 문제. 오늘 파일이 없거나 비었으면 최근(≤3일)
+        #   같은 트랙+라운드 로그 중 '추천이 있는 가장 최근' 파일을 찾아 그 key(날짜 포함)를 사용한다.
         today_us = time.strftime("%Y_%m_%d", time.localtime())
-        cands = []
+        recent = set(time.strftime("%Y_%m_%d", time.localtime(time.time() - 86400 * i)) for i in range(4))
+        best = None            # (date_us, key)  추천 있는 최근 파일
+        same_day_dups = []     # 당일 한자/한글 중복(추천 없을 때 폴백용)
         for fn in os.listdir(ANALYSIS_LOG_DIR):
-            if not fn.endswith(".json") or not fn.startswith(today_us):
+            if not fn.endswith(".json"):
                 continue
-            race = fn[len(today_us):-5].strip("_").replace("_", " ")
-            fa, fnum = _area_num(race)
-            if fnum == num and fa and (area in fa or fa in area):
-                cands.append(fn)
-        if cands:
-            cands.sort()   # 가장 이른(먼저 생성된) 파일을 canonical 로
-            doc = json.load(open(os.path.join(ANALYSIS_LOG_DIR, cands[0]), encoding="utf-8"))
+            m = re.match(r"(\d{4}_\d{2}_\d{2})_(.+)\.json$", fn)
+            if not m or m.group(1) not in recent:
+                continue
+            fdate_us, frace = m.group(1), m.group(2).replace("_", " ")
+            fa, fnum = _area_num(frace)
+            if fnum != num or not fa or not (area in fa or fa in area):
+                continue
+            if fdate_us == today_us:
+                same_day_dups.append(fn)
+            try:
+                d = json.load(open(os.path.join(ANALYSIS_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            if _doc_has_recs(d) and (best is None or fdate_us > best[0]):
+                ck = d.get("raceKey") or d.get("race") or frace
+                if ck and not re.search(r"\d{4}-\d{2}-\d{2}", ck):   # 날짜 없는 key 면 파일 날짜를 붙여 정확 지정
+                    ck = "%s %s" % (fdate_us.replace("_", "-"), ck)
+                best = (fdate_us, ck)
+        if best:
+            return best[1]   # 자정 넘김 방어: 추천 있는 최근 로그(날짜 포함 key) 사용
+        if same_day_dups:   # 추천 있는 파일 못 찾음 → 기존 당일 중복방지(한자/한글 병합)
+            same_day_dups.sort()
+            doc = json.load(open(os.path.join(ANALYSIS_LOG_DIR, same_day_dups[0]), encoding="utf-8"))
             ck = doc.get("raceKey") or doc.get("race")
             if ck and ck != rk:
                 print(f"[중복방지] '{rk}' → 기존 로그 '{ck}' 에 병합(같은 경주)")
@@ -11371,6 +11401,22 @@ def _build_analysis_log(rk, an=None):
         })
     rec_history = rec_history[-50:]   # 무한 증가 방지(최근 50회)
 
+    # [추천 보존·근본수정] 경기 종료 후 재저장(결과 입력 등) 시 an 이 비어 corePicks/final_recommendation 이
+    #   텅 비면, 이미 저장된 라이브 추천을 그대로 유지한다(빈 값으로 덮어쓰기 금지). 이게 없으면 결과 입력 순간
+    #   '우리가 무엇을 추천했는지'가 지워져, 이후 적중 판정이 '추천 없음'→전부 미적중으로 오판되던 근본 버그.
+    def _cp_has_recs(cp):
+        cp = cp or {}
+        return bool(cp.get("finalQuinellas") or cp.get("finalTrifectas")
+                    or cp.get("confQuinellas") or cp.get("confTrifecta"))
+
+    def _fr_has_recs(fr):
+        return any(isinstance(v, dict) and v.get("combo") for v in (fr or {}).values())
+    _new_core = an.get("corePicks")
+    _old_core = doc.get("corePicks") if doc else None
+    core_picks_out = _new_core if _cp_has_recs(_new_core) else (_old_core if _cp_has_recs(_old_core) else _new_core)
+    _old_final = doc.get("final_recommendation") if doc else None
+    final_out = final if _fr_has_recs(final) else (_old_final if _fr_has_recs(_old_final) else final)
+
     log = {
         "race_id": os.path.splitext(os.path.basename(path))[0],
         "raceKey": rk,   # [일본경마 복기] 결과 입력 시 record-result 로 그대로 전달(정확 매칭)
@@ -11389,10 +11435,10 @@ def _build_analysis_log(rk, an=None):
         "third_place_hunt": an.get("thirdPlaceHunt"),   # [배당 3착 자동 발굴] 3착 후보 스냅샷
         "horses": horses,
         "elimination": {"candidates": cand, "eliminated": elim_no, "elimination_reasons": elim_reasons},
-        "final_recommendation": final,
+        "final_recommendation": final_out,   # [추천 보존] 끝난 경기 재저장 시 기존 추천 유지(빈값 덮어쓰기 방지)
         "recommendation_history": rec_history,   # [추천 이력 보존] 변경마다 누적(덮어쓰지 않음)
-        "compare_recommendation": an.get("compareRecommend"),   # [비교학습] 이상감지/전적/최종 3종
-        "corePicks": an.get("corePicks"),   # [확신도 복승 학습] confQuinellas·confTrifecta 결과 판정용 보존
+        "compare_recommendation": an.get("compareRecommend") or (doc.get("compare_recommendation") if doc else None),   # [비교학습] 이상감지/전적/최종 3종
+        "corePicks": core_picks_out,   # [확신도 복승 학습·추천 보존] confQuinellas·confTrifecta 결과 판정용 보존(빈값 덮어쓰기 방지)
         "summary": an.get("summary"),
         "keyHorses": an.get("keyHorses"),
         "result": result_doc,
@@ -15731,6 +15777,269 @@ def races_list():
                         "lastT": (snaps[-1].get("t") if snaps else 0), "snaps": len(snaps)})
     out.sort(key=lambda x: (x.get("lastT") or 0))   # 수집 시각순 → 결과 목록 시간순 매칭
     return jsonify({"races": out, "count": len(out)})
+
+
+# ══════════════ [경쟁 AI 벤치마킹] 저쪽 추천 수집·패턴 역추산·비교 학습 ══════════════
+#   목적: 경쟁 AI 추천 조합을 매 경주 수집→축·연결마·조합패턴 자동분석→우리 추천과 비교→
+#         누적통계로 '저쪽이 잘 맞히는 패턴(고배당 등)'을 역추산해 우리 시스템 개선에 반영.
+#   ⚠ 완전 추가(기존 분석/학습/판정 무관). data/competitor_analysis/ 경주별 저장 + competitor_stats.json 누적.
+COMPETITOR_DIR = os.path.join(os.path.dirname(__file__), "data", "competitor_analysis")
+COMPETITOR_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "competitor_stats.json")
+
+
+def _combo_norm(picks):
+    """[[4,10],[7,10],...] → 정렬 2두+ 조합 리스트(정수·중복제거)."""
+    out, seen = [], set()
+    for c in (picks or []):
+        try:
+            nums = sorted(int(x) for x in c)
+        except (TypeError, ValueError):
+            continue
+        if len(nums) >= 2 and tuple(nums) not in seen:
+            seen.add(tuple(nums))
+            out.append(nums)
+    return out
+
+
+def _analyze_competitor_pattern(picks, odds=None):
+    """추천 조합 → 축(최다등장 번호)·연결마·조합수·고배당포함 패턴 분석. odds(조합별 배당) 있으면 고배당 판정."""
+    combos = _combo_norm(picks)
+    if not combos:
+        return {"combos": [], "axis": [], "connections": [], "others": [], "combo_count": 0,
+                "horses": [], "high_odds": None, "label": "조합 없음"}
+    cnt = {}
+    for c in combos:
+        for n in set(c):
+            cnt[n] = cnt.get(n, 0) + 1
+    maxc = max(cnt.values())
+    axis = sorted([n for n, v in cnt.items() if v == maxc and v >= 2])   # 2조합+ 최다등장 = 축
+    conn = sorted({n for c in combos if set(c) & set(axis) for n in c if n not in axis})
+    others = [c for c in combos if not (set(c) & set(axis))]
+    high_odds = None
+    try:
+        ov = [float(o) for o in (odds or []) if o is not None]
+        if ov:
+            high_odds = bool(max(ov) >= 15)   # 조합 중 15배+ 있으면 고배당 포함
+    except (TypeError, ValueError):
+        pass
+    label = ("%s번 축 %d조합" % ("·".join(map(str, axis)), len(combos))) if axis else ("축 불명 %d조합" % len(combos))
+    if high_odds:
+        label += " · 고배당포함"
+    return {"combos": combos, "axis": axis, "connections": conn, "others": others,
+            "combo_count": len(combos), "horses": sorted(cnt.keys()), "high_odds": high_odds, "label": label}
+
+
+def _our_picks_for_race(rk):
+    """우리 시스템 복승 추천 + 축 → analysis_log corePicks/최종추천에서 복원(_rec_combos 재사용)."""
+    combos = []
+    for c in _rec_combos_from_analysis_log(rk):
+        if c.get("kind") == "복승" and len(c.get("combo") or []) == 2:
+            combos.append(sorted(int(x) for x in c["combo"]))
+    pat = _analyze_competitor_pattern(combos)
+    return {"picks": pat["combos"], "axis": pat["axis"], "connections": pat["connections"],
+            "main_horse": (pat["axis"] or [None])[0], "pattern": pat}
+
+
+def _competitor_result_for_race(rk):
+    """경주 결과(1·2·3착) → analysis_log(canonical) 우선, 없으면 race_results."""
+    try:
+        path, _, _ = _analysis_log_path(_canonical_log_key(rk))
+        d = json.load(open(path, encoding="utf-8"))
+        r = d.get("result")
+        if r and r.get("1st") not in (None, ""):
+            return {k: r.get(k) for k in ("1st", "2nd", "3rd") if r.get(k) not in (None, "")}
+    except Exception:
+        pass
+    try:
+        rp, _, _ = _race_result_path(rk)
+        d = json.load(open(rp, encoding="utf-8"))
+        r = d.get("result") or {}
+        if r.get("1st") not in (None, ""):
+            return {k: r.get(k) for k in ("1st", "2nd", "3rd") if r.get(k) not in (None, "")}
+    except Exception:
+        pass
+    return None
+
+
+def _quinella_hits(combos, result):
+    """복승 조합 중 실제 1·2착(순서무관)과 일치하는 게 있으면 True. 결과 없으면 None."""
+    if not result or result.get("1st") in (None, "") or result.get("2nd") in (None, ""):
+        return None
+    try:
+        top2 = sorted([int(result["1st"]), int(result["2nd"])])
+    except (TypeError, ValueError):
+        return None
+    return any(sorted(c) == top2 for c in (combos or []))
+
+
+def _competitor_compare(comp_pat, our, result):
+    """저쪽 vs 우리 비교: 적중·축 일치·연결마 차이."""
+    ca, oa = set(comp_pat.get("axis") or []), set(our.get("axis") or [])
+    comp_hit = _quinella_hits(comp_pat.get("combos") or [], result)
+    our_hit = _quinella_hits(our.get("picks") or [], result)
+    axis_match = bool(ca and oa and (ca & oa))
+    cc, oc = set(comp_pat.get("connections") or []), set(our.get("connections") or [])
+    diff = []
+    if ca or oa:
+        diff.append(("축 일치(%s)" % "·".join(map(str, sorted(ca & oa)))) if axis_match
+                    else ("축 다름(저쪽 %s / 우리 %s)" % ("·".join(map(str, sorted(ca))) or "-", "·".join(map(str, sorted(oa))) or "-")))
+    only_c, only_o = sorted(cc - oc), sorted(oc - cc)
+    if only_c:
+        diff.append("저쪽만 연결: %s" % "·".join(map(str, only_c)))
+    if only_o:
+        diff.append("우리만 연결: %s" % "·".join(map(str, only_o)))
+    return {"competitor_hit": comp_hit, "our_hit": our_hit,
+            "competitor_axis": sorted(ca), "our_axis": sorted(oa),
+            "axis_match": axis_match, "diff": " · ".join(diff) or "-"}
+
+
+def _competitor_path(rk, date):
+    rid = re.sub(r"[^\w가-힣]+", "_", "%s_%s" % (date, re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip())).strip("_")
+    os.makedirs(COMPETITOR_DIR, exist_ok=True)
+    return os.path.join(COMPETITOR_DIR, rid + ".json")
+
+
+def _competitor_record(rk, comp_picks, comp_odds=None, comp_note=None):
+    """저쪽 추천 저장 + 우리 추천/결과 비교 분석 → data/competitor_analysis/ + 통계 갱신."""
+    m = re.search(r"\d{4}-\d{2}-\d{2}", rk or "")
+    date = m.group(0) if m else time.strftime("%Y-%m-%d", time.localtime())
+    comp_pat = _analyze_competitor_pattern(comp_picks, comp_odds)
+    our = _our_picks_for_race(rk)
+    result = _competitor_result_for_race(rk)
+    analysis = _competitor_compare(comp_pat, our, result)
+    rec = {
+        "date": date, "race": rk,
+        "competitor": {"picks": comp_pat["combos"], "axis": comp_pat["axis"],
+                       "connections": comp_pat["connections"], "high_odds": comp_pat["high_odds"],
+                       "pattern": comp_pat["label"], "note": comp_note},
+        "ours": {"picks": our["picks"], "axis": our["axis"], "main_horse": our["main_horse"]},
+        "result": result, "analysis": analysis, "savedAt": int(time.time()),
+    }
+    try:
+        json.dump(rec, open(_competitor_path(rk, date), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[경쟁분석] 저장 실패:", e)
+    _competitor_recompute_stats()
+    return rec
+
+
+def _competitor_recompute_stats():
+    """data/competitor_analysis/ 전체 스캔 → 적중률·축정확도·고배당 비교 통계 누적."""
+    st = {"races": 0, "with_result": 0,
+          "competitor_hit": 0, "our_hit": 0, "both_hit": 0, "only_competitor": 0, "only_ours": 0, "both_miss": 0,
+          "axis_match": 0, "competitor_high_odds": 0, "competitor_high_odds_hit": 0,
+          "missed_by_us_axis": {}, "updatedAt": int(time.time())}
+    try:
+        if not os.path.isdir(COMPETITOR_DIR):
+            return st
+        for fn in os.listdir(COMPETITOR_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(COMPETITOR_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            st["races"] += 1
+            an = d.get("analysis") or {}
+            if an.get("axis_match"):
+                st["axis_match"] += 1
+            if (d.get("competitor") or {}).get("high_odds"):
+                st["competitor_high_odds"] += 1
+            ch, oh = an.get("competitor_hit"), an.get("our_hit")
+            if ch is None and oh is None:
+                continue
+            st["with_result"] += 1
+            if ch:
+                st["competitor_hit"] += 1
+                if (d.get("competitor") or {}).get("high_odds"):
+                    st["competitor_high_odds_hit"] += 1
+            if oh:
+                st["our_hit"] += 1
+            if ch and oh:
+                st["both_hit"] += 1
+            elif ch and not oh:
+                st["only_competitor"] += 1
+                for a in (d.get("competitor") or {}).get("axis") or []:   # 저쪽만 맞힌 경주의 축 = 우리가 놓친 패턴
+                    st["missed_by_us_axis"][str(a)] = st["missed_by_us_axis"].get(str(a), 0) + 1
+            elif oh and not ch:
+                st["only_ours"] += 1
+            else:
+                st["both_miss"] += 1
+        n = st["with_result"] or 1
+        st["competitor_hit_rate"] = round(100 * st["competitor_hit"] / n)
+        st["our_hit_rate"] = round(100 * st["our_hit"] / n)
+        st["axis_match_rate"] = round(100 * st["axis_match"] / (st["races"] or 1))
+        json.dump(st, open(COMPETITOR_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[경쟁분석] 통계 갱신 실패:", e)
+    return st
+
+
+@app.route("/api/competitor/record", methods=["POST"])
+def competitor_record():
+    """[경쟁분석] 저쪽 추천 저장·비교. body:{raceKey, picks:[[4,10],[7,10]], odds?:[..], note?}."""
+    b = request.json or {}
+    rk_in = (b.get("raceKey") or "").strip()
+    if not rk_in or not b.get("picks"):
+        return jsonify({"error": "raceKey 와 picks 가 필요합니다."}), 400
+    rk = _resolve_race_key(rk_in) or rk_in
+    rec = _competitor_record(rk, b.get("picks"), b.get("odds"), b.get("note"))
+    try:
+        _data_git_backup("경쟁분석 저장: %s" % rk)
+    except Exception:
+        pass
+    return jsonify({"ok": True, "raceKey": rk, "record": rec,
+                    "matchedFrom": rk_in if rk != rk_in else None})
+
+
+@app.route("/api/competitor/list", methods=["GET"])
+def competitor_list():
+    """[경쟁분석] 저장된 경주 목록(?date=YYYY-MM-DD 필터, 기본 전체)."""
+    date = request.args.get("date")
+    out = []
+    if os.path.isdir(COMPETITOR_DIR):
+        for fn in sorted(os.listdir(COMPETITOR_DIR)):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(COMPETITOR_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            if date and d.get("date") != date:
+                continue
+            an = d.get("analysis") or {}
+            out.append({"race": d.get("race"), "date": d.get("date"),
+                        "competitor_axis": an.get("competitor_axis"), "our_axis": an.get("our_axis"),
+                        "competitor_hit": an.get("competitor_hit"), "our_hit": an.get("our_hit"),
+                        "diff": an.get("diff")})
+    out.sort(key=lambda x: (x.get("date") or "", x.get("race") or ""), reverse=True)
+    return jsonify({"races": out, "count": len(out)})
+
+
+@app.route("/api/competitor/get", methods=["GET"])
+def competitor_get():
+    """[경쟁분석] 한 경주 상세(?raceKey=)."""
+    rk_in = (request.args.get("raceKey") or "").strip()
+    if not rk_in:
+        return jsonify({"error": "raceKey 필요"}), 400
+    rk = _resolve_race_key(rk_in) or rk_in
+    m = re.search(r"\d{4}-\d{2}-\d{2}", rk or "")
+    date = m.group(0) if m else time.strftime("%Y-%m-%d", time.localtime())
+    try:
+        d = json.load(open(_competitor_path(rk, date), encoding="utf-8"))
+        return jsonify({"ok": True, "record": d})
+    except Exception:
+        return jsonify({"ok": False, "error": "저장된 경쟁분석 없음", "raceKey": rk})
+
+
+@app.route("/api/competitor/stats", methods=["GET"])
+def competitor_stats():
+    """[경쟁분석] 누적 비교 통계(적중률·축정확도·고배당·우리가 놓친 축 패턴)."""
+    try:
+        st = json.load(open(COMPETITOR_STATS_FILE, encoding="utf-8"))
+    except Exception:
+        st = _competitor_recompute_stats()
+    return jsonify(st)
 
 
 @app.route("/api/history/record-result", methods=["POST"])

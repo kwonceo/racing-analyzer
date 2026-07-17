@@ -183,7 +183,7 @@
         $('#tab-' + btn.dataset.tab).classList.add('active');
         if (btn.dataset.tab === 'board') startBoardTab();   // [공개용 배당판] 카드 UI 시작
         else stopBoardTab();                                // 다른 탭 이동 시 30초 폴링 중단(자원 절약)
-        if (btn.dataset.tab === 'stats') renderStats();
+        if (btn.dataset.tab === 'stats') { renderStats(); try { loadCompetitorStats(); } catch (_) { /* */ } }
         if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); loadSnapshotGallery(); initDayRaces(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
         if (btn.dataset.tab === 'multi') startMultiRaceWatch();   // [다중 경주] 전체 경주 대시보드 시작
@@ -1234,6 +1234,7 @@
     { const b = $('#failReviewRefresh'); if (b) b.addEventListener('click', loadFailureReview); }
     { const b = $('#hallRefresh'); if (b) b.addEventListener('click', loadHallOfFame); }
     { const b = $('#reviewStatsRefresh'); if (b) b.addEventListener('click', loadReviewStats); }   // [6번] 코멘트 모아보기
+    { const b = $('#competitorRefresh'); if (b) b.addEventListener('click', loadCompetitorStats); }   // [경쟁 AI 벤치마킹]
     try { loadReviewStats(); } catch (_) { /* */ }   // 통계 탭 진입 시 자동 로드(있으면)
     initDataProtect();   // [데이터 보호] 자동/수동 GitHub 백업
   }
@@ -7352,6 +7353,61 @@
 
   // ---------- escape ----------
   function esc(str) { return String(str == null ? '' : str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  // [경쟁 AI 벤치마킹] 저쪽 vs 우리 비교 통계 + 최근 경주별 비교 표
+  async function loadCompetitorStats() {
+    const el = document.getElementById('competitorPanel');
+    if (!el) return;
+    el.innerHTML = '<p class="hint">불러오는 중...</p>';
+    try {
+      const st = await fetch('/api/competitor/stats').then((r) => r.json());
+      const lst = await fetch('/api/competitor/list').then((r) => r.json()).catch(() => ({ races: [] }));
+      const n = st.with_result || 0;
+      const cRate = st.competitor_hit_rate != null ? st.competitor_hit_rate : 0;
+      const oRate = st.our_hit_rate != null ? st.our_hit_rate : 0;
+      const missed = Object.entries(st.missed_by_us_axis || {}).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      const mark = (v) => (v === true ? '🎯' : (v === false ? '·' : '—'));
+      let html = '';
+      if (!st.races) {
+        el.innerHTML = '<p class="hint">아직 입력된 경쟁 추천이 없습니다. <code>py tools\\register_competitor.py</code> 로 저쪽 추천을 입력하세요.</p>';
+        return;
+      }
+      html += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <div class="stat-box" style="flex:1;min-width:130px;border:1px solid #333;border-radius:10px;padding:10px">
+          <div class="hint">경쟁 AI 적중률</div><div style="font-size:22px;font-weight:800;color:#f87171">${cRate}%</div>
+          <div class="hint">${st.competitor_hit}/${n} 경주</div></div>
+        <div class="stat-box" style="flex:1;min-width:130px;border:1px solid #333;border-radius:10px;padding:10px">
+          <div class="hint">우리 적중률</div><div style="font-size:22px;font-weight:800;color:#38bdf8">${oRate}%</div>
+          <div class="hint">${st.our_hit}/${n} 경주</div></div>
+        <div class="stat-box" style="flex:1;min-width:130px;border:1px solid #333;border-radius:10px;padding:10px">
+          <div class="hint">축 선정 일치율</div><div style="font-size:22px;font-weight:800;color:#c4b5fd">${st.axis_match_rate || 0}%</div>
+          <div class="hint">저쪽 고배당 ${st.competitor_high_odds || 0}건(적중 ${st.competitor_high_odds_hit || 0})</div></div>
+      </div>`;
+      html += `<div class="hint" style="margin:6px 0">저쪽만 맞힘 <b style="color:#f87171">${st.only_competitor || 0}</b> · 우리만 맞힘 <b style="color:#38bdf8">${st.only_ours || 0}</b> · 둘 다 맞힘 ${st.both_hit || 0} · 둘 다 놓침 ${st.both_miss || 0}</div>`;
+      if (missed.length) {
+        html += `<div style="margin:8px 0;padding:8px;border-radius:8px;background:#2a1a1a">
+          <b style="color:#f87171">⚠ 우리가 놓친 저쪽 축(역추산 힌트):</b> ${missed.map(([a, c]) => `${esc(a)}번(${c}회)`).join(' · ')}
+          <div class="hint">저쪽이 이 번호를 축으로 잡아 맞힌 경주가 많음 → 우리 축 선정에 반영 검토</div></div>`;
+      }
+      const races = (lst.races || []).slice(0, 15);
+      if (races.length) {
+        html += '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:6px"><tr style="border-bottom:1px solid #444;text-align:left">'
+          + '<th>경주</th><th>저쪽축</th><th>우리축</th><th>저쪽</th><th>우리</th><th>차이</th></tr>';
+        for (const r of races) {
+          html += `<tr style="border-bottom:1px solid #2a2a2a">
+            <td>${esc(r.race)}</td>
+            <td>${(r.competitor_axis || []).join('·') || '-'}</td>
+            <td>${(r.our_axis || []).join('·') || '-'}</td>
+            <td>${mark(r.competitor_hit)}</td><td>${mark(r.our_hit)}</td>
+            <td class="hint">${esc(r.diff || '-')}</td></tr>`;
+        }
+        html += '</table>';
+      }
+      el.innerHTML = html;
+    } catch (e) {
+      el.innerHTML = '<p class="hint">불러오기 실패: ' + esc(String(e)) + '</p>';
+    }
+  }
 
   // ══════════ [신규] 고배당 적중 상세 분석 리포트 시스템 (프론트) ══════════
   let _reportWired = false;
