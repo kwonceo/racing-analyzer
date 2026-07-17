@@ -1627,6 +1627,12 @@ OPENING_DROP = -80.0    # opening 배당이 실배당으로 정착할 때의 기
 STALE_ACTIVE_SEC = 1800  # [경주전환 잔존 방어] 활성 3종 배당이 이 시간(30분) 넘게 미갱신 → 끝난 경주로 간주(활성 캐시서 정리)
 # [종목 오분석 근본수정] 한국 경마장명 → sport=horse·category=korea 강제 판정용(확장 KRA_TRACK_RE 와 동일 커버).
 _KRA_TRACK_RE = re.compile(r"(서울|부산경남|부경|부산|제주|과천|렛츠런|한국마사회|경마공원|KRA)")
+# [경륜 전용 지명] 경정장이 없는 '경륜 전용' 경마장명 → sport=cycle 강제(boat 오분석 차단).
+#   ⚠ 경정장과 겹치는 지명(가와사키·다마노·구루메 등)은 제외 — 경륜 전용만 넣어 경정 오정정 방지.
+#   세이부엔(西武園)이 KEIRIN_JO 미등록이라 boat 로 오분석되던 문제(2026-07-17 세이부엔 3경주).
+_KEIRIN_ONLY_RE = re.compile(
+    r"(세이부엔|西武園|야히코|弥彦|마에바시|前橋|우쓰노미야|宇都宮|케이오카쿠|京王閣|"
+    r"이즈|伊豆|다치카와|立川|마쓰도|松戸|오다와라|小田原|기후|岐阜|경륜|競輪|keirin)")
 
 
 def _is_opening_settle(po, pct):
@@ -1902,6 +1908,16 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                     pass
     except Exception as _ke:
         print("[종목 정정] 실패(무시):", _ke)
+    # [경륜 종목 강제·세이부엔 등] 경륜 전용 지명(경정장 없음) → sport=cycle 강제. 확장이 boat 로 오분류해 보내도 서버 최종 방어.
+    #   한국경마 아니고(위에서 이미 처리), 종목이 미지정/boat/bike 로 온 경우만 정정(정상 cycle·horse 는 그대로).
+    try:
+        if _KEIRIN_ONLY_RE.search(str(rk)) and not _KRA_TRACK_RE.search(str(rk)):
+            if sport in (None, "boat", "bike") or category in (None, "boat", "bike"):
+                if sport != "cycle":
+                    print("[종목 정정] %s: 경륜 전용 지명 → sport=cycle (기존 sport=%s·cat=%s)" % (rk, sport, category))
+                sport, category = "cycle", "cycle"
+    except Exception as _ce:
+        print("[종목 정정·경륜] 실패(무시):", _ce)
     # [보완2] betType 직접 대조(가장 확실한 1차 관문) → 뒤바뀐 종류는 여기서 즉시 거부.
     q = _bettype_guard("quinella", q, "복승")
     x = _bettype_guard("exacta", x, "쌍승")
@@ -13410,6 +13426,8 @@ def _rec_combos_from_analysis_log(rk):
         return []
 
     def _parse(s):
+        if isinstance(s, (list, tuple)):                       # corePicks combo 는 리스트([3,4]) 형식
+            return sorted(int(x) for x in s if str(x).strip().lstrip("-").isdigit())
         return sorted(int(x) for x in re.split(r"[+\-]", str(s or "")) if str(x).strip().isdigit())
     out, seen = [], set()
 
@@ -13419,6 +13437,14 @@ def _rec_combos_from_analysis_log(rk):
             if key not in seen:
                 seen.add(key)
                 out.append({"kind": kind, "combo": combo})
+    # [최종 추천 우선] corePicks.finalQuinellas/finalTrifectas 는 recommendation_history 보다 최신·정확
+    #   (배당 안정 후 확정된 복승메인·삼복승). recommendation_history 가 초기 추천(4+5)에서 멈춰도 이걸로 정확 판정.
+    #   ⚠ 세이부엔 3경주 — rec_history 마지막=4+5(초기)인데 corePicks 최종=3+4·3+4+6(적중)이라 미적중 오판되던 문제.
+    cp = doc.get("corePicks") or {}
+    for _q in (cp.get("finalQuinellas") or []):
+        _add("복승", _parse(_q.get("combo")), 2)
+    for _t in (cp.get("finalTrifectas") or []):
+        _add("삼복승", _parse(_t.get("combo")), 3)
     rh = doc.get("recommendation_history") or []
     if rh:
         last = rh[-1]                              # 마지막(가장 확정) 추천
@@ -13550,9 +13576,16 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         rec = _rec_from_history(rk) or rec
     an = _triple_analyze(rk, rec)
 
-    # [적중 판정 버그 수정] 결과 입력 시 재분석 betRecommend가 비면(경주 종료·활성 rec 소실) 저장 추천이력으로 폴백.
-    #   was_hit·복승/삼복승 판정 모두 이 폴백 조합을 사용(라이브 추천이 재분석 공백으로 미적중 오판되던 문제 해결).
-    _bet_for_judge = an.get("betRecommend") or _rec_combos_from_analysis_log(rk)
+    # [적중 판정 버그 수정] 결과 입력 시 재분석 betRecommend + 저장된 라이브 최종추천(corePicks)을 '병합'해 판정.
+    #   ⚠ 재분석 betRecommend(결과입력 시점 재계산)가 라이브 최종추천(corePicks·사용자가 실제 본 것)과 다를 수 있음
+    #     (세이부엔 3경주: 재분석 4+5 vs 라이브 최종 3+4·3+4+6 적중). 둘 다 판정 대상에 넣어 실제 추천 적중을 놓치지 않음.
+    #   기존 폴백(재분석 공백 시 저장이력)도 이 병합에 포함(무삭제·중복 제거).
+    _bet_for_judge = list(an.get("betRecommend") or [])
+    for _lb in _rec_combos_from_analysis_log(rk):
+        if not any(b.get("kind") == _lb.get("kind")
+                   and sorted(int(x) for x in (b.get("combo") or [])) == sorted(int(x) for x in (_lb.get("combo") or []))
+                   for b in _bet_for_judge):
+            _bet_for_judge.append(_lb)
 
     def in3(combo):
         return all(x in top3 for x in combo)
@@ -16699,7 +16732,9 @@ KEIRIN_JO = {"36": "오다와라", "62": "히로시마", "01": "마에바시", "
              "45": "히라쓰카", "48": "가와사키", "56": "기시와다",
              "24": "우쓰노미야",
              # [joCode 업데이트 2026-07-14·라이브 확인] 기시와다 73→56 교정 + 신규 4곳 추가
-             "11": "하코다테", "61": "다마노", "27": "케이오카쿠", "87": "구마모토"}
+             "11": "하코다테", "61": "다마노", "27": "케이오카쿠", "87": "구마모토",
+             # [2026-07-17 추가] 세이부엔(西武園)·야히코(弥彦) — 경륜 전용장(경정장 없음). 세이부엔이 미등록이라 boat 오분석되던 문제 해소.
+             "21": "세이부엔", "22": "야히코"}
 # ⚠ 기시와다=56(岸和田, 라이브 확인). 이전 73은 오매핑이라 교정. 구마모토=87(熊本競輪) 등록 →
 #   sport 유실 시에도 _keirin_jo_from_venue가 cycle 추론 → 복승 개수 종목캡(경륜 9) 정상 적용.
 # 경륜장명 → joCode 역매핑(raceKey에서 joCode 자동 감지용)
