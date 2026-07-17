@@ -2051,16 +2051,26 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-17"
+    },
+    {
+      "race": "부산 3경주 1800M",
+      "horse_no": 1,
+      "recent_avg": 4.7,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-17"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 418,
+      "count": 419,
       "hit": 91
     },
     "전체부진마": {
-      "count": 718,
-      "hit": 198
+      "count": 720,
+      "hit": 199
     },
     "대규모급락": {
       "count": 18,
@@ -2070,8 +2080,8 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 300,
-      "hit": 107
+      "count": 301,
+      "hit": 108
     },
     "급락동반": {
       "count": 85,
