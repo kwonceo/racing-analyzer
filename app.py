@@ -19579,6 +19579,7 @@ def data_status():
 # ───────── KRA 공공데이터: API 키 저장 + 마필 과거기록 조회 ─────────
 KRA_KEY_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_key.txt")
 KRA_HISTORY_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_history.json")
+KRA_GAIT_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_horse_gait.json")   # [한국 각질추론] 말별 추론 각질
 
 
 @app.route("/api/kra/key", methods=["GET", "POST"])
@@ -19852,14 +19853,17 @@ def _gait_of(horse):
     for key in ("gait", "styleType", "runningStyle"):
         v = str(horse.get(key) or "").strip()
         if v:
-            if "자유" in v:
+            # [수정1·경륜 각질 전체 매핑] 자재(양각)=상황가변 → 자유
+            if "자유" in v or "자재" in v or "양각" in v or "両" in v or "自在" in v:
                 return "자유"
-            if "선행" in v or "도주" in v or "선두" in v:
+            # 선행 계열: 선행·도주(逃)·젖히기(捲·まくり·마쿠리)·선두 — 젖히기는 앞에서 치고나가는 선행 계열
+            if any(k in v for k in ("선행", "도주", "선두", "젖히기", "捲", "まくり", "마쿠리", "先行", "逃")):
                 return "선행"
-            if "선입" in v:
-                return "선입"
-            if "추입" in v or "추격" in v or "마크" in v:
+            # 추입 계열: 추입·추격·마크(マ)·차입(差·差し·사시)·追
+            if any(k in v for k in ("추입", "추격", "마크", "マ", "차입", "差", "사시", "追")):
                 return "추입"
+            if "선입" in v or "중간" in v or "중단" in v or "中団" in v:
+                return "선입"
             if v in _GAIT_STYLE_MAP:
                 return _GAIT_STYLE_MAP[v]
             if "평지" in v or "중" in v:
@@ -19867,6 +19871,10 @@ def _gait_of(horse):
     rs = _running_style(horse)                            # pastRaces position 집계 폴백
     if rs:
         return _GAIT_STYLE_MAP.get(rs, "자유")
+    # [수정2·한국 각질추론] styleType/position 없으면 KRA 이력 stOrd 패턴으로 추론(말 이름 기준·신뢰도 60%+만)
+    _inf = _infer_gait_from_history(horse.get("name") or horse.get("hrName"))
+    if _inf and _inf.get("conf", 0) >= 60:
+        return _inf["gait"]
     return "자유"
 
 
@@ -20208,13 +20216,14 @@ def _form_ext_build():
     """KRA 이력 스캔 → {synergy, trainer, postPos} 통계. 표본 하한 적용(궁합2·조교사5·마번5)."""
     hist = _kra_load_history() or {}
     races = hist.get("races") or {}
-    synergy, trainer, postpos = {}, {}, {}
+    synergy, trainer, postpos, gait_rel = {}, {}, {}, {}
     horse_last_date, horse_trainer = {}, {}
     ordered = sorted(races.values(), key=lambda r: str(r.get("date") or ""))
     for r in ordered:
         meet = r.get("meet")
         date = str(r.get("date") or "")
         pl = _kra_race_placings(r)
+        _nfield = len(r.get("horses") or [])                     # [각질추론] 두수(상대위치 계산용)
         if not pl:
             continue
         for h in (r.get("horses") or []):
@@ -20231,6 +20240,12 @@ def _form_ext_build():
             jk = str(h.get("jkName") or "").strip()
             hr = str(h.get("hrName") or "").strip()
             tr = str(h.get("trName") or "").strip()
+            # [각질추론] stOrd(초반 통과순위)/두수 = 상대위치(0~1). 낮으면 앞(선행)·높으면 뒤(추입)
+            if hr and h.get("stOrd") is not None and _nfield > 1:
+                try:
+                    gait_rel.setdefault(hr, []).append(float(h["stOrd"]) / _nfield)
+                except (TypeError, ValueError):
+                    pass
             if jk and hr:                                        # [2] 기수-말 궁합
                 synergy.setdefault(jk + "|" + hr, []).append(rank)
             if tr:                                               # [3] 조교사 전체 + 출전간격버킷
@@ -20270,7 +20285,26 @@ def _form_ext_build():
     for m, v in meet_all.items():
         if v:
             out["postPosBase"][m] = round(sum(1 for p in v if p <= 2) / len(v) * 100, 1)
+    # [각질추론] 말별 stOrd 상대위치 평균 → 각질(선행≤0.35·추입≥0.60·선입) + 일관성 신뢰도. kra_horse_gait.json 저장.
+    out["gait"] = {}
+    for hr, rels in gait_rel.items():
+        if len(rels) < 3:
+            continue
+        avg = sum(rels) / len(rels)
+        var = sum((x - avg) ** 2 for x in rels) / len(rels)
+        conf = max(40, min(95, int(90 - var * 200)))            # 일관성 클수록(분산 작을수록) 신뢰도↑
+        g = "선행" if avg <= 0.35 else ("추입" if avg >= 0.60 else "선입")
+        out["gait"][hr] = {"gait": g, "conf": conf, "n": len(rels)}
+    try:
+        json.dump(out["gait"], open(KRA_GAIT_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+    except Exception as e:
+        print("[한국각질추론] 저장 실패:", e)
     return out
+
+
+def _infer_gait_from_history(horse_name):
+    """[한국 각질 추론] KRA 이력 stOrd(초반위치) 패턴 → 각질+신뢰도. 반환 {gait, conf, n} 또는 None."""
+    return (_form_ext_stats().get("gait") or {}).get(str(horse_name or "").strip())
 
 
 def _form_ext_stats():
@@ -20286,7 +20320,7 @@ def _form_ext_stats():
             _FORM_EXT_SRC_MTIME = mt
         except Exception as e:
             print("[전적확장통계] 빌드 실패:", e)
-            _FORM_EXT_STATS = _FORM_EXT_STATS or {"synergy": {}, "trainer": {}, "postPos": {}, "postPosBase": {}}
+            _FORM_EXT_STATS = _FORM_EXT_STATS or {"synergy": {}, "trainer": {}, "postPos": {}, "postPosBase": {}, "gait": {}}
     return _FORM_EXT_STATS
 
 
