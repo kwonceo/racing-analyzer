@@ -1,0 +1,125 @@
+{
+ "date": "2026-07-18",
+ "results_summary": {
+  "total_races": 35,
+  "hits": 0,
+  "hit_rate": 0.0,
+  "profit": {
+   "net": 0,
+   "settled": 35
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 717,
+  "quality_score": 21,
+  "ai_ready_races": 0,
+  "patterns_tagged": []
+ },
+ "bigdata": {
+  "by_track": {
+   "마쓰사카": {
+    "n": 11,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "세이부엔": {
+    "n": 9,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "도리데": {
+    "n": 7,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "고치": {
+    "n": 4,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "야히코": {
+    "n": 3,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "이와키타이라": {
+    "n": 1,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_field_size": {
+   "미상": {
+    "n": 34,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
+   "중두수(9~12)": {
+    "n": 1,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_time_zone": {
+   "오전": {
+    "n": 35,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_grade": {
+   "미수집": {
+    "n": 35,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_condition": {
+   "미수집": {
+    "n": 35,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "by_weather": {
+   "미수집": {
+    "n": 35,
+    "hits": 0,
+    "hit_rate": 0.0
+   }
+  },
+  "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
+ },
+ "cumulative_pattern_reliability": {
+  "마감급락": {
+   "label": "급락 감지 적중",
+   "hit": 29,
+   "n": 31,
+   "rate": 93.5
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 7,
+   "n": 22,
+   "rate": 31.8
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 29,
+   "n": 69,
+   "rate": 42.0
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 60,
+   "n": 347,
+   "rate": 17.3
+  }
+ },
+ "key_learnings": [],
+ "missed_opportunities": [],
+ "pattern_discoveries": [],
+ "system_improvements": [],
+ "tomorrow_focus": [],
+ "generated_at": "2026-07-18 00:14:52"
+}
