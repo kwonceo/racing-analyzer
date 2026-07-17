@@ -6,7 +6,7 @@
  "date": "2026-07-17",
  "race": "부산 1경주 1200M",
  "analyzed_at": "11:36:49",
- "updated_at": "15:14:59",
+ "updated_at": "15:21:49",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -684,6 +684,35 @@
    "inverseHit": [],
    "confidence": 0,
    "reason": "전적유력마 1번 적중"
+  },
+  "failure": {
+   "type": "전적오판",
+   "label": "유형4 · 전적 오판",
+   "focus": 1,
+   "winner": 1,
+   "missed": [
+    1,
+    2,
+    3
+   ],
+   "reason": "1번은 배당 변화 없이 입상 → 배당은 정상, 전적 판단 실패(이변)",
+   "improvement": "전적 하위라도 최근 컨디션·거리/기수 변경 반영 · 이변 조건 학습 강화",
+   "missed_signal": "배당 신호 없음(전적 이변)",
+   "timeline": [
+    {
+     "mb": null,
+     "odds": 4.0,
+     "pct": null,
+     "time": "15:14:58",
+     "after": false,
+     "src": "단승"
+    }
+   ],
+   "maxDrop": 0,
+   "buriedBy": null,
+   "afterClose": false,
+   "massDrop": false,
+   "winnerSignal": false
   }
  },
  "profit": null,
