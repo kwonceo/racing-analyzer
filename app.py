@@ -1578,7 +1578,11 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
                 "no": no, "name": h.get("name", ""), "jockey": h.get("jockey", ""),
                 "recentPlacings": rp,
                 "baseScore": round(ts or 0, 1), "courseBonus": 0, "jockeyBonus": 0,
-                "totalScore": round(ts or 0, 1), "detail": [], "flags": [], "anomaly": an,
+                # [신규 근거 전달] 저장된 근거 문장(detail)·마체중·거리적성·기수복승률을 그대로 전달 → 패널 표시
+                "totalScore": round(ts or 0, 1), "detail": h.get("detail") or [], "flags": [], "anomaly": an,
+                "bodyWeight": h.get("bodyWeight"), "bodyWeightBonus": h.get("bodyWeightBonus"),
+                "distAptitude": h.get("distAptitude"), "distAptitudeRate": h.get("distAptitudeRate"),
+                "jockeyRate": h.get("jockeyRate"), "jockeyDistRate": h.get("jockeyDistRate"),
                 # [보완1·경륜] 競走得点 절대등급 함께 전달(통합 사분위 grade와 별개)
                 "competScore": h.get("competScore"), "absGrade": h.get("absGrade"),
                 "styleType": h.get("styleType"),
@@ -2958,8 +2962,21 @@ def _jp_jockeys_save():
         print("[일본기수DB] 저장 실패:", e)
 
 
+def _dist_bucket(d):
+    """거리 → 버킷 라벨(경주장·거리별 복승률 키). 짧은/중간/긴 거리 3구간 + 정확거리 병행."""
+    di = _to_int(d)
+    if di is None:
+        return None
+    if di <= 1200:
+        return "S"      # 단거리
+    if di <= 1700:
+        return "M"      # 중거리
+    return "L"          # 장거리
+
+
 def _jp_jockeys_accumulate(details):
-    """oddspark 전적(details={lineageNb: past[]})의 (기수·착순)을 기수별 누적(중복 시그니처 방지·최근 30경주 유지)."""
+    """oddspark 전적(details={lineageNb: past[]})의 (기수·착순)을 기수별 누적(중복 시그니처 방지·최근 30경주 유지).
+    [강화] 전체 복승률 외에 거리버킷(byDist)·경주장(byVenue)별 착순도 함께 누적(각 최근 30·표본 부족 시 전체 폴백)."""
     by = _jp_jockeys_load()
     changed = False
     for past in (details or {}).values():
@@ -2976,9 +2993,26 @@ def _jp_jockeys_accumulate(details):
             rec["placings"].insert(0, pl)
             rec["sigs"] = rec["sigs"][:60]            # 중복방지 시그니처는 여유있게 60개
             rec["placings"] = rec["placings"][:30]    # 복승권율은 최근 30경주 기준
+            # [거리별·경주장별 누적] 같은 sig 중복은 위에서 이미 걸러짐 → 여기선 버킷별로만 추가
+            db = _dist_bucket(pr.get("distance"))
+            if db:
+                lst = rec.setdefault("byDist", {}).setdefault(db, [])
+                lst.insert(0, pl); rec["byDist"][db] = lst[:30]
+            vn = (pr.get("venue") or "").strip()
+            if vn:
+                lst = rec.setdefault("byVenue", {}).setdefault(vn, [])
+                lst.insert(0, pl); rec["byVenue"][vn] = lst[:30]
             changed = True
     if changed:
         _jp_jockeys_save()
+
+
+def _place_rate_of(placings, min_n=5):
+    """착순 리스트 → 복승권율(%)=1~3착 비율. 표본 min_n 미만이면 None(불충분)."""
+    ps = [p for p in (placings or []) if isinstance(p, (int, float)) and p > 0]
+    if len(ps) < min_n:
+        return None
+    return round(sum(1 for p in ps if p <= 3) / len(ps) * 100, 1)
 
 
 def _jp_jockey_place_rate(name):
@@ -2986,10 +3020,39 @@ def _jp_jockey_place_rate(name):
     if not name:
         return None
     rec = _jp_jockeys_load().get(name.strip())
-    ps = (rec or {}).get("placings") or []
-    if len(ps) < 5:
-        return None
-    return round(sum(1 for p in ps if p <= 3) / len(ps) * 100, 1)
+    return _place_rate_of((rec or {}).get("placings"))
+
+
+def _jockey_rate_bonus(ctx):
+    """[기수 복승률 가감점] 복승률 30%+ → 유력 가점 +10 · 10% 이하 → 제거 감점 -10 · 그 외 0.
+    거리버킷 복승률(표본 충분 시)을 우선 판단, 없으면 전체 복승률. 반환 (bonus, detail[list])."""
+    ctx = ctx or {}
+    rate = ctx.get("dist") if ctx.get("dist") is not None else ctx.get("overall")
+    if rate is None:
+        return 0, []
+    src = "거리" if ctx.get("dist") is not None else "전체"
+    if rate >= 30:
+        return 10, [f"기수 복승률 {rate}%({src}) 유력 +10"]
+    if rate <= 10:
+        return -10, [f"기수 복승률 {rate}%({src}) 부진 -10"]
+    return 0, [f"기수 복승률 {rate}%({src})"]
+
+
+def _jp_jockey_rate_ctx(name, cur_dist=None, venue=None):
+    """[강화] 기수 복승률을 거리·경주장 맥락으로 반환. {overall, dist, venue} (%·표본 부족은 None).
+    거리버킷(cur_dist 소속)·해당 경주장 복승률을 전체와 함께 제공 → 추천 근거·가감점에 활용."""
+    if not name:
+        return {"overall": None, "dist": None, "venue": None}
+    rec = _jp_jockeys_load().get(name.strip()) or {}
+    overall = _place_rate_of(rec.get("placings"))
+    dist_rate = None
+    db = _dist_bucket(cur_dist)
+    if db:
+        dist_rate = _place_rate_of((rec.get("byDist") or {}).get(db), min_n=4)
+    venue_rate = None
+    if venue:
+        venue_rate = _place_rate_of((rec.get("byVenue") or {}).get(str(venue).strip()), min_n=4)
+    return {"overall": overall, "dist": dist_rate, "venue": venue_rate}
 
 
 def _placings_list(placings):
@@ -9360,6 +9423,15 @@ def _pub_horse_why(no, an, role):
         if d.get("no") == no and d.get("reason"):
             why.append(str(d["reason"]))
             break
+    # [신규 전적 근거] 마체중·거리적성·기수복승률 → 쉬운 말로(일본경마 form 에서). 재계산 없이 저장값 재사용.
+    fm = next((h for h in (an.get("form") or []) if h.get("no") == no), None)
+    if fm:
+        if fm.get("jockeyRate") is not None and (fm.get("jockeyRate") >= 30 or fm.get("jockeyRate") <= 10):
+            why.append(f"기수 복승률 {fm['jockeyRate']}%" + (" (유력 가점)" if fm["jockeyRate"] >= 30 else " (부진 감점)"))
+        if fm.get("bodyWeight") is not None and fm.get("bodyWeightBonus"):
+            why.append("체중 조정 호조" if fm["bodyWeightBonus"] > 0 else "체중 증가 주의")
+        if fm.get("distAptitude") in ("A", "C"):
+            why.append(f"거리 적성 {fm['distAptitude']}급" + (f"(복승률 {fm['distAptitudeRate']}%)" if fm.get("distAptitudeRate") is not None else ""))
     if role.get(no) == "cut":
         why.append("제거 권장(배당·전적 모두 약함)")
     r = f.get("rep")
@@ -16545,10 +16617,23 @@ def _keiba_last3f_note(past):
     return avg, f"상3F 평균 {avg}초{tag}"
 
 
+def _keiba_starter_store_row(h):
+    """일본경마 전적 저장 행(공용) — totalScore·근거(detail)·신규 지표(마체중·거리적성·기수복승률) 포함.
+    3개 수집 경로(지방 autocollect·지방 API·중앙 JRA)가 동일 스키마로 저장하도록 통일(무삭제·확장만)."""
+    return {"no": h["no"], "name": h.get("name", ""), "jockey": h.get("jockey", ""),
+            "totalScore": h["totalScore"], "recentPlacings": h.get("recentPlacings") or [],
+            "styleType": h.get("styleType"), "grade": h.get("grade"),
+            "detail": h.get("detail") or [], "bodyWeight": h.get("bodyWeight"),
+            "bodyWeightBonus": h.get("bodyWeightBonus"),
+            "distAptitude": h.get("distAptitude"), "distAptitudeRate": h.get("distAptitudeRate"),
+            "jockeyRate": h.get("jockeyRate"), "jockeyDistRate": h.get("jockeyDistRate")}
+
+
 def _keiba_build_form(shutsuba, details):
     """출주표 + 말별 전적 → 통합 전적 점수. base_form_score(착순 가중평균) + 각질/거리변화/상3F 보정.
     STARTERS_STORE 저장·통합등급용 horses[] 반환."""
     cur_dist = shutsuba.get("distance")
+    cur_venue = shutsuba.get("venue")
     horses = []
     for h in shutsuba.get("horses", []):
         past = (details or {}).get(h.get("lineageNb")) or []
@@ -16565,7 +16650,13 @@ def _keiba_build_form(shutsuba, details):
         last3f, l3note = _keiba_last3f_note(past)
         gbonus, gdetail = grade_bonus(None, [pr.get("grade") for pr in past])          # [2번] 등급 경험/하락강자
         debonus, dedetail, dexp = dist_exp_bonus(past, cur_dist)                       # [3번] 당거리 경험
-        total = round(base + sbonus + dbonus + wbonus + gbonus + debonus, 1)
+        # [신규 개선] 마체중 변화 + 거리 적성(복승률) + 기수 복승률(거리·경주장 맥락)
+        bwbonus, bwdetail, bwkg = body_weight_change_bonus(h.get("bodyWeight"), past)   # 마체중(부담중량과 별개)
+        dabonus, dadetail, dagrade, darate = dist_aptitude_bonus(past, cur_dist)        # 거리 적성 A/B/C
+        jkctx = _jp_jockey_rate_ctx(h.get("jockey"), cur_dist, cur_venue)               # 기수 복승률 맥락
+        jkbonus, jkdetail = _jockey_rate_bonus(jkctx)
+        total = round(base + sbonus + dbonus + wbonus + gbonus + debonus
+                      + bwbonus + dabonus + jkbonus, 1)
         horses.append({
             "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "weight": h.get("weight"), "winOdds": h.get("winOdds"), "pop": h.get("pop"),
@@ -16573,8 +16664,14 @@ def _keiba_build_form(shutsuba, details):
             "styleType": style, "styleBonus": sbonus,
             "distanceBonus": dbonus, "weightBonus": wbonus, "last3f": last3f,
             "gradeBonus": gbonus, "distExpBonus": debonus, "distExperienced": dexp,
+            # [신규] 마체중·거리적성·기수복승률 (통합점수 반영 + 근거 표시)
+            "bodyWeight": bwkg, "bodyWeightBonus": bwbonus,
+            "distAptitude": dagrade, "distAptitudeRate": darate, "distAptitudeBonus": dabonus,
+            "jockeyRate": jkctx.get("overall"), "jockeyDistRate": jkctx.get("dist"),
+            "jockeyVenueRate": jkctx.get("venue"), "jockeyBonus": jkbonus,
             "totalScore": total,
-            "detail": sdetail + ddetail + wdetail + gdetail + dedetail + ([l3note] if l3note else []),
+            "detail": (sdetail + ddetail + wdetail + gdetail + dedetail
+                       + bwdetail + dadetail + jkdetail + ([l3note] if l3note else [])),
             "past": past,
         })
     _apply_back_power(horses)                     # [3번] 뒷힘(상3F 상대) 보정 + 거리미경험·뒷힘강점 플래그
@@ -16672,15 +16769,12 @@ def keiba_starters():
     # [live 통합] raceKey 오면 STARTERS_STORE 저장(source=oddspark) → _triple_analyze 통합등급 반영
     linked = None
     if rk and horses:
-        store = [{"no": h["no"], "name": h["name"], "jockey": h.get("jockey", ""),
-                  "totalScore": h["totalScore"], "recentPlacings": h.get("recentPlacings") or [],
-                  "styleType": h.get("styleType"), "grade": h.get("grade")}
-                 for h in horses if h.get("no") is not None]
+        store = [_keiba_starter_store_row(h) for h in horses if h.get("no") is not None]
         sdb = _starters_load()
         sdb[rk] = {"horses": store, "t": time.time(), "source": "oddspark"}
         _starters_save(sdb)
         linked = rk
-        print(f"[지방경마 전적] {rk}: {len(store)}두 oddspark 전적 반영(각질·거리변화·상3F)")
+        print(f"[지방경마 전적] {rk}: {len(store)}두 oddspark 전적 반영(각질·거리변화·상3F·마체중·거리적성·기수복승률)")
     return jsonify({"ok": True, "url": url, "linkedRaceKey": linked,
                     "race": {"venue": shutsuba.get("venue"), "raceNo": shutsuba.get("raceNo"),
                              "distance": shutsuba.get("distance"), "surface": shutsuba.get("surface"),
@@ -16715,10 +16809,7 @@ def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
         except Exception:
             pass
         horses = _keiba_build_form(shutsuba, details)
-        store = [{"no": h["no"], "name": h["name"], "jockey": h.get("jockey", ""),
-                  "totalScore": h["totalScore"], "recentPlacings": h.get("recentPlacings") or [],
-                  "styleType": h.get("styleType"), "grade": h.get("grade")}
-                 for h in horses if h.get("no") is not None]
+        store = [_keiba_starter_store_row(h) for h in horses if h.get("no") is not None]
         if store:
             sdb = _starters_load()
             sdb[rk] = {"horses": store, "t": time.time(), "source": "oddspark"}
@@ -17823,6 +17914,7 @@ def _jra_build_form(shutuba):
     지방경마 _keiba_build_form 과 동일한 채점식(각질 소스만 netkeiba 표기 우선)."""
     cur_dist = shutuba.get("distance")
     cur_grade = shutuba.get("grade")
+    cur_venue = shutuba.get("venue")
     horses = []
     for h in shutuba.get("horses", []):
         past = h.get("past") or []
@@ -17836,14 +17928,25 @@ def _jra_build_form(shutuba):
         last3f, l3note = _keiba_last3f_note(past)
         gbonus, gdetail = grade_bonus(cur_grade, [pr.get("grade") for pr in past])   # [2번] 등급(G1~G3/OP·하락강자)
         debonus, dedetail, dexp = dist_exp_bonus(past, cur_dist)                     # [3번] 당거리 경험
-        total = round(base + sbonus + dbonus + wbonus + gbonus + debonus, 1)
+        # [신규 개선·중앙경마도 동일] 마체중 변화 + 거리 적성 + 기수 복승률
+        bwbonus, bwdetail, bwkg = body_weight_change_bonus(h.get("bodyWeight"), past)
+        dabonus, dadetail, dagrade, darate = dist_aptitude_bonus(past, cur_dist)
+        jkctx = _jp_jockey_rate_ctx(h.get("jockey"), cur_dist, cur_venue)
+        jkbonus, jkdetail = _jockey_rate_bonus(jkctx)
+        total = round(base + sbonus + dbonus + wbonus + gbonus + debonus
+                      + bwbonus + dabonus + jkbonus, 1)
         horses.append({
             "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "weight": h.get("weight"), "recentPlacings": placings[:5], "baseScore": base,
             "styleType": style, "styleBonus": sbonus, "distanceBonus": dbonus, "weightBonus": wbonus,
             "last3f": last3f, "gradeBonus": gbonus, "distExpBonus": debonus, "distExperienced": dexp,
+            "bodyWeight": bwkg, "bodyWeightBonus": bwbonus,
+            "distAptitude": dagrade, "distAptitudeRate": darate, "distAptitudeBonus": dabonus,
+            "jockeyRate": jkctx.get("overall"), "jockeyDistRate": jkctx.get("dist"),
+            "jockeyVenueRate": jkctx.get("venue"), "jockeyBonus": jkbonus,
             "totalScore": total,
-            "detail": sdetail + ddetail + wdetail + gdetail + dedetail + ([l3note] if l3note else []),
+            "detail": (sdetail + ddetail + wdetail + gdetail + dedetail
+                       + bwdetail + dadetail + jkdetail + ([l3note] if l3note else [])),
             "past": past,
         })
     _apply_back_power(horses)                     # [3번] 뒷힘(상3F 상대) + 거리미경험·뒷힘강점 플래그
@@ -17891,10 +17994,7 @@ def jra_starters():
     horses = _jra_build_form(shutuba)
     linked = None
     if rk and horses:
-        store = [{"no": h["no"], "name": h["name"], "jockey": h.get("jockey", ""),
-                  "totalScore": h["totalScore"], "recentPlacings": h.get("recentPlacings") or [],
-                  "styleType": h.get("styleType"), "grade": h.get("grade")}
-                 for h in horses if h.get("no") is not None]
+        store = [_keiba_starter_store_row(h) for h in horses if h.get("no") is not None]
         sdb = _starters_load()
         sdb[rk] = {"horses": store, "t": time.time(), "source": "jra"}
         _starters_save(sdb)
@@ -18299,6 +18399,36 @@ def weight_change_bonus(horse):
     return 5, [f"부담중량 감소({last_w}→{cur}kg)+5"]
 
 
+def _parse_body_weight(bw):
+    """마체중 표기('486(-4)'·'486kg'·486) → 정수 kg. 괄호 안 증감은 무시(절대값만). 실패 None."""
+    if bw is None:
+        return None
+    m = re.search(r"(\d{3})", str(bw))       # 지방경마 마체중은 통상 3자리(300~600kg)
+    return int(m.group(1)) if m else None
+
+
+def body_weight_change_bonus(cur_bw, past):
+    """[마체중 변화·신규] 이번 마체중(cur_bw) vs 직전 경주 마체중.
+    감소 2kg+ → +5(조정 호조·군살 빠짐) · 증가 4kg+ → -5(과체중·컨디션 난조) · 그 외 0.
+    ⚠ 부담중량(핸디캡)과 별개인 '말 체중'. cur_bw 없으면 전적 최근 마체중으로 추세만 참고.
+    반환 (bonus, detail[list], curKg)."""
+    cur = _parse_body_weight(cur_bw)
+    last = None
+    for pr in (past or []):
+        v = _parse_body_weight(pr.get("bodyWeight"))
+        if v is not None:
+            last = v
+            break
+    if cur is None or last is None:
+        return 0, [], cur
+    diff = cur - last
+    if diff <= -2:
+        return 5, [f"마체중 {diff}kg({last}→{cur}) 조정 호조 +5"], cur
+    if diff >= 4:
+        return -5, [f"마체중 +{diff}kg({last}→{cur}) 과체중 -5"], cur
+    return 0, ([f"마체중 {diff:+d}kg({last}→{cur})"] if diff else [f"마체중 유지({cur}kg)"]), cur
+
+
 # ── 3-3c 경마 등급 체계 보정 [2번] ──────────────
 def _norm_grade(g):
     """등급명 정규화: 로마숫자→아라비아, 공백 제거, 대문자. 'GⅢ'/'G III'→'G3'."""
@@ -18386,6 +18516,26 @@ def dist_exp_bonus(past_races, cur_dist):
     if any(d is not None for d in dists):
         return 0, [f"당거리({cd}m) 미경험"], False
     return 0, [], None
+
+
+def dist_aptitude_bonus(past_races, cur_dist, tol=200):
+    """[거리 적성·신규] 이번 경주 거리(±tol m 유사거리) 전적의 복승권율(1~3착 비율)로 적성 등급.
+    적성 A(복승률 40%+) → +10 · 적성 C(복승률 10% 이하) → -5 · 그 외 0. 표본 3경주 미만이면 판단 보류(0).
+    ⚠ dist_exp_bonus(경험 유무)와 별개 — 이건 '그 거리에서 실제로 잘 뛰었나'(성적). 반환 (bonus, detail, grade, rate)."""
+    cd = _to_int(cur_dist)
+    if cd is None:
+        return 0, [], None, None
+    hits = [pr for pr in (past_races or []) if _to_int(pr.get("distance")) is not None
+            and abs(_to_int(pr.get("distance")) - cd) <= tol]
+    placings = [pr.get("placing") for pr in hits if isinstance(pr.get("placing"), (int, float)) and pr["placing"] > 0]
+    if len(placings) < 3:
+        return 0, [], None, None
+    rate = round(sum(1 for p in placings if p <= 3) / len(placings) * 100, 1)
+    if rate >= 40:
+        return 10, [f"{cd}m 적성 A급(복승률 {rate}%·{len(placings)}전) +10"], "A", rate
+    if rate <= 10:
+        return -5, [f"{cd}m 적성 C급(복승률 {rate}%·{len(placings)}전) -5"], "C", rate
+    return 0, [f"{cd}m 적성 B급(복승률 {rate}%·{len(placings)}전)"], "B", rate
 
 
 # ── 3-3e 뒷힘(상승3F) [3번] ──────────────────
