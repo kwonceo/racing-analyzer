@@ -6,100 +6,33 @@
  "date": "2026-07-17",
  "race": "나고야 12경주",
  "analyzed_at": "21:25:48",
- "updated_at": "21:27:49",
+ "updated_at": "23:31:48",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
   "image_file": null,
   "odds_source": "https://asyukk34.qwqwd25.net/money/roulette"
  },
- "odds_timeline": [],
+ "odds_timeline": [
+  {
+   "time": "23:29:47",
+   "minutes_before": null,
+   "quinella": {}
+  },
+  {
+   "time": "23:31:46",
+   "minutes_before": null,
+   "quinella": {}
+  }
+ ],
  "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
-  "signals": [
-   {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "horses": [
-     9,
-     12
-    ],
-    "detail": "9+12 상승 1158% 후 급락 92%",
-    "level": "orange",
-    "hitRate": 70,
-    "hitSample": 90
-   },
-   {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "horses": [
-     9,
-     10
-    ],
-    "detail": "9+10 상승 697% 후 급락 87%",
-    "level": "orange",
-    "hitRate": 70,
-    "hitSample": 90
-   }
-  ],
-  "count": 1,
-  "recommendLevel": "보조",
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
   "dualConverge": false,
-  "types": [
-   8
-  ],
-  "hitRates": {
-   "2": {
-    "type": 2,
-    "label": "역배열 10%+",
-    "fired": 41,
-    "hit": 15,
-    "rate": 37
-   },
-   "1": {
-    "type": 1,
-    "label": "연속하락 3회+",
-    "fired": 5,
-    "hit": 3,
-    "rate": 60
-   },
-   "5": {
-    "type": 5,
-    "label": "복수조합 동시급락",
-    "fired": 34,
-    "hit": 21,
-    "rate": 62
-   },
-   "8": {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "fired": 90,
-    "hit": 63,
-    "rate": 70
-   },
-   "3": {
-    "type": 3,
-    "label": "마감직전 대급락",
-    "fired": 5,
-    "hit": 4,
-    "rate": 80
-   },
-   "4": {
-    "type": 4,
-    "label": "재급락",
-    "fired": 47,
-    "hit": 44,
-    "rate": 94
-   },
-   "6": {
-    "type": 6,
-    "label": "역배열+급락(이중수렴)",
-    "fired": 4,
-    "hit": 0,
-    "rate": 0
-   }
-  }
+  "types": []
  },
  "compression_pattern": {
   "detected": false
@@ -253,9 +186,51 @@
   }
  },
  "final_recommendation": {
-  "budget_allocation": {}
+  "quinella_main": {
+   "combo": "6+9",
+   "odds": null,
+   "reason": "6번(A)·9번(A)"
+  },
+  "trifecta_main": {
+   "combo": "3+6+9",
+   "odds": null,
+   "reason": "3번(B)·6번(A)·9번(A)"
+  },
+  "trifecta_insurance1": {
+   "combo": "2+6+9",
+   "odds": null,
+   "reason": "2번(B)·6번(A)·9번(A)"
+  },
+  "trifecta_insurance2": {
+   "combo": "2+3+6",
+   "odds": null,
+   "reason": "2번(B)·3번(B)·6번(A)"
+  },
+  "budget_allocation": {
+   "quinella_main": "62.1%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
+  }
  },
- "recommendation_history": [],
+ "recommendation_history": [
+  {
+   "time": "23:29:47",
+   "minutes_before": null,
+   "sig": "3-6-9|6+9|None|3+6+9",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    6,
+    9,
+    3
+   ],
+   "summary": "유력마 6·9·3 / 복승 6+9",
+   "quinella_main": "6+9",
+   "quinella_sub": null,
+   "trifecta_main": "3+6+9",
+   "top_signals": []
+  }
+ ],
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
