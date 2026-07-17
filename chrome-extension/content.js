@@ -850,6 +850,8 @@
   function detectSport(raceKey) {
     try {
       const rk = raceKey || '';
+      // [수정1·한국 강제] 한국 경마장 raceKey/URL = 무조건 경마(null) → 경정/경륜 오탐 차단.
+      if (isKoreaByRaceKey(rk) || KRA_TRACK_RE.test(location.href)) return null;
       // [1번·핵심] raceKey에 일본 경마장명이 있으면 무조건 경마 → 경정/경륜 오탐 차단
       if (HORSE_TRACKS.test(rk)) return null;
       const href = location.href, title = (document.title || '');
@@ -874,6 +876,8 @@
   function resolveSport(popupSport, raceKey) {
     try {
       const rk = raceKey || '';
+      // [수정1·한국 강제] 한국 경마장(부산/서울/제주 등) raceKey = 무조건 경마(horse) → 경정/경륜 오탐 완전 차단.
+      if (isKoreaByRaceKey(rk) || (KRA_TRACK_RE.test(location.href))) return 'horse';
       // ① 경마장명 raceKey = 명백한 경마(가장 강한 신호) → 팝업 경륜/경정 정정
       if (HORSE_TRACKS.test(rk)) return 'horse';
       const href = location.href, title = (document.title || '');
@@ -904,10 +908,13 @@
     boat: '일본 경정', cycle: '일본 경륜', bike: '일본 바이크',
   };
   function computeCategory(effSport, isKorea, isCentral) {
+    // [종목 오분석 근본수정·수정1] 한국경마(부산/서울/제주 등)는 무조건 korea 우선.
+    //   기존엔 effSport==='boat'/'cycle' 을 먼저 반환해, asyukk 페이지의 경정/경륜 네비 링크가 종목감지를
+    //   boat 로 켜면 한국 부산 경주가 경정으로 샜다(부산 2경주 6+1 오분석 근본원인). isKorea 를 최우선 판정.
+    if (isKorea) return 'korea';
     if (effSport === 'boat') return 'boat';
     if (effSport === 'cycle') return 'cycle';
     if (effSport === 'bike') return 'bike';
-    if (isKorea) return 'korea';
     return isCentral ? 'japan_central' : 'japan_local';
   }
 

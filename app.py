@@ -1413,6 +1413,22 @@ def results_auto():
     top3 = [x["no"] for x in norm if x["rank"] <= 3]
     final_odds = body.get("finalOdds") or None
 
+    # [수정2·결과 오저장 방어] 한국경마는 확장이 긁은 착순을 KRA API rcTime 실측과 교차검증.
+    #   불일치하면 KRA 결과를 우선(확장 파싱 오류·다른 경주 혼입 차단 — 부산 2경주 3-9-4 오저장 재발 방지).
+    try:
+        if _KRA_TRACK_RE.search(str(race_key)):
+            _meet = _kra_meet_code(_area_num(race_key)[0])
+            _rno = _area_num(race_key)[1]
+            if _meet and _rno:
+                _ymd = time.strftime("%Y%m%d")
+                _ktop3, _kdetail = _kra_extract_result(_meet, _ymd, str(_rno))
+                if _ktop3 and _ktop3 != top3:
+                    print("[결과 교차검증] %s: 확장 %s ≠ KRA %s → KRA 실측 우선" % (race_key, top3, _ktop3))
+                    top3 = _ktop3
+                    norm = [{"rank": i + 1, "no": n, "name": ""} for i, n in enumerate(_ktop3)]
+    except Exception as _ce:
+        print("[결과 교차검증] 실패(무시·확장값 유지):", _ce)
+
     db = _results_load()
     db[race_key] = {"results": norm, "top3": top3, "finalOdds": final_odds,
                     "source": body.get("source") or "extension", "t": time.time()}
@@ -1607,6 +1623,8 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
 OPENING_ODDS = 100.0    # [배당판 미수집 방어] 복승/단승 이 값 이상 = opening/placeholder(실자금 거의 없음)
 OPENING_DROP = -80.0    # opening 배당이 실배당으로 정착할 때의 기계적 급락(신호 아님)
 STALE_ACTIVE_SEC = 1800  # [경주전환 잔존 방어] 활성 3종 배당이 이 시간(30분) 넘게 미갱신 → 끝난 경주로 간주(활성 캐시서 정리)
+# [종목 오분석 근본수정] 한국 경마장명 → sport=horse·category=korea 강제 판정용(확장 KRA_TRACK_RE 와 동일 커버).
+_KRA_TRACK_RE = re.compile(r"(서울|부산경남|부경|부산|제주|과천|렛츠런|한국마사회|경마공원|KRA)")
 
 
 def _is_opening_settle(po, pct):
@@ -1864,6 +1882,24 @@ def _bettype_guard(kind, combos, label):
 def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None):
     """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
     확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
+    # [종목 오분석 근본수정·서버측 강제] raceKey 에 한국 경마장(서울/부산/제주/부경/과천)이 있으면 무조건
+    #   sport=horse·category=korea 로 정정. 확장이 경정/경륜으로 오분류해 보내도 서버가 최종 방어(부산 2경주 오분석 재발 차단).
+    try:
+        if _KRA_TRACK_RE.search(str(rk)):
+            if (sport in (None, "boat", "cycle", "bike")) or (category in (None, "boat", "cycle", "bike")):
+                if sport != "horse" or category != "korea":
+                    print("[종목 정정] %s: 한국경마 raceKey → sport=horse·category=korea (기존 sport=%s·cat=%s)"
+                          % (rk, sport, category))
+                sport, category = "horse", "korea"
+                # [수정3·한국 발주시각→타임스냅샷] 확장이 배당판에서 감지한 발주시각(deadline·ms)을 스케줄 postEpoch(초)로
+                #   반영 → KRA API가 발주시각을 안 줘도 타임 스냅샷(T-7/T-5)이 한국경마에서도 작동(부산 2경주 스냅샷 부재 해결).
+                try:
+                    if deadline:
+                        _korea_schedule_post_epoch(rk, float(deadline) / 1000.0)
+                except Exception:
+                    pass
+    except Exception as _ke:
+        print("[종목 정정] 실패(무시):", _ke)
     # [보완2] betType 직접 대조(가장 확실한 1차 관문) → 뒤바뀐 종류는 여기서 즉시 거부.
     q = _bettype_guard("quinella", q, "복승")
     x = _bettype_guard("exacta", x, "쌍승")
@@ -6960,6 +6996,42 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                             "reason": ("시장 저배당+완화신호" if _r == 0 else "시장 저배당 보완"),
                             "basis": _combo_basis(_cmb),
                             "summary": ("완화신호 유력(메인 보완)" if _r == 0 else "시장 저평가(메인 보완)")})
+
+    # [수정4·유력마 1·2위 조합 우선] 유력마 1위+2위 복승을 메인 최우선으로 편성(부산 2경주 6+1 놓침 교훈).
+    #   6번(1위)+1번(2위)=6+1 을 메인 맨 앞에. 이미 있으면 앞으로 이동만(중복 없음). 단통 조합(≤1.5배)은 제외.
+    #   ⚠ 유력마 top2 는 cp.picks(축2두) 우선, 없으면 confQuinellas/axis. 기존 final_q 는 뒤로 보존(무삭제).
+    _fav12 = []
+    for _p in (cp.get("picks") or []):
+        try:
+            _n = int(_p.get("no"))
+            if _n not in _fav12 and (not vs or _n in vs):
+                _fav12.append(_n)
+        except (TypeError, ValueError):
+            pass
+        if len(_fav12) >= 2:
+            break
+    if len(_fav12) < 2:                                    # picks 부족 시 축(axis)으로 폴백
+        for _n in (cp.get("axis") or []):
+            try:
+                _n = int(_n)
+                if _n not in _fav12 and (not vs or _n in vs):
+                    _fav12.append(_n)
+            except (TypeError, ValueError):
+                pass
+            if len(_fav12) >= 2:
+                break
+    if len(_fav12) >= 2 and curQ:
+        _f12 = tuple(sorted(_fav12[:2]))
+        _f12o = curQ.get(_f12) or curQ.get((_f12[1], _f12[0]))
+        # 단통(≤1.5배) 아니고 유효 조합일 때만 최우선(단통은 dansungPlan 이 별도 처리)
+        if _f12o and not (DANSUNG and _f12o <= DANSUNG_ODDS):
+            _rest = [q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) != _f12]
+            _f12item = next((q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) == _f12), None)
+            if not _f12item:
+                _f12item = {"combo": list(_f12), "odds": _f12o, "stars": 3,
+                            "reason": "유력마 1·2위 조합", "basis": _combo_basis(list(_f12)),
+                            "summary": "유력마 1위+2위 최우선"}
+            final_q = ([_f12item] + _rest)[:max(max_q, 2)]
 
     # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
     _main = None
@@ -20372,6 +20444,36 @@ def _schedule_save(sched):
         os.replace(tmp, SCHEDULE_FILE)
     except Exception as e:
         print("[스케줄] 저장 실패:", e)
+
+
+def _korea_schedule_post_epoch(rk, post_epoch):
+    """[수정3] 한국경마 경주의 발주 epoch(초)를 today_schedule 에 반영 → 타임 스냅샷(T-7/T-5) 작동.
+    확장이 배당판에서 감지한 발주시각을 KRA 스케줄(발주시각 미제공)에 채운다. 트랙 없으면 생성."""
+    try:
+        if not rk or not post_epoch or post_epoch <= 0:
+            return
+        venue, rno = _area_num(rk)
+        if not (venue and rno):
+            return
+        sched = _schedule_load() or {"ymd": time.strftime("%Y%m%d"), "updated": time.time(), "tracks": []}
+        tracks = sched.setdefault("tracks", [])
+        tr = next((t for t in tracks if t.get("venue") == venue and t.get("sport") == "korea"), None)
+        if not tr:
+            tr = {"venue": venue, "sport": "korea", "category": "korea", "races": []}
+            tracks.append(tr)
+        races = tr.setdefault("races", [])
+        rc = next((r for r in races if r.get("raceNo") == rno), None)
+        if not rc:
+            rc = {"raceNo": rno}
+            races.append(rc)
+        # 이미 postEpoch 가 있고 5분 이내 근접하면 갱신 생략(중복쓰기 방지)
+        if rc.get("postEpoch") and abs(rc["postEpoch"] - post_epoch) < 300:
+            return
+        rc["postEpoch"] = post_epoch
+        rc["postTime"] = time.strftime("%H:%M", time.localtime(post_epoch))
+        _schedule_save(sched)
+    except Exception as e:
+        print("[한국 발주시각] 스케줄 반영 실패(무시):", e)
 
 
 def _post_time_epoch(hhmm, ymd):
