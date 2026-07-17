@@ -1,44 +1,44 @@
 {
- "races": 294,
+ "races": 295,
  "byRank": {
   "rank1": {
    "hit": 24,
-   "total": 73,
-   "rate": 32.9
+   "total": 76,
+   "rate": 31.6
   },
   "rank2": {
    "hit": 12,
-   "total": 43,
-   "rate": 27.9
+   "total": 46,
+   "rate": 26.1
   },
   "rank3": {
    "hit": 6,
-   "total": 28,
-   "rate": 21.4
+   "total": 31,
+   "rate": 19.4
   }
  },
  "bySignal": {
   "🔄 크로스역배열 크로스역배열": {
    "hit": 34,
-   "total": 104,
-   "rate": 32.7,
+   "total": 105,
+   "rate": 32.4,
    "weightReady": true
   },
   "역배열": {
    "hit": 8,
-   "total": 24,
-   "rate": 33.3,
+   "total": 26,
+   "rate": 30.8,
    "weightReady": false
   },
   "초기급락 보존": {
    "hit": 0,
-   "total": 11,
+   "total": 14,
    "rate": 0.0,
    "weightReady": false
   },
   "급락": {
    "hit": 0,
-   "total": 3,
+   "total": 6,
    "rate": 0.0,
    "weightReady": false
   },
@@ -58,14 +58,14 @@
   },
   "15~30": {
    "hit": 5,
-   "total": 24,
-   "rate": 20.8,
+   "total": 26,
+   "rate": 19.2,
    "weightReady": false
   },
   "30~50": {
    "hit": 2,
-   "total": 11,
-   "rate": 18.2,
+   "total": 15,
+   "rate": 13.3,
    "weightReady": false
   },
   "100+": {
@@ -78,8 +78,8 @@
  "bySport": {
   "keiba": {
    "hit": 42,
-   "total": 144,
-   "rate": 29.2,
+   "total": 153,
+   "rate": 27.5,
    "weightReady": true
   }
  },
@@ -93,5 +93,5 @@
   "darkHit": 0,
   "winnerSignals": {}
  },
- "updated_at": "2026-07-17 16:54:17"
+ "updated_at": "2026-07-17 18:37:59"
 }

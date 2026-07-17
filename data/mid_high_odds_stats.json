@@ -1,6 +1,6 @@
 {
-  "count": 255,
-  "placed": 47,
+  "count": 258,
+  "placed": 48,
   "cases": [
     {
       "race": "카나자와 8경주",
@@ -2900,13 +2900,46 @@
       ],
       "placed": false,
       "won": false
+    },
+    {
+      "race": "부산 8경주 1200M",
+      "date": "2026-07-17",
+      "no": 5,
+      "odds": 18.3,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "부산 8경주 1200M",
+      "date": "2026-07-17",
+      "no": 1,
+      "odds": 18.9,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": true,
+      "won": false
+    },
+    {
+      "race": "부산 8경주 1200M",
+      "date": "2026-07-17",
+      "no": 11,
+      "odds": 24.1,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
     }
   ],
   "by_signal": {
     "전적A/B": {
-      "count": 109,
-      "placed": 22,
-      "rate": 20.2
+      "count": 112,
+      "placed": 23,
+      "rate": 20.5
     },
     "급락": {
       "count": 57,
@@ -2929,6 +2962,6 @@
       "rate": 20.0
     }
   },
-  "rate": 18.4,
+  "rate": 18.6,
   "note": "중고배당 유력마(복승10배+&강한신호) 실제 입상 자동 집계. 표본 적으면 참고만(50+ 유의)."
 }

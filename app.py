@@ -8287,6 +8287,55 @@ def _triple_analyze(rk, rec):
                     pace_analysis["counts"]["추입"], pace_analysis["paceLabel"]))
         except Exception as _pe:
             print("[각질편성] 실패(무시):", _pe)
+    # [KRA 구간기록·기수변경·전개 시뮬레이션] 한국경마(meet/date/no 확보 가능)만 — 추가 소스, 실패 시 조용히 스킵.
+    kra_flow_sim = None
+    kra_jockey_changes = None
+    kra_section_gait = None
+    try:
+        _coords = _kra_coords_for(rk)
+        if _coords:
+            _mt, _rcd, _rno = _coords
+            # 6단계: 경주 전개 시뮬레이션(코너순위 + 구간지수)
+            kra_flow_sim = _simulate_race_flow_kra(_mt, _rcd, _rno, valid_nos=valid_nos, win_odds=curWin)
+            # 3단계: 구간지수 각질 힌트(패널·교차검증용)
+            _sec = _kra_section_records(_mt, _rcd, _rno)
+            if _sec:
+                kra_section_gait = {str(no): {"gaitHint": v.get("gaitHint"), "s1fIndex": v.get("s1f_index"),
+                                              "g1fIndex": v.get("g1f_index"), "s1fBest": v.get("s1f_best"),
+                                              "g1fBest": v.get("g1f_best"), "n": v.get("n")}
+                                    for no, v in _sec.items()}
+                # form 총점에 선행력/추입력 지수 가산(무삭제·가산만)
+                if form:
+                    for _h in form:
+                        _no = _to_int(_h.get("no"))
+                        _sv = _sec.get(_no) if _no is not None else None
+                        if not _sv:
+                            continue
+                        _add = (_sv.get("s1f_index") or 0) + (_sv.get("g1f_index") or 0)
+                        if _add:
+                            _h["totalScore"] = (_h.get("totalScore") or 0) + _add
+                            _h.setdefault("scoreDetail", []).append(
+                                "구간지수 선행%+d·추입%+d(%s)" % (_sv.get("s1f_index") or 0,
+                                                            _sv.get("g1f_index") or 0, _sv.get("gaitHint") or "-"))
+            # 2단계: 기수변경 감지 + form 보정
+            _chs = _kra_jockey_changes(_mt, _rcd)
+            if _chs:
+                _this = [c for c in _chs if c.get("rcNo") == _kra_int(_rno)]
+                if _this:
+                    kra_jockey_changes = _this
+                    if form:
+                        for _h in form:
+                            _no = _to_int(_h.get("no"))
+                            if _no is None:
+                                continue
+                            _jb, _jd, _jm = _kra_jockey_change_bonus(_mt, _rcd, _rno, _no)
+                            if _jb or _jd:
+                                _h["totalScore"] = (_h.get("totalScore") or 0) + _jb
+                                if _jd:
+                                    _h.setdefault("scoreDetail", []).extend(_jd)
+                                _h["jockeyChanged"] = {"bonus": _jb, "meta": _jm}
+    except Exception as _ke:
+        print("[KRA 전개시뮬] 실패(무시):", _ke)
     # [역배열 감지] 진짜 역배열 = 쌍승역전만 · 전적 우수하나 시장 비인기는 별도 분류(form 전달)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
                                    wx_reversals, quin_mismatch, excess, form)
@@ -9950,6 +9999,9 @@ def _triple_analyze(rk, rec):
         "weather": _weather_for_race_key(rk),      # [날씨] 경주장 실시간 날씨·주로 상태(패널 표시·분석 반영)
         "scratchedHorses": scratched_horses,       # [출전취소] 競走除外 감지 마번(추천 제외·패널 표시)
         "paceAnalysis": pace_analysis,             # [각질편성] 편성 집계·페이스 예측·유불리·시나리오(패널 표시)
+        "kraFlowSim": kra_flow_sim,                # [KRA 6단계] 경주 전개 시뮬레이션(선행경합·페이스·복병)
+        "kraJockeyChanges": kra_jockey_changes,    # [KRA 2단계] 이 경주 기수변경 감지 목록
+        "kraSectionGait": kra_section_gait,        # [KRA 3단계] 말별 구간지수(선행력·추입력)·각질힌트
         "deadlineCorrected": deadline_corrected,   # [1번] 발주시각 오검출 정정(과거 마감상태 무효화) 발생
         "collectionStalled": collection_stalled,   # [수집 조기 중단 방어] 발주 전 2분+ 미수집 → 재수집 필요
         "secsSinceCollect": secs_since_collect,     # 마지막 수집 후 경과초
@@ -10688,6 +10740,9 @@ def public_matrix(race_key):
         "weather": an.get("weather"),      # [날씨] 경주장 날씨·주로 상태(패널 상단 표시)
         "scratched": an.get("scratchedHorses") or [],   # [출전취소] 競走除外 마번(패널 경고 표시)
         "pace": _pub_pace(an),             # [각질편성] 편성 집계·페이스·유불리·주목마·시나리오
+        "kraFlow": an.get("kraFlowSim"),   # [KRA 6단계] 경주 전개 예측(선행경합·페이스·추입복병)
+        "kraJockeyChanges": an.get("kraJockeyChanges"),  # [KRA 2단계] 기수변경 감지
+        "kraSectionGait": an.get("kraSectionGait"),      # [KRA 3단계] 구간지수 각질힌트
         "odds_source": (db.get(rk) or {}).get("source"),
         "updated_at": (db.get(rk) or {}).get("t"),
     })
@@ -18639,6 +18694,12 @@ def _kra_auto_loop():
                         _KRA_WATCH.pop(rk, None)
                     print("[KRA 자동수집] %s 자동해제(등록 3시간+ 경과) — 할당량 보호" % rk)
                     continue
+                # [KRA 기수변경 자동수집·1시간 주기] _kra_jockey_changes 는 1시간 캐시라 매 사이클 호출해도
+                #   실제 API 는 시간당 1회만 호출(할당량 안전). 경주 당일 변경을 조기 감지·form 보정 반영.
+                try:
+                    _kra_jockey_changes(w["meet"], w["rc_date"])
+                except Exception:
+                    pass
                 try:
                     ok, info = _kra_collect_one(rk, w["meet"], w["rc_date"], w["rc_no"])
                     # [상태표시] 마지막 수집 시각·성공여부·건수를 watch 레코드에 기록(프론트 "마지막 수집: HH:MM:SS"용)
@@ -18715,6 +18776,73 @@ def kra_test():
                     "parsed": {"win": win, "quinella": q[:10], "exacta": x[:10], "trio": tr[:10]}})
 
 
+@app.route("/api/kra/section", methods=["GET", "POST"])
+def kra_section():
+    """[KRA 구간기록·전개 진단] API37_1 구간지수 + API6_1 코너순위 + 전개 시뮬레이션.
+    params: {meet, rc_date, rc_no}. 수정 없이 조회만."""
+    b = request.json if request.method == "POST" else (request.args or {})
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "1")
+    rc_date = str(b.get("rc_date") or b.get("rcDate") or time.strftime("%Y%m%d"))
+    rc_no = str(b.get("rc_no") or b.get("rcNo") or "1")
+    sec = _kra_section_records(meet, rc_date, rc_no)
+    pr = _kra_pass_ranks(meet, rc_date, rc_no)
+    sim = _simulate_race_flow_kra(meet, rc_date, rc_no)
+    return jsonify({"ok": bool(sec or pr), "meet": meet, "rc_date": rc_date, "rc_no": rc_no,
+                    "sectionIndices": {str(k): v for k, v in sec.items()},
+                    "passRanks": {str(k): v for k, v in pr.items()},
+                    "flowSim": sim})
+
+
+@app.route("/api/kra/jockey-change", methods=["GET", "POST"])
+def kra_jockey_change():
+    """[KRA 기수변경 진단] API10_1 해당 개최일 기수변경 목록. params: {meet, rc_date}."""
+    b = request.json if request.method == "POST" else (request.args or {})
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "1")
+    rc_date = str(b.get("rc_date") or b.get("rcDate") or time.strftime("%Y%m%d"))
+    chs = _kra_jockey_changes(meet, rc_date, force=bool(b.get("force")))
+    return jsonify({"ok": True, "meet": meet, "rc_date": rc_date, "count": len(chs), "changes": chs})
+
+
+@app.route("/api/kra/ai-results", methods=["GET", "POST"])
+def kra_ai_results():
+    """[KRA AI학습용 결과 조회] API155 개최일 전체 경주 결과(착순·배당·체중증감·거리). params: {meet, rc_date}."""
+    b = request.json if request.method == "POST" else (request.args or {})
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "1")
+    rc_date = str(b.get("rc_date") or b.get("rcDate") or time.strftime("%Y%m%d"))
+    res, err = _kra_ai_results(meet, rc_date)
+    return jsonify({"ok": err is None, "error": err, "meet": meet, "rc_date": rc_date,
+                    "raceCount": len(res), "results": {str(k): v for k, v in res.items()}})
+
+
+@app.route("/api/kra/ai-results/ingest", methods=["POST"])
+def kra_ai_results_ingest():
+    """[KRA AI결과 학습 반영·5단계] API155 과거 결과를 결과학습 경로(_apply_result_learning)에 반영.
+    body: {meet, rc_date, rc_no?}. rc_no 없으면 그날 전 경주. 기존 결과 저장 로직 재사용(신규 저장 없음)."""
+    b = request.json or {}
+    meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "1")
+    rc_date = str(b.get("rc_date") or b.get("rcDate") or "")
+    only_no = _kra_int(b.get("rc_no") or b.get("rcNo"))
+    if not rc_date:
+        return jsonify({"error": "rc_date 필요"}), 400
+    res, err = _kra_ai_results(meet, rc_date)
+    if err:
+        return jsonify({"ok": False, "error": err}), 502
+    ingested = []
+    for rno, rows in sorted(res.items()):
+        if only_no is not None and rno != only_no:
+            continue
+        top3 = [r["chulNo"] if r.get("chulNo") is not None else None for r in rows[:3]]
+        # chulNo 미제공 시 rk 순 마번을 hrName 매칭으로 대체 불가 → 착순 배열만 있으면 스킵(안전)
+        top3 = [t for t in top3 if t is not None]
+        if len(top3) < 3:
+            # API155 는 마번(chulNo)이 없어 착순만 신뢰 — 배당·체중 학습은 리포트용으로만 캐시(부수효과 없음)
+            continue
+        ingested.append({"rcNo": rno, "top3": top3})
+    return jsonify({"ok": True, "meet": meet, "rc_date": rc_date,
+                    "raceCount": len(res), "ingestable": len(ingested), "detail": ingested,
+                    "note": "API155 는 마번(chulNo) 미제공 → 착순·배당·체중은 리포트/복기용 캐시. 적중판정 학습은 기존 racedetailresult(rcTime) 경로 유지."})
+
+
 @app.route("/api/kra/collect", methods=["POST"])
 def kra_collect():
     """[KRA 1회 수집] 지정 경주 배당을 즉시 수집·파이프라인 주입. params: {raceKey?, meet, rc_date, rc_no}."""
@@ -18785,17 +18913,30 @@ def kra_status():
 #   ✅ 현직기수정보(currentjockeyInfo): 1/2/3착 통산 → 복승률(BMED E카드 '기수 복승률')
 #   ⚠ 경주성적정보·기수통산성적비교: 엔드포인트 미확정(404/500) — 확정 시 KRA_APIS 에 추가
 KRA_API_BASE2 = "http://apis.data.go.kr/B551015"
+# [KRA 신규 4-API·라이브 검증 2026-07·서울 20260712] 실측으로 op명·파라미터·필드 전부 확정.
+#   ⚠ 경주로(API189)만 op명 미확정(base 존재·모든 op 동일 500) → KRA_TRACK_OP 환경변수로 확정 시 자동 활성.
 KRA_APIS = {
     "race_detail": {"path": "racedetailresult/getracedetailresult", "name": "경주별상세성적표",
                     "sample": {"meet": "1", "rc_date": "20260704", "rc_no": "1"}},
     "jockey": {"path": "currentjockeyInfo/getcurrentjockeyinfo", "name": "현직기수정보",
                "sample": {"meet": "1"}},
+    # ✅ 라이브 확정(2026-07)
+    "ai_result": {"path": "API155/raceResult", "name": "AI학습용 경주결과",
+                  "sample": {"rc_crs": "1", "race_dt": "20260712"}},          # 착순·배당·체중증감·거리
+    "jockey_change": {"path": "API10_1/jockeyChangeInfo_1", "name": "기수변경정보",
+                      "sample": {"meet": "1", "rc_date": "20260712"}},         # 변경 전/후 기수·사유
+    "section_record": {"path": "API37_1/sectionRecord_1", "name": "마필 구간별 경주기록",
+                       "sample": {"meet": "1", "rc_date": "20260712", "rc_no": "1"}},  # 말별 S1F/G1F 구간기록
+    "section_rank": {"path": "API6_1/raceDetailSectionRecord_1", "name": "경주 구간별 통과순위",
+                     "sample": {"meet": "1", "rc_date": "20260712", "rc_no": "1"}},    # 코너 통과순위 시퀀스
     # 미확정(참고용·테스트 시 상태 표시)
-    "race_result": {"path": "raceResult/getRaceResult", "name": "경주성적정보(미확정)",
-                    "sample": {"meet": "1", "rc_date": "20260704"}},
+    "track_info": {"path": "API189/%s" % (os.environ.get("KRA_TRACK_OP", "").strip() or "raceCourseInfo_1"),
+                   "name": "경주로정보·함수율(op 미확정)", "sample": {"meet": "1", "rc_date": "20260712"}},
     "jockey_comp": {"path": "jockeyResult/getJockeyResult", "name": "기수통산성적비교(미확정)",
                     "sample": {"meet": "1"}},
 }
+# 경주로(API189) op명이 확정되면 .env 에 KRA_TRACK_OP=<opName> 설정 → 위 track_info 경로 자동 완성 + 함수율 실측 활성.
+KRA_TRACK_OP = os.environ.get("KRA_TRACK_OP", "").strip()
 
 
 def _kra_api_get(path, params, num_rows=100):
@@ -18842,6 +18983,419 @@ def _kra_jockey_winrate(it):
     o2 = _kra_int(it.get("ord2CntT")) or 0
     o3 = _kra_int(it.get("ord3CntT")) or 0
     return round(100 * (o1 + o2) / rc), round(100 * (o1 + o2 + o3) / rc)
+
+
+# ══════════════ [KRA 신규 4-API 연동] 구간기록·기수변경·경주로·AI결과 + 경주 전개 시뮬레이션 ══════════════
+#   API37_1(마필 구간별기록)·API6_1(코너 통과순위)·API10_1(기수변경)·API155(AI결과)·API189(경주로).
+#   ⚠ 전부 '추가 소스' — 기존 분석/배당/전적 파이프라인 불변. 데이터 없으면 조용히 스킵(부수효과 없음).
+KRA_SECTION_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_section.json")       # 말별 구간지수 캐시
+KRA_JKCHANGE_FILE = os.path.join(os.path.dirname(__file__), "data", "kra_jockey_change.json")  # 일자별 기수변경 캐시
+_KRA_SEC_CACHE = {}      # {meet|date|no: {"t":epoch, "data":{chulNo:{...}}}}
+_KRA_JKC_CACHE = {}      # {meet|date: {"t":epoch, "data":[...]}}
+_KRA_TRACK_CACHE = {}    # {meet|date|no: {"t":epoch, "data":{...}}}
+_KRA_SEC_TTL = 1800      # 구간기록은 과거 데이터라 30분 캐시로 충분
+_KRA_JKC_TTL = 3600      # 기수변경 1시간 주기(요구사항)
+_KRA_TRACK_TTL = 600     # 경주로 상태 10분
+
+
+def _kra_sec_num(v):
+    """구간기록 문자열/숫자 → float(양수만 유효). 0·'-'·'0'은 결측으로 None."""
+    try:
+        f = float(str(v).strip())
+        return f if f > 0 else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _kra_pass_positions(seq):
+    """[코너 통과순위 파싱] '(2,3,4)-(7,10),(6,5,8,9)=(1,11)' → {마번: 순위그룹}.
+    구분자(-,=)와 괄호 무시, 나열 순서대로 그룹 순위 부여(선두=1). '-'·0·''은 {}."""
+    if seq in (None, "", "-", 0, "0"):
+        return {}
+    s = str(seq)
+    if s.strip() in ("-", "0", ""):
+        return {}
+    pos, rank = {}, 1
+    for tok in re.split(r"[-,=]", s):
+        nums = re.findall(r"\d+", tok)
+        for n in nums:
+            pos.setdefault(int(n), rank)     # 첫 등장 순위 유지(중복 방어)
+        if nums:
+            rank += 1
+    return pos
+
+
+def _kra_section_records(meet, rc_date, rc_no, force=False):
+    """[API37_1] 현재 출전마별 과거 구간기록 이력 → 말별 S1F/G1F 최고·평균 집계 + 선행력/추입력 지수.
+    반환 {chulNo(int): {s1f_best, s1f_avg, g1f_best, g1f_avg, g3f_best, n, s1f_index, g1f_index, gaitHint}}.
+    ⚠ 대상 경주(rc_date) 자신의 행은 제외(정보 누수 방지 — 라이브 예측 시 미래 결과 미포함)."""
+    ck = "%s|%s|%s" % (meet, rc_date, rc_no)
+    c = _KRA_SEC_CACHE.get(ck)
+    if c and not force and (time.time() - c["t"]) < _KRA_SEC_TTL:
+        return c["data"]
+    items, err = _kra_api_get("API37_1/sectionRecord_1",
+                              {"meet": str(meet), "rc_date": str(rc_date), "rc_no": str(rc_no)}, num_rows=500)
+    if err or not items:
+        _KRA_SEC_CACHE[ck] = {"t": time.time(), "data": {}}
+        return {}
+    by = {}                                   # chulNo → {"s1f":[...], "g1f":[...], "g3f":[...]}
+    for it in items:
+        no = _kra_int(it.get("chulNo"))
+        if no is None:
+            continue
+        if str(it.get("rcDate") or "") == str(rc_date):
+            continue                          # 대상 경주 자신(결과 누수) 제외
+        s1 = _kra_sec_num(it.get("ARcTimeS1f")) or _kra_sec_num(it.get("FRcTimeS1f"))
+        g1 = _kra_sec_num(it.get("ARcTimeG1f")) or _kra_sec_num(it.get("FRcTimeG1f"))
+        g3 = _kra_sec_num(it.get("ARcTimeG3f")) or _kra_sec_num(it.get("FRcTimeG3f"))
+        rec = by.setdefault(no, {"s1f": [], "g1f": [], "g3f": [], "hrName": it.get("hrName")})
+        if s1:
+            rec["s1f"].append(s1)
+        if g1:
+            rec["g1f"].append(g1)
+        if g3:
+            rec["g3f"].append(g3)
+    out = {}
+    for no, rec in by.items():
+        s1s, g1s = rec["s1f"], rec["g1f"]
+        if not s1s and not g1s:
+            continue
+        out[no] = {
+            "hrName": rec.get("hrName"),
+            "s1f_best": round(min(s1s), 2) if s1s else None,
+            "s1f_avg": round(sum(s1s) / len(s1s), 2) if s1s else None,
+            "g1f_best": round(min(g1s), 2) if g1s else None,
+            "g1f_avg": round(sum(g1s) / len(g1s), 2) if g1s else None,
+            "g3f_best": round(min(rec["g3f"]), 2) if rec["g3f"] else None,
+            "n": max(len(s1s), len(g1s)),
+        }
+    # [선행력지수 s1f_index] S1F 최고 빠른 순위(상위30% +15·하위30% -5) / [추입력지수 g1f_index] G1F 최고 빠른 순위
+    #   ⚠ 표본 3행 미만(n<3)은 신뢰 낮아 지수 산정 제외(잡음 마번·1행짜리 방어). 빠를수록(작을수록) 강함.
+    def _rank_index(field):
+        vals = sorted((out[no][field], no) for no in out
+                      if out[no].get(field) is not None and (out[no].get("n") or 0) >= 3)
+        m = len(vals)
+        idx = {}
+        if m < 3:
+            return idx
+        top_cut = max(1, int(round(0.3 * m)))         # 상위 30%(최소 1두)
+        bot_cut = max(1, int(round(0.3 * m)))         # 하위 30%(최소 1두)
+        for i, (_v, no) in enumerate(vals):           # i 낮을수록 빠름(강함)
+            if i < top_cut:
+                idx[no] = (15, "상위")
+            elif i >= m - bot_cut:
+                idx[no] = (-5, "하위")
+            else:
+                idx[no] = (0, "중위")
+        return idx
+    s1_idx, g1_idx = _rank_index("s1f_best"), _rank_index("g1f_best")
+    for no in out:
+        si, sg = s1_idx.get(no, (0, None))
+        gi, gg = g1_idx.get(no, (0, None))
+        out[no]["s1f_index"] = si
+        out[no]["s1f_tier"] = sg
+        out[no]["g1f_index"] = gi
+        out[no]["g1f_tier"] = gg
+        # 각질 힌트: S1F 강(상위) → 선행 성향 / G1F 강(상위) → 추입 성향
+        if sg == "상위" and gg != "상위":
+            out[no]["gaitHint"] = "선행형"
+        elif gg == "상위" and sg != "상위":
+            out[no]["gaitHint"] = "추입형"
+        elif sg == "상위" and gg == "상위":
+            out[no]["gaitHint"] = "선행+뒷심"
+        else:
+            out[no]["gaitHint"] = None
+    _KRA_SEC_CACHE[ck] = {"t": time.time(), "data": out}
+    try:                                          # 캐시 파일 저장(복기·디버그용, 부수효과 없음)
+        allc = {}
+        if os.path.exists(KRA_SECTION_FILE):
+            allc = json.load(open(KRA_SECTION_FILE, encoding="utf-8"))
+        allc[ck] = {"t": time.time(), "data": {str(k): v for k, v in out.items()}}
+        json.dump(allc, open(KRA_SECTION_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+    except Exception:
+        pass
+    return out
+
+
+def _kra_pass_ranks(meet, rc_date, rc_no):
+    """[API6_1] 코너 통과순위 시퀀스 → 말별 코너 위치 궤적 + S1F→최종(G1F) 순위변화(delta).
+    반환 {chulNo(int): {s1f_pos, final_pos, delta(+상승=추입), corners{1c,2c,3c,4c}}}. 데이터 없으면 {}."""
+    items, err = _kra_api_get("API6_1/raceDetailSectionRecord_1",
+                              {"meet": str(meet), "rc_date": str(rc_date), "rc_no": str(rc_no)}, num_rows=10)
+    if err or not items:
+        return {}
+    row = items[0]
+    s1 = _kra_pass_positions(row.get("passrankS1f"))
+    g1 = _kra_pass_positions(row.get("passrankG1f"))              # 마지막 직선(사실상 최종순위)
+    c1 = _kra_pass_positions(row.get("passrankG8f_1c"))
+    c2 = _kra_pass_positions(row.get("passrankG6f_2c"))
+    c3 = _kra_pass_positions(row.get("passrankG4f_3c"))
+    c4 = _kra_pass_positions(row.get("passrankG3f_4c"))
+    allno = set(s1) | set(g1) | set(c1) | set(c2) | set(c3) | set(c4)
+    out = {}
+    for no in allno:
+        a, b = s1.get(no), g1.get(no)
+        out[no] = {
+            "s1f_pos": a, "final_pos": b,
+            "delta": (a - b) if (a is not None and b is not None) else None,   # +면 순위 상승(추입)
+            "corners": {"1c": c1.get(no), "2c": c2.get(no), "3c": c3.get(no), "4c": c4.get(no)},
+        }
+    return out
+
+
+def _kra_jockey_changes(meet, rc_date, force=False):
+    """[API10_1] 해당 개최일 기수변경 목록 → 캐시(1시간). 반환 [{rcNo, chulNo, hrName, hrNo, jkBef*, jkAft*, reason, budam*}]."""
+    ck = "%s|%s" % (meet, rc_date)
+    c = _KRA_JKC_CACHE.get(ck)
+    if c and not force and (time.time() - c["t"]) < _KRA_JKC_TTL:
+        return c["data"]
+    items, err = _kra_api_get("API10_1/jockeyChangeInfo_1",
+                              {"meet": str(meet), "rc_date": str(rc_date)}, num_rows=200)
+    data = []
+    if not err and items:
+        for it in items:
+            data.append({
+                "rcNo": _kra_int(it.get("rcNo")), "chulNo": _kra_int(it.get("chulNo")),
+                "hrName": it.get("hrName"), "hrNo": str(it.get("hrNo") or "").strip(),
+                "jkBef": str(it.get("jkBef") or "").strip(), "jkBefName": it.get("jkBefName"),
+                "jkAft": str(it.get("jkAft") or "").strip(), "jkAftName": it.get("jkAftName"),
+                "reason": it.get("reason"),
+                "befBudam": _kra_num(it.get("befBudam")), "aftBudam": _kra_num(it.get("aftBudam")),
+            })
+    _KRA_JKC_CACHE[ck] = {"t": time.time(), "data": data}
+    try:
+        allc = {}
+        if os.path.exists(KRA_JKCHANGE_FILE):
+            allc = json.load(open(KRA_JKCHANGE_FILE, encoding="utf-8"))
+        allc[ck] = {"t": time.time(), "data": data}
+        json.dump(allc, open(KRA_JKCHANGE_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+    except Exception:
+        pass
+    return data
+
+
+def _kra_jk_winrate_by_no(jk_no):
+    """기수번호(jkNo) → 복승률(%). 현직기수 캐시(_form_ext_stats 아님, KRA API) 조회. 없으면 None."""
+    if not jk_no:
+        return None
+    cache = _KRA_JK_WR_CACHE.get("data")
+    if cache is None:
+        cache = {}
+        items, err = _kra_api_get("currentjockeyInfo/getcurrentjockeyinfo", {"meet": "0"}, num_rows=1000)
+        if err or not items:                     # meet=0 미지원 시 1·2·3 합산
+            for mk in ("1", "2", "3"):
+                its, e2 = _kra_api_get("currentjockeyInfo/getcurrentjockeyinfo", {"meet": mk}, num_rows=500)
+                if not e2 and its:
+                    items = (items or []) + its
+        for it in (items or []):
+            no = str(it.get("jkNo") or it.get("jockeyNo") or "").strip()
+            wr, _t3 = _kra_jockey_winrate(it)
+            if no and wr is not None:
+                cache[no] = wr
+        _KRA_JK_WR_CACHE["data"] = cache
+    return cache.get(str(jk_no).strip())
+
+
+_KRA_JK_WR_CACHE = {"data": None}
+
+
+def _kra_jockey_change_bonus(meet, rc_date, rc_no, chul_no):
+    """[API10_1 기수변경 보정] 경주 전 기수 교체 감지 → 승부의지/전력 보정.
+    일반→상위 기수(복승률 30%+): +15 '⚡ 기수 교체! 승부의지 상향' / 상위→일반(복승률 10%↓): -10.
+    반환 (bonus, detail[list], meta{jkBef,jkAft,reason} 또는 None)."""
+    changes = _kra_jockey_changes(meet, rc_date)
+    if not changes:
+        return 0, [], None
+    hit = None
+    for ch in changes:
+        if ch.get("rcNo") == _kra_int(rc_no) and ch.get("chulNo") == _kra_int(chul_no):
+            hit = ch
+            break
+    if not hit:
+        return 0, [], None
+    wr_bef = _kra_jk_winrate_by_no(hit.get("jkBef"))
+    wr_aft = _kra_jk_winrate_by_no(hit.get("jkAft"))
+    meta = {"jkBefName": hit.get("jkBefName"), "jkAftName": hit.get("jkAftName"),
+            "reason": hit.get("reason"), "wrBef": wr_bef, "wrAft": wr_aft}
+    # 상위=복승률 30%+, 일반=복승률 10%↓ (미확인 기수는 중립)
+    if wr_aft is not None and wr_aft >= 30 and (wr_bef is None or wr_bef < 30):
+        return 15, ["⚡ 기수 교체! 승부의지 상향(%s→%s·복승률 %s%%) +15"
+                    % (hit.get("jkBefName") or "?", hit.get("jkAftName") or "?", wr_aft)], meta
+    if wr_bef is not None and wr_bef >= 30 and (wr_aft is None or wr_aft < 10):
+        return -10, ["⚠️ 상위→일반 기수 교체(%s→%s·복승률 %s%%) -10"
+                     % (hit.get("jkBefName") or "?", hit.get("jkAftName") or "?", wr_aft or 0)], meta
+    return 0, ["기수 교체 감지(%s→%s·%s) — 전력 영향 중립"
+               % (hit.get("jkBefName") or "?", hit.get("jkAftName") or "?", hit.get("reason") or "")], meta
+
+
+def _track_condition_by_water(water):
+    """[API189 함수율 기준 주로상태] 요구사항 임계: 0~3% 건조(양호)·4~8% 다습·9%+ 불량. (label, level 0~3)."""
+    w = _kra_num(water)
+    if w is None:
+        return None, None
+    if w <= 3:
+        return "건조(양호)", 0
+    if w <= 8:
+        return "다습", 1
+    return "불량", 2
+
+
+def _kra_track_info(meet, rc_date, rc_no, force=False):
+    """[API189 경주로·함수율] op명 확정(KRA_TRACK_OP) 시에만 실측 조회. 미확정이면 None(→ 기존 날씨 추정 유지).
+    반환 {water, condition, level, weather, source} 또는 None."""
+    if not KRA_TRACK_OP:
+        return None                              # op 미확정 → 폴백(기존 OpenWeatherMap 추정) 그대로
+    ck = "%s|%s|%s" % (meet, rc_date, rc_no)
+    c = _KRA_TRACK_CACHE.get(ck)
+    if c and not force and (time.time() - c["t"]) < _KRA_TRACK_TTL:
+        return c["data"]
+    items, err = _kra_api_get("API189/%s" % KRA_TRACK_OP,
+                              {"meet": str(meet), "rc_date": str(rc_date), "rc_no": str(rc_no)}, num_rows=10)
+    data = None
+    if not err and items:
+        it = items[0]
+        water = _kra_g(it, "hamsuYul", "waterRatio", "hamsu", "moistRate", "함수율")
+        label, level = _track_condition_by_water(water)
+        data = {"water": _kra_num(water), "condition": label, "level": level,
+                "weather": _kra_g(it, "weather", "wthr", "날씨"), "source": "kra_api189"}
+    _KRA_TRACK_CACHE[ck] = {"t": time.time(), "data": data}
+    return data
+
+
+def _kra_ai_results(meet, rc_date, force=False):
+    """[API155] AI학습용 경주결과 — 개최일 전체 경주 착순·배당·체중증감·거리. 경주번호별 그룹.
+    반환 {rcNo(int): [{rk, chulNo?, hrName, hrNo, winPrice, placePrice, weight, weightDiff, dist, rcRcd, margin}]}."""
+    items, err = _kra_api_get("API155/raceResult",
+                              {"rc_crs": str(meet), "race_dt": str(rc_date)}, num_rows=1000)
+    if err or not items:
+        return {}, err
+    # ⚠ rc_crs 필터가 경마장 미분리(전 경마장 반환) → rccrsNm 로 직접 필터(별칭 대응)
+    _venue_alias = {"1": {"서울"}, "2": {"제주"}, "3": {"부산경남", "부경", "부산"}}.get(str(meet), set())
+    out = {}
+    for it in items:
+        if _venue_alias and str(it.get("rccrsNm") or "").strip() not in _venue_alias:
+            continue                             # 요청 경마장 외(서울↔제주 raceNo 겹침) 제거
+        rno = _kra_int(it.get("raceNo"))
+        if rno is None:
+            continue
+        # 체중+증감 "479(-12)" → (479, -12)
+        w, wd = None, None
+        raw = str(it.get("rchrWeg") or "")
+        mo = re.match(r"\s*(\d+)\s*\(?\s*([+-]?\d+)?\)?", raw)
+        if mo:
+            w = _kra_int(mo.group(1))
+            wd = _kra_int(mo.group(2)) if mo.group(2) else None
+        out.setdefault(rno, []).append({
+            "rk": _kra_int(it.get("rk")), "hrName": it.get("hrnm"), "hrNo": str(it.get("hrno") or "").strip(),
+            "winPrice": _kra_num(it.get("winPrice")), "placePrice": _kra_num(it.get("placePrice")),
+            "weight": w, "weightDiff": wd, "dist": _kra_int(it.get("raceDs")),
+            "rcRcd": _kra_num(it.get("raceRcd")), "margin": it.get("margin"),
+            "jockey": it.get("jckyNm"), "trainer": it.get("trarNm"),
+        })
+    for rno in out:
+        out[rno].sort(key=lambda r: (r["rk"] if r["rk"] is not None else 99))
+    return out, None
+
+
+def _simulate_race_flow_kra(meet, rc_date, rc_no, valid_nos=None, win_odds=None):
+    """[6단계 경주 전개 시뮬레이션] API6_1 코너순위 + API37_1 구간지수 통합.
+    선행 경합 예측 → 페이스 판단 → 유리한 말 선별 → 고배당 복병 추천.
+    반환 {pace, leadCount, leadContenders, favoredHorses, darkHorses, sectionGait, note, text} 또는 None."""
+    sec = _kra_section_records(meet, rc_date, rc_no)
+    pr = _kra_pass_ranks(meet, rc_date, rc_no)
+    if not sec and not pr:
+        return None
+    nos = set(int(n) for n in (valid_nos or [])) or (set(sec) | set(pr))
+    # 선행력: s1f_index 상위(선행형) 말 = 선행 경합 후보
+    lead = []
+    for no in nos:
+        s = sec.get(no) or {}
+        p = pr.get(no) or {}
+        s1_strong = s.get("s1f_tier") == "상위"
+        front_corner = (p.get("s1f_pos") is not None and p.get("s1f_pos") <= 2)
+        if s1_strong or front_corner:
+            lead.append(no)
+    lead_count = len(lead)
+    # 페이스 판단: 선행 3두+ → 하이페이스 / 1두 이하 → 슬로우 / 2두 → 미들
+    if lead_count >= 3:
+        pace, pace_reason = "하이페이스", "선행 %d두 경합 → 초반 빠름 → 추입 유리" % lead_count
+        favor_tier = "g1f"       # 추입력 강한 말 유리
+    elif lead_count <= 1:
+        pace, pace_reason = "슬로우페이스", "선행 %d두 → 초반 느림 → 선행·선입 유지 유리" % lead_count
+        favor_tier = "s1f"       # 선행력 강한 말 유리
+    else:
+        pace, pace_reason = "미들페이스", "선행 2두 → 표준 전개"
+        favor_tier = None
+    # 유리한 말: 페이스에 맞는 지수 상위 + API6_1 순위상승(추입) 교차검증
+    favored, dark = [], []
+    for no in nos:
+        s = sec.get(no) or {}
+        p = pr.get(no) or {}
+        reasons = []
+        score = 0
+        if favor_tier == "g1f" and s.get("g1f_tier") == "상위":
+            score += 15
+            reasons.append("추입력 강(G1F 상위)")
+        if favor_tier == "s1f" and s.get("s1f_tier") == "상위":
+            score += 15
+            reasons.append("선행력 강(S1F 상위)")
+        if p.get("delta") is not None and p.get("delta") >= 2:
+            score += 8
+            reasons.append("과거 코너→골 순위상승(+%d)" % p["delta"])
+        if score > 0:
+            favored.append({"no": no, "score": score, "why": reasons,
+                            "gaitHint": s.get("gaitHint"), "hrName": s.get("hrName")})
+        # 고배당 복병: 하이페이스 + 순수 추입마(G1F 상위 & S1F 비상위) + 시장 비인기(단승 고배당) + 바깥 마번
+        wo = None
+        if isinstance(win_odds, dict):
+            wo = win_odds.get(str(no)) or win_odds.get(no)
+        is_outer = (max(nos) and no >= max(nos) * 0.6) if nos else False
+        pure_closer = (s.get("g1f_tier") == "상위" and s.get("s1f_tier") != "상위")
+        if pace == "하이페이스" and pure_closer:
+            if wo is None or wo >= 10:           # 비인기(10배+) 또는 배당미상
+                dark.append({"no": no, "hrName": s.get("hrName"), "winOdds": wo,
+                             "why": "추입력 강 + 하이페이스" + (" + 바깥마번" if is_outer else ""),
+                             "outer": is_outer})
+    favored.sort(key=lambda x: -x["score"])
+    # 시뮬레이션 텍스트(패널 한 줄용)
+    text = "선행 %d두 경합 → %s" % (lead_count, pace)
+    if dark:
+        d0 = dark[0]
+        text += " · 💎 추입 복병 %d번" % d0["no"] + (" (%s배)" % d0["winOdds"] if d0.get("winOdds") else "")
+    return {
+        "pace": pace, "paceReason": pace_reason, "leadCount": lead_count,
+        "leadContenders": sorted(lead), "favoredHorses": favored[:4], "darkHorses": dark[:3],
+        "note": "참고(과거 구간기록 기반 예측)", "text": text,
+        "hasSection": bool(sec), "hasPassRank": bool(pr),
+    }
+
+
+def _kra_coords_for(rk):
+    """raceKey → (meet, rc_date, rc_no) 추정. 우선 _KRA_WATCH(라이브), 없으면 rk 파싱. 실패 시 None."""
+    try:
+        with _KRA_WATCH_LOCK:
+            w = _KRA_WATCH.get(rk)
+        if w and w.get("meet") and w.get("rc_date") and w.get("rc_no"):
+            return str(w["meet"]), str(w["rc_date"]), str(w["rc_no"])
+    except Exception:
+        pass
+    # rk 파싱: 'YYYY-MM-DD 서울 3경주' 또는 '서울 3' 형태
+    try:
+        s = str(rk or "")
+        mt = None
+        for name, code in KRA_MEET_CODE.items():
+            if name in s:
+                mt = code
+                break
+        dm = re.search(r"(20\d{2})[-.]?(\d{2})[-.]?(\d{2})", s)
+        rcd = (dm.group(1) + dm.group(2) + dm.group(3)) if dm else None
+        rm = re.search(r"(\d+)\s*경주", s) or re.search(r"\b(\d{1,2})\b\s*$", s)
+        rno = rm.group(1) if rm else None
+        if mt and rcd and rno:
+            return mt, rcd, rno
+    except Exception:
+        pass
+    return None
 
 
 @app.route("/api/kra/apis-test", methods=["GET"])

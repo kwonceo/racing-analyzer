@@ -250,6 +250,52 @@
     return c;
   }
 
+  // ── [KRA 6단계] 경주 전개 예측 (한국경마 구간기록 기반·없으면 null) ───────────────────
+  function renderKraFlow(d, locked) {
+    var f = d.kraFlow;
+    if (!f || (!f.hasSection && !f.hasPassRank)) return null;
+    var c = card('#eff6ff', '3px solid #2563eb');   // 파랑(전개 예측)
+    c.appendChild(el('div', 'font-size:20px;font-weight:900;color:#1d4ed8;', '🏇 경주 전개 예측'));
+    var body = el('div', '');
+    body.appendChild(el('div', 'font-size:17px;font-weight:900;color:#1e3a8a;margin:4px 0;',
+      '선행 ' + (f.leadCount || 0) + '두 경합 → ' + (f.pace || '')));
+    if (f.paceReason) body.appendChild(el('div', 'font-size:14px;color:' + COLORS.sub + ';margin-bottom:6px;', f.paceReason));
+    if ((f.leadContenders || []).length) {
+      body.appendChild(el('div', 'font-size:14px;color:#1e3a8a;margin:2px 0;',
+        '선행 후보: ' + f.leadContenders.join('·') + '번'));
+    }
+    // 추입 복병(고배당)
+    (f.darkHorses || []).forEach(function (dh) {
+      var row = el('div', 'font-size:18px;font-weight:900;color:#b45309;margin:6px 0 2px;');
+      row.appendChild(el('span', '', '💎 추입 복병: ' + dh.no + '번' + (dh.hrName ? ' ' + dh.hrName : '')));
+      if (dh.winOdds) row.appendChild(el('span', 'font-size:14px;color:' + COLORS.sub + ';', ' (' + dh.winOdds + '배)'));
+      body.appendChild(row);
+      if (dh.why) body.appendChild(el('div', 'font-size:13px;color:#b45309;margin-bottom:4px;', '→ ' + dh.why));
+    });
+    // 유리한 말
+    if ((f.favoredHorses || []).length) {
+      body.appendChild(el('div', 'font-size:14px;font-weight:800;color:#1d4ed8;margin-top:8px;', '전개 유리 말'));
+      (f.favoredHorses || []).forEach(function (h) {
+        body.appendChild(el('div', 'font-size:15px;font-weight:800;color:#1e3a8a;margin:2px 0;',
+          h.no + '번' + (h.hrName ? ' ' + h.hrName : '') + (h.gaitHint ? ' (' + h.gaitHint + ')' : '') +
+          ((h.why || []).length ? ' — ' + h.why.join('·') : '')));
+      });
+    }
+    // 기수변경(있으면)
+    var jc = d.kraJockeyChanges || [];
+    if (jc.length) {
+      body.appendChild(el('div', 'font-size:14px;font-weight:800;color:#dc2626;margin-top:8px;', '⚡ 기수 교체 감지'));
+      jc.forEach(function (ch) {
+        body.appendChild(el('div', 'font-size:14px;color:#dc2626;margin:2px 0;',
+          ch.chulNo + '번 ' + (ch.hrName || '') + ': ' + (ch.jkBefName || '?') + '→' + (ch.jkAftName || '?') +
+          (ch.reason ? ' (' + ch.reason + ')' : '')));
+      });
+    }
+    body.appendChild(el('div', 'font-size:12px;color:' + COLORS.sub + ';margin-top:8px;', '※ 과거 구간기록(S1F 선행력·G1F 추입력) 기반 예측 — 참고용'));
+    c.appendChild(locked ? lockWrap(body, '경주 전개 예측은 프리미엄 전용입니다') : body);
+    return c;
+  }
+
   // ── 카드 3: 복병마 (없으면 null → 카드 숨김) ───────────────────
   function renderDark(d, locked) {
     var list = ((d.recommendation || {}).dark_horse) || [];
@@ -633,6 +679,8 @@
     if (axis) detail.appendChild(axis);        // 🎯 핵심 축 2두 전략
     var pace = renderPace(d, locked);
     if (pace) detail.appendChild(pace);        // 🏇 편성 시나리오(A/B)
+    var kflow = renderKraFlow(d, locked);
+    if (kflow) detail.appendChild(kflow);      // 🏇 경주 전개 예측(KRA 구간기록·복병)
     var dsg = renderDansung(d, locked);
     if (dsg) detail.appendChild(dsg);          // ⚡ 단통 경주
     var dark = renderDark(d, locked);
