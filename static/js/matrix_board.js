@@ -176,6 +176,40 @@
     return c;
   }
 
+  // ── ⚡ 단통 경주 (복승 중심·위험신호) ──────────────────────────
+  //   회원 배팅 80% 복승 → 복승을 맨 위·크게, 삼복승은 작게 하단. 단통말은 탈락 위험으로 표시.
+  function renderDansung(d, locked) {
+    var ds = (d.recommendation || {}).dansung;
+    if (!ds || !(ds.quinellaMain || []).length) return null;
+    var c = card('#fff7ed', '3px solid ' + COLORS.amber);   // 주의색(주황)
+    c.appendChild(el('div', 'font-size:20px;font-weight:900;color:' + COLORS.amberDeep + ';',
+      ds.title || '⚡ 단통 경주'));
+    c.appendChild(el('div', 'font-size:14px;color:' + COLORS.red + ';font-weight:700;margin:2px 0 8px;',
+      '단통말 ' + ds.dansungHorse + '번 (' + (ds.dansungOdds != null ? ds.dansungOdds + '배' : '-') + ') → 탈락 위험 · 복병 집중 모드'));
+    var body = el('div', '');
+    body.appendChild(el('div', 'border-top:2px solid ' + COLORS.amber + '66;padding-top:8px;font-size:15px;font-weight:800;color:' + COLORS.amberDeep + ';', '복승 추천'));
+    // ① 실질 유력, ② 복병 포함 — 크게
+    (ds.quinellaMain || []).forEach(function (q, i) {
+      var row = el('div', 'display:flex;align-items:baseline;gap:8px;margin:5px 0;');
+      row.appendChild(el('span', 'font-size:26px;font-weight:900;color:' + COLORS.amberDeep + ';', (i === 0 ? '①' : (i === 1 ? '②' : '③')) + ' ' + q.text));
+      if (q.label) row.appendChild(el('span', 'font-size:13px;color:' + COLORS.sub + ';', '← ' + q.label));
+      body.appendChild(row);
+    });
+    // 복병 복승 필수(강조)
+    if (ds.darkQuinella) {
+      var dq = el('div', 'margin-top:6px;padding:6px 10px;background:' + COLORS.amberBg + ';border-radius:8px;');
+      dq.appendChild(el('span', 'font-size:20px;font-weight:900;color:' + COLORS.amberDeep + ';', '🐎 복병 복승: ' + ds.darkQuinella.text));
+      body.appendChild(dq);
+    }
+    // 삼복승 보험 — 작게 하단
+    if ((ds.trifectaInsurance || []).length) {
+      body.appendChild(el('div', 'margin-top:10px;border-top:1px dashed ' + COLORS.line + ';padding-top:6px;font-size:13px;color:' + COLORS.sub + ';',
+        '삼복승 보험(참고): ' + ds.trifectaInsurance.join(' · ')));
+    }
+    c.appendChild(locked ? lockWrap(body, '단통 경주 복승 추천은 프리미엄 전용입니다') : body);
+    return c;
+  }
+
   // ── 🐎 복병 조합 (유력1+복병1+복병2) ──────────────────────────
   function renderDarkCombo(d, locked) {
     var dc = (d.recommendation || {}).dark_combo;
@@ -405,6 +439,8 @@
     root.appendChild(renderHeader(d));
     var picks = renderPicks(d, locked);
     if (picks) root.appendChild(picks);
+    var dsg = renderDansung(d, locked);
+    if (dsg) root.appendChild(dsg);            // ⚡ 단통 경주(복승 중심) — 최종추천 바로 아래
     var dark = renderDark(d, locked);
     if (dark) root.appendChild(dark);          // 복병 없으면 카드 자체가 안 붙음(요구사항)
     var dc = renderDarkCombo(d, locked);

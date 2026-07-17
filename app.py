@@ -7015,8 +7015,105 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
             final_t.append({"combo": list(_mk), "odds": _mkt_ins.get("odds"),
                             "reason": _mkt_ins["reason"], "marketInsurance": True})
 
+    # ══════════════ [단통 경주 근본 수정·복승 중심] 단통말 위험신호 처리 ══════════════
+    #   회원 배팅 패턴(복승 80%·삼복승 20%)에 맞춰 복승 중심으로 재편성. 단통말(최저배당 과쏠림 1위)은
+    #   메인 복승에서 제외(삼복승 보험에만)하고, 실질 유력(2·3위)+복병으로 복승 2~3개 + 복병 복승 1개 필수.
+    #   기존 final_q/final_t/special_q 는 폴백으로 보존(무삭제) — DANSUNG 일 때만 dansungPlan 을 별도 부가 +
+    #   final_q 에서 단통말 포함 조합만 제거(비단통 경주는 완전 불변).
+    dansung_plan = None
+    if DANSUNG and curQ:
+        def _qod(a, b):
+            return curQ.get((a, b)) or curQ.get((b, a))
+        # 말별 대표배당(그 말이 낀 최저 복승 조합) → 오름차순 랭킹
+        rep = {}
+        for (_a, _b), _o in curQ.items():
+            try:
+                _a, _b, _o = int(_a), int(_b), float(_o)
+            except Exception:
+                continue
+            if _o <= 0 or (vs and (_a not in vs or _b not in vs)):
+                continue
+            if rep.get(_a) is None or _o < rep[_a]:
+                rep[_a] = _o
+            if rep.get(_b) is None or _o < rep[_b]:
+                rep[_b] = _o
+        ranked = sorted(rep.keys(), key=lambda h: rep[h])
+        if len(ranked) >= 3:
+            dhorse = ranked[0]                                  # 단통말(1위·과쏠림)
+            real_favs = [h for h in ranked[1:] if h != dhorse][:3]   # 실질 유력(2·3·4위)
+            # 복병: darkHorsePicks + BMED특별 조합 말 중 단통말·실질유력 제외 + [복병 집중] 급락8%+/signalScore45+
+            dark_pool = []
+            for d in (cp.get("darkHorsePicks") or []):
+                n = d.get("no")
+                if n is not None:
+                    dark_pool.append(int(n))
+            for c in special_q:
+                for n in (c.get("combo") or []):
+                    dark_pool.append(int(n))
+            darks = []
+            for n in dark_pool:
+                if n == dhorse or n in darks:
+                    continue
+                m = _mh(n)
+                strong = (m.get("drop") is not None and abs(m.get("drop") or 0) >= 8.0) \
+                    or (float(m.get("score") or 0) >= 45) or m.get("smart") or m.get("rev") or m.get("dark")
+                if strong or not meta:
+                    darks.append(n)
+                if len(darks) >= 3:
+                    break
+            if not darks and real_favs:                          # 복병 후보 없으면 4위 이하로 보강
+                darks = [h for h in ranked[3:6] if h != dhorse][:1]
+            f2 = real_favs[0] if real_favs else None
+            f3 = real_favs[1] if len(real_favs) > 1 else None
+            d1 = darks[0] if darks else None
+            d2 = darks[1] if len(darks) > 1 else None
+
+            def _qitem(a, b, label):
+                if a is None or b is None or a == b:
+                    return None
+                combo = sorted([a, b])
+                return {"combo": combo, "odds": _qod(combo[0], combo[1]), "label": label}
+            # 복승 메인 2~3개(단통말 제외) — ①2위+3위 ②2위+복병1 ③3위+복병2(가능 시)
+            q_main = [x for x in [_qitem(f2, f3, "실질 유력(2위+3위)"),
+                                  _qitem(f2, d1, "복병 포함(2위+복병)"),
+                                  _qitem(f3, d2 or d1, "복병 포함(3위+복병)")] if x]
+            # 중복 조합 제거(순서 유지)
+            _seenq, q_main2 = set(), []
+            for x in q_main:
+                k = tuple(x["combo"])
+                if k not in _seenq:
+                    _seenq.add(k); q_main2.append(x)
+            q_main = q_main2[:3]
+            # 복병 복승 1개 필수(단통 탈락 대비) — 복병1+실질유력, 없으면 복병1+복병2
+            dark_q = _qitem(d1, f2, "🐎 복병 복승") or _qitem(d1, d2, "🐎 복병 복승")
+            # 삼복승 보험 2개 — 단통 제외(2위+3위+복병1) + 단통 포함(단통말+2위+3위)
+            tri_ins = []
+            if f2 and f3 and d1:
+                tri_ins.append({"combo": sorted([f2, f3, d1]), "label": "단통 제외(2위+3위+복병)",
+                                "odds": None, "includesDansung": False})
+            if f2 and f3:
+                tri_ins.append({"combo": sorted([dhorse, f2, f3]), "label": "단통 포함(단통말+2위+3위)",
+                                "odds": _qod(dhorse, f2), "includesDansung": True})
+            dansung_plan = {
+                "dansungHorse": dhorse, "dansungOdds": rep.get(dhorse),
+                "realFavorites": real_favs[:2], "darkHorses": darks[:3],
+                "quinellaMain": q_main, "darkQuinella": dark_q, "trifectaInsurance": tri_ins,
+                "title": "⚡ 단통 경주 (%d번 집중)" % dhorse,
+            }
+            # [단통말 메인 제외] final_q 에서 단통말 포함 조합 제거 + 단통 복승 메인을 앞에 편성(중복 방지)
+            _kept = [q for q in final_q if dhorse not in [int(x) for x in (q.get("combo") or [])]]
+            _new_q, _seen2 = [], set()
+            for q in q_main + _kept:
+                k = tuple(sorted(int(x) for x in (q.get("combo") or [])))
+                if len(k) == 2 and k not in _seen2:
+                    _seen2.add(k)
+                    _new_q.append(q if "stars" in q else {"combo": list(k), "odds": q.get("odds"), "stars": 3,
+                                                          "reason": q.get("label") or "단통 실질유력", "basis": _combo_basis(list(k)),
+                                                          "summary": q.get("label") or "단통 복승 재편성"})
+            final_q = _new_q[:max(max_q, 3)]
+
     return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
-            "dansung": DANSUNG, "dansungMinOdds": _min_q}
+            "dansung": DANSUNG, "dansungMinOdds": _min_q, "dansungPlan": dansung_plan}
 
 
 DARK_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_cases.json")
@@ -7176,10 +7273,17 @@ def _dark_log_record(rk, an):
                 doc = json.load(open(p, encoding="utf-8"))
             except Exception:
                 doc = {}
+        # [단통 학습] 단통 경주면 단통말·복승플랜 기록(결과 시점에 1착 여부·복병 적중 판정)
+        _dp = (an.get("corePicks") or {}).get("dansungPlan")
+        dansung_info = None
+        if _dp and _dp.get("dansungHorse") is not None:
+            dansung_info = {"dansungHorse": _dp.get("dansungHorse"), "dansungOdds": _dp.get("dansungOdds"),
+                            "realFavorites": _dp.get("realFavorites") or [], "darkHorses": _dp.get("darkHorses") or []}
         doc.update({
             "race": rk, "date": time.strftime("%Y-%m-%d"),
             "sport": _dark_sport_of(rk, an),
             "dark_horses": ranks,
+            "dansung": dansung_info,
             "result": doc.get("result"), "dark_horse_analysis": doc.get("dark_horse_analysis"),
             "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         })
@@ -7224,6 +7328,16 @@ def _dark_log_apply_result(rk, top3, an, quinella_odds=None):
             if key == "rank3":
                 analysis["rank3_in_result"] = int(r["horse"]) in t3set
         analysis["missed_signal"] = _analyze_missed_dark_horse(rk, t3, an, ranks)
+        # [단통 결과 판정] 단통말 1착 여부·탈락 시 1착말·복병 적중
+        dinfo = doc.get("dansung")
+        if dinfo and dinfo.get("dansungHorse") is not None:
+            dh = int(dinfo["dansungHorse"])
+            won = (len(t3) > 0 and t3[0] == dh)
+            darks = [int(x) for x in (dinfo.get("darkHorses") or [])]
+            analysis["dansung_horse_won"] = won                       # 단통말 1착?
+            analysis["dansung_horse_placed"] = dh in t3set            # 단통말 입상(1~3)?
+            analysis["dansung_winner"] = (t3[0] if not won and t3 else None)   # 탈락 시 실제 1착말
+            analysis["dansung_dark_hit"] = any(x in t3set for x in darks)      # 복병 입상?
         doc["dark_horse_analysis"] = analysis
         doc["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
         os.makedirs(DARK_LOG_DIR, exist_ok=True)
@@ -7277,6 +7391,8 @@ def _dark_stats_recompute():
         by_signal, by_band, by_sport, races = {}, {}, {}, 0
         rank_hit = {"rank1": [0, 0], "rank2": [0, 0], "rank3": [0, 0]}   # [hit, total]
         missed_cnt = 0
+        # [단통 통계] 단통 경주 횟수·단통말 1착·복병 적중·탈락 시 1착말 신호
+        dansung = {"races": 0, "horseWon": 0, "horsePlaced": 0, "darkHit": 0, "winnerSignals": {}}
         for fn in os.listdir(DARK_LOG_DIR):
             if not fn.endswith(".json"):
                 continue
@@ -7290,6 +7406,26 @@ def _dark_stats_recompute():
             races += 1
             if an_.get("missed_signal"):
                 missed_cnt += 1
+            # [단통 집계]
+            if doc.get("dansung"):
+                dansung["races"] += 1
+                if an_.get("dansung_horse_won"):
+                    dansung["horseWon"] += 1
+                if an_.get("dansung_horse_placed"):
+                    dansung["horsePlaced"] += 1
+                if an_.get("dansung_dark_hit"):
+                    dansung["darkHit"] += 1
+                # 탈락 시 1착말이 복병/실질유력 중 무엇이었나(신호 분포)
+                w = an_.get("dansung_winner")
+                if w is not None:
+                    di = doc.get("dansung") or {}
+                    if int(w) in [int(x) for x in (di.get("darkHorses") or [])]:
+                        tag = "복병"
+                    elif int(w) in [int(x) for x in (di.get("realFavorites") or [])]:
+                        tag = "실질유력"
+                    else:
+                        tag = "기타"
+                    dansung["winnerSignals"][tag] = dansung["winnerSignals"].get(tag, 0) + 1
             ranks = doc.get("dark_horses") or {}
             sp = doc.get("sport") or "keiba"
             for key in ("rank1", "rank2", "rank3"):
@@ -7323,6 +7459,14 @@ def _dark_stats_recompute():
                        for k, v in rank_hit.items()},
             "bySignal": _rate(by_signal), "byBand": _rate(by_band), "bySport": _rate(by_sport),
             "missedRaces": missed_cnt,
+            # [단통 통계] 회원 배팅 복승 중심 검증 — 단통말 1착률·복병 적중률·탈락 시 1착말 신호분포
+            "dansung": {
+                "races": dansung["races"],
+                "horseWonRate": round(dansung["horseWon"] / dansung["races"] * 100, 1) if dansung["races"] else 0,
+                "horseWon": dansung["horseWon"], "horsePlaced": dansung["horsePlaced"],
+                "darkHitRate": round(dansung["darkHit"] / dansung["races"] * 100, 1) if dansung["races"] else 0,
+                "darkHit": dansung["darkHit"], "winnerSignals": dansung["winnerSignals"],
+            },
             "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
         os.makedirs(os.path.dirname(DARK_STATS_FILE), exist_ok=True)
@@ -9133,6 +9277,7 @@ def _triple_analyze(rk, rec):
             core_picks["bmedSpecial"] = _fp.get("bmedSpecial") or []   # [BMED 특별 감지] 고배당+강신호 별도 섹션(★★)
             core_picks["dansung"] = bool(_fp.get("dansung"))       # [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
             core_picks["dansungMinOdds"] = _fp.get("dansungMinOdds")   # [단통] 최저복승 배당(경고 표시용)
+            core_picks["dansungPlan"] = _fp.get("dansungPlan")     # [단통 근본수정] 복승 중심 재편성(단통말 제외·복병 복승·삼복승 보험)
             core_picks["quinellaMax"] = _mainmax                   # [표시] 메인 복승 상한(두수별)
             core_picks["raceHorseCount"] = _nh                     # [표시] 출전 두수
             core_picks["chaoticRace"] = bool(chaotic and chaotic.get("detected"))   # [표시] 혼전 여부
@@ -9802,8 +9947,25 @@ def _pub_recommendation(an, role):
                       "quinella": ["+".join(str(x) for x in q["combo"]) + (f" ({q['odds']}배)" if q.get("odds") else "")
                                    for q in dc["quinella"]],
                       "trifecta": ["+".join(str(x) for x in t["combo"]) for t in (dc.get("trifecta") or [])]}
+    # [단통 경주 복승중심 재편성] 단통말 제외·실질유력+복병 복승 + 복병 복승 필수 + 삼복승 보험(참고)
+    dansung = None
+    dp = (an.get("corePicks") or {}).get("dansungPlan")
+    if dp and dp.get("quinellaMain"):
+        def _qtxt(q):
+            c = q.get("combo") or []
+            return "+".join(str(x) for x in c) + (f" ({q['odds']}배)" if q.get("odds") else "")
+        dansung = {
+            "title": dp.get("title"),
+            "dansungHorse": dp.get("dansungHorse"), "dansungOdds": dp.get("dansungOdds"),
+            "realFavorites": dp.get("realFavorites") or [], "darkHorses": dp.get("darkHorses") or [],
+            "quinellaMain": [{"text": _qtxt(q), "label": q.get("label")} for q in (dp.get("quinellaMain") or [])],
+            "darkQuinella": ({"text": _qtxt(dp["darkQuinella"]), "label": dp["darkQuinella"].get("label")}
+                             if dp.get("darkQuinella") else None),
+            "trifectaInsurance": ["+".join(str(x) for x in t.get("combo") or []) for t in (dp.get("trifectaInsurance") or [])],
+        }
     return {"main": main, "trifecta": trifecta, "special": special,
-            "dark_horse": dark, "dark_combo": dark_combo, "reasons": uniq[:6], "locked": locked}
+            "dark_horse": dark, "dark_combo": dark_combo, "dansung": dansung,
+            "reasons": uniq[:6], "locked": locked}
 
 
 def _pub_horse_cards(an, role, nos):
