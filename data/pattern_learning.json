@@ -2069,16 +2069,34 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-07-17"
+    },
+    {
+      "race": "부산 8경주 1200M",
+      "horse_no": 1,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-17"
+    },
+    {
+      "race": "부산 8경주 1200M",
+      "horse_no": 2,
+      "recent_avg": 4.5,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-17"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 422,
-      "hit": 92
+      "count": 429,
+      "hit": 93
     },
     "전체부진마": {
-      "count": 728,
-      "hit": 200
+      "count": 737,
+      "hit": 202
     },
     "대규모급락": {
       "count": 18,
@@ -2088,8 +2106,8 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 306,
-      "hit": 108
+      "count": 308,
+      "hit": 109
     },
     "급락동반": {
       "count": 87,
