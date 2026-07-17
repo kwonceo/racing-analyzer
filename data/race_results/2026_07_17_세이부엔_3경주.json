@@ -1551,10 +1551,10 @@
   "inverse": true
  },
  "result_analysis": {
-  "main_hit": false,
+  "main_hit": true,
   "sub_hit": false,
-  "hit_reason": null,
-  "miss_reason": "추천 조합 미입상",
+  "hit_reason": "적중",
+  "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -1566,10 +1566,10 @@
   "quinella_odds": 4.2,
   "trifecta_odds": null,
   "actual_return": null,
-  "profit": -1000
+  "profit": 3200
  },
- "memo": "복승 3+4·삼복승 3+4+6 적중(경륜정정+병합판정)",
- "saved_at": "2026-07-17 16:48:22",
+ "memo": "복승 3+4·삼복승 3+4+6 적중",
+ "saved_at": "2026-07-17 16:50:21",
  "validation": {
   "ok": true,
   "errors": []

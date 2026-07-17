@@ -557,11 +557,11 @@
   "4th": null,
   "quinella_odds": 4.2,
   "exacta_odds": null,
-  "hit": false,
-  "hit_pattern": null
+  "hit": true,
+  "hit_pattern": "적중"
  },
  "labels": {
-  "quinella_hit": false,
+  "quinella_hit": true,
   "winner": 4,
   "second": 3,
   "odds_range": "중배당"
@@ -576,7 +576,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-17 16:48:22",
+ "saved_at": "2026-07-17 16:50:21",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
