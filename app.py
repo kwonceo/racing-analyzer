@@ -7112,6 +7112,86 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
             final_t.append({"combo": list(_fk), "odds": _form_ins.get("odds"),
                             "reason": _form_ins["reason"], "formInsurance": True})
 
+    # ══════════════ [삼복승 복승메인 정합성·신규] 삼복승은 복승 메인 말을 반드시 포함 ══════════════
+    #   문제: 복승 메인 3+4 인데 삼복승 2+5+6(3·4 없음) → 앞뒤 불일치("쌩뚱맞은 조합").
+    #   [편성] 삼복승 메인 = 복승1위+복승2위+확신도1위 / 보험 = 복승1위+복승2위+복병 (복승메인 2두 앵커·요청1).
+    #   [검증] 모든 삼복승은 복승메인 말 최소 1개 포함 — 0개면 복승1위 주입해 대체(2+5+6 → 3+5+6·요청2).
+    #   [단통 예외] 단통 경주는 단통말 제외 삼복승이 의도된 조합이므로 검증 면제(기존 dansungPlan 존중).
+    #   ⚠ 기존 삼복승(_main·autos·시장유력·전적A 보완) 전부 보존 — 앞에 정합 삼복승 추가 + 무관 조합만 대체.
+    qmain_check = None
+    try:
+        _qm = [int(x) for x in (final_q[0].get("combo") or [])][:2] if final_q else []
+        if len(_qm) == 2 and not DANSUNG:
+            _q1, _q2 = _qm[0], _qm[1]
+            # 대표배당(대체 시 뺄 '가장 약한' 말 판정용)
+            _repx = {}
+            for (_a, _b), _o in (curQ or {}).items():
+                try:
+                    _a, _b, _o = int(_a), int(_b), float(_o)
+                except Exception:
+                    continue
+                if _o <= 0:
+                    continue
+                if _repx.get(_a) is None or _o < _repx[_a]:
+                    _repx[_a] = _o
+                if _repx.get(_b) is None or _o < _repx[_b]:
+                    _repx[_b] = _o
+            # 제3의 말: 확신도1위 → 복병 → 유력마/시장랭크(복승메인 2두 제외)
+            _third3 = []
+            try:
+                _c1 = int(cp.get("confTop1")) if cp.get("confTop1") is not None else None
+            except (TypeError, ValueError):
+                _c1 = None
+            if _c1 is not None and _c1 not in (_q1, _q2) and (not vs or _c1 in vs):
+                _third3.append((_c1, "확신도1위"))
+            for _d in (cp.get("darkHorsePicks") or []):
+                try:
+                    _dn = int(_d.get("no"))
+                except (TypeError, ValueError):
+                    continue
+                if _dn not in (_q1, _q2) and _dn not in [t[0] for t in _third3] and (not vs or _dn in vs):
+                    _third3.append((_dn, "복병"))
+                if len(_third3) >= 2:
+                    break
+            if len(_third3) < 2:                              # 폴백: 유력마 picks·시장랭크로 보충
+                for _n in [int(p.get("no")) for p in (cp.get("picks") or []) if p.get("no") is not None] + _mrank:
+                    if _n not in (_q1, _q2) and _n not in [t[0] for t in _third3] and (not vs or _n in vs):
+                        _third3.append((_n, "유력마"))
+                    if len(_third3) >= 2:
+                        break
+            # [편성·요청1] 삼복승 메인·보험(복승메인 2두 앵커)을 final_t 맨 앞에 우선 배치
+            _anchor_tris = []
+            for _i3, (_t3, _lab3) in enumerate(_third3[:2]):
+                _cc3 = sorted([_q1, _q2, _t3])
+                if _vtri(_cc3):
+                    _anchor_tris.append({"combo": _cc3, "odds": None, "estimated": True,
+                                         "reason": ("삼복승 메인(복승1·2+%s)" if _i3 == 0 else "삼복승 보험(복승1·2+%s)") % _lab3,
+                                         "qMainAnchor": True})
+            # [검증+병합·요청2] 앵커 먼저, 그다음 기존 final_t(복승메인 말 0개는 복승1위 주입 대체)
+            _seen3, _merged, _replaced = set(), [], 0
+            for t in _anchor_tris + final_t:
+                _cc = [int(x) for x in (t.get("combo") or [])]
+                if len(_cc) != 3:
+                    continue
+                if len(set(_cc) & {_q1, _q2}) == 0:            # 복승메인 말 0개 → 복승1위 주입 대체
+                    _worst = max(_cc, key=lambda n: _repx.get(n, 9e9))   # 대표배당 최고(가장 약한) 말 교체
+                    _cc = sorted(set([_q1] + [n for n in _cc if n != _worst]))
+                    if len(_cc) != 3 or not _vtri(_cc):
+                        continue
+                    t = {**t, "combo": _cc, "reason": (t.get("reason") or "삼복승") + " →복승메인 정합", "qMainFixed": True}
+                    _replaced += 1
+                _key = tuple(sorted(_cc))
+                if _key in _seen3:
+                    continue
+                _seen3.add(_key)
+                _merged.append(t)
+            if _merged:
+                final_t = _merged[:5]                          # 앵커2 + 기존보험 여유(과다 방지·기존 개수 보존)
+            qmain_check = {"qMain": [_q1, _q2], "replaced": _replaced,
+                           "allInclude": all(len({int(x) for x in (t.get("combo") or [])} & {_q1, _q2}) >= 1 for t in final_t)}
+    except Exception as _qte:
+        print("[삼복승 복승메인 정합성] 처리 실패(무시):", _qte)
+
     # ══════════════ [축 2마리 전략·신규] 핵심 축 2두 + 연결마 조합 ══════════════
     #   문제: 1순위 말만 축 → 탈락 시 전부 미적중. 해결: 축 2두(축1=signalScore1위+배당최저, 축2=signalScore2위 or 전적A 1위)
     #   복승 ①축1+축2 ②축1+연결1 ③축1+연결2 ④축2+연결1 ⑤축2+연결2 (연결마끼리 복승 제거·복병 복승만 예외).
@@ -7309,7 +7389,7 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
 
     return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
             "dansung": DANSUNG, "dansungMinOdds": _min_q, "dansungPlan": dansung_plan,
-            "axisPlan": axis_plan}
+            "axisPlan": axis_plan, "qMainCheck": qmain_check}
 
 
 DARK_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_cases.json")
@@ -9489,6 +9569,7 @@ def _triple_analyze(rk, rec):
             core_picks["finalQuinellas"] = _fp["quinellas"]
             core_picks["finalTrifectas"] = _fp["trifectas"]
             core_picks["axisPlan"] = _fp.get("axisPlan")           # [축2전략] 핵심 축2두+연결마 복승5조합·삼복승(패널 우선 표시)
+            core_picks["qMainCheck"] = _fp.get("qMainCheck")       # [삼복승 정합성] 복승메인 말 포함 검증 결과(qMain·replaced·allInclude)
             core_picks["bmedSpecial"] = _fp.get("bmedSpecial") or []   # [BMED 특별 감지] 고배당+강신호 별도 섹션(★★)
             core_picks["dansung"] = bool(_fp.get("dansung"))       # [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
             core_picks["dansungMinOdds"] = _fp.get("dansungMinOdds")   # [단통] 최저복승 배당(경고 표시용)
