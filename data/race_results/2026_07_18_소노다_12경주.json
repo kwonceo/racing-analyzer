@@ -44,8 +44,8 @@
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": null,
-  "miss_reason": "추천 조합 미입상",
+  "hit_reason": "적중",
+  "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -57,10 +57,10 @@
   "quinella_odds": null,
   "trifecta_odds": null,
   "actual_return": null,
-  "profit": 0
+  "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-18 07:39:00",
+ "saved_at": "2026-07-18 07:53:01",
  "validation": {
   "ok": true,
   "errors": []

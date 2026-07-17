@@ -1,12 +1,12 @@
 {
  "race_id": "2026_07_17_소노다_8경주",
- "raceKey": "소노다 8경주",
+ "raceKey": "2026-07-17 소노다 8경주",
  "sport": "horse",
  "category": "japan_local",
  "date": "2026-07-17",
  "race": "소노다 8경주",
  "analyzed_at": "08:35:50",
- "updated_at": "18:22:50",
+ "updated_at": "07:52:23",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -127,216 +127,16 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": true,
-  "level": "강력",
-  "band": "4배 이하 2두+",
-  "horses": [
-   1,
-   6
-  ],
-  "axis": 1,
-  "axisGap": 48.4,
-  "reprs": [
-   {
-    "no": 1,
-    "odds": 1.6
-   },
-   {
-    "no": 6,
-    "odds": 3.1
-   },
-   {
-    "no": 3,
-    "odds": 17.1
-   }
-  ],
-  "combo": [
-   1,
-   6
-  ],
-  "withDrop": false,
-  "withReversal": false,
-  "note": "저배당 압축(명확한 축 1번·배당차 48.4%) → 복승 메인 자신있게"
+  "detected": false
  },
  "third_place_hunt": {
-  "active": true,
-  "axis": [
-   1,
-   6
-  ],
-  "mainCombo": [
-   1,
-   6
-  ],
-  "candidates": [
-   {
-    "no": 3,
-    "odds": 17.1,
-    "priority": 3,
-    "reason": "전적 우수(79)",
-    "conf": "중",
-    "icon": "📊",
-    "inBand": true,
-    "dropPct": null
-   },
-   {
-    "no": 8,
-    "odds": 32.4,
-    "priority": 5,
-    "reason": "이상감지말",
-    "conf": "중",
-    "icon": "🚨",
-    "inBand": true,
-    "dropPct": null
-   }
-  ],
-  "trios": [
-   {
-    "combo": [
-     1,
-     3,
-     6
-    ],
-    "cand": 3,
-    "reason": "전적 우수(79)",
-    "conf": "중",
-    "expOddsEst": null
-   },
-   {
-    "combo": [
-     1,
-     6,
-     8
-    ],
-    "cand": 8,
-    "reason": "이상감지말",
-    "conf": "중",
-    "expOddsEst": null
-   }
-  ]
+  "active": false
  },
- "horses": [
-  {
-   "no": 3,
-   "name": "パイラタナー",
-   "jockey": "竹村達（兵庫）",
-   "record_score": 78.8,
-   "record_detail": "최근 2-3-1-2-8",
-   "odds": 17.1,
-   "grade": "A",
-   "grade_reason": "배당 8.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "ペレストリーナ",
-   "jockey": "佐々世（兵庫）",
-   "record_score": 31.2,
-   "record_detail": "최근 6-1-6-4-6",
-   "odds": 35.4,
-   "grade": "B",
-   "grade_reason": "배당 15.4배 · 쌍승 상위 +20(제거 보류) / 단승 30~49배 → 관찰(신호 없으면 제거) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "ワンダーデュエル",
-   "jockey": "小谷哲（兵庫）",
-   "record_score": 52.5,
-   "record_detail": "최근 2-5-3-4-4",
-   "odds": 3.1,
-   "grade": "A",
-   "grade_reason": "배당 2.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 8,
-   "name": "キャバリエクエスト",
-   "jockey": "塩津璃（兵庫）",
-   "record_score": 28.8,
-   "record_detail": "최근 6-5-1-1-2",
-   "odds": 32.4,
-   "grade": "B",
-   "grade_reason": "배당 18.4배 · 쌍승 상위 +20(제거 보류) / 단승 30~49배 → 관찰(신호 없으면 제거) = 120점"
-  },
-  {
-   "no": 1,
-   "name": "ジェイパック",
-   "jockey": "山本咲（兵庫）",
-   "record_score": 62.5,
-   "record_detail": "최근 2-2-8-13-7",
-   "odds": 1.6,
-   "grade": "A",
-   "grade_reason": "배당 2.4배 · 최근평균 6.4착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 2,
-   "name": "リケアコンパンナ",
-   "jockey": "小牧太（兵庫）",
-   "record_score": 3.8,
-   "record_detail": "최근 9-12-12-4-3",
-   "odds": 16.3,
-   "grade": "C",
-   "grade_reason": "배당 11.3배 · 최근평균 8.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 5,
-   "name": "ブルーメサイア",
-   "jockey": "永井孝（兵庫）",
-   "record_score": 0,
-   "record_detail": "최근 18-8-10-6-7",
-   "odds": 8.8,
-   "grade": "C",
-   "grade_reason": "배당 12.5배 · 최근평균 9.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 7,
-   "name": "イービジョンスター",
-   "jockey": "新庄海（兵庫）",
-   "record_score": 13.8,
-   "record_detail": "최근 8-5-3-2-11",
-   "odds": 87.4,
-   "grade": "D",
-   "grade_reason": "배당 36배 · 최근평균 5.8착 -30 / 단승 50~99배 → 제거 권장 = 70점"
-  },
-  {
-   "no": 9,
-   "name": "ベジョータ",
-   "jockey": "廣瀬航（兵庫）",
-   "record_score": 35.0,
-   "record_detail": "최근 9-1-4-7-15",
-   "odds": 70.0,
-   "grade": "C",
-   "grade_reason": "배당 33.8배 · 최근평균 7.2착 -30 / 단승 50~99배 → 제거 권장 = 70점"
-  },
-  {
-   "no": 10,
-   "name": "エイシンシギー",
-   "jockey": "杉浦健（兵庫）",
-   "record_score": 5.0,
-   "record_detail": "최근 7-8-10-6-1",
-   "odds": 356.7,
-   "grade": "D",
-   "grade_reason": "배당 228.5배 · 배당 150배+ -40 / 최근평균 6.4착 -30 / 단승 100배+ → 확실 제거 = 30점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   3,
-   4,
-   6,
-   8,
-   1,
-   2,
-   5
-  ],
-  "eliminated": [
-   7,
-   9,
-   10
-  ],
-  "elimination_reasons": {
-   "7": "배당 36배 · 최근평균 5.8착 -30 / 단승 50~99배 → 제거 권장 = 70점",
-   "9": "배당 33.8배 · 최근평균 7.2착 -30 / 단승 50~99배 → 제거 권장 = 70점",
-   "10": "배당 228.5배 · 배당 150배+ -40 / 최근평균 6.4착 -30 / 단승 100배+ → 확실 제거 = 30점"
-  }
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
  },
  "final_recommendation": {
   "budget_allocation": {}
@@ -452,41 +252,20 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    1,
-    6
-   ],
-   "trio": [
-    1,
-    3,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    1,
-    3
-   ],
-   "trio": [
-    1,
-    3,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    1,
-    6
-   ],
-   "trio": [
-    1,
-    3,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -826,12 +605,8 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 1·6·3 / 복승 1+6",
- "keyHorses": [
-  1,
-  6,
-  3
- ],
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
  "result": null,
  "hit": null,
  "profit": null,

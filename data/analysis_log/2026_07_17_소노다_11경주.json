@@ -1,12 +1,12 @@
 {
  "race_id": "2026_07_17_소노다_11경주",
- "raceKey": "소노다 11경주",
+ "raceKey": "2026-07-17 소노다 11경주",
  "sport": "horse",
  "category": "japan_local",
  "date": "2026-07-17",
  "race": "소노다 11경주",
  "analyzed_at": "19:58:29",
- "updated_at": "20:06:50",
+ "updated_at": "07:52:54",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -76,22 +76,7 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "20:03:57",
-   "type": "배당불일치",
-   "detail": "추천 복승(3+6=18.9배)이 배당판 인기 조합(3+7=4.9배)과 다름",
-   "severity": "⚠️",
-   "reason": "유력마가 배당판 최저(인기)와 동떨어짐 = 초반 배당 미수집/전적 편중 의심. 배당판 인기 조합을 추천에 추가함 — 배당 재확인 권장."
-  },
-  {
-   "time": "20:03:57",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[2·3위 간]: 단승 3번(2위) vs 6번(3위) — 쌍승 6→3(24.0)가 3→6(37.6)보다 낮음 → 상위권 실질순위 역전: 6번 우세 (강한 역배열 0.638)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(6→3) 24.0 / 쌍승(3→6) 37.6 = 0.638 (강한 역배열)"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
   "signals": [],
@@ -106,132 +91,9 @@
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "ローズドゥレッシュ",
-   "jockey": "丸野勝（愛知）",
-   "record_score": 17.5,
-   "record_detail": "최근 5-3-7-3-6",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 17.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "イブシギン",
-   "jockey": "柿原翔（愛知）",
-   "record_score": 25.0,
-   "record_detail": "최근 7-2-5-6-3",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 4.9배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "パルジファル",
-   "jockey": "尾崎章（愛知）",
-   "record_score": 70.0,
-   "record_detail": "최근 1-3-7-1-6",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "キャンディタフト",
-   "jockey": "加藤利（愛知）",
-   "record_score": 38.8,
-   "record_detail": "최근 4-2-4-5-4",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 4.9배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 9,
-   "name": "ピークブルーム",
-   "jockey": "細川智（愛知）",
-   "record_score": 53.8,
-   "record_detail": "최근 1-8-6-5-2",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 7.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "フルオブエナジー",
-   "jockey": "望月洵（愛知）",
-   "record_score": 6.2,
-   "record_detail": "최근 9-6-8-4-1",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 16.3배 · 최근평균 5.6착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 10,
-   "name": "ハクサンフラッシュ",
-   "jockey": "大畑慧（愛知）",
-   "record_score": 40.0,
-   "record_detail": "최근 2-7-10-10-7",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 17.4배 · 최근평균 7.2착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 11,
-   "name": "ゴーゴーゴウト",
-   "jockey": "松本一（笠松）",
-   "record_score": 3.8,
-   "record_detail": "최근 11-9-12-8-2",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 16.2배 · 최근평균 8.4착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 1,
-   "name": "カナアミデスマッチ",
-   "jockey": "塚本征（愛知）",
-   "record_score": 0,
-   "record_detail": "최근 5-9-5-5-11",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 27배 · 최근평균 7.0착 -30 = 70점"
-  },
-  {
-   "no": 5,
-   "name": "ヴィクトリアランド",
-   "jockey": "木之葵（愛知）",
-   "record_score": 8.8,
-   "record_detail": "최근 9-8-6-1-2",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 28.9배 · 최근평균 5.2착 -30 = 70점"
-  },
-  {
-   "no": 8,
-   "name": "ミツカネリブラ",
-   "jockey": "丸山真（愛知）",
-   "record_score": 0,
-   "record_detail": "최근 11-9-10-15-13",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 88.6배 · 배당 80~149 -20 / 최근평균 11.6착 -30 = 50점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   2,
-   3,
-   6,
-   7,
-   9,
-   4,
-   10,
-   11,
-   1,
-   5,
-   8
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
@@ -286,41 +148,20 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    3,
-    6
-   ],
-   "trio": [
-    3,
-    6,
-    9
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    6,
-    9
-   ],
-   "trio": [
-    6,
-    9,
-    10
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    3,
-    6
-   ],
-   "trio": [
-    3,
-    6,
-    9
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -678,12 +519,8 @@
   "chaoticRace": true,
   "formMissing": false
  },
- "summary": "유력마 6·3·9 / 복승 3+6",
- "keyHorses": [
-  6,
-  3,
-  9
- ],
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
  "result": null,
  "hit": null,
  "profit": null,

@@ -1,12 +1,12 @@
 {
  "race_id": "2026_07_17_나고야_5경주",
- "raceKey": "나고야 5경주",
+ "raceKey": "2026-07-17 나고야 5경주",
  "sport": "horse",
  "category": "japan_local",
  "date": "2026-07-17",
  "race": "나고야 5경주",
  "analyzed_at": "16:47:50",
- "updated_at": "17:16:52",
+ "updated_at": "07:52:00",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -369,106 +369,7 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "1+4 복승 64.0→1.4 (2분전 대비 -97.8%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "1+2 복승 280.5→4.2 (2분전 대비 -98.5%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "2+4 복승 287.8→5.2 (2분전 대비 -98.2%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "1+5 복승 83.0→16.4 (2분전 대비 -80.2%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "4+5 복승 129.6→19.9 (2분전 대비 -84.6%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "4+6 복승 135.9→55.5 (2분전 대비 -59.2%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "2+5 복승 1166.4→60.1 (2분전 대비 -94.8%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "1+7 복승 363.3→93.3 (2분전 대비 -74.3%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "1+6 복승 223.8→99.7 (2분전 대비 -55.5%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "4+7 복승 260.7→99.7 (2분전 대비 -61.8%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "2+6 복승 1846.8→231.0 (2분전 대비 -87.5%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "2+7 복승 1055.3→243.8 (2분전 대비 -76.9%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "5+7 복승 671.5→292.6 (2분전 대비 -56.4%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  },
-  {
-   "time": "17:13:41",
-   "type": "마감급락",
-   "detail": "6+7 복승 738.7→487.6 (2분전 대비 -34.0%)",
-   "severity": "🔴",
-   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [
   {
    "time": "16:55:17",
@@ -559,112 +460,14 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "noAxis": true,
-  "level": "강력",
-  "band": "4배 이하 2두+",
-  "reprs": [
-   {
-    "no": 1,
-    "odds": 1.4
-   },
-   {
-    "no": 4,
-    "odds": 1.4
-   },
-   {
-    "no": 2,
-    "odds": 4.2
-   }
-  ],
-  "axisGap": 0.0,
-  "note": "저배당 2두 배당 비슷(축 불명확·차이 0%) → 추천 보류"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 1.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 4.2배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 3,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 54.1배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 1.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 16.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 55.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 93.3배 · 배당 80~149 -20 = 80점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
@@ -692,15 +495,8 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    1,
-    4
-   ],
-   "trio": [
-    1,
-    2,
-    4
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
    "quinella": null,
@@ -711,15 +507,8 @@
    "trio": null
   },
   "final": {
-   "quinella": [
-    1,
-    4
-   ],
-   "trio": [
-    1,
-    2,
-    4
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -1075,12 +864,8 @@
   "chaoticRace": false,
   "formMissing": true
  },
- "summary": "유력마 1·4·2 / 복승 1+4",
- "keyHorses": [
-  1,
-  4,
-  2
- ],
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
  "result": null,
  "hit": null,
  "profit": null,

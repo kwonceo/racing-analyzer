@@ -13,8 +13,48 @@
   "2nd": 2,
   "3rd": 12
  },
- "odds_at_start": {},
- "odds_timeline": [],
+ "odds_at_start": {
+  "quinella": {},
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "07:46:45",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "07:47:45",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "07:48:45",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "07:49:45",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "07:50:48",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "07:52:45",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  }
+ ],
  "anomalies": [],
  "prediction": {
   "candidates": [
@@ -33,10 +73,10 @@
    8,
    12
   ],
-  "recommend_main": null,
+  "recommend_main": "6+9",
   "recommend_sub": null,
   "strategy": null,
-  "signal_quality": null,
+  "signal_quality": "하",
   "confidence": 0,
   "inverse": false
  },
@@ -59,7 +99,7 @@
   "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-18 07:29:52",
+ "saved_at": "2026-07-18 07:53:04",
  "validation": {
   "ok": true,
   "errors": []
