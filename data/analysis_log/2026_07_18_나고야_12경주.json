@@ -5,26 +5,15 @@
  "category": "japan_local",
  "date": "2026-07-18",
  "race": "나고야 12경주",
- "analyzed_at": "01:31:48",
- "updated_at": "01:32:55",
+ "analyzed_at": "06:03:48",
+ "updated_at": "06:16:48",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
   "image_file": null,
   "odds_source": "https://asyukk34.qwqwd25.net/game/result"
  },
- "odds_timeline": [
-  {
-   "time": "01:31:45",
-   "minutes_before": null,
-   "quinella": {}
-  },
-  {
-   "time": "01:32:45",
-   "minutes_before": null,
-   "quinella": {}
-  }
- ],
+ "odds_timeline": [],
  "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
@@ -186,51 +175,9 @@
   }
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "6+9",
-   "odds": null,
-   "reason": "6번(A)·9번(A)"
-  },
-  "trifecta_main": {
-   "combo": "3+6+9",
-   "odds": null,
-   "reason": "3번(B)·6번(A)·9번(A)"
-  },
-  "trifecta_insurance1": {
-   "combo": "2+6+9",
-   "odds": null,
-   "reason": "2번(B)·6번(A)·9번(A)"
-  },
-  "trifecta_insurance2": {
-   "combo": "2+3+6",
-   "odds": null,
-   "reason": "2번(B)·3번(B)·6번(A)"
-  },
-  "budget_allocation": {
-   "quinella_main": "62.1%",
-   "trifecta_main": "14.1%",
-   "trifecta_insurance": "1.9%"
-  }
+  "budget_allocation": {}
  },
- "recommendation_history": [
-  {
-   "time": "01:31:48",
-   "minutes_before": null,
-   "sig": "3-6-9|6+9|None|3+6+9",
-   "anomCount": 0,
-   "sigChanged": true,
-   "keyHorses": [
-    6,
-    9,
-    3
-   ],
-   "summary": "유력마 6·9·3 / 복승 6+9",
-   "quinella_main": "6+9",
-   "quinella_sub": null,
-   "trifecta_main": "3+6+9",
-   "top_signals": []
-  }
- ],
+ "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
@@ -277,49 +224,8 @@
   9,
   3
  ],
- "result": {
-  "1st": 11,
-  "2nd": 2,
-  "3rd": 12
- },
- "hit": {
-  "was_hit": false,
-  "quinella_hit": false,
-  "trifecta_hit": false,
-  "keyhorse_quinella_hit": false,
-  "keyhorse_trifecta_hit": false,
-  "keyhorse_placed": [],
-  "dark_placed": [],
-  "payouts": {
-   "quinella": 0,
-   "trifecta": 0
-  },
-  "anomaly_was_correct": false,
-  "signal_correct": [],
-  "elimination_correct": false,
-  "eliminated": [
-   1,
-   8,
-   12
-  ],
-  "form_pick": 2,
-  "form_pick_hit": true,
-  "pnl": -1000,
-  "stake": 1000,
-  "near_miss": false,
-  "near_miss_horse": null,
-  "pairing_miss": null,
-  "hit_basis": {
-   "formScore": 3.8,
-   "dropAmt": null,
-   "dropScore": 0,
-   "inverse": false,
-   "inverseHorses": [],
-   "inverseHit": [],
-   "confidence": 0,
-   "reason": "전적유력마 2번 적중"
-  }
- },
+ "result": null,
+ "hit": null,
  "profit": null,
  "review": null
 }
