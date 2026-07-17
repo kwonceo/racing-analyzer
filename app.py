@@ -6732,6 +6732,55 @@ def _quinella_target(n_horses, chaotic=False):
     return base
 
 
+def _scenario_plan(cp, curQ, pace_analysis, sig_meta, valid_nos, axis_plan):
+    """[시나리오 조합 자동 생성] 전적·각질·편성·배당 신호 종합 → 2가지 시나리오.
+      ▸ 시나리오A(유력마 축) = axisPlan 재사용(축1+축2·축+연결) 3조합.
+      ▸ 시나리오B(편성 유리) = 페이스 예측 → 유리 각질마(빠른=추입·느린=선행) 중 signalScore 상위 2 → 조합.
+      ▸ 삼복승 = 축1+축2+편성유리1(유력마+편성 유리 복병). 페이스 정보 없으면 None."""
+    if not pace_analysis or not curQ:
+        return None
+    pace = pace_analysis.get("pace")
+    vs = set(int(x) for x in (valid_nos or []))
+    meta = sig_meta or {}
+
+    def _sc(n):
+        return float((meta.get(n) or meta.get(str(n)) or {}).get("score") or 0)
+
+    def _qo(a, b):
+        if a is None or b is None or a == b:
+            return None
+        return curQ.get((min(a, b), max(a, b))) or curQ.get((max(a, b), min(a, b)))
+    # 시나리오 A — 유력마 축(axisPlan 3조합 재사용)
+    scen_a = []
+    for q in ((axis_plan or {}).get("quinellas") or [])[:3]:
+        scen_a.append({"combo": q.get("combo"), "odds": q.get("odds"), "label": q.get("label")})
+    # 시나리오 B — 편성 유리 각질마 중 signalScore 상위 2
+    gl = pace_analysis.get("gaitLists") or {}
+    target = "추입" if pace == "빠른" else ("선행" if pace == "느린" else None)
+    scen_b, focus_nos = [], []
+    if target:
+        cands = [n for n in (gl.get(target) or []) if n and (not vs or n in vs)]
+        cands.sort(key=lambda n: -_sc(n))
+        focus_nos = cands[:2]
+        _a1 = (axis_plan or {}).get("axis1")
+        if len(focus_nos) >= 2 and _qo(*focus_nos[:2]):                    # 추입1+추입2(또는 선행1+선행2)
+            scen_b.append({"combo": sorted(focus_nos[:2]), "odds": _qo(*focus_nos[:2]),
+                           "label": "%s1+%s2" % (target, target)})
+        if focus_nos and _a1 and _a1 != focus_nos[0] and _qo(_a1, focus_nos[0]):   # 축1+편성유리1
+            scen_b.append({"combo": sorted([_a1, focus_nos[0]]), "odds": _qo(_a1, focus_nos[0]),
+                           "label": "축1+%s1" % target})
+    # 삼복승 — 축1+축2+편성유리1
+    tri = None
+    _a1, _a2 = (axis_plan or {}).get("axis1"), (axis_plan or {}).get("axis2")
+    if _a1 and _a2 and focus_nos and len({_a1, _a2, focus_nos[0]}) == 3:
+        tri = {"combo": sorted([_a1, _a2, focus_nos[0]]), "label": "유력마+편성 유리 복병"}
+    if not scen_a and not scen_b:
+        return None
+    return {"pace": pace, "paceLabel": pace_analysis.get("paceLabel"),
+            "counts": pace_analysis.get("counts"), "focusGait": target, "focusNos": focus_nos,
+            "scenarioA": scen_a, "scenarioB": scen_b, "trifecta": tri}
+
+
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                  reversal_quinellas=None, dark_quinellas=None, signal_horses=None, sig_meta=None, sport=None):
     """[추천 구조 개편·종목별 저배당+신호=메인 / 고배당+강신호=BMED특별] 파생 추천을 새 구조로 정리(기존 후보수집·파생필드 무삭제).
@@ -7408,9 +7457,16 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                                                           "summary": q.get("label") or "단통 복승 재편성"})
             final_q = _new_q[:max(max_q, 3)]
 
+    # [시나리오 조합 자동생성] 시나리오A(유력마 축)+B(편성 유리) — 각질 편성 기반(axisPlan·paceAnalysis 종합)
+    scenario_plan = None
+    try:
+        scenario_plan = _scenario_plan(cp, curQ, cp.get("paceAnalysis"), sig_meta, valid_nos, axis_plan)
+    except Exception as _se:
+        print("[시나리오] 생성 실패(무시):", _se)
+
     return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
             "dansung": DANSUNG, "dansungMinOdds": _min_q, "dansungPlan": dansung_plan,
-            "axisPlan": axis_plan, "qMainCheck": qmain_check}
+            "axisPlan": axis_plan, "qMainCheck": qmain_check, "scenarioPlan": scenario_plan}
 
 
 DARK_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_cases.json")
@@ -7436,6 +7492,90 @@ def _dark_cases_save(d):
 #   미감지분석·배당구간별 통계까지 상세 추적하는 별도 로그(요청 스펙). 예측 시점 기록 + 결과 시점 분석.
 DARK_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "dark_horse_log")
 DARK_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_horse_stats.json")
+
+# ══════════════ [각질 편성 학습·신규] 편성 유형 vs 실제 입상 각질 누적 ══════════════
+PACE_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "pace_analysis")
+PACE_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "pace_stats.json")
+
+
+def _pace_log_record(rk, date, pace_analysis, top3, form, scenario_plan=None):
+    """[8] 편성 유형(페이스) vs 실제 입상마 각질 기록 + 시나리오 A/B 적중 → pace_analysis/ 저장 + 통계 재계산."""
+    if not pace_analysis or not top3:
+        return
+    try:
+        os.makedirs(PACE_LOG_DIR, exist_ok=True)
+        gait_by_no = {}
+        for h in (form or []):
+            try:
+                gait_by_no[int(h.get("no"))] = h.get("gait")
+            except (TypeError, ValueError):
+                pass
+        placed = [{"no": n, "gait": gait_by_no.get(n), "rank": i + 1} for i, n in enumerate(top3)]
+        # 시나리오 A/B 복승 적중(순서무관 1·2착 집합 일치)
+        _t2 = sorted(top3[:2]) if len(top3) >= 2 else []
+        scen_hit = None
+        if scenario_plan and _t2:
+            def _hit(cs):
+                return any(sorted(int(x) for x in (q.get("combo") or [])) == _t2 for q in (cs or []))
+            scen_hit = {"a": _hit(scenario_plan.get("scenarioA")), "b": _hit(scenario_plan.get("scenarioB"))}
+        rec = {"raceKey": rk, "date": date, "pace": pace_analysis.get("pace"),
+               "counts": pace_analysis.get("counts"), "placed": placed, "scenHit": scen_hit}
+        fn = os.path.join(PACE_LOG_DIR, _canonical_log_key(rk).replace("/", "_").replace(" ", "_") + ".json")
+        json.dump(rec, open(fn, "w", encoding="utf-8"), ensure_ascii=False)
+        _pace_stats_recompute()
+    except Exception as e:
+        print("[각질편성 학습] 기록 실패:", e)
+
+
+def _pace_stats_recompute():
+    """pace_analysis/ 스캔 → 페이스별 각질 입상률(빠른→추입·느린→선행 등) → pace_stats.json."""
+    try:
+        if not os.path.isdir(PACE_LOG_DIR):
+            return None
+        # {페이스: {각질: {placed(1·2착), total_placed_slots}}} — 입상마 중 각질 분포
+        stat = {}
+        scen = {}                                                   # {페이스: {aHit, bHit, races}}
+        races = 0
+        for fn in os.listdir(PACE_LOG_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                r = json.load(open(os.path.join(PACE_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            pace = r.get("pace")
+            if not pace:
+                continue
+            races += 1
+            sp = stat.setdefault(pace, {"선행": 0, "선입": 0, "추입": 0, "자유": 0, "placedSlots": 0})
+            for p in (r.get("placed") or []):
+                if (p.get("rank") or 9) <= 2 and p.get("gait"):     # 복승권(1·2착) 각질
+                    sp[p["gait"]] = sp.get(p["gait"], 0) + 1
+                    sp["placedSlots"] += 1
+            sh = r.get("scenHit")
+            if sh:                                                   # 시나리오 A/B 적중 누적
+                sc = scen.setdefault(pace, {"aHit": 0, "bHit": 0, "races": 0})
+                sc["races"] += 1
+                if sh.get("a"):
+                    sc["aHit"] += 1
+                if sh.get("b"):
+                    sc["bHit"] += 1
+        out = {"races": races, "byPace": {}, "scenario": {}, "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")}
+        for pace, sp in stat.items():
+            slots = sp.get("placedSlots", 0)
+            if slots:
+                out["byPace"][pace] = {g: round(sp.get(g, 0) / slots * 100, 1) for g in ("선행", "선입", "추입", "자유")}
+                out["byPace"][pace]["n"] = slots
+        for pace, sc in scen.items():
+            n = sc.get("races", 0)
+            if n:
+                out["scenario"][pace] = {"aRate": round(sc["aHit"] / n * 100, 1),
+                                         "bRate": round(sc["bHit"] / n * 100, 1), "n": n}
+        json.dump(out, open(PACE_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+        return out
+    except Exception as e:
+        print("[각질편성 통계] 재계산 실패:", e)
+        return None
 
 
 def _dark_sport_of(rk, an=None):
@@ -8112,6 +8252,17 @@ def _triple_analyze(rk, rec):
                 print("[날씨 보정] %s (%s·주로 %s): %s" % (rk, _wx.get("desc"), _wx.get("condition"), _wxnote))
         except Exception as _we:
             print("[날씨 보정] 실패(무시):", _we)
+    # [각질 편성 분석] 출전마 각질 집계 → 페이스 예측 → 각질별 유불리 보정(form totalScore 가산·무삭제).
+    pace_analysis = None
+    if form:
+        try:
+            pace_analysis = _apply_pace_analysis(form, len(valid_nos) if valid_nos else None)
+            if pace_analysis:
+                print("[각질편성] %s: 선행%d·선입%d·추입%d → %s" % (
+                    rk, pace_analysis["counts"]["선행"], pace_analysis["counts"]["선입"],
+                    pace_analysis["counts"]["추입"], pace_analysis["paceLabel"]))
+        except Exception as _pe:
+            print("[각질편성] 실패(무시):", _pe)
     # [역배열 감지] 진짜 역배열 = 쌍승역전만 · 전적 우수하나 시장 비인기는 별도 분류(form 전달)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
                                    wx_reversals, quin_mismatch, excess, form)
@@ -9584,6 +9735,7 @@ def _triple_analyze(rk, rec):
                 core_picks["formTopA"] = []
             # [축2전략] 단승(win) 배당맵 주입 — 축1/축2 시장최저 tiebreak용(반환 dict의 single 은 이 호출 이후 세팅되므로 미리 주입).
             core_picks["single"] = {str(k): v for k, v in (curWin or {}).items()}
+            core_picks["paceAnalysis"] = pace_analysis             # [시나리오B] 각질 편성 분석 전달(편성 유리 말 선별)
             _fp = _final_picks(core_picks, curQ, _rec_valid, smart_quinella, max_q=_mainmax,
                                reversal_quinellas=_rev_q, dark_quinellas=_dark_q,
                                signal_horses=_sig_h, sig_meta=_sig_meta, sport=_analyze_sport)
@@ -9591,6 +9743,7 @@ def _triple_analyze(rk, rec):
             core_picks["finalTrifectas"] = _fp["trifectas"]
             core_picks["axisPlan"] = _fp.get("axisPlan")           # [축2전략] 핵심 축2두+연결마 복승5조합·삼복승(패널 우선 표시)
             core_picks["qMainCheck"] = _fp.get("qMainCheck")       # [삼복승 정합성] 복승메인 말 포함 검증 결과(qMain·replaced·allInclude)
+            core_picks["scenarioPlan"] = _fp.get("scenarioPlan")   # [시나리오] 시나리오A(유력마)+B(편성 유리) 조합 자동생성
             core_picks["bmedSpecial"] = _fp.get("bmedSpecial") or []   # [BMED 특별 감지] 고배당+강신호 별도 섹션(★★)
             core_picks["dansung"] = bool(_fp.get("dansung"))       # [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
             core_picks["dansungMinOdds"] = _fp.get("dansungMinOdds")   # [단통] 최저복승 배당(경고 표시용)
@@ -9771,6 +9924,7 @@ def _triple_analyze(rk, rec):
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
         "weather": _weather_for_race_key(rk),      # [날씨] 경주장 실시간 날씨·주로 상태(패널 표시·분석 반영)
+        "paceAnalysis": pace_analysis,             # [각질편성] 편성 집계·페이스 예측·유불리·시나리오(패널 표시)
         "deadlineCorrected": deadline_corrected,   # [1번] 발주시각 오검출 정정(과거 마감상태 무효화) 발생
         "collectionStalled": collection_stalled,   # [수집 조기 중단 방어] 발주 전 2분+ 미수집 → 재수집 필요
         "secsSinceCollect": secs_since_collect,     # 마지막 수집 후 경과초
@@ -10324,6 +10478,38 @@ def _pub_recommendation(an, role):
             "reasons": uniq[:6], "locked": locked}
 
 
+def _pub_pace(an):
+    """[7] 각질 편성 분석 공개용 — 편성 집계·페이스·유불리·주목마·시나리오. 없으면 None(패널 숨김)."""
+    pa = an.get("paceAnalysis")
+    if not pa or not pa.get("counts"):
+        return None
+    # 주목마 이름 매핑
+    form = {int(h["no"]): h for h in (an.get("form") or []) if h.get("no") is not None}
+    focus = []
+    for f in (pa.get("focus") or []):
+        h = form.get(f.get("no"))
+        focus.append({"no": f.get("no"), "gait": f.get("gait"), "bonus": f.get("bonus"),
+                      "grade": f.get("grade"),
+                      "name": (h or {}).get("name") or "",
+                      "outer": (f.get("no") or 0) >= 8})
+    # [시나리오 A/B] corePicks.scenarioPlan 을 공개용으로 포맷(편성 섹션에 함께 표시)
+    sp = (an.get("corePicks") or {}).get("scenarioPlan")
+    scenario = None
+    if sp:
+        def _fmt(q):
+            c = q.get("combo") or []
+            return "+".join(str(x) for x in c) + (f" ({q['odds']}배)" if q.get("odds") else "")
+        scenario = {
+            "a": [{"text": _fmt(q), "label": q.get("label")} for q in (sp.get("scenarioA") or [])],
+            "b": [{"text": _fmt(q), "label": q.get("label")} for q in (sp.get("scenarioB") or [])],
+            "focusNos": sp.get("focusNos"), "focusGait": sp.get("focusGait"),
+            "trifecta": ("+".join(str(x) for x in (sp["trifecta"]["combo"])) if sp.get("trifecta") else None),
+        }
+    return {"counts": pa.get("counts"), "pace": pa.get("pace"), "paceLabel": pa.get("paceLabel"),
+            "advice": pa.get("advice"), "scenario2": pa.get("scenario"), "focus": focus,
+            "scenario": scenario}
+
+
 def _pub_horse_cards(an, role, nos):
     """말별 신호 카드 — 등급·역할·태그·부연설명."""
     grades = {}
@@ -10447,6 +10633,7 @@ def public_matrix(race_key):
         "horse_cards": _pub_horse_cards(an, role, nos),
         "result": _pub_result(rk),
         "weather": an.get("weather"),      # [날씨] 경주장 날씨·주로 상태(패널 상단 표시)
+        "pace": _pub_pace(an),             # [각질편성] 편성 집계·페이스·유불리·주목마·시나리오
         "odds_source": (db.get(rk) or {}).get("source"),
         "updated_at": (db.get(rk) or {}).get("t"),
     })
@@ -13655,6 +13842,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _learn_high_odds_companion(rk, doc.get("date"), top3, rec)
     except Exception as e:
         print("[고배당동반학습] 실패:", e)
+
+    # [각질 편성 학습 8번] 편성 유형(페이스) vs 실제 입상 각질 + 시나리오 A/B 적중 누적 → pace_stats
+    try:
+        _pace_log_record(rk, doc.get("date"), an.get("paceAnalysis"), top3, an.get("form"),
+                         (an.get("corePicks") or {}).get("scenarioPlan"))
+    except Exception as e:
+        print("[각질편성학습] 실패:", e)
 
     # ── [4번] 복승/삼복승 정확 적중 + 수익 + 고배당 하이라이트 ──
     rec_bets = _bet_for_judge   # [적중 판정 버그 수정] 재분석 공백 시 저장 추천이력 폴백(위에서 계산)
@@ -18617,6 +18811,17 @@ def kra_race_detail():
                     "rc_no": rc_no or None, "horses": horses})
 
 
+@app.route("/api/pace/stats", methods=["GET"])
+def pace_stats_api():
+    """[각질 편성 학습] 페이스별 각질 입상률(빠른→추입·느린→선행) + 시나리오 A/B 적중률."""
+    try:
+        if os.path.exists(PACE_STATS_FILE):
+            return jsonify(json.load(open(PACE_STATS_FILE, encoding="utf-8")))
+    except Exception:
+        pass
+    return jsonify(_pace_stats_recompute() or {"races": 0, "byPace": {}, "scenario": {}})
+
+
 @app.route("/api/form-ext/stats", methods=["GET"])
 def form_ext_stats_api():
     """[전적확장 통계] 기수-말 궁합·조교사 전략·마번 유불리 요약. params: {jockey?, horse?, trainer?, meet?, no?}."""
@@ -19634,6 +19839,107 @@ def _running_style(horse):
     if back > lead and back >= mid:
         return "추격형"
     return "평지형"
+
+
+# ══════════════ [각질 편성 분석·신규] 4분류 정규화 + 페이스 예측 + 각질별 유불리 ══════════════
+#   고배당 적중 핵심: 편성(각질 분포)으로 페이스 예측 → 각질별 유불리 보정 → 추입 고배당 기회 포착.
+_GAIT_STYLE_MAP = {"선행형": "선행", "도주": "선행", "추격형": "추입", "추입형": "추입",
+                   "마크": "추입", "평지형": "선입"}
+
+
+def _gait_of(horse):
+    """[1] 각질 4분류 정규화 → 선행/선입/추입/자유. 명시 gait/styleType > runningStyle > pastRaces position."""
+    for key in ("gait", "styleType", "runningStyle"):
+        v = str(horse.get(key) or "").strip()
+        if v:
+            if "자유" in v:
+                return "자유"
+            if "선행" in v or "도주" in v or "선두" in v:
+                return "선행"
+            if "선입" in v:
+                return "선입"
+            if "추입" in v or "추격" in v or "마크" in v:
+                return "추입"
+            if v in _GAIT_STYLE_MAP:
+                return _GAIT_STYLE_MAP[v]
+            if "평지" in v or "중" in v:
+                return "선입"
+    rs = _running_style(horse)                            # pastRaces position 집계 폴백
+    if rs:
+        return _GAIT_STYLE_MAP.get(rs, "자유")
+    return "자유"
+
+
+def _pace_scenario(pace, counts, form, nH):
+    """[6] 경주 전개 시나리오 텍스트(리스트)."""
+    lines = ["선행 %d · 선입 %d · 추입 %d%s" % (counts["선행"], counts["선입"], counts["추입"],
+             (" · 자유 %d" % counts["자유"]) if counts["자유"] else "")]
+    if pace == "빠른":
+        lines.append("선행 %d두 경합 → 빠른 페이스" % counts["선행"])
+        lines.append("3코너 선행 탈진 → 추입 기회")
+    elif pace == "느린":
+        lines.append("선행 %d두 → 느린 페이스" % counts["선행"])
+        lines.append("선행 독주 가능 → 앞선 말 유리")
+    else:
+        lines.append("선행 %d두 → 보통 페이스(뚜렷한 유불리 없음)" % counts["선행"])
+    return lines
+
+
+def _apply_pace_analysis(form, horse_count=None):
+    """[2~7] form 각질 편성 분석 → 페이스 예측 + 각질별 유불리 보정(paceBonus 가산·무삭제).
+    각 말에 gait·paceBonus·paceDetail 추가. 반환 {counts, pace, paceLabel, focus, scenario, advice}."""
+    if not form:
+        return None
+    nH = horse_count or len(form)
+    counts = {"선행": 0, "선입": 0, "추입": 0, "자유": 0}
+    for h in form:
+        g = _gait_of(h)
+        h["gait"] = g
+        counts[g] = counts.get(g, 0) + 1
+    lead = counts["선행"]
+    pace = "빠른" if lead >= 3 else ("느린" if lead <= 1 else "보통")           # [2] 페이스 예측
+    _base = {
+        "빠른": {"선행": -10, "선입": 5, "추입": 15, "자유": 0},                  # [3] 빠른→추입 유리
+        "느린": {"선행": 10, "선입": 5, "추입": -10, "자유": 0},                  # [3] 느린→선행 유리
+        "보통": {"선행": 0, "선입": 0, "추입": 0, "자유": 0},
+    }[pace]
+    focus = []
+    for h in form:
+        g = h["gait"]
+        b, det = _base.get(g, 0), []
+        if b:
+            det.append("%s페이스·%s %s%d" % (pace, g, "+" if b > 0 else "", b))
+        is_a = str(h.get("grade") or "").upper() == "A"
+        if is_a and g == "추입" and pace == "빠른":                              # [4] A급 추입·빠른페이스
+            b += 10; det.append("💡 A급 추입마 빠른페이스 유리 +10")
+        elif is_a and g == "선행" and pace == "빠른":                            # [4] A급 선행·경합위험
+            b -= 5; det.append("⚠️ A급 선행마 경합 위험 -5")
+        no = _to_int(h.get("no"))
+        if no is not None:                                                       # [5] 마번+각질
+            inner, outer = no <= 3, no >= max(8, nH - 2)
+            if g == "추입" and inner:
+                b -= 5; det.append("추입·안쪽마번 포위 위험 -5")
+            elif g == "추입" and outer:
+                b += 5; det.append("추입·바깥마번 자유추입 +5")
+            elif g == "선행" and inner:
+                b += 5; det.append("선행·안쪽마번 인코스 유리 +5")
+        h["paceBonus"] = b
+        h["paceDetail"] = det
+        h["totalScore"] = round((h.get("totalScore") or 0) + b, 1)               # 편성 보정 점수 반영
+        if det:
+            h["detail"] = (h.get("detail") or []) + det
+        if b >= 15:
+            focus.append({"no": no, "gait": g, "bonus": b, "grade": h.get("grade")})
+    _label = {"빠른": "⚡ 빠른 페이스", "느린": "🐌 느린 페이스", "보통": "보통 페이스"}[pace]
+    _advice = {"빠른": "추입마 유리 · 선행마 주의", "느린": "선행마 유리 · 추입마 주의", "보통": "뚜렷한 유불리 없음"}[pace]
+    gait_lists = {"선행": [], "선입": [], "추입": [], "자유": []}       # [시나리오B] 각질별 마번 목록
+    for h in form:
+        _n = _to_int(h.get("no"))
+        if _n is not None:
+            gait_lists.setdefault(h.get("gait"), []).append(_n)
+    return {"counts": counts, "pace": pace, "paceLabel": _label, "advice": _advice,
+            "focus": sorted(focus, key=lambda x: -x["bonus"])[:3], "gaitLists": gait_lists,
+            "scenario": _pace_scenario(pace, counts, form, nH)}
 
 
 # ── 3-2c 거리 변화 보너스 [3] ──────────────────

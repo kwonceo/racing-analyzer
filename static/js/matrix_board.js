@@ -190,6 +190,57 @@
     return c;
   }
 
+  // ── 🏇 편성 시나리오 (각질 편성 + 페이스 예측 + 시나리오 A/B) ──────────
+  function renderPace(d, locked) {
+    var p = d.pace;
+    if (!p || !p.counts) return null;
+    var cnt = p.counts;
+    var c = card('#f5f3ff', '3px solid ' + COLORS.purple);   // 보라(편성 분석)
+    c.appendChild(el('div', 'font-size:20px;font-weight:900;color:#6d28d9;', '🏇 편성 시나리오'));
+    c.appendChild(el('div', 'font-size:16px;font-weight:800;color:' + COLORS.ink + ';margin:4px 0;',
+      '선행 ' + (cnt['선행'] || 0) + ' · 선입 ' + (cnt['선입'] || 0) + ' · 추입 ' + (cnt['추입'] || 0) +
+      ((cnt['자유'] || 0) ? ' · 자유 ' + cnt['자유'] : '')));
+    c.appendChild(el('div', 'font-size:18px;font-weight:900;color:#6d28d9;margin-bottom:2px;',
+      (p.paceLabel || '') + ' 예상'));
+    if (p.advice) c.appendChild(el('div', 'font-size:14px;color:' + COLORS.sub + ';margin-bottom:8px;', p.advice));
+    var body = el('div', '');
+    var sc = p.scenario;
+    if (sc) {
+      if ((sc.a || []).length) {
+        body.appendChild(el('div', 'font-size:15px;font-weight:800;color:#1e3a8a;margin-top:6px;', '시나리오 A (유력마 축)'));
+        sc.a.forEach(function (q) {
+          var row = el('div', 'font-size:19px;font-weight:900;color:#1e3a8a;margin:3px 0;');
+          row.appendChild(el('span', '', q.text));
+          if (q.label) row.appendChild(el('span', 'font-size:12px;color:' + COLORS.sub + ';', ' ← ' + q.label));
+          body.appendChild(row);
+        });
+      }
+      if ((sc.b || []).length || (sc.focusNos || []).length) {
+        body.appendChild(el('div', 'font-size:15px;font-weight:800;color:#6d28d9;margin-top:10px;', '시나리오 B (편성 유리)'));
+        if ((sc.focusNos || []).length) {
+          body.appendChild(el('div', 'font-size:15px;font-weight:800;color:#b45309;margin:2px 0;',
+            '🐎 ' + sc.focusNos.join('번·') + '번 ' + (sc.focusGait || '') + '마 주목'));
+        }
+        (sc.b || []).forEach(function (q) {
+          var row = el('div', 'font-size:19px;font-weight:900;color:#6d28d9;margin:3px 0;');
+          row.appendChild(el('span', '', q.text + ' 고배당 가능'));
+          if (q.label) row.appendChild(el('span', 'font-size:12px;color:' + COLORS.sub + ';', ' ← ' + q.label));
+          body.appendChild(row);
+        });
+      }
+      if (sc.trifecta) {
+        body.appendChild(el('div', 'margin-top:10px;border-top:1px dashed ' + COLORS.line + ';padding-top:6px;font-size:14px;color:' + COLORS.sub + ';',
+          '삼복승: ' + sc.trifecta + ' (유력마+편성 유리 복병)'));
+      }
+    }
+    if ((p.scenario2 || []).length) {
+      body.appendChild(el('div', 'margin-top:8px;font-size:13px;color:' + COLORS.sub + ';',
+        (p.scenario2 || []).map(function (s) { return '· ' + s; }).join('  ')));
+    }
+    c.appendChild(locked ? lockWrap(body, '편성 시나리오는 프리미엄 전용입니다') : body);
+    return c;
+  }
+
   // ── 카드 3: 복병마 (없으면 null → 카드 숨김) ───────────────────
   function renderDark(d, locked) {
     var list = ((d.recommendation || {}).dark_horse) || [];
@@ -483,6 +534,8 @@
     if (picks) root.appendChild(picks);
     var axis = renderAxis(d, locked);
     if (axis) root.appendChild(axis);          // 🎯 핵심 축 2두 전략 — 최종추천 바로 아래(우선 표시)
+    var pace = renderPace(d, locked);
+    if (pace) root.appendChild(pace);          // 🏇 편성 시나리오(각질 편성 + 페이스 + 시나리오 A/B)
     var dsg = renderDansung(d, locked);
     if (dsg) root.appendChild(dsg);            // ⚡ 단통 경주(복승 중심) — 최종추천 바로 아래
     var dark = renderDark(d, locked);
