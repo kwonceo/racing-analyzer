@@ -404,6 +404,18 @@
 
     <!-- 결과입력 -->
     <section id="tab-result" class="tab-panel">
+      <!-- [전날 경주 목록] 날짜별 조회 — 경주별 예상vs결과·적중·복병적중·T-5 스크린샷 + KPI -->
+      <div class="panel-card" id="dayRacesCard">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h2 style="margin:0">🗓 날짜별 경주 기록</h2>
+          <input type="date" id="dayRacesDate" style="min-height:40px;font-size:15px">
+          <button id="dayRacesLoad" class="btn btn-small">조회</button>
+          <span style="flex:1"></span>
+        </div>
+        <div id="dayRacesKpi" style="margin-top:10px"></div>
+        <div id="dayRacesList" style="margin-top:12px"></div>
+      </div>
+
       <!-- [결과기록 전면정리] 1. 최상단: 최근 결과 요약 카드 -->
       <div class="panel-card" id="recentResultsCard">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">

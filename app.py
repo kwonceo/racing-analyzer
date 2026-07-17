@@ -7037,6 +7037,302 @@ def _dark_cases_save(d):
         print("[복병케이스] 저장 실패:", e)
 
 
+# ══════════════ [복병마 학습 시스템·신규] data/dark_horse_log/ + dark_horse_stats.json ══════════════
+#   기존 _dark_case_record(복병케이스)는 그대로 유지. 이 시스템은 rank1~3·신호우선순위·감지시각·
+#   미감지분석·배당구간별 통계까지 상세 추적하는 별도 로그(요청 스펙). 예측 시점 기록 + 결과 시점 분석.
+DARK_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "dark_horse_log")
+DARK_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_horse_stats.json")
+
+
+def _dark_sport_of(rk, an=None):
+    """raceKey/분석에서 종목 라벨(keirin/keiba/korea/boat/bike). category 우선."""
+    cat = (an or {}).get("category") or ""
+    if "korea" in cat:
+        return "korea"
+    if "cycle" in cat:
+        return "keirin"
+    if cat in ("boat", "bike"):
+        return cat
+    sp = (an or {}).get("sport") or ""
+    return {"cycle": "keirin", "horse": "keiba", "boat": "boat", "bike": "bike"}.get(sp, "keiba")
+
+
+def _dark_odds_band(odds):
+    """복병 배당 구간 라벨(15~30/30~50/50~100/100+). 15배 미만은 None(복병 아님)."""
+    if odds is None or odds < 15:
+        return None
+    if odds < 30:
+        return "15~30"
+    if odds < 50:
+        return "30~50"
+    if odds < 100:
+        return "50~100"
+    return "100+"
+
+
+def _dark_signal_of(no, an):
+    """[복병 신호 우선순위] 말 no의 복병 신호 판정 → (priority, label). priority 낮을수록 강함(1>2>3).
+    ① 급락 -10%+ & 배당 15배+ → 1  ② 스마트머니 & 역배열 동시 → 2  ③ 초기급락 보존말 → 3  그 외 → 4(약).
+    라벨은 급락%·신호명 포함. darkHorses/drops/inverse/earlyDrop 재사용(재계산 없음)."""
+    no = int(no)
+    # 조합 급락(그 말이 낀 최대 급락 %)
+    max_drop = 0
+    for d in (an.get("drops") or []):
+        cb = [int(x) for x in (d.get("combo") or [])]
+        if no in cb and (d.get("pct") or 0) < max_drop:
+            max_drop = d.get("pct")
+    dh = next((x for x in (an.get("darkHorses") or []) if int(x.get("no", -1)) == no), {})
+    odds = dh.get("oddsRepr")
+    smart = bool(dh.get("smartMoney"))
+    inv = {int(x) for x in (((an.get("inverse") or {}).get("invHorses")) or [])}
+    is_rev = no in inv
+    # 초기급락 보존말(signalTimeline/earlyDrop note)
+    note = str(dh.get("note") or "") + " " + str(dh.get("tierReason") or "")
+    early = ("초기급락" in note) or ("초기주목" in note)
+    if max_drop <= -10 and odds is not None and odds >= 15:
+        return 1, f"급락{round(max_drop)}%·{odds}배"
+    if smart and is_rev:
+        return 2, "스마트머니+역배열"
+    if early:
+        return 3, "초기급락 보존"
+    if smart:
+        return 2, "스마트머니"
+    if is_rev:
+        return 3, "역배열"
+    return 4, (note.strip() or "복병")
+
+
+def _dark_rank_horses(an):
+    """분석에서 복병 후보를 신호 우선순위로 정렬해 rank1~3 산출. 각: {horse, signal, priority, odds, detected_at}."""
+    cands = []
+    seen = set()
+    for d in (an.get("darkHorses") or []):
+        no = d.get("no")
+        if no is None or int(no) in seen:
+            continue
+        seen.add(int(no))
+        pr, label = _dark_signal_of(no, an)
+        cands.append({"horse": int(no), "signal": label, "priority": pr,
+                      "odds": d.get("oddsRepr")})
+    # 우선순위(작을수록 강함) → 배당 높은순(복병성 강조)
+    cands.sort(key=lambda c: (c["priority"], -(c["odds"] or 0)))
+    mb = an.get("minutesBefore")
+    detected = ("T-%d분" % int(mb)) if isinstance(mb, (int, float)) and mb is not None else None
+    ranks = {}
+    for i, c in enumerate(cands[:3]):
+        c["detected_at"] = detected
+        c["recommended"] = (i < 2)          # 1·2순위=추천 / 3순위=기록만
+        ranks["rank%d" % (i + 1)] = c
+    return ranks
+
+
+def _dark_combo_section(key_horses, dark_horses, curQ):
+    """[복병 복승 자동편성] 유력마 1위 + 복병 1·2순위 → 복승 2조합 + 삼복승 1조합(별도 섹션).
+    스타(stars) 높은 복병 우선. 유력마 없거나 복병 2두 미만이면 빈 dict. curQ={(a,b):odds} 배당 표시용."""
+    fav = None
+    for h in (key_horses or []):
+        try:
+            fav = int(h); break
+        except (TypeError, ValueError):
+            continue
+    darks = sorted([d for d in (dark_horses or []) if d.get("no") is not None],
+                   key=lambda d: -(d.get("stars") or 0))
+    dnos = []
+    for d in darks:
+        n = int(d["no"])
+        if n != fav and n not in dnos:
+            dnos.append(n)
+        if len(dnos) >= 2:
+            break
+    if fav is None or len(dnos) < 2:
+        return {}
+
+    def _od(a, b):
+        return (curQ or {}).get((a, b)) or (curQ or {}).get((b, a))
+    d1, d2 = dnos[0], dnos[1]
+    quinella = [{"combo": sorted([fav, d1]), "odds": _od(fav, d1), "label": "유력1+복병1"},
+                {"combo": sorted([fav, d2]), "odds": _od(fav, d2), "label": "유력1+복병2"}]
+    trifecta = [{"combo": sorted([fav, d1, d2]), "label": "유력1+복병1+복병2"}]
+    return {"fav": fav, "darks": dnos, "quinella": quinella, "trifecta": trifecta,
+            "title": "🐎 복병 조합: 유력%d+복병%d+복병%d" % (fav, d1, d2)}
+
+
+def _dark_log_path(rk):
+    safe = re.sub(r"[^\w가-힣]", "_", rk)
+    return os.path.join(DARK_LOG_DIR, safe + ".json")
+
+
+def _dark_log_record(rk, an):
+    """[예측 시점 기록] 복병 rank1~3을 dark_horse_log 에 저장(결과 전). 마감 전만·경주당 최신 갱신."""
+    try:
+        ranks = _dark_rank_horses(an)
+        if not ranks:
+            return
+        os.makedirs(DARK_LOG_DIR, exist_ok=True)
+        p = _dark_log_path(rk)
+        doc = {}
+        if os.path.exists(p):
+            try:
+                doc = json.load(open(p, encoding="utf-8"))
+            except Exception:
+                doc = {}
+        doc.update({
+            "race": rk, "date": time.strftime("%Y-%m-%d"),
+            "sport": _dark_sport_of(rk, an),
+            "dark_horses": ranks,
+            "result": doc.get("result"), "dark_horse_analysis": doc.get("dark_horse_analysis"),
+            "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        })
+        json.dump(doc, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    except Exception as e:
+        print("[복병로그] 예측 기록 실패:", e)
+
+
+def _dark_log_apply_result(rk, top3, an, quinella_odds=None):
+    """[결과 시점 분석] 복병 rank1~3 입상 판정 + 미감지 사후분석 → dark_horse_log 갱신 + 통계 재계산."""
+    try:
+        p = _dark_log_path(rk)
+        doc = {}
+        if os.path.exists(p):
+            doc = json.load(open(p, encoding="utf-8"))
+        else:
+            # 예측 기록이 없으면 지금 분석으로 생성(역산·수동 결과입력 대비)
+            _dark_log_record(rk, an)
+            if os.path.exists(p):
+                doc = json.load(open(p, encoding="utf-8"))
+        ranks = doc.get("dark_horses") or {}
+        t3 = [int(x) for x in (top3 or []) if x is not None]
+        t3set = set(t3)
+        doc["result"] = {"1st": (t3[0] if len(t3) > 0 else None),
+                         "2nd": (t3[1] if len(t3) > 1 else None),
+                         "3rd": (t3[2] if len(t3) > 2 else None),
+                         "quinella_odds": quinella_odds}
+
+        def _place(no):
+            for i, x in enumerate(t3):
+                if x == int(no):
+                    return i + 1
+            return None
+        analysis = {}
+        for key in ("rank1", "rank2", "rank3"):
+            r = ranks.get(key)
+            if not r:
+                continue
+            pl = _place(r["horse"])
+            analysis["%s_hit" % key] = pl is not None
+            analysis["%s_place" % key] = pl
+            if key == "rank3":
+                analysis["rank3_in_result"] = int(r["horse"]) in t3set
+        analysis["missed_signal"] = _analyze_missed_dark_horse(rk, t3, an, ranks)
+        doc["dark_horse_analysis"] = analysis
+        doc["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        os.makedirs(DARK_LOG_DIR, exist_ok=True)
+        json.dump(doc, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _dark_stats_recompute()
+        return doc
+    except Exception as e:
+        print("[복병로그] 결과 분석 실패:", e)
+        return None
+
+
+def _analyze_missed_dark_horse(rk, top3, an, ranks):
+    """[미감지 사후분석] 15배+ 고배당 말이 입상했는데 복병 rank1~3에 없으면 '놓친 신호'로 설명 반환. 없으면 None."""
+    try:
+        picked = {int(r["horse"]) for r in (ranks or {}).values() if r and r.get("horse") is not None}
+        # 말별 대표 복승배당(가장 싼 조합)
+        rep = {}
+        for c in (an.get("quinella") or []):
+            cb = [int(x) for x in (c.get("combo") or [])]
+            if len(cb) == 2 and (c.get("odds") or 0) > 0:
+                for x in cb:
+                    if rep.get(x) is None or c["odds"] < rep[x]:
+                        rep[x] = c["odds"]
+        missed = []
+        for no in (top3 or []):
+            no = int(no)
+            if no in picked:
+                continue
+            ro = rep.get(no)
+            if ro is not None and ro >= 15:
+                pr, label = _dark_signal_of(no, an)
+                missed.append("%d번 %.1f배 입상(신호:%s) 복병 미편성" % (no, ro, label))
+        return " · ".join(missed) if missed else None
+    except Exception:
+        return None
+
+
+def _dark_stats_load():
+    try:
+        return json.load(open(DARK_STATS_FILE, encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _dark_stats_recompute():
+    """dark_horse_log 전체 스캔 → 신호별·배당구간별·패턴별 적중률 집계 → dark_horse_stats.json.
+    30경주+ 신호는 weightReady=True(가중치 자동조정 근거)."""
+    try:
+        if not os.path.isdir(DARK_LOG_DIR):
+            return {}
+        by_signal, by_band, by_sport, races = {}, {}, {}, 0
+        rank_hit = {"rank1": [0, 0], "rank2": [0, 0], "rank3": [0, 0]}   # [hit, total]
+        missed_cnt = 0
+        for fn in os.listdir(DARK_LOG_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                doc = json.load(open(os.path.join(DARK_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            an_ = doc.get("dark_horse_analysis")
+            if not an_:
+                continue                       # 결과 미확정은 통계 제외
+            races += 1
+            if an_.get("missed_signal"):
+                missed_cnt += 1
+            ranks = doc.get("dark_horses") or {}
+            sp = doc.get("sport") or "keiba"
+            for key in ("rank1", "rank2", "rank3"):
+                r = ranks.get(key)
+                if not r:
+                    continue
+                hit = bool(an_.get("%s_hit" % key)) or (key == "rank3" and an_.get("rank3_in_result"))
+                rank_hit[key][1] += 1
+                if hit:
+                    rank_hit[key][0] += 1
+                # 신호별
+                sig = (r.get("signal") or "").split("·")[0].split("%")[0]
+                sig = re.sub(r"-?\d+", "", sig).strip() or "복병"
+                bs = by_signal.setdefault(sig, [0, 0])
+                bs[1] += 1; bs[0] += 1 if hit else 0
+                # 배당구간별
+                band = _dark_odds_band(r.get("odds"))
+                if band:
+                    bb = by_band.setdefault(band, [0, 0])
+                    bb[1] += 1; bb[0] += 1 if hit else 0
+                # 종목별
+                bsp = by_sport.setdefault(sp, [0, 0])
+                bsp[1] += 1; bsp[0] += 1 if hit else 0
+
+        def _rate(d):
+            return {k: {"hit": v[0], "total": v[1], "rate": round(v[0] / v[1] * 100, 1) if v[1] else 0,
+                        "weightReady": v[1] >= 30} for k, v in d.items()}
+        stats = {
+            "races": races,
+            "byRank": {k: {"hit": v[0], "total": v[1], "rate": round(v[0] / v[1] * 100, 1) if v[1] else 0}
+                       for k, v in rank_hit.items()},
+            "bySignal": _rate(by_signal), "byBand": _rate(by_band), "bySport": _rate(by_sport),
+            "missedRaces": missed_cnt,
+            "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        os.makedirs(os.path.dirname(DARK_STATS_FILE), exist_ok=True)
+        json.dump(stats, open(DARK_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        return stats
+    except Exception as e:
+        print("[복병통계] 재계산 실패:", e)
+        return {}
+
+
 def _dark_case_similar(dh):
     """현재 복병(dh)과 유사한 과거 복병 고배당 '적중' 사례 수(등급 이상·배당대 근접)."""
     try:
@@ -8965,6 +9261,7 @@ def _triple_analyze(rk, rec):
         "validHorses": sorted(valid_nos),   # [잔존마 필터·2번] 현재 배당 등장 마번(프론트 TOP5 필터 기준)
         "realtimeAdded": realtime_added,   # [3번] 실시간 급락/역배열로 유력마에 추가된 말(오버레이 '⚡ 실시간 추가')
         "darkHorses": dark_horses,   # [복병_집중급락] 집중급락 10회+/스마트머니 → 배당순위 무관 복병 자동 편입
+        "darkCombos": _dark_combo_section(key_horses, dark_horses, curQ),   # [복병 복승 자동편성] 유력1+복병1+복병2(별도 섹션)
         "darkHighlight": dark_highlight,   # [복병 등급] ★★★ 최강 복병(스마트머니)+유력마 복승 조합·유사케이스(오버레이 강조)
         "marketFavorites": market_favorites,   # [전적 과가중 해결] 저배당(5배↓) 시장유력마(전적 미수집도 유력마 편입)
         "preReversal": pre_reversal,   # [근본해결3] raw 쌍승역전 조기 반영 예비 유력마(마감 전)
@@ -9497,8 +9794,16 @@ def _pub_recommendation(an, role):
         if r not in seen:
             seen.add(r)
             uniq.append(r)
+    # [복병 복승 자동편성] 유력1+복병1+복병2 조합(별도 섹션 표시용)
+    dc = an.get("darkCombos") or {}
+    dark_combo = None
+    if dc.get("quinella"):
+        dark_combo = {"title": dc.get("title"),
+                      "quinella": ["+".join(str(x) for x in q["combo"]) + (f" ({q['odds']}배)" if q.get("odds") else "")
+                                   for q in dc["quinella"]],
+                      "trifecta": ["+".join(str(x) for x in t["combo"]) for t in (dc.get("trifecta") or [])]}
     return {"main": main, "trifecta": trifecta, "special": special,
-            "dark_horse": dark, "reasons": uniq[:6], "locked": locked}
+            "dark_horse": dark, "dark_combo": dark_combo, "reasons": uniq[:6], "locked": locked}
 
 
 def _pub_horse_cards(an, role, nos):
@@ -13207,6 +13512,21 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _dark_case_record(rk, an, top3)
     except Exception as e:
         print("[복병케이스학습] 실패:", e)
+    # [복병로그·신규] rank1~3 입상 판정 + 미감지 사후분석 → dark_horse_log 갱신 + 통계 재계산
+    try:
+        _q_odds = None
+        try:
+            _q_odds = (payouts or {}).get("quinella") if isinstance(payouts, dict) else None
+        except Exception:
+            _q_odds = None
+        _dark_log_apply_result(rk, top3, an, _q_odds)
+    except Exception as e:
+        print("[복병로그학습] 실패:", e)
+    # [타임스냅샷·신규] T-7/T-5 스냅샷 적중 + 변경마 우승 판정(스냅샷 파일 있을 때만)
+    try:
+        _timeline_snap_apply_result(rk, top3)
+    except Exception as e:
+        print("[타임스냅샷학습] 실패:", e)
     # [단통 경주 학습] 복승 최저 ≤1.5배 쏠림 경주만 별도 기록 → 복병(특별) 적중률 통계 축적
     try:
         _dansung_case_record(rk, an, top3)
@@ -14180,6 +14500,225 @@ def failure_rules():
     """[7번] 실패에서 자동 학습된 규칙 목록."""
     d = _failure_load()
     return jsonify({"rules": d.get("rules") or []})
+
+
+# ── [복병마 학습 시스템] API 4종 ──
+@app.route("/api/dark_horse/stats", methods=["GET"])
+def dark_horse_stats():
+    """복병 신호별·배당구간별·종목별·순위별 적중률 통계(dark_horse_stats.json). 없으면 재계산."""
+    st = _dark_stats_load()
+    if not st:
+        st = _dark_stats_recompute()
+    return jsonify(st or {})
+
+
+@app.route("/api/dark_horse/log", methods=["GET"])
+def dark_horse_log():
+    """복병 로그 목록. ?date=YYYYMMDD 로 날짜 필터(미지정=전체 최신순)."""
+    date = (request.args.get("date") or "").strip()
+    date_norm = None
+    if date:
+        d = re.sub(r"[^\d]", "", date)
+        if len(d) == 8:
+            date_norm = "%s-%s-%s" % (d[:4], d[4:6], d[6:8])
+    out = []
+    if os.path.isdir(DARK_LOG_DIR):
+        for fn in os.listdir(DARK_LOG_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                doc = json.load(open(os.path.join(DARK_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            if date_norm and doc.get("date") != date_norm:
+                continue
+            out.append(doc)
+    out.sort(key=lambda d: d.get("updated_at") or "", reverse=True)
+    return jsonify({"count": len(out), "logs": out})
+
+
+@app.route("/api/dark_horse/missed", methods=["GET"])
+def dark_horse_missed():
+    """미감지(15배+ 고배당 입상인데 복병 미편성) 경주만 반환 — 사후분석 리스트."""
+    out = []
+    if os.path.isdir(DARK_LOG_DIR):
+        for fn in os.listdir(DARK_LOG_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                doc = json.load(open(os.path.join(DARK_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            ms = (doc.get("dark_horse_analysis") or {}).get("missed_signal")
+            if ms:
+                out.append({"race": doc.get("race"), "date": doc.get("date"),
+                            "sport": doc.get("sport"), "result": doc.get("result"),
+                            "missed_signal": ms})
+    out.sort(key=lambda d: d.get("date") or "", reverse=True)
+    return jsonify({"count": len(out), "missed": out})
+
+
+@app.route("/api/dark_horse/review", methods=["POST"])
+def dark_horse_review():
+    """[역산·수동] 지정 경주(raceKey)의 결과로 복병 로그 재분석. body:{raceKey, top3?}.
+    top3 미지정 시 저장된 결과(results/history)에서 자동 조회."""
+    b = request.json or {}
+    rk = (b.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"error": "raceKey 필요"}), 400
+    top3 = b.get("top3")
+    if not top3:
+        res = _snapshot_result_for(rk) or {}
+        top3 = res.get("top3")
+    if not top3:
+        return jsonify({"error": "결과(top3)가 없습니다. top3를 직접 전달하세요."}), 400
+    db = _triple_load()
+    rec = db.get(rk) or _rec_from_history(rk) or {}
+    an = _triple_analyze(rk, rec)
+    doc = _dark_log_apply_result(rk, top3, an)
+    return jsonify({"ok": bool(doc), "race": rk, "log": doc})
+
+
+# ── [타임별 스냅샷] API ──
+@app.route("/api/timeline/stats", methods=["GET"])
+def timeline_stats():
+    """T-7/T-5 확정 적중률·변경 시 적중률·변경마 우승률(timeline_stats.json)."""
+    try:
+        st = json.load(open(TIMELINE_STATS_FILE, encoding="utf-8"))
+    except Exception:
+        st = _timeline_stats_recompute()
+    return jsonify(st or {})
+
+
+@app.route("/api/timeline/snapshot/<path:race_key>", methods=["GET"])
+def timeline_snapshot_get(race_key):
+    """경주별 타임 스냅샷(T-10~T+3) + 결과·분석 반환."""
+    p = _timeline_snap_path((race_key or "").strip())
+    if not os.path.exists(p):
+        return jsonify({"ok": False, "error": "스냅샷 없음"}), 404
+    return jsonify({"ok": True, **json.load(open(p, encoding="utf-8"))})
+
+
+# ── [전날 경주 목록 + 스크린샷] 날짜별 결과기록 카드 + KPI ──
+def _day_snapshot_for(rk, trigger="T-5"):
+    """해당 경주의 지정 trigger 스냅샷 파일명 반환(없으면 T-10 등 폴백). 이미지 URL 조립용."""
+    try:
+        if not os.path.isdir(SNAPSHOT_DIR):
+            return None
+        cand = None
+        for fn in os.listdir(SNAPSHOT_DIR):
+            if not fn.endswith(".png"):
+                continue
+            mp = os.path.join(SNAPSHOT_DIR, fn.rsplit(".", 1)[0] + ".json")
+            try:
+                meta = json.load(open(mp, encoding="utf-8"))
+            except Exception:
+                continue
+            if (meta.get("raceKey") or "").strip() != rk.strip():
+                continue
+            if meta.get("trigger") == trigger:
+                return fn
+            cand = cand or fn      # 폴백(아무 스냅샷)
+        return cand
+    except Exception:
+        return None
+
+
+@app.route("/api/day/races", methods=["GET"])
+def day_races():
+    """[전날 경주 목록] ?date=YYYYMMDD → 그 날짜 경주 카드(결과·예상vs결과·적중·복병적중·T-5 스크린샷) + KPI 요약."""
+    date = re.sub(r"[^\d]", "", request.args.get("date") or "")
+    if len(date) != 8:
+        date = time.strftime("%Y%m%d")
+    date_dash = "%s-%s-%s" % (date[:4], date[4:6], date[6:8])
+    cards = []
+    q_hit = q_tot = dark_hit = 0
+    sig_stat = {}
+    # dark_horse_log 인덱싱(경주명→분석)
+    dark_by_race = {}
+    if os.path.isdir(DARK_LOG_DIR):
+        for fn in os.listdir(DARK_LOG_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(DARK_LOG_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            if d.get("date") == date_dash:
+                dark_by_race[d.get("race")] = d
+    if os.path.isdir(RACE_RESULTS_DIR):
+        for fn in sorted(os.listdir(RACE_RESULTS_DIR)):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            if d.get("date") != date_dash:
+                continue
+            rk = d.get("raceKey") or ""
+            res = d.get("result") or {}
+            top3 = [res.get("1st"), res.get("2nd"), res.get("3rd")]
+            top3 = [int(x) for x in top3 if x not in (None, "")]
+            pred = d.get("prediction") or {}
+            ra = d.get("result_analysis") or {}
+            # 복승 예상 조합(recommend_main "3+5") vs 결과
+            main = pred.get("recommend_main")
+            main_hit = bool(ra.get("main_hit"))
+            if main:
+                q_tot += 1
+                if main_hit:
+                    q_hit += 1
+            # 복병 적중
+            dh = dark_by_race.get(rk) or {}
+            dha = dh.get("dark_horse_analysis") or {}
+            dark_ok = bool(dha.get("rank1_hit") or dha.get("rank2_hit"))
+            if dark_ok:
+                dark_hit += 1
+            # 신호별(간이): pattern_tags
+            for tg in (ra.get("pattern_tags") or []):
+                s = sig_stat.setdefault(tg, [0, 0])
+                s[1] += 1; s[0] += 1 if main_hit else 0
+            cards.append({
+                "race": rk, "horses": d.get("horse_count"),
+                "result": {"top3": top3},
+                "prediction": {"main": main, "sub": pred.get("recommend_sub")},
+                "hit": main_hit, "dark_hit": dark_ok,
+                "dark_ranks": dh.get("dark_horses"),
+                "snapshot": _day_snapshot_for(rk, "T-5"),
+            })
+    kpi = {
+        "quinellaRate": round(q_hit / q_tot * 100, 1) if q_tot else 0,
+        "quinellaHit": q_hit, "quinellaTotal": q_tot,
+        "darkHitCount": dark_hit,
+        "bySignal": {k: {"hit": v[0], "total": v[1], "rate": round(v[0] / v[1] * 100, 1) if v[1] else 0}
+                     for k, v in sig_stat.items()},
+    }
+    cards.sort(key=lambda c: c.get("race") or "")
+    return jsonify({"date": date_dash, "count": len(cards), "kpi": kpi, "cards": cards})
+
+
+# ── [카카오 알림] 큐 조회(사업자 등록 전 감사·수동발송용) ──
+@app.route("/api/kakao/queue", methods=["GET"])
+def kakao_queue():
+    """카카오 알림 큐(발송 대기/이력) 최신순. ?limit=N."""
+    limit = int(request.args.get("limit") or 50)
+    out = []
+    try:
+        if os.path.exists(KAKAO_QUEUE_FILE):
+            with open(KAKAO_QUEUE_FILE, encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            out.append(json.loads(line))
+                        except Exception:
+                            pass
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    out = out[-limit:][::-1]
+    return jsonify({"count": len(out), "messages": out,
+                    "webhookConfigured": bool(os.environ.get("KAKAO_NOTIFY_URL"))})
 
 
 def _high_odds_case_save(case):
@@ -20183,6 +20722,244 @@ def multi_race_detail(key):
 
 # ══════════════ [자동 예상] 경기 자동 전환·연속 예상(마감5분전 저장·결과 대조) ══════════════
 AUTO_PRED_DIR = os.path.join(os.path.dirname(__file__), "data", "auto_prediction")
+# ══════════════ [타임별 스냅샷 시스템·신규] data/timeline_snapshot/ + timeline_stats.json ══════════════
+#   기존 실시간 분석(_triple_analyze)·auto_prediction·snapshot_compare 는 절대 건드리지 않는다(요청).
+#   발주 잔여시간(left=postEpoch-now) 기준으로 T-10/T-7/T-5/T+1/T+3 스냅샷을 각 1회 저장.
+#   T-7·T-5 도달 시 카카오 알림 트리거([5]). 결과 입력 시 각 스냅샷 적중·변경마 우승 판정.
+TIMELINE_SNAP_DIR = os.path.join(os.path.dirname(__file__), "data", "timeline_snapshot")
+TIMELINE_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "timeline_stats.json")
+_timeline_saved = set()                   # (raceKey, phase) 1회 저장 가드
+
+# ══════════════ [카카오톡 알림·신규] T-7/T-5 도달 시 텍스트+링크 전송([5]) ══════════════
+#   ⚠ 실제 발송은 카카오 채널/알림톡(사업자 등록·토큰) 필요. 지금은 페이로드 구성 + 전송을 담당하되:
+#     - 환경변수 KAKAO_NOTIFY_URL 이 있으면 그 웹훅으로 POST(솔라피·자체 릴레이 등 연동 지점)
+#     - 없으면 data/kakao_queue.jsonl 에 적재(나중에 사업자 등록 후 일괄 발송·감사 로그)
+#   이미지 전송(T-5 스냅샷 캡처)은 사업자 등록 후 추가 — payload 에 imageHint 만 남긴다.
+KAKAO_QUEUE_FILE = os.path.join(os.path.dirname(__file__), "data", "kakao_queue.jsonl")
+PUBLIC_BOARD_URL = os.environ.get("PUBLIC_BOARD_URL", "https://web-production-d4723.up.railway.app")
+
+
+def _kakao_build_message(rk, phase, an, snap):
+    """카카오 알림 텍스트 구성. T-7=1차 확정 / T-5=최종 확정('지금 사세요!'). 복승·복병·배당판 링크 포함."""
+    main = (snap or {}).get("main") or []
+    odds = (snap or {}).get("odds") or {}
+    main_txt = "+".join(str(x) for x in main) if main else "-"
+    main_odds = ""
+    if main and len(main) == 2:
+        o = odds.get("%d+%d" % (main[0], main[1]))
+        if o:
+            main_odds = " (%s배)" % o
+    darks = (an.get("darkCombos") or {}).get("darks") or []
+    dark_txt = ""
+    if darks:
+        rep = {}
+        for c in (an.get("quinella") or []):
+            cb = [int(x) for x in (c.get("combo") or [])]
+            if len(cb) == 2 and (c.get("odds") or 0) > 0:
+                for x in cb:
+                    if rep.get(x) is None or c["odds"] < rep[x]:
+                        rep[x] = c["odds"]
+        d0 = darks[0]
+        dark_txt = "\n🐎 복병: %d번" % d0 + (" (%s배)" % rep[d0] if rep.get(d0) else "")
+    url = "%s/?race=%s" % (PUBLIC_BOARD_URL.rstrip("/"), urllib.parse.quote(rk))
+    if phase == "T-7":
+        head = "[적중왕] 🔒 %s 1차 확정" % rk
+        tail = "복승: %s%s ★★★%s\n마감 7분 전" % (main_txt, main_odds, dark_txt)
+    else:
+        head = "[적중왕] 🔒 %s 최종 확정" % rk
+        tail = "복승: %s%s ★★★%s\n지금 사세요!" % (main_txt, main_odds, dark_txt)
+    text = "%s\n━━━━━━━━━━━━\n%s\n━━━━━━━━━━━━\n📊 배당판 보기 → %s" % (head, tail, url)
+    return {"race": rk, "phase": phase, "text": text, "url": url,
+            "imageHint": "T-5 스냅샷 캡처(사업자 등록 후 이미지 API 연동)",
+            "at": time.strftime("%Y-%m-%d %H:%M:%S")}
+
+
+def _kakao_notify_race(rk, phase, an, snap):
+    """알림 발송(또는 큐 적재). KAKAO_NOTIFY_URL 있으면 웹훅 POST, 없으면 kakao_queue.jsonl 적재."""
+    msg = _kakao_build_message(rk, phase, an, snap)
+    url = os.environ.get("KAKAO_NOTIFY_URL", "").strip()
+    if url:
+        try:
+            req = urllib.request.Request(url, data=json.dumps(msg).encode("utf-8"),
+                                         headers={"Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=6)
+            msg["sent"] = True
+        except Exception as e:
+            msg["sent"] = False
+            msg["error"] = str(e)[:120]
+    else:
+        msg["sent"] = False
+        msg["queued"] = True
+    try:
+        os.makedirs(os.path.dirname(KAKAO_QUEUE_FILE), exist_ok=True)
+        with open(KAKAO_QUEUE_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(msg, ensure_ascii=False) + "\n")
+    except Exception as e:
+        print("[카카오알림] 큐 적재 실패:", e)
+    print("[카카오알림] %s %s → %s" % (rk, phase, "발송" if msg.get("sent") else "큐 적재"))
+    return msg
+
+
+def _timeline_snap_path(rk):
+    return os.path.join(TIMELINE_SNAP_DIR, re.sub(r"[^\w가-힣]", "_", rk) + ".json")
+
+
+def _timeline_extract(an):
+    """스냅샷용 요약 추출 — main(복승 메인 조합)·dark_horse(복병 1·2순위)·odds(메인 조합 배당)."""
+    cp = an.get("corePicks") or {}
+    fq = cp.get("finalQuinellas") or []
+    main = []
+    odds = {}
+    if fq:
+        c = fq[0].get("combo") or []
+        main = sorted(int(x) for x in c)
+        if len(main) == 2:
+            odds["%d+%d" % (main[0], main[1])] = fq[0].get("odds")
+    dc = an.get("darkCombos") or {}
+    dark = dc.get("darks") or [int(d["no"]) for d in (an.get("darkHorses") or [])[:2] if d.get("no") is not None]
+    return {"main": main, "dark_horse": dark, "odds": odds}
+
+
+def _timeline_snap_save(rk, phase, an):
+    """지정 phase 스냅샷 저장(1회). T-5는 직전 T-7 대비 변경마 계산. 반환 저장된 snap dict 또는 None."""
+    try:
+        os.makedirs(TIMELINE_SNAP_DIR, exist_ok=True)
+        p = _timeline_snap_path(rk)
+        doc = {}
+        if os.path.exists(p):
+            try:
+                doc = json.load(open(p, encoding="utf-8"))
+            except Exception:
+                doc = {}
+        doc.setdefault("race", rk)
+        doc.setdefault("date", time.strftime("%Y-%m-%d"))
+        doc.setdefault("snapshots", {})
+        snap = _timeline_extract(an)
+        snap["confirmed"] = phase in ("T-7", "T-5")
+        snap["at"] = time.strftime("%H:%M:%S")
+        # T-5: T-7 대비 변경 계산
+        if phase == "T-5":
+            t7 = (doc["snapshots"].get("T-7") or {}).get("main") or []
+            changed = sorted(set(snap["main"]) ^ set(t7)) if t7 else []
+            snap["changed_from_T7"] = bool(changed)
+            snap["changed_horses"] = changed
+        # T+3: 마감 후 변경 감지(현재 main vs T-5)
+        if phase == "T+3":
+            t5 = (doc["snapshots"].get("T-5") or {}).get("main") or []
+            snap["post_deadline_change"] = bool(t5 and set(snap["main"]) != set(t5))
+        doc["snapshots"][phase] = snap
+        doc["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        json.dump(doc, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        return snap
+    except Exception as e:
+        print("[타임스냅샷] 저장 실패:", e)
+        return None
+
+
+# 잔여시간(초) → phase (윈도우 폭 ~60s, tick 30s라 각 1회 포착). None=해당없음.
+_TIMELINE_PHASES = [("T-10", 570, 630), ("T-7", 390, 450), ("T-5", 270, 330),
+                    ("T+1", -90, -30), ("T+3", -210, -150)]
+
+
+def _timeline_phase_of(left):
+    for name, lo, hi in _TIMELINE_PHASES:
+        if lo < left <= hi:
+            return name
+    return None
+
+
+def _timeline_snap_tick(races, now, db):
+    """[bg 훅] 각 경주의 잔여시간으로 phase 판정 → 미저장 phase 스냅샷 저장. T-7·T-5는 카카오 알림 트리거."""
+    for pe, venue, rno, rk in races:
+        left = pe - now
+        phase = _timeline_phase_of(left)
+        if not phase or (rk, phase) in _timeline_saved:
+            continue
+        if rk not in (db or {}):
+            continue
+        try:
+            an = _triple_analyze(rk, db.get(rk) or {})
+            snap = _timeline_snap_save(rk, phase, an)
+            _timeline_saved.add((rk, phase))
+            if phase in ("T-7", "T-5") and snap:
+                try:
+                    _kakao_notify_race(rk, phase, an, snap)
+                except Exception as _ke:
+                    print("[타임스냅샷] 알림 트리거 오류(무시):", _ke)
+        except Exception as e:
+            print("[타임스냅샷] tick 오류 %s: %s" % (rk, e))
+
+
+def _timeline_snap_apply_result(rk, top3):
+    """[결과] 각 스냅샷 적중(T7_hit/T5_hit) + 변경마 우승 판정 → 파일 갱신 + 통계 재계산."""
+    try:
+        p = _timeline_snap_path(rk)
+        if not os.path.exists(p):
+            return None
+        doc = json.load(open(p, encoding="utf-8"))
+        t3 = set(int(x) for x in (top3 or []) if x is not None)
+        doc["result"] = {"1st": (top3[0] if len(top3) > 0 else None),
+                         "2nd": (top3[1] if len(top3) > 1 else None),
+                         "3rd": (top3[2] if len(top3) > 2 else None)}
+        snaps = doc.get("snapshots") or {}
+
+        def _hit(main):
+            m = set(int(x) for x in (main or []))
+            return bool(m) and m.issubset(t3)     # 복승 메인 2두가 모두 1~3착이면 적중
+        t7 = snaps.get("T-7") or {}
+        t5 = snaps.get("T-5") or {}
+        analysis = {"T7_hit": _hit(t7.get("main")), "T5_hit": _hit(t5.get("main"))}
+        # 변경마 우승: T-5에서 바뀐 말(changed_horses)이 1~3착에 들었나
+        chg = t5.get("changed_horses") or []
+        if chg:
+            analysis["changed_horse_won"] = any(int(x) in t3 for x in chg)
+        doc["analysis"] = analysis
+        doc["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        json.dump(doc, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _timeline_stats_recompute()
+        return doc
+    except Exception as e:
+        print("[타임스냅샷] 결과 판정 실패:", e)
+        return None
+
+
+def _timeline_stats_recompute():
+    """timeline_snapshot 스캔 → T-7/T-5 적중률·변경 시 적중률·변경마 우승률 → timeline_stats.json."""
+    try:
+        if not os.path.isdir(TIMELINE_SNAP_DIR):
+            return {}
+        t7 = [0, 0]; t5 = [0, 0]; changed = [0, 0]; chg_won = [0, 0]
+        for fn in os.listdir(TIMELINE_SNAP_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                doc = json.load(open(os.path.join(TIMELINE_SNAP_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            a = doc.get("analysis")
+            if not a:
+                continue
+            snaps = doc.get("snapshots") or {}
+            if (snaps.get("T-7") or {}).get("main"):
+                t7[1] += 1; t7[0] += 1 if a.get("T7_hit") else 0
+            if (snaps.get("T-5") or {}).get("main"):
+                t5[1] += 1; t5[0] += 1 if a.get("T5_hit") else 0
+            if (snaps.get("T-5") or {}).get("changed_from_T7"):
+                changed[1] += 1; changed[0] += 1 if a.get("T5_hit") else 0
+                chg_won[1] += 1; chg_won[0] += 1 if a.get("changed_horse_won") else 0
+
+        def _r(v):
+            return {"hit": v[0], "total": v[1], "rate": round(v[0] / v[1] * 100, 1) if v[1] else 0}
+        stats = {"T7": _r(t7), "T5": _r(t5), "changedThenHit": _r(changed),
+                 "changedHorseWon": _r(chg_won), "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")}
+        os.makedirs(os.path.dirname(TIMELINE_STATS_FILE), exist_ok=True)
+        json.dump(stats, open(TIMELINE_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        return stats
+    except Exception as e:
+        print("[타임통계] 재계산 실패:", e)
+        return {}
+
+
 _AUTO_PRED_ENABLED = True                 # 기본 ON(POST /api/auto-prediction/toggle 로 제어)
 _auto_pred_saved = set()                  # raceKey별 마감5분전 예상 저장 1회
 _auto_pred_scored = set()                 # raceKey별 결과 대조 1회
@@ -20212,6 +20989,11 @@ def _auto_pred_save(rk, an):
         fn = _auto_pred_fname(rk)
         json.dump(doc, open(os.path.join(AUTO_PRED_DIR, fn), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
         print("[자동예상] %s 최종예상 저장(%s)" % (rk, fn))
+        # [복병로그] 마감5분전 예측 시점에 복병 rank1~3 기록(결과 대조는 결과 입력 시)
+        try:
+            _dark_log_record(rk, an)
+        except Exception as _de:
+            print("[복병로그] 예측 훅 오류(무시):", _de)
         return fn
     except Exception as e:
         print("[자동예상] 저장 실패:", e)
@@ -20282,6 +21064,13 @@ def _auto_pred_tick(sched, now):
             if (now - pe) >= 900 and rk in _auto_pred_saved and rk not in _auto_pred_scored:
                 if _auto_pred_compare(rk):
                     _auto_pred_scored.add(rk)
+        # [타임스냅샷] T-10/T-7/T-5/T+1/T+3 스냅샷 저장 + T-7·T-5 카카오 알림(기존 자동예상과 독립)
+        try:
+            if db is None:
+                db = _triple_load()
+            _timeline_snap_tick(races, now, db)
+        except Exception as _te:
+            print("[타임스냅샷] tick 훅 오류(무시):", _te)
         # ③ 현재(가장 임박)·다음 경주 상태
         upcoming = [r for r in races if r[0] >= now - 120]
         cur = upcoming[0] if upcoming else None

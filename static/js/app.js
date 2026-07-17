@@ -118,6 +118,61 @@
     if (btn) btn.addEventListener('click', () => startBoardTab());
   }
 
+  // ---------- [전날 경주 목록 + 스크린샷] 🗓 날짜별 경주 기록 ----------
+  let _dayRacesInit = false;
+  function initDayRaces() {
+    const dateEl = $('#dayRacesDate');
+    if (dateEl && !dateEl.value) {
+      const d = new Date(); d.setDate(d.getDate() - 1);   // 기본: 어제
+      dateEl.value = d.toISOString().slice(0, 10);
+    }
+    if (_dayRacesInit) return;
+    _dayRacesInit = true;
+    const btn = $('#dayRacesLoad');
+    if (btn) btn.addEventListener('click', loadDayRaces);
+    loadDayRaces();
+  }
+  async function loadDayRaces() {
+    const list = $('#dayRacesList'), kpi = $('#dayRacesKpi');
+    const dateEl = $('#dayRacesDate');
+    if (!list) return;
+    const ymd = (dateEl && dateEl.value || '').replace(/-/g, '');
+    list.innerHTML = '<p class="hint">불러오는 중…</p>';
+    let d;
+    try { d = await (await fetch('/api/day/races?date=' + ymd)).json(); }
+    catch (_) { list.innerHTML = '<p class="err">조회 실패</p>'; return; }
+    const k = d.kpi || {};
+    if (kpi) {
+      const sig = Object.entries(k.bySignal || {}).map(([s, v]) =>
+        `<span class="chip">${esc(s)} ${v.rate}%(${v.hit}/${v.total})</span>`).join(' ');
+      kpi.innerHTML = `<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:15px">
+        <b>📊 ${esc(d.date)} · ${d.count}경주</b>
+        <span>복승 적중률 <b style="color:#38d39f">${k.quinellaRate}%</b> (${k.quinellaHit}/${k.quinellaTotal})</span>
+        <span>🐎 복병 적중 <b style="color:#f59e0b">${k.darkHitCount}건</b></span>
+      </div><div style="margin-top:6px">${sig}</div>`;
+    }
+    if (!(d.cards || []).length) { list.innerHTML = '<p class="hint">해당 날짜 결과가 없습니다.</p>'; return; }
+    list.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px">
+      ${d.cards.map(dayRaceCardHtml).join('')}</div>`;
+  }
+  function dayRaceCardHtml(c) {
+    const top3 = (c.result && c.result.top3 || []).join(' → ');
+    const hitBadge = c.hit ? '<span style="color:#38d39f;font-weight:800">✅ 적중</span>'
+      : '<span style="color:#ef4444;font-weight:800">❌</span>';
+    const darkBadge = c.dark_hit ? '<span style="color:#f59e0b;font-weight:800">🐎 복병적중</span>' : '';
+    const shot = c.snapshot
+      ? `<img src="/api/snapshot/get/${encodeURIComponent(c.snapshot)}" style="width:100%;border-radius:8px;margin-top:6px;cursor:pointer" onclick="window.open(this.src)">`
+      : '<div class="hint" style="font-size:12px;margin-top:6px">T-5 스크린샷 없음</div>';
+    return `<div style="border:1px solid #334155;border-radius:10px;padding:10px;background:rgba(255,255,255,.03)">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <b style="font-size:15px">${esc(c.race || '')}</b>${c.horses ? `<span class="hint">${c.horses}두</span>` : ''}
+        <span style="flex:1"></span>${hitBadge} ${darkBadge}
+      </div>
+      <div style="margin-top:4px;font-size:14px">예상 <b>${esc(c.prediction && c.prediction.main || '-')}</b> · 결과 <b>${esc(top3 || '-')}</b></div>
+      ${shot}
+    </div>`;
+  }
+
   // ---------- 탭 ----------
   function initTabs() {
     $$('.tab-btn').forEach((btn) => {
@@ -129,7 +184,7 @@
         if (btn.dataset.tab === 'board') startBoardTab();   // [공개용 배당판] 카드 UI 시작
         else stopBoardTab();                                // 다른 탭 이동 시 30초 폴링 중단(자원 절약)
         if (btn.dataset.tab === 'stats') renderStats();
-        if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); loadSnapshotGallery(); }
+        if (btn.dataset.tab === 'result') { renderRecentResults(); renderResultForm(); loadHighlights(); loadReportList(); loadPendingResults(); loadSnapshotGallery(); initDayRaces(); }
         if (btn.dataset.tab === 'jockeydb') renderJockeyDb();
         if (btn.dataset.tab === 'multi') startMultiRaceWatch();   // [다중 경주] 전체 경주 대시보드 시작
         else stopMultiRaceWatch();                                // 다른 탭 이동 시 폴링 중단(자원 절약)

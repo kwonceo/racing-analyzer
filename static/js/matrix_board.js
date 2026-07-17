@@ -176,6 +176,24 @@
     return c;
   }
 
+  // ── 🐎 복병 조합 (유력1+복병1+복병2) ──────────────────────────
+  function renderDarkCombo(d, locked) {
+    var dc = (d.recommendation || {}).dark_combo;
+    if (!dc || !(dc.quinella || []).length) return null;
+    var c = card(COLORS.amberBg, '2px solid #f59e0b');
+    c.appendChild(el('div', 'font-size:18px;font-weight:900;color:' + COLORS.amberDeep + ';margin-bottom:8px;',
+      dc.title || '🐎 복병 조합'));
+    var body = el('div', '');
+    (dc.quinella || []).forEach(function (q) {
+      body.appendChild(el('div', 'font-size:20px;font-weight:800;color:' + COLORS.amberDeep + ';margin:3px 0;', '복승  ' + q));
+    });
+    (dc.trifecta || []).forEach(function (t) {
+      body.appendChild(el('div', 'font-size:17px;font-weight:700;color:' + COLORS.amber + ';margin-top:4px;', '삼복승  ' + t));
+    });
+    c.appendChild(locked ? lockWrap(body, '복병 조합은 프리미엄 전용입니다') : body);
+    return c;
+  }
+
   // ── 예상 vs 결과 비교 ──────────────────────────────────────────
   function renderCompare(d) {
     var r = d.recommendation || {};
@@ -389,6 +407,8 @@
     if (picks) root.appendChild(picks);
     var dark = renderDark(d, locked);
     if (dark) root.appendChild(dark);          // 복병 없으면 카드 자체가 안 붙음(요구사항)
+    var dc = renderDarkCombo(d, locked);
+    if (dc) root.appendChild(dc);              // 🐎 복병 조합(유력1+복병1+복병2)
     var cmp = renderCompare(d);
     if (cmp) root.appendChild(cmp);
     root.appendChild(renderDetails(d, state));
