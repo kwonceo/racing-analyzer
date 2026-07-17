@@ -32,7 +32,7 @@
   "signal_4": {
    "horse": 4,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -42,13 +42,13 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": 35.0,
-   "confidence": 25.0,
+   "confidence": null,
    "reason": "일반"
   },
   "signal_9": {
    "horse": 9,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -61,8 +61,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_7": {
-   "horse": 7,
+  "signal_6": {
+   "horse": 6,
    "placed": false,
    "recommended": true,
    "place_rank": null,
@@ -73,12 +73,12 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 20.5,
+   "record_score": 110.0,
    "confidence": null,
-   "reason": "일반"
+   "reason": "전적상위"
   },
-  "signal_2": {
-   "horse": 2,
+  "signal_13": {
+   "horse": 13,
    "placed": false,
    "recommended": true,
    "place_rank": null,
@@ -89,9 +89,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 35.0,
+   "record_score": 106.8,
    "confidence": null,
-   "reason": "일반"
+   "reason": "전적상위"
   },
   "signal_11": {
    "horse": 11,
@@ -111,10 +111,8 @@
   }
  },
  "recommended_horses": [
-  4,
-  9,
-  7,
-  2,
+  6,
+  13,
   11
  ],
  "recommendation_process": [
@@ -130,23 +128,17 @@
   "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "복승불일치_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
   "formScore": 60.5,
   "dropAmt": null,
   "dropScore": 0,
-  "inverse": true,
-  "inverseHorses": [
-   4
-  ],
-  "inverseHit": [
-   4
-  ],
-  "confidence": 25.0,
-  "reason": "역배열 감지말 4번 입상 · 제거 적중"
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -163,5 +155,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-18 00:16:27"
+ "generated_at": "2026-07-18 01:32:52"
 }

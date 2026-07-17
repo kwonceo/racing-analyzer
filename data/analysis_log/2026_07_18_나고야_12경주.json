@@ -5,8 +5,8 @@
  "category": "japan_local",
  "date": "2026-07-18",
  "race": "나고야 12경주",
- "analyzed_at": "00:14:48",
- "updated_at": "00:16:35",
+ "analyzed_at": "01:31:48",
+ "updated_at": "01:32:55",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -15,27 +15,12 @@
  },
  "odds_timeline": [
   {
-   "time": "00:11:45",
+   "time": "01:31:45",
    "minutes_before": null,
    "quinella": {}
   },
   {
-   "time": "00:12:45",
-   "minutes_before": null,
-   "quinella": {}
-  },
-  {
-   "time": "00:13:43",
-   "minutes_before": null,
-   "quinella": {}
-  },
-  {
-   "time": "00:14:47",
-   "minutes_before": null,
-   "quinella": {}
-  },
-  {
-   "time": "00:15:45",
+   "time": "01:32:45",
    "minutes_before": null,
    "quinella": {}
   }
@@ -229,7 +214,7 @@
  },
  "recommendation_history": [
   {
-   "time": "00:14:48",
+   "time": "01:31:48",
    "minutes_before": null,
    "sig": "3-6-9|6+9|None|3+6+9",
    "anomCount": 0,
@@ -333,25 +318,6 @@
    "inverseHit": [],
    "confidence": 0,
    "reason": "전적유력마 2번 적중"
-  },
-  "failure": {
-   "type": "전적오판",
-   "label": "유형4 · 전적 오판",
-   "focus": 11,
-   "winner": 11,
-   "missed": [
-    11,
-    12
-   ],
-   "reason": "11번은 배당 변화 없이 입상 → 배당은 정상, 전적 판단 실패(이변)",
-   "improvement": "전적 하위라도 최근 컨디션·거리/기수 변경 반영 · 이변 조건 학습 강화",
-   "missed_signal": "배당 신호 없음(전적 이변)",
-   "timeline": [],
-   "maxDrop": 0,
-   "buriedBy": null,
-   "afterClose": true,
-   "massDrop": false,
-   "winnerSignal": false
   }
  },
  "profit": null,

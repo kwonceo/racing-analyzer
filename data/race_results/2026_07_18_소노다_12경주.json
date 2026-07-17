@@ -7,7 +7,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 12,
+ "horse_count": 13,
  "result": {
   "1st": 1,
   "2nd": 4,
@@ -20,30 +20,31 @@
   "candidates": [
    6,
    7,
+   13,
    11,
    1,
+   2,
    4,
    5,
-   9,
-   2,
-   3,
    8,
-   12
+   10
   ],
   "eliminated": [
-   10
+   3,
+   9,
+   12
   ],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
   "signal_quality": null,
-  "confidence": 25.0,
-  "inverse": true
+  "confidence": 0,
+  "inverse": false
  },
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "역배열 감지말 4번 입상 · 제거 적중",
+  "hit_reason": "적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
@@ -59,7 +60,7 @@
   "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-18 00:16:27",
+ "saved_at": "2026-07-18 01:32:52",
  "validation": {
   "ok": true,
   "errors": []

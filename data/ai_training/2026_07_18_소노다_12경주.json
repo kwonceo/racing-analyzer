@@ -8,10 +8,28 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 12,
+  "horse_count": 13,
   "grade": null
  },
  "horses": [
+  {
+   "no": 13,
+   "name": "エイシンマロニエ",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    1,
+    1,
+    4,
+    3
+   ],
+   "record_score": 106.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
   {
    "no": 6,
    "name": "コパノリッキー",
@@ -220,7 +238,7 @@
     10,
     9
    ],
-   "record_score": 20,
+   "record_score": 15,
    "distance_score": null,
    "interval_days": null,
    "weight_change": null,
@@ -234,8 +252,8 @@
   "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
-  "quinella_mismatch": 17.065,
-  "refund_rate": 0.799,
+  "quinella_mismatch": null,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -250,22 +268,23 @@
   "candidates": [
    6,
    7,
+   13,
    11,
    1,
+   2,
    4,
    5,
-   9,
-   2,
-   3,
    8,
-   12
+   10
   ],
   "eliminated": [
-   10
+   3,
+   9,
+   12
   ],
   "recommend": null,
   "strategy": null,
-  "confidence": 25.0,
+  "confidence": 0,
   "signal_quality": null
  },
  "result": {
@@ -276,7 +295,7 @@
   "quinella_odds": null,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "역배열 감지말 4번 입상 · 제거 적중"
+  "hit_pattern": "적중"
  },
  "labels": {
   "quinella_hit": false,
@@ -294,14 +313,15 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-18 00:16:27",
+ "saved_at": "2026-07-18 01:32:52",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
+  "score": 40,
+  "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
+   "이상감지 결과",
    "확정 배당"
   ],
   "errors": []
