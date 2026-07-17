@@ -261,6 +261,9 @@
         const no = toNum(cells[idxNo]);
         if (!isHorseNo(no) || !/^\d{1,2}$/.test(cells[idxNo] || '')) continue;
         const name = idxName >= 0 ? cells[idxName] : '';
+        // [출전취소·除外] 競走除外/取消/失格/中止 텍스트 감지 → scratched 표시(추천 제거용)
+        const rowText = (cells.join(' ') + ' ' + name);
+        const scratched = /除外|取消|出走取消|競走除外|中止|失格|출전\s?취소|제외/.test(rowText);
         // 단승: 순수 소수만 (取消/--- 등은 제외)
         const win = /^\d+(?:\.\d+)?$/.test(cells[idxWin] || '') ? toNum(cells[idxWin]) : null;
         // 복승(place): "4.3-" 셀 + 다음 셀 "13.6" (또는 한 셀 "4.3-5.1")
@@ -272,7 +275,7 @@
           const max = /^\d+(?:\.\d+)?$/.test(b) ? toNum(b) : (parseRange(a)?.max ?? min);
           if (min != null) place = { min, max: max ?? min };
         }
-        horses[no] = { no, name, win, place };
+        horses[no] = { no, name, win, place, scratched };
       }
       if (Object.keys(horses).length) break; // 첫 유효 표에서 종료
     }
@@ -994,21 +997,25 @@
       //   ① 単勝複勝 표를 fetch(여러 oper 후보 시도) → ② 실패 시 현재 화면 DOM 폴백. 실패해도 무시(무해).
       if (!isKorea && !isCentralK) {
         try {
-          let winHorses = [];
+          let winHorses = [], allHorses = [];
           for (const oper of ['OddsTanFuku', 'OddsTanpuku', 'OddsTan']) {
             try {
               const wd = await fetchOddsDoc(oper, q);
-              winHorses = extractHorses(wd).filter((h) => h.win != null && h.win >= 1.0);
+              allHorses = extractHorses(wd);
+              winHorses = allHorses.filter((h) => h.win != null && h.win >= 1.0);
               if (winHorses.length) break;
             } catch (_) { /* 다음 후보 */ }
           }
-          if (!winHorses.length) winHorses = extractHorses().filter((h) => h.win != null && h.win >= 1.0);
+          if (!winHorses.length) { allHorses = extractHorses(); winHorses = allHorses.filter((h) => h.win != null && h.win >= 1.0); }
           if (winHorses.length) {
             const win = {};
             for (const h of winHorses) win[String(h.no)] = h.win;
             payload.win = win;   // 서버 triple_ingest 가 단승 시계열로 저장 → 단승급락 감지
             console.log('[단승수집] 단승 배당', Object.keys(win).length, '두');
           }
+          // [출전취소·除外] 배당판에서 競走除外 감지된 마번 → payload.scratched(서버가 추천 전체에서 제거)
+          const scr = allHorses.filter((h) => h.scratched).map((h) => h.no);
+          if (scr.length) { payload.scratched = scr; console.log('[출전취소] 除外 마번', scr); }
         } catch (e) { console.warn('[단승수집] 실패(무시)', e); }
       }
       if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length) {

@@ -1758,7 +1758,7 @@ def triple_ingest():
     return jsonify(_do_triple_ingest(
         rk, body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or [],
         _win_map_clean(body.get("win")), body.get("sport"), body.get("category"),
-        body.get("source"), body.get("deadline")))
+        body.get("source"), body.get("deadline"), scratched=body.get("scratched")))
 
 
 _ARITY_MIN, _ARITY_MAX = 0.4, 1.5
@@ -1892,7 +1892,7 @@ def _bettype_guard(kind, combos, label):
     return []
 
 
-def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None):
+def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None, scratched=None):
     """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
     확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
     # [종목 오분석 근본수정·서버측 강제] raceKey 에 한국 경마장(서울/부산/제주/부경/과천)이 있으면 무조건
@@ -1978,7 +1978,8 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     category = (category or prev.get("category")
                 or {"cycle": "cycle", "boat": "boat", "bike": "bike"}.get(sport, "japan_local"))
     db[rk] = {"quinella": q, "exacta": x, "trio": tr, "win": win, "history": hist,
-              "source": source, "sport": sport, "category": category, "t": now}
+              "source": source, "sport": sport, "category": category, "t": now,
+              "scratched": sorted(set(int(s) for s in (scratched or []) if str(s).strip().lstrip("-").isdigit()))}
     # [경주전환 잔존 방어] 30분+ 미갱신된 '끝난 직전 경주'를 활성 캐시에서 정리(히스토리는 보존)
     #   → max-t 폴백이 직전 경주 배당을 계속 끌어오던 문제 차단.
     pruned = _triple_prune_stale(db, keep_rk=rk)
@@ -8215,6 +8216,29 @@ def _triple_analyze(rk, rec):
         except (TypeError, ValueError):
             pass
 
+    # [출전취소·競走除外] 확장이 배당판에서 감지한 취소 마번 → valid_nos 제외 + 복승/쌍승/단승 조합에서 완전 제거.
+    #   추천(유력마·조합·삼복승)이 valid_nos·curQ 기반이라 여기서 빼면 이후 전 추천에서 자동 제외됨.
+    scratched_horses = []
+    try:
+        _sc = set()
+        for _s in (rec.get("scratched") or []):                # 확장이 배당판에서 명시 감지한 競走除外(정확·오탐없음)
+            try:
+                _sc.add(int(_s))
+            except (TypeError, ValueError):
+                pass
+        if _sc:
+            for _si in list(_sc):
+                if _si in valid_nos:
+                    valid_nos.discard(_si)
+                scratched_horses.append(_si)
+            curQ = {k: v for k, v in curQ.items() if not (set(int(x) for x in k) & _sc)}
+            curD = {k: v for k, v in curD.items() if not (set(int(x) for x in k) & _sc)}
+            curWin = {k: v for k, v in curWin.items() if int(k) not in _sc}
+            if scratched_horses:
+                print("[출전취소] %s: %s번 除外 → 추천 제외" % (rk, "·".join(map(str, sorted(scratched_horses)))))
+    except Exception as _sce:
+        print("[출전취소] 처리 실패(무시):", _sce)
+
     # 4) 유력마 3마리 (상위 10개 복승 조합 등장 빈도 + 인기가중). 복승 없으면 쌍승 무순.
     base = curQ if curQ else {k: min(curD[k2] for k2 in (k, (k[1], k[0])) if k2 in curD)
                               for k in {tuple(sorted(p)) for p in curD}}
@@ -9924,6 +9948,7 @@ def _triple_analyze(rk, rec):
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
         "weather": _weather_for_race_key(rk),      # [날씨] 경주장 실시간 날씨·주로 상태(패널 표시·분석 반영)
+        "scratchedHorses": scratched_horses,       # [출전취소] 競走除外 감지 마번(추천 제외·패널 표시)
         "paceAnalysis": pace_analysis,             # [각질편성] 편성 집계·페이스 예측·유불리·시나리오(패널 표시)
         "deadlineCorrected": deadline_corrected,   # [1번] 발주시각 오검출 정정(과거 마감상태 무효화) 발생
         "collectionStalled": collection_stalled,   # [수집 조기 중단 방어] 발주 전 2분+ 미수집 → 재수집 필요
@@ -10633,6 +10658,7 @@ def public_matrix(race_key):
         "horse_cards": _pub_horse_cards(an, role, nos),
         "result": _pub_result(rk),
         "weather": an.get("weather"),      # [날씨] 경주장 날씨·주로 상태(패널 상단 표시)
+        "scratched": an.get("scratchedHorses") or [],   # [출전취소] 競走除外 마번(패널 경고 표시)
         "pace": _pub_pace(an),             # [각질편성] 편성 집계·페이스·유불리·주목마·시나리오
         "odds_source": (db.get(rk) or {}).get("source"),
         "updated_at": (db.get(rk) or {}).get("t"),

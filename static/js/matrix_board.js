@@ -528,6 +528,13 @@
     var main = r.main || [], tri = r.trifecta || [];
     var c = card(COLORS.greenDeep, '4px solid ' + COLORS.green, '20px');   // 진한 초록
     c.appendChild(el('div', 'font-size:28px;font-weight:900;color:#ffffff;margin-bottom:12px;', '🔒 지금 사세요!'));
+    // [출전취소] 競走除外 감지 마번 경고(추천에서 이미 제거됨)
+    var scr = d.scratched || [];
+    if (scr.length) {
+      c.appendChild(el('div', 'font-size:20px;font-weight:900;color:#fecaca;background:#7f1d1d;'
+        + 'border-radius:8px;padding:8px 12px;margin-bottom:10px;',
+        '⚠️ ' + scr.join('·') + '번 출전 취소 — 제거됨'));
+    }
     var body = el('div', '');
     if (!main.length && !tri.length) {
       body.appendChild(el('div', 'font-size:24px;font-weight:800;color:#ffffff;', '⏳ 아직 추천이 없습니다'));
