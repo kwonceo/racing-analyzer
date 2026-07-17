@@ -6,17 +6,79 @@
  "date": "2026-07-17",
  "race": "부산 1경주 1200M",
  "analyzed_at": "11:36:49",
- "updated_at": "11:45:49",
+ "updated_at": "15:14:59",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
   "image_file": null,
   "odds_source": "kra_api"
  },
- "odds_timeline": [],
+ "odds_timeline": [
+  {
+   "time": "15:14:58",
+   "minutes_before": null,
+   "quinella": {
+    "4+6": 113.8,
+    "4+7": 331.9,
+    "4+8": 342.2,
+    "4+9": 882.8,
+    "4+10": 400.7,
+    "4+11": 433.2,
+    "5+6": 20.5,
+    "5+7": 55.4,
+    "5+8": 49.8,
+    "5+9": 344.6,
+    "5+10": 91.9,
+    "5+11": 175.3,
+    "6+7": 40.9,
+    "6+8": 33.9,
+    "6+9": 242.2,
+    "6+10": 79.5,
+    "6+11": 125.3,
+    "7+8": 103.2,
+    "7+9": 587.7,
+    "7+10": 195.1,
+    "7+11": 387.4,
+    "8+9": 470.2,
+    "8+10": 180.0,
+    "8+11": 225.7,
+    "9+10": 504.6,
+    "4+5": 177.2,
+    "3+11": 36.1,
+    "3+10": 22.6,
+    "1+2": 178.7,
+    "1+3": 5.1,
+    "1+4": 130.8,
+    "1+5": 28.1,
+    "1+6": 16.0,
+    "1+7": 53.4,
+    "1+8": 53.9,
+    "1+9": 259.9,
+    "1+10": 89.4,
+    "1+11": 133.2,
+    "2+3": 72.2,
+    "2+4": 516.6,
+    "2+5": 289.9,
+    "2+6": 275.6,
+    "2+7": 552.3,
+    "2+8": 537.0,
+    "2+9": 1071.9,
+    "2+10": 860.2,
+    "2+11": 869.0,
+    "3+4": 33.1,
+    "3+5": 5.5,
+    "3+6": 3.6,
+    "3+7": 14.8,
+    "3+8": 12.5,
+    "3+9": 68.5,
+    "9+11": 673.2,
+    "10+11": 242.6
+   }
+  }
+ ],
  "signals_detected": [
   {
-   "time": null,
+   "time": "15:14:58",
    "type": "복승불일치공식",
    "detail": "⚠️ 복승 불일치: 단승 기준 예상 1+3(5.1) / 실제 최저 3+6(3.6) → 6번 집중 자금 유입 (🟡 1.417)",
    "severity": "🟡",
@@ -396,7 +458,36 @@
    }
   ],
   "denseBoxNote": "무신호·저배당 밀집(상위 4두 ≤15배) → 삼복승 박스 4두 확대",
+  "formTopA": [
+   5,
+   1,
+   2
+  ],
+  "single": {
+   "1": 4.0,
+   "2": 70.3,
+   "3": 1.8,
+   "4": 48.6,
+   "5": 9.2,
+   "6": 6.1,
+   "7": 29.3,
+   "8": 22.0,
+   "9": 86.8,
+   "10": 42.4,
+   "11": 53.5
+  },
   "finalQuinellas": [
+   {
+    "combo": [
+     1,
+     3
+    ],
+    "odds": 5.1,
+    "stars": 3,
+    "reason": "시장 저배당 보완",
+    "basis": [],
+    "summary": "시장 저평가(메인 보완)"
+   },
    {
     "combo": [
      3,
@@ -416,17 +507,6 @@
      6
     ],
     "odds": 3.6,
-    "stars": 3,
-    "reason": "시장 저배당 보완",
-    "basis": [],
-    "summary": "시장 저평가(메인 보완)"
-   },
-   {
-    "combo": [
-     1,
-     3
-    ],
-    "odds": 5.1,
     "stars": 3,
     "reason": "시장 저배당 보완",
     "basis": [],
@@ -464,6 +544,84 @@
     "reason": "무신호밀집"
    }
   ],
+  "axisPlan": {
+   "axis1": 5,
+   "axis2": 1,
+   "links": [
+    3,
+    6
+   ],
+   "axis1Score": 4.5,
+   "axis2Score": 0.0,
+   "quinellas": [
+    {
+     "combo": [
+      1,
+      5
+     ],
+     "odds": 28.1,
+     "label": "축1+축2",
+     "rank": 1
+    },
+    {
+     "combo": [
+      3,
+      5
+     ],
+     "odds": 5.5,
+     "label": "축1+연결1",
+     "rank": 2
+    },
+    {
+     "combo": [
+      5,
+      6
+     ],
+     "odds": 20.5,
+     "label": "축1+연결2",
+     "rank": 3
+    },
+    {
+     "combo": [
+      1,
+      3
+     ],
+     "odds": 5.1,
+     "label": "축2+연결1",
+     "rank": 4
+    },
+    {
+     "combo": [
+      1,
+      6
+     ],
+     "odds": 16.0,
+     "label": "축2+연결2",
+     "rank": 5
+    }
+   ],
+   "trifectas": [
+    {
+     "combo": [
+      1,
+      3,
+      5
+     ],
+     "odds": 28.1,
+     "label": "축1+축2+연결1"
+    },
+    {
+     "combo": [
+      1,
+      5,
+      6
+     ],
+     "odds": 28.1,
+     "label": "축1+축2+연결2"
+    }
+   ],
+   "title": "🎯 핵심 축: 5번·1번"
+  },
   "bmedSpecial": [],
   "dansung": false,
   "dansungMinOdds": 3.6,
@@ -479,8 +637,55 @@
   6,
   1
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   3,
+   1
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [
+   2,
+   4,
+   9,
+   11
+  ],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 0,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [
+    6
+   ],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 1번 적중"
+  }
+ },
  "profit": null,
  "review": null
 }
