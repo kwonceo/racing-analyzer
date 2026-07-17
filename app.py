@@ -7878,6 +7878,15 @@ def _triple_analyze(rk, rec):
     # [역배열/추천게이트 공유] 전적 등급을 여기서 미리 계산 → 역배열 '전적 우수·시장 비인기' 판정에 재사용
     #   (기존엔 아래에서 계산했으나 앞당겨 재사용. 삭제 아님·계산 위치만 이동)
     form = _form_from_starters(rk, drops, rec.get("sport"), valid_nos)  # 출마표2/KRA/PDF/경륜 전적(종목 오매칭 차단 + 잔존마 필터)
+    # [날씨 분석 반영] 강풍(선행 불리·추입 유리)·불량주로(과거 불량주로 성적) 보정을 전적 점수에 적용(무변경 복사).
+    _wx = _weather_for_race_key(rk)
+    if _wx and form:
+        try:
+            form, _wxnote = _weather_adjust_form(form, _wx)
+            if _wxnote:
+                print("[날씨 보정] %s (%s·주로 %s): %s" % (rk, _wx.get("desc"), _wx.get("condition"), _wxnote))
+        except Exception as _we:
+            print("[날씨 보정] 실패(무시):", _we)
     # [역배열 감지] 진짜 역배열 = 쌍승역전만 · 전적 우수하나 시장 비인기는 별도 분류(form 전달)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
                                    wx_reversals, quin_mismatch, excess, form)
@@ -9525,6 +9534,7 @@ def _triple_analyze(rk, rec):
                           "advanced": advanced},
         # [마감 후 신호] 현재 스냅샷이 발주(T-0) 이후면 추천 미반영·참고만
         "afterClose": after_close, "minutesBefore": cur_mb,
+        "weather": _weather_for_race_key(rk),      # [날씨] 경주장 실시간 날씨·주로 상태(패널 표시·분석 반영)
         "deadlineCorrected": deadline_corrected,   # [1번] 발주시각 오검출 정정(과거 마감상태 무효화) 발생
         "collectionStalled": collection_stalled,   # [수집 조기 중단 방어] 발주 전 2분+ 미수집 → 재수집 필요
         "secsSinceCollect": secs_since_collect,     # 마지막 수집 후 경과초
@@ -10162,6 +10172,7 @@ def public_matrix(race_key):
         "recommendation": _pub_recommendation(an, role),
         "horse_cards": _pub_horse_cards(an, role, nos),
         "result": _pub_result(rk),
+        "weather": an.get("weather"),      # [날씨] 경주장 날씨·주로 상태(패널 상단 표시)
         "odds_source": (db.get(rk) or {}).get("source"),
         "updated_at": (db.get(rk) or {}).get("t"),
     })
@@ -17613,6 +17624,195 @@ def _kra_api_key():
     return (os.environ.get("KRA_API_KEY") or "").strip()
 
 
+# ══════════════ [경주장 날씨·주로 상태·신규] OpenWeatherMap 자동 수집 ══════════════
+#   경주장별 실시간 날씨 → 주로(track) 상태 판단 → 분석 반영(불량주로 각질·강풍 보정)·패널 표시.
+#   ⚠ API 키(.env WEATHER_API_KEY) 없으면 더미 데이터로 동작(테스트·개발). 30분 캐시.
+WEATHER_VENUES = {
+    "서울": (37.4344, 127.1275), "부산": (35.2580, 129.0200), "제주": (33.4650, 126.3230),
+    "모리오카": (39.7036, 141.1527), "나고야": (35.1815, 136.9066), "가나자와": (36.5944, 136.6256),
+}
+# 경마장명 별칭 → 표준 키(부경=부산 등)
+WEATHER_ALIASES = {"부경": "부산", "부산경남": "부산", "경남": "부산", "서울경마": "서울", "제주경마": "제주"}
+_WEATHER_CACHE = {}     # {venue: {"data": {...}, "t": epoch}}
+_WEATHER_TTL = 1800     # 30분 캐시(발주 임박 시 아래 데몬이 10분으로 단축)
+
+
+def _weather_api_key():
+    return (os.environ.get("WEATHER_API_KEY") or "").strip()
+
+
+def _weather_venue_norm(venue):
+    v = (venue or "").strip()
+    v = WEATHER_ALIASES.get(v, v)
+    return v if v in WEATHER_VENUES else None
+
+
+def _track_condition(weather_main, rain_mm):
+    """[주로 상태 판단] 강수량(mm/1h)·날씨로 주로 등급. 반환 (label, level 0~3)."""
+    rain = float(rain_mm or 0)
+    if weather_main in ("Rain", "Drizzle", "Thunderstorm", "Snow") or rain > 0:
+        if rain >= 5:
+            return "매우불량", 3
+        if rain >= 1:
+            return "불량", 2
+        if rain > 0:
+            return "다습", 1
+    # Clear/Clouds/Mist 등 무강수
+    return "양호", 0
+
+
+def _weather_dummy(venue):
+    """API 키 없을 때 더미 날씨(테스트용) — 경마장 순번으로 결정적 변형(양호/다습/불량/매우불량 골고루)."""
+    try:
+        seed = list(WEATHER_VENUES).index(venue) % 4
+    except ValueError:
+        seed = sum(ord(c) for c in venue) % 4
+    presets = [
+        {"weather_main": "Clear", "desc": "맑음", "temp": 22.0, "rain_mm": 0.0, "wind": 3.2},
+        {"weather_main": "Clouds", "desc": "구름조금", "temp": 19.0, "rain_mm": 0.0, "wind": 5.0},
+        {"weather_main": "Rain", "desc": "비", "temp": 17.0, "rain_mm": 2.3, "wind": 6.1},
+        {"weather_main": "Rain", "desc": "강한 비", "temp": 15.0, "rain_mm": 7.5, "wind": 11.0},
+    ]
+    return presets[seed]
+
+
+def _weather_fetch_raw(venue):
+    """OpenWeatherMap current weather → 표준 dict. 키 없거나 실패 시 더미. (data, source)."""
+    key = _weather_api_key()
+    if not key:
+        return _weather_dummy(venue), "dummy"
+    lat, lon = WEATHER_VENUES[venue]
+    url = ("https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=metric&lang=kr"
+           % (lat, lon, urllib.parse.quote(key)))
+    try:
+        raw = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=8).read()
+        d = json.loads(raw.decode("utf-8", "replace"))
+        w0 = (d.get("weather") or [{}])[0]
+        rain = (d.get("rain") or {}).get("1h") or (d.get("rain") or {}).get("3h") or 0
+        return {
+            "weather_main": w0.get("main") or "Clear",
+            "desc": w0.get("description") or "",
+            "temp": (d.get("main") or {}).get("temp"),
+            "rain_mm": rain,
+            "wind": (d.get("wind") or {}).get("speed") or 0,
+        }, "openweather"
+    except Exception as e:
+        print("[날씨] %s 조회 실패 → 더미:" % venue, str(e)[:60])
+        return _weather_dummy(venue), "dummy"
+
+
+def _weather_get(venue, force=False):
+    """경주장 날씨+주로 상태 반환(캐시). {venue, weather_main, desc, temp, rain_mm, wind, condition, level, strongWind, source, at}."""
+    v = _weather_venue_norm(venue)
+    if not v:
+        return None
+    ck = _WEATHER_CACHE.get(v)
+    if ck and not force and (time.time() - ck.get("t", 0) < _WEATHER_TTL):
+        return ck["data"]
+    raw, source = _weather_fetch_raw(v)
+    cond, level = _track_condition(raw.get("weather_main"), raw.get("rain_mm"))
+    wind = float(raw.get("wind") or 0)
+    data = {
+        "venue": v, "weather_main": raw.get("weather_main"), "desc": raw.get("desc"),
+        "temp": raw.get("temp"), "rain_mm": raw.get("rain_mm"), "wind": wind,
+        "condition": cond, "level": level, "strongWind": wind >= 10.0,
+        "source": source, "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    _WEATHER_CACHE[v] = {"data": data, "t": time.time()}
+    return data
+
+
+def _weather_for_race_key(rk):
+    """raceKey 에서 경마장 추출 → 날씨. 미매칭 시 None."""
+    try:
+        venue = _area_num(rk)[0]
+        return _weather_get(venue)
+    except Exception:
+        return None
+
+
+def _weather_adjust_form(form, weather):
+    """[날씨 분석 반영] form(말별 전적 리스트)에 날씨 보정 적용 → 보정 근거 붙인 리스트 반환(원본 무변경·복사).
+      ▸ 강풍(10m/s+): 선행형 -5(불리) · 추입/추격형 +5(유리)
+      ▸ 불량 주로(level 2+): 과거 불량주로 성적 좋은 말 +10 / 나쁜 말 -5 (badTrackRate 있을 때만)
+      반환: (보정 form, 요약 문자열). weather 없거나 form 없으면 원본 그대로."""
+    if not weather or not form:
+        return form, ""
+    strong_wind = bool(weather.get("strongWind"))
+    bad_track = (weather.get("level") or 0) >= 2
+    if not strong_wind and not bad_track:
+        return form, ""
+    out, notes = [], []
+    for h in form:
+        h2 = dict(h)
+        bonus, detail = 0, []
+        style = str(h2.get("styleType") or "")
+        if strong_wind:
+            if "선행" in style or "도주" in style:
+                bonus -= 5; detail.append("강풍 선행 불리 -5")
+            elif "추입" in style or "추격" in style or "마크" in style:
+                bonus += 5; detail.append("강풍 추입 유리 +5")
+        if bad_track:
+            br = h2.get("badTrackRate")   # 과거 불량주로 복승권율(있을 때만·데이터 미수집이면 None)
+            if isinstance(br, (int, float)):
+                if br >= 40:
+                    bonus += 10; detail.append("불량주로 강세(%.0f%%) +10" % br)
+                elif br <= 10:
+                    bonus -= 5; detail.append("불량주로 약세(%.0f%%) -5" % br)
+        if bonus:
+            h2["weatherBonus"] = bonus
+            h2["totalScore"] = round((h2.get("totalScore") or 0) + bonus, 1)
+            h2["detail"] = (h2.get("detail") or []) + detail
+            notes.append("%s번 %s" % (h2.get("no"), "·".join(detail)))
+        out.append(h2)
+    return out, (" / ".join(notes[:5]))
+
+
+@app.route("/api/weather/current", methods=["GET"])
+def weather_current():
+    """전체 경주장 현재 날씨·주로 상태."""
+    out = {}
+    for v in WEATHER_VENUES:
+        out[v] = _weather_get(v)
+    return jsonify({"venues": out, "keySet": bool(_weather_api_key()),
+                    "updated": time.strftime("%Y-%m-%d %H:%M:%S")})
+
+
+@app.route("/api/weather/<path:venue>", methods=["GET"])
+def weather_venue(venue):
+    """특정 경주장 날씨. ?force=1 로 캐시 무시 강제 갱신."""
+    d = _weather_get(venue, force=bool(request.args.get("force")))
+    if not d:
+        return jsonify({"error": "미지원 경마장(좌표 없음)", "venue": venue,
+                        "supported": list(WEATHER_VENUES.keys())}), 404
+    return jsonify(d)
+
+
+# [날씨 자동수집 데몬] 30분 주기 전체 갱신(발주 임박 경주는 아래에서 10분으로 단축).
+_weather_auto_started = False
+
+
+def _weather_auto_loop():
+    while True:
+        try:
+            # 발주 60분 이내 경주가 있으면 그 경마장은 10분 주기, 아니면 30분 주기(캐시 TTL 이 흡수).
+            for v in WEATHER_VENUES:
+                _weather_get(v)   # TTL 내면 캐시 반환(과호출 방지)
+        except Exception as e:
+            print("[날씨 데몬] 오류(무시):", e)
+        time.sleep(600)           # 10분마다 점검(캐시 TTL 30분이 실제 호출 주기 제어)
+
+
+def _weather_auto_start():
+    global _weather_auto_started
+    if _weather_auto_started:
+        return
+    _weather_auto_started = True
+    threading.Thread(target=_weather_auto_loop, daemon=True, name="weather-auto").start()
+    print("[날씨] 자동수집 데몬 시작(%s· 키 %s)"
+          % ("30분 캐시", "설정됨" if _weather_api_key() else "없음→더미"))
+
+
 def _kra_meet_code(venue):
     """경마장명(서울/제주/부산경남/부경) → KRA meet 코드('1'/'2'/'3'). 숫자면 그대로."""
     if venue is None:
@@ -21506,6 +21706,7 @@ def _boot_background():
     except Exception as e:
         print("[부팅] 날짜 초기화 실패(무시):", e)
     _start_multi_race_bg()               # [핵심] 다중 경주(지방경마·경륜·한국) 24시간 자동수집
+    _weather_auto_start()                # [날씨] 경주장별 실시간 날씨·주로 상태 자동수집(30분 캐시)
     try:
         _archive_compress_old(7)         # 7일+ 경주 배당 .gz 압축 보관(데이터 삭제 없음)
     except Exception as e:

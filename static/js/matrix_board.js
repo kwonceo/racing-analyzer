@@ -69,6 +69,18 @@
       c.appendChild(el('div', 'margin-top:6px;font-size:16px;color:' + COLORS.sub + ';',
         (g.emoji ? g.emoji + ' ' : '') + g.label + (g.score != null ? ' · 신뢰도 ' + g.score + '점' : '')));
     }
+    // [날씨] 경주장 실시간 날씨·주로 상태 — 불량이면 경고색.
+    var w = d.weather;
+    if (w) {
+      var wemo = ({ Clear: '🌤', Clouds: '⛅', Rain: '🌧', Drizzle: '🌦', Thunderstorm: '⛈', Snow: '🌨' })[w.weather_main] || '🌡';
+      var bad = (w.level || 0) >= 2;
+      var wCol = bad ? COLORS.red : ((w.level || 0) === 1 ? COLORS.amber : COLORS.sub);
+      var wtxt = wemo + ' ' + (w.venue || '') + ' ' + (w.desc || '')
+        + ((w.rain_mm || 0) > 0 ? ' ' + w.rain_mm + 'mm' : '')
+        + ' · 주로 ' + (w.condition || '') + (bad ? ' ⚠️' : '')
+        + (w.strongWind ? ' · 강풍 ' + Math.round(w.wind) + 'm/s 🌬' : '');
+      c.appendChild(el('div', 'margin-top:6px;font-size:16px;font-weight:' + (bad ? '800' : '600') + ';color:' + wCol + ';', wtxt));
+    }
     return c;
   }
 
