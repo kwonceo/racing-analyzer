@@ -943,7 +943,7 @@ def _det_horse_note(h, race, leaders):
     if style:
         parts.append(f"각질 {style}")
     _, dd = distance_change_bonus(nh, race, style)
-    _, kd = jockey_change_bonus({**nh, "jockey": h.get("jockey", "")}, leaders)
+    _, kd = jockey_change_bonus({**nh, "jockey": h.get("jockey", "")}, leaders, rate_fn=_jockey_place_rate)
     _, wd = weight_change_bonus(nh)
     for seg in (dd + kd + wd):
         parts.append(seg)
@@ -1604,6 +1604,11 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
                 "styleType": h.get("styleType"),
                 # [날씨·불량주로] 저장된 pastRaces(condition) 있으면 즉시 계산, 없으면 사전계산값 전달
                 "badTrackRate": (bad_track_rate(h.get("pastRaces")) if h.get("pastRaces") else h.get("badTrackRate")),
+                # [전적확장·신규] 기수교체·궁합·조교사·마번 표시용 필드 전달(패널 노출)
+                "jockeyChangeBonus": h.get("jockeyChangeBonus"),
+                "synergyGrade": h.get("synergyGrade"), "synergyRate": h.get("synergyRate"),
+                "trainerName": h.get("trainerName"), "trainerRate": h.get("trainerRate"),
+                "postPosDelta": h.get("postPosDelta"),
             })
         classify_grades(scored)
         scored.sort(key=lambda x: -x["totalScore"])
@@ -10190,6 +10195,22 @@ def _pub_horse_why(no, an, role):
         _btr = fm.get("badTrackRate")
         if isinstance(_btr, (int, float)) and (_btr >= 40 or _btr <= 10):
             why.append(f"불량주로 {'강세' if _btr >= 40 else '약세'}(복승률 {_btr:.0f}%)")
+        # [1] 기수 교체 / [2] 기수-말 궁합 / [3] 조교사 / [4] 마번 유불리 — 전적확장 근거
+        _jcb = fm.get("jockeyChangeBonus")
+        if isinstance(_jcb, (int, float)) and _jcb >= 15:
+            why.append("⚡ 기수 교체 상향(승부의지)")
+        elif isinstance(_jcb, (int, float)) and _jcb <= -10:
+            why.append("⚠️ 기수 하향 교체")
+        _sg = fm.get("synergyGrade")
+        if _sg in ("A", "B"):
+            why.append(f"기수·말 궁합 {_sg}급" + (f"(복승률 {fm['synergyRate']:.0f}%)" if fm.get("synergyRate") is not None else ""))
+        elif _sg == "첫기승":
+            why.append("첫 기승 주목")
+        if fm.get("trainerRate") is not None and fm["trainerRate"] >= 40:
+            why.append(f"조교사 {fm.get('trainerName') or ''} 복승률 {fm['trainerRate']:.0f}% (우수)")
+        _ppd = fm.get("postPosDelta")
+        if isinstance(_ppd, (int, float)) and abs(_ppd) >= 6:
+            why.append(f"이 경주장 {no}번 마번 {'유리' if _ppd > 0 else '불리'} ({_ppd:+.0f}%p)")
     if role.get(no) == "cut":
         why.append("제거 권장(배당·전적 모두 약함)")
     r = f.get("rep")
@@ -17704,15 +17725,18 @@ def _keiba_build_form(shutsuba, details):
                "pastRaces": [{"weight": pr.get("weight")} for pr in past]}
         wbonus, wdetail = weight_change_bonus(nh2)
         last3f, l3note = _keiba_last3f_note(past)
-        gbonus, gdetail = grade_bonus(None, [pr.get("grade") for pr in past])          # [2번] 등급 경험/하락강자
+        gbonus, gdetail = grade_bonus(h.get("grade"), [pr.get("grade") for pr in past])  # [2·5] 등급 경험/하락강자 + 승급전(cur_grade 전달)
         debonus, dedetail, dexp = dist_exp_bonus(past, cur_dist)                       # [3번] 당거리 경험
         # [신규 개선] 마체중 변화 + 거리 적성(복승률) + 기수 복승률(거리·경주장 맥락)
         bwbonus, bwdetail, bwkg = body_weight_change_bonus(h.get("bodyWeight"), past)   # 마체중(부담중량과 별개)
         dabonus, dadetail, dagrade, darate = dist_aptitude_bonus(past, cur_dist)        # 거리 적성 A/B/C
         jkctx = _jp_jockey_rate_ctx(h.get("jockey"), cur_dist, cur_venue)               # 기수 복승률 맥락
         jkbonus, jkdetail = _jockey_rate_bonus(jkctx)
+        # [1·신규] 기수 교체(일본도 적용·일본 기수 복승률 기반) — past[0].jockey vs 현재 기수
+        _jknh = {"jockey": h.get("jockey", ""), "pastRaces": [{"jockey": pr.get("jockey")} for pr in past]}
+        kbonus, kdetail = jockey_change_bonus(_jknh, set(), rate_fn=_jp_jockey_place_rate)
         total = round(base + sbonus + dbonus + wbonus + gbonus + debonus
-                      + bwbonus + dabonus + jkbonus, 1)
+                      + bwbonus + dabonus + jkbonus + kbonus, 1)
         horses.append({
             "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "weight": h.get("weight"), "winOdds": h.get("winOdds"), "pop": h.get("pop"),
@@ -17725,9 +17749,10 @@ def _keiba_build_form(shutsuba, details):
             "distAptitude": dagrade, "distAptitudeRate": darate, "distAptitudeBonus": dabonus,
             "jockeyRate": jkctx.get("overall"), "jockeyDistRate": jkctx.get("dist"),
             "jockeyVenueRate": jkctx.get("venue"), "jockeyBonus": jkbonus,
+            "jockeyChangeBonus": kbonus,                    # [1] 기수 교체(패널 노출용)
             "totalScore": total,
             "detail": (sdetail + ddetail + wdetail + gdetail + dedetail
-                       + bwdetail + dadetail + jkdetail + ([l3note] if l3note else [])),
+                       + bwdetail + dadetail + jkdetail + kdetail + ([l3note] if l3note else [])),
             "past": past,
         })
     _apply_back_power(horses)                     # [3번] 뒷힘(상3F 상대) 보정 + 거리미경험·뒷힘강점 플래그
@@ -18592,6 +18617,27 @@ def kra_race_detail():
                     "rc_no": rc_no or None, "horses": horses})
 
 
+@app.route("/api/form-ext/stats", methods=["GET"])
+def form_ext_stats_api():
+    """[전적확장 통계] 기수-말 궁합·조교사 전략·마번 유불리 요약. params: {jockey?, horse?, trainer?, meet?, no?}."""
+    st = _form_ext_stats()
+    q = request.args or {}
+    out = {"counts": {"synergy": len(st.get("synergy") or {}), "trainer": len(st.get("trainer") or {}),
+                      "postPos": len(st.get("postPos") or {})},
+           "postPosBase": st.get("postPosBase")}
+    if q.get("jockey") and q.get("horse"):
+        b, d, g, r = jockey_horse_synergy_bonus(q.get("jockey"), q.get("horse"))
+        out["synergy"] = {"grade": g, "rate": r, "bonus": b, "detail": d}
+    if q.get("trainer"):
+        out["trainer"] = trainer_strategy_ctx(q.get("trainer"))
+    if q.get("meet") and q.get("no"):
+        try:
+            out["postPos"] = post_position_ctx(int(q.get("meet")), int(q.get("no")))
+        except (TypeError, ValueError):
+            pass
+    return jsonify(out)
+
+
 @app.route("/api/kra/jockey", methods=["GET", "POST"])
 def kra_jockey():
     """[KRA 현직기수정보] 기수 복승률(1+2착)·삼착률·통산 성적. params: {meet, name?(필터)}."""
@@ -19178,8 +19224,11 @@ def _jra_build_form(shutuba):
         dabonus, dadetail, dagrade, darate = dist_aptitude_bonus(past, cur_dist)
         jkctx = _jp_jockey_rate_ctx(h.get("jockey"), cur_dist, cur_venue)
         jkbonus, jkdetail = _jockey_rate_bonus(jkctx)
+        # [1·신규] 기수 교체(중앙경마도 적용·일본 기수 복승률 기반)
+        _jknh = {"jockey": h.get("jockey", ""), "pastRaces": [{"jockey": pr.get("jockey")} for pr in past]}
+        kbonus, kdetail = jockey_change_bonus(_jknh, set(), rate_fn=_jp_jockey_place_rate)
         total = round(base + sbonus + dbonus + wbonus + gbonus + debonus
-                      + bwbonus + dabonus + jkbonus, 1)
+                      + bwbonus + dabonus + jkbonus + kbonus, 1)
         horses.append({
             "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "weight": h.get("weight"), "recentPlacings": placings[:5], "baseScore": base,
@@ -19189,9 +19238,10 @@ def _jra_build_form(shutuba):
             "distAptitude": dagrade, "distAptitudeRate": darate, "distAptitudeBonus": dabonus,
             "jockeyRate": jkctx.get("overall"), "jockeyDistRate": jkctx.get("dist"),
             "jockeyVenueRate": jkctx.get("venue"), "jockeyBonus": jkbonus,
+            "jockeyChangeBonus": kbonus,                    # [1] 기수 교체(패널 노출용)
             "totalScore": total,
             "detail": (sdetail + ddetail + wdetail + gdetail + dedetail
-                       + bwdetail + dadetail + jkdetail + ([l3note] if l3note else [])),
+                       + bwdetail + dadetail + jkdetail + kdetail + ([l3note] if l3note else [])),
             "past": past,
         })
     _apply_back_power(horses)                     # [3번] 뒷힘(상3F 상대) + 거리미경험·뒷힘강점 플래그
@@ -19616,19 +19666,35 @@ def _leader_jockeys(jstats, top_frac=0.2):
     return {n for n, r in rated if r >= thresh}
 
 
-def jockey_change_bonus(horse, leader_names):
-    """직전 기수 vs 이번 기수. 리딩기수로 교체 +10, 리딩→무명 강등 -5. 동일/미상/일반교체 0."""
+def jockey_change_bonus(horse, leader_names, rate_fn=None):
+    """[1] 기수 교체 감지. 직전 기수 vs 이번 기수.
+    ▸ rate_fn(기수명→복승률) 제공 시 복승률 기반 판정 우선: 일반→상위(30%+) +15 / 상위→일반(10%↓) -10.
+    ▸ rate_fn 없거나 판정 불가 시 기존 리딩기수 set 방식(무삭제) — 리딩 상향 +15 / 하향 -10.
+    ▸ 첫 기승(직전 기수 미상=이 말 첫 조합) → 중립 '첫 기승 주목'. 동일 기수 → 0."""
     cur = str(horse.get("jockey", "")).strip()
     prs = horse.get("pastRaces") or []
     last_j = str((prs[0].get("jockey") or "")).strip() if prs else str(horse.get("lastJockey") or "").strip()
-    if not cur or not last_j or cur == last_j:
+    if not cur:
         return 0, []
+    if not last_j:                                       # 직전 기수 미상 = 이 말+기수 첫 조합
+        return 0, ["첫 기승 주목"]
+    if cur == last_j:
+        return 0, []
+    # [확장·복승률 기반] rate_fn 으로 상위(30%+)/하위(10%↓) 판정
+    if rate_fn is not None:
+        cr, lr = rate_fn(cur), rate_fn(last_j)
+        if isinstance(cr, (int, float)) and isinstance(lr, (int, float)) and (cr > 0 or lr > 0):
+            if cr >= 30 and lr < 30:
+                return 15, [f"⚡ 기수 교체! {last_j}→{cur} (승부의지 상향·복승률 {cr:.0f}%) +15"]
+            if lr >= 30 and cr <= 10:
+                return -10, [f"⚠️ 기수 하향 교체 {last_j}→{cur} (복승률 {lr:.0f}%→{cr:.0f}%) -10"]
+    # [기존·리딩기수 set] rate_fn 없거나 판정 불가 시(무삭제)
     ln = leader_names or set()
     if cur in ln and last_j not in ln:
-        return 10, [f"리딩기수 교체({last_j}→{cur})+10"]
+        return 15, [f"⚡ 기수 교체! {last_j}→{cur} (리딩기수 상향) +15"]
     if last_j in ln and cur not in ln:
-        return -5, [f"무명기수 교체({last_j}→{cur})-5"]
-    return 0, [f"기수교체({last_j}→{cur})"]
+        return -10, [f"⚠️ 기수 하향 교체({last_j}→{cur}) -10"]
+    return 0, [f"기수 교체({last_j}→{cur})"]
 
 
 # ── 3-4b 부담중량 변화 보너스 [5] ──────────────
@@ -19741,10 +19807,10 @@ def grade_bonus(cur_grade, past_grades):
     if cr is not None and lr is not None and cr != lr:
         if cr > lr:                      # rank 커짐 = 하위 등급으로 하락 = 상위에서 내려온 강자
             bonus += 15
-            detail.append("등급 하락(상위→하위·강자) +15")
+            detail.append("✅ 강급 출전(상위→하위·강자) +15")   # [5] 승급전 감지·표시
         else:                            # 상위 등급으로 상승 = 적응 중
             bonus -= 5
-            detail.append("등급 상승(하위→상위·적응중) -5")
+            detail.append("⚠️ 승급전 첫 도전(하위→상위·적응중) -5")   # [5] 승급전 감지·표시
     return bonus, detail
 
 
@@ -19797,6 +19863,174 @@ def bad_track_rate(past_races):
     if len(placings) < 2:
         return None
     return round(sum(1 for p in placings if p <= 2) / len(placings) * 100, 1)
+
+
+# ══════════════ [전적 확장 통계·신규] 기수-말 궁합·조교사 전략·마번 유불리 ══════════════
+#   KRA 이력(kra_history.json·647경주+)을 한 번 스캔해 3종 통계 집계 → 분석 시 조회(mtime 캐시).
+#   ⚠ 착순=rcTime 오름차순(KRA stOrd 는 게이트/출발위치라 착순 아님). 복승권=1·2착.
+_FORM_EXT_STATS = None
+_FORM_EXT_SRC_MTIME = None
+
+
+def _kra_race_placings(race):
+    """KRA 경주 1건 → rcTime 오름차순 착순 맵 {마번:착순}. rcTime 없는 말 제외."""
+    rows = []
+    for h in (race.get("horses") or []):
+        sec = _kra_rctime_sec(h.get("rcTime"))
+        no = h.get("no")
+        if sec and no is not None:
+            try:
+                rows.append((int(no), float(sec)))
+            except (TypeError, ValueError):
+                pass
+    rows.sort(key=lambda x: x[1])
+    return {no: i + 1 for i, (no, _s) in enumerate(rows)}
+
+
+def _date_diff_days(d1, d2):
+    """'20260620' 형식 두 날짜의 일수 차(d2-d1). 파싱 실패 시 None."""
+    try:
+        import datetime as _dt
+        a = _dt.date(int(d1[:4]), int(d1[4:6]), int(d1[6:8]))
+        b = _dt.date(int(d2[:4]), int(d2[4:6]), int(d2[6:8]))
+        return (b - a).days
+    except Exception:
+        return None
+
+
+def _form_ext_build():
+    """KRA 이력 스캔 → {synergy, trainer, postPos} 통계. 표본 하한 적용(궁합2·조교사5·마번5)."""
+    hist = _kra_load_history() or {}
+    races = hist.get("races") or {}
+    synergy, trainer, postpos = {}, {}, {}
+    horse_last_date, horse_trainer = {}, {}
+    ordered = sorted(races.values(), key=lambda r: str(r.get("date") or ""))
+    for r in ordered:
+        meet = r.get("meet")
+        date = str(r.get("date") or "")
+        pl = _kra_race_placings(r)
+        if not pl:
+            continue
+        for h in (r.get("horses") or []):
+            no = h.get("no")
+            if no is None:
+                continue
+            try:
+                no = int(no)
+            except (TypeError, ValueError):
+                continue
+            rank = pl.get(no)
+            if rank is None:
+                continue
+            jk = str(h.get("jkName") or "").strip()
+            hr = str(h.get("hrName") or "").strip()
+            tr = str(h.get("trName") or "").strip()
+            if jk and hr:                                        # [2] 기수-말 궁합
+                synergy.setdefault(jk + "|" + hr, []).append(rank)
+            if tr:                                               # [3] 조교사 전체 + 출전간격버킷
+                t = trainer.setdefault(tr, {"pl": [], "gap": {}})
+                t["pl"].append(rank)
+                if hr:
+                    gap = _date_diff_days(horse_last_date.get(hr, ""), date) if horse_last_date.get(hr) and date else None
+                    if gap is not None and gap >= 0:
+                        bk = "le7" if gap <= 7 else ("le14" if gap <= 14 else ("le21" if gap <= 21 else "gt21"))
+                        t["gap"].setdefault(bk, []).append(rank)
+            if meet is not None:                                 # [4] 마번(경주장별)
+                postpos.setdefault(str(meet) + "|" + str(no), []).append(rank)
+            if hr and tr:                                         # 말→최근 조교사(날짜순 마지막=최근)
+                horse_trainer[hr] = tr
+            if hr and date:
+                horse_last_date[hr] = date
+
+    def _rate(pls):
+        n = len(pls)
+        return {"rate": round(sum(1 for p in pls if p <= 2) / n * 100, 1), "n": n} if n else None
+    out = {"synergy": {}, "trainer": {}, "postPos": {}, "postPosBase": {}, "horseTrainer": horse_trainer}
+    for k, v in synergy.items():
+        if len(v) >= 2:
+            out["synergy"][k] = _rate(v)
+    for k, v in trainer.items():
+        if len(v["pl"]) >= 5:
+            rec = _rate(v["pl"])
+            rec["byGap"] = {bk: _rate(pls) for bk, pls in v["gap"].items() if len(pls) >= 3}
+            out["trainer"][k] = rec
+    # 마번: 경주장별 마번 복승률 + 경주장 평균(기준선) → 유불리는 편차로 판단
+    meet_all = {}
+    for k, v in postpos.items():
+        if len(v) >= 5:
+            out["postPos"][k] = _rate(v)
+        m = k.split("|")[0]
+        meet_all.setdefault(m, []).extend(v)
+    for m, v in meet_all.items():
+        if v:
+            out["postPosBase"][m] = round(sum(1 for p in v if p <= 2) / len(v) * 100, 1)
+    return out
+
+
+def _form_ext_stats():
+    """캐시된 전적 확장 통계 반환(kra_history mtime 변경 시 자동 재빌드)."""
+    global _FORM_EXT_STATS, _FORM_EXT_SRC_MTIME
+    try:
+        mt = os.path.getmtime(KRA_HISTORY_FILE) if os.path.exists(KRA_HISTORY_FILE) else 0
+    except Exception:
+        mt = 0
+    if _FORM_EXT_STATS is None or _FORM_EXT_SRC_MTIME != mt:
+        try:
+            _FORM_EXT_STATS = _form_ext_build()
+            _FORM_EXT_SRC_MTIME = mt
+        except Exception as e:
+            print("[전적확장통계] 빌드 실패:", e)
+            _FORM_EXT_STATS = _FORM_EXT_STATS or {"synergy": {}, "trainer": {}, "postPos": {}, "postPosBase": {}}
+    return _FORM_EXT_STATS
+
+
+def jockey_horse_synergy_bonus(jockey, horse_name):
+    """[2] 기수-말 궁합 — KRA 이력 조합 복승권율. A(40%+)+15 / B(20~40%)+5 / C(20%↓)-5 / 첫기승 표시.
+    반환 (bonus, detail, grade, rate). 표본 없으면 첫 기승(중립)."""
+    jk = str(jockey or "").strip()
+    hr = str(horse_name or "").strip()
+    if not jk or not hr:
+        return 0, [], None, None
+    rec = (_form_ext_stats().get("synergy") or {}).get(jk + "|" + hr)
+    if not rec:
+        return 0, ["첫 기승 주목(궁합 데이터 없음)"], "첫기승", None
+    rt, n = rec["rate"], rec["n"]
+    if rt >= 40:
+        return 15, [f"기수·말 궁합 A급(복승률 {rt}%·{n}회) +15"], "A", rt
+    if rt >= 20:
+        return 5, [f"기수·말 궁합 B급(복승률 {rt}%·{n}회) +5"], "B", rt
+    return -5, [f"기수·말 궁합 C급(복승률 {rt}%·{n}회) -5"], "C", rt
+
+
+def trainer_strategy_ctx(trainer, gap_days=None):
+    """[3] 조교사 전략 — 조교사 전체 복승률 + (있으면) 출전간격버킷 복승률. 표시용 컨텍스트 반환.
+    반환 {rate, n, gapRate, gapLabel} 또는 None(데이터 없음)."""
+    tr = str(trainer or "").strip()
+    if not tr:
+        return None
+    rec = (_form_ext_stats().get("trainer") or {}).get(tr)
+    if not rec:
+        return None
+    ctx = {"rate": rec["rate"], "n": rec["n"], "gapRate": None, "gapLabel": None}
+    if gap_days is not None:
+        bk = "le7" if gap_days <= 7 else ("le14" if gap_days <= 14 else ("le21" if gap_days <= 21 else "gt21"))
+        g = (rec.get("byGap") or {}).get(bk)
+        if g:
+            _lab = {"le7": "7일 이내", "le14": "14일", "le21": "21일", "gt21": "21일+"}[bk]
+            ctx["gapRate"], ctx["gapLabel"] = g["rate"], _lab
+    return ctx
+
+
+def post_position_ctx(meet, no):
+    """[4] 마번 유불리 — 경주장별 마번 복승률 vs 경주장 평균 편차. 반환 {rate, base, delta, n} 또는 None."""
+    if meet is None or no is None:
+        return None
+    st = _form_ext_stats()
+    rec = (st.get("postPos") or {}).get(str(meet) + "|" + str(no))
+    base = (st.get("postPosBase") or {}).get(str(meet))
+    if not rec or base is None:
+        return None
+    return {"rate": rec["rate"], "base": base, "delta": round(rec["rate"] - base, 1), "n": rec["n"]}
 
 
 # ── 3-3e 뒷힘(상승3F) [3번] ──────────────────
@@ -19900,6 +20134,13 @@ def score_horses_raw(race, horses, jockey_threshold=None, leader_names=None):
     거리·기수교체·부담중량 보너스는 pastRaces 가 있을 때만 값이 생기고, 없으면 0 → 기존 동작 그대로."""
     if jockey_threshold is None:
         jockey_threshold = top20_threshold([h.get("jockey3mPlaceRate") for h in horses])
+    # [전적확장·신규] 경주장(meet) 도출(마번 유불리용) + KRA 이력 통계(궁합·조교사·마번)
+    _meet = race.get("meet")
+    if _meet is None:
+        _mt = _area_num(str(race.get("track") or race.get("venue") or race.get("raceKey") or ""))
+        _meet = {"서울": 1, "제주": 2, "부산": 3, "부경": 3}.get(_mt[0] if _mt else "", None)
+    _ext = _form_ext_stats()
+    _htr = _ext.get("horseTrainer") or {}
     scored = []
     for h in horses:
         placings = _placings_of(h)
@@ -19908,22 +20149,44 @@ def score_horses_raw(race, horses, jockey_threshold=None, leader_names=None):
         jb, jd = jockey_bonus(h, jockey_threshold)
         style = _running_style(h)                              # [2] 각질 추정
         db_, dd = distance_change_bonus(h, race, style)        # [3] 거리 변화
-        kb, kd = jockey_change_bonus(h, leader_names)          # [4] 기수 교체
+        kb, kd = jockey_change_bonus(h, leader_names, rate_fn=_jockey_place_rate)   # [1] 기수 교체(복승률 기반)
         wb, wd = weight_change_bonus(h)                        # [5] 부담중량 변화
         # [등급/당거리 보정] 등급 경험·하락강자 + 당거리 정확경험(뒷힘은 상3F 있는 지방/중앙 build_form 에서)
         past_grades = [pr.get("grade") for pr in (h.get("pastRaces") or [])]
-        gb, gd = grade_bonus(h.get("grade") or race.get("grade"), past_grades)   # [2] 등급 체계
+        gb, gd = grade_bonus(h.get("grade") or race.get("grade"), past_grades)   # [2·5] 등급 체계+승급전
         deb, ded, dexp = dist_exp_bonus(h.get("pastRaces"), race.get("distance"))  # [3] 당거리 경험
+        # [2·신규] 기수-말 궁합 / [3] 조교사 전략 / [4] 마번 유불리 (KRA 이력 기반·한국경마)
+        _nm = h.get("name", "")
+        syn_b, syn_d, syn_g, syn_r = jockey_horse_synergy_bonus(h.get("jockey"), _nm)
+        _trn = h.get("trainer") or _htr.get(_nm)
+        _trctx = trainer_strategy_ctx(_trn)
+        tr_b, tr_d = 0, []
+        if _trctx:
+            if _trctx["rate"] >= 40:
+                tr_b = 5; tr_d = [f"조교사 {_trn}: 복승률 {_trctx['rate']:.0f}% (우수) +5"]
+            elif _trctx["rate"] <= 12:
+                tr_b = -3; tr_d = [f"조교사 {_trn}: 복승률 {_trctx['rate']:.0f}% (저조) -3"]
+        _ppctx = post_position_ctx(_meet, h.get("no"))
+        pp_b, pp_d = 0, []
+        if _ppctx and _ppctx["n"] >= 8:
+            if _ppctx["delta"] >= 6:
+                pp_b = 4; pp_d = [f"이 경주장 {h.get('no')}번 마번 유리 (+{_ppctx['delta']:.0f}%p)"]
+            elif _ppctx["delta"] <= -6:
+                pp_b = -4; pp_d = [f"이 경주장 {h.get('no')}번 마번 불리 ({_ppctx['delta']:.0f}%p)"]
         flags = special_flags(h, race)
         scored.append({
-            "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
+            "no": h.get("no"), "name": _nm, "jockey": h.get("jockey", ""),
             "recentPlacings": placings[:5],
             "baseScore": base, "courseBonus": cb, "jockeyBonus": jb,
             "distanceBonus": db_, "jockeyChangeBonus": kb, "weightBonus": wb,
             "gradeBonus": gb, "distExpBonus": deb, "distExperienced": dexp,
             "runningStyle": style,
-            "totalScore": round(base + cb + jb + db_ + kb + wb + gb + deb, 1),
-            "detail": cd + jd + dd + kd + wd + gd + ded, "flags": flags,
+            # [신규 전적확장] 궁합·조교사·마번 보정 + 표시용 컨텍스트
+            "synergyBonus": syn_b, "synergyGrade": syn_g, "synergyRate": syn_r,
+            "trainerBonus": tr_b, "trainerName": _trn, "trainerRate": (_trctx or {}).get("rate") if _trctx else None,
+            "postPosBonus": pp_b, "postPosDelta": (_ppctx or {}).get("delta") if _ppctx else None,
+            "totalScore": round(base + cb + jb + db_ + kb + wb + gb + deb + syn_b + tr_b + pp_b, 1),
+            "detail": cd + jd + dd + kd + wd + gd + ded + syn_d + tr_d + pp_d, "flags": flags,
             "anomaly": h.get("anomaly"),
             "badTrackRate": bad_track_rate(h.get("pastRaces")),   # [날씨] 과거 불량주로 복승권율(pastRaces condition)
         })

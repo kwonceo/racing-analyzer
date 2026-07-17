@@ -1,0 +1,97 @@
+{
+ "races": 294,
+ "byRank": {
+  "rank1": {
+   "hit": 24,
+   "total": 73,
+   "rate": 32.9
+  },
+  "rank2": {
+   "hit": 12,
+   "total": 43,
+   "rate": 27.9
+  },
+  "rank3": {
+   "hit": 6,
+   "total": 28,
+   "rate": 21.4
+  }
+ },
+ "bySignal": {
+  "🔄 크로스역배열 크로스역배열": {
+   "hit": 34,
+   "total": 104,
+   "rate": 32.7,
+   "weightReady": true
+  },
+  "역배열": {
+   "hit": 8,
+   "total": 24,
+   "rate": 33.3,
+   "weightReady": false
+  },
+  "초기급락 보존": {
+   "hit": 0,
+   "total": 11,
+   "rate": 0.0,
+   "weightReady": false
+  },
+  "급락": {
+   "hit": 0,
+   "total": 3,
+   "rate": 0.0,
+   "weightReady": false
+  },
+  "스마트머니": {
+   "hit": 0,
+   "total": 2,
+   "rate": 0.0,
+   "weightReady": false
+  }
+ },
+ "byBand": {
+  "50~100": {
+   "hit": 2,
+   "total": 5,
+   "rate": 40.0,
+   "weightReady": false
+  },
+  "15~30": {
+   "hit": 5,
+   "total": 24,
+   "rate": 20.8,
+   "weightReady": false
+  },
+  "30~50": {
+   "hit": 2,
+   "total": 11,
+   "rate": 18.2,
+   "weightReady": false
+  },
+  "100+": {
+   "hit": 0,
+   "total": 2,
+   "rate": 0.0,
+   "weightReady": false
+  }
+ },
+ "bySport": {
+  "keiba": {
+   "hit": 42,
+   "total": 144,
+   "rate": 29.2,
+   "weightReady": true
+  }
+ },
+ "missedRaces": 62,
+ "dansung": {
+  "races": 0,
+  "horseWonRate": 0,
+  "horseWon": 0,
+  "horsePlaced": 0,
+  "darkHitRate": 0,
+  "darkHit": 0,
+  "winnerSignals": {}
+ },
+ "updated_at": "2026-07-17 16:54:17"
+}

@@ -1,21 +1,21 @@
 {
- "race_id": "2026_07_17_나고야_6경주",
- "raceKey": "2026-07-17 나고야 6경주",
+ "race_id": "2026_07_17_세이부엔_5경주",
+ "raceKey": "세이부엔 5경주",
  "sport": "horse",
  "category": "japan_local",
  "date": "2026-07-17",
- "race": "나고야 6경주",
- "analyzed_at": "08:30:07",
- "updated_at": "17:11:50",
+ "race": "세이부엔 5경주",
+ "analyzed_at": "17:12:33",
+ "updated_at": "17:16:53",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
   "image_file": null,
-  "odds_source": "asyukk34 Chrome확장 자동수집"
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
  },
  "odds_timeline": [
   {
-   "time": "17:11:49",
+   "time": "17:16:51",
    "minutes_before": null,
    "quinella": {
     "3+9": 5.8,
@@ -637,45 +637,8 @@
   9,
   1
  ],
- "result": {
-  "1st": 4,
-  "2nd": 5,
-  "3rd": 6
- },
- "hit": {
-  "was_hit": false,
-  "quinella_hit": false,
-  "trifecta_hit": false,
-  "keyhorse_quinella_hit": false,
-  "keyhorse_trifecta_hit": false,
-  "keyhorse_placed": [],
-  "dark_placed": [],
-  "payouts": {
-   "quinella": 0,
-   "trifecta": 0
-  },
-  "anomaly_was_correct": false,
-  "signal_correct": [],
-  "elimination_correct": false,
-  "eliminated": [],
-  "form_pick": null,
-  "form_pick_hit": false,
-  "pnl": 0,
-  "stake": 1000,
-  "near_miss": false,
-  "near_miss_horse": null,
-  "pairing_miss": null,
-  "hit_basis": {
-   "formScore": null,
-   "dropAmt": null,
-   "dropScore": 0,
-   "inverse": false,
-   "inverseHorses": [],
-   "inverseHit": [],
-   "confidence": 0,
-   "reason": "추천 미적중"
-  }
- },
+ "result": null,
+ "hit": null,
  "profit": null,
  "review": null
 }
