@@ -342,7 +342,7 @@
   // ═══════════════════════════════════════════════════════════════════
   //  사이트 자동 감지 + 범용 배당 매트릭스 파서
   //  ---------------------------------------------------------------------
-  //  keiba.go.jp 외에 asyukk34.qwqwd25.net(사설 배당판, class=odds_table/
+  //  keiba.go.jp 외에 ks1.dke-d11diw.site(사설 배당판, class=odds_table/
   //  odds_content) 등 사이트마다 DOM 이 달라, URL 로 사이트를 감지해 파서를
   //  분기한다. 미지의 사이트는 "표 안의 마번 축 + 숫자 셀" 패턴으로 범용 파싱.
   // ═══════════════════════════════════════════════════════════════════
@@ -351,7 +351,7 @@
   function detectSite() {
     const h = location.host;
     if (/(^|\.)keiba\.go\.jp$/.test(h)) return 'keiba';
-    if (/asyukk|qwqwd/i.test(h)) return 'asyukk';
+    if (/asyukk|qwqwd|dke-d11diw/i.test(h)) return 'asyukk';
     return 'generic';
   }
 

@@ -126,7 +126,7 @@ function checkServer() {
 
 // ── 활성 탭의 content script 로 메시지 (지원 배당판 사이트인지 확인) ────
 //    keiba.go.jp + 사설 배당판(asyukk/qwqwd) 모두 허용
-const SUPPORTED_SITE = /keiba\.go\.jp|asyukk|qwqwd/i;
+const SUPPORTED_SITE = /keiba\.go\.jp|asyukk|qwqwd|dke-d11diw/i;
 async function activeKeibaTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab || !SUPPORTED_SITE.test(tab.url || '')) return null;

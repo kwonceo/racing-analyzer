@@ -861,7 +861,7 @@
     }
 
     function locateBoardMatrix() {
-      var oddsClass = /asyukk|qwqwd/i.test(location.host) ? 'odds_content' : null;
+      var oddsClass = /asyukk|qwqwd|dke-d11diw/i.test(location.host) ? 'odds_content' : null;
       var best = null, tables;
       try { tables = document.querySelectorAll('table'); } catch (_) { return null; }
       for (var ti = 0; ti < tables.length; ti++) {
