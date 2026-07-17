@@ -7087,6 +7087,96 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
             final_t.append({"combo": list(_mk), "odds": _mkt_ins.get("odds"),
                             "reason": _mkt_ins["reason"], "marketInsurance": True})
 
+    # ══════════════ [축 2마리 전략·신규] 핵심 축 2두 + 연결마 조합 ══════════════
+    #   문제: 1순위 말만 축 → 탈락 시 전부 미적중. 해결: 축 2두(축1=signalScore1위+배당최저, 축2=signalScore2위 or 전적A 1위)
+    #   복승 ①축1+축2 ②축1+연결1 ③축1+연결2 ④축2+연결1 ⑤축2+연결2 (연결마끼리 복승 제거·복병 복승만 예외).
+    #   연결마 = 복병감지+역배열 최대 2두. 삼복승 = 축1+축2+연결1 / 축1+축2+연결2.
+    #   ⚠ 기존 final_q/final_t 는 폴백 보존(무삭제) — axisPlan 을 별도 필드로 부가(패널이 우선 표시).
+    axis_plan = None
+    try:
+        def _score(_no):
+            return float((_mh(_no).get("score")) or 0)
+        # 축1 = signalScore 최고, 동점이면 배당 최저(대표배당 낮은순)
+        _rep = {}
+        for (_ra, _rb), _ro in (curQ or {}).items():
+            try:
+                _ra, _rb, _ro = int(_ra), int(_rb), float(_ro)
+            except Exception:
+                continue
+            if _ro <= 0 or (vs and (_ra not in vs or _rb not in vs)):
+                continue
+            if _rep.get(_ra) is None or _ro < _rep[_ra]:
+                _rep[_ra] = _ro
+            if _rep.get(_rb) is None or _ro < _rep[_rb]:
+                _rep[_rb] = _ro
+        _cands = list(_rep.keys())
+        if len(_cands) >= 3:
+            # 단승(win) 배당 = 시장 유력도(낮을수록 유력). 축1 tiebreak 에 사용.
+            _win = {}
+            for _k, _v in (cp.get("single") or {}).items():
+                try:
+                    _win[int(_k)] = float(_v)
+                except (TypeError, ValueError):
+                    pass
+            # signalScore 내림차순 → 동점 시 단승배당 오름차순 → 대표배당 오름차순(진짜 유력마가 축1)
+            _ranked = sorted(_cands, key=lambda n: (-_score(n), _win.get(n, 9e9), _rep.get(n, 9e9)))
+            _axis1 = _ranked[0]
+            # 축2 = signalScore 2위. 전적 A급 1위가 있으면(cp.formTopA) 우선.
+            _axis2 = None
+            _formA = [int(n) for n in (cp.get("formTopA") or []) if int(n) != _axis1 and (not vs or int(n) in vs)]
+            if _formA and _rep.get(_formA[0]) is not None:
+                _axis2 = _formA[0]
+            if _axis2 is None:
+                _axis2 = next((n for n in _ranked[1:] if n != _axis1), None)
+            # 연결마 = 복병·역배열 감지 말(축 제외) 최대 2두 — 대표배당 낮은순
+            _links = []
+            for n in _ranked:
+                if n in (_axis1, _axis2):
+                    continue
+                m = _mh(n)
+                if m.get("dark") or m.get("rev") or m.get("smart") or (m.get("drop") is not None and abs(m.get("drop") or 0) >= 8):
+                    _links.append(n)
+                if len(_links) >= 2:
+                    break
+            if not _links:                                   # 신호 연결마 없으면 배당 낮은 아웃사이더로 보강
+                _links = [n for n in _ranked if n not in (_axis1, _axis2)][:2]
+            _l1 = _links[0] if _links else None
+            _l2 = _links[1] if len(_links) > 1 else None
+
+            def _qo(a, b):
+                return (curQ or {}).get((min(a, b), max(a, b))) or (curQ or {}).get((max(a, b), min(a, b)))
+
+            def _qi(a, b, label, rank):
+                if a is None or b is None or a == b:
+                    return None
+                return {"combo": sorted([a, b]), "odds": _qo(a, b), "label": label, "rank": rank}
+            # 복승 5조합 (연결마끼리 제외)
+            _qs = [_qi(_axis1, _axis2, "축1+축2", 1), _qi(_axis1, _l1, "축1+연결1", 2),
+                   _qi(_axis1, _l2, "축1+연결2", 3), _qi(_axis2, _l1, "축2+연결1", 4),
+                   _qi(_axis2, _l2, "축2+연결2", 5)]
+            _seenq, _qlist = set(), []
+            for q in _qs:
+                if not q or q.get("odds") is None:
+                    continue
+                k = tuple(q["combo"])
+                if k in _seenq:
+                    continue
+                _seenq.add(k); _qlist.append(q)
+            # 삼복승 축1+축2+연결
+            _tris = []
+            for lk, lab in [(_l1, "축1+축2+연결1"), (_l2, "축1+축2+연결2")]:
+                if lk is not None and lk not in (_axis1, _axis2):
+                    _tris.append({"combo": sorted([_axis1, _axis2, lk]), "odds": _qo(_axis1, _axis2), "label": lab})
+            if _axis2 is not None and _qlist:
+                axis_plan = {
+                    "axis1": _axis1, "axis2": _axis2, "links": [x for x in [_l1, _l2] if x is not None],
+                    "axis1Score": round(_score(_axis1), 1), "axis2Score": round(_score(_axis2), 1),
+                    "quinellas": _qlist, "trifectas": _tris,
+                    "title": "🎯 핵심 축: %d번·%d번" % (_axis1, _axis2),
+                }
+    except Exception as _ae:
+        print("[축2전략] 산출 실패(무시):", _ae)
+
     # ══════════════ [단통 경주 근본 수정·복승 중심] 단통말 위험신호 처리 ══════════════
     #   회원 배팅 패턴(복승 80%·삼복승 20%)에 맞춰 복승 중심으로 재편성. 단통말(최저배당 과쏠림 1위)은
     #   메인 복승에서 제외(삼복승 보험에만)하고, 실질 유력(2·3위)+복병으로 복승 2~3개 + 복병 복승 1개 필수.
@@ -7185,7 +7275,8 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
             final_q = _new_q[:max(max_q, 3)]
 
     return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
-            "dansung": DANSUNG, "dansungMinOdds": _min_q, "dansungPlan": dansung_plan}
+            "dansung": DANSUNG, "dansungMinOdds": _min_q, "dansungPlan": dansung_plan,
+            "axisPlan": axis_plan}
 
 
 DARK_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_cases.json")
@@ -9350,11 +9441,21 @@ def _triple_analyze(rk, rec):
             else:
                 _mainmax = 6
             _maxq = _quinella_target(_nh, bool(chaotic and chaotic.get("detected")))   # (기존 산출 보존·삼복승 혼전 참조용)
+            # [축2전략] 전적 A급 순위(축2 선정용) 주입 — form 총점 A등급 상위 마번.
+            try:
+                _fa = [int(h.get("no")) for h in (form or [])
+                       if h.get("no") is not None and str(h.get("grade") or "").upper() == "A"]
+                core_picks["formTopA"] = _fa[:3]
+            except Exception:
+                core_picks["formTopA"] = []
+            # [축2전략] 단승(win) 배당맵 주입 — 축1/축2 시장최저 tiebreak용(반환 dict의 single 은 이 호출 이후 세팅되므로 미리 주입).
+            core_picks["single"] = {str(k): v for k, v in (curWin or {}).items()}
             _fp = _final_picks(core_picks, curQ, _rec_valid, smart_quinella, max_q=_mainmax,
                                reversal_quinellas=_rev_q, dark_quinellas=_dark_q,
                                signal_horses=_sig_h, sig_meta=_sig_meta, sport=_analyze_sport)
             core_picks["finalQuinellas"] = _fp["quinellas"]
             core_picks["finalTrifectas"] = _fp["trifectas"]
+            core_picks["axisPlan"] = _fp.get("axisPlan")           # [축2전략] 핵심 축2두+연결마 복승5조합·삼복승(패널 우선 표시)
             core_picks["bmedSpecial"] = _fp.get("bmedSpecial") or []   # [BMED 특별 감지] 고배당+강신호 별도 섹션(★★)
             core_picks["dansung"] = bool(_fp.get("dansung"))       # [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
             core_picks["dansungMinOdds"] = _fp.get("dansungMinOdds")   # [단통] 최저복승 배당(경고 표시용)
@@ -10045,8 +10146,25 @@ def _pub_recommendation(an, role):
                              if dp.get("darkQuinella") else None),
             "trifectaInsurance": ["+".join(str(x) for x in t.get("combo") or []) for t in (dp.get("trifectaInsurance") or [])],
         }
+    # [축2전략] 핵심 축2두 + 연결마 복승5조합 (패널 우선 표시)
+    axis = None
+    ap = (an.get("corePicks") or {}).get("axisPlan")
+    if ap and ap.get("quinellas"):
+        def _atxt(q):
+            c = q.get("combo") or []
+            return "+".join(str(x) for x in c) + (f" ({q['odds']}배)" if q.get("odds") else "")
+        axis = {
+            "title": ap.get("title"),
+            "axis1": ap.get("axis1"), "axis2": ap.get("axis2"),
+            "links": ap.get("links") or [],
+            "axis1Score": ap.get("axis1Score"), "axis2Score": ap.get("axis2Score"),
+            "quinella": [{"text": _atxt(q), "label": q.get("label"), "rank": q.get("rank")}
+                         for q in (ap.get("quinellas") or [])],
+            "trifecta": [{"text": "+".join(str(x) for x in (t.get("combo") or [])), "label": t.get("label")}
+                         for t in (ap.get("trifectas") or [])],
+        }
     return {"main": main, "trifecta": trifecta, "special": special,
-            "dark_horse": dark, "dark_combo": dark_combo, "dansung": dansung,
+            "dark_horse": dark, "dark_combo": dark_combo, "dansung": dansung, "axis": axis,
             "reasons": uniq[:6], "locked": locked}
 
 

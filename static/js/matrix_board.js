@@ -160,6 +160,34 @@
     return c;
   }
 
+  // ── 🎯 핵심 축 2두 전략 (축1·축2 + 연결마 복승 5조합) ──────────────
+  //   1순위 말만 축으로 쓰면 탈락 시 전멸 → 축 2두로 분산. 복승 ①축1+축2 ②③축1+연결 ④⑤축2+연결.
+  function renderAxis(d, locked) {
+    var ax = (d.recommendation || {}).axis;
+    if (!ax || !(ax.quinella || []).length) return null;
+    var c = card(COLORS.blueBg, '3px solid ' + COLORS.blue);
+    c.appendChild(el('div', 'font-size:20px;font-weight:900;color:#1e3a8a;',
+      ax.title || '🎯 핵심 축'));
+    c.appendChild(el('div', 'font-size:14px;color:' + COLORS.sub + ';font-weight:700;margin:2px 0 8px;',
+      '축1 ' + ax.axis1 + '번 · 축2 ' + ax.axis2 + '번' +
+      ((ax.links || []).length ? ' · 연결마 ' + ax.links.join('·') + '번' : '')));
+    var body = el('div', '');
+    var NUM = ['①', '②', '③', '④', '⑤', '⑥'];
+    (ax.quinella || []).forEach(function (q, i) {
+      var row = el('div', 'display:flex;align-items:baseline;gap:8px;margin:5px 0;');
+      row.appendChild(el('span', 'font-size:' + (i === 0 ? 30 : 24) + 'px;font-weight:900;color:#1e3a8a;',
+        (NUM[i] || (i + 1 + '.')) + ' ' + q.text));
+      if (q.label) row.appendChild(el('span', 'font-size:13px;color:' + COLORS.sub + ';', '← ' + q.label));
+      body.appendChild(row);
+    });
+    if ((ax.trifecta || []).length) {
+      body.appendChild(el('div', 'margin-top:10px;border-top:1px dashed ' + COLORS.line + ';padding-top:6px;font-size:14px;color:' + COLORS.sub + ';',
+        '삼복승: ' + ax.trifecta.map(function (t) { return t.text; }).join(' · ')));
+    }
+    c.appendChild(locked ? lockWrap(body, '핵심 축 전략은 프리미엄 전용입니다') : body);
+    return c;
+  }
+
   // ── 카드 3: 복병마 (없으면 null → 카드 숨김) ───────────────────
   function renderDark(d, locked) {
     var list = ((d.recommendation || {}).dark_horse) || [];
@@ -451,6 +479,8 @@
     root.appendChild(renderHeader(d));
     var picks = renderPicks(d, locked);
     if (picks) root.appendChild(picks);
+    var axis = renderAxis(d, locked);
+    if (axis) root.appendChild(axis);          // 🎯 핵심 축 2두 전략 — 최종추천 바로 아래(우선 표시)
     var dsg = renderDansung(d, locked);
     if (dsg) root.appendChild(dsg);            // ⚡ 단통 경주(복승 중심) — 최종추천 바로 아래
     var dark = renderDark(d, locked);
