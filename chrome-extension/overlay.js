@@ -1092,7 +1092,11 @@
 
       // [테두리+반투명 방식] 강조 셀은 테두리 + 얇은 반투명 배경만 → 원본 배당 숫자가 항상 보인다.
       //   미강조 셀은 오버레이 없음(완전 투명). 아이콘은 우측 상단 작은 뱃지로만 표시.
+      // [출전취소·밀림 방어] 배당판 셀의 마번이 실제 출전 마번(validHorses·서버가 competition除外 제외)에 없으면
+      //   강조하지 않는다 → 취소 말(除外) 셀 오강조 차단 + 배당판 셀 밀림으로 잘못된 마번이 나와도 오강조 방지.
+      var _vsetB = validSet(d);
       info.cells.forEach(function (cell) {
+        if (_vsetB && (!_vsetB.has(Number(cell.a)) || !_vsetB.has(Number(cell.b)))) return;
         var stl = boardCellStyle(cell.a, cell.b, ctx);
         if (!stl) return;   // [2번 미강조] 테두리 없음·완전 투명
         var lock = stl.lock;
