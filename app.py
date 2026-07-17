@@ -17932,6 +17932,32 @@ def _keiba_corner_style(past):
     return "평지형", 0, []
 
 
+def _corner_move_bonus(past):
+    """[코너 위치 변화·신규] oddspark 통과순위(corner=3C·4C)의 '첫 코너 → 마지막 코너(4C)' 상대위치 변화로
+    막판 추입강도·근성 판정. 앞으로 상승(추입 성공) +8 / 뒤로 하락(선행 처짐) -5. 반환 (bonus, detail, tag).
+    ⚠ S1F·G1F 구간타임은 API·oddspark 모두 미제공 → 이미 수집 중인 corner(코너 통과순위)를 최대 활용."""
+    moves = []
+    for pr in (past or [])[:5]:
+        corner = pr.get("corner") or ""
+        nums = [int(x) for x in re.findall(r"\d+", corner)]
+        if len(nums) < 2:
+            continue
+        field = pr.get("fieldSize") or max(nums + [8])
+        if field < 2:
+            continue
+        first_rel = nums[0] / field                       # 첫 코너 상대위치(초반)
+        last_rel = nums[-1] / field                       # 마지막 코너(4C) 상대위치(막판 직전)
+        moves.append(first_rel - last_rel)                # +면 앞으로 상승(추입) · -면 뒤로 하락(처짐)
+    if len(moves) < 2:
+        return 0, [], None
+    avg = sum(moves) / len(moves)
+    if avg >= 0.20:                                       # 평균 20%p+ 상승 = 막판 추입 강함(근성)
+        return 8, ["🏇 막판 추입 강함(코너 순위 상승·근성·%d전) +8" % len(moves)], "추입강"
+    if avg <= -0.15:                                      # 평균 15%p+ 하락 = 선행 처짐(스태미너 주의)
+        return -5, ["코너 순위 하락(막판 처짐·스태미너 주의·%d전) -5" % len(moves)], "처짐"
+    return 0, [], None
+
+
 def _keiba_last3f_note(past):
     """전5경주 상3F(막판 스피드) 평균. 빠를수록 추격형 강점. 반환 (avg, note)."""
     vals = [pr.get("last3f") for pr in (past or []) if isinstance(pr.get("last3f"), (int, float)) and pr["last3f"] > 0]
@@ -17983,8 +18009,9 @@ def _keiba_build_form(shutsuba, details):
         # [1·신규] 기수 교체(일본도 적용·일본 기수 복승률 기반) — past[0].jockey vs 현재 기수
         _jknh = {"jockey": h.get("jockey", ""), "pastRaces": [{"jockey": pr.get("jockey")} for pr in past]}
         kbonus, kdetail = jockey_change_bonus(_jknh, set(), rate_fn=_jp_jockey_place_rate)
+        cmbonus, cmdetail, cmtag = _corner_move_bonus(past)   # [코너변화·신규] 3C·4C 순위변화=막판 추입강도/근성
         total = round(base + sbonus + dbonus + wbonus + gbonus + debonus
-                      + bwbonus + dabonus + jkbonus + kbonus, 1)
+                      + bwbonus + dabonus + jkbonus + kbonus + cmbonus, 1)
         horses.append({
             "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "weight": h.get("weight"), "winOdds": h.get("winOdds"), "pop": h.get("pop"),
@@ -18000,7 +18027,7 @@ def _keiba_build_form(shutsuba, details):
             "jockeyChangeBonus": kbonus,                    # [1] 기수 교체(패널 노출용)
             "totalScore": total,
             "detail": (sdetail + ddetail + wdetail + gdetail + dedetail
-                       + bwdetail + dadetail + jkdetail + kdetail + ([l3note] if l3note else [])),
+                       + bwdetail + dadetail + jkdetail + kdetail + cmdetail + ([l3note] if l3note else [])),
             "past": past,
         })
     _apply_back_power(horses)                     # [3번] 뒷힘(상3F 상대) 보정 + 거리미경험·뒷힘강점 플래그
@@ -19486,8 +19513,9 @@ def _jra_build_form(shutuba):
         # [1·신규] 기수 교체(중앙경마도 적용·일본 기수 복승률 기반)
         _jknh = {"jockey": h.get("jockey", ""), "pastRaces": [{"jockey": pr.get("jockey")} for pr in past]}
         kbonus, kdetail = jockey_change_bonus(_jknh, set(), rate_fn=_jp_jockey_place_rate)
+        cmbonus, cmdetail, cmtag = _corner_move_bonus(past)   # [코너변화·신규] 3C·4C 순위변화=막판 추입강도/근성
         total = round(base + sbonus + dbonus + wbonus + gbonus + debonus
-                      + bwbonus + dabonus + jkbonus + kbonus, 1)
+                      + bwbonus + dabonus + jkbonus + kbonus + cmbonus, 1)
         horses.append({
             "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "weight": h.get("weight"), "recentPlacings": placings[:5], "baseScore": base,
@@ -19500,7 +19528,7 @@ def _jra_build_form(shutuba):
             "jockeyChangeBonus": kbonus,                    # [1] 기수 교체(패널 노출용)
             "totalScore": total,
             "detail": (sdetail + ddetail + wdetail + gdetail + dedetail
-                       + bwdetail + dadetail + jkdetail + kdetail + ([l3note] if l3note else [])),
+                       + bwdetail + dadetail + jkdetail + kdetail + cmdetail + ([l3note] if l3note else [])),
             "past": past,
         })
     _apply_back_power(horses)                     # [3번] 뒷힘(상3F 상대) + 거리미경험·뒷힘강점 플래그
