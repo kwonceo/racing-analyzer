@@ -19663,6 +19663,49 @@ def _keirin_schedule(ymd, force=False):
     return tracks
 
 
+# [한국경마 스케줄] KRA 배당 API로 오늘 개최 경주 감지 → 전체 경주 탭 병합용 트랙 리스트.
+#   KRA 는 스케줄 전용 API가 없어 배당 API(_kra_fetch)로 각 경주 존재를 확인한다(발매 시작 후 감지).
+#   ⚠ 발주시각 필드는 KRA API에 없음 → postTime 은 None(카운트다운 대신 목록만). 두수는 단승 개수로 산출.
+#   ⚠ 한국경마 개최일(보통 금 부경·토일 서울/부산/제주)에만 경주가 잡힘. 비개최일엔 빈 리스트(정상).
+_KRA_SCHED_CACHE = {}
+KRA_MEET_FOR_SCHED = [("1", "서울"), ("2", "제주"), ("3", "부산")]
+
+
+def _kra_schedule(ymd, force=False):
+    """[한국경마 서버 감지] 오늘 개최 KRA 경주 → [{venue, meet, sport:'korea', races:[{raceNo, horses, postTime:None}]}].
+      경주 존재는 배당 API 응답 유무로 판단(발매 전이면 빈 값 → 아직 안 뜸). 캐시 30분(개최 진행 중 갱신 반영).
+      ⚠ 배당 API를 경주별로 조회하므로 비개최일엔 12R×3장 헛조회가 되지만, 첫 빈 응답 연속 시 조기 중단."""
+    ck = _KRA_SCHED_CACHE.get(ymd)
+    if ck and not force and (time.time() - ck.get("t", 0) < 1800):
+        return ck["tracks"]
+    tracks = []
+    for meet, venue in KRA_MEET_FOR_SCHED:
+        races = []
+        miss_streak = 0
+        for rc in range(1, 16):        # 최대 15경주(한국은 보통 ~11R)
+            try:
+                items, _meta, err = _kra_fetch(meet, ymd, str(rc), num_rows=200)
+            except Exception:
+                items, err = [], "fetch 오류"
+            if err or not items:
+                miss_streak += 1
+                if miss_streak >= 3 and not races:
+                    break              # 1~3R 연속 없음 + 아직 한 경주도 못 찾음 = 비개최 → 조기 중단
+                if miss_streak >= 3 and races:
+                    break              # 마지막 경주 이후 3연속 없음 = 개최 종료
+                continue
+            miss_streak = 0
+            win, _q, _x, _tr = _kra_parse_items(items)
+            races.append({"raceNo": rc, "horses": len(win), "postTime": None, "postEpoch": None})
+        if races:
+            tracks.append({"venue": venue, "meet": meet, "sport": "korea",
+                           "category": "korea", "races": races})
+    _KRA_SCHED_CACHE[ymd] = {"t": time.time(), "tracks": tracks}
+    print("[한국경마 스케줄] %s: 경마장 %d곳 · 경주 %d개(KRA API 감지·발주시각 미제공)"
+          % (ymd, len(tracks), sum(len(t["races"]) for t in tracks)))
+    return tracks
+
+
 def _multi_schedule_fetch():
     """[1번] 오늘 개최 경주 스케줄(경마장+경주번호+발주시각) → today_schedule.json. 실패해도 예외 전파 안 함.
       [경륜 통합] 지방경마 + 경륜을 서버가 함께 수집(경륜도 oddspark 홈 공개경로 → Chrome 확장 불필요)."""
@@ -19688,10 +19731,18 @@ def _multi_schedule_fetch():
             sched["tracks"].append(kt)
     except Exception as e:
         print("[스케줄] 경륜 병합 실패(무시·경마는 유지):", e)
+    # [한국경마 병합] KRA API로 오늘 개최 한국경마(서울·부산·제주)를 감지해 병합(sport=korea) → 전체 경주 탭에 🇰🇷 표시.
+    #   ⚠ 비개최일엔 빈 리스트(정상). 발주시각은 KRA 미제공이라 목록만(카운트다운 없음).
+    try:
+        for kt in _kra_schedule(ymd):
+            sched["tracks"].append(kt)
+    except Exception as e:
+        print("[스케줄] 한국경마 병합 실패(무시·일본경주는 유지):", e)
     _schedule_save(sched)
     _n_cycle = sum(1 for t in sched["tracks"] if (t.get("sport") == "cycle"))
-    print("[다중경주 스케줄] %s: 트랙 %d곳(경륜 %d곳 포함) · 경주 %d개"
-          % (ymd, len(sched["tracks"]), _n_cycle, sum(len(t["races"]) for t in sched["tracks"])))
+    _n_korea = sum(1 for t in sched["tracks"] if (t.get("sport") == "korea"))
+    print("[다중경주 스케줄] %s: 트랙 %d곳(경륜 %d·한국 %d 포함) · 경주 %d개"
+          % (ymd, len(sched["tracks"]), _n_cycle, _n_korea, sum(len(t["races"]) for t in sched["tracks"])))
     return sched
 
 
@@ -19935,17 +19986,23 @@ def multi_dashboard():
     now = time.time()
     sched = _schedule_load()
     for tr in sched.get("tracks", []):
+        _tr_sport = tr.get("sport") or "horse"     # [종목 표시] 트랙 실제 종목(korea/cycle/horse) — 하드코딩 제거
         for rc in tr.get("races", []):
             pe = rc.get("postEpoch")
             key = _multi_key(tr.get("venue"), rc.get("raceNo")) if rc.get("raceNo") else None
-            if not key or key in collected_keys or not pe:
+            if not key or key in collected_keys:
                 continue
-            left = int(pe - now)
-            if left < -120:                 # 이미 마감 2분+ 지난 경주는 제외
+            # [발주시각 없는 종목 표시·한국경마] KRA 는 발주시각 API가 없어 postEpoch=None →
+            #   기존엔 `not pe`로 걸러져 한국경마가 아예 안 떴다. 발주시각이 있으면 카운트다운,
+            #   없으면 목록 카드(secondsLeft=None)로 표시(일본경마 카운트다운 동작은 그대로 유지).
+            left = int(pe - now) if pe else None
+            if left is not None and left < -120:    # 발주시각 있는 경주만 마감 2분+ 제외(없으면 목록 유지)
                 continue
-            urg = "urgent" if left <= MULTI_URGENT_SEC else ("warn" if left <= MULTI_WARN_SEC else "normal")
+            urg = "normal"
+            if left is not None:
+                urg = "urgent" if left <= MULTI_URGENT_SEC else ("warn" if left <= MULTI_WARN_SEC else "normal")
             cards.append({"raceKey": key, "venue": tr.get("venue"), "raceNo": rc.get("raceNo"),
-                          "sport": "horse", "postTime": rc.get("postTime"), "secondsLeft": left, "urgency": urg,
+                          "sport": _tr_sport, "postTime": rc.get("postTime"), "secondsLeft": left, "urgency": urg,
                           "keyHorses": [], "signals": [], "anomaly": False, "confidence": None,
                           "quinellaMain": None, "afterClose": False, "scheduled": True})
     cards.sort(key=lambda c: (c.get("secondsLeft") if c.get("secondsLeft") is not None else 9e9))
