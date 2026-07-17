@@ -6,7 +6,7 @@
  "date": "2026-07-17",
  "race": "제주 6경주",
  "analyzed_at": "15:32:13",
- "updated_at": "15:44:21",
+ "updated_at": "15:51:19",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -515,6 +515,42 @@
    ],
    "confidence": 55.6,
    "reason": "전적유력마 3번 적중 · 3+6 복승 급락(-43.7%) → 3번 입상 적중"
+  },
+  "failure": {
+   "type": "신호미반영",
+   "label": "유형1 · 신호 미반영",
+   "focus": 5,
+   "winner": 5,
+   "missed": [
+    5,
+    7
+   ],
+   "reason": "5번은 급락 신호(-8%)가 있었으나 추천에서 제외됨 — 추천은 10번(더 강한 급락)이라 5번 신호가 묻힘",
+   "improvement": "상위 3개 신호 말 전부 추천에 포함 · 배당 높아도 신호 있으면 표시",
+   "missed_signal": "약한 신호 무시",
+   "timeline": [
+    {
+     "mb": -2,
+     "odds": 41.7,
+     "pct": null,
+     "time": "15:42:03",
+     "after": true,
+     "src": "복승"
+    },
+    {
+     "mb": -3,
+     "odds": 38.2,
+     "pct": -8,
+     "time": "15:42:13",
+     "after": true,
+     "src": "복승"
+    }
+   ],
+   "maxDrop": -8,
+   "buriedBy": 10,
+   "afterClose": true,
+   "massDrop": false,
+   "winnerSignal": true
   }
  },
  "profit": null,
