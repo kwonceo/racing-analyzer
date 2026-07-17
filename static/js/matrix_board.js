@@ -182,7 +182,9 @@
     });
     if ((ax.trifecta || []).length) {
       body.appendChild(el('div', 'margin-top:10px;border-top:1px dashed ' + COLORS.line + ';padding-top:6px;font-size:14px;color:' + COLORS.sub + ';',
-        '삼복승: ' + ax.trifecta.map(function (t) { return t.text; }).join(' · ')));
+        '삼복승: ' + ax.trifecta.map(function (t) {
+          return t.text + (t.odds != null ? ' (' + oddsTxt(t.odds) + (t.estimated ? ' 예상' : '') + ')' : '');
+        }).join(' · ')));
     }
     c.appendChild(locked ? lockWrap(body, '핵심 축 전략은 프리미엄 전용입니다') : body);
     return c;

@@ -1602,6 +1602,8 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
                 # [보완1·경륜] 競走得点 절대등급 함께 전달(통합 사분위 grade와 별개)
                 "competScore": h.get("competScore"), "absGrade": h.get("absGrade"),
                 "styleType": h.get("styleType"),
+                # [날씨·불량주로] 저장된 pastRaces(condition) 있으면 즉시 계산, 없으면 사전계산값 전달
+                "badTrackRate": (bad_track_rate(h.get("pastRaces")) if h.get("pastRaces") else h.get("badTrackRate")),
             })
         classify_grades(scored)
         scored.sort(key=lambda x: -x["totalScore"])
@@ -7051,6 +7053,7 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     #   시장 유력마 상위(복승 저배당 지지 기준) top3 박스를 삼복승 '보험'에 자동 포함(신호 없어도·메인 ★★★엔 미포함).
     #   근거: 시장이 유력하다고 보는 것 자체가 충분한 근거. 표시 "시장유력 보완: N번+M번"(상위 2마리 앵커).
     _mkt_ins = None
+    _mrank = []
     if curQ:
         _ms = {}
         for (_ma, _mb), _mo in curQ.items():
@@ -7067,6 +7070,21 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
             _mkt_ins = {"combo": sorted(_mrank[:3]), "odds": None,
                         "reason": "시장유력 보완: %d번+%d번" % (_mrank[0], _mrank[1]),
                         "marketInsurance": True}
+    # [전적 A급 유력마 보완] 전적 A급(강한 전적) 유력마가 시장·BMED 신호 지지 없어도 삼복승 보험에 자동 포함.
+    #   시장유력 보완(_mkt_ins)과 '별개' — 전적이 강하다는 것 자체가 근거(배당 무관). 표시 "전적A 보완: N번+M번".
+    #   A급 3두면 그대로, 2두면 시장유력 1두로 박스 보강. 메인 ★★★엔 미포함(삼복승 보험용).
+    _form_ins = None
+    _fa_ins = [int(n) for n in (cp.get("formTopA") or []) if (not vs or int(n) in vs)]
+    if len(_fa_ins) >= 3:
+        _form_ins = {"combo": sorted(_fa_ins[:3]), "odds": None,
+                     "reason": "전적A 보완: %d번+%d번" % (_fa_ins[0], _fa_ins[1]),
+                     "formInsurance": True}
+    elif len(_fa_ins) == 2:
+        _fx = next((h for h in _mrank if h not in _fa_ins), None)
+        if _fx is not None:
+            _form_ins = {"combo": sorted(_fa_ins + [_fx]), "odds": None,
+                         "reason": "전적A 보완: %d번+%d번" % (_fa_ins[0], _fa_ins[1]),
+                         "formInsurance": True}
     final_t, seen_t = [], set()
     for c in ([_main] if _main else []) + autos:          # 메인 먼저, 그다음 가장 강한 자동
         cc = sorted(int(x) for x in (c.get("combo") or [])) if c and c.get("combo") else []
@@ -7086,6 +7104,13 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
             seen_t.add(_mk)
             final_t.append({"combo": list(_mk), "odds": _mkt_ins.get("odds"),
                             "reason": _mkt_ins["reason"], "marketInsurance": True})
+    # [전적A 보완] 시장유력 보완과 별개로 전적 A급 유력마 박스 1개 추가(중복·이미 커버 아니면).
+    if _form_ins and _vtri(_form_ins["combo"]):
+        _fk = tuple(int(x) for x in _form_ins["combo"])
+        if _fk not in seen_t:
+            seen_t.add(_fk)
+            final_t.append({"combo": list(_fk), "odds": _form_ins.get("odds"),
+                            "reason": _form_ins["reason"], "formInsurance": True})
 
     # ══════════════ [축 2마리 전략·신규] 핵심 축 2두 + 연결마 조합 ══════════════
     #   문제: 1순위 말만 축 → 탈락 시 전부 미적중. 해결: 축 2두(축1=signalScore1위+배당최저, 축2=signalScore2위 or 전적A 1위)
@@ -7162,11 +7187,19 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 if k in _seenq:
                     continue
                 _seenq.add(k); _qlist.append(q)
-            # 삼복승 축1+축2+연결
+            # 삼복승 축1+축2+연결 — 실배당 미수집이라 구성 복승 3쌍 기하평균×2 추정(표시용)
+            def _tri_est(a, b, c):
+                ps = [_qo(a, b), _qo(a, c), _qo(b, c)]
+                pr = [float(p) for p in ps if p and p > 0]
+                if len(pr) == 3:
+                    return round((pr[0] * pr[1] * pr[2]) ** (1.0 / 3.0) * 2, 1)
+                return None
             _tris = []
             for lk, lab in [(_l1, "축1+축2+연결1"), (_l2, "축1+축2+연결2")]:
                 if lk is not None and lk not in (_axis1, _axis2):
-                    _tris.append({"combo": sorted([_axis1, _axis2, lk]), "odds": _qo(_axis1, _axis2), "label": lab})
+                    _te = _tri_est(_axis1, _axis2, lk)
+                    _tris.append({"combo": sorted([_axis1, _axis2, lk]), "odds": _te,
+                                  "estimated": True, "label": lab})
             if _axis2 is not None and _qlist:
                 axis_plan = {
                     "axis1": _axis1, "axis2": _axis2, "links": [x for x in [_l1, _l2] if x is not None],
@@ -10057,6 +10090,9 @@ def _pub_horse_why(no, an, role):
             why.append("체중 조정 호조" if fm["bodyWeightBonus"] > 0 else "체중 증가 주의")
         if fm.get("distAptitude") in ("A", "C"):
             why.append(f"거리 적성 {fm['distAptitude']}급" + (f"(복승률 {fm['distAptitudeRate']}%)" if fm.get("distAptitudeRate") is not None else ""))
+        _btr = fm.get("badTrackRate")
+        if isinstance(_btr, (int, float)) and (_btr >= 40 or _btr <= 10):
+            why.append(f"불량주로 {'강세' if _btr >= 40 else '약세'}(복승률 {_btr:.0f}%)")
     if role.get(no) == "cut":
         why.append("제거 권장(배당·전적 모두 약함)")
     r = f.get("rep")
@@ -10160,7 +10196,9 @@ def _pub_recommendation(an, role):
             "axis1Score": ap.get("axis1Score"), "axis2Score": ap.get("axis2Score"),
             "quinella": [{"text": _atxt(q), "label": q.get("label"), "rank": q.get("rank")}
                          for q in (ap.get("quinellas") or [])],
-            "trifecta": [{"text": "+".join(str(x) for x in (t.get("combo") or [])), "label": t.get("label")}
+            "trifecta": [{"text": "+".join(str(x) for x in (t.get("combo") or [])),
+                          "odds": t.get("odds"), "estimated": bool(t.get("estimated")),
+                          "label": t.get("label")}
                          for t in (ap.get("trifectas") or [])],
         }
     return {"main": main, "trifecta": trifecta, "special": special,
@@ -19629,6 +19667,22 @@ def dist_aptitude_bonus(past_races, cur_dist, tol=200):
     return 0, [f"{cd}m 적성 B급(복승률 {rate}%·{len(placings)}전)"], "B", rate
 
 
+def bad_track_rate(past_races):
+    """[불량주로 성적·신규] pastRaces 의 condition(주로: 무거움/불량) 경주 복승권율(1·2착 %) 계산.
+    한국 PDF 전적의 condition 필드(양호/무거움/불량)에서 도출 → _weather_adjust_form 의 badTrackRate 입력.
+    표본 2경주 미만이면 None(판단 보류·날씨 불량주로 보정 미적용). 양호 주로만 있으면 None."""
+    placings = []
+    for pr in past_races or []:
+        cond = str(pr.get("condition") or "")
+        if ("불량" in cond) or ("무거" in cond) or ("다습" in cond):
+            p = pr.get("placing")
+            if isinstance(p, (int, float)) and p > 0:
+                placings.append(int(p))
+    if len(placings) < 2:
+        return None
+    return round(sum(1 for p in placings if p <= 2) / len(placings) * 100, 1)
+
+
 # ── 3-3e 뒷힘(상승3F) [3번] ──────────────────
 def back_power_bonus(my_last3f, all_last3f):
     """[3번] 상승3F(막판 뒷힘). 경주 내 상대: 상위30%(빠름) +15, 하위30%(느림) -5, 보통 0.
@@ -19755,6 +19809,7 @@ def score_horses_raw(race, horses, jockey_threshold=None, leader_names=None):
             "totalScore": round(base + cb + jb + db_ + kb + wb + gb + deb, 1),
             "detail": cd + jd + dd + kd + wd + gd + ded, "flags": flags,
             "anomaly": h.get("anomaly"),
+            "badTrackRate": bad_track_rate(h.get("pastRaces")),   # [날씨] 과거 불량주로 복승권율(pastRaces condition)
         })
     return scored, jockey_threshold
 
