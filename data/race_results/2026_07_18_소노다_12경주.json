@@ -1,0 +1,67 @@
+{
+ "race_id": "2026_07_18_소노다_12경주",
+ "raceKey": "소노다 12경주",
+ "date": "2026-07-18",
+ "track": "소노다",
+ "round": 12,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 12,
+ "result": {
+  "1st": 1,
+  "2nd": 4,
+  "3rd": 9
+ },
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   6,
+   7,
+   11,
+   1,
+   4,
+   5,
+   9,
+   2,
+   3,
+   8,
+   12
+  ],
+  "eliminated": [
+   10
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 25.0,
+  "inverse": true
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": "역배열 감지말 4번 입상 · 제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-18 00:16:27",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "소노다 12경주",
  "analyzed_at": "00:09:48",
- "updated_at": "00:14:48",
+ "updated_at": "00:16:27",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -34,8 +34,8 @@
     ],
     "detail": "11번 압도적 역배열 (배당차 60.0%)",
     "level": "red",
-    "hitRate": 37,
-    "hitSample": 41
+    "hitRate": 36,
+    "hitSample": 42
    }
   ],
   "count": 1,
@@ -48,9 +48,9 @@
    "2": {
     "type": 2,
     "label": "역배열 10%+",
-    "fired": 41,
+    "fired": 42,
     "hit": 15,
-    "rate": 37
+    "rate": 36
    },
    "1": {
     "type": 1,
@@ -767,8 +767,54 @@
   2,
   11
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 1,
+  "2nd": 4,
+  "3rd": 9
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   4,
+   9
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   10
+  ],
+  "form_pick": 6,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 60.5,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": true,
+   "inverseHorses": [
+    4
+   ],
+   "inverseHit": [
+    4
+   ],
+   "confidence": 25.0,
+   "reason": "역배열 감지말 4번 입상 · 제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "나고야 12경주",
  "analyzed_at": "00:14:48",
- "updated_at": "00:14:52",
+ "updated_at": "00:16:35",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -31,6 +31,11 @@
   },
   {
    "time": "00:14:47",
+   "minutes_before": null,
+   "quinella": {}
+  },
+  {
+   "time": "00:15:45",
    "minutes_before": null,
    "quinella": {}
   }
@@ -287,8 +292,68 @@
   9,
   3
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 11,
+  "2nd": 2,
+  "3rd": 12
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [
+   1,
+   8,
+   12
+  ],
+  "form_pick": 2,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 3.8,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 2번 적중"
+  },
+  "failure": {
+   "type": "전적오판",
+   "label": "유형4 · 전적 오판",
+   "focus": 11,
+   "winner": 11,
+   "missed": [
+    11,
+    12
+   ],
+   "reason": "11번은 배당 변화 없이 입상 → 배당은 정상, 전적 판단 실패(이변)",
+   "improvement": "전적 하위라도 최근 컨디션·거리/기수 변경 반영 · 이변 조건 학습 강화",
+   "missed_signal": "배당 신호 없음(전적 이변)",
+   "timeline": [],
+   "maxDrop": 0,
+   "buriedBy": null,
+   "afterClose": true,
+   "massDrop": false,
+   "winnerSignal": false
+  }
+ },
  "profit": null,
  "review": null
 }
