@@ -230,16 +230,7 @@
   }
  ],
  "odds_features": {
-  "timeline": [
-   {
-    "time": "01:31:45",
-    "quinella": {}
-   },
-   {
-    "time": "01:32:45",
-    "quinella": {}
-   }
-  ],
+  "timeline": [],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
@@ -274,10 +265,10 @@
    8,
    12
   ],
-  "recommend": "6+9",
+  "recommend": null,
   "strategy": null,
   "confidence": 0,
-  "signal_quality": "하"
+  "signal_quality": null
  },
  "result": {
   "1st": 11,
@@ -305,13 +296,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-18 01:32:55",
+ "saved_at": "2026-07-18 07:00:47",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
+  "score": 40,
+  "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
+   "배당 타임라인(2회+)",
    "이상감지 결과",
    "확정 배당"
   ],
