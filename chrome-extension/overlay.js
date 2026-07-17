@@ -377,66 +377,67 @@
       }, 550);
     }
 
-    // 강조 팝업 렌더(중요 신호 있을 때만 · 상단 중앙 · 깜빡임 · ✕로 이 신호 닫기)
+    // [팝업 위치 변경] 화면 중앙 자동 팝업 완전 제거 → 오버레이 패널 상단 '배지' + 클릭 시 상세 펼침.
+    //   배당판을 가리지 않도록 패널 안에만 배지 표시. 배지 클릭으로 상세(강도·실질유력·배당차이) 토글, ✕로 닫기.
+    //   기존 computeCritical(신호 산출)·crit.lines(역배열 상세)는 그대로 재사용(무삭제) — 렌더 위치/방식만 변경.
     function renderAlertPopup(crit) {
       try {
         var el = byId(ID_ALERT);
         if (!crit || !enabled || killed || alertDismissed === crit.key) {
           if (el) el.remove(); stopBlink();
-          if (!crit) lastSoundKey = '';   // [보완#3] 신호 해제 → 다음 신호에 다시 알림음
+          if (!crit) lastSoundKey = '';   // 신호 해제 → 다음 신호에 다시 알림음
           return;
         }
-        // [보완#3] 새 중요 신호(키 변경) + 소리 옵션 ON → 알림음 1회
+        var panel = byId(ID_PANEL);
+        if (!panel) { if (el) el.remove(); return; }   // 패널 없으면 표시 안 함(자동 화면 팝업 제거)
         if (soundOn && crit.key !== lastSoundKey) { beep(); }
         lastSoundKey = crit.key;
-        var bg = crit.level === 'red'
-          ? 'linear-gradient(135deg,#dc2626,#991b1b)' : 'linear-gradient(135deg,#f59e0b,#b45309)';
+        var col = crit.level === 'red' ? '#dc2626' : '#f59e0b';
+        var wasExp = el && el.getAttribute('data-exp') === '1';
         if (!el) {
-          el = mk('div',
-            'position:fixed;left:50%;margin-left:-168px;top:58px;z-index:2147483100;width:336px;' +
-            'color:#fff;border:2px solid rgba(255,255,255,.85);border-radius:12px;' +
-            'padding:11px 14px;font:600 13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;' +
-            'box-shadow:0 8px 24px rgba(0,0,0,.55)');
+          el = mk('div', 'margin:0 0 8px;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.35)');
           el.id = ID_ALERT;
-          root().appendChild(el);
         }
-        el.style.background = bg;
+        // 항상 패널 최상단에 위치(재렌더 시에도 맨 위)
+        if (el.parentNode !== panel || panel.firstChild !== el) {
+          try { panel.insertBefore(el, panel.firstChild); } catch (_) { panel.appendChild(el); }
+        }
         while (el.firstChild) el.removeChild(el.firstChild);
-        var head = mk('div', 'display:flex;align-items:center;justify-content:space-between;gap:8px');
-        head.appendChild(mk('span', 'font-weight:900;font-size:15px', crit.icon + ' ' + crit.title));
-        var ctrls = mk('div', 'display:flex;align-items:center;gap:6px');
-        // [보완#3] 알림음 ON/OFF 토글(🔔/🔕)
-        var snd = mk('button', 'all:unset;cursor:pointer;color:#fff;font-size:15px;padding:0 2px', soundOn ? '🔔' : '🔕');
-        snd.title = soundOn ? '알림음 끄기' : '알림음 켜기';
-        snd.addEventListener('click', function () {
-          soundOn = !soundOn;
-          try { chrome.storage.local.set({ overlaySound: soundOn }); } catch (_) { /* */ }
-          if (soundOn) beep();   // 켤 때 확인음 + 오디오 컨텍스트 활성화(사용자 제스처)
-          var s2 = byId(ID_ALERT); if (s2 && crit) renderAlertPopup(crit);
-        });
-        ctrls.appendChild(snd);
-        var x = mk('button', 'all:unset;cursor:pointer;color:#fff;font:900 16px sans-serif;padding:0 2px', '✕');
-        x.title = '이 알림 닫기(다른 신호가 오면 다시 표시)';
-        x.addEventListener('click', function () {
-          alertDismissed = crit.key;
-          var e2 = byId(ID_ALERT); if (e2) e2.remove(); stopBlink();
-        });
-        ctrls.appendChild(x);
-        head.appendChild(ctrls);
-        el.appendChild(head);
-        // [역배열 상세] crit.lines 있으면 여러 줄로(마번·인기순위·쌍승배당·강도), 없으면 단일 msg
+        // ── 배지(클릭 토글) — "🔴 역배열 감지 · 클릭" ──
+        var badge = mk('div', 'cursor:pointer;color:#fff;font-weight:900;font-size:14px;padding:9px 12px;'
+          + 'background:' + col + ';display:flex;align-items:center;justify-content:space-between;gap:8px');
+        badge.appendChild(mk('span', '', crit.icon + ' ' + crit.title + ' · 클릭'));
+        var arrow = mk('span', 'font-size:12px', wasExp ? '▲' : '▼');
+        badge.appendChild(arrow);
+        el.appendChild(badge);
+        // ── 상세(펼침 시만) — 강도·실질유력·배당차이 ──
+        var detail = mk('div', 'display:' + (wasExp ? 'block' : 'none')
+          + ';background:#1f2937;color:#fff;padding:10px 12px;font-size:13px;font-weight:700;line-height:1.5');
         if (crit.lines && crit.lines.length) {
-          var box = mk('div', 'margin-top:5px;font-size:13px;font-weight:700;line-height:1.5');
           crit.lines.forEach(function (ln) {
             var sep = (ln.indexOf('→') === 0 || ln.indexOf('강도:') === 0);
-            box.appendChild(mk('div', sep ? 'margin-top:4px;font-weight:800' : '', ln));
+            detail.appendChild(mk('div', sep ? 'margin-top:4px;font-weight:800' : '', ln));
           });
-          el.appendChild(box);
         } else {
-          el.appendChild(mk('div', 'margin-top:4px;font-size:13px;font-weight:700', crit.msg));
+          detail.appendChild(mk('div', '', crit.msg));
         }
-        startBlink();
-      } catch (_) { /* 강조 팝업 실패는 무시 */ }
+        var closeBtn = mk('button', 'all:unset;cursor:pointer;margin-top:8px;color:#fca5a5;font-size:13px;font-weight:800', '✕ 닫기');
+        closeBtn.addEventListener('click', function (e2) {
+          e2.stopPropagation();
+          alertDismissed = crit.key;
+          var e3 = byId(ID_ALERT); if (e3) e3.remove();
+        });
+        detail.appendChild(closeBtn);
+        el.appendChild(detail);
+        el.setAttribute('data-exp', wasExp ? '1' : '0');
+        badge.addEventListener('click', function () {
+          var now = el.getAttribute('data-exp') === '1';
+          el.setAttribute('data-exp', now ? '0' : '1');
+          detail.style.display = now ? 'none' : 'block';
+          arrow.textContent = now ? '▼' : '▲';
+        });
+        // 화면 깜빡임(startBlink) 미사용 — 배당판 방해 없이 조용히 패널 배지로만 표시
+      } catch (_) { /* 강조 배지 실패는 무시 */ }
     }
 
     // ── [강한 신호 8유형] 강조 박스 + 막판 보존(경주 종료 후 유지) ──────────
