@@ -141,6 +141,15 @@
         '💎 특별 추천: ' + special.map(function (x) { return x.combo; }).join(' · '));
       body.appendChild(s);
     }
+    // [개선1] 시장유력/전적A 보완 삼복승 — 왜 이 조합인지 근거 문장 함께 표시
+    tri.forEach(function (t) {
+      if (!t.insurance) return;
+      var ib = el('div', 'margin-top:8px;padding:9px 11px;background:' + COLORS.grayBg + ';border-radius:9px;border-left:4px solid ' + COLORS.amber + ';');
+      ib.appendChild(el('div', 'font-size:18px;font-weight:800;color:' + COLORS.ink + ';',
+        '🛡 삼복승 보험: ' + t.combo + (t.odds != null ? ' (' + oddsTxt(t.odds) + (t.estimated ? ' 예상' : '') + ')' : '')));
+      if (t.insuranceWhy) ib.appendChild(el('div', 'font-size:14px;color:' + COLORS.sub + ';margin-top:3px;', '→ ' + t.insuranceWhy));
+      body.appendChild(ib);
+    });
 
     // 부연설명 — 왜 이 조합인지
     var reasons = r.reasons || [];
@@ -596,6 +605,12 @@
     // ── [기본 화면·항상 보임] 경주 헤더 + 카드1(최종추천 크게) + 카드2(복병 작게) ──
     root.appendChild(renderHeader(d));
     root.appendChild(renderSimpleMain(d, locked));       // 카드1 — 최종 추천(진한 초록·크게)
+    // [개선2] 페이스 한 줄(빠른/느린만·14px 회색) — 카드1 바로 아래. 보통은 표시 안 함. 상세는 ▼자세히에 유지.
+    var pc = d.pace;
+    if (pc && (pc.pace === '빠른' || pc.pace === '느린')) {
+      root.appendChild(el('div', 'font-size:14px;color:' + COLORS.sub + ';margin:0 0 12px 4px;',
+        pc.paceLabel + ' · ' + (pc.pace === '빠른' ? '추입마 유리' : '선행마 유리')));
+    }
     var sdark = renderSimpleDark(d, locked);
     if (sdark) root.appendChild(sdark);                  // 카드2 — 복병 주목(노랑·작게·없으면 숨김)
 

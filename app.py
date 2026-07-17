@@ -10418,6 +10418,34 @@ def _pub_recommendation(an, role):
                          "odds": t.get("expOdds") if t.get("expOdds") is not None else t.get("expOddsEst"),
                          "estimated": t.get("expOdds") is None,
                          "label": str(t.get("label") or "")})
+    # [개선1·시장유력 보완 근거] finalTrifectas 의 보험 삼복승(시장유력/전적A)을 근거 문장과 함께 삼복승에 병합.
+    #   trioRecommend 에 없는 조합만 추가. 근거: 복승메인 아닌 말 = '시장 주목'(신호 없어도 시장이 유력하게 봄).
+    _cp = an.get("corePicks") or {}
+    _qm = set(int(x) for x in ((_cp.get("qMainCheck") or {}).get("qMain") or []))
+    if not _qm and (_cp.get("finalQuinellas") or []):
+        _qm = set(int(x) for x in ((_cp["finalQuinellas"][0].get("combo") or [])[:2]))
+    for t in (_cp.get("finalTrifectas") or []):
+        _rt = str(t.get("reason") or "")                        # 저장 데이터는 플래그 없이 reason 문자열만 있을 수 있음
+        _is_mkt = bool(t.get("marketInsurance")) or ("시장유력 보완" in _rt)
+        _is_form = bool(t.get("formInsurance")) or ("전적A 보완" in _rt)
+        if not (_is_mkt or _is_form):
+            continue
+        cc = sorted(int(x) for x in (t.get("combo") or []))
+        if len(cc) != 3:
+            continue
+        key = "+".join(str(x) for x in cc)
+        _extra = [n for n in cc if n not in _qm]                # 복승메인 아닌 말 = 시장 주목
+        _ins = "시장유력 보완" if _is_mkt else "전적A 보완"
+        _why = _ins + (" · %s번 시장 주목(신호 없어도 시장이 유력하게 봄)" % _extra[0] if _extra and _is_mkt
+                       else (" · %s번 전적 강자" % _extra[0] if _extra else ""))
+        _existing = next((tt for tt in trifecta if tt["combo"] == key), None)
+        if _existing:                                           # trioRecommend 에 이미 있으면 근거만 보강
+            if not _existing.get("insurance"):
+                _existing["insurance"] = _ins
+                _existing["insuranceWhy"] = _why
+            continue
+        trifecta.append({"combo": key, "odds": t.get("odds"), "estimated": t.get("odds") is None,
+                         "label": t.get("reason") or _ins, "insurance": _ins, "insuranceWhy": _why})
 
     # 복병마 카드(카드 3) — 없으면 빈 리스트 → 프론트가 카드 자체를 숨김
     dark = []
