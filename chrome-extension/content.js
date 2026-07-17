@@ -939,7 +939,8 @@
     let detected = '';
     try { detected = extractRaceKey() || ''; } catch (_) { detected = ''; }
     const ov = (override && override.trim()) || '';
-    const followBoard = (reason === 'auto' || reason === 'race-change' || reason === 'bg' || reason === 'sport-change');
+    const followBoard = (reason === 'auto' || reason === 'race-change' || reason === 'bg' || reason === 'sport-change'
+                         || reason === 'korea-auto' || reason === 'auto-fallback');
     return followBoard ? (detected || ov) : (ov || detected);
   }
 
@@ -1185,6 +1186,13 @@
   //   기타 보드(keiba·generic)는 기존 clickTabAndWait 폴백을 그대로 유지(무삭제).
   async function gotoQuinellaTab(isKorea) {
     if (detectSite() === 'asyukk') {
+      // [수정1·한국 배당판 고정] 이미 복승 탭이 활성이면 클릭하지 않는다 → 배당판이 바뀌지 않음(깜빡임·전환 제거).
+      //   한국경마는 복승만 발매라 배당판이 항상 복승에 있어, 매 수집마다 복승 탭을 다시 누르던 것을 생략.
+      //   verifyActiveBetTab 은 활성표시 확정 시에만 true → 확정 불가(null)면 기존대로 클릭(안전).
+      if (verifyActiveBetTab('복승') === true) {
+        console.log('[복승수집] 이미 복승 탭 활성 → 클릭 생략(배당판 고정)');
+        return { clicked: true, changed: false, sig: oddsSignature() };
+      }
       const before = oddsSignature();
       const el = clickAsyukkBetTab('복승');
       if (el) {
@@ -2454,6 +2462,42 @@
     // 오버레이(overlay.js)가 읽어 "⚡ 전체수집 자동 실행 중..." 배너를 표시하도록 storage 에 상태 기록.
     try { chrome.storage.local.set({ autoFallback: { active: !!active, raceKey: rk || '', at: Date.now() } }); } catch (_) { /* */ }
   }
+
+  // ── [수정2·한국경마 복승 자동수집] 자동전송(autoSend) 버튼 없이 한국 배당판 열면 30초마다 복승 자동수집 ──
+  //   한국경마는 서버 직접수집 불가(asyukk DOM)이므로 확장이 담당. 기존 autoSend 게이트와 무관하게
+  //   한국 감지 시 자동 시작(수동 버튼 불필요). 오버레이 배너 "🇰🇷 한국경마 복승 자동수집 중" 표시 + 경주 고정(board hint).
+  let _krRk = '', _krLast = 0;
+  const _KR_MS = 30000;                                  // 30초 주기
+  function _setKoreaAutoOverlay(active, rk) {
+    try { chrome.storage.local.set({ koreaAuto: { active: !!active, raceKey: rk || '', at: Date.now() } }); } catch (_) { /* */ }
+  }
+  async function _koreaAutoWatch() {
+    try {
+      // 한국 배당판인지 확정(현재 페이지/raceKey 기준). 카테고리='korea' 일 때만 동작.
+      const _cat = await _currentCategory();
+      if (_cat !== 'korea') {                            // 한국 아님 → 배너 끄고 종료(다른 종목 흐름 무영향)
+        if (_krRk) { _krRk = ''; _setKoreaAutoOverlay(false, ''); }
+        return;
+      }
+      let rk = '';
+      try { rk = extractRaceKey(); } catch (_) { rk = ''; }
+      if (!rk) { const s = await getSettings(); rk = (s.raceKey || '').trim(); }
+      if (!rk) return;
+      // [수정3·배당판 고정] 한국 경주를 분석기에 계속 알림(board hint)→ 분석기가 이 경주를 고정 추종(다른 경주로 안 튐).
+      try { _postBoardHint(rk); } catch (_) { /* */ }
+      if (rk !== _krRk) { _krRk = rk; _krLast = 0; }     // 경주 전환 → 즉시 1회 허용
+      const now = Date.now();
+      if (now - _krLast < _KR_MS) return;                // 30초 주기
+      if (_autoRunning) return;                          // 다른 수집 진행중이면 스킵(중복 방지)
+      _krLast = now;
+      _setKoreaAutoOverlay(true, rk);
+      setTripleProgress('🇰🇷 한국경마 복승 자동수집 중… (' + rk + ')', false);
+      _autoRunning = true;
+      try { await collectTriple('korea-auto'); }         // 복승만 수집(collectTripleByTabs 의 isKorea 게이트가 쌍승·삼복승 차단)
+      catch (e) { console.warn('[한국자동수집] 오류', e); }
+      finally { _autoRunning = false; }
+    } catch (_) { /* */ }
+  }
   function _serverHasOddsFor(rk) {
     // 서버 analyze 로 이 경주 배당 존재 여부 확인. res.ok=true → 배당 있음 / false → 없음(404 waiting) / null → 통신불명.
     return new Promise((resolve) => {
@@ -2558,6 +2602,7 @@
     setTimeout(_autoFallbackWatch, 3000);              // [전체수집 자동폴백] 로드 직후 1회(전환 기준 세팅)
     setTimeout(_postBoardHint, 2200);                  // [배당판 추종] 로드 직후 1회(분석기 즉시 동기화)
     setTimeout(_autoInstantWatch, 3500);               // [즉시분석 자동화] 로드 직후 1회(오버레이 ON이면 asyukk 수집)
+    setTimeout(_koreaAutoWatch, 4000);                 // [수정2·한국 자동수집] 로드 직후 1회(한국이면 즉시 시작)
     _raceWatchTimer = setInterval(() => {              // 10초마다 경주 변경 감지 + 마감 감지(자동추종 반응성)
       watchRaceChange();
       watchSportChange();                              // [종목 자동감지 강화] URL·종목 전환 감지 → 재수집
@@ -2565,6 +2610,7 @@
       _autoFallbackWatch();                            // [전체수집 자동폴백] 10초+ 배당 없으면 전체수집 자동 실행
       _postBoardHint();                                // [배당판 추종] 배당판 경주를 분석기에 계속 알림(힌트 TTL 유지)
       _autoInstantWatch();                             // [즉시분석 자동화] 오버레이 ON·30초 주기 asyukk 수집(커버 경주는 생략)
+      _koreaAutoWatch();                               // [수정2·한국 자동수집] 한국 배당판이면 30초마다 복승 자동수집(버튼 불필요)
     }, 10000);
   }
 

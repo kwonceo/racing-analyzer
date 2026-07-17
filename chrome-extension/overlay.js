@@ -219,7 +219,7 @@
       return new Promise(function (resolve) {
         try {
           chrome.storage.local.get({ analyzeStatus: null, timerDeadline: 0, collectAlert: null, raceKey: '',
-            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null, autoFallback: null }, function (v) {
+            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null, autoFallback: null, koreaAuto: null }, function (v) {
             resolve(v || {});
           });
         } catch (_) { resolve({}); }
@@ -1293,6 +1293,18 @@
           }
         } catch (_) { /* */ }
 
+        // [수정2·한국경마 자동수집 표시] 한국 배당판이면 확장이 30초마다 복승 자동수집 중임을 표시(버튼 불필요).
+        try {
+          var _kr = st.koreaAuto;
+          if (_kr && _kr.active && (Date.now() - (_kr.at || 0) < 40000)) {
+            var _krRow = mk('div', 'margin:0 0 6px;padding:6px 9px;border-radius:7px;border:1px solid #38bdf8;background:rgba(56,189,248,.16)');
+            _krRow.appendChild(mk('div', 'font-weight:800;font-size:12px;color:#7dd3fc', '🇰🇷 한국경마 복승 자동수집 중'));
+            _krRow.appendChild(mk('div', 'font-weight:700;font-size:11px;color:#bae6fd',
+              (_kr.raceKey || '') + ' · 30초마다 복승 수집(쌍승·삼복승 없음·배당판 고정)'));
+            panel.appendChild(_krRow);
+          }
+        } catch (_) { /* */ }
+
         // [경주 전환 클리어] 배당판이 새 경주로 넘어갔는데(st.raceKey) 분석은 이전 경주(d.raceKey)면
         //   = 경주 전환 직후 → 이전 추천(corePicks·유력마·복병) 표시를 즉시 숨기고 "🔄 새 경주 분석 중..." 표시 +
         //   새 경주로 즉시 재분석 트리거. 분석 완료(analyzeStatus 갱신)되면 다음 렌더에서 새 결과가 표시됨.
@@ -1711,7 +1723,7 @@
           if (ch.overlayEnabled) { enabled = !!ch.overlayEnabled.newValue; render(); if (enabled) startOverlayAnalyzePoll(); }
           // [오버레이 표시 제어] 팝업 📊/🎯/⏱ 버튼 변경 시 즉시 재렌더
           if ((ch.ovShowMatrix || ch.ovShowPicks || ch.ovShowTimeline) && enabled && !killed) render();
-          if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline || ch.autoFallback) && enabled && !killed) render();
+          if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline || ch.autoFallback || ch.koreaAuto) && enabled && !killed) render();
         } catch (_) { /* */ }
       });
       // [캡쳐 대비] 경주결과 캡쳐 순간 오버레이가 결과를 가리지 않게 잠깐 숨김(visibility만·상태 보존).
