@@ -513,6 +513,63 @@
     return box;
   }
 
+  // ── [단순화] 용어 순화(나이 많은 사용자·전문용어 제거) ────────────
+  function simpleTerm(s) {
+    return String(s == null ? '' : s)
+      .replace(/역배열/g, '주목말').replace(/초과급락/g, '집중주목')
+      .replace(/signalScore/gi, '신뢰도').replace(/smartMoney/gi, '큰돈유입')
+      .replace(/스마트\s?머니/g, '큰돈유입').replace(/BMED/g, '분석결과')
+      .replace(/quinella/gi, '복승').replace(/trifecta/gi, '삼복승');
+  }
+
+  // ── [기본 화면] 카드 1 — 최종 추천 (진한 초록·크게·24px+) ──────────
+  function renderSimpleMain(d, locked) {
+    var r = d.recommendation || {};
+    var main = r.main || [], tri = r.trifecta || [];
+    var c = card(COLORS.greenDeep, '4px solid ' + COLORS.green, '20px');   // 진한 초록
+    c.appendChild(el('div', 'font-size:28px;font-weight:900;color:#ffffff;margin-bottom:12px;', '🔒 지금 사세요!'));
+    var body = el('div', '');
+    if (!main.length && !tri.length) {
+      body.appendChild(el('div', 'font-size:24px;font-weight:800;color:#ffffff;', '⏳ 아직 추천이 없습니다'));
+      var g0 = d.confidence || {};
+      if (g0.message) body.appendChild(el('div', 'margin-top:8px;font-size:18px;color:#bbf7d0;', simpleTerm(g0.message)));
+    } else {
+      var NUM = ['①', '②', '③', '④', '⑤'];
+      main.slice(0, 3).forEach(function (m, i) {
+        var row = el('div', 'margin:8px 0;display:flex;align-items:baseline;flex-wrap:wrap;');
+        row.appendChild(el('span', 'font-size:24px;font-weight:800;color:#bbf7d0;', '복승 ' + (NUM[i] || (i + 1)) + ' '));
+        row.appendChild(el('span', 'font-size:34px;font-weight:900;color:#ffffff;margin:0 6px;', m.combo));
+        if (m.odds != null) row.appendChild(el('span', 'font-size:24px;font-weight:800;color:#86efac;', '(' + oddsTxt(m.odds) + ')'));
+        body.appendChild(row);
+      });
+      if (tri[0]) {
+        var t = el('div', 'margin-top:12px;padding-top:12px;border-top:2px solid #ffffff44;');
+        t.appendChild(el('span', 'font-size:22px;font-weight:800;color:#bbf7d0;', '삼복승: '));
+        t.appendChild(el('span', 'font-size:30px;font-weight:900;color:#ffffff;', tri[0].combo));
+        body.appendChild(t);
+      }
+    }
+    c.appendChild(locked ? lockWrap(body, '최종 추천은 프리미엄 전용입니다') : body);
+    return c;
+  }
+
+  // ── [기본 화면] 카드 2 — 복병 주목 (노란색·18px·작게) ────────────
+  function renderSimpleDark(d, locked) {
+    var list = (d.recommendation || {}).dark_horse || [];
+    if (!list.length) return null;                       // 복병 없으면 카드 숨김
+    var c = card('#fef9c3', '3px solid ' + COLORS.amber, '16px');   // 노란색
+    c.appendChild(el('div', 'font-size:20px;font-weight:900;color:' + COLORS.amberDeep + ';margin-bottom:8px;', '🐎 복병 주목'));
+    var body = el('div', '');
+    list.forEach(function (h) {
+      var why = (h.why && h.why.length) ? simpleTerm(h.why[0]) : (h.smart_money ? '큰돈 유입' : '실질유력');
+      var row = el('div', 'font-size:18px;font-weight:800;color:' + COLORS.amberDeep + ';margin:5px 0;');
+      row.textContent = h.no + '번' + (h.odds != null ? ' (' + oddsTxt(h.odds) + ')' : '') + ' — ' + why;
+      body.appendChild(row);
+    });
+    c.appendChild(locked ? lockWrap(body, '복병 분석은 프리미엄 전용입니다') : body);
+    return c;
+  }
+
   // ── 메인 렌더 ──────────────────────────────────────────────────
   function render(root, d, opts, state) {
     clear(root);
@@ -529,22 +586,41 @@
     }
 
     var locked = (opts.plan || 'free') === 'free';
+    // ── [기본 화면·항상 보임] 경주 헤더 + 카드1(최종추천 크게) + 카드2(복병 작게) ──
     root.appendChild(renderHeader(d));
+    root.appendChild(renderSimpleMain(d, locked));       // 카드1 — 최종 추천(진한 초록·크게)
+    var sdark = renderSimpleDark(d, locked);
+    if (sdark) root.appendChild(sdark);                  // 카드2 — 복병 주목(노랑·작게·없으면 숨김)
+
+    // ── [▼ 자세히 보기] 기존 모든 카드를 접기 안에 배치(삭제 아님·펼침 상태 유지) ──
+    var detail = el('div', 'margin-top:8px;display:' + (state.detailOpen ? 'block' : 'none') + ';');
+    var toggle = el('button', 'width:100%;min-height:56px;font-size:18px;font-weight:800;'
+      + 'color:' + COLORS.ink + ';background:' + COLORS.grayBg + ';border:2px solid ' + COLORS.line + ';'
+      + 'border-radius:12px;margin:6px 0;cursor:pointer;');
+    toggle.textContent = (state.detailOpen ? '▲ 접기' : '▼ 자세히 보기');
+    toggle.onclick = function () {
+      state.detailOpen = !state.detailOpen;
+      detail.style.display = state.detailOpen ? 'block' : 'none';
+      toggle.textContent = state.detailOpen ? '▲ 접기' : '▼ 자세히 보기';
+    };
+    root.appendChild(toggle);
+    // 기존 카드 전부 접기 컨테이너로(무삭제)
     var picks = renderPicks(d, locked);
-    if (picks) root.appendChild(picks);
+    if (picks) detail.appendChild(picks);
     var axis = renderAxis(d, locked);
-    if (axis) root.appendChild(axis);          // 🎯 핵심 축 2두 전략 — 최종추천 바로 아래(우선 표시)
+    if (axis) detail.appendChild(axis);        // 🎯 핵심 축 2두 전략
     var pace = renderPace(d, locked);
-    if (pace) root.appendChild(pace);          // 🏇 편성 시나리오(각질 편성 + 페이스 + 시나리오 A/B)
+    if (pace) detail.appendChild(pace);        // 🏇 편성 시나리오(A/B)
     var dsg = renderDansung(d, locked);
-    if (dsg) root.appendChild(dsg);            // ⚡ 단통 경주(복승 중심) — 최종추천 바로 아래
+    if (dsg) detail.appendChild(dsg);          // ⚡ 단통 경주
     var dark = renderDark(d, locked);
-    if (dark) root.appendChild(dark);          // 복병 없으면 카드 자체가 안 붙음(요구사항)
+    if (dark) detail.appendChild(dark);        // 복병마 상세
     var dc = renderDarkCombo(d, locked);
-    if (dc) root.appendChild(dc);              // 🐎 복병 조합(유력1+복병1+복병2)
+    if (dc) detail.appendChild(dc);            // 🐎 복병 조합
     var cmp = renderCompare(d);
-    if (cmp) root.appendChild(cmp);
-    root.appendChild(renderDetails(d, state));
+    if (cmp) detail.appendChild(cmp);
+    detail.appendChild(renderDetails(d, state));
+    root.appendChild(detail);
 
     var meta = el('div', 'font-size:13px;color:' + COLORS.sub + ';text-align:right;margin-top:4px;');
     meta.textContent = '30초마다 자동 업데이트' + (d.updated_at
