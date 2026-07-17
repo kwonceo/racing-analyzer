@@ -219,7 +219,8 @@
       return new Promise(function (resolve) {
         try {
           chrome.storage.local.get({ analyzeStatus: null, timerDeadline: 0, collectAlert: null, raceKey: '',
-            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null, autoFallback: null, koreaAuto: null }, function (v) {
+            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null, autoFallback: null, koreaAuto: null,
+            detectedCategory: '' }, function (v) {
             resolve(v || {});
           });
         } catch (_) { resolve({}); }
@@ -1313,17 +1314,26 @@
           var _rkTail = function (r) { return String(r || '').replace(/\d{4}-\d{2}-\d{2}/g, '').replace(/\s+/g, ' ').trim(); };
           var _liveRk = _rkTail(st.raceKey);
           var _anaRk = _rkTail(d && d.raceKey);
-          if (_liveRk && _anaRk && _liveRk !== _anaRk) {
+          // [종목 불일치 클리어·한국경마 자동전환] 배당판이 한국경마인데(detectedCategory='korea') 분석이 다른 종목
+          //   (경정/경륜/일본)이면 raceKey 가 비어있거나 꼬리가 우연히 같아도 무조건 전환 클리어 → 경정 분석 잔존 제거.
+          var _boardCat = st.detectedCategory || '';
+          var _anaCat = (d && (d.category || (d.corePicks && d.corePicks.category))) || '';
+          var _catMismatch = (_boardCat === 'korea' && _anaCat && _anaCat !== 'korea');
+          if (_catMismatch || (_liveRk && _anaRk && _liveRk !== _anaRk)) {
             var trans = mk('div', 'margin:0 0 6px;padding:8px 10px;border-radius:7px;border:1px solid #38bdf8;background:rgba(56,189,248,.14)');
-            trans.appendChild(mk('div', 'font-weight:900;font-size:14px;color:#7dd3fc', '🔄 새 경주 분석 중...'));
-            trans.appendChild(mk('div', 'font-weight:800;font-size:14px;color:#e2e8f0;margin-top:2px', st.raceKey || _liveRk));
-            trans.appendChild(mk('div', 'font-size:11px;color:#94a3b8;margin-top:2px', '이전 경주 추천을 초기화했습니다 · 잠시만 기다려 주세요'));
+            trans.appendChild(mk('div', 'font-weight:900;font-size:14px;color:#7dd3fc',
+              _catMismatch ? '🇰🇷 한국경마 분석 중...' : '🔄 새 경주 분석 중...'));
+            trans.appendChild(mk('div', 'font-weight:800;font-size:14px;color:#e2e8f0;margin-top:2px', st.raceKey || _liveRk || '한국경마'));
+            trans.appendChild(mk('div', 'font-size:11px;color:#94a3b8;margin-top:2px',
+              _catMismatch ? '이전 종목(경정/경륜) 분석을 초기화했습니다 · 복승 수집 중' : '이전 경주 추천을 초기화했습니다 · 잠시만 기다려 주세요'));
             panel.appendChild(trans);
-            if (_lastTransitionRk !== _liveRk) {   // 새 경주 감지 → 즉시 1회 재분석(중복 트리거 방지)
-              _lastTransitionRk = _liveRk;
+            // 새 경주/종목 감지 → 즉시 1회 재분석(중복 트리거 방지). 종목 전환은 raceKey 키로 중복 방지.
+            var _trigKey = _catMismatch ? ('korea:' + (_liveRk || st.raceKey || '')) : _liveRk;
+            if (_lastTransitionRk !== _trigKey) {
+              _lastTransitionRk = _trigKey;
               try { pollOverlayAnalyze(); } catch (_) { /* */ }
             }
-            return;   // ⬅ 이전 경주 corePicks/유력마/복병/추천 렌더 억제(전환 클리어)
+            return;   // ⬅ 이전 종목/경주 corePicks·유력마·복병·추천 렌더 억제(전환 클리어)
           }
         } catch (_) { /* */ }
 

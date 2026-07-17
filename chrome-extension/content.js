@@ -2483,6 +2483,11 @@
       try { rk = extractRaceKey(); } catch (_) { rk = ''; }
       if (!rk) { const s = await getSettings(); rk = (s.raceKey || '').trim(); }
       if (!rk) return;
+      // [오버레이 자동전환] 한국 감지 즉시 detectedCategory·raceKey 기록 → 오버레이가 경정/경륜 잔존분석을
+      //   바로 초기화하고 한국경마로 전환(수집 완료 30초 기다리지 않고 종목 불일치 클리어가 즉시 작동).
+      try {
+        chrome.storage.local.set({ detectedCategory: 'korea', detectedSport: 'horse', detectedAt: Date.now(), raceKey: rk });
+      } catch (_) { /* */ }
       // [수정3·배당판 고정] 한국 경주를 분석기에 계속 알림(board hint)→ 분석기가 이 경주를 고정 추종(다른 경주로 안 튐).
       try { _postBoardHint(rk); } catch (_) { /* */ }
       if (rk !== _krRk) { _krRk = rk; _krLast = 0; }     // 경주 전환 → 즉시 1회 허용
