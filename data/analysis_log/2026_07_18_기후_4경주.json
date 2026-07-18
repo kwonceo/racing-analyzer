@@ -1,0 +1,402 @@
+{
+ "race_id": "2026_07_18_기후_4경주",
+ "raceKey": "기후 4경주",
+ "sport": "cycle",
+ "category": "cycle",
+ "date": "2026-07-18",
+ "race": "기후 4경주",
+ "analyzed_at": "09:30:13",
+ "updated_at": "09:39:20",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://ks1.dke-d11diw.site/user_frame.php?PLACE_TYPE=JC"
+ },
+ "odds_timeline": [
+  {
+   "time": "09:30:37",
+   "minutes_before": 1,
+   "quinella": {}
+  },
+  {
+   "time": "09:32:19",
+   "minutes_before": null,
+   "quinella": {}
+  },
+  {
+   "time": "09:33:06",
+   "minutes_before": 19,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  },
+  {
+   "time": "09:33:53",
+   "minutes_before": 19,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  },
+  {
+   "time": "09:34:04",
+   "minutes_before": 18,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  },
+  {
+   "time": "09:34:33",
+   "minutes_before": 18,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  },
+  {
+   "time": "09:35:13",
+   "minutes_before": 17,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  },
+  {
+   "time": "09:36:10",
+   "minutes_before": 16,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  }
+ ],
+ "signals_detected": [
+  {
+   "time": "09:36:10",
+   "type": "자금집중",
+   "detail": "복승 자금 집중 — 상위 3개 조합이 전체의 99% 점유",
+   "severity": "🟠",
+   "reason": "복승 역수합(환급률) 0.203 · 소수 조합 편중 = 특정 결과에 자금 쏠림(이변 시 고배당)"
+  }
+ ],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [
+   {
+    "type": 7,
+    "label": "환수율 90%+ 집중",
+    "horses": [],
+    "detail": "상위3조합 100% 집중 · 환수율 20%",
+    "level": "orange"
+   }
+  ],
+  "count": 1,
+  "recommendLevel": "보조",
+  "dualConverge": false,
+  "types": [
+   7
+  ],
+  "hitRates": {
+   "2": {
+    "type": 2,
+    "label": "역배열 10%+",
+    "fired": 42,
+    "hit": 15,
+    "rate": 36
+   },
+   "1": {
+    "type": 1,
+    "label": "연속하락 3회+",
+    "fired": 5,
+    "hit": 3,
+    "rate": 60
+   },
+   "5": {
+    "type": 5,
+    "label": "복수조합 동시급락",
+    "fired": 35,
+    "hit": 21,
+    "rate": 60
+   },
+   "8": {
+    "type": 8,
+    "label": "상승후급락(스마트머니)",
+    "fired": 90,
+    "hit": 63,
+    "rate": 70
+   },
+   "3": {
+    "type": 3,
+    "label": "마감직전 대급락",
+    "fired": 5,
+    "hit": 4,
+    "rate": 80
+   },
+   "4": {
+    "type": 4,
+    "label": "재급락",
+    "fired": 47,
+    "hit": 44,
+    "rate": 94
+   },
+   "6": {
+    "type": 6,
+    "label": "역배열+급락(이중수렴)",
+    "fired": 4,
+    "hit": 0,
+    "rate": 0
+   }
+  }
+ },
+ "compression_pattern": {
+  "detected": false,
+  "disabled": true,
+  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 5.5배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 5,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 48배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 6,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 5.5배 · 감점 없음 = 100점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   5,
+   6
+  ],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    1,
+    6
+   ],
+   "trio": [
+    1,
+    5,
+    6
+   ]
+  },
+  "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    1,
+    6
+   ],
+   "trio": [
+    1,
+    5,
+    6
+   ]
+  }
+ },
+ "corePicks": {
+  "axis": [
+   1,
+   6
+  ],
+  "third": 5,
+  "quinella": [
+   1,
+   6
+  ],
+  "trifecta": [
+   1,
+   5,
+   6
+  ],
+  "picks": [
+   {
+    "no": 1,
+    "tier": 1,
+    "sub": -5.5,
+    "rep": 5.5,
+    "reason": "유력마 저배당 5.5배"
+   },
+   {
+    "no": 6,
+    "tier": 1,
+    "sub": -5.5,
+    "rep": 5.5,
+    "reason": "유력마 저배당 5.5배"
+   },
+   {
+    "no": 5,
+    "tier": 1,
+    "sub": -48.0,
+    "rep": 48.0,
+    "reason": "유력마 저배당 48배"
+   }
+  ],
+  "quinellaOdds": 5.5,
+  "trifectaOdds": null,
+  "confQuinellas": [
+   {
+    "combo": [
+     1,
+     6
+    ],
+    "odds": 5.5,
+    "reason": "시장유력"
+   }
+  ],
+  "forcedHorses": [],
+  "confTop1": 1,
+  "confTop1Conf": 0.0,
+  "confTop1High": false,
+  "favAxis": [
+   1,
+   6
+  ],
+  "confTrifectaIns": [
+   1,
+   5,
+   6
+  ],
+  "confTrifectaInsOdds": 46.6,
+  "formTopA": [],
+  "single": {},
+  "paceAnalysis": null,
+  "finalQuinellas": [
+   {
+    "combo": [
+     1,
+     6
+    ],
+    "odds": 5.5,
+    "stars": 3,
+    "reason": "유력마 1·2위 조합",
+    "basis": [],
+    "summary": "유력마 1위+2위 최우선"
+   }
+  ],
+  "finalTrifectas": [
+   {
+    "combo": [
+     1,
+     5,
+     6
+    ],
+    "odds": null,
+    "estimated": true,
+    "reason": "삼복승 메인(복승1·2+유력마)",
+    "qMainAnchor": true
+   }
+  ],
+  "axisPlan": {
+   "axis1": 1,
+   "axis2": 6,
+   "links": [
+    5
+   ],
+   "axis1Score": 0.0,
+   "axis2Score": 0.0,
+   "quinellas": [
+    {
+     "combo": [
+      1,
+      6
+     ],
+     "odds": 5.5,
+     "label": "축1+축2",
+     "rank": 1
+    },
+    {
+     "combo": [
+      1,
+      5
+     ],
+     "odds": 48.0,
+     "label": "축1+연결1",
+     "rank": 2
+    }
+   ],
+   "trifectas": [
+    {
+     "combo": [
+      1,
+      5,
+      6
+     ],
+     "odds": null,
+     "estimated": true,
+     "label": "축1+축2+연결1"
+    }
+   ],
+   "title": "🎯 핵심 축: 1번·6번"
+  },
+  "qMainCheck": {
+   "qMain": [
+    1,
+    6
+   ],
+   "replaced": 0,
+   "allInclude": true
+  },
+  "scenarioPlan": null,
+  "bmedSpecial": [],
+  "dansung": false,
+  "dansungMinOdds": 5.5,
+  "dansungPlan": null,
+  "quinellaMax": 3,
+  "raceHorseCount": 3,
+  "chaoticRace": false,
+  "formMissing": true
+ },
+ "summary": "유력마 1·6·5 / 복승 1+6",
+ "keyHorses": [
+  1,
+  6,
+  5
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}
