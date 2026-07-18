@@ -7749,6 +7749,13 @@ def _dark_sport_of(rk, an=None):
     cat = (an or {}).get("category") or ""
     if "korea" in cat:
         return "korea"
+    # [한국 dark_horse 오분류 수정] category 미설정 시 raceKey 경마장명으로 한국경마 판정(서울/제주/부산 등) →
+    #   과거엔 category 없으면 keiba(기본)로 떨어져 한국 복병 학습이 keiba 버킷에 섞여 korea 통계가 1건뿐이던 문제.
+    try:
+        if _KRA_TRACK_RE.search(str(rk or "")):
+            return "korea"
+    except Exception:
+        pass
     if "cycle" in cat:
         return "keirin"
     if cat in ("boat", "bike"):
@@ -7770,6 +7777,21 @@ def _dark_odds_band(odds):
     return "100+"
 
 
+def _norm_sig_key(s):
+    """[신호 라벨 정규화] 이중표기('크로스역배열 크로스역배열')·이모지·인접중복을 단일 라벨로 축약 → 통계 키 통일.
+    'A B A B'(구절 전체 반복)와 'X X'(단어 반복) 모두 처리. 빈값이면 '복병'."""
+    s = re.sub(r"[🔄📉💰⚡★☆🔴🟡➡️]+", "", str(s or "")).strip()
+    w = s.split()
+    n = len(w)
+    if n >= 2 and n % 2 == 0 and w[: n // 2] == w[n // 2:]:   # 'A B A B' → 'A B'
+        w = w[: n // 2]
+    out = []
+    for p in w:                                              # 인접 중복 단어 축약('X X' → 'X')
+        if not out or out[-1] != p:
+            out.append(p)
+    return " ".join(out).strip() or "복병"
+
+
 def _dark_signal_of(no, an):
     """[복병 신호 우선순위] 말 no의 복병 신호 판정 → (priority, label). priority 낮을수록 강함(1>2>3).
     ① 급락 -10%+ & 배당 15배+ → 1  ② 스마트머니 & 역배열 동시 → 2  ③ 초기급락 보존말 → 3  그 외 → 4(약).
@@ -7786,7 +7808,7 @@ def _dark_signal_of(no, an):
     smart = bool(dh.get("smartMoney"))
     inv = {int(x) for x in (((an.get("inverse") or {}).get("invHorses")) or [])}
     is_rev = no in inv
-    # 초기급락 보존말(signalTimeline/earlyDrop note)
+    # 초기급락 보존말(signalTimeline/earlyDrop note) — note+tierReason 은 '키워드 탐지용'으로만 합침(라벨 아님)
     note = str(dh.get("note") or "") + " " + str(dh.get("tierReason") or "")
     early = ("초기급락" in note) or ("초기주목" in note)
     if max_drop <= -10 and odds is not None and odds >= 15:
@@ -7799,7 +7821,10 @@ def _dark_signal_of(no, an):
         return 2, "스마트머니"
     if is_rev:
         return 3, "역배열"
-    return 4, (note.strip() or "복병")
+    # [신호 라벨 이중표기 수정] 폴백 라벨은 note+tierReason 을 그대로 쓰면 '🔄 크로스역배열 크로스역배열'처럼 중복됨.
+    #   → 정제된 tierReason 우선, 없으면 note. 이모지·중복 토큰 제거(_norm_sig_key)로 단일 라벨화.
+    _lab = str(dh.get("tierReason") or "").strip() or str(dh.get("note") or "").strip()
+    return 4, (_norm_sig_key(_lab) if _lab else "복병")
 
 
 def _dark_rank_horses(an):
@@ -8034,6 +8059,13 @@ def _dark_stats_recompute():
                     dansung["winnerSignals"][tag] = dansung["winnerSignals"].get(tag, 0) + 1
             ranks = doc.get("dark_horses") or {}
             sp = doc.get("sport") or "keiba"
+            # [한국 dark_horse 오분류 소급 교정] 기존 로그가 sport=keiba 로 잘못 저장돼 있어도, 경주명이 한국
+            #   경마장이면 재계산 시 korea 로 집계(과거 파일 재기록 없이 통계만 정정 → korea 학습 누적 복원).
+            try:
+                if sp != "korea" and _KRA_TRACK_RE.search(str(doc.get("race") or "")):
+                    sp = "korea"
+            except Exception:
+                pass
             for key in ("rank1", "rank2", "rank3"):
                 r = ranks.get(key)
                 if not r:
@@ -8042,9 +8074,10 @@ def _dark_stats_recompute():
                 rank_hit[key][1] += 1
                 if hit:
                     rank_hit[key][0] += 1
-                # 신호별
+                # 신호별 — [이중표기 소급 교정] 기존 로그의 '크로스역배열 크로스역배열' 등 중복 라벨을 단일 키로 정규화.
                 sig = (r.get("signal") or "").split("·")[0].split("%")[0]
                 sig = re.sub(r"-?\d+", "", sig).strip() or "복병"
+                sig = _norm_sig_key(sig)
                 bs = by_signal.setdefault(sig, [0, 0])
                 bs[1] += 1; bs[0] += 1 if hit else 0
                 # 배당구간별
@@ -11580,11 +11613,20 @@ def _analysis_log_save(rk, an=None):
 RACE_RESULTS_DIR = os.path.join(os.path.dirname(__file__), "data", "race_results")
 
 
+def _strip_race_dist(race):
+    """[중복통합] raceKey/경주명에서 끝의 거리접미(예: ' 1200M', '900M')만 제거 → 한 경주 = 한 표기.
+    거리 표기가 없으면(경륜·경정·일본지방 등) 원본 그대로. 앞부분(경마장·경주번호)은 절대 건드리지 않음."""
+    return re.sub(r"\s*\d{3,4}\s*[Mm]\s*$", "", str(race or "")).strip() or str(race or "")
+
+
 def _race_result_id(rk):
-    """raceKey → race_id(파일명). 예: '2026-07-05 사가 8경주' → '2026-07-05_사가_8경주'."""
+    """raceKey → race_id(파일명). 예: '2026-07-05 사가 8경주' → '2026-07-05_사가_8경주'.
+    [중복통합] 날짜접두 제거 + 거리접미(1200M 등) 제거로 정규화 → '제주 6경주 900M'·'2026-07-18 제주 6경주'가
+    같은 파일 id 로 수렴(한 경주 = 한 파일). 기존 파일명 규칙(언더스코어)은 그대로 유지."""
     m = re.search(r"(\d{4}-\d{2}-\d{2})", rk or "")
     date = m.group(1) if m else time.strftime("%Y-%m-%d", time.localtime())
     race = re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip() or (rk or "race")
+    race = _strip_race_dist(race)   # [중복통합] 거리접미 제거 → 거리 변형 병합
     safe = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
     return safe, date
 
@@ -11592,7 +11634,21 @@ def _race_result_id(rk):
 def _race_result_path(rk):
     os.makedirs(RACE_RESULTS_DIR, exist_ok=True)
     rid, date = _race_result_id(rk)
-    return os.path.join(RACE_RESULTS_DIR, rid + ".json"), rid, date
+    canonical = os.path.join(RACE_RESULTS_DIR, rid + ".json")
+    # [중복통합·호환 탐색] canonical 파일이 없고, 같은 경주의 '거리접미 변형' 파일이 이미 있으면 그걸 재사용
+    #   → 새 중복 파일을 만들지 않고 기존 파일에 이어 쓴다(기존 파일 삭제·덮어쓰기 없이 한 경주=한 파일 수렴).
+    if not os.path.exists(canonical):
+        try:
+            prefix = rid + "_"
+            for fn in sorted(os.listdir(RACE_RESULTS_DIR)):
+                if not (fn.endswith(".json") and fn[:-5].startswith(prefix)):
+                    continue
+                suffix = fn[:-5][len(prefix):]
+                if re.fullmatch(r"\d{3,4}[Mm]", suffix):   # 거리접미 변형만(다른 경주 오탐 방지)
+                    return os.path.join(RACE_RESULTS_DIR, fn), fn[:-5], date
+        except Exception:
+            pass
+    return canonical, rid, date
 
 
 def _validate_race_result(data):
@@ -14087,10 +14143,28 @@ def _winning_quinella_odds(rk, top2):
     return None
 
 
+_RESULT_LEARNED = {}   # [중복학습 방지] canonical race id → (마지막 rk, 결과튜플, 시각). 같은 경주 다른 표기 이중학습 차단.
+
+
 def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout=None, inputs=None):
     """경주 결과 → 히스토리 기록 + 자동학습 레코드/통계 갱신(공용).
     keiba/asyukk 결과 자동수집(results_auto)과 수동 입력(record-result)이 함께 사용.
     이상감지·추천·전적유력마·제거 판정의 실제 적중 여부를 판정해 learning.json 누적."""
+    # ══════════ [중복학습 방지·raceKey 변형 (2026-07-18)] ══════════
+    #   같은 경주가 거리접미('제주 6경주 900M')·날짜접두('2026-07-18 제주 6경주') 등 다른 표기로 두 번 들어오면
+    #   dark_horse·패턴·failure_review 등 학습이 이중 반영돼 통계가 왜곡됐다(오늘 한국 7경주 중복).
+    #   → canonical id(거리·날짜 정규화)로, '다른 표기'가 최근(2시간) 같은 결과로 이미 학습했으면 이번은 스킵.
+    #   ⚠ 같은 rk 재제출(백필 20분 주기 갱신)은 스킵하지 않음 → 기존 '깨끗이 덮어쓰기' 멱등 그대로 유지.
+    try:
+        _cid, _cdate = _race_result_id(rk)
+        _rt = tuple((result or {}).get(k) for k in ("1st", "2nd", "3rd") if (result or {}).get(k) is not None)
+        _prev = _RESULT_LEARNED.get(_cid)
+        if _prev and _prev[0] != rk and _prev[1] == _rt and (time.time() - _prev[2]) < 7200:
+            print(f"[중복학습 방지] {rk}: 같은 경주 다른 표기('{_prev[0]}')로 이미 학습됨 → 이번 학습 스킵(이중 반영 차단)")
+            return ({"was_hit": None, "skipped_duplicate": True, "canonical": _cid, "raceKey": rk},
+                    (_learning_load().get("stats") or {}))
+    except Exception as _de:
+        print("[중복학습 방지] 판정 스킵(무시):", _de)
     path, _, _ = _hist_path(rk)
     try:
         doc = json.load(open(path, encoding="utf-8"))
@@ -14659,6 +14733,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _data_git_backup(f"결과 자동백업: {rk} {'-'.join(map(str, top3))}")
     except Exception as e:
         print("[데이터백업] 트리거 실패:", e)
+    # [중복학습 방지] 이 경주(canonical)를 이 rk 로 학습 완료 기록 → 이후 다른 표기 재유입 시 중복 차단.
+    try:
+        _RESULT_LEARNED[_cid] = (rk, _rt, time.time())
+    except Exception:
+        pass
     return record, L["stats"]
 
 
@@ -23532,6 +23611,27 @@ def multi_dashboard():
                           "keyHorses": [], "signals": [], "anomaly": False, "confidence": None,
                           "quinellaMain": None, "afterClose": False, "scheduled": True})
     cards.sort(key=lambda c: (c.get("secondsLeft") if c.get("secondsLeft") is not None else 9e9))
+    # [岐阜·기후 중복 즉시 제거·렌더단계] 저장키가 岐阜(구)·기후(신) 두 벌로 남아 있어도 화면에선 한 장만.
+    #   (경마장명 정규화 + 경주번호 + 종목)으로 중복 카드를 병합 — 수집분(secondsLeft 있는 카드) 우선 유지.
+    #   ⚠ 기존 카드 데이터는 삭제 없이 '중복 표시'만 접는다(수집 우선·정보 많은 카드 유지).
+    try:
+        _seen_disp, _deduped = {}, []
+        for c in cards:
+            _dk = (_track_norm(c.get("venue")), c.get("raceNo"), c.get("sport") or "horse")
+            if None in _dk[:2]:
+                _deduped.append(c); continue          # 경주 식별 불가 카드는 그대로
+            _prev = _seen_disp.get(_dk)
+            if _prev is None:
+                _seen_disp[_dk] = len(_deduped); _deduped.append(c); continue
+            # 이미 같은 경주 카드가 있음 → 더 '충실한'(수집됨·미예정) 카드를 남긴다
+            _old = _deduped[_prev]
+            _c_rich = (not c.get("scheduled")) and (c.get("secondsLeft") is not None or c.get("keyHorses"))
+            _o_rich = (not _old.get("scheduled")) and (_old.get("secondsLeft") is not None or _old.get("keyHorses"))
+            if _c_rich and not _o_rich:
+                _deduped[_prev] = c
+        cards = _deduped
+    except Exception as _de:
+        print("[대시보드] 岐阜·기후 중복제거 스킵(무시):", _de)
     urgent = [c["raceKey"] for c in cards if c.get("urgency") == "urgent" and not c.get("afterClose")]
     # [5번] 종목별 카운트(토글 UI용)
     by_sport = {}

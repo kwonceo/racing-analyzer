@@ -6,14 +6,20 @@
  "date": "2026-07-18",
  "race": "사가 10경주",
  "analyzed_at": "20:46:49",
- "updated_at": "20:49:54",
+ "updated_at": "21:13:43",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
   "image_file": null,
   "odds_source": "https://ks1.dke-d11diw.site/user_frame.php?PLACE_TYPE=J"
  },
- "odds_timeline": [],
+ "odds_timeline": [
+  {
+   "time": "21:13:31",
+   "minutes_before": null,
+   "quinella": {}
+  }
+ ],
  "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
@@ -283,6 +289,26 @@
    "inverseHit": [],
    "confidence": 0,
    "reason": "추천 미적중"
+  },
+  "failure": {
+   "type": "전적오판",
+   "label": "유형4 · 전적 오판",
+   "focus": 8,
+   "winner": 8,
+   "missed": [
+    8,
+    12,
+    3
+   ],
+   "reason": "8번은 배당 변화 없이 입상 → 배당은 정상, 전적 판단 실패(이변)",
+   "improvement": "전적 하위라도 최근 컨디션·거리/기수 변경 반영 · 이변 조건 학습 강화",
+   "missed_signal": "배당 신호 없음(전적 이변)",
+   "timeline": [],
+   "maxDrop": 0,
+   "buriedBy": null,
+   "afterClose": false,
+   "massDrop": false,
+   "winnerSignal": false
   }
  },
  "profit": null,

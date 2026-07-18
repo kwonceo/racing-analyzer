@@ -5,8 +5,8 @@
  "category": "japan_local",
  "date": "2026-07-18",
  "race": "코치 12경주",
- "analyzed_at": "21:06:48",
- "updated_at": "21:10:01",
+ "analyzed_at": "21:10:48",
+ "updated_at": "21:13:57",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -15,22 +15,17 @@
  },
  "odds_timeline": [
   {
-   "time": "21:08:49",
+   "time": "21:12:40",
    "minutes_before": null,
    "quinella": {}
   },
   {
-   "time": "21:08:49",
+   "time": "21:12:49",
    "minutes_before": null,
    "quinella": {}
   },
   {
-   "time": "21:09:49",
-   "minutes_before": null,
-   "quinella": {}
-  },
-  {
-   "time": "21:09:49",
+   "time": "21:13:17",
    "minutes_before": null,
    "quinella": {}
   }
@@ -201,7 +196,7 @@
  },
  "recommendation_history": [
   {
-   "time": "21:06:48",
+   "time": "21:10:48",
    "minutes_before": null,
    "sig": "1-5-9|1+5|None|1+5+9",
    "anomCount": 0,
@@ -264,48 +259,8 @@
   1,
   9
  ],
- "result": {
-  "1st": 8,
-  "2nd": 6,
-  "3rd": 12
- },
- "hit": {
-  "was_hit": false,
-  "quinella_hit": false,
-  "trifecta_hit": false,
-  "keyhorse_quinella_hit": false,
-  "keyhorse_trifecta_hit": false,
-  "keyhorse_placed": [],
-  "dark_placed": [],
-  "payouts": {
-   "quinella": 0,
-   "trifecta": 0
-  },
-  "anomaly_was_correct": false,
-  "signal_correct": [],
-  "elimination_correct": false,
-  "eliminated": [
-   6,
-   8
-  ],
-  "form_pick": 1,
-  "form_pick_hit": false,
-  "pnl": -1000,
-  "stake": 1000,
-  "near_miss": false,
-  "near_miss_horse": null,
-  "pairing_miss": null,
-  "hit_basis": {
-   "formScore": 17.5,
-   "dropAmt": null,
-   "dropScore": 0,
-   "inverse": false,
-   "inverseHorses": [],
-   "inverseHit": [],
-   "confidence": 0,
-   "reason": "추천 미적중"
-  }
- },
+ "result": null,
+ "hit": null,
  "profit": null,
  "review": null
 }
