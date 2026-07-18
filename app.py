@@ -5024,6 +5024,22 @@ def _advanced_anomaly(hist, curQ, drops):
             elif consec:
                 out["streaks"][key] = {"combo": list(k), "type": "연속하락", "confAdj": 20}
                 _adj(k, 20)
+                # [작업3·연속하락 별도 신호] 단발 급락과 구분 — 3회+ 연속·총 하락폭 15%+ = '서서히 지속 유입'.
+                #   천천히 내려오는 패턴이라 단발 급락보다 약한 신호(weak)로 별도 분류·표시(기존 confAdj 로직은 유지).
+                _cnt = 1
+                for _i in range(len(seq) - 1, 0, -1):
+                    if seq[_i] < seq[_i - 1]:
+                        _cnt += 1
+                    else:
+                        break
+                _tot = (seq[-1 - _cnt + 1 if _cnt <= len(seq) else 0] - seq[-1])
+                _base = seq[max(0, len(seq) - _cnt)]
+                _totfrac = (_base - seq[-1]) / _base if _base > 0 else 0.0
+                if _cnt >= 3 and _totfrac >= 0.15:
+                    out.setdefault("continuousDrops", []).append(
+                        {"combo": list(k), "count": _cnt, "totalDropPct": round(-_totfrac * 100, 1),
+                         "label": "📉 연속하락 감지 · %d회 지속(총 %.0f%%)" % (_cnt, _totfrac * 100),
+                         "level": "weak"})
 
     # ②-b [배당 반등 패턴] 급락→반등 회복비율 정밀 분류 + 급락→반등→재급락(더 강한 신호).
     #   전체 히스토리(마지막 4틱 아님)로 판정 → 회복비율(≤20% 유효 / ≥80% 페이크)·재급락 감지.
@@ -5175,6 +5191,37 @@ _STRONG_SIGNAL_META = {
 }
 
 
+def _drop_time_weight(mb):
+    """[작업2·급락 시간대 가중치] 발주 전 분(mb) → 급락 신뢰도 배수. 학습 데이터 근거:
+    T-1분 급락 55.2%·T-2분 54.5%·T-10분 48.9% 적중(기준 27.3%) → 마감 직전일수록 강력.
+    T-1~3분 x2.0(최강) · T-4~7분 x1.5 · T-8~15분 x1.2 · 그 외 x1.0(기존 동일)."""
+    if mb is None:
+        return 1.0
+    try:
+        m = float(mb)
+    except (TypeError, ValueError):
+        return 1.0
+    if 0 <= m <= 3:
+        return 2.0
+    if m <= 7:
+        return 1.5
+    if m <= 15:
+        return 1.2
+    return 1.0
+
+
+def _drop_time_tag(mb):
+    """[작업2] 시간대 강조 라벨. T-1~3분 급락은 '⚡⚡ 최강 신호'로 강조 표시."""
+    w = _drop_time_weight(mb)
+    if w >= 2.0:
+        return "⚡⚡ T-%s분 집중급락! 최강 신호(x2.0)" % (int(mb) if mb is not None else "?")
+    if w >= 1.5:
+        return "⚡ T-%s분 급락 강신호(x1.5)" % (int(mb) if mb is not None else "?")
+    if w >= 1.2:
+        return "T-%s분 급락(x1.2)" % (int(mb) if mb is not None else "?")
+    return ""
+
+
 def _strong_signals(advanced, inverse, drops, cur_mb, hist, curQ, after_close):
     """8유형 강신호 산출(무삭제 — 표시/학습용 파생 뷰). 기존 advanced·inverse·drops·history만 소비.
     반환 {signals:[{type,label,horses,detail,level}], count(서로다른유형수), recommendLevel, dualConverge, types[]}."""
@@ -5210,14 +5257,22 @@ def _strong_signals(advanced, inverse, drops, cur_mb, hist, curQ, after_close):
         lvl = "red" if ("🔴" in (lead.get("level") or "")) else "orange"
         add(2, [lead_no], str(lead_no) + "번 " + (lead.get("tag") or "역배열") + " (배당차 " + str(lead_diff) + "%)", lvl)
 
-    # 유형3: 마감직전 대급락(T-2분 이내 30%+)
-    if cur_mb is not None and 0 <= cur_mb <= 2 and not after_close and strong_drops:
+    # 유형3: 마감직전 대급락 — [작업2] 시간대 가중치 등급화(T-1~3 최강·T-4~7 강·T-8~15 주목).
+    #   기존엔 T-2분 이내만 잡았으나, 학습상 T-10분 급락도 48.9% 적중 → T-15분까지 확장(무삭제·범위 확대).
+    #   ⚠ 시간대별 강조(_drop_time_tag)와 timeWeight 메타를 신호에 부가 → 마감 직전 급락을 최우선 처리.
+    if cur_mb is not None and 0 <= cur_mb <= 15 and not after_close and strong_drops:
+        _tw = _drop_time_weight(cur_mb)
         top = sorted(strong_drops, key=lambda x: x.get("pct", 0))[:2]
         hs = []
         for d in top:
             hs += (d.get("combo") or [])
         det = " / ".join(str(d["combo"][0]) + "+" + str(d["combo"][1]) + " " + str(d.get("pct")) + "%" for d in top)
-        add(3, hs, "T-" + str(cur_mb) + "분 " + det, "red")
+        _tag = _drop_time_tag(cur_mb)
+        _lvl = "red" if _tw >= 1.5 else "orange"          # T-7분 이내 급락 = 강(red), T-8~15분 = 주목(orange)
+        hs2 = sorted(set(int(h) for h in hs if h is not None))
+        sigs.append({"type": 3, "label": _STRONG_SIGNAL_META.get(3, ""), "horses": hs2,
+                     "detail": (_tag + " · " if _tag else "T-" + str(cur_mb) + "분 ") + det,
+                     "level": _lvl, "timeWeight": _tw, "minutesBefore": cur_mb})
 
     # 유형4: 재급락(급락→반등→재급락)
     for rb in (adv.get("rebounds") or []):
@@ -5230,6 +5285,14 @@ def _strong_signals(advanced, inverse, drops, cur_mb, hist, curQ, after_close):
     if multi:
         det = ", ".join(str(h) + "번(" + str(drop_horse_cnt[h]) + "조합)" for h in multi[:3])
         add(5, multi[:3], det + " → 자금 집중", "red")
+
+    # [작업3] 연속하락(서서히 지속 유입) — 단발 급락과 구분해 '약한 신호(yellow)'로 별도 표시(무삭제·추가만).
+    for cd in (adv.get("continuousDrops") or []):
+        _cdhs = sorted(set(int(h) for h in (cd.get("combo") or []) if h is not None))
+        if _cdhs:
+            sigs.append({"type": 1, "label": _STRONG_SIGNAL_META.get(1, "연속하락"), "horses": _cdhs,
+                         "detail": cd.get("label") or "연속하락 지속", "level": "yellow", "weak": True,
+                         "count": cd.get("count"), "totalDropPct": cd.get("totalDropPct")})
 
     # 유형6: 역배열+급락 동시(이중수렴) — 단독으로도 강력
     dual = False
@@ -8537,6 +8600,22 @@ def _triple_analyze(rk, rec):
                                 _h["jockeyChanged"] = {"bonus": _jb, "meta": _jm}
     except Exception as _ke:
         print("[KRA 전개시뮬] 실패(무시):", _ke)
+    # [작업1·일본경마 전개 시뮬레이션] 한국경마 아닌 일본지방경마(form=oddspark 전적)면 각질·상3F로 전개 예측 → jpFlowSim.
+    #   ⚠ KRA 전개(kra_flow_sim) 있으면 그대로(중복 안 함). 경륜/경정/중앙/한국은 대상 아님. 기존 form 각질보정은 유지.
+    jp_flow_sim = None
+    try:
+        _jcat = (rec.get("category") or "")
+        _jsp = (rec.get("sport") or "")
+        if (not kra_flow_sim) and form and not _KRA_TRACK_RE.search(str(rk)) \
+           and _jcat not in ("korea", "cycle", "boat", "bike", "japan_central") \
+           and _jsp not in ("cycle", "boat", "bike"):
+            jp_flow_sim = _simulate_race_flow_jp(form, valid_nos=valid_nos, win_odds=curWin)
+            if jp_flow_sim:
+                print("[일본전개] %s: %s 선행%d · 유력%d·복병%d" % (
+                    rk, jp_flow_sim["pace"], jp_flow_sim["leadCount"],
+                    len(jp_flow_sim["favoredHorses"]), len(jp_flow_sim["darkHorses"])))
+    except Exception as _je:
+        print("[일본전개] 실패(무시):", _je)
     # [역배열 감지] 진짜 역배열 = 쌍승역전만 · 전적 우수하나 시장 비인기는 별도 분류(form 전달)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
                                    wx_reversals, quin_mismatch, excess, form)
@@ -10201,6 +10280,7 @@ def _triple_analyze(rk, rec):
         "scratchedHorses": scratched_horses,       # [출전취소] 競走除外 감지 마번(추천 제외·패널 표시)
         "paceAnalysis": pace_analysis,             # [각질편성] 편성 집계·페이스 예측·유불리·시나리오(패널 표시)
         "kraFlowSim": kra_flow_sim,                # [KRA 6단계] 경주 전개 시뮬레이션(선행경합·페이스·복병)
+        "jpFlowSim": jp_flow_sim,                  # [작업1] 일본경마 전개 시뮬레이션(각질·상3F 기반·oddspark 전적)
         "kraJockeyChanges": kra_jockey_changes,    # [KRA 2단계] 이 경주 기수변경 감지 목록
         "kraSectionGait": kra_section_gait,        # [KRA 3단계] 말별 구간지수(선행력·추입력)·각질힌트
         "deadlineCorrected": deadline_corrected,   # [1번] 발주시각 오검출 정정(과거 마감상태 무효화) 발생
@@ -10942,6 +11022,7 @@ def public_matrix(race_key):
         "scratched": an.get("scratchedHorses") or [],   # [출전취소] 競走除外 마번(패널 경고 표시)
         "pace": _pub_pace(an),             # [각질편성] 편성 집계·페이스·유불리·주목마·시나리오
         "kraFlow": an.get("kraFlowSim"),   # [KRA 6단계] 경주 전개 예측(선행경합·페이스·추입복병)
+        "jpFlow": an.get("jpFlowSim"),     # [작업1] 일본경마 전개 예측(각질·상3F 기반)
         "kraJockeyChanges": an.get("kraJockeyChanges"),  # [KRA 2단계] 기수변경 감지
         "kraSectionGait": an.get("kraSectionGait"),      # [KRA 3단계] 구간지수 각질힌트
         "odds_source": (db.get(rk) or {}).get("source"),
@@ -21578,6 +21659,73 @@ def _apply_pace_analysis(form, horse_count=None):
     return {"counts": counts, "pace": pace, "paceLabel": _label, "advice": _advice,
             "focus": sorted(focus, key=lambda x: -x["bonus"])[:3], "gaitLists": gait_lists,
             "scenario": _pace_scenario(pace, counts, form, nH)}
+
+
+# ══════════ [작업1·일본경마 전개 시뮬레이션 2026-07-18] ══════════
+#   한국경마(_simulate_race_flow_kra: KRA 구간지수)에 대응하는 일본경마판.
+#   입력: oddspark 전적(form) — 각질(styleType→_gait_of)·상3F(last3f)·뒷심(backPower)·단승배당(winOdds).
+#   ⚠ 기존 각질편성(_apply_pace_analysis)·form 점수 반영은 그대로 유지. 이 함수는 '패널 표시용 전개 예측(jpFlowSim)'만 추가 산출.
+def _simulate_race_flow_jp(form, valid_nos=None, win_odds=None):
+    """[일본경마 전개 시뮬레이션] 각질·상3F로 선행경합→페이스→유리한 말→고배당 복병 예측.
+    _simulate_race_flow_kra 와 동일 출력 구조(jpFlowSim). form 없으면 None(조용히 스킵)."""
+    if not form:
+        return None
+    vs = set()
+    for n in (valid_nos or []):
+        try: vs.add(int(n))
+        except (TypeError, ValueError): pass
+    rows = [h for h in form if isinstance(h, dict) and h.get("no") is not None
+            and (not vs or int(h.get("no")) in vs)]
+    if not rows:
+        return None
+
+    def _g(h):
+        try: return h.get("gait") or _gait_of(h)
+        except Exception: return h.get("gait") or "자유"
+    # 선행 경합 후보(각질=선행)
+    lead = sorted(int(h["no"]) for h in rows if _g(h) == "선행")
+    lead_count = len(lead)
+    if lead_count >= 3:
+        pace, pace_reason, favor = "하이페이스", "선행 %d두 경합 → 초반 빠름 → 추입 유리" % lead_count, "추입"
+    elif lead_count <= 1:
+        pace, pace_reason, favor = "슬로우페이스", "선행 %d두 → 초반 느림 → 선행·선입 유지 유리" % lead_count, "선행"
+    else:
+        pace, pace_reason, favor = "미들페이스", "선행 2두 → 표준 전개", None
+    favored, dark = [], []
+    for h in rows:
+        no = int(h["no"]); g = _g(h)
+        bp = h.get("backPower")                       # 상3F 상대 뒷심(강/보통/약)
+        odds = h.get("winOdds")
+        reasons, score = [], 0
+        if favor == "추입" and g in ("추입", "선입"):
+            score += 15; reasons.append("추입력(빠른페이스 유리)")
+        if favor == "추입" and bp == "강":
+            score += 10; reasons.append("상3F 상위(막판 스피드)")
+        if favor == "선행" and g == "선행":
+            score += 15; reasons.append("선행력(느린페이스 유리)")
+        if bp == "강" and pace == "하이페이스" and "상3F 상위(막판 스피드)" not in reasons:
+            score += 5; reasons.append("뒷심 강")
+        if score <= 0:
+            continue
+        it = {"no": no, "gait": g, "backPower": bp, "odds": odds, "score": score, "reasons": reasons}
+        # 단승 15배+ = 복병(dark), 그 미만 = 유력마(favored). 단승 미수집이면 favored 로.
+        if isinstance(odds, (int, float)) and odds >= 15:
+            dark.append(it)
+        else:
+            favored.append(it)
+    favored.sort(key=lambda x: -x["score"])
+    dark.sort(key=lambda x: -x["score"])
+    if not favored and not dark:
+        return None
+    text = [pace_reason]
+    if favored:
+        text.append("유력: " + ", ".join("%d번(%s)" % (f["no"], "·".join(f["reasons"])) for f in favored[:3]))
+    if dark:
+        text.append("복병: " + ", ".join("%d번(%s%s)" % (d["no"], "·".join(d["reasons"]),
+                    ("·%s배" % d["odds"]) if isinstance(d["odds"], (int, float)) else "") for d in dark[:2]))
+    return {"pace": pace, "paceReason": pace_reason, "leadCount": lead_count, "leadContenders": lead,
+            "favoredHorses": favored[:5], "darkHorses": dark[:5],
+            "note": "%s · %s" % (pace, pace_reason), "text": text, "source": "oddspark전적(각질·상3F)"}
 
 
 # ── 3-2c 거리 변화 보너스 [3] ──────────────────

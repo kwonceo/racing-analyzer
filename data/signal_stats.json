@@ -1639,16 +1639,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "서울 4경주 1300M",
-        "date": "2026-07-18",
-        "horses": [
-          10
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "2026-07-18 제주 3경주",
         "date": "2026-07-18",
         "horses": [
@@ -1993,13 +1983,23 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 4경주 1300M",
+        "date": "2026-07-18",
+        "horses": [
+          3
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
     "count": 131,
     "hit_quinella": 48,
-    "hit_trifecta": 19,
+    "hit_trifecta": 20,
     "rate_quinella": 36.6,
-    "rate_trifecta": 14.5,
+    "rate_trifecta": 15.3,
     "reliable": true
   },
   "전적이중수렴": {
@@ -2617,20 +2617,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "서울 4경주 1300M",
-        "date": "2026-07-18",
-        "horses": [
-          6,
-          11,
-          5
-        ],
-        "placed": [
-          6
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "제주 6경주 900M",
         "date": "2026-07-18",
         "horses": [
@@ -2749,11 +2735,11 @@
         "trifecta_hit": false
       }
     ],
-    "count": 42,
-    "hit_quinella": 12,
+    "count": 41,
+    "hit_quinella": 11,
     "hit_trifecta": 6,
-    "rate_quinella": 28.6,
-    "rate_trifecta": 14.3,
+    "rate_quinella": 26.8,
+    "rate_trifecta": 14.6,
     "reliable": false
   },
   "크로스역배열": {
@@ -2860,17 +2846,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "서울 4경주 1300M",
-        "date": "2026-07-18",
-        "horses": [
-          4,
-          11
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "2026-07-18 제주 3경주",
         "date": "2026-07-18",
         "horses": [
@@ -2921,11 +2896,11 @@
         "trifecta_hit": false
       }
     ],
-    "count": 13,
-    "hit_quinella": 4,
+    "count": 12,
+    "hit_quinella": 3,
     "hit_trifecta": 2,
-    "rate_quinella": 30.8,
-    "rate_trifecta": 15.4,
+    "rate_quinella": 25.0,
+    "rate_trifecta": 16.7,
     "reliable": false
   },
   "집중급락": {
