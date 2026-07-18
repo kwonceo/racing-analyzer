@@ -1,0 +1,93 @@
+{
+ "race_id": "2026_07_18_코치_12경주",
+ "raceKey": "코치 12경주",
+ "date": "2026-07-18",
+ "track": "코치",
+ "round": 12,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 10,
+ "result": {
+  "1st": 8,
+  "2nd": 6,
+  "3rd": 12
+ },
+ "odds_at_start": {
+  "quinella": {},
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "21:08:49",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "21:08:49",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "21:09:49",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "21:09:49",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  }
+ ],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   4,
+   5,
+   7,
+   9,
+   2,
+   3,
+   10
+  ],
+  "eliminated": [
+   6,
+   8
+  ],
+  "recommend_main": "1+5",
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": "하",
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-18 21:10:00",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
