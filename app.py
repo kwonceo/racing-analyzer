@@ -11228,13 +11228,33 @@ def _history_save_analysis(rk, an):
 ANALYSIS_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
 
 
+def _strip_race_dist(race):
+    """[거리 접미사 통일] '서울 2경주 1200M' 끝의 거리(3~4자리+M/m) 제거 → 거리 유무로 파일 갈라지는 중복 방지."""
+    return re.sub(r"\s*\d{3,4}\s*[Mm]\s*$", "", str(race or "")).strip() or str(race or "")
+
+
+def _slug_compat_path(directory, safe):
+    """canonical(거리 제거) 파일이 없고 같은 경주의 거리표기 기존 파일이 있으면 그걸 사용(오늘 진행분 유실 방지)."""
+    path = os.path.join(directory, safe + ".json")
+    if not os.path.exists(path):
+        try:
+            pref = safe + "_"
+            for fn in sorted(os.listdir(directory)):
+                if fn.startswith(pref) and re.match(r"^\d{3,4}[Mm]\.json$", fn[len(pref):]):
+                    return os.path.join(directory, fn)
+        except Exception:
+            pass
+    return path
+
+
 def _analysis_log_path(rk):
     m = re.search(r"(\d{4}-\d{2}-\d{2})", rk or "")
     date = m.group(1) if m else time.strftime("%Y-%m-%d", time.localtime())
     race = re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip() or (rk or "race")
+    race = _strip_race_dist(race)   # [거리 접미사 통일]
     safe = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
     os.makedirs(ANALYSIS_LOG_DIR, exist_ok=True)
-    return os.path.join(ANALYSIS_LOG_DIR, safe + ".json"), date, race
+    return _slug_compat_path(ANALYSIS_LOG_DIR, safe), date, race
 
 
 def _canonical_log_key(rk):
@@ -11494,6 +11514,7 @@ def _race_result_id(rk):
     m = re.search(r"(\d{4}-\d{2}-\d{2})", rk or "")
     date = m.group(1) if m else time.strftime("%Y-%m-%d", time.localtime())
     race = re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip() or (rk or "race")
+    race = _strip_race_dist(race)   # [거리 접미사 통일]
     safe = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
     return safe, date
 
@@ -11501,7 +11522,7 @@ def _race_result_id(rk):
 def _race_result_path(rk):
     os.makedirs(RACE_RESULTS_DIR, exist_ok=True)
     rid, date = _race_result_id(rk)
-    return os.path.join(RACE_RESULTS_DIR, rid + ".json"), rid, date
+    return _slug_compat_path(RACE_RESULTS_DIR, rid), rid, date
 
 
 def _validate_race_result(data):
@@ -19412,13 +19433,11 @@ def kra_section():
     # [수정·검증용] 그 경주 출전마 이름을 API155(경주결과)에서 얻어 해당 말만 표시(경주별 분리 확인).
     #   결과 전(미실시) 경주는 이름을 못 얻어 전체 표시될 수 있음(라이브 분석은 form 기반이라 정확).
     _race_names = set()
-    _raw155 = []
     try:
         _ai155, _ = _kra_ai_results(meet, rc_date)
         for _r in (_ai155.get(_kra_int(rc_no)) or []):
             _rn = (_r.get("hrName") or "").strip()
             if _rn:
-                _raw155.append(_rn)
                 _race_names.add(_kra_norm_name(_rn))   # 정규화 이름으로 매칭
     except Exception:
         pass
@@ -19430,8 +19449,7 @@ def kra_section():
                     "entrants": ("API155 %d두" % len(_race_names)) if _race_names else "미확인(결과전·전체표시)",
                     "sectionIndices": {(v.get("hrName") or str(k)): v for k, v in sec.items()},
                     "passRanks": {str(k): v for k, v in pr.items()},
-                    "flowSim": sim,
-                    "_nameDiag": {"api155_sample": _raw155[:6], "api37_sample": [ (vv.get("hrName") or kk) for kk, vv in list(sec_all.items())[:6] ], "sec_all_count": len(sec_all), "matched": len(sec)}})
+                    "flowSim": sim})
 
 
 @app.route("/api/kra/jockey-change", methods=["GET", "POST"])
