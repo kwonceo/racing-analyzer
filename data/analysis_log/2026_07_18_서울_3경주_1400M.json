@@ -4,9 +4,9 @@
  "sport": "horse",
  "category": "korea",
  "date": "2026-07-18",
- "race": "서울 3경주 1400M",
+ "race": "서울 3경주",
  "analyzed_at": "11:45:22",
- "updated_at": "13:01:23",
+ "updated_at": "13:53:32",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -36,49 +36,9 @@
    "jockey": "수철",
    "record_score": 95,
    "record_detail": "최근 2",
-   "odds": 16.3,
+   "odds": null,
    "grade": "A",
-   "grade_reason": "배당 19.7배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "인스파이",
-   "jockey": "동하",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": 3.8,
-   "grade": "B",
-   "grade_reason": "배당 4.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 8,
-   "name": "루 지",
-   "jockey": "인철",
-   "record_score": 115,
-   "record_detail": "최근 1",
-   "odds": 13.1,
-   "grade": "A",
-   "grade_reason": "배당 14.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 10,
-   "name": "삼정블루",
-   "jockey": "르칸",
-   "record_score": 110,
-   "record_detail": "최근 2",
-   "odds": 8.0,
-   "grade": "A",
-   "grade_reason": "배당 9.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 11,
-   "name": "피엔에스",
-   "jockey": "승운",
-   "record_score": 45,
-   "record_detail": "최근 4",
-   "odds": 14.1,
-   "grade": "B",
-   "grade_reason": "배당 17.6배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 2,
@@ -86,9 +46,19 @@
    "jockey": "옥성",
    "record_score": 0,
    "record_detail": "",
-   "odds": 35.5,
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 4,
+   "name": "인스파이",
+   "jockey": "동하",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
    "grade": "D",
-   "grade_reason": "배당 45.7배 · 단승 30~49배 → 관찰(신호 없으면 제거) = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 7,
@@ -96,9 +66,39 @@
    "jockey": "용근",
    "record_score": 0,
    "record_detail": "",
-   "odds": 13.1,
-   "grade": "C",
-   "grade_reason": "배당 19배 · 감점 없음 = 100점"
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 8,
+   "name": "루 지",
+   "jockey": "인철",
+   "record_score": 115,
+   "record_detail": "최근 1",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 10,
+   "name": "삼정블루",
+   "jockey": "르칸",
+   "record_score": 110,
+   "record_detail": "최근 2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 11,
+   "name": "피엔에스",
+   "jockey": "승운",
+   "record_score": 45,
+   "record_detail": "최근 4",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 3,
@@ -106,9 +106,9 @@
    "jockey": "코지",
    "record_score": 30,
    "record_detail": "최근 10-2",
-   "odds": 2.3,
+   "odds": null,
    "grade": "B",
-   "grade_reason": "배당 4.4배 · 최근평균 6.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
   },
   {
    "no": 5,
@@ -116,9 +116,9 @@
    "jockey": "이스",
    "record_score": 20,
    "record_detail": "최근 7",
-   "odds": 25.6,
-   "grade": "C",
-   "grade_reason": "배당 35.9배 · 최근평균 7.0착 -30 = 70점"
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
   },
   {
    "no": 6,
@@ -126,9 +126,9 @@
    "jockey": "승완",
    "record_score": 20,
    "record_detail": "최근 6",
-   "odds": 25.2,
+   "odds": null,
    "grade": "C",
-   "grade_reason": "배당 34.3배 · 최근평균 6.0착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
   },
   {
    "no": 9,
@@ -136,30 +136,30 @@
    "jockey": "중석",
    "record_score": 20,
    "record_detail": "최근 5",
-   "odds": 39.8,
-   "grade": "D",
-   "grade_reason": "배당 51.4배 · 최근평균 5.0착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 70점"
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
    1,
-   4,
+   2,
    8,
    10,
    11,
-   7,
    3,
    5,
-   6
-  ],
-  "eliminated": [
-   2,
+   6,
    9
   ],
+  "eliminated": [
+   4,
+   7
+  ],
   "elimination_reasons": {
-   "2": "배당 45.7배 · 단승 30~49배 → 관찰(신호 없으면 제거) = 100점",
-   "9": "배당 51.4배 · 최근평균 5.0착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 70점"
+   "4": "배당 미수집 · 배당 150배+ -40 = 60점",
+   "7": "배당 미수집 · 배당 150배+ -40 = 60점"
   }
  },
  "final_recommendation": {
@@ -224,11 +224,11 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    3,
+    8,
     10
    ],
    "trio": [
-    3,
+    1,
     8,
     10
    ]
@@ -250,11 +250,11 @@
   },
   "final": {
    "quinella": [
-    3,
+    8,
     10
    ],
    "trio": [
-    3,
+    1,
     8,
     10
    ]
@@ -668,15 +668,56 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 10·3·8·4 / 복승 3+10",
+ "summary": "유력마 8·10·1 / 복승 8+10",
  "keyHorses": [
-  10,
-  3,
   8,
-  4
+  10,
+  1
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 3,
+  "2nd": 4,
+  "3rd": 1
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   1
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [
+   4,
+   7
+  ],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 30,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 1번 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

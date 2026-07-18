@@ -10,13 +10,13 @@
  },
  "hit": true,
  "hit_type": null,
- "odds": "저배당",
- "win_odds": 4.4,
+ "odds": "미상",
+ "win_odds": 0,
  "why_recommended": {
   "signal_3": {
    "horse": 3,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -32,7 +32,7 @@
   "signal_4": {
    "horse": 4,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -48,7 +48,7 @@
   "signal_1": {
    "horse": 1,
    "placed": true,
-   "recommended": false,
+   "recommended": true,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -58,22 +58,6 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": 95,
-   "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_10": {
-   "horse": 10,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 100,
    "confidence": null,
    "reason": "전적상위"
   },
@@ -92,17 +76,31 @@
    "record_score": 115,
    "confidence": null,
    "reason": "전적상위"
+  },
+  "signal_10": {
+   "horse": 10,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 110,
+   "confidence": null,
+   "reason": "전적상위"
   }
  },
  "recommended_horses": [
-  10,
-  3,
   8,
-  4
+  10,
+  1
  ],
  "recommendation_process": [
   "1. 전적 분석: 3번 30점",
-  "2. 배당 수집 시작 12:36:23",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -124,40 +122,22 @@
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "전적유력마 1번 적중 · 제거 적중"
+  "reason": "전적유력마 1번 적중"
  },
  "signal_change_history": {
   "changes": [],
   "confirmed": [],
-  "candidates": [
-   4
-  ],
-  "events": {
-   "4": {
-    "first": {
-     "time": "12:53:27",
-     "minutes_before": null
-    },
-    "count": 1,
-    "last": {
-     "time": "12:53:27",
-     "minutes_before": null
-    },
-    "vanished": {
-     "time": "12:54:01",
-     "minutes_before": null
-    }
-   }
-  },
-  "finalSignal": 4,
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
   "finalConfirmed": false,
   "excluded": {
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 18
+  "validCount": 0
  },
- "pnl": 3400,
+ "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-18 12:55:40"
+ "generated_at": "2026-07-18 13:53:31"
 }
