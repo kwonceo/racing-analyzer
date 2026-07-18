@@ -1719,21 +1719,6 @@ def _sport_max_no(sport):
     return _SPORT_MAX_NO.get((sport or "horse"), 18)
 
 
-# [사설 우선 + oddspark 백업] 확장(사설 배당판 화면수집)이 방금 커버 중인 경주를 기록 →
-#   oddspark(keirin_odds·bg)는 그 경주를 백업으로 양보(주입 스킵). 사장님이 베팅하는 사설 배당판 배당 우선.
-#   ⚠ KRA 구간기록·각질(_triple_analyze 내부)과 무관 — 배당 소스 라우팅만.
-_EXT_COVERED = {}
-_EXT_COVERED_LOCK = threading.Lock()
-def _ext_covered_active(rk, within=120):
-    """확장(사설 배당판)이 within초 내 이 raceKey 배당을 보냈으면 True → oddspark는 백업(스킵)."""
-    try:
-        with _EXT_COVERED_LOCK:
-            ts = _EXT_COVERED.get(rk)
-        return bool(ts and (time.time() - ts) <= within)
-    except Exception:
-        return False
-
-
 def _oddspark_covered_active(rk, within=200):
     """[자동전송 꼬임 방어] 이 raceKey를 서버가 oddspark로 방금(within초 내) 직접 수집 중인가?
     True면 확장(asyukk 사설 배당판·화면 수집)의 중복 전송은 불필요하고 오히려 유해 —
@@ -1755,26 +1740,82 @@ def _oddspark_covered_active(rk, within=200):
     return False
 
 
+# ══════════ [긴급수정 2026-07-18] 배당판 ↔ 분석 불일치 근본수정 ══════════
+#   증상: 같은 경주가 "오비히로 2경주"(oddspark_bg)와 "2026-07-18 오비히로 2경주"(배당판) 등
+#         2개 키로 갈려 저장 → 분석패널은 oddspark(말번호 밀림), 배당판은 정답을 표시해 서로 어긋남.
+#   ① raceKey 통일  : 오늘 날짜 접두("YYYY-MM-DD ")를 제거해 무접두(=오늘) 규약으로 같은 경주를 한 키로 병합.
+#   ② 사설 우선     : 최근 사설/배당판(비-oddspark) 수집이 있으면 oddspark 백업이 활성 배당을 덮어쓰지 않음.
+#   ③ 말번호 매핑검증: 같은 배당값인데 조합(말번호)이 배당판과 다르면 '밀림'으로 판정·거부(로그 경고).
+#   ⚠ 기존 기능 삭제 없음 — _oddspark_covered_active 등 기존 함수 보존, 판정 방향만 사설 우선으로 교정.
+def _canon_rk(rk):
+    """[① raceKey 통일] 오늘 날짜 접두("2026-07-18 오비히로 2경주")를 무접두("오비히로 2경주")로 통일.
+    무접두 key = 오늘 규약(_analysis_log_path·_multi_key 등 기존 로직과 동일)이라 같은 경주가 한 키로 병합된다.
+    과거 명시 날짜(어제 등)는 보존 → 지난 경주가 오늘로 섞이지 않음. 무접두/파싱실패는 원본 그대로."""
+    s = (rk or "").strip()
+    m = re.match(r"^(\d{4}-\d{2}-\d{2})\s+(.+)$", s)
+    if m and m.group(1) == time.strftime("%Y-%m-%d"):
+        return m.group(2).strip()
+    return s
+
+
+def _src_is_oddspark(src):
+    """소스 문자열이 oddspark(백업 소스)인지. 사설(ks1)·keiba·kra_api·화면수집 등은 False(=배당판 권위)."""
+    return "oddspark" in str(src or "")
+
+
+def _combo_value_multiset(combos):
+    """조합 목록 → 배당'값' 멀티셋(반올림). 말번호 무관하게 '같은 경주인지' 비교용."""
+    from collections import Counter
+    c = Counter()
+    for it in (combos or []):
+        if isinstance(it, dict):
+            v = it.get("odds")
+            if isinstance(v, (int, float)):
+                c[round(float(v), 1)] += 1
+    return c
+
+
+def _combo_map(combos):
+    """조합 목록 → {frozenset(말번호쌍): 배당값}. 말번호 매핑 비교용."""
+    m = {}
+    for it in (combos or []):
+        if isinstance(it, dict):
+            cc = it.get("combo"); v = it.get("odds")
+            try:
+                if cc and len(cc) == 2 and isinstance(v, (int, float)):
+                    m[frozenset(int(x) for x in cc)] = round(float(v), 1)
+            except (TypeError, ValueError):
+                continue
+    return m
+
+
+def _oddspark_mapping_suspect(prev_q, new_q, min_pairs=6):
+    """[③ 말번호 밀림 감지] 직전(배당판) 복승 조합 vs 새(oddspark) 복승 조합 비교.
+    배당 '값'은 거의 같은데(=같은 경주) '말번호 매핑'이 절반 이상 다르면 밀림으로 판정.
+    반환 True = oddspark 말번호가 배당판과 어긋남(밀림) → 덮어쓰기 거부 권장. 근거 부족(다른 경주·소량)=False."""
+    pm, nm = _combo_map(prev_q), _combo_map(new_q)
+    if len(pm) < min_pairs or len(nm) < min_pairs:
+        return False
+    pv, nv = _combo_value_multiset(prev_q), _combo_value_multiset(new_q)
+    if sum((pv & nv).values()) < min_pairs:
+        return False                               # 값 자체가 다름 = 다른 경주(밀림 아님)
+    same = sum(1 for k, v in nm.items() if pm.get(k) == v)
+    return (same / max(1, len(nm))) < 0.5          # 같은 말번호쌍 배당이 절반도 안 맞으면 밀림
+
+
 @app.route("/api/odds/triple/ingest", methods=["POST"])
 def triple_ingest():
     """확장 [전체 자동 수집]: {raceKey, quinella[], exacta[], trio[]} 저장 → {ok, counts}"""
     body = request.json or {}
-    rk = (body.get("raceKey") or "").strip()
+    rk = _canon_rk((body.get("raceKey") or "").strip())   # [긴급수정 ①] 날짜접두 통일 → 같은 경주 병합
     if not rk:
         return jsonify({"error": "raceKey가 필요합니다."}), 400
-    # [자동전송 raceKey 고정·중복차단] 서버가 이 경주를 oddspark로 직접 수집 중이면 확장(화면 수집) 전송은 스킵.
-    #   → 탭 전환마다 다른 경주가 서버를 덮어써 분석기·오버레이가 꼬이던 문제 근본 차단(oddspark 미커버 경주는 정상 저장).
+    # [긴급수정 ② 사설 우선] 확장(사설 배당판·화면수집)은 사용자가 실제로 보고 베팅하는 화면 → 권위 소스.
+    #   과거엔 oddspark 서버수집 중이면 확장을 스킵(oddspark 우선)했으나, oddspark 말번호 밀림으로 분석패널이
+    #   배당판과 어긋나는 문제가 있어 '사설 우선'으로 전환한다. 확장 전송은 스킵하지 않고 그대로 저장하며,
+    #   oddspark 는 _do_triple_ingest 의 소스우선 가드에서 '백업'으로만 반영(사설 데이터 신선하면 미덮어쓰기).
+    #   ※ _oddspark_covered_active(기존 함수)는 삭제하지 않고 보존 — 판정 방향만 교정.
     _src = (body.get("source") or "")
-    _is_ext = ("oddspark" not in _src)                   # oddspark_bg/직접수집이 아닌 확장·수동 화면수집분
-    # [사설 우선] 확장(사설 배당판) 배당은 그대로 저장하고, 이 경주를 확장이 커버 중임을 기록
-    #   → oddspark(keirin_odds·bg)가 이 경주를 백업으로 양보(스킵). (기존 oddspark 권위·확장 스킵을 역전)
-    #   탭 오염은 raceKey별 저장·_do_triple_ingest 종목정정·current_race 로직이 방어(무삭제).
-    if _is_ext:
-        try:
-            with _EXT_COVERED_LOCK:
-                _EXT_COVERED[rk] = time.time()
-        except Exception:
-            pass
     return jsonify(_do_triple_ingest(
         rk, body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or [],
         _win_map_clean(body.get("win")), body.get("sport"), body.get("category"),
@@ -1940,6 +1981,7 @@ def _combo_max_no(*sources):
 def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None, scratched=None):
     """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
     확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
+    rk = _canon_rk(rk)   # [긴급수정 ① raceKey 통일] 모든 수집 경로 공통 정규화(날짜접두 제거 → 같은 경주 1키 병합)
     # [종목 오분석 근본수정·서버측 강제] raceKey 에 한국 경마장(서울/부산/제주/부경/과천)이 있으면 무조건
     #   sport=horse·category=korea 로 정정. 확장이 경정/경륜으로 오분류해 보내도 서버가 최종 방어(부산 2경주 오분석 재발 차단).
     try:
@@ -2006,6 +2048,20 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     db = _triple_load()
     prev = db.get(rk) or {}
     now = time.time()
+    # ══════════ [긴급수정 ②③ 사설 우선 + oddspark 말번호 밀림 방어] ══════════
+    #   사설/배당판(비-oddspark)이 최근(≤200초) 이 경주를 수집했으면 oddspark 는 '백업' 위치 →
+    #   활성 배당을 덮어쓰지 않는다(= 사용자가 실제 베팅하는 배당판과 분석패널을 항상 일치시킴).
+    #   추가로 들어온 oddspark 조합이 배당판과 '같은 값·다른 말번호'(밀림)면 확실히 거부하고 경고를 남긴다.
+    #   ⚠ 배당판이 오래됨(200초 초과·사용자 탭 종료)이면 가드가 풀려 oddspark 가 백업으로 정상 인계.
+    if _src_is_oddspark(source) and prev:
+        _prev_src = prev.get("source") or ""
+        _prev_fresh = (now - (prev.get("t") or 0)) <= 200
+        if _prev_src and (not _src_is_oddspark(_prev_src)) and _prev_fresh:
+            _suspect = _oddspark_mapping_suspect(prev.get("quinella"), q)
+            print("[사설 우선] %s: 최근 배당판(src=%s) 유지 → oddspark(%s) 백업 덮어쓰기 생략%s"
+                  % (rk, _prev_src, source, " · ⚠️ 말번호 밀림 감지(oddspark 매핑 어긋남)" if _suspect else ""))
+            return {"ok": True, "skipped": True, "raceKey": rk, "mappingSuspect": _suspect,
+                    "reason": "사설/배당판 우선 — oddspark 백업 덮어쓰기 생략"}
     # 변동 추적용 히스토리(최근 12회) — 직전 대비 급락/순위/역전 계산에 사용
     prev_hist = prev.get("history") or []
     # [1·3번] 경주 전환 방어: 직전 배당 대비 다수 조합 95%+ 급락 = 다른 경주 잔존 → 기준값 재설정
@@ -7160,29 +7216,18 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 pass
             if len(_fav12) >= 2:
                 break
-    FAV12_MAIN_MAX = 25.0   # [수정·시장 역방향 모순 방지] 유력마 1·2위 조합 메인 최우선 배당 상한(초과 시 복병/특별 섹션으로 이동)
     if len(_fav12) >= 2 and curQ:
         _f12 = tuple(sorted(_fav12[:2]))
         _f12o = curQ.get(_f12) or curQ.get((_f12[1], _f12[0]))
         # 단통(≤1.5배) 아니고 유효 조합일 때만 최우선(단통은 dansungPlan 이 별도 처리)
         if _f12o and not (DANSUNG and _f12o <= DANSUNG_ODDS):
+            _rest = [q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) != _f12]
             _f12item = next((q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) == _f12), None)
-            if _f12o <= FAV12_MAIN_MAX:
-                # [기존 유지] 25배 이하 → 메인 최우선(맨 앞)
-                _rest = [q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) != _f12]
-                if not _f12item:
-                    _f12item = {"combo": list(_f12), "odds": _f12o, "stars": 3,
-                                "reason": "유력마 1·2위 조합", "basis": _combo_basis(list(_f12)),
-                                "summary": "유력마 1위+2위 최우선"}
-                final_q = ([_f12item] + _rest)[:max(max_q, 2)]
-            else:
-                # [수정·모순방지] 25배 초과 유력마 조합 → 메인에서 제외(있었으면 제거)하고 복병/특별(💎 bmedSpecial) 섹션으로 보존 이동(삭제 금지)
-                final_q = [q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) != _f12]
-                _sp_pk = set(tuple(sorted(int(x) for x in (s.get("combo") or []))) for s in (special_q or []))
-                if _f12 not in _sp_pk:
-                    special_q.append({"combo": list(_f12), "odds": _f12o, "stars": 2,
-                                      "reason": "유력마 1·2위 조합(고배당)", "basis": _combo_basis(list(_f12)),
-                                      "summary": "유력마이지만 시장 고배당(%.0f배) → 복병/특별 참고(보존)" % _f12o})
+            if not _f12item:
+                _f12item = {"combo": list(_f12), "odds": _f12o, "stars": 3,
+                            "reason": "유력마 1·2위 조합", "basis": _combo_basis(list(_f12)),
+                            "summary": "유력마 1위+2위 최우선"}
+            final_q = ([_f12item] + _rest)[:max(max_q, 2)]
 
     # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
     _main = None
@@ -8376,17 +8421,10 @@ def _triple_analyze(rk, rec):
         _coords = _kra_coords_for(rk)
         if _coords:
             _mt, _rcd, _rno = _coords
-            # [수정] 그 경주 출전마 순번→말이름 매핑(구간기록/전개시뮬을 이 경주 출전마로 정확 매칭·경주별 분리)
-            _name_by_no = {}
-            for _fh in (form or []):
-                _fno = _to_int(_fh.get("no"))
-                _fnm = (_fh.get("name") or "").strip()
-                if _fno is not None and _fnm:
-                    _name_by_no[_fno] = _fnm
             # 6단계: 경주 전개 시뮬레이션(코너순위 + 구간지수)
-            kra_flow_sim = _simulate_race_flow_kra(_mt, _rcd, _rno, valid_nos=valid_nos, win_odds=curWin, name_by_no=_name_by_no)
+            kra_flow_sim = _simulate_race_flow_kra(_mt, _rcd, _rno, valid_nos=valid_nos, win_odds=curWin)
             # 3단계: 구간지수 각질 힌트(패널·교차검증용)
-            _sec = _kra_section_records(_mt, _rcd, _rno, name_by_no=_name_by_no)
+            _sec = _kra_section_records(_mt, _rcd, _rno)
             if _sec:
                 kra_section_gait = {str(no): {"gaitHint": v.get("gaitHint"), "s1fIndex": v.get("s1f_index"),
                                               "g1fIndex": v.get("g1f_index"), "s1fBest": v.get("s1f_best"),
@@ -11239,33 +11277,13 @@ def _history_save_analysis(rk, an):
 ANALYSIS_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
 
 
-def _strip_race_dist(race):
-    """[거리 접미사 통일] '서울 2경주 1200M' 끝의 거리(3~4자리+M/m) 제거 → 거리 유무로 파일 갈라지는 중복 방지."""
-    return re.sub(r"\s*\d{3,4}\s*[Mm]\s*$", "", str(race or "")).strip() or str(race or "")
-
-
-def _slug_compat_path(directory, safe):
-    """canonical(거리 제거) 파일이 없고 같은 경주의 거리표기 기존 파일이 있으면 그걸 사용(오늘 진행분 유실 방지)."""
-    path = os.path.join(directory, safe + ".json")
-    if not os.path.exists(path):
-        try:
-            pref = safe + "_"
-            for fn in sorted(os.listdir(directory)):
-                if fn.startswith(pref) and re.match(r"^\d{3,4}[Mm]\.json$", fn[len(pref):]):
-                    return os.path.join(directory, fn)
-        except Exception:
-            pass
-    return path
-
-
 def _analysis_log_path(rk):
     m = re.search(r"(\d{4}-\d{2}-\d{2})", rk or "")
     date = m.group(1) if m else time.strftime("%Y-%m-%d", time.localtime())
     race = re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip() or (rk or "race")
-    race = _strip_race_dist(race)   # [거리 접미사 통일]
     safe = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
     os.makedirs(ANALYSIS_LOG_DIR, exist_ok=True)
-    return _slug_compat_path(ANALYSIS_LOG_DIR, safe), date, race
+    return os.path.join(ANALYSIS_LOG_DIR, safe + ".json"), date, race
 
 
 def _canonical_log_key(rk):
@@ -11525,7 +11543,6 @@ def _race_result_id(rk):
     m = re.search(r"(\d{4}-\d{2}-\d{2})", rk or "")
     date = m.group(1) if m else time.strftime("%Y-%m-%d", time.localtime())
     race = re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip() or (rk or "race")
-    race = _strip_race_dist(race)   # [거리 접미사 통일]
     safe = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
     return safe, date
 
@@ -11533,7 +11550,7 @@ def _race_result_id(rk):
 def _race_result_path(rk):
     os.makedirs(RACE_RESULTS_DIR, exist_ok=True)
     rid, date = _race_result_id(rk)
-    return _slug_compat_path(RACE_RESULTS_DIR, rid), rid, date
+    return os.path.join(RACE_RESULTS_DIR, rid + ".json"), rid, date
 
 
 def _validate_race_result(data):
@@ -17879,10 +17896,6 @@ def keirin_odds():
         return jsonify({"error": "배당 수집 실패: %s" % e}), 502
     if not q and not x:
         return jsonify({"error": "배당 정보를 찾지 못했습니다(경주 번호/개최일/발매 여부 확인)."}), 422
-    # [사설 우선] 확장(사설 배당판)이 이 경주를 방금 수집 중이면 oddspark는 백업 → 주입 생략(사설 배당 유지)
-    if _ext_covered_active(rk):
-        return jsonify({"ok": True, "skipped": True, "reason": "사설 배당판(확장) 우선 — oddspark 백업 대기",
-                        "raceKey": rk, "counts": {"quinella": len(q), "exacta": len(x)}})
     # 기존 파이프라인 주입(sport=cycle) → _triple_analyze 가 역배열·급락·이상감지 계산
     res = _do_triple_ingest(rk, q, x, [], {}, sport="cycle", category="cycle", source="oddspark")
     # [경륜 출마표 전적 자동 수집] 배당과 동시에 전적(競走得点·등급) 수집 → 통합등급 반영(1회·이미 있으면 생략)
@@ -19441,24 +19454,11 @@ def kra_section():
     meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "1")
     rc_date = str(b.get("rc_date") or b.get("rcDate") or time.strftime("%Y%m%d"))
     rc_no = str(b.get("rc_no") or b.get("rcNo") or "1")
-    # [수정·검증용] 그 경주 출전마 이름을 API155(경주결과)에서 얻어 해당 말만 표시(경주별 분리 확인).
-    #   결과 전(미실시) 경주는 이름을 못 얻어 전체 표시될 수 있음(라이브 분석은 form 기반이라 정확).
-    _race_names = set()
-    try:
-        _ai155, _ = _kra_ai_results(meet, rc_date)
-        for _r in (_ai155.get(_kra_int(rc_no)) or []):
-            _rn = (_r.get("hrName") or "").strip()
-            if _rn:
-                _race_names.add(_kra_norm_name(_rn))   # 정규화 이름으로 매칭
-    except Exception:
-        pass
-    sec_all = _kra_section_records(meet, rc_date, rc_no)          # 정규화 hrName 키 전체(개최일)
-    sec = {k: v for k, v in sec_all.items() if (not _race_names or k in _race_names)}
+    sec = _kra_section_records(meet, rc_date, rc_no)
     pr = _kra_pass_ranks(meet, rc_date, rc_no)
     sim = _simulate_race_flow_kra(meet, rc_date, rc_no)
     return jsonify({"ok": bool(sec or pr), "meet": meet, "rc_date": rc_date, "rc_no": rc_no,
-                    "entrants": ("API155 %d두" % len(_race_names)) if _race_names else "미확인(결과전·전체표시)",
-                    "sectionIndices": {(v.get("hrName") or str(k)): v for k, v in sec.items()},
+                    "sectionIndices": {str(k): v for k, v in sec.items()},
                     "passRanks": {str(k): v for k, v in pr.items()},
                     "flowSim": sim})
 
@@ -19799,52 +19799,30 @@ def _kra_pass_positions(seq):
     return pos
 
 
-def _kra_norm_name(s):
-    """말 이름 정규화 — API 간 표기차(앞뒤/내부 공백) 흡수. 매칭 전용."""
-    return "".join(str(s or "").split())
-
-
-def _kra_sec_pick(base, name_by_no):
-    """[수정·경주별 분리] 말이름(hrName) 기준 집계(base)를 출전마 매핑으로 순번(chulNo) 키로 변환.
-    name_by_no={chulNo: hrName}. 없으면 hrName 키 그대로 반환(엔드포인트·진단용)."""
-    if not base:
-        return {}
-    if name_by_no:
-        out = {}
-        for _no, _nm in name_by_no.items():
-            v = base.get(_kra_norm_name(_nm))
-            if v is not None:
-                out[_no] = v
-        return out
-    return base
-
-
-def _kra_section_records(meet, rc_date, rc_no, force=False, name_by_no=None):
+def _kra_section_records(meet, rc_date, rc_no, force=False):
     """[API37_1] 현재 출전마별 과거 구간기록 이력 → 말별 S1F/G1F 최고·평균 집계 + 선행력/추입력 지수.
-    [수정] API37_1이 rc_no를 무시하고 개최일 전체를 반환 → 순번(chulNo) 아닌 **말이름(hrName)** 으로 집계하고,
-      출전마 매핑(name_by_no={chulNo:hrName}) 주면 그 경주 출전마만 순번(chulNo) 키로 반환(경주별 정확 분리).
-    ⚠ 집계·매칭 키만 교정 — 지수·각질 산식·구조 불변. 대상 경주(rc_date) 자신 행은 제외(정보 누수 방지)."""
-    ck = "%s|%s" % (meet, rc_date)            # API가 rc_no 무시·개최일 단위 반환 → 개최일로 캐시(중복 호출 절감)
+    반환 {chulNo(int): {s1f_best, s1f_avg, g1f_best, g1f_avg, g3f_best, n, s1f_index, g1f_index, gaitHint}}.
+    ⚠ 대상 경주(rc_date) 자신의 행은 제외(정보 누수 방지 — 라이브 예측 시 미래 결과 미포함)."""
+    ck = "%s|%s|%s" % (meet, rc_date, rc_no)
     c = _KRA_SEC_CACHE.get(ck)
     if c and not force and (time.time() - c["t"]) < _KRA_SEC_TTL:
-        return _kra_sec_pick(c["data"], name_by_no)
+        return c["data"]
     items, err = _kra_api_get("API37_1/sectionRecord_1",
                               {"meet": str(meet), "rc_date": str(rc_date), "rc_no": str(rc_no)}, num_rows=500)
     if err or not items:
         _KRA_SEC_CACHE[ck] = {"t": time.time(), "data": {}}
         return {}
-    by = {}                                   # [수정] hrName(말이름) → {"s1f":[...], "g1f":[...], "g3f":[...]}
+    by = {}                                   # chulNo → {"s1f":[...], "g1f":[...], "g3f":[...]}
     for it in items:
-        _raw = (it.get("hrName") or "").strip()
-        nm = _kra_norm_name(_raw)               # [수정] 정규화 이름을 집계 키로(표기차 흡수)
-        if not nm:
+        no = _kra_int(it.get("chulNo"))
+        if no is None:
             continue
         if str(it.get("rcDate") or "") == str(rc_date):
             continue                          # 대상 경주 자신(결과 누수) 제외
         s1 = _kra_sec_num(it.get("ARcTimeS1f")) or _kra_sec_num(it.get("FRcTimeS1f"))
         g1 = _kra_sec_num(it.get("ARcTimeG1f")) or _kra_sec_num(it.get("FRcTimeG1f"))
         g3 = _kra_sec_num(it.get("ARcTimeG3f")) or _kra_sec_num(it.get("FRcTimeG3f"))
-        rec = by.setdefault(nm, {"s1f": [], "g1f": [], "g3f": [], "hrName": _raw})
+        rec = by.setdefault(no, {"s1f": [], "g1f": [], "g3f": [], "hrName": it.get("hrName")})
         if s1:
             rec["s1f"].append(s1)
         if g1:
@@ -19910,7 +19888,7 @@ def _kra_section_records(meet, rc_date, rc_no, force=False, name_by_no=None):
         json.dump(allc, open(KRA_SECTION_FILE, "w", encoding="utf-8"), ensure_ascii=False)
     except Exception:
         pass
-    return _kra_sec_pick(out, name_by_no)
+    return out
 
 
 def _kra_pass_ranks(meet, rc_date, rc_no):
@@ -19920,14 +19898,7 @@ def _kra_pass_ranks(meet, rc_date, rc_no):
                               {"meet": str(meet), "rc_date": str(rc_date), "rc_no": str(rc_no)}, num_rows=10)
     if err or not items:
         return {}
-    # [수정] API가 경주번호 무시·여러 행 반환 가능 → 해당 경주(rcNo·rcDate) 행만 선택(없으면 미실시=빈값)
-    row = None
-    for _it in items:
-        if str(_kra_int(_it.get("rcNo"))) == str(_kra_int(rc_no)) and str(_it.get("rcDate") or "") == str(rc_date):
-            row = _it
-            break
-    if row is None:
-        return {}
+    row = items[0]
     s1 = _kra_pass_positions(row.get("passrankS1f"))
     g1 = _kra_pass_positions(row.get("passrankG1f"))              # 마지막 직선(사실상 최종순위)
     c1 = _kra_pass_positions(row.get("passrankG8f_1c"))
@@ -20106,17 +20077,15 @@ def _kra_ai_results(meet, rc_date, force=False):
     return out, None
 
 
-def _simulate_race_flow_kra(meet, rc_date, rc_no, valid_nos=None, win_odds=None, name_by_no=None):
+def _simulate_race_flow_kra(meet, rc_date, rc_no, valid_nos=None, win_odds=None):
     """[6단계 경주 전개 시뮬레이션] API6_1 코너순위 + API37_1 구간지수 통합.
     선행 경합 예측 → 페이스 판단 → 유리한 말 선별 → 고배당 복병 추천.
-    [수정] name_by_no(출전마 순번↔이름) 주면 구간기록을 그 경주 출전마로 정확 매칭(경주별 분리). 내부 로직 불변.
     반환 {pace, leadCount, leadContenders, favoredHorses, darkHorses, sectionGait, note, text} 또는 None."""
-    sec = _kra_section_records(meet, rc_date, rc_no, name_by_no=name_by_no)
+    sec = _kra_section_records(meet, rc_date, rc_no)
     pr = _kra_pass_ranks(meet, rc_date, rc_no)
     if not sec and not pr:
         return None
-    # [방어] name_by_no 없이 호출(엔드포인트 등) 시 sec가 말이름 키일 수 있음 → 순번(정수) 키만 사용(문자열×float 방지)
-    nos = set(int(n) for n in (valid_nos or [])) or set(k for k in (set(sec) | set(pr)) if isinstance(k, int))
+    nos = set(int(n) for n in (valid_nos or [])) or (set(sec) | set(pr))
     # 선행력: s1f_index 상위(선행형) 말 = 선행 경합 후보
     lead = []
     for no in nos:
@@ -23280,15 +23249,10 @@ def _multi_collect_one(track, race, ymd):
         #   의존해, 둘 다 꺼지면 '배당 수집 안 됨'으로 보이던 문제 해결. 확장 ingest 와 동일 파이프라인(같은
         #   raceKey 병합·중복 아님)이고 sport 분리 필터가 탭 혼재를 막는다(무삭제·multi_store 경로 유지).
         try:
-            # [사설 우선] 확장(사설 배당판)이 이 경주를 커버 중이면 triple_store 주입은 생략(백업).
-            #   multi_store 백업 기록은 위에서 이미 저장됨 → oddspark는 사설 미수집 시에만 분석 구동.
-            if _ext_covered_active(key):
-                pass
-            else:
-                # [자동전환·마감판정] 발주시각(postEpoch) 전달 → analyze 의 minutesBefore/afterClose 가 채워져
-                #   프론트 '경주 종료' 판정(_raceFinished)·자동예상 T-5분 타이밍이 정확해짐(기존엔 deadline 미전달로 None).
-                _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category,
-                                  source="oddspark_bg", deadline=race.get("postEpoch"))
+            # [자동전환·마감판정] 발주시각(postEpoch) 전달 → analyze 의 minutesBefore/afterClose 가 채워져
+            #   프론트 '경주 종료' 판정(_raceFinished)·자동예상 T-5분 타이밍이 정확해짐(기존엔 deadline 미전달로 None).
+            _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category,
+                              source="oddspark_bg", deadline=race.get("postEpoch"))
         except Exception as _be:
             print("[다중경주] triple_store 브리지 실패(무시·multi_store 는 정상):", _be)
         # [경륜 전적 자동 수집] 다중 경주 경륜 배당 수집 시 전적도 함께(1회·통합등급 반영)
