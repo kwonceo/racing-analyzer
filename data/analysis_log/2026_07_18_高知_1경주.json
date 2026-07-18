@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "高知 1경주",
  "analyzed_at": "15:08:01",
- "updated_at": "15:14:32",
+ "updated_at": "15:23:09",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -349,92 +349,127 @@
     "7+9": 33.2,
     "8+9": 57.8
    }
+  },
+  {
+   "time": "15:15:37",
+   "minutes_before": null,
+   "quinella": {
+    "1+2": 45.9,
+    "1+3": 14.9,
+    "2+3": 13.8,
+    "1+4": 123.0,
+    "2+4": 196.1,
+    "3+4": 94.8,
+    "1+5": 30.5,
+    "2+5": 33.4,
+    "3+5": 10.3,
+    "4+5": 148.3,
+    "1+6": 141.1,
+    "2+6": 150.2,
+    "3+6": 40.1,
+    "4+6": 312.7,
+    "5+6": 20.2,
+    "1+7": 36.3,
+    "2+7": 8.7,
+    "3+7": 7.7,
+    "4+7": 134.5,
+    "5+7": 17.6,
+    "6+7": 79.8,
+    "1+8": 14.3,
+    "2+8": 73.7,
+    "3+8": 17.4,
+    "4+8": 26.2,
+    "5+8": 36.6,
+    "6+8": 120.5,
+    "7+8": 41.3,
+    "1+9": 55.3,
+    "2+9": 60.9,
+    "3+9": 5.5,
+    "4+9": 257.1,
+    "5+9": 34.4,
+    "6+9": 91.8,
+    "7+9": 33.2,
+    "8+9": 57.8
+   }
+  },
+  {
+   "time": "15:17:43",
+   "minutes_before": null,
+   "quinella": {
+    "1+2": 45.9,
+    "1+3": 14.9,
+    "2+3": 13.8,
+    "1+4": 123.0,
+    "2+4": 196.1,
+    "3+4": 94.8,
+    "1+5": 30.5,
+    "2+5": 33.4,
+    "3+5": 10.3,
+    "4+5": 148.3,
+    "1+6": 141.1,
+    "2+6": 150.2,
+    "3+6": 40.1,
+    "4+6": 312.7,
+    "5+6": 20.2,
+    "1+7": 36.3,
+    "2+7": 8.7,
+    "3+7": 7.7,
+    "4+7": 134.5,
+    "5+7": 17.6,
+    "6+7": 79.8,
+    "1+8": 14.3,
+    "2+8": 73.7,
+    "3+8": 17.4,
+    "4+8": 26.2,
+    "5+8": 36.6,
+    "6+8": 120.5,
+    "7+8": 41.3,
+    "1+9": 55.3,
+    "2+9": 60.9,
+    "3+9": 5.5,
+    "4+9": 257.1,
+    "5+9": 34.4,
+    "6+9": 91.8,
+    "7+9": 33.2,
+    "8+9": 57.8
+   }
   }
  ],
  "signals_detected": [
   {
-   "time": "15:14:26",
+   "time": "15:17:43",
    "type": "마감급락",
    "detail": "3+6 복승 56.0→40.1 (5분전 대비 -28.4%)",
    "severity": "🟠",
    "reason": "마감 5분전 대비 급락 → 자금 유입 가속(주목)"
   },
   {
-   "time": "15:14:26",
+   "time": "15:17:43",
    "type": "마감급락",
    "detail": "5+6 복승 29.3→20.2 (5분전 대비 -31.1%)",
    "severity": "🟠",
    "reason": "마감 5분전 대비 급락 → 자금 유입 가속(주목)"
   },
   {
-   "time": "15:14:26",
+   "time": "15:17:43",
    "type": "마감급락",
    "detail": "6+7 복승 103.8→79.8 (5분전 대비 -23.1%)",
    "severity": "🟠",
    "reason": "마감 5분전 대비 급락 → 자금 유입 가속(주목)"
   },
   {
-   "time": "15:14:26",
+   "time": "15:17:43",
    "type": "마감급락",
    "detail": "5+9 복승 46.6→34.4 (5분전 대비 -26.2%)",
    "severity": "🟠",
    "reason": "마감 5분전 대비 급락 → 자금 유입 가속(주목)"
   },
   {
-   "time": "15:14:26",
+   "time": "15:17:43",
    "type": "마감급락",
    "detail": "6+9 복승 129.8→91.8 (5분전 대비 -29.3%)",
    "severity": "🟠",
    "reason": "마감 5분전 대비 급락 → 자금 유입 가속(주목)"
-  },
-  {
-   "time": "15:14:26",
-   "type": "배당불일치",
-   "detail": "추천 복승(5+7=17.6배)이 배당판 인기 조합(3+9=5.5배)과 다름",
-   "severity": "⚠️",
-   "reason": "유력마가 배당판 최저(인기)와 동떨어짐 = 초반 배당 미수집/전적 편중 의심. 배당판 인기 조합을 추천에 추가함 — 배당 재확인 권장."
-  },
-  {
-   "time": "15:14:26",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 3번 유력이나 쌍승에서 6번 1착(66.3)이 3번 1착(138.3)보다 낮음 → 실질 1착: 6번 가능성 (압도적 역배열 0.479)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(6→3) 66.3 / 쌍승(3→6) 138.3 = 0.479 (압도적 역배열)"
-  },
-  {
-   "time": "15:14:26",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 3번 유력이나 쌍승에서 1번 1착(22.5)이 3번 1착(41.6)보다 낮음 → 실질 1착: 1번 가능성 (강한 역배열 0.541)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(1→3) 22.5 / 쌍승(3→1) 41.6 = 0.541 (강한 역배열)"
-  },
-  {
-   "time": "15:14:26",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 3번 유력이나 쌍승에서 5번 1착(14.6)이 3번 1착(26.1)보다 낮음 → 실질 1착: 5번 가능성 (강한 역배열 0.559)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(5→3) 14.6 / 쌍승(3→5) 26.1 = 0.559 (강한 역배열)"
-  },
-  {
-   "time": "15:14:26",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 3번 유력이나 쌍승에서 7번 1착(12.6)이 3번 1착(21.6)보다 낮음 → 실질 1착: 7번 가능성 (강한 역배열 0.583)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(7→3) 12.6 / 쌍승(3→7) 21.6 = 0.583 (강한 역배열)"
-  },
-  {
-   "time": "15:14:26",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 3번 유력이나 쌍승에서 9번 1착(8.0)이 3번 1착(13.5)보다 낮음 → 실질 1착: 9번 가능성 (강한 역배열 0.593)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(9→3) 8.0 / 쌍승(3→9) 13.5 = 0.593 (강한 역배열)"
-  },
-  {
-   "time": "15:14:26",
-   "type": "복승불일치공식",
-   "detail": "⚠️ 복승 불일치: 단승 기준 예상 3+7(7.7) / 실제 최저 3+9(5.5) → 9번 집중 자금 유입 (🟡 1.4)",
-   "severity": "🟡",
-   "reason": "불일치점수 = 예상최저복승 7.7 / 실제최저복승 5.5 = 1.4"
   }
  ],
  "anomaly_history": [
@@ -487,9 +522,7 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
@@ -503,7 +536,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 14.3배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 2,
@@ -513,7 +546,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 8.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 3,
@@ -523,37 +556,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 5.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "吉澤 純平",
-   "jockey": "",
-   "record_score": 139.6,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 10.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "山田 久徳",
-   "jockey": "",
-   "record_score": 140.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 7.7배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 9,
-   "name": "小原 佑太",
-   "jockey": "",
-   "record_score": 99.5,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 5.5배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 4,
@@ -563,7 +566,17 @@
    "record_detail": "",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 26.2배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 5,
+   "name": "吉澤 純平",
+   "jockey": "",
+   "record_score": 139.6,
+   "record_detail": "",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 6,
@@ -573,7 +586,17 @@
    "record_detail": "",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 20.2배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 7,
+   "name": "山田 久徳",
+   "jockey": "",
+   "record_score": 140.0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 8,
@@ -583,7 +606,17 @@
    "record_detail": "",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 14.3배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 9,
+   "name": "小原 佑太",
+   "jockey": "",
+   "record_score": 99.5,
+   "record_detail": "",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   }
  ],
  "elimination": {
@@ -591,41 +624,45 @@
    1,
    2,
    3,
+   4,
    5,
    7,
-   9,
-   4,
+   9
+  ],
+  "eliminated": [
    6,
    8
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "elimination_reasons": {
+   "6": "배당 미수집 · 배당 150배+ -40 = 60점",
+   "8": "배당 미수집 · 배당 150배+ -40 = 60점"
+  }
  },
  "final_recommendation": {
   "quinella_main": {
    "combo": "5+7",
-   "odds": 17.6,
+   "odds": null,
    "reason": "5번(A)·7번(A)"
   },
   "trifecta_main": {
-   "combo": "1+5+7",
-   "odds": 53.8,
-   "reason": "1번(B)·5번(A)·7번(A)"
+   "combo": "4+5+7",
+   "odds": null,
+   "reason": "4번(C)·5번(A)·7번(A)"
   },
   "trifecta_insurance1": {
-   "combo": "1+5+9",
-   "odds": 77.4,
-   "reason": "1번(B)·5번(A)·9번(C)"
+   "combo": "2+5+7",
+   "odds": null,
+   "reason": "2번(B)·5번(A)·7번(A)"
   },
   "trifecta_insurance2": {
-   "combo": "1+7+9",
-   "odds": 81.1,
-   "reason": "1번(B)·7번(A)·9번(C)"
+   "combo": "2+4+7",
+   "odds": null,
+   "reason": "2번(B)·4번(C)·7번(A)"
   },
   "budget_allocation": {
-   "quinella_main": "50%",
-   "trifecta_main": "7%",
-   "trifecta_insurance": "1%"
+   "quinella_main": "62.1%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
   }
  },
  "recommendation_history": [
@@ -713,16 +750,37 @@
     "5+6 복승 29.3→20.2 (5분전 대비 -31.1%)",
     "6+7 복승 103.8→79.8 (5분전 대비 -23.1%)"
    ]
+  },
+  {
+   "time": "15:23:09",
+   "minutes_before": null,
+   "sig": "4-5-7|5+7|None|4+5+7",
+   "anomCount": 5,
+   "sigChanged": true,
+   "keyHorses": [
+    7,
+    5,
+    4
+   ],
+   "summary": "유력마 7·5·4 / 복승 5+7",
+   "quinella_main": "5+7",
+   "quinella_sub": null,
+   "trifecta_main": "4+5+7",
+   "top_signals": [
+    "3+6 복승 56.0→40.1 (5분전 대비 -28.4%)",
+    "5+6 복승 29.3→20.2 (5분전 대비 -31.1%)",
+    "6+7 복승 103.8→79.8 (5분전 대비 -23.1%)"
+   ]
   }
  ],
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    1,
-    5
+    5,
+    7
    ],
    "trio": [
-    1,
+    4,
     5,
     7
    ]
@@ -748,7 +806,7 @@
     7
    ],
    "trio": [
-    1,
+    4,
     5,
     7
    ]
@@ -1157,14 +1215,58 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 1·5·7 / 복승 5+7",
+ "summary": "유력마 7·5·4 / 복승 5+7",
  "keyHorses": [
-  1,
+  7,
   5,
-  7
+  4
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 8
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 105.0,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [
+    6,
+    1,
+    5,
+    9
+   ],
+   "inverseHit": [
+    1
+   ],
+   "confidence": 31.4,
+   "reason": "전적유력마 1번 적중 · 역배열 감지말 1번 입상"
+  }
+ },
  "profit": null,
  "review": null
 }
