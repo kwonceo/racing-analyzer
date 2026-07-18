@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "사가 3경주",
  "analyzed_at": "16:51:06",
- "updated_at": "16:55:10",
+ "updated_at": "17:16:28",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -97,200 +97,56 @@
     "5+6": 2.4,
     "1+6": 8.0
    }
+  },
+  {
+   "time": "17:04:38",
+   "minutes_before": null,
+   "quinella": {
+    "1+2": 69.2,
+    "2+3": 26.0,
+    "2+4": 163.8,
+    "2+5": 175.4,
+    "2+6": 8.9,
+    "1+3": 114.4,
+    "3+4": 94.4,
+    "3+5": 93.2,
+    "3+6": 13.0,
+    "1+4": 233.4,
+    "4+5": 83.5,
+    "4+6": 2.6,
+    "1+5": 170.4,
+    "5+6": 1.9,
+    "1+6": 7.3
+   }
   }
  ],
- "signals_detected": [
+ "signals_detected": [],
+ "anomaly_history": [
   {
-   "time": "16:55:00",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[3·4위 간]: 단승 5번(3위) vs 2번(4위) — 쌍승 2→5(134.2)가 5→2(211.8)보다 낮음 → 상위권 실질순위 역전: 2번 우세 (강한 역배열 0.634)",
-   "severity": "🔴",
-   "reason": "역전비율 = 쌍승(2→5) 134.2 / 쌍승(5→2) 211.8 = 0.634 (강한 역배열)"
-  },
-  {
-   "time": "16:55:00",
-   "type": "복승불일치공식",
-   "detail": "⚠️ 복승 불일치: 단승 기준 예상 3+6(8.2) / 실제 최저 5+6(2.4) → 5번 집중 자금 유입 (🔴🔴 3.417)",
-   "severity": "🔴🔴",
-   "reason": "불일치점수 = 예상최저복승 8.2 / 실제최저복승 2.4 = 3.417"
-  },
-  {
-   "time": "16:55:00",
-   "type": "급락속도",
-   "detail": "1+3 급락 속도 분당 7.8% (9.8% / 1.25분)",
+   "time": "17:04:38",
+   "combo": "5+6",
+   "drop": -21,
+   "text": "5+6 복승 급락 -21%",
    "severity": "🟡",
-   "reason": "분당 5%+ = 자금 유입 가속(주의)"
+   "minutes_before": null
   }
  ],
- "anomaly_history": [],
  "strong_signals": {
-  "signals": [
-   {
-    "type": 2,
-    "label": "역배열 10%+",
-    "horses": [
-     2
-    ],
-    "detail": "2번 압도적 역배열 (배당차 64.1%)",
-    "level": "red",
-    "hitRate": 38,
-    "hitSample": 47
-   }
-  ],
-  "count": 1,
-  "recommendLevel": "보조",
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
   "dualConverge": false,
-  "types": [
-   2
-  ],
-  "hitRates": {
-   "2": {
-    "type": 2,
-    "label": "역배열 10%+",
-    "fired": 47,
-    "hit": 18,
-    "rate": 38
-   },
-   "1": {
-    "type": 1,
-    "label": "연속하락 3회+",
-    "fired": 6,
-    "hit": 4,
-    "rate": 67
-   },
-   "5": {
-    "type": 5,
-    "label": "복수조합 동시급락",
-    "fired": 36,
-    "hit": 21,
-    "rate": 58
-   },
-   "8": {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "fired": 92,
-    "hit": 64,
-    "rate": 70
-   },
-   "3": {
-    "type": 3,
-    "label": "마감직전 대급락",
-    "fired": 5,
-    "hit": 4,
-    "rate": 80
-   },
-   "4": {
-    "type": 4,
-    "label": "재급락",
-    "fired": 47,
-    "hit": 44,
-    "rate": 94
-   },
-   "6": {
-    "type": 6,
-    "label": "역배열+급락(이중수렴)",
-    "fired": 4,
-    "hit": 0,
-    "rate": 0
-   }
-  }
+  "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "noAxis": true,
-  "level": "강력",
-  "band": "4배 이하 2두+",
-  "reprs": [
-   {
-    "no": 5,
-    "odds": 2.4
-   },
-   {
-    "no": 6,
-    "odds": 2.4
-   },
-   {
-    "no": 2,
-    "odds": 6.8
-   }
-  ],
-  "axisGap": 0.0,
-  "note": "저배당 2두 배당 비슷(축 불명확·차이 0%) → 추천 보류"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "ダノンレジェンド",
-   "jockey": "川島拓",
-   "record_score": 23.3,
-   "record_detail": "최근 7-6-5-1",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 6.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "ビーチパトロール",
-   "jockey": "山口勲",
-   "record_score": 148.0,
-   "record_detail": "최근 1-1-3-6-1",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 2.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 1,
-   "name": "カジノドライヴ",
-   "jockey": "椿聡太",
-   "record_score": 15.5,
-   "record_detail": "최근 4-6-7-6",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 8배 · 최근평균 5.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 3,
-   "name": "ホッコータルマエ",
-   "jockey": "石川慎",
-   "record_score": 50.0,
-   "record_detail": "최근 5-4-7-3-8",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 8.2배 · 최근평균 5.4착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 4,
-   "name": "ルーラーシップ",
-   "jockey": "出水拓",
-   "record_score": 1.2,
-   "record_detail": "최근 8-8-4-7-4",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 2.8배 · 최근평균 6.2착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 5,
-   "name": "カジノドライヴ",
-   "jockey": "加茂飛",
-   "record_score": 15.0,
-   "record_detail": "최근 8-5-6-11-1",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 2.4배 · 최근평균 6.2착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   2,
-   6,
-   1,
-   3,
-   4,
-   5
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
@@ -300,48 +156,20 @@
  "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    1,
-    3
-   ],
-   "trio": [
-    1,
-    3,
-    5
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    3,
-    6
-   ],
-   "trio": [
-    2,
-    3,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
-   "quinella": [
-    3,
-    6
-   ],
-   "trio": [
-    2,
-    3,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   },
   "final": {
-   "quinella": [
-    5,
-    6
-   ],
-   "trio": [
-    2,
-    5,
-    6
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -781,15 +609,60 @@
   "chaoticRace": true,
   "formMissing": false
  },
- "summary": "급락 1-3 ▼9.8% / 유력마 5·6·2·3 / 복승 5+6",
- "keyHorses": [
-  5,
-  6,
-  2,
-  3
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 2,
+  "2nd": 6,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   6
+  ],
+  "dark_placed": [
+   2,
+   3
+  ],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": true,
+  "signal_correct": [
+   "5+6 복승 급락(-20.8%) → 6번 입상 적중",
+   "1+6 복승 급락(-8.8%) → 6번 입상 적중"
+  ],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": -20.8,
+   "dropScore": 74.0,
+   "inverse": true,
+   "inverseHorses": [
+    5,
+    6
+   ],
+   "inverseHit": [
+    6
+   ],
+   "confidence": 57.6,
+   "reason": "5+6 복승 급락(-20.8%) → 6번 입상 적중 · 역배열 감지말 6번 입상"
+  }
+ },
  "profit": null,
  "review": null
 }
