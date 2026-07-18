@@ -8,159 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 11,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 10,
-   "name": "파워베스",
-   "jockey": "정준",
-   "jockey_winrate": null,
-   "recent_results": [
-    1
-   ],
-   "record_score": 130,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 19.5
-  },
-  {
-   "no": 1,
-   "name": "무한아르",
-   "jockey": "중석",
-   "jockey_winrate": null,
-   "recent_results": [
-    2
-   ],
-   "record_score": 105,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 234.4
-  },
-  {
-   "no": 3,
-   "name": "슈퍼땅콩",
-   "jockey": "승운",
-   "jockey_winrate": null,
-   "recent_results": [
-    3
-   ],
-   "record_score": 80,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 5.7
-  },
-  {
-   "no": 7,
-   "name": "벌교엠퍼",
-   "jockey": "철호",
-   "jockey_winrate": null,
-   "recent_results": [
-    4
-   ],
-   "record_score": 45,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 2.3
-  },
-  {
-   "no": 9,
-   "name": "파라이바",
-   "jockey": "이혁",
-   "jockey_winrate": 28.4,
-   "recent_results": [
-    6
-   ],
-   "record_score": 40,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 9999.9
-  },
-  {
-   "no": 2,
-   "name": "아리온퀸",
-   "jockey": "재로",
-   "jockey_winrate": null,
-   "recent_results": [
-    7
-   ],
-   "record_score": 20,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 3.8
-  },
-  {
-   "no": 5,
-   "name": "러 버 맨",
-   "jockey": "추열",
-   "jockey_winrate": null,
-   "recent_results": [
-    5
-   ],
-   "record_score": 20,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 117.2
-  },
-  {
-   "no": 8,
-   "name": "럭키서니",
-   "jockey": "이스",
-   "jockey_winrate": null,
-   "recent_results": [
-    8
-   ],
-   "record_score": 25,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 234.4
-  },
-  {
-   "no": 4,
-   "name": "골든벤투",
-   "jockey": "인철",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 7.6
-  },
-  {
-   "no": 6,
-   "name": "타이거망",
-   "jockey": "용근",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 117.2
-  },
-  {
-   "no": 11,
-   "name": "세븐카이",
-   "jockey": "이야",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 5.9
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -282,14 +133,74 @@
      "9+11": 542.9,
      "10+11": 45.2
     }
+   },
+   {
+    "time": "21:50:03",
+    "quinella": {
+     "1+2": 66.7,
+     "1+3": 129.6,
+     "1+4": 273.3,
+     "1+5": 218.0,
+     "1+6": 65.4,
+     "1+7": 116.0,
+     "1+8": 527.7,
+     "1+9": 492.3,
+     "1+10": 187.0,
+     "1+11": 241.1,
+     "2+3": 16.6,
+     "2+4": 34.6,
+     "2+5": 25.4,
+     "2+6": 7.2,
+     "2+7": 10.4,
+     "2+8": 65.8,
+     "2+9": 101.8,
+     "2+10": 37.7,
+     "2+11": 27.1,
+     "3+4": 57.2,
+     "3+5": 50.6,
+     "3+6": 13.7,
+     "3+7": 21.8,
+     "3+8": 196.5,
+     "3+9": 166.5,
+     "3+10": 73.1,
+     "3+11": 55.2,
+     "4+5": 79.9,
+     "4+6": 20.8,
+     "4+7": 32.2,
+     "4+8": 304.4,
+     "4+9": 247.1,
+     "4+10": 118.5,
+     "4+11": 89.1,
+     "5+6": 15.0,
+     "5+7": 24.4,
+     "5+8": 207.5,
+     "5+9": 239.4,
+     "5+10": 90.4,
+     "5+11": 87.3,
+     "6+7": 6.5,
+     "6+8": 61.4,
+     "6+9": 58.5,
+     "6+10": 22.2,
+     "6+11": 21.0,
+     "7+8": 128.0,
+     "7+9": 93.3,
+     "7+10": 35.1,
+     "7+11": 30.9,
+     "8+9": 406.5,
+     "8+10": 271.0,
+     "8+11": 172.8,
+     "9+10": 220.0,
+     "9+11": 217.2,
+     "10+11": 81.3
+    }
    }
   ],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
-  "exacta_reversal": true,
-  "reversal_ratio": 0.316,
-  "quinella_mismatch": 1.783,
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
   "refund_rate": 0.73,
   "consecutive_drops": {},
   "fake_betting": false,
@@ -303,23 +214,23 @@
  },
  "prediction": {
   "candidates": [
-   1,
+   2,
    3,
+   4,
+   5,
    6,
    7,
-   11,
-   4,
    10,
-   2,
-   9,
-   8
+   11
   ],
   "eliminated": [
-   5
+   1,
+   8,
+   9
   ],
   "recommend": null,
   "strategy": null,
-  "confidence": 53.2,
+  "confidence": 0,
   "signal_quality": null
  },
  "result": {
@@ -330,7 +241,7 @@
   "quinella_odds": null,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "역배열 감지말 6번 입상 · 제거 적중"
+  "hit_pattern": "전적유력마 2번 적중 · 제거 적중"
  },
  "labels": {
   "quinella_hit": true,
@@ -342,19 +253,21 @@
   "excess_drop_horse": null,
   "excess_drop_horse_placed": null,
   "excess_drop_value": null,
-  "reversal_horse": 6,
-  "reversal_horse_placed": true,
-  "reversal_ratio": 0.316,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-18 13:53:13",
+ "saved_at": "2026-07-18 21:50:11",
  "quality": {
-  "score": 80,
-  "grade": "AI학습용",
-  "complete": true,
-  "ai_ready": true,
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
   "missing": [
+   "이상감지 결과",
+   "전적 데이터",
    "확정 배당"
   ],
   "errors": []

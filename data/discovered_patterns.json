@@ -1,5 +1,5 @@
 {
- "generated_at": 1784378460.890215,
+ "generated_at": 1784379013.9209,
  "races_with_result": 781,
  "target": 50,
  "sufficiency": 100,
@@ -39,21 +39,21 @@
    "type": "배당변화",
    "key": "had_drop",
    "desc": "급락(자금유입) 동반 경주",
-   "rate": 48.0,
+   "rate": 48.2,
    "baseline": 27.3,
-   "lift": 20.7,
-   "support": 300,
-   "hit": 144
+   "lift": 20.9,
+   "support": 301,
+   "hit": 145
   },
   {
    "type": "배당변화",
    "key": "strong_drop",
    "desc": "30%+ 강한 급락 동반 경주",
-   "rate": 47.1,
+   "rate": 47.3,
    "baseline": 27.3,
-   "lift": 19.8,
-   "support": 257,
-   "hit": 121
+   "lift": 20.0,
+   "support": 258,
+   "hit": 122
   },
   {
    "type": "시점",
@@ -69,11 +69,11 @@
    "type": "배당변화",
    "key": "very_strong_drop",
    "desc": "50%+ 대량 급락 동반 경주",
-   "rate": 44.3,
+   "rate": 44.6,
    "baseline": 27.3,
-   "lift": 17.0,
-   "support": 201,
-   "hit": 89
+   "lift": 17.3,
+   "support": 202,
+   "hit": 90
   },
   {
    "type": "시점",
@@ -108,12 +108,12 @@
   {
    "type": "전적점수",
    "key": "form_range",
-   "desc": "적중 경주 상위등급마 전적점수 주로 21.4~85 구간",
+   "desc": "적중 경주 상위등급마 전적점수 주로 20~85 구간",
    "range": [
-    21.4,
+    20,
     85
    ],
-   "support": 372
+   "support": 366
   }
  ],
  "baseline_hit_rate": 27.3
