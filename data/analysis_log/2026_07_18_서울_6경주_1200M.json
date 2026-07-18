@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "서울 6경주 1200M",
  "analyzed_at": "15:20:44",
- "updated_at": "17:35:24",
+ "updated_at": "17:35:42",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -279,7 +279,7 @@
    "no": 1,
    "name": "플라이밍콩",
    "jockey": "재철",
-   "record_score": 113.6,
+   "record_score": 83.6,
    "record_detail": "최근 2-4",
    "odds": 6.4,
    "grade": "A",
@@ -289,7 +289,7 @@
    "no": 2,
    "name": "베스트프",
    "jockey": "코지",
-   "record_score": 25,
+   "record_score": 15,
    "record_detail": "",
    "odds": 4.2,
    "grade": "C",
@@ -319,7 +319,7 @@
    "no": 7,
    "name": "애순이",
    "jockey": "상범",
-   "record_score": 137.9,
+   "record_score": 107.9,
    "record_detail": "최근 1-4",
    "odds": 2.3,
    "grade": "A",
@@ -329,7 +329,7 @@
    "no": 4,
    "name": "행복여전",
    "jockey": "정희",
-   "record_score": 61.400000000000006,
+   "record_score": 66.4,
    "record_detail": "최근 4-2",
    "odds": 30.5,
    "grade": "B",
@@ -339,7 +339,7 @@
    "no": 11,
    "name": "호라이즌",
    "jockey": "정준",
-   "record_score": 52.9,
+   "record_score": 62.9,
    "record_detail": "최근 7-1",
    "odds": 17.2,
    "grade": "B",
@@ -349,7 +349,7 @@
    "no": 8,
    "name": "학산프린",
    "jockey": "성환",
-   "record_score": 47.1,
+   "record_score": 52.1,
    "record_detail": "최근 9-2",
    "odds": 19.2,
    "grade": "C",
@@ -359,7 +359,7 @@
    "no": 9,
    "name": "크레이지",
    "jockey": "태희",
-   "record_score": 47.1,
+   "record_score": 52.1,
    "record_detail": "최근 10-2",
    "odds": 9.8,
    "grade": "C",
@@ -379,7 +379,7 @@
    "no": 3,
    "name": "퍼플신화",
    "jockey": "드레",
-   "record_score": 35,
+   "record_score": 20,
    "record_detail": "최근 5",
    "odds": 60.3,
    "grade": "D",
@@ -510,7 +510,7 @@
    }
   ],
   "forcedHorses": [],
-  "confTop1": 1,
+  "confTop1": 7,
   "confTop1Conf": 30.0,
   "confTop1High": false,
   "favAxis": [
@@ -698,7 +698,7 @@
     ],
     "odds": null,
     "estimated": true,
-    "reason": "삼복승 메인(복승1·2+확신도1위)",
+    "reason": "삼복승 메인(복승1·2+유력마)",
     "qMainAnchor": true
    },
    {
@@ -739,7 +739,7 @@
     2,
     1
    ],
-   "axis1Score": 14.1,
+   "axis1Score": 15.6,
    "axis2Score": 0.0,
    "quinellas": [
     {
@@ -930,6 +930,59 @@
    "inverseHit": [],
    "confidence": 0,
    "reason": "제거 적중"
+  },
+  "failure": {
+   "type": "전적오판",
+   "label": "유형4 · 전적 오판",
+   "focus": 11,
+   "winner": 11,
+   "missed": [
+    11,
+    9,
+    8
+   ],
+   "reason": "11번은 배당 변화 없이 입상 → 배당은 정상, 전적 판단 실패(이변)",
+   "improvement": "전적 하위라도 최근 컨디션·거리/기수 변경 반영 · 이변 조건 학습 강화",
+   "missed_signal": "배당 신호 없음(전적 이변)",
+   "timeline": [
+    {
+     "mb": null,
+     "odds": 17.2,
+     "pct": null,
+     "time": "15:21:32",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 17.2,
+     "pct": 0,
+     "time": "15:22:05",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 17.2,
+     "pct": 0,
+     "time": "15:22:39",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 17.2,
+     "pct": 0,
+     "time": "17:35:16",
+     "after": false,
+     "src": "단승"
+    }
+   ],
+   "maxDrop": 0,
+   "buriedBy": null,
+   "afterClose": false,
+   "massDrop": false,
+   "winnerSignal": false
   }
  },
  "profit": null,
