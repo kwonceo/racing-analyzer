@@ -1,6 +1,6 @@
 {
-  "count": 274,
-  "placed": 51,
+  "count": 280,
+  "placed": 52,
   "cases": [
     {
       "race": "카나자와 8경주",
@@ -3109,13 +3109,79 @@
       ],
       "placed": false,
       "won": false
+    },
+    {
+      "race": "서울 4경주 1300M",
+      "date": "2026-07-18",
+      "no": 10,
+      "odds": 19.5,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "서울 4경주 1300M",
+      "date": "2026-07-18",
+      "no": 6,
+      "odds": 117.2,
+      "signals": [
+        "역배열"
+      ],
+      "placed": true,
+      "won": true
+    },
+    {
+      "race": "서울 4경주 1300M",
+      "date": "2026-07-18",
+      "no": 1,
+      "odds": 234.4,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "서울 4경주 1300M",
+      "date": "2026-07-18",
+      "no": 9,
+      "odds": 9999.9,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "제주 4경주 1110M",
+      "date": "2026-07-18",
+      "no": 2,
+      "odds": 11.0,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "제주 4경주 1110M",
+      "date": "2026-07-18",
+      "no": 8,
+      "odds": 34.4,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
     }
   ],
   "by_signal": {
     "전적A/B": {
-      "count": 128,
+      "count": 133,
       "placed": 26,
-      "rate": 20.3
+      "rate": 19.5
     },
     "급락": {
       "count": 57,
@@ -3133,9 +3199,9 @@
       "rate": 23.9
     },
     "역배열": {
-      "count": 35,
-      "placed": 7,
-      "rate": 20.0
+      "count": 36,
+      "placed": 8,
+      "rate": 22.2
     }
   },
   "rate": 18.6,

@@ -7160,18 +7160,29 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 pass
             if len(_fav12) >= 2:
                 break
+    FAV12_MAIN_MAX = 25.0   # [수정·시장 역방향 모순 방지] 유력마 1·2위 조합 메인 최우선 배당 상한(초과 시 복병/특별 섹션으로 이동)
     if len(_fav12) >= 2 and curQ:
         _f12 = tuple(sorted(_fav12[:2]))
         _f12o = curQ.get(_f12) or curQ.get((_f12[1], _f12[0]))
         # 단통(≤1.5배) 아니고 유효 조합일 때만 최우선(단통은 dansungPlan 이 별도 처리)
         if _f12o and not (DANSUNG and _f12o <= DANSUNG_ODDS):
-            _rest = [q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) != _f12]
             _f12item = next((q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) == _f12), None)
-            if not _f12item:
-                _f12item = {"combo": list(_f12), "odds": _f12o, "stars": 3,
-                            "reason": "유력마 1·2위 조합", "basis": _combo_basis(list(_f12)),
-                            "summary": "유력마 1위+2위 최우선"}
-            final_q = ([_f12item] + _rest)[:max(max_q, 2)]
+            if _f12o <= FAV12_MAIN_MAX:
+                # [기존 유지] 25배 이하 → 메인 최우선(맨 앞)
+                _rest = [q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) != _f12]
+                if not _f12item:
+                    _f12item = {"combo": list(_f12), "odds": _f12o, "stars": 3,
+                                "reason": "유력마 1·2위 조합", "basis": _combo_basis(list(_f12)),
+                                "summary": "유력마 1위+2위 최우선"}
+                final_q = ([_f12item] + _rest)[:max(max_q, 2)]
+            else:
+                # [수정·모순방지] 25배 초과 유력마 조합 → 메인에서 제외(있었으면 제거)하고 복병/특별(💎 bmedSpecial) 섹션으로 보존 이동(삭제 금지)
+                final_q = [q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) != _f12]
+                _sp_pk = set(tuple(sorted(int(x) for x in (s.get("combo") or []))) for s in (special_q or []))
+                if _f12 not in _sp_pk:
+                    special_q.append({"combo": list(_f12), "odds": _f12o, "stars": 2,
+                                      "reason": "유력마 1·2위 조합(고배당)", "basis": _combo_basis(list(_f12)),
+                                      "summary": "유력마이지만 시장 고배당(%.0f배) → 복병/특별 참고(보존)" % _f12o})
 
     # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
     _main = None
