@@ -2924,16 +2924,34 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-18"
+    },
+    {
+      "race": "서울 9경주 1800M",
+      "horse_no": 3,
+      "recent_avg": 4.6,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-18"
+    },
+    {
+      "race": "서울 9경주 1800M",
+      "horse_no": 9,
+      "recent_avg": 4.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-18"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 653,
-      "hit": 151
+      "count": 658,
+      "hit": 152
     },
     "전체부진마": {
-      "count": 1060,
-      "hit": 297
+      "count": 1066,
+      "hit": 299
     },
     "대규모급락": {
       "count": 18,
@@ -2943,8 +2961,8 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 407,
-      "hit": 146
+      "count": 408,
+      "hit": 147
     },
     "급락동반": {
       "count": 93,
