@@ -18770,8 +18770,12 @@ def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
             return
         url = ("https://www.oddspark.com/keiba/RaceList.do?raceDy=%s&opTrackCd=%s&sponsorCd=%s&raceNb=%s"
                % (ymd, op_track, sponsor, race_nb))
-        shutsuba = _keiba_parse_shutsuba(_keirin_fetch(url))
+        _html = _keirin_fetch(url)
+        shutsuba = _keiba_parse_shutsuba(_html)
         if not shutsuba.get("horses"):
+            # [진단 로그] 실패 지점 노출 — 파라미터/URL/응답길이/HorseDetail 유무를 남겨 원인 즉시 파악
+            print("[지방경마 전적·자동] %s 출주표 0두 → URL=%s | html=%dB | HorseDetail=%s"
+                  % (rk, url, len(_html or ""), ("있음" if _html and "HorseDetail" in _html else "없음")))
             return
         details = _keiba_fetch_details(shutsuba)
         try:
@@ -18788,6 +18792,88 @@ def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
             print(f"[지방경마 전적·자동] {rk}: {len(store)}두 oddspark 전적 수집(bg·각질·거리변화·상3F)")
     except Exception as e:
         print(f"[지방경마 전적·자동] {rk} 수집 실패(무시):", e)
+
+
+# ══════════ [일본경마 전적 board 무관 수집·2026-07-18] ══════════
+#   증상: 새 사설 배당판(ks1)이 배당판 프레임을 안 띄워 확장이 keiba DebaTable 파라미터를 못 뽑음 → 전적 실패.
+#   해결(방법 A): raceKey('소노다 12경주')에서 경마장·경주번호를 직접 뽑아 oddspark 트랙코드를 재해석하고,
+#     서버가 직접 oddspark 出走表+전적을 수집(_keiba_autocollect_form 재사용) → 배당판·확장 의존 완전 제거.
+#   ⚠ 기존 경로(확장 DebaTable·bg 자동수집) 전부 유지(무삭제) — 이 경로는 '추가/폴백'.
+def _keiba_form_collect_by_rk(rk, ymd=None, force=False):
+    """[방법 A] raceKey → (경마장, 경주번호) → oddspark 트랙코드(opTrackCd/sponsorCd) 재해석 → 서버가 직접 전적 수집.
+    반환 {ok, count, venue, raceNo, opTrackCd, sponsorCd, reason}. 실패해도 예외 없이 사유 반환(격리)."""
+    try:
+        if _KRA_TRACK_RE.search(str(rk or "")):
+            return {"ok": False, "reason": "한국경마는 대상 아님(KRA 전용)", "raceKey": rk}
+        venue, rno = _area_num(rk)
+        if not venue or not rno:
+            return {"ok": False, "reason": "raceKey에서 경마장·경주번호 추출 실패", "raceKey": rk}
+        ymd = str(ymd or "").strip() or time.strftime("%Y%m%d", time.localtime())
+        codes = _keiba_resolve_track(venue, ymd)          # 경마장명 → 그날 oddspark 코드
+        if not codes:
+            return {"ok": False, "reason": "oddspark 개최목록에 없음(트랙코드 미해석)",
+                    "venue": venue, "raceNo": rno, "scheduled": list(_keiba_schedule(ymd).keys())}
+        op, sp = codes
+        if force:
+            try: _KEIBA_FORM_DONE.discard(rk)             # 강제수집 시 done 플래그 해제(재수집 허용)
+            except Exception: pass
+        _keiba_autocollect_form(rk, op, sp, ymd, rno)     # oddspark 出走表+HorseDetail 전적 수집·저장(기존 함수)
+        _ex = _starters_load().get(rk) or {}
+        n = len(_ex.get("horses") or []) if (_ex.get("source") == "oddspark") else 0
+        return {"ok": n > 0, "count": n, "venue": venue, "raceNo": rno,
+                "opTrackCd": op, "sponsorCd": sp, "source": _ex.get("source"), "raceKey": rk}
+    except Exception as e:
+        return {"ok": False, "reason": str(e), "raceKey": rk}
+
+
+@app.route("/api/keiba/form", methods=["POST", "GET"])
+def keiba_form():
+    """[방법 B·강제수집 엔드포인트] POST/GET {raceKey, raceDy?} → 서버가 raceKey 기반으로 oddspark 전적 즉시 수집.
+    배당판·확장 없이 '소노다 12경주' 만으로 전적 확보. 반환 {ok, count, ...}."""
+    body = request.json if request.method == "POST" else None
+    body = body or request.args or {}
+    rk = (body.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"error": "raceKey가 필요합니다.",
+                        "usage": "POST /api/keiba/form {raceKey:'소노다 12경주'}"}), 400
+    return jsonify(_keiba_form_collect_by_rk(rk, body.get("raceDy"), force=True))
+
+
+def _jp_form_backfill_once():
+    """[일본경마 전적 백필·board 무관] 활성/분석된 일본지방경마 경주 중 oddspark 전적이 없는 것을 찾아
+    raceKey 기반으로 서버가 직접 전적 수집. 확장·배당판 꺼져 있어도 전적 자동 확보. 실패 격리."""
+    try:
+        sdb = _starters_load()
+        seen, done = set(), []
+        # 후보: triple_store(활성) + multi_store(oddspark 배당수집분) 의 일본지방경마 raceKey
+        cand = {}
+        for store in (_triple_load(), _multi_store_load()):
+            for k, v in (store or {}).items():
+                if k in seen:
+                    continue
+                seen.add(k)
+                cat = (v.get("category") or "")
+                sp = (v.get("sport") or "")
+                # 일본지방경마만(한국·경륜·경정·중앙 제외)
+                if _KRA_TRACK_RE.search(str(k)) or sp in ("cycle", "boat", "bike") or cat in ("korea", "cycle", "boat", "bike", "japan_central"):
+                    continue
+                if not _area_num(k)[1]:
+                    continue
+                # 이미 oddspark 전적 있으면 스킵
+                _ex = sdb.get(k) or {}
+                if _ex.get("source") == "oddspark" and _ex.get("horses"):
+                    continue
+                cand[k] = True
+        for k in list(cand.keys())[:20]:                  # 한 번에 최대 20경주(부하 제한)
+            r = _keiba_form_collect_by_rk(k)
+            if r.get("ok"):
+                done.append("%s(%d두)" % (k, r.get("count") or 0))
+        if done:
+            print("[일본전적 백필] 수집 완료:", ", ".join(done))
+        return done
+    except Exception as e:
+        print("[일본전적 백필] 실패(무시):", e)
+        return []
 
 
 # ══════════════ [KRA 공공API] 한국마사회 확정배당율 통합(B551015/API160_1) ══════════════
@@ -19377,6 +19463,10 @@ def _kra_backfill_loop():
             _jp_result_backfill_once()        # [일본 NAR] keiba RaceMarkTable 결과 백필(키 불필요·공개페이지)
         except Exception as e:
             print("[일본 결과 백필] 루프 오류(무시):", e)
+        try:
+            _jp_form_backfill_once()          # [일본 NAR 전적] board 무관·raceKey 기반 oddspark 전적 백필(확장 의존 제거)
+        except Exception as e:
+            print("[일본 전적 백필] 루프 오류(무시):", e)
 
 
 def _kra_backfill_start():
