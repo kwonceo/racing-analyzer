@@ -2575,16 +2575,34 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-18"
+    },
+    {
+      "race": "제주 6경주 900M",
+      "horse_no": 2,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-18"
+    },
+    {
+      "race": "제주 6경주 900M",
+      "horse_no": 4,
+      "recent_avg": 6.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-18"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 583,
-      "hit": 134
+      "count": 585,
+      "hit": 135
     },
     "전체부진마": {
-      "count": 943,
-      "hit": 259
+      "count": 946,
+      "hit": 261
     },
     "대규모급락": {
       "count": 18,
@@ -2594,8 +2612,8 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 360,
-      "hit": 125
+      "count": 361,
+      "hit": 126
     },
     "급락동반": {
       "count": 87,
