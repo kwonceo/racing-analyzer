@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "제주 3경주",
  "analyzed_at": "13:10:49",
- "updated_at": "13:14:56",
+ "updated_at": "13:53:21",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -114,128 +114,11 @@
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "기 찬",
-   "jockey": "용남",
-   "record_score": 110,
-   "record_detail": "최근 2",
-   "odds": 11.2,
-   "grade": "A",
-   "grade_reason": "배당 6.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 2,
-   "name": "온 언 더",
-   "jockey": "동준",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": 6.6,
-   "grade": "C",
-   "grade_reason": "배당 6.8배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 4,
-   "name": "비상질주",
-   "jockey": "현진",
-   "record_score": 145,
-   "record_detail": "최근 1",
-   "odds": 1.8,
-   "grade": "A",
-   "grade_reason": "배당 3.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 8,
-   "name": "어 부 바",
-   "jockey": "준호",
-   "record_score": 50,
-   "record_detail": "최근 4",
-   "odds": 18.6,
-   "grade": "A",
-   "grade_reason": "배당 17.9배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 10,
-   "name": "소록열풍",
-   "jockey": "영민",
-   "record_score": -3,
-   "record_detail": "최근 2",
-   "odds": 4.1,
-   "grade": "C",
-   "grade_reason": "배당 3.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 9,
-   "name": "광 해 군",
-   "jockey": "민재",
-   "record_score": 75,
-   "record_detail": "최근 3",
-   "odds": 80.9,
-   "grade": "D",
-   "grade_reason": "배당 75.3배 · 단승 50~99배 → 제거 권장 = 100점"
-  },
-  {
-   "no": 3,
-   "name": "서부검객",
-   "jockey": "성광",
-   "record_score": 25,
-   "record_detail": "최근 6",
-   "odds": 12.0,
-   "grade": "B",
-   "grade_reason": "배당 6.5배 · 최근평균 6.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 5,
-   "name": "한도초과",
-   "jockey": "한남",
-   "record_score": 15,
-   "record_detail": "최근 8",
-   "odds": 63.0,
-   "grade": "D",
-   "grade_reason": "배당 74.7배 · 최근평균 8.0착 -30 / 단승 50~99배 → 제거 권장 = 70점"
-  },
-  {
-   "no": 6,
-   "name": "투혼여제",
-   "jockey": "곽석",
-   "record_score": 40,
-   "record_detail": "최근 7",
-   "odds": 26.8,
-   "grade": "B",
-   "grade_reason": "배당 20.9배 · 최근평균 7.0착 -30 = 70점"
-  },
-  {
-   "no": 7,
-   "name": "뚜 벅 이",
-   "jockey": "성민",
-   "record_score": 20,
-   "record_detail": "최근 5",
-   "odds": 48.2,
-   "grade": "C",
-   "grade_reason": "배당 31.8배 · 최근평균 5.0착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 70점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   2,
-   4,
-   8,
-   10,
-   3,
-   6
-  ],
-  "eliminated": [
-   9,
-   5,
-   7
-  ],
-  "elimination_reasons": {
-   "9": "배당 75.3배 · 단승 50~99배 → 제거 권장 = 100점",
-   "5": "배당 74.7배 · 최근평균 8.0착 -30 / 단승 50~99배 → 제거 권장 = 70점",
-   "7": "배당 31.8배 · 최근평균 5.0착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 70점"
-  }
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
  },
  "final_recommendation": {
   "quinella_main": {
@@ -302,41 +185,20 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    4,
-    10
-   ],
-   "trio": [
-    1,
-    4,
-    10
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    1,
-    4
-   ],
-   "trio": [
-    1,
-    4,
-    9
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    4,
-    10
-   ],
-   "trio": [
-    1,
-    4,
-    10
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -765,14 +627,49 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 4·10·1 / 복승 4+10",
- "keyHorses": [
-  4,
-  10,
-  1
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 4,
+  "2nd": 6,
+  "3rd": 6
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   4
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "추천 미적중"
+  }
+ },
  "profit": null,
  "review": null
 }
