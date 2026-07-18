@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "코치 2경주",
  "analyzed_at": "15:21:09",
- "updated_at": "15:31:28",
+ "updated_at": "15:32:15",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -269,28 +269,23 @@
  "final_recommendation": {
   "quinella_main": {
    "combo": "1+5",
-   "odds": null,
-   "reason": "1번(A)·5번(A)"
+   "odds": 2.1,
+   "reason": "1번(C)·5번(A)"
   },
   "trifecta_main": {
-   "combo": "1+5+8",
-   "odds": null,
-   "reason": "1번(A)·5번(A)·8번(B)"
-  },
-  "trifecta_insurance1": {
    "combo": "1+2+5",
-   "odds": null,
-   "reason": "1번(A)·2번(B)·5번(A)"
+   "odds": 22.8,
+   "reason": "1번(C)·2번(B)·5번(A)"
   },
   "trifecta_insurance2": {
-   "combo": "2+5+8",
-   "odds": null,
-   "reason": "2번(B)·5번(A)·8번(B)"
+   "combo": "1+2+8",
+   "odds": 23.0,
+   "reason": "1번(C)·2번(B)·8번(D)"
   },
   "budget_allocation": {
-   "quinella_main": "62.1%",
-   "trifecta_main": "14.1%",
-   "trifecta_insurance": "1.9%"
+   "quinella_main": "87.0%",
+   "trifecta_main": "8.4%",
+   "trifecta_insurance": "1.2%"
   }
  },
  "recommendation_history": [
@@ -354,6 +349,106 @@
    "quinella_sub": null,
    "trifecta_main": "1+5+8",
    "top_signals": []
+  },
+  {
+   "time": "15:31:49",
+   "minutes_before": null,
+   "sig": "1-2-5-8|1+5|None|1+2+5",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    5,
+    2,
+    8
+   ],
+   "summary": "유력마 1·5·2·8 / 복승 1+5",
+   "quinella_main": "1+5",
+   "quinella_sub": null,
+   "trifecta_main": "1+2+5",
+   "top_signals": [
+    "1+2 복승 6.2→4.6 (2분전 대비 -25.8%)",
+    "1+7 복승 11.2→9.5 (2분전 대비 -15.2%)",
+    "7+8 복승 53.9→45.5 (2분전 대비 -15.6%)"
+   ]
+  },
+  {
+   "time": "15:31:51",
+   "minutes_before": null,
+   "sig": "1-5-8|1+5|None|1+5+8",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    5,
+    1,
+    8
+   ],
+   "summary": "유력마 5·1·8 / 복승 1+5",
+   "quinella_main": "1+5",
+   "quinella_sub": null,
+   "trifecta_main": "1+5+8",
+   "top_signals": []
+  },
+  {
+   "time": "15:31:52",
+   "minutes_before": null,
+   "sig": "1-2-5-8|1+5|None|1+2+5",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    5,
+    2,
+    8
+   ],
+   "summary": "유력마 1·5·2·8 / 복승 1+5",
+   "quinella_main": "1+5",
+   "quinella_sub": null,
+   "trifecta_main": "1+2+5",
+   "top_signals": [
+    "1+2 복승 6.2→4.6 (2분전 대비 -25.8%)",
+    "1+7 복승 11.2→9.5 (2분전 대비 -15.2%)",
+    "7+8 복승 53.9→45.5 (2분전 대비 -15.6%)"
+   ]
+  },
+  {
+   "time": "15:31:56",
+   "minutes_before": null,
+   "sig": "1-5-8|1+5|None|1+5+8",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    5,
+    1,
+    8
+   ],
+   "summary": "유력마 5·1·8 / 복승 1+5",
+   "quinella_main": "1+5",
+   "quinella_sub": null,
+   "trifecta_main": "1+5+8",
+   "top_signals": []
+  },
+  {
+   "time": "15:32:03",
+   "minutes_before": null,
+   "sig": "1-2-5-8|1+5|None|1+2+5",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    5,
+    2,
+    8
+   ],
+   "summary": "유력마 1·5·2·8 / 복승 1+5",
+   "quinella_main": "1+5",
+   "quinella_sub": null,
+   "trifecta_main": "1+2+5",
+   "top_signals": [
+    "1+2 복승 6.2→4.6 (2분전 대비 -25.8%)",
+    "1+7 복승 11.2→9.5 (2분전 대비 -15.2%)",
+    "7+8 복승 53.9→45.5 (2분전 대비 -15.6%)"
+   ]
   }
  ],
  "compare_recommendation": {
