@@ -3367,22 +3367,9 @@
       "no": 2,
       "odds": 11.5,
       "signals": [
-        "집중급락",
-        "전적A/B"
+        "집중급락"
       ],
       "placed": false,
-      "won": false
-    },
-    {
-      "race": "서울 7경주 1200M",
-      "date": "2026-07-18",
-      "no": 1,
-      "odds": 29.6,
-      "signals": [
-        "집중급락",
-        "전적A/B"
-      ],
-      "placed": true,
       "won": false
     },
     {
@@ -3395,6 +3382,17 @@
       ],
       "placed": false,
       "won": false
+    },
+    {
+      "race": "서울 7경주 1200M",
+      "date": "2026-07-18",
+      "no": 1,
+      "odds": 29.6,
+      "signals": [
+        "집중급락"
+      ],
+      "placed": true,
+      "won": false
     }
   ],
   "by_signal": {
@@ -3404,9 +3402,9 @@
       "rate": 16.4
     },
     "전적A/B": {
-      "count": 149,
-      "placed": 28,
-      "rate": 18.8
+      "count": 147,
+      "placed": 27,
+      "rate": 18.4
     },
     "스마트머니": {
       "count": 60,

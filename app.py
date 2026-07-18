@@ -11764,6 +11764,22 @@ def _extract_track_round(rk):
     return _area_num(rk)
 
 
+def _rk_sport(rk, an=None):
+    """[오류7] raceKey/분석에서 종목 자동 분류(horse/cycle/boat/bike/korea). 결과·학습 태깅 통일용.
+    분석 sport 우선 → 없으면 raceKey 경마장명(한국·경륜 전용지명)으로 판정. 기본 horse(일본지방 등)."""
+    s = ((an or {}).get("sport") or "").strip()
+    cat = ((an or {}).get("category") or "")
+    if s in ("cycle", "boat", "bike"):
+        return s
+    if s == "horse":
+        return "korea" if (_KRA_TRACK_RE.search(str(rk)) or "korea" in cat) else "horse"
+    if _KRA_TRACK_RE.search(str(rk)):
+        return "korea"
+    if _KEIRIN_ONLY_RE.search(str(rk)):
+        return "cycle"
+    return "horse"
+
+
 def _build_race_result(rk, an, record, result, top4, inputs=None):
     """[1번] 경주별 완전 저장 구조 조립(AI 학습용). an/record/odds_history/입력값 종합."""
     inputs = inputs or {}
@@ -11828,17 +11844,25 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
         "anomaly_correct": record.get("anomaly_was_correct"),
         "form_pick_hit": record.get("form_pick_hit"),
     }
+    # [오류6] 확정복승배당 폴백 — 자동수집(경륜 등)은 inputs 없음 → payouts/우승조합 배당으로 보완.
+    _t2win = sorted([result.get("1st"), result.get("2nd")]) if (result and result.get("2nd")) else []
+    _t2win = [x for x in _t2win if x is not None]
+    _q_odds_fb = (_safe_num(inputs.get("quinella_odds"))
+                  or _safe_num((record.get("payouts") or {}).get("quinella"))
+                  or (_winning_quinella_odds(rk, _t2win) if len(_t2win) == 2 else None))
     inv = {
         "budget": _safe_num(inputs.get("budget")) or 0,
         "main_bet": _safe_num(inputs.get("main_bet")) or 0,
         "sub_bet": _safe_num(inputs.get("sub_bet")) or 0,
-        "quinella_odds": _safe_num(inputs.get("quinella_odds")),
+        "quinella_odds": _q_odds_fb,
         "trifecta_odds": _safe_num(inputs.get("trifecta_odds")),
         "actual_return": record.get("payout_actual"),
         "profit": record.get("pnl"),
     }
     return {
         "race_id": rid, "raceKey": rk, "date": date,
+        "sport": _rk_sport(rk, an),                 # [오류7] 종목 자동 태깅(horse/cycle/korea 등)
+        "category": (an.get("category") or None),
         "track": track, "round": rnd,
         "distance": inputs.get("distance") or record.get("distance"),
         "track_condition": inputs.get("track_condition"),
@@ -14819,7 +14843,159 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _RESULT_LEARNED[_cid] = (rk, _rt, time.time())
     except Exception:
         pass
+    # [Phase0·데이터 검증] 저장 전 자동 오류 체크(로그만·차단 안 함 — 기존 저장 흐름 유지). 오류 시 경고 로그.
+    try:
+        _ok_v, _errs_v = _validate_learning_data(rk, result, top3, _rk_sport(rk, an))
+        if not _ok_v:
+            print("[데이터검증] ⚠️ %s: %s" % (rk, " · ".join(_errs_v)))
+    except Exception as _ve:
+        print("[데이터검증] 스킵(무시):", _ve)
+    # [Phase0·ML 데이터 수집] 경주별 features + label 을 ml_training_data.jsonl 에 누적(학습셋 구축).
+    try:
+        _ml_append_row(rk, an, result, top3, payouts, was_hit)
+    except Exception as _me:
+        print("[ML수집] 스킵(무시):", _me)
     return record, L["stats"]
+
+
+# ══════════ [Phase0·데이터 정합성 + ML 학습셋] 2026-07-18 ══════════
+ML_TRAINING_FILE = os.path.join(os.path.dirname(__file__), "data", "ml_training_data.jsonl")
+SIGNAL_PERF_FILE = os.path.join(os.path.dirname(__file__), "data", "signal_performance.json")
+
+
+def _validate_learning_data(rk, result, top3, sport=None):
+    """[데이터 검증] 학습·저장 전 자동 오류 체크. 반환 (ok, errors[]).
+    체크: ① raceKey 정규화 가능 ② 착순 범위(1~18)·중복 ③ sport 필드 ④ 결과 존재.
+    ⚠ 차단하지 않고 경고만(기존 저장 흐름 유지) — 이중학습은 _RESULT_LEARNED 가드가 별도 처리."""
+    errs = []
+    if not _canon_rk(rk):
+        errs.append("raceKey 비어있음")
+    res = result or {}
+    seen = []
+    for k in ("1st", "2nd", "3rd"):
+        v = res.get(k)
+        if v in (None, ""):
+            continue
+        try:
+            iv = int(v)
+            if not (1 <= iv <= 18):
+                errs.append("%s 착순 범위초과(%s)" % (k, v))
+            seen.append(iv)
+        except (TypeError, ValueError):
+            errs.append("%s 착순 숫자아님(%s)" % (k, v))
+    if len(seen) != len(set(seen)):
+        errs.append("착순 마번 중복")
+    if not seen:
+        errs.append("결과 착순 없음")
+    if not sport:
+        errs.append("sport 미상")
+    return (not errs, errs)
+
+
+def _ml_row_build(rk, an, result, top3, payouts, was_hit):
+    """[ML 학습셋] 경주 1건 → {features, label}. 있는 값만 채우고 없으면 None(관대)."""
+    an = an or {}
+    drops = an.get("drops") or []
+    _dps = [d.get("pct") for d in drops if isinstance(d.get("pct"), (int, float))]
+    inv = an.get("inverse") or {}
+    lead = (inv.get("invLead") or {}) if inv.get("detected") else {}
+    jp = an.get("jpFlowSim") or an.get("kraFlowSim") or {}
+    pace_an = an.get("paceAnalysis") or {}
+    form = an.get("form") or []
+    top_form = form[0] if form else {}
+    cur_mb = an.get("minutesBefore")
+    _smart = any((h or {}).get("smartMoney") for h in (an.get("darkHorses") or []))
+    _venue, _ = _area_num(rk)
+    _win = (top3 or [None])[0]
+    feat = {
+        "max_drop_pct": (min(_dps) if _dps else None),
+        "drop_timing_min": cur_mb,
+        "reversal_strength": round((lead.get("diffPct") or 0) / 100.0, 3) if lead else 0.0,
+        "form_score": top_form.get("totalScore"),
+        "gait_type": top_form.get("gait") or top_form.get("styleType"),
+        "pace_type": jp.get("pace") or pace_an.get("pace"),
+        "lead_count": jp.get("leadCount"),
+        "venue": _venue,
+        "distance": an.get("distance"),
+        "track_condition": an.get("trackCondition"),
+        "horse_count": len(form) or None,
+        "gate_no": _win,
+        "weight_change": top_form.get("bodyWeightBonus"),
+        "jockey_change": bool(top_form.get("jockeyChanged") or top_form.get("jockeyChangeBonus")),
+        "t1_drop": bool(cur_mb is not None and cur_mb <= 3 and _dps),
+        "reversal": bool(inv.get("detected")),
+        "smart_money": bool(_smart),
+    }
+    _oddsp = None
+    try:
+        _oddsp = _winning_quinella_odds(rk, sorted([result.get("1st"), result.get("2nd")])) if (result and result.get("2nd")) else None
+    except Exception:
+        _oddsp = None
+    label = {
+        "hit_place": bool(was_hit),
+        "odds_place": _oddsp,
+        "roi": round(_oddsp, 2) if (_oddsp and was_hit) else (0.0 if not was_hit else None),
+    }
+    return {"raceKey": _canon_rk(rk), "date": time.strftime("%Y-%m-%d"),
+            "sport": _rk_sport(rk, an), "features": feat, "label": label, "t": time.time()}
+
+
+def _ml_append_row(rk, an, result, top3, payouts, was_hit):
+    """[ML 학습셋 누적] ml_training_data.jsonl 에 경주 1건 append(1줄 1경주). 실패 격리."""
+    row = _ml_row_build(rk, an, result, top3, payouts, was_hit)
+    os.makedirs(os.path.dirname(ML_TRAINING_FILE), exist_ok=True)
+    with open(ML_TRAINING_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+def _build_signal_performance():
+    """[signal_performance] 신호별 성과(총·적중·적중률·평균배당·ROI) 재집계 → signal_performance.json.
+    소스: race_results/*.json 의 prediction.signals + result_analysis + investment.quinella_odds.
+    ROI = Σ(적중배당) / 시도수(미적중=0). 매일 22:00 자동 갱신(수동 호출도 가능)."""
+    perf = {}
+    try:
+        if not os.path.isdir(RACE_RESULTS_DIR):
+            return perf
+        for fn in os.listdir(RACE_RESULTS_DIR):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                d = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            ra = d.get("result_analysis") or {}
+            hit = bool(ra.get("main_hit"))
+            odds = _safe_num((d.get("investment") or {}).get("quinella_odds")) or 0.0
+            tags = set(ra.get("pattern_tags") or [])
+            pred = d.get("prediction") or {}
+            for s in (pred.get("signals") or []):
+                if isinstance(s, dict):
+                    tags.add(str(s.get("type") or s.get("label") or "").strip())
+                elif isinstance(s, str):
+                    tags.add(s.strip())
+            for tag in [t for t in tags if t]:
+                p = perf.setdefault(tag, {"total": 0, "hit": 0, "odds_sum": 0.0, "roi_sum": 0.0})
+                p["total"] += 1
+                if hit:
+                    p["hit"] += 1
+                    p["odds_sum"] += odds
+                    p["roi_sum"] += odds        # 1단위 베팅 가정: 적중=배당, 미적중=0
+        out = {}
+        for tag, p in perf.items():
+            t = p["total"] or 1
+            h = p["hit"] or 0
+            out[tag] = {"total": p["total"], "hit": h, "hit_rate": round(h / t, 3),
+                        "avg_odds": round(p["odds_sum"] / h, 2) if h else 0.0,
+                        "roi": round(p["roi_sum"] / t, 2)}
+        out = dict(sorted(out.items(), key=lambda kv: -kv[1]["roi"]))
+        os.makedirs(os.path.dirname(SIGNAL_PERF_FILE), exist_ok=True)
+        json.dump({"updated_at": time.strftime("%Y-%m-%d %H:%M:%S"), "signals": out},
+                  open(SIGNAL_PERF_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("[signal_performance] 갱신: %d개 신호" % len(out))
+        return out
+    except Exception as e:
+        print("[signal_performance] 갱신 실패:", e)
+        return perf
 
 
 # ══════════════ 실패 복기 학습 시스템 (미적중 자동 분류 · 정답말 역추적 · 규칙 자동생성) ══════════════
@@ -16922,7 +17098,7 @@ _TRACK_GROUPS = {
     "카나자와": ["金沢", "kanazawa", "kana"],
     "소노다": ["園田", "sonoda", "sono"],
     "히메지": ["姫路", "himeji", "hime"],
-    "코치": ["高知", "kochi"],
+    "코치": ["高知", "kochi", "고치"],   # [오류5] 高知/코치/고치 3중 중복 통합 → '코치' 하나로
     "사가": ["佐賀", "saga"],
     "몬베츠": ["門別", "monbetsu", "mombetsu", "monb"],
     "도쿄": ["東京", "tokyo"],
@@ -19548,6 +19724,14 @@ def _kra_backfill_loop():
             _jp_form_backfill_once()          # [일본 NAR 전적] board 무관·raceKey 기반 oddspark 전적 백필(확장 의존 제거)
         except Exception as e:
             print("[일본 전적 백필] 루프 오류(무시):", e)
+        # [Phase0·signal_performance 매일 22:00 갱신] 신호별 ROI 재집계(하루 1회). 20분 루프 안에서 시각 체크.
+        try:
+            _now_hm = time.strftime("%Y-%m-%d %H")
+            if time.strftime("%H") == "22" and getattr(_kra_backfill_loop, "_last_sigperf", None) != _now_hm:
+                _kra_backfill_loop._last_sigperf = _now_hm
+                _build_signal_performance()
+        except Exception as e:
+            print("[signal_performance] 스케줄 오류(무시):", e)
 
 
 def _kra_backfill_start():

@@ -1975,16 +1975,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "서울 7경주 1200M",
-        "date": "2026-07-18",
-        "horses": [
-          2
-        ],
-        "placed": [],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
         "race": "서울 4경주 1300M",
         "date": "2026-07-18",
         "horses": [
@@ -1993,6 +1983,16 @@
         "placed": [],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "서울 7경주 1200M",
+        "date": "2026-07-18",
+        "horses": [
+          9
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
     "count": 131,
@@ -2241,25 +2241,13 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
-      },
-      {
-        "race": "서울 7경주 1200M",
-        "date": "2026-07-18",
-        "horses": [
-          3
-        ],
-        "placed": [
-          3
-        ],
-        "quinella_hit": false,
-        "trifecta_hit": false
       }
     ],
-    "count": 21,
+    "count": 20,
     "hit_quinella": 8,
     "hit_trifecta": 3,
-    "rate_quinella": 38.1,
-    "rate_trifecta": 14.3,
+    "rate_quinella": 40.0,
+    "rate_trifecta": 15.0,
     "reliable": false
   },
   "역배열": {
