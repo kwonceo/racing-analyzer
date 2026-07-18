@@ -1,0 +1,197 @@
+{
+ "race_id": "2026_07_18_오비히로_10경주",
+ "raceKey": "오비히로 10경주",
+ "sport": "horse",
+ "category": "japan_local",
+ "date": "2026-07-18",
+ "race": "오비히로 10경주",
+ "analyzed_at": "19:17:38",
+ "updated_at": "19:18:01",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://ks1.dke-d11diw.site/user_frame.php?PLACE_TYPE=J"
+ },
+ "odds_timeline": [
+  {
+   "time": "19:17:38",
+   "minutes_before": 7,
+   "quinella": {}
+  },
+  {
+   "time": "19:17:48",
+   "minutes_before": 7,
+   "quinella": {}
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 5,
+   "name": "レンジシ",
+   "jockey": "赤岡修（高知）",
+   "record_score": 52.5,
+   "record_detail": "최근 3-8-1-3-6",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 1,
+   "name": "ツイスティドシルク",
+   "jockey": "永森大（高知）",
+   "record_score": 55.0,
+   "record_detail": "최근 1-15-4-11-6",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.4착 -30 = 30점"
+  },
+  {
+   "no": 2,
+   "name": "ジーティービバ",
+   "jockey": "岡遼太（高知）",
+   "record_score": 15.0,
+   "record_detail": "최근 4-8-4-5-7",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.6착 -30 = 30점"
+  },
+  {
+   "no": 3,
+   "name": "エスケーブラッド",
+   "jockey": "多田誠（高知）",
+   "record_score": 0,
+   "record_detail": "최근 9-8-8-7-7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.8착 -30 = 30점"
+  },
+  {
+   "no": 4,
+   "name": "アシャカバッハ",
+   "jockey": "西森将（高知）",
+   "record_score": 0,
+   "record_detail": "최근 10-9-10-13-14",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 11.2착 -30 = 30점"
+  },
+  {
+   "no": 6,
+   "name": "マジックステラ",
+   "jockey": "濱尚美（高知）",
+   "record_score": 10.0,
+   "record_detail": "최근 4-11-5-6-9",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
+  },
+  {
+   "no": 7,
+   "name": "ローメット",
+   "jockey": "佐原秀（高知）",
+   "record_score": 0,
+   "record_detail": "최근 8-9-11-11-12",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 10.2착 -30 = 30점"
+  },
+  {
+   "no": 8,
+   "name": "ノクスパーピリオ",
+   "jockey": "塚本直（高知）",
+   "record_score": 30.0,
+   "record_detail": "최근 6-1-5-5-16",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.6착 -30 = 30점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   5,
+   1,
+   2,
+   3,
+   6,
+   8
+  ],
+  "eliminated": [
+   4,
+   7
+  ],
+  "elimination_reasons": {
+   "4": "배당 미수집 · 배당 150배+ -40 / 최근평균 11.2착 -30 = 30점",
+   "7": "배당 미수집 · 배당 150배+ -40 / 최근평균 10.2착 -30 = 30점"
+  }
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    1,
+    5
+   ],
+   "trio": [
+    1,
+    5,
+    8
+   ]
+  },
+  "form": {
+   "quinella": [
+    1,
+    5
+   ],
+   "trio": [
+    1,
+    5,
+    8
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    1,
+    5
+   ],
+   "trio": [
+    1,
+    5,
+    8
+   ]
+  }
+ },
+ "corePicks": null,
+ "summary": "유력마 5·1·8 / 복승 1+5",
+ "keyHorses": [
+  5,
+  1,
+  8
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}

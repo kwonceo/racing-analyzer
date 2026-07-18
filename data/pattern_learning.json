@@ -2825,16 +2825,44 @@
         "복승이상감지"
       ],
       "date": "2026-07-18"
+    },
+    {
+      "race": "서울 10경주 1200M",
+      "horse_no": 9,
+      "recent_avg": 5.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-18"
+    },
+    {
+      "race": "서울 10경주 1200M",
+      "horse_no": 2,
+      "recent_avg": 5.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-18"
+    },
+    {
+      "race": "서울 10경주 1200M",
+      "horse_no": 6,
+      "recent_avg": 6.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-18"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 631,
-      "hit": 145
+      "count": 635,
+      "hit": 146
     },
     "전체부진마": {
-      "count": 1025,
-      "hit": 286
+      "count": 1031,
+      "hit": 289
     },
     "대규모급락": {
       "count": 18,
@@ -2844,8 +2872,8 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 394,
-      "hit": 141
+      "count": 396,
+      "hit": 143
     },
     "급락동반": {
       "count": 90,
