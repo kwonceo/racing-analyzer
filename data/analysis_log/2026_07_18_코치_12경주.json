@@ -5,17 +5,17 @@
  "category": "japan_local",
  "date": "2026-07-18",
  "race": "코치 12경주",
- "analyzed_at": "21:10:48",
- "updated_at": "22:27:55",
+ "analyzed_at": "22:31:52",
+ "updated_at": "22:32:19",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
   "image_file": null,
-  "odds_source": "https://ks1.dke-d11diw.site/user_frame.php?PLACE_TYPE=J"
+  "odds_source": "oddspark"
  },
  "odds_timeline": [
   {
-   "time": "22:21:06",
+   "time": "22:32:10",
    "minutes_before": null,
    "quinella": {
     "1+2": 47.4,
@@ -81,7 +81,7 @@
    }
   },
   {
-   "time": "22:21:11",
+   "time": "22:32:13",
    "minutes_before": null,
    "quinella": {
     "1+2": 47.4,
@@ -149,21 +149,21 @@
  ],
  "signals_detected": [
   {
-   "time": "22:21:11",
+   "time": "22:32:13",
    "type": "쌍승역전공식",
    "detail": "🔄 역전감지[3·4위 간]: 단승 11번(3위) vs 6번(4위) — 쌍승 6→11(32.5)가 11→6(51.5)보다 낮음 → 상위권 실질순위 역전: 6번 우세 (강한 역배열 0.631)",
    "severity": "🔴",
    "reason": "역전비율 = 쌍승(6→11) 32.5 / 쌍승(11→6) 51.5 = 0.631 (강한 역배열)"
   },
   {
-   "time": "22:21:11",
+   "time": "22:32:13",
    "type": "쌍승역전공식",
    "detail": "🔄 역전감지[2·4위 간]: 단승 8번(2위) vs 6번(4위) — 쌍승 6→8(34.8)가 8→6(45.3)보다 낮음 → 상위권 실질순위 역전: 6번 우세 (역배열 0.768)",
    "severity": "🟠",
    "reason": "역전비율 = 쌍승(6→8) 34.8 / 쌍승(8→6) 45.3 = 0.768 (역배열)"
   },
   {
-   "time": "22:21:11",
+   "time": "22:32:13",
    "type": "압축",
    "detail": "상위 복승 배당 근접 (14.9~15.9)",
    "severity": "🟡",
@@ -325,51 +325,9 @@
   "elimination_reasons": {}
  },
  "final_recommendation": {
-  "quinella_main": {
-   "combo": "1+5",
-   "odds": null,
-   "reason": "1번(A)·5번(A)"
-  },
-  "trifecta_main": {
-   "combo": "1+5+9",
-   "odds": null,
-   "reason": "1번(A)·5번(A)·9번(A)"
-  },
-  "trifecta_insurance1": {
-   "combo": "1+5+7",
-   "odds": null,
-   "reason": "1번(A)·5번(A)·7번(B)"
-  },
-  "trifecta_insurance2": {
-   "combo": "5+7+9",
-   "odds": null,
-   "reason": "5번(A)·7번(B)·9번(A)"
-  },
-  "budget_allocation": {
-   "quinella_main": "62.1%",
-   "trifecta_main": "14.1%",
-   "trifecta_insurance": "1.9%"
-  }
+  "budget_allocation": {}
  },
- "recommendation_history": [
-  {
-   "time": "21:10:48",
-   "minutes_before": null,
-   "sig": "1-5-9|1+5|None|1+5+9",
-   "anomCount": 0,
-   "sigChanged": true,
-   "keyHorses": [
-    5,
-    1,
-    9
-   ],
-   "summary": "유력마 5·1·9 / 복승 1+5",
-   "quinella_main": "1+5",
-   "quinella_sub": null,
-   "trifecta_main": "1+5+9",
-   "top_signals": []
-  }
- ],
+ "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
