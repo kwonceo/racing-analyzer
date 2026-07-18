@@ -25,9 +25,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 100.0,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_3": {
    "horse": 3,
@@ -41,9 +41,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 103.8,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_9": {
    "horse": 9,
@@ -57,7 +57,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 46.2,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -73,12 +73,12 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 105,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
-  "signal_5": {
-   "horse": 5,
+  "signal_11": {
+   "horse": 11,
    "placed": false,
    "recommended": true,
    "place_rank": null,
@@ -89,18 +89,18 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 110,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
   6,
   1,
-  5
+  11
  ],
  "recommendation_process": [
-  "1. 전적 분석: 6번 100.0점",
+  "1. 전적 분석: 6번 전적 정보 제한",
   "2. 배당 수집 시작 17:10:46",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
@@ -109,14 +109,14 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 100.0,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 100.0,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
@@ -154,9 +154,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 39
+  "validCount": 40
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-18 19:03:08"
+ "generated_at": "2026-07-18 23:26:28"
 }
