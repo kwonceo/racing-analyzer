@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "오비히로 10경주",
  "analyzed_at": "19:17:38",
- "updated_at": "19:30:19",
+ "updated_at": "19:37:45",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -55,127 +55,11 @@
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "ウンジョウノキセキ",
-   "jockey": "長澤幸（ばんえい）",
-   "record_score": 50.0,
-   "record_detail": "최근 5-1-2-3-3",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 3,
-   "name": "パワフルクィーン",
-   "jockey": "鈴木恵（ばんえい）",
-   "record_score": 62.5,
-   "record_detail": "최근 2-7-1-3-6",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 4,
-   "name": "クリスタルホーク",
-   "jockey": "島津新（ばんえい）",
-   "record_score": 33.8,
-   "record_detail": "최근 6-1-7-5-2",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 5,
-   "name": "ホクトヒーロー",
-   "jockey": "村上章（ばんえい）",
-   "record_score": 27.5,
-   "record_detail": "최근 7-7-1-3-1",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 6,
-   "name": "ショウリノホシ",
-   "jockey": "赤塚健（ばんえい）",
-   "record_score": 62.5,
-   "record_detail": "최근 2-2-5-6-7",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 7,
-   "name": "フジノボーイ",
-   "jockey": "中原蓮（ばんえい）",
-   "record_score": 65.0,
-   "record_detail": "최근 2-9-1-4-2",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 10,
-   "name": "ホクセイマジェスタ",
-   "jockey": "中村太（ばんえい）",
-   "record_score": 57.5,
-   "record_detail": "최근 3-2-7-1-5",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 2,
-   "name": "タイガ",
-   "jockey": "西謙一（ばんえい）",
-   "record_score": 33.8,
-   "record_detail": "최근 3-10-7-9-2",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.2착 -30 = 30점"
-  },
-  {
-   "no": 8,
-   "name": "ツカサマーチ",
-   "jockey": "今井千（ばんえい）",
-   "record_score": 0,
-   "record_detail": "최근 5-10-6-7-9",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.4착 -30 = 30점"
-  },
-  {
-   "no": 9,
-   "name": "ツカサセンター",
-   "jockey": "大友一（ばんえい）",
-   "record_score": 15.0,
-   "record_detail": "최근 8-9-2-5-7",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.2착 -30 = 30점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   3,
-   4,
-   5,
-   6,
-   7,
-   10,
-   2
-  ],
-  "eliminated": [
-   8,
-   9
-  ],
-  "elimination_reasons": {
-   "8": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.4착 -30 = 30점",
-   "9": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.2착 -30 = 30점"
-  }
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
  },
  "final_recommendation": {
   "quinella_main": {
@@ -225,41 +109,20 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    1,
-    7
-   ],
-   "trio": [
-    1,
-    3,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    3,
-    7
-   ],
-   "trio": [
-    3,
-    6,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    1,
-    7
-   ],
-   "trio": [
-    1,
-    3,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -653,12 +516,8 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 1·7·3 / 복승 1+7",
- "keyHorses": [
-  1,
-  7,
-  3
- ],
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
  "result": null,
  "hit": null,
  "profit": null,
