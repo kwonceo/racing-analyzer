@@ -8,7 +8,7 @@
   "3rd": 3,
   "4th": null
  },
- "hit": true,
+ "hit": false,
  "hit_type": null,
  "odds": "미상",
  "win_odds": 0,
@@ -48,8 +48,40 @@
   "signal_3": {
    "horse": 3,
    "placed": true,
-   "recommended": false,
+   "recommended": true,
    "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
@@ -62,9 +94,15 @@
    "reason": "일반"
   }
  },
- "recommended_horses": [],
+ "recommended_horses": [
+  3,
+  7,
+  5
+ ],
  "recommendation_process": [
   "1. 전적 분석: 8번 전적 정보 제한",
+  "2. 배당 수집 시작 23:05:15",
+  "4. 쌍승 역전: 9→5(61.6) < 5→9(87.2) → 9번 실질 상위 신호",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -82,11 +120,13 @@
   "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
-  "inverse": false,
-  "inverseHorses": [],
+  "inverse": true,
+  "inverseHorses": [
+   9
+  ],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "적중"
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -99,9 +139,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 0
+  "validCount": 1
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-18 22:51:18"
+ "generated_at": "2026-07-18 23:05:21"
 }
