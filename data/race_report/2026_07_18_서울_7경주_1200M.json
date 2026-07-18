@@ -25,7 +25,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 52.5,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -41,14 +41,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 140,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_3": {
    "horse": 3,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -57,52 +57,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 92.5,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_7": {
-   "horse": 7,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 97.5,
-   "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_5": {
-   "horse": 5,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 65,
-   "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
- "recommended_horses": [
-  3,
-  7,
-  5
- ],
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 8번 52.5점",
-  "2. 배당 수집 시작 16:02:46",
-  "4. 쌍승 역전: 9→5(61.6) < 5→9(87.2) → 9번 실질 상위 신호",
+  "1. 전적 분석: 8번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -110,22 +72,18 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 52.5,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "전적보조_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 52.5,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
-  "inverse": true,
-  "inverseHorses": [
-   9
-  ],
+  "inverse": false,
+  "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
   "reason": "적중"
@@ -133,51 +91,17 @@
  "signal_change_history": {
   "changes": [],
   "confirmed": [],
-  "candidates": [
-   1,
-   3
-  ],
-  "events": {
-   "3": {
-    "first": {
-     "time": "16:06:34",
-     "minutes_before": null
-    },
-    "count": 1,
-    "last": {
-     "time": "16:06:34",
-     "minutes_before": null
-    },
-    "vanished": {
-     "time": "16:07:08",
-     "minutes_before": null
-    }
-   },
-   "1": {
-    "first": {
-     "time": "21:40:56",
-     "minutes_before": null
-    },
-    "count": 1,
-    "last": {
-     "time": "21:40:56",
-     "minutes_before": null
-    },
-    "vanished": {
-     "time": "22:19:58",
-     "minutes_before": null
-    }
-   }
-  },
-  "finalSignal": 1,
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
   "finalConfirmed": false,
   "excluded": {
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 13
+  "validCount": 0
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-18 22:40:57"
+ "generated_at": "2026-07-18 22:51:18"
 }
