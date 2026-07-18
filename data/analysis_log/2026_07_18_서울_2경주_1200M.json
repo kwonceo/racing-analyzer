@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "서울 2경주 1200M",
  "analyzed_at": "11:30:55",
- "updated_at": "11:54:48",
+ "updated_at": "12:16:49",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -1621,114 +1621,10 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": true,
-  "level": "강력",
-  "band": "4배 이하 2두+",
-  "horses": [
-   5,
-   2
-  ],
-  "axis": 5,
-  "axisGap": 33.3,
-  "reprs": [
-   {
-    "no": 5,
-    "odds": 2.2
-   },
-   {
-    "no": 2,
-    "odds": 3.3
-   },
-   {
-    "no": 1,
-    "odds": 7.9
-   }
-  ],
-  "combo": [
-   2,
-   5
-  ],
-  "withDrop": false,
-  "withReversal": false,
-  "note": "저배당 압축(명확한 축 5번·배당차 33.3%) → 복승 메인 자신있게"
+  "detected": false
  },
  "third_place_hunt": {
-  "active": true,
-  "axis": [
-   2,
-   5
-  ],
-  "mainCombo": [
-   2,
-   5
-  ],
-  "candidates": [
-   {
-    "no": 9,
-    "odds": 19.1,
-    "priority": 3,
-    "reason": "전적 우수(140)",
-    "conf": "중",
-    "icon": "📊",
-    "inBand": true,
-    "dropPct": null
-   },
-   {
-    "no": 4,
-    "odds": 29.2,
-    "priority": 3,
-    "reason": "전적 우수(80)",
-    "conf": "중",
-    "icon": "📊",
-    "inBand": true,
-    "dropPct": null
-   },
-   {
-    "no": 8,
-    "odds": 9.5,
-    "priority": 5,
-    "reason": "이상감지말",
-    "conf": "중",
-    "icon": "🚨",
-    "inBand": true,
-    "dropPct": null
-   }
-  ],
-  "trios": [
-   {
-    "combo": [
-     2,
-     5,
-     9
-    ],
-    "cand": 9,
-    "reason": "전적 우수(140)",
-    "conf": "중",
-    "expOddsEst": null
-   },
-   {
-    "combo": [
-     2,
-     4,
-     5
-    ],
-    "cand": 4,
-    "reason": "전적 우수(80)",
-    "conf": "중",
-    "expOddsEst": null
-   },
-   {
-    "combo": [
-     2,
-     5,
-     8
-    ],
-    "cand": 8,
-    "reason": "이상감지말",
-    "conf": "중",
-    "expOddsEst": null
-   }
-  ]
+  "active": false
  },
  "horses": [
   {
@@ -1737,9 +1633,9 @@
    "jockey": "정희",
    "record_score": 0,
    "record_detail": "",
-   "odds": 7.9,
+   "odds": null,
    "grade": "C",
-   "grade_reason": "배당 9.1배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 2,
@@ -1747,39 +1643,9 @@
    "jockey": "재로",
    "record_score": 45,
    "record_detail": "최근 4",
-   "odds": 3.3,
+   "odds": null,
    "grade": "B",
-   "grade_reason": "배당 4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "새로운비",
-   "jockey": "재철",
-   "record_score": 105,
-   "record_detail": "최근 2",
-   "odds": 2.2,
-   "grade": "A",
-   "grade_reason": "배당 4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 8,
-   "name": "원펑드림",
-   "jockey": "다빈",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": 9.5,
-   "grade": "C",
-   "grade_reason": "배당 10.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 9,
-   "name": "거센함성",
-   "jockey": "이혁",
-   "record_score": 140,
-   "record_detail": "최근 1",
-   "odds": 19.1,
-   "grade": "A",
-   "grade_reason": "배당 17.3배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 3,
@@ -1787,9 +1653,9 @@
    "jockey": "드레",
    "record_score": 0,
    "record_detail": "",
-   "odds": 34.5,
+   "odds": null,
    "grade": "C",
-   "grade_reason": "배당 23.7배 · 단승 30~49배 → 관찰(신호 없으면 제거) = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 4,
@@ -1797,39 +1663,39 @@
    "jockey": "살바",
    "record_score": 80,
    "record_detail": "최근 3",
-   "odds": 29.2,
+   "odds": null,
    "grade": "A",
-   "grade_reason": "배당 28.2배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 7,
-   "name": "제이에스",
-   "jockey": "한별",
-   "record_score": 20,
-   "record_detail": "최근 7",
-   "odds": 16.5,
-   "grade": "B",
-   "grade_reason": "배당 12.9배 · 최근평균 7.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "no": 5,
+   "name": "새로운비",
+   "jockey": "재철",
+   "record_score": 105,
+   "record_detail": "최근 2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 10,
-   "name": "두움",
-   "jockey": "추열",
+   "no": 8,
+   "name": "원펑드림",
+   "jockey": "다빈",
    "record_score": 0,
-   "record_detail": "최근 7",
-   "odds": 22.4,
+   "record_detail": "",
+   "odds": null,
    "grade": "D",
-   "grade_reason": "배당 22배 · 최근평균 7.0착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 11,
-   "name": "비바참",
-   "jockey": "태현",
-   "record_score": 20,
-   "record_detail": "최근 5",
-   "odds": 27.7,
-   "grade": "B",
-   "grade_reason": "배당 21.1배 · 최근평균 5.0착 -30 = 70점"
+   "no": 9,
+   "name": "거센함성",
+   "jockey": "이혁",
+   "record_score": 140,
+   "record_detail": "최근 1",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 6,
@@ -1837,30 +1703,60 @@
    "jockey": "성환",
    "record_score": 25,
    "record_detail": "최근 6",
-   "odds": 83.3,
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
+  },
+  {
+   "no": 7,
+   "name": "제이에스",
+   "jockey": "한별",
+   "record_score": 20,
+   "record_detail": "최근 7",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
+  },
+  {
+   "no": 10,
+   "name": "두움",
+   "jockey": "추열",
+   "record_score": 0,
+   "record_detail": "최근 7",
+   "odds": null,
    "grade": "D",
-   "grade_reason": "배당 124.6배 · 배당 80~149 -20 / 최근평균 6.0착 -30 / 단승 50~99배 → 제거 권장 = 50점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
+  },
+  {
+   "no": 11,
+   "name": "비바참",
+   "jockey": "태현",
+   "record_score": 20,
+   "record_detail": "최근 5",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
    1,
    2,
-   5,
-   8,
-   9,
+   3,
    4,
+   5,
+   9,
+   6,
    7,
-   10,
    11
   ],
   "eliminated": [
-   3,
-   6
+   8,
+   10
   ],
   "elimination_reasons": {
-   "3": "배당 23.7배 · 단승 30~49배 → 관찰(신호 없으면 제거) = 100점",
-   "6": "배당 124.6배 · 배당 80~149 -20 / 최근평균 6.0착 -30 / 단승 50~99배 → 제거 권장 = 50점"
+   "8": "배당 미수집 · 배당 150배+ -40 = 60점",
+   "10": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
   }
  },
  "final_recommendation": {
@@ -1870,13 +1766,13 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    2,
-    5
+    5,
+    9
    ],
    "trio": [
-    1,
-    2,
-    5
+    4,
+    5,
+    9
    ]
   },
   "form": {
@@ -1896,13 +1792,13 @@
   },
   "final": {
    "quinella": [
-    2,
-    5
+    5,
+    9
    ],
    "trio": [
-    1,
-    2,
-    5
+    4,
+    5,
+    9
    ]
   }
  },
@@ -2306,14 +2202,56 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 5·2·1 / 복승 2+5",
+ "summary": "유력마 9·5·4 / 복승 5+9",
  "keyHorses": [
+  9,
   5,
-  2,
-  1
+  4
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 5,
+  "2nd": 7,
+  "3rd": 8
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   5
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   3,
+   6
+  ],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 105,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 56.0,
+   "reason": "제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }
