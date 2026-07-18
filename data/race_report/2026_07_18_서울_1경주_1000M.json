@@ -25,8 +25,8 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": -5,
-   "confidence": 24.0,
+   "record_score": null,
+   "confidence": null,
    "reason": "일반"
   },
   "signal_6": {
@@ -41,8 +41,8 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 0,
-   "confidence": 40.0,
+   "record_score": null,
+   "confidence": null,
    "reason": "일반"
   },
   "signal_9": {
@@ -57,8 +57,8 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": -5,
-   "confidence": 16.0,
+   "record_score": null,
+   "confidence": null,
    "reason": "일반"
   },
   "signal_1": {
@@ -73,25 +73,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 135,
-   "confidence": 40.0,
-   "reason": "전적상위"
-  },
-  "signal_3": {
-   "horse": 3,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 135,
-   "confidence": 16.0,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_4": {
    "horse": 4,
@@ -105,41 +89,40 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": -5,
-   "confidence": 40.0,
+   "record_score": null,
+   "confidence": null,
    "reason": "일반"
   }
  },
  "recommended_horses": [
   1,
-  3,
   4,
   6
  ],
  "recommendation_process": [
-  "1. 전적 분석: 8번 -5점",
+  "1. 전적 분석: 8번 전적 정보 제한",
   "2. 배당 수집 시작 10:40:56",
-  "5. 종합 신뢰도 24.0점(하) 판정"
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 8,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": -5,
-  "total": 24.0,
+  "record_score": null,
+  "total": 0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": -5,
+  "formScore": null,
   "dropAmt": null,
-  "dropScore": 0.0,
+  "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
-  "confidence": 40.0,
+  "confidence": 0,
   "reason": "제거 적중"
  },
  "signal_change_history": {
@@ -153,9 +136,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 9
+  "validCount": 10
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-18 10:54:14"
+ "generated_at": "2026-07-18 15:47:05"
 }
