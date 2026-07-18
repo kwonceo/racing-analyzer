@@ -585,16 +585,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "서울 2경주",
-        "date": "2026-07-12",
-        "horses": [
-          9
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "서울 3경주",
         "date": "2026-07-12",
         "horses": [
@@ -1664,13 +1654,47 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "제주 2경주 1000M",
+        "date": "2026-07-18",
+        "horses": [
+          1
+        ],
+        "placed": [
+          1
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "서울 2경주",
+        "date": "2026-07-18",
+        "horses": [
+          1
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "서울 2경주 1200M",
+        "date": "2026-07-18",
+        "horses": [
+          8
+        ],
+        "placed": [
+          8
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 102,
-    "hit_quinella": 42,
+    "count": 104,
+    "hit_quinella": 41,
     "hit_trifecta": 18,
-    "rate_quinella": 41.2,
-    "rate_trifecta": 17.6,
+    "rate_quinella": 39.4,
+    "rate_trifecta": 17.3,
     "reliable": true
   },
   "전적이중수렴": {
@@ -1804,13 +1828,37 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "제주 2경주 1000M",
+        "date": "2026-07-18",
+        "horses": [
+          2
+        ],
+        "placed": [
+          2
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "서울 2경주 1200M",
+        "date": "2026-07-18",
+        "horses": [
+          5
+        ],
+        "placed": [
+          5
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 11,
+    "count": 13,
     "hit_quinella": 5,
     "hit_trifecta": 3,
-    "rate_quinella": 45.5,
-    "rate_trifecta": 27.3,
+    "rate_quinella": 38.5,
+    "rate_trifecta": 23.1,
     "reliable": false
   },
   "역배열": {
@@ -2156,13 +2204,23 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 2경주",
+        "date": "2026-07-18",
+        "horses": [
+          4
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 30,
+    "count": 31,
     "hit_quinella": 10,
     "hit_trifecta": 5,
-    "rate_quinella": 33.3,
-    "rate_trifecta": 16.7,
+    "rate_quinella": 32.3,
+    "rate_trifecta": 16.1,
     "reliable": false
   },
   "크로스역배열": {
@@ -2254,13 +2312,26 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 2경주",
+        "date": "2026-07-18",
+        "horses": [
+          5,
+          2
+        ],
+        "placed": [
+          5
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 7,
+    "count": 8,
     "hit_quinella": 3,
     "hit_trifecta": 2,
-    "rate_quinella": 42.9,
-    "rate_trifecta": 28.6,
+    "rate_quinella": 37.5,
+    "rate_trifecta": 25.0,
     "reliable": false
   },
   "집중급락": {
@@ -2657,12 +2728,38 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "제주 2경주 1000M",
+        "date": "2026-07-18",
+        "horses": [
+          2,
+          4
+        ],
+        "placed": [
+          2
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "서울 2경주 1200M",
+        "date": "2026-07-18",
+        "horses": [
+          2,
+          5
+        ],
+        "placed": [
+          5
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 4,
+    "count": 6,
     "hit_quinella": 1,
     "hit_trifecta": 0,
-    "rate_quinella": 25.0,
+    "rate_quinella": 16.7,
     "rate_trifecta": 0.0,
     "reliable": false
   }

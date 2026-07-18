@@ -8365,10 +8365,17 @@ def _triple_analyze(rk, rec):
         _coords = _kra_coords_for(rk)
         if _coords:
             _mt, _rcd, _rno = _coords
+            # [수정] 그 경주 출전마 순번→말이름 매핑(구간기록/전개시뮬을 이 경주 출전마로 정확 매칭·경주별 분리)
+            _name_by_no = {}
+            for _fh in (form or []):
+                _fno = _to_int(_fh.get("no"))
+                _fnm = (_fh.get("name") or "").strip()
+                if _fno is not None and _fnm:
+                    _name_by_no[_fno] = _fnm
             # 6단계: 경주 전개 시뮬레이션(코너순위 + 구간지수)
-            kra_flow_sim = _simulate_race_flow_kra(_mt, _rcd, _rno, valid_nos=valid_nos, win_odds=curWin)
+            kra_flow_sim = _simulate_race_flow_kra(_mt, _rcd, _rno, valid_nos=valid_nos, win_odds=curWin, name_by_no=_name_by_no)
             # 3단계: 구간지수 각질 힌트(패널·교차검증용)
-            _sec = _kra_section_records(_mt, _rcd, _rno)
+            _sec = _kra_section_records(_mt, _rcd, _rno, name_by_no=_name_by_no)
             if _sec:
                 kra_section_gait = {str(no): {"gaitHint": v.get("gaitHint"), "s1fIndex": v.get("s1f_index"),
                                               "g1fIndex": v.get("g1f_index"), "s1fBest": v.get("s1f_best"),
@@ -19402,13 +19409,29 @@ def kra_section():
     meet = _kra_meet_code(b.get("meet")) or str(b.get("meet") or "1")
     rc_date = str(b.get("rc_date") or b.get("rcDate") or time.strftime("%Y%m%d"))
     rc_no = str(b.get("rc_no") or b.get("rcNo") or "1")
-    sec = _kra_section_records(meet, rc_date, rc_no)
+    # [수정·검증용] 그 경주 출전마 이름을 API155(경주결과)에서 얻어 해당 말만 표시(경주별 분리 확인).
+    #   결과 전(미실시) 경주는 이름을 못 얻어 전체 표시될 수 있음(라이브 분석은 form 기반이라 정확).
+    _race_names = set()
+    _raw155 = []
+    try:
+        _ai155, _ = _kra_ai_results(meet, rc_date)
+        for _r in (_ai155.get(_kra_int(rc_no)) or []):
+            _rn = (_r.get("hrName") or "").strip()
+            if _rn:
+                _raw155.append(_rn)
+                _race_names.add(_kra_norm_name(_rn))   # 정규화 이름으로 매칭
+    except Exception:
+        pass
+    sec_all = _kra_section_records(meet, rc_date, rc_no)          # 정규화 hrName 키 전체(개최일)
+    sec = {k: v for k, v in sec_all.items() if (not _race_names or k in _race_names)}
     pr = _kra_pass_ranks(meet, rc_date, rc_no)
     sim = _simulate_race_flow_kra(meet, rc_date, rc_no)
     return jsonify({"ok": bool(sec or pr), "meet": meet, "rc_date": rc_date, "rc_no": rc_no,
-                    "sectionIndices": {str(k): v for k, v in sec.items()},
+                    "entrants": ("API155 %d두" % len(_race_names)) if _race_names else "미확인(결과전·전체표시)",
+                    "sectionIndices": {(v.get("hrName") or str(k)): v for k, v in sec.items()},
                     "passRanks": {str(k): v for k, v in pr.items()},
-                    "flowSim": sim})
+                    "flowSim": sim,
+                    "_nameDiag": {"api155_sample": _raw155[:6], "api37_sample": [ (vv.get("hrName") or kk) for kk, vv in list(sec_all.items())[:6] ], "sec_all_count": len(sec_all), "matched": len(sec)}})
 
 
 @app.route("/api/kra/jockey-change", methods=["GET", "POST"])
@@ -19747,30 +19770,52 @@ def _kra_pass_positions(seq):
     return pos
 
 
-def _kra_section_records(meet, rc_date, rc_no, force=False):
+def _kra_norm_name(s):
+    """말 이름 정규화 — API 간 표기차(앞뒤/내부 공백) 흡수. 매칭 전용."""
+    return "".join(str(s or "").split())
+
+
+def _kra_sec_pick(base, name_by_no):
+    """[수정·경주별 분리] 말이름(hrName) 기준 집계(base)를 출전마 매핑으로 순번(chulNo) 키로 변환.
+    name_by_no={chulNo: hrName}. 없으면 hrName 키 그대로 반환(엔드포인트·진단용)."""
+    if not base:
+        return {}
+    if name_by_no:
+        out = {}
+        for _no, _nm in name_by_no.items():
+            v = base.get(_kra_norm_name(_nm))
+            if v is not None:
+                out[_no] = v
+        return out
+    return base
+
+
+def _kra_section_records(meet, rc_date, rc_no, force=False, name_by_no=None):
     """[API37_1] 현재 출전마별 과거 구간기록 이력 → 말별 S1F/G1F 최고·평균 집계 + 선행력/추입력 지수.
-    반환 {chulNo(int): {s1f_best, s1f_avg, g1f_best, g1f_avg, g3f_best, n, s1f_index, g1f_index, gaitHint}}.
-    ⚠ 대상 경주(rc_date) 자신의 행은 제외(정보 누수 방지 — 라이브 예측 시 미래 결과 미포함)."""
-    ck = "%s|%s|%s" % (meet, rc_date, rc_no)
+    [수정] API37_1이 rc_no를 무시하고 개최일 전체를 반환 → 순번(chulNo) 아닌 **말이름(hrName)** 으로 집계하고,
+      출전마 매핑(name_by_no={chulNo:hrName}) 주면 그 경주 출전마만 순번(chulNo) 키로 반환(경주별 정확 분리).
+    ⚠ 집계·매칭 키만 교정 — 지수·각질 산식·구조 불변. 대상 경주(rc_date) 자신 행은 제외(정보 누수 방지)."""
+    ck = "%s|%s" % (meet, rc_date)            # API가 rc_no 무시·개최일 단위 반환 → 개최일로 캐시(중복 호출 절감)
     c = _KRA_SEC_CACHE.get(ck)
     if c and not force and (time.time() - c["t"]) < _KRA_SEC_TTL:
-        return c["data"]
+        return _kra_sec_pick(c["data"], name_by_no)
     items, err = _kra_api_get("API37_1/sectionRecord_1",
                               {"meet": str(meet), "rc_date": str(rc_date), "rc_no": str(rc_no)}, num_rows=500)
     if err or not items:
         _KRA_SEC_CACHE[ck] = {"t": time.time(), "data": {}}
         return {}
-    by = {}                                   # chulNo → {"s1f":[...], "g1f":[...], "g3f":[...]}
+    by = {}                                   # [수정] hrName(말이름) → {"s1f":[...], "g1f":[...], "g3f":[...]}
     for it in items:
-        no = _kra_int(it.get("chulNo"))
-        if no is None:
+        _raw = (it.get("hrName") or "").strip()
+        nm = _kra_norm_name(_raw)               # [수정] 정규화 이름을 집계 키로(표기차 흡수)
+        if not nm:
             continue
         if str(it.get("rcDate") or "") == str(rc_date):
             continue                          # 대상 경주 자신(결과 누수) 제외
         s1 = _kra_sec_num(it.get("ARcTimeS1f")) or _kra_sec_num(it.get("FRcTimeS1f"))
         g1 = _kra_sec_num(it.get("ARcTimeG1f")) or _kra_sec_num(it.get("FRcTimeG1f"))
         g3 = _kra_sec_num(it.get("ARcTimeG3f")) or _kra_sec_num(it.get("FRcTimeG3f"))
-        rec = by.setdefault(no, {"s1f": [], "g1f": [], "g3f": [], "hrName": it.get("hrName")})
+        rec = by.setdefault(nm, {"s1f": [], "g1f": [], "g3f": [], "hrName": _raw})
         if s1:
             rec["s1f"].append(s1)
         if g1:
@@ -19836,7 +19881,7 @@ def _kra_section_records(meet, rc_date, rc_no, force=False):
         json.dump(allc, open(KRA_SECTION_FILE, "w", encoding="utf-8"), ensure_ascii=False)
     except Exception:
         pass
-    return out
+    return _kra_sec_pick(out, name_by_no)
 
 
 def _kra_pass_ranks(meet, rc_date, rc_no):
@@ -19846,7 +19891,14 @@ def _kra_pass_ranks(meet, rc_date, rc_no):
                               {"meet": str(meet), "rc_date": str(rc_date), "rc_no": str(rc_no)}, num_rows=10)
     if err or not items:
         return {}
-    row = items[0]
+    # [수정] API가 경주번호 무시·여러 행 반환 가능 → 해당 경주(rcNo·rcDate) 행만 선택(없으면 미실시=빈값)
+    row = None
+    for _it in items:
+        if str(_kra_int(_it.get("rcNo"))) == str(_kra_int(rc_no)) and str(_it.get("rcDate") or "") == str(rc_date):
+            row = _it
+            break
+    if row is None:
+        return {}
     s1 = _kra_pass_positions(row.get("passrankS1f"))
     g1 = _kra_pass_positions(row.get("passrankG1f"))              # 마지막 직선(사실상 최종순위)
     c1 = _kra_pass_positions(row.get("passrankG8f_1c"))
@@ -20025,15 +20077,17 @@ def _kra_ai_results(meet, rc_date, force=False):
     return out, None
 
 
-def _simulate_race_flow_kra(meet, rc_date, rc_no, valid_nos=None, win_odds=None):
+def _simulate_race_flow_kra(meet, rc_date, rc_no, valid_nos=None, win_odds=None, name_by_no=None):
     """[6단계 경주 전개 시뮬레이션] API6_1 코너순위 + API37_1 구간지수 통합.
     선행 경합 예측 → 페이스 판단 → 유리한 말 선별 → 고배당 복병 추천.
+    [수정] name_by_no(출전마 순번↔이름) 주면 구간기록을 그 경주 출전마로 정확 매칭(경주별 분리). 내부 로직 불변.
     반환 {pace, leadCount, leadContenders, favoredHorses, darkHorses, sectionGait, note, text} 또는 None."""
-    sec = _kra_section_records(meet, rc_date, rc_no)
+    sec = _kra_section_records(meet, rc_date, rc_no, name_by_no=name_by_no)
     pr = _kra_pass_ranks(meet, rc_date, rc_no)
     if not sec and not pr:
         return None
-    nos = set(int(n) for n in (valid_nos or [])) or (set(sec) | set(pr))
+    # [방어] name_by_no 없이 호출(엔드포인트 등) 시 sec가 말이름 키일 수 있음 → 순번(정수) 키만 사용(문자열×float 방지)
+    nos = set(int(n) for n in (valid_nos or [])) or set(k for k in (set(sec) | set(pr)) if isinstance(k, int))
     # 선행력: s1f_index 상위(선행형) 말 = 선행 경합 후보
     lead = []
     for no in nos:
