@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "제주 6경주",
  "analyzed_at": "15:46:38",
- "updated_at": "15:49:59",
+ "updated_at": "15:51:36",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -57,22 +57,7 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "15:49:48",
-   "type": "배당불일치",
-   "detail": "추천 복승(7+9=16.0배)이 배당판 인기 조합(4+7=6.3배)과 다름",
-   "severity": "⚠️",
-   "reason": "유력마가 배당판 최저(인기)와 동떨어짐 = 초반 배당 미수집/전적 편중 의심. 배당판 인기 조합을 추천에 추가함 — 배당 재확인 권장."
-  },
-  {
-   "time": "15:49:48",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[3·4위 간]: 단승 8번(3위) vs 2번(4위) — 쌍승 2→8(58.2)가 8→2(77.8)보다 낮음 → 상위권 실질순위 역전: 2번 우세 (역배열 0.748)",
-   "severity": "🟠",
-   "reason": "역전비율 = 쌍승(2→8) 58.2 / 쌍승(8→2) 77.8 = 0.748 (역배열)"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
   "signals": [],
@@ -87,126 +72,11 @@
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "출정식",
-   "jockey": "용남",
-   "record_score": 45,
-   "record_detail": "최근 4",
-   "odds": 7.7,
-   "grade": "B",
-   "grade_reason": "배당 9.2배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 5,
-   "name": "진짜로",
-   "jockey": "한남",
-   "record_score": -5,
-   "record_detail": "",
-   "odds": 12.8,
-   "grade": "C",
-   "grade_reason": "배당 10.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "레드윙스",
-   "jockey": "현준",
-   "record_score": 30,
-   "record_detail": "",
-   "odds": 16.1,
-   "grade": "C",
-   "grade_reason": "배당 15.5배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "거장",
-   "jockey": "수한",
-   "record_score": 95,
-   "record_detail": "최근 2",
-   "odds": 4.2,
-   "grade": "A",
-   "grade_reason": "배당 6.3배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 8,
-   "name": "직진기",
-   "jockey": "곽석",
-   "record_score": 85,
-   "record_detail": "최근 3",
-   "odds": 6.8,
-   "grade": "A",
-   "grade_reason": "배당 9.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 9,
-   "name": "천년의꿈",
-   "jockey": "유일",
-   "record_score": 145,
-   "record_detail": "최근 1",
-   "odds": 8.3,
-   "grade": "A",
-   "grade_reason": "배당 8.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 1,
-   "name": "산마루",
-   "jockey": "다영",
-   "record_score": 15,
-   "record_detail": "",
-   "odds": 31.1,
-   "grade": "C",
-   "grade_reason": "배당 36.9배 · 단승 30~49배 → 관찰(신호 없으면 제거) = 100점"
-  },
-  {
-   "no": 3,
-   "name": "쾌걸",
-   "jockey": "유나",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": 25.1,
-   "grade": "D",
-   "grade_reason": "배당 35배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 10,
-   "name": "재게재게",
-   "jockey": "민재",
-   "record_score": 40,
-   "record_detail": "최근 4",
-   "odds": 29.6,
-   "grade": "D",
-   "grade_reason": "배당 67.3배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 4,
-   "name": "수월로드",
-   "jockey": "준호",
-   "record_score": 50,
-   "record_detail": "최근 6",
-   "odds": 2.7,
-   "grade": "B",
-   "grade_reason": "배당 6.3배 · 최근평균 6.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   2,
-   5,
-   6,
-   7,
-   8,
-   9,
-   3,
-   10,
-   4
-  ],
-  "eliminated": [
-   1
-  ],
-  "elimination_reasons": {
-   "1": "배당 36.9배 · 단승 30~49배 → 관찰(신호 없으면 제거) = 100점"
-  }
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
  },
  "final_recommendation": {
   "budget_allocation": {}
@@ -214,41 +84,20 @@
  "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    7,
-    9
-   ],
-   "trio": [
-    7,
-    8,
-    9
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    7,
-    9
-   ],
-   "trio": [
-    7,
-    8,
-    9
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    7,
-    9
-   ],
-   "trio": [
-    7,
-    8,
-    9
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -599,15 +448,49 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 7·9·8·4 / 복승 7+9",
- "keyHorses": [
-  7,
-  9,
-  8,
-  4
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 4
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   4
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 1번 적중"
+  }
+ },
  "profit": null,
  "review": null
 }
