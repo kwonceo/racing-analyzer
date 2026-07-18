@@ -2892,16 +2892,32 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-18"
+    },
+    {
+      "race": "사가 10경주",
+      "horse_no": 3,
+      "recent_avg": 6.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-18"
+    },
+    {
+      "race": "사가 10경주",
+      "horse_no": 8,
+      "recent_avg": 5.0,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-18"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 638,
-      "hit": 147
+      "count": 644,
+      "hit": 149
     },
     "전체부진마": {
-      "count": 1043,
-      "hit": 293
+      "count": 1050,
+      "hit": 295
     },
     "대규모급락": {
       "count": 18,
@@ -2911,7 +2927,7 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 405,
+      "count": 406,
       "hit": 146
     },
     "급락동반": {
