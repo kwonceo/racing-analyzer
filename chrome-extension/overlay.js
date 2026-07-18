@@ -766,6 +766,8 @@
     var BCOL = { fav: '#3b82f6', drop: '#ef4444', rec: '#22c55e', warn: '#eab308', special: '#f0abfc' };
 
     function pureIntT(s) { s = (s == null ? '' : String(s)).trim(); return /^\d{1,2}$/.test(s) ? parseInt(s, 10) : null; }
+    // [신규 미러 사이트 대응] 점 붙은 머리글('1.')도 마번 인식(헤더 전용).
+    function hdrIntT(s) { var m = /^(\d{1,2})\.?$/.exec((s == null ? '' : String(s)).trim()); return m ? parseInt(m[1], 10) : null; }
     function numT(s) { var m = (s == null ? '' : String(s)).replace(/[, ]/g, '').match(/\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; }
 
     // 실제 배당판(복승 매트릭스) 표 + 셀 요소 위치 매핑. content.js parseMatrixTable 과 동일 휴리스틱(읽기전용).
@@ -778,19 +780,20 @@
       if (rows.length < 2) return null;
       var headerRow = null, best = 1;
       rows.slice(0, 3).forEach(function (r) {
-        var c = [].slice.call(r.cells).filter(function (td) { return pureIntT(td.textContent) != null; }).length;
+        var c = [].slice.call(r.cells).filter(function (td) { return hdrIntT(td.textContent) != null; }).length;
         if (c > best) { best = c; headerRow = r; }
       });
       if (!headerRow) return null;
       var headerNos = [], hdrEls = [], colByIdx = {};
       [].slice.call(headerRow.cells).forEach(function (cell) {
-        var n = pureIntT(cell.textContent);
+        var n = hdrIntT(cell.textContent);
         if (n != null) { headerNos.push(n); hdrEls.push({ no: n, el: cell }); colByIdx[cell.cellIndex] = n; }
       });
       if (headerNos.length < 2) return null;
+      var _odCell = function (s) { var t = (s || '').trim(); return /^\d+\.\d+$/.test(t) || /^\d{3,}$/.test(t); }; // 소수 또는 100↑(상한)
       var isOdds = oddsClass
-        ? function (td) { return td.classList && td.classList.contains(oddsClass); }
-        : function (td) { return /^\d+\.\d+$/.test((td.textContent || '').trim()); };
+        ? function (td) { return (td.classList && td.classList.contains(oddsClass)) || _odCell(td.textContent); }
+        : function (td) { return _odCell(td.textContent); };
 
       // ═══ [셀 밀림 근본 수정] 열 번호를 '개수 추측'이 아니라 **기하 정렬**로 확정 ═══
       //   기존 로직은 배당 셀 개수가 all/upper/lower 중 무엇과 같은지로 열을 단정했다.
@@ -860,10 +863,45 @@
       return { table: table, headerRow: headerRow, headerNos: headerNos, hdrEls: hdrEls, cells: cells };
     }
 
+    // [프레임 대응] 동일출처 iframe/frame(예: 사설 배당판 frm_race_run) 내부 <table>까지 수집(중첩 재귀).
+    function _allBoardDocs() {
+      var docs = [document], seen = [document];
+      function dig(root) {
+        var fr; try { fr = root.querySelectorAll('iframe, frame'); } catch (_) { return; }
+        for (var i = 0; i < fr.length; i++) {
+          var d = null;
+          try { d = fr[i].contentDocument || (fr[i].contentWindow && fr[i].contentWindow.document) || null; } catch (_) { d = null; }
+          if (d && d.querySelectorAll && seen.indexOf(d) < 0) { seen.push(d); docs.push(d); dig(d); }
+        }
+      }
+      dig(document);
+      return docs;
+    }
+    function _allBoardTables() {
+      var out = [], docs = _allBoardDocs();
+      for (var k = 0; k < docs.length; k++) {
+        try { var t = docs[k].querySelectorAll('table'); for (var j = 0; j < t.length; j++) out.push(t[j]); } catch (_) { /* */ }
+      }
+      return out;
+    }
+    // 셀이 들어있는 문서(프레임)의 최상위 창 기준 좌상단 오프셋(중첩 프레임 합산). 최상위 문서면 {0,0}.
+    function _boardFrameOffset(doc) {
+      var x = 0, y = 0;
+      try {
+        var win = doc && doc.defaultView;
+        while (win && win.frameElement) {
+          var fr = win.frameElement.getBoundingClientRect();
+          x += fr.left; y += fr.top;
+          if (win === win.parent) break;
+          win = win.parent;
+        }
+      } catch (_) { /* 교차출처 조상 = 보정 불가, 현상 유지 */ }
+      return { x: x, y: y };
+    }
     function locateBoardMatrix() {
       var oddsClass = /asyukk|qwqwd|dke-d11diw/i.test(location.host) ? 'odds_content' : null;
       var best = null, tables;
-      try { tables = document.querySelectorAll('table'); } catch (_) { return null; }
+      try { tables = _allBoardTables(); } catch (_) { return null; }
       for (var ti = 0; ti < tables.length; ti++) {
         var info = mapBoardTable(tables[ti], oddsClass);
         if (info && (!best || info.cells.length > best.cells.length)) best = info;
@@ -900,21 +938,31 @@
     // 각 오버레이 셀을 실제 배당판 셀의 현재 화면 좌표(fixed)로 재배치.
     function positionBoard() {
       var i, it, r;
+      // [프레임 대응] 셀이 iframe 안이면 그 프레임 위치만큼 보정(최상위 문서면 0). 문서별 1회 캐시.
+      var _offDoc = null, _off = { x: 0, y: 0 };
+      function _ofs(el) {
+        var d = el.ownerDocument;
+        if (d === document) return { x: 0, y: 0 };
+        if (d !== _offDoc) { _offDoc = d; _off = _boardFrameOffset(d); }
+        return _off;
+      }
       for (i = 0; i < boardItems.length; i++) {
         it = boardItems[i];
         try { r = it.el.getBoundingClientRect(); } catch (_) { continue; }
         if (!r || (r.width === 0 && r.height === 0)) { it.span.style.display = 'none'; continue; }
+        var o = _ofs(it.el);
         it.span.style.display = 'flex';
-        it.span.style.left = r.left + 'px'; it.span.style.top = r.top + 'px';
+        it.span.style.left = (r.left + o.x) + 'px'; it.span.style.top = (r.top + o.y) + 'px';
         it.span.style.width = r.width + 'px'; it.span.style.height = r.height + 'px';
       }
       for (i = 0; i < boardHdrItems.length; i++) {
         it = boardHdrItems[i];
         try { r = it.el.getBoundingClientRect(); } catch (_) { continue; }
         if (!r || (r.width === 0 && r.height === 0)) { it.span.style.display = 'none'; continue; }
+        var o2 = _ofs(it.el);
         it.span.style.display = 'flex';
         // [단통 배지 등 오프셋 지원] it.dy/it.dx(있으면) 만큼 이동·고정폭(it.fixedW) 지원
-        it.span.style.left = (r.left + (it.dx || 0)) + 'px'; it.span.style.top = (r.top + (it.dy || 0)) + 'px';
+        it.span.style.left = (r.left + o2.x + (it.dx || 0)) + 'px'; it.span.style.top = (r.top + o2.y + (it.dy || 0)) + 'px';
         it.span.style.width = (it.fixedW || r.width) + 'px'; it.span.style.height = (it.fixedH || r.height) + 'px';
       }
     }

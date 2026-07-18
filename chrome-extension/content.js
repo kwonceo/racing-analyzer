@@ -356,6 +356,8 @@
   }
 
   const pureInt = (s) => (/^\d{1,2}$/.test((s || '').trim()) ? parseInt(s, 10) : null);
+  // [신규 미러 사이트 대응] 열 머리글이 '1.' 처럼 점이 붙은 경우까지 마번으로 인식(헤더 전용).
+  const hdrInt = (s) => { const m = /^(\d{1,2})\.?$/.exec((s || '').trim()); return m ? parseInt(m[1], 10) : null; };
 
   // [1번][3번] 범용 매트릭스 표 파서
   //   - 헤더 행(정수 마번이 가장 많은 행)에서 "열 마번" 축을 구성 (cellIndex→마번)
@@ -370,7 +372,7 @@
     // 헤더 행: 앞 3행 중 정수 마번이 가장 많은 행(2개 이상일 때만 헤더로 인정)
     let headerRow = null, best = 1;
     for (const r of rows.slice(0, 3)) {
-      const c = [...r.cells].filter((td) => pureInt(td.textContent) != null).length;
+      const c = [...r.cells].filter((td) => hdrInt(td.textContent) != null).length;
       if (c > best) { best = c; headerRow = r; }
     }
     // 헤더의 '열 마번'을 등장 순서(headerNos)와 cellIndex 두 방식으로 수집
@@ -378,13 +380,15 @@
     const colNoByIndex = {};
     if (headerRow) {
       for (const cell of headerRow.cells) {
-        const n = pureInt(cell.textContent);
+        const n = hdrInt(cell.textContent);
         if (n != null) { headerNos.push(n); colNoByIndex[cell.cellIndex] = n; }
       }
     }
+    // 배당 셀 판정: 소수 배당(47.1) 또는 3자리+ 정수(100=100배↑ 상한 표시) — '100'은 무효 아님, 고배당 롱샷.
+    const _odCell = (s) => { const t = (s || '').trim(); return /^\d+\.\d+$/.test(t) || /^\d{3,}$/.test(t); };
     const isOdds = opts.oddsClass
-      ? (td) => td.classList.contains(opts.oddsClass)
-      : (td) => /^\d+\.\d+$/.test((td.textContent || '').trim()); // 소수점 있는 숫자 = 배당
+      ? (td) => td.classList.contains(opts.oddsClass) || _odCell(td.textContent)
+      : (td) => _odCell(td.textContent);
 
     // [출전취소 번호 밀림 근본방어] 취소마(競走除外/取消)의 행은 배당셀이 0개다.
     //   그 마번을 '취소 컬럼'으로 판정해 열 축(headerNos·colNoByIndex)에서 제거한다.
@@ -457,12 +461,12 @@
   function extractByMatrix(oddsClass) {
     const tables = new Set();
     if (oddsClass) {
-      for (const c of document.querySelectorAll('.' + oddsClass)) {
+      for (const c of queryAllDocs('.' + oddsClass)) {
         const t = c.closest('table'); if (t) tables.add(t);
       }
     }
-    // .odds_table 또는 (범용) 모든 표
-    for (const t of document.querySelectorAll('table.odds_table, table')) tables.add(t);
+    // .odds_table 또는 (범용) 모든 표 — [프레임 대응] 동일출처 iframe(예: frm_race_run) 내부 표까지 스캔
+    for (const t of queryAllDocs('table.odds_table, table')) tables.add(t);
 
     const pairsMap = {}; // "a-b"(a<b) -> odds (최소값 유지)
     const singleMap = {}; // no -> {no,win,place}

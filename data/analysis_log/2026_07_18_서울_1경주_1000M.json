@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "서울 1경주 1000M",
  "analyzed_at": "10:28:53",
- "updated_at": "10:54:14",
+ "updated_at": "11:00:49",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -603,7 +603,7 @@
    "no": 1,
    "name": "그랜드폭",
    "jockey": "이야",
-   "record_score": 135,
+   "record_score": 105,
    "record_detail": "최근 2",
    "odds": 2.5,
    "grade": "A",
@@ -613,7 +613,7 @@
    "no": 3,
    "name": "나르사루",
    "jockey": "다빈",
-   "record_score": 135,
+   "record_score": 120,
    "record_detail": "최근 1",
    "odds": 11.9,
    "grade": "A",
@@ -623,7 +623,7 @@
    "no": 4,
    "name": "마이티몰",
    "jockey": "인철",
-   "record_score": -5,
+   "record_score": 0,
    "record_detail": "",
    "odds": 3.3,
    "grade": "B",
@@ -643,7 +643,7 @@
    "no": 7,
    "name": "봉봉티아",
    "jockey": "코지",
-   "record_score": 45,
+   "record_score": 15,
    "record_detail": "",
    "odds": 14.7,
    "grade": "A",
@@ -653,7 +653,7 @@
    "no": 9,
    "name": "로드삭스",
    "jockey": "추열",
-   "record_score": -5,
+   "record_score": 0,
    "record_detail": "",
    "odds": 11.6,
    "grade": "B",
@@ -663,7 +663,7 @@
    "no": 2,
    "name": "안양에이",
    "jockey": "실바",
-   "record_score": 10,
+   "record_score": 0,
    "record_detail": "",
    "odds": 53.3,
    "grade": "C",
@@ -673,7 +673,7 @@
    "no": 8,
    "name": "위즈크라",
    "jockey": "재철",
-   "record_score": -5,
+   "record_score": 0,
    "record_detail": "",
    "odds": 28.5,
    "grade": "C",
@@ -703,7 +703,7 @@
    "no": 11,
    "name": "사랑과진",
    "jockey": "효정",
-   "record_score": -10,
+   "record_score": 0,
    "record_detail": "",
    "odds": 87.8,
    "grade": "D",
@@ -1219,6 +1219,99 @@
    "inverseHit": [],
    "confidence": 40.0,
    "reason": "제거 적중"
+  },
+  "failure": {
+   "type": "전적오판",
+   "label": "유형4 · 전적 오판",
+   "focus": 8,
+   "winner": 8,
+   "missed": [
+    8,
+    6,
+    9
+   ],
+   "reason": "8번은 배당 변화 없이 입상 → 배당은 정상, 전적 판단 실패(이변)",
+   "improvement": "전적 하위라도 최근 컨디션·거리/기수 변경 반영 · 이변 조건 학습 강화",
+   "missed_signal": "배당 신호 없음(전적 이변)",
+   "timeline": [
+    {
+     "mb": null,
+     "odds": 28.5,
+     "pct": null,
+     "time": "10:40:56",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 28.5,
+     "pct": 0,
+     "time": "10:41:27",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 28.5,
+     "pct": 0,
+     "time": "10:41:57",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 28.5,
+     "pct": 0,
+     "time": "10:42:28",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 28.5,
+     "pct": 0,
+     "time": "10:43:02",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 28.5,
+     "pct": 0,
+     "time": "10:43:34",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 28.5,
+     "pct": 0,
+     "time": "10:44:09",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 28.5,
+     "pct": 0,
+     "time": "10:44:44",
+     "after": false,
+     "src": "단승"
+    },
+    {
+     "mb": null,
+     "odds": 28.5,
+     "pct": 0,
+     "time": "10:54:13",
+     "after": false,
+     "src": "단승"
+    }
+   ],
+   "maxDrop": 0,
+   "buriedBy": null,
+   "afterClose": false,
+   "massDrop": false,
+   "winnerSignal": false
   }
  },
  "profit": null,

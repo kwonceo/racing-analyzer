@@ -1719,6 +1719,21 @@ def _sport_max_no(sport):
     return _SPORT_MAX_NO.get((sport or "horse"), 18)
 
 
+# [사설 우선 + oddspark 백업] 확장(사설 배당판 화면수집)이 방금 커버 중인 경주를 기록 →
+#   oddspark(keirin_odds·bg)는 그 경주를 백업으로 양보(주입 스킵). 사장님이 베팅하는 사설 배당판 배당 우선.
+#   ⚠ KRA 구간기록·각질(_triple_analyze 내부)과 무관 — 배당 소스 라우팅만.
+_EXT_COVERED = {}
+_EXT_COVERED_LOCK = threading.Lock()
+def _ext_covered_active(rk, within=120):
+    """확장(사설 배당판)이 within초 내 이 raceKey 배당을 보냈으면 True → oddspark는 백업(스킵)."""
+    try:
+        with _EXT_COVERED_LOCK:
+            ts = _EXT_COVERED.get(rk)
+        return bool(ts and (time.time() - ts) <= within)
+    except Exception:
+        return False
+
+
 def _oddspark_covered_active(rk, within=200):
     """[자동전송 꼬임 방어] 이 raceKey를 서버가 oddspark로 방금(within초 내) 직접 수집 중인가?
     True면 확장(asyukk 사설 배당판·화면 수집)의 중복 전송은 불필요하고 오히려 유해 —
@@ -1751,10 +1766,15 @@ def triple_ingest():
     #   → 탭 전환마다 다른 경주가 서버를 덮어써 분석기·오버레이가 꼬이던 문제 근본 차단(oddspark 미커버 경주는 정상 저장).
     _src = (body.get("source") or "")
     _is_ext = ("oddspark" not in _src)                   # oddspark_bg/직접수집이 아닌 확장·수동 화면수집분
-    if _is_ext and _oddspark_covered_active(rk):
-        print(f"[자동전송 스킵] {rk}: oddspark 서버 자동수집 중 → 확장 중복 전송 생략(꼬임·유령마번 방지)")
-        return jsonify({"ok": True, "skipped": True, "reason": "oddspark 서버 자동수집 중 — 확장 전송 생략",
-                        "raceKey": rk})
+    # [사설 우선] 확장(사설 배당판) 배당은 그대로 저장하고, 이 경주를 확장이 커버 중임을 기록
+    #   → oddspark(keirin_odds·bg)가 이 경주를 백업으로 양보(스킵). (기존 oddspark 권위·확장 스킵을 역전)
+    #   탭 오염은 raceKey별 저장·_do_triple_ingest 종목정정·current_race 로직이 방어(무삭제).
+    if _is_ext:
+        try:
+            with _EXT_COVERED_LOCK:
+                _EXT_COVERED[rk] = time.time()
+        except Exception:
+            pass
     return jsonify(_do_triple_ingest(
         rk, body.get("quinella") or [], body.get("exacta") or [], body.get("trio") or [],
         _win_map_clean(body.get("win")), body.get("sport"), body.get("category"),
@@ -17820,6 +17840,10 @@ def keirin_odds():
         return jsonify({"error": "배당 수집 실패: %s" % e}), 502
     if not q and not x:
         return jsonify({"error": "배당 정보를 찾지 못했습니다(경주 번호/개최일/발매 여부 확인)."}), 422
+    # [사설 우선] 확장(사설 배당판)이 이 경주를 방금 수집 중이면 oddspark는 백업 → 주입 생략(사설 배당 유지)
+    if _ext_covered_active(rk):
+        return jsonify({"ok": True, "skipped": True, "reason": "사설 배당판(확장) 우선 — oddspark 백업 대기",
+                        "raceKey": rk, "counts": {"quinella": len(q), "exacta": len(x)}})
     # 기존 파이프라인 주입(sport=cycle) → _triple_analyze 가 역배열·급락·이상감지 계산
     res = _do_triple_ingest(rk, q, x, [], {}, sport="cycle", category="cycle", source="oddspark")
     # [경륜 출마표 전적 자동 수집] 배당과 동시에 전적(競走得点·등급) 수집 → 통합등급 반영(1회·이미 있으면 생략)
@@ -23173,10 +23197,15 @@ def _multi_collect_one(track, race, ymd):
         #   의존해, 둘 다 꺼지면 '배당 수집 안 됨'으로 보이던 문제 해결. 확장 ingest 와 동일 파이프라인(같은
         #   raceKey 병합·중복 아님)이고 sport 분리 필터가 탭 혼재를 막는다(무삭제·multi_store 경로 유지).
         try:
-            # [자동전환·마감판정] 발주시각(postEpoch) 전달 → analyze 의 minutesBefore/afterClose 가 채워져
-            #   프론트 '경주 종료' 판정(_raceFinished)·자동예상 T-5분 타이밍이 정확해짐(기존엔 deadline 미전달로 None).
-            _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category,
-                              source="oddspark_bg", deadline=race.get("postEpoch"))
+            # [사설 우선] 확장(사설 배당판)이 이 경주를 커버 중이면 triple_store 주입은 생략(백업).
+            #   multi_store 백업 기록은 위에서 이미 저장됨 → oddspark는 사설 미수집 시에만 분석 구동.
+            if _ext_covered_active(key):
+                pass
+            else:
+                # [자동전환·마감판정] 발주시각(postEpoch) 전달 → analyze 의 minutesBefore/afterClose 가 채워져
+                #   프론트 '경주 종료' 판정(_raceFinished)·자동예상 T-5분 타이밍이 정확해짐(기존엔 deadline 미전달로 None).
+                _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category,
+                                  source="oddspark_bg", deadline=race.get("postEpoch"))
         except Exception as _be:
             print("[다중경주] triple_store 브리지 실패(무시·multi_store 는 정상):", _be)
         # [경륜 전적 자동 수집] 다중 경주 경륜 배당 수집 시 전적도 함께(1회·통합등급 반영)
