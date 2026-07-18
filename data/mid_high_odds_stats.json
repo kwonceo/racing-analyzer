@@ -1,6 +1,6 @@
 {
-  "count": 270,
-  "placed": 50,
+  "count": 274,
+  "placed": 51,
   "cases": [
     {
       "race": "카나자와 8경주",
@@ -3065,13 +3065,57 @@
       ],
       "placed": false,
       "won": false
+    },
+    {
+      "race": "서울 3경주 1400M",
+      "date": "2026-07-18",
+      "no": 8,
+      "odds": 13.1,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "서울 3경주 1400M",
+      "date": "2026-07-18",
+      "no": 11,
+      "odds": 14.1,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "서울 3경주 1400M",
+      "date": "2026-07-18",
+      "no": 1,
+      "odds": 16.3,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": true,
+      "won": false
+    },
+    {
+      "race": "서울 3경주 1400M",
+      "date": "2026-07-18",
+      "no": 5,
+      "odds": 25.6,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
     }
   ],
   "by_signal": {
     "전적A/B": {
-      "count": 124,
-      "placed": 25,
-      "rate": 20.2
+      "count": 128,
+      "placed": 26,
+      "rate": 20.3
     },
     "급락": {
       "count": 57,
@@ -3094,6 +3138,6 @@
       "rate": 20.0
     }
   },
-  "rate": 18.5,
+  "rate": 18.6,
   "note": "중고배당 유력마(복승10배+&강한신호) 실제 입상 자동 집계. 표본 적으면 참고만(50+ 유의)."
 }
