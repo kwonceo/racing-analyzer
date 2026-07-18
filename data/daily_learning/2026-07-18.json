@@ -2,8 +2,8 @@
  "date": "2026-07-18",
  "results_summary": {
   "total_races": 112,
-  "hits": 28,
-  "hit_rate": 25.0,
+  "hits": 29,
+  "hit_rate": 25.9,
   "profit": {
    "net": 120300,
    "settled": 110
@@ -12,15 +12,15 @@
  "ai_training_data": {
   "races_collected": 794,
   "quality_score": 40,
-  "ai_ready_races": 9,
+  "ai_ready_races": 8,
   "patterns_tagged": []
  },
  "bigdata": {
   "by_track": {
    "서울": {
     "n": 17,
-    "hits": 10,
-    "hit_rate": 58.8
+    "hits": 11,
+    "hit_rate": 64.7
    },
    "나고야": {
     "n": 12,
@@ -85,14 +85,14 @@
   },
   "by_field_size": {
    "미상": {
-    "n": 80,
-    "hits": 12,
-    "hit_rate": 15.0
+    "n": 81,
+    "hits": 13,
+    "hit_rate": 16.0
    },
    "중두수(9~12)": {
-    "n": 28,
+    "n": 27,
     "hits": 14,
-    "hit_rate": 50.0
+    "hit_rate": 51.9
    },
    "소두수(≤8)": {
     "n": 3,
@@ -118,29 +118,29 @@
    },
    "저녁": {
     "n": 18,
-    "hits": 9,
-    "hit_rate": 50.0
+    "hits": 10,
+    "hit_rate": 55.6
    }
   },
   "by_grade": {
    "미수집": {
     "n": 112,
-    "hits": 28,
-    "hit_rate": 25.0
+    "hits": 29,
+    "hit_rate": 25.9
    }
   },
   "by_condition": {
    "미수집": {
     "n": 112,
-    "hits": 28,
-    "hit_rate": 25.0
+    "hits": 29,
+    "hit_rate": 25.9
    }
   },
   "by_weather": {
    "미수집": {
     "n": 112,
-    "hits": 28,
-    "hit_rate": 25.0
+    "hits": 29,
+    "hit_rate": 25.9
    }
   },
   "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
@@ -176,5 +176,5 @@
  "pattern_discoveries": [],
  "system_improvements": [],
  "tomorrow_focus": [],
- "generated_at": "2026-07-18 22:20:10"
+ "generated_at": "2026-07-18 22:28:09"
 }
