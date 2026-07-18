@@ -1925,7 +1925,7 @@
         <b style="color:${col};font-size:13px">${c.urgency === 'urgent' ? '⚡ ' : ''}${leftTxt}</b>
       </div>
       ${mhLine}
-      <div class="hint" style="font-size:11px;margin:2px 0">발주 ${esc(c.postTime || '?')}${c.confidence != null ? ' · 확신도 ' + esc(String(c.confidence)) : ''}</div>
+      <div class="hint" style="font-size:11px;margin:2px 0">발주 ${esc(c.postTime || '?')}${_confChipText(c.confidence)}</div>
       <div style="margin:4px 0"><span class="hint" style="font-size:11px">⭐ 유력마 </span><b style="color:#4ea1ff">${esc(keyH)}</b></div>
       ${sigs}
     </div>`;
@@ -8010,7 +8010,29 @@
     let d; try { d = await (await fetch('/api/keiba/odds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: rk }) })).json(); }
     catch (e) { _keibaOdds.lastMsg = '조회 실패: ' + e.message; _keibaOdds.lastCounts = null; _renderKeibaStatus(); return null; }
     _keibaOdds.lastTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    if (d.error) { _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '⚠️ ' + (d.error || ''); _renderKeibaStatus(); return d; }
+    if (d.error) {
+      _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '⚠️ ' + (d.error || '');
+      // ══════════ [버그1 수정·oddspark 타깃 자기치유 (2026-07-18)] ══════════
+      //   증상: oddspark 타깃(_closing.panelRk)이 오늘 개최 안 하는 유령 경주(예: 소노다 12경주)에 고정돼
+      //         "개최 목록에 없습니다" 에러만 반복 → 배당판 경주(사가)를 못 따라가고 소노다로 계속 고정.
+      //   원인: _keibaTargetRk = pinnedRk || _closing.panelRk || getActiveRaceKey 에서 stale panelRk 가
+      //         실제 배당판 경주(getActiveRaceKey)를 덮어씀 + 자동추종은 같은 경마장 번호전진만 해 소노다→사가 점프 불가.
+      //   → pin 이 아니고, 실제 배당판 경주가 유효(오늘·일본지방)하고 다르면 그 경주로 타깃 전환(유령 고정 해제·무삭제).
+      try {
+        if (/개최 목록에 없|개최일·경마장명/.test(d.error || '') && !_keibaOdds.pinnedRk) {
+          const _board = (typeof getActiveRaceKey === 'function') ? (getActiveRaceKey() || '') : '';
+          if (_board && _board !== rk && !jpIsKoreaName(_board) && !jpIsCentralName(_board)) {
+            console.log('[oddspark 타깃 자기치유] 유령 경주 ' + rk + ' → 배당판 경주 ' + _board + ' 로 전환');
+            try { setActiveRaceKey(_board); } catch (_) { /* */ }
+            try { setAnomalyPanelRace(_board); } catch (_) { /* */ }   // _closing.panelRk 를 배당판 경주로 갱신
+            _keibaOdds.lastRk = null; _keibaOdds.lastPoll = 0;
+            _keibaOdds.lastMsg = '🔄 유령 경주 해제 → 배당판 경주(' + _board + ')로 전환';
+            Promise.resolve(fetchKeibaOdds(_board, true)).catch(() => { /* */ });
+          }
+        }
+      } catch (_) { /* 자기치유 실패는 조용히 — 기존 동작 유지 */ }
+      _renderKeibaStatus(); return d;
+    }
     if (d.waiting) { _keibaOdds.lastWaiting = true; _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '⏳ ' + (d.reason || '실배당 대기(발매 전·마감 후)'); _renderKeibaStatus(); return d; }
     _keibaOdds.lastWaiting = false;
     _keibaOdds.lastCounts = d.counts || { quinella: 0, exacta: 0 };
@@ -8076,6 +8098,18 @@
       }
     } catch (_) { /* 감지 실패는 조용히(다음 주기 재시도) */ }
     finally { _keibaOdds.detecting = false; }
+  }
+
+  /** [확신도 표시 수정·방어] 카드 확신도 칩 텍스트. 값이 객체({best,band,…})로 와도 [object Object] 방지 —
+   *  대표 점수(best)·밴드(band)·level 을 꺼내 스칼라로 표시. 없으면 빈 문자열. */
+  function _confChipText(v) {
+    if (v == null) return '';
+    if (typeof v === 'object') {
+      const s = (v.best != null ? v.best : (v.band != null ? v.band : (v.level != null ? v.level : null)));
+      if (s == null || (typeof s === 'object')) return '';
+      v = s;
+    }
+    return ' · 확신도 ' + esc(String(v));
   }
 
   /** raceKey → 짧은 라벨(예: '2026-07-05_서울_5' → '2026-07-05 서울 5R') */

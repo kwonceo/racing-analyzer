@@ -7229,6 +7229,48 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                             "summary": "유력마 1위+2위 최우선"}
             final_q = ([_f12item] + _rest)[:max(max_q, 2)]
 
+    # ══════════ [문제1 수정·유력마 받치기 보존 (2026-07-18)] ══════════
+    #   증상(제주 5경주): 마감 직전 '1번 집중급락'으로 메인 복승이 1+10 → 1+5 로 번복돼 실제 top2(1·10)를 놓침.
+    #   유력마 판단([1,10,5])은 정확했으나 급락 조합(1+5)이 유력마 받치기(1+10)를 밀어냄.
+    #   → 실질유력마(축=top 유력마)를 2·3위 유력마와 받치기한 조합을 메인에서 삭제하지 않고 '함께' 남긴다.
+    #     급락 조합(1+5)은 그대로 두고 받치기 조합(1+10)을 추가 → '축은 맞고 짝만 틀리던' 실패 감소.
+    #   ⚠ 추가만·무삭제: 기존 final_q 조합은 하나도 제거하지 않고, 누락된 축 받치기 쌍만 덧붙인다(캡 확장).
+    try:
+        _favN = []
+        for _srcL in [(cp.get("picks") or []), (cp.get("axis") or [])]:
+            for _p in _srcL:
+                try:
+                    _n = int(_p.get("no")) if isinstance(_p, dict) else int(_p)
+                except (TypeError, ValueError):
+                    continue
+                if _n not in _favN and (not vs or _n in vs):
+                    _favN.append(_n)
+                if len(_favN) >= 3:
+                    break
+            if len(_favN) >= 3:
+                break
+        if len(_favN) >= 2 and curQ:
+            _axis0 = _favN[0]                                   # 축 = 최상위 유력마(전적/확신도 1위)
+            _have_c = set(tuple(sorted(int(x) for x in (q.get("combo") or []))) for q in final_q)
+            _back_add = []
+            for _other in _favN[1:3]:                           # 축 × 2위·3위 유력마 받치기(1+10·1+5 동시 보존)
+                if _other == _axis0:
+                    continue
+                _bc = tuple(sorted((_axis0, _other)))
+                if _bc in _have_c:
+                    continue                                    # 이미 메인에 있음 → 중복 추가 안 함
+                _bo = curQ.get(_bc) or curQ.get((_bc[1], _bc[0]))
+                if _bo and not (DANSUNG and _bo <= DANSUNG_ODDS):
+                    _back_add.append({"combo": list(_bc), "odds": _bo, "stars": 3,
+                                      "reason": "유력마 받치기 보존", "basis": _combo_basis(list(_bc)),
+                                      "summary": "유력마 축 받치기(급락 조합과 함께 유지)"})
+                    _have_c.add(_bc)
+            if _back_add:
+                # 기존 final_q 절대 삭제 없이 받치기 조합을 덧붙이고, 캡을 추가분만큼 늘려 잘리지 않게 한다.
+                final_q = (final_q + _back_add)[:max_q + len(_back_add)]
+    except Exception as _bke:
+        print("[유력마 받치기 보존] 스킵(무시):", _bke)
+
     # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
     _main = None
     if cp.get("confTrifecta"):
@@ -16733,6 +16775,9 @@ _TRACK_GROUPS = {
     "후쿠시마": ["福島", "fukushima", "fuku"],
     "삿포로": ["札幌", "sapporo", "sapp"],
     "하코다테": ["函館", "hakodate", "hako"],
+    # [岐阜·기후 중복 통합] 같은 기후 경륜장이 한자(岐阜)와 한글(기후) 두 이름으로 갈려 중복 저장되던 문제 →
+    #   한자·로마자를 한글 표준 '기후'로 통일(경륜 joCode 04='기후'와 일치). oddspark=岐阜 · 확장=기후 → 한 키로 병합.
+    "기후": ["岐阜", "gifu", "gif"],
 }
 # 역방향 조회맵: 별칭(소문자) → 한국어 표준 + 한국어 자기자신도 포함
 _TRACK_REVERSE = {}
@@ -23208,7 +23253,8 @@ def _multi_schedule_fetch():
 
 
 def _multi_key(venue, race_no):
-    return "%s %d경주" % (venue, int(race_no))
+    # [岐阜·기후 중복 통합] 저장키의 경마장명을 표준(한글)으로 정규화 → 岐阜/기후가 한 키로 병합(중복 저장 방지).
+    return "%s %d경주" % (_track_norm(venue), int(race_no))
 
 
 def _multi_collect_one(track, race, ymd):
@@ -23295,6 +23341,22 @@ def _multi_sport_of(rec):
     return "horse"
 
 
+def _card_conf_value(conf):
+    """[확신도 표시 수정] 카드에 표시할 확신도 스칼라 추출.
+    _confidence_engine 의 overall 은 {best,band,bestHorse} 객체이므로 best(대표 점수)를 꺼낸다.
+    레거시(overall 이 숫자)·level 폴백은 그대로 유지. 값 없으면 None."""
+    conf = conf or {}
+    ov = conf.get("overall")
+    if isinstance(ov, dict):
+        ov = ov.get("best")
+    if ov is not None:
+        return ov
+    lv = conf.get("level")
+    if isinstance(lv, dict):
+        lv = lv.get("best") or lv.get("band")
+    return lv
+
+
 def _multi_card(key, rec):
     """[3번] 카드 요약: analyze(기존 _triple_analyze 재사용·읽기전용) → 유력마TOP3·핵심신호·확신도·마감남은초·색상."""
     try:
@@ -23332,13 +23394,16 @@ def _multi_card(key, rec):
     # [4번·⚡ 이상감지 배지] 급락/역배열/스마트머니 신호 하나라도 있으면 anomaly=True
     anomaly = bool(signals)
     return {
-        "raceKey": key, "venue": rec.get("venue"), "raceNo": rec.get("raceNo"),
+        "raceKey": key, "venue": _track_norm(rec.get("venue")), "raceNo": rec.get("raceNo"),
         "sport": _multi_sport_of(rec),   # [통합·4번] 종목 그룹(horse|cycle|korea)
         "postTime": rec.get("postTime"), "secondsLeft": left, "urgency": urgency,
         "keyHorses": (an.get("keyHorses") or [])[:3],
         "signals": signals[:3], "anomaly": anomaly,   # [4번] ⚡ 이상감지 배지
         "midHigh": mid_high,   # [3번] 💎 중고배당 유력마(있으면 카드 배지·별도 강조)
-        "confidence": conf.get("overall") or conf.get("level"),
+        # [확신도 [object Object] 표시 수정] _confidence_engine 의 overall 은 {best,band,bestHorse} 객체다.
+        #   과거엔 이 객체를 그대로 카드 confidence 에 넣어 프론트에서 String(객체)="[object Object]"로 표시됐다.
+        #   → 객체면 대표 점수(best)를 꺼내 숫자로 전달(레거시 스칼라 overall·level 은 그대로).
+        "confidence": _card_conf_value(conf),
         "quinellaMain": next((b.get("combo") for b in (an.get("betRecommend") or []) if b.get("label") == "복승 메인"), None),
         "afterClose": bool(an.get("afterClose")),
         "updatedSecondsAgo": int(now - (rec.get("t") or now)),
@@ -23462,7 +23527,7 @@ def multi_dashboard():
             urg = "normal"
             if left is not None:
                 urg = "urgent" if left <= MULTI_URGENT_SEC else ("warn" if left <= MULTI_WARN_SEC else "normal")
-            cards.append({"raceKey": key, "venue": tr.get("venue"), "raceNo": rc.get("raceNo"),
+            cards.append({"raceKey": key, "venue": _track_norm(tr.get("venue")), "raceNo": rc.get("raceNo"),
                           "sport": _tr_sport, "postTime": rc.get("postTime"), "secondsLeft": left, "urgency": urg,
                           "keyHorses": [], "signals": [], "anomaly": False, "confidence": None,
                           "quinellaMain": None, "afterClose": False, "scheduled": True})

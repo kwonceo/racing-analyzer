@@ -1,45 +1,45 @@
 {
- "races": 347,
+ "races": 355,
  "byRank": {
   "rank1": {
-   "hit": 31,
-   "total": 93,
-   "rate": 33.3
+   "hit": 32,
+   "total": 102,
+   "rate": 31.4
   },
   "rank2": {
-   "hit": 14,
-   "total": 61,
-   "rate": 23.0
+   "hit": 16,
+   "total": 68,
+   "rate": 23.5
   },
   "rank3": {
-   "hit": 9,
-   "total": 42,
-   "rate": 21.4
+   "hit": 10,
+   "total": 49,
+   "rate": 20.4
   }
  },
  "bySignal": {
   "🔄 크로스역배열 크로스역배열": {
-   "hit": 30,
-   "total": 110,
-   "rate": 27.3,
+   "hit": 31,
+   "total": 115,
+   "rate": 27.0,
    "weightReady": true
   },
   "역배열": {
    "hit": 15,
-   "total": 40,
-   "rate": 37.5,
+   "total": 44,
+   "rate": 34.1,
    "weightReady": true
   },
   "초기급락 보존": {
-   "hit": 8,
-   "total": 35,
+   "hit": 11,
+   "total": 48,
    "rate": 22.9,
    "weightReady": true
   },
   "급락": {
    "hit": 1,
-   "total": 9,
-   "rate": 11.1,
+   "total": 10,
+   "rate": 10.0,
    "weightReady": false
   },
   "스마트머니": {
@@ -50,17 +50,17 @@
   }
  },
  "byBand": {
-  "15~30": {
-   "hit": 4,
-   "total": 32,
-   "rate": 12.5,
-   "weightReady": true
-  },
   "30~50": {
-   "hit": 2,
-   "total": 21,
-   "rate": 9.5,
+   "hit": 1,
+   "total": 22,
+   "rate": 4.5,
    "weightReady": false
+  },
+  "15~30": {
+   "hit": 5,
+   "total": 38,
+   "rate": 13.2,
+   "weightReady": true
   },
   "100+": {
    "hit": 1,
@@ -70,26 +70,32 @@
   },
   "50~100": {
    "hit": 2,
-   "total": 5,
-   "rate": 40.0,
+   "total": 7,
+   "rate": 28.6,
    "weightReady": false
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 54,
-   "total": 175,
-   "rate": 30.9,
+   "hit": 58,
+   "total": 194,
+   "rate": 29.9,
    "weightReady": true
   },
   "keirin": {
    "hit": 0,
-   "total": 21,
+   "total": 24,
+   "rate": 0.0,
+   "weightReady": false
+  },
+  "korea": {
+   "hit": 0,
+   "total": 1,
    "rate": 0.0,
    "weightReady": false
   }
  },
- "missedRaces": 65,
+ "missedRaces": 72,
  "dansung": {
   "races": 3,
   "horseWonRate": 0.0,
@@ -99,5 +105,5 @@
   "darkHit": 0,
   "winnerSignals": {}
  },
- "updated_at": "2026-07-18 15:23:09"
+ "updated_at": "2026-07-18 17:33:38"
 }
