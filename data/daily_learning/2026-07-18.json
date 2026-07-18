@@ -1,36 +1,71 @@
 {
  "date": "2026-07-18",
  "results_summary": {
-  "total_races": 35,
-  "hits": 0,
-  "hit_rate": 0.0,
+  "total_races": 112,
+  "hits": 28,
+  "hit_rate": 25.0,
   "profit": {
-   "net": 0,
-   "settled": 35
+   "net": 120300,
+   "settled": 110
   }
  },
  "ai_training_data": {
-  "races_collected": 717,
-  "quality_score": 21,
-  "ai_ready_races": 0,
+  "races_collected": 794,
+  "quality_score": 40,
+  "ai_ready_races": 9,
   "patterns_tagged": []
  },
  "bigdata": {
   "by_track": {
+   "서울": {
+    "n": 17,
+    "hits": 10,
+    "hit_rate": 58.8
+   },
+   "나고야": {
+    "n": 12,
+    "hits": 1,
+    "hit_rate": 8.3
+   },
+   "소노다": {
+    "n": 12,
+    "hits": 4,
+    "hit_rate": 33.3
+   },
+   "우라와": {
+    "n": 12,
+    "hits": 0,
+    "hit_rate": 0.0
+   },
    "마쓰사카": {
     "n": 11,
     "hits": 0,
     "hit_rate": 0.0
+   },
+   "코치": {
+    "n": 10,
+    "hits": 4,
+    "hit_rate": 40.0
    },
    "세이부엔": {
     "n": 9,
     "hits": 0,
     "hit_rate": 0.0
    },
+   "제주": {
+    "n": 8,
+    "hits": 6,
+    "hit_rate": 75.0
+   },
    "도리데": {
     "n": 7,
     "hits": 0,
     "hit_rate": 0.0
+   },
+   "사가": {
+    "n": 6,
+    "hits": 3,
+    "hit_rate": 50.0
    },
    "고치": {
     "n": 4,
@@ -50,42 +85,62 @@
   },
   "by_field_size": {
    "미상": {
-    "n": 34,
-    "hits": 0,
-    "hit_rate": 0.0
+    "n": 80,
+    "hits": 12,
+    "hit_rate": 15.0
    },
    "중두수(9~12)": {
+    "n": 28,
+    "hits": 14,
+    "hit_rate": 50.0
+   },
+   "소두수(≤8)": {
+    "n": 3,
+    "hits": 1,
+    "hit_rate": 33.3
+   },
+   "다두수(13+)": {
     "n": 1,
-    "hits": 0,
-    "hit_rate": 0.0
+    "hits": 1,
+    "hit_rate": 100.0
    }
   },
   "by_time_zone": {
    "오전": {
-    "n": 35,
-    "hits": 0,
-    "hit_rate": 0.0
+    "n": 71,
+    "hits": 5,
+    "hit_rate": 7.0
+   },
+   "오후": {
+    "n": 23,
+    "hits": 14,
+    "hit_rate": 60.9
+   },
+   "저녁": {
+    "n": 18,
+    "hits": 9,
+    "hit_rate": 50.0
    }
   },
   "by_grade": {
    "미수집": {
-    "n": 35,
-    "hits": 0,
-    "hit_rate": 0.0
+    "n": 112,
+    "hits": 28,
+    "hit_rate": 25.0
    }
   },
   "by_condition": {
    "미수집": {
-    "n": 35,
-    "hits": 0,
-    "hit_rate": 0.0
+    "n": 112,
+    "hits": 28,
+    "hit_rate": 25.0
    }
   },
   "by_weather": {
    "미수집": {
-    "n": 35,
-    "hits": 0,
-    "hit_rate": 0.0
+    "n": 112,
+    "hits": 28,
+    "hit_rate": 25.0
    }
   },
   "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
@@ -93,27 +148,27 @@
  "cumulative_pattern_reliability": {
   "마감급락": {
    "label": "급락 감지 적중",
-   "hit": 29,
-   "n": 31,
-   "rate": 93.5
+   "hit": 33,
+   "n": 35,
+   "rate": 94.3
   },
   "쌍승역전": {
    "label": "쌍승 역전 적중",
-   "hit": 7,
-   "n": 22,
-   "rate": 31.8
+   "hit": 8,
+   "n": 26,
+   "rate": 30.8
   },
   "전적이중수렴": {
    "label": "전적 유력마 적중(이중수렴 근사)",
-   "hit": 29,
-   "n": 69,
-   "rate": 42.0
+   "hit": 35,
+   "n": 93,
+   "rate": 37.6
   },
   "추천종합": {
    "label": "추천 종합 적중",
-   "hit": 60,
-   "n": 347,
-   "rate": 17.3
+   "hit": 82,
+   "n": 379,
+   "rate": 21.6
   }
  },
  "key_learnings": [],
@@ -121,5 +176,5 @@
  "pattern_discoveries": [],
  "system_improvements": [],
  "tomorrow_focus": [],
- "generated_at": "2026-07-18 00:14:52"
+ "generated_at": "2026-07-18 22:00:36"
 }
