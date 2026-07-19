@@ -6211,7 +6211,8 @@
   }
 
   // [탭분리] category → 분석기 스포츠 탭(1:1). 현재 경주 종목과 일치하는 탭만 채운다.
-  const SPORT_TAB_CAT = { boat: 'boat', cycle: 'cycle', bike: 'bike', central: 'japan_central' };
+  // [한국경마 실시간 분석 (2026-07-19)] korea 탭 추가 — 기존 종목 매핑 무변경(추가만).
+  const SPORT_TAB_CAT = { boat: 'boat', cycle: 'cycle', bike: 'bike', central: 'japan_central', korea: 'korea' };
   let _lastSportAnalyze = null;
   function mirrorSportAnalysis(a) {
     if (!a || a.error || a.waiting) return;
@@ -6232,6 +6233,10 @@
     { sport: 'cycle', cat: 'cycle' },
     { sport: 'boat', cat: 'boat' },
     { sport: 'bike', cat: 'bike' },
+    // [한국경마 실시간 분석 (2026-07-19)] 서버 latest 가 sport=korea 를 category/경마장명으로 필터 →
+    //   한국경마 탭 하단 sportReport-korea 에 경륜 탭과 동일 방식(핵심 추천·TOP5·복병·신호) 30초 렌더.
+    //   기존 PDF 분석·다른 종목 폴링 무변경(항목 추가만).
+    { sport: 'korea', cat: 'korea' },
   ];
   let _sportOddsTimer = null;
   async function pollSportOdds() {

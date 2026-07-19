@@ -2310,7 +2310,15 @@ def triple_latest():
             return jsonify({"raceKey": rk, "quinella": [], "exacta": [], "trio": [], "waiting": True})
         # [종목 분리] 종목 지정 시 그 종목 레코드만 후보(레거시 sport 없음=horse 로 간주 — 원래 일본경마만 존재).
         cand = list(db.keys())
-        if want_sport:
+        if want_sport == "korea":
+            # [한국경마 탭 실시간 분석 (2026-07-19)] 한국경마는 sport=horse·category=korea 로 저장되므로
+            #   sport 매칭으론 못 거른다 → category/경마장명으로 한국 경주만 후보(기존 horse 요청 동작 무변경·추가만).
+            cand = [k for k in cand
+                    if (db[k].get("category") == "korea") or _KRA_TRACK_RE.search(str(k))]
+            if not cand:
+                return jsonify({"raceKey": None, "quinella": [], "exacta": [], "trio": [],
+                                "waiting": True, "noRace": True, "sport": "korea"})
+        elif want_sport:
             cand = [k for k in cand if _sport_match(db[k].get("sport"), want_sport)]
             if not cand:   # 해당 종목 경주 없음(예: 일본경마 오늘 개최 없음) → 타종목 혼입 없이 대기
                 return jsonify({"raceKey": None, "quinella": [], "exacta": [], "trio": [],
