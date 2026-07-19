@@ -3194,6 +3194,19 @@
         "복승이상감지"
       ],
       "date": "2026-07-19"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "시즈오카 12경주",
+      "total_combos_dropped": 9,
+      "drop_ratio": 0.429,
+      "result": "1+7",
+      "result_odds": "저배당",
+      "result_quinella_odds": 2.3,
+      "signal_result_combo": "-88.2%",
+      "recommended_hit": true,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1784448544.8810444
     }
   ],
   "condition_stats": {
@@ -3206,11 +3219,11 @@
       "hit": 327
     },
     "대규모급락": {
-      "count": 18,
+      "count": 19,
       "high_odds": 0,
-      "recommended_hit": 4,
+      "recommended_hit": 5,
       "high_odds_rate": 0.0,
-      "hit_rate": 22.2
+      "hit_rate": 26.3
     },
     "이상감지동반": {
       "count": 447,
