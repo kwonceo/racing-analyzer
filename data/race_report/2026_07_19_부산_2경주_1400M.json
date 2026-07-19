@@ -25,8 +25,8 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 30,
-   "confidence": 32.0,
+   "record_score": null,
+   "confidence": null,
    "reason": "일반"
   },
   "signal_7": {
@@ -41,9 +41,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 80,
-   "confidence": 8.0,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_3": {
    "horse": 3,
@@ -57,40 +57,40 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 120,
-   "confidence": 24.0,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   }
  },
  "recommended_horses": [
+  1,
   3,
-  7,
-  1
+  7
  ],
  "recommendation_process": [
-  "1. 전적 분석: 1번 30점",
+  "1. 전적 분석: 1번 전적 정보 제한",
   "2. 배당 수집 시작 12:40:19",
-  "5. 종합 신뢰도 32.0점(하) 판정"
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 1,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 30,
-  "total": 32.0,
+  "record_score": null,
+  "total": 0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 30,
+  "formScore": null,
   "dropAmt": null,
-  "dropScore": 0.0,
+  "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
-  "confidence": 32.0,
+  "confidence": 0,
   "reason": "전적유력마 1번 적중 · 제거 적중"
  },
  "signal_change_history": {
@@ -122,9 +122,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 14
+  "validCount": 15
  },
  "pnl": 12000,
  "stake": 1000,
- "generated_at": "2026-07-19 12:55:53"
+ "generated_at": "2026-07-19 15:21:19"
 }

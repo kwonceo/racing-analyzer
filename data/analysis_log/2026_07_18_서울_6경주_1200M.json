@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "서울 6경주 1200M",
  "analyzed_at": "15:20:44",
- "updated_at": "14:49:44",
+ "updated_at": "14:56:51",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -282,8 +282,8 @@
    "record_score": 0,
    "record_detail": "",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 16.7배 · 감점 없음 = 100점"
+   "grade": "B",
+   "grade_reason": "배당 16.8배 · 감점 없음 = 100점"
   },
   {
    "no": 3,
@@ -293,7 +293,7 @@
    "record_detail": "최근 1-3-6",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 9.2배 · 감점 없음 = 100점"
+   "grade_reason": "배당 8.7배 · 감점 없음 = 100점"
   },
   {
    "no": 4,
@@ -303,7 +303,7 @@
    "record_detail": "최근 2-4",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 13.8배 · 감점 없음 = 100점"
+   "grade_reason": "배당 13.5배 · 감점 없음 = 100점"
   },
   {
    "no": 5,
@@ -313,7 +313,7 @@
    "record_detail": "최근 1-1",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 34배 · 감점 없음 = 100점"
+   "grade_reason": "배당 35.2배 · 감점 없음 = 100점"
   },
   {
    "no": 6,
@@ -323,7 +323,7 @@
    "record_detail": "최근 1-2",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 35.3배 · 감점 없음 = 100점"
+   "grade_reason": "배당 35.6배 · 감점 없음 = 100점"
   },
   {
    "no": 7,
@@ -333,7 +333,7 @@
    "record_detail": "최근 1-3",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 12.6배 · 감점 없음 = 100점"
+   "grade_reason": "배당 12.8배 · 감점 없음 = 100점"
   },
   {
    "no": 8,
@@ -342,8 +342,8 @@
    "record_score": 92,
    "record_detail": "최근 0-2",
    "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 11배 · 감점 없음 = 100점"
+   "grade": "A",
+   "grade_reason": "배당 11.6배 · 감점 없음 = 100점"
   },
   {
    "no": 9,
@@ -352,8 +352,8 @@
    "record_score": 98.6,
    "record_detail": "최근 2-4",
    "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 29.9배 · 감점 없음 = 100점"
+   "grade": "C",
+   "grade_reason": "배당 31.7배 · 감점 없음 = 100점"
   },
   {
    "no": 10,
@@ -363,7 +363,7 @@
    "record_detail": "최근 0-1",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 9.2배 · 감점 없음 = 100점"
+   "grade_reason": "배당 8.7배 · 감점 없음 = 100점"
   },
   {
    "no": 11,
@@ -373,7 +373,7 @@
    "record_detail": "최근 1-3",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 54.3배 · 감점 없음 = 100점"
+   "grade_reason": "배당 55.2배 · 감점 없음 = 100점"
   },
   {
    "no": 2,
@@ -383,7 +383,7 @@
    "record_detail": "최근 3-8",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 41.3배 · 최근평균 5.5착 -30 = 70점"
+   "grade_reason": "배당 40.6배 · 최근평균 5.5착 -30 = 70점"
   }
  ],
  "elimination": {
@@ -406,23 +406,23 @@
  "final_recommendation": {
   "quinella_main": {
    "combo": "3+10",
-   "odds": 9.2,
+   "odds": 8.7,
    "reason": "3번(B)·10번(A)"
   },
   "trifecta_main": {
    "combo": "3+8+10",
-   "odds": 23.0,
-   "reason": "3번(B)·8번(B)·10번(A)"
+   "odds": 23.1,
+   "reason": "3번(B)·8번(A)·10번(A)"
   },
   "trifecta_insurance1": {
-   "combo": "7+8+10",
-   "odds": 28.4,
-   "reason": "7번(A)·8번(B)·10번(A)"
+   "combo": "3+7+10",
+   "odds": 26.0,
+   "reason": "3번(B)·7번(A)·10번(A)"
   },
   "trifecta_insurance2": {
-   "combo": "3+7+10",
-   "odds": 27.0,
-   "reason": "3번(B)·7번(A)·10번(A)"
+   "combo": "7+8+10",
+   "odds": 29.4,
+   "reason": "7번(A)·8번(A)·10번(A)"
   },
   "budget_allocation": {
    "quinella_main": "65.9%",
@@ -452,7 +452,7 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    8,
+    3,
     10
    ],
    "trio": [
@@ -507,34 +507,34 @@
    {
     "no": 3,
     "tier": 1,
-    "sub": -9.2,
-    "rep": 9.2,
-    "reason": "유력마 저배당 9.2배"
+    "sub": -8.7,
+    "rep": 8.7,
+    "reason": "유력마 저배당 8.7배"
    },
    {
     "no": 10,
     "tier": 1,
-    "sub": -9.2,
-    "rep": 9.2,
-    "reason": "유력마 저배당 9.2배"
+    "sub": -8.7,
+    "rep": 8.7,
+    "reason": "유력마 저배당 8.7배"
    },
    {
     "no": 8,
     "tier": 1,
-    "sub": -11.0,
-    "rep": 11.0,
-    "reason": "유력마 저배당 11배"
+    "sub": -11.6,
+    "rep": 11.6,
+    "reason": "유력마 저배당 11.6배"
    }
   ],
-  "quinellaOdds": 9.2,
+  "quinellaOdds": 8.7,
   "trifectaOdds": null,
   "confQuinellas": [
    {
     "combo": [
-     8,
+     3,
      10
     ],
-    "odds": 11.0,
+    "odds": 8.7,
     "reason": "시장유력"
    },
    {
@@ -542,7 +542,7 @@
      7,
      10
     ],
-    "odds": 12.6,
+    "odds": 12.8,
     "reason": "시장유력+급락"
    }
   ],
@@ -552,45 +552,20 @@
   "confTop1High": true,
   "favAxis": [
    10,
-   8
+   3
   ],
   "confTrifecta": [
    3,
    8,
    10
   ],
-  "confTrifectaOdds": 23.0,
+  "confTrifectaOdds": 23.1,
   "confTrifectaIns": [
+   3,
    5,
-   8,
    10
   ],
-  "confTrifectaInsOdds": 58.9,
-  "closingDropHorses": [
-   {
-    "no": 1,
-    "firstTime": "14:49:26",
-    "firstMb": 2,
-    "firstPct": -10.0
-   },
-   {
-    "no": 8,
-    "firstTime": "14:49:26",
-    "firstMb": 2,
-    "firstPct": -10.0
-   }
-  ],
-  "closingDropTrifectas": [
-   {
-    "combo": [
-     1,
-     8,
-     10
-    ],
-    "odds": 36.1,
-    "horse": 1
-   }
-  ],
+  "confTrifectaInsOdds": 49.0,
   "denseBoxHorses": [
    3,
    10,
@@ -708,7 +683,7 @@
      3,
      10
     ],
-    "odds": 9.2,
+    "odds": 8.7,
     "stars": 3,
     "reason": "시장 저배당 보완",
     "basis": [],
@@ -719,7 +694,7 @@
      7,
      10
     ],
-    "odds": 12.6,
+    "odds": 12.8,
     "reason": "시장유력+급락",
     "stars": 3,
     "basis": [
@@ -732,7 +707,7 @@
      8,
      10
     ],
-    "odds": 11.0,
+    "odds": 11.6,
     "stars": 3,
     "reason": "시장 저배당 보완",
     "basis": [],
@@ -743,7 +718,7 @@
      4,
      10
     ],
-    "odds": 13.8,
+    "odds": 13.5,
     "stars": 3,
     "reason": "시장 저배당 보완",
     "basis": [],
@@ -754,7 +729,7 @@
      3,
      8
     ],
-    "odds": 15.1,
+    "odds": 15.3,
     "stars": 3,
     "reason": "유력마 받치기 보존",
     "basis": [],
@@ -786,15 +761,6 @@
    },
    {
     "combo": [
-     1,
-     8,
-     10
-    ],
-    "odds": 36.1,
-    "reason": "마감급락 보존"
-   },
-   {
-    "combo": [
      5,
      6,
      10
@@ -819,7 +785,7 @@
       5,
       7
      ],
-     "odds": 74.5,
+     "odds": 79.2,
      "label": "축1+축2",
      "rank": 1
     },
@@ -828,7 +794,7 @@
       3,
       7
      ],
-     "odds": 21.3,
+     "odds": 19.7,
      "label": "축1+연결1",
      "rank": 2
     },
@@ -837,7 +803,7 @@
       7,
       10
      ],
-     "odds": 12.6,
+     "odds": 12.8,
      "label": "축1+연결2",
      "rank": 3
     },
@@ -846,7 +812,7 @@
       3,
       5
      ],
-     "odds": 47.9,
+     "odds": 48.0,
      "label": "축2+연결1",
      "rank": 4
     },
@@ -855,7 +821,7 @@
       5,
       10
      ],
-     "odds": 34.0,
+     "odds": 35.2,
      "label": "축2+연결2",
      "rank": 5
     }
@@ -867,7 +833,7 @@
       5,
       7
      ],
-     "odds": 84.7,
+     "odds": 84.3,
      "estimated": true,
      "label": "축1+축2+연결1"
     },
@@ -877,7 +843,7 @@
       7,
       10
      ],
-     "odds": 63.4,
+     "odds": 65.8,
      "estimated": true,
      "label": "축1+축2+연결2"
     }
@@ -911,7 +877,7 @@
       5,
       7
      ],
-     "odds": 74.5,
+     "odds": 79.2,
      "label": "축1+축2"
     },
     {
@@ -919,7 +885,7 @@
       3,
       7
      ],
-     "odds": 21.3,
+     "odds": 19.7,
      "label": "축1+연결1"
     },
     {
@@ -927,7 +893,7 @@
       7,
       10
      ],
-     "odds": 12.6,
+     "odds": 12.8,
      "label": "축1+연결2"
     }
    ],
@@ -937,7 +903,7 @@
       3,
       7
      ],
-     "odds": 21.3,
+     "odds": 19.7,
      "label": "축1+선행1"
     }
    ],
@@ -952,18 +918,18 @@
   },
   "bmedSpecial": [],
   "dansung": false,
-  "dansungMinOdds": 9.2,
+  "dansungMinOdds": 8.7,
   "dansungPlan": null,
   "quinellaMax": 4,
   "raceHorseCount": 11,
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 10·8·3 / 복승 3+10",
+ "summary": "유력마 10·3·8 / 복승 3+10",
  "keyHorses": [
   10,
-  8,
-  3
+  3,
+  8
  ],
  "result": {
   "1st": 11,
