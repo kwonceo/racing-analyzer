@@ -523,7 +523,24 @@
     const odds = {};
     for (const h of horses) if (h.win != null) odds[String(h.no)] = h.win;
 
-    const raceKey = (overrideRaceKey && overrideRaceKey.trim()) || extractRaceKey();
+    // [경주 혼입 방지 (2026-07-19)] 부산 3경주 복기: 분석기 지정 경주(override='부산 3경주')와
+    //   배당판 실제 표시 경주(모리오카 3경주)가 달랐는데 override 를 무조건 우선해 모리오카 배당이
+    //   '부산 3경주' 이름으로 저장·분석됨(추천 4+9 3.3배 = 모리오카 값). → 배당판에서 경주를 직접
+    //   읽을 수 있고(detected) 지정 경주와 '경주장 or 경주번호'가 다르면 배당판 기준으로 저장.
+    //   배당판에서 못 읽는 사이트(generic 등)는 기존대로 override 사용(기존 동작 유지·대조만 추가).
+    const _detectedRk = extractRaceKey();
+    let raceKey = (overrideRaceKey && overrideRaceKey.trim()) || _detectedRk;
+    try {
+      const _vn = (x) => {
+        const m = /([가-힣一-龥ぁ-んァ-ヶA-Za-z]+)\s*(\d+)\s*(?:경주|R)/.exec(String(x || ''));
+        return m ? (m[1] + '|' + m[2]) : null;
+      };
+      const _dv = _vn(_detectedRk), _ov = _vn(raceKey);
+      if (_dv && _ov && _dv !== _ov) {
+        console.log('[혼입방지] 지정 경주(' + raceKey + ') ≠ 배당판 경주(' + _detectedRk + ') → 배당판 기준으로 저장');
+        raceKey = _detectedRk;
+      }
+    } catch (_) { /* 대조 실패 시 기존 동작 */ }
 
     return {
       raceKey,

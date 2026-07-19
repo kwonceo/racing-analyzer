@@ -1922,12 +1922,21 @@
     let cardBg = mh.length ? 'rgba(240,171,252,.08)' : bg;
     let resBadge = '', resLine = '';
     if (rs && rs.top3 && rs.top3[0] != null) {
-      cardBorder = rs.hit ? '3px solid #3B6D11' : '2px solid #6b7280';
-      cardBg = rs.hit ? 'rgba(59,109,17,.14)' : 'rgba(107,114,128,.10)';
-      resBadge = rs.hit
+      // [적중 표시 정직화 (2026-07-19)] ✅ = 라이브 표시 추천의 '정확' 적중(복승=1·2착 일치 / 삼복승=1·2·3착 일치)만.
+      //   rs.matched/matchedTrio = 실제 일치한 조합(어떤 추천이 맞았는지 그대로 표기). recommend 는 문자열("1+7")도 안전 처리.
+      const anyHit = !!(rs.hit || rs.trioHit);
+      const hitTag = rs.hit && rs.trioHit ? `✅ 복승 ${esc(rs.matched || '')}·삼복승 적중!`
+        : rs.hit ? `✅ 복승 ${esc(rs.matched || '')} 적중!`
+          : rs.trioHit ? `✅ 삼복승 ${esc(rs.matchedTrio || '')} 적중!` : '❌ 미적중';
+      cardBorder = anyHit ? '3px solid #3B6D11' : '2px solid #6b7280';
+      cardBg = anyHit ? 'rgba(59,109,17,.14)' : 'rgba(107,114,128,.10)';
+      resBadge = anyHit
         ? '<span style="background:#3B6D11;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">✅ 적중!</span>'
         : '<span style="background:#6b7280;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">❌ 미적중</span>';
-      resLine = `<div style="margin:3px 0;font-size:12px;font-weight:800;color:${rs.hit ? '#7fd14f' : '#9ca3af'}">📊 결과 ${rs.top3.filter((x) => x != null).join('→')}${rs.recommend ? ` · 추천 ${(rs.recommend || []).join('+')}${rs.hit ? ' ✅' : ' ❌'}` : ''}${rs.hit && rs.quinellaOdds ? ` (${rs.quinellaOdds}배)` : ''}</div>`;
+      const recTxt = (rs.liveQuinellas && rs.liveQuinellas.length)
+        ? rs.liveQuinellas.join('·')
+        : (Array.isArray(rs.recommend) ? rs.recommend.join('+') : (rs.recommend || ''));
+      resLine = `<div style="margin:3px 0;font-size:12px;font-weight:800;color:${anyHit ? '#7fd14f' : '#9ca3af'}">📊 결과 ${rs.top3.filter((x) => x != null).join('→')} · ${hitTag}${recTxt ? ` · 추천 ${esc(recTxt)}` : ''}${anyHit && rs.quinellaOdds ? ` (${rs.quinellaOdds}배)` : ''}</div>`;
     }
     return `<div data-mkey="${esc(c.raceKey)}" title="클릭 → 상세 분석" style="cursor:pointer;border:${cardBorder};border-radius:10px;padding:10px;background:${cardBg}">
       <div style="display:flex;align-items:center;gap:6px">
@@ -2114,6 +2123,9 @@
     if (!a || a.error || a.waiting) return null;
     // [마감 임박 가속] 남은 초 반환(분석의 마감전 분) → 갱신 주기 산정에 사용
     const left = (a.afterClose) ? -1 : (a.minutesBefore != null ? Math.round(a.minutesBefore * 60) : null);
+    // [마감 후 추천 변경 방지 (2026-07-19)] 모리오카 3R: 마감 후 서버 오판(1초 틈)으로 추천이 바뀌어도
+    //   화면은 마감 시점 추천을 유지 — 마감 후엔 ⚡배너·재렌더 자체를 하지 않음(기존 화면 동결·무삭제).
+    if (a.afterClose) return -1;
     const combos = _mdCombosOf(a);
     if (_krLastCombos == null) { _krLastCombos = combos; return left; }   // 첫 조회 = 기준값
     const added = combos.filter((c) => !_krLastCombos.includes(c));
@@ -2161,13 +2173,16 @@
       const ck = (q.combo || []).map(Number).sort((x, y) => x - y).join('+');
       const ok = ck === winSet;
       return `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${ok ? '#7fd14f' : '#9ca3af'}">복승 ${CIRC[i] || (i + 1)} ${esc(ck)} ${ok ? '✅ 적중!' : '❌'}</div>`;
-    }).join('') : (rs.recommend ? `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${rs.hit ? '#7fd14f' : '#9ca3af'}">복승 ${esc((rs.recommend || []).join('+'))} ${rs.hit ? '✅ 적중!' : '❌'}</div>` : '');
-    const why = rs.hit
-      ? `<div style="font-size:14px;color:#a7f3d0;margin-top:4px">💡 ${esc(rs.hitReason || '추천 조합이 1·2착과 일치')}</div>`
+    }).join('') : (rs.recommend ? `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${rs.hit ? '#7fd14f' : '#9ca3af'}">복승 ${esc(Array.isArray(rs.recommend) ? rs.recommend.join('+') : String(rs.recommend))} ${rs.hit ? '✅ 적중!' : '❌'}</div>` : '');
+    // [적중 표시 정직화] 배지·테두리 = 복승 또는 삼복승 '정확' 적중(라이브 표시 추천 기준). 삼복승 일치는 별도 줄로 명시.
+    const anyHit = !!(rs.hit || rs.trioHit);
+    const trioRow = rs.trioHit ? `<div style="font-size:16px;font-weight:800;margin:3px 0;color:#7fd14f">삼복승 ${esc(rs.matchedTrio || '')} ✅ 적중!(1·2·3착 일치)</div>` : '';
+    const why = anyHit
+      ? `<div style="font-size:14px;color:#a7f3d0;margin-top:4px">💡 ${esc(rs.hit ? ('복승 ' + (rs.matched || '') + ' = 1·2착 정확 일치') : ('삼복승 ' + (rs.matchedTrio || '') + ' = 1·2·3착 정확 일치'))}</div>`
       : `<div style="font-size:14px;color:#fca5a5;margin-top:4px">💡 정답 복승 ${esc(winSet)}${rs.missReason ? ` — ${esc(rs.missReason)}` : ' — 추천과 차이'}</div>`;
-    return `<div style="margin:4px 0 8px;padding:12px 14px;border:3px solid ${rs.hit ? '#3B6D11' : '#6b7280'};border-radius:12px;background:${rs.hit ? 'rgba(59,109,17,.14)' : 'rgba(107,114,128,.10)'}">
-      <div style="font-size:16px;font-weight:900;color:${rs.hit ? '#7fd14f' : '#cbd5e1'}">${rs.hit ? '✅ 적중!' : '❌ 미적중'} — 📊 결과 ${t3.join('→')}${rs.quinellaOdds ? ` · 복승 ${winSet} (${rs.quinellaOdds}배)` : ` · 복승 ${winSet}`}</div>
-      <div style="margin-top:6px">${qRows}</div>
+    return `<div style="margin:4px 0 8px;padding:12px 14px;border:3px solid ${anyHit ? '#3B6D11' : '#6b7280'};border-radius:12px;background:${anyHit ? 'rgba(59,109,17,.14)' : 'rgba(107,114,128,.10)'}">
+      <div style="font-size:16px;font-weight:900;color:${anyHit ? '#7fd14f' : '#cbd5e1'}">${anyHit ? '✅ 적중!' : '❌ 미적중'} — 📊 결과 ${t3.join('→')}${rs.quinellaOdds ? ` · 복승 ${winSet} (${rs.quinellaOdds}배)` : ` · 복승 ${winSet}`}</div>
+      <div style="margin-top:6px">${qRows}${trioRow}</div>
       ${why}
     </div>`;
   }

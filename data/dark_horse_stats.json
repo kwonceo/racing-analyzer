@@ -1,38 +1,38 @@
 {
- "races": 375,
+ "races": 379,
  "byRank": {
   "rank1": {
-   "hit": 37,
-   "total": 128,
-   "rate": 28.9
+   "hit": 40,
+   "total": 137,
+   "rate": 29.2
   },
   "rank2": {
-   "hit": 22,
-   "total": 88,
-   "rate": 25.0
+   "hit": 23,
+   "total": 96,
+   "rate": 24.0
   },
   "rank3": {
-   "hit": 12,
-   "total": 64,
-   "rate": 18.8
+   "hit": 15,
+   "total": 72,
+   "rate": 20.8
   }
  },
  "bySignal": {
   "크로스역배열": {
-   "hit": 30,
-   "total": 113,
-   "rate": 26.5,
+   "hit": 31,
+   "total": 114,
+   "rate": 27.2,
    "weightReady": true
   },
   "초기급락 보존": {
-   "hit": 18,
-   "total": 79,
-   "rate": 22.8,
+   "hit": 23,
+   "total": 100,
+   "rate": 23.0,
    "weightReady": true
   },
   "역배열": {
-   "hit": 20,
-   "total": 60,
+   "hit": 21,
+   "total": 63,
    "rate": 33.3,
    "weightReady": true
   },
@@ -58,52 +58,52 @@
  "byBand": {
   "30~50": {
    "hit": 2,
-   "total": 27,
-   "rate": 7.4,
+   "total": 29,
+   "rate": 6.9,
    "weightReady": false
   },
   "15~30": {
-   "hit": 8,
-   "total": 51,
-   "rate": 15.7,
+   "hit": 9,
+   "total": 57,
+   "rate": 15.8,
    "weightReady": true
   },
   "100+": {
-   "hit": 1,
-   "total": 9,
-   "rate": 11.1,
+   "hit": 2,
+   "total": 13,
+   "rate": 15.4,
    "weightReady": false
   },
   "50~100": {
    "hit": 2,
-   "total": 8,
-   "rate": 25.0,
+   "total": 9,
+   "rate": 22.2,
    "weightReady": false
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 61,
-   "total": 223,
-   "rate": 27.4,
+   "hit": 65,
+   "total": 233,
+   "rate": 27.9,
    "weightReady": true
   },
   "korea": {
-   "hit": 1,
-   "total": 6,
-   "rate": 16.7,
+   "hit": 2,
+   "total": 9,
+   "rate": 22.2,
    "weightReady": false
   },
   "keirin": {
-   "hit": 9,
-   "total": 51,
-   "rate": 17.6,
+   "hit": 11,
+   "total": 63,
+   "rate": 17.5,
    "weightReady": true
   }
  },
- "missedRaces": 75,
+ "missedRaces": 77,
  "dansung": {
-  "races": 2,
+  "races": 3,
   "horseWonRate": 0.0,
   "horseWon": 0,
   "horsePlaced": 0,
@@ -111,5 +111,5 @@
   "darkHit": 0,
   "winnerSignals": {}
  },
- "updated_at": "2026-07-19 12:55:53"
+ "updated_at": "2026-07-19 14:06:32"
 }
