@@ -6,7 +6,7 @@
  "date": "2026-07-19",
  "race": "서울 10경주",
  "analyzed_at": "17:56:44",
- "updated_at": "19:12:35",
+ "updated_at": "19:18:14",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -829,6 +829,57 @@
     "8+11": 59.9,
     "10+11": 7.6
    }
+  },
+  {
+   "time": "19:16:18",
+   "minutes_before": null,
+   "quinella": {
+    "1+2": 101.0,
+    "1+3": 84.3,
+    "1+4": 34.9,
+    "1+5": 89.6,
+    "1+6": 17.1,
+    "1+7": 54.2,
+    "1+8": 157.5,
+    "1+10": 20.7,
+    "1+11": 14.4,
+    "2+3": 219.3,
+    "2+4": 133.3,
+    "2+5": 297.7,
+    "2+6": 72.8,
+    "2+7": 213.6,
+    "2+8": 351.4,
+    "2+10": 81.3,
+    "2+11": 66.2,
+    "3+4": 99.8,
+    "3+5": 190.1,
+    "3+6": 45.8,
+    "3+7": 132.4,
+    "3+8": 274.9,
+    "3+10": 55.0,
+    "3+11": 44.7,
+    "4+5": 86.9,
+    "4+6": 14.2,
+    "4+7": 52.8,
+    "4+8": 159.6,
+    "4+10": 20.0,
+    "4+11": 15.7,
+    "5+6": 26.5,
+    "5+7": 103.9,
+    "5+8": 263.5,
+    "5+10": 47.7,
+    "5+11": 41.2,
+    "6+7": 15.9,
+    "6+8": 60.3,
+    "6+10": 6.7,
+    "6+11": 6.6,
+    "7+8": 184.8,
+    "7+10": 24.2,
+    "7+11": 19.0,
+    "8+10": 88.2,
+    "8+11": 59.9,
+    "10+11": 7.6
+   }
   }
  ],
  "signals_detected": [],
@@ -950,39 +1001,9 @@
    "jockey": "인철",
    "record_score": 47.5,
    "record_detail": "최근 10-4-2-1-6",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 2,
-   "name": "베스트토",
-   "jockey": "성환",
-   "record_score": 60,
-   "record_detail": "최근 6-1-3-5-8",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 3,
-   "name": "위즈리얼",
-   "jockey": "재철",
-   "record_score": 93.8,
-   "record_detail": "최근 2-1-9-3-4",
-   "odds": null,
+   "odds": 8.1,
    "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 4,
-   "name": "힐링헤이",
-   "jockey": "효정",
-   "record_score": 65,
-   "record_detail": "최근 4-3-1-6-7",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 14.4배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 6,
@@ -990,19 +1011,9 @@
    "jockey": "동하",
    "record_score": 0,
    "record_detail": "",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 9,
-   "name": "댄싱위즈",
-   "jockey": "중석",
-   "record_score": 66.2,
-   "record_detail": "최근 8-2-1-7-2",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "odds": 3.5,
+   "grade": "C",
+   "grade_reason": "배당 6.6배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 10,
@@ -1010,19 +1021,39 @@
    "jockey": "용근",
    "record_score": 42.5,
    "record_detail": "최근 8-5-2-1-3",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "odds": 4.5,
+   "grade": "B",
+   "grade_reason": "배당 6.7배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
-   "no": 5,
-   "name": "런와일드",
-   "jockey": "추열",
+   "no": 2,
+   "name": "베스트토",
+   "jockey": "성환",
+   "record_score": 60,
+   "record_detail": "최근 6-1-3-5-8",
+   "odds": 35.0,
+   "grade": "D",
+   "grade_reason": "배당 66.2배 · 단승 30~49배 → 관찰(신호 없으면 제거) = 100점"
+  },
+  {
+   "no": 3,
+   "name": "위즈리얼",
+   "jockey": "재철",
+   "record_score": 93.8,
+   "record_detail": "최근 2-1-9-3-4",
+   "odds": 23.6,
+   "grade": "C",
+   "grade_reason": "배당 44.7배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 4,
+   "name": "힐링헤이",
+   "jockey": "효정",
    "record_score": 65,
-   "record_detail": "최근 7-1-2-5-10",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+   "record_detail": "최근 4-3-1-6-7",
+   "odds": 10.3,
+   "grade": "A",
+   "grade_reason": "배당 14.2배 · 감점 없음 = 100점"
   },
   {
    "no": 7,
@@ -1030,19 +1061,9 @@
    "jockey": "태훈",
    "record_score": 22.5,
    "record_detail": "최근 9-5-7-8-3",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.4착 -30 = 30점"
-  },
-  {
-   "no": 8,
-   "name": "나소챗",
-   "jockey": "철호",
-   "record_score": 27,
-   "record_detail": "최근 8-6-2-10-1",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.4착 -30 = 30점"
+   "odds": 10.6,
+   "grade": "B",
+   "grade_reason": "배당 15.9배 · 최근평균 6.4착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
   },
   {
    "no": 11,
@@ -1050,81 +1071,100 @@
    "jockey": "정준",
    "record_score": 22.5,
    "record_detail": "최근 5-7-8-6-3",
-   "odds": null,
+   "odds": 3.9,
+   "grade": "C",
+   "grade_reason": "배당 6.6배 · 최근평균 5.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+  },
+  {
+   "no": 5,
+   "name": "런와일드",
+   "jockey": "추열",
+   "record_score": 65,
+   "record_detail": "최근 7-1-2-5-10",
+   "odds": 14.2,
+   "grade": "A",
+   "grade_reason": "배당 26.5배 · 최근평균 5.0착 -30 = 70점"
+  },
+  {
+   "no": 8,
+   "name": "나소챗",
+   "jockey": "철호",
+   "record_score": 32,
+   "record_detail": "최근 8-6-2-10-1",
+   "odds": 30.1,
    "grade": "D",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
+   "grade_reason": "배당 59.9배 · 최근평균 5.4착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 70점"
   }
  ],
  "elimination": {
   "candidates": [
    1,
-   2,
+   6,
+   10,
    3,
    4,
-   9,
-   10,
-   5,
    7,
-   8
+   11,
+   5
   ],
   "eliminated": [
-   6,
-   11
+   2,
+   8
   ],
   "elimination_reasons": {
-   "6": "배당 미수집 · 배당 150배+ -40 = 60점",
-   "11": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
+   "2": "배당 66.2배 · 단승 30~49배 → 관찰(신호 없으면 제거) = 100점",
+   "8": "배당 59.9배 · 최근평균 5.4착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 70점"
   }
  },
  "final_recommendation": {
   "quinella_main": {
-   "combo": "3+9",
-   "odds": null,
-   "reason": "3번(A)·9번(A)"
+   "combo": "10+11",
+   "odds": 7.6,
+   "reason": "10번(B)·11번(C)"
   },
   "trifecta_main": {
-   "combo": "3+9+10",
-   "odds": null,
-   "reason": "3번(A)·9번(A)·10번(C)"
+   "combo": "4+10+11",
+   "odds": 23.6,
+   "reason": "4번(A)·10번(B)·11번(C)"
   },
   "trifecta_insurance1": {
-   "combo": "3+4+9",
-   "odds": null,
-   "reason": "3번(A)·4번(A)·9번(A)"
+   "combo": "4+6+11",
+   "odds": 21.5,
+   "reason": "4번(A)·6번(C)·11번(C)"
   },
   "trifecta_insurance2": {
-   "combo": "3+4+10",
-   "odds": null,
-   "reason": "3번(A)·4번(A)·10번(C)"
+   "combo": "4+6+10",
+   "odds": 21.3,
+   "reason": "4번(A)·6번(C)·10번(B)"
   },
   "budget_allocation": {
-   "quinella_main": "62.1%",
-   "trifecta_main": "14.1%",
-   "trifecta_insurance": "1.9%"
+   "quinella_main": "43%",
+   "trifecta_main": "29%",
+   "trifecta_insurance": "4%"
   }
  },
  "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    3,
-    9
+    10,
+    11
    ],
    "trio": [
-    3,
-    9,
-    10
+    4,
+    10,
+    11
    ]
   },
   "form": {
    "quinella": [
     3,
-    9
+    4
    ],
    "trio": [
     3,
     4,
-    9
+    5
    ]
   },
   "jockey": {
@@ -1133,13 +1173,13 @@
   },
   "final": {
    "quinella": [
-    3,
-    9
+    10,
+    11
    ],
    "trio": [
-    3,
-    9,
-    10
+    4,
+    10,
+    11
    ]
   }
  },
@@ -1552,11 +1592,12 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 3·9·10 / 복승 3+9",
+ "summary": "유력마 10·11·4·6 / 복승 10+11",
  "keyHorses": [
-  3,
-  9,
-  10
+  10,
+  11,
+  4,
+  6
  ],
  "result": {
   "1st": 10,
