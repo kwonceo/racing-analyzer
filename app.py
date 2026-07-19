@@ -7538,6 +7538,40 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                                        "summary": "시장 최저배당 — 메인 1순위 고정"})
                 elif _mi > 0:
                     final_q.insert(0, final_q.pop(_mi))
+        # ══════════ [경륜 추천 개수 정리 (2026-07-19)] ══════════
+        #   받치기·라인 페어·강제 편입이 얹히며 7명 경주에 복승 5개까지 불어나 혼란 → 최종 상한:
+        #   6명 이하=2개 · 7명+=3개 · 혼전이어도 +1개만. 우선순위: ①최저배당 1순위(고정 유지)
+        #   ②라인 페어 ③급락·역배열(강제 편입 포함) ④배당 낮은순. 초과분은 삭제하지 않고 복병(★★) 이동.
+        if _sp == "cycle" and final_q:
+            _nh_c = len(vs) if vs else 7
+            _cap_c = (2 if _nh_c <= 6 else 3) + (1 if cp.get("chaoticFlag") else 0)
+            if len(final_q) > _cap_c:
+                def _prio_c(_q):
+                    _r = _q.get("reason") or ""
+                    if ("라인 페어" in _r) or ("같은 라인" in _r):
+                        return 1
+                    if ("급락" in _r) or ("역배열" in _r) or ("강제 편입" in _r):
+                        return 2
+                    return 3
+                _keep_c = [final_q[0]]                      # 최저배당 1순위 고정 유지
+                _pool_c = sorted(final_q[1:], key=lambda q: (_prio_c(q), float(q.get("odds") or 9e9)))
+                _over_c = []
+                for _q in _pool_c:
+                    (_keep_c if len(_keep_c) < _cap_c else _over_c).append(_q)
+                if _over_c:
+                    _sp_have5 = set(tuple(sorted(int(x) for x in (c.get("combo") or []))) for c in (special_q or []))
+                    for _q in _over_c:
+                        _ck5 = tuple(sorted(int(x) for x in (_q.get("combo") or [])))
+                        if _ck5 in _sp_have5:
+                            continue
+                        _qd5 = dict(_q)
+                        _qd5["stars"] = 2
+                        _qd5["reason"] = (_qd5.get("reason") or "") + " → 추천 정리(개수 상한) 복병 이동"
+                        special_q = (special_q or []) + [_qd5]
+                        _sp_have5.add(_ck5)
+                print(f"[경륜 추천 개수] {_nh_c}명 → 메인 {len(_keep_c)}개(상한 {_cap_c}"
+                      f"{'·혼전+1' if cp.get('chaoticFlag') else ''}) · 복병 이동 {len(_over_c)}개")
+                final_q = _keep_c
     except Exception as _kfx:
         print("[경륜 추천 모순 수정] 스킵(무시):", _kfx)
 
@@ -10388,6 +10422,7 @@ def _triple_analyze(rk, rec):
                 core_picks["formTopA"] = []
             # [축2전략] 단승(win) 배당맵 주입 — 축1/축2 시장최저 tiebreak용(반환 dict의 single 은 이 호출 이후 세팅되므로 미리 주입).
             core_picks["single"] = {str(k): v for k, v in (curWin or {}).items()}
+            core_picks["chaoticFlag"] = bool(chaotic and chaotic.get("detected"))   # [경륜 추천 개수] 혼전 +1 판단용
             # [역배열 유력마 강제 편입·1 (2026-07-19)] 역배열 강도 30%+ 감지 시 그 말을 _final_picks 에 전달
             #   (서울 2경주 복기: 7번 역배열 42.5% 감지·표시까지 하고 조합엔 미반영 → 1착 놓침)
             try:

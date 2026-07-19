@@ -6,7 +6,7 @@
  "date": "2026-07-17",
  "race": "부산 4경주",
  "analyzed_at": "14:00:48",
- "updated_at": "11:42:48",
+ "updated_at": "12:01:01",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -3433,21 +3433,21 @@
  ],
  "signals_detected": [
   {
-   "time": "11:42:28",
+   "time": null,
    "type": "쌍승역전공식",
    "detail": "🔄 역전감지: 단승 11번 유력이나 쌍승에서 9번 1착(26.6)이 11번 1착(47.0)보다 낮음 → 실질 1착: 9번 가능성 (강한 역배열 0.566)",
    "severity": "🔴",
    "reason": "역전비율 = 쌍승(9→11) 26.6 / 쌍승(11→9) 47.0 = 0.566 (강한 역배열)"
   },
   {
-   "time": "11:42:28",
+   "time": null,
    "type": "복승불일치공식",
    "detail": "⚠️ 복승 불일치: 단승 기준 예상 3+11(80.2) / 실제 최저 1+9(14.9) → 1·9번 집중 자금 유입 (🔴🔴 5.383)",
    "severity": "🔴🔴",
    "reason": "불일치점수 = 예상최저복승 80.2 / 실제최저복승 14.9 = 5.383"
   },
   {
-   "time": "11:42:28",
+   "time": null,
    "type": "압축",
    "detail": "상위 복승 배당 근접 (14.9~17.0)",
    "severity": "🟡",
@@ -3547,7 +3547,7 @@
    "no": 1,
    "name": "벨로시퀸",
    "jockey": "승운",
-   "record_score": 135.8,
+   "record_score": 105.8,
    "record_detail": "최근 1-3-2-1-2",
    "odds": 35.3,
    "grade": "A",
@@ -3557,17 +3557,17 @@
    "no": 2,
    "name": "감동의돌",
    "jockey": "시대",
-   "record_score": 38.8,
+   "record_score": 48.8,
    "record_detail": "최근 7-6-1-1-2",
    "odds": 9999.9,
-   "grade": "D",
+   "grade": "C",
    "grade_reason": "배당 16.1배 · 쌍승 상위 +20(제거 보류) / 단승 999배 → 무조건 제거(전적 무관) = 120점"
   },
   {
    "no": 3,
    "name": "신천프리",
    "jockey": "인권",
-   "record_score": 72.5,
+   "record_score": 57.5,
    "record_detail": "최근 8-2-3-8-1",
    "odds": 10.1,
    "grade": "B",
@@ -3577,7 +3577,7 @@
    "no": 4,
    "name": "태양의열",
    "jockey": "도윤",
-   "record_score": 65,
+   "record_score": 50,
    "record_detail": "최근 11-2-5-2-2",
    "odds": 564.8,
    "grade": "C",
@@ -3590,34 +3590,34 @@
    "record_score": 60,
    "record_detail": "최근 4-2-7-3-1",
    "odds": 564.8,
-   "grade": "C",
+   "grade": "B",
    "grade_reason": "배당 14.9배 · 쌍승 상위 +20(제거 보류) / 단승 100배+ → 확실 제거 = 120점"
   },
   {
    "no": 11,
    "name": "닥터매터",
    "jockey": "나카",
-   "record_score": 80,
+   "record_score": 85,
    "record_detail": "최근 3-1-12-1-7",
    "odds": 1.1,
-   "grade": "B",
+   "grade": "A",
    "grade_reason": "배당 17.4배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 5,
    "name": "대성돌풍",
    "jockey": "형석",
-   "record_score": 83.2,
+   "record_score": 53.2,
    "record_detail": "최근 9-1-3-4-1",
    "odds": 564.8,
-   "grade": "A",
+   "grade": "C",
    "grade_reason": "배당 19.7배 · 단승 100배+ → 확실 제거 = 100점"
   },
   {
    "no": 10,
    "name": "그레이트",
    "jockey": "여수",
-   "record_score": 81.2,
+   "record_score": 91.2,
    "record_detail": "최근 2-1-5-4-8",
    "odds": 564.8,
    "grade": "A",
@@ -3637,7 +3637,7 @@
    "no": 8,
    "name": "돌 핀 퀵",
    "jockey": "정혁",
-   "record_score": 42.5,
+   "record_score": 47.5,
    "record_detail": "최근 10-2-10-8-1",
    "odds": 11.1,
    "grade": "D",
@@ -3647,10 +3647,10 @@
    "no": 6,
    "name": "성실제일",
    "jockey": "은경",
-   "record_score": 62.5,
+   "record_score": 32.5,
    "record_detail": "최근 6-4-8-6-1",
    "odds": 564.8,
-   "grade": "C",
+   "grade": "D",
    "grade_reason": "배당 19.8배 · 최근평균 5.0착 -30 / 단승 100배+ → 확실 제거 = 70점"
   }
  ],
@@ -3747,19 +3747,19 @@
    ],
    "trio": [
     1,
-    2,
+    4,
     9
    ]
   },
   "form": {
    "quinella": [
     1,
-    5
+    10
    ],
    "trio": [
     1,
-    5,
-    10
+    10,
+    11
    ]
   },
   "jockey": {
@@ -3773,7 +3773,7 @@
    ],
    "trio": [
     1,
-    2,
+    4,
     9
    ]
   }
@@ -3783,14 +3783,14 @@
    11,
    1
   ],
-  "third": 9,
+  "third": 4,
   "quinella": [
    1,
    11
   ],
   "trifecta": [
    1,
-   9,
+   4,
    11
   ],
   "picks": [
@@ -3809,7 +3809,7 @@
     "reason": "유력마 저배당 35.3배"
    },
    {
-    "no": 9,
+    "no": 4,
     "tier": 1,
     "sub": -564.8,
     "rep": 564.8,
@@ -3817,7 +3817,7 @@
    }
   ],
   "quinellaOdds": 36.9,
-  "trifectaOdds": 22.0,
+  "trifectaOdds": 44.0,
   "darkHorsePicks": [
    {
     "no": 3,
@@ -3936,6 +3936,7 @@
    "10": 564.8,
    "11": 1.1
   },
+  "chaoticFlag": false,
   "invForce": {
    "no": 9,
    "ratio": 56.6
@@ -3999,12 +4000,12 @@
     ],
     "odds": 43.0,
     "stars": 3,
-    "reason": "유력마 받치기 보존 · 역배열 유력 강제 편입(강도 56.6%)",
+    "reason": "역배열 유력 강제 편입(강도 56.6%)",
     "basis": [
      "9번: 복병",
      "11번: 복병"
     ],
-    "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+    "summary": "감지된 1착 후보를 조합에 반영"
    }
   ],
   "finalTrifectas": [
@@ -4033,19 +4034,19 @@
    {
     "combo": [
      1,
-     9,
+     4,
      11
     ],
-    "odds": 22.0,
+    "odds": 44.0,
     "reason": "삼복승 메인"
    },
    {
     "combo": [
      1,
-     4,
+     9,
      11
     ],
-    "odds": 44.0,
+    "odds": 22.0,
     "reason": "복병"
    },
    {
@@ -4063,8 +4064,8 @@
    "axis1": 9,
    "axis2": 1,
    "links": [
-    5,
-    11
+    11,
+    7
    ],
    "axis1Score": 39.7,
    "axis2Score": 0.0,
@@ -4084,17 +4085,17 @@
       11
      ],
      "odds": 43.0,
-     "label": "축1+연결2",
-     "rank": 3
+     "label": "축1+연결1",
+     "rank": 2
     },
     {
      "combo": [
-      1,
-      5
+      7,
+      9
      ],
-     "odds": 173.8,
-     "label": "축2+연결1",
-     "rank": 4
+     "odds": 28.4,
+     "label": "축1+연결2",
+     "rank": 3
     },
     {
      "combo": [
@@ -4102,6 +4103,15 @@
       11
      ],
      "odds": 36.9,
+     "label": "축2+연결1",
+     "rank": 4
+    },
+    {
+     "combo": [
+      1,
+      7
+     ],
+     "odds": 28.4,
      "label": "축2+연결2",
      "rank": 5
     }
@@ -4110,20 +4120,20 @@
     {
      "combo": [
       1,
-      5,
-      9
+      9,
+      11
      ],
-     "odds": null,
+     "odds": 57.4,
      "estimated": true,
      "label": "축1+축2+연결1"
     },
     {
      "combo": [
       1,
-      9,
-      11
+      7,
+      9
      ],
-     "odds": 57.4,
+     "odds": 45.8,
      "estimated": true,
      "label": "축1+축2+연결2"
     }
@@ -4164,15 +4174,15 @@
       11
      ],
      "odds": 43.0,
-     "label": "축1+연결2"
+     "label": "축1+연결1"
     },
     {
      "combo": [
-      1,
-      5
+      7,
+      9
      ],
-     "odds": 173.8,
-     "label": "축2+연결1"
+     "odds": 28.4,
+     "label": "축1+연결2"
     }
    ],
    "scenarioB": [],
@@ -4205,6 +4215,21 @@
      "11번: 복병"
     ],
     "summary": "유력마 1위+2위 최우선"
+   },
+   {
+    "combo": [
+     4,
+     11
+    ],
+    "odds": 86.9,
+    "stars": 2,
+    "reason": "유력마 받치기 보존 → 고배당(25배↑) 복병 이동",
+    "basis": [
+     "4번: 집중급락",
+     "4번: 복병",
+     "11번: 복병"
+    ],
+    "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
    }
   ],
   "dansung": false,
@@ -4215,11 +4240,11 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 1·9·2·11 / 복승 1+9",
+ "summary": "유력마 1·9·4·11 / 복승 1+9",
  "keyHorses": [
   1,
   9,
-  2,
+  4,
   11
  ],
  "result": {

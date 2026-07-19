@@ -6824,9 +6824,49 @@
     </div>`;
   }
 
+  // [경륜 상단 고정 헤더 (2026-07-19)] 상세 상단에 ①최종 추천(28px·배당·삼복승·복병 한 줄)
+  //   ②신호 요약 한 줄(역배열·스마트머니) ③제거마 한 줄을 고정 — 스크롤 없이 핵심 확인.
+  //   추천이 비어도(신호 대기) 폴백(확신도 복승)으로 최대한 표시. 기존 섹션은 전부 그대로(상단 추가만).
+  function renderKeirinProHeader(a) {
+    if (!a || (a.category || '') !== 'cycle') return '';
+    const cp = a.corePicks || {};
+    let fq = (cp.finalQuinellas || []).slice(0, 2);
+    if (!fq.length && (cp.confQuinellas || []).length) fq = cp.confQuinellas.slice(0, 2);
+    const ft = (cp.finalTrifectas || [])[0] || null;
+    const sp0 = (cp.bmedSpecial || [])[0] || null;
+    const CIRC = ['①', '②'];
+    const qRows = fq.map((q, i) => `<div style="display:flex;align-items:baseline;gap:10px;margin:4px 0">
+      <span style="font-size:14px;color:#8a94a6;font-weight:700">복승 ${CIRC[i] || (i + 1)}</span>
+      <b style="font-size:28px;letter-spacing:2px;color:#38d39f">${esc((q.combo || []).join('+'))}</b>
+      ${q.odds != null ? `<span style="font-size:20px;font-weight:800;color:#ffd24f">(${esc(q.odds)}배)</span>` : ''}
+    </div>`).join('');
+    const tRow = ft ? `<div style="font-size:16px;font-weight:800;color:#4ea1ff;margin:4px 0">삼복승: ${esc((ft.combo || []).join('+'))}${ft.odds != null ? ` <span class="hint">(추정 ${esc(ft.odds)}배)</span>` : ''}</div>` : '';
+    const spRow = sp0 ? `<div style="font-size:15px;font-weight:800;color:#c084fc;margin:2px 0">💎 복병: ${esc((sp0.combo || []).join('+'))}${sp0.odds != null ? ` (${esc(sp0.odds)}배)` : ''}</div>` : '';
+    // ② 신호 요약 한 줄(역배열·스마트머니 번호) + 스마트머니 강조 줄
+    const inv = a.inverse || {};
+    const invNos = Array.from(new Set(((inv.invHorses || []).map(Number))
+      .concat((inv.invLead && inv.invLead.no != null) ? [Number(inv.invLead.no)] : []))).filter((n) => !isNaN(n));
+    const smNos = Array.from(new Set((a.darkHorses || []).filter((d) => d.smartMoney).map((d) => Number(d.no)))).filter((n) => !isNaN(n));
+    const sigBits = [];
+    if (invNos.length) sigBits.push(`역배열 ${invNos.slice(0, 4).map((n) => n + '번').join('·')}`);
+    if (smNos.length) sigBits.push(`스마트머니 ${smNos.slice(0, 3).map((n) => n + '번').join('·')}`);
+    const sigLine = sigBits.length ? `<div style="font-size:14px;color:#dbe4f0;margin:6px 0 2px;border-top:1px dashed #2c3a4f;padding-top:6px">🔎 ${sigBits.map(esc).join(' · ')}</div>` : '';
+    const smLine = smNos.length ? `<div style="font-size:15px;font-weight:800;color:#ffd24f;margin:2px 0">💰 ${smNos.slice(0, 2).map((n) => n + '번').join('·')} 스마트머니 감지</div>` : '';
+    // ③ 제거마 한 줄
+    const elim = (a.eliminationStrong || []).slice(0, 2);
+    const elimLine = elim.length ? `<div style="font-size:14px;color:#ff8a8a;margin:2px 0">🔴 제거: ${elim.map((e) => `${e.no}번${(e.reasons || [])[0] ? ` (${esc(e.reasons[0])})` : ''}`).join(' · ')}</div>` : '';
+    if (!qRows && !tRow && !sigLine && !elimLine) return '';
+    return `<div style="margin:4px 0 8px;padding:12px 14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.13),rgba(20,28,43,.92))">
+      <div style="font-size:16px;font-weight:900;color:#38d39f">🎯 최종 추천 <span class="hint" style="font-weight:400;font-size:11px">${esc(a.raceKey || '')}</span></div>
+      ${qRows || '<div class="hint" style="margin:4px 0">추천 조합 형성 전 — 신호 대기</div>'}
+      ${tRow}${spRow}${smLine}${sigLine}${elimLine}
+    </div>`;
+  }
+
   function sportAnalysisHTML(a, bsel) {
     const six = a.bmed && a.bmed.sixRacer;
     const parts = [];
+    parts.push(renderKeirinProHeader(a));   // [경륜 상단 고정] ①최종 추천 ②신호 요약 ③제거마 — 맨 위(경륜만)
     parts.push(renderCorePicks(a));   // [핵심 추천] 딱 이것만(복승 X+Y·삼복승 X+Y+Z) 최상단
     parts.push(renderKeirinFlow(a));  // [경륜 특화②] 경륜 전개 카드(라인·페이스·라인페어) — 경륜 경주만 표시
     parts.push(renderRaceJudgment(a, bsel));   // [1·2·4번] 경주 판정 크게 + 배팅 배분
