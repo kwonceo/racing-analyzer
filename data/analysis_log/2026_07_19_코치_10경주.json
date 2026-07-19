@@ -6,7 +6,7 @@
  "date": "2026-07-19",
  "race": "코치 10경주",
  "analyzed_at": "19:36:21",
- "updated_at": "19:48:43",
+ "updated_at": "20:31:21",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -195,106 +195,14 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "ロクサーヌ",
-   "jockey": "宮川実（高知）",
-   "record_score": 0,
-   "record_detail": "최근 11-10",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 5.3배 · 최근평균 10.5착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 3,
-   "name": "リゼレインボー",
-   "jockey": "城野慈（高知）",
-   "record_score": 0,
-   "record_detail": "최근 5-5-5-14-12",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 6.1배 · 최근평균 8.2착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 4,
-   "name": "ブルジョア",
-   "jockey": "上田将（高知）",
-   "record_score": 0,
-   "record_detail": "최근 9-6-6-8-10",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 16.6배 · 최근평균 7.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 6,
-   "name": "トーセンブレンダ",
-   "jockey": "岡遼太（高知）",
-   "record_score": 0,
-   "record_detail": "최근 6-8-12-6-11",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 2.7배 · 최근평균 8.6착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 7,
-   "name": "アスクドゥラメンテ",
-   "jockey": "永森大（高知）",
-   "record_score": 0,
-   "record_detail": "최근 13-9-10-12-6",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 2.7배 · 최근평균 10.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 8,
-   "name": "コムルヴァン",
-   "jockey": "多田誠（高知）",
-   "record_score": 0,
-   "record_detail": "최근 10-11-10-13-12",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 55.6배 · 최근평균 11.2착 -30 = 70점"
-  },
-  {
-   "no": 1,
-   "name": "レリッシュ",
-   "jockey": "畑中信（高知）",
-   "record_score": 37.5,
-   "record_detail": "최근 3-4-10-9-8",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 185.9배 · 배당 150배+ -40 / 최근평균 6.8착 -30 = 30점"
-  },
-  {
-   "no": 5,
-   "name": "スクーバー",
-   "jockey": "井上瑛（高知）",
-   "record_score": 47.5,
-   "record_detail": "최근 3-4-3-10-8",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 150.2배 · 배당 150배+ -40 / 최근평균 5.6착 -30 = 30점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   2,
-   3,
-   4,
-   6,
-   7,
-   8,
-   1,
-   5
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
@@ -355,41 +263,20 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    6,
-    7
-   ],
-   "trio": [
-    2,
-    6,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    1,
-    5
-   ],
-   "trio": [
-    1,
-    2,
-    5
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    6,
-    7
-   ],
-   "trio": [
-    2,
-    6,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -791,14 +678,53 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 6·7·2 / 복승 6+7",
- "keyHorses": [
-  6,
-  7,
-  2
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 6,
+  "2nd": 2,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   6,
+   2
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   1,
+   5
+  ],
+  "form_pick": 2,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 2번 적중 · 제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }
