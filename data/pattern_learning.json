@@ -3098,16 +3098,44 @@
         "복승이상감지"
       ],
       "date": "2026-07-19"
+    },
+    {
+      "race": "모리오카 7경주",
+      "horse_no": 10,
+      "recent_avg": 7.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-19"
+    },
+    {
+      "race": "카나자와 4경주",
+      "horse_no": 5,
+      "recent_avg": 4.5,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-19"
+    },
+    {
+      "race": "카나자와 4경주",
+      "horse_no": 1,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-19"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 718,
-      "hit": 164
+      "count": 728,
+      "hit": 165
     },
     "전체부진마": {
-      "count": 1147,
-      "hit": 317
+      "count": 1159,
+      "hit": 320
     },
     "대규모급락": {
       "count": 18,
@@ -3117,8 +3145,8 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 429,
-      "hit": 153
+      "count": 431,
+      "hit": 155
     },
     "급락동반": {
       "count": 93,
