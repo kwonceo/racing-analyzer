@@ -6,7 +6,7 @@
  "date": "2026-07-19",
  "race": "시즈오카 10경주",
  "analyzed_at": "14:43:43",
- "updated_at": "14:48:47",
+ "updated_at": "15:52:01",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -229,53 +229,177 @@
     "5+7": 34.4,
     "6+7": 117.0
    }
+  },
+  {
+   "time": "14:49:37",
+   "minutes_before": 2,
+   "quinella": {
+    "1+2": 10.4,
+    "1+3": 16.6,
+    "2+3": 14.0,
+    "1+4": 10.4,
+    "2+4": 10.5,
+    "3+4": 9.4,
+    "1+5": 21.7,
+    "2+5": 15.5,
+    "3+5": 24.2,
+    "4+5": 3.7,
+    "1+6": 62.8,
+    "2+6": 19.3,
+    "3+6": 105.2,
+    "4+6": 48.5,
+    "5+6": 75.3,
+    "1+7": 33.6,
+    "2+7": 26.7,
+    "3+7": 7.5,
+    "4+7": 20.8,
+    "5+7": 38.1,
+    "6+7": 131.3
+   }
+  },
+  {
+   "time": "14:50:28",
+   "minutes_before": 2,
+   "quinella": {
+    "1+2": 10.4,
+    "1+3": 16.6,
+    "2+3": 14.0,
+    "1+4": 10.4,
+    "2+4": 10.5,
+    "3+4": 9.4,
+    "1+5": 21.7,
+    "2+5": 15.5,
+    "3+5": 24.2,
+    "4+5": 3.7,
+    "1+6": 62.8,
+    "2+6": 19.3,
+    "3+6": 105.2,
+    "4+6": 48.5,
+    "5+6": 75.3,
+    "1+7": 33.6,
+    "2+7": 26.7,
+    "3+7": 7.5,
+    "4+7": 20.8,
+    "5+7": 38.1,
+    "6+7": 131.3
+   }
+  },
+  {
+   "time": "14:52:04",
+   "minutes_before": 0,
+   "quinella": {
+    "1+2": 10.6,
+    "1+3": 16.8,
+    "2+3": 14.2,
+    "1+4": 10.5,
+    "2+4": 10.6,
+    "3+4": 9.5,
+    "1+5": 22.0,
+    "2+5": 15.7,
+    "3+5": 24.6,
+    "4+5": 3.8,
+    "1+6": 50.4,
+    "2+6": 15.5,
+    "3+6": 107.2,
+    "4+6": 43.7,
+    "5+6": 75.9,
+    "1+7": 34.1,
+    "2+7": 27.1,
+    "3+7": 7.6,
+    "4+7": 21.2,
+    "5+7": 38.7,
+    "6+7": 133.8
+   }
+  },
+  {
+   "time": "14:52:52",
+   "minutes_before": null,
+   "quinella": {
+    "1+2": 10.6,
+    "1+3": 16.8,
+    "2+3": 14.2,
+    "1+4": 10.5,
+    "2+4": 10.6,
+    "3+4": 9.5,
+    "1+5": 22.0,
+    "2+5": 15.7,
+    "3+5": 24.6,
+    "4+5": 3.8,
+    "1+6": 50.4,
+    "2+6": 15.5,
+    "3+6": 107.2,
+    "4+6": 43.7,
+    "5+6": 75.9,
+    "1+7": 34.1,
+    "2+7": 27.1,
+    "3+7": 7.6,
+    "4+7": 21.2,
+    "5+7": 38.7,
+    "6+7": 133.8
+   }
+  },
+  {
+   "time": "14:53:45",
+   "minutes_before": null,
+   "quinella": {
+    "1+2": 10.6,
+    "1+3": 16.8,
+    "2+3": 14.2,
+    "1+4": 10.5,
+    "2+4": 10.6,
+    "3+4": 9.5,
+    "1+5": 22.0,
+    "2+5": 15.7,
+    "3+5": 24.6,
+    "4+5": 3.8,
+    "1+6": 50.4,
+    "2+6": 15.5,
+    "3+6": 107.2,
+    "4+6": 43.7,
+    "5+6": 75.9,
+    "1+7": 34.1,
+    "2+7": 27.1,
+    "3+7": 7.6,
+    "4+7": 21.2,
+    "5+7": 38.7,
+    "6+7": 133.8
+   }
   }
  ],
  "signals_detected": [
   {
-   "time": "14:48:46",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 2번 유력이나 쌍승에서 6번 1착(29.3)이 2번 1착(62.7)보다 낮음 → 실질 1착: 6번 가능성 (압도적 역배열 0.467)",
-   "severity": "🔴🔴",
-   "reason": "역전비율 = 쌍승(6→2) 29.3 / 쌍승(2→6) 62.7 = 0.467 (압도적 역배열)"
-  },
-  {
-   "time": "14:48:46",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 2번 유력이나 쌍승에서 7번 1착(32.4)이 2번 1착(59.6)보다 낮음 → 실질 1착: 7번 가능성 (강한 역배열 0.544)",
+   "time": "14:53:45",
+   "type": "마감급락",
+   "detail": "1+6 복승 62.8→50.4 (2분전 대비 -19.7%)",
    "severity": "🔴",
-   "reason": "역전비율 = 쌍승(7→2) 32.4 / 쌍승(2→7) 59.6 = 0.544 (강한 역배열)"
+   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
   },
   {
-   "time": "14:48:46",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 2번 유력이나 쌍승에서 3번 1착(19.5)이 2번 1착(30.4)보다 낮음 → 실질 1착: 3번 가능성 (강한 역배열 0.641)",
+   "time": "14:53:45",
+   "type": "마감급락",
+   "detail": "2+6 복승 19.3→15.5 (2분전 대비 -19.7%)",
    "severity": "🔴",
-   "reason": "역전비율 = 쌍승(3→2) 19.5 / 쌍승(2→3) 30.4 = 0.641 (강한 역배열)"
-  },
-  {
-   "time": "14:48:46",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지: 단승 2번 유력이나 쌍승에서 5번 1착(32.5)이 2번 1착(37.6)보다 낮음 → 실질 1착: 5번 가능성 (약한 역배열 0.864)",
-   "severity": "🟡",
-   "reason": "역전비율 = 쌍승(5→2) 32.5 / 쌍승(2→5) 37.6 = 0.864 (약한 역배열)"
-  },
-  {
-   "time": "14:48:46",
-   "type": "쌍승역전공식",
-   "detail": "🔄 역전감지[2·3위 간]: 단승 4번(2위) vs 3번(3위) — 쌍승 3→4(15.6)가 4→3(22.4)보다 낮음 → 상위권 실질순위 역전: 3번 우세 (역배열 0.696)",
-   "severity": "🟠",
-   "reason": "역전비율 = 쌍승(3→4) 15.6 / 쌍승(4→3) 22.4 = 0.696 (역배열)"
-  },
-  {
-   "time": "14:48:46",
-   "type": "복승불일치공식",
-   "detail": "⚠️ 복승 불일치: 단승 기준 예상 2+4(11.0) / 실제 최저 4+5(3.7) → 5번 집중 자금 유입 (🔴🔴 2.973)",
-   "severity": "🔴🔴",
-   "reason": "불일치점수 = 예상최저복승 11.0 / 실제최저복승 3.7 = 2.973"
+   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
   }
  ],
- "anomaly_history": [],
+ "anomaly_history": [
+  {
+   "time": "14:52:04",
+   "combo": "1+6",
+   "drop": -20,
+   "text": "1+6 복승 급락 -20%",
+   "severity": "🟡",
+   "minutes_before": 0
+  },
+  {
+   "time": "14:52:04",
+   "combo": "2+6",
+   "drop": -20,
+   "text": "2+6 복승 급락 -20%",
+   "severity": "🟡",
+   "minutes_before": 0
+  }
+ ],
  "strong_signals": {
   "signals": [],
   "count": 0,
@@ -284,9 +408,7 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
@@ -300,7 +422,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 10.3배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 2,
@@ -310,7 +432,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 10.6배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 3,
@@ -320,7 +442,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 6.9배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 4,
@@ -330,7 +452,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 3.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 5,
@@ -340,17 +462,7 @@
    "record_detail": "",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 3.7배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 7,
-   "name": "中井 俊亮",
-   "jockey": "",
-   "record_score": 123.7,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 6.9배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 6,
@@ -360,7 +472,17 @@
    "record_detail": "",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 17.5배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 7,
+   "name": "中井 俊亮",
+   "jockey": "",
+   "record_score": 123.7,
+   "record_detail": "",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   }
  ],
  "elimination": {
@@ -368,28 +490,76 @@
    1,
    2,
    3,
-   4,
    5,
-   7,
-   6
+   6,
+   7
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "eliminated": [
+   4
+  ],
+  "elimination_reasons": {
+   "4": "배당 미수집 · 배당 150배+ -40 = 60점"
+  }
  },
  "final_recommendation": {
-  "budget_allocation": {}
+  "quinella_main": {
+   "combo": "6+7",
+   "odds": null,
+   "reason": "6번(B)·7번(A)"
+  },
+  "trifecta_main": {
+   "combo": "1+6+7",
+   "odds": null,
+   "reason": "1번(A)·6번(B)·7번(A)"
+  },
+  "trifecta_insurance1": {
+   "combo": "2+6+7",
+   "odds": null,
+   "reason": "2번(B)·6번(B)·7번(A)"
+  },
+  "trifecta_insurance2": {
+   "combo": "1+2+7",
+   "odds": null,
+   "reason": "1번(A)·2번(B)·7번(A)"
+  },
+  "budget_allocation": {
+   "quinella_main": "62.1%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
+  }
  },
- "recommendation_history": [],
+ "recommendation_history": [
+  {
+   "time": "15:52:01",
+   "minutes_before": null,
+   "sig": "1-6-7|6+7|None|1+6+7",
+   "anomCount": 2,
+   "sigChanged": true,
+   "keyHorses": [
+    7,
+    6,
+    1
+   ],
+   "summary": "유력마 7·6·1 / 복승 6+7",
+   "quinella_main": "6+7",
+   "quinella_sub": null,
+   "trifecta_main": "1+6+7",
+   "top_signals": [
+    "1+6 복승 62.8→50.4 (2분전 대비 -19.7%)",
+    "2+6 복승 19.3→15.5 (2분전 대비 -19.7%)"
+   ]
+  }
+ ],
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    4,
-    5
+    6,
+    7
    ],
    "trio": [
-    3,
-    4,
-    5
+    1,
+    6,
+    7
    ]
   },
   "form": {
@@ -409,13 +579,13 @@
   },
   "final": {
    "quinella": [
-    4,
-    5
+    6,
+    7
    ],
    "trio": [
-    3,
-    4,
-    5
+    1,
+    6,
+    7
    ]
   }
  },
@@ -796,15 +966,60 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 4·5·3·2 / 복승 4+5",
+ "summary": "유력마 7·6·1 / 복승 6+7",
  "keyHorses": [
-  4,
-  5,
-  3,
-  2
+  7,
+  6,
+  1
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 1,
+  "2nd": 5,
+  "3rd": 2
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   5
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 101.9,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": true,
+   "inverseHorses": [
+    6,
+    7,
+    3,
+    5
+   ],
+   "inverseHit": [
+    5
+   ],
+   "confidence": 48.3,
+   "reason": "전적유력마 1번 적중 · 역배열 감지말 5번 입상"
+  }
+ },
  "profit": null,
  "review": null
 }
