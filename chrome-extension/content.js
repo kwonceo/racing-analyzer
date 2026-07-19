@@ -1117,6 +1117,30 @@
   // [확장 무효화 방어 (2026-07-19)] 확장 새로고침/업데이트 후 이전 페이지의 content script 가
   //   chrome.runtime 을 부르면 "Extension context invalidated" 로 죽는다 → 살아있는지 확인 후 동작,
   //   무효화 감지 시 타이머 정리 + 새로고침 안내(1회).
+  // [사용자 조작 유예 (2026-07-19 v2.1.133)] 사용자가 마권종류 탭을 '직접' 클릭(isTrusted)한 직후에는
+  //   자동 수집을 12초 유예 — 수집의 탭 클릭과 사용자 조작이 겹쳐 [탭확정] 불일치가 반복되던 근본 원인 완화.
+  let _lastUserTabClick = 0;
+  let _userChosenTab = '';   // [v2.1.134] 사용자가 마지막으로 '직접' 클릭한 마권 탭 텍스트(복원 목표)
+  const _userTabDocs = new WeakSet();
+  function _armUserTabWatch() {
+    try {
+      for (const d of sameOriginDocs()) {
+        if (_userTabDocs.has(d)) continue;
+        _userTabDocs.add(d);
+        d.addEventListener('click', (ev) => {
+          try {
+            if (!ev.isTrusted) return;                       // 우리(수집)의 프로그램 클릭은 제외
+            const t = ev.target && ev.target.closest && ev.target.closest('.bet_type_btn, [bet_mode], [class*="bet_type"]');
+            if (t) {
+              _lastUserTabClick = Date.now();
+              _userChosenTab = (t.textContent || '').replace(/\s+/g, '').trim() || _userChosenTab;   // [v2.1.134] 사용자가 고른 탭 기억
+              console.log('[사용자 조작] 마권 탭 직접 클릭 감지("' + _userChosenTab + '") → 자동 수집 12초 유예');
+            }
+          } catch (_) { /* */ }
+        }, true);
+      }
+    } catch (_) { /* */ }
+  }
   let _ctxDeadNotified = false;
   function _ctxAlive() {
     try { return !!(chrome.runtime && chrome.runtime.id); } catch (_) { return false; }
@@ -1126,6 +1150,7 @@
     _ctxDeadNotified = true;
     try { if (typeof _raceWatchTimer !== 'undefined' && _raceWatchTimer) clearInterval(_raceWatchTimer); } catch (_) { /* */ }
     try { if (typeof timer !== 'undefined' && timer) clearInterval(timer); } catch (_) { /* */ }
+    try { setTripleProgress('⚠ 확장이 갱신됨 — 이 페이지를 새로고침(F5)해야 수집이 재개됩니다', true); } catch (_) { /* */ }
     console.warn('[확장] 컨텍스트 무효화(확장이 갱신됨) — 이 페이지를 새로고침(F5)해야 수집이 재개됩니다.');
     return true;
   }
@@ -1282,7 +1307,7 @@
       const before = oddsSignature();
       const el = clickAsyukkBetTab('복승');
       if (el) {
-        await wait(3000);   // [대기 상향 (2026-07-19)] 2초→3초(탭 전환 로딩 여유)
+        await wait(4000);   // [대기 상향 v2.1.133] 2초→4초(탭 전환 로딩 여유)
         const sig = oddsSignature();
         console.log('[복승수집] .bet_type_btn "복승" 정확일치 클릭 ✅ (bet_mode=' + (el.getAttribute('bet_mode') || '?') + ')');
         return { clicked: true, changed: (sig !== before && sig.length > 0), sig };
@@ -1298,7 +1323,7 @@
   //   다음 수집 사이클이 그 화면을 복승으로 긁어가는 경로가 있었다. → 사설 보드는 정확일치 우선, 기타 보드는 기존 폴백 유지.
   async function returnToQuinellaTab() {
     if (detectSite() === 'asyukk' && clickAsyukkBetTab('복승')) {
-      await wait(3000);   // [대기 상향 (2026-07-19)] 2초→3초
+      await wait(4000);   // [대기 상향 v2.1.133] 2초→4초
       console.log('[배당수집] 복승(복귀) — .bet_type_btn "복승" 정확일치 클릭 ✅');
       return true;
     }
@@ -1326,7 +1351,7 @@
     for (let attempt = 1; attempt <= 3; attempt++) {
       try { el.click(); } catch (e) { console.warn(`[배당수집] ${betLabel} 클릭 오류`, e); }
       // [긴급2] 탭 로딩 대기: 기본 2초, 재시도마다 1초씩 증가(느린 사설 배당판 대응)
-      await wait((waitMs || 3000) + (attempt - 1) * 1000);   // [대기 상향 (2026-07-19)] 기본 2초→3초
+      await wait((waitMs || 4000) + (attempt - 1) * 1000);   // [대기 상향 v2.1.133] 기본 2초→4초
       const sig = oddsSignature();
       const changed = sig !== prevSig && sig.length > 0;
       if (!requireChange || changed) {
@@ -1807,6 +1832,12 @@
 
   // asyukk/generic 전체 3종 수집 (탭 클릭 방식)
   async function collectTripleByTabs(reason) {
+    if (!_ctxAlive()) { _ctxDeadStop(); return { ok: false, error: '확장 갱신됨 — 페이지 새로고침 필요' }; }   // [좀비 차단 v2.1.133]
+    // [사용자 조작 유예 v2.1.133] 직접 탭 클릭 12초 내에는 자동 수집 건너뜀(수동 수집 'manual'은 예외)
+    if (reason !== 'manual' && _lastUserTabClick && (Date.now() - _lastUserTabClick) < 12000) {
+      console.log('[사용자 조작 유예] 탭 직접 클릭 ' + Math.round((Date.now() - _lastUserTabClick) / 1000) + '초 전 → 이번 자동 수집 건너뜀');
+      return { ok: false, skipped: 'user-active', error: '사용자 탭 조작 중 — 자동 수집 유예' };
+    }
     const site = detectSite();
     const oddsClass = site === 'asyukk' ? 'odds_content' : null;
     // [사용자 탭 유지 (2026-07-19)] 수집이 복승/쌍승 탭을 클릭한 뒤 원래 탭으로 안 돌려놔
@@ -1888,9 +1919,9 @@
         //      복승 화면 오인(다른 탭을 복승으로 오독)은 [보완3] 활성탭 확정 + [오염방지 2] 조합 수 검증이 차단한다.
         let _v1 = verifyActiveBetTab('복승');   // [보완3] true=확정일치 / false=확정불일치 / null=판정불가
         if (!r1.clicked || _v1 === false) {
-          // [탭확정 재시도 (2026-07-19)] 사용자 클릭·수집 겹침으로 일시 불일치 가능 → 즉시 포기 대신 3초 후 1회 재시도
-          console.warn('[복승수집] ⚠ 복승 탭 확보 실패 → 3초 후 재시도 1회');
-          await wait(3000);
+          // [탭확정 재시도 (2026-07-19)] 사용자 클릭·수집 겹침으로 일시 불일치 가능 → 즉시 포기 대신 재시도 1회
+          console.warn('[복승수집] ⚠ 복승 탭 확보 실패 → 5초 후 재시도 1회');
+          await wait(5000);   // [v2.1.133] 3초→5초(배당판 탭 전환 처리 여유)
           r1 = await gotoQuinellaTab(isKorea);
           sig = oddsSignature();
           _v1 = verifyActiveBetTab('복승');
@@ -1935,9 +1966,9 @@
         //   복승과 달리 여기서는 changed=false 도 게이트한다(직전이 복승 화면이므로 '무변화 = 전환 실패'가 확실).
         let _v2 = verifyActiveBetTab('쌍승');   // [보완3] DOM 속성으로 활성 탭 확정
         if (!r2.clicked || !r2.changed || _v2 === false) {
-          // [탭확정 재시도 (2026-07-19)] 즉시 포기 대신 3초 후 1회 재시도(사용자 클릭·수집 겹침 대응)
-          console.warn('[쌍승수집] ⚠ 쌍승 탭 전환 미확인 → 3초 후 재시도 1회');
-          await wait(3000);
+          // [탭확정 재시도 (2026-07-19)] 즉시 포기 대신 재시도 1회(사용자 클릭·수집 겹침 대응)
+          console.warn('[쌍승수집] ⚠ 쌍승 탭 전환 미확인 → 5초 후 재시도 1회');
+          await wait(5000);   // [v2.1.133] 3초→5초
           r2 = await clickTabAndWait(['쌍승', '마단', '쌍승식', '馬単'], oddsSignature(), '쌍승', true, 5000);
           sig = r2.sig || oddsSignature();
           _v2 = verifyActiveBetTab('쌍승');
@@ -2008,6 +2039,14 @@
       //    한국·중앙경마만 생략. 경륜·경정·바이크(6명)도 삼복승 탭을 눌러 수집한다(기존 미클릭 문제 해결).
       //    삼복승은 불안정할 수 있어 독립 try/catch로 격리(실패해도 복승·쌍승은 유지).
       let trio = [];
+      // [삼복승 게이트 v2.1.133] 복승·쌍승이 이번 사이클에 성공한 경우에만 삼복승 시도 —
+      //   앞 단계가 실패한 채 삼복승 탭까지 클릭하면 탭 엇박자만 키우고 오염 위험(기존 서버 데이터는 유지됨).
+      // [v2.1.134 게이트 완화] 쌍승은 원래 불안정 — 쌍승 실패가 삼복승까지 영구 차단하던 과잉 조건 제거.
+      //   복승만 성공하면 삼복승 시도(사용자 지시). 복승도 실패한 사이클만 생략(오염 방지 최소선 유지).
+      const _trioReady = (quinella.length > 0);
+      if (!isKorea && !isCentral && effSport !== 'boat' && !_trioReady) {
+        console.warn('[삼복승수집] ⏸ 복승 미확보 → 삼복승 시도 생략(오염 방지, 기존 데이터 유지)');
+      }
       if (isKorea) {
         console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원) → 삼복승 탭 클릭 차단');
       } else if (isCentral) {
@@ -2015,7 +2054,7 @@
       } else if (effSport === 'boat') {
         // [경정 삼복승 차단] 경정(보트)은 삼복승 배당이 불안정·노이즈 → 복승+쌍승만 수집(사용자 요청).
         console.log('[경정] 삼복승 수집 차단(복승+쌍승만) — 불안정 노이즈 방지');
-      } else {
+      } else if (_trioReady) {
         try {
           const sportTag = isCycleBoat ? SPORT_LABEL[effSport] : '일본경마';
           setTripleProgress(`삼복승 수집중…(${sportTag} · 탭 클릭)`);
@@ -2213,12 +2252,16 @@
     const detail = parts.map((p) => `${p.kind} ${p.n}${p.ok ? '✅' : '❌'}`).join(' · ');
     // [사용자 탭 유지 (2026-07-19)] 수집 종료 → 사용자가 보던 탭으로 복원(수집 시퀀스 무변경·복원만 추가)
     try {
-      if (site === 'asyukk' && _userTab0) {
+      if (site === 'asyukk') {
+        // [v2.1.134] 복원 목표: ①사용자가 '직접' 클릭했던 탭(신뢰 클릭 기록) ②없으면 수집 시작 시점 탭.
+        //   기존엔 ②만 써서, 이전 수집이 쌍승에 방치해 둔 상태를 '사용자 탭'으로 오인·계속 쌍승 복원하는
+        //   자기 강화 루프가 있었다(쌍승 고정 증상의 원인).
+        const _target = _userChosenTab || _userTab0;
         const _cur = activeAsyukkBetTab();
-        if (!_cur || _cur.text !== _userTab0) {
-          clickAsyukkBetTab(_userTab0);
+        if (_target && (!_cur || _cur.text !== _target)) {
+          clickAsyukkBetTab(_target);
           await wait(600);
-          console.log('[사용자 탭 복원] 수집 종료 → "' + _userTab0 + '" 탭으로 복귀');
+          console.log('[사용자 탭 복원] 수집 종료 → "' + _target + '" 탭으로 복귀' + (_userChosenTab ? '(직접 선택 기록)' : ''));
         }
       }
     } catch (_) { /* */ }
@@ -2723,6 +2766,8 @@
   function startRaceWatch() {
     if (_raceWatchTimer) clearInterval(_raceWatchTimer);
     setTimeout(watchRaceChange, 1500);                 // 로드 직후 1회
+    setTimeout(_armUserTabWatch, 2000);                // [사용자 조작 유예 v2.1.133] 탭 직접 클릭 감지 장착
+    setInterval(_armUserTabWatch, 30000);              // iframe 늦은 로드 대비 재장착(중복 방지 WeakSet)
     setTimeout(watchSportChange, 1800);                // [종목감지] 로드 직후 1회(기준값 세팅)
     setTimeout(_autoFallbackWatch, 3000);              // [전체수집 자동폴백] 로드 직후 1회(전환 기준 세팅)
     setTimeout(_postBoardHint, 2200);                  // [배당판 추종] 로드 직후 1회(분석기 즉시 동기화)
