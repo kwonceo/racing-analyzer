@@ -1922,30 +1922,21 @@
     let cardBg = mh.length ? 'rgba(240,171,252,.08)' : bg;
     let resBadge = '', resLine = '';
     if (rs && rs.top3 && rs.top3[0] != null) {
-      if (rs.noRec) {
-        // [추천 미형성 (2026-07-19)] 마감 전 확정 추천이 없던 경주(모리오카 3R: 마감 후 기록만 존재) —
-        //   ✅/❌ 어느 쪽도 아닌 중립 표기·성적 집계 제외(마감 후 기록으로 적중 판정하지 않음).
-        cardBorder = '2px solid #64748b';
-        cardBg = 'rgba(100,116,139,.10)';
-        resBadge = '<span style="background:#64748b;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">➖ 추천 미형성</span>';
-        resLine = `<div style="margin:3px 0;font-size:12px;font-weight:800;color:#94a3b8">📊 결과 ${rs.top3.filter((x) => x != null).join('→')} · 마감 전 추천 미형성(판정 제외)</div>`;
-      } else {
-        // [적중 표시 정직화 (2026-07-19)] ✅ = 라이브 표시 추천의 '정확' 적중(복승=1·2착 일치 / 삼복승=1·2·3착 일치)만.
-        //   rs.matched/matchedTrio = 실제 일치한 조합(어떤 추천이 맞았는지 그대로 표기). recommend 는 문자열("1+7")도 안전 처리.
-        const anyHit = !!(rs.hit || rs.trioHit);
-        const hitTag = rs.hit && rs.trioHit ? `✅ 복승 ${esc(rs.matched || '')}·삼복승 적중!`
-          : rs.hit ? `✅ 복승 ${esc(rs.matched || '')} 적중!`
-            : rs.trioHit ? `✅ 삼복승 ${esc(rs.matchedTrio || '')} 적중!` : '❌ 미적중';
-        cardBorder = anyHit ? '3px solid #3B6D11' : '2px solid #6b7280';
-        cardBg = anyHit ? 'rgba(59,109,17,.14)' : 'rgba(107,114,128,.10)';
-        resBadge = anyHit
-          ? '<span style="background:#3B6D11;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">✅ 적중!</span>'
-          : '<span style="background:#6b7280;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">❌ 미적중</span>';
-        const recTxt = (rs.liveQuinellas && rs.liveQuinellas.length)
-          ? rs.liveQuinellas.join('·')
-          : (Array.isArray(rs.recommend) ? rs.recommend.join('+') : (rs.recommend || ''));
-        resLine = `<div style="margin:3px 0;font-size:12px;font-weight:800;color:${anyHit ? '#7fd14f' : '#9ca3af'}">📊 결과 ${rs.top3.filter((x) => x != null).join('→')} · ${hitTag}${recTxt ? ` · 추천 ${esc(recTxt)}` : ''}${anyHit && rs.quinellaOdds ? ` (${rs.quinellaOdds}배)` : ''}</div>`;
-      }
+      // [적중 표시 정직화 (2026-07-19)] ✅ = 라이브 표시 추천의 '정확' 적중(복승=1·2착 일치 / 삼복승=1·2·3착 일치)만.
+      //   rs.matched/matchedTrio = 실제 일치한 조합(어떤 추천이 맞았는지 그대로 표기). recommend 는 문자열("1+7")도 안전 처리.
+      const anyHit = !!(rs.hit || rs.trioHit);
+      const hitTag = rs.hit && rs.trioHit ? `✅ 복승 ${esc(rs.matched || '')}·삼복승 적중!`
+        : rs.hit ? `✅ 복승 ${esc(rs.matched || '')} 적중!`
+          : rs.trioHit ? `✅ 삼복승 ${esc(rs.matchedTrio || '')} 적중!` : '❌ 미적중';
+      cardBorder = anyHit ? '3px solid #3B6D11' : '2px solid #6b7280';
+      cardBg = anyHit ? 'rgba(59,109,17,.14)' : 'rgba(107,114,128,.10)';
+      resBadge = anyHit
+        ? '<span style="background:#3B6D11;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">✅ 적중!</span>'
+        : '<span style="background:#6b7280;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">❌ 미적중</span>';
+      const recTxt = (rs.liveQuinellas && rs.liveQuinellas.length)
+        ? rs.liveQuinellas.join('·')
+        : (Array.isArray(rs.recommend) ? rs.recommend.join('+') : (rs.recommend || ''));
+      resLine = `<div style="margin:3px 0;font-size:12px;font-weight:800;color:${anyHit ? '#7fd14f' : '#9ca3af'}">📊 결과 ${rs.top3.filter((x) => x != null).join('→')} · ${hitTag}${recTxt ? ` · 추천 ${esc(recTxt)}` : ''}${anyHit && rs.quinellaOdds ? ` (${rs.quinellaOdds}배)` : ''}</div>`;
     }
     return `<div data-mkey="${esc(c.raceKey)}" title="클릭 → 상세 분석" style="cursor:pointer;border:${cardBorder};border-radius:10px;padding:10px;background:${cardBg}">
       <div style="display:flex;align-items:center;gap:6px">
@@ -2171,35 +2162,20 @@
     tick();
   }
   // [카드 적중 표시·상세 대조 (2026-07-19)] 결과가 있으면 상세 맨 위에 '결과 vs 우리 추천' 복기 블록
-  //   [판정-표시 일치 (2026-07-19)] 복기 행 = 적중 판정에 실제 사용된 라이브 추천(rs.liveQuinellas) 우선 —
-  //   판정(로그 4+9)과 화면 행(현재 재계산 6+9…)이 서로 다른 조합을 보여주던 불일치 해소(모리오카 3R).
   function _renderResultCompare(a) {
     const rs = a && a.raceResult;
     if (!rs || !rs.top3 || rs.top3[0] == null) return '';
     const t3 = rs.top3.filter((x) => x != null);
+    const fq = (((a.corePicks || {}).finalQuinellas) || []).slice(0, 3);
     const winSet = t3.slice(0, 2).map(Number).sort((x, y) => x - y).join('+');
-    const CIRC = ['①', '②', '③', '④'];
-    if (rs.noRec) {
-      return `<div style="margin:4px 0 8px;padding:12px 14px;border:3px solid #64748b;border-radius:12px;background:rgba(100,116,139,.10)">
-        <div style="font-size:16px;font-weight:900;color:#cbd5e1">➖ 판정 제외 — 📊 결과 ${t3.join('→')} · 정답 복승 ${winSet}${rs.quinellaOdds ? ` (${rs.quinellaOdds}배)` : ''}</div>
-        <div style="font-size:14px;color:#94a3b8;margin-top:4px">마감 전 확정 추천이 형성되지 않았던 경주입니다(수집 시작 지연·신호 미형성) — 적중/미적중 어느 쪽으로도 집계하지 않습니다.</div>
-      </div>`;
-    }
+    const CIRC = ['①', '②', '③'];
+    const qRows = fq.length ? fq.map((q, i) => {
+      const ck = (q.combo || []).map(Number).sort((x, y) => x - y).join('+');
+      const ok = ck === winSet;
+      return `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${ok ? '#7fd14f' : '#9ca3af'}">복승 ${CIRC[i] || (i + 1)} ${esc(ck)} ${ok ? '✅ 적중!' : '❌'}</div>`;
+    }).join('') : (rs.recommend ? `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${rs.hit ? '#7fd14f' : '#9ca3af'}">복승 ${esc(Array.isArray(rs.recommend) ? rs.recommend.join('+') : String(rs.recommend))} ${rs.hit ? '✅ 적중!' : '❌'}</div>` : '');
+    // [적중 표시 정직화] 배지·테두리 = 복승 또는 삼복승 '정확' 적중(라이브 표시 추천 기준). 삼복승 일치는 별도 줄로 명시.
     const anyHit = !!(rs.hit || rs.trioHit);
-    let qRows = '';
-    if (rs.judged === 'live' && rs.liveQuinellas && rs.liveQuinellas.length) {
-      qRows = rs.liveQuinellas.map((ck, i) => {
-        const ok = ck === winSet;
-        return `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${ok ? '#7fd14f' : '#9ca3af'}">복승 ${CIRC[i] || (i + 1)} ${esc(ck)} ${ok ? '✅ 적중!' : '❌'}</div>`;
-      }).join('');
-    } else {
-      const fq = (((a.corePicks || {}).finalQuinellas) || []).slice(0, 3);
-      qRows = fq.length ? fq.map((q, i) => {
-        const ck = (q.combo || []).map(Number).sort((x, y) => x - y).join('+');
-        const ok = ck === winSet;
-        return `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${ok ? '#7fd14f' : '#9ca3af'}">복승 ${CIRC[i] || (i + 1)} ${esc(ck)} ${ok ? '✅ 적중!' : '❌'}</div>`;
-      }).join('') : (rs.recommend ? `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${rs.hit ? '#7fd14f' : '#9ca3af'}">복승 ${esc(Array.isArray(rs.recommend) ? rs.recommend.join('+') : String(rs.recommend))} ${rs.hit ? '✅ 적중!' : '❌'}</div>` : '');
-    }
     const trioRow = rs.trioHit ? `<div style="font-size:16px;font-weight:800;margin:3px 0;color:#7fd14f">삼복승 ${esc(rs.matchedTrio || '')} ✅ 적중!(1·2·3착 일치)</div>` : '';
     const why = anyHit
       ? `<div style="font-size:14px;color:#a7f3d0;margin-top:4px">💡 ${esc(rs.hit ? ('복승 ' + (rs.matched || '') + ' = 1·2착 정확 일치') : ('삼복승 ' + (rs.matchedTrio || '') + ' = 1·2·3착 정확 일치'))}</div>`
@@ -6636,13 +6612,7 @@
     for (const [tab, cat] of Object.entries(SPORT_TAB_CAT)) {
       if (cat !== a.category) continue;
       const el = document.getElementById('sportReport-' + tab); if (!el) continue;
-      // [분석 대상 명시 (2026-07-19)] 부산 4R: 배당판은 부산 4경주인데 패널은 다른(최근 수집) 경주 분석을
-      //   경주명 없이 보여줘 "분석이 2가지" 혼란 — 어떤 경주의 분석인지 상단에 크게 명시.
-      const _hd = `<div style="margin:0 0 6px;padding:8px 12px;border-radius:8px;background:rgba(78,161,255,.12);border-left:4px solid #4ea1ff">
-        <b style="font-size:16px;color:#4ea1ff">📍 분석 대상: ${esc(a.raceKey || '')}</b>
-        <span class="hint" style="font-size:11px;margin-left:8px">배당판과 경주가 다르면 최근 수집 경주의 분석입니다</span>
-      </div>`;
-      el.innerHTML = _hd + sportAnalysisHTML(a, '#sportBudget-' + tab);
+      el.innerHTML = sportAnalysisHTML(a, '#sportBudget-' + tab);
     }
   }
 
@@ -6947,9 +6917,7 @@
     const dansung = !!cp.dansung;
     const special0 = cp.bmedSpecial || [];
     // [폴백·구데이터] finalQuinellas 미보유 시 기존 confQuinellas/quinella·삼복승으로 대체(단, 단통 경주는 폴백 안 함)
-    // [수익성 3분류 (2026-07-19)] 저배당 경주(profitTier=low)는 복승 의도적 0개 — 폴백 금지(삼복승 집중 유지)
-    const _pt = cp.profitTier || null;
-    if (!fq.length && !dansung && !(_pt && _pt.tier === 'low')) {
+    if (!fq.length && !dansung) {
       if ((cp.confQuinellas || []).length) fq = cp.confQuinellas.slice(0, 2);
       else if (cp.quinella && cp.quinella.length === 2) fq = [{ combo: cp.quinella, odds: cp.quinellaOdds }];
     }
@@ -7003,24 +6971,8 @@
       return `<div style="font-size:17px;font-weight:800;margin:4px 0 0">복승: <span style="color:#f0abfc">${q.combo.join('+')}</span> ${oo} <span style="color:#fbbf24;font-size:13px">★★</span>${sc}</div>${basisBlock(q, '#f0abfc')}`;
     }).join('')}
     </div>` : '';
-    // [수익성 3분류 (2026-07-19)] 저배당 경주 배너(복승 대신 삼복승 집중·축/받치기 안내) + 참고 강등 복승 접기
-    let profitBanner = '';
-    if (_pt && _pt.tier === 'low') {
-      const axisTxt = (_pt.axis || []).join('+');
-      const backTxt = (_pt.backers || []).map((n) => n + '번').join('·');
-      profitBanner = `<div style="margin:2px 0 8px;padding:10px 12px;border:2px solid #fbbf24;border-radius:10px;background:rgba(251,191,36,.12)">
-        <div style="font-size:16px;font-weight:900;color:#fbbf24">${esc(_pt.msg || '⚡ 저배당 경주 — 복승 대신 삼복승 집중')}</div>
-        ${axisTxt ? `<div style="font-size:14px;font-weight:800;color:#e2e8f0;margin-top:3px">축: ${esc(axisTxt)}${backTxt ? ` · 받치기: ${esc(backTxt)}` : ''}</div>` : ''}
-        <div class="hint" style="font-size:11px;margin-top:2px">최저 복승 ${_pt.minOdds}배 — 맞춰도 수수료 포함 손해 → 삼복승 10~30배 노림 (${esc(_pt.sportLabel || '')} 기준 ${_pt.lowTh}배 미만)</div>
-      </div>`;
-    }
-    const refQ = cp.quinellaRef || [];
-    const refBlock = refQ.length ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:#94a3b8">▸ 수익성 제외 복승 ${refQ.length}개 보기(참고·비추천)</summary>
-      ${refQ.map((q) => `<div class="hint" style="font-size:12px;margin:3px 0 0 10px">복승 ${(q.combo || []).join('+')}${q.odds != null ? ` (${q.odds}배)` : ''} — ${esc(q.refReason || '')}</div>`).join('')}
-    </details>` : '';
     return `<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
       <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(근거 기반)</span> ${confHead}</div>
-      ${profitBanner}
       ${dansungBanner}
       ${dansungWarnBanner}
       ${formBadge}
@@ -7028,7 +6980,6 @@
       ${qLines}
       ${tLines}
       ${spBlock}
-      ${refBlock}
     </div>`;
   }
 

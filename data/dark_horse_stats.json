@@ -1,45 +1,45 @@
 {
- "races": 379,
+ "races": 380,
  "byRank": {
   "rank1": {
-   "hit": 40,
-   "total": 137,
-   "rate": 29.2
+   "hit": 41,
+   "total": 143,
+   "rate": 28.7
   },
   "rank2": {
-   "hit": 23,
-   "total": 96,
-   "rate": 24.0
+   "hit": 25,
+   "total": 101,
+   "rate": 24.8
   },
   "rank3": {
-   "hit": 15,
-   "total": 72,
-   "rate": 20.8
+   "hit": 16,
+   "total": 78,
+   "rate": 20.5
   }
  },
  "bySignal": {
   "크로스역배열": {
    "hit": 31,
-   "total": 114,
-   "rate": 27.2,
+   "total": 113,
+   "rate": 27.4,
    "weightReady": true
   },
   "초기급락 보존": {
-   "hit": 23,
-   "total": 100,
-   "rate": 23.0,
+   "hit": 27,
+   "total": 118,
+   "rate": 22.9,
    "weightReady": true
   },
   "역배열": {
    "hit": 21,
-   "total": 63,
-   "rate": 33.3,
+   "total": 64,
+   "rate": 32.8,
    "weightReady": true
   },
   "급락": {
    "hit": 2,
-   "total": 20,
-   "rate": 10.0,
+   "total": 19,
+   "rate": 10.5,
    "weightReady": false
   },
   "스마트머니+역배열": {
@@ -58,14 +58,14 @@
  "byBand": {
   "30~50": {
    "hit": 2,
-   "total": 29,
-   "rate": 6.9,
-   "weightReady": false
+   "total": 30,
+   "rate": 6.7,
+   "weightReady": true
   },
   "15~30": {
-   "hit": 9,
-   "total": 57,
-   "rate": 15.8,
+   "hit": 10,
+   "total": 61,
+   "rate": 16.4,
    "weightReady": true
   },
   "100+": {
@@ -76,16 +76,16 @@
   },
   "50~100": {
    "hit": 2,
-   "total": 9,
-   "rate": 22.2,
+   "total": 10,
+   "rate": 20.0,
    "weightReady": false
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 65,
-   "total": 233,
-   "rate": 27.9,
+   "hit": 69,
+   "total": 246,
+   "rate": 28.0,
    "weightReady": true
   },
   "korea": {
@@ -96,20 +96,22 @@
   },
   "keirin": {
    "hit": 11,
-   "total": 63,
-   "rate": 17.5,
+   "total": 67,
+   "rate": 16.4,
    "weightReady": true
   }
  },
  "missedRaces": 77,
  "dansung": {
-  "races": 3,
+  "races": 5,
   "horseWonRate": 0.0,
   "horseWon": 0,
   "horsePlaced": 0,
-  "darkHitRate": 0.0,
-  "darkHit": 0,
-  "winnerSignals": {}
+  "darkHitRate": 20.0,
+  "darkHit": 1,
+  "winnerSignals": {
+   "기타": 1
+  }
  },
- "updated_at": "2026-07-19 14:06:32"
+ "updated_at": "2026-07-19 15:22:09"
 }

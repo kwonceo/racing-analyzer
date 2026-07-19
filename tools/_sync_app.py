@@ -2363,18 +2363,7 @@ def triple_latest():
         if _pin and _pin in db and (not want_sport or _sport_match(db[_pin].get("sport"), want_sport)):
             rk = _pin
         else:
-            # [배당판 경주 우선 (2026-07-19)] 부산 4R: KR 패널이 '가장 최근 수집된 한국경마 아무 경주'를 보여줘
-            #   배당판(부산 4R·11두)과 다른 경주(9두) 분석이 나란히 뜨던 혼란 — 확장이 알려준 현재 배당판
-            #   경주(board hint)가 이 종목 후보에 있으면 max-t 폴백보다 우선(사용자가 보는 경주 = 분석 대상).
-            _bh0 = None
-            try:
-                _bh0 = (_board_hint_load() or {}).get("raceKey")
-            except Exception:
-                _bh0 = None
-            if _bh0 and _bh0 in cand:
-                rk = _bh0
-            else:
-                rk = max(cand, key=lambda k: db[k].get("t", 0))
+            rk = max(cand, key=lambda k: db[k].get("t", 0))
     rec = db.get(rk) or {}
     # [경주전환 잔존 방어] 30분+ 미갱신 최신 경주 = 끝난 경주 → stale 표기(프론트가 표시 억제)
     age = time.time() - (rec.get("t") or 0)
@@ -7121,10 +7110,9 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     DROP_STRONG_PCT = 15.0        # 강신호: 급락 15%+
     SCORE_STRONG = 70             # 강신호: signalScore 70+
 
-    # [단통 경주 감지] 복승 최저배당 ≤ 1.8배 = 시장이 한 방향으로 과도 쏠림 → 저배당 추천 신뢰도↓·복병 집중.
-    #   ▸ 메인 ★★★에서 쏠림 조합 제외(너무 당연·가치 낮음) ▸ BMED 특별(복병) 감도 상향 + 최대 3개로 확대.
-    #   [수익성 개편 (2026-07-19)] 1.5 → 1.8 상향(사용자 지시) — 1.5~1.8배 맞춰도 수수료 포함 마진 없음.
-    DANSUNG_ODDS = 1.8            # 단통 조합 상한(메인 제외 기준·1.5→1.8 상향)
+    # [단통 경주 감지] 복승 최저배당 ≤ 1.5배 = 시장이 한 방향으로 과도 쏠림 → 저배당 추천 신뢰도↓·복병 집중.
+    #   ▸ 메인 ★★★에서 1.5배↓ 쏠림 조합 제외(너무 당연·가치 낮음) ▸ BMED 특별(복병) 감도 상향 + 최대 3개로 확대.
+    DANSUNG_ODDS = 1.5            # 단통 조합 상한(메인 제외 기준)
     _min_q = None
     if curQ:
         for (_da, _db), _do in curQ.items():
@@ -8021,205 +8009,6 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
             "dansung": DANSUNG, "dansungMinOdds": _min_q, "dansungPlan": dansung_plan,
             "axisPlan": axis_plan, "qMainCheck": qmain_check, "scenarioPlan": scenario_plan}
-
-
-# ══════════ [수익성 구조 개편 (2026-07-19)] 경주 3분류 + 저배당 삼복승 전환 + 기대값 필터 ══════════
-#   근거(오늘 실측): 적중 6/8인데 회수율 122% — 마쓰도 6R 급락 -42% 강신호에 4조합 베팅, 정답 1.3배로 맞추고도
-#   -2.7 손해. 저배당 경주(최저 1.8배 미만) 복승 제외 시 회수율 158%. 경륜 환급률 75%에서 1.3배 조합은 시장
-#   추정 적중률이 이미 ~58%라 정보 우위 마진이 없음 → 신호의 가치는 배당이 높을수록 큼.
-#   ▸ 저배당 경주: 복승 메인 0(참고 강등·무삭제) + 확실 2두 축 삼복승 집중  ▸ 중배당: 2.5배 미만 메인 제외 +
-#   강급락 시 3배+ 타겟  ▸ 고배당: 복승 집중(현행)  ▸ 기대값(배당×추정적중률) 1.0 미만 메인 제외,
-#   전멸 시 최상위 1개 "⚠ 기대값 미달(참고)" 유지. 적중판정 기준(복승1·2/삼복승1·2·3)은 불변.
-EV_BANDS_FILE = os.path.join(os.path.dirname(__file__), "data", "ev_bands.json")
-_EV_BANDS = [(0.0, 1.8, 0.50), (1.8, 2.5, 0.40), (2.5, 5.0, 0.30), (5.0, 15.0, 0.15), (15.0, 9e9, 0.05)]
-
-
-def _ev_bands_load():
-    try:
-        return json.load(open(EV_BANDS_FILE, encoding="utf-8"))
-    except Exception:
-        return {}
-
-
-def _ev_band_key(o):
-    for _lo, _hi, _p in _EV_BANDS:
-        if _lo <= o < _hi:
-            return "%s-%s" % (_lo, _hi)
-    return None
-
-
-def _ev_band_p(o):
-    """배당대별 적중률 추정 — 학습 표본 50+ 밴드는 실측치(자동 교체), 아니면 보수 가정치."""
-    try:
-        o = float(o)
-    except (TypeError, ValueError):
-        return None
-    _learned = _ev_bands_load()
-    _k = _ev_band_key(o)
-    _b = _learned.get(_k) or {}
-    if (_b.get("n") or 0) >= 50 and _b.get("hit") is not None:
-        return max(0.01, min(0.95, _b["hit"] / _b["n"]))
-    for _lo, _hi, _p in _EV_BANDS:
-        if _lo <= o < _hi:
-            return _p
-    return None
-
-
-def _ev_bands_update(combo_odds_list, top2):
-    """[기대값 학습] 판정된 라이브 복승 추천의 (배당대, 적중) 누적 → 표본 50+부터 가정치 자동 교체."""
-    try:
-        d = _ev_bands_load()
-        _t2 = sorted(int(x) for x in (top2 or []) if x is not None)
-        for _c, _o in (combo_odds_list or []):
-            if _o is None:
-                continue
-            _k = _ev_band_key(float(_o))
-            if not _k:
-                continue
-            _b = d.setdefault(_k, {"n": 0, "hit": 0})
-            _b["n"] += 1
-            if len(_t2) == 2 and sorted(int(x) for x in _c) == _t2:
-                _b["hit"] += 1
-        os.makedirs(os.path.dirname(EV_BANDS_FILE), exist_ok=True)
-        json.dump(d, open(EV_BANDS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    except Exception as _e:
-        print("[기대값 학습] 갱신 실패(무시):", _e)
-
-
-def _profit_tier_of(sport, category, min_q):
-    """경주 3분류: low(삼복승 집중)/mid/high — 종목별 경계(경륜류 1.8/5 · 일본경마 2/8 · 한국경마 3/10)."""
-    if min_q is None:
-        return None
-    if (category == "korea") or (sport == "korea"):
-        _lo, _hi, _lbl = 3.0, 10.0, "한국경마"
-    elif sport in ("cycle", "boat", "bike"):
-        _lo, _hi, _lbl = 1.8, 5.0, "경륜·경정·바이크"
-    else:
-        _lo, _hi, _lbl = 2.0, 8.0, "일본경마"
-    _t = "low" if min_q < _lo else ("mid" if min_q < _hi else "high")
-    return {"tier": _t, "minOdds": round(float(min_q), 1), "lowTh": _lo, "highTh": _hi, "sportLabel": _lbl}
-
-
-def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, category=None):
-    """[수익성 3분류 후처리] core_picks 의 finalQuinellas/finalTrifectas 를 경주 등급에 따라 재구성.
-    무삭제 원칙: 메인에서 빠지는 복승은 전부 cp["quinellaRef"](참고·접기 표시)로 이동. 실패 시 완전 무변경."""
-    try:
-        vs = set(int(x) for x in (valid_nos or []))
-        sig_meta = sig_meta or {}
-        fq = list(cp.get("finalQuinellas") or [])
-        ft = list(cp.get("finalTrifectas") or [])
-        # 시장 최저 복승배당(유효 조합만) + 최저 조합(확실 2두 축)
-        _min_q, _min_pair = None, None
-        for (_qa, _qb), _qo in (curQ or {}).items():
-            try:
-                _qa, _qb, _qo = int(_qa), int(_qb), float(_qo)
-            except (TypeError, ValueError):
-                continue
-            if _qo <= 0 or (vs and (_qa not in vs or _qb not in vs)):
-                continue
-            if _min_q is None or _qo < _min_q:
-                _min_q, _min_pair = _qo, tuple(sorted((_qa, _qb)))
-        _tier = _profit_tier_of(sport, category, _min_q)
-        if not _tier:
-            return
-        ref = list(cp.get("quinellaRef") or [])
-
-        def _demote(_q, _why):
-            _d = dict(_q)
-            _d["stars"] = 1
-            _d["refReason"] = _why
-            ref.append(_d)
-        _strong_drop = any((m.get("drop") is not None and float(m.get("drop") or 0) <= -30)
-                           for m in sig_meta.values() if isinstance(m, dict))
-        if _tier["tier"] == "low":
-            # ── 저배당 경주: 복승 메인 전부 참고 강등 + 삼복승 집중 ──
-            for _q in fq:
-                _demote(_q, "저배당 경주(최저 %s배) — 복승 미추천·삼복승 집중" % _tier["minOdds"])
-            fq = []
-            _axis = list(_min_pair) if _min_pair else None
-            _backers = []
-            if _axis:
-                # 받치기 = 급락·역배열·스마트머니·복병 신호마(축 제외) → |급락폭| 큰 순, 최대 3명
-                _cands = []
-                for _no, _m in sig_meta.items():
-                    if not isinstance(_m, dict):
-                        continue
-                    try:
-                        _no = int(_no)
-                    except (TypeError, ValueError):
-                        continue
-                    if _no in _axis or (vs and _no not in vs):
-                        continue
-                    if _m.get("rev") or _m.get("smart") or _m.get("dark") or (
-                            _m.get("drop") is not None and float(_m.get("drop") or 0) <= -10):
-                        _cands.append((abs(float(_m.get("drop") or 0)), _no))
-                _cands.sort(reverse=True)
-                _backers = [n for _, n in _cands[:3]]
-                if not _backers and vs:   # 신호마 없으면 축 제외 전 선수 중 앞 번호(안전 동작)
-                    _backers = sorted(n for n in vs if n not in _axis)[:2]
-                _new_t = []
-                for _i, _b in enumerate(_backers):
-                    _new_t.append({"combo": sorted(_axis + [_b]), "odds": None,
-                                   "reason": ("삼복승 메인 — 확실 2두(%s) + 신호 복병 %d번" if _i == 0 else
-                                              "삼복승 보험 — 확실 2두(%s) + 복병 %d번")
-                                   % ("+".join(map(str, _axis)), _b)})
-                # 기존 삼복승과 병합(신규 우선·중복 제거·최대 5)
-                _seen_t = set()
-                _merged = []
-                for _t3 in _new_t + ft:
-                    _k3 = tuple(sorted(int(x) for x in (_t3.get("combo") or [])))
-                    if len(_k3) != 3 or _k3 in _seen_t:
-                        continue
-                    _seen_t.add(_k3)
-                    _merged.append(_t3)
-                ft = _merged[:5]
-            cp["profitTier"] = dict(_tier, axis=_axis, backers=_backers,
-                                    msg="⚡ 저배당 경주(최저 %s배) — 복승 대신 삼복승 집중" % _tier["minOdds"])
-        else:
-            # ── 중배당: 2.5배 미만 메인 제외 · 강급락(-30%+)시 3배+ 타겟 / 고배당: 유지 ──
-            if _tier["tier"] == "mid":
-                _kept = []
-                for _q in fq:
-                    _o = _q.get("odds")
-                    if _o is not None and float(_o) < 2.5:
-                        _demote(_q, "중배당 경주 — 2.5배 미만 메인 제외(수익성)")
-                    else:
-                        _kept.append(_q)
-                fq = _kept
-                if _strong_drop and any((_q.get("odds") or 0) >= 3.0 for _q in fq):
-                    _kept2 = []
-                    for _q in fq:
-                        _o = _q.get("odds")
-                        if _o is not None and float(_o) < 3.0:
-                            _demote(_q, "급락 -30%+ 강신호 — 3배 이상 타겟 우선(참고 강등)")
-                        else:
-                            _kept2.append(_q)
-                    fq = _kept2
-            # ── 기대값 필터(중·고배당 공통): 배당×추정적중률 < 1.0 메인 제외 ──
-            _kept3 = []
-            for _q in fq:
-                _o = _q.get("odds")
-                _p = _ev_band_p(_o) if _o is not None else None
-                _ev = (round(float(_o) * _p, 2) if (_p is not None and _o is not None) else None)
-                _q["ev"] = _ev
-                if _ev is not None and _ev < 1.0:
-                    _demote(_q, "기대값 %.2f 미달(배당 %s배 × 추정적중률 %d%%)" % (_ev, _o, round(_p * 100)))
-                else:
-                    _kept3.append(_q)
-            fq = _kept3
-            # 전멸 시 최상위 1개 "⚠ 기대값 미달(참고)" 복원(추천 0 방지 — 사용자 승인 정책)
-            if not fq and ref:
-                _best = max(ref, key=lambda q: (q.get("ev") if q.get("ev") is not None else -1))
-                _best = dict(_best)
-                _best["evWarn"] = True
-                _best["reason"] = (_best.get("reason") or "") + " · ⚠ 기대값 미달(참고)"
-                fq = [_best]
-            cp["profitTier"] = dict(_tier, msg=None)
-        cp["finalQuinellas"] = fq
-        cp["finalTrifectas"] = ft
-        cp["quinellaRef"] = ref
-    except Exception as _pfe:
-        print("[수익성 3분류] 처리 실패(무시·기존 추천 유지):", _pfe)
 
 
 DARK_CASES_FILE = os.path.join(os.path.dirname(__file__), "data", "dark_cases.json")
@@ -10667,10 +10456,6 @@ def _triple_analyze(rk, rec):
                                signal_horses=_sig_h, sig_meta=_sig_meta, sport=_analyze_sport)
             core_picks["finalQuinellas"] = _fp["quinellas"]
             core_picks["finalTrifectas"] = _fp["trifectas"]
-            # [수익성 구조 개편 (2026-07-19)] 경주 3분류(저=삼복승 집중/중=2.5배 컷+기대값/고=유지) 후처리 —
-            #   실패 시 내부에서 완전 무변경(기존 추천 유지). 빠진 복승은 quinellaRef(참고 접기)로 무삭제 이동.
-            _apply_profit_strategy(core_picks, curQ, _rec_valid, sig_meta=_sig_meta,
-                                   sport=_analyze_sport, category=rec.get("category"))
             core_picks["axisPlan"] = _fp.get("axisPlan")           # [축2전략] 핵심 축2두+연결마 복승5조합·삼복승(패널 우선 표시)
             core_picks["qMainCheck"] = _fp.get("qMainCheck")       # [삼복승 정합성] 복승메인 말 포함 검증 결과(qMain·replaced·allInclude)
             core_picks["scenarioPlan"] = _fp.get("scenarioPlan")   # [시나리오] 시나리오A(유력마)+B(편성 유리) 조합 자동생성
@@ -14978,18 +14763,6 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     # ⚠ 순서 무관 집합 비교: sorted(combo) == sorted(top2/top3) → 4+5==5+4, {1,4,5}=={5,4,1} 동일 처리
     quinella_hit = bool(top2 and any(r.get("kind") == "복승" and sorted(r["combo"]) == top2 for r in rec_bets))
     trifecta_hit = bool(top3s and any(r.get("kind") == "삼복승" and sorted(r["combo"]) == top3s for r in rec_bets))
-    # [기대값 학습 (2026-07-19)] 라이브 복승 추천(로그 corePicks·배당 포함)의 배당대별 적중 누적 →
-    #   표본 50+ 밴드부터 기대값 필터의 가정 적중률을 실측치로 자동 교체.
-    try:
-        _lp_ev, _, _ = _analysis_log_path(_canonical_log_key(rk))
-        _ld_ev = json.load(open(_lp_ev, encoding="utf-8"))
-        _co_ev = [((_q0.get("combo") or []), _q0.get("odds"))
-                  for _q0 in ((_ld_ev.get("corePicks") or {}).get("finalQuinellas") or [])
-                  if len(_q0.get("combo") or []) == 2]
-        if _co_ev:
-            _ev_bands_update(_co_ev, top3[:2] if len(top3) >= 2 else [])
-    except Exception:
-        pass
 
     # [적중 기준 개선·1·2·3번] 유력마 기반 적중(기존 정확 적중과 병행·무삭제) + 신호별 적중 자동 태깅·저장.
     #   ⚠ 기존 quinella_hit/trifecta_hit(정확 조합)은 손익·기존 통계에 그대로 사용 — 새 지표는 별도.
@@ -20586,10 +20359,6 @@ def _keirin_result_parse(html):
         mq = re.search(r"2車複[^0-9]{0,10}(\d)\s*[-=＝]\s*(\d)\s*([\d,]+)\s*円", body)
         if mq:
             out["quinellaOdds"] = round(int(mq.group(3).replace(",", "")) / 100.0, 1)
-        # [삼복승 배당 백필 (2026-07-19)] 3連複 환급도 파싱 — 저배당 삼복승 전략의 수익 검증 데이터.
-        mt3 = re.search(r"3連複[^0-9]{0,10}(\d)\s*[-=＝]\s*(\d)\s*[-=＝]\s*(\d)\s*([\d,]+)\s*円", body)
-        if mt3:
-            out["trifectaOdds"] = round(int(mt3.group(4).replace(",", "")) / 100.0, 1)
     except Exception:
         pass
     return out
@@ -20611,7 +20380,7 @@ def _keirin_result_top3(jo, ymd, rno, expect_venue=None):
     if not parsed.get("top3") or parsed["top3"][0] is None or parsed["top3"][1] is None:
         return {"error": "결과 미게시/파싱 실패", "venue": parsed.get("venue")}
     return {"ok": True, "top3": parsed["top3"], "quinellaOdds": parsed.get("quinellaOdds"),
-            "trifectaOdds": parsed.get("trifectaOdds"), "venue": parsed.get("venue")}
+            "venue": parsed.get("venue")}
 
 
 def _keirin_result_backfill_once(date=None, verbose=True):
@@ -20646,12 +20415,8 @@ def _keirin_result_backfill_once(date=None, verbose=True):
                 continue
             top3 = [x for x in r["top3"] if x is not None]
             result = {"1st": r["top3"][0], "2nd": r["top3"][1], "3rd": r["top3"][2]}
-            if r.get("quinellaOdds") is not None or r.get("trifectaOdds") is not None:
-                result["payouts"] = {}
-                if r.get("quinellaOdds") is not None:
-                    result["payouts"]["quinella"] = r["quinellaOdds"]
-                if r.get("trifectaOdds") is not None:
-                    result["payouts"]["trifecta"] = r["trifectaOdds"]   # [삼복승 배당 백필]
+            if r.get("quinellaOdds") is not None:
+                result["payouts"] = {"quinella": r["quinellaOdds"]}
             _apply_result_learning(rk, result, top3)
             filled += 1
             done_list.append({"raceKey": rk, "joCode": jo, "top3": r["top3"],
@@ -24749,10 +24514,6 @@ def _multi_key(venue, race_no):
     return "%s %d경주" % (_track_norm(venue), int(race_no))
 
 
-class _SkipOddsparkBridge(Exception):
-    """[사설 우선] 확장 수집 활성 시 oddspark triple_store 주입 생략용 내부 신호."""
-
-
 def _multi_collect_one(track, race, ymd):
     """[2번] 한 경주 배당 수집 → multi_race_store 저장(실패 격리·triple_store 미접근). 반환 raceKey 또는 None.
       종목 라우팅: opTrackCd=경마(keiba) · joCode=경륜(keirin·배당은 공개라 서버 수집 가능·스케줄만 로그인 필요)."""
@@ -24791,23 +24552,10 @@ def _multi_collect_one(track, race, ymd):
         #   의존해, 둘 다 꺼지면 '배당 수집 안 됨'으로 보이던 문제 해결. 확장 ingest 와 동일 파이프라인(같은
         #   raceKey 병합·중복 아님)이고 sport 분리 필터가 탭 혼재를 막는다(무삭제·multi_store 경로 유지).
         try:
-            # [사설 우선·oddspark 백업 (2026-07-19)] 확장(사설 배당판)이 같은 경주를 최근 90초 내 수집 중이면
-            #   oddspark 주입을 생략 — 두 소스가 번갈아 덮어쓰며 배당이 진동(가짜 급락/복원 신호)하는 것 방지.
-            #   확장 수집이 끊기면(90초+) oddspark 가 자동으로 백업 재개(기존 동작·multi_store 카드는 항상 갱신).
-            _tdb0 = _triple_load()
-            _prev0 = _tdb0.get(key) or {}
-            _src0 = str(_prev0.get("source") or "")
-            _age0 = time.time() - (_prev0.get("t") or 0)
-            if _src0 and "oddspark" not in _src0 and _age0 < 90:
-                print("[다중경주] %s: 사설(확장) 수집 활성(%d초 전) → oddspark 주입 생략(사설 우선·백업 대기)"
-                      % (key, int(_age0)))
-                raise _SkipOddsparkBridge()
             # [자동전환·마감판정] 발주시각(postEpoch) 전달 → analyze 의 minutesBefore/afterClose 가 채워져
             #   프론트 '경주 종료' 판정(_raceFinished)·자동예상 T-5분 타이밍이 정확해짐(기존엔 deadline 미전달로 None).
             _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category,
                               source="oddspark_bg", deadline=race.get("postEpoch"))
-        except _SkipOddsparkBridge:
-            pass
         except Exception as _be:
             print("[다중경주] triple_store 브리지 실패(무시·multi_store 는 정상):", _be)
         # [경륜 전적 자동 수집] 다중 경주 경륜 배당 수집 시 전적도 함께(1회·통합등급 반영)

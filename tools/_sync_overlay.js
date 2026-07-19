@@ -583,10 +583,7 @@
           if (recs[i].label && recs[i].label.indexOf('복승 메인') === 0) { main = recs[i]; break; }
         }
         if (!main && recs.length) main = recs[0];
-        // [수익성 3분류 (2026-07-19)] 저배당 경주는 복승 폴백 금지 — 삼복승 집중 표기
-        var _ptLow = ((_cp.profitTier || {}).tier === 'low');
-        if (!quinella && !_ptLow && main && main.combo && main.combo.length) quinella = main.combo.join('+');
-        if (_ptLow && !quinella && trio) trio += ' (저배당 경주 — 삼복승 집중)';
+        if (!quinella && main && main.combo && main.combo.length) quinella = main.combo.join('+');
         var trios = (d.trioRecommend || []).filter(function (t) { return t && t.combo && t.combo.length === 3; });
         if (!trio && trios.length) trio = trios[0].combo.join('+');
         // 역배열 추가: 역배열 실질유력마(invLead) + 유력마 상위 2두로 삼복승 구성
@@ -1074,8 +1071,7 @@
       var _fq = (d.corePicks && d.corePicks.finalQuinellas) || [];
       // [패널 일치 폴백] finalQuinellas 가 비면(엄격 게이트로 메인 0) 패널과 동일하게 confQuinellas→quinella 로 강조
       //   → 패널 추천 조합(1+5·1+7 등)이 배당판에도 반드시 초록/파랑으로 표시됨(불일치 제거).
-      // [수익성 3분류 (2026-07-19)] 저배당 경주(profitTier=low)는 복승 의도적 0개 — 폴백 금지(삼복승 집중)
-      if (!_fq.length && d.corePicks && !d.corePicks.dansung && !((d.corePicks.profitTier || {}).tier === 'low')) {   // [패널 일치] 단통은 폴백 금지(패널 updatePanel과 동일 조건)
+      if (!_fq.length && d.corePicks && !d.corePicks.dansung) {   // [패널 일치] 단통은 폴백 금지(패널 updatePanel과 동일 조건)
         var _cq0 = d.corePicks.confQuinellas || [];
         if (_cq0.length) _fq = _cq0.slice(0, 2);
         else if (d.corePicks.quinella && d.corePicks.quinella.length === 2) {
