@@ -6,7 +6,7 @@
  "date": "2026-07-19",
  "race": "카나자와 8경주",
  "analyzed_at": "18:08:45",
- "updated_at": "18:27:25",
+ "updated_at": "19:12:47",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -183,26 +183,7 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "noAxis": true,
-  "level": "강력",
-  "band": "4배 이하 2두+",
-  "reprs": [
-   {
-    "no": 7,
-    "odds": 3.1
-   },
-   {
-    "no": 2,
-    "odds": 4.5
-   },
-   {
-    "no": 5,
-    "odds": 3.1
-   }
-  ],
-  "axisGap": 0.0,
-  "note": "저배당 2두 배당 비슷(축 불명확·차이 0%) → 추천 보류"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
@@ -216,7 +197,17 @@
    "record_detail": "최근 6-3-2-5-7",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 4.5배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 4,
+   "name": "컴플리트",
+   "jockey": "기원",
+   "record_score": 98.8,
+   "record_detail": "최근 1-2-6-1-4",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 7,
@@ -226,7 +217,17 @@
    "record_detail": "최근 2-3-3-1-7",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 3.1배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 11,
+   "name": "하이퍼선",
+   "jockey": "성환",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 1,
@@ -236,7 +237,7 @@
    "record_detail": "최근 10-6-4-1-4",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 13배 · 최근평균 5.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   },
   {
    "no": 3,
@@ -245,8 +246,8 @@
    "record_score": 36.2,
    "record_detail": "최근 4-9-11-1-4",
    "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 11.4배 · 최근평균 5.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
   },
   {
    "no": 5,
@@ -256,7 +257,17 @@
    "record_detail": "최근 8-6-7-4-8",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 3.1배 · 최근평균 6.6착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.6착 -30 = 30점"
+  },
+  {
+   "no": 6,
+   "name": "위즈원",
+   "jockey": "재철",
+   "record_score": 26.2,
+   "record_detail": "최근 5-5-4-7-4",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   },
   {
    "no": 8,
@@ -266,27 +277,7 @@
    "record_detail": "최근 7-4-6-2-6",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 6.4배 · 최근평균 5.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
-  },
-  {
-   "no": 4,
-   "name": "컴플리트",
-   "jockey": "기원",
-   "record_score": 98.8,
-   "record_detail": "최근 1-2-6-1-4",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 101배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 6,
-   "name": "위즈원",
-   "jockey": "재철",
-   "record_score": 26.2,
-   "record_detail": "최근 5-5-4-7-4",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 71.9배 · 최근평균 5.0착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
   },
   {
    "no": 9,
@@ -295,45 +286,61 @@
    "record_score": 20,
    "record_detail": "최근 5-6-6-10-7",
    "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.8착 -30 = 30점"
+  },
+  {
+   "no": 10,
+   "name": "굿최강",
+   "jockey": "종석",
+   "record_score": 21.2,
+   "record_detail": "최근 5-7-5-4-9",
+   "odds": null,
    "grade": "C",
-   "grade_reason": "배당 32.1배 · 최근평균 6.8착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
    2,
+   4,
    7,
    1,
    3,
    5,
-   8,
-   4,
    6,
+   8,
+   10
+  ],
+  "eliminated": [
+   11,
    9
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "elimination_reasons": {
+   "11": "배당 미수집 · 배당 150배+ -40 = 60점",
+   "9": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.8착 -30 = 30점"
+  }
  },
  "final_recommendation": {
   "quinella_main": {
    "combo": "4+7",
-   "odds": 2.6,
+   "odds": null,
    "reason": "4번(A)·7번(A)"
   },
   "trifecta_main": {
    "combo": "2+4+7",
-   "odds": 10.6,
-   "reason": "2번(B)·4번(A)·7번(A)"
+   "odds": null,
+   "reason": "2번(A)·4번(A)·7번(A)"
   },
   "trifecta_insurance1": {
-   "combo": "4+7+8",
-   "odds": 10.2,
-   "reason": "4번(A)·7번(A)·8번(B)"
+   "combo": "3+4+7",
+   "odds": null,
+   "reason": "3번(B)·4번(A)·7번(A)"
   },
   "trifecta_insurance2": {
-   "combo": "2+7+8",
-   "odds": 29.7,
-   "reason": "2번(B)·7번(A)·8번(B)"
+   "combo": "2+3+7",
+   "odds": null,
+   "reason": "2번(A)·3번(B)·7번(A)"
   },
   "budget_allocation": {
    "quinella_main": "62.1%",
@@ -467,12 +474,12 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    2,
+    4,
     7
    ],
    "trio": [
     2,
-    5,
+    4,
     7
    ]
   },
@@ -493,12 +500,12 @@
   },
   "final": {
    "quinella": [
-    5,
+    4,
     7
    ],
    "trio": [
     2,
-    5,
+    4,
     7
    ]
   }
@@ -922,14 +929,54 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 7·2·5 / 복승 5+7",
+ "summary": "유력마 7·4·2 / 복승 4+7",
  "keyHorses": [
   7,
-  2,
-  5
+  4,
+  2
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 4,
+  "2nd": 7,
+  "3rd": 2
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": true,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   7,
+   2
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 101.0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 2,
+  "form_pick_hit": true,
+  "pnl": 100000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 98.8,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 32.0,
+   "reason": "전적유력마 2번 적중"
+  }
+ },
  "profit": null,
  "review": null
 }
