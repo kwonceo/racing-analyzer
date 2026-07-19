@@ -3088,16 +3088,26 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-19"
+    },
+    {
+      "race": "서울 7경주",
+      "horse_no": 6,
+      "recent_avg": 5.5,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-19"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 713,
+      "count": 718,
       "hit": 164
     },
     "전체부진마": {
-      "count": 1141,
-      "hit": 316
+      "count": 1147,
+      "hit": 317
     },
     "대규모급락": {
       "count": 18,
@@ -3107,8 +3117,8 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 428,
-      "hit": 152
+      "count": 429,
+      "hit": 153
     },
     "급락동반": {
       "count": 93,
