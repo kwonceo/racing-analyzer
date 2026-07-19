@@ -6,7 +6,7 @@
  "date": "2026-07-18",
  "race": "서울 6경주 1200M",
  "analyzed_at": "15:20:44",
- "updated_at": "14:48:57",
+ "updated_at": "14:49:44",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -566,6 +566,31 @@
    10
   ],
   "confTrifectaInsOdds": 58.9,
+  "closingDropHorses": [
+   {
+    "no": 1,
+    "firstTime": "14:49:26",
+    "firstMb": 2,
+    "firstPct": -10.0
+   },
+   {
+    "no": 8,
+    "firstTime": "14:49:26",
+    "firstMb": 2,
+    "firstPct": -10.0
+   }
+  ],
+  "closingDropTrifectas": [
+   {
+    "combo": [
+     1,
+     8,
+     10
+    ],
+    "odds": 36.1,
+    "horse": 1
+   }
+  ],
   "denseBoxHorses": [
    3,
    10,
@@ -761,12 +786,12 @@
    },
    {
     "combo": [
-     5,
+     1,
      8,
      10
     ],
-    "odds": 58.9,
-    "reason": "확신도 보험"
+    "odds": 36.1,
+    "reason": "마감급락 보존"
    },
    {
     "combo": [
