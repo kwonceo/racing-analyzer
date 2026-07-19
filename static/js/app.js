@@ -2105,31 +2105,49 @@
   async function _krRecoRefresh(key) {
     const body = $('#multiDetailBody'), card = $('#multiDetailCard');
     if (!body || !card || card.style.display === 'none' || _krOddsKey !== key) {
-      if (_krOddsTimer) { clearInterval(_krOddsTimer); _krOddsTimer = null; }
-      return;
+      if (_krOddsTimer) { clearTimeout(_krOddsTimer); _krOddsTimer = null; }
+      return null;
     }
     let a;
     try { a = await (await fetch('/api/multi/race/' + encodeURIComponent(key))).json(); }
-    catch (_) { return; }
-    if (!a || a.error || a.waiting) return;
+    catch (_) { return null; }
+    if (!a || a.error || a.waiting) return null;
+    // [마감 임박 가속] 남은 초 반환(분석의 마감전 분) → 갱신 주기 산정에 사용
+    const left = (a.afterClose) ? -1 : (a.minutesBefore != null ? Math.round(a.minutesBefore * 60) : null);
     const combos = _mdCombosOf(a);
-    if (_krLastCombos == null) { _krLastCombos = combos; return; }   // 첫 조회 = 기준값
+    if (_krLastCombos == null) { _krLastCombos = combos; return left; }   // 첫 조회 = 기준값
     const added = combos.filter((c) => !_krLastCombos.includes(c));
-    if (!added.length) { _krLastCombos = combos; return; }           // 추가 없음 → 화면 유지(기존 무삭제)
+    if (!added.length) { _krLastCombos = combos; return left; }           // 추가 없음 → 화면 유지(기존 무삭제)
     const banner = `<div style="margin:0 0 8px;padding:10px 12px;border:2px solid #ffd24f;border-radius:10px;background:rgba(255,210,79,.15);font-size:16px;font-weight:900;color:#ffd24f">⚡ 새 신호! ${added.map(esc).join(' · ')} 추가됨 <span class="hint" style="font-weight:400;font-size:12px">${new Date().toTimeString().slice(0, 8)} 자동 갱신</span></div>`;
     const built = _buildMultiDetailHtml(key, a);
     body.innerHTML = banner + built.html;
     _bindMultiDetailExtras(key, a, built.isKr);
     _krLastCombos = combos;
     try { notify('⚡ 새 신호! ' + added.join(' · ') + ' 이(가) 추천에 추가됐습니다', true); } catch (_) { /* */ }
+    return left;
   }
+  // [마감 임박 가속 (2026-07-19)] 부산 2경주 복기: 정답 신호(1+7·삼복승 1+3+7)가 T-1분 급락으로 왔는데
+  //   수집 30초+재조회 30초 이중 대기로 마감 후 12:46 에야 표시 → 30초 고정 주기를 적응형으로:
+  //   평시 30초 · T-3분 10초 · T-1분 5초. 임박 구간에선 확장에 즉시 수집도 요청(FORCE_COLLECT 릴레이)
+  //   → 수집·표시 지연을 골든타임(T-1분 급락) 안으로 단축. 기존 동작은 평시 주기 그대로.
   function _krLiveOddsStart(key) {
     _krOddsKey = key;
     _krLastCombos = null;
-    if (_krOddsTimer) { clearInterval(_krOddsTimer); _krOddsTimer = null; }
-    _krLiveOddsRefresh(key);                                   // 열 때 즉시 1회(분석 스냅샷 고정값 교체)
-    _krRecoRefresh(key);                                       // 기준 조합 설정(이후 변경 감지)
-    _krOddsTimer = setInterval(() => { _krLiveOddsRefresh(key); _krRecoRefresh(key); }, 30000);
+    if (_krOddsTimer) { clearTimeout(_krOddsTimer); _krOddsTimer = null; }
+    const tick = async () => {
+      const card = $('#multiDetailCard');
+      if (!card || card.style.display === 'none' || _krOddsKey !== key) return;   // 닫힘/전환 → 체인 종료
+      _krLiveOddsRefresh(key);
+      const left = await _krRecoRefresh(key);
+      let iv = 30000;
+      if (left != null && left >= 0) {
+        if (left <= 60) iv = 5000;
+        else if (left <= 180) iv = 10000;
+        if (left <= 180) { try { nudgeExtensionCollect(); } catch (_) { /* */ } }   // 확장 즉시 수집 요청
+      }
+      _krOddsTimer = setTimeout(tick, iv);
+    };
+    tick();
   }
   // [카드 적중 표시·상세 대조 (2026-07-19)] 결과가 있으면 상세 맨 위에 '결과 vs 우리 추천' 복기 블록
   function _renderResultCompare(a) {
@@ -2170,6 +2188,82 @@
     } catch (_) { /* 다음 주기 */ }
   }
 
+  // [경륜·일본경마 상세 정리 (2026-07-19)] 메인 = 6단 요약 카드(요약+확신도/최종 추천/핵심 신호/전개/TOP3/
+  //   전체보기 버튼). 네덜란드식 계산기·자금 분배·추천 근거 상세·신호 이력·패턴 매칭·역배열 목록·말 수 가이드는
+  //   '🔧 전체 분석 보기' 접기 안으로 이동(기존 sportAnalysisHTML 그대로 — 완전 삭제 아님·이동만).
+  function raceProCardHTML(a) {
+    const cp = a.corePicks || {};
+    const sport = a.sport || a.category || '';
+    const S = [];
+    // ── 1. 경주 요약 + 확신도(한 줄) ──
+    const nH = cp.raceHorseCount || (a.form || []).length || null;
+    const unit = (a.category === 'cycle') ? '명' : '두';
+    const flow = a.keirinFlowSim || a.jpFlowSim || a.kraFlowSim || null;
+    const paceTxt = (flow && flow.pace) || ((a.paceAnalysis || {}).paceLabel) || '';
+    const conf = a.confidence || {};
+    const confTxt = (conf && (conf.band || conf.best != null))
+      ? `${conf.band ? esc(conf.band) : ''}${conf.best != null ? ` ★ ${esc(conf.best)}점` : ''}` : '';
+    S.push(`<div style="font-size:17px;font-weight:900;color:#e2e8f0;padding:6px 2px 8px">
+      ${a.category === 'cycle' ? '🚴' : '🏇'} ${esc(a.raceKey || '')}${nH ? ` · ${nH}${unit}` : ''}${paceTxt ? ` · ${esc(paceTxt)}` : ''}${confTxt ? ` · <span style="color:#38d39f">${confTxt}</span>` : ''}
+    </div>`);
+    // ── 2. 최종 추천(크게·고정) ──
+    let fq = (cp.finalQuinellas || []).slice(0, 2);
+    if (!fq.length && (cp.confQuinellas || []).length) fq = cp.confQuinellas.slice(0, 2);
+    const ft = (cp.finalTrifectas || [])[0] || null;
+    const sp0 = (cp.bmedSpecial || [])[0] || null;
+    const CIRC = ['①', '②'];
+    const qRows = fq.map((q, i) => `<div style="display:flex;align-items:baseline;gap:10px;margin:5px 0">
+      <span style="font-size:14px;color:#8a94a6;font-weight:700">복승 ${CIRC[i] || (i + 1)}</span>
+      <b style="font-size:28px;letter-spacing:2px;color:#38d39f">${esc((q.combo || []).join('+'))}</b>
+      ${q.odds != null ? `<span style="font-size:22px;font-weight:800;color:${_oddsGradeColor(q.odds, sport)}">(<span data-live-odds="${(q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+')}" data-odds-sport="${esc(sport)}">${esc(q.odds)}</span>배)</span>` : ''}
+    </div>`).join('');
+    const tRow = ft ? `<div style="font-size:17px;font-weight:800;color:#4ea1ff;margin:4px 0">삼복승: ${esc((ft.combo || []).join('+'))}${ft.odds != null ? ` <span class="hint">(추정 ${esc(ft.odds)}배)</span>` : ''}</div>` : '';
+    const spRow = sp0 ? `<div style="font-size:15px;font-weight:800;color:#c084fc;margin:2px 0">💎 복병: ${esc((sp0.combo || []).join('+'))}${sp0.odds != null ? ` <span style="color:${_oddsGradeColor(sp0.odds, sport)}">(${esc(sp0.odds)}배)</span>` : ''}</div>` : '';
+    S.push(`<div style="margin:4px 0;padding:12px 14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.13),rgba(20,28,43,.92))">
+      <div style="font-size:16px;font-weight:900;color:#38d39f">🎯 최종 추천 ${_oddsGradeLegend(sport)}</div>
+      ${qRows || '<div class="hint" style="margin:4px 0">추천 조합 형성 전 — 신호 대기</div>'}
+      ${tRow}${spRow}
+    </div>`);
+    // ── 3. 핵심 신호(3줄 이하) ──
+    const sig = [];
+    const inv = a.inverse || {};
+    const invNos = Array.from(new Set(((inv.invHorses || []).map(Number))
+      .concat((inv.invLead && inv.invLead.no != null) ? [Number(inv.invLead.no)] : []))).filter((n) => !isNaN(n));
+    if (invNos.length) sig.push(`역배열: <b style="color:#4ea1ff">${invNos.slice(0, 4).map((n) => n + '번').join('·')}</b>`);
+    const dropBits = [];
+    const seenDropNo = new Set();
+    (a.drops || []).filter((d) => (d.pct || 0) < 0).sort((x, y) => (x.pct || 0) - (y.pct || 0)).slice(0, 2)
+      .forEach((d) => (d.combo || []).forEach((n) => {
+        if (!seenDropNo.has(+n)) { seenDropNo.add(+n); dropBits.push(`${n}번(${Math.round(d.pct * 10) / 10}%)`); }
+      }));
+    if (dropBits.length) sig.push(`급락: <b style="color:#ff8a8a">${dropBits.slice(0, 4).join(' · ')}</b>`);
+    const elim = (a.eliminationStrong || []).slice(0, 2);
+    if (elim.length) sig.push(`제거: <b style="color:#9ca3af">${elim.map((e) => `${e.no}번${(e.reasons || [])[0] ? ` (${esc(e.reasons[0])})` : ''}`).join(' · ')}</b>`);
+    if (sig.length) {
+      S.push(`<div style="margin:4px 0;padding:10px 12px;border:1px solid #2b6cb0;border-radius:10px;background:rgba(43,108,176,.07)">
+        ${sig.map((s) => `<div style="font-size:15px;color:#dbe4f0;margin:2px 0">${s}</div>`).join('')}
+      </div>`);
+    }
+    // ── 4. 전개 예측(간단) ──
+    if (flow) {
+      const groups = (flow.lineGroups || []).filter((g) => g && g.length).map((g) => g.join('-')).join(' / ');
+      const favs = (flow.favoredHorses || []).map((x) => (x && x.no != null ? x.no : x)).filter((x) => x != null);
+      S.push(`<div style="margin:4px 0;padding:10px 12px;border:1px solid #2563eb;border-radius:10px;background:rgba(37,99,235,.07)">
+        <div style="font-size:15px;font-weight:800;color:#60a5fa">${a.category === 'cycle' ? '🚴' : '🏇'} 전개: ${esc(flow.pace || '')}${groups ? ` · 라인: ${esc(groups)}` : ''}</div>
+        ${favs.length ? `<div style="font-size:14px;color:#a7f3d0;margin:2px 0">전개 유리: <b>${favs.slice(0, 4).join('·')}번</b></div>` : ''}
+      </div>`);
+    }
+    // ── 5. 유력마 TOP3(간단) ──
+    const eh = ((a.elimination || {}).horses || []).slice(0, 3);
+    if (eh.length) {
+      S.push(`<div style="margin:4px 0;padding:10px 12px;border:1px solid #38d39f;border-radius:10px;background:rgba(56,211,159,.05)">
+        <div style="font-size:14px;font-weight:900;color:#38d39f;margin-bottom:2px">⭐ 유력마 TOP3</div>
+        ${eh.map((h, i) => `<div style="font-size:15px;font-weight:800;color:#e2e8f0;margin:2px 0">${i + 1}위 <b style="color:#4ea1ff">${h.no}번</b>${h.formScore != null ? ` · 득점 ${esc(h.formScore)}` : ''}${h.oddsRepr != null ? ` · <span style="color:${_oddsGradeColor(h.oddsRepr, sport)}">${esc(h.oddsRepr)}배</span>` : ''}</div>`).join('')}
+      </div>`);
+    }
+    return S.join('');
+  }
+
   // [공용 렌더러] openMultiDetail 과 30초 재조회가 같은 화면을 그리도록 추출(동작 동일·중복 방지)
   function _buildMultiDetailHtml(key, a) {
     const compare = _renderResultCompare(a);   // [적중 대조] 결과 있으면 최상단(전 종목)
@@ -2179,6 +2273,13 @@
       try { html = koreaProCardHTML(a); } catch (_) { html = ''; }
       if (html) {
         html += `<button class="btn" id="krProFullBtn" style="min-height:56px;font-size:15px;font-weight:800;width:100%;margin-top:8px">🔧 전체 분석 보기 (기존 화면)</button><div id="krProFullWrap" style="display:none;margin-top:8px"></div>`;
+      }
+    } else if (['cycle', 'japan_local', 'japan_central'].indexOf(a.category || '') >= 0) {
+      // [경륜·일본경마 상세 정리 (2026-07-19)] 메인 = 6단 요약 카드 · 나머지(계산기·포트폴리오·근거 상세·
+      //   신호 이력·패턴 매칭·역배열 목록·말 수 가이드)는 '전체 분석 보기' 접기 안(기존 화면 그대로·이동만)
+      try { html = raceProCardHTML(a); } catch (_) { html = ''; }
+      if (html) {
+        html += `<button class="btn" id="krProFullBtn" style="min-height:56px;font-size:15px;font-weight:800;width:100%;margin-top:8px">▼ 전체 분석 보기 (계산기·근거 상세·이력 포함)</button><div id="krProFullWrap" style="display:none;margin-top:8px"></div>`;
       }
     }
     if (!html) {

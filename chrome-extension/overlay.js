@@ -567,14 +567,25 @@
       // 복승/삼복승 추천 조합 추출(betRecommend '복승 메인' 우선 · trioRecommend 최상위)
       var quinella = null, trio = null, revAdd = null;
       if (d) {
+        // [오버레이-패널 통일 2단계] '지금 사세요' 박스도 패널·배당판 강조와 동일한 corePicks.finalQuinellas 1순위를
+        //   우선 사용(+현재 배당 표기 — 10초 재분석마다 갱신). 없으면 기존 betRecommend 경로 폴백(무삭제).
+        var _cp = d.corePicks || {};
+        var _cfq = _cp.finalQuinellas || [];
+        if (_cfq.length && _cfq[0].combo && _cfq[0].combo.length === 2) {
+          quinella = _cfq[0].combo.join('+') + (_cfq[0].odds != null ? ' (' + _cfq[0].odds + '배)' : '');
+        }
+        var _cft = _cp.finalTrifectas || [];
+        if (_cft.length && _cft[0].combo && _cft[0].combo.length === 3) {
+          trio = _cft[0].combo.join('+') + (_cft[0].odds != null ? ' (' + _cft[0].odds + '배)' : '');
+        }
         var recs = d.betRecommend || [], main = null;
         for (var i = 0; i < recs.length; i++) {
           if (recs[i].label && recs[i].label.indexOf('복승 메인') === 0) { main = recs[i]; break; }
         }
         if (!main && recs.length) main = recs[0];
-        if (main && main.combo && main.combo.length) quinella = main.combo.join('+');
+        if (!quinella && main && main.combo && main.combo.length) quinella = main.combo.join('+');
         var trios = (d.trioRecommend || []).filter(function (t) { return t && t.combo && t.combo.length === 3; });
-        if (trios.length) trio = trios[0].combo.join('+');
+        if (!trio && trios.length) trio = trios[0].combo.join('+');
         // 역배열 추가: 역배열 실질유력마(invLead) + 유력마 상위 2두로 삼복승 구성
         if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null) {
           var lead = Number(d.inverse.invLead.no);
@@ -696,7 +707,14 @@
       var redSet = {};
       _pRedC.slice(0, 3).forEach(function (c) { redSet[c.k] = 1; });
       var recSet = {};
-      (d.betRecommend || []).forEach(function (b) {
+      // [오버레이-패널 통일 2단계] 간이 매트릭스 초록테도 패널·배당판 강조와 동일한 corePicks.finalQuinellas 기준.
+      //   finalQuinellas 비면 기존 betRecommend 폴백(구데이터 호환·무삭제) — app.py _pub_matrix 초록과 동일 규칙.
+      var _rfq = (d.corePicks && d.corePicks.finalQuinellas) || [];
+      _rfq.forEach(function (q) {
+        var c = (q.combo || []).map(Number);
+        if (c.length === 2) recSet[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = 1;
+      });
+      if (!Object.keys(recSet).length) (d.betRecommend || []).forEach(function (b) {
         var c = (b.combo || []).map(Number);
         if (c.length === 2 && /복/.test(b.kind || b.label || '')) recSet[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = 1;
       });

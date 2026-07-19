@@ -6,7 +6,7 @@
  "date": "2026-07-17",
  "race": "부산 2경주",
  "analyzed_at": "12:54:43",
- "updated_at": "12:55:54",
+ "updated_at": "12:59:09",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -96,31 +96,31 @@
    "no": 1,
    "name": "닥터케세",
    "jockey": "승운",
-   "record_score": 30,
+   "record_score": 0,
    "record_detail": "",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 4.3배 · 감점 없음 = 100점"
   },
   {
    "no": 3,
    "name": "가온퍼펙",
    "jockey": "도운",
-   "record_score": 120,
+   "record_score": 105,
    "record_detail": "최근 2",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 24.3배 · 감점 없음 = 100점"
   },
   {
    "no": 6,
    "name": "돌풍의증",
    "jockey": "강주",
-   "record_score": 160,
+   "record_score": 130,
    "record_detail": "최근 1",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 7배 · 감점 없음 = 100점"
   },
   {
    "no": 7,
@@ -130,7 +130,7 @@
    "record_detail": "최근 3",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 4.3배 · 감점 없음 = 100점"
   },
   {
    "no": 9,
@@ -139,58 +139,58 @@
    "record_score": 45,
    "record_detail": "최근 4",
    "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "grade": "D",
+   "grade_reason": "배당 47.7배 · 감점 없음 = 100점"
   },
   {
    "no": 2,
    "name": "탱큐포더",
    "jockey": "성재",
-   "record_score": 10,
+   "record_score": 20,
    "record_detail": "최근 5",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+   "grade": "B",
+   "grade_reason": "배당 15.4배 · 최근평균 5.0착 -30 = 70점"
   },
   {
    "no": 4,
    "name": "판타스틱",
    "jockey": "광희",
-   "record_score": 35,
+   "record_score": 20,
    "record_detail": "최근 6",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
+   "grade": "B",
+   "grade_reason": "배당 23.9배 · 최근평균 6.0착 -30 = 70점"
   },
   {
    "no": 5,
    "name": "원더풀마",
    "jockey": "살바",
-   "record_score": 50,
+   "record_score": 20,
    "record_detail": "최근 7",
    "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
+   "grade": "C",
+   "grade_reason": "배당 7.3배 · 최근평균 7.0착 -30 = 70점"
   },
   {
    "no": 8,
    "name": "하이텐션",
    "jockey": "경민",
-   "record_score": -1.7000000000000002,
+   "record_score": 3.3,
    "record_detail": "최근 6-4-9",
    "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.3착 -30 = 30점"
+   "grade": "C",
+   "grade_reason": "배당 19.7배 · 최근평균 6.3착 -30 = 70점"
   },
   {
    "no": 10,
    "name": "위스트롱",
    "jockey": "한별",
-   "record_score": -13,
+   "record_score": -3,
    "record_detail": "최근 9",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.0착 -30 = 30점"
+   "grade_reason": "배당 11.7배 · 최근평균 9.0착 -30 = 70점"
   }
  ],
  "elimination": {
@@ -202,16 +202,12 @@
    9,
    2,
    4,
-   5
-  ],
-  "eliminated": [
+   5,
    8,
    10
   ],
-  "elimination_reasons": {
-   "8": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.3착 -30 = 30점",
-   "10": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.0착 -30 = 30점"
-  }
+  "eliminated": [],
+  "elimination_reasons": {}
  },
  "final_recommendation": {
   "budget_allocation": {}
@@ -220,11 +216,11 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    3,
-    6
+    6,
+    7
    ],
    "trio": [
-    3,
+    1,
     6,
     7
    ]
@@ -246,11 +242,11 @@
   },
   "final": {
    "quinella": [
-    3,
-    6
+    1,
+    7
    ],
    "trio": [
-    3,
+    1,
     6,
     7
    ]
@@ -674,11 +670,11 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 6·3·7 / 복승 3+6",
+ "summary": "유력마 7·6·1 / 복승 1+7",
  "keyHorses": [
+  7,
   6,
-  3,
-  7
+  1
  ],
  "result": {
   "1st": 1,

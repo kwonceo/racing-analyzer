@@ -561,7 +561,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   // asyukk 탭을 찾아 결과 수집 지시 (content script 가 경주결과 탭 클릭 + 추출)
   let done = false, data = null;
   try {
-    const tabs = await chrome.tabs.query({ url: ['*://*.dke-d11diw.site/*'] });
+    const tabs = await chrome.tabs.query({ url: ['*://*.qwqwd25.net/*', '*://*.dke-d11diw.site/*'] });
     if (tabs.length) {
       const res = await chrome.tabs.sendMessage(tabs[0].id, { type: 'COLLECT_RESULTS', reason: 'timer' })
         .catch(() => null);
@@ -696,7 +696,7 @@ function _ensureFineLoop() {
 }
 
 async function _findOddsTab() {
-  const tabs = await chrome.tabs.query({ url: ['*://*.keiba.go.jp/*', '*://*.dke-d11diw.site/*'] });
+  const tabs = await chrome.tabs.query({ url: ['*://*.keiba.go.jp/*', '*://*.qwqwd25.net/*', '*://*.dke-d11diw.site/*'] });
   if (!tabs.length) return null;
   return tabs.find((t) => /Odds|배당|TodayRaceInfo|DebaTable/i.test(t.url || '')) || tabs[0];
 }
