@@ -8,135 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 7,
-   "name": "지비볼트",
-   "jockey": "아르",
-   "jockey_winrate": null,
-   "recent_results": [
-    1
-   ],
-   "record_score": 125,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 1.0
-  },
-  {
-   "no": 6,
-   "name": "베트랩킨",
-   "jockey": "이스",
-   "jockey_winrate": null,
-   "recent_results": [
-    2
-   ],
-   "record_score": 95,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 1135.2
-  },
-  {
-   "no": 5,
-   "name": "용암세상",
-   "jockey": "다빈",
-   "jockey_winrate": null,
-   "recent_results": [
-    2
-   ],
-   "record_score": 107,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 11.2
-  },
-  {
-   "no": 8,
-   "name": "히어로파",
-   "jockey": "코지",
-   "jockey_winrate": 35.8,
-   "recent_results": [
-    4
-   ],
-   "record_score": 75,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 103.2
-  },
-  {
-   "no": 3,
-   "name": "매글데이",
-   "jockey": "정준",
-   "jockey_winrate": null,
-   "recent_results": [
-    4
-   ],
-   "record_score": 45,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 1135.2
-  },
-  {
-   "no": 9,
-   "name": "파이어파",
-   "jockey": "철호",
-   "jockey_winrate": null,
-   "recent_results": [
-    4
-   ],
-   "record_score": 45,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 11.4
-  },
-  {
-   "no": 1,
-   "name": "새내타운",
-   "jockey": "옥성",
-   "jockey_winrate": null,
-   "recent_results": [
-    7
-   ],
-   "record_score": 50,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 9999.9
-  },
-  {
-   "no": 2,
-   "name": "원펀치드",
-   "jockey": "용근",
-   "jockey_winrate": null,
-   "recent_results": [
-    5
-   ],
-   "record_score": 35,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 1135.2
-  },
-  {
-   "no": 4,
-   "name": "어서말을",
-   "jockey": "동하",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 15,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": 9999.9
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -698,10 +573,10 @@
    9
   ],
   "eliminated": [
+   2,
    3,
    4,
    8,
-   2,
    1
   ],
   "recommend": null,
@@ -735,13 +610,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-19 19:14:11",
+ "saved_at": "2026-07-19 21:53:40",
  "quality": {
-  "score": 80,
-  "grade": "AI학습용",
-  "complete": true,
-  "ai_ready": true,
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
   "missing": [
+   "전적 데이터",
    "확정 배당"
   ],
   "errors": []

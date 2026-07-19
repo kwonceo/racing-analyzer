@@ -25,9 +25,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 75,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
@@ -41,7 +41,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 35,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -57,7 +57,7 @@
    "drop_timeline": [],
    "exacta_reversal": true,
    "reversal_ratio": 0.425,
-   "record_score": 15,
+   "record_score": null,
    "confidence": 35.0,
    "reason": "쌍승역전"
   },
@@ -73,7 +73,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 45,
+   "record_score": null,
    "confidence": 25.0,
    "reason": "일반"
   },
@@ -89,9 +89,25 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 125,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
+  },
+  "signal_9": {
+   "horse": 9,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_6": {
    "horse": 6,
@@ -105,36 +121,20 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 95,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_5": {
-   "horse": 5,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 107,
-   "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
   3,
   7,
-  6,
+  9,
   2,
-  5
+  6
  ],
  "recommendation_process": [
-  "1. 전적 분석: 8번 75점",
+  "1. 전적 분석: 8번 전적 정보 제한",
   "2. 배당 수집 시작 17:05:19",
   "4. 쌍승 역전: 4→7(20.4) < 7→4(48.0) → 4번 실질 상위 신호",
   "5. 종합 신뢰도 0점(하) 판정"
@@ -144,7 +144,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 75,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
@@ -153,7 +153,7 @@
  ],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 75,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": true,
@@ -182,5 +182,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-19 19:14:10"
+ "generated_at": "2026-07-19 21:53:39"
 }
