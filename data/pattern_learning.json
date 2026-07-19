@@ -3343,16 +3343,44 @@
         "복승이상감지"
       ],
       "date": "2026-07-19"
+    },
+    {
+      "race": "서울 8경주 1400M",
+      "horse_no": 2,
+      "recent_avg": 4.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-19"
+    },
+    {
+      "race": "서울 8경주 1400M",
+      "horse_no": 3,
+      "recent_avg": 5.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-19"
+    },
+    {
+      "race": "서울 8경주 1400M",
+      "horse_no": 5,
+      "recent_avg": 6.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-19"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 770,
-      "hit": 174
+      "count": 775,
+      "hit": 175
     },
     "전체부진마": {
-      "count": 1233,
-      "hit": 342
+      "count": 1241,
+      "hit": 345
     },
     "대규모급락": {
       "count": 19,
@@ -3362,8 +3390,8 @@
       "hit_rate": 26.3
     },
     "이상감지동반": {
-      "count": 463,
-      "hit": 168
+      "count": 466,
+      "hit": 170
     },
     "급락동반": {
       "count": 101,
