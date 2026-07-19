@@ -6,7 +6,7 @@
  "date": "2026-07-19",
  "race": "기후 5경주",
  "analyzed_at": "10:04:44",
- "updated_at": "10:15:42",
+ "updated_at": "12:18:18",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -17,180 +17,21 @@
  "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
-  "signals": [
-   {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "horses": [
-     2,
-     4
-    ],
-    "detail": "2+4 상승 50% 후 급락 33%",
-    "level": "orange",
-    "hitRate": 69,
-    "hitSample": 95
-   },
-   {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "horses": [
-     3,
-     4
-    ],
-    "detail": "3+4 상승 41% 후 급락 29%",
-    "level": "orange",
-    "hitRate": 69,
-    "hitSample": 95
-   }
-  ],
-  "count": 1,
-  "recommendLevel": "보조",
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
   "dualConverge": false,
-  "types": [
-   8
-  ],
-  "hitRates": {
-   "2": {
-    "type": 2,
-    "label": "역배열 10%+",
-    "fired": 49,
-    "hit": 19,
-    "rate": 39
-   },
-   "1": {
-    "type": 1,
-    "label": "연속하락 3회+",
-    "fired": 7,
-    "hit": 4,
-    "rate": 57
-   },
-   "5": {
-    "type": 5,
-    "label": "복수조합 동시급락",
-    "fired": 37,
-    "hit": 22,
-    "rate": 59
-   },
-   "8": {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "fired": 95,
-    "hit": 66,
-    "rate": 69
-   },
-   "3": {
-    "type": 3,
-    "label": "마감직전 대급락",
-    "fired": 5,
-    "hit": 4,
-    "rate": 80
-   },
-   "4": {
-    "type": 4,
-    "label": "재급락",
-    "fired": 48,
-    "hit": 45,
-    "rate": 94
-   },
-   "6": {
-    "type": 6,
-    "label": "역배열+급락(이중수렴)",
-    "fired": 4,
-    "hit": 0,
-    "rate": 0
-   }
-  }
+  "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "藤田 真",
-   "jockey": "",
-   "record_score": 85.6,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 9.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 2,
-   "name": "坂本 紘規",
-   "jockey": "",
-   "record_score": 94.6,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 3.4배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 3,
-   "name": "上杉 有弘",
-   "jockey": "",
-   "record_score": 100.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 2.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 4,
-   "name": "金山 栄治",
-   "jockey": "",
-   "record_score": 99.3,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 2.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 5,
-   "name": "三浦 雄大",
-   "jockey": "",
-   "record_score": 97.1,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 4.8배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 6,
-   "name": "樋口 開土",
-   "jockey": "",
-   "record_score": 85.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 35.4배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 7,
-   "name": "坂口 卓士",
-   "jockey": "",
-   "record_score": 92.6,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 19.9배 · 감점 없음 = 100점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
@@ -200,41 +41,20 @@
  "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    3,
-    4
-   ],
-   "trio": [
-    2,
-    3,
-    4
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    3,
-    4
-   ],
-   "trio": [
-    3,
-    4,
-    5
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    3,
-    4
-   ],
-   "trio": [
-    2,
-    3,
-    4
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -643,15 +463,47 @@
   "chaoticRace": true,
   "formMissing": false
  },
- "summary": "유력마 3·4·2·5 / 복승 3+4",
- "keyHorses": [
-  3,
-  4,
-  2,
-  5
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 5,
+  "2nd": 3,
+  "3rd": 4
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": true,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": null,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "적중"
+  }
+ },
  "profit": null,
  "review": null
 }
