@@ -1930,6 +1930,160 @@
       ${sigs}
     </div>`;
   }
+  // ══════════ [한국경마 카드 재설계 (2026-07-19)] ══════════
+  //   전체경주 탭 한국 상세 — 유료회원이 '왜 이 말을 골랐는지' 한눈에 납득하는 5섹션 구조.
+  //   ⚠ 기존 sportAnalysisHTML·모든 렌더러는 삭제하지 않고 그대로 유지 — 한국 경주만 이 카드를 기본
+  //     표시하고, 하단 '전체 분석 보기' 버튼으로 기존 화면 전체를 언제든 펼쳐볼 수 있다(라우팅 추가만).
+  //   용어도 이 카드에선 한글만 사용(신뢰도·확신도·분석결과) — 기술 용어(signalScore 등) 미노출.
+  function koreaProCardHTML(a) {
+    const cp = (a && a.corePicks) || {};
+    const form = a.form || [];
+    const fmap = {};
+    form.forEach((h) => { if (h && h.no != null) fmap[+h.no] = h; });
+    const drops = a.drops || [];
+    const flow = a.kraFlowSim || null;
+    const S = [];
+
+    // ── 섹션 1: 경주 요약(한 줄) ──
+    const nH = cp.raceHorseCount || form.length || null;
+    let paceTxt = '';
+    if (flow && flow.pace) paceTxt = flow.pace;
+    else if (a.paceAnalysis && a.paceAnalysis.paceLabel) paceTxt = a.paceAnalysis.paceLabel;
+    S.push(`<div style="font-size:17px;font-weight:900;color:#e2e8f0;padding:8px 2px 10px">
+      🇰🇷 ${esc(a.raceKey || '')}${nH ? ` · ${nH}두` : ''}${paceTxt ? ` · ⚡${esc(paceTxt)}` : ''}
+    </div>`);
+
+    // ── 섹션 2: 최종 추천(크게) ──
+    // [배당 실시간·가독성 수정 (2026-07-19)] ① 번호와 배당이 붙어 "2+106.2배"로 읽히던 문제 →
+    //   줄 분리(라벨/말번호 28px/현재 배당 22px 노랑) + 충분한 줄간격. ② 배당은 data-live-odds 로 표시해
+    //   상세 열 때·30초마다 실시간 배당(/api/odds/triple/latest)으로 자동 갱신(분석 시점 고정값 문제 해소).
+    const fq = (cp.finalQuinellas || []).slice(0, 3);
+    const ft = (cp.finalTrifectas || [])[0] || null;
+    if (fq.length || ft) {
+      const CIRC = ['①', '②', '③'];
+      const _numTxt = (combo) => (combo || []).map((n) => `${n}번`).join(' + ');
+      const _oKey = (combo) => (combo || []).slice().sort((x, y) => x - y).join('+');
+      const qRows = fq.map((q, i) => `<div style="padding:10px 2px;${i ? 'border-top:1px dashed #2c3a4f;' : ''}">
+        <div style="font-size:15px;color:#8a94a6;font-weight:700;line-height:1.6">복승 ${CIRC[i] || (i + 1)}</div>
+        <div style="font-size:28px;font-weight:900;letter-spacing:1px;color:#38d39f;line-height:1.5">${esc(_numTxt(q.combo))}</div>
+        <div style="font-size:22px;font-weight:800;color:#ffd24f;line-height:1.5">현재 배당 <span data-live-odds="${esc(_oKey(q.combo))}">${q.odds != null ? esc(q.odds) : '—'}</span>배</div>
+      </div>`).join('');
+      const tRow = ft ? `<div style="padding:10px 2px;border-top:2px solid #2c3a4f">
+        <div style="font-size:15px;color:#8a94a6;font-weight:700;line-height:1.6">삼복승</div>
+        <div style="font-size:28px;font-weight:900;letter-spacing:1px;color:#4ea1ff;line-height:1.5">${esc(_numTxt(ft.combo))}</div>
+        ${ft.odds != null ? `<div style="font-size:22px;font-weight:800;color:#ffd24f;line-height:1.5">추정 배당 ${esc(ft.odds)}배</div>` : ''}
+      </div>` : '';
+      S.push(`<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.12),rgba(20,28,43,.9))">
+        <div style="font-size:16px;font-weight:900;color:#38d39f;margin-bottom:2px">🎯 최종 추천 <span style="font-weight:400;font-size:12px;color:#9fb2c8">배당 30초 자동 갱신</span></div>
+        ${qRows}${tRow}
+      </div>`);
+    }
+
+    // ── 섹션 3: 왜 이 말인가?(핵심) ──
+    const mainNos = [];
+    (fq[0] && fq[0].combo || []).forEach((n) => { if (mainNos.length < 2 && !mainNos.includes(+n)) mainNos.push(+n); });
+    const dropOf = (no) => {
+      let best = null;
+      drops.forEach((d) => {
+        if ((d.combo || []).map(Number).includes(+no) && (d.pct || 0) < 0) {
+          if (!best || d.pct < best) best = d.pct;
+        }
+      });
+      return best;
+    };
+    const whyBlocks = mainNos.map((no, i) => {
+      const h = fmap[no] || {};
+      const rows = [];
+      const dp = dropOf(no);
+      if (dp != null) rows.push(`배당 신호: <b style="color:#ff8a8a">급락 ${Math.round(dp)}%</b> (돈이 몰리는 중)`);
+      if (h.totalScore != null) rows.push(`전적: <b>${esc(h.grade || '-')}급 ${esc(h.totalScore)}점</b>${(h.recentPlacings || []).length ? ` · 최근 ${h.recentPlacings.slice(0, 5).join('-')}` : ''}`);
+      if (h.jockeyRate != null) rows.push(`기수: 복승률 <b>${esc(h.jockeyRate)}%</b>${h.synergyGrade ? ` · 이 말과 궁합 <b>${esc(h.synergyGrade)}급</b>` : ''}`);
+      if (h.trainerRate != null) rows.push(`조교사: 복승률 <b>${esc(h.trainerRate)}%</b>`);
+      // KRA 구간·기타 근거(서버가 만든 한글 근거 문장 상위 2개 — 기술 용어 없음)
+      (h.detail || []).slice(0, 2).forEach((d) => rows.push(esc(String(d))));
+      if (!rows.length) rows.push('배당 흐름 기반 추천(전적 미수집)');
+      return `<div style="margin:8px 0;padding:10px 12px;border-left:4px solid ${i === 0 ? '#38d39f' : '#4ea1ff'};background:rgba(78,161,255,.06);border-radius:8px">
+        <div style="font-size:18px;font-weight:900;color:${i === 0 ? '#38d39f' : '#4ea1ff'}">추천 ${i + 1}위 — ${no}번${h.name ? ' ' + esc(h.name) : ''}</div>
+        ${rows.map((r) => `<div style="font-size:15px;color:#dbe4f0;margin:3px 0">· ${r}</div>`).join('')}
+      </div>`;
+    }).join('');
+    if (whyBlocks) {
+      S.push(`<div style="margin:6px 0;padding:12px;border:1px solid #2b6cb0;border-radius:12px;background:rgba(43,108,176,.07)">
+        <div style="font-size:16px;font-weight:900;color:#7db6ff;margin-bottom:2px">🧭 왜 이 말인가?</div>
+        ${whyBlocks}
+      </div>`);
+    }
+
+    // ── 섹션 4: 경주 전개 예측 ──
+    if (flow) {
+      const favs = (flow.favoredHorses || []).map((x) => (x && x.no != null ? x.no : x)).filter((x) => x != null);
+      const darksF = (flow.darkHorses || []);
+      S.push(`<div style="margin:6px 0;padding:12px;border:1px solid #2563eb;border-radius:12px;background:rgba(37,99,235,.07)">
+        <div style="font-size:16px;font-weight:900;color:#60a5fa;margin-bottom:4px">🏇 경주 전개 예측</div>
+        <div style="font-size:15px;color:#dbe4f0;font-weight:700">선행형 ${flow.leadCount != null ? flow.leadCount : '?'}두 → ${esc(flow.pace || '')}</div>
+        ${flow.paceReason ? `<div style="font-size:15px;color:#9fb2c8;margin:2px 0">${esc(flow.paceReason)}</div>` : ''}
+        ${favs.length ? `<div style="font-size:15px;color:#a7f3d0;margin:4px 0">전개 유리: <b>${favs.slice(0, 4).join('·')}번</b></div>` : ''}
+        ${darksF.map((dh) => `<div style="font-size:15px;color:#fbbf24;margin:2px 0">💎 전개 복병: <b>${dh.no}번</b>${dh.winOdds ? ` (${esc(dh.winOdds)}배)` : ''}${dh.why ? ` — ${esc(dh.why)}` : ''}</div>`).join('')}
+      </div>`);
+    }
+
+    // ── 섹션 5: 복병 주목 ──
+    const darkRows = [];
+    (a.darkHorses || []).slice(0, 3).forEach((d) => {
+      const tags = [];
+      if (d.smartMoney) tags.push('큰손 자금 감지');
+      if (d.drop != null) tags.push(`급락 ${Math.round(Math.abs(d.drop))}%`);
+      if (d.reversal || d.rev) tags.push('배당 역전');
+      darkRows.push(`<div style="font-size:15px;color:#e9d5ff;margin:3px 0"><b style="font-size:17px;color:#c084fc">${d.no}번</b>${d.odds != null ? ` <span style="font-size:16px;color:#ffd24f;font-weight:800">${esc(d.odds)}배</span>` : ''}${tags.length ? ` · ${tags.map(esc).join(' · ')}` : ''}</div>`);
+    });
+    (cp.bmedSpecial || []).slice(0, 2).forEach((c) => {
+      darkRows.push(`<div style="font-size:15px;color:#e9d5ff;margin:3px 0">조합 <b style="font-size:17px;color:#c084fc">${esc((c.combo || []).join('+'))}</b>${c.odds != null ? ` <span style="font-size:16px;color:#ffd24f;font-weight:800">${esc(c.odds)}배</span>` : ''} · 분석결과 특별 감지</div>`);
+    });
+    if (darkRows.length) {
+      S.push(`<div style="margin:6px 0;padding:12px;border:1px solid #a855f7;border-radius:12px;background:rgba(168,85,247,.07)">
+        <div style="font-size:16px;font-weight:900;color:#c084fc;margin-bottom:2px">💎 복병 주목 <span style="font-weight:400;font-size:12px;color:#9fb2c8">고배당 이변 대비 · 소액</span></div>
+        ${darkRows.join('')}
+      </div>`);
+    }
+    return S.join('');
+  }
+
+  // [배당 실시간 갱신 (2026-07-19)] 한국 카드 상세의 추천 배당(data-live-odds)을 열 때 즉시 + 30초마다
+  //   실시간 복승 배당으로 갱신. 상세가 닫히거나 다른 경주로 바뀌면 타이머 자동 정리(중복 방지).
+  let _krOddsTimer = null;
+  let _krOddsKey = null;
+  async function _krLiveOddsRefresh(key) {
+    try {
+      const body = $('#multiDetailBody');
+      const card = $('#multiDetailCard');
+      if (!body || !card || card.style.display === 'none' || _krOddsKey !== key) {
+        if (_krOddsTimer) { clearInterval(_krOddsTimer); _krOddsTimer = null; }
+        return;
+      }
+      const els = body.querySelectorAll('[data-live-odds]');
+      if (!els.length) return;
+      const d = await (await fetch('/api/odds/triple/latest', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raceKey: key }),
+      })).json();
+      const map = {};
+      ((d && d.quinella) || []).forEach((c) => {
+        const k = (c.combo || []).slice().sort((x, y) => x - y).join('+');
+        if (c.odds != null) map[k] = c.odds;
+      });
+      els.forEach((el) => {
+        const o = map[el.dataset.liveOdds];
+        if (o != null && String(el.textContent) !== String(o)) el.textContent = o;
+      });
+    } catch (_) { /* 다음 주기 재시도 */ }
+  }
+  function _krLiveOddsStart(key) {
+    _krOddsKey = key;
+    if (_krOddsTimer) { clearInterval(_krOddsTimer); _krOddsTimer = null; }
+    _krLiveOddsRefresh(key);                                   // 열 때 즉시 1회(분석 스냅샷 고정값 교체)
+    _krOddsTimer = setInterval(() => _krLiveOddsRefresh(key), 30000);
+  }
+
   async function openMultiDetail(key) {
     const card = $('#multiDetailCard'), title = $('#multiDetailTitle'), bodyEl = $('#multiDetailBody');
     if (!card) return;
@@ -1942,10 +2096,35 @@
     catch (_) { if (bodyEl) bodyEl.innerHTML = '<p class="err">분석 로드 실패</p>'; return; }
     if (!a || a.error || a.waiting) { if (bodyEl) bodyEl.innerHTML = `<p class="hint">${esc((a && (a.error || (a.waiting && '배당 수집 대기 중'))) || '데이터 없음')}</p>`; return; }
     // [4번] 기존 분석 렌더 재사용(복승 매트릭스·핵심 신호·추천 조합) + 결과 입력 버튼
+    // [한국경마 카드 재설계 (2026-07-19)] 한국 경주만 새 5섹션 카드(요약→추천→왜→전개→복병) 기본 표시.
+    //   기존 전체 화면은 '전체 분석 보기' 버튼으로 그대로 접근 가능(무삭제·라우팅만). 타 종목은 기존 그대로.
     let html = '';
-    try { html = sportAnalysisHTML(a); } catch (_) { html = '<p class="hint">렌더 오류</p>'; }
-    html += `<div style="margin-top:10px"><button class="btn btn-primary" onclick="document.querySelector('.tab-btn[data-tab=&quot;result&quot;]').click()">📝 결과 입력하러 가기</button></div>`;
+    const _isKr = (a.category === 'korea') || (typeof jpIsKoreaName === 'function' && jpIsKoreaName(key));
+    if (_isKr) {
+      try { html = koreaProCardHTML(a); } catch (_) { html = ''; }
+      if (html) {
+        html += `<button class="btn" id="krProFullBtn" style="min-height:56px;font-size:15px;font-weight:800;width:100%;margin-top:8px">🔧 전체 분석 보기 (기존 화면)</button><div id="krProFullWrap" style="display:none;margin-top:8px"></div>`;
+      }
+    }
+    if (!html) {
+      try { html = sportAnalysisHTML(a); } catch (_) { html = '<p class="hint">렌더 오류</p>'; }
+    }
+    html += `<div style="margin-top:10px"><button class="btn btn-primary" style="min-height:56px;font-size:15px" onclick="document.querySelector('.tab-btn[data-tab=&quot;result&quot;]').click()">📝 결과 입력하러 가기</button></div>`;
     if (bodyEl) bodyEl.innerHTML = html;
+    // [배당 실시간 갱신] 한국 카드면 즉시 1회 + 30초 주기 실배당 갱신 시작(타 종목은 대상 요소 없음 → 무동작)
+    if (_isKr) _krLiveOddsStart(key);
+    // [한국 카드] 기존 전체 분석 접기/펼치기(무삭제 보존 뷰)
+    const _fb = document.getElementById('krProFullBtn');
+    if (_fb) _fb.addEventListener('click', () => {
+      const w = document.getElementById('krProFullWrap');
+      if (!w) return;
+      if (w.style.display === 'none') {
+        try { w.innerHTML = sportAnalysisHTML(a); } catch (_) { w.innerHTML = '<p class="hint">렌더 오류</p>'; }
+        w.style.display = 'block'; _fb.textContent = '🔧 전체 분석 접기';
+      } else {
+        w.style.display = 'none'; _fb.textContent = '🔧 전체 분석 보기 (기존 화면)';
+      }
+    });
   }
 
   /** raceKey(예 "2026-07-04 제주 3R" / "제주 3경주")에서 회장·경주번호를 뽑아 한국 칩 자동 선택 */
@@ -6237,6 +6416,9 @@
     //   한국경마 탭 하단 sportReport-korea 에 경륜 탭과 동일 방식(핵심 추천·TOP5·복병·신호) 30초 렌더.
     //   기존 PDF 분석·다른 종목 폴링 무변경(항목 추가만).
     { sport: 'korea', cat: 'korea' },
+    // [중앙경마 실시간 분석 (2026-07-19)] JRA는 서버 수집 불가(oddspark 미지원)지만, 확장이 배당판에서
+    //   중앙 경주를 잡으면 이 탭(sportReport-central)에 실시간 분석을 표시 — korea 와 동일 패턴(추가만).
+    { sport: 'central', cat: 'japan_central' },
   ];
   let _sportOddsTimer = null;
   async function pollSportOdds() {

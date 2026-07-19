@@ -1628,6 +1628,29 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
 
 
 OPENING_ODDS = 100.0    # [배당판 미수집 방어] 복승/단승 이 값 이상 = opening/placeholder(실자금 거의 없음)
+
+
+def _drop_placeholder_combos(combos, label=""):
+    """[placeholder 배당 필터 (2026-07-19)] 발매 전 껍데기 배당(예 1054.4·9999.9)이 유력마·복병·
+    크로스역배열·고배당 감지에 진짜 신호처럼 오인되던 문제(서울 2경주 복기) 차단.
+    실배당은 소수 단위로 제각각 → '동일 값 100배+ 가 3조합 이상 반복'이면 껍데기로 판정,
+    5000배+ 는 반복 무관 항상 껍데기. 원본은 건드리지 않고 걸러진 새 리스트 반환(무삭제·입력 필터만)."""
+    try:
+        vals = {}
+        for c in (combos or []):
+            o = c.get("odds")
+            if o is not None:
+                vals[o] = vals.get(o, 0) + 1
+        bad = {o for o, n in vals.items() if (o >= 5000) or (o >= 100 and n >= 3)}
+        if not bad:
+            return combos
+        out = [c for c in (combos or []) if c.get("odds") not in bad]
+        if len(out) != len(combos or []):
+            print(f"[placeholder 필터]{label} 껍데기 배당 {len(combos) - len(out)}조합 제외(값: "
+                  f"{sorted(bad)[:3]}{'…' if len(bad) > 3 else ''})")
+        return out
+    except Exception:
+        return combos
 OPENING_DROP = -80.0    # opening 배당이 실배당으로 정착할 때의 기계적 급락(신호 아님)
 STALE_ACTIVE_SEC = 1800  # [경주전환 잔존 방어] 활성 3종 배당이 이 시간(30분) 넘게 미갱신 → 끝난 경주로 간주(활성 캐시서 정리)
 # [종목 오분석 근본수정] 한국 경마장명 → sport=horse·category=korea 강제 판정용(확장 KRA_TRACK_RE 와 동일 커버).
@@ -2318,6 +2341,18 @@ def triple_latest():
             if not cand:
                 return jsonify({"raceKey": None, "quinella": [], "exacta": [], "trio": [],
                                 "waiting": True, "noRace": True, "sport": "korea"})
+        elif want_sport == "central":
+            # [중앙경마 탭 실시간 분석 (2026-07-19)] JRA는 oddspark 미지원(서버 수집 불가) — 확장이 배당판에서
+            #   잡아온 중앙 경주(category=japan_central·JRA 경마장명)를 이 탭에 실시간 표시(korea 와 동일 패턴·추가만).
+            def _is_central_key(_k):
+                if db[_k].get("category") == "japan_central":
+                    return True
+                _cv = _area_num(str(_k))[0] or ""
+                return db[_k].get("category") not in ("korea", "cycle", "boat", "bike") and _cv in _JRA_TRACKS
+            cand = [k for k in cand if _is_central_key(k)]
+            if not cand:
+                return jsonify({"raceKey": None, "quinella": [], "exacta": [], "trio": [],
+                                "waiting": True, "noRace": True, "sport": "central"})
         elif want_sport:
             cand = [k for k in cand if _sport_match(db[k].get("sport"), want_sport)]
             if not cand:   # 해당 종목 경주 없음(예: 일본경마 오늘 개최 없음) → 타종목 혼입 없이 대기
@@ -7347,6 +7382,64 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     except Exception as _bke:
         print("[유력마 받치기 보존] 스킵(무시):", _bke)
 
+    # ══════════ [역배열 강제 편입·단승 1·2강 반영 (2026-07-19)] ══════════
+    #   서울 2경주 복기(결과 7-5-11): 7번 역배열 42.5%·5번 단승 2.1배 — 둘 다 감지·표시됐지만
+    #   복승 저배당 기준 추천에 미포함. 감지↔추천 단절 해소:
+    #   ① 역배열 30%+ 말 + 시장유력마(단승 최저) 복승 1개 메인 필수 편입.
+    #   ② 단승 1·2강 페어 복승을 추천 조합에 포함(표시로만 끝나던 '유력마 편입' 실효화).
+    #   50배 초과면 복병(★★)으로. 이미 있으면 근거 표기만(중복 없음·무삭제·추가만).
+    try:
+        _win2 = {}
+        for _wk, _wv in (cp.get("single") or {}).items():
+            try:
+                _win2[int(_wk)] = float(_wv)
+            except (TypeError, ValueError):
+                pass
+        _wrank = [n for n, _ in sorted(_win2.items(), key=lambda kv: kv[1])
+                  if (not vs or n in vs) and _win2[n] < OPENING_ODDS]
+        _have_m4 = set(tuple(sorted(int(x) for x in (q.get("combo") or []))) for q in final_q)
+        _sp_have4 = set(tuple(sorted(int(x) for x in (c.get("combo") or []))) for c in (special_q or []))
+
+        def _force_pair(_pa, _pb, _reason, _summary):
+            nonlocal final_q, special_q
+            if _pa is None or _pb is None or _pa == _pb:
+                return
+            _pk4 = tuple(sorted((int(_pa), int(_pb))))
+            _po4 = (curQ or {}).get(_pk4) or (curQ or {}).get((_pk4[1], _pk4[0]))
+            if _pk4 in _have_m4:
+                for _q4 in final_q:               # 이미 메인에 있음 → 근거만 보강
+                    if tuple(sorted(int(x) for x in (_q4.get("combo") or []))) == _pk4 \
+                            and _reason not in (_q4.get("reason") or ""):
+                        _q4["reason"] = (_q4.get("reason") or "") + " · " + _reason
+                return
+            if not _po4:
+                return
+            _it4 = {"combo": list(_pk4), "odds": _po4, "stars": 3, "reason": _reason,
+                    "basis": _combo_basis(list(_pk4)), "summary": _summary}
+            if float(_po4) <= SPECIAL_ODDS_MAX:
+                final_q.append(_it4)
+                _have_m4.add(_pk4)
+            elif _pk4 not in _sp_have4:
+                _it4["stars"] = 2
+                special_q = (special_q or []) + [_it4]
+                _sp_have4.add(_pk4)
+
+        # ① 역배열 유력마 강제 편입
+        _ivf = cp.get("invForce") or None
+        if _ivf and _ivf.get("no") is not None and _wrank:
+            _ino = int(_ivf["no"])
+            _mate = next((n for n in _wrank if n != _ino), None)
+            if _mate is not None:
+                _force_pair(_ino, _mate,
+                            "역배열 유력 강제 편입(강도 %s%%)" % _ivf.get("ratio"),
+                            "감지된 1착 후보를 조합에 반영")
+        # ② 단승 시장 1·2강 페어
+        if len(_wrank) >= 2:
+            _force_pair(_wrank[0], _wrank[1], "시장 단승 1·2강",
+                        "단승 시장 최상위 두 마리 — 유력마 편입 실효화")
+    except Exception as _fie:
+        print("[강제 편입] 스킵(무시):", _fie)
+
     # ══════════ [경륜 추천 모순 수정 (2026-07-19)] ══════════
     #   증상(기후 2경주·경륜 6두): 복승 1순위 5+6(32.9배) · 2순위 4+5(1.7배) — 고배당이 최저배당보다 앞.
     #   원인: [수정4] 유력마 1·2위 강제 최우선(+받치기 보존)이 배당 상한 없이 전 종목 적용
@@ -8492,6 +8585,11 @@ def _dansung_case_record(rk, an, top3):
 def _triple_analyze(rk, rec):
     quin = rec.get("quinella") or []
     exa = rec.get("exacta") or []
+    # [placeholder 배당 필터·3 (2026-07-19)] 발매 전 껍데기 배당(1054.4·9999.9 등 동일 고배당 반복)을
+    #   분석 입력에서 제거 → 유력마 대표배당·복병·크로스역배열·고배당 유력마 감지 전부에서 완전 차단.
+    #   (저장소 원본은 그대로 — 분석 스냅샷만 필터)
+    quin = _drop_placeholder_combos(quin, f" {rk} 복승")
+    exa = _drop_placeholder_combos(exa, f" {rk} 쌍승")
     trio = rec.get("trio") or []
     hist = rec.get("history") or []
     prev = hist[-2] if len(hist) >= 2 else None  # 직전 수집
@@ -10290,6 +10388,21 @@ def _triple_analyze(rk, rec):
                 core_picks["formTopA"] = []
             # [축2전략] 단승(win) 배당맵 주입 — 축1/축2 시장최저 tiebreak용(반환 dict의 single 은 이 호출 이후 세팅되므로 미리 주입).
             core_picks["single"] = {str(k): v for k, v in (curWin or {}).items()}
+            # [역배열 유력마 강제 편입·1 (2026-07-19)] 역배열 강도 30%+ 감지 시 그 말을 _final_picks 에 전달
+            #   (서울 2경주 복기: 7번 역배열 42.5% 감지·표시까지 하고 조합엔 미반영 → 1착 놓침)
+            try:
+                _invf = None
+                _bn = (inverse or {}).get("banner") or {}
+                _rv = _bn.get("reversal") or {}
+                _ld = (inverse or {}).get("invLead") or {}
+                _rr = _rv.get("ratio")
+                _ch = _rv.get("challenger")
+                _cand_no = _ch if _ch is not None else _ld.get("no")
+                if _rr is not None and float(_rr) >= 0.30 and _cand_no is not None:
+                    _invf = {"no": int(_cand_no), "ratio": round(float(_rr) * 100, 1)}
+                core_picks["invForce"] = _invf
+            except Exception:
+                core_picks["invForce"] = None
             core_picks["paceAnalysis"] = pace_analysis             # [시나리오B] 각질 편성 분석 전달(편성 유리 말 선별)
             # [경륜 특화①] 라인 페어(선두+마크 복승) 전달 → _final_picks 경륜 블록에서 가점·추가
             core_picks["keirinLinePairs"] = (keirin_flow_sim or {}).get("linePairs") or []
