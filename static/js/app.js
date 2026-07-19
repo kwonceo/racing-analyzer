@@ -6560,10 +6560,32 @@
     return `<div class="matrix-title" style="font-size:13px;color:#facc15">🔀 복승·쌍승 크로스 역배열 <span class="hint" style="font-weight:400">인기1위+X vs 인기2위+X · 0.3🟡/0.5🟠/0.7🔴 · 🔁양쪽=복승+쌍승 동시</span></div>${rows}`;
   }
 
+  // [경륜 특화②·전개 카드 (2026-07-19)] 서버 keirinFlowSim(라인·페이스·라인페어·경륜장 경향) 렌더.
+  //   경륜 경주에서만 값이 오므로 다른 종목은 자동으로 빈 문자열(무영향·추가만).
+  function renderKeirinFlow(a) {
+    const f = a && a.keirinFlowSim;
+    if (!f) return '';
+    const groups = (f.lineGroups || []).filter((g) => g && g.length).map((g) => g.join('-')).join('  /  ');
+    const pairs = (f.linePairs || []).map((p) =>
+      `<span class="chip" style="border-color:#34d399;color:#34d399;font-weight:800">${esc((p.combo || []).join('+'))}</span>`).join(' ');
+    const fav = (f.favoredHorses || []).join('·');
+    const dark = (f.darkHorses || []).join('·');
+    return `<div style="margin:6px 0;padding:8px 10px;border:2px solid #34d399;border-radius:10px;background:linear-gradient(180deg,rgba(52,211,153,.08),rgba(20,28,43,.6))">
+      <div style="font-size:15px;font-weight:800;color:#34d399">🚴 경륜 전개 예측 <span class="hint" style="font-weight:400;font-size:11px">라인·각질·경륜장 경향</span></div>
+      <div style="font-size:14px;font-weight:800;color:#e2e8f0;margin:4px 0">${esc(f.pace || '')}${f.note ? ' — ' + esc(f.note) : ''}</div>
+      ${groups ? `<div class="hint" style="margin:2px 0">라인 편성: ${esc(groups)}</div>` : ''}
+      ${pairs ? `<div style="margin:4px 0;font-size:13px;color:#e2e8f0">라인 페어(동반 입상 기대): ${pairs}</div>` : ''}
+      ${fav ? `<div style="font-size:13px;color:#a7f3d0;margin:2px 0">전개 유리: <b>${esc(fav)}번</b></div>` : ''}
+      ${dark ? `<div style="font-size:13px;color:#fbbf24;margin:2px 0">💎 복병 후보: <b>${esc(dark)}번</b></div>` : ''}
+      ${f.tendencyNote ? `<div class="hint" style="margin-top:2px">${esc(f.tendencyNote)}</div>` : ''}
+    </div>`;
+  }
+
   function sportAnalysisHTML(a, bsel) {
     const six = a.bmed && a.bmed.sixRacer;
     const parts = [];
     parts.push(renderCorePicks(a));   // [핵심 추천] 딱 이것만(복승 X+Y·삼복승 X+Y+Z) 최상단
+    parts.push(renderKeirinFlow(a));  // [경륜 특화②] 경륜 전개 카드(라인·페이스·라인페어) — 경륜 경주만 표시
     parts.push(renderRaceJudgment(a, bsel));   // [1·2·4번] 경주 판정 크게 + 배팅 배분
     parts.push(renderChaotic(a, bsel));   // [혼전] 상위 배당 근접 시 고배당 포함 삼복승 전략 배너
     parts.push(renderMidHighFavorites(a));   // [💎 2번] 중고배당 유력마 감지 상단 강조 배너(소리·깜빡임)
@@ -6665,6 +6687,7 @@
     const elimHtml = renderEliminationHTML(a.elimination, new Set()).replace('id="elimPanel"', 'id="jpElimPanel"');
     host.innerHTML = `<div class="panel-card">
       ${renderCorePicks(a)}
+      ${renderKeirinFlow(a)}
       ${renderRaceJudgment(a, '#jpBudget')}
       ${renderChaotic(a, '#jpBudget')}
       ${renderForcedTrifecta(a)}

@@ -7369,6 +7369,45 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                     _sp_have2.add(_ck)
                 final_q = _keep_m
                 print(f"[경륜 추천 모순 수정] 고배당 강제조합 {len(_demote)}건 메인→복병 이동(25배 상한)")
+        # [경륜 특화①·라인 페어 반영 (2026-07-19)] 같은 라인(선두+마크) 복승 = 경륜 동반 입상의 핵심.
+        #   ▸ 이미 메인/복병에 있는 조합이면 근거에 '같은 라인' 표기만 추가(무손상).
+        #   ▸ 없으면 배당 조회해 추가: 25배 이하 → 메인(★★★) / 초과 → 복병(★★). 상위 2개 라인만.
+        if _sp == "cycle" and curQ and (cp.get("keirinLinePairs") or []):
+            _sp_have3 = set(tuple(sorted(int(x) for x in (c.get("combo") or []))) for c in (special_q or []))
+            for _lp in (cp.get("keirinLinePairs") or [])[:2]:
+                try:
+                    _lc = tuple(sorted(int(x) for x in (_lp.get("combo") or [])))
+                except (TypeError, ValueError):
+                    continue
+                if len(_lc) != 2:
+                    continue
+                _annot = False
+                for _c in final_q:
+                    if tuple(sorted(int(x) for x in (_c.get("combo") or []))) == _lc:
+                        if "같은 라인" not in (_c.get("reason") or ""):
+                            _c["reason"] = (_c.get("reason") or "") + " · 같은 라인(선두+마크)"
+                        _annot = True
+                for _c in (special_q or []):
+                    if tuple(sorted(int(x) for x in (_c.get("combo") or []))) == _lc:
+                        if "같은 라인" not in (_c.get("reason") or ""):
+                            _c["reason"] = (_c.get("reason") or "") + " · 같은 라인(선두+마크)"
+                        _annot = True
+                if _annot:
+                    continue
+                _lo = curQ.get(_lc) or curQ.get((_lc[1], _lc[0]))
+                if not _lo:
+                    continue
+                _li = {"combo": list(_lc), "odds": _lo,
+                       "reason": "라인 페어 — " + str(_lp.get("label") or "선두+마크"),
+                       "basis": _combo_basis(list(_lc)),
+                       "summary": "경륜 라인 전술(동반 입상 기대)"}
+                if float(_lo) <= _F12_MAIN_CAP:
+                    _li["stars"] = 3
+                    final_q.append(_li)
+                elif _lc not in _sp_have3:
+                    _li["stars"] = 2
+                    special_q = (special_q or []) + [_li]
+                    _sp_have3.add(_lc)
         # ② 경륜·바이크: 메인 배당 낮은순 정렬 + 시장 최저배당 1순위 고정
         if _sp in ("cycle", "bike") and final_q is not None and curQ:
             _mlow, _mlow_o = None, None
@@ -8678,6 +8717,22 @@ def _triple_analyze(rk, rec):
                     len(jp_flow_sim["favoredHorses"]), len(jp_flow_sim["darkHorses"])))
     except Exception as _je:
         print("[일본전개] 실패(무시):", _je)
+    # [경륜 특화①②·전개 시뮬 (2026-07-19)] 경륜(sport=cycle)이고 keirin 전적이 있으면 라인·각질·경향 기반
+    #   전개 예측(keirinFlowSim) + 라인 페어(linePairs)를 추천(_final_picks)에 전달. 기존 로직 무손상(추가만).
+    keirin_flow_sim = None
+    try:
+        if (rec.get("sport") == "cycle" or rec.get("category") == "cycle") and form:
+            _ksrec = _starters_load().get(rk) or {}
+            if _ksrec.get("source") == "keirin" and _ksrec.get("horses"):
+                keirin_flow_sim = _simulate_race_flow_keirin(
+                    _ksrec.get("horses"), _ksrec.get("line") or [], _ksrec.get("tendency") or {},
+                    valid_nos=valid_nos, win_odds=curWin)
+                if keirin_flow_sim:
+                    print("[경륜전개] %s: %s · 라인 %d개 · 페어 %s" % (
+                        rk, keirin_flow_sim["pace"], len(keirin_flow_sim["lineGroups"]),
+                        [p["combo"] for p in keirin_flow_sim["linePairs"]]))
+    except Exception as _kfe:
+        print("[경륜전개] 실패(무시):", _kfe)
     # [역배열 감지] 진짜 역배열 = 쌍승역전만 · 전적 우수하나 시장 비인기는 별도 분류(form 전달)
     inverse = _inverse_arrangement(fav_rank, bool(single_rank), curWin, curQ,
                                    wx_reversals, quin_mismatch, excess, form)
@@ -10151,6 +10206,8 @@ def _triple_analyze(rk, rec):
             # [축2전략] 단승(win) 배당맵 주입 — 축1/축2 시장최저 tiebreak용(반환 dict의 single 은 이 호출 이후 세팅되므로 미리 주입).
             core_picks["single"] = {str(k): v for k, v in (curWin or {}).items()}
             core_picks["paceAnalysis"] = pace_analysis             # [시나리오B] 각질 편성 분석 전달(편성 유리 말 선별)
+            # [경륜 특화①] 라인 페어(선두+마크 복승) 전달 → _final_picks 경륜 블록에서 가점·추가
+            core_picks["keirinLinePairs"] = (keirin_flow_sim or {}).get("linePairs") or []
             _fp = _final_picks(core_picks, curQ, _rec_valid, smart_quinella, max_q=_mainmax,
                                reversal_quinellas=_rev_q, dark_quinellas=_dark_q,
                                signal_horses=_sig_h, sig_meta=_sig_meta, sport=_analyze_sport)
@@ -10343,6 +10400,7 @@ def _triple_analyze(rk, rec):
         "paceAnalysis": pace_analysis,             # [각질편성] 편성 집계·페이스 예측·유불리·시나리오(패널 표시)
         "kraFlowSim": kra_flow_sim,                # [KRA 6단계] 경주 전개 시뮬레이션(선행경합·페이스·복병)
         "jpFlowSim": jp_flow_sim,                  # [작업1] 일본경마 전개 시뮬레이션(각질·상3F 기반·oddspark 전적)
+        "keirinFlowSim": keirin_flow_sim,          # [경륜 특화②] 경륜 전개 시뮬(라인·각질·경륜장 경향 기반)
         "kraJockeyChanges": kra_jockey_changes,    # [KRA 2단계] 이 경주 기수변경 감지 목록
         "kraSectionGait": kra_section_gait,        # [KRA 3단계] 말별 구간지수(선행력·추입력)·각질힌트
         "deadlineCorrected": deadline_corrected,   # [1번] 발주시각 오검출 정정(과거 마감상태 무효화) 발생
@@ -18298,11 +18356,30 @@ def _keirin_autocollect_form(rk, jo, ymd, race):
             "competScore": round(float(r.get("score") or 0), 1), "absGrade": _keirin_grade(r.get("score")),
             # [보완2] 각질 조정 내역: 통합점수 = 競走得点(원) + 각질보너스. 투명하게 분해 표시.
             "styleBonus": round(float(r.get("adjScore") or r.get("score") or 0) - float(r.get("score") or 0), 1),
+            # [경륜 특화③·저장 확장 (2026-07-19)] 파서가 이미 뽑던 필드를 버리지 않고 저장(추가만):
+            #   착순분포(1-2-3-착외)·결정수비율(도주/젖히기/차입/마크%)·급반(S1/A1)·기어배수.
+            "chaku": r.get("chaku"), "kimariteRatio": r.get("kimariteRatio"),
+            "classGrade": r.get("classGrade"), "gear": r.get("gear"),
         } for r in (an.get("ranked") or []) if r.get("car") is not None and r.get("score") is not None]
+        # [경륜 특화④·득점 갭 가점 (2026-07-19)] 득점 1위가 2위와 3점+ 차이면 유력 확신 +5(투명 분해 표시).
+        try:
+            if len(horses) >= 2:
+                _hs = sorted(horses, key=lambda h: h.get("totalScore") or 0, reverse=True)
+                _gap = (_hs[0].get("totalScore") or 0) - (_hs[1].get("totalScore") or 0)
+                if _gap >= 3.0:
+                    _hs[0]["gapBonus"] = 5.0
+                    _hs[0]["totalScore"] = round((_hs[0].get("totalScore") or 0) + 5.0, 1)
+                    print(f"[경륜 득점갭] {rk}: {_hs[0].get('no')}번 득점 1위 갭 {_gap:.1f} → +5 가점")
+        except Exception as _ge:
+            print("[경륜 득점갭] 실패(무시):", _ge)
         if horses:
-            sdb[rk] = {"horses": horses, "t": time.time(), "source": "keirin"}
+            # [경륜 특화①·③] 경주 단위 데이터도 함께 저장: 라인(並び)·경륜장 결정수 경향·총평(파싱분 보존).
+            sdb[rk] = {"horses": horses, "t": time.time(), "source": "keirin",
+                       "line": card.get("line") or [], "tendency": card.get("tendency") or {},
+                       "comment": card.get("comment") or ""}
             _starters_save(sdb)
-            print(f"[경륜 전적·자동] {rk}: {len(horses)}두 수집(競走得点·절대등급 A/B/C/D) → 통합등급 자동 반영")
+            print(f"[경륜 전적·자동] {rk}: {len(horses)}두 수집(競走得点·절대등급 A/B/C/D"
+                  f"{'·라인' + str(card.get('line')) if card.get('line') else ''}) → 통합등급 자동 반영")
         return horses
     except Exception as e:
         print(f"[경륜 전적·자동] {rk} 실패(무시·배당 무영향): {e}")
@@ -21939,6 +22016,97 @@ def _apply_pace_analysis(form, horse_count=None):
 #   한국경마(_simulate_race_flow_kra: KRA 구간지수)에 대응하는 일본경마판.
 #   입력: oddspark 전적(form) — 각질(styleType→_gait_of)·상3F(last3f)·뒷심(backPower)·단승배당(winOdds).
 #   ⚠ 기존 각질편성(_apply_pace_analysis)·form 점수 반영은 그대로 유지. 이 함수는 '패널 표시용 전개 예측(jpFlowSim)'만 추가 산출.
+def _simulate_race_flow_keirin(horses, line=None, tendency=None, valid_nos=None, win_odds=None):
+    """[경륜 특화①②·전개 시뮬레이션 (2026-07-19)] oddspark 출마표 전적(styleType·득점·결정수비율)과
+    라인(並び)·경륜장 결정수 경향으로 경륜 전용 전개 예측 — 한국(_simulate_race_flow_kra)·
+    일본경마(_simulate_race_flow_jp)와 동형 구조.
+      ▸ 라인 그룹: 출마표 라인 순서에서 자력형(선행형/젖히기형) 선수마다 새 그룹 시작(선두=자력·뒤=마크) 휴리스틱.
+      ▸ 페이스: 선행형 3명+ = 주도권 경합(소모전→젖히기·추입 유리) / 1명 = 단독 선행(그 라인 절대 유리).
+      ▸ 라인 페어: 각 라인 (선두, 2번수) 복승 페어 — 경륜 동반 입상의 핵심(linePairs로 추천 반영).
+      ▸ 경륜장 경향: 직근 1년 결정수 비율(도주/젖히기/차입) 최다 유형과 부합하는 각질 강조.
+    반환 {pace, leadCount, lineGroups, linePairs, favoredHorses, darkHorses, note, text} 또는 None."""
+    try:
+        hs = [h for h in (horses or []) if h.get("no") is not None]
+        if valid_nos:
+            hs = [h for h in hs if int(h["no"]) in valid_nos] or hs
+        if len(hs) < 3:
+            return None
+        by_no = {int(h["no"]): h for h in hs}
+        style_of = {int(h["no"]): str(h.get("styleType") or "") for h in hs}
+        leaders = [n for n, s in style_of.items() if "선행" in s]
+        makuri = [n for n, s in style_of.items() if "젖히기" in s]
+        chasers = [n for n, s in style_of.items() if ("추입" in s or "마크" in s)]
+        lead_n = len(leaders)
+        # ── 라인 그룹(휴리스틱: 라인 순서에서 자력형마다 새 그룹) ──
+        groups = []
+        seq = [int(x) for x in (line or []) if int(x) in by_no]
+        if seq:
+            cur = []
+            for n in seq:
+                if ("선행" in style_of.get(n, "") or "젖히기" in style_of.get(n, "")) and cur:
+                    groups.append(cur)
+                    cur = [n]
+                else:
+                    cur.append(n)
+            if cur:
+                groups.append(cur)
+            in_line = set(seq)
+            for n in by_no:
+                if n not in in_line:
+                    groups.append([n])                     # 라인 밖 = 단기(단독)
+        else:
+            groups = [[n] for n in by_no]                  # 라인 정보 없음 → 전원 단기 취급
+        # 그룹 정렬: 선두 선수 총점 높은 라인부터
+        def _gscore(g):
+            return by_no.get(g[0], {}).get("totalScore") or 0
+        groups.sort(key=_gscore, reverse=True)
+        # ── 페이스 판단 ──
+        if lead_n >= 3:
+            pace, pace_note = "하이(주도권 경합)", "선행형 %d명 주도권 소모전 → 젖히기·추입 유리" % lead_n
+            favored = sorted(makuri + chasers, key=lambda n: by_no[n].get("totalScore") or 0, reverse=True)[:3]
+        elif lead_n == 1:
+            _ld = leaders[0]
+            _grp = next((g for g in groups if _ld in g), [_ld])
+            pace, pace_note = "슬로우(단독 선행)", "%d번 단독 선행 — 그 라인 절대 유리" % _ld
+            favored = ([_ld] + [n for n in _grp if n != _ld])[:3]
+        else:
+            pace, pace_note = "보통", "선행형 %d명 — 라인·득점 우위가 관건" % lead_n
+            favored = sorted(by_no, key=lambda n: by_no[n].get("totalScore") or 0, reverse=True)[:3]
+        # ── 경륜장 경향 결합 ──
+        tend_note = ""
+        td = tendency or {}
+        if td:
+            _fav_style = max(td, key=td.get)
+            tend_note = "이 경륜장 직근 1년 '%s' 결정 %.0f%%" % (_fav_style, td[_fav_style])
+            _match = {"도주": leaders, "젖히기": makuri, "차입": chasers}.get(_fav_style) or []
+            for n in sorted(_match, key=lambda n: by_no[n].get("totalScore") or 0, reverse=True):
+                if n not in favored:
+                    favored = (favored + [n])[:4]
+                    break
+        # ── 라인 페어(선두+2번수 복승) ──
+        line_pairs = []
+        for g in groups:
+            if len(g) >= 2:
+                line_pairs.append({"combo": [g[0], g[1]],
+                                   "label": "라인 페어(%d번 %s + %d번 마크)"
+                                            % (g[0], style_of.get(g[0], "자력"), g[1])})
+        # ── 복병: 하위 랭크지만 연대율/결정수 우수 + 페이스 부합 ──
+        ranked = sorted(by_no, key=lambda n: by_no[n].get("totalScore") or 0, reverse=True)
+        darks = []
+        for n in ranked[3:]:
+            h = by_no[n]
+            kr = h.get("kimariteRatio") or {}
+            if (h.get("rentai") or 0) >= 50 or (lead_n >= 3 and (kr.get("차입", 0) + kr.get("젖히기", 0)) >= 50):
+                darks.append(n)
+        text = " · ".join(x for x in [pace_note, tend_note] if x)
+        return {"pace": pace, "leadCount": lead_n, "lineGroups": groups, "linePairs": line_pairs,
+                "favoredHorses": favored, "darkHorses": darks[:2], "note": pace_note,
+                "tendencyNote": tend_note, "text": text}
+    except Exception as _ke:
+        print("[경륜 전개시뮬] 실패(무시):", _ke)
+        return None
+
+
 def _simulate_race_flow_jp(form, valid_nos=None, win_odds=None):
     """[일본경마 전개 시뮬레이션] 각질·상3F로 선행경합→페이스→유리한 말→고배당 복병 예측.
     _simulate_race_flow_kra 와 동일 출력 구조(jpFlowSim). form 없으면 None(조용히 스킵)."""
