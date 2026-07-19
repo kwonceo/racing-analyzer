@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 11,
+ "horse_count": null,
  "result": {
   "1st": 2,
   "2nd": 5,
@@ -365,18 +365,18 @@
  "prediction": {
   "candidates": [
    2,
-   4,
-   7,
    3,
+   4,
    5,
+   7,
    9,
    1,
    6,
    8
   ],
   "eliminated": [
-   11,
-   10
+   10,
+   11
   ],
   "recommend_main": null,
   "recommend_sub": null,
@@ -404,7 +404,7 @@
   "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-19 19:29:00",
+ "saved_at": "2026-07-19 19:35:25",
  "validation": {
   "ok": true,
   "errors": []
