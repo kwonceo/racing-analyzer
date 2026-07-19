@@ -3207,16 +3207,34 @@
       "recommended_hit": true,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1784448544.8810444
+    },
+    {
+      "race": "부산 7경주 1200M",
+      "horse_no": 8,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-19"
+    },
+    {
+      "race": "부산 7경주 1200M",
+      "horse_no": 11,
+      "recent_avg": 5.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-19"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 737,
-      "hit": 167
+      "count": 741,
+      "hit": 168
     },
     "전체부진마": {
-      "count": 1184,
-      "hit": 327
+      "count": 1191,
+      "hit": 329
     },
     "대규모급락": {
       "count": 19,
@@ -3226,8 +3244,8 @@
       "hit_rate": 26.3
     },
     "이상감지동반": {
-      "count": 447,
-      "hit": 160
+      "count": 450,
+      "hit": 161
     },
     "급락동반": {
       "count": 101,
