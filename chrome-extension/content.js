@@ -1974,13 +1974,16 @@
         // [v2.1.135 진행 중 사용자 우선] 유예(12초)는 '새 수집'만 막고, 이미 시작된 사이클은 그대로
         //   쌍승을 클릭해 "복승 클릭 → 몇 초 뒤 쌍승 전환" 증상을 만들었다 → 사이클 도중 신뢰 클릭이
         //   감지되면 남은 탭 이동(쌍승·삼복승)을 이번 사이클에서 포기하고 사용자 탭으로 즉시 복귀.
-        // [역할 분담 완성 v2.1.137] 일본지방·경륜은 서버(oddspark)가 쌍승·삼복승을 직접 수집(betType 실측
-        //   반영) → 확장은 '사설 복승만' 담당, 쌍승·삼복승 탭 클릭 자체를 생략(탭 안정·오버레이 안정).
-        //   중앙(JRA)은 서버 수집 불가라 기존대로 확장이 쌍승까지 수집(예외 유지).
-        const _srvSideTypes = (category === 'japan_local' || category === 'cycle');
+        // [역할 분담 완성 v2.1.137→138] 일본지방·경륜은 서버(oddspark)가 쌍승·삼복승을 직접 수집(betType
+        //   실측 반영) → 확장은 '사설 복승만' 담당, 쌍승·삼복승 탭 클릭 자체를 생략(탭 안정·오버레이 안정).
+        //   [v2.1.138 사용자 지시] 중앙(JRA)도 탭 클릭 제거 — 확장은 전 종목 복승만(탭 클릭 완전 제로).
+        //   ⚠ JRA 쌍승은 서버(oddspark) 미지원이라 미수집이 됨(쌍승역전 신호는 JRA 한정 약화) —
+        //   탭 안정을 우선한 사용자 결정. 기존 수집 코드는 보존(게이트만·무삭제).
+        const _srvSideTypes = (category === 'japan_local' || category === 'cycle' || category === 'japan_central');
         if (_srvSideTypes) {
-          console.log('[역할 분담] ' + CATEGORY_LABEL[category] + ' → 쌍승·삼복승은 서버(oddspark) 담당 — 확장은 사설 복승만(탭 고정)');
-          _userMidAbort = true;   // 삼복승 게이트도 함께 생략(서버 담당)
+          console.log('[역할 분담] ' + CATEGORY_LABEL[category] + ' → 확장은 사설 복승만(탭 고정)'
+            + (category === 'japan_central' ? ' · JRA 쌍승 미수집(서버 미지원·탭 안정 우선)' : ' · 쌍승·삼복승은 서버(oddspark) 담당'));
+          _userMidAbort = true;   // 삼복승 게이트도 함께 생략
         } else if (_quietMode || _lastUserTabClick > _cycleStart) {
           if (!_quietMode) console.log('[사용자 우선] 수집 도중 탭 직접 클릭 감지 → 쌍승·삼복승 이번 사이클 생략, 사용자 탭 유지(복승 수집분은 전송)');
           try {
