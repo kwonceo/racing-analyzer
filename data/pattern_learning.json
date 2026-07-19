@@ -3126,16 +3126,34 @@
         "복승이상감지"
       ],
       "date": "2026-07-19"
+    },
+    {
+      "race": "부산 5경주",
+      "horse_no": 2,
+      "recent_avg": 4.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-19"
+    },
+    {
+      "race": "부산 5경주",
+      "horse_no": 4,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-19"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 728,
-      "hit": 165
+      "count": 733,
+      "hit": 166
     },
     "전체부진마": {
-      "count": 1159,
-      "hit": 320
+      "count": 1165,
+      "hit": 322
     },
     "대규모급락": {
       "count": 18,
@@ -3145,8 +3163,8 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 431,
-      "hit": 155
+      "count": 432,
+      "hit": 156
     },
     "급락동반": {
       "count": 93,

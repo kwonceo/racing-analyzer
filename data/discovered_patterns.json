@@ -1,6 +1,6 @@
 {
- "generated_at": 1784445230.130831,
- "races_with_result": 809,
+ "generated_at": 1784445265.7579372,
+ "races_with_result": 810,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -10,8 +10,8 @@
    "key": "timing:T-2분",
    "desc": "급락이 T-2분에 발생한 경주",
    "rate": 60.0,
-   "baseline": 29.2,
-   "lift": 30.8,
+   "baseline": 29.1,
+   "lift": 30.9,
    "support": 25,
    "hit": 15
   },
@@ -20,7 +20,7 @@
    "key": "timing:T-1분",
    "desc": "급락이 T-1분에 발생한 경주",
    "rate": 56.9,
-   "baseline": 29.2,
+   "baseline": 29.1,
    "lift": 27.8,
    "support": 72,
    "hit": 41
@@ -30,7 +30,7 @@
    "key": "had_drop",
    "desc": "급락(자금유입) 동반 경주",
    "rate": 49.8,
-   "baseline": 29.2,
+   "baseline": 29.1,
    "lift": 20.7,
    "support": 313,
    "hit": 156
@@ -40,7 +40,7 @@
    "key": "strong_drop",
    "desc": "30%+ 강한 급락 동반 경주",
    "rate": 48.9,
-   "baseline": 29.2,
+   "baseline": 29.1,
    "lift": 19.7,
    "support": 268,
    "hit": 131
@@ -50,8 +50,8 @@
    "key": "timing:T-10분",
    "desc": "급락이 T-10분에 발생한 경주",
    "rate": 47.9,
-   "baseline": 29.2,
-   "lift": 18.7,
+   "baseline": 29.1,
+   "lift": 18.8,
    "support": 48,
    "hit": 23
   },
@@ -60,7 +60,7 @@
    "key": "timing:T-3분",
    "desc": "급락이 T-3분에 발생한 경주",
    "rate": 46.9,
-   "baseline": 29.2,
+   "baseline": 29.1,
    "lift": 17.7,
    "support": 32,
    "hit": 15
@@ -70,7 +70,7 @@
    "key": "very_strong_drop",
    "desc": "50%+ 대량 급락 동반 경주",
    "rate": 45.7,
-   "baseline": 29.2,
+   "baseline": 29.1,
    "lift": 16.5,
    "support": 208,
    "hit": 95
@@ -80,7 +80,7 @@
    "key": "timing:T-5분",
    "desc": "급락이 T-5분에 발생한 경주",
    "rate": 45.2,
-   "baseline": 29.2,
+   "baseline": 29.1,
    "lift": 16.0,
    "support": 31,
    "hit": 14
@@ -90,7 +90,7 @@
    "key": "had_reversal",
    "desc": "쌍승 역전 동반 경주",
    "rate": 42.9,
-   "baseline": 29.2,
+   "baseline": 29.1,
    "lift": 13.7,
    "support": 7,
    "hit": 3
@@ -106,5 +106,5 @@
    "support": 428
   }
  ],
- "baseline_hit_rate": 29.2
+ "baseline_hit_rate": 29.1
 }
