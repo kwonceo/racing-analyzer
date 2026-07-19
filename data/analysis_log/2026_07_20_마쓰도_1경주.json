@@ -6,7 +6,7 @@
  "date": "2026-07-20",
  "race": "마쓰도 1경주",
  "analyzed_at": "08:38:30",
- "updated_at": "08:44:08",
+ "updated_at": "08:44:23",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -780,6 +780,33 @@
    ],
    "confidence": 25.0,
    "reason": "추천 미적중"
+  },
+  "failure": {
+   "type": "전적오판",
+   "label": "유형4 · 전적 오판",
+   "focus": 6,
+   "winner": 6,
+   "missed": [
+    6
+   ],
+   "reason": "6번은 배당 변화 없이 입상 → 배당은 정상, 전적 판단 실패(이변)",
+   "improvement": "전적 하위라도 최근 컨디션·거리/기수 변경 반영 · 이변 조건 학습 강화",
+   "missed_signal": "배당 신호 없음(전적 이변)",
+   "timeline": [
+    {
+     "mb": -3,
+     "odds": 41.0,
+     "pct": null,
+     "time": "08:42:17",
+     "after": true,
+     "src": "복승"
+    }
+   ],
+   "maxDrop": 0,
+   "buriedBy": null,
+   "afterClose": true,
+   "massDrop": false,
+   "winnerSignal": false
   }
  },
  "profit": null,
