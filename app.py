@@ -20129,6 +20129,10 @@ def _kra_backfill_loop():
         except Exception as e:
             print("[일본 결과 백필] 루프 오류(무시):", e)
         try:
+            _keirin_result_backfill_once()    # [경륜] oddspark RaceKekka 결과 백필(공개페이지·20분 주기)
+        except Exception as e:
+            print("[경륜 결과 백필] 루프 오류(무시):", e)
+        try:
             _jp_form_backfill_once()          # [일본 NAR 전적] board 무관·raceKey 기반 oddspark 전적 백필(확장 의존 제거)
         except Exception as e:
             print("[일본 전적 백필] 루프 오류(무시):", e)
@@ -20252,6 +20256,195 @@ def _keiba_result_top3(baba, ymd, rno, timeout=15):
         return _keiba_parse_result(_keiba_decode(raw))
     except Exception:
         return None
+
+
+# ══════════════ [경륜 결과 백필 (2026-07-19)] oddspark RaceKekka.do — 공개 결과 페이지(로그인 불필요) ══════════════
+#   경륜만 결과 자동수집이 없어(확장 활성탭 의존) 오늘 20경주 결과가 0건이던 문제 해결. KRA·NAR 백필과 동형.
+#   ⚠ joCode 정적 맵 오매핑 의심(기후 04 미개최·jo21=야히코 실측) → ①오늘 스케줄(확장 경유 실코드) 우선
+#     ②결과 페이지의 경륜장명을 기대 경륜장과 대조(불일치 시 학습 안 하고 경고) — 런타임 이중 방어.
+def _keirin_jo_today(venue):
+    """경륜장명 → joCode. 오늘 스케줄(확장이 보낸 실코드) 우선, 정적 맵(_keirin_jo_from_venue) 폴백.
+    반환 (joCode|None, from_schedule:bool)."""
+    try:
+        std = _track_norm(venue)
+        for tr in (_schedule_load() or {}).get("tracks", []):
+            if (tr.get("sport") == "cycle") and tr.get("joCode") and _track_norm(tr.get("venue") or "") == std:
+                return str(tr["joCode"]), True
+    except Exception:
+        pass
+    return _keirin_jo_from_venue(venue), False
+
+
+def _keirin_result_parse(html):
+    """RaceKekka.do HTML → {venue, top3:[차번...], quinellaOdds}. 방어적 파싱(구조 변형 대비).
+    착순 표: 행 [착순, 차번, 선수명, ...] — 착순 1~9·차번 1~9 인 행만 채택 후 착순 정렬."""
+    out = {"venue": "", "top3": [], "quinellaOdds": None}
+    mt = re.search(r"<title>(.*?)</title>", html, re.S)
+    if mt:
+        mv = re.search(r"([一-龯ぁ-んァ-ヶー]+?)競輪", _kstrip(mt.group(1)))
+        if mv:
+            out["venue"] = mv.group(1)
+    placed = {}
+    try:
+        for row in _keirin_table_rows(html):
+            if len(row) < 3:
+                continue
+            c0, c1 = str(row[0]).strip(), str(row[1]).strip()
+            if c0.isdigit() and c1.isdigit() and 1 <= int(c0) <= 9 and 1 <= int(c1) <= 9:
+                p = int(c0)
+                if p not in placed:
+                    placed[p] = int(c1)
+    except Exception:
+        pass
+    if placed and 1 in placed and 2 in placed:
+        out["top3"] = [placed.get(1), placed.get(2), placed.get(3)]
+    # 2車複 환급: '2車複 3=5 360円' / '2車複 3-5 360円' 류 → 100엔 기준 배당(360円=3.6배)
+    try:
+        body = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", _htmllib.unescape(html)))
+        mq = re.search(r"2車複[^0-9]{0,10}(\d)\s*[-=＝]\s*(\d)\s*([\d,]+)\s*円", body)
+        if mq:
+            out["quinellaOdds"] = round(int(mq.group(3).replace(",", "")) / 100.0, 1)
+    except Exception:
+        pass
+    return out
+
+
+def _keirin_result_top3(jo, ymd, rno, expect_venue=None):
+    """경륜 결과 1경주 조회 → {ok, top3, quinellaOdds, venue} 또는 {error}. 경륜장명 불일치 시 학습 차단."""
+    try:
+        html = _keirin_fetch("https://www.oddspark.com/keirin/RaceKekka.do?joCode=%s&kaisaiBi=%s&raceNo=%s"
+                             % (jo, ymd, rno))
+    except Exception as e:
+        return {"error": "fetch 실패: %s" % e}
+    if "開催情報がありません" in html:
+        return {"error": "개최정보 없음(joCode·날짜 확인)"}
+    parsed = _keirin_result_parse(html)
+    if expect_venue and parsed.get("venue") and _track_norm(parsed["venue"]) != _track_norm(expect_venue):
+        return {"error": "joCode 불일치(기대 %s · 실제 %s) — 학습 차단" % (expect_venue, parsed["venue"]),
+                "wrongVenue": parsed["venue"]}
+    if not parsed.get("top3") or parsed["top3"][0] is None or parsed["top3"][1] is None:
+        return {"error": "결과 미게시/파싱 실패", "venue": parsed.get("venue")}
+    return {"ok": True, "top3": parsed["top3"], "quinellaOdds": parsed.get("quinellaOdds"),
+            "venue": parsed.get("venue")}
+
+
+def _keirin_result_backfill_once(date=None, verbose=True):
+    """[경륜 결과 백필·1회] 당일 분석됐으나 결과 없는 '경륜' 경주를 RaceKekka 착순으로 자동 수집→학습.
+    경륜 판정: 오늘 스케줄 cycle 트랙에 있거나 경륜 전용 지명(_KEIRIN_ONLY_RE) — JRA 중복 지명(하코다테 등)은
+    스케줄 cycle 에 있을 때만 대상(경마 결과 오학습 방어). 반환 {date,tried,filled,done,failed}."""
+    date = date or time.strftime("%Y-%m-%d", time.localtime())
+    ymd = date.replace("-", "")
+    try:
+        missing = (_missing_results(date) or {}).get("missing", [])
+    except Exception as e:
+        return {"date": date, "tried": 0, "filled": 0, "error": "missing 조회 실패: %s" % e}
+    tried = filled = 0
+    done_list, fail_list = [], []
+    for m in missing:
+        rk = str(m.get("raceKey") or "")
+        if not rk or _KRA_TRACK_RE.search(rk):
+            continue
+        venue, rno = _area_num(rk)
+        if not venue or not rno:
+            continue
+        jo, from_sched = _keirin_jo_today(venue)
+        if not jo:
+            continue                                     # 경륜장 아님(경마 등) → NAR/KRA 백필 담당
+        if not from_sched and not _KEIRIN_ONLY_RE.search(rk):
+            continue                                     # 중복 지명(하코다테 JRA 등) 오수집 방어
+        tried += 1
+        try:
+            r = _keirin_result_top3(jo, ymd, str(rno), expect_venue=venue)
+            if not r.get("ok"):
+                fail_list.append({"raceKey": rk, "joCode": jo, "error": r.get("error")})
+                continue
+            top3 = [x for x in r["top3"] if x is not None]
+            result = {"1st": r["top3"][0], "2nd": r["top3"][1], "3rd": r["top3"][2]}
+            if r.get("quinellaOdds") is not None:
+                result["payouts"] = {"quinella": r["quinellaOdds"]}
+            _apply_result_learning(rk, result, top3)
+            filled += 1
+            done_list.append({"raceKey": rk, "joCode": jo, "top3": r["top3"],
+                              "quinellaOdds": r.get("quinellaOdds")})
+        except Exception as e:
+            fail_list.append({"raceKey": rk, "joCode": jo, "error": str(e)})
+    if verbose and (tried or filled):
+        print("[경륜 결과 백필] %s: 시도 %d · 성공 %d · 실패 %d"
+              % (date, tried, filled, tried - filled))
+        for f in fail_list[:5]:
+            print("  ↳ 실패:", f.get("raceKey"), "-", f.get("error"))
+    return {"date": date, "tried": tried, "filled": filled,
+            "done": done_list, "failed": fail_list}
+
+
+@app.route("/api/keirin/today-stats")
+def keirin_today_stats():
+    """[오늘 성적 요약 (2026-07-19)] 오늘 경륜 결과 파일 집계 → {races, hits, hitRate, avgOdds}.
+    적중 = result_analysis.main_hit(복승 메인·적중판정 기준 불변). 평균배당 = 적중 경주 복승 배당 평균."""
+    date = request.args.get("date") or time.strftime("%Y-%m-%d")
+    prefix = date.replace("-", "_")
+    races = hits = 0
+    odds_list = []
+    rows = []
+    try:
+        cyc_venues = set()
+        for tr in (_schedule_load() or {}).get("tracks", []):
+            if tr.get("sport") == "cycle" and tr.get("venue"):
+                cyc_venues.add(_track_norm(tr["venue"]))
+        for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
+            if not fn.startswith(prefix) or not fn.endswith(".json"):
+                continue
+            try:
+                doc = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            rk = doc.get("raceKey") or doc.get("race_id") or fn
+            venue = _area_num(str(rk))[0] or ""
+            is_cycle = (doc.get("sport") == "cycle" or doc.get("category") == "cycle"
+                        or _track_norm(venue) in cyc_venues or _KEIRIN_ONLY_RE.search(str(rk)))
+            if not is_cycle or _KRA_TRACK_RE.search(str(rk)):
+                continue
+            races += 1
+            ra = doc.get("result_analysis") or {}
+            hit = bool(ra.get("main_hit"))
+            if hit:
+                hits += 1
+                po = (doc.get("result") or {}).get("payouts") or doc.get("payouts") or {}
+                qo = po.get("quinella") if isinstance(po, dict) else None
+                if isinstance(qo, (int, float)) and qo > 0:
+                    odds_list.append(float(qo))
+            r = doc.get("result") or {}
+            rows.append({"raceKey": rk, "hit": hit,
+                         "top3": [r.get("1st"), r.get("2nd"), r.get("3rd")]})
+    except Exception as e:
+        return jsonify({"date": date, "error": str(e), "races": races, "hits": hits}), 200
+    return jsonify({"date": date, "races": races, "hits": hits,
+                    "hitRate": (round(hits / races * 100) if races else 0),
+                    "avgOdds": (round(sum(odds_list) / len(odds_list), 1) if odds_list else None),
+                    "rows": rows})
+
+
+@app.route("/api/keirin/results/backfill", methods=["GET", "POST"])
+def keirin_results_backfill():
+    """[경륜 결과 백필] GET=대상 미리보기 · POST=실제 수집·학습(즉시 실행). ?date=YYYY-MM-DD 지정 가능."""
+    date = (request.args.get("date") if request.method == "GET" else (request.json or {}).get("date"))
+    d = date or time.strftime("%Y-%m-%d")
+    if request.method == "GET":
+        cand = []
+        for m in (_missing_results(d) or {}).get("missing", []):
+            rk = str(m.get("raceKey") or "")
+            if not rk or _KRA_TRACK_RE.search(rk):
+                continue
+            venue, rno = _area_num(rk)
+            if not venue or not rno:
+                continue
+            jo, from_sched = _keirin_jo_today(venue)
+            if jo and (from_sched or _KEIRIN_ONLY_RE.search(rk)):
+                cand.append({"raceKey": rk, "joCode": jo, "raceNo": rno,
+                             "joSource": "스케줄" if from_sched else "정적맵"})
+        return jsonify({"date": d, "targets": cand, "count": len(cand),
+                        "hint": "POST 로 실행하면 수집·학습까지 진행합니다."})
+    return jsonify(_keirin_result_backfill_once(d))
 
 
 def _jp_result_backfill_once(date=None, verbose=True):
@@ -24357,6 +24550,32 @@ def _card_conf_value(conf):
     return lv
 
 
+def _race_result_summary(key):
+    """[카드 적중 표시 (2026-07-19)] 결과 파일 → {top3, hit(복승), subHit, recommend, quinellaOdds} 또는 None.
+    적중 판정은 결과 저장 시 계산된 result_analysis.main_hit(적중판정 기준 불변) 사용."""
+    try:
+        _rid, _ = _race_result_id(key)
+        _rp = os.path.join(RACE_RESULTS_DIR, _rid + ".json")
+        if not os.path.exists(_rp):
+            _rp = _race_result_path(key) if callable(globals().get("_race_result_path")) else None
+            if not _rp or not os.path.exists(_rp):
+                return None
+        _doc = json.load(open(_rp, encoding="utf-8"))
+        _r = _doc.get("result") or {}
+        _t3 = [_r.get("1st"), _r.get("2nd"), _r.get("3rd")]
+        if _t3[0] is None:
+            return None
+        _ra = _doc.get("result_analysis") or {}
+        _pm = ((_doc.get("prediction") or {}).get("recommend_main") or {})
+        _po = _r.get("payouts") or _doc.get("payouts") or {}
+        return {"top3": _t3, "hit": bool(_ra.get("main_hit")), "subHit": bool(_ra.get("sub_hit")),
+                "recommend": _pm.get("combo"), "hitReason": _ra.get("hit_reason"),
+                "missReason": _ra.get("miss_reason"),
+                "quinellaOdds": (_po.get("quinella") if isinstance(_po, dict) else None)}
+    except Exception:
+        return None
+
+
 _MULTI_CARD_CACHE = {}   # [수집 누락 긴급수정 2026-07-19] {key: (built_t, rec_t, card)} 카드 15초 캐시
 #   대시보드 폴링(30초)마다 수집 경주 전부를 _triple_analyze(무거움: KRA API·전적·전개) 재계산 →
 #   개최 많은 날 응답이 수십 초로 늘어나 카드가 늦거나 이전 화면에 머물던 문제. rec.t(새 수집) 변경 시엔 즉시 재계산.
@@ -24436,6 +24655,13 @@ def _multi_card(key, rec):
         "afterClose": bool(an.get("afterClose")),
         "updatedSecondsAgo": int(now - (rec.get("t") or now)),
     }
+    # [카드 적중 표시 (2026-07-19)] 결과가 있으면 ✅적중/❌미적중 배지 데이터 부가(카드 색상은 프론트)
+    try:
+        _rs = _race_result_summary(key)
+        if _rs:
+            card["result"] = _rs
+    except Exception:
+        pass
     try:
         _MULTI_CARD_CACHE[key] = (time.time(), _rt, card)   # [카드 캐시] 성공 카드만 저장
         if len(_MULTI_CARD_CACHE) > 300:                     # 과거 경주 캐시 무한증가 방지
@@ -24611,6 +24837,13 @@ def multi_race_detail(key):
         an = _triple_analyze(key, rec)
     except Exception as e:
         return jsonify({"error": "분석 실패: %s" % e}), 200
+    # [카드 적중 표시 (2026-07-19)] 상세에도 결과·적중 대조 데이터 부가(있을 때만·추가 필드)
+    try:
+        _rs = _race_result_summary(key)
+        if _rs:
+            an["raceResult"] = _rs
+    except Exception:
+        pass
     return jsonify(an)
 
 

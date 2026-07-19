@@ -65,6 +65,15 @@
   <main class="app-main">
     <!-- 한국경마 -->
     <section id="tab-korea" class="tab-panel active">
+      <!-- [한국경마 실시간 분석 (2026-07-19)·긴급2 위치 이동] 탭 열면 실시간 분석이 먼저 보이도록 최상단 배치.
+           내용·기능은 그대로(하단→상단 이동만). PDF 출주표 분석은 바로 아래 유지(무삭제). -->
+      <div class="panel-card">
+        <h2>🇰🇷 실시간 분석 <span class="hint" style="font-weight:400">현재 경주 배당 기반 · 30초 자동 갱신 · 배당 실시간 교체</span></h2>
+        <div class="cfg-row" style="align-items:center;margin:4px 0 8px">
+          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-korea" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+        </div>
+        <div id="sportReport-korea" class="report-area"><p class="hint">🇰🇷 한국 경주 배당 수집이 시작되면 실시간 이상감지·추천이 표시됩니다. (배당판 또는 KRA 자동수집)</p></div>
+      </div>
       <div class="panel-card">
         <h2>한국경마 출주표 분석</h2>
         <p class="hint">KRA 출주표는 한글이 벡터로 그려져 텍스트 추출이 불가합니다. 각 페이지를 이미지로 렌더링해 서버 AI Vision으로 판독합니다.</p>
@@ -127,16 +136,6 @@
       </div>
       <div id="koreaReport" class="report-area"></div>
       <div id="koreaOddsStatus" style="margin:10px 0"></div>
-      <!-- [한국경마 실시간 분석 (2026-07-19)] 경륜 탭과 동일 방식 — 현재 한국 경주의 배당 기반
-           실시간 분석(🎯 핵심 추천·⭐ 유력마 TOP5·💎 복병·🚨 이상감지)을 30초 자동 갱신.
-           기존 PDF 분석(위 koreaReport)은 그대로 유지 — 하단에 추가만. -->
-      <div class="panel-card" style="margin-top:12px">
-        <h2>🇰🇷 실시간 분석 <span class="hint" style="font-weight:400">현재 경주 배당 기반 · 30초 자동 갱신</span></h2>
-        <div class="cfg-row" style="align-items:center;margin:4px 0 8px">
-          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-korea" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
-        </div>
-        <div id="sportReport-korea" class="report-area"><p class="hint">🇰🇷 한국 경주 배당 수집이 시작되면 실시간 이상감지·추천이 표시됩니다. (배당판 또는 KRA 자동수집)</p></div>
-      </div>
       <!-- [보완] 수동 발주시각: 라이브 배당판 없이 PDF 사전분석만 볼 때도 마감 전 3단계 알림 발동 -->
       <div class="cfg-row" style="margin:6px 0">
         <label class="hint">⏰ 발주시각(수동)
@@ -305,6 +304,8 @@
           <label class="hint">💰 베팅 예산(원) <input id="sportBudget-cycle" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
         </div>
       </div>
+      <!-- [오늘 성적 요약 (2026-07-19)] 오늘 경륜 추천·적중·적중률·평균배당 — 결과 백필과 연동 자동 갱신 -->
+      <div id="keirinTodayStats" style="margin:6px 0 10px;padding:10px 12px;border:1px solid #38d39f;border-radius:10px;background:rgba(56,211,159,.07)"><span class="hint">🚴 오늘 성적 집계 준비 중…</span></div>
       <div id="sportReport-cycle" class="report-area"><p class="hint">🚴 경륜 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
       <!-- [경륜 출마표 분석] oddspark 선수 전적 자동 수집·분석 -->
       <div class="panel-card" style="margin-top:12px">

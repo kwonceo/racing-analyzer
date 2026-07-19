@@ -1916,15 +1916,28 @@
     const mhLine = mh.length ? `<div style="margin:3px 0;font-size:12px;color:#f0abfc;font-weight:700">💎 ${mh.map((m) => `${m.no}번(${m.odds}배)`).join(' · ')}</div>` : '';
     const borderW = mh.length ? '3px' : '2px';
     const spLabel = _multiSportLabel(c.sport);
-    return `<div data-mkey="${esc(c.raceKey)}" title="클릭 → 상세 분석" style="cursor:pointer;border:${borderW} solid ${mh.length ? '#f0abfc' : col};border-radius:10px;padding:10px;background:${mh.length ? 'rgba(240,171,252,.08)' : bg}">
+    // [카드 적중 표시 (2026-07-19)] 결과가 있으면 ✅적중(초록 #3B6D11)/❌미적중(회색) 테두리+배지+착순 한 줄
+    const rs = c.result;
+    let cardBorder = `${borderW} solid ${mh.length ? '#f0abfc' : col}`;
+    let cardBg = mh.length ? 'rgba(240,171,252,.08)' : bg;
+    let resBadge = '', resLine = '';
+    if (rs && rs.top3 && rs.top3[0] != null) {
+      cardBorder = rs.hit ? '3px solid #3B6D11' : '2px solid #6b7280';
+      cardBg = rs.hit ? 'rgba(59,109,17,.14)' : 'rgba(107,114,128,.10)';
+      resBadge = rs.hit
+        ? '<span style="background:#3B6D11;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">✅ 적중!</span>'
+        : '<span style="background:#6b7280;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">❌ 미적중</span>';
+      resLine = `<div style="margin:3px 0;font-size:12px;font-weight:800;color:${rs.hit ? '#7fd14f' : '#9ca3af'}">📊 결과 ${rs.top3.filter((x) => x != null).join('→')}${rs.recommend ? ` · 추천 ${(rs.recommend || []).join('+')}${rs.hit ? ' ✅' : ' ❌'}` : ''}${rs.hit && rs.quinellaOdds ? ` (${rs.quinellaOdds}배)` : ''}</div>`;
+    }
+    return `<div data-mkey="${esc(c.raceKey)}" title="클릭 → 상세 분석" style="cursor:pointer;border:${cardBorder};border-radius:10px;padding:10px;background:${cardBg}">
       <div style="display:flex;align-items:center;gap:6px">
         <span style="font-size:11px">${spLabel}</span>
         <b style="font-size:15px;color:#e2e8f0">${esc(c.venue || '')} ${c.raceNo}R</b>
-        ${mhBadge}${anBadge}
+        ${resBadge}${mhBadge}${anBadge}
         <span style="flex:1"></span>
         <b style="color:${col};font-size:13px">${c.urgency === 'urgent' ? '⚡ ' : ''}${leftTxt}</b>
       </div>
-      ${mhLine}
+      ${resLine}${mhLine}
       <div class="hint" style="font-size:11px;margin:2px 0">발주 ${esc(c.postTime || '?')}${_confChipText(c.confidence)}</div>
       <div style="margin:4px 0"><span class="hint" style="font-size:11px">⭐ 유력마 </span><b style="color:#4ea1ff">${esc(keyH)}</b></div>
       ${sigs}
@@ -2114,8 +2127,48 @@
     _krRecoRefresh(key);                                       // 기준 조합 설정(이후 변경 감지)
     _krOddsTimer = setInterval(() => { _krLiveOddsRefresh(key); _krRecoRefresh(key); }, 30000);
   }
+  // [카드 적중 표시·상세 대조 (2026-07-19)] 결과가 있으면 상세 맨 위에 '결과 vs 우리 추천' 복기 블록
+  function _renderResultCompare(a) {
+    const rs = a && a.raceResult;
+    if (!rs || !rs.top3 || rs.top3[0] == null) return '';
+    const t3 = rs.top3.filter((x) => x != null);
+    const fq = (((a.corePicks || {}).finalQuinellas) || []).slice(0, 3);
+    const winSet = t3.slice(0, 2).map(Number).sort((x, y) => x - y).join('+');
+    const CIRC = ['①', '②', '③'];
+    const qRows = fq.length ? fq.map((q, i) => {
+      const ck = (q.combo || []).map(Number).sort((x, y) => x - y).join('+');
+      const ok = ck === winSet;
+      return `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${ok ? '#7fd14f' : '#9ca3af'}">복승 ${CIRC[i] || (i + 1)} ${esc(ck)} ${ok ? '✅ 적중!' : '❌'}</div>`;
+    }).join('') : (rs.recommend ? `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${rs.hit ? '#7fd14f' : '#9ca3af'}">복승 ${esc((rs.recommend || []).join('+'))} ${rs.hit ? '✅ 적중!' : '❌'}</div>` : '');
+    const why = rs.hit
+      ? `<div style="font-size:14px;color:#a7f3d0;margin-top:4px">💡 ${esc(rs.hitReason || '추천 조합이 1·2착과 일치')}</div>`
+      : `<div style="font-size:14px;color:#fca5a5;margin-top:4px">💡 정답 복승 ${esc(winSet)}${rs.missReason ? ` — ${esc(rs.missReason)}` : ' — 추천과 차이'}</div>`;
+    return `<div style="margin:4px 0 8px;padding:12px 14px;border:3px solid ${rs.hit ? '#3B6D11' : '#6b7280'};border-radius:12px;background:${rs.hit ? 'rgba(59,109,17,.14)' : 'rgba(107,114,128,.10)'}">
+      <div style="font-size:16px;font-weight:900;color:${rs.hit ? '#7fd14f' : '#cbd5e1'}">${rs.hit ? '✅ 적중!' : '❌ 미적중'} — 📊 결과 ${t3.join('→')}${rs.quinellaOdds ? ` · 복승 ${winSet} (${rs.quinellaOdds}배)` : ` · 복승 ${winSet}`}</div>
+      <div style="margin-top:6px">${qRows}</div>
+      ${why}
+    </div>`;
+  }
+
+  // [오늘 성적 요약 (2026-07-19)] 경륜 탭 상단 — 오늘 X경주·적중 X·적중률·평균배당(60초 갱신)
+  async function loadKeirinTodayStats() {
+    const el = document.getElementById('keirinTodayStats');
+    if (!el) return;
+    try {
+      const d = await (await fetch('/api/keirin/today-stats')).json();
+      if (!d || !d.races) {
+        el.innerHTML = '<span class="hint">🚴 오늘 성적 — 결과 수집 대기 중(20분 주기 자동 백필)</span>';
+        return;
+      }
+      el.innerHTML = `<b style="color:#38d39f;font-size:15px">🚴 경륜 오늘 성적</b>
+        <span style="font-size:14px;font-weight:800;color:#e2e8f0;margin-left:10px">추천 ${d.races}경주 · 적중 ${d.hits}경주</span>
+        <span style="font-size:14px;font-weight:800;color:#ffd24f;margin-left:10px">적중률 ${d.hitRate}%${d.avgOdds != null ? ` · 평균배당 ${d.avgOdds}배` : ''}</span>`;
+    } catch (_) { /* 다음 주기 */ }
+  }
+
   // [공용 렌더러] openMultiDetail 과 30초 재조회가 같은 화면을 그리도록 추출(동작 동일·중복 방지)
   function _buildMultiDetailHtml(key, a) {
+    const compare = _renderResultCompare(a);   // [적중 대조] 결과 있으면 최상단(전 종목)
     let html = '';
     const _isKr = (a.category === 'korea') || (typeof jpIsKoreaName === 'function' && jpIsKoreaName(key));
     if (_isKr) {
@@ -2127,6 +2180,7 @@
     if (!html) {
       try { html = sportAnalysisHTML(a); } catch (_) { html = '<p class="hint">렌더 오류</p>'; }
     }
+    html = compare + html;
     html += `<div style="margin-top:10px"><button class="btn btn-primary" style="min-height:56px;font-size:15px" onclick="document.querySelector('.tab-btn[data-tab=&quot;result&quot;]').click()">📝 결과 입력하러 가기</button></div>`;
     return { html, isKr: _isKr };
   }
@@ -6459,8 +6513,24 @@
     //   중앙 경주를 잡으면 이 탭(sportReport-central)에 실시간 분석을 표시 — korea 와 동일 패턴(추가만).
     { sport: 'central', cat: 'japan_central' },
   ];
+  // [실배당 패치 (2026-07-19)] 컨테이너 안 data-live-odds 요소를 '방금 수집된' 복승 배당으로 교체.
+  //   카드 표시 배당(분석 스냅샷)과 실제 배당의 어긋남(1+8 표시 11.9배↔실제 4.7배) 해소 — 30초 폴링마다 실행.
+  function _patchLiveOddsIn(root, quinella) {
+    if (!root || !quinella || !quinella.length) return;
+    const map = {};
+    quinella.forEach((c) => {
+      const k = (c.combo || []).map(Number).slice().sort((x, y) => x - y).join('+');
+      if (c.odds != null) map[k] = c.odds;
+    });
+    root.querySelectorAll('[data-live-odds]').forEach((el) => {
+      const o = map[el.dataset.liveOdds];
+      if (o != null && String(el.textContent) !== String(o)) el.textContent = o;
+    });
+  }
+
   let _sportOddsTimer = null;
   async function pollSportOdds() {
+    try { loadKeirinTodayStats(); } catch (_) { /* [오늘 성적] 실패 무시 */ }
     for (const s of _SPORT_POLL_LIST) {
       try {
         const latest = await (await fetch('/api/odds/triple/latest?sport=' + s.sport)).json();
@@ -6473,6 +6543,12 @@
         if (a.raceKey && a.raceKey !== latest.raceKey) continue;   // 직전 경주 잔존 방어
         if (a.category && a.category !== s.cat) continue;          // 종목 일치만 렌더(혼재 방지)
         mirrorSportAnalysis(a);
+        // [실배당 패치] 방금 받은 latest.quinella(현재 수집 배당)로 렌더된 카드의 배당 즉시 교체
+        try {
+          for (const [_tab, _cat] of Object.entries(SPORT_TAB_CAT)) {
+            if (_cat === a.category) _patchLiveOddsIn(document.getElementById('sportReport-' + _tab), latest.quinella);
+          }
+        } catch (_) { /* */ }
       } catch (_) { /* 개별 종목 실패는 조용히 건너뜀(다른 종목 영향 없음) */ }
     }
   }
@@ -6751,7 +6827,7 @@
       ? `<div style="margin:1px 0 4px 16px">${q.basis.map((b) => `<div class="hint" style="font-size:12.5px;color:${col}">→ ${esc(b)}</div>`).join('')}${q.summary ? `<div class="hint" style="font-size:12px;color:#38d39f">→ ${esc(q.summary)}</div>` : ''}</div>`
       : '';
     const qLines = fq.map((q) => {
-      const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(${q.odds}배)</span>` : '';
+      const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(<span data-live-odds="${(q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+')}">${q.odds}</span>배)</span>` : '';
       const st = q.stars ? ` <span style="color:#fbbf24;font-size:14px">${starStr(q.stars)}</span>` : '';
       const rs = q.reason ? ` <span class="hint" style="font-size:12px">· ${esc(q.reason)}</span>` : '';
       return `<div style="font-size:19px;font-weight:800;margin:5px 0 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>${basisBlock(q, '#7dd3fc')}`;
@@ -6766,7 +6842,7 @@
     const spBlock = special.length ? `<div style="margin-top:10px;padding:10px 12px;border:2px dashed #f0abfc;border-radius:10px;background:rgba(240,171,252,.08)">
       <div style="font-size:15px;font-weight:800;color:#f0abfc;margin-bottom:2px">💎 BMED 특별 감지 <span class="hint" style="font-weight:400;font-size:11px">시장은 저평가 · BMED만 감지한 고배당 기회</span></div>
       ${special.map((q) => {
-      const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(${q.odds}배)</span>` : '';
+      const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(<span data-live-odds="${(q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+')}">${q.odds}</span>배)</span>` : '';
       const sc = q.score != null ? ` <span class="hint" style="font-size:11px">· 신호 ${q.score}점</span>` : '';
       return `<div style="font-size:17px;font-weight:800;margin:4px 0 0">복승: <span style="color:#f0abfc">${q.combo.join('+')}</span> ${oo} <span style="color:#fbbf24;font-size:13px">★★</span>${sc}</div>${basisBlock(q, '#f0abfc')}`;
     }).join('')}
