@@ -7334,6 +7334,68 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     except Exception as _bke:
         print("[유력마 받치기 보존] 스킵(무시):", _bke)
 
+    # ══════════ [경륜 추천 모순 수정 (2026-07-19)] ══════════
+    #   증상(기후 2경주·경륜 6두): 복승 1순위 5+6(32.9배) · 2순위 4+5(1.7배) — 고배당이 최저배당보다 앞.
+    #   원인: [수정4] 유력마 1·2위 강제 최우선(+받치기 보존)이 배당 상한 없이 전 종목 적용
+    #         (경마는 두수별 메인상한이 후보 단계에 걸리지만, 강제 최우선 주입 경로엔 상한이 없었음).
+    #   수정: ① 전 종목 — 강제 주입류(유력마 1·2위/받치기 보존) 조합이 25배 초과면 메인에서
+    #            BMED특별(복병 ★★) 섹션으로 이동(삭제 아님·보존). 기존 복병·급락 조합은 그대로 유지.
+    #         ② 경륜(cycle)·바이크 — 메인 복승을 배당 낮은순 정렬 + 시장 최저배당 조합(1.7배·1.4배 등)을
+    #            항상 메인 1순위로 고정(없으면 신규 추가). 경마 메인 정렬은 기존 로직 그대로 유지.
+    try:
+        _F12_MAIN_CAP = 25.0
+        _forced_reasons = ("유력마 1·2위 조합", "유력마 받치기 보존")
+        if final_q:
+            _keep_m, _demote = [], []
+            for _qi in final_q:
+                try:
+                    _qo = float(_qi.get("odds") or 0)
+                except (TypeError, ValueError):
+                    _qo = 0.0
+                if (_qi.get("reason") in _forced_reasons) and _qo > _F12_MAIN_CAP:
+                    _demote.append(_qi)               # 강제 주입 고배당 → 복병 섹션으로 이동(무삭제)
+                else:
+                    _keep_m.append(_qi)
+            if _demote:
+                _sp_have2 = set(tuple(sorted(int(x) for x in (c.get("combo") or []))) for c in (special_q or []))
+                for _qi in _demote:
+                    _ck = tuple(sorted(int(x) for x in (_qi.get("combo") or [])))
+                    if _ck in _sp_have2:
+                        continue                       # 이미 복병 섹션에 있음(급락 등) → 보존·중복 안 함
+                    _qd = dict(_qi)
+                    _qd["stars"] = 2
+                    _qd["reason"] = (_qd.get("reason") or "") + " → 고배당(25배↑) 복병 이동"
+                    special_q = (special_q or []) + [_qd]
+                    _sp_have2.add(_ck)
+                final_q = _keep_m
+                print(f"[경륜 추천 모순 수정] 고배당 강제조합 {len(_demote)}건 메인→복병 이동(25배 상한)")
+        # ② 경륜·바이크: 메인 배당 낮은순 정렬 + 시장 최저배당 1순위 고정
+        if _sp in ("cycle", "bike") and final_q is not None and curQ:
+            _mlow, _mlow_o = None, None
+            for (_qa, _qb), _qo in curQ.items():
+                try:
+                    _qa, _qb, _qo = int(_qa), int(_qb), float(_qo)
+                except (TypeError, ValueError):
+                    continue
+                if _qo <= 0:
+                    continue
+                if vs and (_qa not in vs or _qb not in vs):
+                    continue
+                if _mlow_o is None or _qo < _mlow_o:
+                    _mlow, _mlow_o = tuple(sorted((_qa, _qb))), _qo
+            final_q.sort(key=lambda c: (c.get("odds") is None, float(c.get("odds") or 9e9)))
+            if _mlow:
+                _mi = next((i for i, c in enumerate(final_q)
+                            if tuple(sorted(int(x) for x in (c.get("combo") or []))) == _mlow), None)
+                if _mi is None:
+                    final_q.insert(0, {"combo": list(_mlow), "odds": _mlow_o, "stars": 3,
+                                       "reason": "시장 최저배당(경륜 1순위 고정)", "basis": _combo_basis(list(_mlow)),
+                                       "summary": "시장 최저배당 — 메인 1순위 고정"})
+                elif _mi > 0:
+                    final_q.insert(0, final_q.pop(_mi))
+    except Exception as _kfx:
+        print("[경륜 추천 모순 수정] 스킵(무시):", _kfx)
+
     # ── 삼복승 후보 ── 1순위: 삼복승 메인(고정) / 2순위: 가장 강한 자동 1개 = 추정배당 낮은 순(적중 확률 높은 순)
     _main = None
     if cp.get("confTrifecta"):
@@ -18553,6 +18615,34 @@ def keiba_odds():
     if not (op_track and sponsor):
         codes = _keiba_resolve_track(venue, ymd)
         if not codes:
+            # ══════════ [자동 종목 라우팅 (2026-07-19)] ══════════
+            #   증상: 배당판이 경륜(기후 2경주)으로 넘어가도 '경마' oddspark 수집이 개최목록에 없다며
+            #         대기·에러만 반복 → 사용자가 경마/경륜 탭을 수동 전환해야 수집이 재개되던 문제.
+            #   수정: 경마 개최목록에 없으면 경륜장(joCode)인지 자동 감지 → 같은 요청을 경륜 배당
+            #         (2車複/2車単) 수집으로 자동 전환·주입(sport=cycle). 기존 경마 경로는 무손상(추가만).
+            _jo = _keirin_jo_from_venue(_track_norm(venue)) or _keirin_jo_from_venue(venue)
+            if _jo:
+                try:
+                    q = _keirin_parse_quinella(_keirin_fetch(_keirin_odds_url(_jo, ymd, race_nb, 5)))
+                    x = _keirin_parse_exacta(_keirin_fetch(_keirin_odds_url(_jo, ymd, race_nb, 6)))
+                except Exception as e:
+                    return jsonify({"error": "배당 수집 실패(경륜 자동 라우팅): %s" % e}), 502
+                if not q and not x:
+                    return jsonify({"ok": True, "waiting": True, "raceKey": rk, "sport": "cycle",
+                                    "reason": "발매 중 배당 없음(경륜·발매 전/마감 후 추정) — 실배당 대기",
+                                    "track": {"joCode": _jo, "raceNb": race_nb},
+                                    "counts": {"quinella": 0, "exacta": 0}})
+                res = _do_triple_ingest(rk, q, x, [], {}, sport="cycle", category="cycle", source="oddspark")
+                try:
+                    _keirin_autocollect_form(rk, _jo, ymd, race_nb)
+                except Exception as _fe:
+                    print("[경륜 전적·자동] 오류(무시):", _fe)
+                print(f"[경마→경륜 자동 라우팅] {rk}: 복승 {len(q)}·쌍승 {len(x)} (jo{_jo} R{race_nb})"
+                      " → 경륜으로 자동 전환·파이프라인 반영")
+                return jsonify({"ok": True, "raceKey": rk, "sport": "cycle", "routed": "keirin",
+                                "counts": {"quinella": len(q), "exacta": len(x)},
+                                "track": {"joCode": _jo, "raceNb": race_nb},
+                                "quinella": q, "exacta": x, "ingest": res})
             return jsonify({"error": "경마장 '%s' 이(가) %s 오늘 oddspark 개최 목록에 없습니다(개최일·경마장명 확인)."
                             % (venue or rk, ymd), "scheduled": list(_keiba_schedule(ymd).keys())}), 422
         op_track, sponsor = codes

@@ -8033,8 +8033,32 @@
       } catch (_) { /* 자기치유 실패는 조용히 — 기존 동작 유지 */ }
       _renderKeibaStatus(); return d;
     }
-    if (d.waiting) { _keibaOdds.lastWaiting = true; _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '⏳ ' + (d.reason || '실배당 대기(발매 전·마감 후)'); _renderKeibaStatus(); return d; }
+    if (d.waiting) {
+      _keibaOdds.lastWaiting = true; _keibaOdds.lastCounts = null; _keibaOdds.lastMsg = '⏳ ' + (d.reason || '실배당 대기(발매 전·마감 후)');
+      // ══════════ [대기 고착 자기치유 (2026-07-19)] ══════════
+      //   증상: 어제/이미 끝난 경주(예: 코치 12경주)를 타깃으로 '실배당 대기'만 반복 — 배당판은 이미
+      //         다른 경주(기후 2경주)로 넘어갔는데 waiting 은 에러가 아니라 기존 자기치유(개최목록 에러시)가
+      //         발동 안 함 → 몇 분씩 수집이 멈춰 보이던 문제. 날짜 넘어감(전날 경주 고착)도 동일 원인.
+      //   수정: 대기가 3회 연속이고, 경주 지정(pin)이 아니며, 실제 배당판 경주가 현재 타깃과 다르면
+      //         그 경주로 타깃 전환 + 즉시 1회 수집(무삭제·기존 에러시 자기치유는 그대로 유지).
+      _keibaOdds.waitStreak = (_keibaOdds.waitStreak || 0) + 1;
+      try {
+        if (_keibaOdds.waitStreak >= 3 && !_keibaOdds.pinnedRk) {
+          const _board = (typeof getActiveRaceKey === 'function') ? (getActiveRaceKey() || '') : '';
+          if (_board && _board !== rk && !jpIsKoreaName(_board) && !jpIsCentralName(_board)) {
+            console.log('[oddspark 대기 고착 자기치유] ' + rk + ' (대기 ' + _keibaOdds.waitStreak + '회) → 배당판 경주 ' + _board + ' 로 전환');
+            try { setActiveRaceKey(_board); } catch (_) { /* */ }
+            try { setAnomalyPanelRace(_board); } catch (_) { /* */ }
+            _keibaOdds.lastRk = null; _keibaOdds.lastPoll = 0; _keibaOdds.waitStreak = 0;
+            _keibaOdds.lastMsg = '🔄 대기 고착 해제 → 배당판 경주(' + _board + ')로 전환';
+            Promise.resolve(fetchKeibaOdds(_board, true)).catch(() => { /* */ });
+          }
+        }
+      } catch (_) { /* 자기치유 실패는 조용히 — 기존 동작 유지 */ }
+      _renderKeibaStatus(); return d;
+    }
     _keibaOdds.lastWaiting = false;
+    _keibaOdds.waitStreak = 0;
     _keibaOdds.lastCounts = d.counts || { quinella: 0, exacta: 0 };
     _renderKeibaStatus();
     try { refreshCurrentRace(); } catch (_) { /* */ }
