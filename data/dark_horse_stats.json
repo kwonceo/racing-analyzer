@@ -1,20 +1,20 @@
 {
- "races": 362,
+ "races": 364,
  "byRank": {
   "rank1": {
-   "hit": 33,
-   "total": 116,
-   "rate": 28.4
+   "hit": 34,
+   "total": 119,
+   "rate": 28.6
   },
   "rank2": {
    "hit": 18,
-   "total": 78,
-   "rate": 23.1
+   "total": 80,
+   "rate": 22.5
   },
   "rank3": {
    "hit": 10,
-   "total": 56,
-   "rate": 17.9
+   "total": 58,
+   "rate": 17.2
   }
  },
  "bySignal": {
@@ -24,22 +24,22 @@
    "rate": 26.5,
    "weightReady": true
   },
+  "초기급락 보존": {
+   "hit": 14,
+   "total": 69,
+   "rate": 20.3,
+   "weightReady": true
+  },
   "역배열": {
    "hit": 17,
    "total": 54,
    "rate": 31.5,
    "weightReady": true
   },
-  "초기급락 보존": {
-   "hit": 13,
-   "total": 64,
-   "rate": 20.3,
-   "weightReady": true
-  },
   "급락": {
    "hit": 1,
-   "total": 16,
-   "rate": 6.2,
+   "total": 17,
+   "rate": 5.9,
    "weightReady": false
   },
   "스마트머니": {
@@ -47,19 +47,25 @@
    "total": 3,
    "rate": 0.0,
    "weightReady": false
+  },
+  "스마트머니+역배열": {
+   "hit": 0,
+   "total": 1,
+   "rate": 0.0,
+   "weightReady": false
   }
  },
  "byBand": {
   "30~50": {
-   "hit": 1,
-   "total": 24,
-   "rate": 4.2,
+   "hit": 2,
+   "total": 27,
+   "rate": 7.4,
    "weightReady": false
   },
   "15~30": {
    "hit": 6,
-   "total": 48,
-   "rate": 12.5,
+   "total": 46,
+   "rate": 13.0,
    "weightReady": true
   },
   "100+": {
@@ -70,16 +76,16 @@
   },
   "50~100": {
    "hit": 2,
-   "total": 7,
-   "rate": 28.6,
+   "total": 8,
+   "rate": 25.0,
    "weightReady": false
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 58,
-   "total": 209,
-   "rate": 27.8,
+   "hit": 57,
+   "total": 212,
+   "rate": 26.9,
    "weightReady": true
   },
   "korea": {
@@ -89,15 +95,15 @@
    "weightReady": false
   },
   "keirin": {
-   "hit": 2,
-   "total": 35,
-   "rate": 5.7,
+   "hit": 4,
+   "total": 39,
+   "rate": 10.3,
    "weightReady": true
   }
  },
- "missedRaces": 73,
+ "missedRaces": 74,
  "dansung": {
-  "races": 4,
+  "races": 2,
   "horseWonRate": 0.0,
   "horseWon": 0,
   "horsePlaced": 0,
@@ -105,5 +111,5 @@
   "darkHit": 0,
   "winnerSignals": {}
  },
- "updated_at": "2026-07-19 10:48:32"
+ "updated_at": "2026-07-19 12:19:00"
 }

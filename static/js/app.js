@@ -1979,7 +1979,7 @@
       const qRows = fq.map((q, i) => `<div style="padding:10px 2px;${i ? 'border-top:1px dashed #2c3a4f;' : ''}">
         <div style="font-size:15px;color:#8a94a6;font-weight:700;line-height:1.6">복승 ${CIRC[i] || (i + 1)}</div>
         <div style="font-size:28px;font-weight:900;letter-spacing:1px;color:#38d39f;line-height:1.5">${esc(_numTxt(q.combo))}</div>
-        <div style="font-size:22px;font-weight:800;color:#ffd24f;line-height:1.5">현재 배당 <span data-live-odds="${esc(_oKey(q.combo))}">${q.odds != null ? esc(q.odds) : '—'}</span>배</div>
+        <div style="font-size:22px;font-weight:800;line-height:1.5;color:${_oddsGradeColor(q.odds, 'korea')}">현재 배당 <span data-live-odds="${esc(_oKey(q.combo))}" data-odds-sport="korea">${q.odds != null ? esc(q.odds) : '—'}</span>배</div>
       </div>`).join('');
       const tRow = ft ? `<div style="padding:10px 2px;border-top:2px solid #2c3a4f">
         <div style="font-size:15px;color:#8a94a6;font-weight:700;line-height:1.6">삼복승</div>
@@ -1987,7 +1987,7 @@
         ${ft.odds != null ? `<div style="font-size:22px;font-weight:800;color:#ffd24f;line-height:1.5">추정 배당 ${esc(ft.odds)}배</div>` : ''}
       </div>` : '';
       S.push(`<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.12),rgba(20,28,43,.9))">
-        <div style="font-size:16px;font-weight:900;color:#38d39f;margin-bottom:2px">🎯 최종 추천 <span style="font-weight:400;font-size:12px;color:#9fb2c8">배당 30초 자동 갱신</span></div>
+        <div style="font-size:16px;font-weight:900;color:#38d39f;margin-bottom:2px">🎯 최종 추천 <span style="font-weight:400;font-size:12px;color:#9fb2c8">배당 30초 자동 갱신</span> ${_oddsGradeLegend('korea')}</div>
         ${qRows}${tRow}
       </div>`);
     }
@@ -2087,6 +2087,10 @@
       els.forEach((el) => {
         const o = map[el.dataset.liveOdds];
         if (o != null && String(el.textContent) !== String(o)) el.textContent = o;
+        // [배당 등급 색상] 실배당 교체 시 등급 색도 함께 갱신
+        if (o != null && el.dataset.oddsSport !== undefined && el.parentElement) {
+          el.parentElement.style.color = _oddsGradeColor(o, el.dataset.oddsSport);
+        }
       });
     } catch (_) { /* 다음 주기 재시도 */ }
   }
@@ -6525,6 +6529,10 @@
     root.querySelectorAll('[data-live-odds]').forEach((el) => {
       const o = map[el.dataset.liveOdds];
       if (o != null && String(el.textContent) !== String(o)) el.textContent = o;
+      // [배당 등급 색상] 실배당 교체 시 등급 색도 함께 갱신(경마 8/15/50 · 경륜 4/8/30)
+      if (o != null && el.dataset.oddsSport !== undefined && el.parentElement) {
+        el.parentElement.style.color = _oddsGradeColor(o, el.dataset.oddsSport);
+      }
     });
   }
 
@@ -6827,7 +6835,7 @@
       ? `<div style="margin:1px 0 4px 16px">${q.basis.map((b) => `<div class="hint" style="font-size:12.5px;color:${col}">→ ${esc(b)}</div>`).join('')}${q.summary ? `<div class="hint" style="font-size:12px;color:#38d39f">→ ${esc(q.summary)}</div>` : ''}</div>`
       : '';
     const qLines = fq.map((q) => {
-      const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(<span data-live-odds="${(q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+')}">${q.odds}</span>배)</span>` : '';
+      const oo = q.odds != null ? `<span style="font-size:13px;font-weight:800;color:${_oddsGradeColor(q.odds, a.sport || a.category)}">(<span data-live-odds="${(q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+')}" data-odds-sport="${esc(a.sport || a.category || '')}">${q.odds}</span>배)</span>` : '';
       const st = q.stars ? ` <span style="color:#fbbf24;font-size:14px">${starStr(q.stars)}</span>` : '';
       const rs = q.reason ? ` <span class="hint" style="font-size:12px">· ${esc(q.reason)}</span>` : '';
       return `<div style="font-size:19px;font-weight:800;margin:5px 0 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>${basisBlock(q, '#7dd3fc')}`;
@@ -6842,7 +6850,7 @@
     const spBlock = special.length ? `<div style="margin-top:10px;padding:10px 12px;border:2px dashed #f0abfc;border-radius:10px;background:rgba(240,171,252,.08)">
       <div style="font-size:15px;font-weight:800;color:#f0abfc;margin-bottom:2px">💎 BMED 특별 감지 <span class="hint" style="font-weight:400;font-size:11px">시장은 저평가 · BMED만 감지한 고배당 기회</span></div>
       ${special.map((q) => {
-      const oo = q.odds != null ? `<span class="hint" style="font-size:13px">(<span data-live-odds="${(q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+')}">${q.odds}</span>배)</span>` : '';
+      const oo = q.odds != null ? `<span style="font-size:13px;font-weight:800;color:${_oddsGradeColor(q.odds, a.sport || a.category)}">(<span data-live-odds="${(q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+')}" data-odds-sport="${esc(a.sport || a.category || '')}">${q.odds}</span>배)</span>` : '';
       const sc = q.score != null ? ` <span class="hint" style="font-size:11px">· 신호 ${q.score}점</span>` : '';
       return `<div style="font-size:17px;font-weight:800;margin:4px 0 0">복승: <span style="color:#f0abfc">${q.combo.join('+')}</span> ${oo} <span style="color:#fbbf24;font-size:13px">★★</span>${sc}</div>${basisBlock(q, '#f0abfc')}`;
     }).join('')}
@@ -6900,6 +6908,25 @@
     </div>`;
   }
 
+  // [배당 등급 색상 시스템 (2026-07-19)] 배당 크기를 색으로 즉시 인지 —
+  //   경마(한국·일본·중앙): 🟢8배↓ 안정 · 🟡15배↓ 중간 · 🟠50배↓ 고배당 · 🔴50배+ 초고배당
+  //   경륜·경정·바이크:     🟢4배↓        · 🟡8배↓        · 🟠30배↓        · 🔴30배+
+  function _oddsGradeColor(odds, sport) {
+    if (odds == null || isNaN(Number(odds))) return '#ffd24f';
+    const cyc = (sport === 'cycle' || sport === 'bike' || sport === 'boat');
+    const t = cyc ? [4, 8, 30] : [8, 15, 50];
+    const o = Number(odds);
+    if (o <= t[0]) return '#38d39f';
+    if (o <= t[1]) return '#ffd24f';
+    if (o <= t[2]) return '#fb923c';
+    return '#f87171';
+  }
+  function _oddsGradeLegend(sport) {
+    const cyc = (sport === 'cycle' || sport === 'bike' || sport === 'boat');
+    const t = cyc ? [4, 8, 30] : [8, 15, 50];
+    return `<span class="hint" style="font-size:10px">배당색: <b style="color:#38d39f">≤${t[0]}</b> <b style="color:#ffd24f">≤${t[1]}</b> <b style="color:#fb923c">≤${t[2]}</b> <b style="color:#f87171">${t[2]}+</b></span>`;
+  }
+
   // [경륜 상단 고정 헤더 (2026-07-19)] 상세 상단에 ①최종 추천(28px·배당·삼복승·복병 한 줄)
   //   ②신호 요약 한 줄(역배열·스마트머니) ③제거마 한 줄을 고정 — 스크롤 없이 핵심 확인.
   //   추천이 비어도(신호 대기) 폴백(확신도 복승)으로 최대한 표시. 기존 섹션은 전부 그대로(상단 추가만).
@@ -6914,7 +6941,7 @@
     const qRows = fq.map((q, i) => `<div style="display:flex;align-items:baseline;gap:10px;margin:4px 0">
       <span style="font-size:14px;color:#8a94a6;font-weight:700">복승 ${CIRC[i] || (i + 1)}</span>
       <b style="font-size:28px;letter-spacing:2px;color:#38d39f">${esc((q.combo || []).join('+'))}</b>
-      ${q.odds != null ? `<span style="font-size:20px;font-weight:800;color:#ffd24f">(${esc(q.odds)}배)</span>` : ''}
+      ${q.odds != null ? `<span style="font-size:20px;font-weight:800;color:${_oddsGradeColor(q.odds, 'cycle')}">(<span data-live-odds="${(q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+')}" data-odds-sport="cycle">${esc(q.odds)}</span>배)</span>` : ''}
     </div>`).join('');
     const tRow = ft ? `<div style="font-size:16px;font-weight:800;color:#4ea1ff;margin:4px 0">삼복승: ${esc((ft.combo || []).join('+'))}${ft.odds != null ? ` <span class="hint">(추정 ${esc(ft.odds)}배)</span>` : ''}</div>` : '';
     const spRow = sp0 ? `<div style="font-size:15px;font-weight:800;color:#c084fc;margin:2px 0">💎 복병: ${esc((sp0.combo || []).join('+'))}${sp0.odds != null ? ` (${esc(sp0.odds)}배)` : ''}</div>` : '';
@@ -6933,7 +6960,7 @@
     const elimLine = elim.length ? `<div style="font-size:14px;color:#ff8a8a;margin:2px 0">🔴 제거: ${elim.map((e) => `${e.no}번${(e.reasons || [])[0] ? ` (${esc(e.reasons[0])})` : ''}`).join(' · ')}</div>` : '';
     if (!qRows && !tRow && !sigLine && !elimLine) return '';
     return `<div style="margin:4px 0 8px;padding:12px 14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.13),rgba(20,28,43,.92))">
-      <div style="font-size:16px;font-weight:900;color:#38d39f">🎯 최종 추천 <span class="hint" style="font-weight:400;font-size:11px">${esc(a.raceKey || '')}</span></div>
+      <div style="font-size:16px;font-weight:900;color:#38d39f">🎯 최종 추천 <span class="hint" style="font-weight:400;font-size:11px">${esc(a.raceKey || '')}</span> ${_oddsGradeLegend('cycle')}</div>
       ${qRows || '<div class="hint" style="margin:4px 0">추천 조합 형성 전 — 신호 대기</div>'}
       ${tRow}${spRow}${smLine}${sigLine}${elimLine}
     </div>`;

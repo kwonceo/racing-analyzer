@@ -558,13 +558,26 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "静岡 3경주",
+        "date": "2026-07-19",
+        "horses": [
+          3,
+          5
+        ],
+        "placed": [
+          3
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 40,
-    "hit_quinella": 19,
-    "hit_trifecta": 12,
-    "rate_quinella": 47.5,
-    "rate_trifecta": 30.0,
+    "count": 41,
+    "hit_quinella": 20,
+    "hit_trifecta": 13,
+    "rate_quinella": 48.8,
+    "rate_trifecta": 31.7,
     "reliable": false
   },
   "급락": {
@@ -2015,13 +2028,45 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "静岡 3경주",
+        "date": "2026-07-19",
+        "horses": [
+          2
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "静岡 1경주",
+        "date": "2026-07-19",
+        "horses": [
+          4
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "기후 2경주",
+        "date": "2026-07-19",
+        "horses": [
+          3
+        ],
+        "placed": [
+          3
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 133,
-    "hit_quinella": 49,
-    "hit_trifecta": 20,
-    "rate_quinella": 36.8,
-    "rate_trifecta": 15.0,
+    "count": 136,
+    "hit_quinella": 52,
+    "hit_trifecta": 21,
+    "rate_quinella": 38.2,
+    "rate_trifecta": 15.4,
     "reliable": true
   },
   "전적이중수렴": {
@@ -2285,13 +2330,28 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "静岡 3경주",
+        "date": "2026-07-19",
+        "horses": [
+          1,
+          3,
+          4
+        ],
+        "placed": [
+          1,
+          3
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 22,
-    "hit_quinella": 8,
-    "hit_trifecta": 3,
-    "rate_quinella": 36.4,
-    "rate_trifecta": 13.6,
+    "count": 23,
+    "hit_quinella": 9,
+    "hit_trifecta": 4,
+    "rate_quinella": 39.1,
+    "rate_trifecta": 17.4,
     "reliable": false
   },
   "역배열": {
