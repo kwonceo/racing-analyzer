@@ -5,8 +5,8 @@
  "category": "cycle",
  "date": "2026-07-16",
  "race": "케이오각 9경주",
- "analyzed_at": "00:00:19",
- "updated_at": "21:53:43",
+ "analyzed_at": "21:56:44",
+ "updated_at": "21:56:44",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -16,7 +16,7 @@
  "odds_timeline": [],
  "signals_detected": [
   {
-   "time": "21:53:22",
+   "time": "21:55:44",
    "type": "압축",
    "detail": "상위 복승 배당 근접 (5.4~6.5)",
    "severity": "🟡",
@@ -151,26 +151,7 @@
    "trifecta_insurance": "1.9%"
   }
  },
- "recommendation_history": [
-  {
-   "time": "00:00:19",
-   "minutes_before": null,
-   "sig": "1-2-3-4|1+3|None|1+3+4",
-   "anomCount": 0,
-   "sigChanged": true,
-   "keyHorses": [
-    1,
-    3,
-    4,
-    2
-   ],
-   "summary": "유력마 1·3·4·2 / 복승 1+3",
-   "quinella_main": "1+3",
-   "quinella_sub": null,
-   "trifecta_main": "1+3+4",
-   "top_signals": []
-  }
- ],
+ "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
    "quinella": [

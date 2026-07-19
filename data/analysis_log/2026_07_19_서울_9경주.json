@@ -1,12 +1,12 @@
 {
  "race_id": "2026_07_19_서울_9경주",
- "raceKey": "2026-07-19 서울 9경주",
+ "raceKey": "서울 9경주",
  "sport": "horse",
  "category": "korea",
  "date": "2026-07-19",
  "race": "서울 9경주",
  "analyzed_at": "17:30:43",
- "updated_at": "21:53:40",
+ "updated_at": "21:59:45",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -240,11 +240,115 @@
  "third_place_hunt": {
   "active": false
  },
- "horses": [],
+ "horses": [
+  {
+   "no": 3,
+   "name": "매글데이",
+   "jockey": "정준",
+   "record_score": 30,
+   "record_detail": "최근 4",
+   "odds": 15.9,
+   "grade": "C",
+   "grade_reason": "배당 12.4배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 4,
+   "name": "어서말을",
+   "jockey": "동하",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": 32.2,
+   "grade": "D",
+   "grade_reason": "배당 14.9배 · 쌍승 상위 +20(제거 보류) / 단승 30~49배 → 관찰(신호 없으면 제거) = 120점"
+  },
+  {
+   "no": 5,
+   "name": "용암세상",
+   "jockey": "다빈",
+   "record_score": 107,
+   "record_detail": "최근 2",
+   "odds": 11.8,
+   "grade": "A",
+   "grade_reason": "배당 5.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 6,
+   "name": "베트랩킨",
+   "jockey": "이스",
+   "record_score": 105,
+   "record_detail": "최근 2",
+   "odds": 10.0,
+   "grade": "A",
+   "grade_reason": "배당 4.8배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 7,
+   "name": "지비볼트",
+   "jockey": "아르",
+   "record_score": 130,
+   "record_detail": "최근 1",
+   "odds": 1.4,
+   "grade": "A",
+   "grade_reason": "배당 3배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 8,
+   "name": "히어로파",
+   "jockey": "코지",
+   "record_score": 60,
+   "record_detail": "최근 4",
+   "odds": 14.1,
+   "grade": "B",
+   "grade_reason": "배당 10.6배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 9,
+   "name": "파이어파",
+   "jockey": "철호",
+   "record_score": 45,
+   "record_detail": "최근 4",
+   "odds": 48.9,
+   "grade": "B",
+   "grade_reason": "배당 23.1배 · 쌍승 상위 +20(제거 보류) / 단승 30~49배 → 관찰(신호 없으면 제거) = 120점"
+  },
+  {
+   "no": 2,
+   "name": "원펀치드",
+   "jockey": "용근",
+   "record_score": 20,
+   "record_detail": "최근 5",
+   "odds": 6.6,
+   "grade": "C",
+   "grade_reason": "배당 3배 · 최근평균 5.0착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+  },
+  {
+   "no": 1,
+   "name": "새내타운",
+   "jockey": "옥성",
+   "record_score": 20,
+   "record_detail": "최근 7",
+   "odds": 48.7,
+   "grade": "D",
+   "grade_reason": "배당 56.6배 · 최근평균 7.0착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 70점"
+  }
+ ],
  "elimination": {
-  "candidates": [],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "candidates": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   2
+  ],
+  "eliminated": [
+   1
+  ],
+  "elimination_reasons": {
+   "1": "배당 56.6배 · 최근평균 7.0착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 70점"
+  }
  },
  "final_recommendation": {
   "quinella_main": {
@@ -276,20 +380,41 @@
  "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": null,
-   "trio": null
+   "quinella": [
+    6,
+    7
+   ],
+   "trio": [
+    5,
+    6,
+    7
+   ]
   },
   "form": {
-   "quinella": null,
-   "trio": null
+   "quinella": [
+    5,
+    7
+   ],
+   "trio": [
+    5,
+    6,
+    7
+   ]
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": null,
-   "trio": null
+   "quinella": [
+    6,
+    7
+   ],
+   "trio": [
+    5,
+    6,
+    7
+   ]
   }
  },
  "corePicks": {
@@ -570,8 +695,8 @@
      "5번: 집중급락"
     ],
     "summary": "시장+BMED 동시 유력",
-    "ev": 0.33,
-    "refReason": "기대값 0.33 미달(배당 5.7배 × 추정적중률 6%)"
+    "ev": 0.3,
+    "refReason": "기대값 0.30 미달(배당 5.7배 × 추정적중률 5%)"
    }
   ],
   "axisPlan": {
@@ -711,8 +836,13 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "데이터 부족 — 복승 수집 필요",
- "keyHorses": [],
+ "summary": "유력마 7·6·5·2 / 복승 6+7",
+ "keyHorses": [
+  7,
+  6,
+  5,
+  2
+ ],
  "result": {
   "1st": 8,
   "2nd": 2,
