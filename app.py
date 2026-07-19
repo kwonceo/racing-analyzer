@@ -18849,6 +18849,32 @@ def _keirin_url(jo, ymd, race):
             "?joCode=%s&kaisaiBi=%s&raceNo=%s" % (jo, ymd, race))
 
 
+def _oddspark_parse_trio(html, max_no=18):
+    """[삼복승 서버 수집 (2026-07-19)] oddspark 3連複 배당 페이지 → [{combo:[a,b,c], odds}] (방어적 텍스트 파싱).
+    형식 실측: 조합 "2-3-4" 근처에 배당(소수점 있는 수)과 인기순(정수)이 붙음 — 소수점 필수로 배당만 채택.
+    경륜(betType 8)·지방경마(betType 9) 공용. 구조 변형·발매 전('-')엔 빈 리스트(기존 동작 무영향)."""
+    out = {}
+    try:
+        body = re.sub(r"<[^>]+>", " ", _htmllib.unescape(html or ""))
+        body = re.sub(r"\s+", " ", body)
+        for m in re.finditer(r"(\d{1,2})\s*-\s*(\d{1,2})\s*-\s*(\d{1,2})[^0-9A-Za-z]{0,8}([\d,]{1,7}\.\d)", body):
+            try:
+                a, b, c = int(m.group(1)), int(m.group(2)), int(m.group(3))
+                o = float(m.group(4).replace(",", ""))
+            except (TypeError, ValueError):
+                continue
+            if not (1 <= a <= max_no and 1 <= b <= max_no and 1 <= c <= max_no):
+                continue
+            if len({a, b, c}) != 3 or o <= 1.0 or o > 99999:
+                continue
+            k = tuple(sorted((a, b, c)))
+            if out.get(k) is None or o < out[k]:
+                out[k] = o
+        return [{"combo": list(k), "odds": round(v, 1)} for k, v in sorted(out.items(), key=lambda kv: kv[1])]
+    except Exception:
+        return []
+
+
 def _keirin_odds_url(jo, ymd, race, bet_type):
     """oddspark 경륜 배당 페이지 URL. betType 5=복승(2車複)·6=쌍승(2車単)."""
     return ("https://www.oddspark.com/keirin/Odds.do"
@@ -19165,7 +19191,9 @@ def keirin_current():
 # ══════════ [경마 oddspark 서버 직접 수집] 지방경마(NAR) 복승·쌍승 배당 ══════════
 # oddspark keiba 는 경륜(joCode)과 URL 체계가 다름 → opTrackCd + sponsorCd + raceNb 사용.
 # betType(실측 확정): 6=복승(馬連·순서무관) · 5=쌍승(馬単·순서있음). ⚠ 경륜(5/6)과 반대이므로 주의.
-_KEIBA_BET = {"quinella": 6, "exacta": 5}   # 복승=馬連=6 · 쌍승=馬単=5
+_KEIBA_BET = {"quinella": 6, "exacta": 5, "trio": 9}   # 복승=馬連=6 · 쌍승=馬単=5 · 삼복승=3連複=9
+#   [삼복승 서버 수집 (2026-07-19)] 카나자와 8R 라이브 실측: betType 7=ワイド·8=3連単·9=3連複.
+#   경륜은 별도(2車複=5·2車単=6·ワイド=7·3連複=8·3連単=9 — 코치 7R 실측).
 _KEIBA_SCHED_CACHE = {}                     # {ymd: {한자경마장명: (opTrackCd, sponsorCd)}} 당일 캐시
 
 
@@ -24998,16 +25026,25 @@ def _multi_collect_one(track, race, ymd):
     try:
         rno = race["raceNo"]
         is_cycle = bool(track.get("joCode")) and (track.get("sport") == "cycle" or not track.get("opTrackCd"))
+        tr3 = []   # [삼복승 서버 수집 (2026-07-19)] 서버가 3連複도 직접 수집 — 확장 탭 클릭 불필요
         if is_cycle:
             jo = track["joCode"]
-            # 경륜: betType 5=복승(2車複)·6=쌍승(2車単) (경마와 반대)
+            # 경륜: betType 5=복승(2車複)·6=쌍승(2車単)·8=삼복승(3連複·코치 7R 실측) (경마와 번호 다름)
             q = _keirin_parse_quinella(_keirin_fetch(_keirin_odds_url(jo, ymd, rno, 5)))
             x = _keirin_parse_exacta(_keirin_fetch(_keirin_odds_url(jo, ymd, rno, 6)))
+            try:
+                tr3 = _oddspark_parse_trio(_keirin_fetch(_keirin_odds_url(jo, ymd, rno, 8)), max_no=9)
+            except Exception as _te:
+                print("[다중경주] 경륜 삼복승 수집 실패(무시):", _te)
             sport, category = "cycle", "cycle"
         else:
             op, sp = track["opTrackCd"], track["sponsorCd"]
             q = _keiba_parse_quinella(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["quinella"])))
             x = _keiba_parse_exacta(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["exacta"])))
+            try:
+                tr3 = _oddspark_parse_trio(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["trio"])), max_no=18)
+            except Exception as _te:
+                print("[다중경주] NAR 삼복승 수집 실패(무시):", _te)
             sport, category = "horse", "japan_local"
         if not _keiba_odds_live(q, x):
             return None                        # 발매 전·마감 후(가짜값) → 저장 안 함
@@ -25016,9 +25053,9 @@ def _multi_collect_one(track, race, ymd):
             db = _multi_store_load()
             prev = db.get(key) or {}
             hist = list(prev.get("history") or [])
-            hist.append({"t": time.time(), "quinella": q, "exacta": x, "trio": [], "win": {}})
+            hist.append({"t": time.time(), "quinella": q, "exacta": x, "trio": tr3, "win": {}})
             hist = hist[-12:]
-            db[key] = {"quinella": q, "exacta": x, "trio": [], "win": {}, "history": hist,
+            db[key] = {"quinella": q, "exacta": x, "trio": tr3, "win": {}, "history": hist,
                        "sport": sport, "category": category,
                        "venue": track["venue"], "raceNo": rno,
                        "postTime": race.get("postTime"), "postEpoch": race.get("postEpoch"),
@@ -25038,12 +25075,24 @@ def _multi_collect_one(track, race, ymd):
             _src0 = str(_prev0.get("source") or "")
             _age0 = time.time() - (_prev0.get("t") or 0)
             if _src0 and "oddspark" not in _src0 and _age0 < 90:
-                print("[다중경주] %s: 사설(확장) 수집 활성(%d초 전) → oddspark 주입 생략(사설 우선·백업 대기)"
-                      % (key, int(_age0)))
+                # [역할 분담 완성 (2026-07-19)] 복승·히스토리는 사설 유지(신호 오염 방지), 서버가 가져온
+                #   쌍승·삼복승은 필드만 보완(확장이 탭 클릭 안 해도 3종 완성 — 사용자 원칙).
+                try:
+                    if x:
+                        _prev0["exacta"] = x
+                    if tr3:
+                        _prev0["trio"] = tr3
+                    if x or tr3:
+                        _tdb0[key] = _prev0
+                        _triple_save(_tdb0)
+                except Exception as _me:
+                    print("[다중경주] 쌍승/삼복승 보완 실패(무시):", _me)
+                print("[다중경주] %s: 사설(확장) 수집 활성(%d초 전) → 복승은 사설 유지·서버 쌍승%d/삼복승%d 보완"
+                      % (key, int(_age0), len(x or []), len(tr3 or [])))
                 raise _SkipOddsparkBridge()
             # [자동전환·마감판정] 발주시각(postEpoch) 전달 → analyze 의 minutesBefore/afterClose 가 채워져
             #   프론트 '경주 종료' 판정(_raceFinished)·자동예상 T-5분 타이밍이 정확해짐(기존엔 deadline 미전달로 None).
-            _do_triple_ingest(key, q, x, [], {}, sport=sport, category=category,
+            _do_triple_ingest(key, q, x, tr3, {}, sport=sport, category=category,
                               source="oddspark_bg", deadline=race.get("postEpoch"))
         except _SkipOddsparkBridge:
             pass

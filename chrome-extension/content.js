@@ -1845,6 +1845,22 @@
     //   경륜=쌍승에 머묾·한국=복승 강제 복귀 증상 → 수집 전 사용자 활성 탭을 기억, 수집 후 복원.
     let _userTab0 = '';
     try { const _at0 = site === 'asyukk' ? activeAsyukkBetTab() : null; _userTab0 = (_at0 && _at0.text) || ''; } catch (_) { /* */ }
+    // [v2.1.136 무클릭 관전 모드] 복귀만으론 부족 — 수집이 쌍승을 읽으려면 쌍승 탭을 클릭할 수밖에 없어
+    //   관전 중에도 주기적으로 화면을 뺏겼다. → 사용자가 탭을 '직접' 클릭한 뒤 2분 동안은 탭을 전혀 안 움직임:
+    //   ▸ 현재 탭=복승이면 클릭 없이 복승만 읽기 수집(핵심 데이터 유지·쌍승·삼복승 생략)
+    //   ▸ 다른 탭 관전 중이면 이번 자동 수집 통째로 건너뜀(탭 이동 금지)
+    //   2분+ 무조작이면 풀 수집(쌍승·삼복승 포함) 자동 재개. 수동 수집(manual)은 항상 풀 수집.
+    let _quietMode = false;
+    if (reason !== 'manual' && site === 'asyukk' && _lastUserTabClick && (Date.now() - _lastUserTabClick) < 120000) {
+      let _act = null;
+      try { _act = activeAsyukkBetTab(); } catch (_) { /* */ }
+      if (_act && _act.text && _act.text !== '복승') {
+        console.log('[무클릭 관전] 사용자 탭("' + _act.text + '") 유지 — 이번 자동 수집 건너뜀(탭 이동 금지·' + Math.round((120000 - (Date.now() - _lastUserTabClick)) / 1000) + '초 후 풀 수집 재개)');
+        return { ok: false, skipped: 'user-viewing', error: '사용자 관전 중(무클릭 모드)' };
+      }
+      _quietMode = true;
+      console.log('[무클릭 관전] 복승 탭 관전 중 — 클릭 없이 복승만 수집(쌍승·삼복승 생략)');
+    }
     const { raceKey: override, timerDeadline, sport, market, japanType } = await getSettings();
     const raceKey = _resolveRaceKey(reason, override);   // [경주 자동추종] 자동수집은 배당판 표시 경주 우선
     // [종목 자동감지 강화] resolveSport: 강한 신호(경마장명 raceKey·URL/제목 종목어)로 팝업 stale 정정 → 항상 정확 전송.
@@ -1958,11 +1974,19 @@
         // [v2.1.135 진행 중 사용자 우선] 유예(12초)는 '새 수집'만 막고, 이미 시작된 사이클은 그대로
         //   쌍승을 클릭해 "복승 클릭 → 몇 초 뒤 쌍승 전환" 증상을 만들었다 → 사이클 도중 신뢰 클릭이
         //   감지되면 남은 탭 이동(쌍승·삼복승)을 이번 사이클에서 포기하고 사용자 탭으로 즉시 복귀.
-        if (_lastUserTabClick > _cycleStart) {
-          console.log('[사용자 우선] 수집 도중 탭 직접 클릭 감지 → 쌍승·삼복승 이번 사이클 생략, 사용자 탭 유지(복승 수집분은 전송)');
+        // [역할 분담 완성 v2.1.137] 일본지방·경륜은 서버(oddspark)가 쌍승·삼복승을 직접 수집(betType 실측
+        //   반영) → 확장은 '사설 복승만' 담당, 쌍승·삼복승 탭 클릭 자체를 생략(탭 안정·오버레이 안정).
+        //   중앙(JRA)은 서버 수집 불가라 기존대로 확장이 쌍승까지 수집(예외 유지).
+        const _srvSideTypes = (category === 'japan_local' || category === 'cycle');
+        if (_srvSideTypes) {
+          console.log('[역할 분담] ' + CATEGORY_LABEL[category] + ' → 쌍승·삼복승은 서버(oddspark) 담당 — 확장은 사설 복승만(탭 고정)');
+          _userMidAbort = true;   // 삼복승 게이트도 함께 생략(서버 담당)
+        } else if (_quietMode || _lastUserTabClick > _cycleStart) {
+          if (!_quietMode) console.log('[사용자 우선] 수집 도중 탭 직접 클릭 감지 → 쌍승·삼복승 이번 사이클 생략, 사용자 탭 유지(복승 수집분은 전송)');
           try {
             const _t5 = _userChosenTab || _userTab0;
-            if (_t5) { clickAsyukkBetTab(_t5); await wait(400); }
+            const _cur5 = activeAsyukkBetTab();
+            if (_t5 && (!_cur5 || _cur5.text !== _t5)) { clickAsyukkBetTab(_t5); await wait(400); }   // 이미 그 탭이면 재클릭 안 함
           } catch (_) { /* */ }
           _userMidAbort = true;
         }

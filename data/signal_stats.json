@@ -2452,13 +2452,23 @@
         "placed": [],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 8경주 1400M",
+        "date": "2026-07-19",
+        "horses": [
+          4
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 168,
-    "hit_quinella": 72,
-    "hit_trifecta": 31,
-    "rate_quinella": 42.9,
-    "rate_trifecta": 18.5,
+    "count": 169,
+    "hit_quinella": 73,
+    "hit_trifecta": 32,
+    "rate_quinella": 43.2,
+    "rate_trifecta": 18.9,
     "reliable": true
   },
   "전적이중수렴": {
@@ -2923,13 +2933,23 @@
         "placed": [],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 8경주 1400M",
+        "date": "2026-07-19",
+        "horses": [
+          1
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 38,
-    "hit_quinella": 19,
-    "hit_trifecta": 8,
-    "rate_quinella": 50.0,
-    "rate_trifecta": 21.1,
+    "count": 39,
+    "hit_quinella": 20,
+    "hit_trifecta": 9,
+    "rate_quinella": 51.3,
+    "rate_trifecta": 23.1,
     "reliable": false
   },
   "역배열": {
@@ -3561,13 +3581,26 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 8경주 1400M",
+        "date": "2026-07-19",
+        "horses": [
+          2,
+          9
+        ],
+        "placed": [
+          2
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 54,
-    "hit_quinella": 18,
-    "hit_trifecta": 13,
-    "rate_quinella": 33.3,
-    "rate_trifecta": 24.1,
+    "count": 55,
+    "hit_quinella": 19,
+    "hit_trifecta": 14,
+    "rate_quinella": 34.5,
+    "rate_trifecta": 25.5,
     "reliable": true
   },
   "크로스역배열": {
@@ -3821,13 +3854,31 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 8경주 1400M",
+        "date": "2026-07-19",
+        "horses": [
+          8,
+          3,
+          7,
+          9,
+          4,
+          5
+        ],
+        "placed": [
+          3,
+          5
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 20,
-    "hit_quinella": 7,
-    "hit_trifecta": 6,
-    "rate_quinella": 35.0,
-    "rate_trifecta": 30.0,
+    "count": 21,
+    "hit_quinella": 8,
+    "hit_trifecta": 7,
+    "rate_quinella": 38.1,
+    "rate_trifecta": 33.3,
     "reliable": false
   },
   "집중급락": {

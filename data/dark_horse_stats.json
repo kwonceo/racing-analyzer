@@ -1,27 +1,27 @@
 {
- "races": 385,
+ "races": 386,
  "byRank": {
   "rank1": {
-   "hit": 43,
-   "total": 150,
-   "rate": 28.7
+   "hit": 44,
+   "total": 152,
+   "rate": 28.9
   },
   "rank2": {
-   "hit": 26,
-   "total": 109,
-   "rate": 23.9
+   "hit": 27,
+   "total": 111,
+   "rate": 24.3
   },
   "rank3": {
    "hit": 19,
-   "total": 88,
-   "rate": 21.6
+   "total": 90,
+   "rate": 21.1
   }
  },
  "bySignal": {
   "크로스역배열": {
    "hit": 32,
-   "total": 114,
-   "rate": 28.1,
+   "total": 117,
+   "rate": 27.4,
    "weightReady": true
   },
   "초기급락 보존": {
@@ -31,9 +31,9 @@
    "weightReady": true
   },
   "역배열": {
-   "hit": 24,
-   "total": 67,
-   "rate": 35.8,
+   "hit": 26,
+   "total": 70,
+   "rate": 37.1,
    "weightReady": true
   },
   "급락": {
@@ -64,14 +64,14 @@
   },
   "15~30": {
    "hit": 11,
-   "total": 63,
-   "rate": 17.5,
+   "total": 65,
+   "rate": 16.9,
    "weightReady": true
   },
   "100+": {
-   "hit": 3,
-   "total": 19,
-   "rate": 15.8,
+   "hit": 5,
+   "total": 22,
+   "rate": 22.7,
    "weightReady": false
   },
   "50~100": {
@@ -84,14 +84,14 @@
  "bySport": {
   "keiba": {
    "hit": 72,
-   "total": 263,
-   "rate": 27.4,
+   "total": 266,
+   "rate": 27.1,
    "weightReady": true
   },
   "korea": {
-   "hit": 4,
-   "total": 12,
-   "rate": 33.3,
+   "hit": 6,
+   "total": 15,
+   "rate": 40.0,
    "weightReady": false
   },
   "keirin": {
@@ -113,5 +113,5 @@
    "기타": 1
   }
  },
- "updated_at": "2026-07-19 18:05:21"
+ "updated_at": "2026-07-19 18:12:04"
 }

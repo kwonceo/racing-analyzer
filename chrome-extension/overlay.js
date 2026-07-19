@@ -1321,7 +1321,23 @@
       panel.appendChild(box);
     }
 
+    // [패널 깜박임 제거 v2.1.136] 기존: 매 렌더(10초 분석·수집 상태 갱신)마다 패널을 통째로 비우고 재구성 →
+    //   그 찰나에 빈 화면이 보여 "깜박이며 사라졌다 나타남". → 오프스크린 컨테이너에 먼저 그린 뒤
+    //   ①내용이 직전과 같으면 아무것도 안 함 ②다르면 한 번에 교체(원자 교체·빈 화면 0ms). 실패 시 기존 방식 폴백.
     function updatePanel(panel, st) {
+      try {
+        var _tmp = panel.cloneNode(false);
+        _updatePanelBuild(_tmp, st);
+        var _nh = _tmp.innerHTML;
+        if (updatePanel._lastHtml === _nh) return;          // 동일 내용 → 재그리기 생략(깜박임 원천 차단)
+        updatePanel._lastHtml = _nh;
+        while (panel.firstChild) panel.removeChild(panel.firstChild);
+        while (_tmp.firstChild) panel.appendChild(_tmp.firstChild);   // 완성본 이식(리스너 보존)
+        return;
+      } catch (_e) { console.warn('[오버레이] 원자 교체 실패 — 기존 방식 폴백', _e); }
+      _updatePanelBuild(panel, st);
+    }
+    function _updatePanelBuild(panel, st) {
       try {
         while (panel.firstChild) panel.removeChild(panel.firstChild);
         var d = (st.analyzeStatus && st.analyzeStatus.data) || null;

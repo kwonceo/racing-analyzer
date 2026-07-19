@@ -3,50 +3,6 @@
   "placed": 52,
   "cases": [
     {
-      "race": "하코다테 4경주",
-      "date": "2026-07-12",
-      "no": 3,
-      "odds": 13.2,
-      "signals": [
-        "전적A/B"
-      ],
-      "placed": true,
-      "won": false
-    },
-    {
-      "race": "하코다테 4경주",
-      "date": "2026-07-12",
-      "no": 2,
-      "odds": 49.8,
-      "signals": [
-        "전적A/B"
-      ],
-      "placed": false,
-      "won": false
-    },
-    {
-      "race": "하코다테 4경주",
-      "date": "2026-07-12",
-      "no": 9,
-      "odds": 265.4,
-      "signals": [
-        "전적A/B"
-      ],
-      "placed": false,
-      "won": false
-    },
-    {
-      "race": "하코다테 4경주",
-      "date": "2026-07-12",
-      "no": 1,
-      "odds": 322.5,
-      "signals": [
-        "전적A/B"
-      ],
-      "placed": false,
-      "won": false
-    },
-    {
       "race": "고쿠라 4경주",
       "date": "2026-07-12",
       "no": 13,
@@ -3391,14 +3347,54 @@
       ],
       "placed": false,
       "won": false
+    },
+    {
+      "race": "서울 8경주 1400M",
+      "date": "2026-07-19",
+      "no": 2,
+      "odds": 173.6,
+      "signals": [
+        "역배열",
+        "전적A/B"
+      ],
+      "placed": true,
+      "won": true
+    },
+    {
+      "race": "서울 8경주 1400M",
+      "date": "2026-07-19",
+      "no": 7,
+      "odds": 15.8,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "서울 8경주 1400M",
+      "date": "2026-07-19",
+      "no": 4,
+      "odds": 173.6,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "서울 8경주 1400M",
+      "date": "2026-07-19",
+      "no": 8,
+      "odds": 173.6,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
     }
   ],
   "by_signal": {
-    "전적A/B": {
-      "count": 156,
-      "placed": 27,
-      "rate": 17.3
-    },
     "스마트머니": {
       "count": 55,
       "placed": 7,
@@ -3409,15 +3405,20 @@
       "placed": 21,
       "rate": 23.9
     },
+    "전적A/B": {
+      "count": 156,
+      "placed": 27,
+      "rate": 17.3
+    },
     "급락": {
       "count": 43,
       "placed": 7,
       "rate": 16.3
     },
     "역배열": {
-      "count": 48,
-      "placed": 9,
-      "rate": 18.8
+      "count": 49,
+      "placed": 10,
+      "rate": 20.4
     }
   },
   "rate": 17.3,
