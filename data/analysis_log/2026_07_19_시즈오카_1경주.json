@@ -6,7 +6,7 @@
  "date": "2026-07-19",
  "race": "시즈오카 1경주",
  "analyzed_at": "10:46:44",
- "updated_at": "10:47:31",
+ "updated_at": "10:47:43",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -214,38 +214,28 @@
  "horses": [
   {
    "no": 1,
-   "name": "클러치더",
-   "jockey": "동하",
-   "record_score": 0,
-   "record_detail": "",
+   "name": "샤이니코",
+   "jockey": "정혁",
+   "record_score": 45,
+   "record_detail": "최근 4",
    "odds": null,
-   "grade": "A",
+   "grade": "B",
    "grade_reason": "배당 24.7배 · 감점 없음 = 100점"
   },
   {
-   "no": 3,
-   "name": "카레이칸",
-   "jockey": "인철",
-   "record_score": 0,
-   "record_detail": "",
+   "no": 2,
+   "name": "경복포르",
+   "jockey": "재이",
+   "record_score": 130,
+   "record_detail": "최근 1",
    "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 2.6배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 4,
-   "name": "골드엑스",
-   "jockey": "정준",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 8배 · 감점 없음 = 100점"
+   "grade": "A",
+   "grade_reason": "배당 23.6배 · 감점 없음 = 100점"
   },
   {
    "no": 5,
-   "name": "천둥의블",
-   "jockey": "수철",
+   "name": "그린다이",
+   "jockey": "윤섭",
    "record_score": 0,
    "record_detail": "",
    "odds": null,
@@ -253,45 +243,55 @@
    "grade_reason": "배당 11.6배 · 감점 없음 = 100점"
   },
   {
-   "no": 6,
-   "name": "에코볼트",
-   "jockey": "이스",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 58.1배 · 감점 없음 = 100점"
-  },
-  {
    "no": 7,
-   "name": "엑설런트",
-   "jockey": "르칸",
-   "record_score": 0,
-   "record_detail": "",
+   "name": "푸른신기",
+   "jockey": "경민",
+   "record_score": 102,
+   "record_detail": "최근 2",
    "odds": null,
-   "grade": "C",
+   "grade": "A",
    "grade_reason": "배당 2.6배 · 감점 없음 = 100점"
   },
   {
-   "no": 2,
-   "name": "볼스터",
-   "jockey": "이혁",
-   "record_score": 15,
+   "no": 3,
+   "name": "원플러스",
+   "jockey": "인권",
+   "record_score": 20,
+   "record_detail": "최근 8",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 2.6배 · 최근평균 8.0착 -30 = 70점"
+  },
+  {
+   "no": 4,
+   "name": "스마트유",
+   "jockey": "강주",
+   "record_score": 20,
+   "record_detail": "최근 7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 8배 · 최근평균 7.0착 -30 = 70점"
+  },
+  {
+   "no": 6,
+   "name": "억새",
+   "jockey": "형철",
+   "record_score": 7,
    "record_detail": "최근 6",
    "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 23.6배 · 최근평균 6.0착 -30 = 70점"
+   "grade": "D",
+   "grade_reason": "배당 58.1배 · 최근평균 6.0착 -30 = 70점"
   }
  ],
  "elimination": {
   "candidates": [
    1,
+   2,
+   5,
+   7,
    3,
    4,
-   5,
-   6,
-   7,
-   2
+   6
   ],
   "eliminated": [],
   "elimination_reasons": {}
@@ -300,27 +300,27 @@
   "quinella_main": {
    "combo": "3+7",
    "odds": 2.6,
-   "reason": "3번(B)·7번(C)"
+   "reason": "3번(B)·7번(A)"
   },
   "trifecta_main": {
    "combo": "3+4+7",
    "odds": 24.5,
-   "reason": "3번(B)·4번(B)·7번(C)"
+   "reason": "3번(B)·4번(C)·7번(A)"
   },
   "trifecta_insurance1": {
    "combo": "3+5+7",
    "odds": 16.8,
-   "reason": "3번(B)·5번(C)·7번(C)"
+   "reason": "3번(B)·5번(C)·7번(A)"
   },
   "trifecta_insurance2": {
    "combo": "3+4+5",
    "odds": 77.8,
-   "reason": "3번(B)·4번(B)·5번(C)"
+   "reason": "3번(B)·4번(C)·5번(C)"
   },
   "budget_allocation": {
-   "quinella_main": "62.1%",
-   "trifecta_main": "14.1%",
-   "trifecta_insurance": "1.9%"
+   "quinella_main": "65.9%",
+   "trifecta_main": "12.7%",
+   "trifecta_insurance": "1.8%"
   }
  },
  "recommendation_history": [
@@ -359,6 +359,26 @@
    "top_signals": [
     "⚠️ 복승 불일치: 단승 기준 예상 5+7(11.6) / 실제 최저 3+7(2.6) → 3번 집중 자금 유입 (🔴🔴 4.462)"
    ]
+  },
+  {
+   "time": "10:47:43",
+   "minutes_before": null,
+   "sig": "3-4-5-7|3+7|None|3+4+7",
+   "anomCount": 4,
+   "sigChanged": true,
+   "keyHorses": [
+    3,
+    7,
+    4,
+    5
+   ],
+   "summary": "유력마 3·7·4·5 / 복승 3+7",
+   "quinella_main": "3+7",
+   "quinella_sub": null,
+   "trifecta_main": "3+4+7",
+   "top_signals": [
+    "⚠️ 복승 불일치: 단승 기준 예상 5+7(11.6) / 실제 최저 3+7(2.6) → 3번 집중 자금 유입 (🔴🔴 4.462)"
+   ]
   }
  ],
  "compare_recommendation": {
@@ -375,13 +395,13 @@
   },
   "form": {
    "quinella": [
-    1,
-    2
+    2,
+    7
    ],
    "trio": [
     1,
     2,
-    3
+    7
    ]
   },
   "jockey": {
@@ -807,11 +827,12 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 3·7·4 / 복승 3+7",
+ "summary": "유력마 3·7·4·5 / 복승 3+7",
  "keyHorses": [
   3,
   7,
-  4
+  4,
+  5
  ],
  "result": null,
  "hit": null,
