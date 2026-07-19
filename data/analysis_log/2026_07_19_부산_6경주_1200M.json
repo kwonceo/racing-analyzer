@@ -6,7 +6,7 @@
  "date": "2026-07-19",
  "race": "부산 6경주 1200M",
  "analyzed_at": "15:51:35",
- "updated_at": "15:51:39",
+ "updated_at": "15:51:52",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -79,89 +79,11 @@
  "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
-  "signals": [
-   {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "horses": [
-     2,
-     6
-    ],
-    "detail": "2+6 상승 1308% 후 급락 93%",
-    "level": "orange",
-    "hitRate": 70,
-    "hitSample": 104
-   },
-   {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "horses": [
-     3,
-     6
-    ],
-    "detail": "3+6 상승 987% 후 급락 91%",
-    "level": "orange",
-    "hitRate": 70,
-    "hitSample": 104
-   }
-  ],
-  "count": 1,
-  "recommendLevel": "보조",
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
   "dualConverge": false,
-  "types": [
-   8
-  ],
-  "hitRates": {
-   "2": {
-    "type": 2,
-    "label": "역배열 10%+",
-    "fired": 55,
-    "hit": 24,
-    "rate": 44
-   },
-   "1": {
-    "type": 1,
-    "label": "연속하락 3회+",
-    "fired": 7,
-    "hit": 4,
-    "rate": 57
-   },
-   "5": {
-    "type": 5,
-    "label": "복수조합 동시급락",
-    "fired": 39,
-    "hit": 24,
-    "rate": 62
-   },
-   "8": {
-    "type": 8,
-    "label": "상승후급락(스마트머니)",
-    "fired": 104,
-    "hit": 73,
-    "rate": 70
-   },
-   "3": {
-    "type": 3,
-    "label": "마감직전 대급락",
-    "fired": 6,
-    "hit": 5,
-    "rate": 83
-   },
-   "4": {
-    "type": 4,
-    "label": "재급락",
-    "fired": 49,
-    "hit": 46,
-    "rate": 94
-   },
-   "6": {
-    "type": 6,
-    "label": "역배열+급락(이중수렴)",
-    "fired": 4,
-    "hit": 0,
-    "rate": 0
-   }
-  }
+  "types": []
  },
  "compression_pattern": {
   "detected": false
@@ -390,7 +312,7 @@
   ],
   "forcedHorses": [],
   "confTop1": 7,
-  "confTop1Conf": 30.0,
+  "confTop1Conf": 39.6,
   "confTop1High": true,
   "favAxis": [
    1,
@@ -608,7 +530,7 @@
     4,
     2
    ],
-   "axis1Score": 30.0,
+   "axis1Score": 33.2,
    "axis2Score": 0.0,
    "quinellas": [
     {
