@@ -1,0 +1,330 @@
+{
+ "race_id": "2026_07_19_고쿠라_4경주",
+ "raceKey": "고쿠라 4경주",
+ "sport": "horse",
+ "category": "japan_central",
+ "date": "2026-07-19",
+ "race": "고쿠라 4경주",
+ "analyzed_at": "11:44:25",
+ "updated_at": "11:48:35",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://ks1.dke-d11diw.site/user_frame.php?PLACE_TYPE=JH"
+ },
+ "odds_timeline": [
+  {
+   "time": "11:44:25",
+   "minutes_before": 24,
+   "quinella": {}
+  },
+  {
+   "time": "11:44:59",
+   "minutes_before": 24,
+   "quinella": {}
+  },
+  {
+   "time": "11:45:37",
+   "minutes_before": 23,
+   "quinella": {}
+  },
+  {
+   "time": "11:46:10",
+   "minutes_before": 22,
+   "quinella": {}
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [
+  {
+   "time": "11:45:37",
+   "combo": "11↔12",
+   "drop": null,
+   "text": "쌍승 역전 11↔12",
+   "severity": "🔴",
+   "minutes_before": 23
+  },
+  {
+   "time": "11:45:37",
+   "combo": "11↔13",
+   "drop": null,
+   "text": "쌍승 역전 11↔13",
+   "severity": "🔴",
+   "minutes_before": 23
+  }
+ ],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 3,
+   "name": "신천프리",
+   "jockey": "인권",
+   "record_score": 57.5,
+   "record_detail": "최근 8-2-3-8-1",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 23배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 11,
+   "name": "닥터매터",
+   "jockey": "나카",
+   "record_score": 85,
+   "record_detail": "최근 3-1-12-1-7",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 23배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 12,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 30.5배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 13,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 51.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 4,
+   "name": "태양의열",
+   "jockey": "도윤",
+   "record_score": 50,
+   "record_detail": "최근 11-2-5-2-2",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 85.2배 · 배당 80~149 -20 / 쌍승 상위 +20(제거 보류) = 100점"
+  },
+  {
+   "no": 14,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 85.5배 · 배당 80~149 -20 / 쌍승 상위 +20(제거 보류) = 100점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   3,
+   11,
+   12,
+   13,
+   4,
+   14
+  ],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    3,
+    4
+   ],
+   "trio": [
+    3,
+    4,
+    12
+   ]
+  },
+  "form": {
+   "quinella": [
+    3,
+    11
+   ],
+   "trio": [
+    3,
+    4,
+    11
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    3,
+    4
+   ],
+   "trio": [
+    3,
+    4,
+    12
+   ]
+  }
+ },
+ "corePicks": {
+  "axis": [
+   3,
+   4
+  ],
+  "third": 12,
+  "quinella": [
+   3,
+   4
+  ],
+  "trifecta": [
+   3,
+   4,
+   12
+  ],
+  "picks": [
+   {
+    "no": 3,
+    "tier": 1,
+    "sub": -999.0,
+    "rep": 999.0,
+    "reason": "유력마 저배당 999배"
+   },
+   {
+    "no": 4,
+    "tier": 1,
+    "sub": -999.0,
+    "rep": 999.0,
+    "reason": "유력마 저배당 999배"
+   },
+   {
+    "no": 12,
+    "tier": 1,
+    "sub": -999.0,
+    "rep": 999.0,
+    "reason": "유력마 저배당 999배"
+   }
+  ],
+  "quinellaOdds": null,
+  "trifectaOdds": null,
+  "confQuinellas": [
+   {
+    "combo": [
+     3,
+     4
+    ],
+    "odds": null,
+    "reason": "시장유력"
+   },
+   {
+    "combo": [
+     3,
+     11
+    ],
+    "odds": null,
+    "reason": "확신도1위+2위"
+   },
+   {
+    "combo": [
+     3,
+     13
+    ],
+    "odds": null,
+    "reason": "시장유력+급락"
+   }
+  ],
+  "forcedHorses": [],
+  "confTop1": 11,
+  "confTop1Conf": 25.5,
+  "confTop1High": false,
+  "favAxis": [
+   3,
+   4
+  ],
+  "confTrifecta": [
+   3,
+   4,
+   12
+  ],
+  "confTrifectaOdds": null,
+  "confTrifectaIns": [
+   3,
+   11,
+   13
+  ],
+  "confTrifectaInsOdds": null,
+  "formTopA": [
+   11
+  ],
+  "single": {},
+  "invForce": null,
+  "paceAnalysis": {
+   "counts": {
+    "선행": 0,
+    "선입": 0,
+    "추입": 0,
+    "자유": 3
+   },
+   "pace": "느린",
+   "paceLabel": "🐌 느린 페이스",
+   "advice": "선행마 유리 · 추입마 주의",
+   "focus": [],
+   "gaitLists": {
+    "선행": [],
+    "선입": [],
+    "추입": [],
+    "자유": [
+     11,
+     3,
+     4
+    ]
+   },
+   "scenario": [
+    "선행 0 · 선입 0 · 추입 0 · 자유 3",
+    "선행 0두 → 느린 페이스",
+    "선행 독주 가능 → 앞선 말 유리"
+   ]
+  },
+  "keirinLinePairs": [],
+  "finalQuinellas": [],
+  "finalTrifectas": [],
+  "axisPlan": null,
+  "qMainCheck": null,
+  "scenarioPlan": null,
+  "bmedSpecial": [],
+  "dansung": false,
+  "dansungMinOdds": null,
+  "dansungPlan": null,
+  "quinellaMax": 3,
+  "raceHorseCount": 3,
+  "chaoticRace": false,
+  "formMissing": false
+ },
+ "summary": "유력마 3·4·12 / 복승 3+4",
+ "keyHorses": [
+  3,
+  4,
+  12
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}

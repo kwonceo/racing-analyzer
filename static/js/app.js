@@ -2077,11 +2077,72 @@
       });
     } catch (_) { /* 다음 주기 재시도 */ }
   }
+  // [추천 30초 재조회·변경 감지 (2026-07-19)] 상세가 열려 있는 동안 30초마다 분석을 재조회해
+  //   추천 조합(finalQuinellas)이 바뀌면 카드 자동 갱신 + "⚡ 새 신호! 2+9 추가됨" 배너.
+  //   매트릭스(30초 갱신)와 상세 카드가 다른 시점을 보던 불일치 해소. 전 종목 상세 공통(무삭제·추가만).
+  let _krLastCombos = null;
+  function _mdCombosOf(a) {
+    return (((a || {}).corePicks || {}).finalQuinellas || [])
+      .map((q) => (q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+'));
+  }
+  async function _krRecoRefresh(key) {
+    const body = $('#multiDetailBody'), card = $('#multiDetailCard');
+    if (!body || !card || card.style.display === 'none' || _krOddsKey !== key) {
+      if (_krOddsTimer) { clearInterval(_krOddsTimer); _krOddsTimer = null; }
+      return;
+    }
+    let a;
+    try { a = await (await fetch('/api/multi/race/' + encodeURIComponent(key))).json(); }
+    catch (_) { return; }
+    if (!a || a.error || a.waiting) return;
+    const combos = _mdCombosOf(a);
+    if (_krLastCombos == null) { _krLastCombos = combos; return; }   // 첫 조회 = 기준값
+    const added = combos.filter((c) => !_krLastCombos.includes(c));
+    if (!added.length) { _krLastCombos = combos; return; }           // 추가 없음 → 화면 유지(기존 무삭제)
+    const banner = `<div style="margin:0 0 8px;padding:10px 12px;border:2px solid #ffd24f;border-radius:10px;background:rgba(255,210,79,.15);font-size:16px;font-weight:900;color:#ffd24f">⚡ 새 신호! ${added.map(esc).join(' · ')} 추가됨 <span class="hint" style="font-weight:400;font-size:12px">${new Date().toTimeString().slice(0, 8)} 자동 갱신</span></div>`;
+    const built = _buildMultiDetailHtml(key, a);
+    body.innerHTML = banner + built.html;
+    _bindMultiDetailExtras(key, a, built.isKr);
+    _krLastCombos = combos;
+    try { notify('⚡ 새 신호! ' + added.join(' · ') + ' 이(가) 추천에 추가됐습니다', true); } catch (_) { /* */ }
+  }
   function _krLiveOddsStart(key) {
     _krOddsKey = key;
+    _krLastCombos = null;
     if (_krOddsTimer) { clearInterval(_krOddsTimer); _krOddsTimer = null; }
     _krLiveOddsRefresh(key);                                   // 열 때 즉시 1회(분석 스냅샷 고정값 교체)
-    _krOddsTimer = setInterval(() => _krLiveOddsRefresh(key), 30000);
+    _krRecoRefresh(key);                                       // 기준 조합 설정(이후 변경 감지)
+    _krOddsTimer = setInterval(() => { _krLiveOddsRefresh(key); _krRecoRefresh(key); }, 30000);
+  }
+  // [공용 렌더러] openMultiDetail 과 30초 재조회가 같은 화면을 그리도록 추출(동작 동일·중복 방지)
+  function _buildMultiDetailHtml(key, a) {
+    let html = '';
+    const _isKr = (a.category === 'korea') || (typeof jpIsKoreaName === 'function' && jpIsKoreaName(key));
+    if (_isKr) {
+      try { html = koreaProCardHTML(a); } catch (_) { html = ''; }
+      if (html) {
+        html += `<button class="btn" id="krProFullBtn" style="min-height:56px;font-size:15px;font-weight:800;width:100%;margin-top:8px">🔧 전체 분석 보기 (기존 화면)</button><div id="krProFullWrap" style="display:none;margin-top:8px"></div>`;
+      }
+    }
+    if (!html) {
+      try { html = sportAnalysisHTML(a); } catch (_) { html = '<p class="hint">렌더 오류</p>'; }
+    }
+    html += `<div style="margin-top:10px"><button class="btn btn-primary" style="min-height:56px;font-size:15px" onclick="document.querySelector('.tab-btn[data-tab=&quot;result&quot;]').click()">📝 결과 입력하러 가기</button></div>`;
+    return { html, isKr: _isKr };
+  }
+  function _bindMultiDetailExtras(key, a, isKr) {
+    const _fb = document.getElementById('krProFullBtn');
+    if (_fb) _fb.addEventListener('click', () => {
+      const w = document.getElementById('krProFullWrap');
+      if (!w) return;
+      if (w.style.display === 'none') {
+        try { w.innerHTML = sportAnalysisHTML(a); } catch (_) { w.innerHTML = '<p class="hint">렌더 오류</p>'; }
+        w.style.display = 'block'; _fb.textContent = '🔧 전체 분석 접기';
+      } else {
+        w.style.display = 'none'; _fb.textContent = '🔧 전체 분석 보기 (기존 화면)';
+      }
+    });
+    if (isKr) _krLiveOddsRefresh(key);   // 재렌더 직후 실배당 즉시 반영
   }
 
   async function openMultiDetail(key) {
@@ -2098,33 +2159,11 @@
     // [4번] 기존 분석 렌더 재사용(복승 매트릭스·핵심 신호·추천 조합) + 결과 입력 버튼
     // [한국경마 카드 재설계 (2026-07-19)] 한국 경주만 새 5섹션 카드(요약→추천→왜→전개→복병) 기본 표시.
     //   기존 전체 화면은 '전체 분석 보기' 버튼으로 그대로 접근 가능(무삭제·라우팅만). 타 종목은 기존 그대로.
-    let html = '';
-    const _isKr = (a.category === 'korea') || (typeof jpIsKoreaName === 'function' && jpIsKoreaName(key));
-    if (_isKr) {
-      try { html = koreaProCardHTML(a); } catch (_) { html = ''; }
-      if (html) {
-        html += `<button class="btn" id="krProFullBtn" style="min-height:56px;font-size:15px;font-weight:800;width:100%;margin-top:8px">🔧 전체 분석 보기 (기존 화면)</button><div id="krProFullWrap" style="display:none;margin-top:8px"></div>`;
-      }
-    }
-    if (!html) {
-      try { html = sportAnalysisHTML(a); } catch (_) { html = '<p class="hint">렌더 오류</p>'; }
-    }
-    html += `<div style="margin-top:10px"><button class="btn btn-primary" style="min-height:56px;font-size:15px" onclick="document.querySelector('.tab-btn[data-tab=&quot;result&quot;]').click()">📝 결과 입력하러 가기</button></div>`;
-    if (bodyEl) bodyEl.innerHTML = html;
-    // [배당 실시간 갱신] 한국 카드면 즉시 1회 + 30초 주기 실배당 갱신 시작(타 종목은 대상 요소 없음 → 무동작)
-    if (_isKr) _krLiveOddsStart(key);
-    // [한국 카드] 기존 전체 분석 접기/펼치기(무삭제 보존 뷰)
-    const _fb = document.getElementById('krProFullBtn');
-    if (_fb) _fb.addEventListener('click', () => {
-      const w = document.getElementById('krProFullWrap');
-      if (!w) return;
-      if (w.style.display === 'none') {
-        try { w.innerHTML = sportAnalysisHTML(a); } catch (_) { w.innerHTML = '<p class="hint">렌더 오류</p>'; }
-        w.style.display = 'block'; _fb.textContent = '🔧 전체 분석 접기';
-      } else {
-        w.style.display = 'none'; _fb.textContent = '🔧 전체 분석 보기 (기존 화면)';
-      }
-    });
+    //   [추천 30초 재조회] 공용 렌더러(_buildMultiDetailHtml)로 그려 변경 감지 갱신과 항상 동일 화면.
+    const built = _buildMultiDetailHtml(key, a);
+    if (bodyEl) bodyEl.innerHTML = built.html;
+    _bindMultiDetailExtras(key, a, built.isKr);
+    _krLiveOddsStart(key);   // 전 종목: 30초마다 추천 재조회(변경 시 ⚡배너) · 한국: 실배당 갱신 포함
   }
 
   /** raceKey(예 "2026-07-04 제주 3R" / "제주 3경주")에서 회장·경주번호를 뽑아 한국 칩 자동 선택 */

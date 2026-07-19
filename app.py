@@ -10927,12 +10927,20 @@ def _pub_matrix(an, role):
             om[k] = float(c["odds"])
         nos.add(a); nos.add(b)
 
-    # 초록 = 최종 추천 복승(오버레이 recSet 과 동일: betRecommend 중 '복' 종류)
+    # 초록 = 최종 추천 복승
+    # [추천 소스 통일 (2026-07-19)] 배당판 초록(betRecommend)과 상세 카드(finalQuinellas)가 다른 필드를
+    #   봐서 "매트릭스엔 초록인데 추천엔 없는" 불일치 발생 → 초록을 상세 카드와 동일한
+    #   corePicks.finalQuinellas 기준으로 통일. finalQuinellas 없으면 기존 betRecommend 폴백(구데이터·무삭제).
     green = set()
-    for b in (an.get("betRecommend") or []):
-        cb = b.get("combo") or []
-        if len(cb) == 2 and "복" in str(b.get("kind") or b.get("label") or ""):
+    for q in ((an.get("corePicks") or {}).get("finalQuinellas") or []):
+        cb = q.get("combo") or []
+        if len(cb) == 2:
             green.add(f"{int(min(cb))}-{int(max(cb))}")
+    if not green:
+        for b in (an.get("betRecommend") or []):
+            cb = b.get("combo") or []
+            if len(cb) == 2 and "복" in str(b.get("kind") or b.get("label") or ""):
+                green.add(f"{int(min(cb))}-{int(max(cb))}")
 
     # 빨강 = 진짜 급락만: 조합급락 10%+ AND 급락말 포함 AND 유력마 포함 → 급락폭 큰 순 최대 3개
     flow = an.get("flowScores") or {}
