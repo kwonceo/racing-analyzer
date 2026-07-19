@@ -7759,8 +7759,78 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 if k not in _seenq:
                     _seenq.add(k); q_main2.append(x)
             q_main = q_main2[:3]
+            # ══════════ [단통 고배당 모순 수정 (2026-07-19)] ══════════
+            #   증상(마쓰도 6경주·단통 1.2배): 재편성 복승이 3+5(49.7배)·5+6(187.5배) — 상한 검사 없이 메인 편성.
+            #   ① 상한: 메인 30배 초과 → 복병(★★) 이동 · 50배(SPECIAL_ODDS_MAX) 초과 → 제외.
+            #   ② 경륜 한정: 단통말+마크(같은 라인 2번수) 복승 1개는 메인에 보존 — 경륜은 라인 동반 입상
+            #      빈도가 높아 '단통말 완전 제외'가 경마보다 위험(keirinLinePairs 재활용).
+            #   ③ 대체 조합 전멸(전부 30배↑) 시: '고배당 주의' 경고 + 축소 추천(무리한 재편성 안 함).
+            #   ⚠ 기존 재편성 로직·조합 산출은 그대로 두고 사후 필터·보존만 추가(무삭제).
+            _DAN_MAIN_CAP = 30.0
+            dansung_warn = None
+            try:
+                # ② 경륜: 단통말이 낀 라인 페어(선두+마크) 1개 메인 보존
+                if _sp == "cycle":
+                    _dpair = None
+                    for _lp in (cp.get("keirinLinePairs") or []):
+                        try:
+                            _lc = [int(x) for x in (_lp.get("combo") or [])]
+                        except (TypeError, ValueError):
+                            continue
+                        if len(_lc) == 2 and dhorse in _lc:
+                            _dpair = _lc
+                            break
+                    if _dpair:
+                        _do = _qod(_dpair[0], _dpair[1])
+                        if _do and float(_do) <= _DAN_MAIN_CAP:
+                            if tuple(sorted(_dpair)) not in set(tuple(x["combo"]) for x in q_main):
+                                q_main = [{"combo": sorted(_dpair), "odds": _do,
+                                           "label": "단통말+마크(같은 라인) 보존"}] + q_main
+                # ① 상한: 30배↑ → 복병 이동 후보(_over_dm) · 50배↑ → 완전 제외
+                _kept_dm, _over_dm = [], []
+                for _x in q_main:
+                    try:
+                        _xo = float(_x.get("odds")) if _x.get("odds") is not None else None
+                    except (TypeError, ValueError):
+                        _xo = None
+                    if _xo is None or _xo <= _DAN_MAIN_CAP:
+                        _kept_dm.append(_x)
+                    elif _xo <= SPECIAL_ODDS_MAX:
+                        _over_dm.append(_x)
+                    # 50배 초과 → 어디에도 안 넣음(제외)
+                # ③ 전멸 시: 고배당 주의 + 축소 추천
+                if not _kept_dm:
+                    dansung_warn = ("⚠️ 고배당 주의 — 단통말 제외 시 남는 조합이 전부 %d배 초과. "
+                                    "무리한 재편성 대신 축소 추천(복병 섹션 참고·소액 권장)") % int(_DAN_MAIN_CAP)
+                q_main = _kept_dm[:3]
+                # 30~50배 조합 → 복병(★★) 섹션 이동(중복 방지·기존 복병 보존)
+                if _over_dm:
+                    _sp_have_d = set(tuple(sorted(int(x) for x in (c.get("combo") or []))) for c in (special_q or []))
+                    for _x in _over_dm:
+                        _ck = tuple(sorted(int(v) for v in (_x.get("combo") or [])))
+                        if len(_ck) != 2 or _ck in _sp_have_d:
+                            continue
+                        special_q = (special_q or []) + [{
+                            "combo": list(_ck), "odds": _x.get("odds"), "stars": 2,
+                            "reason": "단통 재편성 " + str(_x.get("label") or "") + " → 고배당(30배↑) 복병 이동",
+                            "basis": _combo_basis(list(_ck)), "summary": "단통 고배당 — 복병 섹션"}]
+                        _sp_have_d.add(_ck)
+                print("[단통 상한] 메인 %d개 · 복병이동 %d개%s" % (
+                    len(q_main), len(_over_dm), " · ⚠️ 고배당 주의(축소)" if dansung_warn else ""))
+            except Exception as _dce:
+                print("[단통 상한] 실패(무시·기존 재편성 유지):", _dce)
             # 복병 복승 1개 필수(단통 탈락 대비) — 복병1+실질유력, 없으면 복병1+복병2
             dark_q = _qitem(d1, f2, "🐎 복병 복승") or _qitem(d1, d2, "🐎 복병 복승")
+            # [단통 상한·복병 복승에도 적용] 50배 초과 제외 · 30~50배는 '고배당' 표기만(복병 성격 유지)
+            try:
+                if dark_q and dark_q.get("odds") is not None:
+                    _dqo = float(dark_q["odds"])
+                    if _dqo > SPECIAL_ODDS_MAX:
+                        dark_q = None
+                    elif _dqo > _DAN_MAIN_CAP:
+                        dark_q = dict(dark_q, label=(dark_q.get("label") or "🐎 복병 복승") + " · 고배당 주의")
+            except (TypeError, ValueError):
+                pass
             # 삼복승 보험 2개 — 단통 제외(2위+3위+복병1) + 단통 포함(단통말+2위+3위)
             tri_ins = []
             if f2 and f3 and d1:
@@ -7774,6 +7844,8 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 "realFavorites": real_favs[:2], "darkHorses": darks[:3],
                 "quinellaMain": q_main, "darkQuinella": dark_q, "trifectaInsurance": tri_ins,
                 "title": "⚡ 단통 경주 (%d번 집중)" % dhorse,
+                "warning": dansung_warn,        # [단통 상한③] 전 조합 30배↑ → '고배당 주의' 라벨(축소 추천)
+                "mainCap": _DAN_MAIN_CAP,
             }
             # [단통말 메인 제외] final_q 에서 단통말 포함 조합 제거 + 단통 복승 메인을 앞에 편성(중복 방지)
             _kept = [q for q in final_q if dhorse not in [int(x) for x in (q.get("combo") or [])]]

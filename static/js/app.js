@@ -6493,6 +6493,10 @@
       <div style="font-size:14.5px;font-weight:900;color:#f59e0b">⚡ 단통 경주 감지 ${cp.dansungMinOdds != null ? `<span class="hint" style="font-weight:700;font-size:12px">(최저 ${cp.dansungMinOdds}배)</span>` : ''}</div>
       <div class="hint" style="font-size:12px;margin-top:2px">저배당 추천 신뢰도 낮음 · <b style="color:#f0abfc">복병 감지에 집중</b>하세요 (💎 BMED 특별 참고)</div>
     </div>` : '';
+    // [단통 상한③·고배당 주의 (2026-07-19)] 단통말 제외 시 전 조합 30배 초과 → 서버 warning 라벨 표시(축소 추천 안내)
+    const dansungWarnBanner = (dansung && cp.dansungPlan && cp.dansungPlan.warning) ? `<div style="margin:4px 0 8px;padding:9px 11px;border:2px solid #f87171;border-radius:9px;background:rgba(248,113,113,.14)">
+      <div style="font-size:14px;font-weight:900;color:#f87171">${esc(cp.dansungPlan.warning)}</div>
+    </div>` : '';
     const confHead = cp.confTop1 != null ? `<span class="hint" style="font-weight:400;font-size:11px">· 확신도 1위 ${cp.confTop1}번${cp.confTop1High ? ' 🔺고배당' : ''}</span>` : '';
     // [근거 기반 추천·두수별 개수] ★등급(★★★ 이중수렴/★★ 단일강신호/★ 참고) + 근거 + N두·복승개수 헤더
     const starStr = (n) => '★'.repeat(Math.max(0, Math.min(3, n || 0)));
@@ -6532,6 +6536,7 @@
     return `<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
       <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(근거 기반)</span> ${confHead}</div>
       ${dansungBanner}
+      ${dansungWarnBanner}
       ${formBadge}
       ${cntHead}
       ${qLines}
