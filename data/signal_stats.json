@@ -106,23 +106,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "카나자와 6경주",
-        "date": "2026-07-12",
-        "horses": [
-          8,
-          3,
-          5,
-          2
-        ],
-        "placed": [
-          8,
-          5,
-          2
-        ],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
         "race": "코치 1경주",
         "date": "2026-07-12",
         "horses": [
@@ -133,21 +116,6 @@
         "placed": [],
         "quinella_hit": true,
         "trifecta_hit": false
-      },
-      {
-        "race": "카나자와 7경주",
-        "date": "2026-07-12",
-        "horses": [
-          8,
-          9,
-          10
-        ],
-        "placed": [
-          8,
-          9
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
       },
       {
         "race": "코치 2경주",
@@ -668,11 +636,11 @@
         "trifecta_hit": false
       }
     ],
-    "count": 48,
-    "hit_quinella": 25,
-    "hit_trifecta": 18,
-    "rate_quinella": 52.1,
-    "rate_trifecta": 37.5,
+    "count": 46,
+    "hit_quinella": 24,
+    "hit_trifecta": 17,
+    "rate_quinella": 52.2,
+    "rate_trifecta": 37.0,
     "reliable": false
   },
   "급락": {
@@ -930,18 +898,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "카나자와 6경주",
-        "date": "2026-07-12",
-        "horses": [
-          8
-        ],
-        "placed": [
-          8
-        ],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
         "race": "코치 1경주",
         "date": "2026-07-12",
         "horses": [
@@ -952,16 +908,6 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": false
-      },
-      {
-        "race": "카나자와 7경주",
-        "date": "2026-07-12",
-        "horses": [
-          5
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": true
       },
       {
         "race": "코치 2경주",
@@ -1837,18 +1783,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "서울 9경주",
-        "date": "2026-07-18",
-        "horses": [
-          9
-        ],
-        "placed": [
-          9
-        ],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
         "race": "코치 6경주",
         "date": "2026-07-18",
         "horses": [
@@ -2466,13 +2400,65 @@
         "placed": [],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 9경주",
+        "date": "2026-07-19",
+        "horses": [
+          5
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "카나자와 7경주",
+        "date": "2026-07-19",
+        "horses": [
+          10
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "모리오카 10경주",
+        "date": "2026-07-19",
+        "horses": [
+          9
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "카나자와 6경주",
+        "date": "2026-07-19",
+        "horses": [
+          3
+        ],
+        "placed": [
+          3
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "부산 7경주 1200M",
+        "date": "2026-07-19",
+        "horses": [
+          3
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 166,
-    "hit_quinella": 70,
+    "count": 168,
+    "hit_quinella": 72,
     "hit_trifecta": 31,
-    "rate_quinella": 42.2,
-    "rate_trifecta": 18.7,
+    "rate_quinella": 42.9,
+    "rate_trifecta": 18.5,
     "reliable": true
   },
   "전적이중수렴": {
@@ -2894,13 +2880,56 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 9경주",
+        "date": "2026-07-19",
+        "horses": [
+          6,
+          7
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "카나자와 7경주",
+        "date": "2026-07-19",
+        "horses": [
+          4
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "모리오카 10경주",
+        "date": "2026-07-19",
+        "horses": [
+          5
+        ],
+        "placed": [
+          5
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "부산 7경주 1200M",
+        "date": "2026-07-19",
+        "horses": [
+          6
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 34,
-    "hit_quinella": 16,
-    "hit_trifecta": 7,
-    "rate_quinella": 47.1,
-    "rate_trifecta": 20.6,
+    "count": 38,
+    "hit_quinella": 19,
+    "hit_trifecta": 8,
+    "rate_quinella": 50.0,
+    "rate_trifecta": 21.1,
     "reliable": false
   },
   "역배열": {
@@ -3508,13 +3537,37 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "모리오카 10경주",
+        "date": "2026-07-19",
+        "horses": [
+          3
+        ],
+        "placed": [
+          3
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "카나자와 6경주",
+        "date": "2026-07-19",
+        "horses": [
+          3
+        ],
+        "placed": [
+          3
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 52,
-    "hit_quinella": 17,
-    "hit_trifecta": 12,
-    "rate_quinella": 32.7,
-    "rate_trifecta": 23.1,
+    "count": 54,
+    "hit_quinella": 18,
+    "hit_trifecta": 13,
+    "rate_quinella": 33.3,
+    "rate_trifecta": 24.1,
     "reliable": true
   },
   "크로스역배열": {
@@ -3738,13 +3791,43 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "모리오카 10경주",
+        "date": "2026-07-19",
+        "horses": [
+          7,
+          3
+        ],
+        "placed": [
+          7,
+          3
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "카나자와 6경주",
+        "date": "2026-07-19",
+        "horses": [
+          2,
+          3,
+          6
+        ],
+        "placed": [
+          2,
+          3,
+          6
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 18,
-    "hit_quinella": 6,
-    "hit_trifecta": 5,
-    "rate_quinella": 33.3,
-    "rate_trifecta": 27.8,
+    "count": 20,
+    "hit_quinella": 7,
+    "hit_trifecta": 6,
+    "rate_quinella": 35.0,
+    "rate_trifecta": 30.0,
     "reliable": false
   },
   "집중급락": {
@@ -3836,51 +3919,6 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
-      },
-      {
-        "race": "카나자와 6경주",
-        "date": "2026-07-12",
-        "horses": [
-          10,
-          6,
-          4,
-          8,
-          11,
-          3,
-          5,
-          9,
-          2
-        ],
-        "placed": [
-          8,
-          5,
-          2
-        ],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
-        "race": "카나자와 7경주",
-        "date": "2026-07-12",
-        "horses": [
-          7,
-          6,
-          8,
-          3,
-          9,
-          10,
-          4,
-          5,
-          1,
-          2
-        ],
-        "placed": [
-          8,
-          3,
-          9
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
       },
       {
         "race": "코치 2경주",
@@ -4027,11 +4065,11 @@
         "trifecta_hit": true
       }
     ],
-    "count": 16,
-    "hit_quinella": 5,
-    "hit_trifecta": 5,
-    "rate_quinella": 31.2,
-    "rate_trifecta": 31.2,
+    "count": 14,
+    "hit_quinella": 4,
+    "hit_trifecta": 4,
+    "rate_quinella": 28.6,
+    "rate_trifecta": 28.6,
     "reliable": false
   },
   "저배당압축": {

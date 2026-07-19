@@ -2119,7 +2119,12 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     _last_t = (prev_hist[-1].get("t") if prev_hist else None) or prev.get("t")
     stale_gap = bool(_last_t and (now - _last_t) > 1200)
     _established = len(prev_hist) >= 4
-    baseline_reset = (sport_changed or stale_gap
+    # [소스 전환 오염 방지 (2026-07-19)] 같은 경주에 사설(확장)↔oddspark 값이 번갈아 들어오면
+    #   두 소스의 배당 체계 차이가 가짜 급락/복원 신호를 만든다 → 소스가 바뀌는 스냅샷은 기준 재설정
+    #   (신호 계산 제외·다음 스냅샷부터 새 소스 기준). "서버=기본 안정·확장=실시간 보완, 서로 오염 금지" 원칙.
+    _src_switched = bool(prev and prev.get("source")
+                         and (_src_is_oddspark(prev.get("source")) != _src_is_oddspark(source)))
+    baseline_reset = (sport_changed or stale_gap or _src_switched
                       or ((not _established) and bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q))))
     hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주·다른 종목·오래된) 배당 완전 제거
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})

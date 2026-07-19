@@ -1840,6 +1840,7 @@
     }
     const site = detectSite();
     const oddsClass = site === 'asyukk' ? 'odds_content' : null;
+    const _cycleStart = Date.now();   // [v2.1.135] 이 수집 사이클 시작 시각(진행 중 사용자 클릭 감지용)
     // [사용자 탭 유지 (2026-07-19)] 수집이 복승/쌍승 탭을 클릭한 뒤 원래 탭으로 안 돌려놔
     //   경륜=쌍승에 머묾·한국=복승 강제 복귀 증상 → 수집 전 사용자 활성 탭을 기억, 수집 후 복원.
     let _userTab0 = '';
@@ -1949,10 +1950,23 @@
 
       // 2) 쌍승 — [일본 전용]. 한국경마는 쌍승을 수집하지 않는다(복승만).
       let exacta = [];
+      let _userMidAbort = false;   // [v2.1.135] 수집 도중 사용자 탭 클릭 → 남은 탭 이동 생략 플래그
       if (isKorea) {
         console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원) → 쌍승 탭 클릭 차단');
         console.log('[쌍승수집] 한국경마 모드 → 쌍승 수집 생략(복승만).');
       } else {
+        // [v2.1.135 진행 중 사용자 우선] 유예(12초)는 '새 수집'만 막고, 이미 시작된 사이클은 그대로
+        //   쌍승을 클릭해 "복승 클릭 → 몇 초 뒤 쌍승 전환" 증상을 만들었다 → 사이클 도중 신뢰 클릭이
+        //   감지되면 남은 탭 이동(쌍승·삼복승)을 이번 사이클에서 포기하고 사용자 탭으로 즉시 복귀.
+        if (_lastUserTabClick > _cycleStart) {
+          console.log('[사용자 우선] 수집 도중 탭 직접 클릭 감지 → 쌍승·삼복승 이번 사이클 생략, 사용자 탭 유지(복승 수집분은 전송)');
+          try {
+            const _t5 = _userChosenTab || _userTab0;
+            if (_t5) { clickAsyukkBetTab(_t5); await wait(400); }
+          } catch (_) { /* */ }
+          _userMidAbort = true;
+        }
+        if (!_userMidAbort) {
         //  [디버그 강화] 쌍승 탭이 실제로 전환·로드됐는지, 조합이 뽑혔는지 상세 로그.
         setTripleProgress('쌍승 수집중…(최대 5초)');
         console.log('[쌍승수집] 탭 클릭 시도... (labels=쌍승/마단/쌍승식/馬単, 타임아웃 5초·재시도 3회)');
@@ -2003,6 +2017,7 @@
             setTripleProgress('쌍승 미수집 — 복승만으로 분석 진행');
           }
         }
+        }   // [v2.1.135] if (!_userMidAbort) 닫기
       }
 
       // 3) [일본 전용] 출마표2 전적: keiba.go.jp DebaTable을 fetch해 추출(우선) → 실패 시 인페이지 탭 클릭 폴백
@@ -2043,7 +2058,7 @@
       //   앞 단계가 실패한 채 삼복승 탭까지 클릭하면 탭 엇박자만 키우고 오염 위험(기존 서버 데이터는 유지됨).
       // [v2.1.134 게이트 완화] 쌍승은 원래 불안정 — 쌍승 실패가 삼복승까지 영구 차단하던 과잉 조건 제거.
       //   복승만 성공하면 삼복승 시도(사용자 지시). 복승도 실패한 사이클만 생략(오염 방지 최소선 유지).
-      const _trioReady = (quinella.length > 0);
+      const _trioReady = (quinella.length > 0) && !_userMidAbort;   // [v2.1.135] 사용자 조작 중단 시 삼복승도 생략
       if (!isKorea && !isCentral && effSport !== 'boat' && !_trioReady) {
         console.warn('[삼복승수집] ⏸ 복승 미확보 → 삼복승 시도 생략(오염 방지, 기존 데이터 유지)');
       }

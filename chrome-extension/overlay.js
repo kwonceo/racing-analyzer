@@ -1002,7 +1002,9 @@
       if (!st || !st.ovShowMatrix || !d || !enabled || killed) { removeBoardMatrix(); return false; }
       var info = locateBoardMatrix();
       if (!info) { removeBoardMatrix(); return false; }
-      removeBoardMatrix();
+      // [깜박임 제거 v2.1.135] 여기서 매번 지우면 렌더 때마다(10초 분석·타이머 갱신 등) 오버레이가
+      //   사라졌다 다시 그려져 깜박임 → 강조 구성이 같으면 위치만 재조정, 바뀐 경우에만 새로 그린다
+      //   (제거는 아래 시그니처 비교 후로 이동 — 기존 기능 무삭제·순서만 이동).
       var role = matrixRoles(d);
       var invSet = {}; (((d.inverse || {}).invHorses) || []).forEach(function (n) { invSet[+n] = 1; });
       var smartSet = {}; (d.darkHorses || []).forEach(function (h) { if (h.smartMoney && h.no != null) smartSet[+h.no] = 1; });
@@ -1145,6 +1147,19 @@
 
       var ctx = { dropMap: dropMap, greenSet: greenSet, blueSet: blueSet, blueTag: blueTag, redSet: redSet, redTag: redTag, specialSet: specialSet, specialTag: specialTag };
 
+      // [깜박임 제거 v2.1.135] 강조 구성(초록/파랑/특별/빨강·헤더·서버배당)이 직전과 동일하고 레이어가
+      //   살아 있으면 → 지우지 않고 위치만 재조정(부드러운 갱신). 구성이 바뀐 경우에만 교체.
+      try {
+        var _bsig = JSON.stringify([Object.keys(greenSet).sort(), Object.keys(blueSet).sort(),
+          Object.keys(specialSet || {}).sort(), Object.keys(redSet).sort(),
+          info.headerNos, _srvOdds, Object.keys(role || {}).sort()]);
+        if (renderBoardMatrix._sig === _bsig && byId(BOARD_ID) && boardItems.length) {
+          schedulePosition();
+          return true;
+        }
+        renderBoardMatrix._sig = _bsig;
+      } catch (_) { /* 시그니처 실패 시 기존 방식(재생성) */ }
+      removeBoardMatrix();
       // 오버레이 레이어(뷰포트 고정·클릭 통과)
       var layer = mk('div', 'position:fixed;left:0;top:0;width:0;height:0;z-index:2147482800;pointer-events:none');
       layer.id = BOARD_ID;
