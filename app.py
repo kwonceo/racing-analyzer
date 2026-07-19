@@ -2001,10 +2001,15 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     except Exception as _ke:
         print("[종목 정정] 실패(무시):", _ke)
     # [경륜 종목 강제·세이부엔 등] 경륜 전용 지명(경정장 없음) → sport=cycle 강제. 확장이 boat 로 오분류해 보내도 서버 최종 방어.
-    #   한국경마 아니고(위에서 이미 처리), 종목이 미지정/boat/bike 로 온 경우만 정정(정상 cycle·horse 는 그대로).
+    #   한국경마 아니고(위에서 이미 처리), 종목이 미지정/boat/bike/horse 로 온 경우 정정(정상 cycle 은 그대로).
+    #   [플립 원천 차단 (2026-07-19)] 조건에 "horse" 추가 — 새 ks1 배당판은 본문에 타 종목 메뉴·배너의
+    #   경마장명이 섞여 확장이 경륜 경주(기후 2경주)를 sport=horse 로 전송 → oddspark 서버수집(cycle)과
+    #   교대될 때마다 [종목 전환 완전 초기화]가 기준값 리셋+경륜 전적 삭제를 반복하고, 마감 직전 확장
+    #   집중수집 시점부터 분석이 경마 스타일로 교체되던 문제. 경륜 전용 지명(기후·마쓰도·세이부엔 등)은
+    #   horse 로 와도 무조건 cycle 로 정정(기존 조건 삭제 없음·확장만).
     try:
         if _KEIRIN_ONLY_RE.search(str(rk)) and not _KRA_TRACK_RE.search(str(rk)):
-            if sport in (None, "boat", "bike") or category in (None, "boat", "bike"):
+            if sport in (None, "horse", "boat", "bike") or category in (None, "japan_local", "boat", "bike"):
                 if sport != "cycle":
                     print("[종목 정정] %s: 경륜 전용 지명 → sport=cycle (기존 sport=%s·cat=%s)" % (rk, sport, category))
                 sport, category = "cycle", "cycle"
@@ -24188,13 +24193,41 @@ def _card_conf_value(conf):
     return lv
 
 
+_MULTI_CARD_CACHE = {}   # [수집 누락 긴급수정 2026-07-19] {key: (built_t, rec_t, card)} 카드 15초 캐시
+#   대시보드 폴링(30초)마다 수집 경주 전부를 _triple_analyze(무거움: KRA API·전적·전개) 재계산 →
+#   개최 많은 날 응답이 수십 초로 늘어나 카드가 늦거나 이전 화면에 머물던 문제. rec.t(새 수집) 변경 시엔 즉시 재계산.
+
+
 def _multi_card(key, rec):
     """[3번] 카드 요약: analyze(기존 _triple_analyze 재사용·읽기전용) → 유력마TOP3·핵심신호·확신도·마감남은초·색상."""
+    # [카드 캐시] 같은 수집본(rec.t 동일)이면 15초간 재분석 생략 → 대시보드 응답 시간 급감(내용 동일)
+    _rt = rec.get("t") or 0
+    try:
+        _ck = _MULTI_CARD_CACHE.get(key)
+        if _ck and (time.time() - _ck[0]) < 15 and _ck[1] == _rt:
+            return _ck[2]
+    except Exception:
+        pass
     try:
         an = _triple_analyze(key, rec)
     except Exception as e:
-        print("[다중경주] 분석 실패", key, e)
-        return None
+        # [수집분 증발 방지] 분석이 실패해도 '수집 대기'로 오표시하지 않게 최소 폴백 카드 반환(원인 로그 포함).
+        import traceback
+        traceback.print_exc()
+        print("[다중경주] 분석 실패", key, e, "→ 폴백 카드(수집 사실 유지)")
+        try:
+            _fb = {
+                "raceKey": key, "venue": _track_norm(rec.get("venue")), "raceNo": rec.get("raceNo"),
+                "sport": _multi_sport_of(rec), "postTime": rec.get("postTime"),
+                "secondsLeft": (int(rec["postEpoch"] - time.time()) if rec.get("postEpoch") else None),
+                "urgency": "normal", "keyHorses": [], "signals": [], "anomaly": False,
+                "midHigh": [], "confidence": None, "quinellaMain": None,
+                "afterClose": False, "analyzeError": True,
+                "updatedSecondsAgo": int(time.time() - (_rt or time.time())),
+            }
+            return _fb
+        except Exception:
+            return None
     now = time.time()
     pe = rec.get("postEpoch")
     left = int(pe - now) if pe else None
@@ -24224,7 +24257,7 @@ def _multi_card(key, rec):
     mid_high = [{"no": m["no"], "odds": m["odds"], "sigTypes": m.get("sigTypes") or []} for m in _mhf[:3]]
     # [4번·⚡ 이상감지 배지] 급락/역배열/스마트머니 신호 하나라도 있으면 anomaly=True
     anomaly = bool(signals)
-    return {
+    card = {
         "raceKey": key, "venue": _track_norm(rec.get("venue")), "raceNo": rec.get("raceNo"),
         "sport": _multi_sport_of(rec),   # [통합·4번] 종목 그룹(horse|cycle|korea)
         "postTime": rec.get("postTime"), "secondsLeft": left, "urgency": urgency,
@@ -24239,6 +24272,14 @@ def _multi_card(key, rec):
         "afterClose": bool(an.get("afterClose")),
         "updatedSecondsAgo": int(now - (rec.get("t") or now)),
     }
+    try:
+        _MULTI_CARD_CACHE[key] = (time.time(), _rt, card)   # [카드 캐시] 성공 카드만 저장
+        if len(_MULTI_CARD_CACHE) > 300:                     # 과거 경주 캐시 무한증가 방지
+            for _old_k in sorted(_MULTI_CARD_CACHE, key=lambda k: _MULTI_CARD_CACHE[k][0])[:100]:
+                _MULTI_CARD_CACHE.pop(_old_k, None)
+    except Exception:
+        pass
+    return card
 
 
 @app.route("/api/multi/keirin-schedule", methods=["POST"])
@@ -24838,15 +24879,41 @@ def _multi_bg_loop():
                 _startup_date_reset()
                 last_day, last_sched = _cur_day, 0
             if now - last_sched >= 1800:       # 30분마다 스케줄 갱신
-                _multi_schedule_fetch()
+                # [수집 누락 긴급수정 2026-07-19·비블로킹] 스케줄 갱신은 개최장 많은 날 수십 초~수 분 걸려
+                #   (경주별 発走時間 페이지 fetch) 같은 스레드의 배당 수집을 통째로 멈추게 하던 문제 →
+                #   별도 스레드로 분리(수집은 계속·갱신은 뒤에서). 기존 갱신 로직 자체는 무변경.
+                threading.Thread(target=_multi_schedule_fetch, daemon=True,
+                                 name="multi-sched-refresh").start()
                 last_sched = now
             sched = _schedule_load()
             ymd = sched.get("ymd") or time.strftime("%Y%m%d")
+            # [수집 누락 긴급수정 2026-07-19·병렬+임박 우선] 기존엔 창(발주 10분전~2분후) 안 경주를 '순차'
+            #   수집(경주당 fetch 2회·타임아웃 15초) → 경륜 67경주 등 동시 개최가 많으면 한 바퀴가 수 분으로
+            #   늘어나 다음 경주가 늦게 뜨거나 통째로 누락되던 문제. → 발주 임박순 정렬 후 병렬(동시 6) 수집.
+            #   _multi_collect_one 은 _multi_lock 으로 저장 직렬화돼 병렬 안전(기존 함수 무변경).
+            _targets = []
             for tr in sched.get("tracks", []):
                 for rc in tr.get("races", []):
                     pe = rc.get("postEpoch")
                     if pe and -120 <= (pe - now) <= MULTI_COLLECT_LEAD_SEC:   # 발주 10분전~2분후
-                        _multi_collect_one(tr, rc, ymd)
+                        _targets.append((pe, tr, rc))
+            _targets.sort(key=lambda t: t[0])          # 발주 임박(남은 시간 적은) 경주 먼저
+            if len(_targets) == 1:
+                _multi_collect_one(_targets[0][1], _targets[0][2], ymd)
+            elif _targets:
+                try:
+                    with ThreadPoolExecutor(max_workers=min(6, len(_targets))) as _mex:
+                        _futs = [_mex.submit(_multi_collect_one, _tr2, _rc2, ymd)
+                                 for (_pe2, _tr2, _rc2) in _targets]
+                        for _f in _futs:
+                            try:
+                                _f.result(timeout=40)
+                            except Exception:
+                                pass                    # 개별 경주 실패·지연은 격리(다른 경주 무영향)
+                except Exception as _pex:
+                    print("[다중경주] 병렬 수집 오류 → 순차 폴백(무시):", _pex)
+                    for (_pe2, _tr2, _rc2) in _targets:
+                        _multi_collect_one(_tr2, _rc2, ymd)
             # [자동 예상] 수집 직후 마감5분전 예상 저장·결과 대조·현재/다음 상태 갱신(연속 자동 전환)
             _auto_pred_tick(sched, now)
         except Exception as e:

@@ -3814,7 +3814,10 @@
     const f = fmap[no];
     const rows = [];
     if (h.formScore != null) rows.push(`전적점수 <b>${h.formScore}</b>`);
-    if (f && f.grade) rows.push(`전적등급 <b>${f.grade}</b>`);
+    // [표시 개선 2026-07-19] 경륜은 절대등급(競走得点) 병기 — "상대 A · 득점 D(56.9)"
+    if (f && f.grade) rows.push(f.absGrade
+      ? `전적등급 <b>상대 ${f.grade} · 득점 ${f.absGrade}${f.competScore != null ? `(${f.competScore})` : ''}</b>`
+      : `전적등급 <b>${f.grade}</b>`);
     if (f && (f.recentPlacings || []).length) rows.push(`최근착순 ${f.recentPlacings.join('-')}`);
     if (f && f.jockey) rows.push(`기수 ${esc(f.jockey)}`);
     if (h.odds != null) rows.push(`대표배당 <b>${h.odds}배</b>`);
@@ -4199,6 +4202,10 @@
       return {
         no,
         grade: f ? f.grade : null,
+        // [표시 개선 2026-07-19·경륜 절대등급 병기] 사분위 상대등급만 보이면 D급 득점(45~60) 선수도
+        //   'A등급'으로 표시돼 경마 전적 혼입처럼 오해 → 競走得点 절대등급(absGrade)·득점을 함께 전달.
+        absGrade: f ? f.absGrade : null,
+        competScore: f ? f.competScore : null,
         score: f ? f.totalScore : null,
         name: f ? (f.name || '') : '',
         isKey: keys.includes(no),
@@ -4214,7 +4221,12 @@
       else if (r.grade) tags.push('<span style="color:#8a94a6">배당신호없음</span>');
       if (r.isAnom) tags.push('<b style="color:#ff5c5c">🚨이상감지</b>');
       const gcol = gc[r.grade] || '#c7cfdb';
-      const gradeTxt = r.grade ? `<b style="color:${gcol}">${r.grade}등급</b>` : '<span class="hint">전적없음</span>';
+      // [표시 개선 2026-07-19] 경륜(absGrade 보유)은 "상대 A · 득점 D(56.9)" 병기 — 상대등급 단독 표기 오해 방지.
+      const gradeTxt = r.grade
+        ? (r.absGrade
+          ? `<b style="color:${gcol}">상대 ${r.grade}</b> <span style="color:${gc[r.absGrade] || '#8a94a6'};font-weight:700">· 득점 ${r.absGrade}${r.competScore != null ? `(${r.competScore})` : ''}</span>`
+          : `<b style="color:${gcol}">${r.grade}등급</b>`)
+        : '<span class="hint">전적없음</span>';
       return `<div style="margin:2px 0;font-size:13px">
         <b style="color:#4ea1ff;min-width:34px;display:inline-block">${r.no}번</b> ${gradeTxt}
         ${r.name ? `<span class="hint">${esc(r.name)}</span>` : ''}
