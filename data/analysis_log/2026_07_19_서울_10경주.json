@@ -6,7 +6,7 @@
  "date": "2026-07-19",
  "race": "서울 10경주",
  "analyzed_at": "17:56:44",
- "updated_at": "18:04:44",
+ "updated_at": "19:12:35",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -950,29 +950,9 @@
    "jockey": "인철",
    "record_score": 47.5,
    "record_detail": "최근 10-4-2-1-6",
-   "odds": 8.1,
-   "grade": "A",
-   "grade_reason": "배당 14.4배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 6,
-   "name": "파사스퍼",
-   "jockey": "동하",
-   "record_score": 0,
-   "record_detail": "",
-   "odds": 3.5,
-   "grade": "C",
-   "grade_reason": "배당 6.6배 · 쌍승 상위 +20(제거 보류) = 120점"
-  },
-  {
-   "no": 10,
-   "name": "스마일링",
-   "jockey": "용근",
-   "record_score": 42.5,
-   "record_detail": "최근 8-5-2-1-3",
-   "odds": 4.5,
+   "odds": null,
    "grade": "B",
-   "grade_reason": "배당 6.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 2,
@@ -980,9 +960,9 @@
    "jockey": "성환",
    "record_score": 60,
    "record_detail": "최근 6-1-3-5-8",
-   "odds": 35.0,
-   "grade": "D",
-   "grade_reason": "배당 66.2배 · 단승 30~49배 → 관찰(신호 없으면 제거) = 100점"
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 3,
@@ -990,9 +970,9 @@
    "jockey": "재철",
    "record_score": 93.8,
    "record_detail": "최근 2-1-9-3-4",
-   "odds": 23.6,
-   "grade": "C",
-   "grade_reason": "배당 44.7배 · 감점 없음 = 100점"
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 4,
@@ -1000,29 +980,39 @@
    "jockey": "효정",
    "record_score": 65,
    "record_detail": "최근 4-3-1-6-7",
-   "odds": 10.3,
+   "odds": null,
    "grade": "A",
-   "grade_reason": "배당 14.2배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 7,
-   "name": "드래곤킹",
-   "jockey": "태훈",
-   "record_score": 22.5,
-   "record_detail": "최근 9-5-7-8-3",
-   "odds": 10.6,
-   "grade": "B",
-   "grade_reason": "배당 15.9배 · 최근평균 6.4착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "no": 6,
+   "name": "파사스퍼",
+   "jockey": "동하",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
-   "no": 11,
-   "name": "라라케이",
-   "jockey": "정준",
-   "record_score": 22.5,
-   "record_detail": "최근 5-7-8-6-3",
-   "odds": 3.9,
+   "no": 9,
+   "name": "댄싱위즈",
+   "jockey": "중석",
+   "record_score": 66.2,
+   "record_detail": "최근 8-2-1-7-2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 10,
+   "name": "스마일링",
+   "jockey": "용근",
+   "record_score": 42.5,
+   "record_detail": "최근 8-5-2-1-3",
+   "odds": null,
    "grade": "C",
-   "grade_reason": "배당 6.6배 · 최근평균 5.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 5,
@@ -1030,90 +1020,111 @@
    "jockey": "추열",
    "record_score": 65,
    "record_detail": "최근 7-1-2-5-10",
-   "odds": 14.2,
-   "grade": "A",
-   "grade_reason": "배당 26.5배 · 최근평균 5.0착 -30 = 70점"
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+  },
+  {
+   "no": 7,
+   "name": "드래곤킹",
+   "jockey": "태훈",
+   "record_score": 22.5,
+   "record_detail": "최근 9-5-7-8-3",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.4착 -30 = 30점"
   },
   {
    "no": 8,
    "name": "나소챗",
    "jockey": "철호",
-   "record_score": 32,
+   "record_score": 27,
    "record_detail": "최근 8-6-2-10-1",
-   "odds": 30.1,
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.4착 -30 = 30점"
+  },
+  {
+   "no": 11,
+   "name": "라라케이",
+   "jockey": "정준",
+   "record_score": 22.5,
+   "record_detail": "최근 5-7-8-6-3",
+   "odds": null,
    "grade": "D",
-   "grade_reason": "배당 59.9배 · 최근평균 5.4착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
    1,
-   6,
-   10,
+   2,
    3,
    4,
+   9,
+   10,
+   5,
    7,
-   11,
-   5
-  ],
-  "eliminated": [
-   2,
    8
   ],
+  "eliminated": [
+   6,
+   11
+  ],
   "elimination_reasons": {
-   "2": "배당 66.2배 · 단승 30~49배 → 관찰(신호 없으면 제거) = 100점",
-   "8": "배당 59.9배 · 최근평균 5.4착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 70점"
+   "6": "배당 미수집 · 배당 150배+ -40 = 60점",
+   "11": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
   }
  },
  "final_recommendation": {
   "quinella_main": {
-   "combo": "10+11",
-   "odds": 7.6,
-   "reason": "10번(B)·11번(C)"
+   "combo": "3+9",
+   "odds": null,
+   "reason": "3번(A)·9번(A)"
   },
   "trifecta_main": {
-   "combo": "4+10+11",
-   "odds": 23.6,
-   "reason": "4번(A)·10번(B)·11번(C)"
+   "combo": "3+9+10",
+   "odds": null,
+   "reason": "3번(A)·9번(A)·10번(C)"
   },
   "trifecta_insurance1": {
-   "combo": "4+6+11",
-   "odds": 21.5,
-   "reason": "4번(A)·6번(C)·11번(C)"
+   "combo": "3+4+9",
+   "odds": null,
+   "reason": "3번(A)·4번(A)·9번(A)"
   },
   "trifecta_insurance2": {
-   "combo": "4+6+10",
-   "odds": 21.3,
-   "reason": "4번(A)·6번(C)·10번(B)"
+   "combo": "3+4+10",
+   "odds": null,
+   "reason": "3번(A)·4번(A)·10번(C)"
   },
   "budget_allocation": {
-   "quinella_main": "43%",
-   "trifecta_main": "29%",
-   "trifecta_insurance": "4%"
+   "quinella_main": "62.1%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
   }
  },
  "recommendation_history": [],
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    10,
-    11
+    3,
+    9
    ],
    "trio": [
-    4,
-    10,
-    11
+    3,
+    9,
+    10
    ]
   },
   "form": {
    "quinella": [
     3,
-    4
+    9
    ],
    "trio": [
     3,
     4,
-    5
+    9
    ]
   },
   "jockey": {
@@ -1122,13 +1133,13 @@
   },
   "final": {
    "quinella": [
-    10,
-    11
+    3,
+    9
    ],
    "trio": [
-    4,
-    10,
-    11
+    3,
+    9,
+    10
    ]
   }
  },
@@ -1541,15 +1552,57 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 10·11·4·6 / 복승 10+11",
+ "summary": "유력마 3·9·10 / 복승 3+9",
  "keyHorses": [
-  10,
-  11,
-  4,
-  6
+  3,
+  9,
+  10
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 10,
+  "2nd": 6,
+  "3rd": 4
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": true,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   10,
+   4
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 6.7,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   2,
+   8
+  ],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": 5700,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 42.5,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }

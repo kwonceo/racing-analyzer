@@ -1,12 +1,12 @@
 {
  "race_id": "2026_07_19_서울_8경주",
- "raceKey": "2026-07-19 서울 8경주",
+ "raceKey": "서울 8경주",
  "sport": "horse",
  "category": "korea",
  "date": "2026-07-19",
  "race": "서울 8경주",
  "analyzed_at": "16:38:44",
- "updated_at": "19:12:00",
+ "updated_at": "19:12:15",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -772,61 +772,41 @@
    "no": 2,
    "name": "용비히어",
    "jockey": "용근",
-   "record_score": 65,
+   "record_score": 50,
    "record_detail": "최근 6-3-2-5-7",
-   "odds": null,
+   "odds": 5.1,
    "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 7.5배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 4,
    "name": "컴플리트",
    "jockey": "기원",
-   "record_score": 113.8,
+   "record_score": 98.8,
    "record_detail": "최근 1-2-6-1-4",
-   "odds": null,
+   "odds": 4.9,
    "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+   "grade_reason": "배당 7.2배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 7,
    "name": "로열베스",
    "jockey": "이아",
-   "record_score": 85,
+   "record_score": 90,
    "record_detail": "최근 2-3-3-1-7",
-   "odds": null,
+   "odds": 4.9,
    "grade": "A",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 11,
-   "name": "하이퍼선",
-   "jockey": "성환",
-   "record_score": -5,
-   "record_detail": "",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
-  },
-  {
-   "no": 1,
-   "name": "미스터스",
-   "jockey": "다빈",
-   "record_score": 61.2,
-   "record_detail": "최근 10-6-4-1-4",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+   "grade_reason": "배당 8배 · 쌍승 상위 +20(제거 보류) = 120점"
   },
   {
    "no": 3,
    "name": "블리스스",
    "jockey": "재로",
-   "record_score": 51.2,
+   "record_score": 36.2,
    "record_detail": "최근 4-9-11-1-4",
-   "odds": null,
+   "odds": 3.4,
    "grade": "B",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
+   "grade_reason": "배당 7.2배 · 최근평균 5.8착 -30 / 쌍승 상위 +20(제거 보류) = 90점"
   },
   {
    "no": 5,
@@ -834,29 +814,29 @@
    "jockey": "추열",
    "record_score": 26.2,
    "record_detail": "최근 8-6-7-4-8",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.6착 -30 = 30점"
+   "odds": 9.2,
+   "grade": "B",
+   "grade_reason": "배당 13.1배 · 최근평균 6.6착 -30 = 70점"
   },
   {
    "no": 6,
    "name": "위즈원",
    "jockey": "재철",
-   "record_score": 16.2,
+   "record_score": 26.2,
    "record_detail": "최근 5-5-4-7-4",
-   "odds": null,
+   "odds": 23.1,
    "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+   "grade_reason": "배당 40.8배 · 최근평균 5.0착 -30 = 70점"
   },
   {
    "no": 8,
    "name": "스팅제트",
    "jockey": "정준",
-   "record_score": 46.2,
+   "record_score": 31.2,
    "record_detail": "최근 7-4-6-2-6",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+   "odds": 17.7,
+   "grade": "C",
+   "grade_reason": "배당 38.9배 · 최근평균 5.0착 -30 = 70점"
   },
   {
    "no": 9,
@@ -864,19 +844,39 @@
    "jockey": "태훈",
    "record_score": 20,
    "record_detail": "최근 5-6-6-10-7",
-   "odds": null,
+   "odds": 14.0,
+   "grade": "B",
+   "grade_reason": "배당 24.4배 · 최근평균 6.8착 -30 = 70점"
+  },
+  {
+   "no": 11,
+   "name": "하이퍼선",
+   "jockey": "성환",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": 45.1,
+   "grade": "D",
+   "grade_reason": "배당 159.2배 · 배당 150배+ -40 / 단승 30~49배 → 관찰(신호 없으면 제거) = 60점"
+  },
+  {
+   "no": 1,
+   "name": "미스터스",
+   "jockey": "다빈",
+   "record_score": 31.2,
+   "record_detail": "최근 10-6-4-1-4",
+   "odds": 45.5,
    "grade": "C",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.8착 -30 = 30점"
+   "grade_reason": "배당 98.6배 · 배당 80~149 -20 / 최근평균 5.0착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 50점"
   },
   {
    "no": 10,
    "name": "굿최강",
    "jockey": "종석",
-   "record_score": 11.2,
+   "record_score": 21.2,
    "record_detail": "최근 5-7-5-4-9",
-   "odds": null,
+   "odds": 38.1,
    "grade": "D",
-   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
+   "grade_reason": "배당 122.1배 · 배당 80~149 -20 / 최근평균 6.0착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 50점"
   }
  ],
  "elimination": {
@@ -884,7 +884,6 @@
    2,
    4,
    7,
-   1,
    3,
    5,
    6,
@@ -893,11 +892,13 @@
   ],
   "eliminated": [
    11,
+   1,
    10
   ],
   "elimination_reasons": {
-   "11": "배당 미수집 · 배당 150배+ -40 = 60점",
-   "10": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
+   "11": "배당 159.2배 · 배당 150배+ -40 / 단승 30~49배 → 관찰(신호 없으면 제거) = 60점",
+   "1": "배당 98.6배 · 배당 80~149 -20 / 최근평균 5.0착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 50점",
+   "10": "배당 122.1배 · 배당 80~149 -20 / 최근평균 6.0착 -30 / 단승 30~49배 → 관찰(신호 없으면 제거) = 50점"
   }
  },
  "final_recommendation": {
@@ -994,7 +995,7 @@
   },
   "final": {
    "quinella": [
-    4,
+    2,
     7
    ],
    "trio": [
@@ -1210,7 +1211,7 @@
      "2번: 집중급락"
     ],
     "summary": "시장+BMED 동시 유력",
-    "ev": 0.55
+    "ev": 0.54
    }
   ],
   "finalTrifectas": [
@@ -1274,8 +1275,8 @@
     "reason": "시장 저배당 보완 · 시장 단승 1·2강",
     "basis": [],
     "summary": "시장 저평가(메인 보완)",
-    "ev": 0.39,
-    "refReason": "기대값 0.39 미달(배당 7.2배 × 추정적중률 5%)"
+    "ev": 0.38,
+    "refReason": "기대값 0.38 미달(배당 7.2배 × 추정적중률 5%)"
    },
    {
     "combo": [
@@ -1289,8 +1290,8 @@
      "2번: 집중급락"
     ],
     "summary": "시장+BMED 동시 유력",
-    "ev": 0.4,
-    "refReason": "기대값 0.40 미달(배당 7.5배 × 추정적중률 5%)"
+    "ev": 0.39,
+    "refReason": "기대값 0.39 미달(배당 7.5배 × 추정적중률 5%)"
    },
    {
     "combo": [
@@ -1304,8 +1305,8 @@
      "2번: 집중급락"
     ],
     "summary": "시장+BMED 동시 유력",
-    "ev": 0.64,
-    "refReason": "기대값 0.64 미달(배당 12.0배 × 추정적중률 5%)"
+    "ev": 0.63,
+    "refReason": "기대값 0.63 미달(배당 12.0배 × 추정적중률 5%)"
    },
    {
     "combo": [
@@ -1317,8 +1318,8 @@
     "reason": "유력마 받치기 보존",
     "basis": [],
     "summary": "유력마 축 받치기(급락 조합과 함께 유지)",
-    "ev": 0.43,
-    "refReason": "기대값 0.43 미달(배당 8.0배 × 추정적중률 5%)"
+    "ev": 0.42,
+    "refReason": "기대값 0.42 미달(배당 8.0배 × 추정적중률 5%)"
    }
   ],
   "axisPlan": {
@@ -1458,11 +1459,12 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 7·4·2 / 복승 4+7",
+ "summary": "유력마 7·4·2·3 / 복승 2+7",
  "keyHorses": [
   7,
   4,
-  2
+  2,
+  3
  ],
  "result": {
   "1st": 2,

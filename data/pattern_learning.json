@@ -3417,16 +3417,44 @@
         "복승이상감지"
       ],
       "date": "2026-07-19"
+    },
+    {
+      "race": "서울 10경주",
+      "horse_no": 4,
+      "recent_avg": 4.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-19"
+    },
+    {
+      "race": "코치 8경주",
+      "horse_no": 3,
+      "recent_avg": 5.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-19"
+    },
+    {
+      "race": "코치 8경주",
+      "horse_no": 5,
+      "recent_avg": 6.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-19"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 783,
-      "hit": 177
+      "count": 792,
+      "hit": 178
     },
     "전체부진마": {
-      "count": 1254,
-      "hit": 350
+      "count": 1268,
+      "hit": 353
     },
     "대규모급락": {
       "count": 19,
@@ -3436,8 +3464,8 @@
       "hit_rate": 26.3
     },
     "이상감지동반": {
-      "count": 471,
-      "hit": 173
+      "count": 476,
+      "hit": 175
     },
     "급락동반": {
       "count": 101,
