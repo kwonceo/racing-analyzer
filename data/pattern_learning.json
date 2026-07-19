@@ -3064,16 +3064,32 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-19"
+    },
+    {
+      "race": "서울 5경주 1400M",
+      "horse_no": 8,
+      "recent_avg": 6.4,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-19"
+    },
+    {
+      "race": "서울 5경주 1400M",
+      "horse_no": 7,
+      "recent_avg": 5.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-19"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 699,
-      "hit": 161
+      "count": 703,
+      "hit": 163
     },
     "전체부진마": {
-      "count": 1121,
-      "hit": 313
+      "count": 1128,
+      "hit": 315
     },
     "대규모급락": {
       "count": 18,
@@ -3083,7 +3099,7 @@
       "hit_rate": 22.2
     },
     "이상감지동반": {
-      "count": 422,
+      "count": 425,
       "hit": 152
     },
     "급락동반": {
