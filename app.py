@@ -2191,7 +2191,7 @@ def _starters_prune(keep_rk=None):
     for k, v in sdb.items():
         if k == keep_rk or (v or {}).get("source") == "korea":
             kept[k] = v            # 현재 경주 + 한국 PDF 사전분석분은 유지
-        elif (time.time() - ((v or {}).get("t") or 0)) < 3 * 3600:
+        elif (time.time() - ((v or {}).get("t") or 0)) < 24 * 3600:   # [안정화 (2026-07-19)] 3→24시간 보존
             # [전적 전멸 수정 (2026-07-19)] 사설 우선 복원 후 한국 확장 수집이 30초마다 ingest →
             #   keep_rk(한국 경주)+korea 외 전부 삭제돼 일본·경륜 전적(oddspark/keirin)이 수집 직후
             #   계속 전멸하던 문제("전적 없음"의 실제 원인). 최근 3시간 전적은 종목 무관 보존 —
@@ -2199,9 +2199,12 @@ def _starters_prune(keep_rk=None):
             kept[k] = v
         else:
             removed += 1
+            # [안정화 (2026-07-19)] 삭제 전 로그 필수 — 무엇을 왜 지웠는지 항상 기록(24시간+ 경과분만)
+            print(f"[잔존마 방어] 전적 삭제: {k} (source={(v or {}).get('source')} · "
+                  f"{int((time.time() - ((v or {}).get('t') or 0)) / 3600)}시간 경과)")
     _starters_save(kept)
     if removed:
-        print(f"[잔존마 방어] starters 정리: {removed}건 제거(유지: {keep_rk or '없음'} + 한국PDF)")
+        print(f"[잔존마 방어] starters 정리: {removed}건 제거(유지: {keep_rk or '없음'} + 한국PDF + 24시간 내 전체)")
     return removed
 
 
@@ -25988,6 +25991,9 @@ def auto_prediction_get(filename):
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+_MULTI_BG_BEAT = {"t": 0.0, "n": 0}   # [안정화 (2026-07-19)] bg 루프 하트비트(워치독·상태 확인용)
+
+
 def _multi_bg_loop():
     """[1·2번] 백그라운드: 스케줄 30분 갱신 + 발주 임박 경주 배당 주기 수집(실패 격리·서버 죽지 않음)."""
     last_sched = 0
@@ -25995,6 +26001,17 @@ def _multi_bg_loop():
     while True:
         try:
             now = time.time()
+            # [안정화·하트비트] 매 사이클 기록 + 10사이클(5분)마다 생존 로그 → 수집 정지가 침묵 속에 묻히지 않게
+            _MULTI_BG_BEAT["t"] = now
+            _MULTI_BG_BEAT["n"] += 1
+            if _MULTI_BG_BEAT["n"] % 10 == 1:
+                try:
+                    _sch0 = _schedule_load()
+                    _sage = int(now - (_sch0.get("t") or 0)) if _sch0.get("t") else -1
+                    print(f"[다중경주] 하트비트 #{_MULTI_BG_BEAT['n']} · 스케줄 ymd={_sch0.get('ymd')} "
+                          f"({_sage}초 전 갱신 · 트랙 {len(_sch0.get('tracks') or [])}개)")
+                except Exception:
+                    print(f"[다중경주] 하트비트 #{_MULTI_BG_BEAT['n']}")
             # [날짜 자동 초기화] 자정 넘어 날짜 바뀌면 어제 데이터 정리 + 스케줄 즉시 재수집(새 날짜 경주로 재시작)
             _cur_day = time.strftime("%Y%m%d")
             if _cur_day != last_day:
@@ -26010,6 +26027,12 @@ def _multi_bg_loop():
                 last_sched = now
             sched = _schedule_load()
             ymd = sched.get("ymd") or time.strftime("%Y%m%d")
+            # [안정화·스케줄 신선도] 스케줄이 오늘 날짜가 아니거나 2시간+ 미갱신이면 즉시 강제 재수집 —
+            #   저녁 경주(미드나이트 경륜 등)가 창에 안 들어와 "수집 정지"처럼 보이던 상황 방어.
+            if (ymd != time.strftime("%Y%m%d")) or (sched.get("t") and now - sched["t"] > 7200):
+                print(f"[다중경주] ⚠ 스케줄 노후(ymd={ymd}·{int(now - (sched.get('t') or now))}초 경과) → 즉시 강제 갱신")
+                threading.Thread(target=_multi_schedule_fetch, daemon=True, name="multi-sched-force").start()
+                last_sched = now
             # [수집 누락 긴급수정 2026-07-19·병렬+임박 우선] 기존엔 창(발주 10분전~2분후) 안 경주를 '순차'
             #   수집(경주당 fetch 2회·타임아웃 15초) → 경륜 67경주 등 동시 개최가 많으면 한 바퀴가 수 분으로
             #   늘어나 다음 경주가 늦게 뜨거나 통째로 누락되던 문제. → 발주 임박순 정렬 후 병렬(동시 6) 수집.
@@ -26044,11 +26067,27 @@ def _multi_bg_loop():
         time.sleep(30)
 
 
+def _multi_bg_watchdog():
+    """[안정화 (2026-07-19)] bg 수집 루프 워치독 — 하트비트가 180초+ 멈추면(스레드 사망·교착) 루프 재기동.
+    오늘 실측: 수집이 1.4시간+ 조용히 멈춘 채 아무 흔적이 없던 문제 → 자기 치유 + 재기동 로그."""
+    while True:
+        try:
+            time.sleep(60)
+            _bt = _MULTI_BG_BEAT.get("t") or 0
+            if _bt and (time.time() - _bt) > 180:
+                print(f"[다중경주] 🚨 워치독: 수집 루프 하트비트 {int(time.time() - _bt)}초 정지 → 루프 재기동")
+                threading.Thread(target=_multi_bg_loop, daemon=True, name="multi-bg-revived").start()
+                time.sleep(120)   # 재기동 직후 중복 재기동 방지
+        except Exception as _we:
+            print("[다중경주] 워치독 오류(무시):", _we)
+
+
 def _start_multi_race_bg():
     """[6번] 다중 경주 백그라운드 시작(실패해도 서버·단일 모드 무영향)."""
     try:
         threading.Thread(target=_multi_bg_loop, daemon=True).start()
-        print("[다중경주] 백그라운드 시작(스케줄 30분·수집 30초·실패격리)")
+        threading.Thread(target=_multi_bg_watchdog, daemon=True, name="multi-bg-watchdog").start()   # [안정화] 자기 치유
+        print("[다중경주] 백그라운드 시작(스케줄 30분·수집 30초·실패격리·워치독 60초)")
     except Exception as e:
         print("[다중경주] 백그라운드 시작 실패(단일 모드 유지):", e)
 
