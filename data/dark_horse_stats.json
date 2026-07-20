@@ -1,15 +1,15 @@
 {
- "races": 390,
+ "races": 392,
  "byRank": {
   "rank1": {
-   "hit": 43,
-   "total": 163,
-   "rate": 26.4
+   "hit": 45,
+   "total": 164,
+   "rate": 27.4
   },
   "rank2": {
    "hit": 34,
-   "total": 127,
-   "rate": 26.8
+   "total": 128,
+   "rate": 26.6
   },
   "rank3": {
    "hit": 29,
@@ -31,21 +31,21 @@
    "weightReady": true
   },
   "역배열": {
-   "hit": 25,
+   "hit": 24,
    "total": 68,
-   "rate": 36.8,
+   "rate": 35.3,
    "weightReady": true
   },
   "급락": {
-   "hit": 5,
+   "hit": 6,
    "total": 25,
-   "rate": 20.0,
+   "rate": 24.0,
    "weightReady": false
   },
   "스마트머니": {
-   "hit": 3,
-   "total": 9,
-   "rate": 33.3,
+   "hit": 5,
+   "total": 11,
+   "rate": 45.5,
    "weightReady": false
   },
   "스마트머니+역배열": {
@@ -57,9 +57,9 @@
  },
  "byBand": {
   "30~50": {
-   "hit": 5,
-   "total": 36,
-   "rate": 13.9,
+   "hit": 7,
+   "total": 37,
+   "rate": 18.9,
    "weightReady": true
   },
   "15~30": {
@@ -83,9 +83,9 @@
  },
  "bySport": {
   "keiba": {
-   "hit": 74,
-   "total": 270,
-   "rate": 27.4,
+   "hit": 76,
+   "total": 272,
+   "rate": 27.9,
    "weightReady": true
   },
   "korea": {
@@ -115,5 +115,5 @@
    "기타": 1
   }
  },
- "updated_at": "2026-07-20 20:48:53"
+ "updated_at": "2026-07-20 21:10:19"
 }

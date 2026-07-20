@@ -10999,7 +10999,7 @@ def _triple_analyze(rk, rec):
         bmed = None           # BMED 배분 표도 비움(신호 대기 상태에선 배분 없음)
         mass_drop_strategy = None
 
-    return {
+    _an_out = {
         "raceKey": rk, "hasPrev": bool(prev),
         "recommendGated": recommend_gated,   # [3번] 저배당 무조건 추천 차단(신호 대기) 여부 → 프론트 '⏳ 신호 대기 중'
         # [타이밍 추천 정책] T-2분 강제 추천 · T-1분 최종 확정 · 마감 후 추천 금지(표시 차단·학습 데이터는 보존)
@@ -11102,6 +11102,86 @@ def _triple_analyze(rk, rec):
 
         "integratedWeights": {"form": _iw_fw, "anomaly": _iw_ow},
     }
+    # [① 추천 히스테리시스 (2026-07-20 승인·시뮬 검증)] 표시 계층 안정화 — 원본 분석·학습 무수정.
+    #   시뮬(오늘 실데이터 31경주): 적중 8/31 → 8/31 동일(정확도 무손실) · 회원에게 보인 추천 교체
+    #   40회 → 5회 (88% 감소·기후 3R A/B 12초 플래핑 등 제거). 실패 시 원본 그대로(안전).
+    try:
+        _apply_rec_hysteresis(rk, _an_out)
+    except Exception as _hye:
+        print("[히스테리시스] 적용 실패(무시·원본 표시):", _hye)
+    return _an_out
+
+
+# ══════════════ [① 추천 히스테리시스 (2026-07-20)] 복승 메인 표시 안정 장치 ══════════════
+#  확정 기준(권대표 승인): ⓐ하드 신호(집중급락)만 즉시 교체 ⓑ점수 요동은 2사이클 연속 우위 시만
+#  ⓒ경주당 교체 상한 2회 ⓓ💎 복병 픽은 별도 섹션이라 본 장치와 무관(독립 유지) ⓔ마감 후 무개입.
+#  구현 원칙: '표시'만 안정화(corePicks.finalQuinellas 선두 순서) — 분석·이력·학습 데이터는 원본 그대로.
+_REC_HYST = {}   # {rk: {"main": (a,b), "item": dict, "streak_m": (a,b)|None, "streak_n": int, "switches": int, "day": str}}
+
+
+def _apply_rec_hysteresis(rk, an):
+    today = time.strftime("%Y-%m-%d")
+    st = _REC_HYST.get(rk)
+    if st and st.get("day") != today:
+        st = None                                    # 날짜 바뀜 → 상태 소멸
+    if an.get("recommendClosed"):
+        return                                       # 마감 후는 기존 표시 정책 그대로(무개입)
+    cp = an.get("corePicks") or {}
+    fq = cp.get("finalQuinellas") or []
+    if not fq or not fq[0].get("combo"):
+        return
+    prop = tuple(sorted(int(x) for x in fq[0]["combo"]))
+    if st is None:
+        _REC_HYST[rk] = {"main": prop, "item": dict(fq[0]), "streak_m": None, "streak_n": 0,
+                         "switches": 0, "day": today}
+        an["recHysteresis"] = {"held": False, "switches": 0}
+        return
+    if prop == st["main"]:
+        st["streak_m"], st["streak_n"] = None, 0
+        st["item"] = dict(fq[0])                     # 배당 등 최신값 갱신
+        an["recHysteresis"] = {"held": False, "switches": st["switches"]}
+        return
+    # 다른 메인 제안 → 교체 판정
+    accept = False
+    if st["switches"] < 2:
+        _hard = False
+        try:
+            _sstxt = json.dumps(an.get("strongSignals") or {}, ensure_ascii=False)
+            _hard = ("집중급락" in _sstxt)
+        except Exception:
+            _hard = False
+        if _hard:
+            accept = True                            # ⓐ 하드 신호 → 즉시 교체
+        else:
+            if st["streak_m"] == prop:
+                st["streak_n"] += 1
+            else:
+                st["streak_m"], st["streak_n"] = prop, 1
+            if st["streak_n"] >= 2:
+                accept = True                        # ⓑ 2사이클 연속 우위 → 교체
+    if accept:
+        st["main"], st["item"] = prop, dict(fq[0])
+        st["streak_m"], st["streak_n"] = None, 0
+        st["switches"] += 1
+        an["recHysteresis"] = {"held": False, "switches": st["switches"], "switched": True}
+        return
+    # 보류 → 기존 표시 메인을 선두로 복원(제안 조합은 목록에 남김 — 무삭제)
+    _held = None
+    for _i, _q in enumerate(fq):
+        try:
+            if tuple(sorted(int(x) for x in (_q.get("combo") or []))) == st["main"]:
+                _held = fq.pop(_i)
+                break
+        except (TypeError, ValueError):
+            continue
+    if _held is None:
+        _held = dict(st["item"])
+        _held["reason"] = (_held.get("reason") or "") + " · 유지(히스테리시스)"
+    fq.insert(0, _held)
+    cp["finalQuinellas"] = fq
+    an["recHysteresis"] = {"held": True, "switches": st["switches"],
+                           "proposal": "+".join(str(x) for x in prop),
+                           "heldMain": "+".join(str(x) for x in st["main"])}
 
 
 @app.route("/api/extract/japan", methods=["POST"])
@@ -15856,11 +15936,26 @@ def _ml_append_row(rk, an, result, top3, payouts, was_hit):
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
+# ══════════════ [④ 오염 기록 학습 제외 (2026-07-20)] 데이터 오염 구간 마킹 — 삭제 금지·통계만 제외 ══════════════
+#  오염 구간: 7/19 저녁(oddspark 파서 전치 — 9두+ 복승 라벨 밀림) ~ 7/20 08:55(혼입가드 v1 오발동).
+#  이 구간의 결과 기록은 보존하되(삭제 금지 원칙) 신호 성과 재집계에서 제외 — 잘못된 배당·추천으로
+#  누적된 적중/미적중이 신호 가중치(Phase 1)를 오염시키는 것 차단. 마쓰도 1R ❌ 오판 등 포함.
+_TAINTED_WINDOWS = [("2026-07-19 17:00:00", "2026-07-20 08:55:00")]
+
+
+def _is_tainted_saved(saved_at):
+    """결과 저장 시각(saved_at 'YYYY-MM-DD HH:MM:SS')이 오염 구간 안인지."""
+    s = str(saved_at or "")
+    return bool(s) and any(a <= s <= b for a, b in _TAINTED_WINDOWS)
+
+
 def _build_signal_performance():
     """[signal_performance] 신호별 성과(총·적중·적중률·평균배당·ROI) 재집계 → signal_performance.json.
     소스: race_results/*.json 의 prediction.signals + result_analysis + investment.quinella_odds.
-    ROI = Σ(적중배당) / 시도수(미적중=0). 매일 22:00 자동 갱신(수동 호출도 가능)."""
+    ROI = Σ(적중배당) / 시도수(미적중=0). 매일 22:00 자동 갱신(수동 호출도 가능).
+    [④ 오염 제외 (2026-07-20)] 오염 구간(tainted) 기록은 집계에서 제외(기록 자체는 보존)."""
     perf = {}
+    _skipped_tainted = 0
     try:
         if not os.path.isdir(RACE_RESULTS_DIR):
             return perf
@@ -15870,6 +15965,9 @@ def _build_signal_performance():
             try:
                 d = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
             except Exception:
+                continue
+            if d.get("tainted") or _is_tainted_saved(d.get("saved_at")):
+                _skipped_tainted += 1
                 continue
             ra = d.get("result_analysis") or {}
             hit = bool(ra.get("main_hit"))
@@ -15899,7 +15997,8 @@ def _build_signal_performance():
         os.makedirs(os.path.dirname(SIGNAL_PERF_FILE), exist_ok=True)
         json.dump({"updated_at": time.strftime("%Y-%m-%d %H:%M:%S"), "signals": out},
                   open(SIGNAL_PERF_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-        print("[signal_performance] 갱신: %d개 신호" % len(out))
+        print("[signal_performance] 갱신: %d개 신호" % len(out)
+              + (" · 오염 구간 제외 %d건(기록 보존)" % _skipped_tainted if _skipped_tainted else ""))
         return out
     except Exception as e:
         print("[signal_performance] 갱신 실패:", e)
@@ -21332,6 +21431,7 @@ def _scoreboard_daily(date=None):
             rows.append({"raceKey": rk, "sport": sport, "verdict": ("hit" if hit else "miss"),
                          "top3": top3, "odds": used_odds, "return": (int(ret) if ret else None),
                          "approx": bool(_approx and ret is not None),   # [회수율 정직화] 근사 배당 회수 표기
+                         "tainted": bool(doc.get("tainted") or _is_tainted_saved(doc.get("saved_at"))),   # [④ 오염 마킹]
                          "legacy": lx is None, "t": _mt})
     except Exception as e:
         return {"date": date, "error": str(e), "judged": judged, "hits": hits}

@@ -1588,6 +1588,17 @@
           var _t0 = cp.confTrifecta || cp.trifecta;
           if (_t0) _ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds }];
         }
+        // [② 변화 알림 1줄 (2026-07-20 확정 원칙)] "이 신호가 추천을 바꿨는가?" — 교체 순간만 1줄 표시,
+        //   유지 판단이면 조용히(요동은 회원에게 안 보임). 서버 히스테리시스(recHysteresis)와 연동.
+        try {
+          var _rhy = d.recHysteresis;
+          if (_rhy && _rhy.switched && _fq.length) {
+            var _chg = mk('div', 'margin:0 0 6px;padding:5px 10px;border-radius:7px;border:1px solid #f59e0b;'
+              + 'background:rgba(245,158,11,.14);font-weight:800;font-size:13px;color:#fcd34d',
+              '🔻 추천 교체 → ' + (_fq[0].combo || []).join('+') + ' (신호 근거)');
+            panel.appendChild(_chg);
+          }
+        } catch (_) { /* */ }
         if ((_fq.length || _dansung || _spAll.length) && !d.recommendClosed && st.ovShowPicks !== false) {   // [🎯 추천] 팝업 토글(기본 표시)
           var cpBox = mk('div', 'margin:0 0 6px;padding:9px 12px;border:3px solid #38d39f;border-radius:9px;background:rgba(56,211,159,.18)');
           cpBox.appendChild(mk('div', 'font-weight:900;color:#38d39f;font-size:16px', '🎯 지금 사세요! (근거 기반)'));

@@ -1825,8 +1825,52 @@
   }
   function stopMultiRaceWatch() { if (_multiTimer) { clearInterval(_multiTimer); _multiTimer = null; } }
 
+  // ── [③ 타임락 성적 바 (2026-07-20 승인 목업)] 전체경주 탭 상단 고정 — /api/scoreboard/daily ──
+  //   헤드라인 회수율=공식 확정배당만(정직 산출) · 근사 회수는 참고 병기 · 클릭 시 /scoreboard 상세.
+  let _scoreBarCache = { t: 0, sb: null };
+  async function _renderScoreBar() {
+    const box = $('#multiCards'); if (!box || !box.parentNode) return;
+    let sb = _scoreBarCache.sb;
+    if (!sb || Date.now() - _scoreBarCache.t > 60000) {
+      try { sb = await (await fetch('/api/scoreboard/daily')).json(); _scoreBarCache = { t: Date.now(), sb }; }
+      catch (_) { return; }
+    }
+    if (!sb || sb.error || !sb.judged) return;
+    let bar = document.getElementById('kbScoreBar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'kbScoreBar';
+      bar.style.cssText = 'cursor:pointer;margin:0 0 10px';
+      bar.title = '클릭 → 타임락 성적표 상세';
+      bar.addEventListener('click', () => window.open('/scoreboard', '_blank'));
+      box.parentNode.insertBefore(bar, box);
+    }
+    const roiTxt = (sb.roi != null) ? (sb.roi + '%') : '—';
+    const profit = sb.profit || 0;
+    const profitTxt = (profit >= 0 ? '+' : '') + profit.toLocaleString() + '원';
+    // 하이라이트: 확정배당 적중 중 최고 배당 1건(5배+)
+    let hl = '';
+    try {
+      const best = (sb.rows || []).filter((r) => r.return && !r.approx).sort((a, b) => (b.odds || 0) - (a.odds || 0))[0];
+      if (best && best.odds >= 5) hl = `<span style="background:rgba(244,114,182,.14);border:1px solid #f472b6;color:#f9a8d4;border-radius:8px;padding:3px 9px;font-weight:800;font-size:12px">💎 ${esc(best.raceKey)} ${best.odds}배 적중</span>`;
+    } catch (_) { /* */ }
+    bar.innerHTML =
+      `<div style="background:linear-gradient(90deg,#14202e,#101a26);border:1px solid #2b3a4f;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">`
+      + `<div><span style="font-size:26px;font-weight:900;color:#38d39f">${esc(roiTxt)}</span> <span style="font-size:11px;color:#94a3b8">오늘 회수율(확정)</span></div>`
+      + `<div style="width:1px;height:30px;background:#2b3a4f"></div>`
+      + `<div style="font-size:12.5px;color:#94a3b8"><b style="color:#e2e8f0">${sb.judged}전 ${sb.hits}중</b> · 패스 ${sb.passes || 0}</div>`
+      + `<div style="width:1px;height:30px;background:#2b3a4f"></div>`
+      + `<div style="font-size:12.5px;color:#94a3b8">💰 1만원씩 <b style="color:#ffd24f;font-size:14px">${esc(profitTxt)}</b></div>`
+      + ((sb.streak || 0) >= 2 ? `<span style="background:rgba(56,211,159,.16);border:1px solid #38d39f;color:#38d39f;border-radius:8px;padding:3px 9px;font-weight:800;font-size:12px">🔥 ${sb.streak}연속 적중</span>` : '')
+      + hl
+      + ((sb.approxUsed || 0) > 0 ? `<span style="font-size:11px;color:#64748b">근사 포함 참고 ${sb.roiWithApprox != null ? sb.roiWithApprox + '%' : '—'}</span>` : '')
+      + `<span style="margin-left:auto;font-size:11px;color:#94a3b8;border:1px solid #6d28d9;border-radius:8px;padding:3px 9px;background:rgba(139,92,246,.10)">🔒 <b style="color:#c4b5fd">타임락 검증</b> — 마감 전 기록·변경 불가</span>`
+      + `</div>`;
+  }
+
   async function renderMultiDashboard() {
     const box = $('#multiCards'), status = $('#multiStatus'); if (!box) return;
+    try { _renderScoreBar(); } catch (_) { /* */ }
     let d;
     try { d = await (await fetch('/api/multi/dashboard')).json(); }
     catch (_) { if (status) status.textContent = '대시보드 로드 실패'; return; }
