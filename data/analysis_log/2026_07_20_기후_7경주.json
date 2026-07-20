@@ -6,7 +6,7 @@
  "date": "2026-07-20",
  "race": "기후 7경주",
  "analyzed_at": "10:54:38",
- "updated_at": "10:55:10",
+ "updated_at": "11:31:19",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -69,15 +69,7 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "10:54:43",
-   "type": "복승불일치공식",
-   "detail": "⚠️ 복승 불일치: 단승 기준 예상 2+7(4.6) / 실제 최저 2+5(2.9) → 5번 집중 자금 유입 (🔴 1.586)",
-   "severity": "🔴",
-   "reason": "불일치점수 = 예상최저복승 4.6 / 실제최저복승 2.9 = 1.586"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
   "signals": [],
@@ -87,95 +79,14 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "佐藤 竜太",
-   "jockey": "",
-   "record_score": 92.4,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 5배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 2,
-   "name": "内山 雅貴",
-   "jockey": "",
-   "record_score": 92.6,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 2.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 3,
-   "name": "三浦 雄大",
-   "jockey": "",
-   "record_score": 107.1,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 16.6배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 4,
-   "name": "上杉 有弘",
-   "jockey": "",
-   "record_score": 85.0,
-   "record_detail": "",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 13.4배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 5,
-   "name": "飯田 辰哉",
-   "jockey": "",
-   "record_score": 111.6,
-   "record_detail": "",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 2.9배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 6,
-   "name": "大塚 城",
-   "jockey": "",
-   "record_score": 84.5,
-   "record_detail": "",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 6.6배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 7,
-   "name": "杉山 悠也",
-   "jockey": "",
-   "record_score": 129.5,
-   "record_detail": "",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 4.6배 · 감점 없음 = 100점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
@@ -257,41 +168,20 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    2,
-    5
-   ],
-   "trio": [
-    2,
-    5,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    5,
-    7
-   ],
-   "trio": [
-    3,
-    5,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    2,
-    5
-   ],
-   "trio": [
-    2,
-    5,
-    7
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -749,15 +639,85 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 2·5·7·1 / 복승 2+5",
- "keyHorses": [
-  2,
-  5,
-  7,
-  1
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 2,
+  "2nd": 7,
+  "3rd": 5
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": true,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   2,
+   5
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": {
+   "detected": true,
+   "top2": [
+    2,
+    7
+   ],
+   "keyHorses": [
+    2,
+    5,
+    4,
+    1,
+    7
+   ],
+   "recQuinella": [
+    [
+     2,
+     5
+    ],
+    [
+     2,
+     4
+    ],
+    [
+     4,
+     5
+    ]
+   ],
+   "leadNo": 5,
+   "backingCovered": false,
+   "wouldBackingCover": false,
+   "lesson": "유력마·삼복승 판단은 정확했으나 복승 메인이 실질유력마와 '다른' 유력마 받치기를 놓쳐 복승 top2를 놓침 → 역배열 실질유력마 축 받치기 복승으로 커버."
+  },
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [
+    5
+   ],
+   "inverseHit": [
+    5
+   ],
+   "confidence": 12.1,
+   "reason": "적중"
+  }
+ },
  "profit": null,
  "review": null
 }
