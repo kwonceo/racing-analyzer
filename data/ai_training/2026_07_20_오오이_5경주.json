@@ -1,0 +1,292 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_20_오오이_5경주",
+ "race_info": {
+  "date": "2026-07-20",
+  "track": "오오이",
+  "round": 5,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 9,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 10,
+   "name": "ティーズアラモード",
+   "jockey": "矢野貴（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4
+   ],
+   "record_score": 25.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "キミヲコイシタウ",
+   "jockey": "達城龍（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    4,
+    9,
+    9,
+    7
+   ],
+   "record_score": 17.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "ハッチトポッチ",
+   "jockey": "杉山海（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    7,
+    4,
+    10,
+    4
+   ],
+   "record_score": 6.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "チャオグラッド",
+   "jockey": "菅原涼（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    8,
+    10
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "パロットフィッシュ",
+   "jockey": "町田直（川崎）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    5,
+    6
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "チュウオースカイ",
+   "jockey": "瀬川将（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    8,
+    8,
+    8,
+    6
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "スピーディワンダー",
+   "jockey": "西啓太（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "プロピュライア",
+   "jockey": "西優哉（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    12,
+    10,
+    9
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "マンゴーパフェ",
+   "jockey": "田中洸（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    9,
+    11,
+    8,
+    6
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "17:03:18",
+    "quinella": {
+     "6+10": 3.2,
+     "7+10": 6.3,
+     "1+10": 6.8,
+     "5+10": 8.2,
+     "3+10": 13.8,
+     "2+10": 14.1,
+     "1+6": 19.3,
+     "6+7": 21.5,
+     "5+6": 25.0,
+     "1+5": 30.6,
+     "1+7": 32.4,
+     "3+6": 37.6,
+     "1+3": 43.0,
+     "5+7": 45.7,
+     "3+5": 51.5,
+     "9+10": 56.4,
+     "2+6": 59.5,
+     "3+7": 62.3,
+     "4+10": 89.6,
+     "1+2": 113.4,
+     "8+10": 114.9,
+     "2+7": 125.7,
+     "2+3": 167.4,
+     "1+9": 167.8,
+     "6+9": 182.7,
+     "2+5": 192.9,
+     "5+9": 214.1,
+     "4+6": 228.4,
+     "6+8": 236.6,
+     "4+7": 251.5,
+     "4+5": 257.7,
+     "7+9": 274.4,
+     "1+4": 293.4,
+     "5+8": 300.7,
+     "1+8": 326.6,
+     "3+9": 337.2,
+     "7+8": 372.0,
+     "3+8": 383.9,
+     "3+4": 440.1,
+     "4+8": 662.2,
+     "2+9": 674.5,
+     "2+4": 721.8,
+     "8+9": 820.2,
+     "4+9": 902.2,
+     "2+8": 949.7
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.747,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   6,
+   10,
+   1,
+   2,
+   3,
+   5,
+   7,
+   9,
+   4,
+   8
+  ],
+  "eliminated": [],
+  "recommend": "6+10",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 5,
+  "2nd": 6,
+  "3rd": 10,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 6번 적중"
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 5,
+  "second": 6,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-20 17:24:13",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

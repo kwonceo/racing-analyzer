@@ -1,0 +1,421 @@
+{
+ "race_id": "2026_07_20_카사마츠_12경주",
+ "raceKey": "카사마츠 12경주",
+ "sport": "horse",
+ "category": "japan_local",
+ "date": "2026-07-20",
+ "race": "카사마츠 12경주",
+ "analyzed_at": "17:17:45",
+ "updated_at": "17:24:17",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "oddspark_bg"
+ },
+ "odds_timeline": [
+  {
+   "time": "17:06:27",
+   "minutes_before": 9,
+   "quinella": {}
+  },
+  {
+   "time": "17:06:27",
+   "minutes_before": 9,
+   "quinella": {}
+  },
+  {
+   "time": "17:08:06",
+   "minutes_before": 7,
+   "quinella": {}
+  },
+  {
+   "time": "17:08:06",
+   "minutes_before": 7,
+   "quinella": {}
+  },
+  {
+   "time": "17:09:06",
+   "minutes_before": 6,
+   "quinella": {}
+  },
+  {
+   "time": "17:09:06",
+   "minutes_before": 6,
+   "quinella": {}
+  },
+  {
+   "time": "17:10:03",
+   "minutes_before": 5,
+   "quinella": {}
+  },
+  {
+   "time": "17:10:03",
+   "minutes_before": 5,
+   "quinella": {}
+  },
+  {
+   "time": "17:11:06",
+   "minutes_before": 4,
+   "quinella": {}
+  },
+  {
+   "time": "17:11:06",
+   "minutes_before": 4,
+   "quinella": {}
+  },
+  {
+   "time": "17:12:41",
+   "minutes_before": 2,
+   "quinella": {}
+  },
+  {
+   "time": "17:12:41",
+   "minutes_before": 2,
+   "quinella": {}
+  },
+  {
+   "time": "17:13:42",
+   "minutes_before": 1,
+   "quinella": {}
+  },
+  {
+   "time": "17:13:42",
+   "minutes_before": 1,
+   "quinella": {}
+  },
+  {
+   "time": "17:14:39",
+   "minutes_before": 0,
+   "quinella": {}
+  },
+  {
+   "time": "17:14:39",
+   "minutes_before": 0,
+   "quinella": {}
+  },
+  {
+   "time": "17:15:41",
+   "minutes_before": null,
+   "quinella": {}
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false,
+  "noAxis": true,
+  "level": "강력",
+  "band": "4배 이하 2두+",
+  "reprs": [
+   {
+    "no": 4,
+    "odds": 3.4
+   },
+   {
+    "no": 8,
+    "odds": 6.6
+   },
+   {
+    "no": 10,
+    "odds": 3.4
+   }
+  ],
+  "axisGap": 0.0,
+  "note": "저배당 2두 배당 비슷(축 불명확·차이 0%) → 추천 보류"
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 4,
+   "name": "ジェイスカイ",
+   "jockey": "臼杵龍（ばんえい）",
+   "record_score": 56.2,
+   "record_detail": "최근 3-4-2-2-6",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 3.4배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 8,
+   "name": "トカチヒロ",
+   "jockey": "中村太（ばんえい）",
+   "record_score": 40.0,
+   "record_detail": "최근 7-2-2-6-3",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 6.6배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 10,
+   "name": "サダノブラボー",
+   "jockey": "西将太（ばんえい）",
+   "record_score": 41.2,
+   "record_detail": "최근 4-1-6-4-5",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 3.4배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 2,
+   "name": "コマサンリキ",
+   "jockey": "西謙一（ばんえい）",
+   "record_score": 28.8,
+   "record_detail": "최근 7-3-3-2-8",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 94.1배 · 배당 80~149 -20 = 80점"
+  },
+  {
+   "no": 1,
+   "name": "テッチャン",
+   "jockey": "金田利（ばんえい）",
+   "record_score": 15.0,
+   "record_detail": "최근 5-5-2-6-7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 30.1배 · 최근평균 5.0착 -30 = 70점"
+  },
+  {
+   "no": 3,
+   "name": "ダイヤセンプー",
+   "jockey": "今井千（ばんえい）",
+   "record_score": 11.2,
+   "record_detail": "최근 7-8-3-4-8",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 36배 · 최근평균 6.0착 -30 = 70점"
+  },
+  {
+   "no": 5,
+   "name": "ホクショウムサシ",
+   "jockey": "鈴木恵（ばんえい）",
+   "record_score": 12.5,
+   "record_detail": "최근 4-9-8-5-3",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 41.3배 · 최근평균 5.8착 -30 = 70점"
+  },
+  {
+   "no": 7,
+   "name": "オオゾラタカラ",
+   "jockey": "赤塚健（ばんえい）",
+   "record_score": 3.8,
+   "record_detail": "최근 8-7-5-4-3",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 4.7배 · 최근평균 5.4착 -30 = 70점"
+  },
+  {
+   "no": 9,
+   "name": "ディーホワイト",
+   "jockey": "中原蓮（ばんえい）",
+   "record_score": 5.0,
+   "record_detail": "최근 5-6-4-7-6",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 11.8배 · 최근평균 5.6착 -30 = 70점"
+  },
+  {
+   "no": 6,
+   "name": "イワキブラボー",
+   "jockey": "菊池一（ばんえい）",
+   "record_score": 11.2,
+   "record_detail": "최근 10-4-8-7-2",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 207.3배 · 배당 150배+ -40 / 최근평균 6.2착 -30 = 30점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   4,
+   8,
+   10,
+   2,
+   1,
+   3,
+   5,
+   7,
+   9
+  ],
+  "eliminated": [
+   6
+  ],
+  "elimination_reasons": {
+   "6": "배당 207.3배 · 배당 150배+ -40 / 최근평균 6.2착 -30 = 30점"
+  }
+ },
+ "final_recommendation": {
+  "quinella_main": {
+   "combo": "4+10",
+   "odds": 3.4,
+   "reason": "4번(A)·10번(A)"
+  },
+  "trifecta_main": {
+   "combo": "4+8+10",
+   "odds": 13.1,
+   "reason": "4번(A)·8번(A)·10번(A)"
+  },
+  "trifecta_insurance2": {
+   "combo": "4+7+8",
+   "odds": 31.0,
+   "reason": "4번(A)·7번(B)·8번(A)"
+  },
+  "budget_allocation": {
+   "quinella_main": "87.0%",
+   "trifecta_main": "8.4%",
+   "trifecta_insurance": "1.2%"
+  }
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    4,
+    8
+   ],
+   "trio": [
+    4,
+    8,
+    10
+   ]
+  },
+  "form": {
+   "quinella": [
+    4,
+    10
+   ],
+   "trio": [
+    4,
+    8,
+    10
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    4,
+    10
+   ],
+   "trio": [
+    4,
+    8,
+    10
+   ]
+  }
+ },
+ "corePicks": null,
+ "summary": "유력마 4·8·10·7 / 복승 4+10",
+ "keyHorses": [
+  4,
+  8,
+  10,
+  7
+ ],
+ "result": {
+  "1st": 10,
+  "2nd": 7,
+  "3rd": 1
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   10
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   6
+  ],
+  "form_pick": 4,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": {
+   "detected": true,
+   "top2": [
+    7,
+    10
+   ],
+   "keyHorses": [
+    4,
+    8,
+    10,
+    7
+   ],
+   "recQuinella": [
+    [
+     4,
+     10
+    ],
+    [
+     8,
+     10
+    ],
+    [
+     4,
+     8
+    ]
+   ],
+   "leadNo": null,
+   "backingCovered": false,
+   "wouldBackingCover": false,
+   "lesson": "유력마·삼복승 판단은 정확했으나 복승 메인이 실질유력마와 '다른' 유력마 받치기를 놓쳐 복승 top2를 놓침 → 역배열 실질유력마 축 받치기 복승으로 커버."
+  },
+  "hit_basis": {
+   "formScore": 41.2,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "제거 적중"
+  },
+  "failure": {
+   "type": "전적오판",
+   "label": "유형4 · 전적 오판",
+   "focus": 1,
+   "winner": 10,
+   "missed": [
+    1
+   ],
+   "reason": "1번은 배당 변화 없이 입상 → 배당은 정상, 전적 판단 실패(이변)",
+   "improvement": "전적 하위라도 최근 컨디션·거리/기수 변경 반영 · 이변 조건 학습 강화",
+   "missed_signal": "배당 신호 없음(전적 이변)",
+   "timeline": [],
+   "maxDrop": 0,
+   "buriedBy": null,
+   "afterClose": true,
+   "massDrop": false,
+   "winnerSignal": false
+  }
+ },
+ "profit": null,
+ "review": null
+}

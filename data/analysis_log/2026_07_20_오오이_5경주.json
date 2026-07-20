@@ -6,7 +6,7 @@
  "date": "2026-07-20",
  "race": "오오이 5경주",
  "analyzed_at": "16:54:06",
- "updated_at": "17:02:18",
+ "updated_at": "17:24:13",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -15,7 +15,7 @@
  },
  "odds_timeline": [
   {
-   "time": "17:00:18",
+   "time": "17:03:18",
    "minutes_before": null,
    "quinella": {
     "6+10": 3.2,
@@ -76,41 +76,12 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "noAxis": true,
-  "level": "강력",
-  "band": "4배 이하 2두+",
-  "reprs": [
-   {
-    "no": 6,
-    "odds": 3.2
-   },
-   {
-    "no": 10,
-    "odds": 3.2
-   },
-   {
-    "no": 7,
-    "odds": 6.3
-   }
-  ],
-  "axisGap": 0.0,
-  "note": "저배당 2두 배당 비슷(축 불명확·차이 0%) → 추천 보류"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
  "horses": [
-  {
-   "no": 6,
-   "name": "",
-   "jockey": "",
-   "record_score": null,
-   "record_detail": "",
-   "odds": null,
-   "grade": "△",
-   "grade_reason": "배당 3.2배 · 감점 없음 = 100점"
-  },
   {
    "no": 10,
    "name": "ティーズアラモード",
@@ -119,7 +90,7 @@
    "record_detail": "최근 4",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 3.2배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 1,
@@ -129,7 +100,7 @@
    "record_detail": "최근 4-4-9-9-7",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 6.8배 · 최근평균 6.6착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.6착 -30 = 30점"
   },
   {
    "no": 2,
@@ -139,7 +110,7 @@
    "record_detail": "최근 9-8-10",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 14.1배 · 최근평균 9.0착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.0착 -30 = 30점"
   },
   {
    "no": 3,
@@ -149,7 +120,17 @@
    "record_detail": "최근 8-5-6",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 13.8배 · 최근평균 6.3착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.3착 -30 = 30점"
+  },
+  {
+   "no": 4,
+   "name": "チュウオースカイ",
+   "jockey": "瀬川将（大井）",
+   "record_score": 0,
+   "record_detail": "최근 10-8-8-8-6",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
   },
   {
    "no": 5,
@@ -159,7 +140,7 @@
    "record_detail": "최근 6-7-4-10-4",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 8.2배 · 최근평균 6.2착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.2착 -30 = 30점"
   },
   {
    "no": 7,
@@ -169,27 +150,7 @@
    "record_detail": "최근 7",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 6.3배 · 최근평균 7.0착 -30 = 70점"
-  },
-  {
-   "no": 9,
-   "name": "マンゴーパフェ",
-   "jockey": "田中洸（大井）",
-   "record_score": 0,
-   "record_detail": "최근 9-9-11-8-6",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 56.4배 · 최근평균 8.6착 -30 = 70점"
-  },
-  {
-   "no": 4,
-   "name": "チュウオースカイ",
-   "jockey": "瀬川将（大井）",
-   "record_score": 0,
-   "record_detail": "최근 10-8-8-8-6",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 89.6배 · 배당 80~149 -20 / 최근평균 8.0착 -30 = 50점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
   },
   {
    "no": 8,
@@ -199,45 +160,58 @@
    "record_detail": "최근 12-10-9",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 114.9배 · 배당 80~149 -20 / 최근평균 10.3착 -30 = 50점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 10.3착 -30 = 30점"
+  },
+  {
+   "no": 9,
+   "name": "マンゴーパフェ",
+   "jockey": "田中洸（大井）",
+   "record_score": 0,
+   "record_detail": "최근 9-9-11-8-6",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.6착 -30 = 30점"
   }
  ],
  "elimination": {
   "candidates": [
-   6,
    10,
    1,
    2,
    3,
-   5,
-   7,
-   9,
    4,
-   8
+   5,
+   7
   ],
-  "eliminated": [],
-  "elimination_reasons": {}
+  "eliminated": [
+   8,
+   9
+  ],
+  "elimination_reasons": {
+   "8": "배당 미수집 · 배당 150배+ -40 / 최근평균 10.3착 -30 = 30점",
+   "9": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.6착 -30 = 30점"
+  }
  },
  "final_recommendation": {
   "quinella_main": {
-   "combo": "6+10",
-   "odds": 3.2,
-   "reason": "6번(?)·10번(A)"
+   "combo": "1+10",
+   "odds": null,
+   "reason": "1번(A)·10번(A)"
   },
   "trifecta_main": {
-   "combo": "6+7+10",
-   "odds": 15.1,
-   "reason": "6번(?)·7번(C)·10번(A)"
+   "combo": "1+5+10",
+   "odds": null,
+   "reason": "1번(A)·5번(A)·10번(A)"
   },
   "trifecta_insurance1": {
-   "combo": "1+6+10",
-   "odds": 15.0,
-   "reason": "1번(A)·6번(?)·10번(A)"
+   "combo": "1+2+10",
+   "odds": null,
+   "reason": "1번(A)·2번(B)·10번(A)"
   },
   "trifecta_insurance2": {
-   "combo": "1+6+7",
-   "odds": 47.6,
-   "reason": "1번(A)·6번(?)·7번(C)"
+   "combo": "2+5+10",
+   "odds": null,
+   "reason": "2번(B)·5번(A)·10번(A)"
   },
   "budget_allocation": {
    "quinella_main": "62.1%",
@@ -291,12 +265,12 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    6,
+    1,
     10
    ],
    "trio": [
-    6,
-    7,
+    1,
+    5,
     10
    ]
   },
@@ -317,12 +291,12 @@
   },
   "final": {
    "quinella": [
-    6,
+    1,
     10
    ],
    "trio": [
-    6,
-    7,
+    1,
+    5,
     10
    ]
   }
@@ -763,14 +737,54 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 6·10·7 / 복승 6+10",
+ "summary": "유력마 10·1·5 / 복승 1+10",
  "keyHorses": [
-  6,
   10,
-  7
+  1,
+  5
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 5,
+  "2nd": 6,
+  "3rd": 10
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   6,
+   10
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 6,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 6.2,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 6번 적중"
+  }
+ },
  "profit": null,
  "review": null
 }
