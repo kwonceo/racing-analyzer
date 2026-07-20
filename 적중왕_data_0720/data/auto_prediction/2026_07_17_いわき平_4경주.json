@@ -1,0 +1,150 @@
+{
+ "raceKey": "いわき平 4경주",
+ "at": "2026-07-17 21:35:39",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    3,
+    7
+   ],
+   "odds": 58.6,
+   "stars": 3,
+   "reason": "유력마 1·2위 조합",
+   "basis": [
+    "3번: 급락 -21.2% 감지",
+    "3번: 복병",
+    "7번: 급락 -12.7% 감지",
+    "7번: 스마트머니 유입",
+    "7번: 복병"
+   ],
+   "summary": "유력마 1위+2위 최우선"
+  },
+  {
+   "combo": [
+    5,
+    6
+   ],
+   "odds": 3.2,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "basis": [
+    "5번: 급락 -11.1% 감지",
+    "5번: 스마트머니 유입",
+    "5번: 복병",
+    "6번: 급락 -11.1% 감지",
+    "6번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    1,
+    2
+   ],
+   "odds": 5.0,
+   "reason": "확신도1위+2위",
+   "stars": 3,
+   "basis": [
+    "1번: 급락 19.7% 감지",
+    "2번: 급락 -12.7% 감지",
+    "2번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    3,
+    7
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    3,
+    5,
+    7
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    3,
+    5,
+    6
+   ],
+   "odds": 30.7,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    2,
+    3,
+    6
+   ],
+   "odds": null,
+   "reason": "전적A 보완: 1번+2번 →복승메인 정합",
+   "formInsurance": true,
+   "qMainFixed": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    2,
+    5
+   ],
+   "odds": 12.8,
+   "reason": "확신도1위+시장유력",
+   "stars": 2,
+   "score": 75.0,
+   "basis": [
+    "2번: 급락 -12.7% 감지",
+    "2번: 복병",
+    "5번: 급락 -11.1% 감지",
+    "5번: 스마트머니 유입",
+    "5번: 복병"
+   ],
+   "summary": "시장 저평가 중 주목"
+  },
+  {
+   "combo": [
+    3,
+    5
+   ],
+   "odds": 43.9,
+   "reason": "복병 포함",
+   "stars": 2,
+   "score": 63.0,
+   "basis": [
+    "3번: 급락 -21.2% 감지",
+    "3번: 복병",
+    "5번: 급락 -11.1% 감지",
+    "5번: 스마트머니 유입",
+    "5번: 복병"
+   ],
+   "summary": "시장 저평가 중 주목"
+  }
+ ],
+ "keyHorses": [
+  5,
+  6,
+  3,
+  4,
+  1
+ ],
+ "dansung": false,
+ "minOdds": 3.2,
+ "raceHorseCount": 7,
+ "result": null,
+ "compared": false
+}

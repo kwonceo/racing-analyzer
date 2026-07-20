@@ -1,0 +1,86 @@
+{
+  "raceKey": "구마모토 1경주",
+  "race_id": "2026_07_13_구마모토_1경주",
+  "date": "2026-07-13",
+  "savedAt": 1783899340741,
+  "signals": {
+    "drops": [],
+    "reversals": [],
+    "smartMoney": [],
+    "keyHorses": [
+      2,
+      7,
+      3
+    ],
+    "alerts": [],
+    "confidence": [
+      {
+        "no": "2",
+        "confidence": 25
+      }
+    ],
+    "recommend": [
+      {
+        "label": "복승 메인",
+        "combo": [
+          2,
+          7
+        ]
+      },
+      {
+        "label": "복승 보조(삼복승 구성)",
+        "combo": [
+          3,
+          7
+        ]
+      },
+      {
+        "label": "복승 보조(삼복승 구성)",
+        "combo": [
+          2,
+          3
+        ]
+      },
+      {
+        "label": "삼복승 메인",
+        "combo": [
+          2,
+          3,
+          7
+        ]
+      },
+      {
+        "label": "삼복승 보험1",
+        "combo": [
+          1,
+          2,
+          7
+        ]
+      },
+      {
+        "label": "삼복승 보험2",
+        "combo": [
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "minutesBefore": 1,
+    "afterClose": false,
+    "count": 0
+  },
+  "result": {
+    "top3": [
+      7,
+      2,
+      4
+    ]
+  },
+  "hit": null,
+  "comment": "",
+  "raw_comment": "",
+  "importance": 1,
+  "weight": 1,
+  "tags": []
+}

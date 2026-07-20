@@ -1,0 +1,70 @@
+{
+ "race": "소노다 3경주",
+ "date": "2026-07-09",
+ "raceKey": "소노다 3경주",
+ "alerts": [
+  {
+   "time": "11:38:30",
+   "race": "소노다 3경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+4 -82.5%",
+   "alert_pair": "3+4",
+   "odds_snapshot": {
+    "3+4": {
+     "before": 48.7,
+     "after": 8.5
+    },
+    "5+6": {
+     "before": 162.1,
+     "after": 80.8
+    },
+    "4+6": {
+     "before": 60.0,
+     "after": 35.6
+    }
+   },
+   "alert_horses": [
+    3,
+    4,
+    5,
+    6
+   ],
+   "current_recommend": "1+4",
+   "minutes_before": 2,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "11:39:08",
+   "race": "소노다 3경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+4 -83.2%",
+   "alert_pair": "2+4",
+   "odds_snapshot": {
+    "2+4": {
+     "before": 49.9,
+     "after": 8.4
+    },
+    "2+6": {
+     "before": 190.3,
+     "after": 78.0
+    },
+    "3+6": {
+     "before": 68.4,
+     "after": 34.8
+    }
+   },
+   "alert_horses": [
+    2,
+    4,
+    6,
+    3
+   ],
+   "current_recommend": "2+4",
+   "minutes_before": null,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

@@ -1,0 +1,86 @@
+{
+  "raceKey": "마쓰도 1경주",
+  "race_id": "2026_07_20_마쓰도_1경주",
+  "date": "2026-07-20",
+  "savedAt": 1784504651021,
+  "signals": {
+    "drops": [],
+    "reversals": [],
+    "smartMoney": [],
+    "keyHorses": [
+      3,
+      7,
+      2
+    ],
+    "alerts": [],
+    "confidence": [
+      {
+        "no": "3",
+        "confidence": 25
+      }
+    ],
+    "recommend": [
+      {
+        "label": "복승 메인",
+        "combo": [
+          3,
+          7
+        ]
+      },
+      {
+        "label": "복승 보조(삼복승 구성)",
+        "combo": [
+          2,
+          7
+        ]
+      },
+      {
+        "label": "복승 보조(삼복승 구성)",
+        "combo": [
+          2,
+          3
+        ]
+      },
+      {
+        "label": "삼복승 메인",
+        "combo": [
+          2,
+          3,
+          7
+        ]
+      },
+      {
+        "label": "삼복승 보험1",
+        "combo": [
+          3,
+          5,
+          7
+        ]
+      },
+      {
+        "label": "삼복승 보험2",
+        "combo": [
+          2,
+          3,
+          5
+        ]
+      }
+    ],
+    "minutesBefore": -4,
+    "afterClose": true,
+    "count": 0
+  },
+  "result": {
+    "top3": [
+      6,
+      3,
+      2
+    ]
+  },
+  "hit": null,
+  "comment": "",
+  "raw_comment": "",
+  "importance": 1,
+  "weight": 1,
+  "tags": []
+}

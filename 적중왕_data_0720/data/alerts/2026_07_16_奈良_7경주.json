@@ -1,0 +1,65 @@
+{
+ "race": "奈良 7경주",
+ "date": "2026-07-16",
+ "raceKey": "奈良 7경주",
+ "alerts": [
+  {
+   "time": "22:44:04",
+   "race": "奈良 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+7 -44.4%",
+   "alert_pair": "6+7",
+   "odds_snapshot": {
+    "6+7": {
+     "before": 436.7,
+     "after": 242.8
+    }
+   },
+   "alert_horses": [
+    6,
+    7
+   ],
+   "current_recommend": "2+6",
+   "minutes_before": 6,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "22:47:04",
+   "race": "奈良 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -55.1%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 206.9,
+     "after": 93.0
+    },
+    "1+4": {
+     "before": 79.6,
+     "after": 47.3
+    },
+    "3+4": {
+     "before": 100.9,
+     "after": 60.1
+    },
+    "2+4": {
+     "before": 96.2,
+     "after": 64.7
+    }
+   },
+   "alert_horses": [
+    4,
+    5,
+    1,
+    3,
+    2
+   ],
+   "current_recommend": "2+3",
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

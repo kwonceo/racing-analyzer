@@ -1,0 +1,86 @@
+{
+ "filename": "2026_07_19_하코다테_1경주_마감후.png",
+ "raceKey": "하코다테 1경주",
+ "at": "2026-07-19 09:48:57",
+ "trigger": "close",
+ "quinellas": [
+  {
+   "basis": [],
+   "combo": [
+    1,
+    4
+   ],
+   "odds": 5.4,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [
+    "8번: 집중급락"
+   ],
+   "combo": [
+    1,
+    8
+   ],
+   "odds": 5.5,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [],
+   "combo": [
+    1,
+    5
+   ],
+   "odds": 7.8,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    1,
+    4,
+    5
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)"
+  },
+  {
+   "combo": [
+    1,
+    4,
+    8
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 보험(복승1·2+유력마)"
+  },
+  {
+   "combo": [
+    1,
+    5,
+    8
+   ],
+   "odds": 104.9,
+   "qMainFixed": true,
+   "reason": "확신도 보험 →복승메인 정합"
+  }
+ ],
+ "special": [],
+ "minOdds": 5.4,
+ "minQuinella": 5.4,
+ "minQuinellaCombo": [
+  1,
+  4
+ ],
+ "dansung": false,
+ "sizeBytes": 584159
+}

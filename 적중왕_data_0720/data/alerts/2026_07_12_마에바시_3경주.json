@@ -1,0 +1,67 @@
+{
+ "race": "마에바시 3경주",
+ "date": "2026-07-12",
+ "raceKey": "마에바시 3경주",
+ "alerts": [
+  {
+   "time": "11:52:43",
+   "race": "마에바시 3경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+6 -53.8%",
+   "alert_pair": "2+6",
+   "odds_snapshot": {
+    "2+6": {
+     "before": 16.0,
+     "after": 7.4
+    },
+    "5+6": {
+     "before": 82.0,
+     "after": 38.3
+    },
+    "4+7": {
+     "before": 42.3,
+     "after": 20.7
+    },
+    "6+7": {
+     "before": 24.9,
+     "after": 12.3
+    },
+    "2+4": {
+     "before": 42.5,
+     "after": 21.0
+    },
+    "1+6": {
+     "before": 27.5,
+     "after": 14.5
+    }
+   },
+   "alert_horses": [
+    2,
+    6,
+    5,
+    4,
+    7,
+    1
+   ],
+   "current_recommend": "2+6",
+   "minutes_before": 1,
+   "result": [
+    1,
+    2,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    2,
+    6,
+    1
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  1,
+  2,
+  6
+ ]
+}

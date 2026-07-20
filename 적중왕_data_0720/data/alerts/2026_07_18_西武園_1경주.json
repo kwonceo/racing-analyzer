@@ -1,0 +1,49 @@
+{
+ "race": "西武園 1경주",
+ "date": "2026-07-18",
+ "raceKey": "西武園 1경주",
+ "alerts": [
+  {
+   "time": "15:24:31",
+   "race": "西武園 1경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+7 -39.9%",
+   "alert_pair": "3+7",
+   "odds_snapshot": {
+    "3+7": {
+     "before": 13.8,
+     "after": 8.3
+    },
+    "4+6": {
+     "before": 202.0,
+     "after": 122.7
+    },
+    "2+4": {
+     "before": 32.3,
+     "after": 20.2
+    },
+    "5+6": {
+     "before": 134.6,
+     "after": 86.3
+    },
+    "2+5": {
+     "before": 26.4,
+     "after": 17.5
+    }
+   },
+   "alert_horses": [
+    3,
+    7,
+    4,
+    6,
+    2,
+    5
+   ],
+   "current_recommend": "4+7",
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

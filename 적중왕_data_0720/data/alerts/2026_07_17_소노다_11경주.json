@@ -1,0 +1,76 @@
+{
+ "race": "소노다 11경주",
+ "date": "2026-07-17",
+ "raceKey": "소노다 11경주",
+ "alerts": [
+  {
+   "time": "19:53:04",
+   "race": "소노다 11경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+8 -43.8%",
+   "alert_pair": "4+8",
+   "odds_snapshot": {
+    "4+8": {
+     "before": 1624.5,
+     "after": 912.5
+    }
+   },
+   "alert_horses": [
+    4,
+    8
+   ],
+   "current_recommend": null,
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "19:54:30",
+   "race": "소노다 11경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+7 -60.9%",
+   "alert_pair": "3+7",
+   "odds_snapshot": {
+    "3+7": {
+     "before": 73.6,
+     "after": 28.8
+    },
+    "6+7": {
+     "before": 44.3,
+     "after": 17.5
+    },
+    "4+10": {
+     "before": 38.9,
+     "after": 17.4
+    },
+    "2+8": {
+     "before": 158.0,
+     "after": 88.6
+    },
+    "9+10": {
+     "before": 309.0,
+     "after": 179.7
+    },
+    "8+10": {
+     "before": 93.9,
+     "after": 57.3
+    }
+   },
+   "alert_horses": [
+    3,
+    7,
+    6,
+    4,
+    10,
+    2,
+    8,
+    9
+   ],
+   "current_recommend": "5+7",
+   "minutes_before": 1,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

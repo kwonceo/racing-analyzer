@@ -1,0 +1,68 @@
+{
+ "race": "제주 6경주",
+ "date": "2026-07-11",
+ "raceKey": "제주 6경주",
+ "alerts": [
+  {
+   "time": "15:45:34",
+   "race": "제주 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "7+8 -87.9%",
+   "alert_pair": "7+8",
+   "odds_snapshot": {
+    "7+8": {
+     "before": 58.8,
+     "after": 7.1
+    },
+    "5+7": {
+     "before": 43.7,
+     "after": 8.9
+    },
+    "8+9": {
+     "before": 91.7,
+     "after": 18.7
+    },
+    "4+9": {
+     "before": 218.5,
+     "after": 54.0
+    },
+    "4+7": {
+     "before": 70.6,
+     "after": 17.8
+    },
+    "1+6": {
+     "before": 382.4,
+     "after": 100.0
+    }
+   },
+   "alert_horses": [
+    7,
+    8,
+    5,
+    9,
+    4,
+    1,
+    6
+   ],
+   "current_recommend": null,
+   "minutes_before": 19,
+   "result": [
+    9,
+    7,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    7,
+    9,
+    6
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  9,
+  7,
+  6
+ ]
+}

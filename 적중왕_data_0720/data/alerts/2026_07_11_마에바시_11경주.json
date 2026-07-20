@@ -1,0 +1,63 @@
+{
+ "race": "마에바시 11경주",
+ "date": "2026-07-11",
+ "raceKey": "마에바시 11경주",
+ "alerts": [
+  {
+   "time": "15:46:59",
+   "race": "마에바시 11경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+4 -70.6%",
+   "alert_pair": "3+4",
+   "odds_snapshot": {
+    "3+4": {
+     "before": 722.4,
+     "after": 212.5
+    },
+    "3+6": {
+     "before": 632.1,
+     "after": 248.9
+    },
+    "6+9": {
+     "before": 429.1,
+     "after": 180.1
+    },
+    "3+9": {
+     "before": 190.3,
+     "after": 81.9
+    },
+    "4+6": {
+     "before": 590.0,
+     "after": 255.6
+    },
+    "4+9": {
+     "before": 397.7,
+     "after": 189.1
+    }
+   },
+   "alert_horses": [
+    3,
+    4,
+    6,
+    9
+   ],
+   "current_recommend": "1+9",
+   "minutes_before": 1,
+   "result": [
+    1,
+    7,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    6
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  1,
+  7,
+  6
+ ]
+}

@@ -1,0 +1,238 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_15_소노다_7경주",
+ "race_info": {
+  "date": "2026-07-15",
+  "track": "소노다",
+  "round": 7,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "13:30:44",
+    "quinella": {
+     "1+2": 4.3,
+     "2+3": 13.9,
+     "2+4": 39.7,
+     "2+5": 38.3,
+     "1+3": 2.8,
+     "3+4": 37.0,
+     "3+5": 9.4,
+     "1+4": 12.5,
+     "4+5": 13.6,
+     "1+5": 3.3
+    }
+   },
+   {
+    "time": "13:31:53",
+    "quinella": {
+     "1+2": 4.2,
+     "2+3": 13.7,
+     "2+4": 40.4,
+     "2+5": 37.7,
+     "1+3": 2.8,
+     "3+4": 37.0,
+     "3+5": 9.4,
+     "1+4": 12.7,
+     "4+5": 13.7,
+     "1+5": 3.3
+    }
+   },
+   {
+    "time": "13:33:00",
+    "quinella": {
+     "1+2": 4.5,
+     "2+3": 15.0,
+     "2+4": 37.2,
+     "2+5": 36.7,
+     "1+3": 2.7,
+     "3+4": 39.9,
+     "3+5": 9.8,
+     "1+4": 13.5,
+     "4+5": 15.0,
+     "1+5": 3.1
+    }
+   },
+   {
+    "time": "13:34:06",
+    "quinella": {
+     "1+2": 4.5,
+     "2+3": 14.7,
+     "2+4": 37.2,
+     "2+5": 36.7,
+     "1+3": 2.7,
+     "3+4": 37.7,
+     "3+5": 9.7,
+     "1+4": 13.7,
+     "4+5": 15.1,
+     "1+5": 3.2
+    }
+   },
+   {
+    "time": "13:35:45",
+    "quinella": {
+     "1+2": 4.7,
+     "2+3": 16.1,
+     "2+4": 44.2,
+     "2+5": 43.2,
+     "1+3": 2.2,
+     "3+4": 46.5,
+     "3+5": 10.5,
+     "1+4": 17.8,
+     "4+5": 18.7,
+     "1+5": 3.3
+    }
+   },
+   {
+    "time": "13:36:53",
+    "quinella": {
+     "1+2": 5.0,
+     "2+3": 15.8,
+     "2+4": 45.6,
+     "2+5": 46.5,
+     "1+3": 2.1,
+     "3+4": 50.3,
+     "3+5": 10.0,
+     "1+4": 19.7,
+     "4+5": 19.7,
+     "1+5": 3.4
+    }
+   },
+   {
+    "time": "13:38:03",
+    "quinella": {
+     "1+2": 5.0,
+     "2+3": 15.2,
+     "2+4": 45.6,
+     "2+5": 46.5,
+     "1+3": 2.1,
+     "3+4": 51.4,
+     "3+5": 10.0,
+     "1+4": 19.1,
+     "4+5": 19.6,
+     "1+5": 3.4
+    }
+   },
+   {
+    "time": "13:39:10",
+    "quinella": {
+     "1+2": 6.3,
+     "2+3": 24.0,
+     "2+4": 55.6,
+     "2+5": 72.9,
+     "1+3": 1.4,
+     "3+4": 85.5,
+     "3+5": 16.2,
+     "1+4": 22.8,
+     "4+5": 31.2,
+     "1+5": 4.4
+    }
+   },
+   {
+    "time": "13:40:17",
+    "quinella": {
+     "1+2": 5.9,
+     "2+3": 21.5,
+     "2+4": 83.5,
+     "2+5": 113.9,
+     "1+3": 1.4,
+     "3+4": 130.3,
+     "3+5": 20.4,
+     "1+4": 32.0,
+     "4+5": 30.5,
+     "1+5": 4.0
+    }
+   },
+   {
+    "time": "13:41:46",
+    "quinella": {
+     "1+2": 5.9,
+     "2+3": 21.5,
+     "2+4": 83.5,
+     "2+5": 113.9,
+     "1+3": 1.4,
+     "3+4": 130.4,
+     "3+5": 20.4,
+     "1+4": 32.0,
+     "4+5": 30.5,
+     "1+5": 4.0
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.756,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "eliminated": [],
+  "recommend": "1+3",
+  "strategy": "BMED_보험형",
+  "confidence": 8.0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 5,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중"
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 1,
+  "second": 2,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-15 20:58:49",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "이상감지 결과",
+   "전적 데이터",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

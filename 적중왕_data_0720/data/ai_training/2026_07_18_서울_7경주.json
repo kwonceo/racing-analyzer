@@ -1,0 +1,266 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_18_서울_7경주",
+ "race_info": {
+  "date": "2026-07-18",
+  "track": "서울",
+  "round": 7,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 10,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "스페셜타",
+   "jockey": "태희",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    3,
+    1,
+    1,
+    7
+   ],
+   "record_score": 110,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 29.6
+  },
+  {
+   "no": 2,
+   "name": "컴플리트",
+   "jockey": "르칸",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    5,
+    2,
+    3,
+    5
+   ],
+   "record_score": 87.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 11.5
+  },
+  {
+   "no": 11,
+   "name": "픽처",
+   "jockey": "이혁",
+   "jockey_winrate": 28.4,
+   "recent_results": [
+    3,
+    8,
+    2,
+    10,
+    1
+   ],
+   "record_score": 85,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 9.2
+  },
+  {
+   "no": 7,
+   "name": "마스터플",
+   "jockey": "범현",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    2,
+    1,
+    5,
+    1
+   ],
+   "record_score": 67.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 5.3
+  },
+  {
+   "no": 5,
+   "name": "싹다나은",
+   "jockey": "기원",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    2,
+    1,
+    5,
+    3
+   ],
+   "record_score": 65,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 6.9
+  },
+  {
+   "no": 6,
+   "name": "아모스골",
+   "jockey": "아르",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    1,
+    4,
+    2,
+    1
+   ],
+   "record_score": 63.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 9.9
+  },
+  {
+   "no": 3,
+   "name": "화산귀환",
+   "jockey": "이야",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    2,
+    2,
+    3,
+    3
+   ],
+   "record_score": 77.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 3.4
+  },
+  {
+   "no": 8,
+   "name": "무초마초",
+   "jockey": "용근",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    5,
+    7,
+    3,
+    1
+   ],
+   "record_score": 57.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 10.5
+  },
+  {
+   "no": 9,
+   "name": "브리도챔",
+   "jockey": "종석",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    3,
+    4,
+    3,
+    1
+   ],
+   "record_score": 47.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 8.8
+  },
+  {
+   "no": 4,
+   "name": "브리도피",
+   "jockey": "재철",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 12.2
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": true,
+  "reversal_ratio": 0.706,
+  "quinella_mismatch": null,
+  "refund_rate": 0.729,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   2,
+   3,
+   5,
+   7,
+   8,
+   11,
+   4,
+   6,
+   9,
+   1
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 17.0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 8,
+  "2nd": 1,
+  "3rd": 3,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 8,
+  "second": 1,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": 9,
+  "reversal_horse_placed": false,
+  "reversal_ratio": 0.706,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-18 23:20:22",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

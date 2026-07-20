@@ -1,0 +1,39 @@
+{
+ "race": "부산 5경주",
+ "date": "2026-07-17",
+ "raceKey": "부산 5경주",
+ "alerts": [
+  {
+   "time": "15:04:53",
+   "race": "부산 5경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+8 -34.0%",
+   "alert_pair": "1+8",
+   "odds_snapshot": {
+    "1+8": {
+     "before": 79.3,
+     "after": 52.3
+    }
+   },
+   "alert_horses": [
+    1,
+    8
+   ],
+   "current_recommend": null,
+   "minutes_before": 5,
+   "result": [
+    2,
+    7,
+    4
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  2,
+  7,
+  4
+ ]
+}

@@ -1,0 +1,49 @@
+{
+ "race": "서울 4경주 1300M",
+ "date": "2026-07-18",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 6,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 117.2,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 11,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 5.9,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 9,
+   "signal": "🔄 크로스역배열 크로스역배열",
+   "priority": 4,
+   "odds": 9999.9,
+   "detected_at": null,
+   "recommended": false
+  }
+ },
+ "dansung": null,
+ "result": {
+  "1st": 6,
+  "2nd": 2,
+  "3rd": 7,
+  "quinella_odds": 8.3
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": true,
+  "rank1_place": 1,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-18 21:50:09"
+}

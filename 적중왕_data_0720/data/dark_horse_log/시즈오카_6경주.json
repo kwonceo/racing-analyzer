@@ -1,0 +1,49 @@
+{
+ "race": "시즈오카 6경주",
+ "date": "2026-07-19",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 4,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 79.5,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 1,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 14.5,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 3,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 1.6,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": null,
+ "result": {
+  "1st": 3,
+  "2nd": 6,
+  "3rd": 2,
+  "quinella_odds": 0
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "rank3_hit": true,
+  "rank3_place": 1,
+  "rank3_in_result": true,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-19 14:01:56"
+}

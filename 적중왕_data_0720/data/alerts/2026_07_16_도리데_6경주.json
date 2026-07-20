@@ -1,0 +1,91 @@
+{
+ "race": "도리데 6경주",
+ "date": "2026-07-16",
+ "raceKey": "도리데 6경주",
+ "alerts": [
+  {
+   "time": "10:01:05",
+   "race": "도리데 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+6 -40.4%",
+   "alert_pair": "1+6",
+   "odds_snapshot": {
+    "1+6": {
+     "before": 71.6,
+     "after": 42.7
+    },
+    "1+2": {
+     "before": 58.8,
+     "after": 38.2
+    }
+   },
+   "alert_horses": [
+    1,
+    6,
+    2
+   ],
+   "current_recommend": "4+7",
+   "minutes_before": 12,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "10:05:51",
+   "race": "도리데 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+7 -30.3%",
+   "alert_pair": "3+7",
+   "odds_snapshot": {
+    "3+7": {
+     "before": 28.4,
+     "after": 19.8
+    }
+   },
+   "alert_horses": [
+    3,
+    7
+   ],
+   "current_recommend": "4+7",
+   "minutes_before": 8,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "10:27:47",
+   "race": "도리데 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+7 -94.7%",
+   "alert_pair": "4+7",
+   "odds_snapshot": {
+    "4+7": {
+     "before": 36.1,
+     "after": 1.9
+    },
+    "3+5": {
+     "before": 35.2,
+     "after": 13.2
+    },
+    "3+7": {
+     "before": 49.1,
+     "after": 21.9
+    },
+    "6+7": {
+     "before": 275.0,
+     "after": 132.7
+    }
+   },
+   "alert_horses": [
+    4,
+    7,
+    3,
+    5,
+    6
+   ],
+   "current_recommend": "5+7",
+   "minutes_before": 8,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

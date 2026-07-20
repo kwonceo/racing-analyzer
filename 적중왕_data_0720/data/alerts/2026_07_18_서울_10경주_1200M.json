@@ -1,0 +1,66 @@
+{
+ "race": "서울 10경주 1200M",
+ "date": "2026-07-18",
+ "raceKey": "서울 10경주 1200M",
+ "alerts": [
+  {
+   "time": "17:56:14",
+   "race": "서울 10경주 1200M",
+   "alert_type": "배당급변",
+   "alert_content": "2+5 -76.2%",
+   "alert_pair": "2+5",
+   "odds_snapshot": {
+    "2+5": {
+     "before": 634.5,
+     "after": 151.2
+    },
+    "5+7": {
+     "before": 1903.5,
+     "after": 563.8
+    },
+    "3+4": {
+     "before": 761.4,
+     "after": 271.4
+    },
+    "4+8": {
+     "before": 68.0,
+     "after": 26.1
+    },
+    "1+2": {
+     "before": 24.7,
+     "after": 13.8
+    },
+    "5+8": {
+     "before": 152.3,
+     "after": 86.8
+    }
+   },
+   "alert_horses": [
+    2,
+    5,
+    7,
+    3,
+    4,
+    8,
+    1
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    9,
+    2,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    2
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  9,
+  2,
+  6
+ ]
+}

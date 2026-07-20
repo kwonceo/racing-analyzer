@@ -1,0 +1,67 @@
+{
+ "race": "사가8경주",
+ "date": "2026-07-11",
+ "raceKey": "사가8경주",
+ "alerts": [
+  {
+   "time": "19:39:22",
+   "race": "사가8경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+4 -61.8%",
+   "alert_pair": "1+4",
+   "odds_snapshot": {
+    "1+4": {
+     "before": 125.3,
+     "after": 47.9
+    },
+    "1+9": {
+     "before": 200.1,
+     "after": 105.0
+    }
+   },
+   "alert_horses": [
+    1,
+    4,
+    9
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "19:39:41",
+   "race": "사가8경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+7 -32.9%",
+   "alert_pair": "2+7",
+   "odds_snapshot": {
+    "2+7": {
+     "before": 346.6,
+     "after": 232.4
+    },
+    "3+8": {
+     "before": 476.6,
+     "after": 320.2
+    },
+    "5+10": {
+     "before": 533.8,
+     "after": 360.3
+    }
+   },
+   "alert_horses": [
+    2,
+    7,
+    3,
+    8,
+    5,
+    10
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

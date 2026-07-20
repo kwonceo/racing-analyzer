@@ -1,0 +1,90 @@
+/*
+ * 年月日リストボックスの表示制御を行うjQueryプラグインです。
+ * 日のコンボボックスは、年・月のコンボボックスの選択を変更することにより、表示内容が動的変化します。
+ * （オプション)
+ *  ・valuePadding : 数値分valueに文字埋めします。ゼロ埋めしない場合は0を指定してください。（デフォルトは１)
+ *  ・labelPadding : 数値分ラベル表示に文字埋めします。ゼロ埋めしない場合は0を指定してください。（デフォルトは１)
+ * 使用法は以下の例を御覧ください。
+ * 
+ * @example  $('#listDay').numericOptions().datePulldown({year:$('#listYear'),month:$('#listMonth')});
+ * 
+ */
+(function() {  
+	$.fn.numericOptions = function(settings){
+		settings = jQuery.extend({
+			remove:true
+			,from:1
+			,to:31
+			,selectedIndex:document.getElementById("listDay").selectedIndex
+			,valuePadding:0
+			,namePadding:0
+		},settings);
+		//error check
+		if(!(settings.from+'').match(/^\d+$/)||!(settings.to+'').match(/^\d+$/)||!(settings.selectedIndex+'').match(/^\d+$/)||!(settings.valuePadding+'').match(/^\d+$/)||!(settings.namePadding+'').match(/^\d+$/)) return;
+		//add options
+		if(settings.remove) this.children().remove();
+		for(var i=settings.from,j=0;i<=settings.to;i++,j++){
+			this.each(function(){
+				this.options[j] = new Option(i,i);
+				});
+		}
+		this.each(function(){this.selectedIndex = settings.selectedIndex;})
+		return this;
+	};
+
+	$.fn.datePulldown = function(settings){
+		if(!settings.year || !settings.month) return ;
+		var y = settings.year;
+		var m = settings.month;
+		if(!y.val() || !m.val()) return;
+		var self = this;
+		var fnc = function(){
+			var tmp = new Date(new Date(y.val(),m.val()).getTime() - 1000);
+			var lastDay = tmp.getDate() - 0;
+			self.each(function(){
+				var ind = (this.selectedIndex<lastDay-1)?this.selectedIndex:lastDay-1;
+				this.selectedIndex = ind;
+				$(this).numericOptions({to:lastDay,selectedIndex:ind});
+			});
+		}
+		y.click(fnc);
+		m.click(fnc);
+		return this;	
+	};
+})(jQuery);
+
+var v,p;
+/*
+ * 一桁の数字にゼロ詰めをする
+ * @param v 文字詰め対象の文字列
+ * @param p 詰める文字
+ */
+function padZero(v, p){
+	if(v.match(/^\d$/)){
+		v = p + v;
+	}
+	return v;
+}
+
+
+/*
+ * 年月日コンボボックスの選択値をYYYYMMDD型に連結します。
+ * 月日にはゼロ埋めを行います。
+ */
+var selYear,selMonth, selDay;
+function concatRaceDyComboBoxValue(selYear, selMonth, selDay) {
+
+	// 月日にゼロ埋め実行
+	selMonth = padZero(selMonth, "0");
+	selDay = padZero(selDay, "0");
+
+	var raceDy = document.getElementById("raceDy");
+	raceDy.value = selYear + selMonth + selDay;
+}
+
+
+//table ストライプ
+$(document).ready(function(){
+$(".stripe tr:even").addClass("even");
+$(".stripe tr:odd").addClass("odd");
+}); 

@@ -1,0 +1,75 @@
+{
+ "race": "오비히로 7경주",
+ "date": "2026-07-18",
+ "snapshots": {
+  "T-7": {
+   "main": [
+    5,
+    10
+   ],
+   "dark_horse": [
+    8,
+    7
+   ],
+   "odds": {
+    "5+10": 6.0
+   },
+   "confirmed": true,
+   "at": "17:43:04"
+  },
+  "T-5": {
+   "main": [
+    6,
+    10
+   ],
+   "dark_horse": [],
+   "odds": {
+    "6+10": 5.8
+   },
+   "confirmed": true,
+   "at": "17:45:46",
+   "changed_from_T7": true,
+   "changed_horses": [
+    5,
+    6
+   ]
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    2,
+    7
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "17:57:32"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    7,
+    9
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "17:53:10",
+   "post_deadline_change": true
+  },
+  "T-10": {
+   "main": [
+    5,
+    10
+   ],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {
+    "5+10": 5.7
+   },
+   "confirmed": false,
+   "at": "17:41:21"
+  }
+ },
+ "updated_at": "2026-07-19 17:53:10"
+}

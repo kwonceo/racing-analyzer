@@ -1,0 +1,50 @@
+{
+ "race": "소노다 1경주",
+ "date": "2026-07-08",
+ "raceKey": "소노다 1경주",
+ "alerts": [
+  {
+   "time": "10:24:11",
+   "race": "소노다 1경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -35.3%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 57.0,
+     "after": 36.9
+    }
+   },
+   "alert_horses": [
+    4,
+    5
+   ],
+   "current_recommend": "7+8",
+   "minutes_before": 16,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "10:30:53",
+   "race": "소노다 1경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+5 -31.8%",
+   "alert_pair": "1+5",
+   "odds_snapshot": {
+    "1+5": {
+     "before": 55.1,
+     "after": 37.6
+    }
+   },
+   "alert_horses": [
+    1,
+    5
+   ],
+   "current_recommend": "4+8",
+   "minutes_before": 9,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

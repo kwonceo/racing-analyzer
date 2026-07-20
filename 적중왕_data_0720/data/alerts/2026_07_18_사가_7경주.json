@@ -1,0 +1,41 @@
+{
+ "race": "사가 7경주",
+ "date": "2026-07-18",
+ "raceKey": "사가 7경주",
+ "alerts": [
+  {
+   "time": "19:01:48",
+   "race": "사가 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+9 -48.8%",
+   "alert_pair": "6+9",
+   "odds_snapshot": {
+    "6+9": {
+     "before": 549.7,
+     "after": 281.4
+    },
+    "2+5": {
+     "before": 1539.3,
+     "after": 1000.7
+    },
+    "1+4": {
+     "before": 769.6,
+     "after": 529.8
+    }
+   },
+   "alert_horses": [
+    6,
+    9,
+    2,
+    5,
+    1,
+    4
+   ],
+   "current_recommend": "5+7",
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

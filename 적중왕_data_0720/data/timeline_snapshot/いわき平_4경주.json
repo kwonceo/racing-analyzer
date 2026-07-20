@@ -1,0 +1,53 @@
+{
+ "race": "いわき平 4경주",
+ "date": "2026-07-17",
+ "snapshots": {
+  "T-7": {
+   "main": [
+    1,
+    3
+   ],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {
+    "1+3": 49.8
+   },
+   "confirmed": true,
+   "at": "21:33:12"
+  },
+  "T-5": {
+   "main": [
+    3,
+    7
+   ],
+   "dark_horse": [
+    7,
+    1
+   ],
+   "odds": {
+    "3+7": 46.6
+   },
+   "confirmed": true,
+   "at": "21:34:51",
+   "changed_from_T7": true,
+   "changed_horses": [
+    1,
+    7
+   ]
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    3,
+    4
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "21:43:13",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-17 21:43:13"
+}

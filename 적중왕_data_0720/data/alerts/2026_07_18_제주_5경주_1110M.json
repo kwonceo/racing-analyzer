@@ -1,0 +1,66 @@
+{
+ "race": "제주 5경주 1110M",
+ "date": "2026-07-18",
+ "raceKey": "제주 5경주 1110M",
+ "alerts": [
+  {
+   "time": "14:50:27",
+   "race": "제주 5경주 1110M",
+   "alert_type": "배당급변",
+   "alert_content": "1+5 -83.4%",
+   "alert_pair": "1+5",
+   "odds_snapshot": {
+    "1+5": {
+     "before": 39.1,
+     "after": 6.5
+    },
+    "5+7": {
+     "before": 115.7,
+     "after": 30.4
+    },
+    "3+9": {
+     "before": 887.0,
+     "after": 239.7
+    },
+    "3+7": {
+     "before": 665.2,
+     "after": 198.9
+    },
+    "7+10": {
+     "before": 190.1,
+     "after": 67.7
+    },
+    "3+5": {
+     "before": 46.7,
+     "after": 20.1
+    }
+   },
+   "alert_horses": [
+    1,
+    5,
+    7,
+    3,
+    9,
+    10
+   ],
+   "current_recommend": "1+5",
+   "minutes_before": null,
+   "result": [
+    1,
+    10,
+    2
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    1,
+    10
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  1,
+  10,
+  2
+ ]
+}

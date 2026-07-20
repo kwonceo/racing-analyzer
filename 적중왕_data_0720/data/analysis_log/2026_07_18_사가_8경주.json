@@ -1,0 +1,758 @@
+{
+ "race_id": "2026_07_18_사가_8경주",
+ "raceKey": "사가 8경주",
+ "sport": "horse",
+ "category": "japan_local",
+ "date": "2026-07-18",
+ "race": "사가 8경주",
+ "analyzed_at": "19:34:36",
+ "updated_at": "19:50:19",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "oddspark_bg"
+ },
+ "odds_timeline": [
+  {
+   "time": "19:40:50",
+   "minutes_before": null,
+   "quinella": {}
+  },
+  {
+   "time": "19:40:56",
+   "minutes_before": null,
+   "quinella": {}
+  },
+  {
+   "time": "19:41:27",
+   "minutes_before": null,
+   "quinella": {}
+  },
+  {
+   "time": "19:41:49",
+   "minutes_before": null,
+   "quinella": {}
+  },
+  {
+   "time": "19:41:56",
+   "minutes_before": null,
+   "quinella": {}
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [
+   {
+    "type": 8,
+    "label": "상승후급락(스마트머니)",
+    "horses": [
+     2,
+     6
+    ],
+    "detail": "2+6 상승 61% 후 급락 28%",
+    "level": "orange",
+    "hitRate": 70,
+    "hitSample": 94
+   }
+  ],
+  "count": 1,
+  "recommendLevel": "보조",
+  "dualConverge": false,
+  "types": [
+   8
+  ],
+  "hitRates": {
+   "2": {
+    "type": 2,
+    "label": "역배열 10%+",
+    "fired": 49,
+    "hit": 19,
+    "rate": 39
+   },
+   "1": {
+    "type": 1,
+    "label": "연속하락 3회+",
+    "fired": 7,
+    "hit": 4,
+    "rate": 57
+   },
+   "5": {
+    "type": 5,
+    "label": "복수조합 동시급락",
+    "fired": 37,
+    "hit": 22,
+    "rate": 59
+   },
+   "8": {
+    "type": 8,
+    "label": "상승후급락(스마트머니)",
+    "fired": 94,
+    "hit": 66,
+    "rate": 70
+   },
+   "3": {
+    "type": 3,
+    "label": "마감직전 대급락",
+    "fired": 5,
+    "hit": 4,
+    "rate": 80
+   },
+   "4": {
+    "type": 4,
+    "label": "재급락",
+    "fired": 48,
+    "hit": 45,
+    "rate": 94
+   },
+   "6": {
+    "type": 6,
+    "label": "역배열+급락(이중수렴)",
+    "fired": 4,
+    "hit": 0,
+    "rate": 0
+   }
+  }
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [],
+ "elimination": {
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "quinella_main": {
+   "combo": "1+7",
+   "odds": null,
+   "reason": "1번(B)·7번(A)"
+  },
+  "trifecta_main": {
+   "combo": "1+3+7",
+   "odds": null,
+   "reason": "1번(B)·3번(A)·7번(A)"
+  },
+  "trifecta_insurance1": {
+   "combo": "1+7+10",
+   "odds": null,
+   "reason": "1번(B)·7번(A)·10번(B)"
+  },
+  "trifecta_insurance2": {
+   "combo": "1+3+10",
+   "odds": null,
+   "reason": "1번(B)·3번(A)·10번(B)"
+  },
+  "budget_allocation": {
+   "quinella_main": "62.1%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
+  }
+ },
+ "recommendation_history": [
+  {
+   "time": "19:34:36",
+   "minutes_before": null,
+   "sig": "2-5-6-9|5+6|None|2+5+6",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    5,
+    6,
+    2,
+    9
+   ],
+   "summary": "🔴쌍승역전 3→1 / 유력마 5·6·2·9 / 복승 5+6",
+   "quinella_main": "5+6",
+   "quinella_sub": null,
+   "trifecta_main": "2+5+6",
+   "top_signals": [
+    "쌍승 3→1 (2916.6) < 1→3 (5250.0)",
+    "쌍승 5→1 (2386.3) < 1→5 (3750.0)",
+    "쌍승 11→4 (3750.0) < 4→11 (5250.0)"
+   ]
+  },
+  {
+   "time": "19:36:41",
+   "minutes_before": null,
+   "sig": "3-4-5-6-9|5+6|None|5+6+9",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    5,
+    6,
+    9,
+    4,
+    3
+   ],
+   "summary": "급락 2-6 ▼28.2% / 유력마 5·6·9·4·3 / 복승 5+6",
+   "quinella_main": "5+6",
+   "quinella_sub": null,
+   "trifecta_main": "5+6+9",
+   "top_signals": [
+    "2번 급락 -28.2% (절대 10%+ 자금집중·추천 필수)",
+    "3번 급락 -23.1% (절대 10%+ 자금집중·추천 필수)",
+    "6번 급락 -20.6% (절대 10%+ 자금집중·추천 필수)"
+   ]
+  },
+  {
+   "time": "19:38:11",
+   "minutes_before": null,
+   "sig": "2-3-5-6-9|5+6|None|2+5+6",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    5,
+    6,
+    2,
+    9,
+    3
+   ],
+   "summary": "급락 2-6 ▼28.2% / 유력마 5·6·2·9·3 / 복승 5+6",
+   "quinella_main": "5+6",
+   "quinella_sub": null,
+   "trifecta_main": "2+5+6",
+   "top_signals": [
+    "2번 급락 -28.2% (절대 10%+ 자금집중·추천 필수)",
+    "3번 급락 -23.1% (절대 10%+ 자금집중·추천 필수)",
+    "6번 급락 -20.6% (절대 10%+ 자금집중·추천 필수)"
+   ]
+  },
+  {
+   "time": "19:40:17",
+   "minutes_before": null,
+   "sig": "1-3-7|1+7|None|1+3+7",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    7,
+    3
+   ],
+   "summary": "유력마 1·7·3 / 복승 1+7",
+   "quinella_main": "1+7",
+   "quinella_sub": null,
+   "trifecta_main": "1+3+7",
+   "top_signals": [
+    "⚠️ 3번 급락 후 반등 (페이크 의심) — 22.8→19.2→19.2→21.3",
+    "⚠️ 10번 급락 후 반등 (페이크 의심) — 20.9→16.6→16.6→22.7"
+   ]
+  }
+ ],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": null,
+   "trio": null
+  },
+  "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": null,
+   "trio": null
+  }
+ },
+ "corePicks": {
+  "axis": [
+   5,
+   6
+  ],
+  "third": 9,
+  "quinella": [
+   5,
+   6
+  ],
+  "trifecta": [
+   5,
+   6,
+   9
+  ],
+  "picks": [
+   {
+    "no": 5,
+    "tier": 1,
+    "sub": -2.6,
+    "rep": 2.6,
+    "reason": "유력마 저배당 2.6배"
+   },
+   {
+    "no": 6,
+    "tier": 1,
+    "sub": -2.6,
+    "rep": 2.6,
+    "reason": "유력마 저배당 2.6배"
+   },
+   {
+    "no": 9,
+    "tier": 1,
+    "sub": -3.7,
+    "rep": 3.7,
+    "reason": "유력마 저배당 3.7배"
+   }
+  ],
+  "quinellaOdds": 2.6,
+  "trifectaOdds": null,
+  "confQuinellas": [
+   {
+    "combo": [
+     5,
+     6
+    ],
+    "odds": 2.6,
+    "reason": "시장유력"
+   }
+  ],
+  "forcedHorses": [],
+  "confTop1": 6,
+  "confTop1Conf": 58.2,
+  "confTop1High": false,
+  "favAxis": [
+   5,
+   6
+  ],
+  "confTrifecta": [
+   2,
+   5,
+   6
+  ],
+  "confTrifectaOdds": 140.5,
+  "confTrifectaIns": [
+   2,
+   6,
+   8
+  ],
+  "confTrifectaInsOdds": 440.3,
+  "darkHorsePicks": [
+   {
+    "no": 1,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   },
+   {
+    "no": 2,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   },
+   {
+    "no": 4,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   },
+   {
+    "no": 5,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   },
+   {
+    "no": 6,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   },
+   {
+    "no": 7,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   },
+   {
+    "no": 8,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   },
+   {
+    "no": 9,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   },
+   {
+    "no": 10,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   },
+   {
+    "no": 11,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   }
+  ],
+  "darkTrifectas": [
+   {
+    "combo": [
+     1,
+     5,
+     6
+    ],
+    "odds": 168.7,
+    "horse": 1
+   },
+   {
+    "combo": [
+     2,
+     5,
+     6
+    ],
+    "odds": 140.5,
+    "horse": 2
+   },
+   {
+    "combo": [
+     4,
+     5,
+     6
+    ],
+    "odds": 116.0,
+    "horse": 4
+   },
+   {
+    "combo": [
+     5,
+     6,
+     7
+    ],
+    "odds": 66.2,
+    "horse": 7
+   },
+   {
+    "combo": [
+     5,
+     6,
+     8
+    ],
+    "odds": 126.1,
+    "horse": 8
+   },
+   {
+    "combo": [
+     5,
+     6,
+     9
+    ],
+    "odds": 83.3,
+    "horse": 9
+   },
+   {
+    "combo": [
+     5,
+     6,
+     10
+    ],
+    "odds": 106.3,
+    "horse": 10
+   },
+   {
+    "combo": [
+     5,
+     6,
+     11
+    ],
+    "odds": 116.9,
+    "horse": 11
+   }
+  ],
+  "formTopA": [],
+  "single": {},
+  "paceAnalysis": null,
+  "finalQuinellas": [
+   {
+    "combo": [
+     5,
+     6
+    ],
+    "odds": 2.6,
+    "reason": "시장 최저복승",
+    "stars": 3,
+    "basis": [
+     "5번: 급락 -18.8% 감지",
+     "5번: 복병",
+     "6번: 급락 -28.2% 감지",
+     "6번: 복병"
+    ],
+    "summary": "시장+BMED 동시 유력"
+   },
+   {
+    "combo": [
+     4,
+     9
+    ],
+    "odds": 3.7,
+    "reason": "시장 저배당+신호",
+    "stars": 3,
+    "basis": [
+     "4번: 급락 -9.8% 감지",
+     "4번: 복병",
+     "9번: 급락 -9.8% 감지",
+     "9번: 복병"
+    ],
+    "summary": "시장+BMED 동시 유력"
+   },
+   {
+    "combo": [
+     8,
+     9
+    ],
+    "odds": 7.9,
+    "reason": "시장 저배당+신호",
+    "stars": 3,
+    "basis": [
+     "8번: 급락 -24.7% 감지",
+     "8번: 복병",
+     "9번: 급락 -9.8% 감지",
+     "9번: 복병"
+    ],
+    "summary": "시장+BMED 동시 유력"
+   },
+   {
+    "combo": [
+     2,
+     7
+    ],
+    "odds": 13.6,
+    "reason": "시장 저배당+신호",
+    "stars": 3,
+    "basis": [
+     "2번: 급락 -28.2% 감지",
+     "2번: 복병",
+     "7번: 급락 14.4% 감지",
+     "7번: 복병"
+    ],
+    "summary": "시장+BMED 동시 유력"
+   },
+   {
+    "combo": [
+     5,
+     9
+    ],
+    "odds": 385.8,
+    "stars": 3,
+    "reason": "유력마 받치기 보존",
+    "basis": [
+     "5번: 급락 -18.8% 감지",
+     "5번: 복병",
+     "9번: 급락 -9.8% 감지",
+     "9번: 복병"
+    ],
+    "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+   }
+  ],
+  "finalTrifectas": [
+   {
+    "combo": [
+     1,
+     5,
+     6
+    ],
+    "odds": null,
+    "estimated": true,
+    "reason": "삼복승 메인(복승1·2+복병)",
+    "qMainAnchor": true
+   },
+   {
+    "combo": [
+     2,
+     5,
+     6
+    ],
+    "odds": null,
+    "estimated": true,
+    "reason": "삼복승 보험(복승1·2+복병)",
+    "qMainAnchor": true
+   },
+   {
+    "combo": [
+     5,
+     6,
+     7
+    ],
+    "odds": 66.2,
+    "reason": "복병"
+   },
+   {
+    "combo": [
+     5,
+     6,
+     9
+    ],
+    "odds": null,
+    "reason": "시장유력 보완: 6번+9번",
+    "marketInsurance": true
+   }
+  ],
+  "axisPlan": {
+   "axis1": 6,
+   "axis2": 2,
+   "links": [
+    5,
+    9
+   ],
+   "axis1Score": 58.2,
+   "axis2Score": 35.9,
+   "quinellas": [
+    {
+     "combo": [
+      2,
+      6
+     ],
+     "odds": 157.1,
+     "label": "축1+축2",
+     "rank": 1
+    },
+    {
+     "combo": [
+      5,
+      6
+     ],
+     "odds": 2.6,
+     "label": "축1+연결1",
+     "rank": 2
+    },
+    {
+     "combo": [
+      6,
+      9
+     ],
+     "odds": 72.1,
+     "label": "축1+연결2",
+     "rank": 3
+    },
+    {
+     "combo": [
+      2,
+      5
+     ],
+     "odds": 848.7,
+     "label": "축2+연결1",
+     "rank": 4
+    },
+    {
+     "combo": [
+      2,
+      9
+     ],
+     "odds": 45.3,
+     "label": "축2+연결2",
+     "rank": 5
+    }
+   ],
+   "trifectas": [
+    {
+     "combo": [
+      2,
+      5,
+      6
+     ],
+     "odds": 140.5,
+     "estimated": true,
+     "label": "축1+축2+연결1"
+    },
+    {
+     "combo": [
+      2,
+      6,
+      9
+     ],
+     "odds": 160.1,
+     "estimated": true,
+     "label": "축1+축2+연결2"
+    }
+   ],
+   "title": "🎯 핵심 축: 6번·2번"
+  },
+  "qMainCheck": {
+   "qMain": [
+    5,
+    6
+   ],
+   "replaced": 0,
+   "allInclude": true
+  },
+  "scenarioPlan": null,
+  "bmedSpecial": [
+   {
+    "combo": [
+     5,
+     10
+    ],
+    "odds": 22.7,
+    "reason": "복병 포함",
+    "stars": 2,
+    "score": 35.2,
+    "basis": [
+     "5번: 급락 -18.8% 감지",
+     "5번: 복병",
+     "10번: 급락 14.4% 감지",
+     "10번: 복병"
+    ],
+    "summary": "시장 저평가 중 주목"
+   }
+  ],
+  "dansung": false,
+  "dansungMinOdds": 2.6,
+  "dansungPlan": null,
+  "quinellaMax": 4,
+  "raceHorseCount": 11,
+  "chaoticRace": false,
+  "formMissing": true
+ },
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 2,
+  "2nd": 6,
+  "3rd": 5
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": true,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": null,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0.0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 24.0,
+   "reason": "적중"
+  }
+ },
+ "profit": null,
+ "review": null
+}

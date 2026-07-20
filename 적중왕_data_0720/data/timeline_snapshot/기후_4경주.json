@@ -1,0 +1,66 @@
+{
+ "race": "기후 4경주",
+ "date": "2026-07-20",
+ "snapshots": {
+  "T-10": {
+   "main": [],
+   "dark_horse": [
+    1,
+    5
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "09:30:49"
+  },
+  "T-7": {
+   "main": [],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {},
+   "confirmed": true,
+   "at": "09:33:45"
+  },
+  "T-5": {
+   "main": [],
+   "dark_horse": [
+    1,
+    5
+   ],
+   "odds": {},
+   "confirmed": true,
+   "at": "09:36:00",
+   "changed_from_T7": false,
+   "changed_horses": []
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    1,
+    5
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "09:41:21"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "09:43:34",
+   "post_deadline_change": false
+  }
+ },
+ "updated_at": "2026-07-20 10:31:34",
+ "result": {
+  "1st": 4,
+  "2nd": 2,
+  "3rd": 7
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false
+ }
+}

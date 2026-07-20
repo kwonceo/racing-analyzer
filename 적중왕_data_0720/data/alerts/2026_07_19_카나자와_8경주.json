@@ -1,0 +1,56 @@
+{
+ "race": "카나자와 8경주",
+ "date": "2026-07-19",
+ "raceKey": "카나자와 8경주",
+ "alerts": [
+  {
+   "time": "18:14:13",
+   "race": "카나자와 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "8+9 -58.0%",
+   "alert_pair": "8+9",
+   "odds_snapshot": {
+    "8+9": {
+     "before": 72.4,
+     "after": 30.4
+    },
+    "5+8": {
+     "before": 85.5,
+     "after": 46.3
+    },
+    "6+8": {
+     "before": 232.1,
+     "after": 127.7
+    },
+    "7+8": {
+     "before": 16.8,
+     "after": 9.6
+    }
+   },
+   "alert_horses": [
+    8,
+    9,
+    5,
+    6,
+    7
+   ],
+   "current_recommend": "4+7",
+   "minutes_before": 1,
+   "result": [
+    4,
+    7,
+    2
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    7
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  4,
+  7,
+  2
+ ]
+}

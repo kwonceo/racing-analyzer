@@ -1,0 +1,41 @@
+{
+ "race": "오비히로 10경주",
+ "date": "2026-07-12",
+ "raceKey": "오비히로 10경주",
+ "alerts": [
+  {
+   "time": "19:24:49",
+   "race": "오비히로 10경주",
+   "alert_type": "배당급변",
+   "alert_content": "7+8 -34.8%",
+   "alert_pair": "7+8",
+   "odds_snapshot": {
+    "7+8": {
+     "before": 34.2,
+     "after": 22.3
+    }
+   },
+   "alert_horses": [
+    7,
+    8
+   ],
+   "current_recommend": "9+10",
+   "minutes_before": 10,
+   "result": [
+    8,
+    10,
+    9
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    8
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  8,
+  10,
+  9
+ ]
+}

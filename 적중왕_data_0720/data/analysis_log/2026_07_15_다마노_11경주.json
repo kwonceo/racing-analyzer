@@ -1,0 +1,278 @@
+{
+ "race_id": "2026_07_15_다마노_11경주",
+ "raceKey": "다마노 11경주",
+ "sport": "horse",
+ "category": "japan_local",
+ "date": "2026-07-15",
+ "race": "다마노 11경주",
+ "analyzed_at": "21:02:22",
+ "updated_at": "21:02:22",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "asyukk34 Chrome확장 자동수집"
+ },
+ "odds_timeline": [
+  {
+   "time": "15:16:39",
+   "minutes_before": 8,
+   "quinella": {
+    "1+2": 45.9,
+    "1+3": 10.1,
+    "2+3": 15.2,
+    "1+4": 100.5,
+    "2+4": 13.8,
+    "3+4": 52.7,
+    "1+5": 4.6,
+    "2+5": 13.9,
+    "3+5": 4.9,
+    "4+5": 39.7,
+    "1+6": 54.5,
+    "2+6": 153.2,
+    "3+6": 63.0,
+    "4+6": 134.0,
+    "5+6": 13.6,
+    "1+7": 30.9,
+    "2+7": 38.3,
+    "3+7": 3.6,
+    "4+7": 119.1,
+    "5+7": 16.0,
+    "6+7": 146.2
+   }
+  },
+  {
+   "time": "15:18:01",
+   "minutes_before": 7,
+   "quinella": {
+    "1+2": 41.5,
+    "1+3": 10.3,
+    "2+3": 14.5,
+    "1+4": 101.6,
+    "2+4": 12.9,
+    "3+4": 53.0,
+    "1+5": 4.5,
+    "2+5": 12.7,
+    "3+5": 5.0,
+    "4+5": 39.3,
+    "1+6": 52.2,
+    "2+6": 118.0,
+    "3+6": 62.0,
+    "4+6": 140.7,
+    "5+6": 12.9,
+    "1+7": 32.6,
+    "2+7": 36.2,
+    "3+7": 3.9,
+    "4+7": 118.0,
+    "5+7": 16.4,
+    "6+7": 146.4
+   }
+  },
+  {
+   "time": "15:19:28",
+   "minutes_before": 6,
+   "quinella": {
+    "1+2": 42.7,
+    "1+3": 10.6,
+    "2+3": 15.1,
+    "1+4": 97.3,
+    "2+4": 12.9,
+    "3+4": 50.5,
+    "1+5": 4.3,
+    "2+5": 12.9,
+    "3+5": 5.2,
+    "4+5": 39.3,
+    "1+6": 50.5,
+    "2+6": 125.5,
+    "3+6": 63.8,
+    "4+6": 144.1,
+    "5+6": 12.2,
+    "1+7": 33.5,
+    "2+7": 35.7,
+    "3+7": 3.9,
+    "4+7": 105.2,
+    "5+7": 16.9,
+    "6+7": 155.7
+   }
+  },
+  {
+   "time": "15:31:00",
+   "minutes_before": null,
+   "quinella": {
+    "1+2": 43.5,
+    "1+3": 10.1,
+    "2+3": 17.8,
+    "1+4": 91.9,
+    "2+4": 10.4,
+    "3+4": 60.6,
+    "1+5": 4.2,
+    "2+5": 10.2,
+    "3+5": 4.9,
+    "4+5": 37.0,
+    "1+6": 61.9,
+    "2+6": 163.4,
+    "3+6": 81.7,
+    "4+6": 147.1,
+    "5+6": 11.1,
+    "1+7": 40.5,
+    "2+7": 36.7,
+    "3+7": 4.6,
+    "4+7": 103.2,
+    "5+7": 17.3,
+    "6+7": 163.4
+   }
+  }
+ ],
+ "signals_detected": [
+  {
+   "time": "15:31:00",
+   "type": "마감급락",
+   "detail": "4+7 복승 118.0→105.2 (2분전 대비 -10.8%)",
+   "severity": "🔴",
+   "reason": "마감 2분전 대비 급락 → 마감 임박 확정성 높음"
+  }
+ ],
+ "anomaly_history": [
+  {
+   "time": "15:31:00",
+   "combo": "2+5",
+   "drop": -21,
+   "text": "2+5 복승 급락 -21%",
+   "severity": "🟡",
+   "minutes_before": null
+  }
+ ],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [],
+ "elimination": {
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": null,
+   "trio": null
+  },
+  "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": null,
+   "trio": null
+  }
+ },
+ "corePicks": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 5,
+  "2nd": 1,
+  "3rd": 2
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   5,
+   2
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": true,
+  "signal_correct": [
+   "2+5 복승 급락(-20.9%) → 2·5번 입상 적중",
+   "2+4 복승 급락(-19.4%) → 2번 입상 적중",
+   "5+6 복승 급락(-9.0%) → 5번 입상 적중"
+  ],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": {
+   "detected": true,
+   "top2": [
+    1,
+    5
+   ],
+   "keyHorses": [
+    5,
+    3,
+    2,
+    1,
+    7
+   ],
+   "recQuinella": [
+    [
+     3,
+     5
+    ],
+    [
+     2,
+     5
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "leadNo": 6,
+   "backingCovered": false,
+   "wouldBackingCover": false,
+   "lesson": "유력마·삼복승 판단은 정확했으나 복승 메인이 실질유력마와 '다른' 유력마 받치기를 놓쳐 복승 top2를 놓침 → 역배열 실질유력마 축 받치기 복승으로 커버."
+  },
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": -20.9,
+   "dropScore": 100.0,
+   "inverse": true,
+   "inverseHorses": [
+    6,
+    1,
+    4,
+    2,
+    5
+   ],
+   "inverseHit": [
+    1,
+    2,
+    5
+   ],
+   "confidence": 65.8,
+   "reason": "전적유력마 1번 적중 · 2+5 복승 급락(-20.9%) → 2·5번 입상 적중 · 역배열 감지말 1·2·5번 입상"
+  }
+ },
+ "profit": null,
+ "review": null
+}

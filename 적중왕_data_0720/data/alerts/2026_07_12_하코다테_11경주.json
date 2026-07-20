@@ -1,0 +1,135 @@
+{
+ "race": "하코다테 11경주",
+ "date": "2026-07-12",
+ "raceKey": "하코다테 11경주",
+ "alerts": [
+  {
+   "time": "15:21:03",
+   "race": "하코다테 11경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+6 -47.0%",
+   "alert_pair": "2+6",
+   "odds_snapshot": {
+    "2+6": {
+     "before": 192.0,
+     "after": 101.8
+    },
+    "5+6": {
+     "before": 257.1,
+     "after": 153.0
+    },
+    "5+10": {
+     "before": 85.8,
+     "after": 54.1
+    },
+    "5+8": {
+     "before": 56.6,
+     "after": 39.3
+    }
+   },
+   "alert_horses": [
+    2,
+    6,
+    5,
+    10,
+    8
+   ],
+   "current_recommend": null,
+   "minutes_before": 7,
+   "result": [
+    10,
+    12,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    10
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "15:22:24",
+   "race": "하코다테 11경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+8 -34.8%",
+   "alert_pair": "6+8",
+   "odds_snapshot": {
+    "6+8": {
+     "before": 296.1,
+     "after": 193.0
+    }
+   },
+   "alert_horses": [
+    6,
+    8
+   ],
+   "current_recommend": "2+4",
+   "minutes_before": 6,
+   "result": [
+    10,
+    12,
+    4
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  },
+  {
+   "time": "15:26:12",
+   "race": "하코다테 11경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+7 -76.3%",
+   "alert_pair": "1+7",
+   "odds_snapshot": {
+    "1+7": {
+     "before": 682.7,
+     "after": 161.7
+    },
+    "7+10": {
+     "before": 1264.0,
+     "after": 442.6
+    },
+    "4+11": {
+     "before": 236.8,
+     "after": 90.1
+    },
+    "6+9": {
+     "before": 238.2,
+     "after": 112.3
+    },
+    "2+6": {
+     "before": 95.3,
+     "after": 65.9
+    }
+   },
+   "alert_horses": [
+    1,
+    7,
+    10,
+    4,
+    11,
+    6,
+    9,
+    2
+   ],
+   "current_recommend": "7+11",
+   "minutes_before": 3,
+   "result": [
+    10,
+    12,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    10,
+    4
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  10,
+  12,
+  4
+ ]
+}

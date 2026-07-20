@@ -1,0 +1,47 @@
+{
+ "race": "高知 7경주",
+ "date": "2026-07-17",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 8,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 113.8,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 41.8,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 7,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 34.2,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": {
+  "dansungHorse": 1,
+  "dansungOdds": 1.5,
+  "realFavorites": [
+   9,
+   2
+  ],
+  "darkHorses": [
+   6,
+   7,
+   8
+  ]
+ },
+ "result": null,
+ "dark_horse_analysis": null,
+ "updated_at": "2026-07-17 17:49:47"
+}

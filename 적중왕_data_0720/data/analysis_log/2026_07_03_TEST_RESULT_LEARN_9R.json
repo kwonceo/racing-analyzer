@@ -1,0 +1,145 @@
+{
+ "race_id": "2026_07_03_TEST_RESULT_LEARN_9R",
+ "date": "2026-07-03",
+ "race": "TEST-RESULT-LEARN-9R",
+ "analyzed_at": "22:29:36",
+ "updated_at": "22:29:36",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "asyukk34 Chrome확장 자동수집"
+ },
+ "odds_timeline": [],
+ "signals_detected": [
+  {
+   "time": null,
+   "type": "급락",
+   "detail": "4+7 복승 5.0→3.1 (-38.0%)",
+   "severity": "🟠",
+   "reason": "자금 유입 감지 → 주목 필요"
+  }
+ ],
+ "horses": [
+  {
+   "no": 1,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 7배(100) · 전적 미수집 → 배당만으로 100"
+  },
+  {
+   "no": 4,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 3.1배(100) · 전적 미수집 → 배당만으로 100"
+  },
+  {
+   "no": 7,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 3.1배(100) · 전적 미수집 → 배당만으로 100"
+  },
+  {
+   "no": 2,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 33배(60) · 전적 미수집 → 배당만으로 60"
+  },
+  {
+   "no": 9,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 33배(60) · 전적 미수집 → 배당만으로 60"
+  },
+  {
+   "no": 15,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "🔴",
+   "grade_reason": "배당 92배(20) · 전적 미수집 → 배당만으로 20"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   4,
+   7,
+   2,
+   9
+  ],
+  "eliminated": [
+   15
+  ],
+  "elimination_reasons": {
+   "15": "배당 92배(20) · 전적 미수집 → 배당만으로 20"
+  }
+ },
+ "final_recommendation": {
+  "quinella_main": {
+   "combo": "4+7",
+   "odds": 3.1,
+   "reason": "4번(?)·7번(?) · 급락감지"
+  },
+  "quinella_sub": {
+   "combo": "1+4",
+   "odds": 7.0,
+   "reason": "1번(?)·4번(?) · 급락감지"
+  },
+  "trifecta_main": {
+   "combo": "1+4+7",
+   "odds": 9.0,
+   "reason": "1번(?)·4번(?)·7번(?) · 급락감지"
+  },
+  "trifecta_insurance1": {
+   "combo": "2+4+7",
+   "odds": null,
+   "reason": "2번(?)·4번(?)·7번(?) · 급락감지"
+  },
+  "trifecta_insurance2": {
+   "combo": "1+2+4",
+   "odds": null,
+   "reason": "1번(?)·2번(?)·4번(?) · 급락감지"
+  },
+  "budget_allocation": {
+   "quinella_main": "43%",
+   "quinella_sub": "20%",
+   "trifecta_main": "29%",
+   "trifecta_insurance": "4%"
+  }
+ },
+ "summary": "급락 4-7 ▼38.0% / 유력마 4·7·1 / 복승 4+7",
+ "keyHorses": [
+  4,
+  7,
+  1
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null,
+ "category": "japan_local",
+ "sport": "horse"
+}

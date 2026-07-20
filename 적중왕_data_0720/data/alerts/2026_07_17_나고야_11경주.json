@@ -1,0 +1,39 @@
+{
+ "race": "나고야 11경주",
+ "date": "2026-07-17",
+ "raceKey": "나고야 11경주",
+ "alerts": [
+  {
+   "time": "20:12:34",
+   "race": "나고야 11경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+5 -88.2%",
+   "alert_pair": "2+5",
+   "odds_snapshot": {
+    "2+5": {
+     "before": 43.3,
+     "after": 5.1
+    },
+    "2+4": {
+     "before": 27.0,
+     "after": 3.2
+    },
+    "2+6": {
+     "before": 139.1,
+     "after": 96.9
+    }
+   },
+   "alert_horses": [
+    2,
+    5,
+    4,
+    6
+   ],
+   "current_recommend": "2+4",
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

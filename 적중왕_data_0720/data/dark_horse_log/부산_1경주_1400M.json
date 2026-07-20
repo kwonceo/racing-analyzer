@@ -1,0 +1,49 @@
+{
+ "race": "부산 1경주 1400M",
+ "date": "2026-07-19",
+ "sport": "korea",
+ "dark_horses": {
+  "rank1": {
+   "horse": 1,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 576.8,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 9,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 576.8,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 10,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 576.8,
+   "detected_at": null,
+   "recommended": false
+  }
+ },
+ "dansung": null,
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 4,
+  "quinella_odds": 100.0
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": true,
+  "rank1_place": 2,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": "4번 44.3배 입상(신호:복병) 복병 미편성"
+ },
+ "updated_at": "2026-07-19 13:10:42"
+}

@@ -1,0 +1,35 @@
+{
+ "race": "소노다 9경주",
+ "date": "2026-07-17",
+ "raceKey": "소노다 9경주",
+ "alerts": [
+  {
+   "time": "18:44:42",
+   "race": "소노다 9경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+6 -45.8%",
+   "alert_pair": "3+6",
+   "odds_snapshot": {
+    "3+6": {
+     "before": 92.3,
+     "after": 50.0
+    },
+    "2+4": {
+     "before": 30.9,
+     "after": 20.5
+    }
+   },
+   "alert_horses": [
+    3,
+    6,
+    2,
+    4
+   ],
+   "current_recommend": "5+7",
+   "minutes_before": 1,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

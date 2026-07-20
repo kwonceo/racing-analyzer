@@ -1,0 +1,66 @@
+{
+ "race": "서울 3경주 1300M",
+ "date": "2026-07-19",
+ "raceKey": "서울 3경주 1300M",
+ "alerts": [
+  {
+   "time": "12:14:49",
+   "race": "서울 3경주 1300M",
+   "alert_type": "배당급변",
+   "alert_content": "6+8 -66.7%",
+   "alert_pair": "6+8",
+   "odds_snapshot": {
+    "6+8": {
+     "before": 30.9,
+     "after": 10.3
+    },
+    "1+8": {
+     "before": 11.9,
+     "after": 4.4
+    },
+    "1+4": {
+     "before": 16.4,
+     "after": 6.5
+    },
+    "7+8": {
+     "before": 123.2,
+     "after": 48.8
+    },
+    "5+6": {
+     "before": 107.3,
+     "after": 58.5
+    },
+    "6+7": {
+     "before": 91.2,
+     "after": 50.8
+    }
+   },
+   "alert_horses": [
+    6,
+    8,
+    1,
+    4,
+    7,
+    5
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    8,
+    1,
+    9
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    8,
+    1
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  8,
+  1,
+  9
+ ]
+}

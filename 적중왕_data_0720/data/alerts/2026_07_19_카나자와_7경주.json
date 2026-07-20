@@ -1,0 +1,46 @@
+{
+ "race": "카나자와 7경주",
+ "date": "2026-07-19",
+ "raceKey": "카나자와 7경주",
+ "alerts": [
+  {
+   "time": "17:39:28",
+   "race": "카나자와 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+6 -38.9%",
+   "alert_pair": "4+6",
+   "odds_snapshot": {
+    "4+6": {
+     "before": 80.0,
+     "after": 48.9
+    },
+    "4+10": {
+     "before": 65.8,
+     "after": 44.9
+    }
+   },
+   "alert_horses": [
+    4,
+    6,
+    10
+   ],
+   "current_recommend": "4+5",
+   "minutes_before": 1,
+   "result": [
+    3,
+    5,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    6
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  3,
+  5,
+  6
+ ]
+}

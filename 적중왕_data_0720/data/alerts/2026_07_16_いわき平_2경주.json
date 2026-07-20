@@ -1,0 +1,55 @@
+{
+ "race": "いわき平 2경주",
+ "date": "2026-07-16",
+ "raceKey": "いわき平 2경주",
+ "alerts": [
+  {
+   "time": "20:55:34",
+   "race": "いわき平 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -40.0%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 942.7,
+     "after": 565.8
+    }
+   },
+   "alert_horses": [
+    4,
+    5
+   ],
+   "current_recommend": "2+3",
+   "minutes_before": 5,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "20:57:04",
+   "race": "いわき平 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+3 -50.0%",
+   "alert_pair": "1+3",
+   "odds_snapshot": {
+    "1+3": {
+     "before": 7.6,
+     "after": 3.8
+    },
+    "3+7": {
+     "before": 495.0,
+     "after": 266.0
+    }
+   },
+   "alert_horses": [
+    1,
+    3,
+    7
+   ],
+   "current_recommend": "2+3",
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

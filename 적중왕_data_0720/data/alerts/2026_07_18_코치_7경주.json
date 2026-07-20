@@ -1,0 +1,34 @@
+{
+ "race": "코치 7경주",
+ "date": "2026-07-18",
+ "raceKey": "코치 7경주",
+ "alerts": [
+  {
+   "time": "17:52:06",
+   "race": "코치 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+7 -35.2%",
+   "alert_pair": "4+7",
+   "odds_snapshot": {
+    "4+7": {
+     "before": 55.4,
+     "after": 35.9
+    },
+    "2+4": {
+     "before": 61.5,
+     "after": 40.7
+    }
+   },
+   "alert_horses": [
+    4,
+    7,
+    2
+   ],
+   "current_recommend": "4+7",
+   "minutes_before": 2,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

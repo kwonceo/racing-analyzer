@@ -1,0 +1,78 @@
+{
+ "race": "마쓰도 6경주",
+ "date": "2026-07-19",
+ "snapshots": {
+  "T-7": {
+   "main": [
+    3,
+    5
+   ],
+   "dark_horse": [
+    3,
+    5
+   ],
+   "odds": {
+    "3+5": 4.6
+   },
+   "confirmed": true,
+   "at": "10:03:52"
+  },
+  "T-5": {
+   "main": [
+    3,
+    5
+   ],
+   "dark_horse": [
+    3,
+    5
+   ],
+   "odds": {
+    "3+5": 4.1
+   },
+   "confirmed": true,
+   "at": "10:05:48",
+   "changed_from_T7": false,
+   "changed_horses": []
+  },
+  "T-10": {
+   "main": [
+    4,
+    5
+   ],
+   "dark_horse": [],
+   "odds": {
+    "4+5": 3.1
+   },
+   "confirmed": false,
+   "at": "10:00:54"
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    3,
+    5
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "10:11:36"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "10:13:34",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-20 10:31:16",
+ "result": {
+  "1st": 5,
+  "2nd": 4,
+  "3rd": 2
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false
+ }
+}

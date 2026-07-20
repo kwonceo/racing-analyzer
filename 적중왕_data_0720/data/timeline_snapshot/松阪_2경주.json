@@ -1,0 +1,56 @@
+{
+ "race": "松阪 2경주",
+ "date": "2026-07-17",
+ "snapshots": {
+  "T-10": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "11:00:44"
+  },
+  "T-7": {
+   "main": [
+    3,
+    7
+   ],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {
+    "3+7": 1.7
+   },
+   "confirmed": true,
+   "at": "11:03:13"
+  },
+  "T-5": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": true,
+   "at": "11:21:27",
+   "changed_from_T7": true,
+   "changed_horses": [
+    3,
+    7
+   ]
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "11:18:11"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "11:20:07",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-18 11:21:27"
+}

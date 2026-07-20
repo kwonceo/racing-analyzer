@@ -1,0 +1,71 @@
+{
+ "race": "카나자와 4경주",
+ "date": "2026-07-19",
+ "snapshots": {
+  "T-10": {
+   "main": [
+    1,
+    5
+   ],
+   "dark_horse": [
+    2,
+    3
+   ],
+   "odds": {
+    "1+5": 3.7
+   },
+   "confirmed": false,
+   "at": "14:56:03"
+  },
+  "T-7": {
+   "main": [
+    1,
+    5
+   ],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {
+    "1+5": 2.7
+   },
+   "confirmed": true,
+   "at": "14:58:42"
+  },
+  "T-5": {
+   "main": [
+    1,
+    5
+   ],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {
+    "1+5": 2.8
+   },
+   "confirmed": true,
+   "at": "15:00:21",
+   "changed_from_T7": false,
+   "changed_horses": []
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "15:08:05",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-19 15:51:37",
+ "result": {
+  "1st": 5,
+  "2nd": 6,
+  "3rd": 1
+ },
+ "analysis": {
+  "T7_hit": true,
+  "T5_hit": true
+ }
+}

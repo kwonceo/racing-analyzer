@@ -1,0 +1,54 @@
+{
+ "result": {
+  "1st": 3,
+  "2nd": 1,
+  "3rd": 4,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-20 10:40:31",
+ "race": "기시와다 1경주",
+ "date": "2026-07-20",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 6,
+   "signal": "급락-28%·45.7배",
+   "priority": 1,
+   "odds": 45.7,
+   "detected_at": "T-5분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 4,
+   "signal": "급락-28%·19.5배",
+   "priority": 1,
+   "odds": 19.5,
+   "detected_at": "T-5분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 5,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 12.9,
+   "detected_at": "T-5분",
+   "recommended": false
+  }
+ },
+ "dansung": {
+  "dansungHorse": 1,
+  "dansungOdds": 1.7,
+  "realFavorites": [
+   7,
+   2
+  ],
+  "darkHorses": [
+   4,
+   6,
+   5
+  ]
+ }
+}

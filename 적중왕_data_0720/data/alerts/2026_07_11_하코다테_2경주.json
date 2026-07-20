@@ -1,0 +1,65 @@
+{
+ "race": "하코다테 2경주",
+ "date": "2026-07-11",
+ "raceKey": "하코다테 2경주",
+ "alerts": [
+  {
+   "time": "10:15:11",
+   "race": "하코다테 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+10 -55.6%",
+   "alert_pair": "2+10",
+   "odds_snapshot": {
+    "2+10": {
+     "before": 72.6,
+     "after": 32.2
+    },
+    "2+12": {
+     "before": 218.0,
+     "after": 101.6
+    },
+    "2+6": {
+     "before": 111.3,
+     "after": 52.8
+    },
+    "3+8": {
+     "before": 50.7,
+     "after": 24.2
+    },
+    "3+6": {
+     "before": 79.3,
+     "after": 37.8
+    },
+    "3+12": {
+     "before": 99.1,
+     "after": 48.2
+    }
+   },
+   "alert_horses": [
+    2,
+    10,
+    12,
+    6,
+    3,
+    8
+   ],
+   "current_recommend": "3+10",
+   "minutes_before": 6,
+   "result": [
+    7,
+    3,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  7,
+  3,
+  4
+ ]
+}

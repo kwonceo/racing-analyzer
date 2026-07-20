@@ -1,0 +1,109 @@
+{
+ "raceKey": "케이오카쿠 3경주",
+ "at": "2026-07-19 21:26:31",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    2,
+    3
+   ],
+   "odds": 4.0,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "2번: 급락 -9.1% 감지",
+    "2번: 복병",
+    "3번: 급락 -32.9% 감지",
+    "3번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 1.18
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    1,
+    3,
+    7
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    2,
+    3
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    1,
+    4
+   ],
+   "odds": 33.8,
+   "reason": "복병 포함",
+   "stars": 2,
+   "score": 68.0,
+   "basis": [
+    "1번: 급락 -12.0% 감지",
+    "1번: 복병",
+    "4번: 급락 18.2% 감지",
+    "4번: 복병"
+   ],
+   "summary": "시장 저평가 중 주목"
+  },
+  {
+   "combo": [
+    1,
+    7
+   ],
+   "odds": 96.2,
+   "stars": 2,
+   "reason": "유력마 1·2위 조합 → 고배당(25배↑) 복병 이동",
+   "basis": [
+    "1번: 급락 -12.0% 감지",
+    "1번: 복병",
+    "7번: 급락 -32.9% 감지"
+   ],
+   "summary": "유력마 1위+2위 최우선"
+  },
+  {
+   "combo": [
+    4,
+    6
+   ],
+   "odds": 31.6,
+   "reason": "라인 페어 — 라인 페어(4번 선행형 + 6번 마크)",
+   "basis": [
+    "4번: 급락 18.2% 감지",
+    "4번: 복병",
+    "6번: 급락 16.4% 감지"
+   ],
+   "summary": "경륜 라인 전술(동반 입상 기대)",
+   "stars": 2
+  }
+ ],
+ "keyHorses": [
+  1,
+  3,
+  7,
+  2,
+  4
+ ],
+ "dansung": false,
+ "minOdds": 2.2,
+ "raceHorseCount": 7,
+ "result": null,
+ "compared": false
+}

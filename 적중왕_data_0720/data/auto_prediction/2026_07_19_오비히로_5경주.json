@@ -1,0 +1,174 @@
+{
+ "raceKey": "오비히로 5경주",
+ "at": "2026-07-19 16:48:45",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    2,
+    4
+   ],
+   "odds": 3.5,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "basis": [
+    "2번: 급락 -31.4% 감지",
+    "4번: 급락 -31.4% 감지",
+    "4번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 1.05
+  },
+  {
+   "combo": [
+    5,
+    7
+   ],
+   "odds": 8.4,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "5번: 급락 -20.1% 감지",
+    "5번: 복병",
+    "7번: 급락 -17.4% 감지"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 1.26
+  },
+  {
+   "combo": [
+    8,
+    10
+   ],
+   "odds": 10.8,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "8번: 급락 -17.4% 감지",
+    "8번: 복병",
+    "10번: 급락 -15.6% 감지"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 1.62
+  },
+  {
+   "combo": [
+    7,
+    9
+   ],
+   "odds": 11.8,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "7번: 급락 -17.4% 감지",
+    "9번: 급락 21.4% 감지"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 1.77
+  },
+  {
+   "combo": [
+    4,
+    7
+   ],
+   "odds": 12.3,
+   "stars": 3,
+   "reason": "유력마 받치기 보존",
+   "basis": [
+    "4번: 급락 -31.4% 감지",
+    "4번: 복병",
+    "7번: 급락 -17.4% 감지"
+   ],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)",
+   "ev": 1.84
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    3,
+    4
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    2,
+    4,
+    5
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    2,
+    4,
+    7
+   ],
+   "odds": 24.7,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    1,
+    2,
+    3
+   ],
+   "odds": null,
+   "reason": "전적A 보완: 1번+2번",
+   "formInsurance": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    2,
+    5
+   ],
+   "odds": 31.4,
+   "reason": "시장유력+급락",
+   "stars": 2,
+   "score": 34.8,
+   "basis": [
+    "2번: 급락 -31.4% 감지",
+    "5번: 급락 -20.1% 감지",
+    "5번: 복병"
+   ],
+   "summary": "시장 저평가 중 주목"
+  },
+  {
+   "combo": [
+    2,
+    3
+   ],
+   "odds": 43.7,
+   "reason": "복병 포함",
+   "stars": 2,
+   "score": 34.8,
+   "basis": [
+    "2번: 급락 -31.4% 감지",
+    "3번: 급락 -11.5% 감지",
+    "3번: 복병"
+   ],
+   "summary": "시장 저평가 중 주목"
+  }
+ ],
+ "keyHorses": [
+  2,
+  4,
+  7,
+  3
+ ],
+ "dansung": false,
+ "minOdds": 3.5,
+ "raceHorseCount": 10,
+ "result": null,
+ "compared": false
+}

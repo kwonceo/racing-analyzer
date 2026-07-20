@@ -1,0 +1,408 @@
+{
+ "race_id": "2026_07_12_하코다테_3경주",
+ "raceKey": "하코다테 3경주",
+ "sport": "horse",
+ "category": "japan_central",
+ "date": "2026-07-12",
+ "race": "하코다테 3경주",
+ "analyzed_at": "10:45:47",
+ "updated_at": "21:22:45",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ },
+ "odds_timeline": [],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "석세스골",
+   "jockey": "경민",
+   "record_score": 98.8,
+   "record_detail": "최근 2-1-6-3-4",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 2,
+   "name": "블루오키",
+   "jockey": "성재",
+   "record_score": 50,
+   "record_detail": "최근 7-4-1-8-3",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 3,
+   "name": "글로벌히",
+   "jockey": "형철",
+   "record_score": 40,
+   "record_detail": "최근 5-6-1-4-2",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 4,
+   "name": "피디스페",
+   "jockey": "실바",
+   "record_score": 53.8,
+   "record_detail": "최근 6-1-7-2-1",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 5,
+   "name": "보령원로",
+   "jockey": "동영",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 6,
+   "name": "뉴리더",
+   "jockey": "시대",
+   "record_score": 82.5,
+   "record_detail": "최근 4-1-2-8-3",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 7,
+   "name": "미라주",
+   "jockey": "정혁",
+   "record_score": 76.2,
+   "record_detail": "최근 2-7-1-5-4",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 9,
+   "name": "노던퀸",
+   "jockey": "도윤",
+   "record_score": 27.6,
+   "record_detail": "최근 5-2-5-2",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 11,
+   "name": "스원퀸",
+   "jockey": "승운",
+   "record_score": 83.8,
+   "record_detail": "최근 1-4-2-1-4",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 8,
+   "name": "은성질주",
+   "jockey": "윤섭",
+   "record_score": 44.4,
+   "record_detail": "최근 9-4-3-0-0",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.3착 -30 = 30점"
+  },
+  {
+   "no": 10,
+   "name": "위라이크",
+   "jockey": "형석",
+   "record_score": 40,
+   "record_detail": "최근 8-12-1-5-7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.6착 -30 = 30점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   6,
+   7,
+   11,
+   8,
+   10
+  ],
+  "eliminated": [
+   5,
+   9
+  ],
+  "elimination_reasons": {
+   "5": "배당 미수집 · 배당 150배+ -40 = 60점",
+   "9": "배당 미수집 · 배당 150배+ -40 = 60점"
+  }
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [
+  {
+   "time": "10:45:47",
+   "minutes_before": null,
+   "sig": "8-10-12|10+12|None|8+10+12",
+   "anomCount": 38,
+   "sigChanged": true,
+   "keyHorses": [
+    12,
+    10,
+    8
+   ],
+   "summary": "유력마 12·10·8 / 복승 10+12",
+   "quinella_main": "10+12",
+   "quinella_sub": null,
+   "trifecta_main": "8+10+12",
+   "top_signals": []
+  },
+  {
+   "time": "10:46:12",
+   "minutes_before": null,
+   "sig": "8-10-12|10+12|None|8+10+12",
+   "anomCount": 39,
+   "sigChanged": false,
+   "keyHorses": [
+    12,
+    10,
+    8
+   ],
+   "summary": "급락 1-7 ▼24.2% / 유력마 12·10·8 / 복승 10+12",
+   "quinella_main": "10+12",
+   "quinella_sub": null,
+   "trifecta_main": "8+10+12",
+   "top_signals": [
+    "1+7 복승 2778.1→2105.8 (2분전 대비 -24.2%)",
+    "1번 급락 -16.4% (절대 10%+ 자금집중·추천 필수)",
+    "7번 급락 -16.4% (절대 10%+ 자금집중·추천 필수)"
+   ]
+  },
+  {
+   "time": "10:46:12",
+   "minutes_before": null,
+   "sig": "4-8-10-12|8+10|None|4+8+10",
+   "anomCount": 39,
+   "sigChanged": true,
+   "keyHorses": [
+    10,
+    8,
+    4,
+    12
+   ],
+   "summary": "급락 1-7 ▼24.2% / 유력마 10·8·4·12 / 복승 8+10",
+   "quinella_main": "8+10",
+   "quinella_sub": null,
+   "trifecta_main": "4+8+10",
+   "top_signals": [
+    "1+7 복승 2778.1→2105.8 (2분전 대비 -24.2%)",
+    "추천 복승(8+10=50.7배)이 배당판 인기 조합(10+12=4.1배)과 다름",
+    "1번 급락 -16.4% (절대 10%+ 자금집중·추천 필수)"
+   ]
+  },
+  {
+   "time": "10:46:13",
+   "minutes_before": null,
+   "sig": "2-3-4-10-14|2+10|None|2+3+10",
+   "anomCount": 113,
+   "sigChanged": true,
+   "keyHorses": [
+    3,
+    2,
+    10,
+    4,
+    14
+   ],
+   "summary": "급락 3-13 ▼79.8% / 유력마 3·2·10·4·14 / 복승 2+10",
+   "quinella_main": "2+10",
+   "quinella_sub": null,
+   "trifecta_main": "2+3+10",
+   "top_signals": [
+    "10+12 복승 4.1→3.4 (2분전 대비 -17.1%)",
+    "2+12 복승 12.6→11.0 (2분전 대비 -12.7%)",
+    "3+12 복승 21.5→17.9 (2분전 대비 -16.7%)"
+   ]
+  },
+  {
+   "time": "10:46:23",
+   "minutes_before": null,
+   "sig": "8-10-12|10+12|None|8+10+12",
+   "anomCount": 113,
+   "sigChanged": true,
+   "keyHorses": [
+    10,
+    8,
+    12
+   ],
+   "summary": "유력마 10·8·12 / 복승 10+12",
+   "quinella_main": "10+12",
+   "quinella_sub": null,
+   "trifecta_main": "8+10+12",
+   "top_signals": [
+    "10+12 복승 4.1→3.4 (2분전 대비 -17.1%)",
+    "8+12 복승 7.9→7.1 (2분전 대비 -10.1%)",
+    "2+12 복승 12.6→10.9 (2분전 대비 -13.5%)"
+   ]
+  },
+  {
+   "time": "10:47:16",
+   "minutes_before": null,
+   "sig": "8-10-12|10+12|None|8+10+12",
+   "anomCount": 114,
+   "sigChanged": false,
+   "keyHorses": [
+    10,
+    8,
+    12
+   ],
+   "summary": "급락 6-13 ▼20.6% / 유력마 10·8·12 / 복승 10+12",
+   "quinella_main": "10+12",
+   "quinella_sub": null,
+   "trifecta_main": "8+10+12",
+   "top_signals": [
+    "10+12 복승 4.1→3.4 (2분전 대비 -17.1%)",
+    "8+12 복승 7.9→7.0 (2분전 대비 -11.4%)",
+    "2+12 복승 12.6→10.9 (2분전 대비 -13.5%)"
+   ]
+  },
+  {
+   "time": "10:55:38",
+   "minutes_before": null,
+   "sig": "2-3-4-5-6|3+6|None|3+4+6",
+   "anomCount": 6,
+   "sigChanged": true,
+   "keyHorses": [
+    4,
+    3,
+    6,
+    2,
+    5
+   ],
+   "summary": "급락 3-4 ▼87.6% / 유력마 4·3·6·2·5 / 복승 3+6",
+   "quinella_main": "3+6",
+   "quinella_sub": null,
+   "trifecta_main": "3+4+6",
+   "top_signals": [
+    "3+6 복승 980.7→7.5 (5분전 대비 -99.2%)",
+    "3+4 복승 78.4→9.7 (5분전 대비 -87.6%)",
+    "2+5 복승 117.3→11.2 (5분전 대비 -90.5%)"
+   ]
+  }
+ ],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    1,
+    11
+   ],
+   "trio": [
+    1,
+    6,
+    11
+   ]
+  },
+  "form": {
+   "quinella": [
+    1,
+    11
+   ],
+   "trio": [
+    1,
+    6,
+    11
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    1,
+    11
+   ],
+   "trio": [
+    1,
+    6,
+    11
+   ]
+  }
+ },
+ "corePicks": null,
+ "summary": "유력마 1·11·6 / 복승 1+11",
+ "keyHorses": [
+  1,
+  11,
+  6
+ ],
+ "result": {
+  "1st": 12,
+  "2nd": 8,
+  "3rd": 5
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [
+   5,
+   9
+  ],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "추천 미적중"
+  }
+ },
+ "profit": null,
+ "review": null
+}

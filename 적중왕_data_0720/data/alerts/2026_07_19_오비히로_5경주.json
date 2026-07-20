@@ -1,0 +1,65 @@
+{
+ "race": "오비히로 5경주",
+ "date": "2026-07-19",
+ "raceKey": "오비히로 5경주",
+ "alerts": [
+  {
+   "time": "16:43:36",
+   "race": "오비히로 5경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -56.6%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 1267.0,
+     "after": 550.0
+    },
+    "3+8": {
+     "before": 380.1,
+     "after": 176.7
+    },
+    "4+8": {
+     "before": 422.3,
+     "after": 206.2
+    },
+    "3+6": {
+     "before": 27.5,
+     "after": 17.1
+    }
+   },
+   "alert_horses": [
+    4,
+    5,
+    3,
+    8,
+    6
+   ],
+   "current_recommend": "2+4",
+   "minutes_before": 6,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "16:45:15",
+   "race": "오비히로 5경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+8 -36.8%",
+   "alert_pair": "3+8",
+   "odds_snapshot": {
+    "3+8": {
+     "before": 179.3,
+     "after": 113.4
+    }
+   },
+   "alert_horses": [
+    3,
+    8
+   ],
+   "current_recommend": "2+4",
+   "minutes_before": 5,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

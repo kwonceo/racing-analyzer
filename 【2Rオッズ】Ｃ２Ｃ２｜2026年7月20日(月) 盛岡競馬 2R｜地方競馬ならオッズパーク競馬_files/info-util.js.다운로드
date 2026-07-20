@@ -1,0 +1,40 @@
+/*
+ * 別ウインドウで画面を開きます。
+ */
+function openFullWindow(url){
+    width  = screen.availWidth  - 10;
+    height = screen.availHeight - 40;
+    if ( !url.match(/^https:/) ) {
+        url = url.replace( /^[^:]+:/, "https:" );
+    }
+
+    var _w = window.open(url,"screen","width="+width+",height="+height+",top=0,left=0,scrollbars=yes,directories=no,resizable=yes,location=no,menubar=no,resizable=yes,toolbar=no");
+    _w.focus();
+}
+
+/*
+ * 別ウインドウで画面を開きます。(ターゲット指定付き)
+ */
+function openTargetFullWindow(url,target){
+    width  = screen.availWidth  - 10;
+    height = screen.availHeight - 40;
+    if ( !url.match(/^https:/) ) {
+        url = url.replace( /^[^:]+:/, "https:" );
+    }
+
+    window.open(url,target,"width="+width+",height="+height+",top=0,left=0,scrollbars=yes,directories=no,resizable=yes,location=no,menubar=no,resizable=yes,toolbar=no");
+}
+
+/*
+ * ヘルプウィンドウなどを開きます。heightを指定しない場合、widthのみ指定して開きます
+ */
+function openWindow(url, width, height){
+    if(arguments.length == 2){
+    	window.open(url,"screen","width="+width+",scrollbars=yes,directories=no,menubar=no,resizable=yes,toolbar=no");
+    } else {
+    	window.open(url,"screen","width="+width+",height="+height+",scrollbars=yes,directories=no,menubar=no,resizable=yes,toolbar=no");
+    }
+
+
+}
+

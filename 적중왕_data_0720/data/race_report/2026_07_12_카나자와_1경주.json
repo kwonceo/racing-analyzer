@@ -1,0 +1,160 @@
+{
+ "race": "카나자와 1경주",
+ "raceKey": "카나자와 1경주",
+ "date": "2026-07-12",
+ "result": {
+  "1st": 4,
+  "2nd": 1,
+  "3rd": null,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 3.0,
+   "reason": "일반"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 40.0,
+   "reason": "일반"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "일반"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 74.2,
+   "reason": "일반"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 4번 전적 정보 제한",
+  "2. 배당 수집 시작 12:56:28",
+  "5. 종합 신뢰도 3.0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 4,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": null,
+  "total": 3.0,
+  "grade": "하"
+ },
+ "win_tags": [],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   6
+  ],
+  "inverseHit": [],
+  "confidence": 40.0,
+  "reason": "전적유력마 1번 적중"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "12:59:23",
+    "minutes_before": 4,
+    "previous_signal": "6번",
+    "new_signal": "4번",
+    "reason": "4번 집중급락(평균 -32.0%)",
+    "prev_was_candidate": true
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   4,
+   6
+  ],
+  "events": {
+   "6": {
+    "first": {
+     "time": "12:59:11",
+     "minutes_before": 4
+    },
+    "count": 1,
+    "last": {
+     "time": "12:59:11",
+     "minutes_before": 4
+    }
+   },
+   "4": {
+    "first": {
+     "time": "12:59:23",
+     "minutes_before": 4
+    },
+    "count": 1,
+    "last": {
+     "time": "12:59:23",
+     "minutes_before": 4
+    },
+    "vanished": {
+     "time": "12:59:34",
+     "minutes_before": 4
+    }
+   }
+  },
+  "finalSignal": 4,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 9
+ },
+ "pnl": 0,
+ "stake": 1000,
+ "generated_at": "2026-07-12 21:24:26"
+}

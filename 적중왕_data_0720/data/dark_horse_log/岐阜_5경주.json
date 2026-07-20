@@ -1,0 +1,47 @@
+{
+ "race": "岐阜 5경주",
+ "date": "2026-07-18",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 7,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 49.0,
+   "detected_at": "T-5분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 35.9,
+   "detected_at": "T-5분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 1,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 10.9,
+   "detected_at": "T-5분",
+   "recommended": false
+  }
+ },
+ "dansung": {
+  "dansungHorse": 3,
+  "dansungOdds": 1.4,
+  "realFavorites": [
+   5,
+   2
+  ],
+  "darkHorses": [
+   1,
+   2,
+   6
+  ]
+ },
+ "result": null,
+ "dark_horse_analysis": null,
+ "updated_at": "2026-07-18 09:48:27"
+}

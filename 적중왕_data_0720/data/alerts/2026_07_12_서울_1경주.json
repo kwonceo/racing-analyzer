@@ -1,0 +1,65 @@
+{
+ "race": "서울 1경주",
+ "date": "2026-07-12",
+ "raceKey": "서울 1경주",
+ "alerts": [
+  {
+   "time": "10:38:45",
+   "race": "서울 1경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+10 -65.5%",
+   "alert_pair": "2+10",
+   "odds_snapshot": {
+    "2+10": {
+     "before": 100.0,
+     "after": 34.5
+    },
+    "8+10": {
+     "before": 71.8,
+     "after": 26.9
+    },
+    "9+10": {
+     "before": 99.0,
+     "after": 38.1
+    },
+    "2+8": {
+     "before": 95.2,
+     "after": 46.0
+    },
+    "3+10": {
+     "before": 100.0,
+     "after": 50.2
+    },
+    "5+10": {
+     "before": 100.0,
+     "after": 54.5
+    }
+   },
+   "alert_horses": [
+    2,
+    10,
+    8,
+    9,
+    3,
+    5
+   ],
+   "current_recommend": null,
+   "minutes_before": 10,
+   "result": [
+    4,
+    7,
+    3
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  4,
+  7,
+  3
+ ]
+}

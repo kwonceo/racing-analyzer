@@ -1,0 +1,66 @@
+{
+ "race": "모리오카 5경주",
+ "date": "2026-07-12",
+ "raceKey": "모리오카 5경주",
+ "alerts": [
+  {
+   "time": "14:22:23",
+   "race": "모리오카 5경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+6 -83.3%",
+   "alert_pair": "3+6",
+   "odds_snapshot": {
+    "3+6": {
+     "before": 62.4,
+     "after": 10.4
+    },
+    "6+10": {
+     "before": 31.6,
+     "after": 5.8
+    },
+    "2+6": {
+     "before": 96.5,
+     "after": 18.9
+    },
+    "6+7": {
+     "before": 82.8,
+     "after": 17.7
+    },
+    "2+7": {
+     "before": 117.7,
+     "after": 25.7
+    },
+    "8+10": {
+     "before": 114.9,
+     "after": 29.0
+    }
+   },
+   "alert_horses": [
+    3,
+    6,
+    10,
+    2,
+    7,
+    8
+   ],
+   "current_recommend": "6+10",
+   "minutes_before": 3,
+   "result": [
+    5,
+    3,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3,
+    7
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  5,
+  3,
+  7
+ ]
+}

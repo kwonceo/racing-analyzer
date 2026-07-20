@@ -1,0 +1,172 @@
+{
+ "race": "부산 6경주",
+ "date": "2026-07-19",
+ "raceKey": "부산 6경주",
+ "alerts": [
+  {
+   "time": "15:49:33",
+   "race": "부산 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+6 -92.9%",
+   "alert_pair": "2+6",
+   "odds_snapshot": {
+    "2+6": {
+     "before": 84.5,
+     "after": 6.0
+    },
+    "4+6": {
+     "before": 54.3,
+     "after": 13.2
+    },
+    "3+10": {
+     "before": 100.0,
+     "after": 33.7
+    },
+    "6+9": {
+     "before": 39.7,
+     "after": 16.4
+    },
+    "4+10": {
+     "before": 99.5,
+     "after": 41.4
+    },
+    "6+7": {
+     "before": 100.0,
+     "after": 41.7
+    }
+   },
+   "alert_horses": [
+    2,
+    6,
+    4,
+    3,
+    10,
+    9,
+    7
+   ],
+   "current_recommend": null,
+   "minutes_before": 15,
+   "result": [
+    5,
+    11,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    7
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "15:49:47",
+   "race": "부산 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+6 -91.9%",
+   "alert_pair": "1+6",
+   "odds_snapshot": {
+    "1+6": {
+     "before": 47.9,
+     "after": 3.9
+    },
+    "1+10": {
+     "before": 68.4,
+     "after": 6.9
+    },
+    "1+9": {
+     "before": 69.8,
+     "after": 12.3
+    },
+    "1+4": {
+     "before": 100.0,
+     "after": 21.7
+    },
+    "8+10": {
+     "before": 100.0,
+     "after": 25.5
+    },
+    "6+8": {
+     "before": 57.8,
+     "after": 15.5
+    }
+   },
+   "alert_horses": [
+    1,
+    6,
+    10,
+    9,
+    4,
+    8
+   ],
+   "current_recommend": null,
+   "minutes_before": 16,
+   "result": [
+    5,
+    11,
+    7
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  },
+  {
+   "time": "15:54:44",
+   "race": "부산 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+8 -76.8%",
+   "alert_pair": "6+8",
+   "odds_snapshot": {
+    "6+8": {
+     "before": 55.7,
+     "after": 12.9
+    },
+    "5+6": {
+     "before": 34.2,
+     "after": 10.8
+    },
+    "6+7": {
+     "before": 40.7,
+     "after": 15.0
+    },
+    "1+5": {
+     "before": 100.0,
+     "after": 39.5
+    },
+    "4+5": {
+     "before": 87.4,
+     "after": 35.5
+    },
+    "2+5": {
+     "before": 53.6,
+     "after": 22.6
+    }
+   },
+   "alert_horses": [
+    6,
+    8,
+    5,
+    7,
+    1,
+    4,
+    2
+   ],
+   "current_recommend": null,
+   "minutes_before": 11,
+   "result": [
+    5,
+    11,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    5,
+    7
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  5,
+  11,
+  7
+ ]
+}

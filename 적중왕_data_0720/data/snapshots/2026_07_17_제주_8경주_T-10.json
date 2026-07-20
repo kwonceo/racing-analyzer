@@ -1,0 +1,119 @@
+{
+ "filename": "2026_07_17_제주_8경주_T-10.png",
+ "raceKey": "제주 8경주",
+ "at": "2026-07-17 17:17:05",
+ "trigger": "T-10",
+ "quinellas": [
+  {
+   "basis": [],
+   "combo": [
+    4,
+    9
+   ],
+   "odds": 9.3,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [
+    "8번: 집중급락"
+   ],
+   "combo": [
+    4,
+    8
+   ],
+   "odds": 8.4,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [
+    "8번: 집중급락"
+   ],
+   "combo": [
+    8,
+    9
+   ],
+   "odds": 13.5,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [],
+   "combo": [
+    2,
+    4
+   ],
+   "odds": 10.1,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    4,
+    6,
+    9
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)"
+  },
+  {
+   "combo": [
+    2,
+    4,
+    9
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 보험(복승1·2+유력마)"
+  },
+  {
+   "combo": [
+    2,
+    4,
+    8
+   ],
+   "odds": 44.2,
+   "qMainFixed": true,
+   "reason": "확신도 보험 →복승메인 정합"
+  },
+  {
+   "combo": [
+    4,
+    8,
+    9
+   ],
+   "marketInsurance": true,
+   "odds": null,
+   "reason": "시장유력 보완: 4번+8번"
+  },
+  {
+   "combo": [
+    2,
+    9,
+    10
+   ],
+   "formInsurance": true,
+   "odds": null,
+   "reason": "전적A 보완: 10번+2번"
+  }
+ ],
+ "special": [],
+ "minOdds": 8.4,
+ "minQuinella": 8.4,
+ "minQuinellaCombo": [
+  4,
+  8
+ ],
+ "dansung": false,
+ "sizeBytes": 964021
+}

@@ -1,0 +1,65 @@
+{
+ "race": "高知 1경주",
+ "date": "2026-07-17",
+ "snapshots": {
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    5
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "15:18:24",
+   "post_deadline_change": false
+  },
+  "T-10": {
+   "main": [
+    3,
+    9
+   ],
+   "dark_horse": [],
+   "odds": {
+    "3+9": 6.0
+   },
+   "confirmed": false,
+   "at": "15:06:29"
+  },
+  "T-7": {
+   "main": [],
+   "dark_horse": [
+    4
+   ],
+   "odds": {},
+   "confirmed": true,
+   "at": "15:08:49"
+  },
+  "T-5": {
+   "main": [],
+   "dark_horse": [
+    4
+   ],
+   "odds": {},
+   "confirmed": true,
+   "at": "15:10:57",
+   "changed_from_T7": false,
+   "changed_horses": []
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "15:17:44"
+  }
+ },
+ "updated_at": "2026-07-18 15:23:09",
+ "result": {
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 8
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false
+ }
+}

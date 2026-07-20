@@ -1,0 +1,173 @@
+{
+ "race": "서울 10경주",
+ "date": "2026-07-19",
+ "raceKey": "서울 10경주",
+ "alerts": [
+  {
+   "time": "17:36:25",
+   "race": "서울 10경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+2 -75.1%",
+   "alert_pair": "1+2",
+   "odds_snapshot": {
+    "1+2": {
+     "before": 96.0,
+     "after": 23.9
+    },
+    "1+8": {
+     "before": 100.0,
+     "after": 28.9
+    },
+    "4+7": {
+     "before": 100.0,
+     "after": 29.5
+    },
+    "3+7": {
+     "before": 100.0,
+     "after": 49.5
+    },
+    "7+8": {
+     "before": 100.0,
+     "after": 49.5
+    },
+    "1+7": {
+     "before": 100.0,
+     "after": 52.6
+    }
+   },
+   "alert_horses": [
+    1,
+    2,
+    8,
+    4,
+    7,
+    3
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    10,
+    6,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "17:49:44",
+   "race": "서울 10경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+5 -73.2%",
+   "alert_pair": "2+5",
+   "odds_snapshot": {
+    "2+5": {
+     "before": 100.0,
+     "after": 26.8
+    },
+    "1+8": {
+     "before": 100.0,
+     "after": 28.9
+    },
+    "1+2": {
+     "before": 67.2,
+     "after": 23.9
+    },
+    "6+7": {
+     "before": 19.4,
+     "after": 8.9
+    },
+    "7+8": {
+     "before": 100.0,
+     "after": 49.5
+    },
+    "6+11": {
+     "before": 7.6,
+     "after": 4.0
+    }
+   },
+   "alert_horses": [
+    2,
+    5,
+    1,
+    8,
+    6,
+    7,
+    11
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    10,
+    6,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    6
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "17:49:45",
+   "race": "서울 10경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+11 -81.1%",
+   "alert_pair": "4+11",
+   "odds_snapshot": {
+    "4+11": {
+     "before": 98.2,
+     "after": 18.6
+    },
+    "4+5": {
+     "before": 253.0,
+     "after": 71.5
+    },
+    "4+6": {
+     "before": 66.4,
+     "after": 19.1
+    },
+    "5+11": {
+     "before": 107.8,
+     "after": 33.5
+    },
+    "5+10": {
+     "before": 146.2,
+     "after": 45.4
+    },
+    "4+10": {
+     "before": 65.1,
+     "after": 21.7
+    }
+   },
+   "alert_horses": [
+    4,
+    11,
+    5,
+    6,
+    10
+   ],
+   "current_recommend": null,
+   "minutes_before": 5,
+   "result": [
+    10,
+    6,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4,
+    6,
+    10
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  10,
+  6,
+  4
+ ]
+}

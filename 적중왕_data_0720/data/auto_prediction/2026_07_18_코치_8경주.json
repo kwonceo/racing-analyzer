@@ -1,0 +1,124 @@
+{
+ "raceKey": "코치 8경주",
+ "at": "2026-07-18 18:17:50",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    3,
+    4
+   ],
+   "odds": 54.1,
+   "stars": 3,
+   "reason": "유력마 1·2위 조합",
+   "basis": [],
+   "summary": "유력마 1위+2위 최우선"
+  },
+  {
+   "combo": [
+    3,
+    7
+   ],
+   "odds": 4.9,
+   "stars": 3,
+   "reason": "시장 저배당+완화신호",
+   "basis": [
+    "7번: 복병"
+   ],
+   "summary": "완화신호 유력(메인 보완)"
+  },
+  {
+   "combo": [
+    3,
+    9
+   ],
+   "odds": 4.9,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [],
+   "summary": "시장 저평가(메인 보완)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    3,
+    4
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    3,
+    4,
+    7
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    3,
+    8
+   ],
+   "odds": 95.2,
+   "reason": "확신도 보험 →복승메인 정합",
+   "qMainFixed": true
+  },
+  {
+   "combo": [
+    3,
+    7,
+    9
+   ],
+   "odds": null,
+   "reason": "시장유력 보완: 9번+3번",
+   "marketInsurance": true
+  },
+  {
+   "combo": [
+    1,
+    3,
+    9
+   ],
+   "odds": null,
+   "reason": "전적A 보완: 9번+3번",
+   "formInsurance": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    2,
+    8
+   ],
+   "odds": 19.3,
+   "reason": "확신도1위+2위",
+   "stars": 2,
+   "score": 97.9,
+   "basis": [
+    "2번: 급락 -10.3% 감지",
+    "8번: 급락 -12.0% 감지"
+   ],
+   "summary": "시장 저평가 중 주목"
+  }
+ ],
+ "keyHorses": [
+  4,
+  7,
+  3,
+  5
+ ],
+ "dansung": false,
+ "minOdds": 4.9,
+ "raceHorseCount": 9,
+ "result": null,
+ "compared": false
+}

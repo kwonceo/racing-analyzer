@@ -1,0 +1,62 @@
+{
+ "race": "제주 1경주",
+ "date": "2026-07-17",
+ "raceKey": "제주 1경주",
+ "alerts": [
+  {
+   "time": "10:36:13",
+   "race": "제주 1경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+6 -75.7%",
+   "alert_pair": "1+6",
+   "odds_snapshot": {
+    "1+6": {
+     "before": 71.3,
+     "after": 17.3
+    },
+    "2+6": {
+     "before": 72.3,
+     "after": 25.4
+    },
+    "1+5": {
+     "before": 17.3,
+     "after": 7.1
+    },
+    "3+6": {
+     "before": 227.1,
+     "after": 98.0
+    },
+    "4+5": {
+     "before": 91.2,
+     "after": 58.3
+    }
+   },
+   "alert_horses": [
+    1,
+    6,
+    2,
+    5,
+    3,
+    4
+   ],
+   "current_recommend": null,
+   "minutes_before": 14,
+   "result": [
+    1,
+    8,
+    2
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    1,
+    2
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  1,
+  8,
+  2
+ ]
+}

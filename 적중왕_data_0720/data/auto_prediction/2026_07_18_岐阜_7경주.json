@@ -1,0 +1,147 @@
+{
+ "raceKey": "岐阜 7경주",
+ "at": "2026-07-18 10:30:25",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    1,
+    3
+   ],
+   "odds": 25.4,
+   "stars": 3,
+   "reason": "유력마 1·2위 조합",
+   "basis": [
+    "1번: 급락 -9.8% 감지",
+    "1번: 복병",
+    "3번: 급락 8.2% 감지"
+   ],
+   "summary": "유력마 1위+2위 최우선"
+  },
+  {
+   "combo": [
+    1,
+    4
+   ],
+   "odds": 3.7,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "basis": [
+    "1번: 급락 -9.8% 감지",
+    "1번: 복병",
+    "4번: 급락 -9.8% 감지"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    3,
+    4
+   ],
+   "odds": 3.9,
+   "reason": "시장유력+급락",
+   "stars": 3,
+   "basis": [
+    "3번: 급락 8.2% 감지",
+    "4번: 급락 -9.8% 감지"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    1,
+    3,
+    5
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    3,
+    6
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    3,
+    7
+   ],
+   "odds": 57.6,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    1,
+    3,
+    4
+   ],
+   "odds": 14.3,
+   "reason": "확신도 보험"
+  },
+  {
+   "combo": [
+    1,
+    4,
+    6
+   ],
+   "odds": null,
+   "reason": "시장유력 보완: 4번+1번",
+   "marketInsurance": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    1,
+    3
+   ],
+   "odds": 25.4,
+   "reason": "시장유력",
+   "stars": 2,
+   "score": 72.4,
+   "basis": [
+    "1번: 급락 -9.8% 감지",
+    "1번: 복병",
+    "3번: 급락 8.2% 감지"
+   ],
+   "summary": "시장 저평가 중 주목"
+  },
+  {
+   "combo": [
+    3,
+    6
+   ],
+   "odds": 32.9,
+   "reason": "복병 포함",
+   "stars": 2,
+   "score": 72.4,
+   "basis": [
+    "3번: 급락 8.2% 감지",
+    "6번: 급락 9.5% 감지",
+    "6번: 복병"
+   ],
+   "summary": "시장 저평가 중 주목"
+  }
+ ],
+ "keyHorses": [
+  3,
+  1,
+  7
+ ],
+ "dansung": false,
+ "minOdds": 3.7,
+ "raceHorseCount": 7,
+ "result": null,
+ "compared": false
+}

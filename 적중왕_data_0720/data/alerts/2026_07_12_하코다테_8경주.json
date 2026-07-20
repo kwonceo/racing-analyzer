@@ -1,0 +1,66 @@
+{
+ "race": "하코다테 8경주",
+ "date": "2026-07-12",
+ "raceKey": "하코다테 8경주",
+ "alerts": [
+  {
+   "time": "13:44:48",
+   "race": "하코다테 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+5 -85.9%",
+   "alert_pair": "1+5",
+   "odds_snapshot": {
+    "1+5": {
+     "before": 58.9,
+     "after": 8.3
+    },
+    "1+2": {
+     "before": 22.2,
+     "after": 3.8
+    },
+    "1+9": {
+     "before": 34.2,
+     "after": 6.5
+    },
+    "1+4": {
+     "before": 154.0,
+     "after": 43.0
+    },
+    "3+4": {
+     "before": 321.2,
+     "after": 98.5
+    },
+    "4+5": {
+     "before": 117.5,
+     "after": 42.7
+    }
+   },
+   "alert_horses": [
+    1,
+    5,
+    2,
+    9,
+    4,
+    3
+   ],
+   "current_recommend": null,
+   "minutes_before": 4,
+   "result": [
+    2,
+    9,
+    8
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    2,
+    9
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  2,
+  9,
+  8
+ ]
+}

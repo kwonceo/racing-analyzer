@@ -1,0 +1,58 @@
+{
+ "race": "오비히로 11경주",
+ "date": "2026-07-19",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 3,
+   "signal": "급락-70%·35.0배",
+   "priority": 1,
+   "odds": 35.0,
+   "detected_at": "T-0분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 1,
+   "signal": "급락-65%·31.9배",
+   "priority": 1,
+   "odds": 31.9,
+   "detected_at": "T-0분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 7,
+   "signal": "스마트머니+역배열",
+   "priority": 2,
+   "odds": 1.2,
+   "detected_at": "T-0분",
+   "recommended": false
+  }
+ },
+ "result": {
+  "1st": 3,
+  "2nd": 4,
+  "3rd": 9,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": true,
+  "rank2_place": 2,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-19 19:59:31",
+ "dansung": {
+  "dansungHorse": 5,
+  "dansungOdds": 1.8,
+  "realFavorites": [
+   7,
+   2
+  ],
+  "darkHorses": [
+   7,
+   3,
+   1
+  ]
+ }
+}

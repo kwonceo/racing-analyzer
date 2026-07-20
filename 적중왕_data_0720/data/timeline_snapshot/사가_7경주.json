@@ -1,0 +1,63 @@
+{
+ "race": "사가 7경주",
+ "date": "2026-07-18",
+ "snapshots": {
+  "T-7": {
+   "main": [
+    5,
+    7
+   ],
+   "dark_horse": [
+    4,
+    6
+   ],
+   "odds": {
+    "5+7": 3.3
+   },
+   "confirmed": true,
+   "at": "18:58:39"
+  },
+  "T-5": {
+   "main": [
+    2,
+    7
+   ],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {
+    "2+7": 74.0
+   },
+   "confirmed": true,
+   "at": "19:00:54",
+   "changed_from_T7": true,
+   "changed_horses": [
+    2,
+    5
+   ]
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    1,
+    7
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "19:07:08"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    1,
+    7
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "19:08:29",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-18 19:08:29"
+}

@@ -1,0 +1,60 @@
+{
+ "race": "도리데 3경주",
+ "date": "2026-07-16",
+ "raceKey": "도리데 3경주",
+ "alerts": [
+  {
+   "time": "08:58:02",
+   "race": "도리데 3경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+6 -52.1%",
+   "alert_pair": "3+6",
+   "odds_snapshot": {
+    "3+6": {
+     "before": 45.5,
+     "after": 21.8
+    },
+    "4+6": {
+     "before": 31.0,
+     "after": 17.6
+    }
+   },
+   "alert_horses": [
+    3,
+    6,
+    4
+   ],
+   "current_recommend": null,
+   "minutes_before": 12,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "09:09:48",
+   "race": "도리데 3경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+5 -51.9%",
+   "alert_pair": "3+5",
+   "odds_snapshot": {
+    "3+5": {
+     "before": 43.7,
+     "after": 21.0
+    },
+    "2+3": {
+     "before": 28.7,
+     "after": 17.9
+    }
+   },
+   "alert_horses": [
+    3,
+    5,
+    2
+   ],
+   "current_recommend": "3+4",
+   "minutes_before": null,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

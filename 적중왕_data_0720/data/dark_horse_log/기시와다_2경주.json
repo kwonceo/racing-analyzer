@@ -1,0 +1,44 @@
+{
+ "race": "기시와다 2경주",
+ "date": "2026-07-20",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 22.0,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 1,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 10.9,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 5,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 10.9,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 4,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": true,
+  "rank1_place": 1,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-20 11:04:53",
+ "dansung": null
+}

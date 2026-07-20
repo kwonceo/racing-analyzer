@@ -1,0 +1,67 @@
+{
+ "race": "소노다 1경주",
+ "date": "2026-07-17",
+ "snapshots": {
+  "T-10": {
+   "main": [
+    9,
+    10
+   ],
+   "dark_horse": [
+    3,
+    6
+   ],
+   "odds": {
+    "9+10": 4.3
+   },
+   "confirmed": false,
+   "at": "14:11:44"
+  },
+  "T-7": {
+   "main": [
+    9,
+    10
+   ],
+   "dark_horse": [
+    6,
+    7
+   ],
+   "odds": {
+    "9+10": 4.4
+   },
+   "confirmed": true,
+   "at": "14:13:58"
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "14:22:02"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "14:22:32",
+   "post_deadline_change": false
+  }
+ },
+ "updated_at": "2026-07-18 07:51:12",
+ "result": {
+  "1st": 2,
+  "2nd": 12,
+  "3rd": 6
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false
+ }
+}

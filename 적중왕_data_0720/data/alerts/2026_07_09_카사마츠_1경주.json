@@ -1,0 +1,66 @@
+{
+ "race": "카사마츠 1경주",
+ "date": "2026-07-09",
+ "raceKey": "카사마츠 1경주",
+ "alerts": [
+  {
+   "time": "10:54:19",
+   "race": "카사마츠 1경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+6 -61.2%",
+   "alert_pair": "3+6",
+   "odds_snapshot": {
+    "3+6": {
+     "before": 26.8,
+     "after": 10.4
+    },
+    "3+8": {
+     "before": 76.5,
+     "after": 31.0
+    },
+    "6+8": {
+     "before": 66.7,
+     "after": 31.6
+    },
+    "2+3": {
+     "before": 20.5,
+     "after": 11.2
+    },
+    "3+4": {
+     "before": 11.8,
+     "after": 7.4
+    },
+    "2+8": {
+     "before": 55.9,
+     "after": 38.2
+    }
+   },
+   "alert_horses": [
+    3,
+    6,
+    8,
+    2,
+    4
+   ],
+   "current_recommend": "4+6",
+   "minutes_before": 1,
+   "result": [
+    3,
+    6,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3,
+    6,
+    4
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  3,
+  6,
+  4
+ ]
+}

@@ -1,0 +1,42 @@
+{
+ "result": {
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 8,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-19 15:50:53",
+ "race": "코치 3경주",
+ "date": "2026-07-19",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 1,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 35.0,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 7,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 14.9,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 3,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 5.6,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": null
+}

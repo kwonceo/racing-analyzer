@@ -1,0 +1,35 @@
+{
+ "race": "소노다 2경주",
+ "date": "2026-07-16",
+ "raceKey": "소노다 2경주",
+ "alerts": [
+  {
+   "time": "11:07:14",
+   "race": "소노다 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+2 -34.8%",
+   "alert_pair": "1+2",
+   "odds_snapshot": {
+    "1+2": {
+     "before": 438.9,
+     "after": 286.0
+    },
+    "7+10": {
+     "before": 3072.3,
+     "after": 2002.6
+    }
+   },
+   "alert_horses": [
+    1,
+    2,
+    7,
+    10
+   ],
+   "current_recommend": "2+7",
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

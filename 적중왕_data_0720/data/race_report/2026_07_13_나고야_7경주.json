@@ -1,0 +1,218 @@
+{
+ "race": "나고야 7경주",
+ "raceKey": "나고야 7경주",
+ "date": "2026-07-13",
+ "result": {
+  "1st": 7,
+  "2nd": 4,
+  "3rd": 11,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 4.0,
+   "reason": "일반"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 16.0,
+   "reason": "일반"
+  },
+  "signal_11": {
+   "horse": 11,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 20.0,
+   "reason": "일반"
+  },
+  "signal_8": {
+   "horse": 8,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 20.0,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  11,
+  8,
+  4
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 7번 전적 정보 제한",
+  "2. 배당 수집 시작 17:53:51",
+  "4. 쌍승 역전: 10→8(25.1) < 8→10(31.7) → 10번 실질 상위 신호",
+  "5. 종합 신뢰도 4.0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 7,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": null,
+  "total": 4.0,
+  "grade": "하"
+ },
+ "win_tags": [],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   10
+  ],
+  "inverseHit": [],
+  "confidence": 20.0,
+  "reason": "전적유력마 4번 적중"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "17:57:43",
+    "minutes_before": null,
+    "previous_signal": "11번",
+    "new_signal": "5번",
+    "reason": "5번 집중급락(평균 -29.0%)",
+    "prev_was_candidate": true
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   5,
+   6,
+   7,
+   11,
+   12
+  ],
+  "events": {
+   "12": {
+    "first": {
+     "time": "17:55:27",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "17:55:27",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "17:55:46",
+     "minutes_before": null
+    }
+   },
+   "6": {
+    "first": {
+     "time": "17:56:09",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "17:56:09",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "17:56:27",
+     "minutes_before": null
+    }
+   },
+   "5": {
+    "first": {
+     "time": "17:56:46",
+     "minutes_before": null
+    },
+    "count": 2,
+    "last": {
+     "time": "17:57:43",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "17:57:04",
+     "minutes_before": null
+    }
+   },
+   "11": {
+    "first": {
+     "time": "17:57:23",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "17:57:23",
+     "minutes_before": null
+    }
+   },
+   "7": {
+    "first": {
+     "time": "17:59:19",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "17:59:19",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "17:59:37",
+     "minutes_before": null
+    }
+   }
+  },
+  "finalSignal": 7,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 19
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-13 21:10:56"
+}

@@ -1,0 +1,159 @@
+{
+ "race": "기후 4경주",
+ "raceKey": "기후 4경주",
+ "date": "2026-07-11",
+ "result": {
+  "1st": 2,
+  "2nd": 7,
+  "3rd": 4,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 49.0,
+   "reason": "일반"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 24.0,
+   "reason": "일반"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "일반"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "일반"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 2번 전적 정보 제한",
+  "2. 배당 수집 시작 11:58:30",
+  "5. 종합 신뢰도 49.0점(중) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 2,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 25,
+  "record_score": null,
+  "total": 49.0,
+  "grade": "중"
+ },
+ "win_tags": [
+  "복승불일치_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": false,
+  "inverseHorses": [
+   2
+  ],
+  "inverseHit": [
+   2
+  ],
+  "confidence": 49.0,
+  "reason": "추천 미적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [
+   3,
+   4
+  ],
+  "events": {
+   "3": {
+    "first": {
+     "time": "12:03:28",
+     "minutes_before": 4
+    },
+    "count": 1,
+    "last": {
+     "time": "12:03:28",
+     "minutes_before": 4
+    },
+    "vanished": {
+     "time": "12:03:35",
+     "minutes_before": 4
+    }
+   },
+   "4": {
+    "first": {
+     "time": "12:04:55",
+     "minutes_before": 3
+    },
+    "count": 1,
+    "last": {
+     "time": "12:04:55",
+     "minutes_before": 3
+    },
+    "vanished": {
+     "time": "12:05:29",
+     "minutes_before": 2
+    }
+   }
+  },
+  "finalSignal": 4,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 13
+ },
+ "pnl": 0,
+ "stake": 1000,
+ "generated_at": "2026-07-11 21:26:47"
+}

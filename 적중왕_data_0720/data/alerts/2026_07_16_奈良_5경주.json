@@ -1,0 +1,39 @@
+{
+ "race": "奈良 5경주",
+ "date": "2026-07-16",
+ "raceKey": "奈良 5경주",
+ "alerts": [
+  {
+   "time": "22:06:34",
+   "race": "奈良 5경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+6 -39.0%",
+   "alert_pair": "2+6",
+   "odds_snapshot": {
+    "2+6": {
+     "before": 33.1,
+     "after": 20.2
+    },
+    "2+7": {
+     "before": 28.3,
+     "after": 19.4
+    },
+    "2+3": {
+     "before": 30.4,
+     "after": 20.9
+    }
+   },
+   "alert_horses": [
+    2,
+    6,
+    7,
+    3
+   ],
+   "current_recommend": "2+5",
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

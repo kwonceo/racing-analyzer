@@ -1,0 +1,364 @@
+{
+ "race_id": "2026_07_16_하코다테_6경주",
+ "raceKey": "2026-07-16 하코다테 6경주",
+ "sport": "horse",
+ "category": "japan_central",
+ "date": "2026-07-16",
+ "race": "하코다테 6경주",
+ "analyzed_at": "12:38:44",
+ "updated_at": "12:38:44",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://ks1.dke-d11diw.site/user_frame.php?PLACE_TYPE=JH"
+ },
+ "odds_timeline": [],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 9,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 69.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 10,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 69.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 3,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 80배 · 배당 80~149 -20 / 쌍승 상위 +20(제거 보류) = 100점"
+  },
+  {
+   "no": 5,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 83.2배 · 배당 80~149 -20 / 쌍승 상위 +20(제거 보류) = 100점"
+  },
+  {
+   "no": 6,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 90.7배 · 배당 80~149 -20 / 쌍승 상위 +20(제거 보류) = 100점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   9,
+   10,
+   3,
+   5,
+   6
+  ],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    9,
+    10
+   ],
+   "trio": [
+    3,
+    9,
+    10
+   ]
+  },
+  "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    9,
+    10
+   ],
+   "trio": [
+    3,
+    9,
+    10
+   ]
+  }
+ },
+ "corePicks": {
+  "axis": [
+   3,
+   9
+  ],
+  "third": 10,
+  "quinella": [
+   3,
+   9
+  ],
+  "trifecta": [
+   3,
+   9,
+   10
+  ],
+  "picks": [
+   {
+    "no": 3,
+    "tier": 1,
+    "sub": -999.0,
+    "rep": 999.0,
+    "reason": "유력마 저배당 999배"
+   },
+   {
+    "no": 9,
+    "tier": 1,
+    "sub": -999.0,
+    "rep": 999.0,
+    "reason": "유력마 저배당 999배"
+   },
+   {
+    "no": 10,
+    "tier": 1,
+    "sub": -999.0,
+    "rep": 999.0,
+    "reason": "유력마 저배당 999배"
+   }
+  ],
+  "quinellaOdds": null,
+  "trifectaOdds": null,
+  "confQuinellas": [
+   {
+    "combo": [
+     9,
+     10
+    ],
+    "odds": null,
+    "reason": "시장유력"
+   },
+   {
+    "combo": [
+     5,
+     10
+    ],
+    "odds": null,
+    "reason": "시장유력+급락"
+   }
+  ],
+  "forcedHorses": [],
+  "confTop1": 9,
+  "confTop1Conf": 0.0,
+  "confTop1High": false,
+  "favAxis": [
+   10,
+   9
+  ],
+  "confTrifecta": [
+   3,
+   9,
+   10
+  ],
+  "confTrifectaOdds": null,
+  "confTrifectaIns": [
+   5,
+   9,
+   10
+  ],
+  "confTrifectaInsOdds": null,
+  "formTopA": [],
+  "single": {},
+  "chaoticFlag": false,
+  "invForce": null,
+  "paceAnalysis": null,
+  "keirinLinePairs": [],
+  "finalQuinellas": [],
+  "finalTrifectas": [
+   {
+    "combo": [
+     3,
+     9,
+     10
+    ],
+    "odds": null,
+    "reason": "삼복승 메인"
+   },
+   {
+    "combo": [
+     5,
+     9,
+     10
+    ],
+    "odds": null,
+    "reason": "확신도 보험"
+   }
+  ],
+  "axisPlan": null,
+  "qMainCheck": null,
+  "scenarioPlan": null,
+  "bmedSpecial": [],
+  "dansung": false,
+  "dansungMinOdds": null,
+  "dansungPlan": null,
+  "quinellaMax": 3,
+  "raceHorseCount": 5,
+  "chaoticRace": false,
+  "formMissing": true
+ },
+ "summary": "유력마 10·9·3 / 복승 9+10",
+ "keyHorses": [
+  10,
+  9,
+  3
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}  "reason": "유력마 저배당 999배"
+   },
+   {
+    "no": 9,
+    "tier": 1,
+    "sub": -999.0,
+    "rep": 999.0,
+    "reason": "유력마 저배당 999배"
+   },
+   {
+    "no": 10,
+    "tier": 1,
+    "sub": -999.0,
+    "rep": 999.0,
+    "reason": "유력마 저배당 999배"
+   }
+  ],
+  "quinellaOdds": null,
+  "trifectaOdds": null,
+  "confQuinellas": [
+   {
+    "combo": [
+     9,
+     10
+    ],
+    "odds": null,
+    "reason": "시장유력"
+   },
+   {
+    "combo": [
+     5,
+     10
+    ],
+    "odds": null,
+    "reason": "시장유력+급락"
+   }
+  ],
+  "forcedHorses": [],
+  "confTop1": 9,
+  "confTop1Conf": 0.0,
+  "confTop1High": false,
+  "favAxis": [
+   10,
+   9
+  ],
+  "confTrifecta": [
+   3,
+   9,
+   10
+  ],
+  "confTrifectaOdds": null,
+  "confTrifectaIns": [
+   5,
+   9,
+   10
+  ],
+  "confTrifectaInsOdds": null,
+  "formTopA": [],
+  "single": {},
+  "chaoticFlag": false,
+  "invForce": null,
+  "paceAnalysis": null,
+  "keirinLinePairs": [],
+  "finalQuinellas": [],
+  "finalTrifectas": [
+   {
+    "combo": [
+     3,
+     9,
+     10
+    ],
+    "odds": null,
+    "reason": "삼복승 메인"
+   },
+   {
+    "combo": [
+     5,
+     9,
+     10
+    ],
+    "odds": null,
+    "reason": "확신도 보험"
+   }
+  ],
+  "axisPlan": null,
+  "qMainCheck": null,
+  "scenarioPlan": null,
+  "bmedSpecial": [],
+  "dansung": false,
+  "dansungMinOdds": null,
+  "dansungPlan": null,
+  "quinellaMax": 3,
+  "raceHorseCount": 5,
+  "chaoticRace": false,
+  "formMissing": true
+ },
+ "summary": "유력마 10·9·3 / 복승 9+10",
+ "keyHorses": [
+  10,
+  9,
+  3
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}

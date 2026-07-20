@@ -1,0 +1,94 @@
+{
+ "race": "부산 8경주",
+ "date": "2026-07-17",
+ "raceKey": "부산 8경주",
+ "alerts": [
+  {
+   "time": "17:34:04",
+   "race": "부산 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "7+9 -33.3%",
+   "alert_pair": "7+9",
+   "odds_snapshot": {
+    "7+9": {
+     "before": 4.8,
+     "after": 3.2
+    }
+   },
+   "alert_horses": [
+    7,
+    9
+   ],
+   "current_recommend": null,
+   "minutes_before": 21,
+   "result": [
+    4,
+    1,
+    2
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  },
+  {
+   "time": "17:41:15",
+   "race": "부산 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+8 -72.0%",
+   "alert_pair": "4+8",
+   "odds_snapshot": {
+    "4+8": {
+     "before": 82.8,
+     "after": 23.2
+    },
+    "5+7": {
+     "before": 100.0,
+     "after": 32.7
+    },
+    "4+6": {
+     "before": 100.0,
+     "after": 35.7
+    },
+    "2+4": {
+     "before": 42.8,
+     "after": 16.8
+    },
+    "7+8": {
+     "before": 100.0,
+     "after": 39.3
+    },
+    "2+3": {
+     "before": 100.0,
+     "after": 45.0
+    }
+   },
+   "alert_horses": [
+    4,
+    8,
+    5,
+    7,
+    6,
+    2,
+    3
+   ],
+   "current_recommend": null,
+   "minutes_before": 14,
+   "result": [
+    4,
+    1,
+    2
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4,
+    2
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  4,
+  1,
+  2
+ ]
+}

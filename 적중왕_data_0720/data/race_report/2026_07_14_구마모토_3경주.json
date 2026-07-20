@@ -1,0 +1,208 @@
+{
+ "race": "구마모토 3경주",
+ "raceKey": "구마모토 3경주",
+ "date": "2026-07-14",
+ "result": {
+  "1st": 3,
+  "2nd": 4,
+  "3rd": 5,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_3": {
+   "horse": 3,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.264,
+   "record_score": 73.2,
+   "confidence": 23.0,
+   "reason": "쌍승역전"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.856,
+   "record_score": 87.6,
+   "confidence": 0.0,
+   "reason": "쌍승역전"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.659,
+   "record_score": 76.5,
+   "confidence": 23.0,
+   "reason": "쌍승역전"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 78.4,
+   "confidence": 0.0,
+   "reason": "전적상위"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 74.1,
+   "confidence": 32.0,
+   "reason": "전적상위"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.881,
+   "record_score": 79.5,
+   "confidence": 9.7,
+   "reason": "쌍승역전"
+  }
+ },
+ "recommended_horses": [
+  1,
+  7,
+  2,
+  5
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 3번 73.2점",
+  "2. 배당 수집 시작 08:54:17",
+  "4. 쌍승 역전: 3→7(60.7) < 7→3(229.7) → 3번 실질 상위 신호",
+  "4. 쌍승 역전: 5→7(50.8) < 7→5(76.5) → 5번 실질 상위 신호",
+  "5. 종합 신뢰도 23.0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 3,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 35,
+  "quinella_mismatch_score": 0,
+  "record_score": 73.2,
+  "total": 23.0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 73.2,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   3,
+   5,
+   4
+  ],
+  "inverseHit": [
+   3,
+   5,
+   4
+  ],
+  "confidence": 23.0,
+  "reason": "역배열 감지말 3·5·4번 입상"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [
+   4,
+   5
+  ],
+  "events": {
+   "5": {
+    "first": {
+     "time": "09:01:38",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "09:01:38",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "09:01:43",
+     "minutes_before": null
+    }
+   },
+   "4": {
+    "first": {
+     "time": "09:02:33",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "09:02:33",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "09:03:17",
+     "minutes_before": null
+    }
+   }
+  },
+  "finalSignal": 4,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 8
+ },
+ "pnl": 0,
+ "stake": 1000,
+ "generated_at": "2026-07-14 09:03:47"
+}

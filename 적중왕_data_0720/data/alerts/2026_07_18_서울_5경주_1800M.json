@@ -1,0 +1,69 @@
+{
+ "race": "서울 5경주 1800M",
+ "date": "2026-07-18",
+ "raceKey": "서울 5경주 1800M",
+ "alerts": [
+  {
+   "time": "14:28:51",
+   "race": "서울 5경주 1800M",
+   "alert_type": "배당급변",
+   "alert_content": "2+9 -79.9%",
+   "alert_pair": "2+9",
+   "odds_snapshot": {
+    "2+9": {
+     "before": 287.6,
+     "after": 57.9
+    },
+    "4+6": {
+     "before": 287.6,
+     "after": 63.6
+    },
+    "3+4": {
+     "before": 158.9,
+     "after": 39.4
+    },
+    "6+7": {
+     "before": 1006.7,
+     "after": 254.2
+    },
+    "1+8": {
+     "before": 50.8,
+     "after": 13.7
+    },
+    "2+5": {
+     "before": 335.6,
+     "after": 104.0
+    }
+   },
+   "alert_horses": [
+    2,
+    9,
+    4,
+    6,
+    3,
+    7,
+    1,
+    8,
+    5
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    4,
+    8,
+    10
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4,
+    8
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  4,
+  8,
+  10
+ ]
+}

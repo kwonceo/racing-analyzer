@@ -1,0 +1,116 @@
+{
+ "raceKey": "오비히로 7경주",
+ "at": "2026-07-19 17:45:45",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    6,
+    10
+   ],
+   "odds": 5.8,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [],
+   "summary": "시장 저평가(메인 보완)",
+   "ev": 1.45
+  },
+  {
+   "combo": [
+    8,
+    10
+   ],
+   "odds": 10.2,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "8번: 집중급락"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 1.52
+  },
+  {
+   "combo": [
+    7,
+    10
+   ],
+   "odds": 8.4,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [],
+   "summary": "시장 저평가(메인 보완)",
+   "ev": 1.58
+  },
+  {
+   "combo": [
+    1,
+    10
+   ],
+   "odds": 10.4,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [],
+   "summary": "시장 저평가(메인 보완)",
+   "ev": 1.54
+  },
+  {
+   "combo": [
+    6,
+    7
+   ],
+   "odds": 15.9,
+   "stars": 3,
+   "reason": "유력마 받치기 보존",
+   "basis": [],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)",
+   "ev": 1.96
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    3,
+    6,
+    10
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    6,
+    7,
+    10
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+유력마)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    3,
+    6
+   ],
+   "odds": null,
+   "reason": "전적A 보완: 1번+2번 →복승메인 정합",
+   "formInsurance": true,
+   "qMainFixed": true
+  }
+ ],
+ "special": [],
+ "keyHorses": [
+  6,
+  10,
+  7,
+  1
+ ],
+ "dansung": false,
+ "minOdds": 5.8,
+ "raceHorseCount": 10,
+ "result": null,
+ "compared": false
+}

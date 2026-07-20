@@ -1,0 +1,45 @@
+{
+ "race": "初帯広 10경주",
+ "date": "2026-07-18",
+ "raceKey": "初帯広 10경주",
+ "alerts": [
+  {
+   "time": "19:22:43",
+   "race": "初帯広 10경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+5 -35.9%",
+   "alert_pair": "2+5",
+   "odds_snapshot": {
+    "2+5": {
+     "before": 71.3,
+     "after": 45.7
+    },
+    "4+10": {
+     "before": 122.1,
+     "after": 81.6
+    },
+    "2+6": {
+     "before": 133.0,
+     "after": 90.0
+    },
+    "3+5": {
+     "before": 63.2,
+     "after": 44.1
+    }
+   },
+   "alert_horses": [
+    2,
+    5,
+    4,
+    10,
+    6,
+    3
+   ],
+   "current_recommend": "2+4",
+   "minutes_before": 2,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

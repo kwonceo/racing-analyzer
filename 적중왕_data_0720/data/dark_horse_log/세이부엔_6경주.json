@@ -1,0 +1,47 @@
+{
+ "race": "세이부엔 6경주",
+ "date": "2026-07-18",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 3,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 15.4,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 4,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 12.1,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 6.0,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": {
+  "dansungHorse": 1,
+  "dansungOdds": 1.0,
+  "realFavorites": [
+   5,
+   6
+  ],
+  "darkHorses": [
+   3,
+   4,
+   6
+  ]
+ },
+ "result": null,
+ "dark_horse_analysis": null,
+ "updated_at": "2026-07-18 13:08:51"
+}

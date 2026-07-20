@@ -1,0 +1,49 @@
+{
+ "race": "오비히로 8경주",
+ "date": "2026-07-19",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 2,
+   "signal": "급락-37%·28.5배",
+   "priority": 1,
+   "odds": 28.5,
+   "detected_at": "T-5분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 4,
+   "signal": "급락-53%·16.5배",
+   "priority": 1,
+   "odds": 16.5,
+   "detected_at": "T-5분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 14.5,
+   "detected_at": "T-5분",
+   "recommended": false
+  }
+ },
+ "result": {
+  "1st": 9,
+  "2nd": 4,
+  "3rd": 5,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": true,
+  "rank1_place": 3,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": "4번 16.3배 입상(신호:복병) 복병 미편성"
+ },
+ "updated_at": "2026-07-19 18:15:29",
+ "dansung": null
+}

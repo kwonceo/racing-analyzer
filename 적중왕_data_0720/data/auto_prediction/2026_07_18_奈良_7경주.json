@@ -1,0 +1,120 @@
+{
+ "raceKey": "奈良 7경주",
+ "at": "2026-07-18 22:45:40",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    3,
+    4
+   ],
+   "odds": 28.2,
+   "stars": 3,
+   "reason": "유력마 1·2위 조합",
+   "basis": [
+    "3번: 급락 -8.1% 감지",
+    "3번: 복병",
+    "4번: 급락 -12.1% 감지"
+   ],
+   "summary": "유력마 1위+2위 최우선"
+  },
+  {
+   "combo": [
+    2,
+    3
+   ],
+   "odds": 3.3,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "basis": [
+    "2번: 복병",
+    "3번: 급락 -8.1% 감지",
+    "3번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    1,
+    2
+   ],
+   "odds": 4.8,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "1번: 급락 -12.1% 감지",
+    "2번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    3,
+    7
+   ],
+   "odds": 62.6,
+   "stars": 3,
+   "reason": "유력마 받치기 보존",
+   "basis": [
+    "3번: 급락 -8.1% 감지",
+    "3번: 복병",
+    "7번: 복병"
+   ],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    3,
+    4
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    3,
+    4,
+    5
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    3,
+    4,
+    7
+   ],
+   "odds": null,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    1,
+    2,
+    3
+   ],
+   "odds": null,
+   "reason": "시장유력 보완: 2번+1번",
+   "marketInsurance": true
+  }
+ ],
+ "special": [],
+ "keyHorses": [
+  7,
+  3,
+  4
+ ],
+ "dansung": false,
+ "minOdds": 3.3,
+ "raceHorseCount": 7,
+ "result": null,
+ "compared": false
+}

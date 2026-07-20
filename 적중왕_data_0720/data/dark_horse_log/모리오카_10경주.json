@@ -1,0 +1,49 @@
+{
+ "result": {
+  "1st": 3,
+  "2nd": 7,
+  "3rd": 5,
+  "quinella_odds": 0
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-19 17:58:51",
+ "race": "모리오카 10경주",
+ "date": "2026-07-19",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 12,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 302.7,
+   "detected_at": "T-1분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 10,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 26.9,
+   "detected_at": "T-1분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 11,
+   "signal": "크로스역배열",
+   "priority": 4,
+   "odds": 194.1,
+   "detected_at": "T-1분",
+   "recommended": false
+  }
+ },
+ "dansung": null
+}

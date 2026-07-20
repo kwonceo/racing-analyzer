@@ -1,0 +1,83 @@
+{
+ "raceKey": "いわき平 5경주",
+ "at": "2026-07-18 21:55:46",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    1,
+    2
+   ],
+   "odds": 1.6,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "basis": [
+    "1번: 집중급락",
+    "1번: 복병",
+    "2번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    1,
+    3
+   ],
+   "odds": 5.7,
+   "stars": 3,
+   "reason": "유력마 받치기 보존",
+   "basis": [
+    "1번: 집중급락",
+    "1번: 복병"
+   ],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    1,
+    2,
+    4
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    2,
+    6
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    2,
+    3
+   ],
+   "odds": null,
+   "reason": "시장유력 보완: 1번+2번",
+   "marketInsurance": true
+  }
+ ],
+ "special": [],
+ "keyHorses": [
+  1,
+  2,
+  4,
+  5,
+  3
+ ],
+ "dansung": false,
+ "minOdds": 1.6,
+ "raceHorseCount": 7,
+ "result": null,
+ "compared": false
+}

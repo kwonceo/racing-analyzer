@@ -1,0 +1,66 @@
+{
+ "race": "高知 8경주",
+ "date": "2026-07-17",
+ "snapshots": {
+  "T-10": {
+   "main": [
+    1,
+    5
+   ],
+   "dark_horse": [
+    4
+   ],
+   "odds": {
+    "1+5": 1.7
+   },
+   "confirmed": false,
+   "at": "18:12:09"
+  },
+  "T-7": {
+   "main": [
+    1,
+    5
+   ],
+   "dark_horse": [
+    4,
+    8
+   ],
+   "odds": {
+    "1+5": 1.8
+   },
+   "confirmed": true,
+   "at": "18:14:36"
+  },
+  "T-5": {
+   "main": [
+    1,
+    9
+   ],
+   "dark_horse": [
+    4,
+    5
+   ],
+   "odds": {
+    "1+9": 20.8
+   },
+   "confirmed": true,
+   "at": "18:16:17",
+   "changed_from_T7": true,
+   "changed_horses": [
+    5,
+    9
+   ]
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    4,
+    5
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "18:22:03"
+  }
+ },
+ "updated_at": "2026-07-17 18:22:03"
+}

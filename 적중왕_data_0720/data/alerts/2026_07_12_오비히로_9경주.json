@@ -1,0 +1,47 @@
+{
+ "race": "오비히로 9경주",
+ "date": "2026-07-12",
+ "raceKey": "오비히로 9경주",
+ "alerts": [
+  {
+   "time": "19:04:12",
+   "race": "오비히로 9경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+5 -38.7%",
+   "alert_pair": "3+5",
+   "odds_snapshot": {
+    "3+5": {
+     "before": 19.1,
+     "after": 11.7
+    },
+    "2+3": {
+     "before": 24.7,
+     "after": 15.5
+    }
+   },
+   "alert_horses": [
+    3,
+    5,
+    2
+   ],
+   "current_recommend": "5+7",
+   "minutes_before": 1,
+   "result": [
+    5,
+    3,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3,
+    5
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  5,
+  3,
+  6
+ ]
+}

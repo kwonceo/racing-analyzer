@@ -1,0 +1,48 @@
+{
+ "race": "오다와라 3경주",
+ "date": "2026-07-17",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 3,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 4.5,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 1,
+   "signal": "🔄 크로스역배열 크로스역배열",
+   "priority": 4,
+   "odds": 5.7,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 4,
+   "signal": "🔄 크로스역배열 크로스역배열",
+   "priority": 4,
+   "odds": 5.7,
+   "detected_at": null,
+   "recommended": false
+  }
+ },
+ "result": {
+  "1st": 4,
+  "2nd": 2,
+  "3rd": 5,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "rank3_hit": true,
+  "rank3_place": 1,
+  "rank3_in_result": true,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-17 10:42:04"
+}

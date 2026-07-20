@@ -1,0 +1,47 @@
+{
+ "race": "弥彦 4경주",
+ "date": "2026-07-17",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 1,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 157.9,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 110.8,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 5,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 23.2,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": {
+  "dansungHorse": 2,
+  "dansungOdds": 1.0,
+  "realFavorites": [
+   4,
+   5
+  ],
+  "darkHorses": [
+   1,
+   5,
+   6
+  ]
+ },
+ "result": null,
+ "dark_horse_analysis": null,
+ "updated_at": "2026-07-17 12:09:48"
+}

@@ -1,0 +1,41 @@
+{
+ "race": "코치 11경주",
+ "date": "2026-07-18",
+ "raceKey": "코치 11경주",
+ "alerts": [
+  {
+   "time": "20:20:36",
+   "race": "코치 11경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+3 -31.3%",
+   "alert_pair": "2+3",
+   "odds_snapshot": {
+    "2+3": {
+     "before": 81.4,
+     "after": 55.9
+    }
+   },
+   "alert_horses": [
+    2,
+    3
+   ],
+   "current_recommend": "1+3",
+   "minutes_before": 0,
+   "result": [
+    3,
+    8,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  3,
+  8,
+  7
+ ]
+}

@@ -1,0 +1,50 @@
+{
+ "race": "다마노 1경주",
+ "date": "2026-07-16",
+ "raceKey": "다마노 1경주",
+ "alerts": [
+  {
+   "time": "10:52:33",
+   "race": "다마노 1경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+4 -37.5%",
+   "alert_pair": "3+4",
+   "odds_snapshot": {
+    "3+4": {
+     "before": 4.0,
+     "after": 2.5
+    }
+   },
+   "alert_horses": [
+    3,
+    4
+   ],
+   "current_recommend": "3+4",
+   "minutes_before": 5,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "10:53:08",
+   "race": "다마노 1경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+7 -38.9%",
+   "alert_pair": "4+7",
+   "odds_snapshot": {
+    "4+7": {
+     "before": 50.9,
+     "after": 31.1
+    }
+   },
+   "alert_horses": [
+    4,
+    7
+   ],
+   "current_recommend": "3+4",
+   "minutes_before": 4,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

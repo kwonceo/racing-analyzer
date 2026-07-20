@@ -1,0 +1,47 @@
+{
+ "race": "도요하시 5경주",
+ "date": "2026-07-19",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 41.3,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 5,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 39.6,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 7,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 8.1,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": {
+  "dansungHorse": 1,
+  "dansungOdds": 1.5,
+  "realFavorites": [
+   3,
+   4
+  ],
+  "darkHorses": [
+   4,
+   5,
+   6
+  ]
+ },
+ "result": null,
+ "dark_horse_analysis": null,
+ "updated_at": "2026-07-19 21:55:44"
+}

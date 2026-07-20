@@ -1,0 +1,48 @@
+{
+ "race": "사가 3경주",
+ "date": "2026-07-18",
+ "snapshots": {
+  "T-7": {
+   "main": [
+    5,
+    6
+   ],
+   "dark_horse": [
+    2,
+    3
+   ],
+   "odds": {
+    "5+6": 2.4
+   },
+   "confirmed": true,
+   "at": "16:54:05"
+  },
+  "T-5": {
+   "main": [
+    5,
+    6
+   ],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {
+    "5+6": 2.4
+   },
+   "confirmed": true,
+   "at": "16:55:21",
+   "changed_from_T7": false,
+   "changed_horses": []
+  }
+ },
+ "updated_at": "2026-07-18 17:16:27",
+ "result": {
+  "1st": 2,
+  "2nd": 6,
+  "3rd": 3
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false
+ }
+}

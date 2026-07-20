@@ -1,0 +1,47 @@
+{
+ "race": "야히코 10경주",
+ "date": "2026-07-19",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 3,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 22.0,
+   "detected_at": "T-5분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 16.9,
+   "detected_at": "T-5분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 2,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 7.0,
+   "detected_at": "T-5분",
+   "recommended": false
+  }
+ },
+ "dansung": {
+  "dansungHorse": 5,
+  "dansungOdds": 1.7,
+  "realFavorites": [
+   7,
+   1
+  ],
+  "darkHorses": [
+   1,
+   2,
+   3
+  ]
+ },
+ "result": null,
+ "dark_horse_analysis": null,
+ "updated_at": "2026-07-19 15:02:27"
+}

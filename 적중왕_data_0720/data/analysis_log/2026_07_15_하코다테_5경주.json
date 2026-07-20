@@ -1,0 +1,252 @@
+{
+ "race_id": "2026_07_15_하코다테_5경주",
+ "raceKey": "하코다테 5경주",
+ "sport": "cycle",
+ "category": "cycle",
+ "date": "2026-07-15",
+ "race": "하코다테 5경주",
+ "analyzed_at": "17:15:19",
+ "updated_at": "21:02:36",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "oddspark_bg"
+ },
+ "odds_timeline": [
+  {
+   "time": "17:26:50",
+   "minutes_before": null,
+   "quinella": {
+    "1+2": 66.8,
+    "1+3": 94.6,
+    "2+3": 54.3,
+    "1+4": 1.4,
+    "2+4": 4.9,
+    "3+4": 8.2,
+    "1+5": 511.2,
+    "2+5": 98.3,
+    "3+5": 319.5,
+    "4+5": 92.9,
+    "1+6": 464.7,
+    "2+6": 120.3,
+    "3+6": 106.5,
+    "4+6": 134.5,
+    "5+6": 730.3,
+    "1+7": 78.0,
+    "2+7": 21.8,
+    "3+7": 105.4,
+    "4+7": 6.4,
+    "5+7": 134.5,
+    "6+7": 393.2
+   }
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [],
+ "elimination": {
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [
+  {
+   "time": "17:19:18",
+   "minutes_before": null,
+   "sig": "1-2-3-4-7|1+4|None|1+4+7",
+   "anomCount": 3,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    4,
+    7,
+    3,
+    2
+   ],
+   "summary": "급락 3-5 ▼20.8% / 유력마 1·4·7·3·2 / 복승 1+4",
+   "quinella_main": "1+4",
+   "quinella_sub": null,
+   "trifecta_main": "1+4+7",
+   "top_signals": [
+    "3+5 복승 242.7→192.3 (2분전 대비 -20.8%)",
+    "4+7 복승 6.5→5.5 (2분전 대비 -15.4%)",
+    "3번 급락 -20.8% (절대 10%+ 자금집중·추천 필수)"
+   ]
+  },
+  {
+   "time": "17:21:18",
+   "minutes_before": null,
+   "sig": "1-2-4-7|1+4|None|1+4+7",
+   "anomCount": 4,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    4,
+    7,
+    2
+   ],
+   "summary": "급락 1-4 ▼25.0% / 유력마 1·4·7·2 / 복승 1+4",
+   "quinella_main": "1+4",
+   "quinella_sub": null,
+   "trifecta_main": "1+4+7",
+   "top_signals": [
+    "1+4 복승 1.6→1.2 (2분전 대비 -25.0%)",
+    "5+6 복승 769.2→640.2 (2분전 대비 -16.8%)",
+    "1번 급락 -25.0% (절대 10%+ 자금집중·추천 필수)"
+   ]
+  },
+  {
+   "time": "17:22:18",
+   "minutes_before": null,
+   "sig": "1-2-3-4-7|1+4|None|1+4+7",
+   "anomCount": 5,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    4,
+    7,
+    3,
+    2
+   ],
+   "summary": "급락 3-4 ▼37.1% / 유력마 1·4·7·3·2 / 복승 1+4",
+   "quinella_main": "1+4",
+   "quinella_sub": null,
+   "trifecta_main": "1+4+7",
+   "top_signals": [
+    "2+4 복승 8.0→6.9 (2분전 대비 -13.7%)",
+    "3+4 복승 17.5→11.0 (2분전 대비 -37.1%)",
+    "1+6 복승 554.9→491.3 (2분전 대비 -11.5%)"
+   ]
+  },
+  {
+   "time": "17:23:18",
+   "minutes_before": null,
+   "sig": "2-3-7|2+7|None|2+3+7",
+   "anomCount": 8,
+   "sigChanged": true,
+   "keyHorses": [
+    7,
+    3,
+    2
+   ],
+   "summary": "유력마 7·3·2 / 복승 2+7",
+   "quinella_main": "2+7",
+   "quinella_sub": null,
+   "trifecta_main": "2+3+7",
+   "top_signals": [
+    "2+4 복승 6.9→4.9 (2분전 대비 -29.0%)",
+    "3+4 복승 11.0→8.2 (2분전 대비 -25.5%)",
+    "1+3 복승 109.1→94.6 (2분전 대비 -13.3%)"
+   ]
+  },
+  {
+   "time": "17:25:18",
+   "minutes_before": null,
+   "sig": "1-2-4|1+4|None|1+2+4",
+   "anomCount": 8,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    4,
+    2
+   ],
+   "summary": "유력마 1·4·2 / 복승 1+4",
+   "quinella_main": "1+4",
+   "quinella_sub": null,
+   "trifecta_main": "1+2+4",
+   "top_signals": [
+    "2+4 복승 6.9→4.9 (2분전 대비 -29.0%)",
+    "3+4 복승 11.0→8.2 (2분전 대비 -25.5%)",
+    "1+3 복승 109.1→94.6 (2분전 대비 -13.3%)"
+   ]
+  }
+ ],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": null,
+   "trio": null
+  },
+  "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": null,
+   "trio": null
+  }
+ },
+ "corePicks": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 4,
+  "2nd": 7,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   4
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": true,
+   "inverseHorses": [
+    7,
+    3,
+    5
+   ],
+   "inverseHit": [
+    7,
+    3
+   ],
+   "confidence": 35.0,
+   "reason": "역배열 감지말 7·3번 입상"
+  }
+ },
+ "profit": null,
+ "review": null
+}

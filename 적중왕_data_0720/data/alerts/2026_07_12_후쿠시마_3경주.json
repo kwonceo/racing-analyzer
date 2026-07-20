@@ -1,0 +1,71 @@
+{
+ "race": "후쿠시마 3경주",
+ "date": "2026-07-12",
+ "raceKey": "후쿠시마 3경주",
+ "alerts": [
+  {
+   "time": "11:06:05",
+   "race": "후쿠시마 3경주",
+   "alert_type": "배당급변",
+   "alert_content": "5+10 -35.3%",
+   "alert_pair": "5+10",
+   "odds_snapshot": {
+    "5+10": {
+     "before": 2482.5,
+     "after": 1606.0
+    },
+    "3+10": {
+     "before": 2289.4,
+     "after": 1505.0
+    }
+   },
+   "alert_horses": [
+    5,
+    10,
+    3
+   ],
+   "current_recommend": "6+9",
+   "minutes_before": 2,
+   "result": [
+    9,
+    13,
+    6
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  },
+  {
+   "time": "11:09:12",
+   "race": "후쿠시마 3경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+7 -75.1%",
+   "alert_pair": "4+7",
+   "odds_snapshot": {
+    "4+7": {
+     "before": 212.2,
+     "after": 52.8
+    }
+   },
+   "alert_horses": [
+    4,
+    7
+   ],
+   "current_recommend": "1+5",
+   "minutes_before": 2,
+   "result": [
+    9,
+    13,
+    6
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  9,
+  13,
+  6
+ ]
+}

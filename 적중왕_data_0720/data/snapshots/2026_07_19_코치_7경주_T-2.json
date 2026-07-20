@@ -1,0 +1,123 @@
+{
+ "filename": "2026_07_19_코치_7경주_T-2.png",
+ "raceKey": "코치 7경주",
+ "at": "2026-07-19 18:03:55",
+ "trigger": "T-2",
+ "quinellas": [
+  {
+   "basis": [
+    "10번: 복병"
+   ],
+   "combo": [
+    3,
+    10
+   ],
+   "ev": 1.14,
+   "odds": 3.8,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [
+    "7번: 집중급락",
+    "7번: 복병",
+    "8번: 복병"
+   ],
+   "combo": [
+    7,
+    8
+   ],
+   "ev": 1.5,
+   "odds": 10,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [
+    "8번: 복병"
+   ],
+   "combo": [
+    2,
+    8
+   ],
+   "ev": 1.45,
+   "odds": 5.8,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [
+    "8번: 복병"
+   ],
+   "combo": [
+    5,
+    8
+   ],
+   "ev": 1.51,
+   "odds": 6.4,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [
+    "8번: 복병"
+   ],
+   "combo": [
+    3,
+    8
+   ],
+   "ev": 1.59,
+   "odds": 10.9,
+   "reason": "유력마 받치기 보존",
+   "stars": 3,
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    3,
+    6,
+    10
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 메인(복승1·2+복병)"
+  },
+  {
+   "combo": [
+    3,
+    7,
+    10
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 보험(복승1·2+복병)"
+  },
+  {
+   "combo": [
+    3,
+    8,
+    10
+   ],
+   "marketInsurance": true,
+   "odds": null,
+   "reason": "시장유력 보완: 8번+10번"
+  }
+ ],
+ "special": [],
+ "minOdds": 3.8,
+ "minQuinella": 3.8,
+ "minQuinellaCombo": [
+  3,
+  10
+ ],
+ "dansung": false,
+ "sizeBytes": 1063043
+}

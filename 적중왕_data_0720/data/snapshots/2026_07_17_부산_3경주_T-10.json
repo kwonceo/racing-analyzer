@@ -1,0 +1,94 @@
+{
+ "filename": "2026_07_17_부산_3경주_T-10.png",
+ "raceKey": "부산 3경주",
+ "at": "2026-07-17 13:15:04",
+ "trigger": "T-10",
+ "quinellas": [
+  {
+   "basis": [],
+   "combo": [
+    1,
+    2
+   ],
+   "odds": 16.6,
+   "reason": "유력마 1·2위 조합",
+   "stars": 3,
+   "summary": "유력마 1위+2위 최우선"
+  },
+  {
+   "basis": [
+    "8번: 집중급락",
+    "8번: 복병"
+   ],
+   "combo": [
+    4,
+    8
+   ],
+   "odds": 6.4,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [],
+   "combo": [
+    1,
+    4
+   ],
+   "odds": 10.6,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [],
+   "combo": [
+    2,
+    4
+   ],
+   "odds": 12.6,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    1,
+    2,
+    4
+   ],
+   "odds": 26.1,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    1,
+    2,
+    8
+   ],
+   "odds": 37,
+   "reason": "초기급락 보존"
+  },
+  {
+   "combo": [
+    1,
+    4,
+    8
+   ],
+   "marketInsurance": true,
+   "odds": null,
+   "reason": "시장유력 보완: 4번+8번"
+  }
+ ],
+ "special": [],
+ "minOdds": 6.4,
+ "minQuinella": 6.4,
+ "minQuinellaCombo": [
+  4,
+  8
+ ],
+ "dansung": false,
+ "sizeBytes": 954646
+}

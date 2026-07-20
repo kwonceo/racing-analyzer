@@ -1,0 +1,65 @@
+{
+ "race": "사세보 6경주",
+ "date": "2026-07-07",
+ "raceKey": "사세보 6경주",
+ "alerts": [
+  {
+   "time": "09:58:37",
+   "race": "사세보 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -74.6%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 493.5,
+     "after": 125.5
+    },
+    "3+4": {
+     "before": 493.5,
+     "after": 150.6
+    },
+    "3+5": {
+     "before": 246.7,
+     "after": 107.6
+    },
+    "2+4": {
+     "before": 319.3,
+     "after": 150.6
+    },
+    "3+7": {
+     "before": 110.8,
+     "after": 55.1
+    },
+    "5+7": {
+     "before": 43.4,
+     "after": 22.1
+    }
+   },
+   "alert_horses": [
+    4,
+    5,
+    3,
+    2,
+    7
+   ],
+   "current_recommend": "1+7",
+   "minutes_before": 15,
+   "result": [
+    1,
+    5,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    5,
+    7
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  1,
+  5,
+  7
+ ]
+}

@@ -1,0 +1,51 @@
+{
+ "race": "부산 2경주",
+ "date": "2026-07-17",
+ "raceKey": "부산 2경주",
+ "alerts": [
+  {
+   "time": "12:06:22",
+   "race": "부산 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+9 -37.6%",
+   "alert_pair": "6+9",
+   "odds_snapshot": {
+    "6+9": {
+     "before": 74.4,
+     "after": 46.4
+    },
+    "6+7": {
+     "before": 45.5,
+     "after": 28.9
+    },
+    "7+9": {
+     "before": 56.8,
+     "after": 37.7
+    }
+   },
+   "alert_horses": [
+    6,
+    9,
+    7
+   ],
+   "current_recommend": null,
+   "minutes_before": 14,
+   "result": [
+    1,
+    6,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    6,
+    7
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  1,
+  6,
+  7
+ ]
+}

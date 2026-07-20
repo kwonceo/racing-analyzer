@@ -1,0 +1,49 @@
+{
+ "race": "2026-07-18 코치 3경주",
+ "date": "2026-07-18",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 6,
+   "signal": "🔄 크로스역배열 크로스역배열",
+   "priority": 4,
+   "odds": 34.5,
+   "detected_at": "T--2분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 4,
+   "signal": "🔄 크로스역배열 크로스역배열",
+   "priority": 4,
+   "odds": 6.1,
+   "detected_at": "T--2분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 5,
+   "signal": "🔄 크로스역배열 크로스역배열",
+   "priority": 4,
+   "odds": 2.4,
+   "detected_at": "T--2분",
+   "recommended": false
+  }
+ },
+ "dansung": null,
+ "result": {
+  "1st": 3,
+  "2nd": 4,
+  "3rd": 5,
+  "quinella_odds": 0
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": true,
+  "rank2_place": 2,
+  "rank3_hit": true,
+  "rank3_place": 3,
+  "rank3_in_result": true,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-18 16:28:29"
+}

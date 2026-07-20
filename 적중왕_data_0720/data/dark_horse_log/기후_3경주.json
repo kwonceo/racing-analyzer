@@ -1,0 +1,49 @@
+{
+ "race": "기후 3경주",
+ "date": "2026-07-20",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 2,
+   "signal": "크로스역배열",
+   "priority": 4,
+   "odds": 9.3,
+   "detected_at": "T-1분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 3,
+   "signal": "크로스역배열",
+   "priority": 4,
+   "odds": 4.2,
+   "detected_at": "T-1분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 7,
+   "signal": "크로스역배열",
+   "priority": 4,
+   "odds": 4.2,
+   "detected_at": "T-1분",
+   "recommended": false
+  }
+ },
+ "result": {
+  "1st": 7,
+  "2nd": 3,
+  "3rd": 4,
+  "quinella_odds": 4.2
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": true,
+  "rank2_place": 2,
+  "rank3_hit": true,
+  "rank3_place": 1,
+  "rank3_in_result": true,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-20 09:46:40",
+ "dansung": null
+}

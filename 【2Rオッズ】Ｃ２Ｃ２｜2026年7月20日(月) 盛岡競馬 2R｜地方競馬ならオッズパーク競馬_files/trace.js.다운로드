@@ -1,0 +1,107 @@
+var _oddspark_user_trace_start = function() {
+try{
+	/* functions */
+	var parseParams = function(url) {
+		params = url.split("?");
+		if (params.length < 2) {
+			return;
+		}
+		paramms = params[1].split("&");
+		var paramArray = [];
+		for (i = 0; i < paramms.length; i++) {
+			neet = paramms[i].split("=");
+			if (neet.length > 1) {
+				paramArray[neet[0]] = neet[1];
+			}
+		}
+		return paramArray;
+	}
+
+	function padZero(num) {
+		var result;
+		if (num < 10) {
+			result = "0" + num;
+		} else {
+			result = "" + num;
+		}
+		return result;
+	}
+
+	function nvl(str){
+		if(str === null || str === undefined){
+			return "";
+		}
+		return str;
+	}
+
+	/* get cookie */
+	var before = "";
+	if (document.cookie) {
+		var cookies = document.cookie.split("; ");
+		for (var i = 0; i < cookies.length; i++) {
+			var str = cookies[i].split("=");
+			if (str[0] == "X_ENTRY_TRACK") {
+				before = decodeURIComponent(str[1]);
+			}
+		}
+	}
+	if(before == "n") return;
+
+	/* parse url */
+	var url = decodeURIComponent(location.href);
+	var params = parseParams(url);
+	var browsby = null;
+	if(params && 'browsby' in params){
+		browsby = params['browsby'];
+	}
+	var now = new Date();
+	var nowTm = "" + now.getFullYear() + padZero(now.getMonth() + 1) +
+			padZero(now.getDate()) + padZero(now.getHours())+ padZero(now.getMinutes());
+
+	if (browsby) {
+
+		if (browsby.length > 100) {
+			return;
+		}
+		if (!browsby.match(/^[a-zA-Z0-9\-_]+$/)) {
+			return;
+		}
+	}
+
+	var hrefArr = url.split("?", -1);
+	var startUrl = hrefArr[0];
+
+	var ref = decodeURIComponent(document.referrer);
+
+	if (ref.indexOf('oddspark.com') != -1 || ref.indexOf('localhost') != -1) {
+//	if (ref.indexOf('oddspark.com') != -1) {
+		return;
+	}
+
+	if (ref && ref.length > 80) {
+		ref = ref.substr(0, 80);
+	}
+
+	if(nvl(browsby) === "" && nvl(ref) === ""){
+		return;
+	}
+
+	if (before) {
+		var bArr = before.split(',');
+		if (bArr.length >= 10) {
+			bArr = bArr.slice(1, 10);
+		}
+		before = bArr.join(',');
+		before += ",";
+	}
+
+	/* add new */
+	var newStart = before + "" + nvl(browsby) + "$" + nvl(ref) + "$" + startUrl + "$" + nowTm;
+	var expire = new Date();
+	expire.setTime(now.getTime() + 24 * 60 * 60 * 1000 * 180);
+	document.cookie = "X_ENTRY_TRACK=" + encodeURIComponent(newStart) + "; domain=.oddspark.com; path=/; expires=" + expire.toUTCString();
+
+}catch( e ){console.log(e)}
+}
+
+setTimeout(_oddspark_user_trace_start, 100);

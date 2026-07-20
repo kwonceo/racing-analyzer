@@ -1,0 +1,329 @@
+{
+ "race": "나고야 8경주",
+ "raceKey": "나고야 8경주",
+ "date": "2026-07-14",
+ "result": {
+  "1st": 8,
+  "2nd": 3,
+  "3rd": 4,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_8": {
+   "horse": 8,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 65.0,
+   "confidence": 28.0,
+   "reason": "전적상위"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 86.2,
+   "confidence": 24.0,
+   "reason": "전적상위"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 66.2,
+   "confidence": 32.0,
+   "reason": "전적상위"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.572,
+   "record_score": 0.0,
+   "confidence": 67.0,
+   "reason": "쌍승역전"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 48.8,
+   "confidence": 24.0,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  2,
+  8,
+  1
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 8번 65.0점",
+  "2. 배당 수집 시작 18:20:26",
+  "4. 쌍승 역전: 2→8(11.8) < 8→2(28.0) → 2번 실질 상위 신호",
+  "4. 쌍승 역전: 2→7(24.3) < 7→2(42.5) → 2번 실질 상위 신호",
+  "5. 종합 신뢰도 28.0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 8,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 65.0,
+  "total": 28.0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "전적보조_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 65.0,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   2
+  ],
+  "inverseHit": [],
+  "confidence": 32.0,
+  "reason": "전적유력마 3번 적중"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "18:22:43",
+    "minutes_before": null,
+    "previous_signal": "8번",
+    "new_signal": "11번",
+    "reason": "11번 집중급락(평균 -47.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "18:24:13",
+    "minutes_before": 6,
+    "previous_signal": "8번",
+    "new_signal": "10번",
+    "reason": "10번 집중급락(평균 -27.7%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "18:24:57",
+    "minutes_before": null,
+    "previous_signal": "10번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -51.4%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "18:25:02",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "1번",
+    "reason": "1번 집중급락(평균 -17.7%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "18:26:05",
+    "minutes_before": null,
+    "previous_signal": "1번",
+    "new_signal": "5번",
+    "reason": "5번 집중급락(평균 -10.0%)",
+    "prev_was_candidate": true
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   1,
+   2,
+   3,
+   5,
+   6,
+   8,
+   9,
+   10,
+   11
+  ],
+  "events": {
+   "2": {
+    "first": {
+     "time": "18:21:34",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "18:21:34",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "18:21:37",
+     "minutes_before": null
+    }
+   },
+   "8": {
+    "first": {
+     "time": "18:22:43",
+     "minutes_before": 7
+    },
+    "count": 3,
+    "last": {
+     "time": "18:24:10",
+     "minutes_before": 6
+    },
+    "vanished": {
+     "time": "18:23:55",
+     "minutes_before": null
+    }
+   },
+   "11": {
+    "first": {
+     "time": "18:22:43",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "18:22:43",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "18:22:45",
+     "minutes_before": null
+    }
+   },
+   "10": {
+    "first": {
+     "time": "18:24:13",
+     "minutes_before": 6
+    },
+    "count": 1,
+    "last": {
+     "time": "18:24:13",
+     "minutes_before": 6
+    }
+   },
+   "3": {
+    "first": {
+     "time": "18:24:57",
+     "minutes_before": null
+    },
+    "count": 2,
+    "last": {
+     "time": "18:27:10",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "18:27:16",
+     "minutes_before": null
+    }
+   },
+   "1": {
+    "first": {
+     "time": "18:25:02",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "18:25:02",
+     "minutes_before": null
+    }
+   },
+   "5": {
+    "first": {
+     "time": "18:26:05",
+     "minutes_before": null
+    },
+    "count": 2,
+    "last": {
+     "time": "18:28:28",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "18:26:11",
+     "minutes_before": null
+    }
+   },
+   "6": {
+    "first": {
+     "time": "18:29:36",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "18:29:36",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "18:29:45",
+     "minutes_before": null
+    }
+   },
+   "9": {
+    "first": {
+     "time": "18:30:44",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "18:30:44",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "18:30:52",
+     "minutes_before": null
+    }
+   }
+  },
+  "finalSignal": 9,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 25
+ },
+ "pnl": 0,
+ "stake": 1000,
+ "generated_at": "2026-07-14 18:36:07"
+}

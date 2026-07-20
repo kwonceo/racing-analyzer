@@ -1,0 +1,117 @@
+{
+ "race": "고쿠라 2경주",
+ "date": "2026-07-12",
+ "raceKey": "고쿠라 2경주",
+ "alerts": [
+  {
+   "time": "10:27:28",
+   "race": "고쿠라 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+9 -82.2%",
+   "alert_pair": "6+9",
+   "odds_snapshot": {
+    "6+9": {
+     "before": 88.6,
+     "after": 15.8
+    },
+    "9+13": {
+     "before": 92.6,
+     "after": 16.6
+    },
+    "3+9": {
+     "before": 26.6,
+     "after": 4.9
+    },
+    "9+10": {
+     "before": 270.9,
+     "after": 54.4
+    },
+    "2+14": {
+     "before": 6696.5,
+     "after": 1375.6
+    },
+    "3+13": {
+     "before": 28.8,
+     "after": 6.0
+    }
+   },
+   "alert_horses": [
+    6,
+    9,
+    13,
+    3,
+    10,
+    2,
+    14
+   ],
+   "current_recommend": "3+9",
+   "minutes_before": 1,
+   "result": [
+    9,
+    6,
+    10
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    6,
+    9,
+    10
+   ],
+   "ignored_miss": false
+  },
+  {
+   "time": "10:28:34",
+   "race": "고쿠라 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+6 -75.7%",
+   "alert_pair": "4+6",
+   "odds_snapshot": {
+    "4+6": {
+     "before": 106.4,
+     "after": 25.9
+    },
+    "6+7": {
+     "before": 1091.7,
+     "after": 282.3
+    },
+    "3+4": {
+     "before": 30.9,
+     "after": 8.8
+    },
+    "1+2": {
+     "before": 235.2,
+     "after": 90.9
+    },
+    "3+7": {
+     "before": 325.0,
+     "after": 162.5
+    }
+   },
+   "alert_horses": [
+    4,
+    6,
+    7,
+    3,
+    1,
+    2
+   ],
+   "current_recommend": "1+4",
+   "minutes_before": 0,
+   "result": [
+    9,
+    6,
+    10
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    6
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  9,
+  6,
+  10
+ ]
+}

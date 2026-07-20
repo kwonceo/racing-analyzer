@@ -1,0 +1,288 @@
+{
+ "race_id": "2026_07_19_오비히로_7경주",
+ "raceKey": "오비히로 7경주",
+ "sport": "horse",
+ "category": "japan_central",
+ "date": "2026-07-19",
+ "race": "오비히로 7경주",
+ "analyzed_at": "17:55:14",
+ "updated_at": "17:56:02",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ },
+ "odds_timeline": [
+  {
+   "time": "17:55:58",
+   "minutes_before": null,
+   "quinella": {
+    "6+10": 5.7,
+    "8+10": 9.2,
+    "7+10": 9.3,
+    "1+10": 9.5,
+    "1+6": 11.2,
+    "9+10": 11.6,
+    "6+7": 14.9,
+    "6+8": 16.4,
+    "7+8": 19.5,
+    "1+7": 20.2,
+    "6+9": 23.6,
+    "3+6": 30.6,
+    "1+8": 32.0,
+    "3+10": 35.2,
+    "5+10": 35.7,
+    "7+9": 40.4,
+    "8+9": 41.6,
+    "1+3": 46.3,
+    "1+9": 50.3,
+    "5+7": 55.8,
+    "3+9": 57.0,
+    "5+6": 63.4,
+    "3+7": 64.4,
+    "1+5": 65.9,
+    "3+8": 69.9,
+    "5+8": 115.1,
+    "2+10": 128.9,
+    "3+5": 142.3,
+    "4+10": 147.4,
+    "4+6": 157.6,
+    "5+9": 166.6,
+    "2+6": 173.6,
+    "1+2": 213.5,
+    "1+4": 220.3,
+    "4+8": 244.0,
+    "2+3": 276.9,
+    "4+7": 301.4,
+    "2+8": 310.5,
+    "3+4": 325.3,
+    "2+7": 359.5,
+    "4+5": 436.0,
+    "2+5": 539.3,
+    "2+9": 585.6,
+    "4+9": 602.8,
+    "2+4": 706.7
+   }
+  }
+ ],
+ "signals_detected": [
+  {
+   "time": "17:55:58",
+   "type": "쌍승역전공식",
+   "detail": "🔄 역전감지[3·4위 간]: 단승 7번(3위) vs 1번(4위) — 쌍승 1→7(41.7)가 7→1(59.1)보다 낮음 → 상위권 실질순위 역전: 1번 우세 (역배열 0.706)",
+   "severity": "🟠",
+   "reason": "역전비율 = 쌍승(1→7) 41.7 / 쌍승(7→1) 59.1 = 0.706 (역배열)"
+  }
+ ],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "マツカゼウンカイ",
+   "jockey": "鈴木恵",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 9.5배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 6,
+   "name": "ヒノデタイガー",
+   "jockey": "島津新",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 5.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 7,
+   "name": "スピードフジ",
+   "jockey": "西謙一",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 9.3배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 8,
+   "name": "コウシュハウンカイ",
+   "jockey": "阿部武",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 9.2배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 9,
+   "name": "ホリセンショウ",
+   "jockey": "中村太",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 11.6배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 10,
+   "name": "フウジンライデン",
+   "jockey": "臼杵龍",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 5.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 3,
+   "name": "コウシュハウンカイ",
+   "jockey": "菊池一",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 30.6배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 5,
+   "name": "コウシュハウンカイ",
+   "jockey": "西将太",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 35.7배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 2,
+   "name": "カネゾウ",
+   "jockey": "船山蔵",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 128.9배 · 배당 80~149 -20 = 80점"
+  },
+  {
+   "no": 4,
+   "name": "コウシュハレガシー",
+   "jockey": "阿部優",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 147.4배 · 배당 80~149 -20 = 80점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   6,
+   7,
+   8,
+   9,
+   10,
+   3,
+   5,
+   2,
+   4
+  ],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "quinella_main": {
+   "combo": "6+10",
+   "odds": 5.7,
+   "reason": "6번(A)·10번(C)"
+  },
+  "trifecta_main": {
+   "combo": "6+8+10",
+   "odds": 19.0,
+   "reason": "6번(A)·8번(B)·10번(C)"
+  },
+  "trifecta_insurance1": {
+   "combo": "6+7+10",
+   "odds": 18.5,
+   "reason": "6번(A)·7번(A)·10번(C)"
+  },
+  "trifecta_insurance2": {
+   "combo": "6+7+8",
+   "odds": 33.7,
+   "reason": "6번(A)·7번(A)·8번(B)"
+  },
+  "budget_allocation": {
+   "quinella_main": "62.1%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
+  }
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    6,
+    10
+   ],
+   "trio": [
+    6,
+    8,
+    10
+   ]
+  },
+  "form": {
+   "quinella": [
+    1,
+    2
+   ],
+   "trio": [
+    1,
+    2,
+    3
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    6,
+    10
+   ],
+   "trio": [
+    6,
+    8,
+    10
+   ]
+  }
+ },
+ "corePicks": null,
+ "summary": "유력마 6·10·8 / 복승 6+10",
+ "keyHorses": [
+  6,
+  10,
+  8
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}

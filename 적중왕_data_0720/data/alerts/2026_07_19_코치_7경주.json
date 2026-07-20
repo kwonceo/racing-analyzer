@@ -1,0 +1,107 @@
+{
+ "race": "코치 7경주",
+ "date": "2026-07-19",
+ "raceKey": "코치 7경주",
+ "alerts": [
+  {
+   "time": "18:03:57",
+   "race": "코치 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+8 -85.1%",
+   "alert_pair": "4+8",
+   "odds_snapshot": {
+    "4+8": {
+     "before": 42.2,
+     "after": 6.3
+    },
+    "8+11": {
+     "before": 93.7,
+     "after": 19.5
+    },
+    "10+11": {
+     "before": 161.4,
+     "after": 43.9
+    },
+    "7+11": {
+     "before": 367.0,
+     "after": 106.6
+    },
+    "7+9": {
+     "before": 961.6,
+     "after": 324.7
+    },
+    "5+7": {
+     "before": 487.6,
+     "after": 185.9
+    }
+   },
+   "alert_horses": [
+    4,
+    8,
+    11,
+    10,
+    7,
+    9,
+    5
+   ],
+   "current_recommend": "7+8",
+   "minutes_before": 1,
+   "result": [
+    2,
+    10,
+    8
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    8,
+    10
+   ],
+   "ignored_miss": false
+  },
+  {
+   "time": "18:04:07",
+   "race": "코치 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+10 -56.5%",
+   "alert_pair": "3+10",
+   "odds_snapshot": {
+    "3+10": {
+     "before": 646.6,
+     "after": 281.4
+    },
+    "3+8": {
+     "before": 173.3,
+     "after": 96.7
+    },
+    "8+12": {
+     "before": 59.9,
+     "after": 38.4
+    }
+   },
+   "alert_horses": [
+    3,
+    10,
+    8,
+    12
+   ],
+   "current_recommend": "8+10",
+   "minutes_before": 1,
+   "result": [
+    2,
+    10,
+    8
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    10,
+    8
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  2,
+  10,
+  8
+ ]
+}

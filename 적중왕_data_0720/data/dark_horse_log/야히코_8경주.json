@@ -1,0 +1,42 @@
+{
+ "result": {
+  "1st": 5,
+  "2nd": 4,
+  "3rd": 1,
+  "quinella_odds": 0
+ },
+ "dark_horse_analysis": {
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-19 14:00:34",
+ "race": "야히코 8경주",
+ "date": "2026-07-19",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 2,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 26.8,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 26.2,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 5,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 10.3,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": null
+}

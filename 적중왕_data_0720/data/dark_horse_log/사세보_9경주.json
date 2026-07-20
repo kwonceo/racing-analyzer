@@ -1,0 +1,37 @@
+{
+ "race": "사세보 9경주",
+ "date": "2026-07-17",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 4,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 1.9,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 1,
+   "signal": "🔄 크로스역배열 크로스역배열",
+   "priority": 4,
+   "odds": 7.3,
+   "detected_at": null,
+   "recommended": true
+  }
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 4,
+  "3rd": 6,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": true,
+  "rank1_place": 2,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-17 10:43:03"
+}

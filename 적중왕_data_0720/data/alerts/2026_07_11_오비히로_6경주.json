@@ -1,0 +1,169 @@
+{
+ "race": "오비히로 6경주",
+ "date": "2026-07-11",
+ "raceKey": "오비히로 6경주",
+ "alerts": [
+  {
+   "time": "17:07:47",
+   "race": "오비히로 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "5+10 -32.4%",
+   "alert_pair": "5+10",
+   "odds_snapshot": {
+    "5+10": {
+     "before": 72.9,
+     "after": 49.3
+    }
+   },
+   "alert_horses": [
+    5,
+    10
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    1,
+    7,
+    8
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  },
+  {
+   "time": "17:12:31",
+   "race": "오비히로 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -43.1%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 121.0,
+     "after": 68.9
+    },
+    "3+10": {
+     "before": 148.0,
+     "after": 86.7
+    }
+   },
+   "alert_horses": [
+    4,
+    5,
+    3,
+    10
+   ],
+   "current_recommend": "1+5",
+   "minutes_before": null,
+   "result": [
+    1,
+    7,
+    8
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  },
+  {
+   "time": "17:18:16",
+   "race": "오비히로 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "5+6 -83.8%",
+   "alert_pair": "5+6",
+   "odds_snapshot": {
+    "5+6": {
+     "before": 74.0,
+     "after": 12.0
+    },
+    "3+9": {
+     "before": 202.2,
+     "after": 62.5
+    },
+    "6+7": {
+     "before": 81.2,
+     "after": 28.4
+    },
+    "4+5": {
+     "before": 58.8,
+     "after": 23.0
+    },
+    "5+7": {
+     "before": 38.7,
+     "after": 18.7
+    },
+    "4+6": {
+     "before": 34.2,
+     "after": 17.0
+    }
+   },
+   "alert_horses": [
+    5,
+    6,
+    3,
+    9,
+    7,
+    4
+   ],
+   "current_recommend": "1+5",
+   "minutes_before": 2,
+   "result": [
+    1,
+    7,
+    8
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    7
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "17:20:03",
+   "race": "오비히로 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+7 -91.9%",
+   "alert_pair": "1+7",
+   "odds_snapshot": {
+    "1+7": {
+     "before": 13.5,
+     "after": 1.1
+    },
+    "2+7": {
+     "before": 77.7,
+     "after": 43.1
+    },
+    "6+7": {
+     "before": 29.6,
+     "after": 17.6
+    },
+    "1+2": {
+     "before": 43.4,
+     "after": 27.9
+    }
+   },
+   "alert_horses": [
+    1,
+    7,
+    2,
+    6
+   ],
+   "current_recommend": "1+7",
+   "minutes_before": 0,
+   "result": [
+    1,
+    7,
+    8
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    1,
+    7
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  1,
+  7,
+  8
+ ]
+}

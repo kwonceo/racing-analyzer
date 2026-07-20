@@ -1,0 +1,130 @@
+{
+ "race": "마쓰야마 4경주",
+ "date": "2026-07-12",
+ "raceKey": "마쓰야마 4경주",
+ "alerts": [
+  {
+   "time": "17:09:18",
+   "race": "마쓰야마 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "5+6 -35.4%",
+   "alert_pair": "5+6",
+   "odds_snapshot": {
+    "5+6": {
+     "before": 108.9,
+     "after": 70.3
+    }
+   },
+   "alert_horses": [
+    5,
+    6
+   ],
+   "current_recommend": null,
+   "minutes_before": 8,
+   "result": [
+    7,
+    1,
+    3
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  },
+  {
+   "time": "17:11:22",
+   "race": "마쓰야마 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+7 -52.0%",
+   "alert_pair": "4+7",
+   "odds_snapshot": {
+    "4+7": {
+     "before": 78.7,
+     "after": 37.8
+    },
+    "3+7": {
+     "before": 12.6,
+     "after": 6.4
+    },
+    "1+3": {
+     "before": 2.7,
+     "after": 1.5
+    },
+    "2+6": {
+     "before": 151.2,
+     "after": 96.3
+    },
+    "3+5": {
+     "before": 84.0,
+     "after": 55.7
+    },
+    "3+4": {
+     "before": 51.7,
+     "after": 34.7
+    }
+   },
+   "alert_horses": [
+    4,
+    7,
+    3,
+    1,
+    2,
+    6,
+    5
+   ],
+   "current_recommend": null,
+   "minutes_before": 6,
+   "result": [
+    7,
+    1,
+    3
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    7,
+    3,
+    1
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "17:14:39",
+   "race": "마쓰야마 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+6 -52.7%",
+   "alert_pair": "3+6",
+   "odds_snapshot": {
+    "3+6": {
+     "before": 24.3,
+     "after": 11.5
+    },
+    "1+6": {
+     "before": 13.7,
+     "after": 8.2
+    }
+   },
+   "alert_horses": [
+    3,
+    6,
+    1
+   ],
+   "current_recommend": "1+3",
+   "minutes_before": 3,
+   "result": [
+    7,
+    1,
+    3
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3,
+    1
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  7,
+  1,
+  3
+ ]
+}

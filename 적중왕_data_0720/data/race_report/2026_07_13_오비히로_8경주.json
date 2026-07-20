@@ -1,0 +1,267 @@
+{
+ "race": "오비히로 8경주",
+ "raceKey": "오비히로 8경주",
+ "date": "2026-07-13",
+ "result": {
+  "1st": 9,
+  "2nd": 4,
+  "3rd": 5,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "중배당",
+ "win_odds": 12.9,
+ "why_recommended": {
+  "signal_9": {
+   "horse": 9,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 36.0,
+   "reason": "일반"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "일반"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.667,
+   "record_score": null,
+   "confidence": 57.4,
+   "reason": "쌍승역전"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 24.0,
+   "reason": "일반"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.79,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "쌍승역전"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  2,
+  5,
+  6,
+  3,
+  4
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 9번 전적 정보 제한",
+  "2. 배당 수집 시작 18:05:40",
+  "4. 쌍승 역전: 5→2(62.0) < 2→5(93.0) → 5번 실질 상위 신호",
+  "4. 쌍승 역전: 6→2(90.8) < 2→6(115.0) → 6번 실질 상위 신호",
+  "5. 종합 신뢰도 36.0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 9,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": null,
+  "total": 36.0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중",
+  "복승불일치_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   5,
+   6
+  ],
+  "inverseHit": [
+   5
+  ],
+  "confidence": 57.4,
+  "reason": "역배열 감지말 5번 입상"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "18:10:04",
+    "minutes_before": 5,
+    "previous_signal": "2번",
+    "new_signal": "4번",
+    "reason": "4번 집중급락(평균 -56.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "18:10:46",
+    "minutes_before": 4,
+    "previous_signal": "2번",
+    "new_signal": "4번",
+    "reason": "4번 집중급락(평균 -55.6%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "18:11:48",
+    "minutes_before": null,
+    "previous_signal": "4번",
+    "new_signal": "2번",
+    "reason": "2번 집중급락(평균 -60.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "18:15:19",
+    "minutes_before": null,
+    "previous_signal": "7번",
+    "new_signal": "9번",
+    "reason": "9번 집중급락(평균 -28.0%)",
+    "prev_was_candidate": true
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   2,
+   4,
+   7,
+   9
+  ],
+  "events": {
+   "2": {
+    "first": {
+     "time": "18:09:35",
+     "minutes_before": null
+    },
+    "count": 3,
+    "last": {
+     "time": "18:11:48",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "18:12:58",
+     "minutes_before": null
+    }
+   },
+   "4": {
+    "first": {
+     "time": "18:10:04",
+     "minutes_before": 5
+    },
+    "count": 2,
+    "last": {
+     "time": "18:10:46",
+     "minutes_before": 4
+    },
+    "vanished": {
+     "time": "18:10:04",
+     "minutes_before": 5
+    }
+   },
+   "7": {
+    "first": {
+     "time": "18:14:08",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "18:14:08",
+     "minutes_before": null
+    }
+   },
+   "9": {
+    "first": {
+     "time": "18:15:19",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "18:15:19",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "18:16:30",
+     "minutes_before": null
+    }
+   }
+  },
+  "finalSignal": 9,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 13
+ },
+ "pnl": 11900,
+ "stake": 1000,
+ "generated_at": "2026-07-13 21:10:57"
+}

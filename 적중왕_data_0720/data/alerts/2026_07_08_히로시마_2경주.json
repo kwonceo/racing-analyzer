@@ -1,0 +1,78 @@
+{
+ "race": "히로시마 2경주",
+ "date": "2026-07-08",
+ "raceKey": "히로시마 2경주",
+ "alerts": [
+  {
+   "time": "08:45:07",
+   "race": "히로시마 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+2 -68.7%",
+   "alert_pair": "1+2",
+   "odds_snapshot": {
+    "1+2": {
+     "before": 33.9,
+     "after": 10.6
+    },
+    "1+7": {
+     "before": 311.1,
+     "after": 113.7
+    },
+    "2+7": {
+     "before": 224.7,
+     "after": 100.7
+    },
+    "1+5": {
+     "before": 37.4,
+     "after": 18.7
+    },
+    "2+3": {
+     "before": 252.7,
+     "after": 130.6
+    },
+    "1+3": {
+     "before": 337.0,
+     "after": 185.6
+    }
+   },
+   "alert_horses": [
+    1,
+    2,
+    7,
+    5,
+    3
+   ],
+   "current_recommend": "4+5",
+   "minutes_before": 4,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "08:47:08",
+   "race": "히로시마 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+6 -55.0%",
+   "alert_pair": "4+6",
+   "odds_snapshot": {
+    "4+6": {
+     "before": 48.4,
+     "after": 21.8
+    },
+    "5+6": {
+     "before": 21.5,
+     "after": 10.3
+    }
+   },
+   "alert_horses": [
+    4,
+    6,
+    5
+   ],
+   "current_recommend": "4+5",
+   "minutes_before": 2,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

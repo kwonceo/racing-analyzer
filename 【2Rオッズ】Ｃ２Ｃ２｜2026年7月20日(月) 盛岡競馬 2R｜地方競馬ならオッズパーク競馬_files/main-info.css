@@ -1,0 +1,1565 @@
+@charset "utf-8";
+/*==================================================
+	Universal Reset
+==================================================*/
+* { margin:0; padding:0; }
+body { line-height:1.4; font-family:"ＭＳ Ｐゴシック", "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", sans-serif; color:#333333; font-size:90%; }
+h1, h2, h3, h4, h5, h6 { font-weight:bold; margin-bottom:10px; }
+address { font-style:normal; }
+strong { font-weight:normal; }
+em { font-style:normal; }
+img { border:0; font-size:0; vertical-align:bottom; }
+ul, dl { list-style:none; }
+ol { padding-left:2.1em; }
+dt { font-weight:bold; }
+th { font-weight:normal; text-align:left; }
+input, select { vertical-align:middle; }
+textarea { font-size:1em; }
+fieldset { border:0 none; }
+legend { display:none; }
+/*==================================================
+	Font Size Adjust
+==================================================*/
+p, li, dt, dd, th, td, h1, h2, h3, h4, h5, h6 { font-size:100%; }
+li p, li li, li dt, li dd, dd p, dd li, dd dt, dd dd { font-size:100%; }
+li h1, li h2, li h3, li h4, li h5, li h6 { font-size:100%; }
+li th, li td { font-size:100%; }
+td p, td li, td dt, td dd { font-size:100%; }
+td td, td th, th td, th th { font-size:100%; }
+td h1, td h2, td h3, td h4, td h5, td h6 { font-size:100%; }
+th p, th li, th dt, th dd { font-size:100%; }
+th h1, th h2, th h3, th h4, th h5, th h6 { font-size:100%; }
+/*==================================================
+	Default Style
+==================================================*/
+a { color:#06f; text-decoration:underline; }
+a:visited { color:#06f; }
+a:hover, a:active { color:#f60; text-decoration:none; background:none; }
+strong { font-weight:bold; }
+em { color:#f00; }
+sup { vertical-align:top; }
+sub { vertical-align:baseline; }
+ul, dl, ol, p, table { margin-bottom:1em; }
+caption { text-align:left; }
+li ul, li ol, li dl, dd ul, dd ol, dd dl { margin-bottom:0; }
+.yScroll { overflow-y:auto;}
+/*==================================================
+	ToolTips　CSS制御ツールTips
+==================================================*/
+a.tooltip:hover { background:#ffffff; text-decoration:none; } /*BG color is a must for IE6*/
+a.tooltip span { display:none; padding:2px 3px; margin-left:8px; width:130px; }
+a.tooltip:hover span { display:inline; position:absolute; background:#ffc; border:1px solid #9C3; color:#666; }
+/*==================================================
+	input
+==================================================*/
+/* input  */
+input[type=text],input[type=password] { border:1px solid #09C; background-color:#fee; *background-color:#fff;
+font-size:10pt; margin:0; padding:0; text-align:left; padding-right:1px; }
+input.effect {
+*border:1px solid #09C;
+*background-color:#fee; text-align:left; }
+input.odds {
+*border:1px solid #09C;
+*background-color:#fee; text-align:left; }
+input.nostyle { border:none; background:none; }
+input:focus { background:#CF9; }
+input.alert { background:#F66; }
+tr.blank input { border:1px solid #ccc; background-color:#ddd; *background-color:#ddd;
+color:#999; } /* disable状態 */
+input[type=checkbox] { border:none; background-color:none; margin:0 5px; }
+input[type=button], #sign input[type=reset], #sign input[type=submit] { -webkit-box-shadow: inset 0 1px 3px #F1F1F1, inset 0 -15px #DFDFDF, 1px 1px 2px #E7E7E7; -moz-box-shadow: inset 0 1px 3px #F1F1F1, inset 0 -15px #DFDFDF, 1px 1px 2px #E7E7E7; font-size:11pt; margin:3px; padding:1px 2px; }
+.letterBtn input[type=button] { -webkit-box-shadow: inset 0 1px 3px #F1F1F1, inset 0 -5px #DFDFDF, 1px 1px 2px #E7E7E7; -moz-box-shadow: inset 0 1px 3px #F1F1F1, inset 0 -5px #DFDFDF, 1px 1px 2px #E7E7E7; font-size:10pt; margin:2px 3px; padding:2px 3px; width:40px; }
+
+/*==================================================
+	Radius角丸
+==================================================*/
+.curved { border-radius:4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; background:#fff;}
+
+/* 背景色指定済みボックス角丸 */
+.curved2{ /*void*/}
+/*==================================================
+	アラート
+==================================================*/
+#info .bg-alert { background:#f99 !important; color:#000 !important; font-weight:bold !important; }
+#info blockquote { display:block; width:98%; padding:1%; margin:10px 0; border:1px solid #666; -webkit-border-radius:4px; border-radius:4px; -moz-border-radius:4px; background:#fee; }
+#info blockquote h3 { border:none !important; border-bottom:2px solid #333; padding:2px; margin:0; }
+/*==================================================
+	スプライト表示アイコンとボタン　情報系
+==================================================*/
+.isprite { background:url(../images/i-sprite.png) no-repeat; display:inline-block; text-indent:-10000px; text-align:center; vertical-align:middle; }
+span#night,span.night { width:35px; height:13px; background:url(../images/i-sprite.png) -40px -297px; margin:0 0 0 3px; }
+span#midnt,span.midnt { width:35px; height:13px; background:url(../images/i-sprite.png) -40px -279px; margin:0 0 0 3px; } 
+span#hakubo,span.hakubo{ width:35px; height:13px; background:url(../images/i-sprite.png) -80px -279px; margin:0 0 0 3px; }
+span#i-night,span.i-night { width:16px; height:16px; background:url(../images/i-sprite.png) 0 -213px; margin:2px 1px 1px 2px; }
+span#i-midnt,span.i-midnt { width:16px; height:16px; background:url(../images/i-sprite.png) 0 -194px; margin:2px 1px 1px 2px; } 
+span#i-hakubo,span.i-hakubo{ width:16px; height:16px; background:url(../images/i-sprite.png) 0 -175px; margin:2px 1px 1px 2px; }
+span.ico-info { display:inline-block; width:20px; height:14px; background:url(../images/i-sprite.png) -164px -240px; margin:2px 3px 1px 2px;vertical-align:middle; }
+
+
+#info a.arrow { margin:0; padding:0 0 0 15px; background:url(../images/i-sprite.png) no-repeat 0px -603px;}
+#info a.search { display:block; width:105px; height:23px; margin:0 0 0 10px; padding:0; background:url(../images/i-sprite.png) no-repeat -120px -365px; text-indent:-9999px; }
+#info a.search:hover { background-position:-120px -390px;}
+#info a.clear { display:block; width:105px; height:23px; margin:0 0 0 10px; padding:0; background:url(../images/i-sprite.png) no-repeat -230px -365px; text-indent:-9999px; }
+#info a.clear:hover { background-position:-230px -390px; }
+#info a.back_spec { display:block; width:120px; height:20px; background:url(../images/i-sprite.png) no-repeat -120px -315px; text-indent:-10000px; }
+#info a.back_spec:hover { background-position:-120px -340px; }
+/*印刷・？*/
+#info a.print { display:inline-block; width:80px; height:16px; text-indent:-9999px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -270px -290px;}
+#info a.printMB5 { display:inline-block; width:80px; height:16px; text-indent:-9999px; margin:0 0 5px 0; padding:0; background:url(../images/i-sprite.png) no-repeat -270px -290px;}
+
+#info a.hatena { display:inline-block; width:15px; height:13px; background:url(../images/i-sprite.png) -120px -240px no-repeat; text-indent:-10000px; }
+/*カレンダー・映像*/
+#info span.ico_cal { display:inline-block; width:11px; height:11px; text-indent:-9999px; margin:0 5px 0 0; padding:0; background:url(../images/i-sprite.png) -275px -270px;}
+#info span.ico_mov { display:inline-block; width:16px; height:17px; text-indent:-9999px; margin:0 0 0 5px; padding:0; background:url(../images/i-sprite.png) -40px -530px; line-height:1em; }
+#info a.ico_mov { display:block; width:16px; height:17px; text-indent:-9999px; margin:0 0 0 5px; padding:0; background:url(../images/i-sprite.png) -40px -530px;}
+/*ソート*/
+#info a.sort_d,
+#info a.sort_a,
+#info a.sort_n { display:inline-block; width:23px; height:12px; margin:0 0 0 5px; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+#info a.sort_d { background-position:-120px -275px; }
+#info a.sort_a { background-position:-120px -287px; }
+#info a.sort_n { background-position:-120px -300px; }
+/*結果・投票・締切　w80ピクセル表示*/
+#info a.res80,
+#info a.vote80,
+#info span.closed80 { display:block; float:right; width:80px; height:23px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+#info a.res80 { background-position:-475px -240px; }
+#info a.res80:hover { background-position:-475px -265px; }
+#info a.vote80 { background-position:-640px -315px; }
+#info a.vote80:hover { background-position:-640px -340px; }
+#info span.closed80 { background-position:-405px -404px; }
+/*重賞*/
+#info span.g1,
+#info span.g2,
+#info span.g3,
+#info span.jpn1,
+#info span.jpn2,
+#info span.jpn3,
+#info span.ico_gd { display:inline-block; line-height:1em; width:24px; height:13px; margin:0 0 0 5px; padding:0; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+#info span.g1 { background-position:-40px -175px; }
+#info span.g2 { background-position:-40px -191px; }
+#info span.g3 { background-position:-40px -207px; }
+#info span.jpn1 { background-position:-40px -255px; }
+#info span.jpn2 { background-position:-40px -240px; }
+#info span.jpn3 { background-position:-40px -225px; }
+#info span.ico_gd { background-position:-40px -551px; }
+#info span.l { display:inline-block; line-height:1em; width:24px; height:13px; margin:0 0 0 5px; padding:0; background:url(../images/ico_l.gif) no-repeat; text-indent:-10000px; }
+#info span.lr { display:inline-block; line-height:1em; width:24px; height:13px; margin:0 0 0 5px; padding:0; background:url(../images/ico_lr.gif) no-repeat; text-indent:-10000px; }
+
+/*等幅父,母,母父*/
+#info th.fuboN { min-width:110px; /width:150px;}
+#info th.fuboW { min-width:130px; /width:150px;}
+
+/*投票ボタン(小)*/
+#info div.race_vote { position:relative; width:100%; }
+#info div.race_vote a:hover { opacity:1; }
+#info a.btn_voteS { display:inline-block; position: absolute; right:2px; top:1px; width:54px; height:23px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -820px -315px; text-indent:-9999px; }
+#info a.btn_voteS:hover { background-position:-820px -340px; }
+/*投票ボタン*/
+#info a.btn_voteL { display:inline-block; width:120px; height:32px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -880px -230px; text-indent:-9999px; }
+#info a.btn_voteL:hover { background-position:-880px -265px; }
+/*表示するボタン*/
+#info a.btn_show { display:inline-block; width:45px; height:20px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -210px -525px; text-indent:-9999px; }
+#info a.btn_show:hover { background-position:-210px -550px; }
+/*印刷ヘルプボタン*/
+#info a.prtHelp { display:inline-block; width:70px; height:16px; text-indent:-9999px; margin:0; padding:0; background:url(../images/i-sprite.png) -270px -310px;}
+#info a.print { display:inline-block; width:70px; height:16px; text-indent:-9999px; margin:0; padding:0; background:url(../images/i-sprite.png)  -270px -290px;}
+/*NP能力値とは*/
+#info a.npHelp { display:inline-block; width:100px; height:16px; text-indent:-9999px; margin:0; padding:0; background:url(../images/i-sprite.png) -270px -335px;}
+/*閉じるボタン*/
+#info a.btn_closeL { display:block; width:130px; height:30px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -120px -630px; text-indent:-9999px; }
+#info a.btn_closeL:hover { background-position:-120px -670px; }
+/*==================================================
+	情報ここから
+==================================================*/
+html #info { margin:0; padding:0;} 
+#info #wrap { width:1004px; margin:0 auto; padding:0 2px; background:url(../images/i-bg.gif) repeat-y;}
+#info #no-support { width:990px; margin:5px 0; padding:20px 0; text-align:center; font-weight:bold; border:5px dashed #c00; background:#fdd;}
+#info #header { width:1000px;height:71px; margin:2px 0 0 0; padding:0; background:url(../images/i-sprite.png) no-repeat 0 0; position:relative; }/* マーキー有り　*/
+#info #header2 { width:1000px;height:71px; margin:2px 0 0 0; padding:0; background:url(../images/i-sprite.png) no-repeat 0 0; position:relative; clear:both; }/* マーキー無し　*/
+#info #header h1, #info #header2 h1 { display:block; float:left; margin:0; padding:0; width:270px; height:35px; text-indent:-10000px; }
+#info #header2 h2 { display:block; width:250px; height:40px; position:absolute; top:15px; left:350px; font-size:9pt; line-height:1.4em; font-weight:normal; }
+#info #header h2 { display:block; float:left; width:400px; height:20px; position:absolute; top:10px; left:220px; font-size:9pt; line-height:1.4em; font-weight:normal; }
+
+#info #nav { margin:0; padding:0; width:1000px; width:38px;}
+#info #content { position:relative; width:980px; margin:5px auto 0; padding:0; }
+#info #contentLeft { width:730px; margin:0 10px 0 0 ; padding:0; float:left;}
+#info #sidebar { width:240px; margin:0 auto; padding:0; float:left; }
+#info #footer { width:1000px; padding:0; min-height:25px; border-top:1px solid #e5e5e5; clear:both;
+background: #ffffff; /* old browsers */
+background: -moz-linear-gradient(top, #ffffff 0%, #EFEFEF 3%, #F9F9F9 54%, #FFFFFF 100%); /* firefox */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(3%,#EFEFEF), color-stop(54%,#F9F9F9), color-stop(100%,#FFFFFF)); /* webkit */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#EFEFEF', endColorstr='#FFFFFF',GradientType=0 ); /* ie */
+background: -o-linear-gradient(top, #ffffff 0%,#EFEFEF 3%,#F9F9F9 54%,#FFFFFF 100%); /* opera */
+}
+
+/* ヘッダ UL */
+#info ul#nav1 { display:block; width:500px; margin:5px 0; padding:0; list-style-type:none; position:absolute; top:3px; right:1px;}
+#info ul#nav1 li { float:right; margin:0 5px 0 0; padding: 0 5px; border-right:1px solid #ccc; font-size:10pt; }
+#info ul#nav1 li:first-child { border:none; }
+/* ヘッダ UL IE7 で消える問題  *:first-child+html  */
+/* *:first-child+html #info ul#nav1 { display:block; float:right; width:500px; margin:3px 0 0 0; padding:0; list-style-type:none; position:relative; } */
+
+#info ul#nav2 { display:block; clear:both; width:995px; height:28px; margin:0 0 5px 0; padding:2px 0 0 5px; list-style-type:none; position:relative; }
+#info ul#nav2 li { float:left; margin:0; padding:0 5px 0 0; text-indent:-10000px; }
+
+#info ul#nav2 a.nv1,
+#info ul#nav2 a.nv2,
+#info ul#nav2 a.nv3,
+#info ul#nav2 a.nv4,
+#info ul#nav2 a.nv5,
+#info ul#nav2 a.nv6,
+#info ul#nav2 a.nv7,
+#info ul#nav2 a.nv8 { display:block; background:url(../images/i-sprite.png) no-repeat; }
+#info ul#nav2 a.nv9 { display:block; background:url(../../../../s_shared/images/i-sprite2023.png) no-repeat; }
+
+#info ul#nav2 a.nv1,
+#info ul#nav2 a.nv2,
+#info ul#nav2 a.nv3,
+#info ul#nav2 a.nv8 { width:105px; height:28px; }
+#info ul#nav2 a.nv4,
+#info ul#nav2 a.nv5,
+#info ul#nav2 a.nv9 { width:80px; }
+#info ul#nav2 a.nv6 { width:60px; }
+#info ul#nav2 a.nv7 { width:93px; }
+
+#info ul#nav2 a.nv4,
+#info ul#nav2 a.nv5,
+#info ul#nav2 a.nv6,
+#info ul#nav2 a.nv7,
+#info ul#nav2 a.nv9 { height:25px; }
+
+#info ul#nav2 a.nv3 { margin-right:207px; }
+#info ul#nav2 a.oppp { margin-right:28px; }
+#info ul#nav2 a.nv7 { margin-left:15px; }
+
+#info ul#nav2 a.nv1 { background-position:-343px -1220px; }
+#info ul#nav2 a.nv2 { background-position:-451px -1220px; }
+#info ul#nav2 a.nv3 { background-position:-559px -1220px; }
+#info ul#nav2 a.nv4 { background-position:-670px -1220px; }
+#info ul#nav2 a.nv5 { background-position:-754px -1220px; }
+#info ul#nav2 a.nv6 { background-position:-838px -1220px; }
+#info ul#nav2 a.nv7 { background-position:-902px -1220px; }
+#info ul#nav2 a.nv8 { background-position:-235px -1220px; }
+#info ul#nav2 a.nv9 { background-position:-754px -710px; }
+
+#info ul#nav2 li.active a.nv1, #info ul#nav2 a.nv1:hover { background-position:-343px -1260px; }
+#info ul#nav2 li.active a.nv2, #info ul#nav2 a.nv2:hover { background-position:-451px -1260px; }
+#info ul#nav2 li.active a.nv3, #info ul#nav2 a.nv3:hover { background-position:-559px -1260px; }
+#info ul#nav2 li.active a.nv4, #info ul#nav2 a.nv4:hover { background-position:-670px -1260px; }
+#info ul#nav2 li.active a.nv5, #info ul#nav2 a.nv5:hover { background-position:-754px -1260px; }
+#info ul#nav2 li.active a.nv6, #info ul#nav2 a.nv6:hover { background-position:-838px -1260px; }
+#info ul#nav2 li.active a.nv7, #info ul#nav2 a.nv7:hover { background-position:-902px -1260px; }
+#info ul#nav2 li.active a.nv8, #info ul#nav2 a.nv8:hover { background-position:-235px -1260px; }
+#info ul#nav2 li.active a.nv9, #info ul#nav2 a.nv9:hover { background-position:-754px -750px; }
+
+/* OPPP */
+#info ul#nav2 li.oppp { width:160px; height:30px; text-indent:0; float:left; margin-left:14px; margin-top:-4px; }
+
+/* マーキー　*/
+div#marq { width:994px;height:20px; margin:0 0 2px 0; padding:3px; background:#600; color:#fff; clear:both; overflow:hidden;
+background:url(../images/i-sprite.png) no-repeat 0 -71px;
+}
+
+/* Global Nav */
+#info #nav ul { display:block; width:1000px; height:38px; margin:0; padding:0; list-style-type:none; overflow:hidden; }
+#info #nav ul li { float: left; margin: 0; padding: 0; text-indent:-10000px;}
+#info #nav ul a     { display:block; height:38px; background:url(../images/i-sprite.png) no-repeat; }
+#info #nav ul a.nv1 { width:143px; background-position: 0 -95px; } 
+#info #nav ul a.nv2 { width:143px; background-position: -143px -95px; }
+#info #nav ul a.nv3 { width:143px; background-position: -286px -95px; }
+#info #nav ul a.nv4 { width:142px; background-position: -429px -95px; }
+#info #nav ul a.nv5 { width:144px; background-position: -572px -95px; }
+#info #nav ul a.nv6 { width:143px; background-position: -716px -95px; }
+#info #nav ul a.nv7 { width:142px; background-position: -859px -95px; } 
+#info #nav ul a.nv1:hover, #info #nav li.active a.nv1 { background-position: 0 -134px; } 
+#info #nav ul a.nv2:hover, #info #nav li.active a.nv2 { background-position: -143px -134px; }
+#info #nav ul a.nv3:hover, #info #nav li.active a.nv3 { background-position: -286px -134px; }
+#info #nav ul a.nv4:hover, #info #nav li.active a.nv4 { background-position: -429px -134px; }
+#info #nav ul a.nv5:hover, #info #nav li.active a.nv5 { background-position: -572px -134px; }
+#info #nav ul a.nv6:hover, #info #nav li.active a.nv6 { background-position: -716px -134px; } 
+#info #nav ul a.nv7:hover, #info #nav li.active a.nv7 { background-position: -859px -134px; } 
+
+/* content */
+/* パンくずリスト　*/
+#info ul#bcrumb { display:block; width:980px; height:20px; margin:5px 0 5px 0; padding:0; list-style-type:none; }
+#info ul#bcrumb li { float: left; margin:0 0 0 15px; padding:0 0 0 20px; font-size:10pt; background:url(../images/i-sprite.png) no-repeat 0px -603px; }
+#info ul#bcrumb li:first-child {margin:0;  padding:0; background: none;}
+
+/*==================================================
+	コンテントタイトル
+==================================================*/
+/* h2 */
+#info #content h2 { display:block; float:left; width:968px; height:1.3em; margin:0 0 7px 0; padding:2px 0 2px 10px; border:1px solid #eee; background:#f3f3f3; -moz-border-radius: 4px; -webkit-border-radius: 4px;
+background: #f3f3f3; /* Old browsers */
+background: -moz-linear-gradient(top, #ffffff 0%, #f6f6f6 47%, #ededed 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(47%,#f6f6f6), color-stop(100%,#ededed)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, #ffffff 0%,#f6f6f6 47%,#ededed 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, #ffffff 0%,#f6f6f6 47%,#ededed 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top, #ffffff 0%,#f6f6f6 47%,#ededed 100%); /* IE10+ */
+background: linear-gradient(top, #ffffff 0%,#f6f6f6 47%,#ededed 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+}
+ 
+#info #content h2 img { margin:-3px 3px 3px 3px;}
+
+/* h3/4 */
+#info #content h3 { display:block; width:auto; height:28px; line-height:30px; color:#fff; font-size:12pt; margin:0 0 5px 0; padding:0 0 0 10px;border-top:1px solid #C8EB6D; border-bottom:1px solid #ccc; clear:both; position:relative; background:url(../images/i-sprite.png) no-repeat 0 -756px; }
+#info #content h3.type2 { margin:5px 0; height:28px; line-height:28px; background-position: 0 -758px;}
+#info #content h3.type3 { margin:5px 0; padding:0 0 0 25px; height:28px; line-height:28px; background-position: 0 -758px;}
+#info #content h3 span { display:inline-block; font-weight:normal; padding-left:1em; }
+#info #content h3 span.date { display:block !important; font-size:10pt; width:250px; height:30px; line-height:30px; text-align:right; position:absolute; top:5px; right:10px; font-weight:normal; }
+#info #content h3 div.ls { display:block; width:60px; height:1em; line-height:1.1em; font-weight:normal; position:absolute; top:3px; left:300px;}
+#info #content h3.type2 a{ display:inline-block; font-size:9pt; width:auto; height:19px; line-height:19px; margin:2px 0 0 0; padding:1px 3px; text-decoration:none; color:#000; background:#fff; border-radius:6px;}
+#info #content h3.type2 a:hover { background:#9C0; color:#fff;}
+#info #content h3 span.date { display:inline-block; width:300px; height:28px; line-height:28px; font-weight:normal; font-size:10pt; position:absolute; top:0; right:5px;}
+#info #content h3.commonError { background: initial; color: #333333; height:initial; line-height:1.4; font-size:100%; display:block; width:auto; margin:5px 0; padding:2px 0 2px 10px; border-left:5px solid #F90; border-right:5px solid #F90;border-top:1px dotted #ccc; border-bottom:1px dotted #ccc; clear:both; position:relative; }
+
+#info #content h4 { display:block; width:auto; height:28px; line-height:28px; color:#000; font-size:12pt; margin:0 0 5px 0; padding:0 0 0 10px;position:relative; background:url(../images/i-sprite.png) no-repeat 0 -900px; }
+
+#info #content div.raceList { display:block;}
+#info #content div.raceList a{ display:block; float:right; width:198px; height:1.3em; margin:5px 0 0 3px; padding:2px; text-align:center; text-decoration:none; border:1px solid #ccc; background:#fff; -moz-border-radius: 4px; -webkit-border-radius: 4px; font-weight: bold; color:#333 !important; }
+#info #content div.raceList a:hover {  background: #CDED79; color:#333; }
+#info #content div.raceList a.active,#info #content div.raceList span.active  {  background: #CDED79; color:#333; }
+#info #content div.raceList p span{ color:#f00;}
+
+/*　開催レース情報 p-b-01　****************************************　*/
+
+#info div.section{ width:980px; min-height:30px; margin:0; padding:0; clear:both;}
+#info ul#date_pr { display:block; float: left; width:170px; height:20px; margin:5px 0 5px 0; padding:0; list-style-type:none;}
+#info ul#date_pr li { float: left; display:block; width:150px; margin:0; padding:0; font-size:10pt; }
+#info ul#date_nx { display:block; float: right; width:170px; height:20px; margin:5px 0 5px 0; padding:0; list-style-type:none; }
+#info ul#date_nx li { display:block; width:150px; margin:0; padding:0; font-size:10pt; text-align:right; }
+
+/*　開催レース一覧メッセージ欄　*/
+#info #content div.mes { float:left; width:980px; height:30px; text-align:right; margin:3px 0 0 3px; padding:3px 0 0 0; }
+#info #content div.mes div {float:left;  width:766px; text-align:right; padding:5px 0 0 0;}
+#info #content div.mes div span{ color:#f00;}
+#info #content div.mes a{ display:block; float:right; width:198px; margin:0 0 0 10px; padding:2px; text-align:center; text-decoration:none; border:1px solid #ccc; background:#fff; -moz-border-radius: 4px; -webkit-border-radius: 4px; font-weight: bold;  color:#333; }
+#info #content div.mes a:hover{ color:#333; background: #CDED79;}
+
+
+/* トップページ */
+#info #camp  { width:720px; float:left; min-height:230px; margin:0 0 10px 0; padding:0;  background:#f3f3f3; }
+
+/*　インデックスレース一覧タイトル　*/
+#info #titles { width:980px; height:25px; clear:both;}
+#info #titles div { display:block; float:left; height:20px; padding:4px 2px 0 2px; border:1px solid #ccc !important; overflow:hidden;text-align:center;
+background: #ffffff; /* old browsers */background: -moz-linear-gradient(top, #ffffff 0%, #f6f6f6 10%, #E5E5E5 100%); /* firefox */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(10%,#f6f6f6), color-stop(100%,#E5E5E5)); /* webkit */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#E5E5E5',GradientType=0 ); /* ie */
+background: -o-linear-gradient(top, #ffffff 0%,#f6f6f6 10%,#E5E5E5 100%); /* opera */}
+#info #titles div.tl01 { width:107px; margin-right:1px; }
+#info #titles div.tl02 { width:127px; margin-right:1px; }
+#info #titles div.tl03 { width:520px; margin-right:1px; }
+#info #titles div.tl04 { width:198px; text-align:center;}
+#info #titles h4 { display:inline; border:none !important; padding:0 !important; margin:0 0 0 0 !important; color:#222; width:auto; font-size:9pt; }
+
+
+/*　開催スケジュール＞レース一覧　*/
+#info #raceToday { width:980px; height:auto; margin:0; padding:0;}
+#info #raceToday div { display:block; width:980px; height:3em; line-height:3em; margin:0; padding:0; border-bottom:1px dotted #aaa; clear:both;}/* 場開催 tableのtrに該当 */
+#info #raceToday div.even { background:#f8f8f8;}/*　偶数列の背景色を変える　*/
+/*　場　*/
+#info #raceToday ul.bank { display:block; float:left; width:5em; margin:0; padding:0; list-style-type: none; text-align: center; }
+#info #raceToday ul.bank li { display:inline-block; font-size:90%;}
+#info #raceToday ul.bank li:first-child { font-weight:bold;}
+
+/* ナイト、薄暮　*/
+#info #raceToday ul.grade { display:block; float:left; width:50px; margin:0; padding:0; }
+#info #raceToday ul.grade li { display:block; width:40px; height:3em;}
+#info #raceToday ul.grade li span { display:block; float:left; width:40px; height:13px; margin:15px 0 0 0; padding:0; text-indent:-9999px; background:url(../images/i-sprite.png) no-repeat;}
+#info #raceToday ul.grade li span.hakubo { background:url(../images/i-sprite.png) -80px -279px;}/* 薄暮 */
+#info #raceToday ul.grade li span.night { background:url(../images/i-sprite.png) -40px -297px;}/* ナイター */
+#info #raceToday ul.grade li span.day { height:0; background:none;}
+
+/*　☆☆☆競馬場名☆☆☆　*/
+#info #raceToday ul.raceName { display:block; float:left; width:590px; margin:0 0 0 5px; padding:0; }
+#info #raceToday ul.raceName li { display:inline; float: left; }
+#info #raceToday ul.raceName li:first-child { width:7em; font-size:11pt; font-weight:bold; margin:0; padding:0; }/*　開催名　*/
+
+/*　出走表・オッズ・結果・映像　*/
+#info #raceToday ul.buttons { display:block; float:right; width:260px; margin:8px 0 0 0; padding:0; }
+#info #raceToday ul.buttons li { float: left; margin:0 0 0 5px; padding: 0; text-indent:-10000px;}
+#info #raceToday ul.buttons a { display:block; width:80px; height:23.333px; }
+#info #raceToday ul.buttons a.pro { background:url(../images/i-sprite.png) -390px -240px;}
+#info #raceToday ul.buttons a.res { background:url(../images/i-sprite.png) -475px -240px;}
+#info #raceToday ul.buttons a.ref { background:url(../images/i-sprite.png) -560px -240px;}
+#info #raceToday ul.buttons a.pro:hover { background:url(../images/i-sprite.png) -390px -265px;}
+#info #raceToday ul.buttons a.res:hover { background:url(../images/i-sprite.png) -475px -265px;}
+#info #raceToday ul.buttons a.ref:hover { background:url(../images/i-sprite.png) -560px -265px;}
+#info #raceToday ul.buttons li.inactive a.pro, #info #raceToday ul.buttons li.inactive a.pro:hover { background:url(../images/i-sprite.png) -390px -290px;}
+#info #raceToday ul.buttons li.inactive a.res, #info #raceToday ul.buttons li.inactive a.res:hover { background:url(../images/i-sprite.png) -475px -290px;}
+#info #raceToday ul.buttons li.inactive a.ref, #info #raceToday ul.buttons li.inactive a.ref:hover { background:url(../images/i-sprite.png) -560px -290px;}
+
+/*　//インデックス開催レース情報 ここまで　****************************************　*/
+
+/*　ログインボタン　*/
+
+/* w180ボタン　戻る・入金　投票購入確認画面で使用　*/
+#info #login ul { display:block; width:238px; margin:5px auto;}
+#info #login ul li { display: block; width:238px; float:left; margin:0; padding:0; list-style-type: none; text-align: center; letter-spacing:-0.1em; clear:both;}
+#info #login ul li a { display:inline-block; width:220px; height:1.6em; clear:both; margin:0 0 5px 0; text-align: left;  }
+#info #login ul li.mes { display: block; width:221px; margin:1px 5px 3px 5px; padding:2px; text-align:left;line-height:1.6; background:#fff; border:1px solid #9CF;}
+
+#info #login ul li.btn1 a { line-height:1.6; color:#222; padding:2px; text-decoration: none; text-align: center; 
+background: #f3f3f3; /* old browsers */
+background: -moz-linear-gradient(top, #ffffff 0%, #e5e5e5 100%); /* firefox */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#e5e5e5)); /* webkit */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* ie */
+background: -o-linear-gradient(top, #ffffff 0%,#e5e5e5 100%); /* opera */
+border:1px solid #f60;}
+
+#info #login ul li.btn2 a { line-height:1.6; color:#fff; font-weight:bold; margin:0 0 10px 0; padding:2px; text-decoration: none; text-align: center; 
+background: #87e0fd; /* old browsers */background: -moz-linear-gradient(top, #87e0fd 0%, #53cbf1 40%, #05abe0 100%); /* firefox */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#87e0fd), color-stop(40%,#53cbf1), color-stop(100%,#05abe0)); /* webkit */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#87e0fd', endColorstr='#05abe0',GradientType=0 ); /* ie */
+background: -o-linear-gradient(top, #87e0fd 0%,#53cbf1 40%,#05abe0 100%); /* opera */
+border:1px solid #ccc;}
+
+#info #login ul li.btn3 a { height:1.2em; line-height:1.3; color:#222; padding:2px; text-decoration: none; text-align: center; font-size:90%;
+background: #ffffff; /* old browsers */
+background: -moz-linear-gradient(top, #ffffff 0%, #e5e5e5 100%); /* firefox */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#e5e5e5)); /* webkit */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* ie */
+background: -o-linear-gradient(top, #ffffff 0%,#e5e5e5 100%); /* opera */
+border:1px solid #ccc;}
+
+#info #login ul li.btn1 a:hover, #info #login li.btn2 a:hover, #info #login ul li.btn3 a:hover { 
+background: #b2e1ff; /* old browsers */
+background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%); /* firefox */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#b2e1ff), color-stop(100%,#66b6fc)); /* webkit */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b2e1ff', endColorstr='#66b6fc',GradientType=0 ); /* ie */
+background: -o-linear-gradient(top, #b2e1ff 0%,#66b6fc 100%); /* opera */
+border:1px solid #09C;}
+
+/*　//開催レース情報 ここまで　****************************************　*/
+/*　レースプログラム　*/
+#info ul#racePrg { display:block; width:150px; height:26px; margin:0; padding:0; list-style-type: none; position:absolute; top:30px; left:558px; z-index:10; background:#F30; }
+#info ul#racePrg li { display: block; float: left; text-align: center; padding:0; margin:0 2px 0 0; }
+#info ul#racePrg li a { background: #fff; width: 11em; height: 1.9em;border: 1px solid #bbb; padding: 0; margin:0 0 5px 0; color: #333; text-decoration: none; display: block; text-align: center; font: bold 12px/22px "Lucida Grande", "Lucida Sans Unicode", verdana, lucida, sans-serif; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
+#info ul#racePrg li a:hover		{ color: #000; background: #CDED79; }
+#info ul#racePrg a:active		{ background: #fff; color: #333; }
+#info ul#racePrg li.active a	{ background: #CDED79; color: #000; }
+#info ul#racePrg li.inactive a	{ background: #ddd; color: #999; }
+#info ul#racePrg li.disable a	{ background: #eee; color: #ddd; }
+
+/*　タブ出走表・オッズ・結果｜映像・投票・LOTO */
+#info #RCtab { display:block; width:980px; height:30px; margin:10px 0; border-bottom:2px solid #6D9E0A; clear:both; }
+#info #RCtab ul { display:block; width:980px; margin:0; padding:0; list-style-type:none; }
+#info #RCtab ul li { float:left; margin:0 5px 0 0; padding:0; text-indent:-10000px; }
+#info #RCtab ul a { display:block; width:107.333px; height:30px; background:url(../images/i-sprite.png) no-repeat; }
+#info #RCtab ul a.tab1 { background-position:-260px -630px; }
+#info #RCtab ul a.tab2 { background-position:-374px -630px; }
+#info #RCtab ul a.tab3 { background-position:-488px -630px; }
+#info #RCtab ul a.tab4 { background-position:-601px -630px; }
+#info #RCtab ul a.tab5 { background-position:-715px -630px; }
+#info #RCtab ul a.tab1:hover, #info #RCtab li.active a.tab1 { background-position:-260px -670px; }
+#info #RCtab ul a.tab2:hover, #info #RCtab li.active a.tab2 { background-position:-374px -670px; }
+#info #RCtab ul a.tab3:hover, #info #RCtab li.active a.tab3 { background-position:-488px -670px; }
+#info #RCtab ul a.tab4:hover, #info #RCtab li.active a.tab4 { background-position:-601px -670px; }
+#info #RCtab ul a.tab5:hover, #info #RCtab li.active a.tab5 { background-position:-715px -670px; }
+
+/*　タブ 映像・投票・LOTOのみ */
+#info #tabAlone { display:block; width:980px; height:30px; margin:10px 0; border-bottom:2px solid #6D9E0A; clear:both; }
+#info #tabAlone ul { display:block;  margin:0; padding:0; list-style-type:none;  }
+#info #tabAlone ul li { float: left; margin: 0; padding: 0; text-indent:-10000px;}
+#info #tabAlone ul a { display:block; width:123px; height:30px; background:url(../images/i-sprite.png) no-repeat; }
+#info #tabAlone ul a.tab4 { width:80px; height:23px ; background:url(../images/i-sprite.png)  -550px -315px; margin-left:700px; }
+#info #tabAlone ul a.tab5 { width:80px; height:23px ; background:url(../images/i-sprite.png)  -640px -315px; margin-left:870px; }/*　投票　*/
+#info #tabAlone ul a.tab6 { width:80px; height:23px ; background:url(../images/i-sprite.png)  -730px -315px; margin-left:5px; }
+#info #tabAlone ul a.tab4:hover, #info #tabAlone li.active a.tab4 { background:url(../images/i-sprite.png)  -550px -340px; }
+#info #tabAlone ul a.tab5:hover, #info #tabAlone li.active a.tab5 { background:url(../images/i-sprite.png)  -640px -340px; }
+#info #tabAlone ul a.tab6:hover, #info #tabAlone li.active a.tab6 { background:url(../images/i-sprite.png)  -730px -340px; }
+
+/*　データベース：検索＞競走馬、騎手、調教師、レース、リーディング
+
+******************************************************************** */
+#info #DBtab { display:block; width:980px; height:24px; margin:10px 0 0 0; border-bottom:1px solid #6D9E0A ; clear:both; }
+#info #DBtab ul { display:block; width:980px; margin:0; padding:0; list-style-type:none;}
+#info #DBtab ul li { float: left; margin:0 5px 0 0; padding: 0; text-indent:-10000px;}
+#info #DBtab ul a { display:block; width:107px; height:24px; background:url(../images/i-sprite.png) no-repeat; }
+#info #DBtab ul a.tab1 { background:url(../images/i-sprite.png)  -260px -434px;} 
+#info #DBtab ul a.tab2 { background:url(../images/i-sprite.png)  -374px -434px;}
+#info #DBtab ul a.tab3 { background:url(../images/i-sprite.png)  -488px -434px;}
+#info #DBtab ul a.tab4 { background:url(../images/i-sprite.png)  -601px -434px;}
+#info #DBtab ul a.tab5 { background:url(../images/i-sprite.png)  -715px -434px; }
+#info #DBtab ul a.tab1:hover, #info #DBtab li.active a.tab1 { background:url(../images/i-sprite.png)  -260px -465px; } 
+#info #DBtab ul a.tab2:hover, #info #DBtab li.active a.tab2 { background:url(../images/i-sprite.png)  -374px -465px; }
+#info #DBtab ul a.tab3:hover, #info #DBtab li.active a.tab3 { background:url(../images/i-sprite.png)  -488px -465px; }
+#info #DBtab ul a.tab4:hover, #info #DBtab li.active a.tab4 { background:url(../images/i-sprite.png)  -601px -465px; }
+#info #DBtab ul a.tab5:hover, #info #DBtab li.active a.tab5 { background:url(../images/i-sprite.png)  -715px -465px; }
+
+/* 検索ボックス */
+#info .DBbox { display:block; width:958px; margin:-10px 0 10px 0; padding:15px 10px; border:1px solid #999; border-bottom-left-radius:6px; border-bottom-right-radius:6px; }
+
+/* 検索結果ページネーション */
+#info ul.ls-page { display:block; width:auto; text-align:right; margin:0;}
+#info ul.ls-page li { display:inline; margin:3px 0; padding:0 10px;}
+
+/*　検索＞二次タブ　総合成績、条件別成績、現役管理馬、過去の管理馬
+
+******************************************************************** */
+#info #DBtab2 { display:block; width:980px; height:24px; margin:0 0 0 0; border-bottom:1px solid #6D9E0A ; clear:both; }
+#info #DBtab2 ul { display:block; width:100%; margin:0; padding:0; list-style-type:none;}
+#info #DBtab2 ul li { float: left; margin:0 5px 0 0; padding: 0; text-indent:-10000px;}
+#info #DBtab2 ul a { display:block; width:107px; height:24px; background:url(../images/i-sprite.png) no-repeat; }
+#info #DBtab2 ul a.tab1 { background:url(../images/i-sprite.png)  -260px -495px;} /* 総合成績 */
+#info #DBtab2 ul a.tab2 { background:url(../images/i-sprite.png)  -374px -495px;} /* 条件別 */
+#info #DBtab2 ul a.tab3 { background:url(../images/i-sprite.png)  -260px -555px;} /* 現役管理馬 */
+#info #DBtab2 ul a.tab4 { background:url(../images/i-sprite.png)  -374px -555px;} /* 過去の管理馬 */
+#info #DBtab2 ul a.tab5 { width:75px; height:22px; background:url(../images/i-sprite.png)  -488px -555px;} /* 所属（リーディング） */
+#info #DBtab2 ul a.tab6 { background:url(../images/i-sprite.png)  -715px -495px;} /* 人気別 */
+
+#info #DBtab2 ul a.tab1:hover, #info #DBtab2 li.active a.tab1 { background:url(../images/i-sprite.png)  -260px -525px; }
+#info #DBtab2 ul a.tab2:hover, #info #DBtab2 li.active a.tab2 { background:url(../images/i-sprite.png)  -374px -525px; }
+#info #DBtab2 ul a.tab3:hover, #info #DBtab2 li.active a.tab3 { background:url(../images/i-sprite.png)  -260px -585px; }
+#info #DBtab2 ul a.tab4:hover, #info #DBtab2 li.active a.tab4 { background:url(../images/i-sprite.png)  -374px -585px; }
+#info #DBtab2 ul a.tab5:hover, #info #DBtab2 li.active a.tab5 { background:url(../images/i-sprite.png)  -488px -585px; }
+#info #DBtab2 ul a.tab6:hover, #info #DBtab2 li.active a.tab6 { background:url(../images/i-sprite.png)  -715px -525px; }
+
+
+/*　データベース：検索　ここまで
+******************************************************************** */
+
+/* レース番号リスト */
+#info ul#racenum,
+#info ul#racenum2 { display:block; width:980px; height:23px; border:0; margin:0 0 5px 0; padding:0; list-style-type: none; clear:both; }
+#info ul#racenum li,
+#info ul#racenum2 li { float:left; padding:0; margin:0 1px 0 0; text-indent:-10000px; }
+#info ul#racenum li a,
+#info ul#racenum2 li a { display:block; width:74.999px; height:23px; background:url(../images/i-sprite.png) no-repeat; }
+
+#info ul#racenum li a.rAl { background-position:-0px -935px; width:65px; }
+#info ul#racenum li a.r01 { background-position:-65px -935px; }
+#info ul#racenum li a.r02 { background-position:-140px -935px; }
+#info ul#racenum li a.r03 { background-position:-215px -935px; }
+#info ul#racenum li a.r04 { background-position:-290px -935px; }
+#info ul#racenum li a.r05 { background-position:-365px -935px; }
+#info ul#racenum li a.r06 { background-position:-440px -935px; }
+#info ul#racenum li a.r07 { background-position:-515px -935px; }
+#info ul#racenum li a.r08 { background-position:-590px -935px; }
+#info ul#racenum li a.r09 { background-position:-665px -935px; }
+#info ul#racenum li a.r10 { background-position:-740px -935px; }
+#info ul#racenum li a.r11 { background-position:-815px -935px; }
+#info ul#racenum li a.r12 { background-position:-890px -935px; }
+
+#info ul#racenum2 li a.r01 { background-position:-65px -1010px; }
+#info ul#racenum2 li a.r02 { background-position:-140px -1010px; }
+#info ul#racenum2 li a.r03 { background-position:-215px -1010px; }
+#info ul#racenum2 li a.r04 { background-position:-290px -1010px; }
+#info ul#racenum2 li a.r05 { background-position:-365px -1010px; }
+#info ul#racenum2 li a.r06 { background-position:-440px -1010px; }
+#info ul#racenum2 li a.r07 { background-position:-515px -1010px; }
+#info ul#racenum2 li a.r08 { background-position:-590px -1010px; }
+#info ul#racenum2 li a.r09 { background-position:-665px -1010px; }
+#info ul#racenum2 li a.r10 { background-position:-740px -1010px; }
+#info ul#racenum2 li a.r11 { background-position:-815px -1010px; }
+#info ul#racenum2 li a.r12 { background-position:-890px -1010px; }
+
+#info ul#racenum li a.rAl:hover, #info ul#racenum li.active a.rAl { background-position:-0px -960px; }
+#info ul#racenum li a.r01:hover, #info ul#racenum li.active a.r01 { background-position:-65px -960px; }
+#info ul#racenum li a.r02:hover, #info ul#racenum li.active a.r02 { background-position:-140px -960px; }
+#info ul#racenum li a.r03:hover, #info ul#racenum li.active a.r03 { background-position:-215px -960px; }
+#info ul#racenum li a.r04:hover, #info ul#racenum li.active a.r04 { background-position:-290px -960px; }
+#info ul#racenum li a.r05:hover, #info ul#racenum li.active a.r05 { background-position:-365px -960px; }
+#info ul#racenum li a.r06:hover, #info ul#racenum li.active a.r06 { background-position:-440px -960px; }
+#info ul#racenum li a.r07:hover, #info ul#racenum li.active a.r07 { background-position:-515px -960px; }
+#info ul#racenum li a.r08:hover, #info ul#racenum li.active a.r08 { background-position:-590px -960px; }
+#info ul#racenum li a.r09:hover, #info ul#racenum li.active a.r09 { background-position:-665px -960px; }
+#info ul#racenum li a.r10:hover, #info ul#racenum li.active a.r10 { background-position:-740px -960px; }
+#info ul#racenum li a.r11:hover, #info ul#racenum li.active a.r11 { background-position:-815px -960px; }
+#info ul#racenum li a.r12:hover, #info ul#racenum li.active a.r12 { background-position:-890px -960px; }
+
+#info ul#racenum2 li a.r01:hover, #info ul#racenum2 li.active a.r01 { background-position:-65px -1035px; }
+#info ul#racenum2 li a.r02:hover, #info ul#racenum2 li.active a.r02 { background-position:-140px -1035px; }
+#info ul#racenum2 li a.r03:hover, #info ul#racenum2 li.active a.r03 { background-position:-215px -1035px; }
+#info ul#racenum2 li a.r04:hover, #info ul#racenum2 li.active a.r04 { background-position:-290px -1035px; }
+#info ul#racenum2 li a.r05:hover, #info ul#racenum2 li.active a.r05 { background-position:-365px -1035px; }
+#info ul#racenum2 li a.r06:hover, #info ul#racenum2 li.active a.r06 { background-position:-440px -1035px; }
+#info ul#racenum2 li a.r07:hover, #info ul#racenum2 li.active a.r07 { background-position:-515px -1035px; }
+#info ul#racenum2 li a.r08:hover, #info ul#racenum2 li.active a.r08 { background-position:-590px -1035px; }
+#info ul#racenum2 li a.r09:hover, #info ul#racenum2 li.active a.r09 { background-position:-665px -1035px; }
+#info ul#racenum2 li a.r10:hover, #info ul#racenum2 li.active a.r10 { background-position:-740px -1035px; }
+#info ul#racenum2 li a.r11:hover, #info ul#racenum2 li.active a.r11 { background-position:-815px -1035px; }
+#info ul#racenum2 li a.r12:hover, #info ul#racenum2 li.active a.r12 { background-position:-890px -1035px; }
+
+#info ul#racenum li.inactive a.rAl { background-position:0 -985px; }
+#info ul#racenum li.inactive a.r01 { background-position:-65px -985px; }
+#info ul#racenum li.inactive a.r02 { background-position:-140px -985px; }
+#info ul#racenum li.inactive a.r03 { background-position:-215px -985px; }
+#info ul#racenum li.inactive a.r04 { background-position:-290px -985px; }
+#info ul#racenum li.inactive a.r05 { background-position:-365px -985px; }
+#info ul#racenum li.inactive a.r06 { background-position:-440px -985px; }
+#info ul#racenum li.inactive a.r07 { background-position:-515px -985px; }
+#info ul#racenum li.inactive a.r08 { background-position:-590px -985px; }
+#info ul#racenum li.inactive a.r09 { background-position:-665px -985px; }
+#info ul#racenum li.inactive a.r10 { background-position:-740px -985px; }
+#info ul#racenum li.inactive a.r11 { background-position:-815px -985px; }
+#info ul#racenum li.inactive a.r12 { background-position:-890px -985px; }
+
+#info ul#racenum2 li.inactive a.r01 { background-position:-65px -1060px; }
+#info ul#racenum2 li.inactive a.r02 { background-position:-140px -1060px; }
+#info ul#racenum2 li.inactive a.r03 { background-position:-215px -1060px; }
+#info ul#racenum2 li.inactive a.r04 { background-position:-290px -1060px; }
+#info ul#racenum2 li.inactive a.r05 { background-position:-365px -1060px; }
+#info ul#racenum2 li.inactive a.r06 { background-position:-440px -1060px; }
+#info ul#racenum2 li.inactive a.r07 { background-position:-515px -1060px; }
+#info ul#racenum2 li.inactive a.r08 { background-position:-590px -1060px; }
+#info ul#racenum2 li.inactive a.r09 { background-position:-665px -1060px; }
+#info ul#racenum2 li.inactive a.r10 { background-position:-740px -1060px; }
+#info ul#racenum2 li.inactive a.r11 { background-position:-815px -1060px; }
+#info ul#racenum2 li.inactive a.r12 { background-position:-890px -1060px; }
+
+
+/*　枠番 Bracket リスト　*/
+#info ul.waku { display:block; float:left; width:60px; height:17px; margin:0 0 0 160px; padding:0; list-style-type:none; }
+#info ul.narrow { margin:0 auto !important; }
+#info ul.waku li { display:block; float: left; margin:0 0 0 3px; padding: 0; width:10px; height:18px; text-align:center; font-size:10px;  }
+#info ul.waku li.n1 { width:17px; background:url(../images/i-sprite.png) no-repeat 0 -273px; }
+#info ul.waku li.n2 { width:17px; background:url(../images/i-sprite.png) no-repeat 0 -292px; }
+#info ul.waku li.n3 { width:17px; background:url(../images/i-sprite.png) no-repeat 0 -312px; }
+#info ul.waku li.n4 { width:17px; background:url(../images/i-sprite.png) no-repeat 0 -331px; }
+#info ul.waku li.n5 { width:17px; background:url(../images/i-sprite.png) no-repeat 0 -351px; }
+#info ul.waku li.n6 { width:17px; background:url(../images/i-sprite.png) no-repeat 0 -370px; }
+#info ul.waku li.n7 { width:17px; background:url(../images/i-sprite.png) no-repeat 0 -390px; }
+#info ul.waku li.n8 { width:17px; background:url(../images/i-sprite.png) no-repeat 0 -409px; }
+#info ul.waku li.n9 { width:17px; background:url(../images/i-sprite.png) no-repeat 0 -429px; }
+
+/* 賭式選択 */
+
+#info div#oddsType ul { display:block; width:980px; height:23px; border:0; margin:0 0 10px 0; padding:0; list-style-type: none; clear:both; }
+#info div#oddsType li { float:left; padding:0; margin:0 2px 0 0; text-indent:-10000px; }
+#info div#oddsType li .odd7 { margin:0 173px 0 0; }
+#info div#oddsType li a { display:block; width:80px; height:23px; background:url(../images/i-sprite.png) no-repeat; }
+
+#info div#oddsType li a.odd1 { background-position:-260px -705px; width:200px; }
+#info div#oddsType li a.odd2 { background-position:-465px -705px; }
+#info div#oddsType li a.odd3 { background-position:-550px -705px; }
+#info div#oddsType li a.odd4 { background-position:-635px -705px; }
+#info div#oddsType li a.odd5 { background-position:-720px -705px; }
+#info div#oddsType li a.odd6 { background-position:-805px -705px; }
+#info div#oddsType li a.odd7 { background-position:-890px -705px; }
+#info div#oddsType li a.odd8 { background-position:-121px -471px; width:105px; }
+#info div#oddsType li a.oddUpdate { background-position:-121px -471px; width:105px; }
+
+#info div#oddsType li a.odd1:hover, #info div#oddsType li.active a.odd1 { background-position:-260px -730px; }
+#info div#oddsType li a.odd2:hover, #info div#oddsType li.active a.odd2 { background-position:-465px -730px; }
+#info div#oddsType li a.odd3:hover, #info div#oddsType li.active a.odd3 { background-position:-550px -730px; }
+#info div#oddsType li a.odd4:hover, #info div#oddsType li.active a.odd4 { background-position:-635px -730px; }
+#info div#oddsType li a.odd5:hover, #info div#oddsType li.active a.odd5 { background-position:-720px -730px; }
+#info div#oddsType li a.odd6:hover, #info div#oddsType li.active a.odd6 { background-position:-805px -730px; }
+#info div#oddsType li a.odd7:hover, #info div#oddsType li.active a.odd7 { background-position:-890px -730px; }
+#info div#oddsType li a.odd8:hover, #info div#oddsType li.active a.odd8 { background-position:-121px -496px; }
+#info div#oddsType li a.oddUpdate:hover, #info div#oddsType li.active a.oddUpdate { background-position:-121px -496px; }
+
+#info div#oddsType li.inactive a.odd1 { background-position:-260px -1310px; width:200px; }
+#info div#oddsType li.inactive a.odd2 { background-position:-465px -1310px; }
+#info div#oddsType li.inactive a.odd3 { background-position:-550px -1310px; }
+#info div#oddsType li.inactive a.odd4 { background-position:-635px -1310px; }
+#info div#oddsType li.inactive a.odd5 { background-position:-720px -1310px; }
+#info div#oddsType li.inactive a.odd6 { background-position:-805px -1310px; }
+#info div#oddsType li.inactive a.odd7 { background-position:-890px -1310px; }
+#info div#oddsType li.inactive a.odd8 { background-position:-121px -471px; width:105px; }
+#info div#oddsType li.inactive a.oddUpdate { background-position:-121px -471px; width:105px; }
+
+
+/* 人気順高配当順　賭式選択 */
+
+#info div#oddsTypePop ul { display:block; width:980px; height:23px; border:0; margin:0 0 10px 0; padding:0; list-style-type: none; clear:both; }
+#info div#oddsTypePop li { float:left; padding:0; margin:0 2px 0 0; text-indent:-9999px; }
+#info div#oddsTypePop li .odd8 { margin:0 205px 0 0; }
+#info div#oddsTypePop li a { display:block; width:80px; height:23px; background:url(../images/i-sprite.png) no-repeat; }
+
+#info div#oddsTypePop li a.odd1 { background-position:-90px -705px;  }
+#info div#oddsTypePop li a.odd2 { background-position:-175px -705px; }
+#info div#oddsTypePop li a.odd3 { background-position:-465px -705px; }
+#info div#oddsTypePop li a.odd4 { background-position:-550px -705px; }
+#info div#oddsTypePop li a.odd5 { background-position:-635px -705px; }
+#info div#oddsTypePop li a.odd6 { background-position:-720px -705px; }
+#info div#oddsTypePop li a.odd7 { background-position:-805px -705px; }
+#info div#oddsTypePop li a.odd8 { background-position:-890px -705px; }
+#info div#oddsTypePop li a.odd9 { background-position:-121px -471px; width:105px; }
+#info div#oddsTypePop li a.oddUpdate { background-position:-121px -471px; width:105px; }
+
+#info div#oddsTypePop li a.odd1:hover, #info div#oddsTypePop li.active a.odd1 { background-position:-90px -730px; }
+#info div#oddsTypePop li a.odd2:hover, #info div#oddsTypePop li.active a.odd2 { background-position:-175px -730px; }
+#info div#oddsTypePop li a.odd3:hover, #info div#oddsTypePop li.active a.odd3 { background-position:-465px -730px; }
+#info div#oddsTypePop li a.odd4:hover, #info div#oddsTypePop li.active a.odd4 { background-position:-550px -730px; }
+#info div#oddsTypePop li a.odd5:hover, #info div#oddsTypePop li.active a.odd5 { background-position:-635px -730px; }
+#info div#oddsTypePop li a.odd6:hover, #info div#oddsTypePop li.active a.odd6 { background-position:-720px -730px; }
+#info div#oddsTypePop li a.odd7:hover, #info div#oddsTypePop li.active a.odd7 { background-position:-805px -730px; }
+#info div#oddsTypePop li a.odd8:hover, #info div#oddsTypePop li.active a.odd8 { background-position:-890px -730px; }
+#info div#oddsTypePop li a.odd9:hover, #info div#oddsTypePop li.active a.odd9 { background-position:-121px -496px; }
+#info div#oddsTypePop li a.oddUpdate:hover, #info div#oddsTypePop li.active a.oddUpdate { background-position:-121px -496px; }
+
+#info div#oddsTypePop li.inactive a.odd1 { background-position:-90px -1310px; }
+#info div#oddsTypePop li.inactive a.odd2 { background-position:-175px -1310px; }
+#info div#oddsTypePop li.inactive a.odd3 { background-position:-465px -1310px; }
+#info div#oddsTypePop li.inactive a.odd4 { background-position:-550px -1310px; }
+#info div#oddsTypePop li.inactive a.odd5 { background-position:-635px -1310px; }
+#info div#oddsTypePop li.inactive a.odd6 { background-position:-720px -1310px; }
+#info div#oddsTypePop li.inactive a.odd7 { background-position:-805px -1310px; }
+#info div#oddsTypePop li.inactive a.odd8 { background-position:-890px -1310px; }
+#info div#oddsTypePop li.inactive a.odd9 { background-position:-121px -471px; width:105px; }
+#info div#oddsTypePop li.inactive a.oddUpdate { background-position:-121px -471px; width:105px; }
+
+/* オッズ賭式リスト */
+#info ul#odds { display: block; width:30em; border:0; margin:0 auto; padding:0; list-style-type: none; text-align: center; }
+#info ul#odds li { display: block; float: left; text-align: center; padding: 0; margin: 0; }
+#info ul#odds li a,#info ul#odds li span { background: #fff; width:5em; height: 25px; border: 1px solid #bbb; border-right: none; padding: 0; margin:0 0 5px 0; color: #333; text-decoration: none; display: block; text-align: center; font: bold 12px/25px "Lucida Grande", "Lucida Sans Unicode", verdana, lucida, sans-serif; }
+#info ul#odds li.last a { border-right:1px solid #bbb; }
+#info ul#odds li a:hover { color: #000; background: #CDED79; }
+#info ul#odds a:active { background: #fff; color: #333; }
+#info ul#odds li.active a { background: #CDED79; color: #000; }
+#info ul#odds li.inactive a,#info ul#odds li.inactive span { background: #ddd; color: #999; }
+
+/* 人気順オッズ用テーブル追加背景色 */
+#info table.ninkiodds td:first-child { background:#EAE7C8; color:#333 !important; }
+
+/*==================================================
+	レース情報
+==================================================*/
+#info #RCheader { display:block; clear:both; overflow:hidden; width:980px; min-height:70px; margin:10px 0; padding:5px 0 0 0; border:1px solid #CCC; border-left:none; border-right:none; }
+#info #RCheader #RCdata1 { display:block; float:left; /* overflow:hidden;*/ width:50px; min-height:70px; margin:0 5px 0 0; padding:0; }
+#info #RCheader #RCdata1 span { display:block; width:50px; height:50px; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+#info #RCheader #RCdata1 span.R1 { background-position:-1px -1130px; }
+#info #RCheader #RCdata1 span.R2 { background-position:-55px -1130px; }
+#info #RCheader #RCdata1 span.R3 { background-position:-110px -1130px; }
+#info #RCheader #RCdata1 span.R4 { background-position:-165px -1130px; }
+#info #RCheader #RCdata1 span.R5 { background-position:-220px -1130px; }
+#info #RCheader #RCdata1 span.R6 { background-position:-275px -1130px; }
+#info #RCheader #RCdata1 span.R7 { background-position:-330px -1130px; }
+#info #RCheader #RCdata1 span.R8 { background-position:-385px -1130px; }
+#info #RCheader #RCdata1 span.R9 { background-position:-440px -1130px; }
+#info #RCheader #RCdata1 span.R10 { background-position:-495px -1130px; }
+#info #RCheader #RCdata1 span.R11 { background-position:-550px -1130px; }
+#info #RCheader #RCdata1 span.R12 { background-position:-605px -1130px; }
+#info #RCheader #RCdata2 { display:block; float:left; /*overflow:hidden;*/ width:649px; min-height:70px; margin:0; padding:0; }
+#info #RCheader #RCdata2 h3 { display:inline; margin:0; padding:0; background:none; border:none; color:#000; line-height:1.5; }
+#info #RCheader #RCdata2 span.ico_gd,
+#info #RCheader #RCdata2 span.g1,
+#info #RCheader #RCdata2 span.g2,
+#info #RCheader #RCdata2 span.g3,
+#info #RCheader #RCdata2 span.jpn1,
+#info #RCheader #RCdata2 span.jpn2,
+#info #RCheader #RCdata2 span.jpn3 { display:inline-block; width:30px; height:15px; margin:0 0 4px 5px; padding:0; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+#info #RCheader #RCdata2 span.l { display:inline-block; width:30px; height:15px; margin:0 0 4px 5px; padding:0; background:url(../images/ico_l.gif) no-repeat; text-indent:-10000px; }
+#info #RCheader #RCdata2 span.lr { display:inline-block; width:30px; height:15px; margin:0 0 4px 5px; padding:0; background:url(../images/ico_lr.gif) no-repeat; text-indent:-10000px; }
+#info #RCheader #RCdata2 span.ico_gd { background-position:-39px -550px; }
+#info #RCheader #RCdata2 span.g1 { background-position:-40px -175px; }
+#info #RCheader #RCdata2 span.g2 { background-position:-40px -191px; }
+#info #RCheader #RCdata2 span.g3 { background-position:-40px -207px; }
+#info #RCheader #RCdata2 span.jpn1 { background-position:-40px -255px; }
+#info #RCheader #RCdata2 span.jpn2 { background-position:-40px -240px; }
+#info #RCheader #RCdata2 span.jpn3 { background-position:-40px -225px; }
+#info #RCheader #RCdata2 ul { display:block; clear:both; height:20px; margin:0 0 5px 0; padding:0; }
+#info #RCheader #RCdata2 li { display:inline; float:left; height:20px; margin:0 5px 0 0; padding:0; font-size:9pt; }
+#info #RCheader #RCdata2 li.RCdate,
+#info #RCheader #RCdata2 li.RCnum,
+#info #RCheader #RCdata2 li.RCdst,
+#info #RCheader #RCdata2 li.RCstm { padding:0 2px;  height:20px; line-height:20px; background-color:#FFFCF2; border:1px solid #FFECB2; }
+#info #RCheader #RCdata2 li.RCwthr { padding:2px; margin:0 4px; height:15px; line-height:13px; /padding:5px 2px;}
+#info #RCheader #RCdata2 li.RCwthr img { padding:0px; margin:0 0 0 2px; }
+#info #RCheader #RCdata2 li.RCcnd { padding:2px; margin:0 4px; height:15px; line-height:13px; /padding:5px 2px;}
+#info #RCheader #RCdata2 li.RCcnd img { padding:0; margin:0 0 0 2px;  }
+#info #RCheader #RCdata2 li.RCwatr { padding:2px; margin:0 4px; height:15px; line-height:13px;}
+#info #RCheader #RCdata2 span.baba { display:inline-block; width:32px; height:15px; line-height:15px; margin:0 0 0 2px; border:1px solid #99CC00; background:#EDFDE9; text-align:center; }
+#info #RCheader #RCdata2 p { clear:both; margin:0; padding:0; font-size:9pt; }
+#info #RCheader #RCdata3 { display:block; float:left; overflow:hidden; width:156px; min-height:70px; margin:0; padding:0; }
+#info #RCheader #RCdata4 { display:block; float:left; overflow:hidden; width:120px; min-height:70px; margin:0; padding:0; }
+#info #RCheader #RCdata4 li { display:block; width:120px; padding:0 0 5px 0; }
+#info #RCheader #RCdata4 li a { display:block; width:120.333px; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+#info #RCheader #RCdata4 li a.btn_bet { height:32px; background-position:-880px -230px; }
+#info #RCheader #RCdata4 li a.btn_live { height:23px; background-position:-880px -380px; }
+#info #RCheader #RCdata4 li a.btn_mov { width:120px; height:23px; background-position:-880px -430px; }
+#info #RCheader #RCdata4 li a.btn_bet:hover { background-position:-880px -265px; }
+#info #RCheader #RCdata4 li a.btn_live:hover { background-position:-880px -405px; }
+#info #RCheader #RCdata4 li a.btn_mov:hover { background-position:-880px -455px; }
+
+#info #RCheader #RCdata4 span.RCtime { display:block; width:118px; height:18px; background:#FFECFD; border:1px solid #E3E3E3; text-align:center; }
+_::-webkit-full-page-media, :future, :root #info #RCheader #RCdata4 span.RCtime { font-size: 13px; }
+
+
+#info #content .RCres { display:block; width:980px; height:22px; padding:2px; border:1px solid #ccc; }
+#info #content .RCres1 { display:inline; float:left; }
+#info #content .RCres2 { display:block; float:right; }
+
+#info #content .RCres1 li { display:inline; float:left; }
+#info #content .RCres1 li h3 { margin:0; padding:0; background:none; border:none; }
+#info #content .RCres1 li h3 a { display:inline-block; float:left; color:#000; line-height:1.4 !important; margin:0 5px;}
+
+#info #content .RCres1 span { display:block; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+#info #content .RCres1 span.ico_gd,
+#info #content .RCres1 span.g1,
+#info #content .RCres1 span.g2,
+#info #content .RCres1 span.g3,
+#info #content .RCres1 span.jpn1,
+#info #content .RCres1 span.jpn2,
+#info #content .RCres1 span.jpn3 { display:block; width:30px; height:15px; margin:4px 0 0 5px; padding:0; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+#info #content .RCres1 span.ico_gd { background-position:-39px -550px; }
+#info #content .RCres1 span.g1 { background-position:-40px -175px; }
+#info #content .RCres1 span.g2 { background-position:-40px -191px; }
+#info #content .RCres1 span.g3 { background-position:-40px -207px; }
+#info #content .RCres1 span.jpn1 { background-position:-40px -255px; }
+#info #content .RCres1 span.jpn2 { background-position:-40px -240px; }
+#info #content .RCres1 span.jpn3 { background-position:-40px -225px; }
+#info #content .RCres1 span.l { display:block; width:30px; height:15px; margin:4px 0 0 5px; padding:0; background:url(../images/ico_l.gif) no-repeat; text-indent:-10000px; }
+#info #content .RCres1 span.lr { display:block; width:30px; height:15px; margin:4px 0 0 5px; padding:0; background:url(../images/ico_lr.gif) no-repeat; text-indent:-10000px; }
+
+#info #content .RCres1 span.R1,
+#info #content .RCres1 span.R2,
+#info #content .RCres1 span.R3,
+#info #content .RCres1 span.R4,
+#info #content .RCres1 span.R5,
+#info #content .RCres1 span.R6,
+#info #content .RCres1 span.R7,
+#info #content .RCres1 span.R8,
+#info #content .RCres1 span.R9,
+#info #content .RCres1 span.R10,
+#info #content .RCres1 span.R11,
+#info #content .RCres1 span.R12 { width:50px; height:22px; }
+
+#info #content .RCres1 span.R1 { background-position:-1px -1184px; }
+#info #content .RCres1 span.R2 { background-position:-55px -1184px; }
+#info #content .RCres1 span.R3 { background-position:-109px -1184px; }
+#info #content .RCres1 span.R4 { background-position:-166px -1184px; }
+#info #content .RCres1 span.R5 { background-position:-220px -1184px; }
+#info #content .RCres1 span.R6 { background-position:-274px -1184px; }
+#info #content .RCres1 span.R7 { background-position:-331px -1184px; }
+#info #content .RCres1 span.R8 { background-position:-385px -1184px; }
+#info #content .RCres1 span.R9 { background-position:-439px -1184px; }
+#info #content .RCres1 span.R10 { background-position:-496px -1184px; }
+#info #content .RCres1 span.R11 { background-position:-550px -1184px; }
+#info #content .RCres1 span.R12 { background-position:-604px -1184px; }
+
+#info #content .RCres2 li { display:block; float:left; text-indent:-10000px; }
+#info #content .RCres2 li a { display:block; height:23px; background:url(../images/i-sprite.png) no-repeat; }
+#info #content .RCres2 li a.btn_mov { width:120px; background-position:-880px -430px; }
+#info #content .RCres2 li a.btn_res { width:80px; margin:0 0 0 2px; background-position:-475px -240px; }
+#info #content .RCres2 li a.btn_mov:hover { background-position:-880px -455px; }
+#info #content .RCres2 li a.btn_res:hover { background-position:-475px -265px; }
+
+#info #raceInfo { position:relative; width:972px; min-height:36px; margin:0 0 7px 0; padding:5px 3px; border:1px solid #ddd;  }
+#info #raceInfo span { line-height:1.3; }
+#info #raceInfo img { margin:2px 4px; } /* グレード、ナイターのアイコン */
+
+#info ul#reload { display:block; width:270px; margin:0; padding:0; list-style-type: none; position:absolute; top:1em; left:750px; }
+#info ul#reload li { display: block; float: left; text-align: center; padding:0; margin:0; }
+#info ul#reload li:first-child { width:12em; margin:2px 0; padding:0.15em; font-size:9pt;text-align: center; background:#eee;}
+#info ul#reload a { background: #fff; width: 5em; height: 1.8em; line-height:1.1em; border: 1px solid #bbb; padding: 0; margin:0 0 0 8px; color: #333; text-decoration: none; display: block; text-align: center; font: bold 12px/22px "Lucida Grande", "Lucida Sans Unicode", verdana, lucida, sans-serif; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
+#info ul#reload a:hover { color: #000; background: #CDED79; }
+
+/* 払戻金一覧の人気順td用 */
+#info #content table.minipay th { width:70px; }
+#info #content table.minipay td.num { width:70px; }
+#info #content table.minipay td.kin { text-align:right; }
+#info #content table.minipay td.nin { width:70px; font-size:90%; }
+
+/* ログインすると予想が見られます　*/
+#info #notice { width:460px; height:auto; margin:5px 0; padding:5px; border:1px solid #fc9; background:#ffc;}
+
+/*　情報オッズ・出走表ルール　*************************　*/
+
+#info #content table ul.name { display:block; width:142px; *width:140px; margin:5px 0 0 5px; padding:0; list-style-type:none; }
+#info #content table ul.name li { display:block; float: left; margin:0 0 5px 5px; padding: 0; width:8em; text-align:left;  }
+#info #content table ul.name li:first-child { display:block; float: left; margin: 0; padding: 0; text-indent:-10000px; width:20px; height:17px;  }
+#info #content table ul.name li.n1 { background:url(../images/i-sprite.png) no-repeat 0 -273px; }
+#info #content table ul.name li.n2 { background:url(../images/i-sprite.png) no-repeat 0 -292px; }
+#info #content table ul.name li.n3 { background:url(../images/i-sprite.png) no-repeat 0 -312px; }
+#info #content table ul.name li.n4 { background:url(../images/i-sprite.png) no-repeat 0 -331px; }
+#info #content table ul.name li.n5 { background:url(../images/i-sprite.png) no-repeat 0 -351px; }
+#info #content table ul.name li.n6 { background:url(../images/i-sprite.png) no-repeat 0 -370px; }
+#info #content table ul.name li.n7 { background:url(../images/i-sprite.png) no-repeat 0 -390px; }
+#info #content table ul.name li.n8 { background:url(../images/i-sprite.png) no-repeat 0 -409px; }
+#info #content table ul.name li.n9 { background:url(../images/i-sprite.png) no-repeat 0 -429px; }
+
+/* オッズテーブルtb50 Pale TH BGcolor */
+.tb50,.tb50c { width:100%; margin:0; padding:0; border:1px #aaa solid; border-collapse:collapse; }
+.tb50 th,.tb50c th { padding:2px; color:#222; font-weight:bold; line-height:1.6; text-align:center; background: #f2f6f8;border: 1px #aaa solid; white-space:nowrap; }
+.tb50 td { padding:3px 2px; border:1px #aaa solid; text-align:right;}
+.tb50c td { padding:3px 2px; border:1px #aaa solid; text-align:center;}
+.tb50 td.al-center { text-align:center !important;}
+.tb50 td.notice { text-align:center !important; background:#FFF2F2 !important;}
+.tb50 td.void { height:2px; padding:0; background:#555 !important;}
+.tb50 td a, .tb50c td a { display:block; width:100%; height:100%;}
+
+/* オッズテーブルtb50 TH NO-BGcolor */
+.tb51 { width:100%; margin:0; padding:0; border:1px #aaa solid; border-collapse:collapse;  overflow: visible; }
+.tb51 th { padding:2px; color:#222; font-weight:bold; line-height:1.3; text-align:center; border: 1px #aaa solid; white-space:nowrap; }
+.tb51 tr.normal th { font-weight:normal;  }
+.tb51 td { padding:2px; border:1px #aaa solid; text-align:right;}
+.tb51 tr.al-center td { text-align:center !important;}
+
+
+/*　オッズ・人気順表示切替タブ　*/
+#info div#tab_odds { display:block; width:980px; margin:10px 0; height:22px; border-bottom:2px solid #6D9E0A; clear:both;  }
+#info #tab_odds ul { display:block; width:980px; margin:0; padding:0; list-style-type:none;  }
+#info #tab_odds ul li { float: left; margin: 0; padding: 0; text-indent:-10000px;}
+#info #tab_odds a { display:block; width:123px; height:22px; background:url(../images/i-sprite.png) no-repeat; }
+#info #tab_odds a.tab1 { background:url(../images/i-sprite.png)  -550px -370px; } 
+#info #tab_odds a.tab2 { background:url(../images/i-sprite.png)  -675px -370px; }
+#info #tab_odds a.tab1:hover, #info #tab_odds li.active a.tab1 { background:url(../images/i-sprite.png)  -550px -400px; } 
+#info #tab_odds a.tab2:hover, #info #tab_odds li.active a.tab2 { background:url(../images/i-sprite.png)  -675px -400px; }
+
+/*　出走表　*/
+.tb60{ width:100%; margin:5px 0; padding:0; border:1px #aaa solid; border-collapse:collapse; text-align:center; }
+.tb60 th { padding:4px 2px; color:#222; font-weight:normal; line-height:1.2; text-align:center; letter-spacing:-2.0;border: 1px #aaa solid;background:url(../images/bg-th-help2.gif) no-repeat bottom right; font-size:90%; }
+.tb60 th.nohelp { background:#ccc; }
+.tb60 td { padding:3px 2px; border: 1px #aaa solid; line-height:1.3;}
+.tb60 th a, .tb60 th a:visited { display:block; text-decoration:none; color:#000; }
+.tb60 th a:hover { background:none !important;}
+/*　出走表　ヘルプ無し　*/
+.tb61{ width:100%; margin:5px 0; padding:0; border:1px #aaa solid; border-collapse:collapse; text-align:center; }
+.tb61 th { padding:4px 2px; color:#222; font-weight:normal; line-height:1.2; text-align:center; letter-spacing:-2.0;border: 1px #aaa solid;background:url(../images/bg-th-help2.gif) no-repeat bottom left; font-size:90%; }
+.tb61 td { padding:3px 2px; border: 1px #aaa solid; line-height:1.3;}
+.tb61 th a, .tb61 th a:visited { display:block; text-decoration:none; color:#000; }
+.tb61 th a:hover { background:none !important;}
+
+/*　開催テーブル　*/
+.tb10 { width:100%; margin:0; padding:0; border:1px #aaa solid; border-collapse:collapse; text-align:center; font-size:90%; }
+.tb10 th { padding:2px; color:#222; font-weight:bold; line-height:1.6; text-align:center; background: #f2f6f8;border: 1px #aaa solid;  }
+.tb10 td { padding:0 ; border:1px #aaa solid; }
+.tb10 td a, .tb10 th a,.tb10 td a:visited,.tb10 th a:visited{ color:#000; text-decoration:none; line-height:1.6; }
+.tb10 th.blank:hover { background:#f2f6f8; !important}
+
+
+/* 情報取消し ***************************************  */
+/* 取消
+********************************************************* */
+tr.del td { background:#eee; color:#999; }
+tr.del td .tx_red { color:#f00;}
+td.del { background:#eee !important; color:#999; }
+ 
+/*　レース情報汎用　*/
+#info div.section1 { width:100%; margin:5px auto; padding:0; clear:both; }
+#info div.goTop { display:block; width:970px; min-height:20px;  margin:5px 0; padding:0; text-align:right; clear:both; border-bottom:1px dotted #ccc; }
+
+#info #footer { margin:20px 0 0 0; clear:both; }
+#info #footer #footerInner { font-size:80%; margin:0 auto; padding:10px; width:980px; }
+_::-webkit-full-page-media, :future, :root #info #footer #footerInner { font-size:70%; }
+#info #footer p#copy { float:left; font-size:11px; }
+#info #footer ul#footerNav { float:right; min-width:670px; padding-left:0; list-style-type:none !important; }
+#info #footer ul#footerNav li { float:left; margin-left:10px; padding-left:5px; }
+#info #footer ul#footerNav li a { color:#000; text-decoration:none; }
+#info #footer ul#footerNav li a:hover { text-decoration:underline; }
+
+/*　競馬場リンクバナー　160*40　*/
+#info a.bn_banei { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) 0px 0px;}
+#info a.bn_hokkaido { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -162px 0px;}
+#info a.bn_iwate { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -325px 0px;}
+#info a.bn_kanazawa { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -490px 0px;}
+#info a.bn_kasamatsu { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -655px 0px;}
+#info a.bn_nagoya { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -820px 0px;}
+
+#info a.bn_hyogo { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) 0px -40px;}
+#info a.bn_fukuyama { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -162px -40px;}
+#info a.bn_kochi { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -325px -40px;}
+#info a.bn_saga { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -490px -40px;}
+#info a.bn_arao { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -655px -40px;}
+
+#info a.bn_urawa { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) 0 -80px;}
+#info a.bn_funabashi { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -162px -80px;}
+#info a.bn_ooi { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -325px -80px;}
+#info a.bn_kawasaki { display:block; width:160px; height:40px; text-indent:-9999px; margin:0; padding:0; background:url(../images/home-list.png?20160912) -490px -80px;}
+
+/*　ライブ映像・過去映像
+==================================================*/
+#info a.btn_close  { display:block; width:20px; height:20px; text-indent:-9999px; margin:0 10x 0 0; padding:0; background:url(../images/i-sprite.png) -145px -420px; position:absolute; top:5px; left:3px;}
+#info a.btn_close:hover  { background-position:-145px -443px;}
+#info a.btn_open  { display:block; width:20px; height:20px; text-indent:-9999px; margin:0 10px 0 0; padding:0; background:url(../images/i-sprite.png) -120px -420px; position:absolute; top:5px; left:3px;}
+#info a.btn_open:hover  { background-position:-120px -443px;}
+
+#info #MVtab1, #info #MVtab2 { display:block; width:auto; height:24px; margin:0; border-bottom:1px solid #6D9E0A ; clear:both; }
+#info #MVtab1 ul, #info #MVtab2 ul { display:block; width:980px; margin:0; padding:0; list-style-type:none;}
+#info #MVtab1 ul li, #info #MVtab2 ul li { float: left; margin:0 5px 0 0; padding: 0; text-indent:-10000px;}
+#info #MVtab1 ul a, #info #MVtab2 ul a { display:block; height:24px; background:url(../images/i-sprite.png) no-repeat; }
+#info #MVtab1 ul a { width:107px; }
+#info #MVtab2 ul a { width:75px; }
+
+#info #MVtab1 ul a.live { background-position:-570px -554px; }
+#info #MVtab1 ul a.movie { background-position:-684px -554px; }
+#info #MVtab1 ul a.live:hover, #info #MVtab1 li.active a.live { background-position:-570px -585px; }
+#info #MVtab1 ul a.movie:hover, #info #MVtab1 li.active a.movie { background-position:-684px -585px; }
+
+#info #MVtab2 ul a.tab1 { background-position:-488px -495px; }
+#info #MVtab2 ul a.tab2 { background-position:-570px -495px; }
+#info #MVtab2 ul a.tab1:hover, #info #MVtab2 li.active a.tab1 { background-position:-488px -525px; }
+#info #MVtab2 ul a.tab2:hover, #info #MVtab2 li.active a.tab2 { background-position:-570px -525px; }
+
+#info a.prev, #info a.next { font-weight:normal; color:#FFF; }
+
+/* レース日とレース日選択　開催カレンダーリンク
+==================================================*/
+
+#RCinfo { display:block; float:left; width:980x; height:27px; line-height:27px; margin:0 0 5px 0; padding:0; }
+#info #RCcal a { margin:5px 0 0 0;}
+#info #RCcal a.prev  { display:block; width:40px; height:20px; text-indent:-9999px; margin:0 5px 0 0; padding:0; background:url(../images/i-sprite.png) -120px -525px;}
+#info #RCcal a.prev:hover { background-position:-120px -550px; }
+#info #RCcal a.next  { display:block; width:40px; height:20px; text-indent:-9999px; margin:0; padding:0; background:url(../images/i-sprite.png) -165px -525px;}
+#info #RCcal a.next:hover { background-position:-165px -550px; }
+#info a.ico_cal  { display:block; width:110px; height:20px; text-indent:-9999px; margin:0; padding:0; background:url(../images/i-sprite.png) -275px -270px;}
+
+#RCtoday { display:block; float:left; width:220px; height:27px; line-height:27px; padding:0 0 0 5px; font-weight:bold; border-bottom:#eee solid 1px;
+background: #f3fdc9; /* Old browsers */ background: -moz-linear-gradient(top, #f3fdc9 13%, #edfabc 96%); /* FF3.6+ */ background: -webkit-gradient(linear, left top, left bottom, color-stop(13%, #f3fdc9), color-stop(96%, #edfabc)); /* Chrome,Safari4+ */ background: -webkit-linear-gradient(top, #f3fdc9 13%, #edfabc 96%); /* Chrome10+,Safari5.1+ */ background: -o-linear-gradient(top, #f3fdc9 13%, #edfabc 96%); /* Opera 11.10+ */ background: -ms-linear-gradient(top, #f3fdc9 13%, #edfabc 96%); /* IE10+ */ background: linear-gradient(top, #f3fdc9 13%, #edfabc 96%); /* W3C */ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f3fdc9', endColorstr='#edfabc', GradientType=0 ); /* IE6-9 */
+}
+
+#RCtoday select { font-size:105%; }
+
+#RCcal { display:block; float:left; width:392px; height:27px; line-height:27px; margin:0; text-align:center; border-bottom:#eee solid 1px; }
+#RCcal ul { display:block; margin:0 0 0 20px; }
+#RCcal ul li { display:block; float:left; height:23px; }
+#RCcal ul li.selected { display:inline-block; width:150px; margin:0 5px; font-size:small;}
+#RCcal ul li.cal { display:block; width:105px; margin:5px 0 0 10px;}
+
+#RCopen { display:block; float:left; width:192px; height:27px; line-height:27px; margin:0; text-align:center; border-bottom:#eee solid 1px; }
+#RCopen ul { display:block; margin:5px 0 0 5px; }
+#RCopen ul li { display:block; float:right; width:100px; height:23px; margin:0 0 0 2px; padding:0:}
+#RCopen ul li a { display:block; float:right; width:100%; height:100%; margin:0;}
+
+#RCprint { display:block; float:left; width:170px; height:27px; line-height:27px;text-align:center; border-bottom:#eee solid 1px; }
+#RCprint ul { display:block; margin:5px 0 0 5px; }
+#RCprint ul li { display:block; float:left; width:70px; height:23px; margin:0 0 0 2px; padding:0:}
+#RCprint ul li a { display:block; float:left; width:100%; height:100%; margin:0;}
+
+#RCprintL { display:block; float:left; width:750px; height:27px; margin:0 0 0 1px; line-height:27px; border-bottom:#eee solid 1px; }
+#RCprintL ul { display:block; margin:5px 0 0 600px; }
+#RCprintL ul li { display:block; float:left; width:70px; height:23px; margin:0 0 0 2px; padding:0:}
+#RCprintL ul li a { display:block; float:left; width:100%; height:100%; margin:0;}
+
+/*　フルサイズ　 */
+#RCprintF { display:block; float:left; width:980px; height:27px; margin:0; line-height:27px; border-bottom:#eee solid 1px; }
+#RCprintF ul { display:block; float:right; margin:5px 0 0 0; }
+#RCprintF ul li { display:block; float:left; width:70px; height:23px; margin:0 0 0 2px; padding:0:}
+#RCprintF ul li a { display:block; float:left; width:100%; height:100%; margin:0;}
+
+
+#RCcal, #RCopen,#RCprint,#RCprintL,#RCprintF { background: #ededed; /* Old browsers */ background: -moz-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%); /* FF3.6+ */ background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ffffff), color-stop(50%, #f3f3f3), color-stop(51%, #ededed), color-stop(100%, #ffffff)); /* Chrome,Safari4+ */ background: -webkit-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%); /* Chrome10+,Safari5.1+ */ background: -o-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%); /* Opera 11.10+ */ background: -ms-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%); /* IE10+ */ background: linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%); /* W3C */ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fdfdfd', endColorstr='#f3f3f3', GradientType=0 ); /* IE6-9 */
+}
+#info #RCdata5 li a.btn_mov { height:23px; background-position:-880px -430px; margin-top:5px; }
+#info #RCdata5 li a.btn_mov:hover { background-position:-880px -455px; }
+
+
+/* 詳細出走表 
+==================================================*/
+#info #content table.ent1 th,
+#info #content table.ent1 td { line-height:1.3; font-size:12px; }
+
+#info #content table.ent1 td a { font-size:13px; }
+#info #content table.ent1 td a.tx-small { font-size:12px; }
+
+#info #content table.ent1 td span.tx-large { font-size:20px; font-weight:bold; }
+#info #content table.ent1 td a.tx-large { font-size:16px; white-space:nowrap; }
+#info #content table.ent1 td a.tx-midium { font-size:14px; white-space:nowrap; }
+#info #content table.ent1 td a.tx-small { font-size:12px; white-space:nowrap; }
+#info #content table.ent1 th,
+#info #content table.ent1 td.nowrap { white-space:nowrap; }
+
+#info #content table.ent1 td a.btn_open_s,
+#info #content table.ent1 td a.btn_close_s { display:block; width:16px; height:16px; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+
+#info #content table.ent1 td a.btn_open_s { background-position:-170px -420px; }
+#info #content table.ent1 td a.btn_open_s:hover { background-position:-170px -443px; }
+
+#info #content table.ent1 td a.btn_close_s { background-position:-190px -420px; }
+#info #content table.ent1 td a.btn_close_s:hover { background-position:-190px -443px; }
+
+#info #content table.ent2 td { text-align:center; border:none; background:none; padding:0; }
+
+#info #content table span.time,
+#info #content table span.niren,
+#info #content table span.sanren { background-color:#FFECFD; border:1px solid #E3E3E3; }
+
+
+
+/* 開催スケジュール 
+==================================================*/
+
+/*　開催テーブル　*/
+.tbSched { width:100%; margin:0; padding:0; border:1px #aaa solid; border-collapse:collapse; text-align:center; font-size:10pt; }
+.tbSched th { padding:1px; color:#222; font-weight:bold; line-height:1.2; text-align:center; background: #f2f6f8;border: 1px #aaa solid; }
+.tbSched td { padding:1px 0; min-height:26px; border:1px #aaa solid;line-height:1.2;vertical-align:bottom;  }
+.tbSched td a, .tbSched th a,.tbSched td a:visited,.tbSched th a:visited{ color:#000; text-decoration:none; line-height:1.6; }
+.tbSched th.blank:hover { background:#f2f6f8; !important}
+
+table.tbSched td.today, table.tbSched th.today{ background:#FEF1C4; border-right:2px solid #666 !important;border-left:2px solid #666 !important; }
+/* アイコン共通事項 */
+table.tbSched td div,table.tbSched2 td div { display:block; width:22px; height:14px; color:#000; margin:1px auto; padding:0; text-align:center; letter-spacing:-0.03em; text-indent:-9999px;}
+table.tbSched td div a { display:block; width:100%; height:100%;}
+
+/* 開催　*/
+div.ico-kaisai { background:url(../images/ico_kaisai.gif) no-repeat; }
+
+/* 取止め　*/
+div.ico-chusi { background:url(../images/ico_toriyame.gif) no-repeat; }
+div.ico-toriyame { background:url(../images/ico_toriyame.gif) no-repeat; }
+/* グレード　*/
+div.ico-g1 { background:url(../images/ico_g1.gif) no-repeat; }
+div.ico-g2 { background:url(../images/ico_g2.gif) no-repeat; }
+div.ico-g3 { background:url(../images/ico_g3.gif) no-repeat; }
+
+div.ico-jpn1 { background:url(../images/ico_jpn1.gif) no-repeat; }
+div.ico-jpn2 { background:url(../images/ico_jpn2.gif) no-repeat; }
+div.ico-jpn3 { background:url(../images/ico_jpn3.gif) no-repeat; }
+
+div.ico-f1 { background:url(../images/ico_f1.gif) no-repeat; }
+div.ico-f2 { background:url(../images/ico_f2.gif) no-repeat; }
+
+div.ico-gp  { background:url(../images/ico_gp.gif) no-repeat; }
+div.ico-sg  { background:url(../images/ico_sg.gif) no-repeat; }
+div.ico-jusho  { background:url(../images/ico_jusho.gif) no-repeat; }
+
+td div a:hover { filter: alpha(opacity=30); -moz-opacity:0.3;  opacity:0.3;}
+
+/* グレードアンカー　*/
+div.ico-kaisai a { background:url(../images/ico_kaisai_a.gif) no-repeat;}
+div.ico-chusi a { background:url(../images/ico_toriyame_a.gif) no-repeat; }
+div.ico-toriyame a { background:url(../images/ico_toriyame_a.gif) no-repeat; }
+
+div.ico-g1 a { background:url(../images/ico_g1_a.gif) no-repeat; }
+div.ico-g2 a { background:url(../images/ico_g2_a.gif) no-repeat; }
+div.ico-g3 a { background:url(../images/ico_g3_a.gif) no-repeat; }
+
+div.ico-jpn1 a { background:url(../images/ico_jpn1_a.gif) no-repeat; }
+div.ico-jpn2 a { background:url(../images/ico_jpn2_a.gif) no-repeat; }
+div.ico-jpn3 a { background:url(../images/ico_jpn3_a.gif) no-repeat; }
+
+div.ico-f1 a { background:url(../images/ico_f1_a.gif) no-repeat; }
+div.ico-f2 a { background:url(../images/ico_f2_a.gif) no-repeat; }
+
+div.ico-gp a { background:url(../images/ico_gp_a.gif) no-repeat; }
+div.ico-sg a { background:url(../images/ico_sg_a.gif) no-repeat; }
+div.ico-jusho a  { background:url(../images/ico_jusho_a.gif) no-repeat; }
+
+h3 span.note{display:inline-block; width:300px; height:18px; text-align:right; position:absolute; top:0; right:10px; line-height:30px; font-size:small; }
+input.tx_Mid { font-size:20pt !important;}
+
+
+/* 予想情報提供ロゴ */
+#info div.yoso_logo { display:block; overflow:hidden; width:980px; height:40px; margin:0 0 10px 0; padding:0; }
+#info div.yoso_logo table { float:right; }
+#info div.yoso_logo small { float:left; }
+
+#info ul.ls_search { display:block; width:230px; height:23px; margin:0 auto; padding:0; }
+#info ul.ls_search li { display:block; float:left; }
+/* 映像検索カレンダー */
+#info table.liv_cal { margin:10px auto; background:#ccc; font-size:12px; color:#666; border-collapse:collapse; border:1px solid #666; }
+#info table.liv_cal th { height:23px; text-align:center; line-height:23px; border:1px solid #666; }
+#info table.liv_cal td { width:25px; height:23px; text-align:center; line-height:23px; border:1px solid #666; }
+#info table.liv_cal th { background:#C7D8ED; color:#000; }
+#info table.liv_cal td { background:#FFF; }
+#info table.liv_cal th.sun { background:#FCC; }
+#info table.liv_cal td.sun { background:#FC9; }
+#info table.liv_cal th.title { background:#EEE; white-space:nowrap; }
+#info table.liv_cal td.today { background:#F30; }
+#info table.liv_cal a { display:block; width:100%; height:100%; color:#000; text-decoration:none; background:#ad0; }
+#info table.liv_cal a:hover { background:#F90;}
+#info table.liv_cal a.active { background:#F90;}
+
+/* 変更情報　出走表 */
+#info div.info_alert { display:block; width:970px; margin:3px 0; padding:2px; border:1px solid #F30; background:#FFC; color:#000;}
+
+/*	情報ここまで
+==================================================*/
+
+
+/*  */
+#info h3 a.btn_addfav { display:inline-block; position:absolute; top:3px; right:5px; width:260px; height:23px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -720px -1130px; font-size:9pt; text-indent:18px; font-weight:normal; line-height:23px; text-decoration:none; color:#000; }
+#info h3 a.btn_addfav span { display:inline !important; margin:0 !important; padding:0 !important; color:#F30; text-indent:0; }/*1155*/
+#info h3 a.btn_addfav:hover { background-position:-720px -1155px; }
+
+/*　印刷画面へ　*/
+#info a.gotoPrint { display:inline-block; width:70px; height:16px; text-indent:-9999px; margin:0; padding:0; background:url(../images/i-sprite.png)  -270px -270px;}
+h5 { margin:2px 0 5px 0; padding:0; border-bottom:1px solid #ccc; color:#333;}
+
+/* ライブ映像 */
+#move{ width: 550px; height: 482px; background: url("../images/moveframe.gif") 0px 0px no-repeat; text-align: center; }
+#movie_main{ width: 520px; height: 390px; padding: 10px 10px 10px 10px; }
+.control{ width: 520px; background: transparent; margin: 0px 10px 0px 10px; }
+#fullscreen{ height: 45px; text-align:left; }
+#volume{ text-align:right; }
+#move2{ width: 270px; height: 482px; background: url("../images/moveframe2.gif") 0px 0px no-repeat; margin-bottom: 0px; }
+#subArea{ margin-bottom: 0px; background: transparent; }
+#rightLive { padding-right: 70px; }
+#leftLive { padding-left: 70px; }
+.pR10Live { padding-right: 10px; }
+.pL10Live { padding-left: 10px; }
+.pL3Live { padding-left:3px; }
+
+/* 過去映像検索結果 */
+.eizo td { line-height:1.2 !important; }
+
+/* ボタン */
+#info a#btn_toplogin { display:block; width:95px; height:27px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -882px -1335px; text-indent:-10000px; }
+#info a#btn_toplogin:hover { background-position:-882px -1365px; }
+
+#info a.btn_tabRace1 { display:block; width:80px; height:23px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat  -390px -240px; text-indent:-10000px; }
+#info a.btn_tabRace1:hover { background-position:-390px -265px; }
+#info a.btn_tabRace1b { display:block; width:80px; height:23px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat 0px -1475px; text-indent:-10000px; }
+#info a.btn_tabRace1b:hover { background-position:-255px -1475px; }
+
+#info a.btn_tabRace2 { display:block; width:80px; height:23px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -85px -1475px; text-indent:-10000px; }
+#info a.btn_tabRace2:hover { background-position:-340px -1475px; }
+#info a.btn_tabRace3 { display:block; width:80px; height:23px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -170px -1475px; text-indent:-10000px; }
+#info a.btn_tabRace3:hover { background-position:-425px -1475px; }
+/* 大きいビデオ */
+#info a.btn_video { display:block; width:25px; height:20px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -945px -1420px; text-indent:-10000px; }
+#info a.btn_video:hover { background-position:-945px -1440px; }
+/* 大きい動画 */
+#info a.btn_movie { display:block; width:25px; height:20px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -970px -1420px; text-indent:-10000px; }
+#info a.btn_movie:hover { background-position:-970px -1440px; }
+ 
+/*	トップページ
+==================================================*/
+/* #info #content { position:relative; width:980px; margin:5px auto 0; padding:0; } */
+/* #info.top #top1 a, #info.top #top2 a { text-decoration:none; } */
+/* #info.top #top1 *, #info.top #top2 * { margin:0; padding:0; } */
+
+/*	メインとサイドバー top1：左 top2：右
+==================================================*/
+#info.top #top1 { display:block; width:740px; height:auto; float:left; margin:0 13px 0 0; padding:0; }
+* html #info.top #top1 { margin:0 8px 0 0 !important; } /* for ie6 */
+#info.top #top2 { display:block; width:227px; height:auto; float:right; margin:0; padding:0; }
+
+
+/*	開催情報
+==================================================*/
+#info.top #titles { width:750; height:25px; clear:both;}
+#info.top #titles div { display:block; float:left; height:20px; padding:0px 2px 5px 2px; border:1px solid #ccc !important; overflow:hidden;text-align:center;
+background: #ffffff; /* old browsers */background: -moz-linear-gradient(top, #ffffff 0%, #f6f6f6 10%, #E5E5E5 100%); /* firefox */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(10%,#f6f6f6), color-stop(100%,#E5E5E5)); /* webkit */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#E5E5E5',GradientType=0 ); /* ie */
+background: linear-gradient(to bottom, #ffffff, #E5E5E5);
+background: -o-linear-gradient(top, #ffffff 0%,#f6f6f6 10%,#E5E5E5 100%); /* opera */}
+#info.top #titles div.tl01 { width: 72px; margin-right: 1px; }
+#info.top #titles div.tl02 { width: 140px; margin-right: 1px; }
+#info.top #titles div.tl03 { width: 330px; margin-right: 1px; }
+#info.top #titles div.tl04 { width: 171px; text-align: center; }
+#info.top #titles h4 { display:inline; border:none !important; padding:0 !important; margin:0 0 0 0 !important; color:#222; width:auto; font-size:9pt; }
+
+/*　インデックスレース一覧　*/
+#info #raceIndex { width: 740px; height: auto; margin: 5px 0; padding: 0; }
+#info #raceIndex div { display:block; width:740px; min-height:4.5em; margin:0; padding:3px 0; border-bottom:1px dotted #aaa; clear:both;}/* 場開催 tableのtrに該当 */
+#info #raceIndex div.odd { background: #ecffdb; /* old browsers */background: -moz-linear-gradient(top, #ecffdb 0%, #feffff 98%); /* firefox */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ecffdb), color-stop(98%,#feffff)); /* webkit */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ecffdb', endColorstr='#feffff',GradientType=0 ); /* ie */
+background: linear-gradient(to top, #ffffff, #ecffdb);
+background: -o-linear-gradient(top, #ecffdb 0%,#feffff 98%); /* opera */}/*　奇数列の背景色を変える　*/
+
+/*　場・何日目　*/
+#info #raceIndex ul.bank { display: block; float: left; width: 75px; min-height: 4.5em; margin: 0; padding: 0; list-style-type: none; text-align: center; border-left: 2px solid #b2d35f;}
+#info #raceIndex ul.bank li {margin-top: 1.5em; font-size:100%; font-weight:bold;}
+
+/* Grade GP,GP1,G2,F2,F1 ナイター、ミッドナイト、薄暮　*/
+#info #raceIndex ol.grade { display:block; float:left; width:30px; margin:0; padding:0; }
+#info #raceIndex ol.grade li { display: block; padding:0; text-indent:-10000px;}
+#info #raceIndex ol.grade li {margin: 2px auto;}
+#info #raceIndex ol.grade li.blank {background: none;}
+#info #raceIndex ol.grade li:first-child { padding:0;} /* グレード表示のみ */
+#info #raceIndex ol.grade li.g1 { background:url(../images/ico_g1_a.gif) 0px 0px no-repeat; width:22px; height:14px;}
+#info #raceIndex ol.grade li.g2 { background:url(../images/ico_g2_a.gif) 0px 0px no-repeat; width:22px; height:14px;}
+#info #raceIndex ol.grade li.g3 { background:url(../images/ico_g3_a.gif) 0px 0px no-repeat; width:22px; height:14px;}
+#info #raceIndex ol.grade li.jpn1 { background:url(../images/ico_jpn1_a.gif) 0px 0px no-repeat; width:22px; height:14px;}
+#info #raceIndex ol.grade li.jpn2 { background:url(../images/ico_jpn2_a.gif) 0px 0px no-repeat; width:22px; height:14px;}
+#info #raceIndex ol.grade li.jpn3 { background:url(../images/ico_jpn3_a.gif) 0px 0px no-repeat; width:22px; height:14px;}
+#info #raceIndex ol.grade li.g { background:url(../images/ico_jusho_a.gif) 0px 0px no-repeat; width:22px; height:14px;}
+#info #raceIndex ol.grade li.hakubo { background:url(../images/i-sprite.png) 0px -175px; width:16px; height:16px;}
+#info #raceIndex ol.grade li.night { background:url(../images/i-sprite.png) 0px -213px; width:16px; height:16px;}
+
+/*　前日のレース　*/
+#info #raceIndex ul.rPrev { display: table-row; float: left; width: 140px; margin: 0; padding: 0 0 0 5px; border-left: 2px solid #ccc; }
+#info #raceIndex ul.rPrev>li { display: table-cell; height: 65px; vertical-align: middle;}
+#info #raceIndex ul.rPrev .col1 {width: 40px; text-align: center;}
+#info #raceIndex ul.rPrev .col3 {padding-left: 10px;}
+#info #raceIndex a.btn_video,#info #raceIndex a.btn_movie { width: 24px !important; height: 20px !important; cursor:pointer; margin:0;}
+
+
+/* IE7 */
+*+html #info #raceIndex ul.rPrev>li {float: left;}
+
+/*　本日のレース　*/
+#info #raceIndex ul.rToday { display: table-row; float: left; width: 330px; min-height: 4.5em; border-left: 2px solid #ccc; padding-left: 5px; margin: 0;}
+#info #raceIndex ul.rToday>li {display: table-cell; vertical-align: middle; height: 4.5em; padding:0;}
+#info #raceIndex ul.rToday .col1{width: 40px;}
+#info #raceIndex ul.rToday .col2 {width: 135px; font-weight: bold; vertical-align: middle;}
+#info #raceIndex ul.rToday .col3 {width: 30px;}
+#info #raceIndex ul.rToday .col2 span.msg {display:block; font-weight: bold;}
+#info #raceIndex ul.rToday .col2 span.sub {font-weight: normal; display: block; line-height: 1.0;}
+#info #raceIndex ul.rToday .col4 {text-align: left; width: 120px; padding-left: 5px;}
+#info #raceIndex ul.rToday .col4 ol {padding:0; margin:0; text-indent:0;}
+#info #raceIndex ul.rToday .col4 ol li {display: block; float: left; padding: 0; margin: 0.15em 0;}
+#info #raceIndex ul.rToday .col4 ol li a {margin: 0 1px;}
+
+#info #raceIndex ul.rTodayNoData { display: table; float: left; width: 331px; min-height: 4.5em; margin: 0; padding: 0 0 0 5px; border-left: 2px solid #ccc; }
+#info #raceIndex ul.rTodayNoData li { height: 66px; display:table-cell; vertical-align: middle; text-align: center; width: 100%;}
+
+/* IE7 */
+*+html #info #raceIndex ul.rToday>li {float: left;}
+
+/*　明日以降のレース　*/
+#info #raceIndex ul.rNext { display: block; float: left; width: 170px; margin: 0; padding: 0 0 0 5px; border-left: 2px solid #FCC; }
+#info #raceIndex ul.rNext>li {display: table-cell; vertical-align: middle; height: 4.5em; padding:0;}
+#info #raceIndex ul.rNext li.col1 {width: 40px;}
+#info #raceIndex ul.rNext li.col2 {text-align: left; width: 120px;}
+#info #raceIndex ul.rNext ol {padding:0; margin:0; text-indent:0;}
+#info #raceIndex ul.rNext li.col2 ol li {display: block; float: left; padding: 0; margin: 0.15em 0;}
+#info #raceIndex ul.rNext li.col2 ol li a {margin: 0 1px;}
+
+/* IE7 */
+*+html #info #raceIndex ul.rNext>li{float: left;}
+*+html #info #raceIndex ul.rNext>li:first-child {width: 45px;}
+*+html #info #raceIndex ul.rNext>li:last-child {width: auto;}
+
+/*　ボタン　出走表・オッズ・結果・映像　*/
+#info #raceIndex ul a { display:block; float:left; width:57.333px; height:23.333px;text-indent:-10000px; margin:0 0 0 3px;}
+#info #raceIndex ul a.blank { background:none; cursor:default; pointer-events: none;} /* なし　*/
+#info #raceIndex ul a.pro { background:url(../images/i-sprite.png) -370px -315px no-repeat; }
+#info #raceIndex ul a.odd { background:url(../images/i-sprite.png) -430px -315px no-repeat;}
+#info #raceIndex ul a.res { background:url(../images/i-sprite.png) -490px -315px no-repeat;}
+#info #raceIndex ul a.yos { background:url(../images/keiba-yosou.png?v2) 0px -1px;}
+#info #raceIndex ul a.mov { width:80px; background:url(../images/i-sprite.png) -550px -315px no-repeat;}
+#info #raceIndex ul a.vot { background:url(../images/i-sprite.png) -820px -315px no-repeat;}
+#info #raceIndex ul a.pro:hover { background:url(../images/i-sprite.png) -370px -340px no-repeat;}
+#info #raceIndex ul a.odd:hover { background:url(../images/i-sprite.png) -430px -340px no-repeat;}
+#info #raceIndex ul a.res:hover { background:url(../images/i-sprite.png) -490px -340px no-repeat;}
+#info #raceIndex ul a.yos:hover { background:url(../images/keiba-yosou.png?v2) 0px -26px no-repeat;}
+#info #raceIndex ul a.mov:hover { background:url(../images/i-sprite.png) -550px -340px no-repeat;}
+#info #raceIndex ul a.vot:hover { background:url(../images/i-sprite.png) -820px -340px no-repeat;}
+/*　//インデックス開催レース情報 ここまで　****************************************　*/
+
+/*	お知らせ
+==================================================*/
+#info.top div.section{ width:740px; min-height:30px; margin:0; padding:0; clear:both;}
+#info.top .news h3 {font-size: 100% !important; color: #333 !important; background:none !important; border-left:5px solid #b2d35f !important; border-right:5px solid #b2d35f !important; height: 26px !important; border-top: 1px dotted #ccc !important; border-bottom: 1px dotted #ccc !important;}
+#info.top .news h3 span { font-weight:normal; padding-left:1em; }
+#info.top .news h3 div.ls { display:block; width:60px; height:1em !important; line-height:1.1em !important; font-weight:normal; position:absolute !important; top:5px !important; left:300px;}
+#info.top .news ul li {border-bottom: 1px dotted #ccc; line-height: 1.7;}
+
+/*	おすすめ注目レース
+==================================================*/
+#info.top #content #top1 h3.top1,
+#info.top #content #top1 h3.top2 { position:relative; display:block; clear:both; width:740px; height:26px; margin:0 0 15px 0; padding:0; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+#info.top #content #top1 h3.top1 { background-position:-140px -1415px; }
+#info.top #content #top1 h3.top2 { margin-top:20px; background-position:-140px -1442px; }
+#info.top h3 a.toList { display:block; width:61px; height:19px; position:absolute; top:4px; left:674px; background:url(../images/i-sprite.png) no-repeat -882px -1419px; text-indent:-10000px; }
+#info.top h3 a.toList:hover { background-position:-882px -1439px; }
+
+#info.top #lsNews a.toList { display:block; width:83px; height:15px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -885px -1460px; text-indent:-10000px; }
+#info.top #lsNews a.toList:hover { background-position:-885px -1480px; }
+#info.top #top_camp	{ display:block; clear:both; width:725px; height:227px; margin:0 auto 5px auto; padding:0; background-color:#fff; }
+#info.top #recomend {background: url("../images/keiba_h2_recomend.png") no-repeat scroll left top; backgrond-color: rgba(0, 0, 0, 0) ; border: 1px solid #ccc; display: block; margin: 0 0 15px; width: 740px;}
+#info.top #content #recomend h3 { border: none; background: none; text-indent: -10000px; display: none;}
+#info.top #recomend p { display: inline-block;; float:none; margin: 0;    word-wrap: break-word; padding: 8px 4px;  padding-left: 150px; width: 590px;}
+#recomend p a{white-space:nowrap;}
+
+#info.top h3.top2 {border: none !important;}
+#info.top ul.expect_blog { display:block; width:740px; margin:0; padding:0; background:none; }
+#info.top ul.expect_blog h3 { background: none !important; border: none !important;}
+#info.top ul.expect_blog li { position:relative; display:block; float:left; width:180px; min-height:80px; margin:0 10px 10px 0; padding:5px 5px 5px 53px; background:#FFFAED; border:1px solid #CCC; }
+#info.top ul.expect_blog li.last { margin:0 0 10px 0; }
+
+#info.top ul.expect_blog img { width:40px; height:40px; position:absolute; top:5px; left:5px; padding:0; }
+#info.top #content ul.expect_blog h3 { display:inline; margin:0; padding:0; font-size:10pt; }
+#info.top ul.expect_blog p { margin:0; padding:0; font-size:10pt; }
+#info.top ul.expect_blog span.icon_new { display:inline-block; width:19px; height:11px;  background:url(../images/i-sprite.png) no-repeat -880px -1400px; line-height:11px; margin-right:5px; }
+
+
+#info.top #content #top2 h2 { display:block; clear:both; margin:0; padding:0; border:none; text-indent:-9999px; filter:none; }
+
+#info.top #content #top2 h2.netNews { position:relative; width:227px; height:37px; margin:0; background:url(../images/i-sprite.png) no-repeat -1px -1507px; }
+
+#info.top #top2 h2.netNews a.hatena { position:absolute; top:12px; left:202px; }
+
+#info.top #content #top2 h2.npTable { display:block; width:227px; height:37px; margin:10px 0 15px 0; } /*background:url(../images/i-sprite.png) no-repeat -235px -1507px; }*/
+#info.top #content #top2 h2.npTable a { display:block; width:227px; height:38px; background:url(../images/i-sprite.png) no-repeat -235px -1506.5px; text-indent:-9999px; }
+#info.top #content #top2 h2.npTable a:hover { background-position:-235px -1544.5px; }
+
+#info.top #content #top2 h3 { height:auto; font-size:9pt; margin:0; padding:0; background:none; border:none; color:#000; line-height:1.5; font-weight:normal; }
+
+#info.top #top2 a.bannar { display:block; width:227px; height:auto; padding:0; margin:0 0 5px 0; padding:0; }
+#info.top #top2 a.twitter { width:225px; height:37px; padding:2px 0; text-align:center; border:1px solid #CCC; }
+#info.top #top2 a.mark { text-align:center; }
+#info.top #top2 { font-size:9pt; }
+
+#info.top #top2 div.gradRace { display:block; width:215px; height:auto; margin:0 0 5px 0; padding:5px; border:1px solid #CCC; clear:both;  }
+#info.top #content #top2 div.gradRace h3 { display:block; width:215px; height:auto; margin:5px 0 2px 0; padding:0; background:#CCDEC7; font-size:10pt; }
+#info.top #top2 div.gradRace img.icon { margin:0 3px 0 0; padding:0; }
+#info.top #top2 div.gradRace ul { margin:0; padding:0; }
+#info.top #top2 div.gradRace li { margin:0; padding:0; }
+#info.top #top2 div.gradRace li a { margin:0; padding:0; font-size:9pt; text-decoration:none; }
+
+
+#info.top a.btn_freens,
+#info.top a.btn_buyns,
+#info.top a.btn_free2ns	{ display:block; width:71px; height:25px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat; text-indent:-10000px; }
+
+#info.top a.btn_freens	{ background-position:-506.5px -1474.5px; }
+#info.top a.btn_buyns 	{ background-position:-654.5px -1474.5px; }
+#info.top a.btn_free2ns	{ background-position:-805.5px -1474.5px; cursor:default; }
+
+#info.top a.btn_freens:hover { background-position:-579.5px -1474.5px; }
+#info.top a.btn_buyns:hover { background-position:-729.5px -1474.5px; }
+/*　ネット新聞　*/
+#info.top #top2 div.netNS { display:block; width:222px; padding:1px; margin:0 auto 5px 0; border:1px solid #ccc; border-top:none; background:#CFEE7E; clear:both; }
+#info.top #top2 div.netNS ul { margin:0; padding:0; }
+#info.top #top2 div.netNS li { position:relative; display:block; width:94px; height:32px; margin:0 0 4px 0; padding:4px 74px 4px 52px; border:1px solid #999; font-size:8pt; letter-spacing:-0.03em;
+background: #ffffff; /* Old browsers */
+background: -moz-linear-gradient(top, #ffffff 0%, #ededed 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#ededed)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, #ffffff 0%,#ededed 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, #ffffff 0%,#ededed 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top, #ffffff 0%,#ededed 100%); /* IE10+ */
+background: linear-gradient(top, #ffffff 0%,#ededed 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+}
+#info.top #top2 div.netNS img { position:absolute; top:8px; left:2px; }
+#info.top #top2 div.netNS li a { position:absolute; top:8px; left:148px; }
+
+#info.top #content #top2 div.netNS h3 { margin:0 0 0 3px; }
+
+#info.top #top2 div.netNS span { position:absolute; top:4px; left:123px; text-align:right; font-weight:bold; }
+
+/* ログイン */
+#info.top #top2 div.topRight { display:block; width:195px; height:auto; margin:0 0 5px 0; padding:10px 15px; border:1px solid #CCC; font-size: 10pt;
+background: #ededed; /* Old browsers */
+background: -moz-linear-gradient(top, #ededed 1%, #ffffff 99%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#ededed), color-stop(99%,#ffffff)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, #ededed 1%,#ffffff 99%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, #ededed 1%,#ffffff 99%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top, #ededed 1%,#ffffff 99%); /* IE10+ */
+background: linear-gradient(top, #ededed 1%,#ffffff 99%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ededed', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
+}
+#info.top .login table {background-color:transparent; margin-bottom: 0.5em;}
+#info.top .login table th{padding-right: 10px; white-space:nowrap;}
+#info.top .login td.autologin{text-align: left !important; padding-top: 7px;}
+#info.top .login td.autologin label input, span{vertical-align: middle; margin: 0;}
+#info.top input[type=text],input[type=password] { border:1px solid #09C; background-color:#fee; *background-color:#fff;
+font-size:10pt; margin:0; padding:0; text-align:left; padding-right:1px; }
+
+#info.top .login a{display: inline-block; width:190px; line-height:1.6; color:#222; padding:2px; text-decoration: none; text-align: center; 
+background: #f3f3f3; /* old browsers */
+background: -moz-linear-gradient(top, #ffffff 0%, #e5e5e5 100%); /* firefox */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#e5e5e5)); /* webkit */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* ie */
+background: -o-linear-gradient(top, #ffffff 0%,#e5e5e5 100%); /* opera */
+border:1px solid #f60;}
+#info.top .login {padding: 0; margin: 0;}
+#info.top .login input[type=submit]{width: 0px; height: 0px; border: none;}
+
+/* 入会案内 */
+#info.top .entry ul { display:block; width:195px; height:auto; margin:0 0 10px 0; padding:0; }
+#info.top .entry li { display:block; width:194px; height:auto; margin:0 0 5px 0; padding:0 0 3px 1px; border-bottom:1px solid #CCC; }
+#info.top .entry li a { *float:left; color:#222; text-decoration: none; }
+
+#info.top .entry div.message { letter-spacing:-1px; font-size: 90%;}
+#info.top .entry div.message span { display:inline-block; width:100%; text-align:center; height:2em; }
+
+#info.top a.btn_entry { display:block; width:195px; height:48px; margin:0; padding:0; background:url(../images/i-sprite.png) no-repeat -470px -1502px; text-indent:-10000px; }
+#info.top a.btn_entry:hover { background-position:-670px -1502px; }
+
+#info.top span.hatena	{ display:inline-block; *display:block; *float:left; width:15px; height:13px; margin:0 5px 0 0; padding:0; background:url(../images/i-sprite.png) -120px -240px no-repeat; text-indent:-10000px; }
+#info.top span.excl_mark{ display:inline-block; *display:block; *float:left; width:17px; height:17px; margin:0 5px 0 0; padding:0; background:url(../images/i-sprite.png) -165px -239px no-repeat; text-indent:-10000px; }
+
+/* おすすめ注目レース */
+#cms div.vote { display:block; line-height:2.0;}
+#cms div.vote div { display:block; width:750px; line-height:1.0; min-height:23px; line-height:23px; vertical-align:top;}
+#cms div.vote a { display:inline-block; }
+#cms div.vote a:hover { display:inline-block; background:#0C0; }
+#cms a.btn_vote_this { display:block; float:left; width:200px; height:33px; background:url(../images/btn-vote-this.gif); text-indent:-9999px; margin:0 0 0 10px; }
+#cms a.btn_vote_this:hover { background:url(../images/btn-vote-this.gif) 0 -35px !important;}
+
+/* ＳＰサイトへのリンク */
+a#to-smart { display:block; position:relative; width:16em; margin:0.5em auto; padding:0.5em; text-align:center;
+  border-radius:0.5em; border:0.1em solid #044062; box-shadow:0 0.1em 0.4em rgba(0,0,0,0.3);text-decoration:none;
+  font-size:3em; color:#FFF; font-weight:bold; text-shadow:0 0.1em 0.1em #194B7E;
+  background:-webkit-gradient(linear,left top,left bottom,from(#5F9CC5),to(#396B9E)) repeat scroll 0 0 #396B9E;
+  -webkit-background-clip:padding-box;
+}
+/* 会員ランク */
+#info #rank {
+  width:215px; float:left; min-height:215px; margin:0 10px 5px 0; padding:5px;
+  border:1px solid #CCC; border-radius:4px; font-size:14px;
+  /* background:#F8F2E9; */
+  background:       #D9F0FF;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#BAE5FF), to(#E9FCFF)); /* Saf4+,Chrome */
+  background-image: -webkit-linear-gradient(#BAE5FF, #E9FCFF); /* Chrome 10+, Saf5.1+ */
+  background-image: -moz-linear-gradient(#BAE5FF, #E9FCFF); /* FF3.6 */
+  background-image: -ms-linear-gradient(#BAE5FF, #E9FCFF); /* IE10 */
+  background-image: -o-linear-gradient(#BAE5FF, #E9FCFF); /* Opera 11.10+ */
+  background-image: linear-gradient(#BAE5FF, #E9FCFF);
+}
+* html #info #rank { margin:0 0 5px 0 !important; } /* for ie6 */
+#info #rank ul {
+  width:203px; min-height:208px; margin:0; padding:5px 5px 0;
+  background:#FFF; border:1px solid #ddd;
+}
+#info #rank li { width:197px; height:auto; margin:0 ; padding:1px 3px; }
+/* #info div.advance li { padding:1px 3px !important; } */
+#info #rank li.name { font-weight:bold; font-size:16px; border:none; text-decoration:underline; }
+#info #rank li.welcome { color:#444; font-size:12px; padding-top:0; border:none !important; text-align:center; padding-bottom:6px; }
+#info #rank li.welcome a { text-decoration:underline; }
+#info #rank li.advance { width:52px; float: left; text-align: center;padding: 0; height: 22px; }
+#info #rank li.advance span {
+display: block; margin: 0 auto; margin-top: 6px; width: 30px;  height: 14px; vertical-align:text-top; 
+  background:#F00; color:#FFF; font-weight:normal; font-size:10px; 
+}
+#info #rank li.rank-title { line-height:16px; margin-top:2px; padding-bottom:0; }
+#info #rank li.rank-img { line-height:21px; border:none; text-align:right; float:left; width:86px; font-size:12px; }
+#info #rank li.rank-next { line-height:15px; border:none; clear:both; }
+#info #rank li.rank-next img { vertical-align:text-bottom; margin: 0 5px;}
+#info #rank li.start-status {clear:both; font-size: 0.85em; padding-top: 6px; padding-left: 2px;}
+#info #rank li.start-status img {margin: 0 4px;}
+#info #rank li.separator {
+  border-bottom:1px solid #ccc; height:0; line-height:0; font-size:0; padding:0 3px; margin:2px 0 4px;
+}
+#info #rank li.for-next { font-size:12px; text-align:center; line-height:18px; padding: 10px 0;}
+#info #rank span.number { font-size:16px; font-weight:bold; color:blue; vertical-align: inherit !important}
+#info #rank span.sp { color:blue; }
+#info #rank li.link{ border:none; text-align:left; border-top:1px solid #ccc; line-height:13px; padding-top: 4px;}
+#info #rank a.small {
+  text-decoration:none; background-position:0px -608px; padding-left:13px;
+  font-size:10px; line-height:10px;
+  display:inline-block; margin-top:5px; margin-bottom:8px;
+}
+#info #rank a.mail { font-size:12px; padding-left:0 !important; text-decoration:none; }
+#info #rank a.mail img { margin-right:5px; }
+#info #rank li.new-mail { font-size:10px; color:#f00; padding:0; margin-left:30px; width:auto; }
+#info #rank li.date { font-size:9px; text-align:right; line-height:18px; float:left; width:95px; -webkit-text-size-adjust:none; }
+#info #rank li.link-btn { display:inline-block; width:auto; height:20px; line-height:18px; margin-bottom: 3px;}
+#info #rank li.rank-now { padding:0; margin-bottom:3px; }
+#info #rank li.rank-now ul { 
+  width:193px; min-height:inherit; *min-height:auto; margin:0; padding:5px 2px; overflow:hidden;
+  background:#eeF; border:3px solid #8eb4e3;
+  border-radius:4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;
+}
+
+/* 予想印から投票 */
+#info tr.yosou_vote { height:43px; }
+#info tr.yosou_vote th { padding:1px; }
+#info a.btn-vote { display:block; width:30px; height:20px; margin:0 auto; cursor:pointer;
+  background:url(../images/i-sprite.png) -350px -175px; text-indent:-10000px;
+}
+#info a.btn-vote:hover, #info a.btn-vote:active { background-position:-350px -195px; }
+
+/* 重要なお知らせ */
+#info .information { width:740px; border:1px solid #E20606; margin:10px 0 10px 0; clear:both; border-radius:3px; }
+#info .information a { text-decoration:underline; display:inline-block; background:url(../images/list_red.gif) 5px 4px no-repeat; padding-left:20px; padding-right:5px; color:#000000; }
+#info .information a:visited { text-decoration:underline; color:#000000; }
+#info .information a:hover { text-decoration:underline; color:#000000; }
+#info .information table { width:735px; margin:0; padding:0; }
+#info .information table tr th { width:150px; background-color:#E20606; font-size:75%; }
+#info .information table tr td { vertical-align:top; padding:6px 0px 5px 5px; }
+#info ul.ls_line li { font-size:10pt; line-height:1.6; border-bottom:1px dotted #ccc; }
+
+/* 競馬TOP・レース情報に南関・ホッカイドウ追加 */
+#info.top #lsRace tr.paragraph td { padding:6px 0 !important; line-height:0; }
+#info.top #lsRace tr.other td     { border-bottom:none; padding-top:10px; padding-bottom:0; }
+#info.top #lsRace tr.other small { -webkit-text-size-adjust: none; }
+#info.top #lsRace tr.othermsg td  { padding-top:0; }
+#info #raceToday div.paragraph { height:12px; }
+#info #raceToday div.other { border-bottom:none; padding-top:10px; padding-bottom:0; height:auto; line-height:1.4; }
+
+#info #content table.ent1 div.racename { width:100px; overflow:hidden; white-space:nowrap; }
+#info #content table.ent1 div.racename-small { width:95px; overflow:hidden; white-space:nowrap; }
+#info #content table.ent1 div.racedetail { width:100%; white-space:nowrap; }

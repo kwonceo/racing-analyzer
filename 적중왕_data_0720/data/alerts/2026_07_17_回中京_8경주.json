@@ -1,0 +1,56 @@
+{
+ "race": "回中京 8경주",
+ "date": "2026-07-17",
+ "raceKey": "回中京 8경주",
+ "alerts": [
+  {
+   "time": "18:28:48",
+   "race": "回中京 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+12 -33.7%",
+   "alert_pair": "6+12",
+   "odds_snapshot": {
+    "6+12": {
+     "before": 289.8,
+     "after": 192.2
+    }
+   },
+   "alert_horses": [
+    6,
+    12
+   ],
+   "current_recommend": "5+9",
+   "minutes_before": 6,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "18:34:49",
+   "race": "回中京 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+8 -38.4%",
+   "alert_pair": "3+8",
+   "odds_snapshot": {
+    "3+8": {
+     "before": 476.2,
+     "after": 293.5
+    },
+    "4+6": {
+     "before": 135.0,
+     "after": 91.2
+    }
+   },
+   "alert_horses": [
+    3,
+    8,
+    4,
+    6
+   ],
+   "current_recommend": "5+9",
+   "minutes_before": 0,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

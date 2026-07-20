@@ -1,0 +1,42 @@
+{
+ "result": {
+  "1st": 7,
+  "2nd": 2,
+  "3rd": 9,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-19 19:21:14",
+ "race": "오비히로 10경주",
+ "date": "2026-07-19",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 7,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 8.1,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 2,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 7.2,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 8,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 6.5,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": null
+}

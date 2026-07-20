@@ -1,0 +1,66 @@
+{
+ "race": "서울 1경주 1000M",
+ "date": "2026-07-18",
+ "raceKey": "서울 1경주 1000M",
+ "alerts": [
+  {
+   "time": "10:39:50",
+   "race": "서울 1경주 1000M",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -79.4%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 743.9,
+     "after": 153.0
+    },
+    "5+11": {
+     "before": 3124.5,
+     "after": 1040.8
+    },
+    "1+6": {
+     "before": 12.2,
+     "after": 5.8
+    },
+    "4+6": {
+     "before": 15.5,
+     "after": 7.7
+    },
+    "6+11": {
+     "before": 538.7,
+     "after": 277.3
+    },
+    "4+8": {
+     "before": 57.4,
+     "after": 36.2
+    }
+   },
+   "alert_horses": [
+    4,
+    5,
+    11,
+    1,
+    6,
+    8
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    8,
+    6,
+    9
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    6,
+    8
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  8,
+  6,
+  9
+ ]
+}

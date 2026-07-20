@@ -1,0 +1,42 @@
+{
+ "race": "코치 2경주",
+ "date": "2026-07-11",
+ "raceKey": "코치 2경주",
+ "alerts": [
+  {
+   "time": "16:39:23",
+   "race": "코치 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "8+9 -35.7%",
+   "alert_pair": "8+9",
+   "odds_snapshot": {
+    "8+9": {
+     "before": 48.2,
+     "after": 31.0
+    }
+   },
+   "alert_horses": [
+    8,
+    9
+   ],
+   "current_recommend": "7+8",
+   "minutes_before": 1,
+   "result": [
+    8,
+    7,
+    9
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    8,
+    9
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  8,
+  7,
+  9
+ ]
+}

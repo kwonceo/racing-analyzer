@@ -1,0 +1,119 @@
+{
+ "race": "마에바시 8경주",
+ "date": "2026-07-11",
+ "raceKey": "마에바시 8경주",
+ "alerts": [
+  {
+   "time": "14:11:52",
+   "race": "마에바시 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+4 -78.0%",
+   "alert_pair": "3+4",
+   "odds_snapshot": {
+    "3+4": {
+     "before": 125.3,
+     "after": 27.6
+    },
+    "4+6": {
+     "before": 136.7,
+     "after": 40.9
+    },
+    "4+5": {
+     "before": 173.6,
+     "after": 55.8
+    },
+    "2+4": {
+     "before": 37.1,
+     "after": 12.2
+    },
+    "4+9": {
+     "before": 41.2,
+     "after": 16.1
+    },
+    "4+7": {
+     "before": 118.7,
+     "after": 53.3
+    }
+   },
+   "alert_horses": [
+    3,
+    4,
+    6,
+    5,
+    2,
+    9,
+    7
+   ],
+   "current_recommend": null,
+   "minutes_before": 4,
+   "result": [
+    1,
+    2,
+    8
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    2
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "14:12:21",
+   "race": "마에바시 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "8+9 -59.2%",
+   "alert_pair": "8+9",
+   "odds_snapshot": {
+    "8+9": {
+     "before": 97.9,
+     "after": 39.9
+    },
+    "2+8": {
+     "before": 34.8,
+     "after": 14.7
+    },
+    "5+8": {
+     "before": 454.3,
+     "after": 203.5
+    },
+    "2+7": {
+     "before": 10.2,
+     "after": 4.9
+    },
+    "5+9": {
+     "before": 21.3,
+     "after": 10.3
+    },
+    "7+8": {
+     "before": 208.3,
+     "after": 107.0
+    }
+   },
+   "alert_horses": [
+    8,
+    9,
+    2,
+    5,
+    7
+   ],
+   "current_recommend": null,
+   "minutes_before": 3,
+   "result": [
+    1,
+    2,
+    8
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    8,
+    2
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  1,
+  2,
+  8
+ ]
+}

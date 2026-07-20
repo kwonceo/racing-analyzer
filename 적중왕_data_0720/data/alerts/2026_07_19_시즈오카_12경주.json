@@ -1,0 +1,47 @@
+{
+ "race": "시즈오카 12경주",
+ "date": "2026-07-19",
+ "raceKey": "시즈오카 12경주",
+ "alerts": [
+  {
+   "time": "16:14:12",
+   "race": "시즈오카 12경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+6 -67.4%",
+   "alert_pair": "4+6",
+   "odds_snapshot": {
+    "4+6": {
+     "before": 249.7,
+     "after": 81.4
+    },
+    "1+6": {
+     "before": 54.5,
+     "after": 27.9
+    }
+   },
+   "alert_horses": [
+    4,
+    6,
+    1
+   ],
+   "current_recommend": null,
+   "minutes_before": 6,
+   "result": [
+    1,
+    7,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4,
+    1
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  1,
+  7,
+  4
+ ]
+}

@@ -1,0 +1,49 @@
+{
+ "race": "오비히로 12경주",
+ "date": "2026-07-18",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 5,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 27.3,
+   "detected_at": "T-3분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 10,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 9.5,
+   "detected_at": "T-3분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 7,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 9.2,
+   "detected_at": "T-3분",
+   "recommended": false
+  }
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 6,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-18 20:27:01",
+ "dansung": null
+}

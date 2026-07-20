@@ -1,0 +1,51 @@
+{
+ "race": "오비히로 2경주",
+ "date": "2026-07-12",
+ "raceKey": "오비히로 2경주",
+ "alerts": [
+  {
+   "time": "15:09:09",
+   "race": "오비히로 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+8 -77.1%",
+   "alert_pair": "4+8",
+   "odds_snapshot": {
+    "4+8": {
+     "before": 79.6,
+     "after": 18.2
+    },
+    "3+8": {
+     "before": 230.3,
+     "after": 78.6
+    },
+    "2+8": {
+     "before": 85.2,
+     "after": 35.2
+    }
+   },
+   "alert_horses": [
+    4,
+    8,
+    3,
+    2
+   ],
+   "current_recommend": null,
+   "minutes_before": 6,
+   "result": [
+    9,
+    4,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  9,
+  4,
+  6
+ ]
+}

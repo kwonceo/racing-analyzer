@@ -1,0 +1,325 @@
+{
+ "race_id": "2026_07_19_기후_2경주",
+ "raceKey": "2026-07-19 기후 2경주",
+ "sport": "cycle",
+ "category": "cycle",
+ "date": "2026-07-19",
+ "race": "기후 2경주",
+ "analyzed_at": "09:03:37",
+ "updated_at": "09:03:37",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/main"
+ },
+ "odds_timeline": [
+  {
+   "time": "09:02:18",
+   "minutes_before": null,
+   "quinella": {
+    "1+2": 232.8,
+    "1+3": 359.9,
+    "2+3": 282.8,
+    "1+4": 42.5,
+    "2+4": 25.7,
+    "3+4": 5.8,
+    "1+5": 219.9,
+    "2+5": 158.3,
+    "3+5": 50.1,
+    "4+5": 1.7,
+    "1+6": 141.4,
+    "2+6": 158.3,
+    "3+6": 35.0,
+    "4+6": 2.4,
+    "5+6": 32.9
+   }
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false,
+  "disabled": true,
+  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "リバージャスミン",
+   "jockey": "石本純（高知）",
+   "record_score": 0,
+   "record_detail": "최근 8-11-7-7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.2착 -30 = 30점"
+  },
+  {
+   "no": 2,
+   "name": "キンデアポチャン",
+   "jockey": "井上瑛（高知）",
+   "record_score": 0,
+   "record_detail": "최근 5-7-10-5-5",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.4착 -30 = 30점"
+  },
+  {
+   "no": 3,
+   "name": "メイジョウエナジー",
+   "jockey": "木村直（高知）",
+   "record_score": 0,
+   "record_detail": "최근 6-11-6-9-8",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
+  },
+  {
+   "no": 4,
+   "name": "ソヴァージュ",
+   "jockey": "城野慈（高知）",
+   "record_score": 40.0,
+   "record_detail": "최근 2-6-8-11-12",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.8착 -30 = 30점"
+  },
+  {
+   "no": 5,
+   "name": "クレインヴォイス",
+   "jockey": "上田将（高知）",
+   "record_score": 45.0,
+   "record_detail": "최근 2-5-4-14-11",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.2착 -30 = 30점"
+  },
+  {
+   "no": 6,
+   "name": "ハルウタ",
+   "jockey": "西森将（高知）",
+   "record_score": 2.5,
+   "record_detail": "최근 9-9-9-7-3",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.4착 -30 = 30점"
+  },
+  {
+   "no": 7,
+   "name": "ヴィルアヴァンセ",
+   "jockey": "濱尚美（高知）",
+   "record_score": 10.0,
+   "record_detail": "최근 8-4-9-3-9",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.6착 -30 = 30점"
+  },
+  {
+   "no": 8,
+   "name": "シデレウス",
+   "jockey": "山崎雅（高知）",
+   "record_score": 10.5,
+   "record_detail": "최근 4-5-5-9",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
+  },
+  {
+   "no": 9,
+   "name": "アピールパワー",
+   "jockey": "郷間勇（高知）",
+   "record_score": 0,
+   "record_detail": "최근 10-9-12-9-12",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 10.4착 -30 = 30점"
+  },
+  {
+   "no": 10,
+   "name": "ウィギル",
+   "jockey": "大澤誠（高知）",
+   "record_score": 3.8,
+   "record_detail": "최근 11-11-9-2-8",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.2착 -30 = 30점"
+  },
+  {
+   "no": 11,
+   "name": "キーゴールド",
+   "jockey": "佐原秀（高知）",
+   "record_score": 1.2,
+   "record_detail": "최근 5-11-8-11-4",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.8착 -30 = 30점"
+  },
+  {
+   "no": 12,
+   "name": "スリーマドンナ",
+   "jockey": "塚本直（高知）",
+   "record_score": 10.0,
+   "record_detail": "최근 7-9-3-12-12",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.6착 -30 = 30점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   4,
+   5,
+   6,
+   7,
+   8,
+   10,
+   11,
+   12
+  ],
+  "eliminated": [
+   2,
+   3,
+   9
+  ],
+  "elimination_reasons": {
+   "2": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.4착 -30 = 30점",
+   "3": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점",
+   "9": "배당 미수집 · 배당 150배+ -40 / 최근평균 10.4착 -30 = 30점"
+  }
+ },
+ "final_recommendation": {
+  "quinella_main": {
+   "combo": "4+5",
+   "odds": null,
+   "reason": "4번(A)·5번(A)"
+  },
+  "trifecta_main": {
+   "combo": "4+5+7",
+   "odds": null,
+   "reason": "4번(A)·5번(A)·7번(B)"
+  },
+  "trifecta_insurance1": {
+   "combo": "4+5+12",
+   "odds": null,
+   "reason": "4번(A)·5번(A)·12번(B)"
+  },
+  "trifecta_insurance2": {
+   "combo": "5+7+12",
+   "odds": null,
+   "reason": "5번(A)·7번(B)·12번(B)"
+  },
+  "budget_allocation": {
+   "quinella_main": "62.1%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
+  }
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    4,
+    5
+   ],
+   "trio": [
+    4,
+    5,
+    7
+   ]
+  },
+  "form": {
+   "quinella": [
+    4,
+    5
+   ],
+   "trio": [
+    4,
+    5,
+    8
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    4,
+    5
+   ],
+   "trio": [
+    4,
+    5,
+    7
+   ]
+  }
+ },
+ "corePicks": null,
+ "summary": "유력마 5·4·7 / 복승 4+5",
+ "keyHorses": [
+  5,
+  4,
+  7
+ ],
+ "result": {
+  "1st": 4,
+  "2nd": 6,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": true,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   4,
+   6
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 2.4,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": 1400,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": true,
+   "inverseHorses": [
+    3,
+    2,
+    5
+   ],
+   "inverseHit": [
+    3
+   ],
+   "confidence": 35.0,
+   "reason": "역배열 감지말 3번 입상"
+  }
+ },
+ "profit": null,
+ "review": null
+}

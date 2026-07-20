@@ -1,0 +1,139 @@
+{
+ "raceKey": "세이부엔 9경주",
+ "at": "2026-07-18 14:38:20",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    2,
+    3
+   ],
+   "odds": 22.0,
+   "stars": 3,
+   "reason": "유력마 1·2위 조합",
+   "basis": [
+    "2번: 급락 -14.5% 감지",
+    "2번: 복병",
+    "3번: 급락 8.4% 감지"
+   ],
+   "summary": "유력마 1위+2위 최우선"
+  },
+  {
+   "combo": [
+    2,
+    4
+   ],
+   "odds": 4.2,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "basis": [
+    "2번: 급락 -14.5% 감지",
+    "2번: 복병",
+    "4번: 급락 -10.3% 감지",
+    "4번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    3,
+    4
+   ],
+   "odds": 4.7,
+   "reason": "복병 포함",
+   "stars": 3,
+   "basis": [
+    "3번: 급락 8.4% 감지",
+    "4번: 급락 -10.3% 감지",
+    "4번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    3,
+    7
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    2,
+    3
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    3,
+    4,
+    7
+   ],
+   "odds": 22.5,
+   "reason": "초기급락 보존"
+  },
+  {
+   "combo": [
+    2,
+    4,
+    7
+   ],
+   "odds": null,
+   "reason": "시장유력 보완: 4번+2번",
+   "marketInsurance": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    3,
+    7
+   ],
+   "odds": 41.7,
+   "reason": "시장유력",
+   "stars": 2,
+   "score": 72.9,
+   "basis": [
+    "3번: 급락 8.4% 감지",
+    "7번: 급락 -17.0% 감지",
+    "7번: 복병"
+   ],
+   "summary": "시장 저평가 중 주목"
+  },
+  {
+   "combo": [
+    3,
+    5
+   ],
+   "odds": 16.1,
+   "reason": "시장유력+급락",
+   "stars": 2,
+   "score": 56.8,
+   "basis": [
+    "3번: 급락 8.4% 감지",
+    "5번: 급락 -17.0% 감지"
+   ],
+   "summary": "시장 저평가 중 주목"
+  }
+ ],
+ "keyHorses": [
+  3,
+  7,
+  2
+ ],
+ "dansung": false,
+ "minOdds": 4.2,
+ "raceHorseCount": 7,
+ "result": null,
+ "compared": false
+}

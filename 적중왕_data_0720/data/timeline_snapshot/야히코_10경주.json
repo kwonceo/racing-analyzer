@@ -1,0 +1,70 @@
+{
+ "race": "야히코 10경주",
+ "date": "2026-07-19",
+ "snapshots": {
+  "T-10": {
+   "main": [
+    5,
+    7
+   ],
+   "dark_horse": [],
+   "odds": {
+    "5+7": 1.9
+   },
+   "confirmed": false,
+   "at": "14:57:52"
+  },
+  "T-7": {
+   "main": [
+    5,
+    7
+   ],
+   "dark_horse": [
+    2,
+    3
+   ],
+   "odds": {
+    "5+7": 2.0
+   },
+   "confirmed": true,
+   "at": "15:00:21"
+  },
+  "T-5": {
+   "main": [],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {},
+   "confirmed": true,
+   "at": "15:02:27",
+   "changed_from_T7": true,
+   "changed_horses": [
+    5,
+    7
+   ]
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "15:08:06"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "15:10:36",
+   "post_deadline_change": false
+  }
+ },
+ "updated_at": "2026-07-19 15:10:36"
+}

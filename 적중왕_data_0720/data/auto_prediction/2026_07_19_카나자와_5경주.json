@@ -1,0 +1,120 @@
+{
+ "raceKey": "카나자와 5경주",
+ "at": "2026-07-19 16:26:06",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    2,
+    6
+   ],
+   "odds": 3.6,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [
+    "6번: 복병"
+   ],
+   "summary": "시장 저평가(메인 보완)",
+   "ev": 1.08
+  },
+  {
+   "combo": [
+    1,
+    6
+   ],
+   "odds": 8.5,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [
+    "1번: 복병",
+    "6번: 복병"
+   ],
+   "summary": "시장 저평가(메인 보완)",
+   "ev": 1.27
+  },
+  {
+   "combo": [
+    4,
+    6
+   ],
+   "odds": 11.6,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [
+    "6번: 복병"
+   ],
+   "summary": "시장 저평가(메인 보완)",
+   "ev": 1.74
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    1,
+    2,
+    6
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    2,
+    3,
+    6
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    2,
+    5,
+    6
+   ],
+   "odds": 41.3,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    2,
+    6,
+    8
+   ],
+   "odds": null,
+   "reason": "시장유력 보완: 6번+2번",
+   "marketInsurance": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    2,
+    8
+   ],
+   "odds": 40.8,
+   "stars": 2,
+   "reason": "유력마 받치기 보존 → 고배당(25배↑) 복병 이동",
+   "basis": [
+    "8번: 집중급락",
+    "8번: 복병"
+   ],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "keyHorses": [
+  2,
+  6,
+  5,
+  8
+ ],
+ "dansung": false,
+ "minOdds": 3.6,
+ "raceHorseCount": 10,
+ "result": null,
+ "compared": false
+}

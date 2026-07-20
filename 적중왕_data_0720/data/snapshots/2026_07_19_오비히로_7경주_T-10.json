@@ -1,0 +1,133 @@
+{
+ "filename": "2026_07_19_오비히로_7경주_T-10.png",
+ "raceKey": "오비히로 7경주",
+ "at": "2026-07-19 17:44:28",
+ "trigger": "T-10",
+ "quinellas": [
+  {
+   "basis": [
+    "6번: 복병"
+   ],
+   "combo": [
+    6,
+    10
+   ],
+   "ev": 1.45,
+   "odds": 5.8,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [
+    "1번: 집중급락"
+   ],
+   "combo": [
+    1,
+    10
+   ],
+   "ev": 1.53,
+   "odds": 10.3,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [
+    "1번: 집중급락",
+    "6번: 복병"
+   ],
+   "combo": [
+    1,
+    6
+   ],
+   "ev": 1.77,
+   "odds": 13,
+   "reason": "시장유력+급락",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [
+    "7번: 복병"
+   ],
+   "combo": [
+    7,
+    10
+   ],
+   "ev": 1.58,
+   "odds": 8.4,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [
+    "6번: 복병",
+    "7번: 복병"
+   ],
+   "combo": [
+    6,
+    7
+   ],
+   "ev": 1.97,
+   "odds": 16.1,
+   "reason": "유력마 받치기 보존",
+   "stars": 3,
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    1,
+    6,
+    10
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)"
+  },
+  {
+   "combo": [
+    5,
+    6,
+    10
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 보험(복승1·2+복병)"
+  },
+  {
+   "combo": [
+    6,
+    7,
+    10
+   ],
+   "odds": 18.4,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    1,
+    3,
+    6
+   ],
+   "formInsurance": true,
+   "odds": null,
+   "qMainFixed": true,
+   "reason": "전적A 보완: 1번+2번 →복승메인 정합"
+  }
+ ],
+ "special": [],
+ "minOdds": 5.8,
+ "minQuinella": 5.8,
+ "minQuinellaCombo": [
+  6,
+  10
+ ],
+ "dansung": false,
+ "sizeBytes": 883611
+}

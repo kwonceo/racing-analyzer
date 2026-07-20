@@ -1,0 +1,49 @@
+{
+ "race": "静岡 3경주",
+ "date": "2026-07-19",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 35.6,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 5,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 12.3,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 2,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 9.8,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": null,
+ "result": {
+  "1st": 3,
+  "2nd": 1,
+  "3rd": 6,
+  "quinella_odds": 4.3
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": true,
+  "rank1_place": 3,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-19 12:17:14"
+}

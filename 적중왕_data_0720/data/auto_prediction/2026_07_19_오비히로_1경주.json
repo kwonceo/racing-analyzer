@@ -1,0 +1,151 @@
+{
+ "raceKey": "오비히로 1경주",
+ "at": "2026-07-19 14:35:36",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    7,
+    9
+   ],
+   "odds": 4.9,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "basis": [
+    "7번: 급락 8.0% 감지",
+    "7번: 복병",
+    "9번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    1,
+    3
+   ],
+   "odds": 6.5,
+   "reason": "복병 포함",
+   "stars": 3,
+   "basis": [
+    "1번: 급락 -9.7% 감지",
+    "1번: 복병",
+    "3번: 급락 -9.7% 감지",
+    "3번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    6,
+    8
+   ],
+   "odds": 7.9,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "6번: 급락 8.0% 감지",
+    "6번: 복병",
+    "8번: 급락 -12.9% 감지"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    2,
+    4
+   ],
+   "odds": 10.3,
+   "reason": "확신도1위+2위",
+   "stars": 3,
+   "basis": [
+    "2번: 급락 8.0% 감지",
+    "2번: 복병",
+    "4번: 급락 -12.9% 감지",
+    "4번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    4,
+    7,
+    9
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    7,
+    9
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    3,
+    7,
+    9
+   ],
+   "odds": 53.2,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    1,
+    3,
+    9
+   ],
+   "odds": 36.7,
+   "reason": "초기급락 보존"
+  },
+  {
+   "combo": [
+    1,
+    3,
+    7
+   ],
+   "odds": null,
+   "reason": "전적A 보완: 1번+2번 →복승메인 정합",
+   "formInsurance": true,
+   "qMainFixed": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    3,
+    7
+   ],
+   "odds": 115.8,
+   "stars": 2,
+   "reason": "유력마 받치기 보존 → 고배당(25배↑) 복병 이동",
+   "basis": [
+    "3번: 급락 -9.7% 감지",
+    "3번: 복병",
+    "7번: 급락 8.0% 감지",
+    "7번: 복병"
+   ],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "keyHorses": [
+  3,
+  9,
+  7,
+  8
+ ],
+ "dansung": false,
+ "minOdds": 4.9,
+ "raceHorseCount": 10,
+ "result": null,
+ "compared": false
+}

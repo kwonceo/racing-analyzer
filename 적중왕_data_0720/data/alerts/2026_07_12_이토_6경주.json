@@ -1,0 +1,95 @@
+{
+ "race": "이토 6경주",
+ "date": "2026-07-12",
+ "raceKey": "이토 6경주",
+ "alerts": [
+  {
+   "time": "17:47:22",
+   "race": "이토 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "5+6 -55.9%",
+   "alert_pair": "5+6",
+   "odds_snapshot": {
+    "5+6": {
+     "before": 47.6,
+     "after": 21.0
+    },
+    "3+4": {
+     "before": 10.5,
+     "after": 4.8
+    },
+    "4+6": {
+     "before": 23.9,
+     "after": 11.2
+    },
+    "3+7": {
+     "before": 10.9,
+     "after": 5.2
+    },
+    "3+5": {
+     "before": 29.7,
+     "after": 14.2
+    },
+    "1+5": {
+     "before": 81.8,
+     "after": 39.3
+    }
+   },
+   "alert_horses": [
+    5,
+    6,
+    3,
+    4,
+    7,
+    1
+   ],
+   "current_recommend": null,
+   "minutes_before": 6,
+   "result": [
+    2,
+    6,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    6,
+    4
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "17:50:30",
+   "race": "이토 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -33.3%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 3.0,
+     "after": 2.0
+    }
+   },
+   "alert_horses": [
+    4,
+    5
+   ],
+   "current_recommend": "3+4",
+   "minutes_before": 3,
+   "result": [
+    2,
+    6,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  2,
+  6,
+  4
+ ]
+}

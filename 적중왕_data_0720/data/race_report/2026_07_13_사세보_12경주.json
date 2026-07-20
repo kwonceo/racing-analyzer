@@ -1,0 +1,220 @@
+{
+ "race": "사세보 12경주",
+ "raceKey": "사세보 12경주",
+ "date": "2026-07-13",
+ "result": {
+  "1st": 4,
+  "2nd": 7,
+  "3rd": 2,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 112.0,
+   "confidence": 48.0,
+   "reason": "전적상위"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 111.3,
+   "confidence": 69.0,
+   "reason": "전적상위"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 110.5,
+   "confidence": 77.0,
+   "reason": "전적상위"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 108.7,
+   "confidence": 96.0,
+   "reason": "전적상위"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 98.1,
+   "confidence": 40.0,
+   "reason": "전적상위"
+  }
+ },
+ "recommended_horses": [
+  2,
+  7,
+  3,
+  6
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 4번 112.0점",
+  "2. 배당 수집 시작 20:17:16",
+  "5. 종합 신뢰도 48.0점(중) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 4,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 112.0,
+  "total": 48.0,
+  "grade": "중"
+ },
+ "win_tags": [
+  "복승불일치_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 112.0,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   2,
+   7
+  ],
+  "inverseHit": [
+   2,
+   7
+  ],
+  "confidence": 77.0,
+  "reason": "역배열 감지말 2·7번 입상"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "events": {
+   "1": {
+    "first": {
+     "time": "20:18:10",
+     "minutes_before": 11
+    },
+    "count": 1,
+    "last": {
+     "time": "20:18:10",
+     "minutes_before": 11
+    },
+    "vanished": {
+     "time": "20:18:12",
+     "minutes_before": 11
+    }
+   },
+   "4": {
+    "first": {
+     "time": "20:18:51",
+     "minutes_before": 11
+    },
+    "count": 2,
+    "last": {
+     "time": "20:27:23",
+     "minutes_before": 2
+    },
+    "vanished": {
+     "time": "20:19:04",
+     "minutes_before": 10
+    }
+   },
+   "2": {
+    "first": {
+     "time": "20:21:18",
+     "minutes_before": null
+    },
+    "count": 3,
+    "last": {
+     "time": "20:26:37",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "20:21:28",
+     "minutes_before": 8
+    }
+   },
+   "3": {
+    "first": {
+     "time": "20:24:37",
+     "minutes_before": null
+    },
+    "count": 2,
+    "last": {
+     "time": "20:25:20",
+     "minutes_before": 4
+    },
+    "vanished": {
+     "time": "20:24:55",
+     "minutes_before": null
+    }
+   }
+  },
+  "finalSignal": 4,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 1,
+   "next_race": 0
+  },
+  "validCount": 52
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-13 21:12:55"
+}

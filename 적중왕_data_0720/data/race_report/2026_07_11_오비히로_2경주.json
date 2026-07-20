@@ -1,0 +1,357 @@
+{
+ "race": "오비히로 2경주",
+ "raceKey": "오비히로 2경주",
+ "date": "2026-07-11",
+ "result": {
+  "1st": 7,
+  "2nd": 6,
+  "3rd": 1,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 40.0,
+   "reason": "일반"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 80.0,
+   "reason": "일반"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 60.0,
+   "reason": "일반"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 80.0,
+   "reason": "일반"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 100.0,
+   "reason": "일반"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 7번 전적 정보 제한",
+  "2. 배당 수집 시작 14:59:55",
+  "5. 종합 신뢰도 40.0점(중) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 7,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": null,
+  "total": 40.0,
+  "grade": "중"
+ },
+ "win_tags": [],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 80.0,
+  "reason": "전적유력마 1번 적중"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "15:00:08",
+    "minutes_before": 5,
+    "previous_signal": "4번",
+    "new_signal": "2번",
+    "reason": "2번 집중급락(평균 -47.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "15:00:34",
+    "minutes_before": 4,
+    "previous_signal": "7번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -54.5%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "15:00:52",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -60.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "15:00:56",
+    "minutes_before": 4,
+    "previous_signal": "7번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -54.2%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:01:27",
+    "minutes_before": 4,
+    "previous_signal": "7번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -53.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:01:33",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -57.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:01:40",
+    "minutes_before": 3,
+    "previous_signal": "7번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -53.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:01:52",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -56.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:02:05",
+    "minutes_before": 3,
+    "previous_signal": "7번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -65.3%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:02:11",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -55.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:02:20",
+    "minutes_before": 3,
+    "previous_signal": "7번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -66.3%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:02:29",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -54.5%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:02:30",
+    "minutes_before": 3,
+    "previous_signal": "7번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -66.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:02:49",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -54.5%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:02:55",
+    "minutes_before": 3,
+    "previous_signal": "7번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -66.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:03:06",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -54.5%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:03:15",
+    "minutes_before": 3,
+    "previous_signal": "7번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -66.3%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:03:26",
+    "minutes_before": null,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -54.5%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:03:40",
+    "minutes_before": 3,
+    "previous_signal": "7번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -66.3%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "15:06:08",
+    "minutes_before": 34,
+    "previous_signal": "3번",
+    "new_signal": "7번",
+    "reason": "7번 집중급락(평균 -57.0%)",
+    "prev_was_candidate": false
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   2,
+   3,
+   4,
+   7
+  ],
+  "events": {
+   "4": {
+    "first": {
+     "time": "14:59:56",
+     "minutes_before": 5
+    },
+    "count": 1,
+    "last": {
+     "time": "14:59:56",
+     "minutes_before": 5
+    }
+   },
+   "2": {
+    "first": {
+     "time": "15:00:08",
+     "minutes_before": 5
+    },
+    "count": 2,
+    "last": {
+     "time": "15:04:35",
+     "minutes_before": 2
+    },
+    "vanished": {
+     "time": "15:00:25",
+     "minutes_before": 5
+    }
+   },
+   "7": {
+    "first": {
+     "time": "15:00:31",
+     "minutes_before": null
+    },
+    "count": 11,
+    "last": {
+     "time": "15:06:08",
+     "minutes_before": 34
+    },
+    "vanished": {
+     "time": "15:06:11",
+     "minutes_before": 34
+    }
+   },
+   "3": {
+    "first": {
+     "time": "15:00:34",
+     "minutes_before": 4
+    },
+    "count": 11,
+    "last": {
+     "time": "15:05:46",
+     "minutes_before": 9
+    },
+    "vanished": {
+     "time": "15:01:10",
+     "minutes_before": 4
+    }
+   }
+  },
+  "finalSignal": 7,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 38
+ },
+ "pnl": 0,
+ "stake": 1000,
+ "generated_at": "2026-07-11 21:24:35"
+}

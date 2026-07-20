@@ -1,0 +1,318 @@
+{
+ "race_id": "2026_07_13_서울_1경주",
+ "raceKey": "서울 1경주",
+ "sport": "horse",
+ "category": "korea",
+ "date": "2026-07-13",
+ "race": "서울 1경주",
+ "analyzed_at": "01:04:08",
+ "updated_at": "02:11:02",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "kra_detail"
+ },
+ "odds_timeline": [
+  {
+   "time": "01:03:31",
+   "minutes_before": null,
+   "quinella": {}
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "원더풀대",
+   "jockey": "김영구",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": 9.4,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 2,
+   "name": "거승파워",
+   "jockey": "강원돈",
+   "record_score": 36.1,
+   "record_detail": "최근 4-2-6",
+   "odds": 23.0,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 3,
+   "name": "색달최고",
+   "jockey": "나종용",
+   "record_score": 85,
+   "record_detail": "최근 2",
+   "odds": 92.1,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 단승 50~99배 → 제거 권장 = 60점"
+  },
+  {
+   "no": 4,
+   "name": "천년여왕",
+   "jockey": "한성택",
+   "record_score": 85,
+   "record_detail": "최근 2",
+   "odds": 53.1,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 단승 50~99배 → 제거 권장 = 60점"
+  },
+  {
+   "no": 5,
+   "name": "한가누리",
+   "jockey": "김귀리",
+   "record_score": 0,
+   "record_detail": "",
+   "odds": 29.5,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   2
+  ],
+  "eliminated": [
+   3,
+   4,
+   5
+  ],
+  "elimination_reasons": {
+   "3": "배당 미수집 · 배당 150배+ -40 / 단승 50~99배 → 제거 권장 = 60점",
+   "4": "배당 미수집 · 배당 150배+ -40 / 단승 50~99배 → 제거 권장 = 60점",
+   "5": "배당 미수집 · 배당 150배+ -40 = 60점"
+  }
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    1,
+    2
+   ],
+   "trio": [
+    1,
+    2,
+    5
+   ]
+  },
+  "form": {
+   "quinella": [
+    3,
+    4
+   ],
+   "trio": [
+    2,
+    3,
+    4
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    1,
+    2
+   ],
+   "trio": [
+    1,
+    2,
+    5
+   ]
+  }
+ },
+ "corePicks": {
+  "axis": [
+   6,
+   1
+  ],
+  "third": 2,
+  "quinella": [
+   1,
+   6
+  ],
+  "trifecta": [
+   1,
+   2,
+   6
+  ],
+  "picks": [
+   {
+    "no": 6,
+    "tier": 1,
+    "sub": -1.8,
+    "rep": 1.8,
+    "reason": "유력마 저배당 1.8배"
+   },
+   {
+    "no": 1,
+    "tier": 1,
+    "sub": -9.4,
+    "rep": 9.4,
+    "reason": "유력마 저배당 9.4배"
+   },
+   {
+    "no": 2,
+    "tier": 1,
+    "sub": -23.0,
+    "rep": 23.0,
+    "reason": "유력마 저배당 23배"
+   }
+  ],
+  "quinellaOdds": null,
+  "trifectaOdds": null,
+  "confQuinellas": [
+   {
+    "combo": [
+     1,
+     2
+    ],
+    "odds": null,
+    "reason": "시장유력"
+   },
+   {
+    "combo": [
+     2,
+     5
+    ],
+    "odds": null,
+    "reason": "시장유력+급락"
+   }
+  ],
+  "forcedHorses": [],
+  "confTop1": 3,
+  "confTop1Conf": 25.5,
+  "confTop1High": true,
+  "favAxis": [
+   2,
+   1
+  ],
+  "confTrifecta": [
+   1,
+   2,
+   5
+  ],
+  "confTrifectaOdds": null,
+  "confTrifectaIns": [
+   1,
+   2,
+   3
+  ],
+  "confTrifectaInsOdds": null,
+  "denseBoxHorses": [
+   6,
+   11,
+   10,
+   1
+  ],
+  "denseBoxTrifectas": [
+   {
+    "combo": [
+     1,
+     6,
+     10
+    ],
+    "odds": null
+   },
+   {
+    "combo": [
+     1,
+     6,
+     11
+    ],
+    "odds": null
+   },
+   {
+    "combo": [
+     1,
+     10,
+     11
+    ],
+    "odds": null
+   },
+   {
+    "combo": [
+     6,
+     10,
+     11
+    ],
+    "odds": null
+   }
+  ],
+  "denseBoxNote": "무신호·저배당 밀집(상위 4두 ≤15배) → 삼복승 박스 4두 확대",
+  "finalQuinellas": [
+   {
+    "combo": [
+     1,
+     2
+    ],
+    "odds": null,
+    "reason": "시장유력"
+   },
+   {
+    "combo": [
+     2,
+     5
+    ],
+    "odds": null,
+    "reason": "시장유력+급락"
+   }
+  ],
+  "finalTrifectas": [
+   {
+    "combo": [
+     1,
+     2,
+     5
+    ],
+    "odds": null,
+    "reason": "삼복승 메인"
+   },
+   {
+    "combo": [
+     1,
+     6,
+     10
+    ],
+    "odds": null,
+    "reason": "무신호밀집"
+   }
+  ]
+ },
+ "summary": "유력마 2·1·5·6 / 복승 1+2",
+ "keyHorses": [
+  2,
+  1,
+  5,
+  6
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}

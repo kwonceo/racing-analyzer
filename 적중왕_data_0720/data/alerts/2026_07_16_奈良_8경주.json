@@ -1,0 +1,34 @@
+{
+ "race": "奈良 8경주",
+ "date": "2026-07-16",
+ "raceKey": "奈良 8경주",
+ "alerts": [
+  {
+   "time": "23:03:34",
+   "race": "奈良 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+4 -37.9%",
+   "alert_pair": "3+4",
+   "odds_snapshot": {
+    "3+4": {
+     "before": 61.4,
+     "after": 38.1
+    },
+    "3+5": {
+     "before": 145.4,
+     "after": 94.9
+    }
+   },
+   "alert_horses": [
+    3,
+    4,
+    5
+   ],
+   "current_recommend": "1+4",
+   "minutes_before": 7,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

@@ -1,0 +1,49 @@
+{
+ "race": "나고야 2경주",
+ "date": "2026-07-17",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 11,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 7.6,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 9,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 5.6,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 2,
+   "signal": "🔄 크로스역배열 크로스역배열",
+   "priority": 4,
+   "odds": 185.6,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "result": {
+  "1st": 9,
+  "2nd": 11,
+  "3rd": 4,
+  "quinella_odds": 0
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": true,
+  "rank1_place": 2,
+  "rank2_hit": true,
+  "rank2_place": 1,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-18 07:51:28",
+ "dansung": null
+}

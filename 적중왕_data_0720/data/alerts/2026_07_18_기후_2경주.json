@@ -1,0 +1,73 @@
+{
+ "race": "기후 2경주",
+ "date": "2026-07-18",
+ "raceKey": "기후 2경주",
+ "alerts": [
+  {
+   "time": "08:41:20",
+   "race": "기후 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+3 -33.9%",
+   "alert_pair": "1+3",
+   "odds_snapshot": {
+    "1+3": {
+     "before": 40.4,
+     "after": 26.7
+    }
+   },
+   "alert_horses": [
+    1,
+    3
+   ],
+   "current_recommend": "6+7",
+   "minutes_before": 9,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "08:46:14",
+   "race": "기후 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+4 -78.9%",
+   "alert_pair": "2+4",
+   "odds_snapshot": {
+    "2+4": {
+     "before": 707.0,
+     "after": 149.1
+    },
+    "4+5": {
+     "before": 1590.7,
+     "after": 338.9
+    },
+    "3+4": {
+     "before": 909.0,
+     "after": 219.3
+    },
+    "4+7": {
+     "before": 530.2,
+     "after": 128.5
+    },
+    "5+7": {
+     "before": 454.5,
+     "after": 133.1
+    },
+    "2+5": {
+     "before": 578.4,
+     "after": 186.4
+    }
+   },
+   "alert_horses": [
+    2,
+    4,
+    5,
+    3,
+    7
+   ],
+   "current_recommend": null,
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

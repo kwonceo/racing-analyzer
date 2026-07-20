@@ -1,0 +1,124 @@
+{
+ "raceKey": "코치 5경주",
+ "at": "2026-07-19 16:56:04",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    2,
+    5
+   ],
+   "odds": 3.9,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [
+    "2번: 복병",
+    "5번: 복병"
+   ],
+   "summary": "시장 저평가(메인 보완)",
+   "ev": 1.17
+  },
+  {
+   "combo": [
+    3,
+    6
+   ],
+   "odds": 4.4,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "3번: 복병",
+    "6번: 집중급락",
+    "6번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 1.32
+  },
+  {
+   "combo": [
+    2,
+    6
+   ],
+   "odds": 9.7,
+   "reason": "시장유력+급락",
+   "stars": 3,
+   "basis": [
+    "2번: 복병",
+    "6번: 집중급락",
+    "6번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 1.45
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    4,
+    5
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    2,
+    5
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    2,
+    5,
+    6
+   ],
+   "odds": 45.4,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    2,
+    5,
+    8
+   ],
+   "odds": 24.9,
+   "reason": "초기급락 보존"
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    2,
+    3
+   ],
+   "odds": 626.4,
+   "stars": 2,
+   "reason": "유력마 받치기 보존 → 고배당(25배↑) 복병 이동",
+   "basis": [
+    "2번: 복병",
+    "3번: 복병"
+   ],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "keyHorses": [
+  2,
+  5,
+  6,
+  3,
+  4
+ ],
+ "dansung": false,
+ "minOdds": 3.9,
+ "raceHorseCount": 8,
+ "result": null,
+ "compared": false
+}

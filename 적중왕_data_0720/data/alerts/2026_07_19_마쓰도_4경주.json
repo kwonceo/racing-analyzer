@@ -1,0 +1,72 @@
+{
+ "race": "마쓰도 4경주",
+ "date": "2026-07-19",
+ "raceKey": "마쓰도 4경주",
+ "alerts": [
+  {
+   "time": "09:27:07",
+   "race": "마쓰도 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+7 -31.6%",
+   "alert_pair": "1+7",
+   "odds_snapshot": {
+    "1+7": {
+     "before": 3.8,
+     "after": 2.6
+    }
+   },
+   "alert_horses": [
+    1,
+    7
+   ],
+   "current_recommend": "1+7",
+   "minutes_before": 3,
+   "result": [
+    1,
+    4,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    1,
+    7
+   ],
+   "ignored_miss": false
+  },
+  {
+   "time": "09:27:54",
+   "race": "마쓰도 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+4 -33.3%",
+   "alert_pair": "1+4",
+   "odds_snapshot": {
+    "1+4": {
+     "before": 2.4,
+     "after": 1.6
+    }
+   },
+   "alert_horses": [
+    1,
+    4
+   ],
+   "current_recommend": "2+4",
+   "minutes_before": 2,
+   "result": [
+    1,
+    4,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    1,
+    4
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  1,
+  4,
+  7
+ ]
+}

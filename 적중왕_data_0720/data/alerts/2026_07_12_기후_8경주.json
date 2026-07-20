@@ -1,0 +1,111 @@
+{
+ "race": "기후 8경주",
+ "date": "2026-07-12",
+ "raceKey": "기후 8경주",
+ "alerts": [
+  {
+   "time": "14:00:31",
+   "race": "기후 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+6 -68.8%",
+   "alert_pair": "2+6",
+   "odds_snapshot": {
+    "2+6": {
+     "before": 120.9,
+     "after": 37.7
+    },
+    "2+3": {
+     "before": 355.8,
+     "after": 118.4
+    },
+    "2+4": {
+     "before": 132.1,
+     "after": 46.7
+    },
+    "6+7": {
+     "before": 25.4,
+     "after": 9.2
+    },
+    "3+5": {
+     "before": 144.5,
+     "after": 56.7
+    },
+    "4+6": {
+     "before": 30.5,
+     "after": 13.1
+    }
+   },
+   "alert_horses": [
+    2,
+    6,
+    3,
+    4,
+    7,
+    5
+   ],
+   "current_recommend": null,
+   "minutes_before": 5,
+   "result": [
+    1,
+    7,
+    5
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    7,
+    5
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "14:05:04",
+   "race": "기후 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+7 -42.3%",
+   "alert_pair": "2+7",
+   "odds_snapshot": {
+    "2+7": {
+     "before": 19.4,
+     "after": 11.2
+    },
+    "5+7": {
+     "before": 6.7,
+     "after": 4.0
+    },
+    "3+7": {
+     "before": 42.1,
+     "after": 26.6
+    },
+    "4+7": {
+     "before": 10.2,
+     "after": 6.7
+    }
+   },
+   "alert_horses": [
+    2,
+    7,
+    5,
+    3,
+    4
+   ],
+   "current_recommend": null,
+   "minutes_before": 3,
+   "result": [
+    1,
+    7,
+    5
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    7,
+    5
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  1,
+  7,
+  5
+ ]
+}

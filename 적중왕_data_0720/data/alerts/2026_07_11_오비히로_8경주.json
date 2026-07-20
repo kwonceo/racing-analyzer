@@ -1,0 +1,149 @@
+{
+ "race": "오비히로 8경주",
+ "date": "2026-07-11",
+ "raceKey": "오비히로 8경주",
+ "alerts": [
+  {
+   "time": "18:02:21",
+   "race": "오비히로 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "7+10 -33.4%",
+   "alert_pair": "7+10",
+   "odds_snapshot": {
+    "7+10": {
+     "before": 303.7,
+     "after": 202.3
+    }
+   },
+   "alert_horses": [
+    7,
+    10
+   ],
+   "current_recommend": "6+7",
+   "minutes_before": null,
+   "result": [
+    2,
+    3,
+    4
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  },
+  {
+   "time": "18:03:38",
+   "race": "오비히로 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "8+10 -60.4%",
+   "alert_pair": "8+10",
+   "odds_snapshot": {
+    "8+10": {
+     "before": 202.3,
+     "after": 80.1
+    },
+    "5+8": {
+     "before": 144.5,
+     "after": 63.2
+    },
+    "1+4": {
+     "before": 112.4,
+     "after": 63.2
+    },
+    "5+10": {
+     "before": 63.2,
+     "after": 42.9
+    }
+   },
+   "alert_horses": [
+    8,
+    10,
+    5,
+    1,
+    4
+   ],
+   "current_recommend": "5+6",
+   "minutes_before": null,
+   "result": [
+    2,
+    3,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "18:07:11",
+   "race": "오비히로 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+10 -45.9%",
+   "alert_pair": "3+10",
+   "odds_snapshot": {
+    "3+10": {
+     "before": 664.1,
+     "after": 359.0
+    }
+   },
+   "alert_horses": [
+    3,
+    10
+   ],
+   "current_recommend": "3+6",
+   "minutes_before": null,
+   "result": [
+    2,
+    3,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3
+   ],
+   "ignored_miss": false
+  },
+  {
+   "time": "18:08:31",
+   "race": "오비히로 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+8 -64.9%",
+   "alert_pair": "6+8",
+   "odds_snapshot": {
+    "6+8": {
+     "before": 62.4,
+     "after": 21.9
+    },
+    "1+8": {
+     "before": 718.1,
+     "after": 417.7
+    },
+    "6+10": {
+     "before": 478.7,
+     "after": 334.2
+    }
+   },
+   "alert_horses": [
+    6,
+    8,
+    1,
+    10
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    2,
+    3,
+    4
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  2,
+  3,
+  4
+ ]
+}

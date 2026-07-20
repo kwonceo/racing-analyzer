@@ -1,0 +1,115 @@
+{
+ "filename": "2026_07_17_나고야_9경주_T-10.png",
+ "raceKey": "나고야 9경주",
+ "at": "2026-07-17 19:00:41",
+ "trigger": "T-10",
+ "quinellas": [
+  {
+   "basis": [],
+   "combo": [
+    2,
+    5
+   ],
+   "odds": 15.7,
+   "reason": "유력마 1·2위 조합",
+   "stars": 3,
+   "summary": "유력마 1위+2위 최우선"
+  },
+  {
+   "basis": [],
+   "combo": [
+    5,
+    11
+   ],
+   "odds": 8.4,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [],
+   "combo": [
+    1,
+    5
+   ],
+   "odds": 11.9,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [],
+   "combo": [
+    2,
+    11
+   ],
+   "odds": 12.5,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    5,
+    9
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)"
+  },
+  {
+   "combo": [
+    2,
+    5,
+    11
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 보험(복승1·2+유력마)"
+  },
+  {
+   "combo": [
+    2,
+    5,
+    10
+   ],
+   "odds": 67.3,
+   "reason": "확신도 보험"
+  },
+  {
+   "combo": [
+    1,
+    5,
+    11
+   ],
+   "marketInsurance": true,
+   "odds": null,
+   "reason": "시장유력 보완: 11번+5번"
+  },
+  {
+   "combo": [
+    2,
+    6,
+    9
+   ],
+   "formInsurance": true,
+   "odds": null,
+   "qMainFixed": true,
+   "reason": "전적A 보완: 9번+6번 →복승메인 정합"
+  }
+ ],
+ "special": [],
+ "minOdds": 8.4,
+ "minQuinella": 8.4,
+ "minQuinellaCombo": [
+  5,
+  11
+ ],
+ "dansung": false,
+ "sizeBytes": 919446
+}

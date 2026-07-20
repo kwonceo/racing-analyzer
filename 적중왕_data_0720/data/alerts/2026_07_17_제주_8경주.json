@@ -1,0 +1,113 @@
+{
+ "race": "제주 8경주",
+ "date": "2026-07-17",
+ "raceKey": "제주 8경주",
+ "alerts": [
+  {
+   "time": "17:10:02",
+   "race": "제주 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "7+8 -36.6%",
+   "alert_pair": "7+8",
+   "odds_snapshot": {
+    "7+8": {
+     "before": 65.9,
+     "after": 41.8
+    },
+    "6+8": {
+     "before": 23.9,
+     "after": 15.3
+    },
+    "3+7": {
+     "before": 77.4,
+     "after": 49.5
+    },
+    "2+7": {
+     "before": 100.0,
+     "after": 64.5
+    },
+    "6+7": {
+     "before": 100.0,
+     "after": 65.7
+    }
+   },
+   "alert_horses": [
+    7,
+    8,
+    6,
+    3,
+    2
+   ],
+   "current_recommend": null,
+   "minutes_before": 15,
+   "result": [
+    10,
+    9,
+    3
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "17:17:34",
+   "race": "제주 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "7+9 -94.2%",
+   "alert_pair": "7+9",
+   "odds_snapshot": {
+    "7+9": {
+     "before": 82.4,
+     "after": 4.8
+    },
+    "2+7": {
+     "before": 64.5,
+     "after": 13.6
+    },
+    "6+7": {
+     "before": 65.7,
+     "after": 14.5
+    },
+    "7+10": {
+     "before": 100.0,
+     "after": 23.9
+    },
+    "9+10": {
+     "before": 36.0,
+     "after": 13.3
+    },
+    "2+9": {
+     "before": 22.3,
+     "after": 9.0
+    }
+   },
+   "alert_horses": [
+    7,
+    9,
+    2,
+    6,
+    10
+   ],
+   "current_recommend": null,
+   "minutes_before": 7,
+   "result": [
+    10,
+    9,
+    3
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    9,
+    10
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  10,
+  9,
+  3
+ ]
+}

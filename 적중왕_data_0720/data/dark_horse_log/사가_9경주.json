@@ -1,0 +1,49 @@
+{
+ "result": {
+  "1st": 2,
+  "2nd": 8,
+  "3rd": 5,
+  "quinella_odds": 10.8
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": true,
+  "rank2_place": 3,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-18 20:29:45",
+ "race": "사가 9경주",
+ "date": "2026-07-18",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 12,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 16.6,
+   "detected_at": "T--8분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 5,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 12.6,
+   "detected_at": "T--8분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 1,
+   "signal": "크로스역배열",
+   "priority": 4,
+   "odds": 47.6,
+   "detected_at": "T--8분",
+   "recommended": false
+  }
+ },
+ "dansung": null
+}

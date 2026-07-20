@@ -1,0 +1,53 @@
+{
+ "race": "시즈오카 9경주",
+ "date": "2026-07-19",
+ "snapshots": {
+  "T-7": {
+   "main": [
+    2,
+    7
+   ],
+   "dark_horse": [],
+   "odds": {
+    "2+7": 2.9
+   },
+   "confirmed": true,
+   "at": "14:12:58"
+  },
+  "T-5": {
+   "main": [
+    2,
+    7
+   ],
+   "dark_horse": [
+    3,
+    6
+   ],
+   "odds": {
+    "2+7": 3.0
+   },
+   "confirmed": true,
+   "at": "14:14:57",
+   "changed_from_T7": false,
+   "changed_horses": []
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "14:23:34",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-19 14:49:49",
+ "result": {
+  "1st": 5,
+  "2nd": 4,
+  "3rd": 7
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false
+ }
+}

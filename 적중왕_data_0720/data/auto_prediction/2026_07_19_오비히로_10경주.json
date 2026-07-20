@@ -1,0 +1,100 @@
+{
+ "raceKey": "오비히로 10경주",
+ "at": "2026-07-19 19:21:14",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    2,
+    8
+   ],
+   "odds": 16.0,
+   "stars": 3,
+   "reason": "유력마 1·2위 조합",
+   "basis": [
+    "2번: 복병",
+    "8번: 복병"
+   ],
+   "summary": "유력마 1위+2위 최우선",
+   "ev": 1.96
+  },
+  {
+   "combo": [
+    8,
+    9
+   ],
+   "odds": 6.5,
+   "stars": 3,
+   "reason": "시장 저배당 보완 · 신호 근거로 기대값 면제",
+   "basis": [
+    "8번: 복병",
+    "9번: 복병"
+   ],
+   "summary": "시장 저평가(메인 보완)",
+   "ev": 0.38
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    4,
+    8
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    2,
+    7,
+    8
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    2,
+    8,
+    9
+   ],
+   "odds": 18.2,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    7,
+    8,
+    9
+   ],
+   "odds": 18.7,
+   "reason": "초기급락 보존"
+  },
+  {
+   "combo": [
+    1,
+    2,
+    3
+   ],
+   "odds": null,
+   "reason": "전적A 보완: 1번+2번",
+   "formInsurance": true
+  }
+ ],
+ "special": [],
+ "keyHorses": [
+  8,
+  9,
+  2
+ ],
+ "dansung": false,
+ "minOdds": 6.5,
+ "raceHorseCount": 10,
+ "result": null,
+ "compared": false
+}

@@ -1,0 +1,39 @@
+{
+ "race": "하코다테 1경주",
+ "date": "2026-07-16",
+ "raceKey": "하코다테 1경주",
+ "alerts": [
+  {
+   "time": "15:42:46",
+   "race": "하코다테 1경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -39.0%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 65.4,
+     "after": 39.9
+    },
+    "1+4": {
+     "before": 26.6,
+     "after": 17.4
+    },
+    "5+6": {
+     "before": 43.1,
+     "after": 28.2
+    }
+   },
+   "alert_horses": [
+    4,
+    5,
+    1,
+    6
+   ],
+   "current_recommend": "2+5",
+   "minutes_before": 2,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

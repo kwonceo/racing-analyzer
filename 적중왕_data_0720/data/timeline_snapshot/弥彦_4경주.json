@@ -1,0 +1,72 @@
+{
+ "race": "弥彦 4경주",
+ "date": "2026-07-17",
+ "snapshots": {
+  "T-10": {
+   "main": [
+    4,
+    5
+   ],
+   "dark_horse": [],
+   "odds": {
+    "4+5": 46.1
+   },
+   "confirmed": false,
+   "at": "12:04:36"
+  },
+  "T-7": {
+   "main": [
+    4,
+    5
+   ],
+   "dark_horse": [
+    1,
+    5
+   ],
+   "odds": {
+    "4+5": 45.1
+   },
+   "confirmed": true,
+   "at": "12:07:20"
+  },
+  "T-5": {
+   "main": [
+    4,
+    5
+   ],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {
+    "4+5": 35.1
+   },
+   "confirmed": true,
+   "at": "12:08:57",
+   "changed_from_T7": false,
+   "changed_horses": []
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    1,
+    5
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "12:15:29"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    1,
+    5
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "12:16:50",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-17 12:16:50"
+}

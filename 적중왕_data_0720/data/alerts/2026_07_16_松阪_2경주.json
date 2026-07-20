@@ -1,0 +1,60 @@
+{
+ "race": "松阪 2경주",
+ "date": "2026-07-16",
+ "raceKey": "松阪 2경주",
+ "alerts": [
+  {
+   "time": "11:05:39",
+   "race": "松阪 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+6 -56.8%",
+   "alert_pair": "2+6",
+   "odds_snapshot": {
+    "2+6": {
+     "before": 51.2,
+     "after": 22.1
+    },
+    "2+3": {
+     "before": 48.9,
+     "after": 21.4
+    },
+    "1+2": {
+     "before": 31.2,
+     "after": 18.2
+    }
+   },
+   "alert_horses": [
+    2,
+    6,
+    3,
+    1
+   ],
+   "current_recommend": "2+7",
+   "minutes_before": 5,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "11:06:39",
+   "race": "松阪 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+5 -36.3%",
+   "alert_pair": "3+5",
+   "odds_snapshot": {
+    "3+5": {
+     "before": 106.4,
+     "after": 67.8
+    }
+   },
+   "alert_horses": [
+    3,
+    5
+   ],
+   "current_recommend": "2+4",
+   "minutes_before": 4,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

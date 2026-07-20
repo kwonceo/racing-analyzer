@@ -1,0 +1,55 @@
+{
+ "race": "세이부엔 9경주",
+ "date": "2026-07-16",
+ "raceKey": "세이부엔 9경주",
+ "alerts": [
+  {
+   "time": "19:17:44",
+   "race": "세이부엔 9경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+5 -37.5%",
+   "alert_pair": "1+5",
+   "odds_snapshot": {
+    "1+5": {
+     "before": 1.6,
+     "after": 1.0
+    }
+   },
+   "alert_horses": [
+    1,
+    5
+   ],
+   "current_recommend": null,
+   "minutes_before": 4,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "19:19:24",
+   "race": "세이부엔 9경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+2 -49.7%",
+   "alert_pair": "1+2",
+   "odds_snapshot": {
+    "1+2": {
+     "before": 33.2,
+     "after": 16.7
+    },
+    "2+3": {
+     "before": 79.1,
+     "after": 52.3
+    }
+   },
+   "alert_horses": [
+    1,
+    2,
+    3
+   ],
+   "current_recommend": "1+5",
+   "minutes_before": 2,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

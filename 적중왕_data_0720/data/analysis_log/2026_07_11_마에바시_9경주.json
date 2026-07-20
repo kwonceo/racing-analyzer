@@ -1,0 +1,205 @@
+{
+ "race_id": "2026_07_11_마에바시_9경주",
+ "raceKey": "마에바시 9경주",
+ "sport": "cycle",
+ "category": "cycle",
+ "date": "2026-07-11",
+ "race": "마에바시 9경주",
+ "analyzed_at": "14:38:45",
+ "updated_at": "21:26:51",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ },
+ "odds_timeline": [
+  {
+   "time": "14:38:45",
+   "minutes_before": 7,
+   "quinella": {}
+  },
+  {
+   "time": "14:38:57",
+   "minutes_before": 7,
+   "quinella": {
+    "2+12": 7.2,
+    "2+7": 8.2,
+    "1+2": 8.4,
+    "2+4": 16.8,
+    "7+12": 17.9,
+    "1+12": 18.4,
+    "2+11": 20.3,
+    "1+7": 22.1,
+    "2+9": 28.3,
+    "2+3": 29.8,
+    "4+7": 32.4,
+    "7+11": 34.0,
+    "11+12": 37.7,
+    "1+11": 39.3,
+    "2+6": 41.3,
+    "4+12": 45.1,
+    "2+5": 47.1,
+    "1+4": 55.3,
+    "2+10": 59.3,
+    "3+7": 61.3,
+    "9+12": 66.1,
+    "3+12": 67.2,
+    "7+9": 69.0,
+    "1+3": 70.3,
+    "5+7": 73.8,
+    "6+12": 83.2,
+    "1+9": 83.8,
+    "6+7": 89.8,
+    "1+6": 97.3,
+    "7+10": 104.8,
+    "4+11": 109.2,
+    "9+11": 119.9,
+    "1+5": 123.0,
+    "5+12": 124.2,
+    "10+12": 130.4,
+    "3+4": 142.9,
+    "4+9": 144.8,
+    "2+13": 146.1,
+    "3+11": 149.1,
+    "7+8": 153.6,
+    "6+11": 156.7,
+    "2+14": 158.1,
+    "7+13": 169.0,
+    "10+11": 169.6,
+    "12+14": 172.2,
+    "2+8": 174.5,
+    "3+9": 189.4,
+    "4+6": 190.0,
+    "4+5": 200.2,
+    "1+10": 203.3,
+    "3+6": 209.3,
+    "6+9": 228.9,
+    "5+11": 236.9,
+    "4+10": 241.9,
+    "5+9": 257.6,
+    "7+14": 271.0,
+    "1+13": 286.0,
+    "3+5": 301.3,
+    "12+13": 305.7,
+    "1+14": 312.1,
+    "5+6": 328.9,
+    "9+10": 365.6,
+    "8+12": 369.7,
+    "4+13": 401.5,
+    "8+9": 426.2,
+    "1+8": 431.8,
+    "11+13": 440.0,
+    "6+10": 445.3,
+    "3+10": 446.6,
+    "11+14": 448.0,
+    "4+14": 529.0,
+    "4+8": 567.2,
+    "9+14": 573.8,
+    "5+10": 601.5,
+    "3+13": 641.6,
+    "6+14": 654.3,
+    "8+11": 658.6,
+    "5+8": 661.5,
+    "3+14": 695.5,
+    "9+13": 713.8,
+    "10+14": 744.0,
+    "6+13": 753.4,
+    "10+13": 789.3,
+    "5+13": 795.6,
+    "6+8": 845.2,
+    "5+14": 867.3,
+    "3+8": 890.6,
+    "13+14": 1096.9,
+    "8+10": 1174.7,
+    "8+14": 1506.9,
+    "8+13": 1676.2
+   }
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [],
+ "elimination": {
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": null,
+   "trio": null
+  },
+  "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": null,
+   "trio": null
+  }
+ },
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 5,
+  "2nd": 9,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   8,
+   14
+  ],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": true,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "제거 적중"
+  }
+ },
+ "profit": null,
+ "review": null
+}

@@ -1,0 +1,50 @@
+{
+ "race": "松阪 4경주",
+ "date": "2026-07-17",
+ "raceKey": "松阪 4경주",
+ "alerts": [
+  {
+   "time": "11:56:01",
+   "race": "松阪 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+5 -47.9%",
+   "alert_pair": "1+5",
+   "odds_snapshot": {
+    "1+5": {
+     "before": 96.0,
+     "after": 50.0
+    }
+   },
+   "alert_horses": [
+    1,
+    5
+   ],
+   "current_recommend": "3+4",
+   "minutes_before": 6,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "11:56:15",
+   "race": "松阪 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+5 -34.3%",
+   "alert_pair": "2+5",
+   "odds_snapshot": {
+    "2+5": {
+     "before": 32.9,
+     "after": 21.6
+    }
+   },
+   "alert_horses": [
+    2,
+    5
+   ],
+   "current_recommend": "3+4",
+   "minutes_before": 5,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

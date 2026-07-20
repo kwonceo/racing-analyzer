@@ -1,0 +1,70 @@
+{
+ "race": "히로시마 7경주",
+ "date": "2026-07-09",
+ "raceKey": "히로시마 7경주",
+ "alerts": [
+  {
+   "time": "10:21:44",
+   "race": "히로시마 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+3 -43.7%",
+   "alert_pair": "2+3",
+   "odds_snapshot": {
+    "2+3": {
+     "before": 141.6,
+     "after": 79.7
+    }
+   },
+   "alert_horses": [
+    2,
+    3
+   ],
+   "current_recommend": "3+4",
+   "minutes_before": 13,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "10:23:44",
+   "race": "히로시마 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+7 -52.9%",
+   "alert_pair": "1+7",
+   "odds_snapshot": {
+    "1+7": {
+     "before": 67.3,
+     "after": 31.7
+    },
+    "5+6": {
+     "before": 59.6,
+     "after": 29.5
+    },
+    "1+5": {
+     "before": 42.6,
+     "after": 24.0
+    },
+    "2+4": {
+     "before": 47.4,
+     "after": 26.7
+    },
+    "2+5": {
+     "before": 29.8,
+     "after": 20.7
+    }
+   },
+   "alert_horses": [
+    1,
+    7,
+    5,
+    6,
+    2,
+    4
+   ],
+   "current_recommend": "3+4",
+   "minutes_before": 11,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

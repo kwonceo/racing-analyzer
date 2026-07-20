@@ -1,0 +1,100 @@
+{
+ "race": "카사마츠 4경주",
+ "date": "2026-07-09",
+ "raceKey": "카사마츠 4경주",
+ "alerts": [
+  {
+   "time": "12:17:37",
+   "race": "카사마츠 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+10 -64.1%",
+   "alert_pair": "1+10",
+   "odds_snapshot": {
+    "1+10": {
+     "before": 582.1,
+     "after": 209.1
+    },
+    "1+8": {
+     "before": 186.3,
+     "after": 128.0
+    }
+   },
+   "alert_horses": [
+    1,
+    10,
+    8
+   ],
+   "current_recommend": "2+6",
+   "minutes_before": 12,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "12:19:19",
+   "race": "카사마츠 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "8+9 -30.2%",
+   "alert_pair": "8+9",
+   "odds_snapshot": {
+    "8+9": {
+     "before": 35.1,
+     "after": 24.5
+    }
+   },
+   "alert_horses": [
+    8,
+    9
+   ],
+   "current_recommend": "5+6",
+   "minutes_before": 11,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "12:29:29",
+   "race": "카사마츠 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+10 -67.9%",
+   "alert_pair": "4+10",
+   "odds_snapshot": {
+    "4+10": {
+     "before": 210.4,
+     "after": 67.6
+    },
+    "3+4": {
+     "before": 156.4,
+     "after": 50.4
+    },
+    "4+9": {
+     "before": 68.5,
+     "after": 28.5
+    },
+    "1+6": {
+     "before": 210.4,
+     "after": 88.0
+    },
+    "9+10": {
+     "before": 113.8,
+     "after": 48.8
+    },
+    "3+10": {
+     "before": 228.7,
+     "after": 99.8
+    }
+   },
+   "alert_horses": [
+    4,
+    10,
+    3,
+    9,
+    1,
+    6
+   ],
+   "current_recommend": "4+9",
+   "minutes_before": 2,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

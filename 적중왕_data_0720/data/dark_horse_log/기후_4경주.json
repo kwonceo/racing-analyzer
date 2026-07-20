@@ -1,0 +1,65 @@
+{
+ "race": "기후 4경주",
+ "date": "2026-07-20",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 1,
+   "signal": "크로스역배열",
+   "priority": 4,
+   "odds": 15.2,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 7,
+   "signal": "크로스역배열",
+   "priority": 4,
+   "odds": 13.7,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 5,
+   "signal": "크로스역배열",
+   "priority": 4,
+   "odds": 7.5,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "result": {
+  "1st": 4,
+  "2nd": 2,
+  "3rd": 7,
+  "quinella_odds": 1.7
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": true,
+  "rank2_place": 3,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": null,
+  "dansung_horse_won": false,
+  "dansung_horse_placed": true,
+  "dansung_winner": 4,
+  "dansung_dark_hit": true
+ },
+ "updated_at": "2026-07-20 10:31:33",
+ "dansung": {
+  "dansungHorse": 2,
+  "dansungOdds": 1.5,
+  "realFavorites": [
+   4,
+   5
+  ],
+  "darkHorses": [
+   1,
+   5,
+   7
+  ]
+ }
+}

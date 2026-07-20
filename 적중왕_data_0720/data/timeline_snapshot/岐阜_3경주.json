@@ -1,0 +1,78 @@
+{
+ "race": "岐阜 3경주",
+ "date": "2026-07-18",
+ "snapshots": {
+  "T-10": {
+   "main": [
+    3,
+    6
+   ],
+   "dark_horse": [
+    3,
+    4
+   ],
+   "odds": {
+    "3+6": 3.4
+   },
+   "confirmed": false,
+   "at": "09:01:39"
+  },
+  "T-7": {
+   "main": [
+    3,
+    4
+   ],
+   "dark_horse": [
+    2,
+    4
+   ],
+   "odds": {
+    "3+4": 15.2
+   },
+   "confirmed": true,
+   "at": "09:04:06"
+  },
+  "T-5": {
+   "main": [
+    3,
+    6
+   ],
+   "dark_horse": [
+    2,
+    4
+   ],
+   "odds": {
+    "3+6": 4.0
+   },
+   "confirmed": true,
+   "at": "09:06:33",
+   "changed_from_T7": true,
+   "changed_horses": [
+    4,
+    6
+   ]
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    2,
+    4
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "09:12:15"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    2,
+    4
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "09:13:33",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-18 09:13:33"
+}

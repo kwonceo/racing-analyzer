@@ -1,0 +1,113 @@
+{
+ "filename": "2026_07_17_우라와_11경주_마감후.png",
+ "raceKey": "우라와 11경주",
+ "at": "2026-07-17 18:55:24",
+ "trigger": "close",
+ "quinellas": [
+  {
+   "basis": [],
+   "combo": [
+    2,
+    6
+   ],
+   "odds": 21.1,
+   "reason": "유력마 1·2위 조합",
+   "stars": 3,
+   "summary": "유력마 1위+2위 최우선"
+  },
+  {
+   "basis": [],
+   "combo": [
+    4,
+    11
+   ],
+   "odds": 6.4,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [],
+   "combo": [
+    4,
+    6
+   ],
+   "odds": 7.9,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "basis": [],
+   "combo": [
+    6,
+    11
+   ],
+   "odds": 8.5,
+   "reason": "시장 저배당 보완",
+   "stars": 3,
+   "summary": "시장 저평가(메인 보완)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    6,
+    7
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)"
+  },
+  {
+   "combo": [
+    2,
+    6,
+    8
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 보험(복승1·2+유력마)"
+  },
+  {
+   "combo": [
+    2,
+    4,
+    6
+   ],
+   "odds": 21.6,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    2,
+    3,
+    6
+   ],
+   "odds": 64.9,
+   "reason": "확신도 보험"
+  },
+  {
+   "combo": [
+    4,
+    6,
+    11
+   ],
+   "marketInsurance": true,
+   "odds": null,
+   "reason": "시장유력 보완: 11번+4번"
+  }
+ ],
+ "special": [],
+ "minOdds": 6.4,
+ "minQuinella": 6.4,
+ "minQuinellaCombo": [
+  4,
+  11
+ ],
+ "dansung": false,
+ "sizeBytes": 1232123
+}

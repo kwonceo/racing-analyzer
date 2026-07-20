@@ -1,0 +1,66 @@
+{
+ "race": "코치 4경주",
+ "date": "2026-07-18",
+ "raceKey": "코치 4경주",
+ "alerts": [
+  {
+   "time": "16:35:04",
+   "race": "코치 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+6 -70.4%",
+   "alert_pair": "1+6",
+   "odds_snapshot": {
+    "1+6": {
+     "before": 196.2,
+     "after": 58.1
+    },
+    "5+6": {
+     "before": 35.3,
+     "after": 11.1
+    },
+    "1+8": {
+     "before": 245.2,
+     "after": 83.9
+    },
+    "4+5": {
+     "before": 85.6,
+     "after": 30.7
+    },
+    "2+6": {
+     "before": 37.8,
+     "after": 15.2
+    },
+    "1+2": {
+     "before": 179.8,
+     "after": 103.3
+    }
+   },
+   "alert_horses": [
+    1,
+    6,
+    5,
+    8,
+    4,
+    2
+   ],
+   "current_recommend": "2+9",
+   "minutes_before": 0,
+   "result": [
+    6,
+    9,
+    1
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    1,
+    6
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  6,
+  9,
+  1
+ ]
+}

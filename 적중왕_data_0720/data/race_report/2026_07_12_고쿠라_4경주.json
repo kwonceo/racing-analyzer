@@ -1,0 +1,197 @@
+{
+ "race": "고쿠라 4경주",
+ "raceKey": "고쿠라 4경주",
+ "date": "2026-07-12",
+ "result": {
+  "1st": 7,
+  "2nd": 12,
+  "3rd": 6,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 0,
+   "confidence": 64.0,
+   "reason": "일반"
+  },
+  "signal_12": {
+   "horse": 12,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": 40.0,
+   "reason": "일반"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 81.2,
+   "confidence": 32.0,
+   "reason": "전적상위"
+  },
+  "signal_11": {
+   "horse": 11,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 23.8,
+   "confidence": 24.0,
+   "reason": "일반"
+  },
+  "signal_8": {
+   "horse": 8,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 31.2,
+   "confidence": 40.0,
+   "reason": "일반"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 7번 0점",
+  "2. 배당 수집 시작 11:19:48",
+  "5. 종합 신뢰도 64.0점(중) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 7,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 0,
+  "total": 64.0,
+  "grade": "중"
+ },
+ "win_tags": [],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 0,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 64.0,
+  "reason": "전적유력마 6번 적중"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "11:26:55",
+    "minutes_before": 2,
+    "previous_signal": "13번",
+    "new_signal": "5번",
+    "reason": "5번 집중급락(평균 -38.0%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "11:32:21",
+    "minutes_before": 6,
+    "previous_signal": "5번",
+    "new_signal": "8번",
+    "reason": "8번 집중급락(평균 -38.2%)",
+    "prev_was_candidate": false
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   5,
+   8,
+   13
+  ],
+  "events": {
+   "13": {
+    "first": {
+     "time": "11:26:48",
+     "minutes_before": 2
+    },
+    "count": 1,
+    "last": {
+     "time": "11:26:48",
+     "minutes_before": 2
+    }
+   },
+   "5": {
+    "first": {
+     "time": "11:26:55",
+     "minutes_before": 2
+    },
+    "count": 2,
+    "last": {
+     "time": "11:28:37",
+     "minutes_before": 0
+    },
+    "vanished": {
+     "time": "11:27:06",
+     "minutes_before": 1
+    }
+   },
+   "8": {
+    "first": {
+     "time": "11:32:21",
+     "minutes_before": 6
+    },
+    "count": 1,
+    "last": {
+     "time": "11:32:21",
+     "minutes_before": 6
+    },
+    "vanished": {
+     "time": "11:32:21",
+     "minutes_before": 6
+    }
+   }
+  },
+  "finalSignal": 8,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 23
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-12 21:22:48"
+}

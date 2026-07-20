@@ -1,0 +1,134 @@
+{
+ "raceKey": "오비히로 5경주",
+ "at": "2026-07-18 16:45:59",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    5,
+    8
+   ],
+   "odds": 5.3,
+   "stars": 3,
+   "reason": "시장 저배당+완화신호",
+   "basis": [
+    "5번: 복병",
+    "8번: 복병"
+   ],
+   "summary": "완화신호 유력(메인 보완)"
+  },
+  {
+   "combo": [
+    3,
+    10
+   ],
+   "odds": 14.8,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "10번: 급락 -16.3% 감지",
+    "10번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    4,
+    8
+   ],
+   "odds": 11.2,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [
+    "8번: 복병"
+   ],
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "combo": [
+    4,
+    5
+   ],
+   "odds": 139.5,
+   "stars": 3,
+   "reason": "유력마 받치기 보존",
+   "basis": [
+    "5번: 복병"
+   ],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    1,
+    5,
+    8
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    2,
+    5,
+    8
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    4,
+    5,
+    8
+   ],
+   "odds": 40.5,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    2,
+    3,
+    5
+   ],
+   "odds": null,
+   "reason": "전적A 보완: 1번+2번 →복승메인 정합",
+   "formInsurance": true,
+   "qMainFixed": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    5,
+    10
+   ],
+   "odds": 33.7,
+   "reason": "확신도1위+2위",
+   "stars": 2,
+   "score": 55.0,
+   "basis": [
+    "5번: 복병",
+    "10번: 급락 -16.3% 감지",
+    "10번: 복병"
+   ],
+   "summary": "시장 저평가 중 주목"
+  }
+ ],
+ "keyHorses": [
+  5,
+  8,
+  4,
+  9
+ ],
+ "dansung": false,
+ "minOdds": 5.3,
+ "raceHorseCount": 10,
+ "result": null,
+ "compared": false
+}

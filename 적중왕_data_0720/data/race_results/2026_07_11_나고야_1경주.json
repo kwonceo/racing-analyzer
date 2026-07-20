@@ -1,0 +1,95 @@
+{
+ "race_id": "2026_07_11_나고야_1경주",
+ "raceKey": "나고야 1경주",
+ "date": "2026-07-11",
+ "track": "나고야",
+ "round": 1,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 12,
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 3
+ },
+ "odds_at_start": {
+  "quinella": {},
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "20:40:08",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "20:41:08",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "20:42:08",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  },
+  {
+   "time": "20:43:08",
+   "minutes_before": null,
+   "quinella": {},
+   "exacta": {}
+  }
+ ],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   6,
+   11,
+   4,
+   5,
+   7,
+   9
+  ],
+  "eliminated": [
+   8,
+   10,
+   12
+  ],
+  "recommend_main": "2+3",
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": "하",
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중 · 제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 500
+ },
+ "memo": null,
+ "saved_at": "2026-07-11 21:26:59",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

@@ -1,0 +1,67 @@
+{
+ "race": "西武園 11경주",
+ "date": "2026-07-17",
+ "snapshots": {
+  "T+1": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "20:16:54"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "20:17:54",
+   "post_deadline_change": false
+  },
+  "T-10": {
+   "main": [
+    3,
+    7
+   ],
+   "dark_horse": [
+    6,
+    7
+   ],
+   "odds": {
+    "3+7": 2.2
+   },
+   "confirmed": false,
+   "at": "20:05:55"
+  },
+  "T-7": {
+   "main": [
+    3,
+    7
+   ],
+   "dark_horse": [
+    1,
+    4
+   ],
+   "odds": {
+    "3+7": 2.2
+   },
+   "confirmed": true,
+   "at": "20:08:30"
+  },
+  "T-5": {
+   "main": [],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {},
+   "confirmed": true,
+   "at": "20:19:28",
+   "changed_from_T7": true,
+   "changed_horses": [
+    3,
+    7
+   ]
+  }
+ },
+ "updated_at": "2026-07-18 20:19:28"
+}

@@ -1,0 +1,66 @@
+{
+ "race": "모리오카 4경주",
+ "date": "2026-07-19",
+ "raceKey": "모리오카 4경주",
+ "alerts": [
+  {
+   "time": "13:27:17",
+   "race": "모리오카 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+9 -93.4%",
+   "alert_pair": "3+9",
+   "odds_snapshot": {
+    "3+9": {
+     "before": 92.7,
+     "after": 6.1
+    },
+    "5+9": {
+     "before": 77.2,
+     "after": 6.0
+    },
+    "7+9": {
+     "before": 92.7,
+     "after": 23.8
+    },
+    "3+4": {
+     "before": 154.5,
+     "after": 42.5
+    },
+    "8+10": {
+     "before": 463.5,
+     "after": 130.0
+    },
+    "4+10": {
+     "before": 154.5,
+     "after": 59.3
+    }
+   },
+   "alert_horses": [
+    3,
+    9,
+    5,
+    7,
+    4,
+    8,
+    10
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    5,
+    1,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    5
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  5,
+  1,
+  6
+ ]
+}

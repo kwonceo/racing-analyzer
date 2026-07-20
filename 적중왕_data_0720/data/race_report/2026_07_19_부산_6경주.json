@@ -1,0 +1,476 @@
+{
+ "race": "부산 6경주",
+ "raceKey": "부산 6경주",
+ "date": "2026-07-19",
+ "result": {
+  "1st": 5,
+  "2nd": 11,
+  "3rd": 7,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": 4.8,
+   "avg_drop": -62.4,
+   "grade": "🔴",
+   "rep_combo": [
+    3,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:10:43",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:12",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:12",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:42",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:44",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:52",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:53",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:12:44",
+     "minutes_before": 7,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:12:44",
+     "minutes_before": 7,
+     "odds": 24.0,
+     "change": -76.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 77,
+   "confidence": 64.0,
+   "reason": "초과급락"
+  },
+  "signal_11": {
+   "horse": 11,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": 3.3,
+   "avg_drop": -63.9,
+   "grade": "🔴",
+   "rep_combo": [
+    2,
+    7
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:10:43",
+     "minutes_before": null,
+     "odds": 61.0,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:12",
+     "minutes_before": null,
+     "odds": 61.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:12",
+     "minutes_before": null,
+     "odds": 61.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:42",
+     "minutes_before": null,
+     "odds": 61.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:44",
+     "minutes_before": null,
+     "odds": 61.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:52",
+     "minutes_before": null,
+     "odds": 61.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:53",
+     "minutes_before": null,
+     "odds": 61.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:12:44",
+     "minutes_before": 7,
+     "odds": 61.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:12:44",
+     "minutes_before": 7,
+     "odds": 22.0,
+     "change": -63.9,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 111.2,
+   "confidence": 89.0,
+   "reason": "초과급락"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": 3.5,
+   "avg_drop": -63.7,
+   "grade": "🔴",
+   "rep_combo": [
+    1,
+    2
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:10:43",
+     "minutes_before": null,
+     "odds": 57.5,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:12",
+     "minutes_before": null,
+     "odds": 57.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:12",
+     "minutes_before": null,
+     "odds": 57.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:42",
+     "minutes_before": null,
+     "odds": 57.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:44",
+     "minutes_before": null,
+     "odds": 57.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:52",
+     "minutes_before": null,
+     "odds": 57.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:53",
+     "minutes_before": null,
+     "odds": 57.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:12:44",
+     "minutes_before": 7,
+     "odds": 57.5,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:12:44",
+     "minutes_before": 7,
+     "odds": 8.7,
+     "change": -84.9,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 56.2,
+   "confidence": 80.0,
+   "reason": "초과급락"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": -8.8,
+   "avg_drop": -76.0,
+   "grade": "🔴",
+   "rep_combo": [
+    3,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:10:43",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:12",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:12",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:42",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:44",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:52",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:11:53",
+     "minutes_before": null,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:12:44",
+     "minutes_before": 7,
+     "odds": 100.0,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:12:44",
+     "minutes_before": 7,
+     "odds": 24.0,
+     "change": -76.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 20,
+   "confidence": 80.0,
+   "reason": "초과급락"
+  }
+ },
+ "recommended_horses": [
+  1,
+  7,
+  3
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 5번 77점",
+  "2. 배당 수집 시작 16:10:43",
+  "3. 초과급락 감지: 1번 초과급락 3.5%p (전체평균 -67.2%)",
+  "5. 종합 신뢰도 64.0점(중) 판정",
+  "6. BMED 전략: 압축형 적용",
+  "7. 최종 추천: 복승 메인 1+7"
+ ],
+ "confidence_breakdown": {
+  "horse": 5,
+  "excess_drop_score": 40,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 77,
+  "total": 64.0,
+  "grade": "중"
+ },
+ "win_tags": [
+  "초과급락_적중",
+  "복승불일치_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 77,
+  "dropAmt": -76.0,
+  "dropScore": 100.0,
+  "inverse": false,
+  "inverseHorses": [
+   7,
+   1,
+   2,
+   3
+  ],
+  "inverseHit": [
+   7
+  ],
+  "confidence": 89.0,
+  "reason": "3+5 복승 급락(-76.0%) → 5번 입상 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [
+   1
+  ],
+  "events": {
+   "1": {
+    "first": {
+     "time": "16:12:44",
+     "minutes_before": 7
+    },
+    "count": 1,
+    "last": {
+     "time": "16:12:44",
+     "minutes_before": 7
+    }
+   }
+  },
+  "finalSignal": 1,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 9
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-19 17:08:39"
+}

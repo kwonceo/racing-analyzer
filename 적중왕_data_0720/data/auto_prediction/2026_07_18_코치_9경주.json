@@ -1,0 +1,86 @@
+{
+ "raceKey": "코치 9경주",
+ "at": "2026-07-18 18:47:35",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    2,
+    7
+   ],
+   "odds": 4.0,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "basis": [
+    "2번: 급락 -9.3% 감지",
+    "7번: 급락 -21.9% 감지",
+    "7번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    1,
+    9
+   ],
+   "odds": 4.5,
+   "reason": "확신도1위+2위",
+   "stars": 3,
+   "basis": [
+    "1번: 급락 9.0% 감지",
+    "9번: 급락 -21.9% 감지"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    1,
+    2
+   ],
+   "odds": 37.4,
+   "stars": 3,
+   "reason": "유력마 받치기 보존",
+   "basis": [
+    "1번: 급락 9.0% 감지",
+    "2번: 급락 -9.3% 감지"
+   ],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    7,
+    9
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    2,
+    7
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+유력마)",
+   "qMainAnchor": true
+  }
+ ],
+ "special": [],
+ "keyHorses": [
+  2,
+  7,
+  1,
+  9
+ ],
+ "dansung": false,
+ "minOdds": 4.0,
+ "raceHorseCount": 9,
+ "result": null,
+ "compared": false
+}

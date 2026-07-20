@@ -1,0 +1,66 @@
+{
+ "race": "이토 12경주",
+ "date": "2026-07-12",
+ "raceKey": "이토 12경주",
+ "alerts": [
+  {
+   "time": "20:26:42",
+   "race": "이토 12경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -72.7%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 713.6,
+     "after": 194.7
+    },
+    "3+4": {
+     "before": 726.7,
+     "after": 270.3
+    },
+    "3+5": {
+     "before": 784.3,
+     "after": 323.4
+    },
+    "1+4": {
+     "before": 191.3,
+     "after": 79.1
+    },
+    "1+7": {
+     "before": 10.2,
+     "after": 4.5
+    },
+    "2+4": {
+     "before": 165.7,
+     "after": 73.3
+    }
+   },
+   "alert_horses": [
+    4,
+    5,
+    3,
+    1,
+    7,
+    2
+   ],
+   "current_recommend": null,
+   "minutes_before": 3,
+   "result": [
+    2,
+    7,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    7,
+    2
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  2,
+  7,
+  6
+ ]
+}

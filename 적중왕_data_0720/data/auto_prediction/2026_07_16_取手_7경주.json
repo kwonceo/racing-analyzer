@@ -1,0 +1,65 @@
+{
+ "raceKey": "取手 7경주",
+ "at": "2026-07-16 10:31:28",
+ "phase": "마감5분전",
+ "quinellas": [],
+ "trifectas": [
+  {
+   "combo": [
+    1,
+    2,
+    7
+   ],
+   "odds": 13.6,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    1,
+    3,
+    7
+   ],
+   "odds": 25.4,
+   "reason": "확신도 보험"
+  },
+  {
+   "combo": [
+    1,
+    4,
+    7
+   ],
+   "odds": null,
+   "reason": "시장유력 보완: 1번+7번",
+   "marketInsurance": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    1,
+    3
+   ],
+   "odds": 22.2,
+   "reason": "시장유력+급락",
+   "stars": 2,
+   "score": 64.8,
+   "basis": [
+    "1번: 급락 -13.3% 감지",
+    "1번: 복병",
+    "3번: 급락 12.7% 감지"
+   ],
+   "summary": "시장 저평가 중 주목"
+  }
+ ],
+ "keyHorses": [
+  1,
+  7,
+  2,
+  4
+ ],
+ "dansung": true,
+ "minOdds": 1.3,
+ "raceHorseCount": 7,
+ "result": null,
+ "compared": false
+}

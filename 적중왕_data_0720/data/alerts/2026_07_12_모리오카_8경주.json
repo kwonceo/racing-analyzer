@@ -1,0 +1,46 @@
+{
+ "race": "모리오카 8경주",
+ "date": "2026-07-12",
+ "raceKey": "모리오카 8경주",
+ "alerts": [
+  {
+   "time": "16:13:46",
+   "race": "모리오카 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+4 -40.0%",
+   "alert_pair": "2+4",
+   "odds_snapshot": {
+    "2+4": {
+     "before": 47.2,
+     "after": 28.3
+    },
+    "3+4": {
+     "before": 40.9,
+     "after": 27.7
+    }
+   },
+   "alert_horses": [
+    2,
+    4,
+    3
+   ],
+   "current_recommend": "2+7",
+   "minutes_before": 1,
+   "result": [
+    9,
+    1,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  9,
+  1,
+  4
+ ]
+}

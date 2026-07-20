@@ -1,0 +1,51 @@
+{
+ "race": "모리오카 9경주",
+ "date": "2026-07-19",
+ "raceKey": "모리오카 9경주",
+ "alerts": [
+  {
+   "time": "16:43:45",
+   "race": "모리오카 9경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+7 -46.0%",
+   "alert_pair": "6+7",
+   "odds_snapshot": {
+    "6+7": {
+     "before": 40.2,
+     "after": 21.7
+    },
+    "1+7": {
+     "before": 37.8,
+     "after": 23.3
+    },
+    "7+8": {
+     "before": 30.2,
+     "after": 19.6
+    }
+   },
+   "alert_horses": [
+    6,
+    7,
+    1,
+    8
+   ],
+   "current_recommend": "5+7",
+   "minutes_before": 1,
+   "result": [
+    5,
+    6,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    6
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  5,
+  6,
+  4
+ ]
+}

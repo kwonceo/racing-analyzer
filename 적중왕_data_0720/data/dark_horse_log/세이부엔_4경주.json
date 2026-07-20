@@ -1,0 +1,42 @@
+{
+ "result": {
+  "1st": 5,
+  "2nd": 1,
+  "3rd": 6,
+  "quinella_odds": 0
+ },
+ "dark_horse_analysis": {
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-19 12:12:32",
+ "race": "세이부엔 4경주",
+ "date": "2026-07-19",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 6,
+   "signal": "급락-11%·45.1배",
+   "priority": 1,
+   "odds": 45.1,
+   "detected_at": "T-1분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 3,
+   "signal": "스마트머니+역배열",
+   "priority": 2,
+   "odds": 3.5,
+   "detected_at": "T-1분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 4,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 4.1,
+   "detected_at": "T-1분",
+   "recommended": false
+  }
+ },
+ "dansung": null
+}

@@ -1,0 +1,94 @@
+{
+ "race": "오다와라 5경주",
+ "date": "2026-07-12",
+ "raceKey": "오다와라 5경주",
+ "alerts": [
+  {
+   "time": "09:51:17",
+   "race": "오다와라 5경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+7 -70.5%",
+   "alert_pair": "6+7",
+   "odds_snapshot": {
+    "6+7": {
+     "before": 141.8,
+     "after": 41.8
+    },
+    "4+5": {
+     "before": 68.8,
+     "after": 27.8
+    },
+    "5+6": {
+     "before": 345.5,
+     "after": 148.0
+    },
+    "3+6": {
+     "before": 54.9,
+     "after": 24.8
+    },
+    "4+6": {
+     "before": 208.8,
+     "after": 98.1
+    },
+    "5+7": {
+     "before": 92.7,
+     "after": 44.4
+    }
+   },
+   "alert_horses": [
+    6,
+    7,
+    4,
+    5,
+    3
+   ],
+   "current_recommend": "3+5",
+   "minutes_before": 1,
+   "result": [
+    4,
+    2,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    7,
+    4
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "09:52:42",
+   "race": "오다와라 5경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+6 -31.4%",
+   "alert_pair": "4+6",
+   "odds_snapshot": {
+    "4+6": {
+     "before": 98.1,
+     "after": 67.3
+    }
+   },
+   "alert_horses": [
+    4,
+    6
+   ],
+   "current_recommend": "4+6",
+   "minutes_before": 0,
+   "result": [
+    4,
+    2,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  4,
+  2,
+  7
+ ]
+}

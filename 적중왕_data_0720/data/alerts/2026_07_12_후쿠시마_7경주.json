@@ -1,0 +1,120 @@
+{
+ "race": "후쿠시마 7경주",
+ "date": "2026-07-12",
+ "raceKey": "후쿠시마 7경주",
+ "alerts": [
+  {
+   "time": "13:26:19",
+   "race": "후쿠시마 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "13+16 -67.0%",
+   "alert_pair": "13+16",
+   "odds_snapshot": {
+    "13+16": {
+     "before": 2826.4,
+     "after": 934.1
+    },
+    "9+16": {
+     "before": 249.3,
+     "after": 87.7
+    },
+    "6+9": {
+     "before": 182.0,
+     "after": 66.6
+    },
+    "6+13": {
+     "before": 1785.1,
+     "after": 661.6
+    },
+    "4+9": {
+     "before": 44.7,
+     "after": 17.3
+    },
+    "13+15": {
+     "before": 2677.6,
+     "after": 1035.0
+    }
+   },
+   "alert_horses": [
+    13,
+    16,
+    9,
+    6,
+    4,
+    15
+   ],
+   "current_recommend": "9+11",
+   "minutes_before": 2,
+   "result": [
+    4,
+    12,
+    10
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "13:33:04",
+   "race": "후쿠시마 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+8 -65.2%",
+   "alert_pair": "4+8",
+   "odds_snapshot": {
+    "4+8": {
+     "before": 257.2,
+     "after": 89.5
+    },
+    "3+10": {
+     "before": 512.1,
+     "after": 181.0
+    },
+    "8+10": {
+     "before": 295.1,
+     "after": 106.8
+    },
+    "4+13": {
+     "before": 185.7,
+     "after": 70.1
+    },
+    "6+10": {
+     "before": 148.0,
+     "after": 56.3
+    },
+    "5+10": {
+     "before": 829.9,
+     "after": 323.0
+    }
+   },
+   "alert_horses": [
+    4,
+    8,
+    3,
+    10,
+    13,
+    6,
+    5
+   ],
+   "current_recommend": null,
+   "minutes_before": 5,
+   "result": [
+    4,
+    12,
+    10
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4,
+    10
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  4,
+  12,
+  10
+ ]
+}

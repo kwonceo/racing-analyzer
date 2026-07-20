@@ -1,0 +1,47 @@
+{
+ "race": "静岡 10경주",
+ "date": "2026-07-18",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 77.1,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 4,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 46.3,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 2,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 8.6,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": {
+  "dansungHorse": 1,
+  "dansungOdds": 1.3,
+  "realFavorites": [
+   5,
+   7
+  ],
+  "darkHorses": [
+   2,
+   4,
+   6
+  ]
+ },
+ "result": null,
+ "dark_horse_analysis": null,
+ "updated_at": "2026-07-18 14:50:19"
+}

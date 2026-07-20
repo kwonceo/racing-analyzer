@@ -1,0 +1,89 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_09_몬베츠_7경주",
+ "race_info": {
+  "date": "2026-07-09",
+  "track": "몬베츠",
+  "round": 7,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {
+   "1": -86.3,
+   "8": -86.3,
+   "2": -70.4,
+   "7": -48.4,
+   "4": -48.4
+  },
+  "excess_drops": {
+   "1": -9.3,
+   "8": -2.8,
+   "2": -3.5
+  },
+  "drop_speed": {
+   "1": -23.9,
+   "8": -23.9,
+   "2": -19.5,
+   "7": -13.4,
+   "4": -13.4
+  },
+  "exacta_reversal": true,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.747,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   7,
+   8,
+   3,
+   5,
+   6,
+   4
+  ],
+  "eliminated": [],
+  "recommend": "1+8",
+  "strategy": "BMED_압축형",
+  "confidence": 40.0,
+  "signal_quality": "상"
+ },
+ "result": {
+  "1st": 12,
+  "2nd": 10,
+  "3rd": 7,
+  "4th": null,
+  "quinella_odds": 5.5,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 12,
+  "second": 10,
+  "odds_range": "중배당"
+ },
+ "saved_at": "2026-07-09 17:53:03",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "전적 데이터"
+  ],
+  "errors": []
+ }
+}

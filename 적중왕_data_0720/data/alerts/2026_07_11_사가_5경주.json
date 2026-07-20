@@ -1,0 +1,67 @@
+{
+ "race": "사가 5경주",
+ "date": "2026-07-11",
+ "raceKey": "사가 5경주",
+ "alerts": [
+  {
+   "time": "18:04:48",
+   "race": "사가 5경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+11 -74.0%",
+   "alert_pair": "2+11",
+   "odds_snapshot": {
+    "2+11": {
+     "before": 591.0,
+     "after": 153.5
+    },
+    "5+11": {
+     "before": 1350.9,
+     "after": 361.9
+    },
+    "3+5": {
+     "before": 2364.1,
+     "after": 666.8
+    },
+    "5+10": {
+     "before": 326.0,
+     "after": 94.1
+    },
+    "2+4": {
+     "before": 945.6,
+     "after": 278.4
+    },
+    "4+9": {
+     "before": 278.1,
+     "after": 91.1
+    }
+   },
+   "alert_horses": [
+    2,
+    11,
+    5,
+    3,
+    10,
+    4,
+    9
+   ],
+   "current_recommend": "7+9",
+   "minutes_before": 0,
+   "result": [
+    10,
+    3,
+    12
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3,
+    10
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  10,
+  3,
+  12
+ ]
+}

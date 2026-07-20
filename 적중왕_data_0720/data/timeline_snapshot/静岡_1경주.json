@@ -1,0 +1,68 @@
+{
+ "race": "静岡 1경주",
+ "date": "2026-07-18",
+ "snapshots": {
+  "T-7": {
+   "main": [
+    3,
+    5
+   ],
+   "dark_horse": [
+    1,
+    4
+   ],
+   "odds": {
+    "3+5": 4.0
+   },
+   "confirmed": true,
+   "at": "10:38:36"
+  },
+  "T-5": {
+   "main": [
+    3,
+    5
+   ],
+   "dark_horse": [
+    1,
+    4
+   ],
+   "odds": {
+    "3+5": 4.1
+   },
+   "confirmed": true,
+   "at": "10:40:14",
+   "changed_from_T7": false,
+   "changed_horses": []
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    7
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "10:46:23"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    1,
+    4
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "10:48:09",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-19 12:17:47",
+ "result": {
+  "1st": 7,
+  "2nd": 3,
+  "3rd": 2
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false
+ }
+}

@@ -1,0 +1,58 @@
+{
+ "race": "나고야 1경주",
+ "date": "2026-07-17",
+ "snapshots": {
+  "T-10": {
+   "main": [
+    4,
+    5
+   ],
+   "dark_horse": [
+    1,
+    3
+   ],
+   "odds": {
+    "4+5": 2.8
+   },
+   "confirmed": false,
+   "at": "14:31:47"
+  },
+  "T-5": {
+   "main": [
+    4,
+    5
+   ],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {
+    "4+5": 3.2
+   },
+   "confirmed": true,
+   "at": "14:35:09",
+   "changed_from_T7": false,
+   "changed_horses": []
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    10,
+    11
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "14:41:50"
+  }
+ },
+ "updated_at": "2026-07-18 07:51:19",
+ "result": {
+  "1st": 6,
+  "2nd": 2,
+  "3rd": 7
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false
+ }
+}

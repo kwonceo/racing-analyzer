@@ -1,0 +1,123 @@
+{
+ "filename": "2026_07_19_부산_3경주_마감후.png",
+ "raceKey": "부산 3경주",
+ "at": "2026-07-19 13:36:40",
+ "trigger": "close",
+ "quinellas": [
+  {
+   "basis": [
+    "4번: 급락 -81.0% 감지",
+    "9번: 급락 -91.8% 감지"
+   ],
+   "combo": [
+    4,
+    9
+   ],
+   "odds": 3.3,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [
+    "9번: 급락 -91.8% 감지",
+    "10번: 급락 -9.4% 감지"
+   ],
+   "combo": [
+    9,
+    10
+   ],
+   "odds": 5.8,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [
+    "5번: 급락 -91.8% 감지",
+    "9번: 급락 -91.8% 감지"
+   ],
+   "combo": [
+    5,
+    9
+   ],
+   "odds": 6,
+   "reason": "확신도1위+2위",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [
+    "3번: 급락 -79.5% 감지",
+    "9번: 급락 -91.8% 감지"
+   ],
+   "combo": [
+    3,
+    9
+   ],
+   "odds": 6.1,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    4,
+    5,
+    9
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 메인(복승1·2+유력마)"
+  },
+  {
+   "combo": [
+    4,
+    9,
+    10
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 보험(복승1·2+유력마)"
+  },
+  {
+   "combo": [
+    4,
+    5,
+    10
+   ],
+   "formInsurance": true,
+   "odds": null,
+   "qMainFixed": true,
+   "reason": "전적A 보완: 10번+5번 →복승메인 정합"
+  }
+ ],
+ "special": [
+  {
+   "basis": [
+    "4번: 급락 -81.0% 감지",
+    "5번: 급락 -91.8% 감지"
+   ],
+   "combo": [
+    4,
+    5
+   ],
+   "odds": 45.8,
+   "reason": "유력마 받치기 보존 → 고배당(25배↑) 복병 이동",
+   "stars": 2,
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "minOdds": 3.3,
+ "minQuinella": 3.3,
+ "minQuinellaCombo": [
+  4,
+  9
+ ],
+ "dansung": false,
+ "sizeBytes": 211331
+}

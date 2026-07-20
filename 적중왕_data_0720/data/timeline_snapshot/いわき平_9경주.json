@@ -1,0 +1,72 @@
+{
+ "race": "いわき平 9경주",
+ "date": "2026-07-17",
+ "snapshots": {
+  "T+1": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "23:21:34"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    5,
+    7
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "23:23:13",
+   "post_deadline_change": true
+  },
+  "T-10": {
+   "main": [
+    2,
+    5
+   ],
+   "dark_horse": [],
+   "odds": {
+    "2+5": 1.8
+   },
+   "confirmed": false,
+   "at": "23:11:16"
+  },
+  "T-7": {
+   "main": [
+    1,
+    2
+   ],
+   "dark_horse": [
+    2,
+    5
+   ],
+   "odds": {
+    "1+2": 21.4
+   },
+   "confirmed": true,
+   "at": "23:13:13"
+  },
+  "T-5": {
+   "main": [
+    1,
+    5
+   ],
+   "dark_horse": [
+    2,
+    5
+   ],
+   "odds": {
+    "1+5": 9.4
+   },
+   "confirmed": true,
+   "at": "23:14:53",
+   "changed_from_T7": true,
+   "changed_horses": [
+    2,
+    5
+   ]
+  }
+ },
+ "updated_at": "2026-07-18 23:23:13"
+}

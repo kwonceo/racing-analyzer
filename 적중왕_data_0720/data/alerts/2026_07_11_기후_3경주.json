@@ -1,0 +1,41 @@
+{
+ "race": "기후 3경주",
+ "date": "2026-07-11",
+ "raceKey": "기후 3경주",
+ "alerts": [
+  {
+   "time": "11:38:30",
+   "race": "기후 3경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+6 -32.7%",
+   "alert_pair": "1+6",
+   "odds_snapshot": {
+    "1+6": {
+     "before": 27.8,
+     "after": 18.7
+    }
+   },
+   "alert_horses": [
+    1,
+    6
+   ],
+   "current_recommend": "5+7",
+   "minutes_before": 2,
+   "result": [
+    5,
+    1,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    1
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  5,
+  1,
+  7
+ ]
+}

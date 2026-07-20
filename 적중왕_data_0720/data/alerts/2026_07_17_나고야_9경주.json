@@ -1,0 +1,105 @@
+{
+ "race": "나고야 9경주",
+ "date": "2026-07-17",
+ "raceKey": "나고야 9경주",
+ "alerts": [
+  {
+   "time": "19:07:07",
+   "race": "나고야 9경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -81.6%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 95.3,
+     "after": 17.5
+    },
+    "7+12": {
+     "before": 329.2,
+     "after": 83.7
+    },
+    "7+9": {
+     "before": 226.3,
+     "after": 70.9
+    },
+    "6+10": {
+     "before": 109.7,
+     "after": 35.3
+    },
+    "10+11": {
+     "before": 26.5,
+     "after": 9.9
+    },
+    "4+8": {
+     "before": 329.2,
+     "after": 133.3
+    }
+   },
+   "alert_horses": [
+    4,
+    5,
+    7,
+    12,
+    9,
+    6,
+    10,
+    11,
+    8
+   ],
+   "current_recommend": null,
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "19:10:07",
+   "race": "나고야 9경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+12 -51.7%",
+   "alert_pair": "1+12",
+   "odds_snapshot": {
+    "1+12": {
+     "before": 81.3,
+     "after": 39.3
+    },
+    "7+10": {
+     "before": 488.1,
+     "after": 296.7
+    },
+    "10+12": {
+     "before": 209.2,
+     "after": 130.1
+    },
+    "8+11": {
+     "before": 142.6,
+     "after": 89.6
+    },
+    "2+4": {
+     "before": 567.8,
+     "after": 374.9
+    },
+    "6+9": {
+     "before": 185.5,
+     "after": 128.4
+    }
+   },
+   "alert_horses": [
+    1,
+    12,
+    7,
+    10,
+    8,
+    11,
+    2,
+    4,
+    6,
+    9
+   ],
+   "current_recommend": "7+11",
+   "minutes_before": 0,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

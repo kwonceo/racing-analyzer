@@ -1,0 +1,105 @@
+{
+ "race": "하코다테 5경주",
+ "date": "2026-07-12",
+ "raceKey": "하코다테 5경주",
+ "alerts": [
+  {
+   "time": "12:12:05",
+   "race": "하코다테 5경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+4 -43.6%",
+   "alert_pair": "2+4",
+   "odds_snapshot": {
+    "2+4": {
+     "before": 85.6,
+     "after": 48.3
+    },
+    "4+10": {
+     "before": 23.3,
+     "after": 13.4
+    },
+    "2+10": {
+     "before": 59.4,
+     "after": 37.5
+    },
+    "4+8": {
+     "before": 69.9,
+     "after": 44.7
+    },
+    "2+9": {
+     "before": 106.0,
+     "after": 71.0
+    }
+   },
+   "alert_horses": [
+    2,
+    4,
+    10,
+    8,
+    9
+   ],
+   "current_recommend": null,
+   "minutes_before": 6,
+   "result": [
+    4,
+    5,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "12:16:42",
+   "race": "하코다테 5경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+7 -70.0%",
+   "alert_pair": "2+7",
+   "odds_snapshot": {
+    "2+7": {
+     "before": 47.0,
+     "after": 14.1
+    },
+    "1+7": {
+     "before": 24.6,
+     "after": 8.9
+    },
+    "3+4": {
+     "before": 402.9,
+     "after": 234.4
+    },
+    "3+8": {
+     "before": 537.0,
+     "after": 334.0
+    }
+   },
+   "alert_horses": [
+    2,
+    7,
+    1,
+    3,
+    4,
+    8
+   ],
+   "current_recommend": "3+7",
+   "minutes_before": 2,
+   "result": [
+    4,
+    5,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  4,
+  5,
+  6
+ ]
+}

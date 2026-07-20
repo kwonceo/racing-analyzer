@@ -1,0 +1,94 @@
+.ai_yosou_wrapper {
+  display:flex;
+  justify-content: space-between;
+  margin-bottom:1em;
+  width:100%;
+}
+
+.ai_yosou_container {
+  display:flex;
+  width:710px;
+  border:solid 1px #d3d3d3;
+  border-radius:4px;
+  margin: 0;
+}
+
+.horizontal-list {
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: -4px;
+}
+
+.ai_yosou {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-right:5px;
+  color:#fff;
+  font-size: 16px;
+  font-weight:bold;
+  background-color: #59B200;
+  border-right:solid 1px #d3d3d3;
+}
+
+.item {
+  /* 横スクロール用 */
+  display: inline-block;
+  width: 600px;
+  /* 見た目調整 */
+  height: 26px;
+  margin: 6px 0px;
+  color:#ffffff;
+  position: relative;
+  z-index: 1;
+  border-radius:15px;
+  margin-right:3px;
+}
+
+.item a {
+  color:#ffffff;
+  font-weight:normal;
+  text-decoration:none;
+  margin-left:2px;
+  position: absolute;
+  top: 5px;
+  left: 0px;
+  width: 95%;
+  height: 100%;
+  //text-indent:-999px;
+  z-index: 2;
+  text-align:center;
+}
+.item:hover {
+    filter:alpha(opacity=70);/* IE 6,7*/
+    -ms-filter: "alpha(opacity=70)";/* IE 8,9 */
+    -moz-opacity:0.7;/* FF , Netscape */
+    -khtml-opacity: 0.7;/* Safari 1.x */
+    opacity:0.7;
+    zoom:1;/*IE*/
+}
+.item a span{
+  font-size:13px;
+}
+.ai_A{
+  background-color: #086f58 !important;
+  width: 100% !important;
+}
+.ai_B{
+  background-color: #C70D2F !important;
+  width: 100% !important;
+}
+.ai_C{
+  background-color: #2bb5aa !important;
+  width: 100% !important;
+}
+.ai_D{
+  background-color: #2B7EB5 !important;
+  width: 100% !important;
+}
+
+#info a.btn_yosou {
+    margin-right: 27px!important;
+}

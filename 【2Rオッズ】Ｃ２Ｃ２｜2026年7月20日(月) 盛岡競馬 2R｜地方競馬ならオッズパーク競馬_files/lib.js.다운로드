@@ -1,0 +1,354 @@
+/*
+ * JTip
+ * By Cody Lindley (http://www.codylindley.com)
+ * Under an Attribution, Share Alike License
+ * JTip is built on top of the very light weight jquery library.
+ */
+
+//on page load (as soon as its ready) call JT_init
+$(document).ready(JT_init);
+
+function JT_init(){
+	       $("a.jTip")
+		   .hover(function(){JT_show(this.href,this.id,this.name)},function(){$('#JT').remove()})
+           .click(function(){return false});
+}
+
+function JT_show(url,linkId,title){
+	if(title == false)title="&nbsp;";
+	var de = document.documentElement;
+	var w = self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth;
+	var hasArea = w - getAbsoluteLeft(linkId);
+	var clickElementy = getAbsoluteTop(linkId) - 3; //set y position
+
+	var queryString = url.replace(/^[^\?]+\??/,'');
+	var params = parseQuery( queryString );
+	if(params['width'] === undefined){params['width'] = 250};
+	if(params['link'] !== undefined){
+	$('#' + linkId).on('click',function(){window.location = params['link']});
+	$('#' + linkId).css('cursor','pointer');
+	}
+
+	if(hasArea>((params['width']*1)+75)){
+		$("body").append("<div id='JT' style='width:"+params['width']*1+"px'><div id='JT_arrow_left'></div><div id='JT_close_left'>"+title+"</div><div id='JT_copy'><div class='JT_loader'><div></div></div>");//right side
+		var arrowOffset = getElementWidth(linkId) + 11;
+		var clickElementx = getAbsoluteLeft(linkId) + arrowOffset; //set x position
+	}else{
+		$("body").append("<div id='JT' style='width:"+params['width']*1+"px'><div id='JT_arrow_right' style='left:"+((params['width']*1)+1)+"px'></div><div id='JT_close_right'>"+title+"</div><div id='JT_copy'><div class='JT_loader'><div></div></div>");//left side
+		var clickElementx = getAbsoluteLeft(linkId) - ((params['width']*1) + 15); //set x position
+	}
+
+	$('#JT').css({left: clickElementx+"px", top: clickElementy+"px"});
+	$('#JT').show();
+	$('#JT_copy').on('load',url);
+
+}
+
+function getElementWidth(objectId) {
+	x = document.getElementById(objectId);
+	return x.offsetWidth;
+}
+
+function getAbsoluteLeft(objectId) {
+	// Get an object left position from the upper left viewport corner
+	o = document.getElementById(objectId)
+	oLeft = o.offsetLeft            // Get left position from the parent object
+	while(o.offsetParent!=null) {   // Parse the parent hierarchy up to the document element
+		oParent = o.offsetParent    // Get parent object reference
+		oLeft += oParent.offsetLeft // Add parent left position
+		o = oParent
+	}
+	return oLeft
+}
+
+function getAbsoluteTop(objectId) {
+	// Get an object top position from the upper left viewport corner
+	o = document.getElementById(objectId)
+	oTop = o.offsetTop            // Get top position from the parent object
+	while(o.offsetParent!=null) { // Parse the parent hierarchy up to the document element
+		oParent = o.offsetParent  // Get parent object reference
+		oTop += oParent.offsetTop // Add parent top position
+		o = oParent
+	}
+	return oTop
+}
+
+function parseQuery ( query ) {
+   var Params = new Object ();
+   if ( ! query ) return Params; // return empty object
+   var Pairs = query.split(/[;&]/);
+   for ( var i = 0; i < Pairs.length; i++ ) {
+      var KeyVal = Pairs[i].split('=');
+      if ( ! KeyVal || KeyVal.length != 2 ) continue;
+      var key = unescape( KeyVal[0] );
+      var val = unescape( KeyVal[1] );
+      val = val.replace(/\+/g, ' ');
+      Params[key] = val;
+   }
+   return Params;
+}
+
+function blockEvents(evt) {
+              if(evt.target){
+              evt.preventDefault();
+              }else{
+              evt.returnValue = false;
+              }
+}
+
+//Roll over image
+function initRollOverImages() {
+  var image_cache = new Object();
+  $("img.swap").each(function(i) {
+    var imgsrc = this.src;
+    var dot = this.src.lastIndexOf('.');
+    var imgsrc_on = this.src.substr(0, dot) + '_on' + this.src.substr(dot, 4);
+    image_cache[this.src] = new Image();
+    image_cache[this.src].src = imgsrc_on;
+    $(this).hover(
+      function() { this.src = imgsrc_on; },
+      function() { this.src = imgsrc; });
+  });
+}
+
+$(document).ready(initRollOverImages);
+
+//Scroll Top
+$(function() {
+	$('a[href="#top"]').click(function() {
+		$('html, body').animate({scrollTop:0},'fast');
+		$('html, body').animate({scrollLeft:0},'fast');
+		return false;
+	});
+});
+
+//macのみテーブル内の文字を小さくする
+if (navigator.appVersion.indexOf("Mac") !=-1){
+document.write("<link rel='stylesheet' href='s_shared/css/mac.css' type='text/css' />");
+}
+
+//oppp
+$(document).ready(function(){
+	var statusId=-1;
+	var isCert = false;
+	var my=$("#headerInner a.nv7");
+	if(my == null || my.html() == null || my.html().indexOf('マイページ') == -1) return;
+	var loto=$("#headerInner a.nv3");
+	if (document.cookie) {
+		var cookies = document.cookie.split("; ");
+		for (var i = 0; i < cookies.length; i++) {
+			var str = cookies[i].split("=");
+			if (str[0] == "X_RANK_ID") {
+				statusId = unescape(str[1]);
+			}
+			if (str[0] == "X_WB_LOGIN") {
+				isCert = true;
+			}
+		}
+	}
+});
+
+//welcome board
+$(document).ready(function() {
+	var wbInitial = "";
+	var isCert = false;
+	if(window.name == "screen"){
+		return;
+	}
+
+	if(parent!= window){
+		return;
+	}
+
+	if (document.cookie) {
+		var cookies = document.cookie.split("; ");
+		for ( var i = 0; i < cookies.length; i++) {
+			var str = cookies[i].split("=");
+			if (str[0] == "X_WB_INITIAL") {
+				wbInitial = unescape(str[1]);
+			}
+			if (str[0] == "X_WB_LOGIN") {
+				isCert = true;
+			}
+		}
+	}
+
+	if ($("input[name=SSO_PROCESS]").val() == "LOGIN") {
+
+		if(wbInitial.indexOf("exec-") != -1){
+			return;
+		}
+		var newWbInitial;
+		if( !wbInitial ){
+			newWbInitial = "exec-today";
+		}
+		else{
+			newWbInitial = "exec-" + wbInitial;
+		}
+		document.cookie = "X_WB_INITIAL=" + escape(newWbInitial) + "; path=/; expires=Tue, 1-Jan-2030 00:00:00 GMT;"
+		return;
+	}
+
+	if(isCert && wbInitial.indexOf("exec-") != -1){
+		modal({width: 830, height: 500, url: "/Welcome.do?auto", close: true});
+	}
+
+});
+
+
+// Open popup welcome board.
+function welcomeboard(isFirst){
+	if(isFirst === undefined) isFirst = false;
+	var width = 830;
+	var height = 500;
+	var lpos=0;
+	var tpos=0;
+
+	var exParam = isFirst ? "?first&" : "";
+	var url = "/Welcome.do" + exParam;
+    var _w = window.open(url,"welcome","width="+width+",height="+height+",top=" + tpos + ",left=" + lpos + ",scrollbars=yes,directories=no,resizable=yes,location=no,menubar=no,resizable=yes,toolbar=no");
+    _w.focus();
+}
+
+function webmail(){
+	window.open('/user/my/WebMsgList.do','message','scrollbars=yes,resizable=yes,width=860,height=500').focus();
+}
+
+function modal(_p){
+	
+	if(_p.url.indexOf('?',0) == -1){
+		_p.url += "?SERIAL=" + ms;
+	}
+	else{
+		_p.url += "&SERIAL=" + ms;
+	}
+	
+	if(navigator.userAgent.search(/Android|iPod|iPad|iPhone/) != -1) {
+		sp_modal(_p);
+		return;
+	}
+	var _opt = {
+		overlayId: 'op-modal-overlay',
+		containerCss:{
+			backgroundColor:"#fff",
+			borderColor:"#fff",
+			height:_p.height,
+			padding:3,
+			width:_p.width
+		},
+		overlayClose:true,
+		skipAppendBody:true
+	};
+
+	if(!_p["close"]){
+		_opt.closeHTML = '';
+	}
+
+	var now = new Date();
+	var ms = now.getMilliseconds();
+
+    if(typeof $.modal == 'function'){
+    	$.modal('<iframe id="MODAL_' + ms + '" name=MODAL_"' + ms + '" src="'+ _p.url +'" height="'+ _p.height +'" width="' + _p.width + '" frameborder="0" style="border:0" />',_opt);
+    }
+	if(typeof modalClose != 'function'){
+		modalClose = function(){
+			$.modal.close();
+		}
+	}
+}
+
+var SP_MODAL_INITED = false;
+function sp_modal(_p) {
+	var isAndroid = navigator.userAgent.indexOf('Android') != -1;
+	if(!SP_MODAL_INITED) {
+		var cover = $('<div id="sp_modal_cover" style="display:none"></div>');
+		var wrap = $('<div id="sp_modal_wrap" style="display:none"></div>');
+		var item = $('<iframe id="sp_modal_item" style="display:none" scrolling="no"></iframe>');
+		var cancel = $('<span id="sp_modal_cancel" class="sp-modal-cancel" style="display:none"></span>');
+		$('body').append(cover);
+		$('body').append(cancel);
+		wrap.append(item);
+		$('body').append(wrap);
+		SP_MODAL_INITED = true;
+	}
+	else {
+		var cover = $('#sp_modal_cover');
+		var wrap = $('#sp_modal_wrap');
+		var item = $('#sp_modal_item');
+		var cancel = $('#sp_modal_cancel');
+	}
+
+	
+	var top = window.innerHeight/2 - _p.height/2;
+	var left = window.innerWidth/2 - _p.width/2;
+	var now = new Date();
+	var ms = now.getMilliseconds();
+
+	cover.css({zIndex: '3000', width:'100%', height:'100%', position: 'absolute', background: '#000', opacity: '0.5', top: '0px', left: '0px'});
+	wrap.css({position: 'absolute', zIndex: '3001', top: "0px", left: left + "px", width: _p.width + 'px', height: '100%', overflowX:'hidden', overflowY: 'scroll', '-webkit-overflow-scrolling':'touch', backgroundColor: '#fff'});
+	item.css({width: '100%', display: 'block', padding: '0', margin: '0', border: '0px solid #fff'});
+	cover.width(window.innerWidth);	
+	if(isAndroid) {
+		cover.height($('body').height() + 100);
+	}
+	else {
+		cover.css({position:'fixed'});
+		cover.height(window.innerHeight);
+	}
+
+	var itemResize = function() {
+		var contents = item.get(0).contentWindow.$('body');
+		contents.css({backgroundColor: 'transparent'});
+		var wrp = contents.find('#wrap');
+		var h = wrp.height();
+		wrp.css({backgroundColor: '#fff', margin: 0, width: '100%'});
+		if(h < window.innerHeight) {
+			$('#wrap').css({overflowY: 'hidden', height: window.innerHeight + 'px'});
+			cover.css({overflowY: 'hidden', height: (window.innerHeight +10) + 'px'})
+		}
+		item.height(h);
+		wrap.height(h + 10);
+		cover.height(Math.max($(document).height(), h) + 50);
+		cover.width($(document).width());
+		cover.show();
+		wrap.show();
+		cancel.show();
+	}
+	item.on('load',function() {
+		itemResize();
+	});
+	item.attr('src', _p.url);
+	var close = function(){
+		cover.hide();
+		wrap.hide();
+		cancel.hide();
+		item.hide();
+		$('#wrap').css({overflowY: 'auto', height: 'auto'})
+		$('body').scrollTop(0);
+	}
+	
+	cancel.click(function() {
+		close();
+	});
+	cover.click(function() {
+		close();
+	});
+	modalClose = function(){
+		close();
+	}
+	
+	$(window).on('resize',function(){
+		var contents = item.get(0).contentWindow.$('body');
+		var wrp = contents.find('#wrap');
+		cover.height(Math.max($(document).height(), h) +50);
+		cover.width($(document).width());
+	});
+
+	$(window).on('orientationchange',function(){
+		if(!$('#sp_modal_cover').length) {
+			return;
+		}
+		modal(_p);
+	});
+
+} 

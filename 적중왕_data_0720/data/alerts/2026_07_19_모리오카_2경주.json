@@ -1,0 +1,48 @@
+{
+ "race": "모리오카 2경주",
+ "date": "2026-07-19",
+ "raceKey": "모리오카 2경주",
+ "alerts": [
+  {
+   "time": "12:44:05",
+   "race": "모리오카 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+4 -54.6%",
+   "alert_pair": "2+4",
+   "odds_snapshot": {
+    "2+4": {
+     "before": 64.1,
+     "after": 29.1
+    },
+    "4+7": {
+     "before": 3.5,
+     "after": 2.4
+    }
+   },
+   "alert_horses": [
+    2,
+    4,
+    7
+   ],
+   "current_recommend": "4+7",
+   "minutes_before": 1,
+   "result": [
+    4,
+    2,
+    7
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    2,
+    4,
+    7
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  4,
+  2,
+  7
+ ]
+}

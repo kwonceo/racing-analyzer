@@ -1,0 +1,63 @@
+{
+ "race": "奈良 3경주",
+ "date": "2026-07-17",
+ "snapshots": {
+  "T-7": {
+   "main": [
+    2,
+    4
+   ],
+   "dark_horse": [
+    1,
+    4
+   ],
+   "odds": {
+    "2+4": 6.8
+   },
+   "confirmed": true,
+   "at": "21:23:17"
+  },
+  "T-5": {
+   "main": [
+    3,
+    4
+   ],
+   "dark_horse": [
+    1,
+    4
+   ],
+   "odds": {
+    "3+4": 45.3
+   },
+   "confirmed": true,
+   "at": "21:25:02",
+   "changed_from_T7": true,
+   "changed_horses": [
+    2,
+    3
+   ]
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    4,
+    5
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "21:31:33"
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [
+    4,
+    5
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "21:33:12",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-17 21:33:12"
+}

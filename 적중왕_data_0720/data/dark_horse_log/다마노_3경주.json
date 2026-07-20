@@ -1,0 +1,48 @@
+{
+ "race": "다마노 3경주",
+ "date": "2026-07-17",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 1,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 1.6,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 7,
+   "signal": "🔄 크로스역배열 크로스역배열",
+   "priority": 4,
+   "odds": 90.8,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 4,
+   "signal": "🔄 크로스역배열 크로스역배열",
+   "priority": 4,
+   "odds": 8.6,
+   "detected_at": null,
+   "recommended": false
+  }
+ },
+ "result": {
+  "1st": 5,
+  "2nd": 2,
+  "3rd": 7,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": true,
+  "rank2_place": 3,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-17 10:42:58"
+}

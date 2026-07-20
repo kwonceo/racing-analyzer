@@ -1,0 +1,207 @@
+{
+ "race_id": "2026_07_07_카나자와_11경주",
+ "raceKey": "카나자와 11경주",
+ "sport": "boat",
+ "category": "boat",
+ "date": "2026-07-07",
+ "race": "카나자와 11경주",
+ "analyzed_at": "18:17:23",
+ "updated_at": "23:23:57",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ },
+ "odds_timeline": [],
+ "signals_detected": [],
+ "horses": [
+  {
+   "no": 1,
+   "name": "サトノプリンス",
+   "jockey": "金田利（ばんえい）",
+   "record_score": 53.9,
+   "record_detail": "최근 4-2-2-2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 2,
+   "name": "フジエース",
+   "jockey": "中村太（ばんえい）",
+   "record_score": 100.0,
+   "record_detail": "최근 1-1-2-1-6",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 3,
+   "name": "ミストレンタ",
+   "jockey": "菊池一（ばんえい）",
+   "record_score": 10.0,
+   "record_detail": "최근 8-7-6-1-1",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 5,
+   "name": "サクラジェームス",
+   "jockey": "今井千（ばんえい）",
+   "record_score": 82.5,
+   "record_detail": "최근 1-2-4-4-2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 6,
+   "name": "サカノキンショウ",
+   "jockey": "船山蔵（ばんえい）",
+   "record_score": 20.0,
+   "record_detail": "최근 5-4-3-3-6",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 7,
+   "name": "マツサンブラック",
+   "jockey": "鈴木恵（ばんえい）",
+   "record_score": 50.0,
+   "record_detail": "최근 10-1-1-6-5",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 9,
+   "name": "コウイッテン",
+   "jockey": "西謙一（ばんえい）",
+   "record_score": 35.0,
+   "record_detail": "최근 4-5-1-1-5",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 4,
+   "name": "トカチリキ",
+   "jockey": "西将太（ばんえい）",
+   "record_score": 22.5,
+   "record_detail": "최근 6-2-8-8-5",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
+  },
+  {
+   "no": 8,
+   "name": "トップギヤ",
+   "jockey": "長澤幸（ばんえい）",
+   "record_score": 6.2,
+   "record_detail": "최근 7-10-9-2-3",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.2착 -30 = 30점"
+  },
+  {
+   "no": 10,
+   "name": "ニジイロアオゾラ",
+   "jockey": "島津新（ばんえい）",
+   "record_score": 0.0,
+   "record_detail": "최근 9-8-7-8-7",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.8착 -30 = 30점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   2,
+   3,
+   5,
+   6,
+   7,
+   9
+  ],
+  "eliminated": [
+   4,
+   8,
+   10
+  ],
+  "elimination_reasons": {
+   "4": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점",
+   "8": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.2착 -30 = 30점",
+   "10": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.8착 -30 = 30점"
+  }
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": null,
+   "trio": null
+  },
+  "form": {
+   "quinella": [
+    2,
+    5
+   ],
+   "trio": [
+    1,
+    2,
+    5
+   ]
+  },
+  "final": {
+   "quinella": null,
+   "trio": null
+  }
+ },
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 5,
+  "2nd": 9,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   4,
+   8,
+   10
+  ],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": 0,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "hit_basis": {
+   "formScore": 82.5,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "제거 적중"
+  }
+ },
+ "profit": null,
+ "review": null
+}

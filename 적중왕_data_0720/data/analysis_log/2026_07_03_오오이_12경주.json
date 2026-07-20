@@ -1,0 +1,302 @@
+{
+ "race_id": "2026_07_03_오오이_12경주",
+ "date": "2026-07-03",
+ "race": "오오이 12경주",
+ "analyzed_at": "22:26:21",
+ "updated_at": "23:59:21",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ },
+ "odds_timeline": [],
+ "signals_detected": [
+  {
+   "time": null,
+   "type": "급락",
+   "detail": "4+12 복승 258.9→140.3 (-45.8%)",
+   "severity": "🟠",
+   "reason": "자금 유입 감지 → 주목 필요"
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "detail": "3+12 복승 175.0→108.4 (-38.1%)",
+   "severity": "🟠",
+   "reason": "자금 유입 감지 → 주목 필요"
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "detail": "8+12 복승 588.0→379.9 (-35.4%)",
+   "severity": "🟠",
+   "reason": "자금 유입 감지 → 주목 필요"
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "detail": "1+4 복승 468.8→314.4 (-32.9%)",
+   "severity": "🟠",
+   "reason": "자금 유입 감지 → 주목 필요"
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "detail": "4+8 복승 39.2→28.7 (-26.8%)",
+   "severity": "🟡",
+   "reason": "자금 유입 초기 → 관찰 필요"
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "detail": "5+12 복승 257.4→188.4 (-26.8%)",
+   "severity": "🟡",
+   "reason": "자금 유입 초기 → 관찰 필요"
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "detail": "4+5 복승 10.2→7.7 (-24.5%)",
+   "severity": "🟡",
+   "reason": "자금 유입 초기 → 관찰 필요"
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "detail": "9+12 복승 337.6→282.0 (-16.5%)",
+   "severity": "🟡",
+   "reason": "자금 유입 초기 → 관찰 필요"
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "detail": "2+4 복승 48.7→40.7 (-16.4%)",
+   "severity": "🟡",
+   "reason": "자금 유입 초기 → 관찰 필요"
+  },
+  {
+   "time": null,
+   "type": "역전",
+   "detail": "쌍승 10→8 (119.7) < 8→10 (128.9)",
+   "severity": "🔄",
+   "reason": "시장이 10번을 실질 1착으로 판단"
+  },
+  {
+   "time": null,
+   "type": "역전",
+   "detail": "쌍승 1→13 (2701.0) < 13→1 (2754.0)",
+   "severity": "🔄",
+   "reason": "시장이 1번을 실질 1착으로 판단"
+  },
+  {
+   "time": null,
+   "type": "역전",
+   "detail": "쌍승 5→8 (71.5) < 8→5 (71.7)",
+   "severity": "🔄",
+   "reason": "시장이 5번을 실질 1착으로 판단"
+  }
+ ],
+ "horses": [
+  {
+   "no": 4,
+   "name": "グラスグリード",
+   "jockey": "笹川翼（大井）",
+   "record_score": 101.2,
+   "record_detail": "최근 1-1-2-2-3",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 6.4배(100) + 전적 101.2(+20) = 120"
+  },
+  {
+   "no": 3,
+   "name": "ロッソナブア",
+   "jockey": "鷹見陸（大井）",
+   "record_score": 78.8,
+   "record_detail": "최근 1-4-2-3-2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 6.4배(100) + 전적 78.8(+10) = 110"
+  },
+  {
+   "no": 5,
+   "name": "キタノライジン",
+   "jockey": "西啓太（大井）",
+   "record_score": 80.0,
+   "record_detail": "최근 1-2-5-2-2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 6.9배(100) + 전적 80.0(+10) = 110"
+  },
+  {
+   "no": 8,
+   "name": "イタロ",
+   "jockey": "石川駿（大井）",
+   "record_score": 22.5,
+   "record_detail": "최근 6-2-5-12-6",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 28.7배(100) + 전적 22.5(-10) = 90"
+  },
+  {
+   "no": 9,
+   "name": "ドゥーロアバンティ",
+   "jockey": "藤本現（大井）",
+   "record_score": 27.5,
+   "record_detail": "최근 8-3-4-2-2",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 16배(100) + 전적 27.5(-10) = 90"
+  },
+  {
+   "no": 10,
+   "name": "ウインアイリーン",
+   "jockey": "矢野貴（大井）",
+   "record_score": 35.0,
+   "record_detail": "최근 4-2-7-7-3",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 11.1배(100) + 전적 35.0(-10) = 90"
+  },
+  {
+   "no": 7,
+   "name": "サトノエンパイア",
+   "jockey": "和田譲（大井）",
+   "record_score": 7.5,
+   "record_detail": "최근 5-5-4-4-4",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 28.9배(100) + 전적 7.5(-30) = 70"
+  },
+  {
+   "no": 2,
+   "name": "モントーク",
+   "jockey": "中山遥（浦和）",
+   "record_score": 37.5,
+   "record_detail": "최근 10-2-2-13-7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 33.3배(60) + 전적 37.5(-10) = 50"
+  },
+  {
+   "no": 6,
+   "name": "キャップ",
+   "jockey": "櫻井光（川崎）",
+   "record_score": 12.5,
+   "record_detail": "최근 4-15-8-3-6",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 125.5배(20) + 전적 12.5(-30) = -10"
+  },
+  {
+   "no": 12,
+   "name": "カセノタイガー",
+   "jockey": "安藤洋（大井）",
+   "record_score": 0.0,
+   "record_detail": "최근 10-10-11-14-11",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 108.4배(20) + 전적 0.0(-30) = -10"
+  },
+  {
+   "no": 13,
+   "name": "ユイノコミチ",
+   "jockey": "東原悠（大井）",
+   "record_score": 30.0,
+   "record_detail": "최근 3-5-9-9-7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 191.8배(0) + 전적 30.0(-10) = -10"
+  },
+  {
+   "no": 1,
+   "name": "イチニチショチョウ",
+   "jockey": "菅原涼（大井）",
+   "record_score": 0.0,
+   "record_detail": "최근 8-13-10-9-12",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 306.8배(0) + 전적 0.0(-30) = -30"
+  },
+  {
+   "no": 11,
+   "name": "ラペルシェール",
+   "jockey": "谷内貫（大井）",
+   "record_score": 0.0,
+   "record_detail": "최근 6-12-7-6-10",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 337.1배(0) + 전적 0.0(-30) = -30"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   4,
+   3,
+   5,
+   8,
+   9,
+   10,
+   7,
+   12,
+   1
+  ],
+  "eliminated": [
+   2,
+   6,
+   13,
+   11
+  ],
+  "elimination_reasons": {
+   "2": "배당 33.3배(60) + 전적 37.5(-10) = 50",
+   "6": "배당 125.5배(20) + 전적 12.5(-30) = -10",
+   "13": "배당 191.8배(0) + 전적 30.0(-10) = -10",
+   "11": "배당 337.1배(0) + 전적 0.0(-30) = -30"
+  }
+ },
+ "final_recommendation": {
+  "quinella_main": {
+   "combo": "3+4",
+   "odds": 6.4,
+   "reason": "3번(A)·4번(A) · 급락감지"
+  },
+  "quinella_sub": {
+   "combo": "3+5",
+   "odds": 6.9,
+   "reason": "3번(A)·5번(A) · 급락감지"
+  },
+  "trifecta_main": {
+   "combo": "3+4+5",
+   "odds": 8.5,
+   "reason": "3번(A)·4번(A)·5번(A) · 급락감지"
+  },
+  "trifecta_insurance1": {
+   "combo": "3+4+12",
+   "odds": 138.0,
+   "reason": "3번(A)·4번(A)·12번(D) · 급락감지"
+  },
+  "trifecta_insurance2": {
+   "combo": "3+5+12",
+   "odds": 156.4,
+   "reason": "3번(A)·5번(A)·12번(D) · 급락감지"
+  },
+  "budget_allocation": {
+   "quinella_main": "43%",
+   "quinella_sub": "20%",
+   "trifecta_main": "29%",
+   "trifecta_insurance": "4%"
+  }
+ },
+ "summary": "급락 4-12 ▼45.8% / 🔴쌍승역전 10→8 / 유력마 3·4·5 / 복승 3+4",
+ "keyHorses": [
+  3,
+  4,
+  5
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null,
+ "category": "japan_local",
+ "sport": "horse"
+}

@@ -1,0 +1,49 @@
+{
+ "race": "서울 8경주 1400M",
+ "date": "2026-07-19",
+ "sport": "korea",
+ "dark_horses": {
+  "rank1": {
+   "horse": 2,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 173.6,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 5,
+   "signal": "역배열",
+   "priority": 3,
+   "odds": 173.6,
+   "detected_at": null,
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 9,
+   "signal": "크로스역배열",
+   "priority": 4,
+   "odds": 9999.9,
+   "detected_at": null,
+   "recommended": false
+  }
+ },
+ "dansung": null,
+ "result": {
+  "1st": 2,
+  "2nd": 5,
+  "3rd": 3,
+  "quinella_odds": 0
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": true,
+  "rank1_place": 1,
+  "rank2_hit": true,
+  "rank2_place": 2,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": null
+ },
+ "updated_at": "2026-07-19 19:48:58"
+}

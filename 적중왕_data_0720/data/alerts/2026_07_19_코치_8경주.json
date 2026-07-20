@@ -1,0 +1,42 @@
+{
+ "race": "코치 8경주",
+ "date": "2026-07-19",
+ "raceKey": "코치 8경주",
+ "alerts": [
+  {
+   "time": "18:25:44",
+   "race": "코치 8경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+7 -31.1%",
+   "alert_pair": "3+7",
+   "odds_snapshot": {
+    "3+7": {
+     "before": 16.7,
+     "after": 11.5
+    }
+   },
+   "alert_horses": [
+    3,
+    7
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    7,
+    3,
+    5
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3,
+    7
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  7,
+  3,
+  5
+ ]
+}

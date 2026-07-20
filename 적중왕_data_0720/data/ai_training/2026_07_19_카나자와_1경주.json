@@ -1,0 +1,230 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_19_카나자와_1경주",
+ "race_info": {
+  "date": "2026-07-19",
+  "track": "카나자와",
+  "round": 1,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 10,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 2,
+   "name": "경복포르",
+   "jockey": "재이",
+   "jockey_winrate": null,
+   "recent_results": [
+    1
+   ],
+   "record_score": 130,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "푸른신기",
+   "jockey": "경민",
+   "jockey_winrate": null,
+   "recent_results": [
+    2
+   ],
+   "record_score": 102,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 10,
+   "name": "오아시스",
+   "jockey": "형석",
+   "jockey_winrate": null,
+   "recent_results": [
+    3
+   ],
+   "record_score": 80,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "샤이니코",
+   "jockey": "정혁",
+   "jockey_winrate": null,
+   "recent_results": [
+    4
+   ],
+   "record_score": 45,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "원플러스",
+   "jockey": "인권",
+   "jockey_winrate": null,
+   "recent_results": [
+    8
+   ],
+   "record_score": 20,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "스마트유",
+   "jockey": "강주",
+   "jockey_winrate": null,
+   "recent_results": [
+    7
+   ],
+   "record_score": 20,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "딥스프린",
+   "jockey": "광희",
+   "jockey_winrate": null,
+   "recent_results": [
+    5
+   ],
+   "record_score": 20,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "억새",
+   "jockey": "형철",
+   "jockey_winrate": null,
+   "recent_results": [
+    6
+   ],
+   "record_score": 7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "그린다이",
+   "jockey": "윤섭",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "오버레인",
+   "jockey": "도윤",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": null,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   7,
+   10,
+   3,
+   4,
+   6,
+   8
+  ],
+  "eliminated": [
+   5,
+   9
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 8,
+  "2nd": 6,
+  "3rd": 3,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "제거 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 8,
+  "second": 6,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-19 14:01:30",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

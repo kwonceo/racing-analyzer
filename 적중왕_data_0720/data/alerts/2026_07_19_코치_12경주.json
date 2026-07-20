@@ -1,0 +1,84 @@
+{
+ "race": "코치 12경주",
+ "date": "2026-07-19",
+ "raceKey": "코치 12경주",
+ "alerts": [
+  {
+   "time": "20:48:08",
+   "race": "코치 12경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+8 -41.1%",
+   "alert_pair": "6+8",
+   "odds_snapshot": {
+    "6+8": {
+     "before": 71.7,
+     "after": 42.2
+    },
+    "6+11": {
+     "before": 74.4,
+     "after": 47.1
+    }
+   },
+   "alert_horses": [
+    6,
+    8,
+    11
+   ],
+   "current_recommend": "4+8",
+   "minutes_before": 2,
+   "result": [
+    4,
+    11,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    6,
+    11
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "20:49:15",
+   "race": "코치 12경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+6 -34.8%",
+   "alert_pair": "4+6",
+   "odds_snapshot": {
+    "4+6": {
+     "before": 109.1,
+     "after": 71.1
+    },
+    "11+12": {
+     "before": 10.6,
+     "after": 7.0
+    }
+   },
+   "alert_horses": [
+    4,
+    6,
+    11,
+    12
+   ],
+   "current_recommend": "4+8",
+   "minutes_before": 1,
+   "result": [
+    4,
+    11,
+    6
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4,
+    6,
+    11
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  4,
+  11,
+  6
+ ]
+}

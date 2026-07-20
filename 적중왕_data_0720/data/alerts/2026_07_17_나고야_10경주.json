@@ -1,0 +1,75 @@
+{
+ "race": "나고야 10경주",
+ "date": "2026-07-17",
+ "raceKey": "나고야 10경주",
+ "alerts": [
+  {
+   "time": "19:39:49",
+   "race": "나고야 10경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+10 -34.3%",
+   "alert_pair": "4+10",
+   "odds_snapshot": {
+    "4+10": {
+     "before": 18.1,
+     "after": 11.9
+    }
+   },
+   "alert_horses": [
+    4,
+    10
+   ],
+   "current_recommend": null,
+   "minutes_before": 5,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "19:44:54",
+   "race": "나고야 10경주",
+   "alert_type": "배당급변",
+   "alert_content": "9+12 -51.3%",
+   "alert_pair": "9+12",
+   "odds_snapshot": {
+    "9+12": {
+     "before": 346.9,
+     "after": 169.0
+    },
+    "11+12": {
+     "before": 158.2,
+     "after": 84.8
+    },
+    "1+12": {
+     "before": 422.0,
+     "after": 227.4
+    },
+    "1+10": {
+     "before": 32.3,
+     "after": 17.9
+    },
+    "7+10": {
+     "before": 25.4,
+     "after": 16.2
+    },
+    "6+12": {
+     "before": 234.4,
+     "after": 161.6
+    }
+   },
+   "alert_horses": [
+    9,
+    12,
+    11,
+    1,
+    10,
+    7,
+    6
+   ],
+   "current_recommend": "9+10",
+   "minutes_before": 0,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

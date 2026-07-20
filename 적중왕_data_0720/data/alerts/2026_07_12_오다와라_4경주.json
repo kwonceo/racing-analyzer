@@ -1,0 +1,66 @@
+{
+ "race": "오다와라 4경주",
+ "date": "2026-07-12",
+ "raceKey": "오다와라 4경주",
+ "alerts": [
+  {
+   "time": "09:20:07",
+   "race": "오다와라 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+3 -77.4%",
+   "alert_pair": "2+3",
+   "odds_snapshot": {
+    "2+3": {
+     "before": 434.2,
+     "after": 98.3
+    },
+    "2+7": {
+     "before": 620.3,
+     "after": 144.3
+    },
+    "3+7": {
+     "before": 723.7,
+     "after": 196.7
+    },
+    "1+7": {
+     "before": 394.7,
+     "after": 120.2
+    },
+    "2+4": {
+     "before": 117.3,
+     "after": 36.6
+    },
+    "6+7": {
+     "before": 482.5,
+     "after": 180.3
+    }
+   },
+   "alert_horses": [
+    2,
+    3,
+    7,
+    1,
+    4,
+    6
+   ],
+   "current_recommend": null,
+   "minutes_before": 11,
+   "result": [
+    5,
+    4,
+    1
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    1,
+    4
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  5,
+  4,
+  1
+ ]
+}

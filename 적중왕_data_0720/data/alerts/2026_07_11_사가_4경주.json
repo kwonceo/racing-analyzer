@@ -1,0 +1,49 @@
+{
+ "race": "사가 4경주",
+ "date": "2026-07-11",
+ "raceKey": "사가 4경주",
+ "alerts": [
+  {
+   "time": "17:25:32",
+   "race": "사가 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+5 -82.7%",
+   "alert_pair": "3+5",
+   "odds_snapshot": {
+    "3+5": {
+     "before": 93.0,
+     "after": 16.1
+    },
+    "1+9": {
+     "before": 100.0,
+     "after": 41.0
+    },
+    "1+7": {
+     "before": 100.0,
+     "after": 44.3
+    },
+    "1+5": {
+     "before": 100.0,
+     "after": 52.0
+    },
+    "3+6": {
+     "before": 39.0,
+     "after": 26.5
+    }
+   },
+   "alert_horses": [
+    3,
+    5,
+    1,
+    9,
+    7,
+    6
+   ],
+   "current_recommend": null,
+   "minutes_before": 4,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

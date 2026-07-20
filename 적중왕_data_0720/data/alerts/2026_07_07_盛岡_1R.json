@@ -1,0 +1,64 @@
+{
+ "race": "盛岡 1R",
+ "date": "2026-07-07",
+ "raceKey": "2026-07-07 盛岡 1R",
+ "alerts": [
+  {
+   "time": "11:39:56",
+   "race": "盛岡 1R",
+   "alert_type": "배당급변",
+   "alert_content": "7+10 -69.5%",
+   "alert_pair": "7+10",
+   "odds_snapshot": {
+    "7+10": {
+     "before": 77.1,
+     "after": 23.5
+    },
+    "4+10": {
+     "before": 73.0,
+     "after": 30.9
+    },
+    "4+6": {
+     "before": 114.3,
+     "after": 51.8
+    },
+    "6+7": {
+     "before": 80.3,
+     "after": 38.5
+    },
+    "6+10": {
+     "before": 15.3,
+     "after": 8.4
+    },
+    "4+7": {
+     "before": 188.4,
+     "after": 108.1
+    }
+   },
+   "alert_horses": [
+    7,
+    10,
+    4,
+    6
+   ],
+   "current_recommend": "5+10",
+   "minutes_before": 0,
+   "result": [
+    10,
+    7,
+    5
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    7,
+    10
+   ],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  10,
+  7,
+  5
+ ]
+}

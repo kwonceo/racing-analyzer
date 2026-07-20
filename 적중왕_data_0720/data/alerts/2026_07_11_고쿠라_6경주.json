@@ -1,0 +1,67 @@
+{
+ "race": "고쿠라 6경주",
+ "date": "2026-07-11",
+ "raceKey": "고쿠라 6경주",
+ "alerts": [
+  {
+   "time": "12:54:18",
+   "race": "고쿠라 6경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+10 -79.5%",
+   "alert_pair": "1+10",
+   "odds_snapshot": {
+    "1+10": {
+     "before": 221.7,
+     "after": 45.4
+    },
+    "3+6": {
+     "before": 217.9,
+     "after": 47.6
+    },
+    "11+14": {
+     "before": 5663.6,
+     "after": 1288.9
+    },
+    "1+11": {
+     "before": 954.1,
+     "after": 244.9
+    },
+    "1+13": {
+     "before": 862.8,
+     "after": 223.3
+    },
+    "12+13": {
+     "before": 1280.4,
+     "after": 435.4
+    }
+   },
+   "alert_horses": [
+    1,
+    10,
+    3,
+    6,
+    11,
+    14,
+    13,
+    12
+   ],
+   "current_recommend": null,
+   "minutes_before": 5,
+   "result": [
+    16,
+    17,
+    1
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    1
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  16,
+  17,
+  1
+ ]
+}

@@ -1,0 +1,53 @@
+{
+ "race": "도리데 4경주",
+ "date": "2026-07-16",
+ "raceKey": "도리데 4경주",
+ "alerts": [
+  {
+   "time": "09:31:51",
+   "race": "도리데 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+7 -87.3%",
+   "alert_pair": "3+7",
+   "odds_snapshot": {
+    "3+7": {
+     "before": 26.0,
+     "after": 3.3
+    },
+    "6+7": {
+     "before": 68.4,
+     "after": 19.0
+    },
+    "3+6": {
+     "before": 180.5,
+     "after": 71.1
+    },
+    "3+5": {
+     "before": 175.6,
+     "after": 84.9
+    },
+    "2+3": {
+     "before": 135.3,
+     "after": 74.0
+    },
+    "4+6": {
+     "before": 249.9,
+     "after": 162.9
+    }
+   },
+   "alert_horses": [
+    3,
+    7,
+    6,
+    5,
+    2,
+    4
+   ],
+   "current_recommend": "3+6",
+   "minutes_before": 0,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

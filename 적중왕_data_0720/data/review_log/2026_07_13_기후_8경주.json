@@ -1,0 +1,97 @@
+{
+  "raceKey": "기후 8경주",
+  "race_id": "2026_07_13_기후_8경주",
+  "date": "2026-07-13",
+  "savedAt": 1783919509547,
+  "signals": {
+    "drops": [],
+    "reversals": [],
+    "smartMoney": [],
+    "keyHorses": [
+      4,
+      5,
+      7,
+      3
+    ],
+    "alerts": [],
+    "confidence": [
+      {
+        "no": "4",
+        "confidence": 25
+      },
+      {
+        "no": "1",
+        "confidence": 8
+      },
+      {
+        "no": "5",
+        "confidence": 8
+      }
+    ],
+    "recommend": [
+      {
+        "label": "복승 메인",
+        "combo": [
+          4,
+          5
+        ]
+      },
+      {
+        "label": "복승 보조(삼복승 구성)",
+        "combo": [
+          5,
+          7
+        ]
+      },
+      {
+        "label": "복승 보조(삼복승 구성)",
+        "combo": [
+          4,
+          7
+        ]
+      },
+      {
+        "label": "삼복승 메인",
+        "combo": [
+          4,
+          5,
+          7
+        ]
+      },
+      {
+        "label": "삼복승 메인",
+        "combo": [
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "label": "삼복승 보험2",
+        "combo": [
+          3,
+          4,
+          7
+        ]
+      }
+    ],
+    "minutesBefore": -2,
+    "afterClose": true,
+    "count": 0
+  },
+  "result": {
+    "top3": [
+      7,
+      1,
+      5
+    ]
+  },
+  "hit": null,
+  "comment": "7변 급락 신호가 왔는데 1번을 사지못했네 너무 아쉬운경기",
+  "raw_comment": "7변 급락 신호가 왔는데 1번을 사지못했네 너무 아쉬운경기",
+  "importance": 3,
+  "weight": 3,
+  "tags": [
+    "near_miss"
+  ]
+}

@@ -1,0 +1,110 @@
+{
+ "filename": "2026_07_19_카나자와_7경주_마감후.png",
+ "raceKey": "카나자와 7경주",
+ "at": "2026-07-19 17:40:03",
+ "trigger": "close",
+ "quinellas": [
+  {
+   "basis": [
+    "3번: 급락 16.4% 감지",
+    "5번: 급락 -12.5% 감지"
+   ],
+   "combo": [
+    3,
+    5
+   ],
+   "ev": 1.44,
+   "odds": 5.7,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [
+    "5번: 급락 -12.5% 감지",
+    "6번: 급락 -38.9% 감지"
+   ],
+   "combo": [
+    5,
+    6
+   ],
+   "ev": 1.58,
+   "odds": 8,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "basis": [
+    "5번: 급락 -12.5% 감지",
+    "10번: 급락 -31.8% 감지"
+   ],
+   "combo": [
+    5,
+    10
+   ],
+   "ev": 1.58,
+   "odds": 8.6,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    3,
+    4,
+    5
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 메인(복승1·2+유력마)"
+  },
+  {
+   "combo": [
+    4,
+    5,
+    6
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 보험(복승1·2+유력마)"
+  },
+  {
+   "combo": [
+    2,
+    4,
+    5
+   ],
+   "odds": 36.9,
+   "reason": "확신도 보험"
+  }
+ ],
+ "special": [
+  {
+   "basis": [
+    "3번: 급락 16.4% 감지",
+    "4번: 급락 -38.9% 감지"
+   ],
+   "combo": [
+    3,
+    4
+   ],
+   "odds": 51.3,
+   "reason": "유력마 받치기 보존 → 고배당(25배↑) 복병 이동",
+   "stars": 2,
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "minOdds": 2.1,
+ "minQuinella": 5.7,
+ "minQuinellaCombo": [
+  3,
+  5
+ ],
+ "dansung": false,
+ "sizeBytes": 382609
+}

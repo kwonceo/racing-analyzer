@@ -1,0 +1,93 @@
+{
+ "race": "佐賀 4R",
+ "date": "2026-07-11",
+ "raceKey": "2026-07-11 佐賀 4R",
+ "alerts": [
+  {
+   "time": "17:29:04",
+   "race": "佐賀 4R",
+   "alert_type": "배당급변",
+   "alert_content": "2+7 -37.5%",
+   "alert_pair": "2+7",
+   "odds_snapshot": {
+    "2+7": {
+     "before": 30.4,
+     "after": 19.0
+    }
+   },
+   "alert_horses": [
+    2,
+    7
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    11,
+    3,
+    10
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  },
+  {
+   "time": "17:58:33",
+   "race": "佐賀 4R",
+   "alert_type": "배당급변",
+   "alert_content": "2+3 -91.0%",
+   "alert_pair": "2+3",
+   "odds_snapshot": {
+    "2+3": {
+     "before": 90.5,
+     "after": 8.1
+    },
+    "1+3": {
+     "before": 100.0,
+     "after": 26.0
+    },
+    "3+6": {
+     "before": 100.0,
+     "after": 26.9
+    },
+    "3+9": {
+     "before": 74.2,
+     "after": 22.0
+    },
+    "5+6": {
+     "before": 100.0,
+     "after": 43.2
+    },
+    "3+7": {
+     "before": 100.0,
+     "after": 50.9
+    }
+   },
+   "alert_horses": [
+    2,
+    3,
+    1,
+    6,
+    9,
+    5,
+    7
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    11,
+    3,
+    10
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    3
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  11,
+  3,
+  10
+ ]
+}

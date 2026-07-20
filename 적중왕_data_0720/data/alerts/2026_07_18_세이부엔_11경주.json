@@ -1,0 +1,43 @@
+{
+ "race": "세이부엔 11경주",
+ "date": "2026-07-18",
+ "raceKey": "세이부엔 11경주",
+ "alerts": [
+  {
+   "time": "15:54:52",
+   "race": "세이부엔 11경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+7 -44.8%",
+   "alert_pair": "1+7",
+   "odds_snapshot": {
+    "1+7": {
+     "before": 15.4,
+     "after": 8.5
+    },
+    "1+6": {
+     "before": 91.1,
+     "after": 53.3
+    },
+    "5+6": {
+     "before": 187.3,
+     "after": 126.0
+    },
+    "5+7": {
+     "before": 57.1,
+     "after": 39.2
+    }
+   },
+   "alert_horses": [
+    1,
+    7,
+    6,
+    5
+   ],
+   "current_recommend": "1+5",
+   "minutes_before": 4,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

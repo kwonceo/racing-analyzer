@@ -1,0 +1,66 @@
+{
+ "race": "기후 7경주",
+ "date": "2026-07-11",
+ "raceKey": "기후 7경주",
+ "alerts": [
+  {
+   "time": "13:30:24",
+   "race": "기후 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "2+6 -66.8%",
+   "alert_pair": "2+6",
+   "odds_snapshot": {
+    "2+6": {
+     "before": 316.3,
+     "after": 105.0
+    },
+    "3+7": {
+     "before": 210.8,
+     "after": 83.7
+    },
+    "4+5": {
+     "before": 108.8,
+     "after": 44.0
+    },
+    "5+7": {
+     "before": 55.8,
+     "after": 22.7
+    },
+    "2+4": {
+     "before": 172.5,
+     "after": 81.3
+    },
+    "3+6": {
+     "before": 204.3,
+     "after": 96.2
+    }
+   },
+   "alert_horses": [
+    2,
+    6,
+    3,
+    7,
+    4,
+    5
+   ],
+   "current_recommend": "4+5",
+   "minutes_before": 1,
+   "result": [
+    1,
+    7,
+    2
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    2,
+    7
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  1,
+  7,
+  2
+ ]
+}

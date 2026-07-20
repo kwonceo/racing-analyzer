@@ -1,0 +1,60 @@
+{
+ "race": "기후 2경주",
+ "date": "2026-07-19",
+ "snapshots": {
+  "T-10": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "08:50:17"
+  },
+  "T-7": {
+   "main": [],
+   "dark_horse": [
+    2,
+    6
+   ],
+   "odds": {},
+   "confirmed": true,
+   "at": "08:53:17"
+  },
+  "T-5": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": true,
+   "at": "08:55:17",
+   "changed_from_T7": false,
+   "changed_horses": []
+  },
+  "T+3": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "09:03:21",
+   "post_deadline_change": false
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [
+    1,
+    7
+   ],
+   "odds": {},
+   "confirmed": false,
+   "at": "09:01:22"
+  }
+ },
+ "updated_at": "2026-07-20 09:03:21",
+ "result": {
+  "1st": 4,
+  "2nd": 6,
+  "3rd": 3
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false
+ }
+}

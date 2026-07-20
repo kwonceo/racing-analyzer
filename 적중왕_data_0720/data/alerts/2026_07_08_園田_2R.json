@@ -1,0 +1,55 @@
+{
+ "race": "園田 2R",
+ "date": "2026-07-08",
+ "raceKey": "2026-07-08 園田 2R",
+ "alerts": [
+  {
+   "time": "10:58:58",
+   "race": "園田 2R",
+   "alert_type": "배당급변",
+   "alert_content": "2+6 -30.2%",
+   "alert_pair": "2+6",
+   "odds_snapshot": {
+    "2+6": {
+     "before": 107.7,
+     "after": 75.2
+    }
+   },
+   "alert_horses": [
+    2,
+    6
+   ],
+   "current_recommend": "1+3",
+   "minutes_before": null,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "11:08:55",
+   "race": "園田 2R",
+   "alert_type": "배당급변",
+   "alert_content": "3+4 -33.3%",
+   "alert_pair": "3+4",
+   "odds_snapshot": {
+    "3+4": {
+     "before": 5.1,
+     "after": 3.4
+    },
+    "4+6": {
+     "before": 37.0,
+     "after": 25.3
+    }
+   },
+   "alert_horses": [
+    3,
+    4,
+    6
+   ],
+   "current_recommend": "3+4",
+   "minutes_before": null,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

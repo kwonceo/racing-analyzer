@@ -1,0 +1,54 @@
+{
+ "race": "우라와 12경주",
+ "date": "2026-07-16",
+ "raceKey": "우라와 12경주",
+ "alerts": [
+  {
+   "time": "19:30:30",
+   "race": "우라와 12경주",
+   "alert_type": "배당급변",
+   "alert_content": "1+12 -62.7%",
+   "alert_pair": "1+12",
+   "odds_snapshot": {
+    "1+12": {
+     "before": 472.0,
+     "after": 175.9
+    },
+    "2+12": {
+     "before": 698.8,
+     "after": 292.2
+    },
+    "7+12": {
+     "before": 112.4,
+     "after": 47.2
+    },
+    "5+12": {
+     "before": 1018.3,
+     "after": 441.9
+    },
+    "3+12": {
+     "before": 426.8,
+     "after": 204.9
+    },
+    "8+12": {
+     "before": 1131.4,
+     "after": 545.2
+    }
+   },
+   "alert_horses": [
+    1,
+    12,
+    2,
+    7,
+    5,
+    3,
+    8
+   ],
+   "current_recommend": "6+7",
+   "minutes_before": 0,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

@@ -1,0 +1,65 @@
+{
+ "result": {
+  "1st": 6,
+  "2nd": 8,
+  "3rd": 7,
+  "quinella_odds": 0
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": true,
+  "rank2_place": 3,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": "6번 17.9배 입상(신호:역배열) 복병 미편성",
+  "dansung_horse_won": false,
+  "dansung_horse_placed": false,
+  "dansung_winner": 6,
+  "dansung_dark_hit": true
+ },
+ "updated_at": "2026-07-19 14:49:13",
+ "race": "카나자와 3경주",
+ "date": "2026-07-19",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 5,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 23.9,
+   "detected_at": "T-1분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 7,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 8.0,
+   "detected_at": "T-1분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 2,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 6.4,
+   "detected_at": "T-1분",
+   "recommended": false
+  }
+ },
+ "dansung": {
+  "dansungHorse": 3,
+  "dansungOdds": 1.5,
+  "realFavorites": [
+   8,
+   2
+  ],
+  "darkHorses": [
+   2,
+   5,
+   7
+  ]
+ }
+}

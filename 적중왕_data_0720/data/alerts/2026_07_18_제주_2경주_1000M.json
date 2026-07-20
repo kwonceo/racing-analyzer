@@ -1,0 +1,68 @@
+{
+ "race": "제주 2경주 1000M",
+ "date": "2026-07-18",
+ "raceKey": "제주 2경주 1000M",
+ "alerts": [
+  {
+   "time": "12:06:57",
+   "race": "제주 2경주 1000M",
+   "alert_type": "배당급변",
+   "alert_content": "2+4 -71.2%",
+   "alert_pair": "2+4",
+   "odds_snapshot": {
+    "2+4": {
+     "before": 8.0,
+     "after": 2.3
+    },
+    "6+8": {
+     "before": 207.5,
+     "after": 64.7
+    },
+    "6+7": {
+     "before": 1037.6,
+     "after": 370.4
+    },
+    "1+8": {
+     "before": 172.9,
+     "after": 72.1
+    },
+    "5+7": {
+     "before": 778.2,
+     "after": 392.0
+    },
+    "5+8": {
+     "before": 183.1,
+     "after": 93.5
+    }
+   },
+   "alert_horses": [
+    2,
+    4,
+    6,
+    8,
+    7,
+    1,
+    5
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": [
+    8,
+    2,
+    1
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    2,
+    8,
+    1
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  8,
+  2,
+  1
+ ]
+}

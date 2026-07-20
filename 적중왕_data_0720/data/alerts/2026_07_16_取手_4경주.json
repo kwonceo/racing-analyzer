@@ -1,0 +1,39 @@
+{
+ "race": "取手 4경주",
+ "date": "2026-07-16",
+ "raceKey": "取手 4경주",
+ "alerts": [
+  {
+   "time": "09:29:00",
+   "race": "取手 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+7 -50.6%",
+   "alert_pair": "4+7",
+   "odds_snapshot": {
+    "4+7": {
+     "before": 89.9,
+     "after": 44.4
+    },
+    "5+7": {
+     "before": 12.4,
+     "after": 6.8
+    },
+    "3+7": {
+     "before": 39.4,
+     "after": 24.8
+    }
+   },
+   "alert_horses": [
+    4,
+    7,
+    5,
+    3
+   ],
+   "current_recommend": "1+7",
+   "minutes_before": 3,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

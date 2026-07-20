@@ -1,0 +1,131 @@
+{
+ "raceKey": "시즈오카 6경주",
+ "at": "2026-07-19 12:49:59",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    3,
+    6
+   ],
+   "odds": 1.6,
+   "reason": "시장 최저복승",
+   "stars": 3,
+   "basis": [
+    "3번: 복병",
+    "6번: 집중급락",
+    "6번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    2,
+    6
+   ],
+   "odds": 3.7,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "6번: 집중급락",
+    "6번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    2,
+    3
+   ],
+   "odds": 10.9,
+   "stars": 3,
+   "reason": "유력마 1·2위 조합 · 같은 라인(선두+마크)",
+   "basis": [
+    "3번: 복병"
+   ],
+   "summary": "유력마 1위+2위 최우선"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    3,
+    6
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    1,
+    3,
+    6
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    2,
+    3,
+    7
+   ],
+   "odds": 44.2,
+   "reason": "삼복승 메인"
+  },
+  {
+   "combo": [
+    2,
+    6,
+    7
+   ],
+   "odds": 21.9,
+   "reason": "초기급락 보존"
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    3,
+    7
+   ],
+   "odds": 25.2,
+   "stars": 2,
+   "reason": "유력마 받치기 보존 → 고배당(25배↑) 복병 이동",
+   "basis": [
+    "3번: 복병"
+   ],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  },
+  {
+   "combo": [
+    4,
+    6
+   ],
+   "odds": 79.5,
+   "reason": "라인 페어 — 라인 페어(6번 선행형 + 4번 마크)",
+   "basis": [
+    "4번: 복병",
+    "6번: 집중급락",
+    "6번: 복병"
+   ],
+   "summary": "경륜 라인 전술(동반 입상 기대)",
+   "stars": 2
+  }
+ ],
+ "keyHorses": [
+  7,
+  2,
+  3
+ ],
+ "dansung": false,
+ "minOdds": 1.6,
+ "raceHorseCount": 7,
+ "result": null,
+ "compared": false
+}

@@ -1,0 +1,42 @@
+{
+ "result": {
+  "1st": 10,
+  "2nd": 3,
+  "3rd": 12,
+  "quinella_odds": null
+ },
+ "dark_horse_analysis": {
+  "missed_signal": "3번 57.5배 입상(신호:복병) 복병 미편성"
+ },
+ "updated_at": "2026-07-18 18:01:13",
+ "race": "사가 5경주",
+ "date": "2026-07-18",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 11,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 116.7,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 5,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 10.1,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 9.4,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": null
+}

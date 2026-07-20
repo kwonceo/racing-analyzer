@@ -1,0 +1,100 @@
+{
+ "raceKey": "카나자와 8경주",
+ "at": "2026-07-19 18:11:54",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    4,
+    7
+   ],
+   "odds": 2.5,
+   "reason": "시장 최저복승 · 신호 근거로 기대값 면제",
+   "stars": 3,
+   "basis": [
+    "4번: 급락 -10.3% 감지",
+    "7번: 급락 8.0% 감지"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 0.95
+  },
+  {
+   "combo": [
+    3,
+    4
+   ],
+   "odds": 3.5,
+   "reason": "복병 포함",
+   "stars": 3,
+   "basis": [
+    "3번: 급락 -10.3% 감지",
+    "3번: 복병",
+    "4번: 급락 -10.3% 감지"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 1.1
+  },
+  {
+   "combo": [
+    5,
+    8
+   ],
+   "odds": 8.3,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "5번: 급락 8.2% 감지",
+    "5번: 복병",
+    "8번: 급락 9.7% 감지",
+    "8번: 복병"
+   ],
+   "summary": "시장+BMED 동시 유력",
+   "ev": 1.58
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    2,
+    4,
+    7
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    3,
+    4,
+    7
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    4,
+    6,
+    7
+   ],
+   "odds": 13.3,
+   "reason": "확신도 보험"
+  }
+ ],
+ "special": [],
+ "keyHorses": [
+  4,
+  7,
+  3,
+  2
+ ],
+ "dansung": false,
+ "minOdds": 2.5,
+ "raceHorseCount": 8,
+ "result": null,
+ "compared": false
+}

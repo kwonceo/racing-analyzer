@@ -1,0 +1,65 @@
+{
+ "race": "마쓰도 6경주",
+ "date": "2026-07-20",
+ "sport": "keirin",
+ "dark_horses": {
+  "rank1": {
+   "horse": 6,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 22.2,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 3,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 4.1,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 4,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 1.8,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": {
+  "dansungHorse": 4,
+  "dansungOdds": 1.8,
+  "realFavorites": [
+   5,
+   3
+  ],
+  "darkHorses": [
+   3,
+   5,
+   6
+  ]
+ },
+ "result": {
+  "1st": 5,
+  "2nd": 4,
+  "3rd": 2,
+  "quinella_odds": 2.3
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "rank3_hit": true,
+  "rank3_place": 2,
+  "rank3_in_result": true,
+  "missed_signal": "2번 30.4배 입상(신호:복병) 복병 미편성",
+  "dansung_horse_won": false,
+  "dansung_horse_placed": true,
+  "dansung_winner": 5,
+  "dansung_dark_hit": true
+ },
+ "updated_at": "2026-07-20 10:31:15"
+}

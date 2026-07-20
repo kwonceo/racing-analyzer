@@ -1,0 +1,338 @@
+{
+ "race_id": "2026_07_12_마쓰야마_4경주",
+ "raceKey": "마쓰야마 4경주",
+ "sport": "cycle",
+ "category": "cycle",
+ "date": "2026-07-12",
+ "race": "마쓰야마 4경주",
+ "analyzed_at": "17:08:18",
+ "updated_at": "21:26:02",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ },
+ "odds_timeline": [],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "명품행진",
+   "jockey": "한남",
+   "record_score": 130,
+   "record_detail": "최근 1",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 3,
+   "name": "천지여왕",
+   "jockey": "재희",
+   "record_score": 105,
+   "record_detail": "최근 2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 4,
+   "name": "천외천",
+   "jockey": "재광",
+   "record_score": 57.1,
+   "record_detail": "최근 1-5",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 7,
+   "name": "날려버려",
+   "jockey": "현준",
+   "record_score": 45,
+   "record_detail": "최근 4",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 9,
+   "name": "오백선녀",
+   "jockey": "명일",
+   "record_score": 105,
+   "record_detail": "최근 2",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
+  },
+  {
+   "no": 2,
+   "name": "대방가",
+   "jockey": "성광",
+   "record_score": 20,
+   "record_detail": "최근 5",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.0착 -30 = 30점"
+  },
+  {
+   "no": 5,
+   "name": "절대권력",
+   "jockey": "수한",
+   "record_score": 20,
+   "record_detail": "최근 9",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.0착 -30 = 30점"
+  },
+  {
+   "no": 6,
+   "name": "진검승부",
+   "jockey": "동준",
+   "record_score": 20,
+   "record_detail": "최근 7",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
+  },
+  {
+   "no": 8,
+   "name": "제주보이",
+   "jockey": "민재",
+   "record_score": 20,
+   "record_detail": "최근 6",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
+  },
+  {
+   "no": 10,
+   "name": "거승태자",
+   "jockey": "유일",
+   "record_score": 20,
+   "record_detail": "최근 8",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   3,
+   4,
+   7,
+   9,
+   2,
+   5,
+   6
+  ],
+  "eliminated": [
+   8,
+   10
+  ],
+  "elimination_reasons": {
+   "8": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점",
+   "10": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.0착 -30 = 30점"
+  }
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [
+  {
+   "time": "17:14:39",
+   "minutes_before": null,
+   "sig": "1-3-6-7|1+3|None|1+3+6",
+   "anomCount": 43,
+   "sigChanged": true,
+   "keyHorses": [
+    6,
+    1,
+    3,
+    7
+   ],
+   "summary": "급락 3-6 ▼52.7% / 🔴쌍승역전 6→1 / 유력마 6·1·3·7 / 복승 1+3",
+   "quinella_main": "1+3",
+   "quinella_sub": null,
+   "trifecta_main": "1+3+6",
+   "top_signals": [
+    "1+6 복승 13.7→8.2 (2분전 대비 -40.1%)",
+    "1+7 복승 11.9→10.1 (2분전 대비 -15.1%)",
+    "3+6 복승 24.3→11.5 (2분전 대비 -52.7%)"
+   ]
+  },
+  {
+   "time": "17:15:14",
+   "minutes_before": null,
+   "sig": "1-3-6|1+3|None|1+3+6",
+   "anomCount": 43,
+   "sigChanged": true,
+   "keyHorses": [
+    6,
+    1,
+    3
+   ],
+   "summary": "유력마 6·1·3 / 복승 1+3",
+   "quinella_main": "1+3",
+   "quinella_sub": null,
+   "trifecta_main": "1+3+6",
+   "top_signals": [
+    "1+6 복승 13.7→8.2 (2분전 대비 -40.1%)",
+    "1+7 복승 11.9→10.1 (2분전 대비 -15.1%)",
+    "3+6 복승 24.3→11.5 (2분전 대비 -52.7%)"
+   ]
+  },
+  {
+   "time": "17:16:15",
+   "minutes_before": null,
+   "sig": "1-3-5-6|1+3|None|1+3+6",
+   "anomCount": 43,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    3,
+    6,
+    5
+   ],
+   "summary": "급락 1-6 ▼14.9% / 유력마 1·3·6·5 / 복승 1+3",
+   "quinella_main": "1+3",
+   "quinella_sub": null,
+   "trifecta_main": "1+3+6",
+   "top_signals": [
+    "1+6 복승 8.2→5.7 (2분전 대비 -30.5%)",
+    "3+6 복승 11.5→9.8 (2분전 대비 -14.8%)",
+    "6+7 복승 45.5→32.5 (5분전 대비 -28.6%)"
+   ]
+  },
+  {
+   "time": "17:16:52",
+   "minutes_before": null,
+   "sig": "1-3-6|1+3|None|1+3+6",
+   "anomCount": 43,
+   "sigChanged": true,
+   "keyHorses": [
+    1,
+    3,
+    6
+   ],
+   "summary": "급락 1-6 ▼14.9% / 유력마 1·3·6 / 복승 1+3",
+   "quinella_main": "1+3",
+   "quinella_sub": null,
+   "trifecta_main": "1+3+6",
+   "top_signals": [
+    "1+6 복승 8.2→5.7 (2분전 대비 -30.5%)",
+    "3+6 복승 11.5→9.8 (2분전 대비 -14.8%)",
+    "6+7 복승 45.5→32.5 (5분전 대비 -28.6%)"
+   ]
+  }
+ ],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    1,
+    3
+   ],
+   "trio": [
+    1,
+    3,
+    9
+   ]
+  },
+  "form": {
+   "quinella": [
+    1,
+    3
+   ],
+   "trio": [
+    1,
+    3,
+    9
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    1,
+    3
+   ],
+   "trio": [
+    1,
+    3,
+    9
+   ]
+  }
+ },
+ "corePicks": null,
+ "summary": "유력마 1·3·9 / 복승 1+3",
+ "keyHorses": [
+  1,
+  3,
+  9
+ ],
+ "result": {
+  "1st": 7,
+  "2nd": 1,
+  "3rd": 3
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   1,
+   3
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   8,
+   10
+  ],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 45,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 1번 적중 · 제거 적중"
+  }
+ },
+ "profit": null,
+ "review": null
+}

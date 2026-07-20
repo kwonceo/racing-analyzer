@@ -1,0 +1,139 @@
+{
+ "raceKey": "모리오카 5경주",
+ "at": "2026-07-19 14:21:55",
+ "phase": "마감5분전",
+ "quinellas": [
+  {
+   "combo": [
+    7,
+    9
+   ],
+   "odds": 3.2,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [],
+   "summary": "시장 저평가(메인 보완)"
+  },
+  {
+   "combo": [
+    8,
+    9
+   ],
+   "odds": 6.5,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "8번: 집중급락"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    6,
+    8
+   ],
+   "odds": 13.8,
+   "reason": "시장 저배당+신호",
+   "stars": 3,
+   "basis": [
+    "6번: 복병",
+    "8번: 집중급락"
+   ],
+   "summary": "시장+BMED 동시 유력"
+  },
+  {
+   "combo": [
+    2,
+    9
+   ],
+   "odds": 6.3,
+   "stars": 3,
+   "reason": "시장 저배당 보완",
+   "basis": [
+    "2번: 복병"
+   ],
+   "summary": "시장 저평가(메인 보완)"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    5,
+    7,
+    9
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 메인(복승1·2+확신도1위)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    2,
+    7,
+    9
+   ],
+   "odds": null,
+   "estimated": true,
+   "reason": "삼복승 보험(복승1·2+복병)",
+   "qMainAnchor": true
+  },
+  {
+   "combo": [
+    4,
+    7,
+    9
+   ],
+   "odds": 13.8,
+   "reason": "초기급락 보존"
+  },
+  {
+   "combo": [
+    7,
+    8,
+    9
+   ],
+   "odds": null,
+   "reason": "시장유력 보완: 9번+7번",
+   "marketInsurance": true
+  },
+  {
+   "combo": [
+    5,
+    7,
+    8
+   ],
+   "odds": null,
+   "reason": "전적A 보완: 5번+3번 →복승메인 정합",
+   "formInsurance": true,
+   "qMainFixed": true
+  }
+ ],
+ "special": [
+  {
+   "combo": [
+    2,
+    7
+   ],
+   "odds": 414.2,
+   "stars": 2,
+   "reason": "유력마 받치기 보존 → 고배당(25배↑) 복병 이동",
+   "basis": [
+    "2번: 복병"
+   ],
+   "summary": "유력마 축 받치기(급락 조합과 함께 유지)"
+  }
+ ],
+ "keyHorses": [
+  7,
+  9,
+  2,
+  3,
+  8
+ ],
+ "dansung": false,
+ "minOdds": 3.2,
+ "raceHorseCount": 11,
+ "result": null,
+ "compared": false
+}

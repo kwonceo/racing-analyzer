@@ -1,0 +1,49 @@
+{
+ "result": {
+  "1st": 6,
+  "2nd": 9,
+  "3rd": 1,
+  "quinella_odds": 58.8
+ },
+ "dark_horse_analysis": {
+  "rank1_hit": false,
+  "rank1_place": null,
+  "rank2_hit": false,
+  "rank2_place": null,
+  "rank3_hit": false,
+  "rank3_place": null,
+  "rank3_in_result": false,
+  "missed_signal": "1번 56.1배 입상(신호:스마트머니) 복병 미편성"
+ },
+ "updated_at": "2026-07-19 16:21:46",
+ "race": "코치 4경주",
+ "date": "2026-07-19",
+ "sport": "keiba",
+ "dark_horses": {
+  "rank1": {
+   "horse": 7,
+   "signal": "급락-39%·35.2배",
+   "priority": 1,
+   "odds": 35.2,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank2": {
+   "horse": 4,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 6.5,
+   "detected_at": "T-4분",
+   "recommended": true
+  },
+  "rank3": {
+   "horse": 1,
+   "signal": "초기급락 보존",
+   "priority": 3,
+   "odds": 5.2,
+   "detected_at": "T-4분",
+   "recommended": false
+  }
+ },
+ "dansung": null
+}

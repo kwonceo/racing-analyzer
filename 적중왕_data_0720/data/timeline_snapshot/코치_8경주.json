@@ -1,0 +1,77 @@
+{
+ "race": "코치 8경주",
+ "date": "2026-07-18",
+ "snapshots": {
+  "T-10": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "18:24:35"
+  },
+  "T-7": {
+   "main": [
+    1,
+    5
+   ],
+   "dark_horse": [
+    8
+   ],
+   "odds": {
+    "1+5": 4.8
+   },
+   "confirmed": true,
+   "at": "18:14:38"
+  },
+  "T+1": {
+   "main": [],
+   "dark_horse": [],
+   "odds": {},
+   "confirmed": false,
+   "at": "18:36:03"
+  },
+  "T+3": {
+   "main": [
+    5,
+    7
+   ],
+   "dark_horse": [],
+   "odds": {
+    "5+7": 3.1
+   },
+   "confirmed": false,
+   "at": "18:24:05",
+   "post_deadline_change": true
+  },
+  "T-5": {
+   "main": [
+    7,
+    8
+   ],
+   "dark_horse": [],
+   "odds": {
+    "7+8": 6.7
+   },
+   "confirmed": true,
+   "at": "18:30:09",
+   "changed_from_T7": true,
+   "changed_horses": [
+    1,
+    5,
+    7,
+    8
+   ]
+  }
+ },
+ "updated_at": "2026-07-19 19:12:39",
+ "result": {
+  "1st": 7,
+  "2nd": 3,
+  "3rd": 5
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false,
+  "changed_horse_won": true
+ }
+}

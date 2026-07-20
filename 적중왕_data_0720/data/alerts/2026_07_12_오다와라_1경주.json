@@ -1,0 +1,39 @@
+{
+ "race": "오다와라 1경주",
+ "date": "2026-07-12",
+ "raceKey": "오다와라 1경주",
+ "alerts": [
+  {
+   "time": "07:25:34",
+   "race": "오다와라 1경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+5 -31.1%",
+   "alert_pair": "4+5",
+   "odds_snapshot": {
+    "4+5": {
+     "before": 88.8,
+     "after": 61.2
+    }
+   },
+   "alert_horses": [
+    4,
+    5
+   ],
+   "current_recommend": null,
+   "minutes_before": 4,
+   "result": [
+    1,
+    2,
+    6
+   ],
+   "alert_correct": false,
+   "placed_horses": [],
+   "ignored_miss": false
+  }
+ ],
+ "result": [
+  1,
+  2,
+  6
+ ]
+}

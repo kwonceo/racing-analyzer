@@ -1,0 +1,168 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_11_이토_8경주",
+ "race_info": {
+  "date": "2026-07-11",
+  "track": "이토",
+  "round": 8,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "18:36:32",
+    "quinella": {
+     "1+2": 3.9,
+     "1+7": 4.8,
+     "1+6": 5.4,
+     "2+4": 8.9,
+     "2+6": 10.8,
+     "1+5": 12.0,
+     "1+4": 14.5,
+     "2+5": 17.0,
+     "2+7": 17.4,
+     "3+5": 20.3,
+     "6+7": 32.7,
+     "1+3": 36.3,
+     "4+5": 60.8,
+     "5+6": 66.8,
+     "2+3": 71.1,
+     "5+7": 81.5,
+     "3+6": 83.6,
+     "4+6": 85.7,
+     "3+4": 107.8,
+     "3+7": 107.8,
+     "4+7": 111.4
+    }
+   },
+   {
+    "time": "18:36:50",
+    "quinella": {
+     "1+2": 3.8,
+     "1+7": 4.5,
+     "1+6": 5.5,
+     "2+4": 8.9,
+     "1+5": 11.5,
+     "2+6": 11.6,
+     "1+4": 15.3,
+     "2+5": 17.1,
+     "2+7": 18.6,
+     "3+5": 20.8,
+     "1+3": 34.6,
+     "6+7": 34.6,
+     "4+5": 66.3,
+     "2+3": 68.7,
+     "5+6": 72.6,
+     "5+7": 83.9,
+     "3+6": 94.4,
+     "4+6": 94.4,
+     "3+4": 114.5,
+     "3+7": 114.5,
+     "4+7": 121.9
+    }
+   },
+   {
+    "time": "18:37:12",
+    "quinella": {
+     "1+2": 3.8,
+     "1+7": 4.5,
+     "1+6": 5.5,
+     "2+4": 8.9,
+     "1+5": 11.5,
+     "2+6": 11.6,
+     "1+4": 15.3,
+     "2+5": 17.1,
+     "2+7": 18.6,
+     "3+5": 20.8,
+     "1+3": 34.6,
+     "6+7": 34.6,
+     "4+5": 66.3,
+     "2+3": 68.7,
+     "5+6": 72.6,
+     "5+7": 83.9,
+     "3+6": 94.4,
+     "4+6": 94.4,
+     "3+4": 114.5,
+     "3+7": 114.5,
+     "4+7": 121.9
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.747,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 7,
+  "2nd": 6,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 7,
+  "second": 6,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-11 21:26:57",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "이상감지 결과",
+   "전적 데이터",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

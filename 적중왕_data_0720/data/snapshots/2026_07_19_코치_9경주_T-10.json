@@ -1,0 +1,75 @@
+{
+ "filename": "2026_07_19_코치_9경주_T-10.png",
+ "raceKey": "코치 9경주",
+ "at": "2026-07-19 19:00:08",
+ "trigger": "T-10",
+ "quinellas": [
+  {
+   "basis": [
+    "8번: 급락 -12.9% 감지"
+   ],
+   "combo": [
+    6,
+    8
+   ],
+   "ev": 0.97,
+   "odds": 2.6,
+   "reason": "시장 최저복승 · 신호 근거로 기대값 면제",
+   "stars": 3,
+   "summary": "시장+BMED 동시 유력"
+  }
+ ],
+ "trifectas": [
+  {
+   "combo": [
+    5,
+    6,
+    8
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 메인(복승1·2+유력마)"
+  },
+  {
+   "combo": [
+    6,
+    7,
+    8
+   ],
+   "estimated": true,
+   "odds": null,
+   "qMainAnchor": true,
+   "reason": "삼복승 보험(복승1·2+유력마)"
+  },
+  {
+   "combo": [
+    6,
+    8,
+    10
+   ],
+   "odds": 61.6,
+   "reason": "확신도 보험"
+  },
+  {
+   "combo": [
+    1,
+    5,
+    6
+   ],
+   "formInsurance": true,
+   "odds": null,
+   "qMainFixed": true,
+   "reason": "전적A 보완: 1번+2번 →복승메인 정합"
+  }
+ ],
+ "special": [],
+ "minOdds": 2.6,
+ "minQuinella": 2.6,
+ "minQuinellaCombo": [
+  6,
+  8
+ ],
+ "dansung": false,
+ "sizeBytes": 903842
+}

@@ -1,0 +1,98 @@
+{
+ "race": "제주 2경주",
+ "date": "2026-07-17",
+ "raceKey": "제주 2경주",
+ "alerts": [
+  {
+   "time": "11:39:46",
+   "race": "제주 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+10 -34.6%",
+   "alert_pair": "6+10",
+   "odds_snapshot": {
+    "6+10": {
+     "before": 8.1,
+     "after": 5.3
+    }
+   },
+   "alert_horses": [
+    6,
+    10
+   ],
+   "current_recommend": "2+6",
+   "minutes_before": 0,
+   "result": [
+    10,
+    7,
+    5
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    10
+   ],
+   "ignored_miss": true
+  },
+  {
+   "time": "11:39:50",
+   "race": "제주 2경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+5 -45.0%",
+   "alert_pair": "3+5",
+   "odds_snapshot": {
+    "3+5": {
+     "before": 100.0,
+     "after": 55.0
+    },
+    "2+7": {
+     "before": 71.8,
+     "after": 41.6
+    },
+    "3+6": {
+     "before": 35.8,
+     "after": 21.9
+    },
+    "6+7": {
+     "before": 85.4,
+     "after": 54.8
+    },
+    "4+8": {
+     "before": 91.9,
+     "after": 61.4
+    },
+    "7+10": {
+     "before": 46.5,
+     "after": 31.8
+    }
+   },
+   "alert_horses": [
+    3,
+    5,
+    2,
+    7,
+    6,
+    4,
+    8,
+    10
+   ],
+   "current_recommend": "2+6",
+   "minutes_before": 0,
+   "result": [
+    10,
+    7,
+    5
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    5,
+    7,
+    10
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  10,
+  7,
+  5
+ ]
+}

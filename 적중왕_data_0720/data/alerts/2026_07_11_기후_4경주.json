@@ -1,0 +1,57 @@
+{
+ "race": "기후 4경주",
+ "date": "2026-07-11",
+ "raceKey": "기후 4경주",
+ "alerts": [
+  {
+   "time": "12:04:55",
+   "race": "기후 4경주",
+   "alert_type": "배당급변",
+   "alert_content": "4+6 -33.0%",
+   "alert_pair": "4+6",
+   "odds_snapshot": {
+    "4+6": {
+     "before": 397.5,
+     "after": 266.3
+    },
+    "5+6": {
+     "before": 161.9,
+     "after": 110.0
+    },
+    "2+6": {
+     "before": 145.7,
+     "after": 101.2
+    },
+    "1+6": {
+     "before": 190.1,
+     "after": 133.1
+    }
+   },
+   "alert_horses": [
+    4,
+    6,
+    5,
+    2,
+    1
+   ],
+   "current_recommend": null,
+   "minutes_before": 3,
+   "result": [
+    2,
+    7,
+    4
+   ],
+   "alert_correct": true,
+   "placed_horses": [
+    4,
+    2
+   ],
+   "ignored_miss": true
+  }
+ ],
+ "result": [
+  2,
+  7,
+  4
+ ]
+}

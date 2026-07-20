@@ -1,0 +1,256 @@
+{
+ "race": "후쿠시마 2경주",
+ "raceKey": "후쿠시마 2경주",
+ "date": "2026-07-11",
+ "result": {
+  "1st": 6,
+  "2nd": 2,
+  "3rd": 5,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_6": {
+   "horse": 6,
+   "placed": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 0,
+   "confidence": 32.0,
+   "reason": "일반"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 18.4,
+   "confidence": 48.0,
+   "reason": "일반"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 0,
+   "confidence": 72.0,
+   "reason": "일반"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 101.7,
+   "confidence": 40.0,
+   "reason": "전적상위"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 76.7,
+   "confidence": 64.0,
+   "reason": "전적상위"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": false,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 58.3,
+   "confidence": 0.0,
+   "reason": "일반"
+  }
+ },
+ "recommendation_process": [
+  "1. 전적 분석: 6번 0점",
+  "2. 배당 수집 시작 10:34:46",
+  "5. 종합 신뢰도 32.0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 6,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 0,
+  "total": 32.0,
+  "grade": "하"
+ },
+ "win_tags": [],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 0,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 72.0,
+  "reason": "제거 적중"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "10:36:37",
+    "minutes_before": 2,
+    "previous_signal": "8번",
+    "new_signal": "12번",
+    "reason": "12번 집중급락(평균 -43.5%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "10:39:42",
+    "minutes_before": 20,
+    "previous_signal": "14번",
+    "new_signal": "6번",
+    "reason": "6번 집중급락(평균 -24.0%)",
+    "prev_was_candidate": true
+   }
+  ],
+  "confirmed": [],
+  "candidates": [
+   6,
+   8,
+   10,
+   11,
+   12,
+   14
+  ],
+  "events": {
+   "8": {
+    "first": {
+     "time": "10:36:31",
+     "minutes_before": 2
+    },
+    "count": 1,
+    "last": {
+     "time": "10:36:31",
+     "minutes_before": 2
+    }
+   },
+   "12": {
+    "first": {
+     "time": "10:36:37",
+     "minutes_before": 2
+    },
+    "count": 1,
+    "last": {
+     "time": "10:36:37",
+     "minutes_before": 2
+    },
+    "vanished": {
+     "time": "10:36:47",
+     "minutes_before": 2
+    }
+   },
+   "14": {
+    "first": {
+     "time": "10:38:35",
+     "minutes_before": 0
+    },
+    "count": 1,
+    "last": {
+     "time": "10:38:35",
+     "minutes_before": 0
+    }
+   },
+   "6": {
+    "first": {
+     "time": "10:39:42",
+     "minutes_before": 20
+    },
+    "count": 1,
+    "last": {
+     "time": "10:39:42",
+     "minutes_before": 20
+    },
+    "vanished": {
+     "time": "10:39:42",
+     "minutes_before": 20
+    }
+   },
+   "10": {
+    "first": {
+     "time": "10:41:00",
+     "minutes_before": 19
+    },
+    "count": 1,
+    "last": {
+     "time": "10:41:00",
+     "minutes_before": 19
+    },
+    "vanished": {
+     "time": "10:41:40",
+     "minutes_before": 18
+    }
+   },
+   "11": {
+    "first": {
+     "time": "10:42:21",
+     "minutes_before": 18
+    },
+    "count": 1,
+    "last": {
+     "time": "10:42:21",
+     "minutes_before": 18
+    },
+    "vanished": {
+     "time": "10:43:05",
+     "minutes_before": 17
+    }
+   }
+  },
+  "finalSignal": 11,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 37
+ },
+ "pnl": 0,
+ "stake": 1000,
+ "generated_at": "2026-07-11 21:29:23"
+}

@@ -1,0 +1,258 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_09_소노다_9경주",
+ "race_info": {
+  "date": "2026-07-09",
+  "track": "소노다",
+  "round": 9,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 10,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 9,
+   "name": "ワンダーブレス",
+   "jockey": "小谷周（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    1,
+    2,
+    3,
+    2
+   ],
+   "record_score": 81.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "エルフェニックス",
+   "jockey": "小牧太（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    1,
+    8,
+    6,
+    5
+   ],
+   "record_score": 80.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "ヴィータレヴィス",
+   "jockey": "杉浦健（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    5,
+    6,
+    1,
+    11
+   ],
+   "record_score": 55.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "リングベルガール",
+   "jockey": "佐々世（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    1,
+    1,
+    4,
+    9
+   ],
+   "record_score": 51.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 10,
+   "name": "サクセスブレイク",
+   "jockey": "永井孝（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    1,
+    2,
+    2,
+    3
+   ],
+   "record_score": 51.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "ヨウタウッドテール",
+   "jockey": "吉村智（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    4,
+    5,
+    1,
+    2
+   ],
+   "record_score": 46.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "エクスプロラベスト",
+   "jockey": "塩津璃（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    4,
+    5,
+    5,
+    2
+   ],
+   "record_score": 21.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "シゲルノヴァ",
+   "jockey": "土方颯（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    11,
+    11,
+    10,
+    7
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "テーオーニコラス",
+   "jockey": "下原理（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    12,
+    11,
+    10,
+    8,
+    9
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "バーストオブカラー",
+   "jockey": "田野豊（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    10,
+    9,
+    5,
+    7
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": null,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   4,
+   5,
+   6,
+   9,
+   10
+  ],
+  "eliminated": [
+   3,
+   7,
+   8
+  ],
+  "recommend": "9+10",
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 8,
+  "2nd": 1,
+  "3rd": 9,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 8,
+  "second": 1,
+  "odds_range": null
+ },
+ "saved_at": "2026-07-09 15:48:40",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

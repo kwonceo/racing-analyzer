@@ -1,0 +1,85 @@
+{
+ "race": "오비히로 7경주",
+ "date": "2026-07-19",
+ "raceKey": "오비히로 7경주",
+ "alerts": [
+  {
+   "time": "17:43:37",
+   "race": "오비히로 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "3+5 -38.5%",
+   "alert_pair": "3+5",
+   "odds_snapshot": {
+    "3+5": {
+     "before": 311.0,
+     "after": 191.4
+    },
+    "6+8": {
+     "before": 115.5,
+     "after": 72.4
+    },
+    "7+8": {
+     "before": 404.4,
+     "after": 255.2
+    }
+   },
+   "alert_horses": [
+    3,
+    5,
+    6,
+    8,
+    7
+   ],
+   "current_recommend": "5+10",
+   "minutes_before": 7,
+   "result": null,
+   "alert_correct": null
+  },
+  {
+   "time": "17:55:13",
+   "race": "오비히로 7경주",
+   "alert_type": "배당급변",
+   "alert_content": "6+10 -84.0%",
+   "alert_pair": "6+10",
+   "odds_snapshot": {
+    "6+10": {
+     "before": 35.7,
+     "after": 5.7
+    },
+    "6+8": {
+     "before": 69.9,
+     "after": 16.4
+    },
+    "8+10": {
+     "before": 35.2,
+     "after": 9.2
+    },
+    "5+6": {
+     "before": 173.6,
+     "after": 63.4
+    },
+    "3+4": {
+     "before": 706.7,
+     "after": 325.3
+    },
+    "5+8": {
+     "before": 244.0,
+     "after": 115.1
+    }
+   },
+   "alert_horses": [
+    6,
+    10,
+    8,
+    5,
+    3,
+    4
+   ],
+   "current_recommend": null,
+   "minutes_before": null,
+   "result": null,
+   "alert_correct": null
+  }
+ ],
+ "result": null
+}

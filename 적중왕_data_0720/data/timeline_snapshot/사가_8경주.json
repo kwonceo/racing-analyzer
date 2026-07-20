@@ -1,0 +1,49 @@
+{
+ "race": "사가 8경주",
+ "date": "2026-07-18",
+ "snapshots": {
+  "T-5": {
+   "main": [
+    1,
+    10
+   ],
+   "dark_horse": [
+    1,
+    10
+   ],
+   "odds": {
+    "1+10": 481.1
+   },
+   "confirmed": true,
+   "at": "19:30:21",
+   "changed_from_T7": false,
+   "changed_horses": []
+  },
+  "T+3": {
+   "main": [
+    5,
+    6
+   ],
+   "dark_horse": [
+    1,
+    2
+   ],
+   "odds": {
+    "5+6": 2.6
+   },
+   "confirmed": false,
+   "at": "19:38:16",
+   "post_deadline_change": true
+  }
+ },
+ "updated_at": "2026-07-18 19:50:19",
+ "result": {
+  "1st": 2,
+  "2nd": 6,
+  "3rd": 5
+ },
+ "analysis": {
+  "T7_hit": false,
+  "T5_hit": false
+ }
+}
