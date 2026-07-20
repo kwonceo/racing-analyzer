@@ -6,7 +6,7 @@
  "date": "2026-07-20",
  "race": "마쓰도 4경주",
  "analyzed_at": "09:40:38",
- "updated_at": "09:46:08",
+ "updated_at": "09:46:37",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -570,68 +570,8 @@
   7,
   5
  ],
- "result": {
-  "1st": 7,
-  "2nd": 2,
-  "3rd": 1
- },
- "hit": {
-  "was_hit": false,
-  "quinella_hit": false,
-  "trifecta_hit": false,
-  "keyhorse_quinella_hit": true,
-  "keyhorse_trifecta_hit": false,
-  "keyhorse_placed": [
-   2,
-   7
-  ],
-  "dark_placed": [],
-  "payouts": {
-   "quinella": 0,
-   "trifecta": 0
-  },
-  "anomaly_was_correct": false,
-  "signal_correct": [],
-  "elimination_correct": false,
-  "eliminated": [],
-  "form_pick": 1,
-  "form_pick_hit": true,
-  "pnl": -1000,
-  "stake": 1000,
-  "near_miss": false,
-  "near_miss_horse": null,
-  "pairing_miss": {
-   "detected": true,
-   "top2": [
-    2,
-    7
-   ],
-   "keyHorses": [
-    2,
-    7,
-    5
-   ],
-   "recQuinella": [],
-   "leadNo": 2,
-   "backingCovered": false,
-   "wouldBackingCover": true,
-   "lesson": "유력마·삼복승 판단은 정확했으나 복승 메인이 실질유력마와 '다른' 유력마 받치기를 놓쳐 복승 top2를 놓침 → 역배열 실질유력마 축 받치기 복승으로 커버."
-  },
-  "hit_basis": {
-   "formScore": 68.1,
-   "dropAmt": null,
-   "dropScore": 0,
-   "inverse": false,
-   "inverseHorses": [
-    2
-   ],
-   "inverseHit": [
-    2
-   ],
-   "confidence": 25.0,
-   "reason": "전적유력마 1번 적중"
-  }
- },
+ "result": null,
+ "hit": null,
  "profit": null,
  "review": null
 }

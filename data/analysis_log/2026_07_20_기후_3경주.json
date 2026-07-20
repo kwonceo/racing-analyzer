@@ -6,7 +6,7 @@
  "date": "2026-07-20",
  "race": "기후 3경주",
  "analyzed_at": "09:15:38",
- "updated_at": "09:34:26",
+ "updated_at": "09:46:40",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -1097,8 +1097,52 @@
   4,
   7
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 7,
+  "2nd": 3,
+  "3rd": 4
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   4,
+   7
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 4.2,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [
+   2,
+   3,
+   9
+  ],
+  "form_pick": 1,
+  "form_pick_hit": false,
+  "pnl": 3200,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 10.0,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "적중"
+  }
+ },
  "profit": null,
  "review": null
 }

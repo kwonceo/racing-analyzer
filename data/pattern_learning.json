@@ -3597,16 +3597,44 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-07-20"
+    },
+    {
+      "race": "기후 3경주",
+      "horse_no": 4,
+      "recent_avg": 7.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "기후 3경주",
+      "horse_no": 7,
+      "recent_avg": 6.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "기후 3경주",
+      "horse_no": 3,
+      "recent_avg": 8.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-20"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 838,
-      "hit": 187
+      "count": 846,
+      "hit": 188
     },
     "전체부진마": {
-      "count": 1336,
-      "hit": 370
+      "count": 1348,
+      "hit": 373
     },
     "대규모급락": {
       "count": 19,
@@ -3616,8 +3644,8 @@
       "hit_rate": 26.3
     },
     "이상감지동반": {
-      "count": 498,
-      "hit": 183
+      "count": 502,
+      "hit": 185
     },
     "급락동반": {
       "count": 101,
