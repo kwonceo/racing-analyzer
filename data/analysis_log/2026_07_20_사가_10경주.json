@@ -6,7 +6,7 @@
  "date": "2026-07-20",
  "race": "사가 10경주",
  "analyzed_at": "20:46:39",
- "updated_at": "20:48:33",
+ "updated_at": "21:10:17",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -24,167 +24,14 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "noAxis": true,
-  "level": "강력",
-  "band": "4배 이하 2두+",
-  "reprs": [
-   {
-    "no": 12,
-    "odds": 2.2
-   },
-   {
-    "no": 10,
-    "odds": 2.2
-   },
-   {
-    "no": 6,
-    "odds": 3.8
-   }
-  ],
-  "axisGap": 0.0,
-  "note": "저배당 2두 배당 비슷(축 불명확·차이 0%) → 추천 보류"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "ジルクン",
-   "jockey": "笹川翼（大井）",
-   "record_score": 17.5,
-   "record_detail": "최근 4-6-7-2-2",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 36.5배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 3,
-   "name": "コンゴウ",
-   "jockey": "西啓太（大井）",
-   "record_score": 55.0,
-   "record_detail": "최근 1-9-6-4-2",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 28.6배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 11,
-   "name": "サヴォイア",
-   "jockey": "藤田凌（大井）",
-   "record_score": 67.5,
-   "record_detail": "최근 2-2-6-2-4",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 14.4배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 12,
-   "name": "ゴーディアンノット",
-   "jockey": "新原周（川崎）",
-   "record_score": 67.5,
-   "record_detail": "최근 2-2-4-7-7",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 2.2배 · 감점 없음 = 100점"
-  },
-  {
-   "no": 4,
-   "name": "リュウノワールド",
-   "jockey": "高野誠（大井）",
-   "record_score": 42.5,
-   "record_detail": "최근 3-6-3-7-3",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 116.9배 · 배당 80~149 -20 = 80점"
-  },
-  {
-   "no": 2,
-   "name": "クライトゥナイト",
-   "jockey": "中村尚（大井）",
-   "record_score": 40.0,
-   "record_detail": "최근 2-8-6-14-5",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 28.9배 · 최근평균 7.0착 -30 = 70점"
-  },
-  {
-   "no": 5,
-   "name": "キルコネクション",
-   "jockey": "高橋優（大井）",
-   "record_score": 11.2,
-   "record_detail": "최근 11-4-14-13-2",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 16.2배 · 최근평균 8.8착 -30 = 70점"
-  },
-  {
-   "no": 6,
-   "name": "ミキノカラクリバコ",
-   "jockey": "鷹見陸（大井）",
-   "record_score": 2.5,
-   "record_detail": "최근 5-6-6-3-5",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 3.8배 · 최근평균 5.0착 -30 = 70점"
-  },
-  {
-   "no": 7,
-   "name": "プレインコート",
-   "jockey": "菅原涼（大井）",
-   "record_score": 0,
-   "record_detail": "최근 10-9-8-11-10",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 34.3배 · 최근평균 9.6착 -30 = 70점"
-  },
-  {
-   "no": 10,
-   "name": "タカノドリーム",
-   "jockey": "安藤洋（大井）",
-   "record_score": 10.0,
-   "record_detail": "최근 4-11-5-6-8",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 2.2배 · 최근평균 6.8착 -30 = 70점"
-  },
-  {
-   "no": 8,
-   "name": "イオリ",
-   "jockey": "東原悠（大井）",
-   "record_score": 1.2,
-   "record_detail": "최근 5-10-8-4-8",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 81.2배 · 배당 80~149 -20 / 최근평균 7.0착 -30 = 50점"
-  },
-  {
-   "no": 9,
-   "name": "ジャスミン",
-   "jockey": "佐野遥（川崎）",
-   "record_score": 15.0,
-   "record_detail": "최근 6-8-2-11-6",
-   "odds": null,
-   "grade": "D",
-   "grade_reason": "배당 150.4배 · 배당 150배+ -40 / 최근평균 6.6착 -30 = 30점"
-  }
- ],
+ "horses": [],
  "elimination": {
-  "candidates": [
-   1,
-   3,
-   11,
-   12,
-   4,
-   2,
-   5,
-   6,
-   7,
-   10,
-   8,
-   9
-  ],
+  "candidates": [],
   "eliminated": [],
   "elimination_reasons": {}
  },
@@ -256,41 +103,20 @@
  ],
  "compare_recommendation": {
   "anomaly": {
-   "quinella": [
-    10,
-    12
-   ],
-   "trio": [
-    6,
-    10,
-    12
-   ]
+   "quinella": null,
+   "trio": null
   },
   "form": {
-   "quinella": [
-    11,
-    12
-   ],
-   "trio": [
-    3,
-    11,
-    12
-   ]
+   "quinella": null,
+   "trio": null
   },
   "jockey": {
    "quinella": null,
    "trio": null
   },
   "final": {
-   "quinella": [
-    10,
-    12
-   ],
-   "trio": [
-    6,
-    10,
-    12
-   ]
+   "quinella": null,
+   "trio": null
   }
  },
  "corePicks": {
@@ -691,14 +517,47 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 12·10·6 / 복승 10+12",
- "keyHorses": [
-  12,
-  10,
-  6
- ],
- "result": null,
- "hit": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": {
+  "1st": 10,
+  "2nd": 6,
+  "3rd": 12
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": true,
+  "trifecta_hit": true,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [],
+  "form_pick": null,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": null,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "적중"
+  }
+ },
  "profit": null,
  "review": null
 }

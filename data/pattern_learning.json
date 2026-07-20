@@ -4142,16 +4142,26 @@
         "복승이상감지"
       ],
       "date": "2026-07-20"
+    },
+    {
+      "race": "오오이 12경주",
+      "horse_no": 1,
+      "recent_avg": 4.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-20"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 959,
+      "count": 969,
       "hit": 211
     },
     "전체부진마": {
-      "count": 1537,
-      "hit": 428
+      "count": 1548,
+      "hit": 429
     },
     "대규모급락": {
       "count": 20,
@@ -4161,8 +4171,8 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 578,
-      "hit": 217
+      "count": 579,
+      "hit": 218
     },
     "급락동반": {
       "count": 106,
@@ -4539,26 +4549,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 169,
-    "hit": 125,
+    "count": 170,
+    "hit": 126,
     "cases": [
-      {
-        "race": "모리오카 5경주",
-        "date": "2026-07-12",
-        "smart_horses": [
-          3,
-          6,
-          5
-        ],
-        "placed": [
-          3,
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "오비히로 1경주",
         "date": "2026-07-12",
@@ -6144,9 +6137,25 @@
         "trifecta_odds": null,
         "quinella_odds": 3.2,
         "high_odds": false
+      },
+      {
+        "race": "오오이 11경주",
+        "date": "2026-07-20",
+        "smart_horses": [
+          5,
+          1
+        ],
+        "placed": [
+          5,
+          1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 1.7,
+        "high_odds": false
       }
     ],
-    "rate": 74.0,
+    "rate": 74.1,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }

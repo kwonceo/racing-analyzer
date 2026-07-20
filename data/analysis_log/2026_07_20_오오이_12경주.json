@@ -6,7 +6,7 @@
  "date": "2026-07-20",
  "race": "오오이 12경주",
  "analyzed_at": "20:55:33",
- "updated_at": "20:59:51",
+ "updated_at": "21:10:15",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -749,8 +749,50 @@
   8,
   1
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 9,
+  "2nd": 11,
+  "3rd": 1
+ },
+ "hit": {
+  "was_hit": true,
+  "quinella_hit": false,
+  "trifecta_hit": true,
+  "keyhorse_quinella_hit": true,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [
+   9,
+   1
+  ],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": true,
+  "eliminated": [
+   3
+  ],
+  "form_pick": 1,
+  "form_pick_hit": true,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 108.8,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "전적유력마 1번 적중 · 제거 적중"
+  }
+ },
  "profit": null,
  "review": null
 }
