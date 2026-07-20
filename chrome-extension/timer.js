@@ -34,7 +34,7 @@
   //   MV3 서비스워커가 절전돼 background 알람(최소 30초)만으로 부활하면 실측 간격이 40~67초로 늘던 문제 해결.
   //   페이지 setInterval(1초)은 스로틀되지 않으므로, 마감 임박에 스케줄대로 FORCE_COLLECT를 발사해 SW를 깨운다.
   let _lastForceCollect = 0;
-  const _isOddsPage = /keiba\.go\.jp|qwqwd25\.net/.test(location.host);   // 배당판만(분석기 탭 제외)
+  const _isOddsPage = /keiba\.go\.jp|dke-d11diw\.site|qwqwd25\.net/.test(location.host);   // 배당판만(분석기 탭 제외)
   function _activeCollectTick(left) {
     if (!_isOddsPage || left == null || left <= 0 || left > 300000) return;   // T-5분 이내에서만
     // background.autoTick 과 동일한 5단계 스케줄: T-30초3초·T-1·2분5초·T-3분10초·T-5분15초

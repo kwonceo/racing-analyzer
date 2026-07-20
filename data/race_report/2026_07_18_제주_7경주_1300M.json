@@ -1,0 +1,165 @@
+{
+ "race": "제주 7경주 1300M",
+ "raceKey": "제주 7경주 1300M",
+ "date": "2026-07-18",
+ "result": {
+  "1st": 7,
+  "2nd": 5,
+  "3rd": 8,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 45,
+   "confidence": 40.0,
+   "reason": "일반"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 15,
+   "confidence": 24.0,
+   "reason": "일반"
+  },
+  "signal_8": {
+   "horse": 8,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 120,
+   "confidence": 32.0,
+   "reason": "전적상위"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 80,
+   "confidence": 24.0,
+   "reason": "전적상위"
+  },
+  "signal_9": {
+   "horse": 9,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 27,
+   "confidence": 48.0,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  8,
+  3,
+  7,
+  9
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 7번 45점",
+  "2. 배당 수집 시작 16:35:19",
+  "5. 종합 신뢰도 40.0점(중) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 7,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 45,
+  "total": 40.0,
+  "grade": "중"
+ },
+ "win_tags": [
+  "전적보조_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 45,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 40.0,
+  "reason": "적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [
+   10
+  ],
+  "events": {
+   "10": {
+    "first": {
+     "time": "16:39:04",
+     "minutes_before": null
+    },
+    "count": 1,
+    "last": {
+     "time": "16:39:04",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "16:39:37",
+     "minutes_before": null
+    }
+   }
+  },
+  "finalSignal": 10,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 18
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-18 16:44:24"
+}

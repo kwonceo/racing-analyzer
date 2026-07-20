@@ -1,0 +1,256 @@
+{
+ "race_id": "2026_07_18_기후_4경주",
+ "raceKey": "2026-07-18 기후 4경주",
+ "sport": "cycle",
+ "category": "cycle",
+ "date": "2026-07-18",
+ "race": "기후 4경주",
+ "analyzed_at": "09:39:33",
+ "updated_at": "09:39:33",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ },
+ "odds_timeline": [
+  {
+   "time": "09:30:37",
+   "minutes_before": 1,
+   "quinella": {}
+  },
+  {
+   "time": "09:32:19",
+   "minutes_before": null,
+   "quinella": {}
+  },
+  {
+   "time": "09:33:06",
+   "minutes_before": 19,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  },
+  {
+   "time": "09:33:53",
+   "minutes_before": 19,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  },
+  {
+   "time": "09:34:04",
+   "minutes_before": 18,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  },
+  {
+   "time": "09:34:33",
+   "minutes_before": 18,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  },
+  {
+   "time": "09:35:13",
+   "minutes_before": 17,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  },
+  {
+   "time": "09:36:10",
+   "minutes_before": 16,
+   "quinella": {
+    "1+6": 5.5,
+    "1+5": 48.0
+   }
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false,
+  "disabled": true,
+  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "リバージャスミン",
+   "jockey": "石本純（高知）",
+   "record_score": 0,
+   "record_detail": "최근 8-11-7-7",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 12.2배 · 최근평균 8.2착 -30 = 70점"
+  },
+  {
+   "no": 2,
+   "name": "キンデアポチャン",
+   "jockey": "井上瑛（高知）",
+   "record_score": 0,
+   "record_detail": "최근 5-7-10-5-5",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 1.7배 · 최근평균 6.4착 -30 = 70점"
+  },
+  {
+   "no": 3,
+   "name": "メイジョウエナジー",
+   "jockey": "木村直（高知）",
+   "record_score": 0,
+   "record_detail": "최근 6-11-6-9-8",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 19.4배 · 최근평균 8.0착 -30 = 70점"
+  },
+  {
+   "no": 4,
+   "name": "ソヴァージュ",
+   "jockey": "城野慈（高知）",
+   "record_score": 40.0,
+   "record_detail": "최근 2-6-8-11-12",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 1.7배 · 최근평균 7.8착 -30 = 70점"
+  },
+  {
+   "no": 5,
+   "name": "クレインヴォイス",
+   "jockey": "上田将（高知）",
+   "record_score": 45.0,
+   "record_detail": "최근 2-5-4-14-11",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 6.2배 · 최근평균 7.2착 -30 = 70점"
+  },
+  {
+   "no": 6,
+   "name": "ハルウタ",
+   "jockey": "西森将（高知）",
+   "record_score": 2.5,
+   "record_detail": "최근 9-9-9-7-3",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 52.1배 · 최근평균 7.4착 -30 = 70점"
+  },
+  {
+   "no": 7,
+   "name": "ヴィルアヴァンセ",
+   "jockey": "濱尚美（高知）",
+   "record_score": 10.0,
+   "record_detail": "최근 8-4-9-3-9",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 11.9배 · 최근평균 6.6착 -30 = 70점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "quinella_main": {
+   "combo": "2+4",
+   "odds": 1.7,
+   "reason": "2번(C)·4번(A)"
+  },
+  "trifecta_main": {
+   "combo": "2+4+5",
+   "odds": 13.0,
+   "reason": "2번(C)·4번(A)·5번(A)"
+  },
+  "trifecta_insurance1": {
+   "combo": "2+4+7",
+   "odds": 17.3,
+   "reason": "2번(C)·4번(A)·7번(B)"
+  },
+  "trifecta_insurance2": {
+   "combo": "4+5+7",
+   "odds": 19.7,
+   "reason": "4번(A)·5번(A)·7번(B)"
+  },
+  "budget_allocation": {
+   "quinella_main": "62.1%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
+  }
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    2,
+    4
+   ],
+   "trio": [
+    2,
+    4,
+    5
+   ]
+  },
+  "form": {
+   "quinella": [
+    4,
+    5
+   ],
+   "trio": [
+    4,
+    5,
+    7
+   ]
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    2,
+    4
+   ],
+   "trio": [
+    2,
+    4,
+    5
+   ]
+  }
+ },
+ "corePicks": null,
+ "summary": "유력마 4·2·5 / 복승 2+4",
+ "keyHorses": [
+  4,
+  2,
+  5
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}

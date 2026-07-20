@@ -1,0 +1,117 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_17_제주_1경주",
+ "race_info": {
+  "date": "2026-07-17",
+  "track": "제주",
+  "round": 1,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "12:53:37",
+    "quinella": {
+     "1+2": 8.0,
+     "1+3": 9.0,
+     "1+4": 10.0,
+     "1+5": 11.0,
+     "1+6": 12.0,
+     "1+7": 13.0,
+     "2+3": 10.0,
+     "2+4": 11.0,
+     "2+5": 12.0,
+     "2+6": 13.0,
+     "2+7": 14.0,
+     "3+4": 12.0,
+     "3+5": 13.0,
+     "3+6": 14.0,
+     "3+7": 15.0,
+     "4+5": 14.0,
+     "4+6": 15.0,
+     "4+7": 16.0,
+     "5+6": 16.0,
+     "5+7": 17.0,
+     "6+7": 18.0
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.593,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 1,
+  "2nd": 8,
+  "3rd": 2,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 1,
+  "second": 8,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-17 23:56:40",
+ "quality": {
+  "score": 20,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "전적 데이터",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

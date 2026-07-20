@@ -561,7 +561,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   // asyukk 탭을 찾아 결과 수집 지시 (content script 가 경주결과 탭 클릭 + 추출)
   let done = false, data = null;
   try {
-    const tabs = await chrome.tabs.query({ url: ['*://*.qwqwd25.net/*'] });
+    const tabs = await chrome.tabs.query({ url: ['*://*.qwqwd25.net/*', '*://*.dke-d11diw.site/*'] });
     if (tabs.length) {
       const res = await chrome.tabs.sendMessage(tabs[0].id, { type: 'COLLECT_RESULTS', reason: 'timer' })
         .catch(() => null);
@@ -696,7 +696,7 @@ function _ensureFineLoop() {
 }
 
 async function _findOddsTab() {
-  const tabs = await chrome.tabs.query({ url: ['*://*.keiba.go.jp/*', '*://*.qwqwd25.net/*'] });
+  const tabs = await chrome.tabs.query({ url: ['*://*.keiba.go.jp/*', '*://*.qwqwd25.net/*', '*://*.dke-d11diw.site/*'] });
   if (!tabs.length) return null;
   return tabs.find((t) => /Odds|배당|TodayRaceInfo|DebaTable/i.test(t.url || '')) || tabs[0];
 }
@@ -736,7 +736,12 @@ async function _onRaceClosed(reason) {
 }
 async function _forceAnalyze() {
   try {
-    const res = await fetch(ANALYZE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey: '' }) });
+    // [v2.1.145 유령 분석 차단] 빈 raceKey 분석은 서버 max-t 폴백이 '엉뚱한(끝난·다른) 경주'를 돌려줘
+    //   전역 analyzeStatus 를 다른 경주 분석으로 덮어씀 — 7명 경륜에 "복병 12번" 등 불가능 번호가
+    //   반복 재출현하던 원인. 현재 raceKey 로 고정하고, 없으면 분석 생략(오염보다 무데이터가 안전).
+    const { raceKey } = await chrome.storage.local.get({ raceKey: '' });
+    if (!raceKey) return null;
+    const res = await fetch(ANALYZE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raceKey }) });
     const d = await res.json();
     if (res.ok) chrome.storage.local.set({ analyzeStatus: { data: d, at: Date.now() } });
     return res.ok ? d : null;

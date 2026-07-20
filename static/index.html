@@ -38,6 +38,7 @@
     <button class="tab-btn" data-tab="japan">🎰 배당판 캡처</button>
     <button class="tab-btn" data-tab="combined">🎯 통합분석</button>
     -->
+    <button class="tab-btn" data-tab="board">📊 배당판</button>
     <button class="tab-btn" data-tab="multi">🏁 전체 경주</button>
     <button class="tab-btn" data-tab="result">📝 결과기록</button>
     <button class="tab-btn" data-tab="jockeydb">🏇 기수DB</button>
@@ -64,6 +65,15 @@
   <main class="app-main">
     <!-- 한국경마 -->
     <section id="tab-korea" class="tab-panel active">
+      <!-- [한국경마 실시간 분석 (2026-07-19)·긴급2 위치 이동] 탭 열면 실시간 분석이 먼저 보이도록 최상단 배치.
+           내용·기능은 그대로(하단→상단 이동만). PDF 출주표 분석은 바로 아래 유지(무삭제). -->
+      <div class="panel-card">
+        <h2>🇰🇷 실시간 분석 <span class="hint" style="font-weight:400">현재 경주 배당 기반 · 30초 자동 갱신 · 배당 실시간 교체</span></h2>
+        <div class="cfg-row" style="align-items:center;margin:4px 0 8px">
+          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-korea" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+        </div>
+        <div id="sportReport-korea" class="report-area"><p class="hint">🇰🇷 한국 경주 배당 수집이 시작되면 실시간 이상감지·추천이 표시됩니다. (배당판 또는 KRA 자동수집)</p></div>
+      </div>
       <div class="panel-card">
         <h2>한국경마 출주표 분석</h2>
         <p class="hint">KRA 출주표는 한글이 벡터로 그려져 텍스트 추출이 불가합니다. 각 페이지를 이미지로 렌더링해 서버 AI Vision으로 판독합니다.</p>
@@ -294,6 +304,8 @@
           <label class="hint">💰 베팅 예산(원) <input id="sportBudget-cycle" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
         </div>
       </div>
+      <!-- [오늘 성적 요약 (2026-07-19)] 오늘 경륜 추천·적중·적중률·평균배당 — 결과 백필과 연동 자동 갱신 -->
+      <div id="keirinTodayStats" style="margin:6px 0 10px;padding:10px 12px;border:1px solid #38d39f;border-radius:10px;background:rgba(56,211,159,.07)"><span class="hint">🚴 오늘 성적 집계 준비 중…</span></div>
       <div id="sportReport-cycle" class="report-area"><p class="hint">🚴 경륜 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
       <!-- [경륜 출마표 분석] oddspark 선수 전적 자동 수집·분석 -->
       <div class="panel-card" style="margin-top:12px">
@@ -361,6 +373,22 @@
       </div>
     </section>
 
+    <!-- [공개용 배당판] 3단계 카드 UI + 상세 펼치기. matrix_board.js 공통 컴포넌트가 렌더.
+         기존 텍스트 분석은 '전문가 모드' 토글로 기존 일본경마 탭에 그대로 유지(무삭제). -->
+    <section id="tab-board" class="tab-panel">
+      <div class="panel-card">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h2 style="margin:0">📊 배당판 <span class="hint" style="font-weight:400;font-size:13px">큰 글씨 카드 UI · 30초 자동 갱신</span></h2>
+          <span style="flex:1"></span>
+          <label style="font-size:14px">경주
+            <select id="boardRaceSel" style="min-height:40px;font-size:15px;margin-left:6px"></select>
+          </label>
+          <button id="boardRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px">🔄 새로고침</button>
+        </div>
+        <div id="boardMount" style="margin-top:14px"></div>
+      </div>
+    </section>
+
     <!-- [다중 경주 동시 배당판] 별도 추가 기능(기존 단일 경주 분석 무영향) -->
     <section id="tab-multi" class="tab-panel">
       <div class="panel-card">
@@ -387,6 +415,18 @@
 
     <!-- 결과입력 -->
     <section id="tab-result" class="tab-panel">
+      <!-- [전날 경주 목록] 날짜별 조회 — 경주별 예상vs결과·적중·복병적중·T-5 스크린샷 + KPI -->
+      <div class="panel-card" id="dayRacesCard">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h2 style="margin:0">🗓 날짜별 경주 기록</h2>
+          <input type="date" id="dayRacesDate" style="min-height:40px;font-size:15px">
+          <button id="dayRacesLoad" class="btn btn-small">조회</button>
+          <span style="flex:1"></span>
+        </div>
+        <div id="dayRacesKpi" style="margin-top:10px"></div>
+        <div id="dayRacesList" style="margin-top:12px"></div>
+      </div>
+
       <!-- [결과기록 전면정리] 1. 최상단: 최근 결과 요약 카드 -->
       <div class="panel-card" id="recentResultsCard">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
@@ -582,6 +622,14 @@
         <div id="statsDashboard"></div>
       </div>
 
+      <!-- [경쟁 AI 벤치마킹] 저쪽 추천 vs 우리 추천 비교 통계 -->
+      <div class="panel-card">
+        <h2>📊 경쟁 AI 분석 <span class="hint" style="font-weight:400;font-size:13px">저쪽 추천 vs 우리 추천 비교·역추산</span></h2>
+        <p class="hint">경쟁 AI 추천을 <code>py tools\register_competitor.py</code> 로 입력하면 축·연결마·적중을 우리와 비교해 누적합니다. 저쪽이 잘 맞히는 패턴(고배당·축 선정)을 역추산해 개선에 활용하세요.</p>
+        <div class="cfg-row"><button id="competitorRefresh" class="btn btn-primary">🔄 경쟁 분석 새로고침</button></div>
+        <div id="competitorPanel" style="margin-top:10px"><p class="hint">[경쟁 분석 새로고침]을 누르세요.</p></div>
+      </div>
+
       <!-- [6번] 내 코멘트 모아보기 — 최고중요 경주·키워드 통계·near_miss 패턴 -->
       <div class="panel-card">
         <h2>💬 내 코멘트 모아보기 <span class="hint" style="font-weight:400">(확장 팝업 결과입력 코멘트)</span></h2>
@@ -691,6 +739,7 @@
   <!-- [1번] 복승→쌍승 전환 카운트다운 오버레이 -->
   <div id="capCountdown" class="cap-countdown hidden"></div>
 
+  <script src="js/matrix_board.js"></script>
   <script src="js/jockey.js"></script>
   <script src="js/pdf-parser.js"></script>
   <script src="js/analysis.js"></script>

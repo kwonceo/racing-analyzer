@@ -38,6 +38,16 @@
   //   보강: 본문 헤더 "2026年7月1日（水） 大 井 第11競走" 파싱
   const BABA_CODE = { 19: '船橋', 20: '大井', 24: '名古屋', 27: '園田', 31: '高知' };
   const TRACKS = /(帯広|門別|盛岡|水沢|浦和|船橋|大井|川崎|金沢|笠松|名古屋|園田|姫路|高知|佐賀)/;
+  // [v2.1.142 raceKey 정규화] 일본어 회장명 폴백(帯広 12R)과 한글 네비(오비히로 12경주)가 같은 경주를
+  //   서로 다른 raceKey 로 만들어 → 수집 키와 분석 키 불일치 → 오버레이 '새 경주 분석 중' 무한 대기.
+  //   회장명을 한글(사설 배당판·서버 oddspark 표기)로 통일한다.
+  const JP2KR_TRACK = {
+    '帯広': '오비히로', '門別': '몬베츠', '盛岡': '모리오카', '水沢': '미즈사와', '浦和': '우라와',
+    '船橋': '후나바시', '大井': '오오이', '川崎': '카와사키', '金沢': '카나자와', '笠松': '카사마츠',
+    '名古屋': '나고야', '園田': '소노다', '姫路': '히메지', '高知': '코치', '佐賀': '사가',
+    '札幌': '삿포로', '函館': '하코다테', '福島': '후쿠시마', '新潟': '니가타', '東京': '도쿄',
+    '中山': '나카야마', '中京': '주쿄', '京都': '교토', '阪神': '한신', '小倉': '고쿠라',
+  };
 
   // [raceKey 오검출 수정] 현재 '활성화된 경주 탭' 또는 두드러진 경주 헤더에서 경주번호를 읽는다.
   //   증상: URL k_raceNo(또는 본문 첫 第N競走)가 stale/목록 첫 항목이라 실제 표시 경주(9R)를 4R로 오검출.
@@ -135,6 +145,12 @@
       if (km) { track = km[1]; raceNo = `${parseInt(km[2], 10)}경주`; }
     }
 
+    // [v2.1.142 raceKey 정규화] 일본어 회장명(帯広 등)으로 폴백된 경우 한글로 통일 + "NR"→"N경주"
+    //   → 한글 네비 성공 시("오비히로 12경주")와 항상 같은 키가 되어 분석 키 불일치 원천 차단.
+    if (JP2KR_TRACK[track]) {
+      track = JP2KR_TRACK[track];
+      if (/^\d+R$/.test(raceNo)) raceNo = raceNo.replace(/R$/, '경주');
+    }
     return [date, track, raceNo].filter(Boolean).join(' ').trim();
   }
 
@@ -261,6 +277,9 @@
         const no = toNum(cells[idxNo]);
         if (!isHorseNo(no) || !/^\d{1,2}$/.test(cells[idxNo] || '')) continue;
         const name = idxName >= 0 ? cells[idxName] : '';
+        // [출전취소·除外] 競走除外/取消/失格/中止 텍스트 감지 → scratched 표시(추천 제거용)
+        const rowText = (cells.join(' ') + ' ' + name);
+        const scratched = /除外|取消|出走取消|競走除外|中止|失格|출전\s?취소|제외/.test(rowText);
         // 단승: 순수 소수만 (取消/--- 등은 제외)
         const win = /^\d+(?:\.\d+)?$/.test(cells[idxWin] || '') ? toNum(cells[idxWin]) : null;
         // 복승(place): "4.3-" 셀 + 다음 셀 "13.6" (또는 한 셀 "4.3-5.1")
@@ -272,7 +291,7 @@
           const max = /^\d+(?:\.\d+)?$/.test(b) ? toNum(b) : (parseRange(a)?.max ?? min);
           if (min != null) place = { min, max: max ?? min };
         }
-        horses[no] = { no, name, win, place };
+        horses[no] = { no, name, win, place, scratched };
       }
       if (Object.keys(horses).length) break; // 첫 유효 표에서 종료
     }
@@ -339,7 +358,7 @@
   // ═══════════════════════════════════════════════════════════════════
   //  사이트 자동 감지 + 범용 배당 매트릭스 파서
   //  ---------------------------------------------------------------------
-  //  keiba.go.jp 외에 asyukk34.qwqwd25.net(사설 배당판, class=odds_table/
+  //  keiba.go.jp 외에 ks1.dke-d11diw.site(사설 배당판, class=odds_table/
   //  odds_content) 등 사이트마다 DOM 이 달라, URL 로 사이트를 감지해 파서를
   //  분기한다. 미지의 사이트는 "표 안의 마번 축 + 숫자 셀" 패턴으로 범용 파싱.
   // ═══════════════════════════════════════════════════════════════════
@@ -348,11 +367,13 @@
   function detectSite() {
     const h = location.host;
     if (/(^|\.)keiba\.go\.jp$/.test(h)) return 'keiba';
-    if (/asyukk|qwqwd/i.test(h)) return 'asyukk';
+    if (/asyukk|qwqwd|dke-d11diw/i.test(h)) return 'asyukk';
     return 'generic';
   }
 
   const pureInt = (s) => (/^\d{1,2}$/.test((s || '').trim()) ? parseInt(s, 10) : null);
+  // [신규 미러 사이트 대응] 열 머리글이 '1.' 처럼 점이 붙은 경우까지 마번으로 인식(헤더 전용).
+  const hdrInt = (s) => { const m = /^(\d{1,2})\.?$/.exec((s || '').trim()); return m ? parseInt(m[1], 10) : null; };
 
   // [1번][3번] 범용 매트릭스 표 파서
   //   - 헤더 행(정수 마번이 가장 많은 행)에서 "열 마번" 축을 구성 (cellIndex→마번)
@@ -367,21 +388,46 @@
     // 헤더 행: 앞 3행 중 정수 마번이 가장 많은 행(2개 이상일 때만 헤더로 인정)
     let headerRow = null, best = 1;
     for (const r of rows.slice(0, 3)) {
-      const c = [...r.cells].filter((td) => pureInt(td.textContent) != null).length;
+      const c = [...r.cells].filter((td) => hdrInt(td.textContent) != null).length;
       if (c > best) { best = c; headerRow = r; }
     }
     // 헤더의 '열 마번'을 등장 순서(headerNos)와 cellIndex 두 방식으로 수집
-    const headerNos = [];
+    let headerNos = [];
     const colNoByIndex = {};
     if (headerRow) {
       for (const cell of headerRow.cells) {
-        const n = pureInt(cell.textContent);
+        const n = hdrInt(cell.textContent);
         if (n != null) { headerNos.push(n); colNoByIndex[cell.cellIndex] = n; }
       }
     }
+    // 배당 셀 판정: 소수 배당(47.1) 또는 3자리+ 정수(100=100배↑ 상한 표시) — '100'은 무효 아님, 고배당 롱샷.
+    const _odCell = (s) => { const t = (s || '').trim(); return /^\d+\.\d+$/.test(t) || /^\d{3,}$/.test(t); };
     const isOdds = opts.oddsClass
-      ? (td) => td.classList.contains(opts.oddsClass)
-      : (td) => /^\d+\.\d+$/.test((td.textContent || '').trim()); // 소수점 있는 숫자 = 배당
+      ? (td) => td.classList.contains(opts.oddsClass) || _odCell(td.textContent)
+      : (td) => _odCell(td.textContent);
+
+    // [출전취소 번호 밀림 근본방어] 취소마(競走除外/取消)의 행은 배당셀이 0개다.
+    //   그 마번을 '취소 컬럼'으로 판정해 열 축(headerNos·colNoByIndex)에서 제거한다.
+    //   제거하지 않으면 아래 순서기반 매핑(cols[i])이 취소 컬럼 수만큼 밀려 이후 조합 마번이 전부
+    //   어긋난다(예: 3번 취소 시 4-5 배당이 3-4 로 밀려 저장 → 취소마·유령조합 추천). 취소 없으면 무영향.
+    if (headerNos.length >= 2) {
+      const scratchedCols = new Set();
+      const hset = new Set(headerNos);
+      for (const r of rows) {
+        if (r === headerRow) continue;
+        let rn = null;
+        for (const cell of r.cells) { const n = pureInt(cell.textContent); if (n != null) { rn = n; break; } }
+        if (rn == null || !hset.has(rn)) continue;
+        if ([...r.cells].filter(isOdds).length === 0) scratchedCols.add(rn); // 배당셀 전무 = 취소마 행
+      }
+      if (scratchedCols.size) {
+        headerNos = headerNos.filter((n) => !scratchedCols.has(n));
+        for (const ci of Object.keys(colNoByIndex)) {
+          if (scratchedCols.has(colNoByIndex[ci])) delete colNoByIndex[ci];
+        }
+        try { console.log('[출전취소·밀림방어] 취소 컬럼 제거:', [...scratchedCols].sort((a, b) => a - b)); } catch (_) {}
+      }
+    }
 
     const pairs = [], singles = [];
     for (const r of rows) {
@@ -431,12 +477,12 @@
   function extractByMatrix(oddsClass) {
     const tables = new Set();
     if (oddsClass) {
-      for (const c of document.querySelectorAll('.' + oddsClass)) {
+      for (const c of queryAllDocs('.' + oddsClass)) {
         const t = c.closest('table'); if (t) tables.add(t);
       }
     }
-    // .odds_table 또는 (범용) 모든 표
-    for (const t of document.querySelectorAll('table.odds_table, table')) tables.add(t);
+    // .odds_table 또는 (범용) 모든 표 — [프레임 대응] 동일출처 iframe(예: frm_race_run) 내부 표까지 스캔
+    for (const t of queryAllDocs('table.odds_table, table')) tables.add(t);
 
     const pairsMap = {}; // "a-b"(a<b) -> odds (최소값 유지)
     const singleMap = {}; // no -> {no,win,place}
@@ -493,7 +539,24 @@
     const odds = {};
     for (const h of horses) if (h.win != null) odds[String(h.no)] = h.win;
 
-    const raceKey = (overrideRaceKey && overrideRaceKey.trim()) || extractRaceKey();
+    // [경주 혼입 방지 (2026-07-19)] 부산 3경주 복기: 분석기 지정 경주(override='부산 3경주')와
+    //   배당판 실제 표시 경주(모리오카 3경주)가 달랐는데 override 를 무조건 우선해 모리오카 배당이
+    //   '부산 3경주' 이름으로 저장·분석됨(추천 4+9 3.3배 = 모리오카 값). → 배당판에서 경주를 직접
+    //   읽을 수 있고(detected) 지정 경주와 '경주장 or 경주번호'가 다르면 배당판 기준으로 저장.
+    //   배당판에서 못 읽는 사이트(generic 등)는 기존대로 override 사용(기존 동작 유지·대조만 추가).
+    const _detectedRk = extractRaceKey();
+    let raceKey = (overrideRaceKey && overrideRaceKey.trim()) || _detectedRk;
+    try {
+      const _vn = (x) => {
+        const m = /([가-힣一-龥ぁ-んァ-ヶA-Za-z]+)\s*(\d+)\s*(?:경주|R)/.exec(String(x || ''));
+        return m ? (m[1] + '|' + m[2]) : null;
+      };
+      const _dv = _vn(_detectedRk), _ov = _vn(raceKey);
+      if (_dv && _ov && _dv !== _ov) {
+        console.log('[혼입방지] 지정 경주(' + raceKey + ') ≠ 배당판 경주(' + _detectedRk + ') → 배당판 기준으로 저장');
+        raceKey = _detectedRk;
+      }
+    } catch (_) { /* 대조 실패 시 기존 동작 */ }
 
     return {
       raceKey,
@@ -850,6 +913,8 @@
   function detectSport(raceKey) {
     try {
       const rk = raceKey || '';
+      // [수정1·한국 강제] 한국 경마장 raceKey/URL = 무조건 경마(null) → 경정/경륜 오탐 차단.
+      if (isKoreaByRaceKey(rk) || KRA_TRACK_RE.test(location.href)) return null;
       // [1번·핵심] raceKey에 일본 경마장명이 있으면 무조건 경마 → 경정/경륜 오탐 차단
       if (HORSE_TRACKS.test(rk)) return null;
       const href = location.href, title = (document.title || '');
@@ -860,6 +925,12 @@
       if (strong(/(경륜|競輪)/)) return 'cycle';
       // [배당판 탭 텍스트 확인] 본문 보조 판정 — 경마장명이 본문에 있으면 경마(경정/경륜 페이지에 경마장 링크 오탐 방지)
       const body = ((document.body && document.body.innerText) || '');
+      // [이중 방어 2026-07-19·ks1 경륜 오탐 수정] 일본어 전용 경륜 마커(けいりん·競輪)를 경마장명 본문
+      //   체크보다 먼저 확인 — 새 ks1 배당판은 본문에 타 종목 메뉴·배너의 경마장명이 섞여 경륜 경주
+      //   (기후 2경주)가 경마로 오탐되던 문제. ⚠ 한국어 '경륜/경정'은 ks1 메뉴 라벨(일본경륜·일본경정)에
+      //   항상 존재해 선행 체크에 쓰면 전 종목 오탐 → 현재 경주 패널에만 나타나는 일본어 표기만 선행.
+      //   (기존 체크는 순서·내용 그대로 유지 — 이 한 줄만 추가. 서버 [종목 정정] horse 포함과 이중 방어.)
+      if (/(けいりん|競輪)/.test(body)) return 'cycle';
       if (HORSE_TRACKS.test(body)) return null;
       if (/(競艇|경정|경정장|모터보트|미사리|ボートレース|보트레이스)/.test(body)) return 'boat';
       if (/(オートレース|오토레이스|오토레이스장)/.test(body)) return 'bike';
@@ -874,6 +945,8 @@
   function resolveSport(popupSport, raceKey) {
     try {
       const rk = raceKey || '';
+      // [수정1·한국 강제] 한국 경마장(부산/서울/제주 등) raceKey = 무조건 경마(horse) → 경정/경륜 오탐 완전 차단.
+      if (isKoreaByRaceKey(rk) || (KRA_TRACK_RE.test(location.href))) return 'horse';
       // ① 경마장명 raceKey = 명백한 경마(가장 강한 신호) → 팝업 경륜/경정 정정
       if (HORSE_TRACKS.test(rk)) return 'horse';
       const href = location.href, title = (document.title || '');
@@ -891,12 +964,19 @@
     }
   }
   // [탭분리] 일본 중앙경마(JRA) 힌트 — 페이지 본문/URL 로 중앙 여부 추정(팝업 japanType 이 우선).
-  function detectCentralHint() {
-    try {
-      const body = (((document.body && document.body.innerText) || '') + ' ' + location.href);
-      return /(중앙경마|中央競馬|JRA|jra\.go\.jp)/.test(body);
-    } catch (_) { return false; }
+  // [수정: 중앙경마 오분류 근본 수정 v2.1.140 (2026-07-19)]
+  // 기존 detectCentralHint()는 document.body.innerText 전체를 스캔 →
+  //   사설 배당판 네비게이션 메뉴의 "中央競馬"/"JRA" 링크에 오판 → 지방경마(오비히로 등)가
+  //   중앙경마로 분류 → 전적 수집 생략·삼복승 생략·쌍승 서버 미지원 → 분석 품질 심각 저하.
+  // 수정: raceKey에 JRA 10개 경마장명이 포함된 경우만 중앙경마 + URL(jra.go.jp) 신뢰.
+  //   기존 함수명 유지(호출부 무변경). 페이지 body 스캔 완전 제거.
+  const _JRA_VENUES = /삿포로|하코다테|후쿠시마|니가타|도쿄|나카야마|주쿄|쿄토|교토|한신|고쿠라|코쿠라|札幌|函館|福島|新潟|東京|中山|中京|京都|阪神|小倉/;
+  function _isJRACentral(rk) {
+    if (_JRA_VENUES.test(rk || '')) return true;
+    try { return /jra\.go\.jp/.test(location.href); } catch (_) { return false; }
   }
+  // [하위 호환] 기존 detectCentralHint() 호출부가 raceKey 없이 부르는 곳용(URL 만 검사).
+  function detectCentralHint() { return _isJRACentral(''); }
   const SPORT_LABEL = { horse: '경마', cycle: '경륜', boat: '경정', bike: '바이크' };
   // [탭분리] 종목 카테고리(분석기 탭과 1:1): korea|japan_local|japan_central|boat|cycle|bike.
   const CATEGORY_LABEL = {
@@ -904,10 +984,13 @@
     boat: '일본 경정', cycle: '일본 경륜', bike: '일본 바이크',
   };
   function computeCategory(effSport, isKorea, isCentral) {
+    // [종목 오분석 근본수정·수정1] 한국경마(부산/서울/제주 등)는 무조건 korea 우선.
+    //   기존엔 effSport==='boat'/'cycle' 을 먼저 반환해, asyukk 페이지의 경정/경륜 네비 링크가 종목감지를
+    //   boat 로 켜면 한국 부산 경주가 경정으로 샜다(부산 2경주 6+1 오분석 근본원인). isKorea 를 최우선 판정.
+    if (isKorea) return 'korea';
     if (effSport === 'boat') return 'boat';
     if (effSport === 'cycle') return 'cycle';
     if (effSport === 'bike') return 'bike';
-    if (isKorea) return 'korea';
     return isCentral ? 'japan_central' : 'japan_local';
   }
 
@@ -920,11 +1003,17 @@
       const { sport: popupSport, market, japanType, raceKey: ov } = await getSettings();
       const eff = resolveSport(popupSport, rk || ov);
       const isKorea = isKoreaMode(rk || ov, market, ov);
-      const isCentral = (japanType === 'central') || detectCentralHint();
+      const isCentral = (japanType === 'central') || _isJRACentral(rk || ov);
       return computeCategory(eff, isKorea, isCentral);
     } catch (_) { return ''; }
   }
-  function _isServerCollectedCat(cat) { return cat === 'japan_local' || cat === 'cycle'; }
+  function _isServerCollectedCat(cat) {
+    // [사설 우선 복원 (2026-07-19)] asyukk 사설 배당판이 열려 있으면 무조건 확장(사설) 수집 우선 —
+    //   'oddspark 커버 중 → asyukk 수집 생략'이 사설 배당을 통째로 비워 오버레이가 안 뜨던 문제(카나자와 4R).
+    //   oddspark 는 백업(배당판이 없는 경주·서버 bg)으로만. 사설이 아닌 페이지(keiba 등)는 기존 규칙 유지.
+    try { if (detectSite() === 'asyukk') return false; } catch (_) { /* */ }
+    return cat === 'japan_local' || cat === 'cycle';
+  }
   // 오버레이/팝업이 읽어 수집 모드 배지 표시("🔄 서버 자동수집 중" vs "📡 확장 수집 중")
   function _markCollectMode(cat) {
     try { chrome.storage.local.set({ collectMode: { serverCollected: _isServerCollectedCat(cat), category: cat || '', at: Date.now() } }); } catch (_) { /* */ }
@@ -939,7 +1028,8 @@
     let detected = '';
     try { detected = extractRaceKey() || ''; } catch (_) { detected = ''; }
     const ov = (override && override.trim()) || '';
-    const followBoard = (reason === 'auto' || reason === 'race-change' || reason === 'bg' || reason === 'sport-change');
+    const followBoard = (reason === 'auto' || reason === 'race-change' || reason === 'bg' || reason === 'sport-change'
+                         || reason === 'korea-auto' || reason === 'auto-fallback');
     return followBoard ? (detected || ov) : (ov || detected);
   }
 
@@ -957,7 +1047,7 @@
     const isKorea = isKoreaMode(raceKey, market, override);
     if (isKorea && market !== 'korea') console.log('[한국모드] KRA 경마장 감지(raceKey/페이지) → 복승만 수집:', raceKey || '(raceKey 미상)');
     // [탭분리] keiba 는 경마 전용 → 한국/중앙/지방 카테고리 산출(팝업 japanType 우선).
-    const kCategory = isKorea ? 'korea' : ((japanType === 'central' || detectCentralHint()) ? 'japan_central' : 'japan_local');
+    const kCategory = isKorea ? 'korea' : ((japanType === 'central' || _isJRACentral(raceKey)) ? 'japan_central' : 'japan_local');
     try { chrome.storage.local.set({ detectedCategory: kCategory, detectedSport: 'horse', detectedAt: Date.now() }); } catch (_) { /* */ }
     const clean = (arr, cap) => arr
       .filter((c) => c.odds > 0)
@@ -986,21 +1076,25 @@
       //   ① 単勝複勝 표를 fetch(여러 oper 후보 시도) → ② 실패 시 현재 화면 DOM 폴백. 실패해도 무시(무해).
       if (!isKorea && !isCentralK) {
         try {
-          let winHorses = [];
+          let winHorses = [], allHorses = [];
           for (const oper of ['OddsTanFuku', 'OddsTanpuku', 'OddsTan']) {
             try {
               const wd = await fetchOddsDoc(oper, q);
-              winHorses = extractHorses(wd).filter((h) => h.win != null && h.win >= 1.0);
+              allHorses = extractHorses(wd);
+              winHorses = allHorses.filter((h) => h.win != null && h.win >= 1.0);
               if (winHorses.length) break;
             } catch (_) { /* 다음 후보 */ }
           }
-          if (!winHorses.length) winHorses = extractHorses().filter((h) => h.win != null && h.win >= 1.0);
+          if (!winHorses.length) { allHorses = extractHorses(); winHorses = allHorses.filter((h) => h.win != null && h.win >= 1.0); }
           if (winHorses.length) {
             const win = {};
             for (const h of winHorses) win[String(h.no)] = h.win;
             payload.win = win;   // 서버 triple_ingest 가 단승 시계열로 저장 → 단승급락 감지
             console.log('[단승수집] 단승 배당', Object.keys(win).length, '두');
           }
+          // [출전취소·除外] 배당판에서 競走除外 감지된 마번 → payload.scratched(서버가 추천 전체에서 제거)
+          const scr = allHorses.filter((h) => h.scratched).map((h) => h.no);
+          if (scr.length) { payload.scratched = scr; console.log('[출전취소] 除外 마번', scr); }
         } catch (e) { console.warn('[단승수집] 실패(무시)', e); }
       }
       if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length) {
@@ -1042,6 +1136,47 @@
   //  → 탭을 텍스트로 찾아 클릭 → 표가 바뀌었는지 확인 → 추출(변화 없으면 재시도)
   // ══════════════════════════════════════════════════════════════════
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // [확장 무효화 방어 (2026-07-19)] 확장 새로고침/업데이트 후 이전 페이지의 content script 가
+  //   chrome.runtime 을 부르면 "Extension context invalidated" 로 죽는다 → 살아있는지 확인 후 동작,
+  //   무효화 감지 시 타이머 정리 + 새로고침 안내(1회).
+  // [사용자 조작 유예 (2026-07-19 v2.1.133)] 사용자가 마권종류 탭을 '직접' 클릭(isTrusted)한 직후에는
+  //   자동 수집을 12초 유예 — 수집의 탭 클릭과 사용자 조작이 겹쳐 [탭확정] 불일치가 반복되던 근본 원인 완화.
+  let _lastUserTabClick = 0;
+  let _userChosenTab = '';   // [v2.1.134] 사용자가 마지막으로 '직접' 클릭한 마권 탭 텍스트(복원 목표)
+  const _userTabDocs = new WeakSet();
+  function _armUserTabWatch() {
+    try {
+      for (const d of sameOriginDocs()) {
+        if (_userTabDocs.has(d)) continue;
+        _userTabDocs.add(d);
+        d.addEventListener('click', (ev) => {
+          try {
+            if (!ev.isTrusted) return;                       // 우리(수집)의 프로그램 클릭은 제외
+            const t = ev.target && ev.target.closest && ev.target.closest('.bet_type_btn, [bet_mode], [class*="bet_type"]');
+            if (t) {
+              _lastUserTabClick = Date.now();
+              _userChosenTab = (t.textContent || '').replace(/\s+/g, '').trim() || _userChosenTab;   // [v2.1.134] 사용자가 고른 탭 기억
+              console.log('[사용자 조작] 마권 탭 직접 클릭 감지("' + _userChosenTab + '") → 자동 수집 12초 유예');
+            }
+          } catch (_) { /* */ }
+        }, true);
+      }
+    } catch (_) { /* */ }
+  }
+  let _ctxDeadNotified = false;
+  function _ctxAlive() {
+    try { return !!(chrome.runtime && chrome.runtime.id); } catch (_) { return false; }
+  }
+  function _ctxDeadStop() {
+    if (_ctxDeadNotified) return true;
+    _ctxDeadNotified = true;
+    try { if (typeof _raceWatchTimer !== 'undefined' && _raceWatchTimer) clearInterval(_raceWatchTimer); } catch (_) { /* */ }
+    try { if (typeof timer !== 'undefined' && timer) clearInterval(timer); } catch (_) { /* */ }
+    try { setTripleProgress('⚠ 확장이 갱신됨 — 이 페이지를 새로고침(F5)해야 수집이 재개됩니다', true); } catch (_) { /* */ }
+    console.warn('[확장] 컨텍스트 무효화(확장이 갱신됨) — 이 페이지를 새로고침(F5)해야 수집이 재개됩니다.');
+    return true;
+  }
 
   // [1번] 동일출처 iframe/frame 문서까지 포함해 스캔 (asyukk 배당판은 탭·표를
   //   프레임 내부에 그리는 경우가 많아, top document 만 보면 출마표2 탭·표를 못 찾음).
@@ -1114,6 +1249,111 @@
     return null;
   }
 
+  // ═══ [보완3] asyukk 배당판 마권종류 탭 상태를 DOM 속성으로 '확정' ═══
+  //   기존엔 활성 탭을 알 방법이 없어 oddsSignature() 변화(=화면이 바뀌었다)로만 추측했다.
+  //   그 시그니처는 "무엇으로 바뀌었는지"는 모르므로, 잘못된 탭으로 바뀌어도 통과한다.
+  //   → `.bet_type_btn` 의 텍스트/bet_mode/combine_mode + 활성표시 클래스를 직접 읽어 확정한다.
+  //   ⚠ 활성표시 방식은 보드마다 다를 수 있어 '판정 불가(null)'를 명확히 구분한다 —
+  //     불가일 때는 기존 동작(시그니처 기반)을 그대로 두고 절대 차단하지 않는다(오탐으로 정상수집 죽이지 않기).
+  const BET_LABEL = { quinella: '복승', exacta: '쌍승', trio: '삼복승' };
+  const _ACTIVE_RE = /(^|[\s_-])(on|active|selected|sel|current|cur|checked)([\s_-]|$)/i;
+
+  function asyukkBetTabs() {
+    const out = [];
+    try {
+      for (const b of queryAllDocs('.bet_type_btn')) {
+        const text = (b.textContent || '').replace(/\s+/g, '').trim();
+        if (!text) continue;
+        const vis = b.offsetParent !== null || (b.getClientRects && b.getClientRects().length > 0);
+        const cls = b.className || '';
+        const aria = (b.getAttribute && (b.getAttribute('aria-selected') || b.getAttribute('data-selected'))) || '';
+        out.push({
+          el: b, text, visible: vis,
+          betMode: (b.getAttribute && b.getAttribute('bet_mode')) || null,
+          combineMode: (b.getAttribute && b.getAttribute('combine_mode')) || null,
+          active: _ACTIVE_RE.test(String(cls)) || aria === 'true',
+        });
+      }
+    } catch (_) { /* */ }
+    return out;
+  }
+
+  // 현재 활성 마권종류 탭. 활성표시를 못 찾으면 null(=판정 불가).
+  function activeAsyukkBetTab() {
+    const tabs = asyukkBetTabs().filter((t) => t.visible);
+    const act = tabs.filter((t) => t.active);
+    return act.length === 1 ? act[0] : null;   // 0개(표시 없음)·2개+(모호) 모두 판정 불가
+  }
+
+  // 기대한 탭이 실제로 활성인지 확정 검증. true=일치 / false=불일치(오염 위험) / null=판정 불가.
+  function verifyActiveBetTab(expectText) {
+    if (detectSite() !== 'asyukk') return null;
+    const a = activeAsyukkBetTab();
+    if (!a) return null;
+    const ok = a.text === expectText;
+    if (!ok) {
+      console.warn(`[탭확정] ⚠ 활성 탭 불일치 — 기대 "${expectText}" / 실제 "${a.text}" `
+        + `(bet_mode=${a.betMode || '?'} · combine_mode=${a.combineMode || '?'})`);
+    } else {
+      console.log(`[탭확정] ✅ 활성 탭 = "${a.text}" (bet_mode=${a.betMode || '?'} · combine_mode=${a.combineMode || '?'})`);
+    }
+    return ok;
+  }
+
+  // [진단] 배당판 탭 구조를 1회 덤프 — 활성표시 클래스/bet_mode 실제값 파악용(사용자가 F12 로 공유 가능).
+  let _betTabDumped = false;
+  function dumpBetTabs() {
+    if (_betTabDumped || detectSite() !== 'asyukk') return;
+    _betTabDumped = true;
+    const tabs = asyukkBetTabs();
+    if (!tabs.length) { console.log('[탭확정·진단] .bet_type_btn 없음(이 보드는 탭확정 미지원 → 기존 시그니처 방식만 사용)'); return; }
+    console.log('[탭확정·진단] 마권종류 탭 목록:', tabs.map((t) =>
+      `"${t.text}"|bet_mode=${t.betMode || '-'}|combine_mode=${t.combineMode || '-'}|class="${t.el.className || '-'}"|active=${t.active}`));
+    if (!tabs.some((t) => t.active)) {
+      console.log('[탭확정·진단] ⚠ 활성표시 클래스를 못 찾았습니다 → 탭 확정 검증은 비활성(기존 방식 유지). '
+        + '위 class 문자열을 공유해주시면 활성 판정 규칙을 추가할 수 있습니다.');
+    }
+  }
+
+  // [보완1] 복승 탭으로 이동 — 사설(asyukk)은 `.bet_type_btn` 정확일치 우선.
+  //   findTabButton 의 3단계 `includes()` 폴백은 '삼복승'/'삼복승조합'이 문자열 '복승'을 포함해 오매칭될 수 있다.
+  //   기타 보드(keiba·generic)는 기존 clickTabAndWait 폴백을 그대로 유지(무삭제).
+  async function gotoQuinellaTab(isKorea) {
+    if (detectSite() === 'asyukk') {
+      // [수정1·한국 배당판 고정] 이미 복승 탭이 활성이면 클릭하지 않는다 → 배당판이 바뀌지 않음(깜빡임·전환 제거).
+      //   한국경마는 복승만 발매라 배당판이 항상 복승에 있어, 매 수집마다 복승 탭을 다시 누르던 것을 생략.
+      //   verifyActiveBetTab 은 활성표시 확정 시에만 true → 확정 불가(null)면 기존대로 클릭(안전).
+      if (verifyActiveBetTab('복승') === true) {
+        console.log('[복승수집] 이미 복승 탭 활성 → 클릭 생략(배당판 고정)');
+        return { clicked: true, changed: false, sig: oddsSignature() };
+      }
+      const before = oddsSignature();
+      const el = clickAsyukkBetTab('복승');
+      if (el) {
+        await wait(4000);   // [대기 상향 v2.1.133] 2초→4초(탭 전환 로딩 여유)
+        const sig = oddsSignature();
+        console.log('[복승수집] .bet_type_btn "복승" 정확일치 클릭 ✅ (bet_mode=' + (el.getAttribute('bet_mode') || '?') + ')');
+        return { clicked: true, changed: (sig !== before && sig.length > 0), sig };
+      }
+      console.warn('[복승수집] .bet_type_btn "복승" 정확일치 실패 → 일반 탭 탐색 폴백');
+    }
+    return clickTabAndWait(['복승', '복연', '馬連'], isKorea ? '' : oddsSignature(), '복승', !isKorea);
+  }
+
+  // [오염방지 4] 복승 탭 복귀 — 사설(asyukk)은 `.bet_type_btn` **정확 일치**로 클릭.
+  //   findTabButton 의 3단계 `includes()` 폴백은 '삼복승'/'삼복승조합'이 문자열 '복승'을 포함해 오매칭될 수 있고,
+  //   기존 복귀 호출은 requireChange=false 라 **어떤 탭이 눌렸든 성공 처리**됐다. 그 결과 보드가 삼복승에 머문 채
+  //   다음 수집 사이클이 그 화면을 복승으로 긁어가는 경로가 있었다. → 사설 보드는 정확일치 우선, 기타 보드는 기존 폴백 유지.
+  async function returnToQuinellaTab() {
+    if (detectSite() === 'asyukk' && clickAsyukkBetTab('복승')) {
+      await wait(4000);   // [대기 상향 v2.1.133] 2초→4초
+      console.log('[배당수집] 복승(복귀) — .bet_type_btn "복승" 정확일치 클릭 ✅');
+      return true;
+    }
+    const r = await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false);   // 기타 보드 폴백(기존 동작 유지)
+    return !!(r && r.clicked);
+  }
+
   // 현재 표 상태의 시그니처(배당 셀 값) — 탭 전환 여부 감지용
   function oddsSignature() {
     const cells = [...document.querySelectorAll('.odds_content')].slice(0, 40)
@@ -1134,7 +1374,7 @@
     for (let attempt = 1; attempt <= 3; attempt++) {
       try { el.click(); } catch (e) { console.warn(`[배당수집] ${betLabel} 클릭 오류`, e); }
       // [긴급2] 탭 로딩 대기: 기본 2초, 재시도마다 1초씩 증가(느린 사설 배당판 대응)
-      await wait((waitMs || 2000) + (attempt - 1) * 1000);
+      await wait((waitMs || 4000) + (attempt - 1) * 1000);   // [대기 상향 v2.1.133] 기본 2초→4초
       const sig = oddsSignature();
       const changed = sig !== prevSig && sig.length > 0;
       if (!requireChange || changed) {
@@ -1304,7 +1544,13 @@
         try { (findHorseButton(axis) || btn).click(); } catch (_) { /* */ }
         await wait(3000); sig = oddsSignature(); tries++;
       }
-      if (sig === before) console.warn(`[배당수집] ⚠ ${axis}번 축 클릭 후에도 배당 매트릭스가 바뀌지 않음(재시도 ${tries}회) — 잘못된 버튼이거나 로딩 지연. 추출된 조합이 부정확할 수 있습니다.`);
+      // [오염방지 1] 축 클릭이 끝내 먹지 않으면(매트릭스 무변화) 화면에는 직전 복승/쌍승 매트릭스가 그대로 남아 있다.
+      //   그대로 진행하면 그 2두 페어에 axis 를 붙여 '존재하지 않는 삼복승 조합'을 복승 배당값으로 날조하게 된다.
+      //   → 이 축은 건너뛴다(다른 축은 계속 시도 — 기존 수집 흐름 유지).
+      if (sig === before) {
+        console.warn(`[배당수집] ⚠ ${axis}번 축 클릭 후에도 배당 매트릭스가 바뀌지 않음(재시도 ${tries}회) — 잘못된 버튼이거나 로딩 지연. 이 축은 건너뜁니다(조합 날조 방지).`);
+        continue;
+      }
       let cnt = 0;
       for (const p of currentMatrixPairs(oddsClass)) {            // p={a:행, b:열} = 남은 두 말
         const combo = [axis, p.a, p.b];
@@ -1558,6 +1804,17 @@
   async function fetchDebaStarters(params) {
     const p = params || (await getDebaParams());
     if (!p) { console.warn('[전적수집] ⚠ DebaTable 파라미터(k_raceDate/k_raceNo/k_babaCode)를 찾지 못함 — keiba 출마표2를 한 번 열면 자동 저장됩니다.'); return []; }
+    // [v2.1.141 경주번호 정정] 페이지 [출마표] 링크·저장 파라미터가 이전 경주(k_raceNo)를 가리키면
+    //   다른 경주 전적(마명 불일치)을 가져와 '전적이 어떤 경주는 나오고 안 나옴' 증상 유발 →
+    //   현재 배당판 raceKey의 경주번호와 다르면 raceKey 기준으로 강제 정정(오비히로 12R인데 11R 전적 fetch 방지).
+    try {
+      const _rk = extractRaceKey() || '';
+      const _m = /(\d{1,2})\s*(?:경주|R)/i.exec(_rk);
+      if (_m && p.k_raceNo != null && String(p.k_raceNo) !== _m[1]) {
+        console.log(`[전적수집] ⚠ k_raceNo 불일치 정정: ${p.k_raceNo} → ${_m[1]} (현재 raceKey=${_rk})`);
+        p.k_raceNo = _m[1];
+      }
+    } catch (_) { /* 정정 실패 시 기존 파라미터 그대로(기존 동작 유지) */ }
     const url = buildDebaUrl(p);
     console.log('[전적수집] DebaTable fetch:', url);
     // [안정화] 네트워크 전송 실패 시 1회 재시도(일시적 오류 대응)
@@ -1609,8 +1866,35 @@
 
   // asyukk/generic 전체 3종 수집 (탭 클릭 방식)
   async function collectTripleByTabs(reason) {
+    if (!_ctxAlive()) { _ctxDeadStop(); return { ok: false, error: '확장 갱신됨 — 페이지 새로고침 필요' }; }   // [좀비 차단 v2.1.133]
+    // [사용자 조작 유예 v2.1.133] 직접 탭 클릭 12초 내에는 자동 수집 건너뜀(수동 수집 'manual'은 예외)
+    if (reason !== 'manual' && _lastUserTabClick && (Date.now() - _lastUserTabClick) < 12000) {
+      console.log('[사용자 조작 유예] 탭 직접 클릭 ' + Math.round((Date.now() - _lastUserTabClick) / 1000) + '초 전 → 이번 자동 수집 건너뜀');
+      return { ok: false, skipped: 'user-active', error: '사용자 탭 조작 중 — 자동 수집 유예' };
+    }
     const site = detectSite();
     const oddsClass = site === 'asyukk' ? 'odds_content' : null;
+    const _cycleStart = Date.now();   // [v2.1.135] 이 수집 사이클 시작 시각(진행 중 사용자 클릭 감지용)
+    // [사용자 탭 유지 (2026-07-19)] 수집이 복승/쌍승 탭을 클릭한 뒤 원래 탭으로 안 돌려놔
+    //   경륜=쌍승에 머묾·한국=복승 강제 복귀 증상 → 수집 전 사용자 활성 탭을 기억, 수집 후 복원.
+    let _userTab0 = '';
+    try { const _at0 = site === 'asyukk' ? activeAsyukkBetTab() : null; _userTab0 = (_at0 && _at0.text) || ''; } catch (_) { /* */ }
+    // [v2.1.136 무클릭 관전 모드] 복귀만으론 부족 — 수집이 쌍승을 읽으려면 쌍승 탭을 클릭할 수밖에 없어
+    //   관전 중에도 주기적으로 화면을 뺏겼다. → 사용자가 탭을 '직접' 클릭한 뒤 2분 동안은 탭을 전혀 안 움직임:
+    //   ▸ 현재 탭=복승이면 클릭 없이 복승만 읽기 수집(핵심 데이터 유지·쌍승·삼복승 생략)
+    //   ▸ 다른 탭 관전 중이면 이번 자동 수집 통째로 건너뜀(탭 이동 금지)
+    //   2분+ 무조작이면 풀 수집(쌍승·삼복승 포함) 자동 재개. 수동 수집(manual)은 항상 풀 수집.
+    let _quietMode = false;
+    if (reason !== 'manual' && site === 'asyukk' && _lastUserTabClick && (Date.now() - _lastUserTabClick) < 120000) {
+      let _act = null;
+      try { _act = activeAsyukkBetTab(); } catch (_) { /* */ }
+      if (_act && _act.text && _act.text !== '복승') {
+        console.log('[무클릭 관전] 사용자 탭("' + _act.text + '") 유지 — 이번 자동 수집 건너뜀(탭 이동 금지·' + Math.round((120000 - (Date.now() - _lastUserTabClick)) / 1000) + '초 후 풀 수집 재개)');
+        return { ok: false, skipped: 'user-viewing', error: '사용자 관전 중(무클릭 모드)' };
+      }
+      _quietMode = true;
+      console.log('[무클릭 관전] 복승 탭 관전 중 — 클릭 없이 복승만 수집(쌍승·삼복승 생략)');
+    }
     const { raceKey: override, timerDeadline, sport, market, japanType } = await getSettings();
     const raceKey = _resolveRaceKey(reason, override);   // [경주 자동추종] 자동수집은 배당판 표시 경주 우선
     // [종목 자동감지 강화] resolveSport: 강한 신호(경마장명 raceKey·URL/제목 종목어)로 팝업 stale 정정 → 항상 정확 전송.
@@ -1624,7 +1908,7 @@
     const isKorea = !isCycleBoat && isKoreaMode(raceKey, market, override);
     if (isKorea) console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원)', market !== 'korea' ? '(감지: raceKey/입력/탭, raceKey=' + (raceKey || '미상') + ' · 입력=' + (override || '없음') + ')' : '(종목=한국)');
     // [탭분리] 중앙경마(JRA): 팝업 japanType='central' 이거나 페이지가 중앙으로 보이면 → 복승+쌍승만(삼복승·전적 제외).
-    const isCentral = !isKorea && !isCycleBoat && (japanType === 'central' || detectCentralHint());
+    const isCentral = !isKorea && !isCycleBoat && (japanType === 'central' || _isJRACentral(raceKey));
     // [탭분리] 종목 카테고리 산출 + 팝업 실시간 표시용 storage 기록.
     const category = computeCategory(effSport, isKorea, isCentral);
     try { chrome.storage.local.set({ detectedCategory: category, detectedSport: effSport, detectedAt: Date.now() }); } catch (_) { /* */ }
@@ -1633,10 +1917,39 @@
       setTripleProgress('❌ raceKey 필요', true);
       return { ok: false, error: '사설 사이트는 raceKey 자동 감지가 안 됩니다. 팝업 raceKey 칸에 입력 후 다시 시도하세요.' };
     }
-    const clean = (arr, cap) => arr
-      .filter((c) => c.odds > 0)
-      .map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10 }))
-      .sort((a, b) => a.odds - b.odds).slice(0, cap);
+    // [오염방지 2·조합 검증] keiba(fetch) 경로에만 있던 `combo.length === st.len` 검증을 탭 경로에도 도입 + 조합 수 정합성 검증.
+    //   ① 구조 검증(전 종류): 조합 길이가 종류와 다르면 그 항목 제외(복승·쌍승=2두 / 삼복승=3두).
+    //   ② 수량 검증(복승·쌍승): 등장 마번 수 N 으로 기대 조합 수 산출 → 50% 미만이면 종류 전체를 빈 배열 처리(오염 차단).
+    //        복승 N*(N-1)/2 · 쌍승 N*(N-1) · 삼복승 N*(N-1)*(N-2)/6
+    //   ⚠ 삼복승은 수량 검증에서 제외한다: '유력마 3두 축 클릭'(collectTrioByAxis) 방식이라 설계상 전체 조합의 일부만
+    //      수집된다(축 1두만 잡히면 전체의 ~3/N ≈ 25% 수준). 수량 검증을 걸면 정상 수집분까지 버려져 기존 기능이 깨진다.
+    //      삼복승 오염(축 클릭 실패 시 조합 날조)은 위 [오염방지 1] `continue` 가 원천 차단한다.
+    const EXPECT = {
+      quinella: (n) => n * (n - 1) / 2,
+      exacta: (n) => n * (n - 1),
+      trio: (n) => n * (n - 1) * (n - 2) / 6,
+    };
+    const clean = (arr, cap, kind) => {
+      const len = (kind === 'trio') ? 3 : 2;
+      const ok = (arr || []).filter((c) => c && Array.isArray(c.combo) && c.combo.length === len
+        && new Set(c.combo).size === len && c.combo.every((n) => isHorseNo(n)) && c.odds > 0);
+      const dropped = (arr || []).length - ok.length;
+      if (dropped > 0) console.warn(`[조합검증] ${kind}: 구조 불일치 ${dropped}개 제외(기대 ${len}두 조합)`);
+      if (ok.length && kind !== 'trio') {
+        const nos = new Set();
+        ok.forEach((c) => c.combo.forEach((n) => nos.add(n)));
+        const n = nos.size, exp = EXPECT[kind](n);
+        if (n >= 3 && exp > 0 && ok.length < exp * 0.5) {
+          console.warn(`[조합검증] ⚠ ${kind}: 조합 ${ok.length}개 < 기대 ${exp}개(${n}두)의 50% → 다른 탭 데이터 오염 의심, 빈 배열 처리`);
+          return [];
+        }
+        console.log(`[조합검증] ${kind}: ${ok.length}/${exp}개 (${n}두) ✅`);
+      }
+      // [보완2] betType 명시 — 기존엔 '어느 키에 담겼는가'로만 종류가 암묵 표현돼 서버가 대조할 방법이 없었다.
+      //   이제 각 조합이 스스로 종류를 밝히므로 서버가 키와 직접 대조해 뒤바뀐 데이터를 잡아낼 수 있다.
+      return ok.map((c) => ({ combo: c.combo, odds: Math.round(c.odds * 10) / 10, betType: kind }))
+        .sort((a, b) => a.odds - b.odds).slice(0, cap);
+    };
     console.log(`[배당수집] ===== 배당 수집 시작 (탭 클릭 방식, ${isKorea ? '한국:복승' : '일본:복승+쌍승+삼복승'}) =====`);
 
     try {
@@ -1649,57 +1962,123 @@
       let quinella = [];
       try {
         setTripleProgress('복승 수집중…');
-        await clickTabAndWait(['복승', '복연', '馬連'], isKorea ? '' : oddsSignature(), '복승', !isKorea);
+        dumpBetTabs();   // [보완3·진단] 탭 구조 1회 덤프(활성표시 클래스·bet_mode 실제값 파악)
+        let r1 = await gotoQuinellaTab(isKorea);   // [보완1] 사설 보드는 정확일치('삼복승' 오매칭 차단)
         sig = oddsSignature();
-        const quinMap = {};
-        for (const p of currentMatrixPairs(oddsClass)) {
-          if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
-          const k = p.a < p.b ? `${p.a}-${p.b}` : `${p.b}-${p.a}`;
-          if (quinMap[k] == null || p.odds < quinMap[k]) quinMap[k] = p.odds;
+        // [오염방지 1] 복승 탭 버튼 자체를 못 찾으면(clicked=false) 지금 화면이 어느 탭인지 알 수 없다 → 수집 포기(빈 배열).
+        //   ⚠ changed=false 는 게이트하지 않는다 — '이미 복승 탭'이 정상 상태이고 그때는 표가 안 바뀌는 게 당연하다.
+        //      복승 화면 오인(다른 탭을 복승으로 오독)은 [보완3] 활성탭 확정 + [오염방지 2] 조합 수 검증이 차단한다.
+        let _v1 = verifyActiveBetTab('복승');   // [보완3] true=확정일치 / false=확정불일치 / null=판정불가
+        if (!r1.clicked || _v1 === false) {
+          // [탭확정 재시도 (2026-07-19)] 사용자 클릭·수집 겹침으로 일시 불일치 가능 → 즉시 포기 대신 재시도 1회
+          console.warn('[복승수집] ⚠ 복승 탭 확보 실패 → 5초 후 재시도 1회');
+          await wait(5000);   // [v2.1.133] 3초→5초(배당판 탭 전환 처리 여유)
+          r1 = await gotoQuinellaTab(isKorea);
+          sig = oddsSignature();
+          _v1 = verifyActiveBetTab('복승');
         }
-        quinella = Object.entries(quinMap).map(([k, o]) => {
-          const [a, b] = k.split('-').map(Number); return { combo: [a, b], odds: o };
-        });
-        console.log(`[복승수집] 파싱 ${quinella.length}조합. 최저배당순 상위: `
-          + quinella.slice().sort((a, b) => a.odds - b.odds).slice(0, 10).map((c) => `${c.combo[0]}-${c.combo[1]}=${c.odds}`).join(' · '));
-        console.log('[복승수집] 실제 배당판과 몇 개 대조해 보세요(예: 4-7). 값이 다르면 매트릭스 열 정렬 문제 → 콘솔의 이 로그를 공유해주세요.');
+        if (!r1.clicked || _v1 === false) {
+          console.warn('[복승수집] ⚠ 복승 탭 '
+            + (_v1 === false ? '활성 확정 불일치' : '버튼을 찾지 못함')
+            + ' → 복승 수집 포기(빈 배열 전송·다른 탭 데이터 오염 방지)');
+          setTripleProgress('복승 탭 확보 실패 — 수집 생략(오염 방지)');
+        } else {
+          const quinMap = {};
+          for (const p of currentMatrixPairs(oddsClass)) {
+            if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
+            const k = p.a < p.b ? `${p.a}-${p.b}` : `${p.b}-${p.a}`;
+            if (quinMap[k] == null || p.odds < quinMap[k]) quinMap[k] = p.odds;
+          }
+          quinella = Object.entries(quinMap).map(([k, o]) => {
+            const [a, b] = k.split('-').map(Number); return { combo: [a, b], odds: o };
+          });
+          console.log(`[복승수집] 파싱 ${quinella.length}조합. 최저배당순 상위: `
+            + quinella.slice().sort((a, b) => a.odds - b.odds).slice(0, 10).map((c) => `${c.combo[0]}-${c.combo[1]}=${c.odds}`).join(' · '));
+          console.log('[복승수집] 실제 배당판과 몇 개 대조해 보세요(예: 4-7). 값이 다르면 매트릭스 열 정렬 문제 → 콘솔의 이 로그를 공유해주세요.');
+        }
       } catch (e) { console.warn('[복승수집] 실패 — 건너뛰고 계속', e); sig = sig || oddsSignature(); }
 
       // 2) 쌍승 — [일본 전용]. 한국경마는 쌍승을 수집하지 않는다(복승만).
       let exacta = [];
+      let _userMidAbort = false;   // [v2.1.135] 수집 도중 사용자 탭 클릭 → 남은 탭 이동 생략 플래그
       if (isKorea) {
         console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원) → 쌍승 탭 클릭 차단');
         console.log('[쌍승수집] 한국경마 모드 → 쌍승 수집 생략(복승만).');
       } else {
+        // [v2.1.135 진행 중 사용자 우선] 유예(12초)는 '새 수집'만 막고, 이미 시작된 사이클은 그대로
+        //   쌍승을 클릭해 "복승 클릭 → 몇 초 뒤 쌍승 전환" 증상을 만들었다 → 사이클 도중 신뢰 클릭이
+        //   감지되면 남은 탭 이동(쌍승·삼복승)을 이번 사이클에서 포기하고 사용자 탭으로 즉시 복귀.
+        // [역할 분담 완성 v2.1.137→138] 일본지방·경륜은 서버(oddspark)가 쌍승·삼복승을 직접 수집(betType
+        //   실측 반영) → 확장은 '사설 복승만' 담당, 쌍승·삼복승 탭 클릭 자체를 생략(탭 안정·오버레이 안정).
+        //   [v2.1.138 사용자 지시] 중앙(JRA)도 탭 클릭 제거 — 확장은 전 종목 복승만(탭 클릭 완전 제로).
+        //   ⚠ JRA 쌍승은 서버(oddspark) 미지원이라 미수집이 됨(쌍승역전 신호는 JRA 한정 약화) —
+        //   탭 안정을 우선한 사용자 결정. 기존 수집 코드는 보존(게이트만·무삭제).
+        const _srvSideTypes = (category === 'japan_local' || category === 'cycle' || category === 'japan_central' || category === 'boat' || category === 'bike');
+        if (_srvSideTypes) {
+          console.log('[역할 분담] ' + CATEGORY_LABEL[category] + ' → 확장은 사설 복승만(탭 고정)'
+            + (category === 'japan_central' ? ' · JRA 쌍승 미수집(서버 미지원·탭 안정 우선)' : ' · 쌍승·삼복승은 서버(oddspark) 담당'));
+          _userMidAbort = true;   // 삼복승 게이트도 함께 생략
+        } else if (_quietMode || _lastUserTabClick > _cycleStart) {
+          if (!_quietMode) console.log('[사용자 우선] 수집 도중 탭 직접 클릭 감지 → 쌍승·삼복승 이번 사이클 생략, 사용자 탭 유지(복승 수집분은 전송)');
+          try {
+            const _t5 = _userChosenTab || _userTab0;
+            const _cur5 = activeAsyukkBetTab();
+            if (_t5 && (!_cur5 || _cur5.text !== _t5)) { clickAsyukkBetTab(_t5); await wait(400); }   // 이미 그 탭이면 재클릭 안 함
+          } catch (_) { /* */ }
+          _userMidAbort = true;
+        }
+        if (!_userMidAbort) {
         //  [디버그 강화] 쌍승 탭이 실제로 전환·로드됐는지, 조합이 뽑혔는지 상세 로그.
         setTripleProgress('쌍승 수집중…(최대 5초)');
         console.log('[쌍승수집] 탭 클릭 시도... (labels=쌍승/마단/쌍승식/馬単, 타임아웃 5초·재시도 3회)');
         // 쌍승은 불안정 → 타임아웃 5초·재시도 3회. 실패해도 오류 없이 복승만으로 진행.
-        const r2 = await clickTabAndWait(['쌍승', '마단', '쌍승식', '馬単'], sig, '쌍승', true, 5000);
+        let r2 = await clickTabAndWait(['쌍승', '마단', '쌍승식', '馬単'], sig, '쌍승', true, 5000);
         console.log(`[쌍승수집] 탭 클릭 결과: ${r2.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${r2.changed ? '변경 확인' : '⚠ 변화 없음(복승 화면 그대로일 수 있음)'}`);
         sig = r2.sig || oddsSignature();
-        const exMap = {};
-        for (const p of currentMatrixPairs(oddsClass)) {
-          if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
-          // [쌍승 방향 긴급수정] asyukk 쌍승 매트릭스는 **열(헤더)=1착(선착)·행=2착(후착)**.
-          //   예: 행3·열5 셀 = "5번(열) 1착, 3번(행) 2착". parseMatrixTable은 {a:행, b:열}이므로
-          //   선착=열=p.b, 후착=행=p.a → combo=[p.b, p.a]. (기존 [p.a,p.b]는 방향이 반대라
-          //   역전 오판을 일으켰음: 5→3 저배당을 3→5로 잘못 저장.)
-          const k = `${p.b}>${p.a}`;
-          if (exMap[k] == null || p.odds < exMap[k]) exMap[k] = p.odds;
+        // [오염방지 1·최우선] 탭 전환이 확인되지 않으면(버튼 못 찾음 OR 표 무변화) 화면에는 아직 복승 매트릭스가 있다.
+        //   기존 코드는 이 경고를 찍고도 그대로 긁어 **복승 배당을 쌍승으로 전송**했고, 방향까지 뒤집혀(`b>a`)
+        //   쌍승역전 공식(_win_exacta_reversal)에 가짜 역전 신호로 주입됐다. → 전환 미확인 시 쌍승은 빈 배열.
+        //   복승과 달리 여기서는 changed=false 도 게이트한다(직전이 복승 화면이므로 '무변화 = 전환 실패'가 확실).
+        let _v2 = verifyActiveBetTab('쌍승');   // [보완3] DOM 속성으로 활성 탭 확정
+        if (!r2.clicked || !r2.changed || _v2 === false) {
+          // [탭확정 재시도 (2026-07-19)] 즉시 포기 대신 재시도 1회(사용자 클릭·수집 겹침 대응)
+          console.warn('[쌍승수집] ⚠ 쌍승 탭 전환 미확인 → 5초 후 재시도 1회');
+          await wait(5000);   // [v2.1.133] 3초→5초
+          r2 = await clickTabAndWait(['쌍승', '마단', '쌍승식', '馬単'], oddsSignature(), '쌍승', true, 5000);
+          sig = r2.sig || oddsSignature();
+          _v2 = verifyActiveBetTab('쌍승');
         }
-        exacta = Object.entries(exMap).map(([k, o]) => {
-          const [a, b] = k.split('>').map(Number); return { combo: [a, b], odds: o };
-        });
-        console.log(`[쌍승수집] 추출된 조합 수: ${exacta.length}개`);
-        if (exacta.length) {
-          const top5 = [...exacta].sort((a, b) => a.odds - b.odds).slice(0, 5)
-            .map((e) => `${e.combo[0]}→${e.combo[1]} ${e.odds}`).join(' · ');
-          console.log(`[쌍승수집] 상위 5개(최저배당순): ${top5}`);
+        if (!r2.clicked || !r2.changed || _v2 === false) {
+          exacta = [];
+          console.warn('[쌍승수집] ⚠ 쌍승 탭 전환 미확인('
+            + (!r2.clicked ? '버튼 못 찾음' : (_v2 === false ? '활성 확정 불일치' : '표 무변화'))
+            + ') → 쌍승 수집 포기(빈 배열 전송·복승 데이터 오염 방지)');
+          setTripleProgress('쌍승 탭 전환 실패 — 수집 생략(오염 방지)');
         } else {
-          console.warn('[쌍승수집] ⚠ 쌍승 미수집 — 복승만으로 분석을 진행합니다.');
-          setTripleProgress('쌍승 미수집 — 복승만으로 분석 진행');
+          const exMap = {};
+          for (const p of currentMatrixPairs(oddsClass)) {
+            if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
+            // [쌍승 방향 긴급수정] asyukk 쌍승 매트릭스는 **열(헤더)=1착(선착)·행=2착(후착)**.
+            //   예: 행3·열5 셀 = "5번(열) 1착, 3번(행) 2착". parseMatrixTable은 {a:행, b:열}이므로
+            //   선착=열=p.b, 후착=행=p.a → combo=[p.b, p.a]. (기존 [p.a,p.b]는 방향이 반대라
+            //   역전 오판을 일으켰음: 5→3 저배당을 3→5로 잘못 저장.)
+            const k = `${p.b}>${p.a}`;
+            if (exMap[k] == null || p.odds < exMap[k]) exMap[k] = p.odds;
+          }
+          exacta = Object.entries(exMap).map(([k, o]) => {
+            const [a, b] = k.split('>').map(Number); return { combo: [a, b], odds: o };
+          });
+          console.log(`[쌍승수집] 추출된 조합 수: ${exacta.length}개`);
+          if (exacta.length) {
+            const top5 = [...exacta].sort((a, b) => a.odds - b.odds).slice(0, 5)
+              .map((e) => `${e.combo[0]}→${e.combo[1]} ${e.odds}`).join(' · ');
+            console.log(`[쌍승수집] 상위 5개(최저배당순): ${top5}`);
+          } else {
+            console.warn('[쌍승수집] ⚠ 쌍승 미수집 — 복승만으로 분석을 진행합니다.');
+            setTripleProgress('쌍승 미수집 — 복승만으로 분석 진행');
+          }
         }
+        }   // [v2.1.135] if (!_userMidAbort) 닫기
       }
 
       // 3) [일본 전용] 출마표2 전적: keiba.go.jp DebaTable을 fetch해 추출(우선) → 실패 시 인페이지 탭 클릭 폴백
@@ -1726,7 +2105,7 @@
           console.log('[전적수집] DebaTable 실패/없음 → 인페이지 출마표2 탭 시도(폴백)');
           setTripleProgress('출마표2 전적 수집중…(인페이지 폴백)');
           try { starters = await collectStartersByTab(); } catch (e) { console.warn('[전적수집] 인페이지 수집 오류', e); }
-          await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false); // 복승으로 복귀
+          await returnToQuinellaTab(); // 복승으로 복귀([오염방지 4] 사설 보드는 정확일치)
         }
         console.log(`[배당수집] 전적 추출: ${starters.length}두`);
       }
@@ -1736,6 +2115,14 @@
       //    한국·중앙경마만 생략. 경륜·경정·바이크(6명)도 삼복승 탭을 눌러 수집한다(기존 미클릭 문제 해결).
       //    삼복승은 불안정할 수 있어 독립 try/catch로 격리(실패해도 복승·쌍승은 유지).
       let trio = [];
+      // [삼복승 게이트 v2.1.133] 복승·쌍승이 이번 사이클에 성공한 경우에만 삼복승 시도 —
+      //   앞 단계가 실패한 채 삼복승 탭까지 클릭하면 탭 엇박자만 키우고 오염 위험(기존 서버 데이터는 유지됨).
+      // [v2.1.134 게이트 완화] 쌍승은 원래 불안정 — 쌍승 실패가 삼복승까지 영구 차단하던 과잉 조건 제거.
+      //   복승만 성공하면 삼복승 시도(사용자 지시). 복승도 실패한 사이클만 생략(오염 방지 최소선 유지).
+      const _trioReady = (quinella.length > 0) && !_userMidAbort;   // [v2.1.135] 사용자 조작 중단 시 삼복승도 생략
+      if (!isKorea && !isCentral && effSport !== 'boat' && !_trioReady) {
+        console.warn('[삼복승수집] ⏸ 복승 미확보 → 삼복승 시도 생략(오염 방지, 기존 데이터 유지)');
+      }
       if (isKorea) {
         console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원) → 삼복승 탭 클릭 차단');
       } else if (isCentral) {
@@ -1743,32 +2130,49 @@
       } else if (effSport === 'boat') {
         // [경정 삼복승 차단] 경정(보트)은 삼복승 배당이 불안정·노이즈 → 복승+쌍승만 수집(사용자 요청).
         console.log('[경정] 삼복승 수집 차단(복승+쌍승만) — 불안정 노이즈 방지');
-      } else {
+      } else if (_trioReady) {
         try {
           const sportTag = isCycleBoat ? SPORT_LABEL[effSport] : '일본경마';
           setTripleProgress(`삼복승 수집중…(${sportTag} · 탭 클릭)`);
           const keyH = localKeyHorses(quinella);   // 상위 복승조합 등장빈도+인기가중 유력마 3두
           console.log(`[삼복승수집] ${sportTag} 유력마(축) 후보:`, keyH.join('·') || '(없음)');
           // [삼복승 강화] ① asyukk34: span.bet_type_btn '삼복승'(정확) 클릭(삼복승조합 혼동 방지)
+          const _sigBeforeTrio = sig;
+          let trioTabOk = false;
           const betTab = clickAsyukkBetTab('삼복승');
           if (betTab) {
             console.log('[삼복승수집] ✅ .bet_type_btn "삼복승" 정확 클릭 (bet_mode=' + (betTab.getAttribute('bet_mode') || '?') + ')');
             await wait(2000); sig = oddsSignature();
+            // [오염방지 1] 정확 클릭이라도 표가 안 바뀌었으면 전환 실패 — 직전(복승/쌍승) 화면이 그대로 남아 있다.
+            trioTabOk = (sig !== _sigBeforeTrio && sig.length > 0);
+            if (!trioTabOk) console.warn('[삼복승수집] ⚠ 삼복승 정확 클릭했으나 표 무변화 → 전환 실패로 간주');
           } else {
             // ② 폴백: 일반 텍스트 탭 탐색(keiba·기타 보드)
             const rt = await clickTabAndWait(['삼복승', '삼복', '三連複', '3連複', '３連複', '삼연복'], sig, '삼복승', true, 5000);
             console.log(`[삼복승수집] 폴백 탭 클릭: ${rt.clicked ? '✅ 클릭됨' : '❌ 버튼 못 찾음'} · 배당 ${rt.changed ? '변경 확인' : '⚠ 변화 없음'}`);
             sig = rt.sig || oddsSignature();
+            trioTabOk = !!(rt.clicked && rt.changed);
           }
-          // ① 직접 목록(화면에 "a-b-c 배당" 나열 — 6명 종목 등 소규모 보드에서 유효)
-          let direct = [];
-          try { direct = currentTrios(); } catch (_) { /* */ }
-          if (direct.length) console.log(`[삼복승수집] 직접 목록 ${direct.length}개 추출`);
-          // ② 유력마 축 클릭 매트릭스(일본 지방경마 등 매트릭스형 보드)
-          let byAxis = [];
-          if (keyH.length) {
-            try { byAxis = await collectTrioByAxis(keyH, oddsClass); } catch (_) { /* */ }
-            if (byAxis.length) console.log(`[삼복승수집] 축 클릭 ${byAxis.length}개 추출`);
+          // [보완3] DOM 속성으로 활성 탭 확정 — 확정 불일치면 시그니처가 바뀌었어도 전환 실패로 간주.
+          if (verifyActiveBetTab('삼복승') === false) {
+            trioTabOk = false;
+            console.warn('[삼복승수집] ⚠ 활성 탭 확정 불일치 → 전환 실패로 간주');
+          }
+          // [오염방지 1] 삼복승 탭 전환이 확인되지 않으면 수집 자체를 생략(빈 배열) — 복승/쌍승 화면을
+          //   삼복승으로 오독하거나 축 클릭으로 조합을 날조하는 경로를 원천 차단.
+          let direct = [], byAxis = [];
+          if (!trioTabOk) {
+            console.warn('[삼복승수집] ⚠ 삼복승 탭 전환 미확인 → 삼복승 수집 포기(빈 배열 전송·복승/쌍승 오염 방지)');
+            setTripleProgress('삼복승 탭 전환 실패 — 수집 생략(오염 방지)');
+          } else {
+            // ① 직접 목록(화면에 "a-b-c 배당" 나열 — 6명 종목 등 소규모 보드에서 유효)
+            try { direct = currentTrios(); } catch (_) { /* */ }
+            if (direct.length) console.log(`[삼복승수집] 직접 목록 ${direct.length}개 추출`);
+            // ② 유력마 축 클릭 매트릭스(일본 지방경마 등 매트릭스형 보드)
+            if (keyH.length) {
+              try { byAxis = await collectTrioByAxis(keyH, oddsClass); } catch (_) { /* */ }
+              if (byAxis.length) console.log(`[삼복승수집] 축 클릭 ${byAxis.length}개 추출`);
+            }
           }
           // 병합(같은 3두 조합은 최저 배당 유지)
           const tmap = {};
@@ -1791,13 +2195,37 @@
               console.log('[삼복승진단] "a-b-c" 형태 텍스트 샘플:', trioTxt.join(' | ') || '(없음)');
             } catch (_) { /* */ }
           }
-          // 복승으로 복귀(다음 수집 사이클 안정화)
-          await clickTabAndWait(['복승', '복연', '馬連'], '', '복승(복귀)', false);
+          // 복승으로 복귀(다음 수집 사이클 안정화) — [오염방지 4] 사설 보드는 정확일치로 '삼복승' 오매칭 차단
+          await returnToQuinellaTab();
         } catch (e) { console.warn('[삼복승수집] 실패 — 복승/쌍승만으로 진행', e); }
       }
 
+      // [오염방지 2] 종류를 넘겨 구조(조합 길이)·수량(기대 조합 수 50%+) 검증을 통과한 것만 전송
+      const _q = clean(quinella, 200, 'quinella');
+      let _x = clean(exacta, 400, 'exacta');
+      const _tr = clean(trio, 300, 'trio');
+      // [오염방지 2-b·핵심] 수량 검증만으로는 최악의 오염을 못 잡는다: 복승 삼각(nC2=66)이 쌍승으로 들어오면
+      //   66/132 = 정확히 50% 라 하한을 통과한다(복승 보드가 정사각이면 100%라 아예 무의미).
+      //   → 값으로 판정: 겹치는 말쌍의 90%+ 에서 쌍승 배당이 복승 배당과 같으면 복승 화면을 긁은 것이다.
+      if (_q.length && _x.length) {
+        const qm = {};
+        _q.forEach((c) => { qm[Math.min(c.combo[0], c.combo[1]) + '|' + Math.max(c.combo[0], c.combo[1])] = c.odds; });
+        let tot = 0, same = 0;
+        _x.forEach((c) => {
+          const qo = qm[Math.min(c.combo[0], c.combo[1]) + '|' + Math.max(c.combo[0], c.combo[1])];
+          if (qo == null || !(qo > 0)) return;
+          tot++;
+          if (Math.abs(c.odds - qo) <= Math.max(0.05, qo * 0.01)) same++;
+        });
+        if (tot >= 5 && same / tot >= 0.9) {
+          console.warn(`[조합검증] ⚠ 쌍승 배당이 복승과 동일(${same}/${tot}) → 복승 화면을 쌍승으로 수집한 것으로 판단, 쌍승 빈 배열 처리`);
+          setTripleProgress('쌍승=복승 동일 감지 — 쌍승 제외(오염 방지)');
+          _x = [];
+        }
+      }
       const payload = {
-        raceKey, win, quinella: clean(quinella, 200), exacta: clean(exacta, 400), trio: clean(trio, 300),
+        raceKey, win,
+        quinella: _q, exacta: _x, trio: _tr,
         sport: effSport,       // [수정#3] 종목(horse|cycle|boat|bike)
         category,              // [탭분리] 분석기 탭 라우팅용(korea|japan_local|japan_central|boat|cycle|bike)
         deadline: timerDeadline || null, capturedAt: new Date().toISOString(), source: location.href,
@@ -1846,6 +2274,7 @@
         const _ar = await chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: _rk });
         if (_ar && _ar.ok && _ar.data) {
           await new Promise((res) => chrome.storage.local.set({ analyzeStatus: { data: _ar.data, at: Date.now() } }, res));
+          _tabAnalyzeBroadcast(_rk, _ar.data);   // [v2.1.144 탭 격리] 같은 탭 오버레이 직접 전달
           console.log('[수집→분석] ' + (_rk || '(현재경주)') + ' 분석 자동 갱신 → 오버레이 즉시 반영');
         }
       }
@@ -1898,6 +2327,21 @@
     }
     const ok = parts.length > 0 && parts.every((p) => p.ok);
     const detail = parts.map((p) => `${p.kind} ${p.n}${p.ok ? '✅' : '❌'}`).join(' · ');
+    // [사용자 탭 유지 (2026-07-19)] 수집 종료 → 사용자가 보던 탭으로 복원(수집 시퀀스 무변경·복원만 추가)
+    try {
+      if (site === 'asyukk') {
+        // [v2.1.134] 복원 목표: ①사용자가 '직접' 클릭했던 탭(신뢰 클릭 기록) ②없으면 수집 시작 시점 탭.
+        //   기존엔 ②만 써서, 이전 수집이 쌍승에 방치해 둔 상태를 '사용자 탭'으로 오인·계속 쌍승 복원하는
+        //   자기 강화 루프가 있었다(쌍승 고정 증상의 원인).
+        const _target = _userChosenTab || _userTab0;
+        const _cur = activeAsyukkBetTab();
+        if (_target && (!_cur || _cur.text !== _target)) {
+          clickAsyukkBetTab(_target);
+          await wait(600);
+          console.log('[사용자 탭 복원] 수집 종료 → "' + _target + '" 탭으로 복귀' + (_userChosenTab ? '(직접 선택 기록)' : ''));
+        }
+      }
+    } catch (_) { /* */ }
     return { ok, parts, detail, raceKey: payload.raceKey, error: ok ? '' : (parts.find((p) => !p.ok)?.error || '전송 실패') };
   }
 
@@ -1963,14 +2407,27 @@
     try { chrome.storage.local.set({ collectAlert: { level, text, at: Date.now() } }); } catch (_) { /* noop */ }
   }
 
+  // [v2.1.144 탭 격리] 분석 결과를 '같은 탭' 오버레이에 직접 전달(window 이벤트).
+  //   chrome.storage(analyzeStatus·raceKey)는 확장 전역이라 배당판 탭이 2개+ 열리면 서로 덮어써
+  //   다른 경주 추천이 섞여 표시됨(기후 1R 화면에 마쓰도 유력마 3·7·2 표시 실증 · 복병 12번 등).
+  //   오버레이는 같은 탭 이벤트를 항상 우선하고, 이벤트가 없는 페이지(분석기 웹 등)만 storage 폴백.
+  function _tabAnalyzeBroadcast(rk, data) {
+    try { window.dispatchEvent(new CustomEvent('kbTabAnalyze', { detail: { raceKey: rk || '', data, at: Date.now() } })); } catch (_) { /* */ }
+  }
+
   // [1번] 서버 이상감지 분석 실행 → 분석결과(betRecommend 등) 반환. 실패 시 null.
   function runAnalyzeForAlert() {
     return new Promise((resolve) => {
       let done = false;
-      chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: '' }, (res) => {
+      // [v2.1.145 유령 분석 차단] 빈 raceKey 요청은 서버가 임의 경주를 반환(다른 경주 추천 오염) →
+      //   이 탭의 현재 경주로 고정. 못 읽으면 요청 자체를 생략.
+      let _rk = ''; try { _rk = extractRaceKey() || ''; } catch (_) { _rk = ''; }
+      if (!_rk) { resolve(null); return; }
+      chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: _rk }, (res) => {
         done = true;
         if (chrome.runtime.lastError || !res || !res.ok || !res.data) { resolve(null); return; }
         try { chrome.storage.local.set({ analyzeStatus: { data: res.data, at: Date.now() } }); } catch (_) { /* noop */ }
+        try { _tabAnalyzeBroadcast(_rk, res.data); } catch (_) { /* */ }   // [v2.1.144 탭 격리]
         resolve(res.data);
       });
       setTimeout(() => { if (!done) resolve(null); }, 8000); // 서버 무응답 방어
@@ -2255,6 +2712,47 @@
     // 오버레이(overlay.js)가 읽어 "⚡ 전체수집 자동 실행 중..." 배너를 표시하도록 storage 에 상태 기록.
     try { chrome.storage.local.set({ autoFallback: { active: !!active, raceKey: rk || '', at: Date.now() } }); } catch (_) { /* */ }
   }
+
+  // ── [수정2·한국경마 복승 자동수집] 자동전송(autoSend) 버튼 없이 한국 배당판 열면 30초마다 복승 자동수집 ──
+  //   한국경마는 서버 직접수집 불가(asyukk DOM)이므로 확장이 담당. 기존 autoSend 게이트와 무관하게
+  //   한국 감지 시 자동 시작(수동 버튼 불필요). 오버레이 배너 "🇰🇷 한국경마 복승 자동수집 중" 표시 + 경주 고정(board hint).
+  let _krRk = '', _krLast = 0;
+  const _KR_MS = 30000;                                  // 30초 주기
+  function _setKoreaAutoOverlay(active, rk) {
+    try { chrome.storage.local.set({ koreaAuto: { active: !!active, raceKey: rk || '', at: Date.now() } }); } catch (_) { /* */ }
+  }
+  async function _koreaAutoWatch() {
+    try {
+      // 한국 배당판인지 확정(현재 페이지/raceKey 기준). 카테고리='korea' 일 때만 동작.
+      const _cat = await _currentCategory();
+      if (_cat !== 'korea') {                            // 한국 아님 → 배너 끄고 종료(다른 종목 흐름 무영향)
+        if (_krRk) { _krRk = ''; _setKoreaAutoOverlay(false, ''); }
+        return;
+      }
+      let rk = '';
+      try { rk = extractRaceKey(); } catch (_) { rk = ''; }
+      if (!rk) { const s = await getSettings(); rk = (s.raceKey || '').trim(); }
+      if (!rk) return;
+      // [오버레이 자동전환] 한국 감지 즉시 detectedCategory·raceKey 기록 → 오버레이가 경정/경륜 잔존분석을
+      //   바로 초기화하고 한국경마로 전환(수집 완료 30초 기다리지 않고 종목 불일치 클리어가 즉시 작동).
+      try {
+        chrome.storage.local.set({ detectedCategory: 'korea', detectedSport: 'horse', detectedAt: Date.now(), raceKey: rk });
+      } catch (_) { /* */ }
+      // [수정3·배당판 고정] 한국 경주를 분석기에 계속 알림(board hint)→ 분석기가 이 경주를 고정 추종(다른 경주로 안 튐).
+      try { _postBoardHint(rk); } catch (_) { /* */ }
+      if (rk !== _krRk) { _krRk = rk; _krLast = 0; }     // 경주 전환 → 즉시 1회 허용
+      const now = Date.now();
+      if (now - _krLast < _KR_MS) return;                // 30초 주기
+      if (_autoRunning) return;                          // 다른 수집 진행중이면 스킵(중복 방지)
+      _krLast = now;
+      _setKoreaAutoOverlay(true, rk);
+      setTripleProgress('🇰🇷 한국경마 복승 자동수집 중… (' + rk + ')', false);
+      _autoRunning = true;
+      try { await collectTriple('korea-auto'); }         // 복승만 수집(collectTripleByTabs 의 isKorea 게이트가 쌍승·삼복승 차단)
+      catch (e) { console.warn('[한국자동수집] 오류', e); }
+      finally { _autoRunning = false; }
+    } catch (_) { /* */ }
+  }
   function _serverHasOddsFor(rk) {
     // 서버 analyze 로 이 경주 배당 존재 여부 확인. res.ok=true → 배당 있음 / false → 없음(404 waiting) / null → 통신불명.
     return new Promise((resolve) => {
@@ -2322,6 +2820,7 @@
   }
   async function _autoInstantWatch() {
     try {
+      if (!_ctxAlive()) { _ctxDeadStop(); return; }    // [확장 무효화 방어]
       const st = await new Promise((r) => chrome.storage.local.get({ overlayEnabled: false, overlayKill: false }, r));
       if (!st.overlayEnabled || st.overlayKill) return;   // [사용자] 오버레이 켜져있을 때만
       let rk = '';
@@ -2338,10 +2837,13 @@
       const ar = await _analyzeOnce(rk);
       if (ar && ar.ok && ar.data) {
         try { chrome.storage.local.set({ analyzeStatus: { data: ar.data, at: now } }); } catch (_) { /* */ }   // 패널 즉시 반영
-        if (ar.data.oddsparkCovered === true) {
-          console.log('[즉시분석 자동] ' + rk + ' — oddspark 커버 중 → asyukk 수집 생략(oddspark 우선·보조로만)');
+        _tabAnalyzeBroadcast(rk, ar.data);   // [v2.1.144 탭 격리] 같은 탭 오버레이 직접 전달
+        if (ar.data.oddsparkCovered === true && detectSite() !== 'asyukk') {
+          // [사설 우선 복원 (2026-07-19)] 사설 배당판이 열려 있으면 커버 중이어도 asyukk 수집 계속(사설 우선)
+          console.log('[즉시분석 자동] ' + rk + ' — oddspark 커버 중(사설 배당판 아님) → asyukk 수집 생략(백업 대기)');
           return;
         }
+        if (ar.data.oddsparkCovered === true) console.log('[즉시분석 자동] ' + rk + ' — oddspark 커버 중이지만 사설 배당판 열림 → 사설 우선 수집 진행');
       }
       // oddspark 미커버(또는 아직 데이터 없음) → asyukk 즉시분석(수집→서버→분석) 자동 실행
       _autoRunning = true;
@@ -2355,17 +2857,22 @@
   function startRaceWatch() {
     if (_raceWatchTimer) clearInterval(_raceWatchTimer);
     setTimeout(watchRaceChange, 1500);                 // 로드 직후 1회
+    setTimeout(_armUserTabWatch, 2000);                // [사용자 조작 유예 v2.1.133] 탭 직접 클릭 감지 장착
+    setInterval(_armUserTabWatch, 30000);              // iframe 늦은 로드 대비 재장착(중복 방지 WeakSet)
     setTimeout(watchSportChange, 1800);                // [종목감지] 로드 직후 1회(기준값 세팅)
     setTimeout(_autoFallbackWatch, 3000);              // [전체수집 자동폴백] 로드 직후 1회(전환 기준 세팅)
     setTimeout(_postBoardHint, 2200);                  // [배당판 추종] 로드 직후 1회(분석기 즉시 동기화)
     setTimeout(_autoInstantWatch, 3500);               // [즉시분석 자동화] 로드 직후 1회(오버레이 ON이면 asyukk 수집)
+    setTimeout(_koreaAutoWatch, 4000);                 // [수정2·한국 자동수집] 로드 직후 1회(한국이면 즉시 시작)
     _raceWatchTimer = setInterval(() => {              // 10초마다 경주 변경 감지 + 마감 감지(자동추종 반응성)
+      if (!_ctxAlive()) { _ctxDeadStop(); return; }    // [확장 무효화 방어] 갱신된 확장 → 루프 정지·새로고침 안내
       watchRaceChange();
       watchSportChange();                              // [종목 자동감지 강화] URL·종목 전환 감지 → 재수집
       _finishWatchdog();                               // [다음경주 자동전환] 카운트다운 소멸 = 마감 통지
       _autoFallbackWatch();                            // [전체수집 자동폴백] 10초+ 배당 없으면 전체수집 자동 실행
       _postBoardHint();                                // [배당판 추종] 배당판 경주를 분석기에 계속 알림(힌트 TTL 유지)
       _autoInstantWatch();                             // [즉시분석 자동화] 오버레이 ON·30초 주기 asyukk 수집(커버 경주는 생략)
+      _koreaAutoWatch();                               // [수정2·한국 자동수집] 한국 배당판이면 30초마다 복승 자동수집(버튼 불필요)
     }, 10000);
   }
 

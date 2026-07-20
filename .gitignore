@@ -27,6 +27,9 @@ data/korea_last.pdf
 data/korea_session.json.tmp
 data/highlight_wins.json
 data/alerts/
+data/dark_horse_log/
+data/timeline_snapshot/
+data/kakao_queue.jsonl
 data/failure_review.json
 # [데이터 보호] 물리 스냅샷 백업(로컬 안전망) — git reset 전 자동 생성, 원격 커밋 안 함
 backups/
@@ -46,3 +49,5 @@ data/auto_prediction/
 
 # 배당판 추종 힌트(고빈도 런타임)
 data/board_hint.json
+data/pace_analysis/
+data/kra_horse_gait.json

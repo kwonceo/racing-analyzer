@@ -63,9 +63,12 @@
       try {
         chrome.storage.local.get({ raceKey: '', overlayEnabled: false }, function (v) {
           if (!v || !v.overlayEnabled) return;
-          chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: (v.raceKey || '') }, function (res) {
+          var _rk = (_tabAnFresh() && _tabAn.raceKey) ? _tabAn.raceKey : (v.raceKey || '');   // [v2.1.144] 탭 raceKey 우선
+          if (!_rk) return;   // [v2.1.140] raceKey 비어있으면 분석 요청 생략 → "새 경주 분석 중" 무한루프 방지
+          chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: _rk }, function (res) {
             try {
               if (chrome.runtime.lastError || !res || !res.ok || !res.data) return;
+              _tabAn = { raceKey: _rk, data: res.data, at: Date.now() };   // [v2.1.144] 이 탭 최신 분석으로 고정
               chrome.storage.local.set({ analyzeStatus: { data: res.data, at: Date.now() } });   // → storage.onChanged 로 자동 재렌더
             } catch (_) { /* */ }
           });
@@ -215,12 +218,30 @@
     }
 
     // chrome.storage 읽기(오류 시 빈 객체)
+    // [v2.1.144 탭 격리] 같은 탭 content.js 가 보내는 분석 결과(window 이벤트) — storage(전역)보다 항상 우선.
+    //   배당판 탭 2개+ 동시 오픈 시 storage 가 서로 덮어써 다른 경주 추천이 섞이던 문제의 근본 수정.
+    var _tabAn = null;   // {raceKey, data, at}
+    try {
+      window.addEventListener('kbTabAnalyze', function (e) {
+        try {
+          var d = e && e.detail;
+          if (d && d.data) _tabAn = { raceKey: d.raceKey || '', data: d.data, at: d.at || Date.now() };
+        } catch (_) { /* */ }
+      });
+    } catch (_) { /* */ }
+    function _tabAnFresh() { return !!(_tabAn && (Date.now() - _tabAn.at) < 90000); }   // 90초 내 = 이 탭이 활성 수집 중
     function readData() {
       return new Promise(function (resolve) {
         try {
           chrome.storage.local.get({ analyzeStatus: null, timerDeadline: 0, collectAlert: null, raceKey: '',
-            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null, autoFallback: null }, function (v) {
-            resolve(v || {});
+            ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null, autoFallback: null, koreaAuto: null,
+            detectedCategory: '' }, function (v) {
+            v = v || {};
+            if (_tabAnFresh()) {   // [v2.1.144] 같은 탭 분석이 신선하면 전역 storage 값 대신 탭 값 사용
+              v.analyzeStatus = { data: _tabAn.data, at: _tabAn.at };
+              if (_tabAn.raceKey) v.raceKey = _tabAn.raceKey;
+            }
+            resolve(v);
           });
         } catch (_) { resolve({}); }
       });
@@ -376,66 +397,67 @@
       }, 550);
     }
 
-    // 강조 팝업 렌더(중요 신호 있을 때만 · 상단 중앙 · 깜빡임 · ✕로 이 신호 닫기)
+    // [팝업 위치 변경] 화면 중앙 자동 팝업 완전 제거 → 오버레이 패널 상단 '배지' + 클릭 시 상세 펼침.
+    //   배당판을 가리지 않도록 패널 안에만 배지 표시. 배지 클릭으로 상세(강도·실질유력·배당차이) 토글, ✕로 닫기.
+    //   기존 computeCritical(신호 산출)·crit.lines(역배열 상세)는 그대로 재사용(무삭제) — 렌더 위치/방식만 변경.
     function renderAlertPopup(crit) {
       try {
         var el = byId(ID_ALERT);
         if (!crit || !enabled || killed || alertDismissed === crit.key) {
           if (el) el.remove(); stopBlink();
-          if (!crit) lastSoundKey = '';   // [보완#3] 신호 해제 → 다음 신호에 다시 알림음
+          if (!crit) lastSoundKey = '';   // 신호 해제 → 다음 신호에 다시 알림음
           return;
         }
-        // [보완#3] 새 중요 신호(키 변경) + 소리 옵션 ON → 알림음 1회
+        var panel = byId(ID_PANEL);
+        if (!panel) { if (el) el.remove(); return; }   // 패널 없으면 표시 안 함(자동 화면 팝업 제거)
         if (soundOn && crit.key !== lastSoundKey) { beep(); }
         lastSoundKey = crit.key;
-        var bg = crit.level === 'red'
-          ? 'linear-gradient(135deg,#dc2626,#991b1b)' : 'linear-gradient(135deg,#f59e0b,#b45309)';
+        var col = crit.level === 'red' ? '#dc2626' : '#f59e0b';
+        var wasExp = el && el.getAttribute('data-exp') === '1';
         if (!el) {
-          el = mk('div',
-            'position:fixed;left:50%;margin-left:-168px;top:58px;z-index:2147483100;width:336px;' +
-            'color:#fff;border:2px solid rgba(255,255,255,.85);border-radius:12px;' +
-            'padding:11px 14px;font:600 13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;' +
-            'box-shadow:0 8px 24px rgba(0,0,0,.55)');
+          el = mk('div', 'margin:0 0 8px;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.35)');
           el.id = ID_ALERT;
-          root().appendChild(el);
         }
-        el.style.background = bg;
+        // 항상 패널 최상단에 위치(재렌더 시에도 맨 위)
+        if (el.parentNode !== panel || panel.firstChild !== el) {
+          try { panel.insertBefore(el, panel.firstChild); } catch (_) { panel.appendChild(el); }
+        }
         while (el.firstChild) el.removeChild(el.firstChild);
-        var head = mk('div', 'display:flex;align-items:center;justify-content:space-between;gap:8px');
-        head.appendChild(mk('span', 'font-weight:900;font-size:15px', crit.icon + ' ' + crit.title));
-        var ctrls = mk('div', 'display:flex;align-items:center;gap:6px');
-        // [보완#3] 알림음 ON/OFF 토글(🔔/🔕)
-        var snd = mk('button', 'all:unset;cursor:pointer;color:#fff;font-size:15px;padding:0 2px', soundOn ? '🔔' : '🔕');
-        snd.title = soundOn ? '알림음 끄기' : '알림음 켜기';
-        snd.addEventListener('click', function () {
-          soundOn = !soundOn;
-          try { chrome.storage.local.set({ overlaySound: soundOn }); } catch (_) { /* */ }
-          if (soundOn) beep();   // 켤 때 확인음 + 오디오 컨텍스트 활성화(사용자 제스처)
-          var s2 = byId(ID_ALERT); if (s2 && crit) renderAlertPopup(crit);
-        });
-        ctrls.appendChild(snd);
-        var x = mk('button', 'all:unset;cursor:pointer;color:#fff;font:900 16px sans-serif;padding:0 2px', '✕');
-        x.title = '이 알림 닫기(다른 신호가 오면 다시 표시)';
-        x.addEventListener('click', function () {
-          alertDismissed = crit.key;
-          var e2 = byId(ID_ALERT); if (e2) e2.remove(); stopBlink();
-        });
-        ctrls.appendChild(x);
-        head.appendChild(ctrls);
-        el.appendChild(head);
-        // [역배열 상세] crit.lines 있으면 여러 줄로(마번·인기순위·쌍승배당·강도), 없으면 단일 msg
+        // ── 배지(클릭 토글) — "🔴 역배열 감지 · 클릭" ──
+        var badge = mk('div', 'cursor:pointer;color:#fff;font-weight:900;font-size:14px;padding:9px 12px;'
+          + 'background:' + col + ';display:flex;align-items:center;justify-content:space-between;gap:8px');
+        badge.appendChild(mk('span', '', crit.icon + ' ' + crit.title + ' · 클릭'));
+        var arrow = mk('span', 'font-size:12px', wasExp ? '▲' : '▼');
+        badge.appendChild(arrow);
+        el.appendChild(badge);
+        // ── 상세(펼침 시만) — 강도·실질유력·배당차이 ──
+        var detail = mk('div', 'display:' + (wasExp ? 'block' : 'none')
+          + ';background:#1f2937;color:#fff;padding:10px 12px;font-size:13px;font-weight:700;line-height:1.5');
         if (crit.lines && crit.lines.length) {
-          var box = mk('div', 'margin-top:5px;font-size:13px;font-weight:700;line-height:1.5');
           crit.lines.forEach(function (ln) {
             var sep = (ln.indexOf('→') === 0 || ln.indexOf('강도:') === 0);
-            box.appendChild(mk('div', sep ? 'margin-top:4px;font-weight:800' : '', ln));
+            detail.appendChild(mk('div', sep ? 'margin-top:4px;font-weight:800' : '', ln));
           });
-          el.appendChild(box);
         } else {
-          el.appendChild(mk('div', 'margin-top:4px;font-size:13px;font-weight:700', crit.msg));
+          detail.appendChild(mk('div', '', crit.msg));
         }
-        startBlink();
-      } catch (_) { /* 강조 팝업 실패는 무시 */ }
+        var closeBtn = mk('button', 'all:unset;cursor:pointer;margin-top:8px;color:#fca5a5;font-size:13px;font-weight:800', '✕ 닫기');
+        closeBtn.addEventListener('click', function (e2) {
+          e2.stopPropagation();
+          alertDismissed = crit.key;
+          var e3 = byId(ID_ALERT); if (e3) e3.remove();
+        });
+        detail.appendChild(closeBtn);
+        el.appendChild(detail);
+        el.setAttribute('data-exp', wasExp ? '1' : '0');
+        badge.addEventListener('click', function () {
+          var now = el.getAttribute('data-exp') === '1';
+          el.setAttribute('data-exp', now ? '0' : '1');
+          detail.style.display = now ? 'none' : 'block';
+          arrow.textContent = now ? '▼' : '▲';
+        });
+        // 화면 깜빡임(startBlink) 미사용 — 배당판 방해 없이 조용히 패널 배지로만 표시
+      } catch (_) { /* 강조 배지 실패는 무시 */ }
     }
 
     // ── [강한 신호 8유형] 강조 박스 + 막판 보존(경주 종료 후 유지) ──────────
@@ -565,14 +587,28 @@
       // 복승/삼복승 추천 조합 추출(betRecommend '복승 메인' 우선 · trioRecommend 최상위)
       var quinella = null, trio = null, revAdd = null;
       if (d) {
+        // [오버레이-패널 통일 2단계] '지금 사세요' 박스도 패널·배당판 강조와 동일한 corePicks.finalQuinellas 1순위를
+        //   우선 사용(+현재 배당 표기 — 10초 재분석마다 갱신). 없으면 기존 betRecommend 경로 폴백(무삭제).
+        var _cp = d.corePicks || {};
+        var _cfq = _cp.finalQuinellas || [];
+        if (_cfq.length && _cfq[0].combo && _cfq[0].combo.length === 2) {
+          quinella = _cfq[0].combo.join('+') + (_cfq[0].odds != null ? ' (' + _cfq[0].odds + '배)' : '');
+        }
+        var _cft = _cp.finalTrifectas || [];
+        if (_cft.length && _cft[0].combo && _cft[0].combo.length === 3) {
+          trio = _cft[0].combo.join('+') + (_cft[0].odds != null ? ' (' + _cft[0].odds + '배)' : '');
+        }
         var recs = d.betRecommend || [], main = null;
         for (var i = 0; i < recs.length; i++) {
           if (recs[i].label && recs[i].label.indexOf('복승 메인') === 0) { main = recs[i]; break; }
         }
         if (!main && recs.length) main = recs[0];
-        if (main && main.combo && main.combo.length) quinella = main.combo.join('+');
+        // [수익성 3분류 (2026-07-19)] 저배당 경주는 복승 폴백 금지 — 삼복승 집중 표기
+        var _ptLow = ((_cp.profitTier || {}).tier === 'low');
+        if (!quinella && !_ptLow && main && main.combo && main.combo.length) quinella = main.combo.join('+');
+        if (_ptLow && !quinella && trio) trio += ' (저배당 경주 — 삼복승 집중)';
         var trios = (d.trioRecommend || []).filter(function (t) { return t && t.combo && t.combo.length === 3; });
-        if (trios.length) trio = trios[0].combo.join('+');
+        if (!trio && trios.length) trio = trios[0].combo.join('+');
         // 역배열 추가: 역배열 실질유력마(invLead) + 유력마 상위 2두로 삼복승 구성
         if (d.inverse && d.inverse.detected && d.inverse.invLead && d.inverse.invLead.no != null) {
           var lead = Number(d.inverse.invLead.no);
@@ -694,7 +730,14 @@
       var redSet = {};
       _pRedC.slice(0, 3).forEach(function (c) { redSet[c.k] = 1; });
       var recSet = {};
-      (d.betRecommend || []).forEach(function (b) {
+      // [오버레이-패널 통일 2단계] 간이 매트릭스 초록테도 패널·배당판 강조와 동일한 corePicks.finalQuinellas 기준.
+      //   finalQuinellas 비면 기존 betRecommend 폴백(구데이터 호환·무삭제) — app.py _pub_matrix 초록과 동일 규칙.
+      var _rfq = (d.corePicks && d.corePicks.finalQuinellas) || [];
+      _rfq.forEach(function (q) {
+        var c = (q.combo || []).map(Number);
+        if (c.length === 2) recSet[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = 1;
+      });
+      if (!Object.keys(recSet).length) (d.betRecommend || []).forEach(function (b) {
         var c = (b.combo || []).map(Number);
         if (c.length === 2 && /복/.test(b.kind || b.label || '')) recSet[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = 1;
       });
@@ -710,16 +753,21 @@
       }
       var wrap = mk('div', 'overflow:auto;max-height:200px;max-width:100%;margin-top:5px;border-top:1px solid #334155;padding-top:5px');
       var grid = mk('div', 'display:inline-block;font-family:monospace');
-      // 헤더 행
+      // [행열 정렬 수정] 실제 복승 배당판과 동일한 기준으로 통일: **행 = 작은 말번호 · 열 = 큰 말번호**(우상 삼각).
+      //   예) 3+4 조합 → 3행 4열. 기존 격자는 행=큰번호·열=작은번호(좌하 삼각)라 실제 배당판과 전치돼 보였다.
+      //   ⚠ 배당값 조회 키(om)는 min|max 정규화라 값 자체는 동일 — 표시 좌표만 배당판 기준으로 맞춘다.
+      // 헤더 행: 열 = 큰 말번호(nos[1..n-1])
       var hRow = mk('div', 'display:flex');
       hRow.appendChild(mk('span', cellBase('color:#64748b'), '복승'));
-      for (var ci0 = 0; ci0 < nos.length - 1; ci0++) hRow.appendChild(hdrCell(nos[ci0]));
+      for (var ci0 = 1; ci0 < nos.length; ci0++) hRow.appendChild(hdrCell(nos[ci0]));
       grid.appendChild(hRow);
-      // 본문 삼각
-      for (var ri = 1; ri < nos.length; ri++) {
+      // 본문 삼각: 행 = 작은 말번호(nos[0..n-2])
+      for (var ri = 0; ri < nos.length - 1; ri++) {
         var row = mk('div', 'display:flex');
         row.appendChild(hdrCell(nos[ri]));
-        for (var ci = 0; ci < ri; ci++) {
+        for (var ci = 1; ci < nos.length; ci++) {
+          if (ci < ri) { row.appendChild(mk('span', cellBase(''), '')); continue; }        // 하단 거울면 = 공백(정렬 유지)
+          if (ci === ri) { row.appendChild(mk('span', cellBase('color:#475569'), '—')); continue; }  // 대각선(같은 말)
           var key = Math.min(nos[ri], nos[ci]) + '|' + Math.max(nos[ri], nos[ci]);
           var v = om[key];
           if (v > 0) {
@@ -730,11 +778,11 @@
             else if (redSet[key]) bd = 'box-shadow:inset 0 0 0 2px #ef4444;';                                  // 빨강=진짜 급락(급락말 포함·최대3)만
             var inv = (invSet[nos[ri]] || invSet[nos[ci]]) ? 'outline:2px solid ' + MX_COL.inv + ';outline-offset:-3px;' : '';
             var cell = mk('span', cellBase('color:#e2e8f0;background:' + mxHeat(v, lo, hi) + ';' + bd + inv), v + (redSet[key] ? '▼' : ''));
+            // 툴팁도 배당판 기준(작은번호-큰번호)으로 표기
             cell.title = nos[ri] + '-' + nos[ci] + ' = ' + v + '배' + (dropMap[key] != null ? ' · 급락 ' + dropMap[key] + '%' : '') + (recSet[key] ? ' · 추천' : '');
             row.appendChild(cell);
           } else row.appendChild(mk('span', cellBase('color:#475569'), '·'));
         }
-        row.appendChild(mk('span', cellBase('color:#475569'), '—'));
         grid.appendChild(row);
       }
       wrap.appendChild(grid);
@@ -755,30 +803,67 @@
     var boardItems = [];      // [{el, span}] 배당 셀 ↔ 오버레이 셀 매핑(재배치용)
     var boardHdrItems = [];   // [{el, span}] 헤더(마번) ↔ 오버레이 매핑
     var boardBound = false, boardRaf = 0;
+    var boardRO = null;       // [밀림 방지] 배당판 표 크기·레이아웃 변화 감시(ResizeObserver)
     var BCOL = { fav: '#3b82f6', drop: '#ef4444', rec: '#22c55e', warn: '#eab308', special: '#f0abfc' };
 
     function pureIntT(s) { s = (s == null ? '' : String(s)).trim(); return /^\d{1,2}$/.test(s) ? parseInt(s, 10) : null; }
+    // [신규 미러 사이트 대응] 점 붙은 머리글('1.')도 마번 인식(헤더 전용).
+    function hdrIntT(s) { var m = /^(\d{1,2})\.?$/.exec((s == null ? '' : String(s)).trim()); return m ? parseInt(m[1], 10) : null; }
     function numT(s) { var m = (s == null ? '' : String(s)).replace(/[, ]/g, '').match(/\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; }
 
     // 실제 배당판(복승 매트릭스) 표 + 셀 요소 위치 매핑. content.js parseMatrixTable 과 동일 휴리스틱(읽기전용).
     function mapBoardTable(table, oddsClass) {
+      // [자체 배당판 제외] 분석기 페이지(127.0.0.1:8011)에도 overlay.js 가 주입되는데, 거기의 '📊 배당판' 탭
+      //   (matrix_board.js)이 그리는 표는 마번 헤더+소수 배당 구조라 실제 배당판으로 오인된다.
+      //   그 표 위에 (다른 경주의) 강조 셀이 겹쳐 그려지는 것을 막는다. 실제 배당판(asyukk/keiba)엔 이 표식이 없다.
+      try { if (table.getAttribute && table.getAttribute('data-mb-board')) return null; } catch (_) { /* */ }
       var rows; try { rows = [].slice.call(table.rows); } catch (_) { return null; }
       if (rows.length < 2) return null;
       var headerRow = null, best = 1;
       rows.slice(0, 3).forEach(function (r) {
-        var c = [].slice.call(r.cells).filter(function (td) { return pureIntT(td.textContent) != null; }).length;
+        var c = [].slice.call(r.cells).filter(function (td) { return hdrIntT(td.textContent) != null; }).length;
         if (c > best) { best = c; headerRow = r; }
       });
       if (!headerRow) return null;
       var headerNos = [], hdrEls = [], colByIdx = {};
       [].slice.call(headerRow.cells).forEach(function (cell) {
-        var n = pureIntT(cell.textContent);
+        var n = hdrIntT(cell.textContent);
         if (n != null) { headerNos.push(n); hdrEls.push({ no: n, el: cell }); colByIdx[cell.cellIndex] = n; }
       });
       if (headerNos.length < 2) return null;
+      var _odCell = function (s) { var t = (s || '').trim(); return /^\d+\.\d+$/.test(t) || /^\d{3,}$/.test(t); }; // 소수 또는 100↑(상한)
       var isOdds = oddsClass
-        ? function (td) { return td.classList && td.classList.contains(oddsClass); }
-        : function (td) { return /^\d+\.\d+$/.test((td.textContent || '').trim()); };
+        ? function (td) { return (td.classList && td.classList.contains(oddsClass)) || _odCell(td.textContent); }
+        : function (td) { return _odCell(td.textContent); };
+
+      // ═══ [셀 밀림 근본 수정] 열 번호를 '개수 추측'이 아니라 **기하 정렬**로 확정 ═══
+      //   기존 로직은 배당 셀 개수가 all/upper/lower 중 무엇과 같은지로 열을 단정했다.
+      //   그 추측이 한 번 빗나가면 **그 행의 모든 셀이 통째로 밀린다**(빈칸·출주취소·colspan·
+      //   삼각 방향이 예상과 다르면 즉시 발생. upper 를 lower 보다 먼저 검사해 두 개수가 같은
+      //   행에선 무조건 upper 로 단정하는 문제도 있었다).
+      //   → 각 배당 셀의 **가로 중심이 어느 헤더(마번) 셀의 가로 범위에 들어가는지**로 열을 정한다.
+      //     실제 화면 좌표(getBoundingClientRect) 기반이라 두수(7·8·10·18두)·삼각 방향·빈칸과
+      //     무관하게 항상 정확하다. 기하 측정이 불가할 때만 기존 개수 추측으로 폴백(무삭제).
+      var _hdrBox = [];
+      hdrEls.forEach(function (h) {
+        var hr; try { hr = h.el.getBoundingClientRect(); } catch (_) { return; }
+        if (!hr || hr.width <= 0) return;
+        _hdrBox.push({ no: h.no, left: hr.left, right: hr.right, cx: hr.left + hr.width / 2 });
+      });
+      // 헤더가 화면에 안 잡히면(숨김·미렌더) 기하 매핑 불가 → 폴백 사용
+      var _geo = _hdrBox.length >= 2 ? function (td) {
+        var r; try { r = td.getBoundingClientRect(); } catch (_) { return null; }
+        if (!r || r.width <= 0) return null;
+        var cx = r.left + r.width / 2, best = null, bd = 1e9;
+        for (var i = 0; i < _hdrBox.length; i++) {
+          if (cx >= _hdrBox[i].left && cx <= _hdrBox[i].right) return _hdrBox[i].no;   // 헤더 열 범위 안 = 확정
+          var dd = Math.abs(cx - _hdrBox[i].cx);
+          if (dd < bd) { bd = dd; best = _hdrBox[i]; }
+        }
+        // 어떤 헤더 범위에도 안 들면 가장 가까운 헤더 — 단, 셀 폭 이내일 때만(그 이상 어긋나면 매핑 포기)
+        return (best && bd <= r.width) ? best.no : null;
+      } : null;
+
       var cells = [];
       rows.forEach(function (r) {
         if (r === headerRow) return;
@@ -787,6 +872,15 @@
         if (rowNo == null) return;
         var oddsCells = rc.filter(isOdds);
         if (!oddsCells.length) return;
+        if (_geo) {
+          // [1순위] 기하 정렬 — 셀 하나하나를 실제 화면 위치로 헤더 열에 대응(밀림 원천 차단)
+          oddsCells.forEach(function (oc) {
+            var colNo = _geo(oc), val = numT(oc.textContent);
+            if (colNo != null && colNo !== rowNo && val != null && val >= 1.0) cells.push({ a: rowNo, b: colNo, odds: val, el: oc });
+          });
+          return;
+        }
+        // [폴백·기존 로직 보존] 기하 측정 불가 시에만 개수 추측 → cellIndex 순으로 대응
         var all = headerNos.filter(function (n) { return n !== rowNo; });
         var upper = headerNos.filter(function (n) { return n > rowNo; });
         var lower = headerNos.filter(function (n) { return n < rowNo; });
@@ -810,20 +904,71 @@
       return { table: table, headerRow: headerRow, headerNos: headerNos, hdrEls: hdrEls, cells: cells };
     }
 
+    // [프레임 대응] 동일출처 iframe/frame(예: 사설 배당판 frm_race_run) 내부 <table>까지 수집(중첩 재귀).
+    function _allBoardDocs() {
+      var docs = [document], seen = [document];
+      function dig(root) {
+        var fr; try { fr = root.querySelectorAll('iframe, frame'); } catch (_) { return; }
+        for (var i = 0; i < fr.length; i++) {
+          var d = null;
+          try { d = fr[i].contentDocument || (fr[i].contentWindow && fr[i].contentWindow.document) || null; } catch (_) { d = null; }
+          if (d && d.querySelectorAll && seen.indexOf(d) < 0) { seen.push(d); docs.push(d); dig(d); }
+        }
+      }
+      dig(document);
+      return docs;
+    }
+    function _allBoardTables() {
+      var out = [], docs = _allBoardDocs();
+      for (var k = 0; k < docs.length; k++) {
+        try { var t = docs[k].querySelectorAll('table'); for (var j = 0; j < t.length; j++) out.push(t[j]); } catch (_) { /* */ }
+      }
+      return out;
+    }
+    // 셀이 들어있는 문서(프레임)의 최상위 창 기준 좌상단 오프셋(중첩 프레임 합산). 최상위 문서면 {0,0}.
+    function _boardFrameOffset(doc) {
+      var x = 0, y = 0;
+      try {
+        var win = doc && doc.defaultView;
+        while (win && win.frameElement) {
+          var fr = win.frameElement.getBoundingClientRect();
+          x += fr.left; y += fr.top;
+          if (win === win.parent) break;
+          win = win.parent;
+        }
+      } catch (_) { /* 교차출처 조상 = 보정 불가, 현상 유지 */ }
+      return { x: x, y: y };
+    }
+    // [v2.1.143 숨김 표 제외] 표가 화면에 실제로 보이는지(면적>0) — 사이트 DOM 에 숨겨진 다른 경주/탭의
+    //   표가 남아 있으면 '셀 수 최다' 선택이 숨김 표를 골라 오버레이가 전부 display:none 으로 그려져
+    //   "표는 인식(ON)인데 화면엔 아무것도 없음" 증상 발생 → 보이는 표만 후보로 인정.
+    function _tblVisible(t) {
+      try { var r = t.getBoundingClientRect(); return !!(r && r.width > 0 && r.height > 0); } catch (_) { return false; }
+    }
     function locateBoardMatrix() {
-      var oddsClass = /asyukk|qwqwd/i.test(location.host) ? 'odds_content' : null;
+      var oddsClass = /asyukk|qwqwd|dke-d11diw/i.test(location.host) ? 'odds_content' : null;
       var best = null, tables;
-      try { tables = document.querySelectorAll('table'); } catch (_) { return null; }
+      var _cand = 0, _hiddenSkip = 0;   // [v2.1.143 진단] 후보/숨김 스킵 카운트
+      try { tables = _allBoardTables(); } catch (_) { return null; }
       for (var ti = 0; ti < tables.length; ti++) {
+        if (!_tblVisible(tables[ti])) { _hiddenSkip++; continue; }
         var info = mapBoardTable(tables[ti], oddsClass);
-        if (info && (!best || info.cells.length > best.cells.length)) best = info;
+        if (info) { _cand++; if (!best || info.cells.length > best.cells.length) best = info; }
       }
       // 사설(asyukk) class 로 못 찾으면 소수점 숫자 폴백으로 재시도
       if (!best && oddsClass) {
         for (var tj = 0; tj < tables.length; tj++) {
+          if (!_tblVisible(tables[tj])) continue;
           var info2 = mapBoardTable(tables[tj], null);
-          if (info2 && (!best || info2.cells.length > best.cells.length)) best = info2;
+          if (info2) { _cand++; if (!best || info2.cells.length > best.cells.length) best = info2; }
         }
+      }
+      // [v2.1.143 진단] 실패 시 왜 실패했는지 상세 1줄(전체 표 수·숨김 스킵·후보 수) — 사유 변경 시만 출력
+      if (!best) {
+        try {
+          _bmWhy('OFF — 배당판 표 인식 실패(표 ' + tables.length + '개 중 숨김 ' + _hiddenSkip
+            + '개 제외·매트릭스 후보 ' + _cand + '개)');
+        } catch (_) { /* */ }
       }
       return best;
     }
@@ -843,27 +988,38 @@
 
     function removeBoardMatrix() {
       try { var b = byId(BOARD_ID); if (b) b.remove(); } catch (_) { /* */ }
+      try { if (boardRO) { boardRO.disconnect(); boardRO = null; } } catch (_) { /* */ }
       boardItems = []; boardHdrItems = [];
     }
 
     // 각 오버레이 셀을 실제 배당판 셀의 현재 화면 좌표(fixed)로 재배치.
     function positionBoard() {
       var i, it, r;
+      // [프레임 대응] 셀이 iframe 안이면 그 프레임 위치만큼 보정(최상위 문서면 0). 문서별 1회 캐시.
+      var _offDoc = null, _off = { x: 0, y: 0 };
+      function _ofs(el) {
+        var d = el.ownerDocument;
+        if (d === document) return { x: 0, y: 0 };
+        if (d !== _offDoc) { _offDoc = d; _off = _boardFrameOffset(d); }
+        return _off;
+      }
       for (i = 0; i < boardItems.length; i++) {
         it = boardItems[i];
         try { r = it.el.getBoundingClientRect(); } catch (_) { continue; }
         if (!r || (r.width === 0 && r.height === 0)) { it.span.style.display = 'none'; continue; }
+        var o = _ofs(it.el);
         it.span.style.display = 'flex';
-        it.span.style.left = r.left + 'px'; it.span.style.top = r.top + 'px';
+        it.span.style.left = (r.left + o.x) + 'px'; it.span.style.top = (r.top + o.y) + 'px';
         it.span.style.width = r.width + 'px'; it.span.style.height = r.height + 'px';
       }
       for (i = 0; i < boardHdrItems.length; i++) {
         it = boardHdrItems[i];
         try { r = it.el.getBoundingClientRect(); } catch (_) { continue; }
         if (!r || (r.width === 0 && r.height === 0)) { it.span.style.display = 'none'; continue; }
+        var o2 = _ofs(it.el);
         it.span.style.display = 'flex';
         // [단통 배지 등 오프셋 지원] it.dy/it.dx(있으면) 만큼 이동·고정폭(it.fixedW) 지원
-        it.span.style.left = (r.left + (it.dx || 0)) + 'px'; it.span.style.top = (r.top + (it.dy || 0)) + 'px';
+        it.span.style.left = (r.left + o2.x + (it.dx || 0)) + 'px'; it.span.style.top = (r.top + o2.y + (it.dy || 0)) + 'px';
         it.span.style.width = (it.fixedW || r.width) + 'px'; it.span.style.height = (it.fixedH || r.height) + 'px';
       }
     }
@@ -877,12 +1033,24 @@
       try { window.addEventListener('resize', schedulePosition); } catch (_) { /* */ }
     }
 
+    // [v2.1.140 진단] 배당판 위 오버레이가 왜 안 그려지는지 콘솔 1줄 보고(사유 변경 시만 → 스팸 없음).
+    function _bmWhy(msg) {
+      if (renderBoardMatrix._why !== msg) { renderBoardMatrix._why = msg; console.log('[배당판 오버레이] ' + msg); }
+    }
     // 실제 배당판 위에 정렬된 강조 오버레이를 그린다. 성공 시 true(→패널 격자 생략).
     function renderBoardMatrix(d, st) {
-      if (!st || !st.ovShowMatrix || !d || !enabled || killed) { removeBoardMatrix(); return false; }
+      if (!st || !st.ovShowMatrix || !d || !enabled || killed) {
+        if (killed) _bmWhy('OFF — overlayKill 활성');
+        else if (!enabled) _bmWhy('OFF — 오버레이 패널 꺼짐');
+        else if (!st || !st.ovShowMatrix) _bmWhy('OFF — 팝업 [📊 매트릭스] 버튼 꺼짐 → 켜면 배당판 위 강조 표시');
+        else _bmWhy('OFF — 분석 데이터 없음(analyzeStatus 대기)');
+        removeBoardMatrix(); return false;
+      }
       var info = locateBoardMatrix();
-      if (!info) { removeBoardMatrix(); return false; }
-      removeBoardMatrix();
+      if (!info) { removeBoardMatrix(); return false; }   // 실패 사유는 locateBoardMatrix 가 상세 로그
+      // [깜박임 제거 v2.1.135] 여기서 매번 지우면 렌더 때마다(10초 분석·타이머 갱신 등) 오버레이가
+      //   사라졌다 다시 그려져 깜박임 → 강조 구성이 같으면 위치만 재조정, 바뀐 경우에만 새로 그린다
+      //   (제거는 아래 시그니처 비교 후로 이동 — 기존 기능 무삭제·순서만 이동).
       var role = matrixRoles(d);
       var invSet = {}; (((d.inverse || {}).invHorses) || []).forEach(function (n) { invSet[+n] = 1; });
       var smartSet = {}; (d.darkHorses || []).forEach(function (h) { if (h.smartMoney && h.no != null) smartSet[+h.no] = 1; });
@@ -954,7 +1122,8 @@
       var _fq = (d.corePicks && d.corePicks.finalQuinellas) || [];
       // [패널 일치 폴백] finalQuinellas 가 비면(엄격 게이트로 메인 0) 패널과 동일하게 confQuinellas→quinella 로 강조
       //   → 패널 추천 조합(1+5·1+7 등)이 배당판에도 반드시 초록/파랑으로 표시됨(불일치 제거).
-      if (!_fq.length && d.corePicks && !d.corePicks.dansung) {   // [패널 일치] 단통은 폴백 금지(패널 updatePanel과 동일 조건)
+      // [수익성 3분류 (2026-07-19)] 저배당 경주(profitTier=low)는 복승 의도적 0개 — 폴백 금지(삼복승 집중)
+      if (!_fq.length && d.corePicks && !d.corePicks.dansung && !((d.corePicks.profitTier || {}).tier === 'low')) {   // [패널 일치] 단통은 폴백 금지(패널 updatePanel과 동일 조건)
         var _cq0 = d.corePicks.confQuinellas || [];
         if (_cq0.length) _fq = _cq0.slice(0, 2);
         else if (d.corePicks.quinella && d.corePicks.quinella.length === 2) {
@@ -1024,14 +1193,42 @@
 
       var ctx = { dropMap: dropMap, greenSet: greenSet, blueSet: blueSet, blueTag: blueTag, redSet: redSet, redTag: redTag, specialSet: specialSet, specialTag: specialTag };
 
+      // [깜박임 제거 v2.1.135] 강조 구성(초록/파랑/특별/빨강·헤더·서버배당)이 직전과 동일하고 레이어가
+      //   살아 있으면 → 지우지 않고 위치만 재조정(부드러운 갱신). 구성이 바뀐 경우에만 교체.
+      try {
+        var _bsig = JSON.stringify([Object.keys(greenSet).sort(), Object.keys(blueSet).sort(),
+          Object.keys(specialSet || {}).sort(), Object.keys(redSet).sort(),
+          info.headerNos, _srvOdds, Object.keys(role || {}).sort()]);
+        if (renderBoardMatrix._sig === _bsig && byId(BOARD_ID) && boardItems.length) {
+          schedulePosition();
+          return true;
+        }
+        renderBoardMatrix._sig = _bsig;
+      } catch (_) { /* 시그니처 실패 시 기존 방식(재생성) */ }
+      removeBoardMatrix();
       // 오버레이 레이어(뷰포트 고정·클릭 통과)
       var layer = mk('div', 'position:fixed;left:0;top:0;width:0;height:0;z-index:2147482800;pointer-events:none');
       layer.id = BOARD_ID;
       root().appendChild(layer);
 
+      // [셀 밀림 방지] 배당판 표의 크기·레이아웃 변화에도 즉시 재정렬.
+      //   scroll/resize 이벤트만으론 '표 내부 재렌더(배당 갱신)·배너 노출로 인한 레이아웃 이동'을 못 잡아
+      //   다음 렌더(10초 주기)까지 오버레이가 옛 좌표에 남아 밀려 보였다. 표 자체를 관찰해 즉시 따라간다.
+      try {
+        if (boardRO) { boardRO.disconnect(); boardRO = null; }
+        if (window.ResizeObserver && info.table) {
+          boardRO = new ResizeObserver(function () { schedulePosition(); });
+          boardRO.observe(info.table);
+        }
+      } catch (_) { /* ResizeObserver 미지원 → scroll/resize 폴백만 사용 */ }
+
       // [테두리+반투명 방식] 강조 셀은 테두리 + 얇은 반투명 배경만 → 원본 배당 숫자가 항상 보인다.
       //   미강조 셀은 오버레이 없음(완전 투명). 아이콘은 우측 상단 작은 뱃지로만 표시.
+      // [출전취소·밀림 방어] 배당판 셀의 마번이 실제 출전 마번(validHorses·서버가 competition除外 제외)에 없으면
+      //   강조하지 않는다 → 취소 말(除外) 셀 오강조 차단 + 배당판 셀 밀림으로 잘못된 마번이 나와도 오강조 방지.
+      var _vsetB = validSet(d);
       info.cells.forEach(function (cell) {
+        if (_vsetB && (!_vsetB.has(Number(cell.a)) || !_vsetB.has(Number(cell.b)))) return;
         var stl = boardCellStyle(cell.a, cell.b, ctx);
         if (!stl) return;   // [2번 미강조] 테두리 없음·완전 투명
         var lock = stl.lock;
@@ -1115,6 +1312,17 @@
           renderBoardMatrix._ro.observe(info.table);
         }
       } catch (_) { /* */ }
+      // [v2.1.143 진단] 그린 결과를 1줄 보고 — 표 셀·강조 셀·헤더 표시·화면 밖(숨김) 수까지.
+      //   강조 0개면 '왜 아무것도 안 보이는지'(추천 조합 없음)가 즉시 드러난다. 사유 변경 시만 출력.
+      try {
+        var _hid = 0;
+        for (var _bi = 0; _bi < boardItems.length; _bi++) { if (boardItems[_bi].span.style.display === 'none') _hid++; }
+        _bmWhy('ON — 표 ' + info.cells.length + '셀 인식 · 강조 ' + boardItems.length + '개(초록 '
+          + Object.keys(greenSet).length + '·파랑 ' + Object.keys(blueSet).length + '·특별 '
+          + Object.keys(specialSet).length + '·빨강 ' + Object.keys(redSet).length + ') · 헤더 '
+          + boardHdrItems.length + '개' + (_hid ? ' · ⚠ 화면 밖/숨김 ' + _hid + '개' : '')
+          + (boardItems.length === 0 ? ' — 강조 대상 조합 없음(추천/유력/급락 미형성)' : ''));
+      } catch (_) { /* */ }
       return (boardItems.length + boardHdrItems.length) > 0;
     }
 
@@ -1170,7 +1378,23 @@
       panel.appendChild(box);
     }
 
+    // [패널 깜박임 제거 v2.1.136] 기존: 매 렌더(10초 분석·수집 상태 갱신)마다 패널을 통째로 비우고 재구성 →
+    //   그 찰나에 빈 화면이 보여 "깜박이며 사라졌다 나타남". → 오프스크린 컨테이너에 먼저 그린 뒤
+    //   ①내용이 직전과 같으면 아무것도 안 함 ②다르면 한 번에 교체(원자 교체·빈 화면 0ms). 실패 시 기존 방식 폴백.
     function updatePanel(panel, st) {
+      try {
+        var _tmp = panel.cloneNode(false);
+        _updatePanelBuild(_tmp, st);
+        var _nh = _tmp.innerHTML;
+        if (updatePanel._lastHtml === _nh) return;          // 동일 내용 → 재그리기 생략(깜박임 원천 차단)
+        updatePanel._lastHtml = _nh;
+        while (panel.firstChild) panel.removeChild(panel.firstChild);
+        while (_tmp.firstChild) panel.appendChild(_tmp.firstChild);   // 완성본 이식(리스너 보존)
+        return;
+      } catch (_e) { console.warn('[오버레이] 원자 교체 실패 — 기존 방식 폴백', _e); }
+      _updatePanelBuild(panel, st);
+    }
+    function _updatePanelBuild(panel, st) {
       try {
         while (panel.firstChild) panel.removeChild(panel.firstChild);
         var d = (st.analyzeStatus && st.analyzeStatus.data) || null;
@@ -1233,6 +1457,18 @@
           }
         } catch (_) { /* */ }
 
+        // [수정2·한국경마 자동수집 표시] 한국 배당판이면 확장이 30초마다 복승 자동수집 중임을 표시(버튼 불필요).
+        try {
+          var _kr = st.koreaAuto;
+          if (_kr && _kr.active && (Date.now() - (_kr.at || 0) < 40000)) {
+            var _krRow = mk('div', 'margin:0 0 6px;padding:6px 9px;border-radius:7px;border:1px solid #38bdf8;background:rgba(56,189,248,.16)');
+            _krRow.appendChild(mk('div', 'font-weight:800;font-size:12px;color:#7dd3fc', '🇰🇷 한국경마 복승 자동수집 중'));
+            _krRow.appendChild(mk('div', 'font-weight:700;font-size:11px;color:#bae6fd',
+              (_kr.raceKey || '') + ' · 30초마다 복승 수집(쌍승·삼복승 없음·배당판 고정)'));
+            panel.appendChild(_krRow);
+          }
+        } catch (_) { /* */ }
+
         // [경주 전환 클리어] 배당판이 새 경주로 넘어갔는데(st.raceKey) 분석은 이전 경주(d.raceKey)면
         //   = 경주 전환 직후 → 이전 추천(corePicks·유력마·복병) 표시를 즉시 숨기고 "🔄 새 경주 분석 중..." 표시 +
         //   새 경주로 즉시 재분석 트리거. 분석 완료(analyzeStatus 갱신)되면 다음 렌더에서 새 결과가 표시됨.
@@ -1241,17 +1477,26 @@
           var _rkTail = function (r) { return String(r || '').replace(/\d{4}-\d{2}-\d{2}/g, '').replace(/\s+/g, ' ').trim(); };
           var _liveRk = _rkTail(st.raceKey);
           var _anaRk = _rkTail(d && d.raceKey);
-          if (_liveRk && _anaRk && _liveRk !== _anaRk) {
+          // [종목 불일치 클리어·한국경마 자동전환] 배당판이 한국경마인데(detectedCategory='korea') 분석이 다른 종목
+          //   (경정/경륜/일본)이면 raceKey 가 비어있거나 꼬리가 우연히 같아도 무조건 전환 클리어 → 경정 분석 잔존 제거.
+          var _boardCat = st.detectedCategory || '';
+          var _anaCat = (d && (d.category || (d.corePicks && d.corePicks.category))) || '';
+          var _catMismatch = (_boardCat === 'korea' && _anaCat && _anaCat !== 'korea');
+          if (_catMismatch || (_liveRk && _anaRk && _liveRk !== _anaRk)) {
             var trans = mk('div', 'margin:0 0 6px;padding:8px 10px;border-radius:7px;border:1px solid #38bdf8;background:rgba(56,189,248,.14)');
-            trans.appendChild(mk('div', 'font-weight:900;font-size:14px;color:#7dd3fc', '🔄 새 경주 분석 중...'));
-            trans.appendChild(mk('div', 'font-weight:800;font-size:14px;color:#e2e8f0;margin-top:2px', st.raceKey || _liveRk));
-            trans.appendChild(mk('div', 'font-size:11px;color:#94a3b8;margin-top:2px', '이전 경주 추천을 초기화했습니다 · 잠시만 기다려 주세요'));
+            trans.appendChild(mk('div', 'font-weight:900;font-size:14px;color:#7dd3fc',
+              _catMismatch ? '🇰🇷 한국경마 분석 중...' : '🔄 새 경주 분석 중...'));
+            trans.appendChild(mk('div', 'font-weight:800;font-size:14px;color:#e2e8f0;margin-top:2px', st.raceKey || _liveRk || '한국경마'));
+            trans.appendChild(mk('div', 'font-size:11px;color:#94a3b8;margin-top:2px',
+              _catMismatch ? '이전 종목(경정/경륜) 분석을 초기화했습니다 · 복승 수집 중' : '이전 경주 추천을 초기화했습니다 · 잠시만 기다려 주세요'));
             panel.appendChild(trans);
-            if (_lastTransitionRk !== _liveRk) {   // 새 경주 감지 → 즉시 1회 재분석(중복 트리거 방지)
-              _lastTransitionRk = _liveRk;
+            // 새 경주/종목 감지 → 즉시 1회 재분석(중복 트리거 방지). 종목 전환은 raceKey 키로 중복 방지.
+            var _trigKey = _catMismatch ? ('korea:' + (_liveRk || st.raceKey || '')) : _liveRk;
+            if (_lastTransitionRk !== _trigKey) {
+              _lastTransitionRk = _trigKey;
               try { pollOverlayAnalyze(); } catch (_) { /* */ }
             }
-            return;   // ⬅ 이전 경주 corePicks/유력마/복병/추천 렌더 억제(전환 클리어)
+            return;   // ⬅ 이전 종목/경주 corePicks·유력마·복병·추천 렌더 억제(전환 클리어)
           }
         } catch (_) { /* */ }
 
@@ -1651,19 +1896,32 @@
           if (ch.overlayEnabled) { enabled = !!ch.overlayEnabled.newValue; render(); if (enabled) startOverlayAnalyzePoll(); }
           // [오버레이 표시 제어] 팝업 📊/🎯/⏱ 버튼 변경 시 즉시 재렌더
           if ((ch.ovShowMatrix || ch.ovShowPicks || ch.ovShowTimeline) && enabled && !killed) render();
-          if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline || ch.autoFallback) && enabled && !killed) render();
+          if ((ch.analyzeStatus || ch.collectAlert || ch.timerDeadline || ch.autoFallback || ch.koreaAuto) && enabled && !killed) render();
         } catch (_) { /* */ }
       });
       // [캡쳐 대비] 경주결과 캡쳐 순간 오버레이가 결과를 가리지 않게 잠깐 숨김(visibility만·상태 보존).
       //   background 가 캡쳐 직전/직후 KB_CAPTURE_PREP{hide} 를 보냄. 읽기전용 원칙 유지(자체 요소 표시만 토글).
       try {
+        var _capRestoreT = null;   // [v2.1.140 안전복원] 캡처 후 복원 메시지 유실 대비 타이머
+        function _capSetVis(vis) {
+          ['kbOvPanel', 'kbOvToggle', 'kbOvAlert', BOARD_ID].forEach(function (id) {
+            var e = byId(id); if (e) e.style.visibility = vis;
+          });
+        }
         chrome.runtime.onMessage.addListener(function (msg, _s, sendResp) {
           try {
             if (msg && msg.type === 'KB_CAPTURE_PREP') {
-              var vis = msg.hide ? 'hidden' : '';
-              ['kbOvPanel', 'kbOvToggle', 'kbOvAlert'].forEach(function (id) {
-                var e = byId(id); if (e) e.style.visibility = vis;
-              });
+              _capSetVis(msg.hide ? 'hidden' : '');
+              // [v2.1.140 안전복원] 결과 자동수집 캡처(T+5/7/10)가 hide:true 후 복원(hide:false) 메시지를
+              //   못 보내면(탭 전환·리로드 타이밍) 오버레이가 visibility:hidden 으로 영영 남아
+              //   '오버레이가 자꾸 꺼짐'으로 보이던 문제 → 숨김 4초 뒤 무조건 자동 복원(캡처는 180ms면 끝).
+              if (_capRestoreT) { clearTimeout(_capRestoreT); _capRestoreT = null; }
+              if (msg.hide) {
+                _capRestoreT = setTimeout(function () {
+                  _capRestoreT = null;
+                  try { _capSetVis(''); console.log('[오버레이] 캡처 복원 메시지 유실 감지 → 4초 자동 복원'); } catch (_) { /* */ }
+                }, 4000);
+              }
               if (typeof sendResp === 'function') sendResp({ ok: true });
             }
           } catch (_) { /* */ }

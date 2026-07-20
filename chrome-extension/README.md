@@ -83,7 +83,7 @@ keiba **경주 오즈 페이지**에서 팝업의 `⚡ 전체 자동 수집` 한
 
 ## 사설 배당판 + 범용 파서 (v1.4.0)
 
-keiba.go.jp 외에 **사설 배당판**(예: `asyukk34.qwqwd25.net`, 클래스 `odds_table`/`odds_content`)도
+keiba.go.jp 외에 **사설 배당판**(예: `ks1.dke-d11diw.site`, 클래스 `odds_table`/`odds_content`)도
 지원합니다. URL 로 사이트를 자동 감지해 파서를 분기합니다.
 
 - **[사이트 자동 감지]** `detectSite()` — `keiba.go.jp`→keiba 파서 / `asyukk`·`qwqwd`→범용 매트릭스 파서(`odds_content`) / 기타→범용(소수점 숫자 셀)
@@ -100,7 +100,7 @@ keiba.go.jp 외에 **사설 배당판**(예: `asyukk34.qwqwd25.net`, 클래스 `
 > **raceKey**: 사설 사이트는 URL 에 keiba 파라미터가 없어 자동 감지가 안 될 수 있습니다.
 > 팝업 `raceKey` 칸에 직접 입력하세요(예: `2026-07-02 서울 5R`).
 >
-> **미러 도메인 교체 시**: 사설 사이트 도메인(`*.qwqwd25.net`)이 바뀌면 `manifest.json` 의
+> **미러 도메인 교체 시**: 사설 사이트 도메인(`*.dke-d11diw.site`)이 바뀌면 `manifest.json` 의
 > `content_scripts.matches` 와 `host_permissions` 에 새 도메인을 한 줄 추가하고 확장을 새로고침하세요.
 
 ## 전송 데이터 형식

@@ -1,0 +1,73 @@
+{
+ "race_id": "2026_07_18_오비히로_1경주",
+ "raceKey": "오비히로 1경주",
+ "sport": "horse",
+ "category": "japan_local",
+ "date": "2026-07-18",
+ "race": "오비히로 1경주",
+ "analyzed_at": "09:19:45",
+ "updated_at": "09:40:17",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://ks1.dke-d11diw.site/user_frame.php?PLACE_TYPE=J"
+ },
+ "odds_timeline": [
+  {
+   "time": "09:19:44",
+   "minutes_before": 10,
+   "quinella": {}
+  }
+ ],
+ "signals_detected": [],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [],
+ "elimination": {
+  "candidates": [],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": null,
+   "trio": null
+  },
+  "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": null,
+   "trio": null
+  }
+ },
+ "corePicks": null,
+ "summary": "데이터 부족 — 복승 수집 필요",
+ "keyHorses": [],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}

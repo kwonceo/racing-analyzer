@@ -1,0 +1,413 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_19_부산_7경주",
+ "race_info": {
+  "date": "2026-07-19",
+  "track": "부산",
+  "round": 7,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 11,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 2,
+   "name": "비월",
+   "jockey": "인권",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    5,
+    1,
+    9,
+    3
+   ],
+   "record_score": 77.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 5.6
+  },
+  {
+   "no": 9,
+   "name": "마하타이",
+   "jockey": "경민",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    2,
+    2,
+    4,
+    7
+   ],
+   "record_score": 78.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 77.3
+  },
+  {
+   "no": 4,
+   "name": "미러클마",
+   "jockey": "살바",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    11,
+    4,
+    7,
+    6
+   ],
+   "record_score": 80,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 14.6
+  },
+  {
+   "no": 6,
+   "name": "본다이아",
+   "jockey": "강주",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    6,
+    4,
+    6,
+    9
+   ],
+   "record_score": 85,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 2.1
+  },
+  {
+   "no": 5,
+   "name": "최고의꿈",
+   "jockey": "재이",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    4,
+    3,
+    2,
+    1
+   ],
+   "record_score": 81.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 14.3
+  },
+  {
+   "no": 8,
+   "name": "나이스버",
+   "jockey": "효식",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    3,
+    3,
+    5,
+    7
+   ],
+   "record_score": 45,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 6.6
+  },
+  {
+   "no": 7,
+   "name": "스타마타",
+   "jockey": "진구",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    3,
+    7,
+    11,
+    1
+   ],
+   "record_score": 45,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 28.3
+  },
+  {
+   "no": 10,
+   "name": "즐거운여",
+   "jockey": "승운",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    4,
+    6,
+    2,
+    2
+   ],
+   "record_score": 30,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 25.4
+  },
+  {
+   "no": 3,
+   "name": "판타스틱",
+   "jockey": "진겸",
+   "jockey_winrate": 32.9,
+   "recent_results": [
+    7,
+    8,
+    10,
+    2,
+    1
+   ],
+   "record_score": 53.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 6.8
+  },
+  {
+   "no": 11,
+   "name": "최강쏘살",
+   "jockey": "도윤",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    6,
+    3,
+    2,
+    8
+   ],
+   "record_score": 28.799999999999997,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 50.3
+  },
+  {
+   "no": 1,
+   "name": "킹애니데",
+   "jockey": "광희",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    6,
+    5,
+    7,
+    2
+   ],
+   "record_score": 58.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 21.0
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "17:03:49",
+    "quinella": {
+     "1+2": 25.6,
+     "1+3": 43.8,
+     "1+4": 78.7,
+     "1+5": 83.6,
+     "1+6": 10.5,
+     "1+7": 133.7,
+     "1+8": 46.0,
+     "1+9": 492.8,
+     "1+10": 122.9,
+     "1+11": 485.2,
+     "2+3": 15.0,
+     "2+4": 29.1,
+     "2+5": 28.2,
+     "2+6": 5.1,
+     "2+7": 57.8,
+     "2+8": 15.4,
+     "2+9": 285.2,
+     "2+10": 56.2,
+     "2+11": 246.6,
+     "3+4": 47.6,
+     "3+5": 35.6,
+     "3+6": 7.9,
+     "3+7": 111.1,
+     "3+8": 24.6,
+     "3+9": 344.0,
+     "3+10": 80.1,
+     "3+11": 277.0,
+     "4+5": 96.0,
+     "4+6": 17.8,
+     "4+7": 227.2,
+     "4+8": 51.7,
+     "4+9": 595.5,
+     "4+10": 134.4,
+     "4+11": 594.8,
+     "5+6": 17.7,
+     "5+7": 158.3,
+     "5+8": 52.2,
+     "5+9": 582.2,
+     "5+10": 134.9,
+     "5+11": 356.2,
+     "6+7": 35.6,
+     "6+8": 7.6,
+     "6+9": 107.0,
+     "6+10": 23.9,
+     "6+11": 117.4,
+     "7+8": 86.4,
+     "7+9": 568.1,
+     "7+10": 283.8,
+     "7+11": 575.3,
+     "8+9": 245.0,
+     "8+10": 61.3,
+     "8+11": 345.6,
+     "9+10": 438.2,
+     "9+11": 880.0,
+     "10+11": 381.4
+    }
+   },
+   {
+    "time": "17:04:36",
+    "quinella": {
+     "1+2": 25.6,
+     "1+3": 43.8,
+     "1+4": 78.7,
+     "1+5": 83.6,
+     "1+6": 10.5,
+     "1+7": 133.7,
+     "1+8": 46.0,
+     "1+9": 492.8,
+     "1+10": 122.9,
+     "1+11": 485.2,
+     "2+3": 15.0,
+     "2+4": 29.1,
+     "2+5": 28.2,
+     "2+6": 5.1,
+     "2+7": 57.8,
+     "2+8": 15.4,
+     "2+9": 285.2,
+     "2+10": 56.2,
+     "2+11": 246.6,
+     "3+4": 47.6,
+     "3+5": 35.6,
+     "3+6": 7.9,
+     "3+7": 111.1,
+     "3+8": 24.6,
+     "3+9": 344.0,
+     "3+10": 80.1,
+     "3+11": 277.0,
+     "4+5": 96.0,
+     "4+6": 17.8,
+     "4+7": 227.2,
+     "4+8": 51.7,
+     "4+9": 595.5,
+     "4+10": 134.4,
+     "4+11": 594.8,
+     "5+6": 17.7,
+     "5+7": 158.3,
+     "5+8": 52.2,
+     "5+9": 582.2,
+     "5+10": 134.9,
+     "5+11": 356.2,
+     "6+7": 35.6,
+     "6+8": 7.6,
+     "6+9": 107.0,
+     "6+10": 23.9,
+     "6+11": 117.4,
+     "7+8": 86.4,
+     "7+9": 568.1,
+     "7+10": 283.8,
+     "7+11": 575.3,
+     "8+9": 245.0,
+     "8+10": 61.3,
+     "8+11": 345.6,
+     "9+10": 438.2,
+     "9+11": 880.0,
+     "10+11": 381.4
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.73,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   2,
+   5,
+   8,
+   10,
+   1,
+   3,
+   4,
+   6,
+   7
+  ],
+  "eliminated": [
+   9,
+   11
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 8,
+  "3rd": 11,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 2,
+  "second": 8,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-19 18:05:23",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

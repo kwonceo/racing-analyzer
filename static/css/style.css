@@ -222,6 +222,46 @@ body {
 .race-chip.chip-done .chip-status { color: var(--accent); }
 .race-chip.active .chip-page { color: rgba(255,255,255,.75); }
 
+/* [칩 가독성 개선 (2026-07-19)] 분석완료·결과입력 칩이 어두워 안 보이던 문제 — 밝은 배경+흰 글씨.
+   ⚠ 기존 규칙 삭제 없이 아래에서 덮어쓰기(추가만). 현재 선택(active) 강조는 :not(.active)로 보존. */
+.race-chip {
+  font-size: 13px;
+  min-height: 32px;
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.race-chip.chip-todo:not(.active) {
+  background: #e0e0d8;
+  border-color: #c9c9c0;
+  color: #2c2c2a;
+  font-weight: 700;
+  opacity: 1;
+}
+.race-chip.chip-todo:not(.active) .chip-status { color: #2c2c2a; }
+.race-chip.chip-todo:not(.active) .chip-page { color: #55554f; }
+.race-chip.chip-analyzed:not(.active) {
+  background: #3B6D11;
+  border-color: #3B6D11;
+  color: #fff;
+  font-weight: 700;
+}
+.race-chip.chip-analyzed:not(.active) .chip-status { color: #fff; }
+.race-chip.chip-analyzed:not(.active) .chip-page { color: rgba(255,255,255,.85); }
+.race-chip.chip-done:not(.active) {
+  background: #185FA5;
+  border-color: #185FA5;
+  color: #fff;
+  font-weight: 700;
+}
+.race-chip.chip-done:not(.active) .chip-status { color: #fff; }
+.race-chip.chip-done:not(.active) .chip-page { color: rgba(255,255,255,.85); }
+/* 범례도 동일 색으로 통일(가독성) */
+.chip-legend .lg-todo { background: #e0e0d8; color: #2c2c2a; padding: 3px 10px; border-radius: 12px; font-weight: 700; }
+.chip-legend .lg-analyzed { background: #3B6D11; color: #fff; padding: 3px 10px; border-radius: 12px; font-weight: 700; }
+.chip-legend .lg-done { background: #185FA5; color: #fff; padding: 3px 10px; border-radius: 12px; font-weight: 700; }
+
 /* [기능3] 진행상황 범례 */
 .chip-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; font-size: 13px; }
 .chip-legend .lg { color: var(--text-dim); }

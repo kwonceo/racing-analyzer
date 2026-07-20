@@ -1,0 +1,350 @@
+{
+ "race_id": "2026_07_17_마쓰사카_9경주",
+ "raceKey": "마쓰사카 9경주",
+ "sport": "cycle",
+ "category": "cycle",
+ "date": "2026-07-17",
+ "race": "마쓰사카 9경주",
+ "analyzed_at": "14:18:40",
+ "updated_at": "14:27:48",
+ "input_data": {
+  "source": "Chrome확장 자동수집(배당) + 전적표",
+  "pdf_file": null,
+  "image_file": null,
+  "odds_source": "https://asyukk34.qwqwd25.net/game"
+ },
+ "odds_timeline": [],
+ "signals_detected": [
+  {
+   "time": null,
+   "type": "쌍승역전공식",
+   "detail": "🔄 역전감지[2·3위 간]: 단승 5번(2위) vs 3번(3위) — 쌍승 3→5(13.6)가 5→3(26.2)보다 낮음 → 상위권 실질순위 역전: 3번 우세 (강한 역배열 0.519)",
+   "severity": "🔴",
+   "reason": "역전비율 = 쌍승(3→5) 13.6 / 쌍승(5→3) 26.2 = 0.519 (강한 역배열)"
+  }
+ ],
+ "anomaly_history": [],
+ "strong_signals": {
+  "signals": [],
+  "count": 0,
+  "recommendLevel": null,
+  "dualConverge": false,
+  "types": []
+ },
+ "compression_pattern": {
+  "detected": false,
+  "disabled": true,
+  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+ },
+ "third_place_hunt": {
+  "active": false
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 17.9배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 3,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 5.1배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 4,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 5.4배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 5,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 2.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 7,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 2.7배 · 쌍승 상위 +20(제거 보류) = 120점"
+  },
+  {
+   "no": 2,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 16.1배 · 감점 없음 = 100점"
+  },
+  {
+   "no": 6,
+   "name": "",
+   "jockey": "",
+   "record_score": null,
+   "record_detail": "",
+   "odds": null,
+   "grade": "△",
+   "grade_reason": "배당 39.6배 · 감점 없음 = 100점"
+  }
+ ],
+ "elimination": {
+  "candidates": [
+   1,
+   3,
+   4,
+   5,
+   7,
+   2,
+   6
+  ],
+  "eliminated": [],
+  "elimination_reasons": {}
+ },
+ "final_recommendation": {
+  "budget_allocation": {}
+ },
+ "recommendation_history": [
+  {
+   "time": "14:18:40",
+   "minutes_before": null,
+   "sig": "3-4-5|3+4|None|3+4+5",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    5,
+    3,
+    4
+   ],
+   "summary": "유력마 5·3·4 / 복승 3+4",
+   "quinella_main": "3+4",
+   "quinella_sub": null,
+   "trifecta_main": "3+4+5",
+   "top_signals": [
+    "🔄 역전감지: 단승 5번 유력이나 쌍승에서 3번 1착(13.6)이 5번 1착(26.2)보다 낮음 → 실질 1착: 3번 가능성 (강한 역배열 0.519)",
+    "⚠️ 복승 불일치: 단승 기준 예상 3+5(9.1) / 실제 최저 5+7(2.7) → 7번 집중 자금 유입 (🔴🔴 3.37)"
+   ]
+  },
+  {
+   "time": "14:18:54",
+   "minutes_before": null,
+   "sig": "3-5-7|5+7|None|3+5+7",
+   "anomCount": 0,
+   "sigChanged": true,
+   "keyHorses": [
+    7,
+    5,
+    3
+   ],
+   "summary": "유력마 7·5·3 / 복승 5+7",
+   "quinella_main": "5+7",
+   "quinella_sub": null,
+   "trifecta_main": "3+5+7",
+   "top_signals": []
+  }
+ ],
+ "compare_recommendation": {
+  "anomaly": {
+   "quinella": [
+    3,
+    7
+   ],
+   "trio": [
+    3,
+    5,
+    7
+   ]
+  },
+  "form": {
+   "quinella": null,
+   "trio": null
+  },
+  "jockey": {
+   "quinella": null,
+   "trio": null
+  },
+  "final": {
+   "quinella": [
+    5,
+    7
+   ],
+   "trio": [
+    3,
+    5,
+    7
+   ]
+  }
+ },
+ "corePicks": {
+  "axis": [
+   5,
+   7
+  ],
+  "third": 3,
+  "quinella": [
+   5,
+   7
+  ],
+  "trifecta": [
+   3,
+   5,
+   7
+  ],
+  "picks": [
+   {
+    "no": 5,
+    "tier": 1,
+    "sub": -2.7,
+    "rep": 2.7,
+    "reason": "유력마 저배당 2.7배"
+   },
+   {
+    "no": 7,
+    "tier": 1,
+    "sub": -2.7,
+    "rep": 2.7,
+    "reason": "유력마 저배당 2.7배"
+   },
+   {
+    "no": 3,
+    "tier": 1,
+    "sub": -5.1,
+    "rep": 5.1,
+    "reason": "유력마 저배당 5.1배"
+   }
+  ],
+  "quinellaOdds": 2.7,
+  "trifectaOdds": 3.5,
+  "confQuinellas": [
+   {
+    "combo": [
+     3,
+     7
+    ],
+    "odds": 5.1,
+    "reason": "시장유력"
+   },
+   {
+    "combo": [
+     3,
+     4
+    ],
+    "odds": 5.4,
+    "reason": "시장유력+급락"
+   }
+  ],
+  "forcedHorses": [],
+  "confTop1": 3,
+  "confTop1Conf": 19.0,
+  "confTop1High": false,
+  "favAxis": [
+   3,
+   7
+  ],
+  "confTrifecta": [
+   3,
+   5,
+   7
+  ],
+  "confTrifectaOdds": 3.5,
+  "confTrifectaIns": [
+   3,
+   4,
+   5
+  ],
+  "confTrifectaInsOdds": 12.2,
+  "darkHorsePicks": [
+   {
+    "no": 4,
+    "anomCount": 0,
+    "smartMoney": false,
+    "forced": false
+   }
+  ],
+  "darkTrifectas": [
+   {
+    "combo": [
+     3,
+     4,
+     7
+    ],
+    "odds": 7.0,
+    "horse": 4
+   }
+  ],
+  "finalQuinellas": [
+   {
+    "combo": [
+     5,
+     7
+    ],
+    "odds": 2.7,
+    "stars": 3,
+    "reason": "시장 저배당 보완",
+    "basis": [],
+    "summary": "시장 저평가(메인 보완)"
+   }
+  ],
+  "finalTrifectas": [
+   {
+    "combo": [
+     3,
+     5,
+     7
+    ],
+    "odds": 3.5,
+    "reason": "삼복승 메인"
+   },
+   {
+    "combo": [
+     3,
+     4,
+     7
+    ],
+    "odds": 7.0,
+    "reason": "복병"
+   }
+  ],
+  "bmedSpecial": [],
+  "dansung": false,
+  "dansungMinOdds": 2.7,
+  "dansungPlan": null,
+  "quinellaMax": 3,
+  "raceHorseCount": 7,
+  "chaoticRace": false,
+  "formMissing": true
+ },
+ "summary": "유력마 3·7·5 / 복승 5+7",
+ "keyHorses": [
+  3,
+  7,
+  5
+ ],
+ "result": null,
+ "hit": null,
+ "profit": null,
+ "review": null
+}
