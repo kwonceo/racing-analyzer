@@ -1663,7 +1663,9 @@ _KEIRIN_ONLY_RE = re.compile(
     r"이즈|伊豆|다치카와|立川|마쓰도|松戸|오다와라|小田原|기후|岐阜|시즈오카|静岡|"
     # [경륜 전용 지명 보강 (2026-07-20)] 기시와다·도요하시 미등록 → 성적표 종목이 '일본경마'로 오분류.
     #   두 지명 모두 경마장 없음(경륜 전용) — 고치·나고야·카와사키는 이중소속이라 여기 넣지 않음.
-    r"기시와다|岸和田|도요하시|豊橋|구마모토|熊本|경륜|競輪|keirin)")
+    # [경륜 전용 지명 보강2 (2026-07-21)] 도야마·마쓰사카 미등록 → 동일 오분류 위험. 둘 다 경마장·경정장
+    #   없는 경륜 전용 지명(富山경마장·松阪경정장 없음 확인) — 이중소속 아님.
+    r"기시와다|岸和田|도요하시|豊橋|구마모토|熊本|도야마|富山|마쓰사카|松阪|경륜|競輪|keirin)")
 
 
 def _is_opening_settle(po, pct):
@@ -9106,9 +9108,23 @@ def _triple_analyze(rk, rec):
             #   → 마지막 스냅샷 이후 실제 흐른 시간을 차감한 '실질 남은 분'으로 판정 — 음수면 마감 처리.
             #   수집이 정상인 경주는 경과가 수십 초 수준이라 영향 없음(음수 전환 시에만 개입·기존 로직 무변경).
             _st0 = _s0.get("t")
-            if cur_mb is not None and _st0:
+            # [T-30초 조기마감 수정 (2026-07-20)] ①발주시각 원본(deadline_epoch)이 있으면 '초 단위 정확' 판정
+            #   — 반올림 근사(mb=0이 T-30초부터라 경과 보정이 실제 마감 30초 전에 마감 처리하던 버그.
+            #   마지막 30초 = T-1~0분 집중급락 최강 신호 구간을 '마감 후'로 오분류하던 손실 제거).
+            #   ②원본 없으면(과거 문서) 기존 경과 보정 유지하되 반올림 반경 +0.5분 보정.
+            _dl_ep0 = None
+            try:
+                _dl_ep0 = float(_hd0.get("deadline_epoch") or 0) or None
+            except (TypeError, ValueError):
+                _dl_ep0 = None
+            if _dl_ep0:
+                _mbf0 = (_dl_ep0 - time.time()) / 60.0
+                # 초 단위 정확: 마감 전(_mbf0>=0)이면 양수 분(내림), 마감 후면 음수 분 — 아래 after_close
+                #   판정(cur_mb<0)이 이 값을 그대로 사용 → T-30초~T-0 구간이 '마감 전'으로 정확 유지.
+                cur_mb = int(_mbf0) if _mbf0 >= 0 else -max(1, int(-_mbf0) if _mbf0 <= -1 else 1)
+            elif cur_mb is not None and _st0:
                 try:
-                    _eff_mb = float(cur_mb) - (time.time() - float(_st0)) / 60.0
+                    _eff_mb = (float(cur_mb) + 0.5) - (time.time() - float(_st0)) / 60.0
                     if _eff_mb < 0:
                         cur_mb = -max(1, int(-_eff_mb))
                 except (TypeError, ValueError):
@@ -12128,6 +12144,9 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
             mb_signed = mb
             minutes_before = mb if mb >= 0 else None  # (하위호환) 기존 소비자는 >=0만 사용
             after_close = mb < 0
+            # [T-30초 조기마감 수정 (2026-07-20)] 발주시각 원본(epoch 초)을 문서에 보존 —
+            #   분 반올림(mb) 근사 대신 분석 시점에 '초 단위 정확' 마감 판정 가능하게(마지막 30초 신호 보호).
+            doc["deadline_epoch"] = dl_ms / 1000.0
     except (TypeError, ValueError):
         minutes_before = mb_signed = None
         after_close = False
@@ -18111,6 +18130,10 @@ _TRACK_GROUPS = {
     "다치카와": ["立川", "tachikawa"],
     "오다와라": ["小田原", "odawara"],
     "구마모토": ["熊本", "kumamoto"],
+    # [경륜장 한자 별칭 보강2 (2026-07-21)] 당일 개최 도야마(富山)·마쓰사카(松阪) 미등록 발견 —
+    #   스케줄이 한자 그대로 잡혀 성적표 '일본경마' 오분류·한자/한글 이중 키(岐阜·기후 패턴) 위험. 추가만.
+    "도야마": ["富山", "toyama"],
+    "마쓰사카": ["松阪", "matsusaka"],
     "세이부엔": ["西武園", "seibuen"],
     "오비히로": ["帯広", "obihiro", "obi"],
     "모리오카": ["盛岡", "morioka", "mori"],
@@ -18906,7 +18929,9 @@ KEIRIN_JO = {"36": "오다와라", "62": "히로시마", "01": "마에바시",
              #   22·25 는 '개최정보 없음' 실측). 같은 목록에서 松戸=31·弥彦=21·京王閣=27·岐阜=43·静岡=38 재확인,
              #   豊橋(도요하시)=45 실측(기존 '히라쓰카' 라벨은 미검증 추정이라 교체) · 高知(고치)=74 신규.
              "43": "기후", "38": "시즈오카",
-             "21": "야히코", "26": "세이부엔", "74": "고치"}
+             "21": "야히코", "26": "세이부엔", "74": "고치",
+             # [joCode 실측 2026-07-21·oddspark 당일 개최 링크] 富山(도야마)=46 · 松阪(마쓰사카)=47 확정
+             "46": "도야마", "47": "마쓰사카"}
 # ⚠ 기시와다=56(岸和田, 라이브 확인). 이전 73은 오매핑이라 교정. 구마모토=87(熊本競輪) 등록 →
 #   sport 유실 시에도 _keirin_jo_from_venue가 cycle 추론 → 복승 개수 종목캡(경륜 9) 정상 적용.
 # 경륜장명 → joCode 역매핑(raceKey에서 joCode 자동 감지용)
