@@ -4026,16 +4026,42 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-20"
+    },
+    {
+      "race": "오오이 7경주",
+      "horse_no": 1,
+      "recent_avg": 7.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "오오이 7경주",
+      "horse_no": 10,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "오오이 7경주",
+      "horse_no": 8,
+      "recent_avg": 5.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-20"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 931,
-      "hit": 209
+      "count": 937,
+      "hit": 211
     },
     "전체부진마": {
-      "count": 1485,
-      "hit": 416
+      "count": 1495,
+      "hit": 419
     },
     "대규모급락": {
       "count": 20,
@@ -4045,8 +4071,8 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 554,
-      "hit": 207
+      "count": 558,
+      "hit": 208
     },
     "급락동반": {
       "count": 101,

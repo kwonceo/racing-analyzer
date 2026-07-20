@@ -6,7 +6,7 @@
  "date": "2026-07-20",
  "race": "오오이 6경주",
  "analyzed_at": "17:28:06",
- "updated_at": "17:45:37",
+ "updated_at": "17:58:17",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -897,6 +897,34 @@
    ],
    "confidence": 4.6,
    "reason": "추천 미적중"
+  },
+  "failure": {
+   "type": "전적오판",
+   "label": "유형4 · 전적 오판",
+   "focus": 4,
+   "winner": 4,
+   "missed": [
+    4,
+    9
+   ],
+   "reason": "4번은 배당 변화 없이 입상 → 배당은 정상, 전적 판단 실패(이변)",
+   "improvement": "전적 하위라도 최근 컨디션·거리/기수 변경 반영 · 이변 조건 학습 강화",
+   "missed_signal": "배당 신호 없음(전적 이변)",
+   "timeline": [
+    {
+     "mb": -13,
+     "odds": 6.2,
+     "pct": null,
+     "time": "17:42:36",
+     "after": true,
+     "src": "복승"
+    }
+   ],
+   "maxDrop": 0,
+   "buriedBy": null,
+   "afterClose": true,
+   "massDrop": false,
+   "winnerSignal": false
   }
  },
  "profit": null,
