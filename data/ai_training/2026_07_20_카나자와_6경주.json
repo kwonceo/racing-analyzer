@@ -1,0 +1,235 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_20_카나자와_6경주",
+ "race_info": {
+  "date": "2026-07-20",
+  "track": "카나자와",
+  "round": 6,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 7,
+   "name": "드래곤데",
+   "jockey": "도운",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    2,
+    2,
+    7,
+    2
+   ],
+   "record_score": 111.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "로드투클",
+   "jockey": "재이",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    1,
+    3,
+    1,
+    7
+   ],
+   "record_score": 105,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "모멘텀",
+   "jockey": "승운",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    10,
+    10,
+    9,
+    7
+   ],
+   "record_score": 70,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "퀸앤드서",
+   "jockey": "효식",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    6,
+    1,
+    3,
+    2
+   ],
+   "record_score": 56.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "골든",
+   "jockey": "경민",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    6,
+    5,
+    7,
+    4
+   ],
+   "record_score": 31.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "챔프의사",
+   "jockey": "진검",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    4,
+    5,
+    8,
+    6
+   ],
+   "record_score": 27.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "플래시런",
+   "jockey": "진구",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    8,
+    8,
+    3,
+    4
+   ],
+   "record_score": 23.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "스마트러",
+   "jockey": "시대",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    8,
+    9,
+    9,
+    11
+   ],
+   "record_score": 20,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.745,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   7,
+   8,
+   2,
+   3,
+   5,
+   6,
+   4
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 24.0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 6,
+  "2nd": 7,
+  "3rd": 2,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 6,
+  "second": 7,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-20 16:31:13",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
