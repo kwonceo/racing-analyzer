@@ -3690,16 +3690,44 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1784512356.2328658
+    },
+    {
+      "race": "카사마츠 1경주",
+      "horse_no": 2,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "카사마츠 1경주",
+      "horse_no": 4,
+      "recent_avg": 6.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "카사마츠 1경주",
+      "horse_no": 7,
+      "recent_avg": 5.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-20"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 862,
-      "hit": 192
+      "count": 865,
+      "hit": 193
     },
     "전체부진마": {
-      "count": 1372,
-      "hit": 379
+      "count": 1379,
+      "hit": 382
     },
     "대규모급락": {
       "count": 20,
@@ -3709,8 +3737,8 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 510,
-      "hit": 187
+      "count": 514,
+      "hit": 189
     },
     "급락동반": {
       "count": 101,
