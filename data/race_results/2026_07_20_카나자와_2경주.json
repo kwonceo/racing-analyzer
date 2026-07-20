@@ -1,0 +1,132 @@
+{
+ "race_id": "2026_07_20_카나자와_2경주",
+ "raceKey": "카나자와 2경주",
+ "date": "2026-07-20",
+ "sport": "horse",
+ "category": "japan_local",
+ "track": "카나자와",
+ "round": 2,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 8,
+ "result": {
+  "1st": 3,
+  "2nd": 2,
+  "3rd": 6
+ },
+ "odds_at_start": {
+  "quinella": {
+   "2+3": 2.0,
+   "1+3": 4.3,
+   "3+5": 4.3,
+   "2+5": 15.2,
+   "1+2": 19.1,
+   "1+5": 21.2,
+   "3+8": 25.0,
+   "3+7": 32.0,
+   "3+4": 40.0,
+   "2+8": 62.9,
+   "1+8": 76.1,
+   "5+8": 82.5,
+   "3+6": 84.1,
+   "2+7": 99.6,
+   "2+4": 107.8,
+   "5+7": 113.2,
+   "1+7": 118.6,
+   "4+5": 139.1,
+   "1+4": 143.1,
+   "7+8": 194.6,
+   "5+6": 200.9,
+   "4+8": 204.2,
+   "2+6": 232.8,
+   "1+6": 327.8,
+   "4+7": 346.0,
+   "6+8": 638.8,
+   "4+6": 778.6,
+   "6+7": 889.8
+  },
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "13:58:07",
+   "minutes_before": null,
+   "quinella": {
+    "2+3": 2.0,
+    "1+3": 4.3,
+    "3+5": 4.3,
+    "2+5": 15.2,
+    "1+2": 19.1,
+    "1+5": 21.2,
+    "3+8": 25.0,
+    "3+7": 32.0,
+    "3+4": 40.0,
+    "2+8": 62.9,
+    "1+8": 76.1,
+    "5+8": 82.5,
+    "3+6": 84.1,
+    "2+7": 99.6,
+    "2+4": 107.8,
+    "5+7": 113.2,
+    "1+7": 118.6,
+    "4+5": 139.1,
+    "1+4": 143.1,
+    "7+8": 194.6,
+    "5+6": 200.9,
+    "4+8": 204.2,
+    "2+6": 232.8,
+    "1+6": 327.8,
+    "4+7": 346.0,
+    "6+8": 638.8,
+    "4+6": 778.6,
+    "6+7": 889.8
+   },
+   "exacta": {}
+  }
+ ],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   3,
+   7,
+   8,
+   6,
+   2,
+   4,
+   5
+  ],
+  "eliminated": [],
+  "recommend_main": "2+3",
+  "recommend_sub": null,
+  "strategy": "BMED_보험형",
+  "signal_quality": "하",
+  "confidence": 8.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 2.0,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-20 14:04:09",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
