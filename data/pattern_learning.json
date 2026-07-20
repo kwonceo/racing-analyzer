@@ -3677,6 +3677,19 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-20"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "마쓰도 7경주",
+      "total_combos_dropped": 6,
+      "drop_ratio": 0.4,
+      "result": "2+5",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": "-46.9%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1784512356.2328658
     }
   ],
   "condition_stats": {
@@ -3689,11 +3702,11 @@
       "hit": 379
     },
     "대규모급락": {
-      "count": 19,
+      "count": 20,
       "high_odds": 0,
       "recommended_hit": 5,
       "high_odds_rate": 0.0,
-      "hit_rate": 26.3
+      "hit_rate": 25.0
     },
     "이상감지동반": {
       "count": 510,
