@@ -6,7 +6,7 @@
  "date": "2026-07-19",
  "race": "마쓰도 2경주",
  "analyzed_at": "08:47:03",
- "updated_at": "08:56:03",
+ "updated_at": "08:59:52",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -571,24 +571,24 @@
  },
  "final_recommendation": {
   "quinella_main": {
-   "combo": "2+5",
-   "odds": 1.8,
-   "reason": "2번(A)·5번(A)"
+   "combo": "4+5",
+   "odds": null,
+   "reason": "4번(A)·5번(A)"
   },
   "trifecta_main": {
-   "combo": "2+5+6",
-   "odds": 14.7,
-   "reason": "2번(A)·5번(A)·6번(C)"
+   "combo": "4+5+7",
+   "odds": null,
+   "reason": "4번(A)·5번(A)·7번(B)"
   },
   "trifecta_insurance1": {
-   "combo": "1+2+5",
-   "odds": 14.8,
-   "reason": "1번(B)·2번(A)·5번(A)"
+   "combo": "4+5+12",
+   "odds": null,
+   "reason": "4번(A)·5번(A)·12번(B)"
   },
   "trifecta_insurance2": {
-   "combo": "1+5+6",
-   "odds": 34.5,
-   "reason": "1번(B)·5번(A)·6번(C)"
+   "combo": "5+7+12",
+   "odds": null,
+   "reason": "5번(A)·7번(B)·12번(B)"
   },
   "budget_allocation": {
    "quinella_main": "62.1%",
@@ -736,6 +736,75 @@
      "odds": 19.1
     }
    ],
+   "top_signals": []
+  },
+  {
+   "time": "08:57:24",
+   "minutes_before": null,
+   "sig": "4-5-7|4+5|None|4+5+7|",
+   "anomCount": 5,
+   "sigChanged": true,
+   "keyHorses": [
+    5,
+    4,
+    7
+   ],
+   "summary": "유력마 5·4·7 / 복승 4+5",
+   "quinella_main": "4+5",
+   "quinella_sub": null,
+   "trifecta_main": "4+5+7",
+   "quinellas": [],
+   "top_signals": []
+  },
+  {
+   "time": "08:57:49",
+   "minutes_before": null,
+   "sig": "2-5-6|2+5|None|2+5+6|5+6/1+5",
+   "anomCount": 5,
+   "sigChanged": true,
+   "keyHorses": [
+    5,
+    2,
+    6
+   ],
+   "summary": "유력마 5·2·6 / 복승 2+5",
+   "quinella_main": "2+5",
+   "quinella_sub": null,
+   "trifecta_main": "2+5+6",
+   "quinellas": [
+    {
+     "combo": [
+      5,
+      6
+     ],
+     "odds": 28.0
+    },
+    {
+     "combo": [
+      1,
+      5
+     ],
+     "odds": 19.1
+    }
+   ],
+   "top_signals": []
+  },
+  {
+   "time": "08:58:10",
+   "minutes_before": null,
+   "sig": "4-5-7|4+5|None|4+5+7|",
+   "anomCount": 5,
+   "sigChanged": true,
+   "keyHorses": [
+    5,
+    4,
+    7
+   ],
+   "summary": "유력마 5·4·7 / 복승 4+5",
+   "quinella_main": "4+5",
+   "quinella_sub": null,
+   "trifecta_main": "4+5+7",
+   "quinellas": [],
    "top_signals": []
   }
  ],
