@@ -1,0 +1,217 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_20_카사마츠_3경주",
+ "race_info": {
+  "date": "2026-07-20",
+  "track": "카사마츠",
+  "round": 3,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 7,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 2,
+   "name": "プリティパンク",
+   "jockey": "渡邊竜（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    3,
+    5,
+    5,
+    5
+   ],
+   "record_score": 45.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "ガケップチー",
+   "jockey": "細川智（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    11,
+    8,
+    3,
+    4
+   ],
+   "record_score": 3.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "ヒルノエルニド",
+   "jockey": "深澤杏（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    6,
+    8,
+    9,
+    8
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "オオイリブクロ",
+   "jockey": "塚本征（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    9,
+    5,
+    8,
+    7
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "ヒルノマース",
+   "jockey": "東川慎（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    6,
+    10,
+    8,
+    9
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "アイベット",
+   "jockey": "丸山真（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    5,
+    8,
+    9,
+    8
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "ペティトール",
+   "jockey": "森島貴（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    7,
+    9,
+    5,
+    6
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": null,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   2,
+   1,
+   3,
+   4,
+   5,
+   6
+  ],
+  "eliminated": [
+   7
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 4,
+  "2nd": 7,
+  "3rd": 2,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 2번 적중"
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 4,
+  "second": 7,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-20 12:46:50",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
