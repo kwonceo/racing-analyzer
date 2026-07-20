@@ -51,3 +51,12 @@ data/auto_prediction/
 data/board_hint.json
 data/pace_analysis/
 data/kra_horse_gait.json
+
+# [C안 (2026-07-20 권대표 승인)] 집↔사무실 git 충돌 정리 — 로그성 대량 파일은 git 추적 제외.
+#   analysis_log = 하루 수십~수백 파일·양쪽 자동커밋 충돌의 주범(당일 3회 실측). 로컬 파일은 그대로 유지되고
+#   보존은 6시간 주기백업 zip(+구글 드라이브)이 담당. 소형 학습 핵심(daily_learning·race_results·
+#   signal_performance 등)은 추적 유지. ⚠ 전환 시 일회성: git rm -r --cached data/analysis_log
+data/analysis_log/
+# 대용량 압축 백업(147MB 커밋 사고 재발 방지 — GitHub 100MB 제한)
+*.zip
+!chrome-extension.zip
