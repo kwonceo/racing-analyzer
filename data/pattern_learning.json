@@ -3651,16 +3651,42 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-20"
+    },
+    {
+      "race": "마쓰도 5경주",
+      "horse_no": 7,
+      "recent_avg": 6.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "마쓰도 5경주",
+      "horse_no": 6,
+      "recent_avg": 7.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "마쓰도 5경주",
+      "horse_no": 3,
+      "recent_avg": 8.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-20"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 854,
-      "hit": 190
+      "count": 862,
+      "hit": 192
     },
     "전체부진마": {
-      "count": 1360,
-      "hit": 376
+      "count": 1372,
+      "hit": 379
     },
     "대규모급락": {
       "count": 19,
@@ -3670,8 +3696,8 @@
       "hit_rate": 26.3
     },
     "이상감지동반": {
-      "count": 506,
-      "hit": 186
+      "count": 510,
+      "hit": 187
     },
     "급락동반": {
       "count": 101,

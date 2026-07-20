@@ -6,7 +6,7 @@
  "date": "2026-07-19",
  "race": "마쓰도 5경주",
  "analyzed_at": "09:52:18",
- "updated_at": "09:54:33",
+ "updated_at": "10:31:59",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -133,9 +133,7 @@
   "types": []
  },
  "compression_pattern": {
-  "detected": false,
-  "disabled": true,
-  "reason": "경륜/경정/바이크는 저배당 압축 미적용(배당 신호 기반만)"
+  "detected": false
  },
  "third_place_hunt": {
   "active": false
@@ -287,29 +285,29 @@
  },
  "final_recommendation": {
   "quinella_main": {
-   "combo": "2+7",
-   "odds": 10.0,
-   "reason": "2번(B)·7번(A)"
+   "combo": "4+5",
+   "odds": null,
+   "reason": "4번(A)·5번(A)"
   },
   "trifecta_main": {
-   "combo": "2+6+7",
-   "odds": 39.0,
-   "reason": "2번(B)·6번(D)·7번(A)"
+   "combo": "4+5+7",
+   "odds": null,
+   "reason": "4번(A)·5번(A)·7번(B)"
   },
   "trifecta_insurance1": {
-   "combo": "2+3+6",
-   "odds": 22.3,
-   "reason": "2번(B)·3번(C)·6번(D)"
+   "combo": "4+5+12",
+   "odds": null,
+   "reason": "4번(A)·5번(A)·12번(B)"
   },
   "trifecta_insurance2": {
-   "combo": "2+3+7",
-   "odds": 12.6,
-   "reason": "2번(B)·3번(C)·7번(A)"
+   "combo": "5+7+12",
+   "odds": null,
+   "reason": "5번(A)·7번(B)·12번(B)"
   },
   "budget_allocation": {
-   "quinella_main": "70.8%",
-   "trifecta_main": "8.6%",
-   "trifecta_insurance": "1.2%"
+   "quinella_main": "62.1%",
+   "trifecta_main": "14.1%",
+   "trifecta_insurance": "1.9%"
   }
  },
  "recommendation_history": [
