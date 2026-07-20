@@ -1,0 +1,129 @@
+{
+ "race": "카나자와 3경주",
+ "raceKey": "카나자와 3경주",
+ "date": "2026-07-20",
+ "result": {
+  "1st": 3,
+  "2nd": 5,
+  "3rd": 4,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_3": {
+   "horse": 3,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 53.8,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 103.8,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 40,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_8": {
+   "horse": 8,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 50,
+   "confidence": null,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  5,
+  8,
+  4
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 3번 53.8점",
+  "5. 종합 신뢰도 0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 3,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 53.8,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "전적보조_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 53.8,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 0
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-20 14:45:44"
+}

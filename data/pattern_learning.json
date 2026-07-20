@@ -3818,16 +3818,36 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-20"
+    },
+    {
+      "race": "카나자와 3경주",
+      "horse_no": 3,
+      "recent_avg": 4.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "카나자와 3경주",
+      "horse_no": 4,
+      "recent_avg": 5.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-20"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 881,
+      "count": 884,
       "hit": 198
     },
     "전체부진마": {
-      "count": 1411,
-      "hit": 393
+      "count": 1417,
+      "hit": 395
     },
     "대규모급락": {
       "count": 20,
@@ -3837,8 +3857,8 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 530,
-      "hit": 195
+      "count": 533,
+      "hit": 197
     },
     "급락동반": {
       "count": 101,

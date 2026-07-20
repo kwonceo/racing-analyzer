@@ -1,0 +1,235 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_20_카나자와_3경주",
+ "race_info": {
+  "date": "2026-07-20",
+  "track": "카나자와",
+  "round": 3,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 5,
+   "name": "그랜드드",
+   "jockey": "한별",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    2,
+    3,
+    6,
+    4
+   ],
+   "record_score": 103.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "불의평화",
+   "jockey": "형석",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    7,
+    2,
+    1,
+    1
+   ],
+   "record_score": 85,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "동남돌풍",
+   "jockey": "은경",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    2,
+    3,
+    8,
+    10
+   ],
+   "record_score": 62.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "바벨폴고",
+   "jockey": "진검",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    9,
+    1,
+    2,
+    4
+   ],
+   "record_score": 55,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "클러치러",
+   "jockey": "도운",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    2,
+    6,
+    5,
+    4
+   ],
+   "record_score": 53.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "새내힐",
+   "jockey": "실바",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    5,
+    1,
+    6,
+    7
+   ],
+   "record_score": 50,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "위닝트리",
+   "jockey": "재이",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    3,
+    7,
+    9,
+    8
+   ],
+   "record_score": 45,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "파워타이",
+   "jockey": "강주",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    7,
+    4,
+    1,
+    9
+   ],
+   "record_score": 40,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.737,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   2,
+   3,
+   5,
+   7,
+   1,
+   4,
+   8,
+   6
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 3,
+  "2nd": 5,
+  "3rd": 4,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 3,
+  "second": 5,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-20 14:45:45",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
