@@ -65,6 +65,9 @@
           if (!v || !v.overlayEnabled) return;
           var _rk = (_tabAnFresh() && _tabAn.raceKey) ? _tabAn.raceKey : (v.raceKey || '');   // [v2.1.144] 탭 raceKey 우선
           if (!_rk) return;   // [v2.1.140] raceKey 비어있으면 분석 요청 생략 → "새 경주 분석 중" 무한루프 방지
+          // [v2.1.146] 경주 전환 직후 이전 경주 키로 계속 분석 요청하던 잔존 차단 — 배당판 경주와 다르면
+          //   탭 분석을 버리고 이번 폴은 생략(다음 수집 사이클이 새 경주 키로 갱신).
+          if (!_rkMatchesBoard(_rk)) { _tabAn = null; return; }
           chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: _rk }, function (res) {
             try {
               if (chrome.runtime.lastError || !res || !res.ok || !res.data) return;
@@ -225,11 +228,36 @@
       window.addEventListener('kbTabAnalyze', function (e) {
         try {
           var d = e && e.detail;
-          if (d && d.data) _tabAn = { raceKey: d.raceKey || '', data: d.data, at: d.at || Date.now() };
+          // [v2.1.146 유령 차단] raceKey 없는 브로드캐스트 무시 — 빈 키 분석(서버 최근경주 폴백)이 탭 분석으로
+          //   고정돼 다른 경주 추천(시즈오카 11R에 8두 경주 데이터)이 표시되던 근본 경로 차단.
+          if (d && d.data && d.raceKey) _tabAn = { raceKey: d.raceKey, data: d.data, at: d.at || Date.now() };
         } catch (_) { /* */ }
       });
     } catch (_) { /* */ }
     function _tabAnFresh() { return !!(_tabAn && (Date.now() - _tabAn.at) < 90000); }   // 90초 내 = 이 탭이 활성 수집 중
+    // [v2.1.146 배당판-분석 경주 일치 가드] 배당판 네비("이전 X N경주 …")에서 현재 경주를 읽어 분석 데이터의
+    //   경주(지명·번호)와 다르면 표시 보류 — SPA 종목/경주 전환 직후 이전 경주 분석이 90초 신선도 안에서
+    //   잔존 표시되던 유령의 근본 차단. 판별 불가 시 기존 동작 유지(안전·5초 캐시로 부하 억제).
+    var _brdCache = { t: 0, v: null };
+    function _boardRk() {
+      if (Date.now() - _brdCache.t < 5000) return _brdCache.v;
+      var res = null;
+      try {
+        var txt = ((document.body && document.body.innerText) || '').slice(0, 30000);
+        var m = /이전\s*([가-힣]{2,8})\s*(\d{1,2})\s*경주/.exec(txt);
+        if (m) res = { v: m[1], n: +m[2] };
+      } catch (_) { /* */ }
+      _brdCache = { t: Date.now(), v: res };
+      return res;
+    }
+    function _rkMatchesBoard(rk) {
+      var b = _boardRk();
+      if (!b || !rk) return true;
+      var m = /([가-힣]{2,8})\s*(\d{1,2})\s*경주/.exec(String(rk));
+      if (!m) return true;
+      var sameV = (m[1].indexOf(b.v) >= 0 || b.v.indexOf(m[1]) >= 0);
+      return sameV && (+m[2] === b.n);
+    }
     function readData() {
       return new Promise(function (resolve) {
         try {
@@ -241,6 +269,15 @@
               v.analyzeStatus = { data: _tabAn.data, at: _tabAn.at };
               if (_tabAn.raceKey) v.raceKey = _tabAn.raceKey;
             }
+            // [v2.1.146] 최종 표시 직전 경주 일치 검증 — 분석 데이터 경주 ≠ 배당판 경주면 표시 보류(대기)
+            try {
+              var _dat = v.analyzeStatus && v.analyzeStatus.data;
+              var _drk = (_dat && (_dat.raceKey || _dat.race)) || v.raceKey || '';
+              if (_dat && _drk && !_rkMatchesBoard(_drk)) {
+                v.analyzeStatus = null;
+                v.rkMismatch = _drk;   // 진단용(렌더러 '경주 전환 감지' 표시 가능)
+              }
+            } catch (_) { /* */ }
             resolve(v);
           });
         } catch (_) { resolve({}); }
@@ -1266,6 +1303,13 @@
       //   ❌제거마는 상한 밖(항상 유지). 스마트머니/역배열은 유력 셀에 들면 ⭐로 커버.
       var _emph = {};
       Object.keys(_starHorse).forEach(function (nn) { _emph[+nn] = { mark: '⭐', bc: BCOL.fav, lbl: '유력(추천·유력 조합)' }; });
+      // [③-3 v2.1.146 유력마 표시 분리] ⭐가 추천 조합 수(EV 필터 결과)에 종속돼 1~2마리로 줄던 문제 —
+      //   keyHorses 상위 4마리는 추천과 무관하게 항상 ⭐ 표시(예전 4마리 표시 복원). 빨강 급락 게이트
+      //   (_starHorse)는 기존 그대로 추천 조합 기준 → 급락 표시 과발화 없음(표시만 확장).
+      ((d.keyHorses || []).slice(0, 4)).forEach(function (kh) {
+        var nn = +kh;
+        if (nn && !_emph[nn]) _emph[nn] = { mark: '⭐', bc: BCOL.fav, lbl: '유력마(분석 상위)' };
+      });
       // [BMED 특별 감지 💎] 특별 조합에 등장하는 말번호 → 헤더에 💎(상한 밖·⭐/❌ 아니면 표시)
       var _spH = {};
       Object.keys(specialSet).forEach(function (k) { var p = k.split('|'); _spH[+p[0]] = 1; _spH[+p[1]] = 1; });

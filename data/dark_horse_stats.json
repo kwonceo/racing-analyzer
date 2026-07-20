@@ -1,45 +1,45 @@
 {
- "races": 388,
+ "races": 389,
  "byRank": {
   "rank1": {
    "hit": 44,
-   "total": 159,
-   "rate": 27.7
+   "total": 163,
+   "rate": 27.0
   },
   "rank2": {
-   "hit": 29,
-   "total": 123,
-   "rate": 23.6
+   "hit": 32,
+   "total": 127,
+   "rate": 25.2
   },
   "rank3": {
    "hit": 27,
-   "total": 103,
-   "rate": 26.2
+   "total": 108,
+   "rate": 25.0
   }
  },
  "bySignal": {
   "크로스역배열": {
-   "hit": 33,
-   "total": 117,
-   "rate": 28.2,
+   "hit": 32,
+   "total": 118,
+   "rate": 27.1,
    "weightReady": true
   },
   "초기급락 보존": {
-   "hit": 33,
-   "total": 161,
-   "rate": 20.5,
+   "hit": 38,
+   "total": 174,
+   "rate": 21.8,
    "weightReady": true
   },
   "역배열": {
    "hit": 26,
-   "total": 68,
-   "rate": 38.2,
+   "total": 69,
+   "rate": 37.7,
    "weightReady": true
   },
   "급락": {
-   "hit": 5,
-   "total": 27,
-   "rate": 18.5,
+   "hit": 4,
+   "total": 25,
+   "rate": 16.0,
    "weightReady": false
   },
   "스마트머니": {
@@ -58,14 +58,14 @@
  "byBand": {
   "30~50": {
    "hit": 5,
-   "total": 36,
-   "rate": 13.9,
+   "total": 35,
+   "rate": 14.3,
    "weightReady": true
   },
   "15~30": {
-   "hit": 12,
-   "total": 72,
-   "rate": 16.7,
+   "hit": 14,
+   "total": 76,
+   "rate": 18.4,
    "weightReady": true
   },
   "100+": {
@@ -75,17 +75,17 @@
    "weightReady": false
   },
   "50~100": {
-   "hit": 2,
-   "total": 9,
-   "rate": 22.2,
+   "hit": 3,
+   "total": 12,
+   "rate": 25.0,
    "weightReady": false
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 76,
-   "total": 270,
-   "rate": 28.1,
+   "hit": 75,
+   "total": 273,
+   "rate": 27.5,
    "weightReady": true
   },
   "korea": {
@@ -95,19 +95,19 @@
    "weightReady": false
   },
   "keirin": {
-   "hit": 18,
-   "total": 100,
-   "rate": 18.0,
+   "hit": 22,
+   "total": 110,
+   "rate": 20.0,
    "weightReady": true
   }
  },
  "missedRaces": 84,
  "dansung": {
-  "races": 11,
+  "races": 12,
   "horseWonRate": 0.0,
   "horseWon": 0,
   "horsePlaced": 3,
-  "darkHitRate": 36.4,
+  "darkHitRate": 33.3,
   "darkHit": 4,
   "winnerSignals": {
    "실질유력": 1,
@@ -115,5 +115,5 @@
    "기타": 1
   }
  },
- "updated_at": "2026-07-20 10:52:36"
+ "updated_at": "2026-07-20 11:52:23"
 }

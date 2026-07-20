@@ -579,13 +579,23 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "카사마츠 2경주",
+        "date": "2026-07-20",
+        "horses": [
+          6
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 42,
-    "hit_quinella": 22,
-    "hit_trifecta": 16,
-    "rate_quinella": 52.4,
-    "rate_trifecta": 38.1,
+    "count": 43,
+    "hit_quinella": 23,
+    "hit_trifecta": 17,
+    "rate_quinella": 53.5,
+    "rate_trifecta": 39.5,
     "reliable": false
   },
   "급락": {
@@ -2468,13 +2478,45 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "카사마츠 1경주",
+        "date": "2026-07-20",
+        "horses": [
+          3
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "기후 7경주",
+        "date": "2026-07-20",
+        "horses": [
+          1
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "카사마츠 2경주",
+        "date": "2026-07-20",
+        "horses": [
+          2
+        ],
+        "placed": [
+          2
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 175,
-    "hit_quinella": 78,
-    "hit_trifecta": 33,
-    "rate_quinella": 44.6,
-    "rate_trifecta": 18.9,
+    "count": 178,
+    "hit_quinella": 80,
+    "hit_trifecta": 34,
+    "rate_quinella": 44.9,
+    "rate_trifecta": 19.1,
     "reliable": true
   },
   "전적이중수렴": {
@@ -3055,13 +3097,23 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "카사마츠 1경주",
+        "date": "2026-07-20",
+        "horses": [
+          1
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 46,
+    "count": 47,
     "hit_quinella": 27,
     "hit_trifecta": 10,
-    "rate_quinella": 58.7,
-    "rate_trifecta": 21.7,
+    "rate_quinella": 57.4,
+    "rate_trifecta": 21.3,
     "reliable": false
   },
   "역배열": {
@@ -3735,13 +3787,25 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "기후 7경주",
+        "date": "2026-07-20",
+        "horses": [
+          5
+        ],
+        "placed": [
+          5
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 58,
-    "hit_quinella": 22,
+    "count": 59,
+    "hit_quinella": 23,
     "hit_trifecta": 15,
-    "rate_quinella": 37.9,
-    "rate_trifecta": 25.9,
+    "rate_quinella": 39.0,
+    "rate_trifecta": 25.4,
     "reliable": true
   },
   "크로스역배열": {
@@ -4372,13 +4436,26 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "카사마츠 1경주",
+        "date": "2026-07-20",
+        "horses": [
+          1,
+          4
+        ],
+        "placed": [
+          4
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 8,
+    "count": 9,
     "hit_quinella": 2,
     "hit_trifecta": 1,
-    "rate_quinella": 25.0,
-    "rate_trifecta": 12.5,
+    "rate_quinella": 22.2,
+    "rate_trifecta": 11.1,
     "reliable": false
   }
 }

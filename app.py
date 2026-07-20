@@ -7537,9 +7537,9 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 final_q.append(_it4)
                 _have_m4.add(_pk4)
             elif _pk4 not in _sp_have4:
-                _it4["stars"] = 2
-                special_q = (special_q or []) + [_it4]
-                _sp_have4.add(_pk4)
+                # [③-4 특별감지 상한 누수 수정 (2026-07-20)] 50배 초과 강제 페어가 💎 특별(★★)로 그대로
+                #   노출되던 구멍(198배 사례) — 특별 상한 초과는 노출 제외(로그만·회원 신뢰 보호).
+                print(f"[강제편입 상한] {_pk4[0]}+{_pk4[1]} {_po4}배 > 특별상한 {SPECIAL_ODDS_MAX}배 → 💎 노출 제외(참고)")
 
         # ① 역배열 유력마 강제 편입
         _ivf = cp.get("invForce") or None
@@ -7585,6 +7585,14 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                     _ck = tuple(sorted(int(x) for x in (_qi.get("combo") or [])))
                     if _ck in _sp_have2:
                         continue                       # 이미 복병 섹션에 있음(급락 등) → 보존·중복 안 함
+                    # [③-4 특별감지 상한 (2026-07-20)] 복병 이동도 특별 상한(50배) 적용 — 초과분 노출 제외
+                    try:
+                        _qo2 = float(_qi.get("odds") or 0)
+                    except (TypeError, ValueError):
+                        _qo2 = 0.0
+                    if _qo2 > SPECIAL_ODDS_MAX:
+                        print(f"[복병 이동 상한] {'+'.join(map(str, _ck))} {_qo2}배 > 특별상한 {SPECIAL_ODDS_MAX}배 → 💎 노출 제외(참고)")
+                        continue
                     _qd = dict(_qi)
                     _qd["stars"] = 2
                     _qd["reason"] = (_qd.get("reason") or "") + " → 고배당(25배↑) 복병 이동"
@@ -8321,6 +8329,15 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
             #   유력마 1·2위 조합 + 신호 근거 조합(리프라이싱 리더·라인 페어·급락·역배열)은 배당만 보는
             #   필터에서 면제(신호가 이미 근거·EV 표기는 유지).
             _kh2 = set(int(x) for x in (key_horses or [])[:2] if str(x).strip().lstrip("-").isdigit())
+            # [③-1 EV 면제 확대 (2026-07-20)] 시장 1·2위(최저 복승 조합)도 면제 — keyHorses 재정렬(전적 통합)로
+            #   시장 최저 조합 ≠ keyHorses 1·2위가 되면 면제를 놓쳐 메인이 전멸→⚠복원되던 구멍(모리오카 5R 1+2).
+            #   면제 토큰에 확신도·이중수렴·시장 계열 추가 — 확신도 조합이 EV로 흔적 없이 잘리던 모순 해소.
+            _mkt2 = None
+            try:
+                _lowc = min(((k, v) for k, v in (curQ or {}).items() if v and v > 0), key=lambda kv: kv[1])[0]
+                _mkt2 = set(int(x) for x in _lowc)
+            except (ValueError, TypeError):
+                _mkt2 = None
             _kept3 = []
             for _q in fq:
                 _o = _q.get("odds")
@@ -8330,7 +8347,9 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
                 _combo2 = set(int(x) for x in (_q.get("combo") or []))
                 _rsn2 = _q.get("reason") or ""
                 _exempt = ((len(_kh2) == 2 and _combo2 == _kh2)
-                           or any(t in _rsn2 for t in ("유력마 1·2위", "리프라이싱 리더", "라인 페어", "급락", "역배열")))
+                           or (_mkt2 is not None and _combo2 == _mkt2)
+                           or any(t in _rsn2 for t in ("유력마 1·2위", "리프라이싱 리더", "라인 페어", "급락", "역배열",
+                                                       "확신도", "이중수렴", "시장 최저복승", "시장유력")))
                 if _ev is not None and _ev < 1.0 and not _exempt:
                     _demote(_q, "기대값 %.2f 미달(배당 %s배 × 추정적중률 %d%%)" % (_ev, _o, round(_p * 100)))
                 else:
@@ -8367,13 +8386,26 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
                                   "basis": [], "summary": "대규모 재편 자금 집중 조합(강제 편입)"})
             except Exception as _mre:
                 print("[리프라이싱 리더] 편입 실패(무시):", _mre)
-            # 전멸 시 최상위 1개 "⚠ 기대값 미달(참고)" 복원(추천 0 방지 — 사용자 승인 정책)
+            # 전멸 시 "⚠ 기대값 미달(참고)" 복원(추천 0 방지 — 사용자 승인 정책)
+            # [③-2 (2026-07-20)] 1개 → 최대 2개: 최상위 EV(시장) 1개 + 확신도/이중수렴 계열 1개 보장 —
+            #   확신도 1위 조합이 복원에서도 흔적 없이 사라지던 모순 해소. 별 등급은 메인 위계 유지(★★★).
             if not fq and ref:
                 _best = max(ref, key=lambda q: (q.get("ev") if q.get("ev") is not None else -1))
                 _best = dict(_best)
                 _best["evWarn"] = True
+                _best["stars"] = 3
                 _best["reason"] = (_best.get("reason") or "") + " · ⚠ 기대값 미달(참고)"
                 fq = [_best]
+                _bc0 = tuple(sorted(int(x) for x in (_best.get("combo") or [])))
+                _conf_alt = next((q for q in ref
+                                  if any(t in (q.get("reason") or "") for t in ("확신도", "이중수렴"))
+                                  and tuple(sorted(int(x) for x in (q.get("combo") or []))) != _bc0), None)
+                if _conf_alt:
+                    _ca = dict(_conf_alt)
+                    _ca["evWarn"] = True
+                    _ca["stars"] = 3
+                    _ca["reason"] = (_ca.get("reason") or "") + " · ⚠ 기대값 미달(참고)"
+                    fq.append(_ca)
             cp["profitTier"] = dict(_tier, msg=None)
         cp["finalQuinellas"] = fq
         cp["finalTrifectas"] = ft
@@ -11078,6 +11110,7 @@ def extract_japan():
     rk = (body.get("raceKey") or "").strip()
     if not rk:
         return jsonify({"error": "raceKey가 필요합니다."}), 400
+    rk = _canon_rk(rk)   # [④ 키 정규화 (2026-07-20)] 전적도 배당과 같은 키 규약으로 저장(날짜접두·거리접미·별칭 통일)
     raw_horses = body.get("horses") or []
     horses = _sanitize_starters(raw_horses)   # [전적복구] 오즈표/전체목록 오탐 방어(중복 마번 제거·1~18만)
     sdb = _starters_load()
@@ -11815,10 +11848,24 @@ def triple_analyze():
     if not db:
         return jsonify({"error": "수집된 3종 배당이 없습니다. 먼저 [전체 자동 수집]을 실행하세요."}), 404
     if rk not in db:
-        if explicit:  # 지정 경주 데이터가 아직 없음 → 폴백 없이 대기 안내(이전 경주 표시 방지)
-            return jsonify({"error": f"'{rk}' 경주의 수집 데이터가 없습니다. 확장에서 해당 raceKey로 [전체 자동 수집]을 실행하세요.",
-                            "raceKey": rk, "waiting": True}), 404
-        rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
+        if explicit:
+            # [④ 키 정규화 (2026-07-20)] 요청 키 변형(날짜 접두·거리 접미·별칭)을 저장 규약으로 정규화 후 재조회 —
+            #   "2026-07-20 모리오카 2경주" 요청 ↔ "모리오카 2경주" 저장이 어긋나 404·유령 폴백되던 문제 종결.
+            #   ①요청 키 canon ②저장 키들의 canon 과 대조(과거 비정규 저장키도 매칭). 실패 시에만 404(폴백 없음 유지).
+            _rk0 = rk
+            rk = _canon_rk(rk)
+            if rk not in db:
+                _match = next((k for k in db if _canon_rk(k) == rk), None)
+                if _match:
+                    rk = _match
+            if rk in db:
+                if rk != _rk0:
+                    print(f"[키 정규화] analyze: 요청 '{_rk0}' → 저장키 '{rk}'")
+            else:  # 지정 경주 데이터가 아직 없음 → 폴백 없이 대기 안내(이전 경주 표시 방지)
+                return jsonify({"error": f"'{_rk0}' 경주의 수집 데이터가 없습니다. 확장에서 해당 raceKey로 [전체 자동 수집]을 실행하세요.",
+                                "raceKey": _rk0, "waiting": True}), 404
+        else:
+            rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
     an = _triple_analyze(rk, db.get(rk) or {})
     # [복기] 분석 시점의 전적/제거/신호/추천을 히스토리 파일에 보존(통계 탭 복기용)
     try:
@@ -12682,6 +12729,18 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
         "actual_return": record.get("payout_actual"),
         "profit": record.get("pnl"),
     }
+    # [회수율 정직화 (2026-07-20 권대표 승인)] 성적표는 payouts 를 읽고 결과 저장은 investment 에만 담아
+    #   적중 전건이 '확정배당 미확보'로 빠지던 어긋남 수정 — 최상위 payouts 로도 저장(추가만).
+    #   출처 구분: 확정(수동입력·백필·record.payouts) vs 근사(마지막 수집 배당 폴백) → payouts_approx 로 정직 표기.
+    _q_official = (_safe_num(inputs.get("quinella_odds"))
+                   or _safe_num((record.get("payouts") or {}).get("quinella")))
+    _t_odds_top = (_safe_num(inputs.get("trifecta_odds"))
+                   or _safe_num((record.get("payouts") or {}).get("trifecta")))
+    _payouts_top = {}
+    if _q_odds_fb is not None:
+        _payouts_top["quinella"] = _q_odds_fb
+    if _t_odds_top is not None:
+        _payouts_top["trifecta"] = _t_odds_top
     return {
         "race_id": rid, "raceKey": rk, "date": date,
         "sport": _rk_sport(rk, an),                 # [오류7] 종목 자동 태깅(horse/cycle/korea 등)
@@ -12693,6 +12752,8 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
         "weather": inputs.get("weather"),
         "horse_count": inputs.get("horse_count") or len(an.get("form") or []) or None,
         "result": {k: result.get(k) for k in ("1st", "2nd", "3rd", "4th") if result.get(k) not in (None, "")},
+        "payouts": (_payouts_top or None),                                        # [회수율 정직화] 성적표 참조 위치
+        "payouts_approx": bool(_payouts_top.get("quinella") is not None and _q_official is None),
         "odds_at_start": odds_start,
         "odds_timeline": timeline,
         "anomalies": anomalies,
@@ -17935,6 +17996,19 @@ _TRACK_GROUPS = {
     "마쓰도": ["松戸", "matsudo"],
     "시즈오카": ["静岡", "shizuoka"],
     "야히코": ["弥彦", "yahiko"],
+    # [경륜장 한자 별칭 보강 (2026-07-20)] 기시와다 결과 백필 전멸 원인 — 岸和田가 사전에 없어 venue 검증
+    #   ("joCode 불일치 — 학습 차단")이 정상 결과를 8건 연속 차단. 당일 나이트 개최장(도요하시·케이오카쿠)
+    #   포함 미등록 경륜장 일괄 추가(추가만·기존 항목 무변경).
+    "기시와다": ["岸和田", "kishiwada"],
+    "도요하시": ["豊橋", "toyohashi"],
+    "케이오카쿠": ["京王閣", "keiokaku"],
+    "세이부엔": ["西武園", "seibuen"],
+    "마에바시": ["前橋", "maebashi"],
+    "우쓰노미야": ["宇都宮", "utsunomiya"],
+    "이즈": ["伊豆", "izu"],
+    "다치카와": ["立川", "tachikawa"],
+    "오다와라": ["小田原", "odawara"],
+    "구마모토": ["熊本", "kumamoto"],
     "세이부엔": ["西武園", "seibuen"],
     "오비히로": ["帯広", "obihiro", "obi"],
     "모리오카": ["盛岡", "morioka", "mori"],
@@ -18953,6 +19027,73 @@ def _keirin_odds_url(jo, ymd, race, bet_type):
             "?joCode=%s&kaisaiBi=%s&raceNo=%s&betType=%s" % (jo, ymd, race, bet_type))
 
 
+# ── [oddspark 그리드 파서 (2026-07-20)] 馬連·3連複 공용 colmap(열지도) 파싱 ─────────────
+#  구조 실측(盛岡 9R 라이브 · 45/45 조합 재현 검증 · 단승 인기순과 정합 확인):
+#   · TH[colspan=2] 텍스트 = 열 선두 라벨("3"=복승 선두마 · "1-2"=삼복승 선두 2두)
+#     — 상단 헤더행(메인 1~8열)뿐 아니라 9두+ '꼬리 블록' 헤더가 데이터 행 중간에 인라인으로 등장.
+#   · TH(colspan=1 · class th2) = 상대 마번, 바로 다음 TD(colspan=1) = 배당(<span> 래핑·취소/미발매="-" del).
+#   · TD[colspan=2 · nob_all] = 빈 필러(열 소진 자리).
+#  colspan 누적 x좌표로 열 지도(colmap[x]=선두 번호들)를 갱신 → combo = 열 선두 + 상대번호.
+#  기존 walking 파서의 '9두+ 8열 블록 분할 라벨 밀림'(parsed(a,b)=실제(b-a+1,b))을 구조적으로 해결.
+#  테이블 단위로 colmap 초기화 → 마방 정보 테이블(枠番/馬番/単勝)은 colspan2 숫자 헤더가 없어 자연 무시(오염 차단).
+_OPGRID_TR_RE = re.compile(r"<tr\b[^>]*>(.*?)</tr>", re.I | re.S)
+_OPGRID_CELL_RE = re.compile(r"<(th|td)\b([^>]*)>(.*?)</\1>", re.I | re.S)
+
+
+def _oddspark_grid_combos(html, max_no=18):
+    """oddspark 배당 그리드 HTML → {tuple(sorted(combo)): odds}. 복승(2두)·삼복승(3두) 공용."""
+    out = {}
+    for tbl in re.findall(r"<table\b[^>]*>(.*?)</table>", html or "", re.I | re.S):
+        colmap = {}
+        for trm in _OPGRID_TR_RE.finditer(tbl):
+            x = 0
+            pend = None
+            for cm in _OPGRID_CELL_RE.finditer(trm.group(1)):
+                tag = cm.group(1).lower()
+                attrs = cm.group(2) or ""
+                txt = re.sub(r"<[^>]+>", "", cm.group(3) or "")
+                txt = re.sub(r"\s+", "", _htmllib.unescape(txt))
+                mcs = re.search(r'colspan\s*=\s*["\']?(\d+)', attrs, re.I)
+                cs = int(mcs.group(1)) if mcs else 1
+                if tag == "th" and cs == 2 and re.fullmatch(r"\d{1,2}(?:-\d{1,2})?", txt):
+                    heads = [int(v) for v in txt.split("-")]
+                    if all(1 <= v <= max_no for v in heads) and len(set(heads)) == len(heads):
+                        colmap[x] = heads
+                    pend = None
+                elif tag == "th" and cs == 1 and re.fullmatch(r"\d{1,2}", txt) and 1 <= int(txt) <= max_no:
+                    pend = (x, int(txt))
+                elif tag == "td" and cs == 1 and pend and pend[0] == x - 1:
+                    mo = re.fullmatch(r"[\d,]+\.\d+", txt)
+                    heads = colmap.get(x - 1)
+                    if mo and heads:
+                        od = float(mo.group(0).replace(",", ""))
+                        combo = heads + [pend[1]]
+                        if od > 0 and len(set(combo)) == len(combo):
+                            k = tuple(sorted(combo))
+                            if out.get(k) is None or od < out[k]:
+                                out[k] = od
+                    pend = None
+                else:
+                    pend = None
+                x += cs
+    return out
+
+
+def _keiba_parse_quinella_grid(html):
+    """[파서 재작성 v2] 복승(馬連=betType6) — colmap 그리드 파싱(9두+ 블록·꼬리 포함 전체 복원)."""
+    grid = _oddspark_grid_combos(html)
+    return sorted([{"combo": list(k), "odds": od} for k, od in grid.items() if len(k) == 2],
+                  key=lambda c: c["odds"])
+
+
+def _keiba_parse_trio_grid(html, max_no=18):
+    """[파서 재작성 v2] 삼복승(3連複=betType9) — NAR 페이지는 'a-b-c 텍스트'가 아니라 짝헤더(1-2 등)
+    그리드 구조(실측)라 기존 _oddspark_parse_trio 가 0건이던 근본 원인 해결."""
+    grid = _oddspark_grid_combos(html, max_no=max_no)
+    return sorted([{"combo": list(k), "odds": od} for k, od in grid.items() if len(k) == 3],
+                  key=lambda c: c["odds"])
+
+
 def _keirin_table_rows(html):
     """oddspark 배당 HTML → 표 행 리스트(각 행=셀 텍스트 리스트). 태그 제거·공백 정리."""
     rows = []
@@ -19321,6 +19462,15 @@ def _keiba_horse_count(html):
 def _keiba_parse_quinella(html):
     """복승(馬連=betType6) 매트릭스 → [{combo:[a,b], odds}]. 상대차 라벨을 따라가는 walking 파싱.
     행 축(axis) + implicit 최소차번으로 상삼각 전체(N(N-1)/2) 복원."""
+    # [파서 재작성 v2 (2026-07-20)] colmap 그리드 파서 우선 — 9두+ 8열 블록·꼬리 블록을 구조적으로
+    #   정확 복원(盛岡 9R 12두 편성 라이브 45/45 조합 재현·단승 인기순 정합 검증). 그리드 파싱이
+    #   실패(구조 변형)한 경우에만 기존 walking 파서(8두 이하)+파서게이트(9두+ 거부)로 폴백(무삭제).
+    try:
+        _gq = _keiba_parse_quinella_grid(html)
+        if len(_gq) >= 3:
+            return _gq
+    except Exception as _ge:
+        print("[경마 복승 그리드] 파싱 실패(무시 → 기존 파서 폴백):", _ge)
     rows = _keiba_matrix_rows(html)
     if not rows:
         return []
@@ -21091,6 +21241,219 @@ def keirin_today_stats():
                     "hitRate": (round(hits / races * 100) if races else 0),
                     "avgOdds": (round(sum(odds_list) / len(odds_list), 1) if odds_list else None),
                     "rows": rows})
+
+
+# ══════════════ [적중왕 타임락 성적표 (2026-07-20)] 전 종목 일일 성적 — 회수율(ROI) 헤드라인 ══════════════
+#  판정 = _live_exact_hit(라이브 추천만·마감 후 기록 제외·noRec=패스) 재사용 — 적중판정 기준 불변(표시 계층만 신설).
+#  ROI = 판정 대상 경주당 1만원 균일 배팅 가정. 회수는 공식 확정배당(payouts.quinella/trifecta)만 인정 —
+#  확정배당 없는 적중은 unconfirmedHits 로 분리(부풀리기 금지·정직 원칙).
+def _scoreboard_daily(date=None):
+    date = date or time.strftime("%Y-%m-%d")
+    prefix = date.replace("-", "_")
+    STAKE = 10000
+    rows, agg = [], {}
+    judged = hits = passes = unconfirmed = 0
+    invested = returned = 0.0
+
+    def _sport_label(doc, rk):
+        sp = (doc.get("sport") or "").lower()
+        cat = (doc.get("category") or "").lower()
+        if sp == "cycle" or cat == "cycle" or _KEIRIN_ONLY_RE.search(str(rk)):
+            return "경륜"
+        if cat == "korea" or _KRA_TRACK_RE.search(str(rk)):
+            return "한국경마"
+        if sp == "horse" or cat.startswith("japan"):
+            return "일본경마"
+        return "기타"
+
+    try:
+        for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
+            if not fn.startswith(prefix) or not fn.endswith(".json"):
+                continue
+            fpath = os.path.join(RACE_RESULTS_DIR, fn)
+            try:
+                doc = json.load(open(fpath, encoding="utf-8"))
+            except Exception:
+                continue
+            rk = doc.get("raceKey") or doc.get("race_id") or fn
+            r = doc.get("result") or {}
+            top3 = [r.get("1st"), r.get("2nd"), r.get("3rd")]
+            if not any(x is not None for x in top3):
+                continue                       # 결과 미확정 경주 제외
+            try:
+                _mt = os.path.getmtime(fpath)  # 결과 저장 시각 ≈ 경주 종료 순서(스트릭 정렬용)
+            except Exception:
+                _mt = 0
+            sport = _sport_label(doc, rk)
+            lx = _live_exact_hit(rk, top3, doc.get("horse_count"))
+            po = (r.get("payouts") or doc.get("payouts") or {})
+            # [회수율 정직화 (2026-07-20 승인)] payouts 없으면 investment 배당 폴백(과거 파일 소급 커버) —
+            #   폴백·근사 출처는 approx 로 정직 표기(부풀리기 방지·표시에 '(근사)' 병기).
+            _approx = bool(doc.get("payouts_approx"))
+            if (not isinstance(po, dict)) or (po.get("quinella") is None and po.get("trifecta") is None):
+                _inv_fb = doc.get("investment") or {}
+                if _inv_fb.get("quinella_odds") is not None or _inv_fb.get("trifecta_odds") is not None:
+                    po = {"quinella": _inv_fb.get("quinella_odds"), "trifecta": _inv_fb.get("trifecta_odds")}
+                    _approx = True   # 과거 파일은 출처 미기록 → 보수적으로 근사 취급
+            if lx is not None and lx.get("noRec"):
+                passes += 1
+                rows.append({"raceKey": rk, "sport": sport, "verdict": "pass", "top3": top3, "t": _mt})
+                continue
+            ra = doc.get("result_analysis") or {}
+            hit = (bool(lx["hit"] or lx["trioHit"]) if lx is not None else bool(ra.get("main_hit")))
+            judged += 1
+            invested += STAKE
+            qo = po.get("quinella") if isinstance(po, dict) else None
+            to = po.get("trifecta") if isinstance(po, dict) else None
+            ret = None
+            used_odds = None
+            if hit:
+                hits += 1
+                if (lx is None or lx.get("hit")) and isinstance(qo, (int, float)) and qo > 0:
+                    ret, used_odds = qo * STAKE, qo
+                elif lx is not None and lx.get("trioHit") and isinstance(to, (int, float)) and to > 0:
+                    ret, used_odds = to * STAKE, to
+                if ret is None:
+                    unconfirmed += 1           # 적중이나 확정배당 미확보 → 회수 집계 제외(정직)
+                else:
+                    returned += ret
+            a = agg.setdefault(sport, {"judged": 0, "hits": 0, "invested": 0, "returned": 0.0})
+            a["judged"] += 1
+            a["hits"] += int(hit)
+            a["invested"] += STAKE
+            a["returned"] += (ret or 0.0)
+            rows.append({"raceKey": rk, "sport": sport, "verdict": ("hit" if hit else "miss"),
+                         "top3": top3, "odds": used_odds, "return": (int(ret) if ret else None),
+                         "approx": bool(_approx and ret is not None),   # [회수율 정직화] 근사 배당 회수 표기
+                         "legacy": lx is None, "t": _mt})
+    except Exception as e:
+        return {"date": date, "error": str(e), "judged": judged, "hits": hits}
+    rows.sort(key=lambda x: x.get("t") or 0)   # 시간순(결과 저장 순)
+    streak = 0
+    for row in reversed([x for x in rows if x["verdict"] in ("hit", "miss")]):
+        if row["verdict"] == "hit":
+            streak += 1
+        else:
+            break
+    for a in agg.values():
+        a["roi"] = (round(a["returned"] / a["invested"] * 100) if a["invested"] else None)
+        a["hitRate"] = (round(a["hits"] / a["judged"] * 100) if a["judged"] else 0)
+        a["returned"] = int(a["returned"])
+    return {"date": date, "stake": STAKE, "judged": judged, "hits": hits, "passes": passes,
+            "hitRate": (round(hits / judged * 100) if judged else 0),
+            "roi": (round(returned / invested * 100) if invested else None),
+            "invested": int(invested), "returned": int(returned),
+            "profit": int(returned - invested), "unconfirmedHits": unconfirmed,
+            "approxUsed": sum(1 for _rw in rows if _rw.get("approx")),   # [회수율 정직화] 근사 배당 사용 건수
+            "streak": streak, "bySport": agg, "rows": rows}
+
+
+@app.route("/api/scoreboard/daily")
+def scoreboard_daily_api():
+    """전 종목 일일 성적 JSON — ?date=YYYY-MM-DD (기본 오늘)."""
+    return jsonify(_scoreboard_daily(request.args.get("date")))
+
+
+@app.route("/scoreboard")
+def scoreboard_page():
+    """[적중왕 타임락 성적표] 읽기 전용 화면 — 회수율 헤드라인·머니시뮬·종목별·경주별 전체 공개·주간 곡선."""
+    date = (request.args.get("date") or time.strftime("%Y-%m-%d")).strip()
+    sb = _scoreboard_daily(date)
+
+    def _esc(x):
+        return (str(x) if x is not None else "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    css = ("<style>body{background:#10161f;color:#e2e8f0;font-family:-apple-system,'Malgun Gothic',sans-serif;"
+           "margin:18px;font-size:14px}a{color:#4ea1ff}h2{color:#c4b5fd;font-size:17px}"
+           ".bar{background:linear-gradient(90deg,#14202e,#101a26);border:1px solid #2b3a4f;border-radius:12px;"
+           "padding:14px 18px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}"
+           ".num{font-size:30px;font-weight:900;color:#38d39f}.lbl{font-size:12px;color:#94a3b8}"
+           ".sep{width:1px;height:34px;background:#2b3a4f}.kv{font-size:12.5px;color:#94a3b8}.kv b{color:#e2e8f0}"
+           ".money b{color:#ffd24f;font-size:16px}"
+           ".streak{background:rgba(56,211,159,.16);border:1px solid #38d39f;color:#38d39f;border-radius:9px;"
+           "padding:3px 10px;font-weight:800;font-size:12.5px}"
+           ".lock{margin-left:auto;font-size:11.5px;color:#94a3b8;border:1px solid #6d28d9;border-radius:9px;"
+           "padding:4px 10px;background:rgba(139,92,246,.10)}.lock b{color:#c4b5fd}"
+           "table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}"
+           "td,th{border-bottom:1px solid #223145;padding:6px 9px;text-align:left}th{color:#64748b;font-size:11px}"
+           ".hit{color:#7fd14f;font-weight:800}.miss{color:#64748b}.pass{color:#ffd24f}"
+           ".hint{color:#64748b;font-size:11.5px}h3{color:#4ea1ff;font-size:13px;margin:20px 0 4px}</style>")
+    roi_txt = ("%s%%" % sb["roi"]) if sb.get("roi") is not None else "—"
+    profit = sb.get("profit") or 0
+    profit_txt = ("+%s원" % format(profit, ",")) if profit >= 0 else ("%s원" % format(profit, ","))
+    out = ["<html><head><meta charset='utf-8'><title>적중왕 성적표</title>%s</head><body>" % css,
+           "<h2>🏆 적중왕 타임락 성적표 — %s</h2>" % _esc(sb["date"]),
+           "<div class='bar'><div><span class='num'>%s</span> <span class='lbl'>오늘 회수율</span></div>" % _esc(roi_txt),
+           "<div class='sep'></div><div class='kv'><b>%d전 %d중</b> · 패스 %d</div>" % (sb["judged"], sb["hits"], sb["passes"]),
+           "<div class='sep'></div><div class='kv money'>💰 1만원씩 배팅 시 <b>%s</b></div>" % _esc(profit_txt)]
+    if sb.get("streak", 0) >= 2:
+        out.append("<div class='streak'>🔥 %d연속 적중</div>" % sb["streak"])
+    out.append("<div class='lock'>🔒 <b>타임락 검증</b> — 모든 추천은 마감 전 기록·변경 불가</div></div>")
+    if sb.get("unconfirmedHits"):
+        out.append("<p class='hint'>※ 확정배당 미확보 적중 %d건은 회수 집계에서 제외(정직 산출)</p>" % sb["unconfirmedHits"])
+    if sb.get("approxUsed"):
+        out.append("<p class='hint'>※ 회수 %d건은 근사 배당(마지막 수집 배당) 기준 — 확정배당 확보 시 자동 대체</p>" % sb["approxUsed"])
+    # 종목별
+    if sb.get("bySport"):
+        out.append("<h3>종목별</h3><table><tr><th>종목</th><th>전적</th><th>적중률</th><th>회수율</th></tr>")
+        for sp, a in sb["bySport"].items():
+            out.append("<tr><td>%s</td><td>%d전 %d중</td><td>%d%%</td><td><b>%s</b></td></tr>"
+                       % (_esc(sp), a["judged"], a["hits"], a["hitRate"],
+                          ("%d%%" % a["roi"]) if a.get("roi") is not None else "—"))
+        out.append("</table>")
+    # 경주별 전체 공개
+    out.append("<h3>경주별 판정 (전체 공개)</h3><table><tr><th>경주</th><th>결과</th><th>판정</th><th>확정배당</th><th>회수(1만원)</th></tr>")
+    for row in sb.get("rows", []):
+        t3 = "-".join(str(x) for x in (row.get("top3") or []) if x is not None)
+        v = row["verdict"]
+        vt = ("<span class='hit'>✅ 적중</span>" if v == "hit" else
+              ("<span class='pass'>➖ 패스</span>" if v == "pass" else "<span class='miss'>❌</span>"))
+        if row.get("legacy"):
+            vt += " <span class='hint'>(구판정)</span>"
+        out.append("<tr><td><a href='/race-log?key=%s&date=%s'>%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+                   % (_esc(row["raceKey"]), _esc(date), _esc(row["raceKey"]), _esc(t3), vt,
+                      (_esc("%s배%s" % (row["odds"], "(근사)" if row.get("approx") else "")) if row.get("odds") else "-"),
+                      (_esc("+" + format(row["return"], ",") + "원") if row.get("return") else "-")))
+    out.append("</table>")
+    # 주간 곡선(최근 7일 손익)
+    try:
+        days, profits = [], []
+        for i in range(6, -1, -1):
+            d = time.strftime("%Y-%m-%d", time.localtime(time.time() - i * 86400))
+            s = _scoreboard_daily(d)
+            days.append(d[5:].replace("-", "/"))
+            profits.append(s.get("profit") or 0)
+        cum, acc = [], 0
+        for p in profits:
+            acc += p
+            cum.append(acc)
+        mx = max(max(cum), 0) or 1
+        mn = min(min(cum), 0)
+        rngv = (mx - mn) or 1
+        pts = []
+        for i, v in enumerate(cum):
+            x = 30 + i * 53
+            y = 10 + (mx - v) / rngv * 90
+            pts.append("%d,%d" % (x, round(y)))
+        zero_y = 10 + (mx - 0) / rngv * 90
+        out.append("<h3>주간 누적 손익 (1만원 균일 배팅 가정)</h3>"
+                   "<svg viewBox='0 0 380 130' width='380' height='130'>"
+                   "<line x1='30' y1='%d' x2='350' y2='%d' stroke='#3b4d66' stroke-dasharray='3 3'/>"
+                   % (round(zero_y), round(zero_y)))
+        out.append("<polyline points='%s' fill='none' stroke='#38d39f' stroke-width='2'/>" % " ".join(pts))
+        for i, dlab in enumerate(days):
+            out.append("<text x='%d' y='125' fill='#64748b' font-size='9' text-anchor='middle'>%s</text>"
+                       % (30 + i * 53, _esc(dlab)))
+        lastx, lasty = pts[-1].split(",")
+        out.append("<circle cx='%s' cy='%s' r='4' fill='#38d39f'/>" % (lastx, lasty))
+        out.append("<text x='%s' y='%d' fill='#38d39f' font-size='11' font-weight='800' text-anchor='end'>%s</text>"
+                   % (lastx, max(int(lasty) - 8, 10), _esc(("+" if cum[-1] >= 0 else "") + format(cum[-1], ",") + "원")))
+        out.append("</svg>")
+    except Exception:
+        pass
+    out.append("<p class='hint'>판정 기준: 마감 전 라이브 추천만 · 마감 후 기록 제외 · 추천 미형성=패스(판정 제외) · "
+               "회수는 공식 확정배당만 · 미적중 포함 전체 공개 · 60초 자동 새로고침</p>"
+               "<script>setTimeout(function(){location.reload()},60000)</script></body></html>")
+    return "".join(out)
 
 
 @app.route("/api/keirin/results/backfill", methods=["GET", "POST"])
@@ -25145,7 +25508,10 @@ def _multi_collect_one(track, race, ymd):
             q = _keiba_parse_quinella(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["quinella"])))
             x = _keiba_parse_exacta(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["exacta"])))
             try:
-                tr3 = _oddspark_parse_trio(_keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["trio"])), max_no=18)
+                _html_t3 = _keirin_fetch(_keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["trio"]))
+                # [파서 재작성 v2 (2026-07-20)] NAR 삼복승은 짝헤더 그리드 구조(실측) → 그리드 파서 우선,
+                #   0건이면 기존 텍스트 파서 폴백(무삭제 · 케이스별 안전망).
+                tr3 = _keiba_parse_trio_grid(_html_t3, max_no=18) or _oddspark_parse_trio(_html_t3, max_no=18)
             except Exception as _te:
                 print("[다중경주] NAR 삼복승 수집 실패(무시):", _te)
             sport, category = "horse", "japan_local"
@@ -25673,6 +26039,12 @@ def multi_race_detail(key):
     rec = db.get(key)
     if not rec:
         rec = _triple_load().get(key)   # [통합] 확장 수집(경륜/한국/일본) 읽기 전용 폴백
+    if not rec:
+        # [④ 키 정규화 (2026-07-20)] 키 변형(날짜접두·거리접미·별칭) 재조회 — analyze 와 동일 규약
+        _k2 = _canon_rk(key)
+        rec = db.get(_k2) or _triple_load().get(_k2)
+        if rec:
+            key = _k2
     if not rec:
         return jsonify({"error": "해당 경주 배당이 아직 수집되지 않았습니다.", "waiting": True}), 200
     try:

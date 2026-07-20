@@ -904,6 +904,24 @@
   // [1번] 일본 경마장(지방 NAR + 중앙 JRA) — 한글·한자 병기. raceKey/페이지에 이 이름이 있으면 '경마' 확정.
   //   사설 배당판(asyukk) 네비 메뉴에 '경정/경륜' 링크가 있어 경마 경주도 경정으로 오탐되던 문제 차단.
   const HORSE_TRACKS = /(帯広|門別|盛岡|水沢|浦和|船橋|大井|川崎|金沢|笠松|名古屋|園田|姫路|高知|佐賀|札幌|函館|福島|新潟|東京|中山|中京|京都|阪神|小倉|오비히로|반에이|몬베츠|몬베쓰|모리오카|미즈사와|우라와|후나바시|오오이|오이|카와사키|가와사키|카나자와|가나자와|카사마츠|나고야|소노다|히메지|고치|사가|삿포로|하코다테|히코다테|후쿠시마|후크시마|니가타|도쿄|나카야마|주쿄|교토|한신|고쿠라)/;
+  // [v2.1.146 이중소속 지명] 경륜장과 이름이 겹치는 지명(고치·나고야·카와사키)은 raceKey 단독으로 경마 확정 금지 —
+  //   "고치 N경주"(경륜)가 HORSE_TRACKS 매칭으로 경마 강제되던 버그 수정. 이중소속 지명을 지운 뒤에도 다른
+  //   경마장명이 남아야만 '경마 확정 강신호'로 인정(그 외엔 본문 일본어 마커 등 기존 후순위 신호로 판정).
+  const AMBIG_TRACKS = /(高知|名古屋|川崎|고치|코치|나고야|카와사키|가와사키)/g;
+  function _horseTrackStrong(rk) {
+    try { return HORSE_TRACKS.test(String(rk || '').replace(AMBIG_TRACKS, '')); } catch (_) { return HORSE_TRACKS.test(rk || ''); }
+  }
+  // [v2.1.146 경정 오감지 수정] URL/제목 종목어 강신호 판정 — 여러 종목어가 동시에 있으면(사이트 공용 타이틀에
+  //   '경정'과 '경륜'이 함께 등장) 강신호로 취급하지 않는다. 기존엔 경정을 먼저 검사해 경륜 경주(마쓰도·시즈오카)가
+  //   "경정 수집 중"으로 오감지되던 근본 원인. 정확히 한 종목어만 있을 때만 확정.
+  function _strongSportSignal(href, title) {
+    const strong = (re) => re.test(href) || re.test(title);
+    const b = strong(/(경정|競艇)/), a = strong(/(오토레이스|オートレース|autorace|바이크경주)/), k = strong(/(경륜|競輪)/);
+    if (b && !a && !k) return 'boat';
+    if (a && !b && !k) return 'bike';
+    if (k && !b && !a) return 'cycle';
+    return null;   // 없음 또는 복수(모호) → 강신호 아님
+  }
 
   // [수정#3/탭분리] 종목 자동 감지 — asyukk34 사설 배당판의 탭/본문 텍스트로 종목을 구분.
   //   팝업 종목이 '경마'인데 페이지가 경륜/경정/바이크로 보이면 이 감지값을 사용(수동 선택이 우선).
@@ -916,13 +934,12 @@
       // [수정1·한국 강제] 한국 경마장 raceKey/URL = 무조건 경마(null) → 경정/경륜 오탐 차단.
       if (isKoreaByRaceKey(rk) || KRA_TRACK_RE.test(location.href)) return null;
       // [1번·핵심] raceKey에 일본 경마장명이 있으면 무조건 경마 → 경정/경륜 오탐 차단
-      if (HORSE_TRACKS.test(rk)) return null;
+      //   [v2.1.146] 이중소속 지명(고치·나고야·카와사키)만으로는 경마 확정 금지(경륜장과 겹침)
+      if (_horseTrackStrong(rk)) return null;
       const href = location.href, title = (document.title || '');
-      const strong = (re) => re.test(href) || re.test(title);   // URL·제목 = 명시적 신호(네비 메뉴 아님)
-      // [경정/경륜 강화] URL 또는 탭 제목에 명시적으로 있을 때만 확정
-      if (strong(/(경정|競艇)/)) return 'boat';
-      if (strong(/(오토레이스|オートレース|autorace|바이크경주)/)) return 'bike';
-      if (strong(/(경륜|競輪)/)) return 'cycle';
+      // [경정/경륜 강화 → v2.1.146] URL·제목에 '정확히 한 종목어'만 있을 때 확정(복수 동시 등장=공용 타이틀 → 모호)
+      const _ss = _strongSportSignal(href, title);
+      if (_ss) return _ss;
       // [배당판 탭 텍스트 확인] 본문 보조 판정 — 경마장명이 본문에 있으면 경마(경정/경륜 페이지에 경마장 링크 오탐 방지)
       const body = ((document.body && document.body.innerText) || '');
       // [이중 방어 2026-07-19·ks1 경륜 오탐 수정] 일본어 전용 경륜 마커(けいりん·競輪)를 경마장명 본문
@@ -948,13 +965,13 @@
       // [수정1·한국 강제] 한국 경마장(부산/서울/제주 등) raceKey = 무조건 경마(horse) → 경정/경륜 오탐 완전 차단.
       if (isKoreaByRaceKey(rk) || (KRA_TRACK_RE.test(location.href))) return 'horse';
       // ① 경마장명 raceKey = 명백한 경마(가장 강한 신호) → 팝업 경륜/경정 정정
-      if (HORSE_TRACKS.test(rk)) return 'horse';
+      //   [v2.1.146] 이중소속 지명(고치·나고야·카와사키)만으로는 경마 확정 금지(경륜장과 겹침)
+      if (_horseTrackStrong(rk)) return 'horse';
       const href = location.href, title = (document.title || '');
-      const strong = (re) => re.test(href) || re.test(title);
       // ② URL/제목의 명시적 종목어 = 강한 신호 → 팝업 stale 정정
-      if (strong(/(경정|競艇)/)) return 'boat';
-      if (strong(/(오토레이스|オートレース|autorace)/)) return 'bike';
-      if (strong(/(경륜|競輪)/)) return 'cycle';
+      //   [v2.1.146] 복수 종목어 동시 등장(공용 타이틀)이면 강신호 아님 — 경정 우선 검사로 경륜이 경정 되던 버그 수정
+      const _ss = _strongSportSignal(href, title);
+      if (_ss) return _ss;
       // ③ 강한 신호 없음 → 팝업 수동선택(경마 아님) 존중
       if (popupSport && popupSport !== 'horse') return popupSport;
       // ④ 팝업이 경마/미설정 → 본문 보조 감지값(없으면 경마)
@@ -2271,6 +2288,10 @@
         let _rk = '';
         try { _rk = extractRaceKey(); } catch (_) { _rk = ''; }
         if (!_rk) { const _s = await getSettings(); _rk = (_s.raceKey || '').trim(); }
+        if (!_rk) {   // [v2.1.146 유령 분석 차단] 빈 raceKey 분석은 서버 최근경주 폴백(다른 경주 추천 오염) → 생략
+          console.log('[수집→분석] raceKey 미확보 → 분석 생략(유령 방지)');
+          return _r;
+        }
         const _ar = await chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: _rk });
         if (_ar && _ar.ok && _ar.data) {
           await new Promise((res) => chrome.storage.local.set({ analyzeStatus: { data: _ar.data, at: Date.now() } }, res));
