@@ -1,6 +1,6 @@
 {
- "generated_at": 1784508402.9880612,
- "races_with_result": 830,
+ "generated_at": 1784508414.2785993,
+ "races_with_result": 831,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -10,7 +10,7 @@
    "key": "timing:T-2분",
    "desc": "급락이 T-2분에 발생한 경주",
    "rate": 58.3,
-   "baseline": 29.3,
+   "baseline": 29.2,
    "lift": 29.1,
    "support": 24,
    "hit": 14
@@ -20,7 +20,7 @@
    "key": "timing:T-1분",
    "desc": "급락이 T-1분에 발생한 경주",
    "rate": 56.6,
-   "baseline": 29.3,
+   "baseline": 29.2,
    "lift": 27.3,
    "support": 76,
    "hit": 43
@@ -30,7 +30,7 @@
    "key": "had_drop",
    "desc": "급락(자금유입) 동반 경주",
    "rate": 48.8,
-   "baseline": 29.3,
+   "baseline": 29.2,
    "lift": 19.5,
    "support": 322,
    "hit": 157
@@ -40,8 +40,8 @@
    "key": "strong_drop",
    "desc": "30%+ 강한 급락 동반 경주",
    "rate": 48.0,
-   "baseline": 29.3,
-   "lift": 18.7,
+   "baseline": 29.2,
+   "lift": 18.8,
    "support": 275,
    "hit": 132
   },
@@ -50,7 +50,7 @@
    "key": "timing:T-3분",
    "desc": "급락이 T-3분에 발생한 경주",
    "rate": 46.9,
-   "baseline": 29.3,
+   "baseline": 29.2,
    "lift": 17.6,
    "support": 32,
    "hit": 15
@@ -60,8 +60,8 @@
    "key": "timing:T-10분",
    "desc": "급락이 T-10분에 발생한 경주",
    "rate": 44.9,
-   "baseline": 29.3,
-   "lift": 15.6,
+   "baseline": 29.2,
+   "lift": 15.7,
    "support": 49,
    "hit": 22
   },
@@ -70,7 +70,7 @@
    "key": "very_strong_drop",
    "desc": "50%+ 대량 급락 동반 경주",
    "rate": 44.7,
-   "baseline": 29.3,
+   "baseline": 29.2,
    "lift": 15.4,
    "support": 215,
    "hit": 96
@@ -80,7 +80,7 @@
    "key": "timing:T-5분",
    "desc": "급락이 T-5분에 발생한 경주",
    "rate": 43.8,
-   "baseline": 29.3,
+   "baseline": 29.2,
    "lift": 14.5,
    "support": 32,
    "hit": 14
@@ -90,7 +90,7 @@
    "key": "had_reversal",
    "desc": "쌍승 역전 동반 경주",
    "rate": 42.9,
-   "baseline": 29.3,
+   "baseline": 29.2,
    "lift": 13.6,
    "support": 7,
    "hit": 3
@@ -106,5 +106,5 @@
    "support": 486
   }
  ],
- "baseline_hit_rate": 29.3
+ "baseline_hit_rate": 29.2
 }
