@@ -6,7 +6,7 @@
  "date": "2026-07-20",
  "race": "오오이 2경주",
  "analyzed_at": "15:17:00",
- "updated_at": "15:26:59",
+ "updated_at": "15:49:12",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -126,43 +126,7 @@
    }
   }
  ],
- "signals_detected": [
-  {
-   "time": "15:26:30",
-   "type": "복승불일치공식",
-   "detail": "⚠️ 복승 불일치: 단승 기준 예상 3+11(8.0) / 실제 최저 5+11(6.5) → 5번 집중 자금 유입 (🟡 1.231)",
-   "severity": "🟡",
-   "reason": "불일치점수 = 예상최저복승 8.0 / 실제최저복승 6.5 = 1.231"
-  },
-  {
-   "time": "15:26:30",
-   "type": "페이크의심",
-   "detail": "⚠️ 3번 급락 후 반등 (페이크 의심) — 8.0→5.0→8.0→5.0→8.0",
-   "severity": "🟠",
-   "reason": "연속 하락 신호로 유인 후 배당 회복 → 신뢰도 하향(허수 베팅 가능성)"
-  },
-  {
-   "time": "15:26:30",
-   "type": "페이크의심",
-   "detail": "⚠️ 10번 급락 후 반등 (페이크 의심) — 9.5→5.9→9.5→5.9→9.5",
-   "severity": "🟠",
-   "reason": "연속 하락 신호로 유인 후 배당 회복 → 신뢰도 하향(허수 베팅 가능성)"
-  },
-  {
-   "time": "15:26:30",
-   "type": "페이크의심",
-   "detail": "⚠️ 11번 급락 후 반등 (페이크 의심) — 6.5→1.9→6.5→1.9→6.5",
-   "severity": "🟠",
-   "reason": "연속 하락 신호로 유인 후 배당 회복 → 신뢰도 하향(허수 베팅 가능성)"
-  },
-  {
-   "time": "15:26:30",
-   "type": "페이크의심",
-   "detail": "⚠️ 15번 급락 후 반등 (페이크 의심) — 68.1→39.2→68.1→39.2→68.1",
-   "severity": "🟠",
-   "reason": "연속 하락 신호로 유인 후 배당 회복 → 신뢰도 하향(허수 베팅 가능성)"
-  }
- ],
+ "signals_detected": [],
  "anomaly_history": [],
  "strong_signals": {
   "signals": [],
@@ -186,7 +150,7 @@
    "record_detail": "최근 5-6-3-4-1",
    "odds": null,
    "grade": "B",
-   "grade_reason": "배당 8배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 11,
@@ -196,7 +160,7 @@
    "record_detail": "최근 1-4-3",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 6.5배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 16,
@@ -206,7 +170,7 @@
    "record_detail": "최근 4-2-7-1-3",
    "odds": null,
    "grade": "A",
-   "grade_reason": "배당 22.5배 · 감점 없음 = 100점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 = 60점"
   },
   {
    "no": 1,
@@ -215,68 +179,8 @@
    "record_score": 30.0,
    "record_detail": "최근 3-7-8-12-5",
    "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 22.4배 · 최근평균 7.0착 -30 = 70점"
-  },
-  {
-   "no": 5,
-   "name": "ツクシ",
-   "jockey": "谷内貫（大井）",
-   "record_score": 62.5,
-   "record_detail": "최근 2-2-5-9-10",
-   "odds": null,
-   "grade": "A",
-   "grade_reason": "배당 6.5배 · 최근평균 5.6착 -30 = 70점"
-  },
-  {
-   "no": 7,
-   "name": "マーナーパス",
-   "jockey": "遠藤健（大井）",
-   "record_score": 31.2,
-   "record_detail": "최근 3-5-7-10-4",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 65.4배 · 최근평균 5.8착 -30 = 70점"
-  },
-  {
-   "no": 8,
-   "name": "ピュアリヤン",
-   "jockey": "笹川翼（大井）",
-   "record_score": 15.8,
-   "record_detail": "최근 10-3-8-9",
-   "odds": null,
    "grade": "B",
-   "grade_reason": "배당 37.9배 · 최근평균 7.5착 -30 = 70점"
-  },
-  {
-   "no": 10,
-   "name": "キュベベペッパー",
-   "jockey": "安藤洋（大井）",
-   "record_score": 22.2,
-   "record_detail": "최근 14-5-1",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 9.5배 · 최근평균 6.7착 -30 = 70점"
-  },
-  {
-   "no": 13,
-   "name": "ヨシノルビー",
-   "jockey": "和田譲（大井）",
-   "record_score": 3.8,
-   "record_detail": "최근 7-6-8-2-7",
-   "odds": null,
-   "grade": "B",
-   "grade_reason": "배당 9.5배 · 최근평균 6.0착 -30 = 70점"
-  },
-  {
-   "no": 15,
-   "name": "マルカンプレスト",
-   "jockey": "達城龍（大井）",
-   "record_score": 7.5,
-   "record_detail": "최근 12-10-5-2-2",
-   "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 68.1배 · 최근평균 6.2착 -30 = 70점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.0착 -30 = 30점"
   },
   {
    "no": 2,
@@ -286,7 +190,27 @@
    "record_detail": "최근 7-8-11-13-10",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 148배 · 배당 80~149 -20 / 최근평균 9.8착 -30 = 50점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.8착 -30 = 30점"
+  },
+  {
+   "no": 4,
+   "name": "エクスプローラー",
+   "jockey": "本村直（大井）",
+   "record_score": 10.0,
+   "record_detail": "최근 4-12-9-10-6",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 8.2착 -30 = 30점"
+  },
+  {
+   "no": 5,
+   "name": "ツクシ",
+   "jockey": "谷内貫（大井）",
+   "record_score": 62.5,
+   "record_detail": "최근 2-2-5-9-10",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.6착 -30 = 30점"
   },
   {
    "no": 6,
@@ -296,7 +220,27 @@
    "record_detail": "최근 10-11-4-8-6",
    "odds": null,
    "grade": "C",
-   "grade_reason": "배당 139.7배 · 배당 80~149 -20 / 최근평균 7.8착 -30 = 50점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.8착 -30 = 30점"
+  },
+  {
+   "no": 7,
+   "name": "マーナーパス",
+   "jockey": "遠藤健（大井）",
+   "record_score": 31.2,
+   "record_detail": "최근 3-5-7-10-4",
+   "odds": null,
+   "grade": "A",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 5.8착 -30 = 30점"
+  },
+  {
+   "no": 8,
+   "name": "ピュアリヤン",
+   "jockey": "笹川翼（大井）",
+   "record_score": 15.8,
+   "record_detail": "최근 10-3-8-9",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 7.5착 -30 = 30점"
   },
   {
    "no": 9,
@@ -305,8 +249,18 @@
    "record_score": 25.0,
    "record_detail": "최근 4-3-10-7-9",
    "odds": null,
-   "grade": "C",
-   "grade_reason": "배당 82배 · 배당 80~149 -20 / 최근평균 6.6착 -30 = 50점"
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.6착 -30 = 30점"
+  },
+  {
+   "no": 10,
+   "name": "キュベベペッパー",
+   "jockey": "安藤洋（大井）",
+   "record_score": 22.2,
+   "record_detail": "최근 14-5-1",
+   "odds": null,
+   "grade": "B",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.7착 -30 = 30점"
   },
   {
    "no": 12,
@@ -316,7 +270,17 @@
    "record_detail": "최근 11-12-11-14-13",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 278.9배 · 배당 150배+ -40 / 최근평균 12.2착 -30 = 30점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 12.2착 -30 = 30점"
+  },
+  {
+   "no": 13,
+   "name": "ヨシノルビー",
+   "jockey": "和田譲（大井）",
+   "record_score": 3.8,
+   "record_detail": "최근 7-6-8-2-7",
+   "odds": null,
+   "grade": "D",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점"
   },
   {
    "no": 14,
@@ -326,7 +290,17 @@
    "record_detail": "최근 5-10-10-15-5",
    "odds": null,
    "grade": "D",
-   "grade_reason": "배당 234.6배 · 배당 150배+ -40 / 최근평균 9.0착 -30 = 30점"
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.0착 -30 = 30점"
+  },
+  {
+   "no": 15,
+   "name": "マルカンプレスト",
+   "jockey": "達城龍（大井）",
+   "record_score": 7.5,
+   "record_detail": "최근 12-10-5-2-2",
+   "odds": null,
+   "grade": "C",
+   "grade_reason": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.2착 -30 = 30점"
   }
  ],
  "elimination": {
@@ -335,45 +309,48 @@
    11,
    16,
    1,
+   4,
    5,
+   6,
    7,
    8,
+   9,
    10,
-   13,
-   15,
-   2,
-   6,
-   9
+   15
   ],
   "eliminated": [
+   2,
    12,
+   13,
    14
   ],
   "elimination_reasons": {
-   "12": "배당 278.9배 · 배당 150배+ -40 / 최근평균 12.2착 -30 = 30점",
-   "14": "배당 234.6배 · 배당 150배+ -40 / 최근평균 9.0착 -30 = 30점"
+   "2": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.8착 -30 = 30점",
+   "12": "배당 미수집 · 배당 150배+ -40 / 최근평균 12.2착 -30 = 30점",
+   "13": "배당 미수집 · 배당 150배+ -40 / 최근평균 6.0착 -30 = 30점",
+   "14": "배당 미수집 · 배당 150배+ -40 / 최근평균 9.0착 -30 = 30점"
   }
  },
  "final_recommendation": {
   "quinella_main": {
-   "combo": "5+11",
-   "odds": 6.5,
-   "reason": "5번(A)·11번(A)"
+   "combo": "11+16",
+   "odds": null,
+   "reason": "11번(A)·16번(A)"
   },
   "trifecta_main": {
-   "combo": "3+5+11",
-   "odds": 19.6,
-   "reason": "3번(B)·5번(A)·11번(A)"
+   "combo": "3+11+16",
+   "odds": null,
+   "reason": "3번(B)·11번(A)·16번(A)"
   },
   "trifecta_insurance1": {
-   "combo": "5+10+11",
-   "odds": 24.5,
-   "reason": "5번(A)·10번(B)·11번(A)"
+   "combo": "5+11+16",
+   "odds": null,
+   "reason": "5번(A)·11번(A)·16번(A)"
   },
   "trifecta_insurance2": {
-   "combo": "3+10+11",
-   "odds": 19.5,
-   "reason": "3번(B)·10번(B)·11번(A)"
+   "combo": "3+5+11",
+   "odds": null,
+   "reason": "3번(B)·5번(A)·11번(A)"
   },
   "budget_allocation": {
    "quinella_main": "62.1%",
@@ -760,13 +737,13 @@
  "compare_recommendation": {
   "anomaly": {
    "quinella": [
-    5,
-    11
+    11,
+    16
    ],
    "trio": [
     3,
-    5,
-    11
+    11,
+    16
    ]
   },
   "form": {
@@ -786,13 +763,13 @@
   },
   "final": {
    "quinella": [
-    5,
-    11
+    11,
+    16
    ],
    "trio": [
     3,
-    5,
-    11
+    11,
+    16
    ]
   }
  },
@@ -1220,14 +1197,56 @@
   "chaoticRace": false,
   "formMissing": false
  },
- "summary": "유력마 11·5·3 / 복승 5+11",
+ "summary": "유력마 11·16·3 / 복승 11+16",
  "keyHorses": [
   11,
-  5,
+  16,
   3
  ],
- "result": null,
- "hit": null,
+ "result": {
+  "1st": 1,
+  "2nd": 6,
+  "3rd": 14
+ },
+ "hit": {
+  "was_hit": false,
+  "quinella_hit": false,
+  "trifecta_hit": false,
+  "keyhorse_quinella_hit": false,
+  "keyhorse_trifecta_hit": false,
+  "keyhorse_placed": [],
+  "dark_placed": [],
+  "payouts": {
+   "quinella": 0,
+   "trifecta": 0
+  },
+  "anomaly_was_correct": false,
+  "signal_correct": [],
+  "elimination_correct": false,
+  "eliminated": [
+   12,
+   14
+  ],
+  "form_pick": 3,
+  "form_pick_hit": false,
+  "pnl": -1000,
+  "stake": 1000,
+  "near_miss": false,
+  "near_miss_horse": null,
+  "pairing_miss": null,
+  "hit_basis": {
+   "formScore": 30.0,
+   "dropAmt": null,
+   "dropScore": 0,
+   "inverse": false,
+   "inverseHorses": [
+    5
+   ],
+   "inverseHit": [],
+   "confidence": 0,
+   "reason": "추천 미적중"
+  }
+ },
  "profit": null,
  "review": null
 }

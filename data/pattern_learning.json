@@ -3868,16 +3868,40 @@
         "복승이상감지"
       ],
       "date": "2026-07-20"
+    },
+    {
+      "race": "오오이 2경주",
+      "horse_no": 1,
+      "recent_avg": 7.0,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "오오이 2경주",
+      "horse_no": 6,
+      "recent_avg": 7.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-20"
+    },
+    {
+      "race": "오오이 2경주",
+      "horse_no": 14,
+      "recent_avg": 9.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-20"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 887,
-      "hit": 198
+      "count": 897,
+      "hit": 201
     },
     "전체부진마": {
-      "count": 1424,
-      "hit": 398
+      "count": 1436,
+      "hit": 401
     },
     "대규모급락": {
       "count": 20,
@@ -3887,7 +3911,7 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 537,
+      "count": 539,
       "hit": 200
     },
     "급락동반": {
