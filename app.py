@@ -1717,6 +1717,32 @@ def _next_race_surge(prev_q, cur_q, thresh=200.0, min_ratio=0.6, min_combos=4):
     return (big / len(common)) >= min_ratio
 
 
+def _board_flip_suspect(prev_q, cur_q, thresh=70.0, min_ratio=0.7, min_combos=10):
+    """[혼입 가드 v2 (2026-07-20)] 직전 스냅샷 대비 판 전체 뒤집힘(같은 raceKey 에 다른 경주 배당판
+    혼입 의심) 감지. 카나자와 8R 실측: 4초 만에 4+7 2.6→101 · 5+7 44.5→3.1 등 36조합 중 31개 뒤집힘.
+    [v2 오발동 수정] 초기 v1(±50%·60%)이 이른 아침 경륜 시장(마쓰도 1R)의 정상 정착(opening 100배대
+    → 실배당 일괄 하락)에 오발동 → 격리·기준재설정 반복 → '신호 대기 중'·추천 리셋 플래핑 유발.
+    혼입의 시그니처는 '값 순열' = 급등과 급락이 반드시 뒤섞임. 정상 초기 정착은 하락 일변도 →
+    ① opening(100배+) 출발 조합 제외 ② 임계 ±70%·비율 70% 상향 ③ 급등≥2 AND 급락≥2 동시 요구.
+    기존 가드 보완 관계는 v1과 동일(_baseline_reset_needed·_next_race_surge·_src_switched 의 구멍)."""
+    pm, cm = _as_qmap(prev_q), _as_qmap(cur_q)
+    common = [k for k in cm if k in pm and pm[k] > 0 and cm[k] > 0]
+    if len(common) < min_combos:
+        return False
+    ups = downs = 0
+    for k in common:
+        if pm[k] >= OPENING_ODDS:
+            continue                     # opening 정착 하락 = 정상 초기 시장(혼입 아님)
+        pct = (cm[k] - pm[k]) / pm[k] * 100.0
+        if pct >= thresh:
+            ups += 1
+        elif pct <= -thresh:
+            downs += 1
+    if ((ups + downs) / len(common)) < min_ratio:
+        return False
+    return ups >= 2 and downs >= 2       # 순열 시그니처: 급등·급락 혼재일 때만 혼입 판정
+
+
 def _triple_prune_stale(db, keep_rk=None, max_age=STALE_ACTIVE_SEC):
     """[경주전환 잔존 방어] 활성 3종 배당(triple_store)에서 max_age(기본 30분) 넘게
     갱신 안 된 경주를 제거한다. 경주별 히스토리 파일(data/odds_history)은 영구 보존되므로
@@ -2088,6 +2114,13 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     db = _triple_load()
     prev = db.get(rk) or {}
     now = time.time()
+    # [빈 수집 가드 (2026-07-20)] 복승이 비었는데 기존 레코드에 신선한(≤120초) 복승이 있으면 덮어쓰지 않는다 —
+    #   로비(/main)·전환 중 페이지를 긁는 다른 탭/브라우저가 30초마다 빈 배당을 보내 좋은 데이터를 지우고
+    #   분석을 '배당있음↔배당없음' 두 상태로 요동시키던 문제(기후 3R 실측: 13스냅샷 중 5개 빈 수집 →
+    #   추천 A/B 플래핑). 발신 source(URL)를 로그에 남겨 어느 탭이 보내는지 추적 가능.
+    if not q and prev.get("quinella") and (now - (prev.get("t") or 0)) <= 120:
+        print(f"[빈수집가드] {rk}: 빈 복승 수집 무시(발신 {source}) — 기존 신선 데이터 유지")
+        return {"ok": True, "skipped": True, "raceKey": rk, "reason": "빈 수집 — 기존 신선 데이터 유지"}
     # ══════════ [긴급수정 ②③ 사설 우선 + oddspark 말번호 밀림 방어] ══════════
     #   사설/배당판(비-oddspark)이 최근(≤200초) 이 경주를 수집했으면 oddspark 는 '백업' 위치 →
     #   활성 배당을 덮어쓰지 않는다(= 사용자가 실제 베팅하는 배당판과 분석패널을 항상 일치시킴).
@@ -2124,7 +2157,27 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     #   (신호 계산 제외·다음 스냅샷부터 새 소스 기준). "서버=기본 안정·확장=실시간 보완, 서로 오염 금지" 원칙.
     _src_switched = bool(prev and prev.get("source")
                          and (_src_is_oddspark(prev.get("source")) != _src_is_oddspark(source)))
-    baseline_reset = (sport_changed or stale_gap or _src_switched
+    # [혼입 가드 (2026-07-19)] 확립(4+ 스냅샷)·같은 소스인데 직전 대비 판 전체(60%+ 조합 ±50%+)가
+    #   뒤집히면 = 다른 경주 배당판 혼입 의심(카나자와 8R: 가짜 마감급락 신호 → 추천 오염 실측).
+    #   → 의심 스냅샷은 격리(이력 미반영·신호 미발동·기존 배당 유지). 단 3회 연속 의심이면 실제
+    #   전면 재편(발주 지연 등)으로 간주해 새 기준으로 수용(기준 재설정) — 영구 차단 방지.
+    #   격리 스냅샷은 학습·급락신호에 전혀 반영되지 않으므로 학습 데이터 오염도 함께 차단.
+    try:
+        _flip_cnt = int(prev.get("flipSuspectCnt") or 0)
+    except (ValueError, TypeError):
+        _flip_cnt = 0
+    _flip_now = bool(_established and not (sport_changed or stale_gap or _src_switched)
+                     and prev_hist and _board_flip_suspect(prev_hist[-1].get("quinella"), q))
+    if _flip_now and _flip_cnt < 2:
+        prev["flipSuspectCnt"] = _flip_cnt + 1
+        db[rk] = prev
+        _triple_save(db)
+        print(f"[혼입가드] {rk}: 직전 대비 판 전체 뒤집힘 의심(연속 {_flip_cnt + 1}회) → 스냅샷 격리(이력 미반영·기존 배당 유지)")
+        return {"ok": True, "quarantined": True, "raceKey": rk,
+                "reason": "배당판 혼입 의심 — 스냅샷 격리(3회 연속이면 새 판으로 수용)"}
+    if _flip_now:
+        print(f"[혼입가드] {rk}: 3회 연속 전면 재편 → 실제 새 배당판으로 수용(기준 재설정·이전 신호 초기화)")
+    baseline_reset = (sport_changed or stale_gap or _src_switched or _flip_now
                       or ((not _established) and bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q))))
     hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주·다른 종목·오래된) 배당 완전 제거
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
@@ -2147,6 +2200,7 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                 or {"cycle": "cycle", "boat": "boat", "bike": "bike"}.get(sport, "japan_local"))
     db[rk] = {"quinella": q, "exacta": x, "trio": tr, "win": win, "history": hist,
               "source": source, "sport": sport, "category": category, "t": now,
+              "flipSuspectCnt": 0,   # [혼입 가드] 정상 수용 시 의심 카운터 리셋
               "scratched": sorted(set(int(s) for s in (scratched or []) if str(s).strip().lstrip("-").isdigit()))}
     # [경주전환 잔존 방어] 30분+ 미갱신된 '끝난 직전 경주'를 활성 캐시에서 정리(히스토리는 보존)
     #   → max-t 폴백이 직전 경주 배당을 계속 끌어오던 문제 차단.
@@ -2154,7 +2208,8 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     _triple_save(db)
     # 배당 변동 히스토리 파일에 스냅샷 누적 (타임스탬프+발주전분+이상감지)
     try:
-        _history_append(rk, q, x, deadline, win, baseline_reset=baseline_reset)
+        _history_append(rk, q, x, deadline, win, baseline_reset=baseline_reset,
+                        source=("oddspark" if _src_is_oddspark(source) else "private"))
     except Exception as e:
         print("[히스토리] 기록 실패:", e)
     # [경륜 출마표 전적 자동 수집] 경륜 배당 수집(확장 asyukk 포함) 시 전적도 함께 → 통합등급 반영(raceKey에서 joCode 자동 감지·1회).
@@ -11907,9 +11962,11 @@ def _exa_fav_dirs(exa_dict):
     return out
 
 
-def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_reset=False):
+def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_reset=False, source=None):
     """경주별 히스토리 파일에 스냅샷 1건 추가. 직전 대비 급락(≤-20%) 이상감지 기록.
-    baseline_reset=True(경주 전환 감지)면 이 스냅샷을 새 기준값으로만 저장(이상감지 계산 생략)."""
+    baseline_reset=True(경주 전환 감지)면 이 스냅샷을 새 기준값으로만 저장(이상감지 계산 생략).
+    [마감전 신호 기록 (2026-07-19)] source: 'private'(사설/확장)·'oddspark'(서버 bg)·None(기타 경로).
+    직전 스냅샷과 소스가 다르면 두 소스의 배당 체계 차이가 가짜 급락을 만들므로 이상감지 계산만 생략(기록은 유지)."""
     path, date, race = _hist_path(rk)
     try:
         doc = json.load(open(path, encoding="utf-8"))
@@ -11983,7 +12040,9 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
     # [경주전환 방어] 기준값 재설정이면 직전 스냅샷과 비교하지 않음(다른 경주 잔존 → 오검출 방지)
     # [첫수집 방어] 첫 비교(스냅샷 1건뿐)는 첫 수집 배당이 불안정(못 가져옴/시장 형성 초기 고배당)해
     #   가짜 급락(-90%대)이 뜬다. 스냅샷 2건 이상(2번째 수집을 기준)일 때부터 이상감지 기록.
-    if len(doc["snapshots"]) >= 2 and not baseline_reset and not next_race_blocked:
+    # [소스 전환 이상감지 생략] 직전 스냅샷과 소스 클래스가 다르면(사설↔oddspark) 비교 생략(가짜 급락 방지)
+    _src_switched_hist = bool(doc["snapshots"] and (doc["snapshots"][-1].get("src") or None) != source)
+    if len(doc["snapshots"]) >= 2 and not baseline_reset and not next_race_blocked and not _src_switched_hist:
         last = doc["snapshots"][-1]
         # [단승] 급락 감지 — 가장 강한 신호이므로 먼저 기록
         prevWin = {}
@@ -12065,25 +12124,31 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
             pv = prev_fav.get(_key)
             if pv and pv[0] == cur_dir[::-1] and pv[0] != cur_dir:
                 anomalies.append(f"쌍승역전: {cur_dir[0]}↔{cur_dir[1]}")
-    doc["snapshots"].append({
-        "time": time.strftime("%H:%M:%S", time.localtime(now)),
-        "minutes_before": minutes_before,
-        "mb_signed": mb_signed, "after_close": after_close,   # [마감후] 부호 포함·마감 후 여부
-        "deadline_corrected": deadline_corrected,   # [1번] 발주시각 오검출 정정 시점(과거 마감상태 무효화)
-        "baseline_reset": bool(baseline_reset),   # [경주전환] 기준값 재설정 시점(변동 계산 제외)
-        "next_race_blocked": next_race_blocked,   # [2번] 다음 경주 배당 유입(200%+ 급등) 차단 시점
-        "signal_horse": signal_horse,             # [3번] 이 스냅샷 대표 이상감지 말(신호 변경 이력·안정화용)
-        "signal_reason": signal_reason,
-        "quinella": _combo_dict(quinella), "exacta": _combo_dict(exacta),
-        "win": {str(k): v for k, v in curWin.items()},
-        "anomalies": anomalies, "t": now,
-    })
-    doc["snapshots"] = doc["snapshots"][-300:]
+    # [ⓒ 마감 후 이력 기록 차단 (2026-07-19)] 마감 후 스냅샷은 분석용 snapshots 에 쌓지 않는다 —
+    #   race-log 가 '마감 후' 행으로만 채워지고(코치 12R 실증) 마감 후 배당이 신호·추천 재계산에 낄 여지 차단.
+    #   단 마감 후 '첫 1건'(확정배당)은 보존(복기·실배당 교체 소스). 이후 건은 archive_snapshots 에만 영구 누적(무삭제).
+    _ac_skip = bool(after_close and doc["snapshots"] and doc["snapshots"][-1].get("after_close"))
+    if not _ac_skip:
+        doc["snapshots"].append({
+            "time": time.strftime("%H:%M:%S", time.localtime(now)),
+            "minutes_before": minutes_before,
+            "mb_signed": mb_signed, "after_close": after_close,   # [마감후] 부호 포함·마감 후 여부
+            "deadline_corrected": deadline_corrected,   # [1번] 발주시각 오검출 정정 시점(과거 마감상태 무효화)
+            "baseline_reset": bool(baseline_reset),   # [경주전환] 기준값 재설정 시점(변동 계산 제외)
+            "next_race_blocked": next_race_blocked,   # [2번] 다음 경주 배당 유입(200%+ 급등) 차단 시점
+            "signal_horse": signal_horse,             # [3번] 이 스냅샷 대표 이상감지 말(신호 변경 이력·안정화용)
+            "signal_reason": signal_reason,
+            "src": source,                            # [마감전 신호 기록] 수집 소스 클래스(private|oddspark|None)
+            "quinella": _combo_dict(quinella), "exacta": _combo_dict(exacta),
+            "win": {str(k): v for k, v in curWin.items()},
+            "anomalies": anomalies, "t": now,
+        })
+        doc["snapshots"] = doc["snapshots"][-300:]
     # [영구보존·1·2번] append-only 아카이브에 이 수집 배당을 영구 누적(리셋/캡/탭전환과 무관·절대 삭제 안 함).
     doc["archive_snapshots"].append({
         "time": time.strftime("%H:%M:%S", time.localtime(now)), "t": now,
         "minutes_before": minutes_before, "mb_signed": mb_signed, "after_close": after_close,
-        "baseline_reset": bool(baseline_reset), "next_race_blocked": next_race_blocked,
+        "baseline_reset": bool(baseline_reset), "next_race_blocked": next_race_blocked, "src": source,
         "quinella": _combo_dict(quinella), "exacta": _combo_dict(exacta),
         "win": {str(k): v for k, v in curWin.items()}, "anomalies": anomalies,
     })
@@ -12365,6 +12430,10 @@ def _build_analysis_log(rk, an=None):
             "quinella_main": (final.get("quinella_main") or {}).get("combo"),
             "quinella_sub": (final.get("quinella_sub") or {}).get("combo"),
             "trifecta_main": (final.get("trifecta_main") or {}).get("combo"),
+            # [삼복승 이력 (2026-07-20)] 보험1·2도 이력에 저장 — race-log 에서 삼복승 변화 추적(기후 4R:
+            #   초반 삼복승 2+4+7이 정답이었는데 요동으로 밀려난 경위를 추적 못 하던 문제).
+            "trifecta_ins": [c for c in ((final.get("trifecta_insurance1") or {}).get("combo"),
+                                         (final.get("trifecta_insurance2") or {}).get("combo")) if c],
             # [복승 ①②③ 이력] 화면 표시와 동일한 복승 전체 구성(①②③)·배당 스냅샷
             "quinellas": [{"combo": q.get("combo"), "odds": q.get("odds")}
                           for q in ((an.get("corePicks") or {}).get("finalQuinellas") or [])],
@@ -19257,6 +19326,15 @@ def _keiba_parse_quinella(html):
         return []
     axes = set(int(r[0]) for r in rows)
     maxcar = max((int(c) for r in rows for c in r if re.fullmatch(r"\d{1,2}", c)), default=0)
+    # [파서 안전 게이트 (2026-07-19)] oddspark 馬連 매트릭스는 9두+에서 8열 블록 분할(1~8열 + 9~열 꼬리 블록).
+    #   본 파서는 블록 미대응 → 9두+에서 조합 라벨 전면 밀림(코치 12R 실측: 60조합 중 44개 어긋남 —
+    #   공식 馬複 4-11=1,250円=12.5배 vs 파싱 "4+11"=6.4배(실제 8+11 값) · 규칙 parsed(a,b)=실제(b-a+1,b)).
+    #   오염 배당이 분석·신호·학습에 유입되는 것보다 '데이터 없음'이 안전(사설 배당판 열려 있으면 사설 대체,
+    #   [혼입가드]·급락신호 오발동 차단) → 9두+는 파싱 거부 + 경고 로그. 블록 대응 재작성 전까지의 임시 게이트.
+    #   8두 이하(단일 블록)는 기존 검증대로 정상 → 무변경.
+    if maxcar >= 9:
+        print(f"[파서게이트] oddspark 복승 {maxcar}두 → 8열 블록 분할 미대응(라벨 밀림) → 수집 거부(재작성 대기·사설 우선)")
+        return []
     implicit = next((c for c in range(1, maxcar + 1) if c not in axes), 1)  # 전용 행 없는 최소 차번
     out, seen = [], set()
     for r in rows:
@@ -20859,11 +20937,27 @@ def race_log_page():
     try:
         if not key:
             rows = []
+            _seen = set()
             try:
                 for fn in sorted(os.listdir(ANALYSIS_LOG_DIR)):
                     if fn.startswith(prefix) and fn.endswith(".json"):
                         rk = fn[len(prefix) + 1:-5].replace("_", " ")
+                        _seen.add(rk)
                         rows.append('<li><a href="/race-log?key=%s&date=%s">%s</a></li>'
+                                    % (_esc(rk), _esc(date), _esc(rk)))
+            except Exception:
+                pass
+            # [마감전 신호 기록 (2026-07-20)] 분석 로그가 없어도 수집 이력(odds_history)이 있는 경주를 함께
+            #   나열 — 서버 bg(oddspark) 단독 수집 경주(사용자 미시청)가 목록에서 안 보이던 문제.
+            #   '수집만' 표시로 구분(클릭 시 배당 수집 타임라인은 그대로 보임).
+            try:
+                for fn in sorted(os.listdir(ODDS_HISTORY_DIR)):
+                    if fn.startswith(prefix) and fn.endswith(".json"):
+                        rk = fn[len(prefix) + 1:-5].replace("_", " ")
+                        if rk in _seen:
+                            continue
+                        _seen.add(rk)
+                        rows.append('<li><a href="/race-log?key=%s&date=%s">%s</a> <span class="hint">(수집 이력만·분석 미실행)</span></li>'
                                     % (_esc(rk), _esc(date), _esc(rk)))
             except Exception:
                 pass
@@ -20893,7 +20987,8 @@ def race_log_page():
         rh = doc.get("recommendation_history") or []
         out.append("<h3>🎯 추천 변화 (%d회 기록)</h3>" % len(rh))
         if rh:
-            out.append("<table><tr><th>시각</th><th>유력마</th><th>복승 구성(①②③)</th><th>메인</th><th>변경</th><th>신호</th></tr>")
+            out.append("<table><tr><th>시각</th><th>유력마</th><th>복승 구성(①②③)</th><th>메인</th>"
+                       "<th>삼복승(메인·보험)</th><th>변경</th><th>신호</th></tr>")
             _prev_q = None
             for e in rh:
                 _qs = e.get("quinellas")
@@ -20902,9 +20997,14 @@ def race_log_page():
                 _chg = "<span class='chg'>★변경</span>" if (_prev_q is not None and _qtxt != _prev_q) or e.get("sigChanged") else ""
                 _prev_q = _qtxt
                 _sigs = "<br>".join(_esc(x) for x in (e.get("top_signals") or [])[:2])
-                out.append("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td class='hint'>%s</td></tr>"
+                # [삼복승 이력 표시 (2026-07-20)] 메인 + 보험(있으면) — 기존 로그의 trifecta_main 도 소급 표시
+                _tri = str(e.get("trifecta_main") or "-")
+                _ti = e.get("trifecta_ins") or []
+                if _ti:
+                    _tri += " · 보험 " + " / ".join(str(x) for x in _ti)
+                out.append("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td class='hint'>%s</td></tr>"
                            % (_esc(e.get("time")), _esc(e.get("keyHorses")), _esc(_qtxt),
-                              _esc(e.get("quinella_main")), _chg, _sigs))
+                              _esc(e.get("quinella_main")), _esc(_tri), _chg, _sigs))
             out.append("</table>")
         else:
             out.append("<p class='hint'>추천 이력 없음(분석 전이거나 추천 미형성)</p>")
@@ -25101,19 +25201,32 @@ def _multi_collect_one(track, race, ymd):
             pass
         except Exception as _be:
             print("[다중경주] triple_store 브리지 실패(무시·multi_store 는 정상):", _be)
+        # [마감전 신호 기록 (2026-07-19)] 서버 수집분도 race-log 이력(_history_append)에 기록 —
+        #   사설 미시청 경주(oddspark 단독)는 마감 전 배당·급락 신호가 이력에 전혀 안 남던 구멍(코치 12R:
+        #   추천 이력 0회·배당수집 기록이 마감 후부터 시작). 사설(확장)이 최근(≤200초) 같은 경주를 수집 중이면
+        #   생략(이중 기록·소스 혼합 방지 — 사설 우선 원칙과 동일 게이트). 소스 전환 시 이상감지는
+        #   _history_append 의 src 비교가 자동 생략(가짜 급락 차단).
+        try:
+            _t0h = _triple_load().get(key) or {}
+            _tsh = str(_t0h.get("source") or "")
+            _fresh_private = bool(_tsh and "oddspark" not in _tsh and (time.time() - (_t0h.get("t") or 0)) <= 200)
+            if not _fresh_private:
+                _history_append(key, q, x, race.get("postEpoch"), {}, source="oddspark")
+        except Exception as _he:
+            print("[다중경주] 이력 기록 실패(무시):", _he)
         # [경륜 전적 자동 수집] 다중 경주 경륜 배당 수집 시 전적도 함께(1회·통합등급 반영)
         if is_cycle:
             try:
                 _keirin_autocollect_form(key, track.get("joCode"), ymd, rno)
-            except Exception:
-                pass
+            except Exception as _fe:
+                print(f"[전적수집] {key} 경륜 전적 실패: {_fe}")
         else:
             # [지방경마(NAR) 전적 자동 수집] 확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'
             #   해소 — 배당과 동시에 oddspark 出走表+전적을 수집·저장(경주당 1회·통합등급 반영). keirin 대칭.
             try:
                 _keiba_autocollect_form(key, track.get("opTrackCd"), track.get("sponsorCd"), ymd, rno)
-            except Exception:
-                pass
+            except Exception as _fe:
+                print(f"[전적수집] {key} NAR 전적 실패: {_fe}")
         return key
     except Exception as e:
         print("[다중경주] 수집 실패 %s %s: %s" % (track.get("venue"), race.get("raceNo"), e))

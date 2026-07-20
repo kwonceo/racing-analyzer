@@ -63,9 +63,12 @@
       try {
         chrome.storage.local.get({ raceKey: '', overlayEnabled: false }, function (v) {
           if (!v || !v.overlayEnabled) return;
-          chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: (v.raceKey || '') }, function (res) {
+          var _rk = (_tabAnFresh() && _tabAn.raceKey) ? _tabAn.raceKey : (v.raceKey || '');   // [v2.1.144] 탭 raceKey 우선
+          if (!_rk) return;   // [v2.1.140] raceKey 비어있으면 분석 요청 생략 → "새 경주 분석 중" 무한루프 방지
+          chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: _rk }, function (res) {
             try {
               if (chrome.runtime.lastError || !res || !res.ok || !res.data) return;
+              _tabAn = { raceKey: _rk, data: res.data, at: Date.now() };   // [v2.1.144] 이 탭 최신 분석으로 고정
               chrome.storage.local.set({ analyzeStatus: { data: res.data, at: Date.now() } });   // → storage.onChanged 로 자동 재렌더
             } catch (_) { /* */ }
           });
@@ -215,13 +218,30 @@
     }
 
     // chrome.storage 읽기(오류 시 빈 객체)
+    // [v2.1.144 탭 격리] 같은 탭 content.js 가 보내는 분석 결과(window 이벤트) — storage(전역)보다 항상 우선.
+    //   배당판 탭 2개+ 동시 오픈 시 storage 가 서로 덮어써 다른 경주 추천이 섞이던 문제의 근본 수정.
+    var _tabAn = null;   // {raceKey, data, at}
+    try {
+      window.addEventListener('kbTabAnalyze', function (e) {
+        try {
+          var d = e && e.detail;
+          if (d && d.data) _tabAn = { raceKey: d.raceKey || '', data: d.data, at: d.at || Date.now() };
+        } catch (_) { /* */ }
+      });
+    } catch (_) { /* */ }
+    function _tabAnFresh() { return !!(_tabAn && (Date.now() - _tabAn.at) < 90000); }   // 90초 내 = 이 탭이 활성 수집 중
     function readData() {
       return new Promise(function (resolve) {
         try {
           chrome.storage.local.get({ analyzeStatus: null, timerDeadline: 0, collectAlert: null, raceKey: '',
             ovShowMatrix: false, ovShowPicks: true, ovShowTimeline: false, keirinAutoStatus: null, autoFallback: null, koreaAuto: null,
             detectedCategory: '' }, function (v) {
-            resolve(v || {});
+            v = v || {};
+            if (_tabAnFresh()) {   // [v2.1.144] 같은 탭 분석이 신선하면 전역 storage 값 대신 탭 값 사용
+              v.analyzeStatus = { data: _tabAn.data, at: _tabAn.at };
+              if (_tabAn.raceKey) v.raceKey = _tabAn.raceKey;
+            }
+            resolve(v);
           });
         } catch (_) { resolve({}); }
       });
@@ -919,20 +939,36 @@
       } catch (_) { /* 교차출처 조상 = 보정 불가, 현상 유지 */ }
       return { x: x, y: y };
     }
+    // [v2.1.143 숨김 표 제외] 표가 화면에 실제로 보이는지(면적>0) — 사이트 DOM 에 숨겨진 다른 경주/탭의
+    //   표가 남아 있으면 '셀 수 최다' 선택이 숨김 표를 골라 오버레이가 전부 display:none 으로 그려져
+    //   "표는 인식(ON)인데 화면엔 아무것도 없음" 증상 발생 → 보이는 표만 후보로 인정.
+    function _tblVisible(t) {
+      try { var r = t.getBoundingClientRect(); return !!(r && r.width > 0 && r.height > 0); } catch (_) { return false; }
+    }
     function locateBoardMatrix() {
       var oddsClass = /asyukk|qwqwd|dke-d11diw/i.test(location.host) ? 'odds_content' : null;
       var best = null, tables;
+      var _cand = 0, _hiddenSkip = 0;   // [v2.1.143 진단] 후보/숨김 스킵 카운트
       try { tables = _allBoardTables(); } catch (_) { return null; }
       for (var ti = 0; ti < tables.length; ti++) {
+        if (!_tblVisible(tables[ti])) { _hiddenSkip++; continue; }
         var info = mapBoardTable(tables[ti], oddsClass);
-        if (info && (!best || info.cells.length > best.cells.length)) best = info;
+        if (info) { _cand++; if (!best || info.cells.length > best.cells.length) best = info; }
       }
       // 사설(asyukk) class 로 못 찾으면 소수점 숫자 폴백으로 재시도
       if (!best && oddsClass) {
         for (var tj = 0; tj < tables.length; tj++) {
+          if (!_tblVisible(tables[tj])) continue;
           var info2 = mapBoardTable(tables[tj], null);
-          if (info2 && (!best || info2.cells.length > best.cells.length)) best = info2;
+          if (info2) { _cand++; if (!best || info2.cells.length > best.cells.length) best = info2; }
         }
+      }
+      // [v2.1.143 진단] 실패 시 왜 실패했는지 상세 1줄(전체 표 수·숨김 스킵·후보 수) — 사유 변경 시만 출력
+      if (!best) {
+        try {
+          _bmWhy('OFF — 배당판 표 인식 실패(표 ' + tables.length + '개 중 숨김 ' + _hiddenSkip
+            + '개 제외·매트릭스 후보 ' + _cand + '개)');
+        } catch (_) { /* */ }
       }
       return best;
     }
@@ -997,11 +1033,21 @@
       try { window.addEventListener('resize', schedulePosition); } catch (_) { /* */ }
     }
 
+    // [v2.1.140 진단] 배당판 위 오버레이가 왜 안 그려지는지 콘솔 1줄 보고(사유 변경 시만 → 스팸 없음).
+    function _bmWhy(msg) {
+      if (renderBoardMatrix._why !== msg) { renderBoardMatrix._why = msg; console.log('[배당판 오버레이] ' + msg); }
+    }
     // 실제 배당판 위에 정렬된 강조 오버레이를 그린다. 성공 시 true(→패널 격자 생략).
     function renderBoardMatrix(d, st) {
-      if (!st || !st.ovShowMatrix || !d || !enabled || killed) { removeBoardMatrix(); return false; }
+      if (!st || !st.ovShowMatrix || !d || !enabled || killed) {
+        if (killed) _bmWhy('OFF — overlayKill 활성');
+        else if (!enabled) _bmWhy('OFF — 오버레이 패널 꺼짐');
+        else if (!st || !st.ovShowMatrix) _bmWhy('OFF — 팝업 [📊 매트릭스] 버튼 꺼짐 → 켜면 배당판 위 강조 표시');
+        else _bmWhy('OFF — 분석 데이터 없음(analyzeStatus 대기)');
+        removeBoardMatrix(); return false;
+      }
       var info = locateBoardMatrix();
-      if (!info) { removeBoardMatrix(); return false; }
+      if (!info) { removeBoardMatrix(); return false; }   // 실패 사유는 locateBoardMatrix 가 상세 로그
       // [깜박임 제거 v2.1.135] 여기서 매번 지우면 렌더 때마다(10초 분석·타이머 갱신 등) 오버레이가
       //   사라졌다 다시 그려져 깜박임 → 강조 구성이 같으면 위치만 재조정, 바뀐 경우에만 새로 그린다
       //   (제거는 아래 시그니처 비교 후로 이동 — 기존 기능 무삭제·순서만 이동).
@@ -1265,6 +1311,17 @@
           renderBoardMatrix._ro.disconnect();
           renderBoardMatrix._ro.observe(info.table);
         }
+      } catch (_) { /* */ }
+      // [v2.1.143 진단] 그린 결과를 1줄 보고 — 표 셀·강조 셀·헤더 표시·화면 밖(숨김) 수까지.
+      //   강조 0개면 '왜 아무것도 안 보이는지'(추천 조합 없음)가 즉시 드러난다. 사유 변경 시만 출력.
+      try {
+        var _hid = 0;
+        for (var _bi = 0; _bi < boardItems.length; _bi++) { if (boardItems[_bi].span.style.display === 'none') _hid++; }
+        _bmWhy('ON — 표 ' + info.cells.length + '셀 인식 · 강조 ' + boardItems.length + '개(초록 '
+          + Object.keys(greenSet).length + '·파랑 ' + Object.keys(blueSet).length + '·특별 '
+          + Object.keys(specialSet).length + '·빨강 ' + Object.keys(redSet).length + ') · 헤더 '
+          + boardHdrItems.length + '개' + (_hid ? ' · ⚠ 화면 밖/숨김 ' + _hid + '개' : '')
+          + (boardItems.length === 0 ? ' — 강조 대상 조합 없음(추천/유력/급락 미형성)' : ''));
       } catch (_) { /* */ }
       return (boardItems.length + boardHdrItems.length) > 0;
     }
@@ -1845,13 +1902,26 @@
       // [캡쳐 대비] 경주결과 캡쳐 순간 오버레이가 결과를 가리지 않게 잠깐 숨김(visibility만·상태 보존).
       //   background 가 캡쳐 직전/직후 KB_CAPTURE_PREP{hide} 를 보냄. 읽기전용 원칙 유지(자체 요소 표시만 토글).
       try {
+        var _capRestoreT = null;   // [v2.1.140 안전복원] 캡처 후 복원 메시지 유실 대비 타이머
+        function _capSetVis(vis) {
+          ['kbOvPanel', 'kbOvToggle', 'kbOvAlert', BOARD_ID].forEach(function (id) {
+            var e = byId(id); if (e) e.style.visibility = vis;
+          });
+        }
         chrome.runtime.onMessage.addListener(function (msg, _s, sendResp) {
           try {
             if (msg && msg.type === 'KB_CAPTURE_PREP') {
-              var vis = msg.hide ? 'hidden' : '';
-              ['kbOvPanel', 'kbOvToggle', 'kbOvAlert'].forEach(function (id) {
-                var e = byId(id); if (e) e.style.visibility = vis;
-              });
+              _capSetVis(msg.hide ? 'hidden' : '');
+              // [v2.1.140 안전복원] 결과 자동수집 캡처(T+5/7/10)가 hide:true 후 복원(hide:false) 메시지를
+              //   못 보내면(탭 전환·리로드 타이밍) 오버레이가 visibility:hidden 으로 영영 남아
+              //   '오버레이가 자꾸 꺼짐'으로 보이던 문제 → 숨김 4초 뒤 무조건 자동 복원(캡처는 180ms면 끝).
+              if (_capRestoreT) { clearTimeout(_capRestoreT); _capRestoreT = null; }
+              if (msg.hide) {
+                _capRestoreT = setTimeout(function () {
+                  _capRestoreT = null;
+                  try { _capSetVis(''); console.log('[오버레이] 캡처 복원 메시지 유실 감지 → 4초 자동 복원'); } catch (_) { /* */ }
+                }, 4000);
+              }
               if (typeof sendResp === 'function') sendResp({ ok: true });
             }
           } catch (_) { /* */ }

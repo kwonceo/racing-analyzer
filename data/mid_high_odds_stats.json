@@ -1,19 +1,7 @@
 {
-  "count": 300,
+  "count": 291,
   "placed": 52,
   "cases": [
-    {
-      "race": "고쿠라 4경주",
-      "date": "2026-07-12",
-      "no": 13,
-      "odds": 72.6,
-      "signals": [
-        "스마트머니",
-        "집중급락"
-      ],
-      "placed": false,
-      "won": false
-    },
     {
       "race": "고쿠라 4경주",
       "date": "2026-07-12",
@@ -2953,50 +2941,6 @@
       "won": false
     },
     {
-      "race": "서울 9경주 1800M",
-      "date": "2026-07-18",
-      "no": 5,
-      "odds": 15.1,
-      "signals": [
-        "전적A/B"
-      ],
-      "placed": false,
-      "won": false
-    },
-    {
-      "race": "서울 9경주 1800M",
-      "date": "2026-07-18",
-      "no": 7,
-      "odds": 16.1,
-      "signals": [
-        "전적A/B"
-      ],
-      "placed": false,
-      "won": false
-    },
-    {
-      "race": "서울 9경주 1800M",
-      "date": "2026-07-18",
-      "no": 3,
-      "odds": 23.8,
-      "signals": [
-        "전적A/B"
-      ],
-      "placed": true,
-      "won": false
-    },
-    {
-      "race": "서울 9경주 1800M",
-      "date": "2026-07-18",
-      "no": 9,
-      "odds": 27.6,
-      "signals": [
-        "전적A/B"
-      ],
-      "placed": true,
-      "won": false
-    },
-    {
       "race": "서울 1경주 1200M",
       "date": "2026-07-19",
       "no": 4,
@@ -3058,39 +3002,6 @@
       "odds": 90.1,
       "signals": [
         "전적A/B"
-      ],
-      "placed": false,
-      "won": false
-    },
-    {
-      "race": "마쓰도 4경주",
-      "date": "2026-07-19",
-      "no": 5,
-      "odds": 32.1,
-      "signals": [
-        "역배열"
-      ],
-      "placed": false,
-      "won": false
-    },
-    {
-      "race": "마쓰도 4경주",
-      "date": "2026-07-19",
-      "no": 3,
-      "odds": 47.4,
-      "signals": [
-        "역배열"
-      ],
-      "placed": false,
-      "won": false
-    },
-    {
-      "race": "마쓰도 4경주",
-      "date": "2026-07-19",
-      "no": 6,
-      "odds": 67.0,
-      "signals": [
-        "역배열"
       ],
       "placed": false,
       "won": false
@@ -3261,17 +3172,6 @@
       "won": false
     },
     {
-      "race": "부산 4경주 1300M",
-      "date": "2026-07-19",
-      "no": 9,
-      "odds": 564.8,
-      "signals": [
-        "역배열"
-      ],
-      "placed": false,
-      "won": false
-    },
-    {
       "race": "서울 9경주",
       "date": "2026-07-19",
       "no": 6,
@@ -3354,61 +3254,60 @@
       "no": 2,
       "odds": 173.6,
       "signals": [
-        "역배열",
-        "전적A/B"
+        "역배열"
       ],
       "placed": true,
       "won": true
     },
     {
-      "race": "서울 8경주 1400M",
+      "race": "부산 4경주 1300M",
       "date": "2026-07-19",
-      "no": 7,
-      "odds": 15.8,
+      "no": 9,
+      "odds": 564.8,
       "signals": [
-        "전적A/B"
+        "역배열"
       ],
       "placed": false,
       "won": false
     },
     {
-      "race": "서울 8경주 1400M",
+      "race": "서울 9경주 1800M",
       "date": "2026-07-19",
       "no": 4,
-      "odds": 173.6,
+      "odds": 9999.9,
       "signals": [
-        "전적A/B"
+        "역배열"
       ],
-      "placed": false,
+      "placed": true,
       "won": false
     },
     {
-      "race": "서울 8경주 1400M",
-      "date": "2026-07-19",
-      "no": 8,
-      "odds": 173.6,
+      "race": "마쓰도 4경주",
+      "date": "2026-07-20",
+      "no": 1,
+      "odds": 49.7,
       "signals": [
         "전적A/B"
       ],
-      "placed": false,
+      "placed": true,
       "won": false
     }
   ],
   "by_signal": {
     "스마트머니": {
-      "count": 55,
+      "count": 54,
       "placed": 7,
-      "rate": 12.7
+      "rate": 13.0
     },
     "집중급락": {
-      "count": 88,
+      "count": 87,
       "placed": 21,
-      "rate": 23.9
+      "rate": 24.1
     },
     "전적A/B": {
-      "count": 156,
-      "placed": 27,
-      "rate": 17.3
+      "count": 149,
+      "placed": 25,
+      "rate": 16.8
     },
     "급락": {
       "count": 43,
@@ -3416,11 +3315,11 @@
       "rate": 16.3
     },
     "역배열": {
-      "count": 49,
-      "placed": 10,
-      "rate": 20.4
+      "count": 47,
+      "placed": 11,
+      "rate": 23.4
     }
   },
-  "rate": 17.3,
+  "rate": 17.9,
   "note": "중고배당 유력마(복승10배+&강한신호) 실제 입상 자동 집계. 표본 적으면 참고만(50+ 유의)."
 }

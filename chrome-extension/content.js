@@ -38,6 +38,16 @@
   //   보강: 본문 헤더 "2026年7月1日（水） 大 井 第11競走" 파싱
   const BABA_CODE = { 19: '船橋', 20: '大井', 24: '名古屋', 27: '園田', 31: '高知' };
   const TRACKS = /(帯広|門別|盛岡|水沢|浦和|船橋|大井|川崎|金沢|笠松|名古屋|園田|姫路|高知|佐賀)/;
+  // [v2.1.142 raceKey 정규화] 일본어 회장명 폴백(帯広 12R)과 한글 네비(오비히로 12경주)가 같은 경주를
+  //   서로 다른 raceKey 로 만들어 → 수집 키와 분석 키 불일치 → 오버레이 '새 경주 분석 중' 무한 대기.
+  //   회장명을 한글(사설 배당판·서버 oddspark 표기)로 통일한다.
+  const JP2KR_TRACK = {
+    '帯広': '오비히로', '門別': '몬베츠', '盛岡': '모리오카', '水沢': '미즈사와', '浦和': '우라와',
+    '船橋': '후나바시', '大井': '오오이', '川崎': '카와사키', '金沢': '카나자와', '笠松': '카사마츠',
+    '名古屋': '나고야', '園田': '소노다', '姫路': '히메지', '高知': '코치', '佐賀': '사가',
+    '札幌': '삿포로', '函館': '하코다테', '福島': '후쿠시마', '新潟': '니가타', '東京': '도쿄',
+    '中山': '나카야마', '中京': '주쿄', '京都': '교토', '阪神': '한신', '小倉': '고쿠라',
+  };
 
   // [raceKey 오검출 수정] 현재 '활성화된 경주 탭' 또는 두드러진 경주 헤더에서 경주번호를 읽는다.
   //   증상: URL k_raceNo(또는 본문 첫 第N競走)가 stale/목록 첫 항목이라 실제 표시 경주(9R)를 4R로 오검출.
@@ -135,6 +145,12 @@
       if (km) { track = km[1]; raceNo = `${parseInt(km[2], 10)}경주`; }
     }
 
+    // [v2.1.142 raceKey 정규화] 일본어 회장명(帯広 등)으로 폴백된 경우 한글로 통일 + "NR"→"N경주"
+    //   → 한글 네비 성공 시("오비히로 12경주")와 항상 같은 키가 되어 분석 키 불일치 원천 차단.
+    if (JP2KR_TRACK[track]) {
+      track = JP2KR_TRACK[track];
+      if (/^\d+R$/.test(raceNo)) raceNo = raceNo.replace(/R$/, '경주');
+    }
     return [date, track, raceNo].filter(Boolean).join(' ').trim();
   }
 
@@ -948,12 +964,19 @@
     }
   }
   // [탭분리] 일본 중앙경마(JRA) 힌트 — 페이지 본문/URL 로 중앙 여부 추정(팝업 japanType 이 우선).
-  function detectCentralHint() {
-    try {
-      const body = (((document.body && document.body.innerText) || '') + ' ' + location.href);
-      return /(중앙경마|中央競馬|JRA|jra\.go\.jp)/.test(body);
-    } catch (_) { return false; }
+  // [수정: 중앙경마 오분류 근본 수정 v2.1.140 (2026-07-19)]
+  // 기존 detectCentralHint()는 document.body.innerText 전체를 스캔 →
+  //   사설 배당판 네비게이션 메뉴의 "中央競馬"/"JRA" 링크에 오판 → 지방경마(오비히로 등)가
+  //   중앙경마로 분류 → 전적 수집 생략·삼복승 생략·쌍승 서버 미지원 → 분석 품질 심각 저하.
+  // 수정: raceKey에 JRA 10개 경마장명이 포함된 경우만 중앙경마 + URL(jra.go.jp) 신뢰.
+  //   기존 함수명 유지(호출부 무변경). 페이지 body 스캔 완전 제거.
+  const _JRA_VENUES = /삿포로|하코다테|후쿠시마|니가타|도쿄|나카야마|주쿄|쿄토|교토|한신|고쿠라|코쿠라|札幌|函館|福島|新潟|東京|中山|中京|京都|阪神|小倉/;
+  function _isJRACentral(rk) {
+    if (_JRA_VENUES.test(rk || '')) return true;
+    try { return /jra\.go\.jp/.test(location.href); } catch (_) { return false; }
   }
+  // [하위 호환] 기존 detectCentralHint() 호출부가 raceKey 없이 부르는 곳용(URL 만 검사).
+  function detectCentralHint() { return _isJRACentral(''); }
   const SPORT_LABEL = { horse: '경마', cycle: '경륜', boat: '경정', bike: '바이크' };
   // [탭분리] 종목 카테고리(분석기 탭과 1:1): korea|japan_local|japan_central|boat|cycle|bike.
   const CATEGORY_LABEL = {
@@ -980,7 +1003,7 @@
       const { sport: popupSport, market, japanType, raceKey: ov } = await getSettings();
       const eff = resolveSport(popupSport, rk || ov);
       const isKorea = isKoreaMode(rk || ov, market, ov);
-      const isCentral = (japanType === 'central') || detectCentralHint();
+      const isCentral = (japanType === 'central') || _isJRACentral(rk || ov);
       return computeCategory(eff, isKorea, isCentral);
     } catch (_) { return ''; }
   }
@@ -1024,7 +1047,7 @@
     const isKorea = isKoreaMode(raceKey, market, override);
     if (isKorea && market !== 'korea') console.log('[한국모드] KRA 경마장 감지(raceKey/페이지) → 복승만 수집:', raceKey || '(raceKey 미상)');
     // [탭분리] keiba 는 경마 전용 → 한국/중앙/지방 카테고리 산출(팝업 japanType 우선).
-    const kCategory = isKorea ? 'korea' : ((japanType === 'central' || detectCentralHint()) ? 'japan_central' : 'japan_local');
+    const kCategory = isKorea ? 'korea' : ((japanType === 'central' || _isJRACentral(raceKey)) ? 'japan_central' : 'japan_local');
     try { chrome.storage.local.set({ detectedCategory: kCategory, detectedSport: 'horse', detectedAt: Date.now() }); } catch (_) { /* */ }
     const clean = (arr, cap) => arr
       .filter((c) => c.odds > 0)
@@ -1781,6 +1804,17 @@
   async function fetchDebaStarters(params) {
     const p = params || (await getDebaParams());
     if (!p) { console.warn('[전적수집] ⚠ DebaTable 파라미터(k_raceDate/k_raceNo/k_babaCode)를 찾지 못함 — keiba 출마표2를 한 번 열면 자동 저장됩니다.'); return []; }
+    // [v2.1.141 경주번호 정정] 페이지 [출마표] 링크·저장 파라미터가 이전 경주(k_raceNo)를 가리키면
+    //   다른 경주 전적(마명 불일치)을 가져와 '전적이 어떤 경주는 나오고 안 나옴' 증상 유발 →
+    //   현재 배당판 raceKey의 경주번호와 다르면 raceKey 기준으로 강제 정정(오비히로 12R인데 11R 전적 fetch 방지).
+    try {
+      const _rk = extractRaceKey() || '';
+      const _m = /(\d{1,2})\s*(?:경주|R)/i.exec(_rk);
+      if (_m && p.k_raceNo != null && String(p.k_raceNo) !== _m[1]) {
+        console.log(`[전적수집] ⚠ k_raceNo 불일치 정정: ${p.k_raceNo} → ${_m[1]} (현재 raceKey=${_rk})`);
+        p.k_raceNo = _m[1];
+      }
+    } catch (_) { /* 정정 실패 시 기존 파라미터 그대로(기존 동작 유지) */ }
     const url = buildDebaUrl(p);
     console.log('[전적수집] DebaTable fetch:', url);
     // [안정화] 네트워크 전송 실패 시 1회 재시도(일시적 오류 대응)
@@ -1874,7 +1908,7 @@
     const isKorea = !isCycleBoat && isKoreaMode(raceKey, market, override);
     if (isKorea) console.log('[한국경마] 복승만 수집 (쌍승/삼복승 미지원)', market !== 'korea' ? '(감지: raceKey/입력/탭, raceKey=' + (raceKey || '미상') + ' · 입력=' + (override || '없음') + ')' : '(종목=한국)');
     // [탭분리] 중앙경마(JRA): 팝업 japanType='central' 이거나 페이지가 중앙으로 보이면 → 복승+쌍승만(삼복승·전적 제외).
-    const isCentral = !isKorea && !isCycleBoat && (japanType === 'central' || detectCentralHint());
+    const isCentral = !isKorea && !isCycleBoat && (japanType === 'central' || _isJRACentral(raceKey));
     // [탭분리] 종목 카테고리 산출 + 팝업 실시간 표시용 storage 기록.
     const category = computeCategory(effSport, isKorea, isCentral);
     try { chrome.storage.local.set({ detectedCategory: category, detectedSport: effSport, detectedAt: Date.now() }); } catch (_) { /* */ }
@@ -1979,7 +2013,7 @@
         //   [v2.1.138 사용자 지시] 중앙(JRA)도 탭 클릭 제거 — 확장은 전 종목 복승만(탭 클릭 완전 제로).
         //   ⚠ JRA 쌍승은 서버(oddspark) 미지원이라 미수집이 됨(쌍승역전 신호는 JRA 한정 약화) —
         //   탭 안정을 우선한 사용자 결정. 기존 수집 코드는 보존(게이트만·무삭제).
-        const _srvSideTypes = (category === 'japan_local' || category === 'cycle' || category === 'japan_central');
+        const _srvSideTypes = (category === 'japan_local' || category === 'cycle' || category === 'japan_central' || category === 'boat' || category === 'bike');
         if (_srvSideTypes) {
           console.log('[역할 분담] ' + CATEGORY_LABEL[category] + ' → 확장은 사설 복승만(탭 고정)'
             + (category === 'japan_central' ? ' · JRA 쌍승 미수집(서버 미지원·탭 안정 우선)' : ' · 쌍승·삼복승은 서버(oddspark) 담당'));
@@ -2240,6 +2274,7 @@
         const _ar = await chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: _rk });
         if (_ar && _ar.ok && _ar.data) {
           await new Promise((res) => chrome.storage.local.set({ analyzeStatus: { data: _ar.data, at: Date.now() } }, res));
+          _tabAnalyzeBroadcast(_rk, _ar.data);   // [v2.1.144 탭 격리] 같은 탭 오버레이 직접 전달
           console.log('[수집→분석] ' + (_rk || '(현재경주)') + ' 분석 자동 갱신 → 오버레이 즉시 반영');
         }
       }
@@ -2372,14 +2407,27 @@
     try { chrome.storage.local.set({ collectAlert: { level, text, at: Date.now() } }); } catch (_) { /* noop */ }
   }
 
+  // [v2.1.144 탭 격리] 분석 결과를 '같은 탭' 오버레이에 직접 전달(window 이벤트).
+  //   chrome.storage(analyzeStatus·raceKey)는 확장 전역이라 배당판 탭이 2개+ 열리면 서로 덮어써
+  //   다른 경주 추천이 섞여 표시됨(기후 1R 화면에 마쓰도 유력마 3·7·2 표시 실증 · 복병 12번 등).
+  //   오버레이는 같은 탭 이벤트를 항상 우선하고, 이벤트가 없는 페이지(분석기 웹 등)만 storage 폴백.
+  function _tabAnalyzeBroadcast(rk, data) {
+    try { window.dispatchEvent(new CustomEvent('kbTabAnalyze', { detail: { raceKey: rk || '', data, at: Date.now() } })); } catch (_) { /* */ }
+  }
+
   // [1번] 서버 이상감지 분석 실행 → 분석결과(betRecommend 등) 반환. 실패 시 null.
   function runAnalyzeForAlert() {
     return new Promise((resolve) => {
       let done = false;
-      chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: '' }, (res) => {
+      // [v2.1.145 유령 분석 차단] 빈 raceKey 요청은 서버가 임의 경주를 반환(다른 경주 추천 오염) →
+      //   이 탭의 현재 경주로 고정. 못 읽으면 요청 자체를 생략.
+      let _rk = ''; try { _rk = extractRaceKey() || ''; } catch (_) { _rk = ''; }
+      if (!_rk) { resolve(null); return; }
+      chrome.runtime.sendMessage({ type: 'ANALYZE_TRIPLE', raceKey: _rk }, (res) => {
         done = true;
         if (chrome.runtime.lastError || !res || !res.ok || !res.data) { resolve(null); return; }
         try { chrome.storage.local.set({ analyzeStatus: { data: res.data, at: Date.now() } }); } catch (_) { /* noop */ }
+        try { _tabAnalyzeBroadcast(_rk, res.data); } catch (_) { /* */ }   // [v2.1.144 탭 격리]
         resolve(res.data);
       });
       setTimeout(() => { if (!done) resolve(null); }, 8000); // 서버 무응답 방어
@@ -2789,6 +2837,7 @@
       const ar = await _analyzeOnce(rk);
       if (ar && ar.ok && ar.data) {
         try { chrome.storage.local.set({ analyzeStatus: { data: ar.data, at: now } }); } catch (_) { /* */ }   // 패널 즉시 반영
+        _tabAnalyzeBroadcast(rk, ar.data);   // [v2.1.144 탭 격리] 같은 탭 오버레이 직접 전달
         if (ar.data.oddsparkCovered === true && detectSite() !== 'asyukk') {
           // [사설 우선 복원 (2026-07-19)] 사설 배당판이 열려 있으면 커버 중이어도 asyukk 수집 계속(사설 우선)
           console.log('[즉시분석 자동] ' + rk + ' — oddspark 커버 중(사설 배당판 아님) → asyukk 수집 생략(백업 대기)');
