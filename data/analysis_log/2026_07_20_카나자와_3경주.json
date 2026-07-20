@@ -6,7 +6,7 @@
  "date": "2026-07-20",
  "race": "카나자와 3경주",
  "analyzed_at": "14:35:18",
- "updated_at": "14:45:48",
+ "updated_at": "14:58:18",
  "input_data": {
   "source": "Chrome확장 자동수집(배당) + 전적표",
   "pdf_file": null,
@@ -587,48 +587,8 @@
   8,
   4
  ],
- "result": {
-  "1st": 3,
-  "2nd": 5,
-  "3rd": 4
- },
- "hit": {
-  "was_hit": true,
-  "quinella_hit": true,
-  "trifecta_hit": true,
-  "keyhorse_quinella_hit": true,
-  "keyhorse_trifecta_hit": false,
-  "keyhorse_placed": [
-   5,
-   4
-  ],
-  "dark_placed": [],
-  "payouts": {
-   "quinella": 0,
-   "trifecta": 0
-  },
-  "anomaly_was_correct": false,
-  "signal_correct": [],
-  "elimination_correct": false,
-  "eliminated": [],
-  "form_pick": 2,
-  "form_pick_hit": false,
-  "pnl": -1000,
-  "stake": 1000,
-  "near_miss": false,
-  "near_miss_horse": null,
-  "pairing_miss": null,
-  "hit_basis": {
-   "formScore": 53.8,
-   "dropAmt": null,
-   "dropScore": 0,
-   "inverse": false,
-   "inverseHorses": [],
-   "inverseHit": [],
-   "confidence": 0,
-   "reason": "적중"
-  }
- },
+ "result": null,
+ "hit": null,
  "profit": null,
  "review": null
 }
