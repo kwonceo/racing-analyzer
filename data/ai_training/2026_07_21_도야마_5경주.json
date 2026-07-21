@@ -1,0 +1,249 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_21_도야마_5경주",
+ "race_info": {
+  "date": "2026-07-21",
+  "track": "도야마",
+  "round": 5,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 6,
+   "name": "コスモベラエステラ",
+   "jockey": "岩本怜（岩手）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    2,
+    8,
+    6,
+    3
+   ],
+   "record_score": 65.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 1.9
+  },
+  {
+   "no": 7,
+   "name": "グレイスショコラ",
+   "jockey": "菅原辰（岩手）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    2,
+    3,
+    5,
+    3
+   ],
+   "record_score": 35.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 6.8
+  },
+  {
+   "no": 9,
+   "name": "ハクアイドリーム",
+   "jockey": "佐々志（岩手）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    10,
+    1,
+    5,
+    1
+   ],
+   "record_score": 25.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 52.3
+  },
+  {
+   "no": 1,
+   "name": "オウケンアマゾネス",
+   "jockey": "坂井瑛（岩手）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    5,
+    3,
+    7,
+    5
+   ],
+   "record_score": 10.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 17.7
+  },
+  {
+   "no": 3,
+   "name": "ミリオーレアルバ",
+   "jockey": "大坪慎（岩手）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    8,
+    4,
+    9,
+    2
+   ],
+   "record_score": 8.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 8.4
+  },
+  {
+   "no": 8,
+   "name": "アズーラ",
+   "jockey": "山本政（岩手）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    6,
+    5,
+    2,
+    2
+   ],
+   "record_score": 7.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 4.3
+  },
+  {
+   "no": 5,
+   "name": "リベリアンガール",
+   "jockey": "阿部英（岩手）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    9,
+    4,
+    5,
+    5
+   ],
+   "record_score": 5.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 6.9
+  },
+  {
+   "no": 2,
+   "name": "マサノビジョン",
+   "jockey": "塚本涼（岩手）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    9,
+    7,
+    7,
+    3
+   ],
+   "record_score": 2.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 34.1
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {
+   "5": -87.5,
+   "6": -87.5,
+   "3": -83.3,
+   "1": -57.5,
+   "7": -42.5
+  },
+  "excess_drops": {
+   "5": -24.5
+  },
+  "drop_speed": {
+   "5": -156.2,
+   "6": -156.2,
+   "3": -148.7,
+   "1": -102.7,
+   "7": -75.9
+  },
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.747,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   6,
+   7,
+   3,
+   5,
+   8,
+   1
+  ],
+  "eliminated": [
+   9,
+   2
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 100.0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 7,
+  "2nd": 2,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 7,
+  "second": 2,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": "5",
+  "excess_drop_horse_placed": false,
+  "excess_drop_value": -24.5,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-21 12:53:24",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
