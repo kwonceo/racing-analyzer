@@ -1665,7 +1665,7 @@ _KEIRIN_ONLY_RE = re.compile(
     #   두 지명 모두 경마장 없음(경륜 전용) — 고치·나고야·카와사키는 이중소속이라 여기 넣지 않음.
     # [경륜 전용 지명 보강2 (2026-07-21)] 도야마·마쓰사카 미등록 → 동일 오분류 위험. 둘 다 경마장·경정장
     #   없는 경륜 전용 지명(富山경마장·松阪경정장 없음 확인) — 이중소속 아님.
-    r"기시와다|岸和田|도요하시|豊橋|구마모토|熊本|도야마|富山|마쓰사카|松阪|경륜|競輪|keirin)")
+    r"기시와다|岸和田|도요하시|豊橋|구마모토|熊本|도야마|富山|마쓰사카|松阪|케이오각|경륜|競輪|keirin)")
 
 
 def _is_opening_settle(po, pct):
@@ -10916,6 +10916,40 @@ def _triple_analyze(rk, rec):
             core_picks["dansung"] = bool(_fp.get("dansung"))       # [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
             core_picks["dansungMinOdds"] = _fp.get("dansungMinOdds")   # [단통] 최저복승 배당(경고 표시용)
             core_picks["dansungPlan"] = _fp.get("dansungPlan")     # [단통 근본수정] 복승 중심 재편성(단통말 제외·복병 복승·삼복승 보험)
+            # [삼복승 축보험 보강 (2026-07-21 권대표 승인)] 마쓰도 1R(결과 4-5-6) 복기 — 축 2두(확실 2두)가
+            #   있을 때 ①💎고배당 후보(흐름 기반) 1순위 ②확신도 1위(축 밖)를 '축 2두+X' 삼복승 보험으로 항상
+            #   편성. 6번(24.7배)이 "→ 삼복승 보험 포함" 문구만 뜨고 실제 조합엔 없던 모순 해소(추가만·무삭제).
+            #   표시 상한(삼복승 2개) 안에 들도록 메인 다음(1번 자리)에 삽입 — 기존 조합은 뒤로 밀릴 뿐 전부 보존.
+            try:
+                _axis2 = [int(x) for x in ((conf_q or {}).get("favAxis") or [])][:2]
+                if len(_axis2) != 2:
+                    _fq_ax = core_picks.get("finalQuinellas") or []
+                    if _fq_ax and len(_fq_ax[0].get("combo") or []) == 2:
+                        _axis2 = [int(x) for x in _fq_ax[0]["combo"]]
+                if len(_axis2) == 2:
+                    _ft_ax = core_picks.get("finalTrifectas") or []
+                    _have_ax = {tuple(sorted(int(x) for x in (t.get("combo") or []))) for t in _ft_ax}
+                    _cand_ax = []
+                    if high_odds_candidates:
+                        _ho_ax = high_odds_candidates[0]
+                        if _ho_ax.get("no") is not None and int(_ho_ax["no"]) not in _axis2:
+                            _cand_ax.append((int(_ho_ax["no"]),
+                                             "축 2두+💎고배당 후보(%s %g배)"
+                                             % (_ho_ax.get("trend") or "흐름", _ho_ax.get("odds") or 0)))
+                    _ct1_ax = core_picks.get("confTop1")
+                    if _ct1_ax is not None and int(_ct1_ax) not in _axis2:
+                        _cand_ax.append((int(_ct1_ax), "축 2두+확신도 1위"))
+                    _ins_at = 1 if _ft_ax else 0
+                    for _no_ax, _rsn_ax in _cand_ax:
+                        _c3_ax = tuple(sorted(set(_axis2 + [_no_ax])))
+                        if len(_c3_ax) == 3 and _c3_ax not in _have_ax:
+                            _have_ax.add(_c3_ax)
+                            _ft_ax.insert(_ins_at, {"combo": list(_c3_ax), "odds": _tri_odds(list(_c3_ax)),
+                                                    "reason": "삼복승 축보험 — " + _rsn_ax})
+                            _ins_at += 1
+                    core_picks["finalTrifectas"] = _ft_ax
+            except Exception as _axe:
+                print("[삼복승 축보험] 편성 스킵(무시):", _axe)
             core_picks["quinellaMax"] = _mainmax                   # [표시] 메인 복승 상한(두수별)
             core_picks["raceHorseCount"] = _nh                     # [표시] 출전 두수
             core_picks["chaoticRace"] = bool(chaotic and chaotic.get("detected"))   # [표시] 혼전 여부
@@ -12605,6 +12639,41 @@ def _build_analysis_log(rk, an=None):
     core_picks_out = _new_core if _cp_has_recs(_new_core) else (_old_core if _cp_has_recs(_old_core) else _new_core)
     _old_final = doc.get("final_recommendation") if doc else None
     final_out = final if _fr_has_recs(final) else (_old_final if _fr_has_recs(_old_final) else final)
+    # [마감 후 corePicks·최종추천 통째 동결 (2026-07-21 도야마 1R)] 같은 경주를 서버 oddspark 분석과
+    #   확장 사설 분석이 번갈아 같은 로그에 쓰면서, 마감 후 재분석/타 소스 값이 corePicks 를 덮어써
+    #   '새로고침마다 추천 내역이 달라지는' 문제. 마감 후에는 기존 기록(마감 전)이 있으면 무조건 유지 —
+    #   빈값 보존 원칙의 확장(추가만). 판정 동결(displayedCombos)과 표시 계층이 함께 고정된다.
+    if an.get("afterClose"):
+        if _cp_has_recs(_old_core):
+            core_picks_out = _old_core
+        if _fr_has_recs(_old_final):
+            final_out = _old_final
+
+    # [표시=판정 일치 (2026-07-21 권대표 승인)] '회원 화면에 실제 표시된 조합'(복승=finalQuinellas 전부
+    #   [메인 상한 캡]·삼복승=상위 2 — 오버레이·전체 분석 공통 표시 규칙)을 별도 기록 → 적중 판정은 이
+    #   명단만 사용. 배경: 마쓰도 4R — 화면 밖 보조 조합(1+2+5) 적중이 ✅로 잡혀 회원 체감과 성적표 불일치.
+    #   ⚠ 마감 후에는 갱신 안 함(마감 시점 표시분 동결) — 마감 후 재분석이 corePicks 를 덮어써도 판정
+    #   기준은 마감 전 표시분 유지. 기존 필드 무변경(추가만)·구데이터는 명단 없음 → 기존 판정 그대로.
+    try:
+        _old_dc = ((doc.get("corePicks") or {}).get("displayedCombos") if doc else None)
+        if an.get("afterClose") and _old_dc:
+            _dc_out = _old_dc                        # 마감 후 → 동결(마감 전 기록 유지)
+        else:
+            _cp_dc = core_picks_out or {}
+            _dc_out = {
+                "quinellas": [sorted(int(x) for x in (q.get("combo") or []))
+                              for q in (_cp_dc.get("finalQuinellas") or []) if q.get("combo")],
+                "trifectas": [sorted(int(x) for x in (t.get("combo") or []))
+                              for t in (_cp_dc.get("finalTrifectas") or [])[:2] if t.get("combo")],
+                "at": time.strftime("%H:%M:%S", time.localtime()),
+            }
+            if not (_dc_out["quinellas"] or _dc_out["trifectas"]):
+                _dc_out = _old_dc                    # 빈 추천으로 기존 기록 덮지 않음(보존 원칙 동일)
+        if isinstance(core_picks_out, dict) and _dc_out:
+            core_picks_out = dict(core_picks_out)
+            core_picks_out["displayedCombos"] = _dc_out
+    except Exception as _dce:
+        print("[표시조합 기록] 스킵(무시):", _dce)
 
     log = {
         "race_id": os.path.splitext(os.path.basename(path))[0],
@@ -12635,7 +12704,12 @@ def _build_analysis_log(rk, an=None):
         "profit": (doc.get("profit") if doc else None),
         "review": (doc.get("review") if doc else None),   # 사용자 복기 메모(텍스트)
     }
-    json.dump(log, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    # [원자적 저장 (2026-07-21 도야마 1R)] 이중 분석 소스가 같은 로그를 동시 기록 → 쓰는 도중 파일을
+    #   읽은 쪽이 JSON 파싱 실패(doc=None) → recommendation_history 가 통째로 초기화되던 소실 버그.
+    #   tmp 기록 후 os.replace 교체로 '읽는 쪽은 항상 완전한 파일'만 보게 함(추가 보강·동작 동일).
+    _tmp_path = path + ".tmp"
+    json.dump(log, open(_tmp_path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    os.replace(_tmp_path, path)
     return log
 
 
@@ -15093,6 +15167,67 @@ def history_get():
         return jsonify({"error": "히스토리가 없습니다."}), 404
 
 
+AUX_PROMOTE_FILE = os.path.join(os.path.dirname(__file__), "data", "aux_promote_stats.json")
+
+
+def _learn_aux_combos(rk, top3):
+    """[보조 조합 학습 (2026-07-21 권대표 지시)] 표시 밖 생성 조합(삼복승 3번째 이후 — 판정 제외)의 적중을
+    별도 집계 → '어떤 보조 경로(전적A 보완·확신도 보험 등)를 표시로 승격할지' 데이터 근거.
+    마쓰도 4R 1+2+5(전적A 보완)가 첫 표본. 성적표·회수율·판정과 완전 무관(참고 통계 전용·추가만)."""
+    try:
+        _lp, _, _ = _analysis_log_path(_canonical_log_key(rk))
+        doc = json.load(open(_lp, encoding="utf-8"))
+    except Exception:
+        return None
+    cp = (doc.get("corePicks") or {})
+    ft = cp.get("finalTrifectas") or []
+    dc = (cp.get("displayedCombos") or {})
+    disp = {tuple(sorted(int(x) for x in c)) for c in (dc.get("trifectas") or []) if c}
+    if not disp:                                    # 명단 없는 구데이터 → 표시 규칙(상위 2)으로 근사
+        disp = {tuple(sorted(int(x) for x in (t.get("combo") or []))) for t in ft[:2] if t.get("combo")}
+    t3 = sorted(int(x) for x in (top3 or [])[:3] if x is not None)
+    if len(t3) < 3 or not ft:
+        return None
+    aux = []
+    for t in ft:
+        try:
+            c = tuple(sorted(int(x) for x in (t.get("combo") or [])))
+        except Exception:
+            continue
+        if len(c) == 3 and c not in disp:
+            aux.append((c, t))
+    if not aux:
+        return None
+    try:
+        P = json.load(open(AUX_PROMOTE_FILE, encoding="utf-8"))
+    except Exception:
+        P = {"cases": [], "byReason": {},
+             "note": "보조 조합(표시 밖 삼복승) 적중 집계 — 표시 승격 판단 근거(판정·회수율 무관·참고 전용)"}
+    changed = False
+    seen_case = {(c.get("raceKey"), tuple(c.get("combo") or [])) for c in P.get("cases", [])}
+    for c, t in aux:
+        if (rk, c) in seen_case:
+            continue
+        reason = str(t.get("reason") or "기타")
+        rkey = (re.split(r"[—:(]", reason)[0].strip() or "기타")
+        st = P["byReason"].setdefault(rkey, {"n": 0, "hits": 0})
+        hit = (list(c) == t3)
+        st["n"] += 1
+        st["hits"] += int(hit)
+        P["cases"].append({"date": time.strftime("%Y-%m-%d"), "raceKey": rk, "combo": list(c),
+                           "reason": reason, "odds": t.get("odds"), "hit": hit, "top3": t3})
+        changed = True
+        if hit:
+            print(f"[보조조합 적중] {rk} · {'+'.join(map(str, c))} ({rkey}) — 승격 후보 표본 누적")
+    if changed:
+        P["cases"] = P["cases"][-300:]
+        try:
+            json.dump(P, open(AUX_PROMOTE_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        except Exception as e:
+            print("[보조조합 학습] 저장 실패:", e)
+    return P.get("byReason")
+
+
 def _rec_combos_from_analysis_log(rk):
     """[적중 판정 폴백] 결과 입력 시 재분석 betRecommend가 비었을 때(경주 종료·활성 rec 소실)
     저장된 analysis_log의 recommendation_history(마지막 확정 추천)·final_recommendation으로 복승/삼복승
@@ -15103,6 +15238,28 @@ def _rec_combos_from_analysis_log(rk):
         doc = json.load(open(path, encoding="utf-8"))
     except Exception:
         return []
+
+    # [표시=판정 일치 (2026-07-21 권대표 승인)] displayedCombos(마감 시점 화면 표시분·동결)가 기록된
+    #   경주는 '그 명단만' 판정 — 화면 밖 보조 조합 적중이 성적을 부풀리던 간극 제거(마쓰도 4R).
+    #   구데이터(명단 없음)는 아래 기존 판정 로직 그대로(무삭제·하위호환).
+    try:
+        _dc0 = ((doc.get("corePicks") or {}).get("displayedCombos")) or {}
+        if _dc0.get("quinellas") or _dc0.get("trifectas"):
+            _out_dc, _seen_dc = [], set()
+            for _kind, _need, _lst in (("복승", 2, _dc0.get("quinellas") or []),
+                                       ("삼복승", 3, _dc0.get("trifectas") or [])):
+                for _c0 in _lst:
+                    try:
+                        _cc0 = sorted(int(x) for x in _c0)
+                    except Exception:
+                        continue
+                    if len(_cc0) == _need and (_kind, tuple(_cc0)) not in _seen_dc:
+                        _seen_dc.add((_kind, tuple(_cc0)))
+                        _out_dc.append({"kind": _kind, "combo": _cc0})
+            if _out_dc:
+                return _out_dc
+    except Exception:
+        pass
 
     def _parse(s):
         if isinstance(s, (list, tuple)):                       # corePicks combo 는 리스트([3,4]) 형식
@@ -15302,6 +15459,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     except Exception as e:
         print("[경고매칭] 실패:", e)
         _al = None
+
+    # [보조 조합 학습 (2026-07-21 권대표 지시)] 표시 밖 삼복승 적중 별도 집계 → 승격 판단 데이터
+    try:
+        _learn_aux_combos(rk, top3)
+    except Exception as e:
+        print("[보조조합 학습] 실패(무시):", e)
 
     # [배당판 3단계 캡처] 결과 확정 → T-10 추천 vs T-2 추천 타이밍 학습 재집계(마감직후엔 착순이 없어 보류됐던 것)
     try:
@@ -15521,6 +15684,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         return _safe_num(x.get("odds")) if isinstance(x, dict) else _safe_num(x)
     q_odds = _odds_val(fo.get("quinella"))
     t_odds = _odds_val(fo.get("trifecta") or fo.get("trio"))
+    # [백필 확정배당 관통 (2026-07-21)] 경륜/NAR 백필이 result["payouts"]에 실어 보내는 공식 확정 환급
+    #   (2車複·3連複)이 final_odds 미전달로 버려지던 배선 누락 — 마쓰도 4R '삼복승 적중인데 배당 0' 원인.
+    _rp0 = (result or {}).get("payouts") or {}
+    if not q_odds:
+        q_odds = _safe_num(_rp0.get("quinella")) or q_odds
+    if not t_odds:
+        t_odds = _safe_num(_rp0.get("trifecta")) or t_odds
     # [수익 자동 계산·추정] 복승 적중인데 실배당 미입력이면 승자 조합의 시장배당으로 추정(확정배당 입력 시 정정).
     if quinella_hit and not q_odds:
         _eq = _winning_quinella_odds(rk, sorted(top3[:2]) if len(top3) >= 2 else [])
@@ -18122,7 +18292,9 @@ _TRACK_GROUPS = {
     #   포함 미등록 경륜장 일괄 추가(추가만·기존 항목 무변경).
     "기시와다": ["岸和田", "kishiwada"],
     "도요하시": ["豊橋", "toyohashi"],
-    "케이오카쿠": ["京王閣", "keiokaku"],
+    # [케이오각 표기 통합 (2026-07-21)] 사설 배당판이 京王閣을 '케이오각'으로 표기 → 미등록 지명이라
+    #   일본경마 오분류 + 서버 '케이오카쿠'와 이중 키 분리(岐阜·기후 패턴). 별칭 추가로 한 키 병합.
+    "케이오카쿠": ["京王閣", "keiokaku", "케이오각"],
     "세이부엔": ["西武園", "seibuen"],
     "마에바시": ["前橋", "maebashi"],
     "우쓰노미야": ["宇都宮", "utsunomiya"],
@@ -21119,6 +21291,34 @@ def _keirin_result_parse(html):
             out["trifectaOdds"] = round(int(mt3.group(4).replace(",", "")) / 100.0, 1)
     except Exception:
         pass
+    # [환급 구조 파싱 보강 (2026-07-21 마쓰도 4R 실측)] 현행 페이지는 조합 숫자가 이미지·라벨은 헤더 분리형
+    #   (レース·2枠連·2車連·ワイド·3連勝 + 複/単 행)이라 위 텍스트 규칙이 매칭 안 됨 → 셀 시퀀스 폴백:
+    #   '複' 셀 뒤 구분자 셀('-'=2두 → 2車複 · '--'=3두 → 3連複)과 금액 셀로 환급 추출. 枠複 발매 시에도
+    #   단일 구분 마지막 항목 = 2車複(枠連 열이 항상 앞). 기존 규칙 매칭 시 그대로 유지(추가 폴백만).
+    if out.get("quinellaOdds") is None or out.get("trifectaOdds") is None:
+        try:
+            entries = []   # (구분자 길이, 배당)
+            for row in _keirin_table_rows(html):
+                cells = [str(c).strip() for c in row]
+                for i, c in enumerate(cells):
+                    if c == "複":
+                        seg = cells[i + 1:i + 4]
+                        if any("未発売" in s for s in seg[:1]):
+                            continue
+                        sep = next((s for s in seg if re.fullmatch(r"[-=＝–—]{1,3}", s)), None)
+                        amt = next((s for s in seg if re.search(r"[\d,]+円", s)), None)
+                        if amt:
+                            m2 = re.search(r"([\d,]+)円", amt)
+                            if m2:
+                                entries.append((len(sep or "-"), round(int(m2.group(1).replace(",", "")) / 100.0, 1)))
+            _two = [a for n, a in entries if n <= 1]
+            _three = [a for n, a in entries if n >= 2]
+            if out.get("quinellaOdds") is None and _two:
+                out["quinellaOdds"] = _two[-1]
+            if out.get("trifectaOdds") is None and _three:
+                out["trifectaOdds"] = _three[0]
+        except Exception:
+            pass
     return out
 
 
@@ -21190,7 +21390,62 @@ def _keirin_result_backfill_once(date=None, verbose=True):
               % (date, tried, filled, tried - filled))
         for f in fail_list[:5]:
             print("  ↳ 실패:", f.get("raceKey"), "-", f.get("error"))
-    return {"date": date, "tried": tried, "filled": filled,
+    # [확정 환급 소급 갱신 (2026-07-21 권대표 승인)] 이미 판정된 경륜 경주 중 공식 환급 미확보(근사 표기)
+    #   건을 RaceKekka 재조회로 정정 — 마쓰도 4R '적중인데 삼복승 배당 0' 해소. 착순 일치할 때만 재학습
+    #   (같은 rk 재제출=멱등 덮어쓰기 허용 규약)·payouts 만 공식으로 채워짐 → 성적표 '(근사)'가 확정으로 편입.
+    refreshed = 0
+    try:
+        prefix = date.replace("-", "_")
+        for fn in (os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
+            if refreshed >= 20:
+                break                                    # 1회 실행당 상한(과호출 방지)
+            if not fn.startswith(prefix) or not fn.endswith(".json"):
+                continue
+            try:
+                doc = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            rk2 = str(doc.get("raceKey") or "")
+            r0 = doc.get("result") or {}
+            if not r0.get("1st") or not rk2 or _KRA_TRACK_RE.search(rk2):
+                continue
+            po0 = doc.get("payouts") or {}
+            if not (bool(doc.get("payouts_approx")) or po0.get("quinella") is None or po0.get("trifecta") is None):
+                continue
+            # [적중 경주 한정 (2026-07-21 보강)] 결과 페이지 환급표는 '당첨 조합'만 게시 — 미적중 경주는
+            #   재조회해도 추천 조합 확정배당을 얻을 수 없어 매 주기 재조회·재학습만 반복(낭비) → 적중만 소급.
+            _t30 = [r0.get("1st"), r0.get("2nd"), r0.get("3rd")]
+            try:
+                _lx0 = _live_exact_hit(rk2, _t30, doc.get("horse_count"))
+            except Exception:
+                _lx0 = None
+            _hit0 = (bool(_lx0["hit"] or _lx0["trioHit"]) if _lx0 is not None
+                     else bool((doc.get("result_analysis") or {}).get("main_hit")))
+            if not _hit0:
+                continue
+            venue2, rno2 = _area_num(rk2)
+            if not venue2 or not rno2:
+                continue
+            jo2, from_sched2 = _keirin_jo_today(venue2)
+            if not jo2 or (not from_sched2 and not _KEIRIN_ONLY_RE.search(rk2)):
+                continue
+            rr = _keirin_result_top3(jo2, ymd, str(rno2), expect_venue=venue2)
+            if not rr.get("ok") or (rr.get("quinellaOdds") is None and rr.get("trifectaOdds") is None):
+                continue
+            if [r0.get("1st"), r0.get("2nd")] != rr["top3"][:2]:
+                continue                                 # 저장 착순과 불일치 → 안전상 미갱신
+            result2 = {"1st": rr["top3"][0], "2nd": rr["top3"][1], "3rd": rr["top3"][2], "payouts": {}}
+            if rr.get("quinellaOdds") is not None:
+                result2["payouts"]["quinella"] = rr["quinellaOdds"]
+            if rr.get("trifectaOdds") is not None:
+                result2["payouts"]["trifecta"] = rr["trifectaOdds"]
+            _apply_result_learning(rk2, result2, [x for x in rr["top3"] if x is not None])
+            refreshed += 1
+        if refreshed and verbose:
+            print(f"[경륜 환급 정정] {date}: 공식 확정배당 소급 {refreshed}건")
+    except Exception as e:
+        print("[경륜 환급 정정] 스킵(무시):", e)
+    return {"date": date, "tried": tried, "filled": filled, "payoutRefreshed": refreshed,
             "done": done_list, "failed": fail_list}
 
 
@@ -21382,6 +21637,7 @@ def _scoreboard_daily(date=None):
     judged = hits = passes = unconfirmed = 0
     invested = returned = 0.0
     approx_returned = 0.0   # [근사 분리 (2026-07-20)] 근사 배당 회수는 헤드라인과 분리(참고 표기 전용)
+    dark_hits = 0           # [💎 복병 적중 배지 (2026-07-21 승인)] 표시 전용 카운트(헤드라인 집계 미포함)
 
     def _sport_label(doc, rk):
         sp = (doc.get("sport") or "").lower()
@@ -21433,6 +21689,25 @@ def _scoreboard_daily(date=None):
             invested += STAKE
             qo = po.get("quinella") if isinstance(po, dict) else None
             to = po.get("trifecta") if isinstance(po, dict) else None
+            # [💎 복병 적중 배지 (2026-07-21 승인)] bmedSpecial(★★ 참고) 조합의 정확 적중(1·2착 일치)을
+            #   '표시 전용'으로 판정 — judged/hits/회수율 헤드라인 집계에는 미포함(정직 판정 유지).
+            #   메인이 빗나가도 복병이 맞은 경주를 성적표에서 복기 가능하게(고배당·학습 가치 보존, 추가만).
+            _dark_hit, _dark_combo, _dark_odds = False, None, None
+            try:
+                _dlp0, _, _ = _analysis_log_path(_canonical_log_key(rk))
+                _dld0 = json.load(open(_dlp0, encoding="utf-8"))
+                _dtop2 = sorted(int(x) for x in top3[:2] if x is not None)
+                if len(_dtop2) == 2:
+                    for _dq0 in ((_dld0.get("corePicks") or {}).get("bmedSpecial") or []):
+                        _dc0 = sorted(int(x) for x in (_dq0.get("combo") or [])
+                                      if str(x).strip().lstrip("-").isdigit())
+                        if len(_dc0) == 2 and _dc0 == _dtop2:
+                            _dark_hit, _dark_combo = True, "+".join(map(str, _dc0))
+                            _dark_odds = (qo if isinstance(qo, (int, float)) else _dq0.get("odds"))
+                            dark_hits += 1
+                            break
+            except Exception:
+                pass
             ret = None
             used_odds = None
             if hit:
@@ -21454,6 +21729,7 @@ def _scoreboard_daily(date=None):
             a["invested"] += STAKE
             a["returned"] += (ret if (ret and not _approx) else 0.0)   # [근사 분리] 종목별도 확정만
             rows.append({"raceKey": rk, "sport": sport, "verdict": ("hit" if hit else "miss"),
+                         "darkHit": _dark_hit, "darkCombo": _dark_combo, "darkOdds": _dark_odds,   # [💎 복병 적중 배지] 표시 전용
                          "top3": top3, "odds": used_odds, "return": (int(ret) if ret else None),
                          "approx": bool(_approx and ret is not None),   # [회수율 정직화] 근사 배당 회수 표기
                          "tainted": bool(doc.get("tainted") or _is_tainted_saved(doc.get("saved_at"))),   # [④ 오염 마킹]
@@ -21479,6 +21755,7 @@ def _scoreboard_daily(date=None):
             "approxUsed": sum(1 for _rw in rows if _rw.get("approx")),   # [회수율 정직화] 근사 배당 사용 건수
             "approxReturned": int(approx_returned),                       # [근사 분리] 참고 전용(헤드라인 제외)
             "roiWithApprox": (round((returned + approx_returned) / invested * 100) if invested else None),
+            "darkHits": dark_hits,   # [💎 복병 적중 배지] 표시 전용(헤드라인 미포함)
             "streak": streak, "bySport": agg, "rows": rows}
 
 
@@ -21529,6 +21806,9 @@ def scoreboard_page():
                    "근사 포함 시 참고 회수율 %s%% (확정배당 확보 시 자동 편입)</p>"
                    % (sb["approxUsed"], format(sb.get("approxReturned") or 0, ","),
                       sb.get("roiWithApprox") if sb.get("roiWithApprox") is not None else "—"))
+    if sb.get("darkHits"):
+        out.append("<p class='hint'>💎 복병(★★ 참고) 적중 %d건 — 참고 등급이라 회수율 집계에서 제외(표시 전용)</p>"
+                   % sb["darkHits"])
     # 종목별
     if sb.get("bySport"):
         out.append("<h3>종목별</h3><table><tr><th>종목</th><th>전적</th><th>적중률</th><th>회수율</th></tr>")
@@ -21546,6 +21826,10 @@ def scoreboard_page():
               ("<span class='pass'>➖ 패스</span>" if v == "pass" else "<span class='miss'>❌</span>"))
         if row.get("legacy"):
             vt += " <span class='hint'>(구판정)</span>"
+        if row.get("darkHit"):   # [💎 복병 적중 배지] 표시 전용(회수 집계 제외)
+            vt += " <span style='color:#c084fc;font-weight:800'>💎복병 %s%s</span>" % (
+                _esc(row.get("darkCombo") or ""),
+                _esc(" (%s배)" % row["darkOdds"]) if row.get("darkOdds") else "")
         out.append("<tr><td><a href='/race-log?key=%s&date=%s'>%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
                    % (_esc(row["raceKey"]), _esc(date), _esc(row["raceKey"]), _esc(t3), vt,
                       (_esc("%s배%s" % (row["odds"], "(근사)" if row.get("approx") else "")) if row.get("odds") else "-"),
@@ -26169,6 +26453,35 @@ def multi_dashboard():
                     "collected": len(collected_keys), "bySport": by_sport})
 
 
+def _rec_trail_for_detail(key):
+    """[추천 내역 상세 (2026-07-21 권대표 요청)] 카드 상세에 '실제 표시된 추천 + 생성됐지만 노출 제외된
+    조합(고배당 상한·표시 개수에 잘린 것 포함) + 추천 변경 이력'을 전부 부가(읽기 전용·analysis_log 기반).
+    배경: 마쓰도 1R — 확신도 보험 1+3+6(89.9배)이 생성됐지만 화면 미노출 → '6번 조합이 없다' 오해.
+    유저 설득용: 어떤 조합이 왜 만들어졌고 왜 안 보였는지 전부 공개."""
+    try:
+        _lp, _, _ = _analysis_log_path(_canonical_log_key(key))
+        doc = json.load(open(_lp, encoding="utf-8"))
+    except Exception:
+        return None
+    cp = doc.get("corePicks") or {}
+
+    def _slim(lst):
+        return [{"combo": x.get("combo"), "odds": x.get("odds"), "reason": x.get("reason"),
+                 "stars": x.get("stars")} for x in (lst or []) if x.get("combo")]
+    out = {
+        "quinellas": _slim(cp.get("finalQuinellas")),
+        "trifectas": _slim(cp.get("finalTrifectas")),
+        "special": _slim(cp.get("bmedSpecial")),
+        "history": [{"time": e.get("time"), "quinella_main": e.get("quinella_main"),
+                     "quinella_sub": e.get("quinella_sub"), "trifecta_main": e.get("trifecta_main")}
+                    for e in (doc.get("recommendation_history") or [])][-12:],
+        "confTop1": cp.get("confTop1"), "confTop1Conf": cp.get("confTop1Conf"),
+    }
+    if not (out["quinellas"] or out["trifectas"] or out["special"] or out["history"]):
+        return None
+    return out
+
+
 @app.route("/api/multi/race/<path:key>", methods=["GET"])
 def multi_race_detail(key):
     """[4번] 카드 클릭 → 해당 경주 전체 분석(기존 _triple_analyze 재사용). 결과입력은 기존 엔드포인트 사용."""
@@ -26193,6 +26506,13 @@ def multi_race_detail(key):
         _rs = _race_result_summary(key)
         if _rs:
             an["raceResult"] = _rs
+    except Exception:
+        pass
+    # [추천 내역 상세 (2026-07-21 권대표 요청)] 표시분+노출 제외분+변경 이력 전부 부가(읽기 전용)
+    try:
+        _rt = _rec_trail_for_detail(key)
+        if _rt:
+            an["recTrail"] = _rt
     except Exception:
         pass
     return jsonify(an)

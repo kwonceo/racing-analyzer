@@ -1641,6 +1641,18 @@
             cpBox.appendChild(mk('div', 'font-weight:800;font-size:16px;margin-top:5px;color:#c4b5fd',
               '🛡 삼복승 보험: ' + t.combo.join('+') + (t.odds != null ? '  (' + t.odds + '배)' : '') + _rs));
           });
+          // [보조 조합 노출 (2026-07-21 권대표 요청)] 표시 상한 밖 생성 조합 — 참고·판정 제외(표시=판정 일치).
+          //   마쓰도 4R: 보조 1+2+5가 화면 밖에서 적중 → 이제 여기서 실시간으로 볼 수 있게(소형·회색 점선).
+          var _aux = _ft.slice(2);
+          if (_aux.length) {
+            var auxBox = mk('div', 'margin-top:5px;padding:5px 8px;border:1px dashed #64748b;border-radius:7px;background:rgba(100,116,139,.10)');
+            auxBox.appendChild(mk('div', 'font-weight:700;color:#94a3b8;font-size:11.5px', '🧩 보조 조합 (참고 · 적중 판정 제외)'));
+            _aux.slice(0, 4).forEach(function (t) {
+              auxBox.appendChild(mk('div', 'font-size:12.5px;color:#cbd5e1;margin-top:2px',
+                '삼복승 ' + (t.combo || []).join('+') + (t.odds != null ? ' (' + t.odds + '배)' : '') + (t.reason ? ' · ' + t.reason : '')));
+            });
+            cpBox.appendChild(auxBox);
+          }
           // [BMED 특별 감지 💎] 고배당+강신호 별도 섹션(하단·최대 2개)
           var _sp = (cp && cp.bmedSpecial) || [];
           if (_sp.length) {
@@ -1657,8 +1669,11 @@
           }
           if (cp.confTop1 != null) {
             // [2번] 확신도1위 글씨 키움(16px)
+            // [확신도 라벨 구분 (2026-07-21 권대표 요청)] '확신도 1위'가 시장 유력 순위로 오독(마쓰도 7R) —
+            //   이 값은 전적·신호 종합 랭킹이므로 명칭을 분리(시장유력 TOP과 별개임을 명시).
             cpBox.appendChild(mk('div', 'font-weight:800;color:#cbd5e1;font-size:16px;margin-top:7px',
-              '확신도1위 ' + cp.confTop1 + '번' + (cp.confTop1High ? '🔺고배당' : '')));
+              '🧠 종합확신도 1위(전적·신호) ' + cp.confTop1 + '번' + (cp.confTop1High ? '🔺고배당' : '')));
+            cpBox.appendChild(mk('div', 'color:#8a94a6;font-size:11px', '※ 시장유력(배당) 순위와 별개 지표'));
           }
           panel.appendChild(cpBox);
         }
