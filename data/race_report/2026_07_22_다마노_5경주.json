@@ -1,0 +1,181 @@
+{
+ "race": "다마노 5경주",
+ "raceKey": "다마노 5경주",
+ "date": "2026-07-22",
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 5,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": "복승 보조(삼복승 구성)",
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    2
+   ],
+   "drop_timeline": [
+    {
+     "time": "12:23:11",
+     "minutes_before": null,
+     "odds": 8.1,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "12:24:33",
+     "minutes_before": 4,
+     "odds": 8.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 92.1,
+   "confidence": 32.0,
+   "reason": "전적상위"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "12:23:11",
+     "minutes_before": null,
+     "odds": 4.6,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "12:24:33",
+     "minutes_before": 4,
+     "odds": 4.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 94.3,
+   "confidence": 8.0,
+   "reason": "전적상위"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "12:23:11",
+     "minutes_before": null,
+     "odds": 4.6,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "12:24:33",
+     "minutes_before": 4,
+     "odds": 4.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 128.0,
+   "confidence": 49.5,
+   "reason": "전적상위"
+  }
+ },
+ "recommended_horses": [
+  1,
+  5,
+  2
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 2번 92.1점",
+  "2. 배당 수집 시작 12:23:11",
+  "5. 종합 신뢰도 32.0점(하) 판정",
+  "6. BMED 전략: 보험형 적용",
+  "7. 최종 추천: 복승 메인 1+5"
+ ],
+ "confidence_breakdown": {
+  "horse": 2,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 92.1,
+  "total": 32.0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "복승불일치_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 92.1,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": false,
+  "inverseHorses": [
+   5
+  ],
+  "inverseHit": [
+   5
+  ],
+  "confidence": 49.5,
+  "reason": "전적유력마 1번 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 2
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-22 12:49:22"
+}

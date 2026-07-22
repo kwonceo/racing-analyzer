@@ -1665,7 +1665,9 @@ _KEIRIN_ONLY_RE = re.compile(
     #   두 지명 모두 경마장 없음(경륜 전용) — 고치·나고야·카와사키는 이중소속이라 여기 넣지 않음.
     # [경륜 전용 지명 보강2 (2026-07-21)] 도야마·마쓰사카 미등록 → 동일 오분류 위험. 둘 다 경마장·경정장
     #   없는 경륜 전용 지명(富山경마장·松阪경정장 없음 확인) — 이중소속 아님.
-    r"기시와다|岸和田|도요하시|豊橋|구마모토|熊本|도야마|富山|마쓰사카|松阪|케이오각|경륜|競輪|keirin)")
+    r"기시와다|岸和田|도요하시|豊橋|구마모토|熊本|도야마|富山|마쓰사카|松阪|케이오각|"
+    # [보강3 (2026-07-22)] 사세보·구루메·다마노·히로시마 — 경륜 전용(경마·경정 이중소속 없음 확인)
+    r"사세보|佐世保|구루메|久留米|다마노|玉野|히로시마|広島|경륜|競輪|keirin)")
 
 
 def _is_opening_settle(po, pct):
@@ -7641,6 +7643,13 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                     _li["stars"] = 3
                     final_q.append(_li)
                 elif _lc not in _sp_have3:
+                    # [특별 상한 보강 (2026-07-21 기시와다 7R)] 라인 페어 복병 편입에도 SPECIAL_ODDS_MAX(50배)
+                    #   적용 — 단통 경주에서 246배·616배 라인 페어가 💎 복병으로 노출되던 구멍(어제 상한은
+                    #   강제조합 이동 경로에만 적용돼 있었음). 초과분은 편입 제외(참고 로그만·라인 정보는
+                    #   keirinLinePairs 에 그대로 보존 — 삭제 아님).
+                    if float(_lo) > SPECIAL_ODDS_MAX:
+                        print(f"[라인 페어 상한] {'+'.join(map(str, _lc))} {_lo}배 > 특별상한 {SPECIAL_ODDS_MAX}배 → 💎 편입 제외(참고)")
+                        continue
                     _li["stars"] = 2
                     special_q = (special_q or []) + [_li]
                     _sp_have3.add(_lc)
@@ -10963,6 +10972,24 @@ def _triple_analyze(rk, rec):
             except Exception as _axe:
                 print("[삼복승 축보험] 편성 스킵(무시):", _axe)
             core_picks["quinellaMax"] = _mainmax                   # [표시] 메인 복승 상한(두수별)
+            # [삼복승 추정배당 표기 (2026-07-22 다마노 3R)] 실배당(trio_map) 없는 조합의 배당은
+            #   _trio_est(복승 3쌍 기하평균×2) 추정치인데 실배당처럼 표시돼 옴(표시 단계 둔갑 —
+            #   다마노 3R 10.3배 vs 실제 저배당). 추정이면 oddsEst=True → 화면·카톡 '~X배(추정)'.
+            #   값 자체는 무변경(기존 소비처 안전) · 표시 전용 · 판정·학습 무영향.
+            try:
+                for _t_e in (core_picks.get("finalTrifectas") or []):
+                    _c_e = _t_e.get("combo") or []
+                    if len(_c_e) == 3 and _t_e.get("odds") is not None \
+                            and trio_map.get(tuple(sorted(int(x) for x in _c_e))) is None:
+                        _t_e["oddsEst"] = True
+                if core_picks.get("trifecta") and core_picks.get("trifectaOdds") is not None \
+                        and trio_map.get(tuple(sorted(int(x) for x in core_picks["trifecta"]))) is None:
+                    core_picks["trifectaOddsEst"] = True
+                if core_picks.get("confTrifecta") and core_picks.get("confTrifectaOdds") is not None \
+                        and trio_map.get(tuple(sorted(int(x) for x in core_picks["confTrifecta"]))) is None:
+                    core_picks["confTrifectaOddsEst"] = True
+            except Exception as _est_e:
+                print("[삼복승 추정표기] 스킵(무시):", _est_e)
             core_picks["raceHorseCount"] = _nh                     # [표시] 출전 두수
             core_picks["chaoticRace"] = bool(chaotic and chaotic.get("detected"))   # [표시] 혼전 여부
             # [전적 수집 실패 감지] form 은 _form_from_starters 반환=마필 점수 '리스트'(None=수집없음).
@@ -11171,6 +11198,74 @@ def _triple_analyze(rk, rec):
         _apply_rec_hysteresis(rk, _an_out)
     except Exception as _hye:
         print("[히스테리시스] 적용 실패(무시·원본 표시):", _hye)
+    # [경주 등급 배지 (2026-07-22 권대표 요청)] 예측 확신을 경주당 1개 등급으로 — 오버레이·카드·카톡
+    #   공통 표시(모든 경주가 같은 무게로 보이던 문제 해소). 기준 = 승부 계층·카톡 알림과 동일 축.
+    #   🔥 강력승부: 신호 2+ & 확신도 65+ / ✅ 추천: 신호 1+ & 확신도 50+ / ⚖️ 관찰: 신호 or 확신도 40+
+    #   / 🛡 참고·패스: 무신호·단통 등. 표시 전용(판정·학습 무영향) — 등급별 성적 분리는 성적표에서.
+    try:
+        _gs = int(((_an_out.get("strongSignals") or {}).get("count")) or 0)
+        _gc = float(_card_conf_value(_an_out.get("confidence")) or 0)
+        _cpg = _an_out.get("corePicks") or {}
+        _dan_g = bool(_cpg.get("dansung"))
+        _rec_g = bool(_cpg.get("finalQuinellas") or _cpg.get("finalTrifectas"))
+        if _gs >= 2 and _gc >= 65:
+            _tier = {"tier": "S", "label": "🔥 강력승부", "color": "#f43f5e"}
+        elif _rec_g and _gs >= 1 and _gc >= 50:
+            _tier = {"tier": "A", "label": "✅ 추천", "color": "#38d39f"}
+        elif _rec_g and (_gs >= 1 or _gc >= 40) and not _dan_g:
+            _tier = {"tier": "B", "label": "⚖️ 관찰", "color": "#fbbf24"}
+        else:
+            _tier = {"tier": "C", "label": "🛡 참고·패스", "color": "#94a3b8"}
+        _tier["basis"] = "신호 %d개 · 확신도 %s%s" % (_gs, round(_gc, 1), " · 단통" if _dan_g else "")
+        # [등급 마감 동결 (2026-07-22 사세보 6R)] 등급이 라이브 재계산이라 마감 후 배당·신호 변화로
+        #   흔들림(🔥 강력승부 적중 경주가 사후 조회 시 ⚖️ 관찰로 표시). corePicks 동결과 동일 원칙:
+        #   마감 전 마지막 등급을 잠그고 마감 후엔 그 값만 표시(locked=True). 서버 재시작 대비로
+        #   분석 로그의 동결 corePicks.raceGrade 에서 1회 복원·캐시. 판정·학습 무영향(표시 전용 유지).
+        _g_today = time.strftime("%Y-%m-%d")
+        _g_closed = bool(_an_out.get("recommendClosed") or _an_out.get("afterClose"))
+        _g_st = _GRADE_LOCK.get(rk)
+        if _g_st and _g_st.get("day") != _g_today:
+            _g_st = None                              # 날짜 바뀜(어제 동일 키) → 상태 소멸
+        if not _g_closed:
+            # [핀 우선] T-7/T-5 틱(카톡 발송과 동일 분석)이 핀 고정한 등급은 일반 라이브 갱신이
+            #   덮지 않음 — 회원이 '최종 확정' 카톡으로 본 등급이 마감 후 기록의 기준(표시는 라이브 유지).
+            if not (_g_st and _g_st.get("pinned")):
+                _GRADE_LOCK[rk] = {"day": _g_today, "tier": dict(_tier)}
+        else:
+            if _g_st is None:
+                # 재시작 후 첫 조회 → ① T-스냅샷(T-5→T-7·카톡 발송 시점과 동일 분석) ② 분석 로그
+                #   corePicks(이중 소스라 후순위 — 사세보 6R: 로그가 서버측 약한 분석값이었음) ③ 현재값.
+                _rest = None
+                try:
+                    _sp_g = _timeline_snap_path(rk)
+                    if os.path.exists(_sp_g):
+                        _sn_g = (json.load(open(_sp_g, encoding="utf-8")) or {}).get("snapshots") or {}
+                        for _ph_g in ("T-5", "T-7"):
+                            _rg_s = ((_sn_g.get(_ph_g) or {}).get("raceGrade")) or None
+                            if isinstance(_rg_s, dict) and _rg_s.get("tier"):
+                                _rest = {k: v for k, v in _rg_s.items() if k != "locked"}
+                                break
+                except Exception:
+                    _rest = None
+                if _rest is None:
+                    try:
+                        _lp_g, _, _ = _analysis_log_path(_canonical_log_key(rk))
+                        if _lp_g and os.path.exists(_lp_g):
+                            _doc_g = json.load(open(_lp_g, encoding="utf-8"))
+                            _rg_g = ((_doc_g.get("corePicks") or {}).get("raceGrade")) or None
+                            if isinstance(_rg_g, dict) and _rg_g.get("tier"):
+                                _rest = {k: v for k, v in _rg_g.items() if k != "locked"}
+                    except Exception:
+                        _rest = None
+                _g_st = {"day": _g_today, "tier": _rest or dict(_tier)}
+                _GRADE_LOCK[rk] = _g_st               # 복원 실패 시 현재 계산값으로라도 고정(재요동 방지)
+            _tier = dict(_g_st.get("tier") or _tier)
+            _tier["locked"] = True                    # 마감 시점 등급 고정 표기
+        _an_out["raceGrade"] = _tier
+        if isinstance(_cpg, dict):
+            _cpg["raceGrade"] = _tier
+    except Exception as _rge:
+        print("[경주 등급] 산출 실패(무시):", _rge)
     return _an_out
 
 
@@ -11179,6 +11274,10 @@ def _triple_analyze(rk, rec):
 #  ⓒ경주당 교체 상한 2회 ⓓ💎 복병 픽은 별도 섹션이라 본 장치와 무관(독립 유지) ⓔ마감 후 무개입.
 #  구현 원칙: '표시'만 안정화(corePicks.finalQuinellas 선두 순서) — 분석·이력·학습 데이터는 원본 그대로.
 _REC_HYST = {}   # {rk: {"main": (a,b), "item": dict, "streak_m": (a,b)|None, "streak_n": int, "switches": int, "day": str}}
+
+# [등급 마감 동결 (2026-07-22)] {rk: {"day": "YYYY-MM-DD", "tier": dict}} — 마감 전 마지막 등급 저장.
+#   마감 후 _triple_analyze 가 이 값을 반환(locked=True). 재시작 시 분석 로그 corePicks.raceGrade 복원.
+_GRADE_LOCK = {}
 
 
 def _apply_rec_hysteresis(rk, an):
@@ -12920,8 +13019,11 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
     # [회수율 정직화 (2026-07-20 권대표 승인)] 성적표는 payouts 를 읽고 결과 저장은 investment 에만 담아
     #   적중 전건이 '확정배당 미확보'로 빠지던 어긋남 수정 — 최상위 payouts 로도 저장(추가만).
     #   출처 구분: 확정(수동입력·백필·record.payouts) vs 근사(마지막 수집 배당 폴백) → payouts_approx 로 정직 표기.
+    # [근사 둔갑 차단 (2026-07-22)] record.payouts 의 추정값(payouts_estimated)은 '확정'으로 인정하지 않음
+    #   — 몬베츠 103.5/275.8배가 approx=false 로 표기되던 뿌리(추정이 공식 행세). 공식 = 입력값 or 비추정 record.
     _q_official = (_safe_num(inputs.get("quinella_odds"))
-                   or _safe_num((record.get("payouts") or {}).get("quinella")))
+                   or (None if record.get("payouts_estimated")
+                       else _safe_num((record.get("payouts") or {}).get("quinella"))))
     _t_odds_top = (_safe_num(inputs.get("trifecta_odds"))
                    or _safe_num((record.get("payouts") or {}).get("trifecta")))
     _payouts_top = {}
@@ -15407,7 +15509,8 @@ def _winning_quinella_odds(rk, top2):
 _RESULT_LEARNED = {}   # [중복학습 방지] canonical race id → (마지막 rk, 결과튜플, 시각). 같은 경주 다른 표기 이중학습 차단.
 
 
-def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout=None, inputs=None):
+def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout=None, inputs=None,
+                           force_relearn=False):
     """경주 결과 → 히스토리 기록 + 자동학습 레코드/통계 갱신(공용).
     keiba/asyukk 결과 자동수집(results_auto)과 수동 입력(record-result)이 함께 사용.
     이상감지·추천·전적유력마·제거 판정의 실제 적중 여부를 판정해 learning.json 누적."""
@@ -15420,7 +15523,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         _cid, _cdate = _race_result_id(rk)
         _rt = tuple((result or {}).get(k) for k in ("1st", "2nd", "3rd") if (result or {}).get(k) is not None)
         _prev = _RESULT_LEARNED.get(_cid)
-        if _prev and _prev[0] != rk and _prev[1] == _rt and (time.time() - _prev[2]) < 7200:
+        # [정합 스윕 강제 재학습 (2026-07-22)] 공식 대조 정정은 중복 게이트를 우회(force_relearn) —
+        #   스윕 직전 오기록 학습이 2시간 게이트로 공식 정정을 막던 문제(몬베츠 6R 103.5배 잔존).
+        if _prev and not force_relearn and _prev[0] != rk and _prev[1] == _rt and (time.time() - _prev[2]) < 7200:
             print(f"[중복학습 방지] {rk}: 같은 경주 다른 표기('{_prev[0]}')로 이미 학습됨 → 이번 학습 스킵(이중 반영 차단)")
             return ({"was_hit": None, "skipped_duplicate": True, "canonical": _cid, "raceKey": rk},
                     (_learning_load().get("stats") or {}))
@@ -15704,10 +15809,12 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     if not t_odds:
         t_odds = _safe_num(_rp0.get("trifecta")) or t_odds
     # [수익 자동 계산·추정] 복승 적중인데 실배당 미입력이면 승자 조합의 시장배당으로 추정(확정배당 입력 시 정정).
+    _q_estimated = False   # [근사 둔갑 차단 (2026-07-22)] 추정값이 record.payouts 로 들어가 '확정'으로 표기되던 버그
     if quinella_hit and not q_odds:
         _eq = _winning_quinella_odds(rk, sorted(top3[:2]) if len(top3) >= 2 else [])
         if _eq:
             q_odds = _eq
+            _q_estimated = True
             print(f"[수익 추정] {rk}: 복승 실배당 미입력 → 시장배당 {_eq}배로 추정(확정배당 입력 시 정정)")
     payouts = {"quinella": (q_odds if quinella_hit and q_odds else 0),
                "trifecta": (t_odds if trifecta_hit and t_odds else 0)}
@@ -15841,6 +15948,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     record = {
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
         "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
+        "payouts_estimated": _q_estimated,   # [근사 둔갑 차단] 시장배당 추정이면 True → 성적표 '(근사)' 정직 표기
+
         # [보완①·확신도 복승 학습] 확신도 1위 필수 포함 복승/삼복승 적중·확신도 1위 입상 여부(임계값 자동 조정 근거)
         "conf_quinella_hit": conf_quinella_hit, "conf_trifecta_hit": conf_trifecta_hit,
         "conf_trifecta_ins_hit": conf_trifecta_ins_hit, "conf_top1_placed": conf_top1_placed,
@@ -18318,6 +18427,12 @@ _TRACK_GROUPS = {
     #   스케줄이 한자 그대로 잡혀 성적표 '일본경마' 오분류·한자/한글 이중 키(岐阜·기후 패턴) 위험. 추가만.
     "도야마": ["富山", "toyama"],
     "마쓰사카": ["松阪", "matsusaka"],
+    # [경륜장 한자 별칭 보강3 (2026-07-22)] 사세보 2R 정합 스윕이 佐世保 미등록으로 차단 — KEIRIN_JO 등록
+    #   경륜장 중 별칭 미등록 잔여분 일괄 추가(추가만). 넷 다 경마장·경정장 없는 경륜 전용 지명.
+    "사세보": ["佐世保", "sasebo"],
+    "구루메": ["久留米", "kurume"],
+    "다마노": ["玉野", "tamano"],
+    "히로시마": ["広島", "hiroshima"],
     "세이부엔": ["西武園", "seibuen"],
     "오비히로": ["帯広", "obihiro", "obi"],
     "모리오카": ["盛岡", "morioka", "mori"],
@@ -21251,6 +21366,168 @@ def _keiba_result_top3(baba, ymd, rno, timeout=15):
         return None
 
 
+def _keiba_result_payouts(baba, ymd, rno, timeout=15):
+    """[NAR 공식 확정환급 (2026-07-22)] keiba.go.jp RaceMarkTable → {'quinella': 馬連複배당, 'trifecta': 三連複배당}.
+    몬베츠 6/9R 환급 오염(103.5/275.8배 — 공식 3.6/4.2배) 복기 — NAR도 공식 소스에서 직접 파싱."""
+    try:
+        d = "%s/%s/%s" % (ymd[:4], ymd[4:6], ymd[6:8])
+        url = "%s?k_raceDate=%s&k_raceNo=%s&k_babaCode=%s" % (
+            KEIBA_RESULT_BASE, urllib.parse.quote(d), rno, baba)
+        raw = urlopen(Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=timeout).read()
+        body = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", _htmllib.unescape(_keiba_decode(raw))))
+        out = {}
+        mq = re.search(r"馬連複\s*(\d{1,2})\s*-\s*(\d{1,2})\s*([\d,]+)円", body)
+        if mq:
+            out["quinella"] = round(int(mq.group(3).replace(",", "")) / 100.0, 1)
+        mt = re.search(r"三連複\s*(\d{1,2})\s*-\s*(\d{1,2})\s*-\s*(\d{1,2})\s*([\d,]+)円", body)
+        if mt:
+            out["trifecta"] = round(int(mt.group(4).replace(",", "")) / 100.0, 1)
+        return out or None
+    except Exception:
+        return None
+
+
+def _official_result_audit(date=None, limit=60, verbose=True):
+    """[결과·환급 정합 스윕 (2026-07-22 권대표 지시)] 판정된 경주의 착순·확정환급을 공식 소스와 대조 →
+    불일치·누락은 공식값으로 재학습(멱등 재제출·공식이 항상 이긴다).
+      경륜 = oddspark RaceKekka(착순+2車複/3連複) · NAR = keiba.go.jp RaceMarkTable(착순+馬連複/三連複).
+    배경: 사세보 2R 착순 오기록(4-2-5 → 공식 3-2-5)·몬베츠 6/9R 환급 오염(103.5/275.8 → 3.6/4.2배)·
+    날짜접두 중복 표기('2026-07-21 몬베츠 4경주') — 비공식 경로 유입 결과의 장부 오염 일괄 정정."""
+    date = date or time.strftime("%Y-%m-%d")
+    ymd = date.replace("-", "")
+    prefix = date.replace("-", "_")
+    fixed, skipped = [], []
+    checked = 0
+    for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
+        if not fn.startswith(prefix) or not fn.endswith(".json"):
+            continue
+        if len(fixed) >= limit:
+            break
+        try:
+            doc = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
+        except Exception:
+            continue
+        rk_raw = str(doc.get("raceKey") or "")
+        rk = re.sub(r"^\d{4}-\d{2}-\d{2}\s+", "", rk_raw).strip()   # [키 정규화] 날짜접두 제거(중복 표기 정리)
+        r0 = doc.get("result") or {}
+        if not r0.get("1st") or not rk or _KRA_TRACK_RE.search(rk):
+            continue
+        venue, rno = _area_num(rk)
+        if not venue or not rno:
+            continue
+        sp = str(doc.get("sport") or "").lower()
+        official = None
+        try:
+            if sp == "cycle" or _KEIRIN_ONLY_RE.search(rk):
+                jo, _fs = _keirin_jo_today(venue)
+                if not jo:
+                    continue
+                rr = _keirin_result_top3(jo, ymd, str(rno), expect_venue=venue)
+                if rr.get("ok"):
+                    official = {"top3": [x for x in rr["top3"] if x is not None],
+                                "quinella": rr.get("quinellaOdds"), "trifecta": rr.get("trifectaOdds")}
+            else:
+                baba = _jp_baba_code_from_rk(rk)
+                if not baba:
+                    continue
+                t3 = _keiba_result_top3(baba, ymd, str(rno))
+                if t3 and len(t3) >= 3:
+                    po = _keiba_result_payouts(baba, ymd, str(rno)) or {}
+                    official = {"top3": list(t3)[:3], "quinella": po.get("quinella"), "trifecta": po.get("trifecta")}
+        except Exception as e:
+            skipped.append("%s(조회 %s)" % (rk, str(e)[:40]))
+            continue
+        checked += 1
+        if not official or len(official["top3"]) < 3:
+            skipped.append(rk)
+            continue
+        _stored3 = [r0.get("1st"), r0.get("2nd"), r0.get("3rd")]
+        _off3 = official["top3"][:3]
+        _po0 = doc.get("payouts") or {}
+        _need = (_stored3 != _off3) or (rk_raw != rk) \
+            or (official.get("quinella") is not None and _po0.get("quinella") != official["quinella"]) \
+            or (official.get("trifecta") is not None and _po0.get("trifecta") != official["trifecta"])
+        if not _need:
+            continue
+        result2 = {"1st": _off3[0], "2nd": _off3[1], "3rd": _off3[2]}
+        inputs2 = {"quinella_odds": official.get("quinella"), "trifecta_odds": official.get("trifecta"),
+                   "memo": "[정합 스윕] 공식 결과·환급 대조 정정(%s)" % time.strftime("%m-%d %H:%M")}
+        # [날짜 지정 키 (2026-07-22 근본수정)] 날짜 없는 키로 재학습하면 _race_result_id 가 '오늘' 날짜를
+        #   붙여 오늘 장부에 오기록(어제 60건이 오늘 파일로 들어간 사고). 대상 날짜를 키에 명시해 원 파일에 기록.
+        _rk_dated = rk if date == time.strftime("%Y-%m-%d") else ("%s %s" % (date, rk))
+        try:
+            _apply_result_learning(_rk_dated, result2, _off3, inputs=inputs2, force_relearn=True)
+            fixed.append({"raceKey": rk, "from": _stored3, "to": _off3,
+                          "q": official.get("quinella"), "t": official.get("trifecta")})
+            print(f"[정합 스윕] {rk}: 착순 {_stored3}→{_off3} · 복승 {official.get('quinella')}배 공식 정정")
+        except Exception as e:
+            skipped.append("%s(학습 %s)" % (rk, str(e)[:40]))
+    if verbose:
+        print(f"[정합 스윕] {date}: 검사 {checked} · 정정 {len(fixed)} · 스킵 {len(skipped)}")
+    return {"date": date, "checked": checked, "fixedCount": len(fixed), "fixed": fixed,
+            "skippedCount": len(skipped), "skipped": skipped[:10]}
+
+
+# ══════════ [복기 엔진 (2026-07-22 D1)] review_engine 모듈 — 분류 스윕 + 리플레이(전략 검증 1호) ══════════
+#   경량화 방침: 신규 로직은 app.py 밖 모듈로. 엔진은 읽기 전용(경주 파일 무수정·review_stats.json 만 기록).
+try:
+    import review_engine as _review_engine
+except Exception as _ree:
+    _review_engine = None
+    print("[복기 엔진] 로드 실패(기능 비활성·서버는 정상):", _ree)
+
+
+@app.route("/api/review/sweep", methods=["GET", "POST"])
+def review_sweep_ep():
+    """[복기 분류] ?date=YYYY-MM-DD — 하루치 실패 유형 분류(계획서 v4 [1]) → review_stats.json."""
+    if not _review_engine:
+        return jsonify({"error": "review_engine 미로드"}), 200
+    return jsonify(_review_engine.sweep((request.args.get("date") or "").strip() or None))
+
+
+@app.route("/api/review/replay", methods=["GET", "POST"])
+def review_replay_ep():
+    """[리플레이] ?date=YYYY-MM-DD — 정책별 가상 성적(baseline/경마 신호게이트/저배당 삼복승)."""
+    if not _review_engine:
+        return jsonify({"error": "review_engine 미로드"}), 200
+    return jsonify(_review_engine.replay_day((request.args.get("date") or "").strip() or None,
+                                             keirin_re=_KEIRIN_ONLY_RE))
+
+
+@app.route("/api/audit/cleanup-strays", methods=["POST"])
+def audit_cleanup_strays():
+    """[정합 스윕 후속 (2026-07-22)] 날짜 미지정 재학습이 '오늘' 파일로 잘못 저장한 타일자 경주 잔재를
+    backups/strays_날짜/ 로 이동(비파괴 보존·장부에서만 제거). 대상 = memo 에 [정합 스윕]/[진단] 마커."""
+    date = (request.args.get("date") or time.strftime("%Y-%m-%d")).strip()
+    prefix = date.replace("-", "_")
+    dest = os.path.join(os.path.dirname(__file__), "backups", "strays_%s" % prefix)
+    moved = []
+    try:
+        os.makedirs(dest, exist_ok=True)
+        for fn in list(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
+            if not fn.startswith(prefix) or not fn.endswith(".json"):
+                continue
+            try:
+                doc = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            _memo = str(doc.get("memo") or "")
+            if "[정합 스윕]" in _memo or "[진단]" in _memo:
+                os.replace(os.path.join(RACE_RESULTS_DIR, fn), os.path.join(dest, fn))
+                moved.append(fn)
+    except Exception as e:
+        return jsonify({"error": str(e), "moved": len(moved)}), 200
+    print(f"[잔재 정리] {date}: {len(moved)}건 → {dest} (비파괴 이동)")
+    return jsonify({"moved": len(moved), "dest": dest, "files": moved[:30]})
+
+
+@app.route("/api/audit/results", methods=["GET", "POST"])
+def audit_results_ep():
+    """[정합 스윕] ?date=YYYY-MM-DD (기본 오늘) — 공식 결과·환급 대조 정정 즉시 실행(멱등)."""
+    date = (request.args.get("date") or "").strip() or None
+    return jsonify(_official_result_audit(date))
+
+
 # ══════════════ [경륜 결과 백필 (2026-07-19)] oddspark RaceKekka.do — 공개 결과 페이지(로그인 불필요) ══════════════
 #   경륜만 결과 자동수집이 없어(확장 활성탭 의존) 오늘 20경주 결과가 0건이던 문제 해결. KRA·NAR 백필과 동형.
 #   ⚠ joCode 정적 맵 오매핑 의심(기후 04 미개최·jo21=야히코 실측) → ①오늘 스케줄(확장 경유 실코드) 우선
@@ -21317,12 +21594,18 @@ def _keirin_result_parse(html):
                         seg = cells[i + 1:i + 4]
                         if any("未発売" in s for s in seg[:1]):
                             continue
-                        sep = next((s for s in seg if re.fullmatch(r"[-=＝–—]{1,3}", s)), None)
-                        amt = next((s for s in seg if re.search(r"[\d,]+円", s)), None)
-                        if amt:
-                            m2 = re.search(r"([\d,]+)円", amt)
+                        # [구분자 2형태 (2026-07-22 사세보 2R)] 페이지에 따라 3連複 구분자가 한 셀("--")
+                        #   또는 두 셀("-","-")로 렌더링 → 셀 개수와 대시 길이 중 큰 값으로 두수 판정.
+                        #   (기존 방식은 두 셀형에서 3連複을 2車複으로 오인 → 복승 15.5배가 2.7배로 뒤바뀜)
+                        _amt_idx = next((j for j, s in enumerate(seg) if re.search(r"[\d,]+円", s)), None)
+                        if _amt_idx is not None:
+                            _pre = seg[:_amt_idx]   # 금액 '앞'의 구분자만 집계(뒤쪽 ワイド 필러 '---' 오인 방지)
+                            _sep_cells = [s for s in _pre if re.fullmatch(r"[-=＝–—]{1,3}", s)]
+                            m2 = re.search(r"([\d,]+)円", seg[_amt_idx])
                             if m2:
-                                entries.append((len(sep or "-"), round(int(m2.group(1).replace(",", "")) / 100.0, 1)))
+                                _n_sep = max(len(_sep_cells),
+                                             max((len(s) for s in _sep_cells), default=1)) if _sep_cells else 1
+                                entries.append((_n_sep, round(int(m2.group(1).replace(",", "")) / 100.0, 1)))
             _two = [a for n, a in entries if n <= 1]
             _three = [a for n, a in entries if n >= 2]
             if out.get("quinellaOdds") is None and _two:
@@ -26292,6 +26575,7 @@ def _multi_card(key, rec):
         #   과거엔 이 객체를 그대로 카드 confidence 에 넣어 프론트에서 String(객체)="[object Object]"로 표시됐다.
         #   → 객체면 대표 점수(best)를 꺼내 숫자로 전달(레거시 스칼라 overall·level 은 그대로).
         "confidence": _card_conf_value(conf),
+        "grade": an.get("raceGrade"),   # [경주 등급 배지] 전체경주 카드에도 동일 등급 전달
         "quinellaMain": next((b.get("combo") for b in (an.get("betRecommend") or []) if b.get("label") == "복승 메인"), None),
         "afterClose": bool(an.get("afterClose")),
         "updatedSecondsAgo": int(now - (rec.get("t") or now)),
@@ -26479,7 +26763,8 @@ def _rec_trail_for_detail(key):
 
     def _slim(lst):
         return [{"combo": x.get("combo"), "odds": x.get("odds"), "reason": x.get("reason"),
-                 "stars": x.get("stars")} for x in (lst or []) if x.get("combo")]
+                 "stars": x.get("stars"), "oddsEst": x.get("oddsEst")}   # [추정 표기] 전달
+                for x in (lst or []) if x.get("combo")]
     out = {
         "quinellas": _slim(cp.get("finalQuinellas")),
         "trifectas": _slim(cp.get("finalTrifectas")),
@@ -26684,6 +26969,90 @@ def kakao_test():
     return jsonify(r)
 
 
+# [카톡 발송 테스트 모드 (2026-07-21 권대표 지시)] 오늘 하루: 경마=매 경주(T-5 최종 1회) · 경륜=추천 형성
+#   경주만(T-5 1회) 발송. 승부 기준(신호 2+·확신도 65+) 충족 경주는 기존대로 T-7·T-5 모두.
+#   테스트 종료 시 False 로 되돌리면 승부 기준만 발송(상시 운영 기본값).
+KAKAO_TEST_ALL = True
+
+# [카톡 발송본 기록 (2026-07-22 소노다 5R)] {rk: {day, phase, quinellas[[..]], trifectas[[..]]}} —
+#   T-7/T-5 발송 시점의 조합 명단. T+1 틱에서 마감 확정본(displayedCombos)과 대조 → 다르면 변경 카톡.
+_KAKAO_SENT = {}
+
+
+def _kakao_rich_message(rk, phase, an):
+    """[카톡 추천 상세 (2026-07-21 권대표 피드백)] '홍보 문구만 보인다' → 해당 경주의 실제 추천 내역을
+    본문에 담는다: 복승 ①②③(배당·★·근거) + 삼복승 상위 2 + 💎복병 + 확신도 1위 + 신호 개수.
+    corePicks 기반 = 화면 표시와 동일(표시=판정 일치). 추천 미형성이면 '패스 권장'으로 정직 표기."""
+    cp = (an.get("corePicks") or {})
+    lines = []
+
+    def _star(n):
+        return "★" * max(0, min(3, int(n or 0)))
+    _circ = "①②③"
+    for i, q in enumerate((cp.get("finalQuinellas") or [])[:3]):
+        _o = (" (%s배)" % q.get("odds")) if q.get("odds") else ""
+        _rs = (" · %s" % str(q.get("reason"))[:22]) if q.get("reason") else ""
+        lines.append("복승%s %s%s %s%s" % (_circ[i] if i < 3 else "", "+".join(map(str, q.get("combo") or [])),
+                                           _o, _star(q.get("stars")), _rs))
+    for t in (cp.get("finalTrifectas") or [])[:2]:
+        if t.get("odds") and t.get("oddsEst"):
+            _o = " (~%s배·추정)" % t.get("odds")     # [추정 표기] 실배당 미수집 조합(다마노 3R 둔갑 방지)
+        elif t.get("odds"):
+            _o = " (%s배)" % t.get("odds")
+        else:
+            _o = ""
+        lines.append("삼복승 %s%s" % ("+".join(map(str, t.get("combo") or [])), _o))
+    for s in (cp.get("bmedSpecial") or [])[:1]:
+        _o = (" (%s배)" % s.get("odds")) if s.get("odds") else ""
+        lines.append("💎복병 %s%s ★★ 참고" % ("+".join(map(str, s.get("combo") or [])), _o))
+    if not lines:
+        lines.append("추천 조합 미형성 — 신호 대기(패스 권장)")
+    try:
+        _sigc = int((an.get("strongSignals") or {}).get("count") or 0)
+    except Exception:
+        _sigc = 0
+    _confv = _card_conf_value(an.get("confidence"))
+    _meta = "신호 %d개" % _sigc + (" · 확신도 %s" % _confv if _confv is not None else "")
+    if cp.get("confTop1") is not None:
+        _meta += " · 종합확신 1위 %s번" % cp.get("confTop1")
+    _grade = (an.get("raceGrade") or {})
+    _gtag = (" " + _grade["label"]) if _grade.get("label") else ""
+    if phase == "T-7":
+        head = "[적중왕]%s %s — 1차 확정 (마감 7분 전)" % (_gtag, rk)
+    elif phase == "T-5":
+        head = "[적중왕]%s %s — 최종 확정 (마감 5분 전)" % (_gtag, rk)
+    else:
+        head = "[적중왕]%s %s — 현재 추천" % (_gtag, rk)
+    url = "%s/?race=%s" % (PUBLIC_BOARD_URL.rstrip("/"), urllib.parse.quote(rk))
+    text = head + "\n━━━━━━━━━━━━\n" + "\n".join(lines) + "\n━━━━━━━━━━━━\n" + _meta + "\n📊 배당판 → " + url
+    return {"race": rk, "phase": phase, "text": text, "url": url,
+            "at": time.strftime("%Y-%m-%d %H:%M:%S")}
+
+
+@app.route("/api/kakao/send-race", methods=["GET", "POST"])
+def kakao_send_race():
+    """[수동/시연] 지정 경주의 현재 추천 내역을 즉시 카톡 발송. ?key=경주키 (예: 모리오카 7경주)."""
+    key = (request.args.get("key") or "").strip()
+    if not key:
+        return jsonify({"error": "key 파라미터 필요 (예: ?key=모리오카 7경주)"}), 200
+    db = _multi_store_load()
+    rec = db.get(key) or _triple_load().get(key)
+    if not rec:
+        _k2 = _canon_rk(key)
+        rec = db.get(_k2) or _triple_load().get(_k2)
+        if rec:
+            key = _k2
+    if not rec:
+        return jsonify({"error": "해당 경주 미수집(배당 수집 후 가능)"}), 200
+    try:
+        an = _triple_analyze(key, rec)
+    except Exception as e:
+        return jsonify({"error": "분석 실패: %s" % e}), 200
+    m = _kakao_rich_message(key, "수동", an)
+    r = _kakao_send_to_me(m["text"], m.get("url"))
+    return jsonify({"ok": bool(r.get("ok")), "sentText": m["text"], "error": r.get("error")})
+
+
 def _kakao_build_message(rk, phase, an, snap):
     """카카오 알림 텍스트 구성. T-7=1차 확정 / T-5=최종 확정('지금 사세요!'). 복승·복병·배당판 링크 포함."""
     main = (snap or {}).get("main") or []
@@ -26741,16 +27110,40 @@ def _kakao_notify_race(rk, phase, an, snap):
             f.write(json.dumps(msg, ensure_ascii=False) + "\n")
     except Exception as e:
         print("[카카오알림] 큐 적재 실패:", e)
-    # [나에게 보내기 (2026-07-21)] 승부 기준(신호 2+·확신도 65+) 충족 경주만 권대표 카톡 발송 —
-    #   '알림은 승부만' 원칙(과알림 방지). 큐·웹훅 동작은 기존 그대로(추가만).
+    # [나에게 보내기 (2026-07-21)] 기본 = 승부 기준(신호 2+·확신도 65+)만 T-7·T-5 발송('알림은 승부만').
+    #   [테스트 모드] KAKAO_TEST_ALL=True 동안: 경마=매 경주(T-5 1회) · 경륜=추천 형성 경주만(T-5 1회).
+    #   본문은 실제 추천 내역(_kakao_rich_message — 권대표 피드백: 홍보 문구가 아닌 조합·배당·근거).
     try:
         _sigc = int((an.get("strongSignals") or {}).get("count") or 0)
         _confv = _card_conf_value(an.get("confidence")) or 0
-        if _sigc >= 2 and float(_confv) >= 65:
-            _sr = _kakao_send_to_me(msg["text"], msg.get("url"))
+        _send_k = (_sigc >= 2 and float(_confv) >= 65)
+        if not _send_k and KAKAO_TEST_ALL and phase == "T-5":
+            _spk = str(an.get("category") or an.get("sport") or "").lower()
+            _cpk = an.get("corePicks") or {}
+            _has_rec = bool(_cpk.get("finalQuinellas") or _cpk.get("finalTrifectas"))
+            if _spk.startswith("japan") or _spk in ("horse", "korea"):
+                _send_k = True                       # 경마: 매 경주(추천 미형성이면 '패스 권장'으로 발송)
+            elif _spk == "cycle" and _has_rec:
+                _send_k = True                       # 경륜: 추천 형성 경주만
+        if _send_k:
+            _rich = _kakao_rich_message(rk, phase, an)
+            _sr = _kakao_send_to_me(_rich["text"], _rich.get("url"))
             msg["sentMe"] = bool(_sr.get("ok"))
             if not _sr.get("ok") and "미연동" not in str(_sr.get("error") or ""):
                 print("[카카오 나에게] 발송 실패:", _sr.get("error") or _sr.get("raw"))
+            # [카톡 발송본 기록 (2026-07-22 소노다 5R)] 발송된 조합 명단 저장 → 마감 확정본(displayedCombos)과
+            #   다르면 T+1에 '🔁 최종 변경' 카톡 발송. 카톡에 없던 조합이 적중 처리되는 신뢰 문제 해소.
+            if _sr.get("ok"):
+                try:
+                    _cpn = an.get("corePicks") or {}
+                    _KAKAO_SENT[rk] = {
+                        "day": time.strftime("%Y-%m-%d"), "phase": phase,
+                        "quinellas": [sorted(int(x) for x in (q.get("combo") or []))
+                                      for q in (_cpn.get("finalQuinellas") or [])[:3] if q.get("combo")],
+                        "trifectas": [sorted(int(x) for x in (t.get("combo") or []))
+                                      for t in (_cpn.get("finalTrifectas") or [])[:2] if t.get("combo")]}
+                except Exception:
+                    pass
     except Exception as _me:
         print("[카카오 나에게] 오류(무시):", _me)
     print("[카카오알림] %s %s → %s" % (rk, phase, "발송" if msg.get("sent") else "큐 적재"))
@@ -26774,7 +27167,19 @@ def _timeline_extract(an):
             odds["%d+%d" % (main[0], main[1])] = fq[0].get("odds")
     dc = an.get("darkCombos") or {}
     dark = dc.get("darks") or [int(d["no"]) for d in (an.get("darkHorses") or [])[:2] if d.get("no") is not None]
-    return {"main": main, "dark_horse": dark, "odds": odds}
+    out = {"main": main, "dark_horse": dark, "odds": odds}
+    # [등급 스냅샷 (2026-07-22 사세보 6R)] T-7/T-5 시점의 등급·확신도·신호수를 영구 기록 —
+    #   등급별 성적 분리 집계(D2)와 복기의 기준값. 기존 필드 무변경(추가만).
+    try:
+        if an.get("raceGrade"):
+            out["raceGrade"] = an.get("raceGrade")
+        _cv = _card_conf_value(an.get("confidence"))
+        if _cv is not None:
+            out["confidence"] = _cv
+        out["signalCount"] = int((an.get("strongSignals") or {}).get("count") or 0)
+    except Exception:
+        pass
+    return out
 
 
 def _timeline_snap_save(rk, phase, an):
@@ -26838,11 +27243,59 @@ def _timeline_snap_tick(races, now, db):
             an = _triple_analyze(rk, db.get(rk) or {})
             snap = _timeline_snap_save(rk, phase, an)
             _timeline_saved.add((rk, phase))
+            # [등급 핀 고정 (2026-07-22)] 카톡 발송과 동일한 이 시점 분석의 등급을 마감 후 기록
+            #   기준으로 핀 — 이후 타 소스 라이브 갱신이 덮지 않음(사세보 6R 로그-카톡 등급 불일치 방지).
+            if phase in ("T-7", "T-5"):
+                try:
+                    _pg = an.get("raceGrade")
+                    if isinstance(_pg, dict) and _pg.get("tier"):
+                        _GRADE_LOCK[rk] = {"day": time.strftime("%Y-%m-%d"),
+                                           "tier": {k: v for k, v in _pg.items() if k != "locked"},
+                                           "pinned": True}
+                except Exception:
+                    pass
             if phase in ("T-7", "T-5") and snap:
                 try:
                     _kakao_notify_race(rk, phase, an, snap)
                 except Exception as _ke:
                     print("[타임스냅샷] 알림 트리거 오류(무시):", _ke)
+            # [🔁 마감 확정 변경 카톡 (2026-07-22 소노다 5R)] T-5 발송 후 마감 직전 배당 변동으로
+            #   확정 명단(displayedCombos·판정 기준)이 달라진 경우에만 T+1에 변경 내역 1건 발송.
+            #   배경: 소노다 5R — 카톡(12:40)엔 없던 ③9+11이 마감 확정(12:42)에 추가·적중 → 회원 불신.
+            #   판정 기준 무변경 · 변경 없으면 무발송(스팸 없음).
+            if phase == "T+1":
+                try:
+                    _ks = _KAKAO_SENT.pop(rk, None)
+                    if _ks and _ks.get("day") == time.strftime("%Y-%m-%d") \
+                            and (_ks.get("quinellas") or _ks.get("trifectas")):
+                        _dcf = {}
+                        _lpc, _, _ = _analysis_log_path(_canonical_log_key(rk))
+                        if _lpc and os.path.exists(_lpc):
+                            _dcf = (((json.load(open(_lpc, encoding="utf-8")) or {}).get("corePicks")
+                                     or {}).get("displayedCombos")) or {}
+                        _fin_q = {tuple(sorted(int(x) for x in c)) for c in (_dcf.get("quinellas") or [])}
+                        _fin_t = {tuple(sorted(int(x) for x in c)) for c in (_dcf.get("trifectas") or [])}
+                        _snt_q = {tuple(c) for c in (_ks.get("quinellas") or [])}
+                        _snt_t = {tuple(c) for c in (_ks.get("trifectas") or [])}
+                        if (_fin_q or _fin_t) and (_fin_q != _snt_q or _fin_t != _snt_t):
+                            _fmt = lambda cs: " · ".join("+".join(map(str, c)) for c in sorted(cs))
+                            _ln = []
+                            if _fin_q - _snt_q:
+                                _ln.append("복승 추가: " + _fmt(_fin_q - _snt_q))
+                            if _snt_q - _fin_q:
+                                _ln.append("복승 제외: " + _fmt(_snt_q - _fin_q))
+                            if _fin_t - _snt_t:
+                                _ln.append("삼복승 추가: " + _fmt(_fin_t - _snt_t))
+                            if _snt_t - _fin_t:
+                                _ln.append("삼복승 제외: " + _fmt(_snt_t - _fin_t))
+                            if _ln:
+                                _kakao_send_to_me("[적중왕] 🔁 %s 마감 확정 변경\n" % rk
+                                                  + "(카톡 발송 후 마감 직전 배당 변동)\n"
+                                                  + "\n".join(_ln)
+                                                  + "\n※ 적중 판정은 마감 시점 확정 명단 기준")
+                                print("[카톡 변경알림] %s 발송: %s" % (rk, " / ".join(_ln)))
+                except Exception as _kce:
+                    print("[카톡 변경알림] 스킵(무시):", _kce)
         except Exception as e:
             print("[타임스냅샷] tick 오류 %s: %s" % (rk, e))
 

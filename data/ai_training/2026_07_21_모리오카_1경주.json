@@ -8,130 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 8,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 5,
-   "name": "シナノエレガンス",
-   "jockey": "石川慎（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    3,
-    6
-   ],
-   "record_score": 60.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "フクシマロイヤル",
-   "jockey": "小松丈（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    6
-   ],
-   "record_score": 14.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ボムパラム",
-   "jockey": "長谷蓮（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    7
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "クラトリレインボー",
-   "jockey": "山田貴（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    8,
-    5
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "クラトリスカイ",
-   "jockey": "青海大（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "キセキノキセキ",
-   "jockey": "後藤武（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    6,
-    7
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "スターオブチャージ",
-   "jockey": "飛田愛（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "マナクキニ",
-   "jockey": "椿聡太（佐賀）",
-   "jockey_winrate": null,
-   "recent_results": [
-    8
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -220,27 +100,27 @@
  },
  "prediction": {
   "candidates": [
-   5,
    1,
    2,
    3,
    4,
+   5,
    6,
    7,
    8
   ],
   "eliminated": [],
-  "recommend": null,
-  "strategy": null,
+  "recommend": "4+8",
+  "strategy": "BMED_보험형",
   "confidence": 0,
-  "signal_quality": null
+  "signal_quality": "하"
  },
  "result": {
   "1st": 8,
   "2nd": 3,
   "3rd": 6,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 15.9,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -249,7 +129,7 @@
   "quinella_hit": false,
   "winner": 8,
   "second": 3,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -261,7 +141,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-21 12:10:58",
+ "saved_at": "2026-07-22 09:50:54",
  "quality": {
   "score": 60,
   "grade": "참고용",
@@ -269,7 +149,7 @@
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

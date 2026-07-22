@@ -1,0 +1,156 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_21_오오이_4경주",
+ "race_info": {
+  "date": "2026-07-21",
+  "track": "오오이",
+  "round": 4,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "16:28:16",
+    "quinella": {
+     "3+5": 4.4,
+     "3+7": 5.3,
+     "1+3": 6.1,
+     "5+7": 9.1,
+     "1+7": 10.5,
+     "3+8": 12.4,
+     "1+5": 14.1,
+     "7+8": 21.1,
+     "3+4": 21.9,
+     "5+8": 23.8,
+     "1+8": 24.7,
+     "1+4": 28.5,
+     "4+5": 33.0,
+     "4+7": 33.9,
+     "4+8": 35.0,
+     "2+3": 63.2,
+     "2+8": 83.6,
+     "6+8": 92.5,
+     "3+6": 100.4,
+     "5+6": 111.8,
+     "2+7": 113.5,
+     "2+5": 128.7,
+     "1+2": 150.5,
+     "6+7": 157.6,
+     "1+6": 196.6,
+     "4+6": 219.0,
+     "2+4": 259.4,
+     "2+6": 377.0
+    }
+   },
+   {
+    "time": "16:28:35",
+    "quinella": {
+     "3+5": 4.4,
+     "3+7": 5.3,
+     "1+3": 6.1,
+     "5+7": 9.1,
+     "1+7": 10.5,
+     "3+8": 12.4,
+     "1+5": 14.1,
+     "7+8": 21.1,
+     "3+4": 21.9,
+     "5+8": 23.8,
+     "1+8": 24.7,
+     "1+4": 28.5,
+     "4+5": 33.0,
+     "4+7": 33.9,
+     "4+8": 35.0,
+     "2+3": 63.2,
+     "2+8": 83.6,
+     "6+8": 92.5,
+     "3+6": 100.4,
+     "5+6": 111.8,
+     "2+7": 113.5,
+     "2+5": 128.7,
+     "1+2": 150.5,
+     "6+7": 157.6,
+     "1+6": 196.6,
+     "4+6": 219.0,
+     "2+4": 259.4,
+     "2+6": 377.0
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.747,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7,
+   8,
+   6
+  ],
+  "eliminated": [],
+  "recommend": "3+5",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 7,
+  "2nd": 8,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": 21.1,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 7,
+  "second": 8,
+  "odds_range": "고배당"
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 09:51:14",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "이상감지 결과",
+   "전적 데이터"
+  ],
+  "errors": []
+ }
+}

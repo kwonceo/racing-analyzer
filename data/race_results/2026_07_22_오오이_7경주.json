@@ -1,0 +1,74 @@
+{
+ "race_id": "2026_07_22_오오이_7경주",
+ "raceKey": "오오이 7경주",
+ "date": "2026-07-22",
+ "sport": "horse",
+ "category": "japan_central",
+ "track": "오오이",
+ "round": 7,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": null,
+ "result": {
+  "1st": 6,
+  "2nd": 4,
+  "3rd": 10
+ },
+ "payouts": {
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   4,
+   6,
+   10,
+   11,
+   3,
+   5,
+   7,
+   9,
+   13,
+   8
+  ],
+  "eliminated": [
+   12
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 20.0,
+  "inverse": true
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-22 18:16:02",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

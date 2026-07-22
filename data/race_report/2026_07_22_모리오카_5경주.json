@@ -1,0 +1,128 @@
+{
+ "race": "모리오카 5경주",
+ "raceKey": "모리오카 5경주",
+ "date": "2026-07-22",
+ "result": {
+  "1st": 12,
+  "2nd": 5,
+  "3rd": 6,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "중배당",
+ "win_odds": 11.5,
+ "why_recommended": {
+  "signal_12": {
+   "horse": 12,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 0,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 10.0,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 0,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 0,
+   "confidence": null,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  6,
+  12,
+  2
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 12번 0점",
+  "2. 배당 수집 시작 08:39:24",
+  "5. 종합 신뢰도 0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 12,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 0,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 0,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "제거 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 1
+ },
+ "pnl": 10500,
+ "stake": 1000,
+ "generated_at": "2026-07-22 09:27:16"
+}

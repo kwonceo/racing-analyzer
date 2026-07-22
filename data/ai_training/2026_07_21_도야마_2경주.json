@@ -8,131 +8,19 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 7,
-   "name": "菅谷 隆司",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 101.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "西田 大志",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 93.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "竹元 健竜",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 89.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "伊藤 大理",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 88.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "吉岡 優太",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 91.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "坂元 洋行",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 80.7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "日浦 崇道",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 72.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
-  "timeline": [
-   {
-    "time": "11:15:10",
-    "quinella": {
-     "2+7": 1.3,
-     "2+5": 9.3,
-     "5+7": 11.2,
-     "4+7": 12.8,
-     "1+5": 19.1,
-     "1+7": 23.0,
-     "2+4": 26.4,
-     "1+2": 28.5,
-     "3+6": 57.4,
-     "4+5": 57.4,
-     "2+3": 74.1,
-     "2+6": 75.5,
-     "3+7": 75.5,
-     "6+7": 110.2,
-     "1+4": 123.5,
-     "3+5": 123.5,
-     "5+6": 135.9,
-     "1+3": 185.3,
-     "1+6": 194.1,
-     "3+4": 226.5,
-     "4+6": 271.8
-    }
-   }
-  ],
+  "timeline": [],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": null,
-  "refund_rate": 0.747,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -144,27 +32,19 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
-  "recommend": "2+7",
-  "strategy": "BMED_보험형",
+  "recommend": null,
+  "strategy": null,
   "confidence": 0,
-  "signal_quality": "하"
+  "signal_quality": null
  },
  "result": {
   "1st": 7,
   "2nd": 2,
   "3rd": 4,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 1.9,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -173,7 +53,7 @@
   "quinella_hit": false,
   "winner": 7,
   "second": 2,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -185,7 +65,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-21 11:37:16",
+ "saved_at": "2026-07-22 09:46:35",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -194,7 +74,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

@@ -1,0 +1,133 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_21_오오이_6경주",
+ "race_info": {
+  "date": "2026-07-21",
+  "track": "오오이",
+  "round": 6,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "17:38:17",
+    "quinella": {
+     "1+9": 2.4,
+     "8+9": 6.0,
+     "7+9": 7.7,
+     "1+8": 10.0,
+     "1+7": 11.5,
+     "2+9": 18.1,
+     "7+8": 21.3,
+     "6+9": 24.0,
+     "4+9": 25.7,
+     "1+4": 29.3,
+     "1+6": 34.7,
+     "1+2": 37.4,
+     "2+8": 42.5,
+     "4+8": 56.8,
+     "2+7": 61.4,
+     "6+7": 72.0,
+     "6+8": 77.7,
+     "4+7": 82.6,
+     "5+9": 91.5,
+     "3+9": 101.9,
+     "2+4": 127.7,
+     "1+3": 128.5,
+     "1+5": 159.9,
+     "3+7": 169.6,
+     "2+6": 172.5,
+     "4+6": 204.9,
+     "5+7": 265.8,
+     "3+8": 289.3,
+     "3+6": 302.6,
+     "5+8": 302.6,
+     "3+4": 409.8,
+     "2+5": 418.6,
+     "2+3": 491.8,
+     "4+5": 517.7,
+     "5+6": 614.8,
+     "3+5": 819.7
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.739,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   4,
+   6,
+   7,
+   8,
+   9,
+   3,
+   5
+  ],
+  "eliminated": [],
+  "recommend": "1+9",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 13,
+  "2nd": 7,
+  "3rd": 2,
+  "4th": null,
+  "quinella_odds": 11.0,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 13,
+  "second": 7,
+  "odds_range": "고배당"
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 09:51:17",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "전적 데이터"
+  ],
+  "errors": []
+ }
+}

@@ -1,0 +1,122 @@
+{
+ "race_id": "2026_07_22_도야마_2경주",
+ "raceKey": "도야마 2경주",
+ "date": "2026-07-22",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "도야마",
+ "round": 2,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 7,
+  "2nd": 2,
+  "3rd": 4
+ },
+ "payouts": {
+  "quinella": 3.0,
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {
+  "quinella": {
+   "2+7": 2.1,
+   "2+4": 6.0,
+   "2+5": 6.6,
+   "1+2": 7.5,
+   "1+5": 20.7,
+   "2+3": 20.7,
+   "5+7": 21.4,
+   "1+6": 24.6,
+   "3+5": 27.9,
+   "1+3": 31.0,
+   "2+6": 32.2,
+   "1+7": 33.9,
+   "4+7": 37.5,
+   "1+4": 61.3,
+   "3+7": 62.8,
+   "4+5": 71.8,
+   "6+7": 86.7,
+   "3+4": 125.7,
+   "5+6": 139.7,
+   "3+6": 209.5,
+   "4+6": 228.6
+  },
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "11:18:51",
+   "minutes_before": null,
+   "quinella": {
+    "2+7": 2.1,
+    "2+4": 6.0,
+    "2+5": 6.6,
+    "1+2": 7.5,
+    "1+5": 20.7,
+    "2+3": 20.7,
+    "5+7": 21.4,
+    "1+6": 24.6,
+    "3+5": 27.9,
+    "1+3": 31.0,
+    "2+6": 32.2,
+    "1+7": 33.9,
+    "4+7": 37.5,
+    "1+4": 61.3,
+    "3+7": 62.8,
+    "4+5": 71.8,
+    "6+7": 86.7,
+    "3+4": 125.7,
+    "5+6": 139.7,
+    "3+6": 209.5,
+    "4+6": 228.6
+   },
+   "exacta": {}
+  }
+ ],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": "2+7",
+  "recommend_sub": null,
+  "strategy": "BMED_보험형",
+  "signal_quality": "하",
+  "confidence": 25.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 3.0,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 2000
+ },
+ "memo": null,
+ "saved_at": "2026-07-22 11:47:54",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

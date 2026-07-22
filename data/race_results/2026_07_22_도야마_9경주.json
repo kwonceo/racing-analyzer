@@ -1,0 +1,150 @@
+{
+ "race_id": "2026_07_22_도야마_9경주",
+ "raceKey": "도야마 9경주",
+ "date": "2026-07-22",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "도야마",
+ "round": 9,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 5
+ },
+ "payouts": {
+  "quinella": 33.9,
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {
+  "quinella": {
+   "2+5": 1.7,
+   "1+7": 8.9,
+   "5+7": 10.4,
+   "1+5": 13.1,
+   "5+6": 16.2,
+   "6+7": 17.0,
+   "2+6": 19.0,
+   "3+6": 21.6,
+   "2+7": 27.1,
+   "3+5": 29.0,
+   "3+7": 30.5,
+   "1+2": 33.9,
+   "1+6": 42.4,
+   "2+3": 49.3,
+   "3+4": 51.8,
+   "4+6": 63.0,
+   "1+3": 70.3,
+   "4+5": 71.9,
+   "4+7": 86.1,
+   "2+4": 91.3,
+   "1+4": 115.4
+  },
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "14:20:55",
+   "minutes_before": 0,
+   "quinella": {
+    "2+5": 1.7,
+    "1+7": 8.9,
+    "5+7": 10.4,
+    "1+5": 13.1,
+    "5+6": 16.2,
+    "6+7": 17.0,
+    "2+6": 19.0,
+    "3+6": 21.6,
+    "2+7": 27.1,
+    "3+5": 29.0,
+    "3+7": 30.5,
+    "1+2": 33.9,
+    "1+6": 42.4,
+    "2+3": 49.3,
+    "3+4": 51.8,
+    "4+6": 63.0,
+    "1+3": 70.3,
+    "4+5": 71.9,
+    "4+7": 86.1,
+    "2+4": 91.3,
+    "1+4": 115.4
+   },
+   "exacta": {}
+  },
+  {
+   "time": "14:21:25",
+   "minutes_before": null,
+   "quinella": {
+    "2+5": 1.7,
+    "1+7": 8.9,
+    "5+7": 10.4,
+    "1+5": 13.1,
+    "5+6": 16.2,
+    "6+7": 17.0,
+    "2+6": 19.0,
+    "3+6": 21.6,
+    "2+7": 27.1,
+    "3+5": 29.0,
+    "3+7": 30.5,
+    "1+2": 33.9,
+    "1+6": 42.4,
+    "2+3": 49.3,
+    "3+4": 51.8,
+    "4+6": 63.0,
+    "1+3": 70.3,
+    "4+5": 71.9,
+    "4+7": 86.1,
+    "2+4": 91.3,
+    "1+4": 115.4
+   },
+   "exacta": {}
+  }
+ ],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": "2+5",
+  "recommend_sub": null,
+  "strategy": "BMED_보험형",
+  "signal_quality": "하",
+  "confidence": 25.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 33.9,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-22 14:51:43",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

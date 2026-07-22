@@ -1,0 +1,447 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_22_몬베츠_6경주",
+ "race_info": {
+  "date": "2026-07-22",
+  "track": "몬베츠",
+  "round": 6,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 11,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 3,
+   "name": "コンチムサシ",
+   "jockey": "小野楓（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    3,
+    5,
+    5,
+    4
+   ],
+   "record_score": 56.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 2.3
+  },
+  {
+   "no": 2,
+   "name": "サクラレイピア",
+   "jockey": "小川悠（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    4,
+    7,
+    4,
+    6
+   ],
+   "record_score": 38.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 5.8
+  },
+  {
+   "no": 11,
+   "name": "マドンナブルー",
+   "jockey": "若杉朝（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    3,
+    8,
+    3,
+    8
+   ],
+   "record_score": 17.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 6.3
+  },
+  {
+   "no": 8,
+   "name": "トムワールド",
+   "jockey": "井上俊（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    6,
+    3,
+    5,
+    8
+   ],
+   "record_score": 10.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 14.7
+  },
+  {
+   "no": 9,
+   "name": "グリース",
+   "jockey": "桑村真（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    8,
+    4,
+    6,
+    3
+   ],
+   "record_score": 7.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 6.7
+  },
+  {
+   "no": 5,
+   "name": "アルカナベル",
+   "jockey": "松井伸（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    9,
+    4,
+    10,
+    11
+   ],
+   "record_score": 5.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 168.1
+  },
+  {
+   "no": 6,
+   "name": "ヤマトノヒカリ",
+   "jockey": "藤田駕（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    11,
+    5,
+    3,
+    4
+   ],
+   "record_score": 3.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 20.6
+  },
+  {
+   "no": 1,
+   "name": "ハッピーモカ",
+   "jockey": "近藤翔（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    8,
+    11,
+    10,
+    11
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 29.9
+  },
+  {
+   "no": 4,
+   "name": "ハタノイチバンボシ",
+   "jockey": "吉本隆（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    12,
+    11,
+    10,
+    10,
+    8
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 379.6
+  },
+  {
+   "no": 7,
+   "name": "ダークディザイア",
+   "jockey": "渡邊準（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 5.4
+  },
+  {
+   "no": 10,
+   "name": "アーススカーレット",
+   "jockey": "坂下秀（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    11,
+    12,
+    11,
+    8,
+    10
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 461.4
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "08:38:30",
+    "quinella": {
+     "2+3": 3.6,
+     "3+9": 8.1,
+     "3+11": 10.7,
+     "3+8": 10.7,
+     "3+7": 13.2,
+     "2+11": 17.0,
+     "2+7": 19.8,
+     "2+8": 20.8,
+     "7+11": 20.9,
+     "2+9": 24.2,
+     "9+11": 24.8,
+     "7+9": 29.9,
+     "1+3": 30.8,
+     "3+6": 31.9,
+     "7+8": 36.6,
+     "8+9": 37.7,
+     "2+6": 43.3,
+     "8+11": 46.2,
+     "6+11": 48.6,
+     "6+7": 58.7,
+     "6+9": 62.1,
+     "1+2": 64.6,
+     "6+8": 75.7,
+     "1+7": 81.0,
+     "1+9": 87.0,
+     "3+5": 94.8,
+     "1+11": 110.3,
+     "1+8": 156.0,
+     "2+5": 188.2,
+     "5+9": 193.9,
+     "1+6": 213.3,
+     "5+11": 220.6,
+     "5+8": 272.3,
+     "5+7": 304.7,
+     "3+4": 319.9,
+     "3+10": 345.9,
+     "4+7": 474.0,
+     "8+10": 511.9,
+     "9+10": 511.9,
+     "5+6": 533.3,
+     "1+4": 556.5,
+     "2+4": 581.7,
+     "4+9": 581.7,
+     "4+11": 581.7,
+     "4+8": 609.5,
+     "10+11": 639.9,
+     "2+10": 673.6,
+     "1+5": 711.0,
+     "4+6": 1066.6,
+     "1+10": 1279.9,
+     "7+10": 1279.9,
+     "4+5": 1599.9,
+     "6+10": 1828.5,
+     "4+10": 2133.2,
+     "5+10": 2559.9
+    }
+   },
+   {
+    "time": "08:38:50",
+    "quinella": {
+     "3+5": 1.2,
+     "4+7": 13.0,
+     "5+7": 19.2,
+     "2+3": 19.4,
+     "3+4": 19.6,
+     "3+7": 23.3,
+     "4+5": 23.6,
+     "2+5": 24.2,
+     "1+4": 32.7,
+     "1+7": 38.9,
+     "1+3": 51.8,
+     "1+5": 54.9,
+     "2+4": 66.7,
+     "3+6": 66.7,
+     "5+6": 69.1,
+     "2+6": 124.5,
+     "1+2": 143.7,
+     "1+6": 155.6,
+     "2+7": 155.6,
+     "4+6": 169.8,
+     "6+7": 169.8
+    }
+   },
+   {
+    "time": "08:39:08",
+    "quinella": {
+     "2+3": 3.6,
+     "3+9": 8.1,
+     "3+11": 10.7,
+     "3+8": 10.7,
+     "3+7": 13.2,
+     "2+11": 17.0,
+     "2+7": 19.8,
+     "2+8": 20.8,
+     "7+11": 20.9,
+     "2+9": 24.2,
+     "9+11": 24.8,
+     "7+9": 29.9,
+     "1+3": 30.8,
+     "3+6": 31.9,
+     "7+8": 36.6,
+     "8+9": 37.7,
+     "2+6": 43.3,
+     "8+11": 46.2,
+     "6+11": 48.6,
+     "6+7": 58.7,
+     "6+9": 62.1,
+     "1+2": 64.6,
+     "6+8": 75.7,
+     "1+7": 81.0,
+     "1+9": 87.0,
+     "3+5": 94.8,
+     "1+11": 110.3,
+     "1+8": 156.0,
+     "2+5": 188.2,
+     "5+9": 193.9,
+     "1+6": 213.3,
+     "5+11": 220.6,
+     "5+8": 272.3,
+     "5+7": 304.7,
+     "3+4": 319.9,
+     "3+10": 345.9,
+     "4+7": 474.0,
+     "8+10": 511.9,
+     "9+10": 511.9,
+     "5+6": 533.3,
+     "1+4": 556.5,
+     "2+4": 581.7,
+     "4+9": 581.7,
+     "4+11": 581.7,
+     "4+8": 609.5,
+     "10+11": 639.9,
+     "2+10": 673.6,
+     "1+5": 711.0,
+     "4+6": 1066.6,
+     "1+10": 1279.9,
+     "7+10": 1279.9,
+     "4+5": 1599.9,
+     "6+10": 1828.5,
+     "4+10": 2133.2,
+     "5+10": 2559.9
+    }
+   }
+  ],
+  "drop_rates": {
+   "2": -81.4,
+   "3": -81.4,
+   "6": -65.4,
+   "7": -65.4,
+   "1": -55.0
+  },
+  "excess_drops": {
+   "2": -9.6,
+   "6": -3.3
+  },
+  "drop_speed": {
+   "2": -262.6,
+   "3": -262.6,
+   "6": -211.0,
+   "7": -211.0,
+   "1": -177.4
+  },
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": 3.667,
+  "refund_rate": 0.751,
+  "consecutive_drops": {},
+  "fake_betting": true,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   2,
+   3,
+   7,
+   1,
+   6,
+   8,
+   9,
+   11
+  ],
+  "eliminated": [
+   5,
+   4,
+   10
+  ],
+  "recommend": "2+3",
+  "strategy": "BMED_압축형",
+  "confidence": 11.0,
+  "signal_quality": "상"
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 3,
+  "3rd": 9,
+  "4th": null,
+  "quinella_odds": 3.6,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 2번 적중 · 2+3 복승 급락(-81.4%) → 2·3번 입상 적중 · 제거 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 2,
+  "second": 3,
+  "odds_range": "중배당"
+ },
+ "signal_hit": {
+  "excess_drop_horse": "2",
+  "excess_drop_horse_placed": true,
+  "excess_drop_value": -9.6,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 09:41:02",
+ "quality": {
+  "score": 100,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
+  "missing": [],
+  "errors": []
+ }
+}

@@ -1,0 +1,225 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_22_도야마_9경주",
+ "race_info": {
+  "date": "2026-07-22",
+  "track": "도야마",
+  "round": 9,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 7,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 5,
+   "name": "朝倉 智仁",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 96.7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "真崎新太郎",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 123.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "後藤 悠",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 97.1,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "吉武信太朗",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 116.4,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "網谷 竜次",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 110.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "根本 哲吏",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 90.1,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "藤田 昌宏",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 86.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "14:20:55",
+    "quinella": {
+     "2+5": 1.7,
+     "1+7": 8.9,
+     "5+7": 10.4,
+     "1+5": 13.1,
+     "5+6": 16.2,
+     "6+7": 17.0,
+     "2+6": 19.0,
+     "3+6": 21.6,
+     "2+7": 27.1,
+     "3+5": 29.0,
+     "3+7": 30.5,
+     "1+2": 33.9,
+     "1+6": 42.4,
+     "2+3": 49.3,
+     "3+4": 51.8,
+     "4+6": 63.0,
+     "1+3": 70.3,
+     "4+5": 71.9,
+     "4+7": 86.1,
+     "2+4": 91.3,
+     "1+4": 115.4
+    }
+   },
+   {
+    "time": "14:21:25",
+    "quinella": {
+     "2+5": 1.7,
+     "1+7": 8.9,
+     "5+7": 10.4,
+     "1+5": 13.1,
+     "5+6": 16.2,
+     "6+7": 17.0,
+     "2+6": 19.0,
+     "3+6": 21.6,
+     "2+7": 27.1,
+     "3+5": 29.0,
+     "3+7": 30.5,
+     "1+2": 33.9,
+     "1+6": 42.4,
+     "2+3": 49.3,
+     "3+4": 51.8,
+     "4+6": 63.0,
+     "1+3": 70.3,
+     "4+5": 71.9,
+     "4+7": 86.1,
+     "2+4": 91.3,
+     "1+4": 115.4
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": 6.118,
+  "refund_rate": 0.733,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend": "2+5",
+  "strategy": "BMED_보험형",
+  "confidence": 25.0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 5,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 2,
+  "second": 1,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 14:51:43",
+ "quality": {
+  "score": 80,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
+  "missing": [
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

@@ -1,0 +1,131 @@
+{
+ "race": "몬베츠 5경주",
+ "raceKey": "몬베츠 5경주",
+ "date": "2026-07-22",
+ "result": {
+  "1st": 8,
+  "2nd": 1,
+  "3rd": 7,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_8": {
+   "horse": 8,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 88.6,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 99.3,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 90.6,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 28.9,
+   "confidence": null,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  7,
+  8,
+  1,
+  4
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 8번 88.6점",
+  "2. 배당 수집 시작 08:40:31",
+  "5. 종합 신뢰도 0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 8,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 88.6,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "전적보조_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 88.6,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "전적유력마 1번 적중 · 제거 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 1
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-22 09:27:26"
+}

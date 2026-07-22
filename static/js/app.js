@@ -1996,6 +1996,10 @@
     }
     const sigs = (c.signals || []).map((s) => `<div style="font-size:12px;font-weight:700;margin:1px 0">${esc(s.text)}</div>`).join('') || '<div class="hint" style="font-size:11px">신호 없음</div>';
     const keyH = (c.keyHorses || []).join(' · ') || '-';
+    // [경주 등급 배지 (2026-07-22)] 서버 raceGrade — 카드 상단 공통 등급 칩(오버레이·카톡과 동일 기준)
+    const _grd = c.grade || null;
+    const gradeBadge = (_grd && _grd.label)
+      ? `<span style="border:1.5px solid ${_grd.color || '#94a3b8'};color:${_grd.color || '#94a3b8'};font-weight:800;font-size:11px;padding:1px 7px;border-radius:6px">${esc(_grd.label)}</span>` : '';
     // [3번·💎 중고배당 유력마] 있으면 카드에 💎 배지 + 요약(별도 강조)
     const mh = (c.midHigh || []);
     const mhBadge = mh.length ? '<span style="background:#f0abfc;color:#1a1a1a;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">💎 고배당</span>' : '';
@@ -2038,7 +2042,7 @@
       <div style="display:flex;align-items:center;gap:6px">
         <span style="font-size:11px">${spLabel}</span>
         <b style="font-size:15px;color:#e2e8f0">${esc(c.venue || '')} ${c.raceNo}R</b>
-        ${resBadge}${mhBadge}${anBadge}
+        ${gradeBadge}${resBadge}${mhBadge}${anBadge}
         <span style="flex:1"></span>
         <b style="color:${col};font-size:13px">${c.urgency === 'urgent' ? '⚡ ' : ''}${leftTxt}</b>
       </div>
@@ -2089,7 +2093,7 @@
       const tRow = ft ? `<div style="padding:10px 2px;border-top:2px solid #2c3a4f">
         <div style="font-size:15px;color:#8a94a6;font-weight:700;line-height:1.6">삼복승</div>
         <div style="font-size:28px;font-weight:900;letter-spacing:1px;color:#4ea1ff;line-height:1.5">${esc(_numTxt(ft.combo))}</div>
-        ${ft.odds != null ? `<div style="font-size:22px;font-weight:800;color:#ffd24f;line-height:1.5">추정 배당 ${esc(ft.odds)}배</div>` : ''}
+        ${ft.odds != null ? `<div style="font-size:22px;font-weight:800;color:#ffd24f;line-height:1.5">${ft.oddsEst ? `배당 ~${esc(ft.odds)}배 <span style="font-size:13px;color:#f59e0b">(추정 — 실배당 미수집)</span>` : `배당 ${esc(ft.odds)}배`}</div>` : ''}
       </div>` : '';
       S.push(`<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.12),rgba(20,28,43,.9))">
         <div style="font-size:16px;font-weight:900;color:#38d39f;margin-bottom:2px">🎯 최종 추천 <span style="font-weight:400;font-size:12px;color:#9fb2c8">배당 30초 자동 갱신</span> ${_oddsGradeLegend('korea')}</div>
@@ -2332,6 +2336,11 @@
     S.push(`<div style="font-size:17px;font-weight:900;color:#e2e8f0;padding:6px 2px 8px">
       ${a.category === 'cycle' ? '🚴' : '🏇'} ${esc(a.raceKey || '')}${nH ? ` · ${nH}${unit}` : ''}${paceTxt ? ` · ${esc(paceTxt)}` : ''}${confTxt ? ` · <span style="color:#38d39f">${confTxt}</span>` : ''}
     </div>`);
+    // [경주 등급 배지 (2026-07-22)] 요약 카드 최상단 — 오버레이·카톡과 동일 등급(공통 기준 1소스)
+    const _rg0 = a.raceGrade || (cp && cp.raceGrade) || null;
+    if (_rg0 && _rg0.label) {
+      S.push(`<div style="margin:0 0 6px;padding:7px 11px;border-radius:9px;font-weight:900;font-size:15px;border:2px solid ${_rg0.color || '#94a3b8'};color:${_rg0.color || '#94a3b8'};background:rgba(255,255,255,.04)">${esc(_rg0.label)} · <span style="font-weight:600;font-size:12.5px">${esc(_rg0.basis || '')}</span></div>`);
+    }
     // ── 2. 최종 추천(크게·고정) ──
     let fq = (cp.finalQuinellas || []).slice(0, 2);
     if (!fq.length && (cp.confQuinellas || []).length) fq = cp.confQuinellas.slice(0, 2);
@@ -2402,7 +2411,7 @@
     const rt = a && a.recTrail; if (!rt) return '';
     const co = (c) => (c || []).join('+');
     const row = (x, tag, col) => `<div style="font-size:12.5px;margin-top:3px"><b style="color:${col}">${tag}</b> `
-      + `<b>${esc(co(x.combo))}</b>${x.odds ? ` · ${esc(String(x.odds))}배` : ''}`
+      + `<b>${esc(co(x.combo))}</b>${x.odds ? ` · ${x.oddsEst ? `~${esc(String(x.odds))}배(추정)` : `${esc(String(x.odds))}배`}` : ''}`
       + ((x.odds || 0) >= 50 ? ` <span style="color:#f59e0b;font-weight:700">— 고배당·화면 노출 제한(참고)</span>` : '')
       + (x.reason ? ` <span class="hint">${esc(String(x.reason))}</span>` : '') + `</div>`;
     let h = `<div style="margin-top:10px;border:1px solid #334155;border-radius:10px;padding:10px 12px;background:#0f172a">`
@@ -7079,7 +7088,8 @@
     }
     if (!ft.length) {
       const _t0 = cp.confTrifecta || cp.trifecta;
-      if (_t0) ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds }];
+      if (_t0) ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds,
+        oddsEst: !!(cp.confTrifecta ? cp.confTrifectaOddsEst : cp.trifectaOddsEst) }];   // [추정 표기]
     }
     if (!fq.length && !dansung && !special0.length) return '';
     // [단통 경고 배너] "저배당 추천 신뢰도 낮음 · 복병 감지에 집중"
@@ -7113,7 +7123,7 @@
       return `<div style="font-size:19px;font-weight:800;margin:5px 0 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>${basisBlock(q, '#7dd3fc')}`;
     }).join('');
     const tLines = ft.slice(0, 2).map((t) => {
-      const oo = t.odds != null ? `<span class="hint" style="font-size:13px">(${t.odds}배)</span>` : '';
+      const oo = t.odds != null ? `<span class="hint" style="font-size:13px">(${t.oddsEst ? `~${t.odds}배·추정` : `${t.odds}배`})</span>` : '';   // [추정 표기 (다마노 3R)]
       const rs = t.reason ? ` <span class="hint" style="font-size:12px">· ${esc(t.reason)}</span>` : '';
       return `<div style="font-size:18px;font-weight:800;margin:5px 0">🛡 삼복승 보험: <span style="color:#c084fc">${t.combo.join('+')}</span> ${oo}${rs}</div>`;
     }).join('');

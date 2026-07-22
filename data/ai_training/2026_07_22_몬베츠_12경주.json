@@ -1,0 +1,227 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_22_몬베츠_12경주",
+ "race_info": {
+  "date": "2026-07-22",
+  "track": "몬베츠",
+  "round": 12,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 9,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "グランラック",
+   "jockey": "阿部龍（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1
+   ],
+   "record_score": 110.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "アンジェアート",
+   "jockey": "宮内勇（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1
+   ],
+   "record_score": 110.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "スハッチェ",
+   "jockey": "近藤翔（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1
+   ],
+   "record_score": 110.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "セルアウトクラウド",
+   "jockey": "落合玄（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1
+   ],
+   "record_score": 110.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "ツリーオブライフ",
+   "jockey": "桑村真（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    2,
+    1,
+    2
+   ],
+   "record_score": 100.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "サザングルーヴ",
+   "jockey": "服部茂（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    4
+   ],
+   "record_score": 77.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "ロゼットリボン",
+   "jockey": "岩橋勇（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    1,
+    1
+   ],
+   "record_score": 55.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "ピンクゴールド",
+   "jockey": "小野楓（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    1
+   ],
+   "record_score": 42.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "プレストジュピター",
+   "jockey": "藤田駕（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    1
+   ],
+   "record_score": 42.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": null,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   6,
+   7,
+   8
+  ],
+  "eliminated": [
+   5,
+   9
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 6,
+  "2nd": 8,
+  "3rd": 7,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 6,
+  "second": 8,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 21:01:02",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

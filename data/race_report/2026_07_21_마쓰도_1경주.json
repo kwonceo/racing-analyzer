@@ -1,6 +1,6 @@
 {
  "race": "마쓰도 1경주",
- "raceKey": "마쓰도 1경주",
+ "raceKey": "2026-07-21 마쓰도 1경주",
  "date": "2026-07-21",
  "result": {
   "1st": 4,
@@ -8,160 +8,40 @@
   "3rd": 6,
   "4th": null
  },
- "hit": true,
- "hit_type": "복승 메인",
- "odds": "저배당",
- "win_odds": 1.6,
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
  "why_recommended": {
   "signal_4": {
    "horse": 4,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    4,
-    5
-   ],
-   "drop_timeline": [
-    {
-     "time": "08:30:27",
-     "minutes_before": null,
-     "odds": 1.6,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:43",
-     "minutes_before": 4,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:44",
-     "minutes_before": 4,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:44",
-     "minutes_before": 4,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:44",
-     "minutes_before": 4,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:46:05",
-     "minutes_before": 4,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:46:48",
-     "minutes_before": 3,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    }
-   ],
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 1.2,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
   "signal_5": {
    "horse": 5,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    4,
-    5
-   ],
-   "drop_timeline": [
-    {
-     "time": "08:30:27",
-     "minutes_before": null,
-     "odds": 1.6,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:43",
-     "minutes_before": 4,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:44",
-     "minutes_before": 4,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:44",
-     "minutes_before": 4,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:44",
-     "minutes_before": 4,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:46:05",
-     "minutes_before": 4,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:46:48",
-     "minutes_before": 3,
-     "odds": 1.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    }
-   ],
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 30.0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -177,119 +57,36 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
-  },
-  "signal_1": {
-   "horse": 1,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": [
-    1,
-    5
-   ],
-   "drop_timeline": [
-    {
-     "time": "08:30:27",
-     "minutes_before": null,
-     "odds": 7.9,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:43",
-     "minutes_before": 4,
-     "odds": 7.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:44",
-     "minutes_before": 4,
-     "odds": 7.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:44",
-     "minutes_before": 4,
-     "odds": 7.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:45:44",
-     "minutes_before": 4,
-     "odds": 7.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:46:05",
-     "minutes_before": 4,
-     "odds": 7.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "08:46:48",
-     "minutes_before": 3,
-     "odds": 7.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    }
-   ],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 66.2,
-   "confidence": null,
-   "reason": "전적상위"
   }
  },
- "recommended_horses": [
-  5,
-  4,
-  1
- ],
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 4번 1.2점",
-  "2. 배당 수집 시작 08:30:27",
-  "5. 종합 신뢰도 0점(하) 판정",
-  "6. BMED 전략: 보험형 적용",
-  "7. 최종 추천: 복승 메인 4+5"
+  "1. 전적 분석: 4번 전적 정보 제한",
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 4,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 1.2,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 1.2,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "적중"
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -302,9 +99,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 7
+  "validCount": 0
  },
- "pnl": 600,
+ "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-21 08:58:51"
+ "generated_at": "2026-07-22 09:49:00"
 }

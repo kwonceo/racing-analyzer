@@ -1,0 +1,145 @@
+{
+ "race": "마쓰사카 7경주",
+ "raceKey": "마쓰사카 7경주",
+ "date": "2026-07-22",
+ "result": {
+  "1st": 3,
+  "2nd": 1,
+  "3rd": 2,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_3": {
+   "horse": 3,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 90.2,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 81.4,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 80.6,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 86.1,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 85.5,
+   "confidence": null,
+   "reason": "전적상위"
+  }
+ },
+ "recommended_horses": [
+  3,
+  5,
+  7
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 3번 90.2점",
+  "5. 종합 신뢰도 0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 3,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 90.2,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "전적보조_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 90.2,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "전적유력마 1번 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 0
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-22 18:37:05"
+}

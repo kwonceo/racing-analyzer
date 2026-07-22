@@ -1,0 +1,253 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_22_몬베츠_5경주",
+ "race_info": {
+  "date": "2026-07-22",
+  "track": "몬베츠",
+  "round": 5,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "リュウノアキレス",
+   "jockey": "近藤翔（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    2
+   ],
+   "record_score": 99.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 9.8
+  },
+  {
+   "no": 7,
+   "name": "ミリオンジュピター",
+   "jockey": "落合玄（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    2,
+    3
+   ],
+   "record_score": 90.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 4.5
+  },
+  {
+   "no": 8,
+   "name": "アイローサ",
+   "jockey": "桑村真（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    3
+   ],
+   "record_score": 88.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 1.3
+  },
+  {
+   "no": 4,
+   "name": "ウィルアイガー",
+   "jockey": "石川倭（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    3,
+    3,
+    3
+   ],
+   "record_score": 28.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 5.8
+  },
+  {
+   "no": 2,
+   "name": "モーニングヒカル",
+   "jockey": "宮内勇（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    11,
+    7,
+    9,
+    8,
+    6
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 151.0
+  },
+  {
+   "no": 3,
+   "name": "カプリチオテソーロ",
+   "jockey": "松井伸（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 374.5
+  },
+  {
+   "no": 5,
+   "name": "チェックレイズ",
+   "jockey": "藤田駕（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    10
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 142.2
+  },
+  {
+   "no": 6,
+   "name": "ガミラスマリアナ",
+   "jockey": "岩橋勇（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    12,
+    9,
+    11,
+    9,
+    11
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 374.5
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "08:40:31",
+    "quinella": {
+     "7+8": 2.3,
+     "1+8": 2.9,
+     "4+8": 3.6,
+     "4+7": 13.3,
+     "1+7": 14.2,
+     "1+4": 15.3,
+     "5+8": 61.4,
+     "1+5": 126.0,
+     "2+8": 130.4,
+     "4+5": 137.5,
+     "6+8": 145.4,
+     "2+4": 149.7,
+     "5+7": 160.9,
+     "3+8": 173.8,
+     "3+4": 222.4,
+     "4+6": 343.8,
+     "2+7": 360.1,
+     "6+7": 378.2,
+     "1+2": 387.9,
+     "3+7": 444.9,
+     "1+6": 472.7,
+     "1+3": 521.6,
+     "2+3": 796.2,
+     "3+5": 945.5,
+     "2+5": 1008.5,
+     "5+6": 1375.2,
+     "3+6": 1512.8,
+     "2+6": 2161.1
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.735,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   4,
+   7,
+   8
+  ],
+  "eliminated": [
+   5,
+   2,
+   6,
+   3
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 8,
+  "2nd": 1,
+  "3rd": 7,
+  "4th": null,
+  "quinella_odds": 2.9,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중 · 제거 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 8,
+  "second": 1,
+  "odds_range": "저배당"
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 09:27:26",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과"
+  ],
+  "errors": []
+ }
+}

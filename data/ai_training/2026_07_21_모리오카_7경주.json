@@ -1,0 +1,142 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_21_모리오카_7경주",
+ "race_info": {
+  "date": "2026-07-21",
+  "track": "모리오카",
+  "round": 7,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "15:17:09",
+    "quinella": {
+     "1+10": 5.9,
+     "1+8": 7.3,
+     "1+6": 8.4,
+     "1+4": 8.5,
+     "1+3": 9.0,
+     "1+9": 9.0,
+     "4+8": 17.6,
+     "4+6": 18.6,
+     "1+7": 19.6,
+     "6+8": 20.3,
+     "8+10": 28.1,
+     "4+10": 36.6,
+     "6+10": 40.4,
+     "3+4": 40.6,
+     "8+9": 41.5,
+     "6+9": 42.4,
+     "9+10": 45.3,
+     "4+9": 48.8,
+     "3+8": 53.2,
+     "3+6": 58.4,
+     "3+10": 58.5,
+     "3+9": 74.9,
+     "1+2": 93.3,
+     "7+8": 122.7,
+     "7+10": 122.7,
+     "1+5": 140.5,
+     "7+9": 144.9,
+     "6+7": 147.1,
+     "4+7": 164.3,
+     "3+7": 189.9,
+     "2+8": 200.7,
+     "2+6": 312.3,
+     "5+6": 323.1,
+     "2+4": 365.0,
+     "2+9": 365.0,
+     "5+8": 369.8,
+     "2+10": 379.8,
+     "4+5": 401.5,
+     "5+10": 439.2,
+     "2+3": 476.4,
+     "3+5": 780.8,
+     "5+9": 803.1,
+     "2+7": 803.1,
+     "5+7": 1338.6,
+     "2+5": 1338.6
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": 1.237,
+  "refund_rate": 0.747,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   3,
+   4,
+   6,
+   7,
+   8,
+   9,
+   10,
+   2,
+   5
+  ],
+  "eliminated": [],
+  "recommend": "1+8",
+  "strategy": "BMED_보험형",
+  "confidence": 1.1,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 9,
+  "2nd": 6,
+  "3rd": 7,
+  "4th": null,
+  "quinella_odds": 42.4,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 9,
+  "second": 6,
+  "odds_range": "고배당"
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 09:50:59",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "전적 데이터"
+  ],
+  "errors": []
+ }
+}

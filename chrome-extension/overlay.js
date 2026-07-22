@@ -1586,8 +1586,21 @@
         }
         if (!_ft.length && cp) {
           var _t0 = cp.confTrifecta || cp.trifecta;
-          if (_t0) _ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds }];
+          if (_t0) _ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds,
+            oddsEst: !!(cp.confTrifecta ? cp.confTrifectaOddsEst : cp.trifectaOddsEst) }];   // [추정 표기]
         }
+        // [경주 등급 배지 (2026-07-22 권대표 요청)] 서버 raceGrade — 전 화면 공통 등급(맨 위 강조).
+        //   🔥 강력승부 / ✅ 추천 / ⚖️ 관찰 / 🛡 참고·패스 — 모든 경주가 같은 무게로 보이던 문제 해소.
+        try {
+          var _rg = d.raceGrade || (cp && cp.raceGrade);
+          if (_rg && _rg.label) {
+            var _rgCol = _rg.color || '#94a3b8';
+            var gb = mk('div', 'margin:0 0 6px;padding:7px 11px;border-radius:9px;font-weight:900;font-size:16px;'
+              + 'border:2px solid ' + _rgCol + ';color:' + _rgCol + ';background:rgba(255,255,255,.05)');
+            gb.textContent = _rg.label + '  ·  ' + (_rg.basis || '');
+            panel.appendChild(gb);
+          }
+        } catch (_) { /* */ }
         // [② 변화 알림 1줄 (2026-07-20 확정 원칙)] "이 신호가 추천을 바꿨는가?" — 교체 순간만 1줄 표시,
         //   유지 판단이면 조용히(요동은 회원에게 안 보임). 서버 히스테리시스(recHysteresis)와 연동.
         try {
@@ -1638,8 +1651,10 @@
           });
           _ft.slice(0, 2).forEach(function (t) {
             var _rs = t.reason ? '  · ' + t.reason : '';
+            // [추정 표기 (2026-07-22 다마노 3R)] 실배당 미수집 조합은 '~X배(추정)' — 실배당 둔갑 방지
+            var _od = t.odds != null ? (t.oddsEst ? '  (~' + t.odds + '배·추정)' : '  (' + t.odds + '배)') : '';
             cpBox.appendChild(mk('div', 'font-weight:800;font-size:16px;margin-top:5px;color:#c4b5fd',
-              '🛡 삼복승 보험: ' + t.combo.join('+') + (t.odds != null ? '  (' + t.odds + '배)' : '') + _rs));
+              '🛡 삼복승 보험: ' + t.combo.join('+') + _od + _rs));
           });
           // [보조 조합 노출 (2026-07-21 권대표 요청)] 표시 상한 밖 생성 조합 — 참고·판정 제외(표시=판정 일치).
           //   마쓰도 4R: 보조 1+2+5가 화면 밖에서 적중 → 이제 여기서 실시간으로 볼 수 있게(소형·회색 점선).
@@ -1648,8 +1663,9 @@
             var auxBox = mk('div', 'margin-top:5px;padding:5px 8px;border:1px dashed #64748b;border-radius:7px;background:rgba(100,116,139,.10)');
             auxBox.appendChild(mk('div', 'font-weight:700;color:#94a3b8;font-size:11.5px', '🧩 보조 조합 (참고 · 적중 판정 제외)'));
             _aux.slice(0, 4).forEach(function (t) {
+              var _aod = t.odds != null ? (t.oddsEst ? ' (~' + t.odds + '배·추정)' : ' (' + t.odds + '배)') : '';   // [추정 표기]
               auxBox.appendChild(mk('div', 'font-size:12.5px;color:#cbd5e1;margin-top:2px',
-                '삼복승 ' + (t.combo || []).join('+') + (t.odds != null ? ' (' + t.odds + '배)' : '') + (t.reason ? ' · ' + t.reason : '')));
+                '삼복승 ' + (t.combo || []).join('+') + _aod + (t.reason ? ' · ' + t.reason : '')));
             });
             cpBox.appendChild(auxBox);
           }

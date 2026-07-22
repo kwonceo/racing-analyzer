@@ -1,0 +1,96 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_22_오오이_7경주",
+ "race_info": {
+  "date": "2026-07-22",
+  "track": "오오이",
+  "round": 7,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": null,
+  "grade": null
+ },
+ "horses": [],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": true,
+  "reversal_ratio": 0.763,
+  "quinella_mismatch": null,
+  "refund_rate": 0.748,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   4,
+   6,
+   10,
+   11,
+   3,
+   5,
+   7,
+   9,
+   13,
+   8
+  ],
+  "eliminated": [
+   12
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 20.0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 6,
+  "2nd": 4,
+  "3rd": 10,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "제거 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 6,
+  "second": 4,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": 1,
+  "reversal_horse_placed": false,
+  "reversal_ratio": 0.763,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 18:16:02",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "전적 데이터",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

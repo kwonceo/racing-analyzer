@@ -1,6 +1,6 @@
 {
  "race": "모리오카 3경주",
- "raceKey": "모리오카 3경주",
+ "raceKey": "2026-07-21 모리오카 3경주",
  "date": "2026-07-21",
  "result": {
   "1st": 5,
@@ -11,7 +11,7 @@
  "hit": true,
  "hit_type": "복승 메인",
  "odds": "저배당",
- "win_odds": 3.8,
+ "win_odds": 4.3,
  "why_recommended": {
   "signal_5": {
    "horse": 5,
@@ -221,9 +221,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 105.5,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
@@ -433,7 +433,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 41.2,
+   "record_score": null,
    "confidence": 0.0,
    "reason": "일반"
   },
@@ -645,221 +645,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 40.0,
+   "record_score": null,
    "confidence": 0.0,
    "reason": "일반"
-  },
-  "signal_7": {
-   "horse": 7,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": [
-    5,
-    7
-   ],
-   "drop_timeline": [
-    {
-     "time": "12:30:56",
-     "minutes_before": 24,
-     "odds": 7.9,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:30:56",
-     "minutes_before": 24,
-     "odds": 7.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:30:56",
-     "minutes_before": 24,
-     "odds": 7.9,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:46:08",
-     "minutes_before": 9,
-     "odds": 7.1,
-     "change": -10.1,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:46:08",
-     "minutes_before": 9,
-     "odds": 7.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:47:07",
-     "minutes_before": 8,
-     "odds": 7.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:47:07",
-     "minutes_before": 8,
-     "odds": 7.1,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:48:06",
-     "minutes_before": 7,
-     "odds": 6.6,
-     "change": -7.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:48:06",
-     "minutes_before": 7,
-     "odds": 6.6,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:49:05",
-     "minutes_before": 6,
-     "odds": 6.8,
-     "change": 3.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:49:05",
-     "minutes_before": 6,
-     "odds": 6.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:50:07",
-     "minutes_before": 5,
-     "odds": 6.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:50:07",
-     "minutes_before": 5,
-     "odds": 6.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:51:05",
-     "minutes_before": 4,
-     "odds": 5.7,
-     "change": -16.2,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:51:05",
-     "minutes_before": 4,
-     "odds": 5.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:52:05",
-     "minutes_before": 3,
-     "odds": 5.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:52:05",
-     "minutes_before": 3,
-     "odds": 5.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:53:01",
-     "minutes_before": 2,
-     "odds": 5.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:53:01",
-     "minutes_before": 2,
-     "odds": 5.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:54:03",
-     "minutes_before": 1,
-     "odds": 5.8,
-     "change": 1.8,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:54:03",
-     "minutes_before": 1,
-     "odds": 5.8,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:55:01",
-     "minutes_before": 0,
-     "odds": 6.4,
-     "change": 10.3,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:55:01",
-     "minutes_before": 0,
-     "odds": 6.4,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "12:56:05",
-     "minutes_before": null,
-     "odds": 6.4,
-     "change": null,
-     "excluded": true,
-     "exclReason": "마감 후 데이터 - 제외됨"
-    }
-   ],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 107.5,
-   "confidence": 0.0,
-   "reason": "전적상위"
   },
   "signal_4": {
    "horse": 4,
@@ -1069,20 +857,19 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 82.5,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
-  7,
   5,
   2,
-  9,
-  4
+  4,
+  9
  ],
  "recommendation_process": [
-  "1. 전적 분석: 5번 105.5점",
+  "1. 전적 분석: 5번 전적 정보 제한",
   "2. 배당 수집 시작 12:30:56",
   "5. 종합 신뢰도 0.0점(하) 판정",
   "6. BMED 전략: 보험형 적용",
@@ -1093,14 +880,14 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 105.5,
+  "record_score": null,
   "total": 0.0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 105.5,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": false,
@@ -1172,7 +959,7 @@
   },
   "validCount": 22
  },
- "pnl": 2800,
+ "pnl": 3300,
  "stake": 1000,
- "generated_at": "2026-07-21 13:13:25"
+ "generated_at": "2026-07-22 09:50:56"
 }

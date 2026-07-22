@@ -1,0 +1,235 @@
+{
+ "race": "사세보 2경주",
+ "raceKey": "사세보 2경주",
+ "date": "2026-07-22",
+ "result": {
+  "1st": 3,
+  "2nd": 2,
+  "3rd": 5,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_3": {
+   "horse": 3,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 113.2,
+   "confidence": 28.0,
+   "reason": "전적상위"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": 0.0,
+   "avg_drop": -13.1,
+   "grade": "🔴",
+   "rep_combo": [
+    2,
+    4
+   ],
+   "drop_timeline": [
+    {
+     "time": "08:59:19",
+     "minutes_before": 11,
+     "odds": 10.6,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "08:59:40",
+     "minutes_before": 11,
+     "odds": 8.8,
+     "change": -17.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 100.6,
+   "confidence": 100.0,
+   "reason": "초과급락"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": 3.9,
+   "avg_drop": -9.2,
+   "grade": null,
+   "rep_combo": [
+    2,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "08:59:19",
+     "minutes_before": 11,
+     "odds": 57.9,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "08:59:40",
+     "minutes_before": 11,
+     "odds": 52.6,
+     "change": -9.2,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 77.6,
+   "confidence": 0.0,
+   "reason": "전적상위"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    2,
+    7
+   ],
+   "drop_timeline": [
+    {
+     "time": "08:59:19",
+     "minutes_before": 11,
+     "odds": 1.2,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "08:59:40",
+     "minutes_before": 11,
+     "odds": 1.3,
+     "change": 8.3,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 77.5,
+   "confidence": 64.0,
+   "reason": "전적상위"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": -3.9,
+   "avg_drop": -17.0,
+   "grade": "🔴",
+   "rep_combo": [
+    2,
+    4
+   ],
+   "drop_timeline": [
+    {
+     "time": "08:59:19",
+     "minutes_before": 11,
+     "odds": 10.6,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "08:59:40",
+     "minutes_before": 11,
+     "odds": 8.8,
+     "change": -17.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 104.3,
+   "confidence": 90.0,
+   "reason": "초과급락"
+  }
+ },
+ "recommended_horses": [
+  2,
+  7,
+  4
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 3번 113.2점",
+  "2. 배당 수집 시작 08:59:19",
+  "3. 초과급락 감지: 4번 초과급락 -3.9%p (전체평균 -13.1%)",
+  "5. 종합 신뢰도 28.0점(하) 판정",
+  "6. BMED 전략: 고배당도전형 적용",
+  "7. 최종 추천: 복승 메인 2+7"
+ ],
+ "confidence_breakdown": {
+  "horse": 3,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 113.2,
+  "total": 28.0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "초과급락_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 113.2,
+  "dropAmt": -17.0,
+  "dropScore": 65.5,
+  "inverse": false,
+  "inverseHorses": [
+   4,
+   2
+  ],
+  "inverseHit": [
+   2
+  ],
+  "confidence": 100.0,
+  "reason": "2+4 복승 급락(-17.0%) → 2번 입상 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 2
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-22 09:15:51"
+}

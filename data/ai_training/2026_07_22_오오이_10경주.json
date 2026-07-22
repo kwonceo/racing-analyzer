@@ -1,0 +1,318 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_22_오오이_10경주",
+ "race_info": {
+  "date": "2026-07-22",
+  "track": "오오이",
+  "round": 10,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 9,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 4,
+   "name": "トーキングザゴッド",
+   "jockey": "笹川翼（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    1
+   ],
+   "record_score": 110.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "スタールビーピアス",
+   "jockey": "和田譲（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    1,
+    2,
+    4,
+    4
+   ],
+   "record_score": 87.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "ジューンアカデミー",
+   "jockey": "安藤洋（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    9,
+    1,
+    5,
+    6
+   ],
+   "record_score": 50.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "オロールシェール",
+   "jockey": "鷹見陸（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    5,
+    1,
+    9,
+    12
+   ],
+   "record_score": 30.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "トゥモローズウェイ",
+   "jockey": "中山遥（浦和）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    12,
+    4,
+    7,
+    10
+   ],
+   "record_score": 15.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "トコシエノヒトミ",
+   "jockey": "野畑凌（川崎）",
+   "jockey_winrate": null,
+   "recent_results": [
+    11,
+    15,
+    7,
+    3,
+    2
+   ],
+   "record_score": 6.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "ライドハイ",
+   "jockey": "藤田凌（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    5,
+    7,
+    2,
+    6
+   ],
+   "record_score": 3.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "ナポレオンバディ",
+   "jockey": "吉原寛（金沢）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    11,
+    11,
+    13,
+    4
+   ],
+   "record_score": 1.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "マッシブショット",
+   "jockey": "小林脩（JRA）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    10,
+    8,
+    7,
+    9
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "19:46:32",
+    "quinella": {
+     "2+4": 4.9,
+     "1+2": 5.3,
+     "1+4": 5.5,
+     "4+5": 10.4,
+     "4+9": 17.0,
+     "2+7": 17.2,
+     "1+5": 21.2,
+     "2+5": 22.7,
+     "2+9": 23.3,
+     "4+7": 24.9,
+     "1+9": 26.2,
+     "1+7": 26.7,
+     "4+8": 33.0,
+     "5+9": 34.6,
+     "2+6": 36.6,
+     "4+6": 37.7,
+     "2+8": 42.7,
+     "1+8": 66.7,
+     "2+3": 67.8,
+     "1+6": 69.2,
+     "5+6": 72.2,
+     "5+7": 73.6,
+     "7+9": 81.5,
+     "6+9": 83.2,
+     "3+4": 96.8,
+     "1+3": 112.1,
+     "5+8": 124.4,
+     "8+9": 129.2,
+     "7+8": 133.8,
+     "6+7": 161.9,
+     "6+8": 214.4,
+     "3+5": 271.3,
+     "3+7": 276.1,
+     "3+9": 312.5,
+     "3+6": 362.1,
+     "3+8": 472.3
+    }
+   }
+  ],
+  "drop_rates": {
+   "2": -88.0,
+   "4": -88.0,
+   "1": -86.0,
+   "3": -78.4,
+   "8": -78.4,
+   "9": -69.7,
+   "7": -68.6,
+   "5": -58.5,
+   "6": -10.8
+  },
+  "excess_drops": {
+   "2": -27.9,
+   "4": -3.2,
+   "1": -3.9,
+   "9": -10.6,
+   "7": -9.5
+  },
+  "drop_speed": {
+   "2": -352.0,
+   "4": -352.0,
+   "1": -344.0,
+   "3": -313.6,
+   "8": -313.6,
+   "9": -278.8,
+   "7": -274.4,
+   "5": -234.0,
+   "6": -43.2
+  },
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.747,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   4,
+   8,
+   2,
+   3,
+   5,
+   7,
+   9,
+   6
+  ],
+  "eliminated": [],
+  "recommend": "2+4",
+  "strategy": "BMED_고배당도전형",
+  "confidence": 100.0,
+  "signal_quality": "상"
+ },
+ "result": {
+  "1st": 4,
+  "2nd": 2,
+  "3rd": 6,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "2+4 복승 급락(-88.0%) → 2·4번 입상 적중"
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 4,
+  "second": 2,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": "2",
+  "excess_drop_horse_placed": true,
+  "excess_drop_value": -27.9,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 19:59:01",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

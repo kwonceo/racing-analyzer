@@ -1,6 +1,6 @@
 {
  "race": "모리오카 4경주",
- "raceKey": "모리오카 4경주",
+ "raceKey": "2026-07-21 모리오카 4경주",
  "date": "2026-07-21",
  "result": {
   "1st": 8,
@@ -21,23 +21,11 @@
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    8,
-    10
-   ],
-   "drop_timeline": [
-    {
-     "time": "13:37:20",
-     "minutes_before": null,
-     "odds": 3.8,
-     "change": null,
-     "excluded": true,
-     "exclReason": "다음 경주 혼입 - 제외됨"
-    }
-   ],
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -53,7 +41,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -65,23 +53,11 @@
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    1,
-    10
-   ],
-   "drop_timeline": [
-    {
-     "time": "13:37:20",
-     "minutes_before": null,
-     "odds": 4.0,
-     "change": null,
-     "excluded": true,
-     "exclReason": "다음 경주 혼입 - 제외됨"
-    }
-   ],
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -93,59 +69,45 @@
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    8,
-    10
-   ],
-   "drop_timeline": [
-    {
-     "time": "13:37:20",
-     "minutes_before": null,
-     "odds": 3.8,
-     "change": null,
-     "excluded": true,
-     "exclReason": "다음 경주 혼입 - 제외됨"
-    }
-   ],
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   }
  },
  "recommended_horses": [
-  8,
   10,
-  1
+  1,
+  8
  ],
  "recommendation_process": [
-  "1. 전적 분석: 8번 0점",
+  "1. 전적 분석: 8번 전적 정보 제한",
   "2. 배당 수집 시작 13:37:19",
-  "5. 종합 신뢰도 0점(하) 판정",
-  "6. BMED 전략: 보험형 적용",
-  "7. 최종 추천: 복승 메인 8+10"
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 8,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 0,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 0,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "제거 적중"
+  "reason": "전적유력마 1번 적중 · 제거 적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -162,5 +124,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-21 14:00:22"
+ "generated_at": "2026-07-22 09:50:57"
 }

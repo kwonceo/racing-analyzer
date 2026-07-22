@@ -1,0 +1,240 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_22_사세보_2경주",
+ "race_info": {
+  "date": "2026-07-22",
+  "track": "사세보",
+  "round": 2,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 7,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 3,
+   "name": "川崎 健次",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 113.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "本多 哲也",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 77.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "秋葉 大輔",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 100.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "梶原 恵介",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 104.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "天野 純平",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 77.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "別所 英幸",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 88.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "田口 守",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 60.7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "08:59:19",
+    "quinella": {
+     "2+7": 1.2,
+     "2+4": 10.6,
+     "1+4": 11.8,
+     "4+7": 14.5,
+     "1+7": 16.7,
+     "1+2": 16.8,
+     "5+7": 42.8,
+     "2+3": 43.7,
+     "2+5": 57.9,
+     "3+6": 64.9,
+     "1+3": 71.4,
+     "3+7": 73.9,
+     "2+6": 82.4,
+     "3+4": 133.9,
+     "4+6": 133.9,
+     "1+6": 142.9,
+     "6+7": 142.9,
+     "1+5": 178.6,
+     "4+5": 214.3,
+     "3+5": 238.1,
+     "5+6": 357.2
+    }
+   },
+   {
+    "time": "08:59:40",
+    "quinella": {
+     "2+7": 1.3,
+     "2+4": 8.8,
+     "1+4": 10.9,
+     "4+7": 14.1,
+     "1+2": 16.0,
+     "1+7": 16.1,
+     "2+3": 41.9,
+     "5+7": 43.5,
+     "2+5": 52.6,
+     "3+6": 64.7,
+     "1+3": 68.6,
+     "3+7": 75.5,
+     "2+6": 78.1,
+     "3+4": 133.2,
+     "6+7": 133.2,
+     "4+6": 141.6,
+     "1+6": 151.0,
+     "1+5": 188.8,
+     "4+5": 226.5,
+     "3+5": 251.7,
+     "5+6": 377.6
+    }
+   }
+  ],
+  "drop_rates": {
+   "2": -17.0,
+   "4": -17.0,
+   "5": -9.2
+  },
+  "excess_drops": {
+   "4": -3.9
+  },
+  "drop_speed": {
+   "2": -50.0,
+   "4": -50.0,
+   "5": -27.1
+  },
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.748,
+  "consecutive_drops": {
+   "3": 3,
+   "6": 3,
+   "2": 3,
+   "4": 3,
+   "1": 3,
+   "7": 3
+  },
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend": "2+7",
+  "strategy": "BMED_고배당도전형",
+  "confidence": 100.0,
+  "signal_quality": "상"
+ },
+ "result": {
+  "1st": 3,
+  "2nd": 2,
+  "3rd": 5,
+  "4th": null,
+  "quinella_odds": 2.7,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 3,
+  "second": 2,
+  "odds_range": "저배당"
+ },
+ "signal_hit": {
+  "excess_drop_horse": "4",
+  "excess_drop_horse_placed": false,
+  "excess_drop_value": -3.9,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": "3",
+  "consecutive_horse_placed": true
+ },
+ "saved_at": "2026-07-22 09:15:51",
+ "quality": {
+  "score": 100,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
+  "missing": [],
+  "errors": []
+ }
+}

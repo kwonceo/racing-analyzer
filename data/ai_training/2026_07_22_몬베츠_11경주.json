@@ -1,0 +1,291 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_22_몬베츠_11경주",
+ "race_info": {
+  "date": "2026-07-22",
+  "track": "몬베츠",
+  "round": 11,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 7,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 7,
+   "name": "バイバイファイト",
+   "jockey": "西優哉（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    10,
+    4,
+    11,
+    6
+   ],
+   "record_score": 35.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "カレックス",
+   "jockey": "藤田凌（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    4,
+    7,
+    6,
+    13
+   ],
+   "record_score": 17.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "シュネープリンセス",
+   "jockey": "矢野貴（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    15,
+    6,
+    3,
+    7
+   ],
+   "record_score": 2.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "ユウユウチャパティ",
+   "jockey": "菅原涼（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    12,
+    11,
+    6,
+    12,
+    8
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "ポロリス",
+   "jockey": "石川駿（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    7,
+    8,
+    9,
+    12
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "オーシャンクロノス",
+   "jockey": "田中洸（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    8,
+    7,
+    10,
+    5
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "ヴェールジャルダン",
+   "jockey": "杉山海（大井）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    5,
+    6,
+    12,
+    10
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "08:40:42",
+    "quinella": {
+     "6+8": 2.4,
+     "6+10": 6.3,
+     "5+6": 6.9,
+     "8+10": 9.0,
+     "6+7": 10.2,
+     "5+8": 14.7,
+     "7+8": 20.5,
+     "4+6": 23.5,
+     "5+7": 27.1,
+     "7+10": 28.3,
+     "4+8": 29.7,
+     "5+10": 30.2,
+     "4+10": 36.7,
+     "4+5": 64.7,
+     "4+7": 83.7,
+     "3+6": 121.3,
+     "2+6": 138.0,
+     "3+8": 158.5,
+     "2+8": 211.7,
+     "3+5": 235.1,
+     "3+10": 254.4,
+     "2+5": 293.9,
+     "2+7": 304.4,
+     "3+7": 374.6,
+     "1+6": 387.4,
+     "3+4": 391.9,
+     "6+9": 448.6,
+     "2+4": 454.6,
+     "2+10": 473.5,
+     "1+8": 568.2,
+     "1+7": 619.9,
+     "8+9": 619.9,
+     "7+9": 643.3,
+     "1+5": 757.7,
+     "2+3": 757.7,
+     "5+9": 852.4,
+     "1+2": 1623.6,
+     "4+9": 1623.6,
+     "9+10": 1623.6,
+     "1+4": 1704.8,
+     "1+10": 1894.2,
+     "2+9": 2622.8,
+     "3+9": 2841.4,
+     "1+3": 3099.7,
+     "1+9": 4262.1
+    }
+   },
+   {
+    "time": "08:40:50",
+    "quinella": {
+     "3+5": 1.3,
+     "4+7": 11.4,
+     "3+4": 15.6,
+     "2+3": 17.3,
+     "5+7": 17.9,
+     "3+7": 18.6,
+     "4+5": 21.4,
+     "2+5": 24.2,
+     "1+4": 26.6,
+     "1+5": 35.8,
+     "1+7": 39.0,
+     "1+3": 42.8,
+     "2+4": 56.0,
+     "3+6": 64.3,
+     "5+6": 64.3,
+     "2+7": 115.0,
+     "1+2": 136.6,
+     "2+6": 136.6,
+     "4+6": 136.6,
+     "6+7": 145.7,
+     "1+6": 156.1
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.734,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend": "3+5",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 8,
+  "2nd": 10,
+  "3rd": 6,
+  "4th": null,
+  "quinella_odds": 9.0,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "적중"
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 8,
+  "second": 10,
+  "odds_range": "고배당"
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 09:27:23",
+ "quality": {
+  "score": 80,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
+  "missing": [
+   "이상감지 결과"
+  ],
+  "errors": []
+ }
+}

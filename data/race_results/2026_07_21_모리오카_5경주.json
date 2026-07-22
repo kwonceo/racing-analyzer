@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_21_모리오카_5경주",
- "raceKey": "모리오카 5경주",
+ "raceKey": "2026-07-21 모리오카 5경주",
  "date": "2026-07-21",
  "sport": "horse",
  "category": "japan_local",
@@ -9,15 +9,15 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 12,
+ "horse_count": null,
  "result": {
   "1st": 12,
   "2nd": 5,
   "3rd": 6
  },
  "payouts": {
-  "quinella": 10.1,
-  "trifecta": 0.0
+  "quinella": 11.5,
+  "trifecta": 9.1
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -4608,11 +4608,11 @@
    8,
    10,
    7,
-   3,
-   11
+   3
   ],
   "eliminated": [
-   1
+   1,
+   11
   ],
   "recommend_main": "6+12",
   "recommend_sub": null,
@@ -4636,13 +4636,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 10.1,
-  "trifecta_odds": null,
+  "quinella_odds": 11.5,
+  "trifecta_odds": 9.1,
   "actual_return": null,
-  "profit": 9100
+  "profit": 10500
  },
- "memo": null,
- "saved_at": "2026-07-21 14:22:10",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-22 09:50)",
+ "saved_at": "2026-07-22 09:50:58",
  "validation": {
   "ok": true,
   "errors": []

@@ -1,0 +1,152 @@
+{
+ "race": "카사마츠 10경주",
+ "raceKey": "카사마츠 10경주",
+ "date": "2026-07-22",
+ "result": {
+  "1st": 1,
+  "2nd": 4,
+  "3rd": 6,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": "복승 보조(삼복승 구성)",
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    6
+   ],
+   "drop_timeline": [
+    {
+     "time": "15:52:11",
+     "minutes_before": null,
+     "odds": 5.8,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 60.0,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    4,
+    6
+   ],
+   "drop_timeline": [
+    {
+     "time": "15:52:11",
+     "minutes_before": null,
+     "odds": 2.8,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 55.0,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_6": {
+   "horse": 6,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    4,
+    6
+   ],
+   "drop_timeline": [
+    {
+     "time": "15:52:11",
+     "minutes_before": null,
+     "odds": 2.8,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 70.0,
+   "confidence": null,
+   "reason": "전적상위"
+  }
+ },
+ "recommended_horses": [
+  6,
+  4,
+  1
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 1번 60.0점",
+  "2. 배당 수집 시작 15:52:11",
+  "5. 종합 신뢰도 0점(하) 판정",
+  "6. BMED 전략: 보험형 적용",
+  "7. 최종 추천: 복승 메인 4+6"
+ ],
+ "confidence_breakdown": {
+  "horse": 1,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 60.0,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "전적보조_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 60.0,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "전적유력마 1번 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 1,
+   "next_race": 0
+  },
+  "validCount": 0
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-22 15:53:37"
+}

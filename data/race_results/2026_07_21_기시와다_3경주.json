@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_21_기시와다_3경주",
- "raceKey": "기시와다 3경주",
+ "raceKey": "2026-07-21 기시와다 3경주",
  "date": "2026-07-21",
  "sport": "cycle",
  "category": "cycle",
@@ -9,14 +9,14 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 5,
   "2nd": 2,
   "3rd": 4
  },
  "payouts": {
-  "quinella": 10.6,
+  "quinella": 12.0,
   "trifecta": 0.0
  },
  "payouts_approx": false,
@@ -116,10 +116,10 @@
    7
   ],
   "eliminated": [],
-  "recommend_main": null,
+  "recommend_main": "3+5",
   "recommend_sub": null,
-  "strategy": null,
-  "signal_quality": null,
+  "strategy": "BMED_보험형",
+  "signal_quality": "하",
   "confidence": 25.0,
   "inverse": false
  },
@@ -136,13 +136,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 10.6,
+  "quinella_odds": 12.0,
   "trifecta_odds": null,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-21 12:11:29",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-22 09:45)",
+ "saved_at": "2026-07-22 09:45:06",
  "validation": {
   "ok": true,
   "errors": []

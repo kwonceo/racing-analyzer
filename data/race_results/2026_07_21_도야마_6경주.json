@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_21_도야마_6경주",
- "raceKey": "도야마 6경주",
+ "raceKey": "2026-07-21 도야마 6경주",
  "date": "2026-07-21",
  "sport": "cycle",
  "category": "cycle",
@@ -9,14 +9,14 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 4,
   "2nd": 2,
   "3rd": 1
  },
  "payouts": {
-  "quinella": 1.4,
+  "quinella": 9.1,
   "trifecta": 0.0
  },
  "payouts_approx": false,
@@ -79,13 +79,13 @@
  "anomalies": [],
  "prediction": {
   "candidates": [
-   4,
-   6,
-   7,
    1,
    2,
    3,
-   5
+   4,
+   5,
+   6,
+   7
   ],
   "eliminated": [],
   "recommend_main": "2+4",
@@ -108,13 +108,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 1.4,
+  "quinella_odds": 9.1,
   "trifecta_odds": null,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-21 13:34:07",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-22 09:47)",
+ "saved_at": "2026-07-22 09:47:03",
  "validation": {
   "ok": true,
   "errors": []

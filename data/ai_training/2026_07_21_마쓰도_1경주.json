@@ -8,268 +8,19 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 6,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "カガヤキトップ",
-   "jockey": "高橋昭（大井）",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    2,
-    9,
-    3,
-    4
-   ],
-   "record_score": 66.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "フェスティヴルディ",
-   "jockey": "西啓太（大井）",
-   "jockey_winrate": null,
-   "recent_results": [
-    3,
-    9,
-    12,
-    8,
-    6
-   ],
-   "record_score": 30.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ゴールドカグヤヒメ",
-   "jockey": "鷹見陸（大井）",
-   "jockey_winrate": null,
-   "recent_results": [
-    13,
-    14,
-    12,
-    3,
-    9
-   ],
-   "record_score": 2.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "パレスゴールド",
-   "jockey": "野畑凌（川崎）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    6,
-    5,
-    4,
-    7
-   ],
-   "record_score": 1.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "シャークシャイニー",
-   "jockey": "岡村健（船橋）",
-   "jockey_winrate": null,
-   "recent_results": [
-    9,
-    12,
-    14,
-    8
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ヘルメース",
-   "jockey": "矢野貴（大井）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    8,
-    10,
-    7,
-    11
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
-  "timeline": [
-   {
-    "time": "08:30:27",
-    "quinella": {
-     "4+5": 1.6,
-     "3+4": 6.9,
-     "1+5": 7.9,
-     "3+5": 8.2,
-     "2+4": 19.4,
-     "2+5": 24.3,
-     "5+6": 24.7,
-     "1+4": 25.5,
-     "1+6": 26.4,
-     "4+6": 29.2,
-     "2+6": 40.4,
-     "1+3": 51.5,
-     "1+2": 54.5,
-     "2+3": 58.9,
-     "3+6": 66.9
-    }
-   },
-   {
-    "time": "08:45:43",
-    "quinella": {
-     "4+5": 1.6,
-     "3+4": 6.9,
-     "1+5": 7.9,
-     "3+5": 8.2,
-     "2+4": 19.4,
-     "2+5": 24.3,
-     "5+6": 24.7,
-     "1+4": 25.5,
-     "1+6": 26.4,
-     "4+6": 29.2,
-     "2+6": 40.4,
-     "1+3": 51.5,
-     "1+2": 54.5,
-     "2+3": 58.9,
-     "3+6": 66.9
-    }
-   },
-   {
-    "time": "08:45:44",
-    "quinella": {
-     "4+5": 1.6,
-     "3+4": 6.9,
-     "1+5": 7.9,
-     "3+5": 8.2,
-     "2+4": 19.4,
-     "2+5": 24.3,
-     "5+6": 24.7,
-     "1+4": 25.5,
-     "1+6": 26.4,
-     "4+6": 29.2,
-     "2+6": 40.4,
-     "1+3": 51.5,
-     "1+2": 54.5,
-     "2+3": 58.9,
-     "3+6": 66.9
-    }
-   },
-   {
-    "time": "08:45:44",
-    "quinella": {
-     "4+5": 1.6,
-     "3+4": 6.9,
-     "1+5": 7.9,
-     "3+5": 8.2,
-     "2+4": 19.4,
-     "2+5": 24.3,
-     "5+6": 24.7,
-     "1+4": 25.5,
-     "1+6": 26.4,
-     "4+6": 29.2,
-     "2+6": 40.4,
-     "1+3": 51.5,
-     "1+2": 54.5,
-     "2+3": 58.9,
-     "3+6": 66.9
-    }
-   },
-   {
-    "time": "08:45:44",
-    "quinella": {
-     "4+5": 1.6,
-     "3+4": 6.9,
-     "1+5": 7.9,
-     "3+5": 8.2,
-     "2+4": 19.4,
-     "2+5": 24.3,
-     "5+6": 24.7,
-     "1+4": 25.5,
-     "1+6": 26.4,
-     "4+6": 29.2,
-     "2+6": 40.4,
-     "1+3": 51.5,
-     "1+2": 54.5,
-     "2+3": 58.9,
-     "3+6": 66.9
-    }
-   },
-   {
-    "time": "08:46:05",
-    "quinella": {
-     "4+5": 1.6,
-     "3+4": 6.9,
-     "1+5": 7.9,
-     "3+5": 8.2,
-     "2+4": 19.4,
-     "2+5": 24.3,
-     "5+6": 24.7,
-     "1+4": 25.5,
-     "1+6": 26.4,
-     "4+6": 29.2,
-     "2+6": 40.4,
-     "1+3": 51.5,
-     "1+2": 54.5,
-     "2+3": 58.9,
-     "3+6": 66.9
-    }
-   },
-   {
-    "time": "08:46:48",
-    "quinella": {
-     "4+5": 1.6,
-     "3+4": 6.9,
-     "1+5": 7.9,
-     "3+5": 8.2,
-     "2+4": 19.4,
-     "2+5": 24.3,
-     "5+6": 24.7,
-     "1+4": 25.5,
-     "1+6": 26.4,
-     "4+6": 29.2,
-     "2+6": 40.4,
-     "1+3": 51.5,
-     "1+2": 54.5,
-     "2+3": 58.9,
-     "3+6": 66.9
-    }
-   }
-  ],
+  "timeline": [],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": null,
-  "refund_rate": 0.737,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -281,35 +32,28 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6
-  ],
+  "candidates": [],
   "eliminated": [],
-  "recommend": "4+5",
-  "strategy": "BMED_보험형",
+  "recommend": null,
+  "strategy": null,
   "confidence": 0,
-  "signal_quality": "하"
+  "signal_quality": null
  },
  "result": {
   "1st": 4,
   "2nd": 5,
   "3rd": 6,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 16.8,
   "exacta_odds": null,
-  "hit": true,
-  "hit_pattern": "적중"
+  "hit": false,
+  "hit_pattern": null
  },
  "labels": {
-  "quinella_hit": true,
+  "quinella_hit": false,
   "winner": 4,
   "second": 5,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -321,15 +65,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-21 08:58:51",
+ "saved_at": "2026-07-22 09:49:00",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
+  "score": 40,
+  "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
+   "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

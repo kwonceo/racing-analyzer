@@ -1,0 +1,122 @@
+{
+ "race_id": "2026_07_22_다마노_9경주",
+ "raceKey": "다마노 9경주",
+ "date": "2026-07-22",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "다마노",
+ "round": 9,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 2,
+  "2nd": 5,
+  "3rd": 3
+ },
+ "payouts": {
+  "quinella": 9.3,
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {
+  "quinella": {
+   "2+5": 3.5,
+   "2+7": 4.8,
+   "3+6": 4.9,
+   "1+7": 10.8,
+   "2+6": 14.1,
+   "2+3": 15.0,
+   "6+7": 16.0,
+   "3+4": 18.3,
+   "3+7": 20.9,
+   "5+7": 24.6,
+   "1+2": 26.8,
+   "4+6": 33.8,
+   "2+4": 43.4,
+   "3+5": 48.1,
+   "5+6": 48.1,
+   "4+7": 52.2,
+   "1+5": 67.0,
+   "1+6": 73.4,
+   "1+3": 79.0,
+   "4+5": 106.3,
+   "1+4": 181.4
+  },
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "14:11:25",
+   "minutes_before": null,
+   "quinella": {
+    "2+5": 3.5,
+    "2+7": 4.8,
+    "3+6": 4.9,
+    "1+7": 10.8,
+    "2+6": 14.1,
+    "2+3": 15.0,
+    "6+7": 16.0,
+    "3+4": 18.3,
+    "3+7": 20.9,
+    "5+7": 24.6,
+    "1+2": 26.8,
+    "4+6": 33.8,
+    "2+4": 43.4,
+    "3+5": 48.1,
+    "5+6": 48.1,
+    "4+7": 52.2,
+    "1+5": 67.0,
+    "1+6": 73.4,
+    "1+3": 79.0,
+    "4+5": 106.3,
+    "1+4": 181.4
+   },
+   "exacta": {}
+  }
+ ],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": "2+5",
+  "recommend_sub": null,
+  "strategy": "BMED_보험형",
+  "signal_quality": "하",
+  "confidence": 24.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 9.3,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 8300
+ },
+ "memo": null,
+ "saved_at": "2026-07-22 14:27:10",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

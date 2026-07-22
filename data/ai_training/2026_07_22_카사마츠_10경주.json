@@ -1,0 +1,269 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_22_카사마츠_10경주",
+ "race_info": {
+  "date": "2026-07-22",
+  "track": "카사마츠",
+  "round": 10,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 6,
+   "name": "リョーマ",
+   "jockey": "明星晴（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    10,
+    2,
+    2,
+    4
+   ],
+   "record_score": 70.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "ウィズフィリップ",
+   "jockey": "塚本征（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    6,
+    1,
+    6,
+    7
+   ],
+   "record_score": 60.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "キングミニスター",
+   "jockey": "加藤聡（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    3,
+    11,
+    7,
+    8
+   ],
+   "record_score": 55.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "ビナホイアン",
+   "jockey": "筒井勇（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    5,
+    3,
+    10,
+    5
+   ],
+   "record_score": 40.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "ラグーン",
+   "jockey": "深澤杏（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    4,
+    2,
+    4,
+    1
+   ],
+   "record_score": 28.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "アンテナラスト",
+   "jockey": "大原浩（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    2,
+    7,
+    3,
+    4
+   ],
+   "record_score": 26.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "コパノモナルカ",
+   "jockey": "向山牧（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    4,
+    7,
+    5,
+    3
+   ],
+   "record_score": 20.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "シュレディンガー",
+   "jockey": "東川慎（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    8,
+    7,
+    6,
+    1
+   ],
+   "record_score": 15.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "15:52:11",
+    "quinella": {
+     "4+6": 2.8,
+     "1+6": 5.8,
+     "1+4": 7.3,
+     "4+7": 11.4,
+     "6+8": 14.0,
+     "6+7": 14.2,
+     "4+8": 14.6,
+     "2+4": 26.4,
+     "1+8": 27.7,
+     "1+7": 28.7,
+     "4+5": 30.2,
+     "5+6": 31.5,
+     "3+6": 40.0,
+     "2+6": 41.2,
+     "3+4": 45.6,
+     "7+8": 51.2,
+     "1+3": 56.0,
+     "1+2": 65.8,
+     "1+5": 68.1,
+     "5+7": 99.5,
+     "2+7": 101.2,
+     "5+8": 109.9,
+     "3+7": 141.1,
+     "2+8": 149.3,
+     "3+8": 151.8,
+     "2+5": 182.8,
+     "2+3": 206.0,
+     "3+5": 229.7
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.746,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   5,
+   6,
+   7,
+   3,
+   4,
+   8
+  ],
+  "eliminated": [],
+  "recommend": "4+6",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 1,
+  "2nd": 4,
+  "3rd": 6,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중"
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 1,
+  "second": 4,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-22 15:53:37",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

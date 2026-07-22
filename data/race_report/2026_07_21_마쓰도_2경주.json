@@ -1,6 +1,6 @@
 {
  "race": "마쓰도 2경주",
- "raceKey": "마쓰도 2경주",
+ "raceKey": "2026-07-21 마쓰도 2경주",
  "date": "2026-07-21",
  "result": {
   "1st": 1,
@@ -16,7 +16,7 @@
   "signal_1": {
    "horse": 1,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -25,14 +25,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 81.2,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_6": {
    "horse": 6,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -41,9 +41,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 72.0,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
@@ -57,34 +57,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 68.9,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_4": {
-   "horse": 4,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 87.6,
-   "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
- "recommended_horses": [
-  4,
-  1,
-  6
- ],
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 1번 81.2점",
+  "1. 전적 분석: 1번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -92,21 +72,21 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 81.2,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 81.2,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "전적유력마 1번 적중"
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -121,7 +101,7 @@
   },
   "validCount": 0
  },
- "pnl": -1000,
+ "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-21 09:31:41"
+ "generated_at": "2026-07-22 09:49:09"
 }
