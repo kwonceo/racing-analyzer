@@ -21862,6 +21862,207 @@ def race_log_page():
         return "<pre>로그 뷰어 오류: %s</pre>" % _esc(e), 200
 
 
+@app.route("/daily-cards")
+def daily_cards_page():
+    """[날짜별 경주 카드 아카이브 (2026-07-22 권대표 요청)] 전체 경주 카드를 날짜별로 복원해서 보는 페이지.
+    /daily-cards                → 오늘 / /daily-cards?date=2026-07-21 → 그날 전체 카드.
+    카드 = 등급 배지(마감 핀 고정값) + 추천 조합(복승·삼복승·배당) + 결과 착순 + 적중 배지 + 확정 환급.
+    데이터 = analysis_log(추천·등급·판정) + race_results(착순·환급) 날짜 프리픽스 스캔 · 읽기 전용(무변경).
+    카드 클릭 → /race-log?key= 상세. 복기용 + 성적 아카이브(유료회원·마케팅) 재료."""
+    date = (request.args.get("date") or time.strftime("%Y-%m-%d")).strip()
+    prefix = date.replace("-", "_")
+
+    def _esc(x):
+        return (str(x) if x is not None else "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    def _fn_parse(fn):
+        base = fn[:-5] if fn.endswith(".json") else fn
+        rest = base[len(prefix) + 1:]
+        if "_" in rest:
+            v, r = rest.rsplit("_", 1)
+        else:
+            v, r = rest, ""
+        m = re.search(r"(\d+)", r)
+        return v, r, (int(m.group(1)) if m else 999)
+
+    races = {}
+    try:
+        # ① 분석 로그: 추천·등급·판정
+        if os.path.isdir(ANALYSIS_LOG_DIR):
+            for fn in os.listdir(ANALYSIS_LOG_DIR):
+                if not (fn.startswith(prefix + "_") and fn.endswith(".json")):
+                    continue
+                try:
+                    doc = json.load(open(os.path.join(ANALYSIS_LOG_DIR, fn), encoding="utf-8"))
+                except Exception:
+                    continue
+                v, r, rno = _fn_parse(fn)
+                cp = doc.get("corePicks") or {}
+                it = races.setdefault((v, rno), {"venue": v, "race": r, "rno": rno})
+                it["rk"] = doc.get("raceKey") or ("%s %s" % (v, r))
+                it["sport"] = doc.get("sport") or it.get("sport")
+                it["grade"] = cp.get("raceGrade") or it.get("grade")
+                _dc = cp.get("displayedCombos") or {}
+                it["q"] = ([{"combo": c} for c in (_dc.get("quinellas") or [])[:4]]
+                           if _dc.get("quinellas") else
+                           [{"combo": q.get("combo"), "odds": q.get("odds")}
+                            for q in (cp.get("finalQuinellas") or [])[:3] if q.get("combo")])
+                # 복승 배당 병기(finalQuinellas 순서 매칭)
+                try:
+                    _om = {tuple(sorted(int(x) for x in q.get("combo") or [])): q.get("odds")
+                           for q in (cp.get("finalQuinellas") or []) if q.get("combo")}
+                    for _qq in it["q"]:
+                        if _qq.get("odds") is None and _qq.get("combo"):
+                            _qq["odds"] = _om.get(tuple(sorted(int(x) for x in _qq["combo"])))
+                except Exception:
+                    pass
+                it["t"] = [{"combo": t.get("combo"), "odds": t.get("odds"), "est": t.get("oddsEst")}
+                           for t in (cp.get("finalTrifectas") or [])[:2] if t.get("combo")]
+                _h = doc.get("hit") or {}
+                if _h:
+                    it["qhit"] = _h.get("quinella_hit")
+                    it["thit"] = _h.get("trifecta_hit")
+                _res = doc.get("result") or {}
+                if _res.get("1st") is not None:
+                    it["top3"] = [_res.get("1st"), _res.get("2nd"), _res.get("3rd")]
+        # ② 결과 파일: 착순·환급 (결과 파일이 착순·환급의 우선 소스)
+        if os.path.isdir(RACE_RESULTS_DIR):
+            for fn in os.listdir(RACE_RESULTS_DIR):
+                if not (fn.startswith(prefix + "_") and fn.endswith(".json")):
+                    continue
+                try:
+                    doc = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
+                except Exception:
+                    continue
+                v, r, rno = _fn_parse(fn)
+                it = races.setdefault((v, rno), {"venue": v, "race": r, "rno": rno})
+                it.setdefault("rk", doc.get("raceKey") or ("%s %s" % (v, r)))
+                it["sport"] = doc.get("sport") or it.get("sport")
+                _res = doc.get("result") or {}
+                if _res.get("1st") is not None:
+                    it["top3"] = [_res.get("1st"), _res.get("2nd"), _res.get("3rd")]
+                _po = doc.get("payouts") or {}
+                if _po:
+                    it["payQ"] = _po.get("quinella")
+                    it["payT"] = _po.get("trifecta")
+                    it["payEst"] = bool(doc.get("payouts_estimated"))
+                _ra = doc.get("result_analysis") or {}
+                if it.get("qhit") is None and _ra.get("main_hit") is not None:
+                    it["qhit"] = _ra.get("main_hit")
+    except Exception as e:
+        return "<pre>daily-cards 오류: %s</pre>" % _esc(e), 200
+
+    # 판정 폴백: hit 기록 없으면 표시 복승 조합 vs 착순 1·2착 직접 대조(표시=판정 원칙과 동일 명단)
+    for it in races.values():
+        t3 = it.get("top3") or []
+        if it.get("qhit") is None and len(t3) >= 2 and it.get("q"):
+            try:
+                _fin = {int(t3[0]), int(t3[1])}
+                it["qhit"] = any(set(int(x) for x in (qq.get("combo") or [])) == _fin for qq in it["q"])
+            except Exception:
+                pass
+        if it.get("thit") is None and len(t3) >= 3 and it.get("t"):
+            try:
+                _f3 = {int(x) for x in t3[:3]}
+                it["thit"] = any({int(x) for x in (tt.get("combo") or [])} == _f3 for tt in it["t"])
+            except Exception:
+                pass
+
+    # 정렬·집계
+    ordered = sorted(races.values(), key=lambda x: (x.get("venue") or "", x.get("rno") or 999))
+    n_all = len(ordered)
+    n_res = sum(1 for x in ordered if x.get("top3"))
+    n_hit = sum(1 for x in ordered if x.get("qhit") or x.get("thit"))
+    g_cnt = {}
+    for x in ordered:
+        _gl = (x.get("grade") or {}).get("label")
+        if _gl:
+            g_cnt[_gl] = g_cnt.get(_gl, 0) + 1
+
+    # 날짜 내비게이션 (결과 파일 프리픽스 스캔)
+    try:
+        _dset = set()
+        for fn in (os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
+            if re.match(r"^\d{4}_\d{2}_\d{2}_", fn):
+                _dset.add(fn[:10].replace("_", "-"))
+        dates = sorted(_dset, reverse=True)[:14]
+    except Exception:
+        dates = []
+
+    css = ("<style>body{background:#10161f;color:#e2e8f0;font-family:-apple-system,'Malgun Gothic',sans-serif;"
+           "margin:16px;font-size:14px}a{color:#4ea1ff;text-decoration:none}h2{color:#38d39f;margin:4px 0 10px}"
+           "h3{color:#4ea1ff;margin:16px 0 6px;border-bottom:1px solid #24344d;padding-bottom:4px}"
+           ".bar{background:#16233a;border:1px solid #2c3a4f;border-radius:9px;padding:9px 13px;margin:8px 0;font-size:13px}"
+           ".dt{display:inline-block;margin:2px 6px 2px 0;padding:3px 9px;border:1px solid #334155;border-radius:7px;font-size:12px}"
+           ".dt.on{border-color:#38d39f;color:#38d39f;font-weight:800}"
+           ".grid{display:flex;flex-wrap:wrap;gap:8px}"
+           ".card{width:250px;background:#141c2b;border:1px solid #2c3a4f;border-radius:10px;padding:9px 11px;color:#e2e8f0}"
+           ".card:hover{border-color:#4ea1ff}.rno{font-weight:900;font-size:15px}"
+           ".gb{font-size:11.5px;font-weight:800;padding:1px 7px;border-radius:6px;border:1px solid}"
+           ".cmb{font-size:12.5px;margin-top:3px;color:#9fd8ff}.res{font-size:12.5px;margin-top:4px}"
+           ".hit{color:#7fd14f;font-weight:800}.miss{color:#94a3b8}.pay{color:#ffd24f}</style>")
+    out = ["<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+           "<title>%s 경주 카드</title>%s</head><body>" % (_esc(date), css),
+           "<h2>🗂 날짜별 경주 카드 <span style='font-size:14px;color:#9fb3c8'>%s</span></h2>" % _esc(date)]
+    out.append("<div>" + "".join("<a class='dt%s' href='/daily-cards?date=%s'>%s</a>"
+                                 % (" on" if d == date else "", d, d[5:]) for d in dates)
+               + "</div>")
+    out.append("<div class='bar'>경주 <b>%d</b> · 결과 확정 <b>%d</b> · <span class='hit'>적중 %d</span>"
+               % (n_all, n_res, n_hit)
+               + "".join(" · %s %d" % (_esc(k), v) for k, v in sorted(g_cnt.items())) + "</div>")
+    if not ordered:
+        out.append("<p style='color:#94a3b8'>이 날짜의 기록이 없습니다.</p>")
+    cur_v = None
+    for it in ordered:
+        if it.get("venue") != cur_v:
+            if cur_v is not None:
+                out.append("</div>")
+            cur_v = it.get("venue")
+            out.append("<h3>%s</h3><div class='grid'>" % _esc(cur_v))
+        g = it.get("grade") or {}
+        gb = ("<span class='gb' style='color:%s;border-color:%s'>%s</span>"
+              % (_esc(g.get("color") or "#94a3b8"), _esc(g.get("color") or "#94a3b8"),
+                 _esc(g.get("label")))) if g.get("label") else ""
+        q_txt = " · ".join("%s%s" % ("+".join(str(x) for x in (qq.get("combo") or [])),
+                                     ("(%s배)" % qq["odds"]) if qq.get("odds") else "")
+                           for qq in (it.get("q") or [])[:3]) or "-"
+        t_txt = " · ".join("%s%s" % ("+".join(str(x) for x in (tt.get("combo") or [])),
+                                     ("(~%s배·추정)" % tt["odds"]) if (tt.get("odds") and tt.get("est"))
+                                     else ("(%s배)" % tt["odds"]) if tt.get("odds") else "")
+                           for tt in (it.get("t") or [])) or "-"
+        t3 = it.get("top3") or []
+        if t3:
+            _hb = ("<span class='hit'>✅ 복승·삼복승 적중</span>" if (it.get("qhit") and it.get("thit")) else
+                   "<span class='hit'>✅ 복승 적중</span>" if it.get("qhit") else
+                   "<span class='hit'>✅ 삼복승 적중</span>" if it.get("thit") else
+                   "<span class='miss'>❌ 미적중</span>")
+            _pay = []
+            if it.get("payQ"):
+                _pay.append("복승 %s배" % it["payQ"])
+            if it.get("payT"):
+                _pay.append("삼복승 %s배" % it["payT"])
+            _pay_s = (" · <span class='pay'>%s%s</span>"
+                      % (" / ".join(_pay), "(근사)" if it.get("payEst") else "")) if _pay else ""
+            res_html = ("<div class='res'>📊 %s → %s %s</div>"
+                        % (_esc("-".join(str(x) for x in t3 if x is not None)), _hb, _pay_s))
+        else:
+            res_html = "<div class='res miss'>결과 대기</div>"
+        out.append("<a class='card' href='/race-log?key=%s&date=%s' style='display:block'>"
+                   "<div style='display:flex;justify-content:space-between;align-items:center'>"
+                   "<span class='rno'>%s</span>%s</div>"
+                   "<div class='cmb'>복승 %s</div><div class='cmb' style='color:#c4b5fd'>삼복승 %s</div>%s</a>"
+                   % (urllib.parse.quote(it.get("rk") or ""), _esc(date),
+                      _esc(it.get("race") or ""), gb, _esc(q_txt), _esc(t_txt), res_html))
+    if cur_v is not None:
+        out.append("</div>")
+    out.append("<p style='color:#94a3b8;font-size:12px;margin-top:14px'>읽기 전용 아카이브 · 카드를 누르면 상세 로그"
+               "(/race-log)로 이동 · 등급은 마감 시점 고정값</p>")
+    if date == time.strftime("%Y-%m-%d"):
+        out.append("<script>setTimeout(function(){location.reload()},60000)</script>")
+    out.append("</body></html>")
+    return "".join(out)
+
+
 @app.route("/api/keirin/today-stats")
 def keirin_today_stats():
     """[오늘 성적 요약 (2026-07-19)] 오늘 경륜 결과 파일 집계 → {races, hits, hitRate, avgOdds}.
