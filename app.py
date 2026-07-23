@@ -1667,7 +1667,10 @@ _KEIRIN_ONLY_RE = re.compile(
     #   없는 경륜 전용 지명(富山경마장·松阪경정장 없음 확인) — 이중소속 아님.
     r"기시와다|岸和田|도요하시|豊橋|구마모토|熊本|도야마|富山|마쓰사카|松阪|케이오각|"
     # [보강3 (2026-07-22)] 사세보·구루메·다마노·히로시마 — 경륜 전용(경마·경정 이중소속 없음 확인)
-    r"사세보|佐世保|구루메|久留米|다마노|玉野|히로시마|広島|경륜|競輪|keirin)")
+    # [보강4 (2026-07-23)] 아오모리·다카마쓰·いわき平·伊東 — 아오모리 3R 카톡 미발송 사건(青森 스케줄 키
+    #   ↔ 아오모리 수집 키 불일치)에서 발견된 신규 개최장. 전부 경륜 전용 지명.
+    r"사세보|佐世保|구루메|久留米|다마노|玉野|히로시마|広島|아오모리|青森|다카마쓰|高松|"
+    r"いわき平|이와키평|伊東|경륜|競輪|keirin)")
 
 
 def _is_opening_settle(po, pct):
@@ -2227,6 +2230,10 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     db[rk] = {"quinella": q, "exacta": x, "trio": tr, "win": win, "history": hist,
               "source": source, "sport": sport, "category": category, "t": now,
               "flipSuspectCnt": 0,   # [혼입 가드] 정상 수용 시 의심 카운터 리셋
+              # [검역 보강 (2026-07-23 다마노 11R)] 발주시각을 rec에 저장 — 저장 안 하면 다음 ingest의
+              #   prev.get("deadline")이 항상 빈 값이라 마감 후 혼입(_closed_g)·발주시각 불일치(_dl_mismatch)
+              #   검역이 한 번도 발동 못 함(사문화). 이번 수집에 deadline 없으면 이전 값 유지(기준 재설정 시 제외).
+              "deadline": (deadline if deadline else (None if baseline_reset else prev.get("deadline"))),
               "scratched": sorted(set(int(s) for s in (scratched or []) if str(s).strip().lstrip("-").isdigit()))}
     # [경주전환 잔존 방어] 30분+ 미갱신된 '끝난 직전 경주'를 활성 캐시에서 정리(히스토리는 보존)
     #   → max-t 폴백이 직전 경주 배당을 계속 끌어오던 문제 차단.
@@ -18495,6 +18502,10 @@ _TRACK_GROUPS = {
     "케이오카쿠": ["京王閣", "keiokaku", "케이오각"],
     "세이부엔": ["西武園", "seibuen"],
     "마에바시": ["前橋", "maebashi"],
+    # [별칭 보강4 (2026-07-23 아오모리 3R)] 스케줄(oddspark 일본어명) ↔ 수집(사설 한글명) 키 불일치로
+    #   타임스냅샷·카톡이 통째로 빠지던 경륜장 — 아오모리 실측(青森 jo12). 다카마쓰는 선제 등록.
+    "아오모리": ["青森", "aomori"],
+    "다카마쓰": ["高松", "takamatsu"],
     "우쓰노미야": ["宇都宮", "utsunomiya"],
     "이즈": ["伊豆", "izu"],
     "다치카와": ["立川", "tachikawa"],
@@ -19307,7 +19318,11 @@ KEIRIN_JO = {"36": "오다와라", "62": "히로시마", "01": "마에바시",
              "43": "기후", "38": "시즈오카",
              "21": "야히코", "26": "세이부엔", "74": "고치",
              # [joCode 실측 2026-07-21·oddspark 당일 개최 링크] 富山(도야마)=46 · 松阪(마쓰사카)=47 확정
-             "46": "도야마", "47": "마쓰사카"}
+             "46": "도야마", "47": "마쓰사카",
+             # [joCode 실측 2026-07-23·당일 스케줄] 青森(아오모리)=12 · いわき平=13 · 伊東=37 확정.
+             #   ⚠ 前橋 는 당일 스케줄에서 22 로 관측 — 기존 "01": "마에바시" 미검증 라벨과 충돌(코드 세션
+             #   검증 대상·역매핑은 01 우선이라 백필 오류 가능성 기록만).
+             "12": "아오모리", "13": "いわき平", "37": "伊東"}
 # ⚠ 기시와다=56(岸和田, 라이브 확인). 이전 73은 오매핑이라 교정. 구마모토=87(熊本競輪) 등록 →
 #   sport 유실 시에도 _keirin_jo_from_venue가 cycle 추론 → 복승 개수 종목캡(경륜 9) 정상 적용.
 # 경륜장명 → joCode 역매핑(raceKey에서 joCode 자동 감지용)
@@ -19792,6 +19807,54 @@ def _keirin_autocollect_form(rk, jo, ymd, race):
         return None
 
 
+def _odds_target_mismatch(rk, race_no, jo=None):
+    """[검역 게이트 (2026-07-23 다마노 11R 오염 실사고)] 저장 키(raceKey) vs 수집 대상(raceNo·경기장) 교차 검증.
+    5R 최종배당이 11R 키로 주입 → 4+7=5.1배(실제 77.2배)·가짜 -93.4% 급락 → S등급 오추천이 마감 동결된
+    사고의 재발 차단. 불일치 사유 문자열 반환(정상=None). raceKey에서 번호를 못 뽑으면 검사 불가 → 통과(기존 동작 보존)."""
+    try:
+        v, num = _area_num(rk)
+    except Exception:
+        return None
+    # 경주번호 대조: raceKey의 N경주 ≠ 요청 raceNo → 다른 경주 배당 주입 확정
+    try:
+        if num and race_no is not None and str(race_no).strip().isdigit() and int(race_no) != int(num):
+            return "경주번호 불일치: raceKey=%s경주 ≠ 요청 raceNo=%s" % (num, race_no)
+    except (TypeError, ValueError):
+        pass
+    # 경기장 대조(경륜 joCode → 장명이 확인될 때만·별칭은 _track_norm 통일)
+    try:
+        if jo and v:
+            _jv = KEIRIN_JO.get(str(jo))
+            if _jv and _track_norm(_jv) != _track_norm(v):
+                return "경기장 불일치: raceKey=%s ≠ joCode=%s(%s)" % (v, jo, _jv)
+    except Exception:
+        pass
+    return None
+
+
+def _sched_post_epoch(rk):
+    """[검역 보강 (2026-07-23)] 다중경주 스케줄에서 raceKey의 발주시각(postEpoch·초) 조회.
+    직접조회 엔드포인트(/api/keirin/odds·/api/keiba/odds)도 deadline을 전달해 _do_triple_ingest의
+    마감 후 혼입(_closed_g)·발주시각 불일치(_dl_mismatch) 검역이 작동하게 한다. 못 찾으면 None(기존 동작)."""
+    try:
+        v, num = _area_num(rk)
+        if not (v and num):
+            return None
+        _vn = _track_norm(v)
+        for _t in (_schedule_load().get("tracks") or []):
+            if _track_norm(_t.get("venue")) != _vn:
+                continue
+            for _rc in (_t.get("races") or []):
+                try:
+                    if int(_rc.get("raceNo") or 0) == int(num):
+                        return _rc.get("postEpoch")
+                except (TypeError, ValueError):
+                    continue
+    except Exception:
+        return None
+    return None
+
+
 @app.route("/api/keirin/odds", methods=["POST"])
 def keirin_odds():
     """[경륜 배당 직접조회] oddspark 복승(2車複)·쌍승(2車単) 배당을 서버가 직접 fetch·파싱해
@@ -19815,6 +19878,12 @@ def keirin_odds():
         race = race or (mr.group(1) if mr else None)
     if not (jo and ymd and race):
         return jsonify({"error": "joCode/kaisaiBi/raceNo(또는 url)가 필요합니다."}), 400
+    # [검역 게이트 (2026-07-23 다마노 11R)] raceKey ≠ 수집 대상(raceNo/joCode) 불일치 → ingest 거부(오염 차단)
+    _mm = _odds_target_mismatch(rk, race, jo=jo)
+    if _mm:
+        print(f"[검역] /api/keirin/odds {rk}: {_mm} → ingest 거부(다른 경주 배당 오염 차단)")
+        return jsonify({"ok": False, "quarantined": True, "raceKey": rk,
+                        "error": "수집 대상 불일치 — %s (raceKey와 raceNo/URL 확인)" % _mm}), 422
     try:
         q = _keirin_parse_quinella(_keirin_fetch(_keirin_odds_url(jo, ymd, race, 5)))
         x = _keirin_parse_exacta(_keirin_fetch(_keirin_odds_url(jo, ymd, race, 6)))
@@ -19823,7 +19892,9 @@ def keirin_odds():
     if not q and not x:
         return jsonify({"error": "배당 정보를 찾지 못했습니다(경주 번호/개최일/발매 여부 확인)."}), 422
     # 기존 파이프라인 주입(sport=cycle) → _triple_analyze 가 역배열·급락·이상감지 계산
-    res = _do_triple_ingest(rk, q, x, [], {}, sport="cycle", category="cycle", source="oddspark")
+    #   [검역 보강 (2026-07-23)] 스케줄 postEpoch를 deadline으로 전달 → 마감 후 혼입·발주시각 불일치 검역 작동
+    res = _do_triple_ingest(rk, q, x, [], {}, sport="cycle", category="cycle", source="oddspark",
+                            deadline=_sched_post_epoch(rk))
     # [경륜 출마표 전적 자동 수집] 배당과 동시에 전적(競走得点·등급) 수집 → 통합등급 반영(1회·이미 있으면 생략)
     try:
         _keirin_autocollect_form(rk, jo, ymd, race)
@@ -20114,6 +20185,13 @@ def keiba_odds():
         race_nb = race_nb or num
     if not race_nb:
         return jsonify({"error": "경주번호를 확인할 수 없습니다(raceKey에 'N경주' 포함 또는 raceNo 지정)."}), 400
+    # [검역 게이트 (2026-07-23 다마노 11R)] 명시 raceNo가 raceKey의 경주번호와 다르면 ingest 거부(오염 차단).
+    #   raceNo 미지정 시 raceKey에서 추출하므로 자동 일치 — 명시 불일치만 걸린다(기존 사용 무영향).
+    _mm = _odds_target_mismatch(rk, race_nb)
+    if _mm:
+        print(f"[검역] /api/keiba/odds {rk}: {_mm} → ingest 거부(다른 경주 배당 오염 차단)")
+        return jsonify({"ok": False, "quarantined": True, "raceKey": rk,
+                        "error": "수집 대상 불일치 — %s (raceKey와 raceNo 확인)" % _mm}), 422
     op_track, sponsor = body.get("opTrackCd"), body.get("sponsorCd")
     if not (op_track and sponsor):
         codes = _keiba_resolve_track(venue, ymd)
@@ -20135,7 +20213,9 @@ def keiba_odds():
                                     "reason": "발매 중 배당 없음(경륜·발매 전/마감 후 추정) — 실배당 대기",
                                     "track": {"joCode": _jo, "raceNb": race_nb},
                                     "counts": {"quinella": 0, "exacta": 0}})
-                res = _do_triple_ingest(rk, q, x, [], {}, sport="cycle", category="cycle", source="oddspark")
+                # [검역 보강 (2026-07-23)] 스케줄 postEpoch를 deadline으로 전달(마감 후 혼입·발주시각 불일치 검역)
+                res = _do_triple_ingest(rk, q, x, [], {}, sport="cycle", category="cycle", source="oddspark",
+                                        deadline=_sched_post_epoch(rk))
                 try:
                     _keirin_autocollect_form(rk, _jo, ymd, race_nb)
                 except Exception as _fe:
@@ -20174,7 +20254,9 @@ def keiba_odds():
         warn = (f"⚠️ 조합 수 불일치({n_horses}두): 복승 {len(q)}/{exp_q} · 쌍승 {len(x)}/{exp_x}"
                 " — 배당 매트릭스 일부 누락 의심(파서 확인 필요)")
         print("[경마 배당 경고]", rk, warn)
-    res = _do_triple_ingest(rk, q, x, [], {}, sport="horse", category="japan_local", source="oddspark")
+    # [검역 보강 (2026-07-23)] 스케줄 postEpoch를 deadline으로 전달(마감 후 혼입·발주시각 불일치 검역)
+    res = _do_triple_ingest(rk, q, x, [], {}, sport="horse", category="japan_local", source="oddspark",
+                            deadline=_sched_post_epoch(rk))
     print(f"[경마 배당] {rk}: 복승 {len(q)}/{exp_q}·쌍승 {len(x)}/{exp_x} ({n_horses}두) oddspark 직접수집"
           f"(op{op_track}/sp{sponsor} R{race_nb}) → 파이프라인 반영")
     return jsonify({"ok": True, "raceKey": rk,
@@ -27464,7 +27546,25 @@ KAKAO_TEST_ALL = True
 
 # [카톡 발송본 기록 (2026-07-22 소노다 5R)] {rk: {day, phase, quinellas[[..]], trifectas[[..]]}} —
 #   T-7/T-5 발송 시점의 조합 명단. T+1 틱에서 마감 확정본(displayedCombos)과 대조 → 다르면 변경 카톡.
-_KAKAO_SENT = {}
+# [리로드 생존 (2026-07-23 소노다 2R)] 배포 리로드마다 메모리가 초기화돼 🔁 즉시 변경 알림이 눌리던
+#   문제 → 파일 영속화(데이터만·오늘 것만 복원). gitignore 대상 아님(민감정보 없음·조합 목록뿐).
+_KAKAO_SENT_FILE = os.path.join(os.path.dirname(__file__), "data", "kakao_sent_state.json")
+try:
+    _KAKAO_SENT = json.load(open(_KAKAO_SENT_FILE, encoding="utf-8"))
+    _KAKAO_SENT = {k: v for k, v in _KAKAO_SENT.items()
+                   if isinstance(v, dict) and v.get("day") == time.strftime("%Y-%m-%d")}
+except Exception:
+    _KAKAO_SENT = {}
+
+
+def _kakao_sent_save():
+    try:
+        os.makedirs(os.path.dirname(_KAKAO_SENT_FILE), exist_ok=True)
+        with open(_KAKAO_SENT_FILE + ".tmp", "w", encoding="utf-8") as _f:
+            json.dump(_KAKAO_SENT, _f, ensure_ascii=False)
+        os.replace(_KAKAO_SENT_FILE + ".tmp", _KAKAO_SENT_FILE)
+    except Exception:
+        pass
 
 
 def _kakao_rich_message(rk, phase, an):
@@ -27634,6 +27734,7 @@ def _kakao_notify_race(rk, phase, an, snap):
                                       for q in (_cpn.get("finalQuinellas") or [])[:3] if q.get("combo")],
                         "trifectas": [sorted(int(x) for x in (t.get("combo") or []))
                                       for t in (_cpn.get("finalTrifectas") or [])[:2] if t.get("combo")]}
+                    _kakao_sent_save()   # [리로드 생존] 발송 즉시 영속화
                 except Exception:
                     pass
     except Exception as _me:
@@ -27762,6 +27863,7 @@ def _timeline_snap_tick(races, now, db):
                             _ks_l["quinellas"] = [list(c) for c in _fq2]
                             _ks_l["trifectas"] = [list(c) for c in _ft2]
                             _ks_l["nsent"] = _ks_l.get("nsent", 0) + 1
+                            _kakao_sent_save()   # [리로드 생존] 갱신 즉시 영속화
                             print("[카톡 변경알림·즉시] %s (남은 %ds): %s" % (rk, left, " / ".join(_ln2)))
         except Exception as _kle:
             print("[카톡 변경알림·즉시] 스킵(무시):", _kle)
@@ -27797,6 +27899,8 @@ def _timeline_snap_tick(races, now, db):
             if phase == "T+1":
                 try:
                     _ks = _KAKAO_SENT.pop(rk, None)
+                    if _ks is not None:
+                        _kakao_sent_save()   # [리로드 생존] 정리 즉시 영속화
                     if _ks and _ks.get("day") == time.strftime("%Y-%m-%d") \
                             and (_ks.get("quinellas") or _ks.get("trifectas")):
                         _dcf = {}
@@ -27982,10 +28086,13 @@ def _auto_pred_tick(sched, now):
             _auto_pred_status["day"] = _day
         races = []
         for tr in sched.get("tracks", []):
+            # [스케줄 키 정규화 (2026-07-23 아오모리 3R)] 스케줄 venue(青森 등 oddspark 일본어명)를
+            #   표준명(아오모리)으로 정규화 → 수집·분석 키와 일치시켜 타임스냅샷·카톡이 정상 발동.
+            _ven_n = _track_norm(tr.get("venue")) or tr.get("venue")
             for rc in tr.get("races", []):
                 pe = rc.get("postEpoch")
                 if pe:
-                    races.append((pe, tr.get("venue"), rc.get("raceNo"), _multi_key(tr.get("venue"), rc.get("raceNo"))))
+                    races.append((pe, _ven_n, rc.get("raceNo"), _multi_key(_ven_n, rc.get("raceNo"))))
         races.sort(key=lambda x: x[0])
         # ① 마감 5분 전(0<left≤300)·미저장 → 최종 예상 저장(배당 수집돼 있을 때만)
         db = None

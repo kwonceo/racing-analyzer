@@ -15,6 +15,7 @@
 - **💰 회수율 정직화(59)**(`_build_race_result` payouts 최상위 기록·payouts_approx 출처 구분 + `_scoreboard_daily` investment 폴백): 결과 저장(investment)과 성적표(payouts)의 어긋남으로 적중 전건이 '확정배당 미확보'이던 문제 수정. **헤드라인 ROI = 공식 확정배당만**, 근사(마지막 수집 스냅샷)는 "(근사)" 표기+참고 줄 분리 — 오전 오염 스냅샷이 근사값을 부풀리는 실측(마쓰도 2R 62.2 vs 실제 19.1배) 근거.
 
 ### 수정된 버그
+- **🛡 배당 오염 검역 3종(62) — 다마노 11R 실사고(7/23)**(`app.py _odds_target_mismatch·_sched_post_epoch`, `content.js collectTripleKeiba`): 5R 배당이 11R 키로 주입돼 4+7=5.1배(실제 77.2배)·가짜 -93.4% 급락 → S등급 오추천이 마감 동결된 사고 재발 차단. ⓐ`/api/keirin/odds`·`/api/keiba/odds`에 raceKey↔수집대상(raceNo·joCode) 정합성 검역 게이트(불일치=422 거부·라이브 3케이스 검증) ⓑ직접조회 ingest에 스케줄 postEpoch를 deadline으로 전달 + rec에 deadline 저장(미저장으로 사문화돼 있던 마감후혼입·발주시각불일치 검역 활성화) ⓒ확장 v2.1.151 — 페이지 탭 전환 시 URL k_raceNo가 stale이면 raceKey(활성 탭) 번호로 정정 후 배당 fetch(DebaTable 정정과 동일 원리).
 - **🔑 경주 키 정규화(55)**(`triple_analyze·multi_race_detail·extract_japan`에 `_canon_rk` 적용): 날짜접두("2026-07-20 모리오카 2경주")·거리접미("…1200M")·한자 지명 변형 요청이 404·유령 폴백·이중학습으로 새던 문제 종결(저장 규약과 조회 규약 통일).
 - **🎯 EV 필터 모순 5종(57)**(`_apply_profit_strategy·_final_picks` 강제편입·`overlay.js` ⭐): ⓐ면제 확대 — 시장 1·2위(최저 복승) 조합 + 확신도·이중수렴·시장 토큰(확신도 조합이 EV로 흔적 없이 잘리던 구멍) ⓑ전멸 복원 1→2개(시장+확신도 계열 보장·★★★ 유지) ⓒ⭐ 유력마 표시 분리 — keyHorses 상위 4마리 상시(추천 개수 종속 해제·빨강 게이트 무변경) ⓓ특별감지 50배 상한 누수 2곳 봉합(198배 ★★ 노출 차단).
 - **🚴 경륜장 한자 사전 보강(58)**(`_TRACK_GROUPS` 10개장 추가): 岸和田 미등록 → 결과 백필 venue 검증("joCode 불일치 — 학습 차단")이 기시와다 정상 결과 8건 연속 차단하던 근본 원인. 나이트 개최장(豊橋·京王閣) 포함 등록. **라이브 검증: 백필 9건 중 8건 즉시 성공·확정배당 회수 반영.**

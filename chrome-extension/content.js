@@ -1056,10 +1056,20 @@
       return { ok: false, error: 'keiba.go.jp 배당판(오즈) 페이지가 맞는지 확인하세요 — 경주 날짜·번호가 URL에 있어야 합니다.' };
     }
     const sp = new URLSearchParams(location.search);
-    const q = ['k_raceDate', 'k_babaCode', 'k_raceNo']
+    let q = ['k_raceDate', 'k_babaCode', 'k_raceNo']
       .filter((k) => sp.get(k)).map((k) => `${k}=${encodeURIComponent(sp.get(k))}`).join('&');
     const { raceKey: override, market, japanType } = await getSettings();
     const raceKey = _resolveRaceKey(reason, override);   // [경주 자동추종] 자동수집은 배당판 표시 경주 우선
+    // [오염 차단 (2026-07-23 다마노 11R)] 페이지 내 경주 탭 전환은 URL을 안 바꿔 k_raceNo가 stale —
+    //   raceKey(활성 탭 기준)는 11R인데 배당 fetch는 URL의 5R을 긁어 '5R 배당 → 11R 키' 오염(가짜 -93% 급락
+    //   → S등급 오추천 마감 동결 실사고). raceKey에서 추출한 번호로 k_raceNo를 정정해 fetch 대상과 저장 키를
+    //   일치시킨다(DebaTable의 k_raceNo 불일치 정정과 동일 원리·기존 로직 무삭제).
+    const _rkNoM = (raceKey || '').match(/(\d{1,2})\s*(?:R\b|경주|レース)/i);
+    const _urlNo = sp.get('k_raceNo');
+    if (_rkNoM && _urlNo && parseInt(_urlNo, 10) !== parseInt(_rkNoM[1], 10)) {
+      console.log(`[오염차단] URL k_raceNo=${_urlNo} ≠ raceKey ${_rkNoM[1]}R → k_raceNo=${_rkNoM[1]}로 정정 후 배당 fetch`);
+      q = q.replace(/k_raceNo=\d+/, `k_raceNo=${parseInt(_rkNoM[1], 10)}`);
+    }
     // [2번][한국모드 강화] 종목=한국 이거나 raceKey(감지·수동입력)/페이지/탭에서 KRA 감지 시 → 복승만(쌍승·삼복승 완전 제외).
     const isKorea = isKoreaMode(raceKey, market, override);
     if (isKorea && market !== 'korea') console.log('[한국모드] KRA 경마장 감지(raceKey/페이지) → 복승만 수집:', raceKey || '(raceKey 미상)');
