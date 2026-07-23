@@ -1,0 +1,165 @@
+{
+ "race": "다마노 11경주",
+ "raceKey": "다마노 11경주",
+ "date": "2026-07-23",
+ "result": {
+  "1st": 5,
+  "2nd": 1,
+  "3rd": 4,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 97.6,
+   "confidence": 40.0,
+   "reason": "전적상위"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": 10.7,
+   "avg_drop": -32.1,
+   "grade": "🔴",
+   "rep_combo": [
+    1,
+    7
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 129.6,
+   "confidence": 40.0,
+   "reason": "초과급락"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": 12.1,
+   "avg_drop": -30.7,
+   "grade": "🔴",
+   "rep_combo": [
+    2,
+    4
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 90.9,
+   "confidence": 70.0,
+   "reason": "초과급락"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": -5.9,
+   "avg_drop": -48.7,
+   "grade": "🔴",
+   "rep_combo": [
+    3,
+    7
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 98.9,
+   "confidence": 65.0,
+   "reason": "초과급락"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": -14.7,
+   "avg_drop": -57.5,
+   "grade": "🔴",
+   "rep_combo": [
+    3,
+    7
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 95.2,
+   "confidence": 50.0,
+   "reason": "초과급락"
+  }
+ },
+ "recommended_horses": [
+  3,
+  5,
+  7,
+  4,
+  1
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 5번 97.6점",
+  "3. 초과급락 감지: 3번 초과급락 -5.9%p (전체평균 -42.8%)",
+  "5. 종합 신뢰도 40.0점(중) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 5,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 97.6,
+  "total": 40.0,
+  "grade": "중"
+ },
+ "win_tags": [
+  "초과급락_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 97.6,
+  "dropAmt": -39.4,
+  "dropScore": 100.0,
+  "inverse": false,
+  "inverseHorses": [
+   3,
+   7,
+   2
+  ],
+  "inverseHit": [],
+  "confidence": 70.0,
+  "reason": "전적유력마 1번 적중 · 2+4 복승 급락(-39.4%) → 4번 입상 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 0
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-23 15:41:11"
+}
