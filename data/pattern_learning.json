@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "2026-07-09 門別 2R",
-      "horse_no": 10,
-      "recent_avg": 10.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-09"
-    },
-    {
       "race": "소노다 9경주",
       "horse_no": 1,
       "recent_avg": 4.2,
@@ -4653,16 +4643,24 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-07-23"
+    },
+    {
+      "race": "아오모리 3경주",
+      "horse_no": 1,
+      "recent_avg": 9.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-23"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1193,
-      "hit": 249
+      "count": 1195,
+      "hit": 250
     },
     "전체부진마": {
-      "count": 1995,
-      "hit": 554
+      "count": 1999,
+      "hit": 555
     },
     "대규모급락": {
       "count": 20,
@@ -4672,7 +4670,7 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 802,
+      "count": 804,
       "hit": 305
     },
     "급락동반": {
