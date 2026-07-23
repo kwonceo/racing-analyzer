@@ -27239,14 +27239,18 @@ def _kakao_rich_message(rk, phase, an):
         _meta += " · 종합확신 1위 %s번" % cp.get("confTop1")
     _grade = (an.get("raceGrade") or {})
     _gtag = (" " + _grade["label"]) if _grade.get("label") else ""
+    # [워딩 정직화 (2026-07-23 사세보 1R)] '최종 확정'이 마감 직전 변동으로 최종이 아닐 수 있음 →
+    #   과장 제거 + T-5엔 '변동 시 즉시 변경 알림' 고지(실제로 즉시 알림 발송 — _timeline_snap_tick).
     if phase == "T-7":
-        head = "[적중왕]%s %s — 1차 확정 (마감 7분 전)" % (_gtag, rk)
+        head = "[적중왕]%s %s — 마감 7분 전 추천 (1차)" % (_gtag, rk)
     elif phase == "T-5":
-        head = "[적중왕]%s %s — 최종 확정 (마감 5분 전)" % (_gtag, rk)
+        head = "[적중왕]%s %s — 마감 5분 전 추천" % (_gtag, rk)
     else:
         head = "[적중왕]%s %s — 현재 추천" % (_gtag, rk)
+    _note = "\n※ 마감 전 변동 시 🔁 변경 알림 즉시 발송" if phase == "T-5" else ""
     url = "%s/?race=%s" % (PUBLIC_BOARD_URL.rstrip("/"), urllib.parse.quote(rk))
-    text = head + "\n━━━━━━━━━━━━\n" + "\n".join(lines) + "\n━━━━━━━━━━━━\n" + _meta + "\n📊 배당판 → " + url
+    text = (head + "\n━━━━━━━━━━━━\n" + "\n".join(lines) + "\n━━━━━━━━━━━━\n" + _meta
+            + _note + "\n📊 배당판 → " + url)
     return {"race": rk, "phase": phase, "text": text, "url": url,
             "at": time.strftime("%Y-%m-%d %H:%M:%S")}
 
@@ -27359,7 +27363,7 @@ def _kakao_notify_race(rk, phase, an, snap):
                 try:
                     _cpn = an.get("corePicks") or {}
                     _KAKAO_SENT[rk] = {
-                        "day": time.strftime("%Y-%m-%d"), "phase": phase,
+                        "day": time.strftime("%Y-%m-%d"), "phase": phase, "nsent": 0,
                         "quinellas": [sorted(int(x) for x in (q.get("combo") or []))
                                       for q in (_cpn.get("finalQuinellas") or [])[:3] if q.get("combo")],
                         "trifectas": [sorted(int(x) for x in (t.get("combo") or []))
@@ -27456,6 +27460,45 @@ def _timeline_snap_tick(races, now, db):
     """[bg 훅] 각 경주의 잔여시간으로 phase 판정 → 미저장 phase 스냅샷 저장. T-7·T-5는 카카오 알림 트리거."""
     for pe, venue, rno, rk in races:
         left = pe - now
+        # [🔁 마감 전 즉시 변경 알림 (2026-07-23 사세보 1R)] T-5 카톡 발송 후 마감까지 표시 명단
+        #   (displayedCombos)이 바뀌면 30초 틱에서 즉시 변경 카톡 — 회원이 마감 전에 따라올 수 있게.
+        #   사세보 1R: T-5 카톡에서 빠진 4+6이 마감 직전 복귀·적중 → 회원은 못 삼(클레임 유형 1위).
+        #   경주당 최대 2회(요동 스팸 방지) · 이후 변동은 기존 T+1 사후 고지가 담당(기준 자동 승계).
+        try:
+            _ks_l = _KAKAO_SENT.get(rk)
+            if _ks_l and _ks_l.get("phase") == "T-5" and 0 < left <= 285 \
+                    and _ks_l.get("day") == time.strftime("%Y-%m-%d") and _ks_l.get("nsent", 0) < 2:
+                _lpc2, _, _ = _analysis_log_path(_canonical_log_key(rk))
+                _dcf2 = {}
+                if _lpc2 and os.path.exists(_lpc2):
+                    _dcf2 = (((json.load(open(_lpc2, encoding="utf-8")) or {}).get("corePicks") or {})
+                             .get("displayedCombos")) or {}
+                _fq2 = {tuple(sorted(int(x) for x in c)) for c in (_dcf2.get("quinellas") or [])}
+                _ft2 = {tuple(sorted(int(x) for x in c)) for c in (_dcf2.get("trifectas") or [])}
+                _sq2 = {tuple(c) for c in (_ks_l.get("quinellas") or [])}
+                _st2 = {tuple(c) for c in (_ks_l.get("trifectas") or [])}
+                if (_fq2 or _ft2) and (_fq2 != _sq2 or _ft2 != _st2):
+                    _fmt2 = lambda cs: " · ".join("+".join(map(str, c)) for c in sorted(cs))
+                    _ln2 = []
+                    if _fq2 - _sq2:
+                        _ln2.append("복승 추가: " + _fmt2(_fq2 - _sq2))
+                    if _sq2 - _fq2:
+                        _ln2.append("복승 제외: " + _fmt2(_sq2 - _fq2))
+                    if _ft2 - _st2:
+                        _ln2.append("삼복승 추가: " + _fmt2(_ft2 - _st2))
+                    if _st2 - _ft2:
+                        _ln2.append("삼복승 제외: " + _fmt2(_st2 - _ft2))
+                    if _ln2:
+                        _mn2 = max(1, int(left // 60))
+                        _sr2 = _kakao_send_to_me("[적중왕] 🔁 %s 추천 변경 (마감 약 %d분 전)\n" % (rk, _mn2)
+                                                 + "\n".join(_ln2) + "\n※ 아직 구매 가능한 시간입니다")
+                        if _sr2.get("ok"):
+                            _ks_l["quinellas"] = [list(c) for c in _fq2]
+                            _ks_l["trifectas"] = [list(c) for c in _ft2]
+                            _ks_l["nsent"] = _ks_l.get("nsent", 0) + 1
+                            print("[카톡 변경알림·즉시] %s (남은 %ds): %s" % (rk, left, " / ".join(_ln2)))
+        except Exception as _kle:
+            print("[카톡 변경알림·즉시] 스킵(무시):", _kle)
         phase = _timeline_phase_of(left)
         if not phase or (rk, phase) in _timeline_saved:
             continue
