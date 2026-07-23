@@ -1,30 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 9경주",
-      "horse_no": 1,
-      "recent_avg": 4.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-09"
-    },
-    {
-      "race": "소노다 9경주",
-      "horse_no": 8,
-      "recent_avg": 8.0,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-09"
-    },
-    {
-      "race": "2026-07-09 카와사키 1경주",
-      "horse_no": 1,
-      "recent_avg": 10.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-09"
-    },
-    {
       "race": "2026-07-09 카와사키 1경주",
       "horse_no": 5,
       "recent_avg": 10.0,
@@ -4651,16 +4627,42 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-23"
+    },
+    {
+      "race": "카사마츠 6경주",
+      "horse_no": 6,
+      "recent_avg": 4.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-23"
+    },
+    {
+      "race": "카사마츠 6경주",
+      "horse_no": 3,
+      "recent_avg": 7.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-23"
+    },
+    {
+      "race": "카사마츠 6경주",
+      "horse_no": 2,
+      "recent_avg": 8.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-23"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1195,
-      "hit": 250
+      "count": 1199,
+      "hit": 252
     },
     "전체부진마": {
-      "count": 1999,
-      "hit": 555
+      "count": 2006,
+      "hit": 558
     },
     "대규모급락": {
       "count": 20,
@@ -4670,8 +4672,8 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 804,
-      "hit": 305
+      "count": 807,
+      "hit": 306
     },
     "급락동반": {
       "count": 174,
