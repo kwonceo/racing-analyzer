@@ -13895,6 +13895,7 @@ def _start_daily_learning_scheduler():
 
     def _loop():
         last_done = None
+        last_review = None
         while True:
             try:
                 time.sleep(60)
@@ -13905,6 +13906,26 @@ def _start_daily_learning_scheduler():
                     _run_data_git_backup(f"학습일지 자동 생성 {today}")
                     last_done = today
                     print(f"[학습일지] {today} {hour}:00 자동 생성·백업 완료")
+                # [복기 상설화 (2026-07-23 권대표 승인 · D2)] 매일 22:05 분류 스윕 + 리플레이 자동 실행·보존.
+                #   수동 엔드포인트(/api/review/sweep·replay)와 동일 로직 재사용 — 결과는 review_stats.json(스윕)
+                #   + data/review_replay/YYYY-MM-DD.json(스윕+리플레이 원장·원자 저장). 읽기 전용·학습 무변경.
+                if (now.tm_hour > hour or (now.tm_hour == hour and now.tm_min >= 5)) and last_review != today:
+                    last_review = today
+                    try:
+                        if _review_engine:
+                            _sw = _review_engine.sweep(today)
+                            _rp = _review_engine.replay_day(today, keirin_re=_KEIRIN_ONLY_RE)
+                            _rdir = os.path.join(os.path.dirname(__file__), "data", "review_replay")
+                            os.makedirs(_rdir, exist_ok=True)
+                            _rp_path = os.path.join(_rdir, today + ".json")
+                            with open(_rp_path + ".tmp", "w", encoding="utf-8") as _rf:
+                                json.dump({"date": today, "sweep": _sw, "replay": _rp},
+                                          _rf, ensure_ascii=False, indent=1)
+                            os.replace(_rp_path + ".tmp", _rp_path)
+                            _bt = (_sw or {}).get("byType") or {}
+                            print(f"[복기 상설화] {today} 분류 {sum(_bt.values())}건({_bt}) · 리플레이 저장 완료")
+                    except Exception as _rev_e:
+                        print("[복기 상설화] 실패(무시):", _rev_e)
             except Exception as e:
                 print("[학습일지] 스케줄러 예외:", e)
 
