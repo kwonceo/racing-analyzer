@@ -1,0 +1,122 @@
+{
+ "race_id": "2026_07_23_오다와라_3경주",
+ "raceKey": "오다와라 3경주",
+ "date": "2026-07-23",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "오다와라",
+ "round": 3,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 1,
+  "2nd": 7,
+  "3rd": 2
+ },
+ "payouts": {
+  "quinella": 2.0,
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {
+  "quinella": {
+   "1+7": 2.0,
+   "3+4": 3.8,
+   "3+7": 5.7,
+   "1+3": 6.3,
+   "4+7": 16.6,
+   "1+4": 22.3,
+   "2+7": 52.1,
+   "3+5": 56.3,
+   "3+6": 66.1,
+   "6+7": 68.7,
+   "4+5": 83.8,
+   "1+6": 104.2,
+   "2+3": 107.4,
+   "1+5": 118.6,
+   "4+6": 122.8,
+   "5+7": 127.3,
+   "1+2": 143.3,
+   "5+6": 191.0,
+   "2+4": 429.9,
+   "2+6": 429.9,
+   "2+5": 1146.5
+  },
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "09:25:19",
+   "minutes_before": null,
+   "quinella": {
+    "1+7": 2.0,
+    "3+4": 3.8,
+    "3+7": 5.7,
+    "1+3": 6.3,
+    "4+7": 16.6,
+    "1+4": 22.3,
+    "2+7": 52.1,
+    "3+5": 56.3,
+    "3+6": 66.1,
+    "6+7": 68.7,
+    "4+5": 83.8,
+    "1+6": 104.2,
+    "2+3": 107.4,
+    "1+5": 118.6,
+    "4+6": 122.8,
+    "5+7": 127.3,
+    "1+2": 143.3,
+    "5+6": 191.0,
+    "2+4": 429.9,
+    "2+6": 429.9,
+    "2+5": 1146.5
+   },
+   "exacta": {}
+  }
+ ],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": "1+7",
+  "recommend_sub": null,
+  "strategy": "BMED_보험형",
+  "signal_quality": "하",
+  "confidence": 25.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 2.0,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-23 09:41:46",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
