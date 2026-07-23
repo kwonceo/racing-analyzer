@@ -1,0 +1,68 @@
+{
+ "race_id": "2026_07_23_도야마_7경주",
+ "raceKey": "도야마 7경주",
+ "date": "2026-07-23",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "도야마",
+ "round": 7,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 1,
+  "2nd": 4,
+  "3rd": 5
+ },
+ "payouts": {
+  "quinella": 10.2,
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7,
+   6
+  ],
+  "eliminated": [],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 25.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 10.2,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 9200
+ },
+ "memo": null,
+ "saved_at": "2026-07-23 13:54:22",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
