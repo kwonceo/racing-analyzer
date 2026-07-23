@@ -215,8 +215,90 @@ def sweep(date=None):
     except Exception as e:
         print("[복기 분류] 저장 실패:", e)
     slip_avg = round(sum(slips) / len(slips), 1) if slips else None
-    return {"date": date, "classified": n, "byType": by_type,
-            "slippageSamples": len(slips), "slippageAvgPct": slip_avg}
+    out = {"date": date, "classified": n, "byType": by_type,
+           "slippageSamples": len(slips), "slippageAvgPct": slip_avg}
+    # [급락 유형별 입상률 (2026-07-23 권대표 — "마감 급락마 입상 잘 된다" 검증)] 시점×강도 밴드별
+    #   급락마 입상률 상설 집계 — 급락 가중치 튜닝의 실측 근거. 첫 실측(7/21-22 오염 포함 데이터):
+    #   전구간 15%+ 급락 49.6%(기대 39.4% 대비 +10%p) · 마감구간만 31.2% · 50%+ 극단 12.5%(오염 의심).
+    #   검역 가드 이후의 깨끗한 데이터로 매일 누적 → 주 단위로 밴드별 판정. 읽기 전용·판정/추천 무영향.
+    try:
+        out["dropStats"] = drop_stats(date)
+    except Exception as e:
+        out["dropStatsError"] = str(e)[:120]
+    return out
+
+
+AI_TRAINING_DIR = os.path.join(BASE, "data", "ai_training")
+
+
+def drop_stats(date=None):
+    """급락 시점(전구간/마감구간)×강도(15-30/30-50/50+%) 밴드별 급락마 입상률 집계.
+    소스 = ai_training 타임라인(수집 배당 시계열)+결과. 말 대표배당 = 그 말 포함 복승 최저배당."""
+    date = date or time.strftime("%Y-%m-%d")
+    prefix = date.replace("-", "_")
+
+    def _horse_min(qmap):
+        m = {}
+        for c, v in (qmap or {}).items():
+            try:
+                a, b = c.split("+")
+                v = float(v)
+                for x in (int(a), int(b)):
+                    if v > 0 and (x not in m or v < m[x]):
+                        m[x] = v
+            except (ValueError, AttributeError):
+                continue
+        return m
+
+    def _band(dr):
+        return "15-30" if dr < 30 else ("30-50" if dr < 50 else "50+")
+
+    races = 0
+    base_sum = base_n = 0
+    full = {"15-30": [0, 0], "30-50": [0, 0], "50+": [0, 0]}   # [입상, 표본]
+    late = {"15-30": [0, 0], "30-50": [0, 0], "50+": [0, 0]}
+    for fn in sorted(os.listdir(AI_TRAINING_DIR) if os.path.isdir(AI_TRAINING_DIR) else []):
+        if not fn.startswith(prefix) or not fn.endswith(".json"):
+            continue
+        d = _load(os.path.join(AI_TRAINING_DIR, fn))
+        if not d:
+            continue
+        res = d.get("result") or {}
+        top3 = {res.get("1st"), res.get("2nd"), res.get("3rd")} - {None}
+        tl = (d.get("odds_features") or {}).get("timeline") or []
+        if len(top3) < 3 or len(tl) < 4:
+            continue
+        races += 1
+        n_h = (d.get("race_info") or {}).get("horse_count") or 0
+        if n_h:
+            base_sum += 3.0 / max(3, n_h)
+            base_n += 1
+        e = _horse_min(tl[0].get("quinella"))
+        mid = _horse_min(tl[max(0, len(tl) - 4)].get("quinella"))
+        fin = _horse_min(tl[-1].get("quinella"))
+        for h, fv in fin.items():
+            ev = e.get(h)
+            if ev and fv < ev:
+                dr = (ev - fv) / ev * 100
+                if dr >= 15:
+                    b = full[_band(dr)]
+                    b[1] += 1
+                    b[0] += (h in top3)
+            mv = mid.get(h)
+            if mv and fv < mv:
+                dr2 = (mv - fv) / mv * 100
+                if dr2 >= 15:
+                    b2 = late[_band(dr2)]
+                    b2[1] += 1
+                    b2[0] += (h in top3)
+
+    def _fmt(t):
+        return {k: {"n": v[1], "placed": v[0],
+                    "rate": round(100.0 * v[0] / v[1], 1) if v[1] else None}
+                for k, v in t.items()}
+    return {"date": date, "races": races,
+            "baselineRate": round(100.0 * base_sum / base_n, 1) if base_n else None,
+            "fullDrop": _fmt(full), "lateDrop": _fmt(late)}
 
 
 # ══════════ [2] 리플레이 — 정책별 가상 성적(전략 검증 1호) ══════════

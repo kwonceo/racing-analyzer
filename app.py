@@ -2175,15 +2175,34 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
         _flip_cnt = 0
     _flip_now = bool(_established and not (sport_changed or stale_gap or _src_switched)
                      and prev_hist and _board_flip_suspect(prev_hist[-1].get("quinella"), q))
-    if _flip_now and _flip_cnt < 2:
+    # [경주 전환 프레임 검역 (2026-07-23 오다와라 6R·사세보 6R 오염 실측)] 확장이 배당판 경주 전환 순간
+    #   다음 경주 프레임을 이전 키로 전송 → '3회 연속 수용' 규칙이 뚫려 다른 경주 배당이 키를 점령.
+    #   보강 2종(기존 가드 무삭제·수용 조건만 강화): ⓐ마감 후엔 판 뒤집힘을 절대 수용 안 함(마감 후
+    #   재편은 물리적으로 없음 — 전부 격리) ⓑ수신 발주시각(deadline)이 저장 발주시각보다 8분+ 뒤면
+    #   다음 경주 프레임 확정 → 수용 안 함. 발주 지연(같은 경주·값 유사)은 flip 미발동이라 영향 없음.
+    _pe_g = prev.get("deadline") or prev.get("postEpoch") or 0
+    try:
+        _pe_g = float(_pe_g) / (1000.0 if float(_pe_g) > 1e12 else 1.0)
+    except (TypeError, ValueError):
+        _pe_g = 0
+    _closed_g = bool(_pe_g and now > _pe_g + 60)
+    try:
+        _in_dl = float(deadline) if deadline else 0
+        _in_dl = _in_dl / (1000.0 if _in_dl > 1e12 else 1.0)
+    except (TypeError, ValueError):
+        _in_dl = 0
+    _dl_mismatch = bool(_in_dl and _pe_g and (_in_dl - _pe_g) > 480)
+    if _flip_now and (_flip_cnt < 2 or _closed_g or _dl_mismatch):
         prev["flipSuspectCnt"] = _flip_cnt + 1
         db[rk] = prev
         _triple_save(db)
-        print(f"[혼입가드] {rk}: 직전 대비 판 전체 뒤집힘 의심(연속 {_flip_cnt + 1}회) → 스냅샷 격리(이력 미반영·기존 배당 유지)")
+        _why = ("마감 후 혼입" if _closed_g else ("발주시각 불일치(+%d분)" % int((_in_dl - _pe_g) / 60)
+                                                 if _dl_mismatch else "연속 %d회" % (_flip_cnt + 1)))
+        print(f"[혼입가드] {rk}: 판 전체 뒤집힘 의심({_why}) → 스냅샷 격리(이력 미반영·기존 배당 유지)")
         return {"ok": True, "quarantined": True, "raceKey": rk,
-                "reason": "배당판 혼입 의심 — 스냅샷 격리(3회 연속이면 새 판으로 수용)"}
+                "reason": "배당판 혼입 의심(%s) — 스냅샷 격리" % _why}
     if _flip_now:
-        print(f"[혼입가드] {rk}: 3회 연속 전면 재편 → 실제 새 배당판으로 수용(기준 재설정·이전 신호 초기화)")
+        print(f"[혼입가드] {rk}: 3회 연속 전면 재편(마감 전·발주시각 일치) → 실제 새 배당판으로 수용(기준 재설정)")
     baseline_reset = (sport_changed or stale_gap or _src_switched or _flip_now
                       or ((not _established) and bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q))))
     hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주·다른 종목·오래된) 배당 완전 제거
@@ -10976,17 +10995,27 @@ def _triple_analyze(rk, rec):
             #   _trio_est(복승 3쌍 기하평균×2) 추정치인데 실배당처럼 표시돼 옴(표시 단계 둔갑 —
             #   다마노 3R 10.3배 vs 실제 저배당). 추정이면 oddsEst=True → 화면·카톡 '~X배(추정)'.
             #   값 자체는 무변경(기존 소비처 안전) · 표시 전용 · 판정·학습 무영향.
+            # [추정 보정 (2026-07-23 사세보 6R 1+6+7 실측)] 공식 확정배당 21경주 대조 결과 추정식(기하평균×2)이
+            #   중앙값 1.96배 과대(저배당 구간 2.4배) → 표시 직전 ÷2 보정. 사세보 6R: 21.9 → 11.0 (실제 7.8).
+            #   보정해도 ±40% 오차라 '추정' 표기 유지 · 표본 쌓이면 종목별 계수 재보정 예정. 표시 전용.
+            _EST_CAL = 2.0
             try:
                 for _t_e in (core_picks.get("finalTrifectas") or []):
                     _c_e = _t_e.get("combo") or []
                     if len(_c_e) == 3 and _t_e.get("odds") is not None \
                             and trio_map.get(tuple(sorted(int(x) for x in _c_e))) is None:
+                        if not _t_e.get("oddsEst"):
+                            _t_e["odds"] = round(float(_t_e["odds"]) / _EST_CAL, 1)
                         _t_e["oddsEst"] = True
                 if core_picks.get("trifecta") and core_picks.get("trifectaOdds") is not None \
                         and trio_map.get(tuple(sorted(int(x) for x in core_picks["trifecta"]))) is None:
+                    if not core_picks.get("trifectaOddsEst"):
+                        core_picks["trifectaOdds"] = round(float(core_picks["trifectaOdds"]) / _EST_CAL, 1)
                     core_picks["trifectaOddsEst"] = True
                 if core_picks.get("confTrifecta") and core_picks.get("confTrifectaOdds") is not None \
                         and trio_map.get(tuple(sorted(int(x) for x in core_picks["confTrifecta"]))) is None:
+                    if not core_picks.get("confTrifectaOddsEst"):
+                        core_picks["confTrifectaOdds"] = round(float(core_picks["confTrifectaOdds"]) / _EST_CAL, 1)
                     core_picks["confTrifectaOddsEst"] = True
             except Exception as _est_e:
                 print("[삼복승 추정표기] 스킵(무시):", _est_e)
@@ -12785,6 +12814,33 @@ def _build_analysis_log(rk, an=None):
             core_picks_out["displayedCombos"] = _dc_out
     except Exception as _dce:
         print("[표시조합 기록] 스킵(무시):", _dce)
+
+    # [마감 확정 이력 (2026-07-23 권대표 — 오다와라 6R)] 이력 마지막 줄 = 최종 발송·판정 명단.
+    #   추천 이력이 T-1분대에서 멈춰 막판 변경(사세보 1R 4+6 복귀 등)이 이력에 안 남던 문제 —
+    #   마감 후 첫 기록 시 동결된 displayedCombos(판정 명단)를 '🔒 마감 확정' 행으로 1회 추가.
+    #   판정·학습 무영향(표시 행·sig 비교 제외). 기존 이력 무수정.
+    try:
+        _dc_fin = (core_picks_out or {}).get("displayedCombos") if isinstance(core_picks_out, dict) else None
+        if an.get("afterClose") and rec_history and _dc_fin \
+                and not any(e.get("closed") for e in rec_history):
+            _dq_f = _dc_fin.get("quinellas") or []
+            _dt_f = _dc_fin.get("trifectas") or []
+            if _dq_f or _dt_f:
+                rec_history.append({
+                    "time": _dc_fin.get("at") or time.strftime("%H:%M:%S", time.localtime()),
+                    "closed": True, "sig": "CLOSED", "sigChanged": False,
+                    "anomCount": len(anomaly_history or []),
+                    "keyHorses": an.get("keyHorses") or (prev_hist[-1].get("keyHorses") if prev_hist else None),
+                    "summary": "🔒 마감 확정 — 최종 발송·판정 명단",
+                    "quinella_main": "+".join(str(x) for x in _dq_f[0]) if _dq_f else None,
+                    "quinella_sub": "+".join(str(x) for x in _dq_f[1]) if len(_dq_f) > 1 else None,
+                    "trifecta_main": "+".join(str(x) for x in _dt_f[0]) if _dt_f else None,
+                    "trifecta_ins": ["+".join(str(x) for x in c) for c in _dt_f[1:2]],
+                    "quinellas": [{"combo": list(c)} for c in _dq_f],
+                    "top_signals": ["🔒 마감 시점 동결 명단(적중 판정 기준·카톡 최종본)"],
+                })
+    except Exception as _cfe:
+        print("[마감 확정 이력] 스킵(무시):", _cfe)
 
     log = {
         "race_id": os.path.splitext(os.path.basename(path))[0],
@@ -22082,6 +22138,69 @@ def daily_cards_page():
         out.append("<script>setTimeout(function(){location.reload()},60000)</script>")
     out.append("</body></html>")
     return "".join(out)
+
+
+@app.route("/api/debug/race-data")
+def debug_race_data():
+    """[원격 진단 (2026-07-23 배당 오염 조사)] 지정 경주의 원본 기록을 읽기 전용으로 요약 — 어떤 소스(src:
+    private=확장/사설 · oddspark=서버 bg)가 언제 어떤 배당을 썼는지 시간순 노출. 경로는 내부 헬퍼
+    (_hist_path·_analysis_log_path)로만 해석(임의 파일 접근 불가·민감 파일 무관). ?key=경주키 [&n=60] · 무변경."""
+    key = _canon_rk((request.args.get("key") or "").strip())
+    try:
+        n = min(150, int(request.args.get("n") or 60))
+    except (TypeError, ValueError):
+        n = 60
+    if not key:
+        return jsonify({"error": "key 필요 (예: ?key=사세보 6경주)"}), 200
+    out = {"key": key}
+
+    def _q_low(qv, k=3):
+        try:
+            if isinstance(qv, dict):
+                items = [(c, float(v)) for c, v in qv.items() if isinstance(v, (int, float))]
+            else:
+                items = [("+".join(map(str, it.get("combo") or [])), float(it.get("odds")))
+                         for it in (qv or []) if isinstance(it, dict) and isinstance(it.get("odds"), (int, float))]
+            return [[c, v] for c, v in sorted(items, key=lambda x: x[1])[:k]]
+        except Exception:
+            return []
+    try:
+        _hp, _, _ = _hist_path(key)
+        doc = json.load(open(_hp, encoding="utf-8")) if os.path.exists(_hp) else {}
+        rows = []
+        for s in (doc.get("archive_snapshots") or [])[-n:]:
+            if s.get("boundary"):
+                rows.append({"at": time.strftime("%H:%M:%S", time.localtime(s.get("t") or 0)),
+                             "boundary": s.get("reason")})
+                continue
+            rows.append({"at": time.strftime("%H:%M:%S", time.localtime(s.get("t") or 0)),
+                         "src": s.get("src"), "low": _q_low(s.get("quinella"))})
+        out["archive"] = rows
+        out["earlyDrop"] = doc.get("early_drop_horses")
+        out["histResult"] = doc.get("result")
+    except Exception as e:
+        out["archiveError"] = str(e)[:120]
+    try:
+        _lp, _, _ = _analysis_log_path(_canonical_log_key(key))
+        d2 = json.load(open(_lp, encoding="utf-8")) if _lp and os.path.exists(_lp) else {}
+        _cp2 = d2.get("corePicks") or {}
+        out["analysisLog"] = {"file": os.path.basename(_lp or ""),
+                              "displayedCombos": _cp2.get("displayedCombos"),
+                              "raceGrade": _cp2.get("raceGrade"), "result": d2.get("result")}
+    except Exception as e:
+        out["analysisLogError"] = str(e)[:120]
+    try:
+        _m3 = _multi_store_load().get(key) or {}
+        out["multiStore"] = {"venue": _m3.get("venue"), "raceNo": _m3.get("raceNo"),
+                             "at": time.strftime("%H:%M:%S", time.localtime(_m3.get("t") or 0)),
+                             "low": _q_low(_m3.get("quinella"))}
+        _t3 = _triple_load().get(key) or {}
+        out["tripleStore"] = {"source": _t3.get("source"),
+                              "at": time.strftime("%H:%M:%S", time.localtime(_t3.get("t") or 0)),
+                              "low": _q_low(_t3.get("quinella"))}
+    except Exception as e:
+        out["storeError"] = str(e)[:120]
+    return jsonify(out)
 
 
 @app.route("/api/keirin/today-stats")
