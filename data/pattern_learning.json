@@ -1,36 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카사마츠 2경주",
-      "horse_no": 6,
-      "recent_avg": 11.4,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-10"
-    },
-    {
-      "race": "하코다테 10경주",
-      "horse_no": 6,
-      "recent_avg": 4.7,
-      "win_place": 3,
-      "conditions": [
-        "급락77%",
-        "복승이상감지"
-      ],
-      "date": "2026-07-11"
-    },
-    {
-      "race": "하코다테 10경주",
-      "horse_no": 7,
-      "recent_avg": 6.3,
-      "win_place": 2,
-      "conditions": [
-        "급락51%",
-        "복승이상감지"
-      ],
-      "date": "2026-07-11"
-    },
-    {
       "race": "2026-07-11 佐賀 4R",
       "horse_no": 10,
       "recent_avg": 6.4,
@@ -4647,16 +4617,42 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-23"
+    },
+    {
+      "race": "카사마츠 12경주",
+      "horse_no": 9,
+      "recent_avg": 4.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-23"
+    },
+    {
+      "race": "카사마츠 12경주",
+      "horse_no": 5,
+      "recent_avg": 5.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-23"
+    },
+    {
+      "race": "카사마츠 12경주",
+      "horse_no": 2,
+      "recent_avg": 8.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-23"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1226,
-      "hit": 259
+      "count": 1230,
+      "hit": 261
     },
     "전체부진마": {
-      "count": 2047,
-      "hit": 569
+      "count": 2055,
+      "hit": 572
     },
     "대규모급락": {
       "count": 20,
@@ -4666,8 +4662,8 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 821,
-      "hit": 310
+      "count": 825,
+      "hit": 311
     },
     "급락동반": {
       "count": 174,
