@@ -22140,6 +22140,125 @@ def daily_cards_page():
     return "".join(out)
 
 
+@app.route("/review-report")
+def review_report_page():
+    """[복기 인포그래픽 (2026-07-23 권대표 요청)] 매일 밤 22:05 자동 복기(분류+리플레이+급락 밴드)를
+    한 장 리포트로 렌더. /review-report[?date=YYYY-MM-DD]. 원장(data/review_replay/날짜.json) 우선,
+    없으면 즉석 계산. 읽기 전용 · 순수 HTML/CSS(외부 라이브러리 없음) · 모든 막대에 직접 라벨(색맹 안전)."""
+    date = (request.args.get("date") or time.strftime("%Y-%m-%d")).strip()
+
+    def _esc(x):
+        return (str(x) if x is not None else "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    sweep = replay = None
+    try:
+        _rp_p = os.path.join(os.path.dirname(__file__), "data", "review_replay", date + ".json")
+        if os.path.exists(_rp_p):
+            _doc_r = json.load(open(_rp_p, encoding="utf-8"))
+            sweep, replay = _doc_r.get("sweep"), _doc_r.get("replay")
+    except Exception:
+        pass
+    if sweep is None and _review_engine:
+        try:
+            sweep = _review_engine.sweep(date)
+            replay = _review_engine.replay_day(date, keirin_re=_KEIRIN_ONLY_RE)
+        except Exception as e:
+            return "<pre>복기 계산 실패: %s</pre>" % _esc(e), 200
+    if not sweep:
+        return "<meta charset='utf-8'><p>복기 엔진 미로드 또는 데이터 없음</p>", 200
+    bt = sweep.get("byType") or {}
+    total = sum(bt.values()) or 1
+    ds = sweep.get("dropStats") or {}
+    pol = replay or {}
+    if "policies" in pol:
+        pol = pol["policies"]
+    # 유형별 상태색(라벨 병기 — 색 단독 의존 없음)
+    _TY = [("hit", "적중", "#38d39f"), ("caught_then_lost", "잡았다 놓침", "#f43f5e"),
+           ("composition_miss", "편성 밀림", "#fb923c"), ("pure_upset", "순수 이변", "#94a3b8"),
+           ("no_signal_forced", "무신호 강행", "#fbbf24"), ("near_structure", "구조 근접", "#4ea1ff"),
+           ("data_tainted", "데이터 오염", "#a78bfa")]
+    _PL = [("baseline", "현행(baseline)"), ("signal_gate", "경마 신호 게이트"), ("lowodds_trio", "저배당 삼복승")]
+    _roi_max = max([100] + [int((pol.get(k) or {}).get("roi") or 0) for k, _ in _PL])
+    css = ("<style>body{background:#10161f;color:#e2e8f0;font-family:-apple-system,'Malgun Gothic',sans-serif;"
+           "margin:18px;font-size:14px}a{color:#4ea1ff;text-decoration:none}h2{color:#38d39f;margin:2px 0 4px}"
+           "h3{color:#9fb3c8;font-size:13px;font-weight:700;margin:22px 0 8px;letter-spacing:.5px}"
+           ".tiles{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}"
+           ".tile{background:#141c2b;border:1px solid #2c3a4f;border-radius:12px;padding:12px 18px;min-width:120px}"
+           ".tile .v{font-size:26px;font-weight:900;line-height:1.2}.tile .l{font-size:11.5px;color:#8a94a6;margin-top:2px}"
+           ".row{display:flex;align-items:center;gap:8px;margin:5px 0}"
+           ".lbl{width:130px;font-size:12.5px;color:#c7d0dd;text-align:right;flex:none}"
+           ".track{flex:1;background:#1a2436;border-radius:5px;height:14px;position:relative}"
+           ".bar{height:10px;margin:2px;border-radius:0 4px 4px 0;min-width:2px}"
+           ".val{font-size:12px;font-weight:800;width:120px;flex:none}"
+           ".grid6{display:grid;grid-template-columns:110px repeat(3,1fr);gap:2px;max-width:640px}"
+           ".cell{background:#141c2b;border-radius:6px;padding:8px 10px;text-align:center}"
+           ".cell .r{font-size:17px;font-weight:900}.cell .n{font-size:10.5px;color:#8a94a6}"
+           ".hd{background:none;color:#8a94a6;font-size:11.5px;padding:4px}"
+           ".ref{position:absolute;top:-2px;bottom:-2px;width:2px;background:#e2e8f0;opacity:.35}"
+           ".hint{color:#8a94a6;font-size:11.5px}</style>")
+    H = ["<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+         "<title>%s 복기 리포트</title>%s</head><body>" % (_esc(date), css),
+         "<h2>📊 적중왕 일일 복기 리포트</h2><div class='hint'>%s · 분류·리플레이·급락 밴드는 매일 22:05 자동 집계"
+         " · <a href='/daily-cards?date=%s'>🗂 경주 카드</a> · <a href='/review-report?date=%s'>◀ 전날</a></div>"
+         % (_esc(date), _esc(date),
+            _esc(time.strftime("%Y-%m-%d", time.localtime(time.mktime(time.strptime(date, "%Y-%m-%d")) - 86400))))]
+    # ① 스탯 타일
+    _hits = bt.get("hit", 0)
+    _b_roi = (pol.get("baseline") or {}).get("roi")
+    _slip = sweep.get("slippageAvgPct")
+    H.append("<div class='tiles'>"
+             + "<div class='tile'><div class='v'>%d</div><div class='l'>분류 경주</div></div>" % total
+             + "<div class='tile'><div class='v' style='color:#38d39f'>%d (%d%%)</div><div class='l'>적중</div></div>" % (_hits, round(100 * _hits / total))
+             + ("<div class='tile'><div class='v' style='color:#4ea1ff'>%s%%</div><div class='l'>현행 리플레이 ROI</div></div>" % _b_roi if _b_roi is not None else "")
+             + ("<div class='tile'><div class='v' style='color:%s'>%+.1f%%</div><div class='l'>슬리피지(잠금→확정)</div></div>"
+                % ("#38d39f" if (_slip or 0) >= 0 else "#f43f5e", _slip) if _slip is not None else "")
+             + "</div>")
+    # ② 실패 해부(분류 바)
+    H.append("<h3>실패 해부 — 어디서 잃었나</h3>")
+    for k, label, col in _TY:
+        v = bt.get(k, 0)
+        if not v:
+            continue
+        H.append("<div class='row'><div class='lbl'>%s</div><div class='track'>"
+                 "<div class='bar' style='width:%.1f%%;background:%s'></div></div>"
+                 "<div class='val' style='color:%s'>%d경주 (%d%%)</div></div>"
+                 % (_esc(label), 100.0 * v / total, col, col, v, round(100 * v / total)))
+    # ③ 리플레이 정책 비교
+    if pol:
+        H.append("<h3>리플레이 — 정책별 가상 ROI (흰 선 = 본전 100%)</h3>")
+        for k, label in _PL:
+            p = pol.get(k) or {}
+            if p.get("roi") is None:
+                continue
+            _w = 100.0 * min(p["roi"], _roi_max) / _roi_max
+            _ref = 100.0 * 100 / _roi_max
+            H.append("<div class='row'><div class='lbl'>%s</div><div class='track'>"
+                     "<div class='bar' style='width:%.1f%%;background:#4ea1ff'></div>"
+                     "<div class='ref' style='left:%.1f%%'></div></div>"
+                     "<div class='val'>ROI %d%% · %d중</div></div>"
+                     % (_esc(label), _w, _ref, p["roi"], p.get("hits") or 0))
+        H.append("<div class='hint'>정책 채택은 누적 리플레이 통과 후에만 (원칙)</div>")
+    # ④ 급락 밴드 히트 그리드
+    if ds.get("fullDrop"):
+        _base_r = ds.get("baselineRate")
+        H.append("<h3>급락마 입상률 — 시점 × 강도 (무작위 기대 %s%%)</h3><div class='grid6'>" % _base_r)
+        H.append("<div class='cell hd'></div>" + "".join("<div class='cell hd'>%s%%</div>" % b for b in ("15-30", "30-50", "50+")))
+        for row_k, row_l in (("fullDrop", "전구간 급락"), ("lateDrop", "마감구간 급락")):
+            H.append("<div class='cell hd' style='text-align:right'>%s</div>" % row_l)
+            for b in ("15-30", "30-50", "50+"):
+                c = (ds.get(row_k) or {}).get(b) or {}
+                r, nn = c.get("rate"), c.get("n") or 0
+                if r is None:
+                    H.append("<div class='cell'><div class='r' style='color:#5b6778'>—</div><div class='n'>n=0</div></div>")
+                    continue
+                _edge = (_base_r is not None and r >= _base_r + 5)
+                _col = "#38d39f" if _edge else ("#f43f5e" if (_base_r is not None and r <= _base_r - 10) else "#c7d0dd")
+                H.append("<div class='cell'><div class='r' style='color:%s'>%.0f%%</div>"
+                         "<div class='n'>n=%d%s</div></div>" % (_col, r, nn, " · ✓우위" if _edge else ""))
+        H.append("</div><div class='hint' style='margin-top:6px'>✓우위 = 기대 대비 +5%p↑ · 표본(n) 작으면 참고만</div>")
+    H.append("<p class='hint' style='margin-top:20px'>읽기 전용 · 원장: data/review_replay/%s.json</p></body></html>" % _esc(date))
+    return "".join(H)
+
+
 @app.route("/api/debug/race-data")
 def debug_race_data():
     """[원격 진단 (2026-07-23 배당 오염 조사)] 지정 경주의 원본 기록을 읽기 전용으로 요약 — 어떤 소스(src:
@@ -27101,11 +27220,39 @@ def _rec_trail_for_detail(key):
     except Exception:
         return None
     cp = doc.get("corePicks") or {}
+    # [확정배당 병기 (2026-07-23 오다와라 6R 2+4)] 표시 배당(마감 전 수집값 5.7배)과 공식 확정(25.1배)이
+    #   달라 '배당 오류'로 오해 — 결과 확정 후 적중 조합엔 근거 문장에 확정배당을 병기(수집값은 보존).
+    _win_pair, _win_trio, _off_q, _off_t = None, None, None, None
+    try:
+        _rr = json.load(open(os.path.join(RACE_RESULTS_DIR, os.path.basename(_lp)), encoding="utf-8"))
+        _res_c = _rr.get("result") or {}
+        if _res_c.get("1st") is not None and _res_c.get("2nd") is not None:
+            _win_pair = frozenset((int(_res_c["1st"]), int(_res_c["2nd"])))
+            if _res_c.get("3rd") is not None:
+                _win_trio = frozenset((int(_res_c["1st"]), int(_res_c["2nd"]), int(_res_c["3rd"])))
+        if not _rr.get("payouts_estimated"):
+            _off_q = (_rr.get("payouts") or {}).get("quinella")
+            _off_t = (_rr.get("payouts") or {}).get("trifecta")
+    except Exception:
+        pass
 
     def _slim(lst):
-        return [{"combo": x.get("combo"), "odds": x.get("odds"), "reason": x.get("reason"),
-                 "stars": x.get("stars"), "oddsEst": x.get("oddsEst")}   # [추정 표기] 전달
-                for x in (lst or []) if x.get("combo")]
+        out2 = []
+        for x in (lst or []):
+            if not x.get("combo"):
+                continue
+            it = {"combo": x.get("combo"), "odds": x.get("odds"), "reason": x.get("reason"),
+                  "stars": x.get("stars"), "oddsEst": x.get("oddsEst")}   # [추정 표기] 전달
+            try:
+                _cset = frozenset(int(v) for v in (x.get("combo") or []))
+                if len(_cset) == 2 and _win_pair and _cset == _win_pair and _off_q:
+                    it["reason"] = ((it.get("reason") or "") + " · ✅ 확정 %s배 (표시값은 마감 전 수집)" % _off_q).strip(" ·")
+                elif len(_cset) == 3 and _win_trio and _cset == _win_trio and _off_t:
+                    it["reason"] = ((it.get("reason") or "") + " · ✅ 확정 %s배 (표시값은 마감 전 수집)" % _off_t).strip(" ·")
+            except Exception:
+                pass
+            out2.append(it)
+        return out2
     out = {
         "quinellas": _slim(cp.get("finalQuinellas")),
         "trifectas": _slim(cp.get("finalTrifectas")),

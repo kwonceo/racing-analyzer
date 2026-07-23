@@ -2022,8 +2022,187 @@
    "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
    "raceKey": "히로시마 4경주",
    "date": "2026-07-22"
+  },
+  "2026_07_23_다마노_1경주.json": {
+   "top3": [
+    3,
+    1,
+    2
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 2,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [1, 3]",
+   "raceKey": "다마노 1경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_사세보_1경주.json": {
+   "top3": [
+    6,
+    4,
+    1
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 2,
+   "slippage": {
+    "locked": 4.0,
+    "official": 6.5,
+    "deltaPct": 62.5
+   },
+   "type": "hit",
+   "raceKey": "사세보 1경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_사세보_3경주.json": {
+   "top3": [
+    3,
+    7,
+    2
+   ],
+   "hit": false,
+   "displayedQ": 0,
+   "displayedT": 2,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "사세보 3경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_사세보_4경주.json": {
+   "top3": [
+    7,
+    5,
+    6
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 2,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [5, 7]",
+   "raceKey": "사세보 4경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_소노다_1경주.json": {
+   "top3": [
+    4,
+    10,
+    3
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 2,
+   "type": "no_signal_forced",
+   "detail": "신호 0 경주에 추천 3개 노출 — 패스 후보",
+   "raceKey": "소노다 1경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_오다와라_1경주.json": {
+   "top3": [
+    1,
+    5,
+    4
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 2,
+   "type": "hit",
+   "raceKey": "오다와라 1경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_오다와라_2경주.json": {
+   "top3": [
+    6,
+    2,
+    5
+   ],
+   "hit": false,
+   "displayedQ": 0,
+   "displayedT": 0,
+   "type": "near_structure",
+   "detail": "정답 일부만 인지([2]) — 축/상대 선택 미스",
+   "raceKey": "오다와라 2경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_오다와라_3경주.json": {
+   "top3": [
+    1,
+    7,
+    2
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 2,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "오다와라 3경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_오다와라_4경주.json": {
+   "top3": [
+    1,
+    4,
+    2
+   ],
+   "hit": false,
+   "displayedQ": 0,
+   "displayedT": 2,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "오다와라 4경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_오다와라_5경주.json": {
+   "top3": [
+    5,
+    2,
+    4
+   ],
+   "hit": false,
+   "displayedQ": 0,
+   "displayedT": 2,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [2, 5]",
+   "raceKey": "오다와라 5경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_오다와라_6경주.json": {
+   "top3": [
+    4,
+    2,
+    7
+   ],
+   "hit": true,
+   "displayedQ": 3,
+   "displayedT": 2,
+   "slippage": {
+    "locked": 5.7,
+    "official": 25.1,
+    "deltaPct": 340.4
+   },
+   "type": "hit",
+   "raceKey": "오다와라 6경주",
+   "date": "2026-07-23"
+  },
+  "2026_07_23_오다와라_7경주.json": {
+   "top3": [
+    3,
+    7,
+    6
+   ],
+   "hit": true,
+   "displayedQ": 3,
+   "displayedT": 2,
+   "slippage": {
+    "locked": 2.7,
+    "official": 6.0,
+    "deltaPct": 122.2
+   },
+   "type": "hit",
+   "raceKey": "오다와라 7경주",
+   "date": "2026-07-23"
   }
  },
  "note": "복기 분류(계획서 v4 [1]) — 경주 파일 무수정·읽기 전용 분류",
- "updated": "2026-07-23 11:09:51"
+ "updated": "2026-07-23 11:17:50"
 }
