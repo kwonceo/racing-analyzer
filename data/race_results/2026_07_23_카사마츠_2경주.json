@@ -1,0 +1,70 @@
+{
+ "race_id": "2026_07_23_카사마츠_2경주",
+ "raceKey": "카사마츠 2경주",
+ "date": "2026-07-23",
+ "sport": "horse",
+ "category": "japan_local",
+ "track": "카사마츠",
+ "round": 2,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 9,
+ "result": {
+  "1st": 3,
+  "2nd": 5,
+  "3rd": 7
+ },
+ "payouts": {
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   2,
+   3,
+   4,
+   6,
+   7,
+   9,
+   5
+  ],
+  "eliminated": [
+   8,
+   1
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-23 12:04:15",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

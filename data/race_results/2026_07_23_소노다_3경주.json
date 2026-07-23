@@ -1,0 +1,69 @@
+{
+ "race_id": "2026_07_23_소노다_3경주",
+ "raceKey": "소노다 3경주",
+ "date": "2026-07-23",
+ "sport": "horse",
+ "category": "japan_local",
+ "track": "소노다",
+ "round": 3,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 8,
+ "result": {
+  "1st": 3,
+  "2nd": 5,
+  "3rd": 2
+ },
+ "payouts": {
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   2,
+   3,
+   4,
+   5,
+   7,
+   8
+  ],
+  "eliminated": [
+   1,
+   6
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 2번 적중 · 제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-23 12:04:14",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
