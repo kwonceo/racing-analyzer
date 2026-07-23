@@ -1,0 +1,69 @@
+{
+ "race_id": "2026_07_23_사세보_1경주",
+ "raceKey": "사세보 1경주",
+ "date": "2026-07-23",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "사세보",
+ "round": 1,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 6,
+  "2nd": 4,
+  "3rd": 1
+ },
+ "payouts": {
+  "quinella": 6.5,
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7
+  ],
+  "eliminated": [
+   6
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 6.5,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 5500
+ },
+ "memo": null,
+ "saved_at": "2026-07-23 09:00:10",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
