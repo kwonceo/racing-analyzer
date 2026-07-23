@@ -1,0 +1,182 @@
+{
+ "race": "아오모리 8경주",
+ "raceKey": "아오모리 8경주",
+ "date": "2026-07-23",
+ "result": {
+  "1st": 4,
+  "2nd": 3,
+  "3rd": 1,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": -14.0,
+   "avg_drop": -59.2,
+   "grade": "🔴",
+   "rep_combo": [
+    4,
+    7
+   ],
+   "drop_timeline": [
+    {
+     "time": "13:42:20",
+     "minutes_before": null,
+     "odds": 12.5,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 103.6,
+   "confidence": 100.0,
+   "reason": "초과급락"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 98.4,
+   "confidence": 60.0,
+   "reason": "전적상위"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 98.8,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": 0.0,
+   "avg_drop": -45.2,
+   "grade": "🔴",
+   "rep_combo": [
+    4,
+    7
+   ],
+   "drop_timeline": [
+    {
+     "time": "13:42:20",
+     "minutes_before": null,
+     "odds": 12.5,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 99.8,
+   "confidence": 100.0,
+   "reason": "초과급락"
+  },
+  "signal_9": {
+   "horse": 9,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    7,
+    9
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
+  }
+ },
+ "recommended_horses": [
+  7,
+  9,
+  4
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 4번 103.6점",
+  "2. 배당 수집 시작 13:42:20",
+  "3. 초과급락 감지: 4번 초과급락 -14.0%p (전체평균 -45.2%)",
+  "5. 종합 신뢰도 100.0점(상) 판정",
+  "6. BMED 전략: 고배당도전형 적용",
+  "7. 최종 추천: 복승 메인 7+9"
+ ],
+ "confidence_breakdown": {
+  "horse": 4,
+  "excess_drop_score": 40,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 103.6,
+  "total": 100.0,
+  "grade": "상"
+ },
+ "win_tags": [
+  "초과급락_적중"
+ ],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 103.6,
+  "dropAmt": -59.2,
+  "dropScore": 100.0,
+  "inverse": false,
+  "inverseHorses": [
+   7,
+   4,
+   6
+  ],
+  "inverseHit": [
+   4
+  ],
+  "confidence": 100.0,
+  "reason": "전적유력마 4번 적중 · 4+7 복승 급락(-59.2%) → 4번 입상 적중 · 제거 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 1,
+   "next_race": 0
+  },
+  "validCount": 0
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-23 13:54:36"
+}
