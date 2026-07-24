@@ -485,7 +485,7 @@ def replay_day(date=None, stake=10000, keirin_re=None):
     prefix = date.replace("-", "_")
     pol = {p: {"judged": 0, "hits": 0, "invested": 0, "returned": 0.0, "unpaid": 0}
            for p in ("baseline", "signal_gate", "lowodds_trio", "t5_freeze", "t2_freeze", "t1_freeze",
-                     "t2_strong", "t2_strong_cycle",
+                     "t2_strong", "t2_strong_cycle", "t2_strong_all",
                      "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev",
                      "fix_lowodds_exempt", "fix_connectors",
                      "fix_connectors_top1", "fix_connectors_top2", "fix_odds_cap_new")}
@@ -613,6 +613,7 @@ def replay_day(date=None, stake=10000, keirin_re=None):
             _book("t2_strong")                    # 라이브 이력 없음 → t2_freeze 와 동일(baseline 처리)
             # [t2_strong_cycle] 경륜만 t2_strong·경마는 baseline → 이력 없으면 양쪽 다 baseline 과 동일
             _book("t2_strong_cycle")
+            _book("t2_strong_all")                # [t2_strong_all] 전 종목 t2_strong(이력 없으면 baseline 동일)
         else:
             # 강급락 말 집합: 집중급락(말 단위) + 급락류 30%+(조합 양 말)
             _strong_h = set()
@@ -652,6 +653,9 @@ def replay_day(date=None, stake=10000, keirin_re=None):
                 _book("t2_strong_cycle", qh=(win_q in _qf_s), th=(win_t in _tf_s))
             else:
                 _book("t2_strong_cycle")          # 경마 = baseline(현행 표시=판정)
+            # ══ [t2_strong_all (2026-07-24) — 전 종목] t2_strong 을 경마 포함 전 종목에 적용(종목 게이트 없음).
+            #   t2_strong_cycle(경륜만)과의 대조군. 기존 t2_strong 과 동일 로직·동일 수치(명시 비교용). ══
+            _book("t2_strong_all", qh=(win_q in _qf_s), th=(win_t in _tf_s))
         # ══ [수정안 검증 정책 4종 (2026-07-23 LOGIC_AUDIT — 본 코드 무수정·기록 재현)] ══
         _cp_r = (log_doc or {}).get("corePicks") or {}
         # ① fix_main_keep (모순1 원 메인 밀림): 이력상 최초 삼복승 원 메인이 판정 밖이면 추가(상위2→최대3)
