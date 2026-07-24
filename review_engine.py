@@ -225,10 +225,106 @@ def sweep(date=None):
         out["dropStats"] = drop_stats(date)
     except Exception as e:
         out["dropStatsError"] = str(e)[:120]
+    try:
+        out["signalPlaceStats"] = signal_place_stats(date)
+    except Exception as e:
+        out["signalPlaceStatsError"] = str(e)[:120]
     return out
 
 
 AI_TRAINING_DIR = os.path.join(BASE, "data", "ai_training")
+TIMELINE_SNAP_DIR = os.path.join(BASE, "data", "timeline_snapshot")
+
+
+def _hms_sec(s):
+    try:
+        h, m, sec = str(s).split(":")
+        return int(h) * 3600 + int(m) * 60 + int(sec)
+    except (ValueError, AttributeError):
+        return None
+
+
+def signal_place_stats(date=None):
+    """[유력마 1위·급락 복병 입상률 (2026-07-23 권대표)] ①분석 유력마 1위(T-5경 이력 keyHorses[0])의
+    입상률·1착률 ②T-5 스냅샷 복병(dark_horse 상위 2)의 입상률 — 무작위 기대와 비교. 읽기 전용."""
+    date = date or time.strftime("%Y-%m-%d")
+    prefix = date.replace("-", "_")
+    k1 = {"n": 0, "placed": 0, "won": 0}
+    k1f = {"n": 0, "placed": 0, "won": 0}
+    dk = {"n": 0, "placed": 0}
+    base_sum = base_n = 0
+    for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
+        if not fn.startswith(prefix) or not fn.endswith(".json"):
+            continue
+        doc = _load(os.path.join(RACE_RESULTS_DIR, fn))
+        if not doc:
+            continue
+        r = doc.get("result") or {}
+        top3 = {int(r[k]) for k in ("1st", "2nd", "3rd") if r.get(k) is not None}
+        if len(top3) < 3:
+            continue
+        try:
+            win1 = int(r.get("1st"))
+        except (TypeError, ValueError):
+            win1 = None
+        n_h = doc.get("horse_count") or 0
+        if n_h:
+            base_sum += 3.0 / max(3, n_h)
+            base_n += 1
+        log_doc = _load(os.path.join(ANALYSIS_LOG_DIR, fn))
+        _rh = [x for x in ((log_doc or {}).get("recommendation_history") or []) if not x.get("closed")]
+        if _rh:
+            _cr = _hms_sec(_rh[-1].get("time"))
+
+            def _kh_at(min_mb):
+                _pick = None
+                for _e in _rh:
+                    _mb = _e.get("minutes_before")
+                    if not isinstance(_mb, (int, float)):
+                        _ts = _hms_sec(_e.get("time"))
+                        _mb = ((_cr - _ts) / 60.0) if (_ts is not None and _cr is not None and _cr >= _ts) else None
+                    if _mb is not None and _mb >= min_mb:
+                        _pick = _e
+                _kh = (_pick or _rh[0]).get("keyHorses") or []
+                try:
+                    return int(_kh[0]) if _kh else None
+                except (TypeError, ValueError):
+                    return None
+            _h5 = _kh_at(4.5)
+            if _h5 is not None:
+                k1["n"] += 1
+                k1["placed"] += (_h5 in top3)
+                k1["won"] += (_h5 == win1)
+            _khf = (_rh[-1].get("keyHorses") or [])
+            try:
+                _hf = int(_khf[0]) if _khf else None
+            except (TypeError, ValueError):
+                _hf = None
+            if _hf is not None:
+                k1f["n"] += 1
+                k1f["placed"] += (_hf in top3)
+                k1f["won"] += (_hf == win1)
+        # T-5 스냅샷 복병 (dark_horse 상위 2 · 스냅샷 doc 날짜 일치 시)
+        _sn_fn = fn[len(prefix) + 1:]
+        _sd = _load(os.path.join(TIMELINE_SNAP_DIR, _sn_fn))
+        if _sd and _sd.get("date") == date:
+            _t5s = (_sd.get("snapshots") or {}).get("T-5") or {}
+            for _d in (_t5s.get("dark_horse") or [])[:2]:
+                try:
+                    dk["n"] += 1
+                    dk["placed"] += (int(_d) in top3)
+                except (TypeError, ValueError):
+                    dk["n"] -= 1
+
+    def _r(d, extra=None):
+        o = {"n": d["n"], "placed": d["placed"],
+             "rate": round(100.0 * d["placed"] / d["n"], 1) if d["n"] else None}
+        if extra and d["n"]:
+            o["winRate"] = round(100.0 * d["won"] / d["n"], 1)
+        return o
+    return {"date": date,
+            "baselineRate": round(100.0 * base_sum / base_n, 1) if base_n else None,
+            "key1_T5": _r(k1, True), "key1_final": _r(k1f, True), "darkT5": _r(dk)}
 
 
 def drop_stats(date=None):
@@ -319,7 +415,9 @@ def replay_day(date=None, stake=10000, keirin_re=None):
     date = date or time.strftime("%Y-%m-%d")
     prefix = date.replace("-", "_")
     pol = {p: {"judged": 0, "hits": 0, "invested": 0, "returned": 0.0, "unpaid": 0}
-           for p in ("baseline", "signal_gate", "lowodds_trio")}
+           for p in ("baseline", "signal_gate", "lowodds_trio", "t5_freeze", "t2_freeze", "t1_freeze",
+                     "t2_strong", "t2_strong_cycle",
+                     "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev")}
     for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
         if not fn.startswith(prefix) or not fn.endswith(".json"):
             continue
@@ -353,20 +451,209 @@ def replay_day(date=None, stake=10000, keirin_re=None):
                 min_q = min(float(o) for o in odds)
                 break
 
-        def _book(p, use_q=True, use_t=True):
-            hit = (use_q and q_hit) or (use_t and t_hit)
+        def _book(p, use_q=True, use_t=True, qh=None, th=None):
+            _qh = q_hit if qh is None else qh
+            _th = t_hit if th is None else th
+            hit = (use_q and _qh) or (use_t and _th)
             pol[p]["judged"] += 1
             pol[p]["invested"] += stake
             if hit:
                 pol[p]["hits"] += 1
-                pay = po.get("quinella") if (use_q and q_hit) else (po.get("trifecta") if t_hit else None)
-                if use_t and t_hit and not (use_q and q_hit):
+                pay = po.get("quinella") if (use_q and _qh) else (po.get("trifecta") if _th else None)
+                if use_t and _th and not (use_q and _qh):
                     pay = po.get("trifecta")
                 if isinstance(pay, (int, float)) and pay > 0:
                     pol[p]["returned"] += pay * stake
                 else:
                     pol[p]["unpaid"] += 1
         _book("baseline")
+        # 전략③ T-5 동결 (2026-07-23 사세보 1R·소노다 2R 양방향 실증): T-5 시점(마감 5분+ 전 마지막
+        #   이력)의 명단으로 판정 — "마감 2분 내 교체가 득이냐 실이냐"를 측정. 카톡 발송본과 근사 일치.
+        #   삼복승은 표시 규칙과 동일하게 상위 2(메인+보험1)만. 이력 없으면 현행 명단과 동일 처리.
+        # [동결 커브 (2026-07-23 소노다 4R "최소 1분은 남겨야")] T-5/T-2/T-1 세 동결 시점을 나란히 측정 —
+        #   마감 직전 교체(12:09:54 유형)의 득실 곡선. 각 시점 = 그 시점 이전 마지막 이력 명단으로 판정.
+        _rhist = ((log_doc or {}).get("recommendation_history") or [])
+        _live_h = [x for x in _rhist if not x.get("closed")]
+        # [mb 추정 보정 (2026-07-23)] minutes_before 결측 항목이 많아 T-5/T-2/T-1이 같은 항목으로 수렴 —
+        #   마감 기준시각(closed 행 시각, 없으면 마지막 이력 시각)과의 차이로 mb 를 추정해 커브를 분해.
+        _close_ref = None
+        for _e in _rhist:
+            if _e.get("closed") and _e.get("time"):
+                _close_ref = _hms_sec(_e["time"])
+                break
+        if _close_ref is None and _live_h and _live_h[-1].get("time"):
+            _close_ref = _hms_sec(_live_h[-1]["time"])
+
+        def _mb_of(_e):
+            _mb = _e.get("minutes_before")
+            if isinstance(_mb, (int, float)):
+                return float(_mb)
+            _ts = _hms_sec(_e.get("time"))
+            if _ts is not None and _close_ref is not None and _close_ref >= _ts:
+                return (_close_ref - _ts) / 60.0
+            return None
+
+        def _freeze_sets(min_mb):
+            _ef = None
+            for _e in _live_h:
+                _mb = _mb_of(_e)
+                if _mb is not None and _mb >= min_mb:
+                    _ef = _e
+            if _ef is None:
+                _ef = _live_h[0] if _live_h else None
+            if _ef is None:
+                return None, None
+            _qf = set()
+            for _c in (_ef.get("quinellas") or []):
+                _cc = _c.get("combo") or []
+                if len(_cc) == 2:
+                    try:
+                        _qf.add(frozenset(int(x) for x in _cc))
+                    except (TypeError, ValueError):
+                        continue
+            if not _qf and _ef.get("quinella_main"):
+                try:
+                    _qf.add(frozenset(int(x) for x in str(_ef["quinella_main"]).split("+")))
+                except (TypeError, ValueError):
+                    pass
+            _tf = set()
+            for _s3 in [_ef.get("trifecta_main")] + list(_ef.get("trifecta_ins") or [])[:1]:
+                try:
+                    _p3 = frozenset(int(x) for x in str(_s3).split("+"))
+                    if len(_p3) == 3:
+                        _tf.add(_p3)
+                except (TypeError, ValueError):
+                    continue
+            return _qf, _tf
+        for _mb_min, _pname in ((5, "t5_freeze"), (2, "t2_freeze"), (1, "t1_freeze")):
+            _qf, _tf = _freeze_sets(_mb_min)
+            if _qf is None:
+                _book(_pname)
+            else:
+                _book(_pname, qh=(win_q in _qf), th=(win_t in _tf))
+        # ══ [t2_strong (2026-07-24) — T-2 동결 + 마감 강급락 예외 편입] ══
+        #   목표: t2_freeze 가 버린 '마감 직전 진짜 급락 신호' 조합만 되살린다(마쓰사카 10R 2+5 -30.3% 유형).
+        #   정의: ⓐ T-2 동결 명단(_freeze_sets(2))을 기본으로 하되 ⓑ 그 이후 새로 편성된(=최종 표시엔 있으나
+        #   T-2 명단엔 없는) 조합 중, '집중급락' 또는 '급락 30%+' 신호에 걸린 말을 포함한 조합만 예외로 추가한다.
+        #   ⚠ 신호원은 strong_signals(대부분 count=0·미집계)가 아니라 실제 시점 신호 로그 signals_detected 를 사용.
+        #   집합에 '추가만' 하므로(제거 없음) t2_strong 적중 ⊇ t2_freeze 적중 — 부활분은 항상 보존(교환손실 0).
+        _qf2, _tf2 = _freeze_sets(2)
+        if _qf2 is None:
+            _book("t2_strong")                    # 라이브 이력 없음 → t2_freeze 와 동일(baseline 처리)
+            # [t2_strong_cycle] 경륜만 t2_strong·경마는 baseline → 이력 없으면 양쪽 다 baseline 과 동일
+            _book("t2_strong_cycle")
+        else:
+            # 강급락 말 집합: 집중급락(말 단위) + 급락류 30%+(조합 양 말)
+            _strong_h = set()
+            for _sg in ((log_doc or {}).get("signals_detected") or []):
+                _sty = str(_sg.get("type") or "")
+                _sdt = str(_sg.get("detail") or "")
+                if "집중급락" in _sty:
+                    _mh = re.search(r"(\d+)\s*번", _sdt)
+                    if _mh:
+                        try:
+                            _strong_h.add(int(_mh.group(1)))
+                        except ValueError:
+                            pass
+                elif "급락" in _sty:               # 급락·마감급락·급락속도 등
+                    _mp = re.search(r"-?(\d+(?:\.\d+)?)\s*%", _sdt)
+                    _pct = float(_mp.group(1)) if _mp else 0.0
+                    if _pct >= 30.0:
+                        for _a, _b in re.findall(r"(\d+)\s*\+\s*(\d+)", _sdt):
+                            try:
+                                _strong_h.add(int(_a))
+                                _strong_h.add(int(_b))
+                            except ValueError:
+                                pass
+            _qf_s, _tf_s = set(_qf2), set(_tf2 or set())
+            if _strong_h:                          # 강급락 말 있을 때만 새 조합 예외 편입
+                for _dc in disp_q:                 # 최종 표시 복승 중 T-2 명단에 없던 새 조합
+                    if _dc not in _qf_s and (_dc & _strong_h):
+                        _qf_s.add(_dc)
+                for _dc in disp_t:                 # 최종 표시 삼복승도 동일 규칙
+                    if _dc not in _tf_s and (_dc & _strong_h):
+                        _tf_s.add(_dc)
+            _book("t2_strong", qh=(win_q in _qf_s), th=(win_t in _tf_s))
+            # ══ [t2_strong_cycle (2026-07-24) — 종목 게이트] ══
+            #   경륜(cycle)만 t2_strong(동결+강급락 예외) 적용, 경마(horse)는 baseline 명단 그대로.
+            #   근거: t2_strong 우위가 경륜에서만 뚜렷(경마는 동결이 오히려 손해인 날 존재) → 종목별 분리 적용.
+            if sport == "cycle":
+                _book("t2_strong_cycle", qh=(win_q in _qf_s), th=(win_t in _tf_s))
+            else:
+                _book("t2_strong_cycle")          # 경마 = baseline(현행 표시=판정)
+        # ══ [수정안 검증 정책 4종 (2026-07-23 LOGIC_AUDIT — 본 코드 무수정·기록 재현)] ══
+        _cp_r = (log_doc or {}).get("corePicks") or {}
+        # ① fix_main_keep (모순1 원 메인 밀림): 이력상 최초 삼복승 원 메인이 판정 밖이면 추가(상위2→최대3)
+        _t_keep = set(disp_t)
+        try:
+            for _e in _live_h:
+                if _e.get("trifecta_main"):
+                    _fm = frozenset(int(x) for x in str(_e["trifecta_main"]).split("+"))
+                    if len(_fm) == 3:
+                        _t_keep.add(_fm)
+                    break
+        except (TypeError, ValueError):
+            pass
+        _book("fix_main_keep", qh=q_hit, th=(win_t in _t_keep))
+        # ② fix_axis2_trio (모순3 축 몰빵): 복승② 2두 + (복승③ 비겹침 1두 또는 확신도1위) 삼복승 추가
+        _t_ax2 = set(disp_t)
+        try:
+            _last_e = _live_h[-1] if _live_h else None
+            _qs_l = [c.get("combo") for c in ((_last_e or {}).get("quinellas") or []) if c.get("combo")]
+            if len(_qs_l) >= 2:
+                _q2 = [int(x) for x in _qs_l[1]]
+                _extra = None
+                if len(_qs_l) >= 3:
+                    for x in _qs_l[2]:
+                        if int(x) not in _q2:
+                            _extra = int(x)
+                            break
+                if _extra is None and _cp_r.get("confTop1") is not None \
+                        and int(_cp_r["confTop1"]) not in _q2:
+                    _extra = int(_cp_r["confTop1"])
+                if _extra is not None:
+                    _c3x = frozenset(_q2 + [_extra])
+                    if len(_c3x) == 3:
+                        _t_ax2.add(_c3x)
+        except (TypeError, ValueError):
+            pass
+        _book("fix_axis2_trio", qh=q_hit, th=(win_t in _t_ax2))
+        # ③ fix_special_incl (모순2 고배당 복병 이동): 💎bmedSpecial 복승도 판정 포함했다면
+        _q_sp = set(disp_q)
+        try:
+            for _c in (_cp_r.get("bmedSpecial") or []):
+                _cc = _c.get("combo") or []
+                if len(_cc) == 2:
+                    _q_sp.add(frozenset(int(x) for x in _cc))
+        except (TypeError, ValueError):
+            pass
+        _book("fix_special_incl", qh=(win_q in _q_sp), th=t_hit)
+        # ④ fix_conf_pair (모순4 조합 단절): 확신도1위 + 💎첫 조합의 비-확신도 말 쌍 복승 추가
+        _q_cp = set(disp_q)
+        try:
+            _ct = _cp_r.get("confTop1")
+            _sp0 = ((_cp_r.get("bmedSpecial") or [{}])[0].get("combo")) or []
+            if _ct is not None and _sp0:
+                _ct = int(_ct)
+                for x in _sp0:
+                    if int(x) != _ct:
+                        _q_cp.add(frozenset((_ct, int(x))))
+                        break
+        except (TypeError, ValueError):
+            pass
+        _book("fix_conf_pair", qh=(win_q in _q_cp), th=t_hit)
+        # ⑤ fix_backing_ev (소노다 7R 3-1-8): EV 컷으로 quinellaRef 에 강등된 '유력마 받치기' 조합을
+        #   판정에 포함했다면 — "유력마 받치기 보존 EV 면제" 수정안 검증 (LOGIC_AUDIT 후속).
+        _q_bk = set(disp_q)
+        try:
+            for _c in (_cp_r.get("quinellaRef") or []):
+                _cc = _c.get("combo") or []
+                _rsn_b = str(_c.get("reason") or "")
+                if len(_cc) == 2 and ("받치기" in _rsn_b or "유력마" in _rsn_b):
+                    _q_bk.add(frozenset(int(x) for x in _cc))
+        except (TypeError, ValueError):
+            pass
+        _book("fix_backing_ev", qh=(win_q in _q_bk), th=t_hit)
         # 전략① 경마 신호 게이트: 경마 & 신호 0 → 패스
         if not (sport == "horse" and sig_cnt == 0):
             _book("signal_gate")
