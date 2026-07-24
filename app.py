@@ -1670,7 +1670,9 @@ _KEIRIN_ONLY_RE = re.compile(
     # [보강4 (2026-07-23)] 아오모리·다카마쓰·いわき平·伊東 — 아오모리 3R 카톡 미발송 사건(青森 스케줄 키
     #   ↔ 아오모리 수집 키 불일치)에서 발견된 신규 개최장. 전부 경륜 전용 지명.
     r"사세보|佐世保|구루메|久留米|다마노|玉野|히로시마|広島|아오모리|青森|다카마쓰|高松|"
-    r"いわき平|이와키평|伊東|경륜|競輪|keirin)")
+    # [보강5 (2026-07-24)] 와카야마(和歌山) — 경륜 전용(joCode55)인데 확장/사설이 horse/japan_central 로
+    #   오분류 저장(와카야마 1R 실측). 정규식 등록 시 아래 [종목 정정] guard 가 sport=cycle 로 자동 정정.
+    r"いわき平|이와키평|伊東|와카야마|和歌山|경륜|競輪|keirin)")
 
 
 def _is_opening_settle(po, pct):
@@ -2086,6 +2088,17 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                 sport, category = "cycle", "cycle"
     except Exception as _ce:
         print("[종목 정정·경륜] 실패(무시):", _ce)
+    # [경정 종목 강제 (2026-07-24) — 에도가와 등 경정 전용 지명] 경마·경륜 없는 경정 전용 지명이 horse/
+    #   japan_central 로 오분류되면 boat 로 정정(에도가와 1R 실측 — JRA 경마로 잘못 분석되던 문제). 경륜 guard
+    #   대칭(무삭제·추가만). ⚠ 경정은 정확히 6정이라 조합 최대마번 7+ 검증(_combo_max_no)이 아래에서 재차 방어.
+    try:
+        if re.search(r"에도가와|江戸川", str(rk)) and not _KRA_TRACK_RE.search(str(rk)):
+            if sport in (None, "horse", "cycle", "bike") or category in (None, "japan_local", "japan_central", "cycle", "bike"):
+                if sport != "boat":
+                    print("[종목 정정] %s: 경정 전용 지명 → sport=boat (기존 sport=%s·cat=%s)" % (rk, sport, category))
+                sport, category = "boat", "boat"
+    except Exception as _be0:
+        print("[종목 정정·경정] 실패(무시):", _be0)
     # [종목 오분석·증거기반 근본수정] 배당 조합의 실제 마번으로 경정(boat) 오분류를 최종 차단.
     #   경정(競艇)은 정확히 6정(마번 1~6)만 존재 → 조합에 7번+ 마번이 있으면 경정이 물리적으로 불가능.
     #   확장이 asyukk 사설 배당판의 '경정' 네비 링크에 낚여 한국경마(부산 7~16두 등)를 boat 로 보내도,
@@ -18622,6 +18635,9 @@ _TRACK_GROUPS = {
     #   타임스냅샷·카톡이 통째로 빠지던 경륜장 — 아오모리 실측(青森 jo12). 다카마쓰는 선제 등록.
     "아오모리": ["青森", "aomori"],
     "다카마쓰": ["高松", "takamatsu"],
+    # [별칭 보강5 (2026-07-24)] 와카야마(和歌山·경륜 joCode55)·에도가와(江戸川·경정) — horse/japan_central 오분류 방어.
+    "와카야마": ["和歌山", "wakayama"],
+    "에도가와": ["江戸川", "edogawa"],
     "우쓰노미야": ["宇都宮", "utsunomiya"],
     "이즈": ["伊豆", "izu"],
     "다치카와": ["立川", "tachikawa"],
@@ -19438,7 +19454,10 @@ KEIRIN_JO = {"36": "오다와라", "62": "히로시마", "01": "마에바시",
              # [joCode 실측 2026-07-23·당일 스케줄] 青森(아오모리)=12 · いわき平=13 · 伊東=37 확정.
              #   ⚠ 前橋 는 당일 스케줄에서 22 로 관측 — 기존 "01": "마에바시" 미검증 라벨과 충돌(코드 세션
              #   검증 대상·역매핑은 01 우선이라 백필 오류 가능성 기록만).
-             "12": "아오모리", "13": "いわき平", "37": "伊東"}
+             "12": "아오모리", "13": "いわき平", "37": "伊東",
+             # [joCode 실측 2026-07-24·당일 스케줄] 和歌山(와카야마)=55 확정 — 미등록으로 결과 백필이
+             #   영구 스킵(_keirin_jo_today None)되던 문제. 역매핑(_KEIRIN_JO_REV) 자동 반영 → 백필 재개.
+             "55": "와카야마"}
 # ⚠ 기시와다=56(岸和田, 라이브 확인). 이전 73은 오매핑이라 교정. 구마모토=87(熊本競輪) 등록 →
 #   sport 유실 시에도 _keirin_jo_from_venue가 cycle 추론 → 복승 개수 종목캡(경륜 9) 정상 적용.
 # 경륜장명 → joCode 역매핑(raceKey에서 joCode 자동 감지용)
