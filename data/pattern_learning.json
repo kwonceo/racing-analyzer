@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "마에바시 10경주",
-      "horse_no": 3,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-11"
-    },
-    {
-      "race": "마에바시 10경주",
       "horse_no": 9,
       "recent_avg": 4.0,
       "win_place": 2,
@@ -4649,16 +4639,26 @@
         "복승이상감지"
       ],
       "date": "2026-07-24"
+    },
+    {
+      "race": "제주 4경주",
+      "horse_no": 9,
+      "recent_avg": 5.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-24"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1235,
+      "count": 1240,
       "hit": 261
     },
     "전체부진마": {
-      "count": 2067,
-      "hit": 576
+      "count": 2073,
+      "hit": 577
     },
     "대규모급락": {
       "count": 20,
@@ -4668,8 +4668,8 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 832,
-      "hit": 315
+      "count": 833,
+      "hit": 316
     },
     "급락동반": {
       "count": 174,
