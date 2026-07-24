@@ -418,7 +418,7 @@ def replay_day(date=None, stake=10000, keirin_re=None):
            for p in ("baseline", "signal_gate", "lowodds_trio", "t5_freeze", "t2_freeze", "t1_freeze",
                      "t2_strong", "t2_strong_cycle",
                      "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev",
-                     "fix_lowodds_exempt")}
+                     "fix_lowodds_exempt", "fix_connectors")}
     for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
         if not fn.startswith(prefix) or not fn.endswith(".json"):
             continue
@@ -699,6 +699,32 @@ def replay_day(date=None, stake=10000, keirin_re=None):
         except (TypeError, ValueError):
             pass
         _book("fix_lowodds_exempt", qh=(win_q in _q_le), th=t_hit)
+        # ⑦ fix_connectors (2026-07-24 LOGIC_AUDIT — composition_miss 회수): 정답 말을 신호·유력마로
+        #   알고도 조합을 안 만들어 놓치던 유형(모순 #3·#4·#5) 대응. favAxis(시장 축) 2두를 '연결마'
+        #   = keyHorses 3위 이하(전적 상위) + confTop1(확신도 1위) 와 각각 이어 복승을 추가한다
+        #   (favAxis[0]×연결마, favAxis[1]×연결마). EV·정액 컷 무관하게 판정에 편입. 연결마 없으면 미발동.
+        #   집합에 '추가만' → 적중 ⊇ baseline. 삼복승은 baseline 유지(복승만 대상).
+        _q_cn = set(disp_q)
+        try:
+            _fav = [int(x) for x in (_cp_r.get("favAxis") or [])
+                    if str(x).strip().lstrip("-").isdigit()][:2]
+            if len(_fav) == 2:
+                _conn = []
+                for _x in ((log_doc or {}).get("keyHorses") or [])[2:]:   # keyHorses 3위 이하
+                    if str(_x).strip().lstrip("-").isdigit():
+                        _conn.append(int(_x))
+                if _cp_r.get("confTop1") is not None:                     # confTop1(확신도 1위)
+                    try:
+                        _conn.append(int(_cp_r["confTop1"]))
+                    except (TypeError, ValueError):
+                        pass
+                _conn = [c for c in dict.fromkeys(_conn) if c not in _fav]   # 중복·축 제거
+                for _c in _conn:
+                    _q_cn.add(frozenset((_fav[0], _c)))
+                    _q_cn.add(frozenset((_fav[1], _c)))
+        except (TypeError, ValueError):
+            pass
+        _book("fix_connectors", qh=(win_q in _q_cn), th=t_hit)
         # 전략① 경마 신호 게이트: 경마 & 신호 0 → 패스
         if not (sport == "horse" and sig_cnt == 0):
             _book("signal_gate")
