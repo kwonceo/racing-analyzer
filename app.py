@@ -8408,6 +8408,40 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
                 _mkt2 = set(int(x) for x in _lowc)
             except (ValueError, TypeError):
                 _mkt2 = None
+            # [축-연결 조합 EV 면제 (2026-07-24 — fix_connectors_top1 반영)] favAxis(시장 축) 2두 중 1두 +
+            #   연결마(keyHorses[2] 또는 confTop1 중 favAxis 페어 배당 낮은 1개)로 만든 복승은 EV 필터 면제.
+            #   근거: 리플레이 fix_connectors_top1 — composition_miss(정답 알고도 미편성) 회수·조합 폭증 없음
+            #   (연결마 top1·최대 2조합). 부산 4R 1+5(keyHorses 5+1) EV 0.92 강등 실증. 정액 컷·기존 면제 무변경.
+            _conn_ex = set()
+            try:
+                _favx = [int(x) for x in (cp.get("favAxis") or [])
+                         if str(x).strip().lstrip("-").isdigit()][:2]
+                if len(_favx) == 2:
+                    _cands = []
+                    _kh_all = [int(x) for x in (key_horses or [])
+                               if str(x).strip().lstrip("-").isdigit()]
+                    if len(_kh_all) >= 3:
+                        _cands.append(_kh_all[2])                 # keyHorses 3위
+                    if cp.get("confTop1") is not None:
+                        try:
+                            _cands.append(int(cp["confTop1"]))    # confTop1(확신도 1위)
+                        except (TypeError, ValueError):
+                            pass
+                    _cands = [c for c in dict.fromkeys(_cands) if c not in _favx]
+
+                    def _conn_pair_odds(_c):
+                        _oo = []
+                        for _f in _favx:
+                            _o = (curQ.get((_f, _c)) or curQ.get((_c, _f))
+                                  or curQ.get(tuple(sorted((_f, _c)))))
+                            if isinstance(_o, (int, float)) and _o > 0:
+                                _oo.append(_o)
+                        return min(_oo) if _oo else 9999.0
+                    if _cands:
+                        _conn1 = sorted(_cands, key=_conn_pair_odds)[0]   # 배당 낮은 순 1개(top1)
+                        _conn_ex = {frozenset((_favx[0], _conn1)), frozenset((_favx[1], _conn1))}
+            except (TypeError, ValueError):
+                _conn_ex = set()
             _kept3 = []
             for _q in fq:
                 _o = _q.get("odds")
@@ -8418,6 +8452,7 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
                 _rsn2 = _q.get("reason") or ""
                 _exempt = ((len(_kh2) == 2 and _combo2 == _kh2)
                            or (_mkt2 is not None and _combo2 == _mkt2)
+                           or (frozenset(_combo2) in _conn_ex)          # 축-연결 조합(favAxis×연결마 top1)
                            or any(t in _rsn2 for t in ("유력마 1·2위", "리프라이싱 리더", "라인 페어", "급락", "역배열",
                                                        "확신도", "이중수렴", "시장 최저복승", "시장유력")))
                 if _ev is not None and _ev < 1.0 and not _exempt:

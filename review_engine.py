@@ -405,6 +405,57 @@ def _sport_of(doc, rk, keirin_re):
     return "horse"
 
 
+def _fix_connector_combos(log_doc, limit=None):
+    """[fix_connectors 계열] favAxis 2두 × 연결마(keyHorses[2:] + confTop1) 복승 조합 집합.
+    limit=None → 전체 연결마 / 1·2 → favAxis 페어 최저배당 오름차순 상위 N개만(조합 폭증 억제 변형).
+    반환: 추가할 복승 frozenset 집합(disp 미포함). 연결마 없으면 빈 집합(미발동)."""
+    cp = (log_doc or {}).get("corePicks") or {}
+    fav = [int(x) for x in (cp.get("favAxis") or []) if str(x).strip().lstrip("-").isdigit()][:2]
+    if len(fav) != 2:
+        return set()
+    conn = []
+    for _x in ((log_doc or {}).get("keyHorses") or [])[2:]:      # keyHorses 3위 이하(전적 상위)
+        if str(_x).strip().lstrip("-").isdigit():
+            conn.append(int(_x))
+    if cp.get("confTop1") is not None:                           # confTop1(확신도 1위)
+        try:
+            conn.append(int(cp["confTop1"]))
+        except (TypeError, ValueError):
+            pass
+    conn = [c for c in dict.fromkeys(conn) if c not in fav]      # 중복·축 제거
+    if not conn:
+        return set()
+    if limit is not None:
+        # 연결마 랭킹: favAxis 페어 최저배당(=가장 인기) 오름차순. 배당 소스는 다중(방어).
+        odds = {}
+        _qo = cp.get("quinellaOdds")
+        if isinstance(_qo, dict):
+            for _k, _v in _qo.items():
+                try:
+                    _p = re.split(r"[+\-]", str(_k))
+                    if isinstance(_v, (int, float)) and _v > 0:
+                        odds.setdefault(frozenset((int(_p[0]), int(_p[1]))), float(_v))
+                except (ValueError, IndexError):
+                    continue
+        for _src in ("finalQuinellas", "quinellaRef", "confQuinellas"):
+            for _c in (cp.get(_src) or []):
+                _cs = _combo_set(_c.get("combo"))
+                _od = _c.get("odds")
+                if _cs and isinstance(_od, (int, float)) and _od > 0:
+                    odds.setdefault(_cs, float(_od))
+
+        def _c_odds(_c):
+            _cand = [odds.get(frozenset((fav[0], _c))), odds.get(frozenset((fav[1], _c)))]
+            _cand = [o for o in _cand if o is not None]
+            return min(_cand) if _cand else 9999.0
+        conn = sorted(conn, key=_c_odds)[:limit]
+    out = set()
+    for _c in conn:
+        out.add(frozenset((fav[0], _c)))
+        out.add(frozenset((fav[1], _c)))
+    return out
+
+
 def replay_day(date=None, stake=10000, keirin_re=None):
     """[2] 하루치를 정책별로 재생 — displayedCombos·공식 확정배당 기준 가상 성적.
     정책:
@@ -418,7 +469,8 @@ def replay_day(date=None, stake=10000, keirin_re=None):
            for p in ("baseline", "signal_gate", "lowodds_trio", "t5_freeze", "t2_freeze", "t1_freeze",
                      "t2_strong", "t2_strong_cycle",
                      "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev",
-                     "fix_lowodds_exempt", "fix_connectors")}
+                     "fix_lowodds_exempt", "fix_connectors",
+                     "fix_connectors_top1", "fix_connectors_top2")}
     for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
         if not fn.startswith(prefix) or not fn.endswith(".json"):
             continue
@@ -725,6 +777,12 @@ def replay_day(date=None, stake=10000, keirin_re=None):
         except (TypeError, ValueError):
             pass
         _book("fix_connectors", qh=(win_q in _q_cn), th=t_hit)
+        # ⑦-b/c fix_connectors_top1·top2 (연결마 상한 변형 — 조합 폭증 억제): 연결마를 favAxis 페어
+        #   최저배당 오름차순 상위 1개(top1·최대 2조합)·상위 2개(top2·최대 4조합)만 사용. 나머지 규칙 동일.
+        _book("fix_connectors_top1",
+              qh=(win_q in (set(disp_q) | _fix_connector_combos(log_doc, 1))), th=t_hit)
+        _book("fix_connectors_top2",
+              qh=(win_q in (set(disp_q) | _fix_connector_combos(log_doc, 2))), th=t_hit)
         # 전략① 경마 신호 게이트: 경마 & 신호 0 → 패스
         if not (sport == "horse" and sig_cnt == 0):
             _book("signal_gate")
