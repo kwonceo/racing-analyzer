@@ -1,25 +1,6 @@
 {
   "patterns": [
     {
-      "race": "마에바시 10경주",
-      "horse_no": 9,
-      "recent_avg": 4.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-11"
-    },
-    {
-      "race": "마쓰야마 4경주",
-      "horse_no": 7,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [
-        "급락70%",
-        "복승이상감지"
-      ],
-      "date": "2026-07-11"
-    },
-    {
       "pattern": "대규모급락",
       "raceKey": "마쓰야마 4경주",
       "total_combos_dropped": 13,
@@ -4645,16 +4626,34 @@
         "복승이상감지"
       ],
       "date": "2026-07-24"
+    },
+    {
+      "race": "와카야마 1경주",
+      "horse_no": 1,
+      "recent_avg": 4.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-24"
+    },
+    {
+      "race": "와카야마 1경주",
+      "horse_no": 6,
+      "recent_avg": 6.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-24"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1247,
-      "hit": 262
+      "count": 1249,
+      "hit": 263
     },
     "전체부진마": {
-      "count": 2086,
-      "hit": 581
+      "count": 2090,
+      "hit": 583
     },
     "대규모급락": {
       "count": 20,
@@ -4664,8 +4663,8 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 839,
-      "hit": 319
+      "count": 841,
+      "hit": 320
     },
     "급락동반": {
       "count": 174,
