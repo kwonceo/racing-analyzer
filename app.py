@@ -11454,19 +11454,20 @@ def _apply_rec_hysteresis(rk, an):
         return
     # 다른 메인 제안 → 교체 판정
     accept = False
-    # ══ [t2_strong_cycle 게이트 (2026-07-24)] 조건 A(경륜) & 조건 B(현재시각 ≥ 커트오프) & T-2 이후(마감
-    #   2분 이내)일 때만 발동: 제안 메인이 급락30%+/집중급락 말을 포함하면 예외 편입(교체), 아니면 홀드(교체
-    #   억제) → T-2 동결 명단 유지. 조건 미충족(경마·커트오프 이전·T-2 이전·발주전분 미상)은 기존 로직 그대로. ══
+    # ══ [t2_strong_all 반영 (2026-07-24) — 전 종목 확대] 조건 B(현재시각 ≥ 커트오프) & T-2 이후(마감 2분
+    #   이내)일 때 발동: 제안 메인이 급락30%+/집중급락 말을 포함하면 예외 편입(교체), 아니면 홀드(교체 억제)
+    #   → T-2 동결 명단 유지. 조건 미충족(커트오프 이전·T-2 이전·발주전분 미상)은 기존 로직 그대로.
+    #   [확대 근거] 초기엔 경륜만(t2_strong_cycle)이었으나 리플레이 t2_strong_all에서 경마 포함 시 hits
+    #   +5~9(경륜만 +2~6) → sport 조건 제거해 전 종목 적용(기존 로직 무삭제·게이트 확대만). ══
     _sp = str(an.get("sport") or "").lower()
     _mb = an.get("minutesBefore")
-    _cyc_t2 = (_sp in ("cycle", "keirin")
-               and time.time() >= CYCLE_T2_APPLY_FROM
+    _cyc_t2 = (time.time() >= CYCLE_T2_APPLY_FROM            # sport 조건 제거(전 종목) — 커트오프·T-2 게이트 유지
                and isinstance(_mb, (int, float)) and _mb <= 2)
     if _cyc_t2:
         _sh = _cycle_t2_strong_horses(an)
         accept = any(h in _sh for h in prop)         # 강급락 말 포함 조합만 교체(예외 편입)·그 외 홀드
-        an["cycleT2"] = {"applied": True, "afterT2": True, "minutesBefore": _mb,
-                         "strongHorses": sorted(_sh), "admitted": bool(accept),
+        an["cycleT2"] = {"applied": True, "afterT2": True, "minutesBefore": _mb, "sport": _sp,
+                         "scope": "all", "strongHorses": sorted(_sh), "admitted": bool(accept),
                          "proposal": "+".join(str(x) for x in prop)}
     elif st["switches"] < 2:
         _hard = False
@@ -13180,6 +13181,18 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
     }
     # 결과 분석(적중/패턴 태그)
     main_hit = bool(record.get("quinella_hit"))
+    # [main_hit 정직화 (2026-07-24)] 마감 전 실제 표시 추천(displayedCombos)이 없으면(noRec) main_hit=False.
+    #   _live_exact_hit 의 noRec 게이트 경유 — 결과입력 시 재분석 betRecommend 로 '유령 적중'(회원이 본 적
+    #   없는 추천)이 저장되던 문제 차단. ⚠ 학습 record(quinella_hit)는 무변경(표시 계층 result_analysis 만 정직화).
+    try:
+        if main_hit:
+            _t3l = [result.get("1st"), result.get("2nd"), result.get("3rd")]
+            _t3l = [int(x) for x in _t3l if x is not None]
+            _leh = _live_exact_hit(rk, _t3l) if len(_t3l) >= 2 else None
+            if _leh and _leh.get("noRec"):
+                main_hit = False
+    except Exception as _mhe:
+        print("[main_hit 정직화] 스킵(무시):", _mhe)
     sub_hit = False
     if _sub and result:
         _t2 = sorted([result.get("1st"), result.get("2nd")]) if result.get("2nd") else []
