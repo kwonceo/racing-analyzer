@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "고쿠라 5경주",
-      "horse_no": 1,
-      "recent_avg": 4.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-11"
-    },
-    {
       "race": "후쿠시마 5경주",
       "horse_no": 1,
       "recent_avg": 4.8,
@@ -4635,16 +4625,24 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-07-24"
+    },
+    {
+      "race": "부산 8경주",
+      "horse_no": 3,
+      "recent_avg": 4.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-24"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1265,
-      "hit": 267
+      "count": 1269,
+      "hit": 268
     },
     "전체부진마": {
-      "count": 2116,
-      "hit": 590
+      "count": 2120,
+      "hit": 591
     },
     "대규모급락": {
       "count": 20,
