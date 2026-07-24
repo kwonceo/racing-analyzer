@@ -28254,6 +28254,39 @@ def _auto_pred_tick(sched, now):
                         _auto_pred_saved.add(rk)
                     except Exception as _se:
                         print("[자동예상] 분석/저장 실패 %s: %s" % (rk, _se))
+        # ══ [마감 10분 전 자동 분석·기록 (2026-07-24 핵심) — 화면 없이도 전 경주 analysis_log 보장] ══
+        #   배경: analysis_log 는 프론트 폴링(/api/odds/triple/analyze)에만 의존 → 화면에서 안 본 경주는
+        #   분석·추천·복기가 생성 안 됨(개최 대비 21%만 분석되던 커버리지 붕괴). 마감 10분 이내(mb -10~0)이고
+        #   아직 로그 파일이 없는 경주를 배경에서 자동 분석·저장(_build_analysis_log). 경정·바이크 제외
+        #   (경마·경륜만). 동시 최대 6개(서버 부하 방어). 프론트 폴링 로그가 이미 있으면 스킵(중복·스팸 방지).
+        _auto_log_n = 0
+        for pe, venue, rno, rk in races:
+            if _auto_log_n >= 6:                      # 동시 최대 6개(부하 방어)
+                break
+            _left = pe - now
+            if not (0 <= _left <= 600):               # 마감 10분 전 ~ 마감(mb -10~0)
+                continue
+            if db is None:
+                db = _triple_load()
+            _rec = db.get(rk)
+            if not _rec:
+                continue                              # 배당 미수집 → 분석 불가(스킵)
+            _spx = str(_rec.get("sport") or "").lower()
+            if _spx in ("boat", "bike"):
+                continue                              # 경정·바이크 제외(경마·경륜만)
+            try:                                      # analysis_log 파일 없는 경주만
+                _lp, _, _ = _analysis_log_path(_canonical_log_key(rk))
+            except Exception:
+                _lp = None
+            if _lp and os.path.exists(_lp):
+                continue                              # 이미 기록됨(프론트 폴링 or 직전 배경) → 스킵
+            try:
+                _an_bg = _triple_analyze(rk, _rec)
+                _build_analysis_log(rk, _an_bg)       # 리치 로그 빌드+저장
+                _auto_log_n += 1
+                print("[자동분석·배경] %s: 마감 %d초 전 자동 분석·기록(로그 없던 경주·%s)" % (rk, int(_left), _spx))
+            except Exception as _ale:
+                print("[자동분석·배경] %s 실패(무시): %s" % (rk, _ale))
         # ② 발주 +15분 지난 저장 경주 → 결과 대조(결과 있으면)
         for pe, venue, rno, rk in races:
             if (now - pe) >= 900 and rk in _auto_pred_saved and rk not in _auto_pred_scored:
