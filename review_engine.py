@@ -417,7 +417,8 @@ def replay_day(date=None, stake=10000, keirin_re=None):
     pol = {p: {"judged": 0, "hits": 0, "invested": 0, "returned": 0.0, "unpaid": 0}
            for p in ("baseline", "signal_gate", "lowodds_trio", "t5_freeze", "t2_freeze", "t1_freeze",
                      "t2_strong", "t2_strong_cycle",
-                     "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev")}
+                     "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev",
+                     "fix_lowodds_exempt")}
     for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
         if not fn.startswith(prefix) or not fn.endswith(".json"):
             continue
@@ -654,6 +655,50 @@ def replay_day(date=None, stake=10000, keirin_re=None):
         except (TypeError, ValueError):
             pass
         _book("fix_backing_ev", qh=(win_q in _q_bk), th=t_hit)
+        # ⑥ fix_lowodds_exempt (2026-07-24 LOGIC_AUDIT — 정액 컷 면제): 카사마츠 4R 2+5(2.1배) 실증 —
+        #   _apply_profit_strategy 의 '2.5배/3.0배 미만 메인 제외(수익성)' 정액 컷은 EV 필터와 달리 면제가
+        #   전혀 없어 시장 1위·유력마 저배당 조합을 통째로 강등한다(quinellaRef 로 밀림). 이 정액 컷으로
+        #   강등된 조합 중 아래 4조건 중 하나라도 해당하면 판정에 되살렸을 때의 성적을 측정:
+        #     ⓐ 시장 최저배당 조합  ⓑ keyHorses 1·2위 조합  ⓒ confTop1 포함 조합  ⓓ 확신도(confQuinellas) 조합.
+        #   집합에 '추가만' → 적중 ⊇ baseline(교환손실 0). 삼복승은 baseline 유지(복승만 대상).
+        _q_le = set(disp_q)
+        try:
+            _refs_le = [r for r in (_cp_r.get("quinellaRef") or [])
+                        if isinstance(r, dict) and r.get("combo")
+                        and ("2.5배 미만" in str(r.get("refReason") or "")
+                             or "3배 이상" in str(r.get("refReason") or ""))]
+            if _refs_le:
+                # 면제 재료
+                _kh12 = frozenset(int(x) for x in (log_doc or {}).get("keyHorses", [])[:2]
+                                  if str(x).strip().lstrip("-").isdigit())
+                _ct1_le = _cp_r.get("confTop1")
+                _conf_le = set()
+                for _cq in (_cp_r.get("confQuinellas") or []):
+                    _cs = _combo_set(_cq.get("combo"))
+                    if _cs:
+                        _conf_le.add(_cs)
+                # 시장 최저 조합 = final+ref+conf 통합에서 배당 최저(odds 있는 것만)
+                _allc = []
+                for _src in ("finalQuinellas", "quinellaRef", "confQuinellas"):
+                    for _c in (_cp_r.get(_src) or []):
+                        _cs = _combo_set(_c.get("combo"))
+                        _od = _c.get("odds")
+                        if _cs and isinstance(_od, (int, float)) and _od > 0:
+                            _allc.append((_cs, float(_od)))
+                _mkt_low = min(_allc, key=lambda x: x[1])[0] if _allc else None
+                for _r in _refs_le:
+                    _rc = _combo_set(_r.get("combo"))
+                    if not _rc:
+                        continue
+                    _exempt = ((_mkt_low is not None and _rc == _mkt_low)          # ⓐ 시장 최저
+                               or (len(_kh12) == 2 and _rc == _kh12)               # ⓑ keyHorses 1·2위
+                               or (_ct1_le is not None and int(_ct1_le) in _rc)    # ⓒ confTop1 포함
+                               or (_rc in _conf_le))                                # ⓓ 확신도 조합
+                    if _exempt:
+                        _q_le.add(_rc)
+        except (TypeError, ValueError):
+            pass
+        _book("fix_lowodds_exempt", qh=(win_q in _q_le), th=t_hit)
         # 전략① 경마 신호 게이트: 경마 & 신호 0 → 패스
         if not (sport == "horse" and sig_cnt == 0):
             _book("signal_gate")

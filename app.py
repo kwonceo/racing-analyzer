@@ -8345,12 +8345,42 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
             cp["profitTier"] = dict(_tier, axis=_axis, backers=_backers,
                                     msg="⚡ 저배당 경주(최저 %s배) — 복승 대신 삼복승 집중" % _tier["minOdds"])
         else:
+            # [정액 컷 면제 (2026-07-24 LOGIC_AUDIT — 카사마츠 4R 2+5 실증)] EV 필터(아래)엔 면제가 있으나
+            #   정액 컷(2.5/3.0배 미만)엔 면제가 없어, 시장 1위·유력마 저배당 조합(2+5=2.1배)이 수익성 명목으로
+            #   통째로 강등되던 모순을 해소. ⓐ시장 최저배당 조합 ⓑkeyHorses 1·2위 ⓒconfTop1 포함 ⓓ확신도 조합
+            #   중 하나라도 해당하면 정액 컷 면제(EV 필터의 _exempt 와 동일 취지·범위 축소판).
+            #   리플레이(review_engine fix_lowodds_exempt) 7/21·22·23 검증: 악화 0·최대 +3적중·ROI 동급~+27%p.
+            _le_mkt = set(_min_pair) if _min_pair else None               # ⓐ 시장 최저배당 조합(유효 조합만)
+            _le_kh = set(int(x) for x in (key_horses or [])[:2]
+                         if str(x).strip().lstrip("-").isdigit())          # ⓑ keyHorses 1·2위
+            try:
+                _le_ct1 = int(cp.get("confTop1")) if cp.get("confTop1") is not None else None   # ⓒ confTop1
+            except (TypeError, ValueError):
+                _le_ct1 = None
+            _le_conf = set()                                              # ⓓ 확신도(confQuinellas) 조합
+            for _cq in (cp.get("confQuinellas") or []):
+                try:
+                    _cc = frozenset(int(x) for x in (_cq.get("combo") or []))
+                    if len(_cc) == 2:
+                        _le_conf.add(_cc)
+                except (TypeError, ValueError):
+                    continue
+
+            def _lowodds_exempt(_qq):
+                _cs = frozenset(int(x) for x in (_qq.get("combo") or [])
+                                if str(x).strip().lstrip("-").isdigit())
+                if len(_cs) != 2:
+                    return False
+                return ((_le_mkt is not None and set(_cs) == _le_mkt)     # ⓐ
+                        or (len(_le_kh) == 2 and set(_cs) == _le_kh)       # ⓑ
+                        or (_le_ct1 is not None and _le_ct1 in _cs)        # ⓒ
+                        or (_cs in _le_conf))                              # ⓓ
             # ── 중배당: 2.5배 미만 메인 제외 · 강급락(-30%+)시 3배+ 타겟 / 고배당: 유지 ──
             if _tier["tier"] == "mid":
                 _kept = []
                 for _q in fq:
                     _o = _q.get("odds")
-                    if _o is not None and float(_o) < 2.5:
+                    if _o is not None and float(_o) < 2.5 and not _lowodds_exempt(_q):
                         _demote(_q, "중배당 경주 — 2.5배 미만 메인 제외(수익성)")
                     else:
                         _kept.append(_q)
@@ -8359,7 +8389,7 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
                     _kept2 = []
                     for _q in fq:
                         _o = _q.get("odds")
-                        if _o is not None and float(_o) < 3.0:
+                        if _o is not None and float(_o) < 3.0 and not _lowodds_exempt(_q):
                             _demote(_q, "급락 -30%+ 강신호 — 3배 이상 타겟 우선(참고 강등)")
                         else:
                             _kept2.append(_q)
