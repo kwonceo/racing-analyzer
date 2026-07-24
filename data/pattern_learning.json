@@ -1,29 +1,6 @@
 {
   "patterns": [
     {
-      "pattern": "대규모급락",
-      "raceKey": "마쓰야마 4경주",
-      "total_combos_dropped": 13,
-      "drop_ratio": 0.619,
-      "result": "1+4",
-      "result_odds": "저배당",
-      "result_quinella_odds": 1.5,
-      "signal_result_combo": "-21.1%",
-      "recommended_hit": true,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1783772814.7893355
-    },
-    {
-      "race": "이토 5경주",
-      "horse_no": 7,
-      "recent_avg": 4.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-11"
-    },
-    {
       "race": "이토 5경주",
       "horse_no": 1,
       "recent_avg": 4.8,
@@ -4644,6 +4621,26 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-24"
+    },
+    {
+      "race": "제주 7경주",
+      "horse_no": 10,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-24"
+    },
+    {
+      "race": "제주 7경주",
+      "horse_no": 4,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-24"
     }
   ],
   "condition_stats": {
@@ -4652,8 +4649,8 @@
       "hit": 263
     },
     "전체부진마": {
-      "count": 2090,
-      "hit": 583
+      "count": 2095,
+      "hit": 585
     },
     "대규모급락": {
       "count": 20,
@@ -4663,8 +4660,8 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 841,
-      "hit": 320
+      "count": 846,
+      "hit": 322
     },
     "급락동반": {
       "count": 174,
