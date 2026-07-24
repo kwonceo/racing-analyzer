@@ -30,48 +30,6 @@
       "signal_result_combo": "-21.1%",
       "recommended_hit": true,
       "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1783772781.7742453
-    },
-    {
-      "race": "마에바시 10경주",
-      "horse_no": 3,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-11"
-    },
-    {
-      "race": "마에바시 10경주",
-      "horse_no": 9,
-      "recent_avg": 4.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-11"
-    },
-    {
-      "race": "마쓰야마 4경주",
-      "horse_no": 7,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [
-        "급락70%",
-        "복승이상감지"
-      ],
-      "date": "2026-07-11"
-    },
-    {
-      "pattern": "대규모급락",
-      "raceKey": "마쓰야마 4경주",
-      "total_combos_dropped": 13,
-      "drop_ratio": 0.619,
-      "result": "1+4",
-      "result_odds": "저배당",
-      "result_quinella_odds": 1.5,
-      "signal_result_combo": "-21.1%",
-      "recommended_hit": true,
-      "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1783772814.7893355
     },
     {
@@ -4649,16 +4607,54 @@
         "복승이상감지"
       ],
       "date": "2026-07-24"
+    },
+    {
+      "race": "제주 6경주",
+      "horse_no": 8,
+      "recent_avg": 4.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-24"
+    },
+    {
+      "race": "부산 5경주",
+      "horse_no": 4,
+      "recent_avg": 6.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-24"
+    },
+    {
+      "race": "부산 5경주",
+      "horse_no": 10,
+      "recent_avg": 4.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-24"
+    },
+    {
+      "race": "부산 5경주",
+      "horse_no": 3,
+      "recent_avg": 4.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-24"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1240,
-      "hit": 261
+      "count": 1247,
+      "hit": 262
     },
     "전체부진마": {
-      "count": 2073,
-      "hit": 577
+      "count": 2086,
+      "hit": 581
     },
     "대규모급락": {
       "count": 20,
@@ -4668,8 +4664,8 @@
       "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 833,
-      "hit": 316
+      "count": 839,
+      "hit": 319
     },
     "급락동반": {
       "count": 174,
