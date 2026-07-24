@@ -11315,6 +11315,39 @@ _REC_HYST = {}   # {rk: {"main": (a,b), "item": dict, "streak_m": (a,b)|None, "s
 #   마감 후 _triple_analyze 가 이 값을 반환(locked=True). 재시작 시 분석 로그 corePicks.raceGrade 복원.
 _GRADE_LOCK = {}
 
+# ══ [t2_strong_cycle 라이브 반영 (2026-07-24) — 경륜만·커트오프 이후] ══
+#   리플레이(review_engine t2_strong_cycle) 검증 결과 경륜에서 '마감 2분(T-2) 내 교체가 잡은 정답을
+#   버린다'가 실증(7/22 경륜 적중 13→18·caught_then_lost 다수 회수). 이를 라이브에 반영하되:
+#     · 경마(horse)는 무개입(현행 유지) — 경륜에서만 우위였고 경마는 동결이 손해인 날 존재.
+#     · '오늘 이후 경주부터'만 적용(과거 판정·회원 발송본 소급 변경 금지) — 아래 커트오프 시각 게이트.
+#   현재 시각(2026-07-24 12:17) 확인 → 다음 정시 13:00 을 적용 시작점으로 고정.
+try:
+    CYCLE_T2_APPLY_FROM = time.mktime(time.strptime("2026-07-24 13:00:00", "%Y-%m-%d %H:%M:%S"))
+except Exception:
+    CYCLE_T2_APPLY_FROM = 0.0
+
+
+def _cycle_t2_strong_horses(an):
+    """[t2_strong_cycle 예외 편입 판정] 마감 2분(T-2) 이후 '급락 30%+' 또는 '집중급락' 신호에 걸린 말 집합.
+    이 말을 포함한 제안 조합만 T-2 동결 명단을 뚫고 교체 허용(그 외는 홀드=교체 억제). 판정용·읽기 전용."""
+    out = set()
+    for _d in (an.get("drops") or []):               # 복승 급락(pct=음수 퍼센트, -30 이하 = 30%+ 급락)
+        try:
+            if _d.get("pct") is not None and float(_d["pct"]) <= ALERT_DROP_THRESH:
+                for _h in (_d.get("combo") or []):
+                    out.add(int(_h))
+        except (TypeError, ValueError):
+            continue
+    for _s in ((an.get("strongSignals") or {}).get("signals") or []):   # 집중급락(말 단위)
+        _txt = str(_s.get("label") or "") + str(_s.get("detail") or "")
+        if "집중급락" in _txt:
+            for _h in (_s.get("horses") or []):
+                try:
+                    out.add(int(_h))
+                except (TypeError, ValueError):
+                    continue
+    return out
+
 
 def _apply_rec_hysteresis(rk, an):
     today = time.strftime("%Y-%m-%d")
@@ -11340,7 +11373,21 @@ def _apply_rec_hysteresis(rk, an):
         return
     # 다른 메인 제안 → 교체 판정
     accept = False
-    if st["switches"] < 2:
+    # ══ [t2_strong_cycle 게이트 (2026-07-24)] 조건 A(경륜) & 조건 B(현재시각 ≥ 커트오프) & T-2 이후(마감
+    #   2분 이내)일 때만 발동: 제안 메인이 급락30%+/집중급락 말을 포함하면 예외 편입(교체), 아니면 홀드(교체
+    #   억제) → T-2 동결 명단 유지. 조건 미충족(경마·커트오프 이전·T-2 이전·발주전분 미상)은 기존 로직 그대로. ══
+    _sp = str(an.get("sport") or "").lower()
+    _mb = an.get("minutesBefore")
+    _cyc_t2 = (_sp in ("cycle", "keirin")
+               and time.time() >= CYCLE_T2_APPLY_FROM
+               and isinstance(_mb, (int, float)) and _mb <= 2)
+    if _cyc_t2:
+        _sh = _cycle_t2_strong_horses(an)
+        accept = any(h in _sh for h in prop)         # 강급락 말 포함 조합만 교체(예외 편입)·그 외 홀드
+        an["cycleT2"] = {"applied": True, "afterT2": True, "minutesBefore": _mb,
+                         "strongHorses": sorted(_sh), "admitted": bool(accept),
+                         "proposal": "+".join(str(x) for x in prop)}
+    elif st["switches"] < 2:
         _hard = False
         try:
             _sstxt = json.dumps(an.get("strongSignals") or {}, ensure_ascii=False)
