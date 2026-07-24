@@ -7257,20 +7257,19 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 except Exception:
                     pass
             _nh_main = len(_hset)
-        # [상한 상향 (2026-07-24) — 부산 4R 5+9=21.9 통째 탈락 실증·리플레이 fix_odds_cap_new 검증]
-        #   구값(10/15/20/25/30)은 시장 상위 인기 조합(급락 동반)이 메인 상한에 걸려 _final_picks에서 통째
-        #   탈락하던 문제. 리플레이 7/21~24 신값 적용 시 전체 순증 +14·경륜 +11(악화 0). 경마만 상향(경륜·경정·
-        #   바이크 분기는 위에서 현행 유지). ~9두 30 · 10~11두 40 · 12~13두 50 · 14~15두 60 · 16두+ 70.
+        # [상한 조정 (2026-07-24) — 40~70배 과대 축소] 초기 상향(30/40/50/60/70)은 고배당 조합이 메인에
+        #   과다 편입돼 회원 체감·실투자 부담 우려 → 보수적 재조정. 구구값(10/15/20/25/30)과 초기상향의 중간.
+        #   경마만 적용(경륜·경정·바이크 분기는 위에서 현행 유지). ~9두 20 · 10~11두 25 · 12~13두 30 · 14~15두 30 · 16두+ 35.
         if _nh_main >= 16:
-            MAIN_ODDS_MAX = 70.0
+            MAIN_ODDS_MAX = 35.0
         elif _nh_main >= 14:
-            MAIN_ODDS_MAX = 60.0
-        elif _nh_main >= 12:
-            MAIN_ODDS_MAX = 50.0
-        elif _nh_main >= 10:
-            MAIN_ODDS_MAX = 40.0
-        else:
             MAIN_ODDS_MAX = 30.0
+        elif _nh_main >= 12:
+            MAIN_ODDS_MAX = 30.0
+        elif _nh_main >= 10:
+            MAIN_ODDS_MAX = 25.0
+        else:
+            MAIN_ODDS_MAX = 20.0
         SPECIAL_ODDS_MIN = MAIN_ODDS_MAX   # 특별 하한 = 메인 상한(메인 끝나는 지점부터 BMED 특별 💎)
     SPECIAL_ODDS_MAX = 50.0       # 특별 상한(50배 초과 제외·근거 약함)
     DROP_STRONG_PCT = 15.0        # 강신호: 급락 15%+
