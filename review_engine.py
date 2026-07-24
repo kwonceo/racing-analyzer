@@ -456,6 +456,24 @@ def _fix_connector_combos(log_doc, limit=None):
     return out
 
 
+def _new_odds_cap(nh):
+    """[fix_odds_cap_new] 두수별 메인 상한 상향안 — 현재 10/15/20/25/30 → 30/40/50/60/70(증분 +10 일정).
+    ≤9두 30 · 10~11두 40 · 12~13두 50 · 14~16두 60 · 17두+ 70."""
+    try:
+        nh = int(nh)
+    except (TypeError, ValueError):
+        return 30.0
+    if nh <= 9:
+        return 30.0
+    if nh <= 11:
+        return 40.0
+    if nh <= 13:
+        return 50.0
+    if nh <= 16:
+        return 60.0
+    return 70.0
+
+
 def replay_day(date=None, stake=10000, keirin_re=None):
     """[2] 하루치를 정책별로 재생 — displayedCombos·공식 확정배당 기준 가상 성적.
     정책:
@@ -470,7 +488,7 @@ def replay_day(date=None, stake=10000, keirin_re=None):
                      "t2_strong", "t2_strong_cycle",
                      "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev",
                      "fix_lowodds_exempt", "fix_connectors",
-                     "fix_connectors_top1", "fix_connectors_top2")}
+                     "fix_connectors_top1", "fix_connectors_top2", "fix_odds_cap_new")}
     for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
         if not fn.startswith(prefix) or not fn.endswith(".json"):
             continue
@@ -783,6 +801,23 @@ def replay_day(date=None, stake=10000, keirin_re=None):
               qh=(win_q in (set(disp_q) | _fix_connector_combos(log_doc, 1))), th=t_hit)
         _book("fix_connectors_top2",
               qh=(win_q in (set(disp_q) | _fix_connector_combos(log_doc, 2))), th=t_hit)
+        # ⑧ fix_odds_cap_new (2026-07-24 — 부산 4R 5+9=21.9 실증): _final_picks 메인 상한(MAIN_ODDS_MAX)을
+        #   두수별 상향(9↓30·10-11 40·12-13 50·14-16 60·17+ 70)했을 때 confQuinellas 중 신규 상한 이하 조합을
+        #   메인 편입했을 성적. 현재 상한(10~30)에 걸려 _final_picks에서 통째 탈락하던 시장 상위 조합 회수 측정.
+        _q_oc = set(disp_q)
+        try:
+            _nh_oc = (_cp_r.get("raceHorseCount")
+                      or len((log_doc or {}).get("horses") or [])
+                      or doc.get("horse_count") or 0)
+            _cap_oc = _new_odds_cap(_nh_oc)
+            for _cq in (_cp_r.get("confQuinellas") or []):
+                _cs = _combo_set(_cq.get("combo"))
+                _od = _cq.get("odds")
+                if _cs and len(_cs) == 2 and isinstance(_od, (int, float)) and 0 < _od <= _cap_oc:
+                    _q_oc.add(_cs)
+        except (TypeError, ValueError):
+            pass
+        _book("fix_odds_cap_new", qh=(win_q in _q_oc), th=t_hit)
         # 전략① 경마 신호 게이트: 경마 & 신호 0 → 패스
         if not (sport == "horse" and sig_cnt == 0):
             _book("signal_gate")
