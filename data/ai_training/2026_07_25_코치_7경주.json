@@ -1,0 +1,323 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_25_코치_7경주",
+ "race_info": {
+  "date": "2026-07-25",
+  "track": "코치",
+  "round": 7,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 11,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "드림릿지",
+   "jockey": "용호",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    2
+   ],
+   "record_score": 119.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 11,
+   "name": "에브리타",
+   "jockey": "이야",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    2
+   ],
+   "record_score": 105,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "주풍령",
+   "jockey": "실바",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    4
+   ],
+   "record_score": 83.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "글로벌서",
+   "jockey": "코지",
+   "jockey_winrate": 35.8,
+   "recent_results": [
+    2,
+    5
+   ],
+   "record_score": 72.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "송암스카",
+   "jockey": "옥성",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    4
+   ],
+   "record_score": 69.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "벽송",
+   "jockey": "성현",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    4
+   ],
+   "record_score": 69.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "베스트드",
+   "jockey": "기원",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    5
+   ],
+   "record_score": 58.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "스톡크라",
+   "jockey": "이혁",
+   "jockey_winrate": 28.4,
+   "recent_results": [],
+   "record_score": 35,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "새로운가",
+   "jockey": "상범",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    5
+   ],
+   "record_score": 34.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 10,
+   "name": "아모스맨",
+   "jockey": "정희",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 20,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "제이에스",
+   "jockey": "정준",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "19:16:07",
+    "quinella": {
+     "6+11": 1.6,
+     "1+6": 7.5,
+     "1+11": 9.8,
+     "4+6": 11.1,
+     "4+11": 16.4,
+     "6+9": 28.8,
+     "1+4": 34.7,
+     "10+11": 38.8,
+     "9+11": 47.2,
+     "6+10": 47.3,
+     "11+12": 57.1,
+     "1+10": 71.6,
+     "6+12": 73.8,
+     "3+6": 107.5,
+     "3+11": 114.9,
+     "4+10": 128.5,
+     "1+9": 133.5,
+     "1+12": 134.4,
+     "5+6": 142.1,
+     "8+11": 143.8,
+     "5+11": 168.9,
+     "4+9": 180.2,
+     "1+3": 185.1,
+     "6+8": 206.1,
+     "2+11": 219.2,
+     "2+6": 236.9,
+     "7+11": 243.4,
+     "6+7": 267.6,
+     "4+12": 272.3,
+     "9+10": 273.6,
+     "10+12": 276.0,
+     "1+5": 282.3,
+     "3+4": 313.8,
+     "2+4": 391.3,
+     "1+2": 404.1,
+     "1+8": 423.5,
+     "4+5": 432.4,
+     "5+10": 479.3,
+     "1+7": 511.0,
+     "5+9": 528.5,
+     "9+12": 562.1,
+     "3+9": 600.3,
+     "3+10": 630.9,
+     "4+8": 754.0,
+     "4+7": 803.0,
+     "2+3": 824.4,
+     "2+10": 835.6,
+     "3+7": 883.3,
+     "3+5": 896.1,
+     "8+10": 909.3,
+     "2+12": 981.5,
+     "2+9": 1066.1,
+     "5+12": 1084.8,
+     "2+8": 1124.2,
+     "2+5": 1166.6,
+     "5+8": 1189.1,
+     "7+10": 1189.1,
+     "7+9": 1236.6,
+     "8+9": 1288.2,
+     "2+7": 1374.1,
+     "3+12": 1438.0,
+     "5+7": 1545.8,
+     "8+12": 1585.5,
+     "3+8": 1671.2,
+     "7+12": 1717.6,
+     "7+8": 1818.6
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.746,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   4,
+   6,
+   9,
+   10,
+   11,
+   12,
+   3,
+   5,
+   8,
+   2,
+   7
+  ],
+  "eliminated": [],
+  "recommend": "6+11",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 11,
+  "2nd": 6,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중"
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 11,
+  "second": 6,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-25 19:23:08",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
