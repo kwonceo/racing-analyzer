@@ -28048,18 +28048,29 @@ def _timeline_snap_tick(races, now, db):
                 if (_fq2 or _ft2) and (_fq2 != _sq2 or _ft2 != _st2):
                     _fmt2 = lambda cs: " · ".join("+".join(map(str, c)) for c in sorted(cs))
                     _ln2 = []
-                    if _fq2 - _sq2:
-                        _ln2.append("복승 추가: " + _fmt2(_fq2 - _sq2))
-                    if _sq2 - _fq2:
-                        _ln2.append("복승 제외: " + _fmt2(_sq2 - _fq2))
-                    if _ft2 - _st2:
-                        _ln2.append("삼복승 추가: " + _fmt2(_ft2 - _st2))
-                    if _st2 - _ft2:
-                        _ln2.append("삼복승 제외: " + _fmt2(_st2 - _ft2))
+                    # [T-2 번복 차단 (2026-07-25 제주1R)] 마감 2분 이내(mb<=2)엔 회원이 이미 매수한 판을
+                    #   뒤집는 알림을 발송하지 않는다. 삼복승 꼬리 변경·복승 제외/교체는 침묵.
+                    #   아무것도 빠지지 않은 '순수 추가'(방어 조합)만 "추가 방어" 문구로 고지(기존 픽 유지 → 번복 아님).
+                    _after_t2 = left <= 120
+                    _title2 = "🔁 %s 추천 변경" % rk
+                    if _after_t2:
+                        if (_fq2 - _sq2) and not (_sq2 - _fq2):
+                            _ln2.append("복승 추가 방어: " + _fmt2(_fq2 - _sq2))
+                            _title2 = "➕ %s 추가 방어" % rk
+                        # 그 외(복승 제외·교체·삼복승 변경)는 T-2 이후 발송 안 함 → _ln2 비어 무발송
+                    else:
+                        if _fq2 - _sq2:
+                            _ln2.append("복승 추가: " + _fmt2(_fq2 - _sq2))
+                        if _sq2 - _fq2:
+                            _ln2.append("복승 제외: " + _fmt2(_sq2 - _fq2))
+                        if _ft2 - _st2:
+                            _ln2.append("삼복승 추가: " + _fmt2(_ft2 - _st2))
+                        if _st2 - _ft2:
+                            _ln2.append("삼복승 제외: " + _fmt2(_st2 - _ft2))
                     if _ln2:
                         _mn2 = max(1, int(left // 60))
-                        _sr2 = _kakao_send_to_me("[적중왕] 🔁 %s 추천 변경 (마감 약 %d분 전)\n" % (rk, _mn2)
-                                                 + "\n".join(_ln2) + "\n※ 아직 구매 가능한 시간입니다")
+                        _sr2 = _kakao_send_to_me("[적중왕] %s (마감 약 %d분 전)\n" % (_title2, _mn2)
+                                                 + "\n".join(_ln2))
                         if _sr2.get("ok"):
                             _ks_l["quinellas"] = [list(c) for c in _fq2]
                             _ks_l["trifectas"] = [list(c) for c in _ft2]

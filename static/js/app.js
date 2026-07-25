@@ -2393,7 +2393,7 @@
     //   1·2·3번이 나란히 표시(마쓰도 1R). 실제 유력마 순위(keyHorses)로 표시하고 득점·배당은 마번 매칭.
     const _ehAll = ((a.elimination || {}).horses || []);
     const _ehMap = {}; _ehAll.forEach((h) => { if (h && h.no != null) _ehMap[Number(h.no)] = h; });
-    const _kh3 = (a.keyHorses || []).slice(0, 3).map(Number).filter((n) => !isNaN(n));
+    const _kh3 = _starHorses(a).slice(0, 3).map(Number).filter((n) => !isNaN(n));
     const eh = _kh3.length ? _kh3.map((n) => (_ehMap[n] || { no: n })) : _ehAll.slice(0, 3);
     if (eh.length) {
       S.push(`<div style="margin:4px 0;padding:10px 12px;border:1px solid #38d39f;border-radius:10px;background:rgba(56,211,159,.05)">
@@ -4154,6 +4154,15 @@
       || ((reprMap[Number(x)] == null ? 1e9 : reprMap[Number(x)]) - (reprMap[Number(y)] == null ? 1e9 : reprMap[Number(y)]))
       || (Number(x) - Number(y)));
   }
+  // [⭐ 캡 프론트 배선 (2026-07-25)] 서버 _final_picks가 두수별 상한으로 캡한 corePicks.starHorses가 있으면
+  //   ⭐ 유력마 마커에 그것을 사용(8~9두:3 / 10~11두:4 / 12두+:5). 없으면 기존 keyHorses 폴백(무삭제).
+  //   판정 명단(displayedCombos)·keyHorses 로직은 무변경 — 표시 마커만 캡.
+  function _starHorses(a) {
+    const cp = (a && a.corePicks) || {};
+    const s = cp.starHorses;
+    if (Array.isArray(s) && s.length) return s;
+    return (a && a.keyHorses) || [];
+  }
 
   // [배당 흐름 기반 제거·2/4번] 흐름 좋은 고배당 추천(💎) + 흐름 없는 말 제거(🔴).
   //   "들어올 말 찾기 → 안 들어올 말 제거". 서버 flowScores/flowRemoval/highOddsCandidates 소비.
@@ -4487,7 +4496,7 @@
     const ranks = (a.rankChanges || []).slice(0, 6).map((r) =>
       `<span class="chip">${r.combo[0]}-${r.combo[1]} ${r.prevRank}위→${r.curRank}위 (${r.delta > 0 ? '▲' : '▼'}${Math.abs(r.delta)})</span>`).join(' ');
     // [유력마 통일] ⭐유력마 라인도 TOP5와 동일 기준(복승 대표배당 낮은 순 + 이상감지 상위)으로 정렬 표시.
-    const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    const keyH = _marketOrderNos(a, _starHorses(a).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     el.innerHTML = `
       ${renderCorePicks(a)}
       ${renderDarkHighlight(a)}
@@ -5139,8 +5148,8 @@
     const an = d.analysis;
     if (!an) return '<p class="hint" style="margin:6px 0">※ 당시 분석 데이터가 없습니다(구버전 수집분). 다음 경주부터 복기 정보가 표시됩니다.</p>';
     const parts = [];
-    if ((an.keyHorses || []).length) {
-      parts.push(`<div style="margin:6px 0"><b>⭐ 유력마</b> ${an.keyHorses.join(' · ')}${an.anomalyHorse != null ? ` <span class="hint">(이상감지말 ${an.anomalyHorse})</span>` : ''}</div>`);
+    if (_starHorses(an).length) {
+      parts.push(`<div style="margin:6px 0"><b>⭐ 유력마</b> ${_starHorses(an).join(' · ')}${an.anomalyHorse != null ? ` <span class="hint">(이상감지말 ${an.anomalyHorse})</span>` : ''}</div>`);
     }
     const formHtml = renderFormGrades(an.form);
     if (formHtml) parts.push(formHtml);
@@ -6669,7 +6678,7 @@
     if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
     state.koreaLastInteg = a;   // [1번] 예산 변경 시 베팅 금액 재계산용
     // [유력마 통일] ⭐유력마 라인도 TOP5와 동일 기준(복승 대표배당 낮은 순 + 이상감지 상위)으로 정렬 표시.
-    const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    const keyH = _marketOrderNos(a, _starHorses(a).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     // [1번] 제거분석 패널 재사용: id 충돌 방지 위해 패널 id 치환. 아래에서 클릭 토글 핸들러 연결.
     const elimHtml = renderEliminationHTML(a.elimination).replace('id="elimPanel"', 'id="koreaElimPanel"');
     // [실시간 배당 분석·편의] 일본 탭에만 있던 실시간 표시(마감 N분전 배지·급락 경고 배너·추천 근거)를
@@ -7366,7 +7375,7 @@
     if (!a || a.error || a.waiting) { host.innerHTML = ''; return; }
     state.jpLastInteg = a;   // [1번] 예산 변경 시 베팅 금액 재계산용
     // [유력마 통일] ⭐유력마 라인도 TOP5와 동일 기준(복승 대표배당 낮은 순 + 이상감지 상위)으로 정렬 표시.
-    const keyH = _marketOrderNos(a, (a.keyHorses || []).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
+    const keyH = _marketOrderNos(a, _starHorses(a).map(Number)).map((h) => `<b style="color:#4ea1ff">${h}</b>`).join(' · ');
     // [1번] 전적 점수별 말 목록(출마표2 등급표) + 제거 분석(읽기전용) 복원
     const formHtml = renderFormGrades(a.form);
     const elimHtml = renderEliminationHTML(a.elimination, new Set()).replace('id="elimPanel"', 'id="jpElimPanel"');
