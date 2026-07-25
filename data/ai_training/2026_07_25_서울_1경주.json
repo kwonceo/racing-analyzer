@@ -1,0 +1,231 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_25_서울_1경주",
+ "race_info": {
+  "date": "2026-07-25",
+  "track": "서울",
+  "round": 1,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 8,
+   "name": "마호",
+   "jockey": "승완",
+   "jockey_winrate": null,
+   "recent_results": [
+    1
+   ],
+   "record_score": 135,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "사우디삭",
+   "jockey": "정희",
+   "jockey_winrate": null,
+   "recent_results": [
+    2
+   ],
+   "record_score": 115,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "슈프림다",
+   "jockey": "인철",
+   "jockey_winrate": null,
+   "recent_results": [
+    2
+   ],
+   "record_score": 110,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "진격의돌",
+   "jockey": "상범",
+   "jockey_winrate": null,
+   "recent_results": [
+    4
+   ],
+   "record_score": 50,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "마이티허",
+   "jockey": "태희",
+   "jockey_winrate": null,
+   "recent_results": [
+    5
+   ],
+   "record_score": 30,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "원평크라",
+   "jockey": "다빈",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "가라카이",
+   "jockey": "추열",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "마이티형",
+   "jockey": "이아",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "10:42:20",
+    "quinella": {
+     "5+8": 1.7,
+     "3+8": 9.0,
+     "4+5": 10.6,
+     "3+5": 11.2,
+     "2+8": 12.0,
+     "2+5": 12.3,
+     "4+8": 12.4,
+     "2+3": 35.7,
+     "2+4": 38.9,
+     "3+4": 39.2,
+     "1+8": 44.7,
+     "7+8": 50.5,
+     "1+5": 56.8,
+     "5+7": 63.8,
+     "6+8": 74.4,
+     "1+2": 100.0,
+     "1+3": 100.0,
+     "1+4": 100.0,
+     "1+6": 100.0,
+     "1+7": 100.0,
+     "2+6": 100.0,
+     "2+7": 100.0,
+     "3+6": 100.0,
+     "3+7": 100.0,
+     "4+6": 100.0,
+     "4+7": 100.0,
+     "5+6": 100.0,
+     "6+7": 100.0
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.772,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   8,
+   7
+  ],
+  "eliminated": [],
+  "recommend": "5+8",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 8,
+  "2nd": 5,
+  "3rd": 3,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 8,
+  "second": 5,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-25 11:37:54",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
