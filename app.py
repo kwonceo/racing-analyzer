@@ -7497,7 +7497,8 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         _f12 = tuple(sorted(_fav12[:2]))
         _f12o = curQ.get(_f12) or curQ.get((_f12[1], _f12[0]))
         # 단통(≤1.5배) 아니고 유효 조합일 때만 최우선(단통은 dansungPlan 이 별도 처리)
-        if _f12o and not (DANSUNG and _f12o <= DANSUNG_ODDS):
+        # [2026-07-25] MAIN_ODDS_MAX 초과 조합 강제 1순위 삽입 금지
+        if _f12o and not (DANSUNG and _f12o <= DANSUNG_ODDS) and float(_f12o) <= MAIN_ODDS_MAX:
             _rest = [q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) != _f12]
             _f12item = next((q for q in final_q if tuple(sorted(int(x) for x in (q.get("combo") or []))) == _f12), None)
             if not _f12item:
