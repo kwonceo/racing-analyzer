@@ -2242,7 +2242,8 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                 or {"cycle": "cycle", "boat": "boat", "bike": "bike"}.get(sport, "japan_local"))
     db[rk] = {"quinella": q, "exacta": x, "trio": tr, "win": win, "history": hist,
               "source": source, "sport": sport, "category": category, "t": now,
-              "flipSuspectCnt": 0,   # [혼입 가드] 정상 수용 시 의심 카운터 리셋
+              "flipSuspectCnt": 0,
+              "lastValidCurQ": (_odds_map_un(q) if q else prev.get("lastValidCurQ") or {}),   # [혼입 가드] 정상 수용 시 의심 카운터 리셋
               # [검역 보강 (2026-07-23 다마노 11R)] 발주시각을 rec에 저장 — 저장 안 하면 다음 ingest의
               #   prev.get("deadline")이 항상 빈 값이라 마감 후 혼입(_closed_g)·발주시각 불일치(_dl_mismatch)
               #   검역이 한 번도 발동 못 함(사문화). 이번 수집에 deadline 없으면 이전 값 유지(기준 재설정 시 제외).
@@ -9188,6 +9189,11 @@ def _triple_analyze(rk, rec):
     prev = hist[-2] if len(hist) >= 2 else None  # 직전 수집
 
     curQ = _odds_map_un(quin)
+    if not curQ:
+        _fallback_q = rec.get("lastValidCurQ") or {}
+        if _fallback_q:
+            curQ = _fallback_q
+            print(f"[lastValidCurQ 폴백] {rk}: curQ 소실 → 마지막 유효 배당 사용({len(curQ)}개)")
     prevQ = _odds_map_un(prev.get("quinella")) if prev else {}
 
     # [경주전환 방어] 직전 대비 다수 조합 95%+ 급락 = 다른 경주 배당 잔존 → 기준값 재설정(변동 계산 안 함)
