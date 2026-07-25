@@ -12693,11 +12693,16 @@ def _analysis_log_path(rk):
     return os.path.join(ANALYSIS_LOG_DIR, safe + ".json"), date, race
 
 
-def _canonical_log_key(rk):
+def _canonical_log_key(rk, live=False):
     """[중복 key 근본 방지] 같은 경주가 다른 표기(한글 '모리오카 1경주' / 한자 '2026-07-07 盛岡 1R')로
     이미 오늘 로그가 있으면 **그 기존 key를 재사용**해 한 파일에 합친다(중복 로그·미입력 중복 제거).
     - 자기 파일이 이미 있으면 그대로(rk).
-    - 없을 때만 오늘·(트랙+라운드) 일치하는 기존 로그를 파일명으로 스캔(경량, doc 1개만 읽음)."""
+    - 없을 때만 오늘·(트랙+라운드) 일치하는 기존 로그를 파일명으로 스캔(경량, doc 1개만 읽음).
+    [라이브/결과 경로 분리 (2026-07-25 긴급) — 과거 파일 오염 차단] live=True(라이브 분석·afterClose 아님)면
+    최근 3일 same-track+round 과거 파일 라우팅을 **금지**하고 오늘 날짜 파일만 사용(없으면 새로 생성).
+    ⚠ 배경: 매일 개최되는 트랙(오다와라 등)에서 오늘 라이브 분석이 '오늘 파일 없음'→최근 과거 파일로
+    라우팅돼 이틀 전 로그에 오늘 배당·rec_history를 덮어쓰던 심각 버그(2026-07-25 오다와라 1~6 실측).
+    과거 파일 매칭은 오직 결과 입력(자정 넘김 방어·live=False)에서만 허용."""
     def _doc_has_recs(d):
         cp = (d or {}).get("corePicks") or {}
         return bool(cp.get("finalQuinellas") or cp.get("finalTrifectas")
@@ -12711,6 +12716,8 @@ def _canonical_log_key(rk):
                     return rk
             except Exception:
                 return rk
+        if live:
+            return rk   # [라이브] 과거 파일 라우팅 금지 — 오늘 날짜 파일만(없으면 _analysis_log_path가 오늘로 생성)
         area, num = _area_num(rk)
         if num is None or not area or not os.path.isdir(ANALYSIS_LOG_DIR):
             return rk
@@ -12762,7 +12769,10 @@ def _build_analysis_log(rk, an=None):
     rec = _triple_load().get(rk) or {}
     if an is None:
         an = _triple_analyze(rk, rec)
-    rk = _canonical_log_key(rk)   # [중복 key 근본 방지] 같은 경주면 기존 로그 key 재사용
+    # [라이브/결과 경로 분리 (2026-07-25 긴급)] 라이브 분석(afterClose 아님)은 과거 파일 라우팅 금지 —
+    #   오늘 라이브 경주가 이틀 전 같은 트랙+라운드 파일에 기록돼 과거 로그를 오염시키던 버그 차단.
+    _live_analyze = not bool((an or {}).get("afterClose"))
+    rk = _canonical_log_key(rk, live=_live_analyze)   # [중복 key 근본 방지] 결과입력(afterClose)만 과거 매칭 허용
     path, date, race = _analysis_log_path(rk)
     try:
         doc = json.load(open(path, encoding="utf-8"))
