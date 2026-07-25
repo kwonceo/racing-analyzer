@@ -7407,6 +7407,26 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                             "stars": c.get("stars", 2), "basis": _combo_basis(c["combo"])})
             if len(final_q) >= max_q:
                 break
+        # [fix_conf_no_signal 2026-07-25] 신호전무+확신도수렴 경주 복승 누락 회수
+        # 조건: sig=0 AND confQuinellas[0].combo==frozenset(favAxis) → 해당 조합 강제 편입
+        if not sig and len(final_q) == 0:
+            _conf_qs = cp.get('confQuinellas') or []
+            _fav_ax = [int(x) for x in (cp.get('favAxis') or []) if str(x).strip().lstrip('-').isdigit()]
+            if _conf_qs and len(_fav_ax) >= 2:
+                _fav_set = frozenset(_fav_ax[:2])
+                _cq0 = frozenset(int(x) for x in (_conf_qs[0].get('combo') or []))
+                if _cq0 and _cq0 == _fav_set:
+                    for _cqi in _conf_qs:
+                        _cqc = _cqi.get('combo') or []
+                        if len(_cqc) == 2 and _vpair(_cqc):
+                            _ck = tuple(sorted(int(x) for x in _cqc))
+                            if _ck not in seen_q:
+                                seen_q.add(_ck)
+                                _cqo = _cqi.get('odds')
+                                if not (DANSUNG and _cqo and float(_cqo) <= DANSUNG_ODDS):
+                                    final_q.append({'combo': list(_cqc), 'odds': _cqo,
+                                                    'reason': '신호전무·확신도수렴 회수',
+                                                    'stars': 3, 'basis': _combo_basis(list(_cqc))})
     else:
         # [개편] 신호 있는 경주 — 저배당+신호=메인 / 고배당+강신호=BMED특별 / 그 외 제외
         _main_cand, _spec_cand = [], []
