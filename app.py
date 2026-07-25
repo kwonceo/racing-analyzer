@@ -8187,8 +8187,22 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     except Exception as _se:
         print("[시나리오] 생성 실패(무시):", _se)
 
+    # [단통 표시 검증 (2026-07-25) — 오염 데이터 방어] 최저복승(_min_q=dansungMinOdds)이 나머지 조합과 크게
+    #   동떨어진 이상 저배당이면(사설/오염 배당이 만든 가짜 최저) 단통 오판 → 배지만 숨김(편성·판정 명단 무변경).
+    #   기준: 2번째 최저 복승이 최저의 1.5배 초과면 최저를 고립 이상치(오염 의심)로 간주.
+    _dansung_suspect = False
+    if DANSUNG and _min_q:
+        try:
+            _valid_odds = sorted(float(_do) for (_da, _db), _do in (curQ or {}).items()
+                                 if _do and float(_do) > 0 and (not vs or (int(_da) in vs and int(_db) in vs)))
+            if len(_valid_odds) >= 2 and _valid_odds[1] > float(_min_q) * 1.5:
+                _dansung_suspect = True
+        except (TypeError, ValueError):
+            _dansung_suspect = False
     return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
-            "dansung": DANSUNG, "dansungMinOdds": _min_q, "dansungPlan": dansung_plan,
+            # [배지 숨김] 오염 의심 시 dansung 표시 플래그만 False(배지 미표시) — dansungPlan/편성은 보존(판정 무관)
+            "dansung": bool(DANSUNG and not _dansung_suspect), "dansungSuspect": _dansung_suspect,
+            "dansungMinOdds": _min_q, "dansungPlan": dansung_plan,
             "axisPlan": axis_plan, "qMainCheck": qmain_check, "scenarioPlan": scenario_plan}
 
 
@@ -11108,6 +11122,27 @@ def _triple_analyze(rk, rec):
             except Exception as _est_e:
                 print("[삼복승 추정표기] 스킵(무시):", _est_e)
             core_picks["raceHorseCount"] = _nh                     # [표시] 출전 두수
+            # [⭐ 표시 두수별 상한 캡 (2026-07-25) — 판정 명단 무변경·표시만] finalQuinellas(=displayedCombos 복승)
+            #   등장 말을 두수별 상한(≤9두 3·10~11두 4·12두+ 5)으로 잘라 starHorses 제공. 프론트 ⭐ 마커는 이 목록만
+            #   표시(8두에 4~5 ⭐ 과다표시 억제). displayedCombos·finalQuinellas·판정은 그대로(추가만).
+            try:
+                _nh_star = int(_nh or 0)
+                _star_cap = 3 if _nh_star <= 9 else (4 if _nh_star <= 11 else 5)
+                _fq_h = []
+                for _sq in (core_picks.get("finalQuinellas") or []):
+                    for _sh in (_sq.get("combo") or []):
+                        try:
+                            _shi = int(_sh)
+                            if _shi not in _fq_h:
+                                _fq_h.append(_shi)
+                        except (TypeError, ValueError):
+                            continue
+                _kh_ord = [int(x) for x in (key_horses or []) if str(x).strip().lstrip("-").isdigit()]
+                _star_ord = [h for h in _kh_ord if h in _fq_h] + [h for h in _fq_h if h not in _kh_ord]
+                core_picks["starHorses"] = _star_ord[:_star_cap]   # ⭐ 표시 대상(캡 적용)
+                core_picks["starCap"] = _star_cap
+            except Exception as _star_e:
+                print("[⭐캡] 스킵(무시):", _star_e)
             core_picks["chaoticRace"] = bool(chaotic and chaotic.get("detected"))   # [표시] 혼전 여부
             # [전적 수집 실패 감지] form 은 _form_from_starters 반환=마필 점수 '리스트'(None=수집없음).
             #   ⚠ 버그수정: 이전엔 form 을 dict 로 오검사(isinstance dict)해 데이터가 있어도 항상 formMissing=True.
@@ -23955,14 +23990,23 @@ def _premium_alert(rk, an):
     # 알림 게이팅(분석 근거): 전략/신호 없으면 발송 안 함(전략없음 적중률 2.8%)
     if not (strategy or strong_drop <= -20 or inv_det or smart or fq):
         return None
+    # [신호 게이트 강화 (2026-07-25) — 삿포로2·서울1 실측] 강신호(strongSignals) 개수 기준 추가.
+    #   ⓐ immediate('지금 사세요!')는 신호 2개+ 필수(신호 0~1이면 승격 금지) ⓑ 신호 0이면 early 자체를
+    #   차단(finalQuinellas 만으로 발송하던 문제 — raceGrade '참고·패스'인데 알림 나가던 모순). 기존 조건 무삭제.
+    try:
+        _sig_cnt = int(((an.get("strongSignals") or {}).get("count")) or 0)
+    except (TypeError, ValueError):
+        _sig_cnt = 0
     # 등급 판정(마감 남은분 + 신호강도)
     grade = None
-    if mb <= 3 and (strong_drop <= -30 or inv_det or smart):
+    if mb <= 3 and (strong_drop <= -30 or inv_det or smart) and _sig_cnt >= 2:   # [ⓐ] immediate=신호 2개+
         grade = "immediate"
     elif mb <= 5 and (strong_drop <= -20 or inv_det):
         grade = "preview"
     elif mb <= 10 and (strong_drop <= -15 or fq):
         grade = "early"
+    if grade and _sig_cnt < 1:            # [ⓑ] 신호 0이면 early 이하 전부 차단(fq만으론 미발송)
+        grade = None
     if not grade:
         return None
     # 신호 요약 텍스트
