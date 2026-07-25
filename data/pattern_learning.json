@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "고쿠라 4경주",
-      "horse_no": 4,
-      "recent_avg": 4.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-12"
-    },
-    {
       "race": "후쿠시마 4경주",
       "horse_no": 8,
       "recent_avg": 4.4,
@@ -4630,16 +4620,26 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1784938081.3327575
+    },
+    {
+      "race": "서울 2경주",
+      "horse_no": 5,
+      "recent_avg": 4.4,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-25"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1284,
+      "count": 1286,
       "hit": 269
     },
     "전체부진마": {
-      "count": 2144,
-      "hit": 597
+      "count": 2148,
+      "hit": 598
     },
     "대규모급락": {
       "count": 7,
@@ -4649,8 +4649,8 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 860,
-      "hit": 328
+      "count": 862,
+      "hit": 329
     },
     "급락동반": {
       "count": 174,
