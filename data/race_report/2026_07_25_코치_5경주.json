@@ -1,11 +1,11 @@
 {
- "race": "서울 7경주 1200M",
- "raceKey": "서울 7경주 1200M",
+ "race": "코치 5경주",
+ "raceKey": "코치 5경주",
  "date": "2026-07-25",
  "result": {
-  "1st": 11,
-  "2nd": 6,
-  "3rd": 7,
+  "1st": 12,
+  "2nd": 11,
+  "3rd": 8,
   "4th": null
  },
  "hit": false,
@@ -13,8 +13,8 @@
  "odds": "미상",
  "win_odds": 0,
  "why_recommended": {
-  "signal_11": {
-   "horse": 11,
+  "signal_12": {
+   "horse": 12,
    "placed": true,
    "recommended": false,
    "place_rank": 1,
@@ -29,8 +29,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_6": {
-   "horse": 6,
+  "signal_11": {
+   "horse": 11,
    "placed": true,
    "recommended": false,
    "place_rank": 2,
@@ -45,8 +45,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_7": {
-   "horse": 7,
+  "signal_8": {
+   "horse": 8,
    "placed": true,
    "recommended": false,
    "place_rank": 3,
@@ -64,11 +64,11 @@
  },
  "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 11번 전적 정보 제한",
+  "1. 전적 분석: 12번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
-  "horse": 11,
+  "horse": 12,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
@@ -103,5 +103,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-25 18:18:37"
+ "generated_at": "2026-07-25 18:18:41"
 }
