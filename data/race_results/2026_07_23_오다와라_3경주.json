@@ -118,5 +118,8 @@
  "validation": {
   "ok": true,
   "errors": []
- }
+ },
+ "tainted": true,
+ "taintedReason": "_canonical_log_key 라우팅 버그로 7/25 라이브 데이터 혼입(오염) — 복기·학습 격리",
+ "taintedAt": "2026-07-25"
 }
