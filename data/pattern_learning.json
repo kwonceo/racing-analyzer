@@ -4630,6 +4630,19 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-07-24"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "오다와라 2경주",
+      "total_combos_dropped": 12,
+      "drop_ratio": 0.571,
+      "result": "2+7",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": "52.7%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1784938081.3327575
     }
   ],
   "condition_stats": {
@@ -4642,11 +4655,11 @@
       "hit": 597
     },
     "대규모급락": {
-      "count": 20,
+      "count": 7,
       "high_odds": 0,
-      "recommended_hit": 5,
+      "recommended_hit": 2,
       "high_odds_rate": 0.0,
-      "hit_rate": 25.0
+      "hit_rate": 28.6
     },
     "이상감지동반": {
       "count": 859,

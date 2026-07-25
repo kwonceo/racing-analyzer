@@ -1,0 +1,235 @@
+{
+ "race_id": "2026_07_25_오다와라_2경주",
+ "raceKey": "오다와라 2경주",
+ "date": "2026-07-25",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "오다와라",
+ "round": 2,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 2,
+  "2nd": 7,
+  "3rd": 1
+ },
+ "payouts": {
+  "quinella": 11.3,
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {
+  "quinella": {
+   "2+4": 2.6,
+   "2+3": 6.6,
+   "1+2": 7.6,
+   "2+7": 11.3,
+   "3+7": 13.9,
+   "1+5": 14.3,
+   "1+3": 14.4,
+   "2+5": 17.4,
+   "2+6": 24.2,
+   "1+4": 26.2,
+   "4+6": 30.6,
+   "3+5": 32.2,
+   "1+7": 33.1,
+   "3+4": 37.0,
+   "4+5": 37.0,
+   "4+7": 38.1,
+   "5+7": 50.3,
+   "3+6": 54.7,
+   "1+6": 74.0,
+   "5+6": 114.4,
+   "6+7": 139.8
+  },
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "08:55:20",
+   "minutes_before": null,
+   "quinella": {
+    "2+4": 2.6,
+    "2+3": 6.6,
+    "1+2": 7.6,
+    "2+7": 11.3,
+    "3+7": 13.9,
+    "1+5": 14.3,
+    "1+3": 14.4,
+    "2+5": 17.4,
+    "2+6": 24.2,
+    "1+4": 26.2,
+    "4+6": 30.6,
+    "3+5": 32.2,
+    "1+7": 33.1,
+    "3+4": 37.0,
+    "4+5": 37.0,
+    "4+7": 38.1,
+    "5+7": 50.3,
+    "3+6": 54.7,
+    "1+6": 74.0,
+    "5+6": 114.4,
+    "6+7": 139.8
+   },
+   "exacta": {}
+  }
+ ],
+ "anomalies": [
+  {
+   "time": "08:55:20",
+   "type": "급락",
+   "combo": [
+    2,
+    3
+   ],
+   "horse": 2,
+   "drop_rate": -87.5,
+   "excess_drop": 2.7
+  },
+  {
+   "time": "08:55:20",
+   "type": "급락",
+   "combo": [
+    3,
+    5
+   ],
+   "horse": 3,
+   "drop_rate": -76.7,
+   "excess_drop": -9.5
+  },
+  {
+   "time": "08:55:20",
+   "type": "급락",
+   "combo": [
+    4,
+    6
+   ],
+   "horse": 4,
+   "drop_rate": -76.6,
+   "excess_drop": -5.9
+  },
+  {
+   "time": "08:55:20",
+   "type": "급락",
+   "combo": [
+    3,
+    6
+   ],
+   "horse": 3,
+   "drop_rate": -72.4,
+   "excess_drop": -9.5
+  },
+  {
+   "time": "08:55:20",
+   "type": "급락",
+   "combo": [
+    1,
+    5
+   ],
+   "horse": 1,
+   "drop_rate": -68.7,
+   "excess_drop": 5.7
+  },
+  {
+   "time": "08:55:20",
+   "type": "급락",
+   "combo": [
+    3,
+    4
+   ],
+   "horse": 3,
+   "drop_rate": -66.7,
+   "excess_drop": -9.5
+  },
+  {
+   "time": "08:55:20",
+   "type": "급락",
+   "combo": [
+    2,
+    4
+   ],
+   "horse": 2,
+   "drop_rate": -63.4,
+   "excess_drop": 2.7
+  },
+  {
+   "time": "08:55:20",
+   "type": "급락",
+   "combo": [
+    1,
+    4
+   ],
+   "horse": 1,
+   "drop_rate": -62.4,
+   "excess_drop": 5.7
+  },
+  {
+   "time": "08:55:20",
+   "type": "급락",
+   "combo": [
+    1,
+    2
+   ],
+   "horse": 1,
+   "drop_rate": -58.7,
+   "excess_drop": 5.7
+  },
+  {
+   "time": "08:55:20",
+   "type": "급락",
+   "combo": [
+    3,
+    7
+   ],
+   "horse": 3,
+   "drop_rate": -51.4,
+   "excess_drop": -9.5
+  }
+ ],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": "2+4",
+  "recommend_sub": null,
+  "strategy": "BMED_분산형",
+  "signal_quality": "상",
+  "confidence": 97.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [
+   "급락50+"
+  ],
+  "anomaly_correct": true,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 11.3,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-25 09:08:06",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

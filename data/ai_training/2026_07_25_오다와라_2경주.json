@@ -1,0 +1,220 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_25_오다와라_2경주",
+ "race_info": {
+  "date": "2026-07-25",
+  "track": "오다와라",
+  "round": 2,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 7,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 2,
+   "name": "小林 申太",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 104.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "中里福太郎",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 78.4,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "寺林 正秋",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 77.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "山崎 悟",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 77.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "成清謙二郎",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 71.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "坂本 毅",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 70.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "太田 真一",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 73.7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "08:55:20",
+    "quinella": {
+     "2+4": 2.6,
+     "2+3": 6.6,
+     "1+2": 7.6,
+     "2+7": 11.3,
+     "3+7": 13.9,
+     "1+5": 14.3,
+     "1+3": 14.4,
+     "2+5": 17.4,
+     "2+6": 24.2,
+     "1+4": 26.2,
+     "4+6": 30.6,
+     "3+5": 32.2,
+     "1+7": 33.1,
+     "3+4": 37.0,
+     "4+5": 37.0,
+     "4+7": 38.1,
+     "5+7": 50.3,
+     "3+6": 54.7,
+     "1+6": 74.0,
+     "5+6": 114.4,
+     "6+7": 139.8
+    }
+   }
+  ],
+  "drop_rates": {
+   "2": -87.5,
+   "3": -87.5,
+   "5": -76.7,
+   "4": -76.6,
+   "6": -76.6,
+   "1": -68.7,
+   "7": -51.4
+  },
+  "excess_drops": {
+   "3": -9.5,
+   "5": -11.3,
+   "4": -5.9
+  },
+  "drop_speed": {
+   "2": -87.5,
+   "3": -87.5,
+   "5": -76.7,
+   "4": -76.6,
+   "6": -76.6,
+   "1": -68.7,
+   "7": -51.4
+  },
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": 2.923,
+  "refund_rate": 0.743,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": true
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend": "2+4",
+  "strategy": "BMED_분산형",
+  "confidence": 97.0,
+  "signal_quality": "상"
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 7,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 2,
+  "second": 7,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": "5",
+  "excess_drop_horse_placed": false,
+  "excess_drop_value": -11.3,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-25 09:08:06",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
