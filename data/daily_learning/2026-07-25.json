@@ -1,16 +1,16 @@
 {
  "date": "2026-07-25",
  "results_summary": {
-  "total_races": 81,
-  "hits": 39,
-  "hit_rate": 48.1,
+  "total_races": 86,
+  "hits": 40,
+  "hit_rate": 46.5,
   "profit": {
-   "net": 166100,
-   "settled": 81
+   "net": 175000,
+   "settled": 86
   }
  },
  "ai_training_data": {
-  "races_collected": 1274,
+  "races_collected": 1279,
   "quality_score": 57,
   "ai_ready_races": 27,
   "patterns_tagged": []
@@ -52,27 +52,27 @@
     "hits": 1,
     "hit_rate": 14.3
    },
-   "오다와라": {
+   "松山": {
     "n": 4,
     "hits": 2,
     "hit_rate": 50.0
    },
    "武雄": {
-    "n": 2,
+    "n": 4,
     "hits": 1,
-    "hit_rate": 50.0
+    "hit_rate": 25.0
    },
-   "松山": {
-    "n": 1,
-    "hits": 1,
-    "hit_rate": 100.0
+   "오다와라": {
+    "n": 4,
+    "hits": 2,
+    "hit_rate": 50.0
    }
   },
   "by_field_size": {
    "미상": {
-    "n": 38,
-    "hits": 17,
-    "hit_rate": 44.7
+    "n": 43,
+    "hits": 18,
+    "hit_rate": 41.9
    },
    "소두수(≤8)": {
     "n": 27,
@@ -92,9 +92,9 @@
     "hit_rate": 48.7
    },
    "저녁": {
-    "n": 30,
-    "hits": 14,
-    "hit_rate": 46.7
+    "n": 35,
+    "hits": 15,
+    "hit_rate": 42.9
    },
    "오전": {
     "n": 12,
@@ -104,23 +104,23 @@
   },
   "by_grade": {
    "미수집": {
-    "n": 81,
-    "hits": 39,
-    "hit_rate": 48.1
+    "n": 86,
+    "hits": 40,
+    "hit_rate": 46.5
    }
   },
   "by_condition": {
    "미수집": {
-    "n": 81,
-    "hits": 39,
-    "hit_rate": 48.1
+    "n": 86,
+    "hits": 40,
+    "hit_rate": 46.5
    }
   },
   "by_weather": {
    "미수집": {
-    "n": 81,
-    "hits": 39,
-    "hit_rate": 48.1
+    "n": 86,
+    "hits": 40,
+    "hit_rate": 46.5
    }
   },
   "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
@@ -146,9 +146,9 @@
   },
   "추천종합": {
    "label": "추천 종합 적중",
-   "hit": 193,
-   "n": 442,
-   "rate": 43.7
+   "hit": 194,
+   "n": 447,
+   "rate": 43.4
   }
  },
  "key_learnings": [],
@@ -156,5 +156,5 @@
  "pattern_discoveries": [],
  "system_improvements": [],
  "tomorrow_focus": [],
- "generated_at": "2026-07-25 22:00:41"
+ "generated_at": "2026-07-25 22:45:40"
 }
