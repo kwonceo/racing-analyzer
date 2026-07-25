@@ -11066,6 +11066,30 @@ def _triple_analyze(rk, rec):
                                signal_horses=_sig_h, sig_meta=_sig_meta, sport=_analyze_sport)
             core_picks["finalQuinellas"] = _fp["quinellas"]
             core_picks["finalTrifectas"] = _fp["trifectas"]
+            # [fix_trio_coherence 2026-07-25] 삼복승 메인 부분 페어를 복승 후보에 편입
+            # 삼복승 2+3+6 → {2+3, 2+6, 3+6} 자동 생성 → 엉뚱 조합 오염 차단
+            try:
+                _ft_main = (core_picks.get('finalTrifectas') or [])
+                _fq_set = set(frozenset(q['combo']) for q in (core_picks.get('finalQuinellas') or []) if q.get('combo'))
+                _tc_adds = []
+                for _tri in _ft_main[:1]:  # 메인 삼복승 1개만
+                    _tc = sorted(int(x) for x in (_tri.get('combo') or []))
+                    if len(_tc) == 3:
+                        for _pa, _pb in [(_tc[0],_tc[1]),(_tc[0],_tc[2]),(_tc[1],_tc[2])]:
+                            _ps = frozenset([_pa, _pb])
+                            if _ps not in _fq_set:
+                                _po = (curQ or {}).get((_pa,_pb)) or (curQ or {}).get((_pb,_pa))
+                                if _po and 0 < float(_po) <= 50:
+                                    _tc_adds.append({'combo': [_pa,_pb], 'odds': _po,
+                                                     'reason': '삼복승연계(fix_trio_coherence)',
+                                                     'stars': 3, 'basis': ''})
+                                    _fq_set.add(_ps)
+                if _tc_adds:
+                    _all_q = list(core_picks.get('finalQuinellas') or []) + _tc_adds
+                    _all_q.sort(key=lambda x: (x.get('odds') is None, x.get('odds') or 9e9))
+                    core_picks['finalQuinellas'] = _all_q[:_mainmax]
+            except Exception:
+                pass
             # [수익성 구조 개편 (2026-07-19)] 경주 3분류(저=삼복승 집중/중=2.5배 컷+기대값/고=유지) 후처리 —
             #   실패 시 내부에서 완전 무변경(기존 추천 유지). 빠진 복승은 quinellaRef(참고 접기)로 무삭제 이동.
             _apply_profit_strategy(core_picks, curQ, _rec_valid, sig_meta=_sig_meta,
