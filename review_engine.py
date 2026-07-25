@@ -23,6 +23,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 RACE_RESULTS_DIR = os.path.join(BASE, "data", "race_results")
 ANALYSIS_LOG_DIR = os.path.join(BASE, "data", "analysis_log")
 REVIEW_STATS_FILE = os.path.join(BASE, "data", "review_stats.json")
+ODDS_HISTORY_DIR  = os.path.join(BASE, "data", "odds_history")
 
 TAINTED_WINDOWS = [("2026-07-19 17:00:00", "2026-07-20 08:55:00")]
 
@@ -488,7 +489,7 @@ def replay_day(date=None, stake=10000, keirin_re=None):
                      "t2_strong", "t2_strong_cycle", "t2_strong_all",
                      "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev",
                      "fix_lowodds_exempt", "fix_connectors",
-                     "fix_connectors_top1", "fix_connectors_top2", "fix_odds_cap_new", "fix_conf_no_signal", "fix_trio_coherence")}
+                     "fix_connectors_top1", "fix_connectors_top2", "fix_odds_cap_new", "fix_conf_no_signal", "fix_trio_coherence", "fix_cross_signal")}
     for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
         if not fn.startswith(prefix) or not fn.endswith(".json"):
             continue
@@ -859,6 +860,53 @@ def replay_day(date=None, stake=10000, keirin_re=None):
         except (TypeError, ValueError):
             pass
         _book('fix_trio_coherence', qh=(win_q in _q_tc), th=t_hit)
+        # fix_cross_signal v3: top3 급락마 x finalQ말 교차 페어 판정 편입
+        _q_cs = set(disp_q)
+        try:
+            _oh_path = os.path.join(ODDS_HISTORY_DIR, fn)
+            _oh = _load(_oh_path) or {}
+            _form = (_oh.get('analysis') or {}).get('form') or []
+            _sig_list = []
+            for _fh in _form:
+                _anom = _fh.get('anomaly') or {}
+                _adrop = _anom.get('drop', 0)
+                _no = _fh.get('no')
+                if isinstance(_adrop, (int, float)) and _adrop >= 0.40 and _no is not None:
+                    _sig_list.append((_no, _adrop))
+            _sig_list.sort(key=lambda x: -x[1])
+            _top3 = [h for h, _ in _sig_list[:3]]
+            _fq_horses = set()
+            for _fq in (_cp_r.get('finalQuinellas') or []):
+                for _hn in (_fq.get('combo') or []):
+                    try:
+                        _fq_horses.add(int(_hn))
+                    except (TypeError, ValueError):
+                        pass
+            if _top3:
+                for _ci in range(len(_top3)):
+                    for _cj in range(_ci + 1, len(_top3)):
+                        _q_cs.add(frozenset([_top3[_ci], _top3[_cj]]))
+                for _sh in _top3:
+                    for _fh in _fq_horses:
+                        if _sh != _fh:
+                            _q_cs.add(frozenset([_sh, _fh]))
+        except Exception:
+            pass
+        # fix_cross_signal v4: keyHorses 중 finalQ 미편성 말 x finalQ말 교차
+        # 오비히로 8R: kh_new={5,8}, fq={2,3,9,10,11} → 5+2=2+5 포착
+        _q_cs = set(disp_q)
+        try:
+            _kh = set(int(x) for x in (log_doc or {}).get('keyHorses') or [] if str(x).isdigit())
+            _fq_h = set(int(n) for _fq in (_cp_r.get('finalQuinellas') or [])
+                        for n in (_fq.get('combo') or []) if str(n).lstrip('-').isdigit())
+            _kh_new = _kh - _fq_h
+            for _sh in _kh_new:
+                for _fh in _fq_h:
+                    if _sh != _fh:
+                        _q_cs.add(frozenset([_sh, _fh]))
+        except Exception:
+            pass
+        _book('fix_cross_signal', qh=(win_q in _q_cs), th=t_hit)
     for p, s in pol.items():
         s["roi"] = round(s["returned"] / s["invested"] * 100) if s["invested"] else None
         s["hitRate"] = round(s["hits"] / s["judged"] * 100) if s["judged"] else 0

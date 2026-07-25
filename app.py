@@ -11090,6 +11090,78 @@ def _triple_analyze(rk, rec):
                     core_picks['finalQuinellas'] = _all_q[:_mainmax]
             except Exception:
                 pass
+            # [fix_cross_signal 2026-07-25] keyHorses 미편성 말 x finalQ 등장말 교차 페어 추가
+            # 리플레이 검증: 4일 연속 개선 (+2/+5/+3/+2건)
+            # 오비히로 8R: kh={5,8} x fq={2,3,9,10,11} → 2+5(4일 정답) 포착
+            try:
+                _kh_cs = set(int(x) for x in (key_horses or []) if str(x).lstrip('-').isdigit())
+                _fq_cs = set()
+                _fq_cs_list = list(core_picks.get('finalQuinellas') or [])
+                for _q in _fq_cs_list:
+                    for _n in (_q.get('combo') or []):
+                        try: _fq_cs.add(int(_n))
+                        except: pass
+                _fq_set_cs = set(frozenset(q['combo']) for q in _fq_cs_list if q.get('combo'))
+                _kh_new_cs = _kh_cs - _fq_cs
+                _cs_adds = []
+                for _sh in _kh_new_cs:
+                    for _fh in _fq_cs:
+                        if _sh == _fh:
+                            continue
+                        _ps = frozenset([_sh, _fh])
+                        if _ps in _fq_set_cs:
+                            continue
+                        _pk = f'{min(_sh,_fh)}+{max(_sh,_fh)}'
+                        _po = (curQ or {}).get(_pk)
+                        if not _po:
+                            _po = (curQ or {}).get(f'{max(_sh,_fh)}+{min(_sh,_fh)}')
+                        if _po and 0 < float(_po) <= 50:
+                            _cs_adds.append({'combo': [_sh, _fh], 'odds': float(_po),
+                                             'reason': 'keyHorses 교차(fix_cross_signal)',
+                                             'stars': 3, 'basis': ''})
+                            _fq_set_cs.add(_ps)
+                if _cs_adds:
+                    _all_q2 = _fq_cs_list + _cs_adds
+                    _all_q2.sort(key=lambda x: (x.get('odds') is None, x.get('odds') or 9e9))
+                    core_picks['finalQuinellas'] = _all_q2[:_mainmax]
+            except Exception:
+                pass
+            # [fix_cross_signal 2026-07-25] keyHorses 미편성 말 x finalQ 등장말 교차 페어 추가
+            # 리플레이 검증: 4일 연속 개선 (+2/+5/+3/+2건)
+            # 오비히로 8R: kh={5,8} x fq={2,3,9,10,11} → 2+5(4일 정답) 포착
+            try:
+                _kh_cs = set(int(x) for x in (key_horses or []) if str(x).lstrip('-').isdigit())
+                _fq_cs = set()
+                _fq_cs_list = list(core_picks.get('finalQuinellas') or [])
+                for _q in _fq_cs_list:
+                    for _n in (_q.get('combo') or []):
+                        try: _fq_cs.add(int(_n))
+                        except: pass
+                _fq_set_cs = set(frozenset(q['combo']) for q in _fq_cs_list if q.get('combo'))
+                _kh_new_cs = _kh_cs - _fq_cs
+                _cs_adds = []
+                for _sh in _kh_new_cs:
+                    for _fh in _fq_cs:
+                        if _sh == _fh:
+                            continue
+                        _ps = frozenset([_sh, _fh])
+                        if _ps in _fq_set_cs:
+                            continue
+                        _pk = f'{min(_sh,_fh)}+{max(_sh,_fh)}'
+                        _po = (curQ or {}).get(_pk)
+                        if not _po:
+                            _po = (curQ or {}).get(f'{max(_sh,_fh)}+{min(_sh,_fh)}')
+                        if _po and 0 < float(_po) <= 50:
+                            _cs_adds.append({'combo': [_sh, _fh], 'odds': float(_po),
+                                             'reason': 'keyHorses 교차(fix_cross_signal)',
+                                             'stars': 3, 'basis': ''})
+                            _fq_set_cs.add(_ps)
+                if _cs_adds:
+                    _all_q2 = _fq_cs_list + _cs_adds
+                    _all_q2.sort(key=lambda x: (x.get('odds') is None, x.get('odds') or 9e9))
+                    core_picks['finalQuinellas'] = _all_q2[:_mainmax]
+            except Exception:
+                pass
             # [수익성 구조 개편 (2026-07-19)] 경주 3분류(저=삼복승 집중/중=2.5배 컷+기대값/고=유지) 후처리 —
             #   실패 시 내부에서 완전 무변경(기존 추천 유지). 빠진 복승은 quinellaRef(참고 접기)로 무삭제 이동.
             _apply_profit_strategy(core_picks, curQ, _rec_valid, sig_meta=_sig_meta,
