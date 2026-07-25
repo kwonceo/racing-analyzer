@@ -488,7 +488,7 @@ def replay_day(date=None, stake=10000, keirin_re=None):
                      "t2_strong", "t2_strong_cycle", "t2_strong_all",
                      "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev",
                      "fix_lowodds_exempt", "fix_connectors",
-                     "fix_connectors_top1", "fix_connectors_top2", "fix_odds_cap_new")}
+                     "fix_connectors_top1", "fix_connectors_top2", "fix_odds_cap_new", "fix_conf_no_signal", "fix_trio_coherence")}
     for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
         if not fn.startswith(prefix) or not fn.endswith(".json"):
             continue
@@ -831,6 +831,34 @@ def replay_day(date=None, stake=10000, keirin_re=None):
             _book("lowodds_trio", use_q=False, use_t=True)
         else:
             _book("lowodds_trio")
+        _q_cns = set(disp_q)
+        try:
+            if sig_cnt == 0:
+                _cq_list = (_cp_r.get('confQuinellas') or [])
+                _fav_axis = [int(x) for x in (_cp_r.get('favAxis') or []) if str(x).strip().lstrip('-').isdigit()]
+                if _cq_list and len(_fav_axis) >= 2:
+                    _fav_set = frozenset(_fav_axis[:2])
+                    _cq0 = _combo_set((_cq_list[0].get('combo') or []))
+                    if _cq0 and _cq0 == _fav_set:
+                        _q_cns.add(_cq0)
+                        for _cqi in _cq_list[1:]:
+                            _cqs = _combo_set((_cqi.get('combo') or []))
+                            if _cqs and len(_cqs) == 2:
+                                _q_cns.add(_cqs)
+        except (TypeError, ValueError):
+            pass
+        _book('fix_conf_no_signal', qh=(win_q in _q_cns), th=t_hit)
+        _q_tc = set(disp_q)
+        try:
+            for _tri in disp_t:
+                _tl = sorted(int(x) for x in _tri)
+                if len(_tl) == 3:
+                    _q_tc.add(frozenset([_tl[0], _tl[1]]))
+                    _q_tc.add(frozenset([_tl[0], _tl[2]]))
+                    _q_tc.add(frozenset([_tl[1], _tl[2]]))
+        except (TypeError, ValueError):
+            pass
+        _book('fix_trio_coherence', qh=(win_q in _q_tc), th=t_hit)
     for p, s in pol.items():
         s["roi"] = round(s["returned"] / s["invested"] * 100) if s["invested"] else None
         s["hitRate"] = round(s["hits"] / s["judged"] * 100) if s["judged"] else 0
