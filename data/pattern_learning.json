@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "후쿠시마 4경주",
-      "horse_no": 8,
-      "recent_avg": 4.4,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-12"
-    },
-    {
       "race": "하코다테 5경주",
       "horse_no": 4,
       "recent_avg": 4.4,
@@ -4632,16 +4622,24 @@
         "복승이상감지"
       ],
       "date": "2026-07-25"
+    },
+    {
+      "race": "코치 9경주",
+      "horse_no": 4,
+      "recent_avg": 5.6,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-25"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1311,
-      "hit": 270
+      "count": 1314,
+      "hit": 271
     },
     "전체부진마": {
-      "count": 2187,
-      "hit": 605
+      "count": 2191,
+      "hit": 606
     },
     "대규모급락": {
       "count": 7,
@@ -4651,7 +4649,7 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 876,
+      "count": 877,
       "hit": 335
     },
     "급락동반": {
