@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_25_서울_10경주",
- "raceKey": "서울 10경주",
+ "raceKey": "서울 10경주 1400M",
  "date": "2026-07-25",
  "sport": "korea",
  "category": "japan_local",
@@ -33,10 +33,10 @@
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": false,
+  "main_hit": true,
   "sub_hit": false,
-  "hit_reason": null,
-  "miss_reason": "추천 조합 미입상",
+  "hit_reason": "적중",
+  "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -51,7 +51,7 @@
   "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-25 18:18:39",
+ "saved_at": "2026-07-25 20:44:10",
  "validation": {
   "ok": true,
   "errors": []
