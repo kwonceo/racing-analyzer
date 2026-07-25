@@ -1,0 +1,68 @@
+{
+ "race_id": "2026_07_25_오다와라_5경주",
+ "raceKey": "오다와라 5경주",
+ "date": "2026-07-25",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "오다와라",
+ "round": 5,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 7,
+  "2nd": 5,
+  "3rd": 2
+ },
+ "payouts": {
+  "quinella": 43.4,
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 13.7,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 43.4,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-25 10:08:29",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
