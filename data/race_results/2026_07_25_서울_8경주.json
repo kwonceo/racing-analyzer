@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_25_서울_8경주",
- "raceKey": "서울 8경주",
+ "raceKey": "서울 8경주 1700M",
  "date": "2026-07-25",
  "sport": "korea",
  "category": "japan_local",
@@ -16,9 +16,10 @@
   "3rd": 2
  },
  "payouts": {
+  "quinella": 6.9,
   "trifecta": 0.0
  },
- "payouts_approx": false,
+ "payouts_approx": true,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -45,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
+  "quinella_odds": 6.9,
   "trifecta_odds": null,
   "actual_return": null,
-  "profit": -1000
+  "profit": 5900
  },
  "memo": null,
- "saved_at": "2026-07-25 17:31:27",
+ "saved_at": "2026-07-25 19:42:41",
  "validation": {
   "ok": true,
   "errors": []
