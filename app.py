@@ -13147,6 +13147,17 @@ def _build_analysis_log(rk, an=None):
     #   기준은 마감 전 표시분 유지. 기존 필드 무변경(추가만)·구데이터는 명단 없음 → 기존 판정 그대로.
     try:
         _old_dc = ((doc.get("corePicks") or {}).get("displayedCombos") if doc else None)
+        # [fix_freeze_finalq 2026-07-26] 마감 후 finalQuinellas 동결
+        # 마감 후 자동분석이 마감 후 배당 기준으로 finalQ를 덮어쓰던 문제 수정
+        # 부산 4R: bgfreeze로 이력 0건 → 마감 후 분석이 finalQ 교체 → 잘못된 추천 표시
+        if an.get("afterClose"):
+            _old_fq = (doc.get("corePicks") or {}).get("finalQuinellas") if doc else None
+            _old_ft = (doc.get("corePicks") or {}).get("finalTrifectas") if doc else None
+            if isinstance(core_picks_out, dict) and _old_fq:
+                core_picks_out = dict(core_picks_out)
+                core_picks_out["finalQuinellas"] = _old_fq  # 마감 전 finalQ 보존
+            if isinstance(core_picks_out, dict) and _old_ft:
+                core_picks_out["finalTrifectas"] = _old_ft  # 마감 전 finalT 보존
         if an.get("afterClose") and _old_dc:
             _dc_out = _old_dc                        # 마감 후 → 동결(마감 전 기록 유지)
         else:
