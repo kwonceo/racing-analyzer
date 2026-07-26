@@ -23282,6 +23282,17 @@ def kra_watch():
     rk = (b.get("raceKey") or "%s %s경주" % (KRA_MEET_NAME.get(meet, meet), rc_no)).strip()
     with _KRA_WATCH_LOCK:
         _KRA_WATCH[rk] = {"meet": meet, "rc_date": rc_date, "rc_no": rc_no, "t": time.time()}
+        _pt = b.get("postTime") or b.get("post_time")
+        _dl = b.get("deadline")
+        try:
+            if _dl:
+                _korea_schedule_post_epoch(rk, float(_dl) / 1000.0)
+            elif _pt:
+                _pe = _post_time_epoch(_pt, rc_date)
+                if _pe:
+                    _korea_schedule_post_epoch(rk, _pe)
+        except Exception as _pte:
+            print("[KRA postTime] 스케줄 반영 실패(무시):", _pte)
     _kra_auto_start()
     return jsonify({"ok": True, "raceKey": rk, "watching": len(_KRA_WATCH)})
 
