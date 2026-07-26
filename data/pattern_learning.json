@@ -2,14 +2,6 @@
   "patterns": [
     {
       "race": "카나자와 3경주",
-      "horse_no": 10,
-      "recent_avg": 6.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-14"
-    },
-    {
-      "race": "카나자와 3경주",
       "horse_no": 3,
       "recent_avg": 5.8,
       "win_place": 1,
@@ -4606,16 +4598,24 @@
         "복승이상감지"
       ],
       "date": "2026-07-26"
+    },
+    {
+      "race": "코치 9경주",
+      "horse_no": 10,
+      "recent_avg": 6.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-26"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1404,
-      "hit": 290
+      "count": 1407,
+      "hit": 291
     },
     "전체부진마": {
-      "count": 2356,
-      "hit": 653
+      "count": 2360,
+      "hit": 654
     },
     "대규모급락": {
       "count": 7,
@@ -4625,7 +4625,7 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 952,
+      "count": 953,
       "hit": 363
     },
     "급락동반": {
