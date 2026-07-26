@@ -1,22 +1,21 @@
 {
- "race_id": "2026_07_26_부산_6경주",
- "raceKey": "부산 6경주 1800M",
+ "race_id": "2026_07_26_부산_7경주",
+ "raceKey": "부산 7경주",
  "date": "2026-07-26",
  "sport": "korea",
  "category": "japan_local",
  "track": "부산",
- "round": 6,
+ "round": 7,
  "distance": null,
  "track_condition": null,
  "weather": null,
  "horse_count": null,
  "result": {
   "1st": 3,
-  "2nd": 2,
-  "3rd": 9
+  "2nd": 8,
+  "3rd": 4
  },
  "payouts": {
-  "quinella": 32.1,
   "trifecta": 0.0
  },
  "payouts_approx": false,
@@ -36,8 +35,8 @@
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": null,
-  "miss_reason": "추천 조합 미입상",
+  "hit_reason": "적중",
+  "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -46,13 +45,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 32.1,
+  "quinella_odds": null,
   "trifecta_odds": null,
   "actual_return": null,
   "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-26 17:15:56",
+ "saved_at": "2026-07-26 17:15:59",
  "validation": {
   "ok": true,
   "errors": []

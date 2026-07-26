@@ -1,14 +1,14 @@
 {
- "race": "부산 6경주 1800M",
- "raceKey": "부산 6경주 1800M",
+ "race": "부산 7경주",
+ "raceKey": "부산 7경주",
  "date": "2026-07-26",
  "result": {
   "1st": 3,
-  "2nd": 2,
-  "3rd": 9,
+  "2nd": 8,
+  "3rd": 4,
   "4th": null
  },
- "hit": false,
+ "hit": true,
  "hit_type": null,
  "odds": "미상",
  "win_odds": 0,
@@ -29,8 +29,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_2": {
-   "horse": 2,
+  "signal_8": {
+   "horse": 8,
    "placed": true,
    "recommended": false,
    "place_rank": 2,
@@ -45,8 +45,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_9": {
-   "horse": 9,
+  "signal_4": {
+   "horse": 4,
    "placed": true,
    "recommended": false,
    "place_rank": 3,
@@ -86,7 +86,7 @@
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "추천 미적중"
+  "reason": "적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -103,5 +103,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-26 17:15:55"
+ "generated_at": "2026-07-26 17:15:59"
 }

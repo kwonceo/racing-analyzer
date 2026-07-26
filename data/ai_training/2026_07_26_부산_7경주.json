@@ -1,10 +1,10 @@
 {
  "schema_version": "1.0",
- "race_id": "2026_07_26_부산_6경주",
+ "race_id": "2026_07_26_부산_7경주",
  "race_info": {
   "date": "2026-07-26",
   "track": "부산",
-  "round": 6,
+  "round": 7,
   "distance": null,
   "condition": null,
   "weather": null,
@@ -41,18 +41,18 @@
  },
  "result": {
   "1st": 3,
-  "2nd": 2,
-  "3rd": 9,
+  "2nd": 8,
+  "3rd": 4,
   "4th": null,
   "quinella_odds": null,
   "exacta_odds": null,
-  "hit": false,
-  "hit_pattern": null
+  "hit": true,
+  "hit_pattern": "적중"
  },
  "labels": {
   "quinella_hit": false,
   "winner": 3,
-  "second": 2,
+  "second": 8,
   "odds_range": null
  },
  "signal_hit": {
@@ -65,7 +65,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 17:15:56",
+ "saved_at": "2026-07-26 17:15:59",
  "quality": {
   "score": 20,
   "grade": "제외",
