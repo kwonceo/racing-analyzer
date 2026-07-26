@@ -1,27 +1,17 @@
 {
- "generated_at": 1785058851.373001,
- "races_with_result": 362,
+ "generated_at": 1785058880.2308931,
+ "races_with_result": 363,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
  "patterns": [
   {
-   "type": "시점",
-   "key": "timing:T-5분",
-   "desc": "급락이 T-5분에 발생한 경주",
-   "rate": 60.7,
-   "baseline": 47.0,
-   "lift": 13.8,
-   "support": 28,
-   "hit": 17
-  },
-  {
    "type": "배당변화",
    "key": "had_compression",
    "desc": "배당 압축 동반 경주",
    "rate": 60.0,
-   "baseline": 47.0,
-   "lift": 13.0,
+   "baseline": 46.8,
+   "lift": 13.2,
    "support": 5,
    "hit": 3
   },
@@ -36,5 +26,5 @@
    "support": 451
   }
  ],
- "baseline_hit_rate": 47.0
+ "baseline_hit_rate": 46.8
 }
