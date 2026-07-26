@@ -16,7 +16,6 @@
   "3rd": 4
  },
  "payouts": {
-  "quinella": 64.9,
   "trifecta": 0.0
  },
  "payouts_approx": false,
@@ -34,10 +33,10 @@
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": false,
+  "main_hit": true,
   "sub_hit": false,
-  "hit_reason": null,
-  "miss_reason": "추천 조합 미입상",
+  "hit_reason": "적중",
+  "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -46,13 +45,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 64.9,
+  "quinella_odds": null,
   "trifecta_odds": null,
   "actual_return": null,
   "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-26 18:29:19",
+ "saved_at": "2026-07-26 18:31:05",
  "validation": {
   "ok": true,
   "errors": []
