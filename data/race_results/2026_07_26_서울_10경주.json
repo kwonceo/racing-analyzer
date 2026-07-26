@@ -33,10 +33,10 @@
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": true,
+  "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -51,7 +51,7 @@
   "profit": -1000
  },
  "memo": null,
- "saved_at": "2026-07-26 19:02:18",
+ "saved_at": "2026-07-26 19:08:01",
  "validation": {
   "ok": true,
   "errors": []
