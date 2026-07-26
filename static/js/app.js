@@ -7125,11 +7125,24 @@
     const basisBlock = (q, col) => (q.basis && q.basis.length)
       ? `<div style="margin:1px 0 4px 16px">${q.basis.map((b) => `<div class="hint" style="font-size:12.5px;color:${col}">→ ${esc(b)}</div>`).join('')}${q.summary ? `<div class="hint" style="font-size:12px;color:#38d39f">→ ${esc(q.summary)}</div>` : ''}</div>`
       : '';
+    // [fix_badge 2026-07-26] 마감직전 특급 뱃지: 집중급락 포함 조합 + T-3분 이내
+    const _mbNow = a.minutesBefore;
+    const _isLastMin = _mbNow != null && _mbNow <= 3 && !a.afterClose;
+    const _hasUrgentDrop = (q) => {
+      const b = q.basis || [];
+      const r = q.reason || '';
+      return b.some((x) => /집중급락|막판 대급락|T-[12]분/.test(x)) || /막판 대급락|마감직전/.test(r);
+    };
     const qLines = fq.map((q) => {
+      const _urgent = _isLastMin && _hasUrgentDrop(q);
+      const _urgentBadge = _urgent
+        ? `<div style="display:inline-block;margin:2px 0 4px;padding:3px 8px;background:#dc2626;border-radius:6px;font-size:12px;font-weight:900;color:#fff;letter-spacing:.5px">🚨 마감직전 특급승부</div><br>`
+        : '';
       const oo = q.odds != null ? `<span style="font-size:13px;font-weight:800;color:${_oddsGradeColor(q.odds, a.sport || a.category)}">(<span data-live-odds="${(q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+')}" data-odds-sport="${esc(a.sport || a.category || '')}">${q.odds}</span>배)</span>` : '';
       const st = q.stars ? ` <span style="color:#fbbf24;font-size:14px">${starStr(q.stars)}</span>` : '';
       const rs = q.reason ? ` <span class="hint" style="font-size:12px">· ${esc(q.reason)}</span>` : '';
-      return `<div style="font-size:19px;font-weight:800;margin:5px 0 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>${basisBlock(q, '#7dd3fc')}`;
+      const _borderStyle = _urgent ? 'border:2px solid #dc2626;border-radius:10px;padding:6px 10px;margin:4px 0;background:rgba(220,38,38,.08);' : '';
+      return `<div style="${_borderStyle}">${_urgentBadge}<div style="font-size:19px;font-weight:800;margin:2px 0 0">복승: <span style="color:#4ea1ff">${q.combo.join('+')}</span> ${oo}${st}${rs}</div>${basisBlock(q, '#7dd3fc')}</div>`;
     }).join('');
     const tLines = ft.slice(0, 2).map((t) => {
       const oo = t.odds != null ? `<span class="hint" style="font-size:13px">(${t.oddsEst ? `~${t.odds}배·추정` : `${t.odds}배`})</span>` : '';   // [추정 표기 (다마노 3R)]
