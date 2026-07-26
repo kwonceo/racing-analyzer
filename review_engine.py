@@ -489,7 +489,7 @@ def replay_day(date=None, stake=10000, keirin_re=None):
                      "t2_strong", "t2_strong_cycle", "t2_strong_all",
                      "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev",
                      "fix_lowodds_exempt", "fix_connectors",
-                     "fix_connectors_top1", "fix_connectors_top2", "fix_odds_cap_new", "fix_conf_no_signal", "fix_trio_coherence", "fix_cross_signal", "fix_signal_axis")}
+                     "fix_connectors_top1", "fix_connectors_top2", "fix_odds_cap_new", "fix_conf_no_signal", "fix_trio_coherence", "fix_cross_signal", "fix_signal_axis", "fix_market_axis")}
     for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
         if not fn.startswith(prefix) or not fn.endswith(".json"):
             continue
@@ -924,6 +924,31 @@ def replay_day(date=None, stake=10000, keirin_re=None):
         except Exception:
             pass
         _book('fix_signal_axis', qh=(win_q in _q_sa), th=t_hit)
+        # fix_market_axis: 시장 최저복승 말 x keyHorses 교차
+        # 부산2R: confQ[0]=2+3(5.2배), keyHorses=[5,6,8] → 2번=시장축 → 2+6 포착
+        _q_ma = set(disp_q)
+        try:
+            _confQ = (_cp_r.get('confQuinellas') or [])
+            _kh_ma = set(int(x) for x in (log_doc or {}).get('keyHorses') or [] if str(x).isdigit())
+            _fq_ma = set(int(n) for _q in (_cp_r.get('finalQuinellas') or [])
+                         for n in (_q.get('combo') or []) if str(n).lstrip('-').isdigit())
+            if _confQ:
+                # 시장 최저 3개 페어에서 말별 등장 횟수 집계
+                _horse_cnt = {}
+                for _cq in _confQ[:5]:
+                    for _hn in (_cq.get('combo') or []):
+                        try: _hn=int(_hn); _horse_cnt[_hn]=_horse_cnt.get(_hn,0)+1
+                        except: pass
+                # 가장 많이 등장한 말 = 시장 축
+                _mkt_axis = max(_horse_cnt, key=lambda x: _horse_cnt[x]) if _horse_cnt else None
+                if _mkt_axis:
+                    # 시장 축 x (keyHorses + finalQ 말) 교차
+                    for _ph in (_kh_ma | _fq_ma):
+                        if _ph != _mkt_axis:
+                            _q_ma.add(frozenset([_mkt_axis, _ph]))
+        except Exception:
+            pass
+        _book('fix_market_axis', qh=(win_q in _q_ma), th=t_hit)
     for p, s in pol.items():
         s["roi"] = round(s["returned"] / s["invested"] * 100) if s["invested"] else None
         s["hitRate"] = round(s["hits"] / s["judged"] * 100) if s["judged"] else 0
