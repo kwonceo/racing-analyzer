@@ -46,11 +46,11 @@
   "4th": null,
   "quinella_odds": null,
   "exacta_odds": null,
-  "hit": true,
-  "hit_pattern": "적중"
+  "hit": false,
+  "hit_pattern": null
  },
  "labels": {
-  "quinella_hit": true,
+  "quinella_hit": false,
   "winner": 2,
   "second": 7,
   "odds_range": null
@@ -65,7 +65,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 19:16:19",
+ "saved_at": "2026-07-26 19:18:28",
  "quality": {
   "score": 20,
   "grade": "제외",
