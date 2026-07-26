@@ -28449,7 +28449,7 @@ def _auto_pred_tick(sched, now):
         #   →T-2 로 누적되어 히스테리시스·cycleT2(t2_strong)가 실전 발동한다(단발 분석은 _REC_HYST 상태가 없어
         #   게이트 미진입). 경정·바이크 제외(경마·경륜만). 임박순 최대 6개(부하 방어)·직전 25초내 갱신분은 스킵(동일틱 중복).
         _auto_log_n = 0
-        _snap_targets = sorted([r for r in races if 0 <= (r[0] - now) <= 600], key=lambda r: r[0])
+        _snap_targets = sorted([r for r in races if 30 <= (r[0] - now) <= 600], key=lambda r: r[0])  # [fix_bgfreeze] left<30초 제외 — 마감 시점 백그라운드 덮어쓰기 차단
         for pe, venue, rno, rk in _snap_targets:      # 임박(마감 가까운)순 → T-2 우선 확보
             if _auto_log_n >= 6:                       # 동시 최대 6개(부하 방어)
                 break
@@ -28467,6 +28467,11 @@ def _auto_pred_tick(sched, now):
                 _lp = None
             if _lp and os.path.exists(_lp) and (now - os.path.getmtime(_lp)) < 25:
                 continue                              # 직전 25초내 갱신(프론트·동일틱) → 중복 방지
+            # [fix_bgfreeze 2026-07-26] 마감 120초 이내 + 로그 3분+ 안정 → 재분석 스킵
+            #   백그라운드가 마감 직전 Q를 덮어쓰던 문제(아오모리4R·와카야마8R 케이스) 차단.
+            _left_bg = pe - now
+            if _left_bg <= 120 and _lp and os.path.exists(_lp) and (now - os.path.getmtime(_lp)) >= 180:
+                continue  # 마감 2분 이내 + 로그 3분+ 불변 → 안정 추천 보호
             try:
                 _an_bg = _triple_analyze(rk, _rec)    # 매 틱 재분석 → _REC_HYST 누적·cycleT2 게이트 진입
                 _build_analysis_log(rk, _an_bg)       # 리치 로그 빌드+저장(rec_history 30초마다 누적)
