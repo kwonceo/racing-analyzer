@@ -13054,9 +13054,20 @@ def _build_analysis_log(rk, an=None):
             "sigChanged": bool(new_sig != last_sig),   # 추천 조합이 실제로 바뀌었는지(신호만 추가면 False)
             "keyHorses": an.get("keyHorses"),
             "summary": an.get("summary"),
-            "quinella_main": (final.get("quinella_main") or {}).get("combo"),
-            "quinella_sub": (final.get("quinella_sub") or {}).get("combo"),
-            "trifecta_main": (final.get("trifecta_main") or {}).get("combo"),
+            # [fix_qmain 2026-07-26] quinella_main을 betRecommend 라벨 기준 → finalQuinellas[0] 기준으로 통일
+            # 나카교 4R 케이스: betRecommend "복승 메인"=1+14, finalQ[0]=11+14(7.6배) 불일치 해소
+            "quinella_main": next(("+".join(str(x) for x in (q.get("combo") or []))
+                                   for q in ((an.get("corePicks") or {}).get("finalQuinellas") or [])
+                                   if q.get("combo")),
+                                  (final.get("quinella_main") or {}).get("combo")),
+            "quinella_sub": next(("+".join(str(x) for x in (q.get("combo") or []))
+                                  for q in list(((an.get("corePicks") or {}).get("finalQuinellas") or []))[1:]
+                                  if q.get("combo")),
+                                 (final.get("quinella_sub") or {}).get("combo")),
+            "trifecta_main": next(("+".join(str(x) for x in (q.get("combo") or []))
+                                   for q in ((an.get("corePicks") or {}).get("finalTrifectas") or [])
+                                   if q.get("combo")),
+                                  (final.get("trifecta_main") or {}).get("combo")),
             # [삼복승 이력 (2026-07-20)] 보험1·2도 이력에 저장 — race-log 에서 삼복승 변화 추적(기후 4R:
             #   초반 삼복승 2+4+7이 정답이었는데 요동으로 밀려난 경위를 추적 못 하던 문제).
             "trifecta_ins": [c for c in ((final.get("trifecta_insurance1") or {}).get("combo"),
