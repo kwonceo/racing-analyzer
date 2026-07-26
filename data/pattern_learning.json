@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "마쓰야마 4경주",
-      "horse_no": 7,
-      "recent_avg": 4.0,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-12"
-    },
-    {
-      "race": "이토 5경주",
-      "horse_no": 2,
-      "recent_avg": 5.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-12"
-    },
-    {
-      "race": "이토 5경주",
-      "horse_no": 6,
-      "recent_avg": 5.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-12"
-    },
-    {
       "race": "우라와 12경주",
       "horse_no": 9,
       "recent_avg": 9.8,
@@ -4612,16 +4584,44 @@
         "복승이상감지"
       ],
       "date": "2026-07-26"
+    },
+    {
+      "race": "카나자와 2경주",
+      "horse_no": 4,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-26"
+    },
+    {
+      "race": "코치 4경주",
+      "horse_no": 2,
+      "recent_avg": 4.8,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-26"
+    },
+    {
+      "race": "코치 4경주",
+      "horse_no": 6,
+      "recent_avg": 5.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-26"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1373,
-      "hit": 282
+      "count": 1378,
+      "hit": 283
     },
     "전체부진마": {
-      "count": 2288,
-      "hit": 629
+      "count": 2298,
+      "hit": 632
     },
     "대규모급락": {
       "count": 7,
@@ -4631,8 +4631,8 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 915,
-      "hit": 347
+      "count": 920,
+      "hit": 349
     },
     "급락동반": {
       "count": 175,
