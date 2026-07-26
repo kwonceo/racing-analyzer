@@ -489,7 +489,7 @@ def replay_day(date=None, stake=10000, keirin_re=None):
                      "t2_strong", "t2_strong_cycle", "t2_strong_all",
                      "fix_main_keep", "fix_axis2_trio", "fix_special_incl", "fix_conf_pair", "fix_backing_ev",
                      "fix_lowodds_exempt", "fix_connectors",
-                     "fix_connectors_top1", "fix_connectors_top2", "fix_odds_cap_new", "fix_conf_no_signal", "fix_trio_coherence", "fix_cross_signal")}
+                     "fix_connectors_top1", "fix_connectors_top2", "fix_odds_cap_new", "fix_conf_no_signal", "fix_trio_coherence", "fix_cross_signal", "fix_signal_axis")}
     for fn in sorted(os.listdir(RACE_RESULTS_DIR) if os.path.isdir(RACE_RESULTS_DIR) else []):
         if not fn.startswith(prefix) or not fn.endswith(".json"):
             continue
@@ -907,6 +907,23 @@ def replay_day(date=None, stake=10000, keirin_re=None):
         except Exception:
             pass
         _book('fix_cross_signal', qh=(win_q in _q_cs), th=t_hit)
+        # fix_signal_axis: anomaly.drop>=50% 말 x favAxis[0] 페어 추가
+        _q_sa = set(disp_q)
+        try:
+            _oh_sa = _load(os.path.join(ODDS_HISTORY_DIR, fn)) or {}
+            _form_sa = (_oh_sa.get('analysis') or {}).get('form') or []
+            _fav_axis = [int(x) for x in (_cp_r.get('favAxis') or []) if str(x).lstrip('-').isdigit()]
+            _fav0 = _fav_axis[0] if _fav_axis else None
+            _sig_sa = [(_fh['no'], (_fh.get('anomaly') or {}).get('drop', 0))
+                       for _fh in _form_sa
+                       if (_fh.get('anomaly') or {}).get('drop', 0) >= 0.50 and _fh.get('no') is not None]
+            if _fav0 is not None:
+                for _sno, _ in _sig_sa:
+                    if _sno != _fav0:
+                        _q_sa.add(frozenset([_fav0, _sno]))
+        except Exception:
+            pass
+        _book('fix_signal_axis', qh=(win_q in _q_sa), th=t_hit)
     for p, s in pol.items():
         s["roi"] = round(s["returned"] / s["invested"] * 100) if s["invested"] else None
         s["hitRate"] = round(s["hits"] / s["judged"] * 100) if s["judged"] else 0
