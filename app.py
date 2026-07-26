@@ -28481,7 +28481,7 @@ def _auto_pred_tick(sched, now):
             # [fix_bgfreeze 2026-07-26] 마감 120초 이내 + 로그 3분+ 안정 → 재분석 스킵
             #   백그라운드가 마감 직전 Q를 덮어쓰던 문제(아오모리4R·와카야마8R 케이스) 차단.
             _left_bg = pe - now
-            if _left_bg <= 120 and _lp and os.path.exists(_lp) and (now - os.path.getmtime(_lp)) >= 180:
+            if _left_bg <= 120 and _lp and os.path.exists(_lp) and (now - os.path.getmtime(_lp)) >= 60:  # [fix_bgfreeze2] 3분→1분
                 continue  # 마감 2분 이내 + 로그 3분+ 불변 → 안정 추천 보호
             try:
                 _an_bg = _triple_analyze(rk, _rec)    # 매 틱 재분석 → _REC_HYST 누적·cycleT2 게이트 진입
