@@ -11168,6 +11168,42 @@ def _triple_analyze(rk, rec):
                     core_picks['finalQuinellas'] = _all_q2[:_mainmax]
             except Exception:
                 pass
+            # [fix_market_axis 2026-07-26] 시장 최저복승 말 x keyHorses 교차 페어 추가
+            # 리플레이 검증: 4일 +18건 (baseline 65→83)
+            # 부산2R: confQ[0]=2+3(5.2배) → 2번=시장축 → 2+keyHorses → 2+6 포착
+            try:
+                _conf_q_ma = core_picks.get('confQuinellas') or []
+                _kh_ma = set(int(x) for x in (key_horses or []) if str(x).lstrip('-').isdigit())
+                _fq_ma_list = list(core_picks.get('finalQuinellas') or [])
+                _fq_ma_h = set(int(n) for _q in _fq_ma_list for n in (_q.get('combo') or [])
+                               if str(n).lstrip('-').isdigit())
+                _fq_ma_set = set(frozenset(_q['combo']) for _q in _fq_ma_list if _q.get('combo'))
+                if _conf_q_ma:
+                    _hcnt_ma = {}
+                    for _cq in _conf_q_ma[:5]:
+                        for _hn in (_cq.get('combo') or []):
+                            try: _hn=int(_hn); _hcnt_ma[_hn]=_hcnt_ma.get(_hn,0)+1
+                            except: pass
+                    _mkt_ax = max(_hcnt_ma, key=lambda x: _hcnt_ma[x]) if _hcnt_ma else None
+                    if _mkt_ax:
+                        _ma_adds = []
+                        for _ph in (_kh_ma | _fq_ma_h):
+                            if _ph == _mkt_ax: continue
+                            _ps = frozenset([_mkt_ax, _ph])
+                            if _ps in _fq_ma_set: continue
+                            _pk = f'{min(_mkt_ax,_ph)}+{max(_mkt_ax,_ph)}'
+                            _po = (curQ or {}).get(_pk) or (curQ or {}).get(f'{max(_mkt_ax,_ph)}+{min(_mkt_ax,_ph)}')
+                            if _po and 0 < float(_po) <= 50:
+                                _ma_adds.append({'combo': [_mkt_ax, _ph], 'odds': float(_po),
+                                                 'reason': '시장축 교차(fix_market_axis)',
+                                                 'stars': 3, 'basis': ''})
+                                _fq_ma_set.add(_ps)
+                        if _ma_adds:
+                            _all_q3 = _fq_ma_list + _ma_adds
+                            _all_q3.sort(key=lambda x: (x.get('odds') is None, x.get('odds') or 9e9))
+                            core_picks['finalQuinellas'] = _all_q3[:_mainmax]
+            except Exception:
+                pass
             # [수익성 구조 개편 (2026-07-19)] 경주 3분류(저=삼복승 집중/중=2.5배 컷+기대값/고=유지) 후처리 —
             #   실패 시 내부에서 완전 무변경(기존 추천 유지). 빠진 복승은 quinellaRef(참고 접기)로 무삭제 이동.
             _apply_profit_strategy(core_picks, curQ, _rec_valid, sig_meta=_sig_meta,
