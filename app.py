@@ -13531,8 +13531,11 @@ def _missing_results(date=None):
         if not has_result and rk and "TEST" not in (rk or "").upper():
             # [신규] 추천 요약(삼복승 우선→복승) + 이상감지 여부 + 마지막 갱신시각(발주 근접 알림용)
             fr = d.get("final_recommendation") or {}
-            _tm = (fr.get("trifecta_main") or {}).get("combo")
-            _qm = (fr.get("quinella_main") or {}).get("combo")
+            cp = d.get("corePicks") or {}  # [신스키마 지원]
+            _fq = cp.get("finalQuinellas") or []
+            _ft = cp.get("finalTrifectas") or []
+            _tm = (fr.get("trifecta_main") or {}).get("combo") or (_ft[0].get("combo") if _ft else None)
+            _qm = (fr.get("quinella_main") or {}).get("combo") or (_fq[0].get("combo") if _fq else None)
             recommend = ("삼복승 " + str(_tm)) if _tm else (("복승 " + str(_qm)) if _qm else "추천 없음")
             had_anomaly = any((s or {}).get("severity") == "🔴" for s in (d.get("signals_detected") or []))
             missing.append({"raceKey": rk, "race": d.get("race"), "race_id": rid,
