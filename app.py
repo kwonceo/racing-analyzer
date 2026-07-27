@@ -10706,7 +10706,21 @@ def _triple_analyze(rk, rec):
             core_picks["confTop1"] = conf_q["top1"]
             core_picks["confTop1Conf"] = conf_q["top1Conf"]
             core_picks["confTop1High"] = conf_q.get("top1High")   # 확신도 1위 고배당(30배+) → 복승 축 제외·삼복승 보험 표기용
-            core_picks["favAxis"] = conf_q.get("favAxis")         # 시장 유력마 복승 축 2두
+            # [T-2분 왕축 교체 금지 2026-07-28] 카나자와7R: T-72초 급락 감지로 10번 왕축 버리고
+            # 1번으로 교체 → 10+1 정답 놓침. T-2분 이내엔 기존 왕축 동결, 급락말은 보조로만 추가.
+            _new_fav = conf_q.get("favAxis")
+            if cur_mb is not None and cur_mb > 2 and not after_close:
+                _FROZEN_FAV_AXIS[rk] = _new_fav   # T-2분 초과: 정상 업데이트 + 캐시 저장
+                core_picks["favAxis"] = _new_fav
+            elif cur_mb is not None and 0 < cur_mb <= 2 and not after_close:
+                _frozen = _FROZEN_FAV_AXIS.get(rk)
+                if _frozen:
+                    core_picks["favAxis"] = _frozen  # 동결된 왕축 유지
+                    print(f"[T-2분 왕축 동결] {rk}: {_new_fav} → {_frozen} 유지(cur_mb={cur_mb})")
+                else:
+                    core_picks["favAxis"] = _new_fav
+            else:
+                core_picks["favAxis"] = _new_fav  # 마감 후 or cur_mb 불명: 그대로
 
             # [보완②] 삼복승 예상배당 표기 — 실배당(trio_map) 우선, 없으면 _trio_est 추정.
             def _tri_odds(cc):
@@ -21768,6 +21782,7 @@ def _kra_auto_start():
 #   해결: watch 와 완전히 독립적으로, '당일 분석됐으나 결과 없는 한국 경주'를 주기적으로 KRA API 로
 #         자동 수집→_apply_result_learning(복기·학습·복병·패턴·백업 자동연쇄). 멱등·읽기전용 조회.
 _KRA_BACKFILL_INTERVAL = 1200     # 20분 주기(경주 종료 후 rcTime 이 올라오면 다음 스윕에서 자동 확보)
+_FROZEN_FAV_AXIS = {}  # {raceKey: favAxis} — T-2분 이내 동결 왕축 캐시 (카나자와7R 대응)
 _kra_backfill_started = False
 
 
