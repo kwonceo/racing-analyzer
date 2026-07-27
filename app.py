@@ -11269,6 +11269,37 @@ def _triple_analyze(rk, rec):
                             core_picks['finalTrifectas'] = _ft_na + _na_adds
             except Exception:
                 pass
+            # [막판 급락 Emergency Override 2026-07-28] T-2분 이내 + 복승 급락 -30%+ + finalQ 미포함
+            # → 최상단 1~2자리 강제 편입. 오탐 방지: 배당 ≤80배 + 복승 기반(단승 아님)
+            # 카나자와7R: T-72초 1번 급락 → 1+10 조합이 finalQ에 없었다면 강제 편입했을 케이스
+            try:
+                if cur_mb is not None and 0 < cur_mb <= 2 and not after_close:
+                    _fq_eo = list(core_picks.get('finalQuinellas') or [])
+                    _fq_eo_set = {frozenset(int(x) for x in (q.get('combo') or [])) for q in _fq_eo}
+                    _eo_adds = []
+                    for _d in (drops or []):
+                        if (_d.get('pct') or 0) > -30:
+                            continue
+                        _dc = [int(x) for x in (_d.get('combo') or [])]
+                        if len(_dc) != 2:
+                            continue
+                        _ds = frozenset(_dc)
+                        if _ds in _fq_eo_set:
+                            continue
+                        _do = (curQ or {}).get((_dc[0], _dc[1])) or (curQ or {}).get((_dc[1], _dc[0]))
+                        if not _do or float(_do) > 80:
+                            continue
+                        _eo_adds.append({'combo': _dc, 'odds': float(_do),
+                                         'reason': f'🚨 막판급락Override(T-{cur_mb}분 {_d.get("pct")}%)',
+                                         'stars': 5, 'basis': '집중급락'})
+                        _fq_eo_set.add(_ds)
+                        if len(_eo_adds) >= 2:
+                            break
+                    if _eo_adds:
+                        core_picks['finalQuinellas'] = _eo_adds + _fq_eo
+                        print(f"[Emergency Override] {rk}: {[e['combo'] for e in _eo_adds]} 최상단 강제 편입")
+            except Exception:
+                pass
             # [수익성 구조 개편 (2026-07-19)] 경주 3분류(저=삼복승 집중/중=2.5배 컷+기대값/고=유지) 후처리 —
             #   실패 시 내부에서 완전 무변경(기존 추천 유지). 빠진 복승은 quinellaRef(참고 접기)로 무삭제 이동.
             _apply_profit_strategy(core_picks, curQ, _rec_valid, sig_meta=_sig_meta,
