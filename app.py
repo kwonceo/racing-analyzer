@@ -11204,6 +11204,44 @@ def _triple_analyze(rk, rec):
                             core_picks['finalQuinellas'] = _all_q3[:_mainmax]
             except Exception:
                 pass
+            # [Non-Axis 삼복승 보험 2026-07-28] strongSignals=0 + 왕축 단순 인기마일 때
+            # finalQ 중 왕축 없는 조합(앵커) x keyHorses 교차 → 삼복승 보험 1~2구멍 자동 생성
+            # 코치 10경주 케이스: strongSignals=0, 1번 왕축, 4+5 앵커 → 4+5+3/4+5+10 보험
+            try:
+                _ss_na = len(core_picks.get('strongSignals') or [])
+                _fa_na = [int(x) for x in ((conf_q or {}).get('favAxis') or [])][:1]
+                _kh_na = [int(x) for x in (key_horses or []) if str(x).lstrip('-').isdigit()]
+                _ft_na = list(core_picks.get('finalTrifectas') or [])
+                _fq_na = list(core_picks.get('finalQuinellas') or [])
+                _ft_na_set = {tuple(sorted(int(x) for x in (t.get('combo') or []))) for t in _ft_na}
+                if _ss_na == 0 and _fa_na and _fq_na:
+                    # 왕축 없는 finalQ 앵커 탐색
+                    _anchor_na = None
+                    for _q_na in _fq_na:
+                        _c_na = [int(x) for x in (_q_na.get('combo') or [])]
+                        if len(_c_na) == 2 and _fa_na[0] not in _c_na:
+                            _anchor_na = _c_na
+                            break
+                    if _anchor_na:
+                        _used_na = set(_anchor_na)
+                        _na_adds = []
+                        for _kh in _kh_na:
+                            if _kh in _used_na:
+                                continue
+                            _c3 = tuple(sorted(_anchor_na + [_kh]))
+                            if _c3 in _ft_na_set:
+                                continue
+                            _na_adds.append({'combo': list(_c3),
+                                             'odds': _tri_odds(list(_c3)),
+                                             'reason': 'Non-Axis 보험(왕축 제외·앵커%s교차)' % str(_anchor_na),
+                                             'stars': 3, 'basis': ''})
+                            _ft_na_set.add(_c3)
+                            if len(_na_adds) >= 2:
+                                break
+                        if _na_adds:
+                            core_picks['finalTrifectas'] = _ft_na + _na_adds
+            except Exception:
+                pass
             # [수익성 구조 개편 (2026-07-19)] 경주 3분류(저=삼복승 집중/중=2.5배 컷+기대값/고=유지) 후처리 —
             #   실패 시 내부에서 완전 무변경(기존 추천 유지). 빠진 복승은 quinellaRef(참고 접기)로 무삭제 이동.
             _apply_profit_strategy(core_picks, curQ, _rec_valid, sig_meta=_sig_meta,
