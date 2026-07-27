@@ -12992,6 +12992,7 @@ def _analysis_log_path(rk):
     m = re.search(r"(\d{4}-\d{2}-\d{2})", rk or "")
     date = m.group(1) if m else time.strftime("%Y-%m-%d", time.localtime())
     race = re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip() or (rk or "race")
+    race = _strip_race_dist(race)   # [중복파일 차단 2026-07-28] 거리접미 제거 → 1300M 별도파일 방지
     safe = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
     os.makedirs(ANALYSIS_LOG_DIR, exist_ok=True)
     return os.path.join(ANALYSIS_LOG_DIR, safe + ".json"), date, race
