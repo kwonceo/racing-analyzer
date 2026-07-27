@@ -1,63 +1,6 @@
 {
   "patterns": [
     {
-      "race": "2026-07-15 名古屋 12R",
-      "horse_no": 7,
-      "recent_avg": 4.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-15"
-    },
-    {
-      "race": "2026-07-15 名古屋 12R",
-      "horse_no": 6,
-      "recent_avg": 5.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-15"
-    },
-    {
-      "race": "2026-07-15 名古屋 12R",
-      "horse_no": 7,
-      "recent_avg": 4.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-15"
-    },
-    {
-      "race": "2026-07-15 名古屋 12R",
-      "horse_no": 6,
-      "recent_avg": 5.2,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-15"
-    },
-    {
-      "race": "2026-07-15 名古屋 12R",
-      "horse_no": 9,
-      "recent_avg": 7.2,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-15"
-    },
-    {
-      "pattern": "대규모급락",
-      "raceKey": "도리데 2경주",
-      "total_combos_dropped": 9,
-      "drop_ratio": 0.6,
-      "result": "2+5",
-      "result_odds": "미상",
-      "result_quinella_odds": null,
-      "signal_result_combo": "17.4%",
-      "recommended_hit": false,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1784116901.1871412
-    },
-    {
       "race": "2026-07-16 園田 2R",
       "horse_no": 3,
       "recent_avg": 5.0,
@@ -4602,16 +4545,70 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-27"
+    },
+    {
+      "race": "카나자와 3경주",
+      "horse_no": 3,
+      "recent_avg": 8.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-27"
+    },
+    {
+      "race": "카나자와 3경주",
+      "horse_no": 2,
+      "recent_avg": 5.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-27"
+    },
+    {
+      "race": "카나자와 3경주",
+      "horse_no": 6,
+      "recent_avg": 5.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-27"
+    },
+    {
+      "race": "모리오카 9경주",
+      "horse_no": 9,
+      "recent_avg": 4.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-27"
+    },
+    {
+      "race": "모리오카 9경주",
+      "horse_no": 4,
+      "recent_avg": 6.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-27"
+    },
+    {
+      "race": "모리오카 9경주",
+      "horse_no": 3,
+      "recent_avg": 4.8,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-27"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1462,
-      "hit": 300
+      "count": 1469,
+      "hit": 303
     },
     "전체부진마": {
-      "count": 2444,
-      "hit": 679
+      "count": 2455,
+      "hit": 685
     },
     "대규모급락": {
       "count": 7,
@@ -4621,8 +4618,8 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 982,
-      "hit": 379
+      "count": 986,
+      "hit": 382
     },
     "급락동반": {
       "count": 182,
@@ -4999,27 +4996,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 286,
-    "hit": 229,
+    "count": 287,
+    "hit": 230,
     "cases": [
-      {
-        "race": "2026-07-21 모리오카 5경주",
-        "date": "2026-07-22",
-        "smart_horses": [
-          9,
-          2,
-          6,
-          12
-        ],
-        "placed": [
-          6,
-          12
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 11.5,
-        "high_odds": false
-      },
       {
         "race": "2026-07-21 모리오카 9경주",
         "date": "2026-07-22",
@@ -6588,6 +6567,24 @@
         "trifecta_odds": null,
         "quinella_odds": 20.3,
         "high_odds": true
+      },
+      {
+        "race": "카나자와 3경주",
+        "date": "2026-07-27",
+        "smart_horses": [
+          3,
+          6,
+          2
+        ],
+        "placed": [
+          3,
+          6,
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
     "rate": 80.1,
