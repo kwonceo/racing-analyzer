@@ -1,40 +1,6 @@
 {
   "patterns": [
     {
-      "race": "하코다테 3경주",
-      "horse_no": 2,
-      "recent_avg": 4.6,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-17"
-    },
-    {
-      "race": "하코다테 5경주",
-      "horse_no": 4,
-      "recent_avg": 4.4,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-17"
-    },
-    {
-      "race": "하코다테 5경주",
-      "horse_no": 7,
-      "recent_avg": 6.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-17"
-    },
-    {
-      "race": "하코다테 5경주",
-      "horse_no": 3,
-      "recent_avg": 5.6,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-17"
-    },
-    {
       "race": "하코다테 7경주",
       "horse_no": 2,
       "recent_avg": 7.0,
@@ -4603,16 +4569,52 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-27"
+    },
+    {
+      "race": "카나자와 5경주",
+      "horse_no": 4,
+      "recent_avg": 4.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-27"
+    },
+    {
+      "race": "카나자와 5경주",
+      "horse_no": 8,
+      "recent_avg": 9.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-27"
+    },
+    {
+      "race": "카나자와 5경주",
+      "horse_no": 9,
+      "recent_avg": 6.4,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-27"
+    },
+    {
+      "race": "모리오카 11경주",
+      "horse_no": 7,
+      "recent_avg": 6.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-27"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1479,
-      "hit": 305
+      "count": 1490,
+      "hit": 307
     },
     "전체부진마": {
-      "count": 2470,
-      "hit": 689
+      "count": 2486,
+      "hit": 693
     },
     "대규모급락": {
       "count": 7,
@@ -4622,8 +4624,8 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 991,
-      "hit": 384
+      "count": 996,
+      "hit": 386
     },
     "급락동반": {
       "count": 182,
@@ -5000,25 +5002,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 294,
-    "hit": 237,
+    "count": 295,
+    "hit": 238,
     "cases": [
-      {
-        "race": "히로시마 2경주",
-        "date": "2026-07-22",
-        "smart_horses": [
-          2,
-          3,
-          4
-        ],
-        "placed": [
-          3
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 10.6,
-        "high_odds": false
-      },
       {
         "race": "いわき平 1경주",
         "date": "2026-07-22",
@@ -6593,9 +6579,25 @@
         "trifecta_odds": null,
         "quinella_odds": 15.8,
         "high_odds": false
+      },
+      {
+        "race": "모리오카 11경주",
+        "date": "2026-07-27",
+        "smart_horses": [
+          7,
+          11
+        ],
+        "placed": [
+          7,
+          11
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 80.6,
+    "rate": 80.7,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
