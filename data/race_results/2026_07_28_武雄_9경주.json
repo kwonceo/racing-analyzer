@@ -1,0 +1,69 @@
+{
+ "race_id": "2026_07_28_武雄_9경주",
+ "raceKey": "武雄 9경주",
+ "date": "2026-07-28",
+ "sport": "horse",
+ "category": "japan_local",
+ "track": "武雄",
+ "round": 9,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 7
+ },
+ "payouts": {
+  "quinella": 4.6,
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7
+  ],
+  "eliminated": [
+   6
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중 · 제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 4.6,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 3600
+ },
+ "memo": null,
+ "saved_at": "2026-07-28 00:00:23",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
