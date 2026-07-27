@@ -1,6 +1,6 @@
 {
- "generated_at": 1785125870.8903146,
- "races_with_result": 420,
+ "generated_at": 1785125889.652109,
+ "races_with_result": 421,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -10,21 +10,21 @@
    "key": "had_compression",
    "desc": "배당 압축 동반 경주",
    "rate": 60.0,
-   "baseline": 47.6,
-   "lift": 12.4,
+   "baseline": 47.7,
+   "lift": 12.3,
    "support": 5,
    "hit": 3
   },
   {
    "type": "전적점수",
    "key": "form_range",
-   "desc": "적중 경주 상위등급마 전적점수 주로 71.2~108.6 구간",
+   "desc": "적중 경주 상위등급마 전적점수 주로 70.1~108.6 구간",
    "range": [
-    71.2,
+    70.1,
     108.6
    ],
-   "support": 566
+   "support": 569
   }
  ],
- "baseline_hit_rate": 47.6
+ "baseline_hit_rate": 47.7
 }
