@@ -28804,6 +28804,9 @@ def _boot_background():
 
 # [Railway/gunicorn] gunicorn 은 __main__ 을 건너뛰므로, 여기서 모듈 로드 시점에 백그라운드 기동.
 #   (SERVER_SOFTWARE 는 gunicorn 이 자동 설정. 로컬 `python app.py` 에선 미설정 → 아래 __main__ 에서 기동)
+
+from admin_page import admin_bp
+app.register_blueprint(admin_bp)
 if os.environ.get("SERVER_SOFTWARE", "").startswith("gunicorn"):
     _boot_background()
 
