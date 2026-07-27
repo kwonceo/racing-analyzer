@@ -7057,9 +7057,22 @@ def _confidence_picks(confidence, curWin, curQ, key_horses, single_rank, anomaly
     if trifecta_ins is None and anomaly_horse is not None and int(anomaly_horse) not in (fav1, fav2):
         trifecta_ins = sorted([fav1, fav2, int(anomaly_horse)])         # 폴백: 유력마 2두 + 이상감지
 
+    # [맹목적 왕축 조건 강화 2026-07-28] 왕축 강도 판정
+    # strongAxis=True: 확신도 60+ AND (2위 대비 2배 이상 OR 단승 2.0배 이하)
+    # False이면 Non-Axis 보험 적극 발동
+    _fav1_conf = _conf(fav1)
+    _fav2_conf = _conf(fav2)
+    _fav1_rep = _rep(fav1)
+    _strong_axis = bool(
+        _fav1_conf >= 60 and (
+            _fav2_conf <= 0 or _fav1_conf >= _fav2_conf * 2 or
+            (_fav1_rep is not None and _fav1_rep <= 2.0)
+        )
+    )
     return {"favAxis": [fav1, fav2], "top1": top1, "top1Conf": round(top1c, 1),
             "top1High": top1_high, "quinellas": quinellas[:3], "forced": forced,
-            "trifecta": trifecta, "trifectaIns": trifecta_ins}
+            "trifecta": trifecta, "trifectaIns": trifecta_ins,
+            "strongAxis": _strong_axis}
 
 
 def _dense_no_signal_box(key_horses, valid_nos, curWin, curQ, trio_map,
@@ -11241,7 +11254,8 @@ def _triple_analyze(rk, rec):
                 _ft_na = list(core_picks.get('finalTrifectas') or [])
                 _fq_na = list(core_picks.get('finalQuinellas') or [])
                 _ft_na_set = {tuple(sorted(int(x) for x in (t.get('combo') or []))) for t in _ft_na}
-                if _ss_na == 0 and _fa_na and _fq_na:
+                _weak_axis = not (conf_q or {}).get("strongAxis", True)
+                if (_ss_na == 0 or _weak_axis) and _fa_na and _fq_na:  # [맹목적 왕축] strongAxis 아니면 보험 확대
                     # 왕축 없는 finalQ 앵커 탐색
                     _anchor_na = None
                     for _q_na in _fq_na:
