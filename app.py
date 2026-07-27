@@ -10913,6 +10913,19 @@ def _triple_analyze(rk, rec):
                         _dn = _dh.get("no")
                         if _dn is not None and int(_dn) != _axis:
                             _dark_q.append({"combo": [_axis, int(_dn)], "odds": _qo(_axis, int(_dn)), "reason": "복병 포함"})
+                    # [왕축×복병 교차 2026-07-28] favAxis(시장 왕축) × 복병 교차 복승 보조 추가
+                    # 카나자와7R: 10번(왕축)×1번(복병) → 10+1 미생성 문제 대응
+                    _fav_ax = (conf_q or {}).get('favAxis') or []
+                    _fav_no = int(_fav_ax[0]) if _fav_ax else None
+                    if _fav_no and _fav_no != _axis:
+                        for _dh in (dark_horses or []):
+                            _dn = _dh.get("no")
+                            if _dn is not None and int(_dn) != _fav_no:
+                                _o = _qo(_fav_no, int(_dn))
+                                if _o and 0 < float(_o) <= 80:
+                                    _dark_q.append({"combo": [_fav_no, int(_dn)],
+                                                    "odds": _o,
+                                                    "reason": "왕축×복병 교차(fix_axis_dark)"})
             except Exception:
                 pass
             # [추천 개편·조합 근거/신호강도] 말별 신호 메타(급락%·역배열·스마트머니·복병·집중급락·signalScore)
