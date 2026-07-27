@@ -2,32 +2,6 @@
   "patterns": [
     {
       "race": "나고야 8경주",
-      "horse_no": 4,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-14"
-    },
-    {
-      "race": "나고야 8경주",
-      "horse_no": 8,
-      "recent_avg": 5.2,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-14"
-    },
-    {
-      "race": "나고야 8경주",
-      "horse_no": 4,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-14"
-    },
-    {
-      "race": "나고야 8경주",
       "horse_no": 8,
       "recent_avg": 5.2,
       "win_place": 1,
@@ -4610,16 +4584,42 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-27"
+    },
+    {
+      "race": "모리오카 4경주",
+      "horse_no": 6,
+      "recent_avg": 6.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-27"
+    },
+    {
+      "race": "모리오카 4경주",
+      "horse_no": 8,
+      "recent_avg": 8.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-27"
+    },
+    {
+      "race": "모리오카 4경주",
+      "horse_no": 2,
+      "recent_avg": 10.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-27"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1434,
-      "hit": 296
+      "count": 1439,
+      "hit": 298
     },
     "전체부진마": {
-      "count": 2398,
-      "hit": 665
+      "count": 2405,
+      "hit": 668
     },
     "대규모급락": {
       "count": 7,
@@ -4629,8 +4629,8 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 964,
-      "hit": 369
+      "count": 966,
+      "hit": 370
     },
     "급락동반": {
       "count": 182,
@@ -5007,22 +5007,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 275,
-    "hit": 218,
+    "count": 276,
+    "hit": 219,
     "cases": [
-      {
-        "race": "도요하시 2경주",
-        "date": "2026-07-21",
-        "smart_horses": [
-          1,
-          4
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "도요하시 7경주",
         "date": "2026-07-21",
@@ -6590,6 +6577,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 5.0,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 4경주",
+        "date": "2026-07-27",
+        "smart_horses": [
+          2,
+          8,
+          4
+        ],
+        "placed": [
+          2,
+          8
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
