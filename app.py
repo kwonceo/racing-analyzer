@@ -13344,6 +13344,18 @@ def _build_analysis_log(rk, an=None):
         "profit": (doc.get("profit") if doc else None),
         "review": (doc.get("review") if doc else None),   # 사용자 복기 메모(텍스트)
     }
+    # [readonly 잠금 2026-07-28] 마감 후 추천 있는 파일 → readonly:True 플래그 설정
+    # 이후 백그라운드 재분석이 corePicks/finalQ를 덮어쓰는 T-0 Race Condition 원천 차단
+    if an.get("afterClose") and _cp_has_recs(core_picks_out):
+        log["readonly"] = True
+    # readonly 파일: result/hit/review/profit 업데이트만 허용, corePicks 등 분석 결과 차단
+    if doc.get("readonly") and an.get("afterClose"):
+        log["corePicks"] = doc.get("corePicks")
+        log["final_recommendation"] = doc.get("final_recommendation")
+        log["recommendation_history"] = doc.get("recommendation_history")
+        log["signals_detected"] = doc.get("signals_detected")
+        log["readonly"] = True
+        print(f"[readonly 잠금] {rk}: 마감 확정 파일 — corePicks 보존, result/hit만 업데이트 허용")
     # [원자적 저장 (2026-07-21 도야마 1R)] 이중 분석 소스가 같은 로그를 동시 기록 → 쓰는 도중 파일을
     #   읽은 쪽이 JSON 파싱 실패(doc=None) → recommendation_history 가 통째로 초기화되던 소실 버그.
     #   tmp 기록 후 os.replace 교체로 '읽는 쪽은 항상 완전한 파일'만 보게 함(추가 보강·동작 동일).
