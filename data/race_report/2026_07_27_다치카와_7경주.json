@@ -1,6 +1,6 @@
 {
  "race": "다치카와 7경주",
- "raceKey": "다치카와 7경주",
+ "raceKey": "2026-07-27 다치카와 7경주",
  "date": "2026-07-27",
  "result": {
   "1st": 1,
@@ -197,9 +197,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 62.7,
+   "record_score": null,
    "confidence": 40.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_4": {
    "horse": 4,
@@ -385,7 +385,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.542,
-   "record_score": 46.0,
+   "record_score": null,
    "confidence": 71.3,
    "reason": "쌍승역전"
   },
@@ -401,7 +401,7 @@
    "drop_timeline": [],
    "exacta_reversal": true,
    "reversal_ratio": 0.074,
-   "record_score": 42.5,
+   "record_score": null,
    "confidence": 83.0,
    "reason": "쌍승역전"
   },
@@ -589,7 +589,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.237,
-   "record_score": 43.4,
+   "record_score": null,
    "confidence": 83.0,
    "reason": "쌍승역전"
   }
@@ -600,7 +600,7 @@
   6
  ],
  "recommendation_process": [
-  "1. 전적 분석: 1번 62.7점",
+  "1. 전적 분석: 1번 전적 정보 제한",
   "2. 배당 수집 시작 13:20:53",
   "4. 쌍승 역전: 7→1(75.2) < 1→7(1203.3) → 7번 실질 상위 신호",
   "4. 쌍승 역전: 3→1(33.2) < 1→3(495.5) → 3번 실질 상위 신호",
@@ -613,7 +613,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 62.7,
+  "record_score": null,
   "total": 40.0,
   "grade": "중"
  },
@@ -622,7 +622,7 @@
  ],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 62.7,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -635,7 +635,7 @@
    5
   ],
   "confidence": 83.0,
-  "reason": "전적유력마 1번 적중 · 역배열 감지말 5번 입상"
+  "reason": "전적유력마 1번 적중 · 역배열 감지말 5번 입상 · 제거 적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -686,5 +686,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-27 13:59:24"
+ "generated_at": "2026-07-29 05:36:33"
 }
