@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_카나자와_10경주",
- "raceKey": "카나자와 10경주",
+ "raceKey": "2026-07-28 카나자와 10경주",
  "date": "2026-07-28",
  "sport": "horse",
  "category": "japan_local",
@@ -9,15 +9,15 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 10,
+ "horse_count": null,
  "result": {
   "1st": 10,
   "2nd": 11,
   "3rd": 2
  },
  "payouts": {
-  "quinella": 24.3,
-  "trifecta": 0.0
+  "quinella": 28.8,
+  "trifecta": 34.9
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -372,21 +372,21 @@
    2,
    5,
    7,
+   10,
    1,
+   4,
    8,
    9,
    11,
-   10,
-   6,
-   4,
-   3
+   3,
+   6
   ],
   "eliminated": [],
   "recommend_main": "5+10",
   "recommend_sub": null,
   "strategy": "BMED_보험형",
   "signal_quality": "하",
-  "confidence": 40.0,
+  "confidence": 0,
   "inverse": false
  },
  "result_analysis": {
@@ -402,13 +402,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 24.3,
-  "trifecta_odds": null,
+  "quinella_odds": 28.8,
+  "trifecta_odds": 34.9,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-28 21:08:27",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:15)",
+ "saved_at": "2026-07-29 02:15:24",
  "validation": {
   "ok": true,
   "errors": []

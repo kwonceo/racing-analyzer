@@ -1,6 +1,6 @@
 {
  "race": "카나자와 10경주",
- "raceKey": "카나자와 10경주",
+ "raceKey": "2026-07-28 카나자와 10경주",
  "date": "2026-07-28",
  "result": {
   "1st": 10,
@@ -37,9 +37,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 75,
-   "confidence": 24.0,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_11": {
    "horse": 11,
@@ -54,7 +54,7 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": null,
-   "confidence": 0.0,
+   "confidence": null,
    "reason": "일반"
   },
   "signal_2": {
@@ -81,9 +81,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 97.5,
-   "confidence": 12.0,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_5": {
    "horse": 5,
@@ -109,9 +109,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 88.8,
-   "confidence": 24.0,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_7": {
    "horse": 7,
@@ -137,20 +137,20 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 60,
-   "confidence": 40.0,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   }
  },
  "recommended_horses": [
-  5,
   10,
+  5,
   7
  ],
  "recommendation_process": [
-  "1. 전적 분석: 10번 75점",
+  "1. 전적 분석: 10번 전적 정보 제한",
   "2. 배당 수집 시작 20:47:19",
-  "5. 종합 신뢰도 24.0점(하) 판정",
+  "5. 종합 신뢰도 0점(하) 판정",
   "6. BMED 전략: 보험형 적용",
   "7. 최종 추천: 복승 메인 5+10"
  ],
@@ -159,22 +159,20 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 75,
-  "total": 24.0,
+  "record_score": null,
+  "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "전적보조_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 75,
+  "formScore": null,
   "dropAmt": null,
-  "dropScore": 0.0,
+  "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
-  "confidence": 24.0,
+  "confidence": 0,
   "reason": "전적유력마 2번 적중"
  },
  "signal_change_history": {
@@ -192,5 +190,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-28 21:08:27"
+ "generated_at": "2026-07-29 02:15:24"
 }
