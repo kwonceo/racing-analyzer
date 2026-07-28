@@ -1,6 +1,6 @@
 {
  "race": "나고야 8경주",
- "raceKey": "나고야 8경주",
+ "raceKey": "2026-07-28 나고야 8경주",
  "date": "2026-07-28",
  "result": {
   "1st": 9,
@@ -197,9 +197,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 88.0,
+   "record_score": null,
    "confidence": 36.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_5": {
    "horse": 5,
@@ -213,7 +213,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 36.2,
+   "record_score": null,
    "confidence": 40.0,
    "reason": "일반"
   },
@@ -229,7 +229,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 53.0,
+   "record_score": null,
    "confidence": 28.0,
    "reason": "일반"
   },
@@ -417,9 +417,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 107.5,
+   "record_score": null,
    "confidence": 16.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_10": {
    "horse": 10,
@@ -605,18 +605,18 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 120.5,
+   "record_score": null,
    "confidence": 4.0,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
-  12,
   9,
+  12,
   10
  ],
  "recommendation_process": [
-  "1. 전적 분석: 9번 88.0점",
+  "1. 전적 분석: 9번 전적 정보 제한",
   "2. 배당 수집 시작 18:00:30",
   "5. 종합 신뢰도 36.0점(하) 판정",
   "6. BMED 전략: 보험형 적용",
@@ -627,14 +627,14 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 88.0,
+  "record_score": null,
   "total": 36.0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 88.0,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": false,
@@ -756,5 +756,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-28 18:19:15"
+ "generated_at": "2026-07-29 01:50:01"
 }

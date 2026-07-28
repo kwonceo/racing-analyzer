@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_나고야_5경주",
- "raceKey": "나고야 5경주",
+ "raceKey": "2026-07-28 나고야 5경주",
  "date": "2026-07-28",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 12,
+ "horse_count": null,
  "result": {
   "1st": 9,
   "2nd": 11,
@@ -17,27 +17,14 @@
  },
  "payouts": {
   "quinella": 7.7,
-  "trifecta": 0.0
+  "trifecta": 9.2
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   6,
-   9,
-   10,
-   11,
-   12,
-   7,
-   2,
-   5,
-   8,
-   1,
-   4,
-   3
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
@@ -60,12 +47,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 7.7,
-  "trifecta_odds": null,
+  "trifecta_odds": 9.2,
   "actual_return": null,
   "profit": 6700
  },
- "memo": null,
- "saved_at": "2026-07-28 16:36:17",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 01:49)",
+ "saved_at": "2026-07-29 01:49:55",
  "validation": {
   "ok": true,
   "errors": []

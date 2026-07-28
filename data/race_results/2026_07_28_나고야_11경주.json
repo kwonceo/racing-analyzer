@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_나고야_11경주",
- "raceKey": "나고야 11경주",
+ "raceKey": "2026-07-28 나고야 11경주",
  "date": "2026-07-28",
  "sport": "horse",
  "category": "japan_local",
@@ -9,17 +9,17 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 12,
+ "horse_count": null,
  "result": {
   "1st": 7,
   "2nd": 10,
   "3rd": 8
  },
  "payouts": {
-  "quinella": 6.4,
-  "trifecta": 0.0
+  "quinella": 6.3,
+  "trifecta": 17.4
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {
   "quinella": {
    "7+10": 8.0,
@@ -4183,14 +4183,15 @@
    8,
    10,
    4,
+   11,
    1,
    6,
-   11,
-   9,
-   12,
-   5
+   5,
+   9
   ],
-  "eliminated": [],
+  "eliminated": [
+   12
+  ],
   "recommend_main": "7+10",
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
@@ -4201,7 +4202,7 @@
  "result_analysis": {
   "main_hit": true,
   "sub_hit": false,
-  "hit_reason": "4+8 복승 급락(-17.6%) → 8번 입상 적중 · 역배열 감지말 10·8번 입상",
+  "hit_reason": "4+8 복승 급락(-17.6%) → 8번 입상 적중 · 역배열 감지말 10·8번 입상 · 제거 적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": true,
@@ -4211,13 +4212,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 6.4,
-  "trifecta_odds": null,
+  "quinella_odds": 6.3,
+  "trifecta_odds": 17.4,
   "actual_return": null,
   "profit": 5400
  },
- "memo": null,
- "saved_at": "2026-07-28 21:08:31",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 01:49)",
+ "saved_at": "2026-07-29 01:49:48",
  "validation": {
   "ok": true,
   "errors": []

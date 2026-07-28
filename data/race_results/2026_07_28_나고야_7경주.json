@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_나고야_7경주",
- "raceKey": "나고야 7경주",
+ "raceKey": "2026-07-28 나고야 7경주",
  "date": "2026-07-28",
  "sport": "horse",
  "category": "japan_local",
@@ -9,15 +9,15 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 12,
+ "horse_count": null,
  "result": {
   "1st": 8,
   "2nd": 10,
   "3rd": 12
  },
  "payouts": {
-  "quinella": 49.7,
-  "trifecta": 0.0
+  "quinella": 49.5,
+  "trifecta": 37.9
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -4115,21 +4115,21 @@
  "prediction": {
   "candidates": [
    1,
-   8,
-   9,
    4,
    5,
+   8,
+   9,
    12,
    10,
    11,
    2,
-   6,
-   3
+   3,
+   6
   ],
   "eliminated": [
    7
   ],
-  "recommend_main": "1+8",
+  "recommend_main": "1+12",
   "recommend_sub": null,
   "strategy": "BMED_보험형",
   "signal_quality": "하",
@@ -4141,9 +4141,7 @@
   "sub_hit": false,
   "hit_reason": null,
   "miss_reason": "추천 조합 미입상",
-  "pattern_tags": [
-   "복승불일치"
-  ],
+  "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
  },
@@ -4151,13 +4149,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 49.7,
-  "trifecta_odds": null,
+  "quinella_odds": 49.5,
+  "trifecta_odds": 37.9,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-28 17:58:13",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 01:49)",
+ "saved_at": "2026-07-29 01:49:59",
  "validation": {
   "ok": true,
   "errors": []

@@ -1,6 +1,6 @@
 {
  "race": "나고야 1경주",
- "raceKey": "나고야 1경주",
+ "raceKey": "2026-07-28 나고야 1경주",
  "date": "2026-07-28",
  "result": {
   "1st": 11,
@@ -9,7 +9,7 @@
   "4th": null
  },
  "hit": true,
- "hit_type": "삼복승 보험2",
+ "hit_type": "복승 보조(삼복승 구성)",
  "odds": "저배당",
  "win_odds": 6.2,
  "why_recommended": {
@@ -37,27 +37,27 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 61.7,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_9": {
    "horse": 9,
    "placed": true,
-   "recommended": false,
+   "recommended": true,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
    "rep_combo": [
-    1,
-    9
+    9,
+    11
    ],
    "drop_timeline": [
     {
      "time": "14:07:45",
      "minutes_before": null,
-     "odds": 15.0,
+     "odds": 6.3,
      "change": null,
      "excluded": true,
      "exclReason": "마감 후 데이터 - 제외됨"
@@ -65,14 +65,14 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 40.0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -93,7 +93,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 49.2,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -121,7 +121,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 8.0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   }
@@ -129,10 +129,10 @@
  "recommended_horses": [
   11,
   1,
-  2
+  9
  ],
  "recommendation_process": [
-  "1. 전적 분석: 11번 61.7점",
+  "1. 전적 분석: 11번 전적 정보 제한",
   "2. 배당 수집 시작 14:07:45",
   "5. 종합 신뢰도 0점(하) 판정",
   "6. BMED 전략: 보험형 적용",
@@ -143,23 +143,21 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 61.7,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "전적보조_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 61.7,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "적중"
+  "reason": "제거 적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -176,5 +174,5 @@
  },
  "pnl": 5200,
  "stake": 1000,
- "generated_at": "2026-07-28 14:23:18"
+ "generated_at": "2026-07-29 01:49:51"
 }

@@ -1,25 +1,25 @@
 {
  "race_id": "2026_07_28_나고야_1경주",
- "raceKey": "나고야 1경주",
+ "raceKey": "2026-07-28 나고야 1경주",
  "date": "2026-07-28",
  "sport": "horse",
- "category": "japan_central",
+ "category": "japan_local",
  "track": "나고야",
  "round": 1,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 11,
+ "horse_count": null,
  "result": {
   "1st": 11,
   "2nd": 9,
   "3rd": 2
  },
  "payouts": {
-  "quinella": 6.2,
-  "trifecta": 0.0
+  "quinella": 6.3,
+  "trifecta": 25.8
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {
   "quinella": {
    "1+11": 3.5,
@@ -147,19 +147,20 @@
  "anomalies": [],
  "prediction": {
   "candidates": [
-   4,
-   11,
    1,
    2,
    3,
+   4,
    5,
    6,
+   8,
    9,
    10,
-   8,
+   11
+  ],
+  "eliminated": [
    7
   ],
-  "eliminated": [],
   "recommend_main": "1+11",
   "recommend_sub": null,
   "strategy": "BMED_보험형",
@@ -170,7 +171,7 @@
  "result_analysis": {
   "main_hit": true,
   "sub_hit": false,
-  "hit_reason": "적중",
+  "hit_reason": "제거 적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
@@ -180,13 +181,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 6.2,
-  "trifecta_odds": null,
+  "quinella_odds": 6.3,
+  "trifecta_odds": 25.8,
   "actual_return": null,
   "profit": 5200
  },
- "memo": null,
- "saved_at": "2026-07-28 14:23:18",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 01:49)",
+ "saved_at": "2026-07-29 01:49:51",
  "validation": {
   "ok": true,
   "errors": []

@@ -1,6 +1,6 @@
 {
  "race": "나고야 5경주",
- "raceKey": "나고야 5경주",
+ "raceKey": "2026-07-28 나고야 5경주",
  "date": "2026-07-28",
  "result": {
   "1st": 9,
@@ -16,7 +16,7 @@
   "signal_9": {
    "horse": 9,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -25,7 +25,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 32.2,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -41,14 +41,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 3.0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
   "signal_12": {
    "horse": 12,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -57,34 +57,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 20,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_10": {
-   "horse": 10,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 48.0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   }
  },
- "recommended_horses": [
-  9,
-  10,
-  12
- ],
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 9번 32.2점",
+  "1. 전적 분석: 9번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -92,14 +72,14 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 32.2,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 32.2,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
@@ -123,5 +103,5 @@
  },
  "pnl": 6700,
  "stake": 1000,
- "generated_at": "2026-07-28 16:36:17"
+ "generated_at": "2026-07-29 01:49:55"
 }

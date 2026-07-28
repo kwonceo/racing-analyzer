@@ -1,6 +1,6 @@
 {
  "race": "나고야 11경주",
- "raceKey": "나고야 11경주",
+ "raceKey": "2026-07-28 나고야 11경주",
  "date": "2026-07-28",
  "result": {
   "1st": 7,
@@ -181,9 +181,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 100.0,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_10": {
    "horse": 10,
@@ -353,7 +353,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.827,
-   "record_score": 90.0,
+   "record_score": null,
    "confidence": 56.9,
    "reason": "초과급락 + 쌍승역전"
   },
@@ -525,7 +525,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 77.5,
+   "record_score": null,
    "confidence": 43.2,
    "reason": "초과급락"
   },
@@ -697,18 +697,18 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 93.8,
+   "record_score": null,
    "confidence": 20.8,
    "reason": "초과급락"
   }
  },
  "recommended_horses": [
+  3,
   7,
-  10,
-  3
+  10
  ],
  "recommendation_process": [
-  "1. 전적 분석: 7번 100.0점",
+  "1. 전적 분석: 7번 전적 정보 제한",
   "2. 배당 수집 시작 19:45:53",
   "3. 초과급락 감지: 8번 초과급락 -3.1%p (전체평균 -14.5%)",
   "4. 쌍승 역전: 10→3(20.6) < 3→10(24.9) → 10번 실질 상위 신호",
@@ -721,7 +721,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 100.0,
+  "record_score": null,
   "total": 0.0,
   "grade": "하"
  },
@@ -732,7 +732,7 @@
  ],
  "combo_tags": true,
  "hit_basis": {
-  "formScore": 100.0,
+  "formScore": null,
   "dropAmt": -17.6,
   "dropScore": 88.0,
   "inverse": true,
@@ -747,7 +747,7 @@
    8
   ],
   "confidence": 56.9,
-  "reason": "4+8 복승 급락(-17.6%) → 8번 입상 적중 · 역배열 감지말 10·8번 입상"
+  "reason": "4+8 복승 급락(-17.6%) → 8번 입상 적중 · 역배열 감지말 10·8번 입상 · 제거 적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -830,5 +830,5 @@
  },
  "pnl": 5400,
  "stake": 1000,
- "generated_at": "2026-07-28 21:08:31"
+ "generated_at": "2026-07-29 01:49:48"
 }

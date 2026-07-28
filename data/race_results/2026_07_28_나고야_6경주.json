@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_나고야_6경주",
- "raceKey": "나고야 6경주",
+ "raceKey": "2026-07-28 나고야 6경주",
  "date": "2026-07-28",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 13,
+ "horse_count": null,
  "result": {
   "1st": 1,
   "2nd": 5,
@@ -17,30 +17,15 @@
  },
  "payouts": {
   "quinella": 10.2,
-  "trifecta": 0.0
+  "trifecta": 33.6
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   8,
-   13,
-   2,
-   3,
-   4,
-   9,
-   10,
-   11,
-   12
-  ],
-  "eliminated": [
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
@@ -51,23 +36,23 @@
  "result_analysis": {
   "main_hit": true,
   "sub_hit": false,
-  "hit_reason": "전적유력마 1번 적중",
+  "hit_reason": "적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
-  "form_pick_hit": true
+  "form_pick_hit": false
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 10.2,
-  "trifecta_odds": null,
+  "trifecta_odds": 33.6,
   "actual_return": null,
   "profit": 9200
  },
- "memo": null,
- "saved_at": "2026-07-28 17:36:59",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 01:49)",
+ "saved_at": "2026-07-29 01:49:57",
  "validation": {
   "ok": true,
   "errors": []

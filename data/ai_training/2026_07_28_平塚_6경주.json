@@ -3,100 +3,15 @@
  "race_id": "2026_07_28_平塚_6경주",
  "race_info": {
   "date": "2026-07-28",
-  "track": "平塚",
+  "track": "히라츠카",
   "round": 6,
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 6,
-   "name": "吉川 美穂",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 50.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "畠山ひすい",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 47.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "東 美月",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 45.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "鈴木 彩夏",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 43.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "栗山 百花",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 48.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "浜地 晴帆",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 66.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "日野 友葵",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 60.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -632,7 +547,7 @@
   "2nd": 6,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 1.8,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "역배열 감지말 7번 입상"
@@ -641,7 +556,7 @@
   "quinella_hit": false,
   "winner": 3,
   "second": 6,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -653,14 +568,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-28 18:19:43",
+ "saved_at": "2026-07-29 01:49:44",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

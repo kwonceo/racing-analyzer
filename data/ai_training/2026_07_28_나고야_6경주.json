@@ -8,244 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 13,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 13,
-   "name": "ウィルソンテソーロ",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    1,
-    2,
-    2,
-    5
-   ],
-   "record_score": 126.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ルーラーシップ",
-   "jockey": "加藤聡",
-   "jockey_winrate": 36.7,
-   "recent_results": [
-    6,
-    10,
-    2,
-    1
-   ],
-   "record_score": 74.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "モーリス",
-   "jockey": "細川智",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    3,
-    8,
-    4,
-    6,
-    5
-   ],
-   "record_score": 55.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 12,
-   "name": "アジアエクスプレス",
-   "jockey": "渡邊竜",
-   "jockey_winrate": 46.7,
-   "recent_results": [
-    7,
-    3,
-    10,
-    9,
-    10
-   ],
-   "record_score": 30.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "ベストウォーリア",
-   "jockey": "山田祥",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    5,
-    5,
-    4,
-    4,
-    4
-   ],
-   "record_score": 22.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "フィエールマン",
-   "jockey": "今井貴",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    8,
-    9,
-    6,
-    7,
-    7
-   ],
-   "record_score": 13.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ダンカーク",
-   "jockey": "ダンカーク",
-   "jockey_winrate": null,
-   "recent_results": [
-    11,
-    11,
-    8,
-    11,
-    3
-   ],
-   "record_score": 15.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ダンカーク",
-   "jockey": "大畑雅",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    8,
-    11,
-    10,
-    9,
-    7
-   ],
-   "record_score": 0.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "ゴールドヘイロー",
-   "jockey": "丸山真",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    4,
-    8,
-    9,
-    9,
-    9
-   ],
-   "record_score": 5.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 11,
-   "name": "ロジャーバローズ",
-   "jockey": "木之葵",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    7,
-    10,
-    7,
-    5,
-    4
-   ],
-   "record_score": 4.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "モーニン",
-   "jockey": "小笠羚",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    10,
-    11,
-    9,
-    4,
-    10
-   ],
-   "record_score": -3.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ミッキーアイル",
-   "jockey": "柿原翔",
-   "jockey_winrate": 0.0,
-   "recent_results": [
-    12,
-    9,
-    10,
-    8,
-    11
-   ],
-   "record_score": -5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ラニ",
-   "jockey": "加藤利",
-   "jockey_winrate": 7.7,
-   "recent_results": [
-    12,
-    5,
-    4,
-    6,
-    10
-   ],
-   "record_score": -5.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [],
   "drop_rates": {},
@@ -266,23 +32,8 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   8,
-   13,
-   2,
-   3,
-   4,
-   9,
-   10,
-   11,
-   12
-  ],
-  "eliminated": [
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend": null,
   "strategy": null,
   "confidence": 0,
@@ -293,16 +44,16 @@
   "2nd": 5,
   "3rd": 12,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 10.2,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "전적유력마 1번 적중"
+  "hit_pattern": "적중"
  },
  "labels": {
   "quinella_hit": true,
   "winner": 1,
   "second": 5,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -314,7 +65,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-28 17:36:59",
+ "saved_at": "2026-07-29 01:49:57",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -323,7 +74,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
