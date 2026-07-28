@@ -1,7 +1,9 @@
 {
  "race_id": "2026_07_07_盛岡_2R",
- "raceKey": "盛岡 2R",
+ "raceKey": "2026-07-07 盛岡 2R",
  "date": "2026-07-07",
+ "sport": "horse",
+ "category": "japan_local",
  "track": "모리오카",
  "round": 2,
  "distance": null,
@@ -13,6 +15,11 @@
   "2nd": 9,
   "3rd": 1
  },
+ "payouts": {
+  "quinella": 95.5,
+  "trifecta": 431.1
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -39,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 95.5,
+  "trifecta_odds": 431.1,
   "actual_return": null,
-  "profit": 0
+  "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-07 23:23:51",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:54)",
+ "saved_at": "2026-07-29 02:54:27",
  "validation": {
   "ok": true,
   "errors": []

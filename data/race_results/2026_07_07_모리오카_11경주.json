@@ -1,36 +1,31 @@
 {
  "race_id": "2026_07_07_모리오카_11경주",
- "raceKey": "모리오카 11경주",
+ "raceKey": "2026-07-07 모리오카 11경주",
  "date": "2026-07-07",
+ "sport": "horse",
+ "category": "japan_local",
  "track": "모리오카",
  "round": 11,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 11,
+ "horse_count": null,
  "result": {
   "1st": 8,
   "2nd": 7,
   "3rd": 3
  },
+ "payouts": {
+  "quinella": 4.1,
+  "trifecta": 43.0
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
   "candidates": [],
-  "eliminated": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7,
-   8,
-   9,
-   10,
-   11
-  ],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
@@ -51,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 4.1,
+  "trifecta_odds": 43.0,
   "actual_return": null,
-  "profit": 0
+  "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-07 23:23:56",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:54)",
+ "saved_at": "2026-07-29 02:54:33",
  "validation": {
   "ok": true,
   "errors": []
