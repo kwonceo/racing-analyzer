@@ -8,112 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 6,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "ゼットシルヴィア",
-   "jockey": "小牧太（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    1,
-    4
-   ],
-   "record_score": 93.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "ナムラオリビア",
-   "jockey": "塩津璃（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    12,
-    1,
-    4
-   ],
-   "record_score": 22.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ライトニングブルー",
-   "jockey": "土方颯（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    9,
-    5,
-    3,
-    3,
-    8
-   ],
-   "record_score": 12.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "マイネルアラウダ",
-   "jockey": "佐々世（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    6,
-    3,
-    5
-   ],
-   "record_score": 10.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "キイチオータム",
-   "jockey": "廣瀬航（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    4,
-    5
-   ],
-   "record_score": 8.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ヴォラヴィア",
-   "jockey": "小谷周（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    10,
-    12,
-    8,
-    12
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [],
   "drop_rates": {},
@@ -122,7 +20,7 @@
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": null,
-  "refund_rate": 0.763,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -134,14 +32,7 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   2,
-   3,
-   1,
-   4,
-   5,
-   6
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend": null,
   "strategy": null,
@@ -153,16 +44,16 @@
   "2nd": 1,
   "3rd": 3,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 3.9,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "전적유력마 2번 적중"
+  "hit_pattern": "적중"
  },
  "labels": {
   "quinella_hit": false,
   "winner": 2,
   "second": 1,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -174,7 +65,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-24 18:54:58",
+ "saved_at": "2026-07-29 05:02:42",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -183,7 +74,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

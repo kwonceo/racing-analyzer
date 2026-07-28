@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_24_소노다_12경주",
- "raceKey": "소노다 12경주",
+ "raceKey": "2026-07-24 소노다 12경주",
  "date": "2026-07-24",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 11,
+ "horse_count": null,
  "result": {
   "1st": 9,
   "2nd": 5,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 102.7,
-  "trifecta": 0.0
+  "trifecta": 116.5
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -432,15 +432,15 @@
  "prediction": {
   "candidates": [
    1,
-   3,
-   5,
-   11,
    2,
+   3,
    4,
+   5,
    7,
    8,
    9,
-   10
+   10,
+   11
   ],
   "eliminated": [
    6
@@ -468,12 +468,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 102.7,
-  "trifecta_odds": null,
+  "trifecta_odds": 116.5,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-24 21:17:44",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:02)",
+ "saved_at": "2026-07-29 05:02:35",
  "validation": {
   "ok": true,
   "errors": []

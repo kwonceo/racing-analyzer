@@ -8,171 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 8,
-   "name": "ロングセラーアスク",
-   "jockey": "小谷哲（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    7,
-    2,
-    1
-   ],
-   "record_score": 62.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "リーデレ",
-   "jockey": "山本咲（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    5,
-    3,
-    2,
-    3
-   ],
-   "record_score": 56.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "エールクイーン",
-   "jockey": "廣瀬航（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    6,
-    4,
-    3,
-    4
-   ],
-   "record_score": 48.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "エートルドゥエ",
-   "jockey": "高橋洸（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    7,
-    3,
-    2,
-    2
-   ],
-   "record_score": 35.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "マジカルフェイス",
-   "jockey": "佐々世（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    4,
-    3,
-    4,
-    7
-   ],
-   "record_score": 28.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "タイムレスラブ",
-   "jockey": "杉浦健（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    2,
-    5,
-    3,
-    7
-   ],
-   "record_score": 25.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "クリノエニシ",
-   "jockey": "福原杏（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    3,
-    5,
-    2,
-    6
-   ],
-   "record_score": 18.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "エクスプロラベスト",
-   "jockey": "新庄海（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    9,
-    4,
-    4,
-    5,
-    5
-   ],
-   "record_score": 12.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "ブリスディーシャ",
-   "jockey": "松木大（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    12,
-    9,
-    3,
-    7,
-    11
-   ],
-   "record_score": 10.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -247,7 +86,7 @@
    4
   ],
   "eliminated": [],
-  "recommend": "3+6",
+  "recommend": "6+7",
   "strategy": "BMED_보험형",
   "confidence": 0,
   "signal_quality": "하"
@@ -257,7 +96,7 @@
   "2nd": 6,
   "3rd": 8,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 7.4,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -266,7 +105,7 @@
   "quinella_hit": false,
   "winner": 7,
   "second": 6,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -278,7 +117,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-24 17:53:51",
+ "saved_at": "2026-07-29 05:02:38",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -287,7 +126,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

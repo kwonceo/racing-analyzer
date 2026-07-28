@@ -1,15 +1,15 @@
 {
  "race_id": "2026_07_24_소노다_8경주",
- "raceKey": "소노다 8경주",
+ "raceKey": "2026-07-24 소노다 8경주",
  "date": "2026-07-24",
  "sport": "horse",
- "category": "japan_central",
+ "category": "japan_local",
  "track": "소노다",
  "round": 8,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 9,
+ "horse_count": null,
  "result": {
   "1st": 7,
   "2nd": 2,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 4.8,
-  "trifecta": 0.0
+  "trifecta": 5.7
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -369,17 +369,17 @@
   "candidates": [
    1,
    2,
+   3,
+   4,
    6,
    7,
    8,
-   9,
-   3,
-   4
+   9
   ],
   "eliminated": [
    5
   ],
-  "recommend_main": "7+9",
+  "recommend_main": "2+9",
   "recommend_sub": null,
   "strategy": "BMED_보험형",
   "signal_quality": "하",
@@ -391,9 +391,7 @@
   "sub_hit": false,
   "hit_reason": "제거 적중",
   "miss_reason": null,
-  "pattern_tags": [
-   "복승불일치"
-  ],
+  "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
  },
@@ -402,12 +400,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 4.8,
-  "trifecta_odds": null,
+  "trifecta_odds": 5.7,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-24 18:34:37",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:02)",
+ "saved_at": "2026-07-29 05:02:40",
  "validation": {
   "ok": true,
   "errors": []
