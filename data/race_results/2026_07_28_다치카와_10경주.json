@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_다치카와_10경주",
- "raceKey": "다치카와 10경주",
+ "raceKey": "2026-07-28 다치카와 10경주",
  "date": "2026-07-28",
  "sport": "cycle",
  "category": "cycle",
@@ -9,15 +9,14 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 1,
   "2nd": 4,
   "3rd": 2
  },
  "payouts": {
-  "quinella": 2.8,
-  "trifecta": 0.0
+  "quinella": 2.4
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -1594,7 +1593,7 @@
    6
   ],
   "eliminated": [],
-  "recommend_main": "4+7",
+  "recommend_main": "1+4",
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
   "signal_quality": "하",
@@ -1606,7 +1605,9 @@
   "sub_hit": false,
   "hit_reason": "전적유력마 1번 적중",
   "miss_reason": null,
-  "pattern_tags": [],
+  "pattern_tags": [
+   "복승불일치"
+  ],
   "anomaly_correct": false,
   "form_pick_hit": true
  },
@@ -1614,13 +1615,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 2.8,
+  "quinella_odds": 2.4,
   "trifecta_odds": null,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-28 15:41:08",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 01:52)",
+ "saved_at": "2026-07-29 01:52:21",
  "validation": {
   "ok": true,
   "errors": []
