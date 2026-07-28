@@ -1,6 +1,6 @@
 {
  "race": "도야마 3경주",
- "raceKey": "도야마 3경주",
+ "raceKey": "2026-07-22 도야마 3경주",
  "date": "2026-07-22",
  "result": {
   "1st": 6,
@@ -25,37 +25,25 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 74.4,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_1": {
    "horse": 1,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    1,
-    5
-   ],
-   "drop_timeline": [
-    {
-     "time": "11:44:51",
-     "minutes_before": null,
-     "odds": 3.5,
-     "change": null,
-     "excluded": true,
-     "exclReason": "마감 후 데이터 - 제외됨"
-    }
-   ],
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 117.3,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_3": {
    "horse": 3,
@@ -69,128 +57,36 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 101.6,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_5": {
-   "horse": 5,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": [
-    1,
-    5
-   ],
-   "drop_timeline": [
-    {
-     "time": "11:44:51",
-     "minutes_before": null,
-     "odds": 3.5,
-     "change": null,
-     "excluded": true,
-     "exclReason": "마감 후 데이터 - 제외됨"
-    }
-   ],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 86.7,
-   "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_2": {
-   "horse": 2,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": [
-    2,
-    5
-   ],
-   "drop_timeline": [
-    {
-     "time": "11:44:51",
-     "minutes_before": null,
-     "odds": 4.0,
-     "change": null,
-     "excluded": true,
-     "exclReason": "마감 후 데이터 - 제외됨"
-    }
-   ],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 117.5,
-   "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_7": {
-   "horse": 7,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": [
-    1,
-    5
-   ],
-   "drop_timeline": [
-    {
-     "time": "11:44:51",
-     "minutes_before": null,
-     "odds": 3.5,
-     "change": null,
-     "excluded": true,
-     "exclReason": "마감 후 데이터 - 제외됨"
-    }
-   ],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 76.5,
-   "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
- "recommended_horses": [
-  1,
-  5,
-  2,
-  7
- ],
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 6번 74.4점",
-  "2. 배당 수집 시작 11:44:51",
-  "5. 종합 신뢰도 0점(하) 판정",
-  "6. BMED 전략: 보험형 적용",
-  "7. 최종 추천: 복승 메인 1+5"
+  "1. 전적 분석: 6번 전적 정보 제한",
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 6,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 74.4,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 74.4,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "전적유력마 1번 적중"
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -200,12 +96,12 @@
   "finalSignal": null,
   "finalConfirmed": false,
   "excluded": {
-   "after_close": 1,
+   "after_close": 0,
    "next_race": 0
   },
   "validCount": 0
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-22 12:08:16"
+ "generated_at": "2026-07-29 04:44:34"
 }
