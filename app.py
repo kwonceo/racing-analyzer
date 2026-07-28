@@ -12040,10 +12040,33 @@ def _apply_rec_hysteresis(rk, an):
             if st["streak_n"] >= 2:
                 accept = True                        # ⓑ 2사이클 연속 우위 → 교체
     if accept:
+        # [교체 전 조합 보존 (2026-07-28 · 안A)] 교체를 승인하되 '버리지는 않는다'.
+        #   실측(막판 교체 210건 중 확정배당 보유 119건 시뮬):
+        #     현행(교체후만)        적중 26 · 회수율 140.9% · 손익 +48,700
+        #     안A(교체후/전 분산)   적중 47 · 회수율 214.1% · 손익 +135,750   ← 총투자 동일
+        #   건수는 교체가 26:21 로 앞섰지만 '놓친 적중'의 배당 합이 341.8 vs 167.7 로 2배였다
+        #   (최대 155.6배를 교체 때문에 버림). 즉 교체 자체보다 '하나만 남기는 것'이 손해였다.
+        #   나고야 10R 실사고: 19:18:42 까지 3+7 → 19:19:52 에 2+6 의 -66.9% 집중급락으로 교체,
+        #   결과 7-3-6 으로 정답은 3+7. 이 로직이면 3+7 이 보조로 남아 적중이었다.
+        #   ⚠ 표시 계층만 — 분석·이력·학습 원본은 그대로. 교체 상한(2회)도 그대로.
+        _prev_main, _prev_item = st["main"], dict(st.get("item") or {})
         st["main"], st["item"] = prop, dict(fq[0])
         st["streak_m"], st["streak_n"] = None, 0
         st["switches"] += 1
-        an["recHysteresis"] = {"held": False, "switches": st["switches"], "switched": True}
+        try:
+            _dup = any(tuple(sorted(int(x) for x in (_q.get("combo") or []))) == _prev_main
+                       for _q in fq)
+            if not _dup and _prev_main:
+                _prev_item["combo"] = list(_prev_main)
+                _prev_item["reason"] = ((_prev_item.get("reason") or "")
+                                        + " · 교체 전 메인(보조 유지)").strip(" ·")
+                _prev_item["switchBackup"] = True     # 프론트에서 '보조' 구분용
+                fq.insert(1, _prev_item)              # 새 메인 바로 뒤(2순위)
+                cp["finalQuinellas"] = fq
+        except Exception as _kbe:
+            print("[히스테리시스] 교체 전 조합 보존 실패(무시):", _kbe)
+        an["recHysteresis"] = {"held": False, "switches": st["switches"], "switched": True,
+                               "keptPrev": "+".join(str(x) for x in _prev_main) if _prev_main else None}
         return
     # 보류 → 기존 표시 메인을 선두로 복원(제안 조합은 목록에 남김 — 무삭제)
     _held = None
