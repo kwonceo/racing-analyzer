@@ -8,173 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 5,
-   "name": "ロベルタカリーナ",
-   "jockey": "阿部英（岩手）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    2,
-    7,
-    3,
-    3
-   ],
-   "record_score": 77.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "スターキー",
-   "jockey": "山本聡（岩手）",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    2,
-    8,
-    1,
-    10
-   ],
-   "record_score": 67.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "マコトダイトウレン",
-   "jockey": "山本政（岩手）",
-   "jockey_winrate": null,
-   "recent_results": [
-    3,
-    3,
-    2,
-    2,
-    2
-   ],
-   "record_score": 67.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "グローサーベア",
-   "jockey": "坂井瑛（岩手）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    9,
-    3,
-    6,
-    2
-   ],
-   "record_score": 63.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "スターライトテール",
-   "jockey": "塚本涼（岩手）",
-   "jockey_winrate": null,
-   "recent_results": [
-    3,
-    4,
-    3,
-    6,
-    6
-   ],
-   "record_score": 47.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "アースアワー",
-   "jockey": "高橋悠（岩手）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    1,
-    4,
-    4,
-    4
-   ],
-   "record_score": 37.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ピュアジャスミン",
-   "jockey": "山本紀（岩手）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    4,
-    7,
-    2,
-    2
-   ],
-   "record_score": 15.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "ホウオウルバン",
-   "jockey": "岩本怜（岩手）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    11,
-    6,
-    6,
-    6
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "アロウカリア",
-   "jockey": "関本玲（岩手）",
-   "jockey_winrate": null,
-   "recent_results": [
-    7,
-    7,
-    8,
-    7,
-    10
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -414,7 +251,7 @@
   "2nd": 3,
   "3rd": 6,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 7.0,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "1+3 복승 급락(-89.8%) → 3번 입상 적중"
@@ -423,7 +260,7 @@
   "quinella_hit": true,
   "winner": 5,
   "second": 3,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": "5",
@@ -435,14 +272,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 18:40:48",
+ "saved_at": "2026-07-29 05:23:55",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

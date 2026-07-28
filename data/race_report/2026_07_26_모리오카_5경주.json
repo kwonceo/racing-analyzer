@@ -1,6 +1,6 @@
 {
  "race": "모리오카 5경주",
- "raceKey": "모리오카 5경주",
+ "raceKey": "2026-07-26 모리오카 5경주",
  "date": "2026-07-26",
  "result": {
   "1st": 5,
@@ -197,9 +197,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 60.5,
+   "record_score": null,
    "confidence": 56.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_9": {
    "horse": 9,
@@ -385,9 +385,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 60.5,
+   "record_score": null,
    "confidence": 4.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_3": {
    "horse": 3,
@@ -401,9 +401,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 70.0,
+   "record_score": null,
    "confidence": 4.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_4": {
    "horse": 4,
@@ -589,18 +589,18 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 148.8,
+   "record_score": null,
    "confidence": 41.2,
    "reason": "초과급락"
   }
  },
  "recommended_horses": [
+  5,
   4,
-  9,
-  5
+  9
  ],
  "recommendation_process": [
-  "1. 전적 분석: 5번 60.5점",
+  "1. 전적 분석: 5번 전적 정보 제한",
   "2. 배당 수집 시작 14:36:27",
   "3. 초과급락 감지: 4번 초과급락 0.0%p (전체평균 -10.6%)",
   "5. 종합 신뢰도 56.0점(중) 판정",
@@ -612,14 +612,14 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 60.5,
+  "record_score": null,
   "total": 56.0,
   "grade": "중"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 60.5,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": false,
@@ -712,5 +712,5 @@
  },
  "pnl": 5900,
  "stake": 1000,
- "generated_at": "2026-07-26 15:02:47"
+ "generated_at": "2026-07-29 05:24:12"
 }

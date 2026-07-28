@@ -1,9 +1,9 @@
 {
  "race_id": "2026_07_26_모리오카_9경주",
- "raceKey": "모리오카 9경주",
+ "raceKey": "2026-07-26 모리오카 9경주",
  "date": "2026-07-26",
  "sport": "horse",
- "category": "japan_central",
+ "category": "japan_local",
  "track": "모리오카",
  "round": 9,
  "distance": null,
@@ -16,166 +16,43 @@
   "3rd": 5
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 2.5,
+  "trifecta": 11.1
  },
  "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
- "anomalies": [
-  {
-   "time": null,
-   "type": "급락",
-   "combo": [
-    4,
-    7
-   ],
-   "horse": 4,
-   "drop_rate": -82.7,
-   "excess_drop": -2.7
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "combo": [
-    3,
-    9
-   ],
-   "horse": 3,
-   "drop_rate": -74.6,
-   "excess_drop": -1.9
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "combo": [
-    5,
-    8
-   ],
-   "horse": 5,
-   "drop_rate": -74.6,
-   "excess_drop": 1.4
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "combo": [
-    1,
-    2
-   ],
-   "horse": 1,
-   "drop_rate": -70.4,
-   "excess_drop": -4.7
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "combo": [
-    3,
-    7
-   ],
-   "horse": 3,
-   "drop_rate": -62.2,
-   "excess_drop": -1.9
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "combo": [
-    1,
-    8
-   ],
-   "horse": 1,
-   "drop_rate": -48.1,
-   "excess_drop": -4.7
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "combo": [
-    6,
-    8
-   ],
-   "horse": 6,
-   "drop_rate": -39.4,
-   "excess_drop": 18.5
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "combo": [
-    3,
-    6
-   ],
-   "horse": 3,
-   "drop_rate": -32.5,
-   "excess_drop": -1.9
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "combo": [
-    4,
-    5
-   ],
-   "horse": 4,
-   "drop_rate": -31.6,
-   "excess_drop": -2.7
-  },
-  {
-   "time": null,
-   "type": "급락",
-   "combo": [
-    7,
-    9
-   ],
-   "horse": 7,
-   "drop_rate": -28.6,
-   "excess_drop": -3.3
-  }
- ],
+ "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7,
-   8,
-   9,
-   10
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
   "signal_quality": null,
-  "confidence": 100.0,
-  "inverse": true
+  "confidence": 0,
+  "inverse": false
  },
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
   "hit_reason": null,
   "miss_reason": "추천 조합 미입상",
-  "pattern_tags": [
-   "급락50+"
-  ],
-  "anomaly_correct": true,
+  "pattern_tags": [],
+  "anomaly_correct": false,
   "form_pick_hit": false
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 2.5,
+  "trifecta_odds": 11.1,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-26 17:16:01",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:24)",
+ "saved_at": "2026-07-29 05:24:21",
  "validation": {
   "ok": true,
   "errors": []

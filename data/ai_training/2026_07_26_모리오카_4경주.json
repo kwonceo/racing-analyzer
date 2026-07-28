@@ -8,209 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 11,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 9,
-   "name": "カリフォルニアクローム",
-   "jockey": "山本政",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    2,
-    1,
-    1,
-    7,
-    1
-   ],
-   "record_score": 118.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "ドレフォン",
-   "jockey": "菅原辰",
-   "jockey_winrate": 40.0,
-   "recent_results": [
-    7,
-    1,
-    1,
-    2,
-    1
-   ],
-   "record_score": 101.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "タイセイレジェンド",
-   "jockey": "山本紀",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    1,
-    1,
-    12,
-    10,
-    11
-   ],
-   "record_score": 73.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "モズアスコット",
-   "jockey": "高橋悠",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    3,
-    7,
-    5,
-    1,
-    3
-   ],
-   "record_score": 97.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 11,
-   "name": "アメリカンペイトリオット",
-   "jockey": "山本聡",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    4,
-    6,
-    4,
-    2,
-    1
-   ],
-   "record_score": 98.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "アルアイン",
-   "jockey": "岩本怜",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    3,
-    3,
-    8,
-    5,
-    3
-   ],
-   "record_score": 40.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "クリソベリル",
-   "jockey": "塚本涼",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    3,
-    5,
-    2,
-    11,
-    6
-   ],
-   "record_score": 38.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "シャンハイボビー",
-   "jockey": "阿部英",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    9,
-    3,
-    7,
-    4,
-    11
-   ],
-   "record_score": 61.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "タワーオブロンドン",
-   "jockey": "齋藤友",
-   "jockey_winrate": 13.0,
-   "recent_results": [
-    7,
-    2,
-    8,
-    7,
-    4
-   ],
-   "record_score": 43.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "カリフォルニアクローム",
-   "jockey": "小林凌",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    7,
-    11,
-    12,
-    11,
-    8
-   ],
-   "record_score": -17.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ヘニーハウンド",
-   "jockey": "佐々志",
-   "jockey_winrate": 3.3,
-   "recent_results": [
-    6,
-    9,
-    9,
-    11,
-    9
-   ],
-   "record_score": -10.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1439,20 +1240,20 @@
  },
  "prediction": {
   "candidates": [
+   5,
    6,
+   7,
    9,
    10,
    11,
-   4,
-   5,
-   7,
    1,
    2,
+   4,
    8,
    3
   ],
   "eliminated": [],
-  "recommend": "6+9",
+  "recommend": "9+11",
   "strategy": "BMED_압축형",
   "confidence": 51.8,
   "signal_quality": "하"
@@ -1462,16 +1263,16 @@
   "2nd": 9,
   "3rd": 11,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 6.5,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "전적유력마 6번 적중"
+  "hit_pattern": "적중"
  },
  "labels": {
   "quinella_hit": true,
   "winner": 6,
   "second": 9,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1483,14 +1284,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 14:20:04",
+ "saved_at": "2026-07-29 05:24:10",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

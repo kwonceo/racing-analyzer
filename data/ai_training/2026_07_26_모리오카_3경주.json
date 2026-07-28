@@ -8,173 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 9,
-   "name": "オウケンブルースリ",
-   "jockey": "オウケンブルースリ",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    6,
-    7,
-    6,
-    5
-   ],
-   "record_score": 85.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "マジェスティックウォリアー",
-   "jockey": "齋藤友",
-   "jockey_winrate": 11.1,
-   "recent_results": [
-    2,
-    3,
-    10,
-    7,
-    10
-   ],
-   "record_score": 73.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ワールドエース",
-   "jockey": "山本紀",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    3,
-    4,
-    7,
-    8,
-    7
-   ],
-   "record_score": 52.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "トランセンド",
-   "jockey": "関本玲",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    6,
-    2,
-    7,
-    5,
-    6
-   ],
-   "record_score": 47.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "トゥザグローリー",
-   "jockey": "塚本涼",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    5,
-    4,
-    6,
-    5,
-    5
-   ],
-   "record_score": 32.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ノボジャック",
-   "jockey": "南郷家",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    3,
-    7,
-    7,
-    9,
-    10
-   ],
-   "record_score": 35.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "ワールドエース",
-   "jockey": "小林凌",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    4,
-    8,
-    5,
-    5,
-    10
-   ],
-   "record_score": 13.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "タワーオブロンドン",
-   "jockey": "佐々志",
-   "jockey_winrate": 3.3,
-   "recent_results": [
-    12,
-    14,
-    14,
-    13,
-    14
-   ],
-   "record_score": 10.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "Ｂｌｕｅ",
-   "jockey": "菅原辰",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    9,
-    8,
-    10,
-    8,
-    6
-   ],
-   "record_score": -2.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1062,8 +899,8 @@
    2,
    5,
    6,
-   9,
    7,
+   9,
    3,
    4,
    8
@@ -1079,7 +916,7 @@
   "2nd": 6,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 4.5,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "적중"
@@ -1088,7 +925,7 @@
   "quinella_hit": true,
   "winner": 9,
   "second": 6,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1100,7 +937,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 13:59:11",
+ "saved_at": "2026-07-29 05:24:08",
  "quality": {
   "score": 60,
   "grade": "참고용",
@@ -1108,7 +945,7 @@
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

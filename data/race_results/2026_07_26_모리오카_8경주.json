@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_26_모리오카_8경주",
- "raceKey": "모리오카 8경주",
+ "raceKey": "2026-07-26 모리오카 8경주",
  "date": "2026-07-26",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 9,
+ "horse_count": null,
  "result": {
   "1st": 4,
   "2nd": 9,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 8.2,
-  "trifecta": 0.0
+  "trifecta": 11.6
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -2111,10 +2111,10 @@
  "anomalies": [],
  "prediction": {
   "candidates": [
-   4,
-   7,
    1,
+   4,
    6,
+   7,
    9,
    2,
    3,
@@ -2143,12 +2143,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 8.2,
-  "trifecta_odds": null,
+  "trifecta_odds": 11.6,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-26 16:54:52",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:24)",
+ "saved_at": "2026-07-29 05:24:19",
  "validation": {
   "ok": true,
   "errors": []

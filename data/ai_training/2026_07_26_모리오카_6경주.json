@@ -8,173 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 5,
-   "name": "ディープブリランテ",
-   "jockey": "山本紀",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    2,
-    2,
-    7,
-    2,
-    2
-   ],
-   "record_score": 85.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "マテラスカイ",
-   "jockey": "南郷家",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    11,
-    10,
-    1,
-    3,
-    6
-   ],
-   "record_score": 47.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "モーニン",
-   "jockey": "山本聡",
-   "jockey_winrate": 46.7,
-   "recent_results": [
-    4,
-    8,
-    7,
-    2,
-    2
-   ],
-   "record_score": 37.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ナムラタイタン",
-   "jockey": "鈴木祐",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    4,
-    6,
-    4,
-    6,
-    5
-   ],
-   "record_score": 40.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "オーヴァルエース",
-   "jockey": "菅原辰",
-   "jockey_winrate": 50.0,
-   "recent_results": [
-    8,
-    7,
-    7,
-    8,
-    9
-   ],
-   "record_score": 35.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ミスチヴィアスアレックス",
-   "jockey": "齋藤友",
-   "jockey_winrate": 12.5,
-   "recent_results": [
-    6,
-    8,
-    10,
-    10,
-    6
-   ],
-   "record_score": 23.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "コパノリッキー",
-   "jockey": "佐々志",
-   "jockey_winrate": 3.3,
-   "recent_results": [
-    9,
-    10,
-    7,
-    12,
-    3
-   ],
-   "record_score": 5.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "モーリス",
-   "jockey": "塚本涼",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    6,
-    7,
-    5,
-    10,
-    6
-   ],
-   "record_score": 5.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ビッグアーサー",
-   "jockey": "岩本怜",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    8,
-    8,
-    6,
-    4,
-    9
-   ],
-   "record_score": -3.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1058,10 +895,10 @@
  },
  "prediction": {
   "candidates": [
-   4,
-   5,
    1,
    2,
+   4,
+   5,
    6,
    7,
    8,
@@ -1079,7 +916,7 @@
   "2nd": 2,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 2.5,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -1088,7 +925,7 @@
   "quinella_hit": false,
   "winner": 4,
   "second": 2,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1100,7 +937,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 15:44:20",
+ "saved_at": "2026-07-29 05:24:14",
  "quality": {
   "score": 60,
   "grade": "참고용",
@@ -1108,7 +945,7 @@
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

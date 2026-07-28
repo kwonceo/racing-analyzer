@@ -14,41 +14,15 @@
  "horses": [],
  "odds_features": {
   "timeline": [],
-  "drop_rates": {
-   "4": -82.7,
-   "7": -82.7,
-   "3": -74.6,
-   "9": -74.6,
-   "5": -74.6,
-   "8": -74.6,
-   "1": -70.4,
-   "2": -70.4,
-   "6": -39.4
-  },
-  "excess_drops": {
-   "4": -2.7,
-   "7": -3.3,
-   "3": -1.9,
-   "1": -4.7,
-   "2": -15.9
-  },
-  "drop_speed": {
-   "4": -168.8,
-   "7": -168.8,
-   "3": -152.2,
-   "9": -152.2,
-   "5": -152.2,
-   "8": -152.2,
-   "1": -143.7,
-   "2": -143.7,
-   "6": -80.4
-  },
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
-  "quinella_mismatch": 3.022,
-  "refund_rate": 0.78,
+  "quinella_mismatch": null,
+  "refund_rate": null,
   "consecutive_drops": {},
-  "fake_betting": true,
+  "fake_betting": false,
   "large_scale_drop": false
  },
  "thresholds_used": {
@@ -58,22 +32,11 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7,
-   8,
-   9,
-   10
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend": null,
   "strategy": null,
-  "confidence": 100.0,
+  "confidence": 0,
   "signal_quality": null
  },
  "result": {
@@ -81,7 +44,7 @@
   "2nd": 7,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 2.5,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -90,19 +53,19 @@
   "quinella_hit": false,
   "winner": 6,
   "second": 7,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
-  "excess_drop_horse": "2",
-  "excess_drop_horse_placed": false,
-  "excess_drop_value": -15.9,
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
   "reversal_horse": null,
   "reversal_horse_placed": null,
   "reversal_ratio": null,
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 17:16:01",
+ "saved_at": "2026-07-29 05:24:21",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -110,8 +73,8 @@
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
-   "전적 데이터",
-   "확정 배당"
+   "이상감지 결과",
+   "전적 데이터"
   ],
   "errors": []
  }
