@@ -8,191 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 10,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 10,
-   "name": "マルヨハルキ",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    1,
-    1,
-    8,
-    1
-   ],
-   "record_score": 105.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "マテラスカイ",
-   "jockey": "東川慎",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    1,
-    4,
-    4,
-    3,
-    8
-   ],
-   "record_score": 105.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "アメリカンペイトリオット",
-   "jockey": "深澤杏",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    2,
-    2,
-    3,
-    8,
-    3
-   ],
-   "record_score": 65.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "ヴァンゴッホ",
-   "jockey": "望月洵",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    12,
-    2,
-    1,
-    2,
-    5
-   ],
-   "record_score": 66.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "アメリカンペイトリオット",
-   "jockey": "筒井勇",
-   "jockey_winrate": 53.3,
-   "recent_results": [
-    6,
-    8,
-    2,
-    6,
-    2
-   ],
-   "record_score": 51.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ダノンプレミアム",
-   "jockey": "森島貴",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    3,
-    5,
-    4,
-    5,
-    6
-   ],
-   "record_score": 65.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "クリソベリル",
-   "jockey": "渡邊竜",
-   "jockey_winrate": 56.7,
-   "recent_results": [
-    7,
-    9,
-    6,
-    2,
-    3
-   ],
-   "record_score": 59.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "シニスターミニスター",
-   "jockey": "明星晴",
-   "jockey_winrate": 40.0,
-   "recent_results": [
-    7,
-    10,
-    5,
-    10,
-    1
-   ],
-   "record_score": 23.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "デクラレーションオブウォー",
-   "jockey": "塚本征",
-   "jockey_winrate": 36.7,
-   "recent_results": [
-    10,
-    5,
-    9,
-    7,
-    10
-   ],
-   "record_score": 25.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "フィエールマン",
-   "jockey": "細川智",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    4,
-    9,
-    3,
-    6,
-    4
-   ],
-   "record_score": 29.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -566,15 +385,15 @@
  "prediction": {
   "candidates": [
    1,
-   8,
-   9,
-   10,
-   6,
    3,
    5,
    7,
-   4,
-   2
+   8,
+   9,
+   10,
+   2,
+   6,
+   4
   ],
   "eliminated": [],
   "recommend": "3+8",
@@ -587,7 +406,7 @@
   "2nd": 7,
   "3rd": 6,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 18.3,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -596,7 +415,7 @@
   "quinella_hit": false,
   "winner": 3,
   "second": 7,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -608,14 +427,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-24 17:13:05",
+ "saved_at": "2026-07-29 05:05:38",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
