@@ -2,48 +2,6 @@
   "patterns": [
     {
       "race": "소노다 12경주",
-      "horse_no": 9,
-      "recent_avg": 7.5,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-18"
-    },
-    {
-      "race": "나고야 12경주",
-      "horse_no": 2,
-      "recent_avg": 4.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-18"
-    },
-    {
-      "race": "나고야 12경주",
-      "horse_no": 11,
-      "recent_avg": 8.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-18"
-    },
-    {
-      "race": "나고야 12경주",
-      "horse_no": 12,
-      "recent_avg": 8.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-18"
-    },
-    {
-      "race": "소노다 12경주",
-      "horse_no": 1,
-      "recent_avg": 6.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-18"
-    },
-    {
-      "race": "소노다 12경주",
       "horse_no": 4,
       "recent_avg": 7.2,
       "win_place": 2,
@@ -4633,16 +4591,62 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-28"
+    },
+    {
+      "race": "모리오카 8경주",
+      "horse_no": 7,
+      "recent_avg": 4.4,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-28"
+    },
+    {
+      "race": "모리오카 8경주",
+      "horse_no": 10,
+      "recent_avg": 5.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-28"
+    },
+    {
+      "race": "나고야 4경주",
+      "horse_no": 10,
+      "recent_avg": 12.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-28"
+    },
+    {
+      "race": "나고야 4경주",
+      "horse_no": 7,
+      "recent_avg": 11.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-28"
+    },
+    {
+      "race": "나고야 4경주",
+      "horse_no": 1,
+      "recent_avg": 11.5,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-28"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1571,
-      "hit": 317
+      "count": 1585,
+      "hit": 319
     },
     "전체부진마": {
-      "count": 2612,
-      "hit": 727
+      "count": 2632,
+      "hit": 732
     },
     "대규모급락": {
       "count": 7,
@@ -4652,8 +4656,8 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 1041,
-      "hit": 410
+      "count": 1047,
+      "hit": 413
     },
     "급락동반": {
       "count": 186,
