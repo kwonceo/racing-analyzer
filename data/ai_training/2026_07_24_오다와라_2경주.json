@@ -8,95 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "小原 将通",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 88.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "木村 貴宏",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 92.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "小林 申太",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 94.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "中里福太郎",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 83.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "小川 圭二",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 87.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "金子 兼久",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 85.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "吉田 航",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 82.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -164,7 +79,7 @@
   "2nd": 3,
   "3rd": 1,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 7.0,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -173,7 +88,7 @@
   "quinella_hit": false,
   "winner": 4,
   "second": 3,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -185,7 +100,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-24 09:24:34",
+ "saved_at": "2026-07-29 05:04:22",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -194,7 +109,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
