@@ -41,10 +41,10 @@
  },
  "result": {
   "1st": 7,
-  "2nd": 3,
+  "2nd": 2,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 3.6,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -52,8 +52,8 @@
  "labels": {
   "quinella_hit": false,
   "winner": 7,
-  "second": 3,
-  "odds_range": null
+  "second": 2,
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -65,17 +65,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-18 00:14:05",
+ "saved_at": "2026-07-29 03:58:33",
  "quality": {
-  "score": 20,
+  "score": 40,
   "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "전적 데이터",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
