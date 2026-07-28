@@ -1,36 +1,31 @@
 {
  "race_id": "2026_07_07_사세보_1경주",
- "raceKey": "사세보 1경주",
+ "raceKey": "2026-07-07 사세보 1경주",
  "date": "2026-07-07",
+ "sport": "cycle",
+ "category": "cycle",
  "track": "사세보",
  "round": 1,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 10,
+ "horse_count": null,
  "result": {
   "1st": 1,
   "2nd": 2,
   "3rd": 4
  },
+ "payouts": {
+  "quinella": 2.7,
+  "trifecta": 3.9
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   7,
-   10
-  ],
-  "eliminated": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   8,
-   9
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
@@ -51,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 2.7,
+  "trifecta_odds": 3.9,
   "actual_return": null,
   "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-07 11:19:31",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:55)",
+ "saved_at": "2026-07-29 02:55:19",
  "validation": {
   "ok": true,
   "errors": []
