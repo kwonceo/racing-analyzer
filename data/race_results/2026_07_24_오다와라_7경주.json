@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_24_오다와라_7경주",
- "raceKey": "오다와라 7경주",
+ "raceKey": "2026-07-24 오다와라 7경주",
  "date": "2026-07-24",
  "sport": "cycle",
  "category": "cycle",
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 1.8,
-  "trifecta": 0.0
+  "trifecta": 4.1
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -109,17 +109,14 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 1.8,
-  "trifecta_odds": null,
+  "trifecta_odds": 4.1,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-24 11:05:20",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:04)",
+ "saved_at": "2026-07-29 05:04:44",
  "validation": {
   "ok": true,
   "errors": []
- },
- "tainted": true,
- "taintedReason": "_canonical_log_key 라우팅 버그로 7/25 라이브 데이터 혼입(오염) — 복기·학습 격리",
- "taintedAt": "2026-07-25"
+ }
 }

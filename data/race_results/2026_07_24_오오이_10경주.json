@@ -1,10 +1,10 @@
 {
  "race_id": "2026_07_24_오오이_10경주",
- "raceKey": "오오이 10경주",
+ "raceKey": "2026-07-24 오오이 10경주",
  "date": "2026-07-24",
  "sport": "horse",
- "category": "japan_central",
- "track": "오오이",
+ "category": "japan_local",
+ "track": "오이",
  "round": 10,
  "distance": null,
  "track_condition": null,
@@ -17,9 +17,9 @@
  },
  "payouts": {
   "quinella": 5.2,
-  "trifecta": 0.0
+  "trifecta": 30.9
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {
   "quinella": {
    "3+7": 5.2,
@@ -219,45 +219,50 @@
  "anomalies": [],
  "prediction": {
   "candidates": [
-   1,
-   2,
-   4,
+   3,
    5,
-   8,
-   9,
    6,
    7,
+   9,
    10,
-   3
+   13,
+   14,
+   1,
+   2,
+   11,
+   12
   ],
-  "eliminated": [],
-  "recommend_main": "5+8",
+  "eliminated": [
+   4,
+   8
+  ],
+  "recommend_main": "3+7",
   "recommend_sub": null,
-  "strategy": "BMED_고배당도전형",
+  "strategy": "BMED_보험형",
   "signal_quality": "하",
-  "confidence": 100.0,
+  "confidence": 0,
   "inverse": false
  },
  "result_analysis": {
   "main_hit": true,
   "sub_hit": false,
-  "hit_reason": "적중",
+  "hit_reason": "전적유력마 3번 적중 · 제거 적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
-  "form_pick_hit": false
+  "form_pick_hit": true
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 5.2,
-  "trifecta_odds": null,
+  "trifecta_odds": 30.9,
   "actual_return": null,
   "profit": 4200
  },
- "memo": null,
- "saved_at": "2026-07-24 19:57:22",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:04)",
+ "saved_at": "2026-07-29 05:04:47",
  "validation": {
   "ok": true,
   "errors": []

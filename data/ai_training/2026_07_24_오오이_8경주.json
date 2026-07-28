@@ -3,7 +3,7 @@
  "race_id": "2026_07_24_오오이_8경주",
  "race_info": {
   "date": "2026-07-24",
-  "track": "오오이",
+  "track": "오이",
   "round": 8,
   "distance": null,
   "condition": null,
@@ -129,7 +129,7 @@
   "2nd": 4,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 109.6,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -138,7 +138,7 @@
   "quinella_hit": false,
   "winner": 3,
   "second": 4,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -150,17 +150,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-24 18:55:00",
+ "saved_at": "2026-07-29 05:04:53",
  "quality": {
-  "score": 20,
+  "score": 40,
   "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "전적 데이터",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

@@ -3,7 +3,7 @@
  "race_id": "2026_07_24_오오이_10경주",
  "race_info": {
   "date": "2026-07-24",
-  "track": "오오이",
+  "track": "오이",
   "round": 10,
   "distance": null,
   "condition": null,
@@ -117,7 +117,7 @@
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": null,
-  "refund_rate": 0.773,
+  "refund_rate": 0.748,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -130,21 +130,26 @@
  },
  "prediction": {
   "candidates": [
-   1,
-   2,
-   4,
+   3,
    5,
-   8,
-   9,
    6,
    7,
+   9,
    10,
-   3
+   13,
+   14,
+   1,
+   2,
+   11,
+   12
   ],
-  "eliminated": [],
-  "recommend": "5+8",
-  "strategy": "BMED_고배당도전형",
-  "confidence": 100.0,
+  "eliminated": [
+   4,
+   8
+  ],
+  "recommend": "3+7",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
   "signal_quality": "하"
  },
  "result": {
@@ -152,16 +157,16 @@
   "2nd": 3,
   "3rd": 14,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 5.2,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "적중"
+  "hit_pattern": "전적유력마 3번 적중 · 제거 적중"
  },
  "labels": {
   "quinella_hit": true,
   "winner": 7,
   "second": 3,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -173,17 +178,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-24 19:57:22",
+ "saved_at": "2026-07-29 05:04:47",
  "quality": {
-  "score": 20,
+  "score": 40,
   "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "전적 데이터",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

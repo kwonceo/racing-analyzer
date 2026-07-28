@@ -1,10 +1,10 @@
 {
  "race_id": "2026_07_24_오오이_12경주",
- "raceKey": "오오이 12경주",
+ "raceKey": "2026-07-24 오오이 12경주",
  "date": "2026-07-24",
  "sport": "horse",
- "category": "japan_central",
- "track": "오오이",
+ "category": "japan_local",
+ "track": "오이",
  "round": 12,
  "distance": null,
  "track_condition": null,
@@ -16,10 +16,10 @@
   "3rd": 8
  },
  "payouts": {
-  "quinella": 110.1,
-  "trifecta": 0.0
+  "quinella": 5.3,
+  "trifecta": 8.0
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {
   "quinella": {
    "6+8": 3.0,
@@ -63,7 +63,7 @@
  },
  "odds_timeline": [
   {
-   "time": "23:48:20",
+   "time": "23:59:20",
    "minutes_before": null,
    "quinella": {
     "6+8": 3.0,
@@ -128,7 +128,7 @@
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": true,
+  "main_hit": false,
   "sub_hit": false,
   "hit_reason": "적중",
   "miss_reason": null,
@@ -140,13 +140,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 110.1,
-  "trifecta_odds": null,
+  "quinella_odds": 5.3,
+  "trifecta_odds": 8.0,
   "actual_return": null,
-  "profit": 109100
+  "profit": 7000
  },
- "memo": null,
- "saved_at": "2026-07-24 23:49:23",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:04)",
+ "saved_at": "2026-07-29 05:04:51",
  "validation": {
   "ok": true,
   "errors": []
