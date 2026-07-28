@@ -1,11 +1,11 @@
 {
  "race": "모리오카 4경주",
- "raceKey": "모리오카 4경주",
+ "raceKey": "2026-07-13 모리오카 4경주",
  "date": "2026-07-13",
  "result": {
   "1st": 3,
   "2nd": 1,
-  "3rd": null,
+  "3rd": 7,
   "4th": null
  },
  "hit": false,
@@ -34,6 +34,22 @@
    "placed": true,
    "recommended": false,
    "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
@@ -85,7 +101,7 @@
   },
   "validCount": 0
  },
- "pnl": 0,
+ "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-13 21:10:42"
+ "generated_at": "2026-07-29 03:22:37"
 }
