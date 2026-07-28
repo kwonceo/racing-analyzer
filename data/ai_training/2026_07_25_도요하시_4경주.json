@@ -8,119 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 5,
-   "name": "守澤 太志",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 139.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "久米 良",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 142.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "櫻井祐太郎",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 98.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "箱田 優樹",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 122.7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "久米 康平",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 102.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "野崎 将史",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 112.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "澤田 義和",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 117.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "佐藤 成人",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 117.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "稲毛 知也",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 85.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1025,7 +916,7 @@
   "2nd": 1,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 37.9,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "전적유력마 1번 적중 · 역배열 감지말 2번 입상"
@@ -1034,7 +925,7 @@
   "quinella_hit": false,
   "winner": 2,
   "second": 1,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1046,14 +937,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-25 12:42:03",
+ "saved_at": "2026-07-29 05:08:45",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
