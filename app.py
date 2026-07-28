@@ -27725,6 +27725,194 @@ def _live_exact_hit(key, top3, horse_count=None):
         return None
 
 
+# ══════════ [전체경주 카드 보강 + 결과기록 전면개편 (2026-07-28)] ══════════
+#   ⚠ 기존 API(/api/review/list)·기존 카드 필드는 하나도 건드리지 않는다. 아래는 전부 '추가'다.
+_GEMINI_IDX = {"t": 0.0, "map": {}}
+_RESULTS_HIST = {"t": 0.0, "rows": []}
+_HIST_TTL = 60          # 60초 메모리 캐시(A안) — analysis_log 683건·17MB 전량 파싱 비용 상쇄
+
+
+def _gemini_latest_map(ttl=_HIST_TTL):
+    """logs/gemini_review/*.json → {raceKey: {status, issues, summary, time}} 최신본 1건씩. 60초 캐시.
+    Gemini 미가동(디렉터리 없음·키 미설정)이어도 빈 dict 반환 — 카드/목록은 정상 동작."""
+    now = time.time()
+    if _GEMINI_IDX["map"] and (now - _GEMINI_IDX["t"]) < ttl:
+        return _GEMINI_IDX["map"]
+    out = {}
+    try:
+        gdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "gemini_review")
+        for fn in os.listdir(gdir):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                j = json.load(open(os.path.join(gdir, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            rk = _canon_rk((j.get("raceKey") or "").strip())
+            if not rk:
+                continue
+            prev = out.get(rk)
+            if prev and str(prev.get("time") or "") >= str(j.get("time") or ""):
+                continue
+            r = j.get("result") or {}
+            out[rk] = {"status": r.get("status"), "issues": (r.get("issues") or [])[:4],
+                       "summary": r.get("summary") or "", "time": j.get("time")}
+    except Exception:
+        pass
+    _GEMINI_IDX.update(t=now, map=out)
+    return out
+
+
+def _log_polluted(doc):
+    """[마감 후 오염 감지] '🔒 마감 확정'(closed) 행의 복승 명단 vs 현재 표시 명단(displayedCombos)이
+    다르면 마감 후 재분석으로 추천이 덮어써진 것 — 모리오카 3R 실사고 유형. 판정 불가면 False."""
+    try:
+        rows = doc.get("recommendation_history") or []
+        cl = [r for r in rows if isinstance(r, dict) and r.get("closed")]
+        if not cl:
+            return False
+        frozen = set()
+        for e in (cl[-1].get("quinellas") or []):
+            cb = e.get("combo") if isinstance(e, dict) else e
+            if cb:
+                frozen.add(tuple(sorted(int(x) for x in cb)))
+        dc = ((doc.get("corePicks") or {}).get("displayedCombos") or {}).get("quinellas") or []
+        cur = set(tuple(sorted(int(x) for x in c)) for c in dc if c)
+        if not frozen or not cur:
+            return False
+        return frozen != cur
+    except Exception:
+        return False
+
+
+def _hist_row_from_doc(doc, race_id):
+    """분석 로그 1건 → 결과기록 카드 1행. (Gemini 는 캐시가 매번 최신으로 덮으므로 여기선 제외)"""
+    rk = _canon_rk((doc.get("raceKey") or doc.get("race") or "").strip())
+    cp = doc.get("corePicks") or {}
+    dc = cp.get("displayedCombos") or {}
+    hit = doc.get("hit") or {}
+    res = doc.get("result") or {}
+    top3 = [x for x in (res.get("1st"), res.get("2nd"), res.get("3rd")) if x not in (None, "")]
+    try:
+        venue, rno = _area_num(rk)
+    except Exception:
+        venue, rno = None, None
+    # 판정 명단(displayedCombos) 우선 — 없으면 finalQ/finalT 폴백(구데이터 호환)
+    _q = dc.get("quinellas") or [e.get("combo") for e in (cp.get("finalQuinellas") or []) if e.get("combo")]
+    _t = dc.get("trifectas") or [e.get("combo") for e in (cp.get("finalTrifectas") or []) if e.get("combo")]
+    _fmt = lambda lst: ["+".join(str(int(x)) for x in c) for c in lst if c][:6]
+    return {
+        "raceId": race_id, "raceKey": rk, "date": doc.get("date"),
+        "venue": _track_norm(venue) if venue else None, "raceNo": rno,
+        "sport": doc.get("sport"), "category": doc.get("category"),
+        "analyzedAt": doc.get("analyzed_at"), "updatedAt": doc.get("updated_at"),
+        "recQuinellas": _fmt(_q), "recTrifectas": _fmt(_t),
+        "top3": top3, "hasResult": bool(top3),
+        "quinellaHit": bool(hit.get("quinella_hit")),
+        "trifectaHit": bool(hit.get("trifecta_hit")),
+        "anyHit": bool(hit.get("quinella_hit") or hit.get("trifecta_hit")),
+        "quinellaOdds": (res.get("payouts") or {}).get("quinella"),
+        "trifectaOdds": (res.get("payouts") or {}).get("trifecta"),
+        "pnl": hit.get("pnl"), "stake": hit.get("stake"),
+        "readonly": bool(doc.get("readonly")),
+        "polluted": _log_polluted(doc),
+    }
+
+
+def _results_history_rows(ttl=_HIST_TTL):
+    """[결과기록 전면개편] data/analysis_log/ → 카드 행 목록(최신순).
+    ⚡ 최적화: 파일별 mtime 증분 캐시 — 683건·17MB 를 매번 재파싱하지 않고 '변경된 파일만' 다시 읽는다.
+      · 첫 호출만 전량 파싱, 이후 갱신은 라이브 수집으로 바뀐 소수 파일만(보통 0~3건)
+      · ttl 은 '디렉터리 스캔' 주기일 뿐 파싱 주기가 아니다
+    적중 판정은 저장된 hit(_apply_result_learning 산출)을 그대로 읽는다 — 판정 기준 불변."""
+    now = time.time()
+    if _RESULTS_HIST["rows"] and (now - _RESULTS_HIST["t"]) < ttl:
+        return _RESULTS_HIST["rows"]
+    cache = _RESULTS_HIST.setdefault("files", {})     # {path: (mtime, row)}
+    seen, parsed = set(), 0
+    try:
+        for fn in os.listdir(ANALYSIS_LOG_DIR):
+            if not fn.endswith(".json"):
+                continue
+            path = os.path.join(ANALYSIS_LOG_DIR, fn)
+            try:
+                mt = os.path.getmtime(path)
+            except OSError:
+                continue
+            seen.add(path)
+            hit = cache.get(path)
+            if hit and hit[0] == mt:
+                continue                                   # 변경 없음 → 재파싱 생략
+            try:
+                doc = json.load(open(path, encoding="utf-8"))
+            except Exception:
+                continue
+            cache[path] = (mt, _hist_row_from_doc(doc, os.path.splitext(fn)[0]))
+            parsed += 1
+    except Exception as e:
+        print("[결과기록] 목록 생성 실패(무시):", e)
+    for gone in [p for p in cache if p not in seen]:       # 삭제된 파일 정리
+        cache.pop(gone, None)
+    gmap = _gemini_latest_map()                            # Gemini 는 매 갱신마다 최신값 부착
+    rows = []
+    for _mt, row in cache.values():
+        r = dict(row)
+        r["gemini"] = gmap.get(r.get("raceKey"))
+        rows.append(r)
+    rows.sort(key=lambda r: (str(r.get("date") or ""), str(r.get("analyzedAt") or "")), reverse=True)
+    _RESULTS_HIST.update(t=now, rows=rows)
+    if parsed:
+        print("[결과기록] 캐시 갱신 — 재파싱 %d건 / 전체 %d건" % (parsed, len(rows)))
+    return rows
+
+
+@app.route("/api/results/history", methods=["GET"])
+def results_history():
+    """[신규] 분석 로그 전체 기반 결과기록 목록.
+    ⚠ 기존 /api/review/list 는 그대로 유지된다(확장 팝업이 계속 사용) — 이 API 는 추가일 뿐이다.
+    쿼리: date(YYYY-MM-DD) · venue · hit(1=적중만/0=미적중만) · sport · polluted(1) · limit · offset · q(검색)"""
+    rows = _results_history_rows()
+    date_f = (request.args.get("date") or "").strip()
+    venue_f = (request.args.get("venue") or "").strip()
+    sport_f = (request.args.get("sport") or "").strip()
+    hit_f = (request.args.get("hit") or "").strip()
+    pol_f = (request.args.get("polluted") or "").strip()
+    q_f = (request.args.get("q") or "").strip()
+    sel = rows
+    if date_f:
+        sel = [r for r in sel if r.get("date") == date_f]
+    if venue_f:
+        _v = _track_norm(venue_f)
+        sel = [r for r in sel if r.get("venue") == _v]
+    if sport_f:
+        sel = [r for r in sel if (r.get("sport") or "") == sport_f]
+    if hit_f in ("1", "0"):
+        want = (hit_f == "1")
+        sel = [r for r in sel if r.get("hasResult") and bool(r.get("anyHit")) == want]
+    if pol_f == "1":
+        sel = [r for r in sel if r.get("polluted")]
+    if q_f:
+        sel = [r for r in sel if q_f in (r.get("raceKey") or "")]
+    try:
+        limit = max(1, min(500, int(request.args.get("limit") or 100)))
+        offset = max(0, int(request.args.get("offset") or 0))
+    except (TypeError, ValueError):
+        limit, offset = 100, 0
+    page = sel[offset:offset + limit]
+    # 요약(필터 적용 후 전체 기준)
+    done = [r for r in sel if r.get("hasResult")]
+    hits = [r for r in done if r.get("anyHit")]
+    pnl = sum(int(r.get("pnl") or 0) for r in done)
+    return jsonify({
+        "ok": True, "rows": page, "total": len(sel), "offset": offset, "limit": limit,
+        "summary": {"races": len(sel), "withResult": len(done), "hits": len(hits),
+                    "hitRate": round(len(hits) * 100.0 / len(done), 1) if done else None,
+                    "pnl": pnl, "polluted": len([r for r in sel if r.get("polluted")])},
+        "venues": sorted({r["venue"] for r in rows if r.get("venue")}),
+        "dates": sorted({r["date"] for r in rows if r.get("date")}, reverse=True)[:60],
+    })
+
+
 def _race_result_summary(key):
     """[카드 적중 표시 (2026-07-19)] 결과 파일 → {top3, hit(복승 정확), trioHit(삼복승 정확), subHit,
     recommend, quinellaOdds} 또는 None. 적중 표시는 라이브 추천 정확 재판정(_live_exact_hit) 우선,
@@ -27869,6 +28057,25 @@ def _multi_card(key, rec):
         _rs = _race_result_summary(key)
         if _rs:
             card["result"] = _rs
+    except Exception:
+        pass
+    # [카드 보강 (2026-07-28)] ⓐ Gemini 자동진단 결과 ⓑ 마감 후 오염 의심 플래그.
+    #   둘 다 캐시(60초)에서 읽으므로 카드 생성 비용은 사실상 0. 실패해도 카드는 그대로 나간다.
+    try:
+        _g = _gemini_latest_map().get(key)
+        if _g and _g.get("status"):
+            card["gemini"] = {"status": _g.get("status"),
+                              "issues": _g.get("issues") or [],
+                              "summary": _g.get("summary") or ""}
+    except Exception:
+        pass
+    try:
+        _row = next((r for r in _results_history_rows() if r.get("raceKey") == key), None)
+        if _row:
+            if _row.get("polluted"):
+                card["polluted"] = True          # ⚠️ 확정 명단과 현재 추천 불일치
+            if _row.get("readonly"):
+                card["readonly"] = True          # 🔒 마감 확정 잠금
     except Exception:
         pass
     try:

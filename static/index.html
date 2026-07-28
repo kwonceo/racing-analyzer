@@ -484,6 +484,31 @@
           <button type="button" class="subtab-btn" data-sub="hall">🏆 명예의전당</button>
           <button type="button" class="subtab-btn" data-sub="report">📄 리포트</button>
           <button type="button" class="subtab-btn" data-sub="records">🔎 분석기록</button>
+          <button type="button" class="subtab-btn" data-sub="allhist">📚 전체기록</button>
+        </div>
+
+        <!-- [전체기록 (2026-07-28)] data/analysis_log 전량 기반 — /api/results/history.
+             ⚠ 기존 '복기'(로컬 History)·'분석기록' 패널은 그대로 유지되며 이 탭은 추가일 뿐이다. -->
+        <div class="subtab-panel" data-sub="allhist" style="display:none">
+          <p class="hint">분석한 <b>모든 경주</b>를 결과·적중·배당과 함께 봅니다. 카드를 클릭하면 상세가 펼쳐집니다.</p>
+          <div id="ahSummary" style="margin:8px 0"></div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0">
+            <select id="ahDate" class="btn btn-small"><option value="">전체 날짜</option></select>
+            <select id="ahVenue" class="btn btn-small"><option value="">전체 경마장</option></select>
+            <select id="ahHit" class="btn btn-small">
+              <option value="">적중/미적중 전체</option>
+              <option value="1">✅ 적중만</option>
+              <option value="0">❌ 미적중만</option>
+            </select>
+            <label style="font-size:12px;display:flex;align-items:center;gap:4px">
+              <input type="checkbox" id="ahPolluted"> ⚠️ 오염 의심만
+            </label>
+            <button id="ahRefresh" class="btn btn-small">🔄 새로고침</button>
+          </div>
+          <div id="ahList"></div>
+          <div style="text-align:center;margin:10px 0">
+            <button id="ahMore" class="btn btn-small" style="display:none">▼ 더 보기</button>
+          </div>
         </div>
 
         <!-- 복기: 최근 결과 날짜별 그룹 + 클릭 복기 -->

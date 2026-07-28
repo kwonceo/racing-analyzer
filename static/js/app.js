@@ -1035,6 +1035,7 @@
           if (sub === 'hall') { try { loadHighlights(); } catch (_) { /* */ } }
           if (sub === 'report') { try { loadReportList(); } catch (_) { /* */ } }
           if (sub === 'records') { try { loadAnalysisRecordsAll(); } catch (_) { /* */ } }   // [분석기록] 검색 기록
+          if (sub === 'allhist') { try { initAllHistory(); } catch (_) { /* */ } }          // [전체기록] analysis_log 전량
         });
       });
     }
@@ -2004,6 +2005,15 @@
     const mh = (c.midHigh || []);
     const mhBadge = mh.length ? '<span style="background:#f0abfc;color:#1a1a1a;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">💎 고배당</span>' : '';
     const anBadge = (c.anomaly && !mh.length) ? '<span style="background:#ef4444;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">⚡ 이상감지</span>' : '';
+    // [카드 보강 (2026-07-28)] 🔴 Gemini 진단(WARNING) — 클릭 없이 요약을 툴팁으로 확인.
+    //   SAFE 는 배지를 만들지 않는다(정상이 대다수라 배지가 의미를 잃음). 미가동이면 c.gemini 자체가 없음.
+    const _gm = c.gemini || null;
+    const gmBadge = (_gm && _gm.status === 'WARNING')
+      ? `<span title="${esc((_gm.summary || '') + ((_gm.issues || []).length ? ' / ' + (_gm.issues || []).join(' · ') : ''))}" style="background:#b91c1c;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">🔴 Gemini</span>` : '';
+    // [카드 보강 (2026-07-28)] ⚠️ 마감 후 오염 의심 — '🔒 마감 확정' 명단과 현재 추천이 불일치하는 경주.
+    //   모리오카 3R 실사고 유형(마감 후 재분석이 확정 추천을 덮어씀) 을 카드에서 바로 식별.
+    const polBadge = c.polluted
+      ? '<span title="마감 확정 명단과 현재 추천이 다릅니다 — 마감 후 재분석 오염 의심" style="background:#f59e0b;color:#1a1a1a;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">⚠️ 오염의심</span>' : '';
     const mhLine = mh.length ? `<div style="margin:3px 0;font-size:12px;color:#f0abfc;font-weight:700">💎 ${mh.map((m) => `${m.no}번(${m.odds}배)`).join(' · ')}</div>` : '';
     const borderW = mh.length ? '3px' : '2px';
     const spLabel = _multiSportLabel(c.sport);
@@ -2042,7 +2052,7 @@
       <div style="display:flex;align-items:center;gap:6px">
         <span style="font-size:11px">${spLabel}</span>
         <b style="font-size:15px;color:#e2e8f0">${esc(c.venue || '')} ${c.raceNo}R</b>
-        ${gradeBadge}${resBadge}${mhBadge}${anBadge}
+        ${gradeBadge}${resBadge}${polBadge}${gmBadge}${mhBadge}${anBadge}
         <span style="flex:1"></span>
         <b style="color:${col};font-size:13px">${c.urgency === 'urgent' ? '⚡ ' : ''}${leftTxt}</b>
       </div>
@@ -8150,6 +8160,134 @@
     const bR = $('#reportRefresh'); if (bR) bR.addEventListener('click', loadReportList);
     const bV = $('#reviewLogRefresh'); if (bV) bV.addEventListener('click', loadReviewLog);
     loadReviewLog();   // [복기 저장] 리포트 서브탭 진입 시 자동 로드
+  }
+
+  // ══════════ [전체기록 (2026-07-28)] data/analysis_log 전량 — /api/results/history ══════════
+  //   ⚠ 기존 '복기'(로컬 History)·'분석기록' 패널과 /api/review/list 는 전혀 건드리지 않는다(추가 전용).
+  //   전체경주 카드와 같은 표기 규칙(✅적중/❌미적중/⚠️오염/🔴Gemini)을 그대로 사용해 화면을 통일.
+  const _ah = { offset: 0, limit: 100, rows: [], total: 0, loading: false, wired: false };
+
+  function _ahCardHTML(r) {
+    const hasRes = r.hasResult;
+    const hit = !!r.anyHit;
+    const border = !hasRes ? '1.5px solid #475569' : (hit ? '3px solid #3B6D11' : '2px solid #6b7280');
+    const bg = !hasRes ? 'rgba(71,85,105,.10)' : (hit ? 'rgba(59,109,17,.14)' : 'rgba(107,114,128,.10)');
+    const resBadge = !hasRes
+      ? '<span style="background:#475569;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">⏳ 결과 대기</span>'
+      : (hit
+        ? '<span style="background:#3B6D11;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">✅ 적중!</span>'
+        : '<span style="background:#6b7280;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">❌ 미적중</span>');
+    const pol = r.polluted
+      ? '<span title="마감 확정 명단과 현재 추천이 다릅니다 — 마감 후 재분석 오염 의심" style="background:#f59e0b;color:#1a1a1a;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">⚠️ 오염의심</span>' : '';
+    const gm = (r.gemini && r.gemini.status === 'WARNING')
+      ? `<span title="${esc((r.gemini.summary || '') + ((r.gemini.issues || []).length ? ' / ' + r.gemini.issues.join(' · ') : ''))}" style="background:#b91c1c;color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:5px">🔴 Gemini</span>` : '';
+    const lock = r.readonly ? '<span title="마감 확정 잠금" style="font-size:11px">🔒</span>' : '';
+    // 전체경주 카드와 동일 문형: "📊 결과 7→9→5 · ✅ 복승 7+9 적중! · 추천 … (6.7배)"
+    let line = '<div class="hint" style="font-size:12px;margin:3px 0">결과 미입력</div>';
+    if (hasRes) {
+      const tag = (r.quinellaHit && r.trifectaHit) ? '✅ 복승·삼복승 적중!'
+        : r.quinellaHit ? '✅ 복승 적중!'
+          : r.trifectaHit ? '✅ 삼복승 적중!' : '❌ 미적중';
+      const od = hit && r.quinellaOdds ? ` (${r.quinellaOdds}배)` : '';
+      line = `<div style="margin:3px 0;font-size:12px;font-weight:800;color:${hit ? '#7fd14f' : '#9ca3af'}">📊 결과 ${r.top3.join('→')} · ${tag}${od}</div>`;
+    }
+    const recQ = (r.recQuinellas || []).join(' · ') || '-';
+    const recT = (r.recTrifectas || []).join(' · ');
+    const pnl = (r.pnl != null)
+      ? `<span style="color:${r.pnl >= 0 ? '#7fd14f' : '#f87171'};font-weight:800">${r.pnl >= 0 ? '+' : ''}${Number(r.pnl).toLocaleString()}원</span>` : '';
+    return `<div class="ah-card" data-rk="${esc(r.raceKey || '')}" style="cursor:pointer;border:${border};border-radius:10px;padding:10px;background:${bg};margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <b style="font-size:14px;color:#e2e8f0">${esc(r.raceKey || '')}</b>${lock}
+        ${resBadge}${pol}${gm}
+        <span style="flex:1"></span>
+        <span class="hint" style="font-size:11px">${esc(r.date || '')} ${esc(r.analyzedAt || '')}</span>
+      </div>
+      ${line}
+      <div style="font-size:12px;margin:2px 0"><span class="hint">복승 </span><b style="color:#4ea1ff">${esc(recQ)}</b>${pnl ? ' · ' + pnl : ''}</div>
+      ${recT ? `<div style="font-size:11px;margin:2px 0"><span class="hint">삼복승 </span><span style="color:#38d39f">${esc(recT)}</span></div>` : ''}
+    </div>`;
+  }
+
+  function _ahQuery(extra) {
+    const p = new URLSearchParams();
+    const d = document.getElementById('ahDate');
+    const v = document.getElementById('ahVenue');
+    const h = document.getElementById('ahHit');
+    const po = document.getElementById('ahPolluted');
+    if (d && d.value) p.set('date', d.value);
+    if (v && v.value) p.set('venue', v.value);
+    if (h && h.value) p.set('hit', h.value);
+    if (po && po.checked) p.set('polluted', '1');
+    p.set('limit', String(_ah.limit));
+    p.set('offset', String((extra && extra.offset) || 0));
+    return p.toString();
+  }
+
+  async function loadAllHistory(append) {
+    if (_ah.loading) return;
+    _ah.loading = true;
+    const list = document.getElementById('ahList');
+    const more = document.getElementById('ahMore');
+    if (list && !append) list.innerHTML = '<p class="hint">불러오는 중…</p>';
+    try {
+      const offset = append ? _ah.offset : 0;
+      const d = await (await fetch('/api/results/history?' + _ahQuery({ offset }))).json();
+      _ah.total = d.total || 0;
+      _ah.rows = append ? _ah.rows.concat(d.rows || []) : (d.rows || []);
+      _ah.offset = offset + (d.rows || []).length;
+      const s = d.summary || {};
+      const sm = document.getElementById('ahSummary');
+      if (sm) {
+        sm.innerHTML = `<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:13px;font-weight:800">
+          <span>총 <b style="color:#e2e8f0">${s.races || 0}</b>경주</span>
+          <span>결과 <b style="color:#e2e8f0">${s.withResult || 0}</b></span>
+          <span style="color:#7fd14f">적중 ${s.hits || 0}${s.hitRate != null ? ` (${s.hitRate}%)` : ''}</span>
+          <span style="color:${(s.pnl || 0) >= 0 ? '#7fd14f' : '#f87171'}">손익 ${(s.pnl || 0) >= 0 ? '+' : ''}${Number(s.pnl || 0).toLocaleString()}원</span>
+          ${s.polluted ? `<span style="color:#f59e0b">⚠️ 오염의심 ${s.polluted}</span>` : ''}
+        </div>`;
+      }
+      // 필터 옵션은 최초 1회만 채운다(선택 유지)
+      const vsel = document.getElementById('ahVenue');
+      if (vsel && vsel.options.length <= 1 && (d.venues || []).length) {
+        d.venues.forEach((v) => { const o = document.createElement('option'); o.value = v; o.textContent = v; vsel.appendChild(o); });
+      }
+      const dsel = document.getElementById('ahDate');
+      if (dsel && dsel.options.length <= 1 && (d.dates || []).length) {
+        d.dates.forEach((v) => { const o = document.createElement('option'); o.value = v; o.textContent = v; dsel.appendChild(o); });
+      }
+      if (list) {
+        list.innerHTML = _ah.rows.length ? _ah.rows.map(_ahCardHTML).join('') : '<p class="hint">조건에 맞는 경주가 없습니다.</p>';
+        list.querySelectorAll('.ah-card').forEach((el) => {
+          el.addEventListener('click', () => {
+            const rk = el.dataset.rk;
+            if (rk) { try { openJapanReview(rk); } catch (_) { try { toast(rk); } catch (__) { /* */ } } }
+          });
+        });
+      }
+      if (more) {
+        more.style.display = (_ah.offset < _ah.total) ? '' : 'none';
+        more.textContent = `▼ 더 보기 (${_ah.offset}/${_ah.total})`;
+      }
+    } catch (e) {
+      if (list) list.innerHTML = '<p class="hint">불러오기 실패 — 새로고침해 주세요.</p>';
+    } finally {
+      _ah.loading = false;
+    }
+  }
+
+  function initAllHistory() {
+    if (!_ah.wired) {
+      _ah.wired = true;
+      ['ahDate', 'ahVenue', 'ahHit', 'ahPolluted'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', () => { _ah.offset = 0; loadAllHistory(false); });
+      });
+      const rf = document.getElementById('ahRefresh');
+      if (rf) rf.addEventListener('click', () => { _ah.offset = 0; loadAllHistory(false); });
+      const mo = document.getElementById('ahMore');
+      if (mo) mo.addEventListener('click', () => loadAllHistory(true));
+    }
+    if (!_ah.rows.length) loadAllHistory(false);
   }
 
   // [복기 저장] 확장 팝업 🧠 복기 저장 목록 — /api/review/list
