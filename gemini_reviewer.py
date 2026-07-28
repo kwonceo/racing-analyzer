@@ -109,13 +109,105 @@ def _fmt_timeline(tl):
     return "\n".join(out) + "\n"
 
 
+# ── 로직 소스 전송 (2026-07-28 권대표 지시: "로직 소스도 보내게 해줘") ──────────────────
+#   데이터만 주면 "결과가 이상하다"까지밖에 못 간다. 판단을 만든 '실제 코드'를 함께 줘야
+#   "어느 함수의 어느 조건이 잘못됐다"는 로직 레벨 분석이 가능하다.
+#   ⚠ app.py 는 읽기만 한다. mtime 캐시라 코드 수정 시 자동 갱신된다.
+_APP_PATH = os.path.join(os.path.dirname(__file__), "app.py")
+_MAX_SOURCE_CHARS = 300000
+_LOGIC_CACHE = {"mtime": None, "text": "", "meta": ""}
+
+# 이 경주의 판단을 실제로 만들어낸 함수들(선정 → 제거 → 신호 → 확정 → 전략 순).
+_LOGIC_FNS = [
+    # 신호·이상감지
+    "_excess_drop_analysis", "_mass_drop_detect", "_win_exacta_reversal", "_quinella_mismatch",
+    "_signal_confidence", "_inverse_arrangement", "_compression_pattern", "_strong_signals",
+    "_advanced_anomaly",
+    # 말 선정·제거·등급
+    "_form_from_starters", "_elimination", "_elim_score",
+    "_integrated_grades", "_learned_integrated_weights", "_integrated_adaptive",
+    "_signal_situation", "_combo_signal_quality",
+    # 조합 확정
+    "_confidence_picks", "_final_picks", "_third_place_hunt", "_reversal_backing_bets",
+    "_trio_est",
+    # 전략·후처리
+    "_bmed_strategy", "_apply_profit_strategy", "_apply_mass_drop_strategy", "_compare_recommend",
+]
+
+_FORMULA_SPEC = """[설계 의도 — 공식과 임계값 (문서 기준)]
+1. 초과급락 = 말N 평균급락 − 전체평균급락. 절대 10%+ 급락은 노이즈가 아니라 집중신호(ABS_STRONG=-10).
+   5%p+ = 강함(🔴) / 0~5%p = 약함(🟡) / 그 외 노이즈 제거.
+2. 역전비율 = 쌍승(B→A) / 쌍승(A→B). <0.95 역전신호 / <0.80 강한 / <0.60 압도적.
+3. 불일치점수 = 예상최저복승 / 실제최저복승. 1.2+ 주의 / 1.5+ 강한 / 2.0+ 압도적.
+4. 종합 신뢰도 = 초과급락 40% + 쌍승역전 35% + 복승불일치 25%. 70+ 🔴 / 40~69 🟡.
+5. 통합 점수 = 이상감지(배당) 60% + 전적 40%. 50경주+ 누적 시 비교학습으로 ±15%p 자동 조정
+   (이상감지 가중치는 0.45~0.75 범위).
+6. 배당 급락 경고: 30%↑ 🟠 / 50%↑ 🔴. A/B/C/D 등급 상위 비율 45:28:17:10.
+7. 상황별 가중(_signal_situation): 일반 50:50 / 이상감지다수 40:60 / 대규모 30:70 / 대규모+집중 20:80.
+8. 마감 후 급락은 추천에 반영하지 않는다(참고만). 첫 수집 1틱은 워밍업으로 급락 계산 보류.
+※ 위는 '의도'다. 아래 실제 소스가 이 의도대로 구현돼 있는지도 검증 대상이다."""
+
+
+def _logic_source():
+    """app.py 에서 판단 로직 함수들의 실제 소스를 추출(줄번호 포함). 실패해도 분석은 계속된다."""
+    try:
+        mt = os.path.getmtime(_APP_PATH)
+    except Exception:
+        return "", "app.py 접근 불가"
+    if _LOGIC_CACHE["mtime"] == mt and _LOGIC_CACHE["text"]:
+        return _LOGIC_CACHE["text"], _LOGIC_CACHE["meta"]
+    try:
+        import ast
+        with open(_APP_PATH, encoding="utf-8") as f:
+            src = f.read()
+        lines = src.splitlines()
+        spans = {}
+        for n in ast.walk(ast.parse(src)):
+            if isinstance(n, ast.FunctionDef):
+                spans.setdefault(n.name, (n.lineno, getattr(n, "end_lineno", n.lineno)))
+        out, used, got, missing = [], 0, [], []
+        for fn in _LOGIC_FNS:
+            sp = spans.get(fn)
+            if not sp:
+                missing.append(fn)
+                continue
+            a, b = sp
+            body = "\n".join(lines[a - 1:b])
+            if used + len(body) > _MAX_SOURCE_CHARS:
+                out.append("# … 크기 상한(%d자) 도달 — 이후 함수 생략: %s"
+                           % (_MAX_SOURCE_CHARS, ", ".join(_LOGIC_FNS[_LOGIC_FNS.index(fn):])))
+                break
+            out.append("# ────── app.py:%d-%d  def %s ──────\n%s" % (a, b, fn, body))
+            used += len(body)
+            got.append("%s(%d줄)" % (fn, b - a + 1))
+        text = "\n\n".join(out)
+        meta = "%d개 함수 %d자 | 미발견: %s" % (len(got), used, ", ".join(missing) or "없음")
+        _LOGIC_CACHE.update(mtime=mt, text=text, meta=meta)
+        return text, meta
+    except Exception as e:
+        return "", "로직 소스 추출 실패: %s" % e
+
+
 def _build_full_prompt(ctx):
-    """[전체자료] 배당판 전량 + 시계열 전량 + 전적 + 시스템 판단근거 + 최종추천(근거 절단 없음)."""
+    """[전체자료] 로직 소스 + 배당판 전량 + 시계열 전량 + 전적 + 판단근거 + 최종추천(절단 없음)."""
     g = ctx.get
     P = []
     P.append("너는 BMED 경마·경륜 베팅 시스템의 수석 로직 검수관이다.")
     P.append("아래는 이 경주에 대해 시스템이 보유한 '전체' 데이터와, 시스템이 내린 최종 판단이다.")
-    P.append("데이터를 직접 읽고, 시스템의 판단 로직에 결함이 있는지 근거를 들어 분석하라.\n")
+    P.append("아래 순서로 제공된다: ①판단 로직의 설계 의도와 실제 소스 ②이 경주의 전체 데이터")
+    P.append("③시스템이 실제로 내린 판단. 셋을 대조해 로직 결함을 근거와 함께 지적하라.\n")
+
+    _src, _srcmeta = _logic_source()
+    P.append("═══ 0. 판단 로직 (설계 의도 + 실제 소스) ═══")
+    P.append(_FORMULA_SPEC)
+    if _src:
+        P.append("\n[실제 구현 소스 — app.py 발췌 · %s]" % _srcmeta)
+        P.append("```python")
+        P.append(_src)
+        P.append("```")
+    else:
+        P.append("\n[실제 구현 소스] 첨부 실패(%s) — 의도 명세만으로 판단하라." % _srcmeta)
+    P.append("")
 
     P.append("═══ 1. 경주 기본 ═══")
     P.append("경주: %s | 종목: %s/%s | 마감까지: %s분 | 마감후: %s"
@@ -177,9 +269,15 @@ def _build_full_prompt(ctx):
     P.append("1) 배당판과 시계열을 직접 읽고, 시스템이 놓친 자금 흐름·급락·역배열이 있는지 확인하라.")
     P.append("2) 유력마·제거마·최종추천이 위 데이터로 정당화되는지 검증하라. 근거 없이 선정된 말이 있는가?")
     P.append("3) 추천에 빠졌지만 데이터상 들어갔어야 할 조합이 있으면 마번과 근거를 들어 지적하라.")
-    P.append("4) 로직 자체의 결함(조건식·임계값·우선순위)이 의심되면 어느 규칙을 어떻게 바꿔야 하는지 제안하라.")
+    P.append("4) [코드 레벨] 0번의 실제 소스를 읽고 다음을 점검하라 —")
+    P.append("   ⓐ 설계 의도(공식·임계값)와 실제 구현이 어긋난 곳")
+    P.append("   ⓑ 이 경주 데이터에 대해 임계값이 부적절하게 동작한 곳(경계에서 뒤집힌 조건)")
+    P.append("   ⓒ 조건 우선순위·단락(early return)·예외처리로 신호가 삼켜진 곳")
+    P.append("   ⓓ 이 경주에서 실제로 타지 않은 분기인데 타야 했던 분기")
+    P.append("   지적할 때는 반드시 '함수명 + app.py 줄번호 + 해당 조건식'을 인용하라.")
     P.append("5) 추측 금지. 모든 지적에는 위 데이터의 구체적 수치(마번·배당·%·시각)를 근거로 인용하라.")
-    P.append("6) 문제가 없으면 status=SAFE, issues=[] 로 답하라. 억지로 문제를 만들지 마라.\n")
+    P.append("6) 코드에 없는 동작을 상상해 지적하지 마라. 소스에 근거가 없으면 지적하지 마라.")
+    P.append("7) 문제가 없으면 status=SAFE, issues=[] 로 답하라. 억지로 문제를 만들지 마라.\n")
     P.append("출력(JSON만):")
     P.append('{"status":"SAFE|WARNING",'
              '"issues":["항목: 근거 수치"],'
@@ -190,7 +288,9 @@ def _build_full_prompt(ctx):
              '"odds_read":"배당판에서 읽히는 자금 흐름",'
              '"signal_read":"이상감지 해석",'
              '"missed":[{"combo":"1+2","why":"근거"}],'
-             '"logic_findings":[{"area":"함수·규칙명","problem":"결함","evidence":"수치 근거","fix":"수정 제안"}]},'
+             '"logic_findings":[{"func":"함수명","line":"app.py 줄번호","code":"문제 조건식 원문",'
+             '"problem":"무엇이 잘못됐나","evidence":"이 경주 수치 근거","fix":"어떻게 고칠지(코드 수준)",'
+             '"severity":"high|mid|low"}]},'
              '"confidence":0}')
 
     text = "\n".join(P)
@@ -284,10 +384,12 @@ def review_async(rk, final_q, final_t, special_q=None, line_pairs=None,
             if _full:
                 prompt = _build_full_prompt(ctx)
                 # 깊은 분석이 목적이므로 thinking 을 켜고 출력 예산도 크게 잡는다(비용보다 정확도 우선).
-                _gen = {"temperature": 0.1, "maxOutputTokens": 8192,
+                # ⚠ maxOutputTokens 는 thinking 토큰과 출력 토큰의 '합'에 걸린다(실측: thinking 7860 +
+                #   출력 318 = 8178 에서 MAX_TOKENS 로 잘림). thinkingBudget 보다 넉넉히 크게 잡을 것.
+                _gen = {"temperature": 0.1, "maxOutputTokens": 32768,
                         "thinkingConfig": {"thinkingBudget": 8192},
                         "responseMimeType": "application/json"}
-                _timeout = 120
+                _timeout = 300
             else:
                 prompt = _build_prompt(rk, final_q, final_t, special_q or [],
                                        line_pairs or [], strong_signals or [],
