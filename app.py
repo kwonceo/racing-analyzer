@@ -7057,9 +7057,22 @@ def _confidence_picks(confidence, curWin, curQ, key_horses, single_rank, anomaly
     if trifecta_ins is None and anomaly_horse is not None and int(anomaly_horse) not in (fav1, fav2):
         trifecta_ins = sorted([fav1, fav2, int(anomaly_horse)])         # 폴백: 유력마 2두 + 이상감지
 
+    # [맹목적 왕축 조건 강화 2026-07-28] 왕축 강도 판정
+    # strongAxis=True: 확신도 60+ AND (2위 대비 2배 이상 OR 단승 2.0배 이하)
+    # False이면 Non-Axis 보험 적극 발동
+    _fav1_conf = _conf(fav1)
+    _fav2_conf = _conf(fav2)
+    _fav1_rep = _rep(fav1)
+    _strong_axis = bool(
+        _fav1_conf >= 60 and (
+            _fav2_conf <= 0 or _fav1_conf >= _fav2_conf * 2 or
+            (_fav1_rep is not None and _fav1_rep <= 2.0)
+        )
+    )
     return {"favAxis": [fav1, fav2], "top1": top1, "top1Conf": round(top1c, 1),
             "top1High": top1_high, "quinellas": quinellas[:3], "forced": forced,
-            "trifecta": trifecta, "trifectaIns": trifecta_ins}
+            "trifecta": trifecta, "trifectaIns": trifecta_ins,
+            "strongAxis": _strong_axis}
 
 
 def _dense_no_signal_box(key_horses, valid_nos, curWin, curQ, trio_map,
@@ -7854,6 +7867,44 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
             seen_t.add(_fk)
             final_t.append({"combo": list(_fk), "odds": _form_ins.get("odds"),
                             "reason": _form_ins["reason"], "formInsurance": True})
+
+    # ══════════════ [경륜 B라인 다중 그물망 v2 2026-07-28] ══════════════
+    # Gemini 제안 — 7871 왕축 강제 로직 실행 전 B라인 seen_t 선점
+    # 도요하시7R: A라인(3+9) 왕축 강제로 2+8+5 생성 불가 → seen_t 선점으로 해결
+    if _sp == "cycle" and (cp.get("keirinLinePairs") or []):
+        try:
+            _lp_list = cp.get("keirinLinePairs") or []
+            if len(_lp_list) >= 2:
+                _a_line = [int(x) for x in (_lp_list[0].get("combo") or [])][:2]
+                _b_line = [int(x) for x in (_lp_list[1].get("combo") or [])][:2]
+                if len(_a_line) == 2 and len(_b_line) == 2:
+                    _a_key = tuple(sorted(_a_line))
+                    _b_key = tuple(sorted(_b_line))
+                    _a_odds = float((curQ or {}).get(_a_key) or (curQ or {}).get(_a_key[::-1]) or 999)
+                    _b_odds = float((curQ or {}).get(_b_key) or (curQ or {}).get(_b_key[::-1]) or 999)
+                    # B라인 활성화 조건: A라인 배당의 2배 이내
+                    if _b_odds <= _a_odds * 2.0 and _b_odds < 999:
+                        _flat = set(_a_line + _b_line)
+                        _kh_inner = [int(x) for x in (key_horses or [])
+                                     if str(x).lstrip('-').isdigit()]
+                        _best3 = next((k for k in _kh_inner
+                                       if k not in _flat and k != _a_line[1]), None)
+                        if _best3:
+                            _b_trio = tuple(sorted(_b_line + [_best3]))
+                            if _b_trio not in seen_t and _vtri(list(_b_trio)):
+                                _bt_odds = trio_map.get(_b_trio)
+                                if not _bt_odds or float(_bt_odds) >= 4.0:
+                                    seen_t.add(_b_trio)
+                                    final_t.append({
+                                        "combo": list(_b_trio),
+                                        "odds": _bt_odds,
+                                        "reason": "B라인 삼복승 보험(%d+%d×%d·AntiCross·seen_t선점)"
+                                                  % (_b_line[0], _b_line[1], _best3),
+                                        "keirinBLine": True
+                                    })
+                                    print(f"[B라인v2 선점] {'+'.join(map(str,_b_trio))} 삼복승 seen_t 선점 완료")
+        except Exception as _ble:
+            print("[경륜 B라인v2] 에러(무시):", _ble)
 
     # ══════════════ [삼복승 복승메인 정합성·신규] 삼복승은 복승 메인 말을 반드시 포함 ══════════════
     #   문제: 복승 메인 3+4 인데 삼복승 2+5+6(3·4 없음) → 앞뒤 불일치("쌩뚱맞은 조합").
@@ -10706,7 +10757,21 @@ def _triple_analyze(rk, rec):
             core_picks["confTop1"] = conf_q["top1"]
             core_picks["confTop1Conf"] = conf_q["top1Conf"]
             core_picks["confTop1High"] = conf_q.get("top1High")   # 확신도 1위 고배당(30배+) → 복승 축 제외·삼복승 보험 표기용
-            core_picks["favAxis"] = conf_q.get("favAxis")         # 시장 유력마 복승 축 2두
+            # [T-2분 왕축 교체 금지 2026-07-28] 카나자와7R: T-72초 급락 감지로 10번 왕축 버리고
+            # 1번으로 교체 → 10+1 정답 놓침. T-2분 이내엔 기존 왕축 동결, 급락말은 보조로만 추가.
+            _new_fav = conf_q.get("favAxis")
+            if cur_mb is not None and cur_mb > 2 and not after_close:
+                _FROZEN_FAV_AXIS[rk] = _new_fav   # T-2분 초과: 정상 업데이트 + 캐시 저장
+                core_picks["favAxis"] = _new_fav
+            elif cur_mb is not None and 0 < cur_mb <= 2 and not after_close:
+                _frozen = _FROZEN_FAV_AXIS.get(rk)
+                if _frozen:
+                    core_picks["favAxis"] = _frozen  # 동결된 왕축 유지
+                    print(f"[T-2분 왕축 동결] {rk}: {_new_fav} → {_frozen} 유지(cur_mb={cur_mb})")
+                else:
+                    core_picks["favAxis"] = _new_fav
+            else:
+                core_picks["favAxis"] = _new_fav  # 마감 후 or cur_mb 불명: 그대로
 
             # [보완②] 삼복승 예상배당 표기 — 실배당(trio_map) 우선, 없으면 _trio_est 추정.
             def _tri_odds(cc):
@@ -10913,6 +10978,19 @@ def _triple_analyze(rk, rec):
                         _dn = _dh.get("no")
                         if _dn is not None and int(_dn) != _axis:
                             _dark_q.append({"combo": [_axis, int(_dn)], "odds": _qo(_axis, int(_dn)), "reason": "복병 포함"})
+                    # [왕축×복병 교차 2026-07-28] favAxis(시장 왕축) × 복병 교차 복승 보조 추가
+                    # 카나자와7R: 10번(왕축)×1번(복병) → 10+1 미생성 문제 대응
+                    _fav_ax = (conf_q or {}).get('favAxis') or []
+                    _fav_no = int(_fav_ax[0]) if _fav_ax else None
+                    if _fav_no and _fav_no != _axis:
+                        for _dh in (dark_horses or []):
+                            _dn = _dh.get("no")
+                            if _dn is not None and int(_dn) != _fav_no:
+                                _o = _qo(_fav_no, int(_dn))
+                                if _o and 0 < float(_o) <= 80:
+                                    _dark_q.append({"combo": [_fav_no, int(_dn)],
+                                                    "odds": _o,
+                                                    "reason": "왕축×복병 교차(fix_axis_dark)"})
             except Exception:
                 pass
             # [추천 개편·조합 근거/신호강도] 말별 신호 메타(급락%·역배열·스마트머니·복병·집중급락·signalScore)
@@ -11202,6 +11280,161 @@ def _triple_analyze(rk, rec):
                             _all_q3 = _fq_ma_list + _ma_adds
                             _all_q3.sort(key=lambda x: (x.get('odds') is None, x.get('odds') or 9e9))
                             core_picks['finalQuinellas'] = _all_q3[:_mainmax]
+            except Exception:
+                pass
+            # [Non-Axis 삼복승 보험 2026-07-28] strongSignals=0 + 왕축 단순 인기마일 때
+            # finalQ 중 왕축 없는 조합(앵커) x keyHorses 교차 → 삼복승 보험 1~2구멍 자동 생성
+            # 코치 10경주 케이스: strongSignals=0, 1번 왕축, 4+5 앵커 → 4+5+3/4+5+10 보험
+            try:
+                _ss_na = len(core_picks.get('strongSignals') or [])
+                _fa_na = [int(x) for x in ((conf_q or {}).get('favAxis') or [])][:1]
+                _kh_na = [int(x) for x in (key_horses or []) if str(x).lstrip('-').isdigit()]
+                _ft_na = list(core_picks.get('finalTrifectas') or [])
+                _fq_na = list(core_picks.get('finalQuinellas') or [])
+                _ft_na_set = {tuple(sorted(int(x) for x in (t.get('combo') or []))) for t in _ft_na}
+                _weak_axis = not (conf_q or {}).get("strongAxis", True)
+                if (_ss_na == 0 or _weak_axis) and _fa_na and _fq_na:  # [맹목적 왕축] strongAxis 아니면 보험 확대
+                    # 왕축 없는 finalQ 앵커 탐색
+                    _anchor_na = None
+                    for _q_na in _fq_na:
+                        _c_na = [int(x) for x in (_q_na.get('combo') or [])]
+                        if len(_c_na) == 2 and _fa_na[0] not in _c_na:
+                            _anchor_na = _c_na
+                            break
+                    if _anchor_na:
+                        _used_na = set(_anchor_na)
+                        _na_adds = []
+                        for _kh in _kh_na:
+                            if _kh in _used_na:
+                                continue
+                            _c3 = tuple(sorted(_anchor_na + [_kh]))
+                            if _c3 in _ft_na_set:
+                                continue
+                            _na_adds.append({'combo': list(_c3),
+                                             'odds': _tri_odds(list(_c3)),
+                                             'reason': 'Non-Axis 보험(왕축 제외·앵커%s교차)' % str(_anchor_na),
+                                             'stars': 3, 'basis': ''})
+                            _ft_na_set.add(_c3)
+                            if len(_na_adds) >= 2:
+                                break
+                        if _na_adds:
+                            core_picks['finalTrifectas'] = _ft_na + _na_adds
+            except Exception:
+                pass
+            # [막판 급락 Emergency Override 2026-07-28] T-2분 이내 + 복승 급락 -30%+ + finalQ 미포함
+            # → 최상단 1~2자리 강제 편입. 오탐 방지: 배당 ≤80배 + 복승 기반(단승 아님)
+            # 카나자와7R: T-72초 1번 급락 → 1+10 조합이 finalQ에 없었다면 강제 편입했을 케이스
+            try:
+                if cur_mb is not None and 0 < cur_mb <= 2 and not after_close:
+                    _fq_eo = list(core_picks.get('finalQuinellas') or [])
+                    _fq_eo_set = {frozenset(int(x) for x in (q.get('combo') or [])) for q in _fq_eo}
+                    _eo_adds = []
+                    for _d in (drops or []):
+                        if (_d.get('pct') or 0) > -30:
+                            continue
+                        _dc = [int(x) for x in (_d.get('combo') or [])]
+                        if len(_dc) != 2:
+                            continue
+                        _ds = frozenset(_dc)
+                        if _ds in _fq_eo_set:
+                            continue
+                        _do = (curQ or {}).get((_dc[0], _dc[1])) or (curQ or {}).get((_dc[1], _dc[0]))
+                        if not _do or float(_do) > 80:
+                            continue
+                        _eo_adds.append({'combo': _dc, 'odds': float(_do),
+                                         'reason': f'🚨 막판급락Override(T-{cur_mb}분 {_d.get("pct")}%)',
+                                         'stars': 5, 'basis': '집중급락'})
+                        _fq_eo_set.add(_ds)
+                        if len(_eo_adds) >= 2:
+                            break
+                    if _eo_adds:
+                        core_picks['finalQuinellas'] = _eo_adds + _fq_eo
+                        print(f"[Emergency Override] {rk}: {[e['combo'] for e in _eo_adds]} 최상단 강제 편입")
+            except Exception:
+                pass
+            # [경륜 B라인 다중 그물망 2026-07-28] keirinLinePairs 2개+ 시 B라인 삼복승 보험 자동 생성
+            # 도요하시7R: A라인(3+9) 메인만 → 2+8(B라인) 기반 보험 미생성 → 2-8-5 전멸 대응
+            # 설계: 메인=A라인×3착최우선 / 보험1=A라인×복병 / 보험2=B라인×3착최우선(Anti-CrossLine)
+            # B라인 활성화: A라인 배당의 2배 이내 OR 스마트머니 신호 1개+
+            try:
+                if _analyze_sport == 'cycle':
+                    _lp_bl = core_picks.get('keirinLinePairs') or []
+                    if len(_lp_bl) >= 2:
+                        _lp_a = _lp_bl[0]   # A라인(1순위)
+                        _lp_b = _lp_bl[1]   # B라인(2순위)
+                        _ca = [int(x) for x in (_lp_a.get('combo') or [])]
+                        _cb = [int(x) for x in (_lp_b.get('combo') or [])]
+                        if len(_ca) == 2 and len(_cb) == 2:
+                            _oa = (curQ or {}).get((_ca[0],_ca[1])) or (curQ or {}).get((_ca[1],_ca[0]))
+                            _ob = (curQ or {}).get((_cb[0],_cb[1])) or (curQ or {}).get((_cb[1],_cb[0]))
+                            # B라인 활성화 조건
+                            _b_smart = any(int(h.get('no',0)) in set(_cb)
+                                          for h in (dark_horses or []) if h.get('smartMoney'))
+                            _b_active = bool(_ob and _oa and
+                                            (float(_ob) <= float(_oa) * 2.0 or _b_smart))
+                            if _b_active:
+                                _ft_bl = list(core_picks.get('finalTrifectas') or [])
+                                _ft_bl_set = {tuple(sorted(int(x) for x in (t.get('combo') or [])))
+                                              for t in _ft_bl}
+                                _kh_bl = [int(x) for x in (key_horses or [])
+                                          if str(x).lstrip('-').isdigit()]
+                                _b_set = set(_cb)
+                                _bl_adds = []
+                                for _kh in _kh_bl:
+                                    if _kh in _b_set:
+                                        continue
+                                    # [Anti-CrossLine] A라인 마크맨 제외(라인 혼용 방지)
+                                    if len(_ca) >= 2 and _kh == _ca[1]:
+                                        continue
+                                    _c3 = tuple(sorted(_cb + [_kh]))
+                                    if _c3 in _ft_bl_set:
+                                        continue
+                                    _bl_adds.append({
+                                        'combo': list(_c3),
+                                        'odds': _tri_odds(list(_c3)),
+                                        'reason': 'B라인 삼복승 보험(%d+%d×%d·AntiCross)' % (_cb[0],_cb[1],_kh),
+                                        'stars': 3, 'basis': ''
+                                    })
+                                    _ft_bl_set.add(_c3)
+                                    if len(_bl_adds) >= 1:
+                                        break
+                                if _bl_adds:
+                                    core_picks['finalTrifectas'] = _ft_bl + _bl_adds
+                                    print(f"[B라인 그물망] {rk}: B라인{_cb} 삼복승보험 {[e['combo'] for e in _bl_adds]} 추가")
+            except Exception:
+                pass
+            # [Gemini 자동 진단 2026-07-28] finalQ/finalT 확정 후 백그라운드 검수
+            try:
+                import gemini_reviewer
+                gemini_reviewer.review_async(
+                    rk=rk,
+                    final_q=core_picks.get('finalQuinellas') or [],
+                    final_t=core_picks.get('finalTrifectas') or [],
+                    special_q=core_picks.get('quinellaRef') or [],
+                    line_pairs=core_picks.get('keirinLinePairs') or [],
+                    strong_signals=core_picks.get('strongSignals') or [],
+                    fav_axis=core_picks.get('favAxis') or [],
+                    strong_axis=(conf_q or {}).get('strongAxis', True),
+                    drops=drops or [],
+                    cur_mb=cur_mb,
+                )
+            except Exception:
+                pass
+            # [Gemini 자동 진단 2026-07-28] finalQ/finalT 확정 후 백그라운드 검수
+            try:
+                import gemini_reviewer
+                gemini_reviewer.review_async(
+                    rk=rk,
+                    final_q=core_picks.get('finalQuinellas') or [],
+                    final_t=core_picks.get('finalTrifectas') or [],
+                    special_q=core_picks.get('quinellaRef') or [],
+                    line_pairs=core_picks.get('keirinLinePairs') or [],
+                    strong_signals=core_picks.get('strongSignals') or [],
+                    fav_axis=core_picks.get('favAxis') or [],
+                    strong_axis=(conf_q or {}).get('strongAxis', True),
+                    drops=drops or [],
+                    cur_mb=cur_mb,
+                )
             except Exception:
                 pass
             # [수익성 구조 개편 (2026-07-19)] 경주 3분류(저=삼복승 집중/중=2.5배 컷+기대값/고=유지) 후처리 —
@@ -12882,6 +13115,7 @@ def _analysis_log_path(rk):
     m = re.search(r"(\d{4}-\d{2}-\d{2})", rk or "")
     date = m.group(1) if m else time.strftime("%Y-%m-%d", time.localtime())
     race = re.sub(r"\d{4}-\d{2}-\d{2}", "", rk or "").strip() or (rk or "race")
+    race = _strip_race_dist(race)   # [중복파일 차단 2026-07-28] 거리접미 제거 → 1300M 별도파일 방지
     safe = re.sub(r"[^\w가-힣]+", "_", f"{date}_{race}").strip("_")
     os.makedirs(ANALYSIS_LOG_DIR, exist_ok=True)
     return os.path.join(ANALYSIS_LOG_DIR, safe + ".json"), date, race
@@ -13233,6 +13467,18 @@ def _build_analysis_log(rk, an=None):
         "profit": (doc.get("profit") if doc else None),
         "review": (doc.get("review") if doc else None),   # 사용자 복기 메모(텍스트)
     }
+    # [readonly 잠금 2026-07-28] 마감 후 추천 있는 파일 → readonly:True 플래그 설정
+    # 이후 백그라운드 재분석이 corePicks/finalQ를 덮어쓰는 T-0 Race Condition 원천 차단
+    if an.get("afterClose") and _cp_has_recs(core_picks_out):
+        log["readonly"] = True
+    # readonly 파일: result/hit/review/profit 업데이트만 허용, corePicks 등 분석 결과 차단
+    if doc.get("readonly") and an.get("afterClose"):
+        log["corePicks"] = doc.get("corePicks")
+        log["final_recommendation"] = doc.get("final_recommendation")
+        log["recommendation_history"] = doc.get("recommendation_history")
+        log["signals_detected"] = doc.get("signals_detected")
+        log["readonly"] = True
+        print(f"[readonly 잠금] {rk}: 마감 확정 파일 — corePicks 보존, result/hit만 업데이트 허용")
     # [원자적 저장 (2026-07-21 도야마 1R)] 이중 분석 소스가 같은 로그를 동시 기록 → 쓰는 도중 파일을
     #   읽은 쪽이 JSON 파싱 실패(doc=None) → recommendation_history 가 통째로 초기화되던 소실 버그.
     #   tmp 기록 후 os.replace 교체로 '읽는 쪽은 항상 완전한 파일'만 보게 함(추가 보강·동작 동일).
@@ -13531,8 +13777,11 @@ def _missing_results(date=None):
         if not has_result and rk and "TEST" not in (rk or "").upper():
             # [신규] 추천 요약(삼복승 우선→복승) + 이상감지 여부 + 마지막 갱신시각(발주 근접 알림용)
             fr = d.get("final_recommendation") or {}
-            _tm = (fr.get("trifecta_main") or {}).get("combo")
-            _qm = (fr.get("quinella_main") or {}).get("combo")
+            cp = d.get("corePicks") or {}  # [신스키마 지원]
+            _fq = cp.get("finalQuinellas") or []
+            _ft = cp.get("finalTrifectas") or []
+            _tm = (fr.get("trifecta_main") or {}).get("combo") or (_ft[0].get("combo") if _ft else None)
+            _qm = (fr.get("quinella_main") or {}).get("combo") or (_fq[0].get("combo") if _fq else None)
             recommend = ("삼복승 " + str(_tm)) if _tm else (("복승 " + str(_qm)) if _qm else "추천 없음")
             had_anomaly = any((s or {}).get("severity") == "🔴" for s in (d.get("signals_detected") or []))
             missing.append({"raceKey": rk, "race": d.get("race"), "race_id": rid,
@@ -21714,6 +21963,7 @@ def _kra_auto_start():
 #   해결: watch 와 완전히 독립적으로, '당일 분석됐으나 결과 없는 한국 경주'를 주기적으로 KRA API 로
 #         자동 수집→_apply_result_learning(복기·학습·복병·패턴·백업 자동연쇄). 멱등·읽기전용 조회.
 _KRA_BACKFILL_INTERVAL = 1200     # 20분 주기(경주 종료 후 rcTime 이 올라오면 다음 스윕에서 자동 확보)
+_FROZEN_FAV_AXIS = {}  # {raceKey: favAxis} — T-2분 이내 동결 왕축 캐시 (카나자와7R 대응)
 _kra_backfill_started = False
 
 
@@ -28805,8 +29055,6 @@ def _boot_background():
 # [Railway/gunicorn] gunicorn 은 __main__ 을 건너뛰므로, 여기서 모듈 로드 시점에 백그라운드 기동.
 #   (SERVER_SOFTWARE 는 gunicorn 이 자동 설정. 로컬 `python app.py` 에선 미설정 → 아래 __main__ 에서 기동)
 
-from admin_page import admin_bp
-app.register_blueprint(admin_bp)
 if os.environ.get("SERVER_SOFTWARE", "").startswith("gunicorn"):
     _boot_background()
 

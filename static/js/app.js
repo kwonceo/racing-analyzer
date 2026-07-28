@@ -6214,7 +6214,7 @@
     const d = new Date();
     return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
   }
-  async function registerKraWatch(title) {
+  async function registerKraWatch(title, postTime) {
     const { venue, num } = koreaRaceParts(title);
     if (!venue || num == null) return;                 // 경마장·경주번호 파싱 실패 → 스킵(무해)
     // 직전 등록 경주는 해제(watch 누적 방지)
@@ -6224,7 +6224,7 @@
     try {
       await fetch('/api/kra/watch', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ raceKey: title, meet: venue, rc_no: num, rc_date: _ymdToday() }),
+        body: JSON.stringify({ raceKey: title, meet: venue, rc_no: num, rc_date: _ymdToday(), ...(postTime ? {postTime} : {}) }),
       });
       _kraWatchedTitle = title;
     } catch (_) { /* 서버 미기동 등 → 무해(확장 폴백 유지) */ }
@@ -6278,7 +6278,7 @@
     setKoreaOddsStatus('waiting', title);
     renderKoreaFormDraft(title);   // [복구] 배당 연동 전에도 전적 기준 통합 초안(유력마 TOP5·조합)을 즉시 표시
     renderKoreaTimeline(title);
-    registerKraWatch(title);       // [KRA 자동배선] 이 경주를 서버 KRA 30초 자동수집에 등록(확정배당·결과판정)
+    registerKraWatch(title, race && (race.postTime || race.post_time));       // [KRA 자동배선] 이 경주를 서버 KRA 30초 자동수집에 등록(확정배당·결과판정)
     const tick = () => { pollKoreaOdds(title, race, form); updateKraApiStatus(title); };
     await tick();
     // [2번] 30초 간격 수집·변동 감시 (확장 [전체 자동 수집] 주기와 정렬) + KRA API 상태 갱신
