@@ -1,6 +1,6 @@
 {
  "race": "코치 7경주",
- "raceKey": "코치 7경주",
+ "raceKey": "2026-07-25 코치 7경주",
  "date": "2026-07-25",
  "result": {
   "1st": 11,
@@ -10,8 +10,8 @@
  },
  "hit": true,
  "hit_type": "복승 메인",
- "odds": "미상",
- "win_odds": 0,
+ "odds": "저배당",
+ "win_odds": 3.3,
  "why_recommended": {
   "signal_11": {
    "horse": 11,
@@ -37,9 +37,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 105,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_6": {
    "horse": 6,
@@ -65,9 +65,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 69.3,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_1": {
    "horse": 1,
@@ -93,18 +93,18 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 119.3,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
-  11,
   6,
+  11,
   1
  ],
  "recommendation_process": [
-  "1. 전적 분석: 11번 105점",
+  "1. 전적 분석: 11번 전적 정보 제한",
   "2. 배당 수집 시작 19:16:07",
   "5. 종합 신뢰도 0점(하) 판정",
   "6. BMED 전략: 보험형 적용",
@@ -115,23 +115,21 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 105,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "전적보조_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 105,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "전적유력마 1번 적중"
+  "reason": "전적유력마 1번 적중 · 제거 적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -146,7 +144,7 @@
   },
   "validCount": 1
  },
- "pnl": -1000,
+ "pnl": 2300,
  "stake": 1000,
- "generated_at": "2026-07-25 19:23:08"
+ "generated_at": "2026-07-29 05:19:58"
 }

@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_25_코치_4경주",
- "raceKey": "코치 4경주",
+ "raceKey": "2026-07-25 코치 4경주",
  "date": "2026-07-25",
  "sport": "horse",
  "category": "japan_local",
@@ -16,10 +16,10 @@
   "3rd": 7
  },
  "payouts": {
-  "quinella": 11.9,
-  "trifecta": 0.0
+  "quinella": 11.5,
+  "trifecta": 21.5
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {
   "quinella": {
    "5+6": 2.8,
@@ -2900,7 +2900,7 @@
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
   "signal_quality": "하",
-  "confidence": 10.8,
+  "confidence": 20.0,
   "inverse": true
  },
  "result_analysis": {
@@ -2916,13 +2916,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 11.9,
-  "trifecta_odds": null,
+  "quinella_odds": 11.5,
+  "trifecta_odds": 21.5,
   "actual_return": null,
-  "profit": 10900
+  "profit": 10500
  },
- "memo": null,
- "saved_at": "2026-07-25 17:57:07",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:19)",
+ "saved_at": "2026-07-29 05:19:52",
  "validation": {
   "ok": true,
   "errors": []

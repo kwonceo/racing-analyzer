@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_25_코치_2경주",
- "raceKey": "코치 2경주",
+ "raceKey": "2026-07-25 코치 2경주",
  "date": "2026-07-25",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 11,
+ "horse_count": null,
  "result": {
   "1st": 11,
   "2nd": 9,
@@ -17,9 +17,9 @@
  },
  "payouts": {
   "quinella": 4.2,
-  "trifecta": 0.0
+  "trifecta": 14.0
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {
   "quinella": {
    "5+9": 2.9,
@@ -3462,17 +3462,17 @@
  "prediction": {
   "candidates": [
    4,
+   5,
    7,
    8,
    9,
-   5,
    10,
    11,
    6,
-   1,
-   2
+   1
   ],
   "eliminated": [
+   2,
    3
   ],
   "recommend_main": "5+9",
@@ -3496,12 +3496,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 4.2,
-  "trifecta_odds": null,
+  "trifecta_odds": 14.0,
   "actual_return": null,
   "profit": 3200
  },
- "memo": null,
- "saved_at": "2026-07-25 17:00:49",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:19)",
+ "saved_at": "2026-07-29 05:19:47",
  "validation": {
   "ok": true,
   "errors": []

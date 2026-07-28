@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_25_코치_7경주",
- "raceKey": "코치 7경주",
+ "raceKey": "2026-07-25 코치 7경주",
  "date": "2026-07-25",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 11,
+ "horse_count": null,
  "result": {
   "1st": 11,
   "2nd": 6,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 1.6,
-  "trifecta": 0.0
+  "trifecta": 3.3
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -178,11 +178,12 @@
    12,
    3,
    5,
-   8,
+   8
+  ],
+  "eliminated": [
    2,
    7
   ],
-  "eliminated": [],
   "recommend_main": "6+11",
   "recommend_sub": null,
   "strategy": "BMED_보험형",
@@ -193,7 +194,7 @@
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "전적유력마 1번 적중",
+  "hit_reason": "전적유력마 1번 적중 · 제거 적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
@@ -204,12 +205,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 1.6,
-  "trifecta_odds": null,
+  "trifecta_odds": 3.3,
   "actual_return": null,
-  "profit": -1000
+  "profit": 2300
  },
- "memo": null,
- "saved_at": "2026-07-25 19:23:08",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:19)",
+ "saved_at": "2026-07-29 05:19:58",
  "validation": {
   "ok": true,
   "errors": []
