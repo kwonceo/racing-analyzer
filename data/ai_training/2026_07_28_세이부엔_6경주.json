@@ -8,95 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "小野 裕次",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 90.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "原 真司",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 87.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "矢島 一弥",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 87.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "矢口啓一郎",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 91.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "平田 徹",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 87.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "勝俣 亮",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 81.7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "岩原 健馬",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 80.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -684,7 +599,7 @@
   "2nd": 4,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 4.2,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "역배열 감지말 2번 입상"
@@ -693,7 +608,7 @@
   "quinella_hit": false,
   "winner": 2,
   "second": 4,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -705,14 +620,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-28 22:36:04",
+ "saved_at": "2026-07-29 01:57:37",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
