@@ -1,6 +1,6 @@
 {
  "race": "도요하시 2경주",
- "raceKey": "도요하시 2경주",
+ "raceKey": "2026-07-27 도요하시 2경주",
  "date": "2026-07-27",
  "result": {
   "1st": 2,
@@ -9,7 +9,7 @@
   "4th": null
  },
  "hit": true,
- "hit_type": "복승 보조(삼복승 구성)",
+ "hit_type": null,
  "odds": "미상",
  "win_odds": 0,
  "why_recommended": {
@@ -197,9 +197,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 93.1,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_7": {
    "horse": 7,
@@ -385,7 +385,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.617,
-   "record_score": 93.5,
+   "record_score": null,
    "confidence": 56.0,
    "reason": "쌍승역전"
   },
@@ -573,9 +573,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 90.3,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_4": {
    "horse": 4,
@@ -761,7 +761,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.844,
-   "record_score": 129.0,
+   "record_score": null,
    "confidence": 20.9,
    "reason": "쌍승역전"
   }
@@ -769,11 +769,11 @@
  "recommended_horses": [
   4,
   7,
-  2,
-  5
+  5,
+  2
  ],
  "recommendation_process": [
-  "1. 전적 분석: 2번 93.1점",
+  "1. 전적 분석: 2번 전적 정보 제한",
   "2. 배당 수집 시작 11:14:55",
   "4. 쌍승 역전: 6→2(36.0) < 2→6(205.5) → 6번 실질 상위 신호",
   "4. 쌍승 역전: 1→2(43.0) < 2→1(73.1) → 1번 실질 상위 신호",
@@ -786,7 +786,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 93.1,
+  "record_score": null,
   "total": 0.0,
   "grade": "하"
  },
@@ -796,7 +796,7 @@
  ],
  "combo_tags": true,
  "hit_basis": {
-  "formScore": 93.1,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -876,5 +876,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-27 11:56:15"
+ "generated_at": "2026-07-29 05:39:01"
 }
