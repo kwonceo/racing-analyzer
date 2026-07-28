@@ -1,6 +1,6 @@
 {
  "race": "야히코 1경주",
- "raceKey": "야히코 1경주",
+ "raceKey": "2026-07-19 야히코 1경주",
  "date": "2026-07-19",
  "result": {
   "1st": 7,
@@ -48,40 +48,8 @@
   "signal_4": {
    "horse": 4,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 3,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_1": {
-   "horse": 1,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_5": {
-   "horse": 5,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
@@ -94,14 +62,9 @@
    "reason": "일반"
   }
  },
- "recommended_horses": [
-  1,
-  4,
-  5
- ],
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 7번 전적 정보 제한",
-  "2. 배당 수집 시작 10:49:47",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -120,9 +83,7 @@
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
-  "inverseHorses": [
-   10
-  ],
+  "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
   "reason": "추천 미적중"
@@ -138,9 +99,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 1
+  "validCount": 0
  },
- "pnl": -1000,
+ "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-19 12:35:08"
+ "generated_at": "2026-07-29 04:12:20"
 }

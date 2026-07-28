@@ -13,61 +13,14 @@
  },
  "horses": [],
  "odds_features": {
-  "timeline": [
-   {
-    "time": "10:49:47",
-    "quinella": {
-     "1+10": 3.3,
-     "1+4": 5.0,
-     "1+5": 11.2,
-     "1+9": 11.5,
-     "1+8": 15.1,
-     "1+2": 18.3,
-     "4+10": 23.9,
-     "1+7": 24.7,
-     "5+10": 35.4,
-     "9+10": 45.9,
-     "8+10": 47.6,
-     "1+6": 48.4,
-     "1+3": 54.4,
-     "4+9": 57.1,
-     "4+5": 58.7,
-     "4+8": 71.5,
-     "2+9": 76.1,
-     "5+9": 79.9,
-     "2+3": 100.0,
-     "2+4": 100.0,
-     "2+5": 100.0,
-     "2+6": 100.0,
-     "2+7": 100.0,
-     "2+8": 100.0,
-     "2+10": 100.0,
-     "3+4": 100.0,
-     "3+5": 100.0,
-     "3+6": 100.0,
-     "3+7": 100.0,
-     "3+8": 100.0,
-     "3+9": 100.0,
-     "3+10": 100.0,
-     "4+6": 100.0,
-     "4+7": 100.0,
-     "5+6": 100.0,
-     "5+7": 100.0,
-     "5+8": 100.0,
-     "7+8": 100.0,
-     "7+9": 100.0,
-     "7+10": 100.0,
-     "8+9": 100.0
-    }
-   }
-  ],
+  "timeline": [],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
-  "quinella_mismatch": 1.515,
-  "refund_rate": 0.937,
+  "quinella_mismatch": null,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -79,22 +32,11 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7,
-   8,
-   9,
-   10
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend": null,
   "strategy": null,
-  "confidence": 9.8,
+  "confidence": 0,
   "signal_quality": null
  },
  "result": {
@@ -102,7 +44,7 @@
   "2nd": 3,
   "3rd": 4,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 58.6,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -111,7 +53,7 @@
   "quinella_hit": false,
   "winner": 7,
   "second": 3,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -123,7 +65,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-19 12:35:09",
+ "saved_at": "2026-07-29 04:12:20",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -131,8 +73,8 @@
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
-   "전적 데이터",
-   "확정 배당"
+   "이상감지 결과",
+   "전적 데이터"
   ],
   "errors": []
  }
