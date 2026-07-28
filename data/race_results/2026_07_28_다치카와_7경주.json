@@ -16,7 +16,8 @@
   "3rd": 5
  },
  "payouts": {
-  "quinella": 1.2
+  "quinella": 1.0,
+  "trifecta": 1.2
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -1614,13 +1615,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 1.2,
-  "trifecta_odds": null,
+  "quinella_odds": 1.0,
+  "trifecta_odds": 1.2,
   "actual_return": null,
   "profit": -1000
  },
- "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:08)",
- "saved_at": "2026-07-29 02:08:18",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:43)",
+ "saved_at": "2026-07-29 02:43:56",
  "validation": {
   "ok": true,
   "errors": []
