@@ -1,7 +1,9 @@
 {
  "race_id": "2026_07_13_기시와다_8경주",
- "raceKey": "기시와다 8경주",
+ "raceKey": "2026-07-13 기시와다 8경주",
  "date": "2026-07-13",
+ "sport": "cycle",
+ "category": "cycle",
  "track": "기시와다",
  "round": 8,
  "distance": null,
@@ -13,6 +15,11 @@
   "2nd": 4,
   "3rd": 6
  },
+ "payouts": {
+  "quinella": 1.9,
+  "trifecta": 5.4
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -27,10 +34,10 @@
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": true,
+  "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -39,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 1.9,
+  "trifecta_odds": 5.4,
   "actual_return": null,
-  "profit": 900
+  "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-13 21:12:41",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 03:18)",
+ "saved_at": "2026-07-29 03:18:46",
  "validation": {
   "ok": true,
   "errors": []
