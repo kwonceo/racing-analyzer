@@ -1,6 +1,6 @@
 {
  "race": "코치 10경주",
- "raceKey": "코치 10경주",
+ "raceKey": "2026-07-18 코치 10경주",
  "date": "2026-07-18",
  "result": {
   "1st": 1,
@@ -8,15 +8,15 @@
   "3rd": 3,
   "4th": null
  },
- "hit": false,
+ "hit": true,
  "hit_type": null,
- "odds": "미상",
- "win_odds": 0,
+ "odds": "고배당",
+ "win_odds": 145.6,
  "why_recommended": {
   "signal_1": {
    "horse": 1,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -25,7 +25,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 38.8,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -41,7 +41,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 45,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
@@ -57,52 +57,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 8.8,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
-  },
-  "signal_8": {
-   "horse": 8,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 110,
-   "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_7": {
-   "horse": 7,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": true,
-   "reversal_ratio": 0.715,
-   "record_score": 35.8,
-   "confidence": 16.2,
-   "reason": "쌍승역전"
   }
  },
- "recommended_horses": [
-  8,
-  1,
-  7
- ],
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 1번 38.8점",
-  "2. 배당 수집 시작 19:52:27",
-  "4. 쌍승 역전: 7→1(11.8) < 1→7(16.5) → 7번 실질 상위 신호",
+  "1. 전적 분석: 1번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -110,23 +72,21 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 38.8,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 38.8,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
-  "inverse": true,
-  "inverseHorses": [
-   7
-  ],
+  "inverse": false,
+  "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "전적유력마 1번 적중"
+  "reason": "적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -136,12 +96,12 @@
   "finalSignal": null,
   "finalConfirmed": false,
   "excluded": {
-   "after_close": 3,
+   "after_close": 0,
    "next_race": 0
   },
-  "validCount": 23
+  "validCount": 0
  },
- "pnl": -1000,
+ "pnl": 144600,
  "stake": 1000,
- "generated_at": "2026-07-18 20:29:43"
+ "generated_at": "2026-07-29 04:05:35"
 }

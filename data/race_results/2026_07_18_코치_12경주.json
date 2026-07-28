@@ -1,68 +1,35 @@
 {
  "race_id": "2026_07_18_코치_12경주",
- "raceKey": "코치 12경주",
+ "raceKey": "2026-07-18 코치 12경주",
  "date": "2026-07-18",
+ "sport": "horse",
+ "category": "japan_local",
  "track": "코치",
  "round": 12,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 10,
+ "horse_count": null,
  "result": {
   "1st": 8,
   "2nd": 6,
   "3rd": 12
  },
- "odds_at_start": {
-  "quinella": {},
-  "exacta": {}
+ "payouts": {
+  "quinella": 18.8,
+  "trifecta": 196.8
  },
- "odds_timeline": [
-  {
-   "time": "21:08:49",
-   "minutes_before": null,
-   "quinella": {},
-   "exacta": {}
-  },
-  {
-   "time": "21:08:49",
-   "minutes_before": null,
-   "quinella": {},
-   "exacta": {}
-  },
-  {
-   "time": "21:09:49",
-   "minutes_before": null,
-   "quinella": {},
-   "exacta": {}
-  },
-  {
-   "time": "21:09:49",
-   "minutes_before": null,
-   "quinella": {},
-   "exacta": {}
-  }
- ],
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   4,
-   5,
-   7,
-   9,
-   2,
-   3,
-   10
-  ],
-  "eliminated": [
-   6,
-   8
-  ],
-  "recommend_main": "1+5",
+  "candidates": [],
+  "eliminated": [],
+  "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
-  "signal_quality": "하",
+  "signal_quality": null,
   "confidence": 0,
   "inverse": false
  },
@@ -79,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 18.8,
+  "trifecta_odds": 196.8,
   "actual_return": null,
-  "profit": -1000
+  "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-18 21:10:00",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:05)",
+ "saved_at": "2026-07-29 04:05:39",
  "validation": {
   "ok": true,
   "errors": []
