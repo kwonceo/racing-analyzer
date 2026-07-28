@@ -1,7 +1,9 @@
 {
  "race_id": "2026_07_13_구마모토_6경주",
- "raceKey": "구마모토 6경주",
+ "raceKey": "2026-07-13 구마모토 6경주",
  "date": "2026-07-13",
+ "sport": "cycle",
+ "category": "cycle",
  "track": "구마모토",
  "round": 6,
  "distance": null,
@@ -13,6 +15,11 @@
   "2nd": 4,
   "3rd": 1
  },
+ "payouts": {
+  "quinella": 28.0,
+  "trifecta": 10.9
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -29,8 +36,8 @@
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -39,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 28.0,
+  "trifecta_odds": 10.9,
   "actual_return": null,
-  "profit": -1000
+  "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-13 21:12:32",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 03:17)",
+ "saved_at": "2026-07-29 03:17:47",
  "validation": {
   "ok": true,
   "errors": []
