@@ -13,48 +13,14 @@
  },
  "horses": [],
  "odds_features": {
-  "timeline": [
-   {
-    "time": "18:10:46",
-    "quinella": {
-     "1+3": 1.5,
-     "3+6": 9.4,
-     "2+3": 11.0,
-     "3+9": 11.3,
-     "3+8": 12.4,
-     "1+6": 20.5,
-     "1+2": 28.8,
-     "1+8": 29.6,
-     "1+9": 30.3,
-     "3+7": 45.8,
-     "3+5": 47.5,
-     "2+6": 65.4,
-     "6+9": 67.7,
-     "8+9": 75.3,
-     "6+8": 80.5,
-     "2+9": 85.8,
-     "2+8": 87.8,
-     "1+7": 107.4,
-     "1+5": 152.7,
-     "5+6": 231.8,
-     "2+7": 251.7,
-     "6+7": 259.1,
-     "7+8": 264.3,
-     "2+5": 278.2,
-     "5+9": 287.3,
-     "5+8": 293.6,
-     "7+9": 362.0,
-     "5+7": 463.7
-    }
-   }
-  ],
+  "timeline": [],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": null,
-  "refund_rate": 0.74,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -66,16 +32,7 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   6,
-   7,
-   8,
-   9,
-   5
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend": null,
   "strategy": null,
@@ -87,16 +44,16 @@
   "2nd": 3,
   "3rd": 1,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 7.6,
   "exacta_odds": null,
-  "hit": false,
-  "hit_pattern": null
+  "hit": true,
+  "hit_pattern": "적중"
  },
  "labels": {
-  "quinella_hit": false,
+  "quinella_hit": true,
   "winner": 5,
   "second": 3,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -108,17 +65,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-12 21:24:49",
+ "saved_at": "2026-07-29 03:15:34",
  "quality": {
-  "score": 20,
+  "score": 40,
   "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "전적 데이터",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

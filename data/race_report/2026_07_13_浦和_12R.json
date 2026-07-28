@@ -16,7 +16,7 @@
   "signal_8": {
    "horse": 8,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -60,48 +60,11 @@
    "record_score": null,
    "confidence": null,
    "reason": "일반"
-  },
-  "signal_2": {
-   "horse": 2,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_4": {
-   "horse": 4,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
   }
  },
- "recommended_horses": [
-  8,
-  2,
-  4
- ],
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 8번 전적 정보 제한",
-  "2. 배당 수집 시작 19:58:51",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -136,9 +99,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 43
+  "validCount": 0
  },
- "pnl": -1000,
+ "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-13 21:11:02"
+ "generated_at": "2026-07-29 03:15:41"
 }
