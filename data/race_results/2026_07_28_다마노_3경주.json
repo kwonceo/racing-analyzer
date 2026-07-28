@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_다마노_3경주",
- "raceKey": "다마노 3경주",
+ "raceKey": "2026-07-28 다마노 3경주",
  "date": "2026-07-28",
  "sport": "cycle",
  "category": "cycle",
@@ -9,15 +9,14 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 1,
   "2nd": 4,
   "3rd": 6
  },
  "payouts": {
-  "quinella": 15.3,
-  "trifecta": 0.0
+  "quinella": 15.3
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -1582,7 +1581,19 @@
    }
   }
  ],
- "anomalies": [],
+ "anomalies": [
+  {
+   "time": "16:43:22",
+   "type": "급락",
+   "combo": [
+    3,
+    6
+   ],
+   "horse": 3,
+   "drop_rate": -15.7,
+   "excess_drop": 0.0
+  }
+ ],
  "prediction": {
   "candidates": [
    1,
@@ -1594,20 +1605,22 @@
    6
   ],
   "eliminated": [],
-  "recommend_main": "1+4",
+  "recommend_main": "2+7",
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
   "signal_quality": "하",
-  "confidence": 35.0,
+  "confidence": 39.4,
   "inverse": true
  },
  "result_analysis": {
   "main_hit": true,
   "sub_hit": false,
-  "hit_reason": "전적유력마 1번 적중 · 역배열 감지말 4번 입상",
+  "hit_reason": "전적유력마 1번 적중 · 3+6 복승 급락(-15.7%) → 6번 입상 적중 · 역배열 감지말 4·6번 입상",
   "miss_reason": null,
-  "pattern_tags": [],
-  "anomaly_correct": false,
+  "pattern_tags": [
+   "복승불일치"
+  ],
+  "anomaly_correct": true,
   "form_pick_hit": true
  },
  "investment": {
@@ -1619,8 +1632,8 @@
   "actual_return": null,
   "profit": 14300
  },
- "memo": null,
- "saved_at": "2026-07-28 16:58:21",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:18)",
+ "saved_at": "2026-07-29 02:18:26",
  "validation": {
   "ok": true,
   "errors": []

@@ -8,95 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 3,
-   "name": "近藤 範昌",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 110.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "成海 大聖",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 80.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "大崎 智久",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 96.7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "林 成人",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 101.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "山田 武",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 74.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "池田 充槻",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 73.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "黒瀬 浩一",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 87.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -646,9 +561,15 @@
     }
    }
   ],
-  "drop_rates": {},
+  "drop_rates": {
+   "3": -15.7,
+   "6": -15.7
+  },
   "excess_drops": {},
-  "drop_speed": {},
+  "drop_speed": {
+   "3": -15.7,
+   "6": -15.7
+  },
   "exacta_reversal": true,
   "reversal_ratio": 0.261,
   "quinella_mismatch": 1.426,
@@ -674,9 +595,9 @@
    6
   ],
   "eliminated": [],
-  "recommend": "1+4",
+  "recommend": "2+7",
   "strategy": "BMED_역배열형",
-  "confidence": 35.0,
+  "confidence": 39.4,
   "signal_quality": "하"
  },
  "result": {
@@ -684,16 +605,16 @@
   "2nd": 4,
   "3rd": 6,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 15.3,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "전적유력마 1번 적중 · 역배열 감지말 4번 입상"
+  "hit_pattern": "전적유력마 1번 적중 · 3+6 복승 급락(-15.7%) → 6번 입상 적중 · 역배열 감지말 4·6번 입상"
  },
  "labels": {
   "quinella_hit": true,
   "winner": 1,
   "second": 4,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -705,14 +626,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-28 16:58:21",
+ "saved_at": "2026-07-29 02:18:26",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
