@@ -957,7 +957,7 @@
   "2nd": 3,
   "3rd": 9,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 1.4,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -966,7 +966,7 @@
   "quinella_hit": false,
   "winner": 5,
   "second": 3,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -978,15 +978,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-25 13:28:19",
+ "saved_at": "2026-07-29 05:09:26",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
-  "complete": false,
-  "ai_ready": false,
+  "score": 80,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
   "missing": [
-   "전적 데이터",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
