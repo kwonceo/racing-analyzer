@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_24_와카야마_1경주",
- "raceKey": "와카야마 1경주",
+ "raceKey": "2026-07-24 와카야마 1경주",
  "date": "2026-07-24",
  "sport": "cycle",
  "category": "cycle",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 5,
   "2nd": 6,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 22.8,
-  "trifecta": 0.0
+  "trifecta": 28.1
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -81,11 +81,11 @@
   "candidates": [
    1,
    2,
-   5,
-   7,
    3,
    4,
-   6
+   5,
+   6,
+   7
   ],
   "eliminated": [],
   "recommend_main": "3+5",
@@ -109,12 +109,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 22.8,
-  "trifecta_odds": null,
+  "trifecta_odds": 28.1,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-24 15:50:11",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:05)",
+ "saved_at": "2026-07-29 05:05:15",
  "validation": {
   "ok": true,
   "errors": []

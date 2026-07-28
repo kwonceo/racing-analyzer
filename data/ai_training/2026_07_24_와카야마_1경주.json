@@ -8,107 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "경복포르",
-   "jockey": "재이",
-   "jockey_winrate": null,
-   "recent_results": [
-    1
-   ],
-   "record_score": 130,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "푸른신기",
-   "jockey": "경민",
-   "jockey_winrate": null,
-   "recent_results": [
-    2
-   ],
-   "record_score": 105,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "샤이니코",
-   "jockey": "정혁",
-   "jockey_winrate": null,
-   "recent_results": [
-    4
-   ],
-   "record_score": 45,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "원플러스",
-   "jockey": "인권",
-   "jockey_winrate": null,
-   "recent_results": [
-    8
-   ],
-   "record_score": 20,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "스마트유",
-   "jockey": "강주",
-   "jockey_winrate": null,
-   "recent_results": [
-    7
-   ],
-   "record_score": 20,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "억새",
-   "jockey": "형철",
-   "jockey_winrate": null,
-   "recent_results": [
-    6
-   ],
-   "record_score": 20,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "그린다이",
-   "jockey": "윤섭",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -159,11 +62,11 @@
   "candidates": [
    1,
    2,
-   5,
-   7,
    3,
    4,
-   6
+   5,
+   6,
+   7
   ],
   "eliminated": [],
   "recommend": "3+5",
@@ -176,7 +79,7 @@
   "2nd": 6,
   "3rd": 1,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 22.8,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -185,7 +88,7 @@
   "quinella_hit": false,
   "winner": 5,
   "second": 6,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -197,7 +100,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-24 15:50:11",
+ "saved_at": "2026-07-29 05:05:15",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -206,7 +109,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
