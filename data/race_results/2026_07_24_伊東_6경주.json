@@ -1,15 +1,15 @@
 {
  "race_id": "2026_07_24_伊東_6경주",
- "raceKey": "伊東 6경주",
+ "raceKey": "2026-07-24 伊東 6경주",
  "date": "2026-07-24",
  "sport": "cycle",
  "category": "cycle",
- "track": "伊東",
+ "track": "이토",
  "round": 6,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 2,
   "2nd": 1,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 1.4,
-  "trifecta": 0.0
+  "trifecta": 2.4
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -1615,12 +1615,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 1.4,
-  "trifecta_odds": null,
+  "trifecta_odds": 2.4,
   "actual_return": null,
-  "profit": -1000
+  "profit": 1400
  },
- "memo": null,
- "saved_at": "2026-07-24 23:28:45",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:01)",
+ "saved_at": "2026-07-29 05:01:29",
  "validation": {
   "ok": true,
   "errors": []
