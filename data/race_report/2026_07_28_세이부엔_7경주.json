@@ -1,6 +1,6 @@
 {
  "race": "세이부엔 7경주",
- "raceKey": "세이부엔 7경주",
+ "raceKey": "2026-07-28 세이부엔 7경주",
  "date": "2026-07-28",
  "result": {
   "1st": 1,
@@ -197,9 +197,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 82.2,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
@@ -385,9 +385,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 86.0,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_5": {
    "horse": 5,
@@ -573,7 +573,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.44,
-   "record_score": 74.4,
+   "record_score": null,
    "confidence": 0.0,
    "reason": "쌍승역전"
   }
@@ -584,7 +584,7 @@
   5
  ],
  "recommendation_process": [
-  "1. 전적 분석: 1번 82.2점",
+  "1. 전적 분석: 1번 전적 정보 제한",
   "2. 배당 수집 시작 22:30:35",
   "4. 쌍승 역전: 6→2(15.7) < 2→6(117.7) → 6번 실질 상위 신호",
   "4. 쌍승 역전: 7→2(73.2) < 2→7(245.3) → 7번 실질 상위 신호",
@@ -597,7 +597,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 82.2,
+  "record_score": null,
   "total": 0.0,
   "grade": "하"
  },
@@ -606,7 +606,7 @@
  ],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 82.2,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -716,5 +716,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-28 22:57:07"
+ "generated_at": "2026-07-29 01:57:49"
 }
