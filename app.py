@@ -7982,6 +7982,17 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                         _third3.append((_n, "유력마"))
                     if len(_third3) >= 2:
                         break
+            # [보강A·전적A 1위 (2026-07-28 나고야 4R)] 제3마 후보에 '전적 A등급 1위'를 뒤에 덧붙인다.
+            #   기존 우선순위(확신도1위→복병→유력마)는 그대로 두고 후보만 추가 — 기존 편성 결과 불변.
+            #   배경: 나고야 4R 정답 10번은 formTopA 1위였는데 후보 목록에 아예 없어 삼복승이 만들어지지 못했다.
+            _fa1 = None
+            try:
+                _fa1 = int((cp.get("formTopA") or [None])[0])
+            except (TypeError, ValueError, IndexError):
+                _fa1 = None
+            if (_fa1 is not None and _fa1 not in (_q1, _q2)
+                    and _fa1 not in [t[0] for t in _third3] and (not vs or _fa1 in vs)):
+                _third3.append((_fa1, "전적A1위"))
             # [편성·요청1] 삼복승 메인·보험(복승메인 2두 앵커)을 final_t 맨 앞에 우선 배치
             _anchor_tris = []
             for _i3, (_t3, _lab3) in enumerate(_third3[:2]):
@@ -7990,6 +8001,27 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                     _anchor_tris.append({"combo": _cc3, "odds": None, "estimated": True,
                                          "reason": ("삼복승 메인(복승1·2+%s)" if _i3 == 0 else "삼복승 보험(복승1·2+%s)") % _lab3,
                                          "qMainAnchor": True})
+            # [보강B·복승 2위 앵커 (2026-07-28 나고야 4R)] 지금까지 앵커는 '복승 1위' 2두로만 만들어져,
+            #   복승 2위를 축으로 한 삼복승이 단 하나도 생성되지 않았다(나고야 4R: 복승 4+7/1+7/1+4 중
+            #   삼복승 5개가 전부 4+7 기반 → 정답 1+7+10 생성 불가·미적중).
+            #   → 복승 2위 2두 + 제3마 1개로 앵커 1건만 추가한다. 제3마는 1위 앵커와 겹치지 않도록
+            #     '전적A1위'를 우선 사용(근거 분산), 없으면 _third3 첫 후보로 폴백.
+            try:
+                _q2c = [int(x) for x in ((final_q[1].get("combo") or []) if len(final_q) > 1 else [])][:2]
+                if len(_q2c) == 2:
+                    _p1, _p2 = _q2c[0], _q2c[1]
+                    _cand2 = [c for c in ([_fa1] if _fa1 is not None else []) + [t[0] for t in _third3]
+                              if c is not None and c not in (_p1, _p2) and (not vs or c in vs)]
+                    if _cand2:
+                        _t3b = _cand2[0]
+                        _lab2 = "전적A1위" if _t3b == _fa1 else next((l for n, l in _third3 if n == _t3b), "유력마")
+                        _cc3b = sorted([_p1, _p2, _t3b])
+                        if _vtri(_cc3b) and _cc3b not in [a["combo"] for a in _anchor_tris]:
+                            _anchor_tris.append({"combo": _cc3b, "odds": None, "estimated": True,
+                                                 "reason": "삼복승 보험(복승2위 축+%s)" % _lab2,
+                                                 "qMainAnchor": True, "q2Anchor": True})
+            except Exception as _q2e:
+                print("[삼복승 복승2위 앵커] 생성 실패(무시):", _q2e)
             # [검증+병합·요청2] 앵커 먼저, 그다음 기존 final_t(복승메인 말 0개는 복승1위 주입 대체)
             _seen3, _merged, _replaced = set(), [], 0
             for t in _anchor_tris + final_t:
@@ -8009,7 +8041,9 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 _seen3.add(_key)
                 _merged.append(t)
             if _merged:
-                final_t = _merged[:5]                          # 앵커2 + 기존보험 여유(과다 방지·기존 개수 보존)
+                # [상한 조정 (2026-07-28)] 앵커가 2 → 3(복승2위 축 추가)로 늘어난 만큼 상한도 5 → 7.
+                #   그대로 5로 두면 신규 앵커가 기존 조합을 '밀어내' 사실상 삭제가 된다(무삭제 원칙 위배).
+                final_t = _merged[:7]                          # 앵커3 + 기존보험 4 (과다 방지·기존 개수 보존)
             qmain_check = {"qMain": [_q1, _q2], "replaced": _replaced,
                            "allInclude": all(len({int(x) for x in (t.get("combo") or [])} & {_q1, _q2}) >= 1 for t in final_t)}
     except Exception as _qte:
