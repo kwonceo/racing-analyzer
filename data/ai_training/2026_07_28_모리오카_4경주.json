@@ -1,0 +1,211 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_28_모리오카_4경주",
+ "race_info": {
+  "date": "2026-07-28",
+  "track": "모리오카",
+  "round": 4,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 6,
+   "name": "ステルヴィオ",
+   "jockey": "大坪慎",
+   "jockey_winrate": 43.3,
+   "recent_results": [
+    3,
+    9,
+    6
+   ],
+   "record_score": 42.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "モーニン",
+   "jockey": "山本政",
+   "jockey_winrate": 43.3,
+   "recent_results": [
+    7
+   ],
+   "record_score": 23.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "オメガパフューム",
+   "jockey": "鈴木祐",
+   "jockey_winrate": 30.0,
+   "recent_results": [
+    5,
+    6,
+    4,
+    6
+   ],
+   "record_score": 15.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "エピカリス",
+   "jockey": "菅原辰",
+   "jockey_winrate": 33.3,
+   "recent_results": [
+    6
+   ],
+   "record_score": 18.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "ホークビル",
+   "jockey": "高橋悠",
+   "jockey_winrate": 40.0,
+   "recent_results": [
+    8
+   ],
+   "record_score": 23.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "エピカリス",
+   "jockey": "小林凌",
+   "jockey_winrate": 20.0,
+   "recent_results": [
+    12,
+    10,
+    7,
+    3,
+    7
+   ],
+   "record_score": 2.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "エーシンシャラク",
+   "jockey": "山本紀",
+   "jockey_winrate": 23.3,
+   "recent_results": [
+    5
+   ],
+   "record_score": 10,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "ゴールドドリーム",
+   "jockey": "井上瑛",
+   "jockey_winrate": 20.8,
+   "recent_results": [
+    8,
+    5
+   ],
+   "record_score": 0.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": 13.281,
+  "refund_rate": 0.864,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 25.0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 5,
+  "3rd": 8,
+  "4th": null,
+  "quinella_odds": 6.7,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 2,
+  "second": 5,
+  "odds_range": "중배당"
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-28 14:00:21",
+ "quality": {
+  "score": 80,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
+  "missing": [
+   "배당 타임라인(2회+)"
+  ],
+  "errors": []
+ }
+}
