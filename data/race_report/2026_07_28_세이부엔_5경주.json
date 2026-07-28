@@ -1,6 +1,6 @@
 {
  "race": "세이부엔 5경주",
- "raceKey": "세이부엔 5경주",
+ "raceKey": "2026-07-28 세이부엔 5경주",
  "date": "2026-07-28",
  "result": {
   "1st": 3,
@@ -16,7 +16,7 @@
   "signal_3": {
    "horse": 3,
    "placed": true,
-   "recommended": false,
+   "recommended": true,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -197,9 +197,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 93.5,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_5": {
    "horse": 5,
@@ -213,7 +213,7 @@
    "drop_timeline": [],
    "exacta_reversal": true,
    "reversal_ratio": 0.416,
-   "record_score": 88.4,
+   "record_score": null,
    "confidence": 19.0,
    "reason": "쌍승역전"
   },
@@ -229,9 +229,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 84.0,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_1": {
    "horse": 1,
@@ -417,9 +417,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 94.3,
+   "record_score": null,
    "confidence": 28.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_4": {
    "horse": 4,
@@ -605,7 +605,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.475,
-   "record_score": 88.6,
+   "record_score": null,
    "confidence": 72.5,
    "reason": "쌍승역전"
   },
@@ -793,18 +793,19 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 86.0,
+   "record_score": null,
    "confidence": 16.0,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
   1,
   4,
+  3,
   2
  ],
  "recommendation_process": [
-  "1. 전적 분석: 3번 93.5점",
+  "1. 전적 분석: 3번 전적 정보 제한",
   "2. 배당 수집 시작 21:50:29",
   "4. 쌍승 역전: 6→2(13.8) < 2→6(59.0) → 6번 실질 상위 신호",
   "4. 쌍승 역전: 5→2(38.3) < 2→5(92.0) → 5번 실질 상위 신호",
@@ -817,7 +818,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 93.5,
+  "record_score": null,
   "total": 0.0,
   "grade": "하"
  },
@@ -826,7 +827,7 @@
  ],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 93.5,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -922,5 +923,5 @@
  },
  "pnl": 20000,
  "stake": 1000,
- "generated_at": "2026-07-28 22:15:00"
+ "generated_at": "2026-07-29 02:25:15"
 }
