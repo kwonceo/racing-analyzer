@@ -8,219 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 12,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "ノーブルミッション",
-   "jockey": "高橋洸",
-   "jockey_winrate": 39.1,
-   "recent_results": [
-    7,
-    3,
-    8,
-    3,
-    2
-   ],
-   "record_score": 74.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ディーマジェスティ",
-   "jockey": "板野央",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    9,
-    6,
-    6,
-    3,
-    3
-   ],
-   "record_score": 35.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "アジアエクスプレス",
-   "jockey": "山本太",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    12,
-    11,
-    11,
-    8,
-    10
-   ],
-   "record_score": 40.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "マクフィ",
-   "jockey": "山田雄",
-   "jockey_winrate": 8.3,
-   "recent_results": [
-    3,
-    6,
-    5,
-    6,
-    3
-   ],
-   "record_score": 37.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "タニノギムレット",
-   "jockey": "川原正",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    8,
-    10,
-    10,
-    5,
-    5
-   ],
-   "record_score": 25.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ベルシャザール",
-   "jockey": "佐々世",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    12,
-    11,
-    11,
-    12,
-    12
-   ],
-   "record_score": 28.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "フェノーメノ",
-   "jockey": "小牧太",
-   "jockey_winrate": 46.7,
-   "recent_results": [
-    6,
-    6,
-    9,
-    2,
-    6
-   ],
-   "record_score": 18.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "ウインバリアシオン",
-   "jockey": "塩津璃",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    8,
-    9,
-    10,
-    10
-   ],
-   "record_score": 15.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 11,
-   "name": "エイシンヒカリ",
-   "jockey": "大山真",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    9,
-    7,
-    8,
-    9
-   ],
-   "record_score": 20.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "アルアイン",
-   "jockey": "山本咲",
-   "jockey_winrate": 50.0,
-   "recent_results": [],
-   "record_score": 10.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "シュヴァルグラン",
-   "jockey": "渡瀬和",
-   "jockey_winrate": 7.1,
-   "recent_results": [
-    9,
-    10,
-    8,
-    9,
-    6
-   ],
-   "record_score": -7.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 12,
-   "name": "エピファネイア",
-   "jockey": "竹村達",
-   "jockey_winrate": 6.7,
-   "recent_results": [
-    9,
-    5,
-    8,
-    5,
-    9
-   ],
-   "record_score": -5.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -314,17 +105,17 @@
  },
  "prediction": {
   "candidates": [
-   2,
-   10,
-   7,
    1,
+   2,
    3,
    4,
    5,
    6,
+   7,
+   8,
    9,
-   11,
-   8
+   10,
+   11
   ],
   "eliminated": [
    12
@@ -339,7 +130,7 @@
   "2nd": 10,
   "3rd": 3,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 7.8,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -348,7 +139,7 @@
   "quinella_hit": false,
   "winner": 4,
   "second": 10,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -360,7 +151,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-23 11:07:56",
+ "saved_at": "2026-07-29 04:55:12",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -369,7 +160,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

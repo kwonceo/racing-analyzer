@@ -8,190 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 10,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 8,
-   "name": "パリパリ",
-   "jockey": "松木大（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    1,
-    6,
-    5,
-    2
-   ],
-   "record_score": 83.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ワイドオルデン",
-   "jockey": "小谷哲（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    3,
-    1,
-    2,
-    2
-   ],
-   "record_score": 52.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "ユナピンクゴールド",
-   "jockey": "大山真（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    3,
-    3,
-    4,
-    4,
-    4
-   ],
-   "record_score": 52.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ピックプリンサ",
-   "jockey": "杉浦健（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    8,
-    1,
-    1,
-    4,
-    6
-   ],
-   "record_score": 51.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "デルタフォー",
-   "jockey": "小牧太（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    4,
-    2,
-    4,
-    2
-   ],
-   "record_score": 37.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "コスモカピタン",
-   "jockey": "下原理（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    1,
-    5,
-    4,
-    1
-   ],
-   "record_score": 36.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "メイショウハチマキ",
-   "jockey": "吉村智（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    1,
-    13,
-    9,
-    8
-   ],
-   "record_score": 30.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "ママトモ",
-   "jockey": "長尾翼（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    8,
-    9,
-    1
-   ],
-   "record_score": 15.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "テクノドラゴン",
-   "jockey": "廣瀬航（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    6,
-    4,
-    7,
-    7
-   ],
-   "record_score": 5.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ウインソラネル",
-   "jockey": "高畑皓（兵庫）",
-   "jockey_winrate": null,
-   "recent_results": [
-    8,
-    12,
-    11,
-    6,
-    8
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -338,11 +158,11 @@
    1,
    2,
    3,
+   4,
    7,
    8,
-   10,
-   4,
    9,
+   10,
    5,
    6
   ],
@@ -357,7 +177,7 @@
   "2nd": 3,
   "3rd": 1,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 21.8,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "전적유력마 1번 적중"
@@ -366,7 +186,7 @@
   "quinella_hit": false,
   "winner": 7,
   "second": 3,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -378,7 +198,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-23 14:35:38",
+ "saved_at": "2026-07-29 04:55:18",
  "quality": {
   "score": 60,
   "grade": "참고용",
@@ -386,7 +206,7 @@
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

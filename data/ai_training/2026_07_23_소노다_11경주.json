@@ -8,154 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 8,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "ディスクリートキャット",
-   "jockey": "佐々世",
-   "jockey_winrate": 50.0,
-   "recent_results": [
-    1,
-    1,
-    1,
-    1,
-    1
-   ],
-   "record_score": 123.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "レイデオロ",
-   "jockey": "山本太",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    2,
-    3,
-    4,
-    4,
-    4
-   ],
-   "record_score": 123.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "マジェスティックウォリアー",
-   "jockey": "田野豊",
-   "jockey_winrate": 46.7,
-   "recent_results": [
-    1,
-    4,
-    2,
-    2,
-    9
-   ],
-   "record_score": 79.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "モーニン",
-   "jockey": "永井孝",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    2,
-    2,
-    13,
-    7,
-    12
-   ],
-   "record_score": 90.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "バンブーエール",
-   "jockey": "廣瀬航",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    6,
-    3,
-    1,
-    5
-   ],
-   "record_score": 84.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "フリオーソ",
-   "jockey": "長尾翼",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    6,
-    2,
-    5,
-    2,
-    6
-   ],
-   "record_score": 31.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ゴールドシップ",
-   "jockey": "吉村智",
-   "jockey_winrate": 60.0,
-   "recent_results": [
-    11,
-    16,
-    12,
-    10,
-    7
-   ],
-   "record_score": 50.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "キングカメハメハ",
-   "jockey": "杉浦健",
-   "jockey_winrate": 53.3,
-   "recent_results": [
-    5,
-    7,
-    5,
-    7,
-    8
-   ],
-   "record_score": 30.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -809,8 +665,8 @@
    2,
    3,
    4,
-   6,
    5,
+   6,
    8,
    7
   ],
@@ -825,7 +681,7 @@
   "2nd": 4,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 165.2,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -834,7 +690,7 @@
   "quinella_hit": false,
   "winner": 2,
   "second": 4,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -846,14 +702,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-23 16:24:08",
+ "saved_at": "2026-07-29 04:55:10",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
