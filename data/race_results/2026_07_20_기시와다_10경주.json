@@ -1,9 +1,9 @@
 {
  "race_id": "2026_07_20_기시와다_10경주",
- "raceKey": "기시와다 10경주",
+ "raceKey": "2026-07-20 기시와다 10경주",
  "date": "2026-07-20",
- "sport": "horse",
- "category": "japan_local",
+ "sport": "cycle",
+ "category": "cycle",
  "track": "기시와다",
  "round": 10,
  "distance": null,
@@ -16,7 +16,8 @@
   "3rd": 5
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 1.1,
+  "trifecta": 7.9
  },
  "payouts_approx": false,
  "odds_at_start": {},
@@ -35,8 +36,8 @@
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -45,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 1.1,
+  "trifecta_odds": 7.9,
   "actual_return": null,
-  "profit": -1000
+  "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-20 20:47:43",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:13)",
+ "saved_at": "2026-07-29 04:13:34",
  "validation": {
   "ok": true,
   "errors": []
