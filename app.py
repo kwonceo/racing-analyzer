@@ -16808,6 +16808,21 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         q_odds = _safe_num(_rp0.get("quinella")) or q_odds
     if not t_odds:
         t_odds = _safe_num(_rp0.get("trifecta")) or t_odds
+    # [공식 확정배당 자동 충전 (2026-07-29 A-3)] 여기까지 와서도 배당이 비어 있으면 공식 소스에서 직접 가져온다.
+    #   삼복승은 어떤 입력 경로에도 배당이 실려 오지 않아 적중 108건 중 103건이 '적중인데 회수 0원'으로
+    #   집계되고 있었다(회수율 자체를 측정할 수 없던 근본 원인). 착순 대조 게이트를 통과한 값만 쓴다.
+    if not q_odds or not t_odds:
+        try:
+            _offp = _official_payouts_for_rk(rk, top3)
+            if _offp:
+                if not q_odds and _safe_num(_offp.get("quinella")):
+                    q_odds = _safe_num(_offp["quinella"])
+                    print(f"[확정배당 충전] {rk}: 복승 {q_odds}배 (공식)")
+                if not t_odds and _safe_num(_offp.get("trifecta")):
+                    t_odds = _safe_num(_offp["trifecta"])
+                    print(f"[확정배당 충전] {rk}: 삼복승 {t_odds}배 (공식)")
+        except Exception as e:
+            print("[확정배당 충전] 조회 실패(무시):", str(e)[:60])
     # [수익 자동 계산·추정] 복승 적중인데 실배당 미입력이면 승자 조합의 시장배당으로 추정(확정배당 입력 시 정정).
     _q_estimated = False   # [근사 둔갑 차단 (2026-07-22)] 추정값이 record.payouts 로 들어가 '확정'으로 표기되던 버그
     if quinella_hit and not q_odds:
@@ -22478,14 +22493,40 @@ def _keiba_parse_result(html):
     return None
 
 
-def _keiba_result_top3(baba, ymd, rno, timeout=15):
-    """keiba.go.jp RaceMarkTable 조회 → 상위3 마번 또는 None. 완전 방어(예외=None)."""
+# [중복 fetch 제거 (2026-07-29)] 착순과 확정환급은 같은 RaceMarkTable 페이지에 함께 있는데
+#   _keiba_result_top3 / _keiba_result_payouts 가 각자 fetch 해 경주당 2회 왕복하고 있었다
+#   (정합 스윕 60건에 538초). 페이지를 1회만 받아 공유한다.
+#   ⚠ 확정 전 페이지는 캐시하지 않는다(馬連複 미표기 = 미확정) — 라이브 중 낡은 결과 고착 방지.
+_KEIBA_PAGE_CACHE = {}
+_KEIBA_PAGE_CACHE_MAX = 500
+
+
+def _keiba_fetch_page(baba, ymd, rno, timeout=15):
+    """RaceMarkTable 페이지 HTML(디코드 완료) 또는 None. 확정분만 캐시."""
+    key = (str(baba), str(ymd), str(rno))
+    if key in _KEIBA_PAGE_CACHE:
+        return _KEIBA_PAGE_CACHE[key]
+    html = None
     try:
         d = "%s/%s/%s" % (ymd[:4], ymd[4:6], ymd[6:8])
         url = "%s?k_raceDate=%s&k_raceNo=%s&k_babaCode=%s" % (
             KEIBA_RESULT_BASE, urllib.parse.quote(d), rno, baba)
         raw = urlopen(Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=timeout).read()
-        return _keiba_parse_result(_keiba_decode(raw))
+        html = _keiba_decode(raw)
+    except Exception:
+        return None
+    if html and ("馬連複" in html):          # 확정(환급 표기) 페이지만 재사용
+        if len(_KEIBA_PAGE_CACHE) > _KEIBA_PAGE_CACHE_MAX:
+            _KEIBA_PAGE_CACHE.clear()
+        _KEIBA_PAGE_CACHE[key] = html
+    return html
+
+
+def _keiba_result_top3(baba, ymd, rno, timeout=15):
+    """keiba.go.jp RaceMarkTable 조회 → 상위3 마번 또는 None. 완전 방어(예외=None)."""
+    try:
+        html = _keiba_fetch_page(baba, ymd, rno, timeout=timeout)
+        return _keiba_parse_result(html) if html else None
     except Exception:
         return None
 
@@ -22494,11 +22535,10 @@ def _keiba_result_payouts(baba, ymd, rno, timeout=15):
     """[NAR 공식 확정환급 (2026-07-22)] keiba.go.jp RaceMarkTable → {'quinella': 馬連複배당, 'trifecta': 三連複배당}.
     몬베츠 6/9R 환급 오염(103.5/275.8배 — 공식 3.6/4.2배) 복기 — NAR도 공식 소스에서 직접 파싱."""
     try:
-        d = "%s/%s/%s" % (ymd[:4], ymd[4:6], ymd[6:8])
-        url = "%s?k_raceDate=%s&k_raceNo=%s&k_babaCode=%s" % (
-            KEIBA_RESULT_BASE, urllib.parse.quote(d), rno, baba)
-        raw = urlopen(Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=timeout).read()
-        body = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", _htmllib.unescape(_keiba_decode(raw))))
+        html = _keiba_fetch_page(baba, ymd, rno, timeout=timeout)   # 착순 조회와 페이지 공유(중복 fetch 제거)
+        if not html:
+            return None
+        body = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", _htmllib.unescape(html)))
         out = {}
         mq = re.search(r"馬連複\s*(\d{1,2})\s*-\s*(\d{1,2})\s*([\d,]+)円", body)
         if mq:
@@ -22507,6 +22547,56 @@ def _keiba_result_payouts(baba, ymd, rno, timeout=15):
         if mt:
             out["trifecta"] = round(int(mt.group(4).replace(",", "")) / 100.0, 1)
         return out or None
+    except Exception:
+        return None
+
+
+def _official_payouts_for_rk(rk, top3=None, timeout=8):
+    """[확정배당 자동 충전 (2026-07-29 A-3)] raceKey → 공식 확정환급 {'quinella','trifecta'} 또는 None.
+
+    배경: 삼복승 확정배당이 적중 108건 중 5건(5%)뿐이었다. 파서(_keiba_result_payouts)도
+      공식 소스도 정상인데 정합 스윕 엔드포인트를 손으로 부를 때만 돌아서, 확정배당이
+      들어올 경로가 사실상 없었다. 결과 입력 시점에 자동으로 채운다.
+    소스: NAR = keiba.go.jp RaceMarkTable · 경륜 = oddspark RaceKekka.
+      한국(KRA)·중앙(JRA)·미지원 경마장은 대상 아님.
+    ⚠ 착순 대조 게이트: raceKey 에 날짜가 없으면 _hist_path 가 '오늘'로 보정하므로, 과거 경주를
+      오늘 같은 번호 경주로 조회해 엉뚱한 배당을 넣을 수 있다. 공식 착순이 우리 착순과
+      일치할 때만 배당을 채운다(top3 미제공 시 대조 생략 불가 → None).
+    완전 방어: 어떤 실패도 None 반환 → 기존 흐름 무영향."""
+    try:
+        s = str(rk or "")
+        if not s or _KRA_TRACK_RE.search(s):
+            return None
+        _t3 = [int(x) for x in (top3 or []) if str(x).strip().isdigit()][:3]
+        if len(_t3) < 3:
+            return None                      # 대조할 착순이 없으면 채우지 않는다(오염 방지)
+        venue, rno = _area_num(s)
+        if not venue or not rno:
+            return None
+        try:
+            _hp, _hd, _hr = _hist_path(s)
+            ymd = re.sub(r"\D", "", str(_hd or ""))[:8]
+        except Exception:
+            ymd = ""
+        if len(ymd) != 8:
+            ymd = time.strftime("%Y%m%d")
+        if _KEIRIN_ONLY_RE.search(s):
+            jo, _fs = _keirin_jo_today(venue)
+            if not jo:
+                return None
+            rr = _keirin_result_top3(jo, ymd, str(rno), expect_venue=venue) or {}
+            if not rr.get("ok"):
+                return None
+            if [x for x in (rr.get("top3") or []) if x is not None][:3] != _t3:
+                return None                  # 착순 불일치 = 다른 경주를 본 것
+            return {"quinella": rr.get("quinellaOdds"), "trifecta": rr.get("trifectaOdds")}
+        baba = _jp_baba_code_from_rk(s)
+        if not baba:
+            return None
+        off3 = _keiba_result_top3(baba, ymd, str(rno), timeout=timeout)   # 페이지 캐시 공유(추가 왕복 없음)
+        if not off3 or list(off3)[:3] != _t3:
+            return None
+        return _keiba_result_payouts(baba, ymd, str(rno), timeout=timeout)
     except Exception:
         return None
 
@@ -22539,6 +22629,14 @@ def _official_result_audit(date=None, limit=60, verbose=True):
         venue, rno = _area_num(rk)
         if not venue or not rno:
             continue
+        # [재스윕 비용 절감 (2026-07-29)] 이미 이 스윕이 저장했어야 할 키 형태이고 복승·삼복승 확정배당이
+        #   모두 있으면 공식 조회 자체를 건너뛴다(경주당 HTTP 왕복 제거 — 23일치 백필의 대부분이 재확인이다).
+        #   착순은 그때 공식으로 맞춘 값이므로 재대조 실익이 없다.
+        #   ⚠ 복승만 있는 건은 건너뛰지 않는다 — 기존 719건이 그 상태이고, 그게 바로 삼복승을 채워야 할 대상이다.
+        _po_pre = doc.get("payouts") or {}
+        _rk_want = rk if date == time.strftime("%Y-%m-%d") else ("%s %s" % (date, rk))
+        if rk_raw == _rk_want and _po_pre.get("quinella") and _po_pre.get("trifecta"):
+            continue
         sp = str(doc.get("sport") or "").lower()
         official = None
         try:
@@ -22568,7 +22666,15 @@ def _official_result_audit(date=None, limit=60, verbose=True):
         _stored3 = [r0.get("1st"), r0.get("2nd"), r0.get("3rd")]
         _off3 = official["top3"][:3]
         _po0 = doc.get("payouts") or {}
-        _need = (_stored3 != _off3) or (rk_raw != rk) \
+        # [날짜 지정 키 (2026-07-22 근본수정)] 날짜 없는 키로 재학습하면 _race_result_id 가 '오늘' 날짜를
+        #   붙여 오늘 장부에 오기록(어제 60건이 오늘 파일로 들어간 사고). 대상 날짜를 키에 명시해 원 파일에 기록.
+        _rk_dated = rk if date == time.strftime("%Y-%m-%d") else ("%s %s" % (date, rk))
+        # [멱등성 복구 (2026-07-29)] 종전 조건은 `rk_raw != rk`(날짜 접두 제거본) 였다. 그런데 과거 날짜
+        #   스윕은 바로 위 규칙대로 raceKey 에 날짜를 **의도적으로** 붙여 저장하므로, 정상 저장분이
+        #   매번 '중복 표기'로 오인돼 계속 정정 대상이 됐다. limit 이 앞에서 걸리므로 **앞쪽 60건만
+        #   무한 반복**되고 뒤쪽은 영원히 처리되지 않았다(7/28 2회 실행에서 동일 60건 재정정 확인).
+        #   비교 대상을 '이 스윕이 저장했어야 할 형태'로 바꿔, 이미 올바른 건은 건너뛴다.
+        _need = (_stored3 != _off3) or (rk_raw != _rk_dated) \
             or (official.get("quinella") is not None and _po0.get("quinella") != official["quinella"]) \
             or (official.get("trifecta") is not None and _po0.get("trifecta") != official["trifecta"])
         if not _need:
@@ -22576,9 +22682,6 @@ def _official_result_audit(date=None, limit=60, verbose=True):
         result2 = {"1st": _off3[0], "2nd": _off3[1], "3rd": _off3[2]}
         inputs2 = {"quinella_odds": official.get("quinella"), "trifecta_odds": official.get("trifecta"),
                    "memo": "[정합 스윕] 공식 결과·환급 대조 정정(%s)" % time.strftime("%m-%d %H:%M")}
-        # [날짜 지정 키 (2026-07-22 근본수정)] 날짜 없는 키로 재학습하면 _race_result_id 가 '오늘' 날짜를
-        #   붙여 오늘 장부에 오기록(어제 60건이 오늘 파일로 들어간 사고). 대상 날짜를 키에 명시해 원 파일에 기록.
-        _rk_dated = rk if date == time.strftime("%Y-%m-%d") else ("%s %s" % (date, rk))
         try:
             _apply_result_learning(_rk_dated, result2, _off3, inputs=inputs2, force_relearn=True)
             fixed.append({"raceKey": rk, "from": _stored3, "to": _off3,
@@ -22647,9 +22750,14 @@ def audit_cleanup_strays():
 
 @app.route("/api/audit/results", methods=["GET", "POST"])
 def audit_results_ep():
-    """[정합 스윕] ?date=YYYY-MM-DD (기본 오늘) — 공식 결과·환급 대조 정정 즉시 실행(멱등)."""
+    """[정합 스윕] ?date=YYYY-MM-DD (기본 오늘) &limit=N (기본 60·최대 500) — 공식 결과·환급 대조 정정(멱등).
+    limit 노출 이유: 하루 100경주가 넘는 날이 있어 기본 60 으로는 뒤쪽이 남는다(기존 기본값은 불변)."""
     date = (request.args.get("date") or "").strip() or None
-    return jsonify(_official_result_audit(date))
+    try:
+        _lim = int(request.args.get("limit") or 60)
+    except Exception:
+        _lim = 60
+    return jsonify(_official_result_audit(date, limit=max(1, min(500, _lim))))
 
 
 # ══════════════ [경륜 결과 백필 (2026-07-19)] oddspark RaceKekka.do — 공개 결과 페이지(로그인 불필요) ══════════════
@@ -22724,7 +22832,14 @@ def _keirin_result_parse(html):
                         _amt_idx = next((j for j, s in enumerate(seg) if re.search(r"[\d,]+円", s)), None)
                         if _amt_idx is not None:
                             _pre = seg[:_amt_idx]   # 금액 '앞'의 구분자만 집계(뒤쪽 ワイド 필러 '---' 오인 방지)
-                            _sep_cells = [s for s in _pre if re.fullmatch(r"[-=＝–—]{1,3}", s)]
+                            # [구분자 공백 형태 (2026-07-29 다마노 1R 실측)] 3連複 구분자가 '-   -' 처럼
+                            #   대시 사이에 공백을 두고 렌더되는 페이지가 있는데 fullmatch 가 공백을 불허해
+                            #   구분자로 인식되지 않았다 → _n_sep=1 로 떨어져 **3連複이 2車複으로 오분류**되고,
+                            #   _two[-1](마지막 2두 항목)을 쓰므로 **복승 배당이 삼복승 값으로 오염**됐다.
+                            #   (다마노 1R: 2車複 49.7 / 3連複 83.6 → 복승이 83.6 으로 잡히던 상태)
+                            #   공백을 제거한 뒤 판정한다 — 기존 '-' · '--' 형태는 그대로 통과.
+                            _sep_cells = [re.sub(r"\s+", "", s) for s in _pre
+                                          if re.fullmatch(r"[-=＝–—\s]{1,8}", s) and re.search(r"[-=＝–—]", s)]
                             m2 = re.search(r"([\d,]+)円", seg[_amt_idx])
                             if m2:
                                 _n_sep = max(len(_sep_cells),
