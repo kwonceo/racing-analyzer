@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_27_히로시마_5경주",
- "raceKey": "히로시마 5경주",
+ "raceKey": "2026-07-27 히로시마 5경주",
  "date": "2026-07-27",
  "sport": "cycle",
  "category": "cycle",
@@ -9,15 +9,15 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 2,
   "2nd": 1,
   "3rd": 7
  },
  "payouts": {
-  "quinella": 13.0,
-  "trifecta": 0.0
+  "quinella": 20.4,
+  "trifecta": 13.0
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -436,18 +436,18 @@
    8
   ],
   "eliminated": [],
-  "recommend_main": "3+5",
+  "recommend_main": null,
   "recommend_sub": null,
-  "strategy": "BMED_보험형",
-  "signal_quality": "하",
+  "strategy": null,
+  "signal_quality": null,
   "confidence": 0,
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": true,
+  "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "전적유력마 1번 적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": true
@@ -456,13 +456,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 13.0,
-  "trifecta_odds": null,
+  "quinella_odds": 20.4,
+  "trifecta_odds": 13.0,
   "actual_return": null,
-  "profit": 12000
+  "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-27 10:13:02",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:43)",
+ "saved_at": "2026-07-29 05:44:03",
  "validation": {
   "ok": true,
   "errors": []
