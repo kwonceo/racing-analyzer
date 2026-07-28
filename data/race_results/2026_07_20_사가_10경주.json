@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_20_사가_10경주",
- "raceKey": "사가 10경주",
+ "raceKey": "2026-07-20 사가 10경주",
  "date": "2026-07-20",
  "sport": "horse",
  "category": "japan_local",
@@ -16,7 +16,8 @@
   "3rd": 12
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 3.8,
+  "trifecta": 3.3
  },
  "payouts_approx": false,
  "odds_at_start": {},
@@ -33,10 +34,10 @@
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": true,
+  "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -45,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 3.8,
+  "trifecta_odds": 3.3,
   "actual_return": null,
-  "profit": -1000
+  "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-20 21:10:17",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:20)",
+ "saved_at": "2026-07-29 04:20:06",
  "validation": {
   "ok": true,
   "errors": []
