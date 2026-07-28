@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_19_코치_11경주",
- "raceKey": "코치 11경주",
+ "raceKey": "2026-07-19 코치 11경주",
  "date": "2026-07-19",
  "sport": "horse",
  "category": "japan_local",
@@ -15,6 +15,11 @@
   "2nd": 2,
   "3rd": 7
  },
+ "payouts": {
+  "quinella": 5.3,
+  "trifecta": 3.0
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -29,7 +34,7 @@
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": false,
+  "main_hit": true,
   "sub_hit": false,
   "hit_reason": "적중",
   "miss_reason": null,
@@ -41,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 5.3,
+  "trifecta_odds": 3.0,
   "actual_return": null,
-  "profit": -1000
+  "profit": 4300
  },
- "memo": null,
- "saved_at": "2026-07-19 20:31:18",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:13)",
+ "saved_at": "2026-07-29 04:13:05",
  "validation": {
   "ok": true,
   "errors": []

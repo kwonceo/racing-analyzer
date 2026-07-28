@@ -8,147 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 10,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "경복포르",
-   "jockey": "재이",
-   "jockey_winrate": null,
-   "recent_results": [
-    1
-   ],
-   "record_score": 130,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "푸른신기",
-   "jockey": "경민",
-   "jockey_winrate": null,
-   "recent_results": [
-    2
-   ],
-   "record_score": 102,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "오아시스",
-   "jockey": "형석",
-   "jockey_winrate": null,
-   "recent_results": [
-    3
-   ],
-   "record_score": 80,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "샤이니코",
-   "jockey": "정혁",
-   "jockey_winrate": null,
-   "recent_results": [
-    4
-   ],
-   "record_score": 45,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "원플러스",
-   "jockey": "인권",
-   "jockey_winrate": null,
-   "recent_results": [
-    8
-   ],
-   "record_score": 20,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "스마트유",
-   "jockey": "강주",
-   "jockey_winrate": null,
-   "recent_results": [
-    7
-   ],
-   "record_score": 20,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "딥스프린",
-   "jockey": "광희",
-   "jockey_winrate": null,
-   "recent_results": [
-    5
-   ],
-   "record_score": 20,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "억새",
-   "jockey": "형철",
-   "jockey_winrate": null,
-   "recent_results": [
-    6
-   ],
-   "record_score": 7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "그린다이",
-   "jockey": "윤섭",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "오버레인",
-   "jockey": "도윤",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [],
   "drop_rates": {},
@@ -169,20 +32,8 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   7,
-   10,
-   3,
-   4,
-   6,
-   8
-  ],
-  "eliminated": [
-   5,
-   9
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend": null,
   "strategy": null,
   "confidence": 0,
@@ -193,16 +44,16 @@
   "2nd": 6,
   "3rd": 3,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 1.6,
   "exacta_odds": null,
-  "hit": true,
-  "hit_pattern": "제거 적중"
+  "hit": false,
+  "hit_pattern": null
  },
  "labels": {
-  "quinella_hit": true,
+  "quinella_hit": false,
   "winner": 8,
   "second": 6,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -214,7 +65,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-19 14:01:30",
+ "saved_at": "2026-07-29 04:12:44",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -223,7 +74,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
