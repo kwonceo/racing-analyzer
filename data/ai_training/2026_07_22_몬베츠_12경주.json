@@ -8,145 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "グランラック",
-   "jockey": "阿部龍（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1
-   ],
-   "record_score": 110.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "アンジェアート",
-   "jockey": "宮内勇（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1
-   ],
-   "record_score": 110.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "スハッチェ",
-   "jockey": "近藤翔（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1
-   ],
-   "record_score": 110.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "セルアウトクラウド",
-   "jockey": "落合玄（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1
-   ],
-   "record_score": 110.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "ツリーオブライフ",
-   "jockey": "桑村真（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    2,
-    1,
-    2
-   ],
-   "record_score": 100.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "サザングルーヴ",
-   "jockey": "服部茂（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    4
-   ],
-   "record_score": 77.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "ロゼットリボン",
-   "jockey": "岩橋勇（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    1,
-    1
-   ],
-   "record_score": 55.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ピンクゴールド",
-   "jockey": "小野楓（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    1
-   ],
-   "record_score": 42.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "プレストジュピター",
-   "jockey": "藤田駕（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    10,
-    1
-   ],
-   "record_score": 42.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [],
   "drop_rates": {},
@@ -167,19 +32,8 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   6,
-   7,
-   8
-  ],
-  "eliminated": [
-   5,
-   9
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend": null,
   "strategy": null,
   "confidence": 0,
@@ -190,7 +44,7 @@
   "2nd": 8,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 2.2,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -199,7 +53,7 @@
   "quinella_hit": false,
   "winner": 6,
   "second": 8,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -211,7 +65,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-22 21:01:02",
+ "saved_at": "2026-07-29 04:48:16",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -220,7 +74,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

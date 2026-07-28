@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_22_몬베츠_12경주",
- "raceKey": "몬베츠 12경주",
+ "raceKey": "2026-07-22 몬베츠 12경주",
  "date": "2026-07-22",
  "sport": "horse",
  "category": "japan_local",
@@ -9,33 +9,23 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 9,
+ "horse_count": null,
  "result": {
   "1st": 6,
   "2nd": 8,
   "3rd": 7
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 2.2,
+  "trifecta": 15.2
  },
  "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   6,
-   7,
-   8
-  ],
-  "eliminated": [
-   5,
-   9
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
@@ -56,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 2.2,
+  "trifecta_odds": 15.2,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-22 21:01:02",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:48)",
+ "saved_at": "2026-07-29 04:48:16",
  "validation": {
   "ok": true,
   "errors": []
