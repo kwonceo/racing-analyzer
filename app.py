@@ -11314,6 +11314,57 @@ def _triple_analyze(rk, rec):
                         print(f"[Emergency Override] {rk}: {[e['combo'] for e in _eo_adds]} 최상단 강제 편입")
             except Exception:
                 pass
+            # [경륜 B라인 다중 그물망 2026-07-28] keirinLinePairs 2개+ 시 B라인 삼복승 보험 자동 생성
+            # 도요하시7R: A라인(3+9) 메인만 → 2+8(B라인) 기반 보험 미생성 → 2-8-5 전멸 대응
+            # 설계: 메인=A라인×3착최우선 / 보험1=A라인×복병 / 보험2=B라인×3착최우선(Anti-CrossLine)
+            # B라인 활성화: A라인 배당의 2배 이내 OR 스마트머니 신호 1개+
+            try:
+                if _analyze_sport == 'cycle':
+                    _lp_bl = core_picks.get('keirinLinePairs') or []
+                    if len(_lp_bl) >= 2:
+                        _lp_a = _lp_bl[0]   # A라인(1순위)
+                        _lp_b = _lp_bl[1]   # B라인(2순위)
+                        _ca = [int(x) for x in (_lp_a.get('combo') or [])]
+                        _cb = [int(x) for x in (_lp_b.get('combo') or [])]
+                        if len(_ca) == 2 and len(_cb) == 2:
+                            _oa = (curQ or {}).get((_ca[0],_ca[1])) or (curQ or {}).get((_ca[1],_ca[0]))
+                            _ob = (curQ or {}).get((_cb[0],_cb[1])) or (curQ or {}).get((_cb[1],_cb[0]))
+                            # B라인 활성화 조건
+                            _b_smart = any(int(h.get('no',0)) in set(_cb)
+                                          for h in (dark_horses or []) if h.get('smartMoney'))
+                            _b_active = bool(_ob and _oa and
+                                            (float(_ob) <= float(_oa) * 2.0 or _b_smart))
+                            if _b_active:
+                                _ft_bl = list(core_picks.get('finalTrifectas') or [])
+                                _ft_bl_set = {tuple(sorted(int(x) for x in (t.get('combo') or [])))
+                                              for t in _ft_bl}
+                                _kh_bl = [int(x) for x in (key_horses or [])
+                                          if str(x).lstrip('-').isdigit()]
+                                _b_set = set(_cb)
+                                _bl_adds = []
+                                for _kh in _kh_bl:
+                                    if _kh in _b_set:
+                                        continue
+                                    # [Anti-CrossLine] A라인 마크맨 제외(라인 혼용 방지)
+                                    if len(_ca) >= 2 and _kh == _ca[1]:
+                                        continue
+                                    _c3 = tuple(sorted(_cb + [_kh]))
+                                    if _c3 in _ft_bl_set:
+                                        continue
+                                    _bl_adds.append({
+                                        'combo': list(_c3),
+                                        'odds': _tri_odds(list(_c3)),
+                                        'reason': 'B라인 삼복승 보험(%d+%d×%d·AntiCross)' % (_cb[0],_cb[1],_kh),
+                                        'stars': 3, 'basis': ''
+                                    })
+                                    _ft_bl_set.add(_c3)
+                                    if len(_bl_adds) >= 1:
+                                        break
+                                if _bl_adds:
+                                    core_picks['finalTrifectas'] = _ft_bl + _bl_adds
+                                    print(f"[B라인 그물망] {rk}: B라인{_cb} 삼복승보험 {[e['combo'] for e in _bl_adds]} 추가")
+            except Exception:
+                pass
             # [수익성 구조 개편 (2026-07-19)] 경주 3분류(저=삼복승 집중/중=2.5배 컷+기대값/고=유지) 후처리 —
             #   실패 시 내부에서 완전 무변경(기존 추천 유지). 빠진 복승은 quinellaRef(참고 접기)로 무삭제 이동.
             _apply_profit_strategy(core_picks, curQ, _rec_valid, sig_meta=_sig_meta,
@@ -28932,8 +28983,6 @@ def _boot_background():
 # [Railway/gunicorn] gunicorn 은 __main__ 을 건너뛰므로, 여기서 모듈 로드 시점에 백그라운드 기동.
 #   (SERVER_SOFTWARE 는 gunicorn 이 자동 설정. 로컬 `python app.py` 에선 미설정 → 아래 __main__ 에서 기동)
 
-from admin_page import admin_bp
-app.register_blueprint(admin_bp)
 if os.environ.get("SERVER_SOFTWARE", "").startswith("gunicorn"):
     _boot_background()
 
