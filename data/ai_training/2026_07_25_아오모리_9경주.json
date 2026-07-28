@@ -599,7 +599,7 @@
   "2nd": 3,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 4.4,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "역배열 감지말 7번 입상"
@@ -608,7 +608,7 @@
   "quinella_hit": true,
   "winner": 2,
   "second": 3,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -620,15 +620,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-25 14:52:25",
+ "saved_at": "2026-07-29 05:14:35",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
-  "complete": false,
-  "ai_ready": false,
+  "score": 80,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
   "missing": [
-   "전적 데이터",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
