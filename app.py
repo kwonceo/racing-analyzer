@@ -7868,6 +7868,44 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
             final_t.append({"combo": list(_fk), "odds": _form_ins.get("odds"),
                             "reason": _form_ins["reason"], "formInsurance": True})
 
+    # ══════════════ [경륜 B라인 다중 그물망 v2 2026-07-28] ══════════════
+    # Gemini 제안 — 7871 왕축 강제 로직 실행 전 B라인 seen_t 선점
+    # 도요하시7R: A라인(3+9) 왕축 강제로 2+8+5 생성 불가 → seen_t 선점으로 해결
+    if _sp == "cycle" and (cp.get("keirinLinePairs") or []):
+        try:
+            _lp_list = cp.get("keirinLinePairs") or []
+            if len(_lp_list) >= 2:
+                _a_line = [int(x) for x in (_lp_list[0].get("combo") or [])][:2]
+                _b_line = [int(x) for x in (_lp_list[1].get("combo") or [])][:2]
+                if len(_a_line) == 2 and len(_b_line) == 2:
+                    _a_key = tuple(sorted(_a_line))
+                    _b_key = tuple(sorted(_b_line))
+                    _a_odds = float((curQ or {}).get(_a_key) or (curQ or {}).get(_a_key[::-1]) or 999)
+                    _b_odds = float((curQ or {}).get(_b_key) or (curQ or {}).get(_b_key[::-1]) or 999)
+                    # B라인 활성화 조건: A라인 배당의 2배 이내
+                    if _b_odds <= _a_odds * 2.0 and _b_odds < 999:
+                        _flat = set(_a_line + _b_line)
+                        _kh_inner = [int(x) for x in (key_horses or [])
+                                     if str(x).lstrip('-').isdigit()]
+                        _best3 = next((k for k in _kh_inner
+                                       if k not in _flat and k != _a_line[1]), None)
+                        if _best3:
+                            _b_trio = tuple(sorted(_b_line + [_best3]))
+                            if _b_trio not in seen_t and _vtri(list(_b_trio)):
+                                _bt_odds = trio_map.get(_b_trio)
+                                if not _bt_odds or float(_bt_odds) >= 4.0:
+                                    seen_t.add(_b_trio)
+                                    final_t.append({
+                                        "combo": list(_b_trio),
+                                        "odds": _bt_odds,
+                                        "reason": "B라인 삼복승 보험(%d+%d×%d·AntiCross·seen_t선점)"
+                                                  % (_b_line[0], _b_line[1], _best3),
+                                        "keirinBLine": True
+                                    })
+                                    print(f"[B라인v2 선점] {'+'.join(map(str,_b_trio))} 삼복승 seen_t 선점 완료")
+        except Exception as _ble:
+            print("[경륜 B라인v2] 에러(무시):", _ble)
+
     # ══════════════ [삼복승 복승메인 정합성·신규] 삼복승은 복승 메인 말을 반드시 포함 ══════════════
     #   문제: 복승 메인 3+4 인데 삼복승 2+5+6(3·4 없음) → 앞뒤 불일치("쌩뚱맞은 조합").
     #   [편성] 삼복승 메인 = 복승1위+복승2위+확신도1위 / 보험 = 복승1위+복승2위+복병 (복승메인 2두 앵커·요청1).
