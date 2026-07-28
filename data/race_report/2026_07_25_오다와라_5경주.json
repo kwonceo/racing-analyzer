@@ -1,6 +1,6 @@
 {
  "race": "오다와라 5경주",
- "raceKey": "오다와라 5경주",
+ "raceKey": "2026-07-25 오다와라 5경주",
  "date": "2026-07-25",
  "result": {
   "1st": 7,
@@ -16,7 +16,7 @@
   "signal_7": {
    "horse": 7,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -25,9 +25,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 77.8,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_5": {
    "horse": 5,
@@ -41,14 +41,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 78.0,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -57,34 +57,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 114.3,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_3": {
-   "horse": 3,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 84.9,
-   "confidence": 13.7,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
- "recommended_horses": [
-  3,
-  7,
-  2
- ],
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 7번 77.8점",
+  "1. 전적 분석: 7번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -92,22 +72,18 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 77.8,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "전적보조_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 77.8,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
-  "inverseHorses": [
-   3
-  ],
+  "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
   "reason": "추천 미적중"
@@ -127,5 +103,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-25 10:08:29"
+ "generated_at": "2026-07-29 05:15:18"
 }
