@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_23_아오모리_3경주",
- "raceKey": "아오모리 3경주",
+ "raceKey": "2026-07-23 아오모리 3경주",
  "date": "2026-07-23",
  "sport": "cycle",
  "category": "cycle",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 5,
+ "horse_count": null,
  "result": {
   "1st": 3,
   "2nd": 7,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 2.6,
-  "trifecta": 0.0
+  "trifecta": 16.1
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -527,16 +527,16 @@
  "anomalies": [],
  "prediction": {
   "candidates": [
-   3,
-   6,
-   7,
    1,
    2,
+   3,
    4,
-   5
+   5,
+   6,
+   7
   ],
   "eliminated": [],
-  "recommend_main": "3+7",
+  "recommend_main": "2+3",
   "recommend_sub": null,
   "strategy": "BMED_보험형",
   "signal_quality": "하",
@@ -544,11 +544,13 @@
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": false,
+  "main_hit": true,
   "sub_hit": false,
-  "hit_reason": null,
-  "miss_reason": "추천 조합 미입상",
-  "pattern_tags": [],
+  "hit_reason": "전적유력마 1번 적중",
+  "miss_reason": null,
+  "pattern_tags": [
+   "복승불일치"
+  ],
   "anomaly_correct": false,
   "form_pick_hit": true
  },
@@ -557,12 +559,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 2.6,
-  "trifecta_odds": null,
+  "trifecta_odds": 16.1,
   "actual_return": null,
-  "profit": -1000
+  "profit": 1600
  },
- "memo": null,
- "saved_at": "2026-07-23 12:04:36",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:55)",
+ "saved_at": "2026-07-29 04:56:02",
  "validation": {
   "ok": true,
   "errors": []
