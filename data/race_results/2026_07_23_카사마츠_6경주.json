@@ -1,23 +1,23 @@
 {
  "race_id": "2026_07_23_카사마츠_6경주",
- "raceKey": "카사마츠 6경주",
+ "raceKey": "2026-07-23 카사마츠 6경주",
  "date": "2026-07-23",
  "sport": "horse",
- "category": "japan_central",
+ "category": "japan_local",
  "track": "카사마츠",
  "round": 6,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 8,
+ "horse_count": null,
  "result": {
   "1st": 6,
   "2nd": 2,
   "3rd": 3
  },
  "payouts": {
-  "quinella": 78.4,
-  "trifecta": 0.0
+  "quinella": 8.2,
+  "trifecta": 20.1
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -1802,51 +1802,99 @@
    }
   }
  ],
- "anomalies": [],
+ "anomalies": [
+  {
+   "time": "13:35:20",
+   "type": "급락",
+   "combo": [
+    1,
+    4
+   ],
+   "horse": 1,
+   "drop_rate": -72.3,
+   "excess_drop": 9.7
+  },
+  {
+   "time": "13:35:20",
+   "type": "급락",
+   "combo": [
+    2,
+    4
+   ],
+   "horse": 2,
+   "drop_rate": -70.2,
+   "excess_drop": -13.5
+  },
+  {
+   "time": "13:35:20",
+   "type": "급락",
+   "combo": [
+    4,
+    7
+   ],
+   "horse": 4,
+   "drop_rate": -62.5,
+   "excess_drop": -11.6
+  },
+  {
+   "time": "13:35:20",
+   "type": "급락",
+   "combo": [
+    1,
+    7
+   ],
+   "horse": 1,
+   "drop_rate": -21.7,
+   "excess_drop": 9.7
+  }
+ ],
  "prediction": {
   "candidates": [
-   4,
-   6,
    1,
+   2,
+   4,
+   7,
+   6,
    9,
    10,
    11,
-   2,
-   7,
-   3,
-   8,
-   5
+   3
   ],
   "eliminated": [
+   5,
+   8,
    12
   ],
   "recommend_main": "7+9",
   "recommend_sub": null,
-  "strategy": "BMED_역배열형",
-  "signal_quality": "하",
-  "confidence": 34.3,
-  "inverse": true
+  "strategy": "BMED_압축형",
+  "signal_quality": "상",
+  "confidence": 4.0,
+  "inverse": false
  },
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "제거 적중",
+  "hit_reason": "2+4 복승 급락(-70.2%) → 2번 입상 적중 · 제거 적중",
   "miss_reason": null,
-  "pattern_tags": [],
-  "anomaly_correct": false,
+  "pattern_tags": [
+   "급락50+",
+   "쌍승역전"
+  ],
+  "anomaly_correct": true,
   "form_pick_hit": false
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 78.4,
-  "trifecta_odds": null,
+  "quinella_odds": 8.2,
+  "trifecta_odds": 20.1,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-23 13:54:07",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:00)",
+ "saved_at": "2026-07-29 05:00:04",
  "validation": {
   "ok": true,
   "errors": []

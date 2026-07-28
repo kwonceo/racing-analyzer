@@ -1,10 +1,10 @@
 {
  "race_id": "2026_07_23_오오이_2경주",
- "raceKey": "오오이 2경주",
+ "raceKey": "2026-07-23 오오이 2경주",
  "date": "2026-07-23",
  "sport": "horse",
  "category": "japan_local",
- "track": "오오이",
+ "track": "오이",
  "round": 2,
  "distance": null,
  "track_condition": null,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 27.2,
-  "trifecta": 0.0
+  "trifecta": 120.1
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -591,8 +591,8 @@
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "전적유력마 1번 적중 · 제거 적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": true
@@ -602,12 +602,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 27.2,
-  "trifecta_odds": null,
+  "trifecta_odds": 120.1,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-23 15:40:59",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:59)",
+ "saved_at": "2026-07-29 04:59:46",
  "validation": {
   "ok": true,
   "errors": []

@@ -3,7 +3,7 @@
  "race_id": "2026_07_23_오오이_12경주",
  "race_info": {
   "date": "2026-07-23",
-  "track": "오오이",
+  "track": "오이",
   "round": 12,
   "distance": null,
   "condition": null,
@@ -15,7 +15,7 @@
  "odds_features": {
   "timeline": [
    {
-    "time": "21:08:20",
+    "time": "23:59:20",
     "quinella": {
      "7+9": 3.8,
      "4+9": 4.9,
@@ -86,7 +86,7 @@
     }
    },
    {
-    "time": "21:08:20",
+    "time": "23:59:20",
     "quinella": {
      "2+9": 3.6,
      "2+5": 6.7,
@@ -162,8 +162,8 @@
   "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
-  "quinella_mismatch": 1.289,
-  "refund_rate": 0.77,
+  "quinella_mismatch": null,
+  "refund_rate": 0.745,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -176,24 +176,24 @@
  },
  "prediction": {
   "candidates": [
-   2,
-   4,
-   6,
-   7,
-   9,
    1,
-   10,
-   11,
-   3
+   2,
+   3,
+   5,
+   6,
+   9,
+   12,
+   4
   ],
   "eliminated": [
-   5,
+   7,
    8,
-   12
+   10,
+   11
   ],
-  "recommend": "7+9",
+  "recommend": "2+9",
   "strategy": "BMED_보험형",
-  "confidence": 2.8,
+  "confidence": 0,
   "signal_quality": "하"
  },
  "result": {
@@ -201,7 +201,7 @@
   "2nd": 5,
   "3rd": 3,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 6.8,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -210,7 +210,7 @@
   "quinella_hit": false,
   "winner": 9,
   "second": 5,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -222,15 +222,15 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-23 21:15:41",
+ "saved_at": "2026-07-29 04:59:44",
  "quality": {
   "score": 60,
   "grade": "참고용",
   "complete": false,
   "ai_ready": false,
   "missing": [
-   "전적 데이터",
-   "확정 배당"
+   "이상감지 결과",
+   "전적 데이터"
   ],
   "errors": []
  }

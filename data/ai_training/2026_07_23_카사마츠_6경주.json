@@ -8,155 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 8,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 8,
-   "name": "マルヨハルキ",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    1,
-    1,
-    8,
-    1
-   ],
-   "record_score": 100.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "シャンハイボビー",
-   "jockey": "東川慎",
-   "jockey_winrate": 36.7,
-   "recent_results": [
-    8,
-    6,
-    2,
-    5,
-    2
-   ],
-   "record_score": 78.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "スクリーンヒーロー",
-   "jockey": "深澤杏",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    9,
-    2,
-    1,
-    4,
-    5
-   ],
-   "record_score": 61.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "アメリカンペイトリオット",
-   "jockey": "筒井勇",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    5,
-    4,
-    7,
-    3,
-    1
-   ],
-   "record_score": 55.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "シニスターミニスター",
-   "jockey": "大原浩",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    4,
-    5,
-    7,
-    3,
-    7
-   ],
-   "record_score": 42.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ビーチパトロール",
-   "jockey": "松本一",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    7,
-    6,
-    7,
-    10,
-    9
-   ],
-   "record_score": 30.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "カレンブラックヒル",
-   "jockey": "明星晴",
-   "jockey_winrate": 46.7,
-   "recent_results": [
-    9,
-    8,
-    10,
-    10,
-    4
-   ],
-   "record_score": -0.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "パイロ",
-   "jockey": "向山牧",
-   "jockey_winrate": 7.4,
-   "recent_results": [
-    10,
-    10,
-    8,
-    6,
-    8
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -744,15 +599,28 @@
     }
    }
   ],
-  "drop_rates": {},
-  "excess_drops": {},
-  "drop_speed": {},
+  "drop_rates": {
+   "1": -72.3,
+   "4": -72.3,
+   "2": -70.2,
+   "7": -62.5
+  },
+  "excess_drops": {
+   "4": -11.6,
+   "2": -13.5
+  },
+  "drop_speed": {
+   "1": -91.5,
+   "4": -91.5,
+   "2": -88.9,
+   "7": -79.1
+  },
   "exacta_reversal": true,
-  "reversal_ratio": 0.539,
+  "reversal_ratio": null,
   "quinella_mismatch": 1.289,
   "refund_rate": 0.77,
   "consecutive_drops": {},
-  "fake_betting": false,
+  "fake_betting": true,
   "large_scale_drop": false
  },
  "thresholds_used": {
@@ -763,60 +631,60 @@
  },
  "prediction": {
   "candidates": [
-   4,
-   6,
    1,
+   2,
+   4,
+   7,
+   6,
    9,
    10,
    11,
-   2,
-   7,
-   3,
-   8,
-   5
+   3
   ],
   "eliminated": [
+   5,
+   8,
    12
   ],
   "recommend": "7+9",
-  "strategy": "BMED_역배열형",
-  "confidence": 34.3,
-  "signal_quality": "하"
+  "strategy": "BMED_압축형",
+  "confidence": 4.0,
+  "signal_quality": "상"
  },
  "result": {
   "1st": 6,
   "2nd": 2,
   "3rd": 3,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 8.2,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "제거 적중"
+  "hit_pattern": "2+4 복승 급락(-70.2%) → 2번 입상 적중 · 제거 적중"
  },
  "labels": {
   "quinella_hit": false,
   "winner": 6,
   "second": 2,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
-  "excess_drop_horse": null,
-  "excess_drop_horse_placed": null,
-  "excess_drop_value": null,
-  "reversal_horse": 7,
-  "reversal_horse_placed": false,
-  "reversal_ratio": 0.539,
+  "excess_drop_horse": "2",
+  "excess_drop_horse_placed": true,
+  "excess_drop_value": -13.5,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-23 13:54:07",
+ "saved_at": "2026-07-29 05:00:04",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

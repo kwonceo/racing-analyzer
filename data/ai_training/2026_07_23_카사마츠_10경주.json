@@ -8,154 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 8,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "タリスマニック",
-   "jockey": "塚本征",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    1,
-    2,
-    1,
-    2,
-    13
-   ],
-   "record_score": 132.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "サートゥルナーリア",
-   "jockey": "渡邊竜",
-   "jockey_winrate": 63.3,
-   "recent_results": [
-    4,
-    1,
-    1,
-    13,
-    15
-   ],
-   "record_score": 93.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "モーリス",
-   "jockey": "森島貴",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    3,
-    2,
-    4,
-    2,
-    4
-   ],
-   "record_score": 68.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "アメリカンペイトリオット",
-   "jockey": "筒井勇",
-   "jockey_winrate": 46.7,
-   "recent_results": [
-    4,
-    3,
-    5,
-    3,
-    5
-   ],
-   "record_score": 92.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "アポロケンタッキー",
-   "jockey": "明星晴",
-   "jockey_winrate": 40.0,
-   "recent_results": [
-    6,
-    4,
-    2,
-    2,
-    5
-   ],
-   "record_score": 81.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ダノンプレミアム",
-   "jockey": "東川慎",
-   "jockey_winrate": 36.7,
-   "recent_results": [
-    5,
-    8,
-    1,
-    1,
-    2
-   ],
-   "record_score": 68.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ミスターメロディ",
-   "jockey": "深澤杏",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    9,
-    6,
-    9,
-    10,
-    4
-   ],
-   "record_score": 26.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "モーニン",
-   "jockey": "加藤聡",
-   "jockey_winrate": 46.7,
-   "recent_results": [
-    12,
-    12,
-    9,
-    9
-   ],
-   "record_score": 10.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -248,8 +104,8 @@
    2,
    4,
    6,
-   8,
-   7
+   7,
+   8
   ],
   "eliminated": [
    3,
@@ -265,7 +121,7 @@
   "2nd": 1,
   "3rd": 8,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 24.5,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -274,7 +130,7 @@
   "quinella_hit": false,
   "winner": 2,
   "second": 1,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -286,7 +142,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-23 16:03:32",
+ "saved_at": "2026-07-29 04:59:55",
  "quality": {
   "score": 60,
   "grade": "참고용",
@@ -294,7 +150,7 @@
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_23_카사마츠_3경주",
- "raceKey": "카사마츠 3경주",
+ "raceKey": "2026-07-23 카사마츠 3경주",
  "date": "2026-07-23",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 1,
   "2nd": 7,
@@ -17,9 +17,9 @@
  },
  "payouts": {
   "quinella": 3.6,
-  "trifecta": 0.0
+  "trifecta": 15.4
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {
   "quinella": {
    "1+7": 3.6,
@@ -80,12 +80,12 @@
  "prediction": {
   "candidates": [
    1,
-   7,
    2,
    3,
    4,
    5,
-   6
+   6,
+   7
   ],
   "eliminated": [],
   "recommend_main": "1+7",
@@ -109,12 +109,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 3.6,
-  "trifecta_odds": null,
+  "trifecta_odds": 15.4,
   "actual_return": null,
   "profit": 2600
  },
- "memo": null,
- "saved_at": "2026-07-23 12:04:13",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:00)",
+ "saved_at": "2026-07-29 05:00:02",
  "validation": {
   "ok": true,
   "errors": []

@@ -8,137 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 7,
-   "name": "アメリータ",
-   "jockey": "馬渕繁（笠松）",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    7,
-    6,
-    3,
-    6
-   ],
-   "record_score": 42.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "キタノヒコボシ",
-   "jockey": "筒井勇（笠松）",
-   "jockey_winrate": null,
-   "recent_results": [
-    9,
-    1,
-    7,
-    5,
-    4
-   ],
-   "record_score": 31.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ジーグフェルド",
-   "jockey": "加藤聡（愛知）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    3,
-    4,
-    2,
-    5
-   ],
-   "record_score": 23.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ベーディーナ",
-   "jockey": "加藤誓（愛知）",
-   "jockey_winrate": null,
-   "recent_results": [
-    8,
-    2,
-    6,
-    7,
-    6
-   ],
-   "record_score": 22.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ヤマニンエイドロン",
-   "jockey": "渡邊竜（笠松）",
-   "jockey_winrate": null,
-   "recent_results": [
-    7,
-    6,
-    5,
-    5,
-    4
-   ],
-   "record_score": 1.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "マッチャンファイト",
-   "jockey": "東川慎（笠松）",
-   "jockey_winrate": null,
-   "recent_results": [
-    8,
-    6,
-    6,
-    7,
-    7
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "ノアブラック",
-   "jockey": "森島貴（笠松）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    7,
-    9,
-    8,
-    7
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -188,12 +61,12 @@
  "prediction": {
   "candidates": [
    1,
-   7,
    2,
    3,
    4,
    5,
-   6
+   6,
+   7
   ],
   "eliminated": [],
   "recommend": "1+7",
@@ -206,7 +79,7 @@
   "2nd": 7,
   "3rd": 3,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 3.6,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "전적유력마 1번 적중"
@@ -215,7 +88,7 @@
   "quinella_hit": true,
   "winner": 1,
   "second": 7,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -227,7 +100,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-23 12:04:13",
+ "saved_at": "2026-07-29 05:00:02",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -236,7 +109,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

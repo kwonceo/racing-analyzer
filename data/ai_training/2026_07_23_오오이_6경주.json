@@ -3,7 +3,7 @@
  "race_id": "2026_07_23_오오이_6경주",
  "race_info": {
   "date": "2026-07-23",
-  "track": "오오이",
+  "track": "오이",
   "round": 6,
   "distance": null,
   "condition": null,
@@ -228,7 +228,7 @@
   "2nd": 8,
   "3rd": 12,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 10.1,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -237,7 +237,7 @@
   "quinella_hit": false,
   "winner": 3,
   "second": 8,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -249,16 +249,15 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-23 17:50:39",
+ "saved_at": "2026-07-29 04:59:49",
  "quality": {
-  "score": 40,
-  "grade": "제외",
+  "score": 60,
+  "grade": "참고용",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "전적 데이터",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

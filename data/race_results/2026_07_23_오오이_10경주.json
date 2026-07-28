@@ -1,10 +1,10 @@
 {
  "race_id": "2026_07_23_오오이_10경주",
- "raceKey": "오오이 10경주",
+ "raceKey": "2026-07-23 오오이 10경주",
  "date": "2026-07-23",
  "sport": "horse",
  "category": "japan_local",
- "track": "오오이",
+ "track": "오이",
  "round": 10,
  "distance": null,
  "track_condition": null,
@@ -16,7 +16,8 @@
   "3rd": 8
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 4.7,
+  "trifecta": 8.0
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -481,8 +482,8 @@
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -491,13 +492,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 4.7,
+  "trifecta_odds": 8.0,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-23 19:53:42",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:59)",
+ "saved_at": "2026-07-29 04:59:42",
  "validation": {
   "ok": true,
   "errors": []

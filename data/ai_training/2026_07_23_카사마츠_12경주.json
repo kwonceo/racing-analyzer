@@ -8,191 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 10,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 10,
-   "name": "マルヨハルキ",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    1,
-    1,
-    8,
-    1
-   ],
-   "record_score": 105.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "マテラスカイ",
-   "jockey": "東川慎",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    1,
-    4,
-    4,
-    3,
-    8
-   ],
-   "record_score": 105.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "アメリカンペイトリオット",
-   "jockey": "深澤杏",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    2,
-    2,
-    3,
-    8,
-    3
-   ],
-   "record_score": 65.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "ヴァンゴッホ",
-   "jockey": "望月洵",
-   "jockey_winrate": 53.3,
-   "recent_results": [
-    12,
-    2,
-    1,
-    2,
-    5
-   ],
-   "record_score": 66.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "アメリカンペイトリオット",
-   "jockey": "筒井勇",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    6,
-    8,
-    2,
-    6,
-    2
-   ],
-   "record_score": 51.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ダノンプレミアム",
-   "jockey": "森島貴",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    3,
-    5,
-    4,
-    5,
-    6
-   ],
-   "record_score": 65.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "クリソベリル",
-   "jockey": "渡邊竜",
-   "jockey_winrate": 56.7,
-   "recent_results": [
-    7,
-    9,
-    6,
-    2,
-    3
-   ],
-   "record_score": 59.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "シニスターミニスター",
-   "jockey": "明星晴",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    7,
-    10,
-    5,
-    10,
-    1
-   ],
-   "record_score": 23.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "デクラレーションオブウォー",
-   "jockey": "塚本征",
-   "jockey_winrate": 40.0,
-   "recent_results": [
-    10,
-    5,
-    9,
-    7,
-    10
-   ],
-   "record_score": 25.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "フィエールマン",
-   "jockey": "細川智",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    4,
-    9,
-    3,
-    6,
-    4
-   ],
-   "record_score": 29.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -242,8 +61,8 @@
   "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
-  "quinella_mismatch": 1.289,
-  "refund_rate": 0.77,
+  "quinella_mismatch": null,
+  "refund_rate": 0.747,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -256,24 +75,20 @@
  },
  "prediction": {
   "candidates": [
-   4,
-   6,
-   9,
    1,
-   10,
-   11,
    2,
+   3,
+   4,
+   5,
+   6,
    7,
    8,
-   3,
-   5
+   9
   ],
-  "eliminated": [
-   12
-  ],
-  "recommend": "7+9",
+  "eliminated": [],
+  "recommend": "4+9",
   "strategy": "BMED_보험형",
-  "confidence": 2.8,
+  "confidence": 0,
   "signal_quality": "하"
  },
  "result": {
@@ -281,7 +96,7 @@
   "2nd": 2,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 39.7,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -290,7 +105,7 @@
   "quinella_hit": false,
   "winner": 9,
   "second": 2,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -302,15 +117,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-23 17:05:11",
+ "saved_at": "2026-07-29 04:59:57",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
+  "score": 40,
+  "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
-   "확정 배당"
+   "이상감지 결과",
+   "전적 데이터"
   ],
   "errors": []
  }
