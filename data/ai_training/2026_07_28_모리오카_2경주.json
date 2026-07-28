@@ -1,0 +1,254 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_28_모리오카_2경주",
+ "race_info": {
+  "date": "2026-07-28",
+  "track": "모리오카",
+  "round": 2,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 9,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "フィエールマン",
+   "jockey": "高橋悠",
+   "jockey_winrate": 43.3,
+   "recent_results": [
+    1,
+    2,
+    8,
+    10,
+    4
+   ],
+   "record_score": 138.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "モーリス",
+   "jockey": "山本紀",
+   "jockey_winrate": 23.3,
+   "recent_results": [
+    1,
+    5,
+    2,
+    5,
+    7
+   ],
+   "record_score": 85.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "スクリーンヒーロー",
+   "jockey": "鈴木祐",
+   "jockey_winrate": 30.0,
+   "recent_results": [
+    4,
+    2,
+    4,
+    2,
+    7
+   ],
+   "record_score": 59.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "ミスターメロディ",
+   "jockey": "岩本怜",
+   "jockey_winrate": 10.0,
+   "recent_results": [
+    9,
+    3,
+    1,
+    3,
+    9
+   ],
+   "record_score": 82.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "マツリダゴッホ",
+   "jockey": "坂井瑛",
+   "jockey_winrate": 30.0,
+   "recent_results": [
+    8,
+    9,
+    2,
+    2,
+    4
+   ],
+   "record_score": 60.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "アルアイン",
+   "jockey": "齋藤友",
+   "jockey_winrate": 16.7,
+   "recent_results": [
+    7,
+    11,
+    4,
+    5,
+    1
+   ],
+   "record_score": 65.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "エイシンフラッシュ",
+   "jockey": "小林凌",
+   "jockey_winrate": 23.3,
+   "recent_results": [
+    11,
+    4,
+    2,
+    4,
+    7
+   ],
+   "record_score": 21.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "ベストウォーリア",
+   "jockey": "菅原辰",
+   "jockey_winrate": 30.0,
+   "recent_results": [
+    6,
+    10,
+    3,
+    4,
+    10
+   ],
+   "record_score": 14.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "ナムラタイタン",
+   "jockey": "塚本涼",
+   "jockey_winrate": 13.3,
+   "recent_results": [
+    12,
+    8,
+    3,
+    6,
+    6
+   ],
+   "record_score": -7.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.741,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   6,
+   3,
+   5,
+   7,
+   8,
+   9,
+   2,
+   4,
+   1
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 24.0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 9,
+  "2nd": 8,
+  "3rd": 5,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 9,
+  "second": 8,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-28 12:40:25",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
