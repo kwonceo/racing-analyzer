@@ -1,15 +1,15 @@
 {
  "race_id": "2026_07_28_모리오카_4경주",
- "raceKey": "모리오카 4경주",
+ "raceKey": "2026-07-28 모리오카 4경주",
  "date": "2026-07-28",
  "sport": "horse",
- "category": "japan_central",
+ "category": "japan_local",
  "track": "모리오카",
  "round": 4,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 8,
+ "horse_count": null,
  "result": {
   "1st": 2,
   "2nd": 5,
@@ -24,22 +24,13 @@
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7,
-   8
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
   "signal_quality": null,
-  "confidence": 25.0,
+  "confidence": 0,
   "inverse": false
  },
  "result_analysis": {
@@ -58,10 +49,10 @@
   "quinella_odds": 6.7,
   "trifecta_odds": 26.6,
   "actual_return": null,
-  "profit": 2200
+  "profit": 5700
  },
- "memo": "복승 메인 2+5 적중(6.7배). 화면 표시 3.2배 vs 확정 6.7배 — 마감 직전 1분 미수집 구간 변동.",
- "saved_at": "2026-07-28 14:00:21",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:24)",
+ "saved_at": "2026-07-29 02:24:17",
  "validation": {
   "ok": true,
   "errors": []
