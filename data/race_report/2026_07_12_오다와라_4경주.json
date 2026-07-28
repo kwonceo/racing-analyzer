@@ -8,14 +8,15 @@
   "3rd": 1,
   "4th": null
  },
- "hit": true,
+ "hit": false,
  "hit_type": null,
- "odds": "저배당",
- "win_odds": 6.4,
+ "odds": "미상",
+ "win_odds": 0,
  "why_recommended": {
   "signal_5": {
    "horse": 5,
    "placed": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -31,6 +32,7 @@
   "signal_4": {
    "horse": 4,
    "placed": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -46,6 +48,7 @@
   "signal_1": {
    "horse": 1,
    "placed": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -59,9 +62,9 @@
    "reason": "일반"
   }
  },
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 5번 전적 정보 제한",
-  "2. 배당 수집 시작 09:40:06",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -83,7 +86,7 @@
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "전적유력마 1번 적중"
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -96,9 +99,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 3
+  "validCount": 0
  },
- "pnl": 300,
+ "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-12 21:25:39"
+ "generated_at": "2026-07-29 03:13:58"
 }
