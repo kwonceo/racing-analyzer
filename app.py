@@ -3007,7 +3007,7 @@ def _snapshot_timing_learn(rk, compare, stage):
             "더 정확한 시점": ("T-2(마감 2분전)" if r2 > r10 else ("T-10(마감 10분전)" if r10 > r2 else "동률")),
         }
         os.makedirs(os.path.dirname(SNAPSHOT_TIMING_FILE), exist_ok=True)
-        json.dump(stat, open(SNAPSHOT_TIMING_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(SNAPSHOT_TIMING_FILE, stat, indent=1)
     except Exception as e:
         print("[타이밍 학습] 실패:", e)
 
@@ -4179,7 +4179,7 @@ def _after_close_load():
 
 def _after_close_save(d):
     os.makedirs(os.path.dirname(AFTER_CLOSE_FILE), exist_ok=True)
-    json.dump(d, open(AFTER_CLOSE_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(AFTER_CLOSE_FILE, d, indent=1)
 
 
 def _record_after_close_case(rk, date, mb_signed, anomalies, surge=None):
@@ -4274,7 +4274,7 @@ def _near_miss_load():
 
 def _near_miss_save(d):
     os.makedirs(os.path.dirname(NEAR_MISS_FILE), exist_ok=True)
-    json.dump(d, open(NEAR_MISS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(NEAR_MISS_FILE, d, indent=1)
 
 
 def _record_near_miss(rk, date, no, name):
@@ -4318,7 +4318,7 @@ def _signal_type_stats_load():
 
 def _signal_type_stats_save(d):
     os.makedirs(os.path.dirname(SIGNAL_TYPE_STATS_FILE), exist_ok=True)
-    json.dump(d, open(SIGNAL_TYPE_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(SIGNAL_TYPE_STATS_FILE, d, indent=1)
 
 
 def _learn_strong_signals(rk, date, an, top3):
@@ -4451,7 +4451,7 @@ def _compression_stats_load():
 
 def _compression_stats_save(d):
     os.makedirs(os.path.dirname(COMPRESSION_STATS_FILE), exist_ok=True)
-    json.dump(d, open(COMPRESSION_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(COMPRESSION_STATS_FILE, d, indent=1)
 
 
 def _learn_compression(rk, date, an, top3):
@@ -4515,7 +4515,7 @@ def _high_odds_companion_stats_load():
 
 def _high_odds_companion_stats_save(d):
     os.makedirs(os.path.dirname(HIGH_ODDS_COMPANION_FILE), exist_ok=True)
-    json.dump(d, open(HIGH_ODDS_COMPANION_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(HIGH_ODDS_COMPANION_FILE, d, indent=1)
 
 
 def _learn_high_odds_companion(rk, date, top3, rec, high_thresh=HIGH_ODDS_COMPANION_THRESH):
@@ -4570,7 +4570,7 @@ def _third_place_stats_load():
 
 def _third_place_stats_save(d):
     os.makedirs(os.path.dirname(THIRD_PLACE_STATS_FILE), exist_ok=True)
-    json.dump(d, open(THIRD_PLACE_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(THIRD_PLACE_STATS_FILE, d, indent=1)
 
 
 def _tp_reason_bucket(reason):
@@ -4650,7 +4650,7 @@ def _signal_lesson_load():
 
 def _signal_lesson_save(d):
     os.makedirs(os.path.dirname(SIGNAL_LESSON_FILE), exist_ok=True)
-    json.dump(d, open(SIGNAL_LESSON_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(SIGNAL_LESSON_FILE, d, indent=1)
 
 
 def _record_signal_lesson(case):
@@ -8449,7 +8449,7 @@ def _ev_bands_update(combo_odds_list, top2):
             if len(_t2) == 2 and sorted(int(x) for x in _c) == _t2:
                 _b["hit"] += 1
         os.makedirs(os.path.dirname(EV_BANDS_FILE), exist_ok=True)
-        json.dump(d, open(EV_BANDS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(EV_BANDS_FILE, d, indent=1)
     except Exception as _e:
         print("[기대값 학습] 갱신 실패(무시):", _e)
 
@@ -8740,7 +8740,7 @@ def _dark_cases_load():
 def _dark_cases_save(d):
     try:
         os.makedirs(os.path.dirname(DARK_CASES_FILE), exist_ok=True)
-        json.dump(d, open(DARK_CASES_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(DARK_CASES_FILE, d, indent=1)
     except Exception as e:
         print("[복병케이스] 저장 실패:", e)
 
@@ -8829,7 +8829,7 @@ def _pace_stats_recompute():
             if n:
                 out["scenario"][pace] = {"aRate": round(sc["aHit"] / n * 100, 1),
                                          "bRate": round(sc["bHit"] / n * 100, 1), "n": n}
-        json.dump(out, open(PACE_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+        _json_atomic(PACE_STATS_FILE, out)
         return out
     except Exception as e:
         print("[각질편성 통계] 재계산 실패:", e)
@@ -9201,7 +9201,7 @@ def _dark_stats_recompute():
             "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
         os.makedirs(os.path.dirname(DARK_STATS_FILE), exist_ok=True)
-        json.dump(stats, open(DARK_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(DARK_STATS_FILE, stats, indent=1)
         return stats
     except Exception as e:
         print("[복병통계] 재계산 실패:", e)
@@ -9283,7 +9283,7 @@ def _dansung_cases_load():
 def _dansung_cases_save(d):
     try:
         os.makedirs(os.path.dirname(DANSUNG_CASES_FILE), exist_ok=True)
-        json.dump(d, open(DANSUNG_CASES_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(DANSUNG_CASES_FILE, d, indent=1)
     except Exception as e:
         print("[단통케이스] 저장 실패:", e)
 
@@ -14227,7 +14227,7 @@ def _threshold_config_save(current, applied_note=None, prev=None):
     cfg["current"] = current
     cfg["history"] = hist[-50:]
     cfg["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    json.dump(cfg, open(THRESHOLD_CONFIG_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(THRESHOLD_CONFIG_FILE, cfg, indent=1)
     return cfg
 
 
@@ -14787,7 +14787,7 @@ def _learning_load():
 
 def _learning_save(d):
     os.makedirs(os.path.dirname(LEARNING_FILE), exist_ok=True)
-    json.dump(d, open(LEARNING_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+    _json_atomic(LEARNING_FILE, d)
 
 
 # ── [2번] 부진마 역전 학습 (전적 기반) ─────────────────────────────────
@@ -14811,7 +14811,7 @@ def _upset_load():
 
 def _upset_save(d):
     os.makedirs(os.path.dirname(UPSET_FILE), exist_ok=True)
-    json.dump(d, open(UPSET_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    _json_atomic(UPSET_FILE, d, indent=2)
 
 
 def _upset_bump(stats, key, hit):
@@ -15358,7 +15358,7 @@ def _discovered_load():
 
 def _discovered_save(out):
     os.makedirs(os.path.dirname(DISCOVERED_FILE), exist_ok=True)
-    json.dump(out, open(DISCOVERED_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(DISCOVERED_FILE, out, indent=1)
 
 
 # [4번] 고배당 적중 하이라이트 저장소
@@ -16202,7 +16202,7 @@ def _learn_aux_combos(rk, top3):
     if changed:
         P["cases"] = P["cases"][-300:]
         try:
-            json.dump(P, open(AUX_PROMOTE_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+            _json_atomic(AUX_PROMOTE_FILE, P, indent=1)
         except Exception as e:
             print("[보조조합 학습] 저장 실패:", e)
     return P.get("byReason")
@@ -17216,7 +17216,7 @@ def _failure_load():
 
 def _failure_save(d):
     os.makedirs(os.path.dirname(FAILURE_FILE), exist_ok=True)
-    json.dump(d, open(FAILURE_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(FAILURE_FILE, d, indent=1)
 
 
 def _horse_repr_timeline(doc, no):
@@ -18606,7 +18606,7 @@ def _competitor_recompute_stats():
         st["competitor_hit_rate"] = round(100 * st["competitor_hit"] / n)
         st["our_hit_rate"] = round(100 * st["our_hit"] / n)
         st["axis_match_rate"] = round(100 * st["axis_match"] / (st["races"] or 1))
-        json.dump(st, open(COMPETITOR_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(COMPETITOR_STATS_FILE, st, indent=1)
     except Exception as e:
         print("[경쟁분석] 통계 갱신 실패:", e)
     return st
@@ -20065,7 +20065,7 @@ def _review_note_append(doc, note, file):
     notes = [n for n in notes if n.get("raceKey") != rk]   # 같은 경주 이전 메모 제거
     notes.append(entry)
     try:
-        json.dump(notes, open(REVIEW_NOTES_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(REVIEW_NOTES_FILE, notes, indent=1)
     except Exception:
         pass
 
@@ -24079,7 +24079,7 @@ def _kra_section_records(meet, rc_date, rc_no, force=False):
         if os.path.exists(KRA_SECTION_FILE):
             allc = json.load(open(KRA_SECTION_FILE, encoding="utf-8"))
         allc[ck] = {"t": time.time(), "data": {str(k): v for k, v in out.items()}}
-        json.dump(allc, open(KRA_SECTION_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+        _json_atomic(KRA_SECTION_FILE, allc)
     except Exception:
         pass
     return out
@@ -24136,7 +24136,7 @@ def _kra_jockey_changes(meet, rc_date, force=False):
         if os.path.exists(KRA_JKCHANGE_FILE):
             allc = json.load(open(KRA_JKCHANGE_FILE, encoding="utf-8"))
         allc[ck] = {"t": time.time(), "data": data}
-        json.dump(allc, open(KRA_JKCHANGE_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+        _json_atomic(KRA_JKCHANGE_FILE, allc)
     except Exception:
         pass
     return data
@@ -28535,7 +28535,7 @@ def _kakao_token_load():
 def _kakao_token_save(tok):
     try:
         os.makedirs(os.path.dirname(KAKAO_TOKEN_FILE), exist_ok=True)
-        json.dump(tok, open(KAKAO_TOKEN_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(KAKAO_TOKEN_FILE, tok, indent=1)
     except Exception as e:
         print("[카카오] 토큰 저장 실패:", e)
 
@@ -29110,7 +29110,7 @@ def _timeline_stats_recompute():
         stats = {"T7": _r(t7), "T5": _r(t5), "changedThenHit": _r(changed),
                  "changedHorseWon": _r(chg_won), "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")}
         os.makedirs(os.path.dirname(TIMELINE_STATS_FILE), exist_ok=True)
-        json.dump(stats, open(TIMELINE_STATS_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(TIMELINE_STATS_FILE, stats, indent=1)
         return stats
     except Exception as e:
         print("[타임통계] 재계산 실패:", e)
