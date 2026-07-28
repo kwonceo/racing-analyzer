@@ -1,11 +1,11 @@
 {
  "race": "나고야 1경주",
- "raceKey": "나고야 1경주",
+ "raceKey": "2026-07-17 나고야 1경주",
  "date": "2026-07-17",
  "result": {
-  "1st": 9,
-  "2nd": 6,
-  "3rd": 3,
+  "1st": 6,
+  "2nd": 2,
+  "3rd": 7,
   "4th": null
  },
  "hit": false,
@@ -13,8 +13,8 @@
  "odds": "미상",
  "win_odds": 0,
  "why_recommended": {
-  "signal_9": {
-   "horse": 9,
+  "signal_6": {
+   "horse": 6,
    "placed": true,
    "recommended": false,
    "place_rank": 1,
@@ -29,8 +29,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_6": {
-   "horse": 6,
+  "signal_2": {
+   "horse": 2,
    "placed": true,
    "recommended": false,
    "place_rank": 2,
@@ -45,8 +45,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_3": {
-   "horse": 3,
+  "signal_7": {
+   "horse": 7,
    "placed": true,
    "recommended": false,
    "place_rank": 3,
@@ -64,11 +64,11 @@
  },
  "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 9번 전적 정보 제한",
+  "1. 전적 분석: 6번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
-  "horse": 9,
+  "horse": 6,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
@@ -101,7 +101,7 @@
   },
   "validCount": 0
  },
- "pnl": 0,
+ "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-17 08:32:20"
+ "generated_at": "2026-07-29 03:50:43"
 }

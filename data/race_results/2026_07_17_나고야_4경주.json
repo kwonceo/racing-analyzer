@@ -1,7 +1,9 @@
 {
  "race_id": "2026_07_17_나고야_4경주",
- "raceKey": "나고야 4경주",
+ "raceKey": "2026-07-17 나고야 4경주",
  "date": "2026-07-17",
+ "sport": "horse",
+ "category": "japan_local",
  "track": "나고야",
  "round": 4,
  "distance": null,
@@ -9,10 +11,15 @@
  "weather": null,
  "horse_count": null,
  "result": {
-  "1st": 2,
-  "2nd": 4,
-  "3rd": 7
+  "1st": 4,
+  "2nd": 6,
+  "3rd": 1
  },
+ "payouts": {
+  "quinella": 12.3,
+  "trifecta": 6.3
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -29,8 +36,8 @@
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": null,
-  "miss_reason": "추천 조합 미입상",
+  "hit_reason": "적중",
+  "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -39,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 12.3,
+  "trifecta_odds": 6.3,
   "actual_return": null,
-  "profit": 0
+  "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-17 08:32:29",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 03:50)",
+ "saved_at": "2026-07-29 03:50:49",
  "validation": {
   "ok": true,
   "errors": []
