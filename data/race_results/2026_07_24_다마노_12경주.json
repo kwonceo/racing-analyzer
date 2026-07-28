@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_24_다마노_12경주",
- "raceKey": "다마노 12경주",
+ "raceKey": "2026-07-24 다마노 12경주",
  "date": "2026-07-24",
  "sport": "cycle",
  "category": "cycle",
@@ -9,35 +9,28 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 3,
   "2nd": 2,
   "3rd": 7
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 15.2,
+  "trifecta": 16.0
  },
  "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
   "signal_quality": null,
-  "confidence": 28.4,
+  "confidence": 0,
   "inverse": false
  },
  "result_analysis": {
@@ -53,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 15.2,
+  "trifecta_odds": 16.0,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-24 16:52:40",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:02)",
+ "saved_at": "2026-07-29 05:02:11",
  "validation": {
   "ok": true,
   "errors": []
