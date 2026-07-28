@@ -1,6 +1,6 @@
 {
  "race": "다치카와 5경주",
- "raceKey": "다치카와 5경주",
+ "raceKey": "2026-07-28 다치카와 5경주",
  "date": "2026-07-28",
  "result": {
   "1st": 7,
@@ -197,7 +197,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.667,
-   "record_score": 92.2,
+   "record_score": null,
    "confidence": 16.4,
    "reason": "쌍승역전"
   },
@@ -385,9 +385,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 111.3,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_5": {
    "horse": 5,
@@ -573,7 +573,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.793,
-   "record_score": 114.8,
+   "record_score": null,
    "confidence": 11.0,
    "reason": "쌍승역전"
   }
@@ -584,7 +584,7 @@
   5
  ],
  "recommendation_process": [
-  "1. 전적 분석: 7번 92.2점",
+  "1. 전적 분석: 7번 전적 정보 제한",
   "2. 배당 수집 시작 12:26:47",
   "4. 쌍승 역전: 4→1(43.4) < 1→4(193.8) → 4번 실질 상위 신호",
   "4. 쌍승 역전: 5→1(14.6) < 1→5(39.9) → 5번 실질 상위 신호",
@@ -597,7 +597,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 20,
   "quinella_mismatch_score": 0,
-  "record_score": 92.2,
+  "record_score": null,
   "total": 16.4,
   "grade": "하"
  },
@@ -606,7 +606,7 @@
  ],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 92.2,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -686,5 +686,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-28 14:24:37"
+ "generated_at": "2026-07-29 01:53:36"
 }
