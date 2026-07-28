@@ -1,6 +1,6 @@
 {
  "race": "코치 3경주",
- "raceKey": "코치 3경주",
+ "raceKey": "2026-07-26 코치 3경주",
  "date": "2026-07-26",
  "result": {
   "1st": 8,
@@ -9,7 +9,7 @@
   "4th": null
  },
  "hit": false,
- "hit_type": null,
+ "hit_type": "삼복승 보험2",
  "odds": "미상",
  "win_odds": 0,
  "why_recommended": {
@@ -165,7 +165,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 54.2,
+   "record_score": null,
    "confidence": 40.8,
    "reason": "초과급락"
   },
@@ -321,9 +321,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 63.0,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_10": {
    "horse": 10,
@@ -477,7 +477,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 68.0,
+   "record_score": null,
    "confidence": 52.8,
    "reason": "초과급락"
   },
@@ -633,18 +633,18 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 113.8,
+   "record_score": null,
    "confidence": 8.0,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
-  6,
   10,
+  6,
   8
  ],
  "recommendation_process": [
-  "1. 전적 분석: 8번 54.2점",
+  "1. 전적 분석: 8번 전적 정보 제한",
   "2. 배당 수집 시작 16:26:08",
   "3. 초과급락 감지: 8번 초과급락 0.0%p (전체평균 -10.4%)",
   "5. 종합 신뢰도 40.8점(중) 판정",
@@ -656,7 +656,7 @@
   "excess_drop_score": 21,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 54.2,
+  "record_score": null,
   "total": 40.8,
   "grade": "중"
  },
@@ -665,7 +665,7 @@
  ],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 54.2,
+  "formScore": null,
   "dropAmt": -10.4,
   "dropScore": 52.0,
   "inverse": false,
@@ -761,5 +761,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-26 16:54:50"
+ "generated_at": "2026-07-29 05:28:41"
 }

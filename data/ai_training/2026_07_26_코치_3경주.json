@@ -8,208 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 11,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 6,
-   "name": "ガルボ",
-   "jockey": "永森大",
-   "jockey_winrate": 60.0,
-   "recent_results": [
-    2,
-    4,
-    1,
-    3,
-    2
-   ],
-   "record_score": 113.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "Ｗａｒ",
-   "jockey": "井上瑛",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    8,
-    1,
-    1,
-    1,
-    1
-   ],
-   "record_score": 68.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "ダノンレジェンド",
-   "jockey": "多田誠",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    1,
-    3,
-    11,
-    9,
-    11
-   ],
-   "record_score": 63.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ブリックスアンドモルタル",
-   "jockey": "岡村卓",
-   "jockey_winrate": 40.0,
-   "recent_results": [
-    7,
-    1,
-    10,
-    9,
-    2
-   ],
-   "record_score": 83.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "Ｆｒａｎｋｅｌ",
-   "jockey": "畑中信",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    6,
-    2,
-    4,
-    7,
-    8
-   ],
-   "record_score": 80.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "シニスターミニスター",
-   "jockey": "シニスターミニスター",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    3,
-    2,
-    10,
-    4
-   ],
-   "record_score": 54.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ゴールドドリーム",
-   "jockey": "郷間勇",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    4,
-    5,
-    2,
-    3,
-    6
-   ],
-   "record_score": 72.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ハービンジャー",
-   "jockey": "山崎雅",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    8,
-    5,
-    7,
-    5,
-    4
-   ],
-   "record_score": 56.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "キズナ",
-   "jockey": "塚本直",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    7,
-    6,
-    1,
-    5,
-    5
-   ],
-   "record_score": 50.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "サトノクラウン",
-   "jockey": "城野慈",
-   "jockey_winrate": 50.0,
-   "recent_results": [
-    7,
-    6,
-    6,
-    6,
-    3
-   ],
-   "record_score": 27.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 11,
-   "name": "ローズキングダム",
-   "jockey": "阿部基",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    9,
-    9,
-    9,
-    9
-   ],
-   "record_score": 15,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1261,12 +1063,12 @@
    5,
    6,
    8,
-   10,
-   4,
    9,
+   10,
    1,
    2,
    3,
+   4,
    7
   ],
   "eliminated": [
@@ -1282,7 +1084,7 @@
   "2nd": 9,
   "3rd": 10,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 30.4,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -1291,7 +1093,7 @@
   "quinella_hit": false,
   "winner": 8,
   "second": 9,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1303,14 +1105,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 16:54:50",
+ "saved_at": "2026-07-29 05:28:41",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

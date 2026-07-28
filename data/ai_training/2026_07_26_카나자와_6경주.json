@@ -8,88 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 5,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 4,
-   "name": "판타스틱",
-   "jockey": "승운",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    3,
-    3,
-    5
-   ],
-   "record_score": 98.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "상임볼트",
-   "jockey": "광희",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    5,
-    4,
-    2,
-    1
-   ],
-   "record_score": 73.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "앤버니",
-   "jockey": "상현",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    6,
-    1,
-    6,
-    2
-   ],
-   "record_score": 53.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "하이레벨",
-   "jockey": "강주",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "네버스톱",
-   "jockey": "시대",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -261,7 +183,7 @@
   "2nd": 6,
   "3rd": 4,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 22.7,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -270,7 +192,7 @@
   "quinella_hit": false,
   "winner": 8,
   "second": 6,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -282,14 +204,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 20:15:21",
+ "saved_at": "2026-07-29 05:28:27",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

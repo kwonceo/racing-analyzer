@@ -1,6 +1,6 @@
 {
  "race": "카나자와 4경주",
- "raceKey": "카나자와 4경주",
+ "raceKey": "2026-07-26 카나자와 4경주",
  "date": "2026-07-26",
  "result": {
   "1st": 8,
@@ -11,7 +11,7 @@
  "hit": true,
  "hit_type": "복승 메인",
  "odds": "저배당",
- "win_odds": 2.1,
+ "win_odds": 4.4,
  "why_recommended": {
   "signal_8": {
    "horse": 8,
@@ -165,9 +165,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 87.1,
+   "record_score": null,
    "confidence": 48.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_9": {
    "horse": 9,
@@ -321,7 +321,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 5.0,
+   "record_score": null,
    "confidence": 8.0,
    "reason": "일반"
   },
@@ -477,7 +477,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 26.2,
+   "record_score": null,
    "confidence": 16.0,
    "reason": "일반"
   }
@@ -488,7 +488,7 @@
   6
  ],
  "recommendation_process": [
-  "1. 전적 분석: 8번 87.1점",
+  "1. 전적 분석: 8번 전적 정보 제한",
   "2. 배당 수집 시작 18:26:20",
   "5. 종합 신뢰도 48.0점(중) 판정",
   "6. BMED 전략: 보험형 적용",
@@ -499,23 +499,21 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 87.1,
+  "record_score": null,
   "total": 48.0,
   "grade": "중"
  },
- "win_tags": [
-  "전적보조_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 87.1,
+  "formScore": null,
   "dropAmt": -9.3,
   "dropScore": 0.0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 48.0,
-  "reason": "전적유력마 8번 적중 · 2+6 복승 급락(-9.3%) → 6번 입상 적중"
+  "reason": "2+6 복승 급락(-9.3%) → 6번 입상 적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -580,7 +578,7 @@
   },
   "validCount": 16
  },
- "pnl": 1100,
+ "pnl": 1200,
  "stake": 1000,
- "generated_at": "2026-07-26 19:08:14"
+ "generated_at": "2026-07-29 05:28:22"
 }

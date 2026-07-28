@@ -8,207 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 11,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 8,
-   "name": "フリオーソ",
-   "jockey": "城野慈",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    4,
-    4,
-    4,
-    2,
-    4
-   ],
-   "record_score": 95.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 11,
-   "name": "ショウナンバッハ",
-   "jockey": "木村直",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    6,
-    6,
-    3,
-    2,
-    4
-   ],
-   "record_score": 96.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "トランセンド",
-   "jockey": "上田将",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    9,
-    7,
-    2,
-    1,
-    5
-   ],
-   "record_score": 93.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ダノンレジェンド",
-   "jockey": "井上瑛",
-   "jockey_winrate": 21.1,
-   "recent_results": [
-    6,
-    2,
-    2,
-    7,
-    7
-   ],
-   "record_score": 67.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "エピファネイア",
-   "jockey": "石本純",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    7,
-    8,
-    1,
-    2,
-    3
-   ],
-   "record_score": 31.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ナダル",
-   "jockey": "郷間勇",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    5,
-    2,
-    11,
-    7,
-    1
-   ],
-   "record_score": 27.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "アジアエクスプレス",
-   "jockey": "塚本直",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    11,
-    3,
-    11,
-    7
-   ],
-   "record_score": 38.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ディープブリランテ",
-   "jockey": "西森将",
-   "jockey_winrate": 6.7,
-   "recent_results": [
-    3,
-    4,
-    9,
-    1,
-    10
-   ],
-   "record_score": 30.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "サトノアレス",
-   "jockey": "畑中信",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    11,
-    8,
-    9,
-    8,
-    9
-   ],
-   "record_score": 23.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "マクフィ",
-   "jockey": "阿部基",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    10,
-    7,
-    10,
-    9
-   ],
-   "record_score": 23.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "アイルハヴアナザー",
-   "jockey": "佐原秀",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    7,
-    7,
-    7,
-    4,
-    5
-   ],
-   "record_score": -8.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1273,19 +1076,20 @@
  },
  "prediction": {
   "candidates": [
+   6,
    8,
+   2,
    4,
    5,
-   6,
    10,
    11,
-   2,
    1,
    9,
-   7,
+   7
+  ],
+  "eliminated": [
    3
   ],
-  "eliminated": [],
   "recommend": "5+10",
   "strategy": "BMED_역배열형",
   "confidence": 65.0,
@@ -1296,7 +1100,7 @@
   "2nd": 4,
   "3rd": 9,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 10.9,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -1305,7 +1109,7 @@
   "quinella_hit": false,
   "winner": 5,
   "second": 4,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": "8",
@@ -1317,14 +1121,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 19:30:34",
+ "saved_at": "2026-07-29 05:28:53",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

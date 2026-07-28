@@ -8,131 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 8,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 3,
-   "name": "금아어뎁",
-   "jockey": "승운",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    2
-   ],
-   "record_score": 119.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "유니언챔",
-   "jockey": "시대",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    3
-   ],
-   "record_score": 108.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "즐거운동",
-   "jockey": "진구",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    3
-   ],
-   "record_score": 108.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "하늘보스",
-   "jockey": "동영",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    4
-   ],
-   "record_score": 83.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "챔프소니",
-   "jockey": "경민",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    4
-   ],
-   "record_score": 83.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "퀸 티 케",
-   "jockey": "생재",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    6
-   ],
-   "record_score": 72.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "대호나라",
-   "jockey": "형석",
-   "jockey_winrate": null,
-   "recent_results": [
-    3,
-    6
-   ],
-   "record_score": 58.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "판타스틱",
-   "jockey": "나카",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    10
-   ],
-   "record_score": 34.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -806,10 +685,10 @@
    2,
    3,
    4,
+   5,
    7,
    8,
-   6,
-   5
+   6
   ],
   "eliminated": [],
   "recommend": "1+3",
@@ -822,7 +701,7 @@
   "2nd": 3,
   "3rd": 4,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 1.8,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -831,7 +710,7 @@
   "quinella_hit": false,
   "winner": 1,
   "second": 3,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": "2",
@@ -843,14 +722,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 19:08:12",
+ "saved_at": "2026-07-29 05:28:51",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

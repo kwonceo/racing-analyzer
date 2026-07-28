@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_26_코치_10경주",
- "raceKey": "코치 10경주",
+ "raceKey": "2026-07-26 코치 10경주",
  "date": "2026-07-26",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 10,
+ "horse_count": null,
  "result": {
   "1st": 5,
   "2nd": 4,
@@ -17,9 +17,9 @@
  },
  "payouts": {
   "quinella": 4.1,
-  "trifecta": 0.0
+  "trifecta": 14.0
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {
   "quinella": {
    "1+4": 3.6,
@@ -128,17 +128,18 @@
  "prediction": {
   "candidates": [
    1,
+   3,
+   4,
    5,
    6,
    7,
    8,
    9,
-   3,
-   4,
-   10,
+   10
+  ],
+  "eliminated": [
    2
   ],
-  "eliminated": [],
   "recommend_main": "1+4",
   "recommend_sub": null,
   "strategy": "BMED_보험형",
@@ -149,7 +150,7 @@
  "result_analysis": {
   "main_hit": true,
   "sub_hit": false,
-  "hit_reason": "적중",
+  "hit_reason": "제거 적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
@@ -160,12 +161,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 4.1,
-  "trifecta_odds": null,
+  "trifecta_odds": 14.0,
   "actual_return": null,
   "profit": 3100
  },
- "memo": null,
- "saved_at": "2026-07-26 20:37:35",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:28)",
+ "saved_at": "2026-07-29 05:28:32",
  "validation": {
   "ok": true,
   "errors": []

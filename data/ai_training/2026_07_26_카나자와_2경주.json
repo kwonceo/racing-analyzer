@@ -8,86 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 5,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "ミスターメロディ",
-   "jockey": "松戸政",
-   "jockey_winrate": 26.3,
-   "recent_results": [
-    3,
-    3,
-    3
-   ],
-   "record_score": 83.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "チュウワウィザード",
-   "jockey": "中島龍",
-   "jockey_winrate": 54.2,
-   "recent_results": [
-    4,
-    3
-   ],
-   "record_score": 73.7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ヴァンゴッホ",
-   "jockey": "栗原大",
-   "jockey_winrate": 56.7,
-   "recent_results": [
-    5,
-    4
-   ],
-   "record_score": 25.7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "タワーオブロンドン",
-   "jockey": "甲賀弘",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    4,
-    4
-   ],
-   "record_score": 25.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "オメガパフューム",
-   "jockey": "青柳正",
-   "jockey_winrate": 50.0,
-   "recent_results": [
-    5
-   ],
-   "record_score": 8.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -398,8 +322,8 @@
    1,
    2,
    3,
-   5,
-   4
+   4,
+   5
   ],
   "eliminated": [],
   "recommend": "2+3",
@@ -412,7 +336,7 @@
   "2nd": 3,
   "3rd": 4,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 1.8,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "적중"
@@ -421,7 +345,7 @@
   "quinella_hit": false,
   "winner": 2,
   "second": 3,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -433,7 +357,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 17:45:05",
+ "saved_at": "2026-07-29 05:28:18",
  "quality": {
   "score": 60,
   "grade": "참고용",
@@ -441,7 +365,7 @@
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

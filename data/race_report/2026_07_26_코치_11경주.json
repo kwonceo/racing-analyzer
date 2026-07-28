@@ -1,6 +1,6 @@
 {
  "race": "코치 11경주",
- "raceKey": "코치 11경주",
+ "raceKey": "2026-07-26 코치 11경주",
  "date": "2026-07-26",
  "result": {
   "1st": 2,
@@ -16,7 +16,7 @@
   "signal_2": {
    "horse": 2,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -60,45 +60,9 @@
    "record_score": null,
    "confidence": null,
    "reason": "일반"
-  },
-  "signal_6": {
-   "horse": 6,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_11": {
-   "horse": 11,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
   }
  },
- "recommended_horses": [
-  2,
-  6,
-  11
- ],
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 2번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
@@ -139,5 +103,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-26 20:59:49"
+ "generated_at": "2026-07-29 05:28:34"
 }

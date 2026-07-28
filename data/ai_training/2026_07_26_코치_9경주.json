@@ -8,155 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 10,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "관악산스",
-   "jockey": "아르",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    1
-   ],
-   "record_score": 120.7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "샤이닝로",
-   "jockey": "범현",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    4
-   ],
-   "record_score": 92.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "벌고낙성",
-   "jockey": "재로",
-   "jockey_winrate": null,
-   "recent_results": [
-    3,
-    1
-   ],
-   "record_score": 86.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "강철전사",
-   "jockey": "르칸",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    1
-   ],
-   "record_score": 67.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "글로벌컴",
-   "jockey": "인철",
-   "jockey_winrate": null,
-   "recent_results": [
-    7,
-    2
-   ],
-   "record_score": 57.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "티나케이",
-   "jockey": "도운",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    2
-   ],
-   "record_score": 47.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "킹 칼 레",
-   "jockey": "용근",
-   "jockey_winrate": null,
-   "recent_results": [
-    8,
-    4
-   ],
-   "record_score": 35.7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "파사스파",
-   "jockey": "태훈",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    5
-   ],
-   "record_score": 25,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "파이브스",
-   "jockey": "용호",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "파리의불",
-   "jockey": "기원",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -235,12 +90,13 @@
    6,
    7,
    8,
+   10
+  ],
+  "eliminated": [
    2,
    3,
-   10,
    9
   ],
-  "eliminated": [],
   "recommend": "5+7",
   "strategy": "BMED_보험형",
   "confidence": 0,
@@ -251,16 +107,16 @@
   "2nd": 10,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 122.1,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "적중"
+  "hit_pattern": "제거 적중"
  },
  "labels": {
   "quinella_hit": false,
   "winner": 5,
   "second": 10,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -272,7 +128,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-26 19:52:27",
+ "saved_at": "2026-07-29 05:28:56",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -281,7 +137,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
