@@ -8,95 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 7,
-   "name": "坂本 敏也",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 68.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "亀井 道佳",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 62.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "藤野 竜也",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 57.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "岡田 大門",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 62.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "南 蓮",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 57.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "吉澤 賢",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 62.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "川西 亮介",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 61.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -736,7 +651,7 @@
   "2nd": 7,
   "3rd": 1,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 16.2,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "전적유력마 1번 적중 · 역배열 감지말 5번 입상"
@@ -745,7 +660,7 @@
   "quinella_hit": false,
   "winner": 5,
   "second": 7,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -757,14 +672,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-25 12:21:13",
+ "saved_at": "2026-07-29 05:17:19",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
