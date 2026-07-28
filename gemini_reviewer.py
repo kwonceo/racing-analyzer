@@ -6,10 +6,21 @@ _GEMINI_LOCK = threading.Lock()
 _CALL_INTERVAL = 300
 _LOG_DIR = os.path.join(os.path.dirname(__file__), "logs", "gemini_review")
 os.makedirs(_LOG_DIR, exist_ok=True)
-_GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+_GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent"
+# gemini-2.0-flash 는 2026-07 기준 서비스 종료("no longer available", 404) → 2.5 계열로 교체.
+#   순서대로 시도(앞이 실패하면 다음). 기존 2.0-flash 도 삭제하지 않고 최후 폴백으로 유지.
+_GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
+_GEMINI_URL = _GEMINI_BASE % _GEMINI_MODELS[0]   # 하위호환(기존 상수명 유지)
+
 
 def _gemini_api_key():
     return (os.environ.get("GEMINI_API_KEY") or "").strip()
+
+
+def _mask(text, key):
+    """로그/예외 문자열에 API 키가 노출되지 않도록 마스킹."""
+    s = str(text)
+    return s.replace(key, "<KEY>") if key else s
 
 def _fmt_combo(lst):
     if not lst:
@@ -54,6 +65,28 @@ def _save_log(rk, result):
     except Exception:
         pass
 
+# app.py 의 실제 발송 함수는 `_kakao_send_to_me(text, url=None)` (반환 {ok, error?}).
+#   기존 후보명 3개는 삭제하지 않고 폴백으로 유지(다른 배포본 호환).
+_KAKAO_FN_NAMES = ["_kakao_send_to_me", "_kakao_send_text", "_send_kakao_msg", "kakao_send"]
+
+
+def _resolve_app_module():
+    """실행 중인 app 모듈을 반환. `python app.py` 는 __main__, gunicorn 은 app 으로 로드된다.
+    ⚠ sys.modules 를 먼저 조회한다 — importlib.import_module("app") 을 먼저 쓰면
+      이미 __main__ 으로 실행 중인 app.py 가 별도 모듈 객체로 '한 번 더' 실행되어
+      불필요한 재초기화가 발생한다(최후 폴백으로만 사용)."""
+    import sys
+    for name in ("__main__", "app"):
+        mod = sys.modules.get(name)
+        if mod is not None and any(hasattr(mod, fn) for fn in _KAKAO_FN_NAMES):
+            return mod
+    try:
+        import importlib
+        return importlib.import_module("app")
+    except Exception:
+        return None
+
+
 def _send_kakao(rk, result):
     try:
         msg = "[" + rk + "] Gemini 경고\n" + result.get("summary", "") + "\n"
@@ -64,15 +97,23 @@ def _send_kakao(rk, result):
             msg += "권장복승: " + result["q_suggest"] + "\n"
         if result.get("t_suggest"):
             msg += "권장삼복승: " + result["t_suggest"]
-        import importlib
-        app_mod = importlib.import_module("app")
-        for fn in ["_kakao_send_text", "_send_kakao_msg", "kakao_send"]:
+        app_mod = _resolve_app_module()
+        if app_mod is None:
+            print("[Gemini] 카카오 발송 실패 — app 모듈을 찾지 못함")
+            return
+        for fn in _KAKAO_FN_NAMES:
             fn_obj = getattr(app_mod, fn, None)
-            if fn_obj:
-                fn_obj(msg)
-                break
-    except Exception:
-        pass
+            if fn_obj is None:
+                continue
+            res = fn_obj(msg)
+            if isinstance(res, dict) and not res.get("ok"):
+                print("[Gemini] 카카오 발송 실패(" + fn + ") —", res.get("error"))
+            else:
+                print("[Gemini] 카카오 경고 발송(" + fn + "):", rk)
+            return
+        print("[Gemini] 카카오 발송 실패 — 발송 함수 없음:", _KAKAO_FN_NAMES)
+    except Exception as e:
+        print("[Gemini] 카카오 발송 예외(무시) —", e)
 
 def review_async(rk, final_q, final_t, special_q=None, line_pairs=None,
                  strong_signals=None, fav_axis=None, strong_axis=True,
@@ -89,22 +130,46 @@ def review_async(rk, final_q, final_t, special_q=None, line_pairs=None,
             prompt = _build_prompt(rk, final_q, final_t, special_q or [],
                                    line_pairs or [], strong_signals or [],
                                    fav_axis, strong_axis, drops or [], cur_mb)
-            resp = requests.post(
-                _GEMINI_URL + "?key=" + key,
-                json={
-                    "contents": [{"parts": [{"text": prompt}]}],
-                    "generationConfig": {"temperature": 0.1, "maxOutputTokens": 300}
+            # ⚠ 키는 URL 쿼리(?key=)가 아닌 헤더로 전달 — 쿼리로 넣으면 requests 예외 메시지에
+            #   전체 URL이 실려 API 키가 콘솔/로그로 그대로 유출된다(실제 발생 확인, 2026-07-28).
+            headers = {"x-goog-api-key": key}
+            payload = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.1,
+                    "maxOutputTokens": 800,          # 300 은 2.5 계열에서 MAX_TOKENS 로 잘려 JSON 파손
+                    "thinkingConfig": {"thinkingBudget": 0},   # thinking 토큰이 출력예산을 잠식하는 것 방지
+                    "responseMimeType": "application/json",    # JSON 이외 출력 차단
                 },
-                timeout=5
-            )
-            resp.raise_for_status()
-            raw = resp.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
-            raw_clean = raw.replace("```json", "").replace("```", "").strip()
-            result = json.loads(raw_clean)
+            }
+            result = None
+            last_err = ""
+            for _model in _GEMINI_MODELS:
+                try:
+                    resp = requests.post(_GEMINI_BASE % _model, headers=headers,
+                                         json=payload, timeout=15)
+                    if resp.status_code != 200:
+                        last_err = "%s %s" % (_model, _mask(resp.text, key)[:160])
+                        continue
+                    _cand = (resp.json().get("candidates") or [{}])[0]
+                    _parts = (_cand.get("content") or {}).get("parts") or []
+                    if not _parts:
+                        last_err = "%s parts 없음(finishReason=%s)" % (_model, _cand.get("finishReason"))
+                        continue
+                    raw = _parts[0].get("text", "").strip()
+                    raw_clean = raw.replace("```json", "").replace("```", "").strip()
+                    result = json.loads(raw_clean)
+                    break
+                except Exception as _me:
+                    last_err = "%s %s" % (_model, _mask(_me, key)[:160])
+                    continue
+            if result is None:
+                print("[Gemini] " + str(rk) + ": 검수 실패(무시) — " + last_err)
+                return
             print("[Gemini] " + str(rk) + ": " + result.get("status", "?") + " — " + result.get("summary", ""))
             _save_log(rk, result)
             if result.get("status") == "WARNING":
                 _send_kakao(rk, result)
         except Exception as e:
-            print("[Gemini] " + str(rk) + ": 에러(무시) — " + str(e))
+            print("[Gemini] " + str(rk) + ": 에러(무시) — " + _mask(e, _gemini_api_key()))
     threading.Thread(target=_run, daemon=True, name="gemini-" + str(rk)[:10]).start()

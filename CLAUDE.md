@@ -299,10 +299,15 @@ git tag -a vX.Y.Z -m "..." && git push origin --tags
 - 검사 4종: ①맹목적 왕축 ②B라인 누락 ③라인 교차 ④급락 미반영.
 - 모델 `gemini-2.0-flash`, 경주당 **5분 1회**(`_CALL_INTERVAL=300`), timeout 5초.
 - 결과 → `logs/gemini_review/YYYYMMDD_<경주>_HHMMSS.json`. `status=="WARNING"`이면 카카오 알림 발송.
-- **가동 전제조건 2가지(둘 다 필요)**
-  1. ✅ **해결(2026-07-28)** — `requests` 설치 완료(2.34.2) + `requirements.txt` 명시. 미설치 시 `import gemini_reviewer` 자체가 실패하고, app.py의 `except`가 삼켜 로그조차 안 남았음(현재는 실패 사유를 콘솔 출력).
-  2. ⚠️ **미해결** — `.env`의 `GEMINI_API_KEY`. 미설정 시 스레드가 즉시 `return`(무음 실패). `.env`에는 현재 `ANTHROPIC_API_KEY`·`KRA_API_KEY`만 존재.
-- ⚠️ **알려진 잠재 버그**: `_send_kakao`가 찾는 함수명(`_kakao_send_text`/`_send_kakao_msg`/`kakao_send`)이 app.py에 **없음**(실제는 `_kakao_send_to_me`) → `status=="WARNING"` 카카오 알림이 무음 실패함. 키 설정 후 알림이 필요하면 함수명 배선 필요.
+- ✅ **가동 확인 완료(2026-07-28 12:20)** — 라이브 서버가 실제 경주 검수 로그 생성(`logs/gemini_review/`). 복구 이력:
+  1. ✅ `requests` 설치(2.34.2) + `requirements.txt` 명시. 미설치 시 `import gemini_reviewer` 자체가 실패하고 app.py의 `except`가 삼켜 로그조차 안 남았음.
+  2. ✅ `.env`에 `GEMINI_API_KEY` 추가(사용자 직접 입력).
+  3. ✅ **모델 교체** — `gemini-2.0-flash`는 **서비스 종료**(404 `"no longer available"`). `_GEMINI_MODELS = [2.5-flash → 2.5-flash-lite → 2.0-flash]` 순차 폴백으로 변경(구모델도 삭제 없이 최후 폴백 유지).
+  4. ✅ **출력 설정** — `maxOutputTokens 300→800`(2.5 계열은 300에서 `MAX_TOKENS`로 잘려 JSON 파손) + `thinkingConfig.thinkingBudget=0`(thinking이 출력예산 잠식 방지) + `responseMimeType="application/json"`. 실측 2.6초/486토큰.
+  5. ✅ **카카오 함수명 배선** — `_send_kakao`가 찾던 3개 이름이 app.py에 전부 없었음 → 실제 함수 `_kakao_send_to_me(text, url=None)`(반환 `{ok, error?}`)를 1순위로 추가(기존 3개는 폴백 보존). 발송 성공/실패를 콘솔에 출력.
+  6. ✅ **모듈 조회 방식** — `importlib.import_module("app")`는 `python app.py`(=`__main__`) 실행 시 app.py를 **두 번째 모듈로 재실행**하므로, `sys.modules["__main__"] → ["app"]` 순 조회로 변경(import_module은 최후 폴백).
+- 🔒 **키 유출 방지**: 인증을 `?key=` 쿼리 → **`x-goog-api-key` 헤더**로 변경. 쿼리 방식은 requests 예외 메시지에 전체 URL이 실려 **API 키가 콘솔·로그로 그대로 노출**된다(실제 발생 확인). 모든 오류 출력은 `_mask()`로 키를 `<KEY>`로 치환.
+- ⚠️ **운영 주의**: `status=="WARNING"`이면 **카카오 알림이 실제 발송**된다(`data/kakao_token.json` 연동 시). Gemini는 WARNING을 후하게 내는 경향이 있어, 경주당 최대 5분 1회(`_CALL_INTERVAL=300`) 알림이 쌓일 수 있음 → 알림 과다 시 `_CALL_INTERVAL` 상향 또는 발송 조건(예: `issues` 2건 이상)을 조여야 한다.
 - ⚠️ **콘솔 인코딩**: app.py는 기동 로그에 em-dash(`—`) 등 비-cp949 문자를 출력하므로, **stdout을 파일로 리다이렉트하면 `UnicodeEncodeError`로 기동 실패**한다. `경마서버_자동시작.bat`처럼 `chcp 65001`(UTF-8 콘솔)로 띄우거나 `PYTHONIOENCODING=utf-8`을 설정할 것.
 - **진단 명령**
   ```bash
