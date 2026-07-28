@@ -8,137 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "プリティパンク",
-   "jockey": "渡邊竜（笠松）",
-   "jockey_winrate": null,
-   "recent_results": [
-    3,
-    3,
-    5,
-    5,
-    5
-   ],
-   "record_score": 45.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ガケップチー",
-   "jockey": "細川智（愛知）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    11,
-    8,
-    3,
-    4
-   ],
-   "record_score": 3.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ヒルノエルニド",
-   "jockey": "深澤杏（笠松）",
-   "jockey_winrate": null,
-   "recent_results": [
-    5,
-    6,
-    8,
-    9,
-    8
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "オオイリブクロ",
-   "jockey": "塚本征（愛知）",
-   "jockey_winrate": null,
-   "recent_results": [
-    9,
-    9,
-    5,
-    8,
-    7
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ヒルノマース",
-   "jockey": "東川慎（笠松）",
-   "jockey_winrate": null,
-   "recent_results": [
-    8,
-    6,
-    10,
-    8,
-    9
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "アイベット",
-   "jockey": "丸山真（愛知）",
-   "jockey_winrate": null,
-   "recent_results": [
-    7,
-    5,
-    8,
-    9,
-    8
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ペティトール",
-   "jockey": "森島貴（笠松）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    7,
-    9,
-    5,
-    6
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [],
   "drop_rates": {},
@@ -159,17 +32,8 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   2,
-   1,
-   3,
-   4,
-   5,
-   6
-  ],
-  "eliminated": [
-   7
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend": null,
   "strategy": null,
   "confidence": 0,
@@ -180,16 +44,16 @@
   "2nd": 7,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 12.0,
   "exacta_odds": null,
-  "hit": true,
-  "hit_pattern": "적중"
+  "hit": false,
+  "hit_pattern": null
  },
  "labels": {
   "quinella_hit": false,
   "winner": 4,
   "second": 7,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -201,7 +65,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-20 13:08:18",
+ "saved_at": "2026-07-29 04:21:59",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -210,7 +74,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

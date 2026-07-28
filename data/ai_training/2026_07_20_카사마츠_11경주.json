@@ -20,7 +20,7 @@
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": null,
-  "refund_rate": 0.741,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -32,15 +32,7 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend": null,
   "strategy": null,
@@ -52,16 +44,16 @@
   "2nd": 1,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 10.9,
   "exacta_odds": null,
-  "hit": true,
-  "hit_pattern": "전적유력마 1번 적중"
+  "hit": false,
+  "hit_pattern": null
  },
  "labels": {
   "quinella_hit": false,
   "winner": 5,
   "second": 1,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -73,17 +65,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-20 17:02:54",
+ "saved_at": "2026-07-29 04:21:48",
  "quality": {
-  "score": 20,
+  "score": 40,
   "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "전적 데이터",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

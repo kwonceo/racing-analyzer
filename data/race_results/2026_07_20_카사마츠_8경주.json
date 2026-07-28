@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_20_카사마츠_8경주",
- "raceKey": "카사마츠 8경주",
+ "raceKey": "2026-07-20 카사마츠 8경주",
  "date": "2026-07-20",
  "sport": "horse",
  "category": "japan_local",
@@ -9,84 +9,27 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 3,
   "2nd": 2,
   "3rd": 5
  },
- "odds_at_start": {
-  "quinella": {
-   "2+3": 2.4,
-   "3+4": 3.4,
-   "3+5": 4.5,
-   "1+3": 6.4,
-   "3+7": 21.7,
-   "2+4": 26.4,
-   "2+5": 42.8,
-   "1+2": 44.8,
-   "4+5": 47.9,
-   "3+6": 48.4,
-   "1+4": 50.0,
-   "1+5": 68.4,
-   "4+7": 93.5,
-   "2+7": 120.4,
-   "1+7": 161.2,
-   "5+7": 176.4,
-   "2+6": 183.3,
-   "5+6": 197.5,
-   "4+6": 318.8,
-   "1+6": 334.0,
-   "6+7": 395.1
-  },
-  "exacta": {}
+ "payouts": {
+  "quinella": 2.4,
+  "trifecta": 5.3
  },
- "odds_timeline": [
-  {
-   "time": "15:01:50",
-   "minutes_before": null,
-   "quinella": {
-    "2+3": 2.4,
-    "3+4": 3.4,
-    "3+5": 4.5,
-    "1+3": 6.4,
-    "3+7": 21.7,
-    "2+4": 26.4,
-    "2+5": 42.8,
-    "1+2": 44.8,
-    "4+5": 47.9,
-    "3+6": 48.4,
-    "1+4": 50.0,
-    "1+5": 68.4,
-    "4+7": 93.5,
-    "2+7": 120.4,
-    "1+7": 161.2,
-    "5+7": 176.4,
-    "2+6": 183.3,
-    "5+6": 197.5,
-    "4+6": 318.8,
-    "1+6": 334.0,
-    "6+7": 395.1
-   },
-   "exacta": {}
-  }
- ],
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
-  "recommend_main": "2+3",
+  "recommend_main": null,
   "recommend_sub": null,
-  "strategy": "BMED_보험형",
-  "signal_quality": "하",
+  "strategy": null,
+  "signal_quality": null,
   "confidence": 0,
   "inverse": false
  },
@@ -104,12 +47,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 2.4,
-  "trifecta_odds": null,
+  "trifecta_odds": 5.3,
   "actual_return": null,
-  "profit": -1000
+  "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-20 15:28:00",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:22)",
+ "saved_at": "2026-07-29 04:22:05",
  "validation": {
   "ok": true,
   "errors": []
