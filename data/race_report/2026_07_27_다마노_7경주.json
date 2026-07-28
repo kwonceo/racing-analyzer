@@ -1,6 +1,6 @@
 {
  "race": "다마노 7경주",
- "raceKey": "다마노 7경주",
+ "raceKey": "2026-07-27 다마노 7경주",
  "date": "2026-07-27",
  "result": {
   "1st": 1,
@@ -9,9 +9,9 @@
   "4th": null
  },
  "hit": true,
- "hit_type": "삼복승 보험2",
- "odds": "고배당",
- "win_odds": 28.6,
+ "hit_type": null,
+ "odds": "중배당",
+ "win_odds": 9.6,
  "why_recommended": {
   "signal_1": {
    "horse": 1,
@@ -165,7 +165,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.249,
-   "record_score": 108.5,
+   "record_score": null,
    "confidence": 55.0,
    "reason": "쌍승역전"
   },
@@ -321,7 +321,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.381,
-   "record_score": 108.1,
+   "record_score": null,
    "confidence": 43.0,
    "reason": "쌍승역전"
   },
@@ -477,7 +477,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.333,
-   "record_score": 101.9,
+   "record_score": null,
    "confidence": 43.0,
    "reason": "쌍승역전"
   },
@@ -633,18 +633,18 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 110.7,
+   "record_score": null,
    "confidence": 8.0,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
-  3,
   4,
+  3,
   1
  ],
  "recommendation_process": [
-  "1. 전적 분석: 1번 108.5점",
+  "1. 전적 분석: 1번 전적 정보 제한",
   "2. 배당 수집 시작 18:05:00",
   "4. 쌍승 역전: 5→4(10.1) < 4→5(47.7) → 5번 실질 상위 신호",
   "4. 쌍승 역전: 1→4(4.2) < 4→1(16.9) → 1번 실질 상위 신호",
@@ -657,7 +657,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 35,
   "quinella_mismatch_score": 0,
-  "record_score": 108.5,
+  "record_score": null,
   "total": 55.0,
   "grade": "중"
  },
@@ -666,7 +666,7 @@
  ],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 108.5,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -745,7 +745,7 @@
   },
   "validCount": 16
  },
- "pnl": 27600,
+ "pnl": 8600,
  "stake": 1000,
- "generated_at": "2026-07-27 18:29:25"
+ "generated_at": "2026-07-29 05:32:20"
 }
