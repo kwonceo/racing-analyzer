@@ -599,7 +599,7 @@
   "2nd": 4,
   "3rd": 6,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 1.0,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "전적유력마 1번 적중"
@@ -608,7 +608,7 @@
   "quinella_hit": false,
   "winner": 1,
   "second": 4,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -620,15 +620,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-25 16:17:04",
+ "saved_at": "2026-07-29 05:16:37",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
-  "complete": false,
-  "ai_ready": false,
+  "score": 80,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
   "missing": [
-   "전적 데이터",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
