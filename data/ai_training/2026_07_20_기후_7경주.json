@@ -13,67 +13,14 @@
  },
  "horses": [],
  "odds_features": {
-  "timeline": [
-   {
-    "time": "10:54:40",
-    "quinella": {
-     "2+5": 2.9,
-     "2+7": 4.6,
-     "1+2": 5.0,
-     "2+6": 6.6,
-     "2+4": 13.4,
-     "2+3": 16.6,
-     "4+7": 18.4,
-     "1+7": 24.0,
-     "3+7": 25.6,
-     "4+6": 43.1,
-     "1+4": 50.6,
-     "3+4": 62.3,
-     "1+3": 64.6,
-     "6+7": 70.5,
-     "1+6": 72.7,
-     "1+5": 87.2,
-     "3+6": 90.6,
-     "5+7": 94.3,
-     "5+6": 118.3,
-     "3+5": 139.6,
-     "4+5": 139.6
-    }
-   },
-   {
-    "time": "10:54:43",
-    "quinella": {
-     "2+5": 2.9,
-     "2+7": 4.6,
-     "1+2": 5.0,
-     "2+6": 6.6,
-     "2+4": 13.4,
-     "2+3": 16.6,
-     "4+7": 18.4,
-     "1+7": 24.0,
-     "3+7": 25.6,
-     "4+6": 43.1,
-     "1+4": 50.6,
-     "3+4": 62.3,
-     "1+3": 64.6,
-     "6+7": 70.5,
-     "1+6": 72.7,
-     "1+5": 87.2,
-     "3+6": 90.6,
-     "5+7": 94.3,
-     "5+6": 118.3,
-     "3+5": 139.6,
-     "4+5": 139.6
-    }
-   }
-  ],
+  "timeline": [],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
-  "quinella_mismatch": 1.586,
-  "refund_rate": 0.745,
+  "quinella_mismatch": null,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -85,36 +32,28 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
-  "recommend": "2+5",
-  "strategy": "BMED_보험형",
-  "confidence": 12.1,
-  "signal_quality": "하"
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
  },
  "result": {
   "1st": 2,
   "2nd": 7,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 4.6,
   "exacta_odds": null,
-  "hit": true,
-  "hit_pattern": "적중"
+  "hit": false,
+  "hit_pattern": null
  },
  "labels": {
   "quinella_hit": false,
   "winner": 2,
   "second": 7,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -126,15 +65,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-20 11:31:19",
+ "saved_at": "2026-07-29 04:17:37",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
+  "score": 40,
+  "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
-   "전적 데이터",
-   "확정 배당"
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "전적 데이터"
   ],
   "errors": []
  }
