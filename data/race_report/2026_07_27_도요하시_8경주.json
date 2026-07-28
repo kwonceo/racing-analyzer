@@ -1,6 +1,6 @@
 {
  "race": "도요하시 8경주",
- "raceKey": "도요하시 8경주",
+ "raceKey": "2026-07-27 도요하시 8경주",
  "date": "2026-07-27",
  "result": {
   "1st": 9,
@@ -25,7 +25,7 @@
    "drop_timeline": [],
    "exacta_reversal": true,
    "reversal_ratio": 0.426,
-   "record_score": 126.0,
+   "record_score": null,
    "confidence": 51.0,
    "reason": "쌍승역전"
   },
@@ -213,7 +213,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.569,
-   "record_score": 126.2,
+   "record_score": null,
    "confidence": 45.0,
    "reason": "쌍승역전"
   },
@@ -401,7 +401,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.584,
-   "record_score": 96.0,
+   "record_score": null,
    "confidence": 43.6,
    "reason": "쌍승역전"
   },
@@ -589,9 +589,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 130.5,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_7": {
    "horse": 7,
@@ -777,7 +777,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.596,
-   "record_score": 94.7,
+   "record_score": null,
    "confidence": 39.6,
    "reason": "쌍승역전"
   }
@@ -788,7 +788,7 @@
   1
  ],
  "recommendation_process": [
-  "1. 전적 분석: 9번 126.0점",
+  "1. 전적 분석: 9번 전적 정보 제한",
   "2. 배당 수집 시작 14:03:23",
   "4. 쌍승 역전: 4→2(15.5) < 2→4(76.6) → 4번 실질 상위 신호",
   "4. 쌍승 역전: 9→2(71.3) < 2→9(167.5) → 9번 실질 상위 신호",
@@ -801,7 +801,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 35,
   "quinella_mismatch_score": 0,
-  "record_score": 126.0,
+  "record_score": null,
   "total": 51.0,
   "grade": "중"
  },
@@ -810,7 +810,7 @@
  ],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 126.0,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -907,5 +907,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-27 14:40:29"
+ "generated_at": "2026-07-29 05:41:04"
 }
