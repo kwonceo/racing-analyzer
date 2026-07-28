@@ -74,14 +74,40 @@ def _pair_key(k):
     return str(k).replace(" ", "")
 
 
-def _fmt_odds_map(m, limit=None, asc=True):
-    """배당 맵 → '1+2:3.4 1+3:5.6 ...' (배당 오름차순). limit=None 이면 전량."""
+def _as_odds_items(m):
+    """[형식 방어 2026-07-28] 배당 자료가 dict 와 list 두 형식으로 들어온다.
+      · dict : {(1,2): 3.4} 또는 {"1+2": 3.4}   (curQ·curWin 등 _parse_combo_map 산출)
+      · list : [{"combo": [1,2], "odds": 3.4}]  (rec 원본 — exacta 는 이 형식이다)
+    실사고: exa(list)를 dict 로 가정해 .items() 를 호출 →
+      "[Gemini] 카나자와 10경주: 에러(무시) — 'list' object has no attribute 'items'"
+      로 전체자료 모드가 매 경주 실패하고 있었다(로그 0건의 진짜 원인).
+    어느 형식이든 [(키, 배당)] 목록으로 정규화한다."""
     if not m:
+        return []
+    if isinstance(m, dict):
+        return list(m.items())
+    out = []
+    if isinstance(m, (list, tuple)):
+        for e in m:
+            if isinstance(e, dict):
+                k = e.get("combo") or e.get("pair") or e.get("no")
+                v = e.get("odds") if e.get("odds") is not None else e.get("odd")
+                if k is not None and v is not None:
+                    out.append((k, v))
+            elif isinstance(e, (list, tuple)) and len(e) == 2:
+                out.append((e[0], e[1]))
+    return out
+
+
+def _fmt_odds_map(m, limit=None, asc=True):
+    """배당 맵/목록 → '1+2:3.4 1+3:5.6 ...' (배당 오름차순). limit=None 이면 전량."""
+    items = _as_odds_items(m)
+    if not items:
         return "없음"
     try:
-        items = sorted(m.items(), key=lambda kv: (kv[1] is None, kv[1]), reverse=not asc)
+        items = sorted(items, key=lambda kv: (kv[1] is None, kv[1]), reverse=not asc)
     except Exception:
-        items = list(m.items())
+        pass
     if limit:
         items = items[:limit]
     return " ".join("%s:%s" % (_pair_key(k), v) for k, v in items)
@@ -218,15 +244,15 @@ def _build_full_prompt(ctx):
     P.append("═══ 2. 현재 배당판 (전량) ═══")
     P.append("[단승] %s" % _fmt_odds_map(g("win")))
     _q = g("quinella") or {}
-    P.append("[복승] %d개 조합" % len(_q))
+    P.append("[복승] %d개 조합" % len(_as_odds_items(_q)))
     P.append(_fmt_odds_map(_q))
     _e = g("exacta") or {}
     if _e:
-        P.append("[쌍승] %d개" % len(_e))
+        P.append("[쌍승] %d개" % len(_as_odds_items(_e)))
         P.append(_fmt_odds_map(_e))
     _t = g("trio") or {}
     if _t:
-        P.append("[삼복승 수집분] %d개" % len(_t))
+        P.append("[삼복승 수집분] %d개" % len(_as_odds_items(_t)))
         P.append(_fmt_odds_map(_t))
     P.append("")
 
