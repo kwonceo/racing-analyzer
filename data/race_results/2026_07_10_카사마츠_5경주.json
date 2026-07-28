@@ -1,7 +1,9 @@
 {
  "race_id": "2026_07_10_카사마츠_5경주",
- "raceKey": "카사마츠 5경주",
+ "raceKey": "2026-07-10 카사마츠 5경주",
  "date": "2026-07-10",
+ "sport": "horse",
+ "category": "japan_local",
  "track": "카사마츠",
  "round": 5,
  "distance": null,
@@ -9,10 +11,15 @@
  "weather": null,
  "horse_count": null,
  "result": {
-  "1st": 6,
-  "2nd": 2,
-  "3rd": 9
+  "1st": 5,
+  "2nd": 6,
+  "3rd": 7
  },
+ "payouts": {
+  "quinella": 43.2,
+  "trifecta": 54.4
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -39,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 43.2,
+  "trifecta_odds": 54.4,
   "actual_return": null,
   "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-10 00:48:40",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 03:00)",
+ "saved_at": "2026-07-29 03:00:50",
  "validation": {
   "ok": true,
   "errors": []

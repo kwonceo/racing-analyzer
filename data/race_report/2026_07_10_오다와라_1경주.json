@@ -1,6 +1,6 @@
 {
  "race": "오다와라 1경주",
- "raceKey": "오다와라 1경주",
+ "raceKey": "2026-07-10 오다와라 1경주",
  "date": "2026-07-10",
  "result": {
   "1st": 7,
@@ -16,6 +16,7 @@
   "signal_7": {
    "horse": 7,
    "placed": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -31,6 +32,7 @@
   "signal_1": {
    "horse": 1,
    "placed": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -46,6 +48,7 @@
   "signal_2": {
    "horse": 2,
    "placed": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -57,27 +60,11 @@
    "record_score": null,
    "confidence": null,
    "reason": "일반"
-  },
-  "signal_6": {
-   "horse": 6,
-   "placed": false,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": true,
-   "reversal_ratio": 0.891,
-   "record_score": null,
-   "confidence": 0.8,
-   "reason": "쌍승역전"
   }
  },
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 7번 전적 정보 제한",
-  "2. 배당 수집 시작 08:35:30",
-  "4. 쌍승 역전: 6→1(16.4) < 1→6(18.4) → 6번 실질 상위 신호",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -95,14 +82,11 @@
   "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
-  "inverse": true,
-  "inverseHorses": [
-   6,
-   5
-  ],
+  "inverse": false,
+  "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "전적유력마 1번 적중"
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -115,9 +99,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 1
+  "validCount": 0
  },
  "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-10 08:57:11"
+ "generated_at": "2026-07-29 03:00:40"
 }

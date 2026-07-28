@@ -1,11 +1,11 @@
 {
  "race": "카사마츠 4경주",
- "raceKey": "카사마츠 4경주",
+ "raceKey": "2026-07-10 카사마츠 4경주",
  "date": "2026-07-10",
  "result": {
-  "1st": 4,
-  "2nd": 6,
-  "3rd": 5,
+  "1st": 1,
+  "2nd": 11,
+  "3rd": 3,
   "4th": null
  },
  "hit": false,
@@ -13,9 +13,10 @@
  "odds": "미상",
  "win_odds": 0,
  "why_recommended": {
-  "signal_4": {
-   "horse": 4,
+  "signal_1": {
+   "horse": 1,
    "placed": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -28,9 +29,10 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_6": {
-   "horse": 6,
+  "signal_11": {
+   "horse": 11,
    "placed": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -43,9 +45,10 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_5": {
-   "horse": 5,
+  "signal_3": {
+   "horse": 3,
    "placed": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -59,12 +62,13 @@
    "reason": "일반"
   }
  },
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 4번 전적 정보 제한",
+  "1. 전적 분석: 1번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
-  "horse": 4,
+  "horse": 1,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
@@ -99,5 +103,5 @@
  },
  "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-10 00:48:40"
+ "generated_at": "2026-07-29 03:00:48"
 }
