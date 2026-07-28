@@ -16940,6 +16940,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             "signal_correct": signal_correct, "elimination_correct": elimination_correct,
             "eliminated": eliminated_nos, "form_pick": form_pick, "form_pick_hit": form_pick_hit,
             "pnl": pnl, "stake": stake,   # [일본경마 복기] 재조회 시 손익 그대로 표시
+            # [손익 재계산 가능화 (2026-07-28)] pnl 을 산출한 '입력값'을 함께 남긴다.
+            #   배경: 오염 복원으로 적중 판정이 바뀐 7건의 손익을 다시 계산하려 했을 때,
+            #   analysis_log 의 hit 에 bet_type 이 없어 '추천 있었음(-stake)' 분기를 못 타고
+            #   전부 0원(불참)으로 잘못 계산됐다(롤백 후 displayedCombos 로 우회).
+            #   이 두 값만 있으면 언제든 원 공식 그대로 재산정할 수 있다.
+            "bet_type": _bet_type,             # 베팅 종목(복승/삼복승) — 없으면 '불참'
+            "payout_actual": actual_payout,    # 실수령 배당금(입력 시) — 있으면 최우선 사용
             "near_miss": near_miss, "near_miss_horse": near_miss_horse,  # [4착] 아깝게 미적중
             "pairing_miss": pairing_miss,   # [히로시마2R] 복승조합엇갈림(유력마는 맞음·복승 상대 어긋남)
             "hit_basis": hit_basis,   # [1번] 적중 근거 요약
