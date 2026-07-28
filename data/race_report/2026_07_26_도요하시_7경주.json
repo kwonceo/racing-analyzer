@@ -1,6 +1,6 @@
 {
  "race": "도요하시 7경주",
- "raceKey": "도요하시 7경주",
+ "raceKey": "2026-07-26 도요하시 7경주",
  "date": "2026-07-26",
  "result": {
   "1st": 2,
@@ -53,7 +53,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.701,
-   "record_score": 102.0,
+   "record_score": null,
    "confidence": 17.4,
    "reason": "쌍승역전"
   },
@@ -65,39 +65,11 @@
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    3,
-    4
-   ],
-   "drop_timeline": [
-    {
-     "time": "13:44:26",
-     "minutes_before": 0,
-     "odds": 32.4,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "13:44:26",
-     "minutes_before": 0,
-     "odds": 32.4,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "13:45:23",
-     "minutes_before": null,
-     "odds": 32.4,
-     "change": null,
-     "excluded": true,
-     "exclReason": "마감 후 데이터 - 제외됨"
-    }
-   ],
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": true,
    "reversal_ratio": 0.642,
-   "record_score": 118.0,
+   "record_score": null,
    "confidence": 22.6,
    "reason": "쌍승역전"
   },
@@ -113,52 +85,8 @@
    "drop_timeline": [],
    "exacta_reversal": true,
    "reversal_ratio": 0.727,
-   "record_score": 98.3,
+   "record_score": null,
    "confidence": 15.2,
-   "reason": "쌍승역전"
-  },
-  "signal_3": {
-   "horse": 3,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": [
-    3,
-    9
-   ],
-   "drop_timeline": [
-    {
-     "time": "13:44:26",
-     "minutes_before": 0,
-     "odds": 1.7,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "13:44:26",
-     "minutes_before": 0,
-     "odds": 1.7,
-     "change": 0.0,
-     "excluded": false,
-     "exclReason": null
-    },
-    {
-     "time": "13:45:23",
-     "minutes_before": null,
-     "odds": 1.7,
-     "change": null,
-     "excluded": true,
-     "exclReason": "마감 후 데이터 - 제외됨"
-    }
-   ],
-   "exacta_reversal": true,
-   "reversal_ratio": 0.9,
-   "record_score": 104.7,
-   "confidence": 0.0,
    "reason": "쌍승역전"
   },
   "signal_9": {
@@ -201,18 +129,62 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 145.8,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    3,
+    9
+   ],
+   "drop_timeline": [
+    {
+     "time": "13:44:26",
+     "minutes_before": 0,
+     "odds": 1.7,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "13:44:26",
+     "minutes_before": 0,
+     "odds": 1.7,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "13:45:23",
+     "minutes_before": null,
+     "odds": 1.7,
+     "change": null,
+     "excluded": true,
+     "exclReason": "마감 후 데이터 - 제외됨"
+    }
+   ],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.9,
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "쌍승역전"
   }
  },
  "recommended_horses": [
-  3,
   9,
+  3,
   2
  ],
  "recommendation_process": [
-  "1. 전적 분석: 2번 102.0점",
+  "1. 전적 분석: 2번 전적 정보 제한",
   "2. 배당 수집 시작 13:44:26",
   "4. 쌍승 역전: 7→9(22.2) < 9→7(108.3) → 7번 실질 상위 신호",
   "4. 쌍승 역전: 1→9(38.4) < 9→1(71.1) → 1번 실질 상위 신호",
@@ -225,7 +197,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 17,
   "quinella_mismatch_score": 0,
-  "record_score": 102.0,
+  "record_score": null,
   "total": 17.4,
   "grade": "하"
  },
@@ -234,7 +206,7 @@
  ],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 102.0,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -264,5 +236,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-26 13:59:33"
+ "generated_at": "2026-07-29 05:23:10"
 }
