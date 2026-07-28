@@ -1,10 +1,10 @@
 {
  "race_id": "2026_07_22_오오이_7경주",
- "raceKey": "오오이 7경주",
+ "raceKey": "2026-07-22 오오이 7경주",
  "date": "2026-07-22",
  "sport": "horse",
- "category": "japan_central",
- "track": "오오이",
+ "category": "japan_local",
+ "track": "오이",
  "round": 7,
  "distance": null,
  "track_condition": null,
@@ -16,42 +16,28 @@
   "3rd": 10
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 4.0,
+  "trifecta": 5.7
  },
  "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   4,
-   6,
-   10,
-   11,
-   3,
-   5,
-   7,
-   9,
-   13,
-   8
-  ],
-  "eliminated": [
-   12
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
   "signal_quality": null,
-  "confidence": 20.0,
-  "inverse": true
+  "confidence": 0,
+  "inverse": false
  },
  "result_analysis": {
-  "main_hit": true,
+  "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "제거 적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -60,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 4.0,
+  "trifecta_odds": 5.7,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-22 18:16:02",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:50)",
+ "saved_at": "2026-07-29 04:50:53",
  "validation": {
   "ok": true,
   "errors": []

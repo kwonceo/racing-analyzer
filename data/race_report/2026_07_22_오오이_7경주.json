@@ -1,6 +1,6 @@
 {
  "race": "오오이 7경주",
- "raceKey": "오오이 7경주",
+ "raceKey": "2026-07-22 오오이 7경주",
  "date": "2026-07-22",
  "result": {
   "1st": 6,
@@ -8,7 +8,7 @@
   "3rd": 10,
   "4th": null
  },
- "hit": true,
+ "hit": false,
  "hit_type": null,
  "odds": "미상",
  "win_odds": 0,
@@ -16,7 +16,7 @@
   "signal_6": {
    "horse": 6,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -32,7 +32,7 @@
   "signal_4": {
    "horse": 4,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -60,32 +60,11 @@
    "record_score": null,
    "confidence": null,
    "reason": "일반"
-  },
-  "signal_1": {
-   "horse": 1,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": true,
-   "reversal_ratio": 0.763,
-   "record_score": null,
-   "confidence": 20.0,
-   "reason": "쌍승역전"
   }
  },
- "recommended_horses": [
-  6,
-  4,
-  1
- ],
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 6번 전적 정보 제한",
-  "4. 쌍승 역전: 1→4(43.7) < 4→1(57.3) → 1번 실질 상위 신호",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -103,13 +82,11 @@
   "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
-  "inverse": true,
-  "inverseHorses": [
-   1
-  ],
+  "inverse": false,
+  "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "제거 적중"
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -126,5 +103,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-22 18:16:01"
+ "generated_at": "2026-07-29 04:50:53"
 }

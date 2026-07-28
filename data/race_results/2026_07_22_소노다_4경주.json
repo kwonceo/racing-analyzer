@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_22_소노다_4경주",
- "raceKey": "소노다 4경주",
+ "raceKey": "2026-07-22 소노다 4경주",
  "date": "2026-07-22",
  "sport": "horse",
  "category": "japan_local",
@@ -9,36 +9,23 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 12,
+ "horse_count": null,
  "result": {
   "1st": 3,
   "2nd": 9,
   "3rd": 11
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 6.5,
+  "trifecta": 19.0
  },
  "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   2,
-   3,
-   10,
-   11,
-   5,
-   9
-  ],
-  "eliminated": [
-   1,
-   8,
-   4,
-   12,
-   6,
-   7
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
@@ -59,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 6.5,
+  "trifecta_odds": 19.0,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-22 12:28:39",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:50)",
+ "saved_at": "2026-07-29 04:50:37",
  "validation": {
   "ok": true,
   "errors": []

@@ -1,44 +1,31 @@
 {
  "race_id": "2026_07_22_소노다_6경주",
- "raceKey": "소노다 6경주",
+ "raceKey": "2026-07-22 소노다 6경주",
  "date": "2026-07-22",
  "sport": "horse",
- "category": "japan_central",
+ "category": "japan_local",
  "track": "소노다",
  "round": 6,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 12,
+ "horse_count": null,
  "result": {
   "1st": 4,
   "2nd": 12,
   "3rd": 5
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 11.1,
+  "trifecta": 11.3
  },
  "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   2,
-   3,
-   12,
-   4,
-   5,
-   7,
-   8,
-   10,
-   11,
-   6
-  ],
-  "eliminated": [
-   1,
-   9
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
@@ -47,13 +34,11 @@
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": true,
+  "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "제거 적중",
-  "miss_reason": null,
-  "pattern_tags": [
-   "복승불일치"
-  ],
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
  },
@@ -61,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 11.1,
+  "trifecta_odds": 11.3,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-22 13:30:10",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:50)",
+ "saved_at": "2026-07-29 04:50:43",
  "validation": {
   "ok": true,
   "errors": []
