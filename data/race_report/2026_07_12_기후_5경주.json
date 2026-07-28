@@ -1,6 +1,6 @@
 {
  "race": "기후 5경주",
- "raceKey": "기후 5경주",
+ "raceKey": "2026-07-12 기후 5경주",
  "date": "2026-07-12",
  "result": {
   "1st": 5,
@@ -16,6 +16,7 @@
   "signal_5": {
    "horse": 5,
    "placed": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -31,6 +32,7 @@
   "signal_7": {
    "horse": 7,
    "placed": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -46,52 +48,8 @@
   "signal_1": {
    "horse": 1,
    "placed": true,
+   "recommended": false,
    "place_rank": 3,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_12": {
-   "horse": 12,
-   "placed": false,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_11": {
-   "horse": 11,
-   "placed": false,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_4": {
-   "horse": 4,
-   "placed": false,
-   "place_rank": null,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
@@ -104,9 +62,9 @@
    "reason": "일반"
   }
  },
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 5번 전적 정보 제한",
-  "2. 배당 수집 시작 12:26:55",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -128,7 +86,7 @@
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "제거 적중"
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -141,9 +99,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 1
+  "validCount": 0
  },
  "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-12 21:25:48"
+ "generated_at": "2026-07-29 03:09:38"
 }
