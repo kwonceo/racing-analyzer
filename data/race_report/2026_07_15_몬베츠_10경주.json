@@ -1,6 +1,6 @@
 {
  "race": "몬베츠 10경주",
- "raceKey": "몬베츠 10경주",
+ "raceKey": "2026-07-15 몬베츠 10경주",
  "date": "2026-07-15",
  "result": {
   "1st": 1,
@@ -8,7 +8,7 @@
   "3rd": 2,
   "4th": null
  },
- "hit": true,
+ "hit": false,
  "hit_type": null,
  "odds": "미상",
  "win_odds": 0,
@@ -16,25 +16,13 @@
   "signal_1": {
    "horse": 1,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    1,
-    9
-   ],
-   "drop_timeline": [
-    {
-     "time": "19:38:49",
-     "minutes_before": 1,
-     "odds": 7.9,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    }
-   ],
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": null,
@@ -60,53 +48,13 @@
   "signal_2": {
    "horse": 2,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    2,
-    9
-   ],
-   "drop_timeline": [
-    {
-     "time": "19:38:49",
-     "minutes_before": 1,
-     "odds": 5.8,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    }
-   ],
-   "exacta_reversal": true,
-   "reversal_ratio": 0.825,
-   "record_score": null,
-   "confidence": 6.6,
-   "reason": "쌍승역전"
-  },
-  "signal_9": {
-   "horse": 9,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": [
-    2,
-    9
-   ],
-   "drop_timeline": [
-    {
-     "time": "19:38:49",
-     "minutes_before": 1,
-     "odds": 5.8,
-     "change": null,
-     "excluded": false,
-     "exclReason": null
-    }
-   ],
+   "rep_combo": null,
+   "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": null,
@@ -114,18 +62,10 @@
    "reason": "일반"
   }
  },
- "recommended_horses": [
-  9,
-  2,
-  1
- ],
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 1번 전적 정보 제한",
-  "2. 배당 수집 시작 19:38:49",
-  "4. 쌍승 역전: 2→9(10.4) < 9→2(12.6) → 2번 실질 상위 신호",
-  "5. 종합 신뢰도 0점(하) 판정",
-  "6. BMED 전략: 역배열형 적용",
-  "7. 최종 추천: 복승 메인 2+9"
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 1,
@@ -136,23 +76,17 @@
   "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "쌍승역전_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
   "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
-  "inverse": true,
-  "inverseHorses": [
-   2
-  ],
-  "inverseHit": [
-   2
-  ],
-  "confidence": 6.6,
-  "reason": "전적유력마 1번 적중 · 역배열 감지말 2번 입상 · 제거 적중"
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -165,9 +99,9 @@
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 1
+  "validCount": 0
  },
- "pnl": -1000,
+ "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-15 20:59:29"
+ "generated_at": "2026-07-29 03:38:28"
 }
