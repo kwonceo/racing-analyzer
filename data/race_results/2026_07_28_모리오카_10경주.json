@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_모리오카_10경주",
- "raceKey": "모리오카 10경주",
+ "raceKey": "2026-07-28 모리오카 10경주",
  "date": "2026-07-28",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 9,
+ "horse_count": null,
  "result": {
   "1st": 5,
   "2nd": 7,
@@ -17,52 +17,42 @@
  },
  "payouts": {
   "quinella": 6.0,
-  "trifecta": 0.0
+  "trifecta": 7.0
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   7,
-   6,
-   3,
-   5,
-   9,
-   2,
-   4,
-   8,
-   1
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
   "signal_quality": null,
-  "confidence": 24.0,
-  "inverse": true
+  "confidence": 0,
+  "inverse": false
  },
  "result_analysis": {
   "main_hit": true,
   "sub_hit": false,
-  "hit_reason": "전적유력마 7번 적중",
+  "hit_reason": "적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
-  "form_pick_hit": true
+  "form_pick_hit": false
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 6.0,
-  "trifecta_odds": null,
+  "trifecta_odds": 7.0,
   "actual_return": null,
   "profit": 5000
  },
- "memo": null,
- "saved_at": "2026-07-28 17:36:57",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 01:56)",
+ "saved_at": "2026-07-29 01:56:06",
  "validation": {
   "ok": true,
   "errors": []

@@ -8,172 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 6,
-   "name": "グランデッツァ",
-   "jockey": "大坪慎",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    5,
-    3,
-    6,
-    2,
-    6
-   ],
-   "record_score": 73.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "パイロ",
-   "jockey": "関本玲",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    5,
-    5,
-    2,
-    7,
-    8
-   ],
-   "record_score": 50.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "アメリカンペイトリオット",
-   "jockey": "鈴木祐",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    8,
-    8,
-    5,
-    5,
-    6
-   ],
-   "record_score": 23.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "マクフィ",
-   "jockey": "山本紀",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    8,
-    8,
-    12,
-    8,
-    2
-   ],
-   "record_score": 16.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ストロングリターン",
-   "jockey": "佐々志",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    7,
-    5,
-    4,
-    5
-   ],
-   "record_score": 15.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "カレンブラックヒル",
-   "jockey": "坂井瑛",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    11,
-    11,
-    12,
-    9,
-    5
-   ],
-   "record_score": 20.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "エピカリス",
-   "jockey": "岩本怜",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    7,
-    10,
-    11,
-    3,
-    9
-   ],
-   "record_score": 22.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "シルバーステート",
-   "jockey": "阿部英",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    8,
-    8,
-    7,
-    8,
-    5
-   ],
-   "record_score": 15.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ベストウォーリア",
-   "jockey": "小林凌",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    11,
-    13,
-    8,
-    9,
-    8
-   ],
-   "record_score": -12.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1057,10 +895,10 @@
  },
  "prediction": {
   "candidates": [
-   6,
    2,
    3,
    5,
+   6,
    7,
    9,
    1,
@@ -1078,7 +916,7 @@
   "2nd": 9,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 3.9,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "적중"
@@ -1087,7 +925,7 @@
   "quinella_hit": true,
   "winner": 7,
   "second": 9,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1099,7 +937,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-28 12:07:27",
+ "saved_at": "2026-07-29 01:56:12",
  "quality": {
   "score": 60,
   "grade": "참고용",
@@ -1107,7 +945,7 @@
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

@@ -1,6 +1,6 @@
 {
  "race": "몬베츠 3경주",
- "raceKey": "몬베츠 3경주",
+ "raceKey": "2026-07-28 몬베츠 3경주",
  "date": "2026-07-28",
  "result": {
   "1st": 6,
@@ -18,137 +18,75 @@
    "placed": true,
    "recommended": false,
    "place_rank": 1,
-   "excess_drop": 16.9,
-   "avg_drop": -14.9,
-   "grade": "🔴",
-   "rep_combo": [
-    6,
-    7
-   ],
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 74.3,
-   "confidence": 10.8,
-   "reason": "초과급락"
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_11": {
    "horse": 11,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 2,
-   "excess_drop": 8.8,
-   "avg_drop": -23.0,
-   "grade": "🔴",
-   "rep_combo": [
-    7,
-    11
-   ],
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 73.9,
-   "confidence": 5.0,
-   "reason": "초과급락"
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_12": {
    "horse": 12,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    5,
-    12
-   ],
+   "rep_combo": null,
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 33.3,
-   "confidence": 80.0,
+   "record_score": null,
+   "confidence": null,
    "reason": "일반"
-  },
-  "signal_5": {
-   "horse": 5,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": -18.2,
-   "avg_drop": -50.0,
-   "grade": "🔴",
-   "rep_combo": [
-    2,
-    5
-   ],
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 73.2,
-   "confidence": 56.0,
-   "reason": "초과급락"
-  },
-  "signal_7": {
-   "horse": 7,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": 4.2,
-   "avg_drop": -27.6,
-   "grade": "🔴",
-   "rep_combo": [
-    2,
-    7
-   ],
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 21.4,
-   "confidence": 92.0,
-   "reason": "초과급락"
   }
  },
- "recommended_horses": [
-  11,
-  5,
-  12,
-  7
- ],
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 6번 74.3점",
-  "3. 초과급락 감지: 2번 초과급락 -36.0%p (전체평균 -31.8%)",
-  "5. 종합 신뢰도 10.8점(하) 판정",
-  "6. BMED 전략: 압축형 적용",
-  "7. 최종 추천: 복승 메인 5+12"
+  "1. 전적 분석: 6번 전적 정보 제한",
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 6,
-  "excess_drop_score": 30,
+  "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 74.3,
-  "total": 10.8,
+  "record_score": null,
+  "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "초과급락_적중",
-  "전적보조_적중"
- ],
- "combo_tags": true,
+ "win_tags": [],
+ "combo_tags": false,
  "hit_basis": {
-  "formScore": 74.3,
-  "dropAmt": -23.0,
-  "dropScore": 100.0,
+  "formScore": null,
+  "dropAmt": null,
+  "dropScore": 0,
   "inverse": false,
-  "inverseHorses": [
-   2,
-   5,
-   7
-  ],
+  "inverseHorses": [],
   "inverseHit": [],
-  "confidence": 80.0,
-  "reason": "7+11 복승 급락(-23.0%) → 11번 입상 적중 · 제거 적중"
+  "confidence": 0,
+  "reason": "적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -165,5 +103,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-28 15:40:14"
+ "generated_at": "2026-07-29 01:56:27"
 }

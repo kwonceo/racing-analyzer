@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_도요하시_9경주",
- "raceKey": "도요하시 9경주",
+ "raceKey": "2026-07-28 도요하시 9경주",
  "date": "2026-07-28",
  "sport": "cycle",
  "category": "cycle",
@@ -9,15 +9,14 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 9,
+ "horse_count": null,
  "result": {
   "1st": 7,
   "2nd": 2,
   "3rd": 8
  },
  "payouts": {
-  "quinella": 21.5,
-  "trifecta": 0.0
+  "quinella": 62.1
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -2572,19 +2571,7 @@
    }
   }
  ],
- "anomalies": [
-  {
-   "time": "14:47:21",
-   "type": "급락",
-   "combo": [
-    6,
-    9
-   ],
-   "horse": 6,
-   "drop_rate": -9.0,
-   "excess_drop": 0.0
-  }
- ],
+ "anomalies": [],
  "prediction": {
   "candidates": [
    1,
@@ -2619,13 +2606,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 21.5,
+  "quinella_odds": 62.1,
   "trifecta_odds": null,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-28 15:05:36",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 01:56)",
+ "saved_at": "2026-07-29 01:56:04",
  "validation": {
   "ok": true,
   "errors": []

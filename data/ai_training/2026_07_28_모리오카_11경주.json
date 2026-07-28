@@ -8,173 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 2,
-   "name": "ハービンジャー",
-   "jockey": "高橋悠",
-   "jockey_winrate": 40.0,
-   "recent_results": [
-    3,
-    4,
-    2,
-    5,
-    1
-   ],
-   "record_score": 98.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "デクラレーションオブウォー",
-   "jockey": "高松亮",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    4,
-    4,
-    1,
-    6,
-    4
-   ],
-   "record_score": 91.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "マインドユアビスケッツ",
-   "jockey": "大坪慎",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    6,
-    6,
-    1,
-    3,
-    11
-   ],
-   "record_score": 57.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "スワーヴリチャード",
-   "jockey": "坂井瑛",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    10,
-    9,
-    8,
-    10,
-    9
-   ],
-   "record_score": 30.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ドレフォン",
-   "jockey": "鈴木祐",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    8,
-    7,
-    9,
-    9,
-    9
-   ],
-   "record_score": 23.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ゴールドアクター",
-   "jockey": "佐々志",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    9,
-    12,
-    5,
-    9,
-    9
-   ],
-   "record_score": 13.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ノーブルミッション",
-   "jockey": "小林凌",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    8,
-    4,
-    9,
-    9,
-    1
-   ],
-   "record_score": 2.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "トーセンジョーダン",
-   "jockey": "山本紀",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    10,
-    6,
-    11,
-    11,
-    9
-   ],
-   "record_score": 5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ハーツクライ",
-   "jockey": "塚本涼",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    9,
-    7,
-    4,
-    9,
-    4
-   ],
-   "record_score": -8.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1058,14 +895,14 @@
  },
  "prediction": {
   "candidates": [
-   2,
-   8,
    1,
+   2,
    3,
    4,
    5,
    7,
    6,
+   8,
    9
   ],
   "eliminated": [],
@@ -1079,7 +916,7 @@
   "2nd": 2,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 12.7,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -1088,7 +925,7 @@
   "quinella_hit": false,
   "winner": 3,
   "second": 2,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1100,14 +937,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-28 17:58:10",
+ "saved_at": "2026-07-29 01:56:08",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
