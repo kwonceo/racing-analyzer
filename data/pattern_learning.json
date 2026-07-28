@@ -5044,60 +5044,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 368,
-    "hit": 292,
+    "count": 371,
+    "hit": 295,
     "cases": [
-      {
-        "race": "取手 7경주",
-        "date": "2026-07-27",
-        "smart_horses": [
-          4,
-          6,
-          7
-        ],
-        "placed": [
-          4,
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
-      {
-        "race": "다치카와 1경주",
-        "date": "2026-07-27",
-        "smart_horses": [
-          1,
-          2,
-          4,
-          5
-        ],
-        "placed": [
-          2,
-          4,
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
-      {
-        "race": "다치카와 2경주",
-        "date": "2026-07-27",
-        "smart_horses": [
-          4,
-          6
-        ],
-        "placed": [
-          6
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 50.0,
-        "high_odds": true
-      },
       {
         "race": "다치카와 3경주",
         "date": "2026-07-27",
@@ -6598,9 +6547,61 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "2026-07-28 나고야 7경주",
+        "date": "2026-07-29",
+        "smart_horses": [
+          12,
+          5,
+          10,
+          11
+        ],
+        "placed": [
+          12,
+          10
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "2026-07-28 나고야 8경주",
+        "date": "2026-07-29",
+        "smart_horses": [
+          5,
+          7,
+          8,
+          2
+        ],
+        "placed": [
+          5,
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "2026-07-28 나고야 9경주",
+        "date": "2026-07-29",
+        "smart_horses": [
+          11,
+          8
+        ],
+        "placed": [
+          11,
+          8
+        ],
+        "hit": true,
+        "trifecta_odds": 35.6,
+        "quinella_odds": 21.7,
+        "high_odds": true
       }
     ],
-    "rate": 79.3,
+    "rate": 79.5,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
