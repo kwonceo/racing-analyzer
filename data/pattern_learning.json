@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "서울 9경주 1800M",
-      "horse_no": 9,
-      "recent_avg": 4.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-18"
-    },
-    {
       "race": "서울 6경주 1200M",
       "horse_no": 11,
       "recent_avg": 4.0,
@@ -4651,16 +4641,24 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-28"
+    },
+    {
+      "race": "히라츠카 8경주",
+      "horse_no": 4,
+      "recent_avg": 4.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-28"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1681,
-      "hit": 333
+      "count": 1683,
+      "hit": 334
     },
     "전체부진마": {
-      "count": 2779,
-      "hit": 766
+      "count": 2781,
+      "hit": 767
     },
     "대규모급락": {
       "count": 7,
