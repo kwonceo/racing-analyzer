@@ -49,7 +49,12 @@ def _build_prompt(rk, final_q, final_t, special_q, line_pairs, strong_signals, f
         "[복승] " + _fmt_combo(final_q) + "\n"
         "[삼복승] " + _fmt_combo(final_t) + "\n"
         "[보조] " + _fmt_combo(special_q or []) + "\n"
-        "진단: 1)맹목적왕축 2)B라인누락 3)라인교차 4)급락미반영\n"
+        "진단 항목(해당하는 것만): 1)맹목적왕축 2)B라인누락 3)라인교차 4)급락미반영\n"
+        "규칙:\n"
+        "- issues 에는 위 데이터에서 '실제로 확인되는' 문제만 넣어라. 항목명을 그대로 나열하지 마라.\n"
+        "- 근거가 없으면 status=SAFE, issues=[] 로 답하라. 대부분의 경주는 SAFE 가 정상이다.\n"
+        "- 확신이 없으면 WARNING 대신 SAFE 를 택하라(오경보가 미탐보다 해롭다).\n"
+        "- 각 issue 는 '항목명: 근거가 된 마번/수치' 형식으로 한 구절씩 쓴다.\n"
         '출력형식(JSON만): {"status":"SAFE" or "WARNING","issues":[],"summary":"한줄","q_suggest":"","t_suggest":""}'
     )
     return prompt
@@ -167,9 +172,18 @@ def review_async(rk, final_q, final_t, special_q=None, line_pairs=None,
                 print("[Gemini] " + str(rk) + ": 검수 실패(무시) — " + last_err)
                 return
             print("[Gemini] " + str(rk) + ": " + result.get("status", "?") + " — " + result.get("summary", ""))
-            _save_log(rk, result)
+            _save_log(rk, result)   # 로그는 항상 남긴다(발송 여부와 무관)
+            # [카카오 도배 방지] WARNING 이어도 아래 조건에서만 실제 발송한다. 판정 로그는 위에서 이미 보존.
+            #   ⓐ issues 가 비면 근거 없는 경고 → 보류
+            #   ⓑ 진단 항목 4개를 '전부' 나열하면 실제 판별이 아니라 프롬프트 항목 되읊기일 확률이 높다
+            #      (2026-07-28 실측: 초기 5건 전부 4개 동일) → 신뢰 불가로 보류
+            _issues = result.get("issues") or []
             if result.get("status") == "WARNING":
-                _send_kakao(rk, result)
+                if 1 <= len(_issues) <= 3:
+                    _send_kakao(rk, result)
+                else:
+                    print("[Gemini] " + str(rk) + ": WARNING 이지만 발송 보류(issues %d개) — 로그만 저장"
+                          % len(_issues))
         except Exception as e:
             print("[Gemini] " + str(rk) + ": 에러(무시) — " + _mask(e, _gemini_api_key()))
     threading.Thread(target=_run, daemon=True, name="gemini-" + str(rk)[:10]).start()

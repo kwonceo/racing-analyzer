@@ -12365,7 +12365,10 @@ def _pub_recommendation(an, role):
     for b in (an.get("betRecommend") or []):
         cb = b.get("combo") or []
         label = str(b.get("label") or "")
-        if len(cb) == 2 and "복" in str(b.get("kind") or label):
+        # ⚠ "복" 부분일치는 "삼복승"에도 True 다(삼복승 ⊃ 복). 현재는 len(cb)==2 가드가 막고 있으나
+        #   조합 길이가 바뀌면 삼복승 배당이 복승 슬롯에 표시될 수 있어 종목을 명시적으로 배제한다.
+        _bkind = str(b.get("kind") or label)
+        if len(cb) == 2 and "복" in _bkind and "삼복" not in _bkind:
             item = {"combo": "+".join(str(int(x)) for x in sorted(cb)),
                     "odds": b.get("expOdds"), "label": label,
                     "why": b.get("signalReason") or "", "quality": b.get("signalQuality") or ""}
