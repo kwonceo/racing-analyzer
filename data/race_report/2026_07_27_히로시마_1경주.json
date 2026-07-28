@@ -1,6 +1,6 @@
 {
  "race": "히로시마 1경주",
- "raceKey": "히로시마 1경주",
+ "raceKey": "2026-07-27 히로시마 1경주",
  "date": "2026-07-27",
  "result": {
   "1st": 4,
@@ -10,8 +10,8 @@
  },
  "hit": true,
  "hit_type": null,
- "odds": "중배당",
- "win_odds": 8.6,
+ "odds": "저배당",
+ "win_odds": 2.3,
  "why_recommended": {
   "signal_4": {
    "horse": 4,
@@ -25,9 +25,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 78.9,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_3": {
    "horse": 3,
@@ -41,9 +41,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 83.3,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_7": {
    "horse": 7,
@@ -57,66 +57,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 76.9,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_1": {
-   "horse": 1,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 110.6,
-   "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_6": {
-   "horse": 6,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 98.9,
-   "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_2": {
-   "horse": 2,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 95.2,
-   "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
- "recommended_horses": [
-  1,
-  6,
-  2
- ],
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 4번 78.9점",
+  "1. 전적 분석: 4번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
@@ -124,21 +72,21 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 78.9,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 78.9,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "제거 적중"
+  "reason": "적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -153,7 +101,7 @@
   },
   "validCount": 0
  },
- "pnl": 7600,
+ "pnl": 1300,
  "stake": 1000,
- "generated_at": "2026-07-27 08:50:21"
+ "generated_at": "2026-07-29 05:42:41"
 }
