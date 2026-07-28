@@ -11862,6 +11862,13 @@ def _triple_analyze(rk, rec):
         _apply_rec_hysteresis(rk, _an_out)
     except Exception as _hye:
         print("[히스테리시스] 적용 실패(무시·원본 표시):", _hye)
+    # [② 삼복승 히스테리시스 (2026-07-28 나고야 4R)] 복승은 안정적인데 삼복승 3번째 자리만 매 틱
+    #   요동쳐(10→5→10→11→4→10→10→9) 마지막 틱 운에 적중이 갈리던 문제. 같은 규칙을 대칭 적용.
+    #   ⚠ 복승 상태(_REC_HYST[rk])가 만들어진 뒤에만 동작 — 위 호출 순서를 바꾸지 말 것.
+    try:
+        _apply_tri_hysteresis(rk, _an_out)
+    except Exception as _tye:
+        print("[삼복승 히스테리시스] 적용 실패(무시·원본 표시):", _tye)
     # [경주 등급 배지 (2026-07-22 권대표 요청)] 예측 확신을 경주당 1개 등급으로 — 오버레이·카드·카톡
     #   공통 표시(모든 경주가 같은 무게로 보이던 문제 해소). 기준 = 승부 계층·카톡 알림과 동일 축.
     #   🔥 강력승부: 신호 2+ & 확신도 65+ / ✅ 추천: 신호 1+ & 확신도 50+ / ⚖️ 관찰: 신호 or 확신도 40+
@@ -12055,6 +12062,79 @@ def _apply_rec_hysteresis(rk, an):
     an["recHysteresis"] = {"held": True, "switches": st["switches"],
                            "proposal": "+".join(str(x) for x in prop),
                            "heldMain": "+".join(str(x) for x in st["main"])}
+
+
+# ══════════ [② 삼복승 메인 히스테리시스 (2026-07-28)] 복승과 동일 규칙을 삼복승에 대칭 적용 ══════════
+#  배경(나고야 4R 실사고): 복승은 8틱 내내 4+7/1+7/1+4 로 안정적이었는데 삼복승 3번째 자리만
+#    10 → 5 → 10 → 11 → 4 → 10 → 10 → 9 로 매 틱 요동쳤고, 하필 마지막 틱에 10번이 9번으로 교체되며
+#    정답 조합이 사라졌다(결과 7-1-10 · 복승 적중 · 삼복승 미적중). 즉 '마지막 틱 운'에 좌우됐다.
+#  규칙(복승과 동일·검증된 기준 재사용): ⓐ집중급락 하드 신호면 즉시 교체 ⓑ아니면 2사이클 연속 우위 시만
+#    ⓒ경주당 교체 상한 2회 ⓓ마감 후 무개입 ⓔ표시(선두 순서)만 안정화 — 분석·이력·학습은 원본 그대로.
+#  ⚠ 보류해도 제안 조합은 목록에서 지우지 않는다(무삭제) — 선두 순서만 되돌린다.
+def _apply_tri_hysteresis(rk, an):
+    today = time.strftime("%Y-%m-%d")
+    st = _REC_HYST.get(rk)
+    if st is None or st.get("day") != today:
+        return                                       # 복승 쪽에서 상태를 먼저 만든다(단독 생성 안 함)
+    if an.get("recommendClosed"):
+        return                                       # 마감 후 무개입
+    cp = an.get("corePicks") or {}
+    ft = cp.get("finalTrifectas") or []
+    if not ft or not ft[0].get("combo"):
+        return
+    try:
+        prop = tuple(sorted(int(x) for x in ft[0]["combo"]))
+    except (TypeError, ValueError):
+        return
+    if st.get("tri") is None:                        # 이 경주 첫 삼복승 → 기준으로 채택
+        st["tri"], st["tri_item"] = prop, dict(ft[0])
+        st["tri_streak_m"], st["tri_streak_n"], st["tri_switches"] = None, 0, 0
+        an["triHysteresis"] = {"held": False, "switches": 0}
+        return
+    if prop == st["tri"]:
+        st["tri_streak_m"], st["tri_streak_n"] = None, 0
+        st["tri_item"] = dict(ft[0])                 # 배당 등 최신값 갱신
+        an["triHysteresis"] = {"held": False, "switches": st.get("tri_switches", 0)}
+        return
+    accept = False
+    if st.get("tri_switches", 0) < 2:
+        _hard = False
+        try:
+            _hard = ("집중급락" in json.dumps(an.get("strongSignals") or {}, ensure_ascii=False))
+        except Exception:
+            _hard = False
+        if _hard:
+            accept = True                            # ⓐ 하드 신호 → 즉시 교체
+        else:
+            if st.get("tri_streak_m") == prop:
+                st["tri_streak_n"] = st.get("tri_streak_n", 0) + 1
+            else:
+                st["tri_streak_m"], st["tri_streak_n"] = prop, 1
+            if st.get("tri_streak_n", 0) >= 2:
+                accept = True                        # ⓑ 2사이클 연속 우위 → 교체
+    if accept:
+        st["tri"], st["tri_item"] = prop, dict(ft[0])
+        st["tri_streak_m"], st["tri_streak_n"] = None, 0
+        st["tri_switches"] = st.get("tri_switches", 0) + 1
+        an["triHysteresis"] = {"held": False, "switches": st["tri_switches"], "switched": True}
+        return
+    # 보류 → 기존 표시 삼복승을 선두로 복원(제안 조합은 목록에 그대로 남김)
+    _held = None
+    for _i, _t in enumerate(ft):
+        try:
+            if tuple(sorted(int(x) for x in (_t.get("combo") or []))) == st["tri"]:
+                _held = ft.pop(_i)
+                break
+        except (TypeError, ValueError):
+            continue
+    if _held is None:
+        _held = dict(st["tri_item"])
+        _held["reason"] = (_held.get("reason") or "") + " · 유지(히스테리시스)"
+    ft.insert(0, _held)
+    cp["finalTrifectas"] = ft
+    an["triHysteresis"] = {"held": True, "switches": st.get("tri_switches", 0),
+                           "proposal": "+".join(str(x) for x in prop),
+                           "heldMain": "+".join(str(x) for x in st["tri"])}
 
 
 @app.route("/api/extract/japan", methods=["POST"])
