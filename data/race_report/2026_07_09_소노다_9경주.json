@@ -1,6 +1,6 @@
 {
  "race": "소노다 9경주",
- "raceKey": "소노다 9경주",
+ "raceKey": "2026-07-09 소노다 9경주",
  "date": "2026-07-09",
  "result": {
   "1st": 8,
@@ -16,6 +16,7 @@
   "signal_8": {
    "horse": 8,
    "placed": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -24,13 +25,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 0.0,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
   "signal_1": {
    "horse": 1,
    "placed": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -39,92 +41,52 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 51.2,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   },
   "signal_9": {
    "horse": 9,
    "placed": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
-   "rep_combo": [
-    9,
-    10
-   ],
+   "rep_combo": null,
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 81.2,
-   "confidence": null,
-   "reason": "전적상위"
-  },
-  "signal_10": {
-   "horse": 10,
-   "placed": false,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": [
-    9,
-    10
-   ],
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 51.2,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_4": {
-   "horse": 4,
-   "placed": false,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": [
-    4,
-    9
-   ],
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 46.2,
+   "record_score": null,
    "confidence": null,
    "reason": "일반"
   }
  },
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 8번 0.0점",
-  "5. 종합 신뢰도 0점(하) 판정",
-  "7. 최종 추천: 복승 메인 9+10"
+  "1. 전적 분석: 8번 전적 정보 제한",
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 8,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 0.0,
+  "record_score": null,
   "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "전적보조_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 0.0,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
   "confidence": 0,
-  "reason": "전적유력마 1번 적중"
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -139,7 +101,7 @@
   },
   "validCount": 0
  },
- "pnl": -1000,
+ "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-09 15:48:40"
+ "generated_at": "2026-07-29 02:59:42"
 }

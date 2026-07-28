@@ -1,6 +1,6 @@
 {
  "race": "카와사키 11경주",
- "raceKey": "카와사키 11경주",
+ "raceKey": "2026-07-09 카와사키 11경주",
  "date": "2026-07-09",
  "result": {
   "1st": 6,
@@ -16,21 +16,23 @@
   "signal_6": {
    "horse": 6,
    "placed": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
    "grade": null,
    "rep_combo": null,
    "drop_timeline": [],
-   "exacta_reversal": true,
-   "reversal_ratio": 0.726,
-   "record_score": 43.8,
-   "confidence": 11.2,
-   "reason": "쌍승역전"
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_1": {
    "horse": 1,
    "placed": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -39,13 +41,14 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 72.5,
-   "confidence": 0.0,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
   },
   "signal_5": {
    "horse": 5,
    "placed": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -54,145 +57,51 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 75.0,
-   "confidence": 0.0,
-   "reason": "전적상위"
-  },
-  "signal_3": {
-   "horse": 3,
-   "placed": false,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": 37.5,
-   "confidence": 0.0,
+   "record_score": null,
+   "confidence": null,
    "reason": "일반"
   }
  },
+ "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 6번 43.8점",
-  "2. 배당 수집 시작 20:07:32",
-  "4. 쌍승 역전: 6→11(68.4) < 11→6(94.2) → 6번 실질 상위 신호",
-  "5. 종합 신뢰도 11.2점(하) 판정"
+  "1. 전적 분석: 6번 전적 정보 제한",
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 6,
   "excess_drop_score": 0,
-  "exacta_reversal_score": 15,
+  "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 43.8,
-  "total": 11.2,
+  "record_score": null,
+  "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "쌍승역전_적중",
-  "전적보조_적중"
- ],
- "combo_tags": true,
+ "win_tags": [],
+ "combo_tags": false,
  "hit_basis": {
-  "formScore": 43.8,
+  "formScore": null,
   "dropAmt": null,
-  "dropScore": 0.0,
-  "inverse": true,
-  "inverseHorses": [
-   6
-  ],
-  "inverseHit": [
-   6
-  ],
-  "confidence": 11.2,
-  "reason": "전적유력마 1번 적중 · 역배열 감지말 6번 입상 · 제거 적중"
+  "dropScore": 0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
-  "changes": [
-   {
-    "time": "20:12:22",
-    "minutes_before": 4,
-    "previous_signal": "2번",
-    "new_signal": "9번",
-    "reason": "9번 집중급락(평균 -11.0%)",
-    "prev_was_candidate": true
-   }
-  ],
+  "changes": [],
   "confirmed": [],
-  "candidates": [
-   2,
-   3,
-   4,
-   9
-  ],
-  "events": {
-   "3": {
-    "first": {
-     "time": "20:09:47",
-     "minutes_before": 7
-    },
-    "count": 1,
-    "last": {
-     "time": "20:09:47",
-     "minutes_before": 7
-    },
-    "vanished": {
-     "time": "20:10:57",
-     "minutes_before": 5
-    }
-   },
-   "2": {
-    "first": {
-     "time": "20:11:46",
-     "minutes_before": 4
-    },
-    "count": 1,
-    "last": {
-     "time": "20:11:46",
-     "minutes_before": 4
-    }
-   },
-   "9": {
-    "first": {
-     "time": "20:12:22",
-     "minutes_before": 4
-    },
-    "count": 1,
-    "last": {
-     "time": "20:12:22",
-     "minutes_before": 4
-    },
-    "vanished": {
-     "time": "20:13:17",
-     "minutes_before": 3
-    }
-   },
-   "4": {
-    "first": {
-     "time": "20:15:55",
-     "minutes_before": 1
-    },
-    "count": 1,
-    "last": {
-     "time": "20:15:55",
-     "minutes_before": 1
-    },
-    "vanished": {
-     "time": "20:16:32",
-     "minutes_before": 0
-    }
-   }
-  },
-  "finalSignal": 4,
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
   "finalConfirmed": false,
   "excluded": {
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 21
+  "validCount": 0
  },
  "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-09 22:33:14"
+ "generated_at": "2026-07-29 02:59:59"
 }
