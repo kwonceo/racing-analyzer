@@ -12246,7 +12246,7 @@ def _record_alert(rk, an):
              "current_recommend": cur_rec, "minutes_before": an.get("minutesBefore"),
              "result": None, "alert_correct": None}
     doc["alerts"].append(entry)
-    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(path, doc, indent=1)
     return entry
 
 
@@ -12274,7 +12274,7 @@ def _match_alerts_to_result(rk, top3, an):
             any_correct = True
     doc["result"] = top3
     try:
-        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(path, doc, indent=1)
     except Exception as e:
         print("[경고매칭] 저장 실패:", e)
     return {"fired": bool(doc.get("alerts")), "horses": sorted(all_h), "hit": any_correct,
@@ -13180,7 +13180,7 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
             _record_after_close_case(rk, date, mb_signed, anomalies, _surge)
         except Exception as e:
             print("[마감후학습] 케이스 저장 실패:", e)
-    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+    _json_atomic(path, doc)
     return path
 
 
@@ -13223,7 +13223,7 @@ def _history_save_analysis(rk, an):
         "at": time.time(),
     }
     try:
-        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+        _json_atomic(path, doc)
     except Exception as e:
         print("[복기저장] 실패:", e)
 
@@ -13231,6 +13231,21 @@ def _history_save_analysis(rk, an):
 # ══════════════ [분석 로그 완전 저장] data/analysis_log/ (추적 가능한 전체 기록) ══════════════
 #   왜 이 말을 추천했는지·어떤 배당을 보고 판단했는지까지 리치 스키마로 경주별 저장.
 #   기존 odds_history/learning 파이프라인은 그대로 두고, 그 데이터를 종합해 추가로 남긴다.
+def _json_atomic(path, obj, indent=None):
+    """[원자적 저장 2026-07-28] 임시파일 기록 후 os.replace 로 교체.
+
+    배경: `json.dump(obj, open(path,"w"))` 는 '열자마자 파일이 0바이트로 잘리고' 그 뒤 천천히 채워진다.
+      그 사이 다른 스레드/프로세스가 같은 파일을 쓰면 짧은 내용 뒤에 이전 긴 내용의 꼬리가 남아
+      'Extra data' 로 깨진다. 2026-07-28 전수 검사에서 analysis_log 9건이 이 형태로 손상돼 있었고
+      (7/21~7/25 발생·성적 집계에서 통째로 누락 중이었음) 8건은 앞부분만 복구, 1건은 복구 불가였다.
+    os.replace 는 같은 볼륨에서 원자적이라, 읽는 쪽은 '항상 완전한 파일'만 보게 된다.
+    ⚠ 예외는 삼키지 않는다 — 저장 실패를 조용히 넘기면 손실을 못 알아챈다(호출부 기존 try 가 처리)."""
+    tmp = "%s.tmp%d" % (path, os.getpid())
+    with open(tmp, "w", encoding="utf-8") as _f:
+        json.dump(obj, _f, ensure_ascii=False, indent=indent)
+    os.replace(tmp, path)
+
+
 ANALYSIS_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
 
 
@@ -16310,7 +16325,7 @@ def recommend_manual():
         doc["summary"] = "📝 수동 추천 — 복승 %d · 삼복승 %d" % (len(quinellas), len(trifectas))
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(path, doc, indent=1)
     except Exception as e:
         return jsonify({"error": "저장 실패: %s" % e}), 500
     return jsonify({"ok": True, "raceKey": rk,
@@ -16390,7 +16405,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     doc["result"] = result
     if final_odds:
         doc["finalOdds"] = final_odds
-    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+    _json_atomic(path, doc)
 
     # [매칭 유연화] triple_store(활성)에 없으면 odds_history 스냅샷에서 rec 재구성 → 분석 재현
     rec = _triple_load().get(rk) or {}
@@ -16929,7 +16944,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             "pairing_miss": pairing_miss,   # [히로시마2R] 복승조합엇갈림(유력마는 맞음·복승 상대 어긋남)
             "hit_basis": hit_basis,   # [1번] 적중 근거 요약
         }
-        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+        _json_atomic(path, doc)
     except Exception as e:
         print("[복기저장] 결과 요약 실패:", e)
     # [신규 1번] 경주별 완전 재현 리포트(data/race_report/) 저장 — 추천 근거·타임라인·신뢰도 분해
@@ -16975,7 +16990,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             record["failure"] = _fail   # 레코드에 실패 분류 첨부(복기 리포트 재사용)
             try:                        # 히스토리 review 블록에도 실패 분류 저장(재조회 시 재계산 불필요)
                 doc.setdefault("review", {})["failure"] = _fail
-                json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+                _json_atomic(path, doc)
             except Exception as _e2:
                 print("[복기저장] 실패분류 저장 실패:", _e2)
     except Exception as e:
@@ -19523,7 +19538,7 @@ def _mark_result_in_log(rk, result):
     doc["result"] = result
     doc["result_via"] = "duplicate_sync"   # primary 로그에서 동기화됨 표시
     try:
-        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(path, doc, indent=1)
         return True
     except Exception:
         return False
@@ -20075,7 +20090,7 @@ def analysis_log_memo():
     # [복기 표식] 복기 완료 마킹 + 시각 기록 → 목록/상세에서 "🧠 복기완료" 배지
     doc["reviewed"] = True
     doc["reviewed_at"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    _json_atomic(path, doc, indent=1)
     # [복기 학습] 메모를 종목·적중 태그와 함께 코퍼스에 축적(검색·패턴화용)
     _review_note_append(doc, review, os.path.basename(path))
     return jsonify({"ok": True, "reviewed": True, "reviewed_at": doc["reviewed_at"]})
@@ -29137,7 +29152,7 @@ def _auto_pred_compare(rk):
         doc["quinellaHit"], doc["trifectaHit"], doc["specialHit"] = _qh, _th, _sh
         doc["compared"] = True
         doc["comparedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
-        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        _json_atomic(path, doc, indent=1)
         print("[자동예상] %s 결과대조 → 복승%s·삼복승%s" % (rk, _qh, _th))
         return True
     except Exception as e:
