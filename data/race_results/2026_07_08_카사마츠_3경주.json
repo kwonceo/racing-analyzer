@@ -1,42 +1,35 @@
 {
  "race_id": "2026_07_08_카사마츠_3경주",
- "raceKey": "카사마츠 3경주",
+ "raceKey": "2026-07-08 카사마츠 3경주",
  "date": "2026-07-08",
+ "sport": "horse",
+ "category": "japan_local",
  "track": "카사마츠",
  "round": 3,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 9,
+ "horse_count": null,
  "result": {
   "1st": 9,
   "2nd": 5,
   "3rd": 3
  },
+ "payouts": {
+  "quinella": 2.6,
+  "trifecta": 16.5
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   7,
-   6
-  ],
-  "eliminated": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7,
-   8,
-   9
-  ],
-  "recommend_main": "1+7",
-  "recommend_sub": "1+6",
+  "candidates": [],
+  "eliminated": [],
+  "recommend_main": null,
+  "recommend_sub": null,
   "strategy": null,
-  "signal_quality": "하",
+  "signal_quality": null,
   "confidence": 0,
   "inverse": false
  },
@@ -53,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 2.6,
+  "trifecta_odds": 16.5,
   "actual_return": null,
-  "profit": -1000
+  "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-08 18:25:50",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:58)",
+ "saved_at": "2026-07-29 02:58:31",
  "validation": {
   "ok": true,
   "errors": []

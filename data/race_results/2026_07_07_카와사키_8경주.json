@@ -1,7 +1,9 @@
 {
  "race_id": "2026_07_07_카와사키_8경주",
- "raceKey": "카와사키 8경주",
+ "raceKey": "2026-07-07 카와사키 8경주",
  "date": "2026-07-07",
+ "sport": "horse",
+ "category": "japan_local",
  "track": "카와사키",
  "round": 8,
  "distance": null,
@@ -13,6 +15,11 @@
   "2nd": 6,
   "3rd": 8
  },
+ "payouts": {
+  "quinella": 15.7,
+  "trifecta": 22.2
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -27,10 +34,10 @@
   "inverse": false
  },
  "result_analysis": {
-  "main_hit": false,
+  "main_hit": true,
   "sub_hit": false,
-  "hit_reason": null,
-  "miss_reason": "추천 조합 미입상",
+  "hit_reason": "적중",
+  "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -39,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 15.7,
+  "trifecta_odds": 22.2,
   "actual_return": null,
-  "profit": 0
+  "profit": 14700
  },
- "memo": null,
- "saved_at": "2026-07-07 23:23:57",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:57)",
+ "saved_at": "2026-07-29 02:57:55",
  "validation": {
   "ok": true,
   "errors": []
