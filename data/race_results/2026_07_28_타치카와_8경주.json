@@ -1,0 +1,121 @@
+{
+ "race_id": "2026_07_28_타치카와_8경주",
+ "raceKey": "타치카와 8경주",
+ "date": "2026-07-28",
+ "sport": "horse",
+ "category": "japan_central",
+ "track": "다치카와",
+ "round": 8,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": null,
+ "result": {
+  "1st": 5,
+  "2nd": 4,
+  "3rd": 7
+ },
+ "payouts": {
+  "quinella": 4.9,
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {
+  "quinella": {
+   "4+7": 2.7,
+   "3+7": 5.8,
+   "2+5": 9.8,
+   "5+7": 12.6,
+   "5+6": 18.1,
+   "4+5": 21.4,
+   "3+5": 47.8,
+   "6+7": 51.6,
+   "2+7": 53.7,
+   "3+4": 58.4,
+   "2+4": 93.8,
+   "1+2": 100.0,
+   "1+3": 100.0,
+   "1+4": 100.0,
+   "1+5": 100.0,
+   "1+6": 100.0,
+   "1+7": 100.0,
+   "2+3": 100.0,
+   "2+6": 100.0,
+   "3+6": 100.0,
+   "4+6": 100.0
+  },
+  "exacta": {}
+ },
+ "odds_timeline": [
+  {
+   "time": "13:58:28",
+   "minutes_before": 2,
+   "quinella": {
+    "4+7": 2.7,
+    "3+7": 5.8,
+    "2+5": 9.8,
+    "5+7": 12.6,
+    "5+6": 18.1,
+    "4+5": 21.4,
+    "3+5": 47.8,
+    "6+7": 51.6,
+    "2+7": 53.7,
+    "3+4": 58.4,
+    "2+4": 93.8,
+    "1+2": 100.0,
+    "1+3": 100.0,
+    "1+4": 100.0,
+    "1+5": 100.0,
+    "1+6": 100.0,
+    "1+7": 100.0,
+    "2+3": 100.0,
+    "2+6": 100.0,
+    "3+6": 100.0,
+    "4+6": 100.0
+   },
+   "exacta": {}
+  }
+ ],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": "4+7",
+  "recommend_sub": null,
+  "strategy": "BMED_보험형",
+  "signal_quality": "하",
+  "confidence": 25.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 4.9,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 3900
+ },
+ "memo": null,
+ "saved_at": "2026-07-28 14:24:04",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
