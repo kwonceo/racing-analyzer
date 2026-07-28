@@ -1,23 +1,22 @@
 {
  "race_id": "2026_07_28_이토_1경주",
- "raceKey": "이토 1경주",
+ "raceKey": "2026-07-28 이토 1경주",
  "date": "2026-07-28",
- "sport": "cycle",
- "category": "cycle",
+ "sport": "horse",
+ "category": "japan_local",
  "track": "이토",
  "round": 1,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 2,
   "2nd": 1,
   "3rd": 3
  },
  "payouts": {
-  "quinella": 1.5,
-  "trifecta": 0.0
+  "quinella": 1.5
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -1577,10 +1576,11 @@
    3,
    4,
    5,
-   6,
+   6
+  ],
+  "eliminated": [
    7
   ],
-  "eliminated": [],
   "recommend_main": "1+2",
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
@@ -1591,7 +1591,7 @@
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "전적유력마 1번 적중",
+  "hit_reason": "전적유력마 1번 적중 · 제거 적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
@@ -1606,8 +1606,8 @@
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-28 21:09:08",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:25)",
+ "saved_at": "2026-07-29 02:25:46",
  "validation": {
   "ok": true,
   "errors": []
