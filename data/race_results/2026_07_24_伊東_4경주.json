@@ -1,15 +1,15 @@
 {
  "race_id": "2026_07_24_伊東_4경주",
- "raceKey": "伊東 4경주",
+ "raceKey": "2026-07-24 伊東 4경주",
  "date": "2026-07-24",
  "sport": "cycle",
  "category": "cycle",
- "track": "伊東",
+ "track": "이토",
  "round": 4,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 7,
   "2nd": 1,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 18.9,
-  "trifecta": 0.0
+  "trifecta": 26.9
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -746,7 +746,7 @@
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
   "signal_quality": "하",
-  "confidence": 48.0,
+  "confidence": 60.0,
   "inverse": true
  },
  "result_analysis": {
@@ -763,12 +763,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 18.9,
-  "trifecta_odds": null,
+  "trifecta_odds": 26.9,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-24 22:37:39",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:00)",
+ "saved_at": "2026-07-29 05:00:47",
  "validation": {
   "ok": true,
   "errors": []
