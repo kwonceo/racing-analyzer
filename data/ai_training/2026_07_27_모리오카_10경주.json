@@ -8,172 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 6,
-   "name": "ノヴェリスト",
-   "jockey": "関本玲",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    1,
-    2,
-    2,
-    9,
-    9
-   ],
-   "record_score": 102.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ストロングリターン",
-   "jockey": "山本聡",
-   "jockey_winrate": 56.7,
-   "recent_results": [
-    6,
-    2,
-    3,
-    3,
-    1
-   ],
-   "record_score": 95.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "サトノアラジン",
-   "jockey": "山本政",
-   "jockey_winrate": 50.0,
-   "recent_results": [
-    3,
-    3,
-    6,
-    7,
-    10
-   ],
-   "record_score": 65.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "シニスターミニスター",
-   "jockey": "山本紀",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    2,
-    9,
-    12,
-    6,
-    5
-   ],
-   "record_score": 60.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "アイルハヴアナザー",
-   "jockey": "大坪慎",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    4,
-    3,
-    9,
-    5,
-    6
-   ],
-   "record_score": 45.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "ヘニーヒューズ",
-   "jockey": "高橋悠",
-   "jockey_winrate": 40.0,
-   "recent_results": [
-    12,
-    9,
-    7,
-    11,
-    7
-   ],
-   "record_score": 35.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ジャスタウェイ",
-   "jockey": "佐々志",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    8,
-    7,
-    3,
-    10,
-    7
-   ],
-   "record_score": 20.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "シニスターミニスター",
-   "jockey": "南郷家",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    6,
-    8,
-    8,
-    2,
-    9
-   ],
-   "record_score": 3.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "ネオユニヴァース",
-   "jockey": "坂井瑛",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    6,
-    11,
-    9,
-    2
-   ],
-   "record_score": 1.9,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -893,10 +731,10 @@
  },
  "prediction": {
   "candidates": [
-   6,
-   7,
    1,
    2,
+   6,
+   7,
    8,
    3,
    4,
@@ -904,7 +742,7 @@
    5
   ],
   "eliminated": [],
-  "recommend": "2+7",
+  "recommend": "7+8",
   "strategy": "BMED_역배열형",
   "confidence": 40.0,
   "signal_quality": "하"
@@ -914,16 +752,16 @@
   "2nd": 7,
   "3rd": 8,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 11.0,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "역배열 감지말 1번 입상"
+  "hit_pattern": "전적유력마 1번 적중 · 역배열 감지말 1번 입상"
  },
  "labels": {
   "quinella_hit": false,
   "winner": 1,
   "second": 7,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -935,14 +773,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-27 17:26:16",
+ "saved_at": "2026-07-29 05:41:28",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

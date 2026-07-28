@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_27_모리오카_11경주",
- "raceKey": "모리오카 11경주",
+ "raceKey": "2026-07-27 모리오카 11경주",
  "date": "2026-07-27",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 11,
+ "horse_count": null,
  "result": {
   "1st": 2,
   "2nd": 11,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 13.3,
-  "trifecta": 0.0
+  "trifecta": 32.6
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -3134,27 +3134,138 @@
    }
   }
  ],
- "anomalies": [],
+ "anomalies": [
+  {
+   "time": "17:40:34",
+   "type": "급락",
+   "combo": [
+    7,
+    11
+   ],
+   "horse": 7,
+   "drop_rate": -59.8,
+   "excess_drop": -11.0
+  },
+  {
+   "time": "17:40:34",
+   "type": "급락",
+   "combo": [
+    2,
+    7
+   ],
+   "horse": 2,
+   "drop_rate": -59.7,
+   "excess_drop": 2.2
+  },
+  {
+   "time": "17:40:34",
+   "type": "급락",
+   "combo": [
+    5,
+    7
+   ],
+   "horse": 5,
+   "drop_rate": -51.9,
+   "excess_drop": -2.2
+  },
+  {
+   "time": "17:40:34",
+   "type": "급락",
+   "combo": [
+    5,
+    11
+   ],
+   "horse": 5,
+   "drop_rate": -33.5,
+   "excess_drop": -2.2
+  },
+  {
+   "time": "17:40:34",
+   "type": "급락",
+   "combo": [
+    2,
+    5
+   ],
+   "horse": 2,
+   "drop_rate": -27.9,
+   "excess_drop": 2.2
+  },
+  {
+   "time": "17:40:34",
+   "type": "급락",
+   "combo": [
+    7,
+    8
+   ],
+   "horse": 7,
+   "drop_rate": -19.5,
+   "excess_drop": -11.0
+  },
+  {
+   "time": "17:40:34",
+   "type": "급락",
+   "combo": [
+    2,
+    4
+   ],
+   "horse": 2,
+   "drop_rate": -18.7,
+   "excess_drop": 2.2
+  },
+  {
+   "time": "17:40:34",
+   "type": "급락",
+   "combo": [
+    2,
+    11
+   ],
+   "horse": 2,
+   "drop_rate": -15.3,
+   "excess_drop": 2.2
+  },
+  {
+   "time": "17:40:34",
+   "type": "급락",
+   "combo": [
+    2,
+    8
+   ],
+   "horse": 2,
+   "drop_rate": -12.2,
+   "excess_drop": 2.2
+  },
+  {
+   "time": "17:40:34",
+   "type": "급락",
+   "combo": [
+    5,
+    10
+   ],
+   "horse": 5,
+   "drop_rate": -11.6,
+   "excess_drop": -2.2
+  }
+ ],
  "prediction": {
   "candidates": [
    2,
-   11,
-   8,
    5,
    7,
+   11,
    9,
    10,
    12,
    1,
    4,
+   8,
    6
   ],
   "eliminated": [],
   "recommend_main": "2+10",
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
-  "signal_quality": "하",
-  "confidence": 45.8,
+  "signal_quality": "상",
+  "confidence": 85.8,
   "inverse": true
  },
  "result_analysis": {
@@ -3162,8 +3273,11 @@
   "sub_hit": false,
   "hit_reason": null,
   "miss_reason": "추천 조합 미입상",
-  "pattern_tags": [],
-  "anomaly_correct": false,
+  "pattern_tags": [
+   "급락50+",
+   "쌍승역전"
+  ],
+  "anomaly_correct": true,
   "form_pick_hit": true
  },
  "investment": {
@@ -3171,12 +3285,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 13.3,
-  "trifecta_odds": null,
+  "trifecta_odds": 32.6,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-27 18:07:36",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:41)",
+ "saved_at": "2026-07-29 05:41:31",
  "validation": {
   "ok": true,
   "errors": []

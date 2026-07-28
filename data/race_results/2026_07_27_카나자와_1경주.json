@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_27_카나자와_1경주",
- "raceKey": "카나자와 1경주",
+ "raceKey": "2026-07-27 카나자와 1경주",
  "date": "2026-07-27",
  "sport": "horse",
  "category": "japan_local",
@@ -9,17 +9,17 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 8,
+ "horse_count": null,
  "result": {
   "1st": 4,
   "2nd": 6,
   "3rd": 7
  },
  "payouts": {
-  "quinella": 4.2,
-  "trifecta": 0.0
+  "quinella": 2.1,
+  "trifecta": 5.0
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {
   "quinella": {
    "4+6": 3.4,
@@ -1860,46 +1860,60 @@
    }
   }
  ],
- "anomalies": [],
+ "anomalies": [
+  {
+   "time": "15:20:58",
+   "type": "급락",
+   "combo": [
+    4,
+    6
+   ],
+   "horse": 4,
+   "drop_rate": -50.0,
+   "excess_drop": 0.0
+  }
+ ],
  "prediction": {
   "candidates": [
-   7,
+   4,
+   6,
    1,
    2,
    3,
-   4,
    5,
-   6,
+   7,
    8
   ],
   "eliminated": [],
   "recommend_main": "4+6",
   "recommend_sub": null,
-  "strategy": "BMED_보험형",
-  "signal_quality": "하",
-  "confidence": 0.0,
+  "strategy": "BMED_압축형",
+  "signal_quality": "상",
+  "confidence": 46.0,
   "inverse": false
  },
  "result_analysis": {
   "main_hit": true,
   "sub_hit": false,
-  "hit_reason": "전적유력마 7번 적중",
+  "hit_reason": "전적유력마 4번 적중 · 4+6 복승 급락(-50.0%) → 4·6번 입상 적중",
   "miss_reason": null,
-  "pattern_tags": [],
-  "anomaly_correct": false,
+  "pattern_tags": [
+   "급락50+"
+  ],
+  "anomaly_correct": true,
   "form_pick_hit": true
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 4.2,
-  "trifecta_odds": null,
+  "quinella_odds": 2.1,
+  "trifecta_odds": 5.0,
   "actual_return": null,
-  "profit": 3200
+  "profit": 1100
  },
- "memo": null,
- "saved_at": "2026-07-27 15:41:35",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:42)",
+ "saved_at": "2026-07-29 05:42:01",
  "validation": {
   "ok": true,
   "errors": []

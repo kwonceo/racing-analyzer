@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_27_모리오카_1경주",
- "raceKey": "모리오카 1경주",
+ "raceKey": "2026-07-27 모리오카 1경주",
  "date": "2026-07-27",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 10,
+ "horse_count": null,
  "result": {
   "1st": 5,
   "2nd": 11,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 20.6,
-  "trifecta": 0.0
+  "trifecta": 371.2
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -2883,9 +2883,9 @@
  "anomalies": [],
  "prediction": {
   "candidates": [
-   6,
    1,
    5,
+   6,
    7,
    10,
    3,
@@ -2895,7 +2895,7 @@
    4
   ],
   "eliminated": [],
-  "recommend_main": "1+6",
+  "recommend_main": "1+5",
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
   "signal_quality": "하",
@@ -2907,9 +2907,7 @@
   "sub_hit": false,
   "hit_reason": null,
   "miss_reason": "추천 조합 미입상",
-  "pattern_tags": [
-   "복승불일치"
-  ],
+  "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
  },
@@ -2918,12 +2916,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 20.6,
-  "trifecta_odds": null,
+  "trifecta_odds": 371.2,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-27 11:55:45",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:41)",
+ "saved_at": "2026-07-29 05:41:36",
  "validation": {
   "ok": true,
   "errors": []

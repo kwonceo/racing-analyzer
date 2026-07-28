@@ -1,6 +1,6 @@
 {
  "race": "모리오카 7경주",
- "raceKey": "모리오카 7경주",
+ "raceKey": "2026-07-27 모리오카 7경주",
  "date": "2026-07-27",
  "result": {
   "1st": 5,
@@ -9,9 +9,9 @@
   "4th": null
  },
  "hit": true,
- "hit_type": "복승 보조(삼복승 구성)",
+ "hit_type": "삼복승 메인",
  "odds": "저배당",
- "win_odds": 3.4,
+ "win_odds": 3.0,
  "why_recommended": {
   "signal_5": {
    "horse": 5,
@@ -181,9 +181,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 110.7,
-   "confidence": null,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": 4.0,
+   "reason": "일반"
   },
   "signal_4": {
    "horse": 4,
@@ -353,8 +353,8 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.66,
-   "record_score": 100.0,
-   "confidence": 29.6,
+   "record_score": null,
+   "confidence": 17.6,
    "reason": "쌍승역전"
   },
   "signal_7": {
@@ -525,9 +525,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 78.7,
-   "confidence": null,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
@@ -697,23 +697,23 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 100.0,
-   "confidence": null,
-   "reason": "전적상위"
+   "record_score": null,
+   "confidence": 0.0,
+   "reason": "일반"
   }
  },
  "recommended_horses": [
   5,
   7,
-  4,
-  2
+  2,
+  4
  ],
  "recommendation_process": [
-  "1. 전적 분석: 5번 110.7점",
+  "1. 전적 분석: 5번 전적 정보 제한",
   "2. 배당 수집 시작 15:05:53",
   "4. 쌍승 역전: 4→2(27.4) < 2→4(48.8) → 4번 실질 상위 신호",
   "4. 쌍승 역전: 4→7(24.8) < 7→4(37.6) → 4번 실질 상위 신호",
-  "5. 종합 신뢰도 0점(하) 판정",
+  "5. 종합 신뢰도 4.0점(하) 판정",
   "6. BMED 전략: 역배열형 적용",
   "7. 최종 추천: 복승 메인 5+7"
  ],
@@ -722,19 +722,18 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 110.7,
-  "total": 0,
+  "record_score": null,
+  "total": 4.0,
   "grade": "하"
  },
  "win_tags": [
-  "쌍승역전_적중",
-  "전적보조_적중"
+  "쌍승역전_적중"
  ],
- "combo_tags": true,
+ "combo_tags": false,
  "hit_basis": {
-  "formScore": 110.7,
+  "formScore": null,
   "dropAmt": null,
-  "dropScore": 0,
+  "dropScore": 0.0,
   "inverse": true,
   "inverseHorses": [
    4
@@ -742,7 +741,7 @@
   "inverseHit": [
    4
   ],
-  "confidence": 29.6,
+  "confidence": 17.6,
   "reason": "역배열 감지말 4번 입상"
  },
  "signal_change_history": {
@@ -810,5 +809,5 @@
  },
  "pnl": 2400,
  "stake": 1000,
- "generated_at": "2026-07-27 15:41:37"
+ "generated_at": "2026-07-29 05:41:51"
 }

@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_27_모리오카_6경주",
- "raceKey": "모리오카 6경주",
+ "raceKey": "2026-07-27 모리오카 6경주",
  "date": "2026-07-27",
  "sport": "horse",
  "category": "japan_local",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 5,
+ "horse_count": null,
  "result": {
   "1st": 6,
   "2nd": 3,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 1.9,
-  "trifecta": 0.0
+  "trifecta": 2.5
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -856,43 +856,55 @@
    }
   }
  ],
- "anomalies": [],
+ "anomalies": [
+  {
+   "time": "14:41:26",
+   "type": "급락",
+   "combo": [
+    4,
+    6
+   ],
+   "horse": 4,
+   "drop_rate": -28.6,
+   "excess_drop": 0.0
+  }
+ ],
  "prediction": {
   "candidates": [
-   4,
-   6,
    2,
    3,
+   4,
+   6,
    5
   ],
   "eliminated": [],
   "recommend_main": "3+6",
   "recommend_sub": null,
-  "strategy": "BMED_보험형",
-  "signal_quality": "하",
-  "confidence": 8.0,
+  "strategy": "BMED_압축형",
+  "signal_quality": "상",
+  "confidence": 48.0,
   "inverse": false
  },
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "적중",
+  "hit_reason": "전적유력마 2번 적중 · 4+6 복승 급락(-28.6%) → 6번 입상 적중",
   "miss_reason": null,
   "pattern_tags": [],
-  "anomaly_correct": false,
-  "form_pick_hit": false
+  "anomaly_correct": true,
+  "form_pick_hit": true
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 1.9,
-  "trifecta_odds": null,
+  "trifecta_odds": 2.5,
   "actual_return": null,
-  "profit": -1000
+  "profit": 1500
  },
- "memo": null,
- "saved_at": "2026-07-27 15:00:32",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:41)",
+ "saved_at": "2026-07-29 05:41:48",
  "validation": {
   "ok": true,
   "errors": []

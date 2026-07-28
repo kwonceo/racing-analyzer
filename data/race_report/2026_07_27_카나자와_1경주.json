@@ -1,6 +1,6 @@
 {
  "race": "카나자와 1경주",
- "raceKey": "카나자와 1경주",
+ "raceKey": "2026-07-27 카나자와 1경주",
  "date": "2026-07-27",
  "result": {
   "1st": 4,
@@ -11,16 +11,16 @@
  "hit": true,
  "hit_type": "복승 메인",
  "odds": "저배당",
- "win_odds": 4.2,
+ "win_odds": 2.1,
  "why_recommended": {
   "signal_4": {
    "horse": 4,
    "placed": true,
    "recommended": true,
    "place_rank": 1,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
+   "excess_drop": 0.0,
+   "avg_drop": -50.0,
+   "grade": "🔴",
    "rep_combo": [
     4,
     6
@@ -181,18 +181,18 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 105.0,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "초과급락"
   },
   "signal_6": {
    "horse": 6,
    "placed": true,
    "recommended": true,
    "place_rank": 2,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
+   "excess_drop": 0.0,
+   "avg_drop": -50.0,
+   "grade": "🔴",
    "rep_combo": [
     4,
     6
@@ -353,9 +353,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 23.0,
-   "confidence": 0.0,
-   "reason": "일반"
+   "record_score": null,
+   "confidence": 46.0,
+   "reason": "초과급락"
   },
   "signal_7": {
    "horse": 7,
@@ -525,7 +525,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 45.0,
+   "record_score": null,
    "confidence": 0.0,
    "reason": "일반"
   },
@@ -697,7 +697,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 13.0,
+   "record_score": null,
    "confidence": 0.0,
    "reason": "일반"
   }
@@ -708,39 +708,42 @@
   1
  ],
  "recommendation_process": [
-  "1. 전적 분석: 4번 105.0점",
+  "1. 전적 분석: 4번 전적 정보 제한",
   "2. 배당 수집 시작 15:11:18",
+  "3. 초과급락 감지: 4번 초과급락 0.0%p (전체평균 -50.0%)",
   "5. 종합 신뢰도 0.0점(하) 판정",
-  "6. BMED 전략: 보험형 적용",
+  "6. BMED 전략: 압축형 적용",
   "7. 최종 추천: 복승 메인 4+6"
  ],
  "confidence_breakdown": {
   "horse": 4,
-  "excess_drop_score": 0,
+  "excess_drop_score": 40,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 105.0,
+  "record_score": null,
   "total": 0.0,
   "grade": "하"
  },
  "win_tags": [
-  "복승불일치_적중",
-  "전적보조_적중"
+  "초과급락_적중",
+  "복승불일치_적중"
  ],
  "combo_tags": true,
  "hit_basis": {
-  "formScore": 105.0,
-  "dropAmt": null,
-  "dropScore": 0.0,
+  "formScore": null,
+  "dropAmt": -50.0,
+  "dropScore": 100.0,
   "inverse": false,
   "inverseHorses": [
-   6
+   6,
+   4
   ],
   "inverseHit": [
-   6
+   6,
+   4
   ],
-  "confidence": 0.0,
-  "reason": "전적유력마 7번 적중"
+  "confidence": 46.0,
+  "reason": "전적유력마 4번 적중 · 4+6 복승 급락(-50.0%) → 4·6번 입상 적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -837,7 +840,7 @@
   },
   "validCount": 18
  },
- "pnl": 3200,
+ "pnl": 1100,
  "stake": 1000,
- "generated_at": "2026-07-27 15:41:35"
+ "generated_at": "2026-07-29 05:42:01"
 }

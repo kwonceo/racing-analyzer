@@ -8,137 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 4,
-   "name": "エピファネイア",
-   "jockey": "中島龍",
-   "jockey_winrate": 56.7,
-   "recent_results": [
-    2,
-    3,
-    3,
-    2,
-    6
-   ],
-   "record_score": 93.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "フリオーソ",
-   "jockey": "吉田晃",
-   "jockey_winrate": 40.0,
-   "recent_results": [
-    2,
-    11,
-    12,
-    10,
-    8
-   ],
-   "record_score": 75.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "フィエールマン",
-   "jockey": "青柳正",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    7,
-    8,
-    4,
-    4,
-    2
-   ],
-   "record_score": 78.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ドレフォン",
-   "jockey": "栗原大",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    6,
-    4,
-    8,
-    6,
-    4
-   ],
-   "record_score": 23.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ディープスカイ",
-   "jockey": "ディープスカイ",
-   "jockey_winrate": null,
-   "recent_results": [
-    11,
-    4,
-    7,
-    2,
-    6
-   ],
-   "record_score": 16.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ルーラーシップ",
-   "jockey": "鈴木太",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    7,
-    6,
-    3,
-    8
-   ],
-   "record_score": 22.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ベルシャザール",
-   "jockey": "田知弘",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    5,
-    7,
-    8,
-    11,
-    8
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -655,10 +528,10 @@
  },
  "prediction": {
   "candidates": [
-   4,
    1,
    2,
    3,
+   4,
    6,
    7,
    5
@@ -674,7 +547,7 @@
   "2nd": 6,
   "3rd": 2,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 6.3,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "적중"
@@ -683,7 +556,7 @@
   "quinella_hit": false,
   "winner": 3,
   "second": 6,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -695,7 +568,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-27 16:44:15",
+ "saved_at": "2026-07-29 05:42:06",
  "quality": {
   "score": 60,
   "grade": "참고용",
@@ -703,7 +576,7 @@
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

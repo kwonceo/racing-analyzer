@@ -8,173 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 4,
-   "name": "レイデオロ",
-   "jockey": "中島龍",
-   "jockey_winrate": 56.7,
-   "recent_results": [
-    2,
-    4,
-    2,
-    3,
-    2
-   ],
-   "record_score": 99.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "オーヴァルエース",
-   "jockey": "柴田勇",
-   "jockey_winrate": 46.7,
-   "recent_results": [
-    5,
-    1,
-    3,
-    3,
-    5
-   ],
-   "record_score": 87.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ジャスタウェイ",
-   "jockey": "甲賀弘",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    3,
-    7,
-    6,
-    6,
-    2
-   ],
-   "record_score": 46.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "アドマイヤムーン",
-   "jockey": "青柳正",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    8,
-    7,
-    11,
-    9,
-    8
-   ],
-   "record_score": 35.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "リオンディーズ",
-   "jockey": "加藤翔",
-   "jockey_winrate": 56.7,
-   "recent_results": [
-    5,
-    11,
-    10,
-    6,
-    8
-   ],
-   "record_score": 33.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ロードカナロア",
-   "jockey": "栗原大",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    8,
-    9,
-    2,
-    5,
-    6
-   ],
-   "record_score": 20.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ワンダーアキュート",
-   "jockey": "魚住謙",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    6,
-    5,
-    8,
-    8,
-    4
-   ],
-   "record_score": 9.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ジャスタウェイ",
-   "jockey": "田知弘",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    9,
-    5,
-    4,
-    6,
-    4
-   ],
-   "record_score": 11.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "レッドファルクス",
-   "jockey": "沖静男",
-   "jockey_winrate": 19.2,
-   "recent_results": [
-    6,
-    7,
-    5,
-    7,
-    6
-   ],
-   "record_score": 0.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -977,11 +814,11 @@
  "prediction": {
   "candidates": [
    4,
-   9,
-   2,
    6,
    8,
+   9,
    1,
+   2,
    3,
    5,
    7
@@ -997,7 +834,7 @@
   "2nd": 8,
   "3rd": 3,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 2.8,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "전적유력마 4번 적중 · 역배열 감지말 8번 입상"
@@ -1006,7 +843,7 @@
   "quinella_hit": true,
   "winner": 4,
   "second": 8,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1018,14 +855,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-27 17:25:57",
+ "saved_at": "2026-07-29 05:42:08",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

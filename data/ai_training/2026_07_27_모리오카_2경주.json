@@ -8,209 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 11,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "フィエールマン",
-   "jockey": "高橋悠",
-   "jockey_winrate": 36.7,
-   "recent_results": [
-    1,
-    2,
-    8,
-    10,
-    4
-   ],
-   "record_score": 138.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "モーリス",
-   "jockey": "山本紀",
-   "jockey_winrate": 53.3,
-   "recent_results": [
-    1,
-    5,
-    2,
-    5,
-    7
-   ],
-   "record_score": 85.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "スクリーンヒーロー",
-   "jockey": "鈴木祐",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    4,
-    2,
-    4,
-    2,
-    7
-   ],
-   "record_score": 59.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "ミスターメロディ",
-   "jockey": "岩本怜",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    9,
-    3,
-    1,
-    3,
-    9
-   ],
-   "record_score": 82.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "マツリダゴッホ",
-   "jockey": "坂井瑛",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    8,
-    9,
-    2,
-    2,
-    4
-   ],
-   "record_score": 60.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "アルアイン",
-   "jockey": "齋藤友",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    7,
-    11,
-    4,
-    5,
-    1
-   ],
-   "record_score": 60.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "エイシンフラッシュ",
-   "jockey": "小林凌",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    11,
-    4,
-    2,
-    4,
-    7
-   ],
-   "record_score": 21.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 11,
-   "name": "ホークビル",
-   "jockey": "山本政",
-   "jockey_winrate": 50.0,
-   "recent_results": [
-    9,
-    6,
-    6,
-    3,
-    10
-   ],
-   "record_score": 15.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ベストウォーリア",
-   "jockey": "菅原辰",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    6,
-    10,
-    3,
-    4,
-    10
-   ],
-   "record_score": 14.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ナムラタイタン",
-   "jockey": "塚本涼",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    12,
-    8,
-    3,
-    6,
-    6
-   ],
-   "record_score": -7.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "シニスターミニスター",
-   "jockey": "南郷家",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    10,
-    7,
-    6,
-    8,
-    9
-   ],
-   "record_score": -17.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1373,9 +1174,9 @@
  },
  "prediction": {
   "candidates": [
+   1,
    3,
    6,
-   1,
    11,
    2,
    5,
@@ -1396,16 +1197,16 @@
   "2nd": 3,
   "3rd": 6,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 3.5,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "전적유력마 3번 적중 · 역배열 감지말 3번 입상"
+  "hit_pattern": "전적유력마 1번 적중 · 역배열 감지말 3번 입상"
  },
  "labels": {
   "quinella_hit": true,
   "winner": 1,
   "second": 3,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1417,14 +1218,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-27 12:36:49",
+ "saved_at": "2026-07-29 05:41:38",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

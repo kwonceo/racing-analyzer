@@ -8,89 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 5,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 6,
-   "name": "クリソベリル",
-   "jockey": "山本政",
-   "jockey_winrate": 46.7,
-   "recent_results": [
-    3,
-    3
-   ],
-   "record_score": 65.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "ダノンプレミアム",
-   "jockey": "菅原辰",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    4
-   ],
-   "record_score": 55.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "デクラレーションオブウォー",
-   "jockey": "高橋悠",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    2,
-    5,
-    4,
-    9
-   ],
-   "record_score": 51.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ジャンダルム",
-   "jockey": "南郷家",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    7,
-    3
-   ],
-   "record_score": 36.4,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ニューイヤーズデイ",
-   "jockey": "佐々志",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    6,
-    8,
-    3,
-    4
-   ],
-   "record_score": 6.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -409,9 +330,15 @@
     }
    }
   ],
-  "drop_rates": {},
+  "drop_rates": {
+   "4": -28.6,
+   "6": -28.6
+  },
   "excess_drops": {},
-  "drop_speed": {},
+  "drop_speed": {
+   "4": -27.8,
+   "6": -27.8
+  },
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": null,
@@ -428,33 +355,33 @@
  },
  "prediction": {
   "candidates": [
-   4,
-   6,
    2,
    3,
+   4,
+   6,
    5
   ],
   "eliminated": [],
   "recommend": "3+6",
-  "strategy": "BMED_보험형",
-  "confidence": 8.0,
-  "signal_quality": "하"
+  "strategy": "BMED_압축형",
+  "confidence": 48.0,
+  "signal_quality": "상"
  },
  "result": {
   "1st": 6,
   "2nd": 3,
   "3rd": 2,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 1.9,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "적중"
+  "hit_pattern": "전적유력마 2번 적중 · 4+6 복승 급락(-28.6%) → 6번 입상 적중"
  },
  "labels": {
   "quinella_hit": false,
   "winner": 6,
   "second": 3,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -466,15 +393,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-27 15:00:32",
+ "saved_at": "2026-07-29 05:41:48",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
-  "complete": false,
-  "ai_ready": false,
+  "score": 80,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
   "missing": [
-   "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

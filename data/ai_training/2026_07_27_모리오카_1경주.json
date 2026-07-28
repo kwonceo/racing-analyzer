@@ -8,190 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 10,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 6,
-   "name": "グランデッツァ",
-   "jockey": "大坪慎",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    5,
-    3,
-    6,
-    2,
-    6
-   ],
-   "record_score": 98.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "パイロ",
-   "jockey": "関本玲",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    5,
-    5,
-    2,
-    7,
-    8
-   ],
-   "record_score": 75.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 11,
-   "name": "プレティオラス",
-   "jockey": "菅原辰",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    9,
-    5,
-    9,
-    7,
-    4
-   ],
-   "record_score": -0.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "マクフィ",
-   "jockey": "山本紀",
-   "jockey_winrate": 36.7,
-   "recent_results": [
-    8,
-    8,
-    12,
-    8,
-    2
-   ],
-   "record_score": 31.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ストロングリターン",
-   "jockey": "佐々志",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    7,
-    5,
-    4,
-    5
-   ],
-   "record_score": 30.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "カレンブラックヒル",
-   "jockey": "坂井瑛",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    11,
-    11,
-    12,
-    9,
-    5
-   ],
-   "record_score": 35.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "エピカリス",
-   "jockey": "岩本怜",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    7,
-    10,
-    11,
-    3,
-    9
-   ],
-   "record_score": 37.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "シルバーステート",
-   "jockey": "阿部英",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    8,
-    8,
-    7,
-    8,
-    5
-   ],
-   "record_score": 30.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "ミッキーアイル",
-   "jockey": "塚本涼",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    6,
-    10,
-    4,
-    5,
-    5
-   ],
-   "record_score": -17.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ベストウォーリア",
-   "jockey": "小林凌",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    11,
-    13,
-    8,
-    9,
-    8
-   ],
-   "record_score": -22.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1164,9 +984,9 @@
  },
  "prediction": {
   "candidates": [
-   6,
    1,
    5,
+   6,
    7,
    10,
    3,
@@ -1176,7 +996,7 @@
    4
   ],
   "eliminated": [],
-  "recommend": "1+6",
+  "recommend": "1+5",
   "strategy": "BMED_역배열형",
   "confidence": 32.0,
   "signal_quality": "하"
@@ -1186,7 +1006,7 @@
   "2nd": 11,
   "3rd": 8,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 20.6,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -1195,7 +1015,7 @@
   "quinella_hit": false,
   "winner": 5,
   "second": 11,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1207,14 +1027,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-27 11:55:45",
+ "saved_at": "2026-07-29 05:41:36",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

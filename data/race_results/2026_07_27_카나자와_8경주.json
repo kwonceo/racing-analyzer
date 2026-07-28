@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_27_카나자와_8경주",
- "raceKey": "카나자와 8경주",
+ "raceKey": "2026-07-27 카나자와 8경주",
  "date": "2026-07-27",
  "sport": "horse",
  "category": "japan_local",
@@ -9,17 +9,17 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 9,
+ "horse_count": null,
  "result": {
   "1st": 5,
   "2nd": 4,
   "3rd": 8
  },
  "payouts": {
-  "quinella": 9.4,
-  "trifecta": 0.0
+  "quinella": 8.9,
+  "trifecta": 13.6
  },
- "payouts_approx": true,
+ "payouts_approx": false,
  "odds_at_start": {
   "quinella": {
    "1+5": 5.3,
@@ -2340,25 +2340,37 @@
    }
   }
  ],
- "anomalies": [],
+ "anomalies": [
+  {
+   "time": "19:31:14",
+   "type": "급락",
+   "combo": [
+    6,
+    9
+   ],
+   "horse": 6,
+   "drop_rate": -14.5,
+   "excess_drop": 0.0
+  }
+ ],
  "prediction": {
   "candidates": [
    1,
    4,
    5,
-   8,
-   6,
    7,
+   8,
    2,
    3,
+   6,
    9
   ],
   "eliminated": [],
   "recommend_main": "1+5",
   "recommend_sub": null,
-  "strategy": "BMED_보험형",
+  "strategy": "BMED_압축형",
   "signal_quality": "하",
-  "confidence": 32.0,
+  "confidence": 61.0,
   "inverse": false
  },
  "result_analysis": {
@@ -2374,13 +2386,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 9.4,
-  "trifecta_odds": null,
+  "quinella_odds": 8.9,
+  "trifecta_odds": 13.6,
   "actual_return": null,
-  "profit": 8400
+  "profit": 7900
  },
- "memo": null,
- "saved_at": "2026-07-27 19:52:35",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:42)",
+ "saved_at": "2026-07-29 05:42:18",
  "validation": {
   "ok": true,
   "errors": []

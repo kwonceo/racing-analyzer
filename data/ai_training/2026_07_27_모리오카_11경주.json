@@ -8,209 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 11,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 11,
-   "name": "ルーラーシップ",
-   "jockey": "山本政",
-   "jockey_winrate": 46.7,
-   "recent_results": [
-    2,
-    4,
-    6,
-    4,
-    3
-   ],
-   "record_score": 134.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ハービンジャー",
-   "jockey": "高橋悠",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    3,
-    4,
-    2,
-    5,
-    1
-   ],
-   "record_score": 123.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "ノヴェリスト",
-   "jockey": "山本聡",
-   "jockey_winrate": 56.7,
-   "recent_results": [
-    3,
-    2,
-    1,
-    10,
-    13
-   ],
-   "record_score": 75.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "デクラレーションオブウォー",
-   "jockey": "高松亮",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    4,
-    4,
-    1,
-    6,
-    4
-   ],
-   "record_score": 101.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "マインドユアビスケッツ",
-   "jockey": "大坪慎",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    6,
-    6,
-    1,
-    3,
-    11
-   ],
-   "record_score": 62.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 12,
-   "name": "モーリス",
-   "jockey": "菅原辰",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    1,
-    9,
-    11,
-    9,
-    5
-   ],
-   "record_score": 25.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "スワーヴリチャード",
-   "jockey": "坂井瑛",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    10,
-    9,
-    8,
-    10,
-    9
-   ],
-   "record_score": 45.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ドレフォン",
-   "jockey": "鈴木祐",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    8,
-    7,
-    9,
-    9,
-    9
-   ],
-   "record_score": 38.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ゴールドアクター",
-   "jockey": "佐々志",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    9,
-    12,
-    5,
-    9,
-    9
-   ],
-   "record_score": 28.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ノーブルミッション",
-   "jockey": "小林凌",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    8,
-    4,
-    9,
-    9,
-    1
-   ],
-   "record_score": -7.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "トーセンジョーダン",
-   "jockey": "山本紀",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    10,
-    6,
-    11,
-    11,
-    9
-   ],
-   "record_score": -5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -1234,9 +1035,29 @@
     }
    }
   ],
-  "drop_rates": {},
-  "excess_drops": {},
-  "drop_speed": {},
+  "drop_rates": {
+   "7": -59.8,
+   "11": -59.8,
+   "2": -59.7,
+   "5": -51.9,
+   "8": -19.5,
+   "4": -18.7,
+   "10": -11.6
+  },
+  "excess_drops": {
+   "7": -11.0,
+   "11": -7.2,
+   "5": -2.2
+  },
+  "drop_speed": {
+   "7": -56.4,
+   "11": -56.4,
+   "2": -56.3,
+   "5": -49.0,
+   "8": -18.4,
+   "4": -17.6,
+   "10": -10.9
+  },
   "exacta_reversal": true,
   "reversal_ratio": 0.697,
   "quinella_mismatch": null,
@@ -1254,29 +1075,29 @@
  "prediction": {
   "candidates": [
    2,
-   11,
-   8,
    5,
    7,
+   11,
    9,
    10,
    12,
    1,
    4,
+   8,
    6
   ],
   "eliminated": [],
   "recommend": "2+10",
   "strategy": "BMED_역배열형",
-  "confidence": 45.8,
-  "signal_quality": "하"
+  "confidence": 85.8,
+  "signal_quality": "상"
  },
  "result": {
   "1st": 2,
   "2nd": 11,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 13.3,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -1285,26 +1106,26 @@
   "quinella_hit": false,
   "winner": 2,
   "second": 11,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
-  "excess_drop_horse": null,
-  "excess_drop_horse_placed": null,
-  "excess_drop_value": null,
+  "excess_drop_horse": "7",
+  "excess_drop_horse_placed": true,
+  "excess_drop_value": -11.0,
   "reversal_horse": 2,
   "reversal_horse_placed": true,
   "reversal_ratio": 0.697,
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-27 18:07:36",
+ "saved_at": "2026-07-29 05:41:31",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

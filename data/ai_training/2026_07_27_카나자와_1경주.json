@@ -8,155 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 8,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 4,
-   "name": "ダンカーク",
-   "jockey": "加藤翔",
-   "jockey_winrate": 53.3,
-   "recent_results": [
-    1,
-    9,
-    10,
-    7,
-    16
-   ],
-   "record_score": 105.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "バトルプラン",
-   "jockey": "柴田勇",
-   "jockey_winrate": 43.3,
-   "recent_results": [
-    9,
-    9,
-    7,
-    8,
-    1
-   ],
-   "record_score": 23.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ゴールドアクター",
-   "jockey": "甲賀弘",
-   "jockey_winrate": 10.0,
-   "recent_results": [
-    7,
-    4,
-    4,
-    4,
-    4
-   ],
-   "record_score": 45.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "ウインバリアシオン",
-   "jockey": "栗原大",
-   "jockey_winrate": 36.7,
-   "recent_results": [
-    7,
-    9,
-    6,
-    6,
-    8
-   ],
-   "record_score": 43.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "ディープブリランテ",
-   "jockey": "浅野登",
-   "jockey_winrate": 17.4,
-   "recent_results": [
-    5,
-    5,
-    2,
-    7,
-    7
-   ],
-   "record_score": 13.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ダイワメジャー",
-   "jockey": "沖静男",
-   "jockey_winrate": 21.7,
-   "recent_results": [
-    4,
-    4,
-    7,
-    9,
-    7
-   ],
-   "record_score": 25.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "トゥザワールド",
-   "jockey": "吉田晃",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    6,
-    5,
-    6,
-    5,
-    5
-   ],
-   "record_score": 5.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ベストウォーリア",
-   "jockey": "魚住謙",
-   "jockey_winrate": 23.3,
-   "recent_results": [
-    10,
-    5,
-    9,
-    7,
-    4
-   ],
-   "record_score": -5.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -787,13 +642,19 @@
     }
    }
   ],
-  "drop_rates": {},
+  "drop_rates": {
+   "4": -50.0,
+   "6": -50.0
+  },
   "excess_drops": {},
-  "drop_speed": {},
+  "drop_speed": {
+   "4": -49.5,
+   "6": -49.5
+  },
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": 1.905,
-  "refund_rate": 0.745,
+  "refund_rate": 0.743,
   "consecutive_drops": {},
   "fake_betting": true,
   "large_scale_drop": false
@@ -806,36 +667,36 @@
  },
  "prediction": {
   "candidates": [
-   7,
+   4,
+   6,
    1,
    2,
    3,
-   4,
    5,
-   6,
+   7,
    8
   ],
   "eliminated": [],
   "recommend": "4+6",
-  "strategy": "BMED_보험형",
-  "confidence": 0.0,
-  "signal_quality": "하"
+  "strategy": "BMED_압축형",
+  "confidence": 46.0,
+  "signal_quality": "상"
  },
  "result": {
   "1st": 4,
   "2nd": 6,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 2.1,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "전적유력마 7번 적중"
+  "hit_pattern": "전적유력마 4번 적중 · 4+6 복승 급락(-50.0%) → 4·6번 입상 적중"
  },
  "labels": {
   "quinella_hit": true,
   "winner": 4,
   "second": 6,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -847,14 +708,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-27 15:41:35",
+ "saved_at": "2026-07-29 05:42:01",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

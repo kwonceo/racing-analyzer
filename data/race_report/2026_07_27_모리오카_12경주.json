@@ -1,6 +1,6 @@
 {
  "race": "모리오카 12경주",
- "raceKey": "모리오카 12경주",
+ "raceKey": "2026-07-27 모리오카 12경주",
  "date": "2026-07-27",
  "result": {
   "1st": 2,
@@ -10,8 +10,8 @@
  },
  "hit": true,
  "hit_type": "복승 메인",
- "odds": "저배당",
- "win_odds": 2.4,
+ "odds": "중배당",
+ "win_odds": 9.7,
  "why_recommended": {
   "signal_2": {
    "horse": 2,
@@ -165,9 +165,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 117.5,
+   "record_score": null,
    "confidence": 4.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_1": {
    "horse": 1,
@@ -321,7 +321,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.778,
-   "record_score": 81.2,
+   "record_score": null,
    "confidence": 62.7,
    "reason": "쌍승역전"
   },
@@ -337,9 +337,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 70.5,
+   "record_score": null,
    "confidence": 8.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_7": {
    "horse": 7,
@@ -493,9 +493,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 105.0,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
@@ -504,7 +504,7 @@
   7
  ],
  "recommendation_process": [
-  "1. 전적 분석: 2번 117.5점",
+  "1. 전적 분석: 2번 전적 정보 제한",
   "2. 배당 수집 시작 18:06:15",
   "4. 쌍승 역전: 1→2(4.9) < 2→1(6.3) → 1번 실질 상위 신호",
   "5. 종합 신뢰도 4.0점(하) 판정",
@@ -516,17 +516,16 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 117.5,
+  "record_score": null,
   "total": 4.0,
   "grade": "하"
  },
  "win_tags": [
-  "쌍승역전_적중",
-  "전적보조_적중"
+  "쌍승역전_적중"
  ],
- "combo_tags": true,
+ "combo_tags": false,
  "hit_basis": {
-  "formScore": 117.5,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -636,5 +635,5 @@
  },
  "pnl": 1400,
  "stake": 1000,
- "generated_at": "2026-07-27 18:29:02"
+ "generated_at": "2026-07-29 05:41:33"
 }

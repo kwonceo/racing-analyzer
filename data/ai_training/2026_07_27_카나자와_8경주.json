@@ -8,173 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 9,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 5,
-   "name": "ホッコータルマエ",
-   "jockey": "柴田勇",
-   "jockey_winrate": 40.0,
-   "recent_results": [
-    2,
-    3,
-    2,
-    3,
-    7
-   ],
-   "record_score": 112.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "シルポート",
-   "jockey": "加藤翔",
-   "jockey_winrate": 56.7,
-   "recent_results": [
-    3,
-    2,
-    1,
-    1,
-    2
-   ],
-   "record_score": 91.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "ダンカーク",
-   "jockey": "中島龍",
-   "jockey_winrate": 60.0,
-   "recent_results": [
-    7,
-    6,
-    2,
-    1,
-    3
-   ],
-   "record_score": 80.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "エスポワールシチー",
-   "jockey": "松戸政",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    1,
-    5,
-    5,
-    6,
-    7
-   ],
-   "record_score": 75.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ダノンレジェンド",
-   "jockey": "沖静男",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    9,
-    2,
-    4,
-    9,
-    1
-   ],
-   "record_score": 45.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ジョーカプチーノ",
-   "jockey": "甲賀弘",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    6,
-    3,
-    9,
-    7,
-    4
-   ],
-   "record_score": 54.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "リアルスティール",
-   "jockey": "栗原大",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    8,
-    5,
-    4,
-    1,
-    1
-   ],
-   "record_score": 15.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "リアルインパクト",
-   "jockey": "吉田晃",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    9,
-    10,
-    2,
-    6,
-    7
-   ],
-   "record_score": 13.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "マジェスティックウォリアー",
-   "jockey": "田知弘",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    10,
-    11,
-    4,
-    9,
-    7
-   ],
-   "record_score": 0.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -957,9 +794,15 @@
     }
    }
   ],
-  "drop_rates": {},
+  "drop_rates": {
+   "6": -14.5,
+   "9": -14.5
+  },
   "excess_drops": {},
-  "drop_speed": {},
+  "drop_speed": {
+   "6": -14.5,
+   "9": -14.5
+  },
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": null,
@@ -979,17 +822,17 @@
    1,
    4,
    5,
-   8,
-   6,
    7,
+   8,
    2,
    3,
+   6,
    9
   ],
   "eliminated": [],
   "recommend": "1+5",
-  "strategy": "BMED_보험형",
-  "confidence": 32.0,
+  "strategy": "BMED_압축형",
+  "confidence": 61.0,
   "signal_quality": "하"
  },
  "result": {
@@ -997,7 +840,7 @@
   "2nd": 4,
   "3rd": 8,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 8.9,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "적중"
@@ -1006,7 +849,7 @@
   "quinella_hit": true,
   "winner": 5,
   "second": 4,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -1018,15 +861,14 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-27 19:52:35",
+ "saved_at": "2026-07-29 05:42:18",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
-  "complete": false,
-  "ai_ready": false,
+  "score": 80,
+  "grade": "AI학습용",
+  "complete": true,
+  "ai_ready": true,
   "missing": [
-   "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

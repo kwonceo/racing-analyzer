@@ -1,6 +1,6 @@
 {
  "race": "카나자와 3경주",
- "raceKey": "카나자와 3경주",
+ "raceKey": "2026-07-27 카나자와 3경주",
  "date": "2026-07-27",
  "result": {
   "1st": 3,
@@ -10,8 +10,8 @@
  },
  "hit": true,
  "hit_type": null,
- "odds": "미상",
- "win_odds": 0,
+ "odds": "중배당",
+ "win_odds": 15.1,
  "why_recommended": {
   "signal_3": {
    "horse": 3,
@@ -181,9 +181,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 75.0,
+   "record_score": null,
    "confidence": 24.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_6": {
    "horse": 6,
@@ -353,7 +353,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 22.5,
+   "record_score": null,
    "confidence": 0.0,
    "reason": "일반"
   },
@@ -369,7 +369,7 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 23.8,
+   "record_score": null,
    "confidence": 8.0,
    "reason": "일반"
   },
@@ -541,9 +541,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 93.8,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_1": {
    "horse": 1,
@@ -713,18 +713,18 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 78.0,
+   "record_score": null,
    "confidence": 8.0,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
-  4,
   3,
+  4,
   1
  ],
  "recommendation_process": [
-  "1. 전적 분석: 3번 75.0점",
+  "1. 전적 분석: 3번 전적 정보 제한",
   "2. 배당 수집 시작 16:25:34",
   "5. 종합 신뢰도 24.0점(하) 판정",
   "6. BMED 전략: 보험형 적용",
@@ -735,14 +735,14 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 75.0,
+  "record_score": null,
   "total": 24.0,
   "grade": "하"
  },
  "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 75.0,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": false,
@@ -846,7 +846,7 @@
   },
   "validCount": 18
  },
- "pnl": -1000,
+ "pnl": 14100,
  "stake": 1000,
- "generated_at": "2026-07-27 16:44:15"
+ "generated_at": "2026-07-29 05:42:06"
 }
