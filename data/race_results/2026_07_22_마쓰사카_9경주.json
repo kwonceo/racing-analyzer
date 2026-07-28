@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_22_마쓰사카_9경주",
- "raceKey": "마쓰사카 9경주",
+ "raceKey": "2026-07-22 마쓰사카 9경주",
  "date": "2026-07-22",
  "sport": "cycle",
  "category": "cycle",
@@ -9,31 +9,23 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 1,
   "2nd": 3,
   "3rd": 7
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 3.7,
+  "trifecta": 7.6
  },
  "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   6,
-   7
-  ],
-  "eliminated": [
-   5
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
@@ -48,19 +40,19 @@
   "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
-  "form_pick_hit": true
+  "form_pick_hit": false
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 3.7,
+  "trifecta_odds": 7.6,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-22 19:38:48",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:47)",
+ "saved_at": "2026-07-29 04:47:18",
  "validation": {
   "ok": true,
   "errors": []
