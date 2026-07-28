@@ -1,7 +1,9 @@
 {
  "race_id": "2026_07_18_세이부엔_9경주",
- "raceKey": "세이부엔 9경주",
+ "raceKey": "2026-07-18 세이부엔 9경주",
  "date": "2026-07-18",
+ "sport": "cycle",
+ "category": "cycle",
  "track": "세이부엔",
  "round": 9,
  "distance": null,
@@ -10,9 +12,14 @@
  "horse_count": null,
  "result": {
   "1st": 1,
-  "2nd": 5,
-  "3rd": 2
+  "2nd": 2,
+  "3rd": 5
  },
+ "payouts": {
+  "quinella": 23.9,
+  "trifecta": 18.1
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -39,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 23.9,
+  "trifecta_odds": 18.1,
   "actual_return": null,
   "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-18 00:14:42",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:04)",
+ "saved_at": "2026-07-29 04:04:29",
  "validation": {
   "ok": true,
   "errors": []
