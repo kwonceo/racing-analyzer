@@ -1,6 +1,6 @@
 {
  "race": "오다와라 4경주",
- "raceKey": "오다와라 4경주",
+ "raceKey": "2026-07-23 오다와라 4경주",
  "date": "2026-07-23",
  "result": {
   "1st": 1,
@@ -8,7 +8,7 @@
   "3rd": 2,
   "4th": null
  },
- "hit": false,
+ "hit": true,
  "hit_type": "복승 메인",
  "odds": "미상",
  "win_odds": 0,
@@ -109,9 +109,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 97.6,
+   "record_score": null,
    "confidence": 68.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_4": {
    "horse": 4,
@@ -209,9 +209,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 90.1,
+   "record_score": null,
    "confidence": 20.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
@@ -309,9 +309,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 94.9,
+   "record_score": null,
    "confidence": 52.0,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
@@ -320,7 +320,7 @@
   2
  ],
  "recommendation_process": [
-  "1. 전적 분석: 1번 97.6점",
+  "1. 전적 분석: 1번 전적 정보 제한",
   "2. 배당 수집 시작 09:35:05",
   "5. 종합 신뢰도 68.0점(중) 판정",
   "6. BMED 전략: 고배당도전형 적용",
@@ -331,16 +331,14 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 97.6,
+  "record_score": null,
   "total": 68.0,
   "grade": "중"
  },
- "win_tags": [
-  "전적보조_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 97.6,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": false,
@@ -427,5 +425,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-23 10:34:49"
+ "generated_at": "2026-07-29 04:58:40"
 }
