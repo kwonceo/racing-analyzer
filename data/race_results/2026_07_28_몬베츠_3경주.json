@@ -1,0 +1,165 @@
+{
+ "race_id": "2026_07_28_몬베츠_3경주",
+ "raceKey": "몬베츠 3경주",
+ "date": "2026-07-28",
+ "sport": "horse",
+ "category": "japan_central",
+ "track": "몬베츠",
+ "round": 3,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 12,
+ "result": {
+  "1st": 6,
+  "2nd": 11,
+  "3rd": 12
+ },
+ "payouts": {
+  "trifecta": 0.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    2,
+    5
+   ],
+   "horse": 2,
+   "drop_rate": -71.8,
+   "excess_drop": -36.0
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    2,
+    7
+   ],
+   "horse": 2,
+   "drop_rate": -63.8,
+   "excess_drop": -36.0
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    8,
+    9
+   ],
+   "horse": 8,
+   "drop_rate": -33.5,
+   "excess_drop": 9.7
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    5,
+    7
+   ],
+   "horse": 5,
+   "drop_rate": -28.2,
+   "excess_drop": -18.2
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    7,
+    11
+   ],
+   "horse": 7,
+   "drop_rate": -23.0,
+   "excess_drop": 4.2
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    6,
+    7
+   ],
+   "horse": 6,
+   "drop_rate": -14.9,
+   "excess_drop": 16.9
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    4,
+    8
+   ],
+   "horse": 4,
+   "drop_rate": -10.6,
+   "excess_drop": 21.2
+  },
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    7,
+    9
+   ],
+   "horse": 7,
+   "drop_rate": -8.2,
+   "excess_drop": 4.2
+  }
+ ],
+ "prediction": {
+  "candidates": [
+   5,
+   7,
+   1,
+   6,
+   11,
+   12,
+   2,
+   8,
+   9,
+   4,
+   10
+  ],
+  "eliminated": [
+   3
+  ],
+  "recommend_main": "5+12",
+  "recommend_sub": null,
+  "strategy": "BMED_압축형",
+  "signal_quality": "상",
+  "confidence": 92.0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": "7+11 복승 급락(-23.0%) → 11번 입상 적중 · 제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [
+   "급락50+",
+   "연속하락"
+  ],
+  "anomaly_correct": true,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-28 15:40:14",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

@@ -1,0 +1,307 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_28_몬베츠_3경주",
+ "race_info": {
+  "date": "2026-07-28",
+  "track": "몬베츠",
+  "round": 3,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 12,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 6,
+   "name": "ブロンドナイト",
+   "jockey": "阿部龍（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    3
+   ],
+   "record_score": 74.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 11,
+   "name": "ニューハーピー",
+   "jockey": "落合玄（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    2,
+    2
+   ],
+   "record_score": 73.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "オリザノヴァ",
+   "jockey": "小野楓（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    2,
+    4,
+    3
+   ],
+   "record_score": 73.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "ヨシノステラ",
+   "jockey": "松井伸（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    5,
+    3,
+    8
+   ],
+   "record_score": 41.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 12,
+   "name": "バシュネル",
+   "jockey": "桑村真（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    3,
+    2
+   ],
+   "record_score": 33.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "ベイビーノンチャン",
+   "jockey": "石川倭（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    11,
+    2
+   ],
+   "record_score": 32.1,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "サスラオウ",
+   "jockey": "服部茂（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4
+   ],
+   "record_score": 25.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "ヤマノシンゲキ",
+   "jockey": "岩橋勇（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    3
+   ],
+   "record_score": 21.4,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "カヴォート",
+   "jockey": "井上俊（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    4,
+    11,
+    10,
+    8
+   ],
+   "record_score": 17.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "ハッピーデイ",
+   "jockey": "宮内勇（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "ミッドナイトハニー",
+   "jockey": "近藤翔（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    5
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 10,
+   "name": "クインテットホープ",
+   "jockey": "藤田駕（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    7
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {
+   "2": -71.8,
+   "5": -71.8,
+   "7": -63.8,
+   "8": -33.5,
+   "9": -33.5,
+   "11": -23.0,
+   "6": -14.9,
+   "4": -10.6
+  },
+  "excess_drops": {
+   "2": -36.0,
+   "5": -18.2
+  },
+  "drop_speed": {
+   "2": -287.2,
+   "5": -287.2,
+   "7": -255.2,
+   "8": -134.0,
+   "9": -134.0,
+   "11": -92.0,
+   "6": -59.6,
+   "4": -42.4
+  },
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.746,
+  "consecutive_drops": {
+   "4": 3,
+   "12": 3,
+   "7": 3
+  },
+  "fake_betting": true,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   5,
+   7,
+   1,
+   6,
+   11,
+   12,
+   2,
+   8,
+   9,
+   4,
+   10
+  ],
+  "eliminated": [
+   3
+  ],
+  "recommend": "5+12",
+  "strategy": "BMED_압축형",
+  "confidence": 92.0,
+  "signal_quality": "상"
+ },
+ "result": {
+  "1st": 6,
+  "2nd": 11,
+  "3rd": 12,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "7+11 복승 급락(-23.0%) → 11번 입상 적중 · 제거 적중"
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 6,
+  "second": 11,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": "2",
+  "excess_drop_horse_placed": false,
+  "excess_drop_value": -36.0,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": "4",
+  "consecutive_horse_placed": false
+ },
+ "saved_at": "2026-07-28 15:40:14",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
