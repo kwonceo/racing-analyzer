@@ -1,7 +1,9 @@
 {
  "race_id": "2026_07_12_기후_7경주",
- "raceKey": "기후 7경주",
+ "raceKey": "2026-07-12 기후 7경주",
  "date": "2026-07-12",
+ "sport": "cycle",
+ "category": "cycle",
  "track": "기후",
  "round": 7,
  "distance": null,
@@ -13,6 +15,11 @@
   "2nd": 1,
   "3rd": 4
  },
+ "payouts": {
+  "quinella": 10.0,
+  "trifecta": 12.4
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -39,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 10.0,
+  "trifecta_odds": 12.4,
   "actual_return": null,
   "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-12 21:25:52",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 03:10)",
+ "saved_at": "2026-07-29 03:10:20",
  "validation": {
   "ok": true,
   "errors": []
