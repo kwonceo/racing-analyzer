@@ -27151,6 +27151,32 @@ def korea_history_save():
     date = b.get("date") or time.strftime("%Y-%m-%d")
     venue = (b.get("venue") or "").strip()
     race_no = b.get("raceNo") or 0
+    # [정합성 검역 (2026-07-28)] 파일명을 정하는 venue/raceNo 와 본문 raceKey 가 '다른 경주'면 거부.
+    #   실사고: 2026-07-05_부산_2R.json 의 내용이 '히로시마 2경주', 2026-07-25_서울_10R.json 이
+    #   '코치 10경주'였다. 한국경마 화면이 일본 경주로 전환된 순간 저장이 호출되면 한국 파일이
+    #   일본 경주 데이터로 통째 덮어써진다(검증이 없어 그대로 저장됨).
+    #   ⚠ raceKey 에서 경마장을 못 뽑으면 검사 불가 → 통과(기존 동작 보존). 62번 배당 검역과 같은 원리.
+    _rk_in = (b.get("raceKey") or "").strip()
+    if _rk_in and venue:
+        try:
+            _v2, _n2 = _area_num(_rk_in)
+        except Exception:
+            _v2, _n2 = None, None
+        if _v2 and _track_norm(_v2) != _track_norm(venue):
+            print("[한국이력 검역] 거부 — 파일=%s %sR / 본문 raceKey=%s (경마장 불일치)"
+                  % (venue, race_no, _rk_in))
+            return jsonify({"ok": False, "rejected": True,
+                            "error": "경마장 불일치 — 파일(%s)과 raceKey(%s)가 다른 경주입니다."
+                                     % (venue, _rk_in)}), 400
+        try:
+            if _n2 and race_no and int(_n2) != int(race_no):
+                print("[한국이력 검역] 거부 — 파일=%s %sR / 본문 raceKey=%s (경주번호 불일치)"
+                      % (venue, race_no, _rk_in))
+                return jsonify({"ok": False, "rejected": True,
+                                "error": "경주번호 불일치 — 파일(%sR)과 raceKey(%s)가 다릅니다."
+                                         % (race_no, _rk_in)}), 400
+        except (TypeError, ValueError):
+            pass
     os.makedirs(KOREA_HISTORY_DIR, exist_ok=True)
     path = _korea_hist_file(date, venue, race_no)
     prev = {}
@@ -27172,8 +27198,7 @@ def korea_history_save():
         "savedAt": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
         "t": time.time(),
     }
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(doc, f, ensure_ascii=False)
+    _json_atomic(path, doc)          # [원자적 저장 2026-07-28] 동시 쓰기로 파일이 깨지던 문제 차단
     return jsonify({"ok": True, "file": os.path.basename(path)})
 
 
