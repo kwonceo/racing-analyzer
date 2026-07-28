@@ -13,41 +13,14 @@
  },
  "horses": [],
  "odds_features": {
-  "timeline": [
-   {
-    "time": "12:10:46",
-    "quinella": {
-     "1+5": 1.1,
-     "1+2": 12.5,
-     "1+7": 15.2,
-     "1+3": 20.7,
-     "1+4": 24.1,
-     "2+7": 24.7,
-     "1+6": 27.6,
-     "5+6": 28.9,
-     "2+5": 34.1,
-     "3+4": 43.7,
-     "5+7": 49.7,
-     "4+5": 80.0,
-     "3+7": 94.8,
-     "3+5": 96.6,
-     "2+4": 102.4,
-     "4+7": 104.5,
-     "2+3": 150.7,
-     "6+7": 170.8,
-     "4+6": 232.9,
-     "2+6": 256.2,
-     "3+6": 269.6
-    }
-   }
-  ],
+  "timeline": [],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
   "exacta_reversal": false,
   "reversal_ratio": null,
   "quinella_mismatch": null,
-  "refund_rate": 0.712,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -59,36 +32,28 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
-  "recommend": "1+5",
-  "strategy": "BMED_보험형",
+  "recommend": null,
+  "strategy": null,
   "confidence": 0,
-  "signal_quality": "하"
+  "signal_quality": null
  },
  "result": {
   "1st": 1,
   "2nd": 5,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": 5.7,
+  "quinella_odds": 1.1,
   "exacta_odds": null,
-  "hit": false,
-  "hit_pattern": null
+  "hit": true,
+  "hit_pattern": "적중"
  },
  "labels": {
-  "quinella_hit": false,
+  "quinella_hit": true,
   "winner": 1,
   "second": 5,
-  "odds_range": "중배당"
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -100,7 +65,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-22 09:46:45",
+ "saved_at": "2026-07-29 04:26:59",
  "quality": {
   "score": 40,
   "grade": "제외",
