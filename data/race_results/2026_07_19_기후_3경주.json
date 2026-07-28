@@ -1,9 +1,9 @@
 {
  "race_id": "2026_07_19_기후_3경주",
- "raceKey": "기후 3경주",
+ "raceKey": "2026-07-19 기후 3경주",
  "date": "2026-07-19",
- "sport": "horse",
- "category": "japan_local",
+ "sport": "cycle",
+ "category": "cycle",
  "track": "기후",
  "round": 3,
  "distance": null,
@@ -15,6 +15,11 @@
   "2nd": 4,
   "3rd": 7
  },
+ "payouts": {
+  "quinella": 57.4,
+  "trifecta": 128.5
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -41,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 57.4,
+  "trifecta_odds": 128.5,
   "actual_return": null,
-  "profit": -1000
+  "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-19 12:18:48",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:07)",
+ "saved_at": "2026-07-29 04:07:14",
  "validation": {
   "ok": true,
   "errors": []
