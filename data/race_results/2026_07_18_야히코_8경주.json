@@ -1,7 +1,9 @@
 {
  "race_id": "2026_07_18_야히코_8경주",
- "raceKey": "야히코 8경주",
+ "raceKey": "2026-07-18 야히코 8경주",
  "date": "2026-07-18",
+ "sport": "cycle",
+ "category": "cycle",
  "track": "야히코",
  "round": 8,
  "distance": null,
@@ -9,10 +11,15 @@
  "weather": null,
  "horse_count": null,
  "result": {
-  "1st": 5,
-  "2nd": 4,
-  "3rd": 1
+  "1st": 3,
+  "2nd": 7,
+  "3rd": 4
  },
+ "payouts": {
+  "quinella": 56.5,
+  "trifecta": 291.4
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -39,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 56.5,
+  "trifecta_odds": 291.4,
   "actual_return": null,
   "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-18 00:14:19",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:04)",
+ "saved_at": "2026-07-29 04:05:10",
  "validation": {
   "ok": true,
   "errors": []
