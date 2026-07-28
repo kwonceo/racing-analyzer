@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_다마노_7경주",
- "raceKey": "다마노 7경주",
+ "raceKey": "2026-07-28 다마노 7경주",
  "date": "2026-07-28",
  "sport": "cycle",
  "category": "cycle",
@@ -9,15 +9,14 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 5,
   "2nd": 6,
   "3rd": 7
  },
  "payouts": {
-  "quinella": 85.9,
-  "trifecta": 0.0
+  "quinella": 75.5
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -1452,7 +1451,7 @@
    1
   ],
   "eliminated": [],
-  "recommend_main": "3+6",
+  "recommend_main": "2+3",
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
   "signal_quality": "하",
@@ -1464,7 +1463,9 @@
   "sub_hit": false,
   "hit_reason": "역배열 감지말 5·7·6번 입상",
   "miss_reason": null,
-  "pattern_tags": [],
+  "pattern_tags": [
+   "복승불일치"
+  ],
   "anomaly_correct": false,
   "form_pick_hit": false
  },
@@ -1472,13 +1473,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 85.9,
+  "quinella_odds": 75.5,
   "trifecta_odds": null,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-28 18:47:55",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 01:51)",
+ "saved_at": "2026-07-29 01:51:48",
  "validation": {
   "ok": true,
   "errors": []
