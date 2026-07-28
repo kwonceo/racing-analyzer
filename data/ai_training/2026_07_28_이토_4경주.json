@@ -8,95 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 1,
-   "name": "松坂 英司",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 113.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "台 和紀",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 112.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "貝原 涼太",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 85.7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "深瀬 泰我",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 78.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "北川 紋部",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 101.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "山崎 晃",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 75.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "門脇 翼",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 71.7,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -646,9 +561,20 @@
     }
    }
   ],
-  "drop_rates": {},
-  "excess_drops": {},
-  "drop_speed": {},
+  "drop_rates": {
+   "4": -16.8,
+   "5": -16.8,
+   "1": -14.7
+  },
+  "excess_drops": {
+   "4": -1.1,
+   "5": -0.1
+  },
+  "drop_speed": {
+   "4": -17.0,
+   "5": -17.0,
+   "1": -14.8
+  },
   "exacta_reversal": true,
   "reversal_ratio": 0.48,
   "quinella_mismatch": null,
@@ -676,7 +602,7 @@
   "eliminated": [],
   "recommend": "2+3",
   "strategy": "BMED_역배열형",
-  "confidence": 51.0,
+  "confidence": 78.4,
   "signal_quality": "하"
  },
  "result": {
@@ -684,7 +610,7 @@
   "2nd": 3,
   "3rd": 1,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 4.2,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -693,26 +619,26 @@
   "quinella_hit": false,
   "winner": 2,
   "second": 3,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
-  "excess_drop_horse": null,
-  "excess_drop_horse_placed": null,
-  "excess_drop_value": null,
+  "excess_drop_horse": "4",
+  "excess_drop_horse_placed": false,
+  "excess_drop_value": -1.1,
   "reversal_horse": 2,
   "reversal_horse_placed": true,
   "reversal_ratio": 0.48,
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-28 22:15:12",
+ "saved_at": "2026-07-29 02:15:02",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

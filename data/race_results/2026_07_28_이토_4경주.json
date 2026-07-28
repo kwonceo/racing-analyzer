@@ -1,23 +1,22 @@
 {
  "race_id": "2026_07_28_이토_4경주",
- "raceKey": "이토 4경주",
+ "raceKey": "2026-07-28 이토 4경주",
  "date": "2026-07-28",
- "sport": "cycle",
- "category": "cycle",
+ "sport": "horse",
+ "category": "japan_local",
  "track": "이토",
  "round": 4,
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 2,
   "2nd": 3,
   "3rd": 1
  },
  "payouts": {
-  "quinella": 1.4,
-  "trifecta": 0.0
+  "quinella": 4.2
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -1582,7 +1581,41 @@
    }
   }
  ],
- "anomalies": [],
+ "anomalies": [
+  {
+   "time": "21:50:30",
+   "type": "급락",
+   "combo": [
+    4,
+    5
+   ],
+   "horse": 4,
+   "drop_rate": -16.8,
+   "excess_drop": -1.1
+  },
+  {
+   "time": "21:50:30",
+   "type": "급락",
+   "combo": [
+    1,
+    4
+   ],
+   "horse": 1,
+   "drop_rate": -14.7,
+   "excess_drop": 1.0
+  },
+  {
+   "time": "21:50:30",
+   "type": "급락",
+   "combo": [
+    1,
+    5
+   ],
+   "horse": 1,
+   "drop_rate": -12.7,
+   "excess_drop": 1.0
+  }
+ ],
  "prediction": {
   "candidates": [
    1,
@@ -1598,7 +1631,7 @@
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
   "signal_quality": "하",
-  "confidence": 51.0,
+  "confidence": 78.4,
   "inverse": true
  },
  "result_analysis": {
@@ -1607,20 +1640,20 @@
   "hit_reason": null,
   "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
-  "anomaly_correct": false,
+  "anomaly_correct": true,
   "form_pick_hit": true
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 1.4,
+  "quinella_odds": 4.2,
   "trifecta_odds": null,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-28 22:15:12",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:15)",
+ "saved_at": "2026-07-29 02:15:02",
  "validation": {
   "ok": true,
   "errors": []
