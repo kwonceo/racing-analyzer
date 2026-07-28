@@ -11403,6 +11403,40 @@ def _triple_analyze(rk, rec):
                                     print(f"[B라인 그물망] {rk}: B라인{_cb} 삼복승보험 {[e['combo'] for e in _bl_adds]} 추가")
             except Exception:
                 pass
+            # [Gemini 자동 진단 2026-07-28] finalQ/finalT 확정 후 백그라운드 검수
+            try:
+                import gemini_reviewer
+                gemini_reviewer.review_async(
+                    rk=rk,
+                    final_q=core_picks.get('finalQuinellas') or [],
+                    final_t=core_picks.get('finalTrifectas') or [],
+                    special_q=core_picks.get('quinellaRef') or [],
+                    line_pairs=core_picks.get('keirinLinePairs') or [],
+                    strong_signals=core_picks.get('strongSignals') or [],
+                    fav_axis=core_picks.get('favAxis') or [],
+                    strong_axis=(conf_q or {}).get('strongAxis', True),
+                    drops=drops or [],
+                    cur_mb=cur_mb,
+                )
+            except Exception:
+                pass
+            # [Gemini 자동 진단 2026-07-28] finalQ/finalT 확정 후 백그라운드 검수
+            try:
+                import gemini_reviewer
+                gemini_reviewer.review_async(
+                    rk=rk,
+                    final_q=core_picks.get('finalQuinellas') or [],
+                    final_t=core_picks.get('finalTrifectas') or [],
+                    special_q=core_picks.get('quinellaRef') or [],
+                    line_pairs=core_picks.get('keirinLinePairs') or [],
+                    strong_signals=core_picks.get('strongSignals') or [],
+                    fav_axis=core_picks.get('favAxis') or [],
+                    strong_axis=(conf_q or {}).get('strongAxis', True),
+                    drops=drops or [],
+                    cur_mb=cur_mb,
+                )
+            except Exception:
+                pass
             # [수익성 구조 개편 (2026-07-19)] 경주 3분류(저=삼복승 집중/중=2.5배 컷+기대값/고=유지) 후처리 —
             #   실패 시 내부에서 완전 무변경(기존 추천 유지). 빠진 복승은 quinellaRef(참고 접기)로 무삭제 이동.
             _apply_profit_strategy(core_picks, curQ, _rec_valid, sig_meta=_sig_meta,
