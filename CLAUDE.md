@@ -214,3 +214,98 @@ cd chrome-extension && python -c "import zipfile,os; zf=zipfile.ZipFile('../chro
 - 확장 변경 시: `manifest.json` 버전 bump + ZIP 재빌드. 서버/프론트만 변경 시: ZIP 불필요(자동 리로드 + 브라우저 새로고침).
 - 커밋 전 검증: `node --check`·`import ast`·app.js `new Function(...)` + 가능하면 라이브/합성 단위 테스트.
 - 페이지↔서버 통신은 확장(timer.js 릴레이) 경유 — 분석기 웹은 `chrome.runtime` 직접 접근 불가.
+
+---
+
+# 🔧 빠른 참조 (2026-07-28 추가)
+
+## 핵심 함수 위치 (`app.py`)
+> 라인 번호는 수정 시 밀림. **정확한 위치는 항상 `grep -n "^def <함수명>" app.py`로 재확인**할 것.
+
+| 함수 | 라인(2026-07-28 기준) | 범위 | 역할 |
+|---|---|---|---|
+| `_confidence_picks` | **6955** | 6955~7075 | 신뢰도 기반 축/후보마 선정 (왕축·strongAxis 판정) |
+| `_final_picks` | **7195** | 7195~8279 | **최종 복승/삼복승 확정**. 왕축 강제 로직 ~7870, B라인 그물망 ~7872 |
+| `_triple_analyze` | **9230** | 9230~11813 | 분석 총괄 진입점. Gemini 검수 호출 11406/11423 |
+| `_history_save_analysis` | **13064** | 13064~13105 | 분석 스냅샷 히스토리 저장 |
+| `_build_analysis_log` | **13194** | 13194~13488 | 분석 로그(패턴학습 코퍼스) 문서 생성 |
+| `_apply_result_learning` | **16212** | — | 결과 입력 시 학습 연쇄 진입점 |
+
+## 데이터 경로
+| 경로 | 추적 | 용도 |
+|---|---|---|
+| `data/analysis_log/` | ✅ git | 분석 로그 = 패턴학습 코퍼스 (30초 주기 갱신) |
+| `data/ai_training/` | ✅ git | AI 학습 완전 데이터 + 품질점수(80+ 학습용) |
+| `data/race_results/` · `data/race_report/` | ✅ git | 경주 결과 / 고배당 재현 리포트 |
+| `data/pattern_learning.json` · `data/discovered_patterns.json` | ✅ git | 부진마 이변·자동 발견 패턴 통계 |
+| `data/korea_history/` · `data/prerace/` · `data/korea_session.json` | ✅ git | 한국 PDF 사전분석 |
+| `logs/gemini_review/` | ❌ 미추적 | **Gemini 자동진단 결과 JSON** (`gemini_reviewer._LOG_DIR`) |
+| `triple_store.json` · `starters_store.json` · `results_store.json` | ❌ gitignore | 배당/전적/착순 고빈도 캐시 |
+| `data/odds_history/` · `data/learning.json` | ❌ gitignore | 스냅샷·학습 원장 (임시·고빈도) |
+| `backups/` | ❌ gitignore | 위험 작업 전 `data/` 물리 스냅샷 |
+
+## Git 워크플로우 (서버PC ↔ 랩탑 2대 운영)
+```bash
+# 1) 항상 pull 먼저 (서버가 결과 입력마다 자동 커밋+푸시 → 원격이 수시로 앞서감)
+git pull --no-rebase origin master
+
+# 2) 코드 수정
+
+# 3) 문법 검증 (커밋 전 필수)
+python -c "import ast; ast.parse(open('app.py',encoding='utf-8').read())"
+node -e "new Function(require('fs').readFileSync('static/js/app.js','utf8'))"
+node --check chrome-extension/content.js
+
+# 4) 커밋 + 푸시
+git add -A && git commit -m "..." && git push origin master
+
+# 5) 마일스톤이면 태그
+git tag -a vX.Y.Z -m "..." && git push origin --tags
+```
+
+### ⚠️ 2대 동시 운영 충돌 대응
+- 서버 PC의 `_data_git_backup`이 **결과 입력마다 자동 커밋+푸시** → 랩탑 작업 중 원격이 계속 전진.
+- `git pull` 충돌 시: **`data/` 는 최신(=경주 더 진행된) 쪽 채택**이 원칙.
+  ```bash
+  cp -r data "backups/data_premerge_$(date +%Y%m%d_%H%M%S)/"   # 먼저 물리 백업
+  git checkout --theirs -- data/ && git add data/              # 원격(랩탑) 채택 예시
+  git commit && git push origin master
+  ```
+- 채택 전 **반드시 양쪽 내용 비교**(`git show :2:<파일>` = ours / `:3:<파일>` = theirs).
+  - 판단 기준: `discovered_patterns.json`의 `races_with_result`가 큰 쪽 = 더 많이 학습된 쪽.
+- `app.py`는 보통 자동머지됨 — 충돌 시에만 수동 병합(**절대 한쪽 통째 채택 금지**).
+
+## 🐛 미해결 버그 목록 (2026-07-28 기준)
+| # | 증상 | 추정 위치 | 상태 |
+|---|---|---|---|
+| 1 | **복승/삼복승 배당 오표시** — 추천 표의 배당값이 실제와 불일치 | `_final_picks`(7195~8279) 배당 주입부 / 프론트 렌더 | 미해결 |
+| 2 | **2+5 중복 콤보** — 동일 조합이 복승 추천에 2회 이상 등장 | `_final_picks` 조합 dedupe 누락 (`_ft_bl_set` 계열 집합 처리) | 미해결 |
+| 3 | **B라인 미발동** — B라인 그물망 삼복승 보험이 조건 충족에도 미추가 | `_final_picks` ~7872 `[B라인 그물망]` 블록 (`seen_t` 선점 경합) | 미해결 |
+| 4 | **14번 마번 오표시** — 마번 14 이상에서 번호가 어긋나게 표시 | 마번 파싱/`valid_nos` 범위 (`_sanitize_starters` 1~18 제한 관련 의심) | 미해결 |
+
+> 수정 시 원칙: **기존 로직 삭제 금지, 추가/보정만**. 수정 후 `tests/run_formula.py`·`tests/run_report.py`로 정합성 검증.
+
+## 🤝 Gemini ↔ Claude Code 협업 분업
+| 역할 | 담당 | 산출물 |
+|---|---|---|
+| **진단·설계** | Gemini | 로직 결함 지적, 수정 방향 제안 (`logs/gemini_review/*.json`) |
+| **검증·패치·커밋** | Claude Code | 제안 검증 → app.py 패치 → 문법체크 → 커밋 → 푸시 |
+
+- Claude Code는 Gemini 제안을 **그대로 적용하지 않는다.** 반드시 실제 코드/데이터로 재검증 후 반영.
+- 코드 내 Gemini 유래 변경은 `# Gemini 제안 — <내용>` 주석으로 표시(예: app.py 7872).
+
+### 자동진단 파이프라인 (`gemini_reviewer.py`, 110줄)
+- 호출: `_triple_analyze` 내 `gemini_reviewer.review_async(...)` (app.py 11406 / 11423) — finalQ/finalT 확정 직후 **백그라운드 스레드**.
+- 검사 4종: ①맹목적 왕축 ②B라인 누락 ③라인 교차 ④급락 미반영.
+- 모델 `gemini-2.0-flash`, 경주당 **5분 1회**(`_CALL_INTERVAL=300`), timeout 5초.
+- 결과 → `logs/gemini_review/YYYYMMDD_<경주>_HHMMSS.json`. `status=="WARNING"`이면 카카오 알림 발송.
+- **가동 전제조건 2가지(둘 다 필요)**
+  1. `pip install requests` — 미설치 시 `import gemini_reviewer` 자체가 실패, app.py의 `try/except: pass`가 **조용히 삼킴**(로그도 안 남음).
+  2. 환경변수 `GEMINI_API_KEY` — 미설정 시 스레드가 즉시 `return`(무음 실패).
+- **진단 명령**
+  ```bash
+  python -c "import requests; print('requests OK')"
+  python -c "import os; print('KEY:', bool(os.environ.get('GEMINI_API_KEY')))"
+  python -c "import glob; print('Gemini 로그수:', len(glob.glob('logs/gemini_review/*.json')))"
+  ```
+  로그 0건 + `logs/gemini_review/` 디렉터리 자체가 없음 = **모듈 import 실패**(디렉터리는 import 시 `os.makedirs`로 생성되므로).
