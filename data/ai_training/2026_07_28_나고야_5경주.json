@@ -1,0 +1,308 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_28_나고야_5경주",
+ "race_info": {
+  "date": "2026-07-28",
+  "track": "나고야",
+  "round": 5,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 12,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 9,
+   "name": "ディスクリートキャット",
+   "jockey": "塚本征",
+   "jockey_winrate": 26.7,
+   "recent_results": [
+    10,
+    7,
+    1
+   ],
+   "record_score": 32.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 10,
+   "name": "カリフォルニアクローム",
+   "jockey": "細川智",
+   "jockey_winrate": 20.0,
+   "recent_results": [
+    9,
+    6,
+    8,
+    6
+   ],
+   "record_score": 48.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 11,
+   "name": "サンダースノー",
+   "jockey": "大畑慧",
+   "jockey_winrate": 30.0,
+   "recent_results": [
+    5,
+    7,
+    9,
+    6,
+    8
+   ],
+   "record_score": 3.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "ディーマジェスティ",
+   "jockey": "今井貴",
+   "jockey_winrate": 23.3,
+   "recent_results": [
+    12,
+    6,
+    9,
+    10,
+    5
+   ],
+   "record_score": 30,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "レーヴミストラル",
+   "jockey": "大原浩",
+   "jockey_winrate": 20.0,
+   "recent_results": [
+    8,
+    4,
+    12,
+    6,
+    4
+   ],
+   "record_score": 6.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "クリエイター２",
+   "jockey": "丸山真",
+   "jockey_winrate": 6.7,
+   "recent_results": [
+    11,
+    10,
+    7,
+    7,
+    7
+   ],
+   "record_score": 15.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "キンシャサノキセキ",
+   "jockey": "丹羽克",
+   "jockey_winrate": 6.7,
+   "recent_results": [
+    9,
+    12,
+    3,
+    11,
+    9
+   ],
+   "record_score": 10.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "バゴ",
+   "jockey": "大畑雅",
+   "jockey_winrate": 13.3,
+   "recent_results": [
+    7,
+    4,
+    8,
+    7,
+    9
+   ],
+   "record_score": 17.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "クリエイター２",
+   "jockey": "尾崎章",
+   "jockey_winrate": 0.0,
+   "recent_results": [
+    7,
+    10,
+    9,
+    9,
+    8
+   ],
+   "record_score": 10,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 12,
+   "name": "クロフネ",
+   "jockey": "小笠羚",
+   "jockey_winrate": 10.0,
+   "recent_results": [
+    11,
+    8,
+    7,
+    11,
+    11
+   ],
+   "record_score": 20,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "ダンカーク",
+   "jockey": "松本一",
+   "jockey_winrate": 23.3,
+   "recent_results": [
+    12,
+    9,
+    11,
+    10,
+    7
+   ],
+   "record_score": -12.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "ファインニードル",
+   "jockey": "加藤利",
+   "jockey_winrate": 7.7,
+   "recent_results": [
+    7,
+    7,
+    9,
+    7,
+    12
+   ],
+   "record_score": -10.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.743,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   6,
+   9,
+   10,
+   11,
+   12,
+   7,
+   2,
+   5,
+   8,
+   1,
+   4,
+   3
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 9,
+  "2nd": 11,
+  "3rd": 12,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 9,
+  "second": 11,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-28 16:36:17",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
