@@ -1,6 +1,6 @@
 {
  "race": "도요하시 12경주",
- "raceKey": "도요하시 12경주",
+ "raceKey": "2026-07-26 도요하시 12경주",
  "date": "2026-07-26",
  "result": {
   "1st": 3,
@@ -9,9 +9,9 @@
   "4th": null
  },
  "hit": true,
- "hit_type": null,
- "odds": "고배당",
- "win_odds": 20.2,
+ "hit_type": "복승 보조(삼복승 구성)",
+ "odds": "저배당",
+ "win_odds": 4.3,
  "why_recommended": {
   "signal_3": {
    "horse": 3,
@@ -181,9 +181,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 116.8,
+   "record_score": null,
    "confidence": 8.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
@@ -353,7 +353,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.207,
-   "record_score": 104.1,
+   "record_score": null,
    "confidence": 31.0,
    "reason": "쌍승역전"
   },
@@ -369,7 +369,7 @@
    "drop_timeline": [],
    "exacta_reversal": true,
    "reversal_ratio": 0.133,
-   "record_score": 139.4,
+   "record_score": null,
    "confidence": 35.0,
    "reason": "쌍승역전"
   },
@@ -541,7 +541,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.209,
-   "record_score": 139.5,
+   "record_score": null,
    "confidence": 50.3,
    "reason": "쌍승역전"
   },
@@ -713,19 +713,19 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.123,
-   "record_score": 96.0,
+   "record_score": null,
    "confidence": 43.0,
    "reason": "쌍승역전"
   }
  },
  "recommended_horses": [
   3,
+  2,
   7,
-  4,
-  2
+  4
  ],
  "recommendation_process": [
-  "1. 전적 분석: 3번 116.8점",
+  "1. 전적 분석: 3번 전적 정보 제한",
   "2. 배당 수집 시작 16:16:09",
   "4. 쌍승 역전: 4→3(4.7) < 3→4(38.1) → 4번 실질 상위 신호",
   "4. 쌍승 역전: 9→3(11.2) < 3→9(83.9) → 9번 실질 상위 신호",
@@ -738,7 +738,7 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 116.8,
+  "record_score": null,
   "total": 8.0,
   "grade": "하"
  },
@@ -747,7 +747,7 @@
  ],
  "combo_tags": false,
  "hit_basis": {
-  "formScore": 116.8,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -810,7 +810,7 @@
   },
   "validCount": 18
  },
- "pnl": 19200,
+ "pnl": 3300,
  "stake": 1000,
- "generated_at": "2026-07-26 16:55:41"
+ "generated_at": "2026-07-29 05:21:08"
 }
