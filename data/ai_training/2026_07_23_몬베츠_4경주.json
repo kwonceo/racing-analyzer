@@ -8,137 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 5,
-   "name": "フロルドラーダ",
-   "jockey": "阿部龍（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    2,
-    2,
-    2,
-    11
-   ],
-   "record_score": 91.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "アークオブライフ",
-   "jockey": "小野楓（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    1,
-    2,
-    6,
-    8,
-    1
-   ],
-   "record_score": 77.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "サクセスビービー",
-   "jockey": "石川倭（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    4,
-    1,
-    2,
-    1,
-    2
-   ],
-   "record_score": 63.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "バイデント",
-   "jockey": "宮内勇（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    2,
-    5,
-    1,
-    10,
-    6
-   ],
-   "record_score": 60.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "スティールスピネル",
-   "jockey": "桑村真（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    7,
-    4,
-    1,
-    1,
-    2
-   ],
-   "record_score": 36.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "テリオスミナ",
-   "jockey": "岩橋勇（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    8,
-    7,
-    7,
-    5,
-    8
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "オールスパイス",
-   "jockey": "黒澤愛（北海道）",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    7,
-    6,
-    9,
-    7
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -260,14 +133,14 @@
   "candidates": [
    1,
    2,
+   3,
+   4,
    5,
    6,
-   7,
-   3,
-   4
+   7
   ],
   "eliminated": [],
-  "recommend": "1+5",
+  "recommend": "4+5",
   "strategy": "BMED_보험형",
   "confidence": 0,
   "signal_quality": "하"
@@ -277,7 +150,7 @@
   "2nd": 5,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 6.6,
   "exacta_odds": null,
   "hit": true,
   "hit_pattern": "적중"
@@ -286,7 +159,7 @@
   "quinella_hit": false,
   "winner": 2,
   "second": 5,
-  "odds_range": null
+  "odds_range": "중배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -298,7 +171,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-23 16:24:06",
+ "saved_at": "2026-07-29 04:53:53",
  "quality": {
   "score": 60,
   "grade": "참고용",
@@ -306,7 +179,7 @@
   "ai_ready": false,
   "missing": [
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

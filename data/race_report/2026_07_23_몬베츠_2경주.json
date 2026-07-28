@@ -1,6 +1,6 @@
 {
  "race": "몬베츠 2경주",
- "raceKey": "몬베츠 2경주",
+ "raceKey": "2026-07-23 몬베츠 2경주",
  "date": "2026-07-23",
  "result": {
   "1st": 3,
@@ -10,8 +10,8 @@
  },
  "hit": true,
  "hit_type": null,
- "odds": "미상",
- "win_odds": 0,
+ "odds": "중배당",
+ "win_odds": 12.5,
  "why_recommended": {
   "signal_3": {
    "horse": 3,
@@ -32,7 +32,7 @@
   "signal_7": {
    "horse": 7,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -42,7 +42,7 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": null,
-   "confidence": 2.8,
+   "confidence": null,
    "reason": "일반"
   },
   "signal_11": {
@@ -60,45 +60,9 @@
    "record_score": null,
    "confidence": null,
    "reason": "일반"
-  },
-  "signal_9": {
-   "horse": 9,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
-  },
-  "signal_4": {
-   "horse": 4,
-   "placed": false,
-   "recommended": true,
-   "place_rank": null,
-   "excess_drop": null,
-   "avg_drop": null,
-   "grade": null,
-   "rep_combo": null,
-   "drop_timeline": [],
-   "exacta_reversal": false,
-   "reversal_ratio": null,
-   "record_score": null,
-   "confidence": null,
-   "reason": "일반"
   }
  },
- "recommended_horses": [
-  9,
-  4,
-  7
- ],
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 3번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
@@ -112,23 +76,17 @@
   "total": 0,
   "grade": "하"
  },
- "win_tags": [
-  "복승불일치_적중"
- ],
+ "win_tags": [],
  "combo_tags": false,
  "hit_basis": {
   "formScore": null,
   "dropAmt": null,
   "dropScore": 0,
   "inverse": false,
-  "inverseHorses": [
-   7
-  ],
-  "inverseHit": [
-   7
-  ],
-  "confidence": 2.8,
-  "reason": "제거 적중"
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "적중"
  },
  "signal_change_history": {
   "changes": [],
@@ -143,7 +101,7 @@
   },
   "validCount": 0
  },
- "pnl": -1000,
+ "pnl": 11500,
  "stake": 1000,
- "generated_at": "2026-07-23 15:16:43"
+ "generated_at": "2026-07-29 04:53:51"
 }

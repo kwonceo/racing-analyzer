@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_23_몬베츠_12경주",
- "raceKey": "몬베츠 12경주",
+ "raceKey": "2026-07-23 몬베츠 12경주",
  "date": "2026-07-23",
  "sport": "horse",
  "category": "japan_local",
@@ -16,7 +16,8 @@
   "3rd": 4
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 3.9,
+  "trifecta": 14.0
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -530,13 +531,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 3.9,
+  "trifecta_odds": 14.0,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-23 20:55:12",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:53)",
+ "saved_at": "2026-07-29 04:53:47",
  "validation": {
   "ok": true,
   "errors": []

@@ -1,9 +1,9 @@
 {
  "race_id": "2026_07_23_몬베츠_2경주",
- "raceKey": "몬베츠 2경주",
+ "raceKey": "2026-07-23 몬베츠 2경주",
  "date": "2026-07-23",
  "sport": "horse",
- "category": "japan_central",
+ "category": "japan_local",
  "track": "몬베츠",
  "round": 2,
  "distance": null,
@@ -16,40 +16,27 @@
   "3rd": 11
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 12.5,
+  "trifecta": 48.7
  },
  "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   2,
-   4,
-   6,
-   7,
-   9,
-   1,
-   10,
-   11,
-   3
-  ],
-  "eliminated": [
-   5,
-   8,
-   12
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
   "signal_quality": null,
-  "confidence": 2.8,
+  "confidence": 0,
   "inverse": false
  },
  "result_analysis": {
   "main_hit": true,
   "sub_hit": false,
-  "hit_reason": "제거 적중",
+  "hit_reason": "적중",
   "miss_reason": null,
   "pattern_tags": [],
   "anomaly_correct": false,
@@ -59,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 12.5,
+  "trifecta_odds": 48.7,
   "actual_return": null,
-  "profit": -1000
+  "profit": 11500
  },
- "memo": null,
- "saved_at": "2026-07-23 15:16:43",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:53)",
+ "saved_at": "2026-07-29 04:53:51",
  "validation": {
   "ok": true,
   "errors": []
