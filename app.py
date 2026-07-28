@@ -13973,12 +13973,21 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
     _q_odds_fb = (_safe_num(inputs.get("quinella_odds"))
                   or _safe_num((record.get("payouts") or {}).get("quinella"))
                   or (_winning_quinella_odds(rk, _t2win) if len(_t2win) == 2 else None))
+    # [삼복승 확정배당 폴백 (2026-07-29)] 복승은 3단(입력→record.payouts→시장배당) 폴백이 있는데
+    #   삼복승은 inputs 하나뿐이라, 자동수집·백필로 들어온 확정배당(record.payouts.trifecta)과
+    #   결과에 실려온 payouts 가 통째로 버려지고 있었다.
+    #   실측(2026-07-29): 삼복승 적중 108건 중 배당 확보 5건(5%) — 복승은 162/165(98%).
+    #   적중해도 배당을 몰라 '회수 0원'으로 집계돼, 회수율 자체를 측정할 수 없는 상태였다.
+    #   ⚠ 복승과 동일한 우선순위(입력값 > 학습레코드 > 결과 payouts)만 맞춘다. 추정은 넣지 않는다.
+    _t_odds_fb = (_safe_num(inputs.get("trifecta_odds"))
+                  or _safe_num((record.get("payouts") or {}).get("trifecta"))
+                  or _safe_num(((result or {}).get("payouts") or {}).get("trifecta")))
     inv = {
         "budget": _safe_num(inputs.get("budget")) or 0,
         "main_bet": _safe_num(inputs.get("main_bet")) or 0,
         "sub_bet": _safe_num(inputs.get("sub_bet")) or 0,
         "quinella_odds": _q_odds_fb,
-        "trifecta_odds": _safe_num(inputs.get("trifecta_odds")),
+        "trifecta_odds": _t_odds_fb,
         "actual_return": record.get("payout_actual"),
         "profit": record.get("pnl"),
     }
@@ -13991,7 +14000,8 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
                    or (None if record.get("payouts_estimated")
                        else _safe_num((record.get("payouts") or {}).get("quinella"))))
     _t_odds_top = (_safe_num(inputs.get("trifecta_odds"))
-                   or _safe_num((record.get("payouts") or {}).get("trifecta")))
+                   or _safe_num((record.get("payouts") or {}).get("trifecta"))
+                   or _safe_num(((result or {}).get("payouts") or {}).get("trifecta")))
     _payouts_top = {}
     if _q_odds_fb is not None:
         _payouts_top["quinella"] = _q_odds_fb
@@ -16808,6 +16818,11 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             print(f"[수익 추정] {rk}: 복승 실배당 미입력 → 시장배당 {_eq}배로 추정(확정배당 입력 시 정정)")
     payouts = {"quinella": (q_odds if quinella_hit and q_odds else 0),
                "trifecta": (t_odds if trifecta_hit and t_odds else 0)}
+    # [확정배당 원본 보존 (2026-07-29)] 위 payouts 는 '적중일 때만' 값을 담는다(손익 계산용이라 그게 맞다).
+    #   그러나 미적중이어도 확정배당 자체는 사후 검증에 필요하다 — "그 조합을 샀다면 얼마였나",
+    #   "EV 필터가 자른 조합이 실제로 얼마였나" 같은 질문에 답하려면 원본이 남아 있어야 한다.
+    #   payouts 는 건드리지 않고(기존 판정·손익 로직 불변) 별도 키로만 보존한다.
+    payouts_raw = {"quinella": q_odds or 0, "trifecta": t_odds or 0}
     try:
         if (quinella_hit and q_odds and q_odds >= 30) or (trifecta_hit and t_odds and t_odds >= 100):
             # [2번] 명예의 전당: 적중 근거(초과급락·역전·전적)·태깅·리포트 슬러그 + 스토리·정답말 타임라인(병합)
@@ -16938,6 +16953,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     record = {
         "race": rk, "result": result, "top3": top3, "was_hit": was_hit,
         "quinella_hit": quinella_hit, "trifecta_hit": trifecta_hit, "payouts": payouts,
+        "payouts_raw": payouts_raw,   # [2026-07-29] 미적중이어도 확정배당 원본 보존(사후 검증용)
         "payouts_estimated": _q_estimated,   # [근사 둔갑 차단] 시장배당 추정이면 True → 성적표 '(근사)' 정직 표기
 
         # [보완①·확신도 복승 학습] 확신도 1위 필수 포함 복승/삼복승 적중·확신도 1위 입상 여부(임계값 자동 조정 근거)
@@ -17060,7 +17076,8 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
             "keyhorse_quinella_hit": keyhorse_hit["quinella_hit"],
             "keyhorse_trifecta_hit": keyhorse_hit["trifecta_hit"],
             "keyhorse_placed": keyhorse_hit["keyPlaced"], "dark_placed": keyhorse_hit["darkPlaced"],
-            "payouts": payouts, "anomaly_was_correct": anomaly_correct,
+            "payouts": payouts, "payouts_raw": payouts_raw,   # [2026-07-29] 확정배당 원본 보존
+            "anomaly_was_correct": anomaly_correct,
             "signal_correct": signal_correct, "elimination_correct": elimination_correct,
             "eliminated": eliminated_nos, "form_pick": form_pick, "form_pick_hit": form_pick_hit,
             "pnl": pnl, "stake": stake,   # [일본경마 복기] 재조회 시 손익 그대로 표시
