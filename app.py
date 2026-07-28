@@ -2208,6 +2208,21 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     except (TypeError, ValueError):
         _in_dl = 0
     _dl_mismatch = bool(_in_dl and _pe_g and (_in_dl - _pe_g) > 480)
+    # [마감 후 프레임 차단 (2026-07-28 모리오카 3R 오염 실사고)] 아래 기존 게이트는 '판 전체 뒤집힘'
+    #   (_flip_now)이 감지될 때만 마감 후 혼입을 막는다. 그래서 마감 후 들어온 '다른 경주 배당'이 직전과
+    #   비슷해 flip 이 안 잡히면 그대로 수용됐고, 히스토리 누적 → 재분석 → 확정 추천이 덮어써졌다
+    #   (실사고: 12:55 마감 확정 → 13:07 유입 → 확정 7+8/8+9/3+8 이 4+9(236.4배) 포함으로 변조).
+    #   마감(+60초) 후에 '발주시각이 8분+ 미래로 이동한' 스냅샷은 다음 경주 프레임이 확실하므로,
+    #   flip 여부와 무관하게 격리한다.
+    #   ⚠ 발주시각 이동이 없는 평범한 마감 후 수집은 기존대로 수용 — '마감 후 신호 참고' 기능 보존.
+    if _closed_g and _dl_mismatch:
+        prev["flipSuspectCnt"] = _flip_cnt + 1
+        db[rk] = prev
+        _triple_save(db)
+        print(f"[혼입가드] {rk}: 마감 후 다음경주 프레임 유입(발주시각 +{int((_in_dl - _pe_g) / 60)}분) "
+              f"→ 스냅샷 격리(이력·배당·발주시각 전부 기존 유지)")
+        return {"ok": True, "quarantined": True, "raceKey": rk,
+                "reason": "마감 후 다음경주 프레임 유입 — 스냅샷 격리"}
     if _flip_now and (_flip_cnt < 2 or _closed_g or _dl_mismatch):
         prev["flipSuspectCnt"] = _flip_cnt + 1
         db[rk] = prev
@@ -2221,6 +2236,14 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
         print(f"[혼입가드] {rk}: 3회 연속 전면 재편(마감 전·발주시각 일치) → 실제 새 배당판으로 수용(기준 재설정)")
     baseline_reset = (sport_changed or stale_gap or _src_switched or _flip_now
                       or ((not _established) and bool(prev_hist and _baseline_reset_needed(prev_hist[-1].get("quinella"), q))))
+    # [마감 후 기준재설정 금지 (2026-07-28 모리오카 3R)] 마감된 경주의 히스토리를 비우면 확정 시점의
+    #   배당 시계열이 통째로 사라지고, 남은 1~2개 스냅샷만으로 가짜 급락이 계산돼 추천이 뒤바뀐다
+    #   (실측: 12:55 마감 확정 경주의 시계열이 13:07 유입분 3개로 리셋 → -77.2% 가짜 급락 → 4+9 강제편입).
+    #   마감 후에는 어떤 사유(소스전환·판뒤집힘·시간간격)로도 히스토리를 비우지 않는다.
+    #   ⚠ 스냅샷 '추가'는 계속한다 — 마감 후 신호 참고 기능은 그대로 유지.
+    if _closed_g and baseline_reset:
+        print(f"[혼입가드] {rk}: 마감 후 기준재설정 요청 무시 — 히스토리 보존(시계열 삭제 차단)")
+        baseline_reset = False
     hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주·다른 종목·오래된) 배당 완전 제거
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
     hist = hist[-12:]
@@ -2247,7 +2270,13 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
               # [검역 보강 (2026-07-23 다마노 11R)] 발주시각을 rec에 저장 — 저장 안 하면 다음 ingest의
               #   prev.get("deadline")이 항상 빈 값이라 마감 후 혼입(_closed_g)·발주시각 불일치(_dl_mismatch)
               #   검역이 한 번도 발동 못 함(사문화). 이번 수집에 deadline 없으면 이전 값 유지(기준 재설정 시 제외).
-              "deadline": (deadline if deadline else (None if baseline_reset else prev.get("deadline"))),
+              # [발주시각 보호 (2026-07-28 모리오카 3R)] 마감된 경주에 '미래로 크게 이동한' 발주시각이
+              #   들어오면 덮어쓰지 않는다. 덮어쓰면 이후 cur_mb 가 마감 전(+분)으로 재계산되어
+              #   afterClose 가 False 로 뒤집히고, 마감후 동결 5중 장치가 한꺼번에 풀린다
+              #   (실사고: 12:55 마감 → 13:07 유입 → '마감 23분 전'으로 재계산됨).
+              #   위 격리 게이트에서 이미 반환되지만, 게이트를 우회하는 경로가 생겨도 막히도록 이중 방어.
+              "deadline": (prev.get("deadline") if (_closed_g and _dl_mismatch)
+                           else (deadline if deadline else (None if baseline_reset else prev.get("deadline")))),
               "scratched": sorted(set(int(s) for s in (scratched or []) if str(s).strip().lstrip("-").isdigit()))}
     # [경주전환 잔존 방어] 30분+ 미갱신된 '끝난 직전 경주'를 활성 캐시에서 정리(히스토리는 보존)
     #   → max-t 폴백이 직전 경주 배당을 계속 끌어오던 문제 차단.
