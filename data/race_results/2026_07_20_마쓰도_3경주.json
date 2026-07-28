@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_20_마쓰도_3경주",
- "raceKey": "마쓰도 3경주",
+ "raceKey": "2026-07-20 마쓰도 3경주",
  "date": "2026-07-20",
  "sport": "cycle",
  "category": "cycle",
@@ -9,32 +9,23 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 12,
+ "horse_count": null,
  "result": {
   "1st": 4,
   "2nd": 6,
   "3rd": 1
  },
+ "payouts": {
+  "quinella": 48.0,
+  "trifecta": 106.5
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   4,
-   5,
-   6,
-   7,
-   8,
-   10,
-   11,
-   12
-  ],
-  "eliminated": [
-   2,
-   3,
-   9
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
@@ -49,19 +40,19 @@
   "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
-  "form_pick_hit": true
+  "form_pick_hit": false
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 48.0,
+  "trifecta_odds": 106.5,
   "actual_return": null,
-  "profit": -1000
+  "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-20 09:46:52",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:18)",
+ "saved_at": "2026-07-29 04:18:36",
  "validation": {
   "ok": true,
   "errors": []
