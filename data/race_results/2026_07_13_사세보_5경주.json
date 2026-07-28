@@ -1,7 +1,9 @@
 {
  "race_id": "2026_07_13_사세보_5경주",
- "raceKey": "사세보 5경주",
+ "raceKey": "2026-07-13 사세보 5경주",
  "date": "2026-07-13",
+ "sport": "cycle",
+ "category": "cycle",
  "track": "사세보",
  "round": 5,
  "distance": null,
@@ -13,6 +15,11 @@
   "2nd": 5,
   "3rd": 3
  },
+ "payouts": {
+  "quinella": 14.6,
+  "trifecta": 16.0
+ },
+ "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -39,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 14.6,
+  "trifecta_odds": 16.0,
   "actual_return": null,
   "profit": 0
  },
- "memo": null,
- "saved_at": "2026-07-13 21:12:48",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 03:24)",
+ "saved_at": "2026-07-29 03:25:10",
  "validation": {
   "ok": true,
   "errors": []
