@@ -1,6 +1,6 @@
 {
  "race": "平塚 2경주",
- "raceKey": "平塚 2경주",
+ "raceKey": "2026-07-28 平塚 2경주",
  "date": "2026-07-28",
  "result": {
   "1st": 4,
@@ -197,7 +197,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.659,
-   "record_score": 116.1,
+   "record_score": null,
    "confidence": 5.1,
    "reason": "쌍승역전"
   },
@@ -385,7 +385,7 @@
    ],
    "exacta_reversal": true,
    "reversal_ratio": 0.441,
-   "record_score": 71.1,
+   "record_score": null,
    "confidence": 79.0,
    "reason": "쌍승역전"
   },
@@ -573,18 +573,18 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 69.3,
+   "record_score": null,
    "confidence": 0.0,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
-  4,
   2,
+  4,
   1
  ],
  "recommendation_process": [
-  "1. 전적 분석: 4번 116.1점",
+  "1. 전적 분석: 4번 전적 정보 제한",
   "2. 배당 수집 시작 16:23:03",
   "4. 쌍승 역전: 3→2(57.2) < 2→3(361.4) → 3번 실질 상위 신호",
   "4. 쌍승 역전: 7→2(83.8) < 2→7(385.5) → 7번 실질 상위 신호",
@@ -597,17 +597,16 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 21,
   "quinella_mismatch_score": 0,
-  "record_score": 116.1,
+  "record_score": null,
   "total": 5.1,
   "grade": "하"
  },
  "win_tags": [
-  "쌍승역전_적중",
-  "전적보조_적중"
+  "쌍승역전_적중"
  ],
- "combo_tags": true,
+ "combo_tags": false,
  "hit_basis": {
-  "formScore": 116.1,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": true,
@@ -703,5 +702,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-28 16:58:33"
+ "generated_at": "2026-07-29 01:49:13"
 }
