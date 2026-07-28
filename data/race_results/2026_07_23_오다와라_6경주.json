@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_23_오다와라_6경주",
- "raceKey": "오다와라 6경주",
+ "raceKey": "2026-07-23 오다와라 6경주",
  "date": "2026-07-23",
  "sport": "cycle",
  "category": "cycle",
@@ -9,15 +9,15 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 4,
   "2nd": 2,
   "3rd": 7
  },
  "payouts": {
-  "quinella": 25.1,
-  "trifecta": 0.0
+  "quinella": 5.7,
+  "trifecta": 25.1
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -840,18 +840,15 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 25.1,
-  "trifecta_odds": null,
+  "quinella_odds": 5.7,
+  "trifecta_odds": 25.1,
   "actual_return": null,
-  "profit": 24100
+  "profit": 4700
  },
- "memo": null,
- "saved_at": "2026-07-23 10:34:17",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:59)",
+ "saved_at": "2026-07-29 04:59:21",
  "validation": {
   "ok": true,
   "errors": []
- },
- "tainted": true,
- "taintedReason": "_canonical_log_key 라우팅 버그로 7/25 라이브 데이터 혼입(오염) — 복기·학습 격리",
- "taintedAt": "2026-07-25"
+ }
 }

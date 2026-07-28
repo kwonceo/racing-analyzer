@@ -1,6 +1,6 @@
 {
  "race": "오다와라 6경주",
- "raceKey": "오다와라 6경주",
+ "raceKey": "2026-07-23 오다와라 6경주",
  "date": "2026-07-23",
  "result": {
   "1st": 4,
@@ -10,8 +10,8 @@
  },
  "hit": true,
  "hit_type": null,
- "odds": "고배당",
- "win_odds": 25.1,
+ "odds": "저배당",
+ "win_odds": 5.7,
  "why_recommended": {
   "signal_4": {
    "horse": 4,
@@ -165,8 +165,8 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 99.3,
-   "confidence": 48.0,
+   "record_score": null,
+   "confidence": 24.0,
    "reason": "초과급락"
   },
   "signal_2": {
@@ -321,7 +321,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 82.1,
+   "record_score": null,
    "confidence": 56.0,
    "reason": "초과급락"
   },
@@ -477,8 +477,8 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 88.0,
-   "confidence": 44.0,
+   "record_score": null,
+   "confidence": 20.0,
    "reason": "초과급락"
   },
   "signal_1": {
@@ -633,7 +633,7 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 85.6,
+   "record_score": null,
    "confidence": 88.0,
    "reason": "초과급락"
   },
@@ -789,21 +789,21 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 81.1,
+   "record_score": null,
    "confidence": 72.0,
    "reason": "초과급락"
   }
  },
  "recommended_horses": [
-  7,
   1,
+  7,
   3
  ],
  "recommendation_process": [
-  "1. 전적 분석: 4번 99.3점",
+  "1. 전적 분석: 4번 전적 정보 제한",
   "2. 배당 수집 시작 10:11:18",
   "3. 초과급락 감지: 1번 초과급락 -0.9%p (전체평균 -60.1%)",
-  "5. 종합 신뢰도 48.0점(중) 판정",
+  "5. 종합 신뢰도 24.0점(하) 판정",
   "6. BMED 전략: 압축형 적용",
   "7. 최종 추천: 복승 메인 1+7"
  ],
@@ -812,17 +812,16 @@
   "excess_drop_score": 40,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
-  "record_score": 99.3,
-  "total": 48.0,
-  "grade": "중"
+  "record_score": null,
+  "total": 24.0,
+  "grade": "하"
  },
  "win_tags": [
-  "초과급락_적중",
-  "전적보조_적중"
+  "초과급락_적중"
  ],
- "combo_tags": true,
+ "combo_tags": false,
  "hit_basis": {
-  "formScore": 99.3,
+  "formScore": null,
   "dropAmt": -88.6,
   "dropScore": 100.0,
   "inverse": false,
@@ -885,7 +884,7 @@
   },
   "validCount": 16
  },
- "pnl": 24100,
+ "pnl": 4700,
  "stake": 1000,
- "generated_at": "2026-07-23 10:34:17"
+ "generated_at": "2026-07-29 04:59:20"
 }
