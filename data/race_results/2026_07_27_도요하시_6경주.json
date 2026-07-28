@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_27_도요하시_6경주",
- "raceKey": "도요하시 6경주",
+ "raceKey": "2026-07-27 도요하시 6경주",
  "date": "2026-07-27",
  "sport": "cycle",
  "category": "cycle",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 9,
+ "horse_count": null,
  "result": {
   "1st": 7,
   "2nd": 9,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 1.4,
-  "trifecta": 0.0
+  "trifecta": 2.0
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -2590,7 +2590,7 @@
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
   "signal_quality": "하",
-  "confidence": 91.0,
+  "confidence": 43.0,
   "inverse": true
  },
  "result_analysis": {
@@ -2607,12 +2607,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 1.4,
-  "trifecta_odds": null,
+  "trifecta_odds": 2.0,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-27 13:38:50",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:40)",
+ "saved_at": "2026-07-29 05:40:23",
  "validation": {
   "ok": true,
   "errors": []
