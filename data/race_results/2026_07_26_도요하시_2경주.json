@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_26_도요하시_2경주",
- "raceKey": "도요하시 2경주",
+ "raceKey": "2026-07-26 도요하시 2경주",
  "date": "2026-07-26",
  "sport": "cycle",
  "category": "cycle",
@@ -9,15 +9,15 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 8,
+ "horse_count": null,
  "result": {
   "1st": 4,
   "2nd": 7,
   "3rd": 2
  },
  "payouts": {
-  "quinella": 7.5,
-  "trifecta": 0.0
+  "quinella": 8.2,
+  "trifecta": 7.5
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -2057,7 +2057,7 @@
    6
   ],
   "eliminated": [],
-  "recommend_main": "2+5",
+  "recommend_main": "2+4",
   "recommend_sub": null,
   "strategy": "BMED_역배열형",
   "signal_quality": "하",
@@ -2069,7 +2069,9 @@
   "sub_hit": false,
   "hit_reason": "역배열 감지말 7번 입상",
   "miss_reason": null,
-  "pattern_tags": [],
+  "pattern_tags": [
+   "복승불일치"
+  ],
   "anomaly_correct": false,
   "form_pick_hit": false
  },
@@ -2077,13 +2079,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 7.5,
-  "trifecta_odds": null,
+  "quinella_odds": 8.2,
+  "trifecta_odds": 7.5,
   "actual_return": null,
-  "profit": 6500
+  "profit": 7200
  },
- "memo": null,
- "saved_at": "2026-07-26 11:46:06",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:21)",
+ "saved_at": "2026-07-29 05:21:29",
  "validation": {
   "ok": true,
   "errors": []
