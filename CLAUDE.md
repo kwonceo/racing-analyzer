@@ -300,8 +300,10 @@ git tag -a vX.Y.Z -m "..." && git push origin --tags
 - 모델 `gemini-2.0-flash`, 경주당 **5분 1회**(`_CALL_INTERVAL=300`), timeout 5초.
 - 결과 → `logs/gemini_review/YYYYMMDD_<경주>_HHMMSS.json`. `status=="WARNING"`이면 카카오 알림 발송.
 - **가동 전제조건 2가지(둘 다 필요)**
-  1. `pip install requests` — 미설치 시 `import gemini_reviewer` 자체가 실패, app.py의 `try/except: pass`가 **조용히 삼킴**(로그도 안 남음).
-  2. 환경변수 `GEMINI_API_KEY` — 미설정 시 스레드가 즉시 `return`(무음 실패).
+  1. ✅ **해결(2026-07-28)** — `requests` 설치 완료(2.34.2) + `requirements.txt` 명시. 미설치 시 `import gemini_reviewer` 자체가 실패하고, app.py의 `except`가 삼켜 로그조차 안 남았음(현재는 실패 사유를 콘솔 출력).
+  2. ⚠️ **미해결** — `.env`의 `GEMINI_API_KEY`. 미설정 시 스레드가 즉시 `return`(무음 실패). `.env`에는 현재 `ANTHROPIC_API_KEY`·`KRA_API_KEY`만 존재.
+- ⚠️ **알려진 잠재 버그**: `_send_kakao`가 찾는 함수명(`_kakao_send_text`/`_send_kakao_msg`/`kakao_send`)이 app.py에 **없음**(실제는 `_kakao_send_to_me`) → `status=="WARNING"` 카카오 알림이 무음 실패함. 키 설정 후 알림이 필요하면 함수명 배선 필요.
+- ⚠️ **콘솔 인코딩**: app.py는 기동 로그에 em-dash(`—`) 등 비-cp949 문자를 출력하므로, **stdout을 파일로 리다이렉트하면 `UnicodeEncodeError`로 기동 실패**한다. `경마서버_자동시작.bat`처럼 `chcp 65001`(UTF-8 콘솔)로 띄우거나 `PYTHONIOENCODING=utf-8`을 설정할 것.
 - **진단 명령**
   ```bash
   python -c "import requests; print('requests OK')"
