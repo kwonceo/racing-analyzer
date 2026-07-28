@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_27_히로시마_4경주",
- "raceKey": "히로시마 4경주",
+ "raceKey": "2026-07-27 히로시마 4경주",
  "date": "2026-07-27",
  "sport": "cycle",
  "category": "cycle",
@@ -9,31 +9,23 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 1,
   "2nd": 5,
   "3rd": 6
  },
  "payouts": {
-  "trifecta": 0.0
+  "quinella": 1.6,
+  "trifecta": 2.2
  },
  "payouts_approx": false,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6
-  ],
-  "eliminated": [
-   7
-  ],
+  "candidates": [],
+  "eliminated": [],
   "recommend_main": null,
   "recommend_sub": null,
   "strategy": null,
@@ -48,19 +40,19 @@
   "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
-  "form_pick_hit": true
+  "form_pick_hit": false
  },
  "investment": {
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
-  "trifecta_odds": null,
+  "quinella_odds": 1.6,
+  "trifecta_odds": 2.2,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-27 09:52:18",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:43)",
+ "saved_at": "2026-07-29 05:43:41",
  "validation": {
   "ok": true,
   "errors": []
