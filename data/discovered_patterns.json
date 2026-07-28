@@ -1,6 +1,6 @@
 {
- "generated_at": 1785227877.2020693,
- "races_with_result": 549,
+ "generated_at": 1785229094.0009909,
+ "races_with_result": 551,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -10,8 +10,8 @@
    "key": "had_compression",
    "desc": "배당 압축 동반 경주",
    "rate": 71.4,
-   "baseline": 48.6,
-   "lift": 22.8,
+   "baseline": 48.5,
+   "lift": 23.0,
    "support": 7,
    "hit": 5
   },
@@ -20,8 +20,8 @@
    "key": "had_reversal",
    "desc": "쌍승 역전 동반 경주",
    "rate": 66.7,
-   "baseline": 48.6,
-   "lift": 18.0,
+   "baseline": 48.5,
+   "lift": 18.2,
    "support": 9,
    "hit": 6
   },
@@ -36,5 +36,5 @@
    "support": 849
   }
  ],
- "baseline_hit_rate": 48.6
+ "baseline_hit_rate": 48.5
 }
