@@ -8,95 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 7,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 4,
-   "name": "阿部 力也",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 144.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "山田 英明",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 137.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "取鳥 雄吾",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 106.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "渡邉 雅也",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 104.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "和田健太郎",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 124.6,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "小川 勇介",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 129.3,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "西田 優大",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [],
-   "record_score": 109.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -598,9 +513,9 @@
   "excess_drops": {},
   "drop_speed": {},
   "exacta_reversal": true,
-  "reversal_ratio": 0.19,
+  "reversal_ratio": 0.178,
   "quinella_mismatch": null,
-  "refund_rate": 0.744,
+  "refund_rate": 0.742,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -632,7 +547,7 @@
   "2nd": 1,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 12.4,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -641,7 +556,7 @@
   "quinella_hit": false,
   "winner": 5,
   "second": 1,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -649,18 +564,18 @@
   "excess_drop_value": null,
   "reversal_horse": 2,
   "reversal_horse_placed": false,
-  "reversal_ratio": 0.19,
+  "reversal_ratio": 0.178,
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-27 20:34:45",
+ "saved_at": "2026-07-29 05:29:56",
  "quality": {
   "score": 80,
   "grade": "AI학습용",
   "complete": true,
   "ai_ready": true,
   "missing": [
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
