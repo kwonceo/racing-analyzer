@@ -1,6 +1,6 @@
 {
  "race": "사세보 3경주",
- "raceKey": "사세보 3경주",
+ "raceKey": "2026-07-23 사세보 3경주",
  "date": "2026-07-23",
  "result": {
   "1st": 3,
@@ -37,9 +37,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 74.3,
+   "record_score": null,
    "confidence": 25.0,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_7": {
    "horse": 7,
@@ -65,9 +65,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 98.8,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
@@ -81,9 +81,9 @@
    "drop_timeline": [],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 69.7,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   },
   "signal_5": {
    "horse": 5,
@@ -109,9 +109,9 @@
    ],
    "exacta_reversal": false,
    "reversal_ratio": null,
-   "record_score": 79.3,
+   "record_score": null,
    "confidence": null,
-   "reason": "전적상위"
+   "reason": "일반"
   }
  },
  "recommended_horses": [
@@ -120,7 +120,7 @@
   5
  ],
  "recommendation_process": [
-  "1. 전적 분석: 3번 74.3점",
+  "1. 전적 분석: 3번 전적 정보 제한",
   "2. 배당 수집 시작 09:15:19",
   "5. 종합 신뢰도 25.0점(하) 판정",
   "6. BMED 전략: 보험형 적용",
@@ -131,17 +131,16 @@
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 25,
-  "record_score": 74.3,
+  "record_score": null,
   "total": 25.0,
   "grade": "하"
  },
  "win_tags": [
-  "복승불일치_적중",
-  "전적보조_적중"
+  "복승불일치_적중"
  ],
- "combo_tags": true,
+ "combo_tags": false,
  "hit_basis": {
-  "formScore": 74.3,
+  "formScore": null,
   "dropAmt": null,
   "dropScore": 0.0,
   "inverse": false,
@@ -169,5 +168,5 @@
  },
  "pnl": -1000,
  "stake": 1000,
- "generated_at": "2026-07-23 09:41:57"
+ "generated_at": "2026-07-29 04:54:46"
 }
