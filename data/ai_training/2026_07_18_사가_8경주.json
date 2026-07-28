@@ -13,28 +13,7 @@
  },
  "horses": [],
  "odds_features": {
-  "timeline": [
-   {
-    "time": "19:40:50",
-    "quinella": {}
-   },
-   {
-    "time": "19:40:56",
-    "quinella": {}
-   },
-   {
-    "time": "19:41:27",
-    "quinella": {}
-   },
-   {
-    "time": "19:41:49",
-    "quinella": {}
-   },
-   {
-    "time": "19:41:56",
-    "quinella": {}
-   }
-  ],
+  "timeline": [],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
@@ -65,16 +44,16 @@
   "2nd": 6,
   "3rd": 5,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 2.6,
   "exacta_odds": null,
-  "hit": true,
-  "hit_pattern": "적중"
+  "hit": false,
+  "hit_pattern": null
  },
  "labels": {
   "quinella_hit": false,
   "winner": 2,
   "second": 6,
-  "odds_range": null
+  "odds_range": "저배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -86,16 +65,16 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-18 19:50:19",
+ "saved_at": "2026-07-29 04:01:24",
  "quality": {
   "score": 40,
   "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
+   "배당 타임라인(2회+)",
    "이상감지 결과",
-   "전적 데이터",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }
