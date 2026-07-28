@@ -2051,6 +2051,41 @@ def _combo_max_no(*sources):
     return mx
 
 
+_INGEST_REJECT_T = {}          # {(rk, reason): last_t} — 같은 사유 반복 시 파일 쓰기 스로틀
+
+
+def _ingest_reject_log(rk, reason, source=None, extra=None, throttle=60):
+    """[수집 진단 2026-07-28 · 모리오카 실사고] 수집이 '거부'될 때 사유 한 줄을 영구 아카이브에 남긴다.
+
+    배경: archive_snapshots 는 '절대 삭제 안 되는 영구 기록'인데, 거부 경로는 _history_append 에
+      도달하기 전에 return 하므로 아무것도 안 남는다. 그래서 모리오카 2·4·5경주처럼 arch=0 이면
+      '수집 요청이 아예 안 온 것'인지 '왔는데 게이트가 거부한 것'인지 사후 구분이 불가능했다.
+    ⚠ 배당 데이터는 기록하지 않는다(오염 방지 원칙 그대로) — 사유·소스·조합수만 남긴다.
+    ⚠ 판정·반환값에 영향 없음. 순수 관찰자."""
+    try:
+        now = time.time()
+        k = (rk, reason)
+        if now - _INGEST_REJECT_T.get(k, 0) < throttle:
+            return
+        _INGEST_REJECT_T[k] = now
+        path, date, race = _hist_path(rk)
+        try:
+            doc = json.load(open(path, encoding="utf-8"))
+        except Exception:
+            doc = {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None}
+        doc.setdefault("archive_snapshots", [])
+        row = {"t": now, "time": time.strftime("%H:%M:%S", time.localtime(now)),
+               "rejected": True, "reason": reason, "src": source}
+        if extra:
+            row.update(extra)
+        doc["archive_snapshots"].append(row)
+        tmp = path + ".tmp"
+        json.dump(doc, open(tmp, "w", encoding="utf-8"), ensure_ascii=False)
+        os.replace(tmp, path)
+    except Exception:
+        pass
+
+
 def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None, scratched=None):
     """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
     확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
@@ -2143,6 +2178,7 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     #   추천 A/B 플래핑). 발신 source(URL)를 로그에 남겨 어느 탭이 보내는지 추적 가능.
     if not q and prev.get("quinella") and (now - (prev.get("t") or 0)) <= 120:
         print(f"[빈수집가드] {rk}: 빈 복승 수집 무시(발신 {source}) — 기존 신선 데이터 유지")
+        _ingest_reject_log(rk, "빈 수집", source, {"combos": 0})
         return {"ok": True, "skipped": True, "raceKey": rk, "reason": "빈 수집 — 기존 신선 데이터 유지"}
     # ══════════ [긴급수정 ②③ 사설 우선 + oddspark 말번호 밀림 방어] ══════════
     #   사설/배당판(비-oddspark)이 최근(≤200초) 이 경주를 수집했으면 oddspark 는 '백업' 위치 →
@@ -2156,6 +2192,8 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
             _suspect = _oddspark_mapping_suspect(prev.get("quinella"), q)
             print("[사설 우선] %s: 최근 배당판(src=%s) 유지 → oddspark(%s) 백업 덮어쓰기 생략%s"
                   % (rk, _prev_src, source, " · ⚠️ 말번호 밀림 감지(oddspark 매핑 어긋남)" if _suspect else ""))
+            _ingest_reject_log(rk, "사설 우선(oddspark 백업 생략)", source,
+                               {"combos": len(q or []), "prevSrc": _prev_src, "mappingSuspect": bool(_suspect)})
             return {"ok": True, "skipped": True, "raceKey": rk, "mappingSuspect": _suspect,
                     "reason": "사설/배당판 우선 — oddspark 백업 덮어쓰기 생략"}
     # 변동 추적용 히스토리(최근 12회) — 직전 대비 급락/순위/역전 계산에 사용
@@ -2221,6 +2259,8 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
         _triple_save(db)
         print(f"[혼입가드] {rk}: 마감 후 다음경주 프레임 유입(발주시각 +{int((_in_dl - _pe_g) / 60)}분) "
               f"→ 스냅샷 격리(이력·배당·발주시각 전부 기존 유지)")
+        _ingest_reject_log(rk, "마감 후 다음경주 프레임", source,
+                           {"combos": len(q or []), "deadlineShiftMin": int((_in_dl - _pe_g) / 60)})
         return {"ok": True, "quarantined": True, "raceKey": rk,
                 "reason": "마감 후 다음경주 프레임 유입 — 스냅샷 격리"}
     if _flip_now and (_flip_cnt < 2 or _closed_g or _dl_mismatch):
@@ -2230,6 +2270,8 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
         _why = ("마감 후 혼입" if _closed_g else ("발주시각 불일치(+%d분)" % int((_in_dl - _pe_g) / 60)
                                                  if _dl_mismatch else "연속 %d회" % (_flip_cnt + 1)))
         print(f"[혼입가드] {rk}: 판 전체 뒤집힘 의심({_why}) → 스냅샷 격리(이력 미반영·기존 배당 유지)")
+        _ingest_reject_log(rk, "판 전체 뒤집힘(%s)" % _why, source,
+                           {"combos": len(q or []), "flipCnt": _flip_cnt + 1})
         return {"ok": True, "quarantined": True, "raceKey": rk,
                 "reason": "배당판 혼입 의심(%s) — 스냅샷 격리" % _why}
     if _flip_now:
@@ -27898,6 +27940,42 @@ def _results_history_rows(ttl=_HIST_TTL):
     if parsed:
         print("[결과기록] 캐시 갱신 — 재파싱 %d건 / 전체 %d건" % (parsed, len(rows)))
     return rows
+
+
+@app.route("/api/ingest/rejects", methods=["GET"])
+def ingest_rejects():
+    """[수집 진단 2026-07-28] 수집 거부 기록 조회 — '수집이 왜 안 됐는지' 사후 추적용.
+    archive_snapshots 의 rejected 행만 모아 경주별로 보여준다. 쿼리: date(YYYY_MM_DD) · rk · limit"""
+    date_f = (request.args.get("date") or time.strftime("%Y_%m_%d")).strip()
+    rk_f = (request.args.get("rk") or "").strip()
+    try:
+        limit = max(1, min(500, int(request.args.get("limit") or 200)))
+    except (TypeError, ValueError):
+        limit = 200
+    out, totals = [], {}
+    try:
+        for fn in sorted(os.listdir(ODDS_HISTORY_DIR), reverse=True):
+            if not fn.endswith(".json") or (date_f and not fn.startswith(date_f)):
+                continue
+            try:
+                doc = json.load(open(os.path.join(ODDS_HISTORY_DIR, fn), encoding="utf-8"))
+            except Exception:
+                continue
+            rk = doc.get("raceKey") or os.path.splitext(fn)[0]
+            if rk_f and rk_f not in rk:
+                continue
+            rej = [a for a in (doc.get("archive_snapshots") or []) if a.get("rejected")]
+            ok = len([a for a in (doc.get("archive_snapshots") or []) if not a.get("rejected") and not a.get("boundary")])
+            if not rej:
+                continue
+            for a in rej:
+                totals[a.get("reason") or "?"] = totals.get(a.get("reason") or "?", 0) + 1
+            out.append({"raceKey": rk, "file": fn, "accepted": ok, "rejected": len(rej),
+                        "rows": rej[-limit:]})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)[:200]}), 200
+    return jsonify({"ok": True, "date": date_f, "races": out,
+                    "reasonTotals": dict(sorted(totals.items(), key=lambda kv: -kv[1]))})
 
 
 @app.route("/api/results/history", methods=["GET"])
