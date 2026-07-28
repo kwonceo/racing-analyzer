@@ -11514,6 +11514,14 @@ def _triple_analyze(rk, rec):
             #   [전체자료 모드 2026-07-28] 정확한 로직 분석이 목적이므로 ctx 에 배당판·시계열·전적·
             #   판단근거를 '자르지 않고' 전부 실어 보낸다(권대표 지시: 비용보다 정확도 우선).
             #   ⚠ 수집 실패 필드는 None 으로 남겨도 무해(gemini_reviewer 가 '없음' 처리).
+            #
+            #   [실행 보장 (2026-07-28 저녁)] ⚠ 이 호출은 11046 에서 시작하는 626행짜리
+            #   try("[최종추천정리]") 안에 있다. 그 앞 465줄 중 어디서든 예외가 나면 여기까지
+            #   도달조차 못 하고 except 가 삼킨다 — 실제로 13:02 이후 7시간 동안 Gemini 로그가
+            #   0건이었고(별도 프로세스 직접 호출은 61초에 정상 생성), 이 구조가 원인이다.
+            #   → 아래 _gemini_pending 에 인자만 담아두고, 실제 호출은 이 try 를 벗어난
+            #     '_triple_analyze 반환 직전'에서 한다(앞단 예외와 무관하게 항상 실행).
+            _gemini_pending = None
             try:
                 import gemini_reviewer
                 try:
@@ -11542,7 +11550,8 @@ def _triple_analyze(rk, rec):
                 except Exception as _ce:
                     _gctx = None
                     print(f"[Gemini] ctx 구성 실패 — 요약 모드로 폴백: {_ce}")
-                gemini_reviewer.review_async(
+                # 실제 호출은 이 try 를 벗어난 뒤(반환 직전) 수행한다 — 인자만 담아둔다.
+                _gemini_pending = dict(
                     rk=rk,
                     final_q=core_picks.get('finalQuinellas') or [],
                     final_t=core_picks.get('finalTrifectas') or [],
@@ -11556,7 +11565,7 @@ def _triple_analyze(rk, rec):
                     ctx=_gctx,
                 )
             except Exception as _e:
-                print(f"[Gemini] 검수 호출 실패(무시) — {_e}")
+                print(f"[Gemini] 검수 인자 구성 실패(무시) — {_e}")
             # [수익성 구조 개편 (2026-07-19)] 경주 3분류(저=삼복승 집중/중=2.5배 컷+기대값/고=유지) 후처리 —
             #   실패 시 내부에서 완전 무변경(기존 추천 유지). 빠진 복승은 quinellaRef(참고 접기)로 무삭제 이동.
             _apply_profit_strategy(core_picks, curQ, _rec_valid, sig_meta=_sig_meta,
@@ -11670,6 +11679,18 @@ def _triple_analyze(rk, rec):
                 core_picks["formMissing"] = False
     except Exception as _e:
         print("[최종추천정리] 실패:", _e)
+    # [Gemini 실행 보장 (2026-07-28 저녁)] 위 626행 try 를 '벗어난' 자리에서 호출한다.
+    #   앞 구간(465줄) 어디서 예외가 나 [최종추천정리] 실패로 빠져도, 그 시점까지 담긴
+    #   _gemini_pending 이 있으면 검수는 정상 수행된다(오히려 로직 오류가 난 경주야말로
+    #   Gemini 진단이 가장 필요하다). 인자 구성 전에 실패했다면 pending 이 없어 조용히 넘어간다.
+    try:
+        if _gemini_pending:
+            import gemini_reviewer
+            gemini_reviewer.review_async(**_gemini_pending)
+    except NameError:
+        pass                      # core_picks 미형성 등으로 인자 구성 자체를 안 한 경우
+    except Exception as _ge:
+        print(f"[Gemini] 검수 호출 실패(무시) — {_ge}")
 
     # [보완·혼전 복승 박스] 혼전(압축) 경주 감지 시 복승 메인 2두 고정 → 상위 3두 박스로 확대.
     #   기존 복승 메인(h1+h2)·보조(h1+h3)에 h2+h3 조합을 추가 → 상위 3두 3조합 전부 커버(이변 대비).
