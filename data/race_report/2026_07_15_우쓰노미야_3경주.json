@@ -1,6 +1,6 @@
 {
  "race": "우쓰노미야 3경주",
- "raceKey": "우쓰노미야 3경주",
+ "raceKey": "2026-07-15 우쓰노미야 3경주",
  "date": "2026-07-15",
  "result": {
   "1st": 4,
@@ -16,7 +16,7 @@
   "signal_4": {
    "horse": 4,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 1,
    "excess_drop": null,
    "avg_drop": null,
@@ -26,13 +26,13 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": null,
-   "confidence": 0.0,
+   "confidence": null,
    "reason": "일반"
   },
   "signal_7": {
    "horse": 7,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 2,
    "excess_drop": null,
    "avg_drop": null,
@@ -42,13 +42,13 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": null,
-   "confidence": 0.0,
+   "confidence": null,
    "reason": "일반"
   },
   "signal_2": {
    "horse": 2,
    "placed": true,
-   "recommended": true,
+   "recommended": false,
    "place_rank": 3,
    "excess_drop": null,
    "avg_drop": null,
@@ -58,19 +58,14 @@
    "exacta_reversal": false,
    "reversal_ratio": null,
    "record_score": null,
-   "confidence": 40.0,
+   "confidence": null,
    "reason": "일반"
   }
  },
- "recommended_horses": [
-  4,
-  2,
-  7
- ],
+ "recommended_horses": [],
  "recommendation_process": [
   "1. 전적 분석: 4번 전적 정보 제한",
-  "2. 배당 수집 시작 11:34:30",
-  "5. 종합 신뢰도 0.0점(하) 판정"
+  "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
   "horse": 4,
@@ -78,7 +73,7 @@
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
   "record_score": null,
-  "total": 0.0,
+  "total": 0,
   "grade": "하"
  },
  "win_tags": [],
@@ -86,61 +81,27 @@
  "hit_basis": {
   "formScore": null,
   "dropAmt": null,
-  "dropScore": 0.0,
+  "dropScore": 0,
   "inverse": false,
   "inverseHorses": [],
   "inverseHit": [],
-  "confidence": 40.0,
-  "reason": "전적유력마 2번 적중"
+  "confidence": 0,
+  "reason": "추천 미적중"
  },
  "signal_change_history": {
   "changes": [],
   "confirmed": [],
-  "candidates": [
-   1,
-   5
-  ],
-  "events": {
-   "5": {
-    "first": {
-     "time": "11:37:41",
-     "minutes_before": 5
-    },
-    "count": 1,
-    "last": {
-     "time": "11:37:41",
-     "minutes_before": 5
-    },
-    "vanished": {
-     "time": "11:38:18",
-     "minutes_before": 4
-    }
-   },
-   "1": {
-    "first": {
-     "time": "11:38:51",
-     "minutes_before": 4
-    },
-    "count": 1,
-    "last": {
-     "time": "11:38:51",
-     "minutes_before": 4
-    },
-    "vanished": {
-     "time": "11:39:14",
-     "minutes_before": 3
-    }
-   }
-  },
-  "finalSignal": 1,
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
   "finalConfirmed": false,
   "excluded": {
    "after_close": 0,
    "next_race": 0
   },
-  "validCount": 6
+  "validCount": 0
  },
- "pnl": -1000,
+ "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-15 21:01:54"
+ "generated_at": "2026-07-29 03:45:27"
 }
