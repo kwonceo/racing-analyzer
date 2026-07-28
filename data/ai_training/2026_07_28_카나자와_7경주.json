@@ -8,208 +8,10 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 11,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 11,
-   "name": "サトノアラジン",
-   "jockey": "青柳正",
-   "jockey_winrate": 60.0,
-   "recent_results": [
-    4,
-    2,
-    1,
-    2,
-    7
-   ],
-   "record_score": 126.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "Ｓｐｅｉｇｈｔｓｔｏｗｎ",
-   "jockey": "田知弘",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    2,
-    3,
-    5,
-    2,
-    2
-   ],
-   "record_score": 82.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ロージズインメイ",
-   "jockey": "葛山晃",
-   "jockey_winrate": 36.4,
-   "recent_results": [
-    2,
-    3,
-    4,
-    6,
-    5
-   ],
-   "record_score": 80.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "インカンテーション",
-   "jockey": "松戸政",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    1,
-    10,
-    16,
-    15
-   ],
-   "record_score": 82.1,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "サトノダイヤモンド",
-   "jockey": "中島龍",
-   "jockey_winrate": 66.7,
-   "recent_results": [
-    1,
-    10,
-    10,
-    7,
-    9
-   ],
-   "record_score": 80.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 9,
-   "name": "レイデオロ",
-   "jockey": "魚住謙",
-   "jockey_winrate": 30.0,
-   "recent_results": [
-    8,
-    2,
-    3,
-    7,
-    5
-   ],
-   "record_score": 45.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ビーチパトロール",
-   "jockey": "栗原大",
-   "jockey_winrate": 40.0,
-   "recent_results": [
-    2,
-    8,
-    9,
-    9,
-    1
-   ],
-   "record_score": 48.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 10,
-   "name": "トゥザワールド",
-   "jockey": "沖静男",
-   "jockey_winrate": 13.3,
-   "recent_results": [
-    9,
-    6,
-    2,
-    7,
-    6
-   ],
-   "record_score": 70.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 4,
-   "name": "ドゥラメンテ",
-   "jockey": "服部大",
-   "jockey_winrate": 7.1,
-   "recent_results": [
-    7,
-    5,
-    4,
-    5,
-    3
-   ],
-   "record_score": 42.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "オルフェーヴル",
-   "jockey": "吉田晃",
-   "jockey_winrate": 26.7,
-   "recent_results": [
-    9,
-    5,
-    8,
-    3,
-    9
-   ],
-   "record_score": 10.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "ビッグアーサー",
-   "jockey": "加藤翔",
-   "jockey_winrate": 60.0,
-   "recent_results": [
-    9,
-    9,
-    8,
-    5,
-    6
-   ],
-   "record_score": 25.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [
    {
@@ -292,19 +94,19 @@
  },
  "prediction": {
   "candidates": [
-   5,
-   7,
-   11,
    2,
+   5,
    6,
+   7,
    8,
    9,
    10,
-   3,
-   4
+   11,
+   3
   ],
   "eliminated": [
-   1
+   1,
+   4
   ],
   "recommend": "7+10",
   "strategy": "BMED_보험형",
@@ -316,7 +118,7 @@
   "2nd": 8,
   "3rd": 2,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 20.8,
   "exacta_odds": null,
   "hit": false,
   "hit_pattern": null
@@ -325,7 +127,7 @@
   "quinella_hit": false,
   "winner": 7,
   "second": 8,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
@@ -337,7 +139,7 @@
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-28 21:08:35",
+ "saved_at": "2026-07-29 02:26:07",
  "quality": {
   "score": 40,
   "grade": "제외",
@@ -346,7 +148,7 @@
   "missing": [
    "배당 타임라인(2회+)",
    "이상감지 결과",
-   "확정 배당"
+   "전적 데이터"
   ],
   "errors": []
  }

@@ -8,164 +8,19 @@
   "distance": null,
   "condition": null,
   "weather": null,
-  "horse_count": 8,
+  "horse_count": null,
   "grade": null
  },
- "horses": [
-  {
-   "no": 4,
-   "name": "エピファネイア",
-   "jockey": "中島龍",
-   "jockey_winrate": 63.3,
-   "recent_results": [
-    2,
-    3,
-    3,
-    2,
-    6
-   ],
-   "record_score": 93.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 8,
-   "name": "レッドルゼル",
-   "jockey": "",
-   "jockey_winrate": null,
-   "recent_results": [
-    6,
-    2,
-    4,
-    1,
-    2
-   ],
-   "record_score": 74.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 3,
-   "name": "フリオーソ",
-   "jockey": "吉田晃",
-   "jockey_winrate": 20.0,
-   "recent_results": [
-    2,
-    11,
-    12,
-    10,
-    8
-   ],
-   "record_score": 75.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 1,
-   "name": "フィエールマン",
-   "jockey": "青柳正",
-   "jockey_winrate": 60.0,
-   "recent_results": [
-    7,
-    8,
-    4,
-    4,
-    2
-   ],
-   "record_score": 78.0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 2,
-   "name": "ドレフォン",
-   "jockey": "栗原大",
-   "jockey_winrate": 36.7,
-   "recent_results": [
-    6,
-    4,
-    8,
-    6,
-    4
-   ],
-   "record_score": 23.8,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 7,
-   "name": "ディープスカイ",
-   "jockey": "ディープスカイ",
-   "jockey_winrate": null,
-   "recent_results": [
-    11,
-    4,
-    7,
-    2,
-    6
-   ],
-   "record_score": 16.2,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 6,
-   "name": "ルーラーシップ",
-   "jockey": "鈴木太",
-   "jockey_winrate": 33.3,
-   "recent_results": [
-    4,
-    7,
-    6,
-    3,
-    8
-   ],
-   "record_score": 22.5,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  },
-  {
-   "no": 5,
-   "name": "ベルシャザール",
-   "jockey": "田知弘",
-   "jockey_winrate": 16.7,
-   "recent_results": [
-    5,
-    7,
-    8,
-    11,
-    8
-   ],
-   "record_score": 0,
-   "distance_score": null,
-   "interval_days": null,
-   "weight_change": null,
-   "odds": null
-  }
- ],
+ "horses": [],
  "odds_features": {
   "timeline": [],
   "drop_rates": {},
   "excess_drops": {},
   "drop_speed": {},
-  "exacta_reversal": true,
-  "reversal_ratio": 0.733,
+  "exacta_reversal": false,
+  "reversal_ratio": null,
   "quinella_mismatch": null,
-  "refund_rate": 0.747,
+  "refund_rate": null,
   "consecutive_drops": {},
   "fake_betting": false,
   "large_scale_drop": false
@@ -177,20 +32,11 @@
   "pre_close_min": 30
  },
  "prediction": {
-  "candidates": [
-   8,
-   4,
-   1,
-   2,
-   5,
-   6,
-   7,
-   3
-  ],
+  "candidates": [],
   "eliminated": [],
   "recommend": null,
   "strategy": null,
-  "confidence": 32.0,
+  "confidence": 0,
   "signal_quality": null
  },
  "result": {
@@ -198,36 +44,37 @@
   "2nd": 8,
   "3rd": 7,
   "4th": null,
-  "quinella_odds": null,
+  "quinella_odds": 23.4,
   "exacta_odds": null,
   "hit": true,
-  "hit_pattern": "전적유력마 8번 적중"
+  "hit_pattern": "적중"
  },
  "labels": {
   "quinella_hit": false,
   "winner": 5,
   "second": 8,
-  "odds_range": null
+  "odds_range": "고배당"
  },
  "signal_hit": {
   "excess_drop_horse": null,
   "excess_drop_horse_placed": null,
   "excess_drop_value": null,
-  "reversal_horse": 1,
-  "reversal_horse_placed": false,
-  "reversal_ratio": 0.733,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
   "consecutive_horse": null,
   "consecutive_horse_placed": null
  },
- "saved_at": "2026-07-28 16:57:44",
+ "saved_at": "2026-07-29 02:26:03",
  "quality": {
-  "score": 60,
-  "grade": "참고용",
+  "score": 40,
+  "grade": "제외",
   "complete": false,
   "ai_ready": false,
   "missing": [
    "배당 타임라인(2회+)",
-   "확정 배당"
+   "이상감지 결과",
+   "전적 데이터"
   ],
   "errors": []
  }

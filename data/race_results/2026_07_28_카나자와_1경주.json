@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_28_카나자와_1경주",
- "raceKey": "카나자와 1경주",
+ "raceKey": "2026-07-28 카나자와 1경주",
  "date": "2026-07-28",
  "sport": "horse",
  "category": "japan_local",
@@ -9,15 +9,15 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 9,
+ "horse_count": null,
  "result": {
   "1st": 3,
   "2nd": 8,
   "3rd": 6
  },
  "payouts": {
-  "quinella": 52.4,
-  "trifecta": 0.0
+  "quinella": 52.5,
+  "trifecta": 313.1
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -109,15 +109,15 @@
  "anomalies": [],
  "prediction": {
   "candidates": [
-   9,
-   7,
    2,
    3,
    4,
    5,
    6,
    8,
-   1
+   9,
+   1,
+   7
   ],
   "eliminated": [],
   "recommend_main": "5+9",
@@ -140,13 +140,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 52.4,
-  "trifecta_odds": null,
+  "quinella_odds": 52.5,
+  "trifecta_odds": 313.1,
   "actual_return": null,
   "profit": -1000
  },
- "memo": null,
- "saved_at": "2026-07-28 15:40:16",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 02:25)",
+ "saved_at": "2026-07-29 02:25:59",
  "validation": {
   "ok": true,
   "errors": []
