@@ -1,11 +1,11 @@
 {
  "race": "소노다 3경주",
- "raceKey": "소노다 3경주",
+ "raceKey": "2026-07-17 소노다 3경주",
  "date": "2026-07-17",
  "result": {
-  "1st": 2,
-  "2nd": 1,
-  "3rd": 5,
+  "1st": 1,
+  "2nd": 2,
+  "3rd": 4,
   "4th": null
  },
  "hit": false,
@@ -13,8 +13,8 @@
  "odds": "미상",
  "win_odds": 0,
  "why_recommended": {
-  "signal_2": {
-   "horse": 2,
+  "signal_1": {
+   "horse": 1,
    "placed": true,
    "recommended": false,
    "place_rank": 1,
@@ -29,8 +29,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_1": {
-   "horse": 1,
+  "signal_2": {
+   "horse": 2,
    "placed": true,
    "recommended": false,
    "place_rank": 2,
@@ -45,8 +45,8 @@
    "confidence": null,
    "reason": "일반"
   },
-  "signal_5": {
-   "horse": 5,
+  "signal_4": {
+   "horse": 4,
    "placed": true,
    "recommended": false,
    "place_rank": 3,
@@ -64,11 +64,11 @@
  },
  "recommended_horses": [],
  "recommendation_process": [
-  "1. 전적 분석: 2번 전적 정보 제한",
+  "1. 전적 분석: 1번 전적 정보 제한",
   "5. 종합 신뢰도 0점(하) 판정"
  ],
  "confidence_breakdown": {
-  "horse": 2,
+  "horse": 1,
   "excess_drop_score": 0,
   "exacta_reversal_score": 0,
   "quinella_mismatch_score": 0,
@@ -103,5 +103,5 @@
  },
  "pnl": 0,
  "stake": 1000,
- "generated_at": "2026-07-17 08:35:29"
+ "generated_at": "2026-07-29 03:55:01"
 }
