@@ -1,6 +1,6 @@
 {
  "race_id": "2026_07_27_다치카와_3경주",
- "raceKey": "다치카와 3경주",
+ "raceKey": "2026-07-27 다치카와 3경주",
  "date": "2026-07-27",
  "sport": "cycle",
  "category": "cycle",
@@ -9,7 +9,7 @@
  "distance": null,
  "track_condition": null,
  "weather": null,
- "horse_count": 7,
+ "horse_count": null,
  "result": {
   "1st": 2,
   "2nd": 4,
@@ -17,7 +17,7 @@
  },
  "payouts": {
   "quinella": 1.1,
-  "trifecta": 0.0
+  "trifecta": 4.1
  },
  "payouts_approx": false,
  "odds_at_start": {
@@ -1473,12 +1473,12 @@
   "main_bet": 0,
   "sub_bet": 0,
   "quinella_odds": 1.1,
-  "trifecta_odds": null,
+  "trifecta_odds": 4.1,
   "actual_return": null,
-  "profit": -1000
+  "profit": 3100
  },
- "memo": null,
- "saved_at": "2026-07-27 11:56:04",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 05:34)",
+ "saved_at": "2026-07-29 05:35:05",
  "validation": {
   "ok": true,
   "errors": []
