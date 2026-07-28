@@ -16,90 +16,28 @@
   "3rd": 3
  },
  "payouts": {
-  "quinella": 5.1,
-  "trifecta": 0.0
+  "quinella": 10.0,
+  "trifecta": 5.1
  },
  "payouts_approx": false,
- "odds_at_start": {
-  "quinella": {
-   "3+4": 2.5,
-   "1+7": 3.9,
-   "1+4": 10.0,
-   "4+7": 10.0,
-   "1+5": 13.5,
-   "2+6": 17.7,
-   "3+7": 19.5,
-   "1+3": 22.5,
-   "4+5": 26.6,
-   "2+4": 28.1,
-   "2+3": 30.5,
-   "5+7": 36.9,
-   "1+2": 37.3,
-   "2+7": 46.5,
-   "3+5": 47.2,
-   "4+6": 80.8,
-   "1+6": 96.5,
-   "2+5": 101.0,
-   "3+6": 140.5,
-   "6+7": 170.1,
-   "5+6": 248.7
-  },
-  "exacta": {}
- },
- "odds_timeline": [
-  {
-   "time": "14:09:18",
-   "minutes_before": null,
-   "quinella": {
-    "3+4": 2.5,
-    "1+7": 3.9,
-    "1+4": 10.0,
-    "4+7": 10.0,
-    "1+5": 13.5,
-    "2+6": 17.7,
-    "3+7": 19.5,
-    "1+3": 22.5,
-    "4+5": 26.6,
-    "2+4": 28.1,
-    "2+3": 30.5,
-    "5+7": 36.9,
-    "1+2": 37.3,
-    "2+7": 46.5,
-    "3+5": 47.2,
-    "4+6": 80.8,
-    "1+6": 96.5,
-    "2+5": 101.0,
-    "3+6": 140.5,
-    "6+7": 170.1,
-    "5+6": 248.7
-   },
-   "exacta": {}
-  }
- ],
+ "odds_at_start": {},
+ "odds_timeline": [],
  "anomalies": [],
  "prediction": {
-  "candidates": [
-   1,
-   2,
-   3,
-   4,
-   5,
-   6,
-   7
-  ],
+  "candidates": [],
   "eliminated": [],
-  "recommend_main": "3+4",
+  "recommend_main": null,
   "recommend_sub": null,
-  "strategy": "BMED_보험형",
-  "signal_quality": "하",
-  "confidence": 25.0,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
   "inverse": false
  },
  "result_analysis": {
   "main_hit": false,
   "sub_hit": false,
-  "hit_reason": "적중",
-  "miss_reason": null,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
   "pattern_tags": [],
   "anomaly_correct": false,
   "form_pick_hit": false
@@ -108,13 +46,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": 5.1,
-  "trifecta_odds": null,
+  "quinella_odds": 10.0,
+  "trifecta_odds": 5.1,
   "actual_return": null,
   "profit": -1000
  },
- "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-22 09:47)",
- "saved_at": "2026-07-22 09:47:13",
+ "memo": "[정합 스윕] 공식 결과·환급 대조 정정(07-29 04:27)",
+ "saved_at": "2026-07-29 04:28:03",
  "validation": {
   "ok": true,
   "errors": []
