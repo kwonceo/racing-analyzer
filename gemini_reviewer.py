@@ -59,6 +59,151 @@ def _build_prompt(rk, final_q, final_t, special_q, line_pairs, strong_signals, f
     )
     return prompt
 
+# ─────────────────────────────────────────────────────────────────────────────
+# [전체자료 모드 2026-07-28] 정확한 로직 분석이 목적이므로 배당판·시계열·전적·판단근거를
+#   '자르지 않고' 전부 보낸다. 기존 요약 프롬프트(_build_prompt)는 폴백으로 그대로 보존.
+#   비용보다 정확도 우선(권대표 지시). gemini-2.5-flash 는 1M 토큰 입력을 받는다.
+# ─────────────────────────────────────────────────────────────────────────────
+_MAX_PROMPT_CHARS = 400000     # 안전 상한(1M 토큰 대비 충분히 여유). 초과 시 시계열 오래된 순으로만 축약.
+
+
+def _pair_key(k):
+    """조합 키를 '1+2' 문자열로 정규화((1,2) 튜플·'1+2'·[1,2] 모두 허용)."""
+    if isinstance(k, (tuple, list)):
+        return "+".join(str(int(x)) for x in k)
+    return str(k).replace(" ", "")
+
+
+def _fmt_odds_map(m, limit=None, asc=True):
+    """배당 맵 → '1+2:3.4 1+3:5.6 ...' (배당 오름차순). limit=None 이면 전량."""
+    if not m:
+        return "없음"
+    try:
+        items = sorted(m.items(), key=lambda kv: (kv[1] is None, kv[1]), reverse=not asc)
+    except Exception:
+        items = list(m.items())
+    if limit:
+        items = items[:limit]
+    return " ".join("%s:%s" % (_pair_key(k), v) for k, v in items)
+
+
+def _fmt_json_block(obj, title):
+    """구조가 제각각인 분석 산출물은 JSON 원문 그대로 전달(정보 손실 0)."""
+    if obj in (None, [], {}, ""):
+        return "[%s] 없음\n" % title
+    try:
+        return "[%s]\n%s\n" % (title, json.dumps(obj, ensure_ascii=False, default=str))
+    except Exception:
+        return "[%s] %s\n" % (title, str(obj))
+
+
+def _fmt_timeline(tl):
+    """배당 시계열 전량 — 스냅샷마다 전 조합 배당. 급락 판정의 원재료라 절대 요약하지 않는다."""
+    if not tl:
+        return "[배당 시계열] 없음\n"
+    out = ["[배당 시계열] %d개 스냅샷 (오래된→최신, T-분 = 마감까지 남은 분)" % len(tl)]
+    for s in tl:
+        mb = s.get("minutes_before")
+        q = s.get("quinella") or {}
+        out.append("T-%s (%s) %s" % (mb, s.get("time"), _fmt_odds_map(q)))
+    return "\n".join(out) + "\n"
+
+
+def _build_full_prompt(ctx):
+    """[전체자료] 배당판 전량 + 시계열 전량 + 전적 + 시스템 판단근거 + 최종추천(근거 절단 없음)."""
+    g = ctx.get
+    P = []
+    P.append("너는 BMED 경마·경륜 베팅 시스템의 수석 로직 검수관이다.")
+    P.append("아래는 이 경주에 대해 시스템이 보유한 '전체' 데이터와, 시스템이 내린 최종 판단이다.")
+    P.append("데이터를 직접 읽고, 시스템의 판단 로직에 결함이 있는지 근거를 들어 분석하라.\n")
+
+    P.append("═══ 1. 경주 기본 ═══")
+    P.append("경주: %s | 종목: %s/%s | 마감까지: %s분 | 마감후: %s"
+             % (g("raceKey"), g("sport"), g("category"), g("minutesBefore"), g("afterClose")))
+    P.append("출전 유효 마번: %s | 인기순(배당등장빈도): %s" % (g("validNos"), g("ranked")))
+    P.append("")
+
+    P.append("═══ 2. 현재 배당판 (전량) ═══")
+    P.append("[단승] %s" % _fmt_odds_map(g("win")))
+    _q = g("quinella") or {}
+    P.append("[복승] %d개 조합" % len(_q))
+    P.append(_fmt_odds_map(_q))
+    _e = g("exacta") or {}
+    if _e:
+        P.append("[쌍승] %d개" % len(_e))
+        P.append(_fmt_odds_map(_e))
+    _t = g("trio") or {}
+    if _t:
+        P.append("[삼복승 수집분] %d개" % len(_t))
+        P.append(_fmt_odds_map(_t))
+    P.append("")
+
+    P.append("═══ 3. 배당 변동 이력 (전량) ═══")
+    P.append(_fmt_timeline(g("timeline")))
+
+    P.append("═══ 4. 이상감지 원본 ═══")
+    P.append(_fmt_json_block(g("drops"), "급락 전체(조합·하락률·시점)"))
+    P.append(_fmt_json_block(g("excess"), "초과급락 분석(말별 평균-전체평균)"))
+    P.append(_fmt_json_block(g("massDrop"), "대규모 급락 판정"))
+    P.append(_fmt_json_block(g("strongSignals"), "강신호 전문"))
+    P.append(_fmt_json_block(g("signals"), "신호 목록 전문"))
+    P.append(_fmt_json_block(g("inverse"), "역배열 분석"))
+    P.append(_fmt_json_block(g("compression"), "배당 압축 패턴"))
+    P.append(_fmt_json_block(g("darkHorses"), "복병(스마트머니 포함)"))
+    P.append(_fmt_json_block(g("advanced"), "실시간 고도화(급락속도·연속하락·환급률)"))
+
+    P.append("═══ 5. 전적·출마 정보 ═══")
+    P.append(_fmt_json_block(g("form"), "말별 전적·점수"))
+    P.append(_fmt_json_block(g("linePairs"), "라인 페어(경륜)"))
+
+    P.append("═══ 6. 시스템의 판단 근거 ═══")
+    P.append(_fmt_json_block(g("keyHorses"), "유력마"))
+    P.append(_fmt_json_block(g("elimination"), "제거마(점수·사유)"))
+    P.append(_fmt_json_block(g("integrated"), "통합 등급(이상감지+전적 가중)"))
+    P.append(_fmt_json_block(g("signalQuality"), "신호 품질(상/중/하)"))
+    P.append(_fmt_json_block(g("confidence"), "종합 신뢰도"))
+
+    P.append("═══ 7. 최종 추천 (근거 원문·절단 없음) ═══")
+    P.append(_fmt_json_block(g("corePicks"), "corePicks(finalQuinellas/finalTrifectas 등)"))
+    P.append(_fmt_json_block(g("betRecommend"), "베팅 추천 전체(kind·combo·alloc·expOdds·label·reason)"))
+    P.append(_fmt_json_block(g("strategy"), "BMED 전략·자금배분"))
+
+    _lrn = g("learned")
+    if _lrn:
+        P.append("═══ 8. 누적 학습 통계 ═══")
+        P.append(_fmt_json_block(_lrn, "학습 통계(조건별 적중률)"))
+
+    P.append("═══ 분석 지시 ═══")
+    P.append("1) 배당판과 시계열을 직접 읽고, 시스템이 놓친 자금 흐름·급락·역배열이 있는지 확인하라.")
+    P.append("2) 유력마·제거마·최종추천이 위 데이터로 정당화되는지 검증하라. 근거 없이 선정된 말이 있는가?")
+    P.append("3) 추천에 빠졌지만 데이터상 들어갔어야 할 조합이 있으면 마번과 근거를 들어 지적하라.")
+    P.append("4) 로직 자체의 결함(조건식·임계값·우선순위)이 의심되면 어느 규칙을 어떻게 바꿔야 하는지 제안하라.")
+    P.append("5) 추측 금지. 모든 지적에는 위 데이터의 구체적 수치(마번·배당·%·시각)를 근거로 인용하라.")
+    P.append("6) 문제가 없으면 status=SAFE, issues=[] 로 답하라. 억지로 문제를 만들지 마라.\n")
+    P.append("출력(JSON만):")
+    P.append('{"status":"SAFE|WARNING",'
+             '"issues":["항목: 근거 수치"],'
+             '"summary":"한줄 요약",'
+             '"q_suggest":"복승 제안",'
+             '"t_suggest":"삼복승 제안",'
+             '"analysis":{'
+             '"odds_read":"배당판에서 읽히는 자금 흐름",'
+             '"signal_read":"이상감지 해석",'
+             '"missed":[{"combo":"1+2","why":"근거"}],'
+             '"logic_findings":[{"area":"함수·규칙명","problem":"결함","evidence":"수치 근거","fix":"수정 제안"}]},'
+             '"confidence":0}')
+
+    text = "\n".join(P)
+    if len(text) > _MAX_PROMPT_CHARS:      # 상한 초과 시 시계열만 오래된 순으로 축약(다른 자료는 보존)
+        tl = g("timeline") or []
+        keep = max(4, len(tl) // 2)
+        ctx2 = dict(ctx)
+        ctx2["timeline"] = tl[-keep:]
+        ctx2["_truncated"] = True
+        text = _build_full_prompt(ctx2) if keep < len(tl) else text[:_MAX_PROMPT_CHARS]
+    return text
+
+
 def _save_log(rk, result):
     try:
         safe = "".join(c if (c.isalnum() or "\uAC00" <= c <= "\uD7A3") else "_" for c in rk)
@@ -122,7 +267,9 @@ def _send_kakao(rk, result):
 
 def review_async(rk, final_q, final_t, special_q=None, line_pairs=None,
                  strong_signals=None, fav_axis=None, strong_axis=True,
-                 drops=None, cur_mb=None):
+                 drops=None, cur_mb=None, ctx=None):
+    """ctx 를 주면 [전체자료 모드](배당판·시계열·전적·판단근거 전량)로 분석한다.
+    ctx 가 없으면 기존 요약 프롬프트로 동작(하위호환 — 기존 호출부 무변경으로 계속 작동)."""
     def _run():
         try:
             with _GEMINI_LOCK:
@@ -132,27 +279,34 @@ def review_async(rk, final_q, final_t, special_q=None, line_pairs=None,
             key = _gemini_api_key()
             if not key:
                 return
-            prompt = _build_prompt(rk, final_q, final_t, special_q or [],
-                                   line_pairs or [], strong_signals or [],
-                                   fav_axis, strong_axis, drops or [], cur_mb)
+            # [전체자료 모드] ctx 가 있으면 배당판·시계열·전적·판단근거를 자르지 않고 전부 보낸다.
+            _full = bool(ctx)
+            if _full:
+                prompt = _build_full_prompt(ctx)
+                # 깊은 분석이 목적이므로 thinking 을 켜고 출력 예산도 크게 잡는다(비용보다 정확도 우선).
+                _gen = {"temperature": 0.1, "maxOutputTokens": 8192,
+                        "thinkingConfig": {"thinkingBudget": 8192},
+                        "responseMimeType": "application/json"}
+                _timeout = 120
+            else:
+                prompt = _build_prompt(rk, final_q, final_t, special_q or [],
+                                       line_pairs or [], strong_signals or [],
+                                       fav_axis, strong_axis, drops or [], cur_mb)
+                _gen = {"temperature": 0.1, "maxOutputTokens": 800,
+                        "thinkingConfig": {"thinkingBudget": 0},
+                        "responseMimeType": "application/json"}
+                _timeout = 15
             # ⚠ 키는 URL 쿼리(?key=)가 아닌 헤더로 전달 — 쿼리로 넣으면 requests 예외 메시지에
             #   전체 URL이 실려 API 키가 콘솔/로그로 그대로 유출된다(실제 발생 확인, 2026-07-28).
             headers = {"x-goog-api-key": key}
-            payload = {
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {
-                    "temperature": 0.1,
-                    "maxOutputTokens": 800,          # 300 은 2.5 계열에서 MAX_TOKENS 로 잘려 JSON 파손
-                    "thinkingConfig": {"thinkingBudget": 0},   # thinking 토큰이 출력예산을 잠식하는 것 방지
-                    "responseMimeType": "application/json",    # JSON 이외 출력 차단
-                },
-            }
+            payload = {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": _gen}
+            print("[Gemini] %s: %s 모드 · 프롬프트 %d자" % (rk, ("전체자료" if _full else "요약"), len(prompt)))
             result = None
             last_err = ""
             for _model in _GEMINI_MODELS:
                 try:
                     resp = requests.post(_GEMINI_BASE % _model, headers=headers,
-                                         json=payload, timeout=15)
+                                         json=payload, timeout=_timeout)
                     if resp.status_code != 200:
                         last_err = "%s %s" % (_model, _mask(resp.text, key)[:160])
                         continue

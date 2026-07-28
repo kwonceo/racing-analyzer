@@ -11406,8 +11406,37 @@ def _triple_analyze(rk, rec):
             # [Gemini 자동 진단 2026-07-28] finalQ/finalT 확정 후 백그라운드 검수
             #   ※ 머지 과정에서 동일 블록이 2회 삽입되어 있던 것을 1회로 정리(2026-07-28).
             #      _CALL_INTERVAL(300초) 락으로 실호출은 1회였으나 죽은 코드였음. 기능 변화 없음.
+            #   [전체자료 모드 2026-07-28] 정확한 로직 분석이 목적이므로 ctx 에 배당판·시계열·전적·
+            #   판단근거를 '자르지 않고' 전부 실어 보낸다(권대표 지시: 비용보다 정확도 우선).
+            #   ⚠ 수집 실패 필드는 None 으로 남겨도 무해(gemini_reviewer 가 '없음' 처리).
             try:
                 import gemini_reviewer
+                try:
+                    _gctx = {
+                        "raceKey": rk, "sport": rec.get("sport"), "category": rec.get("category"),
+                        "minutesBefore": cur_mb, "afterClose": after_close,
+                        "validNos": sorted(valid_nos) if valid_nos else [], "ranked": ranked,
+                        # 배당판 전량
+                        "win": curWin, "quinella": curQ, "exacta": exa, "trio": trio_map,
+                        # 시계열 전량(급락 판정 원재료)
+                        "timeline": [{"time": s.get("time"), "minutes_before": s.get("minutes_before"),
+                                      "quinella": s.get("quinella") or {}} for s in (hist or [])],
+                        # 이상감지 원본
+                        "drops": drops, "excess": excess, "massDrop": mass_drop,
+                        "strongSignals": strong_signals, "signals": signals,
+                        "inverse": inverse, "compression": compression_pattern,
+                        "darkHorses": dark_horses, "advanced": advanced,
+                        # 전적·라인
+                        "form": form, "linePairs": core_picks.get("keirinLinePairs"),
+                        # 시스템 판단 근거
+                        "keyHorses": key_horses, "elimination": elimination,
+                        "integrated": integrated, "confidence": confidence,
+                        # 최종 추천(근거 원문)
+                        "corePicks": core_picks, "betRecommend": bet_rec,
+                    }
+                except Exception as _ce:
+                    _gctx = None
+                    print(f"[Gemini] ctx 구성 실패 — 요약 모드로 폴백: {_ce}")
                 gemini_reviewer.review_async(
                     rk=rk,
                     final_q=core_picks.get('finalQuinellas') or [],
@@ -11419,6 +11448,7 @@ def _triple_analyze(rk, rec):
                     strong_axis=(conf_q or {}).get('strongAxis', True),
                     drops=drops or [],
                     cur_mb=cur_mb,
+                    ctx=_gctx,
                 )
             except Exception as _e:
                 print(f"[Gemini] 검수 호출 실패(무시) — {_e}")
@@ -13457,16 +13487,44 @@ def _build_analysis_log(rk, an=None):
     }
     # [readonly 잠금 2026-07-28] 마감 후 추천 있는 파일 → readonly:True 플래그 설정
     # 이후 백그라운드 재분석이 corePicks/finalQ를 덮어쓰는 T-0 Race Condition 원천 차단
+    _doc = doc or {}                      # ⚠ doc 은 None 일 수 있다(첫 저장) — 아래 전부 _doc 사용
     if an.get("afterClose") and _cp_has_recs(core_picks_out):
         log["readonly"] = True
-    # readonly 파일: result/hit/review/profit 업데이트만 허용, corePicks 등 분석 결과 차단
-    if doc.get("readonly") and an.get("afterClose"):
-        log["corePicks"] = doc.get("corePicks")
-        log["final_recommendation"] = doc.get("final_recommendation")
-        log["recommendation_history"] = doc.get("recommendation_history")
-        log["signals_detected"] = doc.get("signals_detected")
+    # [긴급수정 2026-07-28 · 모리오카 3R 오염] ① 플래그 승계
+    #   log 는 매 저장마다 새로 구성되므로 readonly 를 '조건부로만' 붙이면, afterClose=False 인 재저장에서
+    #   플래그가 통째로 사라져 그 이후로는 영구 무방비가 된다. 한 번 잠긴 파일은 무조건 잠금을 승계한다.
+    if _doc.get("readonly"):
         log["readonly"] = True
-        print(f"[readonly 잠금] {rk}: 마감 확정 파일 — corePicks 보존, result/hit만 업데이트 허용")
+    # [긴급수정 2026-07-28 · 모리오카 3R 오염] ② 마감 확정 이력을 잠금 근거로 사용
+    #   '🔒 마감 확정'(closed:True) 행이 이미 기록된 파일은, 현재 분석의 afterClose 값과 무관하게
+    #   확정된 경주다. 발주시각 재계산으로 afterClose 가 흔들려도 파일 자체 근거로 잠근다.
+    if not log.get("readonly") and _cp_has_recs(core_picks_out):
+        try:
+            _hist_rows = log.get("recommendation_history") or _doc.get("recommendation_history") or []
+            if any(isinstance(h, dict) and h.get("closed") for h in _hist_rows):
+                log["readonly"] = True
+        except Exception:
+            pass
+    # readonly 파일: result/hit/review/profit 업데이트만 허용, corePicks 등 분석 결과 차단
+    # [긴급수정 2026-07-28 · 모리오카 3R 오염] ③ 보호 조건에서 an.afterClose 제거
+    #   기존: doc.readonly AND an.afterClose → 보호가 필요한 바로 그 상황에서 정확히 풀리던 결함.
+    #   실사고: 12:55 마감 확정 후 13:07 에 '다른 경주 배당'이 같은 raceKey 로 유입 → 발주시각이 재계산되어
+    #   cur_mb=+23분(마감 전)으로 잡히고 afterClose=False → 마감후 동결 5중 장치가 동시에 전부 해제 →
+    #   corePicks 가 마감 후 배당으로 덮어써져 4+9(236.4배) 등 없던 조합이 추천으로 기록됨.
+    #   readonly 는 '파일의 확정 상태'이므로 현재 분석 상태에 의존시키지 않는다.
+    if _doc.get("readonly") or log.get("readonly"):
+        if _cp_has_recs(_doc.get("corePicks")):
+            log["corePicks"] = _doc.get("corePicks")
+        if _fr_has_recs(_doc.get("final_recommendation")):
+            log["final_recommendation"] = _doc.get("final_recommendation")
+        if _doc.get("recommendation_history"):
+            log["recommendation_history"] = _doc.get("recommendation_history")
+        if _doc.get("signals_detected"):
+            log["signals_detected"] = _doc.get("signals_detected")
+        if _doc.get("odds_timeline"):
+            log["odds_timeline"] = _doc.get("odds_timeline")   # 마감 후 유입 배당이 시계열을 지우는 것도 차단
+        log["readonly"] = True
+        print(f"[readonly 잠금] {rk}: 마감 확정 파일 — corePicks/시계열 보존, result/hit만 업데이트 허용")
     # [원자적 저장 (2026-07-21 도야마 1R)] 이중 분석 소스가 같은 로그를 동시 기록 → 쓰는 도중 파일을
     #   읽은 쪽이 JSON 파싱 실패(doc=None) → recommendation_history 가 통째로 초기화되던 소실 버그.
     #   tmp 기록 후 os.replace 교체로 '읽는 쪽은 항상 완전한 파일'만 보게 함(추가 보강·동작 동일).
