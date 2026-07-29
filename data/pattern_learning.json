@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "서울 10경주 1200M",
-      "horse_no": 9,
-      "recent_avg": 5.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-18"
-    },
-    {
-      "race": "서울 10경주 1200M",
-      "horse_no": 2,
-      "recent_avg": 5.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-18"
-    },
-    {
-      "race": "서울 10경주 1200M",
-      "horse_no": 6,
-      "recent_avg": 6.6,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-18"
-    },
-    {
       "race": "코치 9경주",
       "horse_no": 9,
       "recent_avg": 5.4,
@@ -4643,16 +4615,44 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-29"
+    },
+    {
+      "race": "나고야 2경주",
+      "horse_no": 12,
+      "recent_avg": 11.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-29"
+    },
+    {
+      "race": "나고야 2경주",
+      "horse_no": 7,
+      "recent_avg": 12.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-29"
+    },
+    {
+      "race": "나고야 2경주",
+      "horse_no": 11,
+      "recent_avg": 15.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1722,
-      "hit": 342
+      "count": 1729,
+      "hit": 343
     },
     "전체부진마": {
-      "count": 2844,
-      "hit": 782
+      "count": 2855,
+      "hit": 785
     },
     "대규모급락": {
       "count": 7,
@@ -4662,8 +4662,8 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 1122,
-      "hit": 440
+      "count": 1126,
+      "hit": 442
     },
     "급락동반": {
       "count": 192,
