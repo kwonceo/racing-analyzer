@@ -1,0 +1,138 @@
+{
+ "race": "히라츠카 7경주",
+ "raceKey": "히라츠카 7경주",
+ "date": "2026-07-29",
+ "result": {
+  "1st": 5,
+  "2nd": 7,
+  "3rd": 4,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.783,
+   "record_score": 85.8,
+   "confidence": 18.2,
+   "reason": "쌍승역전"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 89.0,
+   "confidence": 12.0,
+   "reason": "전적상위"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 88.5,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.533,
+   "record_score": 88.0,
+   "confidence": 48.1,
+   "reason": "쌍승역전"
+  }
+ },
+ "recommended_horses": [
+  3,
+  7,
+  4
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 5번 85.8점",
+  "4. 쌍승 역전: 2→4(49.3) < 4→2(129.1) → 2번 실질 상위 신호",
+  "4. 쌍승 역전: 3→4(36.4) < 4→3(68.3) → 3번 실질 상위 신호",
+  "5. 종합 신뢰도 18.2점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 5,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 10,
+  "quinella_mismatch_score": 0,
+  "record_score": 85.8,
+  "total": 18.2,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 85.8,
+  "dropAmt": null,
+  "dropScore": 0.0,
+  "inverse": true,
+  "inverseHorses": [
+   2,
+   3,
+   5
+  ],
+  "inverseHit": [
+   5
+  ],
+  "confidence": 18.2,
+  "reason": "역배열 감지말 5번 입상"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 0
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-29 18:48:08"
+}
