@@ -11814,6 +11814,18 @@ def _triple_analyze(rk, rec):
     #   앞 구간(465줄) 어디서 예외가 나 [최종추천정리] 실패로 빠져도, 그 시점까지 담긴
     #   _gemini_pending 이 있으면 검수는 정상 수행된다(오히려 로직 오류가 난 경주야말로
     #   Gemini 진단이 가장 필요하다). 인자 구성 전에 실패했다면 pending 이 없어 조용히 넘어간다.
+    # ══════════ [결정론 검수 (2026-07-30)] Gemini 진단 2항목을 코드 판정으로 이관(병행 운영) ══════════
+    #   배경: Gemini 로그 740건 실측 — WARNING 99.5%(SAFE 4건)로 '이상 없음'을 못 내고, 지적의 84%가
+    #     `_final_picks` 인데 **코드는 경주마다 바뀌지 않는다**(같은 코드를 하루 625회 리뷰).
+    #     반면 ②B라인 누락·④급락 미반영은 **집합 비교로 결정론 판정이 가능**하다 → 코드로 옮긴다.
+    #   ⚠ `gemini_reviewer.py` 는 **삭제·비활성화하지 않는다.** 두 판정을 같은 경주에서 나란히 남겨
+    #     대조 검증이 끝날 때까지 병행한다(불일치 건은 로그로 확인 가능).
+    try:
+        if _gemini_pending:
+            _det = _deterministic_review(_gemini_pending)
+            _dr_record(rk, _det, _gemini_pending)
+    except Exception as _de:
+        print("[결정론 검수] 실패(무시):", _de)
     try:
         if _gemini_pending:
             import gemini_reviewer
@@ -13937,6 +13949,121 @@ def _canonical_log_key(rk, live=False):
     except Exception:
         pass
     return rk
+
+
+# ══════════ [결정론 검수 (2026-07-30)] Gemini 진단 항목의 코드 이관 ══════════
+#   판정식은 **집합 비교**다(상수 하드코딩 아님). 데이터가 없으면 판정하지 않는다(오탐 금지).
+DET_DROP_PCT = -30.0        # '급락'으로 볼 최소 하락률(기존 CLAUDE.md 기준: 30%↑ 경고)
+DET_REVIEW_DIR = os.path.join(os.path.dirname(__file__), "logs", "det_review")
+
+
+def _det_combo_sets(items):
+    """[{combo:[...]}...] → {frozenset(마번)} 집합. 잘못된 항목은 조용히 건너뛴다."""
+    out = set()
+    for it in (items or []):
+        cb = (it or {}).get("combo") if isinstance(it, dict) else it
+        try:
+            s = frozenset(int(x) for x in (cb or []))
+        except (TypeError, ValueError):
+            continue
+        if s:
+            out.add(s)
+    return out
+
+
+def _deterministic_review(pend):
+    """[②B라인 누락 · ④급락 미반영] 결정론 판정. 반환 {issues:[...], checked:[...], skipped:[...]}.
+
+    ② B라인 누락 : `keirinLinePairs[1]`(2번째 라인 페어)의 2두가 **어느 finalTrifecta 안에도 함께
+                   들어 있지 않으면** 누락. 판정식 = ¬∃t∈finalTrifectas : linePairs[1] ⊆ t
+    ④ 급락 미반영 : 급락(≤DET_DROP_PCT) 조합에 등장한 마번 중 **finalQuinellas 어디에도 없는** 마번이
+                   있으면 미반영. 판정식 = (급락 마번) − ∪(finalQuinellas) ≠ ∅
+    ⚠ 데이터가 없으면(라인 2개 미만·급락 0건 등) **판정하지 않고 skipped 에 사유를 남긴다** —
+      Gemini 가 항상 WARNING 을 내던 문제(변별력 상실)를 반복하지 않기 위함이다.
+    """
+    issues, checked, skipped = [], [], []
+    lp = pend.get("line_pairs") or []
+    ft = _det_combo_sets(pend.get("final_t"))
+    fq = _det_combo_sets(pend.get("final_q"))
+
+    # ── ② B라인 누락 ──
+    if len(lp) < 2:
+        skipped.append("B라인누락: 라인 페어 %d개(2개 미만)" % len(lp))
+    elif not ft:
+        skipped.append("B라인누락: finalTrifectas 없음")
+    else:
+        checked.append("B라인누락")
+        try:
+            b = frozenset(int(x) for x in ((lp[1] or {}).get("combo") or []))
+        except (TypeError, ValueError):
+            b = frozenset()
+        if len(b) == 2 and not any(b <= t for t in ft):
+            issues.append({"code": "B라인누락",
+                           "detail": "2번째 라인 페어 %s 가 삼복승 추천 어디에도 포함되지 않음"
+                                     % sorted(b),
+                           "pair": sorted(b),
+                           "trifectas": [sorted(t) for t in ft]})
+
+    # ── ④ 급락 미반영 ──
+    drops = [d for d in (pend.get("drops") or [])
+             if isinstance(d, dict) and isinstance(d.get("pct"), (int, float))
+             and d["pct"] <= DET_DROP_PCT]
+    if not drops:
+        skipped.append("급락미반영: %.0f%% 이하 급락 0건" % DET_DROP_PCT)
+    elif not fq:
+        skipped.append("급락미반영: finalQuinellas 없음")
+    else:
+        checked.append("급락미반영")
+        dn = set()
+        for d in drops:
+            try:
+                dn |= {int(x) for x in (d.get("combo") or [])}
+            except (TypeError, ValueError):
+                continue
+        covered = set()
+        for s in fq:
+            covered |= set(s)
+        miss = sorted(dn - covered)
+        if miss:
+            issues.append({"code": "급락미반영",
+                           "detail": "급락 %d건에 등장한 마번 %s 가 복승 추천에 전혀 없음"
+                                     % (len(drops), miss),
+                           "missing": miss,
+                           "dropHorses": sorted(dn)})
+    return {"issues": issues, "checked": checked, "skipped": skipped,
+            "status": ("WARNING" if issues else ("SAFE" if checked else "NO_DATA"))}
+
+
+_DET_LAST = {}          # raceKey → (status, issue codes) 최근 기록(동일 결과 반복 저장 방지)
+
+
+def _dr_record(rk, det, pend):
+    """[대조 검증용] 결정론 판정 결과를 `logs/det_review/` 에 남긴다.
+    같은 경주에서 결과가 **바뀔 때만** 기록해 Gemini 처럼 하루 수백 건이 쌓이지 않게 한다.
+    ⚠ 완전 읽기 전용 — 추천·판정·학습에 일절 개입하지 않는다."""
+    try:
+        sig = (det.get("status"), tuple(sorted(i["code"] for i in det.get("issues") or [])))
+        if _DET_LAST.get(rk) == sig:
+            return
+        _DET_LAST[rk] = sig
+        os.makedirs(DET_REVIEW_DIR, exist_ok=True)
+        _safe = re.sub(r"[^\w가-힣]+", "_", str(rk)).strip("_")
+        p = os.path.join(DET_REVIEW_DIR, "%s_%s.json"
+                         % (time.strftime("%Y%m%d"), _safe))
+        doc = _hist_read_any(p) or {"raceKey": rk, "entries": []}
+        doc["entries"].append({
+            "time": time.strftime("%H:%M:%S"),
+            "minutesBefore": pend.get("cur_mb"),
+            "status": det.get("status"), "checked": det.get("checked"),
+            "skipped": det.get("skipped"), "issues": det.get("issues"),
+        })
+        doc["entries"] = doc["entries"][-50:]
+        _json_atomic(p, doc, indent=1)
+        if det.get("issues"):
+            print("🔎 [결정론 검수] %s: %s"
+                  % (rk, " · ".join(i["code"] for i in det["issues"])))
+    except Exception as e:
+        print("[결정론 검수] 기록 실패(무시):", e)
 
 
 def _raw_profile_snapshot(rk):
