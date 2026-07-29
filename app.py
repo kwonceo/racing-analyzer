@@ -11820,16 +11820,24 @@ def _triple_analyze(rk, rec):
     #     반면 ②B라인 누락·④급락 미반영은 **집합 비교로 결정론 판정이 가능**하다 → 코드로 옮긴다.
     #   ⚠ `gemini_reviewer.py` 는 **삭제·비활성화하지 않는다.** 두 판정을 같은 경주에서 나란히 남겨
     #     대조 검증이 끝날 때까지 병행한다(불일치 건은 로그로 확인 가능).
+    #   ⚠ 이름이 `_gemini_pending` 이지만 이는 **검수 입력 묶음**(final_q·final_t·line_pairs·drops)일 뿐이고,
+    #     Gemini 플래그(`GEMINI_REVIEW_ENABLED`)와는 무관하게 항상 구성된다(app.py:11685).
+    #     따라서 아래 결정론 검수는 **Gemini 가 꺼져 있어도 계속 동작한다**(2026-07-30 중단 조치와 독립).
+    #     ⚠ 훗날 Gemini 를 완전히 걷어낼 때 이 묶음까지 지우면 결정론 검수도 함께 죽는다 — 주의.
     try:
         if _gemini_pending:
             _det = _deterministic_review(_gemini_pending)
             _dr_record(rk, _det, _gemini_pending)
     except Exception as _de:
         print("[결정론 검수] 실패(무시):", _de)
+    #   ⚠ [일시 중단 2026-07-30] `GEMINI_REVIEW_ENABLED`(기본 꺼짐)가 켜져 있을 때만 호출한다.
+    #     삭제가 아니라 플래그다 — 되돌리려면 환경변수 `GEMINI_REVIEW_ENABLED=1`.
+    #     위 `_deterministic_review`(②④ 결정론 판정)는 **이 플래그와 무관하게 계속 동작**한다.
     try:
         if _gemini_pending:
             import gemini_reviewer
-            gemini_reviewer.review_async(**_gemini_pending)
+            if gemini_reviewer.gemini_review_enabled():
+                gemini_reviewer.review_async(**_gemini_pending)
     except NameError:
         pass                      # core_picks 미형성 등으로 인자 구성 자체를 안 한 경우
     except Exception as _ge:
@@ -31353,6 +31361,17 @@ if __name__ == "__main__":
     _host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
     _debug = os.environ.get("FLASK_ENV") != "production"
     print(f"서버 시작: http://{_host}:{_port} (debug={_debug}, 로컬은 자동 리로드 ON)")
+    # [일시 중단 상태 가시화 (2026-07-30)] 플래그가 꺼진 걸 모르고 "Gemini 가 안 돈다"고 오해하지 않도록
+    #   시작 로그에 명시한다. ⚠ 경주 추천 카카오(T-7/T-5분)는 별개 경로라 영향 없음.
+    try:
+        import gemini_reviewer as _gr
+        print("  · Gemini 검수 호출 : %s (GEMINI_REVIEW_ENABLED)"
+              % ("🟢 켜짐" if _gr.gemini_review_enabled() else "⏸️ 꺼짐 — 일시 중단"))
+        print("  · Gemini 카카오발송: %s (GEMINI_KAKAO_ENABLED)"
+              % ("🟢 켜짐" if _gr.gemini_kakao_enabled() else "⏸️ 꺼짐 — 일시 중단"))
+        print("  · 결정론 검수(②④) : 🟢 항상 동작 (logs/det_review/) · 경주 추천 카카오: 🟢 정상")
+    except Exception as _fe:
+        print("  · Gemini 플래그 상태 확인 실패(무시):", _fe)
     # debug=True: 코드 저장 시 자동 재기동(stale 서버로 인한 405 재발 방지). 로컬 전용(127.0.0.1).
     # threaded=True: 브라우저의 다중 keep-alive 연결을 동시 처리(단일 스레드 멈춤 방지).
     # 재개는 리로더의 실제 작업 프로세스(WERKZEUG_RUN_MAIN)에서만 1회 수행.

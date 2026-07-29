@@ -12,6 +12,35 @@ _GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models/%s:gener
 _GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
 _GEMINI_URL = _GEMINI_BASE % _GEMINI_MODELS[0]   # 하위호환(기존 상수명 유지)
 
+# ══════════ [일시 중단 플래그 (2026-07-30 권대표 지시)] 삭제가 아니라 플래그로 끈다 ══════════
+#   중단 사유(로그 740건 전수 감사 근거):
+#     ① `status=="WARNING"` 이 **99.5%**(SAFE 4건) — "이상 없음"을 못 내 선별 도구로 기능하지 않는다.
+#        그 결과 사실상 전 경주에 카카오 알림이 나갔다.
+#     ② 출력이 **베팅 조합이 아니라 코드 수정 지시문**이라 결과와 대조할 대상이 없다(적중 검증 불가).
+#     ③ 지적의 **84%가 `_final_picks`** 인데 **코드는 경주마다 바뀌지 않는다** → 같은 코드를 하루 625회 리뷰.
+#        7/29 하루 **670건**(경주당 평균 7회)은 낭비였다. 감사는 740건으로 이미 끝났다.
+#   ⚠ **코드·기존 로그는 그대로 둔다** — `logs/gemini_review/` 740건은 위 판단의 근거이므로 보존.
+#   ⚠ 되돌리는 법: 아래 기본값을 "1" 로 바꾸거나 환경변수를 설정한다.
+#        set GEMINI_REVIEW_ENABLED=1   → API 호출 재개
+#        set GEMINI_KAKAO_ENABLED=1    → 카카오 발송 재개
+#   ⚠ 재개 조건: 역할 재설계(예측 기록 방식 Phase A/B) 확정 후. 그 전에는 켜지 않는다.
+
+
+def _flag(name, default="0"):
+    """환경변수 우선 · 미설정 시 기본값. '1/true/yes/on' 만 켜짐으로 본다."""
+    return str(os.environ.get(name, default)).strip().lower() in ("1", "true", "yes", "on")
+
+
+def gemini_review_enabled():
+    """Gemini API 호출 허용 여부(기본 꺼짐)."""
+    return _flag("GEMINI_REVIEW_ENABLED", "0")
+
+
+def gemini_kakao_enabled():
+    """Gemini 검수 결과의 카카오 발송 허용 여부(기본 꺼짐).
+    ⚠ 경주 추천 카카오(T-7분·T-5분)와는 **완전히 별개 경로**다 — 그쪽은 이 플래그의 영향을 받지 않는다."""
+    return _flag("GEMINI_KAKAO_ENABLED", "0")
+
 
 def _gemini_api_key():
     return (os.environ.get("GEMINI_API_KEY") or "").strip()
@@ -412,7 +441,11 @@ def review_async(rk, final_q, final_t, special_q=None, line_pairs=None,
                  strong_signals=None, fav_axis=None, strong_axis=True,
                  drops=None, cur_mb=None, ctx=None):
     """ctx 를 주면 [전체자료 모드](배당판·시계열·전적·판단근거 전량)로 분석한다.
-    ctx 가 없으면 기존 요약 프롬프트로 동작(하위호환 — 기존 호출부 무변경으로 계속 작동)."""
+    ctx 가 없으면 기존 요약 프롬프트로 동작(하위호환 — 기존 호출부 무변경으로 계속 작동).
+    ⚠ [일시 중단 2026-07-30] `GEMINI_REVIEW_ENABLED` 가 꺼져 있으면 **API 호출 자체를 하지 않는다.**
+      호출부(app.py)도 같은 플래그를 확인하지만, 다른 경로에서 직접 불러도 막히도록 여기서도 게이트한다."""
+    if not gemini_review_enabled():
+        return
     def _run():
         try:
             with _GEMINI_LOCK:
@@ -478,7 +511,11 @@ def review_async(rk, final_q, final_t, special_q=None, line_pairs=None,
             #      (2026-07-28 실측: 초기 5건 전부 4개 동일) → 신뢰 불가로 보류
             _issues = result.get("issues") or []
             if result.get("status") == "WARNING":
-                if 1 <= len(_issues) <= 3:
+                if not gemini_kakao_enabled():
+                    # [일시 중단 2026-07-30] 발송만 막고 **로그는 위에서 이미 저장**했다(감사 근거 보존).
+                    print("[Gemini] " + str(rk) + ": WARNING 이나 카카오 발송 중단 상태"
+                          "(GEMINI_KAKAO_ENABLED=0) — 로그만 저장")
+                elif 1 <= len(_issues) <= 3:
                     _send_kakao(rk, result)
                 else:
                     print("[Gemini] " + str(rk) + ": WARNING 이지만 발송 보류(issues %d개) — 로그만 저장"
