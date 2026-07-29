@@ -1755,6 +1755,68 @@ def _board_flip_suspect(prev_q, cur_q, thresh=70.0, min_ratio=0.7, min_combos=10
     return ups >= 2 and downs >= 2       # 순열 시그니처: 급등·급락 혼재일 때만 혼입 판정
 
 
+# ══════════ [수신값 검증 (2026-07-29)] 조합 수 딥 · 열 밀림 — 시계열 단독 게이트 ══════════
+#   기존 가드(_baseline_reset_needed·_next_race_surge·_board_flip_suspect)는 모두 "직전 대비 **공통**
+#   조합의 60~70%+"를 보기 때문에, 공통 조합 자체가 줄거나(딥) 소수 조합만 어긋나면(열 밀림) 무력화된다.
+#   실측(1,322경주·23,230 비교틱)으로 두 결함이 서로 다른 축임을 확인해 게이트를 분리 신설한다.
+_DIP_RATIO = 0.70          # 직전 대비 조합 수가 이 비율 미만이면 딥 의심
+_DIP_MIN_PREV = 10         # 직전 조합이 이 미만이면 판정하지 않음(표본 부족)
+
+
+def _combo_count_dip(prev_q, cur_q, ratio=_DIP_RATIO, min_prev=_DIP_MIN_PREV):
+    """[3번 조합 수 딥] 직전 대비 복승 조합 수가 급감했는지. 실측 112건/23,230틱(0.48%).
+
+    사고 사례(나고야 4R): 66조합 → 21조합으로 급감한 틱에서 남은 조합이 폭락·폭등으로 계산돼
+    `3+6` 227.7→4.2배(-98.6%)·`3+9` 23.3→195.7배(+740%)가 만들어졌고 9번(1착)이 추천에서 탈락했다.
+    실제 3+6은 252배로, 4.2배가 오염값이었다.
+    ⚠ **21조합을 무조건 오류로 보면 안 된다** — 취소마(取消)로 8두→7두면 21조합이 정상값이다
+      (카와사키 8R 실화면 확인). 실측에서도 딥 112건 중 43건만 다음 틱에 복귀했다.
+    → 그래서 '거부'가 아니라 **1틱 보류**로 설계한다: 배당은 그대로 저장하되 그 틱의 급락 계산만
+      생략한다. 딥이 2틱 이상 지속되면(=취소마 등 정상 축소) 다음 틱부터 자연히 계산이 재개된다.
+    """
+    pm, cm = _as_qmap(prev_q), _as_qmap(cur_q)
+    if len(pm) < min_prev or not cm:
+        return False
+    return (len(cm) / len(pm)) < ratio
+
+
+def _column_shift_suspect(prev_q, cur_q, min_adj=5, min_common=10, tol=0.06):
+    """[3-B번 열 밀림] 현재 값이 '직전의 인접 조합 값'과 더 잘 맞으면 열 인덱스 어긋남으로 판정.
+
+    실측 포착(7/29 18:37 나고야 9R·발주 8분 전): 조합 수는 55로 **동일**한데 값만 한 칸 밀렸다 —
+      시스템 `5+7=35.0` = 실제 배당판의 `5+8` 값. 가짜 -89.5% 급락 2건이 만들어져 추천 근거가 됐다.
+    조합 수가 같으니 _combo_count_dip 으로는 못 잡고, 소수 조합만 어긋나니 _board_flip_suspect
+    (공통 70%+ 요구)로도 못 잡는다 → 판정 축이 다른 별도 게이트가 필요하다.
+    판정: 같은 축(a)에서 상대 번호가 ±1 밀린 위치의 직전 값과 오차 6% 내로 일치하는 조합이
+      min_adj 개 이상이고, 그것이 '정상 일치' 수의 절반을 넘으면 밀림으로 본다.
+    실측 33건/22,257틱(0.15%) — src=private 0건 · oddspark 16 · 구데이터(src 미기록) 17.
+    ⚠ 사설 배당판 화면에도 "메인배당 오류시 2차배당을 이용" 안내가 있어 소스 자체가 간헐 오류를
+      인정한다. 파서 수정과 별개로 수신값 검증이 필요한 이유다.
+    """
+    pm, cm = _as_qmap(prev_q), _as_qmap(cur_q)
+    if len(pm) < min_common or len(cm) < min_common or len(cm) != len(pm):
+        return False
+
+    def _close(a, b):
+        return a and b and abs(a - b) / max(a, b) <= tol
+    same = adj = 0
+    for (a, b), v in cm.items():
+        pv = pm.get((a, b))
+        if _close(v, pv):
+            same += 1
+            continue
+        for nb in (b + 1, b - 1, a + 1, a - 1):
+            if nb <= 0:
+                continue
+            k2 = tuple(sorted((a, nb))) if nb not in (a + 1, a - 1) else tuple(sorted((nb, b)))
+            if len(set(k2)) != 2:
+                continue
+            if _close(v, pm.get(k2)):
+                adj += 1
+                break
+    return adj >= min_adj and adj > same * 0.5
+
+
 def _triple_prune_stale(db, keep_rk=None, max_age=STALE_ACTIVE_SEC):
     """[경주전환 잔존 방어] 활성 3종 배당(triple_store)에서 max_age(기본 30분) 넘게
     갱신 안 된 경주를 제거한다. 경주별 히스토리 파일(data/odds_history)은 영구 보존되므로
@@ -13551,16 +13613,33 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
     # [2번 다음경주 혼입 방어] 직전 대비 다수 조합 200%+ 급등 = 경주 종료/다음 경주 배당 유입 → 차단.
     #   차단 스냅샷은 이상감지·신호말 계산을 생략하고 next_race_blocked 표기(타임라인·분석에서 제외).
     next_race_blocked = False
+    # [수신값 검증 (2026-07-29)] 조합 수 딥·열 밀림 = 급락 계산 1틱 보류(배당 저장은 그대로).
+    #   기존 가드가 '공통 조합 60~70%+' 축이라 못 잡는 두 결함을 별도 축으로 방어한다.
+    odds_suspect = None
     if doc["snapshots"] and not baseline_reset:
         _lastq = doc["snapshots"][-1].get("quinella")
         if _lastq and _next_race_surge(_lastq, quinella):
             next_race_blocked = True
+        if _lastq and not next_race_blocked:
+            try:
+                if _combo_count_dip(_lastq, quinella):
+                    odds_suspect = "조합수 급감(직전 %d→%d)" % (len(_as_qmap(_lastq)),
+                                                          len(_as_qmap(quinella)))
+                elif _column_shift_suspect(_lastq, quinella):
+                    odds_suspect = "배당 열 밀림 의심(인접 조합 값 일치)"
+                if odds_suspect:
+                    print("⚠️ [수신값 검증] %s · %s → 이 틱 급락 계산 보류(배당은 저장)"
+                          % (rk, odds_suspect))
+            except Exception as _ose:
+                odds_suspect = None
+                print("[수신값 검증] 판정 실패(무시):", _ose)
     # [경주전환 방어] 기준값 재설정이면 직전 스냅샷과 비교하지 않음(다른 경주 잔존 → 오검출 방지)
     # [첫수집 방어] 첫 비교(스냅샷 1건뿐)는 첫 수집 배당이 불안정(못 가져옴/시장 형성 초기 고배당)해
     #   가짜 급락(-90%대)이 뜬다. 스냅샷 2건 이상(2번째 수집을 기준)일 때부터 이상감지 기록.
     # [소스 전환 이상감지 생략] 직전 스냅샷과 소스 클래스가 다르면(사설↔oddspark) 비교 생략(가짜 급락 방지)
     _src_switched_hist = bool(doc["snapshots"] and (doc["snapshots"][-1].get("src") or None) != source)
-    if len(doc["snapshots"]) >= 2 and not baseline_reset and not next_race_blocked and not _src_switched_hist:
+    if (len(doc["snapshots"]) >= 2 and not baseline_reset and not next_race_blocked
+            and not _src_switched_hist and not odds_suspect):
         last = doc["snapshots"][-1]
         # [단승] 급락 감지 — 가장 강한 신호이므로 먼저 기록
         prevWin = {}
@@ -13654,6 +13733,7 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
             "deadline_corrected": deadline_corrected,   # [1번] 발주시각 오검출 정정 시점(과거 마감상태 무효화)
             "baseline_reset": bool(baseline_reset),   # [경주전환] 기준값 재설정 시점(변동 계산 제외)
             "next_race_blocked": next_race_blocked,   # [2번] 다음 경주 배당 유입(200%+ 급등) 차단 시점
+            "odds_suspect": odds_suspect,             # [수신값 검증] 조합수 딥·열 밀림 = 급락 계산 보류 사유
             "signal_horse": signal_horse,             # [3번] 이 스냅샷 대표 이상감지 말(신호 변경 이력·안정화용)
             "signal_reason": signal_reason,
             "src": source,                            # [마감전 신호 기록] 수집 소스 클래스(private|oddspark|None)
@@ -13667,6 +13747,7 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
         "time": time.strftime("%H:%M:%S", time.localtime(now)), "t": now,
         "minutes_before": minutes_before, "mb_signed": mb_signed, "after_close": after_close,
         "baseline_reset": bool(baseline_reset), "next_race_blocked": next_race_blocked, "src": source,
+        "odds_suspect": odds_suspect,             # [수신값 검증] 보류 사유(배당 원본은 그대로 보존)
         "quinella": _combo_dict(quinella), "exacta": _combo_dict(exacta),
         "win": {str(k): v for k, v in curWin.items()}, "anomalies": anomalies,
     })
@@ -15954,9 +16035,11 @@ def _combo_timeline(doc, combo):
         except (TypeError, ValueError):
             continue
         # [1·2번] 마감 후 / 다음 경주 유입 = 제외(변동 계산에서 배제, 데이터는 표시만)
-        excl = bool(s.get("after_close") or s.get("next_race_blocked"))
+        # [수신값 검증] 조합수 딥·열 밀림 틱도 동일하게 제외 표기(데이터는 보존·변동 계산만 배제)
+        excl = bool(s.get("after_close") or s.get("next_race_blocked") or s.get("odds_suspect"))
         excl_reason = ("마감 후 데이터 - 제외됨" if s.get("after_close")
-                       else ("다음 경주 혼입 - 제외됨" if s.get("next_race_blocked") else None))
+                       else ("다음 경주 혼입 - 제외됨" if s.get("next_race_blocked")
+                             else ("%s - 제외됨" % s["odds_suspect"] if s.get("odds_suspect") else None)))
         chg = None if excl else (round((o - prev) / prev * 100, 1) if (prev and prev > 0) else None)
         tl.append({"time": s.get("time"), "minutes_before": s.get("minutes_before"),
                    "odds": o, "change": chg, "excluded": excl, "exclReason": excl_reason})
@@ -15975,7 +16058,8 @@ def _signal_timeline_from_doc(doc):
     excl_after = sum(1 for s in snaps if s.get("after_close"))
     excl_next = sum(1 for s in snaps if s.get("next_race_blocked"))
     valid = [s for s in snaps
-             if not (s.get("after_close") or s.get("next_race_blocked") or s.get("baseline_reset"))]
+             if not (s.get("after_close") or s.get("next_race_blocked") or s.get("baseline_reset")
+                     or s.get("odds_suspect"))]     # [수신값 검증] 오염 의심 틱은 신호 시퀀스에서도 제외
     changes, events = [], {}
     prev_sig, streak = None, 0
     confirmed, order_conf = set(), []
@@ -28354,6 +28438,24 @@ MULTI_STORE_FILE = os.path.join(os.path.dirname(__file__), "data", "multi_race_s
 SCHEDULE_FILE = os.path.join(os.path.dirname(__file__), "data", "today_schedule.json")
 _multi_lock = threading.Lock()
 MULTI_COLLECT_LEAD_SEC = 600      # [2번] 발주 10분전부터 수집 시작
+# ── [수집 공백 진단 (2026-07-29)] ⚠ '병렬 부족' 가설은 **실측으로 반증됨** — 동시성을 올리지 말 것 ──
+#   증상: 오늘 85경주 중 **26경주가 스냅샷 3개 미만 · 그중 15경주는 0개**(나고야 2·4·5·7·8R, 소노다
+#     3·5·8·10·11R 등). 스케줄은 정상(postEpoch 전부 보유)이라 '알고도 못 받은 것'이다.
+#   ❌ 기각된 가설: "경마2+경륜6~7 동시 개최로 동시 6 병렬이 밀린다."
+#     today_schedule 실측 — 오늘 96경주(경마24·경륜72)인데 **수집 창(발주 10분전~2분후) 안 동시 경주는
+#     최대 4개**(경마2·경륜2)다. max_workers=6 으로 이미 충분하며 병렬 부족은 원인이 **아니다**.
+#     ⚠ 동시성을 올리면 밀림은 그대로인 채 oddspark WAF 차단 위험만 커진다(경주당 fetch 3~4회 →
+#       사이클당 요청이 배로 늘어난다). **max_workers=6 유지.**
+#   ✅ 유력 가설(다음 세션 검증 대상): **[사설 우선] 게이트의 오작동**.
+#     `_multi_collect_one` 이 triple_store 의 최근 src 가 'oddspark 아님' + 200초 내면 oddspark 저장을
+#     생략하는데(확장 수집과의 배당 진동 방지 목적), 확장이 실제로 그 경주를 수집하지 않으면
+#     **양쪽 다 저장되지 않아 스냅샷 0**이 된다. 실제 거부 로그에 `사유=사설 우선(oddspark 백업 생략)` +
+#     `mappingSuspect=true` 가 남아 있고, 그 `prevSrc` 는 정규화되지 않은 **원시 URL**
+#     (`https://ks1.dke-d11diw.site/...`)이라 `"oddspark" not in src` 판정을 그대로 통과한다.
+#     → 검증 후 조치안: 게이트 조건에 '그 경주의 private 스냅샷이 실제 존재하는가'를 추가 + src 정규화.
+#   지금 할 수 있는 것은 **가시화**다 — 아래 경보로 '조용한 실패'를 더는 놓치지 않는다.
+SNAPSHOT_MIN_WARN = 3             # 이 미만 스냅샷으로 마감한 경주는 경보(추천 신뢰 불가)
+_SNAP_WARNED = set()              # 경주당 1회만 경보(반복 로그 방지)
 MULTI_URGENT_SEC = 180            # [3·5번] T-3분 이내 = 긴급(빨강)
 MULTI_WARN_SEC = 600             # [3번] T-10분 이내 = 주의(주황)
 
@@ -30464,7 +30566,13 @@ def _multi_bg_loop():
                     pe = rc.get("postEpoch")
                     if pe and -120 <= (pe - now) <= MULTI_COLLECT_LEAD_SEC:   # 발주 10분전~2분후
                         _targets.append((pe, tr, rc))
-            _targets.sort(key=lambda t: t[0])          # 발주 임박(남은 시간 적은) 경주 먼저
+            # [수집 공백 진단 2026-07-29] 1차 발주 임박순 · 동률(60초 버킷)이면 **경마 우선**.
+            #   경마가 밀리면 대체 소스가 없다(경륜은 회차가 촘촘해 다음 틱 회복이 쉽다).
+            #   ⚠ 동시성(max_workers)은 6 유지 — 창 안 동시 경주가 최대 4개로 실측돼 상향이 무의미하고
+            #     oddspark WAF 차단 위험만 키운다(상단 주석의 기각된 가설 참조).
+            _targets.sort(key=lambda t: (int(t[0] // 60),
+                                         0 if not t[1].get("joCode") else 1,
+                                         t[0]))
             if len(_targets) == 1:
                 _multi_collect_one(_targets[0][1], _targets[0][2], ymd)
             elif _targets:
@@ -30483,9 +30591,62 @@ def _multi_bg_loop():
                         _multi_collect_one(_tr2, _rc2, ymd)
             # [자동 예상] 수집 직후 마감5분전 예상 저장·결과 대조·현재/다음 상태 갱신(연속 자동 전환)
             _auto_pred_tick(sched, now)
+            # [수집 공백 경보] 발주 3~15분 지난 경주의 스냅샷 수를 세어 3개 미만이면 1회 경보.
+            #   '조용한 실패'가 이 프로젝트의 반복 병목이었다(오늘 85경주 중 26경주가 3개 미만·15경주 0개).
+            #   ⚠ 읽기 전용 — 수집·판정·학습에 일절 개입하지 않는다(로그와 진단 파일만).
+            try:
+                _snapshot_shortage_check(sched, now)
+            except Exception as _sce:
+                print("[수집 공백 경보] 실패(무시):", _sce)
         except Exception as e:
             print("[다중경주] 백그라운드 오류(무시·서버 유지):", e)
         time.sleep(30)
+
+
+def _snapshot_shortage_check(sched, now):
+    """[수집 공백 경보 (2026-07-29)] 발주 3~15분 지난 경주의 배당 스냅샷 수가 SNAPSHOT_MIN_WARN 미만이면
+    경보 1회 + `data/collect_gaps/<날짜>.json` 누적. 스냅샷 1~2개로 확정된 추천은 신뢰할 수 없는데,
+    지금까지는 그 사실이 **어디에도 남지 않아** 사후에야 알 수 있었다(나고야 4R: 마감 3분 전 단 1회
+    스냅샷으로 확정 → 9번(1착) 탈락). ⚠ 완전 읽기 전용 — 수집·추천·학습 경로에 개입하지 않는다."""
+    gaps = []
+    for tr in sched.get("tracks", []):
+        for rc in tr.get("races", []):
+            pe = rc.get("postEpoch")
+            if not pe or not (180 <= (now - pe) <= 900):     # 발주 3~15분 경과분만
+                continue
+            try:
+                key = _multi_key(tr.get("venue") or tr.get("name") or "", rc.get("raceNo"))
+            except Exception:
+                continue
+            if not key or key in _SNAP_WARNED:
+                continue
+            _SNAP_WARNED.add(key)
+            try:
+                doc = _hist_read_any(_hist_path(key)[0]) or {}
+            except Exception:
+                continue
+            n = len(doc.get("archive_snapshots") or doc.get("snapshots") or [])
+            if n >= SNAPSHOT_MIN_WARN:
+                continue
+            print("🚨 [수집 공백] %s — 스냅샷 %d개(기준 %d) · 추천 신뢰 불가"
+                  % (key, n, SNAPSHOT_MIN_WARN))
+            gaps.append({"raceKey": key, "snapshots": n,
+                         "postEpoch": pe, "time": time.strftime("%H:%M:%S", time.localtime(now))})
+    if not gaps:
+        return
+    try:
+        _d = os.path.join(os.path.dirname(__file__), "data", "collect_gaps")
+        os.makedirs(_d, exist_ok=True)
+        _p = os.path.join(_d, time.strftime("%Y-%m-%d") + ".json")
+        _cur = []
+        if os.path.exists(_p):
+            try:
+                _cur = json.load(open(_p, encoding="utf-8")) or []
+            except Exception:
+                _cur = []
+        _json_atomic(_p, _cur + gaps, indent=1)
+    except Exception as _ge:
+        print("[수집 공백 경보] 저장 실패(무시):", _ge)
 
 
 def _multi_bg_watchdog():
