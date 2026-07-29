@@ -14222,6 +14222,20 @@ def _build_analysis_log(rk, an=None):
             "odds": win.get(str(no)) if isinstance(win, dict) else None,
             "grade": grade_by.get(no) or f.get("grade") or h.get("tier") or h.get("verdict"),
             "grade_reason": h.get("reason"),
+            # ── [페이스 보정 재현용 4필드 (2026-07-30)] ──────────────────────────────
+            #   `_apply_pace_analysis`(app.py:26936)가 각질별 보너스를 **form 총점에 직접 가산**하고
+            #   (`h["totalScore"] += b` · 26976), 그 총점이 `_integrated_grades` → keyHorses →
+            #   `_final_picks` 로 흘러 **최종 추천에 실제로 반영**된다.
+            #   그런데 말별 `gait`·`paceBonus`·`totalScore` 가 **어디에도 저장되지 않아**
+            #   "보정을 반전/제거하면 어땠을까"를 **리플레이로 계산할 수 없었다**(오늘 3안 리플레이 중단 사유).
+            #   ⚠ `paceBonusBase`(가산 전 점수)가 핵심이다 — 이게 있어야 ③제거안을 계산할 수 있다.
+            #     `record_score` 는 가산 **후** 값이라 그것만으로는 되돌릴 수 없다.
+            #   ⚠ 저장만 추가한다 — 추천 경로(`_apply_pace_analysis`·`_final_picks`)는 무수정.
+            "gait": f.get("gait"),                                   # 각질(추정 또는 표기)
+            "paceBonus": f.get("paceBonus"),                         # 이번 경주에 적용된 페이스 보정
+            "paceDetail": f.get("paceDetail") or None,               # 보정 근거 문구(무엇이 몇 점인지)
+            "paceBonusBase": (None if f.get("totalScore") is None or f.get("paceBonus") is None
+                              else round(float(f["totalScore"]) - float(f["paceBonus"]), 1)),
         })
 
     cand = [h["no"] for h in ehorses if h.get("keep") or h.get("override")]
