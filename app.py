@@ -12312,6 +12312,13 @@ def _apply_bet_rules(rk, an):
         # ⓒ 등급 = 백테스트 실측 회수율에 근거한 '추천도'. 배제 기준이 아니라 표기 기준이다.
         _grade, _why = _bet_grade(mk, _o1, _fmiss, _lo)
         an["betGrade"], an["betReason"] = _grade, _why
+        # [기록 보존 (2026-07-29)] an 최상위 필드는 analysis_log 에 저장되지 않는다(실측: 소노다 2R 에서
+        #   shadowTrifectas 는 남았는데 trioShadow·betGrade·betMarket 은 전부 None 이었다).
+        #   corePicks 는 통째로 저장되므로 여기에도 함께 기록해 **사후 집계가 가능**하게 한다.
+        #   ⚠ 관측이 없으면 판단도 없다 — signalQuality 가 로그에 없어 Gemini 지적을 검증조차
+        #     못 했던 것과 같은 유형의 문제다.
+        cp["betGrade"], cp["betReason"], cp["betMarket"] = _grade, _why, mk
+        cp["betOdds1"] = _o1
         if drop:
             for _d in drop:
                 _x = dict(_d)
@@ -12341,6 +12348,10 @@ def _apply_bet_rules(rk, an):
                     _t["shadow"] = True
             cp["shadowTrifectas"] = [dict(_t) for _t in ft if isinstance(_t, dict)]
         an["trioShadow"] = True
+        cp["trioShadow"] = True          # analysis_log 저장용(an 최상위는 로그에 남지 않는다)
+        # 종전 규칙(상위 2)이었다면 판정에 들어갔을 조합 — 섀도우 성적 집계의 기준선이 된다.
+        cp["shadowWouldBet"] = [sorted(int(x) for x in (_t.get("combo") or []))
+                                for _t in (ft or [])[:2] if isinstance(_t, dict) and _t.get("combo")]
 
 
 @app.route("/api/extract/japan", methods=["POST"])
@@ -16300,6 +16311,92 @@ def highlights_list():
         arr = []
     arr = list(reversed(arr))[:100]
     return jsonify({"highlights": arr, "count": len(arr)})
+
+
+@app.route("/api/shadow/trifecta", methods=["GET"])
+def shadow_trifecta_ep():
+    """[섀도우 삼복승 성적 (2026-07-29)] "걸었다면 어땠나"를 실전 데이터로 누적 집계.
+
+    배경: 삼복승은 백테스트에서 어떤 설정으로도 흑자가 없어(경륜 최선 62.5%·경마 38.8%)
+      추천에서 뺐다. 다만 확정배당 확보가 72%뿐이라 평가가 박했을 수 있어 **폐지가 아니라 관찰**로 뒀다.
+      실제로 적용 첫날 소노다 2R 에서 2+3+8(27.7배)이 종전 규칙이면 적중이었다 —
+      1건으로 정책을 뒤집으면 안 되지만, 그 1건들이 쌓인 결과는 반드시 재야 한다.
+    집계 기준: corePicks.shadowWouldBet(= 종전 '상위 2' 규칙으로 걸었을 조합) vs 실제 결과.
+      회수는 확정배당(payouts_raw.trifecta)만 인정한다 — 추정배당은 넣지 않는다.
+    쿼리: ?days=N(기본 30) · ?market=japan|cycle|korea
+    """
+    try:
+        days = max(1, min(180, int(request.args.get("days") or 30)))
+    except Exception:
+        days = 30
+    q_mk = (request.args.get("market") or "").strip()
+    cutoff = time.time() - days * 86400
+    U = 1000
+    rows, skipped = [], 0
+    try:
+        for fn in os.listdir(ANALYSIS_LOG_DIR) if os.path.isdir(ANALYSIS_LOG_DIR) else []:
+            if not fn.endswith(".json"):
+                continue
+            fp = os.path.join(ANALYSIS_LOG_DIR, fn)
+            try:
+                if os.path.getmtime(fp) < cutoff:
+                    continue
+                doc = json.load(open(fp, encoding="utf-8"))
+            except Exception:
+                skipped += 1
+                continue
+            if not isinstance(doc, dict):
+                continue
+            cp = doc.get("corePicks") or {}
+            would = cp.get("shadowWouldBet") or []
+            if not would:
+                # [하위호환] shadowWouldBet 신설 전 로그 — shadowTrifectas 상위 2로 같은 기준 복원.
+                #   (그것도 없으면 finalTrifectas 상위 2 = 종전 displayedCombos 규칙과 동일)
+                _src = cp.get("shadowTrifectas") or (cp.get("finalTrifectas")
+                                                    if cp.get("trioShadow") else None) or []
+                would = [t.get("combo") for t in _src[:2] if isinstance(t, dict) and t.get("combo")]
+            res = doc.get("result") or {}
+            if not would or not res.get("3rd"):
+                continue
+            mk = cp.get("betMarket") or ""
+            if q_mk and mk != q_mk:
+                continue
+            try:
+                t3 = tuple(sorted(int(res[k]) for k in ("1st", "2nd", "3rd")))
+                combos = [tuple(sorted(int(x) for x in c)) for c in would if c]
+            except (TypeError, ValueError):
+                continue
+            h = doc.get("hit") or {}
+            odds = _safe_num((h.get("payouts_raw") or {}).get("trifecta")) or \
+                _safe_num((h.get("payouts") or {}).get("trifecta")) or 0.0
+            rows.append({"race": doc.get("raceKey") or fn, "date": doc.get("date"),
+                         "market": mk, "n": len(combos), "hit": t3 in combos, "odds": odds})
+    except Exception as e:
+        return jsonify({"error": str(e)[:200]}), 200
+
+    def agg(sel):
+        inv = sum(r["n"] for r in sel) * U
+        hits = [r for r in sel if r["hit"]]
+        paid = [r for r in hits if r["odds"]]
+        ret = sum(r["odds"] for r in paid) * U
+        return {"races": len(sel), "invested": inv, "returned": int(ret),
+                "pnl": int(ret - inv), "roi": round(ret / inv * 100, 1) if inv else 0,
+                "hits": len(hits), "hitRate": round(len(hits) * 100.0 / len(sel), 1) if sel else 0,
+                "oddsKnown": len(paid),
+                "avgOdds": round(sum(r["odds"] for r in paid) / len(paid), 1) if paid else 0}
+
+    out = {"days": days, "note": "종전 '상위 2' 규칙으로 걸었다면의 가정 성적 · 확정배당만 회수 인정",
+           "overall": agg(rows), "byMarket": {}, "skippedFiles": skipped}
+    for mk in sorted({r["market"] for r in rows if r["market"]}):
+        out["byMarket"][mk] = agg([r for r in rows if r["market"] == mk])
+    # 판단 보조: 재개를 검토할 만한지(표본 50경주+ & 회수율 100%+)
+    o = out["overall"]
+    out["verdict"] = ("표본 부족 — %d경주(50경주 이상 권장)" % o["races"] if o["races"] < 50
+                      else ("재개 검토 권장 — 회수율 %.1f%%" % o["roi"] if o["roi"] >= 100
+                            else "유지(섀도우) — 회수율 %.1f%%" % o["roi"]))
+    out["hitsDetail"] = sorted([r for r in rows if r["hit"]],
+                               key=lambda r: -r["odds"])[:15]
+    return jsonify(out)
 
 
 @app.route("/api/gemini/findings", methods=["GET"])
