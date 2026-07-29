@@ -28729,6 +28729,130 @@ def _kra_schedule(ymd, force=False):
     return tracks
 
 
+# ══════════ [南関東 4장 수집 (2026-07-29)] keiba.go.jp(NAR 공식) 배당 소스 ══════════
+#   배경: 浦和·船橋·大井·川崎(南関東)는 **oddspark가 발매 정보를 제공하지 않는다**(2026-07-29 직접 대조 —
+#     oddspark 홈의 RaceList.do 개최 링크에 없고, 경마장 소개 페이지(/keiba/racetrack/31~34/)만 존재).
+#     그래서 서버 수집 대상에서 통째로 빠져 확장(사설·30초 주기) 단독 의존이었고, 그날 카와사키 스냅샷은
+#     경주당 1·2·8·9개(6R은 0개)로 마감 직전 변화를 구조적으로 놓쳤다.
+#   해결: 이미 결과 백필·전적에 쓰고 있는 **keiba.go.jp(地方競馬情報サイト·NAR 공식)**를 배당에도 사용한다.
+#     같은 사이트·같은 k_babaCode 체계라 새 소스를 붙이는 게 아니라 **쓰던 소스의 범위를 넓히는 것**이다.
+#   ⚠ 구조적 이점: 배당표가 '축마 1두 = 1 table, 행 = (상대마번, 배당)' 형태라 **열(colspan) 추적이 없다**
+#     → oddspark 그리드 파서에서 반복된 열 밀림(off-by-one)·조합 누락이 원리적으로 발생하지 않는다.
+#   ⚠ 삼복승(三連複)은 '짝(a,b) 단위 표'라 구조가 달라 이번 범위에서 제외 — 기존 `_trio_est` 추정배당
+#     보험이 그대로 적용된다(무삭제·기존 동작 유지).
+NAR_KEIBA_BASE = "https://www2.keiba.go.jp/KeibaWeb/TodayRaceInfo/"
+NAR_ODDS_PATH = {"win": "OddsTanFuku", "quinella": "OddsUmLenFuku", "exacta": "OddsUmLenTan"}
+# 南関東 4장만 대상 — 나머지 NAR(나고야·소노다 등)은 oddspark 가 이미 커버하므로 중복 수집하지 않는다.
+NAR_NANKAN_BABA = {"18": "우라와", "19": "후나바시", "20": "오이", "21": "카와사키"}
+_NAR_TBL_RE = re.compile(r"<table[^>]*>(.*?)</table>", re.S)
+_NAR_TH_RE = re.compile(r"<th[^>]*>(.*?)</th>", re.S)
+_NAR_ROW_RE = re.compile(
+    r"<tr[^>]*>\s*<td[^>]*>\s*(\d{1,2})\s*</td>\s*<td[^>]*>\s*([\d.]+)\s*</td>\s*</tr>", re.S)
+
+
+def _nar_fetch(url):
+    """keiba.go.jp 페이지 fetch + 디코드. ⚠ 이 사이트는 UTF-8 이다 —
+    euc-jp 로 먼저 강제하면 한자가 깨져 '개최 없음' 같은 가짜 결론이 난다(실측 오판 1회)."""
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+    raw = urllib.request.urlopen(req, timeout=20).read()
+    for enc in ("utf-8", "euc-jp", "shift_jis"):
+        try:
+            t = raw.decode(enc, "strict")
+            if ("オッズ" in t) or ("発走" in t) or ("競走" in t):
+                return t
+        except (UnicodeDecodeError, LookupError):
+            continue
+    return raw.decode("utf-8", "replace")
+
+
+def _nar_date_param(ymd):
+    return "%s%%2F%s%%2F%s" % (ymd[:4], ymd[4:6], ymd[6:8])
+
+
+def _nar_odds_url(baba, ymd, rno, kind):
+    """odds_flg=4 = '馬番順' — 축마별 단순 표(파싱 최단·열 추적 불필요)."""
+    return "%s%s?k_raceDate=%s&k_raceNo=%d&k_babaCode=%s&odds_flg=4" % (
+        NAR_KEIBA_BASE, NAR_ODDS_PATH[kind], _nar_date_param(ymd), int(rno), baba)
+
+
+def _nar_parse_pair_odds(html, keep_direction=False, max_no=18):
+    """馬連複/馬連単(馬番順) → [{'combo':[a,b],'odds':x}].
+    각 <table> 이 축마 1두: 첫 <th>=축 마번, 이후 <tr><td>상대</td><td>배당</td>.
+    복승(keep_direction=False)은 정렬키로 중복 제거, 쌍승은 방향 그대로 보존.
+    실측 검증(카와사키 9R·8두): 복승 28=8C2 정합 · 쌍승 56=8P2 정합."""
+    out, seen = [], set()
+    for body in _NAR_TBL_RE.findall(html or ""):
+        ths = [re.sub(r"<[^>]+>", "", t).strip() for t in _NAR_TH_RE.findall(body)]
+        if not ths or not ths[0].isdigit():
+            continue
+        a = int(ths[0])
+        if not (1 <= a <= max_no):
+            continue
+        for b_s, o_s in _NAR_ROW_RE.findall(body):
+            try:
+                b, o = int(b_s), float(o_s)
+            except ValueError:
+                continue
+            if a == b or o <= 0 or not (1 <= b <= max_no):
+                continue
+            k = (a, b) if keep_direction else tuple(sorted((a, b)))
+            if k in seen:
+                continue
+            seen.add(k)
+            out.append({"combo": list(k), "odds": o})
+    return out
+
+
+def _nar_parse_win(html, max_no=18):
+    """単勝・複勝 표 → {마번: 단승배당}. 행 = [枠, 馬番, 馬名, 単勝, 複勝하한 - 상한]."""
+    win = {}
+    for m in re.finditer(r"<tr[^>]*>(.*?)</tr>", html or "", re.S):
+        cells = [re.sub(r"<[^>]+>", " ", c).strip()
+                 for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", m.group(1), re.S)]
+        nums = [c for c in cells if re.fullmatch(r"\d{1,2}", c)]
+        odds = [c for c in cells if re.fullmatch(r"\d{1,4}\.\d", c)]
+        if len(nums) >= 2 and odds:
+            try:
+                no, o = int(nums[1]), float(odds[0])
+            except ValueError:
+                continue
+            if 1 <= no <= max_no and o > 0:
+                win.setdefault(no, o)
+    return win
+
+
+def _nar_race_list(baba, ymd):
+    """keiba.go.jp RaceList(당일 메뉴) → [{raceNo, postTime, postEpoch}]. 미개최면 []."""
+    html = _nar_fetch("%sRaceList?k_raceDate=%s&k_babaCode=%s"
+                      % (NAR_KEIBA_BASE, _nar_date_param(ymd), baba))
+    txt = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
+    out, seen = [], set()
+    for rno, hhmm in re.findall(r"(\d{1,2})R (\d{1,2}:\d{2})", txt):
+        n = int(rno)
+        if not (1 <= n <= 12) or n in seen:
+            continue
+        seen.add(n)
+        out.append({"raceNo": n, "postTime": hhmm, "postEpoch": _post_time_epoch(hhmm, ymd)})
+    return sorted(out, key=lambda r: r["raceNo"])
+
+
+def _nar_schedule(ymd):
+    """南関東 4장 중 오늘 개최분만 트랙 레코드로 반환(미개최=제외). oddspark 커버 경마장과 중복 없음."""
+    out = []
+    for baba, venue in NAR_NANKAN_BABA.items():
+        try:
+            races = _nar_race_list(baba, ymd)
+        except Exception as e:
+            print("[南関東 스케줄] %s(baba=%s) 조회 실패(건너뜀): %s" % (venue, baba, e))
+            continue
+        if not races:
+            continue
+        out.append({"venue": venue, "narBaba": baba, "sport": "horse",
+                    "category": "japan_local", "races": races})
+        print("[南関東 스케줄] %s: %d경주 (keiba.go.jp baba=%s)" % (venue, len(races), baba))
+    return out
+
+
 def _multi_schedule_fetch():
     """[1번] 오늘 개최 경주 스케줄(경마장+경주번호+발주시각) → today_schedule.json. 실패해도 예외 전파 안 함.
       [경륜 통합] 지방경마 + 경륜을 서버가 함께 수집(경륜도 oddspark 홈 공개경로 → Chrome 확장 불필요)."""
@@ -28748,6 +28872,13 @@ def _multi_schedule_fetch():
         except Exception as e:
             print("[스케줄]", kanji, "경주목록 실패(건너뜀):", e)
             continue
+    # [南関東 병합 (2026-07-29)] oddspark 가 커버하지 않는 浦和·船橋·大井·川崎을 keiba.go.jp 로 병합.
+    #   ⚠ 위 oddspark 트랙과 중복되지 않는다(南関東 4장은 oddspark 개최 목록에 애초에 없음 — 실측 확인).
+    try:
+        for nt in _nar_schedule(ymd):
+            sched["tracks"].append(nt)
+    except Exception as e:
+        print("[스케줄] 南関東 병합 실패(무시·기존 경마는 유지):", e)
     # [경륜 서버 직접 수집] 지방경마와 동시에 경륜 스케줄도 병합(sport=cycle) → 확장 없이 경륜 자동 수집·표시
     try:
         for kt in _keirin_schedule(ymd):
@@ -28786,7 +28917,19 @@ def _multi_collect_one(track, race, ymd):
         is_cycle = bool(track.get("joCode")) and (track.get("sport") == "cycle" or not track.get("opTrackCd"))
         tr3 = []   # [삼복승 서버 수집 (2026-07-19)] 서버가 3連複도 직접 수집 — 확장 탭 클릭 불필요
         win = {}   # [단승] 경마만 수집(경륜은 単勝 개념이 다르고 oddspark 매핑도 별도) — 아래 경마 분기에서 채움
-        if is_cycle:
+        if track.get("narBaba"):
+            # ── [南関東] keiba.go.jp(NAR 공식) 경로 — oddspark 미커버 4장 전용 ──
+            #   삼복승은 표 구조가 달라(짝 단위) 미수집 → 기존 `_trio_est` 추정배당 보험이 그대로 적용된다.
+            _bb = track["narBaba"]
+            q = _nar_parse_pair_odds(_nar_fetch(_nar_odds_url(_bb, ymd, rno, "quinella")))
+            x = _nar_parse_pair_odds(_nar_fetch(_nar_odds_url(_bb, ymd, rno, "exacta")),
+                                     keep_direction=True)
+            try:
+                win = _nar_parse_win(_nar_fetch(_nar_odds_url(_bb, ymd, rno, "win")))
+            except Exception as _we:
+                print("[南関東] 단승 수집 실패(무시):", _we)
+            sport, category = "horse", "japan_local"
+        elif is_cycle:
             jo = track["joCode"]
             # 경륜: betType 5=복승(2車複)·6=쌍승(2車単)·8=삼복승(3連複·코치 7R 실측) (경마와 번호 다름)
             q = _keirin_parse_quinella(_keirin_fetch(_keirin_odds_url(jo, ymd, rno, 5)))
@@ -28922,9 +29065,11 @@ def _multi_collect_one(track, race, ymd):
                 _keirin_autocollect_form(key, track.get("joCode"), ymd, rno)
             except Exception as _fe:
                 print(f"[전적수집] {key} 경륜 전적 실패: {_fe}")
-        else:
+        elif track.get("opTrackCd"):
             # [지방경마(NAR) 전적 자동 수집] 확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'
             #   해소 — 배당과 동시에 oddspark 出走表+전적을 수집·저장(경주당 1회·통합등급 반영). keirin 대칭.
+            #   ⚠ 南関東(narBaba)은 oddspark 出走表가 없으므로 이 경로를 타지 않는다 — 매 사이클 실패
+            #     로그만 쌓일 뿐이라 건너뛴다. 전적은 keiba.go.jp DebaTable 로 별도 배선 필요(잔여 과제).
             try:
                 _keiba_autocollect_form(key, track.get("opTrackCd"), track.get("sponsorCd"), ymd, rno)
             except Exception as _fe:
