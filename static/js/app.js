@@ -160,9 +160,11 @@
     const hitBadge = c.hit ? '<span style="color:#38d39f;font-weight:800">✅ 적중</span>'
       : '<span style="color:#ef4444;font-weight:800">❌</span>';
     const darkBadge = c.dark_hit ? '<span style="color:#f59e0b;font-weight:800">🐎 복병적중</span>' : '';
+    // [스냅샷 표기 제거 (2026-07-29 권대표 지시)] 대부분의 경주에 T-5 스크린샷이 없어
+    //   'T-5 스크린샷 없음' 문구만 전 카드에 깔려 화면을 어지럽혔다. 있으면 보여주고, 없으면 아무것도 안 낸다.
     const shot = c.snapshot
       ? `<img src="/api/snapshot/get/${encodeURIComponent(c.snapshot)}" style="width:100%;border-radius:8px;margin-top:6px;cursor:pointer" onclick="window.open(this.src)">`
-      : '<div class="hint" style="font-size:12px;margin-top:6px">T-5 스크린샷 없음</div>';
+      : '';
     return `<div style="border:1px solid #334155;border-radius:10px;padding:10px;background:rgba(255,255,255,.03)">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <b style="font-size:15px">${esc(c.race || '')}</b>${c.horses ? `<span class="hint">${c.horses}두</span>` : ''}
