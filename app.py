@@ -13968,7 +13968,8 @@ def _raw_profile_snapshot(rk):
     for h in hs:
         r = {"no": h.get("no"), "styleType": h.get("styleType")}
         for k in ("corners", "fieldSizes", "pastDistances", "last3fList", "pastPlacings",
-                  "kimarite", "kimariteRatio", "chaku", "rentai", "gear", "classGrade"):
+                  "kimarite", "kimariteRatio", "chaku", "rentai", "gear", "classGrade",
+                  "declaredStyle", "declaredStyleLabel"):   # [표기 각질 병기 2026-07-30]
             v = h.get(k)
             if v not in (None, [], {}):
                 r[k] = v
@@ -21645,6 +21646,16 @@ def _keirin_autocollect_form(rk, jo, ymd, race):
             # [소실 방지 (2026-07-29)] 결정수 **원본 시행수**(逃/捲/差/マ 카운트). 지금까지 비율만 저장해
             #   "3전 중 100% 차입"과 "30전 중 83% 차입"을 구분할 수 없었다 — 표본 가중에 필수.
             "kimarite": r.get("kimarite"),
+            # ── [표기 각질 병기 (2026-07-30)] 출마표의 **1차 표기**(ギア倍数·脚質 컬럼) ──
+            #   `styleType` 은 과거 결정수 비율로 **추정**한 값이고, `declaredStyle` 은 주최측이 출마표에
+            #   직접 표기한 값이다(逃=선행 · 捲=젖히기 · 追=추입 · 差=차입 · 両/自=자재).
+            #   ⚠ 파싱은 `_keirin_parse_card` 가 **이미 하고 있었으나**(gcell 정규식 `[逃捲追差両自]+$`)
+            #     저장행에서 탈락해 왔다 — corners·kimarite 와 같은 유형의 소실이다.
+            #   실측 검증(2026-07-30 아오모리 1~4R **28두 · 원문 대조 100% 일치** · 매핑 누락 0).
+            #   ⚠ **기존 `styleType`·`kimariteRatio` 는 그대로 둔다(무삭제·병기만).**
+            #     "추정(styleType) vs 표기(declaredStyle)" 정확도 비교는 나중에 리플레이로 판정한다.
+            "declaredStyle": r.get("style") or None,             # 원문 표기(逃/捲/追/差/両/自)
+            "declaredStyleLabel": r.get("styleLabel") or None,   # 한글 라벨(KEIRIN_STYLE_LABEL)
         } for r in (an.get("ranked") or []) if r.get("car") is not None and r.get("score") is not None]
         # [경륜 특화④·득점 갭 가점 (2026-07-19)] 득점 1위가 2위와 3점+ 차이면 유력 확신 +5(투명 분해 표시).
         try:
