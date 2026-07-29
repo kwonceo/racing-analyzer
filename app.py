@@ -28269,6 +28269,7 @@ def _multi_collect_one(track, race, ymd):
         rno = race["raceNo"]
         is_cycle = bool(track.get("joCode")) and (track.get("sport") == "cycle" or not track.get("opTrackCd"))
         tr3 = []   # [삼복승 서버 수집 (2026-07-19)] 서버가 3連複도 직접 수집 — 확장 탭 클릭 불필요
+        win = {}   # [단승] 경마만 수집(경륜은 単勝 개념이 다르고 oddspark 매핑도 별도) — 아래 경마 분기에서 채움
         if is_cycle:
             jo = track["joCode"]
             # 경륜: betType 5=복승(2車複)·6=쌍승(2車単)·8=삼복승(3連複·코치 7R 실측) (경마와 번호 다름)
@@ -28291,6 +28292,14 @@ def _multi_collect_one(track, race, ymd):
             except Exception as _te:
                 print("[다중경주] NAR 삼복승 수집 실패(무시):", _te)
             sport, category = "horse", "japan_local"
+            # [단승 수집 (2026-07-29)] 화면이 어느 경주를 보고 있든 무관하게 백그라운드에서 단승도 받는다.
+            #   경마 단승은 확장이 주지 않아(사설 배당판 미제공) 서버가 채우지 않으면 영구 0건이다.
+            #   ⚠ 실패해도 복승·쌍승 수집은 그대로 진행(부가 신호).
+            try:
+                win = _keiba_parse_win(_keirin_fetch(
+                    _keiba_odds_url(op, sp, ymd, rno, _KEIBA_BET["win"])))
+            except Exception as _we:
+                print("[다중경주] 단승 수집 실패(무시):", _we)
         if not _keiba_odds_live(q, x):
             return None                        # 발매 전·마감 후(가짜값) → 저장 안 함
         key = _multi_key(track["venue"], rno)
@@ -28298,9 +28307,9 @@ def _multi_collect_one(track, race, ymd):
             db = _multi_store_load()
             prev = db.get(key) or {}
             hist = list(prev.get("history") or [])
-            hist.append({"t": time.time(), "quinella": q, "exacta": x, "trio": tr3, "win": {}})
+            hist.append({"t": time.time(), "quinella": q, "exacta": x, "trio": tr3, "win": win})
             hist = hist[-12:]
-            db[key] = {"quinella": q, "exacta": x, "trio": tr3, "win": {}, "history": hist,
+            db[key] = {"quinella": q, "exacta": x, "trio": tr3, "win": win, "history": hist,
                        "sport": sport, "category": category,
                        "venue": track["venue"], "raceNo": rno,
                        "postTime": race.get("postTime"), "postEpoch": race.get("postEpoch"),
@@ -28327,7 +28336,12 @@ def _multi_collect_one(track, race, ymd):
                         _prev0["exacta"] = x
                     if tr3:
                         _prev0["trio"] = tr3
-                    if x or tr3:
+                    # [단승 보완 (2026-07-29)] 확장(사설 배당판)은 단승을 주지 않는다 — 서버가 채우지 않으면
+                    #   영구 0건이다. '확장이 안 주는 종류를 서버가 보완한다'는 이 블록의 취지 그대로 추가.
+                    #   복승·히스토리는 건드리지 않으므로 사설 우선 원칙(신호 오염 방지)은 유지된다.
+                    if win:
+                        _prev0["win"] = win
+                    if x or tr3 or win:
                         _tdb0[key] = _prev0
                         _triple_save(_tdb0)
                 except Exception as _me:
@@ -28337,7 +28351,7 @@ def _multi_collect_one(track, race, ymd):
                 raise _SkipOddsparkBridge()
             # [자동전환·마감판정] 발주시각(postEpoch) 전달 → analyze 의 minutesBefore/afterClose 가 채워져
             #   프론트 '경주 종료' 판정(_raceFinished)·자동예상 T-5분 타이밍이 정확해짐(기존엔 deadline 미전달로 None).
-            _do_triple_ingest(key, q, x, tr3, {}, sport=sport, category=category,
+            _do_triple_ingest(key, q, x, tr3, win, sport=sport, category=category,
                               source="oddspark_bg", deadline=race.get("postEpoch"))
         except _SkipOddsparkBridge:
             pass
@@ -28353,7 +28367,7 @@ def _multi_collect_one(track, race, ymd):
             _tsh = str(_t0h.get("source") or "")
             _fresh_private = bool(_tsh and "oddspark" not in _tsh and (time.time() - (_t0h.get("t") or 0)) <= 200)
             if not _fresh_private:
-                _history_append(key, q, x, race.get("postEpoch"), {}, source="oddspark")
+                _history_append(key, q, x, race.get("postEpoch"), win, source="oddspark")
         except Exception as _he:
             print("[다중경주] 이력 기록 실패(무시):", _he)
         # [경륜 전적 자동 수집] 다중 경주 경륜 배당 수집 시 전적도 함께(1회·통합등급 반영)
