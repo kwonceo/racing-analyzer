@@ -14107,6 +14107,19 @@ def _dr_record(rk, det, pend):
             "minutesBefore": pend.get("cur_mb"),
             "status": det.get("status"), "checked": det.get("checked"),
             "skipped": det.get("skipped"), "issues": det.get("issues"),
+            # [판정 입력 스냅샷 (2026-07-30)] 그 순간 무엇을 보고 판정했는지 함께 남긴다 —
+            #   이게 없으면 "그때 왜 WARNING 이었나"를 사후에 재현할 수 없다(오늘 반복된 소실 유형).
+            "input": {
+                "drops": [d for d in (pend.get("drops") or [])
+                          if isinstance(d, dict) and isinstance(d.get("pct"), (int, float))
+                          and d["pct"] <= DET_DROP_PCT][:12],
+                "finalQuinellas": [q.get("combo") for q in (pend.get("final_q") or [])
+                                   if isinstance(q, dict)][:8],
+                "finalTrifectas": [t.get("combo") for t in (pend.get("final_t") or [])
+                                   if isinstance(t, dict)][:4],
+                "linePairs": [p.get("combo") for p in (pend.get("line_pairs") or [])
+                              if isinstance(p, dict)][:4],
+            },
         })
         doc["entries"] = doc["entries"][-50:]
         _json_atomic(p, doc, indent=1)
@@ -14454,6 +14467,12 @@ def _build_analysis_log(rk, an=None):
         #   빈값 덮어쓰기 방지: 이번 분석에 없으면 기존 기록을 유지한다.
         "signal_quality_full": (an.get("signalQuality")
                                 or (doc.get("signal_quality_full") if doc else None)),
+        # [급락 원본 보존 (2026-07-30)] `an.drops` = 복승 조합별 급락 원본(combo·prev·cur·pct).
+        #   `_deterministic_review` ④급락미반영이 **이 값으로 판정**하는데 어디에도 저장되지 않아,
+        #   임계 적정성 계산조차 `anomaly_history` 로 **근사**해야 했다(판정 입력과 다른 값).
+        #   paceBonus 와 같은 구조 — **검증 도구의 입력이 저장되지 않는 문제**다.
+        #   ⚠ 이게 있어야 "그때 왜 WARNING 이었나"를 사후 재현할 수 있다. 빈값 덮어쓰기 방지.
+        "drops_raw": (an.get("drops") or (doc.get("drops_raw") if doc else None)),
         # [소실 방지 (2026-07-29)] 각질·페이스의 **원본 입력**(코너통과·당시 두수·거리/마장·결정수
         #   시행수·경륜 라인)을 보존. 경주 종료 시 출마표가 내려가 영구 소실되는 값들이며, 이것 없이는
         #   임계값을 바꿔도 과거를 재계산할 수 없다. 빈값 덮어쓰기 방지(기존 기록 유지).
