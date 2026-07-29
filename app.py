@@ -13939,6 +13939,45 @@ def _canonical_log_key(rk, live=False):
     return rk
 
 
+def _raw_profile_snapshot(rk):
+    """[소실 방지 (2026-07-29)] 경주 종료 시 영구 소실되는 **원본 입력**을 분석 로그에 복사해 남긴다.
+
+    배경: 각질(styleType)·페이스는 **가공된 결과**만 저장돼 왔고, 그 근거인 코너통과·당시 두수·
+      결정수 시행수·라인 원본·거리/마장은 어디에도 남지 않았다. 출마표는 경주가 끝나면 내려가므로
+      **그 순간이 지나면 영구 소실**이고, 임계값을 바꿔도 과거를 재계산할 수 없다.
+      (실측: 분석 로그 1,392건 전부 거리 0건 — 차원 분석 자체가 불가능했다.)
+    ⚠ 순수 복사만 한다 — 새로 fetch 하지 않고 이미 저장된 starters_store 만 읽으며,
+      추천·판정·학습 경로에 일절 개입하지 않는다. 값이 없으면 None(구데이터 호환).
+    """
+    try:
+        s = (_starters_load() or {}).get(rk) or {}
+    except Exception:
+        return None
+    if not s:
+        return None
+    hs = s.get("horses") or []
+    out = {
+        "source": s.get("source"),
+        "distance": s.get("distance"), "surface": s.get("surface"),
+        "trackCond": s.get("trackCond"),
+        "fieldSize": len(hs) or None,
+        "line": s.get("line") or None,                 # 경륜 라인 원본(並び)
+        "tendency": s.get("tendency") or None,         # 경륜장 결정수 경향
+    }
+    rows = []
+    for h in hs:
+        r = {"no": h.get("no"), "styleType": h.get("styleType")}
+        for k in ("corners", "fieldSizes", "pastDistances", "last3fList", "pastPlacings",
+                  "kimarite", "kimariteRatio", "chaku", "rentai", "gear", "classGrade"):
+            v = h.get(k)
+            if v not in (None, [], {}):
+                r[k] = v
+        rows.append(r)
+    if rows:
+        out["entries"] = rows
+    return out
+
+
 def _build_analysis_log(rk, an=None):
     """_triple_analyze 결과 + odds_history(타임라인/결과) + 전적을 종합해 리치 로그를 만들고 저장.
     기존 로그가 있으면 사용자 입력(analyzed_at·복기 메모·profit)은 보존한다."""
@@ -14221,6 +14260,11 @@ def _build_analysis_log(rk, an=None):
         #   빈값 덮어쓰기 방지: 이번 분석에 없으면 기존 기록을 유지한다.
         "signal_quality_full": (an.get("signalQuality")
                                 or (doc.get("signal_quality_full") if doc else None)),
+        # [소실 방지 (2026-07-29)] 각질·페이스의 **원본 입력**(코너통과·당시 두수·거리/마장·결정수
+        #   시행수·경륜 라인)을 보존. 경주 종료 시 출마표가 내려가 영구 소실되는 값들이며, 이것 없이는
+        #   임계값을 바꿔도 과거를 재계산할 수 없다. 빈값 덮어쓰기 방지(기존 기록 유지).
+        "raw_profile": (_raw_profile_snapshot(rk)
+                        or (doc.get("raw_profile") if doc else None)),
         "summary": an.get("summary"),
         "keyHorses": an.get("keyHorses"),
         "result": result_doc,
@@ -21598,6 +21642,9 @@ def _keirin_autocollect_form(rk, jo, ymd, race):
             #   착순분포(1-2-3-착외)·결정수비율(도주/젖히기/차입/마크%)·급반(S1/A1)·기어배수.
             "chaku": r.get("chaku"), "kimariteRatio": r.get("kimariteRatio"),
             "classGrade": r.get("classGrade"), "gear": r.get("gear"),
+            # [소실 방지 (2026-07-29)] 결정수 **원본 시행수**(逃/捲/差/マ 카운트). 지금까지 비율만 저장해
+            #   "3전 중 100% 차입"과 "30전 중 83% 차입"을 구분할 수 없었다 — 표본 가중에 필수.
+            "kimarite": r.get("kimarite"),
         } for r in (an.get("ranked") or []) if r.get("car") is not None and r.get("score") is not None]
         # [경륜 특화④·득점 갭 가점 (2026-07-19)] 득점 1위가 2위와 3점+ 차이면 유력 확신 +5(투명 분해 표시).
         try:
@@ -22393,7 +22440,17 @@ def _keiba_starter_store_row(h):
             "detail": h.get("detail") or [], "bodyWeight": h.get("bodyWeight"),
             "bodyWeightBonus": h.get("bodyWeightBonus"),
             "distAptitude": h.get("distAptitude"), "distAptitudeRate": h.get("distAptitudeRate"),
-            "jockeyRate": h.get("jockeyRate"), "jockeyDistRate": h.get("jockeyDistRate")}
+            "jockeyRate": h.get("jockeyRate"), "jockeyDistRate": h.get("jockeyDistRate"),
+            # ── [소실 방지 (2026-07-29)] 각질 역산의 **원본 입력**을 함께 보존 ──
+            #   `styleType`(각질)은 oddspark/NAR 출마표의 직접 표기가 아니라 `_keiba_corner_style` 이
+            #   과거 통과순위로 **역산한 값**이다. 그런데 역산의 입력(코너통과·그때의 두수)이 저장되지 않아
+            #   나중에 임계값(현재 상위30%=선행·하위40%=추격)을 바꿔도 **과거 데이터를 재계산할 수 없었다**.
+            #   경주가 끝나면 출마표가 내려가 원본은 영구 소실된다 → 지금부터라도 담는다(추가만·기존 키 무변경).
+            "corners": [pr.get("corner") for pr in (h.get("past") or [])],
+            "fieldSizes": [pr.get("fieldSize") for pr in (h.get("past") or [])],
+            "pastDistances": [pr.get("distance") for pr in (h.get("past") or [])],
+            "last3fList": [pr.get("last3f") for pr in (h.get("past") or [])],
+            "pastPlacings": [pr.get("placing") for pr in (h.get("past") or [])]}
 
 
 def _keiba_build_form(shutsuba, details):
@@ -22543,7 +22600,11 @@ def keiba_starters():
     if rk and horses:
         store = [_keiba_starter_store_row(h) for h in horses if h.get("no") is not None]
         sdb = _starters_load()
-        sdb[rk] = {"horses": store, "t": time.time(), "source": "oddspark"}
+        sdb[rk] = {"horses": store, "t": time.time(), "source": "oddspark",
+                   # [소실 방지] 경주 단위 조건 — `_keiba_parse_shutsuba` 가 **파싱은 하는데 어디에도
+                   #   저장되지 않아** 분석 로그 1,392건 전부 거리 0건이었다(차원 분석 자체가 불가).
+                   "distance": shutsuba.get("distance"), "surface": shutsuba.get("surface"),
+                   "trackCond": shutsuba.get("trackCond")}
         _starters_save(sdb)
         linked = rk
         print(f"[지방경마 전적] {rk}: {len(store)}두 oddspark 전적 반영(각질·거리변화·상3F·마체중·거리적성·기수복승률)")
@@ -22588,7 +22649,10 @@ def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
         store = [_keiba_starter_store_row(h) for h in horses if h.get("no") is not None]
         if store:
             sdb = _starters_load()
-            sdb[rk] = {"horses": store, "t": time.time(), "source": "oddspark"}
+            sdb[rk] = {"horses": store, "t": time.time(), "source": "oddspark",
+                       # [소실 방지] 경주 단위 조건(거리·마장·마장상태) 보존 — 위 주석 참조.
+                       "distance": shutsuba.get("distance"), "surface": shutsuba.get("surface"),
+                       "trackCond": shutsuba.get("trackCond")}
             _starters_save(sdb)
             _KEIBA_FORM_DONE.add(rk)
             print(f"[지방경마 전적·자동] {rk}: {len(store)}두 oddspark 전적 수집(bg·각질·거리변화·상3F)")
@@ -28877,6 +28941,10 @@ _NARD_PLACE_RE = re.compile(r"\|\s*(\d{1,2})\s*\|+\s*\d{2}\.\d{2}\.\d{2}\s+\S+\s
 #   기록 행: "1:37.4 7-7-7-5 39.8" (주파시계·코너통과·상3F)
 _NARD_CORNER_RE = re.compile(r"\d:\d{2}\.\d\s+([\d\-]+)\s+(\d{2}\.\d)")
 _NARD_BW_RE = re.compile(r"\|\s*(\d{3})\s*\|?\s*\(([+\-]?\d+)\)")           # 현재 마체중 460 (+11)
+# [소실 방지 (2026-07-29)] 경주 단위 조건 — 마장(더트/잔디)·마장상태. 거리와 함께 저장해야
+#   '페이스 × 두수 × 거리' 차원 분석이 가능해진다(현재 분석 로그 전 1,392건 거리 0건).
+_NARD_SURF_RE = re.compile(r"(ダ[ート]*|芝)\s*\d{3,4}\s*[ｍm]")
+_NARD_COND_RE = re.compile(r"馬場[：:]\s*(良|稍重|重|不良)")
 _NARD_DIST_RE = re.compile(r"[ダ芝][ー\u30fc]?[トト]?\s*(\d{3,4})\s*[ｍm]")   # 이번 경주 거리
 
 
@@ -28886,9 +28954,14 @@ def _nar_parse_deba(html, max_no=18):
     starts = [(m.start(), int(m.group(1))) for m in _NARD_NUM_RE.finditer(html or "")]
     starts = [s for s in starts if 1 <= s[1] <= max_no]
     if not starts:
-        return {"horses": [], "distance": None, "venue": None}, {}
+        return {"horses": [], "distance": None, "venue": None,
+                "surface": "", "trackCond": ""}, {}
     md = _NARD_DIST_RE.search(html or "")
     cur_dist = int(md.group(1)) if md else None
+    _ms = _NARD_SURF_RE.search(html or "")
+    cur_surf = ("더트" if _ms and _ms.group(1).startswith("ダ") else ("잔디" if _ms else ""))
+    _mc = _NARD_COND_RE.search(html or "")
+    cur_cond = _mc.group(1) if _mc else ""
     horses, details = [], {}
     for i, (pos, no) in enumerate(starts):
         end = starts[i + 1][0] if i + 1 < len(starts) else len(html)
@@ -28912,7 +28985,8 @@ def _nar_parse_deba(html, max_no=18):
                        "bodyWeight": (int(bw.group(1)) if bw else None),
                        "lineageNb": key})
         details[key] = past
-    return {"horses": horses, "distance": cur_dist, "venue": None}, details
+    return ({"horses": horses, "distance": cur_dist, "venue": None,
+             "surface": cur_surf, "trackCond": cur_cond}, details)
 
 
 _NAR_FORM_DONE = set()          # 경주당 1회만 전적 수집(재시작 시 starters_store 로 재판정)
@@ -28942,7 +29016,10 @@ def _nar_autocollect_form(rk, baba, ymd, rno):
         store = [_keiba_starter_store_row(h) for h in horses if h.get("no") is not None]
         if store:
             sdb = _starters_load()
-            sdb[rk] = {"horses": store, "t": time.time(), "source": "keiba_nar"}
+            sdb[rk] = {"horses": store, "t": time.time(), "source": "keiba_nar",
+                       # [소실 방지] 南関東도 동일하게 경주 조건 보존(DebaTable 헤더에서 추출).
+                       "distance": shutsuba.get("distance"), "surface": shutsuba.get("surface"),
+                       "trackCond": shutsuba.get("trackCond")}
             _starters_save(sdb)
             _NAR_FORM_DONE.add(rk)
             print("[南関東 전적] %s: %d두 저장(keiba.go.jp DebaTable)" % (rk, len(store)))
