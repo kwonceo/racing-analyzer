@@ -165,12 +165,31 @@
     const shot = c.snapshot
       ? `<img src="/api/snapshot/get/${encodeURIComponent(c.snapshot)}" style="width:100%;border-radius:8px;margin-top:6px;cursor:pointer" onclick="window.open(this.src)">`
       : '';
-    return `<div style="border:1px solid #334155;border-radius:10px;padding:10px;background:rgba(255,255,255,.03)">
+    // [카드 정보 통일 (2026-07-29 권대표 지시)] 종전엔 prediction.main(단일 조합) 하나만 보여줘
+    //   명단이 여러 개면 적중한 조합이 화면에서 사라졌다(나고야 1R: 명단 3개 중 2번째 9+11 적중인데
+    //   1+11 만 표시돼 오적중처럼 보임). 판정 명단 전체를 보여주고 적중 조합을 강조한다.
+    //   ⚠ combos 가 없는 구데이터는 종전 prediction.main 으로 폴백(무삭제·하위호환).
+    const _cbs = c.combos || [];
+    const _hc = c.hitCombo || '';
+    const comboLine = _cbs.length
+      ? `<div style="margin-top:4px;font-size:13.5px">추천 ${_cbs.map((s) => (s === _hc
+          ? `<b style="color:#38d39f;background:rgba(56,211,159,.16);padding:1px 5px;border-radius:5px">${esc(s)} ✓</b>`
+          : `<span style="color:#cbd5e1">${esc(s)}</span>`)).join(' · ')}</div>`
+      : `<div style="margin-top:4px;font-size:13.5px">예상 <b>${esc(c.prediction && c.prediction.main || '-')}</b></div>`;
+    const oddsTxt = c.quinellaOdds
+      ? ` · <span style="color:#fbbf24;font-weight:800">복승 ${c.quinellaOdds}배</span>` : '';
+    const gradeBadge = c.betGrade
+      ? `<span class="hint" style="font-size:11px;border:1px solid #475569;border-radius:6px;padding:1px 5px">${esc(c.betGrade)}</span>` : '';
+    const gmBadge = c.gemini
+      ? '<span style="color:#f87171;font-weight:800;font-size:11px">🔴 Gemini</span>' : '';
+    return `<div style="border:1px solid ${_hc ? '#38d39f55' : '#334155'};border-radius:10px;padding:10px;background:rgba(255,255,255,.03)">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <b style="font-size:15px">${esc(c.race || '')}</b>${c.horses ? `<span class="hint">${c.horses}두</span>` : ''}
+        ${gradeBadge} ${gmBadge}
         <span style="flex:1"></span>${hitBadge} ${darkBadge}
       </div>
-      <div style="margin-top:4px;font-size:14px">예상 <b>${esc(c.prediction && c.prediction.main || '-')}</b> · 결과 <b>${esc(top3 || '-')}</b></div>
+      ${comboLine}
+      <div style="margin-top:3px;font-size:13.5px">결과 <b>${esc(top3 || '-')}</b>${oddsTxt}</div>
       ${shot}
     </div>`;
   }

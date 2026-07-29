@@ -18727,6 +18727,83 @@ def _day_snapshot_for(rk, trigger="T-5"):
         return None
 
 
+# [날짜별 카드 보강 캐시 (2026-07-29)] analysis_log 를 경주마다 여는 비용을 mtime 증분 캐시로 흡수.
+#   하루 110경주 × 파일 열기는 매 요청 반복하면 화면이 느려진다. 파일이 바뀐 것만 다시 읽는다.
+#   (_results_history_rows 에서 0.74초 → 0.02초를 낸 것과 같은 방식)
+_DAY_CARD_CACHE = {}      # {logpath: (mtime, extra)}
+
+
+def _day_card_extra(rk):
+    """날짜별 카드에 실을 보강 정보 — 판정 명단·적중 조합·확정배당·등급. 실패 시 {}(기존 동작 유지)."""
+    try:
+        path, _, _ = _analysis_log_path(_canonical_log_key(rk))
+    except Exception:
+        return {}
+    try:
+        mt = os.path.getmtime(path)
+    except Exception:
+        return {}
+    hit = _DAY_CARD_CACHE.get(path)
+    if hit and hit[0] == mt:
+        return hit[1]
+    try:
+        d = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return {}
+    if not isinstance(d, dict):
+        return {}
+    cp = d.get("corePicks") or {}
+    dc = cp.get("displayedCombos") or {}
+    h = d.get("hit") or {}
+    res = d.get("result") or {}
+    _q = dc.get("quinellas") or [q.get("combo") for q in (cp.get("finalQuinellas") or [])
+                                 if isinstance(q, dict) and q.get("combo")]
+    _t = dc.get("trifectas") or []
+
+    def fmt(lst):
+        """조합 리스트 → ['1+11', ...]. 형식이 제각각인 구데이터 방어(문자열·중첩·None 혼재)."""
+        out = []
+        for c in (lst or []):
+            if not c:
+                continue
+            if isinstance(c, str):
+                out.append(c)
+                continue
+            try:
+                out.append("+".join(str(int(x)) for x in c))
+            except (TypeError, ValueError):
+                continue
+        return out
+    combos = fmt(_q)
+    # 적중 조합 = 1·2착 페어가 명단에 있으면 그것
+    hit_combo = None
+    try:
+        _t2 = tuple(sorted(int(res[k]) for k in ("1st", "2nd")))
+        for c in _q:
+            if isinstance(c, str):
+                continue
+            if tuple(sorted(int(x) for x in c)) == _t2:
+                hit_combo = "+".join(str(int(x)) for x in sorted(int(y) for y in c))
+                break
+    except (TypeError, ValueError, KeyError):
+        pass
+    h = h if isinstance(h, dict) else {}
+    raw = h.get("payouts_raw") if isinstance(h.get("payouts_raw"), dict) else {}
+    po = h.get("payouts") if isinstance(h.get("payouts"), dict) else {}
+    _gm = d.get("gemini")
+    extra = {
+        "combos": combos, "hitCombo": hit_combo, "trifectas": fmt(_t),
+        "quinellaOdds": _safe_num(po.get("quinella")) or _safe_num(raw.get("quinella")),
+        "trifectaOdds": _safe_num(po.get("trifecta")) or _safe_num(raw.get("trifecta")),
+        "betGrade": cp.get("betGrade"), "sport": d.get("sport"),
+        "gemini": (str(_gm.get("status")) == "WARNING") if isinstance(_gm, dict) else None,
+    }
+    if len(_DAY_CARD_CACHE) > 3000:
+        _DAY_CARD_CACHE.clear()
+    _DAY_CARD_CACHE[path] = (mt, extra)
+    return extra
+
+
 @app.route("/api/day/races", methods=["GET"])
 def day_races():
     """[전날 경주 목록] ?date=YYYYMMDD → 그 날짜 경주 카드(결과·예상vs결과·적중·복병적중·T-5 스크린샷) + KPI 요약."""
@@ -18782,10 +18859,27 @@ def day_races():
             for tg in (ra.get("pattern_tags") or []):
                 s = sig_stat.setdefault(tg, [0, 0])
                 s[1] += 1; s[0] += 1 if main_hit else 0
+            # [카드 정보 보강 (2026-07-29 권대표 지시)] 종전 카드는 prediction.recommend_main(단일 문자열)
+            #   하나만 실어 보냈다. 그 값은 판정 명단(displayedCombos)과 별개로 저장돼 어긋난다 —
+            #   실측: 나고야 1R 은 명단 3개 중 2번째(9+11)가 적중했는데 1번째(1+11)만 보여 오적중처럼 보였고,
+            #   다마노 3R 은 표시값(2+7)이 명단([1,2],[1,4])에 아예 없는 조합이었다(실제는 1+4 적중).
+            #   → 실제 판정 명단 전체 + 적중 조합 + 확정배당 + 등급을 함께 싣는다(기존 필드 무삭제).
+            try:
+                _ext = _day_card_extra(rk) or {}
+            except Exception as _dce:
+                print("[날짜별카드] 보강 실패(무시·기존 카드 유지):", _dce)
+                _ext = {}
             cards.append({
                 "race": rk, "horses": d.get("horse_count"),
                 "result": {"top3": top3},
                 "prediction": {"main": main, "sub": pred.get("recommend_sub")},
+                "combos": _ext.get("combos") or [],          # 판정 명단(복승) 전체
+                "hitCombo": _ext.get("hitCombo"),            # 그중 적중한 조합
+                "trifectas": _ext.get("trifectas") or [],
+                "quinellaOdds": _ext.get("quinellaOdds"),    # 확정배당(추정 아님)
+                "trifectaOdds": _ext.get("trifectaOdds"),
+                "betGrade": _ext.get("betGrade"),            # 추천도 등급(오늘 신설)
+                "sport": _ext.get("sport"), "gemini": _ext.get("gemini"),
                 "hit": main_hit, "dark_hit": dark_ok,
                 "dark_ranks": dh.get("dark_horses"),
                 "snapshot": _day_snapshot_for(rk, "T-5"),
