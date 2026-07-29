@@ -21200,7 +21200,13 @@ def keirin_current():
 # ══════════ [경마 oddspark 서버 직접 수집] 지방경마(NAR) 복승·쌍승 배당 ══════════
 # oddspark keiba 는 경륜(joCode)과 URL 체계가 다름 → opTrackCd + sponsorCd + raceNb 사용.
 # betType(실측 확정): 6=복승(馬連·순서무관) · 5=쌍승(馬単·순서있음). ⚠ 경륜(5/6)과 반대이므로 주의.
-_KEIBA_BET = {"quinella": 6, "exacta": 5, "trio": 9}   # 복승=馬連=6 · 쌍승=馬単=5 · 삼복승=3連複=9
+_KEIBA_BET = {"win": 1, "quinella": 6, "exacta": 5, "trio": 9}   # 단승=単勝=1 · 복승=馬連=6 · 쌍승=馬単=5 · 삼복승=3連複=9
+#   [단승 수집 복구 (2026-07-29 라이브 실측)] 문서에는 v2.1.17 로 '단승 재도입'이 적혀 있었으나
+#     그건 확장(keiba.go.jp 単勝複勝 표) 경로만이었고, 주력인 oddspark 서버 수집(전체 스냅샷의 97%)에는
+#     betType 매핑에 단승이 아예 없어 win 이 항상 빈 값이었다(스냅샷 전수 0건).
+#     → CLAUDE.md 의 "단승 급락 = 최우선 신호(_sh_order 최상단)"가 지금까지 한 번도 동작하지 못했다.
+#   실측(20260729 opTrackCd=43 R1): betType=1 응답에 "単勝・複勝 枠番 馬番 馬名 単勝 複勝" 표가 실려 있고
+#     행 형식은 [枠番, 馬番, 馬名, 単勝배당, 複勝하한 - 複勝상한] 이다. 예) 1 1 マサハヤモーブ 6.2 1.3 - 1.6
 #   [삼복승 서버 수집 (2026-07-19)] 카나자와 8R 라이브 실측: betType 7=ワイド·8=3連単·9=3連複.
 #   경륜은 별도(2車複=5·2車単=6·ワイド=7·3連複=8·3連単=9 — 코치 7R 실측).
 _KEIBA_SCHED_CACHE = {}                     # {ymd: {한자경마장명: (opTrackCd, sponsorCd)}} 당일 캐시
@@ -21242,6 +21248,45 @@ def _keiba_matrix_rows(html):
         if not any(re.fullmatch(r"\d+\.\d+", c) for c in r):
             continue
         out.append(r)
+    return out
+
+
+def _keiba_parse_win(html):
+    """단승(単勝=betType1) 표 → {마번(str): 단승배당(float)}. 실패·미발매 시 {}.
+
+    표 형식(라이브 실측): 枠番 | 馬番 | 馬名 | 単勝 | 複勝하한 - 複勝상한
+      예) 1  1  マサハヤモーブ  6.2  1.3 - 1.6
+    ⚠ 複勝(2·3착) 열을 단승으로 잘못 읽지 않도록 '마명 뒤 첫 배당'만 취한다.
+    ⚠ 0.0 은 미발매·제외마 → 버린다(가짜값이 급락 계산을 오염시킨다).
+    """
+    out = {}
+    try:
+        for r in _keirin_table_rows(html):
+            if len(r) < 4:
+                continue
+            # 마명(가나·한자) 칸을 찾아 그 뒤 첫 소수 배당을 단승으로 채택
+            i_name = next((i for i, c in enumerate(r)
+                           if re.search(r"[ぁ-んァ-ヶ一-龯]", c or "")), None)
+            if i_name is None or i_name < 1:
+                continue
+            no = None
+            for c in r[:i_name][::-1]:               # 마명 바로 앞 = 馬番
+                if re.fullmatch(r"\d{1,2}", (c or "").strip()):
+                    no = int(c)
+                    break
+            if not no or not (1 <= no <= 18):
+                continue
+            odds = None
+            for c in r[i_name + 1:]:
+                m = re.fullmatch(r"(\d{1,4}\.\d)", (c or "").strip())
+                if m:
+                    odds = float(m.group(1))
+                    break
+            if odds and odds > 0:                    # 0.0 = 미발매·제외
+                out[str(no)] = odds
+    except Exception as e:
+        print("[단승 파싱] 실패(무시):", e)
+        return {}
     return out
 
 
@@ -21458,6 +21503,14 @@ def keiba_odds():
         q = _keiba_parse_quinella(html_q)
         x = _keiba_parse_exacta(html_x)
         n_horses = _keiba_horse_count(html_q)
+        # [단승 수집 (2026-07-29)] 단승 급락은 최우선 신호인데 oddspark 경로에 매핑이 없어 전수 0건이었다.
+        #   ⚠ 실패해도 기존 복승·쌍승 수집은 그대로 진행한다(단승은 부가 신호 — 이것 때문에 수집이 끊기면 안 된다).
+        win = {}
+        try:
+            win = _keiba_parse_win(_keirin_fetch(
+                _keiba_odds_url(op_track, sponsor, ymd, race_nb, _KEIBA_BET["win"])))
+        except Exception as _we:
+            print("[단승 수집] 실패(무시·복승/쌍승은 계속):", _we)
     except Exception as e:
         return jsonify({"error": "배당 수집 실패: %s" % e}), 502
     # [발매 전·마감 후 방어] oddspark는 발매 중이 아니면 배당 매트릭스 대신 마방리스트·환급표(정수 0.0/착순)를
@@ -21467,7 +21520,7 @@ def keiba_odds():
         return jsonify({"ok": True, "waiting": True, "raceKey": rk,
                         "reason": "발매 중 배당 없음(발매 전·마감 후 추정) — 실배당 대기",
                         "track": {"opTrackCd": op_track, "sponsorCd": sponsor, "raceNb": race_nb},
-                        "counts": {"quinella": len(q), "exacta": len(x)}})
+                        "counts": {"quinella": len(q), "exacta": len(x), "win": len(win)}})
     # [조합 수 검증] N두 출전 → 복승 N(N-1)/2 · 쌍승 N(N-1). 실제 파싱 수와 비교해 불일치 시 경고(파싱 누락 조기 발견).
     exp_q = n_horses * (n_horses - 1) // 2 if n_horses >= 2 else 0
     exp_x = n_horses * (n_horses - 1) if n_horses >= 2 else 0
@@ -21477,7 +21530,7 @@ def keiba_odds():
                 " — 배당 매트릭스 일부 누락 의심(파서 확인 필요)")
         print("[경마 배당 경고]", rk, warn)
     # [검역 보강 (2026-07-23)] 스케줄 postEpoch를 deadline으로 전달(마감 후 혼입·발주시각 불일치 검역)
-    res = _do_triple_ingest(rk, q, x, [], {}, sport="horse", category="japan_local", source="oddspark",
+    res = _do_triple_ingest(rk, q, x, [], win, sport="horse", category="japan_local", source="oddspark",
                             deadline=_sched_post_epoch(rk))
     print(f"[경마 배당] {rk}: 복승 {len(q)}/{exp_q}·쌍승 {len(x)}/{exp_x} ({n_horses}두) oddspark 직접수집"
           f"(op{op_track}/sp{sponsor} R{race_nb}) → 파이프라인 반영")
