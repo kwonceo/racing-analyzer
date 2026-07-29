@@ -13422,8 +13422,44 @@ def triple_analyze():
         _history_save_analysis(rk, an)
     except Exception as e:
         print("[복기저장] 실패:", e)
+    # ── [마감 후 폴링 저장 가드 (2026-07-30)] ──────────────────────────────────
+    #   문제: 이 엔드포인트는 **프론트가 폴링할 때마다** 재분석+로그 저장을 한다. 마감 후 가드가 없어
+    #     히로시마 3R 이 09:02~17:18(**8시간 16분**) 동안 계속 갱신됐고, 그때마다 Gemini 검수까지
+    #     호출돼 7/29 하루 **670건**(경주당 평균 7회)이 쌓였다. 어제 로그 103개가 7~14시간 전까지
+    #     갱신된 것도 같은 원인이다(day/races 캐시 반복 무효화 · readonly 재평가).
+    #   ⚠ `readonly` **단독 조건은 구멍이 있다** — readonly 는 결과 확정 후에만 걸리므로, 결과 수집이
+    #     실패한 경주(7/29 나고야 11·12R 스냅샷 0건)는 영원히 안 걸려 계속 저장된다.
+    #     → **시간 기반 가드를 병행**한다.
+    #   임계 120분 근거(실측 476경주 · deadline_epoch ↔ 결과파일 mtime):
+    #     30분내 54% · 60분내 71% · **120분내 75%** · 300~330분 구간에 52건(11%) 몰림(일괄등록·백필군).
+    #     30분 컷은 절반 가까이를 잘라내므로 부적절. 120분 뒤에 오는 25%는 폴링이 아니라
+    #     **이벤트**(결과 입력·일괄 등록·수동 재생성)로 채워지므로 폴링 저장을 막아도 손실이 없다.
+    #   ⚠ 분석(`_triple_analyze`)은 그대로 수행하고 **저장만 건너뛴다** — 화면 표시는 영향 없음.
+    #   ⚠ 이벤트 경로는 무영향: 결과 입력(`_apply_result_learning`)·수동 재생성(`/api/analysis-log/rebuild`)·
+    #     일괄 등록은 `_analysis_log_save` 를 직접 호출하므로 이 가드를 타지 않는다.
+    _skip_log = False
+    try:
+        if an.get("afterClose"):
+            _mb = an.get("minutesBefore")
+            _late = isinstance(_mb, (int, float)) and (-float(_mb)) >= POLL_LOG_GUARD_MIN
+            _ro = False
+            try:
+                _lp0, _, _ = _analysis_log_path(rk)
+                _ro = bool((_hist_read_any(_lp0) or {}).get("readonly"))
+            except Exception:
+                _ro = False
+            if _ro or _late:
+                _skip_log = True
+                if _POLL_GUARD_SEEN.get(rk) != _ro:      # 경주당 1회만 로그(폴링마다 찍지 않음)
+                    _POLL_GUARD_SEEN[rk] = _ro
+                    print("⏸ [폴링 저장 가드] %s: 마감 후 %s → 로그 저장 생략(분석·표시는 정상)"
+                          % (rk, "readonly" if _ro else "%d분 경과" % POLL_LOG_GUARD_MIN))
+    except Exception as _pge:
+        _skip_log = False
+        print("[폴링 저장 가드] 판정 실패(무시·저장 진행):", _pge)
     # [분석 로그] 배당 수집·이상감지·추천이 갱신될 때마다 완전 로그 갱신(추적 가능 기록)
-    _analysis_log_save(rk, an)
+    if not _skip_log:
+        _analysis_log_save(rk, an)
     # [신규 1번] 유의미한 배당급변 경고를 data/alerts/ 에 완전 기록(중복 제외)
     try:
         _record_alert(rk, an)
@@ -13437,6 +13473,13 @@ def triple_analyze():
     except Exception:
         pass
     return jsonify(an)
+
+
+# [폴링 저장 가드 (2026-07-30)] 마감 후 이 분(minutes) 이 지나면 폴링 경로의 분석 로그 저장을 생략.
+#   실측(476경주) 마감→결과저장: 30분내 54% · 60분내 71% · 120분내 75%. 30분은 절반을 잘라내 부적절.
+#   이후 유입분(일괄등록·백필 300~330분 52건)은 이벤트 트리거로 들어오므로 폴링 차단과 무관.
+POLL_LOG_GUARD_MIN = 120
+_POLL_GUARD_SEEN = {}      # raceKey → 마지막 판정(readonly 여부). 경주당 1회만 로그 출력
 
 
 # ══════════════ 배당 변동 히스토리 + 결과기반 자동학습 (Phase 5) ══════════════
@@ -14096,7 +14139,8 @@ def _raw_profile_snapshot(rk):
         r = {"no": h.get("no"), "styleType": h.get("styleType")}
         for k in ("corners", "fieldSizes", "pastDistances", "last3fList", "pastPlacings",
                   "kimarite", "kimariteRatio", "chaku", "rentai", "gear", "classGrade",
-                  "declaredStyle", "declaredStyleLabel"):   # [표기 각질 병기 2026-07-30]
+                  "declaredStyle", "declaredStyleLabel",    # [표기 각질 병기 2026-07-30]
+                  "weight", "winOdds", "pop"):              # [발주 시점 값 보존 2026-07-30]
             v = h.get(k)
             if v not in (None, [], {}):
                 r[k] = v
@@ -22584,6 +22628,15 @@ def _keiba_starter_store_row(h):
             #   과거 통과순위로 **역산한 값**이다. 그런데 역산의 입력(코너통과·그때의 두수)이 저장되지 않아
             #   나중에 임계값(현재 상위30%=선행·하위40%=추격)을 바꿔도 **과거 데이터를 재계산할 수 없었다**.
             #   경주가 끝나면 출마표가 내려가 원본은 영구 소실된다 → 지금부터라도 담는다(추가만·기존 키 무변경).
+            # ── [발주 시점 값 보존 (2026-07-30)] 종료 후 **영구 소실**되는 3종 ──
+            #   `weight`(부담중량)·`winOdds`(단승 예상배당)·`pop`(인기순위)는 출마표에만 있고
+            #   경주가 끝나면 페이지가 내려간다. 셋 다 파서(`_keiba_parse_shutsuba`)는 뽑는데
+            #   저장행에서 빠져 왔다 — corners·kimarite·declaredStyle 과 같은 유형의 소실(오늘 5번째).
+            #   ⚠ 실제 피해: `weight_change_bonus` 공식이 부담중량을 쓰는데 **입력값이 안 남아 재계산 불가**였고,
+            #     총평 겹침률 검증조차 배당이 store 에 없어 odds_history 로 우회해야 했다.
+            "weight": h.get("weight"),          # 부담중량(kg)
+            "winOdds": h.get("winOdds"),        # 발주 시점 단승 예상배당 = 시장 인기의 1차 지표
+            "pop": h.get("pop"),                # 인기 순위
             "corners": [pr.get("corner") for pr in (h.get("past") or [])],
             "fieldSizes": [pr.get("fieldSize") for pr in (h.get("past") or [])],
             "pastDistances": [pr.get("distance") for pr in (h.get("past") or [])],
