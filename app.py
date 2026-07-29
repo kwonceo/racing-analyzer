@@ -18715,9 +18715,52 @@ def timeline_snapshot_get(race_key):
 
 
 # ── [전날 경주 목록 + 스크린샷] 날짜별 결과기록 카드 + KPI ──
+# [스냅샷 인덱스 캐시 (2026-07-29)] _day_snapshot_for 는 경주마다 SNAPSHOT_DIR 전체를 훑고
+#   .png 마다 짝 .json 을 열었다. 날짜별 기록은 경주 110건을 한 번에 그리므로 110 × 전체파일이 되어
+#   이 함수 하나가 응답 시간의 대부분을 차지했다. 디렉터리를 한 번만 인덱싱해 공유한다.
+#   TTL 60초 — 스냅샷은 경주 중에만 새로 생기므로 이 정도면 화면 갱신에 지장 없다.
+_SNAP_INDEX = {"t": 0.0, "map": {}}
+
+
+def _snapshot_index(ttl=60):
+    """{raceKey: {trigger: 파일명, '_any': 파일명}} — 실패 시 빈 dict(호출부가 기존 스캔으로 폴백)."""
+    now = time.time()
+    if _SNAP_INDEX["map"] and (now - _SNAP_INDEX["t"]) < ttl:
+        return _SNAP_INDEX["map"]
+    m = {}
+    try:
+        if not os.path.isdir(SNAPSHOT_DIR):
+            return {}
+        for fn in os.listdir(SNAPSHOT_DIR):
+            if not fn.endswith(".png"):
+                continue
+            try:
+                meta = json.load(open(os.path.join(SNAPSHOT_DIR, fn.rsplit(".", 1)[0] + ".json"),
+                                     encoding="utf-8"))
+            except Exception:
+                continue
+            _rk = (meta.get("raceKey") or "").strip()
+            if not _rk:
+                continue
+            e = m.setdefault(_rk, {})
+            e.setdefault("_any", fn)
+            if meta.get("trigger"):
+                e[str(meta["trigger"])] = fn
+    except Exception:
+        return {}
+    _SNAP_INDEX.update(t=now, map=m)
+    return m
+
+
 def _day_snapshot_for(rk, trigger="T-5"):
     """해당 경주의 지정 trigger 스냅샷 파일명 반환(없으면 T-10 등 폴백). 이미지 URL 조립용."""
     try:
+        idx = _snapshot_index()
+        if idx:
+            e = idx.get((rk or "").strip())
+            if not e:
+                return None                      # 인덱스가 있는데 없으면 정말 없는 것
+            return e.get(trigger) or e.get("_any")
         if not os.path.isdir(SNAPSHOT_DIR):
             return None
         cand = None
@@ -18743,6 +18786,8 @@ def _day_snapshot_for(rk, trigger="T-5"):
 #   하루 110경주 × 파일 열기는 매 요청 반복하면 화면이 느려진다. 파일이 바뀐 것만 다시 읽는다.
 #   (_results_history_rows 에서 0.74초 → 0.02초를 낸 것과 같은 방식)
 _DAY_CARD_CACHE = {}      # {logpath: (mtime, extra)}
+_DARK_LOG_CACHE = {}      # {path: (mtime, (date, race, doc))}  — dark_horse_log 전수 스캔 캐시
+_RACE_RESULT_CACHE = {}   # {path: (mtime, doc)}                — race_results 전수 스캔 캐시
 
 
 def _day_card_extra(rk):
@@ -18827,26 +18872,60 @@ def day_races():
     q_hit = q_tot = dark_hit = 0
     sig_stat = {}
     # dark_horse_log 인덱싱(경주명→분석)
+    # [스캔 캐시 (2026-07-29)] 종전엔 매 요청마다 dark_horse_log 전 파일을 열어 date 를 확인했다.
+    #   날짜별 기록은 새로고침이 잦은 화면이라 이 전수 스캔이 그대로 지연으로 나타난다.
+    #   파일별 mtime 으로 캐시하고 바뀐 것만 다시 읽는다(_DAY_CARD_CACHE 와 같은 방식).
     dark_by_race = {}
     if os.path.isdir(DARK_LOG_DIR):
         for fn in os.listdir(DARK_LOG_DIR):
             if not fn.endswith(".json"):
                 continue
+            fp = os.path.join(DARK_LOG_DIR, fn)
             try:
-                d = json.load(open(os.path.join(DARK_LOG_DIR, fn), encoding="utf-8"))
+                mt = os.path.getmtime(fp)
             except Exception:
                 continue
-            if d.get("date") == date_dash:
-                dark_by_race[d.get("race")] = d
+            _c = _DARK_LOG_CACHE.get(fp)
+            if _c and _c[0] == mt:
+                _dt, _race, _doc = _c[1]
+            else:
+                try:
+                    d = json.load(open(fp, encoding="utf-8"))
+                except Exception:
+                    continue
+                _dt, _race, _doc = d.get("date"), d.get("race"), d
+                if len(_DARK_LOG_CACHE) > 4000:
+                    _DARK_LOG_CACHE.clear()
+                _DARK_LOG_CACHE[fp] = (mt, (_dt, _race, _doc))
+            if _dt == date_dash:
+                dark_by_race[_race] = _doc
     if os.path.isdir(RACE_RESULTS_DIR):
         for fn in sorted(os.listdir(RACE_RESULTS_DIR)):
             if not fn.endswith(".json"):
                 continue
+            # [스캔 캐시 (2026-07-29)] race_results 전 파일(1,500+)을 매 요청마다 열던 구간.
+            #   날짜 필터가 파일을 연 뒤에 걸려서, 오늘 날짜가 아닌 파일까지 전부 파싱하고 있었다.
+            #   ⓐ 파일명 날짜 접두로 먼저 걸러 대부분을 파싱 전에 버리고
+            #   ⓑ 남은 것만 mtime 캐시로 재사용한다(기존 date 필드 검사는 그대로 유지 — 안전).
+            _fp = os.path.join(RACE_RESULTS_DIR, fn)
+            if fn[:10].replace("_", "-") != date_dash and re.match(r"\d{4}[-_]\d{2}[-_]\d{2}", fn):
+                continue
             try:
-                d = json.load(open(os.path.join(RACE_RESULTS_DIR, fn), encoding="utf-8"))
+                _mt = os.path.getmtime(_fp)
             except Exception:
                 continue
-            if d.get("date") != date_dash:
+            _rc = _RACE_RESULT_CACHE.get(_fp)
+            if _rc and _rc[0] == _mt:
+                d = _rc[1]
+            else:
+                try:
+                    d = json.load(open(_fp, encoding="utf-8"))
+                except Exception:
+                    continue
+                if len(_RACE_RESULT_CACHE) > 4000:
+                    _RACE_RESULT_CACHE.clear()
+                _RACE_RESULT_CACHE[_fp] = (_mt, d)
+            if not isinstance(d, dict) or d.get("date") != date_dash:
                 continue
             rk = d.get("raceKey") or ""
             res = d.get("result") or {}
