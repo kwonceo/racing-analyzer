@@ -2391,7 +2391,15 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
         _history_append(rk, q, x, deadline, win, baseline_reset=baseline_reset,
                         source=("oddspark" if _src_is_oddspark(source) else "private"))
     except Exception as e:
+        # [관측 개통 (2026-07-29)] 여기서 실패하면 그 경주는 **스냅샷 0**이 되는데, 지금까지는 콘솔
+        #   print 로만 남아 서버 창을 놓치면 흔적이 사라졌다(실측: 나고야 12R 등 archive_snapshots 키가
+        #   아예 없는 채 analysis 만 쌓인 파일이 다수). 거부 로그에 남겨 사후 추적이 가능하게 한다.
         print("[히스토리] 기록 실패:", e)
+        try:
+            _ingest_reject_log(rk, "이력 기록 예외: %s" % str(e)[:80], source,
+                               {"combos": len(q or []), "exception": True})
+        except Exception:
+            pass
     # [경륜 출마표 전적 자동 수집] 경륜 배당 수집(확장 asyukk 포함) 시 전적도 함께 → 통합등급 반영(raceKey에서 joCode 자동 감지·1회).
     if sport == "cycle":
         try:
@@ -28874,8 +28882,38 @@ def _multi_collect_one(track, race, ymd):
             _t0h = _triple_load().get(key) or {}
             _tsh = str(_t0h.get("source") or "")
             _fresh_private = bool(_tsh and "oddspark" not in _tsh and (time.time() - (_t0h.get("t") or 0)) <= 200)
+            # ── [수집 공백 방어 (2026-07-29)] 사설이 '활성'이라도 **실제로 이력을 남기고 있는가**를 확인 ──
+            #   실측: 오늘 85경주 중 15경주가 스냅샷 0개였고, 그중 나고야 7·8R·히라츠카 7R은 배당 수집
+            #   자체는 성공(multi_race_store 에 복승 66조합 존재)했는데 이력만 통째로 비어 있었다.
+            #   원인 = 이 게이트가 triple_store 의 source/t 만 보고 생략하는데, 사설(확장)이 그 경주를
+            #   실제로는 이력에 기록하지 않는 경우(ingest 가 다른 가드에 걸려 거부되는 등)가 있어
+            #   **양쪽 다 기록하지 않는 공백**이 생긴다. 그런데 이 생략은 지금까지 로그조차 없어
+            #   `/api/ingest/rejects` 에 흔적이 남지 않았다(그래서 공백 15경주의 사유를 알 수 없었다).
+            #   → 이력이 최근(≤200초) 갱신 중일 때만 생략하고, 비어 있으면 oddspark 가 공백을 메운다.
+            #   ⚠ 사설이 정상 기록 중이면 판정이 그대로라 기존 '사설 우선' 원칙은 불변(이중 기록도 없음).
+            _gap_fill = False
+            if _fresh_private:
+                _hist_fresh = False
+                try:
+                    _hd0 = _hist_read_any(_hist_path(key)[0]) or {}
+                    _hs0 = _hd0.get("archive_snapshots") or _hd0.get("snapshots") or []
+                    if _hs0:
+                        _hist_fresh = (time.time() - (_hs0[-1].get("t") or 0)) <= 200
+                except Exception:
+                    _hist_fresh = False
+                if not _hist_fresh:
+                    _fresh_private, _gap_fill = False, True
             if not _fresh_private:
                 _history_append(key, q, x, race.get("postEpoch"), win, source="oddspark")
+                if _gap_fill:
+                    print("🩹 [이력 공백 보충] %s: 사설 활성(src=%s)이나 이력이 비어 있어 oddspark 가 기록"
+                          % (key, _tsh[:40]))
+                    _ingest_reject_log(key, "사설 우선 해제(이력 공백) → oddspark 백업 기록", "oddspark",
+                                       {"combos": len(q or []), "prevSrc": _tsh[:80], "gapFill": True})
+            else:
+                # [관측 개통] 생략도 기록에 남긴다 — '조용한 생략'이 공백 원인 추적을 막아 왔다.
+                _ingest_reject_log(key, "사설 우선(이력 기록 생략)", "oddspark",
+                                   {"combos": len(q or []), "prevSrc": _tsh[:80]})
         except Exception as _he:
             print("[다중경주] 이력 기록 실패(무시):", _he)
         # [경륜 전적 자동 수집] 다중 경주 경륜 배당 수집 시 전적도 함께(1회·통합등급 반영)
