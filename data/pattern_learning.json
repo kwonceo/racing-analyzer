@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "서울 5경주 1400M",
-      "horse_no": 7,
-      "recent_avg": 5.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-19"
-    },
-    {
-      "race": "부산 4경주",
-      "horse_no": 10,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-19"
-    },
-    {
-      "race": "서울 7경주",
-      "horse_no": 6,
-      "recent_avg": 5.5,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-19"
-    },
-    {
       "race": "모리오카 7경주",
       "horse_no": 10,
       "recent_avg": 7.4,
@@ -4649,16 +4623,40 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-07-29"
+    },
+    {
+      "race": "나고야 12경주",
+      "horse_no": 1,
+      "recent_avg": 6.4,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-29"
+    },
+    {
+      "race": "나고야 12경주",
+      "horse_no": 5,
+      "recent_avg": 8.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-29"
+    },
+    {
+      "race": "나고야 12경주",
+      "horse_no": 3,
+      "recent_avg": 7.2,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1805,
-      "hit": 356
+      "count": 1814,
+      "hit": 359
     },
     "전체부진마": {
-      "count": 2981,
-      "hit": 810
+      "count": 2993,
+      "hit": 813
     },
     "대규모급락": {
       "count": 7,
@@ -4668,7 +4666,7 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 1176,
+      "count": 1179,
       "hit": 454
     },
     "급락동반": {
