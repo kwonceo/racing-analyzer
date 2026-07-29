@@ -7110,6 +7110,12 @@
       if (_t0) ft = [{ combo: _t0, odds: cp.confTrifecta ? cp.confTrifectaOdds : cp.trifectaOdds,
         oddsEst: !!(cp.confTrifecta ? cp.confTrifectaOddsEst : cp.trifectaOddsEst) }];   // [추정 표기]
     }
+    // [삼복승 섀도우 (2026-07-29 권대표 지시)] 회원 화면에서는 삼복승을 추천하지 않는다 — 대표님께만 전달.
+    //   백테스트상 삼복승은 어떤 설정으로도 흑자가 없었다(경륜 최선 62.5%·경마 38.8%)이며,
+    //   전체 손실 −696,600원이 사실상 전부 삼복승(−698,700원)에서 났다.
+    //   ⚠ 폴백(위 confTrifecta 복원) 뒤에 비워야 한다 — 앞에서 비우면 폴백이 되살린다.
+    //   생성물(corePicks.finalTrifectas·shadowTrifectas)과 기록은 그대로 남는다(시뮬용).
+    if (a.trioShadow) ft = [];
     if (!fq.length && !dansung && !special0.length) return '';
     // [단통 경고 배너] "저배당 추천 신뢰도 낮음 · 복병 감지에 집중"
     const dansungBanner = dansung ? `<div style="margin:4px 0 8px;padding:9px 11px;border:2px solid #f59e0b;border-radius:9px;background:rgba(245,158,11,.14)">

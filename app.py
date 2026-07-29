@@ -11890,6 +11890,12 @@ def _triple_analyze(rk, rec):
         _apply_tri_hysteresis(rk, _an_out)
     except Exception as _tye:
         print("[삼복승 히스테리시스] 적용 실패(무시·원본 표시):", _tye)
+    # [③ 베팅 규칙 v2 (2026-07-29 권대표 승인)] 백테스트로 정한 시장별 규칙 적용 — 아래 BET_RULES 참조.
+    #   ⚠ 히스테리시스 뒤에 와야 한다(안정화된 최종 순위에 규칙을 건다). 실패 시 원본 그대로.
+    try:
+        _apply_bet_rules(rk, _an_out)
+    except Exception as _bre:
+        print("[베팅 규칙] 적용 실패(무시·원본 표시):", _bre)
     # [경주 등급 배지 (2026-07-22 권대표 요청)] 예측 확신을 경주당 1개 등급으로 — 오버레이·카드·카톡
     #   공통 표시(모든 경주가 같은 무게로 보이던 문제 해소). 기준 = 승부 계층·카톡 알림과 동일 축.
     #   🔥 강력승부: 신호 2+ & 확신도 65+ / ✅ 추천: 신호 1+ & 확신도 50+ / ⚖️ 관찰: 신호 or 확신도 40+
@@ -12179,6 +12185,97 @@ def _apply_tri_hysteresis(rk, an):
     an["triHysteresis"] = {"held": True, "switches": st.get("tri_switches", 0),
                            "proposal": "+".join(str(x) for x in prop),
                            "heldMain": "+".join(str(x) for x in st["tri"])}
+
+
+# ══════════ [베팅 규칙 v2 (2026-07-29 권대표 승인·백테스트 기반)] 시장별 복승 규칙 + 삼복승 섀도우 ══════════
+#  배경: 확정배당을 채우고 회수율을 정직하게 재산출하니 전체 67.6%(투자 2,152,000 → 회수 1,455,400)였다.
+#    분해해 보니 손실은 사실상 전부 삼복승에서 났다 — 삼복승 −698,700원 ≈ 전체 손익 −696,600원.
+#    복승만 걸었다면 전체 99.7%, 경륜 복승 단독은 105.7%였다.
+#  백테스트(7/06~7/28 · 중복 파일 병합 후 · 확정배당 기준)로 시장별 최적이 서로 다름을 확인:
+#    · 경륜 251경주 — 상위1 128.8% / 상위2 102.8% / 전체 96.1%   → 1순위 집중
+#    · 일본 141경주 — 상위1  91.8% / 상위2  79.0% / 전체 68.5%   → 1순위 + 배당 컷
+#         └ 배당 컷: 4배+ 134.9%(68경주) · 5배+ 181.7%(48경주). 커버리지를 지키려고 4배 채택 +
+#           '전적 있고 후보 2개 이하'면 컷 면제 → 90경주(65%) 커버에 121.0%.
+#           (4배 미만 71경주 중 전적 누락 15경주는 적중 0건이었다 — 전적 없으면 반드시 실패)
+#    · 한국  26경주 — 상위1  19.6% / 상위2  76.9% / 전체 68.4%   → 1순위가 26경주 중 1건(3.8%)만 적중.
+#           한국만 정반대라 규칙을 걸지 않는다(maxQ=0). 원인 진단 전까지 현행 유지.
+#  ⚠ 무삭제 원칙: 메인에서 빠지는 복승은 지우지 않고 quinellaRef(참고·접기)로 옮긴다.
+#  ⚠ enabled=False 로 두면 종전 동작으로 즉시 복귀한다(되돌리기 한 줄).
+BET_RULES = {
+    "enabled": True,
+    "trioShadow": True,      # 삼복승: 추천·판정에서 빼고 대표 전용으로만 — 생성·저장은 그대로 유지
+    # maxQ: 복승 메인 최대 조합수(0 = 규칙 미적용) · minOdds: 1순위 예상배당 하한(0 = 컷 없음)
+    # altFormMax: 전적이 있고 후보 수가 이 값 이하면 minOdds 컷 면제(0 = 면제 없음)
+    "cycle": {"maxQ": 1, "minOdds": 0.0, "altFormMax": 0},
+    "japan": {"maxQ": 1, "minOdds": 4.0, "altFormMax": 2},
+    "korea": {"maxQ": 0, "minOdds": 0.0, "altFormMax": 0},
+}
+
+
+def _bet_market(rk, sport=None):
+    """raceKey·종목 → 베팅 규칙 시장 키(korea/cycle/japan). 한국이 최우선(경마장명이 확실한 판별자)."""
+    s = str(rk or "")
+    if _KRA_TRACK_RE.search(s):
+        return "korea"
+    if str(sport or "").lower() == "cycle" or _KEIRIN_ONLY_RE.search(s):
+        return "cycle"
+    return "japan"
+
+
+def _apply_bet_rules(rk, an):
+    """시장별 베팅 규칙 적용. 실패해도 원본 무변경(호출부에서 예외 흡수)."""
+    if not BET_RULES.get("enabled"):
+        return
+    cp = an.get("corePicks")
+    if not isinstance(cp, dict):
+        return
+    if an.get("recommendClosed") or an.get("afterClose"):
+        return                                        # 마감 후에는 표시 계층을 건드리지 않는다(동결 원칙)
+    mk = _bet_market(rk, an.get("sport"))
+    rule = BET_RULES.get(mk) or {}
+    an["betMarket"] = mk
+
+    # ── 복승: 상위 maxQ 개만 메인, 나머지는 참고로 강등
+    fq = list(cp.get("finalQuinellas") or [])
+    maxq = int(rule.get("maxQ") or 0)
+    if fq and maxq > 0:
+        _o1 = _safe_num((fq[0] or {}).get("odds")) or 0.0
+        _lo = float(rule.get("minOdds") or 0.0)
+        _altmax = int(rule.get("altFormMax") or 0)
+        # 컷 면제: 전적이 있고 후보가 좁을 때(로직이 확신하는 게 아니라 '재료가 갖춰진' 경주)
+        _alt_ok = bool(_altmax) and (not cp.get("formMissing")) and (len(fq) <= _altmax)
+        _pass = (not _lo) or (_o1 >= _lo) or _alt_ok
+        if _pass:
+            keep, drop = fq[:maxq], fq[maxq:]
+            an["betGrade"] = "승부"
+            an["betReason"] = ("배당 %.1f배 ≥ %.1f배" % (_o1, _lo)) if (_lo and _o1 >= _lo) \
+                else ("전적 보유·후보 %d개" % len(fq) if _alt_ok else "컷 없음")
+        else:
+            keep, drop = [], fq                       # 관망 — 메인 없음(참고로만 남긴다)
+            an["betGrade"] = "관망"
+            an["betReason"] = "1순위 %.1f배 < %.1f배 · 전적/후보 조건 미충족" % (_o1, _lo)
+        if drop:
+            ref = list(cp.get("quinellaRef") or [])
+            for _d in drop:
+                _x = dict(_d)
+                _x["stars"] = 1
+                _x["refReason"] = ((_x.get("refReason") or "") + " · 베팅규칙 참고 강등").strip(" ·")
+                ref.append(_x)
+            cp["quinellaRef"] = ref
+        cp["finalQuinellas"] = keep
+        cp["betRuleApplied"] = {"market": mk, "maxQ": maxq, "minOdds": _lo,
+                                "grade": an.get("betGrade"), "kept": len(keep), "demoted": len(drop)}
+
+    # ── 삼복승 섀도우: 회원 추천·적중 판정에서 제외하되 생성물은 그대로 남긴다.
+    #    (손실은 즉시 멈추고, 시뮬용 기록은 끊기지 않게 — 확정배당 확보가 아직 72%라 폐지하지 않는다)
+    if BET_RULES.get("trioShadow"):
+        ft = cp.get("finalTrifectas") or []
+        if ft:
+            for _t in ft:
+                if isinstance(_t, dict):
+                    _t["shadow"] = True
+            cp["shadowTrifectas"] = [dict(_t) for _t in ft if isinstance(_t, dict)]
+        an["trioShadow"] = True
 
 
 @app.route("/api/extract/japan", methods=["POST"])
@@ -13661,8 +13758,12 @@ def _build_analysis_log(rk, an=None):
             _dc_out = {
                 "quinellas": [sorted(int(x) for x in (q.get("combo") or []))
                               for q in (_cp_dc.get("finalQuinellas") or []) if q.get("combo")],
-                "trifectas": [sorted(int(x) for x in (t.get("combo") or []))
-                              for t in (_cp_dc.get("finalTrifectas") or [])[:2] if t.get("combo")],
+                # [삼복승 섀도우 (2026-07-29)] trioShadow 면 판정 명단에서 제외한다 — 회원에게 추천하지
+                #   않는 조합을 성적표에 넣으면 회수율이 다시 왜곡된다. 생성물(finalTrifectas·
+                #   shadowTrifectas)은 그대로 남아 대표님 전용 확인과 시뮬에 계속 쓰인다.
+                "trifectas": ([] if an.get("trioShadow") else
+                              [sorted(int(x) for x in (t.get("combo") or []))
+                               for t in (_cp_dc.get("finalTrifectas") or [])[:2] if t.get("combo")]),
                 "at": time.strftime("%H:%M:%S", time.localtime()),
             }
             if not (_dc_out["quinellas"] or _dc_out["trifectas"]):
