@@ -8852,6 +8852,15 @@
   const _keibaOdds = { enabled: false, lastPoll: 0, lastRk: null, busy: false,
     lastCounts: null, lastTime: '', lastMsg: '', lastRkShown: '', pinnedRk: '',
     lastDetect: 0, detecting: false, lastWaiting: false };   // [경주 자동추종] 현재 경주번호 감지 상태
+  /** [기본 켜짐 (2026-07-29 권대표 지시)] "일본 경륜과 경마는 항상 하는데 꺼놓을 일이 있나?"
+   *  종전 기본값은 꺼짐(opt-in)이었다. 그런데 이 토글은 **일본 지방경마(NAR)에서만** 동작한다 —
+   *  중앙경마(JRA)는 미지원이라 코드가 자동 비활성화하고, 한국 경주는 폴링에서 제외된다.
+   *  즉 켜서 문제되는 상황이 없고, 안 켜면 서버 수집 경로가 통째로 죽는다(실측: 오늘 경마 단승
+   *  수집이 한 번도 안 돌았고 스냅샷이 전부 확장 경로(src=private)로만 기록됐다).
+   *  → 명시적으로 끈 경우('0')만 꺼짐. 미설정·'1' 은 켜짐. 기존 설정은 그대로 존중된다. */
+  function _keibaAutoDefault() {
+    try { return localStorage.getItem('keibaOddsAuto') !== '0'; } catch (_) { return true; }
+  }
   // 경주 지정(pin)이 있으면 그 경주, 없으면 현재 경주 자동추종
   function _keibaTargetRk() {
     return _keibaOdds.pinnedRk || _closing.panelRk || getActiveRaceKey() || '';
@@ -8868,7 +8877,7 @@
       _setKeibaStatusHtml('<div style="color:#c084fc;font-weight:800">🏇 중앙경마(JRA)</div><div style="color:#94a3b8;font-size:12px">oddspark 서버 수집 미지원 — <b>Chrome 확장으로만 수집</b>됩니다.</div>');
       return;
     }
-    if (_chk && _chk.disabled) { _chk.disabled = false; try { _chk.checked = localStorage.getItem('keibaOddsAuto') === '1'; } catch (_) { /* */ } _keibaOdds.enabled = _chk.checked; }
+    if (_chk && _chk.disabled) { _chk.disabled = false; try { _chk.checked = _keibaAutoDefault(); } catch (_) { /* */ } _keibaOdds.enabled = _chk.checked; }
     if (!_keibaOdds.enabled) { _setKeibaStatusHtml('⬜ 꺼짐 — 토글을 켜면 현재 경주 배당을 자동 수집합니다.'); return; }
     const head = '<div style="color:#38d39f;font-weight:800">✅ oddspark 수집 중</div>';
     const rkLine = _keibaOdds.lastRkShown ? `<div style="color:#94a3b8;font-size:11px">현재 경주: ${esc(_keibaOdds.lastRkShown)}</div>` : '';
@@ -9312,8 +9321,15 @@
     // [경마 oddspark 서버 수집] 토글 + 즉시 1회 조회 배선(설정 localStorage 유지)
     { const chk = document.getElementById('keibaOddsAutoChk');
       if (chk) {
-        try { chk.checked = localStorage.getItem('keibaOddsAuto') === '1'; } catch (_) { /* */ }
+        try { chk.checked = _keibaAutoDefault(); } catch (_) { chk.checked = true; }
         _keibaOdds.enabled = chk.checked;
+        // 기본 켜짐이므로 첫 진입에도 즉시 1회 수집(토글을 손대야만 수집이 시작되던 문제 제거)
+        if (chk.checked) {
+          const _rk0 = _closing.panelRk || (typeof getActiveRaceKey === 'function' ? getActiveRaceKey() : '');
+          if (_rk0 && !jpIsKoreaName(_rk0) && !jpIsCentralName(_rk0)) {
+            Promise.resolve(fetchKeibaOdds(_rk0, true)).catch(() => { /* */ });
+          }
+        }
         _renderKeibaStatus();
         chk.addEventListener('change', () => {
           _keibaOdds.enabled = chk.checked;
