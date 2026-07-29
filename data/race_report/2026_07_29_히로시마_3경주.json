@@ -1,0 +1,171 @@
+{
+ "race": "히로시마 3경주",
+ "raceKey": "히로시마 3경주",
+ "date": "2026-07-29",
+ "result": {
+  "1st": 4,
+  "2nd": 1,
+  "3rd": 2,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    4,
+    5
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.489,
+   "record_score": 78.9,
+   "confidence": 19.0,
+   "reason": "쌍승역전"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": 0.0,
+   "avg_drop": -15.4,
+   "grade": "🔴",
+   "rep_combo": [
+    1,
+    7
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.436,
+   "record_score": 114.2,
+   "confidence": 57.8,
+   "reason": "초과급락 + 쌍승역전"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 94.6,
+   "confidence": 0.0,
+   "reason": "전적상위"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": 0.0,
+   "avg_drop": -15.4,
+   "grade": "🔴",
+   "rep_combo": [
+    1,
+    7
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.658,
+   "record_score": 100.8,
+   "confidence": 97.8,
+   "reason": "초과급락 + 쌍승역전"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    1,
+    5
+   ],
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.339,
+   "record_score": 77.3,
+   "confidence": 36.5,
+   "reason": "쌍승역전"
+  }
+ },
+ "recommended_horses": [
+  7,
+  5,
+  1
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 4번 78.9점",
+  "3. 초과급락 감지: 1번 초과급락 0.0%p (전체평균 -15.4%)",
+  "4. 쌍승 역전: 7→2(12.8) < 2→7(43.9) → 7번 실질 상위 신호",
+  "4. 쌍승 역전: 3→2(27.3) < 2→3(85.8) → 3번 실질 상위 신호",
+  "5. 종합 신뢰도 19.0점(하) 판정",
+  "6. BMED 전략: 역배열형 적용",
+  "7. 최종 추천: 복승 메인 1+5"
+ ],
+ "confidence_breakdown": {
+  "horse": 4,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 35,
+  "quinella_mismatch_score": 0,
+  "record_score": 78.9,
+  "total": 19.0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "초과급락_적중",
+  "쌍승역전_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 78.9,
+  "dropAmt": -15.4,
+  "dropScore": 77.0,
+  "inverse": true,
+  "inverseHorses": [
+   7,
+   3,
+   5,
+   1
+  ],
+  "inverseHit": [
+   1
+  ],
+  "confidence": 57.8,
+  "reason": "전적유력마 1번 적중 · 1+7 복승 급락(-15.4%) → 1번 입상 적중 · 역배열 감지말 1번 입상"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 0
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-29 09:34:06"
+}

@@ -1,0 +1,83 @@
+{
+ "race_id": "2026_07_29_히로시마_3경주",
+ "raceKey": "히로시마 3경주",
+ "date": "2026-07-29",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "히로시마",
+ "round": 3,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 4,
+  "2nd": 1,
+  "3rd": 2
+ },
+ "payouts": {
+  "quinella": 19.8,
+  "trifecta": 5.8
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    1,
+    7
+   ],
+   "horse": 1,
+   "drop_rate": -15.4,
+   "excess_drop": 0.0
+  }
+ ],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   4,
+   5,
+   7,
+   3,
+   6
+  ],
+  "eliminated": [],
+  "recommend_main": "1+5",
+  "recommend_sub": null,
+  "strategy": "BMED_역배열형",
+  "signal_quality": "상",
+  "confidence": 97.8,
+  "inverse": true
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [
+   "쌍승역전",
+   "복승불일치"
+  ],
+  "anomaly_correct": true,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 19.8,
+  "trifecta_odds": 5.8,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-29 09:34:06",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
