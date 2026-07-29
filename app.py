@@ -12279,6 +12279,78 @@ _BET_GRADES = {
 }
 
 
+#  [배당 되돌림 감지 (2026-07-29 리플레이 근거)] 종전 로직은 **급락만** 신호로 썼다.
+#    배당이 '오르는' 움직임은 읽지 않아, 민 조합이 죽어가는 동안에도 계속 밀었다.
+#    소노다 6R 실사고: 8+9 가 T-6분 5.6배 → T-0분 12.8배(+129%)로 올랐는데 끝까지 메인 유지.
+#    실제 정답은 그 사이 올라온 9+12(확정 3.6배)였다.
+#  리플레이 A — '민 조합(초반 최저배당)이 마감까지 X% 상승' 별 적중률 (405경주):
+#      20% 미만(대조군) 360경주 33.6%  |  20%+ 42경주 23.8%  |  50%+ 17경주 17.6%  |  100%+ 7경주 14.3%
+#      → 오를수록 단조 감소. 20% 만으로도 10%p 하락.
+#  리플레이 B — '급락(-20%+) 후 최저점 대비 반등' 별 조합 적중률 (395경주·2,089조합):
+#      반등없음 8.4%  |  5~15% 9.7%  |  15~30% 7.6%  |  30~60% **1.3%**  |  60%+ **1.2%**
+#      → 30% 가 절벽. 그 이상 반등한 급락은 사실상 가짜다(적중률 1/7 토막).
+#  ⚠ 무삭제: 강등된 조합은 지우지 않고 quinellaRef(참고)로 옮긴다.
+SURGE_WARN = 20.0        # 민 조합 상승 — 경고 + 등급 하향
+SURGE_DEMOTE = 50.0      # 민 조합 상승 — 메인에서 참고로 강등
+REBOUND_FAKE = 30.0      # 급락 후 반등 — 가짜 신호로 간주
+
+
+def _combo_odds_trend(rk, combos):
+    """{조합: {'first','last','low','surge','rebound'}} — triple_store history(최근 12틱) 기반.
+    surge  = 첫 관측 대비 마지막 상승률(%)   · 민 조합이 죽어가는지
+    rebound= 최저점 대비 마지막 반등률(%)    · 급락이 되돌아왔는지(가짜 신호)
+    실패 시 {} (호출부는 기존 동작 유지)."""
+    try:
+        hist = ((_triple_load().get(rk) or {}).get("history")) or []
+    except Exception:
+        return {}
+    if len(hist) < 3:
+        return {}
+    want = set()
+    for c in (combos or []):
+        try:
+            want.add(tuple(sorted(int(x) for x in c)))
+        except (TypeError, ValueError):
+            continue
+    if not want:
+        return {}
+    series = {k: [] for k in want}
+    for snap in hist:
+        qm = _as_qmap(snap.get("quinella")) if "_as_qmap" in globals() else None
+        if qm is None:
+            qm = {}
+            _v = snap.get("quinella")
+            if isinstance(_v, dict):
+                for k, o in _v.items():
+                    try:
+                        qm[tuple(sorted(int(x) for x in str(k).replace("+", "-").split("-")))] = float(o)
+                    except (TypeError, ValueError):
+                        pass
+            elif isinstance(_v, list):
+                for it in _v:
+                    if isinstance(it, dict) and it.get("combo") and it.get("odds") is not None:
+                        try:
+                            qm[tuple(sorted(int(x) for x in it["combo"]))] = float(it["odds"])
+                        except (TypeError, ValueError):
+                            pass
+        for k in want:
+            v = qm.get(k)
+            if v:
+                series[k].append(float(v))
+    out = {}
+    for k, vals in series.items():
+        if len(vals) < 3:
+            continue
+        first, last, low = vals[0], vals[-1], min(vals)
+        out[k] = {
+            "first": first, "last": last, "low": low,
+            "surge": round((last - first) / first * 100, 1) if first else 0.0,
+            "rebound": round((last - low) / low * 100, 1) if low else 0.0,
+            "dropFromFirst": round((low - first) / first * 100, 1) if first else 0.0,
+        }
+    return out
+
+
 def _bet_grade(mk, o1, form_missing=False, min_odds=0.0):
     """추천도 등급 → (등급, 근거).
     ⚠ '전적 누락 = 최하 등급'은 **일본 경마 실측**(4배 미만 71경주 중 전적누락 15경주 적중 0건)이다.
@@ -12344,6 +12416,60 @@ def _apply_bet_rules(rk, an):
                 _x["stars"] = 1
                 _x["refReason"] = ((_x.get("refReason") or "") + " · 베팅규칙 참고 강등").strip(" ·")
                 ref.append(_x)
+        # ⓔ [배당 되돌림 필터 (2026-07-29 리플레이 근거)] 메인에 남은 조합의 배당 궤적을 보고
+        #    '죽은 신호'를 걸러낸다. 유형별 실측 적중률(395경주·11,010조합, 전체 평균 3.6%):
+        #      진성급락(반등없음) 8.6~9.1%  ← 최강
+        #      페이크급락(급락후 30%+반등) 1.2%  ← 역신호(진성의 1/7)
+        #      급등 50%+ 0.6%                  ← 최악(1/14)
+        #    ⚠ 급등 20~50%는 기대값 1.57로 흑자처럼 보였으나 2,375배 1건이 만든 착시였다
+        #      (중앙값 25.8배 · 중앙값 기대 0.44) → 채택하지 않고 50% 경계만 쓴다.
+        #    ⚠ 무삭제: 걸러진 조합은 지우지 않고 참고(quinellaRef)로 옮긴다.
+        try:
+            _tr = _combo_odds_trend(rk, [q.get("combo") for q in keep if q.get("combo")])
+            if _tr:
+                _kept2, _flags = [], []
+                for _q in keep:
+                    _k = tuple(sorted(int(x) for x in (_q.get("combo") or [])))
+                    _t = _tr.get(_k)
+                    if not _t:
+                        _kept2.append(_q)
+                        continue
+                    _why = None
+                    if _t["dropFromFirst"] <= -20 and _t["rebound"] >= REBOUND_FAKE:
+                        _why = "페이크급락(급락 %.0f%% 후 %.0f%% 반등 · 실측 적중률 1.2%%)" \
+                               % (_t["dropFromFirst"], _t["rebound"])
+                    elif _t["surge"] >= SURGE_DEMOTE:
+                        _why = "배당 급등 %.0f%%(%.1f→%.1f배 · 실측 적중률 0.6%%)" \
+                               % (_t["surge"], _t["first"], _t["last"])
+                    if _why:
+                        _x = dict(_q)
+                        _x["stars"] = 1
+                        _x["refReason"] = ((_x.get("refReason") or "") + " · " + _why).strip(" ·")
+                        ref.append(_x)
+                        _flags.append({"combo": _q.get("combo"), "reason": _why})
+                        continue
+                    # 남은 조합 표기: 진성급락 우대 / 상승 경고
+                    if _t["dropFromFirst"] <= -20 and _t["rebound"] < 15:
+                        _q["trendTag"] = "🔻 진성급락(반등없음)"
+                        _q["trendBoost"] = True          # 실측 적중률 8.6~9.1% — 전체 평균의 2.4배
+                    elif _t["surge"] >= SURGE_WARN:
+                        _q["trendTag"] = "⚠️ 배당 상승 %.0f%%(이탈 조짐)" % _t["surge"]
+                    _kept2.append(_q)
+                if _kept2 or _flags:
+                    if not _kept2 and keep:
+                        # 전부 걸러졌으면 최소 1개는 남긴다(관망 금지 원칙) — 대신 등급을 낮춘다
+                        _kept2 = [keep[0]]
+                        ref = [r for r in ref
+                               if tuple(sorted(int(x) for x in (r.get("combo") or []))) !=
+                               tuple(sorted(int(x) for x in (keep[0].get("combo") or [])))]
+                        an["betGrade"] = "⚠️ 신중"
+                        an["betReason"] = "추천 조합 전부가 배당 되돌림 — 참고용"
+                    keep = _kept2
+                    if _flags:
+                        cp["trendFiltered"] = _flags
+                        an["trendFiltered"] = _flags
+        except Exception as _tre:
+            print("[배당추세 필터] 실패(무시·원본 추천 유지):", _tre)
         # ⓓ [중복 제거 (2026-07-29 실측 37경주)] 같은 조합이 메인과 참고에 동시에 있던 문제
         #    (히로시마 4R [1,5] 등 691경주 중 37경주=5.4%). 메인에 있으면 참고에서 뺀다.
         try:
