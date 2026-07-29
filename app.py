@@ -12220,6 +12220,7 @@ BET_RULES = {
     "enabled": True,
     "trioShadow": True,      # 삼복승: 추천·판정에서 빼고 대표 전용으로만 — 생성·저장은 그대로 유지
     "minQ": 2,               # ⚠ 단방 금지 — 메인 복승은 최소 이 개수(생성분이 부족하면 있는 만큼)
+    "alwaysRecommend": True,  # ⚠ 관망 금지 — 조건 미달이어도 추천은 준다. 판단은 등급으로 알리고 회원이 한다
     # maxQ: 복승 메인 최대 조합수(0 = 규칙 미적용) · minOdds: 1순위 예상배당 하한(0 = 컷 없음)
     # altFormMax: 전적이 있고 후보 수가 이 값 이하면 minOdds 컷 면제(0 = 면제 없음)
     "cycle": {"maxQ": 2, "minOdds": 0.0, "altFormMax": 0},
@@ -12238,6 +12239,39 @@ def _bet_market(rk, sport=None):
     return "japan"
 
 
+#  [추천도 등급 (2026-07-29 권대표 지시)] "무조건 분석을 해줘야 한다. 다만 이 경주의 확신도 또는
+#    추천도를 표기하고 회원이 결정하는 걸로 간다." → 배당 컷은 **경주를 버리는 기준이 아니라
+#    등급을 매기는 기준**이다. 문구 옆 괄호는 그 구간의 실측 회수율(최소 2조합 기준).
+#    ⚠ 기존 '경주 등급 배지'(신호·확신도 기반)와는 별개 축이다 — 이건 회수율 실적 기반.
+_BET_GRADES = {
+    "japan": [   # (하한배당, 등급, 근거)  — 위에서부터 먼저 맞는 것
+        (5.0, "🔥 강력추천", "1순위 5배+ · 실측 회수율 134.7%"),
+        (4.0, "✅ 추천", "1순위 4배+ · 실측 회수율 101.9%"),
+        (3.0, "⚖️ 관찰", "1순위 3~4배 · 실측 회수율 82.5%"),
+        (0.0, "⚠️ 신중", "1순위 3배 미만 · 실측 회수율 60%대"),
+    ],
+    "cycle": [
+        (0.0, "✅ 추천", "경륜 복승 상위2 · 실측 회수율 102.8%(배당컷은 오히려 악화)"),
+    ],
+    "korea": [
+        (4.0, "✅ 추천", "1순위 4배+ · 실측 회수율 99.6%(표본 17경주)"),
+        (0.0, "⚖️ 관찰", "1순위 4배 미만 · 표본 부족 · 휴장 후 재평가"),
+    ],
+}
+
+
+def _bet_grade(mk, o1, form_missing=False, min_odds=0.0):
+    """추천도 등급 → (등급, 근거).
+    ⚠ '전적 누락 = 최하 등급'은 **일본 경마 실측**(4배 미만 71경주 중 전적누락 15경주 적중 0건)이다.
+      경륜은 컷 없이 102.8%이고 배당컷이 오히려 악화되므로 이 규칙을 적용하지 않는다(근거 없음)."""
+    if form_missing and mk != "cycle" and (o1 or 0) < max(min_odds or 0.0, 4.0):
+        return "⚠️ 신중", "전적 데이터 없음 · 저배당 전적누락 15경주 적중 0건"
+    for _lo, _g, _why in (_BET_GRADES.get(mk) or _BET_GRADES["cycle"]):
+        if (o1 or 0) >= _lo:
+            return _g, _why
+    return "⚖️ 관찰", ""
+
+
 def _apply_bet_rules(rk, an):
     """시장별 베팅 규칙 적용. 실패해도 원본 무변경(호출부에서 예외 흡수)."""
     if not BET_RULES.get("enabled"):
@@ -12251,38 +12285,51 @@ def _apply_bet_rules(rk, an):
     rule = BET_RULES.get(mk) or {}
     an["betMarket"] = mk
 
-    # ── 복승: 상위 maxQ 개만 메인, 나머지는 참고로 강등
+    # ── 복승: 상위 maxQ 개를 메인으로. 조건 미달이어도 **추천은 반드시 준다** — 등급으로 알린다.
     fq = list(cp.get("finalQuinellas") or [])
+    ref = list(cp.get("quinellaRef") or [])
     maxq = int(rule.get("maxQ") or 0)
+    minq = int(BET_RULES.get("minQ") or 1)
+    if maxq > 0:
+        # [관망 금지 (2026-07-29 권대표 지시)] "무조건 분석을 해줘야 한다. 확신도를 표기하고 회원이 결정한다."
+        #   ⓐ 메인이 비어 있으면(저배당 경주=profitTier low 는 복승을 0개로 만든다 · 전체의 23.7%)
+        #      참고 목록에서 상위 minQ 개를 되살린다 — 삼복승 섀도우와 겹쳐 '추천 전무'가 되는 것을 막는다.
+        if not fq and BET_RULES.get("alwaysRecommend") and ref:
+            fq = [dict(_r) for _r in ref[:minq]]
+            _keys = {tuple(sorted(int(x) for x in (_r.get("combo") or []))) for _r in fq}
+            ref = [_r for _r in ref
+                   if tuple(sorted(int(x) for x in (_r.get("combo") or []))) not in _keys]
+            for _f in fq:
+                _f["restored"] = True
+                _f["reason"] = ((_f.get("reason") or "") + " · 저배당 경주 복원(등급 하향)").strip(" ·")
     if fq and maxq > 0:
         _o1 = _safe_num((fq[0] or {}).get("odds")) or 0.0
         _lo = float(rule.get("minOdds") or 0.0)
-        _altmax = int(rule.get("altFormMax") or 0)
-        # 컷 면제: 전적이 있고 후보가 좁을 때(로직이 확신하는 게 아니라 '재료가 갖춰진' 경주)
-        _alt_ok = bool(_altmax) and (not cp.get("formMissing")) and (len(fq) <= _altmax)
-        _pass = (not _lo) or (_o1 >= _lo) or _alt_ok
-        # ⚠ 단방 금지: 규칙이 1개로 좁히더라도 최소 minQ 개는 남긴다(생성분이 부족하면 있는 만큼).
-        maxq = max(maxq, int(BET_RULES.get("minQ") or 1))
-        if _pass:
-            keep, drop = fq[:maxq], fq[maxq:]
-            an["betGrade"] = "승부"
-            an["betReason"] = ("배당 %.1f배 ≥ %.1f배" % (_o1, _lo)) if (_lo and _o1 >= _lo) \
-                else ("전적 보유·후보 %d개" % len(fq) if _alt_ok else "컷 없음")
-        else:
-            keep, drop = [], fq                       # 관망 — 메인 없음(참고로만 남긴다)
-            an["betGrade"] = "관망"
-            an["betReason"] = "1순위 %.1f배 < %.1f배 · 전적/후보 조건 미충족" % (_o1, _lo)
+        _fmiss = bool(cp.get("formMissing"))
+        # ⓑ 단방 금지: 규칙이 1개로 좁히더라도 최소 minQ 개는 남긴다(생성분이 부족하면 있는 만큼).
+        maxq = max(maxq, minq)
+        keep, drop = fq[:maxq], fq[maxq:]
+        # ⓒ 등급 = 백테스트 실측 회수율에 근거한 '추천도'. 배제 기준이 아니라 표기 기준이다.
+        _grade, _why = _bet_grade(mk, _o1, _fmiss, _lo)
+        an["betGrade"], an["betReason"] = _grade, _why
         if drop:
-            ref = list(cp.get("quinellaRef") or [])
             for _d in drop:
                 _x = dict(_d)
                 _x["stars"] = 1
                 _x["refReason"] = ((_x.get("refReason") or "") + " · 베팅규칙 참고 강등").strip(" ·")
                 ref.append(_x)
-            cp["quinellaRef"] = ref
+        # ⓓ [중복 제거 (2026-07-29 실측 37경주)] 같은 조합이 메인과 참고에 동시에 있던 문제
+        #    (히로시마 4R [1,5] 등 691경주 중 37경주=5.4%). 메인에 있으면 참고에서 뺀다.
+        try:
+            _mainkeys = {tuple(sorted(int(x) for x in (_q.get("combo") or []))) for _q in keep}
+            ref = [_r for _r in ref
+                   if tuple(sorted(int(x) for x in (_r.get("combo") or []))) not in _mainkeys]
+        except (TypeError, ValueError):
+            pass
         cp["finalQuinellas"] = keep
-        cp["betRuleApplied"] = {"market": mk, "maxQ": maxq, "minOdds": _lo,
-                                "grade": an.get("betGrade"), "kept": len(keep), "demoted": len(drop)}
+        cp["quinellaRef"] = ref
+        cp["betRuleApplied"] = {"market": mk, "maxQ": maxq, "minOdds": _lo, "grade": _grade,
+                                "kept": len(keep), "demoted": len(drop)}
 
     # ── 삼복승 섀도우: 회원 추천·적중 판정에서 제외하되 생성물은 그대로 남긴다.
     #    (손실은 즉시 멈추고, 시뮬용 기록은 끊기지 않게 — 확정배당 확보가 아직 72%라 폐지하지 않는다)

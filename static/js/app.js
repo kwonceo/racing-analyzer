@@ -7117,6 +7117,17 @@
     //   생성물(corePicks.finalTrifectas·shadowTrifectas)과 기록은 그대로 남는다(시뮬용).
     if (a.trioShadow) ft = [];
     if (!fq.length && !dansung && !special0.length) return '';
+    // [추천도 배지 (2026-07-29 권대표 지시)] "무조건 분석을 해주되, 이 경주의 확신도/추천도를 표기하고
+    //   회원이 결정한다." 서버 _bet_grade 가 실측 회수율로 매긴 등급을 그대로 노출한다.
+    //   ⚠ 추천을 빼는 용도가 아니다 — 조건 미달 경주도 추천은 나오고 등급만 낮게 표기된다.
+    const _bg = a.betGrade || '';
+    const _bgColor = _bg.indexOf('강력') >= 0 ? '#22c55e'
+      : (_bg.indexOf('추천') >= 0 ? '#38bdf8' : (_bg.indexOf('관찰') >= 0 ? '#fbbf24' : '#f87171'));
+    const betGradeBanner = _bg ? `<div style="margin:4px 0 8px;padding:9px 11px;border:2px solid ${_bgColor};border-radius:9px;background:${_bgColor}22">
+      <div style="font-size:14.5px;font-weight:900;color:${_bgColor}">${esc(_bg)} <span class="hint" style="font-weight:700;font-size:11.5px">· 추천도</span></div>
+      ${a.betReason ? `<div class="hint" style="font-size:12px;margin-top:2px">${esc(a.betReason)}</div>` : ''}
+      <div class="hint" style="font-size:11px;margin-top:3px;opacity:.85">※ 등급은 과거 실측 회수율 기준입니다 · 최종 판단은 회원님께서</div>
+    </div>` : '';
     // [단통 경고 배너] "저배당 추천 신뢰도 낮음 · 복병 감지에 집중"
     const dansungBanner = dansung ? `<div style="margin:4px 0 8px;padding:9px 11px;border:2px solid #f59e0b;border-radius:9px;background:rgba(245,158,11,.14)">
       <div style="font-size:14.5px;font-weight:900;color:#f59e0b">⚡ 단통 경주 감지 ${cp.dansungMinOdds != null ? `<span class="hint" style="font-weight:700;font-size:12px">(최저 ${cp.dansungMinOdds}배)</span>` : ''}</div>
@@ -7192,6 +7203,7 @@
     </details>` : '';
     return `<div style="margin:6px 0;padding:14px;border:3px solid #38d39f;border-radius:12px;background:linear-gradient(180deg,rgba(56,211,159,.14),rgba(20,28,43,.92))">
       <div style="font-size:18px;font-weight:900;color:#38d39f;margin-bottom:4px">🎯 지금 사세요! <span class="hint" style="font-weight:400;font-size:11px">(근거 기반)</span> ${confHead}</div>
+      ${betGradeBanner}
       ${profitBanner}
       ${dansungBanner}
       ${dansungWarnBanner}
