@@ -1,0 +1,270 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_29_소노다_5경주",
+ "race_info": {
+  "date": "2026-07-29",
+  "track": "소노다",
+  "round": 5,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 10,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 10,
+   "name": "ゴートゥーミジョカ",
+   "jockey": "下原理（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    2,
+    2,
+    2,
+    4
+   ],
+   "record_score": 92.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "メイショウロンド",
+   "jockey": "土方颯（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    9,
+    2,
+    10,
+    6
+   ],
+   "record_score": 65.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "グランテミス",
+   "jockey": "小谷周（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    5,
+    7,
+    5,
+    5
+   ],
+   "record_score": 50.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "ダイシチセイ",
+   "jockey": "廣瀬航（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    11,
+    9,
+    5,
+    10
+   ],
+   "record_score": 50.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "ピンクブルー",
+   "jockey": "小谷哲（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    1,
+    2,
+    4,
+    7
+   ],
+   "record_score": 46.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "アストリット",
+   "jockey": "井上幹（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    11,
+    1,
+    7,
+    7
+   ],
+   "record_score": 31.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "キークラシック",
+   "jockey": "杉浦健（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    5,
+    3,
+    2,
+    2
+   ],
+   "record_score": 17.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "サクラグラシュー",
+   "jockey": "田野豊（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    3,
+    8,
+    6,
+    4
+   ],
+   "record_score": 16.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "フィオリータ",
+   "jockey": "吉村智（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    9
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "ビッグロゴスルーフ",
+   "jockey": "塩津璃（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    7,
+    7,
+    8,
+    5
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.773,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   3,
+   4,
+   10,
+   2,
+   6,
+   7,
+   1,
+   5,
+   8
+  ],
+  "eliminated": [
+   9
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 10,
+  "2nd": 6,
+  "3rd": 4,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "제거 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 10,
+  "second": 6,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-29 13:16:09",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

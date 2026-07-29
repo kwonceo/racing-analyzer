@@ -1,0 +1,71 @@
+{
+ "race_id": "2026_07_29_소노다_5경주",
+ "raceKey": "소노다 5경주",
+ "date": "2026-07-29",
+ "sport": "horse",
+ "category": "japan_central",
+ "track": "소노다",
+ "round": 5,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 10,
+ "result": {
+  "1st": 10,
+  "2nd": 6,
+  "3rd": 4
+ },
+ "payouts": {
+  "quinella": 9.0
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   3,
+   4,
+   10,
+   2,
+   6,
+   7,
+   1,
+   5,
+   8
+  ],
+  "eliminated": [
+   9
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 9.0,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 8000
+ },
+ "memo": null,
+ "saved_at": "2026-07-29 13:16:09",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
