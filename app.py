@@ -13618,7 +13618,19 @@ def _canonical_log_key(rk, live=False):
                 continue
             fdate_us, frace = m.group(1), m.group(2).replace("_", " ")
             fa, fnum = _area_num(frace)
-            if fnum != num or not fa or not (area in fa or fa in area):
+            # [한자/한글 표기 매칭 (2026-07-29)] 종전엔 부분 문자열 비교만 해서
+            #   raceKey='平塚'(한자) ↔ 파일명='히라츠카'(한글)가 서로 안 걸렸다
+            #   ("平塚" in "히라츠카" = False). 날짜별 기록 110경주 중 33건(30%)의
+            #   판정 명단이 통째로 비던 원인. _track_norm 은 이미 한/일/영 별칭을
+            #   통일하고 있으므로(CHANGELOG 74) 그걸 먼저 쓰고, 기존 부분일치는
+            #   폴백으로 그대로 남긴다(무삭제·하위호환).
+            if fnum != num or not fa:
+                continue
+            try:
+                _na, _nf = _track_norm(area), _track_norm(fa)
+            except Exception:
+                _na = _nf = None
+            if not ((_na and _nf and _na == _nf) or (area in fa) or (fa in area)):
                 continue
             if fdate_us == today_us:
                 same_day_dups.append(fn)
