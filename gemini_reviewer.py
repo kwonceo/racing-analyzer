@@ -369,6 +369,23 @@ def _send_kakao(rk, result):
         issues = result.get("issues", [])
         if issues:
             msg += "⚠ " + " / ".join(issues[:2]) + "\n"
+        # [지적 본문 전달 (2026-07-29)] 응답에는 {func,line,code,problem,evidence,fix} 가 이미 다 담겨
+        #   오는데(실측 408건) 카톡에는 summary+issues 만 나가서, 정작 '어디를 고치면 되는지'가
+        #   로그에만 남고 전달되지 않았다. 심각도 높은 1건의 함수명·줄번호·수정방향을 함께 보낸다.
+        #   ⚠ 카톡 길이 제한을 고려해 1건만·문구는 짧게. 전체는 /api/gemini/findings 로 본다.
+        try:
+            _lf = ((result.get("analysis") or {}).get("logic_findings")) or result.get("logic_findings") or []
+            _lf = [f for f in _lf if isinstance(f, dict)]
+            _top = next((f for f in _lf if str(f.get("severity", "")).lower() in ("high", "critical")),
+                        (_lf[0] if _lf else None))
+            if _top:
+                msg += "🔧 %s (%s)\n" % (_top.get("func") or "?", _top.get("line") or "위치 미상")
+                if _top.get("fix"):
+                    msg += "→ " + str(_top["fix"])[:110] + "\n"
+                if len(_lf) > 1:
+                    msg += "(외 %d건 · /api/gemini/findings)\n" % (len(_lf) - 1)
+        except Exception as _lfe:
+            print("[Gemini] 지적 본문 첨부 실패(무시):", _lfe)
         if result.get("q_suggest"):
             msg += "권장복승: " + result["q_suggest"] + "\n"
         if result.get("t_suggest"):

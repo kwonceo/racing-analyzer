@@ -16302,6 +16302,83 @@ def highlights_list():
     return jsonify({"highlights": arr, "count": len(arr)})
 
 
+@app.route("/api/gemini/findings", methods=["GET"])
+def gemini_findings_ep():
+    """[Gemini 지적 집계 (2026-07-29)] logs/gemini_review/*.json 의 logic_findings 를 함수별로 집계.
+
+    배경: Gemini 응답에는 이미 {func,line,code,problem,evidence,fix,severity} 가 전부 채워져 온다
+      (실측 114개 로그 · 지적 408건). 그런데 카카오로는 summary+issues 2개만 나가서
+      **408건이 로그에만 쌓이고 아무도 보지 않는** 상태였다. 조회 경로를 연다.
+    ⚠ 판독 원칙: 1회성 지적은 오탐 비율이 높다(실측 검증에서 3건 중 2건·2건 중 1건이 빗나감).
+      **반복 지적 횟수가 높은 함수**부터 검증 대상으로 삼는다 — 그래서 count 내림차순으로 준다.
+    쿼리: ?func=이름(해당 함수만) · ?severity=high · ?limit=N(기본 40) · ?days=N(최근 N일)
+    """
+    _dir = os.path.join(os.path.dirname(__file__), "logs", "gemini_review")
+    q_func = (request.args.get("func") or "").strip()
+    q_sev = (request.args.get("severity") or "").strip().lower()
+    try:
+        limit = max(1, min(300, int(request.args.get("limit") or 40)))
+    except Exception:
+        limit = 40
+    try:
+        days = int(request.args.get("days") or 0)
+    except Exception:
+        days = 0
+    cutoff = (time.time() - days * 86400) if days > 0 else 0
+
+    agg, items, files = {}, [], 0
+    try:
+        for fn in sorted(os.listdir(_dir) if os.path.isdir(_dir) else [], reverse=True):
+            if not fn.endswith(".json"):
+                continue
+            fp = os.path.join(_dir, fn)
+            if cutoff and os.path.getmtime(fp) < cutoff:
+                continue
+            try:
+                doc = json.load(open(fp, encoding="utf-8"))
+            except Exception:
+                continue
+            files += 1
+            res = doc.get("result") or doc
+            lf = ((res.get("analysis") or {}).get("logic_findings")) or res.get("logic_findings") or []
+            for f in lf:
+                if not isinstance(f, dict):
+                    continue
+                fname = str(f.get("func") or "?")
+                sev = str(f.get("severity") or "?").lower()
+                if q_func and fname != q_func:
+                    continue
+                if q_sev and sev != q_sev:
+                    continue
+                a = agg.setdefault(fname, {"func": fname, "count": 0, "high": 0,
+                                           "lines": {}, "races": [], "lastFix": None})
+                a["count"] += 1
+                if sev in ("high", "critical"):
+                    a["high"] += 1
+                _ln = str(f.get("line") or "").strip()
+                if _ln:
+                    a["lines"][_ln] = a["lines"].get(_ln, 0) + 1
+                if len(a["races"]) < 8:
+                    a["races"].append(doc.get("raceKey") or os.path.splitext(fn)[0])
+                if not a["lastFix"] and f.get("fix"):
+                    a["lastFix"] = str(f.get("fix"))[:400]
+                if len(items) < limit:
+                    items.append({"file": fn, "raceKey": doc.get("raceKey"),
+                                  "func": fname, "line": f.get("line"), "code": f.get("code"),
+                                  "problem": f.get("problem"), "evidence": f.get("evidence"),
+                                  "fix": f.get("fix"), "severity": sev})
+    except Exception as e:
+        return jsonify({"error": str(e)[:200], "dir": _dir}), 200
+
+    ranked = sorted(agg.values(), key=lambda x: (-x["count"], -x["high"]))
+    for a in ranked:
+        a["topLines"] = sorted(a["lines"].items(), key=lambda kv: -kv[1])[:5]
+        a.pop("lines", None)
+    return jsonify({"logs": files, "totalFindings": sum(a["count"] for a in ranked),
+                    "byFunction": ranked, "items": items,
+                    "note": "count 내림차순 · 반복 지적일수록 실제 결함일 가능성이 높다(1회성은 오탐 비율 높음)"})
+
+
 @app.route("/api/alerts/list", methods=["GET"])
 def alerts_list():
     """[신규 경고시스템] 경고 발생 경주 목록(최신순) → [{slug,race,date,count,result,anyHit}]."""
