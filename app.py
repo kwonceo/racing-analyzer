@@ -8501,10 +8501,26 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
         _strong_drop = any((m.get("drop") is not None and float(m.get("drop") or 0) <= -30)
                            for m in sig_meta.values() if isinstance(m, dict))
         if _tier["tier"] == "low":
-            # ── 저배당 경주: 복승 메인 전부 참고 강등 + 삼복승 집중 ──
-            for _q in fq:
-                _demote(_q, "저배당 경주(최저 %s배) — 복승 미추천·삼복승 집중" % _tier["minOdds"])
-            fq = []
+            # ── 저배당 경주 ──
+            # [전략 반전 (2026-07-29 실측·권대표 지시)] 종전에는 복승 메인을 **전부** 참고로 강등하고
+            #   삼복승에 몰아줬다(fq = []). 실측 결과 그 판단이 정확히 거꾸로였다:
+            #     복승 1순위 배당 ~1.5배 구간 51경주 — 적중률 70.6% · 회수율 142.2% (전 구간 최고)
+            #     같은 구간 삼복승(상위2)          — 회수율 경륜 14.0% · 일본 40.0% (전 구간 최악)
+            #   원인: 강축이 확실할수록 삼복승 배당이 같이 죽는다(그 구간 삼복승 확정배당 중앙값
+            #   경륜 4.2배·일본 3.6배 → 2조합이면 손익분기 9.6배에 한참 못 미침). 적중률은 오르는데
+            #   배당이 그보다 빨리 떨어지는 구조적 함정이다.
+            #   → **가장 좋은 구간을 버리고 가장 나쁜 곳에 넣고 있었다.** 1순위는 남긴다.
+            #   ⚠ 무삭제 원칙 유지: 2순위 이하는 종전대로 참고 강등(메인 과다 노출 방지).
+            _keep_n = 1 if fq else 0
+            for _q in fq[_keep_n:]:
+                _demote(_q, "저배당 경주(최저 %s배) — 2순위 이하 참고" % _tier["minOdds"])
+            fq = fq[:_keep_n]
+            if fq:
+                _o_lo = _safe_num(fq[0].get("odds")) or 0
+                fq[0]["strongAxis"] = True
+                fq[0]["axisNote"] = ("강축 %.1f배 · 이 구간 실측 적중률 70.6%%" % _o_lo) if _o_lo else "강축"
+                fq[0]["reason"] = ((fq[0].get("reason") or "") + " · 🔒 강축(저배당 확실)").strip(" ·")
+            cp["strongAxisRace"] = bool(fq)      # 프론트 강축 배지용
             _axis = list(_min_pair) if _min_pair else None
             _backers = []
             if _axis:
@@ -8550,8 +8566,11 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
                     _seen_t.add(_k3)
                     _merged.append(_t3)
                 ft = _merged[:5]
-            cp["profitTier"] = dict(_tier, axis=_axis, backers=_backers,
-                                    msg="⚡ 저배당 경주(최저 %s배) — 복승 대신 삼복승 집중" % _tier["minOdds"])
+            cp["profitTier"] = dict(
+                _tier, axis=_axis, backers=_backers, strongAxis=bool(fq),
+                msg=("🔒 강축 경주(최저 %s배) — 복승 1순위 집중 (실측 적중률 70.6%%·회수율 142.2%%)"
+                     % _tier["minOdds"]) if fq else
+                    ("⚡ 저배당 경주(최저 %s배) — 복승 후보 없음" % _tier["minOdds"]))
         else:
             # [정액 컷 면제 (2026-07-24 LOGIC_AUDIT — 카사마츠 4R 2+5 실증)] EV 필터(아래)엔 면제가 있으나
             #   정액 컷(2.5/3.0배 미만)엔 면제가 없어, 시장 1위·유력마 저배당 조합(2+5=2.1배)이 수익성 명목으로

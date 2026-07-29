@@ -7191,10 +7191,16 @@
     if (_pt && _pt.tier === 'low') {
       const axisTxt = (_pt.axis || []).join('+');
       const backTxt = (_pt.backers || []).map((n) => n + '번').join('·');
-      profitBanner = `<div style="margin:2px 0 8px;padding:10px 12px;border:2px solid #fbbf24;border-radius:10px;background:rgba(251,191,36,.12)">
-        <div style="font-size:16px;font-weight:900;color:#fbbf24">${esc(_pt.msg || '⚡ 저배당 경주 — 복승 대신 삼복승 집중')}</div>
+      // [강축 전환 (2026-07-29)] 이 구간은 복승 1순위가 실측 최고 성적(70.6% 적중·142.2% 회수)이다.
+      //   종전 문구("복승 대신 삼복승 집중")는 실측과 정반대라 배너를 강축 안내로 바꾼다.
+      const _sa = !!_pt.strongAxis;
+      const _c = _sa ? '#38d39f' : '#fbbf24';
+      profitBanner = `<div style="margin:2px 0 8px;padding:10px 12px;border:2px solid ${_c};border-radius:10px;background:${_c}1f">
+        <div style="font-size:16px;font-weight:900;color:${_c}">${esc(_pt.msg || '⚡ 저배당 경주')}</div>
         ${axisTxt ? `<div style="font-size:14px;font-weight:800;color:#e2e8f0;margin-top:3px">축: ${esc(axisTxt)}${backTxt ? ` · 받치기: ${esc(backTxt)}` : ''}</div>` : ''}
-        <div class="hint" style="font-size:11px;margin-top:2px">최저 복승 ${_pt.minOdds}배 — 맞춰도 수수료 포함 손해 → 삼복승 10~30배 노림 (${esc(_pt.sportLabel || '')} 기준 ${_pt.lowTh}배 미만)</div>
+        <div class="hint" style="font-size:11px;margin-top:2px">${_sa
+          ? `최저 복승 ${_pt.minOdds}배 — <b style="color:#38d39f">강축 경주</b>. 배당은 낮지만 적중률이 높아 1순위 집중이 유리합니다 (${esc(_pt.sportLabel || '')} 기준 ${_pt.lowTh}배 미만)`
+          : `최저 복승 ${_pt.minOdds}배 — 복승 후보가 없어 참고만 (${esc(_pt.sportLabel || '')} 기준 ${_pt.lowTh}배 미만)`}</div>
       </div>`;
     }
     const refQ = cp.quinellaRef || [];
