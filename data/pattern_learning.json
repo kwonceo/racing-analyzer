@@ -1,42 +1,6 @@
 {
   "patterns": [
     {
-      "race": "서울 10경주",
-      "horse_no": 2,
-      "recent_avg": 5.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-18"
-    },
-    {
-      "race": "서울 10경주",
-      "horse_no": 6,
-      "recent_avg": 6.6,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-18"
-    },
-    {
-      "race": "서울 9경주 1800M",
-      "horse_no": 3,
-      "recent_avg": 4.6,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-18"
-    },
-    {
-      "race": "서울 9경주 1800M",
-      "horse_no": 9,
-      "recent_avg": 4.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-18"
-    },
-    {
       "race": "서울 10경주 1200M",
       "horse_no": 9,
       "recent_avg": 5.6,
@@ -4645,16 +4609,50 @@
         "복승이상감지"
       ],
       "date": "2026-07-29"
+    },
+    {
+      "race": "소노다 8경주",
+      "horse_no": 3,
+      "recent_avg": 8.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-29"
+    },
+    {
+      "race": "소노다 8경주",
+      "horse_no": 2,
+      "recent_avg": 6.0,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-29"
+    },
+    {
+      "race": "소노다 7경주",
+      "horse_no": 2,
+      "recent_avg": 9.0,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-29"
+    },
+    {
+      "race": "소노다 7경주",
+      "horse_no": 5,
+      "recent_avg": 11.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1712,
-      "hit": 339
+      "count": 1722,
+      "hit": 342
     },
     "전체부진마": {
-      "count": 2831,
-      "hit": 778
+      "count": 2844,
+      "hit": 782
     },
     "대규모급락": {
       "count": 7,
@@ -4664,8 +4662,8 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 1119,
-      "hit": 439
+      "count": 1122,
+      "hit": 440
     },
     "급락동반": {
       "count": 192,
@@ -5042,22 +5040,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 502,
-    "hit": 410,
+    "count": 503,
+    "hit": 411,
     "cases": [
-      {
-        "race": "2026-07-28 다마노 5경주",
-        "date": "2026-07-29",
-        "smart_horses": [
-          6,
-          2
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "2026-07-28 다마노 7경주",
         "date": "2026-07-29",
@@ -6620,6 +6605,22 @@
         ],
         "placed": [
           1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "소노다 7경주",
+        "date": "2026-07-29",
+        "smart_horses": [
+          2,
+          8,
+          1
+        ],
+        "placed": [
+          2
         ],
         "hit": true,
         "trifecta_odds": null,
