@@ -12424,6 +12424,27 @@ def _apply_bet_rules(rk, an):
         #    ⚠ 급등 20~50%는 기대값 1.57로 흑자처럼 보였으나 2,375배 1건이 만든 착시였다
         #      (중앙값 25.8배 · 중앙값 기대 0.44) → 채택하지 않고 50% 경계만 쓴다.
         #    ⚠ 무삭제: 걸러진 조합은 지우지 않고 참고(quinellaRef)로 옮긴다.
+        # ⓕ [재급락 면제 (2026-07-29 소노다 7R 실사고)] 페이크급락 필터가 시스템 최강 신호를 죽일 뻔했다.
+        #    소노다 7R 2+5: 117.8 → 37.2배(-68%) → 188.6배(+407%). 위 필터 기준으로는 '페이크급락' 이지만
+        #    시스템은 같은 움직임을 「재급락(급락→반등→재급락)」으로 잡았고 그 신호의 실측 적중률은
+        #    **69%(표본 204)** 로 기록돼 있다(strong_signals type 4). 실제로도 2+5 가 고배당 적중했다.
+        #    원인: _combo_odds_trend 는 첫값·최저·마지막 **세 점만** 본다. 그래서 3단 궤적
+        #    (하락→반등→재하락)의 마지막 반등만 보고 '되돌림'으로 오판한다. 타임라인 해상도가 낮으면
+        #    (소노다 7R 은 13:47→13:49 사이 2분 21초 공백) 더 심해진다.
+        #    → 재급락 신호가 붙은 조합은 페이크급락 필터에서 면제한다(급등 50% 필터는 그대로 적용).
+        _resurge = set()
+        try:
+            _ss = an.get("strongSignals")
+            _sl = (_ss.get("signals") if isinstance(_ss, dict) else _ss) or []
+            for _s in _sl:
+                if not isinstance(_s, dict):
+                    continue
+                if "재급락" in str(_s.get("label") or "") or _s.get("type") == 4:
+                    _hs = [int(x) for x in (_s.get("horses") or []) if str(x).strip().isdigit()]
+                    if len(_hs) >= 2:
+                        _resurge.add(tuple(sorted(_hs[:2])))
+        except Exception:
+            _resurge = set()
         try:
             _tr = _combo_odds_trend(rk, [q.get("combo") for q in keep if q.get("combo")])
             if _tr:
@@ -12435,7 +12456,8 @@ def _apply_bet_rules(rk, an):
                         _kept2.append(_q)
                         continue
                     _why = None
-                    if _t["dropFromFirst"] <= -20 and _t["rebound"] >= REBOUND_FAKE:
+                    if (_t["dropFromFirst"] <= -20 and _t["rebound"] >= REBOUND_FAKE
+                            and _k not in _resurge):        # ⓕ 재급락 신호면 면제
                         _why = "페이크급락(급락 %.0f%% 후 %.0f%% 반등 · 실측 적중률 1.2%%)" \
                                % (_t["dropFromFirst"], _t["rebound"])
                     elif _t["surge"] >= SURGE_DEMOTE:
@@ -12449,7 +12471,10 @@ def _apply_bet_rules(rk, an):
                         _flags.append({"combo": _q.get("combo"), "reason": _why})
                         continue
                     # 남은 조합 표기: 진성급락 우대 / 상승 경고
-                    if _t["dropFromFirst"] <= -20 and _t["rebound"] < 15:
+                    if _k in _resurge:
+                        _q["trendTag"] = "🔁 재급락(급락→반등→재급락 · 실측 적중률 69%)"
+                        _q["trendBoost"] = True
+                    elif _t["dropFromFirst"] <= -20 and _t["rebound"] < 15:
                         _q["trendTag"] = "🔻 진성급락(반등없음)"
                         _q["trendBoost"] = True          # 실측 적중률 8.6~9.1% — 전체 평균의 2.4배
                     elif _t["surge"] >= SURGE_WARN:
