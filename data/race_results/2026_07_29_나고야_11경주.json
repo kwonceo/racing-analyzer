@@ -1,0 +1,72 @@
+{
+ "race_id": "2026_07_29_나고야_11경주",
+ "raceKey": "나고야 11경주",
+ "date": "2026-07-29",
+ "sport": "horse",
+ "category": "japan_local",
+ "track": "나고야",
+ "round": 11,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 13,
+ "result": {
+  "1st": 7,
+  "2nd": 12,
+  "3rd": 8
+ },
+ "payouts": null,
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   6,
+   7,
+   8,
+   10,
+   13,
+   12
+  ],
+  "eliminated": [
+   9,
+   11,
+   5
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": null,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-29 20:22:15",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

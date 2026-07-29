@@ -1,0 +1,72 @@
+{
+ "race_id": "2026_07_29_몬베츠_10경주",
+ "raceKey": "몬베츠 10경주",
+ "date": "2026-07-29",
+ "sport": "horse",
+ "category": "japan_local",
+ "track": "몬베츠",
+ "round": 10,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 11,
+ "result": {
+  "1st": 1,
+  "2nd": 10,
+  "3rd": 6
+ },
+ "payouts": {
+  "quinella": 49.9
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   6,
+   7,
+   9,
+   10,
+   1,
+   2,
+   3,
+   4,
+   8
+  ],
+  "eliminated": [
+   5,
+   11
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": false,
+  "sub_hit": false,
+  "hit_reason": null,
+  "miss_reason": "추천 조합 미입상",
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 49.9,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": -1000
+ },
+ "memo": null,
+ "saved_at": "2026-07-29 20:22:23",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

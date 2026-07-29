@@ -1,38 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카나자와 1경주",
-      "horse_no": 3,
-      "recent_avg": 8.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-19"
-    },
-    {
-      "race": "카나자와 1경주",
-      "horse_no": 8,
-      "recent_avg": 5.0,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-19"
-    },
-    {
-      "race": "카나자와 1경주",
-      "horse_no": 6,
-      "recent_avg": 6.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-19"
-    },
-    {
-      "race": "서울 5경주 1400M",
-      "horse_no": 8,
-      "recent_avg": 6.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-19"
-    },
-    {
       "race": "서울 5경주 1400M",
       "horse_no": 7,
       "recent_avg": 5.0,
@@ -4647,16 +4615,50 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-29"
+    },
+    {
+      "race": "나고야 11경주",
+      "horse_no": 12,
+      "recent_avg": 5.8,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-29"
+    },
+    {
+      "race": "카와사키 10경주",
+      "horse_no": 4,
+      "recent_avg": 5.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-29"
+    },
+    {
+      "race": "몬베츠 10경주",
+      "horse_no": 10,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-29"
+    },
+    {
+      "race": "몬베츠 10경주",
+      "horse_no": 1,
+      "recent_avg": 8.8,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-07-29"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1790,
-      "hit": 353
+      "count": 1805,
+      "hit": 356
     },
     "전체부진마": {
-      "count": 2961,
-      "hit": 806
+      "count": 2981,
+      "hit": 810
     },
     "대규모급락": {
       "count": 7,
@@ -4666,8 +4668,8 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 1171,
-      "hit": 453
+      "count": 1176,
+      "hit": 454
     },
     "급락동반": {
       "count": 207,
