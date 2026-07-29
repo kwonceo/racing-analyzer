@@ -5040,26 +5040,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 499,
-    "hit": 407,
+    "count": 500,
+    "hit": 408,
     "cases": [
-      {
-        "race": "2026-07-28 히로시마 4경주",
-        "date": "2026-07-29",
-        "smart_horses": [
-          1,
-          7,
-          3
-        ],
-        "placed": [
-          1,
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 3.5,
-        "high_odds": false
-      },
       {
         "race": "2026-07-28 히로시마 5경주",
         "date": "2026-07-29",
@@ -6620,6 +6603,23 @@
         "hit": false,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "다치카와 3경주",
+        "date": "2026-07-29",
+        "smart_horses": [
+          4,
+          5,
+          2
+        ],
+        "placed": [
+          4,
+          5
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 1.8,
         "high_odds": false
       }
     ],
