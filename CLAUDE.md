@@ -43,7 +43,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 data/
 ├── ai_training/     ← AI 학습 핵심(완전 데이터 + 품질점수)  [추적]
-├── analysis_log/    ← 분석 로그(패턴학습 코퍼스)            [추적]
+├── analysis_log/    ← 분석 로그(패턴학습 코퍼스)        [**미추적**·gitignore]
 ├── race_results/    ← 경주 결과 완전 저장                   [추적]
 ├── race_report/     ← 고배당 적중 재현 리포트(추천근거·타임라인) [추적]
 ├── daily_summary/   ← 일별 자동 요약(YYYY-MM-DD.json)       [추적]
@@ -205,7 +205,16 @@ cd chrome-extension && python -c "import zipfile,os; zf=zipfile.ZipFile('../chro
 ### 데이터 커밋 정책 (churn 운영 규칙)
 - **워킹트리 churn은 정상**: 라이브 분석 중 서버가 데이터 파일(`analysis_log/`·`korea_session.json`·`discovered_patterns.json`·`prerace/` 등)을 30초 주기로 갱신 → `git status`가 상시 dirty. 이는 **의도된 동작**이며 매 변경마다 커밋하지 않는다.
 - **커밋 시점 = 명시적 백업 + 결과 입력 자동 백업**: 서버 백업 함수(`_analysis_log_git_backup`·`_korea_git_backup`, 버튼/엔드포인트) 또는 `#백업`/마일스톤 커밋 외에, **결과 입력마다 `_data_git_backup`(5초 디바운스·pathspec 커밋)이 코퍼스만 자동 add+commit+push**(데몬 스레드·비블로킹). 30초 churn은 여전히 자동 커밋 안 함(결과 입력이라는 명시적 이벤트에만 트리거). 수동 즉시: `POST /api/data/backup` / 통계 탭 `🛡️ 데이터 보호`. ⚠ 위험한 `git reset --hard`는 `scripts/safe_reset.bat`로 실행(실행 전 `backups/data_<ts>/`에 data\ 물리 스냅샷 자동 생성, `backups/`는 gitignore).
-- **추적 유지(백업 대상)**: `analysis_log/`(패턴학습 코퍼스)·`race_results/`(경주별 완전 저장)·`race_report/`(고배당 적중 재현 리포트)·`ai_training/`(AI 학습 완전 데이터·품질점수)·`korea_session.json`·`korea_history/`·`prerace/`·`discovered_patterns.json`·`pattern_learning.json`. **`dist/`(내보내기 출력)·`highlight_wins.json`은 gitignore.**
+- **추적 유지(백업 대상)**: `race_results/`(경주별 완전 저장)·`race_report/`(고배당 적중 재현 리포트)·`ai_training/`(AI 학습 완전 데이터·품질점수)·`korea_session.json`·`korea_history/`·`prerace/`·`discovered_patterns.json`·`pattern_learning.json`·`simulation_db/`(적중왕전개 프로파일). **`dist/`(내보내기 출력)·`highlight_wins.json`은 gitignore.**
+- ⚠️ **`data/analysis_log/` 는 추적 제외다(2026-07-20 [C안] 권대표 승인 · 2026-07-29 문서 정정).**
+  하루 수십~수백 파일이라 **양쪽 PC 자동커밋 충돌의 주범**이었다(당일 3회 실측). 로컬 파일은 그대로 유지되고
+  보존은 **6시간 주기 백업 zip(+구글 드라이브)** 이 담당한다.
+  · 종전 이 문서와 `.gitignore` 5행 주석에 "analysis_log 추적 유지"가 남아 실제 상태와 상충했다 → 정정 완료.
+  · 🔴 **운영 주의 — 분석 로그를 고치는 작업은 PC마다 따로 돌려야 한다.**
+    `analysis_log/`가 git으로 오가지 않으므로, 이 디렉터리를 수정하는 스크립트의 결과는 **그 PC에만 남는다**.
+    예: 경륜장 `sport` 오분류 정정 213건(`tools/fix_keirin_sport_tag.py --apply`)은 **서버 PC에서만 적용**됐다.
+    → **다른 PC(랩탑 등)에서도 같은 스크립트를 각각 재실행**해야 종목별 통계가 일치한다.
+    (스크립트는 멱등이다 — 이미 정정된 파일은 `sport=cycle`이라 대상에서 자동 제외된다.)
 - **gitignore(고빈도 임시)**: `triple_store.json`·`starters_store.json`·`results_store.json`·`odds_store.json`·`learning.json`·`odds_history/`·`kra_history.json`·`.claude/`.
 
 ## PDF 전경주 사전분석 (한국)
@@ -584,6 +593,34 @@ git tag -a vX.Y.Z -m "..." && git push origin --tags
       (샘플 검증: 키 28개 유지·`result`/`hit`/`corePicks` 보존). `--dry` 기본·`--apply` 필요·원자적 저장.
     · **효과**: 종목 분포 경마 843→**630** · 경륜 501→**715**. 경마 페이스 보유율 **23.6% → 31.4%**로 정정
       (누적 기준. 최근 4일 실측 85.4%는 불변 — 오분류가 과거 통계를 끌어내리고 있었다).
+    · ✅ **성적 수치 재계산 완료 — 결론 불변(되돌릴 것 없음).** 재분류 213건 중 성적 판정 대상
+      (`corePicks.profitTier` 보유)은 **단 1경주**뿐이다. 213건이 전부 7/07~7/24인데 `corePicks` 저장이
+      7/18 도입이라 대부분 집계에 애초에 들어가지 않았다.
+      | 지표(정정 전 → 후) | 경륜류 | 일본경마 |
+      |---|---|---|
+      | 복승 전체 | n 314→315 · 적중 38.5→38.4% · 회수 88.8→88.5% | n 167→166 · 30.5→30.7% · 67.5→67.9% |
+      | 삼복승 전체 | n 446→447 · 46.0→45.9% · 51.3→51.1% | n 185→184 · 24.9→25.0% · 30.6→30.7% |
+      | **tier=low 복승** | n 21→21 · **33.3% · 40.5% (Δ0)** | n 1→1 · **0% (Δ0)** |
+      | 시장최저 <2.0배 복승 | n 63→63 · **36.5% · 51.4% (Δ0)** | n 1→1 (Δ0) |
+      | 시장최저 <1.5배 복승 | n 8→8 · **25.0% · 26.2% (Δ0)** | — |
+      **전 지표 Δ적중 ≤ ±0.2%p · Δ회수 ≤ ±0.4%p.** 저배당 구간(<2.0·<1.5·tier=low) **이동분 0경주** →
+      **실전 반영한 `tier=low` 복승 1순위 복구의 근거는 무영향이다. 되돌릴 필요 없음.**
+      ⚠ 표본 주의: 재계산의 저배당 셀은 경륜 8~63경주 · **일본경마 1경주**로 매우 얇다. 절대값은
+      산출 방법(여기서는 `profitTier.minOdds` + 총투자 동일 분할)에 따라 이전 세션 수치와 다를 수 있으며,
+      이번 산출물의 핵심은 **재분류에 따른 이동폭(before→after)** 이다.
+      ⚠ 배당 유형별 수치(진성급락 8.6% 등)는 **종목 무관**이라 재계산 대상이 아니다(확인 완료).
+    · ✅ **tier 경계 오적용 확인(작업3)** — `profitTier.sportLabel`(판정 시점에 적용된 경계)로 직접 검증.
+      경계는 종목별로 다르다(경륜 **1.8/5.0** ↔ 일본경마 **2.0/8.0** ↔ 한국 3.0/10.0).
+      · 재분류 이동분 중 잘못된 경계(일본경마)로 판정된 건 **1경주**(와카야마 1R·minOdds 3.80),
+        그러나 **경계 차이로 tier가 실제로 뒤바뀐 건 0경주**(3.80은 양쪽 다 mid) → **실피해 없음.**
+      · 🟠 **다만 실시간 재발이 완전히 멎지는 않았다** — 최근 7일 562경주 중 종목↔라벨 불일치 **3경주**
+        (와카야마 7/24 · **코치 6R 7/25 · 코치 10R 7/26**). 셋 다 minOdds 3.6~4.6으로 **tier 결과는 동일**해
+        피해는 없었다.
+      · **원인은 `_KEIRIN_ONLY_RE`가 아니다.** 코치는 **이중소속**(경마장+경륜장)이라 설계상 그 정규식에
+        일부러 넣지 않는다. 실제 원인은 **분석 시점에 `sport`가 아직 확정되지 않아**(뒤늦게 `boat`로 확정)
+        `_profit_tier_of`가 경마 경계를 쓴 것이다. 즉 지명 패턴이 아니라 **종목 확정 타이밍** 문제다.
+      · **잔여 과제**: minOdds가 1.8~2.0 구간이면 tier가 low↔mid로 실제 뒤바뀐다. 지금은 우연히 피했을 뿐이므로
+        `_profit_tier_of` 호출 전 종목 확정 보장(또는 확정 후 재판정)이 필요하다. ⚠ 추천 경로 수정이라 별도 승인 필요.
 - ✅ **소실 방지 배선 완료** — 각질·페이스는 **가공 결과만** 저장되고 그 **원본 입력**은 어디에도 남지
   않아, 임계값을 바꿔도 과거를 재계산할 수 없었다. 출마표는 경주 종료 시 내려가 **영구 소실**된다.
   | 보존 대상 | 위치 | 종전 |

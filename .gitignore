@@ -2,8 +2,10 @@
 .claude/
 __pycache__/
 *.pyc
-# 참고: data/analysis_log/ · data/race_results/ · data/ai_training/ 는 의도적으로 추적 유지
+# 참고: data/race_results/ · data/ai_training/ 는 의도적으로 추적 유지
 #       — 패턴학습·AI 학습 코퍼스(백업/복원 대상). dist/(내보내기 출력)만 무시.
+# ⚠ 정정(2026-07-29): data/analysis_log/ 는 **추적 제외로 전환됐다**(아래 [C안] 참조).
+#   이 줄에 "analysis_log 추적 유지"가 남아 있어 실제 상태와 상충했다 → 목록에서 제거.
 dist/
 odds_store.json
 results_store.json
