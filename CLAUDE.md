@@ -368,6 +368,8 @@ git tag -a vX.Y.Z -m "..." && git push origin --tags
   | 복승(馬連複) | `OddsUmLenFuku` + `odds_flg=4`(馬番順) |
   | 쌍승(馬連単) | `OddsUmLenTan` (방향 보존) |
   | 단승 | `OddsTanFuku` |
+  | **삼복승(三連複)** | `Odds3LenFuku` — `_nar_parse_trio`(앵커 기반 별도 파서) |
+  | **전적** | `DebaTable` — `_nar_parse_deba` + `_nar_autocollect_form` |
   | 스케줄 | `RaceList?k_raceDate=&k_babaCode=` — 경주번호·**발주시각**·두수 제공 |
   - 신규 함수: `_nar_fetch`·`_nar_odds_url`·`_nar_parse_pair_odds`·`_nar_parse_win`·`_nar_race_list`·`_nar_schedule`
     + `_multi_schedule_fetch` 병합 + `_multi_collect_one`에 `narBaba` 분기(경륜·oddspark 분기보다 앞).
@@ -376,10 +378,15 @@ git tag -a vX.Y.Z -m "..." && git push origin --tags
   - 검증: 실제 응답 단위검증 **12/12 통과**(카와사키 9R — 복승 28=8C2 · 쌍승 56=8P2 · 단승 8두 일치 ·
     `_keiba_odds_live` 게이트 통과 · 빈/깨진 입력 방어) + 라이브 스케줄 편입 확인(트랙 9→10곳·카와사키 12경주)
     + 전 트랙 분기 라우팅 검증(경마 2·南関東 1·경륜 7 전부 필수필드 보유).
-  - ⚠ **잔여 1 — 삼복승(三連複)**: `Odds3LenFuku`는 '짝(a,b) 단위 표'라 구조가 달라 이번 범위에서 제외했다.
-    기존 `_trio_est` 추정배당 보험이 그대로 적용된다(무삭제·동작 불변).
-  - ⚠ **잔여 2 — 전적**: 南関東은 oddspark 出走表가 없어 `_keiba_autocollect_form`을 건너뛴다
-    (매 사이클 실패 로그만 쌓이므로 `opTrackCd` 보유 시에만 호출하도록 가드). keiba.go.jp `DebaTable`로 별도 배선 필요.
+  - ✅ **삼복승 배선 완료** — `_nar_parse_trio`. ⚠ 표 구조가 복승/쌍승과 **다르다**: 1축(a)이
+    `<a id="Na">` **앵커로 섹션을 나누고** 그 안의 `<table>` 하나가 2축(b), 행이 (3축 c, 배당)이다.
+    즉 a 는 표 안에 없어 **앵커 위치로만** 알 수 있어 표 단위 파서(`_nar_parse_pair_odds`)로는 a 를 잃는다.
+    실배당을 얻으므로 `_trio_est` 추정배당보다 우선(추정 로직은 폴백으로 보존). 검증 **56=8C3·누락 0**.
+  - ✅ **전적 배선 완료** — `_nar_parse_deba`(DebaTable) + `_nar_autocollect_form`.
+    점수 계산은 **기존 `_keiba_build_form` 을 그대로 재사용**해 다른 수집 경로와 동일 스키마·동일 공식
+    (`_keiba_starter_store_row` 키 일치 검증). `starters_store` 에 `source="keiba_nar"` 로 저장·경주당 1회.
+    추출: 마번·마명·기수·**최근5착순·두수·코너통과·상3F·과거거리·마체중** + 이번 경주 거리.
+    E2E 검증(카와사키 9R): 8두 전원 총점 산출 · 각질(선행형/추격형/평지형) · 등급 A~D · 최근착순 보유.
   - ⏳ **라이브 수집 검증 잔여**: 배선 완료 시점에 카와사키 최종 경주(20:50)가 끝나 수집 창(발주 10분전~2분후)
     밖이었다. **다음 南関東 개최일에 `data/odds_history/`의 카와사키·오이·후나바시·우라와 스냅샷 수와
     `src` 값**(`oddspark`로 기록됨)을 확인할 것 — 종전 확장 단독 1·2개에서 20개 내외로 늘어야 정상.

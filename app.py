@@ -28738,10 +28738,13 @@ def _kra_schedule(ymd, force=False):
 #     같은 사이트·같은 k_babaCode 체계라 새 소스를 붙이는 게 아니라 **쓰던 소스의 범위를 넓히는 것**이다.
 #   ⚠ 구조적 이점: 배당표가 '축마 1두 = 1 table, 행 = (상대마번, 배당)' 형태라 **열(colspan) 추적이 없다**
 #     → oddspark 그리드 파서에서 반복된 열 밀림(off-by-one)·조합 누락이 원리적으로 발생하지 않는다.
-#   ⚠ 삼복승(三連複)은 '짝(a,b) 단위 표'라 구조가 달라 이번 범위에서 제외 — 기존 `_trio_est` 추정배당
-#     보험이 그대로 적용된다(무삭제·기존 동작 유지).
+#   ⚠ 삼복승(三連複)은 표 구조가 달라(1축이 앵커, 2축이 표, 3축이 행) `_nar_parse_trio` 로 따로 읽는다.
+#     실배당을 얻으므로 `_trio_est` 추정배당보다 우선한다(추정 로직은 폴백으로 그대로 보존).
+#   ⚠ 전적은 oddspark 出走表가 없어 keiba.go.jp `DebaTable`(`_nar_autocollect_form`)로 수집하며,
+#     점수 계산은 기존 `_keiba_build_form` 을 재사용해 다른 경로와 동일 스키마·동일 공식을 유지한다.
 NAR_KEIBA_BASE = "https://www2.keiba.go.jp/KeibaWeb/TodayRaceInfo/"
-NAR_ODDS_PATH = {"win": "OddsTanFuku", "quinella": "OddsUmLenFuku", "exacta": "OddsUmLenTan"}
+NAR_ODDS_PATH = {"win": "OddsTanFuku", "quinella": "OddsUmLenFuku",
+                 "exacta": "OddsUmLenTan", "trio": "Odds3LenFuku"}
 # 南関東 4장만 대상 — 나머지 NAR(나고야·소노다 등)은 oddspark 가 이미 커버하므로 중복 수집하지 않는다.
 NAR_NANKAN_BABA = {"18": "우라와", "19": "후나바시", "20": "오이", "21": "카와사키"}
 _NAR_TBL_RE = re.compile(r"<table[^>]*>(.*?)</table>", re.S)
@@ -28819,6 +28822,132 @@ def _nar_parse_win(html, max_no=18):
             if 1 <= no <= max_no and o > 0:
                 win.setdefault(no, o)
     return win
+
+
+_NAR_ANCHOR_RE = re.compile(r'id="?(\d{1,2})a"?')
+
+
+def _nar_parse_trio(html, max_no=18):
+    """三連複(馬番順) → [{'combo':[a,b,c],'odds':x}].
+
+    ⚠ 복승/쌍승과 표 구조가 다르다 — 1축(a)이 `<a id="Na">` 앵커로 섹션을 나누고, 그 안에서
+    <table> 하나가 2축(b), 행이 (3축 c, 배당)이다. 즉 a 는 표 안이 아니라 **앵커 위치로만** 알 수 있어
+    표 단위로만 읽는 `_nar_parse_pair_odds` 로는 a 를 잃는다(그래서 별도 파서).
+    실측 검증(카와사키 9R·8두): 56조합 = 8C3 정합."""
+    anchors = [(m.start(), int(m.group(1))) for m in _NAR_ANCHOR_RE.finditer(html or "")]
+    anchors = [a for a in anchors if 1 <= a[1] <= max_no]
+    if not anchors:
+        return []
+    out = {}
+    for m in _NAR_TBL_RE.finditer(html or ""):
+        pos = m.start()
+        a = None
+        for p, v in anchors:                  # 이 표 앞의 마지막 앵커 = 1축
+            if p < pos:
+                a = v
+            else:
+                break
+        if a is None:
+            continue
+        ths = [re.sub(r"<[^>]+>", "", t).strip() for t in _NAR_TH_RE.findall(m.group(1))]
+        if not ths or not ths[0].isdigit():
+            continue
+        b = int(ths[0])
+        for c_s, o_s in _NAR_ROW_RE.findall(m.group(1)):
+            try:
+                c, o = int(c_s), float(o_s)
+            except ValueError:
+                continue
+            k = tuple(sorted((a, b, c)))
+            if len(set(k)) != 3 or o <= 0 or any(not (1 <= n <= max_no) for n in k):
+                continue
+            out.setdefault(k, o)
+    return [{"combo": list(k), "odds": v} for k, v in sorted(out.items())]
+
+
+# ── [南関東 전적] keiba.go.jp DebaTable 파싱 ──
+#   oddspark 出走表가 없는 4장의 '전적 데이터 없음'을 해소. 점수 계산은 기존 `_keiba_build_form` 을
+#   그대로 재사용해 다른 수집 경로와 **동일 스키마·동일 공식**을 유지한다(무삭제·입력만 새로 만듦).
+_NARD_NUM_RE = re.compile(r'class="horseNum"[^>]*>\s*(\d{1,2})\s*<')
+_NARD_NAME_RE = re.compile(r'class="horseName"[^>]*>([^<]+)<')
+_NARD_JOCKEY_RE = re.compile(r'class="jockeyName"[^>]*>([^<（(]+)')
+#   전주 행: "| 착순 | YY.MM.DD 마장상태 N頭| 경마장 左DIST N番"
+_NARD_PLACE_RE = re.compile(r"\|\s*(\d{1,2})\s*\|+\s*\d{2}\.\d{2}\.\d{2}\s+\S+\s+(\d{1,2})頭"
+                            r"\|*\s*([^|]{0,12}?)\s*[左右直]\s*(\d{3,4})")
+#   기록 행: "1:37.4 7-7-7-5 39.8" (주파시계·코너통과·상3F)
+_NARD_CORNER_RE = re.compile(r"\d:\d{2}\.\d\s+([\d\-]+)\s+(\d{2}\.\d)")
+_NARD_BW_RE = re.compile(r"\|\s*(\d{3})\s*\|?\s*\(([+\-]?\d+)\)")           # 현재 마체중 460 (+11)
+_NARD_DIST_RE = re.compile(r"[ダ芝][ー\u30fc]?[トト]?\s*(\d{3,4})\s*[ｍm]")   # 이번 경주 거리
+
+
+def _nar_parse_deba(html, max_no=18):
+    """DebaTable → (shutsuba, details) — `_keiba_build_form` 입력 형태로 정규화.
+    실측 검증(카와사키 9R): 8두 · 착순[5,5,7,1,2] · 코너['7-7-7-5',...] · 두수[7,6,11,9,9]."""
+    starts = [(m.start(), int(m.group(1))) for m in _NARD_NUM_RE.finditer(html or "")]
+    starts = [s for s in starts if 1 <= s[1] <= max_no]
+    if not starts:
+        return {"horses": [], "distance": None, "venue": None}, {}
+    md = _NARD_DIST_RE.search(html or "")
+    cur_dist = int(md.group(1)) if md else None
+    horses, details = [], {}
+    for i, (pos, no) in enumerate(starts):
+        end = starts[i + 1][0] if i + 1 < len(starts) else len(html)
+        blk = html[pos:end]
+        txt = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "|", blk).replace("&nbsp;", " "))
+        nm = _NARD_NAME_RE.search(blk)
+        jk = _NARD_JOCKEY_RE.search(blk)
+        recs = _NARD_CORNER_RE.findall(txt)
+        past = []
+        for j, (pl, fs, _vn, dist) in enumerate(_NARD_PLACE_RE.findall(txt)[:5]):
+            try:
+                past.append({"placing": int(pl), "fieldSize": int(fs), "distance": int(dist),
+                             "corner": recs[j][0] if j < len(recs) else "",
+                             "last3f": float(recs[j][1]) if j < len(recs) else None})
+            except (ValueError, IndexError):
+                continue
+        bw = _NARD_BW_RE.search(txt)
+        key = "nar-%d" % no                          # lineageNb 대용(경주 내 유일)
+        horses.append({"no": no, "name": (nm.group(1).strip() if nm else ""),
+                       "jockey": (jk.group(1).strip() if jk else ""),
+                       "bodyWeight": (int(bw.group(1)) if bw else None),
+                       "lineageNb": key})
+        details[key] = past
+    return {"horses": horses, "distance": cur_dist, "venue": None}, details
+
+
+_NAR_FORM_DONE = set()          # 경주당 1회만 전적 수집(재시작 시 starters_store 로 재판정)
+
+
+def _nar_autocollect_form(rk, baba, ymd, rno):
+    """[南関東 전적 자동수집] keiba.go.jp DebaTable → starters_store. `_keiba_autocollect_form` 의 NAR판.
+    실패해도 배당 수집엔 무영향(완전 격리)."""
+    try:
+        if not (rk and baba and rno) or rk in _NAR_FORM_DONE:
+            return
+        _ex = _starters_load().get(rk)
+        if _ex and _ex.get("horses") and _ex.get("source") == "keiba_nar":
+            _NAR_FORM_DONE.add(rk)
+            return
+        html = _nar_fetch("%sDebaTable?k_raceDate=%s&k_raceNo=%d&k_babaCode=%s"
+                          % (NAR_KEIBA_BASE, _nar_date_param(ymd), int(rno), baba))
+        shutsuba, details = _nar_parse_deba(html)
+        if not shutsuba.get("horses"):
+            print("[南関東 전적] %s 출주표 0두 → html=%dB" % (rk, len(html or "")))
+            return
+        try:
+            _jp_jockeys_accumulate(details)          # 일본 기수 DB 누적(복승권율) — 실패해도 무시
+        except Exception:
+            pass
+        horses = _keiba_build_form(shutsuba, details)
+        store = [_keiba_starter_store_row(h) for h in horses if h.get("no") is not None]
+        if store:
+            sdb = _starters_load()
+            sdb[rk] = {"horses": store, "t": time.time(), "source": "keiba_nar"}
+            _starters_save(sdb)
+            _NAR_FORM_DONE.add(rk)
+            print("[南関東 전적] %s: %d두 저장(keiba.go.jp DebaTable)" % (rk, len(store)))
+    except Exception as e:
+        print("[南関東 전적] %s 실패(무시):" % rk, e)
 
 
 def _nar_race_list(baba, ymd):
@@ -28919,7 +29048,6 @@ def _multi_collect_one(track, race, ymd):
         win = {}   # [단승] 경마만 수집(경륜은 単勝 개념이 다르고 oddspark 매핑도 별도) — 아래 경마 분기에서 채움
         if track.get("narBaba"):
             # ── [南関東] keiba.go.jp(NAR 공식) 경로 — oddspark 미커버 4장 전용 ──
-            #   삼복승은 표 구조가 달라(짝 단위) 미수집 → 기존 `_trio_est` 추정배당 보험이 그대로 적용된다.
             _bb = track["narBaba"]
             q = _nar_parse_pair_odds(_nar_fetch(_nar_odds_url(_bb, ymd, rno, "quinella")))
             x = _nar_parse_pair_odds(_nar_fetch(_nar_odds_url(_bb, ymd, rno, "exacta")),
@@ -28928,6 +29056,11 @@ def _multi_collect_one(track, race, ymd):
                 win = _nar_parse_win(_nar_fetch(_nar_odds_url(_bb, ymd, rno, "win")))
             except Exception as _we:
                 print("[南関東] 단승 수집 실패(무시):", _we)
+            try:
+                # [삼복승] 앵커(1축) 기반 별도 파서 — 실배당 수집 시 `_trio_est` 추정배당보다 우선한다.
+                tr3 = _nar_parse_trio(_nar_fetch(_nar_odds_url(_bb, ymd, rno, "trio")))
+            except Exception as _te:
+                print("[南関東] 삼복승 수집 실패(무시):", _te)
             sport, category = "horse", "japan_local"
         elif is_cycle:
             jo = track["joCode"]
@@ -29065,11 +29198,16 @@ def _multi_collect_one(track, race, ymd):
                 _keirin_autocollect_form(key, track.get("joCode"), ymd, rno)
             except Exception as _fe:
                 print(f"[전적수집] {key} 경륜 전적 실패: {_fe}")
+        elif track.get("narBaba"):
+            # [南関東 전적 자동 수집] oddspark 出走表가 없는 4장은 keiba.go.jp DebaTable 로 수집.
+            #   점수 계산은 `_keiba_build_form` 재사용 → 다른 경로와 동일 스키마·동일 공식.
+            try:
+                _nar_autocollect_form(key, track.get("narBaba"), ymd, rno)
+            except Exception as _fe:
+                print(f"[전적수집] {key} 南関東 전적 실패: {_fe}")
         elif track.get("opTrackCd"):
             # [지방경마(NAR) 전적 자동 수집] 확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'
             #   해소 — 배당과 동시에 oddspark 出走表+전적을 수집·저장(경주당 1회·통합등급 반영). keirin 대칭.
-            #   ⚠ 南関東(narBaba)은 oddspark 出走表가 없으므로 이 경로를 타지 않는다 — 매 사이클 실패
-            #     로그만 쌓일 뿐이라 건너뛴다. 전적은 keiba.go.jp DebaTable 로 별도 배선 필요(잔여 과제).
             try:
                 _keiba_autocollect_form(key, track.get("opTrackCd"), track.get("sponsorCd"), ymd, rno)
             except Exception as _fe:
