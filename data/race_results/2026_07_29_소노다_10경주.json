@@ -1,0 +1,80 @@
+{
+ "race_id": "2026_07_29_소노다_10경주",
+ "raceKey": "소노다 10경주",
+ "date": "2026-07-29",
+ "sport": "horse",
+ "category": "japan_local",
+ "track": "소노다",
+ "round": 10,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 2,
+  "2nd": 7,
+  "3rd": 1
+ },
+ "payouts": {
+  "quinella": 4.4
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [
+  {
+   "time": null,
+   "type": "급락",
+   "combo": [
+    2,
+    7
+   ],
+   "horse": 2,
+   "drop_rate": -10.2,
+   "excess_drop": 0.0
+  }
+ ],
+ "prediction": {
+  "candidates": [
+   1,
+   6,
+   2,
+   3,
+   4,
+   7
+  ],
+  "eliminated": [
+   5
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 40.4,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중 · 2+7 복승 급락(-10.2%) → 2·7번 입상 적중 · 제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": true,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 4.4,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 3400
+ },
+ "memo": null,
+ "saved_at": "2026-07-29 15:58:46",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

@@ -1,0 +1,221 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_29_소노다_10경주",
+ "race_info": {
+  "date": "2026-07-29",
+  "track": "소노다",
+  "round": 10,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 7,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "ビーチパトロール",
+   "jockey": "小牧太",
+   "jockey_winrate": 60.0,
+   "recent_results": [
+    1,
+    6,
+    2,
+    6,
+    8
+   ],
+   "record_score": 125.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 8.4
+  },
+  {
+   "no": 7,
+   "name": "ヘニーヒューズ",
+   "jockey": "下原理",
+   "jockey_winrate": 43.3,
+   "recent_results": [
+    3,
+    5,
+    7,
+    3,
+    8
+   ],
+   "record_score": 105.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 4.2
+  },
+  {
+   "no": 2,
+   "name": "パイロ",
+   "jockey": "杉浦健",
+   "jockey_winrate": 43.3,
+   "recent_results": [
+    10,
+    5,
+    2,
+    4,
+    4
+   ],
+   "record_score": 55.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 1.9
+  },
+  {
+   "no": 6,
+   "name": "ホークビル",
+   "jockey": "廣瀬航",
+   "jockey_winrate": 30.0,
+   "recent_results": [
+    4,
+    4,
+    2,
+    5,
+    6
+   ],
+   "record_score": 45.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 15.5
+  },
+  {
+   "no": 3,
+   "name": "ストロングリターン",
+   "jockey": "田野豊",
+   "jockey_winrate": 40.0,
+   "recent_results": [
+    5,
+    2,
+    10,
+    3,
+    6
+   ],
+   "record_score": 48.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 4.7
+  },
+  {
+   "no": 5,
+   "name": "トゥザグローリー",
+   "jockey": "松木大",
+   "jockey_winrate": 23.3,
+   "recent_results": [
+    8,
+    6,
+    5,
+    6,
+    8
+   ],
+   "record_score": 43.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 35.9
+  },
+  {
+   "no": 4,
+   "name": "エポカドーロ",
+   "jockey": "山本咲",
+   "jockey_winrate": 26.7,
+   "recent_results": [
+    11,
+    11,
+    5,
+    1
+   ],
+   "record_score": 10.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 14.5
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {
+   "2": -10.2,
+   "7": -10.2
+  },
+  "excess_drops": {},
+  "drop_speed": {
+   "2": -10.6,
+   "7": -10.6
+  },
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": 1.375,
+  "refund_rate": 0.772,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   6,
+   2,
+   3,
+   4,
+   7
+  ],
+  "eliminated": [
+   5
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 40.4,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 7,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중 · 2+7 복승 급락(-10.2%) → 2·7번 입상 적중 · 제거 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 2,
+  "second": 7,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-29 15:58:46",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

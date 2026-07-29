@@ -1,0 +1,296 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_29_나고야_4경주",
+ "race_info": {
+  "date": "2026-07-29",
+  "track": "나고야",
+  "round": 4,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 7,
+   "name": "ナムラキングダム",
+   "jockey": "丸野勝（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    2,
+    15,
+    9
+   ],
+   "record_score": 75.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "ナムラライラック",
+   "jockey": "木之葵（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    1,
+    2,
+    13,
+    8
+   ],
+   "record_score": 45.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "ジーティーウンカイ",
+   "jockey": "丸山真（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    9,
+    11,
+    9,
+    6
+   ],
+   "record_score": 40.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "トンデトンデトンデ",
+   "jockey": "塚本征（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    1,
+    8,
+    16,
+    6
+   ],
+   "record_score": 30.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "フィアマネラ",
+   "jockey": "山田祥（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    4,
+    7,
+    9,
+    8
+   ],
+   "record_score": 17.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "デパーチャー",
+   "jockey": "渡邊竜（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    5,
+    7,
+    1,
+    4
+   ],
+   "record_score": 6.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "スターアライズ",
+   "jockey": "加藤誓（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    10,
+    10,
+    11,
+    1
+   ],
+   "record_score": 5.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "マジョリカ",
+   "jockey": "東川慎（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    11,
+    5,
+    11,
+    9,
+    11
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "15:52:39",
+    "quinella": {
+     "3+6": 4.4,
+     "5+7": 8.9,
+     "7+9": 12.0,
+     "3+4": 16.2,
+     "3+8": 17.8,
+     "4+7": 20.8,
+     "4+5": 28.6,
+     "5+9": 40.5,
+     "2+3": 41.8,
+     "6+7": 61.3,
+     "4+9": 69.4,
+     "7+8": 77.4,
+     "7+11": 84.8,
+     "3+11": 90.5,
+     "5+6": 93.1,
+     "2+7": 107.5,
+     "5+8": 119.4,
+     "5+11": 125.3,
+     "3+7": 143.6,
+     "3+5": 165.7,
+     "2+5": 181.0,
+     "3+9": 228.8,
+     "4+6": 334.6,
+     "4+8": 341.1,
+     "6+9": 373.4,
+     "4+11": 449.0,
+     "8+9": 485.9,
+     "9+11": 514.1,
+     "2+9": 554.3,
+     "2+4": 611.6,
+     "6+8": 709.5,
+     "2+6": 985.4,
+     "8+11": 1223.3,
+     "6+11": 1313.9,
+     "2+8": 1689.4,
+     "2+11": 2217.3
+    }
+   }
+  ],
+  "drop_rates": {
+   "7": -89.0,
+   "8": -89.0,
+   "3": -73.3,
+   "2": -73.0,
+   "6": -51.9,
+   "4": -21.3,
+   "5": -21.3
+  },
+  "excess_drops": {
+   "7": -15.1,
+   "8": -2.5,
+   "3": -24.8,
+   "2": -24.5
+  },
+  "drop_speed": {
+   "7": -132.8,
+   "8": -132.8,
+   "3": -109.4,
+   "2": -109.0,
+   "6": -77.5,
+   "4": -31.8,
+   "5": -31.8
+  },
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.87,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   2,
+   3,
+   5,
+   6,
+   7,
+   8,
+   4,
+   1
+  ],
+  "eliminated": [],
+  "recommend": "6+7",
+  "strategy": "BMED_고배당도전형",
+  "confidence": 80.0,
+  "signal_quality": "상"
+ },
+ "result": {
+  "1st": 9,
+  "2nd": 4,
+  "3rd": 8,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 9,
+  "second": 4,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": "3",
+  "excess_drop_horse_placed": false,
+  "excess_drop_value": -24.8,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-29 15:59:04",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
