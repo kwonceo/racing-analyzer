@@ -13918,6 +13918,15 @@ def _build_analysis_log(rk, an=None):
         "recommendation_history": rec_history,   # [추천 이력 보존] 변경마다 누적(덮어쓰지 않음)
         "compare_recommendation": an.get("compareRecommend") or (doc.get("compare_recommendation") if doc else None),   # [비교학습] 이상감지/전적/최종 3종
         "corePicks": core_picks_out,   # [확신도 복승 학습·추천 보존] confQuinellas·confTrifecta 결과 판정용 보존(빈값 덮어쓰기 방지)
+        # [신호품질 원본 저장 (2026-07-29)] _triple_analyze 는 signalQuality{excess·situation·
+        #   integratedAdaptive·combos}를 만들지만 분석 로그에는 **한 번도 저장되지 않았다**(전수 0건).
+        #   기존 signal_quality 키는 _build_race_result/_build_ai_training 에서 조합별 등급 문자열
+        #   ('상/중/하')만 담는 별개 필드다 — 그건 그대로 두고(무삭제) 원본을 별도 키로 남긴다.
+        #   ⚠ 관측이 없으면 검증도 없다: Gemini 가 "_combo_signal_quality 가 전부 '하'로 떨어진다"고
+        #     지적(42회)했을 때 데이터가 없어 사실 확인조차 못 했다. 확신도 재설계의 기반 데이터다.
+        #   빈값 덮어쓰기 방지: 이번 분석에 없으면 기존 기록을 유지한다.
+        "signal_quality_full": (an.get("signalQuality")
+                                or (doc.get("signal_quality_full") if doc else None)),
         "summary": an.get("summary"),
         "keyHorses": an.get("keyHorses"),
         "result": result_doc,
