@@ -176,8 +176,17 @@
           ? `<b style="color:#38d39f;background:rgba(56,211,159,.16);padding:1px 5px;border-radius:5px">${esc(s)} ✓</b>`
           : `<span style="color:#cbd5e1">${esc(s)}</span>`)).join(' · ')}</div>`
       : `<div style="margin-top:4px;font-size:13.5px">예상 <b>${esc(c.prediction && c.prediction.main || '-')}</b></div>`;
-    const oddsTxt = c.quinellaOdds
-      ? ` · <span style="color:#fbbf24;font-weight:800">복승 ${c.quinellaOdds}배</span>` : '';
+    // [놓친 배당 표시 (2026-07-29 권대표 지시)] 적중 여부와 무관하게 그 경주 확정배당을 보여준다.
+    //   실측(중앙값): 적중 일본 4.6배·경륜 3.5배 ↔ 미적중 일본 16.8배·경륜 10.4배 — 3배 격차.
+    //   "안전한 저배당만 잡고 고배당은 놓친다"가 회수율이 안 오르는 구조적 이유라, 매 경주에서
+    //   그 격차를 눈으로 보게 한다. (payouts_raw 덕에 미적중도 확정배당이 남아 있다)
+    const _od = c.quinellaOdds;
+    const oddsTxt = _od
+      ? (c.hit
+        ? ` · <span style="color:#38d39f;font-weight:800">복승 ${_od}배 획득</span>`
+        : ` · <span style="color:#f87171;font-weight:800">놓침 ${_od}배</span>`
+          + (_od >= 20 ? ' <span style="color:#fbbf24;font-size:11px">💰고배당</span>' : ''))
+      : '';
     const gradeBadge = c.betGrade
       ? `<span class="hint" style="font-size:11px;border:1px solid #475569;border-radius:6px;padding:1px 5px">${esc(c.betGrade)}</span>` : '';
     const gmBadge = c.gemini
