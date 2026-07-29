@@ -1,0 +1,239 @@
+{
+ "race": "나고야 10경주",
+ "raceKey": "나고야 10경주",
+ "date": "2026-07-29",
+ "result": {
+  "1st": 7,
+  "2nd": 4,
+  "3rd": 2,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 1,
+   "excess_drop": -5.4,
+   "avg_drop": -56.1,
+   "grade": "🔴",
+   "rep_combo": [
+    2,
+    7
+   ],
+   "drop_timeline": [
+    {
+     "time": "19:23:22",
+     "minutes_before": 2,
+     "odds": 85.9,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "19:23:53",
+     "minutes_before": 1,
+     "odds": 85.9,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "19:24:22",
+     "minutes_before": 1,
+     "odds": 14.3,
+     "change": -83.4,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 112.5,
+   "confidence": 44.0,
+   "reason": "초과급락"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 94.2,
+   "confidence": 0.0,
+   "reason": "전적상위"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": -9.4,
+   "avg_drop": -60.1,
+   "grade": "🔴",
+   "rep_combo": [
+    2,
+    7
+   ],
+   "drop_timeline": [
+    {
+     "time": "19:23:22",
+     "minutes_before": 2,
+     "odds": 85.9,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "19:23:53",
+     "minutes_before": 1,
+     "odds": 85.9,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "19:24:22",
+     "minutes_before": 1,
+     "odds": 14.3,
+     "change": -83.4,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 101.8,
+   "confidence": 100.0,
+   "reason": "초과급락"
+  },
+  "signal_8": {
+   "horse": 8,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": 0.7,
+   "avg_drop": -50.0,
+   "grade": "🔴",
+   "rep_combo": [
+    8,
+    9
+   ],
+   "drop_timeline": [
+    {
+     "time": "19:23:22",
+     "minutes_before": 2,
+     "odds": 14.1,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "19:23:53",
+     "minutes_before": 1,
+     "odds": 14.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "19:24:22",
+     "minutes_before": 1,
+     "odds": 5.9,
+     "change": -58.2,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 66.2,
+   "confidence": 64.0,
+   "reason": "초과급락"
+  }
+ },
+ "recommended_horses": [
+  8,
+  7,
+  2
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 7번 112.5점",
+  "2. 배당 수집 시작 19:23:22",
+  "3. 초과급락 감지: 2번 초과급락 -9.4%p (전체평균 -50.7%)",
+  "5. 종합 신뢰도 44.0점(중) 판정",
+  "6. BMED 전략: 고배당도전형 적용",
+  "7. 최종 추천: 복승 메인 7+8"
+ ],
+ "confidence_breakdown": {
+  "horse": 7,
+  "excess_drop_score": 40,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 112.5,
+  "total": 44.0,
+  "grade": "중"
+ },
+ "win_tags": [
+  "초과급락_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 112.5,
+  "dropAmt": -83.4,
+  "dropScore": 100.0,
+  "inverse": false,
+  "inverseHorses": [
+   2,
+   7,
+   5
+  ],
+  "inverseHit": [
+   2,
+   7
+  ],
+  "confidence": 100.0,
+  "reason": "전적유력마 2번 적중 · 2+7 복승 급락(-83.4%) → 2·7번 입상 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [
+   7
+  ],
+  "events": {
+   "7": {
+    "first": {
+     "time": "19:24:22",
+     "minutes_before": 1
+    },
+    "count": 1,
+    "last": {
+     "time": "19:24:22",
+     "minutes_before": 1
+    }
+   }
+  },
+  "finalSignal": 7,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 3
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-07-29 19:29:16"
+}

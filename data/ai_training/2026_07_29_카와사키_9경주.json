@@ -1,0 +1,271 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_29_카와사키_9경주",
+ "race_info": {
+  "date": "2026-07-29",
+  "track": "카와사키",
+  "round": 9,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 2,
+   "name": "관악산스",
+   "jockey": "아르",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    1
+   ],
+   "record_score": 120.7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "샤이닝로",
+   "jockey": "범현",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    4
+   ],
+   "record_score": 92.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "벌고낙성",
+   "jockey": "재로",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    1
+   ],
+   "record_score": 86.4,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "강철전사",
+   "jockey": "르칸",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    1
+   ],
+   "record_score": 67.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "글로벌컴",
+   "jockey": "인철",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    2
+   ],
+   "record_score": 57.1,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "티나케이",
+   "jockey": "도운",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    2
+   ],
+   "record_score": 47.1,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "파이브스",
+   "jockey": "용호",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "파리의불",
+   "jockey": "기원",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "19:01:34",
+    "quinella": {
+     "2+7": 2.5,
+     "1+7": 7.9,
+     "1+2": 8.6,
+     "5+7": 9.2,
+     "2+5": 9.9,
+     "2+6": 13.9,
+     "7+8": 19.3,
+     "6+7": 20.5,
+     "4+7": 26.2,
+     "2+8": 27.5,
+     "2+4": 29.2,
+     "1+5": 36.4,
+     "1+6": 45.0,
+     "5+6": 51.2,
+     "1+8": 51.5,
+     "1+4": 61.2,
+     "3+7": 72.9,
+     "6+8": 74.6,
+     "4+5": 77.9,
+     "5+8": 82.0,
+     "2+3": 89.6,
+     "4+6": 104.0,
+     "4+8": 163.4,
+     "3+5": 169.6,
+     "1+3": 172.0,
+     "3+6": 183.6,
+     "3+4": 236.5,
+     "3+8": 265.9
+    }
+   },
+   {
+    "time": "19:01:34",
+    "quinella": {
+     "2+7": 2.5,
+     "1+7": 7.9,
+     "1+2": 8.6,
+     "5+7": 9.2,
+     "2+5": 9.9,
+     "2+6": 13.9,
+     "7+8": 19.3,
+     "6+7": 20.5,
+     "4+7": 26.2,
+     "2+8": 27.5,
+     "2+4": 29.2,
+     "1+5": 36.4,
+     "1+6": 45.0,
+     "5+6": 51.2,
+     "1+8": 51.5,
+     "1+4": 61.2,
+     "3+7": 72.9,
+     "6+8": 74.6,
+     "4+5": 77.9,
+     "5+8": 82.0,
+     "2+3": 89.6,
+     "4+6": 104.0,
+     "4+8": 163.4,
+     "3+5": 169.6,
+     "1+3": 172.0,
+     "3+6": 183.6,
+     "3+4": 236.5,
+     "3+8": 265.9
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.745,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   5,
+   7,
+   8,
+   3,
+   4,
+   6
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 7,
+  "2nd": 2,
+  "3rd": 1,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 7,
+  "second": 2,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-29 19:29:19",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}

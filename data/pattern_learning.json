@@ -4651,11 +4651,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1788,
+      "count": 1790,
       "hit": 353
     },
     "전체부진마": {
-      "count": 2956,
+      "count": 2961,
       "hit": 806
     },
     "대규모급락": {
@@ -4666,11 +4666,11 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 1168,
+      "count": 1171,
       "hit": 453
     },
     "급락동반": {
-      "count": 204,
+      "count": 207,
       "hit": 60
     }
   },
@@ -5044,24 +5044,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 514,
-    "hit": 421,
+    "count": 515,
+    "hit": 422,
     "cases": [
-      {
-        "race": "2026-07-28 도요하시 8경주",
-        "date": "2026-07-29",
-        "smart_horses": [
-          4,
-          1
-        ],
-        "placed": [
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "2026-07-28 세이부엔 1경주",
         "date": "2026-07-29",
@@ -6644,6 +6629,22 @@
         "hit": false,
         "trifecta_odds": null,
         "quinella_odds": 1.7,
+        "high_odds": false
+      },
+      {
+        "race": "나고야 10경주",
+        "date": "2026-07-29",
+        "smart_horses": [
+          9,
+          2,
+          8
+        ],
+        "placed": [
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
