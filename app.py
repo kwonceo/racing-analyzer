@@ -8393,6 +8393,22 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
 #   전멸 시 최상위 1개 "⚠ 기대값 미달(참고)" 유지. 적중판정 기준(복승1·2/삼복승1·2·3)은 불변.
 EV_BANDS_FILE = os.path.join(os.path.dirname(__file__), "data", "ev_bands.json")
 _EV_BANDS = [(0.0, 1.8, 0.50), (1.8, 2.5, 0.40), (2.5, 5.0, 0.30), (5.0, 15.0, 0.15), (15.0, 9e9, 0.05)]
+# ── [고배당 포착 복원 (2026-07-29)] EV 필터가 잘라낸 12~30배 조합 중 최저배당 1개를 메인 복원 ──
+#   배경: 회원 요구("저배당만 잡는 건 어떤 AI든 한다 · 10~50배를 균등하게")에 대한 실측 대응.
+#   진단: 시장 환급률 75% 구조에서 EV(배당×적중률) ≥ 1.0 을 넘는 구간은 11.4~15배와 28.6배 이상뿐이라
+#     사실상 전 구간이 강등되고 '면제 토큰'(시장 최저복승·유력마 1·2위) 보유 조합만 살아남았다.
+#     그 면제 토큰이 대부분 저배당 계열이라 추천 1순위의 71.6%가 시장 최저배당이 되는 구조였다.
+#     게다가 학습 표본 50+ 밴드는 _ev_band_p 가 선형보간을 건너뛰고 계단값을 즉시 반환해(8426행)
+#     주석에 적힌 '경계 절벽 해소'가 무력화 — 14.9배 EV 1.32 ↔ 15.0배 EV 0.53(2.5배 낙차)로
+#     **회원이 원하는 20배 구간이 정확히 절벽 바닥**이었다. 요컨대 필터가 거꾸로 작동했다:
+#     실측 0적중인 30배+(n=43)는 열어두고, 실측 흑자인 15~30배는 잘라내고 있었다.
+#   실측 근거(500경주·조합 2,068 · 강등분 모집단): 15~20배 기대값 1.21 · 20~30배 1.35(흑자)
+#     ↔ 8~12배 0.34 · 30~50배 0/36 · 50배+ 0/5(적자). → 개방 구간을 12~30배로 한정한다.
+#   리플레이 검증(총투자 동일·경주당 stake 고정 분할): 전체 82.6%→88.2% · 전반부 72.3%→72.9% ·
+#     **후반부 OOS 92.9%→103.5%(흑자 전환)** · 종목별 전부 개선(일본 69.6→73.2 · 경륜 91.0→97.1 ·
+#     한국 73.1→79.2) · 10~50배 추천 비율 23.8%→28.5%. 경계 민감도도 낮다(15~30배 87.5%로 고원).
+#     ⚠ 8~30배(83.8%)·12~50배(86.0%)는 열수록 악화 — 구간을 넓히지 말 것.
+_EV_RESCUE_LO, _EV_RESCUE_HI, _EV_RESCUE_MAX = 12.0, 30.0, 1
 
 
 def _ev_bands_load():
@@ -8670,6 +8686,7 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
             except (TypeError, ValueError):
                 _conn_ex = set()
             _kept3 = []
+            _ev_cut = []                      # [고배당 복원] 이번 EV 필터에서 강등된 조합 추적
             for _q in fq:
                 _o = _q.get("odds")
                 _p = _ev_band_p(_o) if _o is not None else None
@@ -8684,11 +8701,36 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
                                                        "확신도", "이중수렴", "시장 최저복승", "시장유력")))
                 if _ev is not None and _ev < 1.0 and not _exempt:
                     _demote(_q, "기대값 %.2f 미달(배당 %s배 × 추정적중률 %d%%)" % (_ev, _o, round(_p * 100)))
+                    _ev_cut.append(_q)
                 else:
                     if _ev is not None and _ev < 1.0 and _exempt:
                         _q["reason"] = _rsn2 + " · 신호 근거로 기대값 면제"
                     _kept3.append(_q)
             fq = _kept3
+            # ── [고배당 포착 복원] EV 강등분 중 12~30배 최저배당 1개를 메인 복원(상단 근거 주석 참조) ──
+            #   ⚠ 삭제 없이 '되살리기'만 한다 — 강등 로직·다른 사유 강등분·삼복승은 무변경.
+            try:
+                _resc = []
+                for _q in _ev_cut:
+                    _ro = _safe_num(_q.get("odds"))
+                    if _ro is not None and _EV_RESCUE_LO <= _ro < _EV_RESCUE_HI:
+                        _resc.append((_ro, _q))
+                _resc.sort(key=lambda t: t[0])            # 배당 낮은 순(리플레이 채택안)
+                for _ro, _q in _resc[:_EV_RESCUE_MAX]:
+                    _rc0 = sorted(int(x) for x in (_q.get("combo") or []))
+                    for _i3 in range(len(ref) - 1, -1, -1):   # 참고 목록에서 중복 제거(복원분)
+                        if ("기대값" in (ref[_i3].get("refReason") or "")
+                                and sorted(int(x) for x in (ref[_i3].get("combo") or [])) == _rc0):
+                            ref.pop(_i3)
+                            break
+                    _r1 = dict(_q)
+                    _r1["stars"] = 2
+                    _r1["evRescue"] = True                # 관측용 — 분석 로그에 근거를 남긴다
+                    _r1["reason"] = ((_r1.get("reason") or "")
+                                     + " · 🎯 중고배당 복원(12~30배 · 실측 기대값 1.2~1.35)")
+                    fq.append(_r1)
+            except Exception as _rse:
+                print("[고배당 복원] 실패(무시):", _rse)
             # [막판 리프라이싱 리더 강제 편입 (2026-07-19)] 대규모 재편 속 초과 급락 리더 조합은 최강 신호
             #   (부산 6R 5+11=③에 그쳐 아쉬웠던 케이스) → 메인 앞자리로 강제 편입(EV 필터 면제·최대 2개).
             try:
