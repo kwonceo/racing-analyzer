@@ -22174,6 +22174,21 @@ def _keirin_autocollect_form(rk, jo, ymd, race):
             #     "추정(styleType) vs 표기(declaredStyle)" 정확도 비교는 나중에 리플레이로 판정한다.
             "declaredStyle": r.get("style") or None,             # 원문 표기(逃/捲/追/差/両/自)
             "declaredStyleLabel": r.get("styleLabel") or None,   # 한글 라벨(KEIRIN_STYLE_LABEL)
+            # ── [개최별 성적·선수 속성 저장 (2026-07-31)] ──────────────────────────────
+            #   ⚠ `_keirin_parse_card` 가 **이미 뽑고 있었으나 저장행에서 탈락**해 온 필드들이다
+            #     (오늘 실측: `starters_store` 어느 행에도 recent/prev1/prev2/age/area/ki 없음).
+            #     corners·kimarite·declaredStyle 과 **같은 유형의 소실**이며 오늘만 일곱 번째다.
+            #   왜 필요한가: 출마표는 경주가 끝나면 내려가 **종료 후 영구 소실**된다.
+            #     · `recent`/`prev1`/`prev2` = 금·전·전전 개최 성적 → **컨디션 추세의 1차 자료**
+            #       (CLAUDE.md 「탈락 필드 우선순위」 🟠 4 로 이미 지목돼 있던 항목)
+            #     · `age`/`area`/`ki` = 나이·지역·기수(期) → 정적 속성이나 예측 재료로 쓰인다
+            #   ⚠ 추천 경로 무개입 — 저장행에 필드만 추가한다(기존 필드 전부 무삭제).
+            "recent": r.get("recent") or None,      # 금개최 성적
+            "prev1": r.get("prev1") or None,        # 전개최 성적
+            "prev2": r.get("prev2") or None,        # 전전개최 성적
+            "age": r.get("age") or None,
+            "area": r.get("area") or None,
+            "ki": r.get("ki") or None,              # 기(期)
         } for r in (an.get("ranked") or []) if r.get("car") is not None and r.get("score") is not None]
         # [경륜 특화④·득점 갭 가점 (2026-07-19)] 득점 1위가 2위와 3점+ 차이면 유력 확신 +5(투명 분해 표시).
         try:
