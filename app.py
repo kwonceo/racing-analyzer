@@ -1964,6 +1964,18 @@ _ARITY_MIN, _ARITY_MAX = 0.4, 1.5
 _ARITY_TRUSTED = ("oddspark", "kra_api")
 
 
+# ══════════ [삼복승 추정배당 보정계수 (2026-07-30 위치 이동)] ══════════
+#   `_trio_est` = 구성 복승 3쌍 기하평균 × 2 로 추정한다. 그 값이 과대해 ÷2 보정을 넣었는데,
+#   종전에는 **표시 직전에 3개 리스트만 열거해** 나눠서 나머지 리스트가 보정을 못 받았다
+#   → 같은 조합이 리스트마다 2배 다른 값(발동률 54.8% · 미해결 버그 #1의 원인).
+#   이제 **추정 시점에서 한 번만** 나눈다(모든 소비처가 자동으로 같은 값).
+#   ⚠ 계수 2.0 자체는 실측상 부족하다 — 적중 삼복승 147건 대조에서 raw 추정/실제 **중앙 2.35**,
+#     배당대별로는 0~20배 **2.70**(n=98) ↔ 20~50배 1.40(n=7)로 갈린다. 단일 상수로는 양쪽 다 틀린다.
+#     ⚠ 표본이 적중 조합에 한정돼 저배당 쪽으로 치우친 선택 편향이 있다.
+#     계수 재보정은 **구조 수정 효과를 분리 확인한 뒤** 별도로 진행한다(오늘은 2.0 유지).
+TRIO_EST_CAL = 2.0
+
+
 def _combo_horse_count(combos):
     """조합 목록에 등장하는 서로 다른 마번 수(N)."""
     nos = set()
@@ -6732,12 +6744,18 @@ def _chaotic_race(curQ, curWin, key_horses, anomaly_horse, drops):
         return curQ.get(tuple(sorted((int(a), int(b)))))
 
     def _trio_est(cc):
-        """삼복승 실배당 미수집 → 구성 복승 3쌍 기하평균×2 추정. (odds, is_estimate)."""
+        """삼복승 실배당 미수집 → 구성 복승 3쌍 기하평균×2 ÷보정계수 추정. (odds, is_estimate).
+        ⚠ [보정 위치 이동 (2026-07-30)] 종전에는 `_EST_CAL` 나눗셈을 **표시 직전**(app.py:11755)에서
+          `finalTrifectas`·`trifecta`·`confTrifecta` **세 곳만 열거해** 적용했다. 그 결과
+          `earlyDropTrifectas`·`closingDropTrifectas`·`darkTrifectas`·`final_recommendation.*` 는
+          보정을 못 받아 **같은 조합이 리스트마다 정확히 2배 다르게 표시**됐다(실측 발동률 54.8%).
+          → **추정 시점에서 한 번만 나눈다.** 이러면 모든 소비처가 자동으로 같은 값을 갖는다.
+        ⚠ 계수 자체(2.0)는 이번에 **바꾸지 않는다** — 구조만 고친다(효과 분리를 위해)."""
         ps = [_q(cc[0], cc[1]), _q(cc[0], cc[2]), _q(cc[1], cc[2])]
         present = [p for p in ps if p and p > 0]
         if len(present) == 3:
             gm = (present[0] * present[1] * present[2]) ** (1.0 / 3.0)
-            return round(gm * 2, 1), True
+            return round(gm * 2 / TRIO_EST_CAL, 1), True
         return None, False
 
     def _mk_trio(label, cc, alloc, high_return):
@@ -10495,15 +10513,17 @@ def _triple_analyze(rk, rec):
     #   [보완] 1쌍 미수집(아웃사이더/역배열 조합)이면 그 쌍을 보수적으로 max(known)로 근사해
     #   '거친 추정(estRough)'이라도 배당을 표시(항상 편성한 삼복승의 판단 근거 제공). 2쌍+ 미수집=None.
     def _trio_est(cc):
+        # ⚠ [보정 위치 이동 (2026-07-30)] 위 6737행 정의와 동일한 이유로 여기서도 추정 시점에 나눈다.
+        #   두 정의가 같은 값을 내야 리스트 간 불일치가 사라진다.
         ps = [_q(cc[0], cc[1]), _q(cc[0], cc[2]), _q(cc[1], cc[2])]
         present = [p for p in ps if p is not None and p > 0]
         if len(present) == 3:
             gm = (present[0] * present[1] * present[2]) ** (1.0 / 3.0)
-            return round(gm * 2, 1), False
+            return round(gm * 2 / TRIO_EST_CAL, 1), False
         if len(present) == 2:
             est_missing = max(present)   # 미수집 쌍 = 고배당(비인기) 가능성↑ → 보수적 상향 근사
             gm = (present[0] * present[1] * est_missing) ** (1.0 / 3.0)
-            return round(gm * 2, 1), True
+            return round(gm * 2 / TRIO_EST_CAL, 1), True
         return None, False
     for r in bet_rec:
         if r["kind"] == "삼복승" and r["expOdds"] is None:
@@ -11752,24 +11772,23 @@ def _triple_analyze(rk, rec):
             # [추정 보정 (2026-07-23 사세보 6R 1+6+7 실측)] 공식 확정배당 21경주 대조 결과 추정식(기하평균×2)이
             #   중앙값 1.96배 과대(저배당 구간 2.4배) → 표시 직전 ÷2 보정. 사세보 6R: 21.9 → 11.0 (실제 7.8).
             #   보정해도 ±40% 오차라 '추정' 표기 유지 · 표본 쌓이면 종목별 계수 재보정 예정. 표시 전용.
-            _EST_CAL = 2.0
+            # ⚠ [보정 위치 이동 (2026-07-30)] 나눗셈은 **`_trio_est` 반환 시점으로 옮겼다.**
+            #   여기서는 **추정 표기(`oddsEst`)만** 세운다 — 값은 이미 보정된 상태로 들어온다.
+            #   종전에는 이 블록이 세 리스트만 열거해 나눴기 때문에, 열거되지 않은
+            #   `earlyDropTrifectas`·`closingDropTrifectas`·`darkTrifectas`·`final_recommendation.*` 가
+            #   보정을 못 받아 **같은 조합이 2배 다르게 표시**됐다(발동률 54.8% · 미해결 버그 #1의 원인).
+            #   ⚠ 여기서 다시 나누면 **이중 보정(÷4)** 이 되므로 나눗셈은 절대 되살리지 말 것.
             try:
                 for _t_e in (core_picks.get("finalTrifectas") or []):
                     _c_e = _t_e.get("combo") or []
                     if len(_c_e) == 3 and _t_e.get("odds") is not None \
                             and trio_map.get(tuple(sorted(int(x) for x in _c_e))) is None:
-                        if not _t_e.get("oddsEst"):
-                            _t_e["odds"] = round(float(_t_e["odds"]) / _EST_CAL, 1)
                         _t_e["oddsEst"] = True
                 if core_picks.get("trifecta") and core_picks.get("trifectaOdds") is not None \
                         and trio_map.get(tuple(sorted(int(x) for x in core_picks["trifecta"]))) is None:
-                    if not core_picks.get("trifectaOddsEst"):
-                        core_picks["trifectaOdds"] = round(float(core_picks["trifectaOdds"]) / _EST_CAL, 1)
                     core_picks["trifectaOddsEst"] = True
                 if core_picks.get("confTrifecta") and core_picks.get("confTrifectaOdds") is not None \
                         and trio_map.get(tuple(sorted(int(x) for x in core_picks["confTrifecta"]))) is None:
-                    if not core_picks.get("confTrifectaOddsEst"):
-                        core_picks["confTrifectaOdds"] = round(float(core_picks["confTrifectaOdds"]) / _EST_CAL, 1)
                     core_picks["confTrifectaOddsEst"] = True
             except Exception as _est_e:
                 print("[삼복승 추정표기] 스킵(무시):", _est_e)
@@ -14006,6 +14025,16 @@ def _canonical_log_key(rk, live=False):
 #   판정식은 **집합 비교**다(상수 하드코딩 아님). 데이터가 없으면 판정하지 않는다(오탐 금지).
 DET_DROP_PCT = -30.0        # '급락'으로 볼 최소 하락률(기존 CLAUDE.md 기준: 30%↑ 경고)
 DET_REVIEW_DIR = os.path.join(os.path.dirname(__file__), "logs", "det_review")
+# ── [항목 온·오프 (2026-07-30)] 삭제가 아니라 플래그다. 판정만 스킵하고 로직·코드는 전부 보존한다. ──
+#   ④ 급락 미반영: **판정 항목에서 제외**한다. 근거 —
+#     발동률 77% · 적중률 차 z=+0.18(유의하지 않음). 판정식 변형 4안(현행/상위1두/진성만/진성상위1두)
+#     **전부 z=+0.18~+0.61 로 실패**했다. 판정식이 "급락말을 놓쳤다"가 아니라 **"급락말이 많았다"**를
+#     재고 있었다(급락말이 여러 두면 전부 커버가 불가능해 대부분 WARNING).
+#   ⚠ 다만 **회수율에서는 반대 방향의 신호**가 보였다(진성 상위1두: WARNING 129.7% ↔ SAFE 95.8%,
+#     3건 제외 후에도 103.3% ↔ 59.9%). 즉 "경고"가 아니라 **고배당 표식**일 수 있다.
+#     → `drops_raw`(오늘 배선)가 쌓이면 **정확한 입력으로 재측정**한 뒤 방향을 정한다. 그때까지 보존.
+DET_ITEM_DROP_ENABLED = False        # ④ 급락 미반영 — 판정 스킵(로직 보존)
+DET_ITEM_TRIO_COHERENCE_ENABLED = True   # A 삼복승 정합 — 신규 채택(위험 표식)
 
 
 def _det_combo_sets(items):
@@ -14055,7 +14084,45 @@ def _deterministic_review(pend):
                            "pair": sorted(b),
                            "trifectas": [sorted(t) for t in ft]})
 
-    # ── ④ 급락 미반영 ──
+    # ── A 삼복승 정합성 (2026-07-30 신규 채택) ──
+    #   판정식: ∀q ∈ finalQuinellas(상위1) : ∃t ∈ finalTrifectas : q ⊆ t
+    #   "복승 1순위 2두가 어느 삼복승에도 들어 있지 않으면" 위반 — 같은 경주에서 복승은 A+B를 미는데
+    #   삼복승에는 A·B 가 없는 **구조적 모순**이다.
+    #   실측(620경주): 발동률 **11.6%** · 위반 n=64 적중 **20.3%** ↔ 정상 n=467 **37.9%**
+    #     → **z=−2.75 (95% 유의)**. 3건 제외 후에도 21.8% ↔ 77.0% 로 격차 유지(극단값 착시 아님).
+    #   ⚠ **위험 표식으로만 쓴다.** 측정된 것은 "위반이 있으면 성적이 나쁘다"이고,
+    #     "정합성을 강제하면 성적이 좋아진다"는 **측정되지 않았다**. 위반이 원인인지 증상인지 불명이며,
+    #     복승·삼복승이 갈리는 건 대개 신호가 약하거나 상충할 때라 **"확신 없는 상태"의 증상**일 수 있다.
+    #     근거: `fix_trio_coherence` 가 이미 강제 정합을 하는데도 전체 회수율은 67.6%다.
+    #     → **강제 수정의 근거로 쓰지 않는다.**
+    #   ⚠ 종목별로 쪼개면 유의성이 사라진다(경륜 z=−1.20 n=31 · 일본경마 z=−1.49 n=23 — 표본 부족).
+    if DET_ITEM_TRIO_COHERENCE_ENABLED:
+        # ⚠ '1순위'는 **순서 정보**라 `_det_combo_sets`(set 반환)로는 알 수 없다 → 원본 리스트에서 첫 항목.
+        _fq_raw = [q for q in (pend.get("final_q") or [])
+                   if isinstance(q, dict) and q.get("combo")]
+        try:
+            q1 = frozenset(int(x) for x in (_fq_raw[0]["combo"] or [])) if _fq_raw else frozenset()
+        except (TypeError, ValueError):
+            q1 = frozenset()
+        if len(q1) != 2:
+            skipped.append("삼복승정합: 복승 1순위 없음")
+        elif not ft:
+            skipped.append("삼복승정합: finalTrifectas 없음")
+        else:
+            checked.append("삼복승정합")
+            if not any(q1 <= t for t in ft):
+                issues.append({"code": "삼복승정합",
+                               "direction": "risk",       # 위험 표식(성적 나쁨 방향)
+                               "detail": "복승 1순위 %s 가 삼복승 추천 어디에도 포함되지 않음"
+                                         % sorted(q1),
+                               "quinella1": sorted(q1),
+                               "trifectas": [sorted(t) for t in ft]})
+
+    # ── ④ 급락 미반영 (2026-07-30 판정 비활성 · 로직 보존) ──
+    if not DET_ITEM_DROP_ENABLED:
+        skipped.append("급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)")
+        return {"issues": issues, "checked": checked, "skipped": skipped,
+                "status": ("WARNING" if issues else ("SAFE" if checked else "NO_DATA"))}
     drops = [d for d in (pend.get("drops") or [])
              if isinstance(d, dict) and isinstance(d.get("pct"), (int, float))
              and d["pct"] <= DET_DROP_PCT]
