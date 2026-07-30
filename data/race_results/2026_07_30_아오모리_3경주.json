@@ -1,0 +1,68 @@
+{
+ "race_id": "2026_07_30_아오모리_3경주",
+ "raceKey": "아오모리 3경주",
+ "date": "2026-07-30",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "아오모리",
+ "round": 3,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 2,
+  "2nd": 4,
+  "3rd": 5
+ },
+ "payouts": {
+  "quinella": 1.7,
+  "trifecta": 4.5
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   7,
+   5,
+   6
+  ],
+  "eliminated": [],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 60.0,
+  "inverse": true
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "역배열 감지말 4·5번 입상",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 1.7,
+  "trifecta_odds": 4.5,
+  "actual_return": null,
+  "profit": 700
+ },
+ "memo": null,
+ "saved_at": "2026-07-30 09:21:13",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
