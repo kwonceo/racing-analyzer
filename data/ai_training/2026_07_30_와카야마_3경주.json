@@ -1,0 +1,173 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_30_와카야마_3경주",
+ "race_info": {
+  "date": "2026-07-30",
+  "track": "와카야마",
+  "round": 3,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 7,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 5,
+   "name": "近藤 修康",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 85.1,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "伊藤 亮",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 84.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "土岐 幹多",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 75.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "野上 竜太",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 104.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "根藤 浩二",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 73.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "堀 僚介",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 76.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "眞鍋 伸也",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 66.7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": true,
+  "reversal_ratio": 0.49,
+  "quinella_mismatch": null,
+  "refund_rate": 0.736,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   5,
+   6,
+   7,
+   4
+  ],
+  "eliminated": [],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 35.0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 3,
+  "2nd": 5,
+  "3rd": 2,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "적중"
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 3,
+  "second": 5,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": 6,
+  "reversal_horse_placed": false,
+  "reversal_ratio": 0.49,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-30 12:11:10",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
