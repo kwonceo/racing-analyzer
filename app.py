@@ -29747,6 +29747,7 @@ def _multi_collect_one(track, race, ymd):
         #   서버만으로 실시간 표시. 기존엔 background→multi_store 만 채우고 triple_store 는 확장/토글에만
         #   의존해, 둘 다 꺼지면 '배당 수집 안 됨'으로 보이던 문제 해결. 확장 ingest 와 동일 파이프라인(같은
         #   raceKey 병합·중복 아님)이고 sport 분리 필터가 탭 혼재를 막는다(무삭제·multi_store 경로 유지).
+        _bridge_wrote = False   # [2중 기록 차단 2026-07-30] 브리지가 실제로 이력을 기록했는가
         try:
             # [사설 우선·oddspark 백업 (2026-07-19)] 확장(사설 배당판)이 같은 경주를 최근 90초 내 수집 중이면
             #   oddspark 주입을 생략 — 두 소스가 번갈아 덮어쓰며 배당이 진동(가짜 급락/복원 신호)하는 것 방지.
@@ -29780,6 +29781,12 @@ def _multi_collect_one(track, race, ymd):
             #   프론트 '경주 종료' 판정(_raceFinished)·자동예상 T-5분 타이밍이 정확해짐(기존엔 deadline 미전달로 None).
             _do_triple_ingest(key, q, x, tr3, win, sport=sport, category=category,
                               source="oddspark_bg", deadline=race.get("postEpoch"))
+            # [2중 기록 차단 2026-07-30] `_do_triple_ingest` 내부가 이미 `_history_append` 를 부른다
+            #   (app.py 의 `# 배당 변동 히스토리 파일에 스냅샷 누적` 지점). 아래 [마감전 신호 기록] 블록이
+            #   같은 게이트(`_fresh_private`)로 한 번 더 불러 **같은 수집이 2건씩 기록**돼 왔다.
+            #   실측: 전체 10,997 스냅샷 중 4,507건(41.0%)이 중복 · oddspark 만 42.9% ·
+            #   두 기록의 시각차 중앙 0.031초(99.9%가 0.5초 미만) = 같은 사이클의 2연속 호출.
+            _bridge_wrote = True
         except _SkipOddsparkBridge:
             pass
         except Exception as _be:
@@ -29814,15 +29821,25 @@ def _multi_collect_one(track, race, ymd):
                     _hist_fresh = False
                 if not _hist_fresh:
                     _fresh_private, _gap_fill = False, True
-            if not _fresh_private:
+            # [2중 기록 차단 2026-07-30] `_bridge_wrote` 추가 — 브리지(`_do_triple_ingest`)가 이미
+            #   `_history_append` 를 부른 경우에는 여기서 또 부르지 않는다.
+            #   ⚠ 2026-07-19 이 블록의 원래 목적("oddspark 단독 경주는 마감 전 신호가 이력에 안 남던 구멍")은
+            #     그대로 충족된다 — 사설 비활성이면 브리지가 실행되어 이력이 남기 때문이다. 네 경우 전부:
+            #       ⓐ 사설 비활성        → 브리지 기록(1회) · 여기 생략        = 1회 ✅(종전 2회)
+            #       ⓑ 사설 활성·이력 정상 → 브리지 Skip · 여기 생략            = 0회 ✅(불변, 사설이 기록)
+            #       ⓒ 사설 활성·이력 공백 → 브리지 Skip · 여기 기록(_gap_fill) = 1회 ✅(공백 보충 유지)
+            #       ⓓ 브리지 예외 실패    → _bridge_wrote=False → 여기 기록     = 1회 ✅(백업·오히려 견고)
+            if not _fresh_private and not _bridge_wrote:
                 _history_append(key, q, x, race.get("postEpoch"), win, source="oddspark")
                 if _gap_fill:
                     print("🩹 [이력 공백 보충] %s: 사설 활성(src=%s)이나 이력이 비어 있어 oddspark 가 기록"
                           % (key, _tsh[:40]))
                     _ingest_reject_log(key, "사설 우선 해제(이력 공백) → oddspark 백업 기록", "oddspark",
                                        {"combos": len(q or []), "prevSrc": _tsh[:80], "gapFill": True})
-            else:
+            elif _fresh_private:
                 # [관측 개통] 생략도 기록에 남긴다 — '조용한 생략'이 공백 원인 추적을 막아 왔다.
+                # ⚠ [2026-07-30] `else` → `elif _fresh_private` 로 좁힌다. 브리지가 정상 기록한 경우
+                #   (`_bridge_wrote=True`)까지 '사설 우선 생략'으로 찍히면 거부 로그가 오염된다.
                 _ingest_reject_log(key, "사설 우선(이력 기록 생략)", "oddspark",
                                    {"combos": len(q or []), "prevSrc": _tsh[:80]})
         except Exception as _he:
