@@ -1,0 +1,138 @@
+{
+ "race": "기후 4경주",
+ "raceKey": "기후 4경주",
+ "date": "2026-07-30",
+ "result": {
+  "1st": 3,
+  "2nd": 5,
+  "3rd": 1,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "저배당",
+ "win_odds": 1.2,
+ "why_recommended": {
+  "signal_3": {
+   "horse": 3,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 74.3,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.116,
+   "record_score": 118.5,
+   "confidence": 35.0,
+   "reason": "쌍승역전"
+  },
+  "signal_1": {
+   "horse": 1,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.132,
+   "record_score": 71.4,
+   "confidence": 35.0,
+   "reason": "쌍승역전"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.131,
+   "record_score": 98.6,
+   "confidence": 35.0,
+   "reason": "쌍승역전"
+  }
+ },
+ "recommended_horses": [
+  5,
+  4,
+  1
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 3번 74.3점",
+  "4. 쌍승 역전: 6→3(70.2) < 3→6(756.4) → 6번 실질 상위 신호",
+  "4. 쌍승 역전: 2→3(16.6) < 3→2(146.7) → 2번 실질 상위 신호",
+  "5. 종합 신뢰도 0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 3,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 74.3,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 74.3,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": true,
+  "inverseHorses": [
+   6,
+   2,
+   5
+  ],
+  "inverseHit": [
+   5
+  ],
+  "confidence": 35.0,
+  "reason": "전적유력마 1번 적중 · 역배열 감지말 5번 입상"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 0
+ },
+ "pnl": 200,
+ "stake": 1000,
+ "generated_at": "2026-07-30 12:53:18"
+}

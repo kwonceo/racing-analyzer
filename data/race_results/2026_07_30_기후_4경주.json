@@ -1,0 +1,70 @@
+{
+ "race_id": "2026_07_30_기후_4경주",
+ "raceKey": "기후 4경주",
+ "date": "2026-07-30",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "기후",
+ "round": 4,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 3,
+  "2nd": 5,
+  "3rd": 1
+ },
+ "payouts": {
+  "quinella": 1.2,
+  "trifecta": 3.7
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 35.0,
+  "inverse": true
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "전적유력마 1번 적중 · 역배열 감지말 5번 입상",
+  "miss_reason": null,
+  "pattern_tags": [
+   "복승불일치"
+  ],
+  "anomaly_correct": false,
+  "form_pick_hit": true
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 1.2,
+  "trifecta_odds": 3.7,
+  "actual_return": null,
+  "profit": 200
+ },
+ "memo": null,
+ "saved_at": "2026-07-30 12:53:18",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
