@@ -28,12 +28,21 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SYNTAX_TARGETS = ["app.py", "gemini_reviewer.py", "review_engine.py",
                   "tools/health_check.py", "tools/dedupe_odds_snapshots.py",
-                  "tests/run_freeze_regression.py"]
+                  "tools/build_amedas_map.py",
+                  "tests/run_freeze_regression.py", "tests/run_freeze_behavior.py"]
 
-BLOCKING_SUITES = ["tests/run_report.py", "tests/run_formula.py", "tests/run_flow.py"]
+# 🔴 [2026-07-31] `run_freeze_behavior.py` 를 차단 등급으로 승격.
+#    마감 시점 동결이 구현됐으므로 이제부터 복원 경로가 끊기면 커밋을 막는다.
+BLOCKING_SUITES = ["tests/run_report.py", "tests/run_formula.py", "tests/run_flow.py",
+                   "tests/run_freeze_behavior.py"]
 
 # 🟡 아직 고치지 않은 결함을 재현하는 테스트 — 실패해도 커밋을 막지 않는다.
-#    ⚠ 마감 시점 동결 구현 후 이 목록에서 제거하면 자동으로 차단 등급이 된다.
+#
+# 🔴 [2026-07-31 발견] `run_freeze_regression.py` 는 **여기서 뺄 수 없다.**
+#    그 파일은 **고정 Fixture 만 읽는다** — Fixture 는 *이미 오염된 과거를 찍어둔 사진*이라
+#    코드를 고쳐도 **영원히 초록이 되지 않는다.** '역사 기록'이지 '동작 검증'이 아니다.
+#    ⇒ 그 파일은 외부 앵커(회원이 받은 카톡 원문)로서 **그대로 보존**하고,
+#      동결이 실제로 되는지는 `run_freeze_behavior.py`(위 차단 목록)가 잰다.
 EXPECTED_FAIL_SUITES = ["tests/run_freeze_regression.py"]
 
 

@@ -12162,13 +12162,25 @@ def _triple_analyze(rk, rec):
                         _lp_g, _, _ = _analysis_log_path(_canonical_log_key(rk))
                         if _lp_g and os.path.exists(_lp_g):
                             _doc_g = json.load(open(_lp_g, encoding="utf-8"))
-                            _rg_g = ((_doc_g.get("corePicks") or {}).get("raceGrade")) or None
+                            # [파일 동결 우선 (2026-07-31)] `frozen` 블록은 **마감 시점 확정본**이다.
+                            #   _GRADE_LOCK 은 메모리라 재시작에 소실되지만 이 블록은 파일에 남는다.
+                            _rg_g = ((_doc_g.get("frozen") or {}).get("raceGrade")
+                                     or (_doc_g.get("corePicks") or {}).get("raceGrade")) or None
                             if isinstance(_rg_g, dict) and _rg_g.get("tier"):
                                 _rest = {k: v for k, v in _rg_g.items() if k != "locked"}
                     except Exception:
                         _rest = None
-                _g_st = {"day": _g_today, "tier": _rest or dict(_tier)}
-                _GRADE_LOCK[rk] = _g_st               # 복원 실패 시 현재 계산값으로라도 고정(재요동 방지)
+                # 🔴 [2026-07-31 권대표 지시] 종전에는 복원 실패 시 **현재 계산값으로라도 고정**했다 —
+                #    그것이 곧 '마감 후 값을 굳히는' 경로였다. 이제 실패하면 **잠그지 않는다**.
+                #    라이브 값은 그대로 표시되지만 `locked` 표기가 붙지 않아 확정본으로 오인되지 않는다.
+                if _rest is None:
+                    _tier["lockFailed"] = True
+                    _an_out["raceGrade"] = _tier
+                    if isinstance(_cpg, dict):
+                        _cpg["raceGrade"] = _tier
+                    return _an_out
+                _g_st = {"day": _g_today, "tier": _rest}
+                _GRADE_LOCK[rk] = _g_st
             _tier = dict(_g_st.get("tier") or _tier)
             _tier["locked"] = True                    # 마감 시점 등급 고정 표기
         _an_out["raceGrade"] = _tier
@@ -14814,6 +14826,33 @@ def _build_analysis_log(rk, an=None):
             log["odds_timeline"] = _doc.get("odds_timeline")   # 마감 후 유입 배당이 시계열을 지우는 것도 차단
         log["readonly"] = True
         print(f"[readonly 잠금] {rk}: 마감 확정 파일 — corePicks/시계열 보존, result/hit만 업데이트 허용")
+        # ── [마감 시점 단일 동결 (2026-07-31)] 위 5개 외 **무방비 필드**를 확정본으로 되돌린다 ──
+        #   🔴 나고야 9R: readonly=True 인데도 keyHorses·strongSignals 가 마감 후 값으로 바뀌었다.
+        #      그 둘은 위 보호 목록에 **없었다**. displayedCombos 만 corePicks 안이라 살아남았다.
+        #   ⚠ 복원 실패 시에는 **잠그지 않는다**(권대표 지시) — 틀린 값을 굳히는 것보다 낫다.
+        #      기존 5개 보호는 위에서 이미 적용됐으므로 실패해도 종전 수준은 유지된다.
+        try:
+            _fz = _doc.get("frozen")
+            _fsrc = (_fz or {}).get("src")
+            if not _fz:
+                _fz, _fsrc = _frozen_capture(
+                    rk, _doc, log.get("recommendation_history") or _doc.get("recommendation_history"))
+                _freeze_note(rk, bool(_fz), _fsrc)
+                if _fz:
+                    print("[마감 동결] %s: 확정본 복원(출처 %s · 기준 %s)" % (rk, _fsrc, _fz.get("at")))
+                else:
+                    print("🔴 [마감 동결] %s: 복원 실패 — **잠그지 않음**(%s)" % (rk, _fsrc))
+            if _fz:
+                for _k in _FREEZE_FIELDS:
+                    if _fz.get(_k) not in (None, "", [], {}):
+                        log[_k] = _fz.get(_k)
+                log["frozen"] = _fz
+                # ⚠ 지금까지 readonlyAt 이 None 이었다 — 언제·무엇을 근거로 잠갔는지 기록이 없었다.
+                log["readonlyAt"] = _doc.get("readonlyAt") or time.strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                log["frozenFailed"] = {"reason": _fsrc, "at": time.strftime("%Y-%m-%d %H:%M:%S")}
+        except Exception as _fze:
+            print("[마감 동결] 스킵(무시):", str(_fze)[:120])
     # [원자적 저장 (2026-07-21 도야마 1R)] 이중 분석 소스가 같은 로그를 동시 기록 → 쓰는 도중 파일을
     #   읽은 쪽이 JSON 파싱 실패(doc=None) → recommendation_history 가 통째로 초기화되던 소실 버그.
     #   tmp 기록 후 os.replace 교체로 '읽는 쪽은 항상 완전한 파일'만 보게 함(추가 보강·동작 동일).
@@ -29696,6 +29735,99 @@ def _multi_schedule_fetch():
 def _multi_key(venue, race_no):
     # [岐阜·기후 중복 통합] 저장키의 경마장명을 표준(한글)으로 정규화 → 岐阜/기후가 한 키로 병합(중복 저장 방지).
     return "%s %d경주" % (_track_norm(venue), int(race_no))
+
+
+# ══════════════ [마감 시점 단일 동결 (2026-07-31 · 권대표 승인)] ══════════════
+#  🔴 실사고: 나고야 9R 이 `readonly=True` 인데도 19:41 에 `keyHorses [12,1,2]→[13,4,2]` ·
+#     `strongSignals 3→0` 으로 바뀌었다. `displayedCombos` 만 불변이었다.
+#     ⇒ 그것만 `corePicks` 안에 있어서 보호됐고, 나머지는 **보호 목록에 아예 없었다.**
+#  실측(2026-07-31): readonly=True 이고 '🔒 마감확정' 행이 있는 **540개 중 235개(43.5%)** 가
+#     `keyHorses [값] → []` 로 지워져 있었다.
+#
+#  🔴 핵심 설계: readonly 를 "마감 후 첫 저장"이 아니라 **"마감 시점"** 에 건다.
+#     지금까지는 첫 afterClose 저장의 `an`(=마감 후 재계산값)이 그대로 굳었다.
+#     ⇒ `an` 대신 **마감 시점 확정본에서 복원**해서 잠근다(새로 만드는 게 아니라 승격이다).
+#
+#  ⚠ **기존 보호 5개(`corePicks`·`final_recommendation`·`recommendation_history`·
+#    `signals_detected`·`odds_timeline`)는 종전 그대로 무조건 유지**한다. 아래는 **추가**다.
+#  ⚠ **허용 목록 무변경** — `result`·`hit`·`review`·`profit` 은 계속 갱신된다(결과 입력 경로).
+_FREEZE_FIELDS = ["keyHorses", "summary", "strong_signals", "horses",
+                  "elimination", "compression_pattern", "third_place_hunt"]
+
+
+def _frozen_capture(rk, doc, rec_rows):
+    """마감 시점 확정값을 3단 폴백으로 복원. 반환 (frozen dict, src) — 실패 시 (None, 사유).
+
+    ① `recommendation_history[closed=True]`  — 카톡 발송본과 동일 시각의 확정 행
+    ② `timeline_snapshot` T-5 → T-7          — `_GRADE_LOCK` 복원이 이미 쓰는 경로
+    ③ 마지막 **마감 전** 추천 행              — ①②가 없는 구데이터용
+    ⚠ ③ 비중이 높으면 '마감 확정본이 제대로 안 남고 있다'는 뜻이다 — 별개 문제로 봐야 한다.
+    """
+    doc = doc or {}
+    fz, src = {}, None
+    rows = [r for r in (rec_rows or []) if isinstance(r, dict)]
+    closed = [r for r in rows if r.get("closed")]
+    pre = [r for r in rows if not r.get("closed")]
+    # ① 마감 확정 행
+    if closed and closed[-1].get("keyHorses"):
+        fz["keyHorses"] = closed[-1].get("keyHorses")
+        src = "closed_row"
+    # ② 타임라인 스냅샷 — 등급·신호수(보조 확인용). keyHorses 는 담기지 않는다.
+    try:
+        _sp = _timeline_snap_path(rk)
+        if os.path.exists(_sp):
+            _sn = (json.load(open(_sp, encoding="utf-8")) or {}).get("snapshots") or {}
+            for _ph in ("T-5", "T-7"):
+                _s = _sn.get(_ph) or {}
+                if _s.get("raceGrade"):
+                    fz["raceGrade"] = _s.get("raceGrade")
+                    fz["signalCount"] = _s.get("signalCount")
+                    fz["snapPhase"] = _ph
+                    if src is None:
+                        src = "timeline_%s" % _ph
+                    break
+    except Exception:
+        pass
+    # ③ 마지막 마감 전 추천 행
+    if not fz.get("keyHorses") and pre and pre[-1].get("keyHorses"):
+        fz["keyHorses"] = pre[-1].get("keyHorses")
+        src = src or "pre_close_row"
+    # summary — 확정 행의 summary 는 '🔒 마감 확정…' 고정 문구라 실질 내용이 아니다.
+    #   마지막 마감 전 행 → 저장본 순으로 가져온다.
+    for _c in ([pre[-1].get("summary")] if pre else []) + [doc.get("summary")]:
+        if _c and not str(_c).startswith("🔒"):
+            fz["summary"] = _c
+            break
+    # 나머지 필드 — 첫 afterClose 저장 시점의 `doc` 은 **마감 전 저장분**이므로 그것이 확정값이다.
+    for k in ("strong_signals", "horses", "elimination",
+              "compression_pattern", "third_place_hunt"):
+        if doc.get(k) not in (None, "", [], {}):
+            fz[k] = doc.get(k)
+    if not fz.get("keyHorses"):
+        # ⚠ 복원 실패 — **잠그지 않는다.** 틀린 값을 잠그는 것보다 안 잠긴 채로 두는 게 낫다.
+        return None, ("확정 행 없음(closed=%d · 마감전=%d)" % (len(closed), len(pre)))
+    fz["src"] = src
+    fz["at"] = (closed[-1].get("time") if closed else
+                (pre[-1].get("time") if pre else time.strftime("%H:%M:%S")))
+    fz["capturedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
+    return fz, src
+
+
+def _freeze_note(rk, ok, src_or_reason):
+    """동결 성공/실패 1건 적재. **완전 방어적** — 실패해도 저장 흐름 무영향."""
+    try:
+        d = os.path.join(os.path.dirname(__file__), "data", "freeze_log")
+        os.makedirs(d, exist_ok=True)
+        p = os.path.join(d, time.strftime("%Y-%m-%d") + ".json")
+        cur, _c = _json_load_guard(p, [], tag="freeze/log")
+        if _c or not isinstance(cur, list):
+            cur = []
+        cur.append({"raceKey": rk, "ok": bool(ok),
+                    ("src" if ok else "reason"): src_or_reason,
+                    "at": time.strftime("%H:%M:%S")})
+        _json_atomic(p, cur, indent=1)
+    except Exception:
+        pass
 
 
 class _SkipOddsparkBridge(Exception):
