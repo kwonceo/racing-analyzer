@@ -35,7 +35,7 @@ from html.parser import HTMLParser
 from urllib.request import urlopen, Request
 import urllib.parse
 import urllib.error
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Response  # Response: 체크리스트 UTF-8 응답용(2026-07-30 추가)
 from werkzeug.exceptions import HTTPException
 import anthropic
 try:
@@ -31693,7 +31693,12 @@ def health_checklist_api():
         _spec = _ilu.spec_from_file_location("health_check", _p)
         _m = _ilu.module_from_spec(_spec)
         _spec.loader.exec_module(_m)
-        return jsonify(_m.build_checklist())
+        # ⚠ `jsonify` 는 기본 `ensure_ascii=True` 라 한글이 `충족` 로 나간다 —
+        #   모바일 브라우저에서 그대로 보이면 외부 확인용으로 쓸 수 없다.
+        #   ⚠ `app.json.ensure_ascii` 같은 **전역 설정은 바꾸지 않는다**(다른 엔드포인트 영향).
+        #     이 엔드포인트만 Response 를 직접 만든다.
+        _body = json.dumps(_m.build_checklist(), ensure_ascii=False, indent=1)
+        return Response(_body, mimetype="application/json; charset=utf-8")
     except Exception as e:
         # ⚠ 조용히 빈 값을 돌려주지 않는다 — 체크리스트가 죽은 것을 '이상 없음'으로 오해하면 안 된다.
         print("[체크리스트] 실패:", e)

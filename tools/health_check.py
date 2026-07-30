@@ -124,13 +124,11 @@ def _today_logs():
     return out
 
 
-def check_save_failures():
-    """④-2 저장 실패(WinError) = 0건.
+def _count_save_failures():
+    """당일 stdout 로그(회전본 포함)에서 WinError 를 **발생 지점별로** 센다.
 
-    분모 = **당일 stdout 로그 전체**(회전본 포함). 현재 로그만 보면 재기동으로 카운트가 리셋돼
+    분모 = **당일 로그 전체**(회전본 포함). 현재 로그만 보면 재기동으로 카운트가 리셋돼
       '고쳐진 것처럼' 보인다 — 2026-07-30 에 실제로 누적치와 구간치를 혼동한 적이 있다.
-    ⚠ 발생 지점별로 나눠 센다. `_json_atomic` 계열은 수정됐고 `path+".tmp"` 17곳은 미수정이라,
-      합계만 보면 "고쳐도 안 줄었다"는 잘못된 결론이 난다.
     """
     fixed = unfixed = other = 0
     files = _today_logs()
@@ -143,17 +141,40 @@ def check_save_failures():
             if "WinError" not in line:
                 continue
             if "[복기저장]" in line or "[히스토리]" in line:
-                fixed += 1
+                fixed += 1              # `_json_atomic` 계열 — 2026-07-30 수정 완료 경로
             elif "[분석로그]" in line or "[다중경주]" in line:
-                unfixed += 1
+                unfixed += 1            # `path + ".tmp"` 17곳 — 미수정(ⓐ 작업 대상)
             else:
                 other += 1
-    total = fixed + unfixed + other
-    return _mk("D2", "④ 데이터 보전", "저장 실패(WinError) 건수",
-               "당일 stdout 로그 전체(회전본 포함)",
-               current=total, target=0, ok=(total == 0), n=len(files),
-               note="_json_atomic 계열(수정됨) %d건 · path+\".tmp\" 17곳(미수정) %d건 · 기타 %d건"
-                    % (fixed, unfixed, other))
+    return fixed, unfixed, other, len(files)
+
+
+def check_save_failures_fixed():
+    """④-2a 저장 실패 — **수정 경로**(`_json_atomic` 계열).
+
+    D2 를 하나로 두면 진행이 보이지 않는다(권대표 지시 2026-07-30):
+      수정분 176건이 자정에 리셋되면 '고쳐진 것처럼' 보이고,
+      미수정분이 줄어도 합계에 묻힌다. → **발생 지점별로 분리해 각각 완료선을 둔다.**
+    """
+    fixed, unfixed, other, nf = _count_save_failures()
+    return _mk("D2a", "④ 데이터 보전", "저장 실패(WinError) — 수정 경로",
+               "당일 stdout 로그 전체(회전본 포함) 중 `_json_atomic` 계열([복기저장]·[히스토리])",
+               current=fixed, target=0, ok=(fixed == 0), n=nf,
+               note="tmp 스레드ID·경로별 락·replace 재시도 적용분(2026-07-30). "
+                    "잔여는 '리더가 파일을 잡고 있는' 경우로 관측됨(ⓒ 읽기 락 후보).")
+
+
+def check_save_failures_unfixed():
+    """④-2b 저장 실패 — **미수정 17곳**(`path + ".tmp"` · PID 조차 없음). ⓐ 작업 대상.
+
+    ⚠ 이 항목이 0 이 되는 것이 ⓐ(17곳 tmp 고유화)의 완료 판정이다.
+      D2a 와 분리해 두면 "고쳐도 안 줄었다"는 잘못된 결론을 막을 수 있다.
+    """
+    fixed, unfixed, other, nf = _count_save_failures()
+    return _mk("D2b", "④ 데이터 보전", "저장 실패(WinError) — 미수정 17곳",
+               "당일 stdout 로그 전체(회전본 포함) 중 `path+\".tmp\"` 계열([분석로그]·[다중경주])",
+               current=unfixed, target=0, ok=(unfixed == 0), n=nf,
+               note="ⓐ 17곳 tmp 고유화의 완료 판정 항목. 기타 분류 %d건은 어느 쪽도 아님." % other)
 
 
 def check_schema_contract():
@@ -171,44 +192,117 @@ def check_schema_contract():
                note="계약 파일 미존재 = 미구현. 미구현은 통과가 아니다(CLAUDE.md 설계안 참조).")
 
 
-def check_schema_drift():
-    """④-4 스키마 드리프트 🔴 항목 = 0개.
+def _red_field_rates():
+    """🔴 필드 보유율을 **당일분 / 누적**으로 각각 산출. 반환 (day, cum, day_rows, cum_rows, note).
 
-    분모 = `SCHEMA_RED_FIELDS` 전체(CLAUDE.md 「탈락 필드 우선순위」 🔴 1·2·3).
-    판정 = 각 🔴 필드가 **실데이터에 실제로 저장되고 있는가**(보유 행 1건이라도 있으면 해소).
-    ⚠ '코드에 배선됐는가'가 아니라 '데이터에 남았는가'로 본다 —
-      2026-07-30 에 `surface`/`trackCond` 가 **코드는 배선됐는데 실데이터 0%** 인 사례가 있었다(원칙 5).
+    🔴 분모 통제 (권대표 지시 2026-07-30 · 실측 근거 반영)
+      `winOdds`·`pop`·`weight`·`surface`·`trackCond` 는 **경마 出走表 파서에서만** 나온다.
+      → 분모를 '경마 경주'로 좁혀야 하는데 **`sport` 태그로 판별하면 안 된다**:
+        · 오늘 경륜장 `sport=horse` 오분류 **213건**을 소급 정정했고 실시간 재발도 3경주 확인됐다
+          (와카야마 7/24 · 코치 6R 7/25 · 코치 10R 7/26 · 원인은 분석 시점 sport 미확정).
+        · **실측 확인**: `starters_store` 132경주 전부 `sport` 가 **None** 이다 —
+          애초에 태그로는 분모를 잡을 수 없다.
+      → **`source == "oddspark"`**(경마 出走表 파서를 탄 경주)를 분모로 쓴다. 파서 유래값이라
+        태그 오염과 무관하다. 실측 분포: keirin 87 · oddspark 23 · korea 14 · keiba_nar 1 · 없음 7.
+    ⚠ `t`(레코드 타임스탬프)로 당일분을 가른다 — 키에 날짜가 없기 때문(0/132).
     """
     store = os.path.join(BASE, "starters_store.json")
     if not os.path.exists(store):
-        return _mk("D4", "④ 데이터 보전", "스키마 드리프트 🔴 항목 수",
-                   "SCHEMA_RED_FIELDS %d개 (CLAUDE.md 🔴 1·2·3)" % len(SCHEMA_RED_FIELDS),
-                   current=None, target=0, ok=None, n=None,
-                   reason="starters_store.json 미존재 — 측정 불가")
+        return None, None, 0, 0, "starters_store.json 미존재"
     try:
         db = json.load(open(store, encoding="utf-8"))
     except Exception as e:
-        return _mk("D4", "④ 데이터 보전", "스키마 드리프트 🔴 항목 수",
-                   "SCHEMA_RED_FIELDS %d개" % len(SCHEMA_RED_FIELDS),
-                   current=None, target=0, ok=None, n=None,
-                   reason="starters_store.json 파싱 실패: %s" % str(e)[:80])
-    have = collections.Counter()
-    rows = 0
+        return None, None, 0, 0, "starters_store.json 파싱 실패: %s" % str(e)[:80]
+    day0 = time.mktime(time.strptime(time.strftime("%Y-%m-%d"), "%Y-%m-%d"))
+    day_have, cum_have = collections.Counter(), collections.Counter()
+    day_rows = cum_rows = 0
     for rk, rec in (db.items() if isinstance(db, dict) else []):
-        for h in ((rec or {}).get("horses") or []):
-            rows += 1
+        rec = rec or {}
+        if str(rec.get("source") or "") != "oddspark":
+            continue                       # 경마 出走表 파서를 탄 경주만
+        is_today = (rec.get("t") or 0) >= day0
+        for h in (rec.get("horses") or []):
+            cum_rows += 1
+            if is_today:
+                day_rows += 1
             for f in SCHEMA_RED_FIELDS:
                 if h.get(f) not in (None, "", []):
-                    have[f] += 1
-    missing = [f for f in SCHEMA_RED_FIELDS if have[f] == 0]
-    return _mk("D4", "④ 데이터 보전", "스키마 드리프트 🔴 항목 수",
-               "SCHEMA_RED_FIELDS %d개 · 분자=starters_store 전체 행(%d행) 중 보유 행"
-               % (len(SCHEMA_RED_FIELDS), rows),
-               current=len(missing), target=0, ok=(len(missing) == 0), n=rows,
-               note="미보유: %s · 보유율: %s" % (
-                   (", ".join(missing) if missing else "없음"),
-                   ", ".join("%s %.1f%%" % (f, 100.0 * have[f] / rows if rows else 0)
-                             for f in SCHEMA_RED_FIELDS)))
+                    cum_have[f] += 1
+                    if is_today:
+                        day_have[f] += 1
+    return day_have, cum_have, day_rows, cum_rows, ""
+
+
+def check_schema_drift():
+    """④-4 스키마 드리프트 🔴 필드 보유율 ≥90%.
+
+    ⚠ **판정 방식 변경(2026-07-30)**: 종전 "보유 행 0개 = 미해소"는 `winOdds` **1.7%** 를
+      '해소'로 판정해 **완료선이 너무 관대**했다. → D1 과 동일하게
+      **당일 rolling · 보유율 ≥90% · 누적 병기** 로 바꾼다.
+    ⚠ '코드에 배선됐는가'가 아니라 '데이터에 남았는가'로 본다(원칙 5) —
+      `surface`/`trackCond` 는 코드는 배선됐는데 실데이터 0% 다. rolling 으로도 당분간 0% 일 것이고
+      **그게 정확한 판정**이다(1계층 재수집이 선행 조건). 낮게 나온다고 기준을 낮추지 않는다.
+    """
+    day, cum, day_rows, cum_rows, err = _red_field_rates()
+    denom = ("당일 `starters_store` 중 `source=\"oddspark\"`(경마 出走表 파서) 경주의 전체 행 "
+             "— ⚠ `sport` 태그 미사용(오분류 213건 정정 이력·실측상 전부 None)")
+    if err:
+        return _mk("D4", "④ 데이터 보전", "스키마 드리프트 🔴 필드 보유율",
+                   denom, current=None, target=90.0, ok=None, n=None, reason=err)
+    cum_txt = ", ".join("%s %.1f%%" % (f, 100.0 * cum[f] / cum_rows if cum_rows else 0)
+                        for f in SCHEMA_RED_FIELDS)
+    note = "누적(%d행): %s · surface/trackCond 는 1계층 재수집 선행 조건이라 0%%가 정확한 판정" % (
+        cum_rows, cum_txt)
+    if day_rows < SNAP_MIN_N:
+        return _mk("D4", "④ 데이터 보전", "스키마 드리프트 🔴 필드 보유율",
+                   denom, current=None, target=90.0, ok=None, n=day_rows,
+                   note=note, reason="표본 부족(당일 %d행 < %d) — D1 과 동일 규칙"
+                                     % (day_rows, SNAP_MIN_N))
+    rates = {f: round(100.0 * day[f] / day_rows, 1) for f in SCHEMA_RED_FIELDS}
+    worst = min(rates.values())
+    day_txt = ", ".join("%s %.1f%%" % (f, rates[f]) for f in SCHEMA_RED_FIELDS)
+    return _mk("D4", "④ 데이터 보전", "스키마 드리프트 🔴 필드 보유율",
+               denom, current=worst, target=90.0, ok=(worst >= 90.0), n=day_rows,
+               note="당일(%d행): %s / %s" % (day_rows, day_txt, note))
+
+
+def check_score_decomposition():
+    """④-5 점수 분해 `rank`·`baseScore` 배선 — **신설**(권대표 지시 2026-07-30).
+
+    배경: 「탈락 필드 우선순위」에서 **보너스 분해 8종은 체크리스트 A1·A2 로 이관**했으나
+      (`gait`·`paceBonus`·`paceBonusBase`·`gradeAtBonus`·`paceDetail` 이 오늘 배선됨),
+      **`rank`(통합등급 순위)와 `baseScore` 는 여전히 미배선**임이 실측으로 확인됐다
+      (오늘 분석로그 45파일·372행 중 **둘 다 0.0%**).
+    ⚠ `paceBonusBase`(98.4%)가 `baseScore` 역할을 하는 것처럼 보이지만 **이름이 다른 별개 필드**이므로
+      대체한다고 단정하지 않는다 → 별도 추적 항목으로 분리한다.
+    분모 = 당일 `analysis_log` 의 `horses` 전체 행(스키마 도입 시점으로 좁히지 않는다).
+    """
+    day = time.strftime("%Y_%m_%d")
+    files = glob.glob(os.path.join(BASE, "data", "analysis_log", day + "_*.json"))
+    fields = ["rank", "baseScore"]
+    have = collections.Counter()
+    rows = 0
+    for f in files:
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        for h in (d.get("horses") or []):
+            rows += 1
+            for fl in fields:
+                if h.get(fl) not in (None, "", []):
+                    have[fl] += 1
+    denom = "당일 analysis_log 의 horses 전체 행(스키마 도입 시점으로 좁히지 않는다)"
+    if rows < SNAP_MIN_N:
+        return _mk("D5", "④ 데이터 보전", "점수 분해 rank·baseScore 보유율",
+                   denom, current=None, target=90.0, ok=None, n=rows,
+                   reason="표본 부족(당일 %d행 < %d)" % (rows, SNAP_MIN_N))
+    rates = {f: round(100.0 * have[f] / rows, 1) for f in fields}
+    worst = min(rates.values())
+    return _mk("D5", "④ 데이터 보전", "점수 분해 rank·baseScore 보유율",
+               denom, current=worst, target=90.0, ok=(worst >= 90.0), n=rows,
+               note="당일(%d행): %s · 배선된 분해 필드(paceBonusBase 98.4%%·gradeAtBonus 74.5%%)는 A1·A2 에서 추적"
+                    % (rows, ", ".join("%s %.1f%%" % (f, rates[f]) for f in fields)))
 
 
 # ══════════════ ①②③ 자리 (다음 세션 구현) ══════════════
@@ -252,17 +346,27 @@ _PENDING = [
 
 
 def build_checklist():
-    items = [check_snapshot_coverage(), check_save_failures(),
-             check_schema_contract(), check_schema_drift()]
+    """반환 dict 의 **최상단에 `summary` 계열을 배치**한다(모바일에서 먼저 보이도록).
+    ⚠ 응답은 `ensure_ascii=False` + UTF-8 로 내보낼 것 — `\\uCda9\\uC871` 로 깨지면 외부에서 못 쓴다."""
+    items = [check_snapshot_coverage(),
+             check_save_failures_fixed(), check_save_failures_unfixed(),
+             check_schema_contract(), check_schema_drift(),
+             check_score_decomposition()]
     for (i, area, name, target, denom, why) in _PENDING:
         items.append(_mk(i, area, name, denom, current=None, target=target,
                          ok=None, n=None, note="분모 근거: " + why, reason="미구현"))
     done = sum(1 for x in items if x["ok"] is True)
     fail = sum(1 for x in items if x["ok"] is False)
     unk = sum(1 for x in items if x["ok"] is None)
-    return {"generatedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
+    # 미충족만 뽑는다 — **충족 항목은 넣지 않는다.** 목록이 짧아지는 것이 진행 신호다.
+    open_items = ["[%s] %s (현재 %s / 목표 %s)" % (x["id"], x["name"], x["current"], x["target"])
+                  for x in items if x["ok"] is False]
+    pending = ["[%s] %s" % (x["id"], x["name"]) for x in items if x["ok"] is None]
+    return {"summary": "%d/%d 충족 · 미충족 %d · 미측정/미구현 %d" % (done, len(items), fail, unk),
+            "openItems": open_items,
+            "pendingItems": pending,
+            "generatedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
             "total": len(items), "done": done, "failed": fail, "unmeasured": unk,
-            "summary": "%d/%d 충족 (미충족 %d · 미측정/미구현 %d)" % (done, len(items), fail, unk),
             "items": items}
 
 
