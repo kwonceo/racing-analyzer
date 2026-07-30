@@ -29702,6 +29702,133 @@ class _SkipOddsparkBridge(Exception):
     """[사설 우선] 확장 수집 활성 시 oddspark triple_store 주입 생략용 내부 신호."""
 
 
+# ══════════════ [아메다스 바람 수집 (2026-07-31)] ══════════════
+#  🔴 **관측 배선이다 — 추천·판정 경로에 개입하지 않는다.** 여기서 실패해도 수집은 정상 진행한다.
+#  경륜은 **맞바람이면 선행이 불리**하다. 각질로 예측하면서 바람을 모르면 전제가 흔들린다.
+#  ⚠ JMA 아메다스는 **API 키가 필요 없다**(2026-07-31 실호출 검증: HTTP 200 · 251KB · 1,286지점).
+#  ⚠ 251KB 전체를 받으므로 **경주가 있는 시간대에만** 호출한다 + 10분 캐시(원 갱신 주기와 동일).
+#  ⚠ 임계 20km 초과는 **값을 넣지 않는다** — 틀린 바람보다 없는 게 낫다("제공되지 않는 정보"로 남음).
+AMEDAS_MAP_PATH = os.path.join(os.path.dirname(__file__), "data", "amedas_map.json")
+AMEDAS_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "amedas_obs")
+_AMEDAS_TTL = 600.0                    # 원 갱신 주기 10분 — 그보다 자주 받을 이유가 없다
+_AMEDAS_CACHE = {"at": 0.0, "data": None, "obsTime": None}
+_AMEDAS_MAP_CACHE = {"mtime": None, "map": None}
+_AMEDAS_LOCK = threading.RLock()
+# 풍향은 16방위 코드(1=NNE … 16=N)로 온다. 0/None = 정온(무풍).
+_WIND_DIR16 = ["북북동", "북동", "동북동", "동", "동남동", "남동", "남남동", "남",
+               "남남서", "남서", "서남서", "서", "서북서", "북서", "북북서", "북"]
+
+
+def _amedas_map():
+    """표준키 → 관측지점 매핑표. 파일이 바뀌면 자동 재적재(개최지 추가 대비)."""
+    try:
+        mt = os.path.getmtime(AMEDAS_MAP_PATH)
+    except Exception:
+        return {}
+    if _AMEDAS_MAP_CACHE.get("mtime") == mt and _AMEDAS_MAP_CACHE.get("map") is not None:
+        return _AMEDAS_MAP_CACHE["map"]
+    try:
+        mp, _c = _json_load_guard(AMEDAS_MAP_PATH, {}, tag="amedas/map")
+        _AMEDAS_MAP_CACHE["mtime"], _AMEDAS_MAP_CACHE["map"] = mt, (mp or {})
+        return mp or {}
+    except Exception:
+        return {}
+
+
+def _amedas_fetch():
+    """최신 관측 맵을 받아 캐시. 반환 (data, obsTime) — 실패 시 (None, None)."""
+    with _AMEDAS_LOCK:
+        now = time.time()
+        if _AMEDAS_CACHE["data"] is not None and now - _AMEDAS_CACHE["at"] < _AMEDAS_TTL:
+            return _AMEDAS_CACHE["data"], _AMEDAS_CACHE["obsTime"]
+        try:
+            hdr = {"User-Agent": "Mozilla/5.0", "Accept": "*/*"}
+            req = urllib.request.Request(
+                "https://www.jma.go.jp/bosai/amedas/data/latest_time.txt", headers=hdr)
+            latest = urllib.request.urlopen(req, timeout=10).read().decode("utf-8").strip()
+            # 예) 2026-07-31T04:00:00+09:00 → 202607310400
+            stamp = latest[:16].replace("-", "").replace("T", "").replace(":", "") + "00"
+            req2 = urllib.request.Request(
+                "https://www.jma.go.jp/bosai/amedas/data/map/%s.json" % stamp, headers=hdr)
+            data = json.loads(urllib.request.urlopen(req2, timeout=15).read().decode("utf-8"))
+            _AMEDAS_CACHE.update({"at": now, "data": data, "obsTime": latest})
+            return data, latest
+        except Exception as e:
+            print("[아메다스] 수집 실패(무시):", str(e)[:120])
+            _AMEDAS_CACHE["at"] = now      # 실패도 TTL 동안 재시도 억제(외부 사이트 부담 방지)
+            return None, None
+
+
+def _amedas_wind(venue_or_rk):
+    """경기장(표준키·별칭·한자 무관) → 바람 관측값. 없으면 None.
+
+    ⚠ 반환 키는 **저장 스키마 그대로**다: 풍속·풍향·기온·강수1h·관측시각·지점거리.
+    ⚠ 20km 초과 / 한국 경마장 / 매핑 없음 → None (프롬프트의 "제공되지 않는 정보"로 남는다).
+    """
+    try:
+        key = _track_norm(str(venue_or_rk or "").split()[0]) if venue_or_rk else None
+        if not key:
+            return None
+        ent = (_amedas_map() or {}).get(key)
+        if not ent:
+            # raceKey 전체가 들어온 경우(예: '히라츠카 5경주') 대비 — 경기장만 재추출
+            try:
+                v2, _n2 = _area_num(str(venue_or_rk))
+                ent = (_amedas_map() or {}).get(v2) if v2 else None
+                key = v2 or key
+            except Exception:
+                ent = None
+        if not ent:
+            return None
+        data, obs = _amedas_fetch()
+        if not data:
+            return None
+        st = data.get(str(ent.get("station"))) or {}
+        if not st:
+            return None
+
+        def _v(k):
+            x = st.get(k)
+            return x[0] if isinstance(x, list) and x else None
+        ws = _v("wind")
+        wd = _v("windDirection")
+        if ws is None and wd is None:
+            return None                    # 그 지점이 그 시각에 바람을 안 냈다 → 없는 것으로 둔다
+        try:
+            wdi = int(wd) if wd is not None else 0
+        except (TypeError, ValueError):
+            wdi = 0
+        return {
+            "venue": key,
+            "풍속": ws, "풍향": (_WIND_DIR16[wdi - 1] if 1 <= wdi <= 16 else "정온"),
+            "풍향코드": wdi,
+            "기온": _v("temp"), "강수1h": _v("precipitation1h"),
+            "관측시각": obs, "지점": ent.get("name"), "지점거리km": ent.get("km"),
+        }
+    except Exception as e:
+        print("[아메다스] 조회 실패(무시):", str(e)[:120])
+        return None
+
+
+def _amedas_note(rk, w):
+    """관측값 1건 적재(검증용 건수 집계). **완전 방어적** — 실패해도 흐름 무영향."""
+    try:
+        if not w:
+            return
+        os.makedirs(AMEDAS_LOG_DIR, exist_ok=True)
+        p = os.path.join(AMEDAS_LOG_DIR, time.strftime("%Y-%m-%d") + ".json")
+        cur, _c = _json_load_guard(p, [], tag="amedas/obs")
+        if _c or not isinstance(cur, list):
+            cur = [] if _c else (cur if isinstance(cur, list) else [])
+        row = dict(w)
+        row["raceKey"] = rk
+        row["at"] = time.strftime("%H:%M:%S")
+        cur.append(row)
+        _json_atomic(p, cur, indent=1)
+    except Exception as e:
+        print("[아메다스] 기록 실패(무시):", str(e)[:120])
+
+
 # ══════════════ [Gemini 독립 예측 배선 (2026-07-31)] ══════════════
 #  🔴 저장 전용 · 추천 경로 무개입. 실패해도 수집·추천에 영향이 없도록 호출부에서 격리한다.
 #  ⚠ `GEMINI_FORECAST_ENABLED` 로만 켜진다. `GEMINI_REVIEW_ENABLED`(코드 리뷰)와 **별개**다.
@@ -29710,6 +29837,17 @@ try:
 except Exception as _gfe:                      # 모듈 없거나 import 실패 → 기능만 비활성(서버 정상)
     _gforecast = None
     print("[예측] 모듈 로드 실패(기능 비활성·서버 정상):", _gfe)
+
+
+def _wind_for_forecast(rk):
+    """예측용 바람 1건 조회 + 관측 적재. 실패해도 None 만 돌려주고 예측은 계속된다."""
+    try:
+        w = _amedas_wind(rk)
+        if w:
+            _amedas_note(rk, w)
+        return w
+    except Exception:
+        return None
 
 
 def _forecast_after_form(rk, is_cycle):
@@ -29734,7 +29872,10 @@ def _forecast_after_form(rk, is_cycle):
         #   없으면 프롬프트의 "제공되지 않는 정보"에 자동 표기돼 Gemini 가 지어내지 못한다.
         distance=(rp or {}).get("distance"),
         surface=(rp or {}).get("surface"),
-        track_cond=(rp or {}).get("trackCond"))
+        track_cond=(rp or {}).get("trackCond"),
+        # [아메다스 바람 (2026-07-31)] 값이 있으면 "제공되지 않는 정보"에서 빠지고 프롬프트에
+        #   자동 포함된다. 없으면(20km 초과·한국·수집 실패) 종전대로 "추측하지 마시오"에 남는다.
+        wind=_wind_for_forecast(rk))
     snap["sport"] = "cycle" if is_cycle else "horse"
     _gforecast.forecast_once(rk, snap, [h.get("no") for h in horses])
 

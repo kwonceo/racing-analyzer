@@ -120,7 +120,7 @@ NOT_PROVIDED_ALWAYS = ["주로 상태(습도·경중)", "날씨", "바람(풍향
 
 
 def build_input_snapshot(rk, starters, pace_analysis=None, line_info=None, comment=None,
-                         distance=None, surface=None, track_cond=None):
+                         distance=None, surface=None, track_cond=None, wind=None):
     """프롬프트에 주입할 **원본 데이터**를 만든다. ⚠ 3대 금지 항목을 여기서 차단한다.
 
     starters: [{no, name, gait/styleType, recentPlacings, grade, paceBonusBase, weeks, ...}]
@@ -169,9 +169,15 @@ def build_input_snapshot(rk, starters, pace_analysis=None, line_info=None, comme
         not_provided = [x for x in not_provided if not x.startswith("주로")] if (surface or track_cond) else not_provided
     if surface or track_cond:
         not_provided = [x for x in not_provided if not x.startswith("주로")]
+    # [아메다스 바람 (2026-07-31)] 실측값이 들어온 경주만 "제공되지 않는 정보"에서 뺀다.
+    #   ⚠ 20km 초과·한국 경마장·수집 실패는 값이 없으므로 종전대로 "추측하지 마시오"에 남는다 —
+    #     **틀린 바람보다 없는 게 낫다.** 부재를 명시하지 않으면 Gemini 가 지어낸다.
+    if wind and wind.get("풍속") is not None:
+        not_provided = [x for x in not_provided if not x.startswith("바람")]
     not_provided += ["%s(보유율 %.0f%%로 미달)" % (x["label"], x["rate"]) for x in omitted]
     return {
         "raceKey": rk,
+        "wind": wind or None,
         "fieldSize": len(horses),
         "distance": distance,
         "surface": surface,
@@ -199,6 +205,25 @@ def _build_prompt(snap):
     # 🔴 "제공되지 않는 정보" — 없는 것을 명시하지 않으면 Gemini 가 지어낸다.
     _np = snap.get("_not_provided") or []
     _np_txt = "\n".join("   · " + str(x) for x in _np) if _np else "   (없음)"
+    # [아메다스 바람 (2026-07-31)] 바람이 **실측으로 들어온 경주에만** 안내를 붙인다.
+    #   ⚠ 값이 없으면 이 블록 자체가 비고, 바람은 "제공되지 않는 정보"에 남는다 —
+    #     그래야 "맞바람이라" 같은 문장이 근거 없이 나오지 않는다.
+    _w = snap.get("wind") or {}
+    if _w.get("풍속") is not None:
+        _wind_txt = ("""
+🌬 [바람 — 실측값이 제공됩니다]
+   %s %s m/s · 기온 %s℃ · 강수1h %s mm
+   관측 %s (%s 관측소 · 경기장에서 %s km)
+   ⚠ 경륜에서 **맞바람이면 선행이 불리**하고 뒷바람이면 선행이 버티기 쉽습니다.
+      다만 **주로의 방향(직선 주로가 어느 방위인지)은 제공되지 않습니다.**
+      방위를 모르는 채로 "맞바람이다"라고 단정하지 마시오. 풍속이 충분히 강할 때
+      (대략 5 m/s 이상) **전개에 영향을 줄 수 있다**는 정도로만 다루십시오.
+   ⚠ 풍속이 약하면(2 m/s 미만) 바람을 근거로 삼지 마시오.
+"""
+                     % (_w.get("풍향"), _w.get("풍속"), _w.get("기온"), _w.get("강수1h"),
+                        _w.get("관측시각"), _w.get("지점"), _w.get("지점거리km")))
+    else:
+        _wind_txt = ""
     return """당신은 경륜/경마 전개 분석가입니다.
 **목적은 "누가 1착일까"를 맞히는 것이 아닙니다.** 통계 테이블이 놓치는 것을 찾는 것입니다.
 
@@ -212,9 +237,9 @@ def _build_prompt(snap):
 🔴 [제공되지 않는 정보 — 추측하지 마시오]
 %s
    위 항목을 근거로 삼는 문장은 **쓰지 마시오.**
-   "주로가 무거워서" · "맞바람이라" 같은 표현이 나오면 그 예측은 폐기됩니다.
+   목록에 있는 항목을 근거로 든 예측은 폐기됩니다.
    모르는 것은 모른다고 두고, **주어진 데이터로만** 판단하십시오.
-
+%s
 ⚠ 일반론 금지: "선행이 유리하다" 처럼 **어느 경주에나 해당하는 문장**은 쓰지 마시오.
    그런 답은 통계 표로도 나옵니다. **이 경주에만 해당하는 사정**을 쓰십시오.
 
@@ -235,7 +260,7 @@ def _build_prompt(snap):
   "key_factors": ["...", "..."],
   "exception_note": "예외로 볼 이유. 통상적이면 '통상'",
   "applied_rules": [사용한 규칙 번호(위 목록에 없으면 빈 배열)]
-}""" % (_np_txt, json.dumps(snap, ensure_ascii=False, indent=1)[:9000], rules_txt)
+}""" % (_np_txt, _wind_txt, json.dumps(snap, ensure_ascii=False, indent=1)[:9000], rules_txt)
 
 
 # ══════════════ Phase A — 형식 검증 (부분 채택 금지) ══════════════
