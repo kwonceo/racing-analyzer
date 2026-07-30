@@ -1,0 +1,218 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_30_아오모리_6경주",
+ "race_info": {
+  "date": "2026-07-30",
+  "track": "아오모리",
+  "round": 6,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 7,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 3,
+   "name": "下条 未悠",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 48.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "熊谷 芽緯",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 42.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "北津留千羽",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 79.7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "中野 咲",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 44.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "佐々木 綾",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 63.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "古山 稀絵",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 43.7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "山本さくら",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [],
+   "record_score": 46.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "10:19:31",
+    "quinella": {
+     "3+6": 1.2,
+     "3+7": 8.9,
+     "3+4": 12.2,
+     "6+7": 14.7,
+     "1+3": 17.3,
+     "4+6": 18.5,
+     "2+3": 19.4,
+     "2+6": 19.4,
+     "1+6": 21.6,
+     "1+2": 22.9,
+     "2+4": 25.7,
+     "2+5": 33.0,
+     "3+5": 37.2,
+     "5+6": 50.4,
+     "1+4": 100.0,
+     "1+5": 100.0,
+     "1+7": 100.0,
+     "2+7": 100.0,
+     "4+5": 100.0,
+     "4+7": 100.0,
+     "5+7": 100.0
+    }
+   }
+  ],
+  "drop_rates": {
+   "1": -77.1,
+   "2": -77.1,
+   "4": -74.3,
+   "5": -67.0,
+   "3": -53.8,
+   "6": -53.8
+  },
+  "excess_drops": {
+   "2": -12.6,
+   "4": -14.1,
+   "5": -6.8
+  },
+  "drop_speed": {
+   "1": -240.9,
+   "2": -240.9,
+   "4": -232.2,
+   "5": -209.4,
+   "3": -168.1,
+   "6": -168.1
+  },
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.659,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend": "3+6",
+  "strategy": "BMED_압축형",
+  "confidence": 64.0,
+  "signal_quality": "상"
+ },
+ "result": {
+  "1st": 3,
+  "2nd": 7,
+  "3rd": 4,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 3,
+  "second": 7,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": "4",
+  "excess_drop_horse_placed": true,
+  "excess_drop_value": -14.1,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-30 10:51:04",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
