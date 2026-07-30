@@ -14818,8 +14818,29 @@ def _build_analysis_log(rk, an=None):
             log["corePicks"] = _doc.get("corePicks")
         if _fr_has_recs(_doc.get("final_recommendation")):
             log["final_recommendation"] = _doc.get("final_recommendation")
+        # [🔒 마감 확정 행 병합 (2026-07-31)] 종전에는 디스크 원본으로 **통째 교체**했다.
+        #   그 목적(마감 후 재분석이 이력을 지우는 것 차단)은 옳고 **그대로 유지한다** —
+        #   다만 `rec_history` 는 `list(prev_hist)` 로 뜬 **복사본**이라, 바로 위에서 append 한
+        #   '🔒 마감 확정' 행이 이 교체로 **만들어진 그 저장에서 폐기**되고 있었다.
+        #   🔴 실측: closed 미부착 294건 중 **293건(99.7%)** 이 부착 조건을 전부 충족한 상태였다
+        #      (= 조건 문제가 아니라 덮어쓰기). 그래서 3단 폴백 ①이 44.4% 에 머물렀다.
+        #   ⇒ **교체가 아니라 병합**한다: 디스크 원본을 기준으로 두고(기존 보호 유지),
+        #     원본에 없는 closed 행만 뒤에 얹는다. 중복은 (time, closed) 키로 차단한다.
         if _doc.get("recommendation_history"):
-            log["recommendation_history"] = _doc.get("recommendation_history")
+            _base = _doc.get("recommendation_history")
+            try:
+                _new_closed = [e for e in (log.get("recommendation_history") or [])
+                               if isinstance(e, dict) and e.get("closed")]
+                if _new_closed:
+                    _seen = {(str(e.get("time")), bool(e.get("closed")))
+                             for e in _base if isinstance(e, dict)}
+                    _add = [e for e in _new_closed
+                            if (str(e.get("time")), True) not in _seen]
+                    if _add:
+                        _base = list(_base) + _add       # 원본 무수정(새 리스트로 결합)
+            except Exception as _mge:
+                print("[마감 확정 행 병합] 스킵(무시·원본 유지):", str(_mge)[:100])
+            log["recommendation_history"] = _base
         if _doc.get("signals_detected"):
             log["signals_detected"] = _doc.get("signals_detected")
         if _doc.get("odds_timeline"):
