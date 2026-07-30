@@ -94,19 +94,57 @@ def _load_rules():
 
 
 # ══════════════ Phase A — 입력 구성 ══════════════
-def build_input_snapshot(rk, starters, pace_analysis=None, line_info=None, comment=None):
+# ── [확장 재료 자동 포함 (2026-07-31)] ────────────────────────────────────────
+#  🔴 **재료가 늘면 자동으로 프롬프트에 들어가게** 한다(매번 코드를 고치지 않기 위함).
+#     여기 목록에만 추가하면 되고, **보유율이 임계 미만이면 자동 제외**된다.
+#  ⚠ 포함 여부는 `input_snapshot._fields_included` / `_fields_omitted` 에 **반드시 기록**한다.
+#     나중에 "그때 무엇을 보고 예측했나"를 알아야 하기 때문이다.
+FIELD_INCLUDE_THRESHOLD = 0.70          # 보유율 70% 이상이면 자동 포함
+OPTIONAL_FIELDS = [
+    # (스냅샷 키, starters 원본 키 후보들, 사람이 읽는 이름)
+    ("gear",     ["gear"],                         "기어비"),
+    ("recent",   ["recent"],                       "금개최 성적"),
+    ("prev1",    ["prev1"],                        "전개최 성적"),
+    ("prev2",    ["prev2"],                        "전전개최 성적"),
+    ("chaku",    ["chaku"],                        "착순분포"),
+    ("declared", ["declaredStyleLabel", "declaredStyle"], "표기 각질"),
+    ("weight",   ["weight"],                       "부담중량"),
+    ("bodyWt",   ["bodyWeight"],                   "마체중"),
+    ("jockey",   ["jockey"],                       "기수명"),
+    ("jockeyRate", ["jockeyRate"],                 "기수 승률"),
+    ("distApt",  ["distAptitude"],                 "거리 적성"),
+]
+# 🔴 아직 확보되지 않은 항목 — 프롬프트에 "추측하지 마시오"로 **명시**한다.
+#    없는 정보를 안 알려주면 Gemini 가 지어낸다("주로가 무거워서" 같은 문장).
+NOT_PROVIDED_ALWAYS = ["주로 상태(습도·경중)", "날씨", "바람(풍향·풍속)", "조교 평가"]
+
+
+def build_input_snapshot(rk, starters, pace_analysis=None, line_info=None, comment=None,
+                         distance=None, surface=None, track_cond=None):
     """프롬프트에 주입할 **원본 데이터**를 만든다. ⚠ 3대 금지 항목을 여기서 차단한다.
 
     starters: [{no, name, gait/styleType, recentPlacings, grade, paceBonusBase, weeks, ...}]
     ⚠ `odds`·`pop`·`record_score`·`totalScore` 는 **의도적으로 제외**한다(넣으면 안 된다).
+    ⚠ 선택 항목(`OPTIONAL_FIELDS`)은 **보유율 70% 이상일 때만 자동 포함**되고,
+      포함/제외 결과가 `_fields_included`/`_fields_omitted` 에 남는다.
     """
+    src = [h for h in (starters or []) if h.get("no") is not None]
+    n = len(src) or 1
+    # 보유율 계산 → 임계 이상만 채택
+    included, omitted = [], []
+    for key, cands, label in OPTIONAL_FIELDS:
+        have = sum(1 for h in src
+                   if any(h.get(c) not in (None, "", []) for c in cands))
+        (included if have / n >= FIELD_INCLUDE_THRESHOLD else omitted).append(
+            {"key": key, "label": label, "rate": round(100.0 * have / n, 1)})
+    inc_keys = {x["key"] for x in included}
     horses = []
-    for h in (starters or []):
+    for h in src:
         try:
             no = int(h.get("no"))
         except (TypeError, ValueError):
             continue
-        horses.append({
+        row = {
             "no": no,
             "name": h.get("name") or "",
             "gait": h.get("gait") or h.get("styleType") or h.get("declaredStyleLabel"),
@@ -115,12 +153,29 @@ def build_input_snapshot(rk, starters, pace_analysis=None, line_info=None, comme
             # ⚠ paceBonus 가산 **전** 값만. record_score/totalScore 는 넣지 않는다.
             "paceBonusBase": h.get("paceBonusBase"),
             "weeksInARow": h.get("weeksInARow") or h.get("renzoku"),
-        })
+        }
+        for key, cands, _lb in OPTIONAL_FIELDS:
+            if key not in inc_keys:
+                continue
+            for c in cands:
+                if h.get(c) not in (None, "", []):
+                    row[key] = h.get(c)
+                    break
+        horses.append(row)
     lead = [h["no"] for h in horses if str(h.get("gait") or "").startswith(("선행", "逃"))]
     close = [h["no"] for h in horses if str(h.get("gait") or "").startswith(("추입", "追", "差"))]
+    not_provided = list(NOT_PROVIDED_ALWAYS)
+    if distance:
+        not_provided = [x for x in not_provided if not x.startswith("주로")] if (surface or track_cond) else not_provided
+    if surface or track_cond:
+        not_provided = [x for x in not_provided if not x.startswith("주로")]
+    not_provided += ["%s(보유율 %.0f%%로 미달)" % (x["label"], x["rate"]) for x in omitted]
     return {
         "raceKey": rk,
         "fieldSize": len(horses),
+        "distance": distance,
+        "surface": surface,
+        "trackCond": track_cond,
         "horses": horses,
         "composition": {"leadCount": len(lead), "leadHorses": lead,
                         "closeCount": len(close), "closeHorses": close},
@@ -128,6 +183,10 @@ def build_input_snapshot(rk, starters, pace_analysis=None, line_info=None, comme
         "paceLabel": (pace_analysis or {}).get("pace") if isinstance(pace_analysis, dict) else None,
         "comment": (comment or "")[:600],
         "appliedRulesAvailable": _load_rules(),
+        # ⚠ 재현용 — "그때 무엇을 보고 예측했나"를 나중에 알아야 한다.
+        "_fields_included": included,
+        "_fields_omitted": omitted,
+        "_not_provided": not_provided,
         "_excluded": ["odds", "pop", "marketLowest", "finalQuinellas", "keyHorses",
                       "axis", "record_score", "totalScore"],
     }
@@ -137,6 +196,9 @@ def _build_prompt(snap):
     rules = snap.get("appliedRulesAvailable") or []
     rules_txt = ("\n".join("R%d. %s" % (r["id"], r["text"]) for r in rules)
                  if rules else "(아직 없음 — applied_rules 는 빈 배열로 두세요)")
+    # 🔴 "제공되지 않는 정보" — 없는 것을 명시하지 않으면 Gemini 가 지어낸다.
+    _np = snap.get("_not_provided") or []
+    _np_txt = "\n".join("   · " + str(x) for x in _np) if _np else "   (없음)"
     return """당신은 경륜/경마 전개 분석가입니다.
 **목적은 "누가 1착일까"를 맞히는 것이 아닙니다.** 통계 테이블이 놓치는 것을 찾는 것입니다.
 
@@ -146,6 +208,15 @@ def _build_prompt(snap):
 
 ⚠ 아래 정보에는 **배당·인기·타 시스템 추천이 의도적으로 빠져 있습니다.**
    시장 판단을 베끼지 말고, 주어진 구도와 전적만으로 판단하세요.
+
+🔴 [제공되지 않는 정보 — 추측하지 마시오]
+%s
+   위 항목을 근거로 삼는 문장은 **쓰지 마시오.**
+   "주로가 무거워서" · "맞바람이라" 같은 표현이 나오면 그 예측은 폐기됩니다.
+   모르는 것은 모른다고 두고, **주어진 데이터로만** 판단하십시오.
+
+⚠ 일반론 금지: "선행이 유리하다" 처럼 **어느 경주에나 해당하는 문장**은 쓰지 마시오.
+   그런 답은 통계 표로도 나옵니다. **이 경주에만 해당하는 사정**을 쓰십시오.
 
 [경주 데이터]
 %s
@@ -164,7 +235,7 @@ def _build_prompt(snap):
   "key_factors": ["...", "..."],
   "exception_note": "예외로 볼 이유. 통상적이면 '통상'",
   "applied_rules": [사용한 규칙 번호(위 목록에 없으면 빈 배열)]
-}""" % (json.dumps(snap, ensure_ascii=False, indent=1)[:8000], rules_txt)
+}""" % (_np_txt, json.dumps(snap, ensure_ascii=False, indent=1)[:9000], rules_txt)
 
 
 # ══════════════ Phase A — 형식 검증 (부분 채택 금지) ══════════════

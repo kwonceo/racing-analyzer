@@ -29723,9 +29723,13 @@ def _forecast_after_form(rk, is_cycle):
         rk, horses,
         pace_analysis=None,
         line_info=(rp or {}).get("line"),
-        comment=rec.get("comment"))
+        comment=rec.get("comment"),
+        # ⚠ 거리·주로는 `raw_profile` 에서만 온다(경마 한정·현재 보유율 낮음).
+        #   없으면 프롬프트의 "제공되지 않는 정보"에 자동 표기돼 Gemini 가 지어내지 못한다.
+        distance=(rp or {}).get("distance"),
+        surface=(rp or {}).get("surface"),
+        track_cond=(rp or {}).get("trackCond"))
     snap["sport"] = "cycle" if is_cycle else "horse"
-    snap["distance"] = (rp or {}).get("distance")
     _gforecast.forecast_once(rk, snap, [h.get("no") for h in horses])
 
 
