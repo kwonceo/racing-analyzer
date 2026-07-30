@@ -30730,6 +30730,62 @@ def _kakao_access_token():
         return None
 
 
+# ══════════════ [발송 앵커 (2026-07-30)] 회원이 실제로 받은 원문 = 외부 기준 ══════════════
+#  왜: 파이프라인 **내부의 두 값을 대조하는 것은 증명이 아니다.** "안전하다"는 결론은
+#    **독립된 외부 기준**(카카오 발송 원문 · 사설 배당판 · 실제 착순)으로만 낼 수 있다.
+#    2026-07-30 나고야 9R 에서 실제로 이것이 필요했다 — 전산 확정(`2+11`·`1+12`)과
+#    카톡 문구("복승 추가: 1+12")가 어긋나 보였고, **큐 원문이 있어서** 비로소
+#    "1+12 는 T-7 부터 있었고 중간에 빠졌다 복귀한 것"임을 확정할 수 있었다.
+#  ⚠ **발송 코어(`_kakao_send_to_me` 본체·템플릿·`_kakao_notify_race`·`_kakao_build_message`
+#    ·`_kakao_rich_message`)는 일절 수정하지 않는다.** 호출부에서 결과만 받아 적는다.
+#  ⚠ append-only — 덮어쓰지 않는다. 이 기록이 향후 모든 회귀 테스트의 앵커다.
+KAKAO_ANCHOR_DIR = os.path.join(os.path.dirname(__file__), "data", "kakao_sent")
+
+
+def _kakao_anchor_log(rk, phase, text, result, an=None):
+    """발송 직후 1건 적재. **완전 방어적** — 여기서 실패해도 발송 흐름에 영향 없음."""
+    try:
+        os.makedirs(KAKAO_ANCHOR_DIR, exist_ok=True)
+        cp = ((an or {}).get("corePicks") or {}) if isinstance(an, dict) else {}
+        def _combos(key):
+            out = []
+            for c in (cp.get(key) or []):
+                if not isinstance(c, dict):
+                    continue
+                cb = c.get("combo")
+                if cb:
+                    out.append({"combo": sorted(int(x) for x in cb), "odds": c.get("odds")})
+            return out
+        rg = cp.get("raceGrade") or {}
+        row = {
+            "sentAt": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "sentEpoch": time.time(),
+            "raceKey": rk,
+            "phase": phase,
+            "minutesBefore": (an or {}).get("minutesBefore") if isinstance(an, dict) else None,
+            "quinellas": _combos("finalQuinellas"),
+            "trifectas": _combos("finalTrifectas"),
+            "displayedCombos": cp.get("displayedCombos"),
+            "betGrade": cp.get("betGrade"),
+            "raceGrade": (rg.get("label") if isinstance(rg, dict) else rg),
+            "raceGradeBasis": (rg.get("basis") if isinstance(rg, dict) else None),
+            "text": text,                       # ⭐ 회원이 실제로 받은 원문 — 누락 없이 통째로
+            "kakaoOk": bool((result or {}).get("ok")),
+            "kakaoError": (result or {}).get("error"),
+        }
+        p = os.path.join(KAKAO_ANCHOR_DIR, time.strftime("%Y%m%d") + ".json")
+        cur, _corrupt = _json_load_guard(p, [], tag="kakao_sent/anchor")
+        if _corrupt:
+            print("🧯 [발송앵커] 이력 손상 — 이번 건 기록 생략(발송은 정상)")
+            return
+        if not isinstance(cur, list):
+            cur = []
+        cur.append(row)
+        _json_atomic(p, cur, indent=1)
+    except Exception as e:
+        print("[발송앵커] 기록 실패(무시):", e)
+
+
 def _kakao_send_to_me(text, url=None):
     """카카오톡 '나에게 보내기'(기본 텍스트 템플릿). 반환 {ok, error?}."""
     at = _kakao_access_token()
@@ -30898,6 +30954,7 @@ def kakao_send_race():
         return jsonify({"error": "분석 실패: %s" % e}), 200
     m = _kakao_rich_message(key, "수동", an)
     r = _kakao_send_to_me(m["text"], m.get("url"))
+    _kakao_anchor_log(key, "수동", m["text"], r, an)   # [발송앵커] 기록만 추가(발송 무영향)
     return jsonify({"ok": bool(r.get("ok")), "sentText": m["text"], "error": r.get("error")})
 
 
@@ -30976,6 +31033,7 @@ def _kakao_notify_race(rk, phase, an, snap):
         if _send_k:
             _rich = _kakao_rich_message(rk, phase, an)
             _sr = _kakao_send_to_me(_rich["text"], _rich.get("url"))
+            _kakao_anchor_log(rk, phase, _rich["text"], _sr, an)   # [발송앵커] 기록만 추가(발송 무영향)
             msg["sentMe"] = bool(_sr.get("ok"))
             if not _sr.get("ok") and "미연동" not in str(_sr.get("error") or ""):
                 print("[카카오 나에게] 발송 실패:", _sr.get("error") or _sr.get("raw"))
@@ -31124,8 +31182,9 @@ def _timeline_snap_tick(races, now, db):
                             _ln2.append("삼복승 제외: " + _fmt2(_st2 - _ft2))
                     if _ln2:
                         _mn2 = max(1, int(left // 60))
-                        _sr2 = _kakao_send_to_me("[적중왕] %s (마감 약 %d분 전)\n" % (_title2, _mn2)
-                                                 + "\n".join(_ln2))
+                        _txt2 = ("[적중왕] %s (마감 약 %d분 전)\n" % (_title2, _mn2)) + "\n".join(_ln2)
+                        _sr2 = _kakao_send_to_me(_txt2)
+                        _kakao_anchor_log(rk, "즉시변경", _txt2, _sr2, None)   # [발송앵커] 기록만 추가
                         if _sr2.get("ok"):
                             _ks_l["quinellas"] = [list(c) for c in _fq2]
                             _ks_l["trifectas"] = [list(c) for c in _ft2]
@@ -31191,10 +31250,12 @@ def _timeline_snap_tick(races, now, db):
                             if _snt_t - _fin_t:
                                 _ln.append("삼복승 제외: " + _fmt(_snt_t - _fin_t))
                             if _ln:
-                                _kakao_send_to_me("[적중왕] 🔁 %s 마감 확정 변경\n" % rk
-                                                  + "(카톡 발송 후 마감 직전 배당 변동)\n"
-                                                  + "\n".join(_ln)
-                                                  + "\n※ 적중 판정은 마감 시점 확정 명단 기준")
+                                _txt_c = ("[적중왕] 🔁 %s 마감 확정 변경\n" % rk
+                                          + "(카톡 발송 후 마감 직전 배당 변동)\n"
+                                          + "\n".join(_ln)
+                                          + "\n※ 적중 판정은 마감 시점 확정 명단 기준")
+                                _sr_c = _kakao_send_to_me(_txt_c)
+                                _kakao_anchor_log(rk, "T+1변경", _txt_c, _sr_c, None)  # [발송앵커] 기록만 추가
                                 print("[카톡 변경알림] %s 발송: %s" % (rk, " / ".join(_ln)))
                 except Exception as _kce:
                     print("[카톡 변경알림] 스킵(무시):", _kce)
