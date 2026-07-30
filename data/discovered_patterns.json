@@ -1,6 +1,6 @@
 {
- "generated_at": 1785396599.1348634,
- "races_with_result": 1324,
+ "generated_at": 1785397820.2214892,
+ "races_with_result": 1328,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -21,29 +21,29 @@
    "desc": "급락이 T-1분에 발생한 경주",
    "rate": 53.2,
    "baseline": 31.3,
-   "lift": 22.0,
-   "support": 77,
-   "hit": 41
+   "lift": 21.8,
+   "support": 79,
+   "hit": 42
   },
   {
    "type": "시점",
    "key": "timing:T-5분",
    "desc": "급락이 T-5분에 발생한 경주",
-   "rate": 52.4,
+   "rate": 51.9,
    "baseline": 31.3,
-   "lift": 21.2,
-   "support": 103,
+   "lift": 20.6,
+   "support": 104,
    "hit": 54
   },
   {
    "type": "시점",
    "key": "timing:T-10분",
    "desc": "급락이 T-10분에 발생한 경주",
-   "rate": 51.0,
+   "rate": 51.3,
    "baseline": 31.3,
-   "lift": 19.7,
-   "support": 149,
-   "hit": 76
+   "lift": 20.0,
+   "support": 150,
+   "hit": 77
   },
   {
    "type": "배당변화",
@@ -52,8 +52,8 @@
    "rate": 50.1,
    "baseline": 31.3,
    "lift": 18.8,
-   "support": 521,
-   "hit": 261
+   "support": 525,
+   "hit": 263
   },
   {
    "type": "시점",
@@ -67,43 +67,43 @@
   },
   {
    "type": "배당변화",
-   "key": "had_reversal",
-   "desc": "쌍승 역전 동반 경주",
-   "rate": 48.6,
+   "key": "strong_drop",
+   "desc": "30%+ 강한 급락 동반 경주",
+   "rate": 48.3,
    "baseline": 31.3,
-   "lift": 17.4,
-   "support": 37,
-   "hit": 18
+   "lift": 17.0,
+   "support": 354,
+   "hit": 171
   },
   {
    "type": "배당변화",
-   "key": "strong_drop",
-   "desc": "30%+ 강한 급락 동반 경주",
-   "rate": 48.4,
+   "key": "had_reversal",
+   "desc": "쌍승 역전 동반 경주",
+   "rate": 47.4,
    "baseline": 31.3,
-   "lift": 17.2,
-   "support": 351,
-   "hit": 170
+   "lift": 16.0,
+   "support": 38,
+   "hit": 18
   },
   {
    "type": "배당변화",
    "key": "very_strong_drop",
    "desc": "50%+ 대량 급락 동반 경주",
-   "rate": 44.4,
+   "rate": 44.2,
    "baseline": 31.3,
-   "lift": 13.2,
-   "support": 153,
+   "lift": 12.8,
+   "support": 154,
    "hit": 68
   },
   {
    "type": "전적점수",
    "key": "form_range",
-   "desc": "적중 경주 상위등급마 전적점수 주로 69.8~105 구간",
+   "desc": "적중 경주 상위등급마 전적점수 주로 70.5~105 구간",
    "range": [
-    69.8,
+    70.5,
     105
    ],
-   "support": 620
+   "support": 630
   }
  ],
  "baseline_hit_rate": 31.3
