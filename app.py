@@ -29989,7 +29989,25 @@ try:
     import gemini_forecast as _gforecast
 except Exception as _gfe:                      # 모듈 없거나 import 실패 → 기능만 비활성(서버 정상)
     _gforecast = None
-    print("[예측] 모듈 로드 실패(기능 비활성·서버 정상):", _gfe)
+    # 🔴 [2026-07-31] 침묵 실패 4번째 사례. 2026-07-31 새벽 이 줄이 **한 번 찍히고**
+    #   서버는 하루 종일 `_gforecast = None` 인 채로 돌았다(예측 0건). 한 줄로는 안 보인다.
+    #   ⇒ 눈에 띄게 만들고, 아래 부팅 배너에도 상태를 항상 남긴다. 기능 로직은 무변경.
+    print("=" * 70)
+    print("🔴 [예측] 모듈 로드 실패 — Phase A/B 가 **오늘 하루 통째로 꺼집니다**")
+    print("🔴   사유: %s" % _gfe)
+    print("🔴   조치: python -c \"import ast;ast.parse(open('gemini_forecast.py',encoding='utf-8').read())\"")
+    print("=" * 70)
+
+# [부팅 상태 노출 (2026-07-31)] 다른 Gemini 기능은 배너에 상태가 찍히는데 예측만 없었다.
+#   "동작은 하는데 기록이 없어 검증 불가"를 반복하지 않기 위한 가시화(읽기 전용).
+def _forecast_boot_state():
+    if _gforecast is None:
+        return "🔴 모듈 로드 실패 — 예측 0건이 됩니다"
+    try:
+        return ("✅ 켜짐" if _gforecast.forecast_enabled()
+                else "⏸️ 꺼짐 (GEMINI_FORECAST_ENABLED)")
+    except Exception as e:
+        return "🔴 상태 확인 실패: %s" % str(e)[:60]
 
 
 def _wind_for_forecast(rk):
@@ -30043,10 +30061,18 @@ def _grade_forecast_on_result(rk, result_top3, payout_quinella=None):
         doc = {}
         if os.path.exists(hp):
             doc, _c = _json_load_guard(hp, {}, tag="forecast/grade")
-        _gforecast.grade(rk, result_top3, starters=rec.get("horses"),
-                         snapshots=(doc or {}).get("snapshots"),
-                         deadline_epoch=(doc or {}).get("deadline_epoch"),
-                         payout_quinella=payout_quinella)
+        _g = _gforecast.grade(rk, result_top3, starters=rec.get("horses"),
+                              snapshots=(doc or {}).get("snapshots"),
+                              deadline_epoch=(doc or {}).get("deadline_epoch"),
+                              payout_quinella=payout_quinella)
+        # [Phase C 복기 (2026-07-31)] 채점이 실제로 붙은 건만 복기한다.
+        #   ⚠ 채점 전에는 아무것도 하지 않는다(review() 안에서 한 번 더 확인한다).
+        #   ⚠ 복기는 `review` 키에만 append — 예측 필드는 불변이다.
+        if _g:
+            try:
+                _gforecast.review(rk)
+            except Exception as _re:
+                print("[예측 복기] %s 스킵(무시): %s" % (rk, str(_re)[:120]))
     except Exception as e:
         print("[예측 채점] %s 스킵(무시): %s" % (rk, str(e)[:120]))
 
@@ -32726,6 +32752,8 @@ if __name__ == "__main__":
         print("  · Gemini 카카오발송: %s (GEMINI_KAKAO_ENABLED)"
               % ("🟢 켜짐" if _gr.gemini_kakao_enabled() else "⏸️ 꺼짐 — 일시 중단"))
         print("  · 결정론 검수(②④) : 🟢 항상 동작 (logs/det_review/) · 경주 추천 카카오: 🟢 정상")
+        # [2026-07-31] 예측(Phase A/B)만 배너에 상태가 없어 **모듈이 죽은 것을 못 봤다.**
+        print("  · Gemini 독립예측  : %s" % _forecast_boot_state())
     except Exception as _fe:
         print("  · Gemini 플래그 상태 확인 실패(무시):", _fe)
     # debug=True: 코드 저장 시 자동 재기동(stale 서버로 인한 405 재발 방지). 로컬 전용(127.0.0.1).

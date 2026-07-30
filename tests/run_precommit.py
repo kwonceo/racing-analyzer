@@ -26,7 +26,10 @@ import sys
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SYNTAX_TARGETS = ["app.py", "gemini_reviewer.py", "review_engine.py",
+# 🔴 [2026-07-31] `gemini_forecast.py` 가 이 목록에 **없어서** 문법 오류가 그대로 나갔다.
+#    서버는 `except` 로 삼키고 `_gforecast = None` 으로 두어 **예측 기능만 조용히 꺼진 채**
+#    하루를 돌았다(로그 1줄 뿐). 침묵 실패 4번째 사례다 — 목록 누락이 곧 사각지대다.
+SYNTAX_TARGETS = ["app.py", "gemini_forecast.py", "gemini_reviewer.py", "review_engine.py",
                   "tools/health_check.py", "tools/dedupe_odds_snapshots.py",
                   "tools/build_amedas_map.py",
                   "tests/run_freeze_regression.py", "tests/run_freeze_behavior.py"]

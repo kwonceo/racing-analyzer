@@ -454,6 +454,154 @@ def grade(rk, result_top3, starters=None, snapshots=None, deadline_epoch=None,
     return g
 
 
+# ══════════════ Phase C — 복기 (2026-07-31 신설) ══════════════
+#  🔴 채점(Phase B)은 "몇 개 맞았나"만 센다. **왜 못 봤는지**는 아무도 안 묻는다.
+#     복기가 없으면 규칙이 늘지 않고, 규칙이 없으면 예측은 매번 처음부터 시작한다.
+#  ⚠ **예측 필드는 불변** — 복기는 `review` 키에만 append 한다. 예측을 고치면 채점이 무의미해진다.
+#  ⚠ **복기에는 배당을 넣어도 된다** — 결과 확정 후이고, '고배당을 놓쳤다'는 인식이 필요하다.
+#     단 **예측 단계(Phase A)에는 여전히 금지**다(3대 금지 원칙 유지).
+#  ⚠ 복기 실패도 조용히 넘기지 않는다 — `STATS["review_failed"]` 로 집계한다.
+STATS.update({"review_ok": 0, "review_failed": 0, "review_skipped": 0})
+REVIEW_MIN_MISS = 1          # 놓친 말이 이만큼 이상일 때만 복기(전부 맞았으면 물을 게 없다)
+
+
+def _build_review_prompt(doc):
+    g = doc.get("grading") or {}
+    snap = doc.get("input_snapshot") or {}
+    miss = g.get("missed_info") or []
+    miss_txt = "\n".join(
+        "   · %s번 — 각질 %s · 최근착순 %s · 라인 %s · 등급 %s"
+        % (m.get("no"), m.get("gait") or "?", m.get("recentPlacings") or "?",
+           m.get("line") or "?", m.get("grade") or "?") for m in miss) or "   (없음)"
+    payout = g.get("payout_quinella")
+    payout_txt = ("복승 배당 %s배%s" % (payout, " — 🔴 고배당입니다" if g.get("is_high_odds") else "")
+                  if payout else "복승 배당 정보 없음")
+    return """당신은 방금 끝난 경주의 **예측을 복기**합니다.
+
+⚠ 맞히지 못한 것을 변명하지 마십시오. **무엇을 놓쳤는지**만 쓰십시오.
+⚠ "운이 나빴다" · "이변이었다" 같은 문장은 쓰지 마십시오. 그런 답은 아무 쓸모가 없습니다.
+
+[내가 예측한 것]
+  상위 3: %s / 전개: %s / 페이스: %s
+  확신도: %s
+  근거로 든 것: %s
+  예외 판단: %s
+
+[실제 결과]
+  착순 상위 3: %s
+  맞힌 말: %s (%s/3)
+  🔴 놓친 말:
+%s
+  %s
+
+[예측 당시 내가 본 데이터]
+%s
+
+반드시 아래 JSON만 출력하세요(설명·마크다운 금지):
+{
+  "miss_reason": "왜 못 봤는지. 어떤 정보를 놓쳤는지. 120자 이내. 놓친 말이 없으면 '해당 없음'",
+  "new_rule": "다음에 같은 상황에서 무엇을 볼지 **한 문장 규칙**으로. 80자 이내. 일반론이면 '없음'",
+  "rule_confidence": 1~5 정수
+}""" % (doc.get("predicted_top3"), doc.get("predicted_style"), doc.get("predicted_pace"),
+        doc.get("confidence"), doc.get("key_factors"), doc.get("exception_note"),
+        g.get("actual"), g.get("hit"), g.get("hit_count"), miss_txt, payout_txt,
+        json.dumps(snap, ensure_ascii=False, indent=1)[:4000])
+
+
+def _review_validate(r):
+    if not isinstance(r, dict):
+        return False, "JSON 객체가 아님"
+    for k in ("miss_reason", "new_rule", "rule_confidence"):
+        if k not in r:
+            return False, "키 누락: %s" % k
+    try:
+        c = int(r.get("rule_confidence"))
+    except (TypeError, ValueError):
+        return False, "rule_confidence 가 정수가 아님"
+    if not (1 <= c <= 5):
+        return False, "rule_confidence 범위 이탈(%s)" % c
+    return True, ""
+
+
+def review(rk):
+    """[Phase C] 채점 완료된 예측을 복기. 반환 review dict 또는 None. **완전 방어적**.
+
+    ⚠ 호출 시점 = 결과 확정 + 채점(Phase B) 완료 후. 채점 전에는 아무것도 하지 않는다.
+    """
+    if not forecast_enabled():
+        _bump("review_skipped")
+        return None
+    p = os.path.join(FORECAST_DIR, "%s_%s.json" % (time.strftime("%Y%m%d"), _slug(rk)))
+    if not os.path.exists(p):
+        _bump("review_skipped")
+        return None
+    try:
+        doc = json.load(open(p, encoding="utf-8"))
+    except Exception as e:
+        _LOG.warning("[복기] %s: 예측 파일 파싱 실패 — %s", rk, e)
+        _bump("review_failed")
+        return None
+    if not doc.get("graded"):
+        _bump("review_skipped")           # 채점 전 — 다음 기회에
+        return None
+    if doc.get("reviewed"):
+        return doc.get("review")          # 멱등
+    g = doc.get("grading") or {}
+    if len(g.get("missed") or []) < REVIEW_MIN_MISS:
+        doc["reviewed"] = True
+        doc["review"] = {"miss_reason": "해당 없음(전부 적중)", "new_rule": "없음",
+                         "rule_confidence": 1, "reviewedAt": time.strftime("%Y-%m-%d %H:%M:%S")}
+        _save(rk, doc)
+        _bump("review_skipped")
+        return doc["review"]
+    key = _api_key()
+    if requests is None or not key:
+        _LOG.warning("[복기] %s: requests 미설치 또는 API 키 없음", rk)
+        _bump("review_failed")
+        return None
+    payload = {"contents": [{"parts": [{"text": _build_review_prompt(doc)}]}],
+               "generationConfig": {"maxOutputTokens": 500, "responseMimeType": "application/json",
+                                    "thinkingConfig": {"thinkingBudget": 0}}}
+    headers = {"x-goog-api-key": key, "Content-Type": "application/json"}
+    result, last = None, ""
+    for m in _MODELS:
+        try:
+            r = requests.post(_GEMINI_BASE % m, headers=headers, json=payload, timeout=_TIMEOUT)
+            if r.status_code != 200:
+                last = "%s %s" % (m, _mask(r.text, key)[:140])
+                continue
+            parts = ((r.json().get("candidates") or [{}])[0].get("content") or {}).get("parts") or []
+            if not parts:
+                last = "%s parts 없음" % m
+                continue
+            result = json.loads(parts[0].get("text", "").replace("```json", "").replace("```", "").strip())
+            break
+        except Exception as e:
+            last = "%s %s" % (m, _mask(e, key)[:140])
+            continue
+    if result is None:
+        _LOG.warning("[복기] %s: 호출 실패 — %s", rk, last)
+        print("⚠ [복기 실패] %s: %s" % (rk, last[:90]))
+        _bump("review_failed")
+        return None
+    ok, why = _review_validate(result)
+    if not ok:
+        _LOG.warning("[복기] %s: 형식 검증 실패 → 폐기 (%s)", rk, why)
+        print("⚠ [복기 폐기] %s: %s" % (rk, why))
+        _bump("review_failed")
+        return None
+    rv = dict(result)
+    rv["reviewedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
+    doc["review"] = rv                     # ⚠ 예측 필드는 건드리지 않는다
+    doc["reviewed"] = True
+    _save(rk, doc)
+    _bump("review_ok")
+    print("📝 [복기] %s: %s → 규칙(%s): %s"
+          % (rk, str(rv.get("miss_reason"))[:50], rv.get("rule_confidence"),
+             str(rv.get("new_rule"))[:60]))
+    return rv
+
+
 def stats_summary():
     with _STATS_LOCK:
         s = dict(STATS)
