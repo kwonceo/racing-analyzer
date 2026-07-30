@@ -1,0 +1,68 @@
+{
+ "race_id": "2026_07_30_와카야마_2경주",
+ "raceKey": "와카야마 2경주",
+ "date": "2026-07-30",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "와카야마",
+ "round": 2,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 2,
+  "2nd": 3,
+  "3rd": 5
+ },
+ "payouts": {
+  "quinella": 16.6,
+  "trifecta": 19.7
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7,
+   6
+  ],
+  "eliminated": [],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 46.2,
+  "inverse": true
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "역배열 감지말 5번 입상",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 16.6,
+  "trifecta_odds": 19.7,
+  "actual_return": null,
+  "profit": 15600
+ },
+ "memo": null,
+ "saved_at": "2026-07-30 11:32:17",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
