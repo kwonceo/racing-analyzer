@@ -95,6 +95,7 @@ def run_case(ns, label, pattern):
 def sweep(ns):
     """전수 스윕 — 오염된 파일 전체에서 복원률을 잰다(⚠ 분모 명시)."""
     tot = drift = restored = failed = 0
+    real_loss = intended = 0
     src_cnt = {}
     for f in glob.glob(os.path.join(BASE, "data", "analysis_log", "*.json")):
         try:
@@ -116,10 +117,19 @@ def sweep(ns):
         if got and sorted(got) == sorted(want):
             restored += 1
             src_cnt[src] = src_cnt.get(src, 0) + 1
+            # 🔴 [2026-07-31] 같은 숫자가 뜻이 달라졌다 — 소급 복구 이후로는
+            #   `pre_close_row` 가 "아직 안 고친 것"이 아니라 **일부러 안 덮어쓴 것**이다.
+            #   (마감 시점 값이 아니므로 `frozen` 블록에만 남기고 top-level 은 보존하기로 결정)
+            #   ⚠ 숫자를 지우지 않는다 — **분류만 나눈다.** 안 그러면 나중에 "미완"으로 오해한다.
+            if src == "pre_close_row" and ((d.get("frozen") or {}).get("restoredBy") == "backfill"):
+                intended += 1
+            else:
+                real_loss += 1
         else:
             failed += 1
     return {"denominator_readonly_with_confirmed": tot, "drifted": drift,
-            "restored": restored, "failed": failed, "by_source": src_cnt}
+            "restored": restored, "failed": failed, "by_source": src_cnt,
+            "real_loss": real_loss, "intended_no_overwrite": intended}
 
 
 def main():
@@ -143,9 +153,16 @@ def main():
     print("전수 스윕 (⚠ 분모 = readonly=True 이고 마감 확정값이 남아 있는 파일 %d개)"
           % sw["denominator_readonly_with_confirmed"])
     d = sw["denominator_readonly_with_confirmed"] or 1
-    print("  유실(현재값 ≠ 확정값) : %d / %d (%.1f%%)" % (sw["drifted"], d, 100.0 * sw["drifted"] / d))
+    print("  현재값 ≠ 확정값       : %d / %d (%.1f%%)" % (sw["drifted"], d, 100.0 * sw["drifted"] / d))
     dr = sw["drifted"] or 1
-    print("  복원 성공             : %d / %d (%.1f%%)" % (sw["restored"], sw["drifted"], 100.0 * sw["restored"] / dr))
+    # 🔴 같은 숫자가 두 가지 뜻을 갖는다 — 분류를 나눠 표시한다(숫자는 그대로).
+    print("   ├ 🔴 유실(고쳐야 함)          : %d / %d (%.1f%%)"
+          % (sw["real_loss"], sw["drifted"], 100.0 * sw["real_loss"] / dr))
+    print("   │   = closed_row 확정본인데 top-level 이 다름 → **미복구**")
+    print("   └ 🟢 의도적 미덮어씀(정상)     : %d / %d (%.1f%%)"
+          % (sw["intended_no_overwrite"], sw["drifted"], 100.0 * sw["intended_no_overwrite"] / dr))
+    print("       = pre_close_row(마감 시점 값 아님) → frozen 에만 기록하기로 **결정한 것**")
+    print("  복원 가능             : %d / %d (%.1f%%)" % (sw["restored"], sw["drifted"], 100.0 * sw["restored"] / dr))
     print("  복원 실패             : %d / %d (%.1f%%)" % (sw["failed"], sw["drifted"], 100.0 * sw["failed"] / dr))
     print("  복원 출처별           : %s" % (sw["by_source"] or "없음"))
     ok = sum(1 for r in res if r["ok"])

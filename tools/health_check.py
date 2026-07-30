@@ -409,13 +409,44 @@ def check_forecast_vs_market():
                note=note + " · 낮으면 종결 / 비슷하면 이변 경주만 재판정 / 높으면 편입 검토")
 
 
+def check_freeze_success():
+    """[D6 · 2026-07-31 신설] 마감 시점 동결이 **신규 경주에서 실제로 작동하는가.**
+
+    🔴 핵심 지표는 `closed_row` 비율이다. 수정 전 **44.4%**(235/529)였고,
+      '🔒 마감 확정' 행이 만들어진 그 저장에서 폐기되던 것이 원인이었다(병합으로 수정).
+    ⚠ 분모는 **당일 동결 시도 건수**다 — 과거 소급 복구분은 섞지 않는다.
+    """
+    d = os.path.join(BASE, "data", "freeze_log", time.strftime("%Y-%m-%d") + ".json")
+    rows = []
+    if os.path.exists(d):
+        try:
+            rows = json.load(open(d, encoding="utf-8")) or []
+        except Exception:
+            rows = []
+    n = len(rows)
+    denom = "당일 동결 시도 건수(freeze_log 적재분) — 소급 복구분 제외"
+    ok_rows = [r for r in rows if isinstance(r, dict) and r.get("ok")]
+    cr = sum(1 for r in ok_rows if r.get("src") == "closed_row")
+    pr = sum(1 for r in ok_rows if r.get("src") == "pre_close_row")
+    fail = n - len(ok_rows)
+    cur = (round(100.0 * cr / n, 1) if n else None)
+    note = ("closed_row %d · pre_close_row %d · 실패 %d (n=%d)" % (cr, pr, fail, n)) if n else ""
+    if n < 10:
+        return _mk("D6", "② 저장 무결성", "마감 확정행 동결 성공률", denom,
+                   current=cur, target="≥ 95%", ok=None, n=n, note=note,
+                   reason="판정선 미도달(%d/10경주) — 사후에 낮추지 않는다" % n)
+    return _mk("D6", "② 저장 무결성", "마감 확정행 동결 성공률", denom,
+               current=cur, target="≥ 95%", ok=(cur is not None and cur >= 95.0), n=n,
+               note=note + " · 낮으면 recommendation_history 를 덮어쓰는 다른 경로를 전수 조사")
+
+
 def build_checklist():
     """반환 dict 의 **최상단에 `summary` 계열을 배치**한다(모바일에서 먼저 보이도록).
     ⚠ 응답은 `ensure_ascii=False` + UTF-8 로 내보낼 것 — `\\uCda9\\uC871` 로 깨지면 외부에서 못 쓴다."""
     items = [check_snapshot_coverage(),
              check_save_failures_fixed(), check_save_failures_unfixed(),
              check_schema_contract(), check_schema_drift(),
-             check_score_decomposition(),
+             check_score_decomposition(), check_freeze_success(),
              check_forecast_discard(), check_forecast_vs_market()]
     for (i, area, name, target, denom, why) in _PENDING:
         items.append(_mk(i, area, name, denom, current=None, target=target,
