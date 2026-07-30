@@ -2144,10 +2144,12 @@ def _ingest_reject_log(rk, reason, source=None, extra=None, throttle=60):
             return
         _INGEST_REJECT_T[k] = now
         path, date, race = _hist_path(rk)
-        try:
-            doc = json.load(open(path, encoding="utf-8"))
-        except Exception:
-            doc = {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None}
+        # [손상 파일 격리 2026-07-30] 거부 로그 한 줄 때문에 스냅샷 전체를 날리지 않는다.
+        doc, _corrupt = _json_load_guard(
+            path, {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None},
+            tag="odds_history/_ingest_reject_log")
+        if _corrupt:
+            return
         doc.setdefault("archive_snapshots", [])
         row = {"t": now, "time": time.strftime("%H:%M:%S", time.localtime(now)),
                "rejected": True, "reason": reason, "src": source}
@@ -12882,10 +12884,12 @@ def _record_alert(rk, an):
     slug, date, race = _alert_meta(rk)
     os.makedirs(ALERTS_DIR, exist_ok=True)
     path = os.path.join(ALERTS_DIR, slug + ".json")
-    try:
-        doc = json.load(open(path, encoding="utf-8"))
-    except Exception:
-        doc = {"race": race, "date": date, "raceKey": rk, "alerts": [], "result": None}
+    # [손상 파일 격리 2026-07-30] 경고 이력(alerts)도 빈 문서로 덮지 않는다.
+    doc, _corrupt = _json_load_guard(
+        path, {"race": race, "date": date, "raceKey": rk, "alerts": [], "result": None},
+        tag="alerts/_record_alert")
+    if _corrupt:
+        return None
     top = drops[0]
     pair_key = "+".join(str(x) for x in sorted(int(y) for y in top["combo"]))
     if pair_key in {a.get("alert_pair") for a in doc.get("alerts", [])}:
@@ -13675,10 +13679,13 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
     [마감전 신호 기록 (2026-07-19)] source: 'private'(사설/확장)·'oddspark'(서버 bg)·None(기타 경로).
     직전 스냅샷과 소스가 다르면 두 소스의 배당 체계 차이가 가짜 급락을 만들므로 이상감지 계산만 생략(기록은 유지)."""
     path, date, race = _hist_path(rk)
-    try:
-        doc = json.load(open(path, encoding="utf-8"))
-    except Exception:
-        doc = {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None}
+    # [손상 파일 격리 2026-07-30] 종전 `except: doc={"snapshots":[]}` 는 파싱 실패 시 빈 문서를 그대로
+    #   덮어써 와카야마 8R 20틱+archive 23건을 지웠다 → 손상이면 저장을 건너뛴다(무삭제·추가 계층).
+    doc, _corrupt = _json_load_guard(
+        path, {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None},
+        tag="odds_history/_history_append")
+    if _corrupt:
+        return
     now = time.time()
     # [영구보존] raceKey별 append-only 아카이브 — 분석용 snapshots(오염방어로 리셋/300캡)와 별개로
     #   모든 수집 배당을 절대 삭제·초기화 없이 영구 누적(탭 전환·경주 전환·마감 후에도 유지 → 복기 소스).
@@ -13911,10 +13918,12 @@ def _history_save_analysis(rk, an):
     if not rk or not an:
         return
     path, date, race = _hist_path(rk)
-    try:
-        doc = json.load(open(path, encoding="utf-8"))
-    except Exception:
-        doc = {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None}
+    # [손상 파일 격리 2026-07-30] 위와 동일 — 손상 시 복기 문서를 빈 문서로 덮지 않는다.
+    doc, _corrupt = _json_load_guard(
+        path, {"race": race, "date": date, "raceKey": rk, "snapshots": [], "result": None},
+        tag="odds_history/_history_save_analysis")
+    if _corrupt:
+        return
     elim = an.get("elimination") or {}
     ehorses = elim.get("horses") or []
     candidates = [h["no"] for h in ehorses if (h.get("keep") or h.get("override"))]
@@ -13951,6 +13960,13 @@ def _history_save_analysis(rk, an):
 # ══════════════ [분석 로그 완전 저장] data/analysis_log/ (추적 가능한 전체 기록) ══════════════
 #   왜 이 말을 추천했는지·어떤 배당을 보고 판단했는지까지 리치 스키마로 경주별 저장.
 #   기존 odds_history/learning 파이프라인은 그대로 두고, 그 데이터를 종합해 추가로 남긴다.
+# [동시 쓰기 3층 보강 2026-07-30] 아래 상수·락 배열은 `_json_atomic` 전용(다른 로직 무영향).
+_FILE_LOCK_SLOTS = 1024                                     # 고정 슬롯 → 락이 무한 증가하지 않음
+_FILE_LOCKS = [threading.RLock() for _ in range(_FILE_LOCK_SLOTS)]
+_ATOMIC_RETRY = 3                                           # os.replace 재시도 횟수(최초 1회 + 3회)
+_ATOMIC_RETRY_SLEEP = 0.05                                  # 재시도 간격 → 총 상한 150ms(무한 대기 없음)
+
+
 def _json_atomic(path, obj, indent=None):
     """[원자적 저장 2026-07-28] 임시파일 기록 후 os.replace 로 교체.
 
@@ -13959,11 +13975,165 @@ def _json_atomic(path, obj, indent=None):
       'Extra data' 로 깨진다. 2026-07-28 전수 검사에서 analysis_log 9건이 이 형태로 손상돼 있었고
       (7/21~7/25 발생·성적 집계에서 통째로 누락 중이었음) 8건은 앞부분만 복구, 1건은 복구 불가였다.
     os.replace 는 같은 볼륨에서 원자적이라, 읽는 쪽은 '항상 완전한 파일'만 보게 된다.
-    ⚠ 예외는 삼키지 않는다 — 저장 실패를 조용히 넘기면 손실을 못 알아챈다(호출부 기존 try 가 처리)."""
-    tmp = "%s.tmp%d" % (path, os.getpid())
-    with open(tmp, "w", encoding="utf-8") as _f:
-        json.dump(obj, _f, ensure_ascii=False, indent=indent)
-    os.replace(tmp, path)
+    ⚠ 예외는 삼키지 않는다 — 저장 실패를 조용히 넘기면 손실을 못 알아챈다(호출부 기존 try 가 처리).
+
+    ── [동시 쓰기 3층 보강 2026-07-30] ──────────────────────────────────────────
+    실측 배경: 단일 프로세스 9분에 `WinError 32/5` 26건. 프로세스 중복을 없앤 뒤에도 남았다
+      → 프로세스 간이 아니라 **같은 프로세스의 스레드 간**(수집 루프 ↔ Flask 요청) 충돌이다.
+    종전 tmp 이름은 `path + ".tmp<pid>"` 라 **같은 프로세스의 두 스레드가 같은 tmp 를 공유**했고,
+      두 스레드가 같은 tmp 에 동시에 쓰면 내용이 섞인 채 rename 돼 **원본이 손상 JSON**이 됐다
+      (그 다음 reader 가 파싱 실패 → 빈 문서 폴백 → 전량 소실. 오늘 와카야마 8R 19틱).
+    ① tmp 에 **스레드 ID** 추가 → 같은 tmp 를 두 writer 가 공유하는 일이 없어진다.
+    ② **경로별 락**으로 같은 파일 쓰기를 직렬화(읽는 쪽의 중간 상태 노출도 줄인다).
+       락은 **고정 1024슬롯 배열**(path 해시)이라 무한 증가하지 않는다. 서로 다른 파일이 같은 슬롯에
+       걸릴 수 있으나 쓰기가 수 ms 라 실질 영향이 없고, **경로 개수만큼 락이 늘어나는 문제**를 없앤다.
+       RLock 이라 같은 스레드가 중첩 호출해도 데드락이 나지 않는다.
+    ③ `os.replace` 실패 시 **50ms × 3회 재시도(상한 150ms)**, 그래도 실패하면 예외를 그대로 올린다.
+       바이러스 검사·다른 리더가 순간적으로 파일을 잡은 경우를 흡수한다. 무한 대기는 없다.
+    ⚠ 개별 17곳(`path + ".tmp"` · PID조차 없음)은 이번 범위 밖 — ①②③ 효과 실측 후 별건."""
+    _lk = _FILE_LOCKS[hash(path) % _FILE_LOCK_SLOTS]
+    with _lk:
+        tmp = "%s.tmp%d_%d" % (path, os.getpid(), threading.get_ident())
+        with open(tmp, "w", encoding="utf-8") as _f:
+            json.dump(obj, _f, ensure_ascii=False, indent=indent)
+        for _i in range(_ATOMIC_RETRY + 1):
+            try:
+                os.replace(tmp, path)
+                return
+            except Exception:
+                if _i >= _ATOMIC_RETRY:
+                    try:
+                        os.remove(tmp)          # 최종 실패 시 tmp 잔재 정리(원본은 손대지 않음)
+                    except Exception:
+                        pass
+                    raise
+                time.sleep(_ATOMIC_RETRY_SLEEP)
+
+
+# ══════════════ [손상 파일 격리 (2026-07-30)] 빈 문서 폴백이 데이터를 지우던 문제 ══════════════
+#  🔴 실사고: 2026-07-30 14:09 와카야마 8경주 — 스냅샷 20틱 + archive_snapshots 23건이
+#     **1틱 / 10건으로 초기화**됐다(영구 보존이어야 할 archive 까지 잘림·복구 불가).
+#  원인 관용구(app.py 안에서만 62곳):
+#        try:  doc = json.load(open(path))
+#        except Exception:  doc = {"snapshots": [], ...}      ← 빈 문서를 세우고
+#        ... doc 수정 ...  _json_atomic(path, doc)             ← 그대로 덮어쓴다
+#     `except: pass` 는 '못 보게' 할 뿐이지만 이 관용구는 **지운다** — 질이 다르다.
+#  → 파싱 실패 시 ⓐ원본을 `.corrupt.<ts>` 사본으로 격리 ⓑ앞부분 유효 JSON 복구 시도
+#     ⓒ복구 실패면 `corrupt=True` 를 돌려 **호출부가 그 사이클 저장을 건너뛰게** 한다.
+#  ⚠ 완전 추가 계층 — 기존 함수·경로는 하나도 지우지 않는다(호출부에서 선택적으로 사용).
+_CORRUPT_T = {}                       # path → 마지막 격리 시각(같은 파일 반복 격리 스로틀)
+_CORRUPT_THROTTLE_SEC = 300
+_CORRUPT_KEEP_MAX = 100               # 디렉터리별 `.corrupt.*` 보관 상한(무한 증가 방지)
+_CORRUPT_NOTE_BUSY = threading.local()
+
+
+def _corrupt_note(path, reason, tag="", dst=None):
+    """격리 사실을 `data/collect_gaps/<날짜>.json` 에 남긴다(조용히 넘어가지 않게).
+    ⚠ 이 함수 자체가 손상 파일을 만나 재귀하지 않도록 스레드 로컬 재진입 가드를 둔다."""
+    if getattr(_CORRUPT_NOTE_BUSY, "on", False):
+        return
+    _CORRUPT_NOTE_BUSY.on = True
+    try:
+        _d = os.path.join(os.path.dirname(__file__), "data", "collect_gaps")
+        os.makedirs(_d, exist_ok=True)
+        _p = os.path.join(_d, time.strftime("%Y-%m-%d") + ".json")
+        _cur = []
+        if os.path.exists(_p):
+            try:
+                _cur = json.load(open(_p, encoding="utf-8")) or []
+            except Exception:
+                _cur = []                     # 진단 파일 자체 손상은 여기서 재귀하지 않고 새로 시작
+        if not isinstance(_cur, list):
+            _cur = []
+        _cur.append({"type": "corrupt", "file": os.path.basename(path), "tag": tag,
+                     "reason": str(reason)[:200],
+                     "quarantined": (os.path.basename(dst) if dst else None),
+                     "time": time.strftime("%H:%M:%S")})
+        _json_atomic(_p, _cur, indent=1)
+    except Exception as _ne:
+        print("[손상격리] 기록 실패(무시):", _ne)
+    finally:
+        _CORRUPT_NOTE_BUSY.on = False
+
+
+def _corrupt_prune(dirpath, keep=None):
+    """격리본 무한 증가 방지 — 디렉터리별 최신 keep 개만 남긴다(오래된 것부터 제거)."""
+    keep = _CORRUPT_KEEP_MAX if keep is None else keep
+    try:
+        fs = [os.path.join(dirpath, f) for f in os.listdir(dirpath) if ".corrupt." in f]
+        if len(fs) <= keep:
+            return
+        fs.sort(key=lambda p: os.path.getmtime(p))
+        for f in fs[:-keep]:
+            try:
+                os.remove(f)
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+
+def _corrupt_quarantine(path, err, tag=""):
+    """손상 원본을 `.corrupt.<ts>` **사본**으로 격리(원본은 그대로 둔다 — 이동하면 그것도 소실이다).
+    반환: 격리본 경로 또는 None(스로틀·복사 실패)."""
+    now = time.time()
+    if now - _CORRUPT_T.get(path, 0) < _CORRUPT_THROTTLE_SEC:
+        return None
+    _CORRUPT_T[path] = now
+    dst = "%s.corrupt.%s" % (path, time.strftime("%Y%m%d_%H%M%S"))
+    try:
+        with open(path, "rb") as _s, open(dst, "wb") as _d2:
+            _d2.write(_s.read())
+    except Exception as _ce:
+        print("[손상격리] 사본 생성 실패(무시):", _ce)
+        dst = None
+    _corrupt_note(path, err, tag, dst)
+    try:
+        _corrupt_prune(os.path.dirname(path))
+    except Exception:
+        pass
+    return dst
+
+
+def _json_load_guard(path, default, tag=""):
+    """[손상 파일 격리] `json.load` 의 안전판. 반환 `(doc, corrupt)`.
+
+    **`corrupt=True` 면 호출부는 그 사이클 저장을 건너뛰어야 한다**(빈 문서로 덮지 않기 위함).
+    · 파일 미존재 → `(default, False)`  — 새 경주의 정상 경로다.
+    · 0바이트/공백  → `(default, False)` — 종전 비원자적 저장의 절단 흔적. 잃을 내용이 없으므로 새로 시작하되 기록.
+    · 파싱 실패     → 격리 후 **앞부분 복구 시도**(`raw_decode`). 2026-07-28 전수 복구에서 19건 중 13건이
+                      'Extra data'(앞부분은 완전한 JSON) 유형이었다 → 성공 시 `(복구본, False)`.
+                      복구 실패 시 `(default, True)`.
+    """
+    _d0 = default() if callable(default) else default
+    if not os.path.exists(path):
+        return _d0, False
+    try:
+        raw = open(path, encoding="utf-8").read()
+    except Exception as _re:
+        _corrupt_note(path, "읽기 실패: %s" % _re, tag)
+        print("🧯 [손상격리] %s: 읽기 실패 → 저장 건너뜀 · %s" % (os.path.basename(path), _re))
+        return _d0, True
+    if not raw.strip():
+        _corrupt_note(path, "빈 파일(0바이트)", tag)
+        print("🧯 [손상격리] %s: 빈 파일 — 새로 시작(잃을 내용 없음)" % os.path.basename(path))
+        return _d0, False
+    try:
+        return json.loads(raw), False
+    except Exception as _je:
+        _q = _corrupt_quarantine(path, "파싱 실패: %s" % _je, tag)
+        try:
+            _doc, _end = json.JSONDecoder().raw_decode(raw.lstrip())
+            if isinstance(_doc, (dict, list)):
+                print("🧯 [손상격리] %s: 앞부분 복구 성공(%s) · 격리본 %s"
+                      % (os.path.basename(path), _je.__class__.__name__,
+                         os.path.basename(_q) if _q else "-(스로틀)"))
+                return _doc, False
+        except Exception:
+            pass
+        print("🧯 [손상격리] %s: 파싱 실패 → **저장 건너뜀**(빈 문서로 덮지 않음) · %s"
+              % (os.path.basename(path), _je))
+        return _d0, True
 
 
 ANALYSIS_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
@@ -17573,14 +17743,18 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     except Exception as _de:
         print("[중복학습 방지] 판정 스킵(무시):", _de)
     path, _, _ = _hist_path(rk)
-    try:
-        doc = json.load(open(path, encoding="utf-8"))
-    except Exception:
-        doc = {"raceKey": rk, "snapshots": [], "result": None}
-    doc["result"] = result
-    if final_odds:
-        doc["finalOdds"] = final_odds
-    _json_atomic(path, doc)
+    # [손상 파일 격리 2026-07-30] 결과 부착 한 번 때문에 그 경주 스냅샷 전체를 지우지 않는다.
+    #   ⚠ 손상이면 이 저장만 건너뛰고 **학습 연쇄는 그대로 진행**한다(결과 학습은 별도 저장소를 쓴다).
+    doc, _corrupt = _json_load_guard(
+        path, {"raceKey": rk, "snapshots": [], "result": None},
+        tag="odds_history/_apply_result_learning")
+    if not _corrupt:
+        doc["result"] = result
+        if final_odds:
+            doc["finalOdds"] = final_odds
+        _json_atomic(path, doc)
+    else:
+        print("🧯 [손상격리] %s: 결과 부착 저장만 건너뜀 — 학습 연쇄는 계속 진행" % rk)
 
     # [매칭 유연화] triple_store(활성)에 없으면 odds_history 스냅샷에서 rec 재구성 → 분석 재현
     rec = _triple_load().get(rk) or {}
