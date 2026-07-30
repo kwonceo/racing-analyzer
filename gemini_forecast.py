@@ -1,0 +1,367 @@
+# -*- coding: utf-8 -*-
+"""[Gemini 독립 예측 · Phase A/B (2026-07-31 신설)] 예측 기록 + 기계 채점.
+
+■ 무엇인가
+  Gemini 를 **코드 리뷰가 아니라 경주 예측 엔진**으로 쓴다.
+  통계 테이블(`flow_table`)은 '빠른|7두 추입+추입' 같은 **셀 단위**로만 보므로,
+  "같은 라인에 선행형이 둘이라 내부 경쟁이 난다" 같은 건 표현되지 않는다.
+  → **"이 경주가 통상적인가, 예외로 볼 이유가 있나"** 를 묻고 그 답을 저장·채점한다.
+
+■ 🔴 절대 원칙
+  · **저장 전용.** 기존 추천 경로(`_final_picks`·EV필터·`corePicks`)에 **일절 개입하지 않는다.**
+  · **3대 금지 입력**(Overfitting 방지) — 프롬프트에 넣지 않는다:
+      ① 배당(odds)·인기순위(pop)·시장 최저 조합
+      ② 우리 시스템 추천(finalQuinellas·keyHorses·axis)
+      ③ paceBonus 가 **가산된** 점수(record_score·totalScore) → **가산 전 `paceBonusBase` 만**
+    넣으면 시장이나 우리 답안을 베끼게 되고, 잘 맞아도 **새 정보가 아니다**.
+    (2026-07-30 "마감 후 유력마가 잘 들어온다"가 정확히 그 함정이었다.)
+  · **형식 검증 실패 = 통째 폐기.** 부분 채택 금지. `except: pass` 금지 — 반드시 로그를 남긴다.
+  · `GEMINI_REVIEW_ENABLED`(코드 리뷰)는 **끈 채로 둔다.** 이 모듈은 별도 플래그를 쓴다.
+
+■ 시장 대조군 (Phase B 필수)
+  Gemini 성적만 재면 의미가 없다. **마감 시점(T-5) 스냅샷**의 단승 최저 3두를 `market_top3` 로 잡아
+  나란히 채점한다. ⚠ **마감 후 배당 사용 금지** — 시장이 유리해져 비교가 성립하지 않는다.
+"""
+import json
+import logging
+import os
+import threading
+import time
+
+try:
+    import requests
+except ImportError:
+    requests = None
+
+_LOG = logging.getLogger("gemini_forecast")
+BASE = os.path.dirname(os.path.abspath(__file__))
+FORECAST_DIR = os.path.join(BASE, "logs", "forecast")
+RULES_MD = os.path.join(BASE, "docs", "learned_rules.md")
+
+_GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent"
+_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
+_TIMEOUT = 12
+
+# 통계(집계용) — 침묵 실패 방지. 2026-07-30 에 침묵 실패가 3번 났다.
+STATS = {"called": 0, "ok": 0, "discarded": 0, "failed": 0, "skipped": 0}
+_STATS_LOCK = threading.Lock()
+_CALLED = {}                      # raceKey → 마지막 호출 시각(경주당 1회)
+_CALL_ONCE_SEC = 3600
+
+
+def _flag(name, default="0"):
+    return str(os.environ.get(name, default)).strip().lower() in ("1", "true", "yes", "on")
+
+
+def forecast_enabled():
+    """[Phase A] 예측 호출 허용 여부(기본 꺼짐). ⚠ GEMINI_REVIEW_ENABLED 와 **별개**."""
+    return _flag("GEMINI_FORECAST_ENABLED", "0")
+
+
+def _api_key():
+    return (os.environ.get("GEMINI_API_KEY") or "").strip()
+
+
+def _mask(t, key):
+    s = str(t)
+    return s.replace(key, "<KEY>") if key else s
+
+
+def _bump(k):
+    with _STATS_LOCK:
+        STATS[k] = STATS.get(k, 0) + 1
+
+
+def _slug(rk):
+    import re
+    return re.sub(r"[^\w가-힣]+", "_", str(rk or "race")).strip("_")
+
+
+def _load_rules():
+    """docs/learned_rules.md 의 규칙 목록. 없으면 빈 리스트(필드는 유지)."""
+    if not os.path.exists(RULES_MD):
+        return []
+    out = []
+    try:
+        import re
+        for line in open(RULES_MD, encoding="utf-8"):
+            m = re.match(r"^\s*[-*]?\s*\[?R?(\d+)\]?[.)]?\s+(.+)$", line.strip())
+            if m and len(m.group(2)) > 4:
+                out.append({"id": int(m.group(1)), "text": m.group(2).strip()[:200]})
+    except Exception as e:
+        _LOG.warning("[예측] 규칙 파일 읽기 실패(빈 목록으로 진행): %s", e)
+    return out
+
+
+# ══════════════ Phase A — 입력 구성 ══════════════
+def build_input_snapshot(rk, starters, pace_analysis=None, line_info=None, comment=None):
+    """프롬프트에 주입할 **원본 데이터**를 만든다. ⚠ 3대 금지 항목을 여기서 차단한다.
+
+    starters: [{no, name, gait/styleType, recentPlacings, grade, paceBonusBase, weeks, ...}]
+    ⚠ `odds`·`pop`·`record_score`·`totalScore` 는 **의도적으로 제외**한다(넣으면 안 된다).
+    """
+    horses = []
+    for h in (starters or []):
+        try:
+            no = int(h.get("no"))
+        except (TypeError, ValueError):
+            continue
+        horses.append({
+            "no": no,
+            "name": h.get("name") or "",
+            "gait": h.get("gait") or h.get("styleType") or h.get("declaredStyleLabel"),
+            "recentPlacings": h.get("recentPlacings") or [],
+            "grade": h.get("absGrade") or h.get("grade"),
+            # ⚠ paceBonus 가산 **전** 값만. record_score/totalScore 는 넣지 않는다.
+            "paceBonusBase": h.get("paceBonusBase"),
+            "weeksInARow": h.get("weeksInARow") or h.get("renzoku"),
+        })
+    lead = [h["no"] for h in horses if str(h.get("gait") or "").startswith(("선행", "逃"))]
+    close = [h["no"] for h in horses if str(h.get("gait") or "").startswith(("추입", "追", "差"))]
+    return {
+        "raceKey": rk,
+        "fieldSize": len(horses),
+        "horses": horses,
+        "composition": {"leadCount": len(lead), "leadHorses": lead,
+                        "closeCount": len(close), "closeHorses": close},
+        "lines": line_info or [],
+        "paceLabel": (pace_analysis or {}).get("pace") if isinstance(pace_analysis, dict) else None,
+        "comment": (comment or "")[:600],
+        "appliedRulesAvailable": _load_rules(),
+        "_excluded": ["odds", "pop", "marketLowest", "finalQuinellas", "keyHorses",
+                      "axis", "record_score", "totalScore"],
+    }
+
+
+def _build_prompt(snap):
+    rules = snap.get("appliedRulesAvailable") or []
+    rules_txt = ("\n".join("R%d. %s" % (r["id"], r["text"]) for r in rules)
+                 if rules else "(아직 없음 — applied_rules 는 빈 배열로 두세요)")
+    return """당신은 경륜/경마 전개 분석가입니다.
+**목적은 "누가 1착일까"를 맞히는 것이 아닙니다.** 통계 테이블이 놓치는 것을 찾는 것입니다.
+
+핵심 질문: **이 경주는 통상적입니까, 아니면 예외로 볼 이유가 있습니까?**
+예외의 예: 같은 라인에 선행형이 둘이라 내부 경쟁이 발생 / 연속 출전 피로 /
+총평의 자연어 단서 / 두수 대비 각질 구성의 특수성 / 라인 구도의 불균형.
+
+⚠ 아래 정보에는 **배당·인기·타 시스템 추천이 의도적으로 빠져 있습니다.**
+   시장 판단을 베끼지 말고, 주어진 구도와 전적만으로 판단하세요.
+
+[경주 데이터]
+%s
+
+[적용 가능한 학습 규칙]
+%s
+
+반드시 아래 JSON만 출력하세요(설명·마크다운 금지):
+{
+  "predicted_top3": [정수, 정수, 정수],
+  "predicted_style": "선행|추입|혼합 중 하나",
+  "predicted_pace": "빠른|보통|느린 중 하나",
+  "line_winner": [정수, ...],
+  "confidence": 1~5 정수,
+  "reason_short": "80자 이내",
+  "key_factors": ["...", "..."],
+  "exception_note": "예외로 볼 이유. 통상적이면 '통상'",
+  "applied_rules": [사용한 규칙 번호(위 목록에 없으면 빈 배열)]
+}""" % (json.dumps(snap, ensure_ascii=False, indent=1)[:8000], rules_txt)
+
+
+# ══════════════ Phase A — 형식 검증 (부분 채택 금지) ══════════════
+def validate(result, valid_nos):
+    """반환 (ok, 사유). 하나라도 어긋나면 **통째 폐기**한다."""
+    if not isinstance(result, dict):
+        return False, "JSON 객체가 아님"
+    need = ["predicted_top3", "predicted_style", "predicted_pace", "line_winner",
+            "confidence", "reason_short", "key_factors", "exception_note", "applied_rules"]
+    miss = [k for k in need if k not in result]
+    if miss:
+        return False, "키 누락: %s" % ",".join(miss)
+    t3 = result.get("predicted_top3")
+    if not isinstance(t3, list) or len(t3) != 3:
+        return False, "predicted_top3 가 3개가 아님(%s)" % t3
+    try:
+        t3i = [int(x) for x in t3]
+    except (TypeError, ValueError):
+        return False, "predicted_top3 에 정수가 아닌 값"
+    if len(set(t3i)) != 3:
+        return False, "predicted_top3 중복"
+    vs = set(int(x) for x in (valid_nos or []))
+    if vs:
+        bad = [x for x in t3i if x not in vs]
+        if bad:
+            return False, "출전 명단에 없는 번호: %s (명단 %s)" % (bad, sorted(vs))
+    try:
+        c = int(result.get("confidence"))
+    except (TypeError, ValueError):
+        return False, "confidence 가 정수가 아님"
+    if not (1 <= c <= 5):
+        return False, "confidence 범위 이탈(%s)" % c
+    if not isinstance(result.get("applied_rules"), list):
+        return False, "applied_rules 가 배열이 아님"
+    return True, ""
+
+
+def _save(rk, doc):
+    os.makedirs(FORECAST_DIR, exist_ok=True)
+    p = os.path.join(FORECAST_DIR, "%s_%s.json" % (time.strftime("%Y%m%d"), _slug(rk)))
+    tmp = "%s.tmp%d_%d" % (p, os.getpid(), threading.get_ident())
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(doc, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, p)
+    return p
+
+
+def forecast_once(rk, snap, valid_nos):
+    """[Phase A] 1회 예측·저장. 반환 저장 경로 또는 None. **완전 방어적**."""
+    if not forecast_enabled():
+        _bump("skipped")
+        return None
+    if requests is None:
+        _LOG.warning("[예측] requests 미설치 — 건너뜀")
+        _bump("failed")
+        return None
+    key = _api_key()
+    if not key:
+        _LOG.warning("[예측] GEMINI_API_KEY 없음 — 건너뜀")
+        _bump("failed")
+        return None
+    now = time.time()
+    if now - _CALLED.get(rk, 0) < _CALL_ONCE_SEC:
+        _bump("skipped")
+        return None
+    _CALLED[rk] = now
+    _bump("called")
+    prompt = _build_prompt(snap)
+    payload = {"contents": [{"parts": [{"text": prompt}]}],
+               "generationConfig": {"maxOutputTokens": 800, "responseMimeType": "application/json",
+                                    "thinkingConfig": {"thinkingBudget": 0}}}
+    headers = {"x-goog-api-key": key, "Content-Type": "application/json"}
+    result, last = None, ""
+    for m in _MODELS:
+        try:
+            r = requests.post(_GEMINI_BASE % m, headers=headers, json=payload, timeout=_TIMEOUT)
+            if r.status_code != 200:
+                last = "%s %s" % (m, _mask(r.text, key)[:140])
+                continue
+            cand = (r.json().get("candidates") or [{}])[0]
+            parts = (cand.get("content") or {}).get("parts") or []
+            if not parts:
+                last = "%s parts 없음(%s)" % (m, cand.get("finishReason"))
+                continue
+            raw = parts[0].get("text", "").replace("```json", "").replace("```", "").strip()
+            result = json.loads(raw)
+            break
+        except Exception as e:
+            last = "%s %s" % (m, _mask(e, key)[:140])
+            continue
+    if result is None:
+        _LOG.warning("[예측] %s: 호출 실패 — %s", rk, last)
+        _bump("failed")
+        return None
+    ok, why = validate(result, valid_nos)
+    if not ok:
+        # 🔴 부분 채택 금지 — 통째 폐기하고 반드시 기록한다.
+        _LOG.warning("[예측] %s: 형식 검증 실패 → 통째 폐기 (%s) · 원문 %s",
+                     rk, why, json.dumps(result, ensure_ascii=False)[:200])
+        print("⚠ [예측 폐기] %s: %s" % (rk, why))
+        _bump("discarded")
+        return None
+    doc = dict(result)
+    doc.update({"raceKey": rk, "forecastAt": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "forecastEpoch": time.time(), "readonly": True,
+                "input_snapshot": snap})       # ⚠ 재현용 — 마감 후 덮어쓰기 대비
+    p = _save(rk, doc)
+    _bump("ok")
+    print("🔮 [예측] %s: top3=%s conf=%s · %s" % (rk, doc.get("predicted_top3"),
+                                                doc.get("confidence"), doc.get("exception_note", "")[:40]))
+    return p
+
+
+# ══════════════ Phase B — 기계 채점 ══════════════
+def _market_top3(snapshots, deadline_epoch):
+    """⚠ **마감 시점(T-5) 스냅샷**의 단승 최저 3두. 마감 후 배당 사용 금지."""
+    if not snapshots or not deadline_epoch:
+        return None, None
+    best, bt = None, None
+    for s in snapshots:
+        t = s.get("t")
+        if not t:
+            continue
+        mb = (float(t) - float(deadline_epoch)) / 60.0
+        if mb > 0:
+            continue                       # 마감 후 제외
+        if mb < -8:
+            continue                       # T-8분보다 이른 것도 제외(T-5 근방만)
+        if bt is None or mb > bt:           # 마감에 가장 가까운 마감 전 스냅샷
+            bt, best = mb, s
+    if not best:
+        return None, None
+    win = best.get("win") or best.get("single") or {}
+    if not isinstance(win, dict) or not win:
+        return None, round(bt, 1) if bt is not None else None
+    try:
+        items = sorted(((int(k), float(v)) for k, v in win.items() if float(v) > 0), key=lambda x: x[1])
+    except (TypeError, ValueError):
+        return None, round(bt, 1)
+    return [n for n, _ in items[:3]], round(bt, 1)
+
+
+def grade(rk, result_top3, starters=None, snapshots=None, deadline_epoch=None,
+          payout_quinella=None):
+    """[Phase B] 예측 파일에 채점 필드를 **append**. 기존 예측 필드는 불변.
+    반환 채점 dict 또는 None(예측 파일 없음)."""
+    p = os.path.join(FORECAST_DIR, "%s_%s.json" % (time.strftime("%Y%m%d"), _slug(rk)))
+    if not os.path.exists(p):
+        return None
+    try:
+        doc = json.load(open(p, encoding="utf-8"))
+    except Exception as e:
+        _LOG.warning("[채점] %s: 예측 파일 파싱 실패 — %s", rk, e)
+        return None
+    if doc.get("graded"):
+        return doc.get("grading")
+    try:
+        actual = [int(x) for x in result_top3][:3]
+    except (TypeError, ValueError):
+        _LOG.warning("[채점] %s: 착순 형식 오류 %s", rk, result_top3)
+        return None
+    pred = [int(x) for x in (doc.get("predicted_top3") or [])]
+    hit = [n for n in pred if n in actual]
+    missed = [n for n in actual if n not in pred]
+    by = {}
+    for h in (starters or []):
+        try:
+            by[int(h.get("no"))] = h
+        except (TypeError, ValueError):
+            continue
+    missed_info = [{"no": n,
+                    "gait": (by.get(n) or {}).get("gait") or (by.get(n) or {}).get("styleType"),
+                    "recentPlacings": (by.get(n) or {}).get("recentPlacings"),
+                    "line": (by.get(n) or {}).get("line"),
+                    "grade": (by.get(n) or {}).get("absGrade") or (by.get(n) or {}).get("grade")}
+                   for n in missed]
+    mt3, msnap_mb = _market_top3(snapshots, deadline_epoch)
+    g = {"actual": actual, "hit_count": len(hit), "hit": hit,
+         "missed": missed, "missed_info": missed_info,
+         "payout_quinella": payout_quinella,
+         "is_high_odds": bool(payout_quinella and float(payout_quinella) >= 20.0),
+         "market_top3": mt3,
+         "market_hit_count": (len([n for n in (mt3 or []) if n in actual]) if mt3 else None),
+         "market_snapshot_mb": msnap_mb,
+         "gradedAt": time.strftime("%Y-%m-%d %H:%M:%S")}
+    doc["grading"] = g
+    doc["graded"] = True
+    _save(rk, doc)
+    print("📊 [채점] %s: Gemini %d/3 ↔ 시장 %s/3 · 놓침 %s"
+          % (rk, g["hit_count"], g["market_hit_count"], missed))
+    return g
+
+
+def stats_summary():
+    with _STATS_LOCK:
+        s = dict(STATS)
+    tot = s.get("called", 0)
+    s["discardRate"] = round(100.0 * s.get("discarded", 0) / tot, 1) if tot else None
+    s["failRate"] = round(100.0 * s.get("failed", 0) / tot, 1) if tot else None
+    return s
