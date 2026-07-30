@@ -14321,6 +14321,18 @@ def _build_analysis_log(rk, an=None):
             "paceDetail": f.get("paceDetail") or None,               # 보정 근거 문구(무엇이 몇 점인지)
             "paceBonusBase": (None if f.get("totalScore") is None or f.get("paceBonus") is None
                               else round(float(f["totalScore"]) - float(f["paceBonus"]), 1)),
+            # ── [보너스 시점 전적 등급 (2026-07-30)] ─────────────────────────────
+            #   `_apply_pace_analysis`(27065) 의 `is_a = grade == "A"` 는 **그 시점의 전적 등급**을 본다.
+            #   그런데 위 `grade` 필드는 `grade_by`(=`_integrated_grades` 통합등급)를 우선하므로 **다른 값**이다.
+            #   그래서 저장된 로그만으로는 paceBonus 를 재계산할 수 없었다(실측 재현 정확도 86.2%·불일치 9/65 —
+            #   예: 소노다 1R no=7 은 통합등급 C 인데 보너스는 A 기준으로 계산돼 있었다).
+            #   ⚠ 소급 복원은 불가하다 — 과거 로그엔 이 필드가 없다. **오늘부터의 재현성 확보**가 목적이다
+            #     (앞으로 paceBonus 공식이 바뀌어도 저장된 이 값으로 과거를 재계산할 수 있다).
+            #   ⚠ `_apply_pace_analysis` 는 무수정이다. form 의 `grade` 는 `_keiba_build_form`(22816)·
+            #     `_jra_build_form`(26603) 이 **빌드 시점에** 넣고, `_integrated_grades`(3979)·
+            #     `_integrated_adaptive`(4247) 는 **새 리스트(out)에만** 등급을 부여해 form 을 변형하지 않는다.
+            #     따라서 여기서 읽는 `f["grade"]` 가 곧 보너스 계산 시점의 전적 등급이다.
+            "gradeAtBonus": f.get("grade"),                           # 보너스 시점 전적 등급(저장만)
         })
 
     cand = [h["no"] for h in ehorses if h.get("keep") or h.get("override")]
