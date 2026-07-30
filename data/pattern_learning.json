@@ -1,35 +1,6 @@
 {
   "patterns": [
     {
-      "race": "마쓰도 5경주",
-      "horse_no": 6,
-      "recent_avg": 7.4,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-20"
-    },
-    {
-      "race": "마쓰도 5경주",
-      "horse_no": 3,
-      "recent_avg": 8.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-20"
-    },
-    {
-      "pattern": "대규모급락",
-      "raceKey": "마쓰도 7경주",
-      "total_combos_dropped": 6,
-      "drop_ratio": 0.4,
-      "result": "2+5",
-      "result_odds": "미상",
-      "result_quinella_odds": null,
-      "signal_result_combo": "-46.9%",
-      "recommended_hit": false,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1784512356.2328658
-    },
-    {
       "race": "카사마츠 1경주",
       "horse_no": 2,
       "recent_avg": 5.0,
@@ -4670,16 +4641,44 @@
         "복승이상감지"
       ],
       "date": "2026-07-30"
+    },
+    {
+      "race": "나고야 12경주",
+      "horse_no": 3,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-30"
+    },
+    {
+      "race": "나고야 12경주",
+      "horse_no": 9,
+      "recent_avg": 5.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-30"
+    },
+    {
+      "race": "나고야 12경주",
+      "horse_no": 4,
+      "recent_avg": 5.5,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-07-30"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1927,
-      "hit": 373
+      "count": 1934,
+      "hit": 374
     },
     "전체부진마": {
-      "count": 3221,
-      "hit": 873
+      "count": 3232,
+      "hit": 876
     },
     "대규모급락": {
       "count": 5,
@@ -4689,8 +4688,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 1294,
-      "hit": 500
+      "count": 1298,
+      "hit": 502
     },
     "급락동반": {
       "count": 223,
