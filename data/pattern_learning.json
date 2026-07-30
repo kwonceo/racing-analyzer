@@ -4647,6 +4647,19 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-07-29"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "아오모리 5경주",
+      "total_combos_dropped": 5,
+      "drop_ratio": 0.417,
+      "result": "1+5",
+      "result_odds": "저배당",
+      "result_quinella_odds": 1.2,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1785373822.2599854
     }
   ],
   "condition_stats": {
@@ -4659,11 +4672,11 @@
       "hit": 813
     },
     "대규모급락": {
-      "count": 7,
+      "count": 5,
       "high_odds": 0,
       "recommended_hit": 2,
       "high_odds_rate": 0.0,
-      "hit_rate": 28.6
+      "hit_rate": 40.0
     },
     "이상감지동반": {
       "count": 1179,
