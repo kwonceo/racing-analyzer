@@ -31706,6 +31706,146 @@ def health_checklist_api():
                         "items": [], "total": 0, "done": 0}), 500
 
 
+# ══════════════ [체크리스트 카카오 푸시 (2026-07-30)] 서버 개방 대신 Push ══════════════
+#  배경(권대표 결정 2026-07-30): 외부에서 체크리스트를 보려면 8011 을 열어야 하는데,
+#    방화벽이 **유일한 방어선**이 되고 리셋 리스크가 있다(이 서버엔 `.env` 키 3종·`/admin` 이 있다).
+#    → **공격 표면을 늘리지 않고**, 이미 구축된 카카오 경로로 **서버가 밖으로 밀어낸다.**
+#  🔒 격리 원칙: 기존 **추천 픽 카카오**(`_kakao_notify_race`·`_kakao_build_message`·`_kakao_rich_message`
+#    ·`_KAKAO_SENT_FILE`)는 **일절 건드리지 않는다.** 여기서는 `_kakao_send_to_me` 만 재사용하고
+#    이력도 별도 디렉터리(`data/kakao_sent/`)에 남긴다.
+#  ⚠ **미충족이 0개여도 반드시 보낸다** — 비어서 안 보내면 '문제 없음'과 '발송 실패'가 구분되지 않는다.
+#    메시지가 오면 서버가 살아 있다는 뜻이고, 안 오면 발송 실패다. **침묵이 이상 신호가 되게 한다.**
+HEALTH_KAKAO_DIR = os.path.join(os.path.dirname(__file__), "data", "kakao_sent")
+_health_kakao_sched_started = False
+
+
+def _health_checklist_build():
+    """체크리스트 생성(엔드포인트와 동일 경로 재사용). 실패 시 예외를 올린다."""
+    import importlib.util as _ilu
+    _p = os.path.join(os.path.dirname(__file__), "tools", "health_check.py")
+    _spec = _ilu.spec_from_file_location("health_check", _p)
+    _m = _ilu.module_from_spec(_spec)
+    _spec.loader.exec_module(_m)
+    return _m.build_checklist()
+
+
+def _health_kakao_text(rep):
+    """카카오 본문 — **최대한 짧게**. summary 1줄 + 미충족 목록만(충족 항목은 넣지 않는다).
+    목록이 짧아지는 것이 곧 진행 신호다."""
+    lines = ["📋 완료 조건 체크리스트  %s" % time.strftime("%m/%d %H:%M"),
+             rep.get("summary") or ""]
+    opens = rep.get("openItems") or []
+    if opens:
+        lines.append("")
+        lines.append("❌ 미충족 %d" % len(opens))
+        lines.extend("· " + str(x) for x in opens)
+    else:
+        # ⚠ 전부 충족이어도 한 줄은 반드시 보낸다(침묵 = 발송 실패로 읽히게).
+        lines.append("")
+        lines.append("✅ 전부 충족 %d/%d" % (rep.get("done") or 0, rep.get("total") or 0))
+    pend = rep.get("pendingItems") or []
+    if pend:
+        lines.append("")
+        lines.append("⬜ 미측정·미구현 %d" % len(pend))
+    return "\n".join(lines)
+
+
+def _health_kakao_log(reason, text, result, err=None):
+    """발송 이력 — **성공·실패 모두** `data/kakao_sent/<날짜>.json` 에 누적.
+    ⚠ 실패도 남겨야 '안 온 이유'를 사후에 알 수 있다."""
+    try:
+        os.makedirs(HEALTH_KAKAO_DIR, exist_ok=True)
+        p = os.path.join(HEALTH_KAKAO_DIR, time.strftime("%Y-%m-%d") + ".json")
+        cur, _corrupt = _json_load_guard(p, [], tag="kakao_sent/health")
+        if _corrupt or not isinstance(cur, list):
+            cur = [] if not _corrupt else None
+        if cur is None:
+            print("[체크리스트 카카오] 이력 파일 손상 — 기록만 건너뜀(발송은 완료)")
+            return
+        cur.append({"at": time.strftime("%Y-%m-%d %H:%M:%S"), "kind": "health_checklist",
+                    "reason": reason, "ok": bool(result), "error": (str(err)[:200] if err else None),
+                    "chars": len(text or ""), "preview": (text or "")[:120]})
+        _json_atomic(p, cur, indent=1)
+    except Exception as e:
+        print("[체크리스트 카카오] 이력 기록 실패(무시):", e)
+
+
+def _health_kakao_send(reason="manual"):
+    """체크리스트를 카카오로 1회 발송. 반환 {ok, sent, summary, error?}."""
+    try:
+        rep = _health_checklist_build()
+    except Exception as e:
+        _health_kakao_log(reason, "", False, "체크리스트 생성 실패: %s" % e)
+        print("[체크리스트 카카오] 생성 실패:", e)
+        return {"ok": False, "error": "체크리스트 생성 실패: %s" % str(e)[:200]}
+    text = _health_kakao_text(rep)
+    try:
+        r = _kakao_send_to_me(text) or {}
+    except Exception as e:
+        _health_kakao_log(reason, text, False, e)
+        print("[체크리스트 카카오] 발송 예외:", e)
+        return {"ok": False, "error": str(e)[:200], "text": text}
+    ok = bool(r.get("ok"))
+    _health_kakao_log(reason, text, ok, r.get("error"))
+    print("[체크리스트 카카오] %s 발송 %s (%s)" % (reason, "성공" if ok else "실패", rep.get("summary")))
+    return {"ok": ok, "reason": reason, "summary": rep.get("summary"),
+            "openItems": rep.get("openItems"), "text": text,
+            "error": (None if ok else r.get("error"))}
+
+
+@app.route("/api/health/send_kakao", methods=["GET", "POST"])
+def health_send_kakao_api():
+    """[체크리스트 카카오 푸시] 수동 발송. GET=미리보기(발송 안 함) · POST=실제 발송.
+    ⚠ 기존 추천 픽 카카오와 **완전 분리** — 템플릿·이력 파일·트리거 전부 별개다."""
+    if request.method == "GET":
+        try:
+            rep = _health_checklist_build()
+        except Exception as e:
+            return jsonify({"error": "체크리스트 생성 실패: %s" % str(e)[:200]}), 500
+        _body = json.dumps({"preview": _health_kakao_text(rep), "summary": rep.get("summary"),
+                            "note": "GET 은 미리보기입니다. 실제 발송은 POST."},
+                           ensure_ascii=False, indent=1)
+        return Response(_body, mimetype="application/json; charset=utf-8")
+    r = _health_kakao_send((request.json or {}).get("reason") or "manual")
+    _body = json.dumps(r, ensure_ascii=False, indent=1)
+    return Response(_body, mimetype="application/json; charset=utf-8",
+                    status=(200 if r.get("ok") else 502))
+
+
+def _start_health_kakao_scheduler():
+    """매일 `HEALTH_KAKAO_HOUR`(기본 22)시에 체크리스트 1회 발송(멱등·하루 1회).
+
+    ⚠ **60초 폴링**으로 만든다 — `time.sleep(1200)` 선행 방식은 개발 중 잦은 리로드로 타이머가
+      계속 리셋돼 **오늘 결과 백필이 하루 종일 한 번도 안 돈 사고**가 실제로 있었다(2026-07-30).
+      60초 폴링은 리로드로 잃는 시간이 최대 60초다.
+    ⚠ "마지막 경주 종료 감지"는 조건이 까다로워 **22:00 고정**으로 시작한다(권대표 지시).
+    """
+    global _health_kakao_sched_started
+    if _health_kakao_sched_started:
+        return
+    _health_kakao_sched_started = True
+    try:
+        hour = int(max(0, min(23, int(os.environ.get("HEALTH_KAKAO_HOUR", "") or 22))))
+    except (TypeError, ValueError):
+        hour = 22
+
+    def _loop():
+        last = None
+        while True:
+            try:
+                time.sleep(60)
+                now = time.localtime()
+                today = time.strftime("%Y-%m-%d", now)
+                if now.tm_hour >= hour and last != today:
+                    last = today          # 발송 성공·실패와 무관하게 하루 1회(중복 발송 방지)
+                    _health_kakao_send("daily-%02d:00" % hour)
+            except Exception as e:
+                print("[체크리스트 카카오] 스케줄러 오류(무시):", e)
+
+    threading.Thread(target=_loop, daemon=True, name="health-kakao").start()
+    print("[체크리스트 카카오] 자동 발송 스케줄러 시작(매일 %02d:00 · 60초 폴링 · HEALTH_KAKAO_HOUR)" % hour)
+
+
 @app.route("/api/collect/cycles", methods=["GET"])
 def collect_cycles_api():
     """[수집 사이클 관측] ?limit=N — 최근 사이클 + 경주별 '창 진입 횟수'.
@@ -31876,6 +32016,10 @@ def _boot_background():
         print("[부팅] 한국 사전분석 재개 실패(무시):", e)
     _start_periodic_backup()             # 6시간 주기 안전 백업(결과 미입력이어도 백업)
     _start_daily_learning_scheduler()    # 매일 22:00 학습 일지 자동 생성·백업
+    try:
+        _start_health_kakao_scheduler()  # [체크리스트 카카오 2026-07-30] 매일 22:00 상태 푸시(기존 추천 발송과 분리)
+    except Exception as e:
+        print("[체크리스트 카카오] 스케줄러 기동 실패(무시):", e)
     try:
         _startup_date_reset()            # 어제 고정·수집 데이터 자동 정리(학습 데이터 보존)
     except Exception as e:
