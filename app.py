@@ -1494,6 +1494,10 @@ def _sport_match(rec_sport, want):
 # 출마표2 전적 저장소 (raceKey → {horses:[{no,name,jockey,recent,weight}], t})
 STARTERS_STORE = os.path.join(os.path.dirname(__file__), "starters_store.json")
 
+# [반복 에러 억제 (2026-07-31)] {에러문구: 누적횟수} — 첫 1회 + 100회마다만 출력한다.
+#   ⚠ 완전히 숨기면 침묵 실패가 된다. 살아 있다는 것을 계속 드러내기 위한 카운터다.
+_BLINE_ERR_SEEN = {}
+
 
 def _starters_load():
     try:
@@ -8066,7 +8070,17 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                                     })
                                     print(f"[B라인v2 선점] {'+'.join(map(str,_b_trio))} 삼복승 seen_t 선점 완료")
         except Exception as _ble:
-            print("[경륜 B라인v2] 에러(무시):", _ble)
+            # [로그 억제 (2026-07-31)] 이 에러(`key_horses is not defined`)는 **매 사이클 반복**돼
+            #   로그를 오염시킨다(경주당 수십 줄). B라인 로직 자체는 **보류 항목이라 건드리지 않는다.**
+            #   ⚠ 완전히 숨기면 **침묵 실패**가 된다 — 첫 1회는 반드시 찍고,
+            #     이후 100회마다 "N회 반복됨"을 남겨 살아 있다는 것을 계속 드러낸다.
+            _bl_key = str(_ble)[:80]
+            _bl_n = _BLINE_ERR_SEEN.get(_bl_key, 0) + 1
+            _BLINE_ERR_SEEN[_bl_key] = _bl_n
+            if _bl_n == 1:
+                print("[경륜 B라인v2] 에러(무시·보류 항목):", _ble)
+            elif _bl_n % 100 == 0:
+                print("[경륜 B라인v2] 같은 에러 %d회 반복됨(무시·보류 항목): %s" % (_bl_n, _bl_key))
 
     # ══════════════ [삼복승 복승메인 정합성·신규] 삼복승은 복승 메인 말을 반드시 포함 ══════════════
     #   문제: 복승 메인 3+4 인데 삼복승 2+5+6(3·4 없음) → 앞뒤 불일치("쌩뚱맞은 조합").

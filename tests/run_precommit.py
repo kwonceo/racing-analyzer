@@ -66,8 +66,11 @@ SYNTAX_TARGETS = discover_syntax_targets()
 
 # 🔴 [2026-07-31] `run_freeze_behavior.py` 를 차단 등급으로 승격.
 #    마감 시점 동결이 구현됐으므로 이제부터 복원 경로가 끊기면 커밋을 막는다.
+# 🔴 [2026-07-31] `run_smoke_render.py` 추가 — **문법 검사로는 안 잡히는 유형**을 잡는다.
+#    실사고: 프롬프트 주석의 `100%)` 가 `%` 포맷과 충돌해 `ValueError` 로 생성이 통째로 죽었다.
+#    `ast.parse` 는 통과했고(문법은 완벽) **실행해야만** 드러났다.
 BLOCKING_SUITES = ["tests/run_report.py", "tests/run_formula.py", "tests/run_flow.py",
-                   "tests/run_freeze_behavior.py"]
+                   "tests/run_freeze_behavior.py", "tests/run_smoke_render.py"]
 
 # 🟡 아직 고치지 않은 결함을 재현하는 테스트 — 실패해도 커밋을 막지 않는다.
 #
