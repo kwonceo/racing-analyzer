@@ -26,6 +26,7 @@ import base64
 import random
 import hashlib
 import threading
+import collections          # [수집 사이클 관측 2026-07-30] deque — 기존 지역 `from collections import Counter` 와 무충돌
 import subprocess
 import html as _htmllib
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -28844,8 +28845,28 @@ MULTI_COLLECT_LEAD_SEC = 600      # [2번] 발주 10분전부터 수집 시작
 #   지금 할 수 있는 것은 **가시화**다 — 아래 경보로 '조용한 실패'를 더는 놓치지 않는다.
 SNAPSHOT_MIN_WARN = 3             # 이 미만 스냅샷으로 마감한 경주는 경보(추천 신뢰 불가)
 _SNAP_WARNED = set()              # 경주당 1회만 경보(반복 로그 방지)
+# [경보 창 확대 (2026-07-30)] 종전 '발주 3~15분 경과' 였다. 그런데 7/30 실측에서 스냅샷 부족 14경주 중
+#   **경보는 4건만** 남았다(10건 누락). 원인은 그 12분 창 안에 **해당 경주가 스케줄에 없었기** 때문으로 보인다
+#   (스케줄은 30분 주기 갱신이고 7/30 은 12:52 에도 갱신됐다 — 창을 지난 뒤에야 목록에 들어온 경주가 있다).
+#   → 창을 3분~120분으로 넓혀, 뒤늦게 스케줄에 편입된 경주도 한 번은 검사되게 한다.
+#   경주당 1회 게이트(`_SNAP_WARNED`)가 있어 로그 도배는 늘지 않는다.
+SNAPSHOT_WARN_FROM_SEC = 180      # 발주 후 이 시각부터 검사(3분)
+SNAPSHOT_WARN_TO_SEC = 7200       # 이 시각까지 검사(120분) — 종전 900(15분)
 MULTI_URGENT_SEC = 180            # [3·5번] T-3분 이내 = 긴급(빨강)
 MULTI_WARN_SEC = 600             # [3번] T-10분 이내 = 주의(주황)
+
+# ══════════ [수집 사이클 관측 (2026-07-30)] 창 밖 수집·사이클 지연 가시화 ══════════
+#   배경: 7/30 오전 경륜 3트랙(아오모리 3R+·기후·와카야마)이 **발주 후에야** 첫 수집됐거나 0틱이었다
+#     (소노다=경마는 같은 시간대 발주 9분 전부터 5/5 정상 → 서버·루프는 살아 있었다).
+#     스케줄엔 postEpoch 가 106경주 100% 있었으므로 '스케줄 부재'가 아니라 **수집 창을 놓친 것**이다.
+#   그런데 지금은 "한 사이클에 몇 경주를 돌았고, 얼마나 걸렸고, 창 밖 경주가 섞였는가"가 **어디에도 없다**
+#     → 재발해도 사후 추정만 가능하다(이번에도 '소노다 12경주가 발주 224분 전인데 수집 중'이라는
+#       단서만 얻고 원인을 확정하지 못했다).
+#   ⚠ 완전 읽기 전용 관측이다 — 수집 대상 선정·추천·학습에 개입하지 않는다(기록만 추가).
+_COLLECT_CYCLES = collections.deque(maxlen=400)   # 최근 사이클 관측(메모리)
+_COLLECT_TARGET_SEEN = {}    # raceKey -> {n, first, last} · '창에 들어온 적이 있는가'의 근거
+_COLLECT_OBS_LAST_SAVE = [0.0]                    # 파일 저장 스로틀(60초)
+COLLECT_SLOW_SEC = 10.0      # 경주 1건 수집이 이 시간을 넘으면 'slow' 로 기록
 
 
 def _multi_store_load():
@@ -31287,6 +31308,14 @@ def _multi_bg_loop():
             _targets.sort(key=lambda t: (int(t[0] // 60),
                                          0 if not t[1].get("joCode") else 1,
                                          t[0]))
+            # [수집 사이클 관측 2026-07-30] 이 사이클이 무엇을 대상으로 삼았는지 먼저 기록한다.
+            #   ⚠ 대상 선정에 개입하지 않는다 — 이미 확정된 `_targets` 를 읽어 적기만 한다.
+            _obs_t0 = time.time()
+            _obs = None
+            try:
+                _obs = _collect_cycle_begin(sched, _targets, now, _MULTI_BG_BEAT.get("n"))
+            except Exception as _oe:
+                print("[수집관측] 시작 기록 실패(무시):", _oe)
             if len(_targets) == 1:
                 _multi_collect_one(_targets[0][1], _targets[0][2], ymd)
             elif _targets:
@@ -31303,6 +31332,12 @@ def _multi_bg_loop():
                     print("[다중경주] 병렬 수집 오류 → 순차 폴백(무시):", _pex)
                     for (_pe2, _tr2, _rc2) in _targets:
                         _multi_collect_one(_tr2, _rc2, ymd)
+            # [수집 사이클 관측 2026-07-30] 사이클 소요시간 확정 + 창 밖 갱신 탐지 → 기록.
+            try:
+                if _obs is not None:
+                    _collect_cycle_end(_obs, time.time() - _obs_t0, sched, time.time())
+            except Exception as _oe:
+                print("[수집관측] 종료 기록 실패(무시):", _oe)
             # [자동 예상] 수집 직후 마감5분전 예상 저장·결과 대조·현재/다음 상태 갱신(연속 자동 전환)
             _auto_pred_tick(sched, now)
             # [수집 공백 경보] 발주 3~15분 지난 경주의 스냅샷 수를 세어 3개 미만이면 1회 경보.
@@ -31317,6 +31352,117 @@ def _multi_bg_loop():
         time.sleep(30)
 
 
+def _collect_cycle_begin(sched, targets, now, cycle_no=None):
+    """[수집 사이클 관측 (2026-07-30)] 이 사이클의 대상 선정 결과를 기록용 dict 로 만든다.
+
+    무엇을 답하려는 관측인가:
+      ⓐ **그 경주가 수집 창에 들어온 적이 있는가** — 7/30 기후 1·2·4·5경주는 스냅샷 0인데
+        스케줄엔 postEpoch 가 있었다. '창에 들어왔는데 수집이 실패'인지 '창에 들어온 적조차 없음'인지
+        구분할 근거가 없었다. `_COLLECT_TARGET_SEEN` 이 그 근거가 된다.
+      ⓑ **사이클이 얼마나 걸리는가** — 한 바퀴가 창(12분)보다 길어지면 경주가 통째로 누락된다.
+      ⓒ **창 밖 경주가 갱신되고 있는가** — 소노다 12경주가 발주 224분 전인데 15틱 수집돼 있었다.
+        `_targets` 는 창(발주 10분전~2분후) 안만 담으므로, 창 밖 갱신은 **다른 경로**라는 뜻이다.
+    ⚠ 완전 읽기 전용 — 대상 선정·수집·추천·학습에 개입하지 않는다.
+    """
+    tg = []
+    for (pe, tr, rc) in (targets or []):
+        try:
+            key = _multi_key(tr.get("venue") or tr.get("name") or "", rc.get("raceNo"))
+        except Exception:
+            key = None
+        tg.append({"raceKey": key, "venue": tr.get("venue") or tr.get("name"),
+                   "raceNo": rc.get("raceNo"),
+                   "sport": tr.get("sport") or ("cycle" if tr.get("joCode") else None),
+                   "tMinus": round((pe - now) / 60.0, 1)})
+        if key:
+            s = _COLLECT_TARGET_SEEN.setdefault(key, {"n": 0, "first": None, "last": None})
+            s["n"] += 1
+            s["last"] = now
+            if s["first"] is None:
+                s["first"] = now
+    n_sched = sum(len(tr.get("races") or []) for tr in (sched.get("tracks") or []))
+    return {"t": now, "time": time.strftime("%H:%M:%S", time.localtime(now)),
+            "cycle": cycle_no, "scheduled": n_sched, "nTargets": len(tg), "targets": tg}
+
+
+def _collect_cycle_end(obs, elapsed, sched, now):
+    """[수집 사이클 관측] 소요시간 + '창 밖인데 방금 갱신된 경주' 를 붙여 확정 기록."""
+    obs["elapsedSec"] = round(float(elapsed), 2)
+    obs["slow"] = obs["elapsedSec"] >= COLLECT_SLOW_SEC * max(1, obs.get("nTargets") or 1)
+    # 창 밖 갱신 탐지 — 발주 15분+ 남았는데 이력 파일이 60초 내 갱신된 경주(= 다른 경로가 쓰고 있다)
+    outside = []
+    try:
+        for tr in (sched.get("tracks") or []):
+            for rc in (tr.get("races") or []):
+                pe = rc.get("postEpoch")
+                if not pe or (pe - now) <= 900:          # 창 밖 = 발주 15분 이상 남음
+                    continue
+                try:
+                    key = _multi_key(tr.get("venue") or tr.get("name") or "", rc.get("raceNo"))
+                    p = _hist_path(key)[0]
+                except Exception:
+                    continue
+                try:
+                    if os.path.exists(p) and (now - os.path.getmtime(p)) <= 60:
+                        outside.append({"raceKey": key,
+                                        "tMinus": round((pe - now) / 60.0, 1)})
+                except Exception:
+                    continue
+    except Exception:
+        pass
+    obs["outsideWindowFresh"] = outside
+    _COLLECT_CYCLES.append(obs)
+    # 사이클이 비정상적으로 길거나 창 밖 갱신이 있으면 콘솔에도 남긴다(침묵 방지)
+    if obs["slow"] or outside:
+        print("[수집관측] 사이클#%s 대상 %d · %.1f초%s%s"
+              % (obs.get("cycle"), obs.get("nTargets") or 0, obs["elapsedSec"],
+                 " · ⚠느림" if obs["slow"] else "",
+                 (" · 창밖갱신 %d경주(%s)" % (len(outside), ", ".join(o["raceKey"] for o in outside[:3])))
+                 if outside else ""))
+    # 하루치 파일 누적(60초 스로틀) — 서버 재시작에도 남게
+    try:
+        if now - (_COLLECT_OBS_LAST_SAVE[0] or 0) >= 60:
+            _COLLECT_OBS_LAST_SAVE[0] = now
+            _d = os.path.join(os.path.dirname(__file__), "data", "collect_cycles")
+            os.makedirs(_d, exist_ok=True)
+            _p = os.path.join(_d, time.strftime("%Y-%m-%d") + ".json")
+            _json_atomic(_p, {"updated": time.strftime("%Y-%m-%d %H:%M:%S"),
+                              "cycles": list(_COLLECT_CYCLES),
+                              "targetSeen": _COLLECT_TARGET_SEEN}, indent=1)
+    except Exception as e:
+        print("[수집관측] 저장 실패(무시):", e)
+
+
+@app.route("/api/collect/cycles", methods=["GET"])
+def collect_cycles_api():
+    """[수집 사이클 관측] ?limit=N — 최근 사이클 + 경주별 '창 진입 횟수'.
+
+    진단 사용법:
+      · `targetSeen` 에 **없는** 경주 = 수집 창에 **한 번도 들어오지 않았다**(스케줄 편입 시각 문제).
+      · `targetSeen[key].n` 이 1~2 = 창에 들어왔지만 기회가 거의 없었다(사이클 지연 의심).
+      · `outsideWindowFresh` = 창 밖인데 갱신 중 = `_multi_bg_loop` 아닌 다른 경로가 쓰고 있다.
+    """
+    try:
+        lim = max(1, min(400, int(request.args.get("limit") or 60)))
+    except Exception:
+        lim = 60
+    cy = list(_COLLECT_CYCLES)[-lim:]
+    el = [c.get("elapsedSec") for c in cy if c.get("elapsedSec") is not None]
+    return jsonify({
+        "count": len(_COLLECT_CYCLES), "returned": len(cy),
+        "elapsedSec": {"max": (max(el) if el else None),
+                       "avg": (round(sum(el) / len(el), 2) if el else None)},
+        "slowCycles": sum(1 for c in cy if c.get("slow")),
+        "outsideWindowCycles": sum(1 for c in cy if c.get("outsideWindowFresh")),
+        "targetSeenCount": len(_COLLECT_TARGET_SEEN),
+        "targetSeen": {k: {"n": v["n"],
+                           "first": time.strftime("%H:%M:%S", time.localtime(v["first"])) if v.get("first") else None,
+                           "last": time.strftime("%H:%M:%S", time.localtime(v["last"])) if v.get("last") else None}
+                       for k, v in _COLLECT_TARGET_SEEN.items()},
+        "cycles": cy,
+    })
+
+
 def _snapshot_shortage_check(sched, now):
     """[수집 공백 경보 (2026-07-29)] 발주 3~15분 지난 경주의 배당 스냅샷 수가 SNAPSHOT_MIN_WARN 미만이면
     경보 1회 + `data/collect_gaps/<날짜>.json` 누적. 스냅샷 1~2개로 확정된 추천은 신뢰할 수 없는데,
@@ -31326,7 +31472,9 @@ def _snapshot_shortage_check(sched, now):
     for tr in sched.get("tracks", []):
         for rc in tr.get("races", []):
             pe = rc.get("postEpoch")
-            if not pe or not (180 <= (now - pe) <= 900):     # 발주 3~15분 경과분만
+            # [창 확대 2026-07-30] 종전 하드코딩 `180 <= (now-pe) <= 900`(3~15분) → 상수화 + 120분까지.
+            #   뒤늦게 스케줄에 편입된 경주가 검사조차 되지 않던 누락(7/30 14건 중 10건) 방어.
+            if not pe or not (SNAPSHOT_WARN_FROM_SEC <= (now - pe) <= SNAPSHOT_WARN_TO_SEC):
                 continue
             try:
                 key = _multi_key(tr.get("venue") or tr.get("name") or "", rc.get("raceNo"))
@@ -31334,11 +31482,15 @@ def _snapshot_shortage_check(sched, now):
                 continue
             if not key or key in _SNAP_WARNED:
                 continue
-            _SNAP_WARNED.add(key)
+            # [침묵 억제 수정 2026-07-30] 종전엔 여기서 곧바로 `_SNAP_WARNED.add(key)` 했다. 그래서
+            #   바로 아래 이력 읽기가 예외로 실패하면 **판정을 한 번도 못 했는데 영구히 '검사 완료'로 표시**돼
+            #   그 경주는 다시는 경보 대상이 되지 않았다(조용한 실패를 잡으려는 함수가 스스로 조용히 실패).
+            #   → 판정이 실제로 끝난 뒤에만 표시한다. 예외 시엔 표시하지 않아 다음 사이클에 재시도된다.
             try:
                 doc = _hist_read_any(_hist_path(key)[0]) or {}
             except Exception:
                 continue
+            _SNAP_WARNED.add(key)
             n = len(doc.get("archive_snapshots") or doc.get("snapshots") or [])
             if n >= SNAPSHOT_MIN_WARN:
                 continue

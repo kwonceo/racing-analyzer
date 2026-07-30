@@ -70,3 +70,9 @@ data/kakao_token.json
 # [Gemini 자동진단 2026-07-28] 검수 결과 JSON — 경주마다 생성되는 진단용 임시 로그(학습 코퍼스 아님).
 #   양쪽 PC 자동커밋 충돌·불필요한 churn 방지. 로컬 파일은 그대로 유지된다.
 logs/gemini_review/
+
+# [2026-07-30] 서버 런타임 stdout(진단용·고빈도) — 기존 항목 삭제 없이 추가
+logs/server_stdout.log
+logs/server_stdout.log.err
+# [2026-07-30] 수집 사이클 관측(60초 주기 갱신 = 고빈도 임시)
+data/collect_cycles/
