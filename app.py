@@ -31671,6 +31671,36 @@ def _collect_cycle_end(obs, elapsed, sched, now):
         print("[수집관측] 저장 실패(무시):", e)
 
 
+@app.route("/api/health/checklist", methods=["GET"])
+def health_checklist_api():
+    """[완료 조건 체크리스트 2026-07-30] 17항목 자동 판정 — **완전 읽기 전용**.
+
+    설계 의도: "감시"가 아니라 **완료 조건 체크리스트**다. 각 항목에 숫자 완료선이 있고
+      충족되면 목록에서 ✅ 로 빠진다 — **조용해지는 것이 곧 진행 상황이다.**
+      지금까지 발견이 대부분 육안이었고, 외부에 있으면 0건이 됐다 → 외부에서 확인 가능해야 한다.
+
+    🔴 각 항목의 `denominator`(분모 정의)가 필수 필드다. 2026-07-30 실사고 —
+      "스냅샷 3틱+"를 스냅샷 보유 파일만 분모로 잡으면 81.6%, 0틱 경주를 포함하면 69.4%.
+      분모를 좁히면 **가장 실패한 경주가 통계에서 사라진다.**
+
+    ⚠ 추천·수집·학습에 일절 개입하지 않는다(파일 읽기 전용).
+    ⚠ 측정 불가 항목은 `ok=null` + `reason` — 억지로 통과시키지 않는다.
+    구현: `tools/health_check.py`(서버 없이도 `python tools/health_check.py` 로 실행 가능).
+    """
+    try:
+        import importlib.util as _ilu
+        _p = os.path.join(os.path.dirname(__file__), "tools", "health_check.py")
+        _spec = _ilu.spec_from_file_location("health_check", _p)
+        _m = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_m)
+        return jsonify(_m.build_checklist())
+    except Exception as e:
+        # ⚠ 조용히 빈 값을 돌려주지 않는다 — 체크리스트가 죽은 것을 '이상 없음'으로 오해하면 안 된다.
+        print("[체크리스트] 실패:", e)
+        return jsonify({"error": "체크리스트 생성 실패: %s" % str(e)[:200],
+                        "items": [], "total": 0, "done": 0}), 500
+
+
 @app.route("/api/collect/cycles", methods=["GET"])
 def collect_cycles_api():
     """[수집 사이클 관측] ?limit=N — 최근 사이클 + 경주별 '창 진입 횟수'.
