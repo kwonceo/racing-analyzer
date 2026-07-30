@@ -1,0 +1,334 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_30_소노다_7경주",
+ "race_info": {
+  "date": "2026-07-30",
+  "track": "소노다",
+  "round": 7,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 9,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 2,
+   "name": "アラン",
+   "jockey": "小牧太（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    4,
+    1,
+    1,
+    1
+   ],
+   "record_score": 77.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 1.1
+  },
+  {
+   "no": 5,
+   "name": "ヴァリラプトル",
+   "jockey": "山本咲（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    1,
+    6,
+    2,
+    3
+   ],
+   "record_score": 66.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 54.6
+  },
+  {
+   "no": 1,
+   "name": "チョウウマクイク",
+   "jockey": "新庄海（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    2,
+    5,
+    4,
+    4
+   ],
+   "record_score": 65.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 5.7
+  },
+  {
+   "no": 9,
+   "name": "ビガーサンライズ",
+   "jockey": "塩津璃（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    3,
+    6,
+    5,
+    1
+   ],
+   "record_score": 50.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 19.3
+  },
+  {
+   "no": 10,
+   "name": "ミライチケット",
+   "jockey": "廣瀬航（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    10,
+    2,
+    11,
+    15,
+    10
+   ],
+   "record_score": 22.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 37.7
+  },
+  {
+   "no": 7,
+   "name": "レッドアクトゥール",
+   "jockey": "小谷哲（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    4,
+    7,
+    3,
+    1
+   ],
+   "record_score": 15.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 42.9
+  },
+  {
+   "no": 8,
+   "name": "イービジョンエイト",
+   "jockey": "笹田知（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    4,
+    7,
+    4,
+    8
+   ],
+   "record_score": 8.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 69.1
+  },
+  {
+   "no": 4,
+   "name": "レッドファイブ",
+   "jockey": "佐々世（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    12,
+    5,
+    4,
+    7,
+    7
+   ],
+   "record_score": 5.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 228.9
+  },
+  {
+   "no": 3,
+   "name": "テイケイウェリナ",
+   "jockey": "下原理（兵庫）",
+   "jockey_winrate": null,
+   "recent_results": [
+    12,
+    14
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": 13.3
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "13:48:52",
+    "quinella": {
+     "1+2": 1.8,
+     "2+9": 7.0,
+     "2+3": 9.3,
+     "2+10": 13.2,
+     "2+7": 17.3,
+     "2+8": 17.5,
+     "1+9": 18.9,
+     "2+5": 20.6,
+     "1+3": 36.2,
+     "1+10": 53.6,
+     "1+5": 55.0,
+     "1+7": 60.6,
+     "1+8": 64.6,
+     "3+9": 74.6,
+     "9+10": 84.8,
+     "5+9": 96.3,
+     "3+7": 116.6,
+     "2+4": 119.1,
+     "7+9": 125.5,
+     "3+10": 148.9,
+     "8+9": 173.3,
+     "3+5": 188.3,
+     "5+10": 204.7,
+     "3+8": 225.9,
+     "5+7": 225.9,
+     "7+10": 255.9,
+     "8+10": 270.7,
+     "1+4": 306.2,
+     "7+8": 390.0,
+     "4+9": 489.0,
+     "5+8": 496.4,
+     "4+7": 537.1,
+     "4+5": 595.7,
+     "4+10": 780.1,
+     "3+4": 799.1,
+     "4+8": 1489.3
+    }
+   },
+   {
+    "time": "13:52:32",
+    "quinella": {
+     "1+2": 1.5,
+     "2+9": 8.4,
+     "2+3": 11.4,
+     "2+8": 16.3,
+     "2+10": 16.6,
+     "2+7": 21.7,
+     "1+9": 23.0,
+     "2+5": 24.0,
+     "1+3": 44.5,
+     "1+5": 68.8,
+     "1+10": 68.8,
+     "1+7": 78.3,
+     "1+8": 81.4,
+     "3+9": 91.8,
+     "9+10": 109.0,
+     "5+9": 121.6,
+     "2+4": 150.9,
+     "3+7": 151.4,
+     "7+9": 163.5,
+     "3+10": 181.3,
+     "8+9": 218.0,
+     "3+5": 235.9,
+     "5+10": 253.9,
+     "3+8": 289.7,
+     "5+7": 291.6,
+     "7+10": 329.5,
+     "8+10": 334.6,
+     "1+4": 396.0,
+     "7+8": 507.8,
+     "5+8": 583.3,
+     "4+9": 644.3,
+     "4+7": 707.7,
+     "4+5": 784.9,
+     "4+10": 1027.8,
+     "3+4": 1052.9,
+     "4+8": 1962.3
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.772,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   5,
+   7,
+   9,
+   3,
+   8,
+   10
+  ],
+  "eliminated": [
+   4
+  ],
+  "recommend": "1+2",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 2,
+  "2nd": 1,
+  "3rd": 9,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중 · 제거 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 2,
+  "second": 1,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-30 14:19:40",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
