@@ -17756,6 +17756,14 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     else:
         print("🧯 [손상격리] %s: 결과 부착 저장만 건너뜀 — 학습 연쇄는 계속 진행" % rk)
 
+    # [Gemini 예측 채점 · Phase B (2026-07-31)] 결과 확정 시 1회. 저장 전용·학습 무개입.
+    #   ⚠ 완전 격리 — 채점이 실패해도 결과 학습 연쇄는 그대로 진행된다.
+    try:
+        _grade_forecast_on_result(rk, top3, (final_odds or {}).get("quinella")
+                                  if isinstance(final_odds, dict) else None)
+    except Exception as _gfe2:
+        print("[예측 채점] 호출 실패(무시):", str(_gfe2)[:120])
+
     # [매칭 유연화] triple_store(활성)에 없으면 odds_history 스냅샷에서 rec 재구성 → 분석 재현
     rec = _triple_load().get(rk) or {}
     if not (rec.get("quinella") or rec.get("history")):
@@ -29688,6 +29696,57 @@ class _SkipOddsparkBridge(Exception):
     """[사설 우선] 확장 수집 활성 시 oddspark triple_store 주입 생략용 내부 신호."""
 
 
+# ══════════════ [Gemini 독립 예측 배선 (2026-07-31)] ══════════════
+#  🔴 저장 전용 · 추천 경로 무개입. 실패해도 수집·추천에 영향이 없도록 호출부에서 격리한다.
+#  ⚠ `GEMINI_FORECAST_ENABLED` 로만 켜진다. `GEMINI_REVIEW_ENABLED`(코드 리뷰)와 **별개**다.
+try:
+    import gemini_forecast as _gforecast
+except Exception as _gfe:                      # 모듈 없거나 import 실패 → 기능만 비활성(서버 정상)
+    _gforecast = None
+    print("[예측] 모듈 로드 실패(기능 비활성·서버 정상):", _gfe)
+
+
+def _forecast_after_form(rk, is_cycle):
+    """[Phase A] 전적 확보 직후 1회 예측. **완전 방어적** — 여기서 raise 되지 않는다."""
+    if _gforecast is None or not _gforecast.forecast_enabled():
+        return
+    rec = (_starters_load() or {}).get(rk) or {}
+    horses = rec.get("horses") or []
+    if len(horses) < 4:                        # 전적 미확보 → 다음 사이클에 재시도
+        return
+    rp = None
+    try:
+        rp = _raw_profile_snapshot(rk)
+    except Exception:
+        rp = None
+    snap = _gforecast.build_input_snapshot(
+        rk, horses,
+        pace_analysis=None,
+        line_info=(rp or {}).get("line"),
+        comment=rec.get("comment"))
+    snap["sport"] = "cycle" if is_cycle else "horse"
+    snap["distance"] = (rp or {}).get("distance")
+    _gforecast.forecast_once(rk, snap, [h.get("no") for h in horses])
+
+
+def _grade_forecast_on_result(rk, result_top3, payout_quinella=None):
+    """[Phase B] 결과 확정 시 채점. **완전 방어적**."""
+    if _gforecast is None:
+        return
+    try:
+        rec = (_starters_load() or {}).get(rk) or {}
+        hp, _, _ = _hist_path(rk)
+        doc = {}
+        if os.path.exists(hp):
+            doc, _c = _json_load_guard(hp, {}, tag="forecast/grade")
+        _gforecast.grade(rk, result_top3, starters=rec.get("horses"),
+                         snapshots=(doc or {}).get("snapshots"),
+                         deadline_epoch=(doc or {}).get("deadline_epoch"),
+                         payout_quinella=payout_quinella)
+    except Exception as e:
+        print("[예측 채점] %s 스킵(무시): %s" % (rk, str(e)[:120]))
+
+
 def _multi_collect_one(track, race, ymd):
     """[2번] 한 경주 배당 수집 → multi_race_store 저장(실패 격리·triple_store 미접근). 반환 raceKey 또는 None.
       종목 라우팅: opTrackCd=경마(keiba) · joCode=경륜(keirin·배당은 공개라 서버 수집 가능·스케줄만 로그인 필요)."""
@@ -29879,6 +29938,17 @@ def _multi_collect_one(track, race, ymd):
                 _keiba_autocollect_form(key, track.get("opTrackCd"), track.get("sponsorCd"), ymd, rno)
             except Exception as _fe:
                 print(f"[전적수집] {key} NAR 전적 실패: {_fe}")
+        # ══════ [Gemini 독립 예측 · Phase A (2026-07-31)] ══════
+        #   왜 여기인가: **전적(출마표·각질) 확보 직후**이고 수집 창(발주 10분전~2분후) 안이라
+        #     "마감 10분 전후 · 경주당 1회" 조건을 그대로 만족한다.
+        #     ⚠ 분석 경로(`_triple_analyze`)에 넣으면 **마감 후 폴링마다 재호출**되는 함정에 걸린다
+        #       — 2026-07-30 Gemini 하루 670건(경주당 7회) 사고가 정확히 그 경로였다.
+        #   🔴 **완전 격리**: 예측이 실패해도 배당 수집·추천 생성에 일절 영향이 없다.
+        #     자체 try 로 감싸지 않으면 바깥 except 가 경주 전체를 스킵시킨다.
+        try:
+            _forecast_after_form(key, is_cycle)
+        except Exception as _fce:
+            print("[예측] %s 스킵(무시·수집/추천 무영향): %s" % (key, str(_fce)[:120]))
         return key
     except Exception as e:
         print("[다중경주] 수집 실패 %s %s: %s" % (track.get("venue"), race.get("raceNo"), e))

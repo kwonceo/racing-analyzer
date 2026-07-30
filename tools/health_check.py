@@ -345,13 +345,78 @@ _PENDING = [
 ]
 
 
+def check_forecast_discard():
+    """⑤-1 Gemini 예측 **폐기율** ≤20% (판정선: 30경주 도달 시 형식 점검).
+
+    분모 = `logs/forecast/` 의 **당일 예측 시도 전체**(성공 + 폐기).
+      ⚠ 성공분만 세면 폐기가 통계에서 사라진다 — D1 의 0틱 제외와 같은 함정.
+    ⚠ 폐기는 형식 검증 실패(키 누락·명단 밖 번호·confidence 범위 이탈)로 **통째 폐기**된 건이다.
+      부분 채택은 하지 않는다.
+    """
+    d = os.path.join(BASE, "logs", "forecast")
+    saved = len([f for f in os.listdir(d) if f.endswith(".json")]) if os.path.isdir(d) else 0
+    disc = 0
+    for p in _today_logs():
+        try:
+            disc += open(p, encoding="utf-8", errors="replace").read().count("[예측 폐기]")
+        except Exception:
+            continue
+    tried = saved + disc
+    denom = "logs/forecast 당일 예측 시도 전체(성공+폐기)"
+    if tried < 30:
+        return _mk("F1", "⑤ 예측 검증", "Gemini 예측 폐기율", denom,
+                   current=(round(100.0 * disc / tried, 1) if tried else None), target=20.0,
+                   ok=None, n=tried,
+                   reason="판정선 미도달(%d/30경주) — 30경주에서 형식 점검한다" % tried)
+    rate = round(100.0 * disc / tried, 1)
+    return _mk("F1", "⑤ 예측 검증", "Gemini 예측 폐기율", denom,
+               current=rate, target=20.0, ok=(rate <= 20.0), n=tried,
+               note="폐기 %d / 시도 %d · 20%% 초과 시 프롬프트 수정" % (disc, tried))
+
+
+def check_forecast_vs_market():
+    """⑤-2 Gemini 평균 `hit_count` ≥ 시장 평균 `market_hit_count` (판정선: **100경주**).
+
+    ⚠ **사후에 판정선을 낮추지 않는다.** 100경주 도달 전에는 `ok=null` 이다.
+    ⚠ 시장 대조군은 **마감 전(T-8~T-0)** 스냅샷의 단승 최저 3두다.
+      마감 후 배당을 쓰면 시장이 유리해져 비교가 성립하지 않는다.
+    """
+    d = os.path.join(BASE, "logs", "forecast")
+    g, m, n = 0, 0, 0
+    if os.path.isdir(d):
+        for f in os.listdir(d):
+            if not f.endswith(".json"):
+                continue
+            try:
+                doc = json.load(open(os.path.join(d, f), encoding="utf-8"))
+            except Exception:
+                continue
+            gr = doc.get("grading") or {}
+            if gr.get("hit_count") is None or gr.get("market_hit_count") is None:
+                continue
+            n += 1
+            g += gr["hit_count"]
+            m += gr["market_hit_count"]
+    denom = "채점 완료된 예측 경주(Gemini·시장 둘 다 산출된 건)"
+    cur = (round(g / n, 2) if n else None)
+    note = ("Gemini 평균 %.2f ↔ 시장 평균 %.2f (n=%d)" % (g / n, m / n, n)) if n else ""
+    if n < 100:
+        return _mk("F2", "⑤ 예측 검증", "Gemini 적중 ≥ 시장 적중", denom,
+                   current=cur, target="시장 이상", ok=None, n=n, note=note,
+                   reason="판정선 미도달(%d/100경주) — 사후에 낮추지 않는다" % n)
+    return _mk("F2", "⑤ 예측 검증", "Gemini 적중 ≥ 시장 적중", denom,
+               current=cur, target=round(m / n, 2), ok=(g >= m), n=n,
+               note=note + " · 낮으면 종결 / 비슷하면 이변 경주만 재판정 / 높으면 편입 검토")
+
+
 def build_checklist():
     """반환 dict 의 **최상단에 `summary` 계열을 배치**한다(모바일에서 먼저 보이도록).
     ⚠ 응답은 `ensure_ascii=False` + UTF-8 로 내보낼 것 — `\\uCda9\\uC871` 로 깨지면 외부에서 못 쓴다."""
     items = [check_snapshot_coverage(),
              check_save_failures_fixed(), check_save_failures_unfixed(),
              check_schema_contract(), check_schema_drift(),
-             check_score_decomposition()]
+             check_score_decomposition(),
+             check_forecast_discard(), check_forecast_vs_market()]
     for (i, area, name, target, denom, why) in _PENDING:
         items.append(_mk(i, area, name, denom, current=None, target=target,
                          ok=None, n=None, note="분모 근거: " + why, reason="미구현"))
