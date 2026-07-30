@@ -22056,8 +22056,21 @@ def _keirin_parse_exacta(html):
     return out
 
 
+# [oddspark 지연 해소 2026-07-30] `Accept` 헤더가 없으면 oddspark(Akamai)가 응답을 ~9초 지연시킨다.
+#   실측(경륜3·경마2 엔드포인트): 평균 **9.32초 → 0.44초 (21.2배)**. DNS 0.009초·TCP 0.005초·
+#   TLS 0.031초로 네트워크는 무관했고, 헤더를 하나씩 넣어 분리한 결과 `Accept` 단독 효과였다
+#   (UA만=10.70초 · +Accept-Encoding=8.23초 · **+Accept=0.23초**).
+#   브라우저는 항상 Accept 를 보내므로 봇 판별 tarpit 으로 보인다.
+#   ⚠ 동시성 상향이 아니라 **요청당 비용 감소**다 — 요청 수는 그대로이고 오히려 브라우저에 가까워진다.
+#   ⚠ keiba.go.jp(`_nar_fetch`)는 실측 0.16~0.20초로 이 문제가 없어 건드리지 않는다.
+_ODDSPARK_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "Accept": "*/*",
+}
+
+
 def _keirin_fetch(url):
-    req = Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+    req = Request(url, headers=dict(_ODDSPARK_HEADERS))
     return urlopen(req, timeout=15).read().decode("utf-8", "ignore")
 
 
