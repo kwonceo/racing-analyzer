@@ -8256,10 +8256,15 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 _seenq.add(k); _qlist.append(q)
             # 삼복승 축1+축2+연결 — 실배당 미수집이라 구성 복승 3쌍 기하평균×2 추정(표시용)
             def _tri_est(a, b, c):
+                # ⚠ [보정 누락 수정 (2026-07-30)] 이 인라인 추정식은 `_trio_est` 를 거치지 않아
+                #   `TRIO_EST_CAL` 보정을 못 받았다. 그 결과 `final_recommendation.trifecta_*` 만
+                #   보정 전(×2) 값이 되어, 같은 조합이 여전히 2배 다르게 남았다
+                #   (실측: 아오모리 3R `2+4+7` → finalTrifectas 7.8 ↔ FR.insurance1 **15.6**).
+                #   → 같은 계수를 적용해 모든 경로를 통일한다.
                 ps = [_qo(a, b), _qo(a, c), _qo(b, c)]
                 pr = [float(p) for p in ps if p and p > 0]
                 if len(pr) == 3:
-                    return round((pr[0] * pr[1] * pr[2]) ** (1.0 / 3.0) * 2, 1)
+                    return round((pr[0] * pr[1] * pr[2]) ** (1.0 / 3.0) * 2 / TRIO_EST_CAL, 1)
                 return None
             _tris = []
             for lk, lab in [(_l1, "축1+축2+연결1"), (_l2, "축1+축2+연결2")]:
