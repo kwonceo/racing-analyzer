@@ -31793,6 +31793,202 @@ def _health_kakao_send(reason="manual"):
             "error": (None if ok else r.get("error"))}
 
 
+# ══════════════ [추천 변조 대조 (2026-07-30)] 마감 확정 ↔ 마감 후 재분석 ══════════════
+#  왜 필요한가: 마감 후에도 `_triple_analyze` 가 재계산되고 `_history_save_analysis` 는 마감 후 폴링
+#    가드 **밖**이라 `odds_history.analysis` 를 계속 덮어쓴다. 그래서 **사후에 화면을 열면
+#    "회원이 마감 전에 본 추천"이 아니라 "마감 후 배당으로 다시 만든 추천"이 보인다.**
+#    실측(2026-07-30): 하루 **49경주**에서 A↔B 가 달랐다. 유력마 3두가 통째로 바뀐 경주도 있다.
+#  ⚠ 완전 읽기 전용 — 추천·수집·학습·판정에 일절 개입하지 않는다. 두 저장소를 읽어 나란히 보여줄 뿐이다.
+#  A = `analysis_log`(마감 확정·readonly) · B = `odds_history.analysis`(마감 후 재분석·화면에 보이는 값)
+def _picks_norm(lst):
+    """[{combo:[..]}] 또는 ["1+2"] 또는 [[1,2]] → 정렬된 "1+2" 문자열 리스트."""
+    out = []
+    for c in (lst or []):
+        if isinstance(c, dict):
+            c = c.get("combo")
+        if c is None:
+            continue
+        try:
+            if isinstance(c, (list, tuple)):
+                nums = sorted(int(x) for x in c)
+            else:
+                nums = sorted(int(z) for z in str(c).replace("+", " ").replace("-", " ").split())
+            if nums:
+                out.append("+".join(str(x) for x in nums))
+        except Exception:
+            continue
+    return out
+
+
+def _picks_diff_one(base):
+    """경주 1건의 A/B 대조 dict. 데이터가 없으면 None."""
+    ap = os.path.join(ANALYSIS_LOG_DIR, base + ".json")
+    hp = os.path.join(ODDS_HISTORY_DIR, base + ".json")
+    if not (os.path.exists(ap) and os.path.exists(hp)):
+        return None
+    try:
+        d = json.load(open(ap, encoding="utf-8"))
+        h = json.load(open(hp, encoding="utf-8"))
+    except Exception:
+        return None
+    an = h.get("analysis") or {}
+    if not an:
+        return None
+    cp = d.get("corePicks") or {}
+    dc = cp.get("displayedCombos") or {}
+    fr = an.get("final_recommend") or {}
+    A_q, A_t = _picks_norm(dc.get("quinellas")), _picks_norm(dc.get("trifectas"))
+    B_q = _picks_norm([x for x in [fr.get("quinella_main"), fr.get("quinella_sub")] if x])
+    B_t = _picks_norm([x for x in [fr.get("trifecta_main")] if x])
+    kh_a, kh_b = d.get("keyHorses"), an.get("keyHorses")
+    rg = cp.get("raceGrade") or {}
+    flags = []
+    if kh_a != kh_b:
+        flags.append("유력마 변경")
+    if set(A_q) != set(B_q):
+        flags.append("복승 사라짐" if (A_q and not B_q) else
+                     ("복승 생성" if (not A_q and B_q) else "복승 변경"))
+    if set(A_t) != set(B_t):
+        flags.append("삼복승 생성(표시된 적 없음)" if (not A_t and B_t) else
+                     ("삼복승 사라짐" if (A_t and not B_t) else "삼복승 변경"))
+    # ⚠ 같은 파일 안에서 raceGrade.basis(신호수) ↔ strong_signals.count 가 어긋나는 것도 함께 노출
+    ss = (d.get("strong_signals") or {}).get("count")
+    bm = re.search(r"신호\s*(\d+)", str(rg.get("basis") or ""))
+    grade_mismatch = (bm and ss is not None and int(bm.group(1)) != int(ss))
+    if grade_mismatch:
+        flags.append("등급근거 불일치")
+    return {"race": base[11:] if len(base) > 11 else base, "file": base,
+            "frozenAt": dc.get("at"), "readonly": bool(d.get("readonly")),
+            "raceGrade": rg.get("label"), "raceGradeBasis": rg.get("basis"),
+            "strongSignalsCount": ss, "gradeMismatch": bool(grade_mismatch),
+            "result": d.get("result"),
+            "A": {"keyHorses": kh_a, "quinellas": A_q, "trifectas": A_t},
+            "B": {"keyHorses": kh_b, "quinellas": B_q, "trifectas": B_t},
+            "diff": flags, "changed": bool(flags)}
+
+
+def _picks_diff_day(date=None):
+    date = (date or time.strftime("%Y-%m-%d")).strip()
+    pref = date.replace("-", "_")
+    out = []
+    try:
+        names = sorted(f[:-5] for f in os.listdir(ANALYSIS_LOG_DIR)
+                       if f.startswith(pref) and f.endswith(".json"))
+    except Exception:
+        names = []
+    for b in names:
+        r = _picks_diff_one(b)
+        if r:
+            out.append(r)
+    changed = [r for r in out if r["changed"]]
+    return {"date": date, "total": len(out), "changed": len(changed),
+            "summary": "%s · 대조 %d경주 중 %d경주에서 마감 후 추천이 달라졌다"
+                       % (date, len(out), len(changed)),
+            "races": out}
+
+
+@app.route("/picks-diff")
+def picks_diff_page():
+    """[추천 변조 대조 화면] `/picks-diff[?date=YYYY-MM-DD][&all=1]`
+    A(마감 확정·회원이 실제로 본 것) ↔ B(마감 후 재분석·지금 화면에 보이는 것)를 나란히 렌더.
+    순수 HTML/CSS(외부 라이브러리 없음) · 모바일 대응 · **완전 읽기 전용.**"""
+    date = (request.args.get("date") or time.strftime("%Y-%m-%d")).strip()
+    rep = _picks_diff_day(date)
+    show_all = request.args.get("all") in ("1", "true", "yes")
+    races = rep["races"] if show_all else [r for r in rep["races"] if r["changed"]]
+
+    def esc(s):
+        return (str(s if s is not None else "—")
+                .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+    def chips(items, cls):
+        if not items:
+            return '<span class="none">없음</span>'
+        return "".join('<span class="chip %s">%s</span>' % (cls, esc(x)) for x in items)
+
+    rows = []
+    for r in races:
+        A, B = r["A"], r["B"]
+        badges = "".join('<span class="badge">%s</span>' % esc(f) for f in r["diff"]) or \
+                 '<span class="badge ok">동일</span>'
+        gm = ('<div class="warn">⚠ 등급 근거 불일치 — 표기 「%s」 ↔ 저장된 strong_signals.count <b>%s</b></div>'
+              % (esc(r.get("raceGradeBasis")), esc(r.get("strongSignalsCount")))) if r.get("gradeMismatch") else ""
+        res = r.get("result") or {}
+        res_txt = ("%s-%s-%s" % (res.get("1st"), res.get("2nd"), res.get("3rd"))) if res else "결과 미입력"
+        rows.append("""
+<div class="race">
+  <div class="rh"><b>%s</b> <span class="meta">동결 %s · %s · 결과 %s</span></div>
+  <div class="badges">%s</div>%s
+  <table>
+    <tr><th></th><th class="a">A · 마감 확정<br><small>회원이 실제로 본 것</small></th>
+                 <th class="b">B · 마감 후 재분석<br><small>지금 화면에 보이는 것</small></th></tr>
+    <tr><td class="k">유력마</td><td>%s</td><td>%s</td></tr>
+    <tr><td class="k">복승</td><td>%s</td><td>%s</td></tr>
+    <tr><td class="k">삼복승</td><td>%s</td><td>%s</td></tr>
+  </table>
+</div>""" % (esc(r["race"]), esc(r.get("frozenAt")), esc(r.get("raceGrade")), esc(res_txt), badges, gm,
+              esc(A.get("keyHorses")), esc(B.get("keyHorses")),
+              chips(A["quinellas"], "a"), chips(B["quinellas"], "b"),
+              chips(A["trifectas"], "a"), chips(B["trifectas"], "b")))
+
+    html = """<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>추천 변조 대조 %s</title><style>
+*{box-sizing:border-box}body{margin:0;padding:14px;background:#0f172a;color:#e2e8f0;
+font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI','Malgun Gothic',sans-serif}
+h1{font-size:19px;margin:0 0 4px}
+.sum{background:#1e293b;border-left:4px solid #f43f5e;padding:10px 12px;border-radius:6px;margin-bottom:6px}
+.note{color:#94a3b8;font-size:13px;margin:8px 0 16px;line-height:1.6}
+.nav a{color:#38bdf8;text-decoration:none;margin-right:12px;font-size:13px}
+.race{background:#1e293b;border-radius:8px;padding:12px;margin-bottom:12px}
+.rh{margin-bottom:6px}.meta{color:#94a3b8;font-size:12px;font-weight:400}
+.badges{margin-bottom:8px}
+.badge{display:inline-block;background:#7f1d1d;color:#fecaca;font-size:12px;
+padding:2px 8px;border-radius:10px;margin:2px 4px 2px 0}
+.badge.ok{background:#14532d;color:#bbf7d0}
+.warn{background:#78350f;color:#fde68a;font-size:12px;padding:6px 8px;border-radius:5px;margin-bottom:8px}
+table{width:100%%;border-collapse:collapse}
+th,td{padding:7px 6px;text-align:left;vertical-align:top;border-top:1px solid #334155;font-size:13px}
+th{color:#cbd5e1;font-size:12px;font-weight:600}
+th.a{color:#4ade80}th.b{color:#fb923c}
+th small{font-weight:400;color:#94a3b8;font-size:11px}
+td.k{color:#94a3b8;width:64px;font-size:12px}
+.chip{display:inline-block;padding:2px 7px;border-radius:5px;margin:2px 4px 2px 0;font-size:13px;
+font-variant-numeric:tabular-nums}
+.chip.a{background:#166534;color:#dcfce7}.chip.b{background:#9a3412;color:#ffedd5}
+.none{color:#64748b;font-size:12px}
+.empty{background:#1e293b;padding:20px;border-radius:8px;text-align:center;color:#94a3b8}
+</style></head><body>
+<h1>추천 변조 대조</h1>
+<div class="sum"><b>%s</b></div>
+<div class="nav"><a href="/picks-diff?date=%s">달라진 경주만</a>
+<a href="/picks-diff?date=%s&amp;all=1">전체 보기</a>
+<a href="/api/picks/diff?date=%s">JSON</a></div>
+<div class="note">
+<b style="color:#4ade80">A · 마감 확정</b> = <code>analysis_log</code> 의 <code>displayedCombos</code>
+— 마감 시점에 동결된, <b>회원이 실제로 본</b> 추천.<br>
+<b style="color:#fb923c">B · 마감 후 재분석</b> = <code>odds_history.analysis</code>
+— 마감 후에도 폴링마다 다시 계산돼 덮어써진 값. <b>사후에 화면을 열면 이쪽이 보인다.</b><br>
+⚠ 마감 후에는 정답 조합이 최저배당으로 정착하므로 B 는 <b>사후에 정답처럼 보이기 쉽다</b> — 성적 판정에 쓰면 안 된다.<br>
+⚠ 판정·회수율은 A 기준이라 <b>안전</b>하다. 이 차이는 <b>표시 계층</b>의 문제다.
+</div>
+%s
+</body></html>""" % (esc(date), esc(rep["summary"]), esc(date), esc(date), esc(date),
+                     ("".join(rows) if rows else '<div class="empty">차이 있는 경주가 없습니다.</div>'))
+    return Response(html, mimetype="text/html; charset=utf-8")
+
+
+@app.route("/api/picks/diff", methods=["GET"])
+def picks_diff_api():
+    """[추천 변조 대조] `?date=YYYY-MM-DD&all=1` — A(마감 확정) ↔ B(마감 후 재분석) 차이.
+    기본은 **달라진 경주만**. `all=1` 이면 전부. **완전 읽기 전용.**"""
+    r = _picks_diff_day(request.args.get("date"))
+    if request.args.get("all") not in ("1", "true", "yes"):
+        r["races"] = [x for x in r["races"] if x["changed"]]
+    return Response(json.dumps(r, ensure_ascii=False, indent=1),
+                    mimetype="application/json; charset=utf-8")
+
+
 @app.route("/api/health/send_kakao", methods=["GET", "POST"])
 def health_send_kakao_api():
     """[체크리스트 카카오 푸시] 수동 발송. GET=미리보기(발송 안 함) · POST=실제 발송.
