@@ -29963,11 +29963,23 @@ def _amedas_wind(venue_or_rk):
         return None
 
 
+_AMEDAS_NOTED = {}          # {raceKey: 관측시각} — 경주당 1회만 적재
+
+
 def _amedas_note(rk, w):
-    """관측값 1건 적재(검증용 건수 집계). **완전 방어적** — 실패해도 흐름 무영향."""
+    """관측값 1건 적재(검증용 건수 집계). **완전 방어적** — 실패해도 흐름 무영향.
+
+    🔴 [2026-07-31] 종전에는 30초 사이클마다 append 돼 **2분에 5건**이 쌓였다(값은 전부 동일).
+      oddspark 2중 기록(41% 중복)과 같은 유형이다 — 집계 분모가 부풀어 비율이 전부 틀어진다.
+      ⇒ **경주당 1회**만 적재한다. 관측시각이 바뀌면(10분 주기) 1회 더 남긴다.
+    """
     try:
         if not w:
             return
+        _k = (rk, w.get("관측시각"))
+        if _AMEDAS_NOTED.get(rk) == w.get("관측시각"):
+            return                              # 같은 관측시각 = 같은 값 → 중복
+        _AMEDAS_NOTED[rk] = w.get("관측시각")
         os.makedirs(AMEDAS_LOG_DIR, exist_ok=True)
         p = os.path.join(AMEDAS_LOG_DIR, time.strftime("%Y-%m-%d") + ".json")
         cur, _c = _json_load_guard(p, [], tag="amedas/obs")
@@ -29985,6 +29997,15 @@ def _amedas_note(rk, w):
 # ══════════════ [Gemini 독립 예측 배선 (2026-07-31)] ══════════════
 #  🔴 저장 전용 · 추천 경로 무개입. 실패해도 수집·추천에 영향이 없도록 호출부에서 격리한다.
 #  ⚠ `GEMINI_FORECAST_ENABLED` 로만 켜진다. `GEMINI_REVIEW_ENABLED`(코드 리뷰)와 **별개**다.
+# ⚠ 아래 import 보다 **먼저** 정의해야 한다 — 실패 시 여기에 기록해야 하기 때문이다.
+#   (한 번 순서를 잘못 두어 except 안에서 NameError 로 조용히 삼켜진 적이 있다.)
+_MODULE_LOAD_ERRORS = {}          # {모듈명: 사유} — 로드 실패한 선택 모듈
+
+
+def _note_module_error(name, err):
+    _MODULE_LOAD_ERRORS[name] = str(err)[:200]
+
+
 try:
     import gemini_forecast as _gforecast
 except Exception as _gfe:                      # 모듈 없거나 import 실패 → 기능만 비활성(서버 정상)
@@ -29995,8 +30016,12 @@ except Exception as _gfe:                      # 모듈 없거나 import 실패 
     print("=" * 70)
     print("🔴 [예측] 모듈 로드 실패 — Phase A/B 가 **오늘 하루 통째로 꺼집니다**")
     print("🔴   사유: %s" % _gfe)
-    print("🔴   조치: python -c \"import ast;ast.parse(open('gemini_forecast.py',encoding='utf-8').read())\"")
+    print("🔴   조치: python tests/run_precommit.py  (문법 검사 자동 탐색)")
     print("=" * 70)
+    try:
+        _note_module_error("gemini_forecast", _gfe)
+    except Exception:
+        pass
 
 # [부팅 상태 노출 (2026-07-31)] 다른 Gemini 기능은 배너에 상태가 찍히는데 예측만 없었다.
 #   "동작은 하는데 기록이 없어 검증 불가"를 반복하지 않기 위한 가시화(읽기 전용).
@@ -30008,6 +30033,46 @@ def _forecast_boot_state():
                 else "⏸️ 꺼짐 (GEMINI_FORECAST_ENABLED)")
     except Exception as e:
         return "🔴 상태 확인 실패: %s" % str(e)[:60]
+
+
+# ══════════════ [모듈 로드 상태 · 플래그 자동 수집 (2026-07-31)] ══════════════
+#  🔴 오늘 사고 3개(①문법 검사 목록 누락 ②로드 실패가 로그 1줄 ③부팅 배너 누락)는
+#     전부 **사람이 목록을 관리해서** 생겼다. 파일·플래그가 늘면 계속 반복된다.
+#  ⇒ 목록을 없애고 **자동 수집**한다. 새 플래그를 만들어도 배너에 자동으로 들어간다.
+#  ⚠ 실패해도 서버는 계속 뜬다 — 죽이지 않고 **드러내기만** 한다.
+#  (`_MODULE_LOAD_ERRORS` · `_note_module_error` 는 import 보다 위에 정의돼 있다.)
+
+
+def _boot_flag_lines():
+    """`*_ENABLED` 환경 플래그를 **자동 수집**해 배너 줄로 만든다.
+
+    ⚠ 종전에는 기능마다 손으로 `print` 를 넣어서 **예측만 빠졌다.**
+      이제 이름 규칙(`_ENABLED` 로 끝남)만 맞으면 자동으로 나온다.
+    """
+    out = []
+    try:
+        names = sorted(k for k in os.environ if k.endswith("_ENABLED"))
+        for k in names:
+            v = str(os.environ.get(k, "")).strip().lower()
+            on = v in ("1", "true", "yes", "on")
+            out.append("  · %-26s %s" % (k, "🟢 켜짐" if on else "⏸️ 꺼짐"))
+    except Exception as e:
+        out.append("  · 플래그 자동 수집 실패(무시): %s" % str(e)[:60])
+    return out
+
+
+def _boot_module_lines():
+    """선택 모듈 로드 실패를 **크게** 출력. 체크리스트(D7)도 같은 값을 본다."""
+    if not _MODULE_LOAD_ERRORS:
+        return ["  · 선택 모듈 로드          ✅ 전부 정상"]
+    out = ["  " + "=" * 66,
+           "  🔴 선택 모듈 로드 실패 %d건 — 해당 기능이 **통째로 꺼진 채 돕니다**"
+           % len(_MODULE_LOAD_ERRORS)]
+    for k, v in _MODULE_LOAD_ERRORS.items():
+        out.append("  🔴   %s: %s" % (k, v))
+    out.append("  🔴   확인: python tests/run_precommit.py (문법 검사 자동 탐색)")
+    out.append("  " + "=" * 66)
+    return out
 
 
 def _wind_for_forecast(rk):
@@ -32756,6 +32821,16 @@ if __name__ == "__main__":
         print("  · Gemini 독립예측  : %s" % _forecast_boot_state())
     except Exception as _fe:
         print("  · Gemini 플래그 상태 확인 실패(무시):", _fe)
+    # [자동 수집 (2026-07-31)] 손으로 넣는 배너는 **반드시 하나가 빠진다.**
+    #   플래그·모듈 상태를 이름 규칙으로 자동 수집해 전부 출력한다.
+    try:
+        for _l in _boot_module_lines():
+            print(_l)
+        print("  --- 환경 플래그(자동 수집) ---")
+        for _l in _boot_flag_lines():
+            print(_l)
+    except Exception as _be:
+        print("  · 부팅 상태 자동 수집 실패(무시):", _be)
     # debug=True: 코드 저장 시 자동 재기동(stale 서버로 인한 405 재발 방지). 로컬 전용(127.0.0.1).
     # threaded=True: 브라우저의 다중 keep-alive 연결을 동시 처리(단일 스레드 멈춤 방지).
     # 재개는 리로더의 실제 작업 프로세스(WERKZEUG_RUN_MAIN)에서만 1회 수행.

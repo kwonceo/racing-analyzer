@@ -353,8 +353,13 @@ def check_forecast_discard():
     ⚠ 폐기는 형식 검증 실패(키 누락·명단 밖 번호·confidence 범위 이탈)로 **통째 폐기**된 건이다.
       부분 채택은 하지 않는다.
     """
+    # 🔴 [2026-07-31] 종전에는 `logs/forecast` 의 **전체 파일**을 셌다 — 어제·그제 것이 섞여
+    #   당일 폐기율의 분모가 부풀었다(원칙 8-B: 같은 목록에서 분모를 통일할 것).
+    #   ⇒ 당일 접두사(`YYYYMMDD_`)로 제한한다.
     d = os.path.join(BASE, "logs", "forecast")
-    saved = len([f for f in os.listdir(d) if f.endswith(".json")]) if os.path.isdir(d) else 0
+    _pfx = time.strftime("%Y%m%d") + "_"
+    saved = (len([f for f in os.listdir(d) if f.endswith(".json") and f.startswith(_pfx)])
+             if os.path.isdir(d) else 0)
     disc = 0
     for p in _today_logs():
         try:
@@ -440,13 +445,48 @@ def check_freeze_success():
                note=note + " · 낮으면 recommendation_history 를 덮어쓰는 다른 경로를 전수 조사")
 
 
+def check_module_load():
+    """[D7 · 2026-07-31 신설] **선택 모듈이 조용히 죽어 있지 않은가.**
+
+    🔴 실사고: `gemini_forecast.py` 문법 오류로 import 가 실패했고 서버는 `except` 로
+      삼켜 `_gforecast = None` 인 채 돌았다. 로그 1줄뿐이라 **예측이 하루 종일 0건**이었다.
+    ⚠ 여기서는 **문법만** 본다(서버 기동 없이 판정 가능). 목표는 항상 0건이다.
+    """
+    import ast as _ast
+    targets, bad = [], []
+    for d in (".", "tools", "tests"):
+        base = BASE if d == "." else os.path.join(BASE, d)
+        if not os.path.isdir(base):
+            continue
+        for nm in sorted(os.listdir(base)):
+            if not nm.endswith(".py"):
+                continue
+            p = os.path.join(base, nm)
+            if not os.path.isfile(p):
+                continue
+            rel = nm if d == "." else "%s/%s" % (d, nm)
+            targets.append(rel)
+            try:
+                _ast.parse(open(p, encoding="utf-8").read())
+            except SyntaxError as e:
+                bad.append("%s:%s" % (rel, e.lineno))
+            except Exception:
+                pass
+    n = len(targets)
+    denom = "프로젝트 .py 자동 탐색(루트·tools·tests) — 하드코딩 목록 아님"
+    return _mk("D7", "② 저장 무결성", "모듈 로드(문법) 실패", denom,
+               current=len(bad), target=0, ok=(len(bad) == 0), n=n,
+               note=("전부 정상 (%d개 검사)" % n) if not bad
+                    else "🔴 " + " · ".join(bad[:5]))
+
+
 def build_checklist():
     """반환 dict 의 **최상단에 `summary` 계열을 배치**한다(모바일에서 먼저 보이도록).
     ⚠ 응답은 `ensure_ascii=False` + UTF-8 로 내보낼 것 — `\\uCda9\\uC871` 로 깨지면 외부에서 못 쓴다."""
     items = [check_snapshot_coverage(),
              check_save_failures_fixed(), check_save_failures_unfixed(),
              check_schema_contract(), check_schema_drift(),
-             check_score_decomposition(), check_freeze_success(),
+             check_score_decomposition(), check_freeze_success(), check_module_load(),
              check_forecast_discard(), check_forecast_vs_market()]
     for (i, area, name, target, denom, why) in _PENDING:
         items.append(_mk(i, area, name, denom, current=None, target=target,

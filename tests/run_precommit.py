@@ -26,13 +26,43 @@ import sys
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# 🔴 [2026-07-31] `gemini_forecast.py` 가 이 목록에 **없어서** 문법 오류가 그대로 나갔다.
-#    서버는 `except` 로 삼키고 `_gforecast = None` 으로 두어 **예측 기능만 조용히 꺼진 채**
-#    하루를 돌았다(로그 1줄 뿐). 침묵 실패 4번째 사례다 — 목록 누락이 곧 사각지대다.
-SYNTAX_TARGETS = ["app.py", "gemini_forecast.py", "gemini_reviewer.py", "review_engine.py",
-                  "tools/health_check.py", "tools/dedupe_odds_snapshots.py",
-                  "tools/build_amedas_map.py",
-                  "tests/run_freeze_regression.py", "tests/run_freeze_behavior.py"]
+# 🔴 [2026-07-31] 종전에는 **하드코딩 목록**이었고 `gemini_forecast.py` 가 빠져 있었다.
+#    그래서 문법 오류가 그대로 나갔고, 서버는 `except` 로 삼켜 `_gforecast = None` 인 채
+#    **예측 기능만 조용히 꺼진 상태로 하루를 돌았다**(로그 1줄뿐). 침묵 실패 4번째 사례.
+#    ⇒ **사람이 목록을 관리하는 구조 자체가 사각지대**다. 자동 탐색으로 바꾼다.
+#      새 파일을 만들어도 **자동으로 검사 대상이 된다.**
+#    ⚠ 제외할 것만 아래에 둔다. 나머지는 전부 검사한다.
+SYNTAX_SCAN_DIRS = [".", "tools", "tests"]          # 루트는 하위 재귀 안 함(1단계만)
+SYNTAX_EXCLUDE_DIRS = {"__pycache__", ".git", "backup", "data", "logs",
+                       "node_modules", "venv", ".venv", "docs"}
+SYNTAX_EXCLUDE_FILES = {
+    # 여기에 넣는 것은 **검사 사각지대가 된다.** 넣기 전에 이유를 남길 것.
+}
+
+
+def discover_syntax_targets():
+    """검사 대상 .py 를 자동 수집. ⚠ 목록 누락이라는 사각지대 자체를 없앤다."""
+    out = []
+    for d in SYNTAX_SCAN_DIRS:
+        base = os.path.join(BASE, d) if d != "." else BASE
+        if not os.path.isdir(base):
+            continue
+        try:
+            names = sorted(os.listdir(base))
+        except Exception:
+            continue
+        for nm in names:
+            if not nm.endswith(".py"):
+                continue
+            rel = nm if d == "." else "%s/%s" % (d, nm)
+            if rel in SYNTAX_EXCLUDE_FILES or nm in SYNTAX_EXCLUDE_FILES:
+                continue
+            if os.path.isfile(os.path.join(base, nm)):
+                out.append(rel)
+    return out
+
+
+SYNTAX_TARGETS = discover_syntax_targets()
 
 # 🔴 [2026-07-31] `run_freeze_behavior.py` 를 차단 등급으로 승격.
 #    마감 시점 동결이 구현됐으므로 이제부터 복원 경로가 끊기면 커밋을 막는다.

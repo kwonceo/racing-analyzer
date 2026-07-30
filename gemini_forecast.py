@@ -24,6 +24,7 @@
 """
 import json
 import logging
+import sys
 import os
 import threading
 import time
@@ -34,6 +35,16 @@ except ImportError:
     requests = None
 
 _LOG = logging.getLogger("gemini_forecast")
+# 🔴 [2026-07-31] 핸들러가 없으면 `logging.lastResort` 가 **stderr** 로 보낸다.
+#   서버는 stdout 만 파일로 받으므로 경고가 어디로 갔는지 알 수 없게 된다.
+#   ⇒ stdout 핸들러를 직접 붙인다. **기존 print 는 그대로 둔다**(중복 출력은 감수).
+#   ⚠ 이 파일이 다른 곳에서 import 돼도 핸들러가 두 번 붙지 않게 검사한다.
+if not _LOG.handlers:
+    _h = logging.StreamHandler(sys.stdout)
+    _h.setFormatter(logging.Formatter("[예측·경고] %(message)s"))
+    _LOG.addHandler(_h)
+    _LOG.setLevel(logging.WARNING)
+    _LOG.propagate = False
 BASE = os.path.dirname(os.path.abspath(__file__))
 FORECAST_DIR = os.path.join(BASE, "logs", "forecast")
 RULES_MD = os.path.join(BASE, "docs", "learned_rules.md")
@@ -225,11 +236,25 @@ def _build_prompt(snap):
     else:
         _wind_txt = ""
     return """당신은 경륜/경마 전개 분석가입니다.
-**목적은 "누가 1착일까"를 맞히는 것이 아닙니다.** 통계 테이블이 놓치는 것을 찾는 것입니다.
 
-핵심 질문: **이 경주는 통상적입니까, 아니면 예외로 볼 이유가 있습니까?**
+🔴 [2026-07-31 수정] 종전 프롬프트는 *"누가 1착일까를 맞히는 것이 목적이 아니다"* 로 시작했고,
+   그 결과 `predicted_top3` 가 빈 배열로 와서 **전량 폐기**됐다(폐기율 100퍼센트).
+   지시를 따른 쪽이 옳았고 **검증과 프롬프트가 모순이었다.** 이제 **둘 다** 요구한다.
+
+당신이 할 일은 두 가지이며, **둘 다 반드시** 해야 합니다.
+
+**① 1·2·3착을 예측한다 — `predicted_top3` 에 반드시 3개를 채우십시오.**
+   비워두거나 2개만 쓰면 그 답변은 통째로 버려집니다.
+
+**② 그 순위의 근거가 "통계 평균"이 아니라 "이 경주의 특수성"이어야 합니다.**
+   `exception_note` 에 이 경주가 통상적인지, 예외로 볼 이유가 있는지 쓰십시오.
+
+즉 **순위를 찍되, 왜 그 순위인지가 이 경주에만 해당하는 사정이어야 합니다.**
+"각질 좋은 말이 앞선다" 같은 근거로 순위를 찍으면 통계 표와 같은 답이 됩니다.
+
 예외의 예: 같은 라인에 선행형이 둘이라 내부 경쟁이 발생 / 연속 출전 피로 /
 총평의 자연어 단서 / 두수 대비 각질 구성의 특수성 / 라인 구도의 불균형.
+예외로 볼 이유가 없으면 `exception_note` 에 '통상' 이라고 쓰고, 순위는 그래도 채우십시오.
 
 ⚠ 아래 정보에는 **배당·인기·타 시스템 추천이 의도적으로 빠져 있습니다.**
    시장 판단을 베끼지 말고, 주어진 구도와 전적만으로 판단하세요.
@@ -251,7 +276,7 @@ def _build_prompt(snap):
 
 반드시 아래 JSON만 출력하세요(설명·마크다운 금지):
 {
-  "predicted_top3": [정수, 정수, 정수],
+  "predicted_top3": [정수, 정수, 정수],   ← 🔴 반드시 3개. 비우면 통째 폐기됨
   "predicted_style": "선행|추입|혼합 중 하나",
   "predicted_pace": "빠른|보통|느린 중 하나",
   "line_winner": [정수, ...],
