@@ -31790,11 +31790,31 @@ def _health_checklist_build():
     return _m.build_checklist()
 
 
+def _health_pending_results():
+    """21:00 시점 '결과 대기' 경주 수. 실패해도 None 을 돌려 메시지 조립을 막지 않는다.
+
+    ⚠ 왜 필요한가(권대표 지시 2026-07-30): 경마 마지막 발주가 **20:50** 이면 결과 게시는 ~21:00 이고
+      결과 백필은 **20분 주기**다. 즉 21:00 발송 시점에는 결과가 **덜 들어와 있는 것이 정상**이다.
+      이 줄이 없으면 미충족 수치를 보고 '문제가 생겼다'로 오해하게 된다.
+    """
+    try:
+        r = _missing_results(time.strftime("%Y-%m-%d")) or {}
+        m = r.get("missing")
+        return len(m) if isinstance(m, list) else r.get("count")
+    except Exception as e:
+        print("[체크리스트 카카오] 결과 대기 수 조회 실패(무시):", e)
+        return None
+
+
 def _health_kakao_text(rep):
     """카카오 본문 — **최대한 짧게**. summary 1줄 + 미충족 목록만(충족 항목은 넣지 않는다).
     목록이 짧아지는 것이 곧 진행 신호다."""
     lines = ["📋 완료 조건 체크리스트  %s" % time.strftime("%m/%d %H:%M"),
              rep.get("summary") or ""]
+    # ⏳ 결과 대기 — 21:00 은 경마 마감(20:50) 직후라 결과가 덜 들어온 것이 정상이다.
+    _pend = _health_pending_results()
+    if _pend:
+        lines.append("⏳ 결과 대기 %d경주 (마감 직후라 정상)" % _pend)
     opens = rep.get("openItems") or []
     if opens:
         lines.append("")
@@ -32070,7 +32090,11 @@ def health_send_kakao_api():
 
 
 def _start_health_kakao_scheduler():
-    """매일 `HEALTH_KAKAO_HOUR`(기본 22)시에 체크리스트 1회 발송(멱등·하루 1회).
+    """매일 `HEALTH_KAKAO_HOUR`(기본 **21**)시에 체크리스트 1회 발송(멱등·하루 1회).
+
+    ⚠ **21:00 기준 근거(권대표 확정 2026-07-30)**: 일본 경륜 마감 **20:40** · 일본 경마 마감 **20:50**.
+      그 이후에는 대표가 화면을 확인할 수 없으므로 **21:00 을 하루 마감 기준**으로 삼는다.
+      (종전 22:00 은 마지막 경주 이후지만 확인 시점을 지나 있었다.)
 
     ⚠ **60초 폴링**으로 만든다 — `time.sleep(1200)` 선행 방식은 개발 중 잦은 리로드로 타이머가
       계속 리셋돼 **오늘 결과 백필이 하루 종일 한 번도 안 돈 사고**가 실제로 있었다(2026-07-30).
@@ -32082,7 +32106,7 @@ def _start_health_kakao_scheduler():
         return
     _health_kakao_sched_started = True
     try:
-        hour = int(max(0, min(23, int(os.environ.get("HEALTH_KAKAO_HOUR", "") or 22))))
+        hour = int(max(0, min(23, int(os.environ.get("HEALTH_KAKAO_HOUR", "") or 21))))
     except (TypeError, ValueError):
         hour = 22
 
