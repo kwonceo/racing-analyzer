@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카나자와 4경주",
-      "horse_no": 5,
-      "recent_avg": 4.5,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-19"
-    },
-    {
-      "race": "카나자와 4경주",
-      "horse_no": 1,
-      "recent_avg": 4.8,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-19"
-    },
-    {
-      "race": "부산 5경주",
-      "horse_no": 2,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-19"
-    },
-    {
       "race": "부산 5경주",
       "horse_no": 4,
       "recent_avg": 4.8,
@@ -4652,16 +4624,44 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1785373822.2599854
+    },
+    {
+      "race": "소노다 1경주",
+      "horse_no": 7,
+      "recent_avg": 5.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-07-30"
+    },
+    {
+      "race": "소노다 1경주",
+      "horse_no": 4,
+      "recent_avg": 8.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-30"
+    },
+    {
+      "race": "소노다 1경주",
+      "horse_no": 1,
+      "recent_avg": 8.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-30"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1814,
-      "hit": 359
+      "count": 1818,
+      "hit": 360
     },
     "전체부진마": {
-      "count": 2993,
-      "hit": 813
+      "count": 3000,
+      "hit": 816
     },
     "대규모급락": {
       "count": 5,
@@ -4671,8 +4671,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 1179,
-      "hit": 454
+      "count": 1182,
+      "hit": 456
     },
     "급락동반": {
       "count": 207,
