@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "서울 8경주 1400M",
-      "horse_no": 5,
-      "recent_avg": 6.6,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-19"
-    },
-    {
       "race": "서울 10경주",
       "horse_no": 4,
       "recent_avg": 4.2,
@@ -4655,6 +4645,16 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-07-30"
+    },
+    {
+      "race": "카와사키 3경주",
+      "horse_no": 5,
+      "recent_avg": 7.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-30"
     }
   ],
   "condition_stats": {
@@ -4663,8 +4663,8 @@
       "hit": 367
     },
     "전체부진마": {
-      "count": 3112,
-      "hit": 845
+      "count": 3113,
+      "hit": 846
     },
     "대규모급락": {
       "count": 5,
@@ -4674,8 +4674,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 1229,
-      "hit": 478
+      "count": 1230,
+      "hit": 479
     },
     "급락동반": {
       "count": 210,
