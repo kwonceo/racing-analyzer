@@ -1,29 +1,6 @@
 {
   "patterns": [
     {
-      "pattern": "대규모급락",
-      "raceKey": "시즈오카 12경주",
-      "total_combos_dropped": 9,
-      "drop_ratio": 0.429,
-      "result": "1+7",
-      "result_odds": "저배당",
-      "result_quinella_odds": 2.3,
-      "signal_result_combo": "-88.2%",
-      "recommended_hit": true,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1784448544.8810444
-    },
-    {
-      "race": "부산 7경주 1200M",
-      "horse_no": 8,
-      "recent_avg": 4.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-19"
-    },
-    {
       "race": "부산 7경주 1200M",
       "horse_no": 11,
       "recent_avg": 5.6,
@@ -4650,16 +4627,36 @@
         "복승이상감지"
       ],
       "date": "2026-07-30"
+    },
+    {
+      "race": "소노다 5경주",
+      "horse_no": 8,
+      "recent_avg": 6.5,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-30"
+    },
+    {
+      "race": "소노다 5경주",
+      "horse_no": 1,
+      "recent_avg": 4.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-30"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 1827,
+      "count": 1832,
       "hit": 361
     },
     "전체부진마": {
-      "count": 3018,
-      "hit": 822
+      "count": 3026,
+      "hit": 824
     },
     "대규모급락": {
       "count": 5,
@@ -4669,8 +4666,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 1191,
-      "hit": 461
+      "count": 1194,
+      "hit": 463
     },
     "급락동반": {
       "count": 207,
