@@ -1,0 +1,293 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_07_30_몬베츠_1경주",
+ "race_info": {
+  "date": "2026-07-30",
+  "track": "몬베츠",
+  "round": 1,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 10,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 2,
+   "name": "トーケンオーパス",
+   "jockey": "小川悠（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3
+   ],
+   "record_score": 60.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "リヴァモアザン",
+   "jockey": "黒澤愛（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3
+   ],
+   "record_score": 60.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "フォアサイトゲイズ",
+   "jockey": "落合玄（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    5
+   ],
+   "record_score": 52.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 10,
+   "name": "コンチワッチ",
+   "jockey": "桑村真（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    7,
+    4
+   ],
+   "record_score": 48.9,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "ユーデンブルク",
+   "jockey": "藤田駕（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4
+   ],
+   "record_score": 25.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "ルナベレッツァ",
+   "jockey": "石川倭（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    6,
+    2,
+    5
+   ],
+   "record_score": 15.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "ベストメッセージ",
+   "jockey": "宮内勇（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    5,
+    3
+   ],
+   "record_score": 11.1,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "ハッピーアフリート",
+   "jockey": "阿部龍（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    6,
+    7
+   ],
+   "record_score": 11.1,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "レラノア",
+   "jockey": "井上俊（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    11,
+    7,
+    12
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "フェリンヴァラー",
+   "jockey": "小野楓（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    5
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "14:23:44",
+    "quinella": {
+     "5+10": 1.5,
+     "5+9": 18.7,
+     "8+10": 19.0,
+     "5+8": 19.6,
+     "9+10": 20.6,
+     "2+4": 23.2,
+     "1+5": 27.1,
+     "1+10": 36.5,
+     "2+9": 37.6,
+     "4+10": 47.2,
+     "4+5": 52.4,
+     "1+8": 81.6,
+     "8+9": 89.5,
+     "7+10": 93.0,
+     "1+9": 95.2,
+     "1+2": 99.2,
+     "5+7": 109.7,
+     "1+4": 119.2,
+     "2+7": 119.2,
+     "1+7": 142.8,
+     "1+3": 144.0,
+     "1+6": 145.3,
+     "2+8": 152.0,
+     "3+5": 159.3,
+     "3+10": 159.3,
+     "2+10": 172.6,
+     "4+8": 180.1,
+     "4+9": 192.6,
+     "5+6": 285.7,
+     "4+6": 301.2,
+     "2+3": 306.8,
+     "7+9": 487.3,
+     "7+8": 552.3,
+     "2+6": 690.4,
+     "3+7": 690.4,
+     "4+7": 720.4,
+     "3+9": 872.1,
+     "3+8": 974.7,
+     "3+6": 1506.4,
+     "2+5": 1841.2,
+     "3+4": 1841.2
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.829,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   2,
+   4,
+   5,
+   9,
+   10,
+   3,
+   1,
+   8,
+   6,
+   7
+  ],
+  "eliminated": [],
+  "recommend": "5+10",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 10,
+  "2nd": 11,
+  "3rd": 9,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 10,
+  "second": 11,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-07-30 15:01:41",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
