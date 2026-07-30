@@ -9536,6 +9536,13 @@ def _triple_analyze(rk, rec):
     # [3번] 단승 배당 순위(낮을수록 인기) — 유력마 자동 산출용
     single_rank = [no for no, _ in sorted(curWin.items(), key=lambda kv: kv[1])]
 
+    # [결정론 검수 누수 차단 (2026-07-30)] `_gemini_pending` 을 **함수 레벨에서** 먼저 바인딩한다.
+    #   종전엔 11681(들여쓰기 12칸 = 조건부 블록 안)에서만 초기화돼, 그 블록에 도달하지 못한 경주에서
+    #   `if _gemini_pending:` 이 **지역변수 미바인딩**으로 터졌다(실측 29회/일
+    #   `cannot access local variable '_gemini_pending' where it is not associated with a value`).
+    #   Gemini 호출부는 `except NameError: pass` 로 조용히 삼켰고 **결정론 검수만 죽었다.**
+    #   ⚠ 원인은 `GEMINI_REVIEW_ENABLED=False` 가 아니다 — 그 플래그는 이 변수 이후에만 평가된다.
+    _gemini_pending = None
     # 1) 변동/급락 (복승 조합, 음수 pct = 배당 하락=자금유입)
     drops = []
     for k, o in curQ.items():
@@ -11849,10 +11856,37 @@ def _triple_analyze(rk, rec):
     #     Gemini 플래그(`GEMINI_REVIEW_ENABLED`)와는 무관하게 항상 구성된다(app.py:11685).
     #     따라서 아래 결정론 검수는 **Gemini 가 꺼져 있어도 계속 동작한다**(2026-07-30 중단 조치와 독립).
     #     ⚠ 훗날 Gemini 를 완전히 걷어낼 때 이 묶음까지 지우면 결정론 검수도 함께 죽는다 — 주의.
+    # [Gemini 완전 분리 (2026-07-30)] 검수 입력을 **Gemini 묶음과 무관하게 직접 구성**한다.
+    #   종전엔 `_gemini_pending` 이 유일한 입력이라, 그 묶음을 만드는 블록(11681~11721, 626행짜리
+    #   `[최종추천정리]` try 안)에 도달하지 못하면 결정론 검수도 함께 죽었다 —
+    #   "오늘 만든 A 삼복승 정합 데이터에 구멍이 난" 직접 원인이다.
+    #   → 묶음이 있으면 그대로 쓰고(기존 경로 무삭제), 없으면 `core_picks`·`drops` 에서 재구성한다.
+    #     `_deterministic_review` 가 실제로 쓰는 키는 final_q·final_t·line_pairs·drops 4개이고
+    #     `_dr_record` 가 cur_mb 를 표시용으로 쓴다 — 전부 함수 레벨에서 얻을 수 있다.
+    _det_pend = _gemini_pending
+    if not _det_pend:
+        try:
+            _mb0 = None
+            try:
+                _mb0 = cur_mb          # 조건부 블록에서만 할당되므로 미바인딩 방어
+            except NameError:
+                _mb0 = None
+            _cp0 = core_picks or {}
+            _det_pend = {
+                "final_q": _cp0.get("finalQuinellas") or [],
+                "final_t": _cp0.get("finalTrifectas") or [],
+                "line_pairs": _cp0.get("keirinLinePairs") or [],
+                "drops": drops or [],
+                "cur_mb": _mb0,
+                "detStandalone": True,   # 재구성 경로로 판정됨(사후 구분용)
+            }
+        except Exception as _dpe:
+            _det_pend = None
+            print("[결정론 검수] 입력 재구성 실패(무시):", _dpe)
     try:
-        if _gemini_pending:
-            _det = _deterministic_review(_gemini_pending)
-            _dr_record(rk, _det, _gemini_pending)
+        if _det_pend:
+            _det = _deterministic_review(_det_pend)
+            _dr_record(rk, _det, _det_pend)
     except Exception as _de:
         print("[결정론 검수] 실패(무시):", _de)
     #   ⚠ [일시 중단 2026-07-30] `GEMINI_REVIEW_ENABLED`(기본 꺼짐)가 켜져 있을 때만 호출한다.

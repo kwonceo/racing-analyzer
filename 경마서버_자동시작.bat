@@ -20,13 +20,24 @@ git pull origin master 2>nul
 
 echo.
 echo [2/4] 서버 실행(포트 8011)...
-netstat -ano | findstr :8011 >nul
-if errorlevel 1 (
+REM ─────────── [중복 기동 가드 · 2026-07-30 신설] ───────────
+REM  배경(실사고): 세션이 끊긴 뒤 "서버가 죽은 줄 알고" 두 번째 인스턴스를 띄웠다(7/30 13:30:59).
+REM   Windows 는 SO_REUSEADDR 때문에 나중에 뜬 쪽이 LISTEN 을 가로채고,
+REM   양쪽 트리가 각자 _multi_bg_loop 를 돌려 같은 파일에 동시 쓰기를 한다
+REM   → WinError 32/5 로 [복기저장]·[분석로그] 저장이 실패하고 스냅샷이 유실된다.
+REM  종전 검사(findstr :8011)는 ESTABLISHED/TIME_WAIT 까지 잡아 판정이 불명확했으므로
+REM   LISTENING 상태만 정확히 보고 PID 까지 표시하도록 강화한다.
+REM  ⚠ 강제 종료 로직은 넣지 않는다 — 실행 중인 서버를 죽이는 쪽이 더 위험하다.
+set "SRV_PID="
+for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":8011" ^| findstr "LISTENING"') do set "SRV_PID=%%P"
+if defined SRV_PID (
+  echo    [!] 서버가 이미 실행 중입니다 ^(PID %SRV_PID% · 포트 8011 LISTENING^).
+  echo    [!] 중복 기동은 데이터 동시 쓰기 사고를 일으키므로 새로 띄우지 않습니다.
+  echo    [!] 재시작이 필요하면 기존 프로세스를 먼저 종료한 뒤 이 스크립트를 다시 실행하세요.
+) else (
   start "경마분석서버" cmd /c "py app.py"
   echo    서버 새 창에서 기동 중... (5초 대기)
   timeout /t 5 /nobreak >nul
-) else (
-  echo    서버가 이미 실행 중입니다.
 )
 
 echo.
