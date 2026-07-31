@@ -7368,7 +7368,7 @@ def _scenario_plan(cp, curQ, pace_analysis, sig_meta, valid_nos, axis_plan):
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                  reversal_quinellas=None, dark_quinellas=None, signal_horses=None, sig_meta=None, sport=None):
     """[추천 구조 개편·종목별 저배당+신호=메인 / 고배당+강신호=BMED특별] 파생 추천을 새 구조로 정리(기존 후보수집·파생필드 무삭제).
-      ▸ 메인 추천(★★★) = 종목별 저배당(경륜 5배↓·경정 7배↓·경마 두수별 8~9두 10배↓·10~12두 15배↓·13~18두 20배↓) AND 급락·역배열·스마트머니 신호 1개+. 배당 낮은순·개수=max_q.
+      ▸ 메인 추천(★★★) = 종목별 저배당(경륜 5배↓·경정 7배↓·경마 두수별 ≥16두 35배↓·≥14두 30배↓·≥12두 30배↓·≥10두 25배↓·그외 20배↓) AND 급락·역배열·스마트머니 신호 1개+. 배당 낮은순·개수=max_q.
       ▸ BMED 특별 감지(★★, 별도 💎) = 종목별 고배당(경륜 10배↑·경마 20배↑·경정 15배↑, 50배 이하) AND 강신호(signalScore 70+ OR 급락15%+ OR 스마트머니+역배열 동시). signalScore 높은순·최대 2개.
       ▸ 제외 = BMED 신호 없는 저배당 · 배당 50배 초과 · 종목별 저/고 사이 구간(신호만으로 부족).
       sig_meta: {no:{drop(pct·음수),rev,smart,dark,anomaly,score}} — 조합 근거문장·신호강도 판정용. 미제공/신호전무 시 기존 랭킹(호환).
@@ -7425,7 +7425,7 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
 
     # ── [추천 구조 개편·종목별] 저배당+신호=메인(★★★) / 고배당+강신호=BMED특별(★★) / 그 외=제외 ──
     #   종목별 저배당(메인 상한)·고배당(특별 하한): 경륜 5/10 · 경정 7/15 · 바이크 5/10 ·
-    #   경마=두수별(8~9두 10 · 10~11두 15 · 12~13두 20 · 14~16두 25 · 17~18두 30, 특별 하한=메인 상한). 특별 상한=50배(공통).
+    #   경마=두수별(≥16두 35 · ≥14두 30 · ≥12두 30 · ≥10두 25 · 그외 20 — **코드 실측 2026-07-31**, 특별 하한=메인 상한). 특별 상한=50배(공통).
     _sp = (sport or "").lower()
     if _sp == "boat":
         MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 7.0, 15.0
