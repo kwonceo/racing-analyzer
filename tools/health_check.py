@@ -490,6 +490,34 @@ def check_module_load():
 _INTEG_DAYS = "⚠ 2일 연속 미달이면 조사, 3일이면 위험"
 
 
+SETTLE_MIN = 40         # 마지막 발주 + 이 분(分) 이 지나야 확정값으로 본다(결과·환급 게시 여유)
+
+
+def _is_settled():
+    """그날 경주가 **다 끝났는가**. 반환 (확정여부, 사유).
+
+    🔴 진행 중에 재면 결과 없는 경주가 계속 추가돼 값이 시간에 따라 떨어진다.
+      2026-07-31 실측: 21:00 에 77.7% → 22:00 에 73.7%. **같은 날인데 값이 다르다.**
+    ⚠ 스케줄을 못 읽으면 **미확정으로 둔다**(억지로 통과시키지 않는다).
+    """
+    try:
+        import urllib.request
+        d = json.loads(urllib.request.urlopen(
+            "http://127.0.0.1:8011/api/multi/schedule", timeout=6).read().decode())
+        pe = [r.get("postEpoch") for t in (d.get("tracks") or [])
+              for r in (t.get("races") or []) if r.get("postEpoch")]
+        if not pe:
+            return True, None                     # 개최 없음 → 확정으로 본다
+        last = max(pe)
+        left = (last + SETTLE_MIN * 60) - time.time()
+        if left > 0:
+            return False, ("진행 중 — 마지막 발주 %s + %d분까지 %.0f분 남음(이 시각 전 값은 시간에 따라 변한다)"
+                           % (time.strftime("%H:%M", time.localtime(last)), SETTLE_MIN, left / 60.0))
+        return True, None
+    except Exception as e:
+        return False, "스케줄 조회 실패 — 확정 판정 불가(%s)" % str(e)[:50]
+
+
 def check_payout_coverage():
     """[I1] 확정배당 보유율 — **종목별**. 🔴 경마 0.9% 가 이 항목이 있었으면 첫날 잡혔다."""
     day = time.strftime("%Y-%m-%d")
@@ -511,6 +539,13 @@ def check_payout_coverage():
                       for k, v in sorted(by.items()))
     cur = round(100.0 * ok_ / tot, 1) if tot else None
     worst = min((100.0 * v[1] / max(v[0], 1)) for v in by.values() if v[0] >= 5) if any(v[0] >= 5 for v in by.values()) else None
+    # ⚠ I4 와 **같은 문제**가 있다 — 진행 중이면 결과가 늦게 들어오는 경주가 섞여 값이 낮게 나온다.
+    _settled, _why = _is_settled()
+    if not _settled:
+        return _mk("I1", "🔴 무결성", "확정배당 보유율(종목별)",
+                   "당일 결과확정 경주 %d건 — 종목별 분리" % tot,
+                   current=cur, target=90.0, ok=None, n=tot,
+                   note="⏳ **미확정**(진행 중) " + (note or "당일 결과 없음"), reason=_why)
     return _mk("I1", "🔴 무결성", "확정배당 보유율(종목별)",
                "당일 결과확정 경주 %d건 — 종목별 분리" % tot,
                current=cur, target=90.0,
@@ -659,6 +694,18 @@ def check_measurable_today():
             continue
         ok_ += 1
     cur = round(100.0 * ok_ / tot, 1) if tot else None
+    # 🔴 [기준 시각 (2026-08-01)] 경주가 **진행 중**이면 결과 없는 경주가 계속 추가돼
+    #   값이 시간에 따라 떨어진다(21:00 77.7% → 22:00 73.7%). **언제 재느냐로 값이 달라진다.**
+    #   ⇒ 그날 마지막 발주 + `_SETTLE_MIN` 분이 지나야 **확정값**으로 본다.
+    #   ⚠ 실측(2026-07-31): 마지막 발주 **23:30** 인데 카카오는 **21:00** 에 나간다 —
+    #     발송 시점의 I4 는 구조적으로 미확정이다.
+    _settled, _why = _is_settled()
+    if not _settled:
+        return _mk("I4", "🔴 무결성", "오늘분 측정 가능 비율",
+                   "당일 분석로그 %d건 — 결과·확정배당·마감시각 3종 모두 보유" % tot,
+                   current=cur, target=80.0, ok=None, n=tot,
+                   note="⏳ **미확정**(진행 중) %d/%d · 결손: %s" % (ok_, tot, miss),
+                   reason=_why)
     return _mk("I4", "🔴 무결성", "오늘분 측정 가능 비율",
                "당일 분석로그 %d건 — 결과·확정배당·마감시각 3종 모두 보유" % tot,
                current=cur, target=80.0, ok=(None if tot < 10 else (cur is not None and cur >= 80.0)),

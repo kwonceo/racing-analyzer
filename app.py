@@ -16028,8 +16028,31 @@ def _start_daily_learning_scheduler():
     _daily_learning_sched_started = True
     hour = _daily_learning_hour()
 
+    # 🔴 [중복 실행 방지 (2026-08-01)] 종전은 `last_done` 이 **메모리**라
+    #   재기동하면 None 으로 초기화돼 **그날 것이 다시 실행**됐다.
+    #   실측: 2026-07-31 서버 재기동 15회 = 스케줄러 시작 15회.
+    #   22:00 이후 재기동되면 학습일지가 중복 생성된다.
+    #   ⇒ 주기백업과 **같은 방식**(파일 스탬프)으로 통일한다.
+    _dl_stamp = os.path.join(os.path.dirname(__file__), "data", "_daily_learning_last.txt")
+
+    def _dl_done_day():
+        try:
+            return open(_dl_stamp, encoding="utf-8").read().strip()
+        except Exception:
+            return None
+
+    def _dl_mark(day):
+        try:
+            os.makedirs(os.path.dirname(_dl_stamp), exist_ok=True)
+            _t = _dl_stamp + ".tmp%d" % os.getpid()
+            with open(_t, "w", encoding="utf-8") as f:
+                f.write(day)
+            os.replace(_t, _dl_stamp)
+        except Exception as e:
+            print("[학습일지] 실행일 기록 실패(무시):", str(e)[:80])
+
     def _loop():
-        last_done = None
+        last_done = _dl_done_day()          # ⚠ 재기동해도 파일에서 이어받는다
         last_review = None
         while True:
             try:
@@ -16040,6 +16063,7 @@ def _start_daily_learning_scheduler():
                     _daily_learning_generate(today)   # 정성 내용은 기존 파일 병합 보존
                     _run_data_git_backup(f"학습일지 자동 생성 {today}")
                     last_done = today
+                    _dl_mark(today)                 # ⚠ 파일에도 남긴다(재기동 대비)
                     print(f"[학습일지] {today} {hour}:00 자동 생성·백업 완료")
                 # [복기 상설화 (2026-07-23 권대표 승인 · D2)] 매일 22:05 분류 스윕 + 리플레이 자동 실행·보존.
                 #   수동 엔드포인트(/api/review/sweep·replay)와 동일 로직 재사용 — 결과는 review_stats.json(스윕)
@@ -32845,8 +32869,30 @@ def _start_health_kakao_scheduler():
     except (TypeError, ValueError):
         hour = 22
 
+    # 🔴 [중복 발송 방지 (2026-08-01)] 종전은 `last` 가 **메모리**라 재기동하면 초기화됐다.
+    #   실측: 2026-07-31 재기동 15회. 21:00 이후 재기동되면 **그날 것이 다시 발송**된다.
+    #   ⇒ 주기백업·학습일지와 **같은 방식**(파일 스탬프)으로 통일한다.
+    #   ⚠ 발송 코어(`_kakao_send_to_me`)는 건드리지 않는다. 스케줄러 루프만이다.
+    _hk_stamp = os.path.join(os.path.dirname(__file__), "data", "_health_kakao_last.txt")
+
+    def _hk_done_day():
+        try:
+            return open(_hk_stamp, encoding="utf-8").read().strip()
+        except Exception:
+            return None
+
+    def _hk_mark(day):
+        try:
+            os.makedirs(os.path.dirname(_hk_stamp), exist_ok=True)
+            _t = _hk_stamp + ".tmp%d" % os.getpid()
+            with open(_t, "w", encoding="utf-8") as f:
+                f.write(day)
+            os.replace(_t, _hk_stamp)
+        except Exception as e:
+            print("[체크리스트 카카오] 발송일 기록 실패(무시):", str(e)[:80])
+
     def _loop():
-        last = None
+        last = _hk_done_day()             # ⚠ 재기동해도 파일에서 이어받는다
         while True:
             try:
                 time.sleep(60)
@@ -32854,6 +32900,7 @@ def _start_health_kakao_scheduler():
                 today = time.strftime("%Y-%m-%d", now)
                 if now.tm_hour >= hour and last != today:
                     last = today          # 발송 성공·실패와 무관하게 하루 1회(중복 발송 방지)
+                    _hk_mark(today)       # ⚠ 파일에도 남긴다(재기동 대비)
                     _health_kakao_send("daily-%02d:00" % hour)
             except Exception as e:
                 print("[체크리스트 카카오] 스케줄러 오류(무시):", e)
