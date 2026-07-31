@@ -65,8 +65,10 @@ def scan():
     bad = []
     for p in targets():
         rel = os.path.relpath(p, BASE).replace("\\", "/")
-        if rel.endswith("tests/run_glob_safety.py"):
-            continue                                    # 자기 자신(설명 문자열)
+        # ⚠ 자기 자신(설명 문자열)과 **자기검증 파일**(위험을 일부러 담은 주입 코드)은 제외한다.
+        #   run_selfcheck.py 는 이 테스트가 실제로 잡는지 확인하려고 위반 코드를 문자열로 들고 있다.
+        if rel in ("tests/run_glob_safety.py", "tests/run_selfcheck.py"):
+            continue
         try:
             src = open(p, encoding="utf-8", errors="replace").read()
             tree = _ast.parse(src)
