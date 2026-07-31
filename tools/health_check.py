@@ -535,16 +535,88 @@ def check_backup_alive():
                note="마지막 %s · %s" % (time.strftime("%m-%d %H:%M", time.localtime(last)), _INTEG_DAYS))
 
 
+DAEMON_LONG_SEC = 300.0     # 🔴 이 이상 주기의 sleep-first 데몬만 감시 대상
+# 주기 상수 이름 → 초. `time.sleep(_KRA_BACKFILL_INTERVAL)` 처럼 변수로 쓰는 경우를 푼다.
+_DAEMON_CONSTS = {"_KRA_BACKFILL_INTERVAL": 1200.0, "_PERIODIC_BACKUP_INTERVAL": 21600.0,
+                  "iv": 21600.0, "_AMEDAS_TTL": 600.0}
+# 스탬프 파일이 있는 데몬 — 새로 붙이면 여기에 추가한다.
+_DAEMON_STAMPS = {"_kra_backfill_loop": "_kra_backfill_last.txt",
+                  "_start_periodic_backup": "_periodic_backup_last.txt"}
+
+
+def _scan_daemons():
+    """app.py 에서 `while True` + **sleep-first** 데몬을 찾아 (함수, 주기초, 줄) 로 돌려준다.
+
+    ⚠ 판정 기준을 **코드에서 자동 산출**한다 — 5분 이상 주기 데몬이 새로 생기면
+      목록을 고치지 않아도 자동으로 감시 대상에 들어온다.
+    """
+    import ast as _ast
+    import re as _re
+    try:
+        src = open(os.path.join(BASE, "app.py"), encoding="utf-8").read()
+        tree = _ast.parse(src)
+    except Exception:
+        return [], []
+    lines = src.split(chr(10))
+    long_, low = [], []
+    for n in _ast.walk(tree):
+        if not isinstance(n, _ast.While) or getattr(n.test, "value", None) is not True:
+            continue
+        first = n.body[0] if n.body else None
+        fl = getattr(first, "lineno", n.lineno)
+        seg = chr(10).join(lines[fl - 1:fl + 1])
+        m = _re.search(r"time\.sleep\(([^)]+)\)", seg)
+        if not m:
+            continue                                  # sleep-first 가 아니다
+        raw = m.group(1).strip()
+        try:
+            per = float(raw)
+        except Exception:
+            per = _DAEMON_CONSTS.get(raw, 0.0)
+        fn = "?"
+        for k in range(n.lineno - 1, max(0, n.lineno - 120), -1):
+            mm = _re.match(r"\s*def (\w+)", lines[k])
+            if mm:
+                fn = mm.group(1)
+                break
+        (long_ if per >= DAEMON_LONG_SEC else low).append((fn, per, n.lineno))
+    return long_, low
+
+
 def check_daemon_alive():
-    """[I3] 데몬 마지막 실행 시각 — sleep-first 5곳. ⚠ 현재는 백업만 스탬프가 있다."""
-    d = os.path.join(BASE, "data")
-    known = {"주기백업": "_periodic_backup_last.txt"}
-    have = sum(1 for f in known.values() if os.path.exists(os.path.join(d, f)))
-    miss = ["L16004", "L24007(KRA/NAR 백필)", "L32752", "L32852(워치독)"]
-    return _mk("I3", "🔴 무결성", "데몬 실행시각 스탬프 보유",
-               "sleep-first 데몬 5곳(주기백업 + 미수정 4곳)",
-               current=have, target=5, ok=(have >= 5), n=5,
-               note="보유 %d/5 · 🔴 미보유: %s · %s" % (have, " · ".join(miss), _INTEG_DAYS))
+    """[I3] 🔴 **긴 주기(≥5분) sleep-first 데몬**의 실행시각 스탬프 보유.
+
+    🔴 [2026-08-01 정의 변경] 종전 목표는 "sleep-first 5곳 전부"였다.
+      그런데 60초 주기 데몬은 **재기동 공백이 60초**라 실제 위험이 아니다.
+      위험하지 않은 것을 목표에 넣으면 **I3 가 영원히 미달**이고,
+      항상 빨간 항목은 무시하게 된다(I5 를 회귀 테스트로 옮긴 것과 같은 실수).
+    ⇒ 대상을 **주기 ≥ %d초** 로 한정한다. 60초 데몬은 "저위험"으로 note 에만 남긴다.
+    """ % int(DAEMON_LONG_SEC)
+    # 🔴 대상 = **긴 주기 데몬 전부**(이미 고친 것 + 아직 sleep-first 인 것).
+    #   ⚠ 수정하면 sleep-first 가 아니게 되므로 `_scan_daemons` 만 보면 **대상이 0 이 된다** —
+    #     고칠수록 분모가 사라지는 함정이다. `_DAEMON_STAMPS` 에 등록된 것을 **항상 포함**한다.
+    long_, low = _scan_daemons()
+    names = {fn for fn, _p, _l in long_} | set(_DAEMON_STAMPS)
+    have, miss = 0, []
+    for fn in sorted(names):
+        f = _DAEMON_STAMPS.get(fn)
+        if f and os.path.exists(os.path.join(BASE, "data", f)):
+            have += 1
+        else:
+            _p = next((p for n2, p, _l in long_ if n2 == fn), 0.0)
+            miss.append("%s(%.0f초)" % (fn, _p))
+    tot = len(names)
+    note = "보유 %d/%d" % (have, tot)
+    if miss:
+        note += " · 🔴 미보유: " + " · ".join(miss)
+    if low:
+        note += " · 저위험(감시 제외) %d곳: %s" % (
+            len(low), " ".join("%s(%.0f초)" % (x[0], x[1]) for x in low))
+    return _mk("I3", "🔴 무결성", "긴주기(≥5분) 데몬 스탬프",
+               "app.py `while True` + sleep-first 중 **주기 ≥%d초** — 코드에서 자동 산출"
+               % int(DAEMON_LONG_SEC),
+               current=have, target=tot, ok=(tot > 0 and have >= tot), n=tot,
+               note=note + " · " + _INTEG_DAYS)
 
 
 def check_measurable_today():
