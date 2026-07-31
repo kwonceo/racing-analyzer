@@ -1,6 +1,6 @@
 {
- "generated_at": 1785468931.3559585,
- "races_with_result": 1407,
+ "generated_at": 1785470141.0216448,
+ "races_with_result": 1408,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -11,7 +11,7 @@
    "desc": "급락이 T-3분에 발생한 경주",
    "rate": 54.7,
    "baseline": 33.0,
-   "lift": 21.8,
+   "lift": 21.7,
    "support": 95,
    "hit": 52
   },
@@ -21,9 +21,19 @@
    "desc": "급락이 T-5분에 발생한 경주",
    "rate": 54.3,
    "baseline": 33.0,
-   "lift": 21.4,
+   "lift": 21.3,
    "support": 127,
    "hit": 69
+  },
+  {
+   "type": "시점",
+   "key": "timing:T-1분",
+   "desc": "급락이 T-1분에 발생한 경주",
+   "rate": 52.9,
+   "baseline": 33.0,
+   "lift": 19.9,
+   "support": 85,
+   "hit": 45
   },
   {
    "type": "시점",
@@ -36,14 +46,14 @@
    "hit": 94
   },
   {
-   "type": "시점",
-   "key": "timing:T-1분",
-   "desc": "급락이 T-1분에 발생한 경주",
-   "rate": 52.4,
+   "type": "배당변화",
+   "key": "had_drop",
+   "desc": "급락(자금유입) 동반 경주",
+   "rate": 51.5,
    "baseline": 33.0,
-   "lift": 19.4,
-   "support": 84,
-   "hit": 44
+   "lift": 18.5,
+   "support": 604,
+   "hit": 311
   },
   {
    "type": "시점",
@@ -51,29 +61,19 @@
    "desc": "급락이 T-2분에 발생한 경주",
    "rate": 51.4,
    "baseline": 33.0,
-   "lift": 18.5,
+   "lift": 18.4,
    "support": 70,
    "hit": 36
   },
   {
    "type": "배당변화",
-   "key": "had_drop",
-   "desc": "급락(자금유입) 동반 경주",
-   "rate": 51.4,
-   "baseline": 33.0,
-   "lift": 18.4,
-   "support": 603,
-   "hit": 310
-  },
-  {
-   "type": "배당변화",
    "key": "strong_drop",
    "desc": "30%+ 강한 급락 동반 경주",
-   "rate": 49.6,
+   "rate": 49.8,
    "baseline": 33.0,
    "lift": 16.7,
-   "support": 409,
-   "hit": 203
+   "support": 410,
+   "hit": 204
   },
   {
    "type": "배당변화",
@@ -81,7 +81,7 @@
    "desc": "쌍승 역전 동반 경주",
    "rate": 45.5,
    "baseline": 33.0,
-   "lift": 12.5,
+   "lift": 12.4,
    "support": 44,
    "hit": 20
   },
@@ -91,7 +91,7 @@
    "desc": "급락이 T-10분+에 발생한 경주",
    "rate": 45.5,
    "baseline": 33.0,
-   "lift": 12.5,
+   "lift": 12.4,
    "support": 11,
    "hit": 5
   },
@@ -101,7 +101,7 @@
    "desc": "50%+ 대량 급락 동반 경주",
    "rate": 45.3,
    "baseline": 33.0,
-   "lift": 12.3,
+   "lift": 12.2,
    "support": 179,
    "hit": 81
   },
@@ -113,7 +113,7 @@
     71.1,
     105
    ],
-   "support": 838
+   "support": 841
   }
  ],
  "baseline_hit_rate": 33.0
