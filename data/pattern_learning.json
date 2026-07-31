@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "카사마츠 1경주",
-      "horse_no": 2,
-      "recent_avg": 5.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-20"
-    },
-    {
-      "race": "카사마츠 1경주",
       "horse_no": 4,
       "recent_avg": 6.2,
       "win_place": 1,
@@ -4669,6 +4659,19 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-30"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "호후 7경주",
+      "total_combos_dropped": 7,
+      "drop_ratio": 0.5,
+      "result": "1+4",
+      "result_odds": "저배당",
+      "result_quinella_odds": 1.2,
+      "signal_result_combo": "2000.0%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1785462736.2734478
     }
   ],
   "condition_stats": {
@@ -4681,11 +4684,11 @@
       "hit": 876
     },
     "대규모급락": {
-      "count": 5,
+      "count": 4,
       "high_odds": 0,
-      "recommended_hit": 2,
+      "recommended_hit": 1,
       "high_odds_rate": 0.0,
-      "hit_rate": 40.0
+      "hit_rate": 25.0
     },
     "이상감지동반": {
       "count": 1303,
