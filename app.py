@@ -11473,8 +11473,8 @@ def _triple_analyze(rk, rec):
                 _kh_cs = set(int(x) for x in (key_horses or []) if str(x).lstrip('-').isdigit())
                 _fq_cs = set()
                 _fq_cs_list = list(core_picks.get('finalQuinellas') or [])
-                for _q in _fq_cs_list:
-                    for _n in (_q.get('combo') or []):
+                for _fq_item in _fq_cs_list:   # [2026-07-31] 개명 — def _q(10333) 를 덮어써 혼전복승박스가 92회 실패했다
+                    for _n in (_fq_item.get('combo') or []):
                         try: _fq_cs.add(int(_n))
                         except: pass
                 _fq_set_cs = set(frozenset(q['combo']) for q in _fq_cs_list if q.get('combo'))
@@ -11509,8 +11509,8 @@ def _triple_analyze(rk, rec):
                 _kh_cs = set(int(x) for x in (key_horses or []) if str(x).lstrip('-').isdigit())
                 _fq_cs = set()
                 _fq_cs_list = list(core_picks.get('finalQuinellas') or [])
-                for _q in _fq_cs_list:
-                    for _n in (_q.get('combo') or []):
+                for _fq_item in _fq_cs_list:   # [2026-07-31] 개명 — def _q(10333) 를 덮어써 혼전복승박스가 92회 실패했다
+                    for _n in (_fq_item.get('combo') or []):
                         try: _fq_cs.add(int(_n))
                         except: pass
                 _fq_set_cs = set(frozenset(q['combo']) for q in _fq_cs_list if q.get('combo'))
@@ -18078,9 +18078,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     for b in rec_bets:
         if b.get("kind") == "삼복승":
             cc = [int(x) for x in b.get("combo", [])]
-            in3 = [x for x in cc if x in top3s]
+            _in3_cars = [x for x in cc if x in top3s]   # [2026-07-31] 개명 — def in3(17873) 덮어쓰기 예방
             out = [x for x in cc if x not in top3s]
-            if len(in3) == 2 and len(out) == 1 and top4 is not None and out[0] == top4:
+            if len(_in3_cars) == 2 and len(out) == 1 and top4 is not None and out[0] == top4:
                 trio_near = True
                 break
     near_miss_horse = top4 if (top4 is not None and (top4 in rec_horses or trio_near)) else None
