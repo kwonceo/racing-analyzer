@@ -1498,6 +1498,10 @@ STARTERS_STORE = os.path.join(os.path.dirname(__file__), "starters_store.json")
 #   ⚠ 완전히 숨기면 침묵 실패가 된다. 살아 있다는 것을 계속 드러내기 위한 카운터다.
 _BLINE_ERR_SEEN = {}
 
+# [joCode 미등록 감지 (2026-07-31)] {표준키: 관측횟수} — 경주당 1회만 경고를 찍는다.
+#   ⚠ 이 dict 가 비어 있지 않으면 **그만큼의 경주가 결과·흐름 수집에서 빠졌다**는 뜻이다.
+_KEIRIN_JO_MISSING = {}
+
 
 def _starters_load():
     try:
@@ -21783,7 +21787,13 @@ KEIRIN_JO = {"36": "오다와라", "62": "히로시마", "01": "마에바시",
              #     `<title>`의 `○○競輪` 로 확정했다(추정 아님).
              #   ⚠ 아침에 보강한 `_TRACK_GROUPS` 별칭과 **다른 테이블**이다. 표기가 통일돼도
              #     joCode 가 없으면 **결과 백필·흐름 수집이 통째로 스킵**된다(호후 1경주가 그랬다).
-             "63": "호후", "84": "다케오"}
+             "63": "호후", "84": "다케오",
+             # [joCode 실측 2026-07-31·5일치 전수 스캔] 20곳 발견 중 **5곳이 더 미등록**이었다.
+             #   🔴 `平塚`(35)가 여기 있다 — 아침에 `_TRACK_GROUPS` 별칭만 고치고 이 테이블은 놓쳤다.
+             #     표기가 통일돼도 joCode 가 없으면 **결과 백필·흐름 수집이 조용히 스킵**된다.
+             #   ⚠ 오늘 경기장 이름 테이블 사고 **네 번째**다(별칭·sport=None·glob·joCode).
+             "23": "도리데", "28": "다치카와", "35": "히라츠카",
+             "53": "나라", "75": "마쓰야마"}
 # ⚠ 기시와다=56(岸和田, 라이브 확인). 이전 73은 오매핑이라 교정. 구마모토=87(熊本競輪) 등록 →
 #   sport 유실 시에도 _keirin_jo_from_venue가 cycle 추론 → 복승 개수 종목캡(경륜 9) 정상 적용.
 # 경륜장명 → joCode 역매핑(raceKey에서 joCode 자동 감지용)
@@ -24376,7 +24386,25 @@ def _keirin_jo_today(venue):
                 return str(tr["joCode"]), True
     except Exception:
         pass
-    return _keirin_jo_from_venue(venue), False
+    _jo = _keirin_jo_from_venue(venue)
+    # 🔴 [미등록 자동 감지 (2026-07-31)] 종전에는 joCode 가 없으면 **조용히 스킵**돼
+    #   결과 백필·경주 흐름 수집이 통째로 빠지는데 **아무도 몰랐다**.
+    #   실사고: 오늘 개최 10곳 중 防府·武雄 2곳이 미등록이었고, 5일치 스캔에서 5곳이 더 나왔다
+    #   (取手·立川·平塚·奈良·松山). 特히 `平塚` 는 아침에 별칭만 고치고 이 테이블을 놓친 것이다.
+    #   ⚠ 경주당 한 번만 찍는다(30초 틱마다 반복되면 로그가 오염된다).
+    if not _jo:
+        try:
+            _k = _track_norm(venue) or str(venue)
+            if _k not in _KEIRIN_JO_MISSING:
+                _KEIRIN_JO_MISSING[_k] = 1
+                print("🔴 [joCode 미등록] %s — 결과 백필·경주 흐름 수집이 **통째로 스킵**됩니다. "
+                      "RaceKekka.do 를 joCode 01~89 로 조회해 <title>의 ○○競輪 로 확정 후 "
+                      "KEIRIN_JO 에 추가하십시오." % _k)
+            else:
+                _KEIRIN_JO_MISSING[_k] += 1
+        except Exception:
+            pass
+    return _jo, False
 
 
 def _keirin_result_parse(html):
