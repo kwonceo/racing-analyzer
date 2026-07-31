@@ -70,7 +70,10 @@ SYNTAX_TARGETS = discover_syntax_targets()
 #    실사고: 프롬프트 주석의 `100%)` 가 `%` 포맷과 충돌해 `ValueError` 로 생성이 통째로 죽었다.
 #    `ast.parse` 는 통과했고(문법은 완벽) **실행해야만** 드러났다.
 BLOCKING_SUITES = ["tests/run_report.py", "tests/run_formula.py", "tests/run_flow.py",
-                   "tests/run_freeze_behavior.py", "tests/run_smoke_render.py"]
+                   "tests/run_freeze_behavior.py", "tests/run_smoke_render.py",
+                   # 🔴 [2026-07-31] 원칙 16 — 날짜 없는 glob 매칭은 커밋에서 막는다.
+                   #    중복 자체는 정상이라 매일 감시하면 영원히 빨간불이 된다(I5 제거·이관).
+                   "tests/run_glob_safety.py"]
 
 # 🟡 아직 고치지 않은 결함을 재현하는 테스트 — 실패해도 커밋을 막지 않는다.
 #

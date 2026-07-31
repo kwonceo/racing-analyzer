@@ -32514,8 +32514,11 @@ def _health_kakao_text(rep):
     else:
         lines.append("🟢 무결성 정상")
     lines.append("")
-    lines += ["📋 완료 조건 체크리스트  %s" % time.strftime("%m/%d %H:%M"),
-              rep.get("summary") or ""]
+    # ⚠ 완료조건은 무결성과 **분리해서** 센다 — 섞으면 구조적 미달이 완료선을 영원히 막는다.
+    _cmp = rep.get("completion") or {}
+    lines.append("📋 완료조건 %d/%d  (%s)"
+                 % (_cmp.get("done") or 0, _cmp.get("total") or 0,
+                    time.strftime("%m/%d %H:%M")))
     # ⏳ 결과 대기 — 21:00 은 경마 마감(20:50) 직후라 결과가 덜 들어온 것이 정상이다.
     _pend = _health_pending_results()
     if _pend:

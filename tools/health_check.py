@@ -625,23 +625,38 @@ def build_checklist():
              check_score_decomposition(), check_freeze_success(), check_module_load(),
              # 🔴 무결성 감시(매일·자동) — 성능 측정과 성격이 다르다. 절대 줄이지 않는다.
              check_payout_coverage(), check_backup_alive(), check_daemon_alive(),
-             check_measurable_today(), check_file_duplicate(),
+             check_measurable_today(),   # ⚠ I5(파일 중복)는 제거 — 중복 자체는 정상이라
+             #    영원히 빨간불이 되고 그러면 무시하게 된다. → tests/run_glob_safety.py 로 이관.
              check_forecast_discard(), check_forecast_vs_market()]
     for (i, area, name, target, denom, why) in _PENDING:
         items.append(_mk(i, area, name, denom, current=None, target=target,
                          ok=None, n=None, note="분모 근거: " + why, reason="미구현"))
-    done = sum(1 for x in items if x["ok"] is True)
-    fail = sum(1 for x in items if x["ok"] is False)
-    unk = sum(1 for x in items if x["ok"] is None)
+    # 🔴 [분리 집계 (2026-07-31)] 무결성(I)과 완료조건(D·F·A·B·C)은 성격이 다르다.
+    #   · 무결성 = **항상 초록이어야 정상**(채워가는 것이 아니다)
+    #   · 완료조건 = **N/23 을 채워가는 것**
+    #   섞어 세면 구조적 미달(I3 스탬프 1/5)이 완료선을 영원히 막는다.
+    #   ⚠ 완료 정의는 "완료조건 23이 전부 초록"으로 유지한다.
+    integ = [x for x in items if str(x.get("id") or "").startswith("I")]
+    comp = [x for x in items if not str(x.get("id") or "").startswith("I")]
+    integ_bad = sum(1 for x in integ if x["ok"] is False)
+    done = sum(1 for x in comp if x["ok"] is True)
+    fail = sum(1 for x in comp if x["ok"] is False)
+    unk = sum(1 for x in comp if x["ok"] is None)
     # 미충족만 뽑는다 — **충족 항목은 넣지 않는다.** 목록이 짧아지는 것이 진행 신호다.
     open_items = ["[%s] %s (현재 %s / 목표 %s)" % (x["id"], x["name"], x["current"], x["target"])
-                  for x in items if x["ok"] is False]
-    pending = ["[%s] %s" % (x["id"], x["name"]) for x in items if x["ok"] is None]
-    return {"summary": "%d/%d 충족 · 미충족 %d · 미측정/미구현 %d" % (done, len(items), fail, unk),
+                  for x in comp if x["ok"] is False]
+    pending = ["[%s] %s" % (x["id"], x["name"]) for x in comp if x["ok"] is None]
+    return {"summary": "완료조건 %d/%d · 미충족 %d · 미측정 %d  |  무결성 %s"
+                       % (done, len(comp), fail, unk,
+                          "정상" if integ_bad == 0 else "이상 %d건" % integ_bad),
+            "integrity": {"total": len(integ), "bad": integ_bad,
+                          "items": [{"id": x["id"], "name": x["name"], "ok": x["ok"],
+                                     "current": x["current"], "target": x["target"]} for x in integ]},
+            "completion": {"total": len(comp), "done": done, "failed": fail, "unmeasured": unk},
             "openItems": open_items,
             "pendingItems": pending,
             "generatedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "total": len(items), "done": done, "failed": fail, "unmeasured": unk,
+            "total": len(comp), "done": done, "failed": fail, "unmeasured": unk,
             "items": items}
 
 

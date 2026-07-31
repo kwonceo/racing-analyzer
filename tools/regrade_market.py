@@ -35,7 +35,10 @@ def _hist_for(rk, ymd=None):
       같은 경주명이 여러 날 존재하는 것은 정상이므로 날짜가 없으면 스냅샷이 있는 최신본을 쓴다.
     """
     slug = rk.replace(" ", "_")
-    cands = sorted(glob.glob(os.path.join(BASE, "data", "odds_history", "*_%s.json" % slug)))
+    # ⚠ 여기서는 후보를 모으기만 한다 — **바로 아래에서 `ymd`(날짜)로 좁힌다**(원칙 16).
+    #   날짜 없이 이 목록을 그대로 쓰면 다른 날 데이터가 섞인다(2026-07-31 실사고).
+    _pat = "*_%s.json" % slug          # date-filtered below
+    cands = sorted(glob.glob(os.path.join(BASE, "data", "odds_history", _pat)))
     if ymd:
         pref = "%s_%s_%s_" % (ymd[:4], ymd[4:6], ymd[6:8])
         exact = [p for p in cands if os.path.basename(p).startswith(pref)]
