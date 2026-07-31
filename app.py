@@ -1501,6 +1501,9 @@ _BLINE_ERR_SEEN = {}
 # [joCode 미등록 감지 (2026-07-31)] {표준키: 관측횟수} — 경주당 1회만 경고를 찍는다.
 #   ⚠ 이 dict 가 비어 있지 않으면 **그만큼의 경주가 결과·흐름 수집에서 빠졌다**는 뜻이다.
 _KEIRIN_JO_MISSING = {}
+# [경기장 코드 미보유 감지 (2026-07-31)] 경마는 코드 계열이 3종(narBaba·opTrackCd·그 외)이라
+#   경륜 joCode 와 같은 사고가 날 수 있다. 셋 다 없으면 어느 경로도 못 탄다.
+_VENUE_CODE_MISSING = {}
 
 
 def _starters_load():
@@ -21802,12 +21805,37 @@ for _kc, _kv in KEIRIN_JO.items():
     _KEIRIN_JO_REV.setdefault(_kv, _kc)
 
 
+_KEIRIN_JO_REV_STD = {}      # 표준키 → joCode (지연 생성 · import 순서 의존 없음)
+
+
 def _keirin_jo_from_venue(venue):
-    """raceKey 경륜장명 → joCode(오다와라36·히로시마62·마에바시01·기후04 등). 없으면 None."""
+    """raceKey 경륜장명 → joCode(오다와라36·히로시마62·마에바시01·기후04 등). 없으면 None.
+
+    🔴 [2026-07-31] `KEIRIN_JO` 의 **값 5곳이 표준키가 아니었다**(33곳 중 15.2%):
+      `いわき平`(→이와키타이라) · `伊東`(→이토) · `고치`(→코치) · `가와사키` · `고쿠라`.
+      `_KEIRIN_JO_REV` 는 원문 키만 담으므로 **표준키로 조회하면 못 찾는다** —
+      결과 백필·경주 흐름 수집이 조용히 스킵되는 경로가 하나 더 있었다.
+      ⇒ 값을 표준키로 정규화한 사전을 **추가로** 둔다(기존 사전 무변경).
+    """
     if not venue:
         return None
     v = str(venue).strip()
-    return _KEIRIN_JO_REV.get(v) or _KEIRIN_JO_REV.get(_area_num(v)[0] or "")
+    hit = _KEIRIN_JO_REV.get(v)
+    if hit:
+        return hit
+    if not _KEIRIN_JO_REV_STD:
+        try:
+            for _c, _n in KEIRIN_JO.items():
+                _s = _track_norm(_n) or _n
+                _KEIRIN_JO_REV_STD.setdefault(_s, _c)
+        except Exception:
+            pass
+    try:
+        std = _track_norm(v) or v
+    except Exception:
+        std = v
+    return (_KEIRIN_JO_REV_STD.get(std) or _KEIRIN_JO_REV.get(std)
+            or _KEIRIN_JO_REV.get(_area_num(v)[0] or ""))
 
 
 def _kstrip(s):
@@ -30441,10 +30469,27 @@ def _multi_collect_one(track, race, ymd):
         elif track.get("opTrackCd"):
             # [지방경마(NAR) 전적 자동 수집] 확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'
             #   해소 — 배당과 동시에 oddspark 出走表+전적을 수집·저장(경주당 1회·통합등급 반영). keirin 대칭.
+            # 🔴 [코드 미보유 자동 감지 (2026-07-31)] 경륜 joCode 와 같은 유형의 사고를 막는다.
+            #   실사고: 경륜 joCode 미등록 7곳이 **조용히 스킵**돼 결과·흐름 수집이 통째로 빠졌다.
+            #   경마는 코드 계열이 **3종**이다 — narBaba(南関東 4장 고정) · opTrackCd(당일 스케줄
+            #   자동 추출) · 그 외. 셋 다 없으면 이 경주는 어느 경로도 못 타므로 반드시 드러낸다.
             try:
                 _keiba_autocollect_form(key, track.get("opTrackCd"), track.get("sponsorCd"), ymd, rno)
             except Exception as _fe:
                 print(f"[전적수집] {key} NAR 전적 실패: {_fe}")
+        elif not track.get("joCode"):
+            # 코드가 **하나도 없다** → 전적·결과·흐름 수집이 전부 스킵된다. 경주당 1회만 경고.
+            try:
+                _mk = _track_norm(track.get("venue") or "") or str(track.get("venue"))
+                if _mk not in _VENUE_CODE_MISSING:
+                    _VENUE_CODE_MISSING[_mk] = 1
+                    print("🔴 [경기장 코드 미보유] %s (sport=%s) — joCode·narBaba·opTrackCd 가 모두 없어 "
+                          "전적·결과·경주 흐름 수집이 **통째로 스킵**됩니다."
+                          % (_mk, track.get("sport")))
+                else:
+                    _VENUE_CODE_MISSING[_mk] += 1
+            except Exception:
+                pass
         # ══════ [Gemini 독립 예측 · Phase A (2026-07-31)] ══════
         #   왜 여기인가: **전적(출마표·각질) 확보 직후**이고 수집 창(발주 10분전~2분후) 안이라
         #     "마감 10분 전후 · 경주당 1회" 조건을 그대로 만족한다.

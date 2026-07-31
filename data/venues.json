@@ -1,0 +1,2027 @@
+{
+ "_생성": "2026-07-31 10:13:10",
+ "_설명": "경기장 단일 진실 1단계. 기존 8개 테이블에서 역생성했다. ⚠ 아직 app.py 는 이 파일을 읽지 않는다(1단계는 대조 전용).",
+ "venues": {
+  "いわき平": {
+   "key": "いわき平",
+   "names": {},
+   "codes": {
+    "joCode": "13"
+   },
+   "geo": null,
+   "amedas": null,
+   "sport": "cycle",
+   "_sources": [
+    "KEIRIN_JO",
+    "schedule(today)"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정"
+   }
+  },
+  "伊東": {
+   "key": "伊東",
+   "names": {},
+   "codes": {
+    "joCode": "37"
+   },
+   "geo": null,
+   "amedas": null,
+   "sport": "cycle",
+   "_sources": [
+    "KEIRIN_JO"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정"
+   }
+  },
+  "가나자와": {
+   "key": "가나자와",
+   "names": {},
+   "codes": {},
+   "geo": null,
+   "amedas": null,
+   "sport": null,
+   "_sources": [
+    "WEATHER_VENUES"
+   ],
+   "verified": {}
+  },
+  "가와사키": {
+   "key": "가와사키",
+   "names": {},
+   "codes": {
+    "joCode": "48"
+   },
+   "geo": null,
+   "amedas": null,
+   "sport": "cycle",
+   "_sources": [
+    "KEIRIN_JO"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정"
+   }
+  },
+  "고치": {
+   "key": "고치",
+   "names": {},
+   "codes": {
+    "joCode": "74"
+   },
+   "geo": null,
+   "amedas": null,
+   "sport": "cycle",
+   "_sources": [
+    "KEIRIN_JO",
+    "schedule(today)"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정"
+   }
+  },
+  "고쿠라": {
+   "key": "고쿠라",
+   "names": {},
+   "codes": {
+    "joCode": "81"
+   },
+   "geo": null,
+   "amedas": null,
+   "sport": "cycle",
+   "_sources": [
+    "KEIRIN_JO"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정"
+   }
+  },
+  "구루메": {
+   "key": "구루메",
+   "names": {
+    "aliases": [
+     "久留米",
+     "kurume"
+    ]
+   },
+   "codes": {
+    "joCode": "83"
+   },
+   "geo": {
+    "lat": 33.3236,
+    "lon": 130.5306
+   },
+   "amedas": {
+    "station": "82306",
+    "name": "久留米",
+    "km": 4.13,
+    "lat": 33.3033,
+    "lon": 130.4933
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "구마모토": {
+   "key": "구마모토",
+   "names": {
+    "aliases": [
+     "熊本",
+     "kumamoto"
+    ]
+   },
+   "codes": {
+    "joCode": "87"
+   },
+   "geo": {
+    "lat": 32.8058,
+    "lon": 130.7314
+   },
+   "amedas": {
+    "station": "86141",
+    "name": "熊本",
+    "km": 2.46,
+    "lat": 32.8133,
+    "lon": 130.7067
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "기시와다": {
+   "key": "기시와다",
+   "names": {
+    "aliases": [
+     "岸和田",
+     "kishiwada"
+    ]
+   },
+   "codes": {
+    "joCode": "56"
+   },
+   "geo": {
+    "lat": 34.4694,
+    "lon": 135.3722
+   },
+   "amedas": {
+    "station": "62131",
+    "name": "熊取",
+    "km": 9.6,
+    "lat": 34.385,
+    "lon": 135.35
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "기후": {
+   "key": "기후",
+   "names": {
+    "aliases": [
+     "岐阜",
+     "gifu",
+     "gif"
+    ]
+   },
+   "codes": {
+    "joCode": "43"
+   },
+   "geo": {
+    "lat": 35.4231,
+    "lon": 136.7597
+   },
+   "amedas": {
+    "station": "52586",
+    "name": "岐阜",
+    "km": 2.57,
+    "lat": 35.4,
+    "lon": 136.7617
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map",
+    "schedule(today)",
+    "starters_store"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "나고야": {
+   "key": "나고야",
+   "names": {
+    "aliases": [
+     "名古屋",
+     "nagoya",
+     "nago"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 35.0836,
+    "lon": 136.7522
+   },
+   "amedas": {
+    "station": "53041",
+    "name": "桑名",
+    "km": 6.53,
+    "lat": 35.05,
+    "lon": 136.6933
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map",
+    "WEATHER_VENUES",
+    "schedule(today)",
+    "starters_store"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "나라": {
+   "key": "나라",
+   "names": {
+    "aliases": [
+     "奈良",
+     "nara"
+    ]
+   },
+   "codes": {
+    "joCode": "53"
+   },
+   "geo": {
+    "lat": 34.6839,
+    "lon": 135.8331
+   },
+   "amedas": {
+    "station": "64036",
+    "name": "奈良",
+    "km": 1.22,
+    "lat": 34.6733,
+    "lon": 135.8367
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "나카야마": {
+   "key": "나카야마",
+   "names": {
+    "aliases": [
+     "中山",
+     "nakayama",
+     "naka"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 35.7328,
+    "lon": 140.0022
+   },
+   "amedas": {
+    "station": "45106",
+    "name": "船橋",
+    "km": 4.39,
+    "lat": 35.7117,
+    "lon": 140.0433
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "니가타": {
+   "key": "니가타",
+   "names": {
+    "aliases": [
+     "新潟",
+     "niigata",
+     "niig"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 38.0231,
+    "lon": 139.2214
+   },
+   "amedas": {
+    "station": "54236",
+    "name": "松浜",
+    "km": 12.24,
+    "lat": 37.955,
+    "lon": 139.1117
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "다마노": {
+   "key": "다마노",
+   "names": {
+    "aliases": [
+     "玉野",
+     "tamano"
+    ]
+   },
+   "codes": {
+    "joCode": "61"
+   },
+   "geo": {
+    "lat": 34.4919,
+    "lon": 133.9422
+   },
+   "amedas": {
+    "station": "66501",
+    "name": "玉野",
+    "km": 0.92,
+    "lat": 34.4867,
+    "lon": 133.95
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "다치카와": {
+   "key": "다치카와",
+   "names": {
+    "aliases": [
+     "立川",
+     "tachikawa"
+    ]
+   },
+   "codes": {
+    "joCode": "28"
+   },
+   "geo": {
+    "lat": 35.7086,
+    "lon": 139.4178
+   },
+   "amedas": {
+    "station": "44116",
+    "name": "府中",
+    "km": 6.55,
+    "lat": 35.6833,
+    "lon": 139.4833
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "다카마쓰": {
+   "key": "다카마쓰",
+   "names": {
+    "aliases": [
+     "高松",
+     "takamatsu"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 34.3436,
+    "lon": 134.0553
+   },
+   "amedas": {
+    "station": "72086",
+    "name": "高松",
+    "km": 2.82,
+    "lat": 34.3183,
+    "lon": 134.0533
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "다케오": {
+   "key": "다케오",
+   "names": {
+    "aliases": [
+     "武雄",
+     "takeo",
+     "타케오"
+    ]
+   },
+   "codes": {
+    "joCode": "84"
+   },
+   "geo": {
+    "lat": 33.1928,
+    "lon": 130.0086
+   },
+   "amedas": {
+    "station": "85161",
+    "name": "嬉野",
+    "km": 8.56,
+    "lat": 33.1167,
+    "lon": 129.995
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map",
+    "schedule(today)"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "도리데": {
+   "key": "도리데",
+   "names": {
+    "aliases": [
+     "取手",
+     "toride",
+     "取手市"
+    ]
+   },
+   "codes": {
+    "joCode": "23"
+   },
+   "geo": {
+    "lat": 35.9089,
+    "lon": 140.0722
+   },
+   "amedas": {
+    "station": "45061",
+    "name": "我孫子",
+    "km": 6.1,
+    "lat": 35.8633,
+    "lon": 140.11
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map",
+    "starters_store"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "도야마": {
+   "key": "도야마",
+   "names": {
+    "aliases": [
+     "富山",
+     "toyama"
+    ]
+   },
+   "codes": {
+    "joCode": "46"
+   },
+   "geo": {
+    "lat": 36.7286,
+    "lon": 137.1592
+   },
+   "amedas": {
+    "station": "55102",
+    "name": "富山",
+    "km": 4.41,
+    "lat": 36.7083,
+    "lon": 137.2017
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "도요하시": {
+   "key": "도요하시",
+   "names": {
+    "aliases": [
+     "豊橋",
+     "toyohashi"
+    ]
+   },
+   "codes": {
+    "joCode": "45"
+   },
+   "geo": {
+    "lat": 34.75,
+    "lon": 137.3814
+   },
+   "amedas": {
+    "station": "51331",
+    "name": "豊橋",
+    "km": 3.63,
+    "lat": 34.75,
+    "lon": 137.3417
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "도쿄": {
+   "key": "도쿄",
+   "names": {
+    "aliases": [
+     "東京",
+     "tokyo"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 35.6644,
+    "lon": 139.4844
+   },
+   "amedas": {
+    "station": "44116",
+    "name": "府中",
+    "km": 2.11,
+    "lat": 35.6833,
+    "lon": 139.4833
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "마쓰도": {
+   "key": "마쓰도",
+   "names": {
+    "aliases": [
+     "松戸",
+     "matsudo"
+    ]
+   },
+   "codes": {
+    "joCode": "31"
+   },
+   "geo": {
+    "lat": 35.7906,
+    "lon": 139.9264
+   },
+   "amedas": {
+    "station": "45106",
+    "name": "船橋",
+    "km": 13.73,
+    "lat": 35.7117,
+    "lon": 140.0433
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "마쓰사카": {
+   "key": "마쓰사카",
+   "names": {
+    "aliases": [
+     "松阪",
+     "matsusaka"
+    ]
+   },
+   "codes": {
+    "joCode": "47"
+   },
+   "geo": {
+    "lat": 34.5758,
+    "lon": 136.5347
+   },
+   "amedas": {
+    "station": "53196",
+    "name": "小俣",
+    "km": 13.05,
+    "lat": 34.5283,
+    "lon": 136.665
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "마쓰야마": {
+   "key": "마쓰야마",
+   "names": {
+    "aliases": [
+     "松山",
+     "matsuyama"
+    ]
+   },
+   "codes": {
+    "joCode": "75"
+   },
+   "geo": {
+    "lat": 33.8397,
+    "lon": 132.7778
+   },
+   "amedas": {
+    "station": "73166",
+    "name": "松山",
+    "km": 0.42,
+    "lat": 33.8433,
+    "lon": 132.7767
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "마에바시": {
+   "key": "마에바시",
+   "names": {
+    "aliases": [
+     "前橋",
+     "maebashi"
+    ]
+   },
+   "codes": {
+    "joCode": "01"
+   },
+   "geo": {
+    "lat": 36.3814,
+    "lon": 139.0664
+   },
+   "amedas": {
+    "station": "42251",
+    "name": "前橋",
+    "km": 2.69,
+    "lat": 36.405,
+    "lon": 139.06
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "모리오카": {
+   "key": "모리오카",
+   "names": {
+    "aliases": [
+     "盛岡",
+     "morioka",
+     "mori"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 39.7208,
+    "lon": 141.1919
+   },
+   "amedas": {
+    "station": "33431",
+    "name": "盛岡",
+    "km": 3.4,
+    "lat": 39.6983,
+    "lon": 141.165
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map",
+    "WEATHER_VENUES"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "몬베츠": {
+   "key": "몬베츠",
+   "names": {
+    "aliases": [
+     "門別",
+     "monbetsu",
+     "mombetsu",
+     "monb"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 42.4881,
+    "lon": 142.0189
+   },
+   "amedas": {
+    "station": "22141",
+    "name": "日高門別",
+    "km": 2.98,
+    "lat": 42.4967,
+    "lon": 142.0533
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map",
+    "starters_store"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "미즈사와": {
+   "key": "미즈사와",
+   "names": {
+    "aliases": [
+     "水沢",
+     "mizusawa",
+     "mizu"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 39.1481,
+    "lon": 141.1522
+   },
+   "amedas": {
+    "station": "33781",
+    "name": "江刺",
+    "km": 4.0,
+    "lat": 39.1833,
+    "lon": 141.1617
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "부산": {
+   "key": "부산",
+   "names": {},
+   "codes": {},
+   "geo": null,
+   "amedas": null,
+   "sport": null,
+   "_sources": [
+    "WEATHER_VENUES",
+    "starters_store"
+   ],
+   "verified": {}
+  },
+  "사가": {
+   "key": "사가",
+   "names": {
+    "aliases": [
+     "佐賀",
+     "saga"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 33.3106,
+    "lon": 130.2464
+   },
+   "amedas": {
+    "station": "85142",
+    "name": "佐賀",
+    "km": 7.44,
+    "lat": 33.265,
+    "lon": 130.305
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "사세보": {
+   "key": "사세보",
+   "names": {
+    "aliases": [
+     "佐世保",
+     "sasebo"
+    ]
+   },
+   "codes": {
+    "joCode": "85"
+   },
+   "geo": {
+    "lat": 33.175,
+    "lon": 129.7256
+   },
+   "amedas": {
+    "station": "84266",
+    "name": "佐世保",
+    "km": 1.86,
+    "lat": 33.1583,
+    "lon": 129.7267
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map",
+    "schedule(today)"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "삿포로": {
+   "key": "삿포로",
+   "names": {
+    "aliases": [
+     "札幌",
+     "sapporo",
+     "sapp"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 43.0919,
+    "lon": 141.3283
+   },
+   "amedas": {
+    "station": "14163",
+    "name": "札幌",
+    "km": 3.55,
+    "lat": 43.06,
+    "lon": 141.3283
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "서울": {
+   "key": "서울",
+   "names": {},
+   "codes": {},
+   "geo": null,
+   "amedas": null,
+   "sport": null,
+   "_sources": [
+    "WEATHER_VENUES"
+   ],
+   "verified": {}
+  },
+  "세이부엔": {
+   "key": "세이부엔",
+   "names": {
+    "aliases": [
+     "西武園",
+     "seibuen"
+    ]
+   },
+   "codes": {
+    "joCode": "26"
+   },
+   "geo": {
+    "lat": 35.7719,
+    "lon": 139.4489
+   },
+   "amedas": {
+    "station": "43266",
+    "name": "所沢",
+    "km": 3.21,
+    "lat": 35.7733,
+    "lon": 139.4133
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "소노다": {
+   "key": "소노다",
+   "names": {
+    "aliases": [
+     "園田",
+     "sonoda",
+     "sono"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 34.7581,
+    "lon": 135.3878
+   },
+   "amedas": {
+    "station": "62051",
+    "name": "豊中",
+    "km": 5.4,
+    "lat": 34.7833,
+    "lon": 135.4383
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map",
+    "schedule(today)",
+    "starters_store"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "시즈오카": {
+   "key": "시즈오카",
+   "names": {
+    "aliases": [
+     "静岡",
+     "shizuoka"
+    ]
+   },
+   "codes": {
+    "joCode": "38"
+   },
+   "geo": {
+    "lat": 34.9808,
+    "lon": 138.4064
+   },
+   "amedas": {
+    "station": "50331",
+    "name": "静岡",
+    "km": 0.7,
+    "lat": 34.975,
+    "lon": 138.4033
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "아오모리": {
+   "key": "아오모리",
+   "names": {
+    "aliases": [
+     "青森",
+     "aomori"
+    ]
+   },
+   "codes": {
+    "joCode": "12"
+   },
+   "geo": {
+    "lat": 40.8272,
+    "lon": 140.7539
+   },
+   "amedas": {
+    "station": "31312",
+    "name": "青森",
+    "km": 1.36,
+    "lat": 40.8217,
+    "lon": 140.7683
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map",
+    "schedule(today)",
+    "starters_store"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "야히코": {
+   "key": "야히코",
+   "names": {
+    "aliases": [
+     "弥彦",
+     "yahiko"
+    ]
+   },
+   "codes": {
+    "joCode": "21"
+   },
+   "geo": {
+    "lat": 37.7061,
+    "lon": 138.83
+   },
+   "amedas": {
+    "station": "54387",
+    "name": "寺泊",
+    "km": 9.22,
+    "lat": 37.64,
+    "lon": 138.7667
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map",
+    "schedule(today)",
+    "starters_store"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "에도가와": {
+   "key": "에도가와",
+   "names": {
+    "aliases": [
+     "江戸川",
+     "edogawa"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 35.7069,
+    "lon": 139.8767
+   },
+   "amedas": {
+    "station": "44136",
+    "name": "江戸川臨海",
+    "km": 7.72,
+    "lat": 35.6383,
+    "lon": 139.8633
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "오다와라": {
+   "key": "오다와라",
+   "names": {
+    "aliases": [
+     "小田原",
+     "odawara"
+    ]
+   },
+   "codes": {
+    "joCode": "36"
+   },
+   "geo": {
+    "lat": 35.2606,
+    "lon": 139.1622
+   },
+   "amedas": {
+    "station": "46166",
+    "name": "小田原",
+    "km": 1.9,
+    "lat": 35.2767,
+    "lon": 139.155
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "오비히로": {
+   "key": "오비히로",
+   "names": {
+    "aliases": [
+     "帯広",
+     "obihiro",
+     "obi"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 42.92,
+    "lon": 143.2
+   },
+   "amedas": {
+    "station": "20432",
+    "name": "帯広",
+    "km": 0.97,
+    "lat": 42.9217,
+    "lon": 143.2117
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "오이": {
+   "key": "오이",
+   "names": {
+    "aliases": [
+     "大井",
+     "ooi",
+     "oi"
+    ]
+   },
+   "codes": {
+    "narBaba": "20"
+   },
+   "geo": {
+    "lat": 35.5928,
+    "lon": 139.7461
+   },
+   "amedas": {
+    "station": "44166",
+    "name": "羽田",
+    "km": 5.35,
+    "lat": 35.5533,
+    "lon": 139.78
+   },
+   "sport": "horse",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "NAR_NANKAN_BABA",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "와카야마": {
+   "key": "와카야마",
+   "names": {
+    "aliases": [
+     "和歌山",
+     "wakayama"
+    ]
+   },
+   "codes": {
+    "joCode": "55"
+   },
+   "geo": {
+    "lat": 34.2311,
+    "lon": 135.1739
+   },
+   "amedas": {
+    "station": "65042",
+    "name": "和歌山",
+    "km": 1.02,
+    "lat": 34.2283,
+    "lon": 135.1633
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map",
+    "schedule(today)"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "우라와": {
+   "key": "우라와",
+   "names": {
+    "aliases": [
+     "浦和",
+     "urawa",
+     "ura"
+    ]
+   },
+   "codes": {
+    "narBaba": "18"
+   },
+   "geo": {
+    "lat": 35.8531,
+    "lon": 139.6606
+   },
+   "amedas": {
+    "station": "43241",
+    "name": "さいたま",
+    "km": 7.09,
+    "lat": 35.875,
+    "lon": 139.5867
+   },
+   "sport": "horse",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "NAR_NANKAN_BABA",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "우쓰노미야": {
+   "key": "우쓰노미야",
+   "names": {
+    "aliases": [
+     "宇都宮",
+     "utsunomiya"
+    ]
+   },
+   "codes": {
+    "joCode": "24"
+   },
+   "geo": {
+    "lat": 36.5658,
+    "lon": 139.9033
+   },
+   "amedas": {
+    "station": "41277",
+    "name": "宇都宮",
+    "km": 3.68,
+    "lat": 36.5483,
+    "lon": 139.8683
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "이와키타이라": {
+   "key": "이와키타이라",
+   "names": {
+    "aliases": [
+     "いわき平",
+     "いわき",
+     "iwakitaira",
+     "이와키",
+     "平"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 37.0553,
+    "lon": 140.8892
+   },
+   "amedas": {
+    "station": "36846",
+    "name": "小名浜",
+    "km": 12.14,
+    "lat": 36.9467,
+    "lon": 140.9033
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "이즈": {
+   "key": "이즈",
+   "names": {
+    "aliases": [
+     "伊豆",
+     "izu"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 35.0206,
+    "lon": 138.9269
+   },
+   "amedas": {
+    "station": "50206",
+    "name": "三島",
+    "km": 10.31,
+    "lat": 35.1133,
+    "lon": 138.925
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "이토": {
+   "key": "이토",
+   "names": {
+    "aliases": [
+     "伊東",
+     "ito",
+     "伊東温泉",
+     "이토온센"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 34.9711,
+    "lon": 139.0958
+   },
+   "amedas": {
+    "station": "50281",
+    "name": "網代",
+    "km": 8.23,
+    "lat": 35.045,
+    "lon": 139.0917
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "제주": {
+   "key": "제주",
+   "names": {},
+   "codes": {},
+   "geo": null,
+   "amedas": null,
+   "sport": null,
+   "_sources": [
+    "WEATHER_VENUES"
+   ],
+   "verified": {}
+  },
+  "추쿄": {
+   "key": "추쿄",
+   "names": {
+    "aliases": [
+     "中京",
+     "chukyo",
+     "chuk"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 35.0731,
+    "lon": 137.0022
+   },
+   "amedas": {
+    "station": "51216",
+    "name": "大府",
+    "km": 10.21,
+    "lat": 34.995,
+    "lon": 136.9433
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "카나자와": {
+   "key": "카나자와",
+   "names": {
+    "aliases": [
+     "金沢",
+     "kanazawa",
+     "kana"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 36.59,
+    "lon": 136.6428
+   },
+   "amedas": {
+    "station": "56227",
+    "name": "金沢",
+    "km": 0.87,
+    "lat": 36.5883,
+    "lon": 136.6333
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map",
+    "starters_store"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "카사마츠": {
+   "key": "카사마츠",
+   "names": {
+    "aliases": [
+     "笠松",
+     "kasamatsu",
+     "kasa"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 35.3706,
+    "lon": 136.7683
+   },
+   "amedas": {
+    "station": "52586",
+    "name": "岐阜",
+    "km": 3.32,
+    "lat": 35.4,
+    "lon": 136.7617
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "카와사키": {
+   "key": "카와사키",
+   "names": {
+    "aliases": [
+     "川崎",
+     "kawasaki",
+     "kawa"
+    ]
+   },
+   "codes": {
+    "narBaba": "21"
+   },
+   "geo": {
+    "lat": 35.5361,
+    "lon": 139.7031
+   },
+   "amedas": {
+    "station": "44166",
+    "name": "羽田",
+    "km": 7.22,
+    "lat": 35.5533,
+    "lon": 139.78
+   },
+   "sport": "horse",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "NAR_NANKAN_BABA",
+    "VENUE_LATLON",
+    "amedas_map",
+    "schedule(today)",
+    "starters_store"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "케이오카쿠": {
+   "key": "케이오카쿠",
+   "names": {
+    "aliases": [
+     "京王閣",
+     "keiokaku",
+     "케이오각"
+    ]
+   },
+   "codes": {
+    "joCode": "27"
+   },
+   "geo": {
+    "lat": 35.6497,
+    "lon": 139.5231
+   },
+   "amedas": {
+    "station": "44116",
+    "name": "府中",
+    "km": 5.19,
+    "lat": 35.6833,
+    "lon": 139.4833
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map",
+    "schedule(today)"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "코치": {
+   "key": "코치",
+   "names": {
+    "aliases": [
+     "高知",
+     "kochi",
+     "고치"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 33.5486,
+    "lon": 133.6117
+   },
+   "amedas": {
+    "station": "74188",
+    "name": "南国日章",
+    "km": 5.26,
+    "lat": 33.545,
+    "lon": 133.6683
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "코쿠라": {
+   "key": "코쿠라",
+   "names": {
+    "aliases": [
+     "小倉",
+     "kokura",
+     "koku"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 33.8214,
+    "lon": 130.8353
+   },
+   "amedas": {
+    "station": "82056",
+    "name": "八幡",
+    "km": 9.14,
+    "lat": 33.8517,
+    "lon": 130.7433
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "쿄토": {
+   "key": "쿄토",
+   "names": {
+    "aliases": [
+     "京都",
+     "kyoto"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 34.9022,
+    "lon": 135.7178
+   },
+   "amedas": {
+    "station": "61326",
+    "name": "京田辺",
+    "km": 8.9,
+    "lat": 34.83,
+    "lon": 135.76
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "하코다테": {
+   "key": "하코다테",
+   "names": {
+    "aliases": [
+     "函館",
+     "hakodate",
+     "hako"
+    ]
+   },
+   "codes": {
+    "joCode": "11"
+   },
+   "geo": {
+    "lat": 41.8058,
+    "lon": 140.7539
+   },
+   "amedas": {
+    "station": "23232",
+    "name": "函館",
+    "km": 1.21,
+    "lat": 41.8167,
+    "lon": 140.7533
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "한신": {
+   "key": "한신",
+   "names": {
+    "aliases": [
+     "阪神",
+     "hanshin",
+     "hans"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 34.7794,
+    "lon": 135.3617
+   },
+   "amedas": {
+    "station": "62051",
+    "name": "豊中",
+    "km": 7.01,
+    "lat": 34.7833,
+    "lon": 135.4383
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "호후": {
+   "key": "호후",
+   "names": {
+    "aliases": [
+     "防府",
+     "hofu"
+    ]
+   },
+   "codes": {
+    "joCode": "63"
+   },
+   "geo": {
+    "lat": 34.0511,
+    "lon": 131.5786
+   },
+   "amedas": {
+    "station": "81371",
+    "name": "防府",
+    "km": 4.35,
+    "lat": 34.04,
+    "lon": 131.5333
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map",
+    "schedule(today)",
+    "starters_store"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "후나바시": {
+   "key": "후나바시",
+   "names": {
+    "aliases": [
+     "船橋",
+     "funabashi",
+     "funa"
+    ]
+   },
+   "codes": {
+    "narBaba": "19"
+   },
+   "geo": {
+    "lat": 35.7017,
+    "lon": 139.995
+   },
+   "amedas": {
+    "station": "45106",
+    "name": "船橋",
+    "km": 4.5,
+    "lat": 35.7117,
+    "lon": 140.0433
+   },
+   "sport": "horse",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "NAR_NANKAN_BABA",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "후쿠시마": {
+   "key": "후쿠시마",
+   "names": {
+    "aliases": [
+     "福島",
+     "fukushima",
+     "fuku"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 37.7519,
+    "lon": 140.4497
+   },
+   "amedas": {
+    "station": "36127",
+    "name": "福島",
+    "km": 1.92,
+    "lat": 37.7583,
+    "lon": 140.47
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "히라츠카": {
+   "key": "히라츠카",
+   "names": {
+    "aliases": [
+     "平塚",
+     "hiratsuka",
+     "히라쓰카"
+    ]
+   },
+   "codes": {
+    "joCode": "35"
+   },
+   "geo": {
+    "lat": 35.3242,
+    "lon": 139.345
+   },
+   "amedas": {
+    "station": "46141",
+    "name": "辻堂",
+    "km": 9.54,
+    "lat": 35.32,
+    "lon": 139.45
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "히로시마": {
+   "key": "히로시마",
+   "names": {
+    "aliases": [
+     "広島",
+     "hiroshima"
+    ]
+   },
+   "codes": {
+    "joCode": "62"
+   },
+   "geo": {
+    "lat": 34.3892,
+    "lon": 132.5019
+   },
+   "amedas": {
+    "station": "67437",
+    "name": "広島",
+    "km": 3.83,
+    "lat": 34.3983,
+    "lon": 132.4617
+   },
+   "sport": "cycle",
+   "_sources": [
+    "_TRACK_GROUPS",
+    "KEIRIN_JO",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "joCode": "2026-07-31 RaceKekka <title> 확정",
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  },
+  "히메지": {
+   "key": "히메지",
+   "names": {
+    "aliases": [
+     "姫路",
+     "himeji",
+     "hime"
+    ]
+   },
+   "codes": {},
+   "geo": {
+    "lat": 34.8281,
+    "lon": 134.6683
+   },
+   "amedas": {
+    "station": "63383",
+    "name": "姫路",
+    "km": 1.15,
+    "lat": 34.8383,
+    "lon": 134.67
+   },
+   "sport": null,
+   "_sources": [
+    "_TRACK_GROUPS",
+    "VENUE_LATLON",
+    "amedas_map"
+   ],
+   "verified": {
+    "geo": "2026-07-31 아메다스 매핑 검증(전 경기장 20km 이내)"
+   }
+  }
+ }
+}
