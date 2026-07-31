@@ -776,6 +776,88 @@ def check_file_duplicate():
                     % (len(dup), worst, _INTEG_DAYS))
 
 
+# ══════════════ 🔴 스냅샷 유입 감시 (2026-08-01 · 승인 A안) ══════════════
+#   배경: 배당판 PNG 스냅샷이 **2026-07-30 18:25 이후 0장**이었는데 **이틀간 아무도 몰랐다.**
+#     스냅샷은 서버가 만들지 않는다 — 확장 오버레이가 화면을 캡처해 POST 한다.
+#     ⇒ 서버는 "안 온 요청"을 알 방법이 **구조적으로 없었다.** 그게 이 항목의 존재 이유다.
+#
+#   🔴 판정 단위를 **"연속 N경주 0장"으로 잡으면 안 된다** — 오탐이 쏟아진다.
+#     스냅샷은 사람이 그 배당판 탭을 **포그라운드로 열어둔 경주에만** 찍힌다.
+#     실측(7/30): 카드 108건 중 스냅샷 보유 26건 = **24%**. 즉 평소에도 **연속 0장이 정상**이다.
+#   ⇒ 단위는 **"당일 전체"**: 발주완료 경주가 N건 이상인데 **당일 스냅샷 총 0장**이면 이상.
+#     이 기준은 7/31·8/1(0장)을 잡고 7/30(75장)은 안 잡는다.
+SNAPSHOT_INGEST_MIN_RACES = 10   # N — 하루 발주완료가 100~130건이라 10이면 오전 중 걸린다.
+#   ⚠ 너무 작으면(예: 3) 개최가 거의 없는 날 오탐, 크면(예: 50) 오후까지 못 잡는다.
+#     10 = "오전 한나절을 통째로 놓쳤다"는 뜻이라 사람이 개입할 시간이 남는다.
+
+
+def _posted_races_today(now=None):
+    """오늘 **발주가 지난** 경주 수 — data/today_schedule.json 의 postEpoch 기준(읽기 전용)."""
+    now = now or time.time()
+    p = os.path.join(BASE, "data", "today_schedule.json")
+    try:
+        d = json.load(open(p, encoding="utf-8"))
+    except Exception:
+        return 0
+    n = 0
+    for t in (d.get("tracks") or []):
+        for r in (t.get("races") or []):
+            try:
+                if float(r.get("postEpoch") or 0) <= now:
+                    n += 1
+            except Exception:
+                continue
+    return n
+
+
+def snapshot_ingest_counts(day=None):
+    """(당일 스냅샷 PNG 수, 마지막 저장 시각, 발주완료 경주 수) — D안 API 와 공유한다."""
+    day = day or time.strftime("%Y_%m_%d")
+    sd = os.path.join(BASE, "data", "snapshots")
+    cnt, last = 0, None
+    try:
+        for f in os.listdir(sd):
+            if not f.lower().endswith(".png"):
+                continue
+            if f.startswith(day):
+                cnt += 1
+            try:
+                mt = os.path.getmtime(os.path.join(sd, f))
+                if last is None or mt > last:
+                    last = mt
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return cnt, last, _posted_races_today()
+
+
+def check_snapshot_ingest():
+    """🔴 I6 배당판 스냅샷 유입(당일) — 0장이면 회원 화면 경주기록에 이미지가 안 뜬다.
+
+    ⚠ ID 를 `I5` 로 쓰지 않는다 — `I5`(파일 중복)는 회귀 테스트로 이관되며 제거된 번호다.
+      번호를 재사용하면 과거 기록과 대조가 깨진다.
+    """
+    cnt, last, posted = snapshot_ingest_counts()
+    age_h = round((time.time() - last) / 3600.0, 1) if last else None
+    den = "당일 발주완료 경주 %d건(today_schedule postEpoch 기준) · 판정선 %d건 이상" % (
+        posted, SNAPSHOT_INGEST_MIN_RACES)
+    note = "마지막 스냅샷 %s (%s시간 전)" % (
+        time.strftime("%m-%d %H:%M", time.localtime(last)) if last else "없음", age_h)
+    if posted < SNAPSHOT_INGEST_MIN_RACES:
+        return _mk("I6", "🔴 무결성", "배당판 스냅샷 유입(당일)", den, current=cnt, target="≥ 1",
+                   ok=None, n=posted, note=note,
+                   reason="⏳ 판정 보류 — 발주완료 %d건 < %d건(개최 적은 시간대)" % (
+                       posted, SNAPSHOT_INGEST_MIN_RACES))
+    if cnt > 0:
+        return _mk("I6", "🔴 무결성", "배당판 스냅샷 유입(당일)", den, current=cnt, target="≥ 1",
+                   ok=True, n=posted, note=note)
+    return _mk("I6", "🔴 무결성", "배당판 스냅샷 유입(당일)", den, current=0, target="≥ 1",
+               ok=False, n=posted, note=note,
+               reason="🔴 발주완료 %d경주인데 당일 스냅샷 0장 — 확장 오버레이가 캡처를 안 보내고 있다. "
+                      "후보: ⓐ배당판 탭이 포그라운드가 아님 ⓑ오버레이 OFF ⓒtimerDeadline 미갱신" % posted)
+
+
 def build_checklist():
     """반환 dict 의 **최상단에 `summary` 계열을 배치**한다(모바일에서 먼저 보이도록).
     ⚠ 응답은 `ensure_ascii=False` + UTF-8 로 내보낼 것 — `\\uCda9\\uC871` 로 깨지면 외부에서 못 쓴다."""
@@ -785,6 +867,7 @@ def build_checklist():
              check_score_decomposition(), check_freeze_success(), check_module_load(),
              # 🔴 무결성 감시(매일·자동) — 성능 측정과 성격이 다르다. 절대 줄이지 않는다.
              check_payout_coverage(), check_backup_alive(), check_daemon_alive(),
+             check_snapshot_ingest(),   # 🔴 I6 (2026-08-01 승인 A안) — 조용한 중단 재발 차단
              check_measurable_today(),   # ⚠ I5(파일 중복)는 제거 — 중복 자체는 정상이라
              #    영원히 빨간불이 되고 그러면 무시하게 된다. → tests/run_glob_safety.py 로 이관.
              check_forecast_discard(), check_forecast_vs_market()]

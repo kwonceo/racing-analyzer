@@ -2976,13 +2976,49 @@ def _snapshot_signal_first(rk):
     return None
 
 
-def _snapshot_metas_for_race(rk):
-    """[비교분석] 이 raceKey 로 저장된 스냅샷 메타를 단계(trigger)별로 수집 → {'T-10':meta, 'T-2':meta, 'close':meta}."""
+def _snapshot_dates_for_race(rk):
+    """[2026-08-01 신설] 이 raceKey 로 스냅샷이 존재하는 **날짜 목록**(최신순)."""
+    out = set()
+    try:
+        for fn in os.listdir(SNAPSHOT_DIR):
+            if not fn.lower().endswith(".png"):
+                continue
+            try:
+                meta = json.load(open(_snapshot_meta_path(fn), encoding="utf-8"))
+            except Exception:
+                continue
+            if (meta.get("raceKey") or "") != (rk or ""):
+                continue
+            d = _snap_date_of(fn, meta)
+            if d:
+                out.add(d)
+    except FileNotFoundError:
+        pass
+    return sorted(out, reverse=True)
+
+
+def _snapshot_metas_for_race(rk, date=None):
+    """[비교분석] 이 raceKey 로 저장된 스냅샷 메타를 단계(trigger)별로 수집 → {'T-10':meta, 'T-2':meta, 'close':meta}.
+
+    🔴 [2026-08-01 실오염 수정] `date`(YYYY-MM-DD) 인자 신설 — **다른 날짜 파일은 섞지 않는다.**
+      실측: 이 함수가 날짜 없이 모으는 바람에 `snapshot_compare` 114개 중 **8개(7.0%)** 가
+      다른 날짜를 짝지었다. 예) `나고야 11경주` — T-10·T-2 는 07-29 인데 **마감후가 07-15**,
+      그 짝으로 계산된 `"최저배당 변화 -56.7%"` 가 저장되고 `snapshot_timing.json`(타이밍 학습)에 들어갔다.
+      **표시가 아니라 계산된 판정값이 오염된 것이다.**
+    ⚠ `date=None` 이면 **가장 최근 날짜 하나로 자동 고정**한다(여러 날을 섞지 않는다).
+      종전처럼 "전부 훑어서 trigger 별 최신"을 고르는 동작으로는 **절대 되돌리지 않는다.**
+    """
     stage = {}
     try:
         files = os.listdir(SNAPSHOT_DIR)
     except FileNotFoundError:
         return stage
+    _d = (date or "").strip().replace("_", "-")[:10]
+    if not re.match(r"^\d{4}-\d{2}-\d{2}$", _d):
+        _ds = _snapshot_dates_for_race(rk)
+        if not _ds:
+            return stage
+        _d = _ds[0]                                  # 날짜 미지정 → 최신 날짜 하나로 고정
     for fn in files:
         if not fn.lower().endswith(".png"):
             continue
@@ -2992,18 +3028,40 @@ def _snapshot_metas_for_race(rk):
             continue
         if (meta.get("raceKey") or "") != (rk or ""):
             continue
+        if _snap_date_of(fn, meta) != _d:
+            continue                                 # 🔴 날짜가 다르면 버린다(핵심)
         tg = meta.get("trigger") or ""
         if tg in ("T-10", "T-2", "close") and (tg not in stage or (meta.get("at") or "") > (stage[tg].get("at") or "")):
             stage[tg] = meta
     return stage
 
 
-def _snapshot_build_compare(rk):
+def _snapshot_compare_path(rk, date=None):
+    """🔴 [2026-08-01] 비교분석 저장 경로 — **파일명에 날짜를 넣는다**(원인 ⓑ).
+
+    종전: `snapshot_compare/<raceKey>.json` — 날짜가 없어 **같은 경주의 다른 날이 서로를 덮었다.**
+      ⓐ(날짜 없이 모으기)만 고치고 ⓑ를 두면, 다음 개최일에 그 파일이 또 덮여 **다시 섞인다.**
+    신규: `snapshot_compare/<YYYY-MM-DD>_<raceKey>.json`
+    ⚠ 구 파일명(날짜 없음)도 **읽기는 계속 지원**한다(무삭제·하위호환).
+    """
+    safe = re.sub(r"[^\w가-힣]+", "_", rk or "race").strip("_")[:120]
+    _d = (date or "").strip().replace("_", "-")[:10]
+    if re.match(r"^\d{4}-\d{2}-\d{2}$", _d):
+        return os.path.join(SNAPSHOT_COMPARE_DIR, "%s_%s.json" % (_d, safe)), safe
+    return os.path.join(SNAPSHOT_COMPARE_DIR, safe + ".json"), safe      # 구 경로(하위호환)
+
+
+def _snapshot_build_compare(rk, date=None):
     """[비교분석 자동 저장] 3단계(T-10/T-2/마감후) 스냅샷이 모이면 배당·추천 변화량을 산출·저장.
-    구조: {"T-10":{최저배당·추천}, "T-2":{최저배당·추천}, "마감후":{최종 최저배당}, "변화량":{...}}."""
-    stage = _snapshot_metas_for_race(rk)
+    구조: {"T-10":{최저배당·추천}, "T-2":{최저배당·추천}, "마감후":{최종 최저배당}, "변화량":{...}}.
+
+    🔴 [2026-08-01] `date` 인자 신설 — 한 날짜 안에서만 짝짓는다. 저장 파일명에도 날짜가 들어간다.
+    """
+    stage = _snapshot_metas_for_race(rk, date)
     if "close" not in stage:                       # 마감후 스냅샷 없으면 아직 미완(추후 재호출)
         return None
+    # 실제로 쓰인 날짜를 스냅샷 파일명에서 되읽는다(호출부가 date 를 안 줘도 기록에는 날짜가 남는다).
+    _used = _snap_date_of((stage["close"] or {}).get("filename") or "", stage["close"]) or (date or "")
     t10, t2, close = stage.get("T-10"), stage.get("T-2"), stage["close"]
 
     def _pack(meta):
@@ -3029,6 +3087,7 @@ def _snapshot_build_compare(rk):
         rec_changed = _snapshot_main_combos(t10.get("quinellas")) != _snapshot_main_combos(t2.get("quinellas"))
     compare = {
         "raceKey": rk, "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "raceDate": _used or None,                 # 🔴 어느 날 경주인지 문서 안에도 남긴다
         "T-10": p10, "T-2": p2, "마감후": pc,
         "변화량": {
             "최저배당 변화": ("%+.1f%%" % change_pct) if change_pct is not None else None,
@@ -3038,9 +3097,8 @@ def _snapshot_build_compare(rk):
     }
     try:
         os.makedirs(SNAPSHOT_COMPARE_DIR, exist_ok=True)
-        safe = re.sub(r"[^\w가-힣]+", "_", rk or "race").strip("_")[:120]
-        json.dump(compare, open(os.path.join(SNAPSHOT_COMPARE_DIR, safe + ".json"), "w", encoding="utf-8"),
-                  ensure_ascii=False, indent=1)
+        _p, _safe = _snapshot_compare_path(rk, _used)
+        json.dump(compare, open(_p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     except Exception as e:
         print("[스냅샷 비교] 저장 실패:", e)
     _snapshot_timing_learn(rk, compare, stage)
@@ -3150,7 +3208,8 @@ def snapshot_save():
     compare = None
     if meta["trigger"] == "close" and meta["raceKey"]:    # [3단계 완료] 마감직후 → 비교분석 자동 산출·저장
         try:
-            compare = _snapshot_build_compare(meta["raceKey"])
+            # 🔴 방금 저장한 파일의 날짜로 고정 — 같은 경주의 지난 개최분과 섞이지 않게.
+            compare = _snapshot_build_compare(meta["raceKey"], _snap_date_of(fn, meta))
         except Exception as e:
             print("[스냅샷 비교] 산출 실패:", e)
     return jsonify({"ok": True, "filename": fn, "sizeBytes": len(raw), "compare": compare})
@@ -3199,16 +3258,24 @@ def snapshot_compare_api():
     """[3단계 비교분석] raceKey 지정 시 그 경주 비교(?raceKey=...), 없으면 저장된 전 비교 목록(최신순).
     각 경주의 T-10/T-2/마감후 배당·추천 + 변화량(최저배당 변화·추천 변경 여부·신호 발생 시점)."""
     rk = (request.args.get("raceKey") or "").strip()
+    # 🔴 [2026-08-01] `?date=YYYY-MM-DD` 신설. **없으면 그 경주의 최신 날짜**로 고정한다
+    #   (종전처럼 여러 날을 섞지 않는다). 기존 호출은 date 없이도 그대로 동작한다.
+    _qd = (request.args.get("date") or "").strip().replace("_", "-")[:10]
     if rk:
-        safe = re.sub(r"[^\w가-힣]+", "_", rk).strip("_")[:120]
-        path = os.path.join(SNAPSHOT_COMPARE_DIR, safe + ".json")
-        if os.path.exists(path):
-            try:
-                return jsonify({"ok": True, "compare": json.load(open(path, encoding="utf-8"))})
-            except Exception as e:
-                return jsonify({"ok": False, "error": str(e)}), 500
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", _qd):
+            _ds = _snapshot_dates_for_race(rk)
+            _qd = _ds[0] if _ds else ""
+        path, safe = _snapshot_compare_path(rk, _qd)
+        # 신규(날짜 포함) → 없으면 구 파일명(날짜 없음) 순으로 읽는다(무삭제·하위호환).
+        _legacy = os.path.join(SNAPSHOT_COMPARE_DIR, safe + ".json")
+        for _p in (path, _legacy):
+            if os.path.exists(_p):
+                try:
+                    return jsonify({"ok": True, "compare": json.load(open(_p, encoding="utf-8"))})
+                except Exception as e:
+                    return jsonify({"ok": False, "error": str(e)}), 500
         # 아직 저장 전이면 즉석 산출 시도(3단계 미완이면 None)
-        return jsonify({"ok": True, "compare": _snapshot_build_compare(rk)})
+        return jsonify({"ok": True, "compare": _snapshot_build_compare(rk, _qd)})
     out = []
     try:
         for fn in os.listdir(SNAPSHOT_COMPARE_DIR):
@@ -3222,6 +3289,60 @@ def snapshot_compare_api():
         pass
     out.sort(key=lambda x: x.get("at") or "", reverse=True)
     return jsonify({"ok": True, "compares": out, "count": len(out)})
+
+
+@app.route("/api/snapshot/health", methods=["GET"])
+def snapshot_health_api():
+    """🔴 [2026-08-01 · 승인 D안] 배당판 스냅샷 유입 진단 — **완전 읽기 전용**.
+
+    왜: 스냅샷이 2026-07-30 18:25 이후 0장이었는데 **이틀간 아무도 몰랐다.**
+      서버는 스냅샷을 만들지 않는다(확장 오버레이가 캡처해 POST) → "안 온 요청"을 알 수 없었다.
+    ⚠ 원인을 서버가 단정할 수는 없다. **사유 후보를 나열**해 1분 안에 판별하게 하는 것이 목적이다.
+    """
+    try:
+        from tools.health_check import snapshot_ingest_counts, SNAPSHOT_INGEST_MIN_RACES
+        cnt, last, posted = snapshot_ingest_counts()
+    except Exception as e:
+        return jsonify({"ok": False, "error": "진단 모듈 로드 실패: %s" % str(e)[:120]}), 500
+    now = time.time()
+    age_h = round((now - last) / 3600.0, 1) if last else None
+    d24 = 0
+    try:
+        for f in os.listdir(SNAPSHOT_DIR):
+            if f.lower().endswith(".png") and (now - os.path.getmtime(os.path.join(SNAPSHOT_DIR, f))) <= 86400:
+                d24 += 1
+    except Exception:
+        pass
+    causes = []
+    if d24 == 0:
+        # ⚠ 순서가 곧 확인 순서다 — 위에서부터 보면 가장 빨리 갈린다.
+        causes = [
+            "ⓐ 배당판 탭이 **포그라운드가 아니었다** — `captureVisibleTab` 은 보이는 탭만 찍는다."
+            " 사람이 그 화면을 열어두고 있어야 한다(설계 한계·버그 아님).",
+            "ⓑ 오버레이가 **꺼져 있다**(칩 ✕/토글) — 꺼지면 패널이 사라지고 캡처 판정 코드 자체가 안 돈다."
+            " 수집은 content.js 라 계속되므로 **배당은 정상인데 스냅샷만 0장**이 된다.",
+            "ⓒ 확장 `timerDeadline` 이 **0 이거나 지난 경주 값으로 굳었다** —"
+            " T-10/T-2/마감후 세 분기가 전부 건너뛰어진다(조용한 실패).",
+            "ⓓ 브라우저가 꺼져 있었다.",
+        ]
+    # ⚠ CLAUDE.md 규칙 — 한글이 `충족` 로 깨지면 외부에서 못 쓴다. ensure_ascii=False 로 낸다.
+    _payload = {
+        "ok": True,
+        "today": {"snapshots": cnt, "postedRaces": posted,
+                  "minRacesToJudge": SNAPSHOT_INGEST_MIN_RACES},
+        "last24h": d24,
+        "lastSnapshotAt": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(last)) if last else None,
+        "lastSnapshotAgeHours": age_h,
+        "status": ("🔴 유입 없음" if d24 == 0 else "🟢 정상"),
+        "causeCandidates": causes,
+        "checkOnBoardTab": ("배당판 탭 개발자도구 콘솔에서: "
+                            "chrome.storage.local.get(['overlayEnabled','timerDeadline',"
+                            "'deadlineSource','autoDeadlineRaceKey'],o=>console.log(o,"
+                            "'남은분=',((o.timerDeadline||0)-Date.now())/60000))"),
+        "note": "완전 읽기 전용 — 이 API 는 아무것도 저장·변경하지 않는다.",
+    }
+    return Response(json.dumps(_payload, ensure_ascii=False, indent=1),
+                    mimetype="application/json; charset=utf-8")
 
 
 @app.route("/api/snapshot/timing", methods=["GET"])
@@ -17942,6 +18063,9 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
         print("[보조조합 학습] 실패(무시):", e)
 
     # [배당판 3단계 캡처] 결과 확정 → T-10 추천 vs T-2 추천 타이밍 학습 재집계(마감직후엔 착순이 없어 보류됐던 것)
+    # ⚠ [2026-08-01] 이 스코프에는 날짜 변수가 없다. `date=None` 이면
+    #   `_snapshot_metas_for_race` 가 **그 경주의 최신 날짜 하나로 자동 고정**하므로 여러 날이 섞이지 않는다
+    #   (결과 확정 시점 호출이라 '최신 개최분'이 곧 지금 확정된 그 경주다).
     try:
         if "close" in _snapshot_metas_for_race(rk):
             _snapshot_build_compare(rk)
