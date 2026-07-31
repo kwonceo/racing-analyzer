@@ -15771,13 +15771,43 @@ def _start_periodic_backup(interval=None):
     _periodic_backup_started = True
     iv = int(interval or _PERIODIC_BACKUP_INTERVAL)
 
+    # 🔴 [sleep-first 수정 (2026-07-31)] 종전 구조는 `while True: time.sleep(iv)` 로 **먼저 잤다**.
+    #   개발 중 리로드가 잦아 6시간을 못 채우고 재기동되므로 **한 번도 실행되지 않았다**
+    #   (실측: 서버 로그에 "[주기백업] … 스레드 시작" 1줄뿐, 실제 백업 실행 로그 0줄).
+    #   ⇒ 마지막 실행 시각을 **파일에 남기고**, 재기동 시 경과를 반영해 즉시 실행 여부를 판단한다.
+    #   ⚠ 백업이 없어서 와카야마 8R 19틱이 영구 소실됐다. 이 수정이 그 재발을 막는다.
+    _stamp = os.path.join(os.path.dirname(__file__), "data", "_periodic_backup_last.txt")
+
+    def _last_run():
+        try:
+            return float(open(_stamp, encoding="utf-8").read().strip())
+        except Exception:
+            return 0.0
+
+    def _mark_run():
+        try:
+            os.makedirs(os.path.dirname(_stamp), exist_ok=True)
+            tmp = _stamp + ".tmp%d" % os.getpid()
+            with open(tmp, "w", encoding="utf-8") as f:
+                f.write("%.0f" % time.time())
+            os.replace(tmp, _stamp)
+        except Exception as e:
+            print("[주기백업] 실행시각 기록 실패(무시):", str(e)[:80])
+
     def _loop():
         while True:
             try:
-                time.sleep(iv)
-                _run_data_git_backup(f"주기적 안전 백업({iv // 3600}시간)")
+                _el = time.time() - _last_run()
+                if _el >= iv:
+                    print("[주기백업] 마지막 실행 후 %.1f시간 경과 → 즉시 실행" % (_el / 3600.0))
+                    _run_data_git_backup(f"주기적 안전 백업({iv // 3600}시간)")
+                    _mark_run()
+                    time.sleep(iv)
+                else:
+                    time.sleep(max(60.0, iv - _el))   # 남은 시간만 자고 다시 판단
             except Exception as e:
                 print("[주기백업] 예외:", e)
+                time.sleep(60)
 
     t = threading.Thread(target=_loop, daemon=True)
     t.start()
@@ -25567,9 +25597,26 @@ def _jp_result_backfill_once(date=None, verbose=True):
                 fail_list.append({"raceKey": rk, "error": "결과 미게시/파싱 실패"})
                 continue
             result = {"1st": top3[0], "2nd": top3[1], "3rd": top3[2]}
+            # 🔴 [경마 확정배당 배선 (2026-07-31)] 종전에는 착순만 저장하고 `payouts` 를 만들지 않아
+            #   경마 확정배당 보유가 **0.9%(6/654)** 였다 — 경륜은 같은 시점 100% 였다.
+            #   파서(`_keiba_result_payouts`)는 **이미 있었고 다른 두 곳에서 호출 중**인데
+            #   결과 백필 경로에서만 빠져 있었다("파싱은 되는데 저장에서 탈락" 유형).
+            #   ⚠ 값은 `馬連複 … N円` ÷ 100 = **공제 후 실지급 배당**이다(배당판 오즈가 아니다).
+            #   ⚠ 실패해도 착순 저장은 그대로 진행한다(기존 경로 무영향).
+            try:
+                _po = _keiba_result_payouts(baba, ymd, str(rno)) or {}
+                if _po.get("quinella") is not None or _po.get("trifecta") is not None:
+                    result["payouts"] = {}
+                    if _po.get("quinella") is not None:
+                        result["payouts"]["quinella"] = _po["quinella"]
+                    if _po.get("trifecta") is not None:
+                        result["payouts"]["trifecta"] = _po["trifecta"]
+            except Exception as _pe:
+                print("[일본 결과 백필] 환급 조회 실패(무시):", str(_pe)[:80])
             _apply_result_learning(rk, result, top3)
             filled += 1
-            done_list.append({"raceKey": rk, "top3": top3})
+            done_list.append({"raceKey": rk, "top3": top3,
+                              "payouts": result.get("payouts")})
         except Exception as e:
             fail_list.append({"raceKey": rk, "error": str(e)})
     if verbose and (tried or filled):
