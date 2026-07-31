@@ -19699,9 +19699,39 @@ def timeline_snapshot_get(race_key):
 #   TTL 60초 — 스냅샷은 경주 중에만 새로 생기므로 이 정도면 화면 갱신에 지장 없다.
 _SNAP_INDEX = {"t": 0.0, "map": {}}
 
+# 🔴 [2026-08-01 실사고 수정] 스냅샷 인덱스 키에 **날짜를 넣는다**.
+#   증상: 7월 31일로 검색·클릭했는데 **7월 14일 스냅샷**이 떴다.
+#   원인: `raceKey` 는 `"나고야 11경주"` 로 **날짜가 없다**. 같은 경기장이 여러 날 개최되므로
+#         한 키에 여러 날 파일이 겹쳤고, `setdefault("_any", fn)` 이 `os.listdir` 순서(파일명 오름차순)
+#         **첫 번째 = 가장 오래된 날짜**로 굳었다. 카드가 찾는 `T-5` 가 없으면 그 `_any` 가 나갔다.
+#   실측(2026-08-01): raceKey 157종 중 **31종(19.7%)이 여러 날짜에 걸쳐 있다**.
+#         ⚠ CLAUDE.md 의 "126종(80.3%)" 은 **파일 2개 이상인 raceKey 수**이지 날짜 교차 수가 아니다 — 정정.
+#   ⇒ 키를 `"YYYY-MM-DD|raceKey"` 로 바꾸고 **날짜를 넘지 않는다.**
+#   ⚠ 날짜 출처: 파일명 접두 `YYYY_MM_DD_` (434장 **100%** 존재 · meta["at"] 과 **100% 일치** 실측).
+_SNAP_DATE_PFX = re.compile(r"^(\d{4})[_-](\d{2})[_-](\d{2})[_-]")
+
+
+def _snap_date_of(fn, meta=None):
+    """스냅샷 파일의 날짜(YYYY-MM-DD). 파일명 접두 우선, 없으면 meta['at'] 앞 10자."""
+    g = _SNAP_DATE_PFX.match(fn or "")
+    if g:
+        return "%s-%s-%s" % g.groups()
+    at = ((meta or {}).get("at") or "")[:10].replace("_", "-").replace("/", "-")
+    return at if re.match(r"^\d{4}-\d{2}-\d{2}$", at) else ""
+
+
+def _snap_key(date, rk):
+    """인덱스 키 — 날짜를 반드시 포함한다."""
+    return "%s|%s" % ((date or "").strip(), (rk or "").strip())
+
 
 def _snapshot_index(ttl=60):
-    """{raceKey: {trigger: 파일명, '_any': 파일명}} — 실패 시 빈 dict(호출부가 기존 스캔으로 폴백)."""
+    """{'YYYY-MM-DD|raceKey': {trigger: 파일명, '_sameday': 파일명}} — 실패 시 빈 dict.
+
+    🔴 `'_any'`(날짜 무시 폴백) 는 **제거**했다. 남은 `'_sameday'` 는 **같은 날짜 안에서만** 쓰는
+      trigger 폴백이다 — 같은 경주·같은 날의 다른 촬영 시점이므로 다른 날 데이터가 섞이지 않는다.
+      (원칙: **틀린 데이터보다 없는 게 낫다.** 회원 공개 경로다 — `/api/snapshot/get`·`list`.)
+    """
     now = time.time()
     if _SNAP_INDEX["map"] and (now - _SNAP_INDEX["t"]) < ttl:
         return _SNAP_INDEX["map"]
@@ -19718,10 +19748,11 @@ def _snapshot_index(ttl=60):
             except Exception:
                 continue
             _rk = (meta.get("raceKey") or "").strip()
-            if not _rk:
-                continue
-            e = m.setdefault(_rk, {})
-            e.setdefault("_any", fn)
+            _dt = _snap_date_of(fn, meta)
+            if not _rk or not _dt:
+                continue                          # 날짜를 못 구하면 **넣지 않는다**(추측 금지)
+            e = m.setdefault(_snap_key(_dt, _rk), {})
+            e.setdefault("_sameday", fn)          # ⚠ 같은 날짜 버킷 안에서만 유효
             if meta.get("trigger"):
                 e[str(meta["trigger"])] = fn
     except Exception:
@@ -19730,15 +19761,23 @@ def _snapshot_index(ttl=60):
     return m
 
 
-def _day_snapshot_for(rk, trigger="T-5"):
-    """해당 경주의 지정 trigger 스냅샷 파일명 반환(없으면 T-10 등 폴백). 이미지 URL 조립용."""
+def _day_snapshot_for(rk, trigger="T-5", date=None):
+    """해당 **날짜**·경주의 지정 trigger 스냅샷 파일명 반환. 이미지 URL 조립용.
+
+    🔴 [2026-08-01] `date`(YYYY-MM-DD) 인자 신설. **다른 날짜 파일은 절대 반환하지 않는다.**
+    ⚠ `date` 를 안 주면(구 호출부) 날짜를 특정할 수 없으므로 **None** 을 돌려준다 —
+      종전처럼 아무 날짜나 돌려주면 회원 화면에 **다른 날 경주 사진**이 뜬다(실사고).
+    """
     try:
+        _d = (date or "").strip().replace("_", "-")[:10]
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", _d):
+            return None                          # 날짜 미상 → 없는 것으로 처리(추측 금지)
         idx = _snapshot_index()
         if idx:
-            e = idx.get((rk or "").strip())
+            e = idx.get(_snap_key(_d, rk))
             if not e:
                 return None                      # 인덱스가 있는데 없으면 정말 없는 것
-            return e.get(trigger) or e.get("_any")
+            return e.get(trigger) or e.get("_sameday")
         if not os.path.isdir(SNAPSHOT_DIR):
             return None
         cand = None
@@ -19752,9 +19791,11 @@ def _day_snapshot_for(rk, trigger="T-5"):
                 continue
             if (meta.get("raceKey") or "").strip() != rk.strip():
                 continue
+            if _snap_date_of(fn, meta) != _d:
+                continue                         # 🔴 날짜가 다르면 버린다
             if meta.get("trigger") == trigger:
                 return fn
-            cand = cand or fn      # 폴백(아무 스냅샷)
+            cand = cand or fn      # 폴백(같은 날짜 안의 아무 스냅샷)
         return cand
     except Exception:
         return None
@@ -19951,7 +19992,8 @@ def day_races():
                 "sport": _ext.get("sport"), "gemini": _ext.get("gemini"),
                 "hit": main_hit, "dark_hit": dark_ok,
                 "dark_ranks": dh.get("dark_horses"),
-                "snapshot": _day_snapshot_for(rk, "T-5"),
+                # 🔴 [2026-08-01] 조회 날짜를 반드시 넘긴다 — 안 넘기면 다른 날 스냅샷이 나온다(실사고).
+                "snapshot": _day_snapshot_for(rk, "T-5", date_dash),
             })
     kpi = {
         "quinellaRate": round(q_hit / q_tot * 100, 1) if q_tot else 0,

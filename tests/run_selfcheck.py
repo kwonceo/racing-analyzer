@@ -27,15 +27,32 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PY = sys.executable
 
 
-def _run(rel):
+def _run(rel, args=()):
     env = dict(os.environ, PYTHONIOENCODING="utf-8")
     try:
-        r = subprocess.run([PY, os.path.join(BASE, rel)], cwd=BASE, env=env,
+        r = subprocess.run([PY, os.path.join(BASE, rel)] + list(args), cwd=BASE, env=env,
                            capture_output=True, text=True, encoding="utf-8",
                            errors="replace", timeout=300)
         return r.returncode
     except Exception:
         return -1
+
+
+def _run_json(rel):
+    """🔴 [2026-08-01] rc 만 보면 **기존 위반이 이미 있을 때 주입 없이도 rc=1** 이라
+    자기검증이 공짜로 통과한다(=아무것도 안 잰다). ⇒ **주입한 파일이 목록에 실제로 뜨는지**까지 본다.
+    반환: (rc, 위반목록) · 실패 시 (rc, None)."""
+    env = dict(os.environ, PYTHONIOENCODING="utf-8")
+    try:
+        r = subprocess.run([PY, os.path.join(BASE, rel), "--json"], cwd=BASE, env=env,
+                           capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", timeout=300)
+        try:
+            return r.returncode, (json.loads(r.stdout) or {}).get("violations")
+        except Exception:
+            return r.returncode, None
+    except Exception:
+        return -1, None
 
 
 # ── 케이스 ①  run_glob_safety : 날짜 없는 특정 경주 매칭을 주입 ──────────────
@@ -50,13 +67,74 @@ def case_glob_safety():
     # SELFCHECK-INJECT-END
     open(p, "w", encoding="utf-8").write(src)
     try:
-        rc = _run("tests/run_glob_safety.py")
+        rc, viol = _run_json("tests/run_glob_safety.py")
     finally:
         try:
             os.remove(p)
         except Exception:
             return None, "🔴 원복 실패 — tools/_selfcheck_tmp.py 를 직접 지울 것"
-    return rc == 1, "주입 시 rc=%s (기대 1)" % rc
+    hit = [v for v in (viol or []) if v.get("file") == "tools/_selfcheck_tmp.py"]
+    return (rc == 1 and bool(hit)), "rc=%s · 주입파일 적발 %d건 (기대 rc=1·1건+)" % (rc, len(hit))
+
+
+# ── 케이스 ⑤  run_glob_safety : 🔴 **os.listdir** 로 날짜 없이 특정 경주 지목 ──
+#   ⚠ 실사고 재현 — `_snapshot_index()` 가 `glob` 이 아니라 `os.listdir` 을 써서
+#     검사 대상 밖이었고, 7/31 카드에 7/14 스냅샷이 떴다.
+def case_glob_safety_listdir():
+    p = os.path.join(BASE, "tools", "_selfcheck_tmp_listdir.py")
+    # SELFCHECK-INJECT-BEGIN  ⚠ 아래는 **일부러 위험한** 코드다. glob 안전 검사에서 제외된다.
+    src = ('import json, os\nSNAP = "."\n\n'
+           'def _bad_index():\n'
+           '    m = {}\n'
+           '    for fn in os.listdir(SNAP):\n'
+           '        if not fn.endswith(".png"):\n'
+           '            continue\n'
+           '        meta = json.load(open(os.path.join(SNAP, fn[:-4] + ".json")))\n'
+           '        rk = (meta.get("raceKey") or "").strip()\n'
+           '        m.setdefault(rk, fn)\n'
+           '    return m\n')
+    # SELFCHECK-INJECT-END
+    open(p, "w", encoding="utf-8").write(src)
+    try:
+        rc, viol = _run_json("tests/run_glob_safety.py")
+    finally:
+        try:
+            os.remove(p)
+        except Exception:
+            return None, "🔴 원복 실패 — tools/_selfcheck_tmp_listdir.py 를 직접 지울 것"
+    hit = [v for v in (viol or []) if v.get("file") == "tools/_selfcheck_tmp_listdir.py"]
+    return (rc == 1 and bool(hit)), "rc=%s · 주입파일 적발 %d건 (기대 rc=1·1건+)" % (rc, len(hit))
+
+
+# ── 케이스 ⑥  run_glob_safety : 🔴 **무해한** 전수 스캔은 잡지 **않아야** 한다 ──
+#   ⚠ 원칙 17 의 뒷면 — "다 잡는 테스트"는 영원한 빨간불이라 결국 무시된다.
+#     `os.listdir` 52곳을 전부 위반으로 세면 진짜 5곳이 묻힌다.
+def case_glob_safety_noise():
+    p = os.path.join(BASE, "tools", "_selfcheck_tmp_safe.py")
+    # SELFCHECK-INJECT-BEGIN  ⚠ 아래는 **무해한** 코드다(전수 스캔). 잡히면 안 된다.
+    src = ('import json, os\nD = "."\n\n'
+           'def _ok_list():\n'
+           '    keys = set()\n'
+           '    for fn in os.listdir(D):\n'
+           '        if not fn.endswith(".json"):\n'
+           '            continue\n'
+           '        doc = json.load(open(os.path.join(D, fn)))\n'
+           '        if doc.get("raceKey"):\n'
+           '            keys.add(doc["raceKey"])\n'
+           '    return sorted(keys)\n')
+    # SELFCHECK-INJECT-END
+    open(p, "w", encoding="utf-8").write(src)
+    try:
+        rc, viol = _run_json("tests/run_glob_safety.py")
+    finally:
+        try:
+            os.remove(p)
+        except Exception:
+            return None, "🔴 원복 실패 — tools/_selfcheck_tmp_safe.py 를 직접 지울 것"
+    if viol is None:
+        return None, "--json 파싱 실패"
+    hit = [v for v in viol if v.get("file") == "tools/_selfcheck_tmp_safe.py"]
+    return (not hit), "무해코드 오탐 %d건 (기대 0건)" % len(hit)
 
 
 # ── 케이스 ②  run_smoke_render : 프롬프트에 `%` 포맷 충돌을 주입 ──────────────
@@ -121,6 +199,8 @@ def case_precommit():
 
 CASES = [
     ("run_glob_safety", "날짜 없는 특정 경주 매칭", case_glob_safety),
+    ("run_glob_safety(listdir)", "os.listdir 날짜 없는 지목", case_glob_safety_listdir),
+    ("run_glob_safety(오탐)", "무해한 전수 스캔(잡히면 실패)", case_glob_safety_noise),
     ("run_smoke_render", "% 포맷 충돌(실사고 재현)", case_smoke_render),
     ("run_freeze_behavior", "복원 함수 무력화", case_freeze_behavior),
     ("run_precommit", "문법 오류 주입", case_precommit),
@@ -148,7 +228,7 @@ def main():
     print("실패하면 그 테스트는 **아무것도 안 재고 있다**는 뜻이다.\n")
     for r in res:
         m = "✅" if r["ok"] else ("⏭" if r["ok"] is None else "❌")
-        print("  %s %-22s %-24s %s" % (m, r["test"], r["injected"], r["detail"]))
+        print("  %s %-26s %-28s %s" % (m, r["test"], r["injected"], r["detail"]))
     bad = [x for x in res if x["ok"] is False]
     skip = [x for x in res if x["ok"] is None]
     print("\n" + "=" * 82)
