@@ -1,6 +1,6 @@
 {
- "generated_at": 1785497941.403032,
- "races_with_result": 1483,
+ "generated_at": 1785499047.672871,
+ "races_with_result": 1484,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -10,7 +10,7 @@
    "key": "timing:T-3분",
    "desc": "급락이 T-3분에 발생한 경주",
    "rate": 56.2,
-   "baseline": 34.5,
+   "baseline": 34.4,
    "lift": 21.8,
    "support": 112,
    "hit": 63
@@ -20,7 +20,7 @@
    "key": "timing:T-5분",
    "desc": "급락이 T-5분에 발생한 경주",
    "rate": 55.2,
-   "baseline": 34.5,
+   "baseline": 34.4,
    "lift": 20.7,
    "support": 145,
    "hit": 80
@@ -29,10 +29,10 @@
    "type": "시점",
    "key": "timing:T-10분",
    "desc": "급락이 T-10분에 발생한 경주",
-   "rate": 53.5,
-   "baseline": 34.5,
-   "lift": 19.0,
-   "support": 200,
+   "rate": 53.2,
+   "baseline": 34.4,
+   "lift": 18.8,
+   "support": 201,
    "hit": 107
   },
   {
@@ -40,37 +40,37 @@
    "key": "timing:T-2분",
    "desc": "급락이 T-2분에 발생한 경주",
    "rate": 53.2,
-   "baseline": 34.5,
+   "baseline": 34.4,
    "lift": 18.8,
    "support": 77,
    "hit": 41
-  },
-  {
-   "type": "배당변화",
-   "key": "had_drop",
-   "desc": "급락(자금유입) 동반 경주",
-   "rate": 52.5,
-   "baseline": 34.5,
-   "lift": 18.1,
-   "support": 678,
-   "hit": 356
   },
   {
    "type": "시점",
    "key": "timing:T-1분",
    "desc": "급락이 T-1분에 발생한 경주",
    "rate": 52.6,
-   "baseline": 34.5,
+   "baseline": 34.4,
    "lift": 18.1,
    "support": 97,
    "hit": 51
   },
   {
    "type": "배당변화",
+   "key": "had_drop",
+   "desc": "급락(자금유입) 동반 경주",
+   "rate": 52.4,
+   "baseline": 34.4,
+   "lift": 18.0,
+   "support": 679,
+   "hit": 356
+  },
+  {
+   "type": "배당변화",
    "key": "strong_drop",
    "desc": "30%+ 강한 급락 동반 경주",
    "rate": 50.6,
-   "baseline": 34.5,
+   "baseline": 34.4,
    "lift": 16.2,
    "support": 468,
    "hit": 237
@@ -80,7 +80,7 @@
    "key": "had_reversal",
    "desc": "쌍승 역전 동반 경주",
    "rate": 47.2,
-   "baseline": 34.5,
+   "baseline": 34.4,
    "lift": 12.7,
    "support": 53,
    "hit": 25
@@ -96,5 +96,5 @@
    "support": 1030
   }
  ],
- "baseline_hit_rate": 34.5
+ "baseline_hit_rate": 34.4
 }
