@@ -32655,6 +32655,15 @@ def _health_kakao_text(rep):
     lines.append("📋 완료조건 %d/%d  (%s)"
                  % (_cmp.get("done") or 0, _cmp.get("total") or 0,
                     time.strftime("%m/%d %H:%M")))
+    # 🔴 [2026-08-01 · 승인③] 당일 데이터 대기분을 한 줄로 병기한다.
+    #   왜: 저녁 4/23 → 새벽 1/23 은 **성능 후퇴가 아니라 아직 안 잰 것**인데 화면에는 후퇴로 보였다.
+    #   ⚠ 분모 23 은 그대로다 — 미확정을 분모에서 빼지 않는다. 표식만 붙인다(I1·I4 와 동일 방식).
+    try:
+        _pt = int(_cmp.get("pendingToday") or 0)
+        if _pt:
+            lines.append("⏳ 그중 %d개는 미확정(당일 데이터 대기 · 후퇴 아님)" % _pt)
+    except Exception:
+        pass                                   # 이 줄이 없어도 발송 코어는 그대로 나간다
     # ⏳ 결과 대기 — 21:00 은 경마 마감(20:50) 직후라 결과가 덜 들어온 것이 정상이다.
     _pend = _health_pending_results()
     if _pend:

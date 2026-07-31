@@ -41,6 +41,47 @@ SNAP_MIN_N = 10             # 이보다 표본이 적으면 판정하지 않는�
 #   ⚠ 이 목록을 줄이는 것이 곧 완료선 하향이다. 바꾸려면 CLAUDE.md 를 먼저 고칠 것.
 SCHEMA_RED_FIELDS = ["winOdds", "pop", "weight", "surface", "trackCond"]
 
+# 🔴 [2026-08-01 · 승인③] **당일 데이터에 의존하는 완료조건** — 여기에만 `⏳미확정` 을 붙인다.
+#   왜: 2026-07-31 저녁 `4/23` → 08-01 06:21 `1/23`. **같은 코드인데 값이 떨어졌다.**
+#      성능이 나빠진 것이 아니라 **아직 안 잰 것**인데 화면에는 후퇴로 보인다(I1·I4 와 같은 구조).
+#   ⚠⚠ **분모 23 은 유지한다.** 미확정 항목을 분모에서 빼지 않는다 —
+#      빼면 "23개 중 몇 개가 남았는지"라는 진행 정보 자체가 사라지고 완료선을 사후에 낮추는 것이 된다.
+#   ⚠ 시각 무관 항목(`D3` 미구현 · `D7` 모듈로드 · `F2` 누적 · `A/B/C` 전체)은 **넣지 않는다.**
+#      특히 `D3` 는 "미구현"이지 "미확정"이 아니다 — 시간이 지나도 저절로 측정되지 않는다.
+#   각 항목의 당일 필터 근거(코드 위치)를 함께 적는다. 근거 없이 추가하지 말 것.
+DAY_DEPENDENT = {
+    "D1":  "check_snapshot_coverage — today=%Y_%m_%d 파일명 접두 필터",
+    "D2a": "check_save_failures_fixed — _today_logs()",
+    "D2b": "check_save_failures_unfixed — _today_logs()",
+    "D4":  "check_schema_drift — day0(오늘 0시) 이후 starters_store 행만",
+    "D5":  "check_score_decomposition — day=%Y_%m_%d analysis_log 만",
+    "D6":  "check_freeze_success — freeze_log/<오늘>.json",
+    "F1":  "check_forecast_discard — _today_logs()",
+}
+
+
+def _mark_pending_today(items):
+    """🔴 당일 의존 + **아직 측정 못 함(ok is None)** → `⏳미확정` 으로 재분류.
+
+    ⚠ `ok` 가 True/False 인 항목은 **건드리지 않는다** — 이미 잰 것이다.
+      (예: `D2a`·`D2b` 는 '실패 0건'이 목표라 표본이 있으면 새벽에도 정상 판정된다.
+       당일 의존이지만 미확정이 아니다 — 규칙 하나로 자동 구분된다.)
+    ⚠ 항목을 **삭제하거나 분모에서 빼지 않는다.** 표식만 추가한다.
+    반환: ⏳ 로 표시된 항목 수.
+    """
+    n = 0
+    for it in items:
+        if it.get("id") not in DAY_DEPENDENT or it.get("ok") is not None:
+            continue
+        it["pendingToday"] = True                       # 소비자(카카오·화면)가 읽는 플래그
+        it["dayBasis"] = DAY_DEPENDENT[it["id"]]        # 왜 당일 의존인지 근거를 같이 싣는다
+        _r = it.get("reason") or ""
+        if "⏳미확정" not in _r:
+            it["reason"] = ("⏳ **미확정**(당일 데이터 · 진행 중) — " + _r) if _r else \
+                           "⏳ **미확정**(당일 데이터 · 진행 중)"
+        n += 1
+    return n
+
 
 def _mk(id, area, name, denominator, current=None, target=None, ok=None,
         n=None, note="", reason=""):
@@ -761,19 +802,28 @@ def build_checklist():
     done = sum(1 for x in comp if x["ok"] is True)
     fail = sum(1 for x in comp if x["ok"] is False)
     unk = sum(1 for x in comp if x["ok"] is None)
+    # 🔴 [승인③] 당일 의존 미측정분을 `⏳미확정` 으로 재분류한다.
+    #   ⚠ `unk`(미측정 총수)는 그대로 두고 **그 안에서만** 나눈다 → 분모 23 불변.
+    pending_today = _mark_pending_today(comp)
+    unk_real = unk - pending_today                    # 시각과 무관하게 못 잰 것(미구현 등)
     # 미충족만 뽑는다 — **충족 항목은 넣지 않는다.** 목록이 짧아지는 것이 진행 신호다.
     open_items = ["[%s] %s (현재 %s / 목표 %s)" % (x["id"], x["name"], x["current"], x["target"])
                   for x in comp if x["ok"] is False]
     pending = ["[%s] %s" % (x["id"], x["name"]) for x in comp if x["ok"] is None]
-    return {"summary": "완료조건 %d/%d · 미충족 %d · 미측정 %d  |  무결성 %s"
-                       % (done, len(comp), fail, unk,
+    # ⏳미확정 목록(당일 데이터 대기) — '미구현'과 섞이지 않게 따로 낸다.
+    pending_list = ["[%s] %s" % (x["id"], x["name"]) for x in comp if x.get("pendingToday")]
+    return {"summary": "완료조건 %d/%d · 미충족 %d · ⏳미확정 %d · 미측정 %d  |  무결성 %s"
+                       % (done, len(comp), fail, pending_today, unk_real,
                           "정상" if integ_bad == 0 else "이상 %d건" % integ_bad),
             "integrity": {"total": len(integ), "bad": integ_bad,
                           "items": [{"id": x["id"], "name": x["name"], "ok": x["ok"],
                                      "current": x["current"], "target": x["target"]} for x in integ]},
-            "completion": {"total": len(comp), "done": done, "failed": fail, "unmeasured": unk},
+            # ⚠ total 은 23 고정(분모 불변). pendingToday 는 unmeasured 안에서 갈라낸 값이다.
+            "completion": {"total": len(comp), "done": done, "failed": fail, "unmeasured": unk,
+                           "pendingToday": pending_today, "unmeasuredReal": unk_real},
             "openItems": open_items,
             "pendingItems": pending,
+            "pendingTodayItems": pending_list,
             "generatedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
             "total": len(comp), "done": done, "failed": fail, "unmeasured": unk,
             "items": items}
@@ -796,7 +846,8 @@ def main():
         if it["area"] != area:
             area = it["area"]
             print("\n[%s]" % area)
-        mark = "✅" if it["ok"] is True else ("❌" if it["ok"] is False else "⬜")
+        mark = ("✅" if it["ok"] is True else "❌" if it["ok"] is False
+                else "⏳" if it.get("pendingToday") else "⬜")   # ⏳=당일 데이터 대기 / ⬜=미구현·미측정
         print("  %s %-4s %-32s 현재 %-10s / 목표 %-8s" % (
             mark, it["id"], it["name"], it["current"], it["target"]))
         print("       분모: %s" % it["denominator"])
