@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "사가 8경주",
-      "horse_no": 9,
-      "recent_avg": 8.8,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-20"
-    },
-    {
       "race": "오오이 12경주",
       "horse_no": 1,
       "recent_avg": 4.0,
@@ -4688,16 +4678,26 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-31"
+    },
+    {
+      "race": "소노다 11경주",
+      "horse_no": 1,
+      "recent_avg": 5.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-07-31"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2032,
+      "count": 2039,
       "hit": 389
     },
     "전체부진마": {
-      "count": 3416,
-      "hit": 922
+      "count": 3425,
+      "hit": 923
     },
     "대규모급락": {
       "count": 5,
@@ -4707,8 +4707,8 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 1384,
-      "hit": 533
+      "count": 1386,
+      "hit": 534
     },
     "급락동반": {
       "count": 244,
