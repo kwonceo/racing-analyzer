@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "오오이 7경주",
-      "horse_no": 1,
-      "recent_avg": 7.2,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-20"
-    },
-    {
-      "race": "오오이 7경주",
       "horse_no": 10,
       "recent_avg": 4.8,
       "win_place": 2,
@@ -4699,6 +4689,17 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-07-31"
+    },
+    {
+      "race": "카와사키 10경주",
+      "horse_no": 6,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [
+        "급락77%",
+        "복승이상감지"
+      ],
+      "date": "2026-07-31"
     }
   ],
   "condition_stats": {
@@ -4707,8 +4708,8 @@
       "hit": 381
     },
     "전체부진마": {
-      "count": 3373,
-      "hit": 911
+      "count": 3377,
+      "hit": 912
     },
     "대규모급락": {
       "count": 5,
@@ -4718,12 +4719,12 @@
       "hit_rate": 40.0
     },
     "이상감지동반": {
-      "count": 1371,
-      "hit": 530
+      "count": 1375,
+      "hit": 531
     },
     "급락동반": {
-      "count": 240,
-      "hit": 65
+      "count": 244,
+      "hit": 66
     }
   },
   "bokbyeong_patterns": [
