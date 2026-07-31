@@ -1,18 +1,18 @@
 {
  "date": "2026-07-31",
  "results_summary": {
-  "total_races": 113,
-  "hits": 67,
-  "hit_rate": 59.3,
+  "total_races": 121,
+  "hits": 74,
+  "hit_rate": 61.2,
   "profit": {
-   "net": 13900,
-   "settled": 114
+   "net": 18000,
+   "settled": 121
   }
  },
  "ai_training_data": {
-  "races_collected": 1920,
-  "quality_score": 73,
-  "ai_ready_races": 78,
+  "races_collected": 1928,
+  "quality_score": 74,
+  "ai_ready_races": 86,
   "patterns_tagged": []
  },
  "bigdata": {
@@ -68,26 +68,26 @@
     "hit_rate": 57.1
    },
    "케이오카쿠": {
-    "n": 3,
-    "hits": 3,
+    "n": 5,
+    "hits": 5,
+    "hit_rate": 100.0
+   },
+   "코치": {
+    "n": 5,
+    "hits": 5,
     "hit_rate": 100.0
    },
    "다케오": {
-    "n": 2,
-    "hits": 1,
-    "hit_rate": 50.0
-   },
-   "코치": {
-    "n": 2,
+    "n": 4,
     "hits": 2,
-    "hit_rate": 100.0
+    "hit_rate": 50.0
    }
   },
   "by_field_size": {
    "소두수(≤8)": {
-    "n": 84,
-    "hits": 53,
-    "hit_rate": 63.1
+    "n": 91,
+    "hits": 59,
+    "hit_rate": 64.8
    },
    "중두수(9~12)": {
     "n": 18,
@@ -102,9 +102,9 @@
   },
   "by_time_zone": {
    "저녁": {
-    "n": 50,
-    "hits": 33,
-    "hit_rate": 66.0
+    "n": 57,
+    "hits": 39,
+    "hit_rate": 68.4
    },
    "오후": {
     "n": 43,
@@ -119,23 +119,23 @@
   },
   "by_grade": {
    "미수집": {
-    "n": 114,
-    "hits": 68,
-    "hit_rate": 59.6
+    "n": 121,
+    "hits": 74,
+    "hit_rate": 61.2
    }
   },
   "by_condition": {
    "미수집": {
-    "n": 114,
-    "hits": 68,
-    "hit_rate": 59.6
+    "n": 121,
+    "hits": 74,
+    "hit_rate": 61.2
    }
   },
   "by_weather": {
    "미수집": {
-    "n": 114,
-    "hits": 68,
-    "hit_rate": 59.6
+    "n": 121,
+    "hits": 74,
+    "hit_rate": 61.2
    }
   },
   "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
@@ -143,9 +143,9 @@
  "cumulative_pattern_reliability": {
   "마감급락": {
    "label": "급락 감지 적중",
-   "hit": 60,
-   "n": 73,
-   "rate": 82.2
+   "hit": 61,
+   "n": 74,
+   "rate": 82.4
   },
   "쌍승역전": {
    "label": "쌍승 역전 적중",
@@ -155,15 +155,15 @@
   },
   "전적이중수렴": {
    "label": "전적 유력마 적중(이중수렴 근사)",
-   "hit": 202,
-   "n": 337,
-   "rate": 59.9
+   "hit": 205,
+   "n": 341,
+   "rate": 60.1
   },
   "추천종합": {
    "label": "추천 종합 적중",
-   "hit": 490,
-   "n": 1482,
-   "rate": 33.1
+   "hit": 494,
+   "n": 1484,
+   "rate": 33.3
   }
  },
  "key_learnings": [],
@@ -171,5 +171,5 @@
  "pattern_discoveries": [],
  "system_improvements": [],
  "tomorrow_focus": [],
- "generated_at": "2026-07-31 22:05:38"
+ "generated_at": "2026-07-31 22:59:15"
 }
