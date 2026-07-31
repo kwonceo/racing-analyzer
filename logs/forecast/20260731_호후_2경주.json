@@ -1,0 +1,286 @@
+{
+ "predicted_top3": [
+  5,
+  1,
+  3
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 간 경합 속 5번의 젖히기 기량과 1번의 끈기가 돋보임. 3번의 추입력도 무시 못함.",
+ "key_factors": [
+  "5번(관구 랑토)의 압도적인 최근 성적 (13착 3착 4착 4착 -> 1착 2착 2착)으로 인한 기세",
+  "1번(가모시타 요시토모)의 선행형 각질과 꾸준한 성적 (1착 2착 3착 9착)",
+  "3번(가와카미 신지로)의 추입 능력과 안정적인 입상 기록 (0착 3착 2착 13착)",
+  "7두 경주로 인한 전개 단순화 및 선행, 젖히기형에게 유리한 구도 형성"
+ ],
+ "exception_note": "5번(관구 랑토)이 젖히기형임에도 불구하고 최근 도주(선행) 경향을 보이며 1착을 자주 기록, 기존 각질 분류에 비해 선행력이 강한 점이 특이하다. 이로 인해 같은 라인 내 1번(가모시타 요시토모)과 선행 주도권 다툼이 발생할 가능성이 있으나, 5번의 최근 기세가 워낙 좋아 선행을 굳히거나 젖히기로 압도할 것으로 예상된다. 7두 경주에서 선행/젖히기형이 유리하다는 점도 고려해야 한다.",
+ "applied_rules": [],
+ "raceKey": "호후 2경주",
+ "forecastAt": "2026-07-31 08:50:26",
+ "forecastEpoch": 1785455426.324159,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 2경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 4.7,
+   "풍향": "서북서",
+   "풍향코드": 13,
+   "기온": 29.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T08:40:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 3,
+    "name": "川上真二郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "西武園Ｆ２ 7/16 チ予選 ２着 12 7/17 チ準決 ５着 11.8 7/18 チ選抜 ５着 12.3",
+    "prev2": "松 阪Ｆ２ 7/ 1 チ予選 ４着 11.4 7/ 2 チ選抜 ２着 12.5 7/ 3 チ選抜 ３着 12.1",
+    "chaku": [
+     0,
+     3,
+     2,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "関口 朗斗",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "平 Ｆ２ 7/22 チ予選 １着 12.1 7/23 チ準決 ２着 11.6 7/24 チ決勝 ２着 11.6",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 １着 12.3 7/ 9 チ準決 ６着 11.5 7/10 チ選抜 １着 11.7",
+    "chaku": [
+     13,
+     3,
+     4,
+     4
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "鴨下 佳朋",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "豊 橋Ｆ２ 7/19 チ予選 ２着 12.2 7/20 チ準決 ４着 12 7/21 チ決勝 ３着 11.5",
+    "prev2": "佐世保Ｆ２ 7/ 5 チ予選 １着 11.9 7/ 6 チ準決 ７着 12.7 7/ 7 チ一般 ４着 12.6",
+    "chaku": [
+     1,
+     2,
+     3,
+     9
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "旭 啓介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "和歌山Ｆ２ 7/24 チ予選 ６着 11.8 7/25 チ一般 ３着 12.4 7/26 チ一般 ４着 12.1",
+    "prev2": "平 Ｆ２ 7/10 チ予選 ３着 11.8 7/11 チ準決 ３着 11.9 7/12 チ決勝 ７着 11.9",
+    "chaku": [
+     1,
+     1,
+     3,
+     9
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "小塚 潤",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 １着 12 7/22 チ準決 ６着 12.3 7/23 チ選抜 ４着 12.3",
+    "prev2": "熊 本Ｆ２ 7/13 チ予選 ４着 11.8 7/14 チ選抜 ５着 12 7/15 チ一般 ２着 12.3",
+    "chaku": [
+     2,
+     3,
+     3,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "伊藤 嘉浩",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ２着 12.1 7/22 チ準決 ５着 11.9 7/23 チ選抜 ６着 12.6",
+    "prev2": "平 Ｆ２ 7/10 チ予選 ６着 11.7 7/11 チ一般 ３着 12 7/12 チ一般 ３着 12.2",
+    "chaku": [
+     3,
+     3,
+     4,
+     14
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "井上 典善",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "prev1": "弥 彦Ｆ２ 7/17 チ予選 ７着 12.6 7/18 チ一般 ６着 12.4 7/19 チ一般 ７着 12.8",
+    "prev2": "別 府Ｆ２ 7/ 4 チ予選 ７着 12.6 7/ 5 チ一般 ５着 13 7/ 6 チ一般 ５着 12.9",
+    "chaku": [
+     0,
+     0,
+     2,
+     19
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    1
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    3,
+    2,
+    4,
+    7,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   4,
+   7,
+   5,
+   3,
+   2,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "逃げても捲っても強い関口ー川上を本命視する。パワフルな鴨下ー小塚ー伊藤も猛抵抗。底力ある旭の追い込み注",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}

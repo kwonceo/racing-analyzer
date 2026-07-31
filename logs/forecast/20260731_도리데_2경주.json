@@ -1,0 +1,253 @@
+{
+ "predicted_top3": [
+  3,
+  5,
+  6
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 3,
+ "reason_short": "3번마가 최근 1착으로 상승세를 보이고, 5, 6번마도 준수한 성적을 기록하여",
+ "key_factors": [
+  "3번마 소우패스의 직전 경주 1착",
+  "5번마 리치스카의 직전 경주 2착",
+  "6번마 벌마의거의 직전 경주 3착"
+ ],
+ "exception_note": "이 경주는 특별한 라인 구도나 각질 구성의 불균형이 보이지 않으며, 직전 착순 기록을 통해 상대적인 우위를 판단하는 통상적인 경주로 볼 수 있다.",
+ "applied_rules": [],
+ "raceKey": "도리데 2경주",
+ "forecastAt": "2026-07-31 08:30:42",
+ "forecastEpoch": 1785454242.4728913,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "도리데 2경주",
+  "wind": null,
+  "fieldSize": 11,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "원더폴원",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "상현"
+   },
+   {
+    "no": 2,
+    "name": "골드로저",
+    "gait": null,
+    "recentPlacings": [
+     4
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "승운"
+   },
+   {
+    "no": 3,
+    "name": "소우패스",
+    "gait": null,
+    "recentPlacings": [
+     1
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "은경"
+   },
+   {
+    "no": 4,
+    "name": "챔프의영",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "경민"
+   },
+   {
+    "no": 5,
+    "name": "리치스카",
+    "gait": null,
+    "recentPlacings": [
+     2
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "나카"
+   },
+   {
+    "no": 6,
+    "name": "벌마의거",
+    "gait": null,
+    "recentPlacings": [
+     3
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "진구"
+   },
+   {
+    "no": 7,
+    "name": "광선대로",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "생재"
+   },
+   {
+    "no": 8,
+    "name": "월드하니",
+    "gait": null,
+    "recentPlacings": [
+     5
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "광희"
+   },
+   {
+    "no": 9,
+    "name": "행복트리",
+    "gait": null,
+    "recentPlacings": [
+     7
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "강주"
+   },
+   {
+    "no": 10,
+    "name": "모어퀴클",
+    "gait": null,
+    "recentPlacings": [
+     5
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "형석"
+   },
+   {
+    "no": 11,
+    "name": "닥터프린",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "시대"
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "바람(풍향·풍속)",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}

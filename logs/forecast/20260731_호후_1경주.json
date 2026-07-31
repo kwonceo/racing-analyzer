@@ -1,0 +1,321 @@
+{
+ "predicted_top3": [
+  7,
+  3,
+  1
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  7
+ ],
+ "confidence": 4,
+ "reason_short": "전승 기세의 7번이 유리하며, 라인 구도와 각질 구성이 영향을 미칠 것.",
+ "key_factors": [
+  "7번 森川 康輔의 전 대회 3연승 기세",
+  "강력한 선행형 1번 中川 飛隆의 존재와 라인",
+  "추입형 3번 北村 篤의 꾸준함",
+  "라인 구도의 불균형 (1-4-5, 6 단독, 7-3-2)"
+ ],
+ "exception_note": "이 경주는 7번 森川 康輔의 전 대회 3연승 기세가 매우 강력하여 통상적인 경주와는 다른 특이성을 보인다. 또한, 1번 中川 飛隆과 6번 矢田 晋이라는 두 선행형이 있지만 라인이 각각 1-4-5와 6 단독으로 분리되어 있어 선행형 간의 직접적인 내부 경쟁은 발생하지 않을 가능성이 높다. 대신 7번 森川 康輔의 젖히기형 각질이 이점을 가질 수 있으며, 3번 北村 篤의 추입각질과 라인 구성(7-3-2)이 시너지를 낼 수 있다.",
+ "applied_rules": [],
+ "raceKey": "호후 1경주",
+ "forecastAt": "2026-07-31 08:38:15",
+ "forecastEpoch": 1785454695.195555,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 1경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 3.6,
+   "풍향": "서",
+   "풍향코드": 12,
+   "기온": 29.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T08:30:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 3,
+    "name": "北村 篤",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 １着 11.9 7/25 チ準決 ２着 12.1 7/26 チ決勝 ４着 11.5",
+    "prev2": "奈 良Ｆ２ 7/16 チ予選 ６着 10.2 7/17 チ一般 １着 9.8 7/18 チ選抜 ５着 10.1",
+    "chaku": [
+     3,
+     3,
+     1,
+     17
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "森川 康輔",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "和歌山Ｆ２ 7/24 チ予選 １着 11.5 7/25 チ準決 １着 11.6 7/26 チ決勝 １着 11.8",
+    "prev2": "京王閣Ｆ２ 7/13 チ予選 ５着 11 7/14 チ一般 １着 11.9 7/15 チ選抜 １着 11.6",
+    "chaku": [
+     6,
+     0,
+     2,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "関 敬",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "京王閣Ｆ２ 7/19 チ予選 ５着 12.2",
+    "prev2": "岸和田Ｆ２ 7/ 4 チ予選 ２着 12.4 7/ 5 チ準決 ４着 12.3 7/ 6 チ選抜 ３着 12.5",
+    "chaku": [
+     0,
+     1,
+     1,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "中川 飛隆",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.75,
+    "prev1": "平 Ｆ２ 7/22 チ予選 ４着 12 7/23 チ選抜 ４着 12.1 7/24 チ一般 ２着 11.9",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 ７着 12.4 7/ 9 チ一般 ２着 12.5 7/10 チ一般 １着 11.8",
+    "chaku": [
+     6,
+     7,
+     3,
+     5
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "吉成 晃一",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "武 雄Ｆ２ 7/27 チ一般 ３着 11.4",
+    "prev2": "平 Ｆ２ 7/22 チ予選 ５着 11.6 7/23 チ選抜 ４着 12.5 7/24 チ一般 ５着 11.6",
+    "chaku": [
+     2,
+     3,
+     6,
+     18
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "竹野 行登",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "prev1": "松 戸Ｆ２ 7/19 チ予選 ５着 10.3 7/20 チ選抜 ７着 10.1 7/21 チ一般 ５着 10.2",
+    "prev2": "松 山Ｆ２ 7/11 チ予選 ２着 12.1 7/12 チ準決 失",
+    "chaku": [
+     0,
+     1,
+     2,
+     7
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "矢田 晋",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "prev1": "取 手Ｆ２ 7/15 チ予選 ７着 13.2 7/16 チ一般 ６着 12.1 7/17 チ一般 １着 12.1",
+    "prev2": "久留米Ｆ２ 7/ 7 チ予選 ３着 12.5 7/ 8 チ準決 ６着 11.9 7/ 9 チ選抜 ７着 12.1",
+    "chaku": [
+     1,
+     3,
+     1,
+     17
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    1,
+    6
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    3,
+    4,
+    2,
+    5
+   ]
+  },
+  "lines": [
+   1,
+   4,
+   5,
+   6,
+   7,
+   3,
+   2
+  ],
+  "paceLabel": null,
+  "comment": "前節完全Ｖの勢いのまま、森川が白星発進。北村ー吉成と続く。機動力ある中川ー関も抵抗。矢田は単騎。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   7,
+   3,
+   1
+  ],
+  "hit_count": 3,
+  "hit": [
+   7,
+   3,
+   1
+  ],
+  "missed": [],
+  "missed_info": [],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   7,
+   3,
+   1
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.2,
+  "gradedAt": "2026-07-31 08:58:13",
+  "market_src": "quinella_implied",
+  "marketRegradedAt": "2026-07-31 09:09:19"
+ },
+ "graded": true,
+ "reviewed": true,
+ "review": {
+  "miss_reason": "해당 없음(전부 적중)",
+  "new_rule": "없음",
+  "rule_confidence": 1,
+  "reviewedAt": "2026-07-31 08:58:13"
+ }
+}

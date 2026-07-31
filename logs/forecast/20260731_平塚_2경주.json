@@ -1,0 +1,125 @@
+{
+ "predicted_top3": [
+  2,
+  4,
+  1
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 셋 중 2, 5가 주도하고, 2번이 동료 고정으로 유리해 전개를 주도할 것.",
+ "key_factors": [
+  "선행형 3명, 추입형 4명으로 선행 경쟁이 예상",
+  "코멘트에서 2번(小川)과 5번(友永)의 2분전 언급",
+  "2번(小川)이 4번(高橋)을 동반하는 라인 구축",
+  "2번은 전적상으로도 선행력을 보임"
+ ],
+ "exception_note": "선행형이 셋이지만, 코멘트에서 2번과 5번의 대결을 예고하여 특정 라인에 힘이 실림. 2번은 고정 동료인 4번을 확보하여 상대적으로 유리한 전개 예상.",
+ "applied_rules": [],
+ "raceKey": "平塚 2경주",
+ "forecastAt": "2026-07-31 03:44:44",
+ "forecastEpoch": 1785437084.9438713,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "平塚 2경주",
+  "fieldSize": 7,
+  "horses": [
+   {
+    "no": 4,
+    "name": "高橋 健太",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   },
+   {
+    "no": 1,
+    "name": "阿部 弘",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   },
+   {
+    "no": 3,
+    "name": "時松 正",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   },
+   {
+    "no": 2,
+    "name": "小川佑希也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   },
+   {
+    "no": 7,
+    "name": "奥山 雅士",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   },
+   {
+    "no": 5,
+    "name": "友永 龍介",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   },
+   {
+    "no": 6,
+    "name": "菊池 崇訓",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    1,
+    2,
+    5
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    4,
+    3,
+    7,
+    6
+   ]
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "こちらも小川と友永の２分戦だ。前走弥彦は優参叶わずの小川だが、節間２勝で力は見せた。高橋連れて決める。",
+  "appliedRulesAvailable": [],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}

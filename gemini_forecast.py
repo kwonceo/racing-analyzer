@@ -419,13 +419,55 @@ def _market_top3(snapshots, deadline_epoch):
     if not best:
         return None, None
     win = best.get("win") or best.get("single") or {}
-    if not isinstance(win, dict) or not win:
-        return None, round(bt, 1) if bt is not None else None
-    try:
-        items = sorted(((int(k), float(v)) for k, v in win.items() if float(v) > 0), key=lambda x: x[1])
-    except (TypeError, ValueError):
-        return None, round(bt, 1)
-    return [n for n, _ in items[:3]], round(bt, 1)
+    if isinstance(win, dict) and win:
+        try:
+            items = sorted(((int(k), float(v)) for k, v in win.items() if float(v) > 0),
+                           key=lambda x: x[1])
+            if items:
+                return [n for n, _ in items[:3]], round(bt, 1)
+        except (TypeError, ValueError):
+            pass
+    # 🔴 [2026-07-31] 단승(`win`)이 **경륜에서 항상 빈 dict** 라 시장 대조군이 통째로 None 이었다.
+    #   실측: 7월 스냅샷 보유 104경주 중 `win/single` 보유 **36건(34.6%)** · `quinella` **104건(100%)**.
+    #   ⇒ 복승 배당으로 대체한다. 각 선수의 **내재확률 합**(Σ 1/배당, 그 선수가 낀 조합 전부)이
+    #     클수록 시장이 상위권으로 본다는 뜻이다 — 복승은 '2착 안'에 대한 시장 견해이므로
+    #     top3 근사로 타당하다.
+    #   ⚠ 마감 전 스냅샷만 쓴다는 제약은 위에서 이미 걸려 있다(마감 후 배당 사용 금지).
+    #   ⚠ 어느 소스로 뽑았는지 반드시 남긴다 — 단승 기반과 복승 기반을 섞어 집계하면 안 된다.
+    q = best.get("quinella") or {}
+    if isinstance(q, dict) and q:
+        imp = {}
+        for k, v in q.items():
+            try:
+                nums = [int(x) for x in str(k).replace("-", "+").split("+")]
+                o = float(v)
+            except (TypeError, ValueError):
+                continue
+            if o <= 0 or len(nums) < 2:
+                continue
+            for n in nums:
+                imp[n] = imp.get(n, 0.0) + 1.0 / o
+        if imp:
+            rank = sorted(imp.items(), key=lambda x: -x[1])
+            return [n for n, _ in rank[:3]], round(bt, 1)
+    return None, round(bt, 1) if bt is not None else None
+
+
+def _market_src(snapshots, deadline_epoch):
+    """시장 top3 를 **무엇으로** 뽑았는지. 집계 시 소스를 섞지 않기 위한 표기."""
+    if not snapshots or not deadline_epoch:
+        return None
+    for s in snapshots:
+        t = s.get("t")
+        if not t:
+            continue
+        mb = (float(t) - float(deadline_epoch)) / 60.0
+        if -8 <= mb <= 0:
+            if (s.get("win") or s.get("single")):
+                return "win"
+            if s.get("quinella"):
+                return "quinella_implied"
+    return None
 
 
 def grade(rk, result_top3, starters=None, snapshots=None, deadline_epoch=None,
@@ -470,6 +512,8 @@ def grade(rk, result_top3, starters=None, snapshots=None, deadline_epoch=None,
          "market_top3": mt3,
          "market_hit_count": (len([n for n in (mt3 or []) if n in actual]) if mt3 else None),
          "market_snapshot_mb": msnap_mb,
+         # ⚠ 단승 기반과 복승 기반을 섞어 집계하면 안 된다 — 소스를 반드시 남긴다.
+         "market_src": _market_src(snapshots, deadline_epoch),
          "gradedAt": time.strftime("%Y-%m-%d %H:%M:%S")}
     doc["grading"] = g
     doc["graded"] = True

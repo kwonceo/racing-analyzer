@@ -1,0 +1,274 @@
+{
+ "predicted_top3": [
+  3,
+  2,
+  5
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  3
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 간의 경쟁으로 인한 유리한 전개, 추입형의 높은 기어비 활용.",
+ "key_factors": [
+  "3, 4, 6번의 선행형 각질 구성",
+  "2번의 젖히기형 각질이 선행 경쟁을 틈타 유리한 위치 점할 가능성",
+  "5번의 높은 기어비와 추입 각질 활용",
+  "경주 총평 '地元奮起' (지역 선수의 분발) 3번 중강조"
+ ],
+ "exception_note": "선행형이 3명(3, 4, 6번)으로 라인 내 선행 경쟁이 예상되며, 특히 3번과 6번이 '도주(선행)'와 '자재(양각)'로 표기되어 초반 속도 싸움이 치열할 가능성이 있다. 이로 인해 젖히기형인 2번과 추입형인 5번에게 기회가 올 수 있다. 특히 3번은 '地元奮起' 언급으로 동기 부여가 높다.",
+ "applied_rules": [],
+ "raceKey": "아오모리 2경주",
+ "forecastAt": "2026-07-31 08:40:23",
+ "forecastEpoch": 1785454823.782679,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "아오모리 2경주",
+  "wind": {
+   "venue": "아오모리",
+   "풍속": 2.6,
+   "풍향": "서",
+   "풍향코드": 12,
+   "기온": 25.2,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T08:30:00+09:00",
+   "지점": "青森",
+   "지점거리km": 1.36
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "岡崎 昭次",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "chaku": [
+     2,
+     3,
+     3,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "中川 拓也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     1,
+     2,
+     6,
+     23
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "邊見 斎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     3,
+     6,
+     10,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "石田 宏樹",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     5,
+     6,
+     7,
+     16
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "大室 翔",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "chaku": [
+     3,
+     3,
+     6,
+     14
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "櫻井 宏樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     2,
+     8,
+     0,
+     16
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "近内 三孝",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     0,
+     0,
+     0,
+     9
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    3,
+    4,
+    6
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    5,
+    1,
+    7
+   ]
+  },
+  "lines": [
+   4,
+   1,
+   2,
+   5,
+   7,
+   3,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "地元奮起",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}
