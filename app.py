@@ -24396,6 +24396,57 @@ def _keirin_result_parse(html):
         pass
     if placed and 1 in placed and 2 in placed:
         out["top3"] = [placed.get(1), placed.get(2), placed.get(3)]
+    # ══ [경주 흐름 수집 (2026-07-31)] 決まり手 · 착차 · 上り · S/B ══
+    #   🔴 지금까지 저장된 것은 **1·2·3착과 배당뿐**이었다. "어떻게 그렇게 됐나"가 없어
+    #     어떤 AI가 와도 "왜 이겼나"를 배울 수 없다. ⚠ 경주가 끝나면 페이지가 내려가
+    #     **오늘 안 받으면 오늘 경주는 영원히 못 쓴다** — 시간에 민감한 유일한 항목이다.
+    #   ⚠ 기존 `kimarite`(전적의 결정수 **시행수 4칸**)와 **다른 것**이다.
+    #     그건 과거 누적이고 이건 **이 경주에서 실제로 무엇이 나왔나**이다.
+    #   실측 원문(2026-07-31 아오모리 1~3R):
+    #     `1 3 櫻井 宏樹 37歳／98期 東京 Ａ級３班 差し 12.1`      ← 1착·3번차·差し·上り12.1
+    #     `2 1 相樂 修 … Ａ級３班 １ 車身 12.7`                  ← 2착 이하는 **착차**가 온다
+    #     `1 3 小笠原匠海 … 逃げ 11.2 S/B`                       ← S(先頭誘導)·B(バック先頭) 표시
+    #   ⚠ 완전 방어적 — 실패해도 기존 top3/환급 파싱에 영향이 없다(추가만).
+    try:
+        _flow = []
+        for row in _keirin_table_rows(html):
+            cells = [_kstrip(str(c)) for c in row]
+            if len(cells) < 6:
+                continue
+            if not (cells[0].isdigit() and cells[1].isdigit()):
+                continue
+            _pl, _car = int(cells[0]), int(cells[1])
+            if not (1 <= _pl <= 9 and 1 <= _car <= 9):
+                continue
+            _joined = " ".join(cells)
+            _km = None
+            for _k in ("逃げ", "捲くり", "捲り", "差し", "マーク"):
+                if _k in _joined:
+                    _km = _k
+                    break
+            # 上り = 마지막 한 바퀴 타임(초). 10~15초대 소수 한 자리.
+            _up = None
+            _mu = re.search(r"\b(1[0-9]\.\d)\b", _joined)
+            if _mu:
+                _up = float(_mu.group(1))
+            # 착차(2착 이하) — 車身/車輪/大差/微差 표기
+            _mg = re.search(r"([０-９0-9１-９/／]*\s*(?:車身|車輪)[０-９0-9/／]*|大差|微差|同着)", _joined)
+            _gap = _kstrip(_mg.group(1)) if _mg else None
+            _sb = []
+            if re.search(r"(?<![A-Za-z])S(?![A-Za-z])", _joined):
+                _sb.append("S")
+            if re.search(r"(?<![A-Za-z])B(?![A-Za-z])", _joined):
+                _sb.append("B")
+            _flow.append({"placing": _pl, "car": _car, "kimarite": _km,
+                          "lastLap": _up, "margin": _gap,
+                          "sb": ("/".join(_sb) or None)})
+        if _flow:
+            _flow.sort(key=lambda x: x["placing"])
+            out["flow"] = _flow
+            out["winKimarite"] = (_flow[0].get("kimarite") if _flow else None)
+    except Exception as _fe:
+        print("[경주 흐름] 파싱 스킵(무시):", str(_fe)[:100])
+
     # 2車複 환급: '2車複 3=5 360円' / '2車複 3-5 360円' 류 → 100엔 기준 배당(360円=3.6배)
     try:
         body = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", _htmllib.unescape(html)))
@@ -24468,7 +24519,9 @@ def _keirin_result_top3(jo, ymd, rno, expect_venue=None):
     if not parsed.get("top3") or parsed["top3"][0] is None or parsed["top3"][1] is None:
         return {"error": "결과 미게시/파싱 실패", "venue": parsed.get("venue")}
     return {"ok": True, "top3": parsed["top3"], "quinellaOdds": parsed.get("quinellaOdds"),
-            "trifectaOdds": parsed.get("trifectaOdds"), "venue": parsed.get("venue")}
+            "trifectaOdds": parsed.get("trifectaOdds"), "venue": parsed.get("venue"),
+            # [경주 흐름 (2026-07-31)] 決まり手·착차·上り·S/B. 없으면 키가 없다(빈 값 저장 안 함).
+            "flow": parsed.get("flow"), "winKimarite": parsed.get("winKimarite")}
 
 
 def _keirin_result_backfill_once(date=None, verbose=True):
@@ -24509,6 +24562,13 @@ def _keirin_result_backfill_once(date=None, verbose=True):
                     result["payouts"]["quinella"] = r["quinellaOdds"]
                 if r.get("trifectaOdds") is not None:
                     result["payouts"]["trifecta"] = r["trifectaOdds"]   # [삼복승 배당 백필]
+            # [경주 흐름 저장 (2026-07-31)] 決まり手·착차·上り·S/B — **경주가 끝나면 영구 소실**된다.
+            #   ⚠ 결과 스키마에 **추가만** 한다(1st/2nd/3rd/payouts 무변경).
+            #   ⚠ 없으면 키를 넣지 않는다 — 빈 값으로 "수집했는데 비었다"를 만들지 않는다.
+            if r.get("flow"):
+                result["flow"] = r["flow"]
+            if r.get("winKimarite"):
+                result["winKimarite"] = r["winKimarite"]
             _apply_result_learning(rk, result, top3)
             filled += 1
             done_list.append({"raceKey": rk, "joCode": jo, "top3": r["top3"],
