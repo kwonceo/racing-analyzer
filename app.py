@@ -32493,8 +32493,29 @@ def _health_pending_results():
 def _health_kakao_text(rep):
     """카카오 본문 — **최대한 짧게**. summary 1줄 + 미충족 목록만(충족 항목은 넣지 않는다).
     목록이 짧아지는 것이 곧 진행 신호다."""
-    lines = ["📋 완료 조건 체크리스트  %s" % time.strftime("%m/%d %H:%M"),
-             rep.get("summary") or ""]
+    # 🔴 [무결성 우선 (2026-07-31)] 대표가 이것만 보고 판단할 수 있어야 한다.
+    #   맨 위는 **"오늘분 측정 가능 = 예/아니오"** 다 — 축적 중에도 매일 확인되면
+    #   일주일치가 통째로 날아갈 수 없다. 그다음이 무결성 이상, 그다음이 완료 조건.
+    #   ⚠ 발송 코어(`_kakao_send_to_me`)는 건드리지 않는다. 메시지 조립만이다.
+    _items = rep.get("items") or []
+    _integ = [x for x in _items if str(x.get("id") or "").startswith("I")]
+    _i4 = next((x for x in _integ if x.get("id") == "I4"), None)
+    _bad = [x for x in _integ if x.get("ok") is False]
+    lines = []
+    if _i4 is not None:
+        _c = _i4.get("current")
+        _okm = (_i4.get("ok") is True)
+        lines.append("%s 오늘분 측정 %s (%s%%)"
+                     % ("🟢" if _okm else "🔴", "가능" if _okm else "불가", _c))
+    if _bad:
+        lines.append("🔴 무결성 이상 %d" % len(_bad))
+        for x in _bad:
+            lines.append("· %s: %s (목표 %s)" % (x.get("name"), x.get("current"), x.get("target")))
+    else:
+        lines.append("🟢 무결성 정상")
+    lines.append("")
+    lines += ["📋 완료 조건 체크리스트  %s" % time.strftime("%m/%d %H:%M"),
+              rep.get("summary") or ""]
     # ⏳ 결과 대기 — 21:00 은 경마 마감(20:50) 직후라 결과가 덜 들어온 것이 정상이다.
     _pend = _health_pending_results()
     if _pend:

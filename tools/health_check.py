@@ -480,6 +480,142 @@ def check_module_load():
                     else "🔴 " + " · ".join(bad[:5]))
 
 
+# ══════════════ [무결성 감시 (2026-07-31 신설)] ══════════════
+#  🔴 오늘 큰 결함 셋이 전부 "우연히 조사하다가" 잡혔다. **매일 측정이 잡은 게 아니다.**
+#    · 경마 확정배당 0.9% — 며칠간 몰랐다
+#    · 주기 백업 0회 실행 — 몇 주 몰랐다
+#    · 같은 경기장 다른 날짜 파일 혼입 — 오늘 최대 오류의 원인
+#  ⚠ 성능 측정(주 1회)과 **성격이 다르다**. 무결성 감시는 **매일·자동**이고 절대 줄이지 않는다.
+#  ⚠ 각 항목에 "며칠 연속 미달이면 위험"을 명시한다.
+_INTEG_DAYS = "⚠ 2일 연속 미달이면 조사, 3일이면 위험"
+
+
+def check_payout_coverage():
+    """[I1] 확정배당 보유율 — **종목별**. 🔴 경마 0.9% 가 이 항목이 있었으면 첫날 잡혔다."""
+    day = time.strftime("%Y-%m-%d")
+    files = glob.glob(os.path.join(BASE, "data", "analysis_log", day.replace("-", "_") + "_*.json"))
+    by = {}
+    for p in files:
+        try:
+            d = json.load(open(p, encoding="utf-8"))
+        except Exception:
+            continue
+        if not (d.get("result") or {}).get("1st"):
+            continue
+        sp = d.get("sport") or "?"
+        t, o = by.get(sp, (0, 0))
+        by[sp] = (t + 1, o + (1 if ((d.get("result") or {}).get("payouts") or {}).get("quinella") else 0))
+    tot = sum(v[0] for v in by.values())
+    ok_ = sum(v[1] for v in by.values())
+    note = " · ".join("%s %d/%d(%.0f%%)" % (k, v[1], v[0], 100.0 * v[1] / max(v[0], 1))
+                      for k, v in sorted(by.items()))
+    cur = round(100.0 * ok_ / tot, 1) if tot else None
+    worst = min((100.0 * v[1] / max(v[0], 1)) for v in by.values() if v[0] >= 5) if any(v[0] >= 5 for v in by.values()) else None
+    return _mk("I1", "🔴 무결성", "확정배당 보유율(종목별)",
+               "당일 결과확정 경주 %d건 — 종목별 분리" % tot,
+               current=cur, target=90.0,
+               ok=(None if tot < 5 else (worst is not None and worst >= 90.0)),
+               n=tot, note=note or "당일 결과 없음",
+               reason=None if tot >= 5 else "표본 부족(%d<5)" % tot)
+
+
+def check_backup_alive():
+    """[I2] 백업 실제 실행 — 마지막 실행 시각과 경과. 🔴 6시간 주기가 0회인 것을 몇 주 몰랐다."""
+    p = os.path.join(BASE, "data", "_periodic_backup_last.txt")
+    try:
+        last = float(open(p, encoding="utf-8").read().strip())
+        el = (time.time() - last) / 3600.0
+    except Exception:
+        return _mk("I2", "🔴 무결성", "백업 마지막 실행 경과(시간)",
+                   "data/_periodic_backup_last.txt", current=None, target="≤ 12",
+                   ok=False, n=None, note="🔴 스탬프 파일 없음 — 백업이 한 번도 안 돌았다. " + _INTEG_DAYS)
+    return _mk("I2", "🔴 무결성", "백업 마지막 실행 경과(시간)",
+               "data/_periodic_backup_last.txt", current=round(el, 1), target="≤ 12",
+               ok=(el <= 12.0), n=1,
+               note="마지막 %s · %s" % (time.strftime("%m-%d %H:%M", time.localtime(last)), _INTEG_DAYS))
+
+
+def check_daemon_alive():
+    """[I3] 데몬 마지막 실행 시각 — sleep-first 5곳. ⚠ 현재는 백업만 스탬프가 있다."""
+    d = os.path.join(BASE, "data")
+    known = {"주기백업": "_periodic_backup_last.txt"}
+    have = sum(1 for f in known.values() if os.path.exists(os.path.join(d, f)))
+    miss = ["L16004", "L24007(KRA/NAR 백필)", "L32752", "L32852(워치독)"]
+    return _mk("I3", "🔴 무결성", "데몬 실행시각 스탬프 보유",
+               "sleep-first 데몬 5곳(주기백업 + 미수정 4곳)",
+               current=have, target=5, ok=(have >= 5), n=5,
+               note="보유 %d/5 · 🔴 미보유: %s · %s" % (have, " · ".join(miss), _INTEG_DAYS))
+
+
+def check_measurable_today():
+    """[I4] 🔴 **오늘분 측정 가능 여부** — 결과·확정배당·마감시각이 **모두** 갖춰진 경주 비율.
+
+    ⚠ 이것이 핵심이다. 축적 중에도 매일 확인되면 **일주일치가 통째로 날아갈 수 없다.**
+    """
+    day = time.strftime("%Y-%m-%d")
+    files = glob.glob(os.path.join(BASE, "data", "analysis_log", day.replace("-", "_") + "_*.json"))
+    tot = ok_ = 0
+    miss = {"결과없음": 0, "확정배당없음": 0, "마감시각없음": 0}
+    for p in files:
+        try:
+            d = json.load(open(p, encoding="utf-8"))
+        except Exception:
+            continue
+        tot += 1
+        res = d.get("result") or {}
+        if not res.get("1st"):
+            miss["결과없음"] += 1
+            continue
+        if not (res.get("payouts") or {}).get("quinella"):
+            miss["확정배당없음"] += 1
+            continue
+        hp = p.replace("analysis_log", "odds_history")
+        dl = None
+        for cand in (hp, hp + ".gz"):
+            if os.path.exists(cand):
+                try:
+                    if cand.endswith(".gz"):
+                        import gzip
+                        dl = (json.load(gzip.open(cand, "rt", encoding="utf-8")) or {}).get("deadline_epoch")
+                    else:
+                        dl = (json.load(open(cand, encoding="utf-8")) or {}).get("deadline_epoch")
+                except Exception:
+                    dl = None
+                break
+        if not dl:
+            miss["마감시각없음"] += 1
+            continue
+        ok_ += 1
+    cur = round(100.0 * ok_ / tot, 1) if tot else None
+    return _mk("I4", "🔴 무결성", "오늘분 측정 가능 비율",
+               "당일 분석로그 %d건 — 결과·확정배당·마감시각 3종 모두 보유" % tot,
+               current=cur, target=80.0, ok=(None if tot < 10 else (cur is not None and cur >= 80.0)),
+               n=tot, note="%d/%d · 결손: %s · %s" % (ok_, tot, miss, _INTEG_DAYS),
+               reason=None if tot >= 10 else "표본 부족(%d<10)" % tot)
+
+
+def check_file_duplicate():
+    """[I5] 파일 중복 감지 — 같은 경기장·경주번호의 **날짜가 다른 파일 수**.
+
+    🔴 오늘 최대 오류의 원인이다. 날짜 없이 glob 매칭하면 다른 날 데이터가 섞인다.
+    ⚠ 중복 자체는 정상이다(같은 경기장이 여러 날 개최). **매칭 코드가 날짜를 써야 한다**는 경보다.
+    """
+    import re as _re
+    from collections import Counter
+    c = Counter()
+    for p in glob.glob(os.path.join(BASE, "data", "analysis_log", "*.json")):
+        m = _re.match(r"\d{4}_\d{2}_\d{2}_(.+)\.json$", os.path.basename(p))
+        if m:
+            c[m.group(1)] += 1
+    dup = {k: v for k, v in c.items() if v >= 2}
+    worst = max(dup.values()) if dup else 0
+    return _mk("I5", "🔴 무결성", "동명 경주 최대 중복 일수",
+               "analysis_log 전체 %d파일 · 경기장+경주번호 기준" % sum(c.values()),
+               current=worst, target="기록만", ok=None, n=len(c),
+               note="중복 키 %d종 · 최대 %d일 · 🔴 날짜 없는 glob 매칭 금지(원칙 16) · %s"
+                    % (len(dup), worst, _INTEG_DAYS))
+
+
 def build_checklist():
     """반환 dict 의 **최상단에 `summary` 계열을 배치**한다(모바일에서 먼저 보이도록).
     ⚠ 응답은 `ensure_ascii=False` + UTF-8 로 내보낼 것 — `\\uCda9\\uC871` 로 깨지면 외부에서 못 쓴다."""
@@ -487,6 +623,9 @@ def build_checklist():
              check_save_failures_fixed(), check_save_failures_unfixed(),
              check_schema_contract(), check_schema_drift(),
              check_score_decomposition(), check_freeze_success(), check_module_load(),
+             # 🔴 무결성 감시(매일·자동) — 성능 측정과 성격이 다르다. 절대 줄이지 않는다.
+             check_payout_coverage(), check_backup_alive(), check_daemon_alive(),
+             check_measurable_today(), check_file_duplicate(),
              check_forecast_discard(), check_forecast_vs_market()]
     for (i, area, name, target, denom, why) in _PENDING:
         items.append(_mk(i, area, name, denom, current=None, target=target,
