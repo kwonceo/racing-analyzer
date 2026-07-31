@@ -32,8 +32,12 @@ SCAN_DIRS = ["tools", "tests"]
 
 # 🔴 특정 경주를 가리키는 신호: 경주/raceKey/slug/venue 를 파일명에 끼워 넣는 패턴
 _RACE_HINT = re.compile(r"(경주|raceKey|slug|venue|rk\b)")
-# 날짜가 매칭 키에 들어갔다는 신호
-_DATE_HINT = re.compile(r"%Y|\d{4}_\d{2}_\d{2}|ymd|_pfx|strftime|date\b|day\b")
+# 🔴 [2026-08-01 수정] 종전 정규식은 **주석의 `date` 단어까지 날짜 힌트로 인정**해
+#   `_pat = "*_%s.json" % slug   # date-filtered below` 를 통과시켰다.
+#   ⇒ 실제 안전성이 아니라 **주석을 재고 있었다.** 어제 배운 원칙 그대로다:
+#     "테스트 통과가 곧 정상은 아니다. 테스트가 의도한 것을 재는지 눈으로 확인한다."
+#   이제 **코드 부분만**(주석 제거 후) 검사하고, 날짜 힌트도 **실제 포맷 토큰**만 인정한다.
+_DATE_HINT = re.compile(r"%Y|\d{4}_\d{2}_\d{2}|\bymd\b|_pfx|strftime")
 _GLOB = re.compile(r"glob\.glob\(|(?<![\w.])glob\(")
 
 # 여기에 넣으면 검사에서 빠진다 — **넣기 전에 이유를 남길 것.**
@@ -50,29 +54,47 @@ def targets():
 
 
 def scan():
+    """🔴 [2026-08-01 재설계] **함수 단위**로 본다.
+
+    종전은 한 줄 단위라 `_pat = "*_%s.json" % slug` / `glob.glob(_pat)` 로
+    **변수를 분리하면 그대로 빠져나갔다**(`regrade_market.py` 가 실제로 그랬다).
+    ⇒ 함수 본문 전체에서 `glob` 호출 + 경주 힌트 + 와일드카드가 **함께** 나오면
+      날짜 힌트가 있는지 본다. 주석은 미리 제거한다.
+    """
+    import ast as _ast
     bad = []
     for p in targets():
         rel = os.path.relpath(p, BASE).replace("\\", "/")
         if rel.endswith("tests/run_glob_safety.py"):
             continue                                    # 자기 자신(설명 문자열)
         try:
-            lines = open(p, encoding="utf-8", errors="replace").read().split("\n")
+            src = open(p, encoding="utf-8", errors="replace").read()
+            tree = _ast.parse(src)
         except Exception:
             continue
-        for i, l in enumerate(lines, 1):
-            if not _GLOB.search(l):
+        lines = src.split("\n")
+        for fn in _ast.walk(tree):
+            if not isinstance(fn, (_ast.FunctionDef, _ast.AsyncFunctionDef)):
                 continue
-            s = l.strip()
-            if s.startswith("#"):
+            a, b = fn.lineno - 1, (fn.end_lineno or fn.lineno)
+            body = "\n".join(re.sub(r"#.*$", "", x) for x in lines[a:b])
+            if not _GLOB.search(body):
                 continue
-            # 와일드카드로 시작하는 파일명 매칭이면서
-            if "*_" not in s and "_*" not in s and "*." not in s:
+            # 🔴 [오탐 방지] `glob("*.json")` 같은 **전수 스캔은 무해**하다.
+            #   위험한 것은 파일명에 **변수를 끼워 넣어 특정 경주를 지목**하는 패턴이다.
+            #   → `"*_%s..." % x` 또는 `f"*_{x}..."` 처럼 **와일드카드 + 포맷**이 함께 있어야 한다.
+            _named = re.search(r'["\'][^"\']*\*_[^"\']*["\']\s*%|f["\'][^"\']*\*_\{', body)
+            if not _named:
                 continue
-            # 🔴 특정 경주를 가리키는데 날짜가 없으면 위반
-            if _RACE_HINT.search(s) and not _DATE_HINT.search(s):
-                if any(k[0] == rel and k[1] in s for k in ALLOW):
-                    continue
-                bad.append({"file": rel, "line": i, "code": s[:120]})
+            if not _RACE_HINT.search(body):
+                continue                                 # 특정 경주 매칭이 아니다
+            if _DATE_HINT.search(body):
+                continue                                 # 날짜가 들어가 있다
+            if any(k[0] == rel and k[1] in body for k in ALLOW):
+                continue
+            first = next((a + 1 + i for i, x in enumerate(lines[a:b]) if _GLOB.search(x)), fn.lineno)
+            bad.append({"file": rel, "line": first, "func": fn.name,
+                        "code": lines[first - 1].strip()[:110]})
     return bad
 
 

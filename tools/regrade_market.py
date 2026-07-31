@@ -34,26 +34,28 @@ def _hist_for(rk, ymd=None):
       `market_top3` 가 None 이 됐다. **예측 파일의 날짜를 우선 사용**한다.
       같은 경주명이 여러 날 존재하는 것은 정상이므로 날짜가 없으면 스냅샷이 있는 최신본을 쓴다.
     """
+    # 🔴 [2026-08-01 엄격화] 종전에는 위험이 **두 곳** 남아 있었다:
+    #     ① `ymd` 가 없으면 날짜 없이 최신 파일로 폴백
+    #     ② `ymd` 가 있어도 `if exact:` 가 비면 전체 후보로 폴백
+    #   둘 다 **다른 날 데이터를 반환할 수 있다**(2026-07-31 회수율 오염의 원인).
+    #   ⇒ **날짜가 없으면 아무것도 반환하지 않는다.** 폴백을 없앤다.
+    #     "틀린 데이터보다 없는 게 낫다" — 아메다스 20km 임계와 같은 원칙.
+    if not ymd or len(str(ymd)) < 8:
+        return None
     slug = rk.replace(" ", "_")
-    # ⚠ 여기서는 후보를 모으기만 한다 — **바로 아래에서 `ymd`(날짜)로 좁힌다**(원칙 16).
-    #   날짜 없이 이 목록을 그대로 쓰면 다른 날 데이터가 섞인다(2026-07-31 실사고).
-    _pat = "*_%s.json" % slug          # date-filtered below
-    cands = sorted(glob.glob(os.path.join(BASE, "data", "odds_history", _pat)))
-    if ymd:
-        pref = "%s_%s_%s_" % (ymd[:4], ymd[4:6], ymd[6:8])
-        exact = [p for p in cands if os.path.basename(p).startswith(pref)]
-        if exact:
-            cands = exact
-    best = None
-    for p in reversed(cands):                  # 최신 날짜부터
-        try:
-            d = json.load(open(p, encoding="utf-8"))
-        except Exception:
+    path = os.path.join(BASE, "data", "odds_history",
+                        "%s_%s_%s_%s.json" % (ymd[:4], ymd[4:6], ymd[6:8], slug))
+    for p in (path, path + ".gz"):             # `.gz` 압축본도 읽는다(69%가 압축)
+        if not os.path.exists(p):
             continue
-        if d.get("snapshots") and d.get("deadline_epoch"):
-            return d                           # 스냅샷·마감시각을 갖춘 것 우선
-        best = best or d
-    return best
+        try:
+            if p.endswith(".gz"):
+                import gzip
+                return json.load(gzip.open(p, "rt", encoding="utf-8"))
+            return json.load(open(p, encoding="utf-8"))
+        except Exception:
+            return None
+    return None
 
 
 def main():

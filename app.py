@@ -24034,8 +24034,35 @@ def _kra_result_backfill_once(date=None, verbose=True):
 def _kra_backfill_loop():
     """20분 주기 결과 백필(데몬). KRA 키가 있을 때만 동작. 경주 종료 후 rcTime 게시되면 자동 확보 →
     라이브 감시 해제 여부와 무관하게 복기·학습·복병 학습이 자동 반영된다(수동 입력 불필요)."""
+    # 🔴 [sleep-first 수정 (2026-08-01)] 종전은 **20분 먼저 자고** 시작했다.
+    #   개발 중 리로드가 잦아 재기동마다 첫 20분이 통째로 비었다.
+    #   ⇒ 마지막 실행 시각을 파일에 남기고 **경과가 주기를 넘으면 즉시 실행**한다.
+    #   ⚠ 이 루프는 KRA·NAR·경륜 결과 백필 + 전적 백필을 **한 번에** 돈다 —
+    #     비면 그날 결과·확정배당이 통째로 안 채워진다(경마 확정배당 0.9% 의 원인 중 하나).
+    _bstamp = os.path.join(os.path.dirname(__file__), "data", "_kra_backfill_last.txt")
+
+    def _bf_last():
+        try:
+            return float(open(_bstamp, encoding="utf-8").read().strip())
+        except Exception:
+            return 0.0
+
+    def _bf_mark():
+        try:
+            os.makedirs(os.path.dirname(_bstamp), exist_ok=True)
+            _t = _bstamp + ".tmp%d" % os.getpid()
+            with open(_t, "w", encoding="utf-8") as f:
+                f.write("%.0f" % time.time())
+            os.replace(_t, _bstamp)
+        except Exception as e:
+            print("[결과 백필] 실행시각 기록 실패(무시):", str(e)[:80])
+
     while True:
-        time.sleep(_KRA_BACKFILL_INTERVAL)
+        _el = time.time() - _bf_last()
+        if _el < _KRA_BACKFILL_INTERVAL:
+            time.sleep(max(30.0, _KRA_BACKFILL_INTERVAL - _el))
+            continue
+        _bf_mark()
         try:
             if _kra_api_key():
                 _kra_result_backfill_once()
