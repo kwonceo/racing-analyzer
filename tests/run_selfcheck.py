@@ -41,11 +41,13 @@ def _run(rel):
 # ── 케이스 ①  run_glob_safety : 날짜 없는 특정 경주 매칭을 주입 ──────────────
 def case_glob_safety():
     p = os.path.join(BASE, "tools", "_selfcheck_tmp.py")
+    # SELFCHECK-INJECT-BEGIN  ⚠ 아래는 **일부러 위험한** 코드다. glob 안전 검사에서 제외된다.
     src = ('import glob, os\nBASE = "."\n\n'
            'def _bad(rk):\n'
            '    slug = rk.replace(" ", "_")\n'
            '    pat = "*_%s.json" % slug\n'
            '    return sorted(glob.glob(os.path.join(BASE, "data", "odds_history", pat)))\n')
+    # SELFCHECK-INJECT-END
     open(p, "w", encoding="utf-8").write(src)
     try:
         rc = _run("tests/run_glob_safety.py")

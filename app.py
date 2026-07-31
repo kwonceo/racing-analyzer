@@ -32541,6 +32541,37 @@ def _health_pending_results():
         return None
 
 
+def _health_prev_day_measurable():
+    """[③안 보조 (2026-08-01)] **전날** 측정 가능 비율(확정치). 없으면 None.
+
+    왜: 21:00 발송 시점은 마지막 발주(23:30)보다 일러 **오늘분이 구조적으로 미확정**이다.
+      ⇒ 오늘은 미확정으로 두고 **어제 확정치**를 함께 보여 준다.
+    ⚠ 완전 읽기 전용 · 실패하면 None(카톡 본문에서 그 줄만 빠진다).
+    """
+    try:
+        _y = time.strftime("%Y_%m_%d", time.localtime(time.time() - 86400))
+        _fs = glob.glob(os.path.join(os.path.dirname(__file__), "data", "analysis_log",
+                                     _y + "_*.json"))
+        if not _fs:
+            return None
+        tot = ok_ = 0
+        for _p in _fs:
+            try:
+                _d = json.load(open(_p, encoding="utf-8"))
+            except Exception:
+                continue
+            tot += 1
+            _r = _d.get("result") or {}
+            if not _r.get("1st") or not (_r.get("payouts") or {}).get("quinella"):
+                continue
+            _h = _hist_read_any(_p.replace("analysis_log", "odds_history")) or {}
+            if _h.get("deadline_epoch"):
+                ok_ += 1
+        return round(100.0 * ok_ / tot, 1) if tot else None
+    except Exception:
+        return None
+
+
 def _health_kakao_text(rep):
     """카카오 본문 — **최대한 짧게**. summary 1줄 + 미충족 목록만(충족 항목은 넣지 않는다).
     목록이 짧아지는 것이 곧 진행 신호다."""
@@ -32555,9 +32586,21 @@ def _health_kakao_text(rep):
     lines = []
     if _i4 is not None:
         _c = _i4.get("current")
-        _okm = (_i4.get("ok") is True)
-        lines.append("%s 오늘분 측정 %s (%s%%)"
-                     % ("🟢" if _okm else "🔴", "가능" if _okm else "불가", _c))
+        _ok4 = _i4.get("ok")
+        if _ok4 is None:
+            # 🔴 [2026-08-01 ③안] 발송(21:00)이 마지막 발주보다 이르면 오늘분은 **구조적으로 미확정**이다.
+            #   ⇒ 오늘분은 `⏳미확정` 으로만 쓰고, **전날 확정치를 함께** 보여 준다.
+            #   ⚠ 두 줄 안으로 유지 · 발송 코어 무변경.
+            lines.append("⏳ 오늘분 측정 %s%% (미확정·경주 진행 중)" % _c)
+            try:
+                _y = _health_prev_day_measurable()
+                if _y is not None:
+                    lines.append("✅ 어제 확정 %s%%" % _y)
+            except Exception:
+                pass
+        else:
+            lines.append("%s 오늘분 측정 %s (%s%%)"
+                         % ("🟢" if _ok4 else "🔴", "가능" if _ok4 else "불가", _c))
     if _bad:
         lines.append("🔴 무결성 이상 %d" % len(_bad))
         for x in _bad:

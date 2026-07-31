@@ -65,16 +65,26 @@ def scan():
     bad = []
     for p in targets():
         rel = os.path.relpath(p, BASE).replace("\\", "/")
-        # ⚠ 자기 자신(설명 문자열)과 **자기검증 파일**(위험을 일부러 담은 주입 코드)은 제외한다.
-        #   run_selfcheck.py 는 이 테스트가 실제로 잡는지 확인하려고 위반 코드를 문자열로 들고 있다.
-        if rel in ("tests/run_glob_safety.py", "tests/run_selfcheck.py"):
-            continue
+        if rel == "tests/run_glob_safety.py":
+            continue                                    # 자기 자신(설명 문자열)
         try:
             src = open(p, encoding="utf-8", errors="replace").read()
             tree = _ast.parse(src)
         except Exception:
             continue
         lines = src.split("\n")
+        # 🔴 [제외 범위 좁힘 (2026-08-01)] 종전에는 `run_selfcheck.py` 를 **파일 통째로** 제외했다.
+        #   그러면 그 파일에 **진짜 위험한 코드**가 들어가도 영영 안 잡힌다.
+        #   ⇒ `# SELFCHECK-INJECT-BEGIN/END` 마커 사이 **주입 블록만** 비운다.
+        #   ⚠ 원칙 17 계열 — **제외 목록이 테스트를 무력화하지 않는지** 본다.
+        _mask = False
+        for _i, _l in enumerate(lines):
+            if "SELFCHECK-INJECT-BEGIN" in _l:
+                _mask = True
+            elif "SELFCHECK-INJECT-END" in _l:
+                _mask = False
+            elif _mask:
+                lines[_i] = ""                          # 주입 블록만 지운다
         for fn in _ast.walk(tree):
             if not isinstance(fn, (_ast.FunctionDef, _ast.AsyncFunctionDef)):
                 continue
