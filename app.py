@@ -22263,6 +22263,7 @@ def _keirin_style_bonus(r):
 
 def _keirin_parse_card(html):
     """oddspark 경륜 출마표 HTML → {venue,race_no,dist,post,tendency,riders,line,comment}."""
+    _form_raw_save("keirin", html)   # 🔴 [2026-08-02 승인] 전적 원문 보존(파싱 무개입·실패해도 무시)
     out = {"venue": "", "race_no": None, "race_name": "", "dist": "", "post": "",
            "tendency": {}, "riders": [], "line": [], "comment": ""}
     mt = re.search(r"<title>(.*?)</title>", html, re.S)
@@ -29368,6 +29369,10 @@ def analyze_combined():
 # ─────────────────────────────────────────
 KOREA_SESSION = os.path.join(os.path.dirname(__file__), "data", "korea_session.json")
 KOREA_PDF = os.path.join(os.path.dirname(__file__), "data", "korea_last.pdf")
+# 🔴 [2026-08-02 승인 · 안A] 한국 PDF 원본 보존 기간. **PDF 가 유일한 원본이다.**
+#   한국 개최는 매일이 아니라 주 3일(금·토·일) 중심 → 90일이면 약 800MB 로 부담이 크지 않다.
+#   ⚠ 부담되면 **형식을 바꾸지 말고 이 값을 30 으로 줄인다**(대표 지시).
+KOREA_PDF_KEEP_DAYS = 90
 # [사전분석] 경주별 분석결과를 파일로 영구 저장 → 경주 선택 시 개별 즉시 로드.
 KOREA_PRERACE_DIR = os.path.join(os.path.dirname(__file__), "data", "prerace")
 # [병렬화] 동시 Vision 호출 개수(3~4). [해시캐싱] 완료된 PDF 분석 결과 캐시 폴더.
@@ -29883,6 +29888,28 @@ def korea_start():
     f.save(KOREA_PDF)
     date = time.strftime("%Y-%m-%d")
     md5 = _pdf_md5(KOREA_PDF)
+    # 🔴 [2026-08-02 승인 · 안A] **한국 PDF 날짜별 보존** — 종전에는 `korea_last.pdf` 로
+    #   **매번 덮어써서 과거 재파싱이 영구 불가**였다(인기·두수·날짜를 나중에 받을 수 없다).
+    #   ⚠ **PDF 가 유일한 원본이다. 잃으면 복구가 안 된다.**
+    #   ⚠ 한국은 **실전**이다 — **저장만 추가**하고 파싱·점수 경로는 일절 건드리지 않는다.
+    #   ⚠ 실패해도 예외를 올리지 않는다(업로드가 막히면 안 된다).
+    try:
+        _kdir = os.path.join(os.path.dirname(KOREA_PDF), "korea_pdf_raw")
+        os.makedirs(_kdir, exist_ok=True)
+        _kp = os.path.join(_kdir, "%s_%s.pdf" % (date, (md5 or "")[:10]))
+        if not os.path.exists(_kp):                 # 같은 날 같은 PDF 재업로드는 건너뛴다
+            import shutil as _sh2
+            _sh2.copy2(KOREA_PDF, _kp)
+            print("[한국PDF 보존] %s (%.1f MB)" % (os.path.basename(_kp),
+                                                 os.path.getsize(_kp) / 1048576.0))
+        # 보존 기간 롤링(기본 90일) — 부담되면 KOREA_PDF_KEEP_DAYS 를 30 으로 줄인다
+        _cut = time.time() - KOREA_PDF_KEEP_DAYS * 86400
+        for _fn in os.listdir(_kdir):
+            _fp = os.path.join(_kdir, _fn)
+            if _fn.endswith(".pdf") and os.path.getmtime(_fp) < _cut:
+                os.remove(_fp)
+    except Exception as _ke:
+        print("[한국PDF 보존] 실패(무시):", str(_ke)[:80])
     # [해시 캐싱] 같은 PDF를 이전에 분석 완료했다면 재분석 없이 즉시 복원.
     cached = _pdf_cache_load(md5)
     if cached:
