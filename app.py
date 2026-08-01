@@ -2921,6 +2921,27 @@ def _snapshot_result_for(rk):
 SNAPSHOT_COMPARE_DIR = os.path.join(os.path.dirname(__file__), "data", "snapshot_compare")
 SNAPSHOT_TIMING_FILE = os.path.join(os.path.dirname(__file__), "data", "snapshot_timing.json")
 
+# ══════════ 🔴 [2026-08-01 · 권대표 결정] 스냅샷 **판정 경로 중단** ══════════
+#   왜 껐나 — 스냅샷은 **증거로 쓸 수 없다**는 결론이 났다:
+#     ① 커버리지 **24%**(7/30 실측: 카드 108건 중 26건) — 대부분의 경주에 애초에 없다.
+#     ② **사람이 배당판 탭을 포그라운드로 열어둬야만** 찍힌다(`captureVisibleTab` = 보이는 탭).
+#        서버가 만들 수 없다. 설계 한계이지 버그가 아니다.
+#     ③ 🔴 **파일명과 이미지가 다를 수 있다** — 여러 배당판 탭이 각자 트리거를 쏘지만 캡처는
+#        보이는 화면 하나뿐이다. 7/30 실측으로 **같은 '분'에 서로 다른 두 경기장이 저장된 것 9건**
+#        (11:51 와카야마+기후 · 13:48 소노다+와카야마 · 14:15 몬베츠+부산 …).
+#        ⇒ ③ 때문에 **이미 쌓인 스냅샷도 판정 근거로 못 쓴다.**
+#
+#   ⚠⚠ **끄는 것은 "판정 계산"뿐이다. 아래는 그대로 둔다(무삭제·무중단):**
+#     · 스냅샷 **저장** `/api/snapshot/save` · 이미지 `/api/snapshot/get` · 갤러리 `/api/snapshot/list`
+#     · 경주기록 카드 이미지 `_day_snapshot_for` (날짜 분리 수정분 유지)
+#     · **기존 파일 전부 보존** — `data/snapshots/`·`snapshot_compare/`·`snapshot_timing.json`
+#       어느 것도 지우지 않는다. 생성·누적만 멈춘다.
+#
+#   🔧 **되살리는 방법**: 이 값을 `True` 로 바꾸면 끝이다. 코드는 하나도 지우지 않았다.
+#      되살리기 전에 위 ③(파일명↔이미지 불일치)이 해결됐는지 먼저 확인할 것 —
+#      그게 해결 안 되면 켜도 같은 오염이 다시 쌓인다.
+SNAPSHOT_JUDGE_ENABLED = False
+
 
 def _snapshot_min_quinella(quinellas):
     """[비교분석] 추천 복승 조합 중 최저 배당 + 그 조합 반환. 없으면 (None, None)."""
@@ -3056,7 +3077,11 @@ def _snapshot_build_compare(rk, date=None):
     구조: {"T-10":{최저배당·추천}, "T-2":{최저배당·추천}, "마감후":{최종 최저배당}, "변화량":{...}}.
 
     🔴 [2026-08-01] `date` 인자 신설 — 한 날짜 안에서만 짝짓는다. 저장 파일명에도 날짜가 들어간다.
+    🔴 [2026-08-01 중단] `SNAPSHOT_JUDGE_ENABLED=False` 면 **아무것도 만들지 않는다**(사유는 플래그 주석).
+       ⚠ 저장된 compare 파일 **읽기는 그대로 동작**한다 — 여기서 막는 것은 '새로 만드는 것'뿐이다.
     """
+    if not SNAPSHOT_JUDGE_ENABLED:
+        return None
     stage = _snapshot_metas_for_race(rk, date)
     if "close" not in stage:                       # 마감후 스냅샷 없으면 아직 미완(추후 재호출)
         return None
@@ -3109,7 +3134,13 @@ def _snapshot_build_compare(rk, date=None):
 
 def _snapshot_timing_learn(rk, compare, stage):
     """[타이밍 학습] T-10 추천 vs T-2 추천을 실제 착순과 비교 → 어느 시점 추천이 더 정확한지 누적.
-    결과(top3) 미입력이면 대기(마감후 결과 저장 시 재판정 안 하고, 결과 있을 때만 집계)."""
+    결과(top3) 미입력이면 대기(마감후 결과 저장 시 재판정 안 하고, 결과 있을 때만 집계).
+
+    🔴 [2026-08-01 중단] `snapshot_timing.json` **누적 중단**. 파일은 보존하고 새 집계만 멈춘다.
+       (이미 쌓인 "T-10 이 더 정확 9.1% vs 7.7%" 결론은 오염 케이스 포함·표본 13건이라 **무효** 처리됨)
+    """
+    if not SNAPSHOT_JUDGE_ENABLED:
+        return
     try:
         res = _snapshot_result_for(rk)
         top3 = (res or {}).get("top3") or []

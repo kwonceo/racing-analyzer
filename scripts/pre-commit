@@ -1,0 +1,33 @@
+#!/bin/sh
+# ══════════════════════════════════════════════════════════════════════════
+# [커밋 게이트 (2026-08-01 신설)] — run_precommit.py 를 **실제로** 부른다.
+#
+# 🔴 왜 만들었나
+#   2026-08-01: `run_precommit.py` 는 `BLOCKING_SUITES` 도 있고 rc=1 도 냈지만
+#   **`git commit` 이 그걸 부르는 곳이 0곳**이었다. `.git/hooks` 에는 `.sample` 뿐이었다.
+#   ⇒ "차단"이라는 출력 문구만 있고 실제로는 **아무것도 막지 않는 장식**이었다.
+#   같은 날 rc=1 상태에서 커밋 `47877a0e` 가 그대로 통과한 것으로 실증됐다.
+#
+# ⚠ `--no-verify` 로 우회하면 **이 훅은 아예 실행되지 않는다.** 훅 안에서는 막을 수 없다.
+#   ⇒ 우회 흔적은 `post-commit` 훅이 남긴다(`.git/hooks/post-commit`).
+#     여기서는 "훅이 돌았다"는 표식을 남겨, post-commit 이 그 표식의 유무로 우회를 판별한다.
+# ══════════════════════════════════════════════════════════════════════════
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT" || exit 1
+
+mkdir -p .git/hooks
+# 표식: 이 커밋은 훅을 거쳤다(post-commit 이 읽고 지운다)
+date "+%Y-%m-%d %H:%M:%S" > .git/hooks/.precommit_ran
+
+echo "════════ 커밋 게이트: python tests/run_precommit.py ════════"
+python tests/run_precommit.py
+RC=$?
+if [ $RC -ne 0 ]; then
+  echo ""
+  echo "🔴 커밋 차단 — 위 실패를 고치고 다시 커밋할 것."
+  echo "   ⚠ --no-verify 로 넘길 수 있으나 그 사실이 logs/hook_bypass.log 에 남는다."
+  rm -f .git/hooks/.precommit_ran
+  exit 1
+fi
+echo "✅ 게이트 통과"
+exit 0

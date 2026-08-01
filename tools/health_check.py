@@ -867,7 +867,14 @@ def build_checklist():
              check_score_decomposition(), check_freeze_success(), check_module_load(),
              # 🔴 무결성 감시(매일·자동) — 성능 측정과 성격이 다르다. 절대 줄이지 않는다.
              check_payout_coverage(), check_backup_alive(), check_daemon_alive(),
-             check_snapshot_ingest(),   # 🔴 I6 (2026-08-01 승인 A안) — 조용한 중단 재발 차단
+             # 🔴 [2026-08-01 · 권대표 결정] `check_snapshot_ingest()`(I6) **체크리스트에서 뺀다.**
+             #   같은 날 아침에 넣었다가 같은 날 뺐다 — 스냅샷 **판정 경로를 중단**하기로 결정됐기 때문이다.
+             #   **원칙 18: 안 쓰는 것을 감시하면 노이즈다.** 안 쓰기로 한 데이터가 안 들어온다고
+             #   매일 빨간불을 켜면, 그 빨간불이 다른 진짜 경보까지 무디게 만든다.
+             #   ⚠ 함수는 **지우지 않았다**(무삭제). 스냅샷을 다시 쓰기로 하면 이 줄만 되살리면 된다.
+             #   ⚠ `/api/snapshot/health`(D안)도 남아 있으나 **체크리스트·카카오에는 넣지 않는다** —
+             #     필요할 때 사람이 직접 호출하는 진단용이다(호출 안 하면 비용 0).
+             # check_snapshot_ingest(),
              check_measurable_today(),   # ⚠ I5(파일 중복)는 제거 — 중복 자체는 정상이라
              #    영원히 빨간불이 되고 그러면 무시하게 된다. → tests/run_glob_safety.py 로 이관.
              check_forecast_discard(), check_forecast_vs_market()]

@@ -97,6 +97,11 @@ def regen_targets():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true", help="실제로 이동·재생성한다(기본은 미실행)")
+    # 🔴 [2026-08-01 · 권대표 결정] 격리만 하고 **이관·재생성은 취소**됐다.
+    #   스냅샷 판정 경로를 끊었으므로 compare 를 다시 만드는 것이 무의미하다.
+    #   ⚠ ②③ 코드는 **지우지 않는다**(무삭제) — 판정을 되살리면 그때 필요하다.
+    ap.add_argument("--quarantine-only", action="store_true",
+                    help="🔴 오염분 격리만 한다(정상분 이관·재생성 생략) — 2026-08-01 지시 기본 운용")
     a = ap.parse_args()
 
     bad, ok = scan()
@@ -128,6 +133,13 @@ def main():
         except Exception as e:
             print("   격리 실패 %s: %s" % (f, e))
     print("\n✅ 격리 %d개 → %s" % (moved, os.path.relpath(QD, BASE)))
+
+    if a.quarantine_only:
+        print("\n⏭ `--quarantine-only` — 정상분 이관(%d개)·재생성(%d쌍)은 **실행하지 않는다.**"
+              % (len(ok), len(pairs)))
+        print("   사유: 스냅샷 판정 경로 중단(app.py SNAPSHOT_JUDGE_ENABLED=False) → 재생성이 무의미하다.")
+        print("   ⚠ 해당 코드는 지우지 않았다 — 판정을 되살리면 `--apply` 만으로 다시 쓸 수 있다.")
+        return 0
 
     # 정상분을 날짜 파일명으로 이관(복사 — 구 파일은 하위호환용으로 남긴다)
     migrated = 0

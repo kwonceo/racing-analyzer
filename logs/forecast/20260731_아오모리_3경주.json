@@ -271,5 +271,55 @@
    "totalScore"
   ],
   "sport": "cycle"
- }
+ },
+ "grading": {
+  "actual": [
+   3,
+   2,
+   1
+  ],
+  "hit_count": 1,
+  "hit": [
+   2
+  ],
+  "missed": [
+   3,
+   1
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   },
+   {
+    "no": 1,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   5,
+   1
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 09:59:06"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번(추입형)과 1번(자재형)이 선행형들의 경쟁으로 인해 발생한 빠른 페이스의 수혜를 크게 받을 것이라는 점을 간과했습니다. 특히 1번의 '자재(양각)' 선언이 혼합 전개에서 더 유리하게 작용할 수 있음을 놓쳤습니다. 6번의 꾸준함만 보고 3번과 1번의 상승세를 예측하지 못했습니다.",
+  "new_rule": "선행형 간의 경쟁이 예상될 때, 추입형뿐만 아니라 '자재(양각)' 선언 말의 기어비와 최근 착순 분포를 면밀히 분석하여 어부지리 가능성을 높게 평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 09:59:08"
+ },
+ "reviewed": true
 }

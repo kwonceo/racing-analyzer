@@ -282,5 +282,48 @@
    "totalScore"
   ],
   "sport": "cycle"
- }
+ },
+ "grading": {
+  "actual": [
+   1,
+   4,
+   5
+  ],
+  "hit_count": 2,
+  "hit": [
+   5,
+   1
+  ],
+  "missed": [
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   3,
+   1
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 09:59:11"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번(小塚 潤)의 최근 착순 정보가 누락되어 있었고, 예측 당시 D등급 마필의 추입 능력을 과소평가하여 3위권 진입 가능성을 충분히 고려하지 못했다.",
+  "new_rule": "D등급 추입형 마필이라도 최근 1착 기록이 있다면 3위권 내 진입 가능성을 열어두고 다시 분석한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 09:59:13"
+ },
+ "reviewed": true
 }
