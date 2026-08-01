@@ -208,12 +208,83 @@ def measure(sport="cycle", pattern="2026_07_*", ci_for="현행(기준선)"):
     return out
 
 
+def measure_trio(sport="horse", pattern="2026_0*"):
+    """[삼복승 섀도우 성적 (2026-08-01 신설)] — **완전 읽기 전용**.
+
+    🔴 왜: `trioShadow` 가 2026-07-29 에 켜진 뒤 삼복승은 **생성만 되고 화면·판정에서 빠진다.**
+      그런데 이틀 연속(오비히로 5R `3+5+10` · 코치 4R `7+8+10` 37.6배) **정답을 정확히 만들어놓고
+      버린 것**이 확인됐다. 해제 판단에는 **섀도우 기간 성적**이 필요하다.
+    ⚠ 당시 근거는 *"삼복승 확정배당이 72%만 확보돼 평가가 박할 수 있다"* 였다.
+      지금은 백필로 **79.5%** 가 됐으므로 다시 잴 수 있다.
+    ⚠ 적중 = 생성된 삼복승 조합이 **1·2·3착 집합과 일치**. 배당 = `result.payouts.trifecta`.
+    """
+    rows = []
+    for f in sorted(glob.glob(os.path.join(BASE, "data", "analysis_log", pattern + ".json"))):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        if (d.get("sport") or "") != sport:
+            continue
+        res = d.get("result") or {}
+        po = (res.get("payouts") or {}).get("trifecta")
+        top3 = [res.get("1st"), res.get("2nd"), res.get("3rd")]
+        if not po or any(x is None for x in top3):
+            continue
+        cp = d.get("corePicks") or {}
+        # 섀도우면 finalTrifectas 가 곧 "걸었다면" 목록이다(shadowTrifectas 는 하위호환).
+        ft = cp.get("finalTrifectas") or cp.get("shadowTrifectas") or []
+        combos = []
+        for t in ft:
+            c = t.get("combo") or []
+            if len(c) == 3:
+                combos.append(sorted(int(x) for x in c))
+        if not combos:
+            continue
+        rows.append({"combos": combos, "po": float(po), "top3": sorted(int(x) for x in top3),
+                     "cat": d.get("category") or "?", "n": len(combos)})
+    return rows
+
+
+def report_trio(rows, label):
+    slots = sum(r["n"] for r in rows)
+    hits = []
+    hit_races = 0
+    for r in rows:
+        h = [c for c in r["combos"] if c == r["top3"]]
+        if h:
+            hit_races += 1
+            hits += [r["po"]] * len(h)
+    hits.sort(reverse=True)
+    ret = sum(hits)
+    def pct(x, n):
+        return 100.0 * x / max(n, 1)
+    print("  %-16s 경주 %3d · 조합 %4d · 적중 %3d(%d경주) · 회수율 %6.1f%% · 1제외 %6.1f%% · 3제외 %6.1f%% · 적중배당중앙 %s"
+          % (label, len(rows), slots, len(hits), hit_races, pct(ret, slots),
+             pct(sum(hits[1:]), slots), pct(sum(hits[3:]), slots),
+             ("%.1f배" % statistics.median(hits)) if hits else "-"))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sport", default="cycle")
     ap.add_argument("--pattern", default="2026_07_*")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--trio", action="store_true", help="삼복승 섀도우 성적(별도 측정)")
     a = ap.parse_args()
+    if a.trio:
+        rows = measure_trio(a.sport, a.pattern)
+        print("=" * 118)
+        print("삼복승 **섀도우** 성적 · %s · %s   🔴 판정선 = 환급률 %.1f%%" % (a.sport, a.pattern, PAYBACK))
+        print("=" * 118)
+        print("⚠ 화면·판정에서 빠진 조합이다(회원에게 안 나갔다). **반사실 시뮬레이션**이다.")
+        report_trio(rows, "전체")
+        cats = {}
+        for r0 in rows:
+            cats.setdefault(r0["cat"], []).append(r0)
+        for c, rs in sorted(cats.items(), key=lambda x: -len(x[1])):
+            report_trio(rs, c)
+        return 0
     r = measure(a.sport, a.pattern)
     if a.json:
         print(json.dumps(r, ensure_ascii=False, indent=1))

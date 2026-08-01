@@ -1,0 +1,269 @@
+{
+ "predicted_top3": [
+  5,
+  2,
+  1
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "느린",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "선행형의 부족과 추입형 다수로 인한 전개 이점, 5번의 안정적 기록과 라인 이점.",
+ "key_factors": [
+  "선행형 부족으로 인한 페이스 지연 예상",
+  "3차 라인의 번마인 5번의 전개 이점",
+  "2번의 안정적인 최근 착순 기록"
+ ],
+ "exception_note": "6두 편성으로 인해 선행형 부족 현상이 두드러지며, 이로 인해 추입형 선수들에게 유리한 전개가 예상된다. 특히 5번은 3차 라인의 번마로 전개 이점이 크다. 2번은 단기지만 최근 착순이 꾸준히 상위권에 있어 경쟁력이 있다. 1번은 젖히기형으로 선행에 대한 부담이 적고, 후착을 노릴 가능성이 있다. 3번과 4번은 추입형이지만 5번이나 2번보다 최근 기세가 좋지 못하다. 6번은 선행형이지만 최근 성적이 저조하여 버티기 힘들 것으로 보인다. 바람의 영향은 미미할 것으로 판단된다.",
+ "applied_rules": [],
+ "raceKey": "야히코 6경주",
+ "forecastAt": "2026-08-01 17:50:23",
+ "forecastEpoch": 1785574223.5630448,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 6경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 3.0,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 27.9,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T17:30:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 6,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 2,
+    "name": "久木原 洋",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/30 予 選 ５着 11.4 7/31 選 抜 ４着 11",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ２着 9.9 7/23 準決勝 ２着 9.6 7/24 決 勝 ７着 9.6",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 ２着 9.6 7/ 8 準決勝 ６着 9.9 7/ 9 特 選 ３着 10.2",
+    "chaku": [
+     2,
+     3,
+     3,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "金成 和幸",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ３着 11.4 7/31 選 抜 ７着 11",
+    "prev1": "岐 阜Ｆ１ 7/11 予 選 ６着 11.7 7/12 一 般 ６着 10.9 7/13 一 般 ７着 11.9",
+    "prev2": "大 宮Ｆ１ 7/ 1 予 選 ５着 14.5 7/ 2 選 抜 ６着 14.4 7/ 3 一 般 ６着 14.9",
+    "chaku": [
+     1,
+     3,
+     4,
+     27
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "佐川 翔吾",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ５着 11.8 7/31 一 般 ３着 11.7",
+    "prev1": "宇都宮Ｆ１ 7/13 予 選 ３着 14.1 7/14 選 抜 ５着 14.3 7/15 一 般 ６着 14.6",
+    "prev2": "久留米Ｇ３ 6/ 4 一予選 ７着 11 6/ 5 選 抜 ７着 12.1 6/ 6 一 般 ４着 11.4 6/ 7 一 般 ２着 11.1",
+    "chaku": [
+     2,
+     1,
+     3,
+     16
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "花田 将司",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ５着 11.2 7/31 一 般 ５着 11.6",
+    "prev1": "宇都宮Ｆ１ 7/13 予 選 ４着 13.6 7/14 選 抜 ６着 14 7/15 一 般 ３着 14.2",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ６着 11.6 7/ 3 選 抜 ５着 12 7/ 4 一 般 ９着 11.8 7/ 5 一 般 ６着 12",
+    "chaku": [
+     0,
+     1,
+     4,
+     29
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "村上 翔馬",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ６着 12.4 7/31 一 般 ３着 11.5",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ７着 12.2 7/21 一 般 ３着 11.7 7/22 一 般 ５着 11.9",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ７着 12.5 7/ 9 一 般 ２着 12 7/10 一 般 ３着 12.2",
+    "chaku": [
+     7,
+     9,
+     5,
+     6
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "伊東 佑晟",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ６着 11.7 7/31 一 般 ４着 11.8",
+    "prev1": "函 館Ｆ１ 7/ 8 予 選 ７着 13.3 7/ 9 一 般 ７着 12.4 7/10 一 般 ６着 11.7",
+    "prev2": "伊 東Ｆ１ 6/13 予 選 ７着 10.3 6/14 一 般 ７着 9.6",
+    "chaku": [
+     0,
+     0,
+     0,
+     8
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    6
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    2,
+    4,
+    5,
+    3
+   ]
+  },
+  "lines": [
+   1,
+   5,
+   4,
+   2,
+   6,
+   3
+  ],
+  "paceLabel": null,
+  "comment": "昨日はライン２車で仕事をしたところを掬われた佐川。ここは３車ラインの番手だし村上の先行なら勝機は逃さない。単騎の久木原もここなら決め脚は上位。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}

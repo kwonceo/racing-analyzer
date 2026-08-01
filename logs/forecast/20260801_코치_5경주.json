@@ -373,5 +373,79 @@
    "totalScore"
   ],
   "sport": "horse"
- }
+ },
+ "grading": {
+  "actual": [
+   5,
+   12,
+   9
+  ],
+  "hit_count": 0,
+  "hit": [],
+  "missed": [
+   5,
+   12,
+   9
+  ],
+  "missed_info": [
+   {
+    "no": 5,
+    "gait": "평지형",
+    "recentPlacings": [
+     1,
+     5,
+     2,
+     6,
+     7
+    ],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 12,
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     4,
+     10,
+     6,
+     4
+    ],
+    "line": null,
+    "grade": "B"
+   },
+   {
+    "no": 9,
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     5,
+     8,
+     6,
+     5
+    ],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   1,
+   8
+  ],
+  "market_hit_count": 0,
+  "market_snapshot_mb": -0.6,
+  "market_src": "win",
+  "gradedAt": "2026-08-01 17:50:10"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "선행마들의 과열 경쟁으로 인한 체력 소모를 과소평가했습니다. 평지형 5번의 꾸준한 상위권 성적과 추격형 12, 9번의 뒷심을 간과했습니다. 더트 '重' 주로의 영향과 중하위권 말의 상승세를 예측에 반영하지 못했습니다.",
+  "new_rule": "선행마 간의 경쟁이 과열될 경우, 평지형 또는 추격형 말 중 최근 성적이 꾸준하거나 주로 적성이 좋은 말을 우선적으로 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 17:50:12"
+ },
+ "reviewed": true
 }

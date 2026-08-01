@@ -265,5 +265,48 @@
    "totalScore"
   ],
   "sport": "cycle"
- }
+ },
+ "grading": {
+  "actual": [
+   2,
+   6,
+   3
+  ],
+  "hit_count": 2,
+  "hit": [
+   6,
+   2
+  ],
+  "missed": [
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   6,
+   1
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 17:50:18"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번 스즈키 켄타로의 '자재(양각)' 선언 각질이 실제 선행 전개에서 6번 하이 류보다 우위를 점할 수 있다는 점을 간과했습니다. 6번의 독자적인 전개 가능성에만 집중하여 3번의 선행 주도력을 낮게 평가했습니다.",
+  "new_rule": "선행 주자가 여럿일 경우, 선언 각질이 선행에 유리한 '자재(양각)'인 주자의 초기 포지션 및 전개 주도 가능성을 더 면밀히 검토한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 17:50:20"
+ },
+ "reviewed": true
 }

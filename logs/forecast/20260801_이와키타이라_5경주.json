@@ -288,5 +288,48 @@
    "totalScore"
   ],
   "sport": "cycle"
- }
+ },
+ "grading": {
+  "actual": [
+   4,
+   1,
+   5
+  ],
+  "hit_count": 2,
+  "hit": [
+   4,
+   1
+  ],
+  "missed": [
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 5,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   1,
+   3
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 17:50:25"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "5번 말은 추입형임에도 불구하고, 4번과 3번의 선행 싸움으로 인한 빠른 페이스 전개에서 후미에서 힘을 비축하다가 직선에서 좋은 타이밍에 치고 올라온 것을 간과했습니다. 7두 경주임을 고려할 때 추입마의 활약 가능성을 더 높게 평가했어야 했습니다.",
+  "new_rule": "선행마 간 경쟁이 예상되는 소수 경주에서는 추입마의 최근 전개와 성적을 면밀히 분석하여 복병마 가능성을 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 17:50:27"
+ },
+ "reviewed": true
 }

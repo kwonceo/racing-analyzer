@@ -1,9 +1,9 @@
 {
- "raceKey": "주쿄 11경주",
+ "raceKey": "오비히로 7경주",
  "entries": [
   {
-   "time": "17:36:10",
-   "minutesBefore": 13,
+   "time": "17:55:31",
+   "minutesBefore": 9,
    "status": "SAFE",
    "checked": [
     "삼복승정합"
@@ -17,41 +17,64 @@
     "drops": [],
     "finalQuinellas": [
      [
-      3,
-      7
-     ],
-     [
-      7,
+      8,
       9
      ],
      [
       2,
-      7
+      9
+     ],
+     [
+      6,
+      9
      ]
     ],
     "finalTrifectas": [
      [
-      3,
-      7,
+      1,
+      8,
       9
      ],
      [
       2,
-      3,
-      7
+      8,
+      9
+     ],
+     [
+      1,
+      6,
+      9
      ],
      [
       2,
-      7,
-      9
+      6,
+      8
      ]
     ],
     "linePairs": []
    }
   },
   {
-   "time": "17:50:08",
+   "time": "18:05:08",
    "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:23:11",
+   "minutesBefore": -18,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [

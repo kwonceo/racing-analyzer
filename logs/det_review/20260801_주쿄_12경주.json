@@ -1,8 +1,8 @@
 {
- "raceKey": "주쿄 11경주",
+ "raceKey": "주쿄 12경주",
  "entries": [
   {
-   "time": "17:36:10",
+   "time": "18:06:14",
    "minutesBefore": 13,
    "status": "SAFE",
    "checked": [
@@ -17,32 +17,31 @@
     "drops": [],
     "finalQuinellas": [
      [
-      3,
-      7
-     ],
-     [
-      7,
+      1,
       9
      ],
      [
-      2,
-      7
+      1,
+      3
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      3,
+      4
      ]
     ],
     "finalTrifectas": [
      [
+      1,
       3,
-      7,
       9
      ],
      [
-      2,
-      3,
-      7
-     ],
-     [
-      2,
-      7,
+      1,
+      4,
       9
      ]
     ],
@@ -50,8 +49,26 @@
    }
   },
   {
-   "time": "17:50:08",
+   "time": "18:20:12",
    "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:23:13",
+   "minutesBefore": -3,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [

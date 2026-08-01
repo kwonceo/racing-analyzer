@@ -1,0 +1,310 @@
+{
+ "predicted_top3": [
+  5,
+  1,
+  4
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  5
+ ],
+ "confidence": 3,
+ "reason_short": "선행형 5번 小松原正登이 결승선 100승에 도달하려는 의지가 강하여 초반부터 적극적으로 경주를 이끌 것으로 보이며, 1번 水谷 好宏이 그 뒤를 따를 가능성이 높다. 4번 植原 琢也도 선행을 선언했지만, 5번의 의지가 더 강해 선두는 5번이 가져갈 것이다. 후미의 추입형은 경쟁하기 어려울 것.",
+ "key_factors": [
+  "5번 小松原正登의 100승 달성 의지",
+  "동일 라인 내 선행형 각질 중 5번의 우위",
+  "나머지 선행형의 최근 컨디션 저조"
+ ],
+ "exception_note": "6인 경주에서 선행형 3명과 추입형 3명이 고르게 분포하나, 5번 小松原正登이 특별히 100승에 도달하려는 강한 의지를 지니고 있어 초반 전개에 큰 영향을 미칠 것으로 예상된다. 다른 선행형 4번 植原 琢也와 3번 森本桂太郎도 선행을 선언했으나 최근 성적이 좋지 않아 5번의 독주 가능성이 높다. 이로 인해 5번이 강력한 선두를 형성하고, 뒤따르는 1번 水谷 好宏이 유리한 위치를 점할 것으로 보인다.",
+ "applied_rules": [],
+ "raceKey": "이와키타이라 6경주",
+ "forecastAt": "2026-08-01 17:38:36",
+ "forecastEpoch": 1785573516.0927272,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "이와키타이라 6경주",
+  "wind": {
+   "venue": "이와키타이라",
+   "풍속": 2.0,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 26.9,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T17:20:00+09:00",
+   "지점": "小名浜",
+   "지점거리km": 12.14
+  },
+  "fieldSize": 6,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "小松原正登",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ７着 11.8",
+    "prev1": "函 館Ｆ１ 7/14 予 選 ７着 12.4 7/15 一 般 ６着 11 7/16 一 般 ３着 11.4",
+    "prev2": "和歌山Ｆ１ 7/ 5 予 選 ２着 11.5 7/ 6 準決勝 ７着 11.3 7/ 7 特 選 ５着 11.2",
+    "chaku": [
+     1,
+     4,
+     2,
+     15
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "植原 琢也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.3",
+    "prev1": "富 山Ｆ１ 7/21 予 選 ６着 10.1 7/22 一 般 ６着 10 7/23 一 般 ２着 10.2",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ８着 12.4 7/ 3 選 抜 ４着 11.5 7/ 4 一 般 ３着 11.6 7/ 5 選 抜 ９着 13.5",
+    "chaku": [
+     2,
+     1,
+     3,
+     20
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "水谷 好宏",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.3",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ６着 12.3 7/24 一 般 ４着 11.4 7/25 一 般 １着 11.7",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ７着 11.6 7/ 3 選 抜 ８着 12.1 7/ 4 一 般 落",
+    "chaku": [
+     2,
+     2,
+     0,
+     15
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "相川 永伍",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.2",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ５着 12 7/24 一 般 ５着 11.7 7/25 一 般 ４着 11.8",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 ７着 9.6 7/ 8 一 般 ６着 10.2 7/ 9 一 般 落",
+    "chaku": [
+     0,
+     1,
+     0,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "森本桂太郎",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ７着 12.3",
+    "prev1": "玉 野Ｆ１ 7/14 予 選 ４着 11.4 7/15 選 抜 ６着 11.8 7/16 一 般 ２着 11.6",
+    "prev2": "大 宮Ｆ１ 7/ 1 予 選 ７着 14.6 7/ 2 一 般 ４着 14.8 7/ 3 一 般 ５着 14.4",
+    "chaku": [
+     0,
+     4,
+     2,
+     16
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "高木 竜司",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ７着 11.4",
+    "prev1": "立 川Ｆ１ 7/27 予 選 ７着 11.8 7/28 一 般 ５着 11.8 7/29 一 般 ６着 11.5",
+    "prev2": "函 館Ｆ１ 7/14 予 選 ７着 11.7 7/15 一 般 ４着 11.2 7/16 一 般 ６着 11.9",
+    "chaku": [
+     4,
+     2,
+     2,
+     17
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 4,
+   "closeHorses": [
+    4,
+    1,
+    2,
+    6
+   ]
+  },
+  "lines": [
+   5,
+   1,
+   4,
+   2,
+   3,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "節目の１００勝にリーチしている小松原。得意の捲りで勝利をゲット。埼玉勢はタテ＆タテの連係で不気味だ。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   4,
+   1
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   4
+  ],
+  "missed": [
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   1,
+   3
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 18:10:12"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 相川 永伍는 B등급임에도 불구하고 선두권 추입 각질의 강점을 지니고 있었으나, 5번 小松原正登의 100승 달성 의지에만 집중하여 간과했다.",
+  "new_rule": "선행 주자의 강력한 동기 부여가 있더라도, 추입형 각질의 B등급 선수가 상위권에 들 수 있는 잠재력을 항상 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 18:10:13"
+ },
+ "reviewed": true
+}
