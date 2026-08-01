@@ -101,6 +101,16 @@ def load_races(sport="cycle", pattern="2026_07_*"):
                     #   "생성 후 취소"를 재려면 이 목록이 필요하다 — 최종 추천만 봐서는 안 보인다.
                     "ref": [sorted(x.get("combo") or [])
                             for x in (cp.get("quinellaRef") or []) if x.get("combo")],
+                    # 🔴 [2026-08-01 신설 · --ev-sweep] 강등분을 **EV 값과 함께** 싣는다.
+                    #   ⚠ `ev` 보유는 강등분의 **59.5%** 뿐이다(나머지는 저배당 컷 등 다른 사유).
+                    #     EV 임계 스윕은 **ev 보유분만** 대상으로 한다 — 없는 것을 0 으로 치면
+                    #     임계를 아무리 낮춰도 안 들어와야 할 것이 들어온다.
+                    "refev": [(sorted(x.get("combo")), float(x.get("ev")))
+                              for x in (cp.get("quinellaRef") or [])
+                              if x.get("combo") and x.get("ev") is not None],
+                    # ev 가 없는 강등분(저배당 컷 등) — 스윕 대상이 아님을 밝히기 위해 건수만 싣는다.
+                    "refnoev": len([x for x in (cp.get("quinellaRef") or [])
+                                    if x.get("combo") and x.get("ev") is None]),
                     # 🔴 [2026-08-01] `darkHorsePicks` = **복병 목록**(유력마와 다른 목록이다).
                     #   코치 4R 에서 7번이 복병 1순위·확신도 1위·축이었는데도
                     #   유력마 10번과의 조합 `7+10`(확정 37.7배)이 **어느 목록에도 없었다.**
@@ -206,6 +216,135 @@ def measure(sport="cycle", pattern="2026_07_*", ci_for="현행(기준선)"):
         out["ci"] = {"plan": ci_for, "lo": round(lo, 1), "hi": round(hi, 1),
                      "includes_payback": bool(lo <= PAYBACK <= hi)}
     return out
+
+
+EV_THRESHOLDS = [1.00, 0.90, 0.80, 0.70, 0.60, 0.50, 0.40, 0.30, 0.20, 0.00]
+
+
+def _field_band(r):
+    """두수 구간. ⚠ `horses` 길이를 쓴다 — `raceHorseCount` 는 마번 수와 어긋나는 사례가 있다."""
+    n = len(r.get("hs") or [])
+    if n <= 0:
+        return "?"
+    if n <= 9:
+        return "≤9두"
+    if n <= 12:
+        return "10~12두"
+    return "13두+"
+
+
+def measure_ev_sweep(sport="cycle", pattern="2026_0*"):
+    """[EV 임계 스윕 (2026-08-01 신설)] — **완전 읽기 전용 · 측정만**.
+
+    🔴 왜: EV 필터가 강등한 조합의 **적중배당 중앙이 7.3배**(현행 3.4배의 2.1배)다.
+      회수율만 보면 강등이 옳지만, 대표 원칙(**고배당·중배당이 기본**)상 회수율 단독으로 닫지 않는다.
+    🔴 찾는 것: **회수율 74.5% 를 지키면서 적중배당 중앙이 최대인 임계**.
+      ⚠ **회수율 최대가 아니다.** 두 곡선은 서로 다른 임계에서 최대가 될 수 있다.
+    ⚠ 임계 t 의 뜻: 강등분 중 `ev >= t` 인 조합을 **현행 추천에 되살린다**(반사실 시뮬레이션).
+      t=1.00 은 사실상 현행과 같다(ev≥1.0 이면 애초에 강등되지 않았다).
+    ⚠ 정제 필터(괴리 0.5~2.0배)는 `measure()` 와 **동일하게** 적용한다.
+    """
+    raw = load_races(sport, pattern)
+    clean = [r for r in raw if CLEAN_LO <= r["po"] / r["mo"] <= CLEAN_HI]
+    out = {"sport": sport, "pattern": pattern, "denom_all": len(raw),
+           "denom_clean": len(clean), "payback": PAYBACK, "rows": [], "bands": {}}
+    out["ref_ev_total"] = sum(len(r.get("refev") or []) for r in clean)
+    out["ref_noev_total"] = sum(int(r.get("refnoev") or 0) for r in clean)
+
+    def gen_for(t):
+        return lambda r: r["dc"] + [c for c, ev in (r.get("refev") or []) if ev >= t]
+
+    # 🔴 [정정 2026-08-01] `EV 1.00` 은 현행과 **같지 않다.**
+    #   ev≥1.0 인데도 **다른 사유**(베팅규칙 참고 강등·저배당 컷)로 강등된 조합이 실측 51개 있었다.
+    #   ⇒ 기준선은 **복원 0 인 현행(dc)** 이며, 별도 행으로 먼저 찍는다. 이걸 빼면 비교 대상이 틀린다.
+    i0, h0 = calc(clean, lambda r: r["dc"])
+    out["base"] = {"slots": i0, "hits": len(h0),
+                   "rate": round(100.0 * sum(h0) / max(i0, 1), 1),
+                   "ex1": round(100.0 * sum(h0[1:]) / max(i0, 1), 1),
+                   "ex3": round(100.0 * sum(h0[3:]) / max(i0, 1), 1),
+                   "median_odds": round(statistics.median(h0), 1) if h0 else 0}
+    for t in EV_THRESHOLDS:
+        g = gen_for(t)
+        i2, h2 = calc(clean, g)
+        added = sum(len([1 for c, ev in (r.get("refev") or []) if ev >= t]) for r in clean)
+        out["rows"].append({
+            "ev": t, "slots": i2, "added": added, "hits": len(h2),
+            "rate": round(100.0 * sum(h2) / max(i2, 1), 1),
+            "ex1": round(100.0 * sum(h2[1:]) / max(i2, 1), 1),
+            "ex3": round(100.0 * sum(h2[3:]) / max(i2, 1), 1),
+            "median_odds": round(statistics.median(h2), 1) if h2 else 0,
+            "vs_payback": round(100.0 * sum(h2) / max(i2, 1) - PAYBACK, 1),
+        })
+    # 두수별 분해 (⚠ 셀이 얇으면 판정 불가 — n 을 반드시 함께 본다)
+    for band in ("≤9두", "10~12두", "13두+"):
+        sub = [r for r in clean if _field_band(r) == band]
+        if not sub:
+            continue
+        rows = []
+        for t in EV_THRESHOLDS:
+            g = gen_for(t)
+            i2, h2 = calc(sub, g)
+            rows.append({"ev": t, "n": len(sub), "slots": i2, "hits": len(h2),
+                         "rate": round(100.0 * sum(h2) / max(i2, 1), 1),
+                         "ex3": round(100.0 * sum(h2[3:]) / max(i2, 1), 1),
+                         "median_odds": round(statistics.median(h2), 1) if h2 else 0})
+        out["bands"][band] = rows
+    return out
+
+
+def report_ev_sweep(out):
+    print("⚠ 분모: 전체 %d → 정제(괴리 %.1f~%.1f배) %d경주 (%.1f%%)" % (
+        out["denom_all"], CLEAN_LO, CLEAN_HI, out["denom_clean"],
+        100.0 * out["denom_clean"] / max(out["denom_all"], 1)))
+    print("⚠ 강등분: ev 보유 %d조합(스윕 대상) · ev 없음 %d조합(**대상 아님** — 저배당 컷 등)" % (
+        out["ref_ev_total"], out["ref_noev_total"]))
+    print()
+    print("  %-7s %7s %7s %6s %9s %8s %8s %9s %10s" % (
+        "EV임계", "구좌", "복원", "적중", "회수율", "1제외", "3제외", "배당중앙", "74.5대비"))
+    b = out.get("base") or {}
+    if b:
+        print("  %-7s %7d %7d %6d %8.1f%% %7.1f%% %7.1f%% %8.1f배 %9.1f%%p %s" % (
+            "현행", b["slots"], 0, b["hits"], b["rate"], b["ex1"], b["ex3"],
+            b["median_odds"], b["rate"] - out["payback"],
+            "🟢" if b["rate"] >= out["payback"] else "🔴"))
+        print("  " + "-" * 88)
+    for r in out["rows"]:
+        mark = "🟢" if r["rate"] >= out["payback"] else "🔴"
+        print("  %-7.2f %7d %7d %6d %8.1f%% %7.1f%% %7.1f%% %8.1f배 %9.1f%%p %s" % (
+            r["ev"], r["slots"], r["added"], r["hits"], r["rate"], r["ex1"], r["ex3"],
+            r["median_odds"], r["vs_payback"], mark))
+    ok = [r for r in out["rows"] if r["rate"] >= out["payback"]]
+    print()
+    if not ok:
+        print("  🔴 **74.5%% 를 넘는 임계가 없다.** 어떤 임계도 판정선을 지키지 못한다 → 해답 없음.")
+    else:
+        best_odds = max(ok, key=lambda r: (r["median_odds"], r["rate"]))
+        best_rate = max(ok, key=lambda r: r["rate"])
+        print("  🟢 74.5%% 유지 임계: %s" % ", ".join("%.2f" % r["ev"] for r in ok))
+        print("  🔴 **배당중앙 최대(권고 기준)**: EV %.2f · 회수율 %.1f%% · 배당중앙 %.1f배 · 3제외 %.1f%%"
+              % (best_odds["ev"], best_odds["rate"], best_odds["median_odds"], best_odds["ex3"]))
+        if b:
+            dr = best_odds["rate"] - b["rate"]
+            do = best_odds["median_odds"] - b["median_odds"]
+            print("     ↳ 🔴 **현행 대비**: 회수율 %+.1f%%p · 배당중앙 %+.1f배 · 구좌 %+d (%d→%d)"
+                  % (dr, do, best_odds["slots"] - b["slots"], b["slots"], best_odds["slots"]))
+            if do <= 0:
+                print("     ↳ 🔴 **배당중앙이 오르지 않는다. 채택 근거가 없다**(대표 원칙 기준 미충족).")
+            elif dr < 0:
+                print("     ↳ ⚠ 배당중앙은 오르나 **회수율은 내려간다.** 교환비를 대표가 판단할 사안이다.")
+        print("  ⚠ (대조) 회수율 최대   : EV %.2f · 회수율 %.1f%% · 배당중앙 %.1f배"
+              % (best_rate["ev"], best_rate["rate"], best_rate["median_odds"]))
+        if best_odds["ev"] != best_rate["ev"]:
+            print("  🔴 **두 최대가 서로 다른 임계다.** 회수율만 보면 배당중앙을 놓친다(대표 원칙).")
+    for band, rows in out.get("bands", {}).items():
+        n = rows[0]["n"] if rows else 0
+        warn = "  ⚠ **n<30 판정 불가**" if n < 30 else ""
+        print()
+        print("  ── 두수별 · %s (경주 %d)%s ──" % (band, n, warn))
+        for r in rows:
+            if r["ev"] in (1.00, 0.80, 0.60, 0.40, 0.00):
+                print("     EV %.2f · 구좌 %4d · 적중 %3d · 회수율 %6.1f%% · 3제외 %6.1f%% · 배당중앙 %5.1f배"
+                      % (r["ev"], r["slots"], r["hits"], r["rate"], r["ex3"], r["median_odds"]))
 
 
 def measure_trio(sport="horse", pattern="2026_0*"):
@@ -391,7 +530,21 @@ def main():
     ap.add_argument("--trio", action="store_true", help="삼복승 섀도우 성적(별도 측정)")
     ap.add_argument("--dark3", action="store_true", help="복병 3착 이내 진입률(복승 기준과 별개)")
     ap.add_argument("--drop3", action="store_true", help="급락 폭별 3착 이내 진입률")
+    ap.add_argument("--ev-sweep", dest="ev_sweep", action="store_true",
+                    help="EV 임계 스윕 — 74.5%% 유지하며 적중배당 중앙 최대인 임계를 찾는다")
     a = ap.parse_args()
+    if a.ev_sweep:
+        out = measure_ev_sweep(a.sport, a.pattern)
+        if a.json:
+            print(json.dumps(out, ensure_ascii=False, indent=1))
+            return
+        print("=" * 110)
+        print("EV 임계 스윕 · %s · %s   🔴 판정선 = 환급률 %.1f%%" % (a.sport, a.pattern, PAYBACK))
+        print("=" * 110)
+        print("🔴 찾는 것 = **74.5%% 를 지키면서 적중배당 중앙이 최대인 임계**(회수율 최대가 아니다).")
+        print("⚠ 반사실 시뮬레이션이다 — 강등분은 실제로는 회원에게 나가지 않았다.")
+        report_ev_sweep(out)
+        return
     if a.drop3:
         rows = measure_drop3(a.sport, a.pattern)
         print("=" * 110)
