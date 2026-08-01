@@ -27750,9 +27750,14 @@ def _jra_past_cell(cell):
     cond = mc.group(1) if mc else ""
     mf = re.search(r"(\d+)頭", d03)
     field = int(mf.group(1)) if mf else None
-    mj = re.search(r"\d+人\s*(\S+?)\s+(\d{2}(?:\.\d)?)\b", d03)
-    jockey = mj.group(1) if mj else ""
-    weight = float(mj.group(2)) if mj else None
+    # 🔴 [2026-08-02 승인] **인기순위(人気) 캡처 추가** — 종전에는 `\d+人` 을 **매칭만 하고 버렸다**.
+    #   대표 지시: *"④ 기대 배반(착순 ↔ 그때 시장 평가)"* 의 **유일한 필수 입력**이다.
+    #   ⚠ 이건 **현재 배당이 아니라 과거 경주의 시장 평가**다 — 전적의 일부이지 시장 복사가 아니다.
+    #   ⚠ 괄호만 추가했다. 기존 `jockey`·`weight` 는 **그룹 번호만 밀렸고 값은 동일**하다(무회귀).
+    mj = re.search(r"(\d+)人\s*(\S+?)\s+(\d{2}(?:\.\d)?)\b", d03)
+    pop = int(mj.group(1)) if mj else None            # 그때의 인기순위(1이 가장 인기)
+    jockey = mj.group(2) if mj else ""
+    weight = float(mj.group(3)) if mj else None
     mcorner = re.search(r"(\d+(?:-\d+){1,3})", d06)   # 통과순위(코너별): '15-13' · '8-7-8'
     corner = mcorner.group(1) if mcorner else ""
     ml3 = re.search(r"\((\d{2}\.\d)\)", d06)          # 상3F: '(33.0)'
@@ -27761,7 +27766,8 @@ def _jra_past_cell(cell):
     bodyw = mbw.group(1) if mbw else ""
     return {"date": date, "venue": venue, "placing": placing, "distance": dist, "surface": surface,
             "trackCond": cond, "fieldSize": field, "jockey": jockey, "weight": weight,
-            "corner": corner, "last3f": last3f, "bodyWeight": bodyw, "grade": grade}
+            "corner": corner, "last3f": last3f, "bodyWeight": bodyw, "grade": grade,
+            "pop": pop}   # 🔴 [2026-08-02] 그때의 인기순위 — ④ 기대 배반의 입력(키 추가만)
 
 
 def _jra_parse_shutuba_past(html):
