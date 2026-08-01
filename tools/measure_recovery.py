@@ -326,6 +326,63 @@ def report_dark3(rows, label):
              (got / base) if base else 0, mark))
 
 
+def measure_drop3(sport="horse", pattern="2026_0*"):
+    """[급락 신호의 3착 기여도 (2026-08-01 신설)] — **완전 읽기 전용**.
+
+    🔴 왜: 급락 신호는 지금까지 **복승(1·2착) 판정으로만** 평가됐다. 3착 기준은 분모가 다르다.
+    ⚠ 🔴 **한계를 먼저 밝힌다**: `drops_raw` 는 **조합 단위**(`{"combo":[1,9], "pct":-34}`)다.
+      말 단위 급락은 **그 말이 낀 조합들의 평균**으로 환원한다 — 엔진의 `_excess_drop_analysis`
+      와 같은 방식이다. **한 조합을 두 말에 그대로 귀속시키면 중복 계상**이 되므로 평균을 쓴다.
+    ⚠ 무작위 기대 = 3 ÷ 두수.
+    """
+    out = []
+    for f in sorted(glob.glob(os.path.join(BASE, "data", "analysis_log", pattern + ".json"))):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        if (d.get("sport") or "") != sport:
+            continue
+        res = d.get("result") or {}
+        top3 = [res.get("1st"), res.get("2nd"), res.get("3rd")]
+        if any(x is None for x in top3):
+            continue
+        dr = d.get("drops_raw") or []
+        if not dr:
+            continue
+        cp = d.get("corePicks") or {}
+        nh = int(cp.get("raceHorseCount") or 0)
+        if nh < 4:
+            continue
+        acc = {}
+        for x in dr:
+            try:
+                pct = float(x.get("pct"))
+            except (TypeError, ValueError):
+                continue
+            for n0 in (x.get("combo") or []):
+                acc.setdefault(int(n0), []).append(pct)
+        t3 = [int(v) for v in top3]
+        for no, ps in acc.items():
+            out.append({"no": no, "mean": sum(ps) / len(ps), "n_combo": len(ps),
+                        "place": (t3.index(no) + 1) if no in t3 else 0,
+                        "nh": nh, "cat": d.get("category") or "?"})
+    return out
+
+
+def report_drop3(rows, label):
+    n = len(rows)
+    if not n:
+        print("  %-24s n=0 — 판정 불가" % label)
+        return
+    in3 = sum(1 for r in rows if r["place"])
+    base = 100.0 * statistics.mean([3.0 / r["nh"] for r in rows])
+    got = 100.0 * in3 / n
+    mark = "⚠n<30" if n < 30 else ("🟢" if got >= base * 1.15 else ("🔴" if got <= base * 0.9 else "🟡"))
+    print("  %-24s n=%5d | 3착이내 %5.1f%% (무작위 %4.1f%% · 배수 %.2f) %s"
+          % (label, n, got, base, (got / base) if base else 0, mark))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sport", default="cycle")
@@ -333,7 +390,29 @@ def main():
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--trio", action="store_true", help="삼복승 섀도우 성적(별도 측정)")
     ap.add_argument("--dark3", action="store_true", help="복병 3착 이내 진입률(복승 기준과 별개)")
+    ap.add_argument("--drop3", action="store_true", help="급락 폭별 3착 이내 진입률")
     a = ap.parse_args()
+    if a.drop3:
+        rows = measure_drop3(a.sport, a.pattern)
+        print("=" * 110)
+        print("급락 신호의 **3착 기여도** · %s · %s" % (a.sport, a.pattern))
+        print("=" * 110)
+        print("⚠ 🔴 `drops_raw` 는 조합 단위다. 말 단위는 **그 말이 낀 조합들의 평균 급락률**로 환원했다.")
+        print("⚠ 🔴 복승 기준 발동률(경마 84.5%·경륜 61.6%)과 **분모가 다르다.** 섞어 인용하지 말 것.")
+        report_drop3(rows, "전체(급락 데이터 보유)")
+        for lo, hi, lab in ((-1e9, -50, "평균급락 -50% 이하"), (-50, -40, "-40 ~ -50%"),
+                            (-40, -30, "-30 ~ -40%"), (-30, -20, "-20 ~ -30%"),
+                            (-20, -10, "-10 ~ -20%"), (-10, 0, "-10 ~ 0%"),
+                            (0, 1e9, "상승(0% 이상)")):
+            report_drop3([r for r in rows if lo <= r["mean"] < hi], lab)
+        print("  ── 발동률(전체 대비 비중) ──")
+        tot = len(rows) or 1
+        for th in (-20, -30, -40, -50):
+            k = len([r for r in rows if r["mean"] <= th])
+            print("    평균급락 %d%% 이하 : %5d / %5d = %5.1f%%  %s"
+                  % (th, k, tot, 100.0 * k / tot,
+                     "🟢적정(5~30%)" if 5 <= 100.0 * k / tot <= 30 else "🔴부적정"))
+        return 0
     if a.dark3:
         rows = measure_dark3(a.sport, a.pattern)
         print("=" * 126)
