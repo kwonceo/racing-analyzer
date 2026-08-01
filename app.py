@@ -30614,10 +30614,13 @@ _NARD_NUM_RE = re.compile(r'class="horseNum"[^>]*>\s*(\d{1,2})\s*<')
 _NARD_NAME_RE = re.compile(r'class="horseName"[^>]*>([^<]+)<')
 _NARD_JOCKEY_RE = re.compile(r'class="jockeyName"[^>]*>([^<（(]+)')
 #   전주 행: "| 착순 | YY.MM.DD 마장상태 N頭| 경마장 左DIST N番"
-_NARD_PLACE_RE = re.compile(r"\|\s*(\d{1,2})\s*\|+\s*\d{2}\.\d{2}\.\d{2}\s+\S+\s+(\d{1,2})頭"
+#   🔴 [2026-08-02 승인 G①] **날짜·마장상태를 캡처에 추가**(종전에는 매칭만 하고 버렸다).
+#     그룹 순서: (착순, **날짜**, **마장상태**, 두수, 경기장, 거리) — 사용처 언팩을 함께 고쳤다.
+_NARD_PLACE_RE = re.compile(r"\|\s*(\d{1,2})\s*\|+\s*(\d{2}\.\d{2}\.\d{2})\s+(\S+)\s+(\d{1,2})頭"
                             r"\|*\s*([^|]{0,12}?)\s*[左右直]\s*(\d{3,4})")
 #   기록 행: "1:37.4 7-7-7-5 39.8" (주파시계·코너통과·상3F)
-_NARD_CORNER_RE = re.compile(r"\d:\d{2}\.\d\s+([\d\-]+)\s+(\d{2}\.\d)")
+#   🔴 [2026-08-02 승인 G①] **주파시간을 캡처에 추가**(종전에는 매칭만 하고 버렸다).
+_NARD_CORNER_RE = re.compile(r"(\d:\d{2}\.\d)\s+([\d\-]+)\s+(\d{2}\.\d)")
 _NARD_BW_RE = re.compile(r"\|\s*(\d{3})\s*\|?\s*\(([+\-]?\d+)\)")           # 현재 마체중 460 (+11)
 # [소실 방지 (2026-07-29)] 경주 단위 조건 — 마장(더트/잔디)·마장상태. 거리와 함께 저장해야
 #   '페이스 × 두수 × 거리' 차원 분석이 가능해진다(현재 분석 로그 전 1,392건 거리 0건).
@@ -30650,11 +30653,17 @@ def _nar_parse_deba(html, max_no=18):
         jk = _NARD_JOCKEY_RE.search(blk)
         recs = _NARD_CORNER_RE.findall(txt)
         past = []
-        for j, (pl, fs, _vn, dist) in enumerate(_NARD_PLACE_RE.findall(txt)[:5]):
+        # 🔴 [2026-08-02 승인 G①] 그룹이 4 → 6 개로 늘었다(date·trackCond 추가).
+        #   `venue` 는 종전에도 캡처했으나 `_vn` 으로 **버리고 있었다** — 이제 저장한다.
+        #   ⚠ `recs` 도 앞에 주파시간이 붙어 인덱스가 [0][1] → [1][2] 로 밀렸다.
+        #   ⚠ 기존 3키(placing·fieldSize·distance)는 **값이 동일**하다(무회귀).
+        for j, (pl, dt, cond, fs, vn, dist) in enumerate(_NARD_PLACE_RE.findall(txt)[:5]):
             try:
                 past.append({"placing": int(pl), "fieldSize": int(fs), "distance": int(dist),
-                             "corner": recs[j][0] if j < len(recs) else "",
-                             "last3f": float(recs[j][1]) if j < len(recs) else None})
+                             "date": dt, "trackCond": cond, "venue": (vn or "").strip(),
+                             "corner": recs[j][1] if j < len(recs) else "",
+                             "last3f": float(recs[j][2]) if j < len(recs) else None,
+                             "time": recs[j][0] if j < len(recs) else ""})
             except (ValueError, IndexError):
                 continue
         bw = _NARD_BW_RE.search(txt)
