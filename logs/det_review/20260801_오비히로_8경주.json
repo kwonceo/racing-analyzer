@@ -1,8 +1,8 @@
 {
- "raceKey": "오비히로 7경주",
+ "raceKey": "오비히로 8경주",
  "entries": [
   {
-   "time": "17:55:31",
+   "time": "18:25:31",
    "minutesBefore": 9,
    "status": "SAFE",
    "checked": [
@@ -17,37 +17,120 @@
     "drops": [],
     "finalQuinellas": [
      [
-      8,
-      9
+      2,
+      7
      ],
      [
       2,
       9
      ],
      [
-      6,
+      7,
       9
+     ],
+     [
+      2,
+      3
      ]
     ],
     "finalTrifectas": [
      [
       1,
-      8,
-      9
+      2,
+      7
      ],
      [
       2,
-      8,
-      9
+      3,
+      7
      ],
      [
       1,
-      6,
+      2,
       9
      ],
      [
       2,
+      7,
+      9
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:34:26",
+   "minutesBefore": 0,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [
+     [
+      2,
+      3,
+      7
+     ],
+     [
+      2,
+      3,
+      8
+     ],
+     [
+      7,
+      8,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:34:29",
+   "minutesBefore": 0,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      3,
+      6
+     ],
+     [
+      2,
       6,
+      7
+     ],
+     [
+      2,
+      3,
+      7
+     ],
+     [
+      2,
+      7,
       8
      ]
     ],
@@ -55,7 +138,7 @@
    }
   },
   {
-   "time": "18:05:08",
+   "time": "18:35:08",
    "minutesBefore": -1,
    "status": "NO_DATA",
    "checked": [],
@@ -73,26 +156,8 @@
    }
   },
   {
-   "time": "18:23:11",
-   "minutesBefore": -18,
-   "status": "NO_DATA",
-   "checked": [],
-   "skipped": [
-    "B라인누락: 라인 페어 0개(2개 미만)",
-    "삼복승정합: 복승 1순위 없음",
-    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
-   ],
-   "issues": [],
-   "input": {
-    "drops": [],
-    "finalQuinellas": [],
-    "finalTrifectas": [],
-    "linePairs": []
-   }
-  },
-  {
-   "time": "18:54:11",
-   "minutesBefore": -49,
+   "time": "18:54:12",
+   "minutesBefore": -19,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [

@@ -1,0 +1,421 @@
+{
+ "predicted_top3": [
+  2,
+  3,
+  6
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 2두로 인한 초반 페이스 경쟁, 추격형 강세 속 평지형 변수",
+ "key_factors": [
+  "A등급 추격형 마필의 우세",
+  "선행형 마필 간의 초반 경합 가능성",
+  "重 주로의 영향",
+  "기수 승률의 편차"
+ ],
+ "exception_note": "1300m 더트 경주에서 선행형이 2두(3번, 11번)로 구성되어 초반 포지션 싸움이 예상된다. 이로 인해 후반 추격형 마필들이 유리한 전개를 가져갈 가능성이 높다. 특히 2번 미키아일은 최근 성적이 좋고 기수 승률이 높아 주목된다. 3번 실버스테이트는 선행형 중 가장 좋은 최근 성적과 A등급을 보유하고 있어 초반 경쟁을 이겨낸다면 입상권에 들 수 있다. 6번 리얼스틸도 A등급 추격형으로 높은 기수 승률과 좋은 최근 성적을 바탕으로 순위권 진입이 유력하다.",
+ "applied_rules": [],
+ "raceKey": "코치 7경주",
+ "forecastAt": "2026-08-01 18:30:25",
+ "forecastEpoch": 1785576625.0047462,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "코치 7경주",
+  "wind": {
+   "venue": "코치",
+   "풍속": 1.8,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 29.9,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T18:10:00+09:00",
+   "지점": "南国日章",
+   "지점거리km": 5.26
+  },
+  "fieldSize": 13,
+  "distance": 1300,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 2,
+    "name": "ミッキーアイル",
+    "gait": "추격형",
+    "recentPlacings": [
+     1,
+     8,
+     2,
+     6,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "永森大",
+    "jockeyRate": 46.7,
+    "distApt": "A"
+   },
+   {
+    "no": 6,
+    "name": "リアルスティール",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     6,
+     3,
+     4
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "上田将",
+    "jockeyRate": 36.7
+   },
+   {
+    "no": 9,
+    "name": "リアルインパクト",
+    "gait": "평지형",
+    "recentPlacings": [
+     3,
+     6,
+     1,
+     4,
+     8
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "井上瑛",
+    "jockeyRate": 22.2,
+    "distApt": "A"
+   },
+   {
+    "no": 3,
+    "name": "シルバーステート",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     9,
+     3,
+     10,
+     1
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "岡遼太",
+    "jockeyRate": 23.3,
+    "distApt": "A"
+   },
+   {
+    "no": 7,
+    "name": "ディーマジェスティ",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     4,
+     10,
+     7,
+     5
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "城野慈",
+    "jockeyRate": 46.7,
+    "distApt": "C"
+   },
+   {
+    "no": 5,
+    "name": "アニマルキングダム",
+    "gait": "평지형",
+    "recentPlacings": [
+     8,
+     2,
+     7,
+     10,
+     8
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 52.0,
+    "jockey": "西優哉",
+    "jockeyRate": 25.0,
+    "distApt": "B"
+   },
+   {
+    "no": 8,
+    "name": "キズナ",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     9,
+     8,
+     10,
+     7
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "阿部基",
+    "jockeyRate": 13.3,
+    "distApt": "C"
+   },
+   {
+    "no": 10,
+    "name": "メイショウサムソン",
+    "gait": "평지형",
+    "recentPlacings": [
+     7,
+     5,
+     4,
+     8,
+     1
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "多田誠",
+    "jockeyRate": 43.3,
+    "distApt": "B"
+   },
+   {
+    "no": 1,
+    "name": "リオンディーズ",
+    "gait": "추격형",
+    "recentPlacings": [
+     12,
+     5,
+     2,
+     8
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "大澤誠",
+    "jockeyRate": 3.3,
+    "distApt": "C"
+   },
+   {
+    "no": 4,
+    "name": "ラニ",
+    "gait": "평지형",
+    "recentPlacings": [
+     4,
+     7,
+     7,
+     4,
+     9
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "山崎雅",
+    "jockeyRate": 13.3,
+    "distApt": "C"
+   },
+   {
+    "no": 12,
+    "name": "トウケイヘイロー",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     8,
+     8,
+     11,
+     6
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "畑中信",
+    "jockeyRate": 16.7,
+    "distApt": "C"
+   },
+   {
+    "no": 11,
+    "name": "レッドファルクス",
+    "gait": "선행형",
+    "recentPlacings": [
+     6,
+     9,
+     6,
+     5,
+     10
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "木村直",
+    "jockeyRate": 20.0,
+    "distApt": "C"
+   },
+   {
+    "no": 13,
+    "name": "メモリーキャッチ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    3,
+    11
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 92.3
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 92.3
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 92.3
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 84.6
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   9,
+   2,
+   6
+  ],
+  "hit_count": 2,
+  "hit": [
+   2,
+   6
+  ],
+  "missed": [
+   9
+  ],
+  "missed_info": [
+   {
+    "no": 9,
+    "gait": "평지형",
+    "recentPlacings": [
+     3,
+     6,
+     1,
+     4,
+     8
+    ],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   3,
+   9
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.1,
+  "market_src": "win",
+  "gradedAt": "2026-08-01 18:50:14"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "9번 '리얼임팩트'는 평지형임에도 '重' 주로에서 강점을 보이며 선행형 경합으로 인한 후반 추격 기회를 잘 활용했다. '최근 착순'을 좀 더 비중 있게 고려했어야 했다.",
+  "new_rule": "더트 경주에서 '重' 주로일 경우, 평지형 마필이라도 '최근 착순' 중 우승 기록이 있다면 유심히 살핀다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 18:50:16"
+ },
+ "reviewed": true
+}

@@ -241,8 +241,13 @@ def measure_trio(sport="horse", pattern="2026_0*"):
                 combos.append(sorted(int(x) for x in c))
         if not combos:
             continue
+        # 🔴 [2026-08-01] 복병 목록 — "복병 포함 삼복승"을 따로 재기 위해 함께 싣는다.
+        #   전체가 나빠도 부분은 다를 수 있다(경마 삼복승 3제외 42.9% ↔ 복병 포함분은 미측정이었다).
+        dk = [int(x.get("no")) for x in (cp.get("darkHorsePicks") or [])
+              if x.get("no") is not None]
         rows.append({"combos": combos, "po": float(po), "top3": sorted(int(x) for x in top3),
-                     "cat": d.get("category") or "?", "n": len(combos)})
+                     "cat": d.get("category") or "?", "n": len(combos),
+                     "dk": dk, "dk1": (dk[0] if dk else None)})
     return rows
 
 
@@ -265,13 +270,92 @@ def report_trio(rows, label):
              ("%.1f배" % statistics.median(hits)) if hits else "-"))
 
 
+def measure_dark3(sport="horse", pattern="2026_0*"):
+    """[복병 3착 이내 진입률 (2026-08-01 신설)] — **완전 읽기 전용**.
+
+    🔴 왜: 지금까지 복병 평가는 **복승(1·2착)** 기준뿐이었다. 대표 관찰은
+      *"급락으로 잡힌 복병이 3착 안에 드는 경우가 많다"* 이고, 그건 **삼복승 재료**다.
+      분모가 다르므로 **복승 기준 값과 섞어 쓰면 안 된다.**
+    ⚠ 무작위 기대 = 3 / 두수. 그것과 대조해야 "많다"가 성립한다.
+    """
+    out = []
+    for f in sorted(glob.glob(os.path.join(BASE, "data", "analysis_log", pattern + ".json"))):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        if (d.get("sport") or "") != sport:
+            continue
+        res = d.get("result") or {}
+        top3 = [res.get("1st"), res.get("2nd"), res.get("3rd")]
+        if any(x is None for x in top3):
+            continue
+        cp = d.get("corePicks") or {}
+        dks = cp.get("darkHorsePicks") or []
+        if not dks:
+            continue
+        nh = cp.get("raceHorseCount") or 0
+        t3 = [int(x) for x in top3]
+        for i, x in enumerate(dks):
+            if x.get("no") is None:
+                continue
+            no = int(x["no"])
+            out.append({"no": no, "rank": i + 1, "forced": bool(x.get("forced")),
+                        "anom": int(x.get("anomCount") or 0),
+                        "smart": bool(x.get("smartMoney")),
+                        "place": (t3.index(no) + 1) if no in t3 else 0,
+                        "nh": int(nh or 0), "cat": d.get("category") or "?"})
+    return out
+
+
+def report_dark3(rows, label):
+    n = len(rows)
+    if not n:
+        print("  %-22s n=0 — 판정 불가" % label)
+        return
+    in3 = sum(1 for r in rows if r["place"])
+    exp = [3.0 / r["nh"] for r in rows if r["nh"] >= 4]
+    base = 100.0 * statistics.mean(exp) if exp else 0.0
+    got = 100.0 * in3 / n
+    mark = "⚠n<30" if n < 30 else ("🟢" if got >= base * 1.15 else ("🔴" if got <= base * 0.9 else "🟡"))
+    p1 = sum(1 for r in rows if r["place"] == 1)
+    p2 = sum(1 for r in rows if r["place"] == 2)
+    p3 = sum(1 for r in rows if r["place"] == 3)
+    print("  %-22s n=%4d | 1착 %3d · 2착 %3d · 3착 %3d · 미입상 %4d | **3착이내 %5.1f%%** (무작위 %4.1f%% · 배수 %.2f) %s"
+          % (label, n, p1, p2, p3, n - in3, got, base,
+             (got / base) if base else 0, mark))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sport", default="cycle")
     ap.add_argument("--pattern", default="2026_07_*")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--trio", action="store_true", help="삼복승 섀도우 성적(별도 측정)")
+    ap.add_argument("--dark3", action="store_true", help="복병 3착 이내 진입률(복승 기준과 별개)")
     a = ap.parse_args()
+    if a.dark3:
+        rows = measure_dark3(a.sport, a.pattern)
+        print("=" * 126)
+        print("복병 **3착 이내** 진입률 · %s · %s" % (a.sport, a.pattern))
+        print("=" * 126)
+        print("⚠ 🔴 복승(1·2착) 기준 값과 **분모가 다르다.** 섞어 인용하지 말 것.")
+        print("⚠ 무작위 기대 = 3 ÷ 두수 (경주별 평균). 배수 1.0 이면 신호에 우위가 없다는 뜻이다.")
+        report_dark3(rows, "전체")
+        for k, lab in ((1, "복병 1순위"), (2, "복병 2순위"), (3, "복병 3순위")):
+            report_dark3([r for r in rows if r["rank"] == k], lab)
+        report_dark3([r for r in rows if r["forced"]], "forced=True")
+        report_dark3([r for r in rows if r["smart"]], "smartMoney=True")
+        for lo, hi, lab in ((1, 2, "anomCount 1~2"), (3, 5, "anomCount 3~5"),
+                            (6, 9, "anomCount 6~9"), (10, 999, "anomCount 10+")):
+            report_dark3([r for r in rows if lo <= r["anom"] <= hi], lab)
+        report_dark3([r for r in rows if r["anom"] == 0], "anomCount 0")
+        cats = {}
+        for r0 in rows:
+            cats.setdefault(r0["cat"], []).append(r0)
+        for c, rs in sorted(cats.items(), key=lambda x: -len(x[1]))[:4]:
+            report_dark3(rs, "[%s]" % c)
+        return 0
     if a.trio:
         rows = measure_trio(a.sport, a.pattern)
         print("=" * 118)
@@ -284,6 +368,22 @@ def main():
             cats.setdefault(r0["cat"], []).append(r0)
         for c, rs in sorted(cats.items(), key=lambda x: -len(x[1])):
             report_trio(rs, c)
+        # 🔴 [2026-08-01] 복병 포함 / 미포함 분해. **조합 단위**로 가른다(경주 단위가 아니다).
+        print("")
+        print("  ── 복병 포함 여부로 분해 (⚠ 조합 단위 · 같은 경주가 양쪽에 나뉜다) ──")
+        def _split(rs, pred, label):
+            sub = []
+            for r0 in rs:
+                cs = [c for c in r0["combos"] if pred(r0, c)]
+                if cs:
+                    sub.append({**r0, "combos": cs, "n": len(cs)})
+            if sub:
+                report_trio(sub, label)
+            else:
+                print("  %-16s 조합 0 — 판정 불가" % label)
+        _split(rows, lambda r0, c: bool(set(c) & set(r0["dk"][:2])), "복병(상위2) 포함")
+        _split(rows, lambda r0, c: not (set(c) & set(r0["dk"][:2])), "복병 미포함")
+        _split(rows, lambda r0, c: r0["dk1"] is not None and r0["dk1"] in c, "복병 1순위 포함")
         return 0
     r = measure(a.sport, a.pattern)
     if a.json:

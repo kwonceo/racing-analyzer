@@ -1,0 +1,292 @@
+{
+ "predicted_top3": [
+  1,
+  4,
+  6
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 간 경쟁으로 추입마가 유리. 1번 야마다의 최근 부진 만회 의지.",
+ "key_factors": [
+  "선행형 (7, 6) 두 명의 존재로 인한 내부 경쟁",
+  "7번 나카시마의 '철저 항전' 선언으로 인한 선두권 경합 심화",
+  "1번 야마다가 최근 부진(7착 연속)을 만회하려는 강한 의지"
+ ],
+ "exception_note": "이 경주는 2명의 선행형(7번, 6번)이 존재하고, 특히 7번 나카시마가 '도주(선행)' 각질로 '철저 항전'을 선언하며 선두권 경쟁이 치열할 것으로 예상됩니다. 이는 일반적인 선행-추입 구도에서 선행마가 독주하는 경우와 달리, 선행마들 간의 힘 소모가 커져 추입형에게 유리한 전개가 될 가능성이 높습니다. 또한, 1번 야마다가 최근 연속 7착으로 부진했으나, 총평에서 '우っぷんを爆発させる(울분을 터뜨린다)'는 표현이 있어 강한 승부 의지를 엿볼 수 있습니다.",
+ "applied_rules": [],
+ "raceKey": "야히코 8경주",
+ "forecastAt": "2026-08-01 18:38:44",
+ "forecastEpoch": 1785577124.742194,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 8경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 2.7,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 27.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T18:20:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "山田 久徳",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 ７着 11.7 7/31 準決勝 ７着 15.3",
+    "prev1": "高 知Ｇ２ 7/17 一予選 ６着 14.1 7/18 選 抜 ３着 14.1 7/19 選 抜 ５着 13.9 7/20 選 抜 ３着 14.1",
+    "prev2": "青 森Ｆ１ 7/ 3 初特選 ６着 12.2 7/ 4 準決勝 ２着 11.5 7/ 5 決 勝 ４着 11.3",
+    "chaku": [
+     2,
+     4,
+     5,
+     20
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "大矢 崇弘",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/30 予 選 ３着 11.3 7/31 準決勝 ４着 11",
+    "prev1": "玉 野Ｆ１ 7/22 初特選 ４着 11.6 7/23 準決勝 ２着 11.6 7/24 決 勝 ５着 11.8",
+    "prev2": "松 戸Ｆ１ 6/25 予 選 １着 10.2 6/26 準決勝 １着 9.9 6/27 決 勝 ２着 9.6",
+    "chaku": [
+     5,
+     5,
+     4,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "土屋 壮登",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 １着 11.1 7/31 準決勝 ６着 12.7",
+    "prev1": "大 垣Ｆ１ 7/ 8 予 選 ４着 11.5 7/ 9 選 抜 ５着 11.1 7/10 一 般 １着 12.1",
+    "prev2": "宇都宮Ｇ３ 5/30 一予選 ４着 14 5/31 二予選 落",
+    "chaku": [
+     3,
+     7,
+     1,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "不破 将登",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ６着 10.9 7/31 一 般 １着 11.4",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ５着 10 7/23 特 選 ６着 9.8 7/24 特 選 ８着 10.1",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 １着 11.3 7/ 9 準決勝 ５着 12.2 7/10 特 選 ２着 11.3",
+    "chaku": [
+     4,
+     5,
+     3,
+     20
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "中嶋 宣成",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/30 予 選 ２着 11.3 7/31 準決勝 ７着 13.5",
+    "prev1": "富 山Ｆ１ 7/21 予 選 １着 9.7 7/22 準決勝 ７着 10.3 7/23 特 選 ７着 10.5",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ８着 10.1 7/11 選 抜 ７着 9.9 7/12 選 抜 １着 10.2",
+    "chaku": [
+     8,
+     3,
+     2,
+     16
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "伊勢崎彰大",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ２着 11.6 7/31 準決勝 ５着 11.6",
+    "prev1": "宇都宮Ｆ１ 5/21 予 選 ７着 15.5",
+    "prev2": "函 館Ｇ３ 5/14 一予選 ２着 11.5 5/15 二予選 ６着 11.3 5/16 特 選 ９着 13 5/17 選 抜 ７着 11.4",
+    "chaku": [
+     2,
+     2,
+     1,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "高田 修汰",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ６着 12 7/31 一 般 １着 11.6",
+    "prev1": "岐 阜Ｆ１ 7/11 予 選 ２着 12 7/12 準決勝 ５着 11.3 7/13 特 選 ２着 11.6",
+    "prev2": "和歌山Ｆ１ 7/ 5 予 選 ３着 11.9 7/ 6 選 抜 １着 11.6 7/ 7 特 選 ６着 12",
+    "chaku": [
+     4,
+     5,
+     4,
+     21
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    7,
+    6
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    1,
+    5,
+    3,
+    4,
+    2
+   ]
+  },
+  "lines": [
+   6,
+   1,
+   4,
+   2,
+   7,
+   5,
+   3
+  ],
+  "paceLabel": null,
+  "comment": "特選シードの山田が７着続きのうっぷんを爆発させる。前を回る高田が自分の仕事をきっちりこなし、山田―不破が抜け出すとみた。中嶋が自力で徹底抗戦。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}

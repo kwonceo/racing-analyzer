@@ -266,5 +266,39 @@
    "totalScore"
   ],
   "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   5,
+   3
+  ],
+  "hit_count": 3,
+  "hit": [
+   4,
+   3,
+   5
+  ],
+  "missed": [],
+  "missed_info": [],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   3,
+   6
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 18:30:31"
+ },
+ "graded": true,
+ "reviewed": true,
+ "review": {
+  "miss_reason": "해당 없음(전부 적중)",
+  "new_rule": "없음",
+  "rule_confidence": 1,
+  "reviewedAt": "2026-08-01 18:30:31"
  }
 }

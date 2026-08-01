@@ -1,0 +1,119 @@
+{
+ "raceKey": "코치 8경주",
+ "entries": [
+  {
+   "time": "18:40:14",
+   "minutesBefore": 34,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      11
+     ],
+     [
+      4,
+      11
+     ],
+     [
+      8,
+      11
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      8,
+      11
+     ],
+     [
+      3,
+      4,
+      11
+     ],
+     [
+      4,
+      8,
+      11
+     ],
+     [
+      3,
+      4,
+      8
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:54:15",
+   "minutesBefore": 20,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      11
+     ],
+     [
+      4,
+      11
+     ],
+     [
+      11,
+      12
+     ],
+     [
+      8,
+      11
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      11,
+      12
+     ],
+     [
+      2,
+      3,
+      11
+     ],
+     [
+      3,
+      4,
+      11
+     ],
+     [
+      3,
+      8,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

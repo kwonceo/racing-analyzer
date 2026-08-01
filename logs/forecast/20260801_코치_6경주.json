@@ -371,5 +371,67 @@
    "totalScore"
   ],
   "sport": "horse"
- }
+ },
+ "grading": {
+  "actual": [
+   9,
+   6,
+   4
+  ],
+  "hit_count": 1,
+  "hit": [
+   4
+  ],
+  "missed": [
+   9,
+   6
+  ],
+  "missed_info": [
+   {
+    "no": 9,
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     4,
+     7,
+     14,
+     14
+    ],
+    "line": null,
+    "grade": "C"
+   },
+   {
+    "no": 6,
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     2,
+     6,
+     4,
+     6
+    ],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   10,
+   4,
+   6
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "win",
+  "gradedAt": "2026-08-01 18:30:15"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "9번(추격형)은 C등급임에도 불구하고 중급 능력의 선행마들이 무리한 경쟁으로 인해 선두권이 흔들리는 틈을 타 우승했다. 6번(선행형)은 B등급으로, 4번, 10번과 함께 선두권 경쟁에서 살아남아 입상했다.",
+  "new_rule": "선행마가 많아 빠른 페이스가 예상될 경우, 높은 등급의 추격형 말이 아니더라도, 선두권 혼란 속에서 반사이익을 얻을 수 있는 중위권 추격형 말의 잠재력을 간과하지 않는다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 18:30:18"
+ },
+ "reviewed": true
 }

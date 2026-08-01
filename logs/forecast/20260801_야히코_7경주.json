@@ -285,5 +285,55 @@
    "totalScore"
   ],
   "sport": "cycle"
- }
+ },
+ "grading": {
+  "actual": [
+   3,
+   7,
+   4
+  ],
+  "hit_count": 1,
+  "hit": [
+   7
+  ],
+  "missed": [
+   3,
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 4,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   7,
+   1
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 18:50:29"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번 稲垣 裕之의 직전 경주 성적이 저조했음에도 A등급 기수라는 점과 자재(양각) 선언을 간과하여 마지막 스퍼트 능력을 과소평가했습니다. 4번 北川大五郎은 선행형 B등급으로 선두 경쟁 소모를 예상했으나, 혼전 속에서 선전한 점을 놓쳤습니다. 특히 4번의 금 개최 성적이 11.4로 선전했음을 확인하지 못했습니다.",
+  "new_rule": "선행형이 B등급이라도, 코멘트에서 혼전이 예상되고 직전 경기 성적이 준수하다면, 선행형의 선전 가능성을 높게 평가하고 예측에 포함시킨다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 18:50:32"
+ },
+ "reviewed": true
 }
