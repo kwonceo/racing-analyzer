@@ -52,6 +52,81 @@ def _loadh(base):
     return None
 
 
+# ── 🔴 [2026-08-02] 인기 기저선(`--base market`) ─────────────────────────────────
+#   왜: 지금까지 무작위 기대를 **3 ÷ 두수** 로 썼다. 그건 **모든 말을 동등하게** 본다.
+#   실측은 전혀 다르다(13~16두 1인기 58.6% ↔ 16인기 0.6%). ⇒ 복병 배수는 과소평가,
+#   인기 상위 신호는 과대평가돼 왔다.
+#   🔴 **말마다 자기 인기순위의 기저선을 쓴다.** 경주 단위로 뭉뚱그리면 배수가 부풀려진다.
+#   🔴 **경마(JRA result.html) 실측이다 — 경륜에 쓰지 않는다**(인기 개념·두수 구조가 다르다).
+POPBASE_FILE = os.path.join(BASE, "data", "simulation_db", "pop_baseline.json")
+_PB_CACHE = None
+
+
+def _popbase():
+    global _PB_CACHE
+    if _PB_CACHE is None:
+        try:
+            d = json.load(open(POPBASE_FILE, encoding="utf-8"))
+            _PB_CACHE = d if d.get("verified") else {}   # ⚠ 검산 미통과분은 쓰지 않는다
+        except Exception:
+            _PB_CACHE = {}
+    return _PB_CACHE
+
+
+def _pband(n):
+    """build_popbase.band() 와 **같은 구간**이어야 한다(다르면 셀이 어긋난다)."""
+    return "≤8두" if n <= 8 else ("9~12두" if n <= 12 else ("13~16두" if n <= 16 else "17두+"))
+
+
+def _base_market(nh, pop):
+    """그 말 (두수구간, 인기) 셀의 **실측 3착률(%)**. 셀이 없으면 None — 추측하지 않는다."""
+    pb = _popbase()
+    if not pb or not nh or not pop:
+        return None
+    c = (pb.get("cells") or {}).get("%s|%d" % (_pband(int(nh)), min(int(pop), 18)))
+    return float(c["in3"]) if c else None
+
+
+def _pop_map(d, alog_path):
+    """→ ({마번: 인기순위}, 출처). 🔴 못 구하면 **빈 dict** — 없는 값을 만들지 않는다."""
+    m = {}
+    for e in ((d.get("raw_profile") or {}).get("entries") or []):
+        try:
+            if e.get("pop") and e.get("no") is not None:
+                m[int(e["no"])] = int(e["pop"])
+        except Exception:
+            pass
+    if m:
+        return m, "raw_profile.pop"                       # 🟢 진짜 인기 표기
+    h = _loadh(alog_path.replace("analysis_log", "odds_history"))
+    sn = [s for s in ((h or {}).get("snapshots") or []) if s.get("t")]
+    dl = (h or {}).get("deadline_epoch")
+    if dl:
+        sn = [s for s in sn if (s["t"] - dl) / 60 <= 0] or sn
+    if not sn:
+        return {}, "없음"
+    last = max(sn, key=lambda x: x["t"])
+    try:                                                   # 🟡 단승 배당순 = 사실상 인기순위
+        w = {int(k): float(v) for k, v in (last.get("win") or {}).items()}
+        if w:
+            return {no: i + 1 for i, (no, _o) in enumerate(sorted(w.items(), key=lambda x: x[1]))}, "단승배당순"
+    except Exception:
+        pass
+    best = {}                                              # 🔴 대용: 말별 최저 복승 배당순
+    for k, v in (last.get("quinella") or {}).items():
+        try:
+            nos = [int(x) for x in str(k).replace("-", "+").split("+")][:2]
+            ov = float(v)
+        except Exception:
+            continue
+        for n in nos:
+            if n not in best or ov < best[n]:
+                best[n] = ov
+    if best:
+        return {no: i + 1 for i, (no, _o) in enumerate(sorted(best.items(), key=lambda x: x[1]))}, "복승최저순(대용)"
+    return {}, "없음"
+
+
 def load_races(sport="cycle", pattern="2026_07_*"):
     """🔴 날짜 안전: analysis_log 파일 하나에서 odds_history 경로를 **파생**한다."""
     out = []
@@ -709,19 +784,24 @@ def measure_dark3(sport="horse", pattern="2026_0*"):
             continue
         nh = cp.get("raceHorseCount") or 0
         t3 = [int(x) for x in top3]
+        pmap, psrc = _pop_map(d, f)                        # 🔴 말마다 자기 인기순위를 붙인다
         for i, x in enumerate(dks):
             if x.get("no") is None:
                 continue
             no = int(x["no"])
+            pop = pmap.get(no)
             out.append({"no": no, "rank": i + 1, "forced": bool(x.get("forced")),
                         "anom": int(x.get("anomCount") or 0),
                         "smart": bool(x.get("smartMoney")),
                         "place": (t3.index(no) + 1) if no in t3 else 0,
-                        "nh": int(nh or 0), "cat": d.get("category") or "?"})
+                        "nh": int(nh or 0), "cat": d.get("category") or "?",
+                        "pop": pop, "popsrc": psrc,
+                        "mbase": _base_market(nh, pop)})
     return out
 
 
-def report_dark3(rows, label):
+def report_dark3(rows, label, base_mode="random", sport="horse"):
+    """🔴 `--base` 는 **기존 계산을 지우지 않는다** — random 은 언제나 함께 찍는다(전후 병기)."""
     n = len(rows)
     if not n:
         print("  %-22s n=0 — 판정 불가" % label)
@@ -734,9 +814,25 @@ def report_dark3(rows, label):
     p1 = sum(1 for r in rows if r["place"] == 1)
     p2 = sum(1 for r in rows if r["place"] == 2)
     p3 = sum(1 for r in rows if r["place"] == 3)
-    print("  %-22s n=%4d | 1착 %3d · 2착 %3d · 3착 %3d · 미입상 %4d | **3착이내 %5.1f%%** (무작위 %4.1f%% · 배수 %.2f) %s"
-          % (label, n, p1, p2, p3, n - in3, got, base,
-             (got / base) if base else 0, mark))
+    line = ("  %-22s n=%4d | 1착 %3d · 2착 %3d · 3착 %3d · 미입상 %4d | **3착이내 %5.1f%%** (무작위 %4.1f%% · 배수 %.2f) %s"
+            % (label, n, p1, p2, p3, n - in3, got, base,
+               (got / base) if base else 0, mark))
+    if base_mode == "market":
+        # 🔴 경마 실측 기저선이다. 경륜에 쓰지 않는다(인기 개념이 다르다).
+        if sport != "horse":
+            line += "  | market: 🔴 경마 기저선을 %s 에 쓰지 않는다" % sport
+        else:
+            mb = [r for r in rows if r.get("mbase") is not None]
+            cov = 100.0 * len(mb) / n
+            if len(mb) < 30:
+                line += "  | market: ⚠ 적용 n=%d(<30) 판정 불가 · 커버 %.0f%%" % (len(mb), cov)
+            else:
+                mbase = statistics.mean(r["mbase"] for r in mb)
+                mgot = 100.0 * sum(1 for r in mb if r["place"]) / len(mb)
+                mmark = "🟢" if mgot >= mbase * 1.15 else ("🔴" if mgot <= mbase * 0.9 else "🟡")
+                line += ("  ‖ **market** n=%d(커버 %.0f%%) 3착이내 %.1f%% (시장기저 %.1f%% · **배수 %.2f**) %s"
+                         % (len(mb), cov, mgot, mbase, (mgot / mbase) if mbase else 0, mmark))
+    print(line)
 
 
 def measure_drop3(sport="horse", pattern="2026_0*"):
@@ -810,6 +906,9 @@ def main():
                     help="F3 — Gemini 고배당 능력(시장과 다른 답 && 적중 · 가상 회수율)")
     ap.add_argument("--weights", action="store_true",
                     help="전적이 실제로 순위를 바꾸는가 — 현행(60/40) ↔ 시장100% ↔ 전적100% 대조")
+    # 🔴 [2026-08-02] 기저 선택. **random 을 지우지 않는다** — 항상 함께 찍어 전후를 병기한다.
+    ap.add_argument("--base", choices=["random", "market"], default="random",
+                    help="무작위(3÷두수) ↔ 인기별 실측 기저선. market 은 **경마 전용**")
     a = ap.parse_args()
     if a.weights:
         out = measure_weights(a.sport, a.pattern)
@@ -875,20 +974,33 @@ def main():
         print("=" * 126)
         print("⚠ 🔴 복승(1·2착) 기준 값과 **분모가 다르다.** 섞어 인용하지 말 것.")
         print("⚠ 무작위 기대 = 3 ÷ 두수 (경주별 평균). 배수 1.0 이면 신호에 우위가 없다는 뜻이다.")
-        report_dark3(rows, "전체")
+        if a.base == "market":
+            pb = _popbase()
+            print("🔴 --base market : 인기별 실측 기저선을 **말마다** 적용한다(경마 전용).")
+            print("   기저선: %s경주 %s두 · 셀 %d · 생성 %s"
+                  % (pb.get("races", "?"), pb.get("horses", "?"),
+                     len(pb.get("cells") or {}), pb.get("builtAt", "?")))
+            srcs = {}
+            for r0 in rows:
+                srcs[r0.get("popsrc") or "?"] = srcs.get(r0.get("popsrc") or "?", 0) + 1
+            print("   인기순위 출처: %s" % srcs)
+            print("   ⚠ '복승최저순(대용)' 은 진짜 인기 표기가 아니다 — 근사치임을 명시한다.")
+            print("   ⚠ random 은 지우지 않고 항상 함께 찍는다(전후 병기).")
+        _R = lambda rs, lab: report_dark3(rs, lab, a.base, a.sport)
+        _R(rows, "전체")
         for k, lab in ((1, "복병 1순위"), (2, "복병 2순위"), (3, "복병 3순위")):
-            report_dark3([r for r in rows if r["rank"] == k], lab)
-        report_dark3([r for r in rows if r["forced"]], "forced=True")
-        report_dark3([r for r in rows if r["smart"]], "smartMoney=True")
+            _R([r for r in rows if r["rank"] == k], lab)
+        _R([r for r in rows if r["forced"]], "forced=True")
+        _R([r for r in rows if r["smart"]], "smartMoney=True")
         for lo, hi, lab in ((1, 2, "anomCount 1~2"), (3, 5, "anomCount 3~5"),
                             (6, 9, "anomCount 6~9"), (10, 999, "anomCount 10+")):
-            report_dark3([r for r in rows if lo <= r["anom"] <= hi], lab)
-        report_dark3([r for r in rows if r["anom"] == 0], "anomCount 0")
+            _R([r for r in rows if lo <= r["anom"] <= hi], lab)
+        _R([r for r in rows if r["anom"] == 0], "anomCount 0")
         cats = {}
         for r0 in rows:
             cats.setdefault(r0["cat"], []).append(r0)
         for c, rs in sorted(cats.items(), key=lambda x: -len(x[1]))[:4]:
-            report_dark3(rs, "[%s]" % c)
+            _R(rs, "[%s]" % c)
         return 0
     if a.trio:
         rows = measure_trio(a.sport, a.pattern)
