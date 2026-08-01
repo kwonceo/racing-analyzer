@@ -27211,7 +27211,16 @@ def bmed_view(key):
 # 🔧 되돌리기: `JRA_COLLECT_ENABLED = False` 한 줄. 코드는 지우지 않는다.
 JRA_COLLECT_ENABLED = True      # 서버 직접수집 on/off
 JRA_OBSERVE_ONLY = True         # 🔴 첫날 관찰 모드 — 저장만 하고 추천 반영 금지
-JRA_COLLECT_INTERVAL = 60       # 초. 실측 갱신주기 55~60초 → 30초는 낭비다
+JRA_COLLECT_INTERVAL = 60       # 초. 실측 갱신주기 55~60초 → 평시 30초는 낭비다
+# 🔴 [2026-08-01 승인] 마감 임박 단축 — T-3 이내에는 25초로 좁힌다.
+#   왜: 회원 화면(오버레이·분석기 웹)이 보는 배당은 **서버 응답**이라 지연이 세 겹으로 쌓인다.
+#       ① netkeiba 자체 갱신 ~55초  ② 서버 수집 주기  ③ 프론트 폴링 10초
+#   ⚠⚠ **지연 하한은 약 55초다. 이건 소스의 한계이고 우리가 못 내린다.**
+#      수집 주기를 0으로 만들어도 netkeiba 가 55초마다 갱신하므로 그 아래로는 내려가지 않는다.
+#      ⇒ 나중에 "왜 아직 느리냐"가 나오면 이 줄을 볼 것. **버그가 아니라 소스 특성이다.**
+#   기대 효과: 마감 직전 평균 지연 약 85초 → 약 68초(수집 대기 30초→12.5초 감소분).
+JRA_COLLECT_INTERVAL_CLOSE = 25   # T-3 이내
+JRA_CLOSE_WINDOW_SEC = 180        # "마감 임박" 정의(초)
 JRA_COLLECT_WINDOW_MIN = 15     # 마감 N분 전부터 수집(부하 실측상 동시 최대 2경주)
 JRA_ODDS_TYPES = (4, 7)         # 🔴 BMED 가 쓰는 것만 — 4=馬連(복승) 7=三連複(삼복승).
 #                                  1=단승·6=馬単(쌍승)은 안 쓰므로 요청하지 않는다(부하 절반)
@@ -27301,8 +27310,9 @@ def _jra_recent_private(rk):
 
 
 def _jra_collect_once():
-    """마감 창에 든 JRA 경주의 배당을 1회 수집. 반환 (수집건수, 생략건수)."""
+    """마감 창에 든 JRA 경주의 배당을 1회 수집. 반환 (수집건수, 생략건수, 마감임박여부)."""
     got = skip = 0
+    close_soon = False           # 🔴 T-3 이내 경주가 하나라도 있으면 다음 사이클을 짧게 돈다
     now = time.time()
     ymd = time.strftime("%Y%m%d")
     for race_id in sorted(_jra_race_list(ymd) or []):
@@ -27316,6 +27326,8 @@ def _jra_collect_once():
         # 수집 창: 마감 N분 전 ~ 마감 후 3분(확정배당 취득 기회 포함)
         if left > JRA_COLLECT_WINDOW_MIN * 60 or left < -180:
             continue
+        if 0 < left <= JRA_CLOSE_WINDOW_SEC:
+            close_soon = True                           # 마감 임박 → 다음 사이클 단축
         rk = "%s %d경주" % (venue, rno)
         if _jra_recent_private(rk):
             skip += 1
@@ -27335,24 +27347,32 @@ def _jra_collect_once():
                 print("[JRA수집] %s 확정배당 수집(status=result · dt=%s)" % (rk, dt))
         except Exception as e:
             print("[JRA수집] ingest 실패 %s: %s" % (rk, str(e)[:90]))
-    return got, skip
+    return got, skip, close_soon
 
 
 def _jra_bg_loop():
     """🔴 **별도 스레드**(기존 `_multi_bg_loop` 과 분리). 7/30 에 3트랙 동시 개최로 사이클이 37초까지
     포화된 선례가 있다 — 지금 잘 되고 있는 지방·경륜 수집을 밀지 않는 것이 최우선이다.
-    ⚠ sleep-first: 기동 직후 폭주하지 않게 먼저 쉰다(원칙: 주기 데몬은 sleep 먼저)."""
+    ⚠ sleep-first: 기동 직후 폭주하지 않게 먼저 쉰다(원칙: 주기 데몬은 sleep 먼저).
+    🔴 [2026-08-01] **적응 주기** — 직전 사이클에 T-3 이내 경주가 있었으면 다음엔 짧게 돈다.
+      ⚠ 지연 하한은 netkeiba 갱신주기(~55초)다. 주기를 더 줄여도 그 아래로는 안 내려간다."""
+    _nap = JRA_COLLECT_INTERVAL
     while True:
-        time.sleep(JRA_COLLECT_INTERVAL)
+        time.sleep(_nap)
         if not JRA_COLLECT_ENABLED:
+            _nap = JRA_COLLECT_INTERVAL
             continue
         try:
             t0 = time.time()
-            got, skip = _jra_collect_once()
+            got, skip, close_soon = _jra_collect_once()
+            _nap = JRA_COLLECT_INTERVAL_CLOSE if close_soon else JRA_COLLECT_INTERVAL
             if got or skip:
-                print("[JRA수집] %d경주 수집 · %d경주 생략(확장 우선) · %.2f초%s"
-                      % (got, skip, time.time() - t0, " · 🔬관찰모드" if JRA_OBSERVE_ONLY else ""))
+                print("[JRA수집] %d경주 수집 · %d경주 생략(확장 우선) · %.2f초 · 다음 %d초%s%s"
+                      % (got, skip, time.time() - t0, _nap,
+                         " · ⏱마감임박" if close_soon else "",
+                         " · 🔬관찰모드" if JRA_OBSERVE_ONLY else ""))
         except Exception as e:
+            _nap = JRA_COLLECT_INTERVAL
             print("[JRA수집] 사이클 오류(무시·지방/경륜 무영향):", str(e)[:120])
 
 
