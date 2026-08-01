@@ -366,7 +366,15 @@ def measure_trio(sport="horse", pattern="2026_0*"):
         if (d.get("sport") or "") != sport:
             continue
         res = d.get("result") or {}
-        po = (res.get("payouts") or {}).get("trifecta")
+        # 🔴🔴 [2026-08-01 정정] `trifecta` 필드가 **경로마다 다른 마권**이다. 그대로 쓰면 회수가 부풀려진다.
+        #   · 중앙(netkeiba `_JRA_PAY_MAP`) : 3連複 → **`trio`** · 3連単 → **`trifecta`**
+        #   · 지방(`_keiba_result_payouts`) : 三連複 → **`trifecta`** (3連単 안 받음)
+        #   · 경륜(`_keirin_result_parse`)  : 3連複 → **`trifecta`** (3連単 안 받음)
+        #   ⇒ **`trio` 가 있으면 그것이 삼복승**이고, 그 경주의 `trifecta` 는 3連単이라 쓰면 안 된다.
+        #   실측: 중앙 17건에서 trifecta/trio 배수 **중앙 4.7배**(최대 18.7배) — 그만큼 부풀려졌다.
+        #   ⚠ `trifecta` 만 있는 125건은 **category 가 japan_central 로 오분류된 지방**이라 안전하다.
+        _pay = res.get("payouts") or {}
+        po = _pay.get("trio") if _pay.get("trio") is not None else _pay.get("trifecta")
         top3 = [res.get("1st"), res.get("2nd"), res.get("3rd")]
         if not po or any(x is None for x in top3):
             continue
