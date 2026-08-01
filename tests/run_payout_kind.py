@@ -34,8 +34,11 @@ import sys
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
-# 삼복승을 재는 소비 지점 — 새 도구가 생기면 여기에 추가한다.
-CONSUMERS = [("tools/measure_recovery.py", "measure_trio")]
+# 삼복승 배당을 **읽는 지점** — 새 도구·새 경로가 생기면 여기에 추가한다.
+#   ⚠ 측정 도구만이 아니라 **학습·손익 경로**도 넣는다. 그쪽이 오염되면 시스템이 잘못 학습한다.
+#   (name, 함수명, 검사할 본문 길이) — 함수가 길면 길이를 늘린다.
+CONSUMERS = [("tools/measure_recovery.py", "measure_trio", 4000),
+             ("app.py", "_apply_result_learning", 14000)]
 
 fails = []
 warns = []
@@ -56,7 +59,7 @@ else:
     print("[1] 매핑 상수 — 3連複→trio · 3連単→trifecta  %s" % ("🟢 정상" if not fails else "🔴 이상"))
 
 # ── [2] 소비 지점이 trio 우선인지 ────────────────────────────────────────────
-for rel, fn in CONSUMERS:
+for rel, fn, span in CONSUMERS:
     p = os.path.join(BASE, rel)
     if not os.path.exists(p):
         warns.append("[2] %s 없음 — 건너뜀" % rel)
@@ -66,7 +69,7 @@ for rel, fn in CONSUMERS:
     if i < 0:
         fails.append("[2] %s 에 %s 가 없다" % (rel, fn))
         continue
-    body = t[i:i + 4000]
+    body = t[i:i + span]
     has_trio = 'get("trio")' in body or "get('trio')" in body
     if not has_trio:
         fails.append("[2] %s.%s 가 **trifecta 단독**으로 읽는다 — 중앙경마 3連単이 섞인다" % (rel, fn))

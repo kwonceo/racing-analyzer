@@ -22,6 +22,7 @@
   python tools/measure_recovery.py --json
 """
 import argparse
+import collections
 import glob
 import gzip
 import itertools
@@ -111,6 +112,15 @@ def load_races(sport="cycle", pattern="2026_07_*"):
                     # ev 가 없는 강등분(저배당 컷 등) — 스윕 대상이 아님을 밝히기 위해 건수만 싣는다.
                     "refnoev": len([x for x in (cp.get("quinellaRef") or [])
                                     if x.get("combo") and x.get("ev") is None]),
+                    # 🔴 [2026-08-01 신설 · 정렬 리플레이] **정렬 전 후보 풀**.
+                    #   `finalQuinellas`(채택) + `quinellaRef`(강등) 를 합친다.
+                    #   ⚠ 🔴 **`_main_cand` 와 완전히 같지는 않다** — EV·저배당 컷 **이전** 단계에서
+                    #     잘린 조합은 어디에도 저장되지 않는다(원칙 3: 재현 못 한 부분은 명시한다).
+                    #     ⇒ 이 측정은 **"최종 후보 안에서 순서만 바꾸면"** 에 대한 답이다.
+                    "pool": [{"c": sorted(x.get("combo")), "ev": x.get("ev"),
+                              "odds": x.get("odds"), "stars": x.get("stars") or 0}
+                             for x in ((cp.get("finalQuinellas") or []) + (cp.get("quinellaRef") or []))
+                             if x.get("combo") and len(x.get("combo")) == 2],
                     # 🔴 [2026-08-01] `darkHorsePicks` = **복병 목록**(유력마와 다른 목록이다).
                     #   코치 4R 에서 7번이 복병 1순위·확신도 1위·축이었는데도
                     #   유력마 10번과의 조합 `7+10`(확정 37.7배)이 **어느 목록에도 없었다.**
@@ -140,6 +150,31 @@ def _pace(r, sign):
         r["hs"], key=lambda h: -((h.get("paceBonusBase") or 0) + sign * (h.get("paceBonus") or 0)))][:3]
 
 
+def _sort_pool(r, key, rev=True):
+    """[정렬 리플레이 (2026-08-01 신설)] 후보 풀을 `key` 로 정렬해 **현행과 같은 개수**만 뽑는다.
+
+    🔴 **구좌가 같아야 정렬 비교가 성립한다.** 개수가 달라지면 정렬이 아니라 개수 변경이 섞인다.
+    ⚠ 값이 없는 항목은 맨 뒤로 보낸다(정렬에서 유리해지지 않게).
+    ⚠ 같은 조합이 채택·강등 양쪽에 있으면 dedupe 한다(calc 가 set 으로 다시 거른다).
+    """
+    k = len(r["dc"])
+    if k <= 0:
+        return []
+    pool = r.get("pool") or []
+    if not pool:
+        return r["dc"]
+    seen, uniq = set(), []
+    for x in pool:
+        t = tuple(x["c"])
+        if t in seen:
+            continue
+        seen.add(t)
+        uniq.append(x)
+    neg = float("-inf")
+    uniq.sort(key=lambda x: (x.get(key) if x.get(key) is not None else neg), reverse=rev)
+    return [x["c"] for x in uniq[:k]]
+
+
 # 🔴 오늘 잰 11개 안을 함수로 고정. 새 안은 여기에만 추가한다.
 PLANS = [
     ("현행(기준선)", lambda r: r["dc"]),
@@ -164,6 +199,15 @@ PLANS = [
                                               for b in r["kh"] if a != b]),
     ("복병×유력마 교차만", lambda r: [sorted([a, b]) for a in r["dk"][:2]
                                 for b in r["kh"] if a != b]),
+    # 🔴 [2026-08-01 신설] **정렬 리플레이** — 지금까지 기각된 안은 전부 "무엇을 더 살까"였다.
+    #   정렬은 **같은 것을 다른 순서로** 사므로 **구좌가 늘지 않는다.**
+    #   ⚠ ④ "시장 대비 저평가 순"은 **② EV 순과 수학적으로 동일**하다:
+    #     저평가도 = 우리확률 ÷ 시장확률 = p ÷ (1/배당) = p × 배당 = **EV**.
+    #     ⇒ 별도 안으로 세지 않고 그 자리에 **배당 높은순**(고배당 지향)을 넣는다.
+    ("정렬① 현행(배당낮은순)", lambda r: r["dc"]),
+    ("정렬② EV 순", lambda r: _sort_pool(r, "ev")),
+    ("정렬③ 신호강도(stars) 순", lambda r: _sort_pool(r, "stars")),
+    ("정렬④ 배당 높은순", lambda r: _sort_pool(r, "odds")),
 ]
 
 
@@ -345,6 +389,135 @@ def report_ev_sweep(out):
             if r["ev"] in (1.00, 0.80, 0.60, 0.40, 0.00):
                 print("     EV %.2f · 구좌 %4d · 적중 %3d · 회수율 %6.1f%% · 3제외 %6.1f%% · 배당중앙 %5.1f배"
                       % (r["ev"], r["slots"], r["hits"], r["rate"], r["ex3"], r["median_odds"]))
+
+
+def measure_forecast(sport=None, pattern="2026_0*"):
+    """[F3 — Gemini 고배당 능력 (2026-08-01 신설)] **완전 읽기 전용**.
+
+    🔴 왜: **F2(평균 적중 수)는 배당을 보지 않는다.** Gemini 가 82배를 맞추고 시장이 1.2배를 맞춰도
+      F2 에서는 동점이다. 대표 원칙(**고배당·중배당이 기본**)을 F2 는 구조적으로 못 잰다.
+      ⇒ F2 만으로 판정하면 고배당 능력을 **재보지도 못하고** 닫힌다.
+    🔴 무엇을 재나:
+      ① 시장과 **다른 답**(Gemini top3 중 market_top3 에 없는 말)이 실제 3착 안에 든 건수
+      ② 그 건의 확정배당 분포 (시장 적중분과 나란히)
+      ③ **가상 회수율** — Gemini top3 전조합 vs 시장 top3 전조합 (구좌 동일 = 3조합)
+    ⚠ 🔴 **날짜 안전(원칙 16)**: `logs/forecast/YYYYMMDD_...` → `analysis_log/YYYY_MM_DD_...` 로
+      **날짜를 포함해** 조인한다. 경기장·경주번호만으로 맞추면 다른 날이 섞인다.
+    ⚠ 확정배당·정제 필터는 `load_races()` 와 **같은 기준**을 쓴다(비교 가능성 확보).
+    """
+    rows = []
+    for f in sorted(glob.glob(os.path.join(BASE, "logs", "forecast", "*.json"))):
+        base = os.path.basename(f)[:-5]
+        m = re.match(r"(\d{4})(\d{2})(\d{2})_(.+)$", base)
+        if not m:
+            continue
+        alog = os.path.join(BASE, "data", "analysis_log",
+                            "%s_%s_%s_%s.json" % (m.group(1), m.group(2), m.group(3), m.group(4)))
+        if not os.path.exists(alog):
+            continue
+        try:
+            fc = json.load(open(f, encoding="utf-8"))
+            d = json.load(open(alog, encoding="utf-8"))
+        except Exception:
+            continue
+        if sport not in (None, "all") and (d.get("sport") or "") != sport:
+            continue
+        gr = fc.get("grading") or {}
+        gtop = [int(x) for x in (fc.get("predicted_top3") or []) if x is not None]
+        mtop = [int(x) for x in (gr.get("market_top3") or []) if x is not None]
+        act = [int(x) for x in (gr.get("actual") or []) if x is not None]
+        if len(gtop) < 2 or len(mtop) < 2 or len(act) < 3:
+            continue
+        res = d.get("result") or {}
+        po = (res.get("payouts") or {}).get("quinella")
+        if not po or res.get("1st") is None or res.get("2nd") is None:
+            continue
+        # 정제 필터용 마감배당(load_races 와 동일 기준)
+        h = _loadh(alog.replace("analysis_log", "odds_history"))
+        dl = (h or {}).get("deadline_epoch")
+        mo = None
+        if h and dl:
+            sn = [s for s in (h.get("snapshots") or [])
+                  if s.get("t") and -8 <= (s["t"] - dl) / 60 <= 0 and s.get("quinella")]
+            if sn:
+                q = {}
+                for k, v in max(sn, key=lambda x: x["t"])["quinella"].items():
+                    try:
+                        q[tuple(sorted(int(x) for x in str(k).replace("-", "+").split("+")))] = float(v)
+                    except Exception:
+                        pass
+                mo = q.get(tuple(sorted({res["1st"], res["2nd"]})))
+        rows.append({"gtop": gtop, "mtop": mtop, "act": act, "po": float(po), "mo": mo,
+                     "sport": d.get("sport") or "?", "day": "%s_%s_%s" % m.groups()[:3],
+                     "top2": sorted({res["1st"], res["2nd"]}),
+                     "ghit": gr.get("hit_count"), "mhit": gr.get("market_hit_count")})
+    return rows
+
+
+def report_forecast(rows, label="전체"):
+    if not rows:
+        print("  %-10s n=0 — 판정 불가" % label)
+        return
+    clean = [r for r in rows if r["mo"] and CLEAN_LO <= r["po"] / r["mo"] <= CLEAN_HI]
+    print("  ⚠ 분모: 조인 %d → 정제 %d경주 (%.1f%%)  [%s]"
+          % (len(rows), len(clean), 100.0 * len(clean) / max(len(rows), 1), label))
+    # ① 시장과 다른 답 && 적중
+    diff_hit, diff_n, diff_odds = 0, 0, []
+    same_hit_odds = []
+    for r in rows:
+        uniq = [x for x in r["gtop"] if x not in r["mtop"]]      # Gemini 만 찍은 말
+        if uniq:
+            diff_n += 1
+            got = [x for x in uniq if x in r["act"]]
+            if got:
+                diff_hit += 1
+                diff_odds.append(r["po"])
+        m_uniq = [x for x in r["mtop"] if x not in r["gtop"]]    # 시장만 찍은 말
+        if m_uniq and [x for x in m_uniq if x in r["act"]]:
+            same_hit_odds.append(r["po"])
+    print("  ① 시장과 **다른 답**을 낸 경주 %d · 그중 그 말이 3착 안 = **%d건 (%.1f%%)**"
+          % (diff_n, diff_hit, 100.0 * diff_hit / max(diff_n, 1)))
+    print("     (대조) 시장만 찍은 말이 3착 안 = %d건" % len(same_hit_odds))
+
+    def dist(v, tag):
+        if not v:
+            print("     %s n=0" % tag)
+            return
+        b = collections.Counter()
+        for x in v:
+            b["2배미만" if x < 2 else "2~5배" if x < 5 else "5~10배" if x < 10
+              else "10~20배" if x < 20 else "20배+"] += 1
+        print("     %s n=%d · 중앙 %.1f배 · 평균 %.1f배 · %s"
+              % (tag, len(v), statistics.median(v), sum(v) / len(v),
+                 " · ".join("%s %d" % (k, b[k]) for k in
+                            ("2배미만", "2~5배", "5~10배", "10~20배", "20배+") if b[k])))
+    print("  ② 확정배당 분포 (⚠ 경주 단위 복승 확정배당)")
+    dist(diff_odds, "Gemini 단독 적중")
+    dist(same_hit_odds, "시장 단독 적중")
+    # ③ 열위 건 중 고배당
+    lose = [r for r in rows if r["ghit"] is not None and r["mhit"] is not None and r["ghit"] < r["mhit"]]
+    lose_hi = [r["po"] for r in lose
+               if [x for x in r["gtop"] if x not in r["mtop"] and x in r["act"]] and r["po"] >= 10]
+    print("  ③ F2 **열위** %d건 중 · 시장과 다른 답을 맞추고 확정배당 10배+ = **%d건**%s"
+          % (len(lose), len(lose_hi),
+             (" (중앙 %.1f배)" % statistics.median(lose_hi)) if lose_hi else ""))
+    # ④ 가상 회수율 (구좌 동일 = 상위3 전조합 3구좌)
+    print("  ④ 가상 회수율 (⚠ 정제 %d경주 · 상위3 전조합 = 경주당 3구좌 · 판정선 %.1f%%)"
+          % (len(clean), PAYBACK))
+    for tag, key in (("Gemini top3", "gtop"), ("시장 top3", "mtop")):
+        inv, hits = 0, []
+        for r in clean:
+            cs = _allc(r[key][:3])
+            inv += len(cs)
+            if r["top2"] in [sorted(c) for c in cs]:
+                hits.append(r["po"])
+        hits.sort(reverse=True)
+        rate = 100.0 * sum(hits) / max(inv, 1)
+        print("     %-12s 구좌 %4d · 적중 %3d · 회수율 %6.1f%% · 1제외 %6.1f%% · 3제외 %6.1f%% · 배당중앙 %5.1f배 %s"
+              % (tag, inv, len(hits), rate,
+                 100.0 * sum(hits[1:]) / max(inv, 1), 100.0 * sum(hits[3:]) / max(inv, 1),
+                 statistics.median(hits) if hits else 0,
+                 "🟢" if rate >= PAYBACK else "🔴"))
 
 
 def measure_trio(sport="horse", pattern="2026_0*"):
@@ -540,7 +713,24 @@ def main():
     ap.add_argument("--drop3", action="store_true", help="급락 폭별 3착 이내 진입률")
     ap.add_argument("--ev-sweep", dest="ev_sweep", action="store_true",
                     help="EV 임계 스윕 — 74.5%% 유지하며 적중배당 중앙 최대인 임계를 찾는다")
+    ap.add_argument("--forecast", action="store_true",
+                    help="F3 — Gemini 고배당 능력(시장과 다른 답 && 적중 · 가상 회수율)")
     a = ap.parse_args()
+    if a.forecast:
+        rows = measure_forecast(None if a.sport in ("all", "any") else a.sport, a.pattern)
+        print("=" * 110)
+        print("F3 · Gemini **고배당 능력** · %s · %s   🔴 판정선 = 환급률 %.1f%%"
+              % (a.sport, a.pattern, PAYBACK))
+        print("=" * 110)
+        print("🔴 F2(평균 적중 수)는 **배당을 보지 않는다.** 82배와 1.2배가 동점이다 — F3 가 그것을 잰다.")
+        print("⚠ 날짜 포함 조인(원칙 16) · 확정배당 기준 · 정제 필터는 measure() 와 동일.")
+        report_forecast(rows, "전체")
+        for sp in ("cycle", "horse"):
+            sub = [r for r in rows if r["sport"] == sp]
+            if sub:
+                print()
+                report_forecast(sub, sp)
+        return
     if a.ev_sweep:
         out = measure_ev_sweep(a.sport, a.pattern)
         if a.json:

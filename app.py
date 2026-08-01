@@ -18427,7 +18427,13 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
     if not q_odds:
         q_odds = _safe_num(_rp0.get("quinella")) or q_odds
     if not t_odds:
-        t_odds = _safe_num(_rp0.get("trifecta")) or t_odds
+        # 🔴 [2026-08-01 마권 혼재 정정] `trio` 가 있으면 **그것이 3連複(삼복승)** 이다.
+        #   중앙경마(netkeiba `_JRA_PAY_MAP`) 경로만 `trifecta` 에 **3連単**을 넣는다
+        #   (지방·경륜·사설은 trifecta = 삼복승). 그대로 쓰면 순서무관으로 적중 판정해놓고
+        #   더 비싼 3連単 배당으로 손익을 계산해 **pnl 이 부풀려진다**(실측 배수 중앙 4.7배·최대 18.7배).
+        #   ⚠ 실측 오염 0건이었다(경마 삼복승이 섀도우라 적중 판정이 없었다) — **예방 목적**이다.
+        #   ⚠ trio 가 없으면 종전과 완전히 동일하게 동작한다(무회귀).
+        t_odds = _safe_num(_rp0.get("trio")) or _safe_num(_rp0.get("trifecta")) or t_odds
     # [공식 확정배당 자동 충전 (2026-07-29 A-3)] 여기까지 와서도 배당이 비어 있으면 공식 소스에서 직접 가져온다.
     #   삼복승은 어떤 입력 경로에도 배당이 실려 오지 않아 적중 108건 중 103건이 '적중인데 회수 0원'으로
     #   집계되고 있었다(회수율 자체를 측정할 수 없던 근본 원인). 착순 대조 게이트를 통과한 값만 쓴다.

@@ -429,6 +429,7 @@ def check_forecast_vs_market():
     """
     d = os.path.join(BASE, "logs", "forecast")
     g, m, n = 0, 0, 0
+    win = tie = lose = 0
     if os.path.isdir(d):
         for f in os.listdir(d):
             if not f.endswith(".json"):
@@ -443,16 +444,85 @@ def check_forecast_vs_market():
             n += 1
             g += gr["hit_count"]
             m += gr["market_hit_count"]
-    denom = "채점 완료된 예측 경주(Gemini·시장 둘 다 산출된 건)"
+            if gr["hit_count"] > gr["market_hit_count"]:
+                win += 1
+            elif gr["hit_count"] == gr["market_hit_count"]:
+                tie += 1
+            else:
+                lose += 1
+    # 🔴 [2026-08-01 정정] 판정선은 **변별 표본(동률 제외) 100경주**다.
+    #   종전 코드는 **전체 채점 n**(212)으로 세어 판정선 미도달인데도 판정을 내고 있었다.
+    #   ⚠ 이건 판정선 하향이 아니라 **판정선대로 고치는 것**이다 — 오히려 더 엄격해진다.
+    #   동률은 변별력이 없다(둘 다 같은 답). 그것을 분모에 넣으면 표본이 부풀려진다.
+    decisive = win + lose
+    denom = "채점 완료 중 **변별 표본**(동률 제외) — 동률은 변별력이 없어 분모에서 뺀다"
     cur = (round(g / n, 2) if n else None)
-    note = ("Gemini 평균 %.2f ↔ 시장 평균 %.2f (n=%d)" % (g / n, m / n, n)) if n else ""
-    if n < 100:
+    note = (("Gemini 평균 %.2f ↔ 시장 평균 %.2f (채점 n=%d) · "
+             "우위 %d · 동률 %d · 열위 %d · **변별 %d**") % (g / n, m / n, n, win, tie, lose, decisive)) if n else ""
+    if decisive < 100:
         return _mk("F2", "⑤ 예측 검증", "Gemini 적중 ≥ 시장 적중", denom,
-                   current=cur, target="시장 이상", ok=None, n=n, note=note,
-                   reason="판정선 미도달(%d/100경주) — 사후에 낮추지 않는다" % n)
+                   current=cur, target="시장 이상", ok=None, n=decisive, note=note,
+                   reason="판정선 미도달(변별 %d/100경주) — 사후에 낮추지 않는다" % decisive)
     return _mk("F2", "⑤ 예측 검증", "Gemini 적중 ≥ 시장 적중", denom,
-               current=cur, target=round(m / n, 2), ok=(g >= m), n=n,
-               note=note + " · 낮으면 종결 / 비슷하면 이변 경주만 재판정 / 높으면 편입 검토")
+               current=cur, target=round(m / n, 2), ok=(g >= m), n=decisive,
+               note=note + " · 🔴 **F3 와 함께 판정한다**(F2 단독 종결 금지) — 낮으면 종결 / 비슷하면 이변 경주만 재판정 / 높으면 편입 검토")
+
+
+def check_forecast_highodds():
+    """[F3 · 2026-08-01 신설] Gemini 의 **고배당 능력** — 시장과 다른 답을 내고 맞혔는가.
+
+    🔴 왜 F2 로는 부족한가: **F2 는 배당을 보지 않는다.** Gemini 가 82배를 맞추고 시장이 1.2배를
+      맞춰도 F2 에서는 **동점**이다. 대표 원칙(고배당·중배당이 기본)을 F2 는 구조적으로 못 잰다.
+      ⇒ F2 만으로 판정하면 고배당 능력을 **재보지도 못하고** 닫힌다.
+    🔴 판정 규약: **F2 와 F3 를 나란히 본다. F2 열세여도 F3 우위면 종결하지 않는다.**
+      ⚠ 단 **F3 를 이유로 F2 판정선을 낮추지 않는다.** 두 지표가 엇갈리면 **대표 판단**을 받는다.
+    ⚠ 지표 정의: `Gemini 단독 적중` = Gemini top3 중 **시장 top3 에 없는 말**이 실제 3착 안에 든 경주.
+      시장 단독 적중(= 시장만 찍은 말이 3착 안)과 **건수·배당중앙**을 대조한다.
+    ⚠ 상세(가상 회수율·구간별 분포)는 `measure_recovery.py --forecast` 가 낸다. 여기서는 요약만이다.
+    """
+    d = os.path.join(BASE, "logs", "forecast")
+    g_hit, m_hit = [], []
+    diff_n = 0
+    if os.path.isdir(d):
+        for f in os.listdir(d):
+            if not f.endswith(".json"):
+                continue
+            try:
+                doc = json.load(open(os.path.join(d, f), encoding="utf-8"))
+            except Exception:
+                continue
+            gr = doc.get("grading") or {}
+            gtop = [x for x in (doc.get("predicted_top3") or []) if x is not None]
+            mtop = [x for x in (gr.get("market_top3") or []) if x is not None]
+            act = [x for x in (gr.get("actual") or []) if x is not None]
+            po = gr.get("payout_quinella")
+            if len(gtop) < 2 or len(mtop) < 2 or len(act) < 3:
+                continue
+            uniq = [x for x in gtop if x not in mtop]
+            if uniq:
+                diff_n += 1
+                if [x for x in uniq if x in act]:
+                    g_hit.append(po)
+            m_uniq = [x for x in mtop if x not in gtop]
+            if m_uniq and [x for x in m_uniq if x in act]:
+                m_hit.append(po)
+    denom = "시장과 다른 답을 낸 예측 경주(양쪽 top3 가 갈린 건) — 동일 답은 변별력이 없어 제외"
+
+    def _med(v):
+        vv = sorted(x for x in v if x)
+        return round(vv[len(vv) // 2], 1) if vv else None
+    gm, mm = _med(g_hit), _med(m_hit)
+    note = ("Gemini 단독 적중 %d건(배당중앙 %s) ↔ 시장 단독 적중 %d건(배당중앙 %s) · 갈린 경주 %d"
+            % (len(g_hit), gm if gm else "—", len(m_hit), mm if mm else "—", diff_n))
+    if diff_n < 100:
+        return _mk("F3", "⑤ 예측 검증", "Gemini 고배당 능력(시장과 다른 답 && 적중)", denom,
+                   current=len(g_hit), target="시장 단독 이상", ok=None, n=diff_n, note=note,
+                   reason="판정선 미도달(갈린 경주 %d/100) — 사후에 낮추지 않는다" % diff_n)
+    # 🔴 판정: 건수와 배당중앙을 **둘 다** 본다. 건수가 적어도 배당중앙이 뚜렷이 높으면 우위 후보다.
+    ok = (len(g_hit) >= len(m_hit)) or (gm is not None and mm is not None and gm >= mm * 1.5)
+    return _mk("F3", "⑤ 예측 검증", "Gemini 고배당 능력(시장과 다른 답 && 적중)", denom,
+               current=len(g_hit), target=len(m_hit), ok=ok, n=diff_n,
+               note=note + " · 🔴 F2 와 **함께** 판정한다 · 상세는 `measure_recovery.py --forecast`")
 
 
 def check_freeze_success():
@@ -919,7 +989,7 @@ def build_checklist():
              # check_snapshot_ingest(),
              check_measurable_today(),   # ⚠ I5(파일 중복)는 제거 — 중복 자체는 정상이라
              #    영원히 빨간불이 되고 그러면 무시하게 된다. → tests/run_glob_safety.py 로 이관.
-             check_forecast_discard(), check_forecast_vs_market()]
+             check_forecast_discard(), check_forecast_vs_market(), check_forecast_highodds()]
     for (i, area, name, target, denom, why) in _PENDING:
         items.append(_mk(i, area, name, denom, current=None, target=target,
                          ok=None, n=None, note="분모 근거: " + why, reason="미구현"))
