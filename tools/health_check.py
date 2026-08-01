@@ -617,7 +617,11 @@ _DAEMON_CONSTS = {"_KRA_BACKFILL_INTERVAL": 1200.0, "_PERIODIC_BACKUP_INTERVAL":
                   "iv": 21600.0, "_AMEDAS_TTL": 600.0}
 # 스탬프 파일이 있는 데몬 — 새로 붙이면 여기에 추가한다.
 _DAEMON_STAMPS = {"_kra_backfill_loop": "_kra_backfill_last.txt",
-                  "_start_periodic_backup": "_periodic_backup_last.txt"}
+                  "_start_periodic_backup": "_periodic_backup_last.txt",
+                  # 🔴 [2026-08-01] 중앙경마 착순·확정배당 수집(300초 = I3 대상).
+                  #   ⚠ run-first 구조라 `_scan_daemons`(sleep-first 탐색)에는 안 잡힌다 —
+                  #     그래서 여기 **명시 등록**한다. 안 하면 감시에서 통째로 빠진다.
+                  "_jra_result_loop": "_jra_result_last.txt"}
 
 
 def _scan_daemons():

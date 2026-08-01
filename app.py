@@ -27376,6 +27376,167 @@ def _jra_bg_loop():
             print("[JRA수집] 사이클 오류(무시·지방/경륜 무영향):", str(e)[:120])
 
 
+# ══════════ 🔴 [중앙경마 착순·확정배당 수집 (2026-08-01 신설)] ══════════
+#
+# ■ 왜
+#   중앙경마는 확정배당·착순이 **0건**이라 성적을 못 쟀다. `race/result.html` 에 둘 다 있다.
+#   ⚠ 오즈 API(`api_get_jra_odds`)에는 **착순이 없다**(data 키 = odds·official_datetime 뿐).
+#
+# ■ 🔴 스키마 매핑 — 손 대조로 검증됨(2026-08-01 삿포로 6R · 9경주 교차검증)
+#     우리 '복승' = 馬連(2두·순서무관) → payouts.quinella   [추천 [7,8] ↔ 착순 8·7 ↔ 馬連 "7 8" 570円 일치]
+#     우리 '쌍승' = 馬単               → payouts.exacta
+#     우리 '삼복승'= 3連複              → payouts.trio      (⚠ `三連複` 한자가 아니라 **`3連複`**)
+#   🔴 **`枠連` 을 절대 quinella 에 넣지 않는다.** 삿포로 6R 에서 枠連 조합이 `"7 8"` 로
+#      馬連과 **같아 보이는데 540円 vs 570円** 이다. 枠 번호는 마번이 아니다.
+#      잘못 매핑하면 값은 계속 들어오고 회수율만 조금 낮게 나와 **아무도 모른다.**
+#   ⚠ 확정배당에 **천 단위 콤마**(`"2,550円"`) — 제거 필수.
+#
+# ■ ⚠ 지키는 것
+#   · **결과 미확정이면 아무것도 쓰지 않는다**(착순 0행 = 미확정).
+#   · 이미 결과가 있으면 **덮지 않는다**.
+#   · 기존 지방·경륜 결과 백필 데몬과 **대상이 겹치지 않는다**(그쪽은 지방·경륜).
+#   · 실패해도 배당수집·지방·경륜에 **무영향**.
+JRA_RESULT_ENABLED = True
+JRA_RESULT_INTERVAL = 300        # 5분. ⚠ ≥300초라 **I3 대상** → 스탬프 파일을 남긴다
+JRA_RESULT_AFTER_MIN = 8         # 발주 + N분부터 시도
+JRA_RESULT_RETRY_MIN = (8, 15, 25)   # 미확정이면 이 시점들에 재시도
+_JRA_RESULT_URL = "https://race.netkeiba.com/race/result.html?race_id=%s"
+_JRA_RESULT_DONE = set()         # 이미 저장 완료한 race_id
+_JRA_RESULT_STAMP = os.path.join(os.path.dirname(__file__), "data", "_jra_result_last.txt")
+_JRA_PAY_MAP = {"単勝": "win", "馬連": "quinella", "馬単": "exacta",
+                "3連複": "trio", "三連複": "trio", "３連複": "trio",
+                "3連単": "trifecta", "三連単": "trifecta", "３連単": "trifecta"}
+#   ⚠ 複勝·ワイド·枠連 은 **일부러 뺐다** — 우리 마권과 다르다(위 주석 참조).
+
+
+def _jra_res_cells(tr):
+    out = [re.sub(r"<[^>]+>", " ", c) for c in re.findall(r"<t[hd][^>]*>(.*?)</t[hd]>", tr, re.S)]
+    return [re.sub(r"\s+", " ", c).strip() for c in out]
+
+
+def _jra_yen(s):
+    """`"2,550円"` → 2550. 🔴 천 단위 콤마 제거가 핵심."""
+    m = re.search(r"([\d,]+)", str(s or ""))
+    try:
+        return int(m.group(1).replace(",", "")) if m else None
+    except Exception:
+        return None
+
+
+def _jra_parse_result(html):
+    """→ {finished, order:[{rank,no,name}], top3, payouts, payouts_raw}"""
+    out = {"finished": False, "order": [], "top3": [], "payouts": {}, "payouts_raw": {}}
+    for r in re.findall(r'<tr[^>]*class="[^"]*HorseList[^"]*"[^>]*>(.*?)</tr>', html, re.S):
+        c = _jra_res_cells(r)
+        if len(c) < 4:
+            continue
+        try:
+            rank = int(re.sub(r"\D", "", c[0]) or 0)
+            no = int(re.sub(r"\D", "", c[2]) or 0)      # 0=착순 1=枠 2=마번
+        except Exception:
+            continue
+        if rank and no:
+            out["order"].append({"rank": rank, "no": no, "name": c[3]})
+    out["order"].sort(key=lambda x: x["rank"])
+    out["top3"] = [x["no"] for x in out["order"][:3]]
+    for tbl in re.findall(r'<table[^>]*class="Payout_Detail_Table"[^>]*>(.*?)</table>', html, re.S):
+        for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", tbl, re.S):
+            c = _jra_res_cells(tr)
+            if len(c) < 3:
+                continue
+            out["payouts_raw"][c[0]] = {"combo": c[1], "yen": c[2], "pop": c[3] if len(c) > 3 else ""}
+            if c[0] in _JRA_PAY_MAP:
+                v = _jra_yen(c[2].split(" ")[0])
+                if v:
+                    out["payouts"][_JRA_PAY_MAP[c[0]]] = v
+    out["finished"] = bool(out["order"]) and bool(out["payouts"])
+    return out
+
+
+def _jra_result_save(rk, parsed, race_id):
+    """기존 결과 저장 경로에 합류 — `analysis_log` 의 `result` 만 채운다. **다른 필드 무수정.**"""
+    day = time.strftime("%Y_%m_%d")
+    safe = re.sub(r"[^\w가-힣]+", "_", rk).strip("_")
+    p = os.path.join(ANALYSIS_LOG_DIR, "%s_%s.json" % (day, safe))
+    if not os.path.exists(p):
+        return False
+    d = json.load(open(p, encoding="utf-8"))
+    res = d.get("result") or {}
+    if res.get("1st"):
+        return False                                    # ⚠ 이미 있으면 덮지 않는다
+    o = parsed["order"]
+    res["1st"] = o[0]["no"] if len(o) > 0 else None
+    res["2nd"] = o[1]["no"] if len(o) > 1 else None
+    res["3rd"] = o[2]["no"] if len(o) > 2 else None
+    res["payouts"] = dict(res.get("payouts") or {}, **parsed["payouts"])
+    res["payouts_raw"] = parsed["payouts_raw"]
+    res["order_full"] = parsed["order"]
+    d["result"] = res
+    d.setdefault("jra_result_collected", []).append(
+        {"at": time.strftime("%Y-%m-%d %H:%M:%S"), "race_id": race_id, "source": "netkeiba result.html"})
+    _json_atomic(p, d, indent=1)
+    return True
+
+
+def _jra_result_once():
+    """발주 + N분 지난 중앙경마 경주의 착순·확정배당을 수집. 반환 (저장건수, 미확정건수)."""
+    saved = pending = 0
+    now = time.time()
+    for race_id in sorted(_jra_race_list(time.strftime("%Y%m%d")) or []):
+        if race_id in _JRA_RESULT_DONE:
+            continue
+        info = _jra_post_info(race_id)
+        if not info:
+            continue
+        ep, venue, rno = info
+        if not venue or not rno:
+            continue
+        mins = (now - ep) / 60.0
+        if mins < JRA_RESULT_AFTER_MIN or mins > 90:
+            continue                                    # 아직 이르거나·너무 오래된 것(백필 도구 담당)
+        try:
+            parsed = _jra_parse_result(_keirin_fetch(_JRA_RESULT_URL % race_id))
+        except Exception as e:
+            print("[JRA결과] %s 조회 실패(무시): %s" % (race_id, str(e)[:70]))
+            continue
+        if not parsed["finished"]:
+            pending += 1
+            continue                                    # 🔴 미확정 → **아무것도 쓰지 않는다**
+        rk = "%s %d경주" % (venue, rno)
+        try:
+            if _jra_result_save(rk, parsed, race_id):
+                saved += 1
+                print("[JRA결과] %s 착순 %s · 복승 %s円 · 삼복승 %s円"
+                      % (rk, parsed["top3"], parsed["payouts"].get("quinella"),
+                         parsed["payouts"].get("trio")))
+            _JRA_RESULT_DONE.add(race_id)
+        except Exception as e:
+            print("[JRA결과] %s 저장 실패(무시): %s" % (rk, str(e)[:70]))
+    return saved, pending
+
+
+def _jra_result_loop():
+    """🔴 [2026-08-01] **sleep-first 로 만들지 않는다**(권대표 지시).
+    오늘 서버가 3번 죽었다 — sleep-first 면 재기동할 때마다 **5분 공백**이 생긴다.
+    ⇒ **먼저 1회 돌고** 그 다음 쉰다. 대신 기동 직후 몰림을 막기 위해 짧게(20초)만 지연한다.
+    ⚠ 주기가 300초(≥5분)라 **I3 대상**이다 — 매 사이클 스탬프 파일을 남긴다."""
+    time.sleep(20)                                       # 기동 직후 몰림만 피한다(sleep-first 아님)
+    while True:
+        if JRA_RESULT_ENABLED:
+            try:
+                s, p = _jra_result_once()
+                if s or p:
+                    print("[JRA결과] %d경주 저장 · %d경주 미확정(재시도 대기)" % (s, p))
+                try:
+                    os.makedirs(os.path.dirname(_JRA_RESULT_STAMP), exist_ok=True)
+                    open(_JRA_RESULT_STAMP, "w", encoding="utf-8").write(str(int(time.time())))
+                except Exception:
+                    pass                                 # 스탬프 실패는 수집을 막지 않는다
+            except Exception as e:
+                print("[JRA결과] 사이클 오류(무시·다른 수집 무영향):", str(e)[:120])
+        time.sleep(JRA_RESULT_INTERVAL)
+
+
 # ════════════ [중앙경마(JRA) 전적] netkeiba 馬柱(shutuba_past) 서버 fetch·파싱 ════════════
 # 중앙경마는 keiba.go.jp(지방 전용)에 없고 JRA 공식은 POST세션이라 스크래핑 난해 → netkeiba 馬柱
 # 페이지(서버렌더 HTML)를 소스로 사용. 한 페이지에 마번·기수·부담중량 + 과거5주(착순·거리·통과순위
@@ -33513,6 +33674,15 @@ def _start_multi_race_bg():
                      "🔬관찰모드(추천 미반영)" if JRA_OBSERVE_ONLY else "정식"))
     except Exception as e:
         print("[JRA수집] 백그라운드 시작 실패(중앙만 미수집·나머지 무영향):", e)
+    # 🔴 [2026-08-01] 중앙경마 **착순·확정배당** 수집 — 또 별도 스레드(배당 수집과도 분리).
+    #   ⚠ 배당 수집이 죽어도 결과 수집은 살아 있어야 한다(성적 측정이 끊기면 안 된다).
+    try:
+        if JRA_RESULT_ENABLED:
+            threading.Thread(target=_jra_result_loop, daemon=True, name="jra-result-bg").start()
+            print("[JRA결과] 착순·확정배당 수집 시작(%d초 · 발주+%d분 · 재시도 %s분 · run-first)"
+                  % (JRA_RESULT_INTERVAL, JRA_RESULT_AFTER_MIN, list(JRA_RESULT_RETRY_MIN)))
+    except Exception as e:
+        print("[JRA결과] 시작 실패(결과만 미수집·나머지 무영향):", e)
 
 
 def _startup_date_reset():
