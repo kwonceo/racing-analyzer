@@ -22579,9 +22579,49 @@ _ODDSPARK_HEADERS = {
 }
 
 
-def _keirin_fetch(url):
+# 🔴🔴 [2026-08-02] netkeiba **IP 차단 확정**(대표가 브라우저로 확인 · HTTP 400).
+#   서버가 계속 두드리면 차단이 길어지거나 영구화된다 ⇒ **전면 중단**.
+#   🟢 netkeiba 호출은 **전부 이 함수 하나를 지난다**(배당 27376 · 발주시각 27354 ·
+#      결과 27632 · 스케줄 27710 · 馬柱 27961) — 그래서 여기 한 곳만 막으면 된다.
+#   ⚠ oddspark(경륜)·keiba.go.jp(지방)·한국은 **URL 이 달라 무영향**이다.
+#   🔴 **자동 재개하지 않는다.** 재개는 요청 간격·상한을 넣고 **사람이 판단해서** 켠다.
+#   🔧 되돌리기: 이 값을 True 로 바꾸는 것 하나. 코드는 지우지 않았다.
+NETKEIBA_ENABLED = False
+_NETKEIBA_BLOCKED_N = 0
+try:                                   # ⚠ 없어도 서버가 죽지 않는다(격리)
+    import netkeiba_guard
+except Exception as _nge:
+    netkeiba_guard = None
+    print("[netkeiba] 요청제한 모듈 로드 실패(무시):", str(_nge)[:80])
+
+
+def _keirin_fetch(url, mode="live"):
+    """공용 fetch. ⚠ oddspark(경륜)·keiba.go.jp(지방)는 **종전과 완전히 동일**하게 지난다.
+
+    🔴 netkeiba 만 ① 전면 스위치 ② 요청 제한(`netkeiba_guard`)을 통과해야 나간다.
+    """
+    global _NETKEIBA_BLOCKED_N
+    _nk = "netkeiba.com" in (url or "")
+    if _nk and not NETKEIBA_ENABLED:
+        _NETKEIBA_BLOCKED_N += 1
+        if _NETKEIBA_BLOCKED_N <= 5 or _NETKEIBA_BLOCKED_N % 200 == 0:
+            print("[netkeiba 차단] 요청 안 함(%d회째) · IP 차단 대응 · %s"
+                  % (_NETKEIBA_BLOCKED_N, (url or "")[:70]))
+        raise RuntimeError("netkeiba 요청 중단(NETKEIBA_ENABLED=False · IP 차단 대응)")
+    if _nk and netkeiba_guard is not None:
+        _ok, _why = netkeiba_guard.allow(mode)
+        if not _ok:
+            raise RuntimeError("netkeiba 요청 제한: %s" % _why)
     req = Request(url, headers=dict(_ODDSPARK_HEADERS))
-    return urlopen(req, timeout=15).read().decode("utf-8", "ignore")
+    try:
+        _r = urlopen(req, timeout=15).read().decode("utf-8", "ignore")
+    except Exception as _e:
+        if _nk and netkeiba_guard is not None:
+            netkeiba_guard.record(False, getattr(_e, "code", None))
+        raise
+    if _nk and netkeiba_guard is not None:
+        netkeiba_guard.record(True)
+    return _r
 
 
 @app.route("/api/keirin/card", methods=["POST"])
@@ -27305,7 +27345,9 @@ def bmed_view(key):
 #   · 실패는 전 구간 격리 — 지방·경륜 수집에 **무영향**. 별도 스레드라 기존 사이클을 밀지 않는다.
 #
 # 🔧 되돌리기: `JRA_COLLECT_ENABLED = False` 한 줄. 코드는 지우지 않는다.
-JRA_COLLECT_ENABLED = True      # 서버 직접수집 on/off
+JRA_COLLECT_ENABLED = False     # 🔴 [2026-08-02] netkeiba IP 차단 대응 — 루프 자체를 돌리지 않는다
+#   ⚠ 이것만으로는 결과·스케줄·馬柱 경로가 안 막힌다 → `NETKEIBA_ENABLED=False`(_keirin_fetch)가 본체다.
+#   🔧 재개 시 **둘 다** True 로 돌려야 한다.
 JRA_OBSERVE_ONLY = True         # 🔴 첫날 관찰 모드 — 저장만 하고 추천 반영 금지
 JRA_COLLECT_INTERVAL = 60       # 초. 실측 갱신주기 55~60초 → 평시 30초는 낭비다
 # 🔴 [2026-08-01 승인] 마감 임박 단축 — T-3 이내에는 25초로 좁힌다.

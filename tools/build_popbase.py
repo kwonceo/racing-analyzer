@@ -47,11 +47,39 @@ _TD = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
 _RESULT_TABLE = re.compile(r'<table[^>]*id="All_Result_Table"[^>]*>(.*?)</table>', re.S)
 
 
+# 🔴 [2026-08-02] 소급 수집은 **가장 느리게** 나간다 — 이 도구가 IP 차단을 불렀다.
+#   실측: 588건 / 132.5초 = **4.4 req/s**. 그 직후 netkeiba 가 전 서브도메인 400 으로 막았다.
+#   ⇒ `mode="backfill"`(최소 간격 4초)로 강제한다. **간격을 못 지키면 기다린다**(요청을 버리지 않는다).
+sys.path.insert(0, BASE)
+try:
+    import netkeiba_guard
+except Exception:
+    netkeiba_guard = None
+
+
 def fetch(url, timeout=15):
-    r = urllib.request.urlopen(urllib.request.Request(url, headers=H), timeout=timeout)
-    ct = r.headers.get("Content-Type", "")
-    m = re.search(r"charset=([\w\-]+)", ct, re.I)
-    return r.read().decode(m.group(1) if m else "utf-8", "replace")
+    if netkeiba_guard is not None and "netkeiba.com" in url:
+        for _ in range(600):                        # 최대 10분 대기 후 포기(무한 대기 금지)
+            ok, why = netkeiba_guard.allow("backfill")
+            if ok:
+                break
+            if "중단됨" in why or "상한" in why:
+                raise RuntimeError("netkeiba 요청 제한: %s" % why)
+            time.sleep(1.0)
+        else:
+            raise RuntimeError("netkeiba 요청 제한: 대기 초과")
+    try:
+        r = urllib.request.urlopen(urllib.request.Request(url, headers=H), timeout=timeout)
+        ct = r.headers.get("Content-Type", "")
+        m = re.search(r"charset=([\w\-]+)", ct, re.I)
+        out = r.read().decode(m.group(1) if m else "utf-8", "replace")
+    except Exception as e:
+        if netkeiba_guard is not None and "netkeiba.com" in url:
+            netkeiba_guard.record(False, getattr(e, "code", None))
+        raise
+    if netkeiba_guard is not None and "netkeiba.com" in url:
+        netkeiba_guard.record(True)
+    return out
 
 
 def _txt(h):
