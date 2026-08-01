@@ -372,6 +372,26 @@
   }
 
   const pureInt = (s) => (/^\d{1,2}$/.test((s || '').trim()) ? parseInt(s, 10) : null);
+
+  // 🔴🔴 [2026-08-01 실사고 · 승인 B] 한 칸에 숫자가 **둘 이상**이면 **큰 값**(馬連=복승)을 쓴다.
+  //   실사고: 삿포로 9R 배당판 `2+5` 칸에 큰 값 **19.3** 과 작은 값 **2.4** 가 함께 표시됐는데
+  //           `toNum()` 이 **첫 숫자**만 잡아 **2.4** 를 넣었다(netkeiba 馬連 실제 = 19.7).
+  //   피해: private↔oddspark 75경주 대조 시 오차 중앙 **24.1%** · **30% 초과 44.0%**.
+  //         🔴 그 틀린 값이 대표의 조합 선택까지 바꿨다(2.4배로 보여 후보에서 제외).
+  //   ⚠ 작은 값은 다른 식(ワイド 등)이거나 보조 표기다. **복승 매트릭스에서는 큰 값이 정답**이다.
+  //   ⚠ 숫자가 하나면 종전과 완전히 동일하게 동작한다(무회귀).
+  //   🔧 되돌리기: 호출부의 `cellOdds(oc)` 를 `toNum(oc.textContent)` 로 되돌리면 된다.
+  const cellOdds = (td) => {
+    const t = String((td && td.textContent) || '').replace(/,/g, '');
+    const ms = t.match(/\d+(?:\.\d+)?/g);
+    if (!ms || !ms.length) return null;
+    const nums = ms.map(parseFloat).filter((v) => Number.isFinite(v) && v >= 1.0);
+    if (!nums.length) return null;
+    if (nums.length > 1) {
+      try { console.log('[셀 다중값] "' + t.trim().slice(0, 24) + '" → 큰 값 ' + Math.max(...nums) + ' 사용'); } catch (_) { /* */ }
+    }
+    return Math.max(...nums);
+  };
   // [신규 미러 사이트 대응] 열 머리글이 '1.' 처럼 점이 붙은 경우까지 마번으로 인식(헤더 전용).
   const hdrInt = (s) => { const m = /^(\d{1,2})\.?$/.exec((s || '').trim()); return m ? parseInt(m[1], 10) : null; };
 
@@ -410,15 +430,43 @@
     //   그 마번을 '취소 컬럼'으로 판정해 열 축(headerNos·colNoByIndex)에서 제거한다.
     //   제거하지 않으면 아래 순서기반 매핑(cols[i])이 취소 컬럼 수만큼 밀려 이후 조합 마번이 전부
     //   어긋난다(예: 3번 취소 시 4-5 배당이 3-4 로 밀려 저장 → 취소마·유령조합 추천). 취소 없으면 무영향.
+    //
+    // 🔴🔴 [2026-08-01 실사고 · 승인 A] **"행 배당셀 0개 = 취소마"는 틀렸다.**
+    //   삿포로 9R(발주 14:20) 실사고: 1착 **7번**과 3착 **1번**이 우리 데이터에서 통째로 사라졌다.
+    //   원인 — 이 표는 **삼각 매트릭스**다. 마지막 마번의 행은 **원래 배당셀이 0개**다
+    //          (7번은 열로만 등장하고 행에는 값이 없다). 그것을 취소마로 오판해 축에서 지웠다.
+    //   피해 실측: 착순 있는 943경주 중 **45건(4.8%)** 에서 "우리가 없다고 본 마번"이 3착 안에 들어왔다.
+    //             마감으로 갈수록 마번이 줄어드는 경주 **22건**(카와사키 7R 11두→5두 등).
+    //   ⚠ 진짜 취소마는 **행에서도 열에서도** 배당이 없다. ⇒ **열 방향까지 확인**해야 한다.
+    //   🔧 되돌리기: 아래 `colHasOdds` 조건을 빼면 종전 동작(행만 보고 판정)으로 돌아간다.
     if (headerNos.length >= 2) {
       const scratchedCols = new Set();
       const hset = new Set(headerNos);
+      // ① 먼저 "열 방향에 배당이 하나라도 있는 마번" 집합을 만든다(삼각 매트릭스 방어).
+      const colHasOdds = new Set();
+      for (const r of rows) {
+        if (r === headerRow) continue;
+        let rn0 = null;
+        for (const cell of r.cells) { const n = pureInt(cell.textContent); if (n != null) { rn0 = n; break; } }
+        const ocs = [...r.cells].filter(isOdds);
+        if (!ocs.length || rn0 == null) continue;
+        const all0 = headerNos.filter((n) => n !== rn0);
+        const up0 = headerNos.filter((n) => n > rn0);
+        const lo0 = headerNos.filter((n) => n < rn0);
+        let cs = null;
+        if (ocs.length === all0.length) cs = all0;
+        else if (ocs.length === up0.length) cs = up0;
+        else if (ocs.length === lo0.length) cs = lo0;
+        if (cs) cs.forEach((n) => colHasOdds.add(n));
+        else for (const oc of ocs) { const cn = colNoByIndex[oc.cellIndex]; if (cn != null) colHasOdds.add(cn); }
+      }
       for (const r of rows) {
         if (r === headerRow) continue;
         let rn = null;
         for (const cell of r.cells) { const n = pureInt(cell.textContent); if (n != null) { rn = n; break; } }
         if (rn == null || !hset.has(rn)) continue;
-        if ([...r.cells].filter(isOdds).length === 0) scratchedCols.add(rn); // 배당셀 전무 = 취소마 행
+        // 🔴 행에도 없고 **열에도 없어야** 진짜 취소마다. 행만 비면 삼각 매트릭스의 정상 행이다.
+        if ([...r.cells].filter(isOdds).length === 0 && !colHasOdds.has(rn)) scratchedCols.add(rn);
       }
       if (scratchedCols.size) {
         headerNos = headerNos.filter((n) => !scratchedCols.has(n));
@@ -451,13 +499,13 @@
         else if (oddsCells.length === lower.length) cols = lower;
         if (cols) {
           oddsCells.forEach((oc, i) => {
-            const colNo = cols[i]; const val = toNum(oc.textContent);
+            const colNo = cols[i]; const val = cellOdds(oc);
             if (colNo != null && colNo !== rowNo && val != null && val >= 1.0) pairs.push({ a: rowNo, b: colNo, odds: val });
           });
         } else {
           // 폴백: 빈칸 placeholder가 위치를 유지하는 구조 → cellIndex 정렬
           for (const oc of oddsCells) {
-            const colNo = colNoByIndex[oc.cellIndex]; const val = toNum(oc.textContent);
+            const colNo = colNoByIndex[oc.cellIndex]; const val = cellOdds(oc);
             if (colNo != null && colNo !== rowNo && val != null && val >= 1.0) pairs.push({ a: rowNo, b: colNo, odds: val });
           }
         }
@@ -506,7 +554,21 @@
     }
     const horses = Object.values(singleMap).sort((a, b) => a.no - b.no)
       .map((s) => ({ no: s.no, name: '', win: s.win, place: s.place || null }));
-    return { horses, quinella: { pairs: list, matrix } };
+    // 🔴 [2026-08-01 · 승인 C] **헤더 기준 두수**를 함께 실어 보낸다.
+    //   왜: 서버가 지금까지 `raceHorseCount` 를 **조합에서 역산**했다. 조합이 빠지면 두수도 같이 줄어
+    //       "5두 경주"로 판정되고, 그러면 조합 생성이 절반으로 줄어든다(7두 21조합 → 5두 10조합).
+    //   실측: 착순 있는 943경주 중 **45건(4.8%)** 에서 우리가 없다고 본 마번이 3착 안에 들어왔다.
+    //   ⇒ **역산하지 말고 헤더에서 직접 읽은 값**을 근거로 남긴다.
+    //   ⚠ 서버가 이 필드를 아직 안 쓰더라도 **무해**하다(모르는 필드는 무시된다). 배선은 별도.
+    const axis = new Set();
+    for (const { a, b } of list) { axis.add(a); axis.add(b); }
+    for (const h of horses) axis.add(h.no);
+    return {
+      horses,
+      quinella: { pairs: list, matrix },
+      headerCount: axis.size,                       // 조합·단승에 등장한 실제 마번 수
+      headerNos: [...axis].sort((x, y) => x - y),   // 그 마번 목록(서버 대조용)
+    };
   }
 
   // [3번] 추출 결과 검증: 마번 1~16 · 배당 ≥1.0 · 최소 3조합
@@ -526,8 +588,10 @@
   function buildPayload(overrideRaceKey) {
     const site = detectSite();
     let horses, quinella;
-    if (site === 'asyukk') ({ horses, quinella } = extractByMatrix('odds_content'));
-    else if (site === 'generic') ({ horses, quinella } = extractByMatrix(null));
+    // 🔴 [2026-08-01 · 승인 C] `headerCount`·`headerNos` 도 받아 payload 에 싣는다(버리지 않는다).
+    let headerCount = null, headerNos = null;
+    if (site === 'asyukk') ({ horses, quinella, headerCount, headerNos } = extractByMatrix('odds_content'));
+    else if (site === 'generic') ({ horses, quinella, headerCount, headerNos } = extractByMatrix(null));
     else { horses = extractHorses(); quinella = extractQuinella(); }
 
     // asyukk/generic 에서 아무것도 못 찾으면 keiba식 폴백도 시도
@@ -565,6 +629,10 @@
       // 확장 필드 (참고용)
       horses, // [{no,name,win,place}]
       quinella, // {pairs:[{a,b,odds}], matrix:{a:{b:odds}}}
+      // 🔴 [2026-08-01 · 승인 C] 헤더 기준 두수·마번 목록. 서버가 조합에서 **역산하지 않게** 근거를 넘긴다.
+      //   ⚠ keiba 경로(matrix 파서를 안 타는 사이트)에서는 null 이다 — 그때는 서버가 종전대로 역산한다.
+      headerCount, // 숫자 또는 null
+      headerNos,   // [마번…] 또는 null
       capturedAt: new Date().toISOString(),
       source: location.href,
     };
