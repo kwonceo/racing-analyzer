@@ -120,14 +120,36 @@
 
   // ---------- [전날 경주 목록 + 스크린샷] 🗓 날짜별 경주 기록 ----------
   let _dayRacesInit = false;
-  function initDayRaces() {
+  // [로컬 날짜] toISOString()은 UTC 라 한국시간 09시 이전엔 하루 밀린다. 로컬 기준으로 만든다.
+  function _ymdLocal(d) {
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }
+  // 🔴 [2026-08-01] 기본 날짜를 **"오늘 데이터가 있으면 오늘, 없으면 어제"** 로.
+  //   종전: `d.setDate(d.getDate() - 1)` 로 **항상 어제** 고정 → 오늘 경주가 130건 들어와 있어도
+  //   화면을 열면 어제가 떠서 "오늘이 안 보인다"로 보였다(실측: 08-01 count=10 인데 화면엔 07-31).
+  //   ⚠ 서버 무변경 · 사용자가 날짜를 고른 뒤에는 그 값을 그대로 둔다(초기 기본값만 바꾼다).
+  async function _defaultDayRacesDate() {
+    const today = _ymdLocal(new Date());
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    const yest = _ymdLocal(y);
+    try {
+      const r = await fetch('/api/day/races?date=' + today.replace(/-/g, ''));
+      const j = await r.json();
+      if ((j && j.count) > 0) return today;               // 오늘 데이터가 있으면 오늘
+    } catch (_) { /* 조회 실패는 무시 — 아래 어제 폴백 */ }
+    return yest;                                          // 없거나 실패하면 종전대로 어제
+  }
+  async function initDayRaces() {
+    // ⚠ async 로 바뀌면서 `await` 뒤에 가드를 두면 탭을 빠르게 두 번 눌렀을 때
+    //   두 호출이 모두 통과해 **리스너가 중복 등록**된다. 가드는 **동기 구간에서** 잠근다.
+    const first = !_dayRacesInit;
+    _dayRacesInit = true;
     const dateEl = $('#dayRacesDate');
     if (dateEl && !dateEl.value) {
-      const d = new Date(); d.setDate(d.getDate() - 1);   // 기본: 어제
-      dateEl.value = d.toISOString().slice(0, 10);
+      dateEl.value = await _defaultDayRacesDate();
     }
-    if (_dayRacesInit) return;
-    _dayRacesInit = true;
+    if (!first) return;
     const btn = $('#dayRacesLoad');
     if (btn) btn.addEventListener('click', loadDayRaces);
     loadDayRaces();
