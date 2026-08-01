@@ -401,7 +401,11 @@
  "result": {
   "1st": 2,
   "2nd": 8,
-  "3rd": 5
+  "3rd": 5,
+  "payouts": {
+   "quinella": 7.3,
+   "trifecta": 19.6
+  }
  },
  "hit": {
   "was_hit": false,
@@ -444,5 +448,12 @@
   }
  },
  "profit": null,
- "review": null
+ "review": null,
+ "payouts_backfilled": [
+  {
+   "at": "2026-08-01 15:41:18",
+   "by": "backfill_payouts.py",
+   "source": "keiba.go.jp RaceMarkTable"
+  }
+ ]
 }
