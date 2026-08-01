@@ -1,0 +1,336 @@
+{
+ "predicted_top3": [
+  3,
+  7,
+  5
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  3
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 간 경쟁 속 3번의 우세. 7번은 꾸준한 추입력, 5번은 최근 기세.",
+ "key_factors": [
+  "선행형 두 명(3, 6)의 내부 경쟁 가능성",
+  "7번 浅井 康太의 꾸준한 상위권 전적과 '자재' 각질의 유연성",
+  "5번 土屋 壮登의 최근 1착 기록 및 선전",
+  "경주 해설에서 7번 浅井 康太를 본명으로 지목"
+ ],
+ "exception_note": "선행형 3번(小堀 敢太)과 6번(中嶋 宣成)이 같은 라인에 위치하지는 않으나, 전체적으로 추입형이 다수인 경주에서 두 선행마의 전개 싸움이 변수가 될 수 있다. 특히 3번 小堀 敢太의 최근 우승 이력이 돋보여, 선행 싸움에서 우위를 점할 경우 유리한 고지를 차지할 것으로 예상된다. 7번 浅井 康太는 '자재' 각질로 전개에 유연하게 대처할 수 있으며, 초반 전개 싸움에 이은 후미 추입 찬스를 노릴 것으로 보인다. 경주 해설에서 7번 浅井 康太를 본명으로 지목한 점도 고려할 때, 선행형들의 경쟁이 치열해지면 7번에게 기회가 올 수 있다. 5번 土屋 壮登은 7/30 예선에서 1착을 기록하며 좋은 컨디션을 보였고, 다른 추입형들과의 경쟁에서 우위를 점할 가능성이 있다. 1번 志智 俊夫 역시 꾸준히 상위권에 드는 기록을 보이지만, 7번과 같은 '추입' 각질로 전개 의존도가 높아 보인다.",
+ "applied_rules": [],
+ "raceKey": "야히코 11경주",
+ "forecastAt": "2026-07-31 19:54:41",
+ "forecastEpoch": 1785495281.5188534,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 11경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 2.4,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 26.5,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T19:40:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 7,
+    "name": "浅井 康太",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 ３着 11.5",
+    "prev1": "高 知Ｇ２ 7/17 一予選 ３着 14.3 7/18 二予Ｂ ６着 14 7/19 特 選 ４着 13.5 7/20 特 選 ５着 13.7",
+    "prev2": "豊 橋Ｆ１ 7/ 5 初特選 １着 11.3 7/ 6 準決勝 ４着 11.9 7/ 7 特 選 ６着 12",
+    "chaku": [
+     8,
+     1,
+     8,
+     16
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "志智 俊夫",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/30 初特選 ４着 11.4",
+    "prev1": "富 山Ｆ１ 7/21 初特選 １着 9.6 7/22 準決勝 １着 9.7 7/23 決 勝 ５着 10.1",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 １着 10 7/11 準決勝 ４着 9.8 7/12 特 秀 ９着 9.1",
+    "chaku": [
+     6,
+     7,
+     2,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "磯田 旭",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ２着 11.2",
+    "prev1": "青 森Ｆ１ 7/23 予 選 失",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 落",
+    "chaku": [
+     2,
+     2,
+     4,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "内藤 宣彦",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 ６着 11.7",
+    "prev1": "豊 橋Ｆ１ 7/ 5 初特選 ４着 11.7 7/ 6 準決勝 ２着 12 7/ 7 決 勝 ６着 11.6",
+    "prev2": "取 手Ｇ３ 6/27 一予選 ５着 11.3 6/28 二予選 １着 11.4 6/29 準決勝 落",
+    "chaku": [
+     2,
+     1,
+     4,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "小堀 敢太",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 １着 11.6",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ３着 10 7/23 準決勝 １着 9.6 7/24 決 勝 ９着 10.3",
+    "prev2": "伊 東Ｆ１ 6/13 予 選 １着 10.2 6/14 準決勝 １着 9.6 6/15 決 勝 １着 9.7",
+    "chaku": [
+     6,
+     1,
+     3,
+     7
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "土屋 壮登",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 １着 11.1",
+    "prev1": "大 垣Ｆ１ 7/ 8 予 選 ４着 11.5 7/ 9 選 抜 ５着 11.1 7/10 一 般 １着 12.1",
+    "prev2": "宇都宮Ｇ３ 5/30 一予選 ４着 14 5/31 二予選 落",
+    "chaku": [
+     3,
+     7,
+     1,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "中嶋 宣成",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/30 予 選 ２着 11.3",
+    "prev1": "富 山Ｆ１ 7/21 予 選 １着 9.7 7/22 準決勝 ７着 10.3 7/23 特 選 ７着 10.5",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ８着 10.1 7/11 選 抜 ７着 9.9 7/12 選 抜 １着 10.2",
+    "chaku": [
+     8,
+     3,
+     2,
+     16
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    3,
+    6
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    7,
+    1,
+    2,
+    4,
+    5
+   ]
+  },
+  "lines": [
+   3,
+   4,
+   7,
+   1,
+   6,
+   2,
+   5
+  ],
+  "paceLabel": null,
+  "comment": "初日３着の浅井はもうひと伸び欲しかったところだが、道中の動きはまずまず。実績上位の走りに期待して本命に。初日同様に志智がマーク。対するのは北日本勢。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   7,
+   1,
+   3
+  ],
+  "hit_count": 2,
+  "hit": [
+   3,
+   7
+  ],
+  "missed": [
+   1
+  ],
+  "missed_info": [
+   {
+    "no": 1,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   7,
+   3,
+   1
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 20:17:38"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "1번 志智 俊夫의 최근 우승 이력과 전개 의존도가 높다는 판단이 잘못되었다. 7번 浅井 康太와 같은 추입형이지만, 7번을 본명으로 지목한 해설에 너무 의존하여 1번의 잠재력을 간과했다.",
+  "new_rule": "추입형 선수가 주력으로 언급된 경주에서, 같은 추입형이지만 다른 라인에 속한 선수의 직전 경주 성적과 각질 특성을 더 면밀히 비교하여 순위 가능성을 평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 20:17:40"
+ },
+ "reviewed": true
+}

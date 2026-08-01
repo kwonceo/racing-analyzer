@@ -1,0 +1,319 @@
+{
+ "predicted_top3": [
+  2,
+  1,
+  3
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 2번의 독주와 추입형들의 치열한 후착 경쟁. 1, 3번의 연대가 예상된다.",
+ "key_factors": [
+  "2번 중무삼사로의 선행 독주 가능성",
+  "1번 타니모토 케이신의 라인 전개 이점",
+  "3번 토후시 야스오의 어시스트 능력"
+ ],
+ "exception_note": "이 경주는 7두 경주로 선행형이 2번 하나뿐이다. 따라서 2번의 독주가 유력하며, 나머지 추입형들의 경쟁이 치열할 것으로 예상된다. 특히 1번과 3번이 같은 라인에 포함되어 있어 서로 어시스트하며 순위를 노릴 가능성이 높다. 1번 타니모토 케이신이 B급 중 가장 좋은 성적을 보였고, 3번 토후시 야스오도 준수한 착순 분포를 보인다. 2번이 선두를 유지하며 버티고, 그 뒤를 1번과 3번이 추격하는 그림이 예상된다.",
+ "applied_rules": [],
+ "raceKey": "코치 3경주",
+ "forecastAt": "2026-07-31 21:19:17",
+ "forecastEpoch": 1785500357.901068,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "코치 3경주",
+  "wind": {
+   "venue": "코치",
+   "풍속": 0.5,
+   "풍향": "동",
+   "풍향코드": 4,
+   "기온": 28.0,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T21:10:00+09:00",
+   "지점": "南国日章",
+   "지점거리km": 5.26
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "谷元 奎心",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小 倉Ｆ２ 7/24 特予選 ２着 11.7 7/25 準決勝 ５着 11.7 7/26 特 選 ３着 11.9",
+    "prev2": "松 阪Ｆ１ 7/16 予 選 ４着 11.3 7/17 準決勝 ４着 11.6 7/18 特 選 ７着 11.6",
+    "chaku": [
+     5,
+     2,
+     3,
+     11
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "戸伏 康夫",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ３着 11.7 7/23 準決勝 ３着 11.5 7/24 特 選 ７着 12",
+    "prev2": "奈 良Ｆ２ 7/16 特予選 ６着 10.5 7/17 特一般 ３着 10.3 7/18 特一般 ２着 10",
+    "chaku": [
+     1,
+     2,
+     4,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "中武三四郎",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "和歌山Ｆ２ 7/24 特予選 ３着 12.3 7/25 準決勝 １着 11.5 7/26 決 勝 ７着 12.2",
+    "prev2": "名古屋Ｆ２ 7/10 予 選 ５着 11.9 7/11 一 般 ３着 12.4 7/12 一 般 ２着 11.8",
+    "chaku": [
+     3,
+     6,
+     5,
+     13
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "有馬 雄二",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "京王閣Ｆ２ 7/19 特予選 ６着 12.1 7/20 特一般 ７着 11.4 7/21 特一般 ６着 11.3",
+    "prev2": "名古屋Ｆ２ 7/10 予 選 ７着 12.6 7/11 一 般 ２着 12.2 7/12 一 般 ６着 11.7",
+    "chaku": [
+     1,
+     3,
+     2,
+     20
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "三浦 靖",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 阪Ｆ２ 7/21 特予選 ６着 12.3 7/22 特一般 ７着 12.9 7/23 特一般 ７着",
+    "prev2": "奈 良Ｆ２ 7/ 1 特予選 ７着 9.7 7/ 2 特一般 ５着 9.7 7/ 3 特一般 落",
+    "chaku": [
+     0,
+     1,
+     2,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "片山 直人",
+    "gait": "자재(양각)",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "伊 東Ｆ２ 7/22 予 選 ７着 10.1 7/23 一 般 ６着 10.4 7/24 一 般 ６着 9.6",
+    "prev2": "広 島Ｆ２ 7/13 予 選 ７着 11.7 7/14 一 般 ７着 12 7/15 一 般 ７着 11.8",
+    "chaku": [
+     0,
+     0,
+     0,
+     22
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "穴井 利久",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "弥 彦Ｆ２ 7/17 特予選 ７着 12 7/18 特一般 ６着 12.1 7/19 特一般 ３着 12.1",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 ５着 10.1 7/ 8 一 般 ７着 11 7/ 9 一 般 ７着 10.4",
+    "chaku": [
+     1,
+     0,
+     6,
+     17
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    2
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    1,
+    3,
+    4,
+    5,
+    7
+   ]
+  },
+  "lines": [
+   2,
+   4,
+   5,
+   1,
+   3,
+   6,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "戸伏のアシスト受けて谷元が好機に攻めて。中武ペースに持込めば有馬ー三浦で上位へ。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   3,
+   2
+  ],
+  "hit_count": 3,
+  "hit": [
+   2,
+   1,
+   3
+  ],
+  "missed": [],
+  "missed_info": [],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   2,
+   3
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 22:04:20"
+ },
+ "graded": true,
+ "reviewed": true,
+ "review": {
+  "miss_reason": "해당 없음(전부 적중)",
+  "new_rule": "없음",
+  "rule_confidence": 1,
+  "reviewedAt": "2026-07-31 22:04:20"
+ }
+}

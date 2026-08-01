@@ -20,7 +20,12 @@ mkdir -p .git/hooks
 date "+%Y-%m-%d %H:%M:%S" > .git/hooks/.precommit_ran
 
 echo "════════ 커밋 게이트: python tests/run_precommit.py ════════"
-python tests/run_precommit.py
+# 🔴 [2026-08-01] PYTHONIOENCODING 필수 — 없으면 게이트가 **코드와 무관하게** 죽는다.
+#   실사고: 훅 콘솔이 cp949 라 `run_precommit.py` 가 이모지(🔴)를 출력하는 순간
+#   `UnicodeEncodeError` 로 종료 → rc≠0 → **테스트는 전부 통과했는데 커밋이 막혔다.**
+#   ⚠ 이건 "게이트가 일한 것"이 아니라 **게이트 자체의 고장**이다. 둘을 혼동하면
+#     진짜 실패를 인코딩 문제로 오해해 `--no-verify` 로 넘기게 된다.
+PYTHONIOENCODING=utf-8 python tests/run_precommit.py
 RC=$?
 if [ $RC -ne 0 ]; then
   echo ""

@@ -1,0 +1,334 @@
+{
+ "predicted_top3": [
+  3,
+  5,
+  2
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  3
+ ],
+ "confidence": 4,
+ "reason_short": "3번의 선행 주도와 5번의 마크, 2번의 추입력 고려",
+ "key_factors": [
+  "3번의 압도적인 최근 성적 (예선 5연승)",
+  "7두 경주에 선행형이 3번 한 명뿐이라는 점",
+  "2번과 5번의 추입/자재형 각질로 3번 후미 추격 예상"
+ ],
+ "exception_note": "7두 경주에 선행형은 3번 한 명뿐이며, 다른 선행 선수는 '젖히기형'으로 선행 경쟁은 없을 것으로 예상됨. 3번이 초반부터 주도권을 잡고 안정적인 레이스를 펼칠 가능성이 높음.",
+ "applied_rules": [],
+ "raceKey": "사세보 8경주",
+ "forecastAt": "2026-07-31 13:43:09",
+ "forecastEpoch": 1785472989.2174318,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 8경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 5.5,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 32.8,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T13:20:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 2,
+    "name": "久島 尚樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 阪Ｆ１ 7/16 予 選 ２着 11.3 7/17 準決勝 １着 11.6 7/18 決 勝 ５着",
+    "prev2": "和歌山Ｆ１ 7/ 5 予 選 ３着 11.4 7/ 6 準決勝 ５着 11.1 7/ 7 特 選 ５着 11.6",
+    "chaku": [
+     6,
+     5,
+     3,
+     8
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "兼本 将太",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "岐 阜Ｆ１ 7/11 予 選 ２着 11.1 7/12 準決勝 ７着 12.1 7/13 特 選 ５着 11.4",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ３着 11.9 7/ 3 二予選 ９着 11.8 7/ 4 選 抜 ２着 11.2 7/ 5 特 選 ８着 11.7",
+    "chaku": [
+     2,
+     3,
+     1,
+     10
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "治田 知也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "岸和田Ｆ１ 7/20 予 選 １着 11.4 7/21 準決勝 ３着 11.1 7/22 特 選 ７着 11.6",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 １着 9.7 7/ 8 準決勝 ４着 9.9 7/ 9 特 選 ２着 10.3",
+    "chaku": [
+     9,
+     2,
+     2,
+     9
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "都築 巧",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 予 選 ５着 12 7/24 選 抜 ５着 11.5 7/25 一 般 １着 11.5",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ５着 11.5 7/ 9 一 般 １着 11.8 7/10 特 選 ３着 11.3",
+    "chaku": [
+     2,
+     0,
+     1,
+     3
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "阿部 大樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ４着 9.8 7/23 特 選 落",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ３着 11.3 7/ 9 選 抜 ３着 11.4 7/10 特 選 ６着 11.7",
+    "chaku": [
+     2,
+     2,
+     4,
+     12
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "塩崎 隼秀",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "富 山Ｆ１ 7/21 予 選 ２着 9.7 7/22 準決勝 ６着 10.1 7/23 特 選 ６着 9.6",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ５着 9.7 7/11 特 選 ８着 10.3 7/12 選 抜 ７着 9.8",
+    "chaku": [
+     2,
+     3,
+     1,
+     14
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "三ツ石康洋",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "静 岡Ｆ１ 7/18 予 選 ４着 11.2 7/19 一 般 ７着 11.7 7/20 一 般 ３着 11.8",
+    "prev2": "岐 阜Ｆ１ 7/11 予 選 ７着 11.7 7/12 一 般 １着 11.3 7/13 特 選 ５着 11.7",
+    "chaku": [
+     2,
+     4,
+     3,
+     12
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    3
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    2,
+    4,
+    5,
+    6
+   ]
+  },
+  "lines": [
+   3,
+   5,
+   7,
+   2,
+   1,
+   4,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "③治田は予選５連勝。今シリーズも予選は通過点。マークの⑤阿部が対抗。競走得点トップ②久島は必ず伸びる。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   7,
+   2
+  ],
+  "hit_count": 1,
+  "hit": [
+   2
+  ],
+  "missed": [
+   1,
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 1,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   },
+   {
+    "no": 7,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   2,
+   5
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.0,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 14:17:07"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "1번과 7번의 젖히기형 각질과 A, B 등급에도 불구하고 최근 착순을 제대로 분석하지 못했습니다. 특히 젖히기형이 선행마를 공략할 수 있다는 점을 간과했습니다. 3번의 선행은 예상대로였으나, 후미 추격 예상에서 다른 변수를 고려하지 못했습니다.",
+  "new_rule": "젖히기형 각질마는 선행마의 전개를 방해할 수 있으므로, 젖히기형이 선행마보다 높은 등급이거나 최근 성적이 좋으면 순위에 더 비중을 둔다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 14:17:09"
+ },
+ "reviewed": true
+}

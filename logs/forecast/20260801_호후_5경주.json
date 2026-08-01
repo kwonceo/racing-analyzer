@@ -1,0 +1,335 @@
+{
+ "predicted_top3": [
+  5,
+  1,
+  4
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "5번 횡구관태의 강력한 젖히기 능력과 1번의 후미 추입 조합, 그리고 4번 선행의 저항",
+ "key_factors": [
+  "5번 횡구관태의 최근 성적(7/31 1착, 7/19~21 3연승) 및 젖히기형 각질의 우위",
+  "1번 송전직야의 우수한 기어비(3.93)와 후미 추입 능력",
+  "4번 송본유평의 일관된 선행 능력과 최근 3연승의 기세",
+  "경주평가의 '횡구-송전' 본명시와 '송본, 중천도 저항' 언급"
+ ],
+ "exception_note": "이 경주에는 젖히기형인 5번과 선행형인 4번, 3번이 혼재되어 있어, 선행 라인 내의 경쟁과 젖히기형의 후미 역전 시도가 예상된다. 특히 5번의 젖히기 능력이 최근 매우 뛰어나다는 점이 이 경주의 특수성을 만든다.",
+ "applied_rules": [],
+ "raceKey": "호후 5경주",
+ "forecastAt": "2026-08-01 09:50:24",
+ "forecastEpoch": 1785545424.623147,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 5경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 3.2,
+   "풍향": "서북서",
+   "풍향코드": 13,
+   "기온": 30.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T09:30:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "横溝 貫太",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 １着 9.3",
+    "prev1": "豊 橋Ｆ２ 7/19 チ予選 １着 11.4 7/20 チ準決 １着 11.4 7/21 チ決勝 １着 11.1",
+    "prev2": "久留米Ｆ２ 7/ 7 チ予選 ２着 11.8 7/ 8 チ準決 １着 11.9 7/ 9 チ決勝 １着 11.3",
+    "chaku": [
+     5,
+     3,
+     0,
+     2
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "川上 修平",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "recent": "7/31 チ予選 ２着 10.1",
+    "prev1": "松 山Ｆ２ 7/25 チ予選 ２着 11.2 7/26 チ準決 ５着 11.8 7/27 チ選抜 ２着 11.5",
+    "prev2": "松 戸Ｆ２ 7/19 チ予選 ２着 10.3 7/20 チ準決 ７着 10.6 7/21 チ選抜 ３着 9.6",
+    "chaku": [
+     0,
+     4,
+     3,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "松田 直也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 チ予選 ２着 9.5",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 ６着 11.6 7/25 チ一般 ４着 11.3 7/26 チ一般 ４着 12.8",
+    "prev2": "奈 良Ｆ２ 7/16 チ予選 ６着 9.6 7/17 チ一般 ７着 11.6 7/18 チ一般 ６着 10.1",
+    "chaku": [
+     1,
+     0,
+     2,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "松本 悠平",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 １着 10.2",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 １着 11.8 7/25 チ準決 １着 11.8 7/26 チ決勝 １着 11.6",
+    "prev2": "熊 本Ｆ２ 7/13 チ予選 １着 12.2 7/14 チ準決 １着 11.3 7/15 チ決勝 ５着 11.5",
+    "chaku": [
+     5,
+     1,
+     2,
+     5
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "中川 飛隆",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.83,
+    "recent": "7/31 チ予選 ３着 9.9",
+    "prev1": "平 Ｆ２ 7/22 チ予選 ４着 12 7/23 チ選抜 ４着 12.1 7/24 チ一般 ２着 11.9",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 ７着 12.4 7/ 9 チ一般 ２着 12.5 7/10 チ一般 １着 11.8",
+    "chaku": [
+     6,
+     7,
+     3,
+     5
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "佐川 拓也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "recent": "7/31 チ予選 ３着 9.8",
+    "prev1": "弥 彦Ｆ２ 7/17 チ予選 ５着 12 7/18 チ一般 １着 12.3 7/19 チ選抜 ６着 12.5",
+    "prev2": "別 府Ｆ２ 7/ 4 チ予選 ３着 12 7/ 5 チ準決 ６着 12.2 7/ 6 チ選抜 ７着 12",
+    "chaku": [
+     2,
+     1,
+     1,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "樋口有樹郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 チ予選 ３着 10.3",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 ５着 11.9 7/25 チ一般 ２着 11.6 7/26 チ一般 ２着 12.2",
+    "prev2": "奈 良Ｆ２ 7/16 チ予選 ６着 10 7/17 チ一般 ３着 9.8 7/18 チ一般 ６着 9.7",
+    "chaku": [
+     2,
+     4,
+     1,
+     20
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    4,
+    3
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    2,
+    1,
+    7,
+    6
+   ]
+  },
+  "lines": [
+   3,
+   7,
+   4,
+   2,
+   5,
+   1,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "初日番手を連れてこれ無かったが、スピードは本物。横溝ー松田を本命視。松本の自力や中川も抵抗し好勝負！",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   3,
+   4
+  ],
+  "hit_count": 2,
+  "hit": [
+   5,
+   4
+  ],
+  "missed": [
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   1,
+   5
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 10:29:55"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번 중천비륭은 D등급임에도 불구하고, 7/31 예선에서 9.9초의 좋은 기록으로 3착을 했으며, 선행형으로서 꾸준히 상위권에 진입할 수 있는 능력이 있었다. 1번 송전직야의 최근 성적 부진(연속 4~6착)을 간과하고, 기어비와 후미 추입 능력만을 과대평가했다.",
+  "new_rule": "선행형 D등급이라도 최근 경기에서 짧은 시간에 3착 이내를 기록한 경우, 잠재력을 높게 평가한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 10:29:57"
+ },
+ "reviewed": true
+}

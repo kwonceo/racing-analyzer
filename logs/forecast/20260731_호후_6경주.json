@@ -1,0 +1,335 @@
+{
+ "predicted_top3": [
+  4,
+  3,
+  7
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  4
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 4번의 압도적인 최근 성적과 강한 도주 의지, 이를 따를 3번의 추입력 조합",
+ "key_factors": [
+  "4번 횡구관태의 압도적인 최근 성적 (2회 연속 우승, 6연속 1착 포함)",
+  "4번의 명확한 '도주(선행)' 선언과 각질 '젖히기형'",
+  "7두 중 선행형이 4번과 2번 둘뿐이며, 2번의 성적이 4번에 비해 현저히 낮아 경쟁 심화 가능성 낮음",
+  "3번 조옥장귀의 '추입(마크)' 선언으로 4번 뒤를 노릴 가능성",
+  "7번 무전화야의 '자재(양각)' 선언 및 '전전에 공세를 펼치고 싶다'는 언급으로 변수 창출 가능성"
+ ],
+ "exception_note": "4번 횡구관태의 최근 압도적인 성적이 두드러지며, 다른 선행형(2번)과의 기량 차이가 명확하여 4번이 주도권을 잡을 확률이 높다. 3번 조옥장귀가 4번의 뒤를 안정적으로 마크하며 입상할 것으로 보이나, 7번 무전화야가 '전전에 공세를 펼치고 싶다'는 언급으로 초반 전개에 변동을 줄 가능성이 있다. 7번은 추입형으로 분류되지만 자재(양각) 선언과 언급으로 공격적인 전개를 시도할 수 있다.",
+ "applied_rules": [],
+ "raceKey": "호후 6경주",
+ "forecastAt": "2026-07-31 10:11:55",
+ "forecastEpoch": 1785460315.0050037,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 6경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 3.2,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 30.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T10:00:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 4,
+    "name": "横溝 貫太",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "豊 橋Ｆ２ 7/19 チ予選 １着 11.4 7/20 チ準決 １着 11.4 7/21 チ決勝 １着 11.1",
+    "prev2": "久留米Ｆ２ 7/ 7 チ予選 ２着 11.8 7/ 8 チ準決 １着 11.9 7/ 9 チ決勝 １着 11.3",
+    "chaku": [
+     5,
+     3,
+     0,
+     2
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "照屋 将貴",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 １着 11.9 7/25 チ準決 ５着 11.8 7/26 チ選抜 ２着 12.2",
+    "prev2": "熊 本Ｆ２ 7/13 チ予選 ２着 11.6 7/14 チ準決 失",
+    "chaku": [
+     2,
+     3,
+     2,
+     9
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "武田 和也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 山Ｆ２ 7/25 チ予選 ３着 11.1 7/26 チ準決 ５着 11.4 7/27 チ選抜 ５着 12.3",
+    "prev2": "京王閣Ｆ２ 7/19 チ予選 ４着 11.7 7/20 チ一般 ３着 12.2 7/21 チ一般 ４着 12.7",
+    "chaku": [
+     2,
+     8,
+     5,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "藤縄 洋介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ６着 11.7 7/22 チ一般 ５着 12.3 7/23 チ一般 １着 12.4",
+    "prev2": "別 府Ｆ２ 7/ 4 チ予選 １着 11.8 7/ 5 チ準決 ４着 11.7 7/ 6 チ選抜 ６着 12.1",
+    "chaku": [
+     3,
+     3,
+     2,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "渡邉 正人",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "prev1": "取 手Ｆ２ 7/15 チ予選 ３着 11.6 7/16 チ準決 ６着 11.8 7/17 チ選抜 ３着 12.2",
+    "prev2": "久留米Ｆ２ 7/ 7 チ予選 ６着 12.1 7/ 8 チ一般 ５着 12.2 7/ 9 チ一般 ６着 12.1",
+    "chaku": [
+     4,
+     1,
+     3,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "佐川 拓也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "prev1": "弥 彦Ｆ２ 7/17 チ予選 ５着 12 7/18 チ一般 １着 12.3 7/19 チ選抜 ６着 12.5",
+    "prev2": "別 府Ｆ２ 7/ 4 チ予選 ３着 12 7/ 5 チ準決 ６着 12.2 7/ 6 チ選抜 ７着 12",
+    "chaku": [
+     2,
+     1,
+     1,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "岡田 浩太",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.83,
+    "prev1": "熊 本Ｆ２ 7/13 チ予選 ５着 11.8 7/14 チ選抜 １着 12.2 7/15 チ選抜 ５着 12.5",
+    "prev2": "別 府Ｆ２ 7/ 4 チ予選 ６着 11.2 7/ 5 チ一般 ４着 12.8",
+    "chaku": [
+     1,
+     2,
+     1,
+     20
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 5,
+   "closeHorses": [
+    3,
+    7,
+    1,
+    5,
+    6
+   ]
+  },
+  "lines": [
+   7,
+   1,
+   2,
+   5,
+   4,
+   3,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "ポテンシャルの高い横溝は２場所連続Ｖ。マークの照屋は続きたいが、前々に攻める武田の動向は気になる。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   2,
+   5
+  ],
+  "hit_count": 1,
+  "hit": [
+   4
+  ],
+  "missed": [
+   2,
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   },
+   {
+    "no": 5,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   3,
+   7
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 10:52:24"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 渡邉 正人 선수의 '도주(선행)' 선언과 실제 경주 전개에서 선두권을 유지하며 4번과 함께 레이스를 이끌 가능성을 과소평가했습니다. 5번 佐川 拓也 선수가 라인 구성상 2번과 같은 라인이었던 점을 간과하여, 2번의 선전이 5번의 동반 입상으로 이어질 수 있음을 예측하지 못했습니다.",
+  "new_rule": "선행 선언마 중에서도 기어비와 직전 성적을 통해 선행 유지력을 다시 한번 평가하여, 단순 선행마 숫자가 아닌 실제 선행 경쟁 구도를 예측에 반영한다. 라인 구성에서 선행마와 같은 라인에 묶인 추입마의 동반 입상 가능성을 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 10:52:26"
+ },
+ "reviewed": true
+}

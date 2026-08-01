@@ -1,0 +1,341 @@
+{
+ "predicted_top3": [
+  7,
+  3,
+  6
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "느린",
+ "line_winner": [
+  7
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 이토 신의 낙차 영향과 이토 게이타로의 레이스 운영으로 후미 추입 기회.",
+ "key_factors": [
+  "伊藤信의 최근 낙차 영향으로 인한 불안정성",
+  "伊藤慶太郎의 선행 선언 및 레이스 운영 가능성",
+  "福田滉의 번개 전개 예측",
+  "경주 내 추입형 각질의 압도적 비중"
+ ],
+ "exception_note": "코멘트에 언급된 이토 신의 낙차 영향 가능성과 선행형 이토 게이타로가 레이스를 주도할 경우, 추입형 후미 주자들에게 절호의 기회가 생길 수 있는 라인 구도의 불균형이 존재함. 통계적인 평균을 벗어나는 특수 상황으로 판단.",
+ "applied_rules": [],
+ "raceKey": "야히코 9경주",
+ "forecastAt": "2026-07-31 19:02:31",
+ "forecastEpoch": 1785492151.9741611,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 9경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 1.8,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 26.5,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T18:50:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 2,
+    "name": "伊藤 信",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/30 予 選 ４着 10.8",
+    "prev1": "静 岡Ｆ１ 7/18 初特選 ３着 11.4 7/19 準決勝 失",
+    "prev2": "伊 東Ｆ１ 7/10 予 選 ２着 9.6 7/11 準決勝 ４着 9.7 7/12 特 選 ３着 9.5",
+    "chaku": [
+     6,
+     5,
+     3,
+     17
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "栗山 俊介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ５着 11.6",
+    "prev1": "函 館Ｆ１ 7/14 予 選 ４着 11.6 7/15 準決勝 ６着 11.8 7/16 特 選 ３着 11.5",
+    "prev2": "高 知Ｆ１ 6/29 予 選 ３着 14.2 6/30 準決勝 ６着 14.3 7/ 1 特 選 ７着 15.9",
+    "chaku": [
+     2,
+     1,
+     7,
+     16
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "福田 滉",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ３着 11.3",
+    "prev1": "富 山Ｆ１ 7/21 予 選 ３着 9.7 7/22 準決勝 ４着 9.7 7/23 特 選 ５着 9.7",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ７着 12.6 7/ 3 選 抜 ３着 11.7 7/ 4 選 抜 ８着 11.7 7/ 5 一 般 １着 11.6",
+    "chaku": [
+     3,
+     2,
+     8,
+     22
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "金成 和幸",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ３着 11.4",
+    "prev1": "岐 阜Ｆ１ 7/11 予 選 ６着 11.7 7/12 一 般 ６着 10.9 7/13 一 般 ７着 11.9",
+    "prev2": "大 宮Ｆ１ 7/ 1 予 選 ５着 14.5 7/ 2 選 抜 ６着 14.4 7/ 3 一 般 ６着 14.9",
+    "chaku": [
+     1,
+     3,
+     4,
+     27
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "伊藤慶太郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ４着 11.4",
+    "prev1": "函 館Ｆ１ 7/14 予 選 ６着 11.6 7/15 一 般 １着 11.5 7/16 特 選 １着 11.6",
+    "prev2": "和歌山Ｆ１ 6/23 予 選 ６着 12 6/24 一 般 １着 11.4 6/25 特 選 ７着 13.8",
+    "chaku": [
+     6,
+     2,
+     1,
+     16
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "小野 大介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ３着 11.6",
+    "prev1": "松 阪Ｆ１ 7/16 予 選 ４着 11.1 7/17 選 抜 ４着 11.7 7/18 一 般 ４着 11.2",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ５着 11.3 7/ 9 選 抜 ２着 11.4 7/10 特 選 ５着 11.2",
+    "chaku": [
+     1,
+     2,
+     5,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "木暮 安由",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ３着 11.2",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ２着 9.8 7/23 準決勝 ９着 9.7 7/24 特 選 ７着 9.2",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 １着 11.3 7/ 9 準決勝 ４着 11.2 7/10 特 選 ５着 11.7",
+    "chaku": [
+     2,
+     4,
+     0,
+     8
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 6,
+   "closeHorses": [
+    4,
+    7,
+    1,
+    3,
+    5,
+    6
+   ]
+  },
+  "lines": [
+   2,
+   4,
+   1,
+   5,
+   3,
+   7,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "伊藤信のまくりは一撃必殺の破壊力があるが初日を見ると落車の影響があるか。単騎勢も味方に引き込んで伊藤慶がレースを作れば、番手の福田に絶好の展開。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   4,
+   7
+  ],
+  "hit_count": 1,
+  "hit": [
+   7
+  ],
+  "missed": [
+   2,
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   4,
+   7
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 19:37:31"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 伊藤信의 낙차 영향 불안정성을 과대평가하여 선행 주도 가능성을 간과했고, 4번 栗山俊介의 추입력을 충분히 고려하지 못했다. 라인 구도의 불균형에 너무 집중하여 개별 선수의 잠재력을 놓쳤다.",
+  "new_rule": "선행 선언 주자의 낙차 이력은 불안정성 지표로 활용하되, 당일 예선 성적을 통해 회복세를 우선적으로 판단하여 선행 주도 가능성을 재평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 19:37:33"
+ },
+ "reviewed": true
+}

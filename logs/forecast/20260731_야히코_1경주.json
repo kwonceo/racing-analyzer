@@ -1,0 +1,324 @@
+{
+ "predicted_top3": [
+  7,
+  5,
+  3
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "보통",
+ "line_winner": [
+  7
+ ],
+ "confidence": 4,
+ "reason_short": "유일한 선행마 3번의 선두 유력, 그 뒤를 따르는 7번과 5번의 추입 가능성 높음.",
+ "key_factors": [
+  "유일한 선행형인 3번의 선두 확보 용이성",
+  "추입형이 대부분인 경주 구성",
+  "총평에서 3번의 선행을 언급하며 7번, 5번의 강세 예측"
+ ],
+ "exception_note": "총 7두 중 6두가 추입형이고, 유일한 선행형인 3번마 '楠野 史尭'가 선행을 주도할 가능성이 매우 높다. 이로 인해 후미의 추입형 말들 중 3번마의 뒤를 따를 수 있는 말들이 유리한 전개를 가져갈 것이다. 특히 총평에서도 7번마 '大木 雅也'를 본명으로, 5번마 '飯尾 主税'를 대항으로 언급하며 특정 마필의 유리한 전개를 시사한다.",
+ "applied_rules": [],
+ "raceKey": "야히코 1경주",
+ "forecastAt": "2026-07-31 15:54:45",
+ "forecastEpoch": 1785480885.0787156,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 1경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 1.9,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 27.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T15:40:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 7,
+    "name": "大木 雅也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     0,
+     3,
+     5,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "飯尾 主税",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     3,
+     13,
+     3,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "伊藤 奎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     5,
+     3,
+     3,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "泉谷 直哉",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     5,
+     5,
+     3,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "藤原 夏志",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     0,
+     4,
+     1,
+     15
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "山口 茂",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     0,
+     0,
+     2,
+     20
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "楠野 史尭",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     13,
+     7,
+     3,
+     4
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    3
+   ],
+   "closeCount": 6,
+   "closeHorses": [
+    7,
+    5,
+    2,
+    1,
+    4,
+    6
+   ]
+  },
+  "lines": [
+   4,
+   1,
+   2,
+   6,
+   3,
+   7,
+   5
+  ],
+  "paceLabel": null,
+  "comment": "このメンバー構成なら楠野の先制が有力。番手絶好の大木が本命で、当所の直線を考えると対抗は３番手の飯尾。藤原次第だが、決め脚確かな泉谷に一考。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   2,
+   5
+  ],
+  "hit_count": 1,
+  "hit": [
+   5
+  ],
+  "missed": [
+   1,
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 1,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   },
+   {
+    "no": 2,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   7,
+   5
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 16:20:31"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "유일한 선행형인 3번마 '楠野 史尭'가 선행을 주도할 것이라는 예측은 맞았으나, 이로 인해 후미의 추입형 말들 중 3번마의 뒤를 따를 수 있는 말들이 유리한 전개를 가져갈 것이라는 판단에서 1번과 2번의 잠재력을 간과했다. 총평에서 언급된 泉谷 직전 성적 '5,5,3,19'가 본명으로 예측한 7번 '0,3,5,18'과 큰 차이가 없었음에도 7번과 5번에만 집중했다. '決め脚確かな泉谷に一考'라는 문구를 7,5번에 이은 단순한 고려 정도로 판단했다.",
+  "new_rule": "총평에서 특정 마필에 대한 '고려'(一考) 언급이 있다면, 그 마필의 최근 착순 분포와 전반적인 잠재력을 더 심층적으로 비교 분석하여 상위권 진입 가능성을 평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 16:20:33"
+ },
+ "reviewed": true
+}

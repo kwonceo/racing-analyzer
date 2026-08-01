@@ -1,0 +1,356 @@
+{
+ "predicted_top3": [
+  11,
+  7,
+  5
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 부족과 추격형 강세. 11번 최근 성적 우수하며, 7번 기수 승률 최상위.",
+ "key_factors": [
+  "선행형 1두",
+  "A등급 추격형 3두",
+  "5.9m/s 강한 바람의 영향 고려",
+  "7번 기수 승률 63.3%로 압도적"
+ ],
+ "exception_note": "전체 11두 중 선행형은 1번 '코파노리키' 단 1두 뿐이다. 반면 추격형 A등급마가 11번, 5번 두 마리이며, 평지형 A등급마 7번도 출전한다. 이는 선행마에게 지나친 부담을 줄 수 있는 구도이며, 5.9m/s의 강한 바람(풍향은 알 수 없으나) 또한 선행마에게 불리할 가능성을 높인다. 11번은 최근 5경기 중 1위를 포함하여 4번의 입상을 기록하며 뛰어난 컨디션을 보이며, 7번은 이번 경주에서 가장 높은 기수 승률(63.3%)을 자랑하여 추입 전개에 유리하다.",
+ "applied_rules": [],
+ "raceKey": "나고야 2경주",
+ "forecastAt": "2026-07-31 15:00:18",
+ "forecastEpoch": 1785477618.0614986,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "나고야 2경주",
+  "wind": {
+   "venue": "나고야",
+   "풍속": 5.9,
+   "풍향": "북서",
+   "풍향코드": 14,
+   "기온": 36.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T14:50:00+09:00",
+   "지점": "桑名",
+   "지점거리km": 6.53
+  },
+  "fieldSize": 11,
+  "distance": 1500,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 11,
+    "name": "ウィルソンテソーロ",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     1,
+     2,
+     2,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   },
+   {
+    "no": 7,
+    "name": "クリソベリル",
+    "gait": "평지형",
+    "recentPlacings": [
+     4
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "望月洵",
+    "jockeyRate": 63.3
+   },
+   {
+    "no": 5,
+    "name": "カレンブラックヒル",
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 52.0,
+    "jockey": "近藤颯",
+    "jockeyRate": 33.3
+   },
+   {
+    "no": 10,
+    "name": "シャンハイボビー",
+    "gait": "평지형",
+    "recentPlacings": [
+     6,
+     3
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "渡邊竜",
+    "jockeyRate": 56.7
+   },
+   {
+    "no": 9,
+    "name": "サトノジェネシス",
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     6,
+     12
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "細川智",
+    "jockeyRate": 33.3
+   },
+   {
+    "no": 6,
+    "name": "クリソベリル",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     8,
+     5
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 53.0,
+    "jockey": "木之葵",
+    "jockeyRate": 46.7
+   },
+   {
+    "no": 4,
+    "name": "キセキ",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     7,
+     4
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "大畑慧",
+    "jockeyRate": 20.0
+   },
+   {
+    "no": 3,
+    "name": "ホークビル",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     8,
+     8,
+     8
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "塚本征",
+    "jockeyRate": 40.0
+   },
+   {
+    "no": 8,
+    "name": "アルアイン",
+    "gait": "평지형",
+    "recentPlacings": [
+     7
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "加藤聡",
+    "jockeyRate": 50.0
+   },
+   {
+    "no": 2,
+    "name": "ホークビル",
+    "gait": "추격형",
+    "recentPlacings": [
+     6
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "加藤利",
+    "jockeyRate": 10.0
+   },
+   {
+    "no": 1,
+    "name": "コパノリッキー",
+    "gait": "선행형",
+    "recentPlacings": [
+     6,
+     5,
+     8
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "阪野学",
+    "jockeyRate": 3.3
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    1
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 90.9
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 90.9
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 90.9
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 9.1
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "거리 적성(보유율 9%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   11,
+   4,
+   3
+  ],
+  "hit_count": 1,
+  "hit": [
+   11
+  ],
+  "missed": [
+   4,
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   },
+   {
+    "no": 3,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   11,
+   4,
+   3
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.3,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 15:18:16"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번, 3번 말을 예측에서 제외한 것이 주요 오류였다. 특히 4번의 경우 C등급이었으나, 최근 3번째 경기에서 4착을 기록하는 등 예상보다 좋은 컨디션을 보였다. 기수 승률도 고려했지만, 경주 전개 및 다른 요인들을 충분히 분석하지 못했다. 3번 역시 낮은 등급과 최근 착순으로 제외했지만, 실제 경기에서 예상 밖의 선전을 보였다. 추격형 위주 경주 예측은 맞았으나, 개별 말의 잠재력을 과소평가했다.",
+  "new_rule": "등급이 낮더라도 최근 착순에 4착 이내 기록이 있다면 상위권 진입 가능성을 다시 평가하고, 기수 승률 외에 해당 기수의 최근 경주 운용 경향을 추가 분석한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 15:18:18"
+ },
+ "reviewed": true
+}

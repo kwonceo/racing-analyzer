@@ -1,0 +1,324 @@
+{
+ "predicted_top3": [
+  1,
+  4,
+  7
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 토다가 라인 3차의 도움을 받아 도주, 추입형 미야자와가 뒷심으로 추격.",
+ "key_factors": [
+  "1번 토다의 라인 3차 구성",
+  "7번 마츠오카의 B등급 선행형과의 경쟁 부담",
+  "4번 미야자와의 최근 착순 분포 (1, 2, 4)"
+ ],
+ "exception_note": "선행형이 2명(1, 7번)이지만, 1번 토다의 라인 3차 구성(라인 5번, 4번, 6번)이 라인 7번을 압박하여 선행 경쟁에서 우위를 점할 것으로 예상된다. 7번 마츠오카는 B등급의 선행형과의 힘든 경쟁을 펼쳐야 하므로 고전할 가능성이 있다. 추입형 중에서는 4번 미야자와가 '지방에서 기합 충분'하다는 총평과 최근 착순 분포(1, 2, 4)를 바탕으로 뒷심을 발휘할 것으로 예측된다.",
+ "applied_rules": [],
+ "raceKey": "야히코 2경주",
+ "forecastAt": "2026-07-31 16:16:34",
+ "forecastEpoch": 1785482194.0220234,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 2경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 1.1,
+   "풍향": "서",
+   "풍향코드": 12,
+   "기온": 27.2,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T16:00:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 2,
+    "name": "鷲見 逸喜",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     4,
+     4,
+     3,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "竹内 一暢",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     4,
+     8,
+     5,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "土田 武志",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     6,
+     7,
+     1,
+     15
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "宮澤 晃",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     1,
+     2,
+     4,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "河村 章憲",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     0,
+     5,
+     7,
+     23
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "矢内 良和",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     2,
+     1,
+     2,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "松岡晋乃介",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     1,
+     3,
+     9,
+     17
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    1,
+    7
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    2,
+    5,
+    4,
+    3,
+    6
+   ]
+  },
+  "lines": [
+   7,
+   2,
+   5,
+   3,
+   1,
+   4,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "ライン３車の土田が力で松岡を封じ切って、地元で気合十分な宮沢とのゴール勝負。矢内の食い込みが押さえ。競走得点トップの鷲見は松岡の頑張りにかかる。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   2,
+   5
+  ],
+  "hit_count": 1,
+  "hit": [
+   1
+  ],
+  "missed": [
+   2,
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   },
+   {
+    "no": 5,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   4,
+   6
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 16:41:34"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "경쟁 득점 상위인 2번(와시미)과 5번(다케우치)의 잠재력을 간과했다. 특히 2번의 '마츠오카의 노력에 달렸다'는 코멘트를 7번 마츠오카가 선행 경쟁에서 우위를 점하지 못할 경우 2번의 뒷심 발휘 가능성을 고려하지 못했다.",
+  "new_rule": "경쟁 득점 상위의 추입형이 선행 경쟁으로 인한 페이스 저하 시 기회를 잡을 수 있음을 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 16:41:36"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,389 @@
+{
+ "predicted_top3": [
+  10,
+  7,
+  1
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 다수, 선두권 혼전 예상. 중량 '重' 주로, 선두권 이탈마 중 추입 기회.",
+ "key_factors": [
+  "선행형 다수",
+  "트랙 상태 '重'",
+  "A등급 선행마 10번 마이타이잔",
+  "기수 승률 우수한 7번 킵마이",
+  "거리 적성 A인 1번 배틀플랜"
+ ],
+ "exception_note": "선행형이 4두로 전체 출전 두수의 40%를 차지하여 초반 선두권 경쟁이 매우 치열할 것으로 예상된다. 이로 인해 초반 빠른 페이스가 형성될 것이며, '重' 주로 상태가 더해져 선두권에서 이탈하는 말들이 나올 가능성이 높다. 이틈을 타 추격형/평지형 말이 기회를 잡을 수 있다. 특히 7번과 1번은 각질과 기수 승률, 거리 적성을 고려할 때 막판 추입으로 상위권 진입이 충분히 가능하다.",
+ "applied_rules": [],
+ "raceKey": "소노다 4경주",
+ "forecastAt": "2026-07-31 16:25:36",
+ "forecastEpoch": 1785482736.2136245,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "소노다 4경주",
+  "wind": {
+   "venue": "소노다",
+   "풍속": 3.0,
+   "풍향": "남남서",
+   "풍향코드": 9,
+   "기온": 35.5,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T16:10:00+09:00",
+   "지점": "豊中",
+   "지점거리km": 5.4
+  },
+  "fieldSize": 10,
+  "distance": 1400,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 7,
+    "name": "キズナ",
+    "gait": "평지형",
+    "recentPlacings": [
+     2,
+     8,
+     6,
+     8,
+     6
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "吉村智",
+    "jockeyRate": 53.3
+   },
+   {
+    "no": 10,
+    "name": "マイタイザン",
+    "gait": "선행형",
+    "recentPlacings": [
+     3,
+     12,
+     10,
+     3,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "distApt": "A"
+   },
+   {
+    "no": 1,
+    "name": "バトルプラン",
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     3,
+     8,
+     7,
+     7
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "川原正",
+    "jockeyRate": 26.7,
+    "distApt": "B"
+   },
+   {
+    "no": 3,
+    "name": "ホークビル",
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     4,
+     5,
+     8,
+     7
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "山本咲",
+    "jockeyRate": 30.0,
+    "distApt": "C"
+   },
+   {
+    "no": 9,
+    "name": "タリスマニック",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     6,
+     5,
+     7,
+     5
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "山本太",
+    "jockeyRate": 13.3,
+    "distApt": "B"
+   },
+   {
+    "no": 2,
+    "name": "エスポワールシチー",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     4,
+     8,
+     7,
+     8
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "小谷周",
+    "jockeyRate": 10.0,
+    "distApt": "C"
+   },
+   {
+    "no": 5,
+    "name": "スマートファルコン",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     6,
+     12,
+     7,
+     9
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "板野央",
+    "jockeyRate": 11.1,
+    "distApt": "C"
+   },
+   {
+    "no": 8,
+    "name": "ハービンジャー",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     10,
+     10,
+     7,
+     6
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "大山真",
+    "jockeyRate": 20.0,
+    "distApt": "C"
+   },
+   {
+    "no": 6,
+    "name": "キセキ",
+    "gait": "추격형",
+    "recentPlacings": [
+     11,
+     8,
+     7,
+     7,
+     4
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 51.0,
+    "jockey": "塩津璃",
+    "jockeyRate": 16.7,
+    "distApt": "C"
+   },
+   {
+    "no": 4,
+    "name": "マインドユアビスケッツ",
+    "gait": "선행형",
+    "recentPlacings": [
+     9,
+     4,
+     9,
+     8,
+     6
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "渡瀬和",
+    "jockeyRate": 6.7,
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 4,
+   "leadHorses": [
+    10,
+    3,
+    9,
+    4
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 90.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 90.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 90.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 90.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   4,
+   2,
+   7
+  ],
+  "hit_count": 1,
+  "hit": [
+   7
+  ],
+  "missed": [
+   4,
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "선행형",
+    "recentPlacings": [
+     9,
+     4,
+     9,
+     8,
+     6
+    ],
+    "line": null,
+    "grade": "D"
+   },
+   {
+    "no": 2,
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     4,
+     8,
+     7,
+     8
+    ],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   7,
+   3,
+   4
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.5,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 17:03:20"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번과 2번의 낮은 등급과 저조한 최근 착순 때문에 주요 고려 대상에서 제외했다. 초반 경합으로 인한 이변 가능성을 인식했으나, 해당마들의 잠재력을 과소평가했다.",
+  "new_rule": "D등급 이하 선행마가 '重' 주로에서 전개가 예상되면, 최근 착순이 낮아도 잠재적 복병으로 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 17:03:23"
+ },
+ "reviewed": true
+}

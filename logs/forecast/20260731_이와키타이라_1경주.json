@@ -1,0 +1,328 @@
+{
+ "predicted_top3": [
+  3,
+  4,
+  7
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  3
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 辻田(3)의 최근 상승세와 젖히기형 高橋(4)의 추격, 中村(7)의 마지막 발휘",
+ "key_factors": [
+  "3번 辻田의 최근 상승세: 전 대회에서 연승으로 결승 진출하여 기세를 탐.",
+  "4번 高橋의 각질: '젖히기형'으로 선행형인 3번 辻田 뒤를 따르다 추입할 가능성.",
+  "7번 中村의 '자재' 각질: 라인 구도상 후미에 위치하지만 기어를 활용하여 막판 역전 노림."
+ ],
+ "exception_note": "이 경주는 7두 구성으로 비교적 적은 두수로 인해 선행형 3번 辻田가 초반부터 강력하게 레이스를 주도할 수 있다. 여기에 유일한 젖히기형인 4번 高橋가 3번의 뒤를 따르며 전개를 유리하게 가져갈 가능성이 크다. 나머지 추입형 선수들이 많지만, 앞선 두 선수의 전개에 따라 경주 양상이 결정될 것으로 보인다. 7번 中村은 '자재(양각)'로 표기되어 있으나 최근 성적에서 막판 역전 능력을 보여주어 기회를 엿볼 수 있다.",
+ "applied_rules": [],
+ "raceKey": "이와키타이라 1경주",
+ "forecastAt": "2026-07-31 15:40:41",
+ "forecastEpoch": 1785480041.3128242,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "이와키타이라 1경주",
+  "wind": {
+   "venue": "이와키타이라",
+   "풍속": 2.9,
+   "풍향": "남남동",
+   "풍향코드": 7,
+   "기온": 27.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T15:30:00+09:00",
+   "지점": "小名浜",
+   "지점거리km": 12.14
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 7,
+    "name": "中村 翔平",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "広 島Ｆ２ 7/22 予 選 ２着 11.8 7/23 準決勝 ２着 11.4 7/24 決 勝 ３着 11.7",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 １着 12 7/14 準決勝 失",
+    "chaku": [
+     4,
+     4,
+     3,
+     6
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "内山 拓",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小 倉Ｆ２ 7/24 特予選 ２着 12.6 7/25 準決勝 ４着 11.8 7/26 特 選 ６着 11.6",
+    "prev2": "取 手Ｆ２ 7/ 6 特予選 １着 12.3 7/ 7 準決勝 ５着 11 7/ 8 特 選 ４着 11.9",
+    "chaku": [
+     3,
+     4,
+     4,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "高橋 優斗",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小 倉Ｆ２ 7/24 特予選 ３着 11.6 7/25 準決勝 ４着 11.1 7/26 特 選 ２着 11.5",
+    "prev2": "玉 野Ｆ１ 7/14 予 選 ３着 11.7 7/15 準決勝 ５着 11.7 7/16 特 選 ２着 11.6",
+    "chaku": [
+     0,
+     3,
+     6,
+     6
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "中野 智公",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "豊 橋Ｆ２ 7/19 特予選 ６着 11.3 7/20 特一般 ５着 11.7 7/21 特一般 ５着 11.6",
+    "prev2": "和歌山Ｆ１ 7/ 5 予 選 ３着 12.4 7/ 6 準決勝 ７着 12.9 7/ 7 一 般 ３着 11.8",
+    "chaku": [
+     0,
+     3,
+     5,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "伊原 弘幸",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "奈 良Ｆ２ 7/16 特予選 ２着 10.2 7/17 準決勝 ７着 9.8 7/18 特一般 ３着 9.8",
+    "prev2": "前 橋Ｇ３ 7/10 特予選 ６着 9.3 7/11 特一般 １着 10.2 7/12 特 選 ７着 10",
+    "chaku": [
+     2,
+     2,
+     4,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "辻田 祥大",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "松 阪Ｆ１ 7/16 予 選 １着 11.9 7/17 準決勝 １着 11.7 7/18 決 勝 ３着 11.5",
+    "prev2": "豊 橋Ｆ２ 6/30 予 選 ５着 12 7/ 1 選 抜 ７着 12 7/ 2 一 般 ７着 13",
+    "chaku": [
+     10,
+     4,
+     2,
+     5
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "松根 真",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小田原Ｆ２ 7/23 予 選 ７着 9.8 7/24 一 般 ４着 9.9 7/25 一 般 ７着 10",
+    "prev2": "函 館Ｆ１ 7/14 予 選 ６着 11.7 7/15 一 般 ４着 11.8 7/16 一 般 ６着 12.8",
+    "chaku": [
+     0,
+     7,
+     2,
+     15
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    3
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    7,
+    2,
+    1,
+    5,
+    6
+   ]
+  },
+  "lines": [
+   3,
+   1,
+   5,
+   4,
+   7,
+   2,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "前回の松阪は連勝で今期初優出。感触をつかんできた辻田が積極果敢に攻める。高橋が出切って中村の台頭も。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   3,
+   7,
+   2
+  ],
+  "hit_count": 2,
+  "hit": [
+   3,
+   7
+  ],
+  "missed": [
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   7,
+   4
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 16:20:49"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 내산 拓 선수의 최근 착순 분포(chaku)에서 3위 이내 진입 기록이 잦았음에도 불구하고, '추입형' 각질과 B등급을 기반으로 한 전체 라인 구도 분석에서 후순위로 평가하여 예상에서 제외했습니다. 또한, 코멘트에서 앞선 두 선수(3번, 4번)의 전개에 집중하면서 2번 선수의 막판 추입 가능성을 충분히 고려하지 못했습니다.",
+  "new_rule": "라인 구도에서 후미에 위치한 추입형 선수라도, 'chaku' 데이터에서 3위 이내 진입 기록이 꾸준히 보인다면 예상에 포함하여 상세 분석해야 한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 16:20:51"
+ },
+ "reviewed": true
+}

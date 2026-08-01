@@ -1,0 +1,329 @@
+{
+ "predicted_top3": [
+  1,
+  2,
+  3
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "젖히기형 1번마의 강력한 기세와 추입형 2번마의 연계 추입 기대. 3번마의 선행력도 무시할 수 없다.",
+ "key_factors": [
+  "大高 彰馬 (1)의 '젖히기형' 각질과 최근 연대율",
+  "鹿内 翔 (2)의 '추입형' 각질과 1번과의 연계 가능성",
+  "戸邉 捺希 (3)의 '선행형' 각질과 경주를 이끌 능력",
+  "총평에서 언급된 1번마의 '강력한 젖히기'와 2번마의 '능숙한 추주'"
+ ],
+ "exception_note": "젖히기형 1번마의 기세가 매우 강력하며, 총평에서도 주된 우승 후보로 언급되고 있음. 선행형이 둘임에도 불구하고 1번의 젖히기 전술이 유효할 것으로 보이며, 2번의 연계 추입이 시너지를 낼 것으로 예상된다. 3번마 역시 강력한 선행으로 버틸 가능성이 있다.",
+ "applied_rules": [],
+ "raceKey": "케이오카쿠 6경주",
+ "forecastAt": "2026-07-31 22:55:41",
+ "forecastEpoch": 1785506141.0512917,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "케이오카쿠 6경주",
+  "wind": {
+   "venue": "케이오카쿠",
+   "풍속": 1.5,
+   "풍향": "남동",
+   "풍향코드": 6,
+   "기온": 28.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T22:40:00+09:00",
+   "지점": "府中",
+   "지점거리km": 5.19
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "大高 彰馬",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/14 初特選 ６着 11.7 7/15 準決勝 ２着 11.9 7/16 決 勝 ６着 11",
+    "prev2": "弥 彦Ｆ２ 7/ 7 初特選 ７着 12.1 7/ 8 準決勝 ６着 12.1 7/ 9 特 選 ２着 12.1",
+    "chaku": [
+     2,
+     4,
+     1,
+     8
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "鹿内 翔",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "弥 彦Ｆ２ 7/17 特予選 ２着 11.5 7/18 準決勝 ４着 11.8 7/19 特 選 ３着 11.6",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ２着 11.7 7/ 9 準決勝 ４着 12.5 7/10 特 選 ４着 11.6",
+    "chaku": [
+     1,
+     5,
+     5,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "望月 紀男",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小田原Ｆ２ 7/23 予 選 ４着 9.6 7/24 選 抜 １着 9.8 7/25 特 選 ３着 10",
+    "prev2": "名古屋Ｆ２ 7/10 予 選 ３着 11.7 7/11 選 抜 １着 11.7 7/12 特 選 ４着 11.7",
+    "chaku": [
+     2,
+     1,
+     4,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "戸邉 捺希",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 阪Ｆ２ 7/21 特予選 ３着 11.4 7/22 準決勝 ３着 11.6 7/23 特 選 １着 11.4",
+    "prev2": "取 手Ｆ２ 7/ 6 特予選 ３着 12.2 7/ 7 準決勝 ３着 12 7/ 8 決 勝 ６着 13.7",
+    "chaku": [
+     2,
+     5,
+     5,
+     9
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "堀 政美",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "和歌山Ｆ２ 7/24 特予選 ２着 11.8 7/25 準決勝 ７着 13.5 7/26 特一般 ５着 11.9",
+    "prev2": "岐 阜Ｆ１ 7/11 予 選 ６着 11.6 7/12 一 般 ６着 12.3 7/13 一 般 ５着 11.7",
+    "chaku": [
+     1,
+     3,
+     5,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "田中 勝仁",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "小田原Ｆ２ 7/23 予 選 落",
+    "prev2": "弥 彦Ｆ２ 7/ 7 特予選 ６着 11.8 7/ 8 特一般 ５着 11.6 7/ 9 特一般 １着 11.7",
+    "chaku": [
+     1,
+     1,
+     1,
+     16
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "法月 成祐",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "伊 東Ｆ２ 7/22 予 選 ５着 9.4 7/23 一 般 ２着 9.9 7/24 一 般 ２着 10",
+    "prev2": "取 手Ｆ２ 7/ 6 特予選 ２着 12 7/ 7 準決勝 ２着 12.2 7/ 8 決 勝 ５着 12.9",
+    "chaku": [
+     2,
+     9,
+     3,
+     7
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    3,
+    6
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    2,
+    4,
+    5,
+    7
+   ]
+  },
+  "lines": [
+   1,
+   2,
+   3,
+   5,
+   6,
+   4,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "初日特選組に引けを取らない大高が、怒涛の捲りで首位。連係ある鹿内が巧追走する。戸邉の機動力や、望月の連対も。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   3,
+   4,
+   1
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   3
+  ],
+  "missed": [
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   2,
+   3
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 23:22:46"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번 望月 紀男의 '추입형' 각질과 B등급임에도 불구하고 직전 대회 우승 및 좋은 착순 분포(1착 1회)가 간과되었습니다. 선두권 각질 분석에 집중하여 추입마의 잠재력을 놓쳤습니다.",
+  "new_rule": "선두권에 젖히기/선행형이 많을 때, B등급 이상의 추입형 마필 중 직전 대회 우승 이력이 있는 말은 우승권에 포함하여 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 23:22:48"
+ },
+ "reviewed": true
+}

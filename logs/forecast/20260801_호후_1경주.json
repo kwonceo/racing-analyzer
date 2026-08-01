@@ -1,0 +1,320 @@
+{
+ "predicted_top3": [
+  5,
+  4,
+  2
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 5번의 최근 움직임이 좋아 선두 유지 가능성 높고, 추입형 4번이 뒤쫓을 것. 단기 2번이 변수.",
+ "key_factors": [
+  "5번의 최근 컨디션 (코멘트 참조)",
+  "라인 구성의 불균형 (선행 3 vs 추입 3)",
+  "2번의 단기 출전으로 인한 전개 변수"
+ ],
+ "exception_note": "코멘트에서 5번 '右近 陸人'의 움직임이 '상상'이라고 직접 언급하여 이 경주만의 특수성으로 볼 수 있다. 또한 6두 경주에서 선행형 3명, 추입형 3명으로 구성되어 선행형들 간의 경쟁과 그로 인한 후반 추입형의 기회 창출 가능성 등 라인 구도에 불균형이 있다. 특히 2번이 단기로 나와 전개에 변수가 될 수 있다.",
+ "applied_rules": [],
+ "raceKey": "호후 1경주",
+ "forecastAt": "2026-08-01 08:30:06",
+ "forecastEpoch": 1785540606.0727117,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 1경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 0.9,
+   "풍향": "북북서",
+   "풍향코드": 15,
+   "기온": 28.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T08:10:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 6,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 4,
+    "name": "亀井 道佳",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "7/31 チ予選 ６着 10.5",
+    "prev1": "和歌山Ｆ２ 7/24 チ予選 ５着 12.1 7/25 チ一般 ５着 12.4",
+    "prev2": "青 森Ｆ２ 6/25 チ予選 ３着 12.1 6/26 チ準決 ６着 12.1 6/27 チ選抜 ４着 12.2",
+    "chaku": [
+     1,
+     4,
+     5,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "右近 陸人",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 チ予選 ７着 11",
+    "prev1": "松 戸Ｆ２ 7/19 チ予選 １着 10.4 7/20 チ準決 ５着 10.3 7/21 チ選抜 ７着 11.2",
+    "prev2": "松 山Ｆ２ 7/11 チ予選 ４着 11.4 7/12 チ準決 ４着 11.9 7/13 チ決勝 ７着 12.8",
+    "chaku": [
+     6,
+     4,
+     5,
+     15
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "近藤 直幹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ６着 10.3",
+    "prev1": "武 雄Ｆ２ 7/25 チ予選 ７着 7/26 チ一般 ７着 15.5 7/27 チ一般 ７着 13",
+    "prev2": "取 手Ｆ２ 7/15 チ予選 ４着 11.6 7/16 チ選抜 落",
+    "chaku": [
+     0,
+     5,
+     7,
+     21
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "伊藤 司",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ７着 10.8",
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ７着 11.9 7/22 チ一般 ７着 14.8 7/23 チ一般 ７着 14.3",
+    "prev2": "熊 本Ｆ２ 7/13 チ予選 ５着 12.4 7/14 チ選抜 ７着 12.8 7/15 チ一般 ５着 12.2",
+    "chaku": [
+     3,
+     2,
+     2,
+     20
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "矢田 晋",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "recent": "7/31 チ予選 ６着 9.8",
+    "prev1": "取 手Ｆ２ 7/15 チ予選 ７着 13.2 7/16 チ一般 ６着 12.1 7/17 チ一般 １着 12.1",
+    "prev2": "久留米Ｆ２ 7/ 7 チ予選 ３着 12.5 7/ 8 チ準決 ６着 11.9 7/ 9 チ選抜 ７着 12.1",
+    "chaku": [
+     1,
+     3,
+     1,
+     17
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "井上 典善",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "recent": "7/31 チ予選 ７着 11.3",
+    "prev1": "弥 彦Ｆ２ 7/17 チ予選 ７着 12.6 7/18 チ一般 ６着 12.4 7/19 チ一般 ７着 12.8",
+    "prev2": "別 府Ｆ２ 7/ 4 チ予選 ７着 12.6 7/ 5 チ一般 ５着 13 7/ 6 チ一般 ５着 12.9",
+    "chaku": [
+     0,
+     0,
+     2,
+     19
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    5,
+    1,
+    2
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    4,
+    3,
+    6
+   ]
+  },
+  "lines": [
+   5,
+   3,
+   6,
+   2,
+   1,
+   4
+  ],
+  "paceLabel": null,
+  "comment": "初日に負けはしたが、右近の動きは上々で本命。番手近藤ー井上は一息。対抗は亀井の追い込み。矢田は単騎。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   6,
+   1
+  ],
+  "hit_count": 1,
+  "hit": [
+   4
+  ],
+  "missed": [
+   6,
+   1
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   },
+   {
+    "no": 1,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   3,
+   4
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 09:09:43"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번과 1번의 최근 착순 정보 부재로 인한 상대적 저평가가 있었다. 특히 6두 경주에서 선행/추입 라인 구성 불균형에 따른 전개 변수 예측은 좋았으나, 5번의 컨디션을 과대평가하고 1번과 6번의 반등 가능성을 간과했다. 단기 출전으로 인한 2번의 전개 변수는 발생했으나 최종 착순에는 영향을 주지 못했다.",
+  "new_rule": "6두 경주에서 추입형 기회 창출 가능성이 높은 경우, 낮은 등급의 말이라도 최근 착순 정보가 불충분할 때 잠재적 복병으로 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 09:09:45"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,370 @@
+{
+ "predicted_top3": [
+  3,
+  9,
+  2
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  3,
+  9
+ ],
+ "confidence": 4,
+ "reason_short": "각의 적극적인 선행 주도로 柏野가 유리하며, 田中의 젖히기 시도도 유효.",
+ "key_factors": [
+  "라인 구도",
+  "각질 구성 불균형",
+  "경주 총평의 자연어 단서"
+ ],
+ "exception_note": "이 경주는 젖히기형인 角(3번)이 적극적인 선행을 주도할 것으로 예상되며, 이로 인해 그의 후미에 있는 柏野(9번)가 매우 유리한 위치를 점할 것으로 보인다. 총평에서도 角의 기동성과 柏野의 축을 언급하고 있어, 이들의 협공이 두드러질 가능성이 높다. 田中(2번) 역시 젖히기형으로 기동력을 갖추고 있어 초반 전개에 따라 순위권 진입이 가능하다. 대체로 추입형이 많은 구성이지만, 선행과 젖히기를 선언한 선수들의 역할이 클 것이다. 특히 9번 柏野 智典의 전개최 성적(결승 6착 외 모두 1착)은 강한 뒷심을 보여주고 있다.",
+ "applied_rules": [],
+ "raceKey": "오다와라 3경주",
+ "forecastAt": "2026-08-01 11:40:22",
+ "forecastEpoch": 1785552022.260686,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "오다와라 3경주",
+  "wind": {
+   "venue": "오다와라",
+   "풍속": 2.7,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 34.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T11:30:00+09:00",
+   "지점": "小田原",
+   "지점거리km": 1.9
+  },
+  "fieldSize": 9,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 9,
+    "name": "柏野 智典",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/22 初特選 １着 11.5 7/23 準決勝 １着 11.5 7/24 決 勝 ６着 12.6",
+    "prev2": "前 橋Ｇ３ 7/10 初特選 ７着 9.3 7/11 準決勝 ４着 9.8 7/12 特 秀 ５着 9.4",
+    "chaku": [
+     4,
+     4,
+     7,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "芦澤 大輔",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "高 知Ｇ２ 7/17 一予選 ５着 13.3 7/18 選 抜 ５着 14.1 7/19 選 抜 ６着 13.8 7/20 選 抜 ４着 13.4",
+    "prev2": "防 府Ｆ１ 7/ 7 初特選 ７着 9.8 7/ 8 準決勝 ６着 9.9 7/ 9 特 選 １着 10.2",
+    "chaku": [
+     2,
+     1,
+     2,
+     17
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "田中 大我",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "富 山Ｆ１ 7/21 予 選 １着 9.7 7/22 準決勝 ６着 9.4 7/23 特 選 １着 9.8",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ３着 9.6 7/11 準決勝 ３着 9.4 7/12 決 勝 ３着 10.5",
+    "chaku": [
+     6,
+     0,
+     4,
+     8
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "朝倉 智仁",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "富 山Ｆ１ 7/21 予 選 ４着 10.2 7/22 選 抜 ３着 10.1 7/23 一 般 １着 10.3",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 １着 10.1 7/11 準決勝 ７着 9.8 7/12 特 秀 ８着 9.5",
+    "chaku": [
+     5,
+     2,
+     4,
+     11
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "角 宗哉",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "函 館Ｆ１ 7/14 予 選 １着 11.5 7/15 準決勝 １着 12 7/16 決 勝 ７着 11.9",
+    "prev2": "取 手Ｇ３ 6/27 一予選 ９着 12.1 6/28 選 抜 ３着 12 6/29 選 抜 ８着 11.9 6/30 一 般 １着 11.6",
+    "chaku": [
+     7,
+     2,
+     2,
+     9
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "櫻井 学",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "豊 橋Ｇ３ 7/25 一予選 ７着 11.9 7/26 選 抜 ２着 11.6 7/27 選 抜 ６着 11.4 7/28 選 抜 ５着 11.9",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ７着 11.9 7/ 9 一 般 ４着 12.2 7/10 一 般 ５着 11.2",
+    "chaku": [
+     3,
+     5,
+     2,
+     18
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "黒田 淳",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "佐世保Ｆ１ 7/13 予 選 ５着 11.4 7/14 一 般 ３着 11.1 7/15 一 般 ２着 11.3",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 １着 9.5 7/ 8 準決勝 ６着 9.7 7/ 9 特 選 ５着 10",
+    "chaku": [
+     1,
+     4,
+     2,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 8,
+    "name": "澤田 義和",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "豊 橋Ｇ３ 7/25 一予選 ７着 12 7/26 選 抜 ６着 11.3 7/27 一 般 １着 11.9 7/28 選 抜 ９着 11.7",
+    "prev2": "静 岡Ｆ１ 7/18 予 選 ５着 11.8 7/19 一 般 １着 11.8 7/20 特 選 ２着 11.6",
+    "chaku": [
+     2,
+     1,
+     1,
+     9
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "今藤 康裕",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ４着 11.5 7/23 一 般 ５着 11.9 7/24 一 般 ３着 11.9",
+    "prev2": "岐 阜Ｆ２ 6/27 初特選 ３着 11.9 6/28 準決勝 １着 11.6 6/29 決 勝 落",
+    "chaku": [
+     1,
+     0,
+     3,
+     5
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    5
+   ],
+   "closeCount": 6,
+   "closeHorses": [
+    9,
+    1,
+    7,
+    4,
+    8,
+    6
+   ]
+  },
+  "lines": [
+   5,
+   1,
+   7,
+   2,
+   8,
+   6,
+   3,
+   9,
+   4
+  ],
+  "paceLabel": null,
+  "comment": "田中、朝倉の機動力もかなりの物だが、積極性は角と見て番手の柏野が軸に。朝倉目標から芦沢や中近ラインも差の無い一戦に。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   3,
+   9,
+   5
+  ],
+  "hit_count": 2,
+  "hit": [
+   3,
+   9
+  ],
+  "missed": [
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 5,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   9,
+   1,
+   2
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 12:09:43"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "5번 '朝倉 智仁'의 각질이 선행형임을 인지했으나, 이전 성적에서의 일관성 부족으로 3번, 9번의 조합에 비해 우승 가능성을 낮게 평가했다. 5번의 선행 능력과 레이스 장악력을 과소평가했다.",
+  "new_rule": "선행형 선수가 다수 존재할 때, 직전 경주에서 선행으로 1착을 기록한 선수를 상위권에 포함한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 12:09:45"
+ },
+ "reviewed": true
+}

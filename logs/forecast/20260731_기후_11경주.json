@@ -1,0 +1,319 @@
+{
+ "predicted_top3": [
+  3,
+  7,
+  1
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  3,
+  7
+ ],
+ "confidence": 4,
+ "reason_short": "추입형 강자 3번 이케노의 우위. 7-4번 큐슈 라인의 조직력과 1번의 기동력.",
+ "key_factors": [
+  "3번 이케노 켄타의 압도적인 성적 우위와 총평의 언급",
+  "7-4번 큐슈 라인의 조직적인 전개 가능성",
+  "선행형 2, 5번 간의 선두 경쟁 가능성",
+  "1번 코다마 타쿠마의 '자재' 각질을 활용한 기회 포착"
+ ],
+ "exception_note": "선행 선수가 2번과 5번으로 둘이지만, 5번이 '철저 항전'을 선언하며 내부 선행 경쟁이 예상되어 초반 페이스가 빨라질 가능성이 높다. 이는 추입형 선수들에게 유리하게 작용할 수 있으며, 특히 강한 추입력을 가진 3번에게 기회가 될 것이다. 또한 총평에서 3번의 '연파'와 '자력 결착'을 언급하며 절대적인 우위를 지목하고 있다. 7번-4번 큐슈 라인의 후위 견고화도 예측된 바, 라인의 영향이 클 것으로 보인다.",
+ "applied_rules": [],
+ "raceKey": "기후 11경주",
+ "forecastAt": "2026-07-31 15:33:36",
+ "forecastEpoch": 1785479616.8160405,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "기후 11경주",
+  "wind": {
+   "venue": "기후",
+   "풍속": 6.3,
+   "풍향": "서북서",
+   "풍향코드": 13,
+   "기온": 36.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T15:20:00+09:00",
+   "지점": "岐阜",
+   "지점거리km": 2.57
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 3,
+    "name": "池野 健太",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     11,
+     2,
+     4,
+     19
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "樫山 恭柄",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     7,
+     4,
+     9,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "小玉 拓真",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     5,
+     1,
+     4,
+     15
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "野口 大誠",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     8,
+     2,
+     3,
+     8
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "鈴木 幸紀",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     0,
+     2,
+     1,
+     38
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "内藤 久文",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     2,
+     2,
+     2,
+     26
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "長野 魅切",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     13,
+     0,
+     4,
+     5
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    2,
+    5
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    3,
+    4,
+    1,
+    7,
+    6
+   ]
+  },
+  "lines": [
+   3,
+   7,
+   4,
+   5,
+   1,
+   2,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "降級後の③池野は連覇と前Ｓ１の実力を誇示。的確の位置取りから自力で決着付ける。⑦野口－④樫山の九州勢が後位を固めて上位独占。⑤長野が徹底抗戦の構えで①小玉の抜け出す場面も十分。前回逃げ切りVの②内藤－⑥鈴木も好走。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   7,
+   1,
+   4
+  ],
+  "hit_count": 2,
+  "hit": [
+   7,
+   1
+  ],
+  "missed": [
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   4,
+   7
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.6,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 15:59:53"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번 이케노 켄타의 압도적인 성적 우위와 총평의 언급에 과도하게 의존하여, 4번 樫山 恭柄 선수의 잠재력과 경기 당일 컨디션 변화를 충분히 고려하지 못했습니다. 특히 4번 선수의 '추입(마크)' 각질이 빠른 페이스 속에서 유리하게 작용할 수 있음을 간과했습니다.",
+  "new_rule": "총평에서 언급된 절대적인 우위 선수 외에, 동일 라인 내 다른 추입형 선수들의 최근 성적 및 당일 컨디션 변수를 더 면밀히 검토하여 예측에 반영한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 15:59:56"
+ },
+ "reviewed": true
+}

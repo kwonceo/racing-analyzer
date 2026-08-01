@@ -1,0 +1,363 @@
+{
+ "predicted_top3": [
+  9,
+  2,
+  1
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 3,
+ "reason_short": "선행마 부재로 추격형이 유리하나, 일부 평지형의 최근 성적이 우수함. 기수 승률도 고려.",
+ "key_factors": [
+  "선행형 마필 부재",
+  "추격형 마필의 다수 배치",
+  "일부 평지형 마필의 준수한 최근 성적",
+  "기수 승률이 높은 마필 존재 (5, 3, 10번)"
+ ],
+ "exception_note": "이 경주는 선행형 마필이 전무하여, 평소 선행 전개를 기대하기 어렵다. 대다수가 추격형으로 구성되어 초반 전개가 평이하거나 다소 느릴 가능성이 있으며, 중후반부터 순위 경쟁이 치열해질 것으로 예상된다. 이 경우 최근 성적이 좋고 비교적 마체중이 좋은 추격형 마필이나, 기수 승률이 높은 평지형 마필이 이점을 가질 수 있다. 특히 9번(린텐류)은 Grade A에 최근 성적이 가장 안정적이고, 2번(시ントー하노란)도 Grade A에 최근 성적이 준수하다. 평지형 중에서는 1번(모나크슬러거)의 최근 2착 성적이 눈에 띄며, 기수 승률이 높은 3번(타바네스탄)과 5번(원러브)도 경합 가능성이 있다.",
+ "applied_rules": [],
+ "raceKey": "카와사키 8경주",
+ "forecastAt": "2026-07-31 18:20:28",
+ "forecastEpoch": 1785489628.3210895,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "카와사키 8경주",
+  "wind": {
+   "venue": "카와사키",
+   "풍속": 5.5,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 31.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T18:00:00+09:00",
+   "지점": "羽田",
+   "지점거리km": 7.22
+  },
+  "fieldSize": 10,
+  "distance": 2000,
+  "surface": "더트",
+  "trackCond": "良",
+  "horses": [
+   {
+    "no": 9,
+    "name": "リンテンリュウ",
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     2,
+     6,
+     3,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 492,
+    "jockey": "櫻井光",
+    "jockeyRate": 0.0
+   },
+   {
+    "no": 2,
+    "name": "シントーハナノラン",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     5,
+     3,
+     5,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 470,
+    "jockey": "町田直",
+    "jockeyRate": 0.0
+   },
+   {
+    "no": 1,
+    "name": "モナークスラッガー",
+    "gait": "평지형",
+    "recentPlacings": [
+     2,
+     4,
+     4,
+     4,
+     9
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 427,
+    "jockey": "加藤雄"
+   },
+   {
+    "no": 8,
+    "name": "ヴァッツマン",
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     4,
+     4,
+     13,
+     8
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 490,
+    "jockey": "佐野遥"
+   },
+   {
+    "no": 4,
+    "name": "カンナギ",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     10,
+     10,
+     12,
+     9
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 416,
+    "jockey": "池谷匠",
+    "jockeyRate": 0.0
+   },
+   {
+    "no": 5,
+    "name": "ワンラヴ",
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     7,
+     7,
+     6,
+     13
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 452,
+    "jockey": "張田昂",
+    "jockeyRate": 22.2
+   },
+   {
+    "no": 3,
+    "name": "タヴァネスタン",
+    "gait": "평지형",
+    "recentPlacings": [
+     7,
+     4,
+     8,
+     2,
+     3
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 496,
+    "jockey": "和田譲",
+    "jockeyRate": 21.4
+   },
+   {
+    "no": 7,
+    "name": "ベルバルト",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     9,
+     5,
+     5,
+     12
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 443,
+    "jockey": "新原周",
+    "jockeyRate": 0.0
+   },
+   {
+    "no": 6,
+    "name": "オトコユメラク",
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     5,
+     6,
+     10,
+     13
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 469,
+    "jockey": "増田充"
+   },
+   {
+    "no": 10,
+    "name": "メイショウサノサ",
+    "gait": "추격형",
+    "recentPlacings": [
+     12,
+     11,
+     7,
+     11,
+     11
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 452,
+    "jockey": "中山遥",
+    "jockeyRate": 22.2
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 100.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 70.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 30.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "거리 적성(보유율 30%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   3,
+   2,
+   8
+  ],
+  "hit_count": 1,
+  "hit": [
+   2
+  ],
+  "missed": [
+   3,
+   8
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   },
+   {
+    "no": 8,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   3,
+   8
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.0,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 19:19:33"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번(타바네스탄)은 평지형에 기수 승률이 높았으나 최근 성적이 기복이 심하여 과소평가했고, 8번(ヴァッツマン)은 등급과 최근 성적이 좋지 않아 예측에서 제외했습니다. 두 말 모두 실제 경주에서는 뛰어난 기량으로 상위권에 진입했습니다.",
+  "new_rule": "기수 승률이 높은 평지형 마필 중 기복 있는 성적을 보이는 경우, 잠재력을 더 고려하여 예측에 포함한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 19:19:35"
+ },
+ "reviewed": true
+}

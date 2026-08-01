@@ -1,0 +1,328 @@
+{
+ "predicted_top3": [
+  2,
+  1,
+  7
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 2번의 항속거리 우세, 젖히기형 1번의 후반 추입력, 추입형 7번의 마크 능력.",
+ "key_factors": [
+  "선행형 2번(河合 佑弥)의 일관된 성적과 총평에서의 항속거리 우세 언급",
+  "젖히기형 1번(松岡 辰泰)이 총평에서 '捲り鋭い' (날카로운 추입)으로 언급되며 경쟁력 부각",
+  "추입형 7번(松岡 貴久)이 '마크' 각질로 2번 또는 1번을 추격할 가능성",
+  "동남동 2.9m/s의 바람은 전개에 큰 영향을 미치지 않을 약한 풍속"
+ ],
+ "exception_note": "총평에서 2번의 항속거리와 1번의 날카로운 추입에 대한 언급이 이 경주의 특수성을 형성. 또한 선행형이 2명(1, 2번)이지만 1번은 도주(선행)으로 표기되었으나 젖히기형으로 분류되어 실질적인 선두 경쟁은 2번이 유리할 것으로 판단.",
+ "applied_rules": [],
+ "raceKey": "이와키타이라 6경주",
+ "forecastAt": "2026-07-31 17:38:34",
+ "forecastEpoch": 1785487114.306152,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "이와키타이라 6경주",
+  "wind": {
+   "venue": "이와키타이라",
+   "풍속": 2.9,
+   "풍향": "동남동",
+   "풍향코드": 5,
+   "기온": 26.0,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T17:20:00+09:00",
+   "지점": "小名浜",
+   "지점거리km": 12.14
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 7,
+    "name": "松岡 貴久",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 予 選 ２着 12.2 7/24 準決勝 ２着 11.5 7/25 決 勝 ５着 11.3",
+    "prev2": "伊 東Ｆ１ 7/10 初特選 ５着 9.3 7/11 準決勝 ７着 7/12 一 般 ４着 9.4",
+    "chaku": [
+     1,
+     6,
+     4,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "松岡 辰泰",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "高 知Ｇ２ 7/17 一予選 ８着 14.4 7/18 選 抜 ６着 14.6 7/19 一 般 ５着 14 7/20 一 般 ２着 14",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 １着 11.2 7/ 9 準決勝 ４着 11.3 7/10 特 選 ５着 11.3",
+    "chaku": [
+     3,
+     3,
+     1,
+     18
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "河合 佑弥",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "佐世保Ｆ１ 7/13 予 選 ２着 11.8 7/14 準決勝 ２着 11.8 7/15 決 勝 ５着 11.5",
+    "prev2": "豊 橋Ｆ１ 7/ 5 予 選 ２着 11.7 7/ 6 準決勝 ６着 12 7/ 7 特 選 ２着 11.7",
+    "chaku": [
+     0,
+     6,
+     1,
+     5
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "牧 剛央",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ６着 10 7/23 特 選 ４着 9.7 7/24 特 選 ８着 9.5",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ６着 11.5 7/ 9 一 般 ５着 12 7/10 一 般 １着 11.3",
+    "chaku": [
+     2,
+     2,
+     2,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "小松原正登",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "函 館Ｆ１ 7/14 予 選 ７着 12.4 7/15 一 般 ６着 11 7/16 一 般 ３着 11.4",
+    "prev2": "和歌山Ｆ１ 7/ 5 予 選 ２着 11.5 7/ 6 準決勝 ７着 11.3 7/ 7 特 選 ５着 11.2",
+    "chaku": [
+     1,
+     4,
+     2,
+     15
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "西岡 正一",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ５着 9.7 7/23 特 選 落",
+    "prev2": "岐 阜Ｆ１ 7/11 予 選 ５着 11.5 7/12 選 抜 ４着 11.2 7/13 一 般 ４着 11.8",
+    "chaku": [
+     0,
+     5,
+     1,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "植原 琢也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "富 山Ｆ１ 7/21 予 選 ６着 10.1 7/22 一 般 ６着 10 7/23 一 般 ２着 10.2",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ８着 12.4 7/ 3 選 抜 ４着 11.5 7/ 4 一 般 ３着 11.6 7/ 5 選 抜 ９着 13.5",
+    "chaku": [
+     2,
+     1,
+     3,
+     20
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    2
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    7,
+    5,
+    3,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   7,
+   5,
+   2,
+   6,
+   4,
+   3
+  ],
+  "paceLabel": null,
+  "comment": "航続距離一番の河合がロングスパート。マーク植原と逃げ差し争いを本線としたが、捲り鋭い松岡辰も好勝負。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   7,
+   5
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   7
+  ],
+  "missed": [
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 5,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   7,
+   1,
+   2
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 18:06:38"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "5번 牧 剛央의 최근 기어비와 착순 분포 데이터가 2번 河合 佑弥의 항속거리 우세만큼 경주 전개에 영향을 미칠 것이라는 점을 간과했습니다. 5번은 마크 각질로서 강력한 추입력을 보유하고 있었고, 실제로 1번의 젖히기 전개에 성공적으로 마크하여 상위권에 진입했습니다.",
+  "new_rule": "선행/젖히기형이 강세일 때, 이들을 추격할 마크/추입형의 기어비와 최근 착순분포에서의 경쟁력을 추가적으로 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 18:06:41"
+ },
+ "reviewed": true
+}

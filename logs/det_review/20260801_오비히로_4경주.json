@@ -1,0 +1,178 @@
+{
+ "raceKey": "오비히로 4경주",
+ "entries": [
+  {
+   "time": "16:05:13",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      8,
+      10
+     ],
+     [
+      1,
+      8
+     ],
+     [
+      1,
+      10
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      6,
+      10
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      8,
+      10
+     ],
+     [
+      2,
+      8,
+      10
+     ],
+     [
+      1,
+      2,
+      8
+     ],
+     [
+      6,
+      8,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "16:15:04",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       4,
+       7
+      ],
+      "prev": 75.9,
+      "cur": 34.2,
+      "pct": -54.9
+     },
+     {
+      "combo": [
+       6,
+       7
+      ],
+      "prev": 44.9,
+      "cur": 28.4,
+      "pct": -36.7
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "16:15:40",
+   "minutesBefore": 2,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      8,
+      10
+     ],
+     [
+      1,
+      8
+     ],
+     [
+      6,
+      8
+     ],
+     [
+      1,
+      10
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      8,
+      9,
+      10
+     ],
+     [
+      1,
+      8,
+      10
+     ],
+     [
+      1,
+      8,
+      9
+     ],
+     [
+      6,
+      8,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "16:16:08",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

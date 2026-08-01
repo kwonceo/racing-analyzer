@@ -1,0 +1,328 @@
+{
+ "predicted_top3": [
+  4,
+  1,
+  5
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  4
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 4번의 강한 도주력과 1번의 안정적인 선행 능력, 5번의 추입 기회",
+ "key_factors": [
+  "4번의 직전 경주 우승과 좋은 기록",
+  "1번과 6번 선행형 경쟁 구도 속 1번의 우위",
+  "후미 각질 중 5번의 비교적 나은 최근 성적"
+ ],
+ "exception_note": "이 경주는 선행형 1번과 6번, 젖히기형 4번이 선두권에서 경쟁할 가능성이 있으며, 특히 4번의 강력한 도주 선언과 직전 경기력은 이들을 압도할 수 있는 특이 요소이다. 1번은 선행형이지만 4번의 강한 초반 페이스에 휘말려 제 기량을 발휘하기 어려울 수 있고, 6번은 최근 성적이 다소 부진하여 경쟁에서 밀릴 확률이 높다. 후미권에서는 5번이 다른 추입형들에 비해 상대적으로 좋은 최근 성적을 보여 기회를 엿볼 것으로 예상된다.",
+ "applied_rules": [],
+ "raceKey": "다케오 5경주",
+ "forecastAt": "2026-07-31 22:26:41",
+ "forecastEpoch": 1785504401.1037111,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "다케오 5경주",
+  "wind": {
+   "venue": "다케오",
+   "풍속": 1.0,
+   "풍향": "남남서",
+   "풍향코드": 9,
+   "기온": 26.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T22:10:00+09:00",
+   "지점": "嬉野",
+   "지점거리km": 8.56
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "小出 慎也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "豊 橋Ｆ２ 7/19 チ予選 ３着 11.8 7/20 チ準決 ４着 11.2 7/21 チ選抜 ２着 12",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 ６着 11.4 7/ 9 チ一般 ２着 12.7 7/10 チ一般 ２着 12.6",
+    "chaku": [
+     1,
+     7,
+     1,
+     15
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "爲田 学",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 ４着 11.8 7/25 チ準決 ７着 13.4 7/26 チ一般 ３着 12.4",
+    "prev2": "松 山Ｆ２ 7/11 チ予選 ３着 12.3 7/12 チ準決 ７着 12 7/13 チ選抜 ４着 11.6",
+    "chaku": [
+     0,
+     2,
+     7,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "高嶋 一朗",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 山Ｆ２ 7/25 チ予選 ３着 11.8 7/26 チ準決 ７着 11.6 7/27 チ一般 ２着 13",
+    "prev2": "西武園Ｆ２ 7/16 チ予選 ５着 12.7 7/17 チ一般 ２着 12 7/18 チ一般 ４着 13",
+    "chaku": [
+     6,
+     4,
+     7,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "久保田智之",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "奈 良Ｆ２ 7/16 チ予選 ３着 10.4 7/17 チ準決 １着 10.2 7/18 チ決勝 ５着 10.3",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 落 7/ 9 チ一般 欠",
+    "chaku": [
+     1,
+     0,
+     2,
+     7
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "陶器 一馬",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 ３着 11.6 7/25 チ準決 ６着 11.6 7/26 チ選抜 ３着 12",
+    "prev2": "岸和田Ｆ２ 7/13 チ予選 ３着 11.5 7/14 チ準決 ６着 12 7/15 チ選抜 １着 11.7",
+    "chaku": [
+     2,
+     1,
+     5,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "上原 直樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "prev1": "豊 橋Ｆ２ 7/19 チ予選 ２着 12.1 7/20 チ準決 ５着 11.8 7/21 チ選抜 ６着 11.9",
+    "prev2": "松 山Ｆ２ 7/11 チ予選 ６着 12.3 7/12 チ一般 ７着 12.9 7/13 チ一般 １着 12.1",
+    "chaku": [
+     2,
+     3,
+     2,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "竹村 達也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "取 手Ｆ２ 7/ 6 チ予選 ７着 12.8 7/ 7 チ一般 ２着 12.4 7/ 8 チ一般 ６着 12.8",
+    "prev2": "小松島Ｆ２ 6/25 チ予選 ４着 11.9 6/26 チ準決 ４着 12.2 6/27 チ選抜 ３着 11.8",
+    "chaku": [
+     1,
+     3,
+     4,
+     10
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    1,
+    6
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    2,
+    3,
+    5,
+    7
+   ]
+  },
+  "lines": [
+   1,
+   5,
+   4,
+   2,
+   6,
+   3,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "前回は落車の影響を感じさせない走りで決勝進出を決めた④久保田。ここは本領発揮で首位。近畿作戦や③高嶋にも注",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   2,
+   5
+  ],
+  "hit_count": 2,
+  "hit": [
+   4,
+   5
+  ],
+  "missed": [
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   1,
+   3
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.6,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 23:02:58"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 말의 최근 착순 정보가 불충분하여 잠재력을 간과했다. 특히 전전개최 3착 기록과 직전 경기에서 보여준 12.4초 기록이 예상보다 좋은 결과를 낼 수 있음을 시사했으나 이를 제대로 평가하지 못했다.",
+  "new_rule": "추입형 말이라도 최근 경기에서 상위권 진입과 우수한 기록이 있었다면, 등급이 낮더라도 주의 깊게 살펴본다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 23:03:00"
+ },
+ "reviewed": true
+}

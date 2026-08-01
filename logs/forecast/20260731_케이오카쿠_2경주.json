@@ -1,0 +1,328 @@
+{
+ "predicted_top3": [
+  1,
+  2,
+  5
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "젖히기형 1번의 최근 좋은 성적과 추입형 2번의 안정적 마크 전개, 선행형 5번의 버티기.",
+ "key_factors": [
+  "1번 金野 俊秋의 젖히기형 각질과 최근 안정적인 입상",
+  "2번 原岡泰志郎의 추입 각질과 1번의 후미 마크 가능성",
+  "5번 佐々木祐太의 선행 각질과 버티기 전개"
+ ],
+ "exception_note": "선행형 5번과 7번이 같은 경주에 출전하여 초반 페이스 경쟁이 발생할 수 있으며, 이로 인해 후미의 추입/젖히기형 선수들이 기회를 잡을 가능성이 높다. 특히 1번 金野 俊秋는 젖히기형으로 이런 혼전에서 강점을 보일 수 있다. 2번 原岡泰志郎는 추입형으로 1번의 후미를 안정적으로 마크하며 추입할 수 있는 좋은 포지션이다. 5번은 선행형이지만 두 명의 선행마가 있어 무리한 전개를 피하고 안정적인 선두 유지를 노릴 것으로 보인다. 이 외에 3번 伊藤 太一도 추입형으로 좋은 모습을 보일 수 있다.",
+ "applied_rules": [],
+ "raceKey": "케이오카쿠 2경주",
+ "forecastAt": "2026-07-31 21:03:25",
+ "forecastEpoch": 1785499405.6109962,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "케이오카쿠 2경주",
+  "wind": {
+   "venue": "케이오카쿠",
+   "풍속": 2.1,
+   "풍향": "남남동",
+   "풍향코드": 7,
+   "기온": 29.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T20:40:00+09:00",
+   "지점": "府中",
+   "지점거리km": 5.19
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 2,
+    "name": "原岡泰志郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "佐世保Ｆ２ 7/22 予 選 ５着 11.6 7/23 選 抜 ２着 11.9 7/24 特 選 ４着 12.2",
+    "prev2": "伊 東Ｆ１ 7/10 予 選 ４着 9.7 7/11 準決勝 ４着 9.7 7/12 特 選 ３着 9.8",
+    "chaku": [
+     4,
+     2,
+     7,
+     11
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "金野 俊秋",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小田原Ｆ２ 7/23 予 選 １着 9.7 7/24 準決勝 ４着 10 7/25 特 選 １着 9.8",
+    "prev2": "西武園Ｆ２ 7/16 特予選 ６着 12.1 7/17 特一般 ２着 11.5 7/18 特 選 ４着 12.3",
+    "chaku": [
+     6,
+     6,
+     5,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "伊藤 太一",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小田原Ｆ２ 7/23 予 選 ７着 10 7/24 一 般 １着 9.9 7/25 特 選 ５着 9.9",
+    "prev2": "平 Ｆ２ 7/16 予 選 ５着 11.7 7/17 選 抜 ２着 11.7 7/18 特 選 ２着 11.8",
+    "chaku": [
+     3,
+     4,
+     5,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "須永 勝太",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "伊 東Ｆ２ 7/22 予 選 ６着 9.6 7/23 一 般 ３着 9.8 7/24 一 般 ４着 9.3",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 ５着 14.2 7/14 一 般 ２着 14.4 7/15 一 般 ４着 14.1",
+    "chaku": [
+     5,
+     6,
+     2,
+     14
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "佐々木祐太",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小田原Ｆ２ 7/23 予 選 ４着 9.9 7/24 選 抜 ２着 10.2 7/25 特 選 ７着 10.3",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 ７着 10.4 7/ 8 一 般 ２着 10.6 7/ 9 一 般 ３着 9.9",
+    "chaku": [
+     3,
+     4,
+     5,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "野村 純宏",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "平 Ｆ２ 7/10 特予選 ４着 12 7/11 準決勝 ７着 11.6 7/12 特一般 失",
+    "prev2": "松 戸Ｆ２ 7/ 1 予 選 ７着 10.1 7/ 2 一 般 ５着 10.2 7/ 3 一 般 ３着 10.4",
+    "chaku": [
+     2,
+     1,
+     3,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "吉田夢希斗",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "prev1": "小田原Ｆ２ 7/23 予 選 ６着 10 7/24 一 般 ２着 9.8 7/25 一 般 ５着 10.5",
+    "prev2": "豊 橋Ｆ１ 7/ 5 予 選 ５着 11.9 7/ 6 一 般 ６着 12.9 7/ 7 一 般 ７着 12.3",
+    "chaku": [
+     2,
+     9,
+     3,
+     10
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    5,
+    7
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    2,
+    3,
+    4,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   2,
+   6,
+   7,
+   3,
+   5,
+   4
+  ],
+  "paceLabel": null,
+  "comment": "タテヨコ使い分けられる金野が、好位から一撃を狙う。差し脚ある原岡が番手回り。佐々木も僅差で、須永と連独占も。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   2,
+   6
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   2
+  ],
+  "missed": [
+   6
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   2,
+   4
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 21:37:33"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번 야무라 요시히로 선수의 직전 대회 착순 정보 부재로 인한 최근 기세 파악 실패. C등급 선수임에도 불구하고 선전할 수 있는 잠재력을 간과했습니다.",
+  "new_rule": "등급이 낮은 선수라도 직전 대회 성적이 없는 경우, 다른 경주의 최신 착순 분포와 'declared' 각질을 통해 잠재력을 평가해야 한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 21:37:35"
+ },
+ "reviewed": true
+}

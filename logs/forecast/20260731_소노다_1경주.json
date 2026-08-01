@@ -1,0 +1,400 @@
+{
+ "predicted_top3": [
+  11,
+  8,
+  1
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마와 강한 평지형의 대결, 더트 주로에 강한 말이 우세",
+ "key_factors": [
+  "11번은 꾸준히 좋은 성적을 내고 있으며, 'A' 등급에 거리 적성 'A'로 안정적인 전력을 보인다.",
+  "8번은 'A' 등급에 기수 승률 50%로 강력한 우승 후보이며, 최근 성적에 기복이 있으나 잠재력이 크다.",
+  "1번 선행마는 유일한 선행형으로 경주를 주도할 가능성이 높으며, 'A' 등급과 높은 기수 승률로 3착 이내 진입이 유력하다.",
+  "추격형이 다수 있으나, 중량 주로에서 선행형과 평지형이 초반부터 유리하게 전개될 수 있다."
+ ],
+ "exception_note": "이 경주는 유일한 선행마(1번)가 초반 레이스를 이끌면서 전체적인 페이스를 결정할 가능성이 높고, 더트 주로와 '重' 마장이 강한 평지형(11번, 8번)에게 유리하게 작용할 수 있는 특수성이 있다. 강한 기수를 태운 A등급의 8번과 1번의 경쟁이 주목된다.",
+ "applied_rules": [],
+ "raceKey": "소노다 1경주",
+ "forecastAt": "2026-07-31 14:40:17",
+ "forecastEpoch": 1785476417.8444045,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "소노다 1경주",
+  "wind": {
+   "venue": "소노다",
+   "풍속": 2.9,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 36.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T14:30:00+09:00",
+   "지점": "豊中",
+   "지점거리km": 5.4
+  },
+  "fieldSize": 11,
+  "distance": 1230,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 11,
+    "name": "ベストタイザン",
+    "gait": "평지형",
+    "recentPlacings": [
+     3,
+     2,
+     5,
+     3,
+     8
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "distApt": "A"
+   },
+   {
+    "no": 8,
+    "name": "モーニン",
+    "gait": "평지형",
+    "recentPlacings": [
+     7,
+     9,
+     3,
+     1,
+     4
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "下原理",
+    "jockeyRate": 50.0,
+    "distApt": "B"
+   },
+   {
+    "no": 1,
+    "name": "ダノンレジェンド",
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     3,
+     12,
+     7
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "吉村智",
+    "jockeyRate": 53.3,
+    "distApt": "B"
+   },
+   {
+    "no": 7,
+    "name": "ヴィクトワールピサ",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     12,
+     11,
+     9
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "山本太",
+    "jockeyRate": 20.0,
+    "distApt": "B"
+   },
+   {
+    "no": 10,
+    "name": "ウォータービルド",
+    "gait": "평지형",
+    "recentPlacings": [
+     8,
+     12,
+     8,
+     6,
+     16
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 53.0,
+    "jockey": "佐々世",
+    "jockeyRate": 16.7,
+    "distApt": "C"
+   },
+   {
+    "no": 4,
+    "name": "シュヴァルグラン",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     7,
+     8,
+     3,
+     10
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "高畑皓",
+    "jockeyRate": 10.0,
+    "distApt": "B"
+   },
+   {
+    "no": 2,
+    "name": "タリスマニック",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     10,
+     7,
+     9,
+     6
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 51.0,
+    "jockey": "塩津璃",
+    "jockeyRate": 20.0,
+    "distApt": "C"
+   },
+   {
+    "no": 5,
+    "name": "ミッキーアイル",
+    "gait": "평지형",
+    "recentPlacings": [
+     5,
+     12,
+     8,
+     11,
+     8
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "小谷哲",
+    "jockeyRate": 26.7,
+    "distApt": "C"
+   },
+   {
+    "no": 9,
+    "name": "アメリカンペイトリオット",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     10,
+     6,
+     10,
+     9
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "山田雄",
+    "jockeyRate": 15.0,
+    "distApt": "C"
+   },
+   {
+    "no": 3,
+    "name": "レイデオロ",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     7,
+     11,
+     8,
+     11
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "新庄海",
+    "jockeyRate": 26.7,
+    "distApt": "C"
+   },
+   {
+    "no": 6,
+    "name": "エイシンヒカリ",
+    "gait": "평지형",
+    "recentPlacings": [
+     6,
+     6,
+     5,
+     7
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "永井孝",
+    "jockeyRate": 26.7,
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    1
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 90.9
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 90.9
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 90.9
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   1,
+   7,
+   6
+  ],
+  "hit_count": 1,
+  "hit": [
+   1
+  ],
+  "missed": [
+   7,
+   6
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     12,
+     11,
+     9
+    ],
+    "line": null,
+    "grade": "B"
+   },
+   {
+    "no": 6,
+    "gait": "평지형",
+    "recentPlacings": [
+     6,
+     6,
+     5,
+     7
+    ],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   7,
+   8
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.2,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 14:57:45"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "7번은 최근 착순에 기복이 있었으나, 추격형으로 '重' 주로에서 전개가 유리할 수 있다는 점을 간과했다. 6번은 D등급으로 저평가했으나, 평지형으로 중량 주로와 1230m 단거리 경주에 예상보다 강한 적성을 보였다.",
+  "new_rule": "등급이 낮은 말이라도 '重' 주로에서 각질과 거리 적성이 유리하다면 최근 성적의 기복을 넘어설 가능성을 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 14:57:47"
+ },
+ "reviewed": true
+}

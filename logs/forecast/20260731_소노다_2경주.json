@@ -1,0 +1,367 @@
+{
+ "predicted_top3": [
+  4,
+  10,
+  8
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마들의 치열한 경쟁 속, 가장 안정적인 선행마가 우위를 점할 것.",
+ "key_factors": [
+  "선행형 말 3두의 내부 경쟁",
+  "트랙 상태 重에 따른 선행마의 부담 증가",
+  "기수 승률이 높은 선행마의 안정성"
+ ],
+ "exception_note": "이 경주는 3두의 선행형 말(10, 4, 9)이 출전하여 초반 전개 싸움이 매우 치열할 것으로 예상됩니다. 특히 10번 마이타이잔과 4번 모닌은 모두 A등급의 선행마로, 두 마리 간의 주도권 싸움이 전반적인 레이스 페이스를 빠르게 만들 가능성이 높습니다. 무거운(重) 트랙 컨디션은 빠른 페이스의 선행마에게 더 큰 부담으로 작용할 수 있습니다. 4번 모닌은 60%의 높은 기수 승률을 가진 기수가 기승하여 안정적인 운영을 기대할 수 있어, 치열한 선행 경쟁 속에서도 가장 유리한 위치를 점할 것으로 보입니다. 반면 8번 ビーチパトロール는 추격형이지만 최근 2착을 기록한 바 있어, 선행 그룹의 경쟁이 과열될 경우 역전을 노릴 수 있는 다크호스로 판단됩니다.",
+ "applied_rules": [],
+ "raceKey": "소노다 2경주",
+ "forecastAt": "2026-07-31 15:10:10",
+ "forecastEpoch": 1785478210.3519306,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "소노다 2경주",
+  "wind": {
+   "venue": "소노다",
+   "풍속": 2.9,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 35.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T15:00:00+09:00",
+   "지점": "豊中",
+   "지점거리km": 5.4
+  },
+  "fieldSize": 10,
+  "distance": 1400,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 8,
+    "name": "ビーチパトロール",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     8
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "杉浦健",
+    "jockeyRate": 23.3
+   },
+   {
+    "no": 10,
+    "name": "マイタイザン",
+    "gait": "선행형",
+    "recentPlacings": [
+     3,
+     12,
+     10,
+     3,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "distApt": "A"
+   },
+   {
+    "no": 4,
+    "name": "モーニン",
+    "gait": "선행형",
+    "recentPlacings": [
+     3,
+     4,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "小牧太",
+    "jockeyRate": 60.0,
+    "distApt": "B"
+   },
+   {
+    "no": 5,
+    "name": "キンシャサノキセキ",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     5,
+     4,
+     5,
+     9
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "大山真",
+    "jockeyRate": 30.0,
+    "distApt": "C"
+   },
+   {
+    "no": 1,
+    "name": "スピルバーグ",
+    "gait": "평지형",
+    "recentPlacings": [
+     10,
+     3,
+     5,
+     3,
+     6
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "高畑皓",
+    "jockeyRate": 20.0,
+    "distApt": "A"
+   },
+   {
+    "no": 6,
+    "name": "トランセンド",
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     6,
+     4,
+     7,
+     7
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "渡瀬和",
+    "jockeyRate": 6.7,
+    "distApt": "C"
+   },
+   {
+    "no": 3,
+    "name": "キョウワスプレンダ",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     5,
+     8,
+     8,
+     3
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 10.0,
+    "jockey": "キョウワスプレンダ",
+    "distApt": "B"
+   },
+   {
+    "no": 9,
+    "name": "クリエイター２",
+    "gait": "선행형",
+    "recentPlacings": [
+     6,
+     5,
+     5,
+     3
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 52.0,
+    "jockey": "南部楓",
+    "jockeyRate": 10.0,
+    "distApt": "B"
+   },
+   {
+    "no": 2,
+    "name": "ミッキーロケット",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     8,
+     8,
+     7,
+     7
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "永井孝",
+    "jockeyRate": 16.7,
+    "distApt": "C"
+   },
+   {
+    "no": 7,
+    "name": "キタサンブラック",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     9,
+     8,
+     9,
+     9
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "竹村達",
+    "jockeyRate": 10.0,
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    10,
+    4,
+    9
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 90.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 90.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 80.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 90.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   9,
+   8,
+   2
+  ],
+  "hit_count": 1,
+  "hit": [
+   8
+  ],
+  "missed": [
+   9,
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 9,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   },
+   {
+    "no": 2,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   8,
+   9
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -1.2,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 15:39:11"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "9번 크리에이터2는 선행마 중 최저 등급(C)에 기수 승률도 낮아 선행 경쟁 과열 시 가장 먼저 이탈할 것으로 판단했으나, 실제로는 경쟁에서 살아남아 우승했습니다. 이는 등급과 기수 승률 외에 해당 경주에서의 잠재력을 과소평가했음을 의미합니다. 2번 미키로켓은 D등급에 최근 착순도 좋지 않아 고려 대상에서 제외했습니다. 무거운 트랙 컨디션에서 추격형인 8번 ビーチパトロール가 선전한 점은 예상에 부합했습니다.",
+  "new_rule": "선행마 간의 치열한 경쟁이 예상되는 무거운 주로에서는 저등급 선행마의 잠재적 선전 가능성을 항상 염두에 둔다. 또한 등급이 낮더라도 복병으로 부상할 수 있는 추격형 말을 간과하지 않는다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 15:39:14"
+ },
+ "reviewed": true
+}

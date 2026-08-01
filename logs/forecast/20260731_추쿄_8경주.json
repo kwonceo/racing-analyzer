@@ -1,0 +1,380 @@
+{
+ "predicted_top3": [
+  13,
+  1,
+  3
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마들의 경쟁으로 인한 혼전 속, 꾸준한 성적의 추격마가 유리.",
+ "key_factors": [
+  "선행형 2두의 내부 경쟁 가능성",
+  "추격형 다수",
+  "重 주로의 영향"
+ ],
+ "exception_note": "선행형 1번과 10번이 존재하여 초반 페이스가 예상보다 빨라질 가능성이 있으며, 이는 후미 추격형들에게 기회가 될 수 있다. 특히 1번 L e는 꾸준한 성적을 보여 선행마 중 가장 강력하다. 13번 위르손테소로는 최근 착순이 매우 안정적이며, 3번 우인바리아시온도 우수한 기수 승률과 A등급으로 뒷심 발휘가 기대된다. 重 주로에서 선행마가 초반 오버페이스를 하면 후미에서 역전이 쉬워지는 경향이 있다. 풍속 2.7m/s는 전개에 큰 영향을 미치지 않을 것으로 판단한다.",
+ "applied_rules": [],
+ "raceKey": "추쿄 8경주",
+ "forecastAt": "2026-07-31 18:10:43",
+ "forecastEpoch": 1785489043.219995,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "추쿄 8경주",
+  "wind": {
+   "venue": "추쿄",
+   "풍속": 2.7,
+   "풍향": "서북서",
+   "풍향코드": 13,
+   "기온": 33.5,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T17:50:00+09:00",
+   "지점": "大府",
+   "지점거리km": 10.21
+  },
+  "fieldSize": 13,
+  "distance": 1500,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 13,
+    "name": "ウィルソンテソーロ",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     1,
+     2,
+     2,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "distApt": "A"
+   },
+   {
+    "no": 3,
+    "name": "ウインバリアシオン",
+    "gait": "추격형",
+    "recentPlacings": [
+     1,
+     6,
+     3,
+     5,
+     6
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "丹羽克",
+    "jockeyRate": 30.0,
+    "distApt": "A"
+   },
+   {
+    "no": 1,
+    "name": "Ｌｅ",
+    "gait": "선행형",
+    "recentPlacings": [
+     1,
+     7,
+     4,
+     2,
+     4
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "渡邊竜",
+    "jockeyRate": 46.7,
+    "distApt": "A"
+   },
+   {
+    "no": 6,
+    "name": "リアルスティール",
+    "gait": "추격형",
+    "recentPlacings": [
+     16,
+     12,
+     14,
+     14,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "望月洵",
+    "jockeyRate": 50.0,
+    "distApt": "B"
+   },
+   {
+    "no": 4,
+    "name": "カリフォルニアクローム",
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     4,
+     2,
+     4,
+     5
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "加藤利",
+    "jockeyRate": 10.0,
+    "distApt": "B"
+   },
+   {
+    "no": 8,
+    "name": "インカンテーション",
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     2,
+     6,
+     4,
+     1
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 52.0,
+    "jockey": "小笠羚",
+    "jockeyRate": 16.7,
+    "distApt": "A"
+   },
+   {
+    "no": 10,
+    "name": "ドゥラメンテ",
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     3,
+     5,
+     8,
+     7
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "丸野勝",
+    "jockeyRate": 50.0,
+    "distApt": "B"
+   },
+   {
+    "no": 12,
+    "name": "ダノンレジェンド",
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     6,
+     4,
+     3,
+     1
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "今井貴",
+    "jockeyRate": 46.7
+   },
+   {
+    "no": 9,
+    "name": "ネロ",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     5,
+     8,
+     7,
+     6
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "木之葵",
+    "jockeyRate": 30.0,
+    "distApt": "C"
+   },
+   {
+    "no": 11,
+    "name": "グレーターロンドン",
+    "gait": "평지형",
+    "recentPlacings": [
+     12,
+     8,
+     2,
+     6,
+     8
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "加藤聡",
+    "jockeyRate": 50.0,
+    "distApt": "B"
+   },
+   {
+    "no": 2,
+    "name": "スワーヴリチャード",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     5,
+     4,
+     5,
+     6
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "丸山真",
+    "jockeyRate": 23.3,
+    "distApt": "C"
+   },
+   {
+    "no": 7,
+    "name": "ハービンジャー",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     6,
+     8,
+     9,
+     10
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "阪野学",
+    "jockeyRate": 3.3,
+    "distApt": "C"
+   },
+   {
+    "no": 5,
+    "name": "ビッグアーサー",
+    "gait": "평지형",
+    "recentPlacings": [
+     5,
+     5,
+     9,
+     5,
+     5
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "大原浩",
+    "jockeyRate": 10.0,
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    1,
+    10
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 92.3
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 92.3
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 92.3
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 92.3
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ }
+}

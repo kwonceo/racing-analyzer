@@ -1,0 +1,370 @@
+{
+ "predicted_top3": [
+  3,
+  7,
+  8
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마간 경쟁 심화 속에서 3번 스와브리차드의 안정적인 기량과 기수 능력으로 우세. 추격형 7, 8번이 뒤를 이을 것.",
+ "key_factors": [
+  "다수의 선행형 말 편성으로 초반 경합 예상",
+  "3번 스워브리차드의 꾸준한 성적과 A등급 기수(福原杏)의 기량",
+  "7번, 8번 추격형 말들의 최근 성적 우수 및 높은 기수 승률"
+ ],
+ "exception_note": "전체 10두 중 5두가 선행형으로 구성되어 초반 선두 다툼이 매우 치열할 것으로 예상된다. 이로 인해 선행마 중에서도 가장 안정적인 기량과 기수 능력을 겸비한 3번이 유리하고, 추격형 말들에게는 오히려 전개상 이점이 될 수 있다. 특히 7번과 8번은 A등급 마필이며 기수 승률도 높아 혼전 속에서도 제 기량을 발휘할 가능성이 높다.",
+ "applied_rules": [],
+ "raceKey": "소노다 5경주",
+ "forecastAt": "2026-07-31 17:00:39",
+ "forecastEpoch": 1785484839.425264,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "소노다 5경주",
+  "wind": {
+   "venue": "소노다",
+   "풍속": 3.2,
+   "풍향": "남남서",
+   "풍향코드": 9,
+   "기온": 35.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T16:40:00+09:00",
+   "지점": "豊中",
+   "지점거리km": 5.4
+  },
+  "fieldSize": 10,
+  "distance": 1400,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 7,
+    "name": "ハービンジャー",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     4,
+     5,
+     2,
+     4
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "田野豊",
+    "jockeyRate": 46.7,
+    "distApt": "A"
+   },
+   {
+    "no": 8,
+    "name": "キズナ",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     1,
+     9,
+     3,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "吉村智",
+    "jockeyRate": 53.3,
+    "distApt": "A"
+   },
+   {
+    "no": 3,
+    "name": "スワーヴリチャード",
+    "gait": "선행형",
+    "recentPlacings": [
+     5,
+     1,
+     1,
+     2,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "福原杏",
+    "jockeyRate": 6.7,
+    "distApt": "A"
+   },
+   {
+    "no": 10,
+    "name": "マイタイザン",
+    "gait": "선행형",
+    "recentPlacings": [
+     3,
+     12,
+     10,
+     3,
+     2
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "distApt": "A"
+   },
+   {
+    "no": 2,
+    "name": "ケイムホーム",
+    "gait": "선행형",
+    "recentPlacings": [
+     3,
+     4,
+     3,
+     2,
+     7
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "大山真",
+    "jockeyRate": 16.7,
+    "distApt": "A"
+   },
+   {
+    "no": 4,
+    "name": "メイショウサムソン",
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     11,
+     9,
+     7,
+     7
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "山田雄",
+    "jockeyRate": 15.0,
+    "distApt": "C"
+   },
+   {
+    "no": 1,
+    "name": "ダイワメジャー",
+    "gait": "선행형",
+    "recentPlacings": [
+     10,
+     5,
+     7,
+     6,
+     1
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "杉浦健",
+    "jockeyRate": 20.0,
+    "distApt": "B"
+   },
+   {
+    "no": 5,
+    "name": "パイロ",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     9,
+     11,
+     8,
+     5
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "佐々世",
+    "jockeyRate": 16.7,
+    "distApt": "C"
+   },
+   {
+    "no": 6,
+    "name": "ベストウォーリア",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     11,
+     11,
+     8,
+     10
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "竹村達",
+    "jockeyRate": 10.0,
+    "distApt": "C"
+   },
+   {
+    "no": 9,
+    "name": "サトノクラウン",
+    "gait": "선행형",
+    "recentPlacings": [
+     6,
+     9,
+     12,
+     5,
+     9
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "永井孝",
+    "jockeyRate": 10.0,
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 5,
+   "leadHorses": [
+    3,
+    10,
+    2,
+    1,
+    9
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 90.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 90.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 90.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   3,
+   7,
+   2
+  ],
+  "hit_count": 2,
+  "hit": [
+   3,
+   7
+  ],
+  "missed": [
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   2,
+   8
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 17:23:56"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번마 케이무홈은 선행형임에도 불구하고 선행마들의 초반 경합 속에서 꾸준히 상위권 성적을 기록했으나, 해당 부분을 충분히 고려하지 못했다. 특히 B등급임에도 불구하고 직전 경기에서도 좋은 모습을 보였던 점을 간과했다.",
+  "new_rule": "선행마 초반 경합 예상 시, B등급이라도 최근 5경기에서 3위 이내를 3회 이상 기록한 선행마는 잠재적인 상위권 진입 가능성을 높게 평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 17:23:58"
+ },
+ "reviewed": true
+}

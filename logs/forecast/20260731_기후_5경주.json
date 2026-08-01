@@ -1,0 +1,315 @@
+{
+ "predicted_top3": [
+  4,
+  1,
+  3
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행형이 적고 젖히기형이 유리, 내측 추입마들의 기회 증가",
+ "key_factors": [
+  "유일한 선행형 7번의 역부족",
+  "4번의 기동력 우위와 젖히기형 각질",
+  "1, 3번의 내측 기회와 추입 능력",
+  "대부분의 말이 추입형으로 전개 양상 예측 어려움"
+ ],
+ "exception_note": "대부분의 말이 추입형이고 선행형이 단 한 명에 불과하여 통상적인 경주와는 다른 전개 양상 예상. 4번 젖히기형의 기동력이 유리하게 작용할 수 있으며, 내측에서 전개할 1번과 3번 추입마들의 기회가 있을 것. 7번 선행마의 전적이 좋지 않아 선행이 쉽게 무너질 가능성이 높음.",
+ "applied_rules": [],
+ "raceKey": "기후 5경주",
+ "forecastAt": "2026-07-31 12:36:22",
+ "forecastEpoch": 1785468982.8393157,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "기후 5경주",
+  "wind": {
+   "venue": "기후",
+   "풍속": 6.4,
+   "풍향": "서북서",
+   "풍향코드": 13,
+   "기온": 34.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T12:20:00+09:00",
+   "지점": "岐阜",
+   "지점거리km": 2.57
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 4,
+    "name": "吉岡 詩織",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "chaku": [
+     8,
+     11,
+     3,
+     9
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "高橋 梨香",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.69,
+    "chaku": [
+     1,
+     11,
+     7,
+     14
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "田中 月菜",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "chaku": [
+     1,
+     2,
+     7,
+     11
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "荒川ひかり",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "chaku": [
+     2,
+     2,
+     5,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "豊田 美香",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "chaku": [
+     0,
+     2,
+     6,
+     14
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "塩田 日海",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "chaku": [
+     1,
+     2,
+     2,
+     22
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "仲井 リコ",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "chaku": [
+     0,
+     1,
+     0,
+     14
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    7
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    1,
+    3,
+    5,
+    2,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   2,
+   3,
+   5,
+   4,
+   6,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "機動力上位の④吉岡が自分のタイミングで仕掛けて押し切ろう。①高橋が内枠で好位を占めて突っ込む。③田中が捲り差しで浮上。⑦豊田も位置次第では。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   4,
+   3
+  ],
+  "hit_count": 2,
+  "hit": [
+   4,
+   3
+  ],
+  "missed": [
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 5,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   1,
+   2
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 13:16:08"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "5번은 다른 추입마들과 유사한 착순 분포를 보였으나, '추입(마크)' 선언으로 인해 적극적인 전개와 우위를 가져갈 수 있다는 점을 간과했습니다.",
+  "new_rule": "선언 각질이 '추입(마크)'인 추입형 말은 다른 추입형 말보다 전개 이점을 가질 수 있음을 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 13:16:09"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,369 @@
+{
+ "predicted_top3": [
+  1,
+  7,
+  2
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "河端의 최근 우수한 스피드와 橋本과의 라인 연계가 유리하며, 塩島가 선행을 유지할 가능성.",
+ "key_factors": [
+  "河端의 강력한 젖히기형 각질과 최근 성적",
+  "河端과 橋本의 연대 가능성 (comment 참조)",
+  "염열한 날씨 속 선행형 염도 부담, 하지만 선행이 유리한 상황 조성"
+ ],
+ "exception_note": "경기 총평에서 河端과 橋本의 연대 가능성을 명시적으로 언급하며 특정 라인의 우위를 강하게 시사하고 있습니다. 또한, 유일한 선행마 2번 염도와의 전개에서 1번 河端이 젖히기로 이점을 가져갈 수 있는 구도입니다.",
+ "applied_rules": [],
+ "raceKey": "오다와라 8경주",
+ "forecastAt": "2026-08-01 13:53:19",
+ "forecastEpoch": 1785559999.647234,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "오다와라 8경주",
+  "wind": {
+   "venue": "오다와라",
+   "풍속": 3.1,
+   "풍향": "남남동",
+   "풍향코드": 7,
+   "기온": 32.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T13:40:00+09:00",
+   "지점": "小田原",
+   "지점거리km": 1.9
+  },
+  "fieldSize": 9,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "河端 朋之",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "立 川Ｆ１ 7/27 初特選 ２着 11 7/28 準決勝 ３着 10.9 7/29 決 勝 ４着 11.2",
+    "prev2": "高 知Ｇ２ 7/17 一予選 ７着 14 7/18 選 抜 １着 14 7/19 選 抜 ２着 13.9 7/20 特 選 ２着 13.8",
+    "chaku": [
+     9,
+     7,
+     3,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "橋本 強",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "防 府Ｆ１ 7/ 7 初特選 ６着 9.7 7/ 8 準決勝 ４着 9.8 7/ 9 特 選 ２着 9.8",
+    "prev2": "取 手Ｇ３ 6/27 一予選 ４着 11.5 6/28 二予選 １着 11.6 6/29 準決勝 ５着 11.2 6/30 特 秀 ６着 11.1",
+    "chaku": [
+     1,
+     3,
+     3,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 9,
+    "name": "横関 裕樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "佐世保Ｆ１ 7/13 予 選 ２着 11.9 7/14 準決勝 ４着 11.6 7/15 特 選 ６着",
+    "prev2": "平 塚Ｆ１ 6/30 予 選 ３着 11.4 7/ 1 準決勝 ５着 11.5 7/ 2 特 選 １着 11.5",
+    "chaku": [
+     3,
+     4,
+     5,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "纐纈 洸翔",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "豊 橋Ｇ３ 7/25 一予選 ２着 11.5 7/26 二予選 ９着 11.9 7/27 選 抜 ８着 12.3 7/28 一 般 ４着 11.2",
+    "prev2": "静 岡Ｆ１ 7/18 初特選 ６着 11.4 7/19 準決勝 ５着 11.5 7/20 特 選 ７着 12.3",
+    "chaku": [
+     1,
+     1,
+     3,
+     17
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "小島 歩",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "青 森Ｆ１ 7/23 予 選 ４着 11.7 7/24 選 抜 ２着 11.6 7/25 特 選 ６着 11.8",
+    "prev2": "玉 野Ｆ１ 7/14 予 選 ４着 11.5 7/15 選 抜 ３着 12 7/16 一 般 ３着 11.2",
+    "chaku": [
+     2,
+     4,
+     7,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "塩島嵩一朗",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "豊 橋Ｇ３ 7/25 一予選 ２着 12.1 7/26 二予選 ９着 11.8 7/27 選 抜 １着 11.8 7/28 特 選 ３着 11.4",
+    "prev2": "高 知Ｇ２ 7/17 一予選 ９着 13.9 7/18 選 抜 ８着 15.3 7/19 一 般 ４着 14.8 7/20 一 般 ７着 14.8",
+    "chaku": [
+     4,
+     3,
+     3,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "大崎飛雄馬",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 予 選 ３着 11.5 7/24 選 抜 ４着 11.6 7/25 一 般 ３着 12",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ２着 11.8 7/ 9 準決勝 ６着 12 7/10 特 選 ６着 11.4",
+    "chaku": [
+     4,
+     4,
+     8,
+     8
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 8,
+    "name": "房州 輝也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "奈 良Ｆ１ 7/25 予 選 ７着 10.1 7/26 一 般 ６着 10.3 7/27 一 般 ６着 9.9",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 ６着 13.8 7/14 一 般 ６着 14.8 7/15 一 般 ３着 14.1",
+    "chaku": [
+     0,
+     1,
+     6,
+     26
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "谷口 明正",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/14 予 選 ６着 11.6 7/15 一 般 ７着 13 7/16 一 般 ７着 11.7",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ４着 11.2 7/ 3 二予選 ８着 11.8 7/ 4 選 抜 ５着 11.6 7/ 5 選 抜 ８着 11.3",
+    "chaku": [
+     0,
+     2,
+     3,
+     8
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    2
+   ],
+   "closeCount": 6,
+   "closeHorses": [
+    7,
+    9,
+    5,
+    4,
+    8,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   7,
+   4,
+   2,
+   5,
+   8,
+   3,
+   9,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "トップクラス相手でも随所でそのスピードを発揮する河端。若い塩島、纐纈の出方次第だが一気に仕掛けて橋本との連独占濃厚。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   7,
+   4,
+   1
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   7
+  ],
+  "missed": [
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   7,
+   2
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 14:29:43"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번 대崎는 최근 경기 성적이 꾸준히 4착 이내를 기록하고 있었으며, 강력한 라인 7번 하시모토에 마크하며 추입할 기회를 충분히 얻었다. 2번 염도의 선행으로 인한 전개 유리함만 고려하고 4번의 안정적인 추입 능력을 간과했다.",
+  "new_rule": "라인의 주축 선수의 각질과 선행 여부뿐 아니라, 해당 라인 후미 추입마의 최근 꾸준한 성적과 전개 이점을 함께 고려하여 순위권 진입 가능성을 평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 14:29:45"
+ },
+ "reviewed": true
+}

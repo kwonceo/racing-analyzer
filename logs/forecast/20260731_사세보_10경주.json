@@ -1,0 +1,330 @@
+{
+ "predicted_top3": [
+  1,
+  5,
+  3
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1,
+  5,
+  4
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 간의 경쟁 속 고득점 ①-⑤ 연계와 라인 구성 우위",
+ "key_factors": [
+  "①-⑤-④ 라인의 고득점 연계",
+  "선행형 다수 출전으로 인한 전개 변수",
+  "②, ③의 본선 저항 시도"
+ ],
+ "exception_note": "①번과 ⑤번이 고득점 연계를 이루며 강력한 선행 라인을 형성하고, ⑦번과 ⑥번의 추입력은 비교적 약하며, 선행형이 다수이므로 초반에 경쟁이 치열할 가능성이 있어 통상적인 흐름보다는 선행 라인의 연계 플레이가 중요하게 작용할 것으로 보입니다.",
+ "applied_rules": [],
+ "raceKey": "사세보 10경주",
+ "forecastAt": "2026-07-31 14:43:05",
+ "forecastEpoch": 1785476585.5385053,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 10경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 5.7,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 32.8,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T14:30:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "佐藤 一伸",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "高 知Ｇ２ 7/17 一予選 ７着 14.5 7/18 選 抜 ６着 14 7/19 一 般 ３着 14 7/20 選 抜 ７着 14.1",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 １着 9.7 7/11 準決勝 ３着 9.6 7/12 決 勝 ４着",
+    "chaku": [
+     2,
+     2,
+     5,
+     9
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "小原 佑太",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "高 知Ｇ２ 7/17 一予選 ８着 15.1 7/18 選 抜 ４着 14.1 7/19 選 抜 ９着 14.6 7/20 一 般 ３着 13.7",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ２着 10 7/11 準決勝 ９着 10.2 7/12 特 選 ２着 9.7",
+    "chaku": [
+     2,
+     5,
+     3,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "山口 貴弘",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "前 橋Ｇ３ 7/10 予 選 ７着 9.9 7/11 選 抜 ５着 10 7/12 選 抜 ２着 9.9",
+    "prev2": "高 知Ｆ１ 6/29 予 選 ２着 13.9 6/30 準決勝 ４着 14.4 7/ 1 特 選 ３着 14.1",
+    "chaku": [
+     0,
+     4,
+     6,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "山口 多聞",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "前 橋Ｇ３ 7/22 予 選 １着 10 7/23 準決勝 ６着 11 7/24 特 秀 ７着 10.3",
+    "prev2": "松 阪Ｆ１ 7/16 初特選 ５着 11.6 7/17 準決勝 ６着 11.6 7/18 特 選 ５着 10.8",
+    "chaku": [
+     2,
+     2,
+     3,
+     16
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "吉松 直人",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 予 選 ６着 12 7/24 一 般 ２着 11.4 7/25 一 般 ７着 12",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 ７着 9.4 7/ 8 一 般 １着 9.9 7/ 9 特 選 ４着 10.1",
+    "chaku": [
+     8,
+     5,
+     3,
+     6
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "中川 聖大",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ３着 11.3 7/23 準決勝 ５着 11.9 7/24 特 選 ７着 11.6",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ６着 9.9 7/11 特 選 ３着 9.9 7/12 特 秀 ４着 9.4",
+    "chaku": [
+     5,
+     2,
+     7,
+     10
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "小林 潤二",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 予 選 ７着 13.3 7/24 一 般 ６着 11.6 7/25 一 般 ４着 11.5",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 落 7/11 選 抜 ６着 10.1",
+    "chaku": [
+     0,
+     0,
+     0,
+     7
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    1,
+    3,
+    2
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    7,
+    4,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   5,
+   4,
+   2,
+   7,
+   3,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "①小原－⑤佐藤は高得点同士の連係。そして３番手に④吉松が来たのも大きな材料。②中川と③山口多が本線に抵抗の自力型",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   1,
+   4
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   5
+  ],
+  "missed": [
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   1,
+   4
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -1.6,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 15:18:34"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번마의 등급과 '착순분포' 데이터(8,5,3,6)를 보았을 때, 선행형 다수 출전으로 인한 혼전 속에서 꾸준한 성적을 바탕으로 추입할 가능성을 과소평가했습니다. 특히 ③번의 본선 저항 시도가 예상보다 약하여 4번이 더 유리한 전개를 맞이했습니다.",
+  "new_rule": "선행형이 다수일 경우, 혼전 상황에서 등급 A의 추입형 말의 꾸준한 착순 분포를 주의 깊게 살핀다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 15:18:36"
+ },
+ "reviewed": true
+}

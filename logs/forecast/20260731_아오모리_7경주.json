@@ -1,0 +1,317 @@
+{
+ "predicted_top3": [
+  4,
+  7,
+  6
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "느린",
+ "line_winner": [
+  4
+ ],
+ "confidence": 4,
+ "reason_short": "선행마 2두가 초반부터 강력한 경쟁 없이 이끌며, 후미 추입마 중 가장 안정적인 6번이 3착.",
+ "key_factors": [
+  "선행마 2두 (4, 7)의 초반 전개 이점",
+  "대부분의 말이 추입형으로 후미에서 뭉칠 가능성",
+  "6번마의 최근 착순 분포가 추입마 중 가장 안정적"
+ ],
+ "exception_note": "선행형이 2두밖에 없는 구성으로, 초반 선두 경쟁이 심화되기보다는 4번과 7번이 서로 견제하며 페이스를 조절할 가능성이 높다. 이로 인해 후미 추입마들의 추입 시점이 늦어져 선행마들이 버틸 가능성이 커진다. 특히 4번은 1착 경험이 있어 결승선까지 버티는 힘이 있다.",
+ "applied_rules": [],
+ "raceKey": "아오모리 7경주",
+ "forecastAt": "2026-07-31 10:20:26",
+ "forecastEpoch": 1785460826.5940626,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "아오모리 7경주",
+  "wind": {
+   "venue": "아오모리",
+   "풍속": 5.1,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 26.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T10:00:00+09:00",
+   "지점": "青森",
+   "지점거리km": 1.36
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 3,
+    "name": "青木 美保",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "chaku": [
+     3,
+     9,
+     7,
+     11
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "小原 乃亜",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "chaku": [
+     5,
+     3,
+     0,
+     1
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "野寺 楓",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "chaku": [
+     1,
+     2,
+     6,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "島田 優里",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "chaku": [
+     2,
+     3,
+     3,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "渡口まりあ",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "chaku": [
+     5,
+     5,
+     5,
+     18
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "成海 綾香",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "chaku": [
+     0,
+     1,
+     2,
+     19
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "杉沢毛伊子",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "chaku": [
+     0,
+     3,
+     4,
+     21
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    4,
+    7
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    3,
+    6,
+    2,
+    5,
+    1
+   ]
+  },
+  "lines": [
+   7,
+   6,
+   1,
+   4,
+   3,
+   2,
+   5
+  ],
+  "paceLabel": null,
+  "comment": "地元の有望株",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   7,
+   4,
+   3
+  ],
+  "hit_count": 2,
+  "hit": [
+   4,
+   7
+  ],
+  "missed": [
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   7,
+   4,
+   2
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 10:52:19"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번마의 최근 착순 분포가 비록 안정적이지 않았으나, 추입형 말들 사이에서 가장 높은 '기어비' 수치를 보여주며 뒷심을 발휘할 잠재력이 있었다는 점을 간과했습니다.",
+  "new_rule": "착순 분포가 좋지 않더라도 추입형 말의 기어비가 높을 경우, 다른 추입마보다 우선하여 복병으로 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 10:52:21"
+ },
+ "reviewed": true
+}

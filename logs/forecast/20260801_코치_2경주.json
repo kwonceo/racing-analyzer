@@ -1,0 +1,314 @@
+{
+ "predicted_top3": [
+  3,
+  5,
+  6
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 3,
+ "reason_short": "3번마가 직전 1착으로 상승세. 5, 6번마의 최근 성적도 준수하여 후반 힘을 기대한다.",
+ "key_factors": [
+  "3번마 직전 1착으로 컨디션 상승",
+  "5번마 직전 2착, 6번마 직전 3착으로 경쟁력 입증",
+  "다른 말들의 최근 성적이 두드러지지 않아 이들 간의 경쟁 구도 예상"
+ ],
+ "exception_note": "통상",
+ "applied_rules": [],
+ "raceKey": "코치 2경주",
+ "forecastAt": "2026-08-01 15:55:26",
+ "forecastEpoch": 1785567326.8303745,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "코치 2경주",
+  "wind": {
+   "venue": "코치",
+   "풍속": 3.1,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 30.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T15:40:00+09:00",
+   "지점": "南国日章",
+   "지점거리km": 5.26
+  },
+  "fieldSize": 11,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "원더폴원",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "상현"
+   },
+   {
+    "no": 2,
+    "name": "골드로저",
+    "gait": null,
+    "recentPlacings": [
+     4
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "승운"
+   },
+   {
+    "no": 3,
+    "name": "소우패스",
+    "gait": null,
+    "recentPlacings": [
+     1
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "은경"
+   },
+   {
+    "no": 4,
+    "name": "챔프의영",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "경민"
+   },
+   {
+    "no": 5,
+    "name": "리치스카",
+    "gait": null,
+    "recentPlacings": [
+     2
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "나카"
+   },
+   {
+    "no": 6,
+    "name": "벌마의거",
+    "gait": null,
+    "recentPlacings": [
+     3
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "진구"
+   },
+   {
+    "no": 7,
+    "name": "광선대로",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "생재"
+   },
+   {
+    "no": 8,
+    "name": "월드하니",
+    "gait": null,
+    "recentPlacings": [
+     5
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "광희"
+   },
+   {
+    "no": 9,
+    "name": "행복트리",
+    "gait": null,
+    "recentPlacings": [
+     7
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "강주"
+   },
+   {
+    "no": 10,
+    "name": "모어퀴클",
+    "gait": null,
+    "recentPlacings": [
+     5
+    ],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "형석"
+   },
+   {
+    "no": 11,
+    "name": "닥터프린",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": null,
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "시대"
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   6,
+   2,
+   7
+  ],
+  "hit_count": 1,
+  "hit": [
+   6
+  ],
+  "missed": [
+   2,
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": null,
+    "recentPlacings": [
+     4
+    ],
+    "line": null,
+    "grade": null
+   },
+   {
+    "no": 7,
+    "gait": null,
+    "recentPlacings": [],
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   6,
+   1,
+   2
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.2,
+  "market_src": "win",
+  "gradedAt": "2026-08-01 16:29:35"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번마와 7번마의 최근 성적 외에 다른 정보가 전혀 없어 잠재력을 파악하지 못했다. 특히 2번마의 직전 4착 성적만으로는 상위권 진입을 예상하기 어려웠다.",
+  "new_rule": "데이터 누락이 심한 경주의 경우, 단순히 최근 착순 정보만으로 우열을 판단하지 않고 다른 가능한 요소를 추가적으로 검토한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 16:29:37"
+ },
+ "reviewed": true
+}

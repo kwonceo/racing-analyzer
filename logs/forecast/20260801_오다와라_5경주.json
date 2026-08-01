@@ -1,0 +1,376 @@
+{
+ "predicted_top3": [
+  2,
+  5,
+  3
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "2번 청양의 선행을 5번 소노다의 젖히기가 받아가며, 3번 기무라가 2번 청양을 노릴 수 있는 구도. 2번의 적극적인 선행 시도가 예상됨.",
+ "key_factors": [
+  "2번 청양의 적극적인 선행 의지",
+  "5번 소노다의 젖히기 능력",
+  "3번 기무라의 2번 청양 견제"
+ ],
+ "exception_note": "2번 청양(선행)과 1번 시마카와(선행)가 있으나, 코멘트에서 2번 청양이 적극적으로 나설 것으로 예상되어 1번을 제끼고 2번이 주도권을 잡을 가능성이 높음. 5번 소노다(젖히기)가 2번의 뒤를 노리는 형태가 예상되어 통상적인 선행-추입 구도와는 다른 전개가 가능함.",
+ "applied_rules": [],
+ "raceKey": "오다와라 5경주",
+ "forecastAt": "2026-08-01 12:27:22",
+ "forecastEpoch": 1785554842.5436997,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "오다와라 5경주",
+  "wind": {
+   "venue": "오다와라",
+   "풍속": 3.1,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 34.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T12:10:00+09:00",
+   "지점": "小田原",
+   "지점거리km": 1.9
+  },
+  "fieldSize": 9,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "園田 匠",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "豊 橋Ｇ３ 7/25 初特選 ５着 11 7/26 二予選 ４着 11 7/27 準決勝 ６着 11.5 7/28 特 秀 ４着 11.4",
+    "prev2": "高 知Ｇ２ 7/17 一予選 ４着 13.9 7/18 二予Ｂ １着 13.9 7/19 準決勝 ９着 13.8 7/20 特 選 ５着 14.3",
+    "chaku": [
+     5,
+     6,
+     3,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "新山 将史",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 初特選 ５着 11.8 7/24 準決勝 ２着 11.6 7/25 決 勝 ４着 11.4",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ２着 11.2 7/ 3 二予選 ５着 11.2 7/ 4 特 選 ５着 11.1 7/ 5 特 選 １着 11.3",
+    "chaku": [
+     3,
+     4,
+     4,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "青柳 靖起",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "奈 良Ｆ１ 7/25 予 選 ６着 10.3 7/26 一 般 欠",
+    "prev2": "岸和田Ｆ１ 7/20 初特選 １着 11.5 7/21 準決勝 ７着 11.9 7/22 一 般 １着 11.4",
+    "chaku": [
+     11,
+     6,
+     1,
+     15
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "島川 将貴",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/22 予 選 １着 11.3 7/23 準決勝 ７着 12.3 7/24 一 般 １着 11.4",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ５着 9.5 7/11 特 選 １着 9.7 7/12 特 秀 ６着 9.5",
+    "chaku": [
+     6,
+     0,
+     1,
+     14
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "木村 佑来",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "奈 良Ｆ１ 7/25 予 選 ２着 9.4 7/26 準決勝 ３着 9.8 7/27 特 選 ２着 9.4",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 １着 11.6 7/14 準決勝 ６着 12.4 7/15 特 選 ２着 11.6",
+    "chaku": [
+     6,
+     4,
+     3,
+     15
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 9,
+    "name": "稲吉 悠大",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ７着 10 7/23 選 抜 ５着 9.6 7/24 選 抜 ４着 10",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 ４着 11.5 7/14 準決勝 ５着 11.2 7/15 特 選 ７着 11.2",
+    "chaku": [
+     0,
+     5,
+     6,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "開坂 秀明",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ５着 11.2 7/21 一 般 ４着 11.4 7/22 一 般 ２着 11.3",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 ７着 13.7 7/14 一 般 ２着 14.3 7/15 一 般 １着 14.1",
+    "chaku": [
+     1,
+     6,
+     1,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 8,
+    "name": "高市 訓但",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ４着 11.2 7/21 一 般 ３着 11.3 7/22 一 般 ２着 11.3",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ６着 11.4 7/ 9 一 般 ６着 12.1 7/10 一 般 ４着 11.7",
+    "chaku": [
+     2,
+     3,
+     2,
+     5
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "近藤 誠二",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ４着 11.3 7/21 一 般 ７着 11.5 7/22 一 般 ３着 11.3",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 ５着 13.9 7/14 一 般 ４着 14.1 7/15 一 般 ５着 14.2",
+    "chaku": [
+     1,
+     3,
+     7,
+     10
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    2
+   ],
+   "closeCount": 6,
+   "closeHorses": [
+    5,
+    7,
+    9,
+    4,
+    8,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   8,
+   6,
+   2,
+   5,
+   9,
+   3,
+   7,
+   4
+  ],
+  "paceLabel": null,
+  "comment": "前走奈良の予選は失敗したが近況青柳の競走内容は良い。積極的に飛び出しそうで番手園田が絶好。木村と叩合いなら島川にも。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   7,
+   3,
+   9
+  ],
+  "hit_count": 1,
+  "hit": [
+   3
+  ],
+  "missed": [
+   7,
+   9
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 9,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   7,
+   2
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 13:10:01"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 청양의 선행 의지가 예상보다 약했고, 1번 시마카와가 선행 주도권을 잡지 못했다. 추입형 강자들이 제때 올라오지 못했다. 특히 7번 신산과 9번 이나요시의 상승세를 간과했다.",
+  "new_rule": "선행마들의 최근 컨디션과 경주 흐름 장악 능력을 더욱 면밀히 분석하고, 추입마들의 최근 연대 및 기세를 예측에 반영한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 13:10:03"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,328 @@
+{
+ "predicted_top3": [
+  1,
+  3,
+  2
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "1번이 최근 성적이 가장 우수하고, 3번의 선행으로 전개 이점을 받을 수 있다.",
+ "key_factors": [
+  "1번의 최근 우수한 성적과 우승 경험",
+  "3번의 유일한 선행형 각질로 인한 전개 주도 가능성",
+  "대부분 추입형 각질로 인한 후반 혼전 가능성",
+  "7번의 잦은 착외 기록"
+ ],
+ "exception_note": "이 경주는 7명의 출전 선수 중 1명의 선행형(3번)과 5명의 추입형(1,2,4,5,7번), 1명의 젖히기형(6번)으로 구성되어 있다. 유일한 선행형인 3번이 초반 페이스를 이끌 가능성이 높고, 뒤를 이어 추입형들이 기회를 노릴 것이다. 특히 1번 那須 萌美는 최근 佐世保F1에서 우승하는 등 좋은 컨디션을 보여주고 있어 3번의 선행을 활용한 막판 추입으로 우승을 노릴 수 있다. 3번 露谷菜々花는 유일한 선행형으로 본인의 주도권을 살릴 기회가 될 것이며, 첫 고향 출전이라는 동기 부여도 작용할 수 있다. 2번 川原 未紀는 최근 꾸준히 2~4착을 기록하며 안정적인 모습을 보여주고 있어 3위권 진입을 노려볼 만하다. 다른 추입형들은 1번과 비슷한 전략을 취하겠지만, 최근 성적에서 1번이 확연히 앞서고 있다. 7번 齊藤 由紀는 최근 경기에서 7착을 자주 기록하며 부진한 모습을 보이고 있어 상위권 진입이 어려울 것으로 예상된다.",
+ "applied_rules": [],
+ "raceKey": "코치 2경주",
+ "forecastAt": "2026-07-31 20:55:32",
+ "forecastEpoch": 1785498932.7716444,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "코치 2경주",
+  "wind": {
+   "venue": "코치",
+   "풍속": 2.1,
+   "풍향": "남동",
+   "풍향코드": 6,
+   "기온": 28.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T20:30:00+09:00",
+   "지점": "南国日章",
+   "지점거리km": 5.26
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "那須 萌美",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "prev1": "前 橋Ｇ３ 7/22 予１Ａ ２着 10.1 7/23 予２Ａ ２着 10 7/24 ガ決Ａ ２着 10",
+    "prev2": "佐世保Ｆ１ 7/13 ガ予１ ２着 12.1 7/14 ガ予２ ２着 12 7/15 ガ決勝 １着 11.9",
+    "chaku": [
+     8,
+     11,
+     2,
+     4
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "川原 未紀",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.71,
+    "prev1": "和歌山Ｆ２ 7/24 ガ予１ ２着 12.2 7/25 ガ予２ ４着 12.4 7/26 ガ決勝 ５着 12.2",
+    "prev2": "平 Ｆ２ 7/16 ガ予１ ４着 12.1 7/17 ガ予２ ４着 12.2 7/18 ガ決勝 ５着 12.2",
+    "chaku": [
+     0,
+     4,
+     5,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "片岡 美奈",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "prev1": "玉 野Ｆ１ 7/22 ガ予１ ６着 14.1 7/23 ガ予２ ７着 12.6 7/24 ガ一般 ４着 13.4",
+    "prev2": "函 館Ｆ１ 7/14 ガ予１ ３着 12.4 7/15 ガ予２ ６着 12.3 7/16 ガ一般 ２着 13.4",
+    "chaku": [
+     1,
+     1,
+     2,
+     19
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "藤巻絵里佳",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "prev1": "岸和田Ｆ１ 7/20 ガ予１ ４着 12.6 7/21 ガ予２ ４着 12.2 7/22 ガ決勝 ７着 12.1",
+    "prev2": "玉 野Ｆ２ 7/ 7 ガ予１ ６着 13 7/ 8 ガ予２ ４着 12.8 7/ 9 ガ一般 ３着 13",
+    "chaku": [
+     0,
+     1,
+     3,
+     24
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "露谷菜々花",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "prev1": "和歌山Ｆ２ 7/24 ガ予１ ７着 12.5 7/25 ガ予２ ６着 13.4 7/26 ガ一般 ５着 12.5",
+    "prev2": "玉 野Ｆ２ 7/ 7 ガ予１ ３着 13.1 7/ 8 ガ予２ ２着 12.8 7/ 9 ガ決勝 ６着 13.7",
+    "chaku": [
+     1,
+     4,
+     2,
+     8
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "今西 瑠花",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "prev1": "岸和田Ｆ１ 7/20 ガ予１ ５着 13.3 7/21 ガ予２ ５着 12.4 7/22 ガ一般 ２着 13.2",
+    "prev2": "奈 良Ｆ２ 7/ 1 ガ予１ ７着 10.5 7/ 2 ガ予２ ７着 10.6 7/ 3 ガ一般 ２着 10.7",
+    "chaku": [
+     0,
+     2,
+     0,
+     11
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "齊藤 由紀",
+    "gait": "자재(양각)",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.71,
+    "prev1": "函 館Ｆ１ 7/14 ガ予１ ７着 12.5 7/15 ガ予２ ７着 13.5 7/16 ガ一般 ３着 13.3",
+    "prev2": "伊 東Ｆ２ 6/23 ガ予１ ７着 10.4 6/24 ガ予２ ７着 10.9",
+    "chaku": [
+     0,
+     0,
+     1,
+     14
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    3
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    1,
+    2,
+    4,
+    5
+   ]
+  },
+  "lines": [
+   1,
+   2,
+   3,
+   6,
+   5,
+   4,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "７月佐世保Ｖと戦歴面リードの那須に期待。川原も好機を逃さず。露谷も初の地元戦で。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   3,
+   4
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   3
+  ],
+  "missed": [
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   3,
+   2
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 21:37:39"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번 片岡 美奈 선수의 최근 경기 중 '函 館Ｆ１ 7/14' 예선 3착, '函 館Ｆ１ 7/16' 일반전 2착 기록을 간과하여 안정적인 순위권 진입 가능성을 놓쳤습니다.",
+  "new_rule": "선수의 최근 성적을 단순히 나열된 순위로만 판단하지 않고, 각 경기별 세부 착순과 등급 내에서의 경쟁력을 종합적으로 평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 21:37:41"
+ },
+ "reviewed": true
+}

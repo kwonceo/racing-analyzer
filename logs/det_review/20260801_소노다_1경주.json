@@ -1,0 +1,57 @@
+{
+ "raceKey": "소노다 1경주",
+ "entries": [
+  {
+   "time": "00:00:29",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      7
+     ],
+     [
+      1,
+      8
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      7,
+      8
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      7,
+      8
+     ],
+     [
+      1,
+      6,
+      7
+     ],
+     [
+      1,
+      6,
+      8
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

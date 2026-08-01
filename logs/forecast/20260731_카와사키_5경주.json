@@ -1,0 +1,369 @@
+{
+ "predicted_top3": [
+  4,
+  2,
+  3
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 8두로 초반 경합 심화 예상, 능력 우위의 선행마가 유리.",
+ "key_factors": [
+  "선행마 초과",
+  "경주거리",
+  "상위 그레이드 선행마",
+  "강한 바람"
+ ],
+ "exception_note": "출주마 10두 중 선행형이 8두로, 초반부터 치열한 선두 다툼이 예상된다. 이로 인해 페이스가 빨라질 가능성이 높으며, 후반까지 버티기 위해서는 기본적인 능력이 뒷받침되어야 한다. 남풍 6.4m/s의 강한 바람이 선행마들에게는 불리하게 작용할 수 있으나, 더트 1400m 거리에서 초반 빠른 페이스를 이겨낼 수 있는 상위 그레이드의 선행마가 결국 유리할 것으로 판단된다.",
+ "applied_rules": [],
+ "raceKey": "카와사키 5경주",
+ "forecastAt": "2026-07-31 16:50:19",
+ "forecastEpoch": 1785484219.515298,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "카와사키 5경주",
+  "wind": {
+   "venue": "카와사키",
+   "풍속": 6.4,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 33.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T16:30:00+09:00",
+   "지점": "羽田",
+   "지점거리km": 7.22
+  },
+  "fieldSize": 10,
+  "distance": 1400,
+  "surface": "더트",
+  "trackCond": "良",
+  "horses": [
+   {
+    "no": 4,
+    "name": "マッセダムール",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     11,
+     2,
+     5,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 456,
+    "jockey": "笹川翼",
+    "distApt": "A"
+   },
+   {
+    "no": 3,
+    "name": "ボールドポリシー",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     2,
+     8,
+     11,
+     7
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 480,
+    "jockey": "新原周",
+    "distApt": "A"
+   },
+   {
+    "no": 2,
+    "name": "ウインプリームス",
+    "gait": "선행형",
+    "recentPlacings": [
+     6,
+     2,
+     1,
+     4,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 464,
+    "jockey": "櫻井光",
+    "distApt": "A"
+   },
+   {
+    "no": 7,
+    "name": "オリコウパラダイス",
+    "gait": "선행형",
+    "recentPlacings": [
+     5,
+     3,
+     1,
+     2,
+     9
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 480,
+    "jockey": "伊藤裕",
+    "distApt": "A"
+   },
+   {
+    "no": 1,
+    "name": "フリージングフォグ",
+    "gait": "선행형",
+    "recentPlacings": [
+     1,
+     11,
+     7,
+     4,
+     4
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 479,
+    "jockey": "古岡勇",
+    "distApt": "B"
+   },
+   {
+    "no": 6,
+    "name": "シンボルザサン",
+    "gait": "평지형",
+    "recentPlacings": [
+     8,
+     4,
+     2,
+     6,
+     1
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 439,
+    "jockey": "佐野遥",
+    "distApt": "A"
+   },
+   {
+    "no": 9,
+    "name": "ゼンダントモニ",
+    "gait": "선행형",
+    "recentPlacings": [
+     5,
+     2,
+     7,
+     1,
+     1
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 473,
+    "jockey": "野畑凌",
+    "distApt": "A"
+   },
+   {
+    "no": 10,
+    "name": "ハクシンダンス",
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     5,
+     13,
+     4
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 475,
+    "jockey": "中島良",
+    "distApt": "C"
+   },
+   {
+    "no": 8,
+    "name": "エルロロ",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     12,
+     9,
+     4,
+     4
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 550,
+    "jockey": "中越琉",
+    "distApt": "C"
+   },
+   {
+    "no": 5,
+    "name": "カレンメラメーラ",
+    "gait": "선행형",
+    "recentPlacings": [
+     10,
+     6,
+     6,
+     5,
+     11
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 468,
+    "jockey": "木間龍",
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 8,
+   "leadHorses": [
+    4,
+    3,
+    2,
+    7,
+    1,
+    9,
+    10,
+    5
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 100.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 60.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "기수 승률(보유율 60%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   2,
+   5,
+   4
+  ],
+  "hit_count": 2,
+  "hit": [
+   4,
+   2
+  ],
+  "missed": [
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 5,
+    "gait": null,
+    "recentPlacings": [
+     8
+    ],
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   1,
+   5
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.6,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 17:24:22"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "5번 말은 낮은 등급(D)과 좋지 않은 최근 착순(10, 6, 6, 5, 11)에도 불구하고 빠른 페이스를 버텨내며 입상했다. 이는 예상보다 더 높은 잠재력이나 컨디션을 가졌을 가능성을 시사하며, 단순히 등급과 최근 착순만으로 판단하기 어려운 변수가 있었음을 놓쳤다.",
+  "new_rule": "등급이 낮고 최근 착순이 좋지 않아도, 초반 선두 다툼이 치열한 경주에서는 예상치 못한 잠재력을 발휘하는 말이 있는지 면밀히 살펴본다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 17:24:24"
+ },
+ "reviewed": true
+}

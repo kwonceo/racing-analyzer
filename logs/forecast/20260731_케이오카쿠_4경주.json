@@ -1,0 +1,330 @@
+{
+ "predicted_top3": [
+  1,
+  3,
+  2
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "느린",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 1번의 페이스 조절과 3번의 라인 지원, 2번의 후미 강습 기대.",
+ "key_factors": [
+  "4차 선행을 부여받은 1번 土田栄二의 페이스 조절 능력",
+  "총평에서 3번 土屋仁의 1번 지원 언급",
+  "라인 구성상 선행형이 2명으로 상대적으로 적어 1번의 유리한 전개 예상",
+  "라인 마지막에 있는 2번 栗田雄矢의 추입력"
+ ],
+ "exception_note": "총평에서 1번의 페이스 운영 및 3번의 지원을 명시적으로 언급하며 특정 라인의 우위를 예상하고, 4차 선두 부여가 1번에게 전개 주도권을 줄 수 있는 특수한 상황으로 판단됨.",
+ "applied_rules": [],
+ "raceKey": "케이오카쿠 4경주",
+ "forecastAt": "2026-07-31 21:51:48",
+ "forecastEpoch": 1785502308.9060304,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "케이오카쿠 4경주",
+  "wind": {
+   "venue": "케이오카쿠",
+   "풍속": 2.1,
+   "풍향": "남남동",
+   "풍향코드": 7,
+   "기온": 29.2,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T21:40:00+09:00",
+   "지점": "府中",
+   "지점거리km": 5.19
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "土田 栄二",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "岸和田Ｆ２ 7/13 特予選 １着 11.6 7/14 準決勝 ３着 11.4 7/15 決 勝 ６着 12.3",
+    "prev2": "青 森Ｆ１ 7/ 3 予 選 ２着 12 7/ 4 準決勝 ３着 12.2 7/ 5 特 選 １着 11.5",
+    "chaku": [
+     6,
+     6,
+     4,
+     5
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "栗田 雄矢",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ３着 11.9 7/21 準決勝 ４着 12.1 7/22 特 選 ４着 11.4",
+    "prev2": "函 館Ｆ２ 7/ 1 予 選 ４着 11.4 7/ 2 選 抜 ２着 11.9 7/ 3 特 選 ３着 11.9",
+    "chaku": [
+     2,
+     5,
+     3,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "土屋 仁",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 予 選 ４着 12.3 7/24 準決勝 ２着 11.5 7/25 決 勝 ３着 11.8",
+    "prev2": "名古屋Ｆ２ 7/10 予 選 ３着 11.6 7/11 選 抜 ５着 11.8 7/12 一 般 ２着 11.9",
+    "chaku": [
+     3,
+     6,
+     7,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "瀧野 勝太",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "広 島Ｆ２ 7/22 予 選 ４着 12 7/23 選 抜 ４着 11.3 7/24 一 般 ５着 11.4",
+    "prev2": "岸和田Ｆ２ 7/13 特予選 ５着 12.3 7/14 特一般 ７着 11.6 7/15 特一般 ４着 11.8",
+    "chaku": [
+     2,
+     3,
+     1,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "齊藤 健人",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ５着 12.1 7/23 一 般 １着 12.1 7/24 特 選 ７着 12.3",
+    "prev2": "小田原Ｆ２ 7/10 特予選 ４着 9.8 7/11 特一般 ２着 10.2 7/12 特 選 ７着",
+    "chaku": [
+     3,
+     3,
+     1,
+     17
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "森川 剛",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 予 選 ５着 12.2 7/24 一 般 ７着 14.7 7/25 一 般 ７着 14.9",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 ５着 12 7/14 一 般 ６着 12.2 7/15 一 般 ６着 14",
+    "chaku": [
+     1,
+     1,
+     3,
+     24
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "杉浦 康一",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "和歌山Ｆ２ 7/24 特予選 ７着 12.3 7/25 特一般 ５着 11.8 7/26 特一般 ６着 12.9",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ４着 12.2 7/ 9 一 般 ２着 11.9 7/10 特 選 ５着 11.5",
+    "chaku": [
+     2,
+     1,
+     4,
+     14
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    1,
+    5
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    2,
+    3,
+    4,
+    6,
+    7
+   ]
+  },
+  "lines": [
+   1,
+   3,
+   4,
+   7,
+   5,
+   2,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "４車の先頭を託された土田がペース駆けから押し切る。土屋が援護し茨城決着へ。齊藤に惰性を貰う栗田の強襲に一考。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   3,
+   1,
+   4
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   3
+  ],
+  "missed": [
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   1,
+   4
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.6,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 22:19:33"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번 瀧野 勝太의 추입력을 과소평가했습니다. 1번 土田栄二의 선행과 3번 土屋仁의 지원 라인에 집중하여 4번의 잠재력을 간과했습니다.",
+  "new_rule": "총평에서 특정 라인의 우위를 예상해도, 라인의 후미에 위치한 다른 추입형 선수의 최근 전개 및 착순 분포를 면밀히 검토하여 예상치 못한 추입 가능성을 확인한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 22:19:36"
+ },
+ "reviewed": true
+}

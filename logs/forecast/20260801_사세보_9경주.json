@@ -1,0 +1,335 @@
+{
+ "predicted_top3": [
+  2,
+  5,
+  4
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "선행 주도권 다툼 후 강한 젖히기형 2번이 우위, 추입형 5번, 4번 추격 예상",
+ "key_factors": [
+  "2번과 7번의 선행 선언으로 인한 라인 내 경쟁 발생 가능성",
+  "2번의 강력한 젖히기 각질과 최근 양호한 컨디션",
+  "5번과 4번의 추입형 각질을 활용할 수 있는 전개 예상",
+  "바람의 영향으로 선행 주자의 부담이 가중될 수 있음"
+ ],
+ "exception_note": "2번과 7번 모두 선행을 선언했으나 2번의 젖히기 각질이 더 뛰어나 자체 경쟁보다는 2번이 주도권을 잡을 가능성이 높음. 다만 7번이 무리한 선행을 시도할 경우 체력 소모로 인한 동반 부진 가능성도 존재함. 5번과 4번은 이 기회를 노려 추입에 성공할 수 있을 것으로 판단됨.",
+ "applied_rules": [],
+ "raceKey": "사세보 9경주",
+ "forecastAt": "2026-08-01 14:13:05",
+ "forecastEpoch": 1785561185.9072914,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 9경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 6.2,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 33.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T14:00:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 4,
+    "name": "照井 拓成",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ３着 11.2",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ５着 11.3 7/23 一 般 ２着 11.7 7/24 特 選 ６着 11.1",
+    "prev2": "岐 阜Ｆ１ 7/11 予 選 ７着 11.4 7/12 一 般 ５着 10.9 7/13 一 般 ６着 11.3",
+    "chaku": [
+     1,
+     7,
+     5,
+     11
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "平尾 一晃",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 予 選 ４着 11.7",
+    "prev1": "松 阪Ｆ１ 7/16 予 選 １着 11 7/17 準決勝 ３着 10.8 7/18 特 選 １着 11.5",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ２着 12.2 7/ 3 二予選 ９着 11.5 7/ 4 選 抜 ４着 11.3 7/ 5 選 抜 １着 11",
+    "chaku": [
+     6,
+     4,
+     3,
+     10
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "瀬戸 晋作",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11.3",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ３着 9.9 7/23 準決勝 ５着 10.2 7/24 特 秀 ７着 9.6",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 ４着 14.1 7/14 選 抜 ７着 15 7/15 一 般 ７着 14.9",
+    "chaku": [
+     1,
+     0,
+     2,
+     15
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "武藤 篤弘",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ４着 11.7",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ２着 11.6 7/24 準決勝 ７着 11.8 7/25 特 選 ４着 12.2",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ６着 11.2 7/ 9 一 般 ６着 12 7/10 一 般 ５着 11.1",
+    "chaku": [
+     0,
+     3,
+     6,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "松尾信太郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "7/31 予 選 ４着 11",
+    "prev1": "立 川Ｆ１ 7/27 予 選 ５着 11.2 7/28 一 般 ５着 11.5 7/29 一 般 ３着 11.3",
+    "prev2": "松 阪Ｆ１ 7/16 予 選 ６着 11.8 7/17 一 般 ２着 11.4 7/18 一 般 ３着 11.1",
+    "chaku": [
+     2,
+     2,
+     5,
+     20
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "中川 聖大",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ３着 11.3 7/23 準決勝 ５着 11.9 7/24 特 選 ７着 11.6",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ６着 9.9 7/11 特 選 ３着 9.9 7/12 特 秀 ４着 9.4",
+    "chaku": [
+     5,
+     2,
+     7,
+     10
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "白岩 大助",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ４着 11.1",
+    "prev1": "富 山Ｆ１ 7/21 予 選 ５着 9.3 7/22 一 般 ３着 9.7 7/23 一 般 ４着 9.9",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ９着 10 7/11 選 抜 ６着 9.5 7/12 選 抜 ６着 9.8",
+    "chaku": [
+     3,
+     2,
+     1,
+     12
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    7
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    4,
+    5,
+    1,
+    3,
+    6
+   ]
+  },
+  "lines": [
+   2,
+   5,
+   4,
+   1,
+   6,
+   7,
+   3
+  ],
+  "paceLabel": null,
+  "comment": "②平尾が好位確保から勝負所を逃さず仕掛け、⑤瀬戸が差す地元ワンツーを推す。④照井も組み立てひとつ。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   1,
+   4
+  ],
+  "hit_count": 2,
+  "hit": [
+   5,
+   4
+  ],
+  "missed": [
+   1
+  ],
+  "missed_info": [
+   {
+    "no": 1,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   5,
+   4
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 14:49:58"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번의 선행 능력과 젖히기 각질에 너무 집중한 나머지, 1번의 최근 착순 정보 부족에도 불구하고 잠재된 추입 능력을 간과했다. 1번의 '선언 추입' 각질과 높은 등급을 보았어야 했다.",
+  "new_rule": "선행 주자 간 경쟁 예상 시, 추입형 말들의 선언 각질과 등급을 면밀히 분석하여 이변 가능성을 예측한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 14:50:00"
+ },
+ "reviewed": true
+}

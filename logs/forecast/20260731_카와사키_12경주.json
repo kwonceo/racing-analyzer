@@ -1,0 +1,397 @@
+{
+ "predicted_top3": [
+  3,
+  6,
+  8
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 3,
+ "reason_short": "단독 선행마의 이점을 활용하며, 추격마 중 기수 승률과 거리 적성이 좋은 말이 뒤따를 것으로 예상.",
+ "key_factors": [
+  "단독 선행마 8번의 유리한 전개 가능성",
+  "3번 기수 승률 25%와 거리 적성 A의 조합",
+  "6번 기수 승률 42.9%로 가장 높음"
+ ],
+ "exception_note": "이 경주는 11두 중 유일한 선행형(8번)이 있어 전개상 유리함을 가질 수 있다. 대부분 추격형과 평지형으로 구성되어 있어, 8번이 초반부터 선두를 잡고 경주를 이끌 가능성이 높다. 이로 인해 후미에서 힘을 비축한 추격마들이 막판 추입으로 따라붙는 양상이 될 것이며, 그 중 기수 승률과 거리 적성이 뛰어난 말들이 상위권에 들 것으로 예상된다. 남동풍 5.3m/s의 바람이 있지만, 주로의 방향을 알 수 없어 맞바람 여부를 판단하기 어렵다. 다만 강풍은 선행마에게 다소 불리할 수 있으나, 단독 선행의 이점이 이를 상쇄할 수 있다고 본다.",
+ "applied_rules": [],
+ "raceKey": "카와사키 12경주",
+ "forecastAt": "2026-07-31 20:40:36",
+ "forecastEpoch": 1785498036.7671576,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "카와사키 12경주",
+  "wind": {
+   "venue": "카와사키",
+   "풍속": 5.3,
+   "풍향": "남동",
+   "풍향코드": 6,
+   "기온": 28.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T20:20:00+09:00",
+   "지점": "羽田",
+   "지점거리km": 7.22
+  },
+  "fieldSize": 11,
+  "distance": 1500,
+  "surface": "더트",
+  "trackCond": "良",
+  "horses": [
+   {
+    "no": 5,
+    "name": "ホシニネガイヲ",
+    "gait": "추격형",
+    "recentPlacings": [
+     11,
+     7,
+     11,
+     10,
+     6
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 436,
+    "jockey": "田中涼",
+    "jockeyRate": 20.0,
+    "distApt": "C"
+   },
+   {
+    "no": 1,
+    "name": "タキ",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     7,
+     12,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 440,
+    "jockey": "古岡勇",
+    "distApt": "B"
+   },
+   {
+    "no": 3,
+    "name": "カズヤ",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     7,
+     13,
+     2,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 463,
+    "jockey": "矢野貴",
+    "jockeyRate": 25.0,
+    "distApt": "A"
+   },
+   {
+    "no": 7,
+    "name": "バースフラワー",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     6,
+     8,
+     6,
+     9
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 444,
+    "jockey": "本橋孝",
+    "jockeyRate": 12.5
+   },
+   {
+    "no": 6,
+    "name": "ノッテストラータ",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     10,
+     6,
+     12,
+     7
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 459,
+    "jockey": "笹川翼",
+    "jockeyRate": 42.9,
+    "distApt": "C"
+   },
+   {
+    "no": 9,
+    "name": "ブラッドライン",
+    "gait": "평지형",
+    "recentPlacings": [
+     10,
+     10,
+     8,
+     10,
+     1
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "jockey": "中山遥",
+    "jockeyRate": 22.2,
+    "distApt": "B"
+   },
+   {
+    "no": 2,
+    "name": "ボルドーダゲール",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     6,
+     7,
+     6,
+     10
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 481,
+    "jockey": "増田充"
+   },
+   {
+    "no": 8,
+    "name": "ヴィヴィッドムーン",
+    "gait": "선행형",
+    "recentPlacings": [
+     7,
+     9,
+     8,
+     10,
+     9
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 498,
+    "jockey": "佐野遥",
+    "distApt": "C"
+   },
+   {
+    "no": 11,
+    "name": "セラード",
+    "gait": "추격형",
+    "recentPlacings": [
+     12,
+     10,
+     6,
+     9,
+     3
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 445,
+    "jockey": "町田直",
+    "jockeyRate": 0.0
+   },
+   {
+    "no": 4,
+    "name": "エイシントゥラン",
+    "gait": "평지형",
+    "recentPlacings": [
+     11,
+     8,
+     6,
+     6
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 473,
+    "jockey": "池谷匠",
+    "jockeyRate": 0.0,
+    "distApt": "C"
+   },
+   {
+    "no": 10,
+    "name": "エスジースパークル",
+    "gait": "평지형",
+    "recentPlacings": [
+     7,
+     12,
+     6,
+     10,
+     11
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 466,
+    "jockey": "神尾香",
+    "jockeyRate": 0.0,
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    8
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 90.9
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 72.7
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 72.7
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   3,
+   10,
+   4
+  ],
+  "hit_count": 1,
+  "hit": [
+   3
+  ],
+  "missed": [
+   10,
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 10,
+    "gait": "평지형",
+    "recentPlacings": [
+     7,
+     12,
+     6,
+     10,
+     11
+    ],
+    "line": null,
+    "grade": "D"
+   },
+   {
+    "no": 4,
+    "gait": "평지형",
+    "recentPlacings": [
+     11,
+     8,
+     6,
+     6
+    ],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   6,
+   3,
+   8
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.6,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 20:57:19"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "단독 선행마의 전개 유리함을 과신하고 후미 추입마 중 저등급 평지형의 잠재력을 간과했다. 특히 10번과 4번의 최근 착순 하위권만을 보고 발전 가능성을 놓쳤다.",
+  "new_rule": "단독 선행마의 이점을 지나치게 강조하기보다, 낮은 등급의 평지형 말 중에서도 복병마가 있는지 최근 경주 데이터 외에 다른 요소를 점검한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 20:57:21"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,312 @@
+{
+ "predicted_top3": [
+  3,
+  5,
+  1
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 다수로 초반 경합 예상, 우수 기수와 최근 성적이 좋은 말이 유리. 중량 '重' 주로의 영향도 배제할 수 없음.",
+ "key_factors": [
+  "선행형 각질 다수 (5두)로 인한 초반 페이스 상승 및 경합 심화",
+  "기수 승률이 월등히 높은 기수(吉村智, 田野豊)의 선행마 우세",
+  "최근 성적이 꾸준히 상위권인 A등급 선행마의 안정적인 전력",
+  "주로 상태 '重' (무거움)이 선행마의 버티는 힘에 변수로 작용 가능"
+ ],
+ "exception_note": "전체 7두 중 5두가 선행형 각질로 초반부터 강력한 선두권 다툼이 예상되며, 이는 통상적인 경주보다 빠른 페이스와 치열한 전개로 이어질 수 있다. 특히 A등급 선행마 중 기수 승률이 높은 3번과 1번의 내부 경쟁, 그리고 5번의 안정적인 최근 성적이 두드러진다.",
+ "applied_rules": [],
+ "raceKey": "소노다 8경주",
+ "forecastAt": "2026-07-31 18:41:26",
+ "forecastEpoch": 1785490886.3964539,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "소노다 8경주",
+  "wind": {
+   "venue": "소노다",
+   "풍속": 1.8,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 34.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T18:30:00+09:00",
+   "지점": "豊中",
+   "지점거리km": 5.4
+  },
+  "fieldSize": 7,
+  "distance": 1400,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 5,
+    "name": "マインドユアビスケッツ",
+    "gait": "선행형",
+    "recentPlacings": [
+     1,
+     2,
+     3,
+     1,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "竹村達",
+    "jockeyRate": 16.7,
+    "distApt": "A"
+   },
+   {
+    "no": 3,
+    "name": "リオンディーズ",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     2,
+     3,
+     6,
+     1
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "田野豊",
+    "jockeyRate": 53.3,
+    "distApt": "A"
+   },
+   {
+    "no": 6,
+    "name": "ザファクター",
+    "gait": "추격형",
+    "recentPlacings": [
+     3,
+     2,
+     5,
+     3,
+     4
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "小谷哲",
+    "jockeyRate": 30.0,
+    "distApt": "A"
+   },
+   {
+    "no": 1,
+    "name": "パイロ",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     5,
+     2,
+     5
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "吉村智",
+    "jockeyRate": 70.0,
+    "distApt": "A"
+   },
+   {
+    "no": 4,
+    "name": "チェリークラウン",
+    "gait": "선행형",
+    "recentPlacings": [
+     3,
+     5,
+     2,
+     5
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "高橋洸",
+    "jockeyRate": 26.7,
+    "distApt": "A"
+   },
+   {
+    "no": 7,
+    "name": "マイタイザン",
+    "gait": "선행형",
+    "recentPlacings": [
+     3,
+     12,
+     10,
+     3,
+     2
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "distApt": "A"
+   },
+   {
+    "no": 2,
+    "name": "エイシンフラッシュ",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     7,
+     7,
+     6,
+     3
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "新庄海",
+    "jockeyRate": 20.0,
+    "distApt": "B"
+   }
+  ],
+  "composition": {
+   "leadCount": 5,
+   "leadHorses": [
+    5,
+    3,
+    1,
+    4,
+    7
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 85.7
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 85.7
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 85.7
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   3,
+   5,
+   4
+  ],
+  "hit_count": 2,
+  "hit": [
+   3,
+   5
+  ],
+  "missed": [
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   5,
+   6
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.6,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 19:19:27"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번마의 낮은 등급(C)에도 불구하고 선행형 각질과 가벼운 부담중량(54.0kg)이 중(重) 주로에서 이점을 가져왔을 가능성을 간과했습니다. 특히 경합이 심화되는 전개에서 경량마의 버티는 힘을 과소평가했습니다.",
+  "new_rule": "중(重) 주로의 선행형 경합 경주에서는 낮은 등급이라도 가벼운 부담중량의 선행마가 상위권에 진입할 수 있음을 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 19:19:29"
+ },
+ "reviewed": true
+}

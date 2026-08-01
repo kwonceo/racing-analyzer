@@ -1,0 +1,330 @@
+{
+ "predicted_top3": [
+  2,
+  5,
+  4
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "보통",
+ "line_winner": [
+  2,
+  5,
+  4
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 5번의 젖히기 시도를 추입형 2번이 받아내고, 4번이 뒤따를 가능성.",
+ "key_factors": [
+  "유일한 젖히기형 5번의 선행",
+  "6명의 추입형 경주",
+  "2번의 최근 착순분포와 전개최 성적",
+  "4번의 꾸준한 성적"
+ ],
+ "exception_note": "6명의 추입형 선수 중 유일하게 젖히기형인 5번이 선행을 맡아 페이스 조절을 주도할 가능성이 높고, 이로 인해 경주 초반 흐름이 특정 선수에게 유리하게 작용할 수 있습니다. 특히 2번은 선두권을 유지하려는 5번을 활용하여 막판 역전을 노릴 것으로 예상되며, 4번은 안정적으로 후미에서 기회를 엿볼 것입니다. 이는 통상적인 각질 간 경쟁 구도와는 다른, 5번의 선행 주도에 따른 전개가 예상되는 특이점입니다.",
+ "applied_rules": [],
+ "raceKey": "이와키타이라 2경주",
+ "forecastAt": "2026-07-31 16:02:06",
+ "forecastEpoch": 1785481326.8692894,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "이와키타이라 2경주",
+  "wind": {
+   "venue": "이와키타이라",
+   "풍속": 3.1,
+   "풍향": "동남동",
+   "풍향코드": 5,
+   "기온": 27.2,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T15:50:00+09:00",
+   "지점": "小名浜",
+   "지점거리km": 12.14
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 2,
+    "name": "加藤 寛治",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "奈 良Ｆ２ 7/16 特予選 １着 10.4 7/17 準決勝 ４着 9.5 7/18 特 選 ４着 9.9",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ４着 11.4 7/ 9 準決勝 ５着 12.7 7/10 特 選 ３着 12.1",
+    "chaku": [
+     6,
+     5,
+     1,
+     12
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "鮫島 康治",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "京王閣Ｆ２ 7/19 特予選 ３着 11.9 7/20 準決勝 ７着 11.9 7/21 特一般 ３着 12.2",
+    "prev2": "和歌山Ｆ１ 7/ 5 予 選 １着 11.8 7/ 6 準決勝 ３着 11.1 7/ 7 特 選 ４着 12",
+    "chaku": [
+     5,
+     1,
+     5,
+     7
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "林 明宏",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "伊 東Ｆ２ 7/22 予 選 ７着 11.1 7/23 一 般 ６着 9.9 7/24 一 般 ７着 9.7",
+    "prev2": "松 山Ｆ２ 7/11 特予選 ４着 11.3 7/12 準決勝 ２着 11.3 7/13 決 勝 ７着 12.1",
+    "chaku": [
+     2,
+     4,
+     1,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "眞砂 英作",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "西武園Ｆ２ 7/16 特予選 ２着 12.1 7/17 準決勝 ５着 12 7/18 特 選 ６着 12.4",
+    "prev2": "久留米Ｆ２ 7/ 7 特予選 ５着 11.7 7/ 8 特一般 ３着 12.2 7/ 9 特一般 １着 12.4",
+    "chaku": [
+     3,
+     4,
+     3,
+     11
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "藤原 悠斗",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "小田原Ｆ２ 7/23 予 選 ４着 10.6 7/24 選 抜 ７着 9.9 7/25 一 般 ５着 10",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 ２着 11.9 7/14 準決勝 ５着 12.6 7/15 特 選 ２着 11.5",
+    "chaku": [
+     0,
+     2,
+     6,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "富安 保充",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.83,
+    "prev1": "青 森Ｆ１ 7/23 予 選 ４着 11.5 7/24 一 般 ５着 12.2 7/25 一 般 １着 11.8",
+    "prev2": "岐 阜Ｆ１ 7/11 予 選 ４着 11.7 7/12 一 般 ２着 12 7/13 特 選 ６着 11.8",
+    "chaku": [
+     1,
+     2,
+     3,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "白川 有司",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "広 島Ｆ２ 7/22 予 選 ５着 11.5 7/23 一 般 ３着 11.4 7/24 一 般 ２着 11.9",
+    "prev2": "伊 東Ｆ１ 7/10 予 選 ４着 9.7 7/11 一 般 ２着 10 7/12 特 選 ７着 10.2",
+    "chaku": [
+     1,
+     7,
+     4,
+     15
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 6,
+   "closeHorses": [
+    2,
+    7,
+    1,
+    3,
+    4,
+    6
+   ]
+  },
+  "lines": [
+   5,
+   2,
+   4,
+   1,
+   7,
+   3,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "鮫島を利す加藤の抜け出し本命。富安が３番手を固めて中近本線だが、眞砂が出切ればマーク林との一戦。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   7,
+   4
+  ],
+  "hit_count": 2,
+  "hit": [
+   2,
+   4
+  ],
+  "missed": [
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   5,
+   7
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 16:41:45"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "7번의 최근 성적 중 1착과 2착이 꾸준히 있었음에도 불구하고, 단지 '최근 착순 ?'으로 처리하여 그 잠재력을 간과했습니다. 5번의 선행을 활용하는 전략 외에 7번 자체의 경쟁력을 충분히 분석하지 못했습니다.",
+  "new_rule": "같은 등급의 추입형 선수라도 '최근착순 ?'이 아닌 실제 상세 착순 분포를 확인하여 예상치 못한 강세를 보이는 선수를 놓치지 않도록 한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 16:41:47"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,342 @@
+{
+ "predicted_top3": [
+  5,
+  1,
+  4
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 다수 출전으로 초반 경합 예상되나 5번의 선행 능력과 최근 기세 우세.",
+ "key_factors": [
+  "선행형 3두와 젖히기형 1두",
+  "5번 田口 勇介의 A등급 및 최근 1착 경험",
+  "1번 飯田 辰哉의 안정적인 착순 분포와 추입 능력",
+  "4번 吉田 元輝의 최근 1착과 2착 기록"
+ ],
+ "exception_note": "이 경주에는 선행형이 3두(5, 3, 7번)에 젖히기형(6번)까지 있어 초반부터 주도권 다툼이 치열할 것으로 예상된다. 특히 5번 田口 勇介는 A등급에 '初特選 ３着'으로 최근 좋은 흐름을 보이며 선행을 선언했으나, 3번 矢部 駿人과 7번 篠原 龍馬 또한 선행 및 자재(양각)로 선두 다툼에 가담할 수 있다. 이들의 경쟁으로 인해 후미에서 기회를 엿보는 1번 飯田 辰哉과 4번 吉田 元輝 같은 추입형에게 유리한 전개가 만들어질 가능성이 있다. 5번의 선행력이 우수하여 선두를 잡으면 버틸 힘이 있지만, 뒤따르는 추입형들의 역전 가능성 또한 배제할 수 없다. 4.4m/s의 남서풍은 풍속이 강한 편이지만, 주로 방향을 알 수 없어 맞바람이라 단정하기 어렵다. 그러나 선행형에게는 다소 부담이 될 수 있다.",
+ "applied_rules": [],
+ "raceKey": "사세보 3경주",
+ "forecastAt": "2026-08-01 11:24:36",
+ "forecastEpoch": 1785551076.1557794,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 3경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 4.4,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 32.8,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T11:10:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "田口 勇介",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 ３着 11.7",
+    "prev1": "富 山Ｆ１ 7/21 初特選 ５着 9.9 7/22 準決勝 ４着 10.1 7/23 特 選 １着 9.8",
+    "prev2": "平 Ｆ２ 7/10 初特選 ４着 12.4 7/11 準決勝 ５着 12.3 7/12 特 選 １着 11.3",
+    "chaku": [
+     3,
+     2,
+     2,
+     11
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "飯田 辰哉",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 ４着 11.5",
+    "prev1": "岐 阜Ｆ２ 7/18 特予選 ３着 11.4 7/19 準決勝 ２着 12 7/20 決 勝 ３着 11.8",
+    "prev2": "小田原Ｆ２ 7/10 初特選 ３着 9.8 7/11 準決勝 ２着 9.8 7/12 決 勝 ５着 9.8",
+    "chaku": [
+     3,
+     6,
+     5,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "矢部 駿人",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 ５着 12",
+    "prev1": "小 倉Ｆ２ 7/24 初特選 ３着 11.7 7/25 準決勝 ４着 12.2 7/26 特 選 ５着 12.2",
+    "prev2": "函 館Ｆ１ 7/14 予 選 １着 11.2 7/15 準決勝 ３着 12 7/16 決 勝 ７着 11.9",
+    "chaku": [
+     4,
+     4,
+     5,
+     8
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "吉田 元輝",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.3",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ２着 11.4 7/21 準決勝 失",
+    "prev2": "平 Ｆ２ 7/10 特予選 ２着 12.2 7/11 準決勝 ３着 12.3 7/12 特 選 ２着 11.3",
+    "chaku": [
+     2,
+     8,
+     5,
+     8
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "篠原 龍馬",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.7",
+    "prev1": "青 森Ｆ１ 7/23 予 選 １着 11.7 7/24 準決勝 ７着 12.3 7/25 特 選 ５着 11.6",
+    "prev2": "松 山Ｆ２ 7/11 初特選 ６着 11.4 7/12 準決勝 ３着 11.6 7/13 特 選 １着 11.8",
+    "chaku": [
+     7,
+     3,
+     2,
+     9
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "工藤 文彦",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.6",
+    "prev1": "広 島Ｆ２ 7/22 予 選 ２着 11 7/23 準決勝 ３着 11.3 7/24 特 選 ３着 11.7",
+    "prev2": "玉 野Ｆ２ 7/ 7 予 選 ２着 11.5 7/ 8 準決勝 ４着 11.6 7/ 9 特 選 １着 11.4",
+    "chaku": [
+     2,
+     5,
+     4,
+     7
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "堀越 翔己",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ２着 11.7",
+    "prev1": "豊 橋Ｆ２ 7/19 特予選 ７着 14.3 7/20 特一般 １着 12.2 7/21 特 選 ２着 12",
+    "prev2": "松 山Ｆ２ 7/11 特予選 ３着 11.8 7/12 準決勝 ７着 12.1 7/13 特一般 １着 11.7",
+    "chaku": [
+     6,
+     3,
+     2,
+     9
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    5,
+    3,
+    7
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    1,
+    4,
+    2
+   ]
+  },
+  "lines": [
+   5,
+   1,
+   4,
+   6,
+   2,
+   3,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "正直⑤田口はもう少しやれてもいい。奮起に期待し、健在①飯田との争い。ただし③矢部－⑦篠原も展開ひとつで逆転。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   7,
+   3,
+   4
+  ],
+  "hit_count": 1,
+  "hit": [
+   4
+  ],
+  "missed": [
+   7,
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   },
+   {
+    "no": 3,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   1,
+   3
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 12:10:04"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "5번 田口 勇介의 A등급 선행력을 과신하여 7번 篠原 龍馬과 3번 矢部 駿人의 선행 다툼에서의 우위를 간과했다. 두 선행마의 최근 1착 기록과 전개 판단을 덜 중요하게 보았다.",
+  "new_rule": "선행마들의 직접적인 최근 1착 기록과 선언 각질(도주/자재)을 비교하여 선행 주도권을 더욱 면밀히 판단한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 12:10:06"
+ },
+ "reviewed": true
+}

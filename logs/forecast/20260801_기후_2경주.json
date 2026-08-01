@@ -1,0 +1,339 @@
+{
+ "predicted_top3": [
+  3,
+  4,
+  5
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  3
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 ③번 岡崎 克政이 주도하며 버티고, 마크형 ④번 高田 大輔가 뒤따르며 추입 경쟁 우위.",
+ "key_factors": [
+  "3번 岡崎 克政은 '선행 직인'으로 묘사되며, 이번 경주에서 유일하게 도주(선행)을 선언한 강력한 선행 주자.",
+  "총 7두 중 선행형은 3두(3, 7, 6)이고 추입형은 4두(5, 2, 1, 4).",
+  "코멘트에 3번 岡崎 克政이 '페이스 선행'을 주도하고 '뒷심을 발휘한다'고 명시, 4번 高田 大輔가 '이어서' 독점한다고 언급.",
+  "7번 藤井凜太郎는 최근 성적이 좋지 않고 낙차 이력이 있어 선행 경쟁에서 밀릴 가능성.",
+  "6번 関谷 哲平 역시 최근 7착 등 부진한 성적이 있어 3번의 선행을 위협하기 어려움.",
+  "추입형 중 4번 高田 大輔는 1, 2착 분포가 1, 2로 우수하며, 코멘트에서도 3번을 따르는 역할로 지목됨.",
+  "5번 白井 一機는 단기적으로 전개하여 부상할 수 있는 여지가 있다고 언급되었으나, 1, 2착 분포가 0, 0으로 낮아 3착권으로 예상."
+ ],
+ "exception_note": "이 경주는 3번 岡崎 克政이 명확한 선행 주자로 지목되어 선행 전개를 주도할 가능성이 매우 높고, 나머지 선행형 주자들이 최근 성적 부진으로 인해 3번의 선행을 견제하기 어려울 것으로 예상되는 특이성이 있다. 또한, 해설에서 3번과 4번의 라인 독점을 명시하여 특정 선행마와 그를 따르는 추입마의 유리한 전개를 예측하고 있다.",
+ "applied_rules": [],
+ "raceKey": "기후 2경주",
+ "forecastAt": "2026-08-01 11:20:48",
+ "forecastEpoch": 1785550848.8109276,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "기후 2경주",
+  "wind": {
+   "venue": "기후",
+   "풍속": 4.2,
+   "풍향": "북서",
+   "풍향코드": 14,
+   "기온": 33.8,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T11:10:00+09:00",
+   "지점": "岐阜",
+   "지점거리km": 2.57
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "白井 一機",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 チ予選 ７着 12.1 7/31 チ一般 ３着 11.7",
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ３着 12.3 7/22 チ準決 ４着 11.9 7/23 チ選抜 ３着 12.3",
+    "prev2": "松 戸Ｆ１ 6/25 予 選 ５着 10.3 6/26 一 般 ６着 9.9 6/27 一 般 ６着 10",
+    "chaku": [
+     0,
+     0,
+     2,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "濱田昭一郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "7/30 チ予選 ５着 11.5 7/31 チ一般 ６着 11.7",
+    "prev1": "平 Ｆ２ 7/22 チ予選 ３着 11.9 7/23 チ準決 ４着 12.2 7/24 チ選抜 ７着 12",
+    "prev2": "西武園Ｆ２ 7/16 チ予選 ６着 11.8 7/17 チ一般 ５着 11.8 7/18 チ一般 ３着 11.5",
+    "chaku": [
+     2,
+     4,
+     10,
+     20
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "竜門 孝宗",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 チ予選 ６着 12 7/31 チ一般 ２着 12.3",
+    "prev1": "豊 橋Ｆ２ 7/19 チ予選 ６着 12 7/20 チ一般 ７着 11.4 7/21 チ一般 ５着 12",
+    "prev2": "岸和田Ｆ２ 7/ 4 チ予選 ３着 11.8 7/ 5 チ準決 ５着 12.3 7/ 6 チ選抜 ６着 12.2",
+    "chaku": [
+     1,
+     3,
+     7,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "岡崎 克政",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 チ予選 ５着 12.6 7/31 チ一般 ２着 11.6",
+    "prev1": "平 Ｆ２ 7/22 チ予選 ３着 12.5 7/23 チ準決 ５着 12.4 7/24 チ選抜 ７着 16.8",
+    "prev2": "奈 良Ｆ２ 7/18 チ一般 ３着 10.2",
+    "chaku": [
+     10,
+     4,
+     7,
+     21
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "高田 大輔",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 チ予選 ６着 11.1 7/31 チ一般 ４着 11.5",
+    "prev1": "奈 良Ｆ２ 7/16 チ予選 ７着 9.6 7/17 チ一般 ３着 10.3 7/18 チ一般 ２着 10.1",
+    "prev2": "京王閣Ｆ２ 7/ 4 チ予選 ６着 12.4 7/ 5 チ一般 １着 12.4 7/ 6 チ選抜 ５着 12.1",
+    "chaku": [
+     1,
+     2,
+     4,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "藤井凜太郎",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 チ予選 ７着 12.2 7/31 チ一般 ６着 13.1",
+    "prev1": "熊 本Ｆ２ 5/29 男予１ 落",
+    "prev2": "宇都宮Ｆ２ 5/15 男予１ ６着 14.2 5/16 男予２ ５着 14.1 5/17 男ア般 ７着 14",
+    "chaku": [
+     0,
+     0,
+     0,
+     4
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "関谷 哲平",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 チ予選 ２着 12.2 7/31 チ準決 ７着 11.7",
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ６着 12.1 7/22 チ一般 ６着 13.4 7/23 チ一般 １着 12.7",
+    "prev2": "別 府Ｆ２ 7/ 4 チ予選 ６着 12.7 7/ 5 チ一般 ６着 12.7 7/ 6 チ一般 １着 11.8",
+    "chaku": [
+     4,
+     1,
+     3,
+     16
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    3,
+    7,
+    6
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    5,
+    2,
+    1,
+    4
+   ]
+  },
+  "lines": [
+   6,
+   1,
+   7,
+   2,
+   3,
+   4,
+   5
+  ],
+  "paceLabel": null,
+  "comment": "先行職人の③岡崎が持ち味のペース駆けに持ち込み末脚良く押し切る。④高田が続いて岡山独占。単騎⑤白井が前々に展開して浮上。⑦藤井が好機に巻き返す。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   3,
+   1
+  ],
+  "hit_count": 2,
+  "hit": [
+   3,
+   4
+  ],
+  "missed": [
+   1
+  ],
+  "missed_info": [
+   {
+    "no": 1,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   4,
+   6
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -1.7,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 11:49:37"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "1번 竜門 孝宗의 최근 성적이 코멘트나 다른 정보에서 두드러지지 않아 과소평가했지만, 실제로는 선행마들의 견제 속에서 추입 각질을 활용하여 3착으로 부상한 것으로 보인다. 특히 7/31 일반 경주 2착 등 최근 좋은 흐름을 보였던 점을 놓쳤다.",
+  "new_rule": "코멘트에 언급되지 않았더라도 최근 성적(특히 1, 2착)이 좋은 추입형 말은 선행마 간의 경쟁이 심화될 때 복병으로 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 11:49:39"
+ },
+ "reviewed": true
+}

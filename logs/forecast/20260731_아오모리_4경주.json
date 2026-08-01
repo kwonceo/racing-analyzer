@@ -1,0 +1,323 @@
+{
+ "predicted_top3": [
+  1,
+  7,
+  3
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 3,
+ "reason_short": "도주마 1번이 혼전을 유도할 추입형들의 견제 속에서 버텨낼 가능성이 높다.",
+ "key_factors": [
+  "선행형 2두와 도주형 1두의 혼전 가능성",
+  "대부분이 추입형인 각질 구성",
+  "풍속 5.0m/s의 서남서풍이 전개에 미칠 잠재적 영향"
+ ],
+ "exception_note": "이 경주는 7두 중 선행/도주형이 3두(1, 4, 6번)인 반면 추입형이 4두(2, 3, 5, 7번)로 구성되어 있어, 초반 선행 싸움이 치열하게 전개될 가능성이 높다. 특히 1번(도주)과 4, 6번(선행)이 모두 초반 주도권을 잡으려 할 것이며, 이 과정에서 1번이 특유의 도주 각질로 다른 선행형들을 제압하고 독주할 경우 추입형들이 따라붙기 어려울 수 있다. 하지만 선행형 간의 과열 경쟁이 발생하면 후미의 추입형들에게 유리한 전개가 펼쳐질 수 있다. '別線に警戒'(별선에 경계)라는 코멘트는 이러한 혼전 가능성을 암시한다. 5m/s의 서남서풍은 어느 방향이든 선행마에게 영향을 줄 수 있어 변수가 될 수 있다.",
+ "applied_rules": [],
+ "raceKey": "아오모리 4경주",
+ "forecastAt": "2026-07-31 09:25:14",
+ "forecastEpoch": 1785457514.7612395,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "아오모리 4경주",
+  "wind": {
+   "venue": "아오모리",
+   "풍속": 5.0,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 25.0,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T09:10:00+09:00",
+   "지점": "青森",
+   "지점거리km": 1.36
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 7,
+    "name": "相樂 修",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "chaku": [
+     1,
+     2,
+     2,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "田中 弘章",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "chaku": [
+     2,
+     1,
+     6,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "齊藤紳一朗",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "chaku": [
+     0,
+     2,
+     1,
+     24
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "大薗 宏",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.83,
+    "chaku": [
+     3,
+     3,
+     8,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "福田 悠航",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "chaku": [
+     2,
+     0,
+     2,
+     5
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "吉松 賢二",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "chaku": [
+     8,
+     10,
+     5,
+     18
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "五反田豊和",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     3,
+     6,
+     1,
+     17
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    4,
+    6
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    7,
+    3,
+    5,
+    2
+   ]
+  },
+  "lines": [
+   1,
+   5,
+   4,
+   2,
+   6,
+   3,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "別線に警戒",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   4,
+   7
+  ],
+  "hit_count": 1,
+  "hit": [
+   7
+  ],
+  "missed": [
+   2,
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   },
+   {
+    "no": 4,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   1,
+   5
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 09:58:55"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번과 4번의 잠재력을 간과했다. 특히 4번 선행형은 초반 선두 경쟁에서 1번을 제압하며 좋은 위치를 선점했고, 2번 추입형은 혼전 속에서 뒷심을 발휘하여 상위권에 진입했다. 초기 전개 예측이 빗나가면서 두 마리의 활약을 놓쳤다.",
+  "new_rule": "초반 선행 싸움이 치열할 것으로 예상될 경우, 단순한 각질 분류를 넘어 '표기 각질'과 '착순분포'에서 나타나는 실제 경쟁력을 면밀히 비교하여 잠재적 강자를 재평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 09:58:57"
+ },
+ "reviewed": true
+}

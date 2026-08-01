@@ -1,0 +1,351 @@
+{
+ "predicted_top3": [
+  2,
+  5,
+  9
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행형 다수 출전으로 초반 선두 다툼 치열 예상, 근소한 차이로 선두 유지 가능성 있는 마필 위주.",
+ "key_factors": [
+  "선행형 5두로 초반 경합 심화",
+  "상위 등급 선행마 간의 경쟁",
+  "거리 적성 A인 선행마들의 우위"
+ ],
+ "exception_note": "5두의 선행형 마필이 출전하여 초반 전개가 매우 빠르게 흘러갈 가능성이 높음. 특히 2, 5, 9번은 모두 Grade A에 거리적성 A인 선행마로, 이들 간의 선두 다툼이 승패를 가를 주요 요인이 될 것으로 보임. 통상적인 경주보다 선행마들 간의 체력 소모가 클 수 있으나, 본 경주에서는 그 중에서도 최근 성적이 좋고 비교적 가벼운 체중의 2번이 유리할 것으로 예상된다.",
+ "applied_rules": [],
+ "raceKey": "카와사키 1경주",
+ "forecastAt": "2026-07-31 14:50:25",
+ "forecastEpoch": 1785477025.02424,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "카와사키 1경주",
+  "wind": {
+   "venue": "카와사키",
+   "풍속": 3.0,
+   "풍향": "남동",
+   "풍향코드": 6,
+   "기온": 33.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T14:40:00+09:00",
+   "지점": "羽田",
+   "지점거리km": 7.22
+  },
+  "fieldSize": 9,
+  "distance": 1400,
+  "surface": "더트",
+  "trackCond": "良",
+  "horses": [
+   {
+    "no": 2,
+    "name": "キーファイン",
+    "gait": "선행형",
+    "recentPlacings": [
+     1,
+     1,
+     4,
+     3,
+     8
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 432,
+    "jockey": "矢野貴",
+    "distApt": "A"
+   },
+   {
+    "no": 5,
+    "name": "ゴームズ",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     8,
+     2,
+     4,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 479,
+    "jockey": "菅原涼",
+    "distApt": "A"
+   },
+   {
+    "no": 9,
+    "name": "マイブリッジ",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     5,
+     3,
+     9,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 515,
+    "jockey": "野畑凌",
+    "distApt": "A"
+   },
+   {
+    "no": 7,
+    "name": "ダイユウルージュ",
+    "gait": "평지형",
+    "recentPlacings": [
+     11,
+     2,
+     12,
+     4,
+     7
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 421,
+    "jockey": "秋元耕",
+    "distApt": "B"
+   },
+   {
+    "no": 1,
+    "name": "マイアイガー",
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     5,
+     6,
+     4,
+     6
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 526,
+    "jockey": "田中涼"
+   },
+   {
+    "no": 4,
+    "name": "カラルナ",
+    "gait": "선행형",
+    "recentPlacings": [
+     11,
+     9,
+     2,
+     5,
+     10
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 452,
+    "jockey": "新原周",
+    "distApt": "B"
+   },
+   {
+    "no": 8,
+    "name": "ミカエンブレイス",
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     5,
+     5,
+     8,
+     9
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 430,
+    "jockey": "古岡勇",
+    "distApt": "C"
+   },
+   {
+    "no": 3,
+    "name": "クリナデシコ",
+    "gait": "선행형",
+    "recentPlacings": [
+     9,
+     10,
+     11,
+     4,
+     11
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 489,
+    "jockey": "岡村裕",
+    "distApt": "C"
+   },
+   {
+    "no": 6,
+    "name": "バーサズバラード",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     12,
+     9,
+     12,
+     9
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 426,
+    "jockey": "伊藤裕",
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 5,
+   "leadHorses": [
+    2,
+    5,
+    9,
+    4,
+    3
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 100.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 88.9
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 55.6
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "기수 승률(보유율 56%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   9,
+   1,
+   2
+  ],
+  "hit_count": 2,
+  "hit": [
+   2,
+   9
+  ],
+  "missed": [
+   1
+  ],
+  "missed_info": [
+   {
+    "no": 1,
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     5,
+     6,
+     4,
+     6
+    ],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   9,
+   5
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 15:18:22"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "선행마들의 치열한 경합으로 페이스가 예상보다 더욱 빨라져 후미에서 추입하는 말에게 유리한 전개가 형성되었다. 1번마는 최근 착순이 낮아 주목하지 않았으나, 빠른 페이스에 적합한 추격형 각질과 526kg의 무거운 마체중이 더트 주로에서 안정적인 주행을 가능하게 했을 가능성을 간과했다.",
+  "new_rule": "선행마 간의 경쟁이 심화될 때, 높은 마체중의 추격형 말이 예상외의 성과를 낼 수 있음을 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 15:18:24"
+ },
+ "reviewed": true
+}

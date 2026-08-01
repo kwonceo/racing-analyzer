@@ -1,0 +1,329 @@
+{
+ "predicted_top3": [
+  1,
+  3,
+  2
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "1번 오가타의 압도적인 기량과 앞선 경쟁 구도로 인한 이점 활용 예측.",
+ "key_factors": [
+  "1번 오가타 마오의 최근 뛰어난 성적 (18회 1착)",
+  "경주 총평에서 1번 오가타의 '강함'과 '기합' 언급",
+  "선행형 두 명 중 1번의 압도적인 성적으로 선행 주도 가능성",
+  "추입형 다수와 젖히기형 한 명으로 인해 선행마에게 유리한 전개 예상"
+ ],
+ "exception_note": "전체 7두 중 선행형이 2두(1번, 5번)로 구성되어 있으나, 1번 오가타의 기량이 5번 쿠로코우치에 비해 압도적으로 우세하여 1번이 선행을 주도할 가능성이 높다. 총평에서 1번의 강함이 언급된 점과 최근 성적(18회 1착)이 이를 뒷받침한다. 5번은 최근 성적(0회 1착)이 좋지 않아 1번과의 경쟁에서 밀릴 것으로 보이며, 추입형이 다수인 경주 특성상 1번이 앞에서 버티기에 유리한 구도가 형성될 것으로 예상된다. 3번 杉浦 菜留는 전 개최에서 1번과 함께 예선A에 출전하여 2착, 3착을 기록하며 1번 다음가는 안정적인 모습을 보였다. 2번 吉村早耶香도 전 개최에서 준수한 성적을 기록했으나, 3번 杉浦 菜留보다는 근소하게 밀리는 양상이다.",
+ "applied_rules": [],
+ "raceKey": "다케오 2경주",
+ "forecastAt": "2026-07-31 21:11:25",
+ "forecastEpoch": 1785499885.9890788,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "다케오 2경주",
+  "wind": {
+   "venue": "다케오",
+   "풍속": 0.8,
+   "풍향": "남남서",
+   "풍향코드": 9,
+   "기온": 27.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T20:50:00+09:00",
+   "지점": "嬉野",
+   "지점거리km": 8.56
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "尾方 真生",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "prev1": "前 橋Ｇ３ 7/22 予１Ａ １着 10.1 7/23 予２Ａ １着 10.4 7/24 ガ決Ａ ４着 10.5",
+    "prev2": "小田原Ｆ２ 7/10 ガ予１ １着 10.1 7/11 ガ予２ １着 9.7 7/12 ガ決勝 ４着 9.9",
+    "chaku": [
+     18,
+     2,
+     0,
+     4
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "吉村早耶香",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "prev1": "西武園Ｆ２ 7/16 ガ予１ ２着 12 7/17 ガ予２ ４着 11.9 7/18 ガ決勝 ４着 13.3",
+    "prev2": "久留米Ｆ２ 7/ 7 ガ予１ ３着 12.5 7/ 8 ガ予２ ３着 12.6 7/ 9 ガ決勝 ５着 13",
+    "chaku": [
+     2,
+     6,
+     6,
+     7
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "杉浦 菜留",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "prev1": "前 橋Ｇ３ 7/22 予１Ａ ２着 10.1 7/23 予２Ａ ３着 10.2 7/24 ガ決Ａ ７着 9.8",
+    "prev2": "広 島Ｆ２ 7/13 ガ予１ ６着 12.4 7/14 ガ予２ １着 12.1 7/15 ガ決勝 ７着 12.5",
+    "chaku": [
+     3,
+     4,
+     2,
+     18
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "鈴木 媛子",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "prev1": "平 Ｆ２ 7/16 ガ予１ ４着 12 7/17 ガ予２ ４着 12.3 7/18 ガ一般 １着 12.6",
+    "prev2": "名古屋Ｆ２ 7/10 ガ予１ ５着 12.2 7/11 ガ予２ ４着 12.3 7/12 ガ一般 １着 13",
+    "chaku": [
+     3,
+     1,
+     3,
+     11
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "佐伯 智恵",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "prev1": "前 橋Ｇ３ 7/22 予１Ａ ６着 10 7/23 予２Ａ ７着 10.7 7/24 ガ般Ａ ２着 10.5",
+    "prev2": "伊 東Ｆ１ 7/10 ガ予１ ６着 10.1 7/11 ガ予２ ４着 10.2 7/12 ガ一般 ４着 10.7",
+    "chaku": [
+     0,
+     2,
+     1,
+     21
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "高崎 千賀",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "prev1": "玉 野Ｆ１ 7/22 ガ予１ ７着 12.4 7/23 ガ予２ ６着 12.6 7/24 ガ一般 ６着 12.9",
+    "prev2": "佐世保Ｆ１ 7/13 ガ予１ ５着 12.2 7/14 ガ予２ ５着 12.4 7/15 ガ一般 ４着 12.6",
+    "chaku": [
+     0,
+     1,
+     3,
+     16
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "黒河内由実",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "prev1": "奈 良Ｆ１ 7/25 ガ予１ ５着 10.3 7/26 ガ予２ ４着 10.3 7/27 ガ一般 ５着 10.8",
+    "prev2": "松 阪Ｆ２ 7/21 ガ予１ ４着 12.2 7/22 ガ予２ ５着 11.8 7/23 ガ一般 ６着 13",
+    "chaku": [
+     0,
+     2,
+     5,
+     30
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    1,
+    5
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    2,
+    3,
+    6,
+    7
+   ]
+  },
+  "lines": [
+   2,
+   3,
+   1,
+   4,
+   5,
+   6,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "強さ相変わらずの①尾方。ここは九州地区代表として気合の走りを見せる。相手は安定感ある②吉村や③杉浦となる。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   3,
+   4
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   3
+  ],
+  "missed": [
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   2,
+   3
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 21:37:25"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번 鈴木 媛子 선수의 최근 성적(젖히기형으로서 일반전 1착 2회)과 기어비(3.77)가 2번 吉村早耶香(3.77)과 비슷했음에도 불구하고, 2번보다 약하다고 판단하여 순위권에 포함하지 않은 점을 놓쳤다. 선행마가 아닌 젖히기형 선수의 잠재력을 간과했다.",
+  "new_rule": "젖히기형 선수라도 최근 일반전에서 꾸준히 1착을 기록했다면, 다른 추입형 선수들과 비교하여 상위권 진입 가능성을 충분히 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 21:37:27"
+ },
+ "reviewed": true
+}

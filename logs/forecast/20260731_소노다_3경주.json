@@ -1,0 +1,285 @@
+{
+ "predicted_top3": [
+  7,
+  3,
+  5
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 다수, 단거리 중마장에서 선행력과 기수 승률 우위의 마필이 유리",
+ "key_factors": [
+  "다수의 선행형 마필",
+  "단거리 중마장",
+  "기수 승률"
+ ],
+ "exception_note": "총 7두 중 4두가 선행형으로 구성되어 초반 선두 경쟁이 매우 치열할 것으로 예상된다. 단거리 820m의 중마장 경주 특성상 선행마 중에서도 초반 스피드와 종반 버티는 힘이 중요한데, 에이신마로니에(7)와 마테라스카이(3)가 최근 성적과 기수 승률 면에서 우위를 점하며 선두권 경쟁에서 유리할 것으로 판단된다. 특히 에이신마로니에(7)는 최근 3연승의 좋은 흐름을 보이고 있어 강력한 우승 후보다. 카라바지오(5)는 기수 승률이 가장 높아 초반 경쟁에서 밀리지 않는다면 입상 가능성이 있다. 추격형 마필들은 앞선 경쟁으로 인한 빠른 페이스를 극복하기 어려울 것으로 예상된다.",
+ "applied_rules": [],
+ "raceKey": "소노다 3경주",
+ "forecastAt": "2026-07-31 15:45:27",
+ "forecastEpoch": 1785480327.5934741,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "소노다 3경주",
+  "wind": {
+   "venue": "소노다",
+   "풍속": 2.7,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 35.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T15:30:00+09:00",
+   "지점": "豊中",
+   "지점거리km": 5.4
+  },
+  "fieldSize": 7,
+  "distance": 820,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 3,
+    "name": "マテラスカイ",
+    "gait": "선행형",
+    "recentPlacings": [
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "小谷哲",
+    "jockeyRate": 30.0
+   },
+   {
+    "no": 7,
+    "name": "エイシンマロニエ",
+    "gait": "선행형",
+    "recentPlacings": [
+     1,
+     1,
+     1,
+     4,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   },
+   {
+    "no": 5,
+    "name": "カラヴァッジオ",
+    "gait": "선행형",
+    "recentPlacings": [
+     3
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "下原理",
+    "jockeyRate": 43.3
+   },
+   {
+    "no": 6,
+    "name": "ロゴタイプ",
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     2
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "松木大",
+    "jockeyRate": 26.7
+   },
+   {
+    "no": 2,
+    "name": "ノーブルミッション",
+    "gait": "추격형",
+    "recentPlacings": [
+     4
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "大山真",
+    "jockeyRate": 26.7
+   },
+   {
+    "no": 1,
+    "name": "ビーチパトロール",
+    "gait": "추격형",
+    "recentPlacings": [
+     5
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "井上幹",
+    "jockeyRate": 23.3
+   },
+   {
+    "no": 4,
+    "name": "ロゴタイプ",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     7,
+     5
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "山本太",
+    "jockeyRate": 16.7
+   }
+  ],
+  "composition": {
+   "leadCount": 4,
+   "leadHorses": [
+    3,
+    7,
+    5,
+    6
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 85.7
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 85.7
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 85.7
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   6,
+   5,
+   3
+  ],
+  "hit_count": 2,
+  "hit": [
+   3,
+   5
+  ],
+  "missed": [
+   6
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   6,
+   5
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.0,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 16:20:23"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번 로고타입은 내가 주목했던 7번 에이신마로니에와 동일한 선행형이었으나, 최근 2착의 좋은 성적과 26.7%의 기수 승률을 간과하여 선두권 경쟁력을 과소평가했다.",
+  "new_rule": "선행마가 많은 단거리 중마장 경주에서는 기수 승률이 다소 낮더라도 최근 좋은 성적(2착 이내)을 기록한 선행마의 경쟁력을 높게 평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 16:20:25"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,336 @@
+{
+ "predicted_top3": [
+  4,
+  1,
+  5
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "보통",
+ "line_winner": [
+  4
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 2번을 제외한 전원이 추입각질, 4번의 자재 각질을 활용한 직선 추입 예상.",
+ "key_factors": [
+  "추입마 다수 편성",
+  "2번 선행형의 고립 가능성",
+  "4번의 자재 각질과 최근 성적",
+  "코멘트에서 4번의 捲りを 노린다는 점"
+ ],
+ "exception_note": "7두 중 선행형은 2번(삼목), 나머지 6두는 모두 추입각질이다. 특히 4번 이토 선수는 '자재'로 양각이지만, '최근'에 4착으로 결승선을 끊은 점과 '전전개최'에서 3착을 두 번 기록한 점, 그리고 '코멘트'에서 이토 선수의 捲리를 노린다는 점을 미루어 볼 때, 2번의 선행을 활용한 전략적 추입이 예상된다. 1번(테루야)과 5번(세키)은 추입 각질의 상위권 선수들이므로 후착에 유력하다. 2번은 선행형임에도 불구하고 전개최 성적이 좋지 않아 혼자 고립될 가능성이 크다. 바람은 2.7m/s로 선행에 큰 영향을 미 주지 않을 것으로 판단된다.",
+ "applied_rules": [],
+ "raceKey": "호후 3경주",
+ "forecastAt": "2026-08-01 09:14:20",
+ "forecastEpoch": 1785543260.2030709,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 3경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 2.7,
+   "풍향": "서",
+   "풍향코드": 12,
+   "기온": 29.9,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T09:00:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "照屋 将貴",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 チ予選 ５着 9.8",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 １着 11.9 7/25 チ準決 ５着 11.8 7/26 チ選抜 ２着 12.2",
+    "prev2": "熊 本Ｆ２ 7/13 チ予選 ２着 11.6 7/14 チ準決 失",
+    "chaku": [
+     2,
+     3,
+     2,
+     9
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "関 敬",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ４着 9.8",
+    "prev1": "京王閣Ｆ２ 7/19 チ予選 ５着 12.2",
+    "prev2": "岸和田Ｆ２ 7/ 4 チ予選 ２着 12.4 7/ 5 チ準決 ４着 12.3 7/ 6 チ選抜 ３着 12.5",
+    "chaku": [
+     0,
+     1,
+     1,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "伊藤 嘉浩",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ４着 9.7",
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ２着 12.1 7/22 チ準決 ５着 11.9 7/23 チ選抜 ６着 12.6",
+    "prev2": "平 Ｆ２ 7/10 チ予選 ６着 11.7 7/11 チ一般 ３着 12 7/12 チ一般 ３着 12.2",
+    "chaku": [
+     3,
+     3,
+     4,
+     14
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "三木 翔太",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ４着 10",
+    "prev1": "西武園Ｆ２ 7/16 チ予選 ３着 11.9 7/17 チ準決 ３着 11.4 7/18 チ決勝 ４着 12.4",
+    "prev2": "久留米Ｆ２ 7/ 7 チ予選 ６着 12.1 7/ 8 チ一般 ３着 11.9 7/ 9 チ一般 ３着 12.3",
+    "chaku": [
+     2,
+     0,
+     5,
+     11
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "滝川 秀嗣",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "7/31 チ予選 ５着 10.4",
+    "prev1": "松 山Ｆ２ 7/25 チ予選 ６着 12.3 7/26 チ一般 ６着 11.5 7/27 チ一般 ３着 12.5",
+    "prev2": "京王閣Ｆ２ 7/19 チ予選 ６着 12.1 7/20 チ一般 ４着 12.1 7/21 チ一般 ３着 12.3",
+    "chaku": [
+     0,
+     0,
+     3,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "竹野 行登",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ５着 9.7",
+    "prev1": "松 戸Ｆ２ 7/19 チ予選 ５着 10.3 7/20 チ選抜 ７着 10.1 7/21 チ一般 ５着 10.2",
+    "prev2": "松 山Ｆ２ 7/11 チ予選 ２着 12.1 7/12 チ準決 失",
+    "chaku": [
+     0,
+     1,
+     2,
+     7
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "齋藤 仁",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ５着 9.7",
+    "prev1": "西武園Ｆ２ 7/16 チ予選 ６着 12.4 7/17 チ一般 ４着 11.8 7/18 チ一般 ７着 11.6",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 ６着 11.9 7/ 9 チ一般 ６着 12.6 7/10 チ一般 ３着 11.4",
+    "chaku": [
+     1,
+     1,
+     4,
+     24
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    2
+   ],
+   "closeCount": 6,
+   "closeHorses": [
+    1,
+    5,
+    4,
+    3,
+    7,
+    6
+   ]
+  },
+  "lines": [
+   4,
+   3,
+   2,
+   5,
+   1,
+   7,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "伊藤の捲りを狙う。番手滝川は追走に集中。点数上位照屋ー竹野の九州コンビや、底力ある関、三木も差はない。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   6,
+   1
+  ],
+  "hit_count": 2,
+  "hit": [
+   4,
+   1
+  ],
+  "missed": [
+   6
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   4,
+   2
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 09:49:43"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번 선수는 24회의 착외 경험이 있었고, 최근 성적도 좋지 않았지만 D등급 내에서 다른 추입마들 대비 '착외' 기록이 상대적으로 적고 기어비와 declared 각질이 다른 선수들과 동일하다는 점을 간과하여, 예상치 못한 경주 전개에서 선전할 가능성을 놓쳤다.",
+  "new_rule": "D등급 추입마가 다수일 경우, 등급 내 착순 분포를 심층적으로 비교하여 잠재력을 지닌 마필을 파악한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 09:49:45"
+ },
+ "reviewed": true
+}

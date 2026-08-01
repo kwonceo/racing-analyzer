@@ -1,0 +1,333 @@
+{
+ "predicted_top3": [
+  5,
+  4,
+  1
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 5번의 3차 라인과 강력한 최근 기세, 4번의 젖히기 타이밍이 주효할 것.",
+ "key_factors": [
+  "5번 田上 晃也의 강력한 최근 성적 (전승, 3착 한 번 제외)",
+  "5번이 속한 라인 (5번-1번-6번)이 3차 라인으로 구도상 우세",
+  "4번 森川 康輔의 젖히기 각질과 최근 연승 기세",
+  "경주에 선행형이 두 명 (5, 6번)이지만 5번의 선행력이 압도적"
+ ],
+ "exception_note": "통상적인 경주 흐름이 예상되나, 선행형 5번과 6번의 라인 구도 및 최근 성적 차이가 명확하여 5번이 주도권을 잡을 가능성이 높고, 젖히기형 4번이 이를 활용할 것으로 보인다. 1번 추입형은 선두 라인의 안정적인 흐름에 편승하여 막판 추입을 노릴 수 있다.",
+ "applied_rules": [],
+ "raceKey": "호후 6경주",
+ "forecastAt": "2026-08-01 10:10:20",
+ "forecastEpoch": 1785546620.0765615,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 6경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 2.7,
+   "풍향": "서북서",
+   "풍향코드": 13,
+   "기온": 31.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T09:50:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "田上 晃也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 １着 10",
+    "prev1": "松 戸Ｆ２ 7/19 チ予選 １着 10.3 7/20 チ準決 １着 9.7 7/21 チ決勝 ３着 9.3",
+    "prev2": "京王閣Ｆ２ 7/ 4 チ予選 １着 12.2 7/ 5 チ準決 １着 11.3 7/ 6 チ決勝 １着 11.6",
+    "chaku": [
+     10,
+     3,
+     4,
+     4
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "森川 康輔",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 １着 9.8",
+    "prev1": "和歌山Ｆ２ 7/24 チ予選 １着 11.5 7/25 チ準決 １着 11.6 7/26 チ決勝 １着 11.8",
+    "prev2": "京王閣Ｆ２ 7/13 チ予選 ５着 11 7/14 チ一般 １着 11.9 7/15 チ選抜 １着 11.6",
+    "chaku": [
+     6,
+     0,
+     2,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "沢田 勇治",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ２着 9.9",
+    "prev1": "武 雄Ｆ２ 7/25 チ予選 ３着 11.8 7/26 チ準決 ４着 11.3 7/27 チ決勝 ７着 14.7",
+    "prev2": "松 戸Ｆ２ 7/19 チ予選 ２着 10.3 7/20 チ準決 ２着 9.7 7/21 チ決勝 ５着 9.6",
+    "chaku": [
+     0,
+     3,
+     2,
+     20
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "関口 朗斗",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ３着 9.7",
+    "prev1": "平 Ｆ２ 7/22 チ予選 １着 12.1 7/23 チ準決 ２着 11.6 7/24 チ決勝 ２着 11.6",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 １着 12.3 7/ 9 チ準決 ６着 11.5 7/10 チ選抜 １着 11.7",
+    "chaku": [
+     13,
+     3,
+     4,
+     4
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "早川 成矢",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ３着 9.9",
+    "prev1": "平 Ｆ２ 7/22 チ予選 ４着 11.8 7/23 チ選抜 ５着 11.6 7/24 チ一般 １着 12",
+    "prev2": "取 手Ｆ２ 7/ 6 チ予選 ２着 11.8 7/ 7 チ準決 ３着 12.3 7/ 8 チ決勝 ２着 12",
+    "chaku": [
+     2,
+     5,
+     2,
+     9
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "小塚 潤",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ２着 9.7",
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 １着 12 7/22 チ準決 ６着 12.3 7/23 チ選抜 ４着 12.3",
+    "prev2": "熊 本Ｆ２ 7/13 チ予選 ４着 11.8 7/14 チ選抜 ５着 12 7/15 チ一般 ２着 12.3",
+    "chaku": [
+     2,
+     3,
+     3,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "阿部 龍也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ２着 10.5",
+    "prev1": "武 雄Ｆ２ 7/25 チ予選 ６着 12.4 7/26 チ一般 ２着 12 7/27 チ一般 ３着 12.1",
+    "prev2": "取 手Ｆ２ 7/15 チ予選 ７着 13.1 7/16 チ一般 １着 12 7/17 チ選抜 ４着 11.9",
+    "chaku": [
+     2,
+     3,
+     4,
+     12
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    5,
+    6
+   ],
+   "closeCount": 2,
+   "closeHorses": [
+    1,
+    2
+   ]
+  },
+  "lines": [
+   7,
+   3,
+   5,
+   1,
+   6,
+   4,
+   2
+  ],
+  "paceLabel": null,
+  "comment": "得点上位の田上を本命視。ライン３車なのもプラス。だが、勢いある森川ー小塚の中部勢、関口の自力戦も魅力。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   1,
+   3
+  ],
+  "hit_count": 2,
+  "hit": [
+   5,
+   1
+  ],
+  "missed": [
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   1,
+   7
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.0,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 10:29:36"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번 森川 康輔는 최근 연승 기세가 돋보였으나, D등급의 3번 早川 成矢의 최근 성적이 무시할 수 없는 수준이었다. 4번 森川 康輔는 젖히기형으로 선행마 5번의 뒤를 노릴 것으로 예상했지만, 3번 早川 成矢의 등급이 낮아 간과했다.",
+  "new_rule": "등급이 낮은 선수라도 최근 성적에서 우승권에 꾸준히 드는 흐름을 보인다면 상위권에 들어올 가능성을 고려해야 한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 10:29:38"
+ },
+ "reviewed": true
+}

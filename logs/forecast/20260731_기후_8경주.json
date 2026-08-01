@@ -1,0 +1,325 @@
+{
+ "predicted_top3": [
+  3,
+  5,
+  7
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  3,
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "3번의 선행 선언과 해설의 지목, 5번과의 연계, 7번의 선행형 각질.",
+ "key_factors": [
+  "3번 蒋野 翔太의 '도주(선행)' 선언과 해설의 '타테 기본' 언급",
+  "5번 谷口 幸司가 3번을 '따라간다'는 해설 내용",
+  "7번 枠元 一葵가 유일한 선행형 각질이며 '도주(선행)' 선언"
+ ],
+ "exception_note": "이 경주는 7명 중 2명(3번, 7번)이 선행을 선언했으며, 특히 3번과 5번의 연계 가능성이 해설에 명시되어 선행 주도권이 명확한 편입니다. 일반적으로 선행형이 다수이면 경쟁이 심화되지만, 3번과 5번의 협력 가능성으로 인해 초반 전개가 안정적일 수 있습니다. 서북서풍 6.3m/s의 바람이 선행에 영향을 줄 가능성은 있으나, 직선 주로의 방향을 알 수 없어 단정하기 어렵습니다.",
+ "applied_rules": [],
+ "raceKey": "기후 8경주",
+ "forecastAt": "2026-07-31 14:03:17",
+ "forecastEpoch": 1785474197.2985287,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "기후 8경주",
+  "wind": {
+   "venue": "기후",
+   "풍속": 6.3,
+   "풍향": "서북서",
+   "풍향코드": 13,
+   "기온": 35.8,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T13:50:00+09:00",
+   "지점": "岐阜",
+   "지점거리km": 2.57
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 3,
+    "name": "蒋野 翔太",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     4,
+     4,
+     3,
+     16
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "山本 隼人",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     4,
+     7,
+     3,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "谷口 幸司",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     3,
+     6,
+     4,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "志水 祐彦",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     2,
+     8,
+     1,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "阿部 充宏",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     1,
+     4,
+     6,
+     19
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "枠元 一葵",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     4,
+     2,
+     4,
+     17
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "足達 重満",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     9,
+     8,
+     2,
+     3
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    7
+   ],
+   "closeCount": 6,
+   "closeHorses": [
+    3,
+    1,
+    5,
+    4,
+    2,
+    6
+   ]
+  },
+  "lines": [
+   3,
+   5,
+   2,
+   6,
+   7,
+   1,
+   4
+  ],
+  "paceLabel": null,
+  "comment": "予選スタートの③蒋野が気合いの力走。このメンバーならタテ基本に攻めて首位へ。⑤谷口が付いて独占。⑦枠元が上手くペースで駆けて①山本と浮上狙う。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   7,
+   2
+  ],
+  "hit_count": 1,
+  "hit": [
+   7
+  ],
+  "missed": [
+   4,
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   },
+   {
+    "no": 2,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   3,
+   7
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -2.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 14:37:22"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번과 7번의 선행 선언이 있었음에도, 실제 전개는 추입형 선수들이 우세하여 페이스가 매우 느려진 것으로 보인다. 4번과 2번의 추입 각질을 간과했다. 특히 4번과 2번의 최근 착순 정보가 충분치 않아 이들의 잠재력을 제대로 평가하지 못했다.",
+  "new_rule": "선행 선언이 다수여도, 실제 착순 분포에 추입형 선수의 상위권 기록이 있다면 저배당이 나올 가능성이 있음을 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 14:37:24"
+ },
+ "reviewed": true
+}

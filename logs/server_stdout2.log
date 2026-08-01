@@ -1,0 +1,27 @@
+서버 시작: http://127.0.0.1:8011 (debug=True, 로컬은 자동 리로드 ON)
+  · Gemini 검수 호출 : ⏸️ 꺼짐 — 일시 중단 (GEMINI_REVIEW_ENABLED)
+  · Gemini 카카오발송: ⏸️ 꺼짐 — 일시 중단 (GEMINI_KAKAO_ENABLED)
+  · 결정론 검수(②④) : 🟢 항상 동작 (logs/det_review/) · 경주 추천 카카오: 🟢 정상
+  · Gemini 독립예측  : ✅ 켜짐
+  · 선택 모듈 로드          ✅ 전부 정상
+  --- 환경 플래그(자동 수집) ---
+  · GEMINI_FORECAST_ENABLED    🟢 켜짐
+ * Serving Flask app 'app'
+ * Debug mode: on
+서버 시작: http://127.0.0.1:8011 (debug=True, 로컬은 자동 리로드 ON)
+  · Gemini 검수 호출 : ⏸️ 꺼짐 — 일시 중단 (GEMINI_REVIEW_ENABLED)
+  · Gemini 카카오발송: ⏸️ 꺼짐 — 일시 중단 (GEMINI_KAKAO_ENABLED)
+  · 결정론 검수(②④) : 🟢 항상 동작 (logs/det_review/) · 경주 추천 카카오: 🟢 정상
+  · Gemini 독립예측  : ✅ 켜짐
+  · 선택 모듈 로드          ✅ 전부 정상
+  --- 환경 플래그(자동 수집) ---
+  · GEMINI_FORECAST_ENABLED    🟢 켜짐
+[주기백업] 6시간 주기 데이터 안전 백업 스레드 시작
+[학습일지] 매일 22:00 학습 일지 자동 생성 스케줄러 시작
+[체크리스트 카카오] 자동 발송 스케줄러 시작(매일 21:00 · 60초 폴링 · HEALTH_KAKAO_HOUR)
+[다중경주] 백그라운드 시작(스케줄 30분·수집 30초·실패격리·워치독 60초)
+[다중경주] 하트비트 #1 · 스케줄 ymd=20260801 (-1초 전 갱신 · 트랙 12개)
+[날씨] 자동수집 데몬 시작(30분 캐시· 키 없음→더미)
+[결과 백필] 데몬 시작(20분 주기·당일 미입력 자동수집 — 한국:KRA rcTime · 일본NAR:keiba RaceMarkTable·watch 무관)
+[부팅] 백그라운드 작업 기동 완료(자동수집·백업·학습·날짜정리)
+[경륜 스케줄] 20260801: 경륜장 10곳 · 경주 94개(서버 직접수집·로그인 불필요)

@@ -1,0 +1,336 @@
+{
+ "predicted_top3": [
+  2,
+  6,
+  5
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "느린",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "선행형이 1명뿐이고, 추입형이 다수인 경주. 라인 구도상 2번의 이점이 크다.",
+ "key_factors": [
+  "선행형 부족",
+  "추입형 다수",
+  "총평의 2번, 6번 지목",
+  "라인 구도의 불균형"
+ ],
+ "exception_note": "이 경주에는 선행형이 1번(木村 皆斗) 한 명뿐이고, 나머지 6명은 모두 추입형(5명) 또는 젖히기형(1명)으로 구성되어 있다. 이는 통상적인 경주 흐름과 달리 선두 경쟁이 약하고 후미에서의 역전이 더 활발하게 일어날 가능성이 높다. 특히, 총평에서 6번(酒井 雄多)을 목표로 2번(小松崎大地)이 선두를 탈취할 것이라는 언급은 이 경주의 특정 라인 구도를 강조하며, 1번 선행마의 부담이 가중될 수 있음을 시사한다. 또한, 5번(佐々木眞也) 역시 1번을 이용한 추입을 예상하고 있어, 1번 선행마에게는 여러 추입형 주자들이 큰 압박을 줄 것으로 보인다. 따라서 선행마가 초반에 힘을 다 빼고, 추입마들이 종반에 역전하는 양상이 예상된다.",
+ "applied_rules": [],
+ "raceKey": "이와키타이라 12경주",
+ "forecastAt": "2026-07-31 20:07:36",
+ "forecastEpoch": 1785496056.9103756,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "이와키타이라 12경주",
+  "wind": {
+   "venue": "이와키타이라",
+   "풍속": 0.7,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 25.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T19:50:00+09:00",
+   "지점": "小名浜",
+   "지점거리km": 12.14
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "佐々木眞也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "宇都宮Ｆ１ 7/13 初特選 １着 13.8 7/14 準決勝 失",
+    "prev2": "高 知Ｆ１ 6/29 初特選 ６着 13.9 6/30 準決勝 ２着 14.2 7/ 1 決 勝 ５着 14.3",
+    "chaku": [
+     5,
+     4,
+     1,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "岩津 裕介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "高 知Ｇ２ 7/17 一予選 ２着 13.8 7/18 二予Ａ ７着 13.6 7/19 特 選 ７着 13.6 7/20 選 抜 １着 13.7",
+    "prev2": "和歌山Ｆ１ 7/ 5 初特選 ６着 11.2 7/ 6 準決勝 ４着 11.9 7/ 7 特 選 ３着 11.2",
+    "chaku": [
+     6,
+     5,
+     2,
+     17
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "小松崎大地",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "岸和田Ｆ１ 7/20 初特選 ５着 11.3 7/21 準決勝 ２着 10.8 7/22 決 勝 ３着 10.6",
+    "prev2": "防 府Ｆ１ 7/ 7 初特選 ４着 10.1 7/ 8 準決勝 ３着 10 7/ 9 特 選 ２着 10.2",
+    "chaku": [
+     7,
+     3,
+     4,
+     12
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "坂口 晃輔",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 初特選 ２着 11.8 7/24 準決勝 ４着 11.3 7/25 特 選 ２着 11.5",
+    "prev2": "小田原Ｆ１ 6/22 初特選 ２着 9.6 6/23 準決勝 ３着 9.4 6/24 決 勝 ７着",
+    "chaku": [
+     2,
+     4,
+     3,
+     7
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "小岩 大介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "富 山Ｆ１ 7/21 初特選 ６着 9.7 7/22 準決勝 ３着 9.7 7/23 決 勝 ２着 9.8",
+    "prev2": "函 館Ｆ１ 7/14 初特選 ２着 11.8 7/15 準決勝 失",
+    "chaku": [
+     0,
+     2,
+     1,
+     2
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "木村 皆斗",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "高 知Ｇ２ 7/17 一予選 ４着 14.4 7/18 二予Ｂ ９着 15.2 7/19 選 抜 ３着 14.5 7/20 選 抜 ３着 14.5",
+    "prev2": "豊 橋Ｆ１ 7/ 5 初特選 ３着 11.5 7/ 6 準決勝 １着 11.5 7/ 7 決 勝 ２着 11.9",
+    "chaku": [
+     10,
+     4,
+     4,
+     10
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "酒井 雄多",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "前 橋Ｇ３ 7/22 初特選 ９着 10.3 7/23 準決勝 ６着 9.7 7/24 特 秀 １着 9.6",
+    "prev2": "和歌山Ｆ１ 7/ 5 初特選 ７着 11.5 7/ 6 準決勝 ３着 11.9 7/ 7 特 選 失",
+    "chaku": [
+     4,
+     3,
+     1,
+     16
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    1
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    5,
+    3,
+    2,
+    4,
+    7
+   ]
+  },
+  "lines": [
+   1,
+   5,
+   4,
+   6,
+   2,
+   3,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "Ｇ戦線でも存在感が増している酒井を目標に小松崎が首位奪取。果敢でパワフルな木村を利す佐々木の台頭も。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   3,
+   6,
+   4
+  ],
+  "hit_count": 1,
+  "hit": [
+   6
+  ],
+  "missed": [
+   3,
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   5,
+   3
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 20:58:24"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "라인 구도 분석에서 3번(岩津 裕介)과 4번(坂口 晃輔)의 후미 추입력을 충분히 고려하지 못했습니다. 특히 총평의 2번과 6번 지목에 매몰되어 1번 뒤의 추입 라인이 아닌 다른 추입마들의 잠재력을 간과했습니다.",
+  "new_rule": "총평에서 언급되지 않은 추입형 말이라도 라인 구성 내에서 잠재적인 추입 기회를 가질 수 있으므로, 모든 추입형 말의 최근 성적과 각질을 재평가하여 우승 가능성을 종합적으로 판단합니다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 20:58:26"
+ },
+ "reviewed": true
+}

@@ -1563,6 +1563,17 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
     # [오매칭 차단] 6명 종목(경륜·경정·바이크)에 한국경마 전적이 raceKey 충돌로 들어간 경우 사용 금지.
     if sport in ("cycle", "boat", "bike") and rec.get("source") == "korea":
         return None
+    # ── [승인 B · 2026-08-01] 경마도 차단 — **경기장으로 가른다** ─────────────────
+    # 🔴 왜: 위 줄이 경륜·경정·바이크만 막아, JRA·일부 지방 경마에 한국 PDF 전적이 그대로 들어가
+    #        아래 `prescored` 분기에서 점수화됐다(form → _integrated_grades → keyHorses → 추천).
+    #        실측 31건(카와사키17·삿포로7·중경2·코치2·추쿄1·니가타1·주쿄1 · 07-30~08-01 3일치).
+    # ⚠ `sport=="horse"` 전체를 막으면 **한국경마(KRA)가 죽는다** — korea 전적이 정상 입력인 종목이다.
+    #    그래서 **한국 경마장 키일 때만 허용**하고, 그 판정은 기존 `_KRA_TRACK_RE`(app.py:1669)를
+    #    재사용한다(경기장 목록을 두 곳에 두지 않는다).
+    # 🔧 되돌리기: 이 if 블록만 삭제.
+    if rec.get("source") == "korea" and not _KRA_TRACK_RE.search(str(rk or "")):
+        print("[전적 오매칭 차단] %s: 한국 전적(source=korea)이 한국 경마장이 아닌 경주에 붙어 있다 → 전적 미사용" % rk)
+        return None
     anomaly_by_no = {}
     for d in drops or []:
         if d.get("pct", 0) < 0:  # 배당 하락(자금유입)
@@ -12012,6 +12023,26 @@ def _triple_analyze(rk, rec):
             except Exception as _est_e:
                 print("[삼복승 추정표기] 스킵(무시):", _est_e)
             core_picks["raceHorseCount"] = _nh                     # [표시] 출전 두수
+            # ── [승인 · 완전성 게이트 ③ · 2026-08-01] **관측 전용 표기. 저장·판정 무개입** ──────
+            # 🔴 왜: 중경 7R(08-01)이 45조합(마번2~11) 상태로 분석 저장됐고, 완전한 55조합(마번1~11)은
+            #        36초 뒤에 왔다(발주 15:35 · 저장 15:33:35). "마감 시점 동결"이 **불완전한 것을 얼렸다**.
+            #        그런데 이런 경주가 몇 건인지 **기록 자체가 없어** 저장 건너뛰기(①안)를 정할 근거가 없다.
+            # ⚠ 여기서는 **표기만** 한다 — 아무것도 막지 않는다(①안은 규모 확인 후 별도 승인).
+            # ⚠ `ticks` 를 함께 남긴다 — 중경 7R 은 틱이 3개뿐(중앙 평균 20)이라
+            #    **"동결 시점 문제"와 "수집 부족"을 구분**해야 하기 때문이다. 둘은 대책이 다르다.
+            # 🔧 되돌리기: 이 try 블록만 삭제(프론트·판정은 이 필드를 읽지 않는다).
+            try:
+                _cs = len(curQ or {})
+                _cn = len(_rec_valid or [])
+                _exp = _cn * (_cn - 1) // 2 if _cn >= 2 else 0
+                core_picks["combosSeen"] = _cs
+                core_picks["combosExpected"] = _exp
+                core_picks["collectTicks"] = len(((_triple_load().get(rk) or {}).get("history") or []))
+                if _exp and _cs < _exp:
+                    core_picks["incomplete"] = True
+                    core_picks["incompleteRatio"] = round(_cs / float(_exp), 3)
+            except Exception as _ic_e:
+                print("[완전성 표기] 스킵(무시):", _ic_e)
             # [⭐ 표시 두수별 상한 캡 (2026-07-25) — 판정 명단 무변경·표시만] finalQuinellas(=displayedCombos 복승)
             #   등장 말을 두수별 상한(≤9두 3·10~11두 4·12두+ 5)으로 잘라 starHorses 제공. 프론트 ⭐ 마커는 이 목록만
             #   표시(8두에 4~5 ⭐ 과다표시 억제). displayedCombos·finalQuinellas·판정은 그대로(추가만).
@@ -12987,6 +13018,17 @@ def korea_form():
     rk = (body.get("raceKey") or "").strip()
     if not rk:
         return jsonify({"error": "raceKey가 필요합니다."}), 400
+    # ── [승인 C · 2026-08-01] 한국 경마장 키가 아니면 **저장 자체를 거부**한다 ──────────
+    # 🔴 왜: 여기가 오염의 발원지다. 프론트 `pollKoreaOdds`(static/js/app.js:6370)가
+    #        `/api/odds/triple/match` 로 얻은 raceKey 에 한국 PDF 전적을 그대로 써 넣는데,
+    #        그 매칭 가드(`_is_japan_key`)에 JRA 중앙 10곳이 없어 삿포로·중경 등이 통과했다.
+    # ⚠ **조용히 막지 않는다** — 거부할 때마다 로그를 남기고, 응답에도 사유를 돌려준다.
+    # ⚠ 한국 경마장 판정은 기존 `_KRA_TRACK_RE` 재사용(목록 이중화 금지).
+    # 🔧 되돌리기: 이 if 블록만 삭제.
+    if not _KRA_TRACK_RE.search(rk):
+        print("[한국 전적 거부] %s: 한국 경마장이 아니다 → 저장하지 않음(오염 방지 · 승인 C)" % rk)
+        return jsonify({"ok": False, "rejected": True, "raceKey": rk,
+                        "reason": "한국 경마장 raceKey가 아니어서 한국 전적을 저장하지 않았습니다."}), 200
     horses = _sanitize_starters(body.get("horses") or [])   # [전적복구] 중복 마번 제거
     sdb = _starters_load()
     sdb[rk] = {"horses": horses, "t": time.time(), "source": "korea"}
@@ -13014,6 +13056,20 @@ _JP_TRACKS = (
     "浦和", "川崎", "金沢", "笠松", "姫路", "佐賀",
     "후나바시", "오이", "나고야", "소노다", "고치", "가와사키", "우라와",
     "가나자와", "카사마츠", "히메지", "사가", "모리오카", "미즈사와", "오비히로", "몬베츠",
+    # ── [승인 A · 2026-08-01] 보강 ──────────────────────────────────────────
+    # 🔴 왜: 이 목록이 비어 있던 탓에 한국 PDF 전적이 JRA·일부 지방 경주에 붙었다
+    #        (`/api/korea/form` → source="korea" → _form_from_starters 가 점수화 = 판정 오염).
+    #   ① JRA 중앙 10곳이 **하나도 없었다** → 삿포로·중경·니가타 등이 그대로 통과.
+    #   ② 표기 불일치 — 위 줄의 `가와사키`·`고치` 는 실제 저장 키(`카와사키`·`코치`)와 달라 무력했다.
+    #      실측 오염 31건 중 카와사키 17 · 코치 2 가 이 구멍으로 들어왔다.
+    # ⚠ 추가만 한다. 기존 30개는 하나도 지우지 않았다(되돌리기 = 이 블록만 삭제).
+    # ⚠ 한국 경마장(서울·부산·부경·제주·과천)은 **절대 넣지 않는다** — 넣으면 한국경마가 죽는다.
+    # JRA 중앙 10곳 (한글·한자·이표기)
+    "삿포로", "札幌", "하코다테", "函館", "후쿠시마", "福島", "니가타", "新潟",
+    "도쿄", "東京", "나카야마", "中山", "주쿄", "중경", "추쿄", "中京",
+    "쿄토", "교토", "京都", "한신", "阪神", "고쿠라", "코쿠라", "小倉",
+    # 지방 실제 저장 표기 보강(위 한글과 표기가 다른 것)
+    "카와사키", "코치", "오오이", "몬벳츠", "카나자와", "후나바시",
 )
 
 

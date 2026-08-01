@@ -1,0 +1,310 @@
+{
+ "predicted_top3": [
+  5,
+  4,
+  3
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "단독 선행마의 유리한 전개, 젖히기형의 반격과 추입형의 기회 포착.",
+ "key_factors": [
+  "단독 선행형 5번",
+  "4번 皿屋 豊의 '적극책' 요구",
+  "추입형 다수와 3번의 높은 착순 분포"
+ ],
+ "exception_note": "이 경주는 단 하나의 선행형(5번)만 존재하며, 이는 선행형에게 매우 유리한 구도를 제공합니다. 또한, 코멘트에서 4번 皿屋 豊에게 '적극책'을 요구하고 있어, 단순한 통계적 각질 분포를 넘어선 변수가 될 수 있습니다. 젖히기형 2번 小堺 浩二의 최근 성적 부진과 달리 4번 皿屋 豊는 직전 준결승 1착 기록이 있어 컨디션 반등 가능성도 배제할 수 없습니다. 3번 藤岡 隆治의 높은 착순 분포는 추입 기회 시 강력함을 시사합니다.",
+ "applied_rules": [],
+ "raceKey": "와카야마 7경주",
+ "forecastAt": "2026-07-31 13:23:13",
+ "forecastEpoch": 1785471793.579083,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "와카야마 7경주",
+  "wind": {
+   "venue": "와카야마",
+   "풍속": 4.8,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 34.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T13:00:00+09:00",
+   "지점": "和歌山",
+   "지점거리km": 1.02
+  },
+  "fieldSize": 6,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 4,
+    "name": "皿屋 豊",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/29 予 選 ６着 12 7/30 一 般 ２着 11",
+    "prev1": "前 橋Ｇ３ 7/10 予 選 ３着 10.1 7/11 準決勝 １着 9.4 7/12 決 勝 ７着",
+    "prev2": "取 手Ｇ３ 6/27 一予選 ４着 11.7 6/28 二予選 ５着 11.7 6/29 特 選 ４着 11.3 6/30 特 選 ７着 11.6",
+    "chaku": [
+     3,
+     4,
+     4,
+     17
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "小堺 浩二",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "豊 橋Ｇ３ 7/25 一予選 ７着 11.1 7/26 選 抜 ５着 11.9 7/27 一 般 ３着 11.5 7/28 選 抜 ５着 11.3",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 １着 13.8 7/14 準決勝 ７着 15.2 7/15 特 選 ５着 14.3",
+    "chaku": [
+     8,
+     1,
+     11,
+     27
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "藤岡 隆治",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/29 予 選 ５着 11.2 7/30 選 抜 ６着 11.3",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ４着 9.8 7/23 特 選 ７着 9.5 7/24 特 選 ３着 9.7",
+    "prev2": "小松島Ｇ３ 7/ 3 選 抜 ９着 12.1 7/ 4 一 般 ４着 11.7 7/ 5 一 般 ５着 11.6",
+    "chaku": [
+     4,
+     3,
+     3,
+     22
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "月森 亮輔",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/29 予 選 ６着 12 7/30 一 般 ４着 11.4",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ２着 9.5 7/23 準決勝 ７着 10.1 7/24 特 秀 ９着 10.6",
+    "prev2": "大 宮Ｆ１ 7/ 1 予 選 ５着 14 7/ 2 選 抜 ２着 14.1 7/ 3 特 選 ４着 14.2",
+    "chaku": [
+     2,
+     7,
+     2,
+     17
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "高橋 昇平",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/29 予 選 ６着 11.1 7/30 一 般 ３着 11.3",
+    "prev1": "小松島Ｇ３ 7/ 2 一予選 ６着 11.4 7/ 3 選 抜 ２着 11.7 7/ 4 選 抜 ８着 11.3 7/ 5 一 般 ３着 12.2",
+    "prev2": "松 阪Ｆ１ 6/ 7 初特選 ２着 11.9 6/ 8 準決勝 ２着 11.7 6/ 9 決 勝 ２着 11.7",
+    "chaku": [
+     3,
+     7,
+     4,
+     5
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "岡 光良",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/29 予 選 ５着 11.4 7/30 一 般 ５着 11.4",
+    "prev1": "前 橋Ｇ３ 7/24 選 抜 ２着 10",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 ５着 9.5 7/ 8 選 抜 ６着 9.9 7/ 9 一 般 ６着 9.2",
+    "chaku": [
+     0,
+     9,
+     1,
+     9
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    5
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    3,
+    1,
+    6
+   ]
+  },
+  "lines": [
+   5,
+   3,
+   1,
+   4,
+   2,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "落車の影響か、皿屋は慎重に走り過ぎ。ここは積極策で打開したい。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 83.3
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   3,
+   4,
+   6
+  ],
+  "hit_count": 2,
+  "hit": [
+   4,
+   3
+  ],
+  "missed": [
+   6
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   3,
+   4
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 13:56:38"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번 岡 光良의 최근 성적 부진에도 불구하고 7/24 전개최 선발 2착 기록이 있었으나, 이를 충분히 고려하지 못하고 단지 '추입형'으로만 판단하여 잠재력을 간과했다.",
+  "new_rule": "추입형 선수가 최근 부진하더라도 전개최에 2착 이내의 우수한 성적이 있다면 이를 잠재력 요인으로 더 비중 있게 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 13:56:40"
+ },
+ "reviewed": true
+}

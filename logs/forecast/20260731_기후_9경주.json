@@ -1,0 +1,320 @@
+{
+ "predicted_top3": [
+  5,
+  4,
+  7
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "느린",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "선행형이 둘이지만, 모두 C, B 등급으로 강력한 선행으로 보기 어려워 추입형 우세 예상.",
+ "key_factors": [
+  "추입형 다수와 선행형 2인 경쟁",
+  "선행형 간의 내부 경쟁 가능성",
+  "강한 서북서풍의 영향으로 선행형 불리 가능성"
+ ],
+ "exception_note": "이 경주는 7명 중 5명이 추입형, 2명이 선행형으로 구성되어 있다. 선행형 (4)와 (2)는 각각 B, C 등급으로 강력한 선행으로 보기 어려워 서로 견제하거나 페이스 조절 실패 시 후미 추입형들에게 기회가 돌아갈 수 있다. 특히 (5) 肥後 尚己를 중심으로 한 추입 라인이 잘 형성될 경우, 선행형들의 경쟁을 이용해 막판 스퍼트로 우승을 노릴 가능성이 높다. 또한 서북서 6.6 m/s의 강한 바람은 주로의 방향에 따라 선행형에게는 큰 부담으로 작용할 수 있어, 추입형에게 유리한 전개가 예상된다.",
+ "applied_rules": [],
+ "raceKey": "기후 9경주",
+ "forecastAt": "2026-07-31 14:33:32",
+ "forecastEpoch": 1785476012.8610678,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "기후 9경주",
+  "wind": {
+   "venue": "기후",
+   "풍속": 6.6,
+   "풍향": "서북서",
+   "풍향코드": 13,
+   "기온": 36.0,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T14:20:00+09:00",
+   "지점": "岐阜",
+   "지점거리km": 2.57
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "肥後 尚己",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     3,
+     2,
+     7,
+     6
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "國武 耕二",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     3,
+     3,
+     7,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "坂上 忠克",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     2,
+     8,
+     6,
+     17
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "川又 裕樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "chaku": [
+     3,
+     1,
+     9,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "一ノ瀬 匠",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "chaku": [
+     10,
+     9,
+     1,
+     13
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "西森 一稀",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     15,
+     5,
+     1,
+     6
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "坂元 洋行",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     2,
+     2,
+     2,
+     18
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    4,
+    2
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    5,
+    7,
+    3,
+    1,
+    6
+   ]
+  },
+  "lines": [
+   2,
+   5,
+   3,
+   6,
+   4,
+   7,
+   1
+  ],
+  "paceLabel": null,
+  "comment": "⑤肥後を中心の中近勢に期待。先頭の②西森が予選で連対外してなく好気合い。一気に攻め上がり、肥後が好ガードから差し切る。④一ノ瀬－⑦国武に注意。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   6,
+   4,
+   2
+  ],
+  "hit_count": 1,
+  "hit": [
+   4
+  ],
+  "missed": [
+   6,
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   },
+   {
+    "no": 2,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": null,
+  "market_hit_count": null,
+  "market_snapshot_mb": null,
+  "market_src": null,
+  "gradedAt": "2026-07-31 14:58:03"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번 추입형과 2번 선행형이 C등급임에도 불구하고 높은 순위를 기록했습니다. C등급 말들의 전력과 당일 컨디션, 그리고 라인 내에서의 역할에 대한 분석이 부족했습니다. 특히 6번은 최근 착순에서 좋은 기록을 보여주고 있었으나 이를 간과했습니다.",
+  "new_rule": "등급이 낮은 말이라도 최근 착순이 준수하고 라인 내 역할을 고려하여 예측에 반영합니다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 14:58:04"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,173 @@
+{
+ "raceKey": "삿포로 9경주",
+ "entries": [
+  {
+   "time": "14:05:31",
+   "minutesBefore": 14,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      6
+     ],
+     [
+      2,
+      7
+     ],
+     [
+      6,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      6,
+      7
+     ],
+     [
+      2,
+      3,
+      6
+     ],
+     [
+      3,
+      6,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "14:18:34",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       3,
+       5
+      ],
+      "prev": 64.5,
+      "cur": 35.9,
+      "pct": -44.3
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "14:37:48",
+   "minutesBefore": -19,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       3,
+       4
+      ],
+      "prev": 52.0,
+      "cur": 12.3,
+      "pct": -76.3
+     },
+     {
+      "combo": [
+       3,
+       5
+      ],
+      "prev": 74.3,
+      "cur": 20.7,
+      "pct": -72.1
+     },
+     {
+      "combo": [
+       2,
+       3
+      ],
+      "prev": 33.6,
+      "cur": 15.2,
+      "pct": -54.8
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "14:45:48",
+   "minutesBefore": -27,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       3,
+       4
+      ],
+      "prev": 52.0,
+      "cur": 12.3,
+      "pct": -76.3
+     },
+     {
+      "combo": [
+       3,
+       5
+      ],
+      "prev": 74.3,
+      "cur": 20.7,
+      "pct": -72.1
+     },
+     {
+      "combo": [
+       2,
+       3
+      ],
+      "prev": 33.6,
+      "cur": 15.2,
+      "pct": -54.8
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

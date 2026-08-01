@@ -1,0 +1,337 @@
+{
+ "predicted_top3": [
+  2,
+  1,
+  3
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  2,
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 간의 경쟁으로 추입형에게 기회, 특히 최근 성적 좋은 2번과 1번이 유리.",
+ "key_factors": [
+  "선행형 5번과 7번의 내부 경쟁 예상",
+  "경주 총평에 언급된 '叩き合えば上吹越の一発か' (서로 싸우면 카미후키코시의 한 방)",
+  "2번과 1번의 최근 경주 성적 및 착순 분포가 우수함"
+ ],
+ "exception_note": "선행형이 2명(5번, 7번)이라 선두 다툼이 예상되며, 이는 후미 추입형에게 절대적으로 유리한 전개를 제공할 것이다. 총평에서도 이러한 가능성을 암시하고 있다. 따라서 통상적인 경주보다 추입마의 활약이 두드러질 가능성이 크다.",
+ "applied_rules": [],
+ "raceKey": "코치 7경주",
+ "forecastAt": "2026-07-31 23:02:50",
+ "forecastEpoch": 1785506570.6759663,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "코치 7경주",
+  "wind": {
+   "venue": "코치",
+   "풍속": 2.5,
+   "풍향": "북",
+   "풍향코드": 16,
+   "기온": 27.0,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T22:40:00+09:00",
+   "지점": "南国日章",
+   "지점거리km": 5.26
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "上吹越直樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小 倉Ｆ２ 7/24 初特選 ５着 11.2 7/25 準決勝 ３着 11.4 7/26 決 勝 ２着 11.6",
+    "prev2": "西武園Ｆ２ 7/16 初特選 １着 11.4 7/17 準決勝 ４着 11.1 7/18 特 選 １着 12.3",
+    "chaku": [
+     3,
+     4,
+     3,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "野口 正則",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小 倉Ｆ２ 7/24 初特選 ２着 11.1 7/25 準決勝 １着 11.4 7/26 決 勝 ３着 11.3",
+    "prev2": "奈 良Ｆ２ 7/ 1 初特選 ５着 9.7 7/ 2 準決勝 １着 9.9 7/ 3 決 勝 ７着 10",
+    "chaku": [
+     4,
+     1,
+     3,
+     14
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "小原 周祐",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "佐世保Ｆ２ 7/22 初特選 ４着 11.1 7/23 準決勝 ４着 11.2 7/24 特 選 ３着 12",
+    "prev2": "和歌山Ｆ１ 7/ 5 初特選 ４着 11.6 7/ 6 準決勝 ３着 11.7 7/ 7 決 勝 ３着 11.8",
+    "chaku": [
+     3,
+     3,
+     3,
+     8
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "片山 智晴",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "岸和田Ｆ１ 7/20 初特選 ４着 11.3 7/21 準決勝 ３着 11.2 7/22 特 選 ５着 11.7",
+    "prev2": "松 山Ｆ２ 7/11 初特選 ２着 11.3 7/12 準決勝 ２着 11.7 7/13 決 勝 ６着 11.2",
+    "chaku": [
+     1,
+     3,
+     3,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "小林 信晴",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "和歌山Ｆ２ 7/24 初特選 ６着 11.7 7/25 準決勝 ２着 11.8 7/26 決 勝 ４着 11.6",
+    "prev2": "玉 野Ｆ１ 7/14 初特選 ２着 11.8 7/15 準決勝 ６着 11.7 7/16 特 選 ４着 11.4",
+    "chaku": [
+     1,
+     8,
+     3,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "南儀 拓海",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 阪Ｆ２ 7/21 初特選 ５着 11.6 7/22 準決勝 ７着 12.2 7/23 特一般 ２着 11.9",
+    "prev2": "前 橋Ｇ３ 7/10 初特選 ７着 11.1 7/11 準決勝 １着 10 7/12 決 勝 ６着 10.8",
+    "chaku": [
+     3,
+     3,
+     3,
+     23
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "日野 博幸",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小 倉Ｆ２ 7/24 初特選 ６着 11.4 7/25 準決勝 ６着 11.3 7/26 特 選 ７着 12.3",
+    "prev2": "松 山Ｆ２ 7/11 初特選 ５着 11.4 7/12 準決勝 １着 11.7 7/13 決 勝 ５着 11.6",
+    "chaku": [
+     5,
+     2,
+     2,
+     9
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    5,
+    7
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    1,
+    2,
+    3,
+    4,
+    6
+   ]
+  },
+  "lines": [
+   5,
+   6,
+   2,
+   1,
+   7,
+   3,
+   4
+  ],
+  "paceLabel": null,
+  "comment": "日野に乗って小原ー片山が鋭く。南儀が飛ばせば小林の出番。叩き合えば上吹越の一発か。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   6,
+   5
+  ],
+  "hit_count": 1,
+  "hit": [
+   2
+  ],
+  "missed": [
+   6,
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   },
+   {
+    "no": 5,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   3,
+   6
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 23:42:38"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번은 '남기(선행형)가 날리면 코바야시(6번)의 차례'라는 코멘트를 통해 선행마의 경쟁이 있을 경우 활약할 가능성이 언급되었으나, 추입형인 1, 2번의 최근 성적에 과도하게 집중하여 해당 가능성을 간과했습니다. 5번은 선행마의 경쟁으로 인한 손실을 과대평가하여 배제한 것이 패착입니다.",
+  "new_rule": "선행마들의 선두 다툼이 예상되는 경우, 추입마 중에서도 언급된 특정 전개에 유리한 말이 있다면 그 말을 우선적으로 고려한다. 또한, 선행마 중에서도 경쟁 속에서 버틸 가능성이 있는 말을 함께 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 23:42:41"
+ },
+ "reviewed": true
+}

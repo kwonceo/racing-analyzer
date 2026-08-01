@@ -1,0 +1,319 @@
+{
+ "predicted_top3": [
+  2,
+  1,
+  3
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "②모리타의 선행 주도와 ①나카이의 근성, ③야마구치의 젖히기 기세.",
+ "key_factors": [
+  "선행형 ②모리타의 라인 주도력",
+  "①나카이의 전개 이점과 끈기",
+  "③야마구치의 최근 회복세"
+ ],
+ "exception_note": "이 경주는 라인의 두터움을 가진 신예 ②모리타가 선행을 주도할 것으로 예상되며, 총평에서 언급된 것처럼 ①나카이가 전개상 유리한 위치를 점하고, 낙차 영향에서 벗어나는 ③야마구치의 상승세가 변수로 작용할 수 있어 통상적인 각질 구성과는 다른 전개가 예상됩니다.",
+ "applied_rules": [],
+ "raceKey": "다케오 6경주",
+ "forecastAt": "2026-07-31 22:55:41",
+ "forecastEpoch": 1785506141.7922099,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "다케오 6경주",
+  "wind": {
+   "venue": "다케오",
+   "풍속": 1.0,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 26.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T22:40:00+09:00",
+   "지점": "嬉野",
+   "지점거리km": 8.56
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "中井 大介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "熊 本Ｆ２ 7/13 チ予選 ２着 12.1 7/14 チ準決 ４着 11.8 7/15 チ選抜 ４着 12.5",
+    "prev2": "佐世保Ｆ２ 7/ 5 チ予選 １着 12.2 7/ 6 チ準決 ３着 12.3 7/ 7 チ決勝 ７着 11.3",
+    "chaku": [
+     2,
+     1,
+     1,
+     6
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "山口 直樹",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "和歌山Ｆ２ 7/24 チ予選 ３着 11.8 7/25 チ準決 ４着 12.5 7/26 チ決勝 ２着 11.8",
+    "prev2": "京王閣Ｆ２ 7/13 チ予選 ７着 11.8 7/14 チ一般 ５着 12.5 7/15 チ一般 １着 11.9",
+    "chaku": [
+     3,
+     3,
+     2,
+     7
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "森田 瑞基",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "広 島Ｆ２ 7/ 8 チ予選 ２着 12 7/ 9 チ準決 ５着 12.6 7/10 チ選抜 １着 11.8",
+    "prev2": "松 阪Ｆ２ 7/ 1 チ予選 ２着 11.9 7/ 2 チ準決 ３着 12.2 7/ 3 チ選抜 ３着 12",
+    "chaku": [
+     1,
+     2,
+     4,
+     6
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "茂木 和臣",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "平 Ｆ２ 7/22 チ予選 ６着 12.4 7/23 チ一般 ３着 12.1 7/24 チ一般 ６着 12.3",
+    "prev2": "久留米Ｆ２ 7/ 7 チ予選 失",
+    "chaku": [
+     2,
+     1,
+     3,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "中嶋 樹",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ７着 11.9 7/22 チ一般 ６着 12.1 7/23 チ一般 ３着 12.5",
+    "prev2": "岸和田Ｆ２ 7/14 チ一般 １着 12.5 7/15 チ選抜 ２着 11.9",
+    "chaku": [
+     7,
+     4,
+     2,
+     13
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "川西 亮介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "prev1": "和歌山Ｆ２ 7/24 チ予選 ７着 12 7/25 チ一般 ７着 12.4 7/26 チ一般 １着 12.2",
+    "prev2": "岸和田Ｆ２ 7/ 4 チ予選 ５着 11.8 7/ 5 チ選抜 ４着 12 7/ 6 チ一般 ６着 12.4",
+    "chaku": [
+     1,
+     0,
+     4,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "原 司",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "prev1": "松 山Ｆ２ 7/25 チ予選 ５着 12.2 7/26 チ一般 ７着 12.2 7/27 チ一般 ７着 12.5",
+    "prev2": "奈 良Ｆ２ 7/16 チ予選 ５着 10 7/17 チ一般 ５着 10.6 7/18 チ一般 ３着 10.2",
+    "chaku": [
+     0,
+     0,
+     5,
+     19
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    2,
+    5
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    1,
+    4,
+    6,
+    7
+   ]
+  },
+  "lines": [
+   2,
+   1,
+   7,
+   3,
+   4,
+   5,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "ラインの厚みがある新人の②森田が駆けていく。展開絶好は①中井と読むが、落車の影響が薄れてきた③山口も好勝負。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   3,
+   2
+  ],
+  "hit_count": 3,
+  "hit": [
+   2,
+   1,
+   3
+  ],
+  "missed": [],
+  "missed_info": [],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   2,
+   3
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 23:20:00"
+ },
+ "graded": true,
+ "reviewed": true,
+ "review": {
+  "miss_reason": "해당 없음(전부 적중)",
+  "new_rule": "없음",
+  "rule_confidence": 1,
+  "reviewedAt": "2026-07-31 23:20:00"
+ }
+}

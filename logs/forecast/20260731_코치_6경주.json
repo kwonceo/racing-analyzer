@@ -1,0 +1,330 @@
+{
+ "predicted_top3": [
+  2,
+  1,
+  4
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "2번의 선행력이 강하고, 1번의 추입 능력으로 협공하며 4번이 뒤쫓는 그림.",
+ "key_factors": [
+  "2번(松下 綾馬)의 강한 선행력",
+  "1번(伊藤 大彦)의 뛰어난 추입 능력 및 2번과의 라인 협공",
+  "2번과 4번(加藤 駿) 선행형 선수 간의 정면 승부 가능성",
+  "경주 총평의 '선행력 강한 마츠시타에 이토가 원호', '당소 첫 등장 카토에 이노마타가 정면 승부'"
+ ],
+ "exception_note": "2번과 4번, 두 명의 선행형 선수가 직접적으로 경쟁하는 구도에서, 특히 2번의 선행력이 강하다는 총평을 근거로 삼음. 여기에 1번 추입형 선수의 원호가 더해져 통상적인 추입형 우세 경주와는 다른 전개가 예상됨.",
+ "applied_rules": [],
+ "raceKey": "코치 6경주",
+ "forecastAt": "2026-07-31 22:35:28",
+ "forecastEpoch": 1785504928.6519547,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "코치 6경주",
+  "wind": {
+   "venue": "코치",
+   "풍속": 2.7,
+   "풍향": "북",
+   "풍향코드": 16,
+   "기온": 27.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T22:20:00+09:00",
+   "지점": "南国日章",
+   "지점거리km": 5.26
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "伊藤 大彦",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "広 島Ｆ２ 7/22 予 選 ４着 11.6 7/23 選 抜 １着 11.3 7/24 特 選 ５着 11.5",
+    "prev2": "前 橋Ｇ３ 7/10 特予選 ３着 9.4 7/11 準決勝 ５着 9.6 7/12 特 選 ３着 9.8",
+    "chaku": [
+     2,
+     3,
+     9,
+     9
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "猪俣 康一",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "小 倉Ｆ２ 7/24 特予選 ５着 11.4 7/25 特一般 ３着 12.2 7/26 特一般 ２着 12.4",
+    "prev2": "奈 良Ｆ２ 7/16 特予選 ７着 10.1 7/17 特一般 ４着 10.1 7/18 特一般 ４着 10",
+    "chaku": [
+     0,
+     2,
+     4,
+     9
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "松下 綾馬",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "富 山Ｆ１ 7/21 予 選 ２着 9.5 7/22 準決勝 ７着 10.7 7/23 一 般 ２着 10",
+    "prev2": "玉 野Ｆ１ 7/14 予 選 ４着 13.1 7/15 準決勝 ３着 12.6 7/16 特 選 ５着 12",
+    "chaku": [
+     1,
+     4,
+     3,
+     10
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "小岩 哲也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ６着 11.8 7/23 一 般 ３着 11.7 7/24 一 般 ５着 12",
+    "prev2": "広 島Ｆ２ 7/13 予 選 ６着 11.4 7/14 一 般 ４着 11.7 7/15 一 般 ７着 11.9",
+    "chaku": [
+     0,
+     1,
+     5,
+     18
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "加藤 駿",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小 倉Ｆ２ 7/24 特予選 ２着 11.7 7/25 準決勝 ５着 11.9 7/26 特 選 ４着 12",
+    "prev2": "函 館Ｆ１ 7/14 予 選 ２着 11.7 7/15 準決勝 ６着 11.6 7/16 特 選 ６着 11.1",
+    "chaku": [
+     6,
+     6,
+     4,
+     8
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "米原 大輔",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "小 倉Ｆ２ 7/24 特予選 ３着 12.2 7/25 準決勝 ７着 11.5 7/26 特一般 １着 12.2",
+    "prev2": "玉 野Ｆ１ 7/14 予 選 ３着 12.7 7/15 準決勝 ７着 11.8 7/16 一 般 ７着 11.6",
+    "chaku": [
+     1,
+     7,
+     6,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "山原 利秀",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/14 予 選 ７着 11.9 7/15 一 般 ５着 11.5 7/16 一 般 ４着 11.3",
+    "prev2": "和歌山Ｆ１ 7/ 5 予 選 ６着 11.7 7/ 6 一 般 ４着 12 7/ 7 一 般 ５着 11.7",
+    "chaku": [
+     2,
+     3,
+     3,
+     10
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    2,
+    4
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    1,
+    3,
+    5,
+    6,
+    7
+   ]
+  },
+  "lines": [
+   2,
+   1,
+   7,
+   4,
+   3,
+   6,
+   5
+  ],
+  "paceLabel": null,
+  "comment": "先行力強靭な松下に伊藤が援護して山原と。当所初登場の加藤に猪俣で真っ向勝負を演じ。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   1,
+   7
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   4
+  ],
+  "missed": [
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   2,
+   4
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 22:59:44"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번(松下 綾馬)의 선행력을 과신하여 7번(山原 利秀)의 잠재력을 간과했다. 7번 선수의 착순 분포 (2, 3, 3, 10)를 더 자세히 분석했어야 했다.",
+  "new_rule": "선행형 선수 간의 경쟁 구도에서 단순히 총평에만 의존하지 않고, 추입형 선수의 최근 착순 분포와 등급을 종합적으로 고려하여 예상 밖의 복병을 발굴한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 22:59:46"
+ },
+ "reviewed": true
+}

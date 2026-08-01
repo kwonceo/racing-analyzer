@@ -1,0 +1,328 @@
+{
+ "predicted_top3": [
+  1,
+  2,
+  4
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "신오가 다수의 선행마와 연대할 수 없어 유리, 오쿠하라가 뒤를 쫓음",
+ "key_factors": [
+  "신오의 등급과 최근 전적 우수",
+  "다수의 선행형 마필",
+  "라인 구도의 불균형"
+ ],
+ "exception_note": "신오가 S급 실력자인데, 같은 라인에 선행형이 많아 내부 경쟁이 발생하기보다는, 코멘트와 같이 대쉬를 살린 감기가 유효할 것으로 예상된다. 오쿠하라의 추입이 번수로 따라붙을 가능성이 높다. 伊早坂駿一 또한 선행형으로 꾸준한 성적을 보여 다른 선행마들과의 경쟁 구도를 형성하며 뒷심을 발휘할 수 있다.",
+ "applied_rules": [],
+ "raceKey": "케이오카쿠 3경주",
+ "forecastAt": "2026-07-31 21:27:18",
+ "forecastEpoch": 1785500838.2648249,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "케이오카쿠 3경주",
+  "wind": {
+   "venue": "케이오카쿠",
+   "풍속": 1.8,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 29.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T21:20:00+09:00",
+   "지점": "府中",
+   "지점거리km": 5.19
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "神尾 敬冬",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "広 島Ｆ２ 7/22 初特選 ７着 12.2 7/23 準決勝 ３着 11.7 7/24 決 勝 ７着 11.5",
+    "prev2": "大 宮Ｆ１ 7/ 1 初特選 ５着 14.5 7/ 2 準決勝 ４着 15.1 7/ 3 特 選 ７着 15.2",
+    "chaku": [
+     0,
+     0,
+     1,
+     18
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "奥原 亨",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "佐世保Ｆ２ 7/22 予 選 ３着 11.6 7/23 準決勝 ７着 11.3 7/24 特 選 ５着 11.8",
+    "prev2": "平 Ｆ２ 7/10 特予選 ２着 11.5 7/11 準決勝 ４着 12.2 7/12 特 選 ２着 12.1",
+    "chaku": [
+     5,
+     6,
+     4,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "田村 真広",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/22 予 選 １着 11.9 7/23 準決勝 ５着 11.6 7/24 特 選 ６着 11.7",
+    "prev2": "名古屋Ｆ２ 7/10 予 選 ５着 11.3 7/11 選 抜 １着 11.5 7/12 特 選 ４着 11.3",
+    "chaku": [
+     4,
+     3,
+     4,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "伊早坂駿一",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "伊 東Ｆ２ 7/22 予 選 １着 9.6 7/23 準決勝 ７着 11.2 7/24 特 選 ７着",
+    "prev2": "名古屋Ｆ２ 7/10 予 選 １着 11.6 7/11 準決勝 ７着 11.2 7/12 特 選 ７着 12.3",
+    "chaku": [
+     8,
+     1,
+     2,
+     15
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "新井 剛央",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "伊 東Ｆ２ 7/22 予 選 ４着 9.8 7/23 選 抜 ４着 9.8 7/24 一 般 ５着 9.7",
+    "prev2": "岸和田Ｆ２ 7/13 特予選 ４着 11.8 7/14 特一般 ５着 11.5 7/15 特一般 ５着 11.9",
+    "chaku": [
+     0,
+     0,
+     1,
+     17
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "佐藤 清之",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "弥 彦Ｆ２ 7/17 特予選 ５着 11.5 7/18 特一般 ５着 11.8 7/19 特一般 ７着 12.3",
+    "prev2": "小田原Ｆ２ 7/10 特予選 ５着 9.7 7/11 特一般 １着 9.9 7/12 特 選 ５着 10.3",
+    "chaku": [
+     4,
+     0,
+     2,
+     20
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "菅田 和宏",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "岐 阜Ｆ２ 7/18 特予選 ４着 11.6 7/19 特一般 ２着 12 7/20 特 選 ６着 11.8",
+    "prev2": "久留米Ｆ２ 7/ 7 特予選 ７着 11.9 7/ 8 特一般 ２着 12.4 7/ 9 特一般 ６着 11.3",
+    "chaku": [
+     2,
+     3,
+     1,
+     21
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    1,
+    4,
+    5
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    2,
+    3,
+    7
+   ]
+  },
+  "lines": [
+   1,
+   2,
+   6,
+   5,
+   4,
+   3,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "前期Ｓ級の実力者である神尾が、ダッシュを生かした捲りを決める。連係ある奥原が番手回り。好調の伊早坂も軽視不可。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   1,
+   2
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   2
+  ],
+  "missed": [
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 5,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   1,
+   4
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.0,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 21:59:30"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "5번 말은 C등급으로 예측 당시 주요 근거에서 배제되었으나, 데이터상 선행형이면서 꾸준히 상위권에 들었던 이력을 간과했다. 예상보다 선행마들 간 경쟁이 적어 5번이 자리를 선점한 것으로 보인다.",
+  "new_rule": "선행마가 다수일 때, 낮은 등급의 선행마라도 최근 착순 분포에서 꾸준한 성적을 보이는 경우 번수로 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 21:59:32"
+ },
+ "reviewed": true
+}

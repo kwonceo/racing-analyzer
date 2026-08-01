@@ -1,0 +1,324 @@
+{
+ "predicted_top3": [
+  3,
+  7,
+  6
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  3
+ ],
+ "confidence": 4,
+ "reason_short": "3번 岸川가 선행을 이끌며, 동향 7번 木本이 유리한 위치에서 추입할 것. 6번 尾崎의 추입도 기대된다.",
+ "key_factors": [
+  "3번의 선행 주도",
+  "7번의 마크 추입",
+  "선행형 3두와 추입형 4두의 구도"
+ ],
+ "exception_note": "총평에서 3번 岸川의 선행 주도와 7번 木本의 마크를 명시하고 있어, 이들의 전개 우위가 예상된다. 다른 선행형(2번, 5번)의 경쟁이 없을 가능성이 높다.",
+ "applied_rules": [],
+ "raceKey": "기후 2경주",
+ "forecastAt": "2026-07-31 11:15:30",
+ "forecastEpoch": 1785464130.4381604,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "기후 2경주",
+  "wind": {
+   "venue": "기후",
+   "풍속": 4.0,
+   "풍향": "서북서",
+   "풍향코드": 13,
+   "기온": 34.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T11:00:00+09:00",
+   "지점": "岐阜",
+   "지점거리km": 2.57
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 3,
+    "name": "岸川 哲也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     5,
+     7,
+     5,
+     12
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "木本 賢二",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "chaku": [
+     1,
+     4,
+     4,
+     24
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "加藤 大輔",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "chaku": [
+     5,
+     10,
+     5,
+     17
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "竜門 孝宗",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     1,
+     3,
+     7,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "岡崎 克政",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     10,
+     4,
+     7,
+     21
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "尾崎 勝弘",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "chaku": [
+     1,
+     2,
+     2,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "藤井凜太郎",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     0,
+     0,
+     0,
+     4
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    3,
+    2,
+    5
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    7,
+    1,
+    4,
+    6
+   ]
+  },
+  "lines": [
+   3,
+   7,
+   4,
+   5,
+   1,
+   2,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "③岸川が先行基本にレースを進めて押し切る。同郷⑦木本ががっちりマーク。②岡崎－⑥尾崎の瀬戸内勢の反撃どこまでルーキーの⑤藤井が見せ場を作って。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   7,
+   4
+  ],
+  "hit_count": 1,
+  "hit": [
+   7
+  ],
+  "missed": [
+   2,
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   },
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   3,
+   4
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 11:53:12"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 岡崎의 선행 각질과 '도주(선행)' 선언이 있었음에도, 총평에서 3번 岸川의 선행 주도와 7번 木本의 마크에 집중하여 2번의 잠재력을 간과했다. 4번 竜門의 추입 능력도 과소평가했다. 등급 D인 2번과 4번을 배제한 것이 패착이었다.",
+  "new_rule": "총평에서 특정 선수가 부각되더라도, 등급 D의 선행형 선수가 '도주(선행)' 선언을 한 경우, 다른 선행형 선수들과의 경쟁 구도를 더 면밀히 분석하고 해당 선수의 전개 가능성을 높게 평가한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 11:53:14"
+ },
+ "reviewed": true
+}

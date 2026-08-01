@@ -1,0 +1,320 @@
+{
+ "predicted_top3": [
+  4,
+  1,
+  7
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  4
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 4번의 적극적인 도주와 1번의 협공으로 라인 우세",
+ "key_factors": [
+  "중사국 라인의 강력한 선행 주도",
+  "4번과 1번의 연이은 우승 경험",
+  "다른 선행형 주자의 부진"
+ ],
+ "exception_note": "중사국 라인(4-1-7)에 선행형이 2명(4, 1) 포함되어 있지만, 4번의 최근 성적이 매우 좋고 '도주(선행)'를 선언하여 적극적으로 레이스를 이끌 가능성이 높다. 1번 또한 '자재(양각)'로 선행 활용이 가능하며, 최근 성적이 양호하다. 이 두 선행형이 같은 라인 내에서 경쟁하기보다는 협력하여 초반 주도권을 잡고 후미의 추입형들을 견제할 것으로 보인다. 특히 4번의 안정적인 마지막 랩 타임(11.5, 11.7)과 우승 경험이 많아 라인을 이끌고 버틸 가능성이 높다. 목표 부재인 2번(추입형)은 4-1 라인의 견고한 흐름을 뚫기 어려울 것으로 판단된다.",
+ "applied_rules": [],
+ "raceKey": "사세보 4경주",
+ "forecastAt": "2026-07-31 11:55:03",
+ "forecastEpoch": 1785466503.0509522,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 4경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 4.5,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 32.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T11:40:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "篠原 龍馬",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 予 選 １着 11.7 7/24 準決勝 ７着 12.3 7/25 特 選 ５着 11.6",
+    "prev2": "松 山Ｆ２ 7/11 初特選 ６着 11.4 7/12 準決勝 ３着 11.6 7/13 特 選 １着 11.8",
+    "chaku": [
+     7,
+     3,
+     2,
+     9
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "星野 辰也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "和歌山Ｆ２ 7/24 特予選 ３着 11.9 7/25 準決勝 ４着 11.7 7/26 特 選 ２着 11.7",
+    "prev2": "函 館Ｆ１ 7/14 予 選 ７着 11.4 7/15 一 般 ３着 11.7 7/16 一 般 １着 11.5",
+    "chaku": [
+     6,
+     3,
+     5,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "山崎 航",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "広 島Ｆ２ 7/22 予 選 １着 11.5 7/23 準決勝 ６着 11.8 7/24 特 選 １着 11.7",
+    "prev2": "岐 阜Ｆ１ 7/11 予 選 ２着 11.7 7/12 準決勝 ３着 11.8 7/13 特 選 ３着 11.9",
+    "chaku": [
+     8,
+     4,
+     5,
+     7
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "徳吉 広紀",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小田原Ｆ２ 7/23 予 選 ６着 9.5 7/24 一 般 ３着 9.9 7/25 一 般 ６着 9.9",
+    "prev2": "平 Ｆ２ 7/16 予 選 ４着 11 7/17 選 抜 ４着 11.7 7/18 一 般 ２着 11.6",
+    "chaku": [
+     1,
+     4,
+     7,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "上田 学",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "prev1": "小 倉Ｆ２ 7/24 特予選 ６着 11.8 7/25 特一般 ２着 12.2 7/26 特 選 １着 11.8",
+    "prev2": "玉 野Ｆ２ 7/ 7 予 選 ６着 11.8 7/ 8 一 般 ２着 11.6 7/ 9 一 般 ３着 12.5",
+    "chaku": [
+     3,
+     3,
+     5,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "金子周一郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 阪Ｆ１ 7/16 予 選 ６着 11.7 7/17 一 般 ７着 11.8 7/18 一 般 ６着 11.7",
+    "prev2": "伊 東Ｆ２ 7/ 4 予 選 ４着 10.4 7/ 5 選 抜 ３着 10.5 7/ 6 特 選 ５着 9.9",
+    "chaku": [
+     0,
+     3,
+     1,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "北川 大成",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "平 Ｆ２ 7/16 予 選 ７着 12.4 7/17 一 般 ３着 12.5 7/18 一 般 ６着 12.1",
+    "prev2": "武 雄Ｆ２ 6/21 予 選 ７着 12.8 6/22 一 般 ３着 12 6/23 一 般 ７着 12.1",
+    "chaku": [
+     0,
+     3,
+     3,
+     12
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    1,
+    4,
+    6
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    2,
+    3,
+    7,
+    5
+   ]
+  },
+  "lines": [
+   6,
+   3,
+   4,
+   1,
+   7,
+   2,
+   5
+  ],
+  "paceLabel": null,
+  "comment": "中四国勢は④山崎－①篠原－⑦上田の布陣。④山崎が持ち味を活かしライン上位浮上を狙う。目標不在の②星野はどうする。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   4,
+   7
+  ],
+  "hit_count": 3,
+  "hit": [
+   4,
+   1,
+   7
+  ],
+  "missed": [],
+  "missed_info": [],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   4,
+   2
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -3.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 12:35:28"
+ },
+ "graded": true,
+ "reviewed": true,
+ "review": {
+  "miss_reason": "해당 없음(전부 적중)",
+  "new_rule": "없음",
+  "rule_confidence": 1,
+  "reviewedAt": "2026-07-31 12:35:28"
+ }
+}

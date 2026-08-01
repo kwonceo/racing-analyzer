@@ -1,0 +1,333 @@
+{
+ "predicted_top3": [
+  4,
+  1,
+  2
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  4
+ ],
+ "confidence": 4,
+ "reason_short": "라인의 주도권 싸움에서 1번이 우위를 점하며 4번이 유리한 전개, 2번의 추입력",
+ "key_factors": [
+  "1번 牧田 悠生의 선행 선언 및 3차 구성",
+  "2번 菊池竣太朗의 젖히기 각질과 경쟁",
+  "4번 久木原 洋의 1번 라인 내에서의 유리한 위치"
+ ],
+ "exception_note": "1번 牧田 悠生이 선행을 선언하고 3차 라인을 구성하고 있어, 같은 라인의 젖히기형 2번 菊池竣太朗과의 경쟁이 예상되며, 주도권 싸움이 라인 내부에서 발생할 가능성이 높다. 이로 인해 1번의 후미에 위치할 4번 久木原 洋이 반사이익을 얻을 수 있다.",
+ "applied_rules": [],
+ "raceKey": "야히코 8경주",
+ "forecastAt": "2026-07-31 18:41:25",
+ "forecastEpoch": 1785490885.3726408,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 8경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 1.5,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 26.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T18:30:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 4,
+    "name": "久木原 洋",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/30 予 選 ５着 11.4",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ２着 9.9 7/23 準決勝 ２着 9.6 7/24 決 勝 ７着 9.6",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 ２着 9.6 7/ 8 準決勝 ６着 9.9 7/ 9 特 選 ３着 10.2",
+    "chaku": [
+     2,
+     3,
+     3,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "大洞 翔平",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ５着 11.9",
+    "prev1": "高 知Ｇ２ 7/17 一予選 ９着 17.1 7/18 選 抜 ９着 15.3 7/19 一 般 ５着 14.5 7/20 一 般 ６着 14.6",
+    "prev2": "取 手Ｇ３ 6/27 一予選 ７着 11.3",
+    "chaku": [
+     1,
+     1,
+     1,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "牧田 悠生",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ４着 11.4",
+    "prev1": "松 阪Ｆ１ 7/16 予 選 ４着 11.4 7/17 選 抜 １着 11.9 7/18 特 選 ４着 11.6",
+    "prev2": "和歌山Ｆ１ 6/23 予 選 ７着 11.8",
+    "chaku": [
+     6,
+     2,
+     1,
+     18
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "長谷部 翔",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/30 予 選 ５着 11",
+    "prev1": "松 阪Ｆ１ 7/16 予 選 ４着 11.7 7/17 選 抜 ７着 12 7/18 一 般 ２着 11.2",
+    "prev2": "取 手Ｇ３ 6/27 一予選 ８着 11.5 6/28 選 抜 落",
+    "chaku": [
+     1,
+     2,
+     5,
+     19
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "稲垣 裕之",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ４着 11.3",
+    "prev1": "玉 野Ｆ１ 7/14 予 選 ４着 11.8 7/15 選 抜 ７着 11.5 7/16 一 般 ２着 12",
+    "prev2": "青 森Ｆ１ 7/ 3 予 選 ５着 12.3 7/ 4 一 般 ５着 11.8 7/ 5 一 般 ２着 12",
+    "chaku": [
+     2,
+     4,
+     4,
+     25
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "菊池竣太朗",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ４着 11.1",
+    "prev1": "岐 阜Ｆ１ 7/11 予 選 １着 11.2 7/12 準決勝 ６着 11.4 7/13 特 選 ７着 12",
+    "prev2": "富 山Ｆ１ 6/25 初特選 ２着 9.9 6/26 準決勝 ３着 10.1 6/27 決 勝 ５着 9.8",
+    "chaku": [
+     4,
+     1,
+     1,
+     3
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 5,
+    "name": "鈴木謙太郎",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ４着 11.5",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ６着 10.9 7/21 一 般 ６着 11.4 7/22 一 般 ７着 11.5",
+    "prev2": "宇都宮Ｆ１ 7/15 一 般 ６着 14.5",
+    "chaku": [
+     1,
+     2,
+     5,
+     21
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    5
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    4,
+    3,
+    7,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   4,
+   5,
+   2,
+   7,
+   3,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "ラインができる牧田、菊池はともに自在型。地元の牧田が３車を生かして果敢に仕掛ける展開とみて、番手の久木原に期待。菊池も仕掛け次第で台頭する力がある。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   1,
+   7
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   2
+  ],
+  "missed": [
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   1,
+   2
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 19:20:19"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "7번 長谷部 翔이 초반부터 라인 후미에 위치했지만, 라인 내부 경쟁으로 인한 혼란 속에서 젖히기 타이밍을 정확히 잡고 올라와 1번과 2번 사이를 뚫고 들어온 점을 간과했습니다.",
+  "new_rule": "라인 내부 경쟁이 심화될 때, 후미에서 기회를 엿보는 자재/추입형 선수의 각질 발현 가능성을 높게 평가한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 19:20:21"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,335 @@
+{
+ "predicted_top3": [
+  1,
+  3,
+  4
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "느린",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행마들의 적은 수와 1번의 압도적인 최근 성적, 그리고 총평에서의 기대치가 주요 근거.",
+ "key_factors": [
+  "1번마의 압도적인 최근 성적 (3연속 우승)",
+  "전체 7두 중 선행형은 2두(1, 3번)뿐으로 선행마의 수가 적음",
+  "1번마에 대한 긍정적인 총평 (미래 유망주)"
+ ],
+ "exception_note": "1번 伊藤 京介는 '젖히기형'으로 분류되어 있으나 '도주(선행)'를 선언했으며, 최근 3연속 우승을 모두 선행으로 이끌었다. 또한, 총평에서 '장래 중부 지구를 짊어질 선수'라고 언급될 정도로 잠재력과 현재 기량이 뛰어남을 시사한다. 이 경주에는 선행형이 1번과 3번 두 명뿐이며, 3번 米倉 剛志는 1번만큼의 압도적인 최근 성적을 보여주지 못하고 있어 1번이 큰 방해 없이 선행 주도권을 잡고 우승할 가능성이 높다. 다른 추입형 말들은 1번의 기세를 따라잡기 어려울 것으로 보인다.",
+ "applied_rules": [],
+ "raceKey": "다케오 7경주",
+ "forecastAt": "2026-07-31 23:20:46",
+ "forecastEpoch": 1785507646.9134934,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "다케오 7경주",
+  "wind": {
+   "venue": "다케오",
+   "풍속": 0.8,
+   "풍향": "남남서",
+   "풍향코드": 9,
+   "기온": 26.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T23:00:00+09:00",
+   "지점": "嬉野",
+   "지점거리km": 8.56
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "伊藤 京介",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 １着 11.5 7/22 チ準決 １着 11.4 7/23 チ決勝 １着 11.4",
+    "prev2": "佐世保Ｆ２ 7/ 5 チ予選 １着 11.7 7/ 6 チ準決 １着 11.6 7/ 7 チ決勝 １着 11.4",
+    "chaku": [
+     12,
+     2,
+     0,
+     1
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "樫村 伸平",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "prev1": "和歌山Ｆ２ 7/24 チ予選 ４着 12.2 7/25 チ準決 ６着 12 7/26 チ選抜 ６着 12.5",
+    "prev2": "松 阪Ｆ２ 7/ 1 チ予選 欠",
+    "chaku": [
+     0,
+     1,
+     0,
+     17
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "石井 孝",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "prev1": "松 戸Ｆ２ 7/19 チ予選 ２着 9.8 7/20 チ準決 ７着 12 7/21 チ選抜 ６着 9.8",
+    "prev2": "松 山Ｆ２ 7/11 チ予選 １着 12.2 7/12 チ準決 ５着 11.5 7/13 チ選抜 ３着 11.6",
+    "chaku": [
+     1,
+     3,
+     3,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "米倉 剛志",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "prev1": "平 Ｆ２ 7/22 チ予選 ３着 12.5 7/23 チ準決 ５着 11.9 7/24 チ選抜 ５着 12.1",
+    "prev2": "熊 本Ｆ２ 7/13 チ予選 ７着 11.9 7/14 チ一般 ６着 12 7/15 チ一般 １着 12.5",
+    "chaku": [
+     3,
+     2,
+     3,
+     8
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "佐野多喜男",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "弥 彦Ｆ２ 7/17 チ予選 ５着 11.8 7/18 チ一般 ５着 12 7/19 チ一般 ３着 11.6",
+    "prev2": "岸和田Ｆ２ 7/ 4 チ予選 ５着 12.3 7/ 5 チ選抜 １着 12 7/ 6 チ選抜 ２着 11.8",
+    "chaku": [
+     3,
+     1,
+     4,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "村上 順規",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "prev1": "岸和田Ｆ２ 7/13 チ予選 ６着 11.9 7/14 チ一般 ６着 12.2 7/15 チ一般 ５着 12",
+    "prev2": "別 府Ｆ２ 7/ 4 チ予選 ６着 11.7 7/ 5 チ一般 ２着 11.8 7/ 6 チ一般 ５着 11.7",
+    "chaku": [
+     2,
+     4,
+     1,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "富永 昌久",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 ７着 15.2 7/25 チ一般 ６着 12.1 7/26 チ一般 ４着 12.7",
+    "prev2": "平 Ｆ２ 7/10 チ予選 ４着 12 7/11 チ一般 ５着 12.4 7/12 チ一般 ５着 12.2",
+    "chaku": [
+     0,
+     2,
+     5,
+     20
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    3
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    2,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "lines": [
+   3,
+   4,
+   1,
+   2,
+   7,
+   5,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "①伊藤は将来の中部地区を背負っていく存在になる選手。在所時の記録会では全てゴールデンキャップと桁が違う。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   7,
+   5
+  ],
+  "hit_count": 1,
+  "hit": [
+   1
+  ],
+  "missed": [
+   7,
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   },
+   {
+    "no": 5,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   2,
+   3
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 23:59:37"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "선행형 선언과 최근 연승 기록만으로 1번마의 우승 가능성을 너무 높게 평가했으며, 7번과 5번 추입형 말들의 잠재력이나 최근 흐름을 간과했습니다. 특히 7번과 5번이 D등급임에도 선전한 이유를 파악하지 못했습니다.",
+  "new_rule": "선행마가 압도적인 성적을 보여도, 다른 등급의 추입마들이 예상외의 잠재력을 발휘할 수 있으므로, 단순 등급이나 선언 각질 외에 다른 변수들을 더 깊게 분석해야 한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 23:59:40"
+ },
+ "reviewed": true
+}

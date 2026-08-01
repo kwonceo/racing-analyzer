@@ -1,0 +1,314 @@
+{
+ "predicted_top3": [
+  4,
+  1,
+  5
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  4
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 4번의 강력한 연승 기세와 1번의 젖히기 협공, 5번의 추입력.",
+ "key_factors": [
+  "4번 마츠모토 사다무의 9연승 특진 파워",
+  "1번 히라오 카즈아키의 젖히기형 각질과 전개상 4번의 번수를 받을 가능성",
+  "2번 이타가키 스바루가 선행을 선언했으나 1번과의 경쟁 구도",
+  "5번 오바라 조이치로의 추입형 각질과 북방 연대 2-5의 강력함"
+ ],
+ "exception_note": "4번 마츠모토의 압도적인 최근 연승 기록은 통계적 평균을 상회하는 특이점이며, 1번 히라오가 4번의 번수를 받아 젖히기 타이밍을 노릴 가능성이 높아 내부 라인 경쟁보다는 협공 구도가 예상됩니다. 또한, 2번 이타가키 역시 선행 선언을 했지만 4번의 강력한 선행으로 인해 초반 전개가 복잡해질 수 있습니다.",
+ "applied_rules": [],
+ "raceKey": "사세보 6경주",
+ "forecastAt": "2026-07-31 12:45:33",
+ "forecastEpoch": 1785469533.5520113,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 6경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 4.9,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 32.5,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T12:20:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 6,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "小原丈一郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "富 山Ｆ１ 7/21 予 選 １着 9.4 7/22 準決勝 ５着 9.9 7/23 特 選 １着 9.4",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ６着 9.3 7/11 特 選 １着 9.1 7/12 特 秀 ６着 9.6",
+    "chaku": [
+     5,
+     2,
+     1,
+     12
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "板垣 昴",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ９着 10.5 7/23 選 抜 １着 9.7 7/24 特 選 ２着 9.6",
+    "prev2": "函 館Ｆ１ 7/14 予 選 １着 11.3 7/15 準決勝 ６着 11.8 7/16 特 選 ６着 12",
+    "chaku": [
+     5,
+     2,
+     2,
+     13
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "平尾 一晃",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "松 阪Ｆ１ 7/16 予 選 １着 11 7/17 準決勝 ３着 10.8 7/18 特 選 １着 11.5",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ２着 12.2 7/ 3 二予選 ９着 11.5 7/ 4 選 抜 ４着 11.3 7/ 5 選 抜 １着 11",
+    "chaku": [
+     6,
+     4,
+     3,
+     10
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "山中 貴雄",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "玉 野Ｆ１ 7/27 予 選 ４着 11.5 7/28 選 抜 ５着 11.1 7/29 一 般 ５着 12.1",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ６着 11.5 7/ 9 一 般 ４着 11.6 7/10 一 般 ５着 12.1",
+    "chaku": [
+     0,
+     1,
+     3,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "松本 定",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "広 島Ｆ２ 7/22 初特選 １着 11.5 7/23 準決勝 １着 11.2 7/24 決 勝 １着 11.9",
+    "prev2": "佐世保Ｆ１ 7/13 初特選 １着 11.9 7/14 準決勝 １着 11.5 7/15 決 勝 １着 11.5",
+    "chaku": [
+     18,
+     4,
+     0,
+     2
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "稲葉 一真",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "青 森Ｆ１ 7/23 予 選 ２着 11.3 7/24 準決勝 ６着 12 7/25 特 選 ７着 11.8",
+    "prev2": "伊 東Ｆ１ 7/10 予 選 ６着 9.8 7/11 一 般 ３着 10 7/12 一 般 ５着 10.1",
+    "chaku": [
+     3,
+     1,
+     6,
+     15
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    4
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    5,
+    3,
+    6
+   ]
+  },
+  "lines": [
+   4,
+   1,
+   3,
+   2,
+   5,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "④松本に９連勝特進パワー。押し切りも十分だが、番手はタテ型の①平尾だ。②板垣－⑤小原の北連係も力強い。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   2,
+   6
+  ],
+  "hit_count": 1,
+  "hit": [
+   5
+  ],
+  "missed": [
+   2,
+   6
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 6,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   4,
+   5
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.6,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 13:16:02"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번 마츠모토의 연승 기록에 지나치게 몰두하여 실제 전개에서 1번, 2번, 4번 간의 초반 선행 경쟁이 예상보다 훨씬 격렬하여 4번이 힘을 소진하고 1번, 2번의 순위 변동 가능성을 간과했습니다. 또한, 5번과 2번의 강력한 북방 연대가 예상보다 시너지를 내어 상위권에 진입할 가능성을 낮게 평가했습니다.",
+  "new_rule": "선행 선언이 겹치는 경우, 단순히 번수를 받는 협공 구도보다는 초반 힘 싸움에 따른 선행마의 체력 소진과 그로 인한 후반 추입/젖히기 마의 반사 이득 가능성을 더 높게 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-07-31 13:16:04"
+ },
+ "reviewed": true
+}

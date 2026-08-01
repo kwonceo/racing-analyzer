@@ -1,0 +1,324 @@
+{
+ "predicted_top3": [
+  3,
+  5,
+  4
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  3
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 간 경쟁 심화로 젖히기형, 추입형 유리. 특히 3번의 선행력이 돋보인다.",
+ "key_factors": [
+  "선행형(1, 2번) 간 내부 경쟁으로 인한 체력 소모 예상",
+  "3번 만타 미쓰노리 선수의 '도주(선행)' 선언과 높은 기어비(3.92), 경주 훈련에서의 존재감",
+  "5번 마츠모토 다이치의 '추입(마크)' 선언과 3번과의 '도주-추입' 경쟁 가능성",
+  "4번 우스이 마사키의 '자재(양각)'와 준수한 기어비(3.92)로 후반 역전 기회"
+ ],
+ "exception_note": "선행형(1번, 2번)이 같은 라인에 둘이라 내부 경쟁이 발생하며, 이는 경주 초반 페이스를 빠르게 만들고 체력 소모를 유발할 것이다. 3번 젖히기형 선수는 '선행'을 선언하여 이 혼란을 틈타 초반부터 강하게 밀고 나올 가능성이 크며, 이는 일반적인 '젖히기형'의 전개와는 다른 양상이다. 5번, 4번 추입형 선수들은 이러한 전개로 인해 후반 기회를 잡을 확률이 높아진다.",
+ "applied_rules": [],
+ "raceKey": "기후 4경주",
+ "forecastAt": "2026-07-31 12:09:35",
+ "forecastEpoch": 1785467375.822001,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "기후 4경주",
+  "wind": {
+   "venue": "기후",
+   "풍속": 4.5,
+   "풍향": "북서",
+   "풍향코드": 14,
+   "기온": 35.2,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T11:50:00+09:00",
+   "지점": "岐阜",
+   "지점거리km": 2.57
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "松本 大地",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.71,
+    "chaku": [
+     1,
+     5,
+     8,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "滿田 光紀",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     8,
+     2,
+     1,
+     1
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "臼井 昌巨",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     3,
+     1,
+     2,
+     15
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "大中 拓磨",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "chaku": [
+     6,
+     12,
+     10,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "濱田昭一郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "chaku": [
+     2,
+     4,
+     10,
+     20
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "高田 大輔",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "chaku": [
+     1,
+     2,
+     4,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "土居 佑次",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "chaku": [
+     4,
+     1,
+     2,
+     15
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    1,
+    2
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    5,
+    4,
+    7,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   4,
+   2,
+   6,
+   3,
+   5,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "熊本コンビは大変な時期に参加となったが、気合いで乗り切る。③滿田は競走訓練では先行回数は９位と成績以上の存在感を示していた。⑤松本と逃げ差しの争",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   2,
+   7
+  ],
+  "hit_count": 1,
+  "hit": [
+   5
+  ],
+  "missed": [
+   2,
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   },
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   4,
+   5
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 12:35:15"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 선행형 선수의 D등급임에도 불구하고 높은 기어비(3.92)와 최근 착순 2, 1, 2, 15에서 보듯 꾸준히 상위권에 들어왔던 것을 간과했다. 3번의 도주 선언에 집중해 2번의 실제 역량을 과소평가했다. 7번 선수의 추입형 각질과 3.85의 준수한 기어비, 2, 4, 10, 20의 착순 분포에서 후반 추입 가능성을 고려하지 못했다.",
+  "new_rule": "선행형 선수가 D등급이라도 기어비가 높고 최근 착순이 꾸준히 상위권이라면, 선언된 각질 외에 실제 전개 가능성을 더 높게 평가한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 12:35:17"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,447 @@
+{
+ "predicted_top3": [
+  13,
+  7,
+  10
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 비중이 높아 초반 페이스가 빠를 것으로 예상되며, 추격형 상위권 말들이 유리하다.",
+ "key_factors": [
+  "선행형 말 6두로 초반 경쟁 심화 예상",
+  "상위 그레이드 추격형 말들의 최근 성적 우수",
+  "더트 주로 '重' 조건은 후반 추입에 유리할 수 있음"
+ ],
+ "exception_note": "전체 13두 중 선행형 말이 6두로 절반에 가까워 초반 선행 싸움이 매우 치열할 것으로 예상된다. 이는 선행형 말들의 체력 소모를 증가시켜 후반 추격형 말들에게 유리한 전개로 이어질 수 있다. 특히 A등급 추격형 마필들(13, 7, 10, 1)이 다수 포진해 있어 뒷심 발휘가 두드러질 가능성이 높다. 13번 위ルソンテソーロ는 최근 꾸준히 1~2착을 기록하며 최상의 컨디션을 보이고 있고, 7번 루ヴァンスレーヴ와 10번 디스크リートキャット도 A등급 내에서 꾸준한 성적을 보여주고 있어 빠른 페이스 속에서도 막판 추입력을 발휘할 것으로 판단된다.",
+ "applied_rules": [],
+ "raceKey": "나고야 12경주",
+ "forecastAt": "2026-07-31 20:30:36",
+ "forecastEpoch": 1785497436.6704838,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "나고야 12경주",
+  "wind": {
+   "venue": "나고야",
+   "풍속": 4.1,
+   "풍향": "서북서",
+   "풍향코드": 13,
+   "기온": 31.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T20:10:00+09:00",
+   "지점": "桑名",
+   "지점거리km": 6.53
+  },
+  "fieldSize": 13,
+  "distance": 1500,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 13,
+    "name": "ウィルソンテソーロ",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     1,
+     2,
+     2,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "distApt": "A"
+   },
+   {
+    "no": 7,
+    "name": "ルヴァンスレーヴ",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     7,
+     5,
+     3,
+     6
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 52.0,
+    "jockey": "近藤颯",
+    "jockeyRate": 26.7,
+    "distApt": "A"
+   },
+   {
+    "no": 1,
+    "name": "ロジャーバローズ",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     1,
+     3,
+     9,
+     7
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 53.0,
+    "jockey": "木之葵",
+    "jockeyRate": 33.3,
+    "distApt": "A"
+   },
+   {
+    "no": 10,
+    "name": "ディスクリートキャット",
+    "gait": "추격형",
+    "recentPlacings": [
+     3,
+     5,
+     5,
+     3,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "大畑慧",
+    "jockeyRate": 33.3,
+    "distApt": "A"
+   },
+   {
+    "no": 8,
+    "name": "リアルインパクト",
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     3,
+     2,
+     10,
+     1
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "細川智",
+    "jockeyRate": 33.3,
+    "distApt": "A"
+   },
+   {
+    "no": 9,
+    "name": "ミッキーロケット",
+    "gait": "선행형",
+    "recentPlacings": [
+     8,
+     1,
+     3,
+     7,
+     1
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "丸山真",
+    "jockeyRate": 20.0,
+    "distApt": "A"
+   },
+   {
+    "no": 5,
+    "name": "ゼンノロブロイ",
+    "gait": "선행형",
+    "recentPlacings": [
+     10,
+     3,
+     3,
+     4,
+     5
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "大原浩",
+    "jockeyRate": 16.7,
+    "distApt": "A"
+   },
+   {
+    "no": 3,
+    "name": "ノーブルミッション",
+    "gait": "추격형",
+    "recentPlacings": [
+     3,
+     4,
+     6,
+     5,
+     10
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 52.0,
+    "jockey": "小笠羚",
+    "jockeyRate": 20.0,
+    "distApt": "B"
+   },
+   {
+    "no": 11,
+    "name": "フィエールマン",
+    "gait": "선행형",
+    "recentPlacings": [
+     5,
+     4,
+     2,
+     10,
+     7
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "塚本征",
+    "jockeyRate": 43.3,
+    "distApt": "B"
+   },
+   {
+    "no": 6,
+    "name": "レッドファルクス",
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     7,
+     2,
+     5,
+     6
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "柿原翔",
+    "jockeyRate": 6.7,
+    "distApt": "B"
+   },
+   {
+    "no": 2,
+    "name": "マクフィ",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     9,
+     9,
+     2,
+     4
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "加藤聡",
+    "jockeyRate": 33.3,
+    "distApt": "B"
+   },
+   {
+    "no": 12,
+    "name": "ビーチパトロール",
+    "gait": "선행형",
+    "recentPlacings": [
+     5,
+     5,
+     1,
+     5,
+     7
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "丸野勝",
+    "jockeyRate": 26.7,
+    "distApt": "B"
+   },
+   {
+    "no": 4,
+    "name": "ミスターメロディ",
+    "gait": "선행형",
+    "recentPlacings": [
+     7,
+     11,
+     2,
+     1,
+     6
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "阪野学",
+    "jockeyRate": 3.3,
+    "distApt": "A"
+   }
+  ],
+  "composition": {
+   "leadCount": 6,
+   "leadHorses": [
+    8,
+    9,
+    5,
+    11,
+    12,
+    4
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 92.3
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 92.3
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 92.3
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   2,
+   4,
+   7
+  ],
+  "hit_count": 1,
+  "hit": [
+   7
+  ],
+  "missed": [
+   2,
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     9,
+     9,
+     2,
+     4
+    ],
+    "line": null,
+    "grade": "D"
+   },
+   {
+    "no": 4,
+    "gait": "선행형",
+    "recentPlacings": [
+     7,
+     11,
+     2,
+     1,
+     6
+    ],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   11,
+   7,
+   4
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.1,
+  "market_src": "win",
+  "gradedAt": "2026-07-31 20:57:28"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번(마크피)과 4번(미스터메로디)의 최근 성적 부진에도 불구하고, 강한 추입력을 발휘할 수 있는 잠재력과 '重' 주로에서의 적응성을 과소평가했습니다. 특히 D등급 말들의 상위권 진입 가능성을 낮게 보았습니다.",
+  "new_rule": "더트 주로 '重' 조건에서는 저등급 말이라도 최근 기복이 심한 추격형/선행형 말이 의외의 결과를 만들 수 있으니, 각질 특성과 주로 적응성을 더 세밀하게 분석한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 20:57:30"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,171 @@
+{
+ "raceKey": "세이부엔 7경주",
+ "entries": [
+  {
+   "time": "22:30:24",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      1,
+      5
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      2,
+      5
+     ],
+     [
+      1,
+      2,
+      3
+     ],
+     [
+      2,
+      4,
+      7
+     ]
+    ],
+    "linePairs": [
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      5,
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "time": "22:31:35",
+   "minutesBefore": 8,
+   "status": "WARNING",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [
+    {
+     "code": "B라인누락",
+     "detail": "2번째 라인 페어 [4, 7] 가 삼복승 추천 어디에도 포함되지 않음",
+     "pair": [
+      4,
+      7
+     ],
+     "trifectas": [
+      [
+       1,
+       2,
+       5
+      ],
+      [
+       1,
+       2,
+       3
+      ]
+     ]
+    }
+   ],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       2,
+       5
+      ],
+      "prev": 16.9,
+      "cur": 10.3,
+      "pct": -39.1
+     }
+    ],
+    "finalQuinellas": [
+     [
+      1,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      1,
+      5
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      2,
+      5
+     ],
+     [
+      1,
+      2,
+      3
+     ]
+    ],
+    "linePairs": [
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      5,
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "time": "22:40:04",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

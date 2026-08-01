@@ -1,0 +1,329 @@
+{
+ "predicted_top3": [
+  1,
+  5,
+  6
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 1번의 압도적 우위 속에 후착은 라인 연계와 전개 이점을 고려.",
+ "key_factors": [
+  "1번 鈴木薫의 강력한 선행력",
+  "1번의 홈 트랙 이점 언급",
+  "전반적인 추입형 각질 다수 경주",
+  "1번과 5번의 라인 연계 가능성",
+  "6번의 자재 각질과 총평에서의 부상 가능성"
+ ],
+ "exception_note": "이 경주는 7두 중 1번 鈴木薫을 제외하고는 모두 추입형 또는 자재형으로 분류되는 각질 구성의 불균형이 두드러집니다. 선행 주자가 1명뿐이라 선행형의 압도적인 전개가 예상되며, 총평에서도 1번의 '홈 트랙 이점'과 '고회전의 捲り(젖히기)'를 언급하여 선행마의 우위를 강조하고 있습니다. 통상적인 경주 흐름보다는 1번의 독주 가능성이 높습니다. 2착 이하를 다투는 경합이 예상됩니다.",
+ "applied_rules": [],
+ "raceKey": "케이오카쿠 7경주",
+ "forecastAt": "2026-07-31 23:11:40",
+ "forecastEpoch": 1785507100.9938717,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "케이오카쿠 7경주",
+  "wind": {
+   "venue": "케이오카쿠",
+   "풍속": 1.9,
+   "풍향": "남동",
+   "풍향코드": 6,
+   "기온": 28.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-07-31T22:50:00+09:00",
+   "지점": "府中",
+   "지점거리km": 5.19
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "鈴木 薫",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "佐世保Ｆ２ 7/22 初特選 １着 11.4 7/23 準決勝 １着 11.1 7/24 決 勝 ４着 11.4",
+    "prev2": "取 手Ｆ２ 7/ 6 初特選 ２着 12 7/ 7 準決勝 １着 11.2 7/ 8 決 勝 １着 12.6",
+    "chaku": [
+     4,
+     3,
+     1,
+     5
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "石橋慎太郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.54,
+    "prev1": "小田原Ｆ２ 7/23 初特選 ５着 9.8 7/24 準決勝 ２着 10 7/25 決 勝 ３着 10.1",
+    "prev2": "伊 東Ｆ２ 7/ 4 初特選 ５着 9.8 7/ 5 準決勝 ２着 9.8 7/ 6 決 勝 ２着 9.6",
+    "chaku": [
+     1,
+     3,
+     3,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "保科 千春",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "広 島Ｆ２ 7/22 初特選 ６着 11.9 7/23 準決勝 ４着 11.6 7/24 特 選 １着 11.5",
+    "prev2": "函 館Ｆ１ 7/14 初特選 ５着 11.5 7/15 準決勝 ６着 11.4 7/16 特 選 １着 11.9",
+    "chaku": [
+     2,
+     4,
+     3,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "宇佐見優介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "静 岡Ｆ１ 7/18 初特選 ２着 11 7/19 準決勝 ２着 11.8 7/20 決 勝 ５着 11.1",
+    "prev2": "岐 阜Ｆ１ 7/11 初特選 ３着 11.8 7/12 準決勝 ３着 11.6 7/13 決 勝 ４着 11.4",
+    "chaku": [
+     1,
+     6,
+     3,
+     2
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "川口 満宏",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "岐 阜Ｆ１ 7/11 初特選 ５着 11.8 7/12 準決勝 ６着 11.8 7/13 特 選 ２着 12",
+    "prev2": "函 館Ｆ２ 7/ 1 初特選 １着 12 7/ 2 準決勝 ４着 11.4 7/ 3 特 選 ３着 12.4",
+    "chaku": [
+     1,
+     2,
+     3,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "鈴木 庸之",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "prev1": "広 島Ｆ２ 7/22 初特選 ２着 11.6 7/23 準決勝 ４着 12.1 7/24 特 選 １着 11.6",
+    "prev2": "函 館Ｆ１ 7/14 初特選 ４着 11.8 7/15 準決勝 ２着 11.6 7/16 決 勝 ３着 11.5",
+    "chaku": [
+     2,
+     3,
+     1,
+     6
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "馬場 和広",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "prev1": "平 Ｆ２ 7/16 初特選 ４着 11.8 7/17 準決勝 ６着 11.2 7/18 特 選 １着 11.9",
+    "prev2": "大 垣Ｆ１ 7/ 8 初特選 １着 11.6 7/ 9 準決勝 ２着 11.8 7/10 決 勝 ５着 11.9",
+    "chaku": [
+     6,
+     4,
+     3,
+     9
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 6,
+   "closeHorses": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "lines": [
+   1,
+   5,
+   2,
+   4,
+   3,
+   7,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "ホームバンクの鈴木薫が、高回転の捲りを決める。連係２度目の川口がしぶとく続く。馬場が奮闘なら鈴木庸の浮上も。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "금개최 성적(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   6,
+   1,
+   3
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   6
+  ],
+  "missed": [
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   5,
+   4
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-07-31 23:39:27"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번 保科 千春은 B등급 추입형으로, 1번 선행마의 독주 시 유리한 위치를 잡거나 혼전 속에서 기회를 잡을 가능성을 간과했다. 라인 연계가 명확하지 않은 추입형 말의 잠재력을 충분히 고려하지 못했다.",
+  "new_rule": "선행마 독주 예상 시, 라인 연계가 약하더라도 등급이 낮은 추입마가 혼전 속에서 의외의 성적을 낼 수 있음을 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-07-31 23:39:29"
+ },
+ "reviewed": true
+}
