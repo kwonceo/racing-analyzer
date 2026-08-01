@@ -2439,8 +2439,14 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     _triple_save(db)
     # 배당 변동 히스토리 파일에 스냅샷 누적 (타임스탬프+발주전분+이상감지)
     try:
+        # 🔴 [2026-08-01] 종전은 **`oddspark` / `private` 2값**이라 중앙경마 서버수집(netkeiba)이
+        #   `private`(=확장 수집)로 묻혔다 — 관찰 모드에서 **소스별 비교가 불가능**해진다.
+        #   ⚠ 기존 2값은 **하나도 바꾸지 않는다.** `netkeiba` 로 시작하는 것만 세 번째 값으로 뺀다
+        #     (이 값은 `_jra_collect_once` 만 만든다 → 기존 경로에 영향 0).
         _history_append(rk, q, x, deadline, win, baseline_reset=baseline_reset,
-                        source=("oddspark" if _src_is_oddspark(source) else "private"))
+                        source=("oddspark" if _src_is_oddspark(source)
+                                else ("netkeiba" if str(source or "").startswith("netkeiba")
+                                      else "private")))
     except Exception as e:
         # [관측 개통 (2026-07-29)] 여기서 실패하면 그 경주는 **스냅샷 0**이 되는데, 지금까지는 콘솔
         #   print 로만 남아 서버 창을 놓치면 흔적이 사라졌다(실측: 나고야 12R 등 archive_snapshots 키가
@@ -27178,6 +27184,178 @@ def bmed_view(key):
     })
 
 
+# ══════════════ 🔴 [중앙경마(JRA) 배당 서버 직접수집 (2026-08-01 신설·관찰 모드)] ══════════════
+#
+# ■ 왜 만들었나
+#   중앙경마는 **확장이 사설 배당판 화면을 긁는 경로뿐**이었다 — 사람이 배당판 탭을 포그라운드로
+#   열어둬야만 들어온다. 실측 커버리지 **3.4%**(최근 30일 JRA 324경주 중 11건 · 개최 9일 중 6일이 0건).
+#   결과 확정 0건이라 성적도 못 쟀다. ⇒ 서버가 직접 가져온다.
+#
+# ■ 🔴 실측으로 확인한 것(2026-08-01 · 원문 `logs/jra_odds_probe/`)
+#   · `&action=update` 가 **필수**다. 안 붙이면 발주 전 경주는
+#     `{"status":"middle","data":"","reason":"result odds empty"}` — **빈 응답**이다.
+#     (`action` 없이 성공했던 것은 **이미 끝난 경주의 확정배당**이었다)
+#   · 갱신 주기 **약 55~60초로 일정**(마감 임박·여유 구간 동일). 30초로 부르면 절반이 중복이다.
+#   · `official_datetime` 이 바뀔 때 **실제 배당값도 항상 바뀌었다**(14/14 · 13/13).
+#   · 조합키: 복승 `"0102"`(2자리×2) · 삼복승 `"010203"`(2자리×3) · 값 `[배당, "", 인기순]`.
+#   · ⚠ 확정배당에는 **천 단위 콤마**가 온다(`"1,197.9"`) — 반드시 제거해야 float 변환이 된다.
+#   · 부하: 마감 15분 창 최대 동시 2경주 × 2type = **4요청 0.3초**(요청당 0.08초).
+#
+# ■ ⚠ 지키는 것
+#   · **입력만 추가한다.** 저장·동결·판정·추천 경로는 한 줄도 바꾸지 않는다(`_do_triple_ingest` 재사용).
+#   · **확장을 끄지 않는다.** 확장이 최근에 보냈으면 서버가 **생략**한다(`_fresh_private` 와 같은 판정).
+#     반대로 확장을 막으면 서버가 실패했을 때 **둘 다 0** 이 된다 — 끊으면 되돌릴 수 없다.
+#   · **관찰 모드**(`JRA_OBSERVE_ONLY=True`): 저장은 하되 **추천/카카오에 반영하지 않는다.**
+#   · 실패는 전 구간 격리 — 지방·경륜 수집에 **무영향**. 별도 스레드라 기존 사이클을 밀지 않는다.
+#
+# 🔧 되돌리기: `JRA_COLLECT_ENABLED = False` 한 줄. 코드는 지우지 않는다.
+JRA_COLLECT_ENABLED = True      # 서버 직접수집 on/off
+JRA_OBSERVE_ONLY = True         # 🔴 첫날 관찰 모드 — 저장만 하고 추천 반영 금지
+JRA_COLLECT_INTERVAL = 60       # 초. 실측 갱신주기 55~60초 → 30초는 낭비다
+JRA_COLLECT_WINDOW_MIN = 15     # 마감 N분 전부터 수집(부하 실측상 동시 최대 2경주)
+JRA_ODDS_TYPES = (4, 7)         # 🔴 BMED 가 쓰는 것만 — 4=馬連(복승) 7=三連複(삼복승).
+#                                  1=단승·6=馬単(쌍승)은 안 쓰므로 요청하지 않는다(부하 절반)
+_JRA_ODDS_API = "https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=%s&type=%d&action=update"
+_JRA_SHUTUBA = "https://race.netkeiba.com/race/shutuba.html?race_id=%s"
+_JRA_POST_CACHE = {}            # {race_id: (발주epoch, 경기장, 경주번호)} — 하루치라 무제한 아님
+_JRA_SEEN_RESULT = set()        # 확정배당까지 받은 race_id(중복 수집 방지)
+
+
+def _jra_num(s):
+    """netkeiba 배당 문자열 → float. ⚠ 확정배당에 **천 단위 콤마**가 온다(`"1,197.9"`)."""
+    try:
+        return float(str(s).replace(",", "").strip())
+    except Exception:
+        return None
+
+
+def _jra_combo_key(k):
+    """조합키 → 마번 리스트. 복승 `"0102"`→[1,2] · 삼복승 `"010203"`→[1,2,3]."""
+    try:
+        if len(k) % 2 or not k.isdigit():
+            return None
+        return [int(k[i:i + 2]) for i in range(0, len(k), 2)]
+    except Exception:
+        return None
+
+
+def _jra_post_info(race_id):
+    """race_id → (발주epoch, 경기장한글, 경주번호). shutuba 의 `RaceData01` 에 `HH:MM発走` 가 있다.
+    ⚠ `race_list_sub` 에도 시각이 있으나 race_id 와의 블록 매칭이 어긋난다(실측 0/34) — shutuba 를 쓴다.
+    경주당 1회만 받고 캐시한다(하루 36회 · 부하 무시 수준)."""
+    if race_id in _JRA_POST_CACHE:
+        return _JRA_POST_CACHE[race_id]
+    try:
+        html = _keirin_fetch(_JRA_SHUTUBA % race_id)
+        m = re.search(r"(\d{1,2}):(\d{2})\s*発走", html)
+        if not m:
+            return None
+        hh, mm = int(m.group(1)), int(m.group(2))
+        ymd = race_id[:4] + "-" + "??"      # race_id 에 날짜가 없다 → 오늘 기준으로 만든다
+        lt = time.localtime()
+        ep = time.mktime((lt.tm_year, lt.tm_mon, lt.tm_mday, hh, mm, 0, 0, 0, -1))
+        venue = (_JRA_TRACK.get(race_id[4:6]) or ("", ""))[0]
+        rno = int(race_id[10:12])
+        info = (ep, venue, rno)
+        if venue and rno:
+            _JRA_POST_CACHE[race_id] = info
+        return info
+    except Exception as e:
+        print("[JRA수집] 발주시각 실패 %s: %s" % (race_id, str(e)[:80]))
+        return None
+
+
+def _jra_fetch_odds(race_id, otype):
+    """(status, {조합키: 배당}, official_datetime). 실패 시 (None, {}, None)."""
+    try:
+        raw = _keirin_fetch(_JRA_ODDS_API % (race_id, otype))
+        j = json.loads(raw)
+        d = j.get("data")
+        if not isinstance(d, dict):
+            return j.get("status"), {}, None       # 발주 전 빈 응답(status=middle)
+        od = (d.get("odds") or {}).get(str(otype)) or {}
+        out = {}
+        for k, v in od.items():
+            combo = _jra_combo_key(k)
+            o = _jra_num(v[0] if isinstance(v, list) and v else v)
+            if combo and o and o > 0:
+                out[tuple(combo)] = o
+        return j.get("status"), out, d.get("official_datetime")
+    except Exception as e:
+        print("[JRA수집] 배당 실패 %s type=%d: %s" % (race_id, otype, str(e)[:80]))
+        return None, {}, None
+
+
+def _jra_recent_private(rk):
+    """🔴 이중 기록 방지 — 확장(사설)이 최근 200초 안에 이 경주를 보냈으면 서버는 **생략**한다.
+    7/30 oddspark 2중 기록(4,507건·41%) 과 같은 사고를 중앙에서 반복하지 않기 위한 게이트.
+    판정 근거는 기존 `_fresh_private`(app.py 다중경주 경로)와 **같은 방식**이다."""
+    try:
+        rec = (_triple_load() or {}).get(rk) or {}
+        src = str(rec.get("source") or "")
+        if src and "netkeiba" not in src and "oddspark" not in src:
+            return (time.time() - (rec.get("t") or 0)) <= 200
+    except Exception:
+        pass
+    return False
+
+
+def _jra_collect_once():
+    """마감 창에 든 JRA 경주의 배당을 1회 수집. 반환 (수집건수, 생략건수)."""
+    got = skip = 0
+    now = time.time()
+    ymd = time.strftime("%Y%m%d")
+    for race_id in sorted(_jra_race_list(ymd) or []):
+        info = _jra_post_info(race_id)
+        if not info:
+            continue
+        ep, venue, rno = info
+        if not venue or not rno:
+            continue
+        left = ep - now
+        # 수집 창: 마감 N분 전 ~ 마감 후 3분(확정배당 취득 기회 포함)
+        if left > JRA_COLLECT_WINDOW_MIN * 60 or left < -180:
+            continue
+        rk = "%s %d경주" % (venue, rno)
+        if _jra_recent_private(rk):
+            skip += 1
+            continue                                    # 🔴 확장이 이미 보내고 있다 → 서버는 빠진다
+        st4, q, dt = _jra_fetch_odds(race_id, 4)
+        st7, tr, _ = _jra_fetch_odds(race_id, 7)
+        if not q:
+            continue                                    # 아직 배당 없음(발주 전 빈 응답)
+        quin = [{"combo": list(c), "odds": o} for c, o in sorted(q.items(), key=lambda kv: kv[1])]
+        trio = [{"combo": list(c), "odds": o} for c, o in sorted(tr.items(), key=lambda kv: kv[1])]
+        try:
+            _do_triple_ingest(rk, quin, [], trio, {}, sport="horse", category="japan_central",
+                              source="netkeiba", deadline=ep * 1000)
+            got += 1
+            if st4 == "result" and race_id not in _JRA_SEEN_RESULT:
+                _JRA_SEEN_RESULT.add(race_id)
+                print("[JRA수집] %s 확정배당 수집(status=result · dt=%s)" % (rk, dt))
+        except Exception as e:
+            print("[JRA수집] ingest 실패 %s: %s" % (rk, str(e)[:90]))
+    return got, skip
+
+
+def _jra_bg_loop():
+    """🔴 **별도 스레드**(기존 `_multi_bg_loop` 과 분리). 7/30 에 3트랙 동시 개최로 사이클이 37초까지
+    포화된 선례가 있다 — 지금 잘 되고 있는 지방·경륜 수집을 밀지 않는 것이 최우선이다.
+    ⚠ sleep-first: 기동 직후 폭주하지 않게 먼저 쉰다(원칙: 주기 데몬은 sleep 먼저)."""
+    while True:
+        time.sleep(JRA_COLLECT_INTERVAL)
+        if not JRA_COLLECT_ENABLED:
+            continue
+        try:
+            t0 = time.time()
+            got, skip = _jra_collect_once()
+            if got or skip:
+                print("[JRA수집] %d경주 수집 · %d경주 생략(확장 우선) · %.2f초%s"
+                      % (got, skip, time.time() - t0, " · 🔬관찰모드" if JRA_OBSERVE_ONLY else ""))
+        except Exception as e:
+            print("[JRA수집] 사이클 오류(무시·지방/경륜 무영향):", str(e)[:120])
+
+
 # ════════════ [중앙경마(JRA) 전적] netkeiba 馬柱(shutuba_past) 서버 fetch·파싱 ════════════
 # 중앙경마는 keiba.go.jp(지방 전용)에 없고 JRA 공식은 POST세션이라 스크래핑 난해 → netkeiba 馬柱
 # 페이지(서버렌더 HTML)를 소스로 사용. 한 페이지에 마번·기수·부담중량 + 과거5주(착순·거리·통과순위
@@ -33303,6 +33481,18 @@ def _start_multi_race_bg():
         print("[다중경주] 백그라운드 시작(스케줄 30분·수집 30초·실패격리·워치독 60초)")
     except Exception as e:
         print("[다중경주] 백그라운드 시작 실패(단일 모드 유지):", e)
+    # 🔴 [2026-08-01] 중앙경마(JRA) 수집은 **별도 스레드**로 띄운다.
+    #   위 다중경주 사이클에 얹지 않는다 — 7/30 에 3트랙 동시 개최로 그 사이클이 37초까지 포화됐다.
+    #   지금 잘 되고 있는 지방·경륜 수집을 밀지 않는 것이 최우선이다.
+    #   ⚠ 여기서 실패해도 위 다중경주는 이미 떠 있다(try 를 따로 둔 이유).
+    try:
+        if JRA_COLLECT_ENABLED:
+            threading.Thread(target=_jra_bg_loop, daemon=True, name="jra-odds-bg").start()
+            print("[JRA수집] 중앙경마 백그라운드 시작(%d초 · 마감%d분창 · type%s · %s)"
+                  % (JRA_COLLECT_INTERVAL, JRA_COLLECT_WINDOW_MIN, list(JRA_ODDS_TYPES),
+                     "🔬관찰모드(추천 미반영)" if JRA_OBSERVE_ONLY else "정식"))
+    except Exception as e:
+        print("[JRA수집] 백그라운드 시작 실패(중앙만 미수집·나머지 무영향):", e)
 
 
 def _startup_date_reset():
