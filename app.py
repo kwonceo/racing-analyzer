@@ -27726,6 +27726,51 @@ def _jra_resolve_raceid(venue, ymd, race_no):
     return None
 
 
+FORM_RAW_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "form_raw")
+FORM_RAW_KEEP_DAYS = 90        # 🔴 90일 롤링 — 소급 리플레이는 3개월이면 충분하다
+FORM_RAW_ENABLED = True        # 🔧 되돌리기: 이 한 줄을 False
+
+
+def _form_raw_save(sport, html, tag=""):
+    """[전적 원문 보존 (2026-08-02 승인)] **완전 읽기 전용 · 파싱 경로 무개입**.
+
+    🔴 왜: **전적 원문을 저장하는 종목이 하나도 없었다.** 파싱을 고쳐도 과거를 되살릴 수 없어
+      **매번 그 시점부터만** 쌓였다(오늘 인기순위 캡처 추가의 소급이 **0경주**인 이유).
+      원문이 남으면 **앞으로 모든 파싱 수정이 소급 가능**해진다.
+    ⚠ raceKey 없이 저장한다 — **원문만 있으면 재파싱으로 전부 복원**되므로 키가 필요 없고,
+      파서 진입부에 훅을 거는 쪽이 호출부를 건드리지 않아 안전하다.
+    ⚠ gzip 필수(약 1/8~1/10). 실패해도 **절대 예외를 올리지 않는다**(수집이 멈추면 안 된다).
+    """
+    if not FORM_RAW_ENABLED or not html:
+        return
+    try:
+        import gzip as _gz
+        import shutil as _sh
+        day = time.strftime("%Y%m%d")
+        d = os.path.join(FORM_RAW_DIR, day)
+        os.makedirs(d, exist_ok=True)
+        h = hashlib.md5(html.encode("utf-8", "replace")).hexdigest()[:10]
+        p = os.path.join(d, "%s_%s%s_%s.html.gz" % (sport, time.strftime("%H%M%S"),
+                                                    ("_" + re.sub(r"\W+", "", tag)[:20]) if tag else "", h))
+        if os.path.exists(p):
+            return                                   # 같은 내용 재저장 방지(해시 동일)
+        with _gz.open(p, "wt", encoding="utf-8") as f:
+            f.write(html)
+        # 90일 롤링 — 하루 1회만 훑는다(디렉터리 이름이 날짜라 비교가 싸다)
+        global _FORM_RAW_SWEPT
+        if _FORM_RAW_SWEPT != day:
+            _FORM_RAW_SWEPT = day
+            cut = time.strftime("%Y%m%d", time.localtime(time.time() - FORM_RAW_KEEP_DAYS * 86400))
+            for sub in os.listdir(FORM_RAW_DIR):
+                if len(sub) == 8 and sub.isdigit() and sub < cut:
+                    _sh.rmtree(os.path.join(FORM_RAW_DIR, sub), ignore_errors=True)
+    except Exception:
+        pass                                         # 🔴 저장 실패가 수집을 막지 않는다
+
+
+_FORM_RAW_SWEPT = ""
+
+
 def _jra_past_cell(cell):
     """馬柱 Past 셀(과거 1경주) → {date,venue,placing,distance,surface,trackCond,fieldSize,
     jockey,weight,corner(통과순위),last3f(상3F),bodyWeight}. Data01=날짜·착순 / Data05=코스·마장 /
@@ -27774,6 +27819,7 @@ def _jra_parse_shutuba_past(html):
     """netkeiba 馬柱(shutuba_past) → {venue,raceNo,distance,surface,trackCond,horses:[...]}.
     horses[]: {no(馬番),name,jockey,weight(부담중량),nkStyle(netkeiba 각질 逃/先/差/追/自),past:[전5주]}.
     범례(placeholder '馬名') 행은 제외."""
+    _form_raw_save("jra", html)      # 🔴 [2026-08-02 승인] 전적 원문 보존(파싱 무개입·실패해도 무시)
     out = {"venue": "", "raceNo": None, "distance": None, "surface": "", "trackCond": "", "horses": []}
     mrid = re.search(r"race_id=(\d{12})", html)
     if mrid:
@@ -30567,6 +30613,7 @@ def _nar_parse_deba(html, max_no=18):
     cur_surf = ("더트" if _ms and _ms.group(1).startswith("ダ") else ("잔디" if _ms else ""))
     _mc = _NARD_COND_RE.search(html or "")
     cur_cond = _mc.group(1) if _mc else ""
+    _form_raw_save("nar", html)      # 🔴 [2026-08-02 승인] 전적 원문 보존(파싱 무개입·실패해도 무시)
     horses, details = [], {}
     for i, (pos, no) in enumerate(starts):
         end = starts[i + 1][0] if i + 1 < len(starts) else len(html)
