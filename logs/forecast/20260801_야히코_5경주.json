@@ -1,0 +1,269 @@
+{
+ "predicted_top3": [
+  6,
+  2,
+  1
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  6
+ ],
+ "confidence": 4,
+ "reason_short": "단독 선행 주자의 이점과 라인 구성의 특수성을 고려",
+ "key_factors": [
+  "4차 라인을 이끄는 6번 하이 류의 단독 선행 기회",
+  "관동세의 연계 불발로 인한 3번의 단독 출전",
+  "2번 오오도 쇼헤이의 양호한 최근 성적과 추입 기회"
+ ],
+ "exception_note": "이 경주는 4차 라인의 선행 주자가 한 명(6번)으로 명확하여 다른 경주에 비해 독보적인 전개를 보일 가능성이 높다. 특히 관동세가 연계 없이 단독으로 출전하여 3번이 선행을 가져가더라도 라인 싸움에서 불리하다. 이는 통상적인 각질 경쟁 구도와는 다른 예외적인 상황으로, 6번이 자신의 페이스대로 경주를 이끌 기회가 매우 크다.",
+ "applied_rules": [],
+ "raceKey": "야히코 5경주",
+ "forecastAt": "2026-08-01 17:35:09",
+ "forecastEpoch": 1785573309.2176645,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 5경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 2.6,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 28.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T17:20:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 6,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 2,
+    "name": "大洞 翔平",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ５着 11.9 7/31 選 抜 ６着 11.1",
+    "prev1": "高 知Ｇ２ 7/17 一予選 ９着 17.1 7/18 選 抜 ９着 15.3 7/19 一 般 ５着 14.5 7/20 一 般 ６着 14.6",
+    "prev2": "取 手Ｇ３ 6/27 一予選 ７着 11.3",
+    "chaku": [
+     1,
+     1,
+     1,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "小野 大介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ３着 11.6 7/31 選 抜 ６着 11.2",
+    "prev1": "松 阪Ｆ１ 7/16 予 選 ４着 11.1 7/17 選 抜 ４着 11.7 7/18 一 般 ４着 11.2",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ５着 11.3 7/ 9 選 抜 ２着 11.4 7/10 特 選 ５着 11.2",
+    "chaku": [
+     1,
+     2,
+     5,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "木暮 安由",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ３着 11.2 7/31 選 抜 ５着 11.1",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ２着 9.8 7/23 準決勝 ９着 9.7 7/24 特 選 ７着 9.2",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 １着 11.3 7/ 9 準決勝 ４着 11.2 7/10 特 選 ５着 11.7",
+    "chaku": [
+     2,
+     4,
+     0,
+     8
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "鈴木謙太郎",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ４着 11.5 7/31 選 抜 ５着 10.9",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ６着 10.9 7/21 一 般 ６着 11.4 7/22 一 般 ７着 11.5",
+    "prev2": "宇都宮Ｆ１ 7/15 一 般 ６着 14.5",
+    "chaku": [
+     1,
+     2,
+     5,
+     21
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "佐藤 康紀",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ６着 10.8 7/31 一 般 ２着 11.4",
+    "prev1": "松 阪Ｆ１ 7/16 予 選 ６着 11.1 7/17 一 般 ６着 11.7 7/18 一 般 ７着 11.7",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ８着 14 7/ 3 選 抜 ６着 11.6 7/ 4 一 般 ６着 11.8 7/ 5 一 般 ８着 12.3",
+    "chaku": [
+     0,
+     0,
+     1,
+     28
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "下井 竜",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ７着 11.2 7/31 一 般 ５着 11.6",
+    "prev1": "和歌山Ｆ１ 7/ 5 予 選 ７着 12.3 7/ 6 一 般 ４着 11.5 7/ 7 一 般 ４着 11.9",
+    "prev2": "岐 阜Ｆ２ 6/27 初特選 ４着 12.1 6/28 準決勝 ２着 11.7 6/29 決 勝 ４着 12.4",
+    "chaku": [
+     2,
+     5,
+     4,
+     10
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    3
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    2,
+    1,
+    5,
+    4
+   ]
+  },
+  "lines": [
+   6,
+   2,
+   1,
+   4,
+   3,
+   5
+  ],
+  "paceLabel": null,
+  "comment": "関東勢は連係せずに単騎を選択。４車ラインで自分のペースで駆けられる下井が本命だ。すんなり番手を回れば大洞も差し切る力はある。木暮、小野に一考。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}

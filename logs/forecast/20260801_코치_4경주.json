@@ -334,5 +334,54 @@
    "totalScore"
   ],
   "sport": "horse"
- }
+ },
+ "grading": {
+  "actual": [
+   10,
+   7,
+   8
+  ],
+  "hit_count": 2,
+  "hit": [
+   10,
+   7
+  ],
+  "missed": [
+   8
+  ],
+  "missed_info": [
+   {
+    "no": 8,
+    "gait": "선행형",
+    "recentPlacings": [
+     6,
+     6,
+     1,
+     1,
+     3
+    ],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   2,
+   8
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -1.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 17:30:12"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "선행형 마필들의 경쟁이 과열될 것으로 예상하여 선행마 9번 헨리바로우즈를 선택했지만, 예상과 달리 8번 에포카도르가 혼전 속에서도 선두권을 유지하며 좋은 성적을 냈다. 8번 마필의 최근 성적 중 1착 기록이 두 번 있었음에도 불구하고, 다른 선행마들과의 경쟁 구도에만 집중하여 해당 마필의 능력을 충분히 고려하지 못했다.",
+  "new_rule": "선행형 마필이 많아도 최근 좋은 성적(특히 1착)을 기록한 선행마는 혼전 속에서도 강점을 발휘할 수 있으므로, 해당 마필의 꾸준한 능력을 과소평가하지 않는다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 17:30:15"
+ },
+ "reviewed": true
 }

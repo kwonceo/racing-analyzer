@@ -287,5 +287,55 @@
    "totalScore"
   ],
   "sport": "cycle"
- }
+ },
+ "grading": {
+  "actual": [
+   5,
+   6,
+   2
+  ],
+  "hit_count": 1,
+  "hit": [
+   5
+  ],
+  "missed": [
+   6,
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   },
+   {
+    "no": 2,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   2,
+   5
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 17:10:03"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번과 2번의 최근 성적 및 라인을 종합적으로 분석하여 이들의 잠재력을 과소평가했습니다. 특히 6번의 이전 경주에서의 경쟁력 있는 모습을 간과했습니다.",
+  "new_rule": "라인 구성에서 예측하지 못한 복병마가 있는지 확인하고, 이전 경주의 최근 성적에서 좋은 모습을 보인 선수를 간과하지 않도록 유의한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 17:10:04"
+ },
+ "reviewed": true
 }

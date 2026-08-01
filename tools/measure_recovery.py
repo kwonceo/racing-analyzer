@@ -101,6 +101,12 @@ def load_races(sport="cycle", pattern="2026_07_*"):
                     #   "생성 후 취소"를 재려면 이 목록이 필요하다 — 최종 추천만 봐서는 안 보인다.
                     "ref": [sorted(x.get("combo") or [])
                             for x in (cp.get("quinellaRef") or []) if x.get("combo")],
+                    # 🔴 [2026-08-01] `darkHorsePicks` = **복병 목록**(유력마와 다른 목록이다).
+                    #   코치 4R 에서 7번이 복병 1순위·확신도 1위·축이었는데도
+                    #   유력마 10번과의 조합 `7+10`(확정 37.7배)이 **어느 목록에도 없었다.**
+                    #   ⇒ "둘 다 봤는데 못 산다"를 재려면 이 목록이 필요하다.
+                    "dk": [int(x.get("no")) for x in (cp.get("darkHorsePicks") or [])
+                           if x.get("no") is not None],
                     "hs": [x for x in (d.get("horses") or []) if x.get("no") is not None],
                     "day": m.group(1) if m else "?"})
     return out
@@ -142,6 +148,12 @@ PLANS = [
     #   ⚠ 이건 **반사실 시뮬레이션**이다 — 실제로는 강등돼 회원에게 안 나갔다.
     ("현행 + 강등분(quinellaRef)", lambda r: r["dc"] + r["ref"]),
     ("강등분만(quinellaRef)", lambda r: r["ref"]),
+    # 🔴 [2026-08-01 신설] **복병 × 유력마 교차**. 두 목록이 따로 놀아 조합이 안 만들어지는 문제.
+    #   ⚠ 복병은 상위 2두만 쓴다(전부 쓰면 구좌가 폭발해 회수율이 자동으로 나빠 보인다).
+    ("복병×유력마 교차 추가", lambda r: r["dc"] + [sorted([a, b]) for a in r["dk"][:2]
+                                              for b in r["kh"] if a != b]),
+    ("복병×유력마 교차만", lambda r: [sorted([a, b]) for a in r["dk"][:2]
+                                for b in r["kh"] if a != b]),
 ]
 
 

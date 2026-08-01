@@ -1,0 +1,101 @@
+{
+ "raceKey": "니가타 10경주",
+ "entries": [
+  {
+   "time": "17:16:06",
+   "minutesBefore": 13,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      5,
+      13
+     ],
+     [
+      1,
+      13
+     ],
+     [
+      12,
+      13
+     ],
+     [
+      6,
+      13
+     ],
+     [
+      4,
+      13
+     ],
+     [
+      9,
+      13
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      5,
+      13
+     ],
+     [
+      5,
+      12,
+      13
+     ],
+     [
+      1,
+      12,
+      13
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:30:09",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:36:10",
+   "minutesBefore": -6,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
