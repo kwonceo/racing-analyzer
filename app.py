@@ -14734,7 +14734,16 @@ def _raw_profile_snapshot(rk):
         for k in ("corners", "fieldSizes", "pastDistances", "last3fList", "pastPlacings",
                   "kimarite", "kimariteRatio", "chaku", "rentai", "gear", "classGrade",
                   "declaredStyle", "declaredStyleLabel",    # [표기 각질 병기 2026-07-30]
-                  "weight", "winOdds", "pop"):              # [발주 시점 값 보존 2026-07-30]
+                  "weight", "winOdds", "pop",               # [발주 시점 값 보존 2026-07-30]
+                  # 🔴 [2026-08-02 승인] 경륜 과거 개최 전적 원문 — **받는데 저장에서 탈락하던 것**.
+                  #   `starters_store` 에는 있으나 `raw_profile` 에 없어 **매일 버려지고 있었다**
+                  #   (starters_store 는 라이브 캐시 20경주·키에 날짜가 없어 소급이 불가능하다).
+                  #   실값: prev1 "弥 彦Ｆ２ 7/17 特予選 ２着 11.5 7/18 準決勝 ４着 11.8 …"
+                  #        → **경기장·등급(Ｆ１/Ｆ２)·날짜·경주종류·착순·타임**이 통째로 들어 있다.
+                  #   🔴 이것이 **③승급 부진** 판정의 유일한 입력이다(경마는 클래스 정보가 없다).
+                  #   ⚠ 필드 추가만이다 — 기존 저장 경로·판정·추천에 일절 개입하지 않는다.
+                  "recent", "prev1", "prev2",
+                  "age", "area", "ki"):                     # 선수 정적 속성(재수집 가능하나 함께 남긴다)
             v = h.get(k)
             if v not in (None, [], {}):
                 r[k] = v
