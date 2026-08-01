@@ -391,6 +391,99 @@ def report_ev_sweep(out):
                       % (r["ev"], r["slots"], r["hits"], r["rate"], r["ex3"], r["median_odds"]))
 
 
+def _rec3(r):
+    """전적 100% 근사 — 저장된 `record_score` 상위 3두.
+    ⚠ 실제 `_integrated_grades` 의 전적 축과 완전히 같지는 않다(보너스·등급 반영분이 빠진다).
+      ⇒ **하한 근사**로 본다. 재현 못 한 부분은 결과에 명시한다(원칙 3)."""
+    hs = [h for h in (r.get("hs") or []) if h.get("record_score") is not None]
+    return [int(h["no"]) for h in sorted(hs, key=lambda h: -(h.get("record_score") or 0))][:3]
+
+
+def measure_weights(sport="cycle", pattern="2026_0*"):
+    """[전적이 실제로 순위를 바꾸는가 (2026-08-02 신설)] **완전 읽기 전용**.
+
+    🔴 대표 지적: *"전적은 항상 같은 패턴이라 결국 배당판 정보로만 변동이 생기는 것 아닌가."*
+      전적은 경주 전 확정이고 마감까지 재수집되지 않는다(`_KEIBA_FORM_DONE` 게이트).
+      ⇒ 틱마다 순위가 바뀐다면 **그 변동은 전부 배당 때문**이다.
+    🔴 무엇을 재나: 세 축의 **상위 3두 집합**을 만들고 **조합 일치율**과 성적을 나란히 본다.
+      · 현행(60/40)  = `keyHorses`      (저장값)
+      · 시장 100%    = `_mkt3(r)`       (배당 내재확률 상위 3두)
+      · 전적 100%    = `_rec3(r)`       (`record_score` 상위 3두 · 하한 근사)
+    ⚠ **일치율이 높으면 "60/40" 표기가 오해를 만든다** — 전적이 이름만 있는 것이다.
+    """
+    raw = load_races(sport, pattern)
+    clean = [r for r in raw if CLEAN_LO <= r["po"] / r["mo"] <= CLEAN_HI]
+    out = {"sport": sport, "pattern": pattern, "denom_all": len(raw), "denom_clean": len(clean),
+           "pairs": [], "plans": [], "rec_missing": 0}
+    axes = {"현행(60/40)": lambda r: r["kh"][:3],
+            "시장 100%": _mkt3,
+            "전적 100%": _rec3}
+    # ① 축 사이의 집합·조합 일치율
+    keys = list(axes)
+    for i in range(len(keys)):
+        for j in range(i + 1, len(keys)):
+            a, b = keys[i], keys[j]
+            same_set, same_combo, n = 0, 0, 0
+            for r in clean:
+                x, y = axes[a](r), axes[b](r)
+                if len(x) < 3 or len(y) < 3:
+                    continue
+                n += 1
+                if set(x) == set(y):
+                    same_set += 1
+                ca = {tuple(c) for c in _allc(x)}
+                cb = {tuple(c) for c in _allc(y)}
+                same_combo += len(ca & cb) / 3.0     # 3조합 중 겹치는 비율
+            out["pairs"].append({"a": a, "b": b, "n": n,
+                                 "set_same": round(100.0 * same_set / max(n, 1), 1),
+                                 "combo_same": round(100.0 * same_combo / max(n, 1), 1)})
+    # ② 축별 성적 (상위3 전조합 = 구좌 동일)
+    for name, fn in axes.items():
+        inv, hits, hit3 = 0, [], 0
+        for r in clean:
+            top = fn(r)
+            if len(top) < 3:
+                continue
+            cs = _allc(top)
+            inv += len(cs)
+            if r["top2"] in [sorted(c) for c in cs]:
+                hits.append(r["po"])
+            if len(set(r["top2"]) & set(top)) == 2:
+                hit3 += 1
+        hits.sort(reverse=True)
+        out["plans"].append({
+            "name": name, "slots": inv, "hits": len(hits),
+            "rate": round(100.0 * sum(hits) / max(inv, 1), 1),
+            "ex1": round(100.0 * sum(hits[1:]) / max(inv, 1), 1),
+            "ex3": round(100.0 * sum(hits[3:]) / max(inv, 1), 1),
+            "median_odds": round(statistics.median(hits), 1) if hits else 0,
+            "incl": round(100.0 * hit3 / max(len(clean), 1), 1),
+        })
+    out["rec_missing"] = sum(1 for r in clean if len(_rec3(r)) < 3)
+    return out
+
+
+def report_weights(out):
+    print("⚠ 분모: 전체 %d → 정제 %d경주 (%.1f%%) · `record_score` 부족으로 전적축 산출불가 %d경주"
+          % (out["denom_all"], out["denom_clean"],
+             100.0 * out["denom_clean"] / max(out["denom_all"], 1), out["rec_missing"]))
+    print()
+    print("  ① 축 사이 일치율 (상위 3두)")
+    print("     %-24s %8s %10s %10s" % ("비교", "n", "집합동일", "조합겹침"))
+    for p in out["pairs"]:
+        mark = " 🔴" if p["combo_same"] >= 80 else (" 🟡" if p["combo_same"] >= 60 else "")
+        print("     %-24s %8d %9.1f%% %9.1f%%%s"
+              % (p["a"] + " ↔ " + p["b"], p["n"], p["set_same"], p["combo_same"], mark))
+    print()
+    print("  ② 축별 성적 (상위3 전조합 · 구좌 동일 · 판정선 %.1f%%)" % PAYBACK)
+    print("     %-14s %7s %6s %9s %8s %8s %9s %9s" %
+          ("축", "구좌", "적중", "회수율", "1제외", "3제외", "배당중앙", "1·2착포함"))
+    for p in out["plans"]:
+        print("     %-14s %7d %6d %8.1f%% %7.1f%% %7.1f%% %8.1f배 %8.1f%% %s"
+              % (p["name"], p["slots"], p["hits"], p["rate"], p["ex1"], p["ex3"],
+                 p["median_odds"], p["incl"], "🟢" if p["rate"] >= PAYBACK else "🔴"))
+
+
 def measure_forecast(sport=None, pattern="2026_0*"):
     """[F3 — Gemini 고배당 능력 (2026-08-01 신설)] **완전 읽기 전용**.
 
@@ -715,7 +808,18 @@ def main():
                     help="EV 임계 스윕 — 74.5%% 유지하며 적중배당 중앙 최대인 임계를 찾는다")
     ap.add_argument("--forecast", action="store_true",
                     help="F3 — Gemini 고배당 능력(시장과 다른 답 && 적중 · 가상 회수율)")
+    ap.add_argument("--weights", action="store_true",
+                    help="전적이 실제로 순위를 바꾸는가 — 현행(60/40) ↔ 시장100% ↔ 전적100% 대조")
     a = ap.parse_args()
+    if a.weights:
+        out = measure_weights(a.sport, a.pattern)
+        print("=" * 110)
+        print("전적의 실질 영향 · %s · %s   🔴 판정선 = 환급률 %.1f%%" % (a.sport, a.pattern, PAYBACK))
+        print("=" * 110)
+        print("🔴 전적은 경주 전 확정이고 마감까지 재수집되지 않는다 → 틱별 순위 변동은 **배당 때문**이다.")
+        print("⚠ 전적축은 `record_score` 상위3 = **하한 근사**(보너스·등급 반영분이 빠진다).")
+        report_weights(out)
+        return
     if a.forecast:
         rows = measure_forecast(None if a.sport in ("all", "any") else a.sport, a.pattern)
         print("=" * 110)
