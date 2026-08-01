@@ -1571,7 +1571,10 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
     #    그래서 **한국 경마장 키일 때만 허용**하고, 그 판정은 기존 `_KRA_TRACK_RE`(app.py:1669)를
     #    재사용한다(경기장 목록을 두 곳에 두지 않는다).
     # 🔧 되돌리기: 이 if 블록만 삭제.
-    if rec.get("source") == "korea" and not _KRA_TRACK_RE.search(str(rk or "")):
+    # ⚠ [2026-08-01 보강] 정확일치(`== "korea"`)가 아니라 **접두 일치**로 본다.
+    #   오염 레코드를 `korea_contaminated` 로 재표기(tools/quarantine_form_records.py)하는데,
+    #   정확일치면 재표기된 순간 **이 가드에 안 걸려 오염 전적이 다시 점수에 들어간다.**
+    if str(rec.get("source") or "").startswith("korea") and not _KRA_TRACK_RE.search(str(rk or "")):
         print("[전적 오매칭 차단] %s: 한국 전적(source=korea)이 한국 경마장이 아닌 경주에 붙어 있다 → 전적 미사용" % rk)
         return None
     anomaly_by_no = {}

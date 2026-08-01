@@ -1,27 +1,27 @@
 {
- "races": 1431,
+ "races": 1432,
  "byRank": {
   "rank1": {
-   "hit": 135,
-   "total": 628,
-   "rate": 21.5
+   "hit": 134,
+   "total": 629,
+   "rate": 21.3
   },
   "rank2": {
    "hit": 233,
-   "total": 601,
-   "rate": 38.8
+   "total": 602,
+   "rate": 38.7
   },
   "rank3": {
    "hit": 255,
-   "total": 563,
-   "rate": 45.3
+   "total": 564,
+   "rate": 45.2
   }
  },
  "bySignal": {
   "초기급락 보존": {
-   "hit": 389,
-   "total": 1138,
-   "rate": 34.2,
+   "hit": 392,
+   "total": 1144,
+   "rate": 34.3,
    "weightReady": true
   },
   "크로스역배열": {
@@ -31,21 +31,21 @@
    "weightReady": true
   },
   "스마트머니": {
-   "hit": 107,
-   "total": 231,
-   "rate": 46.3,
+   "hit": 106,
+   "total": 230,
+   "rate": 46.1,
    "weightReady": true
   },
   "스마트머니+역배열": {
-   "hit": 63,
-   "total": 142,
-   "rate": 44.4,
+   "hit": 61,
+   "total": 140,
+   "rate": 43.6,
    "weightReady": true
   },
   "역배열": {
-   "hit": 24,
+   "hit": 23,
    "total": 72,
-   "rate": 33.3,
+   "rate": 31.9,
    "weightReady": true
   },
   "급락": {
@@ -58,40 +58,40 @@
  "byBand": {
   "15~30": {
    "hit": 78,
-   "total": 350,
+   "total": 349,
    "rate": 22.3,
    "weightReady": true
   },
   "50~100": {
    "hit": 10,
-   "total": 154,
-   "rate": 6.5,
+   "total": 151,
+   "rate": 6.6,
    "weightReady": true
   },
   "30~50": {
-   "hit": 28,
-   "total": 198,
-   "rate": 14.1,
+   "hit": 27,
+   "total": 200,
+   "rate": 13.5,
    "weightReady": true
   },
   "100+": {
    "hit": 5,
-   "total": 72,
-   "rate": 6.9,
+   "total": 73,
+   "rate": 6.8,
    "weightReady": true
   }
  },
  "bySport": {
   "keiba": {
    "hit": 328,
-   "total": 969,
-   "rate": 33.8,
+   "total": 972,
+   "rate": 33.7,
    "weightReady": true
   },
   "keirin": {
-   "hit": 294,
+   "hit": 293,
    "total": 814,
-   "rate": 36.1,
+   "rate": 36.0,
    "weightReady": true
   },
   "korea": {
@@ -107,7 +107,7 @@
    "weightReady": false
   }
  },
- "missedRaces": 187,
+ "missedRaces": 189,
  "dansung": {
   "races": 108,
   "horseWonRate": 36.1,
@@ -121,5 +121,5 @@
    "실질유력": 22
   }
  },
- "updated_at": "2026-08-01 16:30:04"
+ "updated_at": "2026-08-01 16:50:11"
 }

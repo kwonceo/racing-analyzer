@@ -611,6 +611,43 @@ def check_backup_alive():
                note="마지막 %s · %s" % (time.strftime("%m-%d %H:%M", time.localtime(last)), _INTEG_DAYS))
 
 
+SERVER_LOG_MAX_MIN = 15.0   # 🔴 이 시간 이상 콘솔 로그가 안 늘면 이상
+
+
+def check_server_log_alive():
+    """[I7] 서버 콘솔 로그가 **지금도 쌓이고 있나** — 최신 `logs/server*.log` 의 갱신 경과(분).
+
+    🔴 왜 필요한가 (2026-08-01 실사고)
+      가드 A·B·C 를 검증하려고 `logs/server_stdout.log` 를 봤는데 `[전적 오매칭 차단]` 이 **0회**였다.
+      **하마터면 "가드가 안 걸렸다"고 보고할 뻔했다.** 실제로는 그 파일이 **07:03 에서 멈춰 있었고**
+      현재 서버 로그는 `logs/server_b.log` 로 가고 있었다(가드는 **42회 정상 발동**).
+      ⇒ 로그가 어디로 가는지 모르면 **모든 검증이 무의미**하다. 오늘은 원자료를 다시 봐서 피했지만
+        다음엔 오판한다.
+
+    ⚠ 원인은 "로그가 안 남는다"가 아니라 **파일이 18개로 흩어져 어느 것이 현재 것인지 모른다**는 것이다
+      (`server_stdout`·`server_a`·`server_b`·`server_jra`·`server_jra4`·`server_jra5`…).
+      서버가 죽고 다시 뜰 때마다 새 리다이렉트 파일이 생겼다.
+    ⚠ ID 는 `I7` 이다 — `I6`(스냅샷 유입)은 **뺀 번호**라 재사용하면 과거 대조가 깨진다(I5 선례).
+    ⚠ 그래서 **특정 파일명을 고정하지 않는다** — `logs/server*.log` 중 **가장 최근 것**을 본다.
+      그래야 재기동으로 파일이 바뀌어도 감시가 따라간다(고치면 대상에서 빠지는 정의를 피한다 · 원칙 19).
+    """
+    import glob as _g
+    fs = _g.glob(os.path.join(BASE, "logs", "server*.log"))
+    if not fs:
+        return _mk("I7", "🔴 무결성", "서버 콘솔 로그 갱신 경과(분)", "logs/server*.log",
+                   current=None, target="≤ %d" % int(SERVER_LOG_MAX_MIN), ok=False, n=None,
+                   note="🔴 서버 로그 파일이 하나도 없다 — 콘솔 출력이 **어디에도 안 남는다**. " + _INTEG_DAYS)
+    newest = max(fs, key=os.path.getmtime)
+    el = (time.time() - os.path.getmtime(newest)) / 60.0
+    return _mk("I7", "🔴 무결성", "서버 콘솔 로그 갱신 경과(분)", "logs/server*.log",
+               current=round(el, 1), target="≤ %d" % int(SERVER_LOG_MAX_MIN),
+               ok=(el <= SERVER_LOG_MAX_MIN), n=len(fs),
+               note="최신 %s (%s) · 로그파일 %d개 — 흩어져 있으면 검증이 엉뚱한 파일을 본다. %s"
+                    % (os.path.basename(newest),
+                       time.strftime("%m-%d %H:%M", time.localtime(os.path.getmtime(newest))),
+                       len(fs), _INTEG_DAYS))
+
+
 DAEMON_LONG_SEC = 300.0     # 🔴 이 이상 주기의 sleep-first 데몬만 감시 대상
 # 주기 상수 이름 → 초. `time.sleep(_KRA_BACKFILL_INTERVAL)` 처럼 변수로 쓰는 경우를 푼다.
 _DAEMON_CONSTS = {"_KRA_BACKFILL_INTERVAL": 1200.0, "_PERIODIC_BACKUP_INTERVAL": 21600.0,
@@ -871,6 +908,7 @@ def build_checklist():
              check_score_decomposition(), check_freeze_success(), check_module_load(),
              # 🔴 무결성 감시(매일·자동) — 성능 측정과 성격이 다르다. 절대 줄이지 않는다.
              check_payout_coverage(), check_backup_alive(), check_daemon_alive(),
+             check_server_log_alive(),   # I7 — 로그가 지금도 쌓이는가(검증 신뢰성의 전제)
              # 🔴 [2026-08-01 · 권대표 결정] `check_snapshot_ingest()`(I6) **체크리스트에서 뺀다.**
              #   같은 날 아침에 넣었다가 같은 날 뺐다 — 스냅샷 **판정 경로를 중단**하기로 결정됐기 때문이다.
              #   **원칙 18: 안 쓰는 것을 감시하면 노이즈다.** 안 쓰기로 한 데이터가 안 들어온다고

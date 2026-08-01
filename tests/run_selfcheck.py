@@ -197,7 +197,45 @@ def case_precommit():
     return rc == 1, "주입 시 rc=%s (기대 1)" % rc
 
 
+def case_hook_crash():
+    """[2026-08-01 신설] **훅 자체가 죽는 상황**을 주입한다.
+
+    🔴 왜: 오늘 커밋 훅이 cp949 콘솔에서 `UnicodeEncodeError` 로 죽어 rc=1 이 됐다.
+      **테스트는 전부 통과했는데 커밋이 막혔다.** 화면에는 "커밋 차단"만 떠서
+      내용을 안 보면 "위반이 있나 보다" 하고 `--no-verify` 로 넘기게 된다.
+      ⇒ 훅은 **"정당한 차단"과 "게이트 고장"을 갈라서 출력**해야 한다. 그것을 여기서 검증한다.
+
+    통과 조건 3가지 — 셋 다 만족해야 한다:
+      ① 커밋을 **막는다**(고장 났다고 통과시키면 게이트가 없는 것과 같다)
+      ② 출력에 **"게이트 오류"** 가 있다
+      ③ **"커밋 차단(정당)"** 으로 오분류하지 않는다
+    """
+    hook = os.path.join(BASE, ".git", "hooks", "pre-commit")
+    if not os.path.exists(hook):
+        return None, "⏭ .git/hooks/pre-commit 미설치 — scripts/install_hooks.bat 실행 필요"
+    p = os.path.join(BASE, "tests", "run_precommit.py")
+    bak = p + ".bak_selfcheck"
+    shutil.copy2(p, bak)
+    try:
+        s = open(p, encoding="utf-8").read()
+        s = s.replace("def main():",
+                      'def main():\n    raise RuntimeError("SELFCHECK: 게이트 고장 주입")', 1)
+        open(p, "w", encoding="utf-8").write(s)
+        r = subprocess.run(["sh", hook], cwd=BASE, capture_output=True,
+                           text=True, encoding="utf-8", errors="replace")
+        out = (r.stdout or "") + (r.stderr or "")
+    finally:
+        try:
+            shutil.move(bak, p)
+        except Exception:
+            return None, "🔴 원복 실패 — %s 를 %s 로 되돌릴 것" % (bak, p)
+    ok = (r.returncode != 0) and ("게이트 오류" in out) and ("커밋 차단(정당)" not in out)
+    return ok, "rc=%s · 고장분류=%s · 정당오분류=%s" % (
+        r.returncode, "게이트 오류" in out, "커밋 차단(정당)" in out)
+
+
 CASES = [
+    ("pre-commit(고장구분)", "게이트 스크립트 자체 예외", case_hook_crash),
     ("run_glob_safety", "날짜 없는 특정 경주 매칭", case_glob_safety),
     ("run_glob_safety(listdir)", "os.listdir 날짜 없는 지목", case_glob_safety_listdir),
     ("run_glob_safety(오탐)", "무해한 전수 스캔(잡히면 실패)", case_glob_safety_noise),

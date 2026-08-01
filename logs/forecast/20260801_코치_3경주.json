@@ -354,5 +354,48 @@
    "totalScore"
   ],
   "sport": "horse"
- }
+ },
+ "grading": {
+  "actual": [
+   11,
+   5,
+   3
+  ],
+  "hit_count": 2,
+  "hit": [
+   5,
+   11
+  ],
+  "missed": [
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   11,
+   7,
+   3
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -1.7,
+  "market_src": "win",
+  "gradedAt": "2026-08-01 16:49:54"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번(コントレイル)은 선행형이었으나, 선행마 초반 과열 경쟁에서 9번보다 더 잘 버텨냈다는 점을 간과했습니다. 9번의 최근 성적에만 너무 집중했습니다.",
+  "new_rule": "선행마 과포화 경주에서 A등급 내에서도 상대적으로 기수 승률이 낮은 말이 예상보다 좋은 성적을 낼 수 있음을 고려해야 한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 16:49:56"
+ },
+ "reviewed": true
 }

@@ -288,5 +288,48 @@
    "totalScore"
   ],
   "sport": "cycle"
- }
+ },
+ "grading": {
+  "actual": [
+   7,
+   5,
+   1
+  ],
+  "hit_count": 2,
+  "hit": [
+   5,
+   7
+  ],
+  "missed": [
+   1
+  ],
+  "missed_info": [
+   {
+    "no": 1,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   7,
+   2
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 16:50:08"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "1번 마츠오카 신노스케의 부진에 대한 판단이 섣불렀다. 그의 선행형 각질과 라인 구성을 고려할 때, 5번 카와다 신야와 함께 경주 초반의 전개를 주도할 가능성을 간과했다. 특히 1번의 최근 착순 정보가 공백이었던 점을 주의 깊게 보지 못했다.",
+  "new_rule": "선행형 마필의 최근 성적이 부진하더라도 라인 구성 내에 동일 각질이 없거나 적을 경우, 예상외의 선전 가능성을 항상 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 16:50:10"
+ },
+ "reviewed": true
 }
