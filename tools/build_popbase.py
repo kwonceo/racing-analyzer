@@ -50,22 +50,34 @@ def _txt(h):
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h)).strip()
 
 
+_FIELD_RE = re.compile(r"(\d{1,2})頭")
+
+
 def parse_result(html):
-    """→ [{placing, pop, field}] · ⚠ 착순/인기가 숫자가 아닌 행(중지·제외)은 버린다."""
+    """→ ([{placing, pop, field}], 진단) · 🔴 **두수는 세지 않고 페이지 표기(N頭)에서 읽는다.**
+
+    🔴 [2026-08-02 검산 실패 정정] 종전에는 `field = len(out)` 이었다.
+      파싱 실패분이 곧 두수 오류가 되어 **12두 경주가 13두로** 잡혔다(실측 15행 ↔ 표기 12頭).
+      ⇒ **원본이 명시한 값이 있으면 그것을 읽는다. 세지 않는다.**
+    ⚠ 표기가 없으면 **그 경주를 통째로 건너뛴다**(추측 금지).
+    """
+    m = _FIELD_RE.search(_txt(html))
+    field = int(m.group(1)) if m else None
     rows = _ROW.findall(html)
     out = []
     for r in rows:
         c = [_txt(x) for x in _TD.findall(r)]
-        if len(c) < 11:
+        if len(c) < 15:                    # 🔴 말 행은 셀 15개 — 범례·요약 행을 배제한다
             continue
         try:
-            out.append({"placing": int(c[0]), "pop": int(c[9])})
+            pl, pp = int(c[0]), int(c[9])
         except (ValueError, IndexError):
-            continue                       # 중지·실격 등 — 조용히 넘기지 않고 분모에서 뺀다
-    n = len(out)
-    for x in out:
-        x["field"] = n
-    return out
+            continue                       # 中止·除外 등(착순·인기가 숫자가 아니다) — 분모에서 뺀다
+        out.append({"placing": pl, "pop": pp, "field": field})
+    diag = {"rows": len(rows), "parsed": len(out), "field": field}
+    if field is None or len(out) != field:
+        return [], diag                    # 🔴 표기와 불일치 → 그 경주는 버린다(오염 차단)
+    return out, diag
 
 
 def band(n):
@@ -86,8 +98,9 @@ def main():
     print("🔴 분석 로그를 읽지도 쓰지도 않는다(격리) · 원문은 logs/form_raw 에 보존")
 
     t0 = time.time()
-    days, races, horses = 0, 0, 0
+    days, races, horses, skipped = 0, 0, 0, 0
     agg = {}          # (band, pop) → [n, in3, in2]
+    rc_by_band = {}   # band → 경주 수 (검산②에 쓴다)
     raw_bytes = 0
     for d in range(a.days):
         ymd = time.strftime("%Y%m%d", time.localtime(time.time() - d * 86400))
@@ -104,10 +117,15 @@ def main():
                 html = fetch("https://race.netkeiba.com/race/result.html?race_id=" + rid)
             except Exception:
                 continue
-            rows = parse_result(html)
+            rows, diag = parse_result(html)
             if not rows:
+                skipped += 1
+                if skipped <= 3:
+                    print("   ⚠ 스킵(표기↔파싱 불일치): %s 행%s 파싱%s 표기%s"
+                          % (rid, diag["rows"], diag["parsed"], diag["field"]))
                 continue
             races += 1
+            rc_by_band[band(rows[0]["field"])] = rc_by_band.get(band(rows[0]["field"]), 0) + 1
             horses += len(rows)
             raw_bytes += len(html.encode("utf-8"))
             if apply:                                  # 원문 보존(재파싱 가능하게)
@@ -154,12 +172,51 @@ def main():
               % (b, p, n, r3, 100.0 * i2 / n, r3 / rnd if rnd else 0))
         doc["cells"]["%s|%d" % (b, p)] = {"n": n, "in3": round(r3, 2),
                                           "in2": round(100.0 * i2 / n, 2)}
+    # ── 🔴 검산 3종 (2026-08-02 승인) — **통과 못 하면 저장하지 않는다** ──────────────
+    #   왜: 직전 수집이 두수를 `len(out)` 으로 세어 **1인기 3착률이 77.6% 로 부풀려졌다**.
+    #   집계표는 "합이 말이 되는가"를 스스로 검산해야 한다(새 절차).
+    print("\n" + "=" * 60)
+    print("검산 3종")
+    fails = []
+    # ① 인기별 n 일치 — 같은 경주에 인기 1·2가 각 1마리씩이므로 n 은 같아야 한다
+    for b in sorted(rc_by_band):
+        ns = [v[0] for (bb, p), v in agg.items() if bb == b and p <= 5]
+        if len(ns) >= 2:
+            lo, hi = min(ns), max(ns)
+            gap = 100.0 * (hi - lo) / max(hi, 1)
+            mark = "🟢" if gap <= 5 else "🔴"
+            print("  ① %-8s 인기1~5 n %d~%d (편차 %.1f%%) %s" % (b, lo, hi, gap, mark))
+            if gap > 5:
+                fails.append("① %s 인기별 n 편차 %.1f%% > 5%%" % (b, gap))
+    # ② 3착 건수 합 ÷ 경주 수 ≈ 3
+    for b, rc in sorted(rc_by_band.items()):
+        tot3 = sum(v[1] for (bb, p), v in agg.items() if bb == b)
+        val = tot3 / max(rc, 1)
+        mark = "🟢" if abs(val - 3.0) <= 0.15 else "🔴"
+        print("  ② %-8s 3착합 %d ÷ 경주 %d = %.2f (기대 3.00) %s" % (b, tot3, rc, val, mark))
+        if abs(val - 3.0) > 0.15:
+            fails.append("② %s 3착합÷경주수 %.2f (기대 3.00)" % (b, val))
+    # ③ 두수 일치율 — 표기와 다른 경주는 이미 스킵했으므로 채택분은 100% 여야 한다
+    rate = 100.0 * races / max(races + skipped, 1)
+    print("  ③ 두수 일치 채택 %d · 스킵 %d → 채택률 %.1f%% (스킵분은 표기↔파싱 불일치)"
+          % (races, skipped, rate))
+    if races == 0:
+        fails.append("③ 채택 경주 0")
+    print("=" * 60)
+
+    if fails:
+        print("🔴 **검산 실패 %d건 — 저장하지 않는다**" % len(fails))
+        for f in fails:
+            print("   -", f)
+        sys.exit(1)
+    print("🟢 검산 통과")
     if apply:
         os.makedirs(os.path.dirname(OUT), exist_ok=True)
+        doc["verified"] = True
         json.dump(doc, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-        print("\n🟢 저장: %s (셀 %d)" % (OUT, len(doc["cells"])))
+        print("🟢 저장: %s (셀 %d)" % (OUT, len(doc["cells"])))
     else:
-        print("\n⚠ DRY — 저장하지 않았다. --apply 로 저장한다.")
+        print("⚠ DRY — 저장하지 않았다. --apply 로 저장한다.")
 
 
 if __name__ == "__main__":
