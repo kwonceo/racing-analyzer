@@ -27296,17 +27296,40 @@ def _jra_fetch_odds(race_id, otype):
 
 
 def _jra_recent_private(rk):
-    """🔴 이중 기록 방지 — 확장(사설)이 최근 200초 안에 이 경주를 보냈으면 서버는 **생략**한다.
-    7/30 oddspark 2중 기록(4,507건·41%) 과 같은 사고를 중앙에서 반복하지 않기 위한 게이트.
-    판정 근거는 기존 `_fresh_private`(app.py 다중경주 경로)와 **같은 방식**이다."""
-    try:
-        rec = (_triple_load() or {}).get(rk) or {}
-        src = str(rec.get("source") or "")
-        if src and "netkeiba" not in src and "oddspark" not in src:
-            return (time.time() - (rec.get("t") or 0)) <= 200
-    except Exception:
-        pass
-    return False
+    """🔴 [2026-08-01 · 승인 A로 **뒤집힘**] 중앙경마는 **netkeiba 우선 · 확장은 폴백**이다.
+
+    ■ 왜 뒤집었나 (실사고 2026-08-01 삿포로 9R · 발주 14:20)
+      화면 오버레이 `복승 2+5 = 2.4배` ↔ 배당판 같은 칸 `19.3배` — **8배 차이**.
+      원인 대조:
+        배당판 화면            2+5 = 19.3
+        🟢 netkeiba type=4(馬連) 2+5 = **19.7** (14:16:36)  ← **일치**
+           netkeiba type=5(ワイド) = 5.3 · type=2(複勝) = 1.2 · type=1(단승) = 2.1  ← 전부 불일치
+        🔴 우리 저장값(src=private) = **2.4**  ← **어느 것과도 안 맞는다**
+      ⇒ **netkeiba 파서는 정확하고, 확장(사설 배당판) 파서가 틀린 값을 넣고 있었다.**
+        (배당판 칸 안에 큰 값 19.3 과 작은 값 2.4 가 함께 표시되는데 확장이 작은 쪽을 긁는 것으로 보인다)
+      🔴 **이 오류가 판단까지 바꿨다** — 2.4배로 보여 대표가 그 조합을 고려 대상에서 뺐다.
+         데이터만 틀린 게 아니라 **의사결정이 틀어졌다.**
+
+    ■ 정정: 종전 게이트는 "확장이 최근 200초 내 보냈으면 서버가 양보"였다.
+      그 근거는 삿포로 7R 에서 **확장 값이 더 신선했다**는 관찰이었는데,
+      🔴 **신선도만 봤고 정확성은 검증하지 않았다.** 9R 이 정반대 사례다.
+    ⇒ 이제 **양보하지 않는다.** netkeiba 를 항상 쓴다.
+
+    ⚠ 이중 기록은 어떻게 막나: `_do_triple_ingest` 는 같은 raceKey 에 **덮어쓰기**이고
+      히스토리는 `src` 로 구분되므로, 7/30 oddspark 사고(같은 수집을 `_history_append` 로 **2번** 부른 것)와
+      **구조가 다르다**. 소스가 둘이어도 각 1회씩이라 중복 계상이 아니다.
+    🔧 되돌리기: 이 함수가 종전처럼 200초 판정을 하도록 아래 `return False` 를 지우고
+      주석 처리된 블록을 살리면 된다. **코드는 지우지 않았다.**
+    """
+    # ── (구) 확장 우선 게이트 — 2026-08-01 승인 A로 비활성. 지우지 않고 남긴다.
+    # try:
+    #     rec = (_triple_load() or {}).get(rk) or {}
+    #     src = str(rec.get("source") or "")
+    #     if src and "netkeiba" not in src and "oddspark" not in src:
+    #         return (time.time() - (rec.get("t") or 0)) <= 200
+    # except Exception:
+    #     pass
+    return False                       # 🔴 netkeiba 우선 — 확장에 양보하지 않는다
 
 
 def _jra_collect_once():
