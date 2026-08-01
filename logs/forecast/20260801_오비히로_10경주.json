@@ -1,0 +1,245 @@
+{
+ "predicted_top3": [
+  2,
+  4,
+  10
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 3,
+ "reason_short": "낮은 부담중량 말이 유리한 가운데, A등급 말들 사이의 경쟁이 치열할 것.",
+ "key_factors": [
+  "부담중량",
+  "등급 차이"
+ ],
+ "exception_note": "이 경주에 특별한 라인 구도나 각질 특수성은 보이지 않지만, 전반적으로 부담중량이 낮은 말들이 상위 등급의 경주마와 경쟁하며 이변을 만들어낼 가능성이 있다. 2번, 4번, 10번은 모두 10kg의 낮은 부담중량을 가지고 있어, A, B등급의 다른 말들과 비교했을 때 상대적으로 유리한 조건에서 경주에 임할 수 있다. 특히 2번 '키요에이보이'는 A등급임에도 10kg의 최저 부담중량을 가지고 있어 다른 A등급의 30kg 말들보다 전개에 이점이 있을 것으로 보인다.",
+ "applied_rules": [],
+ "raceKey": "오비히로 10경주",
+ "forecastAt": "2026-08-01 19:25:23",
+ "forecastEpoch": 1785579923.7070127,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "오비히로 10경주",
+  "wind": {
+   "venue": "오비히로",
+   "풍속": 0.7,
+   "풍향": "남남동",
+   "풍향코드": 7,
+   "기온": 17.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T19:10:00+09:00",
+   "지점": "帯広",
+   "지점거리km": 0.97
+  },
+  "fieldSize": 10,
+  "distance": 200,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 1,
+    "name": "イサムフジ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 30.0,
+    "jockey": "長澤幸"
+   },
+   {
+    "no": 2,
+    "name": "キョウエイボーイ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 10.0,
+    "jockey": "キョウエイボーイ"
+   },
+   {
+    "no": 3,
+    "name": "レットダイヤ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 30.0,
+    "jockey": "金田利"
+   },
+   {
+    "no": 4,
+    "name": "テンカムソウ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 10.0,
+    "jockey": "松本秀"
+   },
+   {
+    "no": 5,
+    "name": "スピードフジ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 30.0,
+    "jockey": "西謙一"
+   },
+   {
+    "no": 6,
+    "name": "フジダイビクトリー",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 30.0,
+    "jockey": "渡来心"
+   },
+   {
+    "no": 7,
+    "name": "ガンバルダゾ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 20.0,
+    "jockey": "今井千"
+   },
+   {
+    "no": 8,
+    "name": "キタノオーロラ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 30.0,
+    "jockey": "船山蔵"
+   },
+   {
+    "no": 9,
+    "name": "ナリタボブサップ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 30.0,
+    "jockey": "村上章"
+   },
+   {
+    "no": 10,
+    "name": "キタノドリーマー",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 10.0,
+    "jockey": "中村太"
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 100.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ }
+}

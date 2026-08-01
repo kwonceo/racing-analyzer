@@ -1,0 +1,126 @@
+{
+ "raceKey": "코치 10경주",
+ "entries": [
+  {
+   "time": "19:45:49",
+   "minutesBefore": 34,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      10
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      2,
+      10
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      3,
+      4
+     ],
+     [
+      2,
+      3,
+      5
+     ],
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      2,
+      3,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "20:20:04",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       4,
+       5
+      ],
+      "prev": 120.0,
+      "cur": 71.6,
+      "pct": -40.3
+     },
+     {
+      "combo": [
+       4,
+       10
+      ],
+      "prev": 22.6,
+      "cur": 13.9,
+      "pct": -38.5
+     },
+     {
+      "combo": [
+       9,
+       10
+      ],
+      "prev": 86.4,
+      "cur": 56.1,
+      "pct": -35.1
+     },
+     {
+      "combo": [
+       7,
+       10
+      ],
+      "prev": 30.0,
+      "cur": 19.7,
+      "pct": -34.3
+     },
+     {
+      "combo": [
+       5,
+       10
+      ],
+      "prev": 33.6,
+      "cur": 22.4,
+      "pct": -33.3
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

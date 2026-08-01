@@ -1,0 +1,289 @@
+{
+ "predicted_top3": [
+  1,
+  4,
+  3
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 #3, 젖히기형 #1, #5, #4의 혼전 속에서 #1의 라인 선전 기대.",
+ "key_factors": [
+  "선행형 3번 鈴木 浩太의 존재와 그에 따른 전개",
+  "젖히기형 1번 酒井 雄多의 빠른 반응과 라인 우세",
+  "동일 라인 내 각질 구성 불균형 및 경쟁 심화 가능성"
+ ],
+ "exception_note": "#1 酒井 雄多는 '도주' 선언했으나 '젖히기형' 각질이며, #3 鈴木 浩太는 '도주' 선언한 '선행형'이다. 이로 인해 초반 주도권 다툼이 발생할 수 있으며, 이는 경주 코멘트에서 '선두의 酒井'을 언급하는 것과 상충될 수 있다. 또한, #1과 #4가 같은 라인에 묶여 있으면서 #4 佐々木堅次가 #1의 '번수'로 언급된 점은 #1이 선행을 주도할 경우 #4가 유리한 위치를 점할 수 있음을 시사한다. 반면, #3 鈴木 浩太는 홀로 선행형으로 나서게 되어 앞선에서의 부담이 클 수 있다.",
+ "applied_rules": [],
+ "raceKey": "이와키타이라 12경주",
+ "forecastAt": "2026-08-01 20:07:33",
+ "forecastEpoch": 1785582453.6012197,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "이와키타이라 12경주",
+  "wind": {
+   "venue": "이와키타이라",
+   "풍속": 2.1,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 26.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T19:50:00+09:00",
+   "지점": "小名浜",
+   "지점거리km": 12.14
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 7,
+    "name": "佐々木眞也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 ６着 12.7",
+    "prev1": "宇都宮Ｆ１ 7/13 初特選 １着 13.8 7/14 準決勝 失",
+    "prev2": "高 知Ｆ１ 6/29 初特選 ６着 13.9 6/30 準決勝 ２着 14.2 7/ 1 決 勝 ５着 14.3",
+    "chaku": [
+     5,
+     4,
+     1,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "酒井 雄多",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 ２着 11.7",
+    "prev1": "前 橋Ｇ３ 7/22 初特選 ９着 10.3 7/23 準決勝 ６着 9.7 7/24 特 秀 １着 9.6",
+    "prev2": "和歌山Ｆ１ 7/ 5 初特選 ７着 11.5 7/ 6 準決勝 ３着 11.9 7/ 7 特 選 失",
+    "chaku": [
+     4,
+     3,
+     1,
+     16
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "松岡 貴久",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ２着 11.2",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ２着 12.2 7/24 準決勝 ２着 11.5 7/25 決 勝 ５着 11.3",
+    "prev2": "伊 東Ｆ１ 7/10 初特選 ５着 9.3 7/11 準決勝 ７着 7/12 一 般 ４着 9.4",
+    "chaku": [
+     1,
+     6,
+     4,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "市橋司優人",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "7/31 予 選 １着 11.3",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ６着 9.5 7/23 特 選 ２着 9.9 7/24 特 秀 ３着 9.4",
+    "prev2": "玉 野Ｆ１ 7/14 予 選 ５着 11.4 7/15 選 抜 １着 11.1 7/16 特 選 ４着 11.2",
+    "chaku": [
+     1,
+     3,
+     3,
+     16
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "佐々木堅次",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ３着 11.4",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ３着 11.1 7/23 準決勝 ２着 11 7/24 決 勝 ７着 13.6",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ８着 9.7 7/11 選 抜 ３着 9.9 7/12 特 選 ５着 9.7",
+    "chaku": [
+     4,
+     2,
+     2,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "佐伯 翔",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ２着 11.7",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ６着 9.5 7/23 特 選 ５着 9.6 7/24 特 選 ６着 9.4",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 ４着 11.5 7/14 一 般 ４着 11.7 7/15 一 般 ５着 11.4",
+    "chaku": [
+     0,
+     0,
+     1,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "鈴木 浩太",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.6",
+    "prev1": "静 岡Ｆ１ 7/18 予 選 ７着 12.4 7/19 一 般 ３着 12.4 7/20 一 般 １着 12.2",
+    "prev2": "大 宮Ｆ１ 7/ 1 予 選 １着 14",
+    "chaku": [
+     6,
+     1,
+     1,
+     11
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    3
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    7,
+    2,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   4,
+   6,
+   5,
+   2,
+   3,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "地元３人が力を合わせて別線撃破。本命は先頭の酒井で佐々木堅が番手で好援護。鈴木を利す佐々木眞の台頭も。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}

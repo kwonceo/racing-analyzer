@@ -1,0 +1,333 @@
+{
+ "predicted_top3": [
+  5,
+  1,
+  4
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 5번이 강력한 가운데, 추입형 1번이 추격, 젖히기형 4번이 변수",
+ "key_factors": [
+  "5번의 강력한 선행력과 최근 우수한 성적",
+  "1번의 꾸준한 추입 능력",
+  "4번 篠田 幸希 선수의 젖히기 각질과 최근 낙차 후 회복 여부"
+ ],
+ "exception_note": "5번 小堀 敢太 선수의 연이은 좋은 내용과 강력한 선행 선언, 그리고 1번 大森 慶一 선수의 꾸준한 추입 능력이 돋보인다. 특히 '아쉽게 3착으로 결승을 놓쳤으나 연일 내용은 진하다'는 총평에서 5번의 잠재력을 높게 평가하고 있으며, 1번의 추격을 뿌리쳤다는 언급에서 5-1 라인의 견고함을 엿볼 수 있다. 4번은 젖히기형으로 최근 낙차 이력이 있으나 총평에서 '호위에서 발진하면 일발 매력 있음'으로 언급되어 변수로 작용할 수 있다.",
+ "applied_rules": [],
+ "raceKey": "야히코 9경주",
+ "forecastAt": "2026-08-01 19:02:40",
+ "forecastEpoch": 1785578560.6527746,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 9경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 3.6,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 27.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T18:50:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "大森 慶一",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "recent": "7/30 予 選 ２着 11.4 7/31 準決勝 ４着 10.9",
+    "prev1": "前 橋Ｇ３ 7/10 予 選 ３着 9.5 7/11 準決勝 ６着 9.8 7/12 特 秀 ３着 9.4",
+    "prev2": "小 倉Ｆ１ 6/26 初特選 １着 11.3 6/27 準決勝 ５着 10.9 6/28 特 選 ２着 11.4",
+    "chaku": [
+     5,
+     3,
+     7,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "小堀 敢太",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 １着 11.6 7/31 準決勝 ３着 11.9",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ３着 10 7/23 準決勝 １着 9.6 7/24 決 勝 ９着 10.3",
+    "prev2": "伊 東Ｆ１ 6/13 予 選 １着 10.2 6/14 準決勝 １着 9.6 6/15 決 勝 １着 9.7",
+    "chaku": [
+     6,
+     1,
+     3,
+     7
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "篠田 幸希",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 １着 11.2 7/31 準決勝 ６着 11.6",
+    "prev1": "高 知Ｇ２ 7/17 一予選 ３着 14.6 7/18 二予Ｂ 落",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 １着 9.3 7/11 準決勝 ８着 9.6 7/12 特 選 １着 9.4",
+    "chaku": [
+     6,
+     7,
+     3,
+     10
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "伊代野貴照",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ２着 11.3 7/31 準決勝 ５着 11.1",
+    "prev1": "奈 良Ｆ１ 7/25 予 選 ３着 9.3 7/26 準決勝 ４着 9.6 7/27 特 選 ２着 9.3",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ４着 11.9 7/ 9 選 抜 ７着 10.9 7/10 一 般 ２着 11.9",
+    "chaku": [
+     1,
+     4,
+     4,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "栗山 俊介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ５着 11.6 7/31 選 抜 ２着 11.1",
+    "prev1": "函 館Ｆ１ 7/14 予 選 ４着 11.6 7/15 準決勝 ６着 11.8 7/16 特 選 ３着 11.5",
+    "prev2": "高 知Ｆ１ 6/29 予 選 ３着 14.2 6/30 準決勝 ６着 14.3 7/ 1 特 選 ７着 15.9",
+    "chaku": [
+     2,
+     1,
+     7,
+     16
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "志村 太賀",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ２着 11.4 7/31 準決勝 ７着 11.3",
+    "prev1": "松 阪Ｆ１ 7/16 初特選 ２着 11.4 7/17 準決勝 ６着 11.3 7/18 特 選 ４着 11.3",
+    "prev2": "豊 橋Ｆ１ 7/ 5 予 選 ５着 11.2 7/ 6 一 般 ２着 11.7 7/ 7 特 選 ３着 11.2",
+    "chaku": [
+     1,
+     5,
+     4,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "牧田 悠生",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 ４着 11.4 7/31 選 抜 ２着 10.9",
+    "prev1": "松 阪Ｆ１ 7/16 予 選 ４着 11.4 7/17 選 抜 １着 11.9 7/18 特 選 ４着 11.6",
+    "prev2": "和歌山Ｆ１ 6/23 予 選 ７着 11.8",
+    "chaku": [
+     6,
+     2,
+     1,
+     18
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    5
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    1,
+    3,
+    7,
+    2
+   ]
+  },
+  "lines": [
+   5,
+   1,
+   4,
+   2,
+   7,
+   3,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "惜しくも３着で決勝を逃した小堀だが、連日の内容は濃い。初日同様に大森の追撃を振り切ってワンツー決着。好位から仕掛けられれば、篠田も一発の魅力あり。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   1,
+   6
+  ],
+  "hit_count": 2,
+  "hit": [
+   5,
+   1
+  ],
+  "missed": [
+   6
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   5,
+   4
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 19:30:04"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번 牧田 悠生 선수는 젖히기형으로 최근 선발전에서 2착을 기록하는 등 좋은 컨디션을 보였으나, 예측 시 '라인' 및 '총평'에서 5,1,4번에 집중하여 6번의 잠재력을 간과했다. 특히 4번과의 직접 비교를 통해 6번의 상승세를 놓쳤다.",
+  "new_rule": "젖히기형 선수의 최근 선발전 성적과 직전 경주 내용을 주의 깊게 분석하여, 라인 상의 이점을 가진 선수와의 비교 우위를 판단한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 19:30:06"
+ },
+ "reviewed": true
+}

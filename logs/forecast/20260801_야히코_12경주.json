@@ -1,0 +1,290 @@
+{
+ "predicted_top3": [
+  4,
+  1,
+  5
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  4
+ ],
+ "confidence": 4,
+ "reason_short": "森田-坂井 라인의 강력한 연계와 淺井康太의 추입 능력, 그리고 선행형 간의 경쟁으로 인한 혼전 예상",
+ "key_factors": [
+  "森田(1)와 坂井(4)의 강력한 라인 연계",
+  "淺井康太(5)의 뛰어난 추입 타이밍",
+  "도주/선행형이 3명(1, 2, 6)으로 선행 경쟁 가능성",
+  "解說 코멘트의 森田-坂井 라인 강조"
+ ],
+ "exception_note": "경기 해설에서 森田(1)와 坂井(4)의 라인 연계가 강력하다고 언급하며, 森田가 주도권을 잡으면 坂井의 우승 가능성이 높다고 지목했다. 또한 浅井(5)의 추입 기회를 언급하여 이들 셋의 우세를 시사한다. 선행형이 3명(1,2,6)으로 선행 경쟁이 발생할 가능성도 예외적인 요소이다.",
+ "applied_rules": [],
+ "raceKey": "야히코 12경주",
+ "forecastAt": "2026-08-01 20:20:18",
+ "forecastEpoch": 1785583218.9991221,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 12경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 2.4,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 27.2,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T20:00:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "浅井 康太",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 ３着 11.5 7/31 準決勝 １着 11.6",
+    "prev1": "高 知Ｇ２ 7/17 一予選 ３着 14.3 7/18 二予Ｂ ６着 14 7/19 特 選 ４着 13.5 7/20 特 選 ５着 13.7",
+    "prev2": "豊 橋Ｆ１ 7/ 5 初特選 １着 11.3 7/ 6 準決勝 ４着 11.9 7/ 7 特 選 ６着 12",
+    "chaku": [
+     8,
+     1,
+     8,
+     16
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "坂井 洋",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 １着 11.3 7/31 準決勝 ２着 11.2",
+    "prev1": "高 知Ｇ２ 7/17 特選予 ５着 13.7 7/18 二予Ａ ２着 13.7 7/19 準決勝 ２着 13.5 7/20 決 勝 ６着 13.5",
+    "prev2": "小松島Ｇ３ 7/ 2 初特選 ６着 11.3 7/ 3 二予選 １着 11.3 7/ 4 準決勝 ４着 11.1 7/ 5 特 秀 １着 11.2",
+    "chaku": [
+     11,
+     5,
+     5,
+     14
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "森田 優弥",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 １着 11.2 7/31 準決勝 ２着 11.3",
+    "prev1": "高 知Ｇ２ 7/17 一予選 １着 14 7/18 二予Ａ ４着 13.7 7/19 準決勝 ４着 14.1 7/20 特 選 ６着 14.5",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 １着 11.5 7/ 9 準決勝 １着 11.3 7/10 決 勝 ３着 11.9",
+    "chaku": [
+     9,
+     2,
+     5,
+     11
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "佐藤 礼文",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 ５着 11.3 7/31 準決勝 ３着 11.3",
+    "prev1": "大 垣Ｆ１ 7/ 8 初特選 １着 11.1 7/ 9 準決勝 ２着 11.3 7/10 決 勝 ７着 11.9",
+    "prev2": "取 手Ｇ３ 6/27 一予選 １着 11.7 6/28 二予選 ８着 11.1 6/29 選 抜 １着 11.4 6/30 特 選 １着 11.7",
+    "chaku": [
+     7,
+     2,
+     0,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "志智 俊夫",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/30 初特選 ４着 11.4 7/31 準決勝 ２着 11.6",
+    "prev1": "富 山Ｆ１ 7/21 初特選 １着 9.6 7/22 準決勝 １着 9.7 7/23 決 勝 ５着 10.1",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 １着 10 7/11 準決勝 ４着 9.8 7/12 特 秀 ９着 9.1",
+    "chaku": [
+     6,
+     7,
+     2,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "青野 将大",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 ２着 11.6 7/31 準決勝 １着 10.9",
+    "prev1": "高 知Ｇ２ 7/17 一予選 ５着 13.9 7/18 選 抜 ６着 14.4 7/19 一 般 １着 13.5 7/20 選 抜 ８着 14.4",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ４着 12.3 7/ 3 二予選 ９着 12.3 7/ 4 選 抜 １着 11.8 7/ 5 特 選 １着 11.6",
+    "chaku": [
+     5,
+     4,
+     1,
+     14
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "大石 剣士",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 １着 11.6 7/31 準決勝 １着 11.5",
+    "prev1": "大 垣Ｆ１ 7/ 8 予 選 ２着 11.6 7/ 9 準決勝 ６着 12.4 7/10 特 選 １着 11.8",
+    "prev2": "小 倉Ｆ１ 6/26 予 選 ３着 11 6/27 準決勝 ４着 10.9 6/28 特 選 ５着 11.2",
+    "chaku": [
+     7,
+     9,
+     3,
+     7
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    2
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    5,
+    7,
+    3
+   ]
+  },
+  "lines": [
+   1,
+   4,
+   7,
+   5,
+   3,
+   6,
+   2
+  ],
+  "paceLabel": null,
+  "comment": "森田―坂井のタッグは強力。車番的にも有利に運べるし、森田が最終主導権を確保すれば番手の坂井のＶ機だ。南関勢が関東勢に真っ向勝負を挑むと、浅井の出番。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}

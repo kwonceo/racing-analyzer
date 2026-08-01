@@ -1,0 +1,340 @@
+{
+ "predicted_top3": [
+  2,
+  1,
+  4
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "대부분 선행형으로 초반 주도권 다툼 치열, 2번의 최근 압도적인 역량으로 우승 예상.",
+ "key_factors": [
+  "선행형 다수",
+  "2번의 압도적 최근 성적",
+  "라인 불균형"
+ ],
+ "exception_note": "이 경주는 7명 중 3명이 선행형이고 2명이 젖히기형, 2명이 추입형으로, 선행 및 젖히기 각질의 비중이 높아 초반부터 강한 흐름이 예상된다. 특히 2번 大塚 城은 최근 연속 1착을 기록하며 강력한 모습을 보였고, '준결의 강렬한 6번수 마크'라는 코멘트가 있어 현재 기량이 매우 뛰어나다. 선행 주도권 다툼에서 우위를 점하고 버텨낼 가능성이 높다. 1번 上川 直紀는 젖히기형으로 2번의 뒤를 이어 추격할 것이며, 4번 近谷 涼은 단기적으로도 호조를 보이고 있어 혼전 속에서도 자리를 지킬 수 있을 것이다.",
+ "applied_rules": [],
+ "raceKey": "야히코 11경주",
+ "forecastAt": "2026-08-01 19:54:25",
+ "forecastEpoch": 1785581665.6249743,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "야히코 11경주",
+  "wind": {
+   "venue": "야히코",
+   "풍속": 2.8,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 27.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T19:40:00+09:00",
+   "지점": "寺泊",
+   "지점거리km": 9.22
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 7,
+    "name": "野中 祐志",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 ４着 11.2 7/31 準決勝 ２着 11.6",
+    "prev1": "岐 阜Ｆ２ 7/18 初特選 ７着 11.2 7/19 準決勝 ４着 11.9 7/20 特 選 ２着 12",
+    "prev2": "伊 東Ｆ１ 5/11 予 選 ７着 10.6 5/12 一 般 ４着 9.9 5/13 一 般 ６着 9.9",
+    "chaku": [
+     0,
+     2,
+     3,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "丸山 貴秀",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 ７着 11.2 7/31 準決勝 ３着 11.7",
+    "prev1": "小田原Ｆ２ 7/23 初特選 ２着 9.9 7/24 準決勝 ２着 9.8 7/25 決 勝 ２着 10.1",
+    "prev2": "取 手Ｇ３ 6/27 一予選 ８着 11.8 6/28 選 抜 ６着 11.7 6/29 一 般 ３着 11.7 6/30 選 抜 ６着 12",
+    "chaku": [
+     1,
+     5,
+     8,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "近谷 涼",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 １着 11 7/31 準決勝 １着 11.5",
+    "prev1": "豊 橋Ｆ１ 7/ 5 初特選 ３着 11.8 7/ 6 準決勝 １着 11.8 7/ 7 決 勝 １着 11.6",
+    "prev2": "富 山Ｆ１ 6/25 初特選 ７着 10.4 6/26 準決勝 １着 10.3 6/27 決 勝 ２着 10.3",
+    "chaku": [
+     3,
+     4,
+     2,
+     3
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "上川 直紀",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 ２着 11.3 7/31 準決勝 ２着 11.3",
+    "prev1": "西武園Ｆ２ 7/16 初特選 ５着 11.6 7/17 準決勝 ６着 12 7/18 特 選 ４着 11.9",
+    "prev2": "久留米Ｆ２ 7/ 7 初特選 ７着 14 7/ 8 準決勝 ４着 11 7/ 9 特 選 ２着 11.6",
+    "chaku": [
+     3,
+     4,
+     4,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "磯島 康祐",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "7/30 初特選 ３着 11.3 7/31 準決勝 ２着 11.8",
+    "prev1": "玉 野Ｆ１ 7/22 初特選 ５着 11.3 7/23 準決勝 ４着 11.9 7/24 特 選 ２着 11.7",
+    "prev2": "小田原Ｆ２ 7/10 初特選 ５着 10.3 7/11 準決勝 １着 9.7 7/12 決 勝 ３着 10.1",
+    "chaku": [
+     7,
+     4,
+     4,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "大塚 城",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 予 選 １着 12 7/31 準決勝 １着 11.1",
+    "prev1": "岐 阜Ｆ２ 7/18 特予選 ２着 11.4 7/19 準決勝 １着 11.6 7/20 決 勝 ６着 12.4",
+    "prev2": "京王閣Ｆ１ 6/17 予 選 欠",
+    "chaku": [
+     10,
+     3,
+     3,
+     5
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "伊原 克彦",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/30 初特選 ５着 11.1 7/31 準決勝 １着 11.5",
+    "prev1": "玉 野Ｆ２ 7/ 7 予 選 ２着 11.3 7/ 8 準決勝 ４着 11.5 7/ 9 特 選 １着 11.4",
+    "prev2": "熊 本Ｆ２ 6/18 予 選 ２着 11.2 6/19 準決勝 ４着 11.6 6/20 特 選 １着 11.4",
+    "chaku": [
+     7,
+     6,
+     2,
+     12
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    4,
+    3,
+    2
+   ],
+   "closeCount": 2,
+   "closeHorses": [
+    7,
+    5
+   ]
+  },
+  "lines": [
+   2,
+   1,
+   7,
+   3,
+   5,
+   4,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "準決の強烈な６番手まくりを見れば、脚的には大塚は抜けた存在。押し切りに期待したが、まともに逃げると上川の差し切りも。単騎近谷も好調だし、磯島も圏内。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   7,
+   6
+  ],
+  "hit_count": 1,
+  "hit": [
+   4
+  ],
+  "missed": [
+   7,
+   6
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 6,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   4,
+   2
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 20:30:07"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 대쓰까 조의 압도적인 최근 성적에 과도하게 의존하여 7번 노나카 유시와 6번 이하라 가쓰히코의 추입/젖히기 잠재력을 간과했다. 특히 7번과 6번이 A, B등급에서 꾸준히 좋은 모습을 보였음에도, 예측 시점에서 이들의 각질이 선행 우세 흐름 속에서 불리할 것이라 판단하여 배제했다.",
+  "new_rule": "선행형이 다수라도, 추입/젖히기형 중 최근 꾸준한 성적을 보이는 A/B 등급의 마필은 후반 역전 가능성을 항상 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 20:30:09"
+ },
+ "reviewed": true
+}

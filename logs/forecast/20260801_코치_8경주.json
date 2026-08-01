@@ -1,0 +1,427 @@
+{
+ "predicted_top3": [
+  11,
+  3,
+  12
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  11
+ ],
+ "confidence": 4,
+ "reason_short": "선행마 다수 속 강력한 11번의 우세와 추격마 3, 12번의 추입 경쟁.",
+ "key_factors": [
+  "선행형 11번 마쿠피의 압도적인 최근 성적 (5연승)",
+  "경주 내 다수의 선행형 각질 (6마리)로 인한 초반 페이스 상승 가능성",
+  "추격형 3번 미키아일과 12번 아일하브어나더 모두 상위권 전적과 A등급으로 추입력 기대",
+  "기수 승률이 높은 4번 다이와메이저의 잠재력"
+ ],
+ "exception_note": "6마리의 선행형 각질이 포진하여 초반 전개가 매우 빠를 것으로 예상되며, 이로 인해 선행마 간의 경쟁 심화 및 후반 추입마들의 기회가 증대될 수 있다. 특히 11번 마쿠피가 압도적인 선행력으로 버텨낼지, 아니면 과도한 선행 경쟁에 휘말릴지가 관건. 풍속은 약하여 전개에 큰 영향은 없을 것으로 판단된다. 13번 메모리캐치와 10번 킹맨은 데이터 부족 및 낮은 등급으로 배제.",
+ "applied_rules": [],
+ "raceKey": "코치 8경주",
+ "forecastAt": "2026-08-01 19:05:41",
+ "forecastEpoch": 1785578741.3825972,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "코치 8경주",
+  "wind": {
+   "venue": "코치",
+   "풍속": 1.6,
+   "풍향": "남동",
+   "풍향코드": 6,
+   "기온": 29.0,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T18:50:00+09:00",
+   "지점": "南国日章",
+   "지점거리km": 5.26
+  },
+  "fieldSize": 13,
+  "distance": 1300,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 3,
+    "name": "ミッキーアイル",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     1,
+     4,
+     2,
+     1
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "赤岡修",
+    "jockeyRate": 63.3,
+    "distApt": "A"
+   },
+   {
+    "no": 11,
+    "name": "マクフィ",
+    "gait": "선행형",
+    "recentPlacings": [
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "多田誠",
+    "jockeyRate": 46.7
+   },
+   {
+    "no": 12,
+    "name": "アイルハヴアナザー",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     6,
+     1,
+     2,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "永森大",
+    "jockeyRate": 53.3,
+    "distApt": "A"
+   },
+   {
+    "no": 4,
+    "name": "ダイワメジャー",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     1,
+     3,
+     1,
+     6
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "宮川実",
+    "jockeyRate": 76.7,
+    "distApt": "A"
+   },
+   {
+    "no": 5,
+    "name": "サウスヴィグラス",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     7,
+     1,
+     6,
+     10
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "濱尚美",
+    "jockeyRate": 20.0,
+    "distApt": "B"
+   },
+   {
+    "no": 8,
+    "name": "サンダースノー",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     8,
+     14,
+     13,
+     13
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "山崎雅",
+    "jockeyRate": 16.7,
+    "distApt": "B"
+   },
+   {
+    "no": 7,
+    "name": "エイシンヒカリ",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     2,
+     4,
+     7,
+     4
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "岡遼太",
+    "jockeyRate": 26.7
+   },
+   {
+    "no": 6,
+    "name": "スズカコーズウェイ",
+    "gait": "추격형",
+    "recentPlacings": [
+     3,
+     8,
+     8,
+     5,
+     3
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "岡村卓",
+    "jockeyRate": 26.7,
+    "distApt": "B"
+   },
+   {
+    "no": 1,
+    "name": "アドマイヤマックス",
+    "gait": "평지형",
+    "recentPlacings": [
+     5,
+     1,
+     5,
+     1,
+     5
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "城野慈",
+    "jockeyRate": 46.7,
+    "distApt": "B"
+   },
+   {
+    "no": 9,
+    "name": "ディスクリートキャット",
+    "gait": "선행형",
+    "recentPlacings": [
+     7,
+     4,
+     8,
+     1,
+     10
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 52.0,
+    "jockey": "西優哉",
+    "jockeyRate": 22.2,
+    "distApt": "B"
+   },
+   {
+    "no": 10,
+    "name": "Ｋｉｎｇｍａｎ",
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     6,
+     11,
+     9,
+     8
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 10.0,
+    "jockey": "Ｋｉｎｇｍａｎ",
+    "distApt": "C"
+   },
+   {
+    "no": 2,
+    "name": "ワンダーアキュート",
+    "gait": "선행형",
+    "recentPlacings": [
+     10,
+     3,
+     10,
+     11,
+     6
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "大澤誠",
+    "jockeyRate": 3.3,
+    "distApt": "B"
+   },
+   {
+    "no": 13,
+    "name": "メモリーキャッチ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   }
+  ],
+  "composition": {
+   "leadCount": 6,
+   "leadHorses": [
+    11,
+    5,
+    8,
+    7,
+    9,
+    2
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 92.3
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 92.3
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 84.6
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 76.9
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   3,
+   12,
+   7
+  ],
+  "hit_count": 2,
+  "hit": [
+   3,
+   12
+  ],
+  "missed": [
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     2,
+     4,
+     7,
+     4
+    ],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   11,
+   3,
+   12
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "win",
+  "gradedAt": "2026-08-01 19:29:54"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "선행마 11번 마쿠피의 연승 기록에 과도하게 집중하여, 다른 선행마 7번 에이신히카리의 꾸준한 상위권 성적(B등급, 최근 5경기 중 4위 이내 4번)을 간과했다. 빠른 전개 예상에도 불구하고, 7번은 선행마 그룹 내에서 안정적으로 상위권을 유지할 수 있는 능력이 있었다.",
+  "new_rule": "등급 B 이상의 선행마 중, 최근 성적이 꾸준히 상위권이고 부담 중량이 적당하다면, 빠른 페이스 예상 시에도 선두권 경쟁에서 버텨낼 가능성을 높게 평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 19:29:56"
+ },
+ "reviewed": true
+}
