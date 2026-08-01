@@ -7260,3 +7260,500 @@ UnicodeDecodeError: 'cp949' codec can't decode byte 0xec in position 25: illegal
 127.0.0.1 - - [01/Aug/2026 16:40:54] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
 127.0.0.1 - - [01/Aug/2026 16:40:58] "POST /api/current_race HTTP/1.1" 200 -
 127.0.0.1 - - [01/Aug/2026 16:40:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:08] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:09] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:09] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:18] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:24] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:24] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:28] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:28] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:38] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:38] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:38] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:46] "GET /api/results/auto-status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:46] "GET /api/auto-prediction/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:46] "GET /api/kra/status?raceKey=부산%203경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:46] "POST /api/odds/anomaly-feed HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:46] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:46] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:46] "POST /api/keiba/current HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:47] "POST /api/keiba/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:47] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:47] "GET /api/race-results/missing HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:48] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:48] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:54] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:41:54] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\tools\\health_check.py', reloading
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:42:00] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:00] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:08] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:08] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\tools\\health_check.py', reloading
+Exception in thread Thread-4 (serve_forever):
+Traceback (most recent call last):
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\werkzeug\serving.py", line 820, in serve_forever
+    super().serve_forever(poll_interval=poll_interval)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\socketserver.py", line 235, in serve_forever
+    ready = selector.select(poll_interval)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\selectors.py", line 323, in select
+    r, w, _ = self._select(self._readers, self._writers, [], timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\selectors.py", line 314, in _select
+    r, w, x = select.select(r, w, w, timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10038] 소켓 이외의 개체에 작업을 시도했습니다
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:42:18] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:18] "POST /api/odds/triple/analyze HTTP/1.1" 404 -
+127.0.0.1 - - [01/Aug/2026 16:42:18] "POST /api/odds/triple/analyze HTTP/1.1" 404 -
+127.0.0.1 - - [01/Aug/2026 16:42:19] "GET /api/multi/schedule HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:21] "GET /api/multi/schedule HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:28] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:28] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:33] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:33] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:38] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:38] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:46] "GET /api/results/auto-status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:46] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:46] "GET /api/auto-prediction/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:46] "GET /api/kra/status?raceKey=부산%203경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:46] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:47] "POST /api/keiba/current HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:47] "GET /api/race-results/missing HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:48] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:48] "POST /api/keiba/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:48] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:48] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:49] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:58] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:42:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:04] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:04] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:08] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:08] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:18] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\tests\\run_selfcheck.py', reloading
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\tests\\run_precommit.py', reloading
+Exception in thread Thread-4 (serve_forever):
+Traceback (most recent call last):
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\werkzeug\serving.py", line 820, in serve_forever
+    super().serve_forever(poll_interval=poll_interval)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\socketserver.py", line 235, in serve_forever
+    ready = selector.select(poll_interval)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\selectors.py", line 323, in select
+    r, w, _ = self._select(self._readers, self._writers, [], timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\selectors.py", line 314, in _select
+    r, w, x = select.select(r, w, w, timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10038] 소켓 이외의 개체에 작업을 시도했습니다
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:43:30] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:31] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\app.py', reloading
+Exception in thread Thread-4 (serve_forever):
+Traceback (most recent call last):
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\werkzeug\serving.py", line 820, in serve_forever
+    super().serve_forever(poll_interval=poll_interval)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\socketserver.py", line 235, in serve_forever
+    ready = selector.select(poll_interval)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\selectors.py", line 323, in select
+    r, w, _ = self._select(self._readers, self._writers, [], timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\selectors.py", line 314, in _select
+    r, w, x = select.select(r, w, w, timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10038] 소켓 이외의 개체에 작업을 시도했습니다
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:43:38] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:38] "POST /api/odds/triple/analyze HTTP/1.1" 404 -
+127.0.0.1 - - [01/Aug/2026 16:43:38] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:39] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "GET /api/health HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "POST /api/score HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "POST /api/score/form HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "POST /api/odds/snapshot HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "POST /api/odds/race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "POST /api/odds/compute HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "POST /api/odds/undo HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "POST /api/odds/clear HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "POST /api/analyze/combined HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "OPTIONS /api/extract/jockey HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "OPTIONS /api/extract/race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "OPTIONS /api/extract/training HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "OPTIONS /api/extract/results HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:41] "OPTIONS /api/detect HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:42] "OPTIONS /api/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:42] "OPTIONS /api/analyze/japan HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:42] "OPTIONS /api/analyze/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:42] "POST /api/score HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:42] "POST /api/odds/clear HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:42] "POST /api/odds/snapshot HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:42] "POST /api/odds/snapshot HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:42] "POST /api/odds/compute HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:42] "POST /api/analyze/combined HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:42] "POST /api/odds/clear HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:46] "GET /api/results/auto-status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:46] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:46] "GET /api/auto-prediction/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:46] "GET /api/kra/status?raceKey=부산%203경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:46] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:46] "POST /api/keiba/current HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:47] "POST /api/keiba/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:47] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:47] "GET /api/race-results/missing HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:48] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:48] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:48] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:58] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:43:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:04] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:04] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:08] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:08] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:18] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:28] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:28] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:28] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\app.py', reloading
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:44:38] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:38] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:39] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:39] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "GET /api/results/auto-status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "GET /api/auto-prediction/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "POST /api/odds/anomaly-feed HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "GET /api/kra/status?raceKey=부산%203경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "POST /api/keiba/current HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "POST /api/score HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "POST /api/kra/unwatch HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:46] "GET /api/kra/status?raceKey=부산%205경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:47] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:47] "POST /api/kra/watch HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:47] "POST /api/keiba/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:47] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:48] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:48] "GET /api/race-results/missing HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:48] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:52] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:52] "POST /api/odds/triple/analyze HTTP/1.1" 404 -
+127.0.0.1 - - [01/Aug/2026 16:44:52] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:53] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:58] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:44:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:02] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:03] "POST /api/extract/japan HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:03] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:04] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:04] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:04] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:04] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:08] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:08] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:11] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:12] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:17] "GET /api/kra/status?raceKey=부산%205경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:17] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:18] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:19] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:21] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:22] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:28] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:28] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:38] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:38] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:46] "GET /api/results/auto-status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:46] "GET /api/auto-prediction/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:46] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:46] "POST /api/keiba/current HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:47] "GET /api/kra/status?raceKey=부산%205경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:47] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:47] "POST /api/keiba/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:47] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:48] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:49] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:49] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:49] "GET /api/race-results/missing HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:58] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:45:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:04] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:04] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:08] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:08] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:17] "GET /api/kra/status?raceKey=부산%205경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:17] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:18] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\tools\\track_key.py', reloading
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:46:28] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:28] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:34] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:34] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:38] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:38] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:46] "GET /api/results/auto-status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:46] "GET /api/auto-prediction/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:46] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:47] "POST /api/keiba/current HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:47] "GET /api/race-results/missing HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:47] "GET /api/kra/status?raceKey=부산%205경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:47] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:48] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:48] "POST /api/odds/triple/analyze HTTP/1.1" 404 -
+127.0.0.1 - - [01/Aug/2026 16:46:48] "POST /api/keiba/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:48] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:58] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:46:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:08] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:08] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:14] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:14] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:17] "GET /api/kra/status?raceKey=부산%205경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:17] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:18] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:28] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:29] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:29] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:38] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:38] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\tests\\run_track_key.py', reloading
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:47:46] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:46] "GET /api/results/auto-status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:46] "GET /api/auto-prediction/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:46] "POST /api/odds/anomaly-feed HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:46] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:47] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:47] "GET /api/kra/status?raceKey=부산%205경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:47] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:48] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:49] "POST /api/keiba/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:49] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:49] "GET /api/odds/triple/latest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:49] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:49] "POST /api/keiba/current HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:49] "GET /api/race-results/missing HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\tests\\run_track_key.py', reloading
+Exception in thread Thread-4 (serve_forever):
+Traceback (most recent call last):
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\werkzeug\serving.py", line 820, in serve_forever
+    super().serve_forever(poll_interval=poll_interval)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\socketserver.py", line 235, in serve_forever
+    ready = selector.select(poll_interval)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\selectors.py", line 323, in select
+    r, w, _ = self._select(self._readers, self._writers, [], timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\selectors.py", line 314, in _select
+    r, w, x = select.select(r, w, w, timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10038] 소켓 이외의 개체에 작업을 시도했습니다
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:47:58] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:47:59] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:08] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:08] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:14] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:14] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:18] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\tests\\run_track_key.py', reloading
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:48:28] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:29] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:29] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:38] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:38] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:44] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:44] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\tools\\track_key.py', reloading
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:48:48] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:48] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:48] "GET /api/results/auto-status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:48] "GET /api/auto-prediction/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:48] "GET /api/kra/status?raceKey=부산%205경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:48] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:48] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:48] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:49] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:50] "POST /api/keiba/current HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:51] "POST /api/keiba/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:51] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:51] "GET /api/race-results/missing HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:58] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:48:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:08] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:08] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:13] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:14] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:18] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Administrator\\Desktop\\경마분석서버\\tests\\run_track_key.py', reloading
+ * Restarting with stat
+ * Tip: There are .env files present. Install python-dotenv to use them.
+ * Debugger is active!
+ * Debugger PIN: 126-950-083
+127.0.0.1 - - [01/Aug/2026 16:49:28] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:29] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:29] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:38] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:38] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:44] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:44] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:46] "GET /api/auto/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:46] "POST /api/odds/triple/match HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:46] "GET /api/auto-prediction/status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:46] "GET /api/results/auto-status HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:46] "GET /api/kra/status?raceKey=부산%205경주%201400M HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:46] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:47] "POST /api/keiba/current HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:47] "GET /api/race-results/missing HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:48] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:48] "POST /api/keiba/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:48] "GET /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:48] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:58] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:49:58] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:08] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:08] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:14] "POST /api/odds/triple/ingest HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:14] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "GET /api/health HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/score HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/score/form HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/odds/snapshot HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/odds/race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/odds/compute HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/odds/undo HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/odds/clear HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/analyze/combined HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "OPTIONS /api/extract/jockey HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "OPTIONS /api/extract/race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "OPTIONS /api/extract/training HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "OPTIONS /api/extract/results HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "OPTIONS /api/detect HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "OPTIONS /api/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "OPTIONS /api/analyze/japan HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "OPTIONS /api/analyze/odds HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/score HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/odds/clear HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/odds/snapshot HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/odds/snapshot HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:15] "POST /api/odds/compute HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:16] "POST /api/analyze/combined HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:16] "POST /api/odds/clear HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:18] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:18] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+Exception in thread Thread-32 (_readerthread):
+Exception in thread Thread-31 (_readerthread):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+    self.run()
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in _readerthread
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+                  ^^^^^^^^^
+UnicodeDecodeError: 'cp949' codec can't decode byte 0xec in position 25: illegal multibyte sequence
+UnicodeDecodeError: 'cp949' codec can't decode byte 0xe2 in position 0: illegal multibyte sequence
+127.0.0.1 - - [01/Aug/2026 16:50:28] "POST /api/current_race HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:28] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:28] "POST /api/odds/triple/analyze HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 16:50:38] "POST /api/current_race HTTP/1.1" 200 -

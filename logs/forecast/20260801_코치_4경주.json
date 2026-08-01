@@ -1,0 +1,338 @@
+{
+ "predicted_top3": [
+  10,
+  7,
+  9
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 다수 포진, 추격마 중 상위 그레이드와 높은 기수 승률의 마필 유리.",
+ "key_factors": [
+  "선행형 마필 다수로 인한 선두권 혼전",
+  "추격형 마필의 기수 승률 우수",
+  "重 주로의 영향"
+ ],
+ "exception_note": "총 11두 중 5두가 선행형 마필로, 초반부터 선두권 경쟁이 치열할 가능성이 높다. 이로 인해 선행형 마필들이 서로를 견제하며 페이스를 무리하게 끌어올릴 수 있어, 후반에 힘이 빠질 수 있다. 반면, 추격형 마필들은 이러한 선두권 혼전을 이용해 막판 스퍼트를 노릴 수 있는 이점이 있다. 특히 10번 인디차프와 7번 탈리스마닉은 추격형이며 각각 60%, 24%의 높은 기수 승률을 기록하고 있어 유리하다. 9번 헨리바로우즈는 선행형임에도 불구하고 가장 좋은 최근 성적(5,4,3,6,3)을 보이며 버틸 가능성이 있다. 重 주로에서 선행형이 유리할 수 있으나, 선행마들의 과도한 경쟁으로 그 이점이 상쇄될 수 있다.",
+ "applied_rules": [],
+ "raceKey": "코치 4경주",
+ "forecastAt": "2026-08-01 16:55:39",
+ "forecastEpoch": 1785570939.0844195,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "코치 4경주",
+  "wind": {
+   "venue": "코치",
+   "풍속": 2.0,
+   "풍향": "남남동",
+   "풍향코드": 7,
+   "기온": 30.7,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T16:40:00+09:00",
+   "지점": "南国日章",
+   "지점거리km": 5.26
+  },
+  "fieldSize": 11,
+  "distance": 1300,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 7,
+    "name": "タリスマニック",
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     1,
+     2,
+     7,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "井上瑛",
+    "jockeyRate": 24.0,
+    "distApt": "A"
+   },
+   {
+    "no": 10,
+    "name": "インディチャンプ",
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     3,
+     7,
+     4,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "宮川実",
+    "jockeyRate": 60.0,
+    "distApt": "A"
+   },
+   {
+    "no": 9,
+    "name": "ヘンリーバローズ",
+    "gait": "선행형",
+    "recentPlacings": [
+     5,
+     4,
+     3,
+     6,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "岡村卓",
+    "jockeyRate": 36.7,
+    "distApt": "A"
+   },
+   {
+    "no": 4,
+    "name": "モーニン",
+    "gait": "추격형",
+    "recentPlacings": [
+     3,
+     11,
+     3,
+     2,
+     2
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "木村直",
+    "jockeyRate": 23.3,
+    "distApt": "A"
+   },
+   {
+    "no": 1,
+    "name": "ベストウォーリア",
+    "gait": "선행형",
+    "recentPlacings": [
+     1,
+     6,
+     4,
+     6,
+     5
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "城野慈",
+    "jockeyRate": 50.0,
+    "distApt": "C"
+   },
+   {
+    "no": 8,
+    "name": "エポカドーロ",
+    "gait": "선행형",
+    "recentPlacings": [
+     6,
+     6,
+     1,
+     1,
+     3
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "多田誠",
+    "jockeyRate": 46.7,
+    "distApt": "A"
+   },
+   {
+    "no": 5,
+    "name": "ベストウォーリア",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     11,
+     7,
+     5,
+     10
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "永森大",
+    "jockeyRate": 60.0,
+    "distApt": "C"
+   },
+   {
+    "no": 2,
+    "name": "エイシンフラッシュ",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     8,
+     5,
+     2,
+     2
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "畑中信",
+    "jockeyRate": 16.7,
+    "distApt": "A"
+   },
+   {
+    "no": 3,
+    "name": "マテラスカイ",
+    "gait": "추격형",
+    "recentPlacings": [
+     3,
+     11,
+     10,
+     5,
+     11
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "西優哉",
+    "jockeyRate": 25.0
+   },
+   {
+    "no": 6,
+    "name": "カリフォルニアクローム",
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     5,
+     7,
+     8,
+     9
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "郷間勇",
+    "jockeyRate": 33.3,
+    "distApt": "C"
+   },
+   {
+    "no": 11,
+    "name": "メモリーキャッチ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   }
+  ],
+  "composition": {
+   "leadCount": 5,
+   "leadHorses": [
+    9,
+    1,
+    8,
+    5,
+    6
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 90.9
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 90.9
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 90.9
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 81.8
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ }
+}
