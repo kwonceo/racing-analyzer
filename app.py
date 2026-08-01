@@ -27567,7 +27567,22 @@ def _jra_result_save(rk, parsed, race_id):
     res["1st"] = o[0]["no"] if len(o) > 0 else None
     res["2nd"] = o[1]["no"] if len(o) > 1 else None
     res["3rd"] = o[2]["no"] if len(o) > 2 else None
-    res["payouts"] = dict(res.get("payouts") or {}, **parsed["payouts"])
+    # ── [승인 A · 2026-08-01] 🔴 **円 → 배 변환**. 이게 없어서 100배로 저장됐다 ──────────
+    #  사고: 니가타 11R 확정 `1,040円` 을 그대로 넣어 **"1,040배 적중"** 으로 보고했다.
+    #        실제는 **10.4배**다. 지방(`_keiba_result_payouts`)·`backfill_payouts.py` 는
+    #        원래 `/100.0` 을 하는데 **이 경로만 빠져 있었다**(경로별 단위 불일치).
+    #  규모: `japan_central` **24건**(2026-08-01 실측 · 오늘만 14건).
+    #  ⚠ 이중 적용 방지: 여기서는 **파서 반환값(항상 円)** 을 나눈다. 저장된 값을 다시 나누지 않는다.
+    #    재수집돼도 `parsed["payouts"]` 는 매번 새로 파싱한 円이므로 **몇 번 돌아도 결과가 같다.**
+    #  ⚠ 소급 정정은 `tools/fix_jra_payout_unit.py`(payouts_raw 円 키로 판별 + `unit_fixed` 이력).
+    #  🔧 되돌리기: `_v` 변환 블록을 지우고 `parsed["payouts"]` 를 그대로 쓰면 된다.
+    _pay_conv = {}
+    for _k, _v in (parsed.get("payouts") or {}).items():
+        try:
+            _pay_conv[_k] = round(float(_v) / 100.0, 1)
+        except (TypeError, ValueError):
+            _pay_conv[_k] = _v
+    res["payouts"] = dict(res.get("payouts") or {}, **_pay_conv)
     res["payouts_raw"] = parsed["payouts_raw"]
     res["order_full"] = parsed["order"]
     d["result"] = res

@@ -1,0 +1,291 @@
+{
+ "predicted_top3": [
+  1,
+  2,
+  7
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 간 경쟁 속 佐々木祐太의 적극적인 전개와 북세 라인 동반입상",
+ "key_factors": [
+  "선행형 간 내부 경쟁 가능성",
+  "코멘트의 특정 선수 언급",
+  "라인 구성의 불균형"
+ ],
+ "exception_note": "코멘트에서 佐々木祐太의 기동력 우위와 '北勢で独占(북세 라인 독점)' 언급이 있어, 다른 선행형(4, 6번)과의 경쟁 속에서도 우위를 점할 것으로 예상되며, 같은 라인의 2, 7번 추입형이 동반 입상할 가능성이 높음. 3, 4, 5번은 연대율이 낮고 최근 성적도 좋지 않아 보임.",
+ "applied_rules": [],
+ "raceKey": "케이오카쿠 1경주",
+ "forecastAt": "2026-08-01 20:43:39",
+ "forecastEpoch": 1785584619.9087594,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "케이오카쿠 1경주",
+  "wind": {
+   "venue": "케이오카쿠",
+   "풍속": 0.9,
+   "풍향": "남동",
+   "풍향코드": 6,
+   "기온": 28.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T20:30:00+09:00",
+   "지점": "府中",
+   "지점거리km": 5.19
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "佐々木祐太",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 12.1",
+    "prev1": "小田原Ｆ２ 7/23 予 選 ４着 9.9 7/24 選 抜 ２着 10.2 7/25 特 選 ７着 10.3",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 ７着 10.4 7/ 8 一 般 ２着 10.6 7/ 9 一 般 ３着 9.9",
+    "chaku": [
+     3,
+     4,
+     5,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "佐々木健司",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.9",
+    "prev1": "青 森Ｆ１ 7/25 一 般 ２着 12.3",
+    "prev2": "名古屋Ｆ２ 7/10 予 選 ６着 11.9 7/11 一 般 ６着 11.4 7/12 一 般 ６着 11.8",
+    "chaku": [
+     2,
+     1,
+     5,
+     17
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "若林 耕司",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "7/31 予 選 ６着 11.5",
+    "prev1": "松 阪Ｆ２ 7/21 特予選 ６着 11.4 7/22 特一般 ５着 12.2 7/23 特一般 ６着 11.9",
+    "prev2": "伊 東Ｆ１ 7/10 予 選 ７着 9.8 7/11 一 般 ６着 9.9 7/12 一 般 ５着 10.2",
+    "chaku": [
+     0,
+     2,
+     1,
+     20
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "佐藤 清之",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11.7",
+    "prev1": "弥 彦Ｆ２ 7/17 特予選 ５着 11.5 7/18 特一般 ５着 11.8 7/19 特一般 ７着 12.3",
+    "prev2": "小田原Ｆ２ 7/10 特予選 ５着 9.7 7/11 特一般 １着 9.9 7/12 特 選 ５着 10.3",
+    "chaku": [
+     4,
+     0,
+     2,
+     20
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "齊藤 健人",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11.4",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ５着 12.1 7/23 一 般 １着 12.1 7/24 特 選 ７着 12.3",
+    "prev2": "小田原Ｆ２ 7/10 特予選 ４着 9.8 7/11 特一般 ２着 10.2 7/12 特 選 ７着",
+    "chaku": [
+     3,
+     3,
+     1,
+     17
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "大関 祐也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ７着 13.2",
+    "prev1": "伊 東Ｆ２ 7/22 予 選 ６着 10.5 7/23 一 般 ７着 11.1 7/24 一 般 １着 9.8",
+    "prev2": "前 橋Ｇ３ 7/10 特予選 ７着 10.3 7/11 特一般 ４着 10.3 7/12 特一般 ３着 10.3",
+    "chaku": [
+     2,
+     2,
+     4,
+     19
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "杉浦 康一",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.8",
+    "prev1": "和歌山Ｆ２ 7/24 特予選 ７着 12.3 7/25 特一般 ５着 11.8 7/26 特一般 ６着 12.9",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ４着 12.2 7/ 9 一 般 ２着 11.9 7/10 特 選 ５着 11.5",
+    "chaku": [
+     2,
+     1,
+     4,
+     14
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    1,
+    4,
+    6
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    2,
+    5,
+    7
+   ]
+  },
+  "lines": [
+   1,
+   2,
+   7,
+   6,
+   3,
+   4,
+   5
+  ],
+  "paceLabel": null,
+  "comment": "機動力で上回る佐々木祐が、仕掛け所を修正して１勝。佐々木健がしぶとく続いて北勢で独占。大関次第で佐藤と浮上も。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}

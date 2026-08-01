@@ -143,7 +143,10 @@ def main():
             res["1st"] = o[0]["no"] if len(o) > 0 else res.get("1st")
             res["2nd"] = o[1]["no"] if len(o) > 1 else res.get("2nd")
             res["3rd"] = o[2]["no"] if len(o) > 2 else res.get("3rd")
-            res["payouts"] = dict(res.get("payouts") or {}, **{k: v for k, v in r["payouts"].items() if v})
+            # 🔴 [승인 A · 2026-08-01] **円 → 배**. app.py `_jra_result_save` 와 같은 버그가 여기에도 있었다.
+            #   한쪽만 고치면 이 도구를 돌릴 때 다시 円으로 쌓인다. ⚠ 파서 반환값(항상 円)을 나눈다.
+            res["payouts"] = dict(res.get("payouts") or {},
+                                  **{k: round(float(v) / 100.0, 1) for k, v in r["payouts"].items() if v})
             res["payouts_raw"] = r["payouts_raw"]
             res["order_full"] = r["order"]
             d["result"] = res
