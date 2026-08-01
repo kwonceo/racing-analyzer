@@ -84,6 +84,10 @@ def load_races(sport="cycle", pattern="2026_07_*"):
                 q[tuple(sorted(int(x) for x in str(k).replace("-", "+").split("+")))] = float(v)
             except Exception:
                 pass
+        # 🔴 [2026-08-01] 1착·2착이 **둘 다** 있어야 한다. 한쪽만 있으면 정렬에서 죽는다
+        #   (오늘 부분 착순 레코드가 들어와 도구가 통째로 크래시했다 — 조용히 넘기지 말고 건너뛴다).
+        if res.get("1st") is None or res.get("2nd") is None:
+            continue
         top2 = sorted({res.get("1st"), res.get("2nd")})
         mo = q.get(tuple(top2))
         if not mo:
@@ -92,6 +96,11 @@ def load_races(sport="cycle", pattern="2026_07_*"):
         out.append({"q": q, "po": float(po), "mo": float(mo), "top2": top2, "dc": dc, "kh": kh,
                     "bm": [sorted(x.get("combo") or [])
                            for x in (cp.get("bmedSpecial") or []) if x.get("combo")],
+                    # 🔴 [2026-08-01] `quinellaRef` = **만들었다가 강등된 조합**(EV 미달·베팅규칙).
+                    #   오비히로 5R 에서 정답 복승 `3+10`(18.9배)이 **ev 0.73 으로 여기 있었다.**
+                    #   "생성 후 취소"를 재려면 이 목록이 필요하다 — 최종 추천만 봐서는 안 보인다.
+                    "ref": [sorted(x.get("combo") or [])
+                            for x in (cp.get("quinellaRef") or []) if x.get("combo")],
                     "hs": [x for x in (d.get("horses") or []) if x.get("no") is not None],
                     "day": m.group(1) if m else "?"})
     return out
@@ -129,6 +138,10 @@ PLANS = [
     ("paceBonus ② 반전", lambda r: _allc(_pace(r, -1))),
     ("paceBonus ③ 제거", lambda r: _allc(_pace(r, 0))),
     ("현행 + BMED", lambda r: r["dc"] + r["bm"]),
+    # 🔴 [2026-08-01 신설] "만들었다가 지운 것"을 되살리면 어떻게 되나.
+    #   ⚠ 이건 **반사실 시뮬레이션**이다 — 실제로는 강등돼 회원에게 안 나갔다.
+    ("현행 + 강등분(quinellaRef)", lambda r: r["dc"] + r["ref"]),
+    ("강등분만(quinellaRef)", lambda r: r["ref"]),
 ]
 
 
