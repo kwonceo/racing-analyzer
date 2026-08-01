@@ -37,6 +37,14 @@ H = {"User-Agent": "Mozilla/5.0", "Accept": "*/*", "Accept-Encoding": "identity"
 # 🔴 [2026-08-02] Content-Type 을 먼저 읽는다 — euc-jp 로 넘겨짚어 "데이터 없음" 오판을 한 적이 있다.
 _ROW = re.compile(r'<tr[^>]*class="[^"]*HorseList[^"]*"[^>]*>(.*?)</tr>', re.S)
 _TD = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
+# 🔴 [2026-08-02] 결과표로 **범위를 먼저 좁힌다** — 원본이 `id="All_Result_Table"` 로 명시한다.
+#   왜: 과거 페이지에는 `RapSummary_Table`(각마 랩) · `milage_summary`(주행거리) ·
+#   `LapSummary_Table`(각질) **분석표 3개**가 더 있고 **그 행들도 class="HorseList" 를 쓴다.**
+#   그중 주행거리표 행은 c[0]="1"(착순)·c[9]=숫자라 **말 행으로 읽혀 매 경주 +1 이 됐다.**
+#   ⇒ 채택률 14.1% · 3착합÷경주수 3.51 의 원인이 정확히 이것이었다(원문 588건 대조).
+#   ⚠ **최근 페이지에는 이 분석표가 아직 없다** — "과거 구조가 다르다"가 아니라
+#     "최근 페이지에 아직 안 붙었다"가 맞다(방향이 반대였다).
+_RESULT_TABLE = re.compile(r'<table[^>]*id="All_Result_Table"[^>]*>(.*?)</table>', re.S)
 
 
 def fetch(url, timeout=15):
@@ -63,7 +71,10 @@ def parse_result(html):
     """
     m = _FIELD_RE.search(_txt(html))
     field = int(m.group(1)) if m else None
-    rows = _ROW.findall(html)
+    mt = _RESULT_TABLE.search(html)          # 🔴 결과표 밖의 분석표 행을 원천 배제한다
+    if not mt:
+        return [], {"rows": 0, "parsed": 0, "field": field, "why": "결과표없음"}
+    rows = _ROW.findall(mt.group(1))
     out = []
     for r in rows:
         c = [_txt(x) for x in _TD.findall(r)]
@@ -80,6 +91,39 @@ def parse_result(html):
     return out, diag
 
 
+def iter_raw(days_limit):
+    """보존된 원문을 **최신 개최일부터** 돌려준다(네트워크 미사용)."""
+    if not os.path.isdir(RAWDIR):
+        return
+    for d in sorted(os.listdir(RAWDIR), reverse=True)[:days_limit]:
+        dd = os.path.join(RAWDIR, d)
+        if not os.path.isdir(dd):
+            continue
+        for f in sorted(os.listdir(dd)):
+            if not (f.startswith("jra_result_") and f.endswith(".html.gz")):
+                continue
+            try:
+                with gzip.open(os.path.join(dd, f), "rt", encoding="utf-8") as fh:
+                    yield d, f[11:23], fh.read()
+            except Exception:
+                continue                     # 손상 파일은 건너뛴다(덮어쓰지 않는다)
+
+
+def iter_live(days):
+    """netkeiba 에서 개최일 목록 → 경주별 결과 페이지를 받아 돌려준다."""
+    for d in range(days):
+        ymd = time.strftime("%Y%m%d", time.localtime(time.time() - d * 86400))
+        try:
+            lst = fetch("https://race.netkeiba.com/top/race_list_sub.html?kaisai_date=" + ymd)
+        except Exception:
+            continue
+        for rid in sorted(set(re.findall(r"race_id=(\d{12})", lst))):
+            try:
+                yield ymd, rid, fetch("https://race.netkeiba.com/race/result.html?race_id=" + rid)
+            except Exception:
+                continue
+
+
 def band(n):
     return "≤8두" if n <= 8 else ("9~12두" if n <= 12 else ("13~16두" if n <= 16 else "17두+"))
 
@@ -89,6 +133,9 @@ def main():
     ap.add_argument("--days", type=int, default=60)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--dry", action="store_true")
+    # 🔴 [2026-08-02] 보존해 둔 원문으로 **재파싱**한다 — 네트워크를 쓰지 않는다.
+    #   원문 보존의 원래 취지가 이것이다: **파서를 고치면 과거가 즉시 소급된다.**
+    ap.add_argument("--from-raw", action="store_true", help="logs/form_raw 원문으로 재파싱(네트워크 미사용)")
     a = ap.parse_args()
     apply = a.apply and not a.dry
 
@@ -102,54 +149,44 @@ def main():
     agg = {}          # (band, pop) → [n, in3, in2]
     rc_by_band = {}   # band → 경주 수 (검산②에 쓴다)
     raw_bytes = 0
-    for d in range(a.days):
-        ymd = time.strftime("%Y%m%d", time.localtime(time.time() - d * 86400))
-        try:
-            lst = fetch("https://race.netkeiba.com/top/race_list_sub.html?kaisai_date=" + ymd)
-        except Exception:
+    seen_days = set()
+    src = iter_raw(a.days) if a.from_raw else iter_live(a.days)
+    for ymd, rid, html in src:
+        if a.days <= 3 and ymd not in seen_days and len(seen_days) >= 2:
+            break                                       # --dry 빠른 확인용(개최일 2일)
+        seen_days.add(ymd)
+        days = len(seen_days)
+        rows, diag = parse_result(html)
+        if not rows:
+            skipped += 1
+            if skipped <= 3:
+                print("   ⚠ 스킵(표기↔파싱 불일치): %s 행%s 파싱%s 표기%s"
+                      % (rid, diag["rows"], diag["parsed"], diag["field"]))
             continue
-        ids = sorted(set(re.findall(r"race_id=(\d{12})", lst)))
-        if not ids:
-            continue
-        days += 1
-        for rid in ids:
+        races += 1
+        rc_by_band[band(rows[0]["field"])] = rc_by_band.get(band(rows[0]["field"]), 0) + 1
+        horses += len(rows)
+        raw_bytes += len(html.encode("utf-8"))
+        if apply and not a.from_raw:                    # 원문 보존(재파싱 가능하게)
             try:
-                html = fetch("https://race.netkeiba.com/race/result.html?race_id=" + rid)
+                dd = os.path.join(RAWDIR, ymd)
+                os.makedirs(dd, exist_ok=True)
+                p = os.path.join(dd, "jra_result_%s.html.gz" % rid)
+                if not os.path.exists(p):
+                    with gzip.open(p, "wt", encoding="utf-8") as f:
+                        f.write(html)
             except Exception:
-                continue
-            rows, diag = parse_result(html)
-            if not rows:
-                skipped += 1
-                if skipped <= 3:
-                    print("   ⚠ 스킵(표기↔파싱 불일치): %s 행%s 파싱%s 표기%s"
-                          % (rid, diag["rows"], diag["parsed"], diag["field"]))
-                continue
-            races += 1
-            rc_by_band[band(rows[0]["field"])] = rc_by_band.get(band(rows[0]["field"]), 0) + 1
-            horses += len(rows)
-            raw_bytes += len(html.encode("utf-8"))
-            if apply:                                  # 원문 보존(재파싱 가능하게)
-                try:
-                    dd = os.path.join(RAWDIR, ymd)
-                    os.makedirs(dd, exist_ok=True)
-                    p = os.path.join(dd, "jra_result_%s.html.gz" % rid)
-                    if not os.path.exists(p):
-                        with gzip.open(p, "wt", encoding="utf-8") as f:
-                            f.write(html)
-                except Exception:
-                    pass
-            for x in rows:
-                k = (band(x["field"]), min(x["pop"], 18))
-                s = agg.setdefault(k, [0, 0, 0])
-                s[0] += 1
-                if x["placing"] <= 3:
-                    s[1] += 1
-                if x["placing"] <= 2:
-                    s[2] += 1
-        if days and days % 5 == 0:
+                pass
+        for x in rows:
+            k = (band(x["field"]), min(x["pop"], 18))
+            s = agg.setdefault(k, [0, 0, 0])
+            s[0] += 1
+            if x["placing"] <= 3:
+                s[1] += 1
+            if x["placing"] <= 2:
+                s[2] += 1
+        if races and races % 100 == 0:
             print("  … 개최일 %d · 경주 %d · 말 %d (%.0f초)" % (days, races, horses, time.time() - t0))
-        if a.days <= 3 and days >= 2:
-            break                                       # --dry 빠른 확인용
 
     el = time.time() - t0
     print()
@@ -160,8 +197,12 @@ def main():
         return
     print()
     print("  %-8s %5s %7s %9s %9s %10s" % ("두수", "인기", "n", "3착률", "1·2착률", "3÷두수 대비"))
+    # ⚠ 판단 근거를 값과 **같이** 저장한다 — 나중에 "이 값이 어디서 왔나"를 물을 수 있어야 한다.
     doc = {"builtAt": time.strftime("%Y-%m-%d %H:%M:%S"), "days": days, "races": races,
-           "horses": horses, "cells": {}}
+           "horses": horses, "source": ("from-raw" if a.from_raw else "live"),
+           "skippedRaces": skipped,
+           "note": "스킵분은 中止·除外·取消 로 표기두수↔파싱두수가 어긋난 경주다(추측 금지 원칙에 따라 통째로 제외).",
+           "cells": {}}
     mid = {"≤8두": 7.5, "9~12두": 10.5, "13~16두": 14.5, "17두+": 17.5}
     for (b, p), (n, i3, i2) in sorted(agg.items()):
         if n < 20:

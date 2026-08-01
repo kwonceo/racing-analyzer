@@ -16,12 +16,25 @@
 사용: python tests/run_selfcheck.py [--json]
 """
 import argparse
+import io
 import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
+
+# 🔴 [2026-08-02] 자기 출력 인코딩을 **스스로** 세운다.
+#   왜: 이 파일은 ⚠·🟢 같은 기호를 찍는데 Windows 기본 콘솔은 cp949 라
+#   `PYTHONIOENCODING=utf-8` 없이 실행하면 **UnicodeEncodeError 로 통째로 죽는다.**
+#   ⇒ 직전 세션에 "6/7 · pre-commit 실패"로 보고된 것이 이 유형이었다
+#     (게이트가 고장난 것이 아니라 **호출 방식** 문제 — 실제로는 7/7 통과한다).
+#   ⚠ 실행 방법에 의존하는 테스트는 **실행 방법이 바뀌면 조용히 거짓 실패**한다.
+try:
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+except Exception:
+    pass                                   # 이미 UTF-8 이거나 버퍼가 없으면 그대로 둔다
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PY = sys.executable
@@ -160,9 +173,26 @@ def case_smoke_render():
     return rc == 1, "주입 시 rc=%s (기대 1)" % rc
 
 
+def _server_is_live(port=8011, timeout=1.0):
+    """8011 이 떠 있으면 True. 🔴 app.py 에 주입하는 케이스의 **안전 게이트**다."""
+    import socket
+    try:
+        s = socket.create_connection(("127.0.0.1", port), timeout=timeout)
+        s.close()
+        return True
+    except Exception:
+        return False
+
+
 # ── 케이스 ③  run_freeze_behavior : 복원 함수를 무력화 ────────────────────
 def case_freeze_behavior():
     p = os.path.join(BASE, "app.py")
+    # 🔴 [2026-08-02 실사고] 이 케이스는 **app.py 를 직접 고쳤다 되돌린다.**
+    #   서버가 debug=True 로 떠 있으면 Flask 리로더가 **주입된 중간 상태를 읽고 죽는다.**
+    #   실제로 2026-08-02 08:2x 에 이 경로로 서버가 내려갔다(개최일 아침이었다).
+    #   ⚠ 조용히 건너뛰지 않는다 — 화면에 사유를 남긴다(원칙 18).
+    if _server_is_live():
+        return None, "⏭ 서버 가동 중 — app.py 주입을 하지 않는다(리로더가 서버를 죽인다). 서버 정지 후 실행할 것"
     bak = p + ".selfcheck.bak"
     src = open(p, encoding="utf-8").read()
     anchor = "def _frozen_capture(rk, doc, rec_rows):"
