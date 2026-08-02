@@ -1619,6 +1619,16 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
             scored.append({
                 "no": no, "name": h.get("name", ""), "jockey": h.get("jockey", ""),
                 "recentPlacings": rp,
+                # ── 🔴 [형식 손실 수정 2/2 (2026-08-03)] 시계열 4종을 form 으로 **전달**한다 ──
+                #   `starters_store` 행에는 이 4키가 정상 저장돼 있는데(모리오카 1R 실측:
+                #   corners ['5-4','7-7',…]) **여기서 옮기지 않아** 분석로그까지 오지 못했다.
+                #   ⇒ `_build_analysis_log` 에 저장 코드를 넣어도 **corners 보유가 0%** 였던 이유가 이것이다.
+                #   ⚠ 순수 전달만 한다 — 점수·판정·추천 경로는 이 값을 쓰지 않는다(읽기 전용 보존용).
+                "fieldSizes": h.get("fieldSizes") or [],
+                "corners": h.get("corners") or [],
+                "last3fList": h.get("last3fList") or [],
+                "pastDistances": h.get("pastDistances") or [],
+                "past": h.get("past") or [],
                 "baseScore": round(ts or 0, 1), "courseBonus": 0, "jockeyBonus": 0,
                 # [신규 근거 전달] 저장된 근거 문장(detail)·마체중·거리적성·기수복승률을 그대로 전달 → 패널 표시
                 "totalScore": round(ts or 0, 1), "detail": h.get("detail") or [], "flags": [], "anomaly": an,
@@ -14876,6 +14886,32 @@ def _build_analysis_log(rk, an=None):
             "jockey": f.get("jockey") or "",
             "record_score": f.get("totalScore"),
             "record_detail": ("최근 " + "-".join(str(x) for x in rp)) if rp else "",
+            # ── 🔴🔴 [형식 손실 수정 (2026-08-02 승인 · 08-03 적용)] ─────────────────
+            #   위 `record_detail` 은 **배열을 읽어놓고 "최근 3-4-4" 문자열로 압축**한다.
+            #   그 결과 `analysis_log.horses[]` 의 시계열 보유가 **0 / 6,882 = 0.0%** 였다.
+            #   🔴 "저장 탈락"이 아니라 **형식 손실**이다 — 읽기는 하는데 배열을 버린다.
+            #   `starters_store` 에는 22키로 정상 저장되지만(jra 96.2% · keiba_nar 89.3%),
+            #   그건 **라이브 캐시라 키에 날짜가 없고 30분 미갱신분이 정리**된다 ⇒ **소급 불가**.
+            #   ⇒ 분석로그에 없으면 **영구 소실**이고, 그래서 패턴 측정이 원천 불가였다.
+            #   ⚠ 실피해: 미적중의 **92%가 ①유형**(후보에 아예 없던 말)인데, 그 원인인
+            #     `record_score` 하위권 0점 포화(최빈 0.0 · 566회)를 **패턴으로 가르려면 이 시계열이 필요하다.**
+            #   ⚠ **추가만 한다** — `record_detail` 문자열도 그대로 두고(기존 소비처가 쓴다),
+            #     `record_score` 계산 경로는 **한 줄도 건드리지 않는다**(여기서는 읽기만 한다).
+            #   🔧 되돌리기: 아래 5줄 삭제.
+            #   🔴 **소급 불가 — 넣은 날부터 쌓인다.**
+            #   ⚠ [08-03 실측 정정] `_keiba_build_form` 이 담는 것은 **`past` 배열**이고,
+            #     `fieldSizes`·`corners`·`last3fList`·`pastDistances` 는 `_keiba_starter_store_row` 가
+            #     **`past` 에서 파생**한다(실측: form 객체에 그 4키가 없다 · corners 보유 0%).
+            #     ⇒ 여기서도 **같은 방식으로 파생**한다. 직접 키가 있으면 그것을 우선한다(경로별 호환).
+            "recentPlacings": rp or [],                        # 최근 착순(최신순)
+            "fieldSizes": (f.get("fieldSizes")
+                           or [pr.get("fieldSize") for pr in (f.get("past") or [])]),
+            "corners": (f.get("corners")
+                        or [pr.get("corner") for pr in (f.get("past") or [])]),
+            "last3fList": (f.get("last3fList")
+                           or [pr.get("last3f") for pr in (f.get("past") or [])]),
+            "pastDistances": (f.get("pastDistances")
+                              or [pr.get("distance") for pr in (f.get("past") or [])]),
             "odds": win.get(str(no)) if isinstance(win, dict) else None,
             "grade": grade_by.get(no) or f.get("grade") or h.get("tier") or h.get("verdict"),
             "grade_reason": h.get("reason"),
