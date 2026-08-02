@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 4경주",
-      "horse_no": 2,
-      "recent_avg": 4.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-22"
-    },
-    {
-      "race": "몬베츠 4경주",
-      "horse_no": 5,
-      "recent_avg": 7.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-22"
-    },
-    {
       "race": "몬베츠 6경주",
       "horse_no": 2,
       "recent_avg": 4.8,
@@ -4687,16 +4669,26 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1785665440.6287556
+    },
+    {
+      "race": "모리오카 12경주",
+      "horse_no": 1,
+      "recent_avg": 4.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-02"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2178,
+      "count": 2190,
       "hit": 412
     },
     "전체부진마": {
-      "count": 3683,
-      "hit": 988
+      "count": 3697,
+      "hit": 989
     },
     "대규모급락": {
       "count": 7,
@@ -4706,8 +4698,8 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 1505,
-      "hit": 576
+      "count": 1507,
+      "hit": 577
     },
     "급락동반": {
       "count": 277,
