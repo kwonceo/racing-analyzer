@@ -186,31 +186,41 @@ def _server_is_live(port=8011, timeout=1.0):
 
 # ── 케이스 ③  run_freeze_behavior : 복원 함수를 무력화 ────────────────────
 def case_freeze_behavior():
+    """🔴 [2026-08-02 실사고 수정] **라이브 app.py 를 건드리지 않는다.**
+
+    종전에는 `app.py` 를 직접 고쳤다 되돌렸고, Flask 리로더가 **주입된 중간 상태를 읽어
+    2026-08-02 08:12:58 에 서버가 죽었다**(개최일 아침 · 다운 2분 20초).
+    ⇒ 이제 **사본에 주입**하고 `FREEZE_APP_SRC` 로 그 사본을 읽게 한다.
+      자기검증이 시스템을 죽이면 안 된다.
+    """
     p = os.path.join(BASE, "app.py")
-    # 🔴 [2026-08-02 실사고] 이 케이스는 **app.py 를 직접 고쳤다 되돌린다.**
-    #   서버가 debug=True 로 떠 있으면 Flask 리로더가 **주입된 중간 상태를 읽고 죽는다.**
-    #   실제로 2026-08-02 08:2x 에 이 경로로 서버가 내려갔다(개최일 아침이었다).
-    #   ⚠ 조용히 건너뛰지 않는다 — 화면에 사유를 남긴다(원칙 18).
-    if _server_is_live():
-        return None, "⏭ 서버 가동 중 — app.py 주입을 하지 않는다(리로더가 서버를 죽인다). 서버 정지 후 실행할 것"
-    bak = p + ".selfcheck.bak"
     src = open(p, encoding="utf-8").read()
     anchor = "def _frozen_capture(rk, doc, rec_rows):"
     if anchor not in src:
         return None, "앵커 없음 — 케이스 갱신 필요"
-    shutil.copy2(p, bak)
+    tmpd = tempfile.mkdtemp(prefix="selfcheck_app_")
+    cp = os.path.join(tmpd, "app_injected.py")
     try:
         # 복원이 항상 실패하게 만든다 → 행위 테스트가 잡아야 한다
-        open(p, "w", encoding="utf-8").write(
-            src.replace(anchor, anchor + '\n    return None, "selfcheck"', 1))
-        rc = _run("tests/run_freeze_behavior.py")
+        with open(cp, "w", encoding="utf-8") as f:
+            f.write(src.replace(anchor, anchor + '\n    return None, "selfcheck"', 1))
+        env2 = dict(os.environ)
+        env2["FREEZE_APP_SRC"] = cp
+        env2.setdefault("PYTHONIOENCODING", "utf-8")
+        r = subprocess.run([PY, os.path.join(BASE, "tests/run_freeze_behavior.py")],
+                           cwd=BASE, env=env2, capture_output=True, timeout=180)
+        rc = r.returncode
+    except Exception as e:
+        return None, "주입 실패: %s" % str(e)[:80]
     finally:
         try:
-            shutil.copy2(bak, p)
-            os.remove(bak)
+            shutil.rmtree(tmpd, ignore_errors=True)
         except Exception:
-            return None, "🔴 원복 실패 — %s 를 %s 로 복원할 것" % (bak, p)
-    return rc == 1, "주입 시 rc=%s (기대 1)" % rc
+            pass
+    # 🔴 라이브 app.py 가 그대로인지 확인한다(한 글자라도 바뀌면 즉시 실패로 본다)
+    if open(p, encoding="utf-8").read() != src:
+        return False, "🔴 라이브 app.py 가 변경됐다 — 즉시 확인할 것"
+    return rc == 1, "사본 주입 시 rc=%s (기대 1) · 라이브 app.py 무변경 확인" % rc
 
 
 # ── 케이스 ④  run_precommit : 문법 오류를 주입 ────────────────────────────

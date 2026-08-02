@@ -11637,6 +11637,49 @@ def _triple_analyze(rk, rec):
             _fp = _final_picks(core_picks, curQ, _rec_valid, smart_quinella, max_q=_mainmax,
                                reversal_quinellas=_rev_q, dark_quinellas=_dark_q,
                                signal_horses=_sig_h, sig_meta=_sig_meta, sport=_analyze_sport)
+            # ── 🔴🔴 [2026-08-02 승인] 출주 명단 밖 마번 차단 ────────────────────────────
+            #   실사고: 호후 3경주(7명)에 **11두짜리 다른 경주 배당**이 확장(private)으로 들어와
+            #   없는 마번 7·11 이 추천되고 **카카오로 회원에게 나갔다.**
+            #   전수: 발송 301건 중 **13건(4.3%)** · 7/30~8/2 **매일** 나가고 있었다.
+            #   🔴 진실 소스 = **출마표(form)** 하나. 이유:
+            #     · `oddspark` 는 취소마가 빠져 **더 좁다**(둘 다 보유분에서 불일치 20.6%가 전부 그 방향)
+            #       ⇒ 좁은 쪽을 쓰면 **정상 조합을 잘못 자른다**.
+            #     · `private`(확장)은 **오늘 틀린 쪽**이라 진실 소스로 쓰지 않는다.
+            #   ⚠ 출마표가 없으면 **판정하지 않는다**(추측 금지 · 종전대로 통과).
+            #   ⚠ 조용히 지우지 않는다 — 제외할 때마다 로그를 남기고 `rosterDropped` 에 기록한다.
+            try:
+                _roster = set()
+                for _fh in (form or []):
+                    try:
+                        if _fh.get("no") is not None:
+                            _roster.add(int(_fh["no"]))
+                    except Exception:
+                        pass
+                core_picks["rosterNos"] = sorted(_roster) or None
+                if len(_roster) >= 2:
+                    def _in_roster(_c):
+                        try:
+                            return all(int(x) in _roster for x in (_c or []))
+                        except Exception:
+                            return True          # 판정 불가면 건드리지 않는다
+                    _drops = []
+                    for _key in ("quinellas", "trifectas", "bmedSpecial"):
+                        _src = _fp.get(_key) or []
+                        _keep = []
+                        for _it in _src:
+                            if _in_roster(_it.get("combo")):
+                                _keep.append(_it)
+                            else:
+                                _drops.append({"list": _key, "combo": _it.get("combo"),
+                                               "odds": _it.get("odds")})
+                        _fp[_key] = _keep
+                    if _drops:
+                        core_picks["rosterDropped"] = _drops
+                        print("🔴 [출주명단 게이트] %s: 명단 밖 마번 조합 %d개 제외 (출마표 %s) → %s"
+                              % (rk, len(_drops), sorted(_roster),
+                                 [d["combo"] for d in _drops][:6]))
+            except Exception as _rge:
+                print("[출주명단 게이트] 실패(무시):", str(_rge)[:100])
             core_picks["finalQuinellas"] = _fp["quinellas"]
             core_picks["finalTrifectas"] = _fp["trifectas"]
             # [fix_trio_coherence 2026-07-25] 삼복승 메인 부분 페어를 복승 후보에 편입
@@ -32640,6 +32683,33 @@ def _kakao_notify_race(rk, phase, an, snap):
                 _send_k = True                       # 경마: 매 경주(추천 미형성이면 '패스 권장'으로 발송)
             elif _spk == "cycle" and _has_rec:
                 _send_k = True                       # 경륜: 추천 형성 경주만
+        # ── 🔴🔴 [2026-08-02 승인] 발송 직전 2차 검사 — **오늘은 발송까지 나갔다** ──────────
+        #   1차 게이트(_final_picks 뒤)를 통과해도, 발송 본문은 다른 목록에서도 조합을 끌어올 수 있다.
+        #   ⇒ **보내기 직전에 한 번 더** 출주 명단과 대조한다.
+        #   🔴 명단 밖 마번이 하나라도 있으면 **그 경주는 보내지 않는다.**
+        #     조합만 빼면 본문·근거가 어긋나고, 그 상태는 **데이터가 이미 오염됐다는 뜻**이라
+        #     "일부만 보내는 것"보다 **안 보내는 것이 정직하다.**
+        #   ⚠ 조용히 넘기지 않는다 — 콘솔에 크게 남긴다.
+        if _send_k:
+            try:
+                _rst = set((an.get("corePicks") or {}).get("rosterNos") or [])
+                if len(_rst) >= 2:
+                    _cpk2 = an.get("corePicks") or {}
+                    _chk = set()
+                    for _lk in ("finalQuinellas", "finalTrifectas", "bmedSpecial"):
+                        for _it in (_cpk2.get(_lk) or []):
+                            for _x in (_it.get("combo") or []):
+                                try:
+                                    _chk.add(int(_x))
+                                except Exception:
+                                    pass
+                    _bad = sorted(_chk - _rst)
+                    if _bad:
+                        print("🔴🔴 [카카오 발송 차단] %s %s — 출주 명단 밖 마번 %s (출마표 %s). "
+                              "데이터 오염이므로 보내지 않는다." % (rk, phase, _bad, sorted(_rst)))
+                        _send_k = False
+            except Exception as _kge:
+                print("[카카오 명단검사] 실패(무시):", str(_kge)[:100])
         if _send_k:
             _rich = _kakao_rich_message(rk, phase, an)
             _sr = _kakao_send_to_me(_rich["text"], _rich.get("url"))

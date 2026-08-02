@@ -38,7 +38,11 @@ CASES = [
 
 def _load_freeze_funcs():
     """app.py 를 **기동하지 않고** 동결 함수만 떼어 실행한다(서버 부작용 방지)."""
-    src = open(os.path.join(BASE, "app.py"), encoding="utf-8").read()
+    # 🔴 [2026-08-02] 자기검증이 **라이브 app.py 를 고쳐서 서버를 죽인 사고**가 있었다.
+    #   (08:12:58 · Flask 리로더가 주입된 중간 상태를 읽고 SyntaxError 로 종료)
+    #   ⇒ `FREEZE_APP_SRC` 로 **사본 경로**를 넘기면 그것을 읽는다. 없으면 종전대로 app.py.
+    _app = os.environ.get("FREEZE_APP_SRC") or os.path.join(BASE, "app.py")
+    src = open(_app, encoding="utf-8").read()
     a = src.index("_FREEZE_FIELDS = [")
     b = src.index("class _SkipOddsparkBridge")
     ns = {"os": os, "json": json, "time": time, "threading": threading,
