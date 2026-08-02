@@ -22655,7 +22655,18 @@ def _keirin_fetch(url, mode="live"):
                   % (_NETKEIBA_BLOCKED_N, (url or "")[:70]))
         raise RuntimeError("netkeiba 요청 중단(NETKEIBA_ENABLED=False · IP 차단 대응)")
     if _nk and netkeiba_guard is not None:
+        # 🔴 [2026-08-02 10:2x 실사고 수정] 종전에는 간격 미달이면 **요청을 버렸다.**
+        #   그 결과 JRA 발주시각 조회(경주당 1회 · 36경주)가 연속 호출돼 **전부 거부**됐고,
+        #   발주시각이 없어 **수집 창 판정이 불가 → 오늘 중앙경마 0경주 수집**이 됐다.
+        #   ⇒ **간격 미달은 기다린다**(버리지 않는다). 상한·중단은 그대로 즉시 거부한다.
+        #   ⚠ 이것이 요청 수를 늘리지는 않는다 — 같은 요청을 **느리게** 보낼 뿐이다.
         _ok, _why = netkeiba_guard.allow(mode)
+        if not _ok and "간격" in _why:
+            for _ in range(12):                     # 최대 6초 대기(0.5초 × 12)
+                time.sleep(0.5)
+                _ok, _why = netkeiba_guard.allow(mode)
+                if _ok or "간격" not in _why:
+                    break
         if not _ok:
             raise RuntimeError("netkeiba 요청 제한: %s" % _why)
     req = Request(url, headers=dict(_ODDSPARK_HEADERS))
@@ -27391,9 +27402,10 @@ def bmed_view(key):
 #   · 실패는 전 구간 격리 — 지방·경륜 수집에 **무영향**. 별도 스레드라 기존 사이클을 밀지 않는다.
 #
 # 🔧 되돌리기: `JRA_COLLECT_ENABLED = False` 한 줄. 코드는 지우지 않는다.
-JRA_COLLECT_ENABLED = False     # 🔴 [2026-08-02] netkeiba IP 차단 대응 — 루프 자체를 돌리지 않는다
-#   ⚠ 이것만으로는 결과·스케줄·馬柱 경로가 안 막힌다 → `NETKEIBA_ENABLED=False`(_keirin_fetch)가 본체다.
-#   🔧 재개 시 **둘 다** True 로 돌려야 한다.
+#   ✅ [2026-08-02 09:5x · 승인 ③] ② 5분 관찰이 깨끗해(요청 12건 · 400 0건) 정상 창으로 재개한다.
+#   ⚠ 요청은 `netkeiba_guard`(간격 1초 · 분당 40 · 시간당 400 · 일일 2,000)를 통과해야만 나간다.
+#   🔴 400 이 연속 3회면 가드가 **그날 자동 중단**한다(사람이 켜기 전까지 재개 없음).
+JRA_COLLECT_ENABLED = True
 JRA_OBSERVE_ONLY = True         # 🔴 첫날 관찰 모드 — 저장만 하고 추천 반영 금지
 JRA_COLLECT_INTERVAL = 60       # 초. 실측 갱신주기 55~60초 → 평시 30초는 낭비다
 # 🔴 [2026-08-01 승인] 마감 임박 단축 — T-3 이내에는 25초로 좁힌다.
