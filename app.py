@@ -32736,9 +32736,31 @@ def _kakao_notify_race(rk, phase, an, snap):
                                     pass
                     _bad = sorted(_chk - _rst)
                     if _bad:
-                        print("🔴🔴 [카카오 발송 차단] %s %s — 출주 명단 밖 마번 %s (출마표 %s). "
-                              "데이터 오염이므로 보내지 않는다." % (rk, phase, _bad, sorted(_rst)))
-                        _send_k = False
+                        # 🔴 [2026-08-02 11:1x 정정] 종전에는 **경주 전체를 보류**했다.
+                        #   소급 측정: 차단될 발송 3건에서 오염 11개 ↔ **정상 17개가 함께 막혔다.**
+                        #   호후 4경주는 **적중한 [4,6](16.8배)이 안 나갈 뻔했다.**
+                        #   ⇒ **오염 조합만 제거**하고 나머지는 보낸다(본문은 이 리스트로 만들어지므로 일관).
+                        #   남은 조합이 0개면 그때 보류한다.
+                        _rm = 0
+                        for _lk in ("finalQuinellas", "finalTrifectas", "bmedSpecial"):
+                            _sl = _cpk2.get(_lk) or []
+                            _nl = []
+                            for _it in _sl:
+                                try:
+                                    _okc = all(int(_x) in _rst for _x in (_it.get("combo") or []))
+                                except Exception:
+                                    _okc = True
+                                if _okc:
+                                    _nl.append(_it)
+                                else:
+                                    _rm += 1
+                            _cpk2[_lk] = _nl
+                        _left = len(_cpk2.get("finalQuinellas") or []) + len(_cpk2.get("finalTrifectas") or [])
+                        print("🔴 [카카오 명단검사] %s %s — 명단 밖 마번 %s · 오염 조합 %d개 제거 · 남은 %d개"
+                              % (rk, phase, _bad, _rm, _left))
+                        if _left == 0:
+                            print("🔴🔴 [카카오 발송 보류] %s %s — 남은 조합이 없다." % (rk, phase))
+                            _send_k = False
             except Exception as _kge:
                 print("[카카오 명단검사] 실패(무시):", str(_kge)[:100])
         if _send_k:
