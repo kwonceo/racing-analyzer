@@ -11647,6 +11647,12 @@ def _triple_analyze(rk, rec):
             #     · `private`(확장)은 **오늘 틀린 쪽**이라 진실 소스로 쓰지 않는다.
             #   ⚠ 출마표가 없으면 **판정하지 않는다**(추측 금지 · 종전대로 통과).
             #   ⚠ 조용히 지우지 않는다 — 제외할 때마다 로그를 남기고 `rosterDropped` 에 기록한다.
+            # 🔴🔴 [2026-08-02 10:5x 즉시 정정] 처음엔 **출마표(form)만** 진실로 썼다.
+            #   소급 측정 결과 **자를 조합 90개 중 75개(83.3%)가 오탐**이었다 —
+            #   출마표가 불완전한 경주가 많다(예: 소노다 3R 출마표 최대 6 ↔ 실제 배당 최대 12).
+            #   ⇒ **출마표 ∪ 배당 마번(합집합)** 으로 바꾼다. 어느 한쪽에라도 있으면 유효로 본다.
+            #   🟢 호후 3R 은 그래도 잡힌다(출마표 1~6 · 서버배당 1~6 → 7·11 은 양쪽 모두에 없다).
+            #   🔴 **넓은 쪽을 쓴다** — 가드는 "확실히 없는 것"만 막아야 한다(오탐이 더 위험하다).
             try:
                 _roster = set()
                 for _fh in (form or []):
@@ -11655,6 +11661,19 @@ def _triple_analyze(rk, rec):
                             _roster.add(int(_fh["no"]))
                     except Exception:
                         pass
+                # 🔴 `curQ` 를 쓰면 안 된다 — **오염된 private 배당이 그 안에 들어 있다**
+                #   (호후 3R 의 55조합이 정확히 그것). ⇒ **서버 직접수집(oddspark·netkeiba)** 만 신뢰한다.
+                try:
+                    _hp, _, _ = _hist_path(rk)
+                    _hd, _ = _json_load_guard(_hp, {"snapshots": []}, tag="roster")
+                    for _s in (_hd.get("snapshots") or [])[-40:]:
+                        if str(_s.get("src") or "").startswith(("oddspark", "netkeiba")):
+                            for _k in (_s.get("quinella") or {}):
+                                for _x in str(_k).replace("-", "+").split("+"):
+                                    if _x.isdigit():
+                                        _roster.add(int(_x))
+                except Exception:
+                    pass
                 core_picks["rosterNos"] = sorted(_roster) or None
                 if len(_roster) >= 2:
                     def _in_roster(_c):

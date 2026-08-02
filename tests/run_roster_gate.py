@@ -91,47 +91,69 @@ def main():
     if not r5:
         fails.append("⑤ 발송단 검사가 추천단보다 앞에 있다")
 
-    # ⑥ 🔴 과거 실데이터로 발동 규모 확인 — 4.3% 근처여야 한다(0% 면 아무것도 안 재는 것)
+    # ⑥⑦ 🔴 과거 실데이터 소급 — **발동 규모 + 오탐률**을 함께 잰다.
+    #   🔴 [2026-08-02 교훈] 오탐을 안 재고 켠 가드가 실제로 수집을 죽였다(netkeiba guard).
+    #     그리고 이 게이트도 **출마표만 쓰던 첫 판은 오탐 83.3%** 였다.
+    #     ⇒ **오탐률을 재지 않은 가드는 켜지 않는다.**
+    def _nos(q):
+        s = set()
+        for k in (q or {}):
+            for x in str(k).replace("-", "+").split("+"):
+                if x.isdigit():
+                    s.add(int(x))
+        return s
     try:
         import glob
-        tot = bad = 0
-        for f in sorted(glob.glob(os.path.join(BASE, "data", "kakao_sent", "*.json"))):
-            day = os.path.basename(f)[:8]
-            day = "%s_%s_%s" % (day[:4], day[4:6], day[6:8])
-            d = json.load(open(f, encoding="utf-8"))
-            items = d if isinstance(d, list) else (d.get("items") or [])
-            for it in items:
-                if not isinstance(it, dict):
-                    continue
-                nos = set()
-                for c in (it.get("quinellas") or []) + (it.get("trifectas") or []):
-                    nos |= set(c.get("combo") or [])
-                if not nos:
-                    continue
-                lf = os.path.join(BASE, "data", "analysis_log",
-                                  "%s_%s.json" % (day, str(it.get("raceKey") or "").replace(" ", "_")))
-                if not os.path.exists(lf):
-                    continue
-                dd = json.load(open(lf, encoding="utf-8"))
-                rs = set()
-                for e in ((dd.get("raw_profile") or {}).get("entries") or []):
-                    try:
-                        rs.add(int(e["no"]))
-                    except Exception:
-                        pass
-                if len(rs) < 2:
-                    continue
-                tot += 1
-                if nos - rs:
-                    bad += 1
-        rate = 100.0 * bad / max(tot, 1)
-        r6 = tot >= 100 and bad > 0
-        print("  %s ⑥ 과거 발동 규모        %d/%d = %.1f%% (0%% 이면 검사가 무의미)"
-              % ("✅" if r6 else "🔴", bad, tot, rate))
+        applied = cutn = fpn = 0
+        for f in sorted(glob.glob(os.path.join(BASE, "data", "analysis_log", "2026_0*.json"))):
+            try:
+                d = json.load(open(f, encoding="utf-8"))
+            except Exception:
+                continue
+            cp = d.get("corePicks") or {}
+            combos = []
+            for k in ("finalQuinellas", "finalTrifectas", "bmedSpecial"):
+                for it in (cp.get(k) or []):
+                    if it.get("combo"):
+                        combos.append([int(x) for x in it["combo"]])
+            if not combos:
+                continue
+            rs = set()
+            for e in ((d.get("raw_profile") or {}).get("entries") or []):
+                try:
+                    rs.add(int(e["no"]))
+                except Exception:
+                    pass
+            srv = set()
+            try:
+                h = json.load(open(f.replace("analysis_log", "odds_history"), encoding="utf-8"))
+                for s in (h.get("snapshots") or []):
+                    if str(s.get("src") or "").startswith(("oddspark", "netkeiba")):
+                        srv |= _nos(s.get("quinella"))
+            except Exception:
+                pass
+            rr = rs | srv                      # 🔴 출마표 ∪ 서버수집(private 제외)
+            if len(rr) < 2:
+                continue
+            applied += 1
+            for c in combos:
+                if not all(x in rr for x in c):
+                    cutn += 1
+                    if srv and all(x in srv for x in c):
+                        fpn += 1               # 서버 배당에 실재 = 살 수 있는 조합 = **오탐**
+        rate = 100.0 * fpn / max(cutn, 1)
+        r6 = applied >= 100 and cutn > 0
+        print("  %s ⑥ 소급 발동 규모        적용 %d경주 · 차단 %d조합 (0 이면 검사가 무의미)"
+              % ("✅" if r6 else "🔴", applied, cutn))
+        r7 = (fpn == 0)
+        print("  %s ⑦ 🔴 오탐률             %d/%d = %.1f%% (기대 0%% · 오탐이 더 위험하다)"
+              % ("✅" if r7 else "🔴", fpn, cutn, rate))
         if not r6:
             fails.append("⑥ 과거 데이터에서 발동이 0 — 검사가 아무것도 안 잡는다")
+        if not r7:
+            fails.append("⑦ 🔴 오탐 %d건 — 정상 조합을 자른다. 켜면 안 된다" % fpn)
     except Exception as e:
-        print("  ⚠ ⑥ 과거 대조 실패(건너뜀):", str(e)[:80])
+        print("  ⚠ ⑥⑦ 과거 대조 실패(건너뜀):", str(e)[:80])
 
     print()
     if fails:
