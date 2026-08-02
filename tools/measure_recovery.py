@@ -203,6 +203,9 @@ def load_races(sport="cycle", pattern="2026_07_*"):
                     "dk": [int(x.get("no")) for x in (cp.get("darkHorsePicks") or [])
                            if x.get("no") is not None],
                     "hs": [x for x in (d.get("horses") or []) if x.get("no") is not None],
+                    # 🔴 [2026-08-02] bmedSpecial 조건부 편입 측정용. 동결값 우선(마감 시점 신호).
+                    "sig": int((((d.get("frozen") or {}).get("strong_signals")
+                                 or d.get("strong_signals") or {}).get("count")) or 0),
                     "day": m.group(1) if m else "?"})
     return out
 
@@ -250,6 +253,113 @@ def _sort_pool(r, key, rev=True):
     return [x["c"] for x in uniq[:k]]
 
 
+def measure_trio_dark(sport="cycle", pattern="2026_0*"):
+    """[2026-08-02 신설] **축 2두(유력마 1·2위) + 복병 1두** 삼복승 성적.
+
+    🔴 착안: 복병 1순위의 3착 이내 배수는 1.27(경륜·n=622)로 실재하는데
+      복승(1·2착) 기여는 약하다 ⇒ **복병은 삼복승 재료일 수 있다**(대표 가설).
+    ⚠ 적중 = 조합이 top3 집합과 일치. 배당 = `trio` 우선(없으면 `trifecta`) — 마권 혼재 정정 규칙 준수.
+    ⚠ 경마 삼복승은 **섀도우 유지 중**이라 실전 반영 불가(측정만).
+    """
+    import glob as _g
+    rows = []
+    for f in sorted(_g.glob(os.path.join(BASE, "data", "analysis_log", pattern + ".json"))):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        if (d.get("sport") or "") != sport:
+            continue
+        res = d.get("result") or {}
+        pay = res.get("payouts") or {}
+        po = pay.get("trio") if pay.get("trio") is not None else pay.get("trifecta")
+        t3 = [res.get("1st"), res.get("2nd"), res.get("3rd")]
+        if not po or any(x is None for x in t3):
+            continue
+        cp = d.get("corePicks") or {}
+        kh = [int(x) for x in (d.get("keyHorses") or [])][:2]
+        dk = [int(x.get("no")) for x in (cp.get("darkHorsePicks") or []) if x.get("no") is not None]
+        if len(kh) < 2 or not dk:
+            continue
+        rows.append({"kh": kh, "dk": dk, "po": float(po),
+                     "top3": sorted(int(x) for x in t3)})
+    return rows
+
+
+def report_trio_dark(rows, label, drank=1):
+    sel = []
+    for r in rows:
+        ds = [r["dk"][0]] if drank == 1 else r["dk"][:3]
+        for x in ds:
+            if x in r["kh"]:
+                continue
+            sel.append((sorted(r["kh"] + [x]) == r["top3"], r["po"]))
+    n = len(sel)
+    if not n:
+        print("  %-18s n=0 판정 불가" % label)
+        return
+    hits = sorted([p for ok, p in sel if ok], reverse=True)
+    tot = sum(hits)
+    rr = 100.0 * tot / n
+    ex1 = 100.0 * sum(hits[1:]) / max(n - 1, 1)
+    ex3 = 100.0 * sum(hits[3:]) / max(n - 3, 1)
+    med = statistics.median(hits) if hits else 0
+    print("  %-18s 구좌 %4d · 적중 %3d · 회수율 %6.1f%% · 1제외 %6.1f%% · 3제외 %6.1f%% · 배당중앙 %.1f배 %s"
+          % (label, n, len(hits), rr, ex1, ex3, med, "⚠n<30" if n < 30 else ""))
+
+
+def _bm_cross(r, drank=None):
+    """bmedSpecial 중 **한 말은 유력마 · 다른 말은 복병**인 조합만.
+
+    drank=1 이면 복병 1순위만 · 23 이면 복병 2~3순위만(`darkHorsePicks` 순서 = 순위).
+    ⚠ 두 말이 모두 유력마이거나 모두 복병이면 '교차'가 아니다.
+    """
+    kh = set(r.get("kh") or [])
+    dk = r.get("dk") or []
+    out = []
+    for c in (r.get("bm") or []):
+        if len(c) != 2:
+            continue
+        a, b = c
+        pair = None
+        if a in kh and b in dk and b not in kh:
+            pair = dk.index(b) + 1
+        elif b in kh and a in dk and a not in kh:
+            pair = dk.index(a) + 1
+        if pair is None:
+            continue
+        if drank == 1 and pair != 1:
+            continue
+        if drank == 23 and pair not in (2, 3):
+            continue
+        out.append(c)
+    return out
+
+
+def _drop_low(r, k):
+    """유력마 3두 전조합에서 **배당 낮은 것 k개**를 뺀다(구좌가 늘지 않는다).
+
+    ⚠ 배당을 모르는 조합은 맨 뒤(=남는 쪽)로 보낸다 — 모르는 것이 유리해지면 안 된다.
+    """
+    cs = [c for c in _allc(r["kh"])]
+    if not cs:
+        return []
+    q = r.get("q") or {}
+    big = float("inf")
+    cs.sort(key=lambda c: (q.get(tuple(c)) if q.get(tuple(c)) is not None else big))
+    return cs[k:] if len(cs) > k else []
+
+
+def _gap3(r):
+    """유력마 3두 세 조합의 **최고 ÷ 최저 배당**. 셋 다 배당이 있어야 낸다(없으면 None)."""
+    q = r.get("q") or {}
+    vs = [q.get(tuple(c)) for c in _allc(r["kh"])]
+    vs = [v for v in vs if v]
+    if len(vs) < 3:
+        return None
+    return max(vs) / min(vs) if min(vs) else None
+
+
 # 🔴 오늘 잰 11개 안을 함수로 고정. 새 안은 여기에만 추가한다.
 PLANS = [
     ("현행(기준선)", lambda r: r["dc"]),
@@ -283,6 +393,27 @@ PLANS = [
     ("정렬② EV 순", lambda r: _sort_pool(r, "ev")),
     ("정렬③ 신호강도(stars) 순", lambda r: _sort_pool(r, "stars")),
     ("정렬④ 배당 높은순", lambda r: _sort_pool(r, "odds")),
+    # 🔴 [2026-08-02 신설] **유력마 3두 안에서 최저배당 조합을 뺀다.**
+    #   착안(사세보 4R): 같은 유력마 3두(1·5·6) 안인데 `1+5=2.0배` ↔ `1+6=27.7배` 로 **13.8배 차이**다.
+    #   현행은 배당 낮은순 정렬이라 **2.0배를 산다**. ⇒ 고배당은 유력마 **밖**만이 아니라 **안**에도 있다.
+    #   ⚠ 이 안은 **구좌가 늘지 않는다**(오히려 준다) — 조합 확대안이 기각된 이유를 피한다.
+    #   ⚠ 배당을 모르는 조합은 뒤로 보낸다(정렬에서 유리해지지 않게).
+    # 🔴 [2026-08-02 신설] **bmedSpecial 조건부 편입**. 삿포로 6R 에서 복병 10번 × 유력마 3번 교차
+    #   `[3,10]` 23.0배를 **만들어놓고 표시 명단에서 뺐다**(10번 우승).
+    #   ⚠ 단순 전량 편입은 어제 실측 회수율 **37.4%** 로 근거가 없다 — **조건을 좁혀** 잰다.
+    #   ⚠ 아래는 전부 **그 부분집합만** 사는 안이다(현행에 더하는 것이 아니다 · 구좌 비교 주의).
+    ("BMED 전체만", lambda r: r["bm"]),
+    ("BMED 복병×유력마 교차만", lambda r: _bm_cross(r)),
+    ("BMED 교차·복병1순위", lambda r: _bm_cross(r, drank=1)),
+    ("BMED 교차·복병2~3순위", lambda r: _bm_cross(r, drank=23)),
+    ("BMED 교차·신호2개+", lambda r: _bm_cross(r) if r.get("sig", 0) >= 2 else []),
+    ("BMED 교차·신호3개+", lambda r: _bm_cross(r) if r.get("sig", 0) >= 3 else []),
+    ("BMED 교차·10~30배", lambda r: [c for c in _bm_cross(r)
+                                  if r["q"].get(tuple(c)) and 10 <= r["q"][tuple(c)] <= 30]),
+    ("BMED 교차·30~50배", lambda r: [c for c in _bm_cross(r)
+                                  if r["q"].get(tuple(c)) and 30 < r["q"][tuple(c)] <= 50]),
+    ("유력마3두 최저1제외(2개)", lambda r: _drop_low(r, 1)),
+    ("유력마3두 최저2제외(1개)", lambda r: _drop_low(r, 2)),
 ]
 
 
