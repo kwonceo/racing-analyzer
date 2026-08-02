@@ -4679,6 +4679,19 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-01"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "호후 4경주",
+      "total_combos_dropped": 5,
+      "drop_ratio": 0.455,
+      "result": "4+6",
+      "result_odds": "중배당",
+      "result_quinella_odds": 16.8,
+      "signal_result_combo": null,
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1785631799.7959263
     }
   ],
   "condition_stats": {
@@ -4691,11 +4704,11 @@
       "hit": 940
     },
     "대규모급락": {
-      "count": 5,
+      "count": 6,
       "high_odds": 0,
       "recommended_hit": 2,
       "high_odds_rate": 0.0,
-      "hit_rate": 40.0
+      "hit_rate": 33.3
     },
     "이상감지동반": {
       "count": 1418,
