@@ -71,6 +71,11 @@ def _mark_pending_today(items):
     """
     n = 0
     for it in items:
+        # 🔴 [2026-08-03] **종결 항목이 우선한다.** F1 은 당일 의존 목록에도 있어
+        #   그대로 두면 `⏳미확정(진행 중)` 으로 잡혀 **종결 사실이 화면에서 가려진다.**
+        #   ⇒ note 에 종결 표시가 있으면 재분류하지 않는다.
+        if "🏁 종결" in str(it.get("note") or ""):
+            continue
         if it.get("id") not in DAY_DEPENDENT or it.get("ok") is not None:
             continue
         it["pendingToday"] = True                       # 소비자(카카오·화면)가 읽는 플래그
@@ -386,6 +391,23 @@ _PENDING = [
 ]
 
 
+# ── 🏁 [2026-08-03] Gemini 독립 예측 **종결** ────────────────────────────────
+#   F2·F3 **동시 열위**로 종결했다(판정선 변별 100·동률 제외를 낮추지 않고 도달 후 판정).
+#     F2 Gemini 1.73 ↔ 시장 1.94 · 변별 102(우위 31 · 동률 134 · 열위 71)
+#     F3 단독 적중 57 ↔ 98 · 가상 회수율 70.4 ↔ 70.7(동률) · 3제외 53.8 ↔ 62.3
+#   🔴 **분모(24)에서 빼지 않는다** — 빼면 "몇 개를 접었는지"가 화면에서 사라진다.
+#     미구현을 목록에 남기는 원칙과 같은 이유다. `ok=None` + 사유로 **미충족·미측정과 구분**한다.
+#   🔧 되살리려면 `gemini_forecast.FORECAST_TERMINATED = False` 로 바꾼다(그때 이 상수도 함께 내린다).
+FORECAST_TERMINATED = True
+_TERM_NOTE = "🏁 종결(2026-08-03 · F2·F3 동시 열위 — 판정선 미달)"
+
+
+def _terminated(idn, title, denom, basis):
+    """종결 항목을 **분모에 남긴 채** ok=None 으로 돌려준다(미측정과 사유로 구분)."""
+    return _mk(idn, "⑤ 예측 검증", title, denom,
+               current=None, target=None, ok=None, n=None, note=_TERM_NOTE, reason=basis)
+
+
 def check_forecast_discard():
     """⑤-1 Gemini 예측 **폐기율** ≤20% (판정선: 30경주 도달 시 형식 점검).
 
@@ -394,6 +416,10 @@ def check_forecast_discard():
     ⚠ 폐기는 형식 검증 실패(키 누락·명단 밖 번호·confidence 범위 이탈)로 **통째 폐기**된 건이다.
       부분 채택은 하지 않는다.
     """
+    if FORECAST_TERMINATED:
+        return _terminated("F1", "Gemini 예측 폐기율",
+                           "종결 전 분모 유지(재개 시 그대로 쓴다)", "판정선을 낮추지 않고 도달 후 판정했다")
+
     # 🔴 [2026-07-31] 종전에는 `logs/forecast` 의 **전체 파일**을 셌다 — 어제·그제 것이 섞여
     #   당일 폐기율의 분모가 부풀었다(원칙 8-B: 같은 목록에서 분모를 통일할 것).
     #   ⇒ 당일 접두사(`YYYYMMDD_`)로 제한한다.
@@ -427,6 +453,10 @@ def check_forecast_vs_market():
     ⚠ 시장 대조군은 **마감 전(T-8~T-0)** 스냅샷의 단승 최저 3두다.
       마감 후 배당을 쓰면 시장이 유리해져 비교가 성립하지 않는다.
     """
+    if FORECAST_TERMINATED:
+        return _terminated("F2", "Gemini 적중 ≥ 시장 적중",
+                           "종결 전 분모 유지(재개 시 그대로 쓴다)", "판정선을 낮추지 않고 도달 후 판정했다")
+
     d = os.path.join(BASE, "logs", "forecast")
     g, m, n = 0, 0, 0
     win = tie = lose = 0
@@ -480,6 +510,10 @@ def check_forecast_highodds():
       시장 단독 적중(= 시장만 찍은 말이 3착 안)과 **건수·배당중앙**을 대조한다.
     ⚠ 상세(가상 회수율·구간별 분포)는 `measure_recovery.py --forecast` 가 낸다. 여기서는 요약만이다.
     """
+    if FORECAST_TERMINATED:
+        return _terminated("F3", "Gemini 고배당 능력(시장과 다른 답 && 적중)",
+                           "종결 전 분모 유지(재개 시 그대로 쓴다)", "판정선을 낮추지 않고 도달 후 판정했다")
+
     d = os.path.join(BASE, "logs", "forecast")
     g_hit, m_hit = [], []
     diff_n = 0
