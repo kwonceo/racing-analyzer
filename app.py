@@ -22586,7 +22586,10 @@ _ODDSPARK_HEADERS = {
 #   ⚠ oddspark(경륜)·keiba.go.jp(지방)·한국은 **URL 이 달라 무영향**이다.
 #   🔴 **자동 재개하지 않는다.** 재개는 요청 간격·상한을 넣고 **사람이 판단해서** 켠다.
 #   🔧 되돌리기: 이 값을 True 로 바꾸는 것 하나. 코드는 지우지 않았다.
-NETKEIBA_ENABLED = False
+#   ✅ [2026-08-02 09:1x · 승인 ②] IP 변경 후 수동 1회 요청이 **HTTP 200**(54,583B · 0.284초)
+#      ⇒ 차단은 **IP 기반**이었다. 이제 요청 제한(netkeiba_guard)을 통과해야만 나간다.
+#      ⚠ `JRA_COLLECT_ENABLED` 는 **아직 False** — 배당 루프는 안 돈다(단계 ③에서 켠다).
+NETKEIBA_ENABLED = True
 _NETKEIBA_BLOCKED_N = 0
 try:                                   # ⚠ 없어도 서버가 죽지 않는다(격리)
     import netkeiba_guard
