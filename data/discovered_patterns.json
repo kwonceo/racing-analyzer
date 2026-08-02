@@ -1,6 +1,6 @@
 {
- "generated_at": 1785667819.9738648,
- "races_with_result": 1711,
+ "generated_at": 1785669036.1692173,
+ "races_with_result": 1712,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -10,7 +10,7 @@
    "key": "timing:T-3분",
    "desc": "급락이 T-3분에 발생한 경주",
    "rate": 57.3,
-   "baseline": 36.5,
+   "baseline": 36.6,
    "lift": 20.8,
    "support": 150,
    "hit": 86
@@ -20,7 +20,7 @@
    "key": "timing:T-5분",
    "desc": "급락이 T-5분에 발생한 경주",
    "rate": 56.8,
-   "baseline": 36.5,
+   "baseline": 36.6,
    "lift": 20.3,
    "support": 190,
    "hit": 108
@@ -30,8 +30,8 @@
    "key": "timing:T-10분",
    "desc": "급락이 T-10분에 발생한 경주",
    "rate": 53.9,
-   "baseline": 36.5,
-   "lift": 17.4,
+   "baseline": 36.6,
+   "lift": 17.3,
    "support": 269,
    "hit": 145
   },
@@ -40,7 +40,7 @@
    "key": "timing:T-2분",
    "desc": "급락이 T-2분에 발생한 경주",
    "rate": 52.2,
-   "baseline": 36.5,
+   "baseline": 36.6,
    "lift": 15.7,
    "support": 90,
    "hit": 47
@@ -50,41 +50,41 @@
    "key": "had_drop",
    "desc": "급락(자금유입) 동반 경주",
    "rate": 52.0,
-   "baseline": 36.5,
-   "lift": 15.4,
-   "support": 891,
-   "hit": 463
+   "baseline": 36.6,
+   "lift": 15.5,
+   "support": 892,
+   "hit": 464
   },
   {
    "type": "배당변화",
    "key": "strong_drop",
    "desc": "30%+ 강한 급락 동반 경주",
-   "rate": 51.1,
-   "baseline": 36.5,
-   "lift": 14.5,
-   "support": 605,
-   "hit": 309
+   "rate": 51.2,
+   "baseline": 36.6,
+   "lift": 14.6,
+   "support": 606,
+   "hit": 310
   },
   {
    "type": "배당변화",
    "key": "had_reversal",
    "desc": "쌍승 역전 동반 경주",
    "rate": 50.0,
-   "baseline": 36.5,
-   "lift": 13.5,
+   "baseline": 36.6,
+   "lift": 13.4,
    "support": 74,
    "hit": 37
   },
   {
    "type": "전적점수",
    "key": "form_range",
-   "desc": "적중 경주 상위등급마 전적점수 주로 73.7~107.7 구간",
+   "desc": "적중 경주 상위등급마 전적점수 주로 73.6~107.7 구간",
    "range": [
-    73.7,
+    73.6,
     107.7
    ],
-   "support": 1492
+   "support": 1496
   }
  ],
- "baseline_hit_rate": 36.5
+ "baseline_hit_rate": 36.6
 }
