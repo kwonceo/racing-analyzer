@@ -1,55 +1,6 @@
 {
   "patterns": [
     {
-      "race": "오오이 6경주",
-      "horse_no": 7,
-      "recent_avg": 9.4,
-      "win_place": 2,
-      "conditions": [
-        "급락91%",
-        "복승이상감지"
-      ],
-      "date": "2026-07-21"
-    },
-    {
-      "race": "오오이 7경주",
-      "horse_no": 3,
-      "recent_avg": 4.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-21"
-    },
-    {
-      "race": "오오이 7경주",
-      "horse_no": 9,
-      "recent_avg": 6.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-21"
-    },
-    {
-      "race": "오오이 7경주",
-      "horse_no": 5,
-      "recent_avg": 11.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-21"
-    },
-    {
-      "race": "모리오카 12경주",
-      "horse_no": 4,
-      "recent_avg": 5.6,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-21"
-    },
-    {
       "race": "모리오카 12경주",
       "horse_no": 3,
       "recent_avg": 4.8,
@@ -4681,16 +4632,62 @@
         "복승이상감지"
       ],
       "date": "2026-08-02"
+    },
+    {
+      "race": "모리오카 8경주",
+      "horse_no": 10,
+      "recent_avg": 4.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-02"
+    },
+    {
+      "race": "모리오카 8경주",
+      "horse_no": 2,
+      "recent_avg": 7.6,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-08-02"
+    },
+    {
+      "race": "코치 3경주",
+      "horse_no": 4,
+      "recent_avg": 9.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-02"
+    },
+    {
+      "race": "코치 3경주",
+      "horse_no": 8,
+      "recent_avg": 8.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-02"
+    },
+    {
+      "race": "코치 3경주",
+      "horse_no": 2,
+      "recent_avg": 7.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-02"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2135,
-      "hit": 404
+      "count": 2146,
+      "hit": 406
     },
     "전체부진마": {
-      "count": 3601,
-      "hit": 966
+      "count": 3617,
+      "hit": 971
     },
     "대규모급락": {
       "count": 6,
@@ -4700,8 +4697,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 1466,
-      "hit": 562
+      "count": 1471,
+      "hit": 565
     },
     "급락동반": {
       "count": 270,
@@ -5078,39 +5075,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 623,
-    "hit": 505,
+    "count": 625,
+    "hit": 507,
     "cases": [
-      {
-        "race": "세이부엔 7경주",
-        "date": "2026-07-29",
-        "smart_horses": [
-          1,
-          7
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": 18.3,
-        "high_odds": false
-      },
-      {
-        "race": "소노다 2경주",
-        "date": "2026-07-30",
-        "smart_horses": [
-          1,
-          2,
-          10
-        ],
-        "placed": [
-          1,
-          10
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 3.2,
-        "high_odds": false
-      },
       {
         "race": "소노다 4경주",
         "date": "2026-07-30",
@@ -6643,6 +6610,39 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 8경주",
+        "date": "2026-08-02",
+        "smart_horses": [
+          9,
+          3,
+          10
+        ],
+        "placed": [
+          3,
+          10
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "코치 3경주",
+        "date": "2026-08-02",
+        "smart_horses": [
+          4,
+          3,
+          6
+        ],
+        "placed": [
+          4
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.8,
         "high_odds": false
       }
     ],
