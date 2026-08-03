@@ -1,0 +1,112 @@
+{
+ "raceKey": "오비히로 5경주",
+ "entries": [
+  {
+   "time": "16:35:15",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      8
+     ],
+     [
+      4,
+      8
+     ],
+     [
+      8,
+      10
+     ],
+     [
+      2,
+      10
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      4,
+      8
+     ],
+     [
+      2,
+      4,
+      9
+     ],
+     [
+      1,
+      2,
+      8
+     ],
+     [
+      2,
+      4,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "16:45:01",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       1,
+       5
+      ],
+      "prev": 329.0,
+      "cur": 178.8,
+      "pct": -45.7
+     },
+     {
+      "combo": [
+       2,
+       10
+      ],
+      "prev": 7.9,
+      "cur": 5.0,
+      "pct": -36.7
+     },
+     {
+      "combo": [
+       2,
+       9
+      ],
+      "prev": 129.1,
+      "cur": 82.4,
+      "pct": -36.2
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

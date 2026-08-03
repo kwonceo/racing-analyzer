@@ -1,0 +1,189 @@
+{
+ "raceKey": "카나자와 8경주",
+ "entries": [
+  {
+   "time": "19:20:39",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      9,
+      10
+     ],
+     [
+      10,
+      12
+     ],
+     [
+      7,
+      10
+     ],
+     [
+      7,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      7,
+      9,
+      10
+     ],
+     [
+      9,
+      10,
+      12
+     ],
+     [
+      7,
+      10,
+      12
+     ],
+     [
+      3,
+      7,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "19:30:12",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       5,
+       8
+      ],
+      "prev": 323.1,
+      "cur": 133.3,
+      "pct": -58.7
+     },
+     {
+      "combo": [
+       2,
+       5
+      ],
+      "prev": 740.6,
+      "cur": 326.4,
+      "pct": -55.9
+     },
+     {
+      "combo": [
+       7,
+       8
+      ],
+      "prev": 40.6,
+      "cur": 21.5,
+      "pct": -47.0
+     },
+     {
+      "combo": [
+       4,
+       8
+      ],
+      "prev": 106.4,
+      "cur": 59.7,
+      "pct": -43.9
+     },
+     {
+      "combo": [
+       4,
+       7
+      ],
+      "prev": 79.7,
+      "cur": 45.6,
+      "pct": -42.8
+     },
+     {
+      "combo": [
+       6,
+       8
+      ],
+      "prev": 116.1,
+      "cur": 67.2,
+      "pct": -42.1
+     },
+     {
+      "combo": [
+       5,
+       7
+      ],
+      "prev": 160.1,
+      "cur": 94.3,
+      "pct": -41.1
+     },
+     {
+      "combo": [
+       5,
+       6
+      ],
+      "prev": 538.6,
+      "cur": 342.1,
+      "pct": -36.5
+     },
+     {
+      "combo": [
+       2,
+       4
+      ],
+      "prev": 230.8,
+      "cur": 147.9,
+      "pct": -35.9
+     },
+     {
+      "combo": [
+       4,
+       5
+      ],
+      "prev": 341.8,
+      "cur": 223.6,
+      "pct": -34.6
+     },
+     {
+      "combo": [
+       5,
+       10
+      ],
+      "prev": 110.4,
+      "cur": 72.8,
+      "pct": -34.1
+     },
+     {
+      "combo": [
+       2,
+       8
+      ],
+      "prev": 121.7,
+      "cur": 84.5,
+      "pct": -30.6
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

@@ -126,5 +126,79 @@
   "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_03_모리오카_3경주.json'",
   "quarantined": null,
   "time": "12:46:49"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_03_모리오카_6경주.json",
+  "tag": "odds_history/_history_append",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_03_모리오카_6경주.json'",
+  "quarantined": null,
+  "time": "14:47:48"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_03_후나바시_3경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_03_후나바시_3경주.json'",
+  "quarantined": null,
+  "time": "15:51:49"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_03_오비히로_4경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_03_오비히로_4경주.json'",
+  "quarantined": null,
+  "time": "16:25:50"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_03_오비히로_5경주.json",
+  "tag": "roster",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_03_오비히로_5경주.json'",
+  "quarantined": null,
+  "time": "16:41:50"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_03_오비히로_7경주.json",
+  "tag": "roster",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_03_오비히로_7경주.json'",
+  "quarantined": null,
+  "time": "17:43:48"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_03_후나바시_9경주.json",
+  "tag": "roster",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_03_후나바시_9경주.json'",
+  "quarantined": null,
+  "time": "18:55:49"
+ },
+ {
+  "raceKey": "楽天 7경주",
+  "snapshots": 0,
+  "postEpoch": 1785750600.0,
+  "time": "20:25:53"
+ },
+ {
+  "raceKey": "楽天 8경주",
+  "snapshots": 0,
+  "postEpoch": 1785753000.0,
+  "time": "20:25:53"
+ },
+ {
+  "raceKey": "楽天 9경주",
+  "snapshots": 0,
+  "postEpoch": 1785755100.0,
+  "time": "20:25:53"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_03_후나바시_12경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_03_후나바시_12경주.json'",
+  "quarantined": null,
+  "time": "22:09:48"
  }
 ]

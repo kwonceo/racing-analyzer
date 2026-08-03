@@ -1,0 +1,284 @@
+{
+ "raceKey": "후나바시 6경주",
+ "entries": [
+  {
+   "time": "17:10:29",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      5,
+      12
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      5,
+      13
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      1,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      5,
+      7
+     ],
+     [
+      5,
+      7,
+      12
+     ],
+     [
+      5,
+      6,
+      7
+     ],
+     [
+      1,
+      6,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:19:51",
+   "minutesBefore": 0,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [
+     [
+      5,
+      6,
+      11
+     ],
+     [
+      5,
+      6,
+      13
+     ],
+     [
+      5,
+      12,
+      13
+     ],
+     [
+      5,
+      6,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:19:59",
+   "minutesBefore": 0,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      5,
+      8
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      8
+     ],
+     [
+      5,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      5,
+      7
+     ],
+     [
+      2,
+      5,
+      9
+     ],
+     [
+      5,
+      7,
+      8
+     ],
+     [
+      2,
+      5,
+      6
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:20:09",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       10,
+       13
+      ],
+      "prev": 517.4,
+      "cur": 137.3,
+      "pct": -73.5
+     },
+     {
+      "combo": [
+       11,
+       13
+      ],
+      "prev": 159.0,
+      "cur": 49.9,
+      "pct": -68.6
+     },
+     {
+      "combo": [
+       1,
+       13
+      ],
+      "prev": 73.9,
+      "cur": 27.2,
+      "pct": -63.2
+     },
+     {
+      "combo": [
+       6,
+       13
+      ],
+      "prev": 82.7,
+      "cur": 30.8,
+      "pct": -62.8
+     },
+     {
+      "combo": [
+       5,
+       10
+      ],
+      "prev": 177.1,
+      "cur": 87.2,
+      "pct": -50.8
+     },
+     {
+      "combo": [
+       10,
+       11
+      ],
+      "prev": 1207.2,
+      "cur": 649.8,
+      "pct": -46.2
+     },
+     {
+      "combo": [
+       8,
+       13
+      ],
+      "prev": 168.8,
+      "cur": 92.6,
+      "pct": -45.1
+     },
+     {
+      "combo": [
+       4,
+       13
+      ],
+      "prev": 383.4,
+      "cur": 220.5,
+      "pct": -42.5
+     },
+     {
+      "combo": [
+       3,
+       13
+      ],
+      "prev": 412.6,
+      "cur": 239.2,
+      "pct": -42.0
+     },
+     {
+      "combo": [
+       1,
+       10
+      ],
+      "prev": 582.0,
+      "cur": 381.6,
+      "pct": -34.4
+     },
+     {
+      "combo": [
+       7,
+       13
+      ],
+      "prev": 59.2,
+      "cur": 39.0,
+      "pct": -34.1
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

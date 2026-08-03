@@ -1,0 +1,101 @@
+{
+ "raceKey": "후나바시 5경주",
+ "entries": [
+  {
+   "time": "16:40:25",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      11
+     ],
+     [
+      6,
+      11
+     ],
+     [
+      4,
+      11
+     ],
+     [
+      2,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      6,
+      11
+     ],
+     [
+      2,
+      8,
+      11
+     ],
+     [
+      4,
+      6,
+      11
+     ],
+     [
+      2,
+      4,
+      6
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "16:49:55",
+   "minutesBefore": 0,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [
+     [
+      2,
+      11,
+      12
+     ],
+     [
+      2,
+      8,
+      12
+     ],
+     [
+      2,
+      6,
+      11
+     ],
+     [
+      3,
+      6,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

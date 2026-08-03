@@ -12947,7 +12947,17 @@ BET_RULES = {
     #    🔴 측정은 `tools/measure_recovery.py --trio --pattern "2026_0*"` 하나로만 한다(즉석 집계 금지).
     # ⚠ 표시는 **상위 2개**로 제한한다(`trioShowMax`). 생성물은 종전대로 전부 보존한다.
     # 🔧 되돌리기: 이 dict 를 `True` 로 바꾸면 종전(전 종목 섀도우)으로 즉시 복귀.
-    "trioShadow": {"cycle": False, "japan": True, "korea": True},
+    # 🔴 [2026-08-03 되돌림] 경륜 삼복승을 **다시 섀도우로** 돌린다(`cycle: False` → `True`).
+    #   ✏️ 2026-08-01 해제 근거 **76.6%는 `shadowWouldBet`(가상 집합) 기준**이었다.
+    #     🔴 **실제 판정 명단(`displayedCombos.trifectas`) 으로 재니 전혀 다르다**:
+    #       전체      구좌 200 · 적중 7.5% · 회수율 **42.3%** · **3제외 24.3%**
+    #       해제 후만 구좌  86 · 적중 4.7% · 회수율 **17.4%** · **3제외  1.3%**
+    #       날짜별 3제외 0.0 / 0.0 / 19.9 / -0.0% — **한 번도 74.5% 근처에 간 적이 없다**
+    #     ⚠ 가상 집합(598구좌)은 96.4%·3제외 73.8% 로 보이지만 **실전 분모가 아니다.**
+    #   🔴 **교훈: 판정선은 실제 실전에 나가는 분모로 잰다.** 가상 집합으로 재고 실전을 결정하지 않는다.
+    #   ⚠ 경마(japan)·한국(korea)은 종전대로 섀도우 유지 — 변화 없다.
+    #   🔧 되돌리기: `"cycle": False` 로 바꾼다(단, 실제 명단 기준 3제외 ≥74.5% · n≥150 을 먼저 확인할 것).
+    "trioShadow": {"cycle": True, "japan": True, "korea": True},
     "trioShowMax": 2,        # 섀도우 해제 종목의 삼복승 표시·판정 최대 개수
     "minQ": 2,               # ⚠ 단방 금지 — 메인 복승은 최소 이 개수(생성분이 부족하면 있는 만큼)
     "alwaysRecommend": True,  # ⚠ 관망 금지 — 조건 미달이어도 추천은 준다. 판단은 등급으로 알리고 회원이 한다
@@ -31825,7 +31835,34 @@ def _multi_collect_one(track, race, ymd):
             _prev0 = _tdb0.get(key) or {}
             _src0 = str(_prev0.get("source") or "")
             _age0 = time.time() - (_prev0.get("t") or 0)
-            if _src0 and "oddspark" not in _src0 and _age0 < 90:
+            # 🔴 [ⓒ 경마만 oddspark 우선 · 2026-08-03 · **위치 이동**] ──────────────────
+            #   실사고: 처음엔 이 판정을 `_do_triple_ingest` **안**에 넣었다. 그런데 아래
+            #     `raise _SkipOddsparkBridge()` 가 **그 함수 호출 자체를 막아** 영영 도달하지 못했다.
+            #     실측: 오늘 경마 배당보유 48경주 중 두 소스 공존 **30경주**인데 발동 **0건**.
+            #   🔴 **교훈: 함수 안에 게이트를 넣기 전에 호출 경로를 먼저 확인한다.**
+            #     상위에서 raise·return 으로 빠져나가면 아래 코드는 영영 안 돈다.
+            #   근거: 경마 오염 **35.9%**(14/39) ↔ 경륜 7.1%(2/28). 확장이 17초 앞서는 대가로
+            #     경마의 3분의 1이 크게 틀린다. **신선하지만 틀린 값은 의미가 없다.**
+            #   ⚠ 경마만이다. 경륜·경정은 그대로(ⓑ 게이트로 충분) · 한국 KRA 는 확장이 유일 소스라 제외.
+            #   ⚠ `_do_triple_ingest` 안의 같은 판정은 **지우지 않는다** — 그 함수를 직접 부르는
+            #     다른 경로(확장 `triple_ingest` 등)에서는 여전히 유효하고, 여기서 이미 통과한 건은
+            #     `prev` 가 갱신돼 재판정에 걸리지 않는다(이중 차단이 아니다).
+            #   🔧 되돌리기: 이 블록만 지운다.
+            try:
+                _c_horse = (str(sport or "") == "horse" and str(category or "") != "korea"
+                            and not _KRA_TRACK_RE.search(str(key)))
+            except Exception:
+                _c_horse = False
+            if _c_horse and _src0 and "oddspark" not in _src0 and _age0 < 90:
+                print("🟢 [oddspark 우선·경마] %s: 사설(src=%s · %d초 전) 대신 **서버 수집을 쓴다** "
+                      "(경마 오염률 35.9% 실측)" % (key, _src0[:24], int(_age0)))
+                try:
+                    _ingest_reject_log(key, "oddspark 우선(경마) — 사설 보완 생략", "oddspark_bg",
+                                       {"prevSrc": _src0[:60], "ageSec": int(_age0),
+                                        "sport": sport, "category": category})
+                except Exception:
+                    pass
+            elif _src0 and "oddspark" not in _src0 and _age0 < 90:
                 # [역할 분담 완성 (2026-07-19)] 복승·히스토리는 사설 유지(신호 오염 방지), 서버가 가져온
                 #   쌍승·삼복승은 필드만 보완(확장이 탭 클릭 안 해도 3종 완성 — 사용자 원칙).
                 try:

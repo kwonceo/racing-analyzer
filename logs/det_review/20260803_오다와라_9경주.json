@@ -1,0 +1,89 @@
+{
+ "raceKey": "오다와라 9경주",
+ "entries": [
+  {
+   "time": "14:39:21",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      7
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      4,
+      7
+     ],
+     [
+      4,
+      7,
+      9
+     ],
+     [
+      2,
+      4,
+      5
+     ],
+     [
+      2,
+      4,
+      7
+     ]
+    ],
+    "linePairs": [
+     [
+      1,
+      5
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      6,
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "time": "14:49:56",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

@@ -158,6 +158,61 @@
     ],
     "linePairs": []
    }
+  },
+  {
+   "time": "14:30:07",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       2,
+       3
+      ],
+      "prev": 703.5,
+      "cur": 268.1,
+      "pct": -61.9
+     },
+     {
+      "combo": [
+       3,
+       9
+      ],
+      "prev": 320.4,
+      "cur": 140.0,
+      "pct": -56.3
+     },
+     {
+      "combo": [
+       4,
+       8
+      ],
+      "prev": 280.0,
+      "cur": 147.1,
+      "pct": -47.5
+     },
+     {
+      "combo": [
+       2,
+       6
+      ],
+      "prev": 554.6,
+      "cur": 337.8,
+      "pct": -39.1
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
   }
  ]
 }
