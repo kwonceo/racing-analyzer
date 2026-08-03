@@ -1960,6 +1960,56 @@ def _combo_map(combos):
     return m
 
 
+# ══════════ [ⓑ 두 소스 대조 게이트 (2026-08-03 승인)] ══════════
+#   임계 근거(전 기간 실측 · 두 소스 마지막 틱 **120초 이내**로 시각차를 통제한 66경주):
+#     괴리 0% 20건 · 0~10% 8 · 10~30% 20 · 30~50% 3 · 50%+ 15   (중앙 14.3% · 75p 40.0%)
+#     🔴 30~50% 구간이 **3건뿐**이라 그 사이가 비어 있다 = 자연스러운 경계다.
+#     발동률: >=30% 27.3% · >=40% 25.8% · **>=50% 22.7%** · >=60% 19.7% · >=70% 12.1%
+#   ⇒ **50% 를 쓴다.** 30% 는 10~30% 구간(정상 변동으로 보이는 20건)에 너무 가깝고,
+#     70% 는 오늘 사고 3건(57.1 · 62.1~71.9 · 63.0%) 중 일부를 놓친다.
+#   🟢 오늘 사고 3건은 50% 임계에 **전부 걸린다.**
+#   ⚠ 발동률 22.7% 는 원칙 18 의 적정 구간(5~30%) 안이다.
+#   ⚠ 공통 조합이 적으면 우연히 어긋날 수 있어 **최소 8쌍**을 함께 건다.
+SRC_DIVERGE_PCT = 50.0        # 공통 조합 중 '2배 이상 어긋난' 비율이 이 값 이상이면 사설 폐기
+SRC_DIVERGE_MIN_PAIRS = 8     # 그 판정에 필요한 최소 공통 조합 수
+
+
+def _src_divergence(prev_q, new_q):
+    """두 소스의 공통 조합 배당을 대조 → {n, off(%), med} 또는 None.
+
+    ⚠ 값만 본다(개수가 아니다) — 취소마로 조합이 줄어드는 것과 무관하다.
+    ⚠ 판정 불가(공통 부족·값 이상)면 None 을 돌려 **아무것도 막지 않는다.**
+    """
+    def _norm(qd):
+        out = {}
+        if isinstance(qd, dict):
+            for k, v in qd.items():
+                try:
+                    kk = tuple(sorted(int(x) for x in
+                                      (k if isinstance(k, (list, tuple)) else str(k).split("+"))))
+                    out[kk] = float(v)
+                except Exception:
+                    continue
+        elif isinstance(qd, list):
+            for it in qd:
+                try:
+                    c = it.get("combo") or []
+                    if len(c) == 2:
+                        out[tuple(sorted(int(x) for x in c))] = float(it.get("odds"))
+                except Exception:
+                    continue
+        return out
+    a, b = _norm(prev_q), _norm(new_q)          # a=사설(기존) · b=oddspark(새로 온 것)
+    common = [k for k in a if k in b and a[k] > 0 and b[k] > 0]
+    if len(common) < 5:
+        return None
+    rats = [a[k] / b[k] for k in common]
+    off = sum(1 for r in rats if r < 0.5 or r > 2.0) / len(rats) * 100.0
+    rats.sort()
+    med = rats[len(rats) // 2]
+    return {"n": len(common), "off": off, "med": med}
+
+
 def _oddspark_mapping_suspect(prev_q, new_q, min_pairs=6):
     """[③ 말번호 밀림 감지] 직전(배당판) 복승 조합 vs 새(oddspark) 복승 조합 비교.
     배당 '값'은 거의 같은데(=같은 경주) '말번호 매핑'이 절반 이상 다르면 밀림으로 판정.
@@ -2391,6 +2441,28 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     if _src_is_oddspark(source) and prev:
         _prev_src = prev.get("source") or ""
         _prev_fresh = (now - (prev.get("t") or 0)) <= 200
+        if _prev_src and (not _src_is_oddspark(_prev_src)) and _prev_fresh:
+            # 🔴 [ⓑ 두 소스 대조 게이트 · 2026-08-03 승인] ────────────────────────
+            #   실사고(오다와라 7R): 확장(private)이 1+6 을 **2.9배**로 보냈는데
+            #     배당판 화면과 oddspark 는 **85~92배**였다. 조합 수도 40개(10두면 45개)로 안 맞았다.
+            #     그 값으로 "시장 최저복승" 판정이 뒤집혀 **카카오까지 4.1배로 나갔다.**
+            #   🔴 '사설 우선'은 2026-08-01 에 "확장이 사용자가 보는 화면"이라는 근거로 넣었다.
+            #     같은 날 삿포로 9R 로 **중앙만** 되돌렸고 **지방·경륜은 그대로 남아** 오늘 사고가 났다.
+            #   ⇒ 우선순위를 바꾸지 않고(그건 ⓒ·검증 후), **값이 크게 어긋날 때만** 사설을 버린다.
+            #   ⚠ 한계: **oddspark 가 없는 경주에는 안 걸린다**(오늘 27경주 중 19경주).
+            #     확장이 유일 소스인 한국 KRA·바이크는 이 분기에 애초에 안 들어온다(무영향).
+            try:
+                _dv = _src_divergence(prev.get("quinella"), q)
+                if _dv and _dv["off"] >= SRC_DIVERGE_PCT and _dv["n"] >= SRC_DIVERGE_MIN_PAIRS:
+                    print("🔴 [소스 대조] %s: 사설(src=%s) 값이 oddspark 와 크게 어긋난다 "
+                          "→ **사설을 버리고 oddspark 를 쓴다** (공통 %d조합 · 괴리 %.1f%% · 비율중앙 %.2f)"
+                          % (rk, _prev_src, _dv["n"], _dv["off"], _dv["med"]))
+                    _ingest_reject_log(rk, "소스 대조: 사설 폐기(oddspark 채택)", _prev_src,
+                                       {"common": _dv["n"], "offPct": round(_dv["off"], 1),
+                                        "ratioMed": round(_dv["med"], 2), "threshold": SRC_DIVERGE_PCT})
+                    _prev_fresh = False          # 사설 우선 해제 → 아래 블록을 건너뛰고 oddspark 가 기록된다
+            except Exception as _dve:
+                print("[소스 대조] %s 판정 실패(무시·기존 동작 유지): %s" % (rk, str(_dve)[:80]))
         if _prev_src and (not _src_is_oddspark(_prev_src)) and _prev_fresh:
             _suspect = _oddspark_mapping_suspect(prev.get("quinella"), q)
             print("[사설 우선] %s: 최근 배당판(src=%s) 유지 → oddspark(%s) 백업 덮어쓰기 생략%s"
