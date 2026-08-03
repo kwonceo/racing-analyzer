@@ -150,6 +150,71 @@ def main():
         if not str(why).strip():
             fails.append("EXPECTED %s 에 사유가 없다 — 실수인지 의도인지 구분 불가" % (key,))
 
+    # ── [5] 🔴 수신 시점 표준화 **오탐률** (2026-08-03 · 원칙 20) ──────────────────
+    #   왜: 2026-08-03 에 `triple_ingest` 진입부에서 경기장명을 표준키로 바꾸기 시작했다.
+    #     이건 **모든 수집의 입구**라 잘못 바꾸면 전 종목이 엉뚱한 키로 저장된다.
+    #   오탐 = "합쳐지면 안 되는 경기장이 합쳐진 것". 실제 저장된 고유 경기장 토큰 전수에
+    #     `_track_norm` 을 돌려, **승인된 통합(EXPECTED_MERGE) 밖의 변경**이 있으면 실패다.
+    #   ⚠ 이 항목이 0% 가 아니면 rc=1 — "발동은 하는데 오탐률을 안 잰" 상태를 만들지 않는다.
+    #   🔴 검사 대상은 `_track_norm` 전체가 아니라 **수신 정규화가 실제로 적용하는 범위**다.
+    #     app.py 의 `_INGEST_NORM_ALLOW` 를 **소스에서 직접 읽어** 대조한다 —
+    #     목록을 테스트에 따로 적으면 두 벌이 되어 오늘 네 번 본 '목록 갈림' 사고가 재발한다.
+    _srcA = open(os.path.join(BASE, "app.py"), encoding="utf-8").read()
+    _mAllow = re.search(r"^_INGEST_NORM_ALLOW\s*=\s*\{.*?^\}", _srcA, re.S | re.M)
+    _nsA = {}
+    exec(_mAllow.group(0), _nsA)
+    ALLOW = _nsA["_INGEST_NORM_ALLOW"]
+    for _k, _why in ALLOW.items():
+        if not str(_why).strip():
+            fails.append("_INGEST_NORM_ALLOW['%s'] 에 사유가 없다 — 실수인지 의도인지 구분 불가" % _k)
+    EXPECTED_MERGE = {k: (None, v) for k, v in ALLOW.items()}   # 표준키는 _track_norm 결과를 따른다
+    # 🔴 `tools/track_key.py`(대용 모듈)가 아니라 **app.py 가 실제로 쓰는 `_track_norm`** 을 잰다.
+    #   대용으로 재면 "테스트는 통과하는데 운영은 다른 것"이 된다(원칙 8-D).
+    import glob as _glob
+    _srcA = open(os.path.join(BASE, "app.py"), encoding="utf-8").read()
+    _ns = {}
+    exec("import re", _ns)
+    _mA = re.search(r"^_TRACK_ALIAS\s*=\s*\{[^}]*\}", _srcA, re.M)
+    exec(_mA.group(0), _ns)
+    _i = _srcA.find("_TRACK_GROUPS = {")
+    exec(_srcA[_i:_srcA.find("\ndef ", _i)], _ns)
+    exec(re.search(r"^def _track_norm.*?(?=\n(?:def |@|\Z))", _srcA, re.S | re.M).group(0), _ns)
+    norm = _ns["_track_norm"]
+    toks = set()
+    _vre = re.compile(r"^(.+?)\s*\d+경주")
+    for pat in ("data/analysis_log/*.json", "data/odds_history/*.json"):
+        for f in _glob.glob(os.path.join(BASE, pat)):
+            b = re.sub(r"^\d{4}_\d{2}_\d{2}_", "", os.path.basename(f)[:-5]).replace("_", " ")
+            m = _vre.match(b)
+            if m:
+                toks.add(m.group(1).strip())
+    changed, bad, guarded = [], [], []
+    for t in sorted(toks):
+        try:
+            out = norm(t)
+        except Exception as e:
+            fails.append("_track_norm('%s') 예외: %s" % (t, str(e)[:60]))
+            continue
+        if not out or out == t:
+            continue
+        if t in ALLOW:
+            changed.append((t, out))            # 수신 정규화가 실제로 바꾸는 것
+        else:
+            guarded.append((t, out))            # `_track_norm` 은 바꾸지만 **범위 밖이라 안 바꾼다**
+    print("\n[5] 수신 표준화 오탐률 — 저장된 경기장 토큰 %d개" % len(toks))
+    print("    승인 범위(_INGEST_NORM_ALLOW) 적용 %d건:" % len(changed))
+    for t, o in changed:
+        print("       🟢 '%s' → '%s'   %s" % (t, o, ALLOW.get(t, "")))
+    print("    🔒 범위 밖이라 **원문 유지** %d건(=_track_norm 은 바꾸지만 수신은 안 바꾼다):" % len(guarded))
+    print("       %s" % ", ".join("%s(→%s)" % (t, o) for t, o in guarded[:20]))
+    for t, o in changed:
+        if t not in ALLOW:
+            bad.append((t, o))
+    rate = (len(bad) / len(changed) * 100) if changed else 0.0
+    print("    ⇒ 오탐률 %.1f%% (승인 밖 적용 %d / 적용 %d)" % (rate, len(bad), len(changed)))
+    if bad:
+        fails.append("수신 표준화 오탐 %d건 — 승인되지 않은 경기장 통합" % len(bad))
+
     print("\n" + "=" * 84)
     if fails:
         print("🔴 실패 %d건" % len(fails))
