@@ -1986,6 +1986,7 @@
     try { _checkPickAlert(cards); } catch (_) { /* */ }
     // [5번] 종목별 토글 + [4번] 종목별 그룹핑
     const bySport = (d && d.bySport) || {};
+    try { _loadTodayCum(); } catch (_) { /* 실패해도 라벨은 종전대로 */ }
     _renderMultiToggles(bySport);
     const shown = cards.filter((c) => _multiSportOn(c.sport || 'horse'));
     // 종목 그룹 순서(경정 제외): 일본경마 → 경륜 → 한국경마
@@ -1994,7 +1995,8 @@
     order.forEach((sp) => {
       const g = shown.filter((c) => (c.sport || 'horse') === sp);
       if (!g.length) return;
-      html += `<div style="grid-column:1/-1;margin:6px 0 2px;font-weight:800;color:#94a3b8">${_multiSportLabel(sp)} <span class="hint" style="font-weight:400">${g.length}경주</span></div>`;
+      // [탭 라벨] 현재 창 ↔ 오늘 누적을 **나란히** 적는다(둘은 다른 숫자다).
+      html += `<div style="grid-column:1/-1;margin:6px 0 2px;font-weight:800;color:#94a3b8">${_multiSportLabel(sp)} <span class="hint" style="font-weight:400">현재 창 ${g.length}경주${_cumTxt(sp)}</span></div>`;
       html += g.map(_multiCardHtml).join('');
     });
     box.innerHTML = html || '<p class="hint">표시할 경주가 없습니다. (종목 토글 확인 · 발주 10분전부터 자동 수집)</p>';
@@ -2010,12 +2012,60 @@
   function _multiSportLabel(sp) {
     return ({ horse: '🇯🇵 일본경마', central: '🏇 중앙경마', cycle: '🚴 경륜', boat: '🚤 경정', korea: '🇰🇷 한국경마' })[sp] || '🏇 경마';
   }
+  // ── [실시간 탭 라벨 (2026-08-03 승인)] "현재 창 N · 오늘 누적 M" 병기 ───────────────
+  //   🔴 왜: 종전 라벨은 **수집 창(발주 10분전~2분후)에 든 경주 수**만 보여줬다. 그래서
+  //     "오늘 36경주인데 화면엔 2개"처럼 보여 **대표가 세 번 오해했다.** 둘은 다른 숫자다.
+  //   ⚠ 서버 무변경 — 기존 `/api/analysis-log/list`(오늘 분석 로그) 를 60초 캐시로 읽어 센다.
+  //   ⚠ 실패해도 라벨이 **종전과 똑같이** 나온다(누적만 생략). 화면을 막지 않는다.
+  let _todayCum = { t: 0, by: null, loading: false };
+  function _cumSportOf(x) {
+    const c = (x && (x.category || '')) || '';
+    if (c === 'japan_central') return 'central';
+    if (c === 'japan_local') return 'horse';
+    if (c === 'korea') return 'korea';
+    if (c === 'cycle' || c === 'boat' || c === 'bike') return c;
+    return (x && x.sport) || 'horse';
+  }
+  function _ymdDash() {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;   // ⚠ 로컬 기준(UTC 아님)
+  }
+  function _loadTodayCum() {
+    if (_todayCum.by && Date.now() - _todayCum.t < 60000) return;           // 60초 캐시
+    if (_todayCum.loading) return;
+    _todayCum.loading = true;
+    // 🔴 `/api/analysis-log/list` 는 **date 파라미터를 받지 않는다**(전체를 돌려준다 — 실측 1,912건).
+    //   처음엔 `?date=` 를 붙였는데 무시돼 **전체 누적을 '오늘'로 셀 뻔했다**(조용히 틀리는 유형).
+    //   ⇒ **클라이언트에서 `x.date` 로 오늘만** 거른다. ⚠ 서버 무변경 원칙을 지키기 위한 선택이고,
+    //     그 대가로 응답이 크다(약 400KB) — 그래서 **60초 캐시**를 둔다.
+    const _ymd = _ymdDash();
+    fetch('/api/analysis-log/list')
+      .then((r) => r.json())
+      .then((d) => {
+        const by = {};
+        (d && d.logs || []).forEach((x) => {
+          if ((x && x.date) !== _ymd) return;                 // 🔴 오늘만
+          const sp = _cumSportOf(x); by[sp] = (by[sp] || 0) + 1;
+        });
+        _todayCum = { t: Date.now(), by, loading: false };
+        try { renderMultiDashboard(); } catch (_) { /* */ }                 // 값이 오면 한 번 다시 그린다
+      })
+      .catch(() => { _todayCum.loading = false; });                          // 🔴 실패해도 화면은 그대로
+  }
+  function _cumTxt(sp) {
+    const by = _todayCum.by;
+    if (!by) return '';
+    const n = by[sp] || 0;
+    return ` · 오늘 누적 ${n}`;
+  }
   function _renderMultiToggles(bySport) {
     const bar = $('#multiSportToggles'); if (!bar) return;
     const sports = ['horse', 'central', 'cycle', 'korea'];   // 경정 제외
     bar.innerHTML = sports.map((sp) => {
       const on = _multiSportOn(sp), n = bySport[sp] || 0;
-      return `<label style="cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid ${on ? '#38d39f' : '#334155'};color:${on ? '#38d39f' : '#94a3b8'}"><input type="checkbox" data-sp="${sp}" ${on ? 'checked' : ''} style="vertical-align:middle"> ${_multiSportLabel(sp)} (${n})</label>`;
+      const _cum = _todayCum.by ? `/${_todayCum.by[sp] || 0}` : '';   // 현재창/오늘누적
+      return `<label title="현재 수집 창 ${n}경주${_todayCum.by ? ` · 오늘 누적 ${_todayCum.by[sp] || 0}경주` : ''}" style="cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid ${on ? '#38d39f' : '#334155'};color:${on ? '#38d39f' : '#94a3b8'}"><input type="checkbox" data-sp="${sp}" ${on ? 'checked' : ''} style="vertical-align:middle"> ${_multiSportLabel(sp)} (${n}${_cum})</label>`;
     }).join(' ');
     bar.querySelectorAll('input[data-sp]').forEach((cb) => cb.addEventListener('change', () => {
       let on; try { on = JSON.parse(localStorage.getItem(_multiSportKey) || 'null'); } catch (_) { on = null; }
