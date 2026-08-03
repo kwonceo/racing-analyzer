@@ -285,5 +285,48 @@
    "totalScore"
   ],
   "sport": "cycle"
- }
+ },
+ "grading": {
+  "actual": [
+   4,
+   7,
+   1
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   4
+  ],
+  "missed": [
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   7,
+   1,
+   4
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 20:50:08"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "#7 佐々木眞也의 추입형 각질과 라인 구성에서의 잠재력을 간과했다. 선두 다툼에 집중하여 후방에서의 전개 가능성을 충분히 고려하지 못했다.",
+  "new_rule": "라인 코멘트에서 특정 선수의 '대두' 언급은 해당 선수가 주요 복병이 될 수 있음을 의미한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 20:50:10"
+ },
+ "reviewed": true
 }

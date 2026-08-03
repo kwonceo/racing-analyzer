@@ -1,0 +1,313 @@
+{
+ "predicted_top3": [
+  3,
+  7,
+  2
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "느린",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 5번의 능력이 약해 선두 싸움 없이 안정적인 전개가 예상. 상위 등급마들이 유리.",
+ "key_factors": [
+  "선행형 5번의 저조한 최근 성적 (C등급)으로 빠른 페이스를 이끌기 어려움",
+  "평지형 A등급 마필인 3번, 7번이 유리한 전개 가져갈 가능성",
+  "경주마 수가 7두로 적어 혼전 가능성 낮음",
+  "추격형 2번이 평지형들 사이에서 뒷심 발휘 가능성"
+ ],
+ "exception_note": "이 경주는 7두의 소수 경주로 선행형 마필이 1두밖에 없고 그마저도 등급이 낮아 선두 경쟁이 약해질 가능성이 크다. 이는 통상적인 다두 경주와 달리 페이스가 느려질 수 있는 특수성으로 작용한다.",
+ "applied_rules": [],
+ "raceKey": "후나바시 4경주",
+ "forecastAt": "2026-08-02 16:05:15",
+ "forecastEpoch": 1785654315.540366,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "후나바시 4경주",
+  "wind": {
+   "venue": "후나바시",
+   "풍속": 3.1,
+   "풍향": "동북동",
+   "풍향코드": 3,
+   "기온": 29.5,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T15:50:00+09:00",
+   "지점": "船橋",
+   "지점거리km": 4.5
+  },
+  "fieldSize": 7,
+  "distance": 1200,
+  "surface": "더트",
+  "trackCond": "良",
+  "horses": [
+   {
+    "no": 3,
+    "name": "ナックナック",
+    "gait": "평지형",
+    "recentPlacings": [
+     11,
+     2,
+     2,
+     11,
+     5
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 392,
+    "jockey": "木間龍",
+    "distApt": "B"
+   },
+   {
+    "no": 7,
+    "name": "ラヴィエベル",
+    "gait": "평지형",
+    "recentPlacings": [
+     1,
+     6,
+     7,
+     5,
+     4
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 389,
+    "jockey": "所　蛍",
+    "distApt": "B"
+   },
+   {
+    "no": 1,
+    "name": "グリンネル",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     9,
+     10,
+     10,
+     9
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 450,
+    "jockey": "藤原幹",
+    "distApt": "C"
+   },
+   {
+    "no": 2,
+    "name": "スマイルフレイヤ",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     3,
+     12,
+     8,
+     8
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 495,
+    "jockey": "山本大"
+   },
+   {
+    "no": 5,
+    "name": "ソルヴェイ",
+    "gait": "선행형",
+    "recentPlacings": [
+     10,
+     6,
+     8,
+     11,
+     9
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 405,
+    "jockey": "川島正",
+    "distApt": "C"
+   },
+   {
+    "no": 4,
+    "name": "イニシエート",
+    "gait": "평지형",
+    "recentPlacings": [
+     7,
+     6,
+     12,
+     8,
+     4
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 452,
+    "jockey": "笠野雄",
+    "distApt": "C"
+   },
+   {
+    "no": 6,
+    "name": "マサッキー",
+    "gait": "평지형",
+    "recentPlacings": [
+     9,
+     8,
+     8,
+     8,
+     9
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 433,
+    "jockey": "臼井健",
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    5
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 100.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 85.7
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 14.3
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "기수 승률(보유율 14%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   2,
+   4,
+   1
+  ],
+  "hit_count": 1,
+  "hit": [
+   2
+  ],
+  "missed": [
+   4,
+   1
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   },
+   {
+    "no": 1,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   2,
+   3
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.1,
+  "market_src": "win",
+  "gradedAt": "2026-08-02 16:29:55"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번마 '이니시 에이트'의 평지형 각질과 최근 성적(4착)을 간과했으며, 1번마 '그린 넬'이 등급 B임에도 불구하고 전개의 특수성을 고려하지 못했다. 소수 경주에서 낮은 등급의 말도 혼전에 의해 상위권에 진입할 가능성을 고려하지 못했다.",
+  "new_rule": "소수 경주(7두 이하)에서 선행마가 저조한 경우, 평지형 또는 추격형의 B, C등급 마필도 예상보다 높은 순위를 기록할 수 있음을 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-02 16:29:57"
+ },
+ "reviewed": true
+}

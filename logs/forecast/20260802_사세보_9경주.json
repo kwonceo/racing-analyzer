@@ -1,0 +1,334 @@
+{
+ "predicted_top3": [
+  5,
+  6,
+  2
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "보통",
+ "line_winner": [
+  5,
+  6
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 ⑥마쓰모토가 강하게 전개하고 ⑤오가와가 이를 활용하여 추입으로 우승. ②히사다의 젖히기 견제가 변수.",
+ "key_factors": [
+  "⑥마쓰모토의 선행력",
+  "⑤오가와의 추입력과 ⑥마쓰모토의 라인 협력",
+  "②히사다의 젖히기 능력"
+ ],
+ "exception_note": "코멘트에서 九州勢는 盤石한 布陣이라고 언급하며 ⑥마쓰모토가 선행하고 ⑤오가와가 이를 활용해 추입할 것으로 예상, 九州独占을 기대하나 ②히사다의 막판 젖히기 일격이 위협적이라는 구체적인 전개 예상과 특정 선수의 위협을 지목함. 이는 통계적 예측이 아닌 경주 특수성에 기반한 예상이다. 바람의 영향은 풍속 4.0m/s로 강하지 않아 전개에 큰 변수로 작용하지 않을 것으로 판단.",
+ "applied_rules": [],
+ "raceKey": "사세보 9경주",
+ "forecastAt": "2026-08-02 14:21:14",
+ "forecastEpoch": 1785648074.6182032,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 9경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 4.0,
+   "풍향": "남남서",
+   "풍향코드": 9,
+   "기온": 35.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T14:00:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "小川 勇介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 ３着 11.1 8/ 1 準決勝 ４着 11.4",
+    "prev1": "玉 野Ｆ１ 7/27 初特選 ７着 11.3 7/28 準決勝 ４着 11.7 7/29 特 選 ５着 11.4",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 １着 12.1 7/ 3 二予選 ５着 11.9 7/ 4 特 選 ２着 11.5 7/ 5 特 秀 ３着 11.1",
+    "chaku": [
+     1,
+     2,
+     4,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "久島 尚樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ３着 11.7 8/ 1 準決勝 ６着 12.1",
+    "prev1": "松 阪Ｆ１ 7/16 予 選 ２着 11.3 7/17 準決勝 １着 11.6 7/18 決 勝 ５着",
+    "prev2": "和歌山Ｆ１ 7/ 5 予 選 ３着 11.4 7/ 6 準決勝 ５着 11.1 7/ 7 特 選 ５着 11.6",
+    "chaku": [
+     6,
+     5,
+     3,
+     8
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "久田 裕也",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ２着 11.3 8/ 1 準決勝 ５着 11.7",
+    "prev1": "富 山Ｆ１ 7/21 予 選 ２着 9.7 7/22 準決勝 ２着 9.6 7/23 決 勝 ７着 10.2",
+    "prev2": "伊 東Ｆ１ 7/10 予 選 ４着 9.9 7/11 準決勝 ３着 9.9 7/12 特 選 ２着 9.8",
+    "chaku": [
+     2,
+     9,
+     3,
+     7
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "川越 勇星",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.1 8/ 1 準決勝 ７着 11.4",
+    "prev1": "玉 野Ｆ１ 7/14 予 選 １着 11.4 7/15 準決勝 １着 11.8 7/16 決 勝 落",
+    "prev2": "平 塚Ｆ１ 6/30 予 選 ３着 11.8 7/ 1 準決勝 ６着 11.6 7/ 2 特 選 ５着 11.6",
+    "chaku": [
+     4,
+     3,
+     4,
+     8
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "都築 巧",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ４着 11.6 8/ 1 選 抜 ２着 11.7",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ５着 12 7/24 選 抜 ５着 11.5 7/25 一 般 １着 11.5",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ５着 11.5 7/ 9 一 般 １着 11.8 7/10 特 選 ３着 11.3",
+    "chaku": [
+     2,
+     0,
+     1,
+     3
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "阿部 大樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.3 8/ 1 一 般 １着 11.4",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ４着 9.8 7/23 特 選 落",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ３着 11.3 7/ 9 選 抜 ３着 11.4 7/10 特 選 ６着 11.7",
+    "chaku": [
+     2,
+     2,
+     4,
+     12
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "松本 定",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 予 選 ５着 11.9 8/ 1 選 抜 １着 11.7",
+    "prev1": "広 島Ｆ２ 7/22 初特選 １着 11.5 7/23 準決勝 １着 11.2 7/24 決 勝 １着 11.9",
+    "prev2": "佐世保Ｆ１ 7/13 初特選 １着 11.9 7/14 準決勝 １着 11.5 7/15 決 勝 １着 11.5",
+    "chaku": [
+     18,
+     4,
+     0,
+     2
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    6
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    5,
+    1,
+    7,
+    4
+   ]
+  },
+  "lines": [
+   6,
+   5,
+   1,
+   2,
+   7,
+   3,
+   4
+  ],
+  "paceLabel": null,
+  "comment": "九州勢は盤石な布陣となった。⑥松本がブン回して⑤小川が援護し抜け出す。九州独占に期待も②久田の捲り一撃が怖い",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   5,
+   1
+  ],
+  "hit_count": 2,
+  "hit": [
+   5,
+   2
+  ],
+  "missed": [
+   1
+  ],
+  "missed_info": [
+   {
+    "no": 1,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   6,
+   1
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.6,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 15:10:29"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "1번 히사다 나오키는 추입형 각질임에도 불구하고 끈질긴 마크력으로 2위 오가와 유스케의 후미를 파고들어 3착을 기록했다. 그의 최근 착순과 라인 정보를 놓쳤다.",
+  "new_rule": "추입형 선수가 라인에 편입되었을 때, 선행마의 전개에 따라 후미에서 힘을 비축하다가 직선에서 파고들어 상위권 진입할 가능성을 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 15:10:31"
+ },
+ "reviewed": true
+}

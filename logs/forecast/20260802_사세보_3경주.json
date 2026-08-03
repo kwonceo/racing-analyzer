@@ -1,0 +1,336 @@
+{
+ "predicted_top3": [
+  2,
+  7,
+  3
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "단독 선행형 2번 薦田의 선행과 7번 栗田의 추입 대결, 3번 吉田의 상승세.",
+ "key_factors": [
+  "2번 薦田의 유일한 선행 각질",
+  "7번 栗田의 최근 좋은 컨디션과 추입력",
+  "3번 吉田의 꾸준한 성적과 기어비 이점",
+  "서남서 4.2m/s 바람으로 선행에 다소 부담"
+ ],
+ "exception_note": "경주마 중 유일한 선행형인 2번 薦田가 압도적으로 선두를 잡을 가능성이 높으며, 다른 추입형 선수들이 이를 추격하는 구도. 7번 栗田와 3번 吉田는 최근 성적이 좋고 특히 3번은 준결승 3착으로 컨디션이 올라왔다. 5번 八谷은 '도주(선행)'을 선언했으나 실제 각질은 '추입형'이므로 2번과의 선행 경쟁은 없을 것으로 예상. 오히려 2번 薦田가 긴 거리를 혼자 선행할 경우 후미 추입마들에게 기회가 올 수 있다.",
+ "applied_rules": [],
+ "raceKey": "사세보 3경주",
+ "forecastAt": "2026-08-02 11:30:14",
+ "forecastEpoch": 1785637814.1005116,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 3경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 4.2,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 34.0,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T11:10:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 2,
+    "name": "薦田 将伍",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 １着 11.8 8/ 1 準決勝 ４着 12",
+    "prev1": "広 島Ｆ２ 7/22 初特選 ４着 12 7/23 準決勝 １着 11.8 7/24 決 勝 ２着 11.8",
+    "prev2": "小田原Ｆ２ 7/10 初特選 １着 9.8 7/11 準決勝 １着 10.1 7/12 決 勝 ６着 10.1",
+    "chaku": [
+     5,
+     1,
+     5,
+     16
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "八谷 誠賢",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 初特選 ２着 11.6 8/ 1 準決勝 ４着 11.6",
+    "prev1": "広 島Ｆ２ 7/22 予 選 １着 11.8 7/23 準決勝 ２着 11.6 7/24 決 勝 ５着 11.9",
+    "prev2": "岐 阜Ｆ１ 7/11 初特選 ６着 12.3 7/12 準決勝 ２着 11.5 7/13 決 勝 ６着 12",
+    "chaku": [
+     6,
+     4,
+     3,
+     8
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "吉田 元輝",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.3 8/ 1 準決勝 ３着 11.3",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ２着 11.4 7/21 準決勝 失",
+    "prev2": "平 Ｆ２ 7/10 特予選 ２着 12.2 7/11 準決勝 ３着 12.3 7/12 特 選 ２着 11.3",
+    "chaku": [
+     2,
+     8,
+     5,
+     8
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "星野 辰也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ４着 11.6 8/ 1 準決勝 ６着 11.7",
+    "prev1": "和歌山Ｆ２ 7/24 特予選 ３着 11.9 7/25 準決勝 ４着 11.7 7/26 特 選 ２着 11.7",
+    "prev2": "函 館Ｆ１ 7/14 予 選 ７着 11.4 7/15 一 般 ３着 11.7 7/16 一 般 １着 11.5",
+    "chaku": [
+     6,
+     3,
+     5,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "川島 勝",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "7/31 予 選 １着 11.6 8/ 1 準決勝 ５着 11.6",
+    "prev1": "富 山Ｆ１ 7/21 予 選 １着 10 7/22 準決勝 ３着 9.6 7/23 特 選 ６着 9.8",
+    "prev2": "玉 野Ｆ２ 7/ 7 予 選 １着 11.9 7/ 8 準決勝 ６着 11.4 7/ 9 特 選 ５着 12.3",
+    "chaku": [
+     3,
+     3,
+     3,
+     9
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "栗田 貴徳",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ４着 11.9 8/ 1 一 般 １着 11.7",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ２着 11.5 7/21 準決勝 ５着 11.8 7/22 特 選 １着 11.8",
+    "prev2": "広 島Ｆ２ 7/13 予 選 ７着 11.6 7/14 一 般 ２着 11.9 7/15 一 般 １着 11.9",
+    "chaku": [
+     2,
+     2,
+     0,
+     2
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "安東 英博",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ３着 11.7 8/ 1 準決勝 ６着 11.5",
+    "prev1": "広 島Ｆ２ 7/22 予 選 ６着 11.9 7/23 一 般 ３着 11.8 7/24 一 般 ３着 11.5",
+    "prev2": "函 館Ｆ１ 7/14 予 選 ７着 11.9 7/15 一 般 ４着 11.8 7/16 一 般 ２着 11.7",
+    "chaku": [
+     1,
+     4,
+     6,
+     13
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    2
+   ],
+   "closeCount": 6,
+   "closeHorses": [
+    5,
+    3,
+    4,
+    1,
+    7,
+    6
+   ]
+  },
+  "lines": [
+   5,
+   1,
+   6,
+   2,
+   7,
+   3,
+   4
+  ],
+  "paceLabel": null,
+  "comment": "②薦田がロングも厭わず先制へ。⑦栗田との直線勝負で愛媛◎〇とした。⑤八谷は準決勝の失敗を挽回したい。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   2,
+   7
+  ],
+  "hit_count": 2,
+  "hit": [
+   2,
+   7
+  ],
+  "missed": [
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   5,
+   1
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 12:11:08"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번 星野 辰也는 B등급 추입형 선수였으나, 준결승에서 6착으로 저조한 성적을 보여 순위권 진입을 예상하지 못했습니다. 하지만, 이 선수는 이전에 3착, 2착 등 높은 순위를 기록한 경험이 있으며, 특히 전전 개최에서는 1착을 기록한 적도 있음을 간과했습니다. 경기 당일의 컨디션이나 라인 형성에서 예상치 못한 변수가 있었을 수 있습니다.",
+  "new_rule": "B등급 추입형 선수라도 최근 착순이 낮더라도 이전 대회 상위권 진입 기록이 있다면 복병으로 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 12:11:10"
+ },
+ "reviewed": true
+}

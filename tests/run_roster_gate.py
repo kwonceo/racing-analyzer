@@ -80,13 +80,13 @@ def main():
     # ④ 🔴 app.py 에 게이트가 **실제로 배선**돼 있는가(빠지면 ①~③이 무의미하다)
     src = open(os.path.join(BASE, "app.py"), encoding="utf-8").read()
     r4a = "rosterNos" in src and "출주명단 게이트" in src
-    r4b = "카카오 발송 차단" in src
+    r4b = ("카카오 명단검사" in src or "카카오 발송 보류" in src)
     print("  %s ④ app.py 배선           추천단 %s · 발송단 %s" % ("✅" if (r4a and r4b) else "🔴", r4a, r4b))
     if not (r4a and r4b):
         fails.append("④ app.py 에 게이트가 배선돼 있지 않다")
 
     # ⑤ 발송단 차단이 **추천단 뒤**에 있는가(순서가 뒤집히면 오염이 새 나간다)
-    r5 = src.find("출주명단 게이트") < src.find("카카오 발송 차단")
+    r5 = src.find("출주명단 게이트") < src.find("카카오 명단검사")
     print("  %s ⑤ 순서(추천 → 발송)" % ("✅" if r5 else "🔴"))
     if not r5:
         fails.append("⑤ 발송단 검사가 추천단보다 앞에 있다")

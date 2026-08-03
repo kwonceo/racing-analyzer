@@ -1,0 +1,336 @@
+{
+ "predicted_top3": [
+  1,
+  5,
+  2
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  1
+ ],
+ "confidence": 3,
+ "reason_short": "선행형 1번의 적극적인 운영과 5번의 지원, 그리고 2번의 젖히기 시도.",
+ "key_factors": [
+  "선행형 1번의 유일한 선행 각질",
+  "코멘트의 1번-5번 라인 언급",
+  "대부분 추입형 각질로 선행마가 유리한 구도"
+ ],
+ "exception_note": "이 경주는 7두 중 유일한 선행형인 1번(早坂 秀悟)이 선두에서 경기를 이끌 가능성이 매우 높다. 다른 말들은 대부분 추입형 또는 젖히기형으로, 선행형이 없는 상황에서 1번이 초반부터 유리한 위치를 점할 수 있다. 특히 코멘트에서 '早坂―丸山が一気のカマシ発進なら両者の線もありそうだ' 라고 언급하며 1번과 5번의 연대 가능성을 시사하고 있다. 5번(丸山 直樹) 역시 추입형이지만 1번을 마크하며 따라갈 경우 동반 입상이 가능하다. 2번(梅崎 隆介)은 젖히기형으로 1번의 뒤를 노리거나 후반에 역전을 시도할 수 있지만, 1번이 충분히 도주에 성공할 경우 어려울 수 있다. 대부분의 추입형 말들은 선행마가 페이스를 조절하며 도주할 경우 따라가기 어렵다. 바람의 영향은 2.4m/s로 약하여 전개에 큰 영향을 미치지 않을 것으로 판단된다.",
+ "applied_rules": [],
+ "raceKey": "오다와라 2경주",
+ "forecastAt": "2026-08-02 11:24:29",
+ "forecastEpoch": 1785637469.0131164,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "오다와라 2경주",
+  "wind": {
+   "venue": "오다와라",
+   "풍속": 2.4,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 35.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T11:10:00+09:00",
+   "지점": "小田原",
+   "지점거리km": 1.9
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 7,
+    "name": "徳永 哲人",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ６着 9.6",
+    "prev1": "豊 橋Ｇ３ 7/25 一予選 ４着 11.6 7/26 二予選 ６着 11 7/27 特 選 ８着 11.1 7/28 選 抜 ４着 11.7",
+    "prev2": "高 知Ｇ２ 7/17 一予選 ９着 13.8 7/18 選 抜 ２着 14.3 7/19 選 抜 ７着 13.7 7/20 一 般 ４着 14",
+    "chaku": [
+     3,
+     3,
+     3,
+     21
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "梅崎 隆介",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ９着 10.3",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ８着 10.1 7/23 選 抜 ５着 10.2 7/24 選 抜 ５着 10.2",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ６着 11.7 7/ 9 一 般 ４着 11.8 7/10 一 般 ３着 11.7",
+    "chaku": [
+     2,
+     3,
+     3,
+     12
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "開坂 秀明",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ６着 9.7",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ５着 11.2 7/21 一 般 ４着 11.4 7/22 一 般 ２着 11.3",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 ７着 13.7 7/14 一 般 ２着 14.3 7/15 一 般 １着 14.1",
+    "chaku": [
+     1,
+     6,
+     1,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "島田 竜二",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ９着 13.1",
+    "prev1": "富 山Ｆ１ 7/21 予 選 ６着 9.6 7/22 一 般 ７着 9.6 7/23 一 般 ２着 9.9",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ６着 11.5 7/ 9 一 般 欠",
+    "chaku": [
+     0,
+     2,
+     0,
+     4
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "丸山 直樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ７着 10",
+    "prev1": "豊 橋Ｇ３ 7/25 一予選 ７着 10.8 7/26 選 抜 ５着 11.5 7/27 一 般 ６着 11.8 7/28 一 般 ２着 11.4",
+    "prev2": "松 阪Ｆ１ 7/16 予 選 ６着 11.4 7/17 一 般 ４着 12 7/18 一 般 ５着 11.3",
+    "chaku": [
+     2,
+     4,
+     2,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "早坂 秀悟",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ７着 9.7",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ７着 13.1 7/24 一 般 ７着 12.4 7/25 一 般 ６着 11.7",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 ６着 12 7/14 一 般 ６着 11.7 7/15 一 般 ６着 11.9",
+    "chaku": [
+     1,
+     2,
+     1,
+     14
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "坂本 周作",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ７着 9.8",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ６着 11.3 7/21 一 般 ７着 13.6 7/22 一 般 ７着 12.9",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 ７着 13.7 7/14 一 般 ６着 12.4 7/15 一 般 ３着 11.9",
+    "chaku": [
+     1,
+     0,
+     1,
+     16
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    1
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    7,
+    3,
+    4,
+    5
+   ]
+  },
+  "lines": [
+   1,
+   5,
+   2,
+   7,
+   4,
+   6,
+   3
+  ],
+  "paceLabel": null,
+  "comment": "自在脚ある梅崎の仕掛けに乗って、徳永の直線追込みに期待したが、早坂―丸山が一気のカマシ発進なら両者の線もありそうだ。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   7,
+   3,
+   2
+  ],
+  "hit_count": 1,
+  "hit": [
+   2
+  ],
+  "missed": [
+   7,
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 3,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": null,
+  "market_hit_count": null,
+  "market_snapshot_mb": null,
+  "market_src": null,
+  "gradedAt": "2026-08-02 11:49:57"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "선행마 1번의 최근 성적이 좋지 않아 선행 성공 가능성이 낮았음에도, 유일한 선행 각질이라는 점에 과도하게 비중을 두었다. 실제 우승마 7번과 3번은 모두 추입형으로, 추입 각질의 잠재력을 간과했다.",
+  "new_rule": "유일한 선행마라도 최근 성적이 부진하다면 선행 성공률을 낮게 평가하고, 추입마들의 최근 활약 여부를 추가로 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 11:49:59"
+ },
+ "reviewed": true
+}

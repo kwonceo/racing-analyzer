@@ -1,216 +1,245 @@
 {
  "predicted_top3": [
+  1,
   3,
-  5,
-  6
+  2
  ],
  "predicted_style": "혼합",
  "predicted_pace": "보통",
- "line_winner": [],
- "confidence": 3,
- "reason_short": "3번마가 직전 1착으로 상승세. 5, 6번마의 최근 성적도 준수하여 후반 힘을 기대한다.",
- "key_factors": [
-  "3번마 직전 1착으로 컨디션 상승",
-  "5번마 직전 2착, 6번마 직전 3착으로 경쟁력 입증",
-  "다른 말들의 최근 성적이 두드러지지 않아 이들 간의 경쟁 구도 예상"
+ "line_winner": [
+  1
  ],
- "exception_note": "통상",
+ "confidence": 4,
+ "reason_short": "추입형 강자가 많고 유일한 선행마 3번이 초반부터 주도할 것으로 예상, 1번의 막판 추입이 유력.",
+ "key_factors": [
+  "7두 중 선행형 1두(3번)로 초반 전개 예측 용이",
+  "1번의 최근 착순 분포 및 직전 경기 1착 기록으로 컨디션 확인",
+  "경주 총평에서 1번과 3번 언급"
+ ],
+ "exception_note": "이 경주는 7두 중 선행형이 1두(3번)뿐이고 나머지가 모두 추입형 또는 자재형으로 구성되어 있어, 전개 양상이 통상적인 다자 구도와는 다르게 예측됩니다. 3번이 초반 선행을 주도할 가능성이 높으며, 이는 강력한 추입력을 가진 1번에게 유리한 전개를 제공할 것입니다. 또한, 1번은 직전 경기 1착을 기록하며 좋은 컨디션을 보이고 있고, 경주 총평에서도 '那須가 好機에 仕掛けて 再勝へ' 라고 언급되어 있습니다.",
  "applied_rules": [],
  "raceKey": "코치 2경주",
- "forecastAt": "2026-08-01 15:55:26",
- "forecastEpoch": 1785567326.8303745,
+ "forecastAt": "2026-08-01 20:55:20",
+ "forecastEpoch": 1785585320.5496788,
  "readonly": true,
  "input_snapshot": {
   "raceKey": "코치 2경주",
   "wind": {
    "venue": "코치",
-   "풍속": 3.1,
-   "풍향": "남",
-   "풍향코드": 8,
-   "기온": 30.7,
+   "풍속": 1.8,
+   "풍향": "북",
+   "풍향코드": 16,
+   "기온": 28.2,
    "강수1h": 0.0,
-   "관측시각": "2026-08-01T15:40:00+09:00",
+   "관측시각": "2026-08-01T20:40:00+09:00",
    "지점": "南国日章",
    "지점거리km": 5.26
   },
-  "fieldSize": 11,
+  "fieldSize": 7,
   "distance": null,
   "surface": null,
   "trackCond": null,
   "horses": [
    {
     "no": 1,
-    "name": "원더폴원",
-    "gait": null,
+    "name": "那須 萌美",
+    "gait": "추입형",
     "recentPlacings": [],
-    "grade": null,
+    "grade": "D",
     "paceBonusBase": null,
     "weeksInARow": null,
-    "jockey": "상현"
+    "gear": 3.77,
+    "recent": "7/31 ガ予１ １着 15.3",
+    "prev1": "前 橋Ｇ３ 7/22 予１Ａ ２着 10.1 7/23 予２Ａ ２着 10 7/24 ガ決Ａ ２着 10",
+    "prev2": "佐世保Ｆ１ 7/13 ガ予１ ２着 12.1 7/14 ガ予２ ２着 12 7/15 ガ決勝 １着 11.9",
+    "chaku": [
+     8,
+     11,
+     2,
+     4
+    ],
+    "declared": "자재(양각)"
    },
    {
     "no": 2,
-    "name": "골드로저",
-    "gait": null,
-    "recentPlacings": [
-     4
-    ],
-    "grade": null,
+    "name": "蛯原 杏奈",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
     "paceBonusBase": null,
     "weeksInARow": null,
-    "jockey": "승운"
-   },
-   {
-    "no": 3,
-    "name": "소우패스",
-    "gait": null,
-    "recentPlacings": [
-     1
+    "gear": 3.77,
+    "recent": "7/31 ガ予１ ３着 15.3",
+    "prev1": "玉 野Ｆ１ 7/22 ガ予１ ５着 12.5 7/23 ガ予２ ４着 12.8 7/24 ガ一般 ５着 13.3",
+    "prev2": "平 Ｆ２ 7/16 ガ予１ ５着 12.1 7/17 ガ予２ ５着 12.2 7/18 ガ一般 ２着 12.5",
+    "chaku": [
+     1,
+     3,
+     9,
+     20
     ],
-    "grade": null,
-    "paceBonusBase": null,
-    "weeksInARow": null,
-    "jockey": "은경"
+    "declared": "추입(마크)"
    },
    {
     "no": 4,
-    "name": "챔프의영",
-    "gait": null,
+    "name": "宮西 令奈",
+    "gait": "추입형",
     "recentPlacings": [],
-    "grade": null,
+    "grade": "D",
     "paceBonusBase": null,
     "weeksInARow": null,
-    "jockey": "경민"
+    "gear": 3.69,
+    "recent": "7/31 ガ予１ ６着 15.7",
+    "prev1": "弥 彦Ｆ２ 7/17 ガ予１ ７着 12.9 7/18 ガ予２ ５着 12.3 7/19 ガ一般 ２着 12.8",
+    "prev2": "伊 東Ｆ１ 7/10 ガ予１ ７着 10 7/11 ガ予２ ６着 10.4 7/12 ガ一般 ７着 10.8",
+    "chaku": [
+     0,
+     6,
+     2,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "露谷菜々花",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "recent": "7/31 ガ予１ ２着 15.7",
+    "prev1": "和歌山Ｆ２ 7/24 ガ予１ ７着 12.5 7/25 ガ予２ ６着 13.4 7/26 ガ一般 ５着 12.5",
+    "prev2": "玉 野Ｆ２ 7/ 7 ガ予１ ３着 13.1 7/ 8 ガ予２ ２着 12.8 7/ 9 ガ決勝 ６着 13.7",
+    "chaku": [
+     1,
+     4,
+     2,
+     8
+    ],
+    "declared": "자재(양각)"
    },
    {
     "no": 5,
-    "name": "리치스카",
-    "gait": null,
-    "recentPlacings": [
-     2
-    ],
-    "grade": null,
+    "name": "前田 真希",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
     "paceBonusBase": null,
     "weeksInARow": null,
-    "jockey": "나카"
+    "gear": 3.77,
+    "recent": "7/31 ガ予１ ４着 15.4",
+    "prev1": "小 倉Ｆ２ 7/24 ガ予１ ７着 12.4 7/25 ガ予２ ７着 13.9 7/26 ガ一般 ４着 12.6",
+    "prev2": "名古屋Ｆ２ 7/10 ガ予１ ７着 12.7 7/11 ガ予２ ７着 12.7 7/12 ガ一般 ６着 13.1",
+    "chaku": [
+     0,
+     3,
+     1,
+     11
+    ],
+    "declared": "자재(양각)"
    },
    {
     "no": 6,
-    "name": "벌마의거",
-    "gait": null,
-    "recentPlacings": [
-     3
-    ],
-    "grade": null,
+    "name": "萩原 瑞生",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
     "paceBonusBase": null,
     "weeksInARow": null,
-    "jockey": "진구"
+    "gear": 3.77,
+    "recent": "7/31 ガ予１ ５着 15.3",
+    "prev1": "静 岡Ｆ１ 7/18 ガ予１ ５着 12.8 7/19 ガ予２ ７着 13.1",
+    "prev2": "名古屋Ｆ２ 7/10 ガ予１ ７着 12.5 7/11 ガ予２ ７着 13 7/12 ガ一般 ４着 13.1",
+    "chaku": [
+     0,
+     0,
+     2,
+     16
+    ],
+    "declared": "추입(마크)"
    },
    {
     "no": 7,
-    "name": "광선대로",
-    "gait": null,
+    "name": "齊藤 由紀",
+    "gait": "자재(양각)",
     "recentPlacings": [],
-    "grade": null,
+    "grade": "D",
     "paceBonusBase": null,
     "weeksInARow": null,
-    "jockey": "생재"
-   },
-   {
-    "no": 8,
-    "name": "월드하니",
-    "gait": null,
-    "recentPlacings": [
-     5
+    "gear": 3.71,
+    "recent": "7/31 ガ予１ ７着 15.4",
+    "prev1": "函 館Ｆ１ 7/14 ガ予１ ７着 12.5 7/15 ガ予２ ７着 13.5 7/16 ガ一般 ３着 13.3",
+    "prev2": "伊 東Ｆ２ 6/23 ガ予１ ７着 10.4 6/24 ガ予２ ７着 10.9",
+    "chaku": [
+     0,
+     0,
+     1,
+     14
     ],
-    "grade": null,
-    "paceBonusBase": null,
-    "weeksInARow": null,
-    "jockey": "광희"
-   },
-   {
-    "no": 9,
-    "name": "행복트리",
-    "gait": null,
-    "recentPlacings": [
-     7
-    ],
-    "grade": null,
-    "paceBonusBase": null,
-    "weeksInARow": null,
-    "jockey": "강주"
-   },
-   {
-    "no": 10,
-    "name": "모어퀴클",
-    "gait": null,
-    "recentPlacings": [
-     5
-    ],
-    "grade": null,
-    "paceBonusBase": null,
-    "weeksInARow": null,
-    "jockey": "형석"
-   },
-   {
-    "no": 11,
-    "name": "닥터프린",
-    "gait": null,
-    "recentPlacings": [],
-    "grade": null,
-    "paceBonusBase": null,
-    "weeksInARow": null,
-    "jockey": "시대"
+    "declared": "자재(양각)"
    }
   ],
   "composition": {
-   "leadCount": 0,
-   "leadHorses": [],
-   "closeCount": 0,
-   "closeHorses": []
+   "leadCount": 1,
+   "leadHorses": [
+    3
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    1,
+    2,
+    4,
+    5,
+    6
+   ]
   },
-  "lines": [],
+  "lines": [
+   1,
+   3,
+   2,
+   4,
+   5,
+   6,
+   7
+  ],
   "paceLabel": null,
-  "comment": "",
+  "comment": "那須が好機に仕掛けて再勝へ。地元戦で気合い入る露谷も機動力を発揮。蛯原にも要警戒。",
   "appliedRulesAvailable": [],
   "_fields_included": [
    {
-    "key": "jockey",
-    "label": "기수명",
-    "rate": 100.0
-   }
-  ],
-  "_fields_omitted": [
-   {
     "key": "gear",
     "label": "기어비",
-    "rate": 0.0
+    "rate": 100.0
    },
    {
     "key": "recent",
     "label": "금개최 성적",
-    "rate": 0.0
+    "rate": 100.0
    },
    {
     "key": "prev1",
     "label": "전개최 성적",
-    "rate": 0.0
+    "rate": 100.0
    },
    {
     "key": "prev2",
     "label": "전전개최 성적",
-    "rate": 0.0
+    "rate": 100.0
    },
    {
     "key": "chaku",
     "label": "착순분포",
-    "rate": 0.0
+    "rate": 100.0
    },
    {
     "key": "declared",
     "label": "표기 각질",
-    "rate": 0.0
-   },
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
    {
     "key": "weight",
     "label": "부담중량",
@@ -219,6 +248,11 @@
    {
     "key": "bodyWt",
     "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
     "rate": 0.0
    },
    {
@@ -236,14 +270,9 @@
    "주로 상태(습도·경중)",
    "날씨",
    "조교 평가",
-   "기어비(보유율 0%로 미달)",
-   "금개최 성적(보유율 0%로 미달)",
-   "전개최 성적(보유율 0%로 미달)",
-   "전전개최 성적(보유율 0%로 미달)",
-   "착순분포(보유율 0%로 미달)",
-   "표기 각질(보유율 0%로 미달)",
    "부담중량(보유율 0%로 미달)",
    "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
    "기수 승률(보유율 0%로 미달)",
    "거리 적성(보유율 0%로 미달)"
   ],
@@ -257,58 +286,6 @@
    "record_score",
    "totalScore"
   ],
-  "sport": "horse"
- },
- "grading": {
-  "actual": [
-   6,
-   2,
-   7
-  ],
-  "hit_count": 1,
-  "hit": [
-   6
-  ],
-  "missed": [
-   2,
-   7
-  ],
-  "missed_info": [
-   {
-    "no": 2,
-    "gait": null,
-    "recentPlacings": [
-     4
-    ],
-    "line": null,
-    "grade": null
-   },
-   {
-    "no": 7,
-    "gait": null,
-    "recentPlacings": [],
-    "line": null,
-    "grade": null
-   }
-  ],
-  "payout_quinella": null,
-  "is_high_odds": false,
-  "market_top3": [
-   6,
-   1,
-   2
-  ],
-  "market_hit_count": 2,
-  "market_snapshot_mb": -0.2,
-  "market_src": "win",
-  "gradedAt": "2026-08-01 16:29:35"
- },
- "graded": true,
- "review": {
-  "miss_reason": "2번마와 7번마의 최근 성적 외에 다른 정보가 전혀 없어 잠재력을 파악하지 못했다. 특히 2번마의 직전 4착 성적만으로는 상위권 진입을 예상하기 어려웠다.",
-  "new_rule": "데이터 누락이 심한 경주의 경우, 단순히 최근 착순 정보만으로 우열을 판단하지 않고 다른 가능한 요소를 추가적으로 검토한다.",
-  "rule_confidence": 4,
-  "reviewedAt": "2026-08-01 16:29:37"
- },
- "reviewed": true
+  "sport": "cycle"
+ }
 }

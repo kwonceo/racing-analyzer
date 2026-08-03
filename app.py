@@ -14804,6 +14804,7 @@ def _raw_profile_snapshot(rk):
     for h in hs:
         r = {"no": h.get("no"), "styleType": h.get("styleType")}
         for k in ("corners", "fieldSizes", "pastDistances", "last3fList", "pastPlacings",
+                  "pastPops",                               # 🔴 [ⓓ 2026-08-03] 과거 인기 시계열(P4 입력)
                   "kimarite", "kimariteRatio", "chaku", "rentai", "gear", "classGrade",
                   "declaredStyle", "declaredStyleLabel",    # [표기 각질 병기 2026-07-30]
                   "weight", "winOdds", "pop",               # [발주 시점 값 보존 2026-07-30]
@@ -23665,7 +23666,14 @@ def _keiba_starter_store_row(h):
             "fieldSizes": [pr.get("fieldSize") for pr in (h.get("past") or [])],
             "pastDistances": [pr.get("distance") for pr in (h.get("past") or [])],
             "last3fList": [pr.get("last3f") for pr in (h.get("past") or [])],
-            "pastPlacings": [pr.get("placing") for pr in (h.get("past") or [])]}
+            "pastPlacings": [pr.get("placing") for pr in (h.get("past") or [])],
+            # 🔴 [ⓓ 2026-08-03 승인] **과거 인기 시계열** — ④기대배반(P4)의 유일한 필수 입력.
+            #   실사고: `_jra_past_cell` 이 2026-08-02 에 pop 캡처를 추가했는데, 이 저장행이
+            #   `past[]` 를 5개 배열로 **풀어 담으면서 pop 만 빠뜨려** 그대로 버려지고 있었다
+            #   (실측 `raw_profile.entries` 의 past/pastPops 구조 보유 **0건 / 3,990건**).
+            #   ⚠ 바로 위 "pop" 키는 **현재 경주 인기**다 — 이것과 혼동하면 안 된다.
+            #   ⚠ 키 추가만이다. 기존 키·`record_score` 계산 경로 무변경. 🔴 소급 불가(넣은 날부터 쌓인다).
+            "pastPops": [pr.get("pop") for pr in (h.get("past") or [])]}
 
 
 def _keiba_build_form(shutsuba, details):
@@ -23836,16 +23844,22 @@ _KEIBA_FORM_DONE = set()   # 지방경마 전적 자동수집 완료(rk) — 전
 def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
     """[지방경마(NAR) 전적 자동수집] 서버 배당 수집(_multi_collect_one) 시 oddspark 出走表+전5경주 전적을 함께 수집·저장(경주당 1회).
     확장 자동전송 차단(NAR 서버 전담) 상황에서 '전적 데이터 없음'을 해소 → _triple_analyze 통합등급 반영.
-    keirin(_keirin_autocollect_form)의 경마판. 실패해도 배당 수집엔 무영향(격리)."""
+    keirin(_keirin_autocollect_form)의 경마판. 실패해도 배당 수집엔 무영향(격리).
+
+    🔴 [2026-08-03 승인 ⓐ] **반환값을 추가한다** — 종전에는 항상 None 이라 호출부가
+      성공/실패를 알 수 없었고, 그래서 oddspark 가 0두를 내도 **폴백을 걸 방법이 없었다**.
+        True  = 전적이 확보된 상태(이미 있음 · 이번에 저장 성공)
+        False = 확보 실패(0두 · 저장 0행 · 예외 · 인자 부족)
+      ⚠ 기존 호출부 2곳은 반환값을 쓰지 않으므로 **무회귀**다(값만 추가)."""
     try:
         if not (rk and op_track and sponsor and race_nb):
-            return
+            return False
         if rk in _KEIBA_FORM_DONE:
-            return
+            return True
         _ex = _starters_load().get(rk)                       # 이미 이 경주 oddspark 전적 있으면 스킵(재시작 대비)
         if _ex and _ex.get("horses") and _ex.get("source") == "oddspark":
             _KEIBA_FORM_DONE.add(rk)
-            return
+            return True
         url = ("https://www.oddspark.com/keiba/RaceList.do?raceDy=%s&opTrackCd=%s&sponsorCd=%s&raceNb=%s"
                % (ymd, op_track, sponsor, race_nb))
         _html = _keirin_fetch(url)
@@ -23854,7 +23868,7 @@ def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
             # [진단 로그] 실패 지점 노출 — 파라미터/URL/응답길이/HorseDetail 유무를 남겨 원인 즉시 파악
             print("[지방경마 전적·자동] %s 출주표 0두 → URL=%s | html=%dB | HorseDetail=%s"
                   % (rk, url, len(_html or ""), ("있음" if _html and "HorseDetail" in _html else "없음")))
-            return
+            return False
         details = _keiba_fetch_details(shutsuba)
         try:
             _jp_jockeys_accumulate(details)                  # 일본 기수 DB 누적(복승권율)
@@ -23871,8 +23885,11 @@ def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
             _starters_save(sdb)
             _KEIBA_FORM_DONE.add(rk)
             print(f"[지방경마 전적·자동] {rk}: {len(store)}두 oddspark 전적 수집(bg·각질·거리변화·상3F)")
+            return True
+        return False                                         # 파싱은 됐으나 저장행 0 — 폴백 대상
     except Exception as e:
         print(f"[지방경마 전적·자동] {rk} 수집 실패(무시):", e)
+        return False
 
 
 # ══════════ [일본경마 전적 board 무관 수집·2026-07-18] ══════════
@@ -30776,6 +30793,21 @@ _NARD_PLACE_RE = re.compile(r"\|\s*(\d{1,2})\s*\|+\s*(\d{2}\.\d{2}\.\d{2})\s+(\S
 #   기록 행: "1:37.4 7-7-7-5 39.8" (주파시계·코너통과·상3F)
 #   🔴 [2026-08-02 승인 G①] **주파시간을 캡처에 추가**(종전에는 매칭만 하고 버렸다).
 _NARD_CORNER_RE = re.compile(r"(\d:\d{2}\.\d)\s+([\d\-]+)\s+(\d{2}\.\d)")
+# ══════════ [ⓓ 지방 과거 인기(人気) — 2026-08-03 승인] ══════════
+#   🔴 **④기대배반(P4) 의 유일한 필수 입력**이다. 종전에는 "지방은 원문이 없어 못 만든다"고 적어 뒀으나,
+#     오늘 keiba.go.jp DebaTable 원문을 실제로 받아 확인했다:
+#       "4 26.07.27 重 10頭 盛岡 左1000 3番"   ← 착순 행
+#       "7人 460 佐々志 54.0"                  ← 🔴 그때의 **인기**·마체중·기수·부담중량
+#   🔴 **개수로 맞추면 조용히 틀린다.** `除外`·`中止`·`取消` 행은 착순이 숫자가 아니라
+#     `_NARD_PLACE_RE` 가 **건너뛰고**, 그 행은 인기도 없어(`計不`) 목록이 **서로 밀린다**.
+#     ⇒ 착순 자리를 넓힌 `_NARD_SLOT_RE` 로 **전체 슬롯을 순서대로** 잡고, 인기도 `(\d+人)?` 를
+#       **선택적**으로 만들어 인기 없는 행이 **자기 자리를 차지하게** 한다. 그래야 행 단위로 짝지어진다.
+#   🟢 실측 검증(2026-08-03 모리오카 1R · 除外+計不 섞인 경주):
+#       12두 전부 슬롯수 == 인기수 · 1번마 슬롯 ['4','7','除外','5','4'] ↔ 인기 ['7','9','-','5','4']
+#       → past 인기 [7,9,5,4] 로 **除外 행만 정확히 빠졌다**.
+_NARD_SLOT_RE = re.compile(r"\|\s*(除外|中止|取消|\d{1,2})\s*\|+\s*(\d{2}\.\d{2}\.\d{2})\s+(\S+)\s+(\d{1,2})頭"
+                           r"\|*\s*([^|]{0,12}?)\s*[左右直]\s*(\d{3,4})")
+_NARD_POP_RE = re.compile(r"\|\s*(?:(\d{1,2})人\s+)?(?:(\d{3})|計不|計測不能)\s+(\S+?)\s+(\d{2}(?:\.\d)?)\s*\|")
 _NARD_BW_RE = re.compile(r"\|\s*(\d{3})\s*\|?\s*\(([+\-]?\d+)\)")           # 현재 마체중 460 (+11)
 # [소실 방지 (2026-07-29)] 경주 단위 조건 — 마장(더트/잔디)·마장상태. 거리와 함께 저장해야
 #   '페이스 × 두수 × 거리' 차원 분석이 가능해진다(현재 분석 로그 전 1,392건 거리 0건).
@@ -30807,6 +30839,18 @@ def _nar_parse_deba(html, max_no=18):
         nm = _NARD_NAME_RE.search(blk)
         jk = _NARD_JOCKEY_RE.search(blk)
         recs = _NARD_CORNER_RE.findall(txt)
+        # ── [ⓓ 2026-08-03] 과거 인기(人気)를 **행 단위로** 짝짓는다 ──
+        #   `_NARD_PLACE_RE` 는 除外/中止/取消 행을 건너뛰므로 그 인덱스로 인기를 붙이면 **밀린다**.
+        #   ⇒ 전체 슬롯(`_NARD_SLOT_RE`)에서 "숫자 착순인 슬롯의 원래 위치"를 구해 그 위치의 인기를 쓴다.
+        #   🔴 슬롯 수와 인기 수가 다르면 **아무것도 붙이지 않는다** — 조용히 틀리는 것보다 없는 게 낫다.
+        _slots = _NARD_SLOT_RE.findall(txt)[:5]
+        _pops = _NARD_POP_RE.findall(txt)[:5]
+        _pop_at = []                                  # past[j] 에 대응하는 인기(없으면 None)
+        if len(_slots) == len(_pops):
+            for _k, _s in enumerate(_slots):
+                if str(_s[0]).isdigit():              # 착순이 숫자인 슬롯만 past 에 들어간다(무회귀)
+                    _v = _pops[_k][0]
+                    _pop_at.append(int(_v) if _v else None)
         past = []
         # 🔴 [2026-08-02 승인 G①] 그룹이 4 → 6 개로 늘었다(date·trackCond 추가).
         #   `venue` 는 종전에도 캡처했으나 `_vn` 으로 **버리고 있었다** — 이제 저장한다.
@@ -30818,7 +30862,9 @@ def _nar_parse_deba(html, max_no=18):
                              "date": dt, "trackCond": cond, "venue": (vn or "").strip(),
                              "corner": recs[j][1] if j < len(recs) else "",
                              "last3f": float(recs[j][2]) if j < len(recs) else None,
-                             "time": recs[j][0] if j < len(recs) else ""})
+                             "time": recs[j][0] if j < len(recs) else "",
+                             # 🔴 [ⓓ 2026-08-03] 그때의 인기순위 — ④기대배반(P4)의 입력. 키 추가만.
+                             "pop": (_pop_at[j] if j < len(_pop_at) else None)})
             except (ValueError, IndexError):
                 continue
         bw = _NARD_BW_RE.search(txt)
@@ -30868,6 +30914,83 @@ def _nar_autocollect_form(rk, baba, ymd, rno):
             print("[南関東 전적] %s: %d두 저장(keiba.go.jp DebaTable)" % (rk, len(store)))
     except Exception as e:
         print("[南関東 전적] %s 실패(무시):" % rk, e)
+
+
+# ══════════ [ⓐ NAR 전적 폴백 (2026-08-03 승인)] ══════════
+#   왜: `narBaba`(南関東 4장) 에만 keiba.go.jp 경로가 열려 있어, 모리오카·몬베츠·오비히로·나고야·
+#     소노다는 oddspark 가 실패하면 **대안이 없어 전적이 통째로 비었다**.
+#     실측 — 경마 전적 전무 61경주 중 **NAR 26경주**(몬베츠7·오비히로7·오오이5·모리오카2·나고야2 …)
+#     그리고 전적이 없으면 성적이 실제로 무너진다: 지방 복승 회수율 **완비 85.3% ↔ 전무 21.8%**.
+#   ⚠ 매핑 누락이 아니었다 — `_JP_BABA_CODE` 에 NAR 15장이 **이미 전부 있다**. 그대로 재사용한다.
+#   🔴 원칙 20(오탐률을 재기 전에 켜지 않는다): 이 폴백은 **막는 가드가 아니라 보태는 경로**라
+#     "정상을 잘랐나"가 아니라 **"필요 없는데 돌았나"** 가 오탐이다. 그래서 매 발동을 4분류로 센다.
+_NAR_FALLBACK_STAT = {"fired": 0, "ok": 0, "fail": 0, "unneeded": 0, "nocode": 0, "blocked": 0}
+
+
+def _nar_form_fallback(rk, ymd, rno, primary_ok):
+    """oddspark 전적이 실패한 경주만 keiba.go.jp DebaTable 로 한 번 더 시도한다.
+
+    ⚠ 완전 격리 — 예외를 위로 올리지 않는다(배당 수집·기존 전적 경로 무영향).
+    ⚠ 조용히 돌지 않는다 — **발동할 때마다 로그를 남긴다**(생략도 사유와 함께).
+    """
+    try:
+        if primary_ok:
+            return False                                  # 정상 경로가 성공 — 폴백 자체가 안 돈다
+        if not rk or not rno:
+            return False
+        if rk in _NAR_FORM_DONE:
+            return False
+        # ── 오탐 계측 ⓐ: 이미 전적이 있는데 도는가 (있으면 불필요한 요청이다) ──
+        try:
+            _ex = (_starters_load() or {}).get(rk) or {}
+        except Exception:
+            _ex = {}
+        if _ex.get("horses"):
+            _NAR_FALLBACK_STAT["unneeded"] += 1
+            print("[전적폴백] %s 생략 — 이미 전적 보유(src=%s) · 오탐 누적 %d"
+                  % (rk, _ex.get("source"), _NAR_FALLBACK_STAT["unneeded"]))
+            return False
+        baba = _jp_baba_code_from_rk(rk)                   # 🔴 기존 매핑 재사용(새 목록을 만들지 않는다)
+        if not baba:
+            _NAR_FALLBACK_STAT["nocode"] += 1
+            print("[전적폴백] %s 생략 — keiba.go.jp 미지원 경마장(k_babaCode 없음)" % rk)
+            return False
+        # ── 요청 제한 관문 (⚠ netkeiba 와 별도 카운터) ──
+        try:
+            import nar_guard
+            ok, why = nar_guard.wait_allow("live", max_wait=8.0)
+            if not ok:
+                _NAR_FALLBACK_STAT["blocked"] += 1
+                print("[전적폴백] %s 생략 — 요청 제한: %s" % (rk, why))
+                return False
+        except Exception:
+            nar_guard = None                              # 모듈 실패해도 서버는 죽지 않는다
+        _NAR_FALLBACK_STAT["fired"] += 1
+        print("[전적폴백] %s → keiba.go.jp DebaTable 시도(baba=%s · oddspark 실패분) · 발동 누적 %d"
+              % (rk, baba, _NAR_FALLBACK_STAT["fired"]))
+        _nar_autocollect_form(rk, baba, ymd, rno)
+        got = False
+        try:
+            _af = (_starters_load() or {}).get(rk) or {}
+            got = bool(_af.get("horses"))
+        except Exception:
+            pass
+        try:
+            if nar_guard:
+                nar_guard.record(ok=got, code=None if got else 0)
+        except Exception:
+            pass
+        if got:
+            _NAR_FALLBACK_STAT["ok"] += 1
+            print("[전적폴백] 🟢 %s 회복 — %d두 확보(keiba.go.jp) · 회복 누적 %d"
+                  % (rk, len(_af.get("horses") or []), _NAR_FALLBACK_STAT["ok"]))
+        else:
+            _NAR_FALLBACK_STAT["fail"] += 1
+            print("[전적폴백] 🔴 %s 폴백도 실패 · 실패 누적 %d" % (rk, _NAR_FALLBACK_STAT["fail"]))
+        return got
+    except Exception as e:
+        print("[전적폴백] %s 예외(무시):" % rk, e)
+        return False
 
 
 def _nar_race_list(baba, ymd):
@@ -31542,9 +31665,21 @@ def _multi_collect_one(track, race, ymd):
             #   경마는 코드 계열이 **3종**이다 — narBaba(南関東 4장 고정) · opTrackCd(당일 스케줄
             #   자동 추출) · 그 외. 셋 다 없으면 이 경주는 어느 경로도 못 타므로 반드시 드러낸다.
             try:
-                _keiba_autocollect_form(key, track.get("opTrackCd"), track.get("sponsorCd"), ymd, rno)
+                _ok_form = _keiba_autocollect_form(key, track.get("opTrackCd"),
+                                                   track.get("sponsorCd"), ymd, rno)
             except Exception as _fe:
+                _ok_form = False
                 print(f"[전적수집] {key} NAR 전적 실패: {_fe}")
+            # 🔴 [2026-08-03 승인 ⓐ] **keiba.go.jp 폴백** — oddspark 가 0두/실패면 이어서 시도한다.
+            #   실측 근거: 오늘 모리오카 1R 을 keiba.go.jp DebaTable 로 직접 받아 **12두 정상 파싱**했다.
+            #   종전 구조는 `narBaba`(南関東 4장)에만 그 경로를 열어 두어, 모리오카·몬베츠·오비히로 등은
+            #   oddspark 가 실패하면 **대안이 없어 전적이 통째로 비었다**(경마 전무 61경주 중 NAR 26경주).
+            #   ⚠ 매핑 누락이 아니다 — `_JP_BABA_CODE` 에는 NAR 15장이 **이미 전부 있다**(그대로 재사용).
+            #   ⚠ 완전 격리: 폴백에서 무슨 일이 나도 배당 수집·기존 전적 경로에 영향이 없다.
+            try:
+                _nar_form_fallback(key, ymd, rno, _ok_form)
+            except Exception as _fe:
+                print(f"[전적수집·폴백] {key} 실패(무시): {_fe}")
         elif not track.get("joCode"):
             # 코드가 **하나도 없다** → 전적·결과·흐름 수집이 전부 스킵된다. 경주당 1회만 경고.
             try:
@@ -33995,6 +34130,177 @@ def _start_health_kakao_scheduler():
     print("[체크리스트 카카오] 자동 발송 스케줄러 시작(매일 %02d:00 · 60초 폴링 · HEALTH_KAKAO_HOUR)" % hour)
 
 
+# ══════════ [ⓑ NAR 전적 개최일 오전 선수집 (2026-08-03 승인)] ══════════
+#   왜: 전적 수집이 **배당 수집 루프 안**에 있어, 수집 창(발주 10분전~2분후)을 놓치면
+#     전적까지 통째로 결손된다. 실제로 오오이·후나바시는 `narBaba` 대상인데도 전무 경주가 있었다
+#     — 경로 문제가 아니라 **창 미진입**이다.
+#   🔴 이게 되면 "전적 없음"과 "배당 부실"이 **갈린다**. 지금은 같은 창을 공유해 원인을 못 가른다.
+#
+#   ✏️ **"전날"이 아니라 "개최일 오전"으로 구현한 이유**(승인 문구와 다르므로 근거를 남긴다):
+#     `raceKey` 에 날짜가 없다(`모리오카 1경주`). 전날 저장하면 **다음날 경주와 키가 같아지고**,
+#     `_starters_prune`(24시간) 과도 충돌해 **어제 전적이 오늘 경주에 붙는 사고**가 난다.
+#     ⚠ 24h 창 실발생은 2026-08-01 조사에서 0건이었으나 **방어가 없다는 사실은 그대로**다.
+#     ⇒ 개최일 오전 6~9시(경주 없는 시간)에 **그날 것만** 받는다. 취소마 반영에도 유리하다.
+#     🟢 keiba.go.jp 는 전날에도 제공한다(실측: 8/4 모리오카 10두·과거경주행 40) — 필요하면 앞당길 수 있다.
+NAR_PRELOAD_ENABLED = True                 # 🔧 되돌리기: 이 한 줄을 False
+NAR_PRELOAD_HOUR_FROM = int(os.environ.get("NAR_PRELOAD_HOUR_FROM", "6"))
+NAR_PRELOAD_HOUR_TO = int(os.environ.get("NAR_PRELOAD_HOUR_TO", "9"))
+_NAR_PRELOAD_STARTED = False
+
+
+def _nar_preload_venues():
+    """{k_babaCode: 한글 대표 경마장명} — 🔴 **`_JP_BABA_CODE` 에서 파생**한다.
+
+    ⚠ 새 목록을 만들지 않는다. 오늘만 '같은 목록이 여러 벌로 갈려 구멍이 난' 사례를 네 번 봤다.
+    """
+    out = {}
+    for name, code in _JP_BABA_CODE.items():
+        if code in out:
+            continue
+        if re.match(r"^[가-힣]+$", name):       # 한자·영문 별칭이 아니라 한글 대표명만
+            out[code] = name
+    return out
+
+
+def _nar_preload_once(ymd=None, max_races=None):
+    """개최일 오전에 그날 NAR 전 경주 전적을 미리 받는다. → 통계 dict
+
+    ⚠ 완전 격리 — 예외를 위로 올리지 않는다. ⚠ 이미 받은 경주는 다시 받지 않는다.
+    """
+    ymd = ymd or time.strftime("%Y%m%d")
+    st = {"ymd": ymd, "venues": 0, "open": 0, "races": 0, "skip": 0,
+          "got": 0, "fail": 0, "blocked": 0, "t0": time.time()}
+    try:
+        import nar_guard
+    except Exception as e:
+        print("[NAR 선수집] 요청 관문 로드 실패 — 중단:", str(e)[:80])
+        return st
+    venues = _nar_preload_venues()
+    st["venues"] = len(venues)
+    print("[NAR 선수집] 시작 · %s · 대상 경마장 %d곳(개최 여부는 조회로 판정)" % (ymd, len(venues)))
+    for code, venue in venues.items():
+        try:
+            ok, why = nar_guard.wait_allow("preload", max_wait=60.0)
+            if not ok:
+                st["blocked"] += 1
+                print("[NAR 선수집] 🔴 중단 — 요청 제한: %s" % why)
+                break
+            try:
+                races = _nar_race_list(code, ymd)
+                nar_guard.record(ok=True)
+            except Exception as e:
+                nar_guard.record(ok=False, code=0)
+                print("[NAR 선수집] %s 개최 조회 실패(건너뜀): %s" % (venue, str(e)[:80]))
+                continue
+            if not races:
+                continue                                  # 미개최 — 정상이다
+            st["open"] += 1
+            print("[NAR 선수집] %s: %d경주 개최(baba=%s)" % (venue, len(races), code))
+            for r in races:
+                if max_races and st["races"] >= max_races:
+                    break
+                rno = r.get("raceNo")
+                rk = _multi_key(venue, rno)
+                try:
+                    _ex = (_starters_load() or {}).get(rk) or {}
+                except Exception:
+                    _ex = {}
+                if _ex.get("horses"):
+                    st["skip"] += 1                       # 🔴 이미 받은 경주는 다시 받지 않는다
+                    continue
+                ok, why = nar_guard.wait_allow("preload", max_wait=60.0)
+                if not ok:
+                    st["blocked"] += 1
+                    print("[NAR 선수집] 🔴 중단 — 요청 제한: %s" % why)
+                    return st
+                st["races"] += 1
+                _nar_autocollect_form(rk, code, ymd, rno)
+                try:
+                    _af = (_starters_load() or {}).get(rk) or {}
+                except Exception:
+                    _af = {}
+                _got = bool(_af.get("horses"))
+                nar_guard.record(ok=_got, code=None if _got else 0)
+                if _got:
+                    st["got"] += 1
+                else:
+                    st["fail"] += 1
+        except Exception as e:
+            print("[NAR 선수집] %s 처리 실패(무시): %s" % (venue, str(e)[:100]))
+    st["sec"] = round(time.time() - st["t0"], 1)
+    print("[NAR 선수집] 완료 · 개최 %d곳 · 시도 %d경주 · 🟢회복 %d · 실패 %d · 이미보유 %d · 제한 %d · %.1f초"
+          % (st["open"], st["races"], st["got"], st["fail"], st["skip"], st["blocked"], st["sec"]))
+    return st
+
+
+def _start_nar_preload_scheduler():
+    """🔴 sleep-first 로 만들지 않는다 — **검사 먼저, 대기 나중**. 하루 1회 판정은 **파일 스탬프**로 한다.
+
+    근거: 2026-08-01 실측에서 주기 백업(6시간·sleep-first)이 **하루 종일 한 번도 안 돌았다**.
+      개발 중 리로더 재기동이 잦아 타이머가 계속 리셋됐기 때문이다.
+    """
+    global _NAR_PRELOAD_STARTED
+    if _NAR_PRELOAD_STARTED or not NAR_PRELOAD_ENABLED:
+        return
+    _NAR_PRELOAD_STARTED = True
+    _np_stamp = os.path.join(os.path.dirname(__file__), "data", "_nar_preload_last.txt")
+
+    def _done_day():
+        try:
+            return open(_np_stamp, encoding="utf-8").read().strip()
+        except Exception:
+            return None
+
+    def _mark(day):
+        try:
+            os.makedirs(os.path.dirname(_np_stamp), exist_ok=True)
+            _t = _np_stamp + ".tmp%d" % os.getpid()
+            with open(_t, "w", encoding="utf-8") as f:
+                f.write(day)
+            os.replace(_t, _np_stamp)
+        except Exception as e:
+            print("[NAR 선수집] 실행일 기록 실패(무시):", str(e)[:80])
+
+    def _loop():
+        while True:
+            try:
+                now = time.localtime()
+                today = time.strftime("%Y-%m-%d", now)
+                if (NAR_PRELOAD_HOUR_FROM <= now.tm_hour < NAR_PRELOAD_HOUR_TO
+                        and _done_day() != today):
+                    _mark(today)          # 🔴 실행 **직전**에 찍는다 — 중간에 재기동돼도 그날 재폭주하지 않는다
+                    _nar_preload_once()
+            except Exception as e:
+                print("[NAR 선수집] 스케줄러 오류(무시):", e)
+            time.sleep(60)                # ⚠ 검사 뒤에 잔다(sleep-first 아님)
+
+    threading.Thread(target=_loop, daemon=True, name="nar-preload").start()
+    print("[NAR 선수집] 스케줄러 시작(매일 %02d~%02d시 · 60초 폴링 · 파일 스탬프로 하루 1회)"
+          % (NAR_PRELOAD_HOUR_FROM, NAR_PRELOAD_HOUR_TO))
+
+
+@app.route("/api/nar/preload", methods=["GET", "POST"])
+def nar_preload_api():
+    """[NAR 전적 선수집] GET=현황(읽기 전용) · POST=즉시 1회 실행(수동).
+
+    ⚠ POST 는 사람이 부를 때만 돈다. 자동 프로브를 만들지 않는다.
+    """
+    try:
+        import nar_guard
+        q = nar_guard.stats()
+    except Exception as e:
+        q = {"error": str(e)[:80]}
+    if request.method == "GET":
+        return jsonify({"enabled": NAR_PRELOAD_ENABLED,
+                        "window": "%02d~%02d시" % (NAR_PRELOAD_HOUR_FROM, NAR_PRELOAD_HOUR_TO),
+                        "venues": _nar_preload_venues(),
+                        "quota": q, "fallbackStat": dict(_NAR_FALLBACK_STAT)})
+    body = request.json or {}
+    st = _nar_preload_once(ymd=(body.get("ymd") or None),
+                           max_races=body.get("maxRaces"))
+    return jsonify({"ok": True, "stat": st, "quota": (lambda: __import__("nar_guard").stats())()})
+
+
 @app.route("/api/collect/cycles", methods=["GET"])
 def collect_cycles_api():
     """[수집 사이클 관측] ?limit=N — 최근 사이클 + 경주별 '창 진입 횟수'.
@@ -34188,6 +34494,7 @@ def _boot_background():
     _start_daily_learning_scheduler()    # 매일 22:00 학습 일지 자동 생성·백업
     try:
         _start_health_kakao_scheduler()  # [체크리스트 카카오 2026-07-30] 매일 22:00 상태 푸시(기존 추천 발송과 분리)
+        _start_nar_preload_scheduler()   # [ⓑ NAR 선수집 2026-08-03] 개최일 오전 6~9시 · 수집 창과 전적을 분리
     except Exception as e:
         print("[체크리스트 카카오] 스케줄러 기동 실패(무시):", e)
     try:

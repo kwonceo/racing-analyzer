@@ -1,0 +1,259 @@
+{
+ "predicted_top3": [
+  2,
+  5,
+  6
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 넷의 혼전 속 A등급 2, 5번이 주도. 6번 추격이 예상됨.",
+ "key_factors": [
+  "선행마 초과",
+  "A등급 선행마 간의 경쟁",
+  "단거리",
+  "B등급 추격마 존재"
+ ],
+ "exception_note": "전체 6두 중 선행마가 4두로 압도적이며, 그 중 2두(2번, 5번)는 A등급으로 각축이 예상된다. 단거리 경주에서 이러한 선행마 과잉은 초반 빠른 페이스를 유도하여 선행 버티기가 어려울 수 있으나, 2번과 5번의 최근 성적이 우수하여 이들의 페이스 조절 여부가 관건이다. 후미에서 추격하는 B등급 6번에게는 기회가 될 수 있는 전개이다.",
+ "applied_rules": [],
+ "raceKey": "후나바시 3경주",
+ "forecastAt": "2026-08-02 15:30:41",
+ "forecastEpoch": 1785652241.172621,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "후나바시 3경주",
+  "wind": {
+   "venue": "후나바시",
+   "풍속": 2.4,
+   "풍향": "북동",
+   "풍향코드": 2,
+   "기온": 30.0,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T15:10:00+09:00",
+   "지점": "船橋",
+   "지점거리km": 4.5
+  },
+  "fieldSize": 6,
+  "distance": 1200,
+  "surface": "더트",
+  "trackCond": "良",
+  "horses": [
+   {
+    "no": 2,
+    "name": "ステルスハンター",
+    "gait": "선행형",
+    "recentPlacings": [
+     1
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 480,
+    "jockey": "岡村健"
+   },
+   {
+    "no": 5,
+    "name": "アンヴァンク",
+    "gait": "선행형",
+    "recentPlacings": [
+     1
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 426,
+    "jockey": "仲野光"
+   },
+   {
+    "no": 6,
+    "name": "フルールマジック",
+    "gait": "추격형",
+    "recentPlacings": [
+     2
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 449,
+    "jockey": "野澤憲"
+   },
+   {
+    "no": 1,
+    "name": "トップオブトップ",
+    "gait": "평지형",
+    "recentPlacings": [
+     3,
+     2
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 444,
+    "jockey": "佐野遥"
+   },
+   {
+    "no": 4,
+    "name": "アンナロード",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     6
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 454,
+    "jockey": "山本大"
+   },
+   {
+    "no": 3,
+    "name": "コパノベリーズ",
+    "gait": "선행형",
+    "recentPlacings": [
+     5,
+     6,
+     9,
+     2
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 424,
+    "jockey": "小杉亮"
+   }
+  ],
+  "composition": {
+   "leadCount": 4,
+   "leadHorses": [
+    2,
+    5,
+    4,
+    3
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 100.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 16.7
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 16.7
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "기수 승률(보유율 17%로 미달)",
+   "거리 적성(보유율 17%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   2,
+   5,
+   6
+  ],
+  "hit_count": 3,
+  "hit": [
+   2,
+   5,
+   6
+  ],
+  "missed": [],
+  "missed_info": [],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   5,
+   2,
+   6
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.2,
+  "market_src": "win",
+  "gradedAt": "2026-08-02 15:50:28"
+ },
+ "graded": true,
+ "reviewed": true,
+ "review": {
+  "miss_reason": "해당 없음(전부 적중)",
+  "new_rule": "없음",
+  "rule_confidence": 1,
+  "reviewedAt": "2026-08-02 15:50:28"
+ }
+}

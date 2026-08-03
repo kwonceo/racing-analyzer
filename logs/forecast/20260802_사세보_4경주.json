@@ -1,0 +1,334 @@
+{
+ "predicted_top3": [
+  1,
+  5,
+  4
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 1번과 4번의 경쟁 속 1번의 우세, 추입형 5번의 막판 역전 기대.",
+ "key_factors": [
+  "선행형 2명 (1, 4)의 전개 경쟁",
+  "A급 1번의 선행 능력과 이번 개최에서의 분발 기대",
+  "추입형 5번의 최근 꾸준한 착순과 막판 강점"
+ ],
+ "exception_note": "A급 선행마 1번과 B급 선행마 4번이 같은 라인에 위치하지 않아 직접적인 내부 경쟁은 피하나, 두 선행마 간의 전개 주도권 싸움이 예상된다. 1번 田口 勇介는 이번 개최에서 '초특선'과 '준결승'에서 다소 아쉬운 성적을 보였으나, '총평'에서 3度目の正直(세 번째에는 성공)이라는 단서가 있어 분발을 기대할 수 있다. 반면 4번 高井 流星은 최근 1착도 있으나 기복이 있어 1번에게 밀릴 가능성이 있다. 5번 飯田 辰哉는 꾸준히 3, 2, 3착 등 상위권에 들었으며, 7번 工藤 文彦 또한 직전 1착 기록이 있어 추입 싸움에서 강세를 보일 수 있다. 전반적으로 선행마 간의 초반 경쟁이 치열해지면 추입형에게 유리한 전개가 될 수 있으나, 1번의 등급과 '총평'의 단서를 감안할 때 1번의 선행 우세를 점친다.",
+ "applied_rules": [],
+ "raceKey": "사세보 4경주",
+ "forecastAt": "2026-08-02 11:58:25",
+ "forecastEpoch": 1785639505.9906332,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 4경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 2.9,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 33.8,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T11:40:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "田口 勇介",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 ３着 11.7 8/ 1 準決勝 ５着 11.5",
+    "prev1": "富 山Ｆ１ 7/21 初特選 ５着 9.9 7/22 準決勝 ４着 10.1 7/23 特 選 １着 9.8",
+    "prev2": "平 Ｆ２ 7/10 初特選 ４着 12.4 7/11 準決勝 ５着 12.3 7/12 特 選 １着 11.3",
+    "chaku": [
+     3,
+     2,
+     2,
+     11
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "飯田 辰哉",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 ４着 11.5 8/ 1 準決勝 ６着 11.5",
+    "prev1": "岐 阜Ｆ２ 7/18 特予選 ３着 11.4 7/19 準決勝 ２着 12 7/20 決 勝 ３着 11.8",
+    "prev2": "小田原Ｆ２ 7/10 初特選 ３着 9.8 7/11 準決勝 ２着 9.8 7/12 決 勝 ５着 9.8",
+    "chaku": [
+     3,
+     6,
+     5,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "高井 流星",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 12.2 8/ 1 一 般 ２着 11.8",
+    "prev1": "伊 東Ｆ２ 7/22 予 選 ６着 9.5 7/23 一 般 １着 10 7/24 特 選 ２着 10.2",
+    "prev2": "玉 野Ｆ１ 7/14 予 選 １着 12.1 7/15 準決勝 ３着 12.2 7/16 決 勝 ４着 11",
+    "chaku": [
+     7,
+     4,
+     1,
+     11
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "工藤 文彦",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.6 8/ 1 準決勝 ４着 11.2",
+    "prev1": "広 島Ｆ２ 7/22 予 選 ２着 11 7/23 準決勝 ３着 11.3 7/24 特 選 ３着 11.7",
+    "prev2": "玉 野Ｆ２ 7/ 7 予 選 ２着 11.5 7/ 8 準決勝 ４着 11.6 7/ 9 特 選 １着 11.4",
+    "chaku": [
+     2,
+     5,
+     4,
+     7
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "池田 浩士",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ４着 11.6 8/ 1 準決勝 ５着 11.6",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 １着 11.6 7/21 準決勝 ２着 11.8 7/22 決 勝 ５着 11.2",
+    "prev2": "佐世保Ｆ１ 7/14 一 般 ２着 11.3 7/15 特 選 ３着 12",
+    "chaku": [
+     1,
+     5,
+     4,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "下沖 功児",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "recent": "7/31 予 選 ２着 11.8 8/ 1 準決勝 ３着 11.7",
+    "prev1": "小 倉Ｆ２ 7/24 特予選 １着 12.1 7/25 準決勝 ６着 11.7 7/26 特 選 ２着 11.6",
+    "prev2": "松 阪Ｆ１ 7/16 初特選 ６着 11.4 7/17 準決勝 ４着 11.5 7/18 特 選 １着 11.5",
+    "chaku": [
+     7,
+     3,
+     0,
+     14
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "神開 将暢",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11.5 8/ 1 一 般 １着 11.5",
+    "prev1": "小 倉Ｆ２ 7/24 特予選 １着 12.4 7/25 準決勝 ２着 11.7 7/26 決 勝 ４着 11.8",
+    "prev2": "西武園Ｆ２ 7/16 特予選 ３着 11.8 7/17 準決勝 ４着 12 7/18 特 選 ３着 12.2",
+    "chaku": [
+     1,
+     10,
+     4,
+     6
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    1,
+    4
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    5,
+    7,
+    3,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   5,
+   6,
+   2,
+   7,
+   4,
+   3
+  ],
+  "paceLabel": null,
+  "comment": "噛み合っていない①田口だが３度目の正直「◎」に応えてくれ！ 駆け方次第で⑤飯田の差し、④高井－③池田も展開１つ",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   5,
+   6
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   5
+  ],
+  "missed": [
+   6
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   5,
+   2
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 12:30:00"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번 神開 将暢 선수의 최근 개최 성적 '일반 1착'을 간과했습니다. 7월 전체 착순 분포는 양호했으나, C등급이라는 점과 이번 개최 1일차 성적(5착)에 집중하여 과소평가했습니다.",
+  "new_rule": "C등급 추입형 선수라도 최근 개최에서 1착을 기록한 경우, 예상 외의 선전을 할 가능성을 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 12:30:02"
+ },
+ "reviewed": true
+}

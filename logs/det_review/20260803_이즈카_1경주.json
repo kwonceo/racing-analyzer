@@ -1,0 +1,50 @@
+{
+ "raceKey": "이즈카 1경주",
+ "entries": [
+  {
+   "time": "08:47:59",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      5
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      4,
+      5
+     ],
+     [
+      4,
+      5,
+      9
+     ],
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      2,
+      4,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

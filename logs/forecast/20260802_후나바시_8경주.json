@@ -1,0 +1,374 @@
+{
+ "predicted_top3": [
+  1,
+  8,
+  2
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 초과 경쟁 속 A급 선행마 간의 전개 우위, 후미 각질은 불리 예상.",
+ "key_factors": [
+  "선행형 말 5두로 인해 초반 페이스가 빠르게 전개될 가능성 높음",
+  "A등급 선행형 말 1, 8번의 선두 경쟁 심화 예상",
+  "B, C, D등급 선행형 말들이 초반 오버페이스로 무너질 가능성"
+ ],
+ "exception_note": "9두 경주에 선행형 말이 5두로, 선행마 간의 초반 포지션 경쟁이 매우 치열할 것으로 예상된다. 이로 인해 빠른 페이스가 형성될 것이며, 이는 후미 추격마들에게 유리할 수 있지만, 전체적인 각질 구성을 볼 때 A등급 선행마들이 유리한 전개를 가져갈 가능성이 높다. 특히, 1번과 8번은 A등급 선행형으로 서로 선두권 다툼을 할 것으로 보이며, 1번이 최근 성적의 꾸준함과 마체중의 우위로 8번보다 근소하게 앞설 것으로 예상한다. 2번은 B등급이지만 최근 1착 빈도가 높아 선행마들의 경쟁 속에서 선두권에 가세할 가능성이 있다.",
+ "applied_rules": [],
+ "raceKey": "후나바시 8경주",
+ "forecastAt": "2026-08-02 18:25:42",
+ "forecastEpoch": 1785662742.4663346,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "후나바시 8경주",
+  "wind": {
+   "venue": "후나바시",
+   "풍속": 2.6,
+   "풍향": "북동",
+   "풍향코드": 2,
+   "기온": 24.9,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T18:10:00+09:00",
+   "지점": "船橋",
+   "지점거리km": 4.5
+  },
+  "fieldSize": 9,
+  "distance": 1200,
+  "surface": "더트",
+  "trackCond": "良",
+  "horses": [
+   {
+    "no": 1,
+    "name": "リンガスロシェ",
+    "gait": "선행형",
+    "recentPlacings": [
+     5,
+     1,
+     1,
+     1,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 518,
+    "jockey": "笠野雄",
+    "distApt": "A"
+   },
+   {
+    "no": 4,
+    "name": "ゲンキイッパイ",
+    "gait": "평지형",
+    "recentPlacings": [
+     3,
+     8,
+     1,
+     4,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 517,
+    "jockey": "山口達",
+    "distApt": "A"
+   },
+   {
+    "no": 8,
+    "name": "フレンドシルバー",
+    "gait": "선행형",
+    "recentPlacings": [
+     1,
+     8,
+     2,
+     9,
+     4
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 466,
+    "jockey": "實川純",
+    "distApt": "A"
+   },
+   {
+    "no": 6,
+    "name": "ベストポジション",
+    "gait": "추격형",
+    "recentPlacings": [
+     12,
+     5,
+     4,
+     3,
+     2
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 451,
+    "jockey": "篠谷葵",
+    "distApt": "A"
+   },
+   {
+    "no": 2,
+    "name": "ツーエムフリーク",
+    "gait": "선행형",
+    "recentPlacings": [
+     6,
+     1,
+     1,
+     1
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 511,
+    "jockey": "山中悠"
+   },
+   {
+    "no": 5,
+    "name": "ミヤビモルタル",
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     9,
+     2,
+     2,
+     2
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 521,
+    "jockey": "本田重",
+    "distApt": "A"
+   },
+   {
+    "no": 9,
+    "name": "ダイセンシリウス",
+    "gait": "추격형",
+    "recentPlacings": [
+     3,
+     6,
+     6,
+     7,
+     2
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 466,
+    "jockey": "本橋孝"
+   },
+   {
+    "no": 7,
+    "name": "ゼンソレイユ",
+    "gait": "선행형",
+    "recentPlacings": [
+     8,
+     4,
+     3,
+     4,
+     5
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 405,
+    "jockey": "張田昂",
+    "distApt": "B"
+   },
+   {
+    "no": 3,
+    "name": "マルヒロユートピア",
+    "gait": "평지형",
+    "recentPlacings": [
+     8,
+     7,
+     8,
+     4,
+     12
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 493,
+    "jockey": "仲野光",
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 5,
+   "leadHorses": [
+    1,
+    8,
+    2,
+    5,
+    7
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 100.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 77.8
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 55.6
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "기수 승률(보유율 56%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   6,
+   5,
+   3
+  ],
+  "hit_count": 0,
+  "hit": [],
+  "missed": [
+   6,
+   5,
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "추격형",
+    "recentPlacings": [
+     12,
+     5,
+     4,
+     3,
+     2
+    ],
+    "line": null,
+    "grade": "B"
+   },
+   {
+    "no": 5,
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     9,
+     2,
+     2,
+     2
+    ],
+    "line": null,
+    "grade": "C"
+   },
+   {
+    "no": 3,
+    "gait": "평지형",
+    "recentPlacings": [
+     8,
+     7,
+     8,
+     4,
+     12
+    ],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   1,
+   9
+  ],
+  "market_hit_count": 0,
+  "market_snapshot_mb": -0.5,
+  "market_src": "win",
+  "gradedAt": "2026-08-02 18:50:31"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "선행마 간의 치열한 경쟁 속에서 A등급 선행마들이 우위를 점할 것이라는 예상과 달리, 선행마들의 오버페이스가 더 크게 작용하여 후미 추격마와 평지형 말에게 유리하게 작용한 점을 놓쳤다. 특히 6번(추격형)의 최근 성적이 부진했지만, 빠른 페이스에 대한 수혜를 간과했다.",
+  "new_rule": "선행마의 수가 과도하게 많을 경우, A등급 선행마라도 초반 오버페이스로 무너질 수 있다는 점을 고려하여 후미 추격마와 평지형 말의 역전 가능성을 높게 평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-02 18:50:34"
+ },
+ "reviewed": true
+}

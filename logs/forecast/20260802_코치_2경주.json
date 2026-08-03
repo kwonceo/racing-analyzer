@@ -1,0 +1,384 @@
+{
+ "predicted_top3": [
+  9,
+  11,
+  1
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 3,
+ "reason_short": "전반적으로 부진한 흐름 속, 9번과 11번이 기수 승률 우위와 평지/추격 각질로 선전 예상",
+ "key_factors": [
+  "대다수 마필의 최근 성적이 매우 저조",
+  "기수 승률이 높은 마필의 상대적 우위",
+  "평지형과 추격형의 혼재된 각질 구성"
+ ],
+ "exception_note": "대부분의 출전 마필들이 최근 매우 부진한 성적을 기록하고 있어, 통상적인 경주 흐름을 예측하기 어렵다. 특히 1착 후보 9번과 11번은 상대적으로 높은 기수 승률을 바탕으로 혼란스러운 경주에서 우위를 점할 것으로 보인다. 1번 로저바ローズ는 낮은 부담중량과 평지형 각질로 이변을 노릴 수 있다.",
+ "applied_rules": [],
+ "raceKey": "코치 2경주",
+ "forecastAt": "2026-08-02 15:55:14",
+ "forecastEpoch": 1785653714.1736577,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "코치 2경주",
+  "wind": {
+   "venue": "코치",
+   "풍속": 2.7,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 32.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T15:40:00+09:00",
+   "지점": "南国日章",
+   "지점거리km": 5.26
+  },
+  "fieldSize": 13,
+  "distance": 1300,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 9,
+    "name": "ベンバトル",
+    "gait": "평지형",
+    "recentPlacings": [
+     11,
+     12,
+     11
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "加藤翔",
+    "jockeyRate": 60.0
+   },
+   {
+    "no": 2,
+    "name": "ミスチヴィアスアレックス",
+    "gait": "추격형",
+    "recentPlacings": [
+     18,
+     12,
+     14
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "岡村卓",
+    "jockeyRate": 30.0
+   },
+   {
+    "no": 12,
+    "name": "アドマイヤムーン",
+    "gait": "평지형",
+    "recentPlacings": [
+     9,
+     7,
+     15,
+     14,
+     7
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "畑中信",
+    "jockeyRate": 30.0
+   },
+   {
+    "no": 10,
+    "name": "トーセンラー",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     12,
+     9
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "山崎雅",
+    "jockeyRate": 30.0
+   },
+   {
+    "no": 11,
+    "name": "ブリックスアンドモルタル",
+    "gait": "추격형",
+    "recentPlacings": [
+     14,
+     11,
+     13
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "赤岡修",
+    "jockeyRate": 60.0
+   },
+   {
+    "no": 4,
+    "name": "レッドファルクス",
+    "gait": "추격형",
+    "recentPlacings": [
+     16,
+     11,
+     10,
+     7,
+     13
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "永森大",
+    "jockeyRate": 50.0
+   },
+   {
+    "no": 3,
+    "name": "フォーウィールドライブ",
+    "gait": "추격형",
+    "recentPlacings": [
+     13,
+     9
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "上田将",
+    "jockeyRate": 26.7
+   },
+   {
+    "no": 5,
+    "name": "イスラボニータ",
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     9,
+     6,
+     16,
+     12
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "岡遼太",
+    "jockeyRate": 36.7
+   },
+   {
+    "no": 8,
+    "name": "ウインブライト",
+    "gait": "추격형",
+    "recentPlacings": [
+     16,
+     15
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "大澤誠",
+    "jockeyRate": 3.3
+   },
+   {
+    "no": 6,
+    "name": "サトノダイヤモンド",
+    "gait": "추격형",
+    "recentPlacings": [
+     14,
+     17
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "郷間勇",
+    "jockeyRate": 23.3
+   },
+   {
+    "no": 7,
+    "name": "カリフォルニアクローム",
+    "gait": "평지형",
+    "recentPlacings": [
+     16,
+     8,
+     11
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "城野慈",
+    "jockeyRate": 26.7
+   },
+   {
+    "no": 13,
+    "name": "メモリーキャッチ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   },
+   {
+    "no": 1,
+    "name": "ロジャーバローズ",
+    "gait": "평지형",
+    "recentPlacings": [
+     8,
+     9,
+     6,
+     13,
+     14
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "阿部基",
+    "jockeyRate": 16.7
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 92.3
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 92.3
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 92.3
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 38.5
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "거리 적성(보유율 38%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   11,
+   7,
+   9
+  ],
+  "hit_count": 2,
+  "hit": [
+   9,
+   11
+  ],
+  "missed": [
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   7,
+   11
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -1.9,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 16:30:03"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "7번 말의 최근 착순이 16, 8, 11로 부진했으나, 평지형 각질과 낮은 부담중량이 이변을 만들 수 있는 잠재력을 과소평가했다. 특히 '重' 주로 컨디션에서 평지형 각질의 7번이 예상보다 좋은 퍼포먼스를 보였다.",
+  "new_rule": "'重' 주로에서 D등급 평지형 각질의 낮은 부담중량 마필은 예상외의 결과를 낼 수 있으므로, 해당 조건을 가진 마필을 주의 깊게 살펴야 한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-02 16:30:05"
+ },
+ "reviewed": true
+}

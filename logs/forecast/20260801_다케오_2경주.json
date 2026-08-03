@@ -1,0 +1,334 @@
+{
+ "predicted_top3": [
+  1,
+  2,
+  3
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 강자 1번의 안정적인 선두 유지와 후속 추입형 2,3번의 유력한 순위권 진입.",
+ "key_factors": [
+  "선행형 1번의 압도적인 최근 성적",
+  "경쟁 선행형들의 최근 부진",
+  "추입형 2,3번의 안정적인 순위권 기록"
+ ],
+ "exception_note": "이 경주는 1번 '尾方 真生'가 선행형 중 압도적인 기량을 보여주고 있어, 다른 두 선행형(5번, 6번)과의 내부 경쟁에서 쉽게 우위를 점할 것으로 예상된다. 따라서 일반적인 선행형 다수 경주에서 발생할 수 있는 과도한 선두 다툼으로 인한 페이스 붕괴 가능성이 낮아, 1번이 비교적 편하게 레이스를 운영할 수 있을 것이다. 후속 추입형인 2번과 3번은 1번의 뒤를 안정적으로 쫓아 순위권에 진입할 가능성이 높다.",
+ "applied_rules": [],
+ "raceKey": "다케오 2경주",
+ "forecastAt": "2026-08-01 21:11:17",
+ "forecastEpoch": 1785586277.4243956,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "다케오 2경주",
+  "wind": {
+   "venue": "다케오",
+   "풍속": 1.4,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 28.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T20:50:00+09:00",
+   "지점": "嬉野",
+   "지점거리km": 8.56
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 2,
+    "name": "高尾貴美歌",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "recent": "7/31 ガ予１ ２着 11.8",
+    "prev1": "岸和田Ｆ２ 7/13 ガ予１ ３着 12.4 7/14 ガ予２ ２着 12.1 7/15 ガ決勝 ２着 11.9",
+    "prev2": "岐 阜Ｆ２ 6/27 ガ予１ ２着 12.2 6/28 ガ予２ ３着 12.3 6/29 ガ決勝 ３着 11.9",
+    "chaku": [
+     3,
+     10,
+     4,
+     1
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "尾方 真生",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "recent": "7/31 ガ予１ １着 11.9",
+    "prev1": "前 橋Ｇ３ 7/22 予１Ａ １着 10.1 7/23 予２Ａ １着 10.4 7/24 ガ決Ａ ４着 10.5",
+    "prev2": "小田原Ｆ２ 7/10 ガ予１ １着 10.1 7/11 ガ予２ １着 9.7 7/12 ガ決勝 ４着 9.9",
+    "chaku": [
+     18,
+     2,
+     0,
+     4
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "増茂るるこ",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "recent": "7/31 ガ予１ ４着 11.8",
+    "prev1": "弥 彦Ｆ２ 7/17 ガ予１ ２着 12 7/18 ガ予２ ２着 11.9 7/19 ガ決勝 ５着 12.1",
+    "prev2": "高 知Ｆ２ 6/18 ガ予１ ４着 16.1 6/19 ガ予２ ５着 15.5 6/20 ガ決勝 ５着 15.2",
+    "chaku": [
+     1,
+     3,
+     0,
+     8
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "鈴木 媛子",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "recent": "7/31 ガ予１ ３着 12.4",
+    "prev1": "平 Ｆ２ 7/16 ガ予１ ４着 12 7/17 ガ予２ ４着 12.3 7/18 ガ一般 １着 12.6",
+    "prev2": "名古屋Ｆ２ 7/10 ガ予１ ５着 12.2 7/11 ガ予２ ４着 12.3 7/12 ガ一般 １着 13",
+    "chaku": [
+     3,
+     1,
+     3,
+     11
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 7,
+    "name": "三谷 尚子",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.77,
+    "recent": "7/31 ガ予１ ５着 12.1",
+    "prev1": "松 阪Ｆ２ 7/21 ガ予１ ７着 12.5 7/22 ガ予２ ６着 12.3 7/23 ガ一般 ３着 12.7",
+    "prev2": "松 山Ｆ２ 7/11 ガ予１ ５着 12.2 7/12 ガ予２ ３着 12.4 7/13 ガ決勝 ７着 12.2",
+    "chaku": [
+     0,
+     0,
+     2,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "黒河内由実",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.79,
+    "recent": "7/31 ガ予１ ６着 12.2",
+    "prev1": "奈 良Ｆ１ 7/25 ガ予１ ５着 10.3 7/26 ガ予２ ４着 10.3 7/27 ガ一般 ５着 10.8",
+    "prev2": "松 阪Ｆ２ 7/21 ガ予１ ４着 12.2 7/22 ガ予２ ５着 11.8 7/23 ガ一般 ６着 13",
+    "chaku": [
+     0,
+     2,
+     5,
+     30
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "新井 美菜",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.71,
+    "recent": "7/31 ガ予１ ７着 12.3",
+    "prev1": "静 岡Ｆ１ 7/18 ガ予１ ７着 13.1 7/19 ガ予２ ４着 12.8 7/20 ガ一般 ３着 13.2",
+    "prev2": "小田原Ｆ２ 7/10 ガ予１ ６着 10.6 7/11 ガ予２ ６着 10.1 7/12 ガ一般 １着 10.8",
+    "chaku": [
+     2,
+     1,
+     2,
+     14
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    1,
+    5,
+    6
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    2,
+    3,
+    7
+   ]
+  },
+  "lines": [
+   1,
+   3,
+   2,
+   4,
+   5,
+   6,
+   7
+  ],
+  "paceLabel": null,
+  "comment": "当然のごとく期待に応える①尾方から。相手探しの一戦は②高尾が一番手。③増茂は自在性を生かして立ち向かいたい。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   1,
+   2,
+   5
+  ],
+  "hit_count": 2,
+  "hit": [
+   1,
+   2
+  ],
+  "missed": [
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 5,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   2,
+   3
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-01 21:50:04"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "5번 말 '黒河内由実'의 최근 성적이 부진했음에도 불구하고, 레이스 중 1번 말을 따라가는 능력이 예상보다 강하여 순위권에 진입할 가능성을 과소평가했다. 특히 'declared' 속성이 '추입(마크)'으로 선행형 1번 뒤에 마크했을 때의 시너지를 고려하지 못했다.",
+  "new_rule": "선행마의 뒤를 마크할 수 있는 선행형 추입마는 최근 성적이 좋지 않더라도 강력한 선행마와 함께 순위권에 진입할 가능성을 높게 본다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-01 21:50:06"
+ },
+ "reviewed": true
+}

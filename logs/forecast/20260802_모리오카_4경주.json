@@ -1,0 +1,410 @@
+{
+ "predicted_top3": [
+  12,
+  4,
+  7
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마들의 내부 경쟁 심화, 추격형 강세. 12번의 최근 상승세와 4번의 꾸준함.",
+ "key_factors": [
+  "선행형 4두의 경쟁으로 인한 혼전 예상",
+  "추격형 A등급 마필 12번, 4번의 기회 증대",
+  "12번의 최근 5경기 1착 1회, 3착 2회로 상승세",
+  "4번의 최근 5경기 2착 2회로 안정적인 성적"
+ ],
+ "exception_note": "총 12두 중 선행형 4두로 인해 초반부터 치열한 선두 다툼이 예상되며, 이는 후미 추격형 마필들에게 유리한 전개를 제공할 것으로 보인다. 특히 A등급 추격형인 12번과 4번이 이러한 상황에서 두각을 나타낼 가능성이 높다. 7번은 선행형이지만 A등급으로 혼전 속에서도 버텨낼 가능성이 있다.",
+ "applied_rules": [],
+ "raceKey": "모리오카 4경주",
+ "forecastAt": "2026-08-02 14:15:38",
+ "forecastEpoch": 1785647738.183301,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "모리오카 4경주",
+  "wind": {
+   "venue": "모리오카",
+   "풍속": 1.8,
+   "풍향": "남남서",
+   "풍향코드": 9,
+   "기온": 23.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T14:00:00+09:00",
+   "지점": "盛岡",
+   "지점거리km": 3.4
+  },
+  "fieldSize": 12,
+  "distance": 1400,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 4,
+    "name": "ファインニードル",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     2,
+     12,
+     12,
+     14
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "山本聡",
+    "jockeyRate": 53.3,
+    "distApt": "A"
+   },
+   {
+    "no": 12,
+    "name": "タイセイブラスト",
+    "gait": "추격형",
+    "recentPlacings": [
+     1,
+     4,
+     3,
+     7,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "distApt": "A"
+   },
+   {
+    "no": 7,
+    "name": "ファインニードル",
+    "gait": "선행형",
+    "recentPlacings": [
+     7,
+     2,
+     3,
+     4,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "山本政",
+    "jockeyRate": 26.7,
+    "distApt": "A"
+   },
+   {
+    "no": 5,
+    "name": "リオンディーズ",
+    "gait": "평지형",
+    "recentPlacings": [
+     1,
+     11,
+     12,
+     13,
+     15
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "佐々志",
+    "jockeyRate": 26.7,
+    "distApt": "B"
+   },
+   {
+    "no": 3,
+    "name": "サートゥルナーリア",
+    "gait": "선행형",
+    "recentPlacings": [
+     16,
+     10,
+     5,
+     3
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "高松亮",
+    "jockeyRate": 23.3
+   },
+   {
+    "no": 11,
+    "name": "エポカドーロ",
+    "gait": "선행형",
+    "recentPlacings": [
+     9,
+     1,
+     10,
+     13,
+     9
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 53.0,
+    "jockey": "坂井瑛",
+    "jockeyRate": 20.0,
+    "distApt": "B"
+   },
+   {
+    "no": 8,
+    "name": "ヘンリーバローズ",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     5,
+     5,
+     2
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "小林凌",
+    "jockeyRate": 23.3,
+    "distApt": "B"
+   },
+   {
+    "no": 1,
+    "name": "ノヴェリスト",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     7,
+     11,
+     7,
+     6
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "塚本涼",
+    "jockeyRate": 13.3,
+    "distApt": "C"
+   },
+   {
+    "no": 2,
+    "name": "アメリカンペイトリオット",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     8,
+     6,
+     8,
+     9
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "山本紀",
+    "jockeyRate": 16.7,
+    "distApt": "C"
+   },
+   {
+    "no": 6,
+    "name": "アニマルキングダム",
+    "gait": "추격형",
+    "recentPlacings": [
+     10,
+     6,
+     8,
+     5,
+     9
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "菅原辰",
+    "jockeyRate": 23.3,
+    "distApt": "C"
+   },
+   {
+    "no": 9,
+    "name": "ベストウォーリア",
+    "gait": "선행형",
+    "recentPlacings": [
+     5,
+     5,
+     7,
+     5,
+     4
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "鈴木祐",
+    "jockeyRate": 20.0,
+    "distApt": "C"
+   },
+   {
+    "no": 10,
+    "name": "インディチャンプ",
+    "gait": "평지형",
+    "recentPlacings": [
+     8,
+     11,
+     10,
+     11,
+     8
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "大坪慎",
+    "jockeyRate": 43.3,
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 4,
+   "leadHorses": [
+    7,
+    3,
+    11,
+    9
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 91.7
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 91.7
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 91.7
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 91.7
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   4,
+   3,
+   7
+  ],
+  "hit_count": 2,
+  "hit": [
+   4,
+   7
+  ],
+  "missed": [
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": "선행형",
+    "recentPlacings": [
+     16,
+     10,
+     5,
+     3
+    ],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   3,
+   5
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "win",
+  "gradedAt": "2026-08-02 14:50:11"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번 마필의 최근 성적 중 3착이 있었음에도 불구하고 B등급이라는 점과 상대적으로 낮은 최근 착순 때문에 선행형 혼전 상황에서 버텨낼 가능성을 과소평가했습니다.",
+  "new_rule": "선행형 마필 중 B등급이라도 최근 3착 이내 기록이 있다면, 혼전 상황에서도 입상 가능성을 배제하지 않는다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 14:50:13"
+ },
+ "reviewed": true
+}

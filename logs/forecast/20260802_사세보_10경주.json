@@ -1,0 +1,335 @@
+{
+ "predicted_top3": [
+  2,
+  5,
+  1
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 간 경쟁 속 ②의 우위. 후미 추입 견제가 변수.",
+ "key_factors": [
+  "선행형 2명, 추입형 4명으로 구성",
+  "②小原佑太와 ①原田亮太 선행 경합 예상",
+  "북서풍 4.2m/s, 선행에게 유리할 수 있음 (주로 방향 미지)",
+  "②小原佑太의 최근 스피드 우위 언급"
+ ],
+ "exception_note": "선행형이 둘이라 내부 경쟁이 발생하지만, 경기 총평에서 ②小原佑太의 스피드 우위가 명시되어 있어 상대적으로 경쟁 우위가 예측됩니다. 후미 추입마들의 대거 편성으로 선행 싸움 이후 전개에 영향을 줄 수 있습니다.",
+ "applied_rules": [],
+ "raceKey": "사세보 10경주",
+ "forecastAt": "2026-08-02 14:51:34",
+ "forecastEpoch": 1785649894.537983,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 10경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 4.2,
+   "풍향": "북서",
+   "풍향코드": 14,
+   "기온": 36.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T14:30:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 4,
+    "name": "恩田 淳平",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 ５着 11 8/ 1 準決勝 ５着 11.7",
+    "prev1": "前 橋Ｇ３ 7/22 初特選 ５着 9.9 7/23 準決勝 １着 9.7 7/24 決 勝 ２着 9.6",
+    "prev2": "豊 橋Ｆ１ 7/ 5 初特選 ５着 11.7 7/ 6 準決勝 ２着 11.4 7/ 7 決 勝 １着 11.7",
+    "chaku": [
+     4,
+     4,
+     2,
+     11
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "三宅 達也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 予 選 １着 11.1 8/ 1 準決勝 ４着 11.3",
+    "prev1": "青 森Ｆ１ 7/23 初特選 ３着 11.7 7/24 準決勝 １着 11.5 7/25 決 勝 ７着 13.7",
+    "prev2": "平 塚Ｆ１ 6/30 予 選 ４着 10.9 7/ 1 準決勝 ５着 11.1 7/ 2 特 選 ４着 11.8",
+    "chaku": [
+     2,
+     3,
+     5,
+     15
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "小原 佑太",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ２着 11.2 8/ 1 準決勝 ４着 11.7",
+    "prev1": "高 知Ｇ２ 7/17 一予選 ８着 15.1 7/18 選 抜 ４着 14.1 7/19 選 抜 ９着 14.6 7/20 一 般 ３着 13.7",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ２着 10 7/11 準決勝 ９着 10.2 7/12 特 選 ２着 9.7",
+    "chaku": [
+     2,
+     5,
+     3,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "照井 拓成",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ３着 11.2 8/ 1 選 抜 ３着 11.8",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ５着 11.3 7/23 一 般 ２着 11.7 7/24 特 選 ６着 11.1",
+    "prev2": "岐 阜Ｆ１ 7/11 予 選 ７着 11.4 7/12 一 般 ５着 10.9 7/13 一 般 ６着 11.3",
+    "chaku": [
+     1,
+     7,
+     5,
+     11
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "原田 亮太",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.7 8/ 1 準決勝 ７着 12.4",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 １着 10.1 7/23 準決勝 ８着 10.5 7/24 特 秀 ９着 10.7",
+    "prev2": "玉 野Ｆ１ 7/14 予 選 ２着 12.1 7/15 準決勝 ７着 12.2 7/16 特 選 ６着 11.9",
+    "chaku": [
+     8,
+     4,
+     3,
+     13
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "武藤 篤弘",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ４着 11.7 8/ 1 選 抜 ２着 11.6",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ２着 11.6 7/24 準決勝 ７着 11.8 7/25 特 選 ４着 12.2",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ６着 11.2 7/ 9 一 般 ６着 12 7/10 一 般 ５着 11.1",
+    "chaku": [
+     0,
+     3,
+     6,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "塩崎 隼秀",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.4 8/ 1 準決勝 ６着 11.5",
+    "prev1": "富 山Ｆ１ 7/21 予 選 ２着 9.7 7/22 準決勝 ６着 10.1 7/23 特 選 ６着 9.6",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ５着 9.7 7/11 特 選 ８着 10.3 7/12 選 抜 ７着 9.8",
+    "chaku": [
+     2,
+     3,
+     1,
+     14
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    2,
+    1
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    4,
+    3,
+    5,
+    7
+   ]
+  },
+  "lines": [
+   2,
+   5,
+   1,
+   4,
+   7,
+   6,
+   3
+  ],
+  "paceLabel": null,
+  "comment": "ここでは②小原のスピードが一枚上。⑤照井なら離れる心配はなさそう。①原田に乗る④恩田やシャープな③三宅の連絡みも",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   3,
+   5
+  ],
+  "hit_count": 2,
+  "hit": [
+   2,
+   5
+  ],
+  "missed": [
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 3,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   2,
+   5
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 15:31:43"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "3번 삼택 달성은 최근 경기력이 좋았고, 특히 예선에서 11.1초를 기록하며 빠른 스피드를 보였다. 이 부분을 간과하여 추입 능력을 제대로 평가하지 못했다.",
+  "new_rule": "추입형 선수가 예선에서 11초 초반대의 빠른 기록을 보였다면, 그 선수의 추입 능력을 상위권으로 재평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-02 15:31:44"
+ },
+ "reviewed": true
+}

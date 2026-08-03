@@ -1,0 +1,336 @@
+{
+ "predicted_top3": [
+  3,
+  5,
+  7
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  3,
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 3번과 5번의 치열한 선두 다툼 속에 7번이 유리한 자리 선점 예상.",
+ "key_factors": [
+  "선행형 두 명의 내부 경쟁",
+  "코멘트에서 3번의 강한 의지 언급",
+  "7번의 마크 선호 및 라인 구도상 유리한 위치"
+ ],
+ "exception_note": "이 경주는 2명의 선행형(3번, 5번)이 같은 라인에 위치하여 초반부터 치열한 선두 다툼이 예상되며, 이는 통상적인 각질 분포보다 빠른 페이스와 혼전을 야기할 수 있습니다. 특히 3번 '치다 토모야' 선수가 '미승리에서는 끝낼 수 없다'는 강한 의지를 보이고 있어, 5번 '나카가와 마사히로' 선수와의 주도권 싸움이 격렬해질 것입니다. 이로 인해 두 선행형 뒤를 마크하는 추입형 선수들에게 오히려 기회가 생길 수 있으며, 특히 7번 '아베 타카유키' 선수가 3번을 마크하면서 유리한 전개를 가져갈 가능성이 있습니다. 라인 구성상 5-2-1-4와 3-7-6으로 나뉘어 있으나, 5번과 3번의 선두 다툼으로 인해 후미 추입마들의 역전극 가능성도 배제할 수 없습니다.",
+ "applied_rules": [],
+ "raceKey": "사세보 7경주",
+ "forecastAt": "2026-08-02 13:30:30",
+ "forecastEpoch": 1785645030.8758073,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 7경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 3.3,
+   "풍향": "남남서",
+   "풍향코드": 9,
+   "기온": 34.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T13:20:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 3,
+    "name": "治田 知也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 予 選 ７着 11.7 8/ 1 一 般 ４着 11.5",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 １着 11.4 7/21 準決勝 ３着 11.1 7/22 特 選 ７着 11.6",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 １着 9.7 7/ 8 準決勝 ４着 9.9 7/ 9 特 選 ２着 10.3",
+    "chaku": [
+     9,
+     2,
+     2,
+     9
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "棚橋 勉",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 予 選 ６着 11 8/ 1 一 般 ４着 11.2",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ２着 12 7/24 準決勝 ３着 11.5 7/25 特 選 ３着 11.4",
+    "prev2": "玉 野Ｆ１ 7/16 一 般 １着 11.4",
+    "chaku": [
+     3,
+     2,
+     8,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "大坪 功一",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11.2 8/ 1 選 抜 ７着 12.8",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ５着 11.3 7/23 一 般 ２着 11.4 7/24 一 般 ４着 11.6",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 ７着 14.6 7/14 一 般 ４着 14.3 7/15 一 般 ４着 14.3",
+    "chaku": [
+     1,
+     2,
+     2,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "山崎 泰己",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.3 8/ 1 一 般 ５着 11.4",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ８着 10 7/23 選 抜 ９着 10 7/24 選 抜 ６着 10.2",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ７着 11.1 7/ 9 一 般 ３着 12 7/10 一 般 ３着 11.3",
+    "chaku": [
+     2,
+     1,
+     5,
+     19
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "中川 聖大",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11 8/ 1 選 抜 ５着 12",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ３着 11.3 7/23 準決勝 ５着 11.9 7/24 特 選 ７着 11.6",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ６着 9.9 7/11 特 選 ３着 9.9 7/12 特 秀 ４着 9.4",
+    "chaku": [
+     5,
+     2,
+     7,
+     10
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "安部 貴之",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.5 8/ 1 一 般 ６着 12.7",
+    "prev1": "富 山Ｆ１ 7/21 予 選 ６着 10.3 7/22 一 般 ５着 9.7 7/23 一 般 ６着 10.4",
+    "prev2": "函 館Ｆ１ 7/ 8 予 選 ５着 11.6 7/ 9 一 般 ７着 11.8 7/10 一 般 ３着 12.1",
+    "chaku": [
+     0,
+     0,
+     1,
+     5
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "三ツ石康洋",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11.4 8/ 1 一 般 ５着 12",
+    "prev1": "静 岡Ｆ１ 7/18 予 選 ４着 11.2 7/19 一 般 ７着 11.7 7/20 一 般 ３着 11.8",
+    "prev2": "岐 阜Ｆ１ 7/11 予 選 ７着 11.7 7/12 一 般 １着 11.3 7/13 特 選 ５着 11.7",
+    "chaku": [
+     2,
+     4,
+     3,
+     12
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    3,
+    5
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    1,
+    2,
+    4,
+    7,
+    6
+   ]
+  },
+  "lines": [
+   5,
+   2,
+   1,
+   4,
+   3,
+   7,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "未勝利では終われない③治田が意地を見せて叩き切るか。⑦安部マークも、⑤中川は持ち前の機動力で抵抗したい。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   5,
+   3
+  ],
+  "hit_count": 2,
+  "hit": [
+   3,
+   5
+  ],
+  "missed": [
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   2,
+   5
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 13:50:06"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 대츠보 코이치의 최근 착순 분포(1,2,2)가 3번, 5번의 선두 다툼으로 인한 빠른 페이스에 유리하게 작용할 수 있다는 점을 간과했습니다. 또한 2번의 추입 능력이 생각보다 강력했음을 놓쳤습니다.",
+  "new_rule": "선행형 간의 강한 경쟁이 예상되는 경주에서는, 최근 착순 분포에 1착, 2착이 다수 포함된 추입형 선수를 주의 깊게 살핀다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-02 13:50:08"
+ },
+ "reviewed": true
+}

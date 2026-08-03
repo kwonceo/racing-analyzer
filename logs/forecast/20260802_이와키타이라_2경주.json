@@ -1,0 +1,348 @@
+{
+ "predicted_top3": [
+  7,
+  2,
+  3
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  7
+ ],
+ "confidence": 4,
+ "reason_short": "선행 주자들의 내부 경쟁으로 추입형인 7번, 2번의 기회가 커짐.",
+ "key_factors": [
+  "선행형 2, 3, 4번의 내부 경쟁 구도",
+  "7번, 2번의 추입 기회 증가",
+  "7번의 최근 좋은 성적"
+ ],
+ "exception_note": "선행형 주자가 3명(2, 3, 4번)이나 있어 초반 선두 다툼이 치열할 것으로 예상된다. 특히 2번 眞砂는 '도주' 각질로 선두를 노릴 것이고, 3번 佐々木吉徳과 4번 齋藤 一茂 역시 선행형으로 선두 경쟁에 참여하여 서로 체력을 소모할 가능성이 높다. 이로 인해 후미의 추입형 주자들에게 기회가 올 것이며, 특히 점수 탑인 7번 中村 翔平이 2번 라인에 편성되어 있어 2번의 선행을 이용한 추입에 성공할 가능성이 크다. 2번은 선행형임에도 '추입형'으로 분류되어 있어 혼란을 줄 수 있지만, '도주' 선언을 고려할 때 선행 싸움에 적극 가담할 것이다. 7번은 최근 2착, 3착 등 좋은 성적을 보였고, 2번 역시 금 개최에서 3착을 기록하며 컨디션이 나쁘지 않다. 라인의 불균형(선행 3명, 추입 4명)과 선행형 간의 경쟁으로 인해 추입형이 유리한 예외적인 경주로 판단된다.",
+ "applied_rules": [],
+ "raceKey": "이와키타이라 2경주",
+ "forecastAt": "2026-08-02 16:06:40",
+ "forecastEpoch": 1785654400.1071854,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "이와키타이라 2경주",
+  "wind": {
+   "venue": "이와키타이라",
+   "풍속": 4.6,
+   "풍향": "북북동",
+   "풍향코드": 1,
+   "기온": 25.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T15:50:00+09:00",
+   "지점": "小名浜",
+   "지점거리km": 12.14
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 7,
+    "name": "中村 翔平",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ２着 11.8 8/ 1 準決勝 ７着 11.3",
+    "prev1": "広 島Ｆ２ 7/22 予 選 ２着 11.8 7/23 準決勝 ２着 11.4 7/24 決 勝 ３着 11.7",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 １着 12 7/14 準決勝 失",
+    "chaku": [
+     4,
+     4,
+     3,
+     6
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "眞砂 英作",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 予 選 ７着 12.2 8/ 1 一 般 ３着 12.3",
+    "prev1": "西武園Ｆ２ 7/16 特予選 ２着 12.1 7/17 準決勝 ５着 12 7/18 特 選 ６着 12.4",
+    "prev2": "久留米Ｆ２ 7/ 7 特予選 ５着 11.7 7/ 8 特一般 ３着 12.2 7/ 9 特一般 １着 12.4",
+    "chaku": [
+     3,
+     4,
+     3,
+     11
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "佐々木吉徳",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.8 8/ 1 一 般 ７着 12.4",
+    "prev1": "奈 良Ｆ１ 7/25 予 選 ４着 10.3 7/26 準決勝 ７着 10.4 7/27 一 般 ２着 10.2",
+    "prev2": "平 Ｆ２ 7/16 予 選 １着 12 7/17 準決勝 ５着 12.3 7/18 特 選 ７着 12.5",
+    "chaku": [
+     3,
+     5,
+     2,
+     14
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 4,
+    "name": "齋藤 一茂",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ７着 16.7 8/ 1 一 般 ２着 12.3",
+    "prev1": "小田原Ｆ２ 7/23 予 選 ２着 10 7/24 準決勝 ７着 7/25 特 選 ７着 10.5",
+    "prev2": "玉 野Ｆ１ 7/14 予 選 ５着 13.4 7/15 一 般 １着 11.8 7/16 特 選 ２着 11.6",
+    "chaku": [
+     8,
+     2,
+     2,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "伊原 弘幸",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 予 選 ６着 11.5 8/ 1 一 般 ５着 12.2",
+    "prev1": "奈 良Ｆ２ 7/16 特予選 ２着 10.2 7/17 準決勝 ７着 9.8 7/18 特一般 ３着 9.8",
+    "prev2": "前 橋Ｇ３ 7/10 特予選 ６着 9.3 7/11 特一般 １着 10.2 7/12 特 選 ７着 10",
+    "chaku": [
+     2,
+     2,
+     4,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "十文字菊雄",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ２着 12.1 8/ 1 準決勝 ７着 11.8",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ７着 11.6 7/23 一 般 ６着 11.6 7/24 一 般 １着 12",
+    "prev2": "小田原Ｆ２ 7/10 特予選 ３着 9.9 7/11 準決勝 ４着 10 7/12 特 選 ７着 10",
+    "chaku": [
+     2,
+     1,
+     3,
+     9
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "松根 真",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ７着 11.5 8/ 1 一 般 ６着 12.1",
+    "prev1": "小田原Ｆ２ 7/23 予 選 ７着 9.8 7/24 一 般 ４着 9.9 7/25 一 般 ７着 10",
+    "prev2": "函 館Ｆ１ 7/14 予 選 ６着 11.7 7/15 一 般 ４着 11.8 7/16 一 般 ６着 12.8",
+    "chaku": [
+     0,
+     7,
+     2,
+     15
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    3,
+    4
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    7,
+    2,
+    1,
+    5,
+    6
+   ]
+  },
+  "lines": [
+   2,
+   7,
+   1,
+   3,
+   5,
+   4,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "点数トップの中村が眞砂に乗って抜け出す。ライン上位独占に期待したが、齋藤や佐々木の機動力も軽視禁物。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   1,
+   5
+  ],
+  "hit_count": 0,
+  "hit": [],
+  "missed": [
+   4,
+   1,
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   },
+   {
+    "no": 1,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   },
+   {
+    "no": 5,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   7,
+   2,
+   3
+  ],
+  "market_hit_count": 0,
+  "market_snapshot_mb": -0.5,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 16:30:22"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "선행형 주자들 간의 경쟁으로 인한 체력 소모 가능성을 과대평가하여 4번 齋藤 一茂의 선행 능력을 간과했다. 또한 1번 伊原 弘幸과 5번 十文字菊雄의 잠재력을 제대로 파악하지 못했다.",
+  "new_rule": "선행형 주자의 과거 선행 성공률과 지구력을 추가로 고려하여, 선행 싸움의 결과가 단순히 체력 소모로 이어지지 않을 가능성을 열어둔다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 16:30:24"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,315 @@
+{
+ "predicted_top3": [
+  1,
+  6,
+  8
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 비중이 높아 초반 페이스가 빠를 것이며, A등급 선행마들이 유리할 것.",
+ "key_factors": [
+  "선행마 5두로 초반 경합 심화 예상",
+  "A등급 선행마인 1번과 6번의 우위",
+  "경합 중 이점을 가질 수 있는 1번 마체중"
+ ],
+ "exception_note": "전체 9두 중 선행형이 5두(1, 4, 5, 6, 9번)로 압도적으로 많아 초반부터 치열한 선두권 다툼이 예상된다. 특히 1번, 6번, 4번은 A, B등급 선행마로, 이들 간의 경쟁이 전개의 핵심이 될 것이다. 이 과정에서 상대적으로 여유를 가질 수 있는 1번과 6번이 유리할 것으로 판단된다. 또한, 가장 작은 마체중의 추격형 8번이 선두권 다툼으로 인해 지친 말들을 추월할 가능성이 있다.",
+ "applied_rules": [],
+ "raceKey": "후나바시 2경주",
+ "forecastAt": "2026-08-02 15:00:12",
+ "forecastEpoch": 1785650412.0933945,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "후나바시 2경주",
+  "wind": {
+   "venue": "후나바시",
+   "풍속": 2.7,
+   "풍향": "북동",
+   "풍향코드": 2,
+   "기온": 30.8,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T14:40:00+09:00",
+   "지점": "船橋",
+   "지점거리km": 4.5
+  },
+  "fieldSize": 9,
+  "distance": 1200,
+  "surface": "더트",
+  "trackCond": "良",
+  "horses": [
+   {
+    "no": 1,
+    "name": "サヴィルガーデン",
+    "gait": "선행형",
+    "recentPlacings": [
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 436,
+    "jockey": "澤田龍"
+   },
+   {
+    "no": 8,
+    "name": "ラヴィクレール",
+    "gait": "추격형",
+    "recentPlacings": [
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 386,
+    "jockey": "矢野貴"
+   },
+   {
+    "no": 6,
+    "name": "アルファチェルシー",
+    "gait": "선행형",
+    "recentPlacings": [
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 470,
+    "jockey": "所　蛍"
+   },
+   {
+    "no": 4,
+    "name": "スティールビート",
+    "gait": "선행형",
+    "recentPlacings": [
+     3
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 453,
+    "jockey": "張田昂"
+   },
+   {
+    "no": 7,
+    "name": "マンデラエフェクト",
+    "gait": "추격형",
+    "recentPlacings": [
+     3
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 470,
+    "jockey": "本田重"
+   },
+   {
+    "no": 5,
+    "name": "グランデアーリ",
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     4
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 475,
+    "jockey": "菅原吏"
+   },
+   {
+    "no": 9,
+    "name": "ズットオレノターン",
+    "gait": "선행형",
+    "recentPlacings": [
+     3,
+     5
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 415,
+    "jockey": "中山遥"
+   },
+   {
+    "no": 3,
+    "name": "アマルフィディオ",
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     3
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 469,
+    "jockey": "野畑凌"
+   },
+   {
+    "no": 2,
+    "name": "サンダーミキチャン",
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     5,
+     7,
+     5
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 421,
+    "jockey": "藤原幹"
+   }
+  ],
+  "composition": {
+   "leadCount": 5,
+   "leadHorses": [
+    1,
+    6,
+    4,
+    5,
+    9
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 100.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 66.7
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 11.1
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "기수 승률(보유율 67%로 미달)",
+   "거리 적성(보유율 11%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   7,
+   8,
+   5
+  ],
+  "hit_count": 1,
+  "hit": [
+   8
+  ],
+  "missed": [
+   7,
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   },
+   {
+    "no": 5,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   8,
+   1,
+   4
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -2.0,
+  "market_src": "win",
+  "gradedAt": "2026-08-02 15:30:29"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "7번(B등급 추격형)과 5번(C등급 선행형)의 최근 착순 정보가 부족했음에도 불구하고, 치열한 선두권 다툼으로 인한 피로도를 과소평가하여 예상치 못한 이점 발생을 놓쳤다. 5번은 선행마 경합 속에서도 선두권을 유지했으며, 7번은 예상보다 높은 등급을 바탕으로 후미에서 치고 올라오는 강력한 추입력을 보였다.",
+  "new_rule": "선행마 경합이 예상될 때는 A등급 선행마뿐만 아니라 B, C등급 선행/추격마 중 최근 착순 데이터가 더 좋은 말의 잠재력을 추가로 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-02 15:30:32"
+ },
+ "reviewed": true
+}

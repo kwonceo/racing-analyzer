@@ -1,0 +1,341 @@
+{
+ "predicted_top3": [
+  1,
+  7,
+  5
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 집중 경주에서 1번의 훌륭한 최근 성적과 라인 이점을 활용한 우승 기대",
+ "key_factors": [
+  "1번 田上 晃也의 뛰어난 금 개최 성적과 안정적인 전적",
+  "7번 横溝 貫太의 준수한 최근 기량과 2착 추입 가능성",
+  "5번 沢田 勇治의 추입형 각질과 라인 내 위치로 인한 기회",
+  "선행형 다수 출전으로 인한 전개 복잡성"
+ ],
+ "exception_note": "선행형이 5두로 매우 많고, 그 중에서도 1번 田上가 '번수(番手)'에 회전하며 완전 우승을 노린다는 코멘트가 있어, 통상적인 선행 경주보다 전개가 복잡하고 라인 내 협력 또는 경쟁 구도가 크게 작용할 것으로 예상된다. 1번의 선행 능력과 7번의 젖히기 기량으로 인한 경합이 예상되며, 후미 추입마인 5번에게는 오히려 기회가 될 수 있는 전개이다.",
+ "applied_rules": [],
+ "raceKey": "호후 7경주",
+ "forecastAt": "2026-08-02 10:26:47",
+ "forecastEpoch": 1785634007.5217955,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 7경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 2.6,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 32.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T10:20:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "田上 晃也",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 １着 10 8/ 1 チ準決 １着 9.8",
+    "prev1": "松 戸Ｆ２ 7/19 チ予選 １着 10.3 7/20 チ準決 １着 9.7 7/21 チ決勝 ３着 9.3",
+    "prev2": "京王閣Ｆ２ 7/ 4 チ予選 １着 12.2 7/ 5 チ準決 １着 11.3 7/ 6 チ決勝 １着 11.6",
+    "chaku": [
+     10,
+     3,
+     4,
+     4
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "横溝 貫太",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 １着 9.3 8/ 1 チ準決 １着 9.4",
+    "prev1": "豊 橋Ｆ２ 7/19 チ予選 １着 11.4 7/20 チ準決 １着 11.4 7/21 チ決勝 １着 11.1",
+    "prev2": "久留米Ｆ２ 7/ 7 チ予選 ２着 11.8 7/ 8 チ準決 １着 11.9 7/ 9 チ決勝 １着 11.3",
+    "chaku": [
+     5,
+     3,
+     0,
+     2
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "沢田桂太郎",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 チ予選 １着 9.4 8/ 1 チ準決 １着 9.6",
+    "prev1": "熊 本Ｆ２ 7/13 チ予選 ２着 12.6 7/14 チ準決 ２着 11.5 7/15 チ決勝 １着 11.4",
+    "prev2": "別 府Ｆ２ 7/ 4 チ予選 １着 11.6 7/ 5 チ準決 １着 12.1 7/ 6 チ決勝 ３着 11.1",
+    "chaku": [
+     4,
+     7,
+     2,
+     2
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 5,
+    "name": "沢田 勇治",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ２着 9.9 8/ 1 チ準決 ２着 9.7",
+    "prev1": "武 雄Ｆ２ 7/25 チ予選 ３着 11.8 7/26 チ準決 ４着 11.3 7/27 チ決勝 ７着 14.7",
+    "prev2": "松 戸Ｆ２ 7/19 チ予選 ２着 10.3 7/20 チ準決 ２着 9.7 7/21 チ決勝 ５着 9.6",
+    "chaku": [
+     0,
+     3,
+     2,
+     20
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "加藤 昌平",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "7/31 チ予選 ３着 9.4 8/ 1 チ準決 ２着 9.7",
+    "prev1": "武 雄Ｆ２ 7/25 チ予選 ５着 12.6 7/26 チ一般 ３着 11.6 7/27 チ一般 １着 12",
+    "prev2": "取 手Ｆ２ 7/15 チ予選 ３着 11.2 7/16 チ準決 ３着 11.7 7/17 チ選抜 ２着 11.7",
+    "chaku": [
+     4,
+     12,
+     5,
+     6
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "松本 悠平",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 １着 10.2 8/ 1 チ準決 ３着 9.6",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 １着 11.8 7/25 チ準決 １着 11.8 7/26 チ決勝 １着 11.6",
+    "prev2": "熊 本Ｆ２ 7/13 チ予選 １着 12.2 7/14 チ準決 １着 11.3 7/15 チ決勝 ５着 11.5",
+    "chaku": [
+     5,
+     1,
+     2,
+     5
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "中川 飛隆",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.83,
+    "recent": "7/31 チ予選 ３着 9.9 8/ 1 チ準決 ２着 9.3",
+    "prev1": "平 Ｆ２ 7/22 チ予選 ４着 12 7/23 チ選抜 ４着 12.1 7/24 チ一般 ２着 11.9",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 ７着 12.4 7/ 9 チ一般 ２着 12.5 7/10 チ一般 １着 11.8",
+    "chaku": [
+     6,
+     7,
+     3,
+     5
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    1,
+    3,
+    6
+   ],
+   "closeCount": 2,
+   "closeHorses": [
+    5,
+    4
+   ]
+  },
+  "lines": [
+   3,
+   1,
+   5,
+   2,
+   7,
+   4,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "今節デキの良い田上が、松本の番手に回りで完全Ｖ！３番手に沢田勇。沢田桂ー横溝ー加藤も猛抵抗し上位激戦。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   3,
+   5
+  ],
+  "hit_count": 1,
+  "hit": [
+   5
+  ],
+  "missed": [
+   2,
+   3
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   },
+   {
+    "no": 3,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   7,
+   1,
+   2
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 11:10:04"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 沢田桂太郎는 '젖히기형'으로, 선행형이 많은 복잡한 전개에서 1번 田上 晃也와 7번 横溝 貫太의 경합을 뚫고 올라올 수 있는 기량을 과소평가했습니다. 3번 松本 悠平은 선행형임에도 불구하고, 1번 田上가 松本의 '번수(番手)'에 회전한다는 코멘트를 간과하여 그의 잠재력을 제대로 파악하지 못했습니다.",
+  "new_rule": "선행형이 다수 출전하여 복잡한 전개가 예상될 때, '젖히기형' 각질의 말들이 경쟁 구도 속에서 반사이익을 얻을 가능성을 더 높게 평가한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 11:10:06"
+ },
+ "reviewed": true
+}

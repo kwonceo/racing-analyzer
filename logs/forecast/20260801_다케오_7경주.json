@@ -1,0 +1,291 @@
+{
+ "predicted_top3": [
+  1,
+  5,
+  3
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "보통",
+ "line_winner": [
+  1
+ ],
+ "confidence": 4,
+ "reason_short": "①이 압도적인 기량으로 선행을 노릴 것이며, 후속 라인의 추입력에 주목해야 함.",
+ "key_factors": [
+  "1번마의 압도적 기량",
+  "선행형 2번과 4번의 내부 경쟁 가능성",
+  "추입형 다수 포진 및 라인 구도"
+ ],
+ "exception_note": "1번 伊藤 京介는 최근 3개 개최 연속 우승으로 압도적인 기량을 보여주고 있으며, 7/31 치예선에서도 여유 있는 1착을 기록했다. '影をも踏まさぬ逃走(그림자조차 밟지 못하는 도주)'라는 코멘트처럼 독주가 예상된다. 반면, 2번 織茂雄一郎와 4번 中嶋 樹는 모두 선행형 각질을 선언했고 라인 구도상 같은 라인에 포함되어 있어 선행 포지션을 두고 내부 경쟁이 발생할 가능성이 높다. 이는 선두권의 힘을 빼는 요인이 될 수 있으며, 후미에 포진한 추입형 선수들에게 기회를 제공할 것이다. 특히, 5번 佐野多喜男와 3번 陶器 一馬는 최근 성적에서 안정적인 입착을 보여주며 추입 각질의 강점을 살릴 것으로 예상된다. 7번 라모스레오는 도주 선언에도 불구하고 최근 성적이 저조하여 선행 경쟁에서 밀려날 가능성이 크다.",
+ "applied_rules": [],
+ "raceKey": "다케오 7경주",
+ "forecastAt": "2026-08-01 23:30:53",
+ "forecastEpoch": 1785594653.2285306,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "다케오 7경주",
+  "wind": {
+   "venue": "다케오",
+   "풍속": 0.7,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 27.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-01T23:20:00+09:00",
+   "지점": "嬉野",
+   "지점거리km": 8.56
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "伊藤 京介",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 １着 11.5",
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 １着 11.5 7/22 チ準決 １着 11.4 7/23 チ決勝 １着 11.4",
+    "prev2": "佐世保Ｆ２ 7/ 5 チ予選 １着 11.7 7/ 6 チ準決 １着 11.6 7/ 7 チ決勝 １着 11.4",
+    "chaku": [
+     12,
+     2,
+     0,
+     1
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "織茂雄一郎",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ３着 11.4",
+    "prev1": "松 山Ｆ２ 7/11 チ予選 ５着 12 7/12 チ一般 ３着 11.8 7/13 チ一般 ２着 12.4",
+    "prev2": "弥 彦Ｆ２ 7/ 2 チ予選 ３着 12.6 7/ 3 チ準決 ３着 12.9 7/ 4 チ決勝 失",
+    "chaku": [
+     3,
+     6,
+     6,
+     9
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "陶器 一馬",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "7/31 チ予選 ３着 11.7",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 ３着 11.6 7/25 チ準決 ６着 11.6 7/26 チ選抜 ３着 12",
+    "prev2": "岸和田Ｆ２ 7/13 チ予選 ３着 11.5 7/14 チ準決 ６着 12 7/15 チ選抜 １着 11.7",
+    "chaku": [
+     2,
+     1,
+     5,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "佐野多喜男",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ３着 11.4",
+    "prev1": "弥 彦Ｆ２ 7/17 チ予選 ５着 11.8 7/18 チ一般 ５着 12 7/19 チ一般 ３着 11.6",
+    "prev2": "岸和田Ｆ２ 7/ 4 チ予選 ５着 12.3 7/ 5 チ選抜 １着 12 7/ 6 チ選抜 ２着 11.8",
+    "chaku": [
+     3,
+     1,
+     4,
+     16
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "橋本 大祐",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 １着 12.2",
+    "prev1": "和歌山Ｆ２ 7/24 チ予選 ７着 12.3 7/25 チ一般 ２着 11.9 7/26 チ一般 ３着 11.6",
+    "prev2": "熊 本Ｆ２ 7/13 チ予選 ６着 12.2 7/14 チ一般 ６着 11.7 7/15 チ一般 ２着 12.2",
+    "chaku": [
+     0,
+     4,
+     3,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "中嶋 樹",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ４着 12.1",
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ７着 11.9 7/22 チ一般 ６着 12.1 7/23 チ一般 ３着 12.5",
+    "prev2": "岸和田Ｆ２ 7/14 チ一般 １着 12.5 7/15 チ選抜 ２着 11.9",
+    "chaku": [
+     7,
+     4,
+     2,
+     13
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "ラモスレオ",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 チ予選 ４着 12.2",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 ５着 11.6",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 ６着 11.9 7/ 9 チ一般 １着 12.3 7/10 チ選抜 ４着 12.3",
+    "chaku": [
+     3,
+     3,
+     3,
+     16
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    2,
+    4
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    3,
+    5,
+    6,
+    7
+   ]
+  },
+  "lines": [
+   2,
+   5,
+   1,
+   6,
+   7,
+   4,
+   3
+  ],
+  "paceLabel": null,
+  "comment": "初日は影をも踏まさぬ逃走で見せ場を作った①伊藤。ポテンシャルは文句なしで、ここも圧倒の走りで連勝有力だ。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ }
+}

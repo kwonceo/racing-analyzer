@@ -1,0 +1,369 @@
+{
+ "predicted_top3": [
+  10,
+  2,
+  9
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "평지형 각질 10번이 선행 전개로 유리한 위치를 점하고, 뒤를 2번과 9번이 추격.",
+ "key_factors": [
+  "유일한 평지형 각질의 10번 마필",
+  "대다수 추격형 각질",
+  "1200m 단거리 경주"
+ ],
+ "exception_note": "이 경주에는 유일하게 '평지형' 각질을 가진 10번 마필이 존재하며, 나머지 9두는 모두 '추격형' 각질이다. 이는 10번이 선행을 통해 독주할 가능성이 매우 높고, 다른 마필들은 후미에서 서로 견제하며 순위를 다투게 될 특수한 구도이다. 1200m 단거리 경주에서 이러한 각질 분포는 선행마에게 매우 유리하게 작용한다. 또한, 트랙 컨디션이 '重'이라 앞선에서 힘을 아낄 수 있는 마필이 유리할 수 있다. 2.4 m/s의 바람은 전개에 큰 영향을 미치지 않을 약한 수준이다.",
+ "applied_rules": [],
+ "raceKey": "모리오카 1경주",
+ "forecastAt": "2026-08-02 12:25:09",
+ "forecastEpoch": 1785641109.9502747,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "모리오카 1경주",
+  "wind": {
+   "venue": "모리오카",
+   "풍속": 2.4,
+   "풍향": "북북서",
+   "풍향코드": 15,
+   "기온": 22.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T12:00:00+09:00",
+   "지점": "盛岡",
+   "지점거리km": 3.4
+  },
+  "fieldSize": 10,
+  "distance": 1200,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 10,
+    "name": "マテラスカイ",
+    "gait": "평지형",
+    "recentPlacings": [
+     5,
+     5,
+     12,
+     2,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "distApt": "A"
+   },
+   {
+    "no": 2,
+    "name": "サトノクラウン",
+    "gait": "추격형",
+    "recentPlacings": [
+     2,
+     9,
+     6,
+     8,
+     8
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "菅原辰",
+    "jockeyRate": 23.3,
+    "distApt": "B"
+   },
+   {
+    "no": 9,
+    "name": "ビッグアーサー",
+    "gait": "추격형",
+    "recentPlacings": [
+     3,
+     8,
+     12,
+     10,
+     12
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "高松亮",
+    "jockeyRate": 30.0
+   },
+   {
+    "no": 4,
+    "name": "ハービンジャー",
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     6,
+     7,
+     5,
+     3
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "山本紀",
+    "jockeyRate": 23.3,
+    "distApt": "B"
+   },
+   {
+    "no": 5,
+    "name": "サートゥルナーリア",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     4,
+     8,
+     6,
+     9
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "坂井瑛",
+    "jockeyRate": 26.7,
+    "distApt": "C"
+   },
+   {
+    "no": 3,
+    "name": "オーヴァルエース",
+    "gait": "추격형",
+    "recentPlacings": [
+     3,
+     10,
+     10,
+     7,
+     10
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "岩本怜",
+    "jockeyRate": 23.3,
+    "distApt": "B"
+   },
+   {
+    "no": 8,
+    "name": "フェノーメノ",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     9,
+     9,
+     8,
+     10
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "鈴木祐",
+    "jockeyRate": 23.3,
+    "distApt": "C"
+   },
+   {
+    "no": 6,
+    "name": "ノヴェリスト",
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     9,
+     10,
+     11,
+     7
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "大坪慎",
+    "jockeyRate": 43.3,
+    "distApt": "C"
+   },
+   {
+    "no": 1,
+    "name": "サングレーザー",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     4,
+     5,
+     9,
+     5
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "佐々志",
+    "jockeyRate": 30.0,
+    "distApt": "C"
+   },
+   {
+    "no": 7,
+    "name": "ホッコータルマエ",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     6,
+     8,
+     8,
+     9
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 56.0,
+    "jockey": "小林凌",
+    "jockeyRate": 20.0,
+    "distApt": "C"
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 90.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 90.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 90.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 90.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   2,
+   9,
+   7
+  ],
+  "hit_count": 2,
+  "hit": [
+   2,
+   9
+  ],
+  "missed": [
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     6,
+     8,
+     8,
+     9
+    ],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   9,
+   5
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "win",
+  "gradedAt": "2026-08-02 12:49:54"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "10번 마필이 평지형 각질임에도 선행 독주에 실패하며 후미 그룹에 합류하여, 추격형 각질인 7번 마필에게 기회를 주었다. 7번 마필의 D등급을 과소평가했다.",
+  "new_rule": "선행마의 등급이 낮은 경우, 각질상의 유리함에도 불구하고 후미 추격마 중 복병마를 추가적으로 고려한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 12:49:56"
+ },
+ "reviewed": true
+}

@@ -371,5 +371,67 @@
    "totalScore"
   ],
   "sport": "horse"
- }
+ },
+ "grading": {
+  "actual": [
+   9,
+   1,
+   5
+  ],
+  "hit_count": 1,
+  "hit": [
+   9
+  ],
+  "missed": [
+   1,
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 1,
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     7,
+     7,
+     10,
+     8
+    ],
+    "line": null,
+    "grade": "C"
+   },
+   {
+    "no": 5,
+    "gait": "추격형",
+    "recentPlacings": [
+     11,
+     8,
+     9,
+     5,
+     11
+    ],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   9,
+   12
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.2,
+  "market_src": "win",
+  "gradedAt": "2026-08-01 21:09:54"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "1번 로지스인메이와 5번 월드에이스는 모두 추격형으로 최근 착순이 저조했으나, 중(重) 주로에서 추격형마가 선전할 수 있는 변수를 간과했습니다. 특히 1번 말의 기수 승률(22.2%)이 나쁘지 않았던 점과 두 말 모두 C, D 등급에서 의외의 선전 가능성을 제대로 평가하지 못했습니다.",
+  "new_rule": "중(重) 주로에서는 저등급 추격형 말이 의외의 결과를 낼 수 있으므로, 해당 말들의 기수 승률을 다시 한번 고려하여 예측에 반영한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-01 21:09:56"
+ },
+ "reviewed": true
 }

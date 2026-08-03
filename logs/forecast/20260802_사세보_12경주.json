@@ -1,0 +1,332 @@
+{
+ "predicted_top3": [
+  5,
+  1,
+  3
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "빠른",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 다수와 젖히기형의 강력한 힘, 라인 구도의 특수성으로 인한 혼전",
+ "key_factors": [
+  "선행형/젖히기형 다수: 1, 5, 2, 4, 3",
+  "강력한 선행 의지: 1번 산자키 켄토, 5번 이시하라 하야테",
+  "라인 구도 불균형: 九州 라인 외 혼합",
+  "해설자의 4번 선행 예측과 1번의 번수 마쿠리 예측"
+ ],
+ "exception_note": "전체 7두 중 선행형 1두, 젖히기형 4두로 선두권 경쟁이 치열할 수 있는 구성. 특히 해설에서 4번 마츠모토 슈노스케의 선행과 1번 야마자키 켄토의 번수 마쿠리(추월)를 예상하며 선두권 내부 경쟁을 시사. 5번 이시하라 하야테 또한 '선행'을 선언한 강력한 젖히기형으로 선두 싸움에 가세하며 경주가 혼전 양상으로 흐를 가능성이 높음. 추입형 7번 츠카모토 다이키와 6번 오하라 죠이치로도 후반 추입력을 발휘할 수 있으나, 선두권 싸움으로 인한 빠른 전개는 젖히기형에게 유리할 수 있음. 3번 마츠이 히로유키도 도주(선행)를 선언한 젖히기형으로, 강력한 선행 경쟁에 참여할 것.",
+ "applied_rules": [],
+ "raceKey": "사세보 12경주",
+ "forecastAt": "2026-08-02 15:54:34",
+ "forecastEpoch": 1785653674.0895524,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "사세보 12경주",
+  "wind": {
+   "venue": "사세보",
+   "풍속": 4.4,
+   "풍향": "북서",
+   "풍향코드": 14,
+   "기온": 36.4,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T15:40:00+09:00",
+   "지점": "佐世保",
+   "지점거리km": 1.86
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "山崎 賢人",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 初特選 ２着 11.2 8/ 1 準決勝 １着 11.5",
+    "prev1": "高 知Ｇ２ 7/17 一予選 １着 13.2 7/18 二予Ａ 落",
+    "prev2": "大 垣Ｆ１ 7/ 8 初特選 ３着 10.9 7/ 9 準決勝 １着 11.6 7/10 決 勝 ６着 11.6",
+    "chaku": [
+     11,
+     3,
+     2,
+     7
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 7,
+    "name": "塚本 大樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 初特選 ４着 11.1 8/ 1 準決勝 ２着 11.5",
+    "prev1": "高 知Ｇ２ 7/17 特選予 ７着 13.9 7/18 二予Ｂ ２着 14.3 7/19 準決勝 ７着 13.6 7/20 特 選 ３着 14",
+    "prev2": "大 垣Ｆ１ 7/ 8 初特選 ５着 11 7/ 9 準決勝 ４着 11.2 7/10 特 選 ３着 11.6",
+    "chaku": [
+     0,
+     3,
+     4,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "石原 颯",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 １着 11 8/ 1 準決勝 １着 11.4",
+    "prev1": "高 知Ｇ２ 7/17 特選予 ３着 13.7 7/18 ＡＬＴ ８着 14.9 7/19 準決勝 １着 13.9 7/20 決 勝 ９着 16.8",
+    "prev2": "小松島Ｇ３ 7/ 2 初特選 ９着 12.7 7/ 3 二予選 ２着 11 7/ 4 準決勝 １着 11.1 7/ 5 決 勝 ６着 11.4",
+    "chaku": [
+     6,
+     3,
+     2,
+     14
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "佐藤 一伸",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.1 8/ 1 準決勝 ２着 11.3",
+    "prev1": "高 知Ｇ２ 7/17 一予選 ７着 14.5 7/18 選 抜 ６着 14 7/19 一 般 ３着 14 7/20 選 抜 ７着 14.1",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 １着 9.7 7/11 準決勝 ３着 9.6 7/12 決 勝 ４着",
+    "chaku": [
+     2,
+     2,
+     5,
+     9
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "松本秀之介",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 初特選 ７着 13.2 8/ 1 準決勝 ２着 11.3",
+    "prev1": "青 森Ｆ１ 7/23 初特選 ７着 12.1 7/24 準決勝 １着 11.5 7/25 決 勝 ６着 11.5",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ５着 10 7/11 特 選 ２着 9.2 7/12 特 秀 ３着 9.1",
+    "chaku": [
+     6,
+     5,
+     1,
+     9
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "松井 宏佑",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ３着 11.4 8/ 1 準決勝 １着 11.4",
+    "prev1": "高 知Ｇ２ 7/17 特選予 ３着 13.5 7/18 ＡＬＴ ９着 16.3 7/19 準決勝 ８着 13.5 7/20 特 選 ９着 15.2",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ３着 10.2 7/11 準決勝 ９着 10.6 7/12 特 選 １着 9.6",
+    "chaku": [
+     5,
+     0,
+     2,
+     18
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "小原丈一郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 １着 11.8 8/ 1 準決勝 ３着 11.3",
+    "prev1": "富 山Ｆ１ 7/21 予 選 １着 9.4 7/22 準決勝 ５着 9.9 7/23 特 選 １着 9.4",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ６着 9.3 7/11 特 選 １着 9.1 7/12 特 秀 ６着 9.6",
+    "chaku": [
+     5,
+     2,
+     1,
+     12
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    1
+   ],
+   "closeCount": 2,
+   "closeHorses": [
+    7,
+    6
+   ]
+  },
+  "lines": [
+   4,
+   1,
+   7,
+   3,
+   2,
+   6,
+   5
+  ],
+  "paceLabel": null,
+  "comment": "九州結束！ ④松本がメイチの先行策で①山崎が番手捲りと読んだ。⑦塚本が続くと見たが⑤石原や③松井にも強烈な脚。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   1,
+   7
+  ],
+  "hit_count": 2,
+  "hit": [
+   5,
+   1
+  ],
+  "missed": [
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   1,
+   5,
+   7
+  ],
+  "market_hit_count": 3,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 16:30:30"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "7번 츠카모토 다이키의 최근 성적(금개최 4착, 2착)과 전개최 G2에서의 3착 기록을 간과하여 빠른 페이스 속에서의 추입 가능성을 충분히 평가하지 못했습니다.",
+  "new_rule": "선두권 경쟁이 치열하여 빠른 페이스가 예상될 경우, 추입형 선수의 최근 G2급 이상 대회에서의 입상 기록 및 금개최 준결승 성적을 더 비중 있게 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-02 16:30:32"
+ },
+ "reviewed": true
+}

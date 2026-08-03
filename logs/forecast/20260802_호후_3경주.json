@@ -1,0 +1,306 @@
+{
+ "predicted_top3": [
+  2,
+  3,
+  5
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  2,
+  3
+ ],
+ "confidence": 4,
+ "reason_short": "2번의 선행을 3번이 받아먹는 그림, 5번이 이를 추격하며 3착권.",
+ "key_factors": [
+  "선행형 2번의 스피드",
+  "추입형 3번의 직전 경주력",
+  "경주 편성상 소수 선행형과 다수 추입형의 대결 구도",
+  "라인 불균형 (선행형이 한 라인에 분산)"
+ ],
+ "exception_note": "6두 경주에서 3명의 선행형과 3명의 추입형이 나뉘어 있어, 선행 그룹 내 경쟁과 추입 그룹의 추격 타이밍이 중요한 경주. 특히 2번의 선행을 3번이 마크하는 흐름이 자연스럽고, 나머지 선행형(1, 5)은 2번의 뒤를 잡으려 하거나 각자 전개를 가져갈 가능성 있음. 5번의 자재(양각) 각질이 혼전 시 우위에 설 수 있음.",
+ "applied_rules": [],
+ "raceKey": "호후 3경주",
+ "forecastAt": "2026-08-02 09:01:28",
+ "forecastEpoch": 1785628888.7139711,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 3경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 2.3,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 30.8,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T08:50:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 6,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 3,
+    "name": "関 敬",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ４着 9.8 8/ 1 チ選抜 ５着 10.2",
+    "prev1": "京王閣Ｆ２ 7/19 チ予選 ５着 12.2",
+    "prev2": "岸和田Ｆ２ 7/ 4 チ予選 ２着 12.4 7/ 5 チ準決 ４着 12.3 7/ 6 チ選抜 ３着 12.5",
+    "chaku": [
+     0,
+     1,
+     1,
+     10
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "近藤 直幹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ６着 10.3 8/ 1 チ一般 ４着 10.8",
+    "prev1": "武 雄Ｆ２ 7/25 チ予選 ７着 7/26 チ一般 ７着 15.5 7/27 チ一般 ７着 13",
+    "prev2": "取 手Ｆ２ 7/15 チ予選 ４着 11.6 7/16 チ選抜 落",
+    "chaku": [
+     0,
+     5,
+     7,
+     21
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "三木 翔太",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ４着 10 8/ 1 チ選抜 ４着 10.5",
+    "prev1": "西武園Ｆ２ 7/16 チ予選 ３着 11.9 7/17 チ準決 ３着 11.4 7/18 チ決勝 ４着 12.4",
+    "prev2": "久留米Ｆ２ 7/ 7 チ予選 ６着 12.1 7/ 8 チ一般 ３着 11.9 7/ 9 チ一般 ３着 12.3",
+    "chaku": [
+     2,
+     0,
+     5,
+     11
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "藤原 義浩",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ４着 10.6 8/ 1 チ選抜 ５着 9.7",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 ７着 11.9 7/25 チ一般 ３着 12 7/26 チ一般 ５着 12.3",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 ７着 12.3 7/ 9 チ一般 ４着 12.4 7/10 チ一般 ６着 13",
+    "chaku": [
+     0,
+     0,
+     3,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "伊藤 翼",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ７着 8/ 1 チ一般 ２着 10.1",
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ４着 11.9 7/22 チ一般 １着 12.1 7/23 チ選抜 ７着",
+    "prev2": "取 手Ｆ２ 7/15 チ予選 ７着 14.9 7/16 チ一般 ４着 12.2 7/17 チ一般 １着 11.9",
+    "chaku": [
+     5,
+     1,
+     0,
+     23
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "矢田 晋",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.86,
+    "recent": "7/31 チ予選 ６着 9.8 8/ 1 チ一般 故",
+    "prev1": "取 手Ｆ２ 7/15 チ予選 ７着 13.2 7/16 チ一般 ６着 12.1 7/17 チ一般 １着 12.1",
+    "prev2": "久留米Ｆ２ 7/ 7 チ予選 ３着 12.5 7/ 8 チ準決 ６着 11.9 7/ 9 チ選抜 ７着 12.1",
+    "chaku": [
+     1,
+     3,
+     1,
+     17
+    ],
+    "declared": "자재(양각)"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    5,
+    2,
+    1
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    3,
+    4,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   6,
+   4,
+   2,
+   3,
+   5
+  ],
+  "paceLabel": null,
+  "comment": "伊藤のスピードを貰って関が抜け出し最終日１勝。３番手には三木が回る。矢田ー藤原の捲りにも注意。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   2,
+   3,
+   5
+  ],
+  "hit_count": 3,
+  "hit": [
+   2,
+   3,
+   5
+  ],
+  "missed": [],
+  "missed_info": [],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   11,
+   7,
+   3
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 09:29:56"
+ },
+ "graded": true,
+ "reviewed": true,
+ "review": {
+  "miss_reason": "해당 없음(전부 적중)",
+  "new_rule": "없음",
+  "rule_confidence": 1,
+  "reviewedAt": "2026-08-02 09:29:56"
+ }
+}

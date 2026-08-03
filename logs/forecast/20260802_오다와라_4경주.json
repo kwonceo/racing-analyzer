@@ -1,0 +1,365 @@
+{
+ "predicted_top3": [
+  4,
+  3,
+  5
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  4,
+  3
+ ],
+ "confidence": 4,
+ "reason_short": "단독 선행마의 존재로 전개 유리, 후미 추입마들 경쟁 심화",
+ "key_factors": [
+  "1번의 단독 선행으로 인한 안정적인 페이스 형성 가능성",
+  "4번 타케우치 토모히코의 최근 준수한 성적 및 추입력",
+  "3번 이토 유키와 5번 요코제키 유키의 자재각질 연대 및 스피드",
+  "대다수 추입형 각질로 인한 후미 혼전 심화"
+ ],
+ "exception_note": "1번이 유일한 선행형이라 독주할 가능성이 높고, 이로 인해 후미 그룹에서 추입형들 간의 경쟁이 심화될 수 있다. 4번은 1번을 마크하며 이점을 취할 수 있는 유리한 전개를 맞이할 것으로 보임. 반면 3번과 5번은 자재형으로 후미에서 타이밍을 잡아야 하지만, 경쟁자가 많아 쉽지 않을 수 있음.",
+ "applied_rules": [],
+ "raceKey": "오다와라 4경주",
+ "forecastAt": "2026-08-02 12:12:08",
+ "forecastEpoch": 1785640328.892867,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "오다와라 4경주",
+  "wind": {
+   "venue": "오다와라",
+   "풍속": 1.8,
+   "풍향": "남남동",
+   "풍향코드": 7,
+   "기온": 35.0,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T11:50:00+09:00",
+   "지점": "小田原",
+   "지점거리km": 1.9
+  },
+  "fieldSize": 8,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 4,
+    "name": "竹内 智彦",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ６着 10",
+    "prev1": "豊 橋Ｇ３ 7/25 一予選 １着 12 7/26 二予選 ９着 11.2 7/27 選 抜 ５着 10.9 7/28 選 抜 ２着 11.9",
+    "prev2": "岐 阜Ｆ１ 7/11 初特選 ２着 11 7/12 準決勝 ３着 11.4 7/13 特 選 １着 11.1",
+    "chaku": [
+     3,
+     5,
+     3,
+     8
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "坂本健太郎",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.85,
+    "recent": "8/ 1 一予選 ７着 10.6",
+    "prev1": "奈 良Ｆ１ 7/25 予 選 ４着 9.8 7/26 一 般 ２着 9.5 7/27 特 選 ４着 9.6",
+    "prev2": "高 知Ｇ２ 7/17 一予選 ８着 13.8 7/18 選 抜 ７着 14.1 7/19 一 般 ７着 13.6 7/20 一 般 ４着 13.4",
+    "chaku": [
+     2,
+     4,
+     2,
+     21
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "横関 裕樹",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ７着 9.5",
+    "prev1": "佐世保Ｆ１ 7/13 予 選 ２着 11.9 7/14 準決勝 ４着 11.6 7/15 特 選 ６着",
+    "prev2": "平 塚Ｆ１ 6/30 予 選 ３着 11.4 7/ 1 準決勝 ５着 11.5 7/ 2 特 選 １着 11.5",
+    "chaku": [
+     3,
+     4,
+     5,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "高木 和仁",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ６着 9.1",
+    "prev1": "宇都宮Ｆ１ 7/13 予 選 ５着 14.1 7/14 一 般 ６着 14.7 7/15 一 般 １着 14.2",
+    "prev2": "豊 橋Ｆ１ 7/ 5 予 選 ５着 11.4 7/ 6 一 般 ４着 11.4 7/ 7 一 般 ３着 11.4",
+    "chaku": [
+     2,
+     1,
+     5,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "伊藤 裕貴",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ６着 10",
+    "prev1": "函 館Ｆ１ 7/14 予 選 ３着 11.2 7/15 準決勝 落",
+    "prev2": "和歌山Ｆ１ 7/ 5 予 選 ３着 11.4 7/ 6 選 抜 ３着 11.2 7/ 7 特 選 ４着 11.2",
+    "chaku": [
+     2,
+     2,
+     7,
+     14
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 1,
+    "name": "望月 湧世",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ８着 10.3",
+    "prev1": "岐 阜Ｆ１ 7/11 予 選 ５着 11.9 7/12 選 抜 ５着 12 7/13 一 般 ５着 11.7",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ５着 11.8 7/ 3 二予選 ９着 13.1 7/ 4 選 抜 ６着 12.4 7/ 5 選 抜 ９着 12.2",
+    "chaku": [
+     1,
+     4,
+     2,
+     13
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 8,
+    "name": "吉田 裕全",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "8/ 1 一予選 ９着 9.9",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ７着 11.6 7/23 一 般 ７着 11.4 7/24 一 般 ５着 11.3",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 ３着 14.2 7/14 選 抜 ３着 14 7/15 特 選 ７着 14.3",
+    "chaku": [
+     1,
+     4,
+     4,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "今藤 康裕",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ９着 9.4",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ４着 11.5 7/23 一 般 ５着 11.9 7/24 一 般 ３着 11.9",
+    "prev2": "岐 阜Ｆ２ 6/27 初特選 ３着 11.9 6/28 準決勝 １着 11.6 6/29 決 勝 落",
+    "chaku": [
+     1,
+     0,
+     3,
+     5
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    1
+   ],
+   "closeCount": 6,
+   "closeHorses": [
+    4,
+    7,
+    5,
+    2,
+    8,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   4,
+   8,
+   7,
+   2,
+   3,
+   5,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "若い望月にマーク出来る竹内が展開有利にレースを運ぶとみたが、伊藤―横関もスピードは十分でタイミング良く巻き返しなら。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   7,
+   2,
+   5
+  ],
+  "hit_count": 1,
+  "hit": [
+   5
+  ],
+  "missed": [
+   7,
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 2,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   5,
+   1
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 12:50:11"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "7번과 2번의 최근 착순 정보가 불확실했음에도 불구하고, 이들의 실제 경기력을 과소평가했다. 특히 1번의 선행 능력에 대한 신뢰가 너무 컸고, 후미 그룹의 혼전 속에서 터져나올 변수를 충분히 고려하지 못했다.",
+  "new_rule": "최근 착순 정보가 불충분하더라도, 다른 추입형 말들의 직전 경기 내용과 각질의 특징을 바탕으로 후미 혼전 시 역전 가능성을 더 면밀히 평가한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-02 12:50:13"
+ },
+ "reviewed": true
+}

@@ -1,0 +1,311 @@
+{
+ "predicted_top3": [
+  4,
+  5,
+  1
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  4
+ ],
+ "confidence": 3,
+ "reason_short": "추입형 강세와 선행형의 내부 경쟁, 그리고 유일한 A급 선수인 4번의 안정적인 전력.",
+ "key_factors": [
+  "추입형 다수 (4명 중 4명)",
+  "선행형의 내부 경쟁 가능성 (1번과 5번 모두 도주/선행 선언)",
+  "유일한 A급 선수 4번의 꾸준한 성적",
+  "풍속 4.2m/s, 바람 영향 고려 (맞바람 시 선행 불리 가능성)"
+ ],
+ "exception_note": "전체 6두 중 4두가 추입형으로 구성되어 후반 역전 전개가 유력하며, 선행을 선언한 1번과 5번은 각질이 겹쳐 내부 경쟁으로 인한 체력 소모 가능성이 있다. 유일한 A등급 선수인 4번은 최근 꾸준히 입상하며 전력이 안정적이다. 중강풍이 선행형에 불리하게 작용할 수 있으나 주로 방위를 알 수 없어 단정은 어렵다.",
+ "applied_rules": [],
+ "raceKey": "이와키타이라 6경주",
+ "forecastAt": "2026-08-02 17:46:39",
+ "forecastEpoch": 1785660399.128699,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "이와키타이라 6경주",
+  "wind": {
+   "venue": "이와키타이라",
+   "풍속": 4.2,
+   "풍향": "북북동",
+   "풍향코드": 1,
+   "기온": 24.1,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T17:30:00+09:00",
+   "지점": "小名浜",
+   "지점거리km": 12.14
+  },
+  "fieldSize": 6,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 4,
+    "name": "三浦 貴大",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.7 8/ 1 一 般 ２着 11.3",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ４着 11.5 7/24 選 抜 ６着 11.5 7/25 一 般 ２着 12",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ７着 11.9 7/ 3 選 抜 １着 12 7/ 4 特 選 ９着 12 7/ 5 選 抜 ２着 11.1",
+    "chaku": [
+     5,
+     2,
+     0,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "土屋 裕二",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11.7 8/ 1 選 抜 ７着 11.3",
+    "prev1": "伊 東Ｆ１ 6/13 予 選 ４着 10 6/14 選 抜 ３着 9.7 6/15 一 般 ４着 10.5",
+    "prev2": "久留米Ｇ３ 6/ 4 一予選 ３着 11.8 6/ 5 二予選 ６着 11.5 6/ 6 特 選 ７着 11.3 6/ 7 選 抜 ６着 11.3",
+    "chaku": [
+     0,
+     0,
+     2,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "森本桂太郎",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ７着 12.3 8/ 1 一 般 ６着 12.1",
+    "prev1": "玉 野Ｆ１ 7/14 予 選 ４着 11.4 7/15 選 抜 ６着 11.8 7/16 一 般 ２着 11.6",
+    "prev2": "大 宮Ｆ１ 7/ 1 予 選 ７着 14.6 7/ 2 一 般 ４着 14.8 7/ 3 一 般 ５着 14.4",
+    "chaku": [
+     0,
+     4,
+     2,
+     16
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "小橋 秀幸",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ４着 11.5 8/ 1 選 抜 ５着 11.1",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ９着 10.6 7/23 選 抜 ６着 9.8 7/24 選 抜 ２着 10",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 ５着 11.8 7/14 一 般 ５着 11.1 7/15 一 般 ４着 11.7",
+    "chaku": [
+     4,
+     5,
+     2,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "五十嵐 綾",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ３着 11.8 8/ 1 選 抜 ４着 11.4",
+    "prev1": "高 知Ｇ２ 7/17 一予選 ９着 15.6 7/18 選 抜 ９着 14.6 7/19 一 般 ８着 14.1 7/20 一 般 ８着 15",
+    "prev2": "大 垣Ｆ１ 7/ 8 予 選 ３着 11.3 7/ 9 選 抜 ６着 11.3 7/10 一 般 ２着 11.2",
+    "chaku": [
+     3,
+     3,
+     3,
+     14
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 6,
+    "name": "宝満 大作",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11.7 8/ 1 選 抜 ６着 11.2",
+    "prev1": "富 山Ｆ１ 7/21 予 選 ６着 11.1 7/22 一 般 ４着 9.8 7/23 一 般 ３着 9.7",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ８着 12.8 7/ 3 選 抜 ６着 11.9 7/ 4 一 般 ６着 11.5 7/ 5 一 般 ２着 12",
+    "chaku": [
+     0,
+     2,
+     2,
+     14
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 0,
+   "leadHorses": [],
+   "closeCount": 4,
+   "closeHorses": [
+    4,
+    3,
+    2,
+    6
+   ]
+  },
+  "lines": [
+   1,
+   4,
+   6,
+   5,
+   2,
+   3
+  ],
+  "paceLabel": null,
+  "comment": "◎は迷いに迷ったが競走得点を信頼。唯一１００点オーバーである三浦◎。地元奮起の五十嵐が相手。森本が単穴",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   1,
+   2
+  ],
+  "hit_count": 2,
+  "hit": [
+   4,
+   1
+  ],
+  "missed": [
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 2,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "B"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   4,
+   8,
+   11
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.2,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 18:11:24"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "2번 말의 최근 성적 중 전전개최 경주에서 선발전 2착 기록이 있었으나, 추입형 각질과 B등급이라는 점에만 집중하여 해당 기록의 의미를 간과했습니다.",
+  "new_rule": "B등급 추입형 말이라도 최근 기록에 상위 입상이 있다면 해당 경주의 전개와 함께 더 상세히 검토한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 18:11:26"
+ },
+ "reviewed": true
+}

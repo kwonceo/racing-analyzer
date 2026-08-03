@@ -1,0 +1,356 @@
+{
+ "predicted_top3": [
+  2,
+  7,
+  3
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "A급 추격형의 안정적인 전개와 선행마들의 경쟁 구도",
+ "key_factors": [
+  "A등급 마필의 강세",
+  "선행형 마필 간의 경합 예상",
+  "추격형 마필의 후반 역전 가능성"
+ ],
+ "exception_note": "상위 등급인 A급 마필 중 추격형이 2번, 3번으로 전개상 이점이 있으며, 선행형 마필 7번, 8번, 6번이 다수 포진하여 초반 페이스가 다소 빨라질 가능성이 있어 선행마 간의 소모전이 예상됨. 이로 인해 후반 추격형 마필들이 힘을 비축하여 역전에 성공할 확률이 높음. 특히 2번 타가노나쉬빌은 최근 1착, 2착 등 꾸준히 좋은 성적을 내고 있어 안정적.",
+ "applied_rules": [],
+ "raceKey": "후나바시 6경주",
+ "forecastAt": "2026-08-02 17:10:33",
+ "forecastEpoch": 1785658233.0886476,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "후나바시 6경주",
+  "wind": {
+   "venue": "후나바시",
+   "풍속": 2.4,
+   "풍향": "동북동",
+   "풍향코드": 3,
+   "기온": 27.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T16:50:00+09:00",
+   "지점": "船橋",
+   "지점거리km": 4.5
+  },
+  "fieldSize": 10,
+  "distance": 1500,
+  "surface": "더트",
+  "trackCond": "良",
+  "horses": [
+   {
+    "no": 2,
+    "name": "タガノナッシュビル",
+    "gait": "추격형",
+    "recentPlacings": [
+     9,
+     1,
+     2,
+     2,
+     2
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 501,
+    "jockey": "笠野雄"
+   },
+   {
+    "no": 7,
+    "name": "ジュンピリカ",
+    "gait": "선행형",
+    "recentPlacings": [
+     3,
+     7,
+     7,
+     1,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 430,
+    "jockey": "張田昂"
+   },
+   {
+    "no": 3,
+    "name": "ジオパークムーン",
+    "gait": "추격형",
+    "recentPlacings": [
+     4,
+     6,
+     1,
+     3
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 423,
+    "jockey": "臼井健"
+   },
+   {
+    "no": 8,
+    "name": "コマサ",
+    "gait": "선행형",
+    "recentPlacings": [
+     7,
+     2,
+     1
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 508,
+    "jockey": "篠谷葵"
+   },
+   {
+    "no": 9,
+    "name": "セザンヴィーナス",
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     6,
+     10,
+     3,
+     8
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 488,
+    "jockey": "所　蛍"
+   },
+   {
+    "no": 1,
+    "name": "キタノマヒロ",
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     3,
+     7,
+     8,
+     7
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 467,
+    "jockey": "小杉亮"
+   },
+   {
+    "no": 5,
+    "name": "マオノハイジ",
+    "gait": "추격형",
+    "recentPlacings": [
+     6,
+     6,
+     9,
+     2,
+     5
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 439,
+    "jockey": "仲野光"
+   },
+   {
+    "no": 6,
+    "name": "ウォニョン",
+    "gait": "선행형",
+    "recentPlacings": [
+     4,
+     6,
+     2,
+     12,
+     12
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 438,
+    "jockey": "菅原吏"
+   },
+   {
+    "no": 10,
+    "name": "ストックテイキング",
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     6,
+     8,
+     3,
+     3
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 410,
+    "jockey": "山口達"
+   },
+   {
+    "no": 4,
+    "name": "スコーレブロー",
+    "gait": "평지형",
+    "recentPlacings": [
+     5,
+     6,
+     5,
+     9
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "bodyWt": 438,
+    "jockey": "藤本現"
+   }
+  ],
+  "composition": {
+   "leadCount": 3,
+   "leadHorses": [
+    7,
+    8,
+    6
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 100.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 30.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 40.0
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "부담중량(보유율 0%로 미달)",
+   "기수 승률(보유율 30%로 미달)",
+   "거리 적성(보유율 40%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   8,
+   5,
+   7
+  ],
+  "hit_count": 1,
+  "hit": [
+   7
+  ],
+  "missed": [
+   8,
+   5
+  ],
+  "missed_info": [
+   {
+    "no": 8,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   },
+   {
+    "no": 5,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   8,
+   4,
+   11
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.2,
+  "market_src": "win",
+  "gradedAt": "2026-08-02 17:30:20"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "B등급 선행형 마필인 8번 '코마사'의 최근 연승 기록(2, 1착)을 간과하여 선행마 간의 경합 속에서도 선두를 유지할 가능성을 놓쳤습니다. 또한, C등급 추격형 마필인 5번 '마오노하이디'가 상위권에 진입할 것이라고 예측하지 못했습니다. 추격형 마필 간의 상대적 우위를 평가하는 기준이 미흡했습니다.",
+  "new_rule": "선행형 마필 간의 경합이 예상될 때, B등급 마필이라도 최근 연승 기록이 있다면 선두 유지 및 입상 가능성을 높게 평가한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 17:30:22"
+ },
+ "reviewed": true
+}

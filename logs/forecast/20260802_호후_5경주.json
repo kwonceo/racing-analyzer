@@ -1,0 +1,339 @@
+{
+ "predicted_top3": [
+  2,
+  7,
+  1
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "관동 라인의 기동력과 안정적인 경기 운영, 그리고 자재형 강자 간의 경쟁 구도.",
+ "key_factors": [
+  "관동 라인(2-7)의 강력한 선행/젖히기 각질 시너지",
+  "모리카와(1)의 젖히기형으로서 준결 성적 및 최근 우승 이력",
+  "라인 내 경쟁으로 인한 주요 선수의 잠재적 피로도"
+ ],
+ "exception_note": "2번(関口)과 6번(安本) 모두 선행/도주형으로 선언했으나, 2번의 최근 경주에서 더 우세한 기동력을 보여주며 라인 형성에서도 유리한 위치를 점하고 있다. 6번은 최근 성적이 저조하며 선행형임에도 불구하고 버티지 못하는 모습을 자주 보였다. 이로 인해 강력한 선행 경쟁이 발생하기보다는 2번이 주도권을 잡고, 7번(早川)이 이를 뒷받침하며 관동 라인이 선두에서 유리하게 전개될 가능성이 높다. 1번(森川)은 자재형으로 라인에 구애받지 않고 유연하게 대처할 수 있으며, 준결에서 4착을 기록하며 체력적인 부담이 적고 전개에 능하여 충분히 상위권에 진입할 수 있다. 5번(北村)과 3번(松田)은 추입형이지만 강력한 선행형이 앞에서 끌어주지 않으면 힘을 발휘하기 어려울 수 있다. 따라서 2번의 선행을 7번이 견고히 받쳐주는 관동 라인의 우세가 예상된다.",
+ "applied_rules": [],
+ "raceKey": "호후 5경주",
+ "forecastAt": "2026-08-02 09:54:46",
+ "forecastEpoch": 1785632086.5613356,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 5경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 2.5,
+   "풍향": "남서",
+   "풍향코드": 10,
+   "기온": 31.9,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T09:40:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 7,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 5,
+    "name": "北村 篤",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ２着 9.7 8/ 1 チ準決 ６着 9.4",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 １着 11.9 7/25 チ準決 ２着 12.1 7/26 チ決勝 ４着 11.5",
+    "prev2": "奈 良Ｆ２ 7/16 チ予選 ６着 10.2 7/17 チ一般 １着 9.8 7/18 チ選抜 ５着 10.1",
+    "chaku": [
+     3,
+     3,
+     1,
+     17
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 1,
+    "name": "森川 康輔",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 １着 9.8 8/ 1 チ準決 ４着 9.7",
+    "prev1": "和歌山Ｆ２ 7/24 チ予選 １着 11.5 7/25 チ準決 １着 11.6 7/26 チ決勝 １着 11.8",
+    "prev2": "京王閣Ｆ２ 7/13 チ予選 ５着 11 7/14 チ一般 １着 11.9 7/15 チ選抜 １着 11.6",
+    "chaku": [
+     6,
+     0,
+     2,
+     10
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 2,
+    "name": "関口 朗斗",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ３着 9.7 8/ 1 チ準決 ７着 10.6",
+    "prev1": "平 Ｆ２ 7/22 チ予選 １着 12.1 7/23 チ準決 ２着 11.6 7/24 チ決勝 ２着 11.6",
+    "prev2": "広 島Ｆ２ 7/ 8 チ予選 １着 12.3 7/ 9 チ準決 ６着 11.5 7/10 チ選抜 １着 11.7",
+    "chaku": [
+     13,
+     3,
+     4,
+     4
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 3,
+    "name": "松田 直也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 チ予選 ２着 9.5 8/ 1 チ準決 ６着 9.6",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 ６着 11.6 7/25 チ一般 ４着 11.3 7/26 チ一般 ４着 12.8",
+    "prev2": "奈 良Ｆ２ 7/16 チ予選 ６着 9.6 7/17 チ一般 ７着 11.6 7/18 チ一般 ６着 10.1",
+    "chaku": [
+     1,
+     0,
+     2,
+     18
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 7,
+    "name": "早川 成矢",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ３着 9.9 8/ 1 チ準決 ３着 9.7",
+    "prev1": "平 Ｆ２ 7/22 チ予選 ４着 11.8 7/23 チ選抜 ５着 11.6 7/24 チ一般 １着 12",
+    "prev2": "取 手Ｆ２ 7/ 6 チ予選 ２着 11.8 7/ 7 チ準決 ３着 12.3 7/ 8 チ決勝 ２着 12",
+    "chaku": [
+     2,
+     5,
+     2,
+     9
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 4,
+    "name": "吉成 晃一",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ７着 10.2 8/ 1 チ一般 １着 10.3",
+    "prev1": "武 雄Ｆ２ 7/27 チ一般 ３着 11.4",
+    "prev2": "平 Ｆ２ 7/22 チ予選 ５着 11.6 7/23 チ選抜 ４着 12.5 7/24 チ一般 ５着 11.6",
+    "chaku": [
+     2,
+     3,
+     6,
+     18
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "安本 昇平",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 チ予選 ３着 9.9 8/ 1 チ準決 ３着 9.6",
+    "prev1": "小 倉Ｆ２ 7/24 チ予選 ５着 11.4 7/25 チ一般 ６着 11.6 7/26 チ一般 ５着 12.6",
+    "prev2": "松 山Ｆ２ 7/11 チ予選 ５着 13.5 7/12 チ一般 ６着 12.2 7/13 チ一般 ７着 14.5",
+    "chaku": [
+     0,
+     0,
+     0,
+     6
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    6
+   ],
+   "closeCount": 3,
+   "closeHorses": [
+    5,
+    3,
+    4
+   ]
+  },
+  "lines": [
+   2,
+   7,
+   1,
+   5,
+   3,
+   4,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "機動力高い関口ー早川の関東勢を本命視する。総合力の高い森川ー北村の同県岐阜コンビも強敵で互角の勝負！",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   6,
+   4,
+   2
+  ],
+  "hit_count": 1,
+  "hit": [
+   2
+  ],
+  "missed": [
+   6,
+   4
+  ],
+  "missed_info": [
+   {
+    "no": 6,
+    "gait": "선행형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   },
+   {
+    "no": 4,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "D"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   1,
+   7
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 10:09:55"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "6번 안본 선수의 최근 성적이 저조하다고 판단했으나, 예선/준결에서 3착을 기록하며 기세를 올리고 있었고, 2번과의 선행 경쟁에서 우위를 점할 수 있는 전개 판단이 부족했습니다. 4번 요시나리 선수가 전전 대회에서 부진했지만, 직전 경주에서 1착을 기록하며 컨디션이 회복되고 있었음을 간과했습니다.",
+  "new_rule": "선행형 선수의 최근 성적이 단기적으로 상승세에 있다면, 과거 성적 부진에도 불구하고 선행 주도권을 잡을 가능성을 높게 평가한다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 10:09:58"
+ },
+ "reviewed": true
+}

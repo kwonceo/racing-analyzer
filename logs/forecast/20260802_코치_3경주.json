@@ -1,0 +1,415 @@
+{
+ "predicted_top3": [
+  8,
+  6,
+  11
+ ],
+ "predicted_style": "혼합",
+ "predicted_pace": "보통",
+ "line_winner": [],
+ "confidence": 4,
+ "reason_short": "선행마 2두의 경쟁 심화로 후반 추격형 강세 예상. 8번 기수 승률 압도적.",
+ "key_factors": [
+  "선행형 두 마리의 내부 경쟁",
+  "8번 마의 압도적인 기수 승률",
+  "더트 주로 '重' 컨디션"
+ ],
+ "exception_note": "선행형 (11, 6번)이 두수 대비 많은 상황에서, 중상위권 기수 승률을 가진 말들이 이끌 경우 초반부터 무리한 속도 경쟁으로 이어져 후반 추격형(8, 3번)에게 유리한 전개가 예상된다. 특히 8번 宮川実 기수는 70%의 승률로 압도적이며, 3번 加藤翔 기수도 60%의 승률을 기록하고 있어 추격 전개에서 강점을 보일 것이다.",
+ "applied_rules": [],
+ "raceKey": "코치 3경주",
+ "forecastAt": "2026-08-02 16:25:40",
+ "forecastEpoch": 1785655540.9713006,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "코치 3경주",
+  "wind": {
+   "venue": "코치",
+   "풍속": 2.8,
+   "풍향": "남",
+   "풍향코드": 8,
+   "기온": 32.8,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T16:10:00+09:00",
+   "지점": "南国日章",
+   "지점거리km": 5.26
+  },
+  "fieldSize": 13,
+  "distance": 1300,
+  "surface": "더트",
+  "trackCond": "重",
+  "horses": [
+   {
+    "no": 11,
+    "name": "ビッグアーサー",
+    "gait": "선행형",
+    "recentPlacings": [
+     2,
+     15
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "大澤誠",
+    "jockeyRate": 3.3
+   },
+   {
+    "no": 4,
+    "name": "ハービンジャー",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     11,
+     6,
+     12,
+     11
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "岡村卓",
+    "jockeyRate": 26.7
+   },
+   {
+    "no": 8,
+    "name": "パイロ",
+    "gait": "추격형",
+    "recentPlacings": [
+     3,
+     6,
+     13,
+     10,
+     8
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "宮川実",
+    "jockeyRate": 70.0
+   },
+   {
+    "no": 6,
+    "name": "リオンディーズ",
+    "gait": "선행형",
+    "recentPlacings": [
+     6,
+     7,
+     9,
+     3,
+     12
+    ],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "筒井勇",
+    "jockeyRate": 36.7
+   },
+   {
+    "no": 3,
+    "name": "レッドファルクス",
+    "gait": "추격형",
+    "recentPlacings": [
+     5,
+     5,
+     8
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "加藤翔",
+    "jockeyRate": 60.0
+   },
+   {
+    "no": 5,
+    "name": "ダノンレジェンド",
+    "gait": "추격형",
+    "recentPlacings": [
+     11
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "木村直",
+    "jockeyRate": 23.3
+   },
+   {
+    "no": 10,
+    "name": "アポロケンタッキー",
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     10,
+     5,
+     7,
+     10
+    ],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "岡遼太",
+    "jockeyRate": 33.3
+   },
+   {
+    "no": 9,
+    "name": "ヤングマンパワー",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     10,
+     7,
+     12
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "畑中信",
+    "jockeyRate": 23.3
+   },
+   {
+    "no": 2,
+    "name": "ホッコータルマエ",
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     8,
+     7,
+     5,
+     10
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 57.0,
+    "jockey": "城野慈",
+    "jockeyRate": 26.7
+   },
+   {
+    "no": 12,
+    "name": "イスラボニータ",
+    "gait": "평지형",
+    "recentPlacings": [
+     5,
+     10,
+     14,
+     15,
+     15
+    ],
+    "grade": "C",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 53.0,
+    "jockey": "濱尚美",
+    "jockeyRate": 16.7
+   },
+   {
+    "no": 13,
+    "name": "メモリーキャッチ",
+    "gait": null,
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null
+   },
+   {
+    "no": 7,
+    "name": "ダンカーク",
+    "gait": "추격형",
+    "recentPlacings": [
+     12,
+     10,
+     9,
+     12,
+     9
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 54.0,
+    "jockey": "塚本直",
+    "jockeyRate": 13.3
+   },
+   {
+    "no": 1,
+    "name": "アメリカンペイトリオット",
+    "gait": "평지형",
+    "recentPlacings": [
+     4,
+     8,
+     15,
+     11,
+     11
+    ],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "weight": 55.0,
+    "jockey": "西森将",
+    "jockeyRate": 13.3
+   }
+  ],
+  "composition": {
+   "leadCount": 2,
+   "leadHorses": [
+    11,
+    6
+   ],
+   "closeCount": 0,
+   "closeHorses": []
+  },
+  "lines": [],
+  "paceLabel": null,
+  "comment": "",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 92.3
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 92.3
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 92.3
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 0.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 0.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 0.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 53.8
+   }
+  ],
+  "_not_provided": [
+   "날씨",
+   "조교 평가",
+   "기어비(보유율 0%로 미달)",
+   "금개최 성적(보유율 0%로 미달)",
+   "전개최 성적(보유율 0%로 미달)",
+   "전전개최 성적(보유율 0%로 미달)",
+   "착순분포(보유율 0%로 미달)",
+   "표기 각질(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "거리 적성(보유율 54%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "horse"
+ },
+ "grading": {
+  "actual": [
+   4,
+   8,
+   2
+  ],
+  "hit_count": 1,
+  "hit": [
+   8
+  ],
+  "missed": [
+   4,
+   2
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": "추격형",
+    "recentPlacings": [
+     8,
+     11,
+     6,
+     12,
+     11
+    ],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 2,
+    "gait": "추격형",
+    "recentPlacings": [
+     7,
+     8,
+     7,
+     5,
+     10
+    ],
+    "line": null,
+    "grade": "C"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   8,
+   4,
+   6
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "win",
+  "gradedAt": "2026-08-02 16:50:05"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번마의 기수(岡村卓) 승률 26.7%는 중간 등급임에도 중량 57.0kg을 이끌고 우승할 잠재력을 간과했다. 또한 2번마는 낮은 등급(C)에도 불구하고 57.0kg의 중량과 26.7%의 기수 승률로 상위권에 진입할 가능성을 고려하지 못했다. 전개 예측에서 초반 속도 경쟁이 심화될 것이라는 판단은 적중했으나, 그로 인해 추격형 말들에게 유리해질 것이라는 예측에서 8번마 외에 4번과 2번의 잠재력을 놓쳤다.",
+  "new_rule": "더트 주로 '重' 컨디션에서 부담중량이 높더라도 중위권 기수 승률(25% 이상)을 가진 추격형 말의 복병 가능성을 주의깊게 본다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-02 16:50:07"
+ },
+ "reviewed": true
+}

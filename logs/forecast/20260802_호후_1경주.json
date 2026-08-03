@@ -1,0 +1,304 @@
+{
+ "predicted_top3": [
+  2,
+  3,
+  5
+ ],
+ "predicted_style": "추입",
+ "predicted_pace": "느린",
+ "line_winner": [
+  2
+ ],
+ "confidence": 4,
+ "reason_short": "선행형 4번의 컨디션 저하와 다수의 추입형이 선두권을 압박할 가능성",
+ "key_factors": [
+  "선행마의 컨디션 난조",
+  "다수의 추입형 경주마",
+  "라인 구도의 불균형"
+ ],
+ "exception_note": "6두 중 선행형은 4번(伊藤 司) 단 1명뿐이며, 최근 성적이 매우 부진하여 선행을 제대로 끌고 가기 어렵다. 다른 5두는 모두 추입형으로, 이들이 서로 견제하며 후미에서 기회를 노릴 것으로 보인다. 특히 2번(藤縄 洋介)과 3번(榊枝 輝文)은 최근 컨디션이 양호하며, 5번(武田 和也) 역시 총평에서 최종일의 분전을 기대하고 있어 주목할 필요가 있다. 바람은 약하여 전개에 큰 영향을 미치지 않을 것이다.",
+ "applied_rules": [],
+ "raceKey": "호후 1경주",
+ "forecastAt": "2026-08-02 08:22:47",
+ "forecastEpoch": 1785626567.3067098,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "호후 1경주",
+  "wind": {
+   "venue": "호후",
+   "풍속": 1.6,
+   "풍향": "서남서",
+   "풍향코드": 11,
+   "기온": 29.5,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T08:10:00+09:00",
+   "지점": "防府",
+   "지점거리km": 4.35
+  },
+  "fieldSize": 6,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 1,
+    "name": "柴田 健",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ６着 9.7 8/ 1 チ一般 ３着 10.1",
+    "prev1": "岸和田Ｆ２ 7/13 チ予選 ３着 11.8 7/14 チ準決 ６着 11.7 7/15 チ選抜 ５着 11.5",
+    "prev2": "武 雄Ｆ２ 6/12 チ予選 ２着 12.5 6/13 チ準決 ５着 12 6/14 チ選抜 １着 12.4",
+    "chaku": [
+     1,
+     4,
+     3,
+     7
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "武田 和也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ７着 10.3 8/ 1 チ一般 ７着 12.2",
+    "prev1": "松 山Ｆ２ 7/25 チ予選 ３着 11.1 7/26 チ準決 ５着 11.4 7/27 チ選抜 ５着 12.3",
+    "prev2": "京王閣Ｆ２ 7/19 チ予選 ４着 11.7 7/20 チ一般 ３着 12.2 7/21 チ一般 ４着 12.7",
+    "chaku": [
+     2,
+     8,
+     5,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 3,
+    "name": "榊枝 輝文",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "7/31 チ予選 ５着 9.9 8/ 1 チ選抜 ３着 9.7",
+    "prev1": "平 Ｆ２ 7/22 チ予選 ４着 12.3 7/23 チ選抜 ７着 12.6 7/24 チ一般 ３着 11.7",
+    "prev2": "西武園Ｆ２ 7/16 チ予選 ３着 12.1 7/17 チ準決 ６着 11.5 7/18 チ選抜 ３着 12.3",
+    "chaku": [
+     3,
+     7,
+     5,
+     12
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 2,
+    "name": "藤縄 洋介",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ４着 9.5 8/ 1 チ選抜 ４着 9.6",
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ６着 11.7 7/22 チ一般 ５着 12.3 7/23 チ一般 １着 12.4",
+    "prev2": "別 府Ｆ２ 7/ 4 チ予選 １着 11.8 7/ 5 チ準決 ４着 11.7 7/ 6 チ選抜 ６着 12.1",
+    "chaku": [
+     3,
+     3,
+     2,
+     13
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "藤野 竜也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ６着 10.1 8/ 1 チ一般 ４着 10.6",
+    "prev1": "和歌山Ｆ２ 7/24 チ予選 ７着 15.6 7/25 チ一般 ４着 12.2 7/26 チ一般 ６着 11.3",
+    "prev2": "京王閣Ｆ２ 7/13 チ予選 ４着 11.9 7/14 チ一般 ３着 12 7/15 チ一般 ４着 11.7",
+    "chaku": [
+     1,
+     0,
+     1,
+     9
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "伊藤 司",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "D",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 チ予選 ７着 10.8 8/ 1 チ一般 ３着 11.1",
+    "prev1": "松 阪Ｆ２ 7/21 チ予選 ７着 11.9 7/22 チ一般 ７着 14.8 7/23 チ一般 ７着 14.3",
+    "prev2": "熊 本Ｆ２ 7/13 チ予選 ５着 12.4 7/14 チ選抜 ７着 12.8 7/15 チ一般 ５着 12.2",
+    "chaku": [
+     3,
+     2,
+     2,
+     20
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    4
+   ],
+   "closeCount": 5,
+   "closeHorses": [
+    1,
+    5,
+    3,
+    2,
+    6
+   ]
+  },
+  "lines": [
+   5,
+   2,
+   1,
+   6,
+   3,
+   4
+  ],
+  "paceLabel": null,
+  "comment": "今開催らしくない武田、最終日の奮起戦に期待。番手は藤縄ー柴田と続く。榊枝の捲りや乗る伊藤、藤野に注意。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   5,
+   2,
+   3
+  ],
+  "hit_count": 3,
+  "hit": [
+   2,
+   3,
+   5
+  ],
+  "missed": [],
+  "missed_info": [],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   2,
+   5,
+   1
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.4,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 08:49:56"
+ },
+ "graded": true,
+ "reviewed": true,
+ "review": {
+  "miss_reason": "해당 없음(전부 적중)",
+  "new_rule": "없음",
+  "rule_confidence": 1,
+  "reviewedAt": "2026-08-02 08:49:56"
+ }
+}

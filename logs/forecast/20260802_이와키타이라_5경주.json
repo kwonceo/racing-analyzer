@@ -1,0 +1,319 @@
+{
+ "predicted_top3": [
+  5,
+  3,
+  2
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "보통",
+ "line_winner": [
+  5
+ ],
+ "confidence": 4,
+ "reason_short": "젖히기형 5번의 선행이 유력하며, 추입형 말들의 라인 경쟁 예상.",
+ "key_factors": [
+  "5번의 '도주(선행)' 선언에도 불구하고 실제 각질은 '젖히기형'으로 기록된 점",
+  "선행형 6번과 젖히기형 5번 두 선두 주자의 존재",
+  "추입형 말들이 4두로 다수 포진, 막판 라인 경쟁 심화 가능성"
+ ],
+ "exception_note": "6두의 소수 편성 경주로, 선행형 6번과 젖히기형 5번 간의 초반 주도권 다툼이 예상되며, 젖히기형 5번이 '도주(선행)'을 선언했음에도 실제 각질이 '젖히기형'인 점이 변수. 대부분 추입형이라 막판에 순위 변동이 클 수 있음.",
+ "applied_rules": [],
+ "raceKey": "이와키타이라 5경주",
+ "forecastAt": "2026-08-02 17:21:38",
+ "forecastEpoch": 1785658898.516767,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "이와키타이라 5경주",
+  "wind": {
+   "venue": "이와키타이라",
+   "풍속": 4.3,
+   "풍향": "북북동",
+   "풍향코드": 1,
+   "기온": 24.6,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T17:00:00+09:00",
+   "지점": "小名浜",
+   "지점거리km": 12.14
+  },
+  "fieldSize": 6,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 2,
+    "name": "坂本 修一",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ５着 11.8 8/ 1 選 抜 ５着 11.3",
+    "prev1": "岐 阜Ｆ１ 7/11 予 選 ２着 11.4 7/12 準決勝 ４着 11.3 7/13 特 選 ３着 11.7",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ３着 11.7 7/ 3 二予選 ３着 11.4 7/ 4 準決勝 ７着 11.2 7/ 5 特 選 ３着 11.3",
+    "chaku": [
+     2,
+     2,
+     8,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "青森 伸也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ４着 11.8 8/ 1 選 抜 ３着 11.2",
+    "prev1": "玉 野Ｆ１ 7/14 予 選 ６着 11.1 7/15 一 般 ４着 12 7/16 一 般 ２着 11.2",
+    "prev2": "岐 阜Ｇ３ 6/11 一予選 ７着 11.7 6/12 選 抜 ４着 11.9 6/13 選 抜 落",
+    "chaku": [
+     0,
+     2,
+     2,
+     5
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "後藤 悠",
+    "gait": "젖히기형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ７着 12.2 8/ 1 一 般 ３着 11.4",
+    "prev1": "富 山Ｆ１ 7/21 予 選 ５着 10.6 7/22 選 抜 ２着 10.2 7/23 特 選 ７着 9.7",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ８着 9.8 7/11 選 抜 ２着 10.2 7/12 特 選 ８着 10.2",
+    "chaku": [
+     1,
+     4,
+     3,
+     13
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "八日市屋浩",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ３着 11.3 8/ 1 選 抜 ４着 11.3",
+    "prev1": "玉 野Ｆ１ 7/22 予 選 ６着 10.9 7/23 一 般 ４着 11.6 7/24 一 般 ２着 11.9",
+    "prev2": "前 橋Ｇ３ 7/10 予 選 ７着 9.7 7/11 選 抜 ２着 9.8 7/12 特 選 ６着 9.1",
+    "chaku": [
+     0,
+     2,
+     0,
+     6
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "水谷 好宏",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.3 8/ 1 一 般 ３着 11.5",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ６着 12.3 7/24 一 般 ４着 11.4 7/25 一 般 １着 11.7",
+    "prev2": "小松島Ｇ３ 7/ 2 一予選 ７着 11.6 7/ 3 選 抜 ８着 12.1 7/ 4 一 般 落",
+    "chaku": [
+     2,
+     2,
+     0,
+     15
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 6,
+    "name": "中原 航大",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "7/31 予 選 ６着 11.4 8/ 1 一 般 ６着 12.1",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ５着 10 7/23 特 選 ９着 11.2 7/24 選 抜 ３着 10.4",
+    "prev2": "佐世保Ｆ１ 7/13 予 選 ６着 11.8 7/14 一 般 ２着 11.9 7/15 一 般 ３着 11.4",
+    "chaku": [
+     7,
+     6,
+     2,
+     9
+    ],
+    "declared": "도주(선행)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    6
+   ],
+   "closeCount": 4,
+   "closeHorses": [
+    2,
+    3,
+    1,
+    4
+   ]
+  },
+  "lines": [
+   4,
+   1,
+   6,
+   2,
+   5,
+   3
+  ],
+  "paceLabel": null,
+  "comment": "航続距離と近況の気配で後藤－青森の北日本コンビに期待したが、中原に乗る坂本や水谷－八日市屋も連入圏内。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   4,
+   3,
+   1
+  ],
+  "hit_count": 1,
+  "hit": [
+   3
+  ],
+  "missed": [
+   4,
+   1
+  ],
+  "missed_info": [
+   {
+    "no": 4,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   },
+   {
+    "no": 1,
+    "gait": null,
+    "recentPlacings": null,
+    "line": null,
+    "grade": null
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   10,
+   5
+  ],
+  "market_hit_count": 1,
+  "market_snapshot_mb": -0.1,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 17:50:28"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "4번은 '자재(양각)' 각질로 선두권 추입이 가능하며, 1번은 추입형으로 마지막 라인 경쟁에서 예상보다 강한 모습을 보였다. 6두의 소수 편성에서 추입형 말들의 실제 전개 양상을 정확히 예측하지 못했다.",
+  "new_rule": "소수 편성 경주에서 추입형 말들의 '자재' 선언은 실제 전개 시 선두권에 가깝게 붙어 추입할 가능성을 고려한다.",
+  "rule_confidence": 4,
+  "reviewedAt": "2026-08-02 17:50:30"
+ },
+ "reviewed": true
+}

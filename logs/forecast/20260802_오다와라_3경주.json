@@ -1,0 +1,364 @@
+{
+ "predicted_top3": [
+  3,
+  5,
+  4
+ ],
+ "predicted_style": "선행",
+ "predicted_pace": "느린",
+ "line_winner": [
+  3
+ ],
+ "confidence": 4,
+ "reason_short": "선행마 3번의 강한 선행 의지와 뒤를 따르는 추입마들의 경쟁.",
+ "key_factors": [
+  "3번 염도심일랑의 선행 선언 및 지역 이점",
+  "대부분의 말이 추입형으로 선행마의 독주 가능성",
+  "라인 내 경쟁은 없으나 후미 추입마들의 막판 역전 시도"
+ ],
+ "exception_note": "이 경주는 8두 중 선행형이 3번 '염도심일랑' 단 한 명뿐이며, 그마저도 홈그라운드라는 이점을 가지고 있다. 또한, 해설에서 '지역에서 오늘이야말로 선행 파워를 발휘할 것'이라고 언급되어 있어, 강력한 선행 의지를 엿볼 수 있다. 나머지 7마리는 모두 추입형 또는 자재형으로 구성되어 있어, 3번이 초반부터 독주할 가능성이 매우 높다. 다만, 3번의 직전 '일예선 6착'과 '경주 코멘트'에서 '베테랑 곤노와의 도주-추입 경쟁을 중심으로 가사마츠-카키사와도 맹추격'이라는 언급을 통해, 추입마들의 견제가 예상되지만, 단독 선행마의 이점을 살려 버텨낼 것으로 보인다.",
+ "applied_rules": [],
+ "raceKey": "오다와라 3경주",
+ "forecastAt": "2026-08-02 11:44:05",
+ "forecastEpoch": 1785638645.2411964,
+ "readonly": true,
+ "input_snapshot": {
+  "raceKey": "오다와라 3경주",
+  "wind": {
+   "venue": "오다와라",
+   "풍속": 2.4,
+   "풍향": "남남동",
+   "풍향코드": 7,
+   "기온": 35.3,
+   "강수1h": 0.0,
+   "관측시각": "2026-08-02T11:20:00+09:00",
+   "지점": "小田原",
+   "지점거리km": 1.9
+  },
+  "fieldSize": 8,
+  "distance": null,
+  "surface": null,
+  "trackCond": null,
+  "horses": [
+   {
+    "no": 7,
+    "name": "柿澤 大貴",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ７着 9.9",
+    "prev1": "岸和田Ｆ１ 7/20 予 選 ２着 11.5 7/21 準決勝 ５着 11 7/22 特 選 ３着 11.4",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 １着 14.1 7/14 準決勝 ６着 14.2 7/15 特 選 ６着 14.3",
+    "chaku": [
+     3,
+     6,
+     2,
+     14
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 5,
+    "name": "紺野 哲也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ８着 10.1",
+    "prev1": "青 森Ｆ１ 7/23 予 選 ５着 11.6 7/24 選 抜 ５着 11.2 7/25 一 般 ４着 11.9",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 ５着 13.9 7/14 選 抜 ２着 13.8 7/15 特 選 ２着 14.1",
+    "chaku": [
+     2,
+     4,
+     3,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 3,
+    "name": "塩島嵩一朗",
+    "gait": "선행형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ６着 9.9",
+    "prev1": "豊 橋Ｇ３ 7/25 一予選 ２着 12.1 7/26 二予選 ９着 11.8 7/27 選 抜 １着 11.8 7/28 特 選 ３着 11.4",
+    "prev2": "高 知Ｇ２ 7/17 一予選 ９着 13.9 7/18 選 抜 ８着 15.3 7/19 一 般 ４着 14.8 7/20 一 般 ７着 14.8",
+    "chaku": [
+     4,
+     3,
+     3,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 1,
+    "name": "黒田 淳",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ６着 9.4",
+    "prev1": "佐世保Ｆ１ 7/13 予 選 ５着 11.4 7/14 一 般 ３着 11.1 7/15 一 般 ２着 11.3",
+    "prev2": "防 府Ｆ１ 7/ 7 予 選 １着 9.5 7/ 8 準決勝 ６着 9.7 7/ 9 特 選 ５着 10",
+    "chaku": [
+     1,
+     4,
+     2,
+     13
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 4,
+    "name": "笠松 将太",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ８着 10.1",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ９着 10.4 7/23 選 抜 ７着 9.7 7/24 選 抜 １着 10",
+    "prev2": "函 館Ｆ１ 7/14 予 選 ４着 11.4 7/15 一 般 ２着 11.2 7/16 特 選 ４着 11.9",
+    "chaku": [
+     3,
+     3,
+     1,
+     12
+    ],
+    "declared": "도주(선행)"
+   },
+   {
+    "no": 2,
+    "name": "房州 輝也",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "A",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "8/ 1 一予選 ８着 9.7",
+    "prev1": "奈 良Ｆ１ 7/25 予 選 ７着 10.1 7/26 一 般 ６着 10.3 7/27 一 般 ６着 9.9",
+    "prev2": "宇都宮Ｆ１ 7/13 予 選 ６着 13.8 7/14 一 般 ６着 14.8 7/15 一 般 ３着 14.1",
+    "chaku": [
+     0,
+     1,
+     6,
+     26
+    ],
+    "declared": "자재(양각)"
+   },
+   {
+    "no": 8,
+    "name": "松田 治之",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.93,
+    "recent": "8/ 1 一予選 ９着 9.8",
+    "prev1": "前 橋Ｇ３ 7/22 予 選 ７着 9.6 7/23 選 抜 ４着 9.8 7/24 選 抜 ７着 10.7",
+    "prev2": "和歌山Ｆ１ 7/ 5 予 選 ６着 11.2 7/ 6 一 般 ６着 11.7 7/ 7 一 般 ６着 12",
+    "chaku": [
+     0,
+     0,
+     0,
+     6
+    ],
+    "declared": "추입(마크)"
+   },
+   {
+    "no": 6,
+    "name": "徳丸 泰教",
+    "gait": "추입형",
+    "recentPlacings": [],
+    "grade": "B",
+    "paceBonusBase": null,
+    "weeksInARow": null,
+    "gear": 3.92,
+    "recent": "8/ 1 一予選 ５着 9.7",
+    "prev1": "奈 良Ｆ１ 7/27 一 般 ５着 9.4",
+    "prev2": "玉 野Ｆ１ 7/22 予 選 ５着 11.4 7/23 一 般 ７着 12.9 7/24 一 般 ７着 11.4",
+    "chaku": [
+     3,
+     2,
+     2,
+     19
+    ],
+    "declared": "추입(마크)"
+   }
+  ],
+  "composition": {
+   "leadCount": 1,
+   "leadHorses": [
+    3
+   ],
+   "closeCount": 7,
+   "closeHorses": [
+    7,
+    5,
+    1,
+    4,
+    2,
+    8,
+    6
+   ]
+  },
+  "lines": [
+   3,
+   5,
+   2,
+   4,
+   7,
+   1,
+   8,
+   6
+  ],
+  "paceLabel": null,
+  "comment": "初日敗退に終った塩島だが、地元で今日こそ先行パワーをフル発揮。ベテラン紺野との逃げ差し争い中心に笠松―柿沢も迫るか。",
+  "appliedRulesAvailable": [],
+  "_fields_included": [
+   {
+    "key": "gear",
+    "label": "기어비",
+    "rate": 100.0
+   },
+   {
+    "key": "recent",
+    "label": "금개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev1",
+    "label": "전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "prev2",
+    "label": "전전개최 성적",
+    "rate": 100.0
+   },
+   {
+    "key": "chaku",
+    "label": "착순분포",
+    "rate": 100.0
+   },
+   {
+    "key": "declared",
+    "label": "표기 각질",
+    "rate": 100.0
+   }
+  ],
+  "_fields_omitted": [
+   {
+    "key": "weight",
+    "label": "부담중량",
+    "rate": 0.0
+   },
+   {
+    "key": "bodyWt",
+    "label": "마체중",
+    "rate": 0.0
+   },
+   {
+    "key": "jockey",
+    "label": "기수명",
+    "rate": 0.0
+   },
+   {
+    "key": "jockeyRate",
+    "label": "기수 승률",
+    "rate": 0.0
+   },
+   {
+    "key": "distApt",
+    "label": "거리 적성",
+    "rate": 0.0
+   }
+  ],
+  "_not_provided": [
+   "주로 상태(습도·경중)",
+   "날씨",
+   "조교 평가",
+   "부담중량(보유율 0%로 미달)",
+   "마체중(보유율 0%로 미달)",
+   "기수명(보유율 0%로 미달)",
+   "기수 승률(보유율 0%로 미달)",
+   "거리 적성(보유율 0%로 미달)"
+  ],
+  "_excluded": [
+   "odds",
+   "pop",
+   "marketLowest",
+   "finalQuinellas",
+   "keyHorses",
+   "axis",
+   "record_score",
+   "totalScore"
+  ],
+  "sport": "cycle"
+ },
+ "grading": {
+  "actual": [
+   3,
+   1,
+   7
+  ],
+  "hit_count": 1,
+  "hit": [
+   3
+  ],
+  "missed": [
+   1,
+   7
+  ],
+  "missed_info": [
+   {
+    "no": 1,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   },
+   {
+    "no": 7,
+    "gait": "추입형",
+    "recentPlacings": [],
+    "line": null,
+    "grade": "A"
+   }
+  ],
+  "payout_quinella": null,
+  "is_high_odds": false,
+  "market_top3": [
+   3,
+   5,
+   7
+  ],
+  "market_hit_count": 2,
+  "market_snapshot_mb": -0.3,
+  "market_src": "quinella_implied",
+  "gradedAt": "2026-08-02 12:10:07"
+ },
+ "graded": true,
+ "review": {
+  "miss_reason": "단독 선행마의 이점을 지나치게 강조하여 후미 추입마들의 잠재력을 간과했다. 특히 1번과 7번의 최근 경주 기록이 부족한 상태에서, 단순히 추입형이라는 각질만으로 이들을 배제한 것이 패착이었다. 데이터에 없는 복합적인 라인 형성이 실제로 이들의 경쟁력을 높였을 가능성을 고려하지 못했다.",
+  "new_rule": "선행마 독주 예상 시, 후미 추입마 중 최근 기록은 없어도 잠재력이 있는 말은 배제하지 않는다.",
+  "rule_confidence": 3,
+  "reviewedAt": "2026-08-02 12:10:09"
+ },
+ "reviewed": true
+}
