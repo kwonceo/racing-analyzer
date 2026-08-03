@@ -4581,6 +4581,8 @@ def _record_after_close_case(rk, date, mb_signed, anomalies, surge=None):
 
 def _after_close_learn_result(rk, date, result):
     """[3번] 마감 후 대급락말이 실제 입상(1~3착)했는지 판정 → surge_hit 갱신(입상률 학습)."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     if not result:
         return
     placed = set()
@@ -4648,6 +4650,8 @@ def _near_miss_save(d):
 
 def _record_near_miss(rk, date, no, name):
     """[2·3번] 추천 말이 4착(아깝게 미적중)한 케이스 저장. 경주별 1건."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     d = _near_miss_load()
     cases = d.setdefault("cases", [])
     payload = {"raceKey": rk, "date": date, "no": no, "name": (name or "").strip(), "t": time.time()}
@@ -4692,6 +4696,8 @@ def _signal_type_stats_save(d):
 
 def _learn_strong_signals(rk, date, an, top3):
     """[5번] 결과 → 강한 신호 8유형별 적중(신호말이 1~3착 입상) 누적. 경주별 멱등 저장."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     try:
         ss = (an or {}).get("strongSignals") or {}
         sigs = ss.get("signals") or []
@@ -4825,6 +4831,8 @@ def _compression_stats_save(d):
 
 def _learn_compression(rk, date, an, top3):
     """[4번] 저배당 압축 패턴 발생 경주 → 압축 2두가 실제 복승 적중(둘 다 1~2착)했는지 누적. 경주별 멱등."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     try:
         cp = (an or {}).get("compressionPattern") or {}
         if not cp.get("detected"):
@@ -4890,6 +4898,8 @@ def _high_odds_companion_stats_save(d):
 def _learn_high_odds_companion(rk, date, top3, rec, high_thresh=HIGH_ODDS_COMPANION_THRESH):
     """[4번] 1착이 고배당(7배+)인 경주만 분모로, 2·3착에 다른 고배당(7배+)이 있었는지 누적. 경주별 멱등.
       → '고배당 1착 시 3착 내 고배당 포함 비율' 산출(참고 추천 신뢰도 근거)."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     try:
         top3i = [int(x) for x in (top3 or [])[:3] if x is not None]
         if not top3i:
@@ -4958,6 +4968,8 @@ def _tp_reason_bucket(reason):
 
 def _learn_third_place(rk, date, an, top3):
     """[5번] 3착 발굴 후보가 실제 3착/입상했는지 신호 유형별 누적. 경주별 멱등."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     try:
         tp = (an or {}).get("thirdPlaceHunt") or {}
         cands = tp.get("candidates") or []
@@ -8841,6 +8853,8 @@ def _ev_band_p(o):
 
 def _ev_bands_update(combo_odds_list, top2):
     """[기대값 학습] 판정된 라이브 복승 추천의 (배당대, 적중) 누적 → 표본 50+부터 가정치 자동 교체."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     try:
         d = _ev_bands_load()
         _t2 = sorted(int(x) for x in (top2 or []) if x is not None)
@@ -9209,6 +9223,8 @@ PACE_STATS_FILE = os.path.join(os.path.dirname(__file__), "data", "pace_stats.js
 
 def _pace_log_record(rk, date, pace_analysis, top3, form, scenario_plan=None):
     """[8] 편성 유형(페이스) vs 실제 입상마 각질 기록 + 시나리오 A/B 적중 → pace_analysis/ 저장 + 통계 재계산."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     if not pace_analysis or not top3:
         return
     try:
@@ -9678,6 +9694,8 @@ def _dark_case_similar(dh):
 def _dark_case_record(rk, an, top3):
     """[3번·복병 케이스 학습] 결과 입력 시 복병(darkHorses)의 입상 여부를 케이스로 저장.
     오비히로·마에바시·모리오카·카나자와·하코다테 등 복병 고배당 패턴 축적 → _dark_case_similar 로 유사강조."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     try:
         darks = an.get("darkHorses") or []
         if not darks:
@@ -9742,6 +9760,8 @@ def _dansung_cases_save(d):
 def _dansung_case_record(rk, an, top3):
     """[단통 경주 학습·저배당 쏠림] 복승 최저배당 ≤1.5배(시장 과도 쏠림) 경주만 별도 기록 → 복병 적중률 통계.
     ▸ BMED 특별(복병) 복승 조합 적중(두 말 모두 1·2착) ▸ 복병마 입상(연대 top3) 축적 → 단통 경주에서 복병 전략 효과 검증."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     try:
         cp = an.get("corePicks") or {}
         if not cp.get("dansung"):
@@ -15890,6 +15910,8 @@ def _ai_quality_score(data):
 
 def _save_ai_training(rk, an, record, result, top4, inputs=None):
     """[1·2번] AI 학습 완전 데이터 저장 + 품질검증(중복=같은 race_id 덮어쓰기)."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     try:
         data = _build_ai_training(rk, an, record, result, top4, inputs)
     except Exception as e:
@@ -16547,6 +16569,8 @@ def _learning_load():
 
 
 def _learning_save(d):
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     os.makedirs(os.path.dirname(LEARNING_FILE), exist_ok=True)
     _json_atomic(LEARNING_FILE, d)
 
@@ -16585,6 +16609,8 @@ def _upset_bump(stats, key, hit):
 def _learn_mass_drop(rk, an, top3, payouts=None):
     """[대규모급락 학습] 결과 입력 시 pattern_learning.json 의 patterns 배열에 사례 1건 추가 + 통계 갱신.
     대규모 급락(전체 조합 50%+ 동시급락)이 감지된 경주만 기록 → 이변/고배당 여부를 축적."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     md = an.get("massDrop")
     if not md or not md.get("detected"):
         return None
@@ -16631,6 +16657,8 @@ def _learn_smart_money(rk, an, top3, payouts=None, date_str=None):
     """[스마트머니 자동 학습] 결과 입력 시 darkHorses 중 스마트머니(상승후급락) 감지 말이 실제 입상(1~3착)했는지
     자동 집계 → pattern_learning.json 의 smart_money_stats(count·hit·rate·cases) 갱신.
     수동 저장(오비히로 11R)과 동일 저장소를 자동으로 누적 → 표본이 쌓이면 신뢰도 산출."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     darks = an.get("darkHorses") or []
     smart_nos = [int(h["no"]) for h in darks if h.get("smartMoney") and h.get("no") is not None]
     if not smart_nos:
@@ -16751,6 +16779,8 @@ def _signal_stats_save(d):
 
 def _learn_signal_stats(rk, an, top3, date_str=None):
     """[3번] 결과 입력 시 신호별 적중(유력마 기반) 자동 태깅·저장 → signal_stats.json. 경주별 멱등(재입력 시 교체)."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     sig_horses = _active_signal_horses(an)
     kh = _keyhorse_hit(an, top3)
     t3 = set(int(x) for x in (top3 or []) if x is not None)
@@ -16810,6 +16840,8 @@ def _mid_high_stats_save(d):
 
 def _learn_mid_high_odds(rk, an, top3, payouts=None, date_str=None):
     """[5번] 중고배당 유력마(💎) 감지 시 어떤 신호로 감지했나·실제 입상했나·배당·누적 적중률 저장(경주별 멱등)."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     mhs = an.get("midHighFavorites") or []
     if not mhs:
         return None
@@ -16895,6 +16927,8 @@ def _signal_reliability_for(strong_signals, dark_horses, inverse, compression_pa
 def _learn_upset(rk, an, top3, date_str=None):
     """부진마(최근5경주 평균착순≥4.0)의 입상 여부 + 동반 조건을 학습.
     반환: 갱신된 pattern_learning dict(없으면 None)."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     form = an.get("form") or []
     if not form:
         return None
@@ -17022,6 +17056,8 @@ def _race_features(log):
 
 def _discover_patterns():
     """data/analysis_log/ 전체를 스캔해 적중 경주의 공통점을 자동 발견 → discovered_patterns.json."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     feats = []
     if os.path.isdir(ANALYSIS_LOG_DIR):
         for fn in os.listdir(ANALYSIS_LOG_DIR):
@@ -17134,6 +17170,8 @@ def _safe_num(v):
 
 
 def _highlight_save(entry):
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     os.makedirs(os.path.dirname(HIGHLIGHT_FILE), exist_ok=True)
     try:
         arr = json.load(open(HIGHLIGHT_FILE, encoding="utf-8"))
@@ -18081,6 +18119,8 @@ def _learn_aux_combos(rk, top3):
     """[보조 조합 학습 (2026-07-21 권대표 지시)] 표시 밖 생성 조합(삼복승 3번째 이후 — 판정 제외)의 적중을
     별도 집계 → '어떤 보조 경로(전적A 보완·확신도 보험 등)를 표시로 승격할지' 데이터 근거.
     마쓰도 4R 1+2+5(전적A 보완)가 첫 표본. 성적표·회수율·판정과 완전 무관(참고 통계 전용·추가만)."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     try:
         _lp, _, _ = _analysis_log_path(_canonical_log_key(rk))
         doc = json.load(open(_lp, encoding="utf-8"))
@@ -18300,6 +18340,43 @@ def _winning_quinella_odds(rk, top2):
 
 
 _RESULT_LEARNED = {}   # [중복학습 방지] canonical race id → (마지막 rk, 결과튜플, 시각). 같은 경주 다른 표기 이중학습 차단.
+
+
+# ══════════ [ⓕ 관찰 모드 학습 억제 (2026-08-03 승인)] ══════════
+#   왜: 중앙경마 결과가 `race_results` 에 저장되지 않아 **전체 경주 탭에 안 나왔다**.
+#     원인은 `_jra_result_save` 가 `_apply_result_learning` 을 부르지 않는 것이다(지방·경륜은 부른다).
+#   🔴 그런데 그냥 부르면 **관찰 모드(JRA_OBSERVE_ONLY=True) 인 중앙이 글로벌 학습 통계에 들어간다.**
+#     지금까지 모든 학습 수치는 **중앙이 없다는 전제**로 쌓였다 — 갑자기 섞이면 과거와 비교가 끊긴다.
+#   ⇒ **결과 파일·hit/pnl 은 남기고, 누적만 건너뛴다.**
+#     · `race_results` 생성 🟢 · `analysis_log` 갱신 🟢 · hit/pnl 계산 🟢
+#     · 🔴 learning.json · signal_stats · EV밴드 · dark_horse · failure_review · ai_training · ml_row 스킵
+#   ⚠ 가드는 **호출부 27곳이 아니라 누적 함수 22곳의 진입부**에 1줄씩 넣었다.
+#     호출부를 고치면 한 곳만 빠져도 조용히 새는데, 정의부는 **모든 경로를 한 번에** 덮는다.
+#   ⚠ 스레드 로컬이라 **지방·경륜 경로에는 켜지지 않는다**(무회귀).
+#   🔧 되돌리기: `_LEARN_SUPPRESS` 를 켜는 블록만 지우면 22개 가드가 전부 무효가 된다(항상 False).
+_LEARN_SUPPRESS = threading.local()
+
+
+def _learn_suppressed():
+    return bool(getattr(_LEARN_SUPPRESS, "off", False))
+
+
+class _learn_suppress_ctx(object):
+    """with 블록 안에서만 글로벌 학습 누적을 끈다. 🔴 예외가 나도 반드시 원복한다."""
+
+    def __init__(self, on):
+        self.on = bool(on)
+        self.prev = False
+
+    def __enter__(self):
+        self.prev = _learn_suppressed()
+        if self.on:
+            _LEARN_SUPPRESS.off = True
+        return self
+
+    def __exit__(self, *a):
+        _LEARN_SUPPRESS.off = self.prev
+        return False
 
 
 def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout=None, inputs=None,
@@ -19083,6 +19160,8 @@ def _ml_row_build(rk, an, result, top3, payouts, was_hit):
 
 def _ml_append_row(rk, an, result, top3, payouts, was_hit):
     """[ML 학습셋 누적] ml_training_data.jsonl 에 경주 1건 append(1줄 1경주). 실패 격리."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     row = _ml_row_build(rk, an, result, top3, payouts, was_hit)
     os.makedirs(os.path.dirname(ML_TRAINING_FILE), exist_ok=True)
     with open(ML_TRAINING_FILE, "a", encoding="utf-8") as f:
@@ -19416,6 +19495,8 @@ def _classify_failure(rk, an, top3, doc):
 def _failure_record(rk, an, top3, doc, record, stats):
     """[1·4·7번] 실패 분류 → failure_review.json 누적(유형 카운트·놓친 패턴) + 규칙 자동 생성.
     반환: 이 경주의 분류 dict(레코드/히스토리에 첨부)."""
+    if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
+        return None
     fail = _classify_failure(rk, an, top3, doc)
     if not fail:
         return None
@@ -27862,6 +27943,23 @@ def _jra_result_save(rk, parsed, race_id):
     d.setdefault("jra_result_collected", []).append(
         {"at": time.strftime("%Y-%m-%d %H:%M:%S"), "race_id": race_id, "source": "netkeiba result.html"})
     _json_atomic(p, d, indent=1)
+    # 🔴 [ⓕ 2026-08-03 승인] **결과 처리 경로를 지방·경륜과 맞춘다.**
+    #   종전: 이 함수는 `analysis_log.result` 만 채우고 끝났다 → `race_results` 파일이 **안 생겨**
+    #     전체 경주 탭에 중앙이 **0건**이었다(실측 8/2 analysis_log 26건 ↔ race_results 0건).
+    #     `hit`·`pnl` 도 비어 있었다(2026-08-01 기록 *"자동수집은 result 만 채운다"* 와 같은 뿌리).
+    #   ⚠ 대조: `_jp_result_backfill_once`·`_keirin_result_backfill_once` 는 이미 이 함수를 부른다.
+    #   🔴 **관찰 모드면 글로벌 학습 누적만 끈다** — 파일·hit/pnl 은 그대로 남는다.
+    #     지금까지 모든 학습 수치가 "중앙 없음" 전제로 쌓였으므로 갑자기 섞으면 과거와 비교가 끊긴다.
+    #   ⚠ 완전 격리 — 실패해도 결과 저장(위 `_json_atomic`)은 이미 끝났다.
+    try:
+        _top3 = [res.get("1st"), res.get("2nd"), res.get("3rd")]
+        if all(x is not None for x in _top3):
+            with _learn_suppress_ctx(JRA_OBSERVE_ONLY):
+                _apply_result_learning(rk, res, [int(x) for x in _top3])
+            print("[중앙 결과] %s: race_results 생성%s"
+                  % (rk, " · 🔬관찰 모드라 학습 통계는 누적하지 않음" if JRA_OBSERVE_ONLY else ""))
+    except Exception as _le:
+        print("[중앙 결과] %s 학습 경로 실패(무시): %s" % (rk, str(_le)[:100]))
     return True
 
 

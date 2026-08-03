@@ -1,5 +1,62 @@
 # CLAUDE.md
 
+# ✅ [2026-08-03 · 51차 승인 적용] ⓕ 중앙경마 결과 배선 + 관찰 모드 학습 억제
+
+## 무엇을 고쳤나
+```
+_jra_result_save 끝  →  _apply_result_learning(rk, res, top3) 호출 추가
+                        🔴 단, `with _learn_suppress_ctx(JRA_OBSERVE_ONLY):` 로 감싼다
+```
+종전에는 이 함수가 `analysis_log.result` 만 채우고 끝나 **`race_results` 파일이 안 생겼다**
+(실측 8/2: analysis_log 중앙 26건 ↔ race_results 중앙 **0건**). 그래서 전체 경주 탭에 중앙이 없었고
+`hit`·`pnl` 도 비어 있었다. ⚠ 지방·경륜 백필은 **이미 이 함수를 부른다** — 중앙만 빠져 있었다.
+
+## 🔴 안전장치 — 관찰 모드면 **누적만** 끈다
+```
+🟢 남는 것 : race_results 파일 · analysis_log 갱신 · hit / pnl 계산
+🔴 스킵    : learning.json · signal_stats · EV밴드 · dark_horse · failure_review ·
+             near_miss · ai_training · ml_training_data · discovered_patterns · highlight ·
+             pace_log · upset · mass_drop · smart_money · compression · third_place ·
+             strong_signals · aux_combos · mid_high_odds · high_odds_companion ·
+             dansung_case · after_close   (= **22곳 전수**)
+```
+🔴 **왜 끄나**: 지금까지 **모든 학습 수치가 "중앙이 없다"는 전제**로 쌓였다. 갑자기 섞이면
+  과거와 비교가 끊긴다. 관찰 모드(`JRA_OBSERVE_ONLY=True`)가 풀리면 그때 자동으로 학습에 들어간다.
+
+## 🔴 왜 **호출부가 아니라 정의부**에 가드를 넣었나
+```
+(검토) `_apply_result_learning(..., learn=False)` 인자 추가 → 🔴 **호출부 27곳**을 고쳐야 하고
+                                                             **한 곳만 빠져도 조용히 샌다**
+(채택) 누적 함수 **22곳의 정의부**에 `if _learn_suppressed(): return None` **1줄씩**
+       ⇒ 어느 경로로 불려도 **한 번에** 덮인다. 새 호출부가 생겨도 자동으로 적용된다
+```
+⚠ **스레드 로컬**이라 지방·경륜 경로에는 켜지지 않는다. ⚠ `with` 컨텍스트라 **예외가 나도 원복**한다.
+🔧 되돌리기: `_learn_suppress_ctx(JRA_OBSERVE_ONLY)` 로 감싼 블록만 지우면 22개 가드가 전부 무효(항상 False).
+
+## 🟢 검증
+```
+[가드 단위검증 5/5]  기본 False · 진입 True · 탈출 False · 🔴 **예외 후에도 False** · 비관찰 False
+[배선]              가드 22곳 · _jra_result_save → _apply_result_learning 🟢 · 억제 컨텍스트 🟢
+[🔴 무회귀 실측]     가드 삽입 **후에도** 지방·경륜 학습 파일 **8/9 가 4분 전 갱신 중**
+                    (learning · signal_stats · ev_bands · dark_horse · pattern_learning ·
+                     discovered_patterns · ml_training_data · timeline_stats)
+                    ⚠ review_stats 만 736분 전 — 그건 원래 갱신 주기가 다르다(가드와 무관)
+[회귀 11종]          thresholds · glob_safety · freeze_behavior · roster_gate · payout_kind ·
+                    payout_unit · track_key · nar_limit · netkeiba_limit · report · formula → **전부 통과**
+```
+🔴 **실데이터 확인은 다음 개최일** — 오늘(월) 중앙 개최가 **없다**(`_jra_race_list` ids=0).
+  ⇒ **전체 경주 탭에 중앙이 나오는지는 아직 확인하지 못했다.** 코드 경로만 증명했다.
+
+## ⚠ 지금까지 측정이 "중앙 제외"였나 — **그렇다. 그리고 과거는 안 바뀐다**
+- `measure_recovery` 는 `analysis_log` + **`race_results`** 를 조인한다 → 중앙은 파일이 0이라
+  **자동으로 분모에서 빠져 있었다.**
+- `signal_stats`·EV밴드는 `learning.json` 기반이라 **중앙이 원래 없었다.**
+🔴 **소급하지 않으므로 과거 수치는 그대로다.** 바뀌는 것은 **관찰 모드가 풀린 뒤 새로 쌓이는 것**이다.
+⚠ 관찰 해제 시 **회수율·적중률 분모에 중앙이 들어온다** — 그때 **해제 전후를 반드시 병기**할 것.
+
+---
+
+
 # 🔴 다음 개최일 확인 목록 (2026-08-03 · 50차 종료 시점)
 ```
 1. ⓒ 중앙 전적 자동 루프 **실제 회복 건수** — 오늘(월)은 개최 없어 0. 코드 동작만 증명함
