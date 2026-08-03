@@ -33110,8 +33110,64 @@ def _kakao_build_message(rk, phase, an, snap):
             "at": time.strftime("%Y-%m-%d %H:%M:%S")}
 
 
+def _kakao_send_blocked_by_src(rk):
+    """🔴 [발송 직전 소스 대조 · 2026-08-03 승인] 배당이 오염됐으면 그 경주는 보내지 않는다.
+
+    왜: 어제 넣은 **출주 명단 게이트는 마번만 본다** — 마번이 전부 정상이고 **배당값만 틀린**
+      경우를 못 잡는다. 오늘 오다와라 7R 이 정확히 그랬다:
+      확장이 `1+6` 을 **2.9배**로 보냈고(실제 85~92배) 카카오가 **4.1배**로 나갔다.
+      모리오카 2R · 오다와라 4R 까지 **3경주가 전부 발송**됐다.
+    무엇을 보나: `triple_store` 의 현재 배당(사설)과 **직전 oddspark 스냅샷**을 대조해
+      `_src_divergence` 가 임계를 넘으면 **그 경주 발송을 보류**한다.
+    ⚠ 조합만 빼지 않고 **경주 전체를 보류**한다 — 배당이 오염된 상태에서 일부만 보내는 것보다
+      안 보내는 것이 정직하다(2026-08-02 출주명단 게이트와 같은 판단).
+    ⚠ 판정 불가(oddspark 스냅샷 없음·공통 부족)면 **막지 않는다.** 확실한 것만 막는다(원칙 20).
+    → (막을지, 사유)
+    """
+    try:
+        rec = (_triple_load() or {}).get(rk) or {}
+        cur = rec.get("quinella")
+        if not cur or _src_is_oddspark(rec.get("source") or ""):
+            return False, ""                      # 현재값이 oddspark 면 대조 대상이 아니다
+        hp, _d, _r = _hist_path(rk)
+        if not os.path.exists(hp):
+            return False, ""
+        doc = json.load(open(hp, encoding="utf-8"))
+        ref = None
+        for s in reversed(doc.get("snapshots") or []):
+            if s.get("quinella") and _src_is_oddspark(s.get("src") or ""):
+                ref = s
+                break
+        if not ref:
+            return False, ""                      # oddspark 가 없는 경주 — 🔴 여기선 못 막는다(한계)
+        if (time.time() - (ref.get("t") or 0)) > 600:
+            return False, ""                      # 너무 오래된 대조군은 쓰지 않는다
+        dv = _src_divergence(cur, ref.get("quinella"))
+        if dv and dv["off"] >= SRC_DIVERGE_PCT and dv["n"] >= SRC_DIVERGE_MIN_PAIRS:
+            return True, ("공통 %d조합 · 괴리 %.1f%% · 비율중앙 %.2f (임계 %.0f%%)"
+                          % (dv["n"], dv["off"], dv["med"], SRC_DIVERGE_PCT))
+    except Exception as e:
+        print("[카카오·소스대조] %s 판정 실패(무시·발송 진행): %s" % (rk, str(e)[:80]))
+    return False, ""
+
+
 def _kakao_notify_race(rk, phase, an, snap):
     """알림 발송(또는 큐 적재). KAKAO_NOTIFY_URL 있으면 웹훅 POST, 없으면 kakao_queue.jsonl 적재."""
+    # 🔴 [발송 직전 소스 대조 · 2026-08-03] 조용히 막지 않는다 — 막을 때마다 로그를 남긴다.
+    _blk, _why = _kakao_send_blocked_by_src(rk)
+    if _blk:
+        print("🔴🔴 [카카오 보류] %s (%s): **배당 소스 불일치 — 회원에게 보내지 않는다** · %s"
+              % (rk, phase, _why))
+        try:
+            os.makedirs(os.path.dirname(KAKAO_QUEUE_FILE), exist_ok=True)
+            with open(KAKAO_QUEUE_FILE, "a", encoding="utf-8") as _f:
+                _f.write(json.dumps({"raceKey": rk, "phase": phase, "blocked": True,
+                                     "reason": "소스 불일치", "detail": _why,
+                                     "at": time.strftime("%Y-%m-%d %H:%M:%S")},
+                                    ensure_ascii=False) + "\n")
+        except Exception:
+            pass
+        return {"blocked": True, "raceKey": rk, "phase": phase, "reason": _why}
     msg = _kakao_build_message(rk, phase, an, snap)
     url = os.environ.get("KAKAO_NOTIFY_URL", "").strip()
     if url:
