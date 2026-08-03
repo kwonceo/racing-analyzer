@@ -2441,6 +2441,27 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     if _src_is_oddspark(source) and prev:
         _prev_src = prev.get("source") or ""
         _prev_fresh = (now - (prev.get("t") or 0)) <= 200
+        # 🔴 [ⓒ 경마만 oddspark 우선 · 2026-08-03 승인] ──────────────────────────
+        #   근거(실측 · 두 소스 공존 경주 · 마지막 틱 120초 이내):
+        #     경마 : 신선도 +14초 · 🔴 **오염 35.9%(14/39)**   ← 5경주 중 2경주가 크게 어긋난다
+        #     경륜 : 신선도 +18초 ·    오염  7.1%( 2/28)       ← ⓑ 게이트로 충분하다
+        #   ⇒ 2026-08-01 에 '사설 우선'으로 바꾼 근거("확장이 더 신선하다")는 경마에서 무너졌다.
+        #     **17초 앞서는 대가로 3분의 1이 크게 틀린다.** 신선하지만 틀린 값은 의미가 없다.
+        #   ⚠ **경륜은 그대로 둔다**(7.1%). ⚠ **한국 KRA·바이크는 확장이 유일 소스**라 제외한다
+        #     — 위 2324행에서 한국은 이미 `sport=horse·category=korea` 로 정정되므로 category 로 가른다.
+        #   ⚠ 종목 판정이 불확실하면(sport 가 None) **되돌리지 않는다** — 기존 동작 유지.
+        #   🔧 되돌리기: 이 `_jp_horse_first` 블록만 지우면 종전(전 종목 사설 우선)으로 돌아간다.
+        try:
+            _jp_horse_first = (sport == "horse" and str(category or "") != "korea"
+                               and not _KRA_TRACK_RE.search(str(rk)))
+        except Exception:
+            _jp_horse_first = False
+        if _jp_horse_first and _prev_fresh and _prev_src and not _src_is_oddspark(_prev_src):
+            print("🟢 [oddspark 우선·경마] %s: 사설(src=%s) 대신 **서버 수집을 쓴다** "
+                  "(경마 오염률 35.9% 실측 · 2026-08-03)" % (rk, _prev_src))
+            _ingest_reject_log(rk, "oddspark 우선(경마) — 사설 덮어쓰기 허용", source,
+                               {"prevSrc": _prev_src, "sport": sport, "category": category})
+            _prev_fresh = False                  # 사설 우선 해제 → oddspark 가 그대로 기록된다
         if _prev_src and (not _src_is_oddspark(_prev_src)) and _prev_fresh:
             # 🔴 [ⓑ 두 소스 대조 게이트 · 2026-08-03 승인] ────────────────────────
             #   실사고(오다와라 7R): 확장(private)이 1+6 을 **2.9배**로 보냈는데

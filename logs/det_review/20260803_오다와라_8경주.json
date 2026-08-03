@@ -1,15 +1,15 @@
 {
- "raceKey": "모리오카 3경주",
+ "raceKey": "오다와라 8경주",
  "entries": [
   {
-   "time": "12:45:16",
+   "time": "14:08:19",
    "minutesBefore": 9,
    "status": "SAFE",
    "checked": [
+    "B라인누락",
     "삼복승정합"
    ],
    "skipped": [
-    "B라인누락: 라인 페어 0개(2개 미만)",
     "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
    ],
    "issues": [],
@@ -21,31 +21,54 @@
       5
      ],
      [
-      1,
-      2
+      3,
+      9
      ],
      [
-      2,
-      5
+      1,
+      2
      ]
     ],
     "finalTrifectas": [
      [
       1,
-      2,
+      3,
       5
      ],
      [
       1,
       5,
-      7
+      8
+     ],
+     [
+      3,
+      5,
+      9
+     ],
+     [
+      1,
+      5,
+      9
      ]
     ],
-    "linePairs": []
+    "linePairs": [
+     [
+      3,
+      9
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      7,
+      2
+     ]
+    ]
    }
   },
   {
-   "time": "12:55:09",
+   "time": "14:17:41",
    "minutesBefore": -1,
    "status": "NO_DATA",
    "checked": [],
@@ -56,15 +79,97 @@
    ],
    "issues": [],
    "input": {
-    "drops": [],
+    "drops": [
+     {
+      "combo": [
+       1,
+       5
+      ],
+      "prev": 49.4,
+      "cur": 3.8,
+      "pct": -92.3
+     },
+     {
+      "combo": [
+       2,
+       7
+      ],
+      "prev": 45.3,
+      "cur": 6.2,
+      "pct": -86.3
+     },
+     {
+      "combo": [
+       1,
+       2
+      ],
+      "prev": 54.3,
+      "cur": 12.1,
+      "pct": -77.7
+     },
+     {
+      "combo": [
+       2,
+       9
+      ],
+      "prev": 77.6,
+      "cur": 18.1,
+      "pct": -76.7
+     },
+     {
+      "combo": [
+       2,
+       4
+      ],
+      "prev": 77.6,
+      "cur": 21.9,
+      "pct": -71.8
+     },
+     {
+      "combo": [
+       3,
+       9
+      ],
+      "prev": 23.6,
+      "cur": 8.7,
+      "pct": -63.1
+     },
+     {
+      "combo": [
+       5,
+       6
+      ],
+      "prev": 49.4,
+      "cur": 22.0,
+      "pct": -55.5
+     },
+     {
+      "combo": [
+       2,
+       3
+      ],
+      "prev": 41.8,
+      "cur": 20.0,
+      "pct": -52.2
+     },
+     {
+      "combo": [
+       3,
+       5
+      ],
+      "prev": 36.2,
+      "cur": 19.8,
+      "pct": -45.3
+     }
+    ],
     "finalQuinellas": [],
     "finalTrifectas": [],
     "linePairs": []
    }
   },
   {
-   "time": "14:02:57",
-   "minutesBefore": -67,
+   "time": "14:21:08",
+   "minutesBefore": -3,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [
@@ -81,44 +186,8 @@
    }
   },
   {
-   "time": "14:06:00",
-   "minutesBefore": -71,
-   "status": "NO_DATA",
-   "checked": [],
-   "skipped": [
-    "B라인누락: 라인 페어 0개(2개 미만)",
-    "삼복승정합: 복승 1순위 없음",
-    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
-   ],
-   "issues": [],
-   "input": {
-    "drops": [],
-    "finalQuinellas": [],
-    "finalTrifectas": [],
-    "linePairs": []
-   }
-  },
-  {
-   "time": "14:21:58",
-   "minutesBefore": -86,
-   "status": "NO_DATA",
-   "checked": [],
-   "skipped": [
-    "B라인누락: 라인 페어 0개(2개 미만)",
-    "삼복승정합: 복승 1순위 없음",
-    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
-   ],
-   "issues": [],
-   "input": {
-    "drops": [],
-    "finalQuinellas": [],
-    "finalTrifectas": [],
-    "linePairs": []
-   }
-  },
-  {
-   "time": "14:23:00",
-   "minutesBefore": -88,
+   "time": "14:23:02",
+   "minutesBefore": -5,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [
