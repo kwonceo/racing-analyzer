@@ -1,0 +1,177 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_08_03_후나바시_12경주",
+ "race_info": {
+  "date": "2026-08-03",
+  "track": "후나바시",
+  "round": 12,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 2,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 4,
+   "name": "ジャルダンデュロワ",
+   "jockey": "庄司大",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    2,
+    1,
+    3,
+    2
+   ],
+   "record_score": 98.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "ボニファシオ",
+   "jockey": "澤田龍",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    11,
+    7,
+    10,
+    9
+   ],
+   "record_score": 28.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "21:10:49",
+    "quinella": {
+     "5+9": 8.8,
+     "4+9": 10.5,
+     "8+9": 12.4,
+     "4+5": 12.7,
+     "4+8": 12.9,
+     "5+8": 13.6,
+     "2+5": 15.6,
+     "2+9": 17.1,
+     "2+4": 21.2,
+     "7+9": 21.8,
+     "4+7": 26.0,
+     "2+8": 29.3,
+     "1+9": 29.6,
+     "5+7": 30.5,
+     "4+10": 34.3,
+     "1+4": 36.4,
+     "1+5": 37.5,
+     "5+10": 37.7,
+     "9+10": 37.9,
+     "2+10": 38.0,
+     "7+8": 38.3,
+     "3+4": 43.7,
+     "1+2": 46.3,
+     "2+7": 48.3,
+     "3+9": 50.1,
+     "1+8": 52.3,
+     "8+10": 55.4,
+     "1+10": 58.9,
+     "1+7": 61.5,
+     "4+6": 67.4,
+     "3+5": 69.1,
+     "7+10": 73.0,
+     "3+8": 105.4,
+     "2+3": 107.8,
+     "2+6": 129.6,
+     "1+3": 133.7,
+     "3+7": 136.6,
+     "5+6": 148.9,
+     "6+9": 153.1,
+     "3+10": 222.1,
+     "6+8": 240.3,
+     "6+7": 245.0,
+     "1+6": 263.7,
+     "6+10": 345.2,
+     "3+6": 426.7
+    }
+   },
+   {
+    "time": "21:11:07",
+    "quinella": {
+     "4+5": 600.0
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.002,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   4,
+   5
+  ],
+  "eliminated": [],
+  "recommend": "4+5",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 5,
+  "2nd": 13,
+  "3rd": 4,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 4번 적중"
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 5,
+  "second": 13,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-08-03 21:11:43",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
