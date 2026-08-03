@@ -2,57 +2,57 @@
 chcp 65001 >nul
 setlocal
 REM ============================================================
-REM  ê²½ë§ˆ BMED ë¶„ì„ê¸° - ì „ì²´ ë°ì´í„° ë°±ì—… ì²´í¬í¬ì¸íŠ¸
-REM  data/ ì „ì²´ ì»¤ë°‹ + GitHub í‘¸ì‹œ + ë°±ì—… ë‚ ì§œ ê¸°ë¡
-REM  ê¸°ì¡´ ê¸°ëŠ¥ ì‚­ì œ ì—†ìŒ(ì¶”ê°€ë§Œ). í”„ë¡œì íŠ¸ ë£¨íŠ¸ì—ì„œ ì‹¤í–‰.
+REM  °æ¸¶ BMED ºĞ¼®±â - ÀüÃ¼ µ¥ÀÌÅÍ ¹é¾÷ Ã¼Å©Æ÷ÀÎÆ®
+REM  data/ ÀüÃ¼ Ä¿¹Ô + GitHub Çª½Ã + ¹é¾÷ ³¯Â¥ ±â·Ï
+REM  ±âÁ¸ ±â´É »èÁ¦ ¾øÀ½(Ãß°¡¸¸). ÇÁ·ÎÁ§Æ® ·çÆ®¿¡¼­ ½ÇÇà.
 REM ============================================================
 cd /d "%~dp0.."
 
-REM [ë³´ì™„] ë¬´ì¸(ìŠ¤ì¼€ì¤„ëŸ¬) ì‹¤í–‰ ê°ì§€: /auto ì¸ìë©´ ë§ˆì§€ë§‰ pause ìƒëµ(ì•ˆ í•˜ë©´ ìì • ë°±ì—…ì´ í‚¤ ëŒ€ê¸°ë¡œ ë©ˆì¶¤)
+REM [º¸¿Ï] ¹«ÀÎ(½ºÄÉÁÙ·¯) ½ÇÇà °¨Áö: /auto ÀÎÀÚ¸é ¸¶Áö¸· pause »ı·«(¾È ÇÏ¸é ÀÚÁ¤ ¹é¾÷ÀÌ Å° ´ë±â·Î ¸ØÃã)
 set AUTORUN=0
 if /I "%~1"=="/auto" set AUTORUN=1
 
-REM [ë³´ì™„] git ì ê¸ˆ ì¶©ëŒ ë°©ì–´: ì„œë²„ê°€ ì»¤ë°‹ ì¤‘(.git\index.lock ì¡´ì¬)ì´ë©´ ì´ë²ˆ íšŒì°¨ëŠ” ê±´ë„ˆëœ€(ë‹¤ìŒ ìì • ì¬ì‹œë„)
+REM [º¸¿Ï] git Àá±İ Ãæµ¹ ¹æ¾î: ¼­¹ö°¡ Ä¿¹Ô Áß(.git\index.lock Á¸Àç)ÀÌ¸é ÀÌ¹ø È¸Â÷´Â °Ç³Ê¶Ü(´ÙÀ½ ÀÚÁ¤ Àç½Ãµµ)
 if exist ".git\index.lock" (
-  echo âš ï¸ git ì ê¸ˆ(.git\index.lock) ê°ì§€ - ë‹¤ë¥¸ ì»¤ë°‹ ì§„í–‰ ì¤‘. ì´ë²ˆ ë°±ì—…ì€ ê±´ë„ˆëœë‹ˆë‹¤.
+  echo [ÁÖÀÇ] git Àá±İ(.git\index.lock) °¨Áö - ´Ù¸¥ Ä¿¹Ô ÁøÇà Áß. ÀÌ¹ø ¹é¾÷Àº °Ç³Ê¶İ´Ï´Ù.
   echo %date% %time% - SKIP (index.lock)>> data\backup_log.txt
   if "%AUTORUN%"=="0" pause
   goto :eof
 )
 
-echo [1/4] í˜„ì¬ ìƒíƒœ í™•ì¸...
+echo [1/4] ÇöÀç »óÅÂ È®ÀÎ...
 git status --short
 
 echo.
-echo [2/4] data/ ë° ë¬¸ì„œ ìŠ¤í…Œì´ì§•...
+echo [2/4] data/ ¹× ¹®¼­ ½ºÅ×ÀÌÂ¡...
 git add data/analysis_log data/race_results data/ai_training data/daily_summary data/prerace data/korea_history data/korea_session.json data/discovered_patterns.json data/pattern_learning.json 2>nul
 git add CHANGELOG.md CLAUDE.md README.md RECOVERY.md 2>nul
 
 echo.
-echo [3/4] ì»¤ë°‹...
+echo [3/4] Ä¿¹Ô...
 for /f "tokens=1-3 delims=/- " %%a in ("%date%") do set TODAY=%%a-%%b-%%c
 set STAMP=%date% %time%
-git commit -m "ì²´í¬í¬ì¸íŠ¸ ë°±ì—… (%STAMP%)" -m "data/ í•™ìŠµÂ·AI ì½”í¼ìŠ¤ + ë¬¸ì„œ ë°±ì—…" -m "Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
+git commit -m "Ã¼Å©Æ÷ÀÎÆ® ¹é¾÷ (%STAMP%)" -m "data/ ÇĞ½À¡¤AI ÄÚÆÛ½º + ¹®¼­ ¹é¾÷" -m "Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 if errorlevel 1 (
-  echo    ë³€ê²½ ì‚¬í•­ ì—†ìŒ ë˜ëŠ” ì»¤ë°‹ ìŠ¤í‚µ.
+  echo    º¯°æ »çÇ× ¾øÀ½ ¶Ç´Â Ä¿¹Ô ½ºÅµ.
 )
 
 echo.
-echo [4/4] GitHub í‘¸ì‹œ...
+echo [4/4] GitHub Çª½Ã...
 git push origin master
 if errorlevel 1 (
-  echo    âš ï¸ í‘¸ì‹œ ì‹¤íŒ¨ - ë„¤íŠ¸ì›Œí¬/ì¸ì¦ í™•ì¸ í›„ ì¬ì‹œë„: git push origin master
+  echo    [ÁÖÀÇ] Çª½Ã ½ÇÆĞ - ³×Æ®¿öÅ©/ÀÎÁõ È®ÀÎ ÈÄ Àç½Ãµµ: git push origin master
 ) else (
-  echo    âœ… í‘¸ì‹œ ì™„ë£Œ.
+  echo    [OK] Çª½Ã ¿Ï·á.
 )
 
 echo.
-echo %STAMP% - ë°±ì—… ì‹¤í–‰>> data\backup_log.txt
-echo ë°±ì—… ë‚ ì§œ ê¸°ë¡: data\backup_log.txt
+echo %STAMP% - ¹é¾÷ ½ÇÇà>> data\backup_log.txt
+echo ¹é¾÷ ³¯Â¥ ±â·Ï: data\backup_log.txt
 echo.
-echo ===== ë°±ì—… ì²´í¬í¬ì¸íŠ¸ ì™„ë£Œ =====
+echo ===== ¹é¾÷ Ã¼Å©Æ÷ÀÎÆ® ¿Ï·á =====
 endlocal
-REM [ë³´ì™„] ë¬´ì¸ ì‹¤í–‰(/autoÂ·ìŠ¤ì¼€ì¤„ëŸ¬)ì—ì„œëŠ” pause ìƒëµ â†’ ì‘ì—…ì´ ë©ˆì¶”ì§€ ì•Šê³  ì •ìƒ ì¢…ë£Œ.
-REM   %~1 ì€ íŒŒë¼ë¯¸í„°ë¼ endlocal ì˜í–¥ì„ ì•ˆ ë°›ìŒ(ë³€ìˆ˜ %AUTORUN% ì€ endlocal ë¡œ ì‚¬ë¼ì§).
+REM [º¸¿Ï] ¹«ÀÎ ½ÇÇà(/auto¡¤½ºÄÉÁÙ·¯)¿¡¼­´Â pause »ı·« -> ÀÛ¾÷ÀÌ ¸ØÃßÁö ¾Ê°í Á¤»ó Á¾·á.
+REM   %~1 Àº ÆÄ¶ó¹ÌÅÍ¶ó endlocal ¿µÇâÀ» ¾È ¹ŞÀ½(º¯¼ö %AUTORUN% Àº endlocal ·Î »ç¶óÁü).
 if /I "%~1"=="/auto" goto :eof
 pause

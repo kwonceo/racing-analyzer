@@ -1,29 +1,7 @@
 {
-  "count": 126,
+  "count": 132,
   "placed": 22,
   "cases": [
-    {
-      "race": "모리오카 1경주",
-      "date": "2026-07-21",
-      "no": 1,
-      "odds": 18.3,
-      "signals": [
-        "전적A/B"
-      ],
-      "placed": false,
-      "won": false
-    },
-    {
-      "race": "모리오카 1경주",
-      "date": "2026-07-21",
-      "no": 5,
-      "odds": 23.2,
-      "signals": [
-        "전적A/B"
-      ],
-      "placed": false,
-      "won": false
-    },
     {
       "race": "도야마 5경주",
       "date": "2026-07-21",
@@ -1407,25 +1385,132 @@
       ],
       "placed": false,
       "won": false
+    },
+    {
+      "race": "모리오카 1경주",
+      "date": "2026-08-03",
+      "no": 1,
+      "odds": 14.0,
+      "signals": [
+        "급락",
+        "집중급락",
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "모리오카 1경주",
+      "date": "2026-08-03",
+      "no": 11,
+      "odds": 17.7,
+      "signals": [
+        "급락",
+        "집중급락",
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "모리오카 1경주",
+      "date": "2026-08-03",
+      "no": 7,
+      "odds": 26.5,
+      "signals": [
+        "급락",
+        "집중급락",
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "모리오카 1경주",
+      "date": "2026-08-03",
+      "no": 8,
+      "odds": 30.9,
+      "signals": [
+        "급락",
+        "집중급락",
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "모리오카 1경주",
+      "date": "2026-08-03",
+      "no": 10,
+      "odds": 138.6,
+      "signals": [
+        "급락",
+        "집중급락",
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "모리오카 1경주",
+      "date": "2026-08-03",
+      "no": 3,
+      "odds": 320.4,
+      "signals": [
+        "급락",
+        "집중급락",
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "모리오카 1경주",
+      "date": "2026-08-03",
+      "no": 4,
+      "odds": 78.3,
+      "signals": [
+        "급락",
+        "집중급락"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "모리오카 1경주",
+      "date": "2026-08-03",
+      "no": 6,
+      "odds": 277.3,
+      "signals": [
+        "급락",
+        "집중급락"
+      ],
+      "placed": false,
+      "won": false
     }
   ],
   "by_signal": {
-    "전적A/B": {
-      "count": 106,
-      "placed": 19,
-      "rate": 17.9
-    },
     "급락": {
-      "count": 11,
+      "count": 19,
       "placed": 4,
-      "rate": 36.4
+      "rate": 21.1
+    },
+    "전적A/B": {
+      "count": 110,
+      "placed": 19,
+      "rate": 17.3
     },
     "역배열": {
       "count": 29,
       "placed": 5,
       "rate": 17.2
+    },
+    "집중급락": {
+      "count": 8,
+      "placed": 0,
+      "rate": 0.0
     }
   },
-  "rate": 17.5,
+  "rate": 16.7,
   "note": "중고배당 유력마(복승10배+&강한신호) 실제 입상 자동 집계. 표본 적으면 참고만(50+ 유의)."
 }

@@ -2,25 +2,25 @@
  "races": 1444,
  "byRank": {
   "rank1": {
-   "hit": 141,
+   "hit": 142,
    "total": 640,
-   "rate": 22.0
+   "rate": 22.2
   },
   "rank2": {
-   "hit": 232,
+   "hit": 231,
    "total": 613,
-   "rate": 37.8
+   "rate": 37.7
   },
   "rank3": {
-   "hit": 276,
+   "hit": 277,
    "total": 569,
-   "rate": 48.5
+   "rate": 48.7
   }
  },
  "bySignal": {
   "초기급락 보존": {
    "hit": 412,
-   "total": 1168,
+   "total": 1167,
    "rate": 35.3,
    "weightReady": true
   },
@@ -38,14 +38,14 @@
   },
   "스마트머니+역배열": {
    "hit": 58,
-   "total": 138,
-   "rate": 42.0,
+   "total": 139,
+   "rate": 41.7,
    "weightReady": true
   },
   "역배열": {
-   "hit": 25,
+   "hit": 26,
    "total": 80,
-   "rate": 31.2,
+   "rate": 32.5,
    "weightReady": true
   },
   "급락": {
@@ -58,40 +58,40 @@
  "byBand": {
   "15~30": {
    "hit": 92,
-   "total": 369,
-   "rate": 24.9,
+   "total": 372,
+   "rate": 24.7,
    "weightReady": true
   },
   "50~100": {
-   "hit": 9,
-   "total": 152,
-   "rate": 5.9,
+   "hit": 10,
+   "total": 151,
+   "rate": 6.6,
    "weightReady": true
   },
   "30~50": {
-   "hit": 28,
-   "total": 193,
-   "rate": 14.5,
+   "hit": 26,
+   "total": 189,
+   "rate": 13.8,
    "weightReady": true
   },
   "100+": {
    "hit": 4,
-   "total": 68,
-   "rate": 5.9,
+   "total": 70,
+   "rate": 5.7,
    "weightReady": true
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 353,
+   "hit": 352,
    "total": 1028,
-   "rate": 34.3,
+   "rate": 34.2,
    "weightReady": true
   },
   "keirin": {
-   "hit": 295,
+   "hit": 297,
    "total": 788,
-   "rate": 37.4,
+   "rate": 37.7,
    "weightReady": true
   },
   "korea": {
@@ -101,19 +101,19 @@
    "weightReady": false
   }
  },
- "missedRaces": 191,
+ "missedRaces": 190,
  "dansung": {
-  "races": 100,
-  "horseWonRate": 33.0,
-  "horseWon": 33,
-  "horsePlaced": 73,
-  "darkHitRate": 67.0,
-  "darkHit": 67,
+  "races": 99,
+  "horseWonRate": 32.3,
+  "horseWon": 32,
+  "horsePlaced": 72,
+  "darkHitRate": 66.7,
+  "darkHit": 66,
   "winnerSignals": {
    "기타": 5,
    "복병": 28,
    "실질유력": 22
   }
  },
- "updated_at": "2026-08-03 11:30:31"
+ "updated_at": "2026-08-03 12:31:22"
 }
