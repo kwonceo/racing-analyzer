@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 5경주",
-      "horse_no": 11,
-      "recent_avg": 5.4,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-22"
-    },
-    {
-      "race": "소노다 6경주",
-      "horse_no": 12,
-      "recent_avg": 4.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-22"
-    },
-    {
-      "race": "소노다 6경주",
-      "horse_no": 4,
-      "recent_avg": 5.8,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-22"
-    },
-    {
       "race": "소노다 6경주",
       "horse_no": 5,
       "recent_avg": 8.0,
@@ -4678,6 +4650,39 @@
         "복승이상감지"
       ],
       "date": "2026-08-03"
+    },
+    {
+      "race": "모리오카 5경주",
+      "horse_no": 5,
+      "recent_avg": 6.6,
+      "win_place": 3,
+      "conditions": [
+        "급락63%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-03"
+    },
+    {
+      "race": "모리오카 5경주",
+      "horse_no": 3,
+      "recent_avg": 6.2,
+      "win_place": 2,
+      "conditions": [
+        "급락62%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-03"
+    },
+    {
+      "race": "모리오카 5경주",
+      "horse_no": 6,
+      "recent_avg": 9.2,
+      "win_place": 1,
+      "conditions": [
+        "급락63%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-03"
     }
   ],
   "condition_stats": {
@@ -4686,8 +4691,8 @@
       "hit": 419
     },
     "전체부진마": {
-      "count": 3775,
-      "hit": 1013
+      "count": 3783,
+      "hit": 1016
     },
     "대규모급락": {
       "count": 7,
@@ -4697,12 +4702,12 @@
       "hit_rate": 28.6
     },
     "이상감지동반": {
-      "count": 1549,
-      "hit": 594
+      "count": 1557,
+      "hit": 597
     },
     "급락동반": {
-      "count": 292,
-      "hit": 78
+      "count": 300,
+      "hit": 81
     }
   },
   "bokbyeong_patterns": [
@@ -5075,27 +5080,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 658,
-    "hit": 535,
+    "count": 659,
+    "hit": 536,
     "cases": [
-      {
-        "race": "아오모리 2경주",
-        "date": "2026-07-31",
-        "smart_horses": [
-          3,
-          1,
-          4,
-          2
-        ],
-        "placed": [
-          3,
-          2
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 2.5,
-        "high_odds": false
-      },
       {
         "race": "호후 6경주",
         "date": "2026-07-31",
@@ -6636,6 +6623,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 5경주",
+        "date": "2026-08-03",
+        "smart_horses": [
+          6,
+          3,
+          7
+        ],
+        "placed": [
+          6,
+          3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 3.7,
         "high_odds": false
       }
     ],
