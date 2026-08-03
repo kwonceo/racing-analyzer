@@ -13149,7 +13149,17 @@ def extract_japan():
     else:
         if len(raw_horses) != len(horses):
             print(f"[출마표2 전적] {rk}: 입력 {len(raw_horses)}행 → 정제 {len(horses)}두(중복·범위밖 제거)")
-        sdb[rk] = {"horses": horses, "t": time.time()}
+        # 🔴 [ⓔ 2026-08-03 승인] **source 표기 추가** — 저장 경로 8곳 중 **여기 한 곳만** 빠져 있었다.
+        #   실측 피해: 28경주 264두가 `raw_profile.source=None` 으로 남아 "전적 결손"으로 오인됐다
+        #   (실제로는 전적이 멀쩡히 있었다 — 47차에서 "1,496두 결손"을 과대평가한 원인 중 하나).
+        #   ⚠ **값 선택이 동작을 바꾼다** — 확인하고 골랐다:
+        #     · `keiba_nar` 를 넣으면 `_nar_autocollect_form` 이 **스킵**하게 돼 서버 수집이 죽는다
+        #     · `oddspark` 를 넣으면 `_keiba_autocollect_form` 이 **스킵**하게 된다
+        #     ⇒ 둘 다 **동작 변경**이다. 새 값이면 종전(None)과 똑같이 어느 가드에도 안 걸린다.
+        #   ⇒ `keiba_ext` = keiba.go.jp DebaTable 을 **확장(브라우저) 경유**로 받은 것.
+        #     서버 직접 수집(`keiba_nar`)과 **구분해야** 소스별 성적 비교가 가능하다.
+        #   ⚠ `startswith("korea")` 가드와 이름이 겹치지 않는다(확인함). 🔴 소급하지 않는다.
+        sdb[rk] = {"horses": horses, "t": time.time(), "source": "keiba_ext"}
         _starters_save(sdb)
     # 배당이 함께 오면 triple_store 도 갱신(히스토리 유지)
     if body.get("quinella") or body.get("exacta") or body.get("trio"):
@@ -27922,7 +27932,13 @@ def _jra_result_loop():
 _JRA_TRACK = {   # netkeiba 場코드 → (한글, 한자)
     "01": ("삿포로", "札幌"), "02": ("하코다테", "函館"), "03": ("후쿠시마", "福島"),
     "04": ("니가타", "新潟"), "05": ("도쿄", "東京"), "06": ("나카야마", "中山"),
-    "07": ("주쿄", "中京"), "08": ("교토", "京都"), "09": ("한신", "阪神"), "10": ("고쿠라", "小倉"),
+    # 🔴 [2026-08-03] `주쿄` → **`추쿄`**(= `_TRACK_GROUPS` 표준키)로 맞춘다.
+    #   왜: 같은 날 수신 시점 표준화를 켜서 확장 경유분이 `추쿄 N경주` 로 저장되기 시작했는데,
+    #     서버 중앙 수집은 여기서 `주쿄` 를 만든다(`_jra_post_info` → `rk = "%s %d경주"`).
+    #     ⇒ 그대로 두면 **같은 경주가 `주쿄`·`추쿄` 두 키로 갈린다** — 내가 만든 새 분리다.
+    #   ⚠ 새 분리를 만드는 것이 아니라 **이미 갈려 있던 것**(주쿄17·중경9·추쿄2)을 한 쪽으로 모은다.
+    #   ⚠ 과거 파일은 그대로 둔다(소급 정규화 없음) — 앞으로 들어오는 것만 통일된다.
+    "07": ("추쿄", "中京"), "08": ("교토", "京都"), "09": ("한신", "阪神"), "10": ("고쿠라", "小倉"),
 }
 _JRA_SCHED_CACHE = {}   # {ymd: {"t":epoch, "ids":set(race_id)}}
 
@@ -27937,7 +27953,10 @@ def _jra_venue_code(venue):
             return code
     std = _track_norm(v)                       # 표준화 폴백(소노다/園田 류와 동일 경로)
     for code, (kr, kanji) in _JRA_TRACK.items():
-        if std == kr or std == kanji:
+        # 🔴 [2026-08-03] `_track_norm(kr)` 과도 비교한다 — 표기 변형이 늘어도 목록을 안 늘려도 된다.
+        #   실례: `주쿄`·`중경`·`나카교` 는 전부 표준키 `추쿄` 로 접힌다. 종전에는 `std == kr`
+        #   직접 비교뿐이라 `중경` 을 넣으면 **None 이 나와 중앙 경주를 통째로 놓쳤다.**
+        if std == kr or std == kanji or std == _track_norm(kr):
             return code
     return None
 
@@ -34352,6 +34371,183 @@ def _start_nar_preload_scheduler():
           % (NAR_PRELOAD_HOUR_FROM, NAR_PRELOAD_HOUR_TO))
 
 
+# ══════════ [ⓒ 중앙(JRA) 전적 자동 루프 (2026-08-03 승인)] ══════════
+#   왜: 전적 결손 317두 중 **280두(88%)가 중앙**이다. `/api/jra/starters` 는 **수동 API** 이고
+#     자동 루프가 없어, 사람이 부르지 않으면 중앙 전적이 통째로 비었다.
+#   🔴 **netkeiba 는 2026-08-02 에 IP 차단을 당했다**(4.4 req/s 버스트). 그래서:
+#     · `netkeiba_guard` 를 반드시 태운다(모든 요청 전 `allow`, 직후 `record`)
+#     · 간격은 **`backfill`(4.0초)** — 실시간(1.0초)을 쓰지 않는다. 차단 원인이 4.4 req/s 였다
+#     · 400/403/429 가 **연속 3회면 그날 중단**(guard 가 판정 · 자동 재시도 없음)
+#   📐 요청량 실측 추정: race_list 1 + 경주당 shutuba_past 1 × 최대 36 = **37건/개최일**
+#     4초 간격이면 약 2.5분. 일일 상한 2,000 의 **1.9%** · 정상 1,080요청 대비 **+3.4%**.
+#   ⚠ ⓑ NAR 선수집과 **같은 구조**다 — 개최일 오전 · 파일 스탬프 · sleep-first 금지.
+#     배당 루프에 얹지 않는다(마감 직전 부하 증가 + 창을 놓치면 또 결손).
+JRA_PRELOAD_ENABLED = True                 # 🔧 되돌리기: 이 한 줄을 False
+_JRA_PRELOAD_STARTED = False
+_JRA_PRELOAD_STAT = {"fired": 0, "got": 0, "fail": 0, "skip": 0, "blocked": 0, "nocode": 0}
+
+
+def _jra_preload_once(ymd=None, max_races=None):
+    """개최일 오전에 그날 중앙(JRA) 전 경주 전적을 미리 받는다. → 통계 dict
+
+    ⚠ 완전 격리 — 예외를 위로 올리지 않는다. ⚠ 이미 받은 경주는 다시 받지 않는다.
+    """
+    ymd = ymd or time.strftime("%Y%m%d")
+    st = {"ymd": ymd, "ids": 0, "races": 0, "skip": 0, "got": 0,
+          "fail": 0, "blocked": 0, "t0": time.time()}
+    try:
+        import netkeiba_guard as _g
+    except Exception as e:
+        print("[중앙 선수집] 요청 관문 로드 실패 — 중단:", str(e)[:80])
+        return st
+    if not NETKEIBA_ENABLED:
+        print("[중앙 선수집] NETKEIBA_ENABLED=False — 돌지 않는다(차단 대응 상태)")
+        return st
+    # 🔴 [정정 2026-08-03] 관문을 **여기서 직접 부르지 않는다.**
+    #   처음엔 `_g.allow()` / `_g.record()` 를 직접 불렀는데, 실측하니 첫 경주부터 `blocked=1` 로
+    #   멈췄다. 원인: **`_keirin_fetch(url, mode)` 가 이미 `netkeiba_guard` 를 태우고
+    #   간격 미달이면 대기까지 한다**(app.py:22794~22817). ⇒ 내 호출은 **이중 호출**이었고
+    #   카운터를 2배로 세면서 간격 판정을 어긋나게 했다.
+    #   ✅ `mode="backfill"`(4.0초)만 넘기면 간격·상한·차단감지·기록이 **전부 자동**이다.
+    #   ⚠ `_g` 는 이제 **통계 출력용으로만** 쓴다(요청 판정에 관여하지 않는다).
+    try:
+        ids = sorted(_jra_race_list(ymd))
+    except Exception as e:
+        print("[중앙 선수집] 개최 목록 실패:", str(e)[:100])
+        return st
+    st["ids"] = len(ids)
+    if not ids:
+        print("[중앙 선수집] %s 개최 없음(정상)" % ymd)
+        return st
+    print("[중앙 선수집] 시작 · %s · race_id %d건 (간격 4.0초 · 예상 %.1f분)"
+          % (ymd, len(ids), len(ids) * 4.0 / 60))
+    for rid in ids:
+        try:
+            if max_races and st["races"] >= max_races:
+                break
+            venue = (_JRA_TRACK.get(str(rid)[4:6]) or ("", ""))[0]
+            rno = int(str(rid)[10:12] or 0)
+            if not venue or not rno:
+                _JRA_PRELOAD_STAT["nocode"] += 1
+                continue
+            rk = _multi_key(venue, rno)         # 🔴 배당 경로와 같은 키 규약(표준키 통일)
+            # ── 오탐 계측(원칙 20): 이미 전적이 있는데 도는가 ──
+            try:
+                _ex = (_starters_load() or {}).get(rk) or {}
+            except Exception:
+                _ex = {}
+            if _ex.get("horses") and _ex.get("source") == "jra":
+                st["skip"] += 1
+                _JRA_PRELOAD_STAT["skip"] += 1
+                continue                        # 🔴 이미 받은 경주는 다시 받지 않는다
+            if (_g.stats() or {}).get("stopped"):     # 🔴 그날 중단이면 즉시 멈춘다(자동 재시도 금지)
+                st["blocked"] += 1
+                print("[중앙 선수집] 🔴 중단 — netkeiba 관문이 그날 중단 상태: %s"
+                      % _g.stats().get("stopped"))
+                break
+            st["races"] += 1
+            _JRA_PRELOAD_STAT["fired"] += 1
+            try:
+                # 🔴 mode="backfill" → 간격 4.0초 · 상한 · 400 연속 3회 중단이 **관문에서 자동 적용**
+                html = _keirin_fetch(
+                    "https://race.netkeiba.com/race/shutuba_past.html?race_id=%s" % rid,
+                    mode="backfill")
+            except Exception as e:
+                html = ""
+                print("[중앙 선수집] %s fetch 실패: %s" % (rk, str(e)[:80]))
+            if not html:
+                st["fail"] += 1
+                _JRA_PRELOAD_STAT["fail"] += 1
+                continue
+            shutuba = _jra_parse_shutuba_past(html)
+            hs = shutuba.get("horses") or []
+            if not hs:
+                st["fail"] += 1
+                _JRA_PRELOAD_STAT["fail"] += 1
+                print("[중앙 선수집] %s 출전마 0두(건너뜀)" % rk)
+                continue
+            horses = _jra_build_form(shutuba)
+            store = [_keiba_starter_store_row(h) for h in horses if h.get("no") is not None]
+            if not store:
+                st["fail"] += 1
+                _JRA_PRELOAD_STAT["fail"] += 1
+                continue
+            sdb = _starters_load()
+            sdb[rk] = {"horses": store, "t": time.time(), "source": "jra",
+                       "distance": shutuba.get("distance"), "surface": shutuba.get("surface"),
+                       "trackCond": shutuba.get("trackCond")}
+            _starters_save(sdb)
+            st["got"] += 1
+            _JRA_PRELOAD_STAT["got"] += 1
+            print("[중앙 선수집] 🟢 %s: %d두 저장(netkeiba 馬柱 · race_id=%s)" % (rk, len(store), rid))
+        except Exception as e:
+            st["fail"] += 1
+            print("[중앙 선수집] %s 처리 실패(무시): %s" % (rid, str(e)[:100]))
+    st["sec"] = round(time.time() - st["t0"], 1)
+    print("[중앙 선수집] 완료 · race_id %d · 시도 %d · 🟢회복 %d · 실패 %d · 이미보유 %d · 제한 %d · %.1f초"
+          % (st["ids"], st["races"], st["got"], st["fail"], st["skip"], st["blocked"], st["sec"]))
+    return st
+
+
+def _start_jra_preload_scheduler():
+    """🔴 sleep-first 금지 — 검사 먼저, 대기 나중. 하루 1회 판정은 **파일 스탬프**로 한다."""
+    global _JRA_PRELOAD_STARTED
+    if _JRA_PRELOAD_STARTED or not JRA_PRELOAD_ENABLED:
+        return
+    _JRA_PRELOAD_STARTED = True
+    _jp_stamp = os.path.join(os.path.dirname(__file__), "data", "_jra_preload_last.txt")
+
+    def _done_day():
+        try:
+            return open(_jp_stamp, encoding="utf-8").read().strip()
+        except Exception:
+            return None
+
+    def _mark(day):
+        try:
+            os.makedirs(os.path.dirname(_jp_stamp), exist_ok=True)
+            _t = _jp_stamp + ".tmp%d" % os.getpid()
+            with open(_t, "w", encoding="utf-8") as f:
+                f.write(day)
+            os.replace(_t, _jp_stamp)
+        except Exception as e:
+            print("[중앙 선수집] 실행일 기록 실패(무시):", str(e)[:80])
+
+    def _loop():
+        while True:
+            try:
+                now = time.localtime()
+                today = time.strftime("%Y-%m-%d", now)
+                if (NAR_PRELOAD_HOUR_FROM <= now.tm_hour < NAR_PRELOAD_HOUR_TO
+                        and _done_day() != today):
+                    _mark(today)          # 🔴 실행 직전에 찍는다(재기동 시 재폭주 방지)
+                    _jra_preload_once()
+            except Exception as e:
+                print("[중앙 선수집] 스케줄러 오류(무시):", e)
+            time.sleep(60)                # ⚠ 검사 뒤에 잔다(sleep-first 아님)
+
+    threading.Thread(target=_loop, daemon=True, name="jra-preload").start()
+    print("[중앙 선수집] 스케줄러 시작(매일 %02d~%02d시 · 60초 폴링 · netkeiba_guard backfill 4.0초)"
+          % (NAR_PRELOAD_HOUR_FROM, NAR_PRELOAD_HOUR_TO))
+
+
+@app.route("/api/jra/preload", methods=["GET", "POST"])
+def jra_preload_api():
+    """[중앙 전적 선수집] GET=현황(읽기 전용) · POST=즉시 1회(수동). 자동 프로브 없음."""
+    try:
+        import netkeiba_guard as _g
+        q = _g.stats()
+    except Exception as e:
+        q = {"error": str(e)[:80]}
+    if request.method == "GET":
+        return jsonify({"enabled": JRA_PRELOAD_ENABLED, "netkeibaEnabled": NETKEIBA_ENABLED,
+                        "window": "%02d~%02d시" % (NAR_PRELOAD_HOUR_FROM, NAR_PRELOAD_HOUR_TO),
+                        "stat": dict(_JRA_PRELOAD_STAT), "quota": q})
+    body = request.json or {}
+    st = _jra_preload_once(ymd=(body.get("ymd") or None), max_races=body.get("maxRaces"))
+    return jsonify({"ok": True, "stat": st, "cum": dict(_JRA_PRELOAD_STAT)})
+
+
 @app.route("/api/nar/preload", methods=["GET", "POST"])
 def nar_preload_api():
     """[NAR 전적 선수집] GET=현황(읽기 전용) · POST=즉시 1회 실행(수동).
@@ -34568,6 +34764,7 @@ def _boot_background():
     try:
         _start_health_kakao_scheduler()  # [체크리스트 카카오 2026-07-30] 매일 22:00 상태 푸시(기존 추천 발송과 분리)
         _start_nar_preload_scheduler()   # [ⓑ NAR 선수집 2026-08-03] 개최일 오전 6~9시 · 수집 창과 전적을 분리
+        _start_jra_preload_scheduler()   # [ⓒ 중앙 선수집 2026-08-03] 결손 317두 중 280두가 중앙 · netkeiba_guard 필수
     except Exception as e:
         print("[체크리스트 카카오] 스케줄러 기동 실패(무시):", e)
     try:
