@@ -23,6 +23,25 @@ import os
 import re
 import subprocess
 import sys
+import time
+
+
+def _parent_of(pid):
+    """PID 의 부모 PID(없으면 None).
+
+    🔴 [2026-08-03] 오늘 `netstat` 스냅샷만 보고 7148 을 '고아'로 오판했다.
+      실제로는 7148(부모)+24384(자식)의 **Flask 리로더 정상 구조**였다.
+      ⇒ **프로세스를 판정할 때는 부모-자식 관계를 먼저 확인한다.**
+    """
+    try:
+        out = subprocess.run(
+            ["powershell", "-NoProfile", "-Command",
+             "(Get-CimInstance Win32_Process -Filter \"ProcessId=%d\").ParentProcessId" % int(pid)],
+            capture_output=True, text=True, timeout=15)
+        s = (out.stdout or "").strip()
+        return int(s) if s.isdigit() else None
+    except Exception:
+        return None
 
 SERVER_PORT = 8011
 
@@ -75,6 +94,15 @@ def main():
     ap.add_argument("--match", help="커맨드라인에 이 문자열이 든 프로세스만 대상")
     ap.add_argument("--apply", action="store_true", help="실제로 종료(기본은 미실행)")
     ap.add_argument("--list", action="store_true", help="현황만 출력")
+    # 🔴 [ⓐ 2026-08-03 승인] **서버를 일부러 끄는 모드**(추가만 · 기존 동작 무변경).
+    #   배경: 이 도구는 원래 "서버를 실수로 죽이지 않기" 위해 만들어져 8011 LISTEN PID 를
+    #     **무조건 제외**한다. 그래서 **끄는 용도로 그대로 부르면 서버가 안 죽는다.**
+    #   ⚠ 대표가 창을 닫아도 안 죽는 이유는 2026-07-30 에 `Start-Process -WindowStyle Hidden`
+    #     (detached)로 띄웠기 때문이다 — 창과 프로세스가 분리된다.
+    #   🔴 이 모드는 **서버 PID 와 그 자식(리로더)까지** 대상으로 삼는다. 반드시 확인을 받는다.
+    ap.add_argument("--server", action="store_true",
+                    help="🔴 서버(8011 LISTEN)와 그 자식까지 종료 대상으로 삼는다 — 끄는 용도")
+    ap.add_argument("--yes", action="store_true", help="확인 프롬프트 생략(배치에서 이미 확인받은 경우)")
     a = ap.parse_args()
 
     sp = server_pids()
@@ -95,6 +123,57 @@ def main():
         print("   %-7d %s %s" % (pid, tag, (cmd or "")[:100]))
 
     if a.list:
+        return 0
+    # ── [ⓐ] 서버 종료 모드 ──────────────────────────────────────────────
+    if a.server:
+        if not sp:
+            print("\n🟢 8011 을 LISTEN 하는 프로세스가 없다 — **이미 꺼져 있다.** 아무것도 하지 않는다.")
+            return 0
+        # 🔴 서버 PID 의 **부모·자식**까지 모은다(Flask 리로더는 부모+자식 2벌 구조다).
+        #   오늘(2026-08-03) 7148(부모)+24384(자식)를 2벌로 오판한 사례가 있어 관계를 명시한다.
+        fam = set(sp)
+        for pid, _c in procs:
+            try:
+                if _parent_of(pid) in sp:
+                    fam.add(pid)
+            except Exception:
+                pass
+        for pid in list(sp):
+            try:
+                pp = _parent_of(pid)
+                if pp and any(pp == q for q, _ in procs):
+                    fam.add(pp)
+            except Exception:
+                pass
+        tg = [(p, c) for p, c in procs if p in fam]
+        print("\n🔴 종료 대상 %d개 (서버 + 리로더 자식/부모):" % len(tg))
+        for pid, cmd in tg:
+            role = "LISTEN(서버)" if pid in sp else "리로더 가족"
+            print("   %-7d [%s] %s" % (pid, role, (cmd or "")[:90]))
+        if not a.apply:
+            print("\n⚠ DRY-RUN 이다. 실제로 끄려면 `--server --apply` 를 붙인다.")
+            return 0
+        if not a.yes:
+            try:
+                ans = input("\n🔴 위 %d개를 정말 종료합니까? (y/N) " % len(tg)).strip().lower()
+            except Exception:
+                ans = "n"
+            if ans != "y":
+                print("취소했다. 아무것도 종료하지 않았다.")
+                return 0
+        for pid, _c in tg:
+            try:
+                subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"],
+                               capture_output=True, text=True)
+                print("   종료 요청: %d" % pid)
+            except Exception as e:
+                print("   🔴 실패 %d: %s" % (pid, str(e)[:60]))
+        time.sleep(1.5)
+        left = server_pids()                     # 🔴 정말 죽었는지 그 순간 다시 확인
+        if left:
+            print("\n🔴 아직 %d 포트를 LISTEN 하는 PID 가 있다: %s — **종료 실패**" % (SERVER_PORT, sorted(left)))
+            return 1
+        print("\n🟢 종료 완료 — %d 포트를 LISTEN 하는 프로세스가 없다." % SERVER_PORT)
         return 0
     if not a.match:
         print("\n⚠ `--match` 가 없다. 무엇을 죽일지 지정하지 않으면 **아무것도 하지 않는다.**")
