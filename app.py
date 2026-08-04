@@ -35188,8 +35188,13 @@ def _midcheck_accum():
     🔴 pastPops 는 **실값 기준**으로 센다. oddspark 는 키만 있고 값이 전부 null 이라
       키 보유로 세면 실제보다 크게 부풀려진다(8/4 실측: 키 207 ↔ 실값 72).
     """
-    out = {"pastPops": 0, "popDeno": 0, "k5have": 0, "k5deno": 0, "srcs": {}, "races": 0,
-           "bySrc": {}}
+    # 🔴 [2026-08-05 대표 지적] `k5have/k5deno`(담는 경로만)는 **안 담는 경로를 분모에서 빼므로
+    #   구조적으로 100% 에 붙는다.** 실측 8/4: 담는경로 207/208 = 99.5% ↔ 전체 207/928 = 22.3%.
+    #   ⇒ **주 지표는 전체 분모(`k5allHave/k5allDeno`)** 로 하고 담는경로 값은 병기만 한다.
+    #   ⚠ 전체 분모에는 keirin(구조상 5키 없음)·keiba_ext(3키만)가 들어가 100% 가 될 수 없다.
+    #     그래도 주 지표로 쓰는 이유: **「전체 중 얼마나 채웠나」가 축적의 실제 진도**이기 때문이다.
+    out = {"pastPops": 0, "popDeno": 0, "k5have": 0, "k5deno": 0,
+           "k5allHave": 0, "k5allDeno": 0, "srcs": {}, "races": 0, "bySrc": {}}
     d = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
     pre = time.strftime("%Y_%m_%d") + "_"
     try:
@@ -35220,6 +35225,9 @@ def _midcheck_accum():
                 bs["k5"] += 1
             if _okpp:
                 bs["pop"] += 1
+            out["k5allDeno"] += 1              # 🔴 주 지표 분모 = 전체 entries(경로 제한 없음)
+            if _ok5:
+                out["k5allHave"] += 1
             if src in _ACCUM_FORM_PATHS:
                 out["k5deno"] += 1
                 out["popDeno"] += 1
@@ -35260,7 +35268,7 @@ def _midcheck_accum_delta(today):
     if not isinstance(prev, dict):
         return None, (ydays[-1] if ydays else None)
     dl = {}
-    for k in ("pastPops", "k5have", "k5deno", "races"):
+    for k in ("pastPops", "k5have", "k5deno", "k5allHave", "k5allDeno", "races"):
         if isinstance(today.get(k), int) and isinstance(prev.get(k), int):
             dl[k] = today[k] - prev[k]
     _pn, _tn = (prev.get("srcs") or {}).get("none", 0), (today.get("srcs") or {}).get("none", 0)
@@ -35387,11 +35395,13 @@ def _midcheck_text(slot, f, prev_stamp):
     if _ac:
         def _d(key):
             return "" if not isinstance((_dl or {}).get(key), int) else " (%+d)" % _dl[key]
+        # 🔴 주 지표는 **전체 분모**다(2026-08-05 대표 지적). 담는경로만 값은 괄호로 병기한다.
+        _all = (100.0 * _ac["k5allHave"] / _ac["k5allDeno"]) if _ac.get("k5allDeno") else None
         _rate = (100.0 * _ac["k5have"] / _ac["k5deno"]) if _ac.get("k5deno") else None
-        # 🔴 분모를 문구에 박는다 — 「5키 99%」만 보면 전체인 줄 오독한다(원칙 8-C).
-        L.append("· 5키 %s (%d/%d · 담는경로만)%s"
-                 % ("?" if _rate is None else "%.0f%%" % _rate,
-                    _ac.get("k5have", 0), _ac.get("k5deno", 0), _d("k5have")))
+        L.append("· 5키 %s (%d/%d 전체)%s · 담는경로 %s"
+                 % ("?" if _all is None else "%.0f%%" % _all,
+                    _ac.get("k5allHave", 0), _ac.get("k5allDeno", 0), _d("k5allHave"),
+                    "?" if _rate is None else "%.0f%%" % _rate))
         L.append("· pastPops 실값 %d/%d%s"
                  % (_ac.get("pastPops", 0), _ac.get("popDeno", 0), _d("pastPops")))
         _sr = _ac.get("srcs") or {}
