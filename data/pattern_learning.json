@@ -4738,11 +4738,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2468,
+      "count": 2474,
       "hit": 455
     },
     "전체부진마": {
-      "count": 4225,
+      "count": 4231,
       "hit": 1141
     },
     "대규모급락": {
@@ -5131,26 +5131,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 709,
+    "count": 710,
     "hit": 582,
     "cases": [
-      {
-        "race": "이와키타이라 9경주",
-        "date": "2026-08-01",
-        "smart_horses": [
-          5,
-          1,
-          7
-        ],
-        "placed": [
-          5,
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.4,
-        "high_odds": false
-      },
       {
         "race": "다케오 5경주",
         "date": "2026-08-01",
@@ -6722,9 +6705,21 @@
         "trifecta_odds": null,
         "quinella_odds": 16.1,
         "high_odds": false
+      },
+      {
+        "race": "몬베츠 11경주",
+        "date": "2026-08-04",
+        "smart_horses": [
+          2
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 82.1,
+    "rate": 82.0,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
