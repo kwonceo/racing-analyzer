@@ -2037,6 +2037,11 @@ def _src_divergence(prev_q, new_q):
 # ══════════ [3층 · 배당 오염 표시 차단 (2026-08-04 승인)] ══════════
 ODDS_SUSPECT_GATE = True      # 🔧 되돌리기: False
 
+# 🔴 [2026-08-04 승인] 3층이 발동했는데 폴링 저장 가드(마감 후 120분)로 기록이 안 남던 문제.
+#   이 집합에 없는 경주면 **딱 1회** 가드를 뚫어 오염 플래그를 저장한다(중복 저장 방지).
+#   ⚠ 메모리다 — 재기동하면 비고, 그러면 경주당 1회가 다시 허용된다. 저장 1회가 더 늘 뿐이라 안전하다.
+_SUSPECT_SAVED = set()
+
 _GATE_HITS = {}               # {name: {"reach": n, "fire": n, "day": "YYYY-MM-DD"}}
 _GATE_HITS_FILE = os.path.join(DATA_DIR, "_gate_hits.json") if "DATA_DIR" in dir() else "data/_gate_hits.json"
 _GATE_HITS_LOCK = threading.RLock()   # 🔴 수집이 6병렬이라 스레드 경합이 실제로 난다
@@ -2258,6 +2263,13 @@ def _odds_suspect_verdict(rk, an):
             roster.add(int(h.get("no")))
     except (TypeError, ValueError):
         pass
+    # 🔴🔴 [2026-08-04] **명단 판정은 출마표 단독으로 하지 않는다**(2026-08-02 규칙).
+    #   8/2 에 출마표 단독으로 판정했다가 **오탐 83.3%** 를 냈고, 그때 「출마표 ∪ 서버 직접수집」으로
+    #   고쳤다. 그런데 3층은 그 규칙이 적용되지 않은 채 남아 있었다 — 같은 실수를 반복했다.
+    #   실측(8/4 · 추천 보유 104경주): 확장하면 **오탐 2건이 사라지고**(모리오카 7경주·카나자와 6경주)
+    #   진짜 오염 13건은 그대로 잡는다. 모리오카 7경주는 **결과 3착이 10번**이라 진짜 10두 경주였다.
+    #   ⚠ oddspark 는 서버 직접수집이라 신뢰 소스다. 캐시가 비면 종전 동작으로 되돌아갈 뿐이다.
+    roster |= _oddspark_seen_get(rk)
     # 배당에 등장한 마번
     odds_nos = set()
     try:
@@ -14413,6 +14425,21 @@ def triple_analyze():
                 _cps = an.get("corePicks") or {}
                 _cps["oddsSuspect"] = True
                 _cps["oddsSuspectReason"] = _sv
+                # 🔴🔴 [2026-08-04 승인] 발동했는데 **폴링 저장 가드(마감 후 120분)** 때문에
+                #   기록이 안 남는 문제. 실측: 3층 발동 149건 ↔ 저장 **1건**.
+                #   발동 경주 4개 중 3개가 창 밖이라 통째로 사라졌다.
+                #   🔴 발동했는데 기록이 없으면 **오염 규모를 사후에 못 센다.**
+                #   ⇒ 저장된 로그에 아직 플래그가 없으면 **경주당 딱 1회** 가드를 뚫는다.
+                #   ⚠ 가드 시간을 늘리는 안은 기각했다 — 3층과 무관한 저장까지 늘어나
+                #     7/30 「마감 후 8시간 반복 저장」 사고와 같은 계열이 된다.
+                #   ⚠ 저장하는 것은 플래그와 사유뿐이고 **추천은 지우지 않는다**(측정용 원본 보존).
+                if _skip_log and rk not in _SUSPECT_SAVED:
+                    _SUSPECT_SAVED.add(rk)
+                    _skip_log = False
+                    print("🔴 [3층·저장플래그] %s: 저장 가드 1회 해제 — 오염 플래그를 기록한다(%s)"
+                          % (rk, str(_sv)[:60]))
+                    if len(_SUSPECT_SAVED) > 2000:
+                        _SUSPECT_SAVED.clear()   # 무한 증가 방지(날짜가 바뀌면 어차피 다시 센다)
     except Exception as _sfe:
         print("[3층·저장플래그] 실패(무시):", str(_sfe)[:80])
     # [분석 로그] 배당 수집·이상감지·추천이 갱신될 때마다 완전 로그 갱신(추적 가능 기록)
