@@ -28,6 +28,13 @@ import hashlib
 import threading
 import collections          # [수집 사이클 관측 2026-07-30] deque — 기존 지역 `from collections import Counter` 와 무충돌
 import subprocess
+# 🔴🔴🔴 [2026-08-04 실사고] `io` 가 **어디에도 import 되지 않은 채** `_gate_hit` 이 `io.open` 을 썼다.
+#   그 결과 매 호출이 NameError → `except Exception` 이 삼킴 → 3회 재시도 → `disk is None`
+#   → **"읽기 실패 3회 · 기록 건너뜀" 으로 조기 return.** 계수기가 통째로 죽어 있었다.
+#   실측: 로그 최근 2MB 에 읽기 실패 **977건** · `_gate_hits.json` 이 16:57 에서 멈춤 ·
+#   `logs/gate_fire/` 는 append 지점이 return 뒤라 **한 번도 생성되지 않았다**.
+#   ⚠ 「재기동으로 값이 지워졌다」가 아니라 「아무것도 안 써졌다」가 진실이다.
+import io
 import html as _htmllib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from itertools import permutations
@@ -34807,6 +34814,485 @@ def _start_health_kakao_scheduler():
     print("[체크리스트 카카오] 자동 발송 스케줄러 시작(매일 %02d:00 · 60초 폴링 · HEALTH_KAKAO_HOUR)" % hour)
 
 
+# ══════════ [중간점검 하루 3회 (2026-08-04 승인 · 세 번 밀린 항목)] ══════════
+#   왜: 하루가 끝난 뒤에만 말해 주는 장치(21:00 체크리스트·커밋 훅)로는 낮에 생긴 사고를 그날 못 잡는다.
+#     실측 근거 — 2026-08-04 하루에만 **대표가 직접 물어야 알게 된 것이 네 번**이다.
+#   🔴 09:00·22:00 은 **정상이어도 한 줄 보낸다.** 안 오는 것과 죽은 것이 구분되지 않기 때문이다.
+#   🔴 14:00 은 이상 있을 때만 보낸다. 다만 **스탬프는 무조건 찍는다** — 침묵이 「이상 없음」인지
+#     「점검이 죽었다」인지 갈리는 유일한 근거다. 09:00·22:00 이 그 스탬프를 읽어 함께 보고한다.
+#   🔴 sleep-first 아님 — 60초 폴링이다(2026-07-30 결과 백필이 하루 종일 안 돈 사고와 같은 유형 방지).
+#   🔴 스탬프 읽기 실패를 빈 값으로 삼키지 않는다(원칙 9) — 오늘 계수기가 그것 때문에 죽었다.
+#   ⚠ 카카오 발송 코어(`_kakao_send_to_me`)는 한 줄도 건드리지 않는다. 조립·스케줄만이다.
+#   ⚠ 완전 읽기 전용 — 수집·추천·학습에 개입하지 않는다.
+#   🔧 되돌리기: `MIDCHECK_ENABLED = False` 한 줄.
+MIDCHECK_ENABLED = True
+MIDCHECK_SLOTS = (9, 14, 22)          # 09:00 정상도 발송 · 14:00 이상시만 · 22:00 정상도 발송
+MIDCHECK_QUIET_SLOTS = (14,)          # 이 슬롯은 이상이 있을 때만 보낸다
+# ⚠ 서버가 슬롯 시각에 죽어 있었다면 늦게라도 보낸다. 단 **90분 안에서만** —
+#   그보다 늦으면 이미 지난 상황을 뒤늦게 알리는 노이즈다(기동 직후 과거 슬롯 몰아보내기 방지).
+MIDCHECK_BACKFILL_MIN = 90
+MIDCHECK_STALE_MIN = 400              # 직전 점검이 이보다 오래되면 그것 자체를 이상으로 본다
+MIDCHECK_STAMP = os.path.join(os.path.dirname(__file__), "data", "_midcheck_last.json")
+_midcheck_sched_started = False
+
+# 🔴 [14:00 침묵 해제 임계 · 원칙 18] 아래 숫자를 넘으면 14:00 에도 발송한다.
+#   ⚠ 실측 근거를 함께 적는다 — 근거 없는 임계는 도배되거나 영원히 안 걸린다.
+MIDCHECK_TH_SAVEFAIL = 30     # 8/3 하루 230건 = 10분당 2.6건. 점검 간격(5시간)이면 평상시 78건 수준이나
+#                               ⚠ 로그 tail 기준이라 실측 후 재조정 대상. 폭주(8/4 후나바시 352건)만 잡는 값.
+MIDCHECK_TH_GAP = 3           # 8/3 경주 내 5분 초과 공백 5건/106경주. 점검 간격당 3건이면 이상.
+MIDCHECK_TH_CORRUPT = 1       # 8월 전수 신규 0건 → 1건이면 즉시 이상.
+MIDCHECK_TH_DIVERGE = 2       # 8/3 공존 37경주 중 17건 불일치(45.9%). 🔴 발동률이 높을 수 있어 관찰부터.
+MIDCHECK_TH_COUNTER_MIN = 90  # 계수기 마지막 갱신이 이보다 오래되면 계수기가 죽은 것으로 본다.
+
+
+def _midcheck_stamp_load():
+    """스탬프 읽기. 🔴 **실패를 빈 dict 로 삼키지 않는다**(원칙 9) — 실패면 None.
+
+    왜: 빈 값으로 시작해 그대로 덮어쓰면 이전 기록이 지워진다. 오늘 도달 계수기가
+      정확히 그 경로로 12번 지워졌다. 파일 없음(첫 실행)만 정상으로 본다.
+    """
+    for _ in range(3):
+        try:
+            with io.open(MIDCHECK_STAMP, encoding="utf-8") as f:
+                d = json.load(f)
+            return d if isinstance(d, dict) else {}
+        except FileNotFoundError:
+            return {}
+        except Exception:
+            time.sleep(0.05)
+    return None
+
+
+def _midcheck_stamp_save(d):
+    try:
+        os.makedirs(os.path.dirname(MIDCHECK_STAMP), exist_ok=True)
+        _json_atomic(MIDCHECK_STAMP, d, indent=1)
+        return True
+    except Exception as e:
+        print("[중간점검] 스탬프 기록 실패(무시):", str(e)[:100])
+        return False
+
+
+def _midcheck_procs():
+    """app.py 파이썬 프로세스 수. 정상은 부모+자식 **정확히 2개**(Flask 리로더).
+
+    🔴 실패하면 숫자를 만들지 않고 None 을 돌려준다(추측 금지). `wmic` 은 최신 Windows 에서
+      제거됐을 수 있어 PowerShell `Get-CimInstance` 를 쓴다.
+    """
+    try:
+        _c = ("(@(Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | "
+              "Where-Object { $_.CommandLine -like '*app.py*' })).Count")
+        r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", _c],
+                           capture_output=True, text=True, timeout=25)
+        s = (r.stdout or "").strip()
+        return int(s) if s.isdigit() else None
+    except Exception:
+        return None
+
+
+def _midcheck_savefail():
+    """오늘 로그의 저장 실패(WinError) 건수. 실패면 None.
+
+    ⚠ **한계**: 로그가 커서 끝 8MB 만 읽는다. 로그가 그보다 많이 자라면 창이 밀려
+      직전 점검 대비 증가분이 음수가 될 수 있다 — 그 경우 「로그 회전」으로 표기하고
+      증가분을 만들지 않는다(가짜 급증 알림 방지).
+    """
+    d = os.path.join(os.path.dirname(__file__), "logs")
+    today = time.strftime("%Y-%m-%d")
+    total, got = 0, False
+    try:
+        names = [x for x in os.listdir(d)
+                 if x.startswith("server_") and (x.endswith(".log") or x.endswith(".err"))]
+    except Exception:
+        return None
+    for nm in names:
+        p = os.path.join(d, nm)
+        try:
+            st = os.stat(p)
+            if time.strftime("%Y-%m-%d", time.localtime(st.st_mtime)) != today:
+                continue
+            with open(p, "rb") as f:
+                if st.st_size > 8 * 1024 * 1024:
+                    f.seek(-8 * 1024 * 1024, os.SEEK_END)
+                buf = f.read()
+            total += buf.count(b"WinError")
+            got = True
+        except Exception:
+            continue
+    return total if got else None
+
+
+def _midcheck_gaps():
+    """`data/collect_gaps/<날짜>.json` 에서 (수집 공백 건수, JSON 손상 건수).
+
+    ⚠ 이 파일에는 두 종류가 섞여 있다 — `type=="corrupt"` 는 손상 격리이고,
+      `raceKey`+`snapshots` 를 가진 것은 스냅샷 부족(수집 공백)이다. 갈라서 센다.
+    """
+    p = os.path.join(os.path.dirname(__file__), "data", "collect_gaps",
+                     time.strftime("%Y-%m-%d") + ".json")
+    try:
+        with io.open(p, encoding="utf-8") as f:
+            rows = json.load(f)
+    except FileNotFoundError:
+        return (0, 0)
+    except Exception:
+        return (None, None)
+    if not isinstance(rows, list):
+        return (None, None)
+    gap = sum(1 for x in rows if isinstance(x, dict) and x.get("raceKey") and x.get("type") != "corrupt")
+    bad = sum(1 for x in rows if isinstance(x, dict) and x.get("type") == "corrupt")
+    return (gap, bad)
+
+
+def _mc_q_shape(q):
+    """복승 배당에서 (조합 수, 최대 마번). 실패면 (None, None)."""
+    try:
+        keys = []
+        if isinstance(q, dict):
+            keys = list(q.keys())
+        elif isinstance(q, list):
+            for it in q:
+                keys.append(it.get("combo") if isinstance(it, dict) else it)
+        nos = set()
+        for c in keys:
+            if isinstance(c, str):
+                parts = re.findall(r"\d+", c)
+            elif isinstance(c, (list, tuple)):
+                parts = [str(x) for x in c]
+            else:
+                continue
+            for pnum in parts:
+                try:
+                    nos.add(int(pnum))
+                except (TypeError, ValueError):
+                    pass
+        return (len(keys), (max(nos) if nos else None))
+    except Exception:
+        return (None, None)
+
+
+def _midcheck_diverge():
+    """오늘 두 소스(oddspark ↔ 사설)가 **다른 경주를 보고 있는** 경주 수.
+
+    판정: 각 소스의 마지막 스냅샷에서 (조합 수, 최대 마번) 이 **둘 다** 다르면 불일치로 센다.
+      ⚠ 한쪽만 다른 것은 취소마·부분수집으로 설명되므로 세지 않는다(오탐 억제).
+    반환 (불일치 경주, 공존 경주). 실패면 (None, None).
+    """
+    d = os.path.join(os.path.dirname(__file__), "data", "odds_history")
+    pre = time.strftime("%Y_%m_%d") + "_"
+    try:
+        names = [x for x in os.listdir(d) if x.startswith(pre) and x.endswith(".json")]
+    except Exception:
+        return (None, None)
+    both, diff = 0, 0
+    for nm in names:
+        try:
+            with io.open(os.path.join(d, nm), encoding="utf-8") as f:
+                doc = json.load(f)
+            last = {}
+            for s in (doc.get("snapshots") or []):
+                if not isinstance(s, dict) or not s.get("quinella"):
+                    continue
+                grp = "oddspark" if "oddspark" in str(s.get("src") or "") else "private"
+                last[grp] = s
+            if len(last) < 2:
+                continue
+            a = _mc_q_shape(last["oddspark"].get("quinella"))
+            b = _mc_q_shape(last["private"].get("quinella"))
+            if a[0] is None or b[0] is None:
+                continue
+            both += 1
+            if a[0] != b[0] and a[1] != b[1]:
+                diff += 1
+        except Exception:
+            continue
+    return (diff, both)
+
+
+def _midcheck_kakao():
+    """오늘 카카오 발송 (건수, 마지막 시각). 실패면 (None, None)."""
+    p = os.path.join(HEALTH_KAKAO_DIR, time.strftime("%Y%m%d") + ".json")
+    try:
+        with io.open(p, encoding="utf-8") as f:
+            rows = json.load(f)
+        if not isinstance(rows, list):
+            return (None, None)
+        lastat = None
+        for x in rows:
+            if isinstance(x, dict):
+                lastat = x.get("sentAt") or x.get("at") or lastat
+        return (len(rows), lastat)
+    except FileNotFoundError:
+        return (0, None)
+    except Exception:
+        return (None, None)
+
+
+def _midcheck_gate():
+    """게이트 도달·발동. 카운터(참고) + `logs/gate_fire/` append 로그(진실)를 함께 낸다."""
+    out = {"counter": None, "fireLog": None, "counterAgeMin": None}
+    try:
+        with io.open(_GATE_HITS_FILE, encoding="utf-8") as f:
+            out["counter"] = json.load(f)
+    except FileNotFoundError:
+        out["counter"] = {}
+    except Exception:
+        out["counter"] = None
+    try:
+        _meta = (out["counter"] or {}).get("_meta") or {}
+        _up = _meta.get("updatedAt")
+        if _up:
+            _t = time.mktime(time.strptime(_up, "%Y-%m-%d %H:%M:%S"))
+            out["counterAgeMin"] = round((time.time() - _t) / 60.0, 1)
+    except Exception:
+        pass
+    try:
+        _p = os.path.join(os.path.dirname(__file__), "logs", "gate_fire",
+                          time.strftime("%Y-%m-%d") + ".jsonl")
+        n = {}
+        with io.open(_p, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    g = (json.loads(line) or {}).get("gate") or "?"
+                except Exception:
+                    g = "?"
+                n[g] = n.get(g, 0) + 1
+        out["fireLog"] = n
+    except FileNotFoundError:
+        out["fireLog"] = {}
+    except Exception:
+        out["fireLog"] = None
+    return out
+
+
+def _midcheck_collect(prev):
+    """점검 사실 수집(완전 읽기 전용). `prev` 는 직전 점검 스탬프(없으면 {})."""
+    f = {"at": time.strftime("%Y-%m-%d %H:%M:%S")}
+    f["procs"] = _midcheck_procs()
+    f["saveFail"] = _midcheck_savefail()
+    _pf = (prev or {}).get("saveFail")
+    if isinstance(f["saveFail"], int) and isinstance(_pf, int):
+        _d = f["saveFail"] - _pf
+        f["saveFailDelta"] = _d if _d >= 0 else None      # 음수 = 로그 회전 → 증가분 만들지 않는다
+    else:
+        f["saveFailDelta"] = None
+    f["gap"], f["corrupt"] = _midcheck_gaps()
+    # 🔴 [도배 방지 · 원칙 18] 공백·손상은 **하루 누적**이다. 누적을 임계와 비교하면
+    #   오후에는 늘 임계를 넘어 14:00 이 매일 발동한다 — 그러면 무시하게 된다
+    #   (Gemini WARNING 99.5% 전례). ⇒ **직전 점검 이후 증가분**으로 판정한다.
+    #   ⚠ 첫 실행은 직전 값이 없으므로 누적을 그대로 쓴다(그날 상태를 한 번은 알려야 한다).
+    for _k in ("gap", "corrupt"):
+        _pv = (prev or {}).get(_k)
+        _cv = f.get(_k)
+        f[_k + "Delta"] = ((_cv - _pv) if (isinstance(_cv, int) and isinstance(_pv, int)
+                                           and _cv >= _pv) else None)
+    f["diverge"], f["divergeBoth"] = _midcheck_diverge()
+    f["kakao"], f["kakaoLast"] = _midcheck_kakao()
+    f["gate"] = _midcheck_gate()
+    try:
+        rep = _health_checklist_build()
+        _it = rep.get("items") or []
+        f["integBad"] = [str(x.get("name")) for x in _it
+                         if str(x.get("id") or "").startswith("I") and x.get("ok") is False]
+        f["integTotal"] = sum(1 for x in _it if str(x.get("id") or "").startswith("I"))
+        f["completion"] = rep.get("completion") or {}
+    except Exception as e:
+        f["integBad"] = None
+        f["integErr"] = str(e)[:120]
+    return f
+
+
+def _midcheck_abnormal(f):
+    """이상 사유 목록(빈 리스트면 정상). 14:00 침묵 해제 판정에 쓴다."""
+    bad = []
+    if f.get("procs") is None:
+        bad.append("서버 프로세스 수 측정 실패")
+    elif f.get("procs") != 2:
+        bad.append("서버 프로세스 %d개(정상 2)" % f["procs"])
+    if isinstance(f.get("saveFailDelta"), int) and f["saveFailDelta"] >= MIDCHECK_TH_SAVEFAIL:
+        bad.append("저장 실패 +%d" % f["saveFailDelta"])
+    # 🔴 증가분이 있으면 증가분으로, 첫 실행이면 누적으로 판정한다(위 주석 참조).
+    for _key, _th, _label in (("gap", MIDCHECK_TH_GAP, "수집 공백"),
+                              ("corrupt", MIDCHECK_TH_CORRUPT, "JSON 손상")):
+        _dv = f.get(_key + "Delta")
+        _use, _is_delta = ((_dv, True) if isinstance(_dv, int) else (f.get(_key), False))
+        if isinstance(_use, int) and _use >= _th:
+            bad.append("%s %s%d건" % (_label, ("+" if _is_delta else "누적 "), _use))
+    if isinstance(f.get("diverge"), int) and f["diverge"] >= MIDCHECK_TH_DIVERGE:
+        bad.append("두 소스 괴리 %d경주" % f["diverge"])
+    if f.get("integBad"):
+        bad.append("무결성 이상 %d" % len(f["integBad"]))
+    _g = f.get("gate") or {}
+    _age = _g.get("counterAgeMin")
+    if isinstance(_age, (int, float)) and _age > MIDCHECK_TH_COUNTER_MIN:
+        bad.append("게이트 계수기 %.0f분째 정지" % _age)
+    return bad
+
+
+def _midcheck_text(slot, f, prev_stamp):
+    """카카오 본문 — 짧게. ⚠ 발송 코어는 건드리지 않는다(조립만)."""
+    L = []
+    bad = _midcheck_abnormal(f)
+    L.append("%s 중간점검 %02d:00 · %s" % ("🔴" if bad else "🟢", slot, time.strftime("%m/%d")))
+    _p = f.get("procs")
+    L.append("· 서버 %s" % ("측정 실패" if _p is None else
+                           ("%d벌(정상)" % _p if _p == 2 else "🔴 프로세스 %d개" % _p)))
+    _d = f.get("saveFailDelta")
+    L.append("· 저장실패 %s (누적 %s)"
+             % ("측정 불가" if _d is None else "+%d" % _d,
+                "?" if f.get("saveFail") is None else f["saveFail"]))
+    def _gv(key):
+        _dv = f.get(key + "Delta")
+        if isinstance(_dv, int):
+            return "+%d(누적%s)" % (_dv, f.get(key))
+        return "?" if f.get(key) is None else "누적%d" % f[key]
+    L.append("· 수집공백 %s · JSON손상 %s" % (_gv("gap"), _gv("corrupt")))
+    L.append("· 두소스 괴리 %s/%s"
+             % ("?" if f.get("diverge") is None else f["diverge"],
+                "?" if f.get("divergeBoth") is None else f["divergeBoth"]))
+    L.append("· 카카오 %s건%s"
+             % ("?" if f.get("kakao") is None else f["kakao"],
+                (" · 마지막 %s" % str(f["kakaoLast"])[-8:]) if f.get("kakaoLast") else ""))
+    if f.get("integBad") is None:
+        L.append("· 무결성 측정 실패")
+    elif f["integBad"]:
+        L.append("· 🔴 무결성 이상 %d: %s" % (len(f["integBad"]), " / ".join(f["integBad"][:3])))
+    else:
+        L.append("· 무결성 정상 (I 항목 %s)" % f.get("integTotal"))
+    _g = f.get("gate") or {}
+    _c = _g.get("counter") or {}
+    _fl = _g.get("fireLog")
+    def _one(key, label):
+        e = _c.get(key) or {}
+        _fire_log = None if _fl is None else _fl.get(key, 0)
+        return "%s 도달%s·발동%s%s" % (label, e.get("reach", "?"), e.get("fire", "?"),
+                                    ("(로그%s)" % _fire_log) if _fire_log is not None else "")
+    L.append("· 게이트 %s / %s" % (_one("layer1_ingest_drop", "1층"),
+                                 _one("layer3_display_block", "3층")))
+    _age = _g.get("counterAgeMin")
+    if _age is not None:
+        L.append("· 계수기 갱신 %.0f분 전%s" % (_age, " 🔴" if _age > MIDCHECK_TH_COUNTER_MIN else ""))
+    # 🔴 직전 점검이 언제였나 — 14:00 이 침묵했을 때 「이상 없음」과 「죽음」을 가르는 유일한 근거다.
+    try:
+        _last = (prev_stamp or {}).get("lastRun")
+        if _last:
+            _mins = (time.time() - time.mktime(time.strptime(_last, "%Y-%m-%d %H:%M:%S"))) / 60.0
+            L.append("· 직전 점검 %s (%.0f분 전)%s"
+                     % (_last[11:16], _mins, " 🔴 지연" if _mins > MIDCHECK_STALE_MIN else ""))
+        else:
+            L.append("· 직전 점검 기록 없음(첫 실행)")
+    except Exception:
+        pass
+    if bad:
+        L.append("")
+        L.append("🔴 이상 %d: %s" % (len(bad), " / ".join(bad)))
+    return "\n".join(L)
+
+
+def _midcheck_run(slot, force=False, dry=False):
+    """한 슬롯을 1회 실행. 반환 {ok, sent, slot, reason, text}.
+
+    🔴 스탬프는 **보내지 않아도 찍는다** — 14:00 침묵이 「이상 없음」인지 「죽음」인지 갈린다.
+    """
+    stamp = _midcheck_stamp_load()
+    if stamp is None:
+        # 🔴 원칙 9 — 읽기 실패면 덮어쓰지 않는다. 이번 회차를 건너뛴다.
+        print("🔴 [중간점검] 스탬프 읽기 실패 3회 — 이번 회차 건너뜀(덮어쓰지 않는다)")
+        return {"ok": False, "sent": False, "slot": slot, "reason": "스탬프 읽기 실패"}
+    prev = stamp.get("last") or {}
+    try:
+        f = _midcheck_collect(prev)
+    except Exception as e:
+        print("[중간점검] 수집 실패:", str(e)[:150])
+        return {"ok": False, "sent": False, "slot": slot, "reason": "수집 실패: %s" % str(e)[:120]}
+    bad = _midcheck_abnormal(f)
+    text = _midcheck_text(slot, f, stamp)
+    quiet = (slot in MIDCHECK_QUIET_SLOTS) and not bad and not force
+    sent, err = False, None
+    if not dry and not quiet:
+        try:
+            r = _kakao_send_to_me(text) or {}
+            sent = bool(r.get("ok"))
+            err = r.get("error")
+        except Exception as e:
+            err = str(e)[:200]
+        try:
+            _health_kakao_log("midcheck-%02d:00" % slot, text, sent, err)
+        except Exception:
+            pass
+    if not dry:
+        # 🔴 보냈든 침묵했든 **반드시** 기록한다(점검이 돌았다는 증거).
+        stamp["lastRun"] = f["at"]
+        stamp["lastSlot"] = slot
+        stamp.setdefault("slots", {})[time.strftime("%Y-%m-%d") + "/%02d" % slot] = {
+            "at": f["at"], "sent": sent, "quiet": quiet, "abnormal": bad, "error": err}
+        stamp["last"] = {"saveFail": f.get("saveFail"), "gap": f.get("gap"),
+                         "corrupt": f.get("corrupt"), "at": f["at"]}
+        _midcheck_stamp_save(stamp)
+    print("[중간점검] %02d:00 %s (이상 %d)"
+          % (slot, "침묵(정상)" if quiet else ("발송 성공" if sent else "발송 실패/미발송"), len(bad)))
+    return {"ok": True, "sent": sent, "slot": slot, "quiet": quiet,
+            "abnormal": bad, "error": err, "text": text, "facts": f}
+
+
+def _start_midcheck_scheduler():
+    """하루 3회 정시 점검. 🔴 sleep-first 아님 — 60초 폴링 + 파일 스탬프."""
+    global _midcheck_sched_started
+    if _midcheck_sched_started or not MIDCHECK_ENABLED:
+        return
+    _midcheck_sched_started = True
+
+    def _loop():
+        while True:
+            try:
+                time.sleep(60)
+                now = time.localtime()
+                today = time.strftime("%Y-%m-%d", now)
+                st = _midcheck_stamp_load()
+                if st is None:
+                    continue                       # 읽기 실패 — 덮어쓰지 않고 다음 폴링에서 재시도
+                done = st.get("slots") or {}
+                for slot in MIDCHECK_SLOTS:
+                    key = "%s/%02d" % (today, slot)
+                    if key in done:
+                        continue
+                    late = (now.tm_hour - slot) * 60 + now.tm_min
+                    if late < 0:
+                        continue                   # 아직 시각 전
+                    if late > MIDCHECK_BACKFILL_MIN:
+                        # 서버가 그 시각에 죽어 있었다 — 뒤늦게 보내지 않고 사유만 남긴다.
+                        st.setdefault("slots", {})[key] = {
+                            "at": time.strftime("%Y-%m-%d %H:%M:%S"), "sent": False,
+                            "quiet": False, "abnormal": [], "error": "지연 %d분 — 발송 생략" % late}
+                        _midcheck_stamp_save(st)
+                        continue
+                    _midcheck_run(slot)
+                    break                          # 한 번에 한 슬롯만(다음 폴링에서 이어간다)
+            except Exception as e:
+                print("[중간점검] 스케줄러 오류(무시):", str(e)[:150])
+
+    threading.Thread(target=_loop, daemon=True, name="midcheck").start()
+    print("[중간점검] 스케줄러 시작(%s시 · 60초 폴링 · %02d시는 이상시만 · 스탬프 %s)"
+          % ("·".join("%02d" % s for s in MIDCHECK_SLOTS), MIDCHECK_QUIET_SLOTS[0],
+             os.path.basename(MIDCHECK_STAMP)))
+
+
+@app.route("/api/midcheck", methods=["GET", "POST"])
+def api_midcheck():
+    """GET = 미리보기(발송 안 함) · POST = 즉시 1회 발송. ⚠ 읽기 전용 점검이다."""
+    try:
+        slot = int(request.args.get("slot") or time.localtime().tm_hour)
+    except (TypeError, ValueError):
+        slot = time.localtime().tm_hour
+    r = _midcheck_run(slot, force=True, dry=(request.method == "GET"))
+    return Response(json.dumps(r, ensure_ascii=False, default=str),
+                    mimetype="application/json; charset=utf-8",
+                    status=(200 if r.get("ok") else 500))
+
+
 # ══════════ [ⓑ NAR 전적 개최일 오전 선수집 (2026-08-03 승인)] ══════════
 #   왜: 전적 수집이 **배당 수집 루프 안**에 있어, 수집 창(발주 10분전~2분후)을 놓치면
 #     전적까지 통째로 결손된다. 실제로 오오이·후나바시는 `narBaba` 대상인데도 전무 경주가 있었다
@@ -35348,6 +35834,7 @@ def _boot_background():
     _start_daily_learning_scheduler()    # 매일 22:00 학습 일지 자동 생성·백업
     try:
         _start_health_kakao_scheduler()  # [체크리스트 카카오 2026-07-30] 매일 22:00 상태 푸시(기존 추천 발송과 분리)
+        _start_midcheck_scheduler()      # [중간점검 2026-08-04] 09·14·22시 · 14시는 이상시만 · 스탬프 필수
         _start_nar_preload_scheduler()   # [ⓑ NAR 선수집 2026-08-03] 개최일 오전 6~9시 · 수집 창과 전적을 분리
         _start_jra_preload_scheduler()   # [ⓒ 중앙 선수집 2026-08-03] 결손 317두 중 280두가 중앙 · netkeiba_guard 필수
     except Exception as e:
