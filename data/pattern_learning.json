@@ -1,46 +1,6 @@
 {
   "patterns": [
     {
-      "race": "서울 4경주",
-      "horse_no": 7,
-      "recent_avg": 9.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-26"
-    },
-    {
-      "race": "부산 2경주",
-      "horse_no": 2,
-      "recent_avg": 4.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-26"
-    },
-    {
-      "race": "부산 2경주",
-      "horse_no": 10,
-      "recent_avg": 5.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-26"
-    },
-    {
-      "race": "모리오카 2경주",
-      "horse_no": 8,
-      "recent_avg": 8.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-26"
-    },
-    {
-      "race": "모리오카 2경주",
-      "horse_no": 9,
-      "recent_avg": 5.2,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-26"
-    },
-    {
       "race": "모리오카 2경주",
       "horse_no": 1,
       "recent_avg": 6.0,
@@ -4729,16 +4689,62 @@
         "복승이상감지"
       ],
       "date": "2026-08-04"
+    },
+    {
+      "race": "카나자와 3경주",
+      "horse_no": 2,
+      "recent_avg": 14.3,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-04"
+    },
+    {
+      "race": "카나자와 3경주",
+      "horse_no": 6,
+      "recent_avg": 13.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-04"
+    },
+    {
+      "race": "카나자와 3경주",
+      "horse_no": 8,
+      "recent_avg": 12.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-04"
+    },
+    {
+      "race": "몬베츠 5경주",
+      "horse_no": 2,
+      "recent_avg": 6.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-04"
+    },
+    {
+      "race": "몬베츠 5경주",
+      "horse_no": 3,
+      "recent_avg": 6.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-04"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2387,
-      "hit": 441
+      "count": 2395,
+      "hit": 443
     },
     "전체부진마": {
-      "count": 4078,
-      "hit": 1098
+      "count": 4093,
+      "hit": 1103
     },
     "대규모급락": {
       "count": 10,
@@ -4748,8 +4754,8 @@
       "hit_rate": 30.0
     },
     "이상감지동반": {
-      "count": 1691,
-      "hit": 657
+      "count": 1698,
+      "hit": 660
     },
     "급락동반": {
       "count": 339,

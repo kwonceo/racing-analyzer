@@ -1,6 +1,6 @@
 {
- "generated_at": 1785828683.8178675,
- "races_with_result": 1869,
+ "generated_at": 1785829844.254294,
+ "races_with_result": 1870,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -49,11 +49,11 @@
    "type": "배당변화",
    "key": "had_drop",
    "desc": "급락(자금유입) 동반 경주",
-   "rate": 52.8,
+   "rate": 52.9,
    "baseline": 38.2,
    "lift": 14.6,
-   "support": 1043,
-   "hit": 551
+   "support": 1044,
+   "hit": 552
   },
   {
    "type": "배당변화",
@@ -69,21 +69,21 @@
    "type": "배당변화",
    "key": "strong_drop",
    "desc": "30%+ 강한 급락 동반 경주",
-   "rate": 51.4,
+   "rate": 51.5,
    "baseline": 38.2,
    "lift": 13.2,
-   "support": 716,
-   "hit": 368
+   "support": 717,
+   "hit": 369
   },
   {
    "type": "전적점수",
    "key": "form_range",
-   "desc": "적중 경주 상위등급마 전적점수 주로 72.9~106.7 구간",
+   "desc": "적중 경주 상위등급마 전적점수 주로 72.9~106.6 구간",
    "range": [
     72.9,
-    106.7
+    106.6
    ],
-   "support": 1863
+   "support": 1868
   }
  ],
  "baseline_hit_rate": 38.2
