@@ -1,0 +1,392 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_08_04_몬베츠_8경주",
+ "race_info": {
+  "date": "2026-08-04",
+  "track": "몬베츠",
+  "round": 8,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 8,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "キタノハドソン",
+   "jockey": "服部茂（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    3
+   ],
+   "record_score": 88.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "リコーニック",
+   "jockey": "岩橋勇（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    2,
+    2,
+    2
+   ],
+   "record_score": 43.4,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "キタノオンザバス",
+   "jockey": "落合玄（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    11,
+    9,
+    12
+   ],
+   "record_score": 41.6,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "ラスターカノン",
+   "jockey": "藤田駕（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    7,
+    5,
+    7,
+    4,
+    5
+   ],
+   "record_score": 1.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "マリノステアハート",
+   "jockey": "近藤翔（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    16,
+    11,
+    10,
+    12
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "エンデューロ",
+   "jockey": "小川悠（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    9,
+    10,
+    8,
+    7,
+    7
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "ベストカリフ",
+   "jockey": "吉本隆（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    8,
+    5,
+    5,
+    7
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "エメラルファイン",
+   "jockey": "小野楓（北海道）",
+   "jockey_winrate": null,
+   "recent_results": [
+    13,
+    11,
+    12
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "18:18:26",
+    "quinella": {
+     "1+8": 3.2,
+     "1+5": 3.4,
+     "1+7": 6.7,
+     "5+8": 7.9,
+     "1+2": 8.1,
+     "5+7": 11.6,
+     "7+8": 15.4,
+     "2+5": 23.7,
+     "2+8": 26.9,
+     "2+7": 33.6,
+     "1+3": 78.4,
+     "1+6": 128.0,
+     "1+4": 164.2,
+     "3+8": 164.2,
+     "5+6": 217.6,
+     "6+8": 223.1,
+     "3+5": 235.2,
+     "4+7": 235.2,
+     "4+8": 263.7,
+     "4+5": 280.7,
+     "6+7": 310.8,
+     "3+7": 414.5,
+     "2+3": 435.2,
+     "2+6": 483.5,
+     "2+4": 512.0,
+     "3+4": 669.5,
+     "3+6": 669.5,
+     "4+6": 1450.7
+    }
+   },
+   {
+    "time": "18:19:08",
+    "quinella": {
+     "1+5": 3.0,
+     "1+8": 3.2,
+     "5+8": 7.2,
+     "1+2": 8.3,
+     "1+7": 9.1,
+     "5+7": 13.5,
+     "7+8": 16.1,
+     "2+5": 23.7,
+     "2+8": 27.2,
+     "2+7": 34.2,
+     "1+3": 69.1,
+     "1+6": 115.6,
+     "1+4": 139.7,
+     "3+8": 152.4,
+     "5+6": 191.6,
+     "6+8": 197.2,
+     "4+7": 203.2,
+     "3+5": 223.5,
+     "4+5": 239.5,
+     "4+8": 268.2,
+     "6+7": 268.2,
+     "3+7": 394.5,
+     "2+4": 558.9,
+     "2+6": 558.9,
+     "2+3": 670.7,
+     "3+4": 745.2,
+     "3+6": 838.4,
+     "4+6": 1117.8
+    }
+   },
+   {
+    "time": "18:19:42",
+    "quinella": {
+     "1+5": 3.3,
+     "1+8": 3.7,
+     "1+7": 5.7,
+     "5+7": 6.7,
+     "5+8": 8.3,
+     "1+2": 9.6,
+     "7+8": 17.6,
+     "2+5": 22.9,
+     "2+8": 33.9,
+     "2+7": 39.6,
+     "1+3": 82.8,
+     "1+6": 142.5,
+     "3+8": 165.6,
+     "1+4": 204.2,
+     "3+5": 218.8,
+     "5+6": 272.3,
+     "6+8": 291.8,
+     "3+7": 298.9,
+     "4+7": 298.9,
+     "4+5": 360.4,
+     "4+8": 360.4,
+     "6+7": 383.0,
+     "2+3": 532.8,
+     "2+4": 645.0,
+     "2+6": 645.0,
+     "3+4": 875.4,
+     "3+6": 875.4,
+     "4+6": 2042.7
+    }
+   },
+   {
+    "time": "18:20:22",
+    "quinella": {
+     "1+5": 3.3,
+     "1+8": 3.7,
+     "1+7": 5.7,
+     "5+7": 6.7,
+     "5+8": 8.3,
+     "1+2": 9.6,
+     "7+8": 17.6,
+     "2+5": 22.9,
+     "2+8": 33.9,
+     "2+7": 39.6,
+     "1+3": 82.8,
+     "1+6": 142.5,
+     "3+8": 165.6,
+     "1+4": 204.2,
+     "3+5": 218.8,
+     "5+6": 272.3,
+     "6+8": 291.8,
+     "3+7": 298.9,
+     "4+7": 298.9,
+     "4+5": 360.4,
+     "4+8": 360.4,
+     "6+7": 383.0,
+     "2+3": 532.8,
+     "2+4": 645.0,
+     "2+6": 645.0,
+     "3+4": 875.4,
+     "3+6": 875.4,
+     "4+6": 2042.7
+    }
+   },
+   {
+    "time": "18:20:57",
+    "quinella": {
+     "1+5": 3.3,
+     "1+8": 3.7,
+     "1+7": 5.7,
+     "5+7": 6.7,
+     "5+8": 8.3,
+     "1+2": 9.6,
+     "7+8": 17.6,
+     "2+5": 22.9,
+     "2+8": 33.9,
+     "2+7": 39.6,
+     "1+3": 82.8,
+     "1+6": 142.5,
+     "3+8": 165.6,
+     "1+4": 204.2,
+     "3+5": 218.8,
+     "5+6": 272.3,
+     "6+8": 291.8,
+     "3+7": 298.9,
+     "4+7": 298.9,
+     "4+5": 360.4,
+     "4+8": 360.4,
+     "6+7": 383.0,
+     "2+3": 532.8,
+     "2+4": 645.0,
+     "2+6": 645.0,
+     "3+4": 875.4,
+     "3+6": 875.4,
+     "4+6": 2042.7
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.745,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   5,
+   2,
+   7,
+   8,
+   3,
+   6,
+   4
+  ],
+  "eliminated": [],
+  "recommend": "1+5",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 1,
+  "2nd": 5,
+  "3rd": 7,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": true,
+  "hit_pattern": "전적유력마 1번 적중"
+ },
+ "labels": {
+  "quinella_hit": true,
+  "winner": 1,
+  "second": 5,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-08-04 18:30:41",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
