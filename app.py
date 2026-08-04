@@ -35166,13 +35166,30 @@ MIDCHECK_ACCUM_FILE = os.path.join(os.path.dirname(__file__), "data", "_accum_da
 #   ⇒ 절대값보다 **어제 대비 증감**이 본체다. 그래서 날짜별로 남긴다.
 #   ⚠ 5키 보유율은 **담을 수 있는 경로(oddspark·keiba_nar·jra)** 만 분모로 쓴다 —
 #     경륜은 구조상 5키가 없어 분모에 넣으면 영원히 못 채운다(2026-08-04 확정).
-_ACCUM_5KEYS = ("recentPlacings", "fieldSizes", "corners", "last3fList", "pastDistances")
+# 🔴🔴 [2026-08-04 정정] 첫 판에 `recentPlacings` 를 썼는데 **실제 키는 `pastPlacings`** 다.
+#   원자료 확인(모리오카 10경주 entries[0]): corners·fieldSizes·last3fList·no·pastDistances·
+#   **pastPlacings**·pastPops·styleType. `recentPlacings` 는 **없다.**
+#   그래서 첫 측정이 0% 가 나왔다 — 실제로 떨어진 게 아니라 **기준이 틀렸다.**
+#   ⚠ CLAUDE.md 8/4 정정 ③에 「실제는 pastPlacings」라고 이미 적혀 있었는데 같은 실수를 반복했다.
+#   검증: 신식으로 8/3 을 다시 재면 **78.5%** 로 CLAUDE.md 기록과 정확히 일치한다.
+_ACCUM_5KEYS = ("pastPlacings", "fieldSizes", "corners", "last3fList", "pastDistances")
+# 🔴 5키 분모는 **담을 수 있는 경로만**이다. keirin 은 구조상 5키가 없고(chaku 배열),
+#   keiba_ext 는 3키(no·recent·styleType)만 담는다 — 분모에 넣으면 영원히 못 채운다.
 _ACCUM_FORM_PATHS = ("oddspark", "keiba_nar", "jra")
 
 
 def _midcheck_accum():
-    """오늘 축적 지표(완전 읽기 전용). 실패해도 예외를 올리지 않는다."""
-    out = {"pastPops": 0, "k5have": 0, "k5deno": 0, "srcs": {}, "races": 0}
+    """오늘 축적 지표(완전 읽기 전용). 실패해도 예외를 올리지 않는다.
+
+    🔴 **분모가 지표마다 다르다. 나란히 읽으면 오독한다(원칙 8-C).**
+      · k5deno  = `_ACCUM_FORM_PATHS` 경로의 entries 만
+      · popDeno = 같은 분모(pastPops 도 그 경로에서만 나온다)
+      · srcs    = **전체** entries(경로 제한 없음) — 위 둘과 모집단이 다르다
+    🔴 pastPops 는 **실값 기준**으로 센다. oddspark 는 키만 있고 값이 전부 null 이라
+      키 보유로 세면 실제보다 크게 부풀려진다(8/4 실측: 키 207 ↔ 실값 72).
+    """
+    out = {"pastPops": 0, "popDeno": 0, "k5have": 0, "k5deno": 0, "srcs": {}, "races": 0,
+           "bySrc": {}}
     d = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
     pre = time.strftime("%Y_%m_%d") + "_"
     try:
@@ -35190,15 +35207,26 @@ def _midcheck_accum():
         src = str(rp.get("source") or "none")
         ents = rp.get("entries") or []
         out["srcs"][src] = out["srcs"].get(src, 0) + len(ents)
+        bs = out["bySrc"].setdefault(src, {"n": 0, "k5": 0, "pop": 0})
         for e in ents:
             if not isinstance(e, dict):
                 continue
-            if e.get("pastPops"):
-                out["pastPops"] += 1
+            bs["n"] += 1
+            _ok5 = all(e.get(k) for k in _ACCUM_5KEYS)
+            _pp = e.get("pastPops")
+            # 🔴 실값 기준 — 리스트가 있어도 전부 null 이면 세지 않는다(위 docstring).
+            _okpp = isinstance(_pp, list) and any(x is not None for x in _pp)
+            if _ok5:
+                bs["k5"] += 1
+            if _okpp:
+                bs["pop"] += 1
             if src in _ACCUM_FORM_PATHS:
                 out["k5deno"] += 1
-                if all(e.get(k) for k in _ACCUM_5KEYS):
+                out["popDeno"] += 1
+                if _ok5:
                     out["k5have"] += 1
+                if _okpp:
+                    out["pastPops"] += 1
     return out
 
 
@@ -35360,14 +35388,17 @@ def _midcheck_text(slot, f, prev_stamp):
         def _d(key):
             return "" if not isinstance((_dl or {}).get(key), int) else " (%+d)" % _dl[key]
         _rate = (100.0 * _ac["k5have"] / _ac["k5deno"]) if _ac.get("k5deno") else None
-        L.append("· 축적 pastPops %d%s · 5키 %s (%d/%d)%s"
-                 % (_ac.get("pastPops", 0), _d("pastPops"),
-                    "?" if _rate is None else "%.0f%%" % _rate,
+        # 🔴 분모를 문구에 박는다 — 「5키 99%」만 보면 전체인 줄 오독한다(원칙 8-C).
+        L.append("· 5키 %s (%d/%d · 담는경로만)%s"
+                 % ("?" if _rate is None else "%.0f%%" % _rate,
                     _ac.get("k5have", 0), _ac.get("k5deno", 0), _d("k5have")))
+        L.append("· pastPops 실값 %d/%d%s"
+                 % (_ac.get("pastPops", 0), _ac.get("popDeno", 0), _d("pastPops")))
         _sr = _ac.get("srcs") or {}
         _top = sorted(_sr.items(), key=lambda kv: -kv[1])[:3]
-        L.append("· 전적소스 %s · none %d%s"
-                 % (" ".join("%s %d" % (k, v) for k, v in _top), _sr.get("none", 0), _d("none")))
+        L.append("· 전적소스(전체 %d두) %s · none %d%s"
+                 % (sum(_sr.values()), " ".join("%s %d" % (k, v) for k, v in _top),
+                    _sr.get("none", 0), _d("none")))
         if _dl is None:
             L.append("· ⚠ 어제 기록이 없어 증감 없음(첫날)")
     # 🔴 직전 점검이 언제였나 — 14:00 이 침묵했을 때 「이상 없음」과 「죽음」을 가르는 유일한 근거다.
