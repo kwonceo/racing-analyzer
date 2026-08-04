@@ -2,14 +2,6 @@
   "patterns": [
     {
       "race": "카사마츠 12경주",
-      "horse_no": 6,
-      "recent_avg": 4.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-24"
-    },
-    {
-      "race": "카사마츠 12경주",
       "horse_no": 7,
       "recent_avg": 6.6,
       "win_place": 2,
@@ -5128,26 +5120,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 689,
-    "hit": 563,
+    "count": 690,
+    "hit": 564,
     "cases": [
-      {
-        "race": "이와키타이라 10경주",
-        "date": "2026-07-31",
-        "smart_horses": [
-          6,
-          2,
-          5,
-          3
-        ],
-        "placed": [
-          2
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.3,
-        "high_odds": false
-      },
       {
         "race": "나고야 11경주",
         "date": "2026-07-31",
@@ -6695,6 +6670,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 6.0,
+        "high_odds": false
+      },
+      {
+        "race": "小松島 8경주",
+        "date": "2026-08-04",
+        "smart_horses": [
+          3,
+          4,
+          6
+        ],
+        "placed": [
+          3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
