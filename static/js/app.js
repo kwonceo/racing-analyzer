@@ -193,7 +193,17 @@
     //   ⚠ combos 가 없는 구데이터는 종전 prediction.main 으로 폴백(무삭제·하위호환).
     const _cbs = c.combos || [];
     const _hc = c.hitCombo || '';
-    const comboLine = _cbs.length
+    // 🔴 [3층 표시차단 · 화면 배선 (2026-08-04 승인)] 서버가 `oddsSuspect` 를 카드까지 보내는데
+    //   읽는 코드가 없어 **오염 경주가 정상처럼 보였다**(고마쓰시마 10경주·후나바시 3경주).
+    //   ⇒ 배당 숫자를 그리지 않고 「확인 불가」를 띄운다. 🔴 틀린 숫자보다 확인 불가가 정직하다.
+    //   ⚠ 추천 조합·확정배당 원본은 서버에 그대로 남는다(측정용) — 화면에서만 가린다.
+    const _sus = !!c.oddsSuspect;
+    const susBanner = _sus
+      ? `<div style="margin-top:5px;padding:6px 9px;border:2px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,.13);font-size:12.5px;font-weight:800;color:#fbbf24">⚠ 배당 확인 불가 · 배당판을 직접 보세요${c.oddsSuspectReason ? `<div style="font-weight:600;font-size:11px;color:#fcd34d;margin-top:2px">${esc(c.oddsSuspectReason)}</div>` : ''}</div>`
+      : '';
+    const comboLine = _sus
+      ? '<div style="margin-top:4px;font-size:13.5px;color:#94a3b8">추천 <b>표시 안 함</b> <span class="hint">(오염 감지)</span></div>'
+      : _cbs.length
       ? `<div style="margin-top:4px;font-size:13.5px">추천 ${_cbs.map((s) => (s === _hc
           ? `<b style="color:#38d39f;background:rgba(56,211,159,.16);padding:1px 5px;border-radius:5px">${esc(s)} ✓</b>`
           : `<span style="color:#cbd5e1">${esc(s)}</span>`)).join(' · ')}</div>`
@@ -202,7 +212,7 @@
     //   실측(중앙값): 적중 일본 4.6배·경륜 3.5배 ↔ 미적중 일본 16.8배·경륜 10.4배 — 3배 격차.
     //   "안전한 저배당만 잡고 고배당은 놓친다"가 회수율이 안 오르는 구조적 이유라, 매 경주에서
     //   그 격차를 눈으로 보게 한다. (payouts_raw 덕에 미적중도 확정배당이 남아 있다)
-    const _od = c.quinellaOdds;
+    const _od = _sus ? null : c.quinellaOdds;      // 🔴 오염이면 배당 숫자를 그리지 않는다
     const oddsTxt = _od
       ? (c.hit
         ? ` · <span style="color:#38d39f;font-weight:800">복승 ${_od}배 획득</span>`
@@ -219,6 +229,7 @@
         ${gradeBadge} ${gmBadge}
         <span style="flex:1"></span>${hitBadge} ${darkBadge}
       </div>
+      ${susBanner}
       ${comboLine}
       <div style="margin-top:3px;font-size:13.5px">결과 <b>${esc(top3 || '-')}</b>${oddsTxt}</div>
       ${shot}

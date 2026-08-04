@@ -2141,6 +2141,45 @@ def _gate_hit(name, rk=None, reason=None, reach_only=False):
 
 INGEST_GHOST_DROP = True      # 🔧 되돌리기: False
 
+# 🔴 [1층 보강 · 2026-08-04 승인] 서버 직접수집(oddspark)이 본 마번을 명단에 더한다.
+#   왜: 출마표(starters_store)는 **부분수집이 실존**한다. 실측 — 모리오카 7경주는 출마표가 7두인데
+#     oddspark 가 45조합·최대마번 10 을 44틱 일관 송신했고 **결과 3착이 10번**이었다.
+#     즉 진짜 10두 경주이고 출마표가 덜 수집된 것이다. 출마표만 명단으로 쓰면 정상 배당을 폐기한다.
+#   ⇒ roster = 출마표 ∪ oddspark 마번. 이건 2026-08-02 출주명단 게이트가 이미 채택한 규칙과 같다.
+#   ⚠ 메모리 캐시라 재기동하면 비지만, 비어 있으면 **종전 동작으로 되돌아갈 뿐**이라 안전하다.
+_ODDSPARK_SEEN = {}           # {raceKey: (set(마번), 갱신 epoch)}
+_ODDSPARK_SEEN_TTL = 3 * 3600
+
+
+def _oddspark_seen_note(rk, q):
+    """oddspark 페이로드의 마번을 기록(1층 명단 확장용). 실패해도 예외를 올리지 않는다."""
+    try:
+        nos = set()
+        for it in (q or []):
+            for x in (it.get("combo") or []):
+                nos.add(int(x))
+        if not nos:
+            return
+        now = time.time()
+        cur = _ODDSPARK_SEEN.get(rk)
+        prev = cur[0] if (cur and (now - cur[1]) <= _ODDSPARK_SEEN_TTL) else set()
+        _ODDSPARK_SEEN[rk] = (prev | nos, now)
+        if len(_ODDSPARK_SEEN) > 400:           # 오래된 것부터 정리(무한 증가 방지)
+            for _k, _v in sorted(_ODDSPARK_SEEN.items(), key=lambda kv: kv[1][1])[:100]:
+                _ODDSPARK_SEEN.pop(_k, None)
+    except (TypeError, ValueError, AttributeError):
+        pass
+
+
+def _oddspark_seen_get(rk):
+    try:
+        cur = _ODDSPARK_SEEN.get(rk)
+        if cur and (time.time() - cur[1]) <= _ODDSPARK_SEEN_TTL:
+            return set(cur[0])
+    except Exception:
+        pass
+    return set()
+
 
 def _ingest_ghost_verdict(rk, q, sport):
     """[1층 판정] 수신 배당에 출주 명단 밖 마번이 있으면 사유, 없으면 None.
@@ -2161,6 +2200,8 @@ def _ingest_ghost_verdict(rk, q, sport):
                 pass
         if len(roster) < 2:
             return None                      # 판정 불가 — 막지 않는다
+        _base_n = len(roster)
+        roster |= _oddspark_seen_get(rk)      # 🔴 서버 직접수집이 본 마번을 명단에 더한다(위 주석)
         # 🔴 여기부터가 '실제로 판정한 것' = 도달이다. 발동(폐기)과 따로 센다.
         #   ⚠ 이걸 안 세면 「조용한 날」과 「도달 못 함」이 구분되지 않는다(2026-08-04 ⓒ 교훈).
         _gate_hit("layer1_ingest_drop", rk, None, reach_only=True)
@@ -2178,11 +2219,27 @@ def _ingest_ghost_verdict(rk, q, sport):
         ghost = nos - roster
         if not ghost:
             return None
-        if str(sport or "") not in ("cycle", "boat", "bike"):
+        _mx = max(nos)
+        # 🔴🔴 [2026-08-04 승인] 조합수 == C(최대마번,2) 이면 **통째로 다른 경주**다.
+        #   왜: 진짜 부분수집이면 배당에 그 마번이 **드물게** 등장한다. 그런데 다른 경주 배당이
+        #     통째로 오면 모든 마번이 **빠짐없이** 등장하므로 「3조합 이상」 예외가 반드시 걸린다.
+        #     ⇒ 종전 예외는 **오염이 클수록 확실히 발동해 오염을 살렸다.** 정확히 반대로 작동했다.
+        #   실물: 후나바시 1경주(출마표 6두) 에 private 가 36조합=C(9,2) 을 7틱 · 45조합=C(10,2) 을 2틱
+        #     보냈고 그대로 저장됐다. 7·8·9 가 각각 8조합에 등장해 예외로 전부 살아났다.
+        #   🔴 오탐률 실측(원칙 20 · 분모 = 8/3~8/4 복승 스냅샷 11,277틱):
+        #     현행 355(3.15%) → 신규 **530(4.70%)**. 신규 발동 175건은 **전부 private** ·
+        #     oddspark **0건**. 명단 확장이 없었다면 oddspark 119건이 오탐으로 걸렸을 것이다.
+        #     ⚠ 5% 하한에 약간 못 미치나 **오탐 0** 이 확인돼 켠다(육안 3건 전부 진짜 오염).
+        #   🔧 되돌리기: 아래 `and not _exact` 를 지운다.
+        _exact = (len(q or []) == _mx * (_mx - 1) // 2)
+        if str(sport or "") not in ("cycle", "boat", "bike") and not _exact:
             ghost = {g for g in ghost if cnt.get(g, 0) < 3}    # 경마 부분수집 예외
             if not ghost:
                 return None
-        return "유령 마번 %s (출마표 %d두 · 배당 최대 %d)" % (sorted(ghost)[:6], len(roster), max(nos))
+        return "유령 마번 %s (명단 %d두%s · 배당 최대 %d · 조합 %d%s)" % (
+            sorted(ghost)[:6], len(roster),
+            ("" if len(roster) == _base_n else "←출마표 %d+oddspark" % _base_n),
+            _mx, len(q or []), " =C(%d,2) 통째 오염" % _mx if _exact else "")
     except Exception:
         return None                          # 실패 시 막지 않는다
 
@@ -2661,6 +2718,15 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     #   ⚠ 전체 3.1% 는 원칙 18 하한(5%)보다 낮으나 **오염이 오는 경로(private)에서는 9.5%** 로 구간 안이다.
     #   ⚠ 출마표 2두 미만이면 **판정하지 않는다**(추측 금지 · 3층이 그 경우를 따로 잡는다).
     #   🔧 되돌리기: `INGEST_GHOST_DROP = False` 한 줄.
+    try:
+        # 🔴 [명단 확장 · 2026-08-04] oddspark(서버 직접수집)가 본 마번을 먼저 기록한다.
+        #   ⚠ 판정 **앞**에 둔다 — oddspark 자신은 신뢰 소스라 이 기록으로 자기를 막지 않는다
+        #     (자기 마번은 항상 명단 안에 들어가므로 유령이 될 수 없다).
+        #   ⚠ 실패해도 예외를 올리지 않는다. 비어 있으면 종전 동작으로 되돌아갈 뿐이다.
+        if q and _src_is_oddspark(source):
+            _oddspark_seen_note(rk, q)
+    except Exception:
+        pass
     try:
         if INGEST_GHOST_DROP and q:
             _g1 = _ingest_ghost_verdict(rk, q, sport)
