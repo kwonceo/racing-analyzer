@@ -35193,8 +35193,16 @@ def _midcheck_accum():
     #   ⇒ **주 지표는 전체 분모(`k5allHave/k5allDeno`)** 로 하고 담는경로 값은 병기만 한다.
     #   ⚠ 전체 분모에는 keirin(구조상 5키 없음)·keiba_ext(3키만)가 들어가 100% 가 될 수 없다.
     #     그래도 주 지표로 쓰는 이유: **「전체 중 얼마나 채웠나」가 축적의 실제 진도**이기 때문이다.
+    # 🔴 [2026-08-05 확정] 분모를 **셋**으로 낸다. 어느 하나만 보면 반드시 왜곡된다.
+    #   ① 담는경로만(k5have/k5deno)  — 안 담는 경로를 빼므로 **구조적으로 100% 에 붙는다**(참고)
+    #   ② 전체(k5allHave/k5allDeno)  — 경륜이 절반이라 **구조적으로 과소평가**된다(참고)
+    #   ③ 🔴 경마만(k5hHave/k5hDeno) — **주 지표.** 경륜·경정·바이크는 직선 주로라
+    #      corners·last3f·pastDistances 개념 자체가 없어 못 채운다. 분모에 넣으면 영원히 안 오른다.
+    #   실측 8/4: ③ 50.4%(207/411) ↔ ② 20.9% ↔ ① 99.5%. 같은 데이터가 셋 다 다르게 보인다.
+    #   ⚠ 경마 판정은 `sport=="horse"` 로 한다 — source 를 열거하면 새 경로가 생길 때마다 목록이 갈린다.
     out = {"pastPops": 0, "popDeno": 0, "k5have": 0, "k5deno": 0,
-           "k5allHave": 0, "k5allDeno": 0, "srcs": {}, "races": 0, "bySrc": {}}
+           "k5allHave": 0, "k5allDeno": 0, "k5hHave": 0, "k5hDeno": 0,
+           "srcs": {}, "races": 0, "bySrc": {}}
     d = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
     pre = time.strftime("%Y_%m_%d") + "_"
     try:
@@ -35210,6 +35218,7 @@ def _midcheck_accum():
         out["races"] += 1
         rp = doc.get("raw_profile") or {}
         src = str(rp.get("source") or "none")
+        _is_horse = (str(doc.get("sport") or "") == "horse")   # 🔴 주 지표 분모 판정(위 주석)
         ents = rp.get("entries") or []
         out["srcs"][src] = out["srcs"].get(src, 0) + len(ents)
         bs = out["bySrc"].setdefault(src, {"n": 0, "k5": 0, "pop": 0})
@@ -35225,9 +35234,13 @@ def _midcheck_accum():
                 bs["k5"] += 1
             if _okpp:
                 bs["pop"] += 1
-            out["k5allDeno"] += 1              # 🔴 주 지표 분모 = 전체 entries(경로 제한 없음)
+            out["k5allDeno"] += 1              # ② 전체(참고)
             if _ok5:
                 out["k5allHave"] += 1
+            if _is_horse:                      # 🔴 ③ 경마만 = 주 지표
+                out["k5hDeno"] += 1
+                if _ok5:
+                    out["k5hHave"] += 1
             if src in _ACCUM_FORM_PATHS:
                 out["k5deno"] += 1
                 out["popDeno"] += 1
@@ -35268,7 +35281,8 @@ def _midcheck_accum_delta(today):
     if not isinstance(prev, dict):
         return None, (ydays[-1] if ydays else None)
     dl = {}
-    for k in ("pastPops", "k5have", "k5deno", "k5allHave", "k5allDeno", "races"):
+    for k in ("pastPops", "k5have", "k5deno", "k5allHave", "k5allDeno",
+              "k5hHave", "k5hDeno", "races"):
         if isinstance(today.get(k), int) and isinstance(prev.get(k), int):
             dl[k] = today[k] - prev[k]
     _pn, _tn = (prev.get("srcs") or {}).get("none", 0), (today.get("srcs") or {}).get("none", 0)
@@ -35395,13 +35409,13 @@ def _midcheck_text(slot, f, prev_stamp):
     if _ac:
         def _d(key):
             return "" if not isinstance((_dl or {}).get(key), int) else " (%+d)" % _dl[key]
-        # 🔴 주 지표는 **전체 분모**다(2026-08-05 대표 지적). 담는경로만 값은 괄호로 병기한다.
-        _all = (100.0 * _ac["k5allHave"] / _ac["k5allDeno"]) if _ac.get("k5allDeno") else None
-        _rate = (100.0 * _ac["k5have"] / _ac["k5deno"]) if _ac.get("k5deno") else None
-        L.append("· 5키 %s (%d/%d 전체)%s · 담는경로 %s"
-                 % ("?" if _all is None else "%.0f%%" % _all,
-                    _ac.get("k5allHave", 0), _ac.get("k5allDeno", 0), _d("k5allHave"),
-                    "?" if _rate is None else "%.0f%%" % _rate))
+        # 🔴 주 지표는 **경마만**이다(2026-08-05 확정). ①담는경로·②전체는 괄호로 병기한다.
+        _pc = lambda h, n: ("?" if not n else "%.0f%%" % (100.0 * h / n))
+        L.append("· 5키 %s (%d/%d 경마)%s · 담는경로 %s · 전체 %s"
+                 % (_pc(_ac.get("k5hHave", 0), _ac.get("k5hDeno", 0)),
+                    _ac.get("k5hHave", 0), _ac.get("k5hDeno", 0), _d("k5hHave"),
+                    _pc(_ac.get("k5have", 0), _ac.get("k5deno", 0)),
+                    _pc(_ac.get("k5allHave", 0), _ac.get("k5allDeno", 0))))
         L.append("· pastPops 실값 %d/%d%s"
                  % (_ac.get("pastPops", 0), _ac.get("popDeno", 0), _d("pastPops")))
         _sr = _ac.get("srcs") or {}
