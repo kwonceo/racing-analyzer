@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "코치 8경주",
-      "horse_no": 5,
-      "recent_avg": 4.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-26"
-    },
-    {
-      "race": "코치 8경주",
       "horse_no": 4,
       "recent_avg": 4.2,
       "win_place": 2,
@@ -4734,16 +4724,24 @@
         "복승이상감지"
       ],
       "date": "2026-08-04"
+    },
+    {
+      "race": "후나바시 11경주",
+      "horse_no": 6,
+      "recent_avg": 9.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-04"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2474,
-      "hit": 455
+      "count": 2482,
+      "hit": 456
     },
     "전체부진마": {
-      "count": 4231,
-      "hit": 1141
+      "count": 4239,
+      "hit": 1142
     },
     "대규모급락": {
       "count": 10,
