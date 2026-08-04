@@ -1,0 +1,176 @@
+{
+ "raceKey": "小松島 4경주",
+ "entries": [
+  {
+   "time": "11:56:28",
+   "minutesBefore": 9,
+   "status": "WARNING",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [
+    {
+     "code": "B라인누락",
+     "detail": "2번째 라인 페어 [3, 6] 가 삼복승 추천 어디에도 포함되지 않음",
+     "pair": [
+      3,
+      6
+     ],
+     "trifectas": [
+      [
+       1,
+       3,
+       5
+      ],
+      [
+       2,
+       3,
+       5
+      ],
+      [
+       2,
+       5,
+       6
+      ]
+     ]
+    }
+   ],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      2,
+      3
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      3,
+      5
+     ],
+     [
+      2,
+      5,
+      6
+     ],
+     [
+      1,
+      3,
+      5
+     ]
+    ],
+    "linePairs": [
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      1,
+      7
+     ]
+    ]
+   }
+  },
+  {
+   "time": "12:03:25",
+   "minutesBefore": 2,
+   "status": "SAFE",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      5,
+      7
+     ],
+     [
+      2,
+      3,
+      5
+     ],
+     [
+      3,
+      5,
+      7
+     ],
+     [
+      3,
+      5,
+      6
+     ]
+    ],
+    "linePairs": [
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      1,
+      7
+     ]
+    ]
+   }
+  },
+  {
+   "time": "12:06:36",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

@@ -1708,7 +1708,24 @@ _KEIRIN_ONLY_RE = re.compile(
     r"사세보|佐世保|구루메|久留米|다마노|玉野|히로시마|広島|아오모리|青森|다카마쓰|高松|"
     # [보강5 (2026-07-24)] 와카야마(和歌山) — 경륜 전용(joCode55)인데 확장/사설이 horse/japan_central 로
     #   오분류 저장(와카야마 1R 실측). 정규식 등록 시 아래 [종목 정정] guard 가 sport=cycle 로 자동 정정.
-    r"いわき平|이와키평|伊東|와카야마|和歌山|경륜|競輪|keirin)")
+    r"いわき平|이와키평|伊東|와카야마|和歌山|"
+    # 🔴 [보강6 (2026-08-04)] **한글·한자 한쪽만 등록돼 오분류가 실제로 났다.**
+    #   실측(analysis_log): `別府`(한자) 7건은 전부 cycle 인데 `벳푸`(한글) 2건은 **horse/japan_local** 로 저장됐다.
+    #   ⇒ 배당 상한이 경륜 5배가 아니라 경마 20~35배로 적용된다. 오늘 오염이 난 그 경주다.
+    #   같은 유형: 이와키타이라 horse 10건 · 호후 horse 3건 · 히라츠카 horse 1건 · 武雄 horse 1건.
+    #   (`いわき平`·`伊東` 한자는 이미 위에 있는데 한글 표기가 없어 갈렸다)
+    #   ⚠ 전부 경마장·경정장 없는 **경륜 전용** 지명이다.
+    #   🔴 `飯塚`(이즈카)는 **넣지 않는다** — 오토레이스장이라 sport=bike 가 맞을 수 있다(별도 확인 대상).
+    #   🔴 `別府`(벳푸)와 `防府`(호후)는 **다른 경기장**이다. 둘 다 경륜 전용이라 나란히 넣는다.
+    r"別府|벳푸|이와키타이라|武雄|다케오|平塚|히라츠카|防府|호후|"
+    # 🔴 [보강7 (2026-08-04)] `_TRACK_GROUPS` 로는 모이는데 이 정규식에는 없어 갈리던 **한글 표기 변형**.
+    #   전수 대조(표준키 30종의 별칭 43개) 중 **실제 저장 기록이 있는 4종만** 넣는다:
+    #     타마노(→다마노) horse 1 · 타치카와(→다치카와) horse 1 ·
+    #     토요하시(→도요하시) horse 1 · 🔴 이토(→이토) 27건 중 horse 1 (한자 `伊東` 만 등록돼 있었다)
+    #   ⚠ 영문 별칭(tamano·ito·gifu 등)은 저장 기록 0건이라 **넣지 않는다**(불필요한 매칭 확대 방지).
+    #   🔴 별칭 `平`(이와키타이라)은 **절대 넣지 않는다** — 한 글자라 `平塚`(히라츠카)에도 걸려 충돌한다.
+    r"타마노|타치카와|토요하시|이토|"
+    r"경륜|競輪|keirin)")
 
 
 def _is_opening_settle(po, pct):
@@ -2008,6 +2025,199 @@ def _src_divergence(prev_q, new_q):
     rats.sort()
     med = rats[len(rats) // 2]
     return {"n": len(common), "off": off, "med": med}
+
+
+# ══════════ [3층 · 배당 오염 표시 차단 (2026-08-04 승인)] ══════════
+ODDS_SUSPECT_GATE = True      # 🔧 되돌리기: False
+
+_GATE_HITS = {}               # {name: {"reach": n, "fire": n, "day": "YYYY-MM-DD"}}
+_GATE_HITS_FILE = os.path.join(DATA_DIR, "_gate_hits.json") if "DATA_DIR" in dir() else "data/_gate_hits.json"
+_GATE_HITS_LOCK = threading.RLock()   # 🔴 수집이 6병렬이라 스레드 경합이 실제로 난다
+
+
+def _gate_hit(name, rk=None, reason=None, reach_only=False):
+    """[도달·발동 계수기] 🔴 **도달과 발동을 따로 센다.**
+
+    왜: 2026-08-04 에 ⓒ(oddspark 우선·경마)가 「발동 0건」으로 보였는데 실제로는 **발동 4건이
+      전부 예외로 죽은 것**이었다. 성공 로그만 세면 「도달 못 함」과 「도달했는데 죽음」이 구분되지 않는다.
+    ⚠ 실패해도 예외를 올리지 않는다(계수기가 본 기능을 막으면 안 된다).
+    """
+    with _GATE_HITS_LOCK:
+        try:
+            day = time.strftime("%Y-%m-%d")
+            # 🔴🔴 [2026-08-04 실사고 · 두 번 리셋됐다] 이 dict 는 **프로세스 메모리**다.
+            #   ⓐ Flask 리로더는 **부모 + 자식 두 프로세스**가 돈다(실측 23960/13348). 둘 다 이 파일에 쓴다.
+            #   ⓑ 종전엔 병합을 `if not _GATE_HITS:` = **프로세스 첫 호출에만** 했다.
+            #      그 뒤로는 자기 메모리만 믿고 덮으므로 **상대 프로세스가 그 사이 쓴 항목이 사라진다.**
+            #      실측: 「layer3만 남고 layer1 사라짐」 → 「layer1만 남고 layer3 사라짐」 두 번 다 관측.
+            #   ⇒ 🔴 **저장할 때마다 읽기·병합·쓰기.** 첫 호출 최적화를 하지 않는다.
+            #      계수기는 초당 수 회 수준이라 매번 읽어도 부담이 없다(파일 수백 바이트).
+            #   ⚠ 스레드 경합도 있으므로 락으로 감싼다(수집은 6병렬이다).
+            # 🔴🔴 [2026-08-04 · 원칙 9 위반을 내가 저질렀다] 종전엔 읽기 실패를 `disk = {}` 로 삼켰다.
+            #   그러면 **빈 값으로 시작해 그대로 파일을 덮어써 이전 기록이 지워진다.**
+            #   실측: 재기동 후 `fire 2 → 0`. reach 는 초당 여러 번 올라가 금세 36까지 다시 차오르지만
+            #   **fire 는 드물어서 한 번 0이 되면 영영 0** 이다. 「reach 는 유지되고 fire 만 사라짐」이
+            #   정확히 이 모양이었다. (파일이 `_json_atomic` 의 replace 순간이면 읽기가 실패할 수 있다)
+            #   ⇒ 🔴 **읽기에 실패하면 그 사이클 저장을 건너뛴다.** 덮어쓰지 않는다.
+            disk = None
+            for _try in range(3):
+                try:
+                    with io.open(_GATE_HITS_FILE, encoding="utf-8") as _gf:
+                        disk = json.load(_gf) or {}
+                    break
+                except FileNotFoundError:
+                    disk = {}           # 파일이 아직 없는 것은 정상(첫 기록)
+                    break
+                except Exception:
+                    time.sleep(0.03)    # replace 순간일 수 있다 — 잠깐 뒤 재시도
+            if disk is None:
+                print("🔴 [도달계수기] 읽기 실패 3회 — 이번 기록 건너뜀(덮어쓰지 않는다) name=%s" % name)
+                return
+            merged = {}
+            for _src in (disk, _GATE_HITS):
+                for _k, _v in (_src or {}).items():
+                    if not isinstance(_v, dict) or _v.get("day") != day:
+                        continue          # 날짜가 바뀌면 자연히 새로 시작(과거는 남기지 않는다)
+                    cur = merged.get(_k)
+                    if not cur:
+                        merged[_k] = dict(_v)
+                        continue
+                    # 🔴 같은 날 기록이면 **큰 값을 남긴다** — 어느 프로세스가 더 셌든 잃지 않는다.
+                    cur["reach"] = max(int(cur.get("reach") or 0), int(_v.get("reach") or 0))
+                    cur["fire"] = max(int(cur.get("fire") or 0), int(_v.get("fire") or 0))
+                    if _v.get("last"):
+                        cur["last"] = _v["last"]
+            # 🔴 리셋 감지 — 디스크에 있던 항목이 병합 후 사라지면 **조용히 넘기지 않고 로그로 남긴다.**
+            #   ⚠ 감시기가 스스로 침묵한 전례(2026-07-30)를 반복하지 않기 위함이다.
+            try:
+                lost = [k for k, v in (disk or {}).items()
+                        if isinstance(v, dict) and v.get("day") == day and k not in merged]
+                if lost:
+                    print("🔴 [도달계수기] 항목 소실 감지 %s — 병합으로 복구 시도" % lost)
+            except Exception:
+                pass
+            e = merged.get(name)
+            if not e:
+                e = {"reach": 0, "fire": 0, "day": day}
+                merged[name] = e
+            e["reach"] = int(e.get("reach") or 0) + 1
+            if not reach_only:
+                e["fire"] = int(e.get("fire") or 0) + 1
+                e["last"] = {"rk": rk, "reason": reason, "at": time.strftime("%H:%M:%S")}
+                # 🔴 **발동은 append-only 로그로도 남긴다.** 카운터는 read-modify-write 라
+                #   어느 시점에 누가 덮으면 잃지만, append 는 **덮어쓰기가 없어 구조적으로 잃지 않는다.**
+                #   ⇒ 카운터는 참고용이고 **진실은 이 jsonl** 이다. 점검·보고는 이 파일을 센다.
+                #   ⚠ reach 는 초당 여러 번이라 append 하면 파일이 커진다 → **fire 만** 남긴다.
+                #     🔴 그래서 「도달 0」의 신뢰도는 여전히 카운터에 의존한다(한계를 명시한다).
+                try:
+                    _gfdir = os.path.join(LOGS_DIR, "gate_fire") if "LOGS_DIR" in globals() else "logs/gate_fire"
+                    os.makedirs(_gfdir, exist_ok=True)
+                    with io.open(os.path.join(_gfdir, "%s.jsonl" % day), "a", encoding="utf-8") as _fw:
+                        _fw.write(json.dumps({"at": time.strftime("%Y-%m-%d %H:%M:%S"), "gate": name,
+                                              "rk": rk, "reason": reason, "pid": os.getpid()},
+                                             ensure_ascii=False) + "\n")
+                except Exception:
+                    pass
+            # 🔴 계수기가 살아 있는지 확인할 수 있게 **마지막 갱신 시각**을 함께 남긴다.
+            #   이 값이 오래되면 계수기 자체가 죽은 것이므로 점검이 그것을 잡는다.
+            merged["_meta"] = {"day": day, "updatedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
+                               "pid": os.getpid()}
+            _GATE_HITS.clear()
+            _GATE_HITS.update(merged)
+            try:
+                _json_atomic(_GATE_HITS_FILE, _GATE_HITS)
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+
+INGEST_GHOST_DROP = True      # 🔧 되돌리기: False
+
+
+def _ingest_ghost_verdict(rk, q, sport):
+    """[1층 판정] 수신 배당에 출주 명단 밖 마번이 있으면 사유, 없으면 None.
+
+    ⚠ 출마표가 2두 미만이면 **판정하지 않는다**(None) — 추측 금지. 그 경우는 3층이 따로 잡는다.
+    🔴 경마는 **출마표 부분수집이 실존**하므로 배당 3조합 이상 등장한 마번은 유령으로 보지 않는다
+      (기존 `_odds_attested` 예외와 같은 규칙 · 실측 73틱이 이 예외로 살아났다).
+      경륜·경정·바이크는 oddspark 출주표가 완전 수집이라 예외 없음(2026-07-21 도야마 5R 결정 유지).
+    """
+    try:
+        sdb = _starters_load() or {}
+        rec = sdb.get(rk) or {}
+        roster = set()
+        for h in (rec.get("horses") or []):
+            try:
+                roster.add(int(h.get("no")))
+            except (TypeError, ValueError):
+                pass
+        if len(roster) < 2:
+            return None                      # 판정 불가 — 막지 않는다
+        # 🔴 여기부터가 '실제로 판정한 것' = 도달이다. 발동(폐기)과 따로 센다.
+        #   ⚠ 이걸 안 세면 「조용한 날」과 「도달 못 함」이 구분되지 않는다(2026-08-04 ⓒ 교훈).
+        _gate_hit("layer1_ingest_drop", rk, None, reach_only=True)
+        nos, cnt = set(), {}
+        for it in (q or []):
+            try:
+                for x in (it.get("combo") or []):
+                    xi = int(x)
+                    nos.add(xi)
+                    cnt[xi] = cnt.get(xi, 0) + 1
+            except (TypeError, ValueError):
+                continue
+        if not nos:
+            return None
+        ghost = nos - roster
+        if not ghost:
+            return None
+        if str(sport or "") not in ("cycle", "boat", "bike"):
+            ghost = {g for g in ghost if cnt.get(g, 0) < 3}    # 경마 부분수집 예외
+            if not ghost:
+                return None
+        return "유령 마번 %s (출마표 %d두 · 배당 최대 %d)" % (sorted(ghost)[:6], len(roster), max(nos))
+    except Exception:
+        return None                          # 실패 시 막지 않는다
+
+
+def _odds_suspect_verdict(rk, an):
+    """[3층 판정] 오염이면 사유 문자열, 아니면 None. 🔴 **판정 불가도 통과시키지 않는다.**"""
+    cp = an.get("corePicks") or {}
+    # 추천이 하나도 없으면 그릴 숫자 자체가 없다 → 판정 불필요(노이즈 방지)
+    if not (cp.get("finalQuinellas") or cp.get("confQuinellas") or cp.get("finalTrifectas")):
+        return None
+    _gate_hit("layer3_display_block", rk, None, reach_only=True)   # 🔴 도달 먼저 센다
+    # 출주 명단(출마표) — `_triple_analyze` 가 form 에 담아 둔 것을 그대로 쓴다(새 조회 없음)
+    roster = set()
+    try:
+        for h in (an.get("form") or []):
+            roster.add(int(h.get("no")))
+    except (TypeError, ValueError):
+        pass
+    # 배당에 등장한 마번
+    odds_nos = set()
+    try:
+        for it in (an.get("quinella") or []):
+            for x in (it.get("combo") or []):
+                odds_nos.add(int(x))
+    except (TypeError, ValueError):
+        pass
+    # ⓒ 종목 오분류(보조) — 경륜 전용 지명인데 sport 가 cycle 이 아니다
+    try:
+        if _KEIRIN_ONLY_RE.search(str(rk)) and str(an.get("sport") or "") not in ("cycle", ""):
+            return "종목 오분류(경륜 지명인데 sport=%s) — 키 갈림 의심" % an.get("sport")
+    except Exception:
+        pass
+    # ⓐ 🔴 판정 불가 — 출마표가 2두 미만이면 아래 검사를 아예 못 한다
+    if len(roster) < 2:
+        if odds_nos:
+            return "출주 명단 없음 — 배당 검증 불가(마번 최대 %d)" % max(odds_nos)
+        return "출주 명단 없음 — 배당 검증 불가"
+    # ⓑ 유령 마번
+    ghost = odds_nos - roster
+    if ghost:
+        return "유령 마번 %s (출마표 %d두)" % (sorted(ghost)[:6], len(roster))
+    return None
 
 
 def _oddspark_mapping_suspect(prev_q, new_q, min_pairs=6):
@@ -2433,6 +2643,29 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
         print(f"[빈수집가드] {rk}: 빈 복승 수집 무시(발신 {source}) — 기존 신선 데이터 유지")
         _ingest_reject_log(rk, "빈 수집", source, {"combos": 0})
         return {"ok": True, "skipped": True, "raceKey": rk, "reason": "빈 수집 — 기존 신선 데이터 유지"}
+    # 🔴🔴 [1층 · 입구 차단 (2026-08-04 승인)] ────────────────────────────────
+    #   🔴 **유령 마번이 하나라도 있으면 payload 를 통째로 버린다. 조합만 빼지 않는다.**
+    #     근거: 히로시마 5R 은 유령 8·9 를 감지하고도 **조합만 걸러** 남은 1~7번의 오염 배당을 그대로 썼다
+    #     (2-4 를 31.6배가 아니라 7.9배로). **일부가 다른 경주 것이면 나머지도 그 경주 것이 아니다.**
+    #   🔴 오탐률 실측(분모 = 출마표 2두+ 보유 경주의 복승 스냅샷 **3,828틱** · 8/3~8/4):
+    #     발동 **119틱 = 3.1%**   🔴 **oddspark 0건(0.0%) · private 119건(9.5%)**
+    #     ⇒ 서버 수집은 한 건도 안 걸린다 = **오탐이 아니라는 강한 증거**다.
+    #     종목별 경륜 119 · 경마 0 · 🟢 경마 부분수집 예외로 살린 것 **73틱**(예외가 실제로 작동한다).
+    #   ⚠ 전체 3.1% 는 원칙 18 하한(5%)보다 낮으나 **오염이 오는 경로(private)에서는 9.5%** 로 구간 안이다.
+    #   ⚠ 출마표 2두 미만이면 **판정하지 않는다**(추측 금지 · 3층이 그 경우를 따로 잡는다).
+    #   🔧 되돌리기: `INGEST_GHOST_DROP = False` 한 줄.
+    try:
+        if INGEST_GHOST_DROP and q:
+            _g1 = _ingest_ghost_verdict(rk, q, sport)
+            if _g1:
+                print("🔴 [1층·입구차단] %s: %s → **payload 통째 폐기**(발신 %s)" % (rk, _g1, source))
+                _ingest_reject_log(rk, "1층 입구차단: 유령 마번 — payload 폐기", source,
+                                   {"combos": len(q or []), "reason": _g1})
+                _gate_hit("layer1_ingest_drop", rk, _g1)
+                return {"ok": True, "skipped": True, "raceKey": rk, "ghostDropped": True,
+                        "reason": "유령 마번 — 다른 경주 배당으로 판단해 폐기"}
+    except Exception as _g1e:
+        print("[1층·입구차단] 판정 실패(무시·기존 동작 유지):", str(_g1e)[:100])
     # ══════════ [긴급수정 ②③ 사설 우선 + oddspark 말번호 밀림 방어] ══════════
     #   사설/배당판(비-oddspark)이 최근(≤200초) 이 경주를 수집했으면 oddspark 는 '백업' 위치 →
     #   활성 배당을 덮어쓰지 않는다(= 사용자가 실제 베팅하는 배당판과 분석패널을 항상 일치시킴).
@@ -2458,7 +2691,7 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
             _jp_horse_first = False
         if _jp_horse_first and _prev_fresh and _prev_src and not _src_is_oddspark(_prev_src):
             print("🟢 [oddspark 우선·경마] %s: 사설(src=%s) 대신 **서버 수집을 쓴다** "
-                  "(경마 오염률 35.9% 실측 · 2026-08-03)" % (rk, _prev_src))
+                  "(경마 오염률 35.9%% 실측 · 2026-08-03)" % (rk, _prev_src))
             _ingest_reject_log(rk, "oddspark 우선(경마) — 사설 덮어쓰기 허용", source,
                                {"prevSrc": _prev_src, "sport": sport, "category": category})
             _prev_fresh = False                  # 사설 우선 해제 → oddspark 가 그대로 기록된다
@@ -14095,6 +14328,20 @@ def triple_analyze():
     except Exception as _pge:
         _skip_log = False
         print("[폴링 저장 가드] 판정 실패(무시·저장 진행):", _pge)
+    # 🔴 [3층 보강 · 저장 플래그 (2026-08-04)] ────────────────────────────────
+    #   실사고: 3층을 **응답 직전**에만 걸었더니 `/api/day/races`(전체 경주 탭)·`/api/multi/dashboard` 는
+    #     저장된 로그를 읽으므로 **게이트를 안 타고 오염 추천을 그대로 보여줬다**(고마쓰시마 10경주).
+    #   ⇒ **저장 시점에 플래그를 남긴다.** 🔴 추천은 지우지 않는다 — 측정용 원본이 사라지면 안 된다.
+    #     읽는 쪽이 이 플래그를 보고 가린다(오염 제외 측정에도 그대로 쓴다).
+    try:
+        if ODDS_SUSPECT_GATE:
+            _sv = _odds_suspect_verdict(rk, an)
+            if _sv:
+                _cps = an.get("corePicks") or {}
+                _cps["oddsSuspect"] = True
+                _cps["oddsSuspectReason"] = _sv
+    except Exception as _sfe:
+        print("[3층·저장플래그] 실패(무시):", str(_sfe)[:80])
     # [분석 로그] 배당 수집·이상감지·추천이 갱신될 때마다 완전 로그 갱신(추적 가능 기록)
     if not _skip_log:
         _analysis_log_save(rk, an)
@@ -14110,6 +14357,45 @@ def triple_analyze():
         an["oddsSource"] = (db.get(rk) or {}).get("source")
     except Exception:
         pass
+    # 🔴🔴 [3층 · 표시 차단 (2026-08-04 승인)] ────────────────────────────────
+    #   왜: 시스템이 오염을 **이미 감지하고도** 조합만 걸러 남은 오염 배당을 그대로 그렸다
+    #     (히로시마 5R: [유령마번 제외] 8·9 + 조합수 45→21 을 둘 다 감지했는데 추천 배당은 7.9배 오염값).
+    #   🔴 **감지한 것은 반드시 버리는 데 쓴다. 감지만 하고 통과시키지 않는다.**
+    #   ⚠ 여기는 **응답 직전**이다 — `_analysis_log_save` 는 이미 끝났으므로 **저장 데이터는 그대로 남는다**
+    #     (사후 측정·복구 가능). 🔴 화면에 나가는 것만 막는다. `_triple_analyze` 본체 무수정.
+    #   ⚠ 원본을 **지우지 않는다** — `suspectPicks` 로 옮겨 보존한다(무삭제 원칙).
+    #
+    #   판정 3종 (하나라도 걸리면 숫자를 그리지 않는다)
+    #     ⓐ 🔴 **판정 불가도 통과시키지 않는다** — 출마표 2두 미만이면 유령마번·두수 검사를 아예 못 한다.
+    #        고마쓰시마·벳푸가 정확히 이 경우였다(조합수는 C(n,2)와 맞아 조합수 검사로도 못 잡는다).
+    #     ⓑ 유령 마번 — 배당 마번이 출마표 밖
+    #     ⓒ 종목 오분류 — 경륜 전용 지명인데 sport≠cycle (키가 갈리면 함께 나타난다)
+    #   🔴 오탐률 실측(분모 8/3~8/4 analysis_log **151경주**):
+    #     ⓐ 8.6%(13) · ⓒ 1.3%(2) · 합집합 **8.6%(13)** → 원칙 18 적정 구간(5~30%) 안.
+    #     🟢 **오탐 0건** — 발동 13경주가 전부 키 갈림 오염이다(고마쓰시마 8·벳푸 2·이즈카 2·카나자와 1).
+    #     ⚠ ⓒ 단독은 1.3% 로 얇고 ⓐ가 전부 덮는다 → **보조 신호로만** 쓴다(단독 발동 0건).
+    #   🔧 되돌리기: `ODDS_SUSPECT_GATE = False` 한 줄.
+    try:
+        if ODDS_SUSPECT_GATE:
+            _sus = _odds_suspect_verdict(rk, an)
+            if _sus:
+                _cp3 = an.get("corePicks") or {}
+                _keep = {}
+                for _k3 in ("finalQuinellas", "finalTrifectas", "confQuinellas",
+                            "confTrifectas", "bmedSpecial", "displayedCombos"):
+                    if _cp3.get(_k3):
+                        _keep[_k3] = _cp3[_k3]      # 원본 보존(무삭제)
+                        _cp3[_k3] = [] if _k3 != "displayedCombos" else {}
+                _cp3["suspectPicks"] = _keep        # 사후 분석·복구용
+                _cp3["oddsSuspect"] = True
+                _cp3["oddsSuspectReason"] = _sus
+                an["oddsSuspect"] = True
+                an["oddsSuspectReason"] = _sus
+                an["oddsSuspectNotice"] = "⚠ 배당 확인 불가 · 배당판을 직접 보세요"
+                _gate_hit("layer3_display_block", rk, _sus)
+                print("🔴 [3층·표시차단] %s: %s → 배당 숫자 미표시 · 추천 미노출(저장은 유지)" % (rk, _sus))
+    except Exception as _s3e:
+        print("[3층·표시차단] 실패(무시·기존 동작 유지):", str(_s3e)[:100])
     return jsonify(an)
 
 
@@ -20513,6 +20799,9 @@ def _day_card_extra(rk):
         "trifectaOdds": _safe_num(po.get("trifecta")) or _safe_num(raw.get("trifecta")),
         "betGrade": cp.get("betGrade"), "sport": d.get("sport"),
         "gemini": (str(_gm.get("status")) == "WARNING") if isinstance(_gm, dict) else None,
+        # 🔴 [3층 보강 2026-08-04] 저장된 오염 플래그를 카드까지 전달(이 탭은 analyze 게이트를 안 탄다).
+        "oddsSuspect": bool(cp.get("oddsSuspect")),
+        "oddsSuspectReason": cp.get("oddsSuspectReason"),
     }
     if len(_DAY_CARD_CACHE) > 3000:
         _DAY_CARD_CACHE.clear()
@@ -20634,6 +20923,10 @@ def day_races():
                 "dark_ranks": dh.get("dark_horses"),
                 # 🔴 [2026-08-01] 조회 날짜를 반드시 넘긴다 — 안 넘기면 다른 날 스냅샷이 나온다(실사고).
                 "snapshot": _day_snapshot_for(rk, "T-5", date_dash),
+                # 🔴 [3층 보강 2026-08-04] 오염 표시 — 이 탭은 analyze 게이트를 안 타므로 여기서 함께 넘긴다.
+                #   ⚠ 값을 지우지 않는다(측정 원본 유지). 화면이 이 플래그를 보고 숫자를 가린다.
+                "oddsSuspect": bool(_ext.get("oddsSuspect")),
+                "oddsSuspectReason": _ext.get("oddsSuspectReason"),
             })
     kpi = {
         "quinellaRate": round(q_hit / q_tot * 100, 1) if q_tot else 0,
@@ -21686,7 +21979,7 @@ _TRACK_GROUPS = {
     "오비히로": ["帯広", "obihiro", "obi"],
     "모리오카": ["盛岡", "morioka", "mori"],
     "미즈사와": ["水沢", "mizusawa", "mizu"],
-    "카와사키": ["川崎", "kawasaki", "kawa"],
+    "카와사키": ["川崎", "kawasaki", "kawa", "가와사키"],
     "후나바시": ["船橋", "funabashi", "funa"],
     "오이": ["大井", "ooi", "oi"],
     "우라와": ["浦和", "urawa", "ura"],
@@ -21733,6 +22026,14 @@ _TRACK_GROUPS = {
     #   `防府`(호후·경륜)는 오늘 개최 목록에서 유일하게 표준키 미등록이었다.
     "히라츠카": ["平塚", "hiratsuka", "히라쓰카"],
     "호후": ["防府", "hofu"],
+    # 🔴 [2026-08-04] 別府(벳푸)는 防府(호후)와 **다른 경기장**이다. 절대 같은 키로 묶지 않는다.
+    #   실사고: 오늘 서버는 `別府 6경주`, 확장은 `벳푸 6경주` 로 저장해 **같은 경주가 두 파일로 갈렸다.**
+    #   그 결과 두 소스가 만나지 못해 ⓑ 대조·출주명단 게이트가 **판정할 상대 자체가 없었고**,
+    #   확장이 보낸 10두짜리 다른 경주 배당(45조합)이 그대로 추천이 됐다(복승 5+8 · 8번은 없는 선수).
+    #   ⚠ 어제 조사에서 `防府` 만 보고 `別府` 를 놓쳤다 — 이름이 비슷해 같은 곳으로 착각했다.
+    "벳푸": ["別府", "beppu"],
+    # 🔴 [2026-08-04] 이즈카(飯塚) 신규 — 한자·영문이 미등록이라 확장이 한자로 보내면 같은 유형으로 갈린다.
+    "이즈카": ["飯塚", "izuka", "iizuka"],
 }
 # [표기 이중키 통합 (2026-07-28)] 이미 등록된 장에 누락 별칭만 덧붙인다.
 #   dict 리터럴에 같은 키를 다시 쓰면 위쪽 정의를 통째로 덮어써(중복 키) 혼란·누락 위험이 있으므로,
@@ -31855,7 +32156,7 @@ def _multi_collect_one(track, race, ymd):
                 _c_horse = False
             if _c_horse and _src0 and "oddspark" not in _src0 and _age0 < 90:
                 print("🟢 [oddspark 우선·경마] %s: 사설(src=%s · %d초 전) 대신 **서버 수집을 쓴다** "
-                      "(경마 오염률 35.9% 실측)" % (key, _src0[:24], int(_age0)))
+                      "(경마 오염률 35.9%% 실측)" % (key, _src0[:24], int(_age0)))
                 try:
                     _ingest_reject_log(key, "oddspark 우선(경마) — 사설 보완 생략", "oddspark_bg",
                                        {"prevSrc": _src0[:60], "ageSec": int(_age0),

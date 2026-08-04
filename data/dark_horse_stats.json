@@ -1,97 +1,97 @@
 {
- "races": 1454,
+ "races": 1475,
  "byRank": {
   "rank1": {
-   "hit": 141,
-   "total": 649,
-   "rate": 21.7
+   "hit": 154,
+   "total": 669,
+   "rate": 23.0
   },
   "rank2": {
-   "hit": 234,
-   "total": 622,
-   "rate": 37.6
+   "hit": 244,
+   "total": 640,
+   "rate": 38.1
   },
   "rank3": {
-   "hit": 275,
-   "total": 574,
-   "rate": 47.9
+   "hit": 285,
+   "total": 589,
+   "rate": 48.4
   }
  },
  "bySignal": {
   "초기급락 보존": {
-   "hit": 414,
-   "total": 1194,
-   "rate": 34.7,
+   "hit": 442,
+   "total": 1245,
+   "rate": 35.5,
    "weightReady": true
   },
   "크로스역배열": {
-   "hit": 24,
-   "total": 77,
-   "rate": 31.2,
-   "weightReady": true
-  },
-  "스마트머니": {
-   "hit": 109,
-   "total": 239,
-   "rate": 45.6,
-   "weightReady": true
-  },
-  "스마트머니+역배열": {
-   "hit": 55,
-   "total": 137,
-   "rate": 40.1,
-   "weightReady": true
-  },
-  "역배열": {
    "hit": 26,
    "total": 80,
    "rate": 32.5,
    "weightReady": true
   },
+  "스마트머니": {
+   "hit": 110,
+   "total": 236,
+   "rate": 46.6,
+   "weightReady": true
+  },
+  "스마트머니+역배열": {
+   "hit": 59,
+   "total": 143,
+   "rate": 41.3,
+   "weightReady": true
+  },
+  "역배열": {
+   "hit": 25,
+   "total": 80,
+   "rate": 31.2,
+   "weightReady": true
+  },
   "급락": {
-   "hit": 22,
-   "total": 118,
-   "rate": 18.6,
+   "hit": 21,
+   "total": 114,
+   "rate": 18.4,
    "weightReady": true
   }
  },
  "byBand": {
   "15~30": {
-   "hit": 88,
-   "total": 375,
-   "rate": 23.5,
+   "hit": 92,
+   "total": 388,
+   "rate": 23.7,
    "weightReady": true
   },
   "50~100": {
-   "hit": 11,
-   "total": 157,
-   "rate": 7.0,
+   "hit": 15,
+   "total": 173,
+   "rate": 8.7,
    "weightReady": true
   },
   "30~50": {
-   "hit": 29,
-   "total": 192,
-   "rate": 15.1,
+   "hit": 27,
+   "total": 186,
+   "rate": 14.5,
    "weightReady": true
   },
   "100+": {
-   "hit": 5,
-   "total": 69,
-   "rate": 7.2,
+   "hit": 6,
+   "total": 64,
+   "rate": 9.4,
    "weightReady": true
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 347,
-   "total": 1025,
-   "rate": 33.9,
+   "hit": 348,
+   "total": 1008,
+   "rate": 34.5,
    "weightReady": true
   },
   "keirin": {
-   "hit": 302,
-   "total": 814,
-   "rate": 37.1,
+   "hit": 334,
+   "total": 884,
+   "rate": 37.8,
    "weightReady": true
   },
   "korea": {
@@ -101,19 +101,19 @@
    "weightReady": false
   }
  },
- "missedRaces": 191,
+ "missedRaces": 195,
  "dansung": {
-  "races": 109,
-  "horseWonRate": 33.0,
-  "horseWon": 36,
-  "horsePlaced": 80,
-  "darkHitRate": 69.7,
-  "darkHit": 76,
+  "races": 117,
+  "horseWonRate": 35.9,
+  "horseWon": 42,
+  "horsePlaced": 87,
+  "darkHitRate": 72.6,
+  "darkHit": 85,
   "winnerSignals": {
    "기타": 6,
-   "복병": 31,
-   "실질유력": 24
+   "복병": 30,
+   "실질유력": 27
   }
  },
- "updated_at": "2026-08-03 23:50:39"
+ "updated_at": "2026-08-04 17:51:31"
 }

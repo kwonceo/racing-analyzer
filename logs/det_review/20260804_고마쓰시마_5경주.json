@@ -1,0 +1,57 @@
+{
+ "raceKey": "고마쓰시마 5경주",
+ "entries": [
+  {
+   "time": "12:27:55",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      10
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      4,
+      10
+     ],
+     [
+      2,
+      8
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      4,
+      10
+     ],
+     [
+      2,
+      8,
+      10
+     ],
+     [
+      2,
+      4,
+      8
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}
