@@ -35161,6 +35161,85 @@ def _midcheck_gate():
     return out
 
 
+MIDCHECK_ACCUM_FILE = os.path.join(os.path.dirname(__file__), "data", "_accum_daily.json")
+# 🔴 [축적 지표 (2026-08-04 대표 지시)] 「늘고 있는지 줄고 있는지만 보면 된다」
+#   ⇒ 절대값보다 **어제 대비 증감**이 본체다. 그래서 날짜별로 남긴다.
+#   ⚠ 5키 보유율은 **담을 수 있는 경로(oddspark·keiba_nar·jra)** 만 분모로 쓴다 —
+#     경륜은 구조상 5키가 없어 분모에 넣으면 영원히 못 채운다(2026-08-04 확정).
+_ACCUM_5KEYS = ("recentPlacings", "fieldSizes", "corners", "last3fList", "pastDistances")
+_ACCUM_FORM_PATHS = ("oddspark", "keiba_nar", "jra")
+
+
+def _midcheck_accum():
+    """오늘 축적 지표(완전 읽기 전용). 실패해도 예외를 올리지 않는다."""
+    out = {"pastPops": 0, "k5have": 0, "k5deno": 0, "srcs": {}, "races": 0}
+    d = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
+    pre = time.strftime("%Y_%m_%d") + "_"
+    try:
+        names = [x for x in os.listdir(d) if x.startswith(pre) and x.endswith(".json")]
+    except Exception:
+        return None
+    for nm in names:
+        try:
+            with io.open(os.path.join(d, nm), encoding="utf-8") as f:
+                doc = json.load(f)
+        except Exception:
+            continue
+        out["races"] += 1
+        rp = doc.get("raw_profile") or {}
+        src = str(rp.get("source") or "none")
+        ents = rp.get("entries") or []
+        out["srcs"][src] = out["srcs"].get(src, 0) + len(ents)
+        for e in ents:
+            if not isinstance(e, dict):
+                continue
+            if e.get("pastPops"):
+                out["pastPops"] += 1
+            if src in _ACCUM_FORM_PATHS:
+                out["k5deno"] += 1
+                if all(e.get(k) for k in _ACCUM_5KEYS):
+                    out["k5have"] += 1
+    return out
+
+
+def _midcheck_accum_delta(today):
+    """어제 대비 증감. 🔴 읽기 실패를 빈 값으로 삼키지 않는다(원칙 9) — 실패면 None."""
+    if not today:
+        return None, None
+    hist = None
+    for _ in range(3):
+        try:
+            with io.open(MIDCHECK_ACCUM_FILE, encoding="utf-8") as f:
+                hist = json.load(f)
+            break
+        except FileNotFoundError:
+            hist = {}
+            break
+        except Exception:
+            time.sleep(0.05)
+    if hist is None or not isinstance(hist, dict):
+        return None, None                      # 덮어쓰지 않는다
+    day = time.strftime("%Y-%m-%d")
+    ydays = sorted(k for k in hist if k < day)
+    prev = hist.get(ydays[-1]) if ydays else None
+    hist[day] = today
+    for _k in sorted(hist)[:-14]:              # 14일치만 남긴다
+        hist.pop(_k, None)
+    try:
+        _json_atomic(MIDCHECK_ACCUM_FILE, hist, indent=1)
+    except Exception:
+        pass
+    if not isinstance(prev, dict):
+        return None, (ydays[-1] if ydays else None)
+    dl = {}
+    for k in ("pastPops", "k5have", "k5deno", "races"):
+        if isinstance(today.get(k), int) and isinstance(prev.get(k), int):
+            dl[k] = today[k] - prev[k]
+    _pn, _tn = (prev.get("srcs") or {}).get("none", 0), (today.get("srcs") or {}).get("none", 0)
+    dl["none"] = _tn - _pn
+    return dl, (ydays[-1] if ydays else None)
+
+
 def _midcheck_collect(prev):
     """점검 사실 수집(완전 읽기 전용). `prev` 는 직전 점검 스탬프(없으면 {})."""
     f = {"at": time.strftime("%Y-%m-%d %H:%M:%S")}
@@ -35185,6 +35264,12 @@ def _midcheck_collect(prev):
     f["diverge"], f["divergeBoth"] = _midcheck_diverge()
     f["kakao"], f["kakaoLast"] = _midcheck_kakao()
     f["gate"] = _midcheck_gate()
+    try:
+        f["accum"] = _midcheck_accum()
+        f["accumDelta"], f["accumPrevDay"] = _midcheck_accum_delta(f["accum"])
+    except Exception as _ae:
+        f["accum"] = None
+        print("[중간점검] 축적 지표 실패(무시):", str(_ae)[:100])
     try:
         rep = _health_checklist_build()
         _it = rep.get("items") or []
@@ -35268,6 +35353,23 @@ def _midcheck_text(slot, f, prev_stamp):
     _age = _g.get("counterAgeMin")
     if _age is not None:
         L.append("· 계수기 갱신 %.0f분 전%s" % (_age, " 🔴" if _age > MIDCHECK_TH_COUNTER_MIN else ""))
+    # 🔴 [축적 지표 · 2026-08-04 대표 지시] 「늘고 있는지 줄고 있는지만 보면 된다」.
+    #   ⇒ 절대값보다 **어제 대비 증감**이 본체다. 어제 기록이 없으면 그 사실을 명시한다.
+    _ac, _dl = f.get("accum"), f.get("accumDelta")
+    if _ac:
+        def _d(key):
+            return "" if not isinstance((_dl or {}).get(key), int) else " (%+d)" % _dl[key]
+        _rate = (100.0 * _ac["k5have"] / _ac["k5deno"]) if _ac.get("k5deno") else None
+        L.append("· 축적 pastPops %d%s · 5키 %s (%d/%d)%s"
+                 % (_ac.get("pastPops", 0), _d("pastPops"),
+                    "?" if _rate is None else "%.0f%%" % _rate,
+                    _ac.get("k5have", 0), _ac.get("k5deno", 0), _d("k5have")))
+        _sr = _ac.get("srcs") or {}
+        _top = sorted(_sr.items(), key=lambda kv: -kv[1])[:3]
+        L.append("· 전적소스 %s · none %d%s"
+                 % (" ".join("%s %d" % (k, v) for k, v in _top), _sr.get("none", 0), _d("none")))
+        if _dl is None:
+            L.append("· ⚠ 어제 기록이 없어 증감 없음(첫날)")
     # 🔴 직전 점검이 언제였나 — 14:00 이 침묵했을 때 「이상 없음」과 「죽음」을 가르는 유일한 근거다.
     try:
         _last = (prev_stamp or {}).get("lastRun")
