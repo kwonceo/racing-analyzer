@@ -1,39 +1,6 @@
 {
   "patterns": [
     {
-      "pattern": "대규모급락",
-      "raceKey": "서울 8경주",
-      "total_combos_dropped": 16,
-      "drop_ratio": 0.667,
-      "result": "1+8",
-      "result_odds": "미상",
-      "result_quinella_odds": null,
-      "signal_result_combo": null,
-      "recommended_hit": true,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1785052488.2838697
-    },
-    {
-      "race": "코치 3경주",
-      "horse_no": 9,
-      "recent_avg": 7.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-26"
-    },
-    {
-      "race": "코치 3경주",
-      "horse_no": 8,
-      "recent_avg": 4.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-26"
-    },
-    {
       "race": "모리오카 8경주",
       "horse_no": 9,
       "recent_avg": 5.6,
@@ -4737,16 +4704,44 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-08-04"
+    },
+    {
+      "race": "모리오카 11경주",
+      "horse_no": 6,
+      "recent_avg": 5.4,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-04"
+    },
+    {
+      "race": "모리오카 11경주",
+      "horse_no": 3,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-04"
+    },
+    {
+      "race": "모리오카 11경주",
+      "horse_no": 9,
+      "recent_avg": 6.0,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-08-04"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2422,
-      "hit": 448
+      "count": 2429,
+      "hit": 449
     },
     "전체부진마": {
-      "count": 4142,
-      "hit": 1115
+      "count": 4152,
+      "hit": 1118
     },
     "대규모급락": {
       "count": 10,
@@ -4756,8 +4751,8 @@
       "hit_rate": 30.0
     },
     "이상감지동반": {
-      "count": 1720,
-      "hit": 667
+      "count": 1723,
+      "hit": 669
     },
     "급락동반": {
       "count": 349,
