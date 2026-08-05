@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카나자와 5경주",
-      "horse_no": 8,
-      "recent_avg": 9.2,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-27"
-    },
-    {
-      "race": "카나자와 5경주",
-      "horse_no": 9,
-      "recent_avg": 6.4,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-27"
-    },
-    {
       "race": "모리오카 11경주",
       "horse_no": 7,
       "recent_avg": 6.2,
@@ -4752,16 +4734,38 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-08-05"
+    },
+    {
+      "race": "후나바시 11경주",
+      "horse_no": 3,
+      "recent_avg": 5.4,
+      "win_place": 1,
+      "conditions": [
+        "급락88%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-05"
+    },
+    {
+      "race": "후나바시 11경주",
+      "horse_no": 8,
+      "recent_avg": 4.0,
+      "win_place": 3,
+      "conditions": [
+        "급락81%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-05"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2552,
+      "count": 2553,
       "hit": 469
     },
     "전체부진마": {
-      "count": 4381,
-      "hit": 1178
+      "count": 4389,
+      "hit": 1180
     },
     "대규모급락": {
       "count": 12,
@@ -4771,12 +4775,12 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 1829,
-      "hit": 709
+      "count": 1836,
+      "hit": 711
     },
     "급락동반": {
-      "count": 383,
-      "hit": 104
+      "count": 389,
+      "hit": 106
     }
   },
   "bokbyeong_patterns": [
@@ -5149,26 +5153,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 746,
-    "hit": 610,
+    "count": 747,
+    "hit": 611,
     "cases": [
-      {
-        "race": "케이오카쿠 1경주",
-        "date": "2026-08-02",
-        "smart_horses": [
-          3,
-          6,
-          2
-        ],
-        "placed": [
-          3,
-          6
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 4.0,
-        "high_odds": false
-      },
       {
         "race": "케이오카쿠 2경주",
         "date": "2026-08-02",
@@ -6728,6 +6715,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 4.9,
+        "high_odds": false
+      },
+      {
+        "race": "후나바시 11경주",
+        "date": "2026-08-05",
+        "smart_horses": [
+          3,
+          9
+        ],
+        "placed": [
+          3,
+          9
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
