@@ -14646,7 +14646,19 @@ def triple_analyze():
                 #     「오염 관측 0건」이 **볼 수단이 없어서**일 수 있으므로 세는 것은 계속한다.
                 #   🔧 되돌리기: `_kra3` 를 항상 False 로 만든다.
                 _kra3 = bool(_KRA_TRACK_RE.search(str(rk or "")))
-                if not _kra3:
+                # 🔴🔴 [일본 완화 · 2026-08-05 승인 · 라이브 대응] **「출주 명단 없음」만은 일본도 가리지 않는다.**
+                #   실사고: 도요하시(새 경륜장) 오버레이가 전부 비었다. 원인은 3층이 아니라 **명단 미수집**이다 —
+                #     새 경기장이라 `_keirin_autocollect_form` 이 아직 명단을 못 담았고(horses=[]), 그런데
+                #     oddspark 배당은 7두 21조합 **정상**인데 「명단 없음」으로 통째로 가렸다.
+                #   🔴 「명단 없음」은 **유령 판정 자체가 불가능**하다 = 오염 신호가 아니라 **못 잰다**는 뜻이다.
+                #     한국 완화와 같은 논리(2026-08-05). 오늘 일본 3층 발동 5건이 **전부 명단 없음**이고
+                #     배당은 경륜 정상 두수(7~10)였다 — 유령·오분류는 0.
+                #   ⚠ **유령 마번·sport 오분류는 계속 가린다**(대표 지시). 그건 진짜 오염 신호다.
+                #   🔴 이중 안전 — 통째 오염(C(n,2))은 **1층이 입구에서 이미 폐기**한다(도요하시 66조합 폐기 실측).
+                #   🔧 되돌리기: `or _nolist` 를 지운다.
+                _nolist = str(_sus or "").startswith("출주 명단 없음")
+                _soft = bool(_kra3 or _nolist)
+                if not _soft:
                     _keep = {}
                     for _k3 in ("finalQuinellas", "finalTrifectas", "confQuinellas",
                                 "confTrifectas", "bmedSpecial", "displayedCombos"):
@@ -14659,13 +14671,15 @@ def triple_analyze():
                 an["oddsSuspect"] = True
                 an["oddsSuspectReason"] = _sus
                 # 🔴 `soft` = 「경고만 · 가리지 않음」. 프론트가 이 값을 보고 조합·배당을 남긴다.
-                _cp3["oddsSuspectSoft"] = _kra3
-                an["oddsSuspectSoft"] = _kra3
-                an["oddsSuspectNotice"] = ("⚠ 출마표와 배당 두수가 다릅니다 · 배당판을 함께 확인하세요"
+                _cp3["oddsSuspectSoft"] = _soft
+                an["oddsSuspectSoft"] = _soft
+                an["oddsSuspectNotice"] = ("⚠ 출주 명단 미수집 · 배당판을 함께 확인하세요" if _nolist
+                                           else "⚠ 출마표와 배당 두수가 다릅니다 · 배당판을 함께 확인하세요"
                                            if _kra3 else "⚠ 배당 확인 불가 · 배당판을 직접 보세요")
                 _gate_hit("layer3_display_block", rk, _sus)
                 print("%s [3층·%s] %s: %s"
-                      % ("🟠" if _kra3 else "🔴", "경고만(한국)" if _kra3 else "표시차단",
+                      % ("🟠" if _soft else "🔴",
+                         ("경고만(명단없음)" if _nolist else "경고만(한국)") if _soft else "표시차단",
                          rk, _sus))
     except Exception as _s3e:
         print("[3층·표시차단] 실패(무시·기존 동작 유지):", str(_s3e)[:100])
