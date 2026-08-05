@@ -197,9 +197,14 @@
     //   읽는 코드가 없어 **오염 경주가 정상처럼 보였다**(고마쓰시마 10경주·후나바시 3경주).
     //   ⇒ 배당 숫자를 그리지 않고 「확인 불가」를 띄운다. 🔴 틀린 숫자보다 확인 불가가 정직하다.
     //   ⚠ 추천 조합·확정배당 원본은 서버에 그대로 남는다(측정용) — 화면에서만 가린다.
-    const _sus = !!c.oddsSuspect;
-    const susBanner = _sus
-      ? `<div style="margin-top:5px;padding:6px 9px;border:2px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,.13);font-size:12.5px;font-weight:800;color:#fbbf24">⚠ 배당 확인 불가 · 배당판을 직접 보세요${c.oddsSuspectReason ? `<div style="font-weight:600;font-size:11px;color:#fcd34d;margin-top:2px">${esc(c.oddsSuspectReason)}</div>` : ''}</div>`
+    // 🔴 [한국 완화 ① · 2026-08-05] `oddsSuspectSoft` 면 **경고만** 하고 조합·배당은 남긴다.
+    //   근거: 한국 소급 리플레이 48경주 중 3층 차단 31건이 전부 오탐(31/31 = 100%)이고
+    //   오염 관측은 0건이다. 켜면 화면의 64.6% 가 빈다 — 정상 경주를 막는 쪽이 오염보다 나쁘다.
+    const _susAll = !!c.oddsSuspect;
+    const _soft = !!c.oddsSuspectSoft;
+    const _sus = _susAll && !_soft;          // 실제로 '가리는' 경우만
+    const susBanner = _susAll
+      ? `<div style="margin-top:5px;padding:6px 9px;border:2px solid ${_soft ? '#38bdf8' : '#f59e0b'};border-radius:8px;background:${_soft ? 'rgba(56,189,248,.12)' : 'rgba(245,158,11,.13)'};font-size:12.5px;font-weight:800;color:${_soft ? '#7dd3fc' : '#fbbf24'}">${_soft ? '⚠ 출마표와 배당 두수가 다릅니다 · 배당판을 함께 확인하세요' : '⚠ 배당 확인 불가 · 배당판을 직접 보세요'}${c.oddsSuspectReason ? `<div style="font-weight:600;font-size:11px;color:${_soft ? '#bae6fd' : '#fcd34d'};margin-top:2px">${esc(c.oddsSuspectReason)}</div>` : ''}</div>`
       : '';
     const comboLine = _sus
       ? '<div style="margin-top:4px;font-size:13.5px;color:#94a3b8">추천 <b>표시 안 함</b> <span class="hint">(오염 감지)</span></div>'

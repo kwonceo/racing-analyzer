@@ -169,6 +169,22 @@ def _post(path, body):
         return {"error": str(e)[:200]}
 
 
+def _iso_dir():
+    """🔴 격리 디렉터리. **없으면 빈 문자열이 아니라 None 취급으로 막는다.**
+
+    ⚠ 종전엔 MARK 가 없으면 `d = ""` 가 되고 `os.path.join("", "logs", "gate_fire")` 가
+      **`logs/gate_fire`(실전 상대경로)** 로 풀려 **실전 로그를 격리 결과로 읽었다**
+      (2026-08-05 실사고 — 세이부엔·몬베츠·히로시마가 격리 출력에 찍혔다).
+    """
+    if not os.path.exists(MARK):
+        return ""
+    d = open(MARK, encoding="utf-8").read().strip()
+    if not d or "iso_racing_" not in d or not os.path.isdir(d):
+        print("🔴 격리 디렉터리 없음 — 실전 경로를 읽지 않는다 (MARK=%r)" % d)
+        return ""
+    return d
+
+
 def probe():
     """오염 payload 를 넣어 1층이 실제로 막는지 확인. 🔴 격리 서버에만 넣는다."""
     if not _port_busy(ISO_PORT):
@@ -194,23 +210,88 @@ def probe():
     print("③ 오염 payload(36조합=C(9,2)) — 1층이 막아야 한다")
     print("  ", _post("/api/odds/triple/ingest",
                       {"raceKey": rk, "quinella": bad_q, "source": "probe-private"}))
-    d = open(MARK, encoding="utf-8").read().strip() if os.path.exists(MARK) else ""
-    gf = os.path.join(d, "logs", "gate_fire")
-    print("④ gate_fire 로그:", os.listdir(gf) if os.path.isdir(gf) else "없음")
-    gh = os.path.join(d, "data", "_gate_hits.json")
-    if os.path.exists(gh):
+    d = _iso_dir()
+    gf = os.path.join(d, "logs", "gate_fire") if d else ""
+    print("④ gate_fire 로그:", os.listdir(gf) if gf and os.path.isdir(gf) else "없음")
+    gh = os.path.join(d, "data", "_gate_hits.json") if d else ""
+    if gh and os.path.exists(gh):
         print("⑤ 계수기:", open(gh, encoding="utf-8").read()[:300])
+    # ══════ [한국 완화안 검증 · 2026-08-05] 한국은 경고만 · 일본은 그대로 가린다 ══════
+    #   🔴 종목 판정이 틀리면 일본까지 완화된다 — **둘을 나란히 넣어 갈라지는지 본다.**
+    print()
+    print("=== 한국 완화안 검증 ===")
+    for tag, rk2 in (("🇰🇷 한국", "부산 9경주"), ("🇯🇵 일본", "후나바시 9경주")):
+        # 명단 6두를 심는다(한국 경로만 저장되므로 일본은 3층 'ⓐ 명단 없음'으로 걸린다)
+        _post("/api/korea/form", {"raceKey": rk2, "horses": [{"no": i} for i in range(1, 7)]})
+        r = _post("/api/odds/triple/ingest",
+                  {"raceKey": rk2, "quinella": bad_q, "source": "probe-private"})
+        drop = bool(r.get("ghostDropped"))
+        an = _post("/api/odds/triple/analyze", {"raceKey": rk2})
+        cp = (an or {}).get("corePicks") or {}
+        print("  %s %-14s 1층폐기=%-5s 3층flag=%-5s soft=%-5s 추천유지=%s"
+              % (tag, rk2, drop, bool(an.get("oddsSuspect")), bool(an.get("oddsSuspectSoft")),
+                 bool(cp.get("finalQuinellas") or cp.get("displayedCombos"))))
+    print("  기대: 한국은 1층폐기 False · soft True · 추천유지 True")
+    print("        일본은 1층폐기 True(또는 3층이 가림) · soft False")
+    gf2 = os.path.join(d, "logs", "gate_fire") if d else ""
+    if gf2 and os.path.isdir(gf2):
+        for fn in os.listdir(gf2):
+            print("  gate_fire/%s:" % fn)
+            for line in open(os.path.join(gf2, fn), encoding="utf-8"):
+                if line.strip():
+                    j = json.loads(line)
+                    print("     %s %s %s" % (j.get("at"), j.get("gate"), str(j.get("rk"))))
     return 0
+
+
+def _iso_pids():
+    """🔴 포트 8012 를 잡고 있는 PID + 그 자식(Flask 리로더). **실전 PID 는 절대 안 잡는다.**
+
+    ⚠ 종전엔 CommandLine 에 `iso_racing_` 이 들어 있다고 보고 매칭했는데,
+      명령줄은 `python app.py` 뿐이고 디렉터리는 **cwd 에만** 있다 → 매칭이 항상 실패했다.
+      그래서 `--stop` 이 「정리 완료」를 찍고도 프로세스를 안 죽였고, 서버가
+      **삭제된 디렉터리에서 계속 돌았다**(2026-08-05 실사고).
+    """
+    out = subprocess.run(["netstat", "-ano"], capture_output=True, text=True).stdout or ""
+    pids = set()
+    for line in out.splitlines():
+        if (":%d " % ISO_PORT) in line and "LISTENING" in line:
+            p = line.split()[-1]
+            if p.isdigit():
+                pids.add(int(p))
+    if not pids:
+        return []
+    ps = subprocess.run(["powershell", "-NoProfile", "-Command",
+                         "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | "
+                         "Select-Object ProcessId,ParentProcessId | ConvertTo-Json -Compress"],
+                        capture_output=True, text=True).stdout or "[]"
+    try:
+        rows = json.loads(ps)
+        rows = rows if isinstance(rows, list) else [rows]
+    except Exception:
+        rows = []
+    for r in list(rows):                       # 리로더 자식도 함께
+        if r.get("ParentProcessId") in pids:
+            pids.add(r.get("ProcessId"))
+    live = subprocess.run(["netstat", "-ano"], capture_output=True, text=True).stdout or ""
+    for line in live.splitlines():             # 🔴 안전장치 — 실전 포트 PID 는 제외
+        if (":%d " % LIVE_PORT) in line and "LISTENING" in line:
+            p = line.split()[-1]
+            if p.isdigit():
+                pids.discard(int(p))
+    return sorted(pids)
 
 
 def stop():
     d = open(MARK, encoding="utf-8").read().strip() if os.path.exists(MARK) else ""
-    subprocess.run(["powershell", "-NoProfile", "-Command",
-                    "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | "
-                    "Where-Object { $_.CommandLine -like '*iso_racing_*' } | "
-                    "ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"],
-                   capture_output=True)
+    pids = _iso_pids()
+    print("격리 PID:", pids or "없음")
+    for pid in pids:
+        subprocess.run(["taskkill", "/PID", str(pid), "/F", "/T"], capture_output=True)
     time.sleep(2)
+    if _port_busy(ISO_PORT):
+        print("🔴 포트 %d 가 아직 살아 있다 — 수동 확인 필요" % ISO_PORT)
+        return 1
     if d and os.path.isdir(d) and "iso_racing_" in d:
         shutil.rmtree(d, ignore_errors=True)
         print("격리 디렉터리 삭제:", d)

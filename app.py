@@ -2237,7 +2237,19 @@ def _ingest_ghost_verdict(rk, q, sport):
         #     ⚠ 5% 하한에 약간 못 미치나 **오탐 0** 이 확인돼 켠다(육안 3건 전부 진짜 오염).
         #   🔧 되돌리기: 아래 `and not _exact` 를 지운다.
         _exact = (len(q or []) == _mx * (_mx - 1) // 2)
-        if str(sport or "") not in ("cycle", "boat", "bike") and not _exact:
+        # 🔴🔴 [한국 완화 ② · 2026-08-05 승인] **한국(KRA)에서는 exact 예외 해제를 적용하지 않는다.**
+        #   왜: 한국은 확장(private)이 **유일 소스**라 두 소스 대조도 명단 확장도 작동하지 않는다.
+        #     출마표는 PDF Vision·사람 업로드 의존이라 **부분 판독이 실존**하고, 오염과 그것을
+        #     가릴 대조군이 구조적으로 없다.
+        #   실증: 7/30 부산 3경주 — 배당 틱이 15→21→45→53→55조합으로 **점진 충전**됐다.
+        #     오염이면 처음부터 55조합이 온다. 실제 11두 경주이고 PDF 가 9두만 판독된 것이다.
+        #   🔴 소급 리플레이(48경주): 3층 차단 31건이 **전부 오탐(31/31 = 100%)** · 오염 관측 0건.
+        #   ⚠ 종목 판정은 `_KRA_TRACK_RE` 재사용(목록 이중화 금지). 저장된 경기장 토큰 96개 중
+        #     4개만 걸리고 **전부 한국**이다(오탐 0 · 일본은 하나도 안 걸린다).
+        #   ⚠ 유령 판정 자체는 남는다 — 3조합 예외를 통과한 진짜 유령은 여전히 잡는다.
+        #   🔧 되돌리기: `and not _kra` 를 지운다.
+        _kra = bool(_KRA_TRACK_RE.search(str(rk or "")))
+        if str(sport or "") not in ("cycle", "boat", "bike") and (not _exact or _kra):
             ghost = {g for g in ghost if cnt.get(g, 0) < 3}    # 경마 부분수집 예외
             if not ghost:
                 return None
@@ -14425,6 +14437,8 @@ def triple_analyze():
                 _cps = an.get("corePicks") or {}
                 _cps["oddsSuspect"] = True
                 _cps["oddsSuspectReason"] = _sv
+                # 🔴 한국은 「경고만」이다(완화 ①) — 저장 플래그에도 그 구분을 남긴다.
+                _cps["oddsSuspectSoft"] = bool(_KRA_TRACK_RE.search(str(rk or "")))
                 # 🔴🔴 [2026-08-04 승인] 발동했는데 **폴링 저장 가드(마감 후 120분)** 때문에
                 #   기록이 안 남는 문제. 실측: 3층 발동 149건 ↔ 저장 **1건**.
                 #   발동 경주 4개 중 3개가 창 밖이라 통째로 사라졌다.
@@ -14480,20 +14494,36 @@ def triple_analyze():
             _sus = _odds_suspect_verdict(rk, an)
             if _sus:
                 _cp3 = an.get("corePicks") or {}
-                _keep = {}
-                for _k3 in ("finalQuinellas", "finalTrifectas", "confQuinellas",
-                            "confTrifectas", "bmedSpecial", "displayedCombos"):
-                    if _cp3.get(_k3):
-                        _keep[_k3] = _cp3[_k3]      # 원본 보존(무삭제)
-                        _cp3[_k3] = [] if _k3 != "displayedCombos" else {}
-                _cp3["suspectPicks"] = _keep        # 사후 분석·복구용
+                # 🔴🔴 [한국 완화 ① · 2026-08-05 승인] **한국(KRA)에서는 가리지 않는다.**
+                #   근거: 소급 리플레이 48경주 중 3층 차단 31건이 **전부 오탐(31/31 = 100%)**.
+                #     명단없음 30건은 PDF 업로드가 있는 날만 명단이 생기기 때문이고(오염 신호가 아니다),
+                #     유령 1건은 점진 충전된 진짜 11두 경주였다. 한국 오염 관측은 **0건**.
+                #   🔴 켜면 화면의 **64.6% 가 빈다.** 정상 경주를 막는 쪽이 오염보다 나쁘다.
+                #   ⚠ 플래그·사유·계수기·append 는 **그대로 남긴다**(완화 ③) —
+                #     「오염 관측 0건」이 **볼 수단이 없어서**일 수 있으므로 세는 것은 계속한다.
+                #   🔧 되돌리기: `_kra3` 를 항상 False 로 만든다.
+                _kra3 = bool(_KRA_TRACK_RE.search(str(rk or "")))
+                if not _kra3:
+                    _keep = {}
+                    for _k3 in ("finalQuinellas", "finalTrifectas", "confQuinellas",
+                                "confTrifectas", "bmedSpecial", "displayedCombos"):
+                        if _cp3.get(_k3):
+                            _keep[_k3] = _cp3[_k3]      # 원본 보존(무삭제)
+                            _cp3[_k3] = [] if _k3 != "displayedCombos" else {}
+                    _cp3["suspectPicks"] = _keep        # 사후 분석·복구용
                 _cp3["oddsSuspect"] = True
                 _cp3["oddsSuspectReason"] = _sus
                 an["oddsSuspect"] = True
                 an["oddsSuspectReason"] = _sus
-                an["oddsSuspectNotice"] = "⚠ 배당 확인 불가 · 배당판을 직접 보세요"
+                # 🔴 `soft` = 「경고만 · 가리지 않음」. 프론트가 이 값을 보고 조합·배당을 남긴다.
+                _cp3["oddsSuspectSoft"] = _kra3
+                an["oddsSuspectSoft"] = _kra3
+                an["oddsSuspectNotice"] = ("⚠ 출마표와 배당 두수가 다릅니다 · 배당판을 함께 확인하세요"
+                                           if _kra3 else "⚠ 배당 확인 불가 · 배당판을 직접 보세요")
                 _gate_hit("layer3_display_block", rk, _sus)
-                print("🔴 [3층·표시차단] %s: %s → 배당 숫자 미표시 · 추천 미노출(저장은 유지)" % (rk, _sus))
+                print("%s [3층·%s] %s: %s"
+                      % ("🟠" if _kra3 else "🔴", "경고만(한국)" if _kra3 else "표시차단",
+                         rk, _sus))
     except Exception as _s3e:
         print("[3층·표시차단] 실패(무시·기존 동작 유지):", str(_s3e)[:100])
     return jsonify(an)
@@ -20902,6 +20932,8 @@ def _day_card_extra(rk):
         # 🔴 [3층 보강 2026-08-04] 저장된 오염 플래그를 카드까지 전달(이 탭은 analyze 게이트를 안 탄다).
         "oddsSuspect": bool(cp.get("oddsSuspect")),
         "oddsSuspectReason": cp.get("oddsSuspectReason"),
+        # 🔴 한국은 배너만 띄우고 조합·배당은 남긴다(완화 ① · 2026-08-05)
+        "oddsSuspectSoft": bool(cp.get("oddsSuspectSoft")),
     }
     if len(_DAY_CARD_CACHE) > 3000:
         _DAY_CARD_CACHE.clear()

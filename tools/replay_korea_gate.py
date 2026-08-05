@@ -124,12 +124,24 @@ def main():
         detail.append((key, "유령", len(roster), n, mx, ghost[:5],
                        "오탐후보(점진충전)" if ramp else "오염후보"))
     print("한국 배당 보유 %d경주" % tot)
+    print()
+    print("[완화 전]")
     print("  3층 차단(추천 가림)  : %d (%.1f%%)" % (blocked3, 100.0 * blocked3 / max(tot, 1)))
     print("     └ 명단 없음       : %d" % nomatch)
     print("     └ 유령 마번       : %d" % (blocked3 - nomatch))
     print("  1층 폐기(exact)      : %d (%.1f%%)" % (fired1, 100.0 * fired1 / max(tot, 1)))
     fp = sum(1 for x in detail if "오탐" in x[6])
     print("  🔴 오탐 후보         : %d / %d = %.1f%%" % (fp, blocked3, 100.0 * fp / max(blocked3, 1)))
+    # 🔴 [완화안 적용 후 · 2026-08-05 승인] 한국은 가리지 않고 **경고만** 하고,
+    #   1층은 exact 예외 해제를 적용하지 않는다. 플래그·계수기는 그대로 남는다(완화 ③).
+    #   ⚠ 이 스크립트는 여기서 대상이 **전부 한국**이므로 완화 후 차단은 0 이 된다.
+    print()
+    print("[완화 후 · 승인 적용]")
+    print("  3층 차단(추천 가림)  : 0 (0.0%)      ← 한국은 배너만")
+    print("  3층 경고 배너        : %d (%.1f%%)   ← 플래그·계수기는 그대로 남는다(완화 ③)"
+          % (blocked3, 100.0 * blocked3 / max(tot, 1)))
+    print("  1층 폐기             : 0 (0.0%)      ← exact 예외 해제 미적용")
+    print("  🔴 오탐              : 0 / 0")
     print()
     for x in detail[:40]:
         print("   %-30s %-8s 명단%2d 조합%-4d 최대%2d 유령%-12s %s" % x)

@@ -274,8 +274,55 @@ def case_hook_crash():
         r.returncode, "게이트 오류" in out, "커밋 차단(정당)" in out)
 
 
+# ── 케이스 ⑤  run_gate_selfcheck : 배당 오염 안전장치를 하나씩 무력화 ──────────
+# 🔴 왜 다섯 개나 넣는가: 게이트는 **층이 여러 개**라 하나만 검사하면 나머지가 죽어도 통과한다.
+#   2026-08-04 에 계수기가 977번 조용히 죽었는데 아무 테스트도 실패하지 않았다.
+_GATE_INJECTIONS = [
+    ("io 미import(2026-08-04 실사고)", "\nimport io\n", "\n"),
+    ("1층 한국 완화 제거", "(not _exact or _kra)", "(not _exact)"),
+    ("1층 오염 판정 무력화", "ghost = nos - roster", "ghost = set()"),
+    ("3층 유령 판정 무력화", "ghost = odds_nos - roster", "ghost = set()"),
+    ("중간점검 프로세스 검사 무력화", 'elif f.get("procs") != 2:', "elif False:"),
+]
+
+
+def case_gate_selfcheck():
+    """🔴 라이브 app.py 를 건드리지 않는다 — 사본에 주입하고 `GATE_APP_SRC` 로 읽힌다."""
+    p = os.path.join(BASE, "app.py")
+    src = open(p, encoding="utf-8").read()
+    missing = [n for n, a, _ in _GATE_INJECTIONS if a not in src]
+    if missing:
+        return None, "앵커 없음 %s — 케이스 갱신 필요" % missing
+    tmpd = tempfile.mkdtemp(prefix="selfcheck_gate_")
+    caught, detail = 0, []
+    try:
+        for name, a, b in _GATE_INJECTIONS:
+            cp = os.path.join(tmpd, "app_injected.py")
+            with open(cp, "w", encoding="utf-8") as f:
+                f.write(src.replace(a, b, 1))
+            env2 = dict(os.environ)
+            env2["GATE_APP_SRC"] = cp
+            env2.setdefault("PYTHONIOENCODING", "utf-8")
+            r = subprocess.run([PY, os.path.join(BASE, "tests/run_gate_selfcheck.py")],
+                               cwd=BASE, env=env2, capture_output=True, timeout=180)
+            if r.returncode == 1:
+                caught += 1
+            else:
+                detail.append("%s(rc=%d)" % (name, r.returncode))
+    except Exception as e:
+        return None, "주입 실패: %s" % str(e)[:80]
+    finally:
+        shutil.rmtree(tmpd, ignore_errors=True)
+    if open(p, encoding="utf-8").read() != src:
+        return False, "🔴 라이브 app.py 가 변경됐다 — 즉시 확인할 것"
+    n = len(_GATE_INJECTIONS)
+    return caught == n, ("주입 검출 %d/%d · 라이브 무변경" % (caught, n)
+                         + (" · 못 잡음: %s" % ", ".join(detail) if detail else ""))
+
+
 CASES = [
     ("pre-commit(고장구분)", "게이트 스크립트 자체 예외", case_hook_crash),
+    ("run_gate_selfcheck", "1층·3층·계수기·중간점검 5종", case_gate_selfcheck),
     ("run_glob_safety", "날짜 없는 특정 경주 매칭", case_glob_safety),
     ("run_glob_safety(listdir)", "os.listdir 날짜 없는 지목", case_glob_safety_listdir),
     ("run_glob_safety(오탐)", "무해한 전수 스캔(잡히면 실패)", case_glob_safety_noise),

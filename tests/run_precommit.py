@@ -73,7 +73,17 @@ BLOCKING_SUITES = ["tests/run_report.py", "tests/run_formula.py", "tests/run_flo
                    "tests/run_freeze_behavior.py", "tests/run_smoke_render.py",
                    # 🔴 [2026-07-31] 원칙 16 — 날짜 없는 glob 매칭은 커밋에서 막는다.
                    #    중복 자체는 정상이라 매일 감시하면 영원히 빨간불이 된다(I5 제거·이관).
-                   "tests/run_glob_safety.py"]
+                   "tests/run_glob_safety.py",
+                   # 🔴🔴 [2026-08-05] `run_gate_selfcheck.py` 를 **차단 등급**으로 넣는다.
+                   #  왜 차단인가 — 실패했을 때 **회원 화면에 곧바로 나타나는 두 방향**을 잰다:
+                   #    ⓐ 오염이 그대로 표시된다(8/4 히로시마 5R·벳푸 6R 유형)
+                   #    ⓑ 🔴 **정상 경주가 막힌다** — 대표 지시대로 이쪽이 오염보다 나쁘다.
+                   #  그리고 2026-08-04 `import io` 누락처럼 **`except` 가 삼켜 977번 조용히 죽는**
+                   #  유형은 문법 검사·다른 회귀가 하나도 못 잡았다. 이 테스트만 결과로 잡는다.
+                   #  ⚠ 비용이 낮다 — 네트워크·서버·실전 데이터를 쓰지 않고 임시 디렉터리에서만 돈다.
+                   #  ⚠ 위험: app.py 앵커(구간 시작 문자열)가 바뀌면 커밋이 막힌다.
+                   #    ⇒ 그때는 **앵커를 고치는 것이 맞다**(구간이 옮겨졌다는 뜻이므로).
+                   "tests/run_gate_selfcheck.py"]
 
 # 🟡 아직 고치지 않은 결함을 재현하는 테스트 — 실패해도 커밋을 막지 않는다.
 #
