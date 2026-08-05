@@ -1,6 +1,48 @@
 # CLAUDE.md
 
-# 🔴🔴 [2026-08-05] KRA 공식 API — **현재 키로 열리는 것은 딱 둘이다**
+# 🔴🔴 [2026-08-05 · 68차] KRA API 20종 승인 후 실측 — **열리는 것은 5종 · 명단은 아직**
+
+## 🟢 실제로 열리는 것 5종 (resultCode 00 · numOfRows=1 실측)
+```
+racedetailresult/getracedetailresult   경주별상세성적   total 108   🟢 **쓰는 중**(fetch_kra)
+API160_1/integratedInfo_1              확정배당율통합   total 13256  🟢 **쓰는 중**(app.py:24838)
+API10_1/jockeyChangeInfo_1             기수변경        total 2      🔴 **안 씀**(코드에 경로만)
+API37_1/sectionRecord_1                구간별기록      total 409    🔴 **안 씀**
+API6_1/raceDetailSectionRecord_1       구간별통과순위   total 10     🔴 **안 씀**
+```
+🟢 트래픽 제한 안 걸림 확인(전수 후에도 resultCode 00). 개발계정 한도 여유.
+
+## 🔴 명단(출전표)·경주계획은 오늘 승인됐다는데 **아직 코드 12**
+```
+API26_2/* (출전표 상세정보 · 데이터셋 15058677) 후보 4종 → 전부 NO_OPENAPI_SERVICE_ERROR(12)
+API57_1/racehorseInfo_1 · API12_1/raceResult_1 → 코드 12
+racehorselist/getracehorselist → HTTP403 SERVICE_KEY(https 필요 or 별도)
+```
+🔴 **원인 둘 중 하나** — ⓐ 승인 반영 지연(보통 즉시~2시간, 최대 하루) ⓑ 정확한 operation명 필요.
+  ⚠ **추측 URL 나열을 멈췄다**(대표 지시). operation명은 데이터셋마다 제각각이다 —
+  `getracedetailresult`(소문자) ↔ `integratedInfo_1`(카멜) ↔ `sectionRecord_1`. 규칙이 없다.
+  ⇒ 🔴 **문서(.docx)나 Swagger 명세에서 정확히 읽어야 한다.** WebFetch 는 .docx 를 못 연다.
+📋 **대표가 확인할 것**: data.go.kr 마이페이지 → 출전표 상세정보(15058677) → **"End Point"와
+  "요청 변수"를 그대로 알려주면** 즉시 배선한다. (예: `.../B551015/API26_2/<정확한이름>`)
+
+## 🔴 취소마 전용 API — **못 찾았다. 그러나 단서가 있다**
+```
+racedetailresult 응답에 **chulYn(출전여부)·chulNo(마번)** 필드가 있다.
+서울 7/26 1경주 실측: 11두 전원 chulYn=0 (취소마 없는 경주).
+🔴 그러나 이건 **결과(사후) API** 다 — 사전 취소 판정엔 못 쓴다.
+⚠ chulYn=0 이 「출전」인지 「취소」인지 **의미 미확정**(취소마 있는 경주로 대조해야 안다).
+```
+⇒ **출전취소 전용 API 가 승인 20종에 있는지 대표가 확인**해야 한다(목록에서 이름이 안 보였다).
+  있으면 축소 판정을 왕복 추정이 아니라 **직접**(취소마 제외 후 남은 축소만 오염)으로 바꾸고
+  기각한 조합수 검사(ⓐ)도 되살릴 수 있다. ⏸ 파악까지 · 배선은 금요일 이후.
+
+## ⇒ 금요일 결론 — **명단은 여전히 PDF 단독**
+출전표 API 가 열리기 전까지 한국 명단은 PDF 업로드가 유일하다. 위 「금요일 점검표」 그대로 간다.
+🔴 대표가 출전표 End Point 를 알려주면 그 순간 배선 → 3층 차단 64.6% 가 사라진다.
+
+---
+
+# 🔴🔴 [2026-08-05] KRA 공식 API — **현재 키로 열리는 것은 딱 둘이다**(67차 · 아래는 이력)
 
 ## 실측 (data.go.kr B551015 · 우리 서비스키)
 ```
