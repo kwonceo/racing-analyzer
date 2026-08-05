@@ -3744,3 +3744,18 @@ reach/fire 를 **하나의 JSON 을 덮어쓰며** 세는 한, 어느 시점에 
 - TT-3 되돌림 시 완전 종료 아니라 4단 관찰(데이터 계속 축적). 알림에 숫자·사유. 되돌림 이력 파일.
 - TT-4 반복 오르내림 자체가 신호 → rollback_log에 누적.
 🔴 설계 정정만. 구현 승인 후. 판정선 사후 하향 아님(더 보수적으로 바꾸는 것).
+
+## [2026-08-06 · 78차] keyHorses 저장 위치 전수 (복기 착수 전)
+
+- UU-1 corePicks.keyHorses는 0%였으나 frozen.keyHorses·recommendation_history·timeline_snapshot에 있을 것.
+- UU-2 대표 지적: axis≠keyHorses. axis는 조합용, keyHorses는 우리 순위.
+- UU-3 원자료 1건 열어 확인. 오늘 두 번 키 덜 본 전례(recent·pdfDate).
+🔴 정말 없으면 대안 논의. 있으면 그 경로 사용.
+
+### 78차 실제
+- 🔴 keyHorses 있다(정정). corePicks.keyHorses가 아니라 **최상위 .keyHorses·frozen.keyHorses·rec_history**.
+  8월 최상위 98%·frozen 84%. 오늘 세 번째 키 덜 본 사례.
+- 우리순위 = frozen.keyHorses 우선(마감 동결), 없으면 최상위 keyHorses. axis 안 씀(대표 지시).
+- build_review.py 신설. 8/5 115경주 복기(적중36·미적중79). 4분류 ③15①19④36②9.
+- 용량: 경주당 0.77KB · 하루 0.10MB · 90일 8.8MB. 멱등 확인(재실행 동일 md5).
+- P2 태그 정상(소노다6 recent[6,7,8]→P2). 적중·미적중 동형.
