@@ -5153,42 +5153,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 754,
-    "hit": 614,
+    "count": 756,
+    "hit": 616,
     "cases": [
-      {
-        "race": "히로시마 3경주",
-        "date": "2026-08-03",
-        "smart_horses": [
-          3,
-          4
-        ],
-        "placed": [
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
-      {
-        "race": "모리오카 1경주",
-        "date": "2026-08-03",
-        "smart_horses": [
-          2,
-          5,
-          9
-        ],
-        "placed": [
-          2,
-          5,
-          9
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "오다와라 3경주",
         "date": "2026-08-03",
@@ -6725,9 +6692,41 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "다마노 7경주",
+        "date": "2026-08-05",
+        "smart_horses": [
+          7,
+          1
+        ],
+        "placed": [
+          7,
+          1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "나라 6경주",
+        "date": "2026-08-05",
+        "smart_horses": [
+          7,
+          5,
+          3
+        ],
+        "placed": [
+          5
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 3.8,
+        "high_odds": false
       }
     ],
-    "rate": 81.4,
+    "rate": 81.5,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
