@@ -30872,6 +30872,29 @@ def _korea_run_job(gen, api_key=None):
         sess_date = sess.get("date")
         todo = [i for i, r in enumerate(races) if not (r.get("report") and r.get("horses"))]
 
+        # 🔴 [2026-08-06 승인] **경주마다 그 페이지 헤더에서 date 를 단다.**
+        #   왜: 한 PDF 에 8/7·8/8·8/9 가 섞일 수 있다. 첫 페이지 헤더 하나만 읽으면
+        #     8/8·8/9 경주에도 8/7 이 붙는다(대표 지시). ⇒ 각 race 의 summaryPage 텍스트로 판정.
+        #   ⚠ 페이지 대응이 안 잡히면 그 경주는 **date 없음**(None) 으로 둔다 — prerace 는
+        #     'nodate' 키가 되고, 게이트는 명단 없음으로 본다(완화안이 있어 화면은 안 빔).
+        try:
+            _pdoc = fitz.open(KOREA_PDF)
+            for _r in races:
+                _sp = _r.get("summaryPage")
+                if not _sp or _sp < 1 or _sp > _pdoc.page_count:
+                    _r["date"] = None
+                    continue
+                _rt = _pdoc[_sp - 1].get_text()
+                _rd = _korea_pdf_date(_rt, None)   # 못 읽으면 None(오늘로 폴백하지 않는다)
+                _r["date"] = _rd
+            _pdoc.close()
+            _dc = {}
+            for _r in races:
+                _dc[_r.get("date")] = _dc.get(_r.get("date"), 0) + 1
+            print("[한국 PDF] 경주별 날짜 분포:", _dc)
+        except Exception as _rde:
+            print("[한국 PDF] 경주별 날짜 파싱 실패(무시):", str(_rde)[:60])
+
         def _analyze_one(idx):
             race = races[idx]
             if cancelled():
@@ -30918,7 +30941,7 @@ def _korea_run_job(gen, api_key=None):
                     if res.get("error"):
                         race["error"] = res["error"]
                     if res["status"] == "done":
-                        _prerace_save_race(sess_date, race)   # 메인 스레드에서만 저장
+                        _prerace_save_race(race.get("date") or sess_date, race)   # 🔴 경주별 date 우선(2026-08-06)
                     done = sum(1 for r in races if r.get("status") == "done")
                     sess["done"] = done
                     sess["message"] = f"분석 중... {done}/{len(races)} 경주 완료 — {race['title']}"
@@ -30948,6 +30971,35 @@ def _korea_start_job(api_key=None):
     threading.Thread(target=_korea_run_job, args=(gen, api_key), daemon=True).start()
 
 
+# 🔴 [2026-08-06] **요일이 붙은 날짜만** 잡는다 — 경주 헤더는 '8월07일(금요일)' 처럼 요일이 있고,
+#   전적표의 과거 출주일('7월9일')에는 요일이 없다. 요일을 강제하지 않으면 과거 전적 날짜를 먼저
+#   잡아 8/7 경주가 7/9 로 오염된다(실측: p5→7/16 · p6→7/9 오판). 요일 강제로 그 오염을 막는다.
+_KOREA_DATE_RE = re.compile(r"(\d{1,2})\s*월\s*(\d{1,2})\s*일\s*[（(]\s*([월화수목금토일])")
+_KOREA_YEAR_RE = re.compile(r"(20\d\d)\s*년")
+
+
+def _korea_pdf_date(txt, fallback=None):
+    """[2026-08-06 승인] PDF **원문에서 경주일**을 읽는다. 못 읽으면 fallback(오늘 아님·None 가능).
+
+    🔴 왜: 종전엔 `date = time.strftime()`(업로드한 날)을 붙였다. 8/7 금요일 PDF 를 8/6 에
+      올리면 date=8/6 이 되고, 금요일에 pdfDate(8/6)≠오늘(8/7) 로 **명단이 통째 차단**된다.
+    ⚠ 실측: 첫 줄 `금/일08월07일(금요일) 부산경마` · p37 `2026년 8월 7일`. 요일이 붙은 날짜만 신뢰한다.
+    ⚠ 연도는 텍스트의 '20NN년' 을 우선, 없으면 현재 연도.
+    ⚠ 🔴 **경주별 호출은 fallback=None** 으로 준다 — 못 읽으면 오늘로 폴백하지 않고 **date 없음(None)** →
+      prerace 가 'nodate' 키가 되고 게이트는 명단 없음으로 본다(완화안이 있어 화면은 안 빔).
+    """
+    if not txt:
+        return fallback
+    y = _KOREA_YEAR_RE.search(txt)
+    year = y.group(1) if y else time.strftime("%Y")
+    m = _KOREA_DATE_RE.search(txt)
+    if m:
+        mo, dy = int(m.group(1)), int(m.group(2))
+        if 1 <= mo <= 12 and 1 <= dy <= 31:
+            return "%s-%02d-%02d" % (year, mo, dy)
+    return fallback
+
+
 @app.route("/api/korea/start", methods=["POST"])
 def korea_start():
     """PDF 업로드 → 새 세션 시작(기존 세션/진행중 작업은 덮어씀 = '새 PDF 업로드' 초기화)."""
@@ -30959,7 +31011,21 @@ def korea_start():
         return jsonify({"error": "PDF 파일이 없습니다 (multipart 'pdf' 필드)."}), 400
     os.makedirs(os.path.dirname(KOREA_PDF), exist_ok=True)
     f.save(KOREA_PDF)
-    date = time.strftime("%Y-%m-%d")
+    # 🔴 [2026-08-06 승인] 세션 대표 date 를 **PDF 첫 페이지들에서 파싱**(업로드 날짜 아님).
+    #   ⚠ 이건 세션 대표값이고, **경주별 date 는 _korea_run_job 에서 그 페이지 헤더로 따로 단다**
+    #     (한 PDF 에 여러 날이 섞일 수 있으므로 · 대표 지시). 파싱 실패 시에만 오늘로 폴백.
+    _today = time.strftime("%Y-%m-%d")
+    date = _today
+    try:
+        if fitz is not None:
+            _pd = fitz.open(KOREA_PDF)
+            _head = "".join(_pd[_i].get_text() for _i in range(min(3, _pd.page_count)))
+            _pd.close()
+            date = _korea_pdf_date(_head, _today)
+            if date != _today:
+                print("[한국 PDF] 경주일 파싱: %s (업로드일 %s)" % (date, _today))
+    except Exception as _de:
+        print("[한국 PDF] 날짜 파싱 실패(오늘로 폴백):", str(_de)[:60])
     md5 = _pdf_md5(KOREA_PDF)
     # 🔴 [2026-08-02 승인 · 안A] **한국 PDF 날짜별 보존** — 종전에는 `korea_last.pdf` 로
     #   **매번 덮어써서 과거 재파싱이 영구 불가**였다(인기·두수·날짜를 나중에 받을 수 없다).
@@ -30994,7 +31060,7 @@ def korea_start():
         try:
             for r in (cached.get("races") or []):
                 if r.get("status") == "done" and r.get("report") and r.get("horses"):
-                    _prerace_save_race(date, r)
+                    _prerace_save_race(r.get("date") or date, r)   # 🔴 경주별 date 우선(2026-08-06)
         except Exception as e:
             print("[한국] 캐시 사전분석 복원 실패:", e)
         return jsonify({"ok": True, "cached": True})
@@ -31064,7 +31130,7 @@ def korea_reextract():
             sess.get("jockeyStats") or {}, body.get("api_key"))
         race["status"] = "done"
         _korea_save(sess)
-        _prerace_save_race(sess.get("date"), race)   # [사전분석] 재추출 결과도 경주별 파일 갱신
+        _prerace_save_race(race.get("date") or sess.get("date"), race)   # 🔴 경주별 date 우선(2026-08-06)
         return jsonify({"ok": True, "race": race})
     finally:
         doc.close()
