@@ -1,36 +1,6 @@
 {
   "patterns": [
     {
-      "race": "모리오카 6경주",
-      "horse_no": 2,
-      "recent_avg": 5.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-27"
-    },
-    {
-      "race": "카나자와 1경주",
-      "horse_no": 4,
-      "recent_avg": 8.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-27"
-    },
-    {
-      "race": "카나자와 1경주",
-      "horse_no": 6,
-      "recent_avg": 6.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-27"
-    },
-    {
       "race": "카나자와 1경주",
       "horse_no": 7,
       "recent_avg": 4.6,
@@ -4753,16 +4723,42 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-05"
+    },
+    {
+      "race": "소노다 10경주",
+      "horse_no": 9,
+      "recent_avg": 4.8,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-08-05"
+    },
+    {
+      "race": "소노다 10경주",
+      "horse_no": 7,
+      "recent_avg": 5.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-05"
+    },
+    {
+      "race": "소노다 10경주",
+      "horse_no": 11,
+      "recent_avg": 4.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-05"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2510,
-      "hit": 461
+      "count": 2516,
+      "hit": 463
     },
     "전체부진마": {
-      "count": 4314,
-      "hit": 1161
+      "count": 4325,
+      "hit": 1164
     },
     "대규모급락": {
       "count": 11,
@@ -4772,11 +4768,11 @@
       "hit_rate": 27.3
     },
     "이상감지동반": {
-      "count": 1804,
-      "hit": 700
+      "count": 1809,
+      "hit": 701
     },
     "급락동반": {
-      "count": 380,
+      "count": 383,
       "hit": 104
     }
   },
@@ -5150,44 +5146,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 728,
-    "hit": 595,
+    "count": 730,
+    "hit": 597,
     "cases": [
-      {
-        "race": "모리오카 9경주",
-        "date": "2026-08-02",
-        "smart_horses": [
-          3,
-          6,
-          5
-        ],
-        "placed": [
-          3,
-          6,
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 2.0,
-        "high_odds": false
-      },
-      {
-        "race": "코치 4경주",
-        "date": "2026-08-02",
-        "smart_horses": [
-          7,
-          4,
-          2,
-          3
-        ],
-        "placed": [
-          3
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "코치 5경주",
         "date": "2026-08-02",
@@ -6719,9 +6680,44 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "소노다 10경주",
+        "date": "2026-08-05",
+        "smart_horses": [
+          7,
+          8,
+          10,
+          9
+        ],
+        "placed": [
+          7,
+          9
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "몬베츠 3경주",
+        "date": "2026-08-05",
+        "smart_horses": [
+          8,
+          7,
+          5
+        ],
+        "placed": [
+          8,
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.9,
+        "high_odds": false
       }
     ],
-    "rate": 81.7,
+    "rate": 81.8,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
