@@ -35483,7 +35483,13 @@ def _midcheck_accum():
     #      corners·last3f·pastDistances 개념 자체가 없어 못 채운다. 분모에 넣으면 영원히 안 오른다.
     #   실측 8/4: ③ 50.4%(207/411) ↔ ② 20.9% ↔ ① 99.5%. 같은 데이터가 셋 다 다르게 보인다.
     #   ⚠ 경마 판정은 `sport=="horse"` 로 한다 — source 를 열거하면 새 경로가 생길 때마다 목록이 갈린다.
+    # 🔴 [2026-08-06 대표 지시] 5키를 **P2/P6 두 지표로 쪼갠다.** 하나로 묶으면 P6 때문에
+    #   나빠 보인다(8/5 실측: P2 85% ↔ P6 45%). keiba_ext 는 recent 를 담아 **P2 는 되고 P6 만 막힌다**.
+    #     P2가능(우상향) = recent 또는 pastPlacings 보유(최근 3전 착순이 있으면 P2 판정 가능)
+    #     P6가능(상3F괴리) = last3fList 와 corners 둘 다 보유(상3F 순위와 통과순위가 있어야 판정)
+    #   ⚠ 둘 다 **경마만**(_is_horse) 분모다 — 경륜은 직선 주로라 corners·last3f 개념이 없다.
     out = {"pastPops": 0, "popDeno": 0, "k5have": 0, "k5deno": 0,
+           "p2hHave": 0, "p2hDeno": 0, "p6hHave": 0, "p6hDeno": 0,
            "k5allHave": 0, "k5allDeno": 0, "k5hHave": 0, "k5hDeno": 0,
            "srcs": {}, "races": 0, "bySrc": {}}
     d = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
@@ -35524,6 +35530,13 @@ def _midcheck_accum():
                 out["k5hDeno"] += 1
                 if _ok5:
                     out["k5hHave"] += 1
+                # 🔴 P2/P6 분리(경마만)
+                out["p2hDeno"] += 1
+                if e.get("recent") or e.get("pastPlacings"):
+                    out["p2hHave"] += 1
+                out["p6hDeno"] += 1
+                if e.get("last3fList") and e.get("corners"):
+                    out["p6hHave"] += 1
             if src in _ACCUM_FORM_PATHS:
                 out["k5deno"] += 1
                 out["popDeno"] += 1
@@ -35694,7 +35707,13 @@ def _midcheck_text(slot, f, prev_stamp):
             return "" if not isinstance((_dl or {}).get(key), int) else " (%+d)" % _dl[key]
         # 🔴 주 지표는 **경마만**이다(2026-08-05 확정). ①담는경로·②전체는 괄호로 병기한다.
         _pc = lambda h, n: ("?" if not n else "%.0f%%" % (100.0 * h / n))
-        L.append("· 5키 %s (%d/%d 경마)%s · 담는경로 %s · 전체 %s"
+        # 🔴 [2026-08-06 대표 지시] 5키를 P2/P6 둘로 나눠 표시한다(하나로 묶으면 P6 때문에 나빠 보임).
+        L.append("· P2가능 %s (%d/%d 경마)%s · P6가능 %s (%d/%d)%s"
+                 % (_pc(_ac.get("p2hHave", 0), _ac.get("p2hDeno", 0)),
+                    _ac.get("p2hHave", 0), _ac.get("p2hDeno", 0), _d("p2hHave"),
+                    _pc(_ac.get("p6hHave", 0), _ac.get("p6hDeno", 0)),
+                    _ac.get("p6hHave", 0), _ac.get("p6hDeno", 0), _d("p6hHave")))
+        L.append("· 5키(P2∩P6) %s (%d/%d 경마)%s · 담는경로 %s · 전체 %s"
                  % (_pc(_ac.get("k5hHave", 0), _ac.get("k5hDeno", 0)),
                     _ac.get("k5hHave", 0), _ac.get("k5hDeno", 0), _d("k5hHave"),
                     _pc(_ac.get("k5have", 0), _ac.get("k5deno", 0)),
