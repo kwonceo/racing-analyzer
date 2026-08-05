@@ -35190,6 +35190,80 @@ def _start_health_kakao_scheduler():
     print("[체크리스트 카카오] 자동 발송 스케줄러 시작(매일 %02d:00 · 60초 폴링 · HEALTH_KAKAO_HOUR)" % hour)
 
 
+# ══════════ [복기 자동 기록 스케줄러 (2026-08-06 승인 · 작업1·2)] ══════════
+#   왜: build_review.py 가 지금은 사람이 손으로 돌리는 도구다. 결과가 확정될 때마다 자동으로
+#     오답 노트가 쌓여야 학습 입력이 마른 채로 가지 않는다.
+#   🔴 완전 읽기 전용 — analysis_log·race_results 를 **읽기만** 하고 별도 파일(logs/race_review)에 쓴다.
+#     실패해도 결과 수집·저장·추천에 일절 개입하지 않는다(try/except 격리).
+#   🔴 sleep-first 아님 — 폴링 방식이다. autorun 이 파일 mtime 스탬프(_review_last.json)로
+#     이미 처리한 것을 건너뛰므로 **재기동해도 손실이 없다**(다음 폴링에서 다 잡는다).
+#   🔴 도달·발동 계수기(review_autowrite)에 남긴다 — 「돌긴 도는데 아무것도 안 쓴다」를 구분하려면.
+#   🔧 되돌리기: `REVIEW_ENABLED = False` 한 줄.
+REVIEW_ENABLED = True
+REVIEW_INTERVAL = 180                  # 복기는 급하지 않다 · 스탬프라 지연돼도 무손실
+_review_sched_started = False
+_PATTERN_ALERT_STAMP = os.path.join(os.path.dirname(__file__), "data", "_pattern_alert.json")
+
+
+def _review_pattern_alert(p2_cum):
+    """🔴 [작업2] 패턴 누적이 30(관찰)·200(채택)에 처음 닿는 순간 1회 알림. 스탬프로 중복 방지.
+    ⚠ 카카오 발송 코어(`_kakao_send_to_me`)는 건드리지 않는다 — 조립·판정만."""
+    try:
+        try:
+            st = json.load(io.open(_PATTERN_ALERT_STAMP, encoding="utf-8")) or {}
+        except Exception:
+            st = {}
+        done = set(st.get("P2_우상향") or [])
+        for mark in (30, 200):
+            if p2_cum >= mark and mark not in done:
+                done.add(mark)
+                st["P2_우상향"] = sorted(done)
+                _json_atomic(_PATTERN_ALERT_STAMP, st)   # 🔴 먼저 기록(발송 실패해도 중복 안 냄)
+                try:
+                    _kakao_send_to_me(
+                        "📊 패턴 P2_우상향 누적 발동 %d 도달 · 판정선 %d(%s)"
+                        % (p2_cum, mark, "관찰 기준" if mark == 30 else "채택 검토 기준(n≥200)"))
+                except Exception:
+                    pass
+    except Exception as e:
+        print("[복기] 패턴 알림 오류(무시):", str(e)[:120])
+
+
+def _start_review_scheduler():
+    global _review_sched_started
+    if _review_sched_started or not REVIEW_ENABLED:
+        return
+    _review_sched_started = True
+    try:
+        import importlib.util
+        _bp = os.path.join(os.path.dirname(__file__), "tools", "build_review.py")
+        _spec = importlib.util.spec_from_file_location("build_review", _bp)
+        _reviewmod = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_reviewmod)            # 🔴 stdout 부작용 제거됨(2026-08-06)
+    except Exception as e:
+        print("[복기] 모듈 로드 실패 — 스케줄러 미기동(무시):", str(e)[:120])
+        return
+
+    def _loop():
+        while True:
+            try:
+                time.sleep(REVIEW_INTERVAL)
+                today = time.strftime("%Y-%m-%d")
+                yday = time.strftime("%Y-%m-%d", time.localtime(time.time() - 86400))
+                _gate_hit("review_autowrite", reach_only=True)          # 도달(폴링마다)
+                res = _reviewmod.autorun([today, yday]) or {}
+                w = int(res.get("written") or 0)
+                if w:
+                    _gate_hit("review_autowrite", reason="복기 저장 %d건" % w)   # 발동
+                    print("[복기] 저장 %d건 · 변경일 %s" % (w, res.get("changed")))
+                _review_pattern_alert(int(res.get("p2_cum") or 0))
+            except Exception as e:
+                print("[복기] 스케줄러 오류(무시):", str(e)[:150])
+
+    threading.Thread(target=_loop, daemon=True, name="review").start()
+    print("[복기] 자동 기록 스케줄러 시작(%d초 폴링 · 스탬프 · 읽기전용)" % REVIEW_INTERVAL)
+
+
 # ══════════ [중간점검 하루 3회 (2026-08-04 승인 · 세 번 밀린 항목)] ══════════
 #   왜: 하루가 끝난 뒤에만 말해 주는 장치(21:00 체크리스트·커밋 훅)로는 낮에 생긴 사고를 그날 못 잡는다.
 #     실측 근거 — 2026-08-04 하루에만 **대표가 직접 물어야 알게 된 것이 네 번**이다.
@@ -35699,6 +35773,22 @@ def _midcheck_text(slot, f, prev_stamp):
     _age = _g.get("counterAgeMin")
     if _age is not None:
         L.append("· 계수기 갱신 %.0f분 전%s" % (_age, " 🔴" if _age > MIDCHECK_TH_COUNTER_MIN else ""))
+    # 🔴 [복기 자동기록 2026-08-06] 오답 노트가 도는지 + 패턴 누적 현황 한 줄(읽기 전용).
+    try:
+        _rvdir = os.path.join(os.path.dirname(__file__), "logs", "race_review")
+        _tp = time.strftime("%Y_%m_%d")
+        _rvn = sum(1 for x in os.listdir(_rvdir) if x.startswith(_tp)) if os.path.isdir(_rvdir) else 0
+        try:
+            _ps = json.load(io.open(os.path.join(os.path.dirname(__file__), "data",
+                                                 "pattern_stats.json"), encoding="utf-8")) or {}
+        except Exception:
+            _ps = {}
+        _p2 = sum((v or {}).get("발동", 0) for v in (_ps.get("P2_우상향") or {}).values())
+        _mark, _left = ("관찰30", 30 - _p2) if _p2 < 30 else \
+                       (("채택200", 200 - _p2) if _p2 < 200 else ("채택선통과", 0))
+        L.append("· 복기 오늘 %d건 · P2누적 %d (%s까지 %d)" % (_rvn, _p2, _mark, max(0, _left)))
+    except Exception:
+        pass
     # 🔴 [축적 지표 · 2026-08-04 대표 지시] 「늘고 있는지 줄고 있는지만 보면 된다」.
     #   ⇒ 절대값보다 **어제 대비 증감**이 본체다. 어제 기록이 없으면 그 사실을 명시한다.
     _ac, _dl = f.get("accum"), f.get("accumDelta")
@@ -36387,6 +36477,7 @@ def _boot_background():
     try:
         _start_health_kakao_scheduler()  # [체크리스트 카카오 2026-07-30] 매일 22:00 상태 푸시(기존 추천 발송과 분리)
         _start_midcheck_scheduler()      # [중간점검 2026-08-04] 09·14·22시 · 14시는 이상시만 · 스탬프 필수
+        _start_review_scheduler()        # [복기 자동기록 2026-08-06] 180초 폴링 · 스탬프 · 읽기전용
         _start_nar_preload_scheduler()   # [ⓑ NAR 선수집 2026-08-03] 개최일 오전 6~9시 · 수집 창과 전적을 분리
         _start_jra_preload_scheduler()   # [ⓒ 중앙 선수집 2026-08-03] 결손 317두 중 280두가 중앙 · netkeiba_guard 필수
     except Exception as e:

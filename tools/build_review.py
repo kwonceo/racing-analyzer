@@ -31,10 +31,11 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AL = os.path.join(BASE, "data", "analysis_log")
 RR = os.path.join(BASE, "data", "race_results")
 OUT = os.path.join(BASE, "logs", "race_review")
-try:
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-except Exception:
-    pass
+# 🔴 [2026-08-06] stdout 래핑은 **main() 안**에서만 한다.
+#   app.py 가 이 모듈을 import 해 autorun() 을 부르므로, top-level 에서 sys.stdout 을
+#   TextIOWrapper 로 덮으면 **app.py 의 stdout 을 통째로 바꿔** 서버 로그가 깨진다.
+REVIEW_STAMP = os.path.join(BASE, "data", "_review_last.json")
+PSTAT = os.path.join(BASE, "data", "pattern_stats.json")
 
 # 패턴 정의는 thresholds 를 재사용(목록 이중화 금지)
 try:
@@ -64,10 +65,33 @@ def _our_rank(kh, no):
         return None
 
 
-def _pattern_tags(recent):
-    """그 말의 최근 착순 시계열이 어느 패턴에 걸리나. recent = [최신, …]."""
+# 🔴 [2026-08-06] 경륜 recent 전용 파서 — 대표 지시 「경륜 recent가 문자열이라 P2가 안 걸린다」.
+#   원문 실측(원칙: 추측 금지, 원문 먼저): recent = '8/ 3 初特選 ６着 12.3 8/ 4 準決勝 ２着 11.6'
+#     · 착순 = **전각 숫자 + 着** (６着·２着) · 뒤 실수(11.6)는 타임이라 着가 없어 안 걸린다
+#     · 방향 = **오래→최신**(8/3 → 8/4). 경마 recent(최신-앞)와 **반대**다.
+#   경륜은 recent 에 이번 개최 2전만, prev1 에 직전 개최 3전이 있다 → 둘을 시간순으로 이어
+#   최근 3전을 복원한다(prev1 먼저 · recent 나중).
+_ZEN2HAN = {ord("０") + i: ord("0") + i for i in range(10)}
+
+
+def _keirin_placings(recent, prev1=None):
+    """경륜 recent/prev1 문자열 → 최근 착순 [최신, …]. 없으면 []. (원칙 8-D: 없으면 빈 값)"""
+    seq = []                                          # 시간순(오래→최신)으로 모은다
+    for s in (prev1, recent):                         # prev1(직전 개최) 먼저, recent(이번) 나중
+        if not isinstance(s, str):
+            continue
+        for m in re.finditer(r"(\d)\s*着", s.translate(_ZEN2HAN)):
+            seq.append(int(m.group(1)))
+    return seq[::-1]                                  # 최신-앞으로 뒤집는다(경마와 방향 통일)
+
+
+def _pattern_tags(recent, prev1=None):
+    """그 말의 최근 착순 시계열이 어느 패턴에 걸리나. recent = [최신, …] 또는 경륜 문자열."""
     tags = []
-    seq = [x for x in (recent or []) if isinstance(x, int)]
+    if isinstance(recent, str):                       # 🔴 경륜 — 문자열이면 전용 파서로 착순 복원
+        seq = _keirin_placings(recent, prev1)
+    else:
+        seq = [x for x in (recent or []) if isinstance(x, int)]
     if len(seq) >= 3:
         s3 = seq[:3]
         # P2 우상향 — 최근 3전 단조 개선(비감소) AND 폭 ≥ 2 (thresholds 정의)
@@ -154,7 +178,7 @@ def _horse_row(doc, no, kh):
         "fieldSizes": e.get("fieldSizes"),
         "corners": e.get("corners"),
         "last3f": e.get("last3fList"),
-        "patternTags": _pattern_tags(recent),
+        "patternTags": _pattern_tags(recent, e.get("prev1")),   # 🔴 경륜은 prev1 도 넘긴다
     }
 
 
@@ -208,7 +232,117 @@ def build_one(fn):
     }
 
 
+# ══════════ [패턴 성적 누적 · 2026-08-06 작업2] ══════════
+#   🔴 read-modify-write. 그날 것만 재계산해 그 날짜 슬롯을 교체한다(다른 날짜는 병합 유지).
+#     계수기가 두 번 지워진 사고(빈 값으로 덮어씀)를 반복하지 않기 위해 **절대 통째 덮지 않는다**.
+#   🔴 회수율은 None 이다 — 복기 기록에 그 말이 낀 조합의 배당이 없다(원칙 8-D: 없으면 만들지 않는다).
+#     발동(패턴 태그 가진 말 수)·in3(그중 3착 이내 든 말 수)는 정확히 누적한다.
+def pattern_scan(doc):
+    """그 경주 전체 말의 패턴 발동·성적. → {패턴: {발동, in3}} (말 단위)."""
+    r = doc.get("result") or {}
+    top3 = set()
+    for k in ("1st", "2nd", "3rd"):
+        try:
+            top3.add(int(r.get(k)))
+        except (TypeError, ValueError):
+            pass
+    ent = [e for e in ((doc.get("raw_profile") or {}).get("entries") or []) if isinstance(e, dict)]
+    out = {}
+    for e in ent:
+        tags = _pattern_tags(e.get("recent") or e.get("pastPlacings"), e.get("prev1"))
+        try:
+            no = int(e.get("no"))
+        except (TypeError, ValueError):
+            no = None
+        for tg in tags:
+            o = out.setdefault(tg, {"발동": 0, "in3": 0})
+            o["발동"] += 1
+            if no is not None and no in top3:
+                o["in3"] += 1
+    return out
+
+
+def _pattern_cum(cur, tag):
+    """그 패턴의 누적 발동 수(전 날짜 합)."""
+    return sum((v or {}).get("발동", 0) for v in (cur.get(tag) or {}).values())
+
+
+def update_pattern_stats(date, files):
+    """그날 파일 전체를 재계산해 pattern_stats.json 의 그 날짜 슬롯만 교체(병합)."""
+    cur = _load(PSTAT)
+    if not isinstance(cur, dict):
+        cur = {}
+    day = {}
+    for fn in files:
+        doc = _load(os.path.join(AL, fn))
+        if not isinstance(doc, dict):
+            continue
+        r = doc.get("result") or {}
+        if not (r.get("1st") and r.get("2nd")):
+            continue
+        for tg, o in pattern_scan(doc).items():
+            d = day.setdefault(tg, {"발동": 0, "in3": 0, "경주": 0, "회수율": None})
+            d["발동"] += o["발동"]
+            d["in3"] += o["in3"]
+            d["경주"] += 1
+    for tg, d in day.items():                          # 🔴 그 날짜 슬롯만 교체 — 다른 날짜 유지
+        cur.setdefault(tg, {})[date] = d
+    _atomic(PSTAT, cur)
+    return cur
+
+
+def autorun(dates):
+    """[스케줄러용] 새로 확정된 복기만 저장 + pattern_stats 갱신. 완전 읽기 전용(입력 파일 무수정).
+    반환 {written, p2_cum, changed}. dates = [오늘, 어제] 같은 YYYY-MM-DD 목록."""
+    stamp = _load(REVIEW_STAMP)
+    if not isinstance(stamp, dict):
+        stamp = {}
+    prefs = tuple(d.replace("-", "_") for d in dates)
+    stamp = {k: v for k, v in stamp.items() if k.startswith(prefs)}   # 범위 밖은 버린다
+    os.makedirs(OUT, exist_ok=True)
+    written = 0
+    changed = set()
+    try:
+        names = os.listdir(AL)
+    except OSError:
+        names = []
+    for fn in names:
+        if not (fn.startswith(prefs) and fn.endswith(".json")):
+            continue
+        try:
+            mt = os.path.getmtime(os.path.join(AL, fn))
+        except OSError:
+            continue
+        if stamp.get(fn) == mt:                        # 변화 없음 — 이미 처리
+            continue
+        rv = build_one(fn)
+        stamp[fn] = mt                                 # 결과 미확정이어도 mtime 기록(재확인 방지)
+        if rv is None:
+            continue
+        key = re.sub(r"[^0-9A-Za-z가-힣]+", "_",
+                     "%s_%s" % (fn[:10], rv["raceKey"])).strip("_")
+        _atomic(os.path.join(OUT, key + ".json"), rv)
+        written += 1
+        changed.add(rv["date"])
+    _atomic(REVIEW_STAMP, stamp)
+    cur = None
+    for date in changed:                               # 변경된 날짜만 패턴 재계산
+        pref = date.replace("-", "_")
+        files = [f for f in names if f.startswith(pref) and f.endswith(".json")]
+        cur = update_pattern_stats(date, files)
+    if cur is None:
+        cur = _load(PSTAT)
+        if not isinstance(cur, dict):
+            cur = {}
+    return {"written": written, "p2_cum": _pattern_cum(cur, "P2_우상향"),
+            "changed": sorted(changed)}
+
+
 def main():
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true", help="실제 저장(기본은 dry)")
     ap.add_argument("--date", default=None, help="YYYY-MM-DD (없으면 전체)")
