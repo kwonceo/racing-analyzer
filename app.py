@@ -31626,8 +31626,16 @@ def _kra_schedule(ymd, force=False):
 NAR_KEIBA_BASE = "https://www2.keiba.go.jp/KeibaWeb/TodayRaceInfo/"
 NAR_ODDS_PATH = {"win": "OddsTanFuku", "quinella": "OddsUmLenFuku",
                  "exacta": "OddsUmLenTan", "trio": "Odds3LenFuku"}
-# 南関東 4장만 대상 — 나머지 NAR(나고야·소노다 등)은 oddspark 가 이미 커버하므로 중복 수집하지 않는다.
-NAR_NANKAN_BABA = {"18": "우라와", "19": "후나바시", "20": "오이", "21": "카와사키"}
+# 🔴 [2026-08-06 승인] oddspark **미커버 NAR** 를 keiba.go.jp 로 수집하는 목록.
+#   원래 南関東 4장(우라와·후나바시·오이·카와사키)만이었는데, **몬베츠(門別·홋카이도)**도
+#   oddspark 가 스케줄에 주지 않아(실측 7~8월 oddspark 0틱 · private 472틱만) 명단·정상배당이
+#   통째로 안 들어왔다. 확장(private)이 keiba.go.jp NAR 오염 배당을 보내 그대로 통과하던 문제.
+#   ⇒ 몬베츠(babaCode 36)를 추가한다. 이름은 NANKAN 이지만 **의미는 「oddspark 미커버 NAR」**다.
+#   ⚠ 오오이·우라와는 8월 개최가 없어 실발동은 몬베츠뿐(검증도 몬베츠로).
+#   ⚠ 수집·요청 제한(nar_guard)·명단(_nar_autocollect_form) 경로는 **기존 것을 그대로 재사용**한다.
+#   🔧 되돌리기: "36" 항목만 지운다.
+NAR_NANKAN_BABA = {"18": "우라와", "19": "후나바시", "20": "오이", "21": "카와사키",
+                   "36": "몬베츠"}
 _NAR_TBL_RE = re.compile(r"<table[^>]*>(.*?)</table>", re.S)
 _NAR_TH_RE = re.compile(r"<th[^>]*>(.*?)</th>", re.S)
 _NAR_ROW_RE = re.compile(
