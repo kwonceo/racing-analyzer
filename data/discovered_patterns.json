@@ -1,6 +1,6 @@
 {
- "generated_at": 1785895859.8496683,
- "races_with_result": 1946,
+ "generated_at": 1785897079.8071165,
+ "races_with_result": 1948,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -42,8 +42,8 @@
    "rate": 53.1,
    "baseline": 39.0,
    "lift": 14.1,
-   "support": 1117,
-   "hit": 593
+   "support": 1119,
+   "hit": 594
   },
   {
    "type": "시점",
@@ -62,28 +62,18 @@
    "rate": 51.4,
    "baseline": 39.0,
    "lift": 12.4,
-   "support": 760,
-   "hit": 391
-  },
-  {
-   "type": "배당변화",
-   "key": "had_reversal",
-   "desc": "쌍승 역전 동반 경주",
-   "rate": 51.0,
-   "baseline": 39.0,
-   "lift": 12.0,
-   "support": 98,
-   "hit": 50
+   "support": 762,
+   "hit": 392
   },
   {
    "type": "전적점수",
    "key": "form_range",
-   "desc": "적중 경주 상위등급마 전적점수 주로 71.2~105.8 구간",
+   "desc": "적중 경주 상위등급마 전적점수 주로 71.1~105.8 구간",
    "range": [
-    71.2,
+    71.1,
     105.8
    ],
-   "support": 2048
+   "support": 2052
   }
  ],
  "baseline_hit_rate": 39.0
