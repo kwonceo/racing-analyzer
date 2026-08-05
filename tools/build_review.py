@@ -80,10 +80,12 @@ def _pattern_tags(recent):
 
 def _miss_class(doc, cp, top2, kh):
     """미적중 4분류. 적중이면 None.
-    ① 후보 밖   : 1·2착이 우리 순위(keyHorses)에 둘 다 없다
+    ① 후보 밖   : 1·2착이 우리 순위(keyHorses)에 둘 다 없다 (= 못 봤다)
     ② 미생성    : 둘 다 순위엔 있는데 그 조합을 안 만들었다
     ③ 잘림      : 만들었다가 강등(quinellaRef)됐다
-    ④ 어쩔수없음: 위 어디에도 안 맞는 나머지
+    🔴 ⑤ 원인미규명 : 위 어디에도 안 맞는 나머지. **「어쩔수없음」이 아니다** — 아직 안 본 것이다
+       (2026-08-06 대표 지시: "어쩔 수 없는 건 없다. 이름이 사고를 가둔다").
+       `_unknown_sub()` 로 다시 넷으로 쪼갠다.
     """
     disp = [tuple(sorted(c)) for c in ((cp.get("displayedCombos") or {}).get("quinellas") or [])]
     tkey = tuple(sorted(int(x) for x in top2 if x is not None))
@@ -98,7 +100,35 @@ def _miss_class(doc, cp, top2, kh):
         return "③잘림"
     if r1 and r2:
         return "②미생성"
-    return "④어쩔수없음"
+    return "⑤원인미규명"
+
+
+def _unknown_sub(doc, cp, top2, kh):
+    """🔴 [2026-08-06] 「원인 미규명」을 넷으로 다시 쪼갠다 — ④(진짜 무작위)로 가둬 두지 않는다.
+    ⑤a 순위낮음  : 1·2착이 후보 안에 있었으나 **우리 순위 4위 이하**(= 봤는데 낮게 봤다 · 순위 문제)
+    ⑤b 조합밀림  : 순위는 상위(1~3)인데 조합 우선순위에서 밀렸다(= 조합 선택 문제)
+    🔴 ⑤c 전적공부 : 1·2착 중 하나가 **순위 밖인데 전적이 좋다**(record_score 상위권 · 전적 공부 대상)
+    ④ 무작위     : ①②③⑤a⑤b⑤c 를 다 보고도 단서가 없을 때만
+    """
+    hs = {h.get("no"): h for h in (doc.get("horses") or []) if isinstance(h, dict)}
+    scores = sorted([h.get("record_score") for h in hs.values()
+                     if isinstance(h.get("record_score"), (int, float))], reverse=True)
+    hi_cut = scores[max(0, len(scores) // 3 - 1)] if scores else 0   # 상위 1/3 경계
+    r1 = _our_rank(kh, top2[0]); r2 = _our_rank(kh, top2[1])
+    ranks = [r for r in (r1, r2) if r]
+    # ⑤a 순위낮음 — 후보 안이지만 4위 이하가 있다
+    if any(r >= 4 for r in ranks):
+        return "⑤a순위낮음"
+    # ⑤c 전적공부 — 순위 밖인 말이 전적 상위권
+    for no, r in ((top2[0], r1), (top2[1], r2)):
+        if r is None:
+            sc = (hs.get(no) or {}).get("record_score")
+            if isinstance(sc, (int, float)) and sc >= hi_cut and hi_cut > 0:
+                return "⑤c전적공부"
+    # ⑤b 조합밀림 — 순위는 상위인데 조합에서 밀렸다(순위 있는 게 하나뿐이거나 상위)
+    if ranks and all(r <= 3 for r in ranks):
+        return "⑤b조합밀림"
+    return "④무작위"
 
 
 def _horse_row(doc, no, kh):
@@ -144,6 +174,20 @@ def build_one(fn):
     tkey = tuple(sorted(int(x) for x in top2 if x is not None))
     hit = (len(tkey) == 2 and tkey in disp)
     q = payouts.get("quinella")
+    mc = None if hit else _miss_class(doc, cp, top2, kh)
+    sub = _unknown_sub(doc, cp, top2, kh) if mc == "⑤원인미규명" else None
+    r1 = _our_rank(kh, top2[0]); r2 = _our_rank(kh, top2[1])
+    # 🔴 순위 진단: 봤는데 낮게(4위+) vs 못 봤다(순위밖)
+    diag = None
+    if not hit:
+        if any(r and r >= 4 for r in (r1, r2)):
+            diag = "봤는데낮게(4위+)"
+        elif r1 is None and r2 is None:
+            diag = "못봤다(둘다순위밖)"
+        elif (r1 is None) != (r2 is None):
+            diag = "한쪽만순위밖"
+        else:
+            diag = "상위인데놓침"
     return {
         "raceKey": doc.get("raceKey") or fn[:-5],
         "date": fn[:10].replace("_", "-"),
@@ -152,7 +196,9 @@ def build_one(fn):
         "source": (doc.get("raw_profile") or {}).get("source"),
         "frozen": bool(doc.get("frozen")),
         "hit": hit,                                    # 🔴 적중·미적중 동형
-        "miss_class": None if hit else _miss_class(doc, cp, top2, kh),
+        "miss_class": mc,
+        "unknown_sub": sub,                            # 🔴 원인미규명 재분류(넷)
+        "rank_diag": diag,                             # 🔴 순위 문제 vs 정보 문제
         "result": {"1st": r.get("1st"), "2nd": r.get("2nd"), "3rd": r.get("3rd")},
         "ourKeyHorses": kh,                            # 🔴 우리 순위(frozen 우선)
         "our_source": "frozen" if (doc.get("frozen") or {}).get("keyHorses") else "top",
@@ -192,15 +238,23 @@ def main():
             _atomic(os.path.join(OUT, key + ".json"), rv)
     print("복기 대상 %d경주 (적중 %d · 미적중 %d) · %s"
           % (made, hit, miss, "저장함" if a.apply else "dry(안 씀)"))
-    # 미적중 분류 분포
+    # 미적중 분류 분포 + 원인미규명 재분류 + 순위진단
     if made:
         from collections import Counter
-        cls = Counter()
+        cls = Counter(); sub = Counter(); diag = Counter(); diag_h = Counter()
         for fn in files:
             rv = build_one(fn)
             if rv and not rv["hit"]:
                 cls[rv["miss_class"]] += 1
+                if rv.get("unknown_sub"):
+                    sub[rv["unknown_sub"]] += 1
+                diag[rv.get("rank_diag")] += 1
+                if rv.get("sport") == "horse":
+                    diag_h[rv.get("rank_diag")] += 1
         print("  미적중 분류:", dict(cls))
+        print("  🔴 원인미규명 재분류:", dict(sub))
+        print("  🔴 순위진단(전체):", dict(diag))
+        print("  🔴 순위진단(경마만):", dict(diag_h))
     for lab, ex in (("적중", hit_ex), ("미적중", miss_ex)):
         for rv in ex:
             print("  [%s] %s 결과%s-%s ourKH=%s" % (lab, rv["raceKey"],
