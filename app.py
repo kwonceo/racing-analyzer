@@ -2308,6 +2308,94 @@ def _odds_suspect_verdict(rk, an):
     return None
 
 
+CURQ_SHRINK_GUARD = True      # 🔧 되돌리기: False
+
+
+def _curq_shrink_guard(rk, cur_map, hist):
+    """[축소 오염 교정 · 2026-08-05 승인 C안] 마지막 틱이 **직전보다 좁으면** 넓은 틱을 쓴다.
+
+    🔴 왜: 1층·3층은 「명단 밖 마번이 있다」만 본다. **명단보다 좁은** 오염은
+      `ghost = 배당마번 − 명단` 이 공집합이라 **구조적으로 못 잡는다.**
+      실물 — 소노다 8/5 1경주: oddspark 는 내내 45조합·마번 1~10 인데 private 가
+      21조합·마번 1~7 을 번갈아 보냈고 **마지막 틱이 그것**이라 분석이 7두로 굳었다.
+      🔴 **1착 10번을 후보에 담지도 못했다.** 복승 76.3배를 그렇게 놓쳤다.
+
+    판별선 — **취소마는 왕복할 수 없다.**
+      실측(7~8월 1976경주·틱 34,709): 축소 경주 197(10.0%) 중 빠진 마번이 **다시 돌아옴 73.1%**.
+      취소마면 영구히 빠진다. 돌아오면 오염이다.
+      ⚠ 취소마 정보 보유율은 **0.00%** 라 그것으로는 못 가른다.
+
+    규칙(C안 · 4안 비교에서 채택):
+      ① 진행하며 넓은 마번 집합을 유지한다
+      ② **2틱 연속** 좁으면 정상 축소(취소마)로 인정하고 넓은 집합을 줄인다
+      ③ 🔴 단 `oddspark`(서버 직접수집)가 **여전히 넓게 보내면** 연속이라도 인정하지 않는다
+      실측 발동 3.8% · 되살린 마번이 실제 3착에 든 비율 **41%**(A안 14% · D안 25%).
+      ⚠ 41% 는 **하한**이다 — 되살린 말이 3착 밖이면 확인할 수단이 없다(오탐이 아니라 판별 불가).
+      🔴 논리적 오탐률 0 — 취소마는 왕복이 불가능하고, 2틱 연속이면 ②가 축소를 인정한다.
+
+    ⚠ **저장은 건드리지 않는다.** 좁은 틱도 히스토리에 그대로 남는다(측정·복기용).
+      바꾸는 것은 **분석이 쓸 배당** 하나뿐이다.
+    ⚠ 기존 `lastValidCurQ` 폴백과 **충돌하지 않는다** — 그쪽은 `curQ` 가 **비었을 때만** 돌고
+      이쪽은 **비지 않았는데 좁을 때** 돈다. 조건이 배타적이다.
+    🔧 되돌리기: `CURQ_SHRINK_GUARD = False`.
+    """
+    if not CURQ_SHRINK_GUARD or not cur_map or not hist:
+        return None
+    _gate_hit("curq_shrink_guard", rk, None, reach_only=True)
+
+    def _nos(m):
+        s = set()
+        for k in (m or {}):
+            for x in k:
+                try:
+                    s.add(int(x))
+                except (TypeError, ValueError):
+                    pass
+        return s
+
+    seq = []
+    for h in hist:
+        if not isinstance(h, dict):
+            continue
+        m = _odds_map_un(h.get("quinella"))
+        if not m:
+            continue
+        n = _nos(m)
+        if n:
+            seq.append((str(h.get("src") or ""), n, m))
+    if len(seq) < 3:
+        return None                       # 표본이 얇으면 판정하지 않는다(추측 금지)
+    cur_nos = _nos(cur_map)
+    if not cur_nos:
+        return None
+    wide, wide_map, run, op_last = set(seq[0][1]), seq[0][2], 0, None
+    for src, nos, m in seq:
+        if src.startswith("oddspark"):
+            # 🔴 **누적 합집합이 아니라 「가장 최근」 oddspark 틱**이다.
+            #   누적으로 두면 oddspark 가 뒤늦게 좁아져도(=진짜 취소마) 영원히 넓게 남아
+            #   아래 ③ 조건이 **축소를 절대 인정하지 않는다.** 함수 단위 검증이 이 결함을 잡았다.
+            op_last = set(nos)
+        if wide - nos:
+            run += 1
+            # ③ oddspark 가 **여전히** 넓게 보내면 축소를 인정하지 않는다
+            if run >= 2 and not (op_last and (op_last - nos)):
+                wide, wide_map, run = set(nos), m, 0
+        else:
+            run = 0
+            wide |= nos
+            wide_map = m                  # 넓이를 유지하는 **가장 최신** 배당을 쓴다
+    miss = wide - cur_nos
+    if not miss:
+        return None
+    out = dict(wide_map)
+    out.update(cur_map)                   # 현재 틱 값이 더 신선하다 — 겹치는 조합은 현재 것으로
+    _gate_hit("curq_shrink_guard", rk, "마번 %s 복원(마지막 틱 %d두 → %d두)"
+              % (sorted(miss)[:6], len(cur_nos), len(wide)))
+    print("🔴 [축소 교정] %s: 마지막 틱 %d두 → 넓은 틱 %d두 · 복원 마번 %s · 조합 %d→%d"
+          % (rk, len(cur_nos), len(wide), sorted(miss)[:6], len(cur_map), len(out)))
+    return out
+
+
 def _oddspark_mapping_suspect(prev_q, new_q, min_pairs=6):
     """[③ 말번호 밀림 감지] 직전(배당판) 복승 조합 vs 새(oddspark) 복승 조합 비교.
     배당 '값'은 거의 같은데(=같은 경주) '말번호 매핑'이 절반 이상 다르면 밀림으로 판정.
@@ -10244,6 +10332,15 @@ def _triple_analyze(rk, rec):
         if _fallback_q:
             curQ = _odds_map_un(_fallback_q)
             print(f"[lastValidCurQ 폴백] {rk}: curQ 소실 → 마지막 유효 배당 사용({len(curQ)}개)")
+    # 🔴 [축소 오염 교정 · 2026-08-05 승인] 위 폴백은 curQ 가 **비었을 때**만 돈다.
+    #   여기는 **비지 않았는데 마번이 좁아진** 경우다(소노다 8/5 1경주 — 1착 10번을 못 담았다).
+    #   ⚠ try/except 로 격리한다 — 실패하면 기존 동작(마지막 틱 그대로)을 유지한다.
+    try:
+        _wide_q = _curq_shrink_guard(rk, curQ, hist)
+        if _wide_q:
+            curQ = _wide_q
+    except Exception as _sge:
+        print("[축소 교정] 실패(무시) %s: %s" % (rk, str(_sge)[:80]))
     prevQ = _odds_map_un(prev.get("quinella")) if prev else {}
 
     # [경주전환 방어] 직전 대비 다수 조합 95%+ 급락 = 다른 경주 배당 잔존 → 기준값 재설정(변동 계산 안 함)
