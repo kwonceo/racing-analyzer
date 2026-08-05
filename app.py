@@ -1584,6 +1584,17 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
     if str(rec.get("source") or "").startswith("korea") and not _KRA_TRACK_RE.search(str(rk or "")):
         print("[전적 오매칭 차단] %s: 한국 전적(source=korea)이 한국 경마장이 아닌 경주에 붙어 있다 → 전적 미사용" % rk)
         return None
+    # 🔴 [2026-08-05 승인] **한국 명단 날짜 대조** — PDF 날짜가 오늘과 다르면 쓰지 않는다.
+    #   왜: 7/30 부산 3경주가 **4일 지난 7/26 명단**으로 판정됐다(미개최일에 확장이 배당을 보냄).
+    #   ⚠ 오탐 0 — 7/26 은 날짜 일치라 통과, 새로 막히는 건 미개최일 유령뿐(소급 실측).
+    #   ⚠ 완화안이 있어 명단이 빠지면 화면이 비지 않고 **경고 배너**만 뜬다(soft).
+    #   ⚠ pdfDate 가 없는 옛 레코드(배선 전 저장분)는 대조하지 않는다(추측 금지 · 종전대로 사용).
+    #   🔧 되돌리기: 이 if 블록만 삭제.
+    if str(rec.get("source") or "") == "korea" and rec.get("pdfDate"):
+        if str(rec.get("pdfDate"))[:10] != time.strftime("%Y-%m-%d"):
+            print("[한국 명단 날짜불일치] %s: PDF %s ≠ 오늘 → 명단 미사용(오래된 명단 방지)"
+                  % (rk, rec.get("pdfDate")))
+            return None
     anomaly_by_no = {}
     for d in drops or []:
         if d.get("pct", 0) < 0:  # 배당 하락(자금유입)
@@ -2047,12 +2058,24 @@ _GATE_HITS_FILE = os.path.join(DATA_DIR, "_gate_hits.json") if "DATA_DIR" in dir
 _GATE_HITS_LOCK = threading.RLock()   # 🔴 수집이 6병렬이라 스레드 경합이 실제로 난다
 
 
-def _gate_hit(name, rk=None, reason=None, reach_only=False):
+_GATE_FIRE_ONCE = set()   # {(name, once_key, day)} — 경주당 1회 fire 로 묶을 때 쓴다(메모리)
+
+
+def _gate_hit(name, rk=None, reason=None, reach_only=False, once_key=None):
     """[도달·발동 계수기] 🔴 **도달과 발동을 따로 센다.**
 
     왜: 2026-08-04 에 ⓒ(oddspark 우선·경마)가 「발동 0건」으로 보였는데 실제로는 **발동 4건이
       전부 예외로 죽은 것**이었다. 성공 로그만 세면 「도달 못 함」과 「도달했는데 죽음」이 구분되지 않는다.
     ⚠ 실패해도 예외를 올리지 않는다(계수기가 본 기능을 막으면 안 된다).
+
+    🔴 **fire 의 단위 (2026-08-05 명시)**:
+      · `once_key=None`(기본) → **폴링 단위**. 같은 경주가 30초마다 재판정되면 fire 가 매번 오른다.
+        1층(`layer1_ingest_drop`)·3층(`layer3_display_block`)이 이 방식이다.
+      · `once_key=rk`        → **경주 단위**. (name, once_key, 날짜)당 fire 를 **1회만** 센다.
+        축소 판정(`curq_shrink_guard`)이 이 방식이다.
+      🔴 **소급 실측은 경주 단위**다. 실전 계수기와 나란히 볼 때 **단위가 다르면 헷갈린다** —
+        폴링 단위 게이트의 fire 는 소급 % 와 직접 비교하지 말 것(2026-08-05 축소 fire 도배 교훈).
+      ⚠ reach(도달)는 **항상 폴링 단위**다 — 폴링마다 판정에 들어간 횟수가 맞다.
     """
     with _GATE_HITS_LOCK:
         try:
@@ -2113,6 +2136,14 @@ def _gate_hit(name, rk=None, reason=None, reach_only=False):
                 e = {"reach": 0, "fire": 0, "day": day}
                 merged[name] = e
             e["reach"] = int(e.get("reach") or 0) + 1
+            # 🔴 [2026-08-05] once_key 가 주어지면 (name, once_key, 날짜)당 fire 를 **1회만** 센다.
+            #   reach 는 위에서 이미 올렸으므로 폴링 단위 그대로다. 축소 판정 fire 도배를 막는다.
+            if not reach_only and once_key is not None:
+                _ok = (name, str(once_key), day)
+                if _ok in _GATE_FIRE_ONCE:
+                    reach_only = True          # 이미 이 경주에 fire 함 → 이번엔 fire·append 생략
+                else:
+                    _GATE_FIRE_ONCE.add(_ok)
             if not reach_only:
                 e["fire"] = int(e.get("fire") or 0) + 1
                 e["last"] = {"rk": rk, "reason": reason, "at": time.strftime("%H:%M:%S")}
@@ -2389,10 +2420,12 @@ def _curq_shrink_guard(rk, cur_map, hist):
         return None
     out = dict(wide_map)
     out.update(cur_map)                   # 현재 틱 값이 더 신선하다 — 겹치는 조합은 현재 것으로
+    _first = (("curq_shrink_guard", str(rk), time.strftime("%Y-%m-%d")) not in _GATE_FIRE_ONCE)
     _gate_hit("curq_shrink_guard", rk, "마번 %s 복원(마지막 틱 %d두 → %d두)"
-              % (sorted(miss)[:6], len(cur_nos), len(wide)))
-    print("🔴 [축소 교정] %s: 마지막 틱 %d두 → 넓은 틱 %d두 · 복원 마번 %s · 조합 %d→%d"
-          % (rk, len(cur_nos), len(wide), sorted(miss)[:6], len(cur_map), len(out)))
+              % (sorted(miss)[:6], len(cur_nos), len(wide)), once_key=rk)
+    if _first:                            # 🔴 콘솔 로그도 경주당 1회만(폴링 도배 방지)
+        print("🔴 [축소 교정] %s: 마지막 틱 %d두 → 넓은 틱 %d두 · 복원 마번 %s · 조합 %d→%d"
+              % (rk, len(cur_nos), len(wide), sorted(miss)[:6], len(cur_map), len(out)))
     return out
 
 
@@ -13753,10 +13786,23 @@ def korea_form():
                         "reason": "한국 경마장 raceKey가 아니어서 한국 전적을 저장하지 않았습니다."}), 200
     horses = _sanitize_starters(body.get("horses") or [])   # [전적복구] 중복 마번 제거
     sdb = _starters_load()
-    sdb[rk] = {"horses": horses, "t": time.time(), "source": "korea"}
+    # 🔴 [2026-08-05 승인] 명단에 **PDF 날짜**를 붙인다. 프론트가 보낸 pdfDate(YYYY-MM-DD) 우선,
+    #   없으면 세션 날짜, 그것도 없으면 오늘. 왜: 7/30 부산 3경주가 **4일 지난 명단**(7/26 세션)으로
+    #   판정됐다. 미개최일에 확장이 배당을 보냈고 오래된 명단이 그대로 붙었다.
+    #   ⚠ 저장만이다 — 판정에서 날짜를 쓰는 곳은 `_form_from_starters`(roster 조회)다.
+    _pdf_date = (body.get("pdfDate") or "").strip()[:10]
+    if not re.match(r"\d{4}-\d{2}-\d{2}", _pdf_date):
+        try:
+            _sess = json.load(io.open(KOREA_SESSION, encoding="utf-8")) if os.path.exists(KOREA_SESSION) else {}
+            _pdf_date = str((_sess or {}).get("date") or "")[:10]
+        except Exception:
+            _pdf_date = ""
+    if not re.match(r"\d{4}-\d{2}-\d{2}", _pdf_date):
+        _pdf_date = time.strftime("%Y-%m-%d")
+    sdb[rk] = {"horses": horses, "t": time.time(), "source": "korea", "pdfDate": _pdf_date}
     _starters_save(sdb)
-    print(f"[한국 전적] {rk}: {len(horses)}두 저장(PDF, 전적 {sum(1 for h in horses if _horse_has_form(h))}두)")
-    return jsonify({"ok": True, "count": len(horses), "raceKey": rk})
+    print(f"[한국 전적] {rk}: {len(horses)}두 저장(PDF {_pdf_date}, 전적 {sum(1 for h in horses if _horse_has_form(h))}두)")
+    return jsonify({"ok": True, "count": len(horses), "raceKey": rk, "pdfDate": _pdf_date})
 
 
 def _rk_venue_num(k):
