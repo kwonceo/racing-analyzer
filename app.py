@@ -15517,6 +15517,7 @@ def _raw_profile_snapshot(rk):
         r = {"no": h.get("no"), "styleType": h.get("styleType")}
         for k in ("corners", "fieldSizes", "pastDistances", "last3fList", "pastPlacings",
                   "pastPops",                               # 🔴 [ⓓ 2026-08-03] 과거 인기 시계열(P4 입력)
+                  "pastGrades",                             # 🔴 [2026-08-05] 과거 등급 시계열(승급 판정 입력)
                   "kimarite", "kimariteRatio", "chaku", "rentai", "gear", "classGrade",
                   "declaredStyle", "declaredStyleLabel",    # [표기 각질 병기 2026-07-30]
                   "weight", "winOdds", "pop",               # [발주 시점 값 보존 2026-07-30]
@@ -24280,6 +24281,9 @@ def _keiba_dist_of(s):
 def _keiba_parse_shutsuba(html):
     """oddspark 지방경마 출주표(RaceList.do) → {venue,raceNo,distance,surface,trackCond,horses:[...]}.
     horses[]: {no(마번=행순서), name, sexAge, jockey, weight(부담중량), winOdds, pop, lineageNb, detailUrl}."""
+    _form_raw_save("oddspark", html)   # 🔴 [2026-08-05 승인] 원문 보존(파싱 무개입·실패해도 무시).
+    #   왜: 대표가 화면에서 본 Ｃ３三·Ｃ３四(등급)가 이 화면일 가능성이 크다. 원문이 없으면
+    #     등급 표기가 실재하는지 확인조차 못 한다. 다른 3종(keirin·jra·nar)과 같은 방식·같은 훅이다.
     out = {"venue": "", "raceNo": None, "distance": None, "surface": "", "trackCond": "", "horses": []}
     mt = re.search(r"<title>(.*?)</title>", html, re.S)
     if mt:
@@ -24464,6 +24468,12 @@ def _keiba_starter_store_row(h):
             "pastDistances": [pr.get("distance") for pr in (h.get("past") or [])],
             "last3fList": [pr.get("last3f") for pr in (h.get("past") or [])],
             "pastPlacings": [pr.get("placing") for pr in (h.get("past") or [])],
+            # 🔴 [2026-08-05 승인] **과거 경주별 등급 시계열** — 승급 판정(P3·P2 등급 조건)의 유일한 입력.
+            #   중앙(jra)은 `_jra_past_cell` 이 past 마다 `grade`(G1/OP/1勝/未勝利…)를 이미 뽑는데
+            #   저장행에서만 빠져 있었다 — corners·pastPops 와 같은 유형의 소실이다. **저장만 추가**한다.
+            #   ⚠ record_score 계산 경로 무개입 · 기존 키 무변경. 지방·oddspark 는 past 에 grade 가
+            #     없어 [None,...] 로 남는다(원문에 없다 — 담을 수 없다).
+            "pastGrades": [pr.get("grade") for pr in (h.get("past") or [])],
             # 🔴 [ⓓ 2026-08-03 승인] **과거 인기 시계열** — ④기대배반(P4)의 유일한 필수 입력.
             #   실사고: `_jra_past_cell` 이 2026-08-02 에 pop 캡처를 추가했는데, 이 저장행이
             #   `past[]` 를 5개 배열로 **풀어 담으면서 pop 만 빠뜨려** 그대로 버려지고 있었다
