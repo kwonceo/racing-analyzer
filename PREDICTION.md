@@ -3632,3 +3632,9 @@ reach/fire 를 **하나의 JSON 을 덮어쓰며** 세는 한, 어느 시점에 
 - 조치: 「출주 명단 없음」만 일본도 soft(배너만) · 유령·오분류는 hard 유지.
 - 검증: 도요하시6 추천 복귀 · 고마쓰시마5·7 soft=True finalQ 유지 suspectPicks 없음.
 - 이중 안전: 통째 오염(C(n,2))은 1층이 입구에서 폐기(도요하시 66조합 실측).
+
+### 69차 실제(완결)
+- 오버레이는 finalQuinellas로 그린다(overlay.js) → soft면 뜬다. 도요하시6 배당 4.7·8.0 확인.
+- 유령/오분류 hard 유지 함수 단위 확인(soft=False). 명단없음만 soft=True.
+- 도요하시 명단 지금 수집됨(joCode 45). 고마쓰시마는 KEIRIN_JO 미등록이라 구조적 미수집.
+- 격리 probe: 후나바시(일본)도 명단없음이라 soft=True — 일본 명단없음 완화 실증.
