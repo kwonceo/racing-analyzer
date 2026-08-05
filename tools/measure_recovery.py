@@ -253,6 +253,90 @@ def _sort_pool(r, key, rev=True):
     return [x["c"] for x in uniq[:k]]
 
 
+def measure_pattern(sport="horse", pattern="2026_0*", tag="P2_우상향"):
+    """[2026-08-06] 패턴 말의 3착 진입률 ↔ 같은 인기대 기저선 대비 **배수** · 대조군(비패턴)과 나란히.
+    🔴 회수율의 **선행 지표**(대표 지시): 배수 1.0 이하면 어떤 조합으로 사도 소용없다.
+    🔴 답은 절대값이 아니라 **패턴군 배수 − 대조군 배수**다(대조군 없이는 P2 값어치를 못 말한다).
+    🔴 경마만 pop_baseline(VALID) 사용. 경륜은 기저선이 없어 **무작위(3÷평균두수)** 로 임시 표기(명시).
+    ⚠ 확정배당이 아니라 **3착 진입**만 본다 — 배수는 회수율이 아니다(회수율은 별도 3단 조건).
+    ⚠ 패턴 파서는 build_review 를 재사용한다(목록 이중화 금지).
+    """
+    import glob as _g
+    sys.path.insert(0, os.path.join(BASE, "tools"))
+    import build_review as _R
+    G = {"pat": {"n": 0, "in3": 0, "bsum": 0.0, "bn": 0, "nhsum": 0, "nhn": 0},
+         "ctl": {"n": 0, "in3": 0, "bsum": 0.0, "bn": 0, "nhsum": 0, "nhn": 0}}
+    for f in sorted(_g.glob(os.path.join(BASE, "data", "analysis_log", pattern + ".json"))):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        if (d.get("sport") or "") != sport:
+            continue
+        res = d.get("result") or {}
+        if not (res.get("1st") and res.get("2nd") and res.get("3rd")):
+            continue                                   # 3착까지 있어야 3착 진입 판정
+        top3 = set()
+        for k in ("1st", "2nd", "3rd"):
+            try:
+                top3.add(int(res.get(k)))
+            except (TypeError, ValueError):
+                pass
+        ent = [e for e in ((d.get("raw_profile") or {}).get("entries") or []) if isinstance(e, dict)]
+        nh = len(ent) or (d.get("corePicks") or {}).get("raceHorseCount")
+        popmap, _src = _pop_map(d, f)
+        for e in ent:
+            try:
+                no = int(e.get("no"))
+            except (TypeError, ValueError):
+                continue
+            ispat = tag in _R._pattern_tags(e.get("recent") or e.get("pastPlacings"), e.get("prev1"))
+            g = G["pat"] if ispat else G["ctl"]
+            g["n"] += 1
+            if no in top3:
+                g["in3"] += 1
+            # 🔴 pop_baseline 은 경마(JRA) 실측이다 — 경륜에 쓰지 않는다(_base_market 원칙).
+            #   경륜 인기·두수가 우연히 셀에 매칭돼 값이 나오면 **틀린 기저**다 → 경마만 조회한다.
+            b = _base_market(nh, popmap.get(no)) if sport == "horse" else None
+            if b is not None:
+                g["bsum"] += b
+                g["bn"] += 1
+            if nh:
+                g["nhsum"] += int(nh)
+                g["nhn"] += 1
+    return G, sport
+
+
+def report_pattern(G, sport, tag):
+    print("  종목 %s · 패턴 %s   🔴 배수 = 3착률 ÷ 기저 · 답은 두 군의 차이" % (sport, tag))
+
+    def _one(g, lab):
+        n = g["n"]
+        if n == 0:
+            print("    %s n=0" % lab)
+            return None
+        r3 = 100.0 * g["in3"] / n
+        if g["bn"] >= 1:
+            base = g["bsum"] / g["bn"]
+            bsrc = "인기기저(pop_baseline · 셀보유 %d/%d)" % (g["bn"], n)
+        else:
+            avgnh = g["nhsum"] / g["nhn"] if g["nhn"] else 0
+            base = 300.0 / avgnh if avgnh else 0
+            bsrc = "🔴무작위(3÷평균두수 %.1f · 기저선없음)" % avgnh
+        mult = r3 / base if base else 0
+        flag = " ⚠판정불가(n<30)" if n < 30 else (" (방향만·n<200)" if n < 200 else "")
+        print("    %s n=%d · 3착률 %.1f%% · 기저 %.1f%% · 배수 %.2f%s  [%s]"
+              % (lab, n, r3, base, mult, flag, bsrc))
+        return mult
+
+    mp = _one(G["pat"], "패턴  ")
+    mc = _one(G["ctl"], "대조군")
+    if mp is not None and mc is not None:
+        print("    🔴 배수 차이(패턴 − 대조군) = %+.2f  %s"
+              % (mp - mc, "→ P2에 값어치 있음" if mp - mc > 0.05
+                 else ("→ 차이 없음(P2 무의미)" if abs(mp - mc) <= 0.05 else "→ P2가 오히려 나쁨")))
+
+
 def measure_trio_dark(sport="cycle", pattern="2026_0*"):
     """[2026-08-02 신설] **축 2두(유력마 1·2위) + 복병 1두** 삼복승 성적.
 
@@ -1051,7 +1135,18 @@ def main():
     # 🔴 [2026-08-02] 기저 선택. **random 을 지우지 않는다** — 항상 함께 찍어 전후를 병기한다.
     ap.add_argument("--base", choices=["random", "market"], default="random",
                     help="무작위(3÷두수) ↔ 인기별 실측 기저선. market 은 **경마 전용**")
+    ap.add_argument("--pattern-mult", dest="pattern_mult", action="store_true",
+                    help="패턴(P2) 말의 3착 배수 · 대조군 나란히 · 회수율의 선행 지표(대표 지시)")
     a = ap.parse_args()
+    if a.pattern_mult:
+        sports = ["horse", "cycle"] if a.sport in ("all", "any") else [a.sport]
+        print("=" * 90)
+        print("패턴 3착 배수 · %s   🔴 대조군과의 차이가 답 · n<200 방향만(사후 하향 금지)" % a.pattern)
+        print("=" * 90)
+        for sp in sports:
+            G, _ = measure_pattern(sp, a.pattern, "P2_우상향")
+            report_pattern(G, sp, "P2_우상향")
+        return
     if a.weights:
         out = measure_weights(a.sport, a.pattern)
         print("=" * 110)
