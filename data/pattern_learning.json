@@ -1,64 +1,6 @@
 {
   "patterns": [
     {
-      "race": "모리오카 2경주",
-      "horse_no": 8,
-      "recent_avg": 5.6,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-28"
-    },
-    {
-      "race": "모리오카 2경주",
-      "horse_no": 5,
-      "recent_avg": 5.6,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-28"
-    },
-    {
-      "race": "모리오카 4경주",
-      "horse_no": 2,
-      "recent_avg": 7.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-28"
-    },
-    {
-      "race": "모리오카 4경주",
-      "horse_no": 8,
-      "recent_avg": 8.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-28"
-    },
-    {
-      "race": "모리오카 4경주",
-      "horse_no": 5,
-      "recent_avg": 6.5,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-28"
-    },
-    {
-      "race": "모리오카 3경주",
-      "horse_no": 8,
-      "recent_avg": 6.4,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-28"
-    },
-    {
       "race": "모리오카 5경주",
       "horse_no": 4,
       "recent_avg": 4.8,
@@ -4763,16 +4705,74 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-06"
+    },
+    {
+      "race": "몬베츠 1경주",
+      "horse_no": 2,
+      "recent_avg": 4.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-06"
+    },
+    {
+      "race": "몬베츠 1경주",
+      "horse_no": 7,
+      "recent_avg": 7.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-06"
+    },
+    {
+      "race": "몬베츠 1경주",
+      "horse_no": 6,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-06"
+    },
+    {
+      "race": "소노다 8경주",
+      "horse_no": 2,
+      "recent_avg": 7.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-06"
+    },
+    {
+      "race": "소노다 8경주",
+      "horse_no": 3,
+      "recent_avg": 4.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-06"
+    },
+    {
+      "race": "소노다 8경주",
+      "horse_no": 7,
+      "recent_avg": 6.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-06"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2581,
-      "hit": 473
+      "count": 2590,
+      "hit": 474
     },
     "전체부진마": {
-      "count": 4447,
-      "hit": 1195
+      "count": 4464,
+      "hit": 1201
     },
     "대규모급락": {
       "count": 13,
@@ -4782,8 +4782,8 @@
       "hit_rate": 30.8
     },
     "이상감지동반": {
-      "count": 1866,
-      "hit": 722
+      "count": 1874,
+      "hit": 727
     },
     "급락동반": {
       "count": 396,
