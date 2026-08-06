@@ -358,7 +358,10 @@ def verify(doc, body, valid_nos):
             for x in (c.get("combo") or []):
                 inc.add(int(x))
         if not (set(und) & inc):
-            problems.append("⚠경고(폐기 아님) 저평가 후보 %s 가 조합에 하나도 없다" % und)
+            # 🔴 [2026-08-06 대표 지시] 경고 → **폐기**로 올린다.
+            #   "계산한 말은 반드시 저평가 목록에 넣는다. 어긋나면 폐기."
+            #   실제 사고: 계산해 놓고 '괴리 없음'에 넣었는데 그 말이 3착이었다.
+            problems.append("저평가 후보 %s 가 조합에 하나도 없다" % und)
 
     # ⑤ 🔴 [2026-08-06] 다루지 않은 말 — 한 말을 통째로 빠뜨렸고 그 말이 2착이었다.
     #   ⚠ 숫자 오류가 아니라 **누락**이므로 폐기하지 않고 사유에만 남긴다(경고 성격).
@@ -625,6 +628,18 @@ def market_table(html, kind):
             parts.append("최고타임 %s" % h["best"])
         if h.get("weight"):
             parts.append("부담 %.1f" % h["weight"])
+        # 🔴 [2026-08-06 대표 지시] '1착 0회 · 2착 다수' 축.
+        #   대표 관찰: 세 번 나왔고 세 번 다 2착권. 시장이 낮게 보는 유형이다.
+        #   실측(NAR 4일 888두): 발동 **3.3%(29두)** · 사례 4건이 전부 인기 하위였다.
+        #   ⚠ 발동률이 원칙 18 구간(5~30%)보다 낮지만 이건 **발굴 축**이라 드문 것이 성격이다.
+        #   ⚠ 근거는 측정이 아니라 대표 관찰 + 시장 저평가 방향의 일치다. 배수는 아직 없다.
+        #     '3착 전문'이 0.87 로 무너진 전례가 있으므로 표본이 쌓이면 반드시 배수로 재고
+        #     1.0 미만이면 뺀다.
+        second_type = False
+        _a = h.get("all")
+        if _a and _a[0] == 0 and _a[1] >= 2:
+            second_type = True
+            parts.append("🔴 1착 0회·2착 %d회(2착형)" % _a[1])
         rk = []
         best_gap = None
         for lab in ("距승", "場승", "全연", "타임"):
@@ -641,6 +656,9 @@ def market_table(html, kind):
         if best_gap is not None and mk:
             head += " · 괴리 %+d" % best_gap
             gaps.append((best_gap, no, h.get("name") or "", mk))
+        # 🔴 2착형은 괴리와 무관하게 **반드시 저평가 목록에 넣는다**(대표 지시).
+        if second_type and mk:
+            gaps.append((99, no, (h.get("name") or "") + "·2착형", mk))
         lines.append("%s\n      %s\n      조건순위: %s"
                      % (head, " · ".join(parts) or "원문에 조건별 실적 없음",
                         " / ".join(rk) or "판정 가능한 조건 축 없음"))
@@ -652,11 +670,20 @@ def market_table(html, kind):
     #     표본이 쌓이면 다시 재고, 그때 임계를 **낮추는 방향으로는 바꾸지 않는다.**
     GAP_MIN = 4
     gaps.sort(key=lambda x: -x[0])
-    top = [g for g in gaps if g[0] >= GAP_MIN][:3]
+    top, seen_no = [], set()
+    for g, n, nm, mk in gaps:                 # ⚠ 같은 말이 괴리·2착형으로 두 번 들어올 수 있다
+        if n in seen_no or (g < GAP_MIN and g != 99):
+            continue
+        seen_no.add(n)
+        top.append((g, n, nm, mk))
+        if len(top) >= 3:
+            break
     tail = ""
     if top:
         tail = ("\n🔴 저평가 후보(조건 상위인데 시장 하위): %s\n"
-                % " · ".join("%d번(%s · 시장 %d인기 · 괴리 %+d)" % (n, nm, mk, g)
+                "⚠ 이 말들은 ④에서 반드시 다루고 ⑥ 조합에 **최소 하나** 넣는다. 어긋나면 폐기된다.\n"
+                % " · ".join("%d번(%s · 시장 %d인기 · %s)"
+                             % (n, nm, mk, ("2착형" if g == 99 else "괴리 %+d" % g))
                              for g, n, nm, mk in top))
     return ("# 조건별 실적 · 시장 괴리(원문에서 기계 추출 — 🔴 이 값을 그대로 쓴다)\n"
             "⚠ 全=통산 · 場=당 경마장 · 距=당거리 (1착-2착-3착-착외). 距 는 NAR 원문에만 있다.\n"
