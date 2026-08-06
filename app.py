@@ -24346,13 +24346,55 @@ def _keiba_dist_of(s):
     return surface, (int(m.group(1)) if m else None)
 
 
+# ── [2026-08-06] 지방경마 클래스(등급) 표기 ────────────────────────────────
+#   🔴 조(組) 한자를 유니코드 범위로 쓰면 안 된다. 一二三四五六七八九十 은 연속이 아니다
+#     (一=U+4E00·三=U+4E09·七=U+4E03·九=U+4E5D 만 4E00~4E5D 안이고 二=U+4E8C·四=U+56DB 등은 밖).
+#     실제로 범위 정규식으로 뽑으니 'Ｃ３二' 가 'Ｃ３' 으로 잘렸다 — 명시 열거한다.
+#   🔴 record_score 에 섞지 않는다. `grade`/`grade_bonus` 와 이름·경로를 완전히 분리한다.
+_CLASS_KUMI = "一二三四五六七八九十"
+_CLASS_GRADE_RE = re.compile(r"([Ａ-Ｄ])([１-６])([%s])?" % _CLASS_KUMI)
+
+
+def _class_grade_pick(text):
+    """레이스명에서 클래스 1개를 뽑는다(예 'Ｃ３一'). 없거나 혼합이면 None.
+
+    ⚠ oddspark 레이스명은 같은 등급을 두 번 반복한다('Ｃ３一Ｃ３一３歳以上') → 중복 제거.
+      중복 제거 후 2종 이상이면 선발전(Ｃ２Ｃ３選抜馬)이라 단일 등급으로 볼 수 없다.
+      억지로 하나를 고르면 승강급 판정이 조용히 틀리므로 None 을 준다."""
+    if not text:
+        return None
+    seen = []
+    for m in _CLASS_GRADE_RE.finditer(text):
+        g = m.group(1) + m.group(2) + (m.group(3) or "")
+        if g not in seen:
+            seen.append(g)
+    return seen[0] if len(seen) == 1 else None
+
+
+def _class_grade_rank(g):
+    """클래스 문자열 → 서열 점수(작을수록 상위). Ａ>Ｂ>Ｃ>Ｄ · 급내 1>2>3 · 조 一>二>三.
+    ⚠ 조 이동(Ｃ３一↔Ｃ３二)과 승강급(Ｃ２↔Ｃ３)은 성격이 다르다 — 쓰는 쪽에서 갈라야 한다."""
+    if not g or len(g) < 2:
+        return None
+    cls = {"Ａ": 0, "Ｂ": 1, "Ｃ": 2, "Ｄ": 3}.get(g[0])
+    if cls is None:
+        return None
+    try:
+        num = "１２３４５６".index(g[1])
+    except ValueError:
+        return None
+    kumi = _CLASS_KUMI.index(g[2]) if len(g) > 2 and g[2] in _CLASS_KUMI else 5
+    return cls * 100 + num * 10 + kumi
+
+
 def _keiba_parse_shutsuba(html):
     """oddspark 지방경마 출주표(RaceList.do) → {venue,raceNo,distance,surface,trackCond,horses:[...]}.
     horses[]: {no(마번=행순서), name, sexAge, jockey, weight(부담중량), winOdds, pop, lineageNb, detailUrl}."""
     _form_raw_save("oddspark", html)   # 🔴 [2026-08-05 승인] 원문 보존(파싱 무개입·실패해도 무시).
     #   왜: 대표가 화면에서 본 Ｃ３三·Ｃ３四(등급)가 이 화면일 가능성이 크다. 원문이 없으면
     #     등급 표기가 실재하는지 확인조차 못 한다. 다른 3종(keirin·jra·nar)과 같은 방식·같은 훅이다.
-    out = {"venue": "", "raceNo": None, "distance": None, "surface": "", "trackCond": "", "horses": []}
+    out = {"venue": "", "raceNo": None, "distance": None, "surface": "", "trackCond": "",
+           "raceGrade": None, "horses": []}
     mt = re.search(r"<title>(.*?)</title>", html, re.S)
     if mt:
         t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", mt.group(1)))
@@ -24362,6 +24404,8 @@ def _keiba_parse_shutsuba(html):
         mr = re.search(r"(\d+)R", t)
         if mr:
             out["raceNo"] = int(mr.group(1))
+        # [2026-08-06] 이번 경주 등급 — 기준이 없으면 승급인지 강급인지 판정할 수 없다.
+        out["raceGrade"] = _class_grade_pick(t)
     # 레이스 헤더(거리·마장): HorseDetail 등장 이전 구간에서 'ダ1230'·마장상태 추출
     head = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html[:html.find("HorseDetail")] if "HorseDetail" in html else html[:4000]))
     md = re.search(r"([ダ芝])\s*(\d{3,4})\s*m?", head)
@@ -24373,6 +24417,32 @@ def _keiba_parse_shutsuba(html):
         out["trackCond"] = mc.group(1)
     # 출전마 행(HorseDetail 링크 보유) — 출주표는 馬番 순서
     trs = [t for t in re.findall(r"<tr[^>]*>.*?</tr>", html, re.S) if "HorseDetail" in t]
+    # [2026-08-06] 말별 과거 5전의 클래스·통산 성적 — 출주표 한 건에 이미 들어 있어 재요청이 필요 없다.
+    #   ⚠ 과거 셀(td.showElm)은 말 <tr> 바깥에 있어 tr 정규식으로는 안 잡힌다 →
+    #     HorseDetail 등장 위치로 블록을 나눈다(마번 순서 동일·실측 확인).
+    _pg_by_no = {}
+    try:
+        _bpos = [m.start() for m in re.finditer(r"HorseDetail", html)]
+        if len(_bpos) == len(trs):                       # 🔴 개수가 다르면 아무것도 붙이지 않는다
+            for _bi, _bp in enumerate(_bpos):
+                _blk = html[_bp:(_bpos[_bi + 1] if _bi + 1 < len(_bpos) else len(html))]
+                _pl = re.findall(r"showElm\s+bg-(\d+)chaku", _blk)
+                _rn = re.findall(r'racename-small"\s+title="(.*?)"', _blk, re.S)
+                if not _pl or len(_pl) != len(_rn):       # 착순과 레이스명 짝이 안 맞으면 버린다
+                    continue
+                _car = None
+                _me = re.search(r'<table class="ent2">(.*?)</table>', _blk, re.S)
+                if _me:
+                    _rows = re.findall(r"<tr>(.*?)</tr>", _me.group(1), re.S)
+                    if _rows:
+                        _cs = [re.sub(r"<[^>]+>", "", c).strip() for c in re.findall(r"<td[^>]*>(.*?)</td>", _rows[0], re.S)]
+                        _ns = [int(c) for c in _cs if c.isdigit()]
+                        if len(_ns) >= 4:
+                            _car = {"win": _ns[0], "second": _ns[1], "third": _ns[2], "other": _ns[3]}
+                _pg_by_no[_bi] = {"pastClassGrades": [_class_grade_pick(x) for x in _rn],
+                                  "pastClassPlacings": [int(x) for x in _pl], "career": _car}
+    except Exception as _ce:
+        print("[등급파싱] 생략(무시):", str(_ce)[:60])
     for i, tr in enumerate(trs):
         cells = [c for c in _keiba_cells(tr) if c]
         mln = re.search(r"lineageNb=(\d+)", tr)
@@ -24405,10 +24475,15 @@ def _keiba_parse_shutsuba(html):
             win_odds = float(mo.group(1)) if mo else None
             mp = re.search(r"(\d+)人気", oc)
             pop = int(mp.group(1)) if mp else None
+        _pg = _pg_by_no.get(i) or {}
         out["horses"].append({
             "no": i + 1, "name": name, "sexAge": sex_age, "jockey": jockey,
             "weight": weight, "winOdds": win_odds, "pop": pop, "lineageNb": lineage,
             "detailUrl": ("https://www.oddspark.com/keiba/HorseDetail.do?lineageNb=%s" % lineage) if lineage else None,
+            # [2026-08-06] 독립 축 — `grade`(통합등급)·`grade_bonus` 와 이름·경로가 겹치지 않는다.
+            "pastClassGrades": _pg.get("pastClassGrades"),
+            "pastClassPlacings": _pg.get("pastClassPlacings"),
+            "career": _pg.get("career"),
         })
     return out
 
@@ -24513,6 +24588,12 @@ def _keiba_starter_store_row(h):
     return {"no": h["no"], "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "totalScore": h["totalScore"], "recentPlacings": h.get("recentPlacings") or [],
             "styleType": h.get("styleType"), "grade": h.get("grade"),
+            # ── [클래스 축 (2026-08-06)] 과거 경주별 등급·통산 성적 ──
+            #   🔴 `grade`(통합등급)와 다른 것이다. record_score·totalScore 에 섞지 않는다.
+            #   경주가 끝나면 출주표가 내려가 영구 소실되므로 지금부터 담는다(추가만).
+            "pastClassGrades": h.get("pastClassGrades"),
+            "pastClassPlacings": h.get("pastClassPlacings"),
+            "career": h.get("career"),
             "detail": h.get("detail") or [], "bodyWeight": h.get("bodyWeight"),
             "bodyWeightBonus": h.get("bodyWeightBonus"),
             "distAptitude": h.get("distAptitude"), "distAptitudeRate": h.get("distAptitudeRate"),
@@ -24586,6 +24667,10 @@ def _keiba_build_form(shutsuba, details):
         horses.append({
             "no": h.get("no"), "name": h.get("name", ""), "jockey": h.get("jockey", ""),
             "weight": h.get("weight"), "winOdds": h.get("winOdds"), "pop": h.get("pop"),
+            # [2026-08-06] 클래스 축(독립) — total 에 더하지 않는다. 순수 통과만 한다.
+            "pastClassGrades": h.get("pastClassGrades"),
+            "pastClassPlacings": h.get("pastClassPlacings"),
+            "career": h.get("career"),
             "recentPlacings": placings[:5], "baseScore": base,
             "styleType": style, "styleBonus": sbonus,
             "distanceBonus": dbonus, "weightBonus": wbonus, "last3f": last3f,
@@ -24702,7 +24787,8 @@ def keiba_starters():
                    # [소실 방지] 경주 단위 조건 — `_keiba_parse_shutsuba` 가 **파싱은 하는데 어디에도
                    #   저장되지 않아** 분석 로그 1,392건 전부 거리 0건이었다(차원 분석 자체가 불가).
                    "distance": shutsuba.get("distance"), "surface": shutsuba.get("surface"),
-                   "trackCond": shutsuba.get("trackCond")}
+                   "trackCond": shutsuba.get("trackCond"),
+                   "raceGrade": shutsuba.get("raceGrade")}   # [2026-08-06] 이번 경주 등급(승강급 판정 기준)
         _starters_save(sdb)
         linked = rk
         print(f"[지방경마 전적] {rk}: {len(store)}두 oddspark 전적 반영(각질·거리변화·상3F·마체중·거리적성·기수복승률)")
@@ -24756,7 +24842,8 @@ def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
             sdb[rk] = {"horses": store, "t": time.time(), "source": "oddspark",
                        # [소실 방지] 경주 단위 조건(거리·마장·마장상태) 보존 — 위 주석 참조.
                        "distance": shutsuba.get("distance"), "surface": shutsuba.get("surface"),
-                       "trackCond": shutsuba.get("trackCond")}
+                       "trackCond": shutsuba.get("trackCond"),
+                       "raceGrade": shutsuba.get("raceGrade")}   # [2026-08-06] 이번 경주 등급
             _starters_save(sdb)
             _KEIBA_FORM_DONE.add(rk)
             print(f"[지방경마 전적·자동] {rk}: {len(store)}두 oddspark 전적 수집(bg·각질·거리변화·상3F)")
