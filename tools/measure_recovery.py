@@ -444,6 +444,39 @@ def _gap3(r):
     return max(vs) / min(vs) if min(vs) else None
 
 
+def _swap_low_for_ref(r, lo=None):
+    """구좌를 **늘리지 않고** 현행의 최저배당 1개를 강등분 고배당 1개로 바꾼다.
+
+    🔴 [2026-08-06] 대표 지시 "저배당 뻔한 조합을 바꾼다"의 최소 개입 형태다.
+      · 현행이 1개 이하면 바꾸지 않는다(유일한 추천을 없애면 화면이 빈다).
+      · 강등분에 쓸 조합이 없으면 현행 그대로 둔다(억지로 채우지 않는다).
+      · lo=(a,b) 를 주면 그 배당대 안에서만 고른다 — 극단 고배당 한 건에 회수가 끌려가는 것을 막는다.
+    ⚠ 반사실 시뮬레이션이다. 실제로는 강등돼 회원에게 안 나갔다."""
+    dc = list(r["dc"] or [])
+    ref = list(r["ref"] or [])
+    q = r["q"] or {}
+    if len(dc) < 2 or not ref:
+        return dc
+    cand = []
+    for c in ref:
+        v = q.get(tuple(sorted(c)))
+        if not v:
+            continue
+        if lo and not (lo[0] <= v <= lo[1]):
+            continue
+        cand.append((v, sorted(c)))
+    if not cand:
+        return dc
+    cand.sort(key=lambda x: -x[0])
+    add = cand[0][1]
+    if add in [sorted(c) for c in dc]:
+        return dc
+    dcv = [(q.get(tuple(sorted(c))) or 0, c) for c in dc]
+    dcv.sort(key=lambda x: x[0])          # 최저배당이 앞
+    keep = [c for _v, c in dcv[1:]]        # 가장 뻔한 것 하나를 뺀다
+    return keep + [add]
+
+
 # 🔴 오늘 잰 11개 안을 함수로 고정. 새 안은 여기에만 추가한다.
 PLANS = [
     ("현행(기준선)", lambda r: r["dc"]),
@@ -462,6 +495,13 @@ PLANS = [
     #   ⚠ 이건 **반사실 시뮬레이션**이다 — 실제로는 강등돼 회원에게 안 나갔다.
     ("현행 + 강등분(quinellaRef)", lambda r: r["dc"] + r["ref"]),
     ("강등분만(quinellaRef)", lambda r: r["ref"]),
+    # 🔴 [2026-08-06 신설] **구좌를 안 늘리고 저배당 1개를 강등분 고배당 1개로 교체**한다.
+    #   대표 지시: "안 맞아도 회원들이 좋아한다. 맞아도 짜증나는 구조다" — 기준이 회수율에서
+    #   회원 만족(적중배당)으로 바뀌었다. 그러나 **회수율이 얼마나 나빠지는지 숫자로 함께 낸다.**
+    #   ⚠ 실측 배경: 현행 표시는 적중률 13.9%·배당중앙 3.1배 · 강등분은 8.6%·9.7배(경마 8월).
+    #     보조가 더 자주 맞는 게 아니라 **맞을 때 배당이 3배**다. 그 교환을 재는 안이다.
+    ("교체 저배당1→강등최고", lambda r: _swap_low_for_ref(r, lo=None)),
+    ("교체 저배당1→강등5~30배", lambda r: _swap_low_for_ref(r, lo=(5.0, 30.0))),
     # 🔴 [2026-08-01 신설] **복병 × 유력마 교차**. 두 목록이 따로 놀아 조합이 안 만들어지는 문제.
     #   ⚠ 복병은 상위 2두만 쓴다(전부 쓰면 구좌가 폭발해 회수율이 자동으로 나빠 보인다).
     ("복병×유력마 교차 추가", lambda r: r["dc"] + [sorted([a, b]) for a in r["dk"][:2]
