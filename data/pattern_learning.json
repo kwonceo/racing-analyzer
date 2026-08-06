@@ -1,26 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카나자와 7경주",
-      "horse_no": 6,
-      "recent_avg": 10.5,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-27"
-    },
-    {
-      "race": "카나자와 7경주",
-      "horse_no": 8,
-      "recent_avg": 7.4,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-27"
-    },
-    {
       "race": "카나자와 8경주",
       "horse_no": 8,
       "recent_avg": 4.8,
@@ -4763,16 +4743,34 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1785982279.3441868
+    },
+    {
+      "race": "소노다 3경주",
+      "horse_no": 8,
+      "recent_avg": 5.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-06"
+    },
+    {
+      "race": "소노다 3경주",
+      "horse_no": 7,
+      "recent_avg": 9.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-06"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2562,
-      "hit": 469
+      "count": 2566,
+      "hit": 470
     },
     "전체부진마": {
-      "count": 4409,
-      "hit": 1183
+      "count": 4414,
+      "hit": 1185
     },
     "대규모급락": {
       "count": 13,
@@ -4782,8 +4780,8 @@
       "hit_rate": 30.8
     },
     "이상감지동반": {
-      "count": 1847,
-      "hit": 714
+      "count": 1848,
+      "hit": 715
     },
     "급락동반": {
       "count": 396,
