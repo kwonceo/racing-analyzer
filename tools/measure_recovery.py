@@ -444,6 +444,72 @@ def _gap3(r):
     return max(vs) / min(vs) if min(vs) else None
 
 
+def _maxq_of(r):
+    """경마 두수별 메인 상한(`_mainmax` 계단과 같은 값). 두수를 모르면 None.
+    ⚠ 경륜·경정은 3 고정이라 이 함수를 쓰지 않는다(`--sport horse` 로만 쓴다)."""
+    nh = len(r.get("hs") or [])
+    if nh < 5:
+        return None
+    if nh <= 9:
+        return 3
+    if nh <= 12:
+        return 4
+    return 6
+
+
+def _fill_gap_cross(r, wide=False, band=None):
+    """🔴 [2026-08-06 신설] **빈 자리에만** 복병 × 유력마 교차를 채운다.
+
+    대표 지적: *"전면 교차는 기각됐지만(52.5%) 자리가 남을 때만 채우는 것은 다르다."*
+      전면 교차는 조합을 통째로 갈아치워 구좌가 폭발한다. 이 안은
+      **max_q 미달분(빈 자리)만** 채우므로 상한을 넘지 않는다.
+    ⚠ 그래도 **구좌는 는다** — 지금 2개 내는 경주가 3개를 내게 된다. "안 늘린다"가 아니다.
+    ⚠ `keyHorses` 저장이 0% 라 `kh` 는 axis 대용이다(원본 로직과 다를 수 있다 · 결과에 명시).
+
+    실물 근거(후나바시 9R · 결과 3-4-5): 3번은 복병 목록에, 4번은 삼복승 '마감급락 보존'에
+      각각 있었는데 복승 3+4 는 어디에도 없었다. 표시가 2개(max_q=3)라 **자리도 남아 있었다.**"""
+    dc = [sorted(c) for c in (r["dc"] or [])]
+    mq = _maxq_of(r)
+    if mq is None or len(dc) >= mq:
+        return dc
+    kh = list(r.get("kh") or [])
+    dk = list(r.get("dk") or [])
+    if not kh or not dk:
+        return dc
+    q = r.get("q") or {}
+    have = set(tuple(c) for c in dc)
+    cand = []
+    src = dk if wide else dk[:2]           # 기본은 복병 상위 2두만(전면 교차와 구분)
+    for a in src:
+        for b in kh:
+            if a == b:
+                continue
+            c = sorted([int(a), int(b)])
+            if tuple(c) in have:
+                continue
+            v = q.get(tuple(c))
+            if not v:
+                continue
+            # 🔴 [2026-08-06 실측] 배당 상한이 없으면 **중앙 102.8배·최대 11,713배**가 들어온다.
+            #   그건 고배당이 아니라 사실상 안 오는 조합이다. 대표 원칙의 '중배당'을 지키려면
+            #   band 로 구간을 좁혀야 한다(EV 복원이 12~30배로 성과를 낸 것과 같은 취지).
+            if band and not (band[0] <= v <= band[1]):
+                continue
+            cand.append((v, c))
+    if not cand:
+        return dc
+    cand.sort(key=lambda x: -x[0])          # 🔴 배당 높은순 — 저배당 편중을 고치는 것이 목적이다
+    out = list(dc)
+    for _v, c in cand:
+        if len(out) >= mq:
+            break
+        if tuple(c) in have:
+            continue
+        have.add(tuple(c))
+        out.append(c)
+    return out
+
+
 def _swap_low_for_ref(r, lo=None):
     """구좌를 **늘리지 않고** 현행의 최저배당 1개를 강등분 고배당 1개로 바꾼다.
 
@@ -502,6 +568,13 @@ PLANS = [
     #     보조가 더 자주 맞는 게 아니라 **맞을 때 배당이 3배**다. 그 교환을 재는 안이다.
     ("교체 저배당1→강등최고", lambda r: _swap_low_for_ref(r, lo=None)),
     ("교체 저배당1→강등5~30배", lambda r: _swap_low_for_ref(r, lo=(5.0, 30.0))),
+    # 🔴 [2026-08-06 신설] 빈 자리(max_q 미달)에만 복병×유력마 교차를 채운다.
+    #   전면 교차(52.5%로 기각)와 달리 상한을 넘지 않는다. ⚠ 그래도 구좌는 는다.
+    ("빈자리 교차채움(복병2)", lambda r: _fill_gap_cross(r, wide=False)),
+    ("빈자리 교차채움(복병전부)", lambda r: _fill_gap_cross(r, wide=True)),
+    ("빈자리 교차 5~30배", lambda r: _fill_gap_cross(r, wide=False, band=(5.0, 30.0))),
+    ("빈자리 교차 10~50배", lambda r: _fill_gap_cross(r, wide=False, band=(10.0, 50.0))),
+    ("빈자리 교차 5~15배", lambda r: _fill_gap_cross(r, wide=False, band=(5.0, 15.0))),
     # 🔴 [2026-08-01 신설] **복병 × 유력마 교차**. 두 목록이 따로 놀아 조합이 안 만들어지는 문제.
     #   ⚠ 복병은 상위 2두만 쓴다(전부 쓰면 구좌가 폭발해 회수율이 자동으로 나빠 보인다).
     ("복병×유력마 교차 추가", lambda r: r["dc"] + [sorted([a, b]) for a in r["dk"][:2]
