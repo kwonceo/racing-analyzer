@@ -196,6 +196,15 @@ B. 🔴 경마라면 **등급(클래스) 변화**를 반드시 다룬다.
      둘은 성격이 다르다. 급이 내려온 것을 조 이동처럼 적으면 안 된다.
    ⚠ 등급 순서는 Ａ>Ｂ>Ｃ>Ｄ, 같은 급 안에서는 1>2>3, 조는 一>二>三 이다.
    ⚠ 아래 '# 등급 이력' 이 주어지면 그 값을 그대로 쓴다. 직접 다시 읽어 계산하지 않는다.
+A-3. 🔴🔴 **저평가 후보를 반드시 하나 이상 지목한다.**
+   '# 조건별 실적 · 시장 괴리' 표가 주어지면 거기 적힌 **괴리가 큰 말**(조건 상위인데 시장 하위)을
+   축 하나로 세우고, ④에서 그 말의 근거를 조건별 실적으로 적는다.
+   ⚠ 표가 없으면(oddspark·경륜) 등급 강급·통산 성적의 모양으로 대신 찾는다.
+   🔴 시장 상위 3두를 그대로 옮겨 적고 끝내면 그것은 분석이 아니다.
+     "이 말은 조건에서는 상위인데 시장은 N인기로 낮게 본다" 를 **한 문장으로 명시**한다.
+   ⚠ 저평가 후보가 반드시 온다고 말하지 않는다. **왜 그렇게 볼 여지가 있는지**만 적는다.
+A-4. 🔴 조건별 실적을 말별로 적는다 — 당거리(距)·당경마장(場)·통산(全)·최고타임·부담중량.
+   ⚠ 距 는 NAR 원문에만 있다. 표에 없으면 **없다고 적고 지어내지 않는다.**
 B-2. 🔴 위 '# 등급 이력' 이 **주어지지 않은 경주**(NAR·중앙·경륜)는 등급 축을 억지로 만들지 않는다.
    NAR(船橋 등)은 레이스명이 'Ａ２以下'·'Ｂ１選抜馬' 형태로 조(組)가 없고, 과거 착순과의 짝짓기가
    원문에서 확실하지 않다 — 등급 변화를 추측해 쓰면 조용히 틀린다.
@@ -240,6 +249,7 @@ def build_prompt(rec):
     body = prepare(rec)
     head = "%s / %s %s경주 (%s)" % (rec["title"][:80], rec["venue"], rec["rno"], rec["kind"])
     cls = class_history(rec["html"], rec["kind"], rec.get("date"))   # 실패하면 "" — 종전과 같아진다
+    cls += market_table(rec["html"], rec["kind"])                    # NAR 조건별 실적·괴리(없으면 "")
     # 🔴 검증 대조본에 기본표를 **더한다**. 기본표의 숫자(경과 주수·통산)는 코드가 원문에서
     #   기계 추출·계산한 값이라 정당한데, 대조본이 원문뿐이면 그것이 환각으로 잡혀 폐기된다.
     #   실제로 '19주 공백'의 19 가 잡혀 정상 분석문이 폐기됐다(2026-08-06 · 오탐 3번째).
@@ -529,6 +539,79 @@ def class_history(html, kind, ymd=None):
             "⚠ 마명은 여기 적힌 것만 쓴다. `父` 는 아버지 말이므로 **그 말의 이름이 아니다**.\n"
             "⚠ 통산은 全(전체)·場(당 경마장)·他(타 경마장)·重(중마장) 순서다. 거리별 칸은 원문에 없다.\n%s\n"
             % (cur or "(단일 등급 아님)", "\n".join(lines)))
+
+
+# ── 조건별 실적 + 시장 괴리 (NAR) ─────────────────────────────────────────
+#   🔴 [2026-08-06 대표 지시] "오늘 저평가를 네 번 짚은 근거가 전부 이 넷인데 분석문에 하나도 없다."
+#     당거리(距)·당경마장(場)·최고타임·등급 이동 + **시장 인기 순위를 나란히** 넣는다.
+#   ⚠ NAR 원문에는 距·最高タイム 이 다 있다. oddspark 에는 距 칸이 없으니 있는 것만 쓴다.
+#   🔴 이 표는 **조건 축에 배당·인기를 넣지 않는다.** 인기는 대조(괴리 계산)로만 쓴다.
+def market_table(html, kind):
+    """NAR 원문 → 조건별 실적·시장 인기·괴리 표. 실패하면 "".
+
+    괴리 = 시장 인기 순위 − 조건 축 순위. **양수가 크면 조건 상위인데 시장 하위** = 저평가 후보.
+    ⚠ 실측 근거(NAR 31경주): 괴리 +4 이상에서 통산연대율 1.85 · 최고타임 1.73 · 당거리승수 1.82.
+      단 n=27~41 이라 **방향까지**다. 이 표는 근거를 보여줄 뿐 성적을 보장하지 않는다."""
+    if kind != "nar":
+        return ""
+    try:
+        import measure_undervalued as MU
+    except Exception:
+        return ""
+    try:
+        race = MU.parse_race(html)
+    except Exception:
+        return ""
+    hs = race.get("horses") or []
+    if len(hs) < 4:
+        return ""
+    ar = MU.axis_ranks(race)
+    mr = MU.market_rank(race)
+    if len(mr) < 4:
+        return ""
+    lines = []
+    gaps = []
+    for h in sorted(hs, key=lambda x: x["no"]):
+        no = h["no"]
+        parts = []
+        for lab, key in (("全", "all"), ("場", "place"), ("距", "dist")):
+            v = h.get(key)
+            if v:
+                parts.append("%s %d-%d-%d-%d" % ((lab,) + tuple(v)))
+        if h.get("best"):
+            parts.append("최고타임 %s" % h["best"])
+        if h.get("weight"):
+            parts.append("부담 %.1f" % h["weight"])
+        rk = []
+        best_gap = None
+        for lab in ("距승", "場승", "全연", "타임"):
+            r = (ar.get(lab) or {}).get(no)
+            if r:
+                rk.append("%s %d위" % (lab, r))
+                g = (mr.get(no) or 99) - r
+                if best_gap is None or g > best_gap:
+                    best_gap = g
+        mk = mr.get(no)
+        head = "%d번 %s" % (no, h.get("name") or "")
+        if mk:
+            head += " · 시장 %d인기" % mk
+        if best_gap is not None and mk:
+            head += " · 괴리 %+d" % best_gap
+            gaps.append((best_gap, no, h.get("name") or "", mk))
+        lines.append("%s\n      %s\n      조건순위: %s"
+                     % (head, " · ".join(parts) or "원문에 조건별 실적 없음",
+                        " / ".join(rk) or "판정 가능한 조건 축 없음"))
+    gaps.sort(key=lambda x: -x[0])
+    top = [g for g in gaps if g[0] >= 3][:3]
+    tail = ""
+    if top:
+        tail = ("\n🔴 저평가 후보(조건 상위인데 시장 하위): %s\n"
+                % " · ".join("%d번(%s · 시장 %d인기 · 괴리 %+d)" % (n, nm, mk, g)
+                             for g, n, nm, mk in top))
+    return ("# 조건별 실적 · 시장 괴리(원문에서 기계 추출 — 🔴 이 값을 그대로 쓴다)\n"
+            "⚠ 全=통산 · 場=당 경마장 · 距=당거리 (1착-2착-3착-착외). 距 는 NAR 원문에만 있다.\n"
+            "⚠ 괴리 = 시장 인기 순위 − 조건 축 순위. **양수가 크면 조건 상위인데 시장 하위**다.\n%s%s\n"
+            % ("\n".join(lines), tail))
 
 
 # ── LLM 호출 ───────────────────────────────────────────────────────────────
