@@ -35936,6 +35936,20 @@ def _midcheck_text(slot, f, prev_stamp):
         L.append("· 복기 오늘 %d건 · P2누적 %d (%s까지 %d)" % (_rvn, _p2, _mark, max(0, _left)))
     except Exception:
         pass
+    # 🔴 [전적 분석문 2026-08-06] 생성·폐기 건수 한 줄(읽기 전용 · 판정 무개입).
+    #   왜: 자동 생성(강력승부만)이 도는지, 폐기가 늘고 있는지를 매일 눈으로 본다.
+    #   ⚠ 폐기는 실패가 아니라 **숫자 검증이 일한 것**이다 — 0이면 오히려 검증을 의심한다.
+    try:
+        _fb = json.load(io.open(os.path.join(os.path.dirname(__file__), "data",
+                                             "form_brief_stats.json"), encoding="utf-8")) or {}
+        _fd = _fb.get(time.strftime("%Y-%m-%d")) or {}
+        if _fd:
+            _pub, _dis = _fd.get("published", 0), _fd.get("discard", 0)
+            _att = _fd.get("attempt", 0)
+            L.append("· 전적 분석문 %d건 · 폐기 %d/%d (자동 %d)"
+                     % (_pub, _dis, _att, _fd.get("auto_made", 0)))
+    except Exception:
+        pass
     # 🔴 [한국 PDF fitz 검증 2026-08-06] 유령·누락이 있으면 알린다(조용히 지나가지 않는다).
     try:
         _kv = json.load(io.open(os.path.join(os.path.dirname(__file__), "data",

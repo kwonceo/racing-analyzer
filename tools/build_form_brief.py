@@ -57,6 +57,11 @@ def _identify(html):
     m = re.search(r"([^\s｜]+?)(?:競馬|競輪)\s*(\d+)R", t)
     if m:
         return m.group(1), int(m.group(2))
+    # 중앙(JRA·netkeiba 馬柱): '… | 2026年8月2日 札幌1R レース情報(JRA) - netkeiba'
+    #   ⚠ 여기엔 '競馬' 글자가 없어 위 정규식으로는 안 잡힌다(그래서 인덱스에서 통째로 빠져 있었다).
+    m = re.search(r"日\s*([^\s｜|0-9]+?)(\d+)R\s*レース情報", t)
+    if m:
+        return m.group(1), int(m.group(2))
     h4 = re.search(r"<h4[^>]*>(.*?)</h4>", html, re.S)
     if h4:
         x = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", h4.group(1)))
@@ -150,16 +155,25 @@ _PROMPT = u"""당신은 일본 지방경마·경륜 전적을 읽고 회원용 �
 5. ⑤(뺀 말과 이유)는 최소 1두 이상, ⑦(주의점)은 최소 2개를 채운다. 비워 두면 그 분석문은 폐기된다.
    후보에서 뺀 말이 없다고 생각되더라도, 가장 근거가 약한 말을 골라 왜 약한지 적는다.
 6. 한국어로 쓴다. 말·선수 이름은 원문 표기 그대로 둔다.
+   🔴 **등급 표기도 원문 그대로 쓴다** — 'Ｃ３一' 을 'C3일'·'C3-1' 로 바꾸지 않는다.
+     조 한자(一二三)를 한국어 발음으로 옮기면 '일(1조)'인지 '일(日)'인지 읽는 사람이 헷갈린다.
 7. 숫자를 직접 계산하지 않는다. 승률·연대율·확률을 스스로 나눗셈해 만들지 않는다.
    원문에 적혀 있는 숫자만 쓴다. 원문에 '4-11-7-74' 라고 있으면 그 표기 그대로 인용한다.
+8. 🔴 숫자를 **반올림하거나 근사하지 않는다.** '11.5' 를 '11.0' 이나 '11초대' 로 바꾸면
+   그 분석문은 폐기된다. 구간을 말하고 싶으면 '11.5 와 12.4' 처럼 원문 값을 그대로 나열한다.
+   ⚠ 실제로 이 유형(경륜 타임 반올림)으로 두 번 연속 폐기됐다(2026-08-06).
 
 # 분석 관점(가장 중요)
 A. 🔴 배당·인기는 축으로 최대 1개만 쓴다. 나머지 축은 배당과 무관한 것으로 잡는다.
    배당 순서를 그대로 옮겨 적는 것은 분석이 아니다. 시장이 이미 아는 것을 되풀이하지 않는다.
 B. 🔴 경마라면 **등급(클래스) 변화**를 반드시 다룬다.
-   원문의 과거 경주명에 'Ｃ２一' 'Ｃ３二' 같은 등급이 들어 있다. 이번 경주 등급과 비교해
-   그 말이 위 조에서 내려왔는지(강급) 아래 조에서 올라왔는지(승급)를 말별로 적는다.
+   🔴 직전 한 전만 보지 않는다. **최근 5전 안에서 등급이 바뀐 지점**을 찾아 적는다.
+     직전이 이번과 같아도 그 앞에서 내려왔으면 그것이 강급이다.
+     (실제 사례: 직전 Ｃ３一 이라 '유지'로 봤는데 그 앞 4전이 전부 Ｃ２一 = Ｃ２→Ｃ３ 강급이었다)
+   🔴 **급 단위(Ｃ２→Ｃ３)와 조 단위(Ｃ３一→Ｃ３二)를 반드시 구분해 적는다.**
+     둘은 성격이 다르다. 급이 내려온 것을 조 이동처럼 적으면 안 된다.
    ⚠ 등급 순서는 Ａ>Ｂ>Ｃ>Ｄ, 같은 급 안에서는 1>2>3, 조는 一>二>三 이다.
+   ⚠ 아래 '# 등급 이력' 이 주어지면 그 값을 그대로 쓴다. 직접 다시 읽어 계산하지 않는다.
 C. 🔴 통산 성적('全 4-11-7-74' 형태 = 1착-2착-3착-착외)을 본다.
    3착이 유난히 많은 말, 2착만 많고 1착이 없는 말처럼 **모양이 치우친 말**을 짚는다.
 D. 부담중량과 감량 표기(▲·△·☆)를 본다. 직전보다 늘었는지 줄었는지 적는다.
@@ -174,7 +188,7 @@ raceCharacter 와 structure 는 원문을 그대로 옮기지 말고 **한국어
   "structure": "문자열",
   "axisRanks": [{"axis": "축 이름", "order": "상위 순서와 근거"}],
   "horses": [{"no": 마번(정수), "facts": "원문에서 그대로 가져온 사실",
-              "classMove": "직전 등급 -> 이번 등급 (강급/승급/유지 중 하나와 근거). 경륜이면 급별·라인",
+              "classMove": "🔴 최근 5전 안 등급 변화 지점. 급 단위인지 조 단위인지 밝힌다. 경륜이면 급별·라인",
               "view": "그에 대한 우리 판단"}],
   "excluded": [{"no": 마번(정수), "why": "뺀 이유"}],
   "combos": [{"combo": [마번, 마번], "why": "근거"}],
@@ -184,6 +198,7 @@ raceCharacter 와 structure 는 원문을 그대로 옮기지 말고 **한국어
 # 경주
 %(head)s
 
+%(cls)s
 # 원문
 %(body)s
 """
@@ -192,7 +207,8 @@ raceCharacter 와 structure 는 원문을 그대로 옮기지 말고 **한국어
 def build_prompt(rec):
     body = prepare(rec)
     head = "%s / %s %s경주 (%s)" % (rec["title"][:80], rec["venue"], rec["rno"], rec["kind"])
-    return _PROMPT % {"head": head, "body": body}, body
+    cls = class_history(rec["html"], rec["kind"])   # 실패하면 "" — 프롬프트는 종전과 같아진다
+    return _PROMPT % {"head": head, "body": body, "cls": cls}, body
 
 
 # ── 숫자 검증 ──────────────────────────────────────────────────────────────
@@ -268,20 +284,155 @@ def verify(doc, body, valid_nos):
 
 
 def valid_nos_of(html, kind):
-    """출전 번호 범위를 **원문 HTML 의 상세 링크 개수**로 읽는다. 경마·경륜 모두 1번부터 연속이다.
+    """출전 번호 범위를 **원문의 '나의 예상' 마크 선택기 id** 로 읽는다.
+    oddspark 출주표는 출전마(선수)마다 `id="fill_select_myYoso_<마번>"` 을 정확히 1개씩 둔다.
 
-    🔴 [2026-08-06 정정] 처음에는 정제본에서 'N番' 텍스트를 세었는데 **오탐이 났다** —
-      소노다 6R 에서 '5番' 하나만 걸려 두수를 5로 보고 6~10번을 전부 유령으로 판정,
-      정상 분석문을 통째로 폐기했다(검증 12건 실패는 전부 오탐이었다).
-      가드가 정상을 막는 쪽이 더 나쁘다(원칙 20) → 텍스트 추정을 버리고 링크 개수로 바꾼다.
+    🔴 [2026-08-06 정정 2회차] 판정 근거를 두 번 바꿨다. 이력을 남긴다.
+      1차: 정제본의 'N番' 텍스트 → 소노다 6R 에서 '5番' 하나만 걸려 두수 5로 오판,
+           6~10번을 전부 유령으로 보고 **정상 분석문 12건을 통째로 폐기**했다(전부 오탐).
+      2차: 상세 링크(lineageNb) 개수 → 🔴 **경마에서 항상 +1 이 나온다.**
+           과거 전적표의 **1착마 링크**가 같은 `HorseDetail.do?lineageNb=` 형태라 함께 잡힌다.
+           실측(8/6 소노다 1~6R): lineageNb 는 두수보다 정확히 1 크고, 그 1건은
+           "2020/03/11 園田 ダ1400 マイタイザン" 처럼 **과거 경주 행**에 있었다.
+           ⇒ 유령 마번 검사가 매 경주 1번씩 느슨했다(정상을 막지는 않았으나 검출력이 샜다).
+      3차(현재): `fill_select_myYoso_<마번>` 의 최댓값. 경마·경륜 공통이고 마번과 1:1 이다.
+           교차검증(경륜 8/6 벳푸 1~6R): playerCd 개수와 **전부 일치**. 경마는 lineageNb-1 과 일치.
+    ⚠ NAR(keiba.go.jp DebaTable)은 화면 구조가 아예 다르다 — `fill_select_myYoso_` 가 0건이다.
+      그쪽은 마번 셀 `class="horseNum"` 의 값을 쓴다(8/6 후나바시 1~12R 전부 1..N 연속 확인).
     ⚠ 못 읽으면 None 을 주고 마번 검사를 건너뛴다. 추측으로 막지 않는다."""
-    if kind == "keirin":
-        n = len(set(re.findall(r"PlayerDetail[^\"']*?playerCd=(\d+)", html)))
+    if kind == "nar":
+        nos = sorted(set(int(x) for x in
+                         re.findall(r'class="horseNum"[^>]*>\s*(\d+)', html)))
+    elif kind == "jra":
+        # 중앙(netkeiba 馬柱)은 `<td class="Waku1">枠</td><td class="Waku">馬番</td>`.
+        # ⚠ `<tr class="HorseList">` 개수는 다른 테이블 행이 섞여 +7 정도 크다 — 쓰지 않는다.
+        nos = sorted(set(int(x) for x in re.findall(r'class="Waku">\s*(\d+)', html)))
     else:
-        n = len(set(re.findall(r"lineageNb=(\d+)", html)))
-    if not (2 <= n <= 18):
+        nos = sorted(set(int(x) for x in re.findall(r"fill_select_myYoso_(\d+)", html)))
+    n = max(nos) if nos else 0
+    if not (2 <= n <= 18) or len(nos) != n:
+        return None                      # 결번·비연속이면 판정하지 않는다(추측 금지)
+    return nos
+
+
+# ── 등급 표기 정규화 ──────────────────────────────────────────────────────
+#   🔴 [2026-08-06] LLM 이 전각 등급 'Ｃ３一' 을 'C3일'·'C2이'·'C3삼' 으로 옮겨 쓴다.
+#     프롬프트로 두 번 막으려 했으나 계속 나온다(모델 성향) → **저장 직전에 되돌린다.**
+#     '일(1조)'인지 '일(日)'인지 대표가 읽을 때 헷갈리는 것이 실제 문제다.
+#   ⚠ 검증(숫자·마번·단정어) 을 **통과한 뒤에** 적용한다. 검증을 우회하지 않는다.
+#     등급의 급 숫자는 1자리라 애초에 숫자 검증 대상이 아니다(2자리+ 와 소수만 본다).
+_KUMI_KR = {"일": "一", "이": "二", "삼": "三", "사": "四", "오": "五", "육": "六"}
+_GRADE_KR_RE = re.compile(r"([A-DＡ-Ｄ])\s*([1-6１-６])\s*(일|이|삼|사|오|육)(?![0-9일])")
+_FW_NUM = {"1": "１", "2": "２", "3": "３", "4": "４", "5": "５", "6": "６"}
+_FW_CLS = {"A": "Ａ", "B": "Ｂ", "C": "Ｃ", "D": "Ｄ"}
+
+
+def _grade_fix(s):
+    if not isinstance(s, str):
+        return s
+    def rep(m):
+        c, n, k = m.group(1), m.group(2), m.group(3)
+        return _FW_CLS.get(c, c) + _FW_NUM.get(n, n) + _KUMI_KR[k]
+    return _GRADE_KR_RE.sub(rep, s)
+
+
+def normalize_grades(doc):
+    """생성문 전체의 등급 표기를 원문 전각으로 되돌린다(문자열 값만 · 구조 무변경)."""
+    if isinstance(doc, dict):
+        return {k: normalize_grades(v) for k, v in doc.items()}
+    if isinstance(doc, list):
+        return [normalize_grades(v) for v in doc]
+    return _grade_fix(doc)
+
+
+# ── 등급(클래스) 이력 — 최근 5전 안에서 바뀐 지점을 찾는다 ────────────────
+#   🔴 [2026-08-06] 왜 필요한가: 직전 한 전만 보면 놓친다.
+#     소노다 5R 8번은 직전이 Ｃ３一(유지)이라 LLM 이 "등급 유지"로 봤는데,
+#     그 앞 4전이 전부 Ｃ２一 이었다 = **최근 5전 안에 Ｃ２→Ｃ３ 급 강급 지점이 있다.**
+#     강급은 오늘 측정에서 유일하게 지지된 축이다(같은 급 내림 배수 1.21 ↔ 완전동일 0.86).
+#   🔴 급 단위(Ｃ２→Ｃ３)와 조 단위(Ｃ３一→Ｃ３二)를 반드시 구분한다. 성격이 다르다.
+_APP_PY = os.path.join(ROOT, "app.py")
+
+
+def _load_class_fns():
+    """app.py 의 `_CLASS_KUMI`~`_class_grade_rank` 블록만 잘라 실행해 재사용한다.
+
+    🔴 목록을 두 곳에 두지 않는다(`tools/track_key.py` 선례와 같은 방식).
+      조(組) 한자는 유니코드 연속이 아니라 범위 정규식이 조용히 틀린다 — 그 지식이 app.py 에 있다.
+    ⚠ app.py 를 import 하지 않는다. import 하면 서버 초기화 부작용이 돈다
+      (build_review.py 가 top-level 에서 sys.stdout 을 덮던 사고와 같은 계열)."""
+    try:
+        src = io.open(_APP_PY, encoding="utf-8").read()
+        i = src.find("_CLASS_KUMI = ")
+        j = src.find("def _keiba_parse_shutsuba")
+        if i < 0 or j <= i:
+            return None, None
+        ns = {"re": re}
+        exec(src[i:j], ns)                       # noqa: S102 — 잘라낸 상수·순수함수 2개뿐
+        return ns.get("_class_grade_pick"), ns.get("_class_grade_rank")
+    except Exception as e:
+        print("[등급이력] app.py 재사용 실패(등급 요약 생략):", str(e)[:80])
+        return None, None
+
+
+def _move_kind(old, new, rank):
+    """과거 등급 old → 새 등급 new 의 변화 종류. (라벨, 급단위여부) 또는 None(변화 없음)."""
+    if not old or not new or old == new:
         return None
-    return list(range(1, n + 1))
+    ro, rn = rank(old), rank(new)
+    if ro is None or rn is None:
+        return None
+    cls_move = old[:2] != new[:2]                # 'Ｃ２' vs 'Ｃ３' — 급 자체가 바뀌었나
+    if rn > ro:
+        return ("급 강급" if cls_move else "조 내림"), cls_move
+    return ("급 승급" if cls_move else "조 올림"), cls_move
+
+
+def class_history(html, kind):
+    """원문 → 등급 이력 요약 텍스트. 경마(oddspark 출주표)만 대상. 실패하면 "".
+
+    말 블록 경계는 `<tr>` 이 아니라 **HorseDetail 등장 위치**다(app.py 실측 교훈).
+    ⚠ 과거 등급 리스트는 **최신이 앞**이다(직전 = index 0).
+    ⚠ 등급이 안 잡히는 말은 그 말만 건너뛴다. 억지로 채우지 않는다."""
+    if kind != "oddspark" or "HorseDetail" not in html:
+        return ""
+    pick, rank = _load_class_fns()
+    if not pick:
+        return ""
+    cur = pick(re.sub(r"\s+", " ", _title_of(html)))
+    pos = [m.start() for m in re.finditer(r"HorseDetail", html)] + [len(html)]
+    lines = []
+    for i in range(len(pos) - 1):
+        blk = html[pos[i]:pos[i + 1]]
+        rn = re.findall(r'racename-small"\s+title="(.*?)"', blk, re.S)
+        pl = re.findall(r"bg-(\d+)chaku", blk)
+        gs = [pick(x) for x in rn]
+        if not any(gs):
+            continue                              # 과거 전적표 1착마 링크 블록 등 — 건너뛴다
+        no = i + 1
+        seq = []
+        for k, g in enumerate(gs):
+            seq.append("%s(%s착)" % (g or "?", pl[k] if k < len(pl) else "?"))
+        # 변화 지점: 이번 경주 ← 직전 ← 그 앞 …  (최신이 앞이므로 gs[k] 가 gs[k+1] 보다 최신)
+        moves = []
+        mv = _move_kind(gs[0], cur, rank) if gs else None
+        if mv:
+            moves.append("직전 %s → 이번 %s: %s" % (gs[0], cur, mv[0]))
+        _lab = lambda k: "직전" if k == 0 else "%d전 전" % (k + 1)   # noqa: E731
+        for k in range(len(gs) - 1):
+            mv = _move_kind(gs[k + 1], gs[k], rank)
+            if mv:
+                moves.append("%s %s → %s %s: %s"
+                             % (_lab(k + 1), gs[k + 1], _lab(k), gs[k], mv[0]))
+        lines.append("%d번: 최근5전(최신순) %s\n      %s"
+                     % (no, " ← ".join(seq),
+                        (" / ".join(moves) if moves else "최근 5전 안 등급 변화 없음")))
+    if not lines:
+        return ""
+    return ("# 등급 이력(원문에서 기계 추출 — 이 값을 그대로 쓴다. 다시 계산하지 않는다)\n"
+            "이번 경주 등급: %s\n"
+            "⚠ 급 단위(Ｃ２→Ｃ３)와 조 단위(Ｃ３一→Ｃ３二)는 성격이 다르다. 구분해 적는다.\n%s\n"
+            % (cur or "(단일 등급 아님)", "\n".join(lines)))
 
 
 # ── LLM 호출 ───────────────────────────────────────────────────────────────
@@ -430,10 +581,119 @@ def run_one(rec, dry=False):
             print("     -", p)
         _bump("discard")
         return None
+    doc = normalize_grades(doc)          # 🔴 검증 통과 후에만 — 표기만 되돌린다(값 무변경)
     p = save(rec, doc, meta)
     _bump("published")
     print("  🟢 통과 · 저장:", os.path.basename(p))
     return doc
+
+
+# ── 범위 배선 — 강력승부 등급만 자동 생성 ─────────────────────────────────
+#   🔴 [2026-08-06 승인] 좁게 시작한다. 판정 로직은 **읽기만** 한다(등급을 만들지 않는다).
+#   실측 건수(8/1~8/5 analysis_log): 강력승부 하루 3~11건(중앙 7) · 추천까지 넣으면 12~24건.
+#     ⇒ 강력승부만이면 경주당 약 17원 기준 **하루 약 120원**, 폐기 재시도 1.4배로 봐도 약 170원.
+#   ⚠ raceGrade 는 마감 후 재분석으로 흔들린 이력이 있다(일치율 30.4%). 여기서는 **범위 선정에만**
+#     쓰고 판정에는 쓰지 않으므로, 흔들려도 "몇 건 만드느냐"만 달라진다. 상한이 그것을 막는다.
+AUTO_GRADES = ("강력승부",)          # 여기를 넓히면 대상이 는다. 넓힐 때는 건수부터 다시 잰다.
+AUTO_MAX_PER_DAY = 20                 # 🔴 비용 상한. 넘으면 그날은 더 만들지 않는다.
+
+
+def auto_targets(date):
+    """오늘 원문이 있고 시스템 등급이 강력승부인 경주 목록. (완전 읽기 전용)"""
+    idx = index_raw(date)
+    out = []
+    for key in sorted(idx, key=lambda x: (x[0], x[1])):
+        rec = dict(idx[key]); rec["venue"], rec["rno"] = key
+        sp = system_picks(rec)
+        lab = (sp or {}).get("raceGrade") or ""
+        if any(g in lab for g in AUTO_GRADES):
+            out.append((key, rec, lab))
+    return out
+
+
+def run_auto(date, dry=False):
+    made = skipped = discarded = 0
+    done_today = len(glob.glob(os.path.join(OUT_DIR, "%s_*.json" % date)))
+    tg = auto_targets(date)
+    print("[자동] %s · 강력승부 %d경주 (이미 생성 %d · 상한 %d)"
+          % (date, len(tg), done_today, AUTO_MAX_PER_DAY))
+    for (key, rec, lab) in tg:
+        p = os.path.join(OUT_DIR, "%s_%s_%sR.json" % (date, key[0], key[1]))
+        if os.path.exists(p):
+            skipped += 1
+            continue
+        if done_today + made >= AUTO_MAX_PER_DAY:
+            print("  🔴 하루 상한 %d 도달 — 중단" % AUTO_MAX_PER_DAY)
+            _bump("auto_capped")
+            break
+        print("\n=== [자동] %s %sR · %s ===" % (key[0], key[1], lab))
+        if dry:
+            made += 1
+            continue
+        if run_one(rec, dry=False):
+            made += 1
+        else:
+            discarded += 1
+    if not dry:                      # ⚠ --dry 는 실제로 만들지 않는다 → 계수기도 올리지 않는다
+        _bump("auto_made", made)
+        _bump("auto_discard", discarded)
+    print("\n[자동] 생성 %d · 폐기 %d · 이미있음 %d" % (made, discarded, skipped))
+    return made, discarded, skipped
+
+
+# ── 사람이 읽는 형태로 내보내기(완전 읽기 전용) ───────────────────────────
+def export_txt(date, out_path):
+    """저장된 분석문 JSON → 대표가 읽을 텍스트 1개 파일. 판정·저장 경로 무개입."""
+    files = sorted(glob.glob(os.path.join(OUT_DIR, "%s_*.json" % date)))
+    if not files:
+        print("[내보내기] %s 분석문 없음" % date)
+        return None
+    L = []
+    L.append("전적 분석문 — %s (%d경주)" % (date, len(files)))
+    L.append("※ 전적 원문만 읽고 만든 분석입니다. 시스템 추천과 다를 수 있습니다.")
+    L.append("=" * 74)
+    for f in files:
+        d = normalize_grades(json.load(io.open(f, encoding="utf-8")))
+        # ⚠ 정규화를 여기서도 한 번 더 돈다 — 정규화 배선 **이전에 저장된 파일**도
+        #   대표가 읽을 때는 올바른 표기로 나오게 하기 위해서다(재생성 비용 0).
+        b, m = d.get("brief") or {}, d.get("meta") or {}
+        L.append("")
+        L.append("■ %s %sR  (%s · %s)" % (d.get("venue"), d.get("raceNo"), d.get("kind"),
+                                          m.get("at", "")))
+        L.append("-" * 74)
+        L.append("[1] 경주 성격\n  " + (b.get("raceCharacter") or "").strip())
+        L.append("[2] 구조\n  " + (b.get("structure") or "").strip())
+        L.append("[3] 축별 순위")
+        for x in (b.get("axisRanks") or []):
+            L.append("  · %s\n      %s" % (x.get("axis"), (x.get("order") or "").strip()))
+        L.append("[4] 말(선수)별")
+        for h in (b.get("horses") or []):
+            L.append("  %s번" % h.get("no"))
+            L.append("    사실 : " + (h.get("facts") or "").strip())
+            if h.get("classMove"):
+                L.append("    등급 : " + h["classMove"].strip())
+            L.append("    판단 : " + (h.get("view") or "").strip())
+        L.append("[5] 뺀 말")
+        for e in (b.get("excluded") or []):
+            L.append("  %s번 — %s" % (e.get("no"), (e.get("why") or "").strip()))
+        L.append("[6] 조합")
+        for c in (b.get("combos") or []):
+            L.append("  %s — %s" % ("+".join(str(x) for x in (c.get("combo") or [])),
+                                    (c.get("why") or "").strip()))
+        L.append("[7] 주의점")
+        for c in (b.get("cautions") or []):
+            L.append("  · " + str(c).strip())
+        ag, sp = d.get("agreement") or {}, d.get("systemPicks") or {}
+        L.append("[참고] 시스템 추천 대조 — %s" % ag.get("status"))
+        L.append("  우리 조합   : %s" % ["+".join(map(str, c)) for c in (ag.get("mine") or [])])
+        L.append("  시스템 복승 : %s" % ["+".join(map(str, c)) for c in (ag.get("system") or [])])
+        L.append("  시스템 등급 : %s" % sp.get("raceGrade"))
+        L.append("=" * 74)
+    txt = "\n".join(L)
+    with io.open(out_path, "w", encoding="utf-8") as fp:
+        fp.write(txt)
+    print("[내보내기] %d경주 → %s (%d자)" % (len(files), out_path, len(txt)))
+    return out_path
 
 
 def main():
@@ -442,7 +702,15 @@ def main():
     ap.add_argument("--race", default="")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--dry", action="store_true")
+    ap.add_argument("--export", default="", help="저장된 분석문을 텍스트 파일로 내보낸다")
+    ap.add_argument("--auto", action="store_true", help="강력승부 등급 경주만 자동 생성")
     a = ap.parse_args()
+
+    if a.export:
+        return 0 if export_txt(a.date, a.export) else 1
+    if a.auto:
+        run_auto(a.date, dry=a.dry)
+        return 0
 
     idx = index_raw(a.date)
     if a.list or not a.race:
