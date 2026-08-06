@@ -30850,6 +30850,55 @@ def _prerace_clear():
         pass
 
 
+def _korea_renumber_by_post(races):
+    """🔴 [2026-08-07] 한국 경주번호를 **발주시각(fitz)** 으로 교정한다. 제자리 수정.
+
+    실사고: Vision 이 제주 1R(13:15)을 **6R 로**, 제주 3R(14:55)을 **5R 로** 읽었다.
+      fitzVerify 는 '제주 1·3 누락'이라 했는데 **해석이 틀렸다** — 없는 게 아니라
+      **틀린 자리에 있었다.** 그대로 두면 제주 1R 명단이 6R 에 붙어 회원이 다른 경주 말을 본다.
+      "명단 없음"보다 나쁘다(조용히 틀린다).
+    🔴 발주시각이 **정확히 일치할 때만** 바꾼다 · 같은 자리가 차 있으면 안 바꾼다 · 명단은 안 건드린다.
+    🔴 도달·발동 계수기(korea_pdf_renum)를 남긴다 — 「돌긴 도는데 안 걸린다」를 구분하려면.
+    """
+    _gate_hit("korea_pdf_renum", reach_only=True)          # 도달(호출될 때마다)
+    fx = {}
+    _pd = fitz.open(KOREA_PDF)
+    try:
+        for _i in range(_pd.page_count):
+            _m = re.search(r"(부산|제주|서울)경마\s*(\d+)경주.*?일반경주\((\d{2}:\d{2})\)",
+                           _pd[_i].get_text(), re.S)
+            if _m:
+                fx.setdefault(_m.group(3), (_track_norm(_m.group(1)), int(_m.group(2))))
+    finally:
+        _pd.close()
+    if not fx:
+        return 0
+    taken = set()
+    for r in races:                                        # 이미 맞는 것부터 자리를 잡는다
+        p = r.get("postTime")
+        if p and fx.get(p) == (_track_norm(r.get("venue")), int(r.get("raceNo") or 0)):
+            taken.add(fx[p])
+    n = 0
+    for r in races:
+        p = r.get("postTime")
+        tgt = fx.get(p) if p else None
+        if not tgt:
+            continue                                       # 시각을 못 맞추면 손대지 않는다
+        cur = (_track_norm(r.get("venue")), int(r.get("raceNo") or 0))
+        if cur == tgt or tgt in taken:
+            continue
+        print("🔴 [한국·번호교정] %s %s경주 → %s %s경주 (발주 %s 기준)"
+              % (cur[0], cur[1], tgt[0], tgt[1], p))
+        r["venue"], r["raceNo"] = tgt[0], tgt[1]
+        r["renumFrom"] = "%s %s경주" % cur
+        r["renumBy"] = "fitz 발주시각 %s" % p
+        taken.add(tgt)
+        n += 1
+    if n:
+        _gate_hit("korea_pdf_renum", reason="번호교정 %d건" % n)   # 발동
+    return n
+
+
 def _korea_verify_fitz(races):
     """🔴 [2026-08-06 승인] fitz 경주목록을 진실로 삼아 Vision(detected) races 를 검증한다.
     왜: Vision 은 흔들린다(8/7 실측: 유령 서울4·누락 제주1·3). fitz(PDF 내장 텍스트)는 결정적.
@@ -31128,6 +31177,14 @@ def _korea_run_job(gen, api_key=None):
             if cancelled():
                 return
 
+        # 🔴 [2026-08-07] 발주시각으로 경주번호 교정 — **여기가 맞는 자리다.**
+        #   ⚠ `_korea_verify_fitz` 안에도 같은 교정이 있으나 **그 시점엔 postTime 이 아직 없어
+        #     한 번도 안 걸렸다**(검증이 postTime 부여보다 앞선다). 코드만 넣고 됐다고 보면 안 된다.
+        #   여기는 경주별 분석이 끝나 postTime 이 다 붙은 뒤다.
+        try:
+            _korea_renumber_by_post(races)
+        except Exception as _rn:
+            print("[한국검증] 번호 교정 실패(무시) — 원본 유지:", str(_rn)[:100])
         sess["status"] = "done"; sess["phase"] = "done"
         sess["done"] = sum(1 for r in races if r.get("status") == "done")
         sess["message"] = f"완료 — {sess['done']}/{len(races)} 경주 분석 완료"
