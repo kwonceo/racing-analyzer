@@ -125,6 +125,25 @@ def _time_sec(s):
         return None
 
 
+def _dense_rank(vals):
+    """[(마번, 값, ...)] → {마번: 순위}. 🔴 **동점은 공동 순위**(공동 3위 다음은 5위).
+
+    🔴 [2026-08-06 대표 지시] 동점 처리를 명세에 못 박는다.
+      종전 코드는 `sort(key=(-값, -전수))` 로 **동점이면 전수 많은 쪽을 위로** 놓았다.
+      대표가 손으로 낸 계산(+4)과 도구(+3)가 달랐던 유력 원인이 이것이다.
+    ⇒ 공동 순위를 택한 이유: ⓐ동점을 인위적으로 가르지 않는다
+      ⓑ순위가 앞당겨지지 않아 괴리가 **작게** 나온다(과대 지목 방지) ⓒ재현 가능하다.
+    ⚠ 2차 기준 '전수 적은 쪽'은 표본이 얇다는 뜻이라 오히려 불리할 수 있어 쓰지 않는다."""
+    out, prev, rank = {}, None, 0
+    for i, item in enumerate(vals):
+        no, v = item[0], item[1]
+        if prev is None or v != prev:
+            rank = i + 1                      # 건너뛰기 방식: 공동 3위가 둘이면 다음은 5위
+            prev = v
+        out[no] = rank
+    return out
+
+
 def axis_ranks(race):
     """축별 순위 → {축이름: {마번: 순위}}. 🔴 합치지 않는다. 판정 불가 말은 그 축에서 뺀다."""
     hs = race["horses"]
@@ -140,18 +159,18 @@ def axis_ranks(race):
             if kind == "win" and r <= 0:
                 continue                      # 🔴 그 조건에서 이겨 본 적 없는 말은 이 축에서 뺀다
             vals.append((h["no"], r, n))
-        vals.sort(key=lambda x: (-x[1], -x[2]))
-        out[lab] = {no: i + 1 for i, (no, _r, _n) in enumerate(vals)}
+        vals.sort(key=lambda x: -x[1])
+        out[lab] = _dense_rank(vals)
     # 최고타임 — 빠를수록 상위. ⚠ 거리 조건이 다르면 비교 불가이나 원문 최고타임은
     #   그 말의 대표 기록이라 같은 경주 안 비교로만 쓴다(절대값을 인용하지 않는다).
     tv = [(h["no"], _time_sec(h["best"])) for h in hs if h.get("best")]
     tv = [(n, s) for n, s in tv if s]
     tv.sort(key=lambda x: x[1])
-    out["타임"] = {no: i + 1 for i, (no, _s) in enumerate(tv)}
+    out["타임"] = _dense_rank(tv)          # 동점 공동 순위(위 _dense_rank 주석 참조)
     # 부담중량 — 가벼울수록 상위(감량 기수 포함). 같은 값이면 동순위로 두지 않고 마번순.
     wv = [(h["no"], h["weight"]) for h in hs if h.get("weight")]
     wv.sort(key=lambda x: x[1])
-    out["부담"] = {no: i + 1 for i, (no, _w) in enumerate(wv)}
+    out["부담"] = _dense_rank(wv)
     return out
 
 
@@ -159,7 +178,7 @@ def market_rank(race):
     """시장 순위 = 인기. 🔴 이것은 대조군이고 조건 축에 절대 넣지 않는다."""
     hs = [h for h in race["horses"] if h.get("pop")]
     hs.sort(key=lambda h: h["pop"])
-    return {h["no"]: i + 1 for i, h in enumerate(hs)}
+    return _dense_rank([(h["no"], h["pop"]) for h in hs])
 
 
 def market_rank_from_odds(path):
@@ -204,7 +223,7 @@ def market_rank_from_odds(path):
             if no not in best or v < best[no]:
                 best[no] = v
     order = sorted(best.items(), key=lambda x: x[1])
-    return {no: i + 1 for i, (no, _v) in enumerate(order)}, top3
+    return _dense_rank(order), top3
 
 
 def main():
