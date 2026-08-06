@@ -30763,6 +30763,50 @@ def _prerace_clear():
         pass
 
 
+def _korea_verify_fitz(races):
+    """🔴 [2026-08-06 승인] fitz 경주목록을 진실로 삼아 Vision(detected) races 를 검증한다.
+    왜: Vision 은 흔들린다(8/7 실측: 유령 서울4·누락 제주1·3). fitz(PDF 내장 텍스트)는 결정적.
+      · 유령(fitz 에 없음) = 마명을 경주로 오판 → **races 에서 제외(폐기)**
+      · 누락(Vision 에 없음) = 판독이 통째로 빠뜨림 → **경고**(그 경주는 명단이 없다)
+    🔴 조용히 하지 않는다 — 로그·계수기(korea_pdf_ghost/miss)·검증파일에 남긴다.
+    🔴 try/except 격리 — 실패해도 기존 파싱을 막지 않는다(원본 races 그대로 반환).
+    반환 (kept_races, verify_dict or None).
+    """
+    try:
+        import importlib.util
+        _bp = os.path.join(os.path.dirname(__file__), "tools", "parse_korea_meta.py")
+        _spec = importlib.util.spec_from_file_location("parse_korea_meta", _bp)
+        _pm = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_pm)
+        vis = [(_track_norm(r.get("venue")), int(r.get("raceNo")))
+               for r in races if r.get("raceNo") is not None]
+        v = _pm.verify_vision(KOREA_PDF, vis)
+    except Exception as e:
+        print("[한국검증] fitz 대조 실패(무시) — 파싱은 계속:", str(e)[:110])
+        return races, None
+    ghost = set(v["ghost"])
+    if ghost:
+        _gate_hit("korea_pdf_ghost", reason="유령 %d: %s" % (len(ghost), sorted(ghost)))
+        print("🔴 [한국검증] 유령 경주 폐기 %d개 (fitz에 없음·마명 오판): %s" % (len(ghost), sorted(ghost)))
+    else:
+        _gate_hit("korea_pdf_ghost", reach_only=True)
+    if v["miss"]:
+        _gate_hit("korea_pdf_miss", reason="누락 %d: %s" % (len(v["miss"]), v["miss"]))
+        print("🔴 [한국검증] 누락 경주 경고 %d개 (fitz엔 있으나 Vision 못 봄): %s"
+              % (len(v["miss"]), v["miss"]))
+    else:
+        _gate_hit("korea_pdf_miss", reach_only=True)
+    try:
+        _json_atomic(os.path.join(os.path.dirname(__file__), "data", "_korea_verify.json"),
+                     {"at": time.strftime("%Y-%m-%d %H:%M:%S"), "ghost": v["ghost"],
+                      "miss": v["miss"], "fitz_n": v["fitz_n"], "vision_n": v["vision_n"]})
+    except Exception:
+        pass
+    kept = [r for r in races
+            if (_track_norm(r.get("venue")), int(r.get("raceNo") or 0)) not in ghost]
+    return kept, v
+
+
 def _korea_run_job(gen, api_key=None):
     """백그라운드 분석 본체. 세션(disk)을 기준으로 진행하며, 이미 끝난 단계는 건너뛰어 '재개'를 지원."""
     def cancelled():
@@ -30857,6 +30901,9 @@ def _korea_run_job(gen, api_key=None):
                               "summaryPage": summ, "title": _korea_race_label(g["venue"], g["raceNo"], g["distance"]),
                               "horses": [], "report": None, "status": "todo"})
             races.sort(key=lambda x: ((x["venue"] or ""), x["raceNo"] or 0))
+            # 🔴 [2026-08-06] fitz 로 Vision 검증 — 유령 경주 폐기·누락 경고(로그·계수기·검증파일).
+            #   try/except 안이라 실패해도 원본 races 를 그대로 쓴다(파싱을 막지 않는다).
+            races, sess["fitzVerify"] = _korea_verify_fitz(races)
             sess["races"] = races
             sess["total"] = len(races)
             venue = races[0]["venue"] if races else ""
@@ -35787,6 +35834,19 @@ def _midcheck_text(slot, f, prev_stamp):
         _mark, _left = ("관찰30", 30 - _p2) if _p2 < 30 else \
                        (("채택200", 200 - _p2) if _p2 < 200 else ("채택선통과", 0))
         L.append("· 복기 오늘 %d건 · P2누적 %d (%s까지 %d)" % (_rvn, _p2, _mark, max(0, _left)))
+    except Exception:
+        pass
+    # 🔴 [한국 PDF fitz 검증 2026-08-06] 유령·누락이 있으면 알린다(조용히 지나가지 않는다).
+    try:
+        _kv = json.load(io.open(os.path.join(os.path.dirname(__file__), "data",
+                                             "_korea_verify.json"), encoding="utf-8"))
+        _gh, _ms = len(_kv.get("ghost") or []), len(_kv.get("miss") or [])
+        if _gh or _ms:
+            L.append("· 🔴 한국 PDF 유령 %d · 누락 %d (fitz %d ↔ Vision %d · %s)"
+                     % (_gh, _ms, _kv.get("fitz_n", 0), _kv.get("vision_n", 0),
+                        str(_kv.get("at", ""))[5:16]))
+        else:
+            L.append("· 한국 PDF 검증 정상 (fitz=Vision %d경주)" % _kv.get("fitz_n", 0))
     except Exception:
         pass
     # 🔴 [축적 지표 · 2026-08-04 대표 지시] 「늘고 있는지 줄고 있는지만 보면 된다」.

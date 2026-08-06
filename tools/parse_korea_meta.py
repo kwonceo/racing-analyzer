@@ -56,6 +56,22 @@ def race_list(pdf_path):
                   key=lambda r: (r["track"], r["no"]))
 
 
+def verify_vision(pdf_path, vision_races):
+    """[2026-08-06] fitz 경주목록을 기준으로 Vision 결과를 검증한다.
+    vision_races = [(track, no), ...] (Vision 이 판독한 경주). fitz 를 진실로 본다.
+    → {"ghost": [...], "miss": [...], "ok": [...]}
+      🔴 ghost(유령)  = Vision 에는 있는데 fitz 에 없다 → 폐기 대상(마명을 경주로 오판한 것)
+      🔴 miss(누락)   = fitz 에는 있는데 Vision 에 없다 → 경고 대상(판독이 통째로 빠뜨림)
+    ⚠ 조용히 처리하지 않는다 — 부르는 쪽이 로그·계수기에 남긴다."""
+    fitz_set = {(r["track"], r["no"]) for r in race_list(pdf_path)}
+    vis_set = {(t, int(n)) for t, n in vision_races}
+    ghost = sorted(vis_set - fitz_set)
+    miss = sorted(fitz_set - vis_set)
+    ok = sorted(vis_set & fitz_set)
+    return {"ghost": ghost, "miss": miss, "ok": ok,
+            "fitz_n": len(fitz_set), "vision_n": len(vis_set)}
+
+
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else "data/korea_last.pdf"
     rl = race_list(path)
