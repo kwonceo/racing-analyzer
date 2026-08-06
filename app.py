@@ -30901,13 +30901,19 @@ def _korea_run_job(gen, api_key=None):
                               "summaryPage": summ, "title": _korea_race_label(g["venue"], g["raceNo"], g["distance"]),
                               "horses": [], "report": None, "status": "todo"})
             races.sort(key=lambda x: ((x["venue"] or ""), x["raceNo"] or 0))
-            # 🔴 [2026-08-06] fitz 로 Vision 검증 — 유령 경주 폐기·누락 경고(로그·계수기·검증파일).
-            #   try/except 안이라 실패해도 원본 races 를 그대로 쓴다(파싱을 막지 않는다).
-            races, sess["fitzVerify"] = _korea_verify_fitz(races)
             sess["races"] = races
             sess["total"] = len(races)
             venue = races[0]["venue"] if races else ""
             sess["label"] = (f"{sess.get('date', '')} {venue}경마 {len(races)}경주").strip()
+            _korea_save(sess)
+
+        # 🔴 [2026-08-06] fitz 검증 — races 확보 후 **신규·재개 공통 지점**에서 1회.
+        #   왜 여기인가: 재업로드(sess 재개)면 위 races 생성 블록을 스킵한다 → 그 안에 두면
+        #   재개 때 검증이 조용히 안 돈다(금요일 캐시 히트 시 유령·누락을 못 잡는다).
+        #   유령 경주는 여기서 제외(폐기)하고 계수기·로그·검증파일에 남긴다. try/except 격리.
+        if sess.get("races"):
+            sess["races"], sess["fitzVerify"] = _korea_verify_fitz(sess["races"])
+            sess["total"] = len(sess["races"])
             _korea_save(sess)
 
         # 4) 경주별 추출 + BMED 분석 — ThreadPool 병렬(3~4 동시). [병렬화]
@@ -31102,6 +31108,13 @@ def korea_start():
         cached = dict(cached)
         cached.update({"status": "done", "phase": "done", "date": date, "pdfHash": md5,
                        "message": (cached.get("message") or "") + " (캐시 즉시 복원)"})
+        # 🔴 [2026-08-06] 캐시 복원 경로는 run_job 을 안 탄다 → **여기서도 fitz 검증**.
+        #   안 그러면 같은 PDF 재업로드(캐시 히트) 시 유령·누락이 조용히 안 잡힌다.
+        try:
+            cached["races"], cached["fitzVerify"] = _korea_verify_fitz(cached.get("races") or [])
+            cached["total"] = len(cached["races"])
+        except Exception as _ve:
+            print("[한국검증] 캐시 경로 검증 실패(무시):", str(_ve)[:80])
         _korea_save(cached)
         # 사전분석 개별 파일도 캐시에서 복원(경주 선택 즉시 로드용)
         try:
