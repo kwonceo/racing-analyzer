@@ -640,12 +640,24 @@ def market_table(html, kind):
         if _a and _a[0] == 0 and _a[1] >= 2:
             second_type = True
             parts.append("🔴 1착 0회·2착 %d회(2착형)" % _a[1])
+        # 🔴 [2026-08-06 대표 지시 ②] **경주 조건(거리)에 맞는 축을 우선한다.**
+        #   당경마장(場)만 높고 당거리(距)가 0승이면 저평가로 뽑지 않는다.
+        #   실물: 후나바시 11R 11번이 괴리 +12 인데 **당거리 3전 무입상**이었다.
+        #   ⚠ 距 출주가 0 이면 '무승'이 아니라 **'자료 없음'**이다 — 거르지 않는다.
+        #   ⚠ 距 칸이 없는 소스(oddspark)도 거를 수 없다. 그 경우 종전대로 둔다.
+        _d = h.get("dist")
+        dist_zero = bool(_d) and sum(_d) > 0 and _d[0] == 0
+        #   🔴 場승만 빼면 부족했다 — 후나바시 11R 11번이 +12 → +6 으로 줄었으나 여전히 뽑혔다.
+        #     全연(통산)도 **거리와 무관한 축**이라 함께 뺀다. 거리에 걸린 축(距승·타임)만 남긴다.
+        skip_axes = ("場승", "全연") if dist_zero else ()
         rk = []
         best_gap = None
         for lab in ("距승", "場승", "全연", "타임"):
             r = (ar.get(lab) or {}).get(no)
             if r:
-                rk.append("%s %d위" % (lab, r))
+                rk.append("%s %d위%s" % (lab, r, "(거리 무승·괴리 제외)" if lab in skip_axes else ""))
+                if lab in skip_axes:
+                    continue                      # 순위는 보여주되 괴리 근거로는 쓰지 않는다
                 g = (mr.get(no) or 99) - r
                 if best_gap is None or g > best_gap:
                     best_gap = g
@@ -655,7 +667,13 @@ def market_table(html, kind):
             head += " · 시장 %d인기" % mk
         if best_gap is not None and mk:
             head += " · 괴리 %+d" % best_gap
-            gaps.append((best_gap, no, h.get("name") or "", mk))
+            # 🔴 축을 두 개 빼도 타임 축이 남아 후나바시 11R 11번이 계속 뽑혔다.
+            #   대표 지시는 "당거리가 0승이면 저평가로 **안 뽑는다**"이므로
+            #   거리 무승은 괴리 기반 지목에서 통째로 제외한다(2착형 축은 별개라 유지).
+            if dist_zero:
+                head += " · 🔴 당거리 무승 → 저평가 제외"
+            else:
+                gaps.append((best_gap, no, h.get("name") or "", mk))
         # 🔴 2착형은 괴리와 무관하게 **반드시 저평가 목록에 넣는다**(대표 지시).
         if second_type and mk:
             gaps.append((99, no, (h.get("name") or "") + "·2착형", mk))
@@ -670,14 +688,15 @@ def market_table(html, kind):
     #     표본이 쌓이면 다시 재고, 그때 임계를 **낮추는 방향으로는 바꾸지 않는다.**
     GAP_MIN = 4
     gaps.sort(key=lambda x: -x[0])
+    # 🔴 [2026-08-06 대표 지시 ①] **계산한 말은 전부 목록에 넣는다. 사람이 고르지 않는다.**
+    #   종전 `[:3]` 상한이 곧 "고르는" 지점이었다 — 8/6 에 두 번 연속 계산해놓고 빠졌고
+    #   그 말들이 3착·1착이었다. ⇒ 상한을 없앤다.
     top, seen_no = [], set()
     for g, n, nm, mk in gaps:                 # ⚠ 같은 말이 괴리·2착형으로 두 번 들어올 수 있다
         if n in seen_no or (g < GAP_MIN and g != 99):
             continue
         seen_no.add(n)
         top.append((g, n, nm, mk))
-        if len(top) >= 3:
-            break
     tail = ""
     if top:
         tail = ("\n🔴 저평가 후보(조건 상위인데 시장 하위): %s\n"
