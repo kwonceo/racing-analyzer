@@ -30865,6 +30865,43 @@ def _korea_verify_fitz(races):
         _spec = importlib.util.spec_from_file_location("parse_korea_meta", _bp)
         _pm = importlib.util.module_from_spec(_spec)
         _spec.loader.exec_module(_pm)
+        # 🔴 [2026-08-07 승인] **발주시각으로 경주번호를 교정한다** — verify_vision 앞에서.
+        #   실사고: Vision 이 제주 1R(13:15)을 **6R 로**, 제주 3R(14:55)을 **5R 로** 읽었다.
+        #   fitzVerify 는 그것을 '제주 1·3 누락'으로 보고했는데 **해석이 틀렸다** —
+        #   없는 게 아니라 **틀린 자리에 있었다.** 그대로 두면 제주 1R 명단이 6R 에 붙어
+        #   회원이 다른 경주 말을 본다. "명단 없음"보다 나쁘다(조용히 틀린다).
+        #   🔴 발주시각이 정확히 일치할 때만 바꾼다. 안 맞으면 아무것도 안 바꾼다.
+        try:
+            _fx = {}                                   # {발주시각: (경기장, 경주번호)}
+            _pdoc = fitz.open(KOREA_PDF)
+            for _pi in range(_pdoc.page_count):
+                _mm = re.search(r"(부산|제주|서울)경마\s*(\d+)경주.*?일반경주\((\d{2}:\d{2})\)",
+                                _pdoc[_pi].get_text(), re.S)
+                if _mm:
+                    _fx.setdefault(_mm.group(3), (_track_norm(_mm.group(1)), int(_mm.group(2))))
+            _pdoc.close()
+            _taken = set()
+            for _r in races:                           # 이미 맞는 것부터 자리를 잡는다
+                _p = _r.get("postTime")
+                if _p and _fx.get(_p) == (_track_norm(_r.get("venue")), int(_r.get("raceNo") or 0)):
+                    _taken.add(_fx[_p])
+            for _r in races:
+                _p = _r.get("postTime")
+                _tgt = _fx.get(_p) if _p else None
+                if not _tgt:
+                    continue                           # 시각을 못 맞추면 손대지 않는다
+                _cur = (_track_norm(_r.get("venue")), int(_r.get("raceNo") or 0))
+                if _cur == _tgt or _tgt in _taken:
+                    continue                           # 같은 자리가 이미 차 있으면 바꾸지 않는다
+                print("🔴 [한국검증·번호교정] %s %s경주 → %s %s경주 (발주 %s 기준)"
+                      % (_cur[0], _cur[1], _tgt[0], _tgt[1], _p))
+                _r["venue"], _r["raceNo"] = _tgt[0], _tgt[1]
+                _taken.add(_tgt)
+                _gate_hit("korea_pdf_renum",
+                          reason="%s %s → %s %s (발주 %s)" % (_cur[0], _cur[1], _tgt[0], _tgt[1], _p))
+        except Exception as _re2:
+            print("[한국검증] 번호 교정 실패(무시) — 원본 유지:", str(_re2)[:100])
+
         vis = [(_track_norm(r.get("venue")), int(r.get("raceNo")))
                for r in races if r.get("raceNo") is not None]
         v = _pm.verify_vision(KOREA_PDF, vis)
