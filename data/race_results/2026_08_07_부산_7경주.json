@@ -15,8 +15,10 @@
   "2nd": 8,
   "3rd": 7
  },
- "payouts": null,
- "payouts_approx": false,
+ "payouts": {
+  "quinella": 8.2
+ },
+ "payouts_approx": true,
  "odds_at_start": {},
  "odds_timeline": [],
  "anomalies": [],
@@ -43,13 +45,13 @@
   "budget": 0,
   "main_bet": 0,
   "sub_bet": 0,
-  "quinella_odds": null,
+  "quinella_odds": 8.2,
   "trifecta_odds": null,
   "actual_return": null,
-  "profit": -1000
+  "profit": 7200
  },
  "memo": null,
- "saved_at": "2026-08-07 22:18:14",
+ "saved_at": "2026-08-07 22:57:46",
  "validation": {
   "ok": true,
   "errors": []
