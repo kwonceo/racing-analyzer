@@ -1,1 +1,59 @@
-{"race_id": "2026_08_07_부산_1경주", "raceKey": "부산 1경주 1200M", "date": "2026-08-07", "sport": "korea", "category": "japan_local", "track": "부산", "round": 1, "distance": null, "track_condition": null, "weather": null, "horse_count": null, "result": {"1st": 1, "2nd": 3, "3rd": 8}, "payouts": {"quinella": 6.6}, "payouts_approx": true, "odds_at_start": {}, "odds_timeline": [], "anomalies": [], "prediction": {"candidates": [], "eliminated": [], "recommend_main": null, "recommend_sub": null, "strategy": null, "signal_quality": null, "confidence": 0, "inverse": false}, "result_analysis": {"main_hit": true, "sub_hit": false, "hit_reason": "적중", "miss_reason": null, "pattern_tags": [], "anomaly_correct": false, "form_pick_hit": false}, "investment": {"budget": 0, "main_bet": 0, "sub_bet": 0, "quinella_odds": 500.0, "trifecta_odds": null, "actual_return": null, "profit": 499000}, "memo": null, "saved_at": "2026-08-07 13:00:23", "validation": {"ok": true, "errors": []}, "1st": 1, "2nd": 3, "3rd": 8, "payoutFixed": {"at": "2026-08-07 13:04:29", "from": 500.0, "to": 6.6, "why": "확장이 원 단위(500원=5.0배)를 배 단위로 보낸 오염 틱이 확정 시점에 잡혔다. 마감 전 6.8배·현재 6.6배. 대표 확인"}}
+{
+ "race_id": "2026_08_07_부산_1경주",
+ "raceKey": "부산 1경주 1200M",
+ "date": "2026-08-07",
+ "sport": "korea",
+ "category": "japan_local",
+ "track": "부산",
+ "round": 1,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": null,
+ "result": {
+  "1st": 1,
+  "2nd": 3,
+  "3rd": 8
+ },
+ "payouts": {
+  "quinella": 500.0
+ },
+ "payouts_approx": true,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [],
+  "eliminated": [],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 500.0,
+  "trifecta_odds": null,
+  "actual_return": null,
+  "profit": 499000
+ },
+ "memo": null,
+ "saved_at": "2026-08-07 14:21:11",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}
