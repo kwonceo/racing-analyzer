@@ -1,0 +1,144 @@
+{
+ "raceKey": "소노다 10경주",
+ "entries": [
+  {
+   "time": "15:20:32",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      8,
+      10
+     ],
+     [
+      10,
+      12
+     ],
+     [
+      5,
+      10
+     ],
+     [
+      5,
+      8
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      5,
+      8,
+      10
+     ],
+     [
+      6,
+      8,
+      10
+     ],
+     [
+      5,
+      10,
+      12
+     ],
+     [
+      5,
+      8,
+      12
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:30:02",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       11,
+       12
+      ],
+      "prev": 30.2,
+      "cur": 12.8,
+      "pct": -57.6
+     },
+     {
+      "combo": [
+       9,
+       11
+      ],
+      "prev": 56.3,
+      "cur": 25.0,
+      "pct": -55.6
+     },
+     {
+      "combo": [
+       10,
+       11
+      ],
+      "prev": 15.3,
+      "cur": 8.0,
+      "pct": -47.7
+     },
+     {
+      "combo": [
+       6,
+       8
+      ],
+      "prev": 450.0,
+      "cur": 267.8,
+      "pct": -40.5
+     },
+     {
+      "combo": [
+       8,
+       11
+      ],
+      "prev": 18.4,
+      "cur": 11.5,
+      "pct": -37.5
+     },
+     {
+      "combo": [
+       2,
+       11
+      ],
+      "prev": 431.2,
+      "cur": 279.2,
+      "pct": -35.3
+     },
+     {
+      "combo": [
+       9,
+       12
+      ],
+      "prev": 53.3,
+      "cur": 36.8,
+      "pct": -31.0
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

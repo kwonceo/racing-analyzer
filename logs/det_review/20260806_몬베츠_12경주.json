@@ -1,0 +1,144 @@
+{
+ "raceKey": "몬베츠 12경주",
+ "entries": [
+  {
+   "time": "20:15:53",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       8,
+       9
+      ],
+      "prev": 75.0,
+      "cur": 10.7,
+      "pct": -85.7
+     },
+     {
+      "combo": [
+       5,
+       7
+      ],
+      "prev": 224.4,
+      "cur": 68.0,
+      "pct": -69.7
+     },
+     {
+      "combo": [
+       1,
+       5
+      ],
+      "prev": 263.7,
+      "cur": 80.2,
+      "pct": -69.6
+     },
+     {
+      "combo": [
+       7,
+       8
+      ],
+      "prev": 133.5,
+      "cur": 43.0,
+      "pct": -67.8
+     },
+     {
+      "combo": [
+       2,
+       3
+      ],
+      "prev": 59.6,
+      "cur": 28.6,
+      "pct": -52.0
+     },
+     {
+      "combo": [
+       7,
+       9
+      ],
+      "prev": 71.2,
+      "cur": 36.5,
+      "pct": -48.7
+     },
+     {
+      "combo": [
+       5,
+       6
+      ],
+      "prev": 119.2,
+      "cur": 69.0,
+      "pct": -42.1
+     }
+    ],
+    "finalQuinellas": [
+     [
+      2,
+      8
+     ],
+     [
+      2,
+      9
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      8,
+      10
+     ],
+     [
+      2,
+      8,
+      9
+     ],
+     [
+      2,
+      9,
+      10
+     ],
+     [
+      2,
+      5,
+      8
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "20:30:08",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

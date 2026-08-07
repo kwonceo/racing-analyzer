@@ -1,0 +1,299 @@
+{
+ "date": "2026-08-05",
+ "sweep": {
+  "date": "2026-08-05",
+  "classified": 106,
+  "byType": {
+   "caught_then_lost": 19,
+   "hit": 31,
+   "composition_miss": 40,
+   "no_signal_forced": 10,
+   "pure_upset": 2,
+   "near_structure": 4
+  },
+  "slippageSamples": 31,
+  "slippageAvgPct": -1.5,
+  "dropStats": {
+   "date": "2026-08-05",
+   "races": 104,
+   "baselineRate": 41.8,
+   "fullDrop": {
+    "15-30": {
+     "n": 120,
+     "placed": 63,
+     "rate": 52.5
+    },
+    "30-50": {
+     "n": 86,
+     "placed": 46,
+     "rate": 53.5
+    },
+    "50+": {
+     "n": 30,
+     "placed": 12,
+     "rate": 40.0
+    }
+   },
+   "lateDrop": {
+    "15-30": {
+     "n": 9,
+     "placed": 3,
+     "rate": 33.3
+    },
+    "30-50": {
+     "n": 13,
+     "placed": 7,
+     "rate": 53.8
+    },
+    "50+": {
+     "n": 46,
+     "placed": 18,
+     "rate": 39.1
+    }
+   }
+  },
+  "signalPlaceStats": {
+   "date": "2026-08-05",
+   "baselineRate": 41.8,
+   "key1_T5": {
+    "n": 98,
+    "placed": 56,
+    "rate": 57.1,
+    "winRate": 15.3
+   },
+   "key1_final": {
+    "n": 98,
+    "placed": 54,
+    "rate": 55.1,
+    "winRate": 18.4
+   },
+   "darkT5": {
+    "n": 14,
+    "placed": 6,
+    "rate": 42.9
+   }
+  }
+ },
+ "replay": {
+  "date": "2026-08-05",
+  "stake": 10000,
+  "policies": {
+   "baseline": {
+    "judged": 106,
+    "hits": 31,
+    "invested": 1060000,
+    "returned": 934000,
+    "unpaid": 0,
+    "roi": 88,
+    "hitRate": 29
+   },
+   "signal_gate": {
+    "judged": 67,
+    "hits": 23,
+    "invested": 670000,
+    "returned": 632000,
+    "unpaid": 0,
+    "roi": 94,
+    "hitRate": 34
+   },
+   "lowodds_trio": {
+    "judged": 106,
+    "hits": 16,
+    "invested": 1060000,
+    "returned": 667000,
+    "unpaid": 0,
+    "roi": 63,
+    "hitRate": 15
+   },
+   "t5_freeze": {
+    "judged": 106,
+    "hits": 43,
+    "invested": 1060000,
+    "returned": 3263000,
+    "unpaid": 0,
+    "roi": 308,
+    "hitRate": 41
+   },
+   "t2_freeze": {
+    "judged": 106,
+    "hits": 36,
+    "invested": 1060000,
+    "returned": 2061000,
+    "unpaid": 0,
+    "roi": 194,
+    "hitRate": 34
+   },
+   "t1_freeze": {
+    "judged": 106,
+    "hits": 39,
+    "invested": 1060000,
+    "returned": 2587000,
+    "unpaid": 0,
+    "roi": 244,
+    "hitRate": 37
+   },
+   "t2_strong": {
+    "judged": 106,
+    "hits": 38,
+    "invested": 1060000,
+    "returned": 2210000,
+    "unpaid": 0,
+    "roi": 208,
+    "hitRate": 36
+   },
+   "t2_strong_cycle": {
+    "judged": 106,
+    "hits": 36,
+    "invested": 1060000,
+    "returned": 1307000,
+    "unpaid": 0,
+    "roi": 123,
+    "hitRate": 34
+   },
+   "t2_strong_all": {
+    "judged": 106,
+    "hits": 38,
+    "invested": 1060000,
+    "returned": 2210000,
+    "unpaid": 0,
+    "roi": 208,
+    "hitRate": 36
+   },
+   "fix_main_keep": {
+    "judged": 106,
+    "hits": 32,
+    "invested": 1060000,
+    "returned": 948000,
+    "unpaid": 0,
+    "roi": 89,
+    "hitRate": 30
+   },
+   "fix_axis2_trio": {
+    "judged": 106,
+    "hits": 32,
+    "invested": 1060000,
+    "returned": 983000,
+    "unpaid": 0,
+    "roi": 93,
+    "hitRate": 30
+   },
+   "fix_special_incl": {
+    "judged": 106,
+    "hits": 34,
+    "invested": 1060000,
+    "returned": 1437000,
+    "unpaid": 0,
+    "roi": 136,
+    "hitRate": 32
+   },
+   "fix_conf_pair": {
+    "judged": 106,
+    "hits": 34,
+    "invested": 1060000,
+    "returned": 1350000,
+    "unpaid": 0,
+    "roi": 127,
+    "hitRate": 32
+   },
+   "fix_backing_ev": {
+    "judged": 106,
+    "hits": 33,
+    "invested": 1060000,
+    "returned": 1039000,
+    "unpaid": 0,
+    "roi": 98,
+    "hitRate": 31
+   },
+   "fix_lowodds_exempt": {
+    "judged": 106,
+    "hits": 31,
+    "invested": 1060000,
+    "returned": 934000,
+    "unpaid": 0,
+    "roi": 88,
+    "hitRate": 29
+   },
+   "fix_connectors": {
+    "judged": 106,
+    "hits": 42,
+    "invested": 1060000,
+    "returned": 2979000,
+    "unpaid": 0,
+    "roi": 281,
+    "hitRate": 40
+   },
+   "fix_connectors_top1": {
+    "judged": 106,
+    "hits": 40,
+    "invested": 1060000,
+    "returned": 2459000,
+    "unpaid": 0,
+    "roi": 232,
+    "hitRate": 38
+   },
+   "fix_connectors_top2": {
+    "judged": 106,
+    "hits": 42,
+    "invested": 1060000,
+    "returned": 2979000,
+    "unpaid": 0,
+    "roi": 281,
+    "hitRate": 40
+   },
+   "fix_odds_cap_new": {
+    "judged": 106,
+    "hits": 33,
+    "invested": 1060000,
+    "returned": 1204000,
+    "unpaid": 0,
+    "roi": 114,
+    "hitRate": 31
+   },
+   "fix_conf_no_signal": {
+    "judged": 106,
+    "hits": 34,
+    "invested": 1060000,
+    "returned": 1600000,
+    "unpaid": 0,
+    "roi": 151,
+    "hitRate": 32
+   },
+   "fix_trio_coherence": {
+    "judged": 106,
+    "hits": 31,
+    "invested": 1060000,
+    "returned": 934000,
+    "unpaid": 0,
+    "roi": 88,
+    "hitRate": 29
+   },
+   "fix_cross_signal": {
+    "judged": 106,
+    "hits": 46,
+    "invested": 1060000,
+    "returned": 3536000,
+    "unpaid": 0,
+    "roi": 334,
+    "hitRate": 43
+   },
+   "fix_signal_axis": {
+    "judged": 106,
+    "hits": 32,
+    "invested": 1060000,
+    "returned": 6730000,
+    "unpaid": 0,
+    "roi": 635,
+    "hitRate": 30
+   },
+   "fix_market_axis": {
+    "judged": 106,
+    "hits": 42,
+    "invested": 1060000,
+    "returned": 4227000,
+    "unpaid": 0,
+    "roi": 399,
+    "hitRate": 40
+   }
+  }
+ }
+}

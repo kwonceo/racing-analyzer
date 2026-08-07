@@ -1,0 +1,189 @@
+{
+ "raceKey": "몬베츠 10경주",
+ "entries": [
+  {
+   "time": "19:14:51",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      8,
+      10
+     ],
+     [
+      10,
+      12
+     ],
+     [
+      8,
+      11
+     ],
+     [
+      11,
+      12
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      7,
+      8,
+      10
+     ],
+     [
+      8,
+      10,
+      11
+     ],
+     [
+      7,
+      10,
+      12
+     ],
+     [
+      7,
+      8,
+      12
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "19:29:13",
+   "minutesBefore": -4,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       7,
+       12
+      ],
+      "prev": 77.9,
+      "cur": 10.0,
+      "pct": -87.2
+     },
+     {
+      "combo": [
+       5,
+       12
+      ],
+      "prev": 33.7,
+      "cur": 8.1,
+      "pct": -76.0
+     },
+     {
+      "combo": [
+       3,
+       7
+      ],
+      "prev": 632.8,
+      "cur": 156.4,
+      "pct": -75.3
+     },
+     {
+      "combo": [
+       1,
+       3
+      ],
+      "prev": 1074.4,
+      "cur": 310.5,
+      "pct": -71.1
+     },
+     {
+      "combo": [
+       10,
+       12
+      ],
+      "prev": 10.7,
+      "cur": 3.3,
+      "pct": -69.2
+     },
+     {
+      "combo": [
+       1,
+       5
+      ],
+      "prev": 245.7,
+      "cur": 77.3,
+      "pct": -68.5
+     },
+     {
+      "combo": [
+       1,
+       9
+      ],
+      "prev": 401.7,
+      "cur": 147.5,
+      "pct": -63.3
+     },
+     {
+      "combo": [
+       5,
+       7
+      ],
+      "prev": 60.0,
+      "cur": 26.3,
+      "pct": -56.2
+     },
+     {
+      "combo": [
+       2,
+       6
+      ],
+      "prev": 2100.0,
+      "cur": 1007.4,
+      "pct": -52.0
+     },
+     {
+      "combo": [
+       8,
+       12
+      ],
+      "prev": 20.7,
+      "cur": 10.1,
+      "pct": -51.2
+     },
+     {
+      "combo": [
+       2,
+       11
+      ],
+      "prev": 280.0,
+      "cur": 146.9,
+      "pct": -47.5
+     },
+     {
+      "combo": [
+       3,
+       9
+      ],
+      "prev": 592.3,
+      "cur": 353.0,
+      "pct": -40.4
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

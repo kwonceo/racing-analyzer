@@ -169,7 +169,11 @@ def load_races(sport="cycle", pattern="2026_07_*"):
         if not mo:
             continue
         m = re.match(r"(\d{4}_\d{2}_\d{2})", os.path.basename(f))
-        out.append({"q": q, "po": float(po), "mo": float(mo), "top2": top2, "dc": dc, "kh": kh,
+        # 🔴 [2026-08-07 신설] 표시 **삼복승**도 싣는다. 우라와 6R(결과 2-10 · 복승 25배)에서
+        #   2번과 10번이 **서로 다른 조합**에 각각 들어 있었는데 2+10 은 어디에도 없었다.
+        #   "등장한 마번끼리의 짝"을 재려면 복승만으로는 분모가 모자란다.
+        dt = [sorted(c) for c in ((cp.get("displayedCombos") or {}).get("trifectas") or [])]
+        out.append({"q": q, "po": float(po), "mo": float(mo), "top2": top2, "dc": dc, "dt": dt, "kh": kh,
                     "bm": [sorted(x.get("combo") or [])
                            for x in (cp.get("bmedSpecial") or []) if x.get("combo")],
                     # 🔴 [2026-08-01] `quinellaRef` = **만들었다가 강등된 조합**(EV 미달·베팅규칙).
@@ -552,6 +556,56 @@ def _swap_low_for_ref(r, lo=None):
 
 
 # 🔴 오늘 잰 11개 안을 함수로 고정. 새 안은 여기에만 추가한다.
+def _seen_nos(r):
+    """표시된 복승·삼복승에 **등장한 마번 전부**. 우라와 6R 유형을 재는 모집단이다."""
+    s = set()
+    for c in (r.get("dc") or []) + (r.get("dt") or []):
+        for n in c:
+            try:
+                s.add(int(n))
+            except Exception:
+                pass
+    return sorted(s)
+
+
+def _cross_missing(r):
+    """등장 마번끼리의 짝 중 **표시에 없는 것**. 배당이 있는 것만(살 수 있어야 한다)."""
+    have = set(tuple(sorted(c)) for c in (r.get("dc") or []))
+    q = r.get("q") or {}
+    nos = _seen_nos(r)
+    out = []
+    for i in range(len(nos)):
+        for j in range(i + 1, len(nos)):
+            c = (nos[i], nos[j])
+            if c in have or c not in q:
+                continue
+            out.append(list(c))
+    return out
+
+
+def _cross_all(r):
+    """현행 + 미생성 짝 전부. ⚠ 구좌가 크게 는다 — 한계 회수율로 함께 본다."""
+    return [sorted(c) for c in (r.get("dc") or [])] + _cross_missing(r)
+
+
+def _cross_swap(r, band=None):
+    """🔴 구좌 동일 교체 — 현행 **저배당 1개**를 미생성 짝(band 안 최고배당)으로 바꾼다.
+    ⚠ 현행이 1개 이하면 바꾸지 않는다(유일한 추천을 없애면 화면이 빈다)."""
+    dc = [sorted(c) for c in (r.get("dc") or [])]
+    if len(dc) <= 1:
+        return dc
+    q = r.get("q") or {}
+    miss = _cross_missing(r)
+    if band:
+        lo, hi = band
+        miss = [c for c in miss if lo <= q.get(tuple(c), 0) <= hi]
+    if not miss:
+        return dc
+    best = max(miss, key=lambda c: q.get(tuple(c), 0))
+    low = min(dc, key=lambda c: q.get(tuple(c), 9e9))
+    return [c for c in dc if c != low] + [best]
+
+
 PLANS = [
     ("현행(기준선)", lambda r: r["dc"]),
     ("현행 +1", lambda r: r["dc"] + _allc(r["kh"])[:1]),
@@ -583,6 +637,13 @@ PLANS = [
     ("빈자리 교차 5~30배", lambda r: _fill_gap_cross(r, wide=False, band=(5.0, 30.0))),
     ("빈자리 교차 10~50배", lambda r: _fill_gap_cross(r, wide=False, band=(10.0, 50.0))),
     ("빈자리 교차 5~15배", lambda r: _fill_gap_cross(r, wide=False, band=(5.0, 15.0))),
+    # 🔴 [2026-08-07] 우라와 6R 유형 — 등장 마번끼리의 미생성 짝
+    ("전조합 교차 추가(전부)", _cross_all),
+    ("전조합 교차 교체(구좌동일)", _cross_swap),
+    ("전조합 교차 교체 5~30배", lambda r: _cross_swap(r, band=(5.0, 30.0))),
+    # 🔴 이웃 구간 — 5~30 이 진짜 최적인지, 사후 최적화인지 가른다
+    ("전조합 교차 교체 3~20배", lambda r: _cross_swap(r, band=(3.0, 20.0))),
+    ("전조합 교차 교체 5~50배", lambda r: _cross_swap(r, band=(5.0, 50.0))),
     # 🔴 [2026-08-01 신설] **복병 × 유력마 교차**. 두 목록이 따로 놀아 조합이 안 만들어지는 문제.
     #   ⚠ 복병은 상위 2두만 쓴다(전부 쓰면 구좌가 폭발해 회수율이 자동으로 나빠 보인다).
     ("복병×유력마 교차 추가", lambda r: r["dc"] + [sorted([a, b]) for a in r["dk"][:2]

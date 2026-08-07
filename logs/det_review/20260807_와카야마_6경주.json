@@ -1,0 +1,129 @@
+{
+ "raceKey": "와카야마 6경주",
+ "entries": [
+  {
+   "time": "12:36:28",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      3,
+      5
+     ],
+     [
+      2,
+      5,
+      9
+     ],
+     [
+      2,
+      3,
+      9
+     ],
+     [
+      3,
+      5,
+      7
+     ]
+    ],
+    "linePairs": [
+     [
+      5,
+      2
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      6,
+      8
+     ]
+    ]
+   }
+  },
+  {
+   "time": "12:46:31",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "16:26:04",
+   "minutesBefore": -220,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "16:37:05",
+   "minutesBefore": -231,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

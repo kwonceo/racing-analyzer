@@ -1,0 +1,199 @@
+{
+ "raceKey": "소노다 10경주",
+ "entries": [
+  {
+   "time": "19:04:55",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       5,
+       6
+      ],
+      "prev": 31.5,
+      "cur": 4.7,
+      "pct": -85.1
+     },
+     {
+      "combo": [
+       1,
+       4
+      ],
+      "prev": 573.6,
+      "cur": 166.9,
+      "pct": -70.9
+     },
+     {
+      "combo": [
+       3,
+       4
+      ],
+      "prev": 242.1,
+      "cur": 106.7,
+      "pct": -55.9
+     },
+     {
+      "combo": [
+       1,
+       6
+      ],
+      "prev": 84.4,
+      "cur": 56.8,
+      "pct": -32.7
+     },
+     {
+      "combo": [
+       6,
+       9
+      ],
+      "prev": 32.1,
+      "cur": 21.9,
+      "pct": -31.8
+     },
+     {
+      "combo": [
+       1,
+       5
+      ],
+      "prev": 178.6,
+      "cur": 123.7,
+      "pct": -30.7
+     }
+    ],
+    "finalQuinellas": [
+     [
+      5,
+      6
+     ],
+     [
+      6,
+      12
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      5,
+      6
+     ],
+     [
+      5,
+      6,
+      12
+     ],
+     [
+      4,
+      6,
+      12
+     ],
+     [
+      1,
+      4,
+      6
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "19:20:00",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       1,
+       9
+      ],
+      "prev": 137.6,
+      "cur": 30.9,
+      "pct": -77.5
+     },
+     {
+      "combo": [
+       1,
+       8
+      ],
+      "prev": 343.4,
+      "cur": 124.1,
+      "pct": -63.9
+     },
+     {
+      "combo": [
+       1,
+       2
+      ],
+      "prev": 59.4,
+      "cur": 29.8,
+      "pct": -49.8
+     },
+     {
+      "combo": [
+       8,
+       9
+      ],
+      "prev": 42.5,
+      "cur": 21.5,
+      "pct": -49.4
+     },
+     {
+      "combo": [
+       1,
+       3
+      ],
+      "prev": 259.4,
+      "cur": 140.0,
+      "pct": -46.0
+     },
+     {
+      "combo": [
+       1,
+       5
+      ],
+      "prev": 192.8,
+      "cur": 112.3,
+      "pct": -41.8
+     },
+     {
+      "combo": [
+       1,
+       7
+      ],
+      "prev": 139.7,
+      "cur": 81.7,
+      "pct": -41.5
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

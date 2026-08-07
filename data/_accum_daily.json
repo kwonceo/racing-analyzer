@@ -45,28 +45,138 @@
   }
  },
  "2026-08-05": {
-  "pastPops": 0,
-  "popDeno": 24,
-  "k5have": 24,
-  "k5deno": 24,
-  "k5allHave": 24,
-  "k5allDeno": 30,
-  "k5hHave": 24,
-  "k5hDeno": 24,
+  "pastPops": 61,
+  "popDeno": 167,
+  "k5have": 132,
+  "k5deno": 167,
+  "k5allHave": 132,
+  "k5allDeno": 778,
+  "k5hHave": 132,
+  "k5hDeno": 294,
   "srcs": {
-   "keirin": 6,
-   "oddspark": 24
+   "keirin": 498,
+   "none": 0,
+   "keiba_ext": 113,
+   "oddspark": 85,
+   "keiba_nar": 82
   },
-  "races": 3,
+  "races": 114,
   "bySrc": {
    "keirin": {
-    "n": 6,
+    "n": 498,
+    "k5": 0,
+    "pop": 0
+   },
+   "none": {
+    "n": 0,
+    "k5": 0,
+    "pop": 0
+   },
+   "keiba_ext": {
+    "n": 113,
     "k5": 0,
     "pop": 0
    },
    "oddspark": {
-    "n": 24,
-    "k5": 24,
+    "n": 85,
+    "k5": 70,
+    "pop": 0
+   },
+   "keiba_nar": {
+    "n": 82,
+    "k5": 62,
+    "pop": 61
+   }
+  }
+ },
+ "2026-08-06": {
+  "pastPops": 100,
+  "popDeno": 191,
+  "k5have": 170,
+  "k5deno": 191,
+  "p2hHave": 301,
+  "p2hDeno": 322,
+  "p6hHave": 170,
+  "p6hDeno": 322,
+  "k5allHave": 170,
+  "k5allDeno": 851,
+  "k5hHave": 170,
+  "k5hDeno": 322,
+  "srcs": {
+   "keirin": 536,
+   "keiba_nar": 125,
+   "keiba_ext": 124,
+   "oddspark": 66,
+   "none": 0
+  },
+  "races": 110,
+  "bySrc": {
+   "keirin": {
+    "n": 536,
+    "k5": 0,
+    "pop": 0
+   },
+   "keiba_nar": {
+    "n": 125,
+    "k5": 104,
+    "pop": 100
+   },
+   "keiba_ext": {
+    "n": 124,
+    "k5": 0,
+    "pop": 0
+   },
+   "oddspark": {
+    "n": 66,
+    "k5": 66,
+    "pop": 0
+   },
+   "none": {
+    "n": 0,
+    "k5": 0,
+    "pop": 0
+   }
+  }
+ },
+ "2026-08-07": {
+  "pastPops": 0,
+  "popDeno": 0,
+  "k5have": 0,
+  "k5deno": 0,
+  "p2hHave": 20,
+  "p2hDeno": 42,
+  "p6hHave": 0,
+  "p6hDeno": 42,
+  "k5allHave": 0,
+  "k5allDeno": 220,
+  "k5hHave": 0,
+  "k5hDeno": 42,
+  "srcs": {
+   "keirin": 178,
+   "none": 0,
+   "korea": 22,
+   "keiba_ext": 20
+  },
+  "races": 30,
+  "bySrc": {
+   "keirin": {
+    "n": 178,
+    "k5": 0,
+    "pop": 0
+   },
+   "none": {
+    "n": 0,
+    "k5": 0,
+    "pop": 0
+   },
+   "korea": {
+    "n": 22,
+    "k5": 0,
+    "pop": 0
+   },
+   "keiba_ext": {
+    "n": 20,
+    "k5": 0,
     "pop": 0
    }
   }

@@ -1,0 +1,128 @@
+{
+ "slots": {
+  "2026-08-04/09": {
+   "at": "2026-08-04 18:14:06",
+   "sent": false,
+   "quiet": false,
+   "abnormal": [],
+   "error": "지연 554분 — 발송 생략"
+  },
+  "2026-08-04/14": {
+   "at": "2026-08-04 18:14:06",
+   "sent": false,
+   "quiet": false,
+   "abnormal": [],
+   "error": "지연 254분 — 발송 생략"
+  },
+  "2026-08-04/18": {
+   "at": "2026-08-04 18:16:10",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "수집 공백 8건",
+    "JSON 손상 21건",
+    "두 소스 괴리 9경주"
+   ],
+   "error": null
+  },
+  "2026-08-04/22": {
+   "at": "2026-08-04 22:00:30",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +1건",
+    "두 소스 괴리 10경주"
+   ],
+   "error": null
+  },
+  "2026-08-05/09": {
+   "at": "2026-08-05 09:00:13",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "서버 프로세스 4개(정상 2)",
+    "JSON 손상 누적 2건"
+   ],
+   "error": null
+  },
+  "2026-08-05/14": {
+   "at": "2026-08-05 14:00:13",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "저장 실패 +222",
+    "JSON 손상 +7건",
+    "두 소스 괴리 6경주"
+   ],
+   "error": null
+  },
+  "2026-08-05/22": {
+   "at": "2026-08-05 22:00:05",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "저장 실패 +176",
+    "JSON 손상 +12건",
+    "두 소스 괴리 12경주"
+   ],
+   "error": null
+  },
+  "2026-08-06/09": {
+   "at": "2026-08-06 09:00:54",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 누적 3건"
+   ],
+   "error": null
+  },
+  "2026-08-06/14": {
+   "at": "2026-08-06 14:01:39",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "저장 실패 +34",
+    "JSON 손상 +4건"
+   ],
+   "error": null
+  },
+  "2026-08-06/22": {
+   "at": "2026-08-06 22:00:02",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +9건",
+    "두 소스 괴리 2경주"
+   ],
+   "error": null
+  },
+  "2026-08-07/09": {
+   "at": "2026-08-07 09:00:30",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 누적 4건"
+   ],
+   "error": null
+  },
+  "2026-08-07/14": {
+   "at": "2026-08-07 14:00:03",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "저장 실패 +146",
+    "JSON 손상 +4건",
+    "두 소스 괴리 5경주"
+   ],
+   "error": null
+  }
+ },
+ "lastRun": "2026-08-07 14:00:03",
+ "lastSlot": 14,
+ "last": {
+  "saveFail": 580,
+  "gap": 0,
+  "corrupt": 8,
+  "at": "2026-08-07 14:00:03"
+ }
+}

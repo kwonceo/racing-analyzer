@@ -1,0 +1,587 @@
+{
+ "raceKey": "모리오카 12경주",
+ "entries": [
+  {
+   "time": "18:05:20",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      5
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      4,
+      11
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      4,
+      5,
+      11
+     ],
+     [
+      3,
+      4,
+      11
+     ],
+     [
+      3,
+      5,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:09:32",
+   "minutesBefore": 5,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      5
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      4,
+      11
+     ],
+     [
+      2,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      5,
+      11
+     ],
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      3,
+      4,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:12:44",
+   "minutesBefore": 2,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      5
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      4,
+      11
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      5,
+      11
+     ],
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      3,
+      4,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:13:09",
+   "minutesBefore": 1,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      5
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      4,
+      11
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      4,
+      5,
+      6
+     ],
+     [
+      3,
+      4,
+      11
+     ],
+     [
+      4,
+      5,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:13:49",
+   "minutesBefore": 1,
+   "status": "WARNING",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [
+    {
+     "code": "삼복승정합",
+     "direction": "risk",
+     "detail": "복승 1순위 [1, 4] 가 삼복승 추천 어디에도 포함되지 않음",
+     "quinella1": [
+      1,
+      4
+     ],
+     "trifectas": [
+      [
+       3,
+       4,
+       11
+      ],
+      [
+       2,
+       4,
+       5
+      ],
+      [
+       2,
+       4,
+       11
+      ],
+      [
+       3,
+       4,
+       5
+      ],
+      [
+       4,
+       5,
+       6
+      ],
+      [
+       4,
+       5,
+       7
+      ]
+     ]
+    }
+   ],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       4,
+       6
+      ],
+      "prev": 12.4,
+      "cur": 5.8,
+      "pct": -53.2
+     },
+     {
+      "combo": [
+       1,
+       4
+      ],
+      "prev": 44.2,
+      "cur": 26.0,
+      "pct": -41.2
+     },
+     {
+      "combo": [
+       4,
+       9
+      ],
+      "prev": 56.3,
+      "cur": 33.2,
+      "pct": -41.0
+     },
+     {
+      "combo": [
+       2,
+       4
+      ],
+      "prev": 8.1,
+      "cur": 5.6,
+      "pct": -30.9
+     }
+    ],
+    "finalQuinellas": [
+     [
+      1,
+      4
+     ],
+     [
+      4,
+      9
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      5,
+      7
+     ],
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      2,
+      4,
+      11
+     ],
+     [
+      4,
+      5,
+      6
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:14:02",
+   "minutesBefore": 0,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       4,
+       6
+      ],
+      "prev": 12.4,
+      "cur": 5.8,
+      "pct": -53.2
+     },
+     {
+      "combo": [
+       1,
+       4
+      ],
+      "prev": 44.2,
+      "cur": 26.0,
+      "pct": -41.2
+     },
+     {
+      "combo": [
+       4,
+       9
+      ],
+      "prev": 56.3,
+      "cur": 33.2,
+      "pct": -41.0
+     },
+     {
+      "combo": [
+       2,
+       4
+      ],
+      "prev": 8.1,
+      "cur": 5.6,
+      "pct": -30.9
+     }
+    ],
+    "finalQuinellas": [
+     [
+      4,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      5,
+      7
+     ],
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      2,
+      4,
+      11
+     ],
+     [
+      4,
+      5,
+      6
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:15:02",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:21:10",
+   "minutesBefore": -6,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "19:15:09",
+   "minutesBefore": -60,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "19:25:17",
+   "minutesBefore": -70,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "19:26:18",
+   "minutesBefore": -71,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "20:02:06",
+   "minutesBefore": -107,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "20:05:14",
+   "minutesBefore": -110,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

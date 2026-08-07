@@ -1,0 +1,126 @@
+{
+ "raceKey": "제주 4경주",
+ "entries": [
+  {
+   "time": "15:42:51",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      6
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      2,
+      6
+     ],
+     [
+      1,
+      6,
+      9
+     ],
+     [
+      1,
+      2,
+      9
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:45:09",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       4,
+       5
+      ],
+      "prev": 187.8,
+      "cur": 50.2,
+      "pct": -73.3
+     },
+     {
+      "combo": [
+       5,
+       6
+      ],
+      "prev": 59.3,
+      "cur": 21.2,
+      "pct": -64.2
+     },
+     {
+      "combo": [
+       2,
+       4
+      ],
+      "prev": 82.1,
+      "cur": 31.5,
+      "pct": -61.6
+     },
+     {
+      "combo": [
+       3,
+       9
+      ],
+      "prev": 198.7,
+      "cur": 97.6,
+      "pct": -50.9
+     },
+     {
+      "combo": [
+       4,
+       6
+      ],
+      "prev": 55.7,
+      "cur": 29.9,
+      "pct": -46.3
+     },
+     {
+      "combo": [
+       4,
+       8
+      ],
+      "prev": 111.4,
+      "cur": 66.7,
+      "pct": -40.1
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

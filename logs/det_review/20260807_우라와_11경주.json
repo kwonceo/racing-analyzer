@@ -1,0 +1,122 @@
+{
+ "raceKey": "우라와 11경주",
+ "entries": [
+  {
+   "time": "18:45:13",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      7,
+      8
+     ],
+     [
+      1,
+      8
+     ],
+     [
+      1,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      7,
+      8
+     ],
+     [
+      4,
+      7,
+      8
+     ],
+     [
+      1,
+      4,
+      7
+     ],
+     [
+      1,
+      5,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:55:01",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       4,
+       5
+      ],
+      "prev": 46.6,
+      "cur": 21.2,
+      "pct": -54.5
+     },
+     {
+      "combo": [
+       3,
+       4
+      ],
+      "prev": 51.7,
+      "cur": 24.8,
+      "pct": -52.0
+     },
+     {
+      "combo": [
+       4,
+       9
+      ],
+      "prev": 203.3,
+      "cur": 106.8,
+      "pct": -47.5
+     },
+     {
+      "combo": [
+       4,
+       7
+      ],
+      "prev": 15.1,
+      "cur": 10.0,
+      "pct": -33.8
+     },
+     {
+      "combo": [
+       1,
+       4
+      ],
+      "prev": 20.2,
+      "cur": 13.4,
+      "pct": -33.7
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

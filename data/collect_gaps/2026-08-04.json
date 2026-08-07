@@ -206,5 +206,21 @@
   "snapshots": 0,
   "postEpoch": 1785804600.0,
   "time": "11:30:06"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_04_모리오카_12경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_04_모리오카_12경주.json'",
+  "quarantined": null,
+  "time": "18:12:49"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_04_카나자와_10경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_04_카나자와_10경주.json'",
+  "quarantined": null,
+  "time": "20:44:50"
  }
 ]

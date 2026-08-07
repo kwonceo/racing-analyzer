@@ -1,6 +1,6 @@
 {
-  "count": 135,
-  "placed": 22,
+  "count": 152,
+  "placed": 25,
   "cases": [
     {
       "race": "도야마 5경주",
@@ -1520,18 +1520,211 @@
       ],
       "placed": false,
       "won": false
+    },
+    {
+      "race": "소노다 1경주",
+      "date": "2026-08-05",
+      "no": 7,
+      "odds": 15.3,
+      "signals": [
+        "급락"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "소노다 1경주",
+      "date": "2026-08-05",
+      "no": 1,
+      "odds": 84.2,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "몬베츠 5경주",
+      "date": "2026-08-05",
+      "no": 7,
+      "odds": 11.6,
+      "signals": [
+        "스마트머니"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "몬베츠 5경주",
+      "date": "2026-08-05",
+      "no": 4,
+      "odds": 37.4,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": true,
+      "won": true
+    },
+    {
+      "race": "몬베츠 5경주",
+      "date": "2026-08-05",
+      "no": 3,
+      "odds": 90.1,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "몬베츠 5경주",
+      "date": "2026-08-05",
+      "no": 2,
+      "odds": 165.1,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "몬베츠 7경주",
+      "date": "2026-08-05",
+      "no": 2,
+      "odds": 27.9,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": true,
+      "won": false
+    },
+    {
+      "race": "도요하시 6경주",
+      "date": "2026-08-07",
+      "no": 1,
+      "odds": 22.8,
+      "signals": [
+        "급락",
+        "스마트머니",
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "도요하시 6경주",
+      "date": "2026-08-07",
+      "no": 4,
+      "odds": 10.8,
+      "signals": [
+        "급락",
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "도요하시 6경주",
+      "date": "2026-08-07",
+      "no": 2,
+      "odds": 17.1,
+      "signals": [
+        "급락",
+        "전적A/B"
+      ],
+      "placed": true,
+      "won": false
+    },
+    {
+      "race": "우라와 2경주",
+      "date": "2026-08-07",
+      "no": 1,
+      "odds": 70.6,
+      "signals": [
+        "급락",
+        "스마트머니",
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "우라와 2경주",
+      "date": "2026-08-07",
+      "no": 3,
+      "odds": 12.8,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "우라와 2경주",
+      "date": "2026-08-07",
+      "no": 6,
+      "odds": 19.1,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "부산 5경주",
+      "date": "2026-08-07",
+      "no": 6,
+      "odds": 10.1,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "부산 5경주",
+      "date": "2026-08-07",
+      "no": 9,
+      "odds": 16.0,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "부산 5경주",
+      "date": "2026-08-07",
+      "no": 5,
+      "odds": 23.6,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "부산 5경주",
+      "date": "2026-08-07",
+      "no": 7,
+      "odds": 64.2,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
     }
   ],
   "by_signal": {
     "급락": {
-      "count": 19,
-      "placed": 4,
-      "rate": 21.1
+      "count": 24,
+      "placed": 5,
+      "rate": 20.8
     },
     "전적A/B": {
-      "count": 113,
-      "placed": 19,
-      "rate": 16.8
+      "count": 128,
+      "placed": 22,
+      "rate": 17.2
     },
     "역배열": {
       "count": 29,
@@ -1542,8 +1735,13 @@
       "count": 8,
       "placed": 0,
       "rate": 0.0
+    },
+    "스마트머니": {
+      "count": 3,
+      "placed": 0,
+      "rate": 0.0
     }
   },
-  "rate": 16.3,
+  "rate": 16.4,
   "note": "중고배당 유력마(복승10배+&강한신호) 실제 입상 자동 집계. 표본 적으면 참고만(50+ 유의)."
 }
