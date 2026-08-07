@@ -78,3 +78,15 @@ logs/server_stdout.log.err
 data/collect_cycles/
 logs/form_raw/
 data/korea_pdf_raw/
+
+# 🔴 [2026-08-08] 서버 콘솔 로그 — git 에서 제외(물리 백업 backups/logs_<날짜>/ 에 보관)
+#   왜: server_c.log 가 57MB 로 깃허브 상한 경고가 떴다(하드 리밋 100MB).
+#   ⚠ 2026-07-31 odds_history 사고와 **다르다** — 그건 배당 원자료라 복구 불가였고,
+#     이건 콘솔 출력이라 서버가 돌면 다시 쌓이고 결론은 CLAUDE.md·보고서에 옮겨져 있다.
+#   🔴 패턴을 **넓게** 잡는다 — server_c 가 샌 이유가 "이름을 바꿔가며 띄워서"다.
+#     `.err` 형식이 두 가지다: `server_c.err` · `server_a.log.err`
+#     ⇒ `logs/server*` 하나로 둘 다 덮는다. 새 이름으로 띄워도 안 샌다.
+#   ⚠ logs/ 전체를 빼지 않는다 — det_review·form_brief·gate_fire·forecast 는 판단 근거다.
+logs/server*
+logs/server_*.log
+logs/server_*.err

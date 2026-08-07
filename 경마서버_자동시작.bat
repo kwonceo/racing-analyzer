@@ -27,6 +27,9 @@ REM   -> WinError 32/5 로 [복기저장]·[분석로그] 저장이 실패하고 스냅샷이 유실된
 REM  종전 검사(findstr :8011)는 ESTABLISHED/TIME_WAIT 까지 잡아 판정이 불명확했으므로
 REM   LISTENING 상태만 정확히 보고 PID 까지 표시하도록 강화한다.
 REM  [주의] 강제 종료 로직은 넣지 않는다  실행 중인 서버를 죽이는 쪽이 더 위험하다.
+REM [2026-08-08] console log rotation (over 50MB -> keep in backups\logs)
+call "%~dp0scriptsotate_logs.bat"
+
 set "SRV_PID="
 for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":8011" ^| findstr "LISTENING"') do set "SRV_PID=%%P"
 if defined SRV_PID (
