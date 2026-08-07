@@ -203,6 +203,14 @@ def load_races(sport="cycle", pattern="2026_07_*"):
                     "dk": [int(x.get("no")) for x in (cp.get("darkHorsePicks") or [])
                            if x.get("no") is not None],
                     "hs": [x for x in (d.get("horses") or []) if x.get("no") is not None],
+                    # 🔴 [2026-08-07] 확신도 측정용. 8/7 경륜 3경주에서 확신도 1위가 전부 3착 밖이었다
+                    #   (기후 7R 44점 · 와카야마 1R 74.4점 · 도요하시 1R 39.1점).
+                    #   화면에 점수를 띄우는데 성적과 무관하면 회원을 오도한다 → 배수로 잰다.
+                    "conf1": cp.get("confTop1"),
+                    "confv": (cp.get("confidence") if isinstance(cp.get("confidence"), (int, float))
+                              else (cp.get("confidenceTop") if isinstance(cp.get("confidenceTop"), (int, float)) else None)),
+                    "top3": sorted({res.get("1st"), res.get("2nd"), res.get("3rd")} - {None}),
+                    "nh": len(d.get("horses") or []),
                     # 🔴 [2026-08-02] bmedSpecial 조건부 편입 측정용. 동결값 우선(마감 시점 신호).
                     "sig": int((((d.get("frozen") or {}).get("strong_signals")
                                  or d.get("strong_signals") or {}).get("count")) or 0),
@@ -1231,11 +1239,52 @@ def report_drop3(rows, label):
           % (label, n, got, base, (got / base) if base else 0, mark))
 
 
+def measure_conf(rows, label):
+    """🔴 [2026-08-07] 확신도 1위가 실제로 3착에 드나 — **기저선(3/두수) 대비 배수**로 잰다.
+
+    왜: 8/7 경륜 3경주에서 확신도 1위가 전부 3착 밖이었다(44점·74.4점·39.1점).
+      점수가 높아도 안 오면 화면 표시가 회원을 오도한다.
+    ⚠ 기저선은 무작위(3 ÷ 두수)다. 경륜에는 인기별 기저선이 없다(pop_baseline 은 JRA 전용).
+      그 한계를 결과에 명시한다.
+    ⚠ n<30 은 판정 불가로 표시한다."""
+    sub = [r for r in rows if r.get("conf1") and r.get("top3") and r.get("nh")]
+    if not sub:
+        print("  확신도 저장분 없음")
+        return
+    hit = sum(1 for r in sub if int(r["conf1"]) in set(r["top3"]))
+    exp = sum(3.0 / r["nh"] for r in sub) / len(sub)
+    act = hit / float(len(sub))
+    print("\n[확신도 1위 · %s] n=%d · 3착 진입 %.1f%% · 기저(3/두수) %.1f%% · 배수 %.2f%s"
+          % (label, len(sub), 100 * act, 100 * exp, (act / exp) if exp else 0,
+             "  ⚠판정불가(n<30)" if len(sub) < 30 else ""))
+    band = {}
+    for r in sub:
+        v = r.get("confv")
+        if v is None:
+            continue
+        b = int(float(v) // 10) * 10
+        d = band.setdefault(b, [0, 0, 0.0])
+        d[0] += 1
+        d[1] += 1 if int(r["conf1"]) in set(r["top3"]) else 0
+        d[2] += 3.0 / r["nh"]
+    if not band:
+        print("  ⚠ 확신도 **점수값**이 저장돼 있지 않다 — 구간별 분해 불가(마번만 저장된다)")
+        return
+    print("  구간별(10점 단위):")
+    for b in sorted(band):
+        n, h, e = band[b]
+        eb = e / n
+        print("    %3d~%3d  n=%3d  3착 %5.1f%%  기저 %5.1f%%  배수 %.2f%s"
+              % (b, b + 9, n, 100 * h / n, 100 * eb, (h / n) / eb if eb else 0,
+                 "  ⚠n<30" if n < 30 else ""))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sport", default="cycle")
     ap.add_argument("--pattern", default="2026_07_*")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--conf", action="store_true", help="확신도 1위가 3착에 드나(배수)")
     ap.add_argument("--trio", action="store_true", help="삼복승 섀도우 성적(별도 측정)")
     ap.add_argument("--dark3", action="store_true", help="복병 3착 이내 진입률(복승 기준과 별개)")
     ap.add_argument("--drop3", action="store_true", help="급락 폭별 3착 이내 진입률")
@@ -1284,6 +1333,12 @@ def main():
                 print()
                 report_forecast(sub, sp)
         return
+    if a.conf:
+        # 🔴 [2026-08-07] 확신도 1위가 실제로 3착에 드나. 종목별로 따로 낸다(경마·경륜이 자주 반대다).
+        for _sp in (["horse", "cycle"] if a.sport in ("all", "any") else [a.sport]):
+            measure_conf(load_races(_sp, a.pattern), "%s · %s" % (_sp, a.pattern))
+        print("\n⚠ 기저선은 무작위(3÷두수)다 — 경륜에는 인기별 기저선이 없다(pop_baseline 은 JRA 전용).")
+        return 0
     if a.ev_sweep:
         out = measure_ev_sweep(a.sport, a.pattern)
         if a.json:
