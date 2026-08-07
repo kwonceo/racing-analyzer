@@ -1,0 +1,57 @@
+{
+ "raceKey": "소노다 8경주",
+ "entries": [
+  {
+   "time": "00:00:07",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      6
+     ],
+     [
+      3,
+      8
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      6,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      6,
+      9
+     ],
+     [
+      3,
+      6,
+      8
+     ],
+     [
+      3,
+      8,
+      9
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}
