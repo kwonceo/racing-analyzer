@@ -30899,6 +30899,53 @@ def _korea_renumber_by_post(races):
     return n
 
 
+def _korea_roster_sanity(races):
+    """🔴 [2026-08-07] 판독 두수가 fitz 두수보다 **크게 적으면 그 경주 명단을 비운다.**
+
+    실사고: 제주 2R 이 fitz 10두인데 Vision 이 **3두만** 읽었다.
+      그대로 두면 1층 게이트가 배당의 4번 이상을 전부 유령으로 보고 **배당을 통째로 폐기**한다.
+    🔴 대표 원칙: **틀린 명단보다 '명단 없음'이 낫다.**
+      명단 없음은 배너가 떠 회원이 알지만, 틀린 명단은 **조용히 배당을 죽인다.**
+    ⚠ fitz 두수는 '1부터 연속인 마번'으로 세는 추정치라 ±1 오차가 난다(부산 1R fitz10 ↔ 실제11).
+      그래서 **3두 이상 모자랄 때만** 비운다. 애매하면 손대지 않는다(원칙 20 — 오탐이 더 나쁘다).
+    ⚠ 명단을 지우는 것이 아니라 **비우고 사유를 남긴다**(rosterCleared).
+    """
+    _gate_hit("korea_roster_thin", reach_only=True)
+    fx = {}
+    _pd = fitz.open(KOREA_PDF)
+    try:
+        for _i in range(_pd.page_count):
+            _t = _pd[_i].get_text()
+            _m = re.search(r"(부산|제주|서울)경마\s*(\d+)경주", _t)
+            if not _m:
+                continue
+            _nos = set(int(x) for x in re.findall(r"^(\d{1,2})$", _t, re.M))
+            _seq = 0
+            for _k in range(1, 19):
+                if _k in _nos:
+                    _seq = _k
+                else:
+                    break
+            fx[(_track_norm(_m.group(1)), int(_m.group(2)))] = _seq
+    finally:
+        _pd.close()
+    n = 0
+    for r in races:
+        key = (_track_norm(r.get("venue")), int(r.get("raceNo") or 0))
+        want = fx.get(key) or 0
+        have = len(r.get("horses") or [])
+        if want >= 5 and have > 0 and have <= want - 3:      # 🔴 3두 이상 모자랄 때만
+            print("🔴 [한국·명단검증] %s %s경주 fitz %d두 ↔ 판독 %d두 → 명단을 비운다"
+                  % (key[0], key[1], want, have))
+            r["rosterCleared"] = "fitz %d두 ↔ 판독 %d두 불일치" % (want, have)
+            r["horses"] = []
+            r["status"] = "empty"
+            n += 1
+    if n:
+        _gate_hit("korea_roster_thin", reason="명단 비움 %d경주" % n)
+    return n
+
+
 def _korea_verify_fitz(races):
     """🔴 [2026-08-06 승인] fitz 경주목록을 진실로 삼아 Vision(detected) races 를 검증한다.
     왜: Vision 은 흔들린다(8/7 실측: 유령 서울4·누락 제주1·3). fitz(PDF 내장 텍스트)는 결정적.
@@ -31185,6 +31232,11 @@ def _korea_run_job(gen, api_key=None):
             _korea_renumber_by_post(races)
         except Exception as _rn:
             print("[한국검증] 번호 교정 실패(무시) — 원본 유지:", str(_rn)[:100])
+        # 🔴 번호를 고친 **뒤에** 명단 두수를 검증한다(순서 중요 — 번호가 틀리면 대조 대상도 틀린다).
+        try:
+            _korea_roster_sanity(races)
+        except Exception as _rs:
+            print("[한국검증] 명단 두수 검증 실패(무시) — 원본 유지:", str(_rs)[:100])
         sess["status"] = "done"; sess["phase"] = "done"
         sess["done"] = sum(1 for r in races if r.get("status") == "done")
         sess["message"] = f"완료 — {sess['done']}/{len(races)} 경주 분석 완료"
