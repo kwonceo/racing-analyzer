@@ -1,6 +1,6 @@
 {
- "generated_at": 1786097514.792503,
- "races_with_result": 2241,
+ "generated_at": 1786098689.1672523,
+ "races_with_result": 2242,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -39,21 +39,21 @@
    "type": "배당변화",
    "key": "had_drop",
    "desc": "급락(자금유입) 동반 경주",
-   "rate": 54.0,
+   "rate": 54.1,
    "baseline": 41.4,
    "lift": 12.7,
-   "support": 1403,
-   "hit": 758
+   "support": 1404,
+   "hit": 759
   },
   {
    "type": "전적점수",
    "key": "form_range",
-   "desc": "적중 경주 상위등급마 전적점수 주로 70.0~105.2 구간",
+   "desc": "적중 경주 상위등급마 전적점수 주로 69.8~105.2 구간",
    "range": [
-    70.0,
+    69.8,
     105.2
    ],
-   "support": 2724
+   "support": 2729
   }
  ],
  "baseline_hit_rate": 41.4
