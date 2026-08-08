@@ -302,6 +302,14 @@ A-7. 🟢 «1착 0회 · 2착 다수»인 말은 복승·삼복승에 **가점**
 
 A-8. 축이 확실하면 축에 얹고, 애매하면 **삼각형으로 묶는다.**
 
+A-11. 🔴🔴 **`summary` 는 여섯 줄이다. 지금 길이는 아무도 안 읽는다(대표 지적).**
+     ① 경주명과 거리 ② 축 하나 ③ 상대 하나 ④ 복병 하나 ⑤ 복승 조합 ⑥ 주의점 하나.
+     🔴 **각 줄에 숫자를 반드시 넣는다** — "기록이 좋다"가 아니라
+        "1:14.3 으로 2위보다 2.1초 빠르다" 처럼 원문 숫자를 그대로 쓴다.
+     ⚠ **말별 판단을 나열하지 않는다.** 그건 ④에 이미 있다.
+     🔴 `summary` 에 쓴 마번은 **⑥ 조합에도 있어야 한다.** 어긋나면 폐기된다.
+     ⚠ 상세 7단은 그대로 둔다 — 근거가 거기 있고 복기에 쓴다.
+
 A-9. 🔴🔴 **[경륜] 원문의 아래 축을 반드시 읽고 순위를 세워 문장에 쓴다.**
      원문에 있어도 지시하지 않으면 읽지 않는다 — 실제로 한 번 그랬다.
      ① **경주득점(競走得点)** — 선수별 절대 실력. 높은 순으로 세운다
@@ -368,7 +376,15 @@ raceCharacter 와 structure 는 원문을 그대로 옮기지 말고 **한국어
               "view": "그에 대한 우리 판단"}],
   "excluded": [{"no": 마번(정수), "why": "뺀 이유"}],
   "combos": [{"combo": [마번, 마번], "why": "근거"}],
-  "cautions": ["주의점", "주의점"]
+  "cautions": ["주의점", "주의점"],
+  "summary": {
+    "race": "경주명과 거리 (예: 서울 1R 1000M)",
+    "axis": "🔴 축 한 마리 — 마번·마명과 근거 **한 줄**. 반드시 숫자를 넣는다",
+    "rival": "상대 한 마리 — 마번·마명과 근거 한 줄",
+    "dark": "복병 한 마리 — 마번·마명과 근거 한 줄",
+    "combo": "복승 조합 (예: 3+7)",
+    "caution": "주의점 한 줄"
+  }
 }
 
 # 경주
@@ -463,6 +479,41 @@ def verify(doc, body, valid_nos):
     #     ⚠ 항목 자체는 남긴다(기능 삭제 금지) — '판단 보류'로 쓰이면 그대로 실린다.
     if not (doc.get("cautions") or []):
         problems.append("⑦ 주의점이 비었다")
+
+    # 🔴🔴 [2026-08-09] **빈 문서가 통과하던 구멍을 막는다.**
+    #   실물: 20260808_서울_1R.json 의 doc 이 `{}` 였는데 «🟢 통과» 로 저장됐다.
+    #   ⚠ 위 검사들은 전부 «있으면 본다» 라 **아무것도 없으면 하나도 안 걸린다.**
+    if not (doc.get("horses") or []) or not str(doc.get("raceCharacter") or "").strip():
+        problems.append("본문이 비었다(horses 또는 raceCharacter 없음)")
+
+    # 🔴 [2026-08-09] **요약 ↔ 상세 정합** — 둘이 어긋나면 회원이 다른 말을 본다.
+    #   요약에 쓴 마번은 ⑥ 조합에도 있어야 한다(대표 지시).
+    try:
+        _sm = doc.get("summary") or {}
+        if _sm:
+            _sn = set()
+            for _k in ("axis", "rival", "dark", "combo"):
+                for _m in re.finditer(r"(\d{1,2})\s*번", str(_sm.get(_k) or "")):
+                    _v = int(_m.group(1))
+                    if valid_nos and _v in valid_nos:
+                        _sn.add(_v)
+            for _m in re.finditer(r"(\d{1,2})", str(_sm.get("combo") or "")):
+                _v = int(_m.group(1))
+                if valid_nos and _v in valid_nos:
+                    _sn.add(_v)
+            _cb = set()
+            for _c in (doc.get("combos") or []):
+                for _x in (_c.get("combo") if isinstance(_c, dict) else _c) or []:
+                    try:
+                        _cb.add(int(_x))
+                    except Exception:
+                        pass
+            _miss = sorted(_sn - _cb)
+            if _miss and _cb:
+                problems.append("요약에 %s번을 썼는데 ⑥ 조합에 없다(요약↔상세 불일치)"
+                                % "·".join(str(x) for x in _miss))
+    except Exception:
+        pass
 
     # 🔴🔴 [2026-08-09 대표 지시] **경고만 적고 그대로 내지 않는다.**
     #   "분석문에 위험이 있다고 적으면 그 위험을 없애도록 조합을 바꾼다."

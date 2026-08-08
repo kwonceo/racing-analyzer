@@ -388,6 +388,145 @@
     "finalTrifectas": [],
     "linePairs": []
    }
+  },
+  {
+   "time": "14:18:37",
+   "minutesBefore": 0,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      1,
+      5
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      3,
+      4
+     ],
+     [
+      1,
+      4,
+      6
+     ],
+     [
+      2,
+      3,
+      4
+     ],
+     [
+      1,
+      2,
+      4
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "14:19:33",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       2,
+       7
+      ],
+      "prev": 110.8,
+      "cur": 24.4,
+      "pct": -78.0
+     },
+     {
+      "combo": [
+       1,
+       3
+      ],
+      "prev": 341.7,
+      "cur": 82.5,
+      "pct": -75.9
+     },
+     {
+      "combo": [
+       1,
+       5
+      ],
+      "prev": 69.5,
+      "cur": 19.4,
+      "pct": -72.1
+     },
+     {
+      "combo": [
+       1,
+       6
+      ],
+      "prev": 269.9,
+      "cur": 78.5,
+      "pct": -70.9
+     },
+     {
+      "combo": [
+       6,
+       7
+      ],
+      "prev": 143.2,
+      "cur": 92.9,
+      "pct": -35.1
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "14:27:50",
+   "minutesBefore": -8,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
   }
  ]
 }
