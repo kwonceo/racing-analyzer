@@ -1,0 +1,62 @@
+{
+ "raceKey": "제주 3경주",
+ "entries": [
+  {
+   "time": "08:48:20",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      7
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      1,
+      5
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      3,
+      5
+     ],
+     [
+      2,
+      5,
+      6
+     ],
+     [
+      3,
+      5,
+      6
+     ],
+     [
+      1,
+      2,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

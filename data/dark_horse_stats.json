@@ -2,32 +2,32 @@
  "races": 1516,
  "byRank": {
   "rank1": {
-   "hit": 154,
+   "hit": 153,
    "total": 709,
-   "rate": 21.7
+   "rate": 21.6
   },
   "rank2": {
-   "hit": 257,
+   "hit": 258,
    "total": 680,
-   "rate": 37.8
+   "rate": 37.9
   },
   "rank3": {
-   "hit": 303,
-   "total": 626,
-   "rate": 48.4
+   "hit": 304,
+   "total": 627,
+   "rate": 48.5
   }
  },
  "bySignal": {
   "초기급락 보존": {
-   "hit": 484,
-   "total": 1387,
-   "rate": 34.9,
+   "hit": 487,
+   "total": 1390,
+   "rate": 35.0,
    "weightReady": true
   },
   "크로스역배열": {
    "hit": 26,
-   "total": 83,
-   "rate": 31.3,
+   "total": 84,
+   "rate": 31.0,
    "weightReady": true
   },
   "스마트머니": {
@@ -43,9 +43,9 @@
    "weightReady": true
   },
   "역배열": {
-   "hit": 28,
-   "total": 86,
-   "rate": 32.6,
+   "hit": 26,
+   "total": 83,
+   "rate": 31.3,
    "weightReady": true
   },
   "급락": {
@@ -64,26 +64,26 @@
  "byBand": {
   "15~30": {
    "hit": 91,
-   "total": 392,
+   "total": 393,
    "rate": 23.2,
    "weightReady": true
   },
   "50~100": {
    "hit": 10,
-   "total": 158,
-   "rate": 6.3,
+   "total": 157,
+   "rate": 6.4,
    "weightReady": true
   },
   "30~50": {
    "hit": 29,
-   "total": 201,
-   "rate": 14.4,
+   "total": 200,
+   "rate": 14.5,
    "weightReady": true
   },
   "100+": {
    "hit": 6,
-   "total": 69,
-   "rate": 8.7,
+   "total": 68,
+   "rate": 8.8,
    "weightReady": true
   }
  },
@@ -95,8 +95,8 @@
    "weightReady": true
   },
   "keirin": {
-   "hit": 359,
-   "total": 993,
+   "hit": 360,
+   "total": 994,
    "rate": 36.2,
    "weightReady": true
   },
@@ -107,19 +107,19 @@
    "weightReady": false
   }
  },
- "missedRaces": 218,
+ "missedRaces": 219,
  "dansung": {
-  "races": 117,
-  "horseWonRate": 30.8,
+  "races": 116,
+  "horseWonRate": 31.0,
   "horseWon": 36,
-  "horsePlaced": 79,
-  "darkHitRate": 69.2,
-  "darkHit": 81,
+  "horsePlaced": 78,
+  "darkHitRate": 69.0,
+  "darkHit": 80,
   "winnerSignals": {
    "기타": 5,
-   "복병": 35,
+   "복병": 34,
    "실질유력": 27
   }
  },
- "updated_at": "2026-08-07 23:59:39"
+ "updated_at": "2026-08-08 09:11:29"
 }
