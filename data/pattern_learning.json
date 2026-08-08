@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 5경주",
-      "horse_no": 1,
-      "recent_avg": 4.6,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-30"
-    },
-    {
       "race": "소노다 6경주",
       "horse_no": 12,
       "recent_avg": 4.4,
@@ -4803,6 +4793,16 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1786173118.942844
+    },
+    {
+      "race": "서울 5경주",
+      "horse_no": 4,
+      "recent_avg": 5.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-08"
     }
   ],
   "condition_stats": {
@@ -4811,8 +4811,8 @@
       "hit": 514
     },
     "전체부진마": {
-      "count": 4833,
-      "hit": 1306
+      "count": 4838,
+      "hit": 1307
     },
     "대규모급락": {
       "count": 17,
@@ -4822,8 +4822,8 @@
       "hit_rate": 29.4
     },
     "이상감지동반": {
-      "count": 2033,
-      "hit": 792
+      "count": 2038,
+      "hit": 793
     },
     "급락동반": {
       "count": 436,
@@ -5200,23 +5200,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 864,
-    "hit": 700,
+    "count": 865,
+    "hit": 701,
     "cases": [
-      {
-        "race": "몬베츠 3경주",
-        "date": "2026-08-06",
-        "smart_horses": [
-          8,
-          1,
-          3
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "소노다 11경주",
         "date": "2026-08-06",
@@ -6725,6 +6711,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 1.6,
+        "high_odds": false
+      },
+      {
+        "race": "서울 5경주",
+        "date": "2026-08-08",
+        "smart_horses": [
+          6,
+          1,
+          8
+        ],
+        "placed": [
+          8
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
