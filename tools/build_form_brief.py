@@ -1209,6 +1209,19 @@ def export_txt(date, out_path):
         L.append("■ %s %sR  (%s · %s)" % (d.get("venue"), d.get("raceNo"), d.get("kind"),
                                           m.get("at", "")))
         L.append("-" * 74)
+        # 🔴 [2026-08-09] **요약을 맨 앞에** 올린다 — 지금 길이는 아무도 안 읽는다(대표 지적).
+        #   ⚠ 상세 7단은 **그대로 둔다.** 근거가 거기 있고 복기에 쓴다. 위에 얹기만 한다.
+        #   ⚠ 스키마·프롬프트만 넣고 **여기 출력을 안 고쳐서** 안 나오고 있었다.
+        _sm = b.get("summary") or {}
+        if _sm:
+            L.append("【요약】")
+            for _k, _lab in (("race", "경주"), ("axis", "축"), ("rival", "상대"),
+                             ("dark", "복병"), ("combo", "복승"), ("caution", "주의")):
+                _v = str(_sm.get(_k) or "").strip()
+                if _v:
+                    L.append("  %s : %s" % (_lab, _v))
+            L.append("")
+            L.append("【상세】")
         L.append("[1] 경주 성격\n  " + (b.get("raceCharacter") or "").strip())
         L.append("[2] 구조\n  " + (b.get("structure") or "").strip())
         L.append("[3] 축별 순위")
