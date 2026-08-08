@@ -2,24 +2,6 @@
   "patterns": [
     {
       "race": "소노다 2경주",
-      "horse_no": 8,
-      "recent_avg": 4.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-30"
-    },
-    {
-      "race": "소노다 2경주",
-      "horse_no": 1,
-      "recent_avg": 7.6,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-30"
-    },
-    {
-      "race": "소노다 2경주",
       "horse_no": 10,
       "recent_avg": 7.6,
       "win_place": 1,
@@ -4798,16 +4780,34 @@
       "recommended_hit": true,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1786163496.6476448
+    },
+    {
+      "race": "제주 4경주",
+      "horse_no": 6,
+      "recent_avg": 4.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-08"
+    },
+    {
+      "race": "제주 4경주",
+      "horse_no": 5,
+      "recent_avg": 4.6,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-08-08"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2789,
-      "hit": 513
+      "count": 2793,
+      "hit": 514
     },
     "전체부진마": {
-      "count": 4812,
-      "hit": 1300
+      "count": 4818,
+      "hit": 1302
     },
     "대규모급락": {
       "count": 16,
@@ -4817,8 +4817,8 @@
       "hit_rate": 31.2
     },
     "이상감지동반": {
-      "count": 2023,
-      "hit": 787
+      "count": 2025,
+      "hit": 788
     },
     "급락동반": {
       "count": 432,
@@ -5195,25 +5195,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 855,
-    "hit": 694,
+    "count": 856,
+    "hit": 695,
     "cases": [
-      {
-        "race": "나라 6경주",
-        "date": "2026-08-05",
-        "smart_horses": [
-          7,
-          5,
-          3
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 3.8,
-        "high_odds": false
-      },
       {
         "race": "나라 7경주",
         "date": "2026-08-05",
@@ -6722,6 +6706,22 @@
         ],
         "placed": [
           3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "제주 4경주",
+        "date": "2026-08-08",
+        "smart_horses": [
+          8,
+          2,
+          9
+        ],
+        "placed": [
+          9
         ],
         "hit": true,
         "trifecta_odds": null,
