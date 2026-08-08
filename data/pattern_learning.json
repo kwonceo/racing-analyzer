@@ -1,22 +1,6 @@
 {
   "patterns": [
     {
-      "race": "나고야 12경주",
-      "horse_no": 5,
-      "recent_avg": 8.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-29"
-    },
-    {
-      "race": "나고야 12경주",
-      "horse_no": 3,
-      "recent_avg": 7.2,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-07-29"
-    },
-    {
       "pattern": "대규모급락",
       "raceKey": "아오모리 5경주",
       "total_combos_dropped": 5,
@@ -4785,6 +4769,41 @@
         "복승이상감지"
       ],
       "date": "2026-08-07"
+    },
+    {
+      "race": "제주 1경주",
+      "horse_no": 6,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [
+        "급락40%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-08"
+    },
+    {
+      "race": "제주 1경주",
+      "horse_no": 4,
+      "recent_avg": 7.0,
+      "win_place": 1,
+      "conditions": [
+        "급락78%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-08"
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "제주 1경주",
+      "total_combos_dropped": 8,
+      "drop_ratio": 0.381,
+      "result": "4+6",
+      "result_odds": "미상",
+      "result_quinella_odds": null,
+      "signal_result_combo": "-40.2%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1786161104.0740933
     }
   ],
   "condition_stats": {
@@ -4793,23 +4812,23 @@
       "hit": 513
     },
     "전체부진마": {
-      "count": 4800,
-      "hit": 1296
+      "count": 4805,
+      "hit": 1298
     },
     "대규모급락": {
-      "count": 15,
+      "count": 16,
       "high_odds": 0,
       "recommended_hit": 4,
       "high_odds_rate": 0.0,
-      "hit_rate": 26.7
+      "hit_rate": 25.0
     },
     "이상감지동반": {
-      "count": 2012,
-      "hit": 783
+      "count": 2017,
+      "hit": 785
     },
     "급락동반": {
-      "count": 422,
-      "hit": 113
+      "count": 426,
+      "hit": 115
     }
   },
   "bokbyeong_patterns": [
@@ -5182,23 +5201,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 847,
-    "hit": 690,
+    "count": 848,
+    "hit": 691,
     "cases": [
-      {
-        "race": "몬베츠 6경주",
-        "date": "2026-08-05",
-        "smart_horses": [
-          10,
-          4,
-          11
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "후나바시 12경주",
         "date": "2026-08-05",
@@ -6711,6 +6716,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 1.4,
+        "high_odds": false
+      },
+      {
+        "race": "제주 1경주",
+        "date": "2026-08-08",
+        "smart_horses": [
+          5,
+          1,
+          7,
+          8
+        ],
+        "placed": [
+          5
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
