@@ -1038,6 +1038,25 @@ def run_one(rec, dry=False):
         for p in probs[:8]:
             print("     -", p)
         _bump("discard")
+        # 🔴 [2026-08-09] 폐기 **사유별**로도 센다 — 하나로 묶여 있어 어느 검사가 원인인지 못 갈랐다.
+        #   폐기율이 30% 를 넘으면 **어느 검사를 좁혀야 하는지** 이 계수기로 바로 알 수 있다.
+        #   ⚠ 한 건이 여러 사유로 걸리면 **각각 센다**(합이 discard 보다 클 수 있다).
+        try:
+            for _p in probs:
+                if "심리" in _p:
+                    _bump("d_mind")
+                elif "원문에 없는 숫자" in _p:
+                    _bump("d_number")
+                elif "주의점" in _p and "조합에 안" in _p:
+                    _bump("d_caution")
+                elif "유령" in _p or "명단" in _p:
+                    _bump("d_ghost")
+                elif "단정" in _p:
+                    _bump("d_assert")
+                else:
+                    _bump("d_other")
+        except Exception:
+            pass
         # 🔴 [2026-08-09] 폐기본도 남긴다 — **왜 폐기됐는지 보려면 내용이 있어야 한다.**
         #   ⚠ 회원에게 나가지 않는다(별도 디렉터리 · export 대상 아님).
         try:
