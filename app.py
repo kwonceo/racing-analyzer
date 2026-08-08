@@ -2756,6 +2756,56 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                     pass
     except Exception as _ke:
         print("[종목 정정] 실패(무시):", _ke)
+
+    # 🔴🔴 [2026-08-09] **경주 간 배당 지문 대조 — 지금은 기록만 한다(섀도우).**
+    #   실물: 8/8 12:39 에 `서울 1경주` 와 `제주 1경주` 가 **45조합 전부 같은 값**이었다
+    #     (3+5=2.7 · 5+9=4.7). 배당판 화면의 진짜 제주 1R 은 3+5=64.0 이었다.
+    #   🔴 명단 게이트는 **명단 밖 마번만** 본다 — 두 경주 두수가 같으면 구조적으로 못 잡는다.
+    #   🔴 사후 파일로도 못 잡는다 — odds_history 49,032쌍에서 90%+ 일치 35건이 **전부 .tmp 오탐**이었다.
+    #     즉 이 현상은 **활성 캐시에서만 순간적으로** 생기고 히스토리에 안 남는다.
+    #   ⇒ **수신 시점 검사가 유일한 방법**이다.
+    #   ⚠ 🔴 **폐기하지 않는다.** 오탐률을 잴 표본이 아직 0 이다(원칙 20).
+    #     며칠 세고 «100% 일치 중 정상이 하나라도 있나» 를 본 뒤에 실폐기로 전환한다.
+    #   ⚠ 임계는 **100% 만** 센다 — 두수가 같고 인기가 비슷하면 90% 는 우연히 날 수 있다.
+    #     45조합이 **전부** 같은 것은 정상적으로 나오지 않는다. 분포 확인용으로 95·90 도 함께 센다.
+    try:
+        if q and len(q) >= 10:
+            _now = time.time()
+            _fp = {}
+            for _k, _v in (q.items() if isinstance(q, dict) else []):
+                try:
+                    _fp[tuple(sorted(int(x) for x in str(_k).replace("-", "+").split("+")))] = float(_v)
+                except Exception:
+                    pass
+            for _ork, _orec in list(_triple_load().items()):
+                if _ork == rk or (_now - float(_orec.get("t") or 0)) > 300:
+                    continue                      # 5분 안에 갱신된 다른 경주만 본다
+                _oq = _orec.get("quinella")
+                if isinstance(_oq, list):
+                    _oq = {"+".join(str(z) for z in (it.get("combo") or [])): it.get("odds")
+                           for it in _oq if isinstance(it, dict)}
+                if not isinstance(_oq, dict) or len(_oq) < 10:
+                    continue
+                _o2 = {}
+                for _k, _v in _oq.items():
+                    try:
+                        _o2[tuple(sorted(int(x) for x in str(_k).replace("-", "+").split("+")))] = float(_v)
+                    except Exception:
+                        pass
+                _com = [c for c in _fp if c in _o2]
+                if len(_com) < 10:
+                    continue
+                _same = sum(1 for c in _com if abs(_fp[c] - _o2[c]) < 0.05)
+                _r = _same / float(len(_com))
+                if _r >= 0.90:
+                    _lv = "100%" if _r >= 1.0 else ("95%" if _r >= 0.95 else "90%")
+                    _gate_hit("odds_twin_%s" % _lv.replace("%", ""), rk=rk,
+                              reason="%s 와 배당 %d/%d 일치" % (_ork, _same, len(_com)))
+                    print("🔴 [배당 지문 중복·%s] %s ↔ %s : 공통 %d 중 %d 일치 "
+                          "(기록만 · 폐기하지 않는다)" % (_lv, rk, _ork, len(_com), _same))
+                    break
+    except Exception as _twe:
+        print("[배당 지문 대조] 실패(무시):", str(_twe)[:80])
     # [경륜 종목 강제·세이부엔 등] 경륜 전용 지명(경정장 없음) → sport=cycle 강제. 확장이 boat 로 오분류해 보내도 서버 최종 방어.
     #   한국경마 아니고(위에서 이미 처리), 종목이 미지정/boat/bike/horse 로 온 경우 정정(정상 cycle 은 그대로).
     #   [플립 원천 차단 (2026-07-19)] 조건에 "horse" 추가 — 새 ks1 배당판은 본문에 타 종목 메뉴·배너의

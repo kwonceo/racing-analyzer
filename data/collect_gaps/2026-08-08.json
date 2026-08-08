@@ -750,5 +750,13 @@
   "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_삿포로_1경주.json'",
   "quarantined": null,
   "time": "10:04:52"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_08_제주_1경주.json",
+  "tag": "roster",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_제주_1경주.json'",
+  "quarantined": null,
+  "time": "12:17:50"
  }
 ]
