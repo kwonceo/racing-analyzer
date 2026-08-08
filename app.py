@@ -3606,6 +3606,12 @@ SNAPSHOT_TIMING_FILE = os.path.join(os.path.dirname(__file__), "data", "snapshot
 #   🔧 **되살리는 방법**: 이 값을 `True` 로 바꾸면 끝이다. 코드는 하나도 지우지 않았다.
 #      되살리기 전에 위 ③(파일명↔이미지 불일치)이 해결됐는지 먼저 확인할 것 —
 #      그게 해결 안 되면 켜도 같은 오염이 다시 쌓인다.
+# 🔴 [2026-08-09] 배당 컷 모드 — "legacy"(종전) / "wide"(경륜 메인 상한 10배)
+#   경륜 메인 후보가 경주당 1.62개뿐이라 finalQuinellas 가 2개를 못 넘던 문제(상한 도달 0.0%).
+#   ⚠ 경마·경정은 이 값과 무관하게 legacy 그대로다(app.py 의 cycle 분기에서만 본다).
+#   🔧 롤백: "legacy" 로 되돌린다.
+ODDS_CAP_MODE = "wide"
+
 SNAPSHOT_JUDGE_ENABLED = False
 
 
@@ -8260,7 +8266,24 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     if _sp == "boat":
         MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 7.0, 15.0
     elif _sp in ("cycle", "bike"):
+        # 🔴 [2026-08-09 대표 결정] 경륜 메인 상한 5.0 → **10.0**(`ODDS_CAP_MODE="wide"`).
+        #   왜: 경륜은 메인 후보(5배 이하)가 **경주당 1.62개**뿐이라 `finalQuinellas` 가 2개를 못 넘었다
+        #     (상한 도달 **0.0%** · 520경주 전수). 아흐레 동안 「조합 미생성」이라 부르던 것의 정체다.
+        #   실측 경주당 조합: ~5배 1.62 · 5~8배 1.06 · 8~10배 0.71  ⇒ 10배로 올리면 **3.39개**(상한 3 충족).
+        #   🔴 **빈 구간이 없어진다** — 종전 5.0↔10.0 사이는 메인도 특별도 아니었다.
+        #     특별 하한 10.0 은 **그대로 둔다**(10~50배 유지 · 특별이 줄지 않는다).
+        #   ⚠ **측정 근거로 정한 것이 아니다.** 한 달 표본으로는 어떤 안도 못 골랐고(±28%p),
+        #     대표 원칙(고배당·중배당이 기본)으로 정했다. 나중에 "측정해서 정했다"로 기억이 바뀌면 안 된다.
+        #   ⚠ 경마·경정은 **legacy 유지**(한꺼번에 켜면 나빠졌을 때 원인을 못 가린다).
+        #   🔧 롤백: ODDS_CAP_MODE = "legacy" 한 줄.
+        #   🔴 멈출 선(사후에 낮추지 않는다): 누적 3제외가 경륜 **54.0%** 아래로 **3일 연속**이면 legacy.
+        #     ⚠ 누적 n<100 이면 판정하지 않는다.
         MAIN_ODDS_MAX, SPECIAL_ODDS_MIN = 5.0, 10.0
+        try:
+            if ODDS_CAP_MODE == "wide" and _sp == "cycle":
+                MAIN_ODDS_MAX = 10.0
+        except Exception:
+            pass
     else:                                             # horse(경마)·기타
         # [두수별 저배당 기준 완화·세분화] 두수 많을수록 배당↑ → 상대적 저배당 상향(12두면 20배도 저배당).
         #   8~9두=10배↓ · 10~11두=15배↓ · 12~13두=20배↓ · 14~16두=25배↓ · 17~18두=30배↓.
@@ -8288,6 +8311,16 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         else:
             MAIN_ODDS_MAX = 20.0
         SPECIAL_ODDS_MIN = MAIN_ODDS_MAX   # 특별 하한 = 메인 상한(메인 끝나는 지점부터 BMED 특별 💎)
+    # 🔴 [2026-08-09] 배당 컷 계수기 — **로그·계수기만. 판정 무개입.**
+    #   왜: wide 를 켰는데 finalQuinellas 개수가 안 늘면 «배선이 그 경로에 도달했나»를
+    #     짐작으로 답하게 된다. 그러면 또 며칠을 쓴다. 도달·발동을 분리해 센다(원칙: 도달 ≠ 발동).
+    #   ⚠ 실패해도 추천에 영향이 없도록 통째로 try 로 감싼다.
+    try:
+        _gate_hit("odds_cap_reach", reach_only=True)
+        if _sp == "cycle" and MAIN_ODDS_MAX >= 10.0:
+            _gate_hit("odds_cap_wide_cycle", reason="경륜 메인 상한 10배(wide)")
+    except Exception:
+        pass
     SPECIAL_ODDS_MAX = 50.0       # 특별 상한(50배 초과 제외·근거 약함)
     DROP_STRONG_PCT = 15.0        # 강신호: 급락 15%+
     SCORE_STRONG = 70             # 강신호: signalScore 70+

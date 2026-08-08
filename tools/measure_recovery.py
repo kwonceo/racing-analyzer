@@ -211,8 +211,12 @@ def load_races(sport="cycle", pattern="2026_07_*"):
                     #   (기후 7R 44점 · 와카야마 1R 74.4점 · 도요하시 1R 39.1점).
                     #   화면에 점수를 띄우는데 성적과 무관하면 회원을 오도한다 → 배수로 잰다.
                     "conf1": cp.get("confTop1"),
-                    "confv": (cp.get("confidence") if isinstance(cp.get("confidence"), (int, float))
-                              else (cp.get("confidenceTop") if isinstance(cp.get("confidenceTop"), (int, float)) else None)),
+                    # 🔴 [2026-08-09 정정] 실제 필드명은 **`confTop1Conf`** 다(app.py:11897).
+                    #   종전엔 `confidence`/`confidenceTop` 을 찾아 **전부 None** 이었고,
+                    #   그것을 "점수값이 저장돼 있지 않다"로 보고했다 — **오진**(원칙 8-E).
+                    #   실측: 8월 로그 864건 중 **826건(95.6%)** 에 실값이 있다.
+                    "confv": (cp.get("confTop1Conf") if isinstance(cp.get("confTop1Conf"), (int, float))
+                              else (cp.get("confidence") if isinstance(cp.get("confidence"), (int, float)) else None)),
                     "top3": sorted({res.get("1st"), res.get("2nd"), res.get("3rd")} - {None}),
                     "nh": len(d.get("horses") or []),
                     # 🔴 [2026-08-02] bmedSpecial 조건부 편입 측정용. 동결값 우선(마감 시점 신호).

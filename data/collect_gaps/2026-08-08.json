@@ -734,5 +734,21 @@
   "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_서울_6경주.json'",
   "quarantined": null,
   "time": "09:16:55"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_08_삿포로_1경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_삿포로_1경주.json'",
+  "quarantined": null,
+  "time": "10:03:51"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_08_삿포로_1경주.json",
+  "tag": "odds_history/_history_append",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_삿포로_1경주.json'",
+  "quarantined": null,
+  "time": "10:04:52"
  }
 ]

@@ -1126,13 +1126,27 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "기후 4경주",
+        "date": "2026-08-08",
+        "horses": [
+          1,
+          4,
+          2
+        ],
+        "placed": [
+          2
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 84,
-    "hit_quinella": 54,
-    "hit_trifecta": 43,
-    "rate_quinella": 64.3,
-    "rate_trifecta": 51.2,
+    "count": 85,
+    "hit_quinella": 55,
+    "hit_trifecta": 44,
+    "rate_quinella": 64.7,
+    "rate_trifecta": 51.8,
     "reliable": true
   },
   "역배열": {
@@ -3192,18 +3206,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "기후 4경주",
-        "date": "2026-08-07",
-        "horses": [
-          3
-        ],
-        "placed": [
-          3
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
         "race": "기후 5경주",
         "date": "2026-08-07",
         "horses": [
@@ -4265,6 +4267,16 @@
         "placed": [
           7
         ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "기후 4경주",
+        "date": "2026-08-08",
+        "horses": [
+          5
+        ],
+        "placed": [],
         "quinella_hit": true,
         "trifecta_hit": true
       }
@@ -5636,21 +5648,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "기후 4경주",
-        "date": "2026-08-07",
-        "horses": [
-          2,
-          4,
-          5
-        ],
-        "placed": [
-          2,
-          4
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
         "race": "기후 5경주",
         "date": "2026-08-07",
         "horses": [
@@ -6619,6 +6616,21 @@
         "placed": [
           2,
           4
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "기후 4경주",
+        "date": "2026-08-08",
+        "horses": [
+          1,
+          2,
+          7
+        ],
+        "placed": [
+          2,
+          7
         ],
         "quinella_hit": true,
         "trifecta_hit": true

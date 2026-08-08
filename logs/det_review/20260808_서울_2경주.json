@@ -1,0 +1,62 @@
+{
+ "raceKey": "서울 2경주",
+ "entries": [
+  {
+   "time": "10:04:55",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      8,
+      9
+     ],
+     [
+      1,
+      8
+     ],
+     [
+      2,
+      9
+     ],
+     [
+      1,
+      2
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      2,
+      9
+     ],
+     [
+      1,
+      2,
+      8
+     ],
+     [
+      1,
+      8,
+      9
+     ],
+     [
+      1,
+      5,
+      8
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}
