@@ -1077,6 +1077,16 @@ def run_one(rec, dry=False):
         _bump("parse_fail")
         return None
     vn = valid_nos_of(rec["html"], rec["kind"])
+    # 🔴 [2026-08-09 원칙 23] 응답 원문을 남긴다 — 「파싱 실패」와 「응답이 빈 것」을 가른다.
+    try:
+        _rd = os.path.join(OUT_DIR, "_raw")
+        os.makedirs(_rd, exist_ok=True)
+        io.open(os.path.join(_rd, "%s_%s_%sR.txt" % (rec.get("date"), rec["venue"], rec["rno"])),
+                "w", encoding="utf-8").write(res.get("text") or "")
+        print("  [응답] 길이 %d · doc 키 %d개 · horses %d두"
+              % (len(res.get("text") or ""), len(doc or {}), len((doc or {}).get("horses") or [])))
+    except Exception:
+        pass
     ok, probs = verify(doc, body, vn)
     u = res.get("usage") or {}
     meta = {"model": res["model"], "promptTokens": u.get("promptTokenCount"),
