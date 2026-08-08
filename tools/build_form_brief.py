@@ -308,6 +308,11 @@ A-11. 🔴🔴 **`summary` 는 여섯 줄이다. 지금 길이는 아무도 안 
         "1:14.3 으로 2위보다 2.1초 빠르다" 처럼 원문 숫자를 그대로 쓴다.
      ⚠ **말별 판단을 나열하지 않는다.** 그건 ④에 이미 있다.
      🔴 `summary` 에 쓴 마번은 **⑥ 조합에도 있어야 한다.** 어긋나면 폐기된다.
+     🔴 `summary.combo` 에는 **복승을 전부** 적는다(하나만 적으면 회원이 하나만 산다).
+        ⚠ **삼복승은 요약에 넣지 않는다** — 회원 발송은 복승만이다(7/30 실측: 손실 전액이 삼복승).
+          삼복승은 ⑥ 조합에 그대로 두어 **참고자료**로 남긴다.
+     🔴 `summary.caution` 에 마번을 적었으면 **그 말도 ⑥ 조합에 넣는다.**
+        ⚠ 요약이 회원이 보는 화면이다. 거기 「위험하다」고 써놓고 조합에 없으면 안 된다.
      ⚠ 상세 7단은 그대로 둔다 — 근거가 거기 있고 복기에 쓴다.
 
 A-9. 🔴🔴 **[경륜] 원문의 아래 축을 반드시 읽고 순위를 세워 문장에 쓴다.**
@@ -382,7 +387,7 @@ raceCharacter 와 structure 는 원문을 그대로 옮기지 말고 **한국어
     "axis": "🔴 축 한 마리 — 마번·마명과 근거 **한 줄**. 반드시 숫자를 넣는다",
     "rival": "상대 한 마리 — 마번·마명과 근거 한 줄",
     "dark": "복병 한 마리 — 마번·마명과 근거 한 줄",
-    "combo": "복승 조합 (예: 3+7)",
+    "combo": "🔴 **복승 전부**를 쉼표로 (예: 3+7, 1+3, 5+7). ⚠ 삼복승은 넣지 않는다 — 요약은 복승만이다",
     "caution": "주의점 한 줄"
   }
 }
@@ -492,7 +497,9 @@ def verify(doc, body, valid_nos):
         _sm = doc.get("summary") or {}
         if _sm:
             _sn = set()
-            for _k in ("axis", "rival", "dark", "combo"):
+            # 🔴 [2026-08-09] `caution` 추가 — 종전엔 `cautions` 배열만 봤다.
+            #   ⚠ **요약이 회원이 보는 화면인데 검사 밖이었다.**
+            for _k in ("axis", "rival", "dark", "combo", "caution"):
                 for _m in re.finditer(r"(\d{1,2})\s*번", str(_sm.get(_k) or "")):
                     _v = int(_m.group(1))
                     if valid_nos and _v in valid_nos:
@@ -591,6 +598,31 @@ def verify(doc, body, valid_nos):
     #   숫자·마번·단정어는 종전대로 하나만 걸려도 폐기한다 — 그 원칙은 그대로다.
     fatal = [p for p in problems if not p.startswith("⚠경고")]
     return (len(fatal) == 0), problems
+
+
+def korea_roster_nos(ven, no):
+    """🔴 [2026-08-09] 한국(KRA)은 PDF 라 HTML 마번 표식이 없다 → `korea_session` 명단에서 읽는다.
+
+    ⚠ **왜 필요한가**: `valid_nos_of` 가 한국에서 **빈 집합**을 돌려줘
+      「유령 마번 검사 · 주의점 검사 · 요약 정합 검사」 **셋이 통째로 무력화**돼 있었다
+      (검사들이 `if valid_nos and _v in valid_nos` 라 빈 집합이면 아무것도 안 담는다).
+      실물: 8/9 서울 1R 요약 caution 에 2번이 있고 조합에 없는데 **통과**했다.
+    ⚠ `korea_roster_ok` 가 이미 같은 명단을 읽는다 — **경로를 새로 만들지 않는다.**
+    ⚠ 일본 경로는 건드리지 않는다."""
+    try:
+        sess = json.load(io.open(os.path.join(ROOT, "data", "korea_session.json"), encoding="utf-8"))
+    except Exception:
+        return set()
+    for r in (sess.get("races") or []):
+        if r.get("venue") == ven and int(r.get("raceNo") or 0) == int(no):
+            out = set()
+            for h in (r.get("horses") or []):
+                try:
+                    out.add(int(h.get("horseNum")))
+                except Exception:
+                    pass
+            return out
+    return set()
 
 
 def valid_nos_of(html, kind):
@@ -1077,6 +1109,11 @@ def run_one(rec, dry=False):
         _bump("parse_fail")
         return None
     vn = valid_nos_of(rec["html"], rec["kind"])
+    # 🔴 [2026-08-09] 한국은 PDF 라 위에서 빈 집합이 나온다 → 세션 명단으로 채운다.
+    #   ⚠ 이것이 없으면 마번을 쓰는 검사 셋이 **전부 조용히 통과**한다.
+    if rec.get("kind") == "korea" and not vn:
+        vn = korea_roster_nos(rec["venue"], rec["rno"])
+        print("  [마번] 세션 명단에서 %d두 복원: %s" % (len(vn), sorted(vn)))
     # 🔴 [2026-08-09 원칙 23] 응답 원문을 남긴다 — 「파싱 실패」와 「응답이 빈 것」을 가른다.
     try:
         _rd = os.path.join(OUT_DIR, "_raw")

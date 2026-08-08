@@ -34176,7 +34176,12 @@ def _kakao_rich_message(rk, phase, an):
             _o = " (%s배)" % t.get("odds")
         else:
             _o = ""
-        lines.append("삼복승 %s%s" % ("+".join(map(str, t.get("combo") or [])), _o))
+        # 🔴 [2026-08-09 대표 결정] **회원 발송은 복승만.** 삼복승은 **참고**로만 표기한다.
+        #   근거: 7/30 실측에서 손실 **전액이 삼복승**이었다(삼복승 -698,700 ≈ 전체 손익 -696,600).
+        #     복승만 걸었다면 전체 **99.7%**·경륜 복승 단독 105.7%. 그때 섀도우 전환한 것과 정합한다.
+        #   ⚠ **지우지 않는다** — 줄은 그대로 나가고 「참고」 꼬리표만 붙인다(참고자료로 남긴다).
+        #   🔧 롤백: 아래 `· 참고` 를 지운다.
+        lines.append("삼복승 %s%s · 참고" % ("+".join(map(str, t.get("combo") or [])), _o))
     for s in (cp.get("bmedSpecial") or [])[:1]:
         _o = (" (%s배)" % s.get("odds")) if s.get("odds") else ""
         lines.append("💎복병 %s%s ★★ 참고" % ("+".join(map(str, s.get("combo") or [])), _o))
