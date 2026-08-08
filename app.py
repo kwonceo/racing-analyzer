@@ -2757,6 +2757,46 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     except Exception as _ke:
         print("[종목 정정] 실패(무시):", _ke)
 
+    # 🔴🔴 [2026-08-09] **확장이 deadline 을 안 보내면 PDF 발주시각을 쓴다.**
+    #   왜: 8/8 서울 1R 이 **42초에 일곱 번** 추천이 바뀌었다. 원인은 `minutes_before` 가
+    #     **전부 None** 이라 T-2분 동결이 아예 판정조차 못 한 것이다.
+    #   🔴 `korea_session.json` 에는 `postTime`("12:55")이 **15경주 100% 저장**돼 있었다.
+    #     그런데 `minutes_before` 는 이 인자 `deadline` 만 읽는다 — **두 경로가 안 이어져 있었다.**
+    #     ⚠ 8/7 「발주시각 배선 완료」는 **postTime 저장**이었고 deadline 과 다른 것이다(정정).
+    #   ⚠ 위 `_korea_schedule_post_epoch` 는 **확장 → 스케줄** 방향이다. 여기는 그 **반대**다.
+    #   🔴 안전장치 셋: ⓐ기존 deadline 이 있으면 손대지 않는다(확장 우선)
+    #     ⓑ세션 날짜가 오늘과 다르면 쓰지 않는다(오래된 PDF 방지 · 7/30 부산 사고)
+    #     ⓒ try/except 격리 — 실패해도 수집을 막지 않는다.
+    #   🔧 롤백: 이 블록만 삭제.
+    try:
+        if not deadline:
+            # ⚠ KOREA_SESSION 상수는 아래(30649행)에 정의돼 여기서는 아직 없다 → 경로를 직접 만든다.
+            _ks = json.load(open(os.path.join(os.path.dirname(__file__),
+                                              "data", "korea_session.json"),
+                                 encoding="utf-8"))
+            if str(_ks.get("date") or "")[:10] == time.strftime("%Y-%m-%d"):
+                _kv, _kn = None, None
+                _m = re.match(r"\s*(\S+?)\s*(\d+)\s*경주", str(rk))
+                if _m:
+                    _kv, _kn = _m.group(1), int(_m.group(2))
+                for _r in (_ks.get("races") or []):
+                    if _r.get("venue") == _kv and int(_r.get("raceNo") or 0) == _kn:
+                        _pt = str(_r.get("postTime") or "")
+                        if re.match(r"^\d{1,2}:\d{2}$", _pt):
+                            _hh, _mm = [int(z) for z in _pt.split(":")]
+                            _lt = time.localtime()
+                            _ep = time.mktime((_lt.tm_year, _lt.tm_mon, _lt.tm_mday,
+                                               _hh, _mm, 0, 0, 0, -1))
+                            deadline = _ep * 1000.0
+                            _gate_hit("korea_post_from_pdf", rk=rk,
+                                      reason="PDF 발주시각 %s → deadline" % _pt)
+                            print("[한국 발주시각·PDF] %s: postTime %s 를 deadline 으로 사용"
+                                  % (rk, _pt))
+                        break
+    except Exception as _pe2:
+        print("[한국 발주시각·PDF] 실패(무시):", str(_pe2)[:80])
+
+
     # 🔴🔴 [2026-08-09] **경주 간 배당 지문 대조 — 지금은 기록만 한다(섀도우).**
     #   실물: 8/8 12:39 에 `서울 1경주` 와 `제주 1경주` 가 **45조합 전부 같은 값**이었다
     #     (3+5=2.7 · 5+9=4.7). 배당판 화면의 진짜 제주 1R 은 3+5=64.0 이었다.

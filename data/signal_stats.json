@@ -543,18 +543,6 @@
         "trifecta_hit": true
       },
       {
-        "race": "와카야마 6경주",
-        "date": "2026-08-07",
-        "horses": [
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
         "race": "부산 2경주",
         "date": "2026-08-07",
         "horses": [
@@ -1255,13 +1243,25 @@
         "placed": [],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "제주 2경주",
+        "date": "2026-08-08",
+        "horses": [
+          2,
+          6,
+          3
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
     "count": 93,
     "hit_quinella": 64,
-    "hit_trifecta": 50,
+    "hit_trifecta": 49,
     "rate_quinella": 68.8,
-    "rate_trifecta": 53.8,
+    "rate_trifecta": 52.7,
     "reliable": true
   },
   "역배열": {
@@ -1651,18 +1651,6 @@
         "trifecta_hit": true
       },
       {
-        "race": "와카야마 6경주",
-        "date": "2026-08-07",
-        "horses": [
-          9
-        ],
-        "placed": [
-          9
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
         "race": "부산 2경주",
         "date": "2026-08-07",
         "horses": [
@@ -1899,6 +1887,18 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "다치카와 6경주",
+        "date": "2026-08-08",
+        "horses": [
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
     "count": 58,
@@ -3407,18 +3407,6 @@
         "trifecta_hit": true
       },
       {
-        "race": "와카야마 6경주",
-        "date": "2026-08-07",
-        "horses": [
-          9
-        ],
-        "placed": [
-          9
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
         "race": "부산 2경주",
         "date": "2026-08-07",
         "horses": [
@@ -4478,13 +4466,53 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 1경주",
+        "date": "2026-08-08",
+        "horses": [
+          5
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "와카야마 6경주",
+        "date": "2026-08-08",
+        "horses": [
+          5
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "제주 2경주",
+        "date": "2026-08-08",
+        "horses": [
+          6
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "다치카와 6경주",
+        "date": "2026-08-08",
+        "horses": [
+          5
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 239,
-    "hit_quinella": 155,
-    "hit_trifecta": 111,
-    "rate_quinella": 64.9,
-    "rate_trifecta": 46.4,
+    "count": 242,
+    "hit_quinella": 158,
+    "hit_trifecta": 112,
+    "rate_quinella": 65.3,
+    "rate_trifecta": 46.3,
     "reliable": true
   },
   "전적이중수렴": {
@@ -5909,19 +5937,6 @@
         "trifecta_hit": true
       },
       {
-        "race": "와카야마 6경주",
-        "date": "2026-08-07",
-        "horses": [
-          2,
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
         "race": "와카야마 8경주",
         "date": "2026-08-07",
         "horses": [
@@ -6915,13 +6930,57 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "와카야마 6경주",
+        "date": "2026-08-08",
+        "horses": [
+          1,
+          2,
+          9
+        ],
+        "placed": [
+          1,
+          2
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "제주 2경주",
+        "date": "2026-08-08",
+        "horses": [
+          1,
+          5
+        ],
+        "placed": [
+          1
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "다치카와 6경주",
+        "date": "2026-08-08",
+        "horses": [
+          1,
+          2,
+          4,
+          5
+        ],
+        "placed": [
+          1,
+          4
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 177,
-    "hit_quinella": 120,
+    "count": 179,
+    "hit_quinella": 122,
     "hit_trifecta": 89,
-    "rate_quinella": 67.8,
-    "rate_trifecta": 50.3,
+    "rate_quinella": 68.2,
+    "rate_trifecta": 49.7,
     "reliable": true
   },
   "집중급락": {
@@ -7150,13 +7209,36 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "서울 1경주",
+        "date": "2026-08-08",
+        "horses": [
+          5,
+          4,
+          2,
+          7,
+          1,
+          8,
+          9,
+          10,
+          3,
+          6
+        ],
+        "placed": [
+          4,
+          1,
+          8
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 16,
-    "hit_quinella": 8,
-    "hit_trifecta": 6,
-    "rate_quinella": 50.0,
-    "rate_trifecta": 37.5,
+    "count": 17,
+    "hit_quinella": 9,
+    "hit_trifecta": 7,
+    "rate_quinella": 52.9,
+    "rate_trifecta": 41.2,
     "reliable": false
   },
   "크로스역배열": {
