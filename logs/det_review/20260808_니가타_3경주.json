@@ -1,0 +1,84 @@
+{
+ "raceKey": "니가타 3경주",
+ "entries": [
+  {
+   "time": "10:33:21",
+   "minutesBefore": 6,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      7,
+      10
+     ],
+     [
+      7,
+      12
+     ],
+     [
+      10,
+      12
+     ],
+     [
+      6,
+      12
+     ],
+     [
+      6,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      7,
+      10
+     ],
+     [
+      3,
+      7,
+      10
+     ],
+     [
+      1,
+      7,
+      12
+     ],
+     [
+      6,
+      7,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "10:41:54",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

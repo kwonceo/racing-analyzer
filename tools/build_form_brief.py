@@ -77,6 +77,80 @@ def _identify(html):
     return None, None
 
 
+def index_korea(date=None):
+    """🔴 [2026-08-09] 한국(KRA)은 **PDF** 라 form_raw HTML 인덱스에 안 잡힌다.
+    ⇒ `tools/dump_korea_race.py` 의 페이지 인덱스를 그대로 재사용해 **fitz 텍스트를 원문으로** 쓴다.
+      ⚠ **파싱하지 않는다.** 텍스트를 통째로 넣는다 — 일본에서 그 방식이 통했고
+        조교 훈련시간·구간별 순위처럼 우리가 파싱하지 않는 값도 그대로 읽힌다.
+      ⚠ 새 파서를 만들지 않는다(목록 이중화 금지).
+    반환 형식은 index_raw 와 같다: {(경기장, 경주번호): {file, kind, mtime, html}}"""
+    out = {}
+    try:
+        import importlib.util
+        _p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dump_korea_race.py")
+        _sp = importlib.util.spec_from_file_location("_dkr", _p)
+        _m = importlib.util.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        import fitz
+        d = fitz.open(_m.PDF)
+        for ven, no, pg, rest in _m.index_pages():
+            txt = "\n".join(d[x].get_text() for x in [pg] + rest)
+            out[(ven, no)] = {"file": _m.PDF, "kind": "korea", "mtime": os.path.getmtime(_m.PDF),
+                              "html": txt, "title": "%s경마 %d경주 (KRA PDF)" % (ven, no),
+                              "date": date or time.strftime("%Y%m%d")}
+        d.close()
+    except Exception as e:
+        print("  [한국 원문] 인덱스 실패(무시):", str(e)[:80])
+    return out
+
+
+def korea_roster_ok(ven, no):
+    """🔴 [2026-08-09 대표 지시] 명단 검증 — **안 맞으면 예상문을 내지 않는다.**
+    «틀린 말을 설명하는 것이 안 내는 것보다 나쁘다».
+    ⚠ 8/7 사고 셋: 제주 1·3 경주번호 오판 · 제주 2 마번 혼입 · 명단 없음 셋.
+    검사 3종 — ① 명단 두수 ≤ fitz 두수 ② 두수를 넘는 마번 없음 ③ 명단 ≥ 배당 마번 수 × 0.6
+    ⚠ 🔴 **60% 는 제주 2R(명단 3 ↔ 배당 10) 하나에 맞춘 값이다.**
+      먼저 켜되 **걸린 건수를 매일 세고 며칠 뒤 조정**한다.
+      오탐 손해가 «예상문 하나 안 나감»뿐이라 배당 게이트와 성격이 다르다(막아도 회원 화면이 안 빈다).
+    반환 (ok, 사유)"""
+    try:
+        sess = json.load(io.open(os.path.join(ROOT, "data", "korea_session.json"), encoding="utf-8"))
+    except Exception:
+        return True, "세션 없음 — 검증 건너뜀"      # 추측으로 막지 않는다
+    r = None
+    for x in (sess.get("races") or []):
+        if x.get("venue") == ven and int(x.get("raceNo") or 0) == int(no):
+            r = x
+            break
+    if not r:
+        return False, "korea_session 에 그 경주가 없다"
+    nos = []
+    for h in (r.get("horses") or []):
+        try:
+            nos.append(int(h.get("horseNum")))
+        except Exception:
+            pass
+    if not nos:
+        return False, "명단 0두"
+    # 배당 마번 — 있으면 대조, 없으면 ①②만 본다(없는 것을 지어내지 않는다)
+    onos = set()
+    try:
+        st = json.load(io.open(os.path.join(ROOT, "triple_store.json"), encoding="utf-8"))
+        for k, v in st.items():
+            if ven in k and ("%d경주" % int(no)) in k:
+                for c in (v.get("quinella") or {}):
+                    for t in str(c).replace("-", "+").split("+"):
+                        onos.add(int(t))
+                break
+    except Exception:
+        pass
+    if onos and max(nos) > max(onos):
+        return False, "명단에 배당 최대마번(%d)을 넘는 %d번이 있다" % (max(onos), max(nos))
+    if onos and len(nos) < len(onos) * 0.6:
+        return False, "명단 %d두 < 배당 마번 %d의 60%%" % (len(nos), len(onos))
+    return True, "명단 %d두%s" % (len(nos), (" · 배당 %d마번" % len(onos)) if onos else "")
+
+
 def index_raw(date=None):
     """logs/form_raw/<날짜>/ → {(경기장, 경주번호): {file, kind, mtime, html}} (같은 경주는 최신만).
     ⚠ 파일명에 경주 식별자가 없다(<종목>_<HHMMSS>_<해시>). 반드시 내용으로 식별해야 한다."""
@@ -228,6 +302,28 @@ A-7. 🟢 «1착 0회 · 2착 다수»인 말은 복승·삼복승에 **가점**
 
 A-8. 축이 확실하면 축에 얹고, 애매하면 **삼각형으로 묶는다.**
 
+A-9. 🔴🔴 **[경륜] 원문의 아래 축을 반드시 읽고 순위를 세워 문장에 쓴다.**
+     원문에 있어도 지시하지 않으면 읽지 않는다 — 실제로 한 번 그랬다.
+     ① **경주득점(競走得点)** — 선수별 절대 실력. 높은 순으로 세운다
+     ② **결정수 비율** — 逃 · 捲 · 差 · マ 각각 몇 %%인가. 그 판에서 누가 무엇으로 이기나
+     ③ **이번 개최 성적**(금장소 착순) — 가장 최근 근거다. 통산보다 먼저 본다
+     ④ **착순 표기**(1-2-3-외)에서 3착 이내가 **몇 번인지 횟수로** 쓴다(예: 「7전 중 3착 이내 4번」).
+        🔴 **비율(%%)로 환산해 적지 않는다** — 원문에 없는 숫자라 검증에서 폐기된다.
+        ⚠ 그리고 그 횟수 1위를 **축으로 삼지 않는다**(8/7 실전 7전 1승).
+     ⑤ **라인 자리**(선두·번수·3번수) · **ギア 배수** · **지역**
+     🔴 라인 구성원을 개별 성적으로 쪼개지 않는다(A-6과 같다).
+
+A-10. 🔴🔴 **[한국·KRA] 원문의 아래 축을 반드시 읽고 문장에 쓴다.**
+     ⚠ 이것들은 **우리만 가진 정보**다. 원문에 다 있는데 지금까지 한 번도 안 썼다.
+     ① **조교 훈련시간** — 직전 2주 ↔ 이번 2주. **원문 숫자를 그대로 인용**하고 늘었는지 줄었는지 말한다
+     ⑤ **거리별 최고기록 순위** — PDF 가 원숫자로 매겨 준다. 그대로 쓴다
+     🔴 계산해서 새 숫자를 만들지 않는다 — 원문에 없는 숫자는 폐기된다
+     ② **구간별 순위** — S-1F · 3코너 · 4코너 · 3F · G-1F · 착점.
+        어디서 앞서고 어디서 밀리나(각질을 여기서 읽는다)
+     ③ **레이팅** · **편성난이도** · **마필습성**
+     ④ 부담중량 · 기수 · 주로상태
+     🔴 ⑥ 조합을 **반드시 채운다.** 비워 두면 그 분석문은 폐기된다.
+
 A-4. 🔴 조건별 실적을 말별로 적는다 — 당거리(距)·당경마장(場)·통산(全)·최고타임·부담중량.
    ⚠ 距 는 NAR 원문에만 있다. 표에 없으면 **없다고 적고 지어내지 않는다.**
 B-2. 🔴 위 '# 등급 이력' 이 **주어지지 않은 경주**(NAR·중앙·경륜)는 등급 축을 억지로 만들지 않는다.
@@ -375,12 +471,21 @@ def verify(doc, body, valid_nos):
     #   ⚠ 조합으로 못 막는 위험(표본 얇음·배당 없음·휴양 공백·데이터 부재)은 **예외**다 —
     #     그런 문장에는 마번이 안 나오므로 아래 정규식에 자연히 안 걸린다.
     try:
-        _cau = " ".join(str(x) for x in (doc.get("cautions") or []))
+        # 🔴 [2026-08-09 조건 축소] 마번이 나오면 무조건 걸려 **폐기율 100%** 였다.
+        #   「약하다」와 「위험하다」를 못 갈랐다 — "득점이 낮아서"는 정상적인 근거 서술이고
+        #   오히려 있어야 한다. **문장 단위로** 보고 «올 수도 있는데 안 넣었다» 어구가 있을 때만 잡는다.
+        #   ⚠ 8/7 도요하시 7R 실물: "4번을 조합에 못 넣었습니다. 이번에도 같은 위험이 있습니다" → 4번 1착.
+        _RISK = ("온다", "올 수", "올지", "옵니다", "오면", "살면", "터지면", "터질",
+                 "못 넣", "안 넣", "넣지 못", "빠졌", "아쉽", "다만 넣")
         _warn_nos = set()
-        for m in re.finditer(r"(\d{1,2})\s*번", _cau):
-            v = int(m.group(1))
-            if valid_nos and v in valid_nos:
-                _warn_nos.add(v)
+        for _sent in (doc.get("cautions") or []):
+            _sent = str(_sent)
+            if not any(w in _sent for w in _RISK):
+                continue                       # 「왜 뺐는지」 설명은 통과시킨다
+            for m in re.finditer(r"(\d{1,2})\s*번", _sent):
+                v = int(m.group(1))
+                if valid_nos and v in valid_nos:
+                    _warn_nos.add(v)
         if _warn_nos:
             _in_combo = set()
             for c in (doc.get("combos") or doc.get("quinellas") or []):
@@ -824,6 +929,11 @@ def call_llm(prompt):
 
 
 # ── 계수기·저장 ────────────────────────────────────────────────────────────
+# 🔴 [2026-08-09] 생성 상한 — 자동으로 도는 구조라 상한이 없으면 사고 시 비용이 튄다.
+#   경주당 2회(폐기율 20% 면 3회째는 거의 안 붙는다) · 하루 40회(한국 16 + 일본 20 여유).
+DAY_MAX_ATTEMPT = 40
+
+
 def _bump(key, n=1):
     try:
         os.makedirs(os.path.dirname(STAT_FILE), exist_ok=True)
@@ -928,6 +1038,16 @@ def run_one(rec, dry=False):
         for p in probs[:8]:
             print("     -", p)
         _bump("discard")
+        # 🔴 [2026-08-09] 폐기본도 남긴다 — **왜 폐기됐는지 보려면 내용이 있어야 한다.**
+        #   ⚠ 회원에게 나가지 않는다(별도 디렉터리 · export 대상 아님).
+        try:
+            _dd = os.path.join(OUT_DIR, "_discard")
+            os.makedirs(_dd, exist_ok=True)
+            io.open(os.path.join(_dd, "%s_%s_%sR.json" % (rec.get("date"), rec["venue"], rec["rno"])),
+                    "w", encoding="utf-8").write(
+                json.dumps({"doc": doc, "meta": meta}, ensure_ascii=False, indent=1))
+        except Exception:
+            pass
         return None
     doc = normalize_grades(doc)          # 🔴 검증 통과 후에만 — 표기만 되돌린다(값 무변경)
     p = save(rec, doc, meta)
@@ -1061,6 +1181,7 @@ def main():
         return 0
 
     idx = index_raw(a.date)
+    idx.update(index_korea(a.date))      # 🔴 한국(PDF)을 같은 인덱스에 합친다
     if a.list or not a.race:
         print("[원문 인덱스] %s · %d경주" % (a.date, len(idx)))
         for (v, n) in sorted(idx, key=lambda x: (x[0], x[1])):
@@ -1078,6 +1199,22 @@ def main():
             _bump("no_raw")
             continue
         rec["venue"], rec["rno"] = key
+        # 🔴 [2026-08-09] 재시도 상한 — 자동으로 도는 구조라 상한이 없으면 사고 시 비용이 튄다.
+        #   경주당 2회 · 하루 40회(한국 16 + 일본 20 여유). 넘으면 그 경주는 건너뛴다.
+        try:
+            _d = (json.load(io.open(STAT_FILE, encoding="utf-8"))
+                  .get(time.strftime("%Y-%m-%d")) or {}) if os.path.exists(STAT_FILE) else {}
+            if int(_d.get("attempt") or 0) >= DAY_MAX_ATTEMPT:
+                print("  🔴 하루 시도 상한(%d) 도달 — 오늘은 더 만들지 않는다" % DAY_MAX_ATTEMPT)
+                break
+        except Exception:
+            pass
+        if rec.get("kind") == "korea":
+            _ok, _why = korea_roster_ok(*key)
+            print("  [명단검증] %s — %s" % ("통과" if _ok else "🔴 차단", _why))
+            if not _ok:
+                _bump("no_roster")
+                continue
         run_one(rec, dry=a.dry)
     return 0
 
