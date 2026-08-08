@@ -5187,24 +5187,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 889,
-    "hit": 722,
+    "count": 890,
+    "hit": 723,
     "cases": [
-      {
-        "race": "이토 3경주",
-        "date": "2026-08-06",
-        "smart_horses": [
-          3,
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 3.2,
-        "high_odds": false
-      },
       {
         "race": "우쓰노미야 3경주",
         "date": "2026-08-06",
@@ -6723,6 +6708,21 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 5.1,
+        "high_odds": false
+      },
+      {
+        "race": "우쓰노미야 4경주",
+        "date": "2026-08-08",
+        "smart_horses": [
+          2,
+          1
+        ],
+        "placed": [
+          1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
