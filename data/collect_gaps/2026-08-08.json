@@ -782,5 +782,53 @@
   "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_제주_3경주.json'",
   "quarantined": null,
   "time": "14:03:52"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_08_제주_7경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_제주_7경주.json'",
+  "quarantined": null,
+  "time": "17:46:52"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_08_사세보_7경주.json",
+  "tag": "odds_history/_history_append",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_사세보_7경주.json'",
+  "quarantined": null,
+  "time": "18:18:52"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_08_서울_7경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_서울_7경주.json'",
+  "quarantined": null,
+  "time": "18:24:00"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_08_오비히로_10경주.json",
+  "tag": "roster",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_오비히로_10경주.json'",
+  "quarantined": null,
+  "time": "19:37:52"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_08_사가_8경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_사가_8경주.json'",
+  "quarantined": null,
+  "time": "19:54:52"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_08_오비히로_12경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_08_오비히로_12경주.json'",
+  "quarantined": null,
+  "time": "20:43:55"
  }
 ]

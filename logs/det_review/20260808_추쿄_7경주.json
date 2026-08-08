@@ -1,0 +1,183 @@
+{
+ "raceKey": "추쿄 7경주",
+ "entries": [
+  {
+   "time": "15:31:43",
+   "minutesBefore": 13,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      7
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      1,
+      3
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      3,
+      7
+     ],
+     [
+      3,
+      6,
+      7
+     ],
+     [
+      1,
+      6,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:40:55",
+   "minutesBefore": 4,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      7
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      6,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      3,
+      7
+     ],
+     [
+      3,
+      6,
+      7
+     ],
+     [
+      1,
+      6,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:45:15",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       3,
+       7
+      ],
+      "prev": 27.9,
+      "cur": 4.1,
+      "pct": -85.3
+     },
+     {
+      "combo": [
+       1,
+       7
+      ],
+      "prev": 27.2,
+      "cur": 5.5,
+      "pct": -79.8
+     },
+     {
+      "combo": [
+       7,
+       8
+      ],
+      "prev": 96.9,
+      "cur": 24.6,
+      "pct": -74.6
+     },
+     {
+      "combo": [
+       6,
+       7
+      ],
+      "prev": 19.3,
+      "cur": 7.4,
+      "pct": -61.7
+     },
+     {
+      "combo": [
+       5,
+       7
+      ],
+      "prev": 121.9,
+      "cur": 52.6,
+      "pct": -56.8
+     },
+     {
+      "combo": [
+       3,
+       8
+      ],
+      "prev": 57.1,
+      "cur": 32.7,
+      "pct": -42.7
+     },
+     {
+      "combo": [
+       1,
+       8
+      ],
+      "prev": 59.3,
+      "cur": 38.1,
+      "pct": -35.8
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
