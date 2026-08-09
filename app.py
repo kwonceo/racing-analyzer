@@ -34662,6 +34662,55 @@ def _timeline_snap_save(rk, phase, an):
         return None
 
 
+# ══════════ [한국 경주 카톡 경로 (2026-08-10)] ══════════
+#  왜: 발송 앵커가 남는 전 기간(7/30~8/9) 한국 발송 **0건 / 3,493건**. 같은 기간 한국 분석로그는
+#    8/9 17건 · 8/8 18건 · 7/26 27건으로 대상은 계속 있었다.
+#  🔴 원인은 조건도 예외도 아니고 **경로가 없다**. `_auto_pred_tick` 의 races 는
+#    `sched["tracks"]`(oddspark = 일본 지방·경륜 전용) 하나에서만 만들어져 한국이 실리지 않는다.
+#    그래서 `_timeline_snap_tick` → `_kakao_notify_race` 에 **도달조차 못 한다**(원칙 23 「도달 0」).
+#    실증: timeline_snapshot 510건 중 한국 0건 · kakao_sent_state 에도 한국 키 없음.
+#  ⚠ 일본 경로는 한 줄도 건드리지 않는다 — 한국 목록을 **따로 만들어 뒤에 덧붙이기만** 한다.
+#  🔴 첫날은 로그만: KOREA_KAKAO_ENABLED=False 면 스냅샷·자동분석까지만 하고 **발송은 안 한다.**
+#    롤백은 이 한 줄을 False 로 두는 것뿐이다.
+KOREA_KAKAO_ENABLED = False      # 🔴 True 로 바꿔야 실제 카톡이 나간다(대표 승인 후)
+
+
+def _korea_kakao_targets(now):
+    """[한국] korea_session.json 의 postTime 으로 (postEpoch, venue, raceNo, rk) 목록을 만든다.
+
+    일본 races 와 **같은 형식**이라 `_timeline_snap_tick` 이 그대로 소비한다.
+    ⚠ 발주시각은 이미 확보돼 있다(8/9 `korea_post_from_pdf` 도달 205 · 발동 205).
+    ⚠ 실패해도 빈 목록을 돌려준다 — 일본 경로에 영향을 주지 않는다.
+    """
+    out = []
+    try:
+        p = os.path.join(os.path.dirname(__file__), "data", "korea_session.json")
+        if not os.path.exists(p):
+            return out
+        d = json.load(open(p, encoding="utf-8")) or {}
+        _day = str(d.get("date") or "")[:10].replace("-", "")
+        if len(_day) != 8 or _day != time.strftime("%Y%m%d"):
+            return out                               # 🔴 오늘 세션이 아니면 걸지 않는다(어제 것 재발송 방지)
+        for rc in (d.get("races") or []):
+            _v, _n, _pt = rc.get("venue"), rc.get("raceNo"), rc.get("postTime")
+            if not (_v and _n and _pt):
+                continue
+            pe = _post_time_epoch(_pt, _day)
+            if not pe:
+                continue
+            out.append((pe, _v, int(_n), _multi_key(_v, _n)))
+    except Exception as _kte:
+        print("[한국카톡] 대상 생성 실패(무시):", _kte)
+    return out
+
+
+def _is_korea_rk(rk):
+    try:
+        return bool(_KRA_TRACK_RE.search(str(rk)))
+    except Exception:
+        return False
+
+
 # 잔여시간(초) → phase (윈도우 폭 ~60s, tick 30s라 각 1회 포착). None=해당없음.
 _TIMELINE_PHASES = [("T-10", 570, 630), ("T-7", 390, 450), ("T-5", 270, 330),
                     ("T+1", -90, -30), ("T+3", -210, -150)]
@@ -34752,7 +34801,20 @@ def _timeline_snap_tick(races, now, db):
                     pass
             if phase in ("T-7", "T-5") and snap:
                 try:
-                    _kakao_notify_race(rk, phase, an, snap)
+                    # [한국 카톡 게이트 (2026-08-10)] 첫날은 로그만 — 스냅샷·자동분석은 그대로 돌고
+                    #   **발송만** 막는다. 일본은 이 분기에 들어오지 않으므로 무영향이다.
+                    if _is_korea_rk(rk) and not KOREA_KAKAO_ENABLED:
+                        _gate_hit("korea_kakao_hold", rk=rk, reason="한국 발송 보류(로그만)",
+                                  once_key="%s|%s" % (rk, phase))
+                        _t5_log({"ev": "korea_hold", "rk": rk, "phase": phase,
+                                 "at": time.strftime("%H:%M:%S"),
+                                 "quinellas": [list(c) for c in
+                                               ((snap or {}).get("quinellas") or [])][:6],
+                                 "main": (snap or {}).get("main"),
+                                 "enabled": bool(KOREA_KAKAO_ENABLED)})
+                        print("[한국카톡·보류] %s %s — 경로는 탔고 발송만 막았다(로그만)" % (rk, phase))
+                    else:
+                        _kakao_notify_race(rk, phase, an, snap)
                 except Exception as _ke:
                     print("[타임스냅샷] 알림 트리거 오류(무시):", _ke)
             # [🔁 마감 확정 변경 카톡 (2026-07-22 소노다 5R)] T-5 발송 후 마감 직전 배당 변동으로
@@ -35018,7 +35080,19 @@ def _auto_pred_tick(sched, now):
         try:
             if db is None:
                 db = _triple_load()
-            _timeline_snap_tick(races, now, db)
+            # [한국 합류 (2026-08-10)] 일본 races 는 그대로 두고 한국 목록만 **뒤에 덧붙인다**.
+            #   🔴 `_auto_pred_tick` 의 다른 로직(예상 저장·결과 대조·자동분석 배경)에는 넣지 않았다 —
+            #     그쪽까지 건드리면 일본 경로의 부하·동작이 바뀐다. 카톡 경로만 여는 것이 이번 범위다.
+            _tl_races = races
+            try:
+                _ko = _korea_kakao_targets(now)
+                if _ko:
+                    _tl_races = list(races) + _ko
+                    _gate_hit("korea_kakao_targets", rk=None,
+                              reason="한국 대상 %d경주" % len(_ko))
+            except Exception as _koe:
+                print("[한국카톡] 합류 실패(무시·일본만 진행):", _koe)
+            _timeline_snap_tick(_tl_races, now, db)
         except Exception as _te:
             print("[타임스냅샷] tick 훅 오류(무시):", _te)
         # ③ 현재(가장 임박)·다음 경주 상태
