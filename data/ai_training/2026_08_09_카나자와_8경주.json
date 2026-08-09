@@ -1,0 +1,248 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_08_09_카나자와_8경주",
+ "race_info": {
+  "date": "2026-08-09",
+  "track": "카나자와",
+  "round": 8,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 7,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 1,
+   "name": "ダノンスマッシュ",
+   "jockey": "青柳正",
+   "jockey_winrate": 50.0,
+   "recent_results": [
+    2,
+    1,
+    3
+   ],
+   "record_score": 105.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "カレンブラックヒル",
+   "jockey": "中島龍",
+   "jockey_winrate": 63.3,
+   "recent_results": [
+    2,
+    1
+   ],
+   "record_score": 96.7,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "レッドルゼル",
+   "jockey": "",
+   "jockey_winrate": null,
+   "recent_results": [
+    6,
+    2,
+    4,
+    1,
+    2
+   ],
+   "record_score": 99.2,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "アメリカンペイトリオット",
+   "jockey": "鈴木太",
+   "jockey_winrate": 25.0,
+   "recent_results": [
+    4,
+    2,
+    2
+   ],
+   "record_score": 82.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 3,
+   "name": "ミッキーロケット",
+   "jockey": "加藤翔",
+   "jockey_winrate": 46.7,
+   "recent_results": [
+    6,
+    3,
+    2
+   ],
+   "record_score": 56.3,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "サトノクラウン",
+   "jockey": "魚住謙",
+   "jockey_winrate": 30.0,
+   "recent_results": [
+    9,
+    1,
+    2
+   ],
+   "record_score": 48.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "イスラボニータ",
+   "jockey": "平瀬城",
+   "jockey_winrate": 13.3,
+   "recent_results": [
+    4,
+    5,
+    5,
+    4
+   ],
+   "record_score": 31.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "21:01:56",
+    "quinella": {
+     "6+8": 2.6,
+     "4+8": 6.2,
+     "8+9": 9.0,
+     "3+8": 9.8,
+     "7+8": 16.5,
+     "1+8": 16.5,
+     "4+6": 17.3,
+     "3+4": 19.0,
+     "8+10": 25.0,
+     "6+9": 30.1,
+     "3+6": 30.8,
+     "6+7": 46.5,
+     "1+6": 50.8,
+     "4+9": 52.9,
+     "1+4": 61.5,
+     "5+8": 65.3,
+     "7+9": 67.9,
+     "4+7": 68.3,
+     "3+9": 68.8,
+     "1+3": 84.9,
+     "6+10": 99.3,
+     "3+10": 106.3,
+     "9+10": 106.3,
+     "3+7": 107.4,
+     "1+9": 119.6,
+     "5+6": 128.3,
+     "4+10": 129.9,
+     "4+5": 134.9,
+     "1+7": 142.2,
+     "1+10": 181.5,
+     "1+5": 233.9,
+     "5+9": 292.4,
+     "7+10": 309.6,
+     "3+5": 350.9,
+     "5+7": 438.6,
+     "5+10": 501.3
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.744,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   1,
+   3,
+   4,
+   6,
+   7,
+   8,
+   9,
+   5,
+   10
+  ],
+  "eliminated": [],
+  "recommend": "6+8",
+  "strategy": "BMED_보험형",
+  "confidence": 0,
+  "signal_quality": "하"
+ },
+ "result": {
+  "1st": 3,
+  "2nd": 5,
+  "3rd": 4,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 3,
+  "second": 5,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-08-09 21:18:21",
+ "quality": {
+  "score": 40,
+  "grade": "제외",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "배당 타임라인(2회+)",
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
