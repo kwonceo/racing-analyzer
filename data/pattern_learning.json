@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "나고야 6경주",
-      "horse_no": 4,
-      "recent_avg": 8.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-31"
-    },
-    {
-      "race": "나고야 7경주",
-      "horse_no": 1,
-      "recent_avg": 8.4,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-31"
-    },
-    {
       "race": "소노다 7경주",
       "horse_no": 4,
       "recent_avg": 7.2,
@@ -4786,16 +4768,36 @@
         "복승이상감지"
       ],
       "date": "2026-08-09"
+    },
+    {
+      "race": "카나자와 7경주",
+      "horse_no": 5,
+      "recent_avg": 4.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-09"
+    },
+    {
+      "race": "카나자와 7경주",
+      "horse_no": 3,
+      "recent_avg": 7.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-09"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2964,
+      "count": 2969,
       "hit": 539
     },
     "전체부진마": {
-      "count": 5153,
-      "hit": 1387
+      "count": 5161,
+      "hit": 1389
     },
     "대규모급락": {
       "count": 18,
@@ -4805,8 +4807,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2189,
-      "hit": 848
+      "count": 2192,
+      "hit": 850
     },
     "급락동반": {
       "count": 457,
@@ -5183,27 +5185,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 936,
-    "hit": 759,
+    "count": 937,
+    "hit": 760,
     "cases": [
-      {
-        "race": "이토 7경주",
-        "date": "2026-08-07",
-        "smart_horses": [
-          3,
-          5,
-          1,
-          4
-        ],
-        "placed": [
-          3,
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "이토 8경주",
         "date": "2026-08-07",
@@ -6746,6 +6730,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 6.7,
+        "high_odds": false
+      },
+      {
+        "race": "카나자와 7경주",
+        "date": "2026-08-09",
+        "smart_horses": [
+          3,
+          9,
+          6,
+          4
+        ],
+        "placed": [
+          3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
