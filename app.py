@@ -15902,7 +15902,13 @@ def _build_analysis_log(rk, an=None):
     if final.get("quinella_main") and not an.get("afterClose") and (new_sig != last_sig or _new_anomaly):
         rec_history.append({
             "time": now_hms,
-            "minutes_before": (an.get("lastSnapshot") or {}).get("minutesBefore"),
+            # 🔴 [2026-08-09] 키 이름이 어긋나 **2,215행 전부 None** 이었다.
+            #   `lastSnapshot` 은 11834행에서 **스네이크**(`minutes_before`)로 만든다.
+            #   여기서만 카멜(`minutesBefore`)로 읽어 늘 None → 소비처(review_engine 283·560)가
+            #   **시각 차이로 mb 를 추정**하는 폴백으로 떨어졌다.
+            #   ⚠ 19596행은 처음부터 스네이크로 읽고 있었다 — **이 한 곳만 틀렸다.**
+            #   🔴 소급 불가 — 오늘부터 쌓인다.
+            "minutes_before": (an.get("lastSnapshot") or {}).get("minutes_before"),
             "sig": new_sig,
             "anomCount": _anom_count,   # [2번] 이 시점까지 누적 이상감지 수(신규 신호 유입 판별)
             "sigChanged": bool(new_sig != last_sig),   # 추천 조합이 실제로 바뀌었는지(신호만 추가면 False)
