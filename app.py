@@ -13181,6 +13181,14 @@ def _triple_analyze(rk, rec):
         _apply_bet_rules(rk, _an_out)
     except Exception as _bre:
         print("[베팅 규칙] 적용 실패(무시·원본 표시):", _bre)
+    # [④ T-5 확정 후 삭제 금지 (2026-08-10)] mb<=5 첫 시점의 복승 집합을 확정하고 이후 삭제를 막는다.
+    #   ⚠ 반드시 베팅 규칙 **뒤**여야 한다 — 최종 표시 명단(displayedCombos 가 읽는 그 리스트)을 봐야
+    #     '실제로 회원 화면에서 빠졌는가'를 재는 것이 된다. 앞에 두면 규칙이 뒤에서 또 지운다.
+    #   🔴 첫날은 T5_FREEZE_ENABLED=False 라 로그만 남는다(표시 무변경). 실패 시 원본 그대로.
+    try:
+        _apply_t5_freeze(rk, _an_out)
+    except Exception as _t5e:
+        print("[T5동결] 적용 실패(무시·원본 표시):", _t5e)
     # [경주 등급 배지 (2026-07-22 권대표 요청)] 예측 확신을 경주당 1개 등급으로 — 오버레이·카드·카톡
     #   공통 표시(모든 경주가 같은 무게로 보이던 문제 해소). 기준 = 승부 계층·카톡 알림과 동일 축.
     #   🔥 강력승부: 신호 2+ & 확신도 65+ / ✅ 추천: 신호 1+ & 확신도 50+ / ⚖️ 관찰: 신호 or 확신도 40+
@@ -13273,6 +13281,144 @@ _REC_HYST = {}   # {rk: {"main": (a,b), "item": dict, "streak_m": (a,b)|None, "s
 # [등급 마감 동결 (2026-07-22)] {rk: {"day": "YYYY-MM-DD", "tier": dict}} — 마감 전 마지막 등급 저장.
 #   마감 후 _triple_analyze 가 이 값을 반환(locked=True). 재시작 시 분석 로그 corePicks.raceGrade 복원.
 _GRADE_LOCK = {}
+
+# ══════════ [T-5 확정 후 삭제 금지 (2026-08-10)] ══════════
+#  왜: 마감 5분 전에 있던 조합이 마감 직전에 **빠지는** 일이 실측 43.5%(47/108경주)로 잦다.
+#    실물 근거 — 기후 4R 정답이 5분 전에 있다가 빠짐 · 서울 2R 54.2배가 최종에서 빠짐 ·
+#    부산 4R 96배가 4초만 본선 · 부산 2R 63배.
+#  🔴 지금 아무도 '삭제'를 막고 있지 않다. `_apply_rec_hysteresis` 는 **1순위 순서**만 되돌리고
+#    목록에서 조합을 지우지 않는다(그 함수 주석의 "무삭제"는 제안 조합을 지우지 않는다는 뜻이고,
+#    다음 틱에 재생성되며 사라지는 것은 막지 못한다). 그래서 별도 계층이 필요하다.
+#  규칙: mb<=5 가 되는 **첫 시점**의 복승 조합을 확정하고, 그 뒤로는 **빼지 않는다. 추가만 허용.**
+#  ⚠ 히스테리시스와 겹치지 않는다 — 저쪽은 '순서', 이쪽은 '집합'이다. 순서는 건드리지 않는다.
+#  ⚠ mb 가 없는 경주(deadline 미상)에는 걸지 않는다. 틀린 mb 로 동결하면 엉뚱한 시점이 확정된다.
+#  🔴 첫날은 **로그만**(T5_FREEZE_ENABLED=False) — 막았을 때와 안 막았을 때를 둘 다 기록한다.
+#    롤백은 이 한 줄을 False 로 되돌리는 것뿐이다.
+T5_FREEZE_ENABLED = False        # 🔴 True 로 바꾸면 실제 복원(표시·판정 반영). False = 로그만.
+T5_FREEZE_MB = 5                 # 확정 시작 시점(분)
+_T5_FROZEN = {}                  # {rk: {"day","combos":set,"at","mb","n"}}
+#   ⚠ 이 프로젝트에 BASE_DIR 는 없다. DET_REVIEW_DIR(15642) 와 같은 방식을 그대로 쓴다.
+_T5_FREEZE_DIR = os.path.join(os.path.dirname(__file__), "logs", "t5_freeze")
+
+
+def _t5_log(rec):
+    """[T-5 동결 관측] append-only. 덮어쓰기가 없어 구조적으로 잃지 않는다(원칙 9·23)."""
+    try:
+        os.makedirs(_T5_FREEZE_DIR, exist_ok=True)
+        _p = os.path.join(_T5_FREEZE_DIR, time.strftime("%Y%m%d") + ".jsonl")
+        with io.open(_p, "a", encoding="utf-8") as _f:
+            _f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception as _le:
+        print("[T5동결] 로그 실패(무시):", _le)
+
+
+def _t5_combos(fq):
+    out = []
+    for _q in (fq or []):
+        _c = _q.get("combo") or []
+        if len(_c) == 2:
+            try:
+                out.append(tuple(sorted(int(x) for x in _c)))
+            except (TypeError, ValueError):
+                continue
+    return out
+
+
+def _t5_items(fq):
+    """조합 → 원본 항목(배당·근거) 매핑. 복원 시 빈 껍데기가 아니라 원래 값을 되살리기 위함."""
+    out = {}
+    for _q in (fq or []):
+        _c = _q.get("combo") or []
+        if len(_c) != 2:
+            continue
+        try:
+            out[tuple(sorted(int(x) for x in _c))] = dict(_q)
+        except (TypeError, ValueError):
+            continue
+    return out
+
+
+def _apply_t5_freeze(rk, an):
+    """[T-5 확정 후 삭제 금지] mb<=5 첫 시점의 복승 집합을 확정하고 이후 삭제를 관측(또는 복원)한다.
+
+    🔴 구좌: 되살리면 **구좌가 는다**(실측 소급 +31.3% · 211→277). '안 는다'가 아니다.
+      그래서 첫날은 로그만 남기고, 며칠 보고 실적용을 정한다.
+    ⚠ 표시 계층만 — 분석·이력·학습 원본은 건드리지 않는다.
+    """
+    today = time.strftime("%Y-%m-%d")
+    st = _T5_FROZEN.get(rk)
+    if st and st.get("day") != today:
+        st = None
+        _T5_FROZEN.pop(rk, None)
+    if an.get("recommendClosed") or an.get("afterClose"):
+        return                                       # 마감 후 무개입(동결 명단 갱신도 안 한다)
+    _mb = an.get("minutesBefore")
+    if not isinstance(_mb, (int, float)):
+        # 🔴 이름을 분리한다 — 같은 이름으로 세면 「mb 없어서 못 건다」와 「걸 수 있는데 조건 미달」이
+        #   한 숫자에 섞여 원인 추적이 짐작이 된다(원칙 23).
+        _gate_hit("t5_freeze_nomb", rk=rk, reason="mb 없음(미적용)", reach_only=True)
+        return                                       # 🔴 mb 미상 경주에는 걸지 않는다
+    _gate_hit("t5_freeze", rk=rk, reason="도달(mb 유효)", reach_only=True)
+    if _mb > T5_FREEZE_MB:
+        return                                       # 아직 확정 시점 전
+    cp = an.get("corePicks") or {}
+    fq = cp.get("finalQuinellas") or []
+    cur = _t5_combos(fq)
+    if not cur:
+        return                                       # 빈 명단으로 동결하지 않는다(원칙 9)
+    cur_set = set(cur)
+    if st is None:                                   # ── 확정 시점 ──
+        _T5_FROZEN[rk] = {"day": today, "combos": set(cur_set),
+                          "at": time.strftime("%H:%M:%S"), "mb": _mb, "n": len(cur_set),
+                          # 복원 시 배당·근거를 그대로 살리기 위해 원본 항목을 보관한다(표시 품질).
+                          #   ⚠ zip(cur, fq) 로 짝지으면 combo 없는 항목이 섞일 때 어긋난다 — 직접 만든다.
+                          "items": _t5_items(fq)}
+        # 확정 자체도 센다 — 경주 단위(once_key)라 폴링으로 도배되지 않는다.
+        _gate_hit("t5_freeze_set", rk=rk, reason="T-5 확정", once_key=rk)
+        _t5_log({"ev": "freeze", "rk": rk, "at": time.strftime("%H:%M:%S"), "mb": _mb,
+                 "combos": ["+".join(str(x) for x in c) for c in sorted(cur_set)],
+                 "dl": an.get("deadlineEpoch") or an.get("deadline_epoch"),
+                 "enabled": bool(T5_FREEZE_ENABLED)})
+        an["t5Freeze"] = {"frozen": True, "at": time.strftime("%H:%M:%S"), "mb": _mb,
+                          "n": len(cur_set), "lost": [], "enabled": bool(T5_FREEZE_ENABLED)}
+        return
+    lost = [c for c in sorted(st["combos"]) if c not in cur_set]
+    added = [c for c in sorted(cur_set) if c not in st["combos"]]
+    if added:
+        st["combos"] |= set(added)                   # 추가는 그대로 허용(집합에 편입)
+    if not lost:
+        an["t5Freeze"] = {"frozen": True, "at": st["at"], "mb": st["mb"],
+                          "n": len(st["combos"]), "lost": [], "enabled": bool(T5_FREEZE_ENABLED)}
+        return
+    # ── 삭제 발생 ── 🔴 막았을 때와 안 막았을 때를 둘 다 기록한다
+    _gate_hit("t5_freeze", rk=rk, reason="T-5 이후 삭제 감지")
+    _now = ["+".join(str(x) for x in c) for c in sorted(cur_set)]
+    _with = ["+".join(str(x) for x in c) for c in sorted(cur_set | set(lost))]
+    _t5_log({"ev": "lost", "rk": rk, "at": time.strftime("%H:%M:%S"), "mb": _mb,
+             "frozenAt": st["at"], "frozenMb": st["mb"],
+             "lost": ["+".join(str(x) for x in c) for c in lost],
+             "withoutFreeze": _now, "withFreeze": _with,
+             "seatsNow": len(_now), "seatsWithFreeze": len(_with),
+             "dl": an.get("deadlineEpoch") or an.get("deadline_epoch"),
+             "enabled": bool(T5_FREEZE_ENABLED)})
+    an["t5Freeze"] = {"frozen": True, "at": st["at"], "mb": st["mb"], "n": len(st["combos"]),
+                      "lost": ["+".join(str(x) for x in c) for c in lost],
+                      "seatsNow": len(_now), "seatsWithFreeze": len(_with),
+                      "enabled": bool(T5_FREEZE_ENABLED)}
+    if not T5_FREEZE_ENABLED:
+        return                                       # 🔴 첫날은 여기서 끝 — 표시는 한 건도 안 바뀐다
+    # 실적용: 빠진 조합을 목록 뒤에 되살린다(추가만 · 순서·1순위 무변경)
+    try:
+        for c in lost:
+            _item = dict((st.get("items") or {}).get(c) or {})
+            _item["combo"] = list(c)
+            _item["t5Restored"] = True
+            _item["reason"] = ((_item.get("reason") or "") + " · T-5 확정 후 삭제 금지(복원)").strip(" ·")
+            fq.append(_item)
+        cp["finalQuinellas"] = fq
+    except Exception as _re:
+        print("[T5동결] 복원 실패(무시·원본 표시):", _re)
+
 
 # ══ [t2_strong_cycle 라이브 반영 (2026-07-24) — 경륜만·커트오프 이후] ══
 #   리플레이(review_engine t2_strong_cycle) 검증 결과 경륜에서 '마감 2분(T-2) 내 교체가 잡은 정답을
