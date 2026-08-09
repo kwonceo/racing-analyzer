@@ -1,0 +1,452 @@
+{
+ "race": "부산 6경주",
+ "raceKey": "부산 6경주",
+ "date": "2026-08-09",
+ "result": {
+  "1st": 8,
+  "2nd": 10,
+  "3rd": 7,
+  "4th": null
+ },
+ "hit": false,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_8": {
+   "horse": 8,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 22.5,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_10": {
+   "horse": 10,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 72.5,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_7": {
+   "horse": 7,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": null,
+   "confidence": null,
+   "reason": "일반"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 80,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_4": {
+   "horse": 4,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": null,
+   "drop_timeline": [],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 80,
+   "confidence": null,
+   "reason": "전적상위"
+  }
+ },
+ "recommended_horses": [
+  5,
+  4,
+  10
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 8번 22.5점",
+  "2. 배당 수집 시작 15:46:52",
+  "5. 종합 신뢰도 0점(하) 판정"
+ ],
+ "confidence_breakdown": {
+  "horse": 8,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 22.5,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [],
+ "combo_tags": false,
+ "hit_basis": {
+  "formScore": 22.5,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": false,
+  "inverseHorses": [],
+  "inverseHit": [],
+  "confidence": 0,
+  "reason": "추천 미적중"
+ },
+ "signal_change_history": {
+  "changes": [
+   {
+    "time": "15:58:54",
+    "minutes_before": 6,
+    "previous_signal": "6번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -71.2%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "15:59:21",
+    "minutes_before": 6,
+    "previous_signal": "6번",
+    "new_signal": "5번",
+    "reason": "5번 집중급락(평균 -56.7%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:00:01",
+    "minutes_before": 5,
+    "previous_signal": "5번",
+    "new_signal": "10번",
+    "reason": "10번 집중급락(평균 -68.5%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "16:00:07",
+    "minutes_before": 5,
+    "previous_signal": "10번",
+    "new_signal": "5번",
+    "reason": "5번 집중급락(평균 -56.7%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "16:00:56",
+    "minutes_before": 4,
+    "previous_signal": "1번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -62.4%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "16:01:10",
+    "minutes_before": 4,
+    "previous_signal": "6번",
+    "new_signal": "4번",
+    "reason": "4번 집중급락(평균 -51.8%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:01:52",
+    "minutes_before": 3,
+    "previous_signal": "3번",
+    "new_signal": "10번",
+    "reason": "10번 집중급락(평균 -67.1%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:02:10",
+    "minutes_before": 3,
+    "previous_signal": "10번",
+    "new_signal": "4번",
+    "reason": "4번 집중급락(평균 -65.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:02:26",
+    "minutes_before": 3,
+    "previous_signal": "4번",
+    "new_signal": "1번",
+    "reason": "1번 집중급락(평균 -44.3%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:02:59",
+    "minutes_before": 2,
+    "previous_signal": "6번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -71.2%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:03:10",
+    "minutes_before": 2,
+    "previous_signal": "10번",
+    "new_signal": "5번",
+    "reason": "5번 집중급락(평균 -63.6%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:03:57",
+    "minutes_before": 1,
+    "previous_signal": "5번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -77.1%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:03:58",
+    "minutes_before": 1,
+    "previous_signal": "3번",
+    "new_signal": "4번",
+    "reason": "4번 집중급락(평균 -78.5%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:03:58",
+    "minutes_before": 1,
+    "previous_signal": "4번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -77.1%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:03:59",
+    "minutes_before": 1,
+    "previous_signal": "3번",
+    "new_signal": "10번",
+    "reason": "10번 집중급락(평균 -68.4%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:04:10",
+    "minutes_before": 1,
+    "previous_signal": "10번",
+    "new_signal": "4번",
+    "reason": "4번 집중급락(평균 -66.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:04:55",
+    "minutes_before": 0,
+    "previous_signal": "1번",
+    "new_signal": "6번",
+    "reason": "6번 집중급락(평균 -44.4%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:04:56",
+    "minutes_before": 0,
+    "previous_signal": "6번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -71.0%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:04:56",
+    "minutes_before": 0,
+    "previous_signal": "3번",
+    "new_signal": "2번",
+    "reason": "2번 집중급락(평균 -76.8%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:04:56",
+    "minutes_before": 0,
+    "previous_signal": "2번",
+    "new_signal": "3번",
+    "reason": "3번 집중급락(평균 -78.4%)",
+    "prev_was_candidate": true
+   },
+   {
+    "time": "16:05:10",
+    "minutes_before": 0,
+    "previous_signal": "3번",
+    "new_signal": "2번",
+    "reason": "2번 집중급락(평균 -76.8%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:05:18",
+    "minutes_before": 0,
+    "previous_signal": "2번",
+    "new_signal": "1번",
+    "reason": "1번 집중급락(평균 -36.8%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:09:54",
+    "minutes_before": 20,
+    "previous_signal": "3번",
+    "new_signal": "2번",
+    "reason": "2번 집중급락(평균 -77.2%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:09:56",
+    "minutes_before": null,
+    "previous_signal": "2번",
+    "new_signal": "6번",
+    "reason": "6번 집중급락(평균 -44.6%)",
+    "prev_was_candidate": false
+   },
+   {
+    "time": "16:11:56",
+    "minutes_before": 18,
+    "previous_signal": "6번",
+    "new_signal": "4번",
+    "reason": "4번 집중급락(평균 -64.0%)",
+    "prev_was_candidate": false
+   }
+  ],
+  "confirmed": [
+   5
+  ],
+  "candidates": [
+   1,
+   2,
+   3,
+   4,
+   6,
+   10
+  ],
+  "events": {
+   "6": {
+    "first": {
+     "time": "15:58:54",
+     "minutes_before": 6
+    },
+    "count": 6,
+    "last": {
+     "time": "16:09:56",
+     "minutes_before": null
+    }
+   },
+   "3": {
+    "first": {
+     "time": "15:58:54",
+     "minutes_before": 6
+    },
+    "count": 9,
+    "last": {
+     "time": "16:09:52",
+     "minutes_before": null
+    },
+    "vanished": {
+     "time": "15:58:54",
+     "minutes_before": 6
+    }
+   },
+   "5": {
+    "first": {
+     "time": "15:59:21",
+     "minutes_before": 6
+    },
+    "count": 4,
+    "last": {
+     "time": "16:03:30",
+     "minutes_before": 1
+    },
+    "vanished": {
+     "time": "16:00:41",
+     "minutes_before": 4
+    },
+    "confirmed": {
+     "time": "16:03:30",
+     "minutes_before": 1
+    }
+   },
+   "10": {
+    "first": {
+     "time": "16:00:01",
+     "minutes_before": 5
+    },
+    "count": 4,
+    "last": {
+     "time": "16:03:59",
+     "minutes_before": 1
+    }
+   },
+   "1": {
+    "first": {
+     "time": "16:00:53",
+     "minutes_before": 4
+    },
+    "count": 4,
+    "last": {
+     "time": "16:05:18",
+     "minutes_before": 0
+    },
+    "vanished": {
+     "time": "16:02:57",
+     "minutes_before": 2
+    }
+   },
+   "4": {
+    "first": {
+     "time": "16:01:10",
+     "minutes_before": 4
+    },
+    "count": 5,
+    "last": {
+     "time": "16:11:56",
+     "minutes_before": 18
+    },
+    "vanished": {
+     "time": "16:01:23",
+     "minutes_before": 4
+    }
+   },
+   "2": {
+    "first": {
+     "time": "16:04:56",
+     "minutes_before": 0
+    },
+    "count": 3,
+    "last": {
+     "time": "16:09:54",
+     "minutes_before": 20
+    }
+   }
+  },
+  "finalSignal": 4,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 50
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-08-09 16:12:37"
+}
