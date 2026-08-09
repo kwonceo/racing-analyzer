@@ -692,6 +692,45 @@ def _grade_fix(s):
     return _GRADE_KR_RE.sub(rep, s)
 
 
+_NAME_FIXED = [0]
+
+
+def strip_broken_names(doc):
+    """🔴 [2026-08-09] **깨진 마명을 마번으로 바꾼다.** 저장 직전에만 돈다.
+
+    왜: 한국 PDF 를 fitz 로 뽑으면 **글자 단위로** 깨진다(16경주 486자 · 1.7%).
+      실물: 부산 2R 8번이 `޷झ௏௏`. 코드포인트가 아랍·데바나가리·타밀 대역이다.
+    🔴 **프롬프트로는 안 된다** — LLM 은 자기가 읽은 글자가 깨진 줄 모른다(실측으로 확인).
+    ⚠ **원문을 LLM 에 주기 전에 바꾸지 않는다.** 그러면 그 말을 아예 모르게 된다.
+      등급 정규화(normalize_grades)와 같은 자리·같은 방식이다.
+    ⚠ 마번은 정확하다 — 깨진 이름을 내보내는 것보다 `8번` 이 낫다."""
+    try:
+        import importlib.util
+        _p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "name_ok.py")
+        _sp = importlib.util.spec_from_file_location("_nok", _p)
+        _n = importlib.util.module_from_spec(_sp)
+        _sp.loader.exec_module(_n)
+    except Exception:
+        return doc
+
+    def _fix(v):
+        if isinstance(v, dict):
+            return {k: _fix(x) for k, x in v.items()}
+        if isinstance(v, list):
+            return [_fix(x) for x in v]
+        if not isinstance(v, str) or not _n.name_broken(v):
+            return v
+        # "8번 ޷झ௏௏" → "8번" · 그 외 깨진 토막은 통째로 지운다
+        out = re.sub(r"(\d{1,2}\s*번)\s+[^\s]*[^가-힣ㄱ-ㆎ0-9A-Za-z\s()·,.'\"-][^\s]*",
+                     r"", v)
+        out = re.sub(r"[^가-힣ㄱ-ㆎ0-9A-Za-z\s()·,.'\":\-~%%+/]+", "", out)
+        if out != v:
+            _NAME_FIXED[0] += 1
+        return re.sub(r"\s{2,}", " ", out).strip()
+
+    return _fix(doc)
+
+
 def normalize_grades(doc):
     """생성문 전체의 등급 표기를 원문 전각으로 되돌린다(문자열 값만 · 구조 무변경)."""
     if isinstance(doc, dict):
@@ -1182,6 +1221,11 @@ def run_one(rec, dry=False):
         except Exception:
             pass
         return None
+    _NAME_FIXED[0] = 0
+    doc = strip_broken_names(doc)        # 🔴 깨진 마명 → 마번(검증 통과 후에만 · 값 무변경)
+    if _NAME_FIXED[0]:
+        print("  [마명] 깨진 표기 %d곳을 마번으로 치환" % _NAME_FIXED[0])
+        _bump("name_fixed", _NAME_FIXED[0])
     doc = normalize_grades(doc)          # 🔴 검증 통과 후에만 — 표기만 되돌린다(값 무변경)
     p = save(rec, doc, meta)
     _bump("published")
