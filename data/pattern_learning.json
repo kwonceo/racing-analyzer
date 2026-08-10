@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "모리오카 8경주",
-      "horse_no": 2,
-      "recent_avg": 7.6,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-08-02"
-    },
-    {
-      "race": "코치 3경주",
-      "horse_no": 4,
-      "recent_avg": 9.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-02"
-    },
-    {
       "race": "코치 3경주",
       "horse_no": 8,
       "recent_avg": 8.0,
@@ -4799,6 +4781,28 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-10"
+    },
+    {
+      "race": "카나자와 6경주",
+      "horse_no": 6,
+      "recent_avg": 8.2,
+      "win_place": 1,
+      "conditions": [
+        "급락87%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "카나자와 6경주",
+      "horse_no": 10,
+      "recent_avg": 6.0,
+      "win_place": 2,
+      "conditions": [
+        "급락52%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
     }
   ],
   "condition_stats": {
@@ -4807,8 +4811,8 @@
       "hit": 561
     },
     "전체부진마": {
-      "count": 5387,
-      "hit": 1449
+      "count": 5395,
+      "hit": 1451
     },
     "대규모급락": {
       "count": 18,
@@ -4818,12 +4822,12 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2293,
-      "hit": 888
+      "count": 2301,
+      "hit": 890
     },
     "급락동반": {
-      "count": 478,
-      "hit": 132
+      "count": 486,
+      "hit": 134
     }
   },
   "bokbyeong_patterns": [
@@ -5196,23 +5200,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 963,
-    "hit": 782,
+    "count": 964,
+    "hit": 783,
     "cases": [
-      {
-        "race": "사세보 1경주",
-        "date": "2026-08-08",
-        "smart_horses": [
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.6,
-        "high_odds": false
-      },
       {
         "race": "서울 5경주",
         "date": "2026-08-08",
@@ -6758,6 +6748,22 @@
         ],
         "placed": [],
         "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "카나자와 6경주",
+        "date": "2026-08-10",
+        "smart_horses": [
+          4,
+          2,
+          3
+        ],
+        "placed": [
+          2
+        ],
+        "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
