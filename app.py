@@ -18757,6 +18757,221 @@ def _recompute_learning_stats(records):
     }
 
 
+# ══════════ [경주 카드 신호 이력 (2026-08-10 대표 지시)] ══════════
+#  왜: **대표가 매번 물어봐야 아는 상태였다.** 부산 4R 에서 5+8 이 4초만 본선이었고 96배였는데
+#    물어보고서야 알았다. 🔴 **빠진 조합에는 지금 아무 흔적이 없다** — 그게 가장 중요한 정보다.
+#  ⚠ 완전 읽기 전용이다. 저장·판정·추천·학습에 일절 개입하지 않는다.
+#  ⚠ 새 저장소를 만들지 않는다 — 이미 쌓이는 것만 조립한다:
+#    analysis_log(recommendation_history·corePicks) · logs/t5_freeze/*.jsonl · odds_history · race_results
+def _card_odds_path(rk):
+    """🔴 odds_history 파일명은 **날짜 접두**다(`2026_08_10_히라츠카_3경주.json`).
+    `rk`(=「히라츠카 3경주」)만으로 찾으면 영원히 못 찾는다 — 원칙 16.
+    analysis_log 경로에서 파생해 날짜를 그대로 물려받는다(같은 규칙을 두 곳에 두지 않는다)."""
+    try:
+        lp, _, _ = _analysis_log_path(_canonical_log_key(rk))
+        if lp:
+            return os.path.join(os.path.dirname(__file__), "data", "odds_history",
+                                os.path.basename(lp))
+    except Exception:
+        pass
+    return os.path.join(os.path.dirname(__file__), "data", "odds_history", rk + ".json")
+
+
+def _card_odds_at(rk, when_hms, combo):
+    """그 시각에 가장 가까운 스냅샷에서 조합 배당을 찾는다. 🔴 빠진 조합의 배당이 핵심이다."""
+    try:
+        p = _card_odds_path(rk)
+        if not os.path.exists(p):
+            return None
+        d = json.load(open(p, encoding="utf-8"))
+        want = None
+        if when_hms:
+            hh, mm, ss = [int(x) for x in str(when_hms).split(":")]
+            want = hh * 3600 + mm * 60 + ss
+        key_a = "%d+%d" % (combo[0], combo[1])
+        key_b = "%d+%d" % (combo[1], combo[0])
+        best, bestdiff = None, None
+        for s in (d.get("snapshots") or []):
+            q = s.get("quinella") or {}
+            v = q.get(key_a, q.get(key_b))
+            if v is None:
+                continue
+            try:
+                v = float(v[0] if isinstance(v, list) else v)
+            except (TypeError, ValueError):
+                continue
+            if want is None:
+                best = v
+                continue
+            lt = time.localtime(float(s.get("t") or 0))
+            sec = lt.tm_hour * 3600 + lt.tm_min * 60 + lt.tm_sec
+            diff = abs(sec - want)
+            if bestdiff is None or diff < bestdiff:
+                best, bestdiff = v, diff
+        return best
+    except Exception:
+        return None
+
+
+def _race_card_timeline(rk):
+    """카드용 신호 이력 1건 조립(읽기 전용)."""
+    out = {"raceKey": rk, "rows": [], "lost": [], "tiers": {}, "result": None,
+           "resultMissing": True, "signals": [], "reasons": []}
+    try:
+        lp, _, _ = _analysis_log_path(_canonical_log_key(rk))
+    except Exception:
+        lp = None
+    doc = {}
+    if lp and os.path.exists(lp):
+        try:
+            doc = json.load(open(lp, encoding="utf-8")) or {}
+        except Exception:
+            doc = {}
+    cp = doc.get("corePicks") or {}
+
+    # ① 시각별 조합 이력 — 붙은 것/빠진 것을 **직전 행과 비교**해 만든다
+    prev = set()
+    for r in (doc.get("recommendation_history") or []):
+        cur = set()
+        for q in (r.get("quinellas") or []):
+            c = q.get("combo") or []
+            if len(c) == 2:
+                try:
+                    cur.add(tuple(sorted(int(x) for x in c)))
+                except (TypeError, ValueError):
+                    pass
+        if not cur and r.get("quinella_main"):
+            try:
+                cur.add(tuple(sorted(int(x) for x in str(r["quinella_main"]).split("+"))))
+            except (TypeError, ValueError):
+                pass
+        add = sorted(cur - prev)
+        rem = sorted(prev - cur)
+        out["rows"].append({
+            "at": r.get("time"), "mb": r.get("minutes_before"),
+            "closed": bool(r.get("closed")),
+            "combos": ["+".join(str(x) for x in c) for c in sorted(cur)],
+            "added": ["+".join(str(x) for x in c) for c in add],
+            "removed": ["+".join(str(x) for x in c) for c in rem],
+            "summary": r.get("summary"),
+            "topSignals": (r.get("top_signals") or [])[:3],
+        })
+        prev = cur
+
+    # ② 🔴 빠진 조합 + 그때 배당 — t5_freeze 로그(있으면)와 이력 diff 를 합친다
+    seen = set()
+    try:
+        lf = os.path.join(_T5_FREEZE_DIR, time.strftime("%Y%m%d") + ".jsonl")
+        if os.path.exists(lf):
+            for ln in io.open(lf, encoding="utf-8"):
+                try:
+                    j = json.loads(ln)
+                except Exception:
+                    continue
+                if j.get("rk") != rk or j.get("ev") != "lost":
+                    continue
+                for cs in (j.get("lost") or []):
+                    if cs in seen:
+                        continue
+                    seen.add(cs)
+                    nos = [int(x) for x in cs.split("+")]
+                    out["lost"].append({"combo": cs, "at": j.get("at"), "mb": j.get("mb"),
+                                        "odds": _card_odds_at(rk, j.get("at"), nos),
+                                        "src": "T-5 확정 후 삭제"})
+    except Exception:
+        pass
+    for row in out["rows"]:                           # 이력 diff 로도 보완(로그 없는 과거 경주)
+        for cs in (row.get("removed") or []):
+            if cs in seen:
+                continue
+            seen.add(cs)
+            nos = [int(x) for x in cs.split("+")]
+            out["lost"].append({"combo": cs, "at": row.get("at"), "mb": row.get("mb"),
+                                "odds": _card_odds_at(rk, row.get("at"), nos),
+                                "src": "표시에서 빠짐"})
+
+    # ③ 사유 + 등급(★본선/⚡추가/💎복병)
+    for q in (cp.get("finalQuinellas") or []):
+        c = q.get("combo") or []
+        if len(c) != 2:
+            continue
+        out["reasons"].append({"combo": "+".join(str(x) for x in c), "odds": q.get("odds"),
+                               "reason": q.get("reason"), "tier": q.get("pickTier"),
+                               "tierLabel": q.get("tierLabel"),
+                               "restored": bool(q.get("t5Restored"))})
+    for q in (cp.get("bmedSpecial") or []):
+        c = q.get("combo") or []
+        if len(c) == 2:
+            out["reasons"].append({"combo": "+".join(str(x) for x in c), "odds": q.get("odds"),
+                                   "reason": q.get("reason"), "tier": "dark",
+                                   "tierLabel": "💎 복병", "restored": False})
+    for t in ("main", "late", "dark"):
+        out["tiers"][t] = sum(1 for x in out["reasons"] if x.get("tier") == t)
+
+    # ④ 급락·급등 신호가 어느 말에 붙었나
+    for d0 in (doc.get("signals_detected") or [])[:12]:
+        out["signals"].append({"at": d0.get("time") or d0.get("at"),
+                               "text": d0.get("label") or d0.get("reason") or d0.get("detail"),
+                               "horses": d0.get("horses")})
+
+    # ⑤ 결과 대조 — 🔴 결손도 표시한다(2026-08-10 부산 2R 유형)
+    try:
+        rp = os.path.join(os.path.dirname(__file__), "data", "race_results", rk + ".json")
+        if os.path.exists(rp):
+            raw = json.load(open(rp, encoding="utf-8")) or {}
+            res = raw.get("result") or {}
+            pay = (raw.get("payouts") or {}).get("quinella")
+            if pay is None:
+                pay = (res.get("payouts") or {}).get("quinella")   # 구데이터 호환
+            top2 = None
+            try:
+                top2 = tuple(sorted([int(res.get("1st")), int(res.get("2nd"))]))
+            except (TypeError, ValueError):
+                top2 = None
+            if top2:
+                out["resultMissing"] = False
+                tk = "+".join(str(x) for x in top2)
+                disp = {tuple(sorted(c)) for c in
+                        ((cp.get("displayedCombos") or {}).get("quinellas") or [])}
+                hit_tier = None
+                for x in out["reasons"]:
+                    if x["combo"] == tk or x["combo"] == "+".join(str(v) for v in top2[::-1]):
+                        hit_tier = x.get("tierLabel") or x.get("tier")
+                out["result"] = {
+                    "top3": [res.get("1st"), res.get("2nd"), res.get("3rd")],
+                    "quinella": tk, "payout": pay,
+                    "hitDisplayed": top2 in disp,
+                    "hitTier": hit_tier,
+                    # 🔴 빠진 것이 정답이었나 — 이 한 줄이 이번 작업의 핵심이다
+                    "lostWasWinner": any(l["combo"] == tk for l in out["lost"]),
+                }
+    except Exception:
+        pass
+    if out["resultMissing"]:
+        out["resultNote"] = "🔴 결과 미저장 — 착순이 들어오면 자동으로 채워진다"
+    return out
+
+
+@app.route("/api/race/card-timeline", methods=["GET"])
+def race_card_timeline_api():
+    """[경주 카드 신호 이력] 완전 읽기 전용. ?raceKey=... (&view=member 면 회원용 축약)"""
+    rk = (request.args.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"ok": False, "error": "raceKey 필요"}), 400
+    try:
+        data = _race_card_timeline(rk)
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)[:200]}), 500
+    # 🔴 대표용 / 회원용 분리 — 회원에게는 '빠진 조합'과 틱 단위 요동을 보내지 않는다.
+    #   그것은 판단 근거가 아니라 내부 관측이고, 회원 화면이 복잡해지면 안 된다는 지시가 있다.
+    if (request.args.get("view") or "").lower() == "member":
+        data = {"raceKey": data["raceKey"], "tiers": data["tiers"],
+                "reasons": data["reasons"], "result": data["result"],
+                "resultMissing": data["resultMissing"],
+                "resultNote": data.get("resultNote")}
+    return jsonify({"ok": True, "data": data})
+
+
 @app.route("/api/race-report/list", methods=["GET"])
 def race_report_list():
     """[신규 1번] 저장된 경주 재현 리포트 목록 → [{slug,race,date,hit,hit_type,odds,win_tags}]."""

@@ -237,9 +237,86 @@
       ${susBanner}
       ${comboLine}
       <div style="margin-top:3px;font-size:13.5px">결과 <b>${esc(top3 || '-')}</b>${oddsTxt}</div>
+      ${cardTimelineHtml(c.race || '')}
       ${shot}
     </div>`;
   }
+
+  // 🔴 [경주 카드 신호 이력 (2026-08-10 대표 지시)] 대표가 매번 물어봐야 아는 상태였다.
+  //   부산 4R 에서 5+8 이 4초만 본선이었고 96배였는데 물어보고서야 알았다.
+  //   ⚠ 기본은 **접혀 있다** — 회원 화면이 복잡해지면 안 된다는 지시. 누를 때만 서버를 부른다(지연 로드).
+  //   ⚠ 기존 카드 요소는 하나도 건드리지 않았다(한 줄 추가).
+  function cardTimelineHtml(rk) {
+    if (!rk) return '';
+    return `<details class="tlBox" data-rk="${esc(rk)}" style="margin-top:6px"
+              ontoggle="if(this.open)window.loadCardTimeline(this)">
+      <summary style="cursor:pointer;font-size:12px;color:#94a3b8;user-select:none">🔎 신호 이력</summary>
+      <div class="tlBody" style="font-size:12px;color:#cbd5e1;margin-top:5px">불러오는 중…</div>
+    </details>`;
+  }
+
+  // 🔴 대표용 / 회원용 — 회원에게는 '빠진 조합'과 틱 단위 요동을 보내지 않는다(서버가 잘라서 준다).
+  //   대표용으로 보려면 브라우저 콘솔에서 `localStorage.adminView = '1'` 한 번만 실행하면 된다.
+  window.loadCardTimeline = async function (el) {
+    const body = el.querySelector('.tlBody');
+    if (!body || el.dataset.loaded === '1') return;
+    const rk = el.dataset.rk || '';
+    const admin = (localStorage.getItem('adminView') === '1');
+    try {
+      const r = await fetch('/api/race/card-timeline?raceKey=' + encodeURIComponent(rk)
+        + (admin ? '' : '&view=member'));
+      const j = await r.json();
+      if (!j.ok) { body.textContent = '불러오지 못했습니다'; return; }
+      const d = j.data || {};
+      const L = [];
+      const t = d.tiers || {};
+      L.push(`<div style="margin-bottom:4px">★ 본선 ${t.main || 0} · ⚡ 마감 신호 ${t.late || 0} · 💎 복병 ${t.dark || 0}</div>`);
+      (d.reasons || []).forEach((x) => {
+        L.push(`<div>${esc(x.tierLabel || '')} <b>${esc(x.combo)}</b>`
+          + (x.odds != null ? ` ${x.odds}배` : '')
+          + (x.restored ? ' <span style="color:#fbbf24">복원</span>' : '')
+          + (x.reason ? `<div style="color:#94a3b8;font-size:11px;margin:1px 0 3px 12px">${esc(x.reason)}</div>` : '')
+          + '</div>');
+      });
+      // 🔴 빠진 조합 — 이것이 가장 중요하다. 지금까지 아무 흔적이 없었다.
+      if ((d.lost || []).length) {
+        L.push('<div style="margin-top:6px;color:#f87171;font-weight:800">🔴 빠진 조합</div>');
+        d.lost.forEach((x) => {
+          L.push(`<div style="color:#fca5a5">${esc(x.combo)}`
+            + (x.odds != null ? ` <b>${x.odds}배</b>` : ' <span class="hint">배당 미상</span>')
+            + ` <span class="hint">${esc(x.at || '')}${x.mb != null ? ' · 마감 ' + x.mb + '분 전' : ''} · ${esc(x.src || '')}</span></div>`);
+        });
+      }
+      if ((d.rows || []).length) {
+        L.push('<div style="margin-top:6px;color:#94a3b8;font-weight:800">시각별 이력</div>');
+        d.rows.forEach((r2) => {
+          const chg = [];
+          if ((r2.added || []).length) chg.push('<span style="color:#38d39f">+' + r2.added.map(esc).join(' +') + '</span>');
+          if ((r2.removed || []).length) chg.push('<span style="color:#f87171">-' + r2.removed.map(esc).join(' -') + '</span>');
+          L.push(`<div><span class="hint">${esc(r2.at || '')}${r2.mb != null ? ' (T-' + r2.mb + ')' : ''}${r2.closed ? ' 🔒' : ''}</span> `
+            + esc((r2.combos || []).join(' · ')) + (chg.length ? ' ' + chg.join(' ') : '') + '</div>');
+        });
+      }
+      if (d.resultMissing) {
+        L.push(`<div style="margin-top:6px;color:#fbbf24">${esc(d.resultNote || '결과 미저장')}</div>`);
+      } else if (d.result) {
+        const rr = d.result;
+        L.push('<div style="margin-top:6px;color:#94a3b8;font-weight:800">결과 대조</div>');
+        L.push(`<div>정답 <b>${esc(rr.quinella || '')}</b>`
+          + (rr.payout != null ? ` ${rr.payout}배` : '')
+          + (rr.hitDisplayed ? ' <span style="color:#38d39f;font-weight:800">✅ 표시 명단 적중</span>'
+                             : ' <span style="color:#f87171">표시 명단 미적중</span>')
+          + (rr.hitTier ? ` <span class="hint">(${esc(rr.hitTier)})</span>` : '') + '</div>');
+        if (rr.lostWasWinner) {
+          L.push('<div style="color:#f87171;font-weight:800">🔴 빠진 조합이 정답이었다</div>');
+        }
+      }
+      body.innerHTML = L.join('');
+      el.dataset.loaded = '1';
+    } catch (e) {
+      body.textContent = '오류: ' + (e && e.message || e);
+    }
+  };
 
   // ---------- 탭 ----------
   function initTabs() {
