@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "후나바시 4경주",
-      "horse_no": 1,
-      "recent_avg": 9.2,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-02"
-    },
-    {
-      "race": "코치 2경주",
-      "horse_no": 7,
-      "recent_avg": 11.7,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-02"
-    },
-    {
       "race": "코치 2경주",
       "horse_no": 9,
       "recent_avg": 11.3,
@@ -4807,16 +4789,34 @@
         "복승이상감지"
       ],
       "date": "2026-08-10"
+    },
+    {
+      "race": "카나자와 5경주",
+      "horse_no": 3,
+      "recent_avg": 7.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "카나자와 5경주",
+      "horse_no": 4,
+      "recent_avg": 6.6,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-10"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3077,
-      "hit": 557
+      "count": 3080,
+      "hit": 558
     },
     "전체부진마": {
-      "count": 5360,
-      "hit": 1443
+      "count": 5367,
+      "hit": 1445
     },
     "대규모급락": {
       "count": 18,
@@ -4826,8 +4826,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2283,
-      "hit": 886
+      "count": 2287,
+      "hit": 887
     },
     "급락동반": {
       "count": 478,
@@ -5204,26 +5204,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 960,
-    "hit": 780,
+    "count": 961,
+    "hit": 781,
     "cases": [
-      {
-        "race": "사가 1경주",
-        "date": "2026-08-08",
-        "smart_horses": [
-          8,
-          5,
-          7
-        ],
-        "placed": [
-          5,
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.9,
-        "high_odds": false
-      },
       {
         "race": "다치카와 12경주",
         "date": "2026-08-08",
@@ -6773,9 +6756,25 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "카나자와 5경주",
+        "date": "2026-08-10",
+        "smart_horses": [
+          6,
+          3,
+          8
+        ],
+        "placed": [
+          3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.3,
+        "high_odds": false
       }
     ],
-    "rate": 81.2,
+    "rate": 81.3,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
