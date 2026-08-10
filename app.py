@@ -16454,6 +16454,12 @@ def _build_analysis_log(rk, an=None):
         "recommendation_history": rec_history,   # [추천 이력 보존] 변경마다 누적(덮어쓰지 않음)
         "compare_recommendation": an.get("compareRecommend") or (doc.get("compare_recommendation") if doc else None),   # [비교학습] 이상감지/전적/최종 3종
         "corePicks": core_picks_out,   # [확신도 복승 학습·추천 보존] confQuinellas·confTrifecta 결과 판정용 보존(빈값 덮어쓰기 방지)
+        # 🔴 [보험 매트릭스 저장 (2026-08-10)] 화면 하단에 **금액·원금보전까지 계산해 보여주는데**
+        #   분석 로그에는 한 번도 저장되지 않아 소급 측정이 **0구좌**로 잡혔다.
+        #   실물: 2026-08-10 도야마 7R 의 복승 2+5(24.5배)가 이 목록에만 있었고 저장 어디에도 없었다.
+        #   ⚠ **저장만 한다** — 판정(displayedCombos)에는 넣지 않는다. 안 저장하면 영원히 못 잰다.
+        "bmed_insurance": ((an.get("bmed") or {}).get("insurance")
+                           or (doc.get("bmed_insurance") if doc else None)),
         # [신호품질 원본 저장 (2026-07-29)] _triple_analyze 는 signalQuality{excess·situation·
         #   integratedAdaptive·combos}를 만들지만 분석 로그에는 **한 번도 저장되지 않았다**(전수 0건).
         #   기존 signal_quality 키는 _build_race_result/_build_ai_training 에서 조합별 등급 문자열
@@ -34896,6 +34902,10 @@ def _kakao_access_token():
 #  ⚠ append-only — 덮어쓰지 않는다. 이 기록이 향후 모든 회귀 테스트의 앵커다.
 KAKAO_ANCHOR_DIR = os.path.join(os.path.dirname(__file__), "data", "kakao_sent")
 
+# 🔴 [카톡 삼복승 개수 (2026-08-10 대표 결정)] 발송 전용 상한. 화면·판정에는 영향 없다.
+#   1 = 대표 결정(trifecta_main 만) · 2 = 종전 · 0 = 완전 제외(측정상 99.5%지만 고배당 기회를 버린다)
+KAKAO_TRIO_MAX = 1
+
 
 def _kakao_anchor_log(rk, phase, text, result, an=None):
     """발송 직후 1건 적재. **완전 방어적** — 여기서 실패해도 발송 흐름에 영향 없음."""
@@ -35049,7 +35059,16 @@ def _kakao_rich_message(rk, phase, an):
         _rs = (" · %s" % str(q.get("reason"))[:22]) if q.get("reason") else ""
         lines.append("복승%s %s%s %s%s" % (_circ[i] if i < 3 else "", "+".join(map(str, q.get("combo") or [])),
                                            _o, _star(q.get("stars")), _rs))
-    for t in (cp.get("finalTrifectas") or [])[:2]:
+    # 🔴 [2026-08-10 대표 결정] **카톡 삼복승을 1개로 줄인다.**
+    #   소급 2,472경주(회원에게 나간 순서 기준):
+    #     상위1 **82.9%**(판정선 +8.4) ↔ 상위2 72.5% ↔ 상위3 71.3% ↔ 현행(전부) 71.6%
+    #     🔴 1개와 2개 사이가 **10.4%p 절벽**이라 중간이 없다.
+    #   회원 실제(복승 판정명단 + 삼복승 상위N): 현행 78.0% → **1개 93.8%**(+15.8%p)
+    #     구좌 14,926 → 5,193. ⚠ 완전 제외(99.5%)보다 1개를 택한 이유는 **고배당 한 방**이다
+    #     (2026-08-10 도야마 7R 삼복승 97배).
+    #   ⚠ 화면·오버레이는 그대로 둔다 — **발송만** 줄인다(참고 표시는 유지).
+    #   🔧 롤백: KAKAO_TRIO_MAX 를 2 로 되돌린다.
+    for t in (cp.get("finalTrifectas") or [])[:KAKAO_TRIO_MAX]:
         if t.get("odds") and t.get("oddsEst"):
             _o = " (~%s배·추정)" % t.get("odds")     # [추정 표기] 실배당 미수집 조합(다마노 3R 둔갑 방지)
         elif t.get("odds"):
