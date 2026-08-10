@@ -8302,6 +8302,17 @@ HEAD_PAIR_ENABLED = True
 HEAD_PAIR_MAX_ODDS = 2.5     # 단승이 이 이하일 때만 '머리로 팔리는 말'로 본다
 HEAD_PAIR_ADD = 1            # 몇 개를 끼워 넣나(대표 지시: 하나만)
 
+# 🔴 [유력마끼리 짝 (2026-08-10 · ②-B 승인)] 별도 스위치 — HEAD_PAIR 와 독립이다.
+#   왜: 「정답 두 말이 **둘 다 유력마 안에 있는데** 그 짝을 안 만든다」가 오늘만 두 번 나왔다
+#     (모리오카 1R 정답 2+11 · 우라와 1R 1+12). 유력마를 **축 하나로만** 쓰고 유력마끼리는
+#     교차시키지 않는 구조 때문이다.
+#   소급 1,728경주: 적중 642 → **757** · 회수율 100.2 → **101.1%** · 3제외 74.7 → **80.5%**
+#     · 적중배당 중앙 2.7 → **3.0배** · 🔴 **한계 회수율 103.1%**(추가 1,550구좌 · 추가 회수 1,597)
+#   ⚠ 비교안은 전부 아래였다 — 임계 상향 86~91% · 머리+후보 전체 83.4%.
+#   ⚠ 통째로 바꾸지 않는다. **미조합 짝 하나만** 넣는다.
+KEY_PAIR_ENABLED = True
+KEY_PAIR_ADD = 1             # 하나만
+
 
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                  reversal_quinellas=None, dark_quinellas=None, signal_horses=None, sig_meta=None, sport=None):
@@ -9494,6 +9505,63 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                     _gate_hit("head_pair", rk=None, reason="머리 %d + %d" % (_head, _p))
     except Exception as _hpe:
         print("[머리짝] 편입 실패(무시):", _hpe)
+
+    # ══════════ 🔴 [유력마끼리 짝 (2026-08-10 · ②-B 승인)] ══════════
+    #   유력마끼리인데 아직 조합이 없는 짝을 **하나만** 넣는다.
+    #   짝 선택은 **단승 최저(머리)가 낀 것 우선** — 대표 지시 「머리로 팔리는 말의 짝은 필수」.
+    #   ⚠ 순위 순(②-A)보다 소급이 낫다: 한계 100.3% → **103.1%** · 3제외 79.6 → **80.5%**.
+    #   ⚠ 단승이 없는 종목(경륜)에서는 자연히 순위 순과 같아진다 — 별도 분기를 두지 않는다.
+    try:
+        if KEY_PAIR_ENABLED:
+            _kh2 = []
+            for _x in (cp.get("keyHorses") or []):
+                try:
+                    _kh2.append(int(_x))
+                except (TypeError, ValueError):
+                    continue
+            if len(_kh2) >= 2:
+                _gate_hit("key_pair", rk=None, reason="도달(유력마 %d두)" % len(_kh2), reach_only=True)
+                _have2 = {tuple(sorted(int(x) for x in (q.get("combo") or []))) for q in final_q}
+                _miss = []
+                for _i in range(len(_kh2)):
+                    for _j in range(_i + 1, len(_kh2)):
+                        _k2 = tuple(sorted((_kh2[_i], _kh2[_j])))
+                        if _k2 not in _have2:
+                            _miss.append(_k2)
+                if _miss:
+                    _w2 = {}
+                    for _wk2, _wv2 in (cp.get("single") or {}).items():
+                        try:
+                            _o2 = float(_wv2)
+                            if _o2 > 0:
+                                _w2[int(_wk2)] = _o2
+                        except (TypeError, ValueError):
+                            continue
+                    _pick = None
+                    if _w2:
+                        _hd2 = min(_w2, key=lambda n: _w2[n])
+                        _wh = [k for k in _miss if _hd2 in k]
+                        if _wh:
+                            # 머리가 낀 것 중 **상대의 유력마 순위가 높은** 쪽
+                            _wh.sort(key=lambda k: min(_kh2.index(x) for x in k if x != _hd2))
+                            _pick = _wh[0]
+                    if _pick is None:
+                        _pick = _miss[0]              # 머리 없음(경륜 등) → 순위 순
+                    _od2 = None
+                    for (_a2, _b2), _o3 in (curQ or {}).items():
+                        if tuple(sorted((int(_a2), int(_b2)))) == _pick:
+                            _od2 = _o3
+                            break
+                    final_q.append({
+                        "combo": list(_pick), "odds": _od2, "stars": 3, "keyPair": True,
+                        "reason": "유력마끼리 짝(%s) — 축 하나로만 쓰던 유력마를 교차"
+                                  % "+".join(str(x) for x in _pick),
+                        "basis": _combo_basis(list(_pick)),
+                        "summary": "유력마 교차(필수 편입)"})
+                    _gate_hit("key_pair", rk=None,
+                              reason="편입 %s" % "+".join(str(x) for x in _pick))
+    except Exception as _kpe:
+        print("[유력마짝] 편입 실패(무시):", _kpe)
 
     # [시나리오 조합 자동생성] 시나리오A(유력마 축)+B(편성 유리) — 각질 편성 기반(axisPlan·paceAnalysis 종합)
     scenario_plan = None

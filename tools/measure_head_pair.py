@@ -64,7 +64,9 @@ def collect(pattern, max_odds):
         fired = head is not None and win.get(head, 99) <= max_odds
         # 유력마 — 저장분이 없으면 그 경주는 '유력마짝' 안에서 제외(정직하게 미적용)
         kh = []
-        for x in (cp.get("keyHorses") or []):
+        # 🔴 저장은 **최상위 keyHorses** 가 98%다(corePicks.keyHorses 는 오늘 배선분 3건뿐).
+        #   앞선 측정에서 「keyHorses 저장 0건」이 나온 것은 이 경로를 안 봤기 때문이다.
+        for x in (doc.get("keyHorses") or cp.get("keyHorses") or []):
             try:
                 kh.append(int(x))
             except (TypeError, ValueError):
@@ -78,6 +80,7 @@ def collect(pattern, max_odds):
         rows.append({"rk": rk, "cur": cur, "top2": top2, "pay": pay,
                      "head": head, "fired": fired, "win": win,
                      "kh": [n for n in kh if n != head],
+                     "khAll": kh,                      # 🔴 ② 안은 머리를 빼지 않는다(순위로만)
                      "cands": [n for n in cands if n != head]})
     return rows
 
@@ -94,6 +97,75 @@ def _pair1(r):
         if k not in out:
             out.add(k)
             break
+    return out
+
+
+def _pair_th(th):
+    """① 임계만 올린다 — 머리 판정선을 th 로."""
+    def f(r):
+        out = set(r["cur"])
+        if not r["win"]:
+            return out
+        head = min(r["win"], key=lambda n: r["win"][n])
+        if r["win"][head] > th:
+            return out
+        pool = [n for n in (r["kh"] or r["cands"]) if n != head]
+        pool = sorted(pool, key=lambda n: r["win"].get(n, 9e9))
+        for p in pool:
+            k = tuple(sorted((head, p)))
+            if k not in out:
+                out.add(k)
+                break
+        return out
+    return f
+
+
+def _kh_pair(r):
+    """② 🔴 배당과 무관하게 **유력마끼리** 아직 없는 짝 하나 — 순위로만 고른다.
+
+    모리오카 1R·3R 둘 다 「정답 두 말이 유력마 안에 있는데 그 짝을 안 만든」 경우다.
+    """
+    out = set(r["cur"])
+    kh = r["khAll"]
+    if len(kh) < 2:
+        return out
+    for i in range(len(kh)):
+        for j in range(i + 1, len(kh)):
+            k = tuple(sorted((kh[i], kh[j])))
+            if k not in out:
+                out.add(k)
+                return out
+    return out
+
+
+def _kh_pair_head(r):
+    """②-B 🔴 유력마끼리 미조합 짝 중 **단승 최저(머리)가 낀 것**을 우선.
+
+    대표 지시 원문이 「11번이 머리로 팔리는 말이기에 11-2는 필수」였다.
+    순위 순은 모리오카 1R 에서 2+5 를 골라 정답 2+11 을 놓친다.
+    ⚠ 단승이 없는 경주(경륜 등)에서는 순위 순과 같아진다.
+    """
+    out = set(r["cur"])
+    kh = r["khAll"]
+    if len(kh) < 2:
+        return out
+    miss = []
+    for i in range(len(kh)):
+        for j in range(i + 1, len(kh)):
+            k = tuple(sorted((kh[i], kh[j])))
+            if k not in out:
+                miss.append(k)
+    if not miss:
+        return out
+    if r["win"]:
+        head = min(r["win"], key=lambda n: r["win"][n])
+        withhead = [k for k in miss if head in k]
+        if withhead:
+            # 머리가 낀 것 중 상대의 유력마 순위가 높은 쪽
+            withhead.sort(key=lambda k: min(kh.index(x) for x in k if x != head))
+            out.add(withhead[0])
+            return out
+    out.add(miss[0])
     return out
 
 
@@ -156,7 +228,11 @@ def main():
         return
     print()
     for name, f in [("현행", lambda r: r["cur"]),
-                    ("유력마 짝 1개(지시안)", _pair1),
+                    ("① 임계 2.5(현행 배선)", _pair1),
+                    ("① 임계 3.5", _pair_th(3.5)),
+                    ("① 임계 4.0", _pair_th(4.0)),
+                    ("🔴 ②-A 유력마끼리(순위 순)", _kh_pair),
+                    ("🔴 ②-B 유력마끼리(머리 우선)", _kh_pair_head),
                     ("머리+후보 전체", _wide)]:
         c = _calc(rows, f)
         lo, hi = _ci(rows, f)
@@ -166,11 +242,28 @@ def main():
         print("  1건제외 %.1f%% · 3건제외 %.1f%% · 적중배당 중앙 %s · CI[%.1f, %.1f]"
               % (_ex(c, 1), _ex(c, 3), ("%.1f배" % c["med"]) if c["med"] else "-", lo, hi))
     base = _calc(rows, lambda r: r["cur"])
-    for name, f in [("유력마 짝 1개(지시안)", _pair1), ("머리+후보 전체", _wide)]:
+    for name, f in [("① 임계 2.5", _pair1), ("① 임계 3.5", _pair_th(3.5)),
+                    ("① 임계 4.0", _pair_th(4.0)),
+                    ("🔴 ②-A 순위 순", _kh_pair), ("🔴 ②-B 머리 우선", _kh_pair_head),
+                    ("머리+후보 전체", _wide)]:
         c = _calc(rows, f)
         ds, dr = c["seats"] - base["seats"], c["ret"] - base["ret"]
         print("  [한계] %s — 추가 구좌 %d · 추가 회수 %.1f · 한계 회수율 %s"
               % (name, ds, dr, ("%.1f%%" % (dr / ds * 100)) if ds else "-"))
+    # 🔴 두 안이 지목 경주를 각각 잡나 — 하나만 잡히는 안은 사후 최적화다
+    print()
+    print("=== 지목 경주 대조 (하나만 잡히면 사후 최적화다) ===")
+    for want in ("모리오카_1경주", "모리오카_3경주", "모리오카_4경주"):
+        hit = [r for r in rows if r["rk"].endswith(want)]
+        if not hit:
+            print("  %s : 대상 아님(결과·확정배당 없음)" % want)
+            continue
+        r = hit[0]
+        for nm, f in [("②-A 순위 순", _kh_pair), ("②-B 머리 우선", _kh_pair_head)]:
+            cs = f(r)
+            print("  %s | %-12s | 정답 %s | 넣은 짝 %s | 적중 %s"
+                  % (want, nm, "+".join(map(str, r["top2"])),
+                     sorted(cs - r["cur"]) or "없음", r["top2"] in cs))
     print()
     print("⚠ n<30 이면 판정 불가(원칙 1). 상위 1·3건 제외를 함께 본다(원칙 2).")
 
