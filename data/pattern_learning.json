@@ -1,55 +1,6 @@
 {
   "patterns": [
     {
-      "race": "코치 11경주",
-      "horse_no": 9,
-      "recent_avg": 8.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-01"
-    },
-    {
-      "race": "코치 11경주",
-      "horse_no": 1,
-      "recent_avg": 7.6,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-01"
-    },
-    {
-      "race": "코치 11경주",
-      "horse_no": 5,
-      "recent_avg": 8.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-01"
-    },
-    {
-      "pattern": "대규모급락",
-      "raceKey": "호후 4경주",
-      "total_combos_dropped": 5,
-      "drop_ratio": 0.455,
-      "result": "4+6",
-      "result_odds": "중배당",
-      "result_quinella_odds": 16.8,
-      "signal_result_combo": null,
-      "recommended_hit": false,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1785631799.7959263
-    },
-    {
-      "race": "모리오카 1경주",
-      "horse_no": 2,
-      "recent_avg": 6.6,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-02"
-    },
-    {
       "race": "모리오카 1경주",
       "horse_no": 9,
       "recent_avg": 9.0,
@@ -4804,16 +4755,67 @@
         "복승이상감지"
       ],
       "date": "2026-08-10"
+    },
+    {
+      "race": "우라와 6경주",
+      "horse_no": 3,
+      "recent_avg": 5.6,
+      "win_place": 2,
+      "conditions": [
+        "급락48%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "우라와 6경주",
+      "horse_no": 5,
+      "recent_avg": 5.6,
+      "win_place": 3,
+      "conditions": [
+        "급락36%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "우라와 6경주",
+      "horse_no": 6,
+      "recent_avg": 5.8,
+      "win_place": 1,
+      "conditions": [
+        "급락46%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "모리오카 8경주",
+      "horse_no": 6,
+      "recent_avg": 6.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "모리오카 8경주",
+      "horse_no": 10,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3034,
-      "hit": 548
+      "count": 3043,
+      "hit": 549
     },
     "전체부진마": {
-      "count": 5269,
-      "hit": 1419
+      "count": 5289,
+      "hit": 1424
     },
     "대규모급락": {
       "count": 18,
@@ -4823,12 +4825,12 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2235,
-      "hit": 871
+      "count": 2246,
+      "hit": 875
     },
     "급락동반": {
-      "count": 457,
-      "hit": 124
+      "count": 463,
+      "hit": 127
     }
   },
   "bokbyeong_patterns": [
@@ -5201,38 +5203,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 952,
-    "hit": 773,
+    "count": 954,
+    "hit": 775,
     "cases": [
-      {
-        "race": "다치카와 8경주",
-        "date": "2026-08-08",
-        "smart_horses": [
-          6,
-          5
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
-      {
-        "race": "와카야마 8경주",
-        "date": "2026-08-08",
-        "smart_horses": [
-          8,
-          1
-        ],
-        "placed": [
-          8,
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "와카야마 10경주",
         "date": "2026-08-08",
@@ -6765,6 +6738,38 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "우라와 6경주",
+        "date": "2026-08-10",
+        "smart_horses": [
+          3,
+          2,
+          7
+        ],
+        "placed": [
+          3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 8경주",
+        "date": "2026-08-10",
+        "smart_horses": [
+          9,
+          7,
+          2
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 14.5,
         "high_odds": false
       }
     ],
