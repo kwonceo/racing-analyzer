@@ -8291,6 +8291,13 @@ def _scenario_plan(cp, curQ, pace_analysis, sig_meta, valid_nos, axis_plan):
             "scenarioA": scen_a, "scenarioB": scen_b, "trifecta": tri}
 
 
+# 🔴 [머리로 팔리는 말의 짝 (2026-08-10 대표 지시)] 스위치 — False 로 되돌리면 편입이 멎는다.
+#   ⚠ 판정 로직·컷 상수는 그대로다. **조합 하나를 더 만드는 것**뿐이다.
+HEAD_PAIR_ENABLED = True
+HEAD_PAIR_MAX_ODDS = 2.5     # 단승이 이 이하일 때만 '머리로 팔리는 말'로 본다
+HEAD_PAIR_ADD = 1            # 몇 개를 끼워 넣나(대표 지시: 하나만)
+
+
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                  reversal_quinellas=None, dark_quinellas=None, signal_horses=None, sig_meta=None, sport=None):
     """[추천 구조 개편·종목별 저배당+신호=메인 / 고배당+강신호=BMED특별] 파생 추천을 새 구조로 정리(기존 후보수집·파생필드 무삭제).
@@ -9427,6 +9434,61 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                                                           "reason": q.get("label") or "단통 실질유력", "basis": _combo_basis(list(k)),
                                                           "summary": q.get("label") or "단통 복승 재편성"})
             final_q = _new_q[:max(max_q, 3)]
+
+    # ══════════ 🔴 [머리로 팔리는 말의 짝 (2026-08-10 대표 지시)] ══════════
+    #   지시 원문: 「11번이 머리로 팔리는 말이기에 11-2번은 필수야」
+    #   실물(모리오카 1경주 · 착순 11-2-5 · 정답 복승 11+2 = **27.8배**):
+    #     11번 단승 **1.6배**(압도적 1위)라 11이 낀 조합을 5개나 만들었는데 **11+2 만 없었다.**
+    #   🔴 원인: `_final_picks` 가 유력마를 인자로 안 받아 조합이 유력마와 따로 놀았다.
+    #     ⇒ 호출부에서 `cp["keyHorses"]` 로 넘기고, 여기서 **짝 하나만** 끼워 넣는다.
+    #   ⚠ 통째로 바꾸지 않는다 — 「유력마 상위2만 쓰면 47%로 더 나쁘다」가 이미 측정돼 있다.
+    #   ⚠ 단승 배당이 낮은 말을 **우선**한다. 전적 점수만 보면 그런 말이 빠진다
+    #     (모리오카 11번은 전적 27.5로 하위인데 단승 1.6배였다).
+    try:
+        if HEAD_PAIR_ENABLED and len(final_q) < max(max_q, 1) + HEAD_PAIR_ADD:
+            # 🔴 단승 소스는 **`cp["single"]`** 이다(9192행이 쓰는 그것).
+            #   처음에 `cp["form"]`/`cp["horses"]` 로 짚었는데 `core_picks` 에는 그 키가 없어
+            #   **계수기가 0 이었다**(원칙 23 — 도달 0 은 배선 문제다).
+            _wins = {}
+            for _wk, _wv in (cp.get("single") or {}).items():
+                try:
+                    _wo = float(_wv)
+                    if _wo > 0:
+                        _wins[int(_wk)] = _wo
+                except (TypeError, ValueError):
+                    continue
+            _head = min(_wins, key=lambda n: _wins[n]) if _wins else None
+            if _head is not None and _wins.get(_head, 99) <= HEAD_PAIR_MAX_ODDS:
+                _have = {tuple(sorted(int(x) for x in (q.get("combo") or []))) for q in final_q}
+                _kh = [int(x) for x in (cp.get("keyHorses") or []) if int(x) != _head]
+                # 유력마가 비면 후보(valid_nos)로 폴백 — 그래도 '머리 + 무언가'는 만든다
+                _pool = _kh or [int(x) for x in (valid_nos or []) if int(x) != _head]
+                # 🔴 단승이 낮은 순으로 우선(머리로 팔리는 말 계열을 먼저 붙인다)
+                _pool.sort(key=lambda n: _wins.get(n, 9e9))
+                _added = 0
+                for _p in _pool:
+                    if _added >= HEAD_PAIR_ADD:
+                        break
+                    _key = tuple(sorted((_head, _p)))
+                    if _key in _have:
+                        continue
+                    _od = None
+                    for (_a, _b), _o in (curQ or {}).items():
+                        if tuple(sorted((int(_a), int(_b)))) == _key:
+                            _od = _o
+                            break
+                    final_q.append({
+                        "combo": list(_key), "odds": _od, "stars": 3,
+                        "headPair": True,
+                        "reason": "머리 %d번(단승 %s배) 짝 — 유력마 %d번 강제 편입"
+                                  % (_head, _wins.get(_head), _p),
+                        "basis": _combo_basis(list(_key)),
+                        "summary": "머리 짝(필수 편입)"})
+                    _have.add(_key)
+                    _added += 1
+                    _gate_hit("head_pair", rk=None, reason="머리 %d + %d" % (_head, _p))
+    except Exception as _hpe:
+        print("[머리짝] 편입 실패(무시):", _hpe)
 
     # [시나리오 조합 자동생성] 시나리오A(유력마 축)+B(편성 유리) — 각질 편성 기반(axisPlan·paceAnalysis 종합)
     scenario_plan = None
@@ -12407,6 +12469,14 @@ def _triple_analyze(rk, rec):
             core_picks["paceAnalysis"] = pace_analysis             # [시나리오B] 각질 편성 분석 전달(편성 유리 말 선별)
             # [경륜 특화①] 라인 페어(선두+마크 복승) 전달 → _final_picks 경륜 블록에서 가점·추가
             core_picks["keirinLinePairs"] = (keirin_flow_sim or {}).get("linePairs") or []
+            # 🔴 [2026-08-10 대표 지시] `_final_picks` 가 유력마를 **인자로 받지 않는 것**이 원인이었다.
+            #   그래서 조합이 유력마와 따로 놀았다(모리오카 1R: 유력마에 없는 말로 조합이 만들어지고
+            #   정답 11+2 는 어디에도 없었다). ⚠ 통째로 바꾸지 않는다 — `keirinLinePairs` 를 넘기는
+            #   **바로 이 자리·이 방식**으로 값만 전달하고, 쓰는 쪽에서 짝 하나만 끼워 넣는다.
+            try:
+                core_picks["keyHorses"] = list(key_horses or [])
+            except Exception:
+                core_picks["keyHorses"] = []
             _fp = _final_picks(core_picks, curQ, _rec_valid, smart_quinella, max_q=_mainmax,
                                reversal_quinellas=_rev_q, dark_quinellas=_dark_q,
                                signal_horses=_sig_h, sig_meta=_sig_meta, sport=_analyze_sport)
