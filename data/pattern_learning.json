@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카와사키 12경주",
-      "horse_no": 3,
-      "recent_avg": 7.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-07-31"
-    },
-    {
-      "race": "카와사키 12경주",
-      "horse_no": 4,
-      "recent_avg": 7.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-07-31"
-    },
-    {
-      "race": "카와사키 12경주",
-      "horse_no": 10,
-      "recent_avg": 9.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-07-31"
-    },
-    {
       "race": "나고야 12경주",
       "horse_no": 7,
       "recent_avg": 4.6,
@@ -4799,16 +4773,42 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-08-10"
+    },
+    {
+      "race": "모리오카 3경주",
+      "horse_no": 7,
+      "recent_avg": 4.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "모리오카 3경주",
+      "horse_no": 3,
+      "recent_avg": 5.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "모리오카 3경주",
+      "horse_no": 1,
+      "recent_avg": 11.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 2992,
-      "hit": 541
+      "count": 2997,
+      "hit": 543
     },
     "전체부진마": {
-      "count": 5195,
-      "hit": 1398
+      "count": 5204,
+      "hit": 1401
     },
     "대규모급락": {
       "count": 18,
@@ -4818,8 +4818,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2203,
-      "hit": 857
+      "count": 2207,
+      "hit": 858
     },
     "급락동반": {
       "count": 457,
