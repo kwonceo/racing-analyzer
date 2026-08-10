@@ -18908,6 +18908,15 @@ def _race_card_timeline(rk):
     for t in ("main", "late", "dark"):
         out["tiers"][t] = sum(1 for x in out["reasons"] if x.get("tier") == t)
 
+    # 🔴 [배당 컷 등급] 여기에도 넣는다 — `/api/multi/race/<key>` 는 **활성 캐시에 있는 경주만** 열린다
+    #   (어제 경주는 `waiting:true`). 이 엔드포인트는 analysis_log 기반이라 **과거 경주도 검증**할 수 있다.
+    try:
+        if CUT_TIER_DISPLAY:
+            out["cutTiers"] = _cut_tier_candidates(rk, doc, cp)
+    except Exception as _cte2:
+        out["cutTiers"] = []
+        print("[컷 등급·카드] 실패(무시):", _cte2)
+
     # ④ 급락·급등 신호가 어느 말에 붙었나
     for d0 in (doc.get("signals_detected") or [])[:12]:
         out["signals"].append({"at": d0.get("time") or d0.get("at"),
@@ -34279,6 +34288,139 @@ def multi_dashboard():
                     "collected": len(collected_keys), "bySport": by_sport})
 
 
+# 🔴 [배당 컷 등급 표시 (2026-08-10 대표 결정)] 스위치. False 로 되돌리면 컷 조합이 화면에서 사라진다.
+#   ⚠ 이 값을 바꿔도 판정·추천·학습은 그대로다 — 표시 계층 전용이다.
+CUT_TIER_DISPLAY = True
+CUT_TIER_TOPN = 8                # 화면에 올릴 최대 개수(많으면 오히려 안 보인다)
+
+
+def _cut_tier_candidates(key, doc, cp):
+    """컷에 걸려 화면에서 사라진 조합에 등급을 붙여 돌려준다(표시 전용·읽기 전용).
+
+    🔴 판정 명단(displayedCombos)에 넣지 않는다. `_final_picks` 도 건드리지 않는다.
+    전적 순위는 `horses[].record_score` 로만 본다(배당을 다시 섞지 않는다 — 그게 저배당 편중의 원인이었다).
+    """
+    horses = doc.get("horses") or []
+    rec = {}
+    for h in horses:
+        try:
+            rec[int(h.get("no"))] = float(h.get("record_score") or 0)
+        except (TypeError, ValueError):
+            continue
+    if len(rec) < 4:
+        return []
+    order = sorted(rec, key=lambda n: -rec[n])
+    top_cut = max(2, len(order) // 3)              # 상위 1/3 을 '전적 상위'로 본다
+    top = set(order[:top_cut])
+
+    # 마감 직전 배당판(있는 그대로) — 없으면 판단할 수 없으니 빈 목록
+    odds = {}
+    try:
+        p = _card_odds_path(key)
+        if os.path.exists(p):
+            d2 = json.load(open(p, encoding="utf-8"))
+            snap = {}
+            for s in (d2.get("snapshots") or []):
+                q = s.get("quinella")
+                if isinstance(q, dict) and q:
+                    snap = q
+            for k2, v2 in snap.items():
+                ps = [x for x in str(k2).replace("-", "+").split("+") if x.isdigit()]
+                if len(ps) != 2:
+                    continue
+                try:
+                    odds[tuple(sorted(int(x) for x in ps))] = float(v2[0] if isinstance(v2, list) else v2)
+                except (TypeError, ValueError):
+                    continue
+    except Exception:
+        return []
+    if not odds:
+        return []
+
+    # 🔴 [시장 축 추가] 전적만 보면 **시장 1인기를 통째로 놓친다.**
+    #   오비히로 3R 실물: 정답 4+9 에서 4번은 전적 10.5점(9두 중 8위)인데 **시장 1인기**였고 1착했다.
+    #   즉 우리 전적이 못 본 말을 시장은 봤다. 두 정보원이 **서로 다른 말**을 지목한 교차 조합은
+    #   「전적 상위 2두」와 같은 급으로 본다(시장을 그대로 베끼는 것이 아니라 교차에서만 쓴다 — 원칙 14).
+    mkt_rank = {}
+    try:
+        _w = {}
+        for _c2, _o2 in odds.items():
+            for _n2 in _c2:
+                if _o2 and (_n2 not in _w or _o2 < _w[_n2]):
+                    _w[_n2] = _o2            # 말별 최저 복승배당 = 시장이 보는 강도
+        for _i2, _n2 in enumerate(sorted(_w, key=lambda z: _w[z])):
+            mkt_rank[_n2] = _i2 + 1
+    except Exception:
+        mkt_rank = {}
+    mkt_top = {n for n, r in mkt_rank.items() if r <= max(2, len(mkt_rank) // 3)}
+
+    shown = set()
+    for src in ("finalQuinellas", "bmedSpecial"):
+        for q in (cp.get(src) or []):
+            c = q.get("combo") or []
+            if len(c) == 2:
+                try:
+                    shown.add(tuple(sorted(int(x) for x in c)))
+                except (TypeError, ValueError):
+                    pass
+    # 이미 서버가 '강등 사유'를 적어 둔 것이 있으면 그대로 쓴다(우리가 사유를 지어내지 않는다)
+    refwhy = {}
+    for q in (cp.get("quinellaRef") or []):
+        c = q.get("combo") or []
+        if len(c) == 2:
+            try:
+                refwhy[tuple(sorted(int(x) for x in c))] = q.get("refReason") or q.get("reason")
+            except (TypeError, ValueError):
+                pass
+
+    out = []
+    for c, o in odds.items():
+        if c in shown:
+            continue
+        a, b = c
+        n = (1 if a in top else 0) + (1 if b in top else 0)
+        if n == 0:
+            continue                               # 근거가 전혀 없는 조합까지 올리면 화면이 무의미해진다
+        # 교차: 전적 상위 1두 + **그 상대가 시장 상위** → 두 정보원이 서로 다른 말을 지목한 것
+        cross = (n == 1 and ((a in top and b in mkt_top) or (b in top and a in mkt_top)))
+        tier = "dark" if (n == 2 or cross) else "weak"
+        label = "💎 고배당" if tier == "dark" else "⚠ 참고"
+        if n == 2:
+            why = "전적 상위 2두(%d·%d번) — 배당 컷 밖" % (a, b)
+        elif cross:
+            _f = a if a in top else b
+            _m = b if a in top else a
+            why = "전적 1위권 %d번 + 시장 상위 %d번 — 두 축 교차" % (_f, _m)
+        else:
+            why = "전적 상위 1두 포함 — 근거 약함"
+        why = refwhy.get(c) or why                 # 서버가 적어 둔 강등 사유가 있으면 그것을 우선
+        out.append({"combo": [a, b], "odds": o, "tier": tier, "tierLabel": label,
+                    "reason": why, "cross": bool(cross),
+                    "recs": [rec.get(a), rec.get(b)],
+                    "rank": [order.index(a) + 1 if a in order else None,
+                             order.index(b) + 1 if b in order else None],
+                    "mktRank": [mkt_rank.get(a), mkt_rank.get(b)]})
+    # 💎 를 먼저, 그 안에서는 **전적 순위가 좋은 순** → 같으면 배당 높은 순.
+    # 🔴 처음엔 배당 높은 순으로만 정렬했더니 오비히로 3R 의 **정답 4+9(49.3배)가 상한에 잘려 나갔다.**
+    #   4번은 전적 최하위권이라 ⚠ 참고인데, 9번이 전적 1위라 순위합으로는 앞자리다.
+    #   고배당 우선(사업 원칙)은 **같은 등급 안에서만** 적용한다 — 정답이 잘리면 표시의 뜻이 없다.
+    def _rk_sum(x):
+        # 🔴 말마다 **전적 순위와 시장 순위 중 좋은 쪽**을 쓴다.
+        #   전적 순위만 쓰면 교차 조합이 늘 불리하다 — 오비히로 3R 의 4번이 전적 8위라
+        #   정답 4+9 가 상한에 잘려 나갔다(시장 순위로는 상위권인데도).
+        tot, seen2 = 0, 0
+        for i2, n2 in enumerate(x.get("combo") or []):
+            r1 = (x.get("rank") or [None, None])[i2] if i2 < 2 else None
+            r2 = (x.get("mktRank") or [None, None])[i2] if i2 < 2 else None
+            cand = [r for r in (r1, r2) if r]
+            if cand:
+                tot += min(cand)
+                seen2 += 1
+        return tot if seen2 else 999
+    out.sort(key=lambda x: (0 if x["tier"] == "dark" else 1, _rk_sum(x), -(x["odds"] or 0)))
+    return out[:CUT_TIER_TOPN]
+
+
 def _rec_trail_for_detail(key):
     """[추천 내역 상세 (2026-07-21 권대표 요청)] 카드 상세에 '실제 표시된 추천 + 생성됐지만 노출 제외된
     조합(고배당 상한·표시 개수에 잘린 것 포함) + 추천 변경 이력'을 전부 부가(읽기 전용·analysis_log 기반).
@@ -34328,10 +34470,31 @@ def _rec_trail_for_detail(key):
         "trifectas": _slim(cp.get("finalTrifectas")),
         "special": _slim(cp.get("bmedSpecial")),
         "history": [{"time": e.get("time"), "quinella_main": e.get("quinella_main"),
-                     "quinella_sub": e.get("quinella_sub"), "trifecta_main": e.get("trifecta_main")}
-                    for e in (doc.get("recommendation_history") or [])][-12:],
+                     "quinella_sub": e.get("quinella_sub"), "trifecta_main": e.get("trifecta_main"),
+                     "minutes_before": e.get("minutes_before"), "closed": bool(e.get("closed")),
+                     # 🔴 그 시각의 전체 조합 — 「무엇이 붙고 빠졌나」를 화면에서 계산하려면 이게 있어야 한다
+                     "combos": ["+".join(str(v) for v in sorted(int(z) for z in (q.get("combo") or [])))
+                                for q in (e.get("quinellas") or []) if len(q.get("combo") or []) == 2]}
+                    for e in (doc.get("recommendation_history") or [])][-14:],
         "confTop1": cp.get("confTop1"), "confTop1Conf": cp.get("confTop1Conf"),
     }
+    # 🔴 [배당 컷을 등급으로 (2026-08-10 대표 결정)] 「자르지 말고 표시로 나누고 회원이 결정한다」
+    #   ⚠ 판정 로직·컷 상수는 **한 줄도 안 바꿨다.** `_final_picks` 무수정 · displayedCombos 무영향.
+    #     여기서 하는 일은 **이미 잘린 것을 화면에 보여주는 것**뿐이다(표시 계층).
+    #   등급: ★ 본선(=finalQuinellas·위 quinellas) / 💎 고배당(컷 밖인데 **전적 상위 2두**가 낀 것)
+    #         / ⚠ 참고(한쪽만 전적 상위 — 근거가 약하다)
+    #   실물 근거: 2026-08-10 오비히로 3R — 9번이 **전적 1위(65.0점)** 인데 배당 46.9배라 메인 컷 밖이었고
+    #     삼복승 보험에만 들어갔다. 결과 4-9-3 으로 **정답 복승 4+9 는 어디에도 없었다.**
+    try:
+        if CUT_TIER_DISPLAY:
+            out["cutTiers"] = _cut_tier_candidates(key, doc, cp)
+    except Exception as _cte:
+        print("[컷 등급] 실패(무시):", _cte)
+    # 🔴 [빠진 조합 (2026-08-10)] 대표가 매번 물어봐야 알던 것 — 여기 붙여야 눈에 띈다.
+    try:
+        out["lost"] = (_race_card_timeline(key) or {}).get("lost") or []
+    except Exception:
+        out["lost"] = []
     if not (out["quinellas"] or out["trifectas"] or out["special"] or out["history"]):
         return None
     return out

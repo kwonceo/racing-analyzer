@@ -2627,14 +2627,51 @@
     (rt.quinellas || []).forEach((q) => { h += row(q, '복승', '#38d39f'); });
     (rt.trifectas || []).forEach((t, i) => { h += row(t, i < 2 ? '삼복승' : '삼복승·보조(판정제외)', i < 2 ? '#4ea1ff' : '#94a3b8'); });
     (rt.special || []).forEach((s) => { h += row(s, '💎복병(판정제외)', '#c084fc'); });
+    // 🔴 [배당 컷을 등급으로 (2026-08-10 대표 결정)] 「자르지 말고 표시로 나누고 회원이 결정한다」
+    //   메인 컷(경륜 5배·경마 20~35배)에 걸려 **화면에서 통째로 사라지던** 조합을 여기 되살린다.
+    //   ⚠ 판정 명단이 아니다 — 회원이 고를 수 있게 보여주는 것뿐이고 컷 상수는 그대로다.
+    //   실물: 2026-08-10 오비히로 3R 정답 4+9(49.3배)가 이 목록 3번째에 뜬다(9번 전적 1위·4번 시장 2위).
+    if ((rt.cutTiers || []).length) {
+      h += `<div style="font-weight:700;color:#c084fc;font-size:12px;margin-top:8px">🎯 배당 컷에 걸린 조합 (판정 제외 · 참고)</div>`;
+      (rt.cutTiers || []).forEach((x) => {
+        const col = x.tier === 'dark' ? '#f59e0b' : '#94a3b8';
+        h += `<div style="font-size:12.5px;margin-top:3px"><b style="color:${col}">${esc(x.tierLabel || '')}</b> `
+          + `<b>${esc((x.combo || []).join('+'))}</b>${x.odds != null ? ` · ${esc(String(x.odds))}배` : ''}`
+          + `<div class="hint" style="margin-left:12px;font-size:11px">${esc(x.reason || '')}`
+          + `${(x.rank || []).length ? ` · 전적순위 ${esc((x.rank || []).join('/'))}` : ''}`
+          + `${(x.mktRank || []).length ? ` · 시장순위 ${esc((x.mktRank || []).join('/'))}` : ''}</div></div>`;
+      });
+    }
+    // 🔴 [빠진 조합] 대표가 매번 물어봐야 알던 것 — 부산 4R 5+8 이 4초만 본선이었고 96배였다.
+    if ((rt.lost || []).length) {
+      h += `<div style="font-weight:700;color:#f87171;font-size:12px;margin-top:8px">🔴 한 번 올라왔다 빠진 조합</div>`;
+      (rt.lost || []).forEach((x) => {
+        h += `<div style="font-size:12.5px;margin-top:2px;color:#fca5a5"><b>${esc(x.combo || '')}</b>`
+          + (x.odds != null ? ` · <b>${esc(String(x.odds))}배</b>` : ' · <span class="hint">배당 미상</span>')
+          + ` <span class="hint">${esc(x.at || '')}${x.mb != null ? ' · 마감 ' + esc(String(x.mb)) + '분 전' : ''} · ${esc(x.src || '')}</span></div>`;
+      });
+    }
     if ((rt.history || []).length) {
       h += `<div style="font-weight:700;color:#94a3b8;font-size:12px;margin-top:6px">추천 변경 이력</div>`;
+      // 🔴 직전 행과 비교해 **무엇이 붙고 빠졌는지**를 함께 보인다(종전엔 결과만 나열해 변화가 안 보였다).
+      let _prev = null;
       (rt.history || []).forEach((e) => {
         const parts = [];
         if (e.quinella_main) parts.push('복승 ' + e.quinella_main);
         if (e.quinella_sub) parts.push('보험 ' + e.quinella_sub);
         if (e.trifecta_main) parts.push('삼복승 ' + e.trifecta_main);
-        h += `<div class="hint" style="margin-top:2px">${esc(e.time || '')} — ${esc(parts.join(' · ') || '—')}</div>`;
+        const cur = (e.combos || []);
+        let chg = '';
+        if (_prev) {
+          const add = cur.filter((x) => _prev.indexOf(x) < 0);
+          const rem = _prev.filter((x) => cur.indexOf(x) < 0);
+          if (add.length) chg += ` <span style="color:#38d39f">+${esc(add.join(' +'))}</span>`;
+          if (rem.length) chg += ` <span style="color:#f87171">-${esc(rem.join(' -'))}</span>`;
+        }
+        _prev = cur;
+        h += `<div class="hint" style="margin-top:2px">${esc(e.time || '')}`
+          + `${e.minutes_before != null ? ` (T-${esc(String(e.minutes_before))})` : ''}${e.closed ? ' 🔒' : ''}`
+          + ` — ${esc(parts.join(' · ') || '—')}${chg}</div>`;
       });
     }
     h += `</div>`;

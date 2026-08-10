@@ -1,100 +1,100 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>경마 BMED 분석기</title>
+  <title>寃쎈쭏 BMED 遺꾩꽍湲?/title>
   <link rel="stylesheet" href="css/style.css" />
-  <!-- PDF.js는 js/pdf-parser.js에서 동적 import로 로드됩니다 -->
+  <!-- PDF.js??js/pdf-parser.js?먯꽌 ?숈쟻 import濡?濡쒕뱶?⑸땲??-->
 </head>
 <body>
   <header class="app-header">
     <div class="brand">
-      <span class="logo">🏇</span>
-      <h1>경마 BMED 분석기</h1>
+      <span class="logo">?룈</span>
+      <h1>寃쎈쭏 BMED 遺꾩꽍湲?/h1>
     </div>
     <div class="server-box" style="display:flex;align-items:center;gap:8px">
-      <input id="kraKeyInput" type="password" placeholder="data.go.kr KRA API 키" title="공공데이터포털 인증키"
+      <input id="kraKeyInput" type="password" placeholder="data.go.kr KRA API ?? title="怨듦났?곗씠?고룷???몄쬆??
              style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:190px" />
-      <button id="kraKeySave" class="btn" style="padding:5px 10px;font-size:12px">키 저장</button>
-      <span id="kraKeyStatus" class="hint" style="margin:0">⬜</span>
-      <span id="serverStatus" class="api-status">● 서버 확인 중...</span>
+      <button id="kraKeySave" class="btn" style="padding:5px 10px;font-size:12px">?????/button>
+      <span id="kraKeyStatus" class="hint" style="margin:0">燧?/span>
+      <span id="serverStatus" class="api-status">???쒕쾭 ?뺤씤 以?..</span>
     </div>
   </header>
 
-  <!-- [자동 예상] 연속 자동 전환 상태 배너 — 현재 예상 중 경주 + 다음 자동 분석(분). 활성 시에만 표시 -->
+  <!-- [?먮룞 ?덉긽] ?곗냽 ?먮룞 ?꾪솚 ?곹깭 諛곕꼫 ???꾩옱 ?덉긽 以?寃쎌＜ + ?ㅼ쓬 ?먮룞 遺꾩꽍(遺?. ?쒖꽦 ?쒖뿉留??쒖떆 -->
   <div id="autoPredBanner" style="display:none;margin:6px 12px 0;padding:8px 12px;border-radius:9px;border:1px solid #22d3ee;background:rgba(34,211,238,.12);font-size:13px;color:#e2e8f0"></div>
 
   <nav class="tabs">
-    <button class="tab-btn active" data-tab="korea">🇰🇷 한국경마</button>
-    <button class="tab-btn" data-tab="jp">🇯🇵 일본경마</button>
-    <!-- [탭분리] asyukk34 종목별 분석 탭 — 경정/경륜/바이크(6명)·중앙경마(배당 전용) -->
-    <button class="tab-btn" data-tab="boat">🚤 경정</button>
-    <button class="tab-btn" data-tab="cycle">🚴 경륜</button>
-    <button class="tab-btn" data-tab="bike">🏍 바이크</button>
-    <button class="tab-btn" data-tab="central">🏇 중앙경마</button>
-    <!-- [개편] 배당판 캡처·통합분석 탭 제거: 캡처 방식 폐지, 배당은 Chrome 확장 실시간 수집으로 통일.
-         통합분석은 한국/일본 탭에 자동 표시됨.
-    <button class="tab-btn" data-tab="japan">🎰 배당판 캡처</button>
-    <button class="tab-btn" data-tab="combined">🎯 통합분석</button>
+    <button class="tab-btn active" data-tab="korea">?눖?눟 ?쒓뎅寃쎈쭏</button>
+    <button class="tab-btn" data-tab="jp">?눓?눝 ?쇰낯寃쎈쭏</button>
+    <!-- [??텇由? asyukk34 醫낅ぉ蹂?遺꾩꽍 ????寃쎌젙/寃쎈쪣/諛붿씠??6紐?쨌以묒븰寃쎈쭏(諛곕떦 ?꾩슜) -->
+    <button class="tab-btn" data-tab="boat">?슕 寃쎌젙</button>
+    <button class="tab-btn" data-tab="cycle">?슫 寃쎈쪣</button>
+    <button class="tab-btn" data-tab="bike">?룏 諛붿씠??/button>
+    <button class="tab-btn" data-tab="central">?룈 以묒븰寃쎈쭏</button>
+    <!-- [媛쒗렪] 諛곕떦??罹≪쿂쨌?듯빀遺꾩꽍 ???쒓굅: 罹≪쿂 諛⑹떇 ?먯?, 諛곕떦? Chrome ?뺤옣 ?ㅼ떆媛??섏쭛?쇰줈 ?듭씪.
+         ?듯빀遺꾩꽍? ?쒓뎅/?쇰낯 ??뿉 ?먮룞 ?쒖떆??
+    <button class="tab-btn" data-tab="japan">?렟 諛곕떦??罹≪쿂</button>
+    <button class="tab-btn" data-tab="combined">?렞 ?듯빀遺꾩꽍</button>
     -->
-    <button class="tab-btn" data-tab="board">📊 배당판</button>
-    <button class="tab-btn" data-tab="multi">🏁 전체 경주</button>
-    <button class="tab-btn" data-tab="result">📝 결과기록</button>
-    <button class="tab-btn" data-tab="jockeydb">🏇 기수DB</button>
-    <button class="tab-btn" data-tab="stats">📊 통계</button>
+    <button class="tab-btn" data-tab="board">?뱤 諛곕떦??/button>
+    <button class="tab-btn" data-tab="multi">?뢾 ?꾩껜 寃쎌＜</button>
+    <button class="tab-btn" data-tab="result">?뱷 寃곌낵湲곕줉</button>
+    <button class="tab-btn" data-tab="jockeydb">?룈 湲곗닔DB</button>
+    <button class="tab-btn" data-tab="stats">?뱤 ?듦퀎</button>
   </nav>
 
-  <!-- [경주 자동 업데이트] 확장이 수집 중인 현재 배당판 경주 표시 + 즉시 새로고침 -->
+  <!-- [寃쎌＜ ?먮룞 ?낅뜲?댄듃] ?뺤옣???섏쭛 以묒씤 ?꾩옱 諛곕떦??寃쎌＜ ?쒖떆 + 利됱떆 ?덈줈怨좎묠 -->
   <div id="raceRefreshBar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 16px;background:#0f172a;border-bottom:1px solid #334155">
-    <span style="font-size:15px">🏇</span>
-    <span class="hint" style="margin:0;color:#94a3b8">현재 배당판 경주</span>
-    <b id="rrCurrentRace" style="color:#38d39f;font-size:14px">— (수집 대기)</b>
-    <button id="rrRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px" title="확장이 수집한 현재 경주를 즉시 불러와 화면을 갱신합니다">🔄 경주 새로고침</button>
-    <button id="rrPinBtn" class="btn" style="padding:5px 12px;font-size:13px" title="현재 보고 있는 경주를 고정해 자동 전환을 중단합니다. 고정 중에는 다른 경마장·경주가 수집돼도 화면이 바뀌지 않습니다(새로고침·다음 경주로만 전환).">📌 현재 경주 고정</button>
-    <button id="rrNewRaceBtn" class="btn" style="padding:5px 12px;font-size:13px;background:#7c3aed" title="활성 배당을 모두 초기화하고 새 경주를 시작합니다(히스토리·학습 보존)">🆕 새 경주 시작</button>
+    <span style="font-size:15px">?룈</span>
+    <span class="hint" style="margin:0;color:#94a3b8">?꾩옱 諛곕떦??寃쎌＜</span>
+    <b id="rrCurrentRace" style="color:#38d39f;font-size:14px">??(?섏쭛 ?湲?</b>
+    <button id="rrRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px" title="?뺤옣???섏쭛???꾩옱 寃쎌＜瑜?利됱떆 遺덈윭? ?붾㈃??媛깆떊?⑸땲??>?봽 寃쎌＜ ?덈줈怨좎묠</button>
+    <button id="rrPinBtn" class="btn" style="padding:5px 12px;font-size:13px" title="?꾩옱 蹂닿퀬 ?덈뒗 寃쎌＜瑜?怨좎젙???먮룞 ?꾪솚??以묐떒?⑸땲?? 怨좎젙 以묒뿉???ㅻⅨ 寃쎈쭏?Β룰꼍二쇨? ?섏쭛?쇰룄 ?붾㈃??諛붾뚯? ?딆뒿?덈떎(?덈줈怨좎묠쨌?ㅼ쓬 寃쎌＜濡쒕쭔 ?꾪솚).">?뱦 ?꾩옱 寃쎌＜ 怨좎젙</button>
+    <button id="rrNewRaceBtn" class="btn" style="padding:5px 12px;font-size:13px;background:#7c3aed" title="?쒖꽦 諛곕떦??紐⑤몢 珥덇린?뷀븯怨???寃쎌＜瑜??쒖옉?⑸땲???덉뒪?좊━쨌?숈뒿 蹂댁〈)">?넅 ??寃쎌＜ ?쒖옉</button>
     <span id="rrStatus" class="hint" style="margin:0"></span>
     <span style="flex:1"></span>
-    <!-- [별도 창] 배당판과 나란히 볼 수 있도록 분석기를 팝업 창으로 열기 -->
-    <button id="popoutBtn" class="btn" style="padding:5px 12px;font-size:13px" title="분석기를 별도 창으로 열어 배당판과 함께 봅니다">🪟 별도 창으로 열기</button>
-    <label id="onTopWrap" title="브라우저는 창을 '항상 위'로 강제할 수 없습니다. Windows PowerToys 설치 후 창 선택 → Win+Ctrl+T 로 항상 위 고정하세요." style="display:flex;align-items:center;gap:4px;font-size:12px;color:#94a3b8;cursor:pointer">
-      <input type="checkbox" id="onTopChk" style="cursor:pointer" /> 📌 항상 위 <span class="hint" style="margin:0;font-size:11px">(Win+Ctrl+T)</span>
+    <!-- [蹂꾨룄 李? 諛곕떦?먭낵 ?섎???蹂????덈룄濡?遺꾩꽍湲곕? ?앹뾽 李쎌쑝濡??닿린 -->
+    <button id="popoutBtn" class="btn" style="padding:5px 12px;font-size:13px" title="遺꾩꽍湲곕? 蹂꾨룄 李쎌쑝濡??댁뼱 諛곕떦?먭낵 ?④퍡 遊낅땲??>?첒 蹂꾨룄 李쎌쑝濡??닿린</button>
+    <label id="onTopWrap" title="釉뚮씪?곗???李쎌쓣 '??긽 ??濡?媛뺤젣?????놁뒿?덈떎. Windows PowerToys ?ㅼ튂 ??李??좏깮 ??Win+Ctrl+T 濡???긽 ??怨좎젙?섏꽭??" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#94a3b8;cursor:pointer">
+      <input type="checkbox" id="onTopChk" style="cursor:pointer" /> ?뱦 ??긽 ??<span class="hint" style="margin:0;font-size:11px">(Win+Ctrl+T)</span>
     </label>
   </div>
 
   <main class="app-main">
-    <!-- 한국경마 -->
+    <!-- ?쒓뎅寃쎈쭏 -->
     <section id="tab-korea" class="tab-panel active">
-      <!-- [한국경마 실시간 분석 (2026-07-19)·긴급2 위치 이동] 탭 열면 실시간 분석이 먼저 보이도록 최상단 배치.
-           내용·기능은 그대로(하단→상단 이동만). PDF 출주표 분석은 바로 아래 유지(무삭제). -->
+      <!-- [?쒓뎅寃쎈쭏 ?ㅼ떆媛?遺꾩꽍 (2026-07-19)쨌湲닿툒2 ?꾩튂 ?대룞] ???대㈃ ?ㅼ떆媛?遺꾩꽍??癒쇱? 蹂댁씠?꾨줉 理쒖긽??諛곗튂.
+           ?댁슜쨌湲곕뒫? 洹몃?濡??섎떒?믪긽???대룞留?. PDF 異쒖＜??遺꾩꽍? 諛붾줈 ?꾨옒 ?좎?(臾댁궘??. -->
       <div class="panel-card">
-        <h2>🇰🇷 실시간 분석 <span class="hint" style="font-weight:400">현재 경주 배당 기반 · 30초 자동 갱신 · 배당 실시간 교체</span></h2>
+        <h2>?눖?눟 ?ㅼ떆媛?遺꾩꽍 <span class="hint" style="font-weight:400">?꾩옱 寃쎌＜ 諛곕떦 湲곕컲 쨌 30珥??먮룞 媛깆떊 쨌 諛곕떦 ?ㅼ떆媛?援먯껜</span></h2>
         <div class="cfg-row" style="align-items:center;margin:4px 0 8px">
-          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-korea" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+          <label class="hint">?뮥 踰좏똿 ?덉궛(?? <input id="sportBudget-korea" type="number" min="0" step="1000" placeholder="?? 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
         </div>
-        <div id="sportReport-korea" class="report-area"><p class="hint">🇰🇷 한국 경주 배당 수집이 시작되면 실시간 이상감지·추천이 표시됩니다. (배당판 또는 KRA 자동수집)</p></div>
+        <div id="sportReport-korea" class="report-area"><p class="hint">?눖?눟 ?쒓뎅 寃쎌＜ 諛곕떦 ?섏쭛???쒖옉?섎㈃ ?ㅼ떆媛??댁긽媛먯?쨌異붿쿇???쒖떆?⑸땲?? (諛곕떦???먮뒗 KRA ?먮룞?섏쭛)</p></div>
       </div>
       <div class="panel-card">
-        <h2>한국경마 출주표 분석</h2>
-        <p class="hint">KRA 출주표는 한글이 벡터로 그려져 텍스트 추출이 불가합니다. 각 페이지를 이미지로 렌더링해 서버 AI Vision으로 판독합니다.</p>
+        <h2>?쒓뎅寃쎈쭏 異쒖＜??遺꾩꽍</h2>
+        <p class="hint">KRA 異쒖＜?쒕뒗 ?쒓???踰≫꽣濡?洹몃젮???띿뒪??異붿텧??遺덇??⑸땲?? 媛??섏씠吏瑜??대?吏濡??뚮뜑留곹빐 ?쒕쾭 AI Vision?쇰줈 ?먮룆?⑸땲??</p>
 
-        <!-- [1번] 경주 환경: 주로 상태 + 날씨 (분석 프롬프트에 반영) -->
+        <!-- [1踰? 寃쎌＜ ?섍꼍: 二쇰줈 ?곹깭 + ?좎뵪 (遺꾩꽍 ?꾨＼?꾪듃??諛섏쁺) -->
         <div class="cond-bar" id="condBar">
           <div class="cond-group">
-            <span class="cond-label">주로</span>
-            <button type="button" class="cond-btn" data-track="양호">양호</button>
-            <button type="button" class="cond-btn" data-track="다습">다습</button>
-            <button type="button" class="cond-btn" data-track="불량">불량</button>
-            <button type="button" class="cond-btn" data-track="건조">건조</button>
+            <span class="cond-label">二쇰줈</span>
+            <button type="button" class="cond-btn" data-track="?묓샇">?묓샇</button>
+            <button type="button" class="cond-btn" data-track="?ㅼ뒿">?ㅼ뒿</button>
+            <button type="button" class="cond-btn" data-track="遺덈웾">遺덈웾</button>
+            <button type="button" class="cond-btn" data-track="嫄댁“">嫄댁“</button>
           </div>
           <div class="cond-group">
-            <span class="cond-label">날씨</span>
-            <button type="button" class="cond-btn" data-weather="맑음">맑음</button>
-            <button type="button" class="cond-btn" data-weather="흐림">흐림</button>
-            <button type="button" class="cond-btn" data-weather="비">비</button>
-            <button type="button" class="cond-btn" data-weather="강풍">강풍</button>
+            <span class="cond-label">?좎뵪</span>
+            <button type="button" class="cond-btn" data-weather="留묒쓬">留묒쓬</button>
+            <button type="button" class="cond-btn" data-weather="?먮┝">?먮┝</button>
+            <button type="button" class="cond-btn" data-weather="鍮?>鍮?/button>
+            <button type="button" class="cond-btn" data-weather="媛뺥뭾">媛뺥뭾</button>
           </div>
-          <span class="hint" id="condHint" style="margin:0">선택 사항 — 비 선택 시 주로가 불량으로 자동 설정됩니다</span>
+          <span class="hint" id="condHint" style="margin:0">?좏깮 ?ы빆 ??鍮??좏깮 ??二쇰줈媛 遺덈웾?쇰줈 ?먮룞 ?ㅼ젙?⑸땲??/span>
         </div>
 
         <div id="koreaRestoreBanner" class="restore-banner hidden"></div>
@@ -102,301 +102,301 @@
         <div class="upload-zone" id="koreaUploadZone">
           <input type="file" id="koreaPdfInput" accept="application/pdf" hidden />
           <div class="upload-inner">
-            <span class="upload-icon">📄</span>
-            <p>PDF 출주표를 끌어다 놓거나 <button class="link-btn" id="koreaBrowseBtn">파일 선택</button></p>
+            <span class="upload-icon">?뱞</span>
+            <p>PDF 異쒖＜?쒕? ?뚯뼱???볤굅??<button class="link-btn" id="koreaBrowseBtn">?뚯씪 ?좏깮</button></p>
           </div>
         </div>
 
         <div id="koreaConfig" class="hidden">
           <p class="hint" id="koreaPdfInfo"></p>
           <div class="cfg-row">
-            <button id="koreaScanBtn" class="btn btn-primary">자동 감지 &amp; 경주 목록 생성 (서버 백그라운드)</button>
-            <button id="koreaResetBtn" class="btn" style="display:none">🆕 새 PDF 업로드</button>
+            <button id="koreaScanBtn" class="btn btn-primary">?먮룞 媛먯? &amp; 寃쎌＜ 紐⑸줉 ?앹꽦 (?쒕쾭 諛깃렇?쇱슫??</button>
+            <button id="koreaResetBtn" class="btn" style="display:none">?넅 ??PDF ?낅줈??/button>
           </div>
           <p class="hint" id="koreaProgress"></p>
         </div>
 
         <div id="koreaChipLegend" class="chip-legend hidden">
-          <b>당일 진행 상황</b> — <span class="lg lg-todo">○ 미분석</span>
-          <span class="lg lg-analyzed">✅ 분석완료</span>
-          <span class="lg lg-done">🏁 결과입력</span>
-          <span class="hint" style="margin:0">· 칩을 누르면 해당 경주로 이동합니다</span>
+          <b>?뱀씪 吏꾪뻾 ?곹솴</b> ??<span class="lg lg-todo">??誘몃텇??/span>
+          <span class="lg lg-analyzed">??遺꾩꽍?꾨즺</span>
+          <span class="lg lg-done">?뢾 寃곌낵?낅젰</span>
+          <span class="hint" style="margin:0">쨌 移⑹쓣 ?꾨Ⅴ硫??대떦 寃쎌＜濡??대룞?⑸땲??/span>
         </div>
         <div id="koreaRaceList" class="race-list"></div>
 
-        <!-- [보완#2] 저장된 사전분석: 세션과 무관하게 과거 PDF 분석을 날짜별로 즉시 불러오기 -->
+        <!-- [蹂댁셿#2] ??λ맂 ?ъ쟾遺꾩꽍: ?몄뀡怨?臾닿??섍쾶 怨쇨굅 PDF 遺꾩꽍???좎쭨蹂꾨줈 利됱떆 遺덈윭?ㅺ린 -->
         <div id="koreaPreracePanel" style="margin-top:12px">
           <div class="cfg-row" style="align-items:center">
-            <button id="koreaPreraceToggle" class="btn" type="button">📅 저장된 사전분석 열기</button>
-            <button id="koreaPreraceRefresh" class="btn" type="button" style="display:none">🔄 갱신</button>
-            <span class="hint" id="koreaPreraceHint" style="margin:0">아침에 분석해 둔 과거 경주를 날짜별로 즉시 불러옵니다(세션 무관).</span>
+            <button id="koreaPreraceToggle" class="btn" type="button">?뱟 ??λ맂 ?ъ쟾遺꾩꽍 ?닿린</button>
+            <button id="koreaPreraceRefresh" class="btn" type="button" style="display:none">?봽 媛깆떊</button>
+            <span class="hint" id="koreaPreraceHint" style="margin:0">?꾩묠??遺꾩꽍????怨쇨굅 寃쎌＜瑜??좎쭨蹂꾨줈 利됱떆 遺덈윭?듬땲???몄뀡 臾닿?).</span>
           </div>
           <div id="koreaPreraceList" style="display:none;margin-top:8px"></div>
         </div>
       </div>
       <div id="koreaReport" class="report-area"></div>
       <div id="koreaOddsStatus" style="margin:10px 0"></div>
-      <!-- [보완] 수동 발주시각: 라이브 배당판 없이 PDF 사전분석만 볼 때도 마감 전 3단계 알림 발동 -->
+      <!-- [蹂댁셿] ?섎룞 諛쒖＜?쒓컖: ?쇱씠釉?諛곕떦???놁씠 PDF ?ъ쟾遺꾩꽍留?蹂??뚮룄 留덇컧 ??3?④퀎 ?뚮┝ 諛쒕룞 -->
       <div class="cfg-row" style="margin:6px 0">
-        <label class="hint">⏰ 발주시각(수동)
+        <label class="hint">??諛쒖＜?쒓컖(?섎룞)
           <input id="koreaDeadline" type="time"
                  style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:110px" />
         </label>
-        <button id="koreaDeadlineSet" class="btn" type="button">설정</button>
-        <button id="koreaDeadlineClear" class="btn" type="button" style="display:none">해제</button>
-        <span class="hint" id="koreaDeadlineStatus">배당판 없이 PDF만 볼 때 발주시각을 입력하면 마감 1분30초·1분·30초 전 알림이 뜹니다.</span>
+        <button id="koreaDeadlineSet" class="btn" type="button">?ㅼ젙</button>
+        <button id="koreaDeadlineClear" class="btn" type="button" style="display:none">?댁젣</button>
+        <span class="hint" id="koreaDeadlineStatus">諛곕떦???놁씠 PDF留?蹂???諛쒖＜?쒓컖???낅젰?섎㈃ 留덇컧 1遺?0珥댟?遺꽷?0珥????뚮┝???밸땲??</span>
       </div>
-      <!-- [1번] 베팅 예산: 통합분석의 베팅 추천 표에 복승/삼복승 배분 금액을 자동 계산 -->
+      <!-- [1踰? 踰좏똿 ?덉궛: ?듯빀遺꾩꽍??踰좏똿 異붿쿇 ?쒖뿉 蹂듭듅/?쇰났??諛곕텇 湲덉븸???먮룞 怨꾩궛 -->
       <div class="cfg-row" style="margin:6px 0">
-        <label class="hint">💰 베팅 예산(원)
-          <input id="koreaBudget" type="number" min="0" step="1000" placeholder="예: 20000"
+        <label class="hint">?뮥 踰좏똿 ?덉궛(??
+          <input id="koreaBudget" type="number" min="0" step="1000" placeholder="?? 20000"
                  style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" />
         </label>
-        <span class="hint">입력 시 통합분석 베팅 추천에 조합별 금액이 표시됩니다</span>
+        <span class="hint">?낅젰 ???듯빀遺꾩꽍 踰좏똿 異붿쿇??議고빀蹂?湲덉븸???쒖떆?⑸땲??/span>
       </div>
       <div id="koreaIntegrated" class="report-area"></div>
     </section>
 
-    <!-- 일본경마: 배당판 캡처 + 전적표 업로드 통합 -->
+    <!-- ?쇰낯寃쎈쭏: 諛곕떦??罹≪쿂 + ?꾩쟻???낅줈???듯빀 -->
     <section id="tab-jp" class="tab-panel">
-      <!-- [경마 oddspark 서버 직접 수집] 탭 최상단 — Chrome 확장 없이 서버가 지방경마 복승·쌍승을
-           직접 조회(30초·마감 3분전 3초). 기존 확장 수집은 폴백으로 유지. -->
+      <!-- [寃쎈쭏 oddspark ?쒕쾭 吏곸젒 ?섏쭛] ??理쒖긽????Chrome ?뺤옣 ?놁씠 ?쒕쾭媛 吏諛⑷꼍留?蹂듭듅쨌?띿듅??
+           吏곸젒 議고쉶(30珥댟룸쭏媛?3遺꾩쟾 3珥?. 湲곗〈 ?뺤옣 ?섏쭛? ?대갚?쇰줈 ?좎?. -->
       <div class="panel-card" style="border-left:4px solid #38d39f;background:rgba(56,211,159,.06)">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <label style="font-weight:800;color:#38d39f;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:6px">
             <input id="keibaOddsAutoChk" type="checkbox" style="width:18px;height:18px;vertical-align:middle;cursor:pointer">
-            🏇 oddspark 서버 수집 <span class="hint" style="font-weight:600;font-size:12px;color:#94a3b8">ON/OFF</span>
+            ?룈 oddspark ?쒕쾭 ?섏쭛 <span class="hint" style="font-weight:600;font-size:12px;color:#94a3b8">ON/OFF</span>
           </label>
-          <button id="keibaOddsOnceBtn" class="btn btn-small" type="button">지금 1회 조회</button>
+          <button id="keibaOddsOnceBtn" class="btn btn-small" type="button">吏湲?1??議고쉶</button>
         </div>
-        <!-- [경주 지정] 경주가 안 넘어가거나 다른 경주를 볼 때 직접 지정(비우면 현재 경주 자동추종) -->
+        <!-- [寃쎌＜ 吏?? 寃쎌＜媛 ???섏뼱媛嫄곕굹 ?ㅻⅨ 寃쎌＜瑜?蹂???吏곸젒 吏??鍮꾩슦硫??꾩옱 寃쎌＜ ?먮룞異붿쥌) -->
         <div class="cfg-row" style="margin:8px 0 0;gap:6px;align-items:center;flex-wrap:wrap">
-          <label class="hint" style="font-size:11px">🎯 경주 지정
-            <input id="keibaOddsRk" type="text" placeholder="예: 소노다 2경주 (비우면 자동)"
+          <label class="hint" style="font-size:11px">?렞 寃쎌＜ 吏??
+            <input id="keibaOddsRk" type="text" placeholder="?? ?뚮끂??2寃쎌＜ (鍮꾩슦硫??먮룞)"
                    style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:4px 8px;font:inherit;font-size:12px;width:180px" />
           </label>
-          <button id="keibaOddsRkSet" class="btn btn-small" type="button">지정</button>
-          <button id="keibaOddsRkClear" class="btn btn-small" type="button" style="display:none">자동</button>
-          <span class="hint" style="font-size:11px">경주가 안 넘어가면 여기에 현재 경주를 입력하세요</span>
+          <button id="keibaOddsRkSet" class="btn btn-small" type="button">吏??/button>
+          <button id="keibaOddsRkClear" class="btn btn-small" type="button" style="display:none">?먮룞</button>
+          <span class="hint" style="font-size:11px">寃쎌＜媛 ???섏뼱媛硫??ш린???꾩옱 寃쎌＜瑜??낅젰?섏꽭??/span>
         </div>
-        <p class="hint" style="margin:6px 0 0;font-size:11px">Chrome 확장 없이 <b>서버가 oddspark에서 복승+쌍승 배당을 자동 수집</b>합니다 · 30초 간격(마감 3분전 3초) · 페이지가 열려 있을 때만 동작 · 기존 확장 수집은 폴백으로 유지</p>
-        <div id="keibaOddsStatus" style="margin-top:8px;font:600 12px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#94a3b8">⬜ 꺼짐 — 토글을 켜면 현재 경주 배당을 자동 수집합니다.</div>
+        <p class="hint" style="margin:6px 0 0;font-size:11px">Chrome ?뺤옣 ?놁씠 <b>?쒕쾭媛 oddspark?먯꽌 蹂듭듅+?띿듅 諛곕떦???먮룞 ?섏쭛</b>?⑸땲??쨌 30珥?媛꾧꺽(留덇컧 3遺꾩쟾 3珥? 쨌 ?섏씠吏媛 ?대젮 ?덉쓣 ?뚮쭔 ?숈옉 쨌 湲곗〈 ?뺤옣 ?섏쭛? ?대갚?쇰줈 ?좎?</p>
+        <div id="keibaOddsStatus" style="margin-top:8px;font:600 12px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#94a3b8">燧?爰쇱쭚 ???좉???耳쒕㈃ ?꾩옱 寃쎌＜ 諛곕떦???먮룞 ?섏쭛?⑸땲??</div>
       </div>
-      <!-- [상단 우선] 실시간 배당 이상감지 + 유력마 TOP5. 전적표 없이 배당만으로도 자동 표시. -->
+      <!-- [?곷떒 ?곗꽑] ?ㅼ떆媛?諛곕떦 ?댁긽媛먯? + ?좊젰留?TOP5. ?꾩쟻???놁씠 諛곕떦留뚯쑝濡쒕룄 ?먮룞 ?쒖떆. -->
       <div class="panel-card">
-        <h2>⚡ 실시간 배당 분석 (이상감지 · 유력마 TOP5)</h2>
-        <p class="hint">oddspark 서버 수집(위 토글) 또는 Chrome 확장으로 배당이 들어오면 <b>실시간 이상감지·역배열·유력마 TOP5·추천 조합</b>이 자동 표시됩니다. 전적표 없이 배당만으로도 동작하며, 전적표를 넣으면(아래 보조) 통합등급에 반영됩니다.</p>
-        <!-- [1번] 베팅 예산: 통합분석의 베팅 추천 표에 복승/삼복승 배분 금액을 자동 계산 -->
+        <h2>???ㅼ떆媛?諛곕떦 遺꾩꽍 (?댁긽媛먯? 쨌 ?좊젰留?TOP5)</h2>
+        <p class="hint">oddspark ?쒕쾭 ?섏쭛(???좉?) ?먮뒗 Chrome ?뺤옣?쇰줈 諛곕떦???ㅼ뼱?ㅻ㈃ <b>?ㅼ떆媛??댁긽媛먯?쨌??같?는룹쑀?λ쭏 TOP5쨌異붿쿇 議고빀</b>???먮룞 ?쒖떆?⑸땲?? ?꾩쟻???놁씠 諛곕떦留뚯쑝濡쒕룄 ?숈옉?섎ŉ, ?꾩쟻?쒕? ?ｌ쑝硫??꾨옒 蹂댁“) ?듯빀?깃툒??諛섏쁺?⑸땲??</p>
+        <!-- [1踰? 踰좏똿 ?덉궛: ?듯빀遺꾩꽍??踰좏똿 異붿쿇 ?쒖뿉 蹂듭듅/?쇰났??諛곕텇 湲덉븸???먮룞 怨꾩궛 -->
         <div class="cfg-row" style="margin:6px 0">
-          <label class="hint">💰 베팅 예산(원)
-            <input id="jpBudget" type="number" min="0" step="1000" placeholder="예: 20000"
+          <label class="hint">?뮥 踰좏똿 ?덉궛(??
+            <input id="jpBudget" type="number" min="0" step="1000" placeholder="?? 20000"
                    style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" />
           </label>
-          <span class="hint">입력 시 통합분석 베팅 추천에 조합별 금액이 표시됩니다</span>
+          <span class="hint">?낅젰 ???듯빀遺꾩꽍 踰좏똿 異붿쿇??議고빀蹂?湲덉븸???쒖떆?⑸땲??/span>
         </div>
       </div>
       <div id="jpIntegrated" class="report-area"></div>
 
-      <!-- [하단·보조] 전적표 업로드 — 배당 분석의 보조. 넣으면 통합등급(전적40+배당60)에 반영. -->
+      <!-- [?섎떒쨌蹂댁“] ?꾩쟻???낅줈????諛곕떦 遺꾩꽍??蹂댁“. ?ｌ쑝硫??듯빀?깃툒(?꾩쟻40+諛곕떦60)??諛섏쁺. -->
       <div class="panel-card" style="margin-top:12px;opacity:.96">
-        <h2 style="font-size:15px">📋 전적표 업로드 <span class="hint" style="font-weight:400;font-size:12px">(보조 · 선택)</span></h2>
-        <p class="hint">전적표 이미지를 업로드해 분석하면 유력마 통합등급(전적40+배당60)에 반영됩니다. <b>배당만으로도 상단 실시간 분석은 동작</b>하므로 전적표는 선택 사항입니다.</p>
+        <h2 style="font-size:15px">?뱥 ?꾩쟻???낅줈??<span class="hint" style="font-weight:400;font-size:12px">(蹂댁“ 쨌 ?좏깮)</span></h2>
+        <p class="hint">?꾩쟻???대?吏瑜??낅줈?쒗빐 遺꾩꽍?섎㈃ ?좊젰留??듯빀?깃툒(?꾩쟻40+諛곕떦60)??諛섏쁺?⑸땲?? <b>諛곕떦留뚯쑝濡쒕룄 ?곷떒 ?ㅼ떆媛?遺꾩꽍? ?숈옉</b>?섎?濡??꾩쟻?쒕뒗 ?좏깮 ?ы빆?낅땲??</p>
         <div class="jp-slot" id="jpFormSlot" style="max-width:420px">
-          <div class="jp-slot-head"><span>📋 전적표</span><span class="jp-status" id="jpFormStatus">⬜ 미설정</span></div>
+          <div class="jp-slot-head"><span>?뱥 ?꾩쟻??/span><span class="jp-status" id="jpFormStatus">燧?誘몄꽕??/span></div>
           <img id="jpFormPreview" class="jp-preview hidden" alt="" />
           <div class="cfg-row" style="margin-top:8px">
-            <button id="jpFormFileBtn" class="btn btn-primary btn-small">📁 전적표 업로드</button>
+            <button id="jpFormFileBtn" class="btn btn-primary btn-small">?뱚 ?꾩쟻???낅줈??/button>
             <input type="file" id="jpFormInput" accept="image/*" hidden />
           </div>
         </div>
         <div style="margin-top:10px">
-          <button id="jpAnalyzeBtn" class="btn btn-primary" disabled>전적 분석</button>
-          <span class="hint" id="jpHint" style="margin-left:8px">전적표를 업로드하세요</span>
+          <button id="jpAnalyzeBtn" class="btn btn-primary" disabled>?꾩쟻 遺꾩꽍</button>
+          <span class="hint" id="jpHint" style="margin-left:8px">?꾩쟻?쒕? ?낅줈?쒗븯?몄슂</span>
         </div>
       </div>
       <div id="jpReport" class="report-area"></div>
       <div id="jpOddsStatus" style="margin:10px 0"></div>
 
-      <!-- [지방경마 출주표 전적] oddspark 出走表 + 전5경주(각질·거리변화·상3F) 서버 직접 수집 -->
+      <!-- [吏諛⑷꼍留?異쒖＜???꾩쟻] oddspark ?븃뎔烏?+ ??寃쎌＜(媛곸쭏쨌嫄곕━蹂?붋룹긽3F) ?쒕쾭 吏곸젒 ?섏쭛 -->
       <div class="panel-card" style="margin-top:12px">
-        <h3>🏇 지방경마 전적 분석 <span class="hint" style="font-weight:400">oddspark 출주표·전5경주(각질·거리변화·상3F) 자동 수집</span></h3>
-        <p class="hint">경마장·개최일·경주번호(또는 raceKey)를 넣으면 oddspark 출주표와 각 말의 <b>전5경주</b>를 가져와 <b>착순·통과순위(각질)·거리변화·상3F(막판스피드)</b>로 전적 점수를 계산합니다. raceKey 연동 시 <b>유력마·통합등급</b>(전적+배당역배열)에 자동 반영됩니다. (keiba.go.jp 대신 oddspark 메인 전적 소스)</p>
+        <h3>?룈 吏諛⑷꼍留??꾩쟻 遺꾩꽍 <span class="hint" style="font-weight:400">oddspark 異쒖＜?쑣룹쟾5寃쎌＜(媛곸쭏쨌嫄곕━蹂?붋룹긽3F) ?먮룞 ?섏쭛</span></h3>
+        <p class="hint">寃쎈쭏?Β룰컻理쒖씪쨌寃쎌＜踰덊샇(?먮뒗 raceKey)瑜??ｌ쑝硫?oddspark 異쒖＜?쒖? 媛?留먯쓽 <b>??寃쎌＜</b>瑜?媛?몄? <b>李⑹닚쨌?듦낵?쒖쐞(媛곸쭏)쨌嫄곕━蹂?붋룹긽3F(留됲뙋?ㅽ뵾??</b>濡??꾩쟻 ?먯닔瑜?怨꾩궛?⑸땲?? raceKey ?곕룞 ??<b>?좊젰留댟룻넻?⑸벑湲?/b>(?꾩쟻+諛곕떦??같?????먮룞 諛섏쁺?⑸땲?? (keiba.go.jp ???oddspark 硫붿씤 ?꾩쟻 ?뚯뒪)</p>
         <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
-          <label class="hint">경마장 <input id="narVenue" class="cfg-input" type="text" placeholder="예: 소노다 / 園田" style="width:120px"></label>
-          <label class="hint">개최일 <input id="narYmd" class="cfg-input" type="text" placeholder="YYYYMMDD(기본 오늘)" style="width:130px"></label>
-          <label class="hint">경주 <input id="narRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
-          <button id="narFetchBtn" class="btn btn-primary">🏇 전적 분석</button>
+          <label class="hint">寃쎈쭏??<input id="narVenue" class="cfg-input" type="text" placeholder="?? ?뚮끂??/ ?믥뵲" style="width:120px"></label>
+          <label class="hint">媛쒖턀??<input id="narYmd" class="cfg-input" type="text" placeholder="YYYYMMDD(湲곕낯 ?ㅻ뒛)" style="width:130px"></label>
+          <label class="hint">寃쎌＜ <input id="narRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
+          <button id="narFetchBtn" class="btn btn-primary">?룈 ?꾩쟻 遺꾩꽍</button>
         </div>
         <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
-          <label class="hint" style="flex:1">live 연동 raceKey <input id="narRaceKey" class="cfg-input" type="text" placeholder="예: 소노다 5경주 (비우면 현재 경주 자동)" style="width:100%;max-width:360px"></label>
-          <span class="hint" style="font-size:11px">← 입력 시 전적이 통합등급(전적+배당)에 반영</span>
+          <label class="hint" style="flex:1">live ?곕룞 raceKey <input id="narRaceKey" class="cfg-input" type="text" placeholder="?? ?뚮끂??5寃쎌＜ (鍮꾩슦硫??꾩옱 寃쎌＜ ?먮룞)" style="width:100%;max-width:360px"></label>
+          <span class="hint" style="font-size:11px">???낅젰 ???꾩쟻???듯빀?깃툒(?꾩쟻+諛곕떦)??諛섏쁺</span>
         </div>
         <div id="narCardResult"></div>
       </div>
 
-      <!-- [중앙경마(JRA) 출주표 전적] netkeiba 馬柱 서버 직접 수집(각질·거리변화·상3F) -->
+      <!-- [以묒븰寃쎈쭏(JRA) 異쒖＜???꾩쟻] netkeiba 腰ф윶 ?쒕쾭 吏곸젒 ?섏쭛(媛곸쭏쨌嫄곕━蹂?붋룹긽3F) -->
       <div class="panel-card" style="margin-top:12px">
-        <h3>🏇 중앙경마(JRA) 전적 분석 <span class="hint" style="font-weight:400">netkeiba 馬柱·전5주(각질·거리변화·상3F) 자동 수집</span></h3>
-        <p class="hint">중앙경마(도쿄·나카야마·한신·교토·주쿄·니가타·후쿠시마·고쿠라·삿포로·하코다테)는 배당 전용이었으나, 경마장·개최일·경주번호(또는 raceKey)를 넣으면 netkeiba <b>馬柱(출주표+과거5주)</b>를 서버가 직접 가져와 <b>착순·통과순위(각질)·거리변화·상3F(막판스피드)</b>로 전적 점수를 계산합니다. netkeiba 각질 표기(逃/先/差/追)를 우선 사용합니다. raceKey 연동 시 <b>유력마·통합등급</b>(전적+배당역배열)에 자동 반영됩니다. (기존 배당 이상감지는 그대로 유지)</p>
+        <h3>?룈 以묒븰寃쎈쭏(JRA) ?꾩쟻 遺꾩꽍 <span class="hint" style="font-weight:400">netkeiba 腰ф윶쨌??二?媛곸쭏쨌嫄곕━蹂?붋룹긽3F) ?먮룞 ?섏쭛</span></h3>
+        <p class="hint">以묒븰寃쎈쭏(?꾩퓙쨌?섏뭅?쇰쭏쨌?쒖떊쨌援먰넗쨌二쇱퓙쨌?덇??쨌?꾩퓼?쒕쭏쨌怨좎퓼?셋룹궭?щ줈쨌?섏퐫?ㅽ뀒)??諛곕떦 ?꾩슜?댁뿀?쇰굹, 寃쎈쭏?Β룰컻理쒖씪쨌寃쎌＜踰덊샇(?먮뒗 raceKey)瑜??ｌ쑝硫?netkeiba <b>腰ф윶(異쒖＜??怨쇨굅5二?</b>瑜??쒕쾭媛 吏곸젒 媛?몄? <b>李⑹닚쨌?듦낵?쒖쐞(媛곸쭏)쨌嫄곕━蹂?붋룹긽3F(留됲뙋?ㅽ뵾??</b>濡??꾩쟻 ?먯닔瑜?怨꾩궛?⑸땲?? netkeiba 媛곸쭏 ?쒓린(????藥?瓦?瑜??곗꽑 ?ъ슜?⑸땲?? raceKey ?곕룞 ??<b>?좊젰留댟룻넻?⑸벑湲?/b>(?꾩쟻+諛곕떦??같?????먮룞 諛섏쁺?⑸땲?? (湲곗〈 諛곕떦 ?댁긽媛먯???洹몃?濡??좎?)</p>
         <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
-          <label class="hint">경마장 <input id="jraVenue" class="cfg-input" type="text" placeholder="예: 도쿄 / 東京" style="width:120px"></label>
-          <label class="hint">개최일 <input id="jraYmd" class="cfg-input" type="text" placeholder="YYYYMMDD(기본 오늘)" style="width:130px"></label>
-          <label class="hint">경주 <input id="jraRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
-          <button id="jraFetchBtn" class="btn btn-primary">🏇 전적 분석</button>
+          <label class="hint">寃쎈쭏??<input id="jraVenue" class="cfg-input" type="text" placeholder="?? ?꾩퓙 / ?긴벵" style="width:120px"></label>
+          <label class="hint">媛쒖턀??<input id="jraYmd" class="cfg-input" type="text" placeholder="YYYYMMDD(湲곕낯 ?ㅻ뒛)" style="width:130px"></label>
+          <label class="hint">寃쎌＜ <input id="jraRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
+          <button id="jraFetchBtn" class="btn btn-primary">?룈 ?꾩쟻 遺꾩꽍</button>
         </div>
         <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
-          <label class="hint" style="flex:1">live 연동 raceKey <input id="jraRaceKey" class="cfg-input" type="text" placeholder="예: 도쿄 11경주 (비우면 현재 경주 자동)" style="width:100%;max-width:360px"></label>
-          <span class="hint" style="font-size:11px">← 입력 시 전적이 통합등급(전적+배당)에 반영</span>
+          <label class="hint" style="flex:1">live ?곕룞 raceKey <input id="jraRaceKey" class="cfg-input" type="text" placeholder="?? ?꾩퓙 11寃쎌＜ (鍮꾩슦硫??꾩옱 寃쎌＜ ?먮룞)" style="width:100%;max-width:360px"></label>
+          <span class="hint" style="font-size:11px">???낅젰 ???꾩쟻???듯빀?깃툒(?꾩쟻+諛곕떦)??諛섏쁺</span>
         </div>
         <div id="jraCardResult"></div>
       </div>
 
-      <!-- [일본경마 복기] 분석했던 경주 목록 → 클릭 → 유력마/제거마·이상감지·추천조합·결과입력·복기 -->
+      <!-- [?쇰낯寃쎈쭏 蹂듦린] 遺꾩꽍?덈뜕 寃쎌＜ 紐⑸줉 ???대┃ ???좊젰留??쒓굅留댟룹씠?곴컧吏쨌異붿쿇議고빀쨌寃곌낵?낅젰쨌蹂듦린 -->
       <div class="panel-card" id="jpReviewCard" style="margin-top:12px">
-        <h2>📒 일본경마 분석 내역 · 결과 복기</h2>
-        <p class="hint">오늘 분석한 일본경마 경주 목록입니다. 경주를 누르면 당시 <b>유력마/제거마·이상감지·추천 조합</b>을 보고 <b>실제 결과·투자금액</b>을 입력할 수 있습니다. 저장하면 적중 판정·손익·이상감지 정확도가 자동 계산되고 학습/통계에 반영됩니다.</p>
+        <h2>?뱬 ?쇰낯寃쎈쭏 遺꾩꽍 ?댁뿭 쨌 寃곌낵 蹂듦린</h2>
+        <p class="hint">?ㅻ뒛 遺꾩꽍???쇰낯寃쎈쭏 寃쎌＜ 紐⑸줉?낅땲?? 寃쎌＜瑜??꾨Ⅴ硫??뱀떆 <b>?좊젰留??쒓굅留댟룹씠?곴컧吏쨌異붿쿇 議고빀</b>??蹂닿퀬 <b>?ㅼ젣 寃곌낵쨌?ъ옄湲덉븸</b>???낅젰?????덉뒿?덈떎. ??ν븯硫??곸쨷 ?먯젙쨌?먯씡쨌?댁긽媛먯? ?뺥솗?꾧? ?먮룞 怨꾩궛?섍퀬 ?숈뒿/?듦퀎??諛섏쁺?⑸땲??</p>
         <div class="cfg-row" style="margin:4px 0 8px">
-          <button id="jpReviewRefresh" class="btn btn-primary btn-small">🔄 목록 새로고침</button>
-          <label class="hint" style="margin-left:8px"><input type="checkbox" id="jpReviewAllDates" /> 지난 날짜도 보기</label>
+          <button id="jpReviewRefresh" class="btn btn-primary btn-small">?봽 紐⑸줉 ?덈줈怨좎묠</button>
+          <label class="hint" style="margin-left:8px"><input type="checkbox" id="jpReviewAllDates" /> 吏???좎쭨??蹂닿린</label>
           <span id="jpReviewMsg" class="hint" style="margin-left:8px"></span>
         </div>
-        <div id="jpReviewList"><p class="hint">불러오는 중…</p></div>
+        <div id="jpReviewList"><p class="hint">遺덈윭?ㅻ뒗 以묅?/p></div>
         <div id="jpReviewDetail" style="margin-top:10px"></div>
       </div>
-      <!-- [영구보존·3번] 저장된 모든 경주 배당 아카이브 복기(탭 전환·마감 후에도 유지) -->
+      <!-- [?곴뎄蹂댁〈쨌3踰? ??λ맂 紐⑤뱺 寃쎌＜ 諛곕떦 ?꾩뭅?대툕 蹂듦린(???꾪솚쨌留덇컧 ?꾩뿉???좎?) -->
       <div class="panel-card" style="margin-top:12px">
-        <h2>📚 배당 히스토리 보관함 <span class="hint" style="font-weight:400">모든 경주 배당 영구 보존 · 복기</span></h2>
-        <p class="hint">수집된 모든 경주의 배당 타임라인이 raceKey별로 영구 저장됩니다(탭 전환·마감·경주 전환에도 삭제 안 함). 7일+ 지난 데이터는 자동 압축 보관됩니다. 경주를 누르면 전체 배당 변화를 복기할 수 있습니다.</p>
+        <h2>?뱴 諛곕떦 ?덉뒪?좊━ 蹂닿???<span class="hint" style="font-weight:400">紐⑤뱺 寃쎌＜ 諛곕떦 ?곴뎄 蹂댁〈 쨌 蹂듦린</span></h2>
+        <p class="hint">?섏쭛??紐⑤뱺 寃쎌＜??諛곕떦 ??꾨씪?몄씠 raceKey蹂꾨줈 ?곴뎄 ??λ맗?덈떎(???꾪솚쨌留덇컧쨌寃쎌＜ ?꾪솚?먮룄 ??젣 ????. 7?? 吏???곗씠?곕뒗 ?먮룞 ?뺤텞 蹂닿??⑸땲?? 寃쎌＜瑜??꾨Ⅴ硫??꾩껜 諛곕떦 蹂?붾? 蹂듦린?????덉뒿?덈떎.</p>
         <div class="cfg-row" style="margin:4px 0 8px">
-          <button id="oddsArchiveRefresh" class="btn btn-primary btn-small">🔄 보관함 새로고침</button>
-          <button id="oddsArchiveCompress" class="btn btn-small">🗜 7일+ 압축 정리</button>
+          <button id="oddsArchiveRefresh" class="btn btn-primary btn-small">?봽 蹂닿????덈줈怨좎묠</button>
+          <button id="oddsArchiveCompress" class="btn btn-small">?뿙 7?? ?뺤텞 ?뺣━</button>
           <span id="oddsArchiveMsg" class="hint" style="margin-left:8px"></span>
         </div>
-        <div id="oddsArchiveList"><p class="hint">🔄 새로고침을 눌러 보관된 경주를 불러오세요.</p></div>
+        <div id="oddsArchiveList"><p class="hint">?봽 ?덈줈怨좎묠???뚮윭 蹂닿???寃쎌＜瑜?遺덈윭?ㅼ꽭??</p></div>
         <div id="oddsArchiveDetail" style="margin-top:10px"></div>
       </div>
     </section>
 
-    <!-- [탭분리] 일본 경정 (6명 출전) -->
+    <!-- [??텇由? ?쇰낯 寃쎌젙 (6紐?異쒖쟾) -->
     <section id="tab-boat" class="tab-panel">
       <div class="panel-card">
-        <h2>🚤 일본 경정 <span class="hint" style="font-weight:400">6명 출전 · 복승+쌍승</span></h2>
-        <p class="hint">Chrome 확장 종목을 <b>🚤 경정</b>으로 설정하거나 경정 배당판을 열면 자동 감지됩니다. 6명 전용 로직 + <b>BMED 저배당(원금보전) 집중</b> 전략이 기본입니다. (전적·삼복승 없음)</p>
+        <h2>?슕 ?쇰낯 寃쎌젙 <span class="hint" style="font-weight:400">6紐?異쒖쟾 쨌 蹂듭듅+?띿듅</span></h2>
+        <p class="hint">Chrome ?뺤옣 醫낅ぉ??<b>?슕 寃쎌젙</b>?쇰줈 ?ㅼ젙?섍굅??寃쎌젙 諛곕떦?먯쓣 ?대㈃ ?먮룞 媛먯??⑸땲?? 6紐??꾩슜 濡쒖쭅 + <b>BMED ?諛곕떦(?먭툑蹂댁쟾) 吏묒쨷</b> ?꾨왂??湲곕낯?낅땲?? (?꾩쟻쨌?쇰났???놁쓬)</p>
         <div class="cfg-row" style="margin:6px 0">
-          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-boat" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+          <label class="hint">?뮥 踰좏똿 ?덉궛(?? <input id="sportBudget-boat" type="number" min="0" step="1000" placeholder="?? 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
         </div>
       </div>
-      <div id="sportReport-boat" class="report-area"><p class="hint">🚤 경정 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
+      <div id="sportReport-boat" class="report-area"><p class="hint">?슕 寃쎌젙 諛곕떦?먯뿉???섏쭛???쒖옉?섎㈃ ?ㅼ떆媛??댁긽媛먯?쨌BMED 異붿쿇???쒖떆?⑸땲??</p></div>
       <div class="panel-card" style="margin-top:12px">
-        <h3>📋 이 종목 분석 기록 <span class="hint" style="font-weight:400">과거 분석·배팅 복기</span></h3>
-        <p class="hint">🚤 경정으로 분석했던 경주입니다. 클릭하면 <b>당시 유력마·이상감지·추천·결과</b>를 복기할 수 있습니다.</p>
-        <div id="sportRec-boat"><p class="hint">탭을 열면 기록을 불러옵니다.</p></div>
+        <h3>?뱥 ??醫낅ぉ 遺꾩꽍 湲곕줉 <span class="hint" style="font-weight:400">怨쇨굅 遺꾩꽍쨌諛고똿 蹂듦린</span></h3>
+        <p class="hint">?슕 寃쎌젙?쇰줈 遺꾩꽍?덈뜕 寃쎌＜?낅땲?? ?대┃?섎㈃ <b>?뱀떆 ?좊젰留댟룹씠?곴컧吏쨌異붿쿇쨌寃곌낵</b>瑜?蹂듦린?????덉뒿?덈떎.</p>
+        <div id="sportRec-boat"><p class="hint">??쓣 ?대㈃ 湲곕줉??遺덈윭?듬땲??</p></div>
         <div id="sportRecDetail-boat" style="margin-top:10px"></div>
       </div>
     </section>
 
-    <!-- [탭분리] 일본 경륜 (6명 출전) -->
+    <!-- [??텇由? ?쇰낯 寃쎈쪣 (6紐?異쒖쟾) -->
     <section id="tab-cycle" class="tab-panel">
       <div class="panel-card">
-        <h2>🚴 일본 경륜 <span class="hint" style="font-weight:400">6명 출전 · 복승+쌍승</span></h2>
-        <p class="hint">Chrome 확장 종목을 <b>🚴 경륜</b>으로 설정하거나 경륜 배당판을 열면 자동 감지됩니다. 6명 전용 로직 + <b>BMED 저배당(원금보전) 집중</b> 전략이 기본입니다. (전적·삼복승 없음)</p>
+        <h2>?슫 ?쇰낯 寃쎈쪣 <span class="hint" style="font-weight:400">6紐?異쒖쟾 쨌 蹂듭듅+?띿듅</span></h2>
+        <p class="hint">Chrome ?뺤옣 醫낅ぉ??<b>?슫 寃쎈쪣</b>?쇰줈 ?ㅼ젙?섍굅??寃쎈쪣 諛곕떦?먯쓣 ?대㈃ ?먮룞 媛먯??⑸땲?? 6紐??꾩슜 濡쒖쭅 + <b>BMED ?諛곕떦(?먭툑蹂댁쟾) 吏묒쨷</b> ?꾨왂??湲곕낯?낅땲?? (?꾩쟻쨌?쇰났???놁쓬)</p>
         <div class="cfg-row" style="margin:6px 0">
-          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-cycle" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+          <label class="hint">?뮥 踰좏똿 ?덉궛(?? <input id="sportBudget-cycle" type="number" min="0" step="1000" placeholder="?? 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
         </div>
       </div>
-      <!-- [오늘 성적 요약 (2026-07-19)] 오늘 경륜 추천·적중·적중률·평균배당 — 결과 백필과 연동 자동 갱신 -->
-      <div id="keirinTodayStats" style="margin:6px 0 10px;padding:10px 12px;border:1px solid #38d39f;border-radius:10px;background:rgba(56,211,159,.07)"><span class="hint">🚴 오늘 성적 집계 준비 중…</span></div>
-      <div id="sportReport-cycle" class="report-area"><p class="hint">🚴 경륜 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
-      <!-- [경륜 출마표 분석] oddspark 선수 전적 자동 수집·분석 -->
+      <!-- [?ㅻ뒛 ?깆쟻 ?붿빟 (2026-07-19)] ?ㅻ뒛 寃쎈쪣 異붿쿇쨌?곸쨷쨌?곸쨷瑜졖룻룊洹좊같????寃곌낵 諛깊븘怨??곕룞 ?먮룞 媛깆떊 -->
+      <div id="keirinTodayStats" style="margin:6px 0 10px;padding:10px 12px;border:1px solid #38d39f;border-radius:10px;background:rgba(56,211,159,.07)"><span class="hint">?슫 ?ㅻ뒛 ?깆쟻 吏묎퀎 以鍮?以묅?/span></div>
+      <div id="sportReport-cycle" class="report-area"><p class="hint">?슫 寃쎈쪣 諛곕떦?먯뿉???섏쭛???쒖옉?섎㈃ ?ㅼ떆媛??댁긽媛먯?쨌BMED 異붿쿇???쒖떆?⑸땲??</p></div>
+      <!-- [寃쎈쪣 異쒕쭏??遺꾩꽍] oddspark ?좎닔 ?꾩쟻 ?먮룞 ?섏쭛쨌遺꾩꽍 -->
       <div class="panel-card" style="margin-top:12px">
-        <h3>🚴 출마표 분석 <span class="hint" style="font-weight:400">oddspark 선수 전적(競走得点·각질·결정타) 자동 수집</span></h3>
-        <p class="hint">개최일·경륜장·경주번호를 넣거나 <b>oddspark 출마표 URL</b>을 붙여넣으면 선수 전적을 가져와 <b>등급(A/B/C/D)·결정수 보정·라인 예상</b>을 분석합니다. (서버가 직접 조회 — 확장 불필요)</p>
+        <h3>?슫 異쒕쭏??遺꾩꽍 <span class="hint" style="font-weight:400">oddspark ?좎닔 ?꾩쟻(塋띈뎔孃쀧궧쨌媛곸쭏쨌寃곗젙?) ?먮룞 ?섏쭛</span></h3>
+        <p class="hint">媛쒖턀?셋룰꼍瑜쒖옣쨌寃쎌＜踰덊샇瑜??ｊ굅??<b>oddspark 異쒕쭏??URL</b>??遺숈뿬?ｌ쑝硫??좎닔 ?꾩쟻??媛?몄? <b>?깃툒(A/B/C/D)쨌寃곗젙??蹂댁젙쨌?쇱씤 ?덉긽</b>??遺꾩꽍?⑸땲?? (?쒕쾭媛 吏곸젒 議고쉶 ???뺤옣 遺덊븘??</p>
         <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
-          <label class="hint">경륜장코드 <input id="keirinJo" class="cfg-input" type="text" placeholder="예: 85(사세보)" style="width:110px"></label>
-          <label class="hint">개최일 <input id="keirinYmd" class="cfg-input" type="text" placeholder="YYYYMMDD" style="width:110px"></label>
-          <label class="hint">경주 <input id="keirinRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
-          <button id="keirinFetchBtn" class="btn btn-primary">🚴 출마표 분석</button>
-          <button id="keirinOddsBtn" class="btn" title="oddspark 복승·쌍승 배당을 서버가 직접 조회해 역배열·배당변화·이상감지에 반영(확장 불필요)">💰 배당 조회</button>
-          <label class="hint" style="font-size:11px"><input id="keirinOddsPoll" type="checkbox" style="vertical-align:middle"> 30초 자동갱신(배당변화)</label>
+          <label class="hint">寃쎈쪣?μ퐫??<input id="keirinJo" class="cfg-input" type="text" placeholder="?? 85(?ъ꽭蹂?" style="width:110px"></label>
+          <label class="hint">媛쒖턀??<input id="keirinYmd" class="cfg-input" type="text" placeholder="YYYYMMDD" style="width:110px"></label>
+          <label class="hint">寃쎌＜ <input id="keirinRace" class="cfg-input" type="number" min="1" max="12" placeholder="R" style="width:60px"></label>
+          <button id="keirinFetchBtn" class="btn btn-primary">?슫 異쒕쭏??遺꾩꽍</button>
+          <button id="keirinOddsBtn" class="btn" title="oddspark 蹂듭듅쨌?띿듅 諛곕떦???쒕쾭媛 吏곸젒 議고쉶????같?는룸같?밸??붋룹씠?곴컧吏??諛섏쁺(?뺤옣 遺덊븘??">?뮥 諛곕떦 議고쉶</button>
+          <label class="hint" style="font-size:11px"><input id="keirinOddsPoll" type="checkbox" style="vertical-align:middle"> 30珥??먮룞媛깆떊(諛곕떦蹂??</label>
         </div>
         <div id="keirinOddsResult" class="hint" style="margin:0 0 6px"></div>
         <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
-          <label class="hint" style="flex:1">또는 URL <input id="keirinUrl" class="cfg-input" type="text" placeholder="https://www.oddspark.com/keirin/RaceList.do?joCode=85&kaisaiBi=...&raceNo=6" style="width:100%;max-width:520px"></label>
+          <label class="hint" style="flex:1">?먮뒗 URL <input id="keirinUrl" class="cfg-input" type="text" placeholder="https://www.oddspark.com/keirin/RaceList.do?joCode=85&kaisaiBi=...&raceNo=6" style="width:100%;max-width:520px"></label>
         </div>
         <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px">
-          <label class="hint" style="flex:1">live 배당 연동 raceKey <input id="keirinRaceKey" class="cfg-input" type="text" placeholder="예: 히로시마 2경주 (비우면 현재 경주 자동)" style="width:100%;max-width:360px"></label>
-          <span class="hint" style="font-size:11px">← 입력 시 이 전적이 유력마·근거·통합등급(전적+배당역배열)에 반영됩니다</span>
+          <label class="hint" style="flex:1">live 諛곕떦 ?곕룞 raceKey <input id="keirinRaceKey" class="cfg-input" type="text" placeholder="?? ?덈줈?쒕쭏 2寃쎌＜ (鍮꾩슦硫??꾩옱 寃쎌＜ ?먮룞)" style="width:100%;max-width:360px"></label>
+          <span class="hint" style="font-size:11px">???낅젰 ?????꾩쟻???좊젰留댟룰렐嫄걔룻넻?⑸벑湲??꾩쟻+諛곕떦??같????諛섏쁺?⑸땲??/span>
         </div>
         <div id="keirinCardResult"></div>
       </div>
       <div class="panel-card" style="margin-top:12px">
-        <h3>📋 이 종목 분석 기록 <span class="hint" style="font-weight:400">과거 분석·배팅 복기</span></h3>
-        <p class="hint">🚴 경륜으로 분석했던 경주입니다. 클릭하면 <b>당시 유력마·이상감지·추천·결과</b>를 복기할 수 있습니다.</p>
-        <div id="sportRec-cycle"><p class="hint">탭을 열면 기록을 불러옵니다.</p></div>
+        <h3>?뱥 ??醫낅ぉ 遺꾩꽍 湲곕줉 <span class="hint" style="font-weight:400">怨쇨굅 遺꾩꽍쨌諛고똿 蹂듦린</span></h3>
+        <p class="hint">?슫 寃쎈쪣?쇰줈 遺꾩꽍?덈뜕 寃쎌＜?낅땲?? ?대┃?섎㈃ <b>?뱀떆 ?좊젰留댟룹씠?곴컧吏쨌異붿쿇쨌寃곌낵</b>瑜?蹂듦린?????덉뒿?덈떎.</p>
+        <div id="sportRec-cycle"><p class="hint">??쓣 ?대㈃ 湲곕줉??遺덈윭?듬땲??</p></div>
         <div id="sportRecDetail-cycle" style="margin-top:10px"></div>
       </div>
     </section>
 
-    <!-- [탭분리] 일본 바이크(오토레이스) (6명 출전) -->
+    <!-- [??텇由? ?쇰낯 諛붿씠???ㅽ넗?덉씠?? (6紐?異쒖쟾) -->
     <section id="tab-bike" class="tab-panel">
       <div class="panel-card">
-        <h2>🏍 일본 바이크 <span class="hint" style="font-weight:400">6명 출전 · 복승+쌍승</span></h2>
-        <p class="hint">Chrome 확장 종목을 <b>🏍 바이크</b>로 설정하거나 오토레이스 배당판을 열면 자동 감지됩니다. 6명 전용 로직 + <b>BMED 저배당(원금보전) 집중</b> 전략이 기본입니다. (전적·삼복승 없음)</p>
+        <h2>?룏 ?쇰낯 諛붿씠??<span class="hint" style="font-weight:400">6紐?異쒖쟾 쨌 蹂듭듅+?띿듅</span></h2>
+        <p class="hint">Chrome ?뺤옣 醫낅ぉ??<b>?룏 諛붿씠??/b>濡??ㅼ젙?섍굅???ㅽ넗?덉씠??諛곕떦?먯쓣 ?대㈃ ?먮룞 媛먯??⑸땲?? 6紐??꾩슜 濡쒖쭅 + <b>BMED ?諛곕떦(?먭툑蹂댁쟾) 吏묒쨷</b> ?꾨왂??湲곕낯?낅땲?? (?꾩쟻쨌?쇰났???놁쓬)</p>
         <div class="cfg-row" style="margin:6px 0">
-          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-bike" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+          <label class="hint">?뮥 踰좏똿 ?덉궛(?? <input id="sportBudget-bike" type="number" min="0" step="1000" placeholder="?? 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
         </div>
       </div>
-      <div id="sportReport-bike" class="report-area"><p class="hint">🏍 바이크 배당판에서 수집이 시작되면 실시간 이상감지·BMED 추천이 표시됩니다.</p></div>
+      <div id="sportReport-bike" class="report-area"><p class="hint">?룏 諛붿씠??諛곕떦?먯뿉???섏쭛???쒖옉?섎㈃ ?ㅼ떆媛??댁긽媛먯?쨌BMED 異붿쿇???쒖떆?⑸땲??</p></div>
       <div class="panel-card" style="margin-top:12px">
-        <h3>📋 이 종목 분석 기록 <span class="hint" style="font-weight:400">과거 분석·배팅 복기</span></h3>
-        <p class="hint">🏍 바이크로 분석했던 경주입니다. 클릭하면 <b>당시 유력마·이상감지·추천·결과</b>를 복기할 수 있습니다.</p>
-        <div id="sportRec-bike"><p class="hint">탭을 열면 기록을 불러옵니다.</p></div>
+        <h3>?뱥 ??醫낅ぉ 遺꾩꽍 湲곕줉 <span class="hint" style="font-weight:400">怨쇨굅 遺꾩꽍쨌諛고똿 蹂듦린</span></h3>
+        <p class="hint">?룏 諛붿씠?щ줈 遺꾩꽍?덈뜕 寃쎌＜?낅땲?? ?대┃?섎㈃ <b>?뱀떆 ?좊젰留댟룹씠?곴컧吏쨌異붿쿇쨌寃곌낵</b>瑜?蹂듦린?????덉뒿?덈떎.</p>
+        <div id="sportRec-bike"><p class="hint">??쓣 ?대㈃ 湲곕줉??遺덈윭?듬땲??</p></div>
         <div id="sportRecDetail-bike" style="margin-top:10px"></div>
       </div>
     </section>
 
-    <!-- [탭분리] 일본 중앙경마(JRA) — 배당 전용 -->
+    <!-- [??텇由? ?쇰낯 以묒븰寃쎈쭏(JRA) ??諛곕떦 ?꾩슜 -->
     <section id="tab-central" class="tab-panel">
       <div class="panel-card">
-        <h2>🏇 일본 중앙경마 (JRA) <span class="hint" style="font-weight:400">배당 전용 · 복승+쌍승</span></h2>
-        <p class="hint">Chrome 확장에서 <b>일본 종류 = 🏇 중앙(JRA)</b>로 두거나 중앙경마 배당판을 열면 자동 감지됩니다. 중앙경마는 전적표가 없어 <b>복승·쌍승 배당 이상감지 중심</b>으로 분석합니다. (삼복승·전적 없음)</p>
+        <h2>?룈 ?쇰낯 以묒븰寃쎈쭏 (JRA) <span class="hint" style="font-weight:400">諛곕떦 ?꾩슜 쨌 蹂듭듅+?띿듅</span></h2>
+        <p class="hint">Chrome ?뺤옣?먯꽌 <b>?쇰낯 醫낅쪟 = ?룈 以묒븰(JRA)</b>濡??먭굅??以묒븰寃쎈쭏 諛곕떦?먯쓣 ?대㈃ ?먮룞 媛먯??⑸땲?? 以묒븰寃쎈쭏???꾩쟻?쒓? ?놁뼱 <b>蹂듭듅쨌?띿듅 諛곕떦 ?댁긽媛먯? 以묒떖</b>?쇰줈 遺꾩꽍?⑸땲?? (?쇰났?뮤룹쟾???놁쓬)</p>
         <div class="cfg-row" style="margin:6px 0">
-          <label class="hint">💰 베팅 예산(원) <input id="sportBudget-central" type="number" min="0" step="1000" placeholder="예: 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
+          <label class="hint">?뮥 踰좏똿 ?덉궛(?? <input id="sportBudget-central" type="number" min="0" step="1000" placeholder="?? 20000" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font:inherit;font-size:12px;width:120px" /></label>
         </div>
       </div>
-      <div id="sportReport-central" class="report-area"><p class="hint">🏇 중앙경마 배당판에서 수집이 시작되면 실시간 배당 이상감지가 표시됩니다.</p></div>
+      <div id="sportReport-central" class="report-area"><p class="hint">?룈 以묒븰寃쎈쭏 諛곕떦?먯뿉???섏쭛???쒖옉?섎㈃ ?ㅼ떆媛?諛곕떦 ?댁긽媛먯?媛 ?쒖떆?⑸땲??</p></div>
       <div class="panel-card" style="margin-top:12px">
-        <h3>📋 이 종목 분석 기록 <span class="hint" style="font-weight:400">과거 분석·배팅 복기</span></h3>
-        <p class="hint">🏇 중앙경마로 분석했던 경주입니다. 클릭하면 <b>당시 유력마·이상감지·추천·결과</b>를 복기할 수 있습니다.</p>
-        <div id="sportRec-central"><p class="hint">탭을 열면 기록을 불러옵니다.</p></div>
+        <h3>?뱥 ??醫낅ぉ 遺꾩꽍 湲곕줉 <span class="hint" style="font-weight:400">怨쇨굅 遺꾩꽍쨌諛고똿 蹂듦린</span></h3>
+        <p class="hint">?룈 以묒븰寃쎈쭏濡?遺꾩꽍?덈뜕 寃쎌＜?낅땲?? ?대┃?섎㈃ <b>?뱀떆 ?좊젰留댟룹씠?곴컧吏쨌異붿쿇쨌寃곌낵</b>瑜?蹂듦린?????덉뒿?덈떎.</p>
+        <div id="sportRec-central"><p class="hint">??쓣 ?대㈃ 湲곕줉??遺덈윭?듬땲??</p></div>
         <div id="sportRecDetail-central" style="margin-top:10px"></div>
       </div>
     </section>
 
-    <!-- [공개용 배당판] 3단계 카드 UI + 상세 펼치기. matrix_board.js 공통 컴포넌트가 렌더.
-         기존 텍스트 분석은 '전문가 모드' 토글로 기존 일본경마 탭에 그대로 유지(무삭제). -->
+    <!-- [怨듦컻??諛곕떦?? 3?④퀎 移대뱶 UI + ?곸꽭 ?쇱튂湲? matrix_board.js 怨듯넻 而댄룷?뚰듃媛 ?뚮뜑.
+         湲곗〈 ?띿뒪??遺꾩꽍? '?꾨Ц媛 紐⑤뱶' ?좉?濡?湲곗〈 ?쇰낯寃쎈쭏 ??뿉 洹몃?濡??좎?(臾댁궘??. -->
     <section id="tab-board" class="tab-panel">
       <div class="panel-card">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <h2 style="margin:0">📊 배당판 <span class="hint" style="font-weight:400;font-size:13px">큰 글씨 카드 UI · 30초 자동 갱신</span></h2>
+          <h2 style="margin:0">?뱤 諛곕떦??<span class="hint" style="font-weight:400;font-size:13px">??湲??移대뱶 UI 쨌 30珥??먮룞 媛깆떊</span></h2>
           <span style="flex:1"></span>
-          <label style="font-size:14px">경주
+          <label style="font-size:14px">寃쎌＜
             <select id="boardRaceSel" style="min-height:40px;font-size:15px;margin-left:6px"></select>
           </label>
-          <button id="boardRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px">🔄 새로고침</button>
+          <button id="boardRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px">?봽 ?덈줈怨좎묠</button>
         </div>
         <div id="boardMount" style="margin-top:14px"></div>
       </div>
     </section>
 
-    <!-- [다중 경주 동시 배당판] 별도 추가 기능(기존 단일 경주 분석 무영향) -->
+    <!-- [?ㅼ쨷 寃쎌＜ ?숈떆 諛곕떦?? 蹂꾨룄 異붽? 湲곕뒫(湲곗〈 ?⑥씪 寃쎌＜ 遺꾩꽍 臾댁쁺?? -->
     <section id="tab-multi" class="tab-panel">
       <div class="panel-card">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <h2 style="margin:0">🏁 전체 경주 <span class="hint" style="font-weight:400;font-size:13px">오늘 개최 경주 동시 모니터링 · 발주 10분전부터 자동 수집</span></h2>
+          <h2 style="margin:0">?뢾 ?꾩껜 寃쎌＜ <span class="hint" style="font-weight:400;font-size:13px">?ㅻ뒛 媛쒖턀 寃쎌＜ ?숈떆 紐⑤땲?곕쭅 쨌 諛쒖＜ 10遺꾩쟾遺???먮룞 ?섏쭛</span></h2>
           <span style="flex:1"></span>
-          <button id="multiRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px">🔄 새로고침</button>
-          <button id="multiScheduleBtn" class="btn" style="padding:5px 12px;font-size:13px" title="오늘 개최 스케줄을 다시 수집합니다">📅 스케줄 갱신</button>
+          <button id="multiRefreshBtn" class="btn" style="padding:5px 12px;font-size:13px">?봽 ?덈줈怨좎묠</button>
+          <button id="multiScheduleBtn" class="btn" style="padding:5px 12px;font-size:13px" title="?ㅻ뒛 媛쒖턀 ?ㅼ?以꾩쓣 ?ㅼ떆 ?섏쭛?⑸땲??>?뱟 ?ㅼ?以?媛깆떊</button>
         </div>
         <div id="multiUrgentBanner" style="display:none;margin-top:8px"></div>
         <div id="multiSportToggles" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
@@ -405,351 +405,351 @@
       </div>
       <div class="panel-card" id="multiDetailCard" style="display:none">
         <div style="display:flex;align-items:center;gap:10px">
-          <h3 id="multiDetailTitle" style="margin:0">경주 상세</h3>
+          <h3 id="multiDetailTitle" style="margin:0">寃쎌＜ ?곸꽭</h3>
           <span style="flex:1"></span>
-          <button id="multiDetailClose" class="btn" style="padding:4px 10px;font-size:12px">✕ 닫기</button>
+          <button id="multiDetailClose" class="btn" style="padding:4px 10px;font-size:12px">???リ린</button>
         </div>
         <div id="multiDetailBody" style="margin-top:8px"></div>
       </div>
     </section>
 
-    <!-- 결과입력 -->
+    <!-- 寃곌낵?낅젰 -->
     <section id="tab-result" class="tab-panel">
-      <!-- [전날 경주 목록] 날짜별 조회 — 경주별 예상vs결과·적중·복병적중·T-5 스크린샷 + KPI -->
+      <!-- [?꾨궇 寃쎌＜ 紐⑸줉] ?좎쭨蹂?議고쉶 ??寃쎌＜蹂??덉긽vs寃곌낵쨌?곸쨷쨌蹂듬퀝?곸쨷쨌T-5 ?ㅽ겕由곗꺑 + KPI -->
       <div class="panel-card" id="dayRacesCard">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <h2 style="margin:0">🗓 날짜별 경주 기록</h2>
+          <h2 style="margin:0">?뿎 ?좎쭨蹂?寃쎌＜ 湲곕줉</h2>
           <input type="date" id="dayRacesDate" style="min-height:40px;font-size:15px">
-          <button id="dayRacesLoad" class="btn btn-small">조회</button>
+          <button id="dayRacesLoad" class="btn btn-small">議고쉶</button>
           <span style="flex:1"></span>
         </div>
         <div id="dayRacesKpi" style="margin-top:10px"></div>
         <div id="dayRacesList" style="margin-top:12px"></div>
       </div>
 
-      <!-- [결과기록 전면정리] 1. 최상단: 최근 결과 요약 카드 -->
+      <!-- [寃곌낵湲곕줉 ?꾨㈃?뺣━] 1. 理쒖긽?? 理쒓렐 寃곌낵 ?붿빟 移대뱶 -->
       <div class="panel-card" id="recentResultsCard">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-          <h2 style="margin:0">📅 최근 결과 요약</h2>
-          <button id="recentResultsRefresh" class="btn btn-small">🔄 새로고침</button>
+          <h2 style="margin:0">?뱟 理쒓렐 寃곌낵 ?붿빟</h2>
+          <button id="recentResultsRefresh" class="btn btn-small">?봽 ?덈줈怨좎묠</button>
         </div>
         <div id="recentSummary" style="margin-top:8px"></div>
       </div>
 
-      <!-- [배당판 스냅샷 갤러리] 마감 1분전 자동 + 수동 캡처된 배당판(오버레이·패널·워터마크 포함) 이미지 → 추천 vs 실제결과 비교 -->
+      <!-- [諛곕떦???ㅻ깄??媛ㅻ윭由? 留덇컧 1遺꾩쟾 ?먮룞 + ?섎룞 罹≪쿂??諛곕떦???ㅻ쾭?덉씠쨌?⑤꼸쨌?뚰꽣留덊겕 ?ы븿) ?대?吏 ??異붿쿇 vs ?ㅼ젣寃곌낵 鍮꾧탳 -->
       <div class="panel-card" id="snapshotCard">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-          <h2 style="margin:0">📸 배당판 스냅샷 갤러리 <span class="hint" style="font-weight:400;font-size:12px">마감 1분전 자동 + 수동 캡처</span></h2>
-          <button id="snapshotRefresh" class="btn btn-small">🔄 새로고침</button>
+          <h2 style="margin:0">?벝 諛곕떦???ㅻ깄??媛ㅻ윭由?<span class="hint" style="font-weight:400;font-size:12px">留덇컧 1遺꾩쟾 ?먮룞 + ?섎룞 罹≪쿂</span></h2>
+          <button id="snapshotRefresh" class="btn btn-small">?봽 ?덈줈怨좎묠</button>
         </div>
-        <p class="hint">확장(오버레이) 📸 버튼 또는 마감 1분 전 자동 캡처로 저장됩니다. 썸네일을 누르면 크게 보이고, 실제 결과가 있으면 추천 조합과 1·2·3착을 비교합니다.</p>
+        <p class="hint">?뺤옣(?ㅻ쾭?덉씠) ?벝 踰꾪듉 ?먮뒗 留덇컧 1遺????먮룞 罹≪쿂濡???λ맗?덈떎. ?몃꽕?쇱쓣 ?꾨Ⅴ硫??ш쾶 蹂댁씠怨? ?ㅼ젣 寃곌낵媛 ?덉쑝硫?異붿쿇 議고빀怨?1쨌2쨌3李⑹쓣 鍮꾧탳?⑸땲??</p>
         <div id="snapshotGallery" style="margin-top:8px"></div>
       </div>
 
-      <!-- 2. 결과 입력 대기 (가장 눈에 띄게) + 경주별 직접 입력(기본 접힘) -->
+      <!-- 2. 寃곌낵 ?낅젰 ?湲?(媛???덉뿉 ?꾧쾶) + 寃쎌＜蹂?吏곸젒 ?낅젰(湲곕낯 ?묓옒) -->
       <div class="panel-card" id="pendingCard" style="border:2px solid #4ea1ff;box-shadow:0 0 0 3px rgba(78,161,255,.08)">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-          <h2 id="pendingResultsTitle" style="margin:0">📋 결과 입력 대기</h2>
-          <button id="toggleResultForm" class="btn btn-small">✏️ 경주별 직접 입력 펼치기</button>
+          <h2 id="pendingResultsTitle" style="margin:0">?뱥 寃곌낵 ?낅젰 ?湲?/h2>
+          <button id="toggleResultForm" class="btn btn-small">?륅툘 寃쎌＜蹂?吏곸젒 ?낅젰 ?쇱튂湲?/button>
         </div>
-        <p class="hint">분석·배당 수집된 경주가 자동으로 여기 뜹니다. [결과 입력]을 누르면 팝업에서 착순·배당만 넣어 즉시 적중판정·학습됩니다.</p>
+        <p class="hint">遺꾩꽍쨌諛곕떦 ?섏쭛??寃쎌＜媛 ?먮룞?쇰줈 ?ш린 ?밸땲?? [寃곌낵 ?낅젰]???꾨Ⅴ硫??앹뾽?먯꽌 李⑹닚쨌諛곕떦留??ｌ뼱 利됱떆 ?곸쨷?먯젙쨌?숈뒿?⑸땲??</p>
         <div id="pendingResultsList"></div>
-        <!-- [2번] 경주별 직접 입력 — 기본 접힘, 위 버튼으로 펼치기 -->
+        <!-- [2踰? 寃쎌＜蹂?吏곸젒 ?낅젰 ??湲곕낯 ?묓옒, ??踰꾪듉?쇰줈 ?쇱튂湲?-->
         <div id="resultFormWrap" style="display:none;margin-top:12px;border-top:1px solid #2b3648;padding-top:12px">
-          <h3 style="font-size:14px;margin:0 0 4px">✏️ 경주 결과 직접 입력</h3>
-          <p class="hint">실제 착순을 입력하면 누적 학습 DB에 반영됩니다.</p>
+          <h3 style="font-size:14px;margin:0 0 4px">?륅툘 寃쎌＜ 寃곌낵 吏곸젒 ?낅젰</h3>
+          <p class="hint">?ㅼ젣 李⑹닚???낅젰?섎㈃ ?꾩쟻 ?숈뒿 DB??諛섏쁺?⑸땲??</p>
           <div id="resultForm"></div>
         </div>
       </div>
 
-      <!-- [수동 추천 저장] 라이브 배당 미수집 경주(예: 일부 경륜)에도 전문가 사전추천을 저장 → 결과 입력 시 자동 판정 -->
+      <!-- [?섎룞 異붿쿇 ??? ?쇱씠釉?諛곕떦 誘몄닔吏?寃쎌＜(?? ?쇰? 寃쎈쪣)?먮룄 ?꾨Ц媛 ?ъ쟾異붿쿇???????寃곌낵 ?낅젰 ???먮룞 ?먯젙 -->
       <div class="panel-card" id="manualRecCard">
-        <h2 style="margin:0">📝 수동 추천 저장 <span class="hint" style="font-weight:400;font-size:12px">라이브 배당 없어도 전문가 추천을 기록</span></h2>
-        <p class="hint">배당이 수집 안 된 경주에도 복승/삼복승 추천을 저장하면, 나중에 결과를 입력할 때 자동으로 적중 판정됩니다.</p>
+        <h2 style="margin:0">?뱷 ?섎룞 異붿쿇 ???<span class="hint" style="font-weight:400;font-size:12px">?쇱씠釉?諛곕떦 ?놁뼱???꾨Ц媛 異붿쿇??湲곕줉</span></h2>
+        <p class="hint">諛곕떦???섏쭛 ????寃쎌＜?먮룄 蹂듭듅/?쇰났??異붿쿇????ν븯硫? ?섏쨷??寃곌낵瑜??낅젰?????먮룞?쇰줈 ?곸쨷 ?먯젙?⑸땲??</p>
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:8px">
-          <label class="hint">경주(raceKey)<br><input id="mrRaceKey" class="cfg-input" type="text" placeholder="예: 우쓰노미야 1경주" style="width:170px"></label>
-          <label class="hint">복승 조합(쉼표/줄바꿈)<br><input id="mrQuinella" class="cfg-input" type="text" placeholder="3+4, 3+7, 4+7" style="width:190px"></label>
-          <label class="hint">삼복승 보험(최대 2)<br><input id="mrTrifecta" class="cfg-input" type="text" placeholder="3+4+7, 3+5+7" style="width:170px"></label>
-          <label class="hint">메모(선택)<br><input id="mrNote" class="cfg-input" type="text" placeholder="근거 메모" style="width:150px"></label>
-          <button id="mrSave" class="btn btn-small">💾 추천 저장</button>
+          <label class="hint">寃쎌＜(raceKey)<br><input id="mrRaceKey" class="cfg-input" type="text" placeholder="?? ?곗벐?몃???1寃쎌＜" style="width:170px"></label>
+          <label class="hint">蹂듭듅 議고빀(?쇳몴/以꾨컮轅?<br><input id="mrQuinella" class="cfg-input" type="text" placeholder="3+4, 3+7, 4+7" style="width:190px"></label>
+          <label class="hint">?쇰났??蹂댄뿕(理쒕? 2)<br><input id="mrTrifecta" class="cfg-input" type="text" placeholder="3+4+7, 3+5+7" style="width:170px"></label>
+          <label class="hint">硫붾え(?좏깮)<br><input id="mrNote" class="cfg-input" type="text" placeholder="洹쇨굅 硫붾え" style="width:150px"></label>
+          <button id="mrSave" class="btn btn-small">?뮶 異붿쿇 ???/button>
         </div>
         <div id="mrMsg" class="hint" style="margin-top:6px"></div>
       </div>
 
-      <!-- 3. 서브탭: 복기 / 일괄등록 / 명예의전당 / 리포트 -->
+      <!-- 3. ?쒕툕?? 蹂듦린 / ?쇨큵?깅줉 / 紐낆삁?섏쟾??/ 由ы룷??-->
       <div class="panel-card">
         <div class="subtab-bar" id="resultSubtabs">
-          <button type="button" class="subtab-btn active" data-sub="review">📋 복기</button>
-          <button type="button" class="subtab-btn" data-sub="bulk">📥 일괄등록</button>
-          <button type="button" class="subtab-btn" data-sub="hall">🏆 명예의전당</button>
-          <button type="button" class="subtab-btn" data-sub="report">📄 리포트</button>
-          <button type="button" class="subtab-btn" data-sub="records">🔎 분석기록</button>
-          <button type="button" class="subtab-btn" data-sub="allhist">📚 전체기록</button>
+          <button type="button" class="subtab-btn active" data-sub="review">?뱥 蹂듦린</button>
+          <button type="button" class="subtab-btn" data-sub="bulk">?뱿 ?쇨큵?깅줉</button>
+          <button type="button" class="subtab-btn" data-sub="hall">?룇 紐낆삁?섏쟾??/button>
+          <button type="button" class="subtab-btn" data-sub="report">?뱞 由ы룷??/button>
+          <button type="button" class="subtab-btn" data-sub="records">?뵊 遺꾩꽍湲곕줉</button>
+          <button type="button" class="subtab-btn" data-sub="allhist">?뱴 ?꾩껜湲곕줉</button>
         </div>
 
-        <!-- [전체기록 (2026-07-28)] data/analysis_log 전량 기반 — /api/results/history.
-             ⚠ 기존 '복기'(로컬 History)·'분석기록' 패널은 그대로 유지되며 이 탭은 추가일 뿐이다. -->
+        <!-- [?꾩껜湲곕줉 (2026-07-28)] data/analysis_log ?꾨웾 湲곕컲 ??/api/results/history.
+             ??湲곗〈 '蹂듦린'(濡쒖뺄 History)쨌'遺꾩꽍湲곕줉' ?⑤꼸? 洹몃?濡??좎??섎ŉ ????? 異붽???肉먯씠?? -->
         <div class="subtab-panel" data-sub="allhist" style="display:none">
-          <p class="hint">분석한 <b>모든 경주</b>를 결과·적중·배당과 함께 봅니다. 카드를 클릭하면 상세가 펼쳐집니다.</p>
+          <p class="hint">遺꾩꽍??<b>紐⑤뱺 寃쎌＜</b>瑜?寃곌낵쨌?곸쨷쨌諛곕떦怨??④퍡 遊낅땲?? 移대뱶瑜??대┃?섎㈃ ?곸꽭媛 ?쇱퀜吏묐땲??</p>
           <div id="ahSummary" style="margin:8px 0"></div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0">
-            <select id="ahDate" class="btn btn-small"><option value="">전체 날짜</option></select>
-            <select id="ahVenue" class="btn btn-small"><option value="">전체 경마장</option></select>
+            <select id="ahDate" class="btn btn-small"><option value="">?꾩껜 ?좎쭨</option></select>
+            <select id="ahVenue" class="btn btn-small"><option value="">?꾩껜 寃쎈쭏??/option></select>
             <select id="ahHit" class="btn btn-small">
-              <option value="">적중/미적중 전체</option>
-              <option value="1">✅ 적중만</option>
-              <option value="0">❌ 미적중만</option>
+              <option value="">?곸쨷/誘몄쟻以??꾩껜</option>
+              <option value="1">???곸쨷留?/option>
+              <option value="0">??誘몄쟻以묐쭔</option>
             </select>
             <label style="font-size:12px;display:flex;align-items:center;gap:4px">
-              <input type="checkbox" id="ahPolluted"> ⚠️ 오염 의심만
+              <input type="checkbox" id="ahPolluted"> ?좑툘 ?ㅼ뿼 ?섏떖留?
             </label>
-            <button id="ahRefresh" class="btn btn-small">🔄 새로고침</button>
+            <button id="ahRefresh" class="btn btn-small">?봽 ?덈줈怨좎묠</button>
           </div>
           <div id="ahList"></div>
           <div style="text-align:center;margin:10px 0">
-            <button id="ahMore" class="btn btn-small" style="display:none">▼ 더 보기</button>
+            <button id="ahMore" class="btn btn-small" style="display:none">????蹂닿린</button>
           </div>
         </div>
 
-        <!-- 복기: 최근 결과 날짜별 그룹 + 클릭 복기 -->
+        <!-- 蹂듦린: 理쒓렐 寃곌낵 ?좎쭨蹂?洹몃９ + ?대┃ 蹂듦린 -->
         <div class="subtab-panel" data-sub="review">
-          <p class="hint">최근 결과를 날짜별로 모아 보여줍니다. 경주를 클릭하면 적중은 "왜 맞았는지", 미적중은 "왜 놓쳤는지" 복기가 열립니다.</p>
+          <p class="hint">理쒓렐 寃곌낵瑜??좎쭨蹂꾨줈 紐⑥븘 蹂댁뿬以띾땲?? 寃쎌＜瑜??대┃?섎㈃ ?곸쨷? "??留욎븯?붿?", 誘몄쟻以묒? "???볦낀?붿?" 蹂듦린媛 ?대┰?덈떎.</p>
           <div id="recentResultsList" style="margin-top:8px"></div>
         </div>
 
-        <!-- 일괄등록: 일괄 결과 등록 + 순서대로 빠른 입력 -->
+        <!-- ?쇨큵?깅줉: ?쇨큵 寃곌낵 ?깅줉 + ?쒖꽌?濡?鍮좊Ⅸ ?낅젰 -->
         <div class="subtab-panel" data-sub="bulk" style="display:none">
-          <h3 style="font-size:15px;margin-top:0">📋 일괄 결과 등록</h3>
-          <p class="hint">결과 페이지(asyukk34 등)의 URL을 넣거나 결과표 HTML을 붙여넣으면, 모든 경주의 1~3착·확정배당을 한 번에 파싱해 분석한 경주와 자동 매칭·적중판정·학습합니다.</p>
+          <h3 style="font-size:15px;margin-top:0">?뱥 ?쇨큵 寃곌낵 ?깅줉</h3>
+          <p class="hint">寃곌낵 ?섏씠吏(asyukk34 ????URL???ｊ굅??寃곌낵??HTML??遺숈뿬?ｌ쑝硫? 紐⑤뱺 寃쎌＜??1~3李㈑룻솗?뺣같?뱀쓣 ??踰덉뿉 ?뚯떛??遺꾩꽍??寃쎌＜? ?먮룞 留ㅼ묶쨌?곸쨷?먯젙쨌?숈뒿?⑸땲??</p>
           <div class="cfg-row">
-            <button id="bulkResultToggle" class="btn btn-primary">📋 일괄 등록 열기</button>
+            <button id="bulkResultToggle" class="btn btn-primary">?뱥 ?쇨큵 ?깅줉 ?닿린</button>
           </div>
           <div id="bulkResultPanel" style="display:none;margin-top:10px">
             <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
-              <input id="bulkResultUrl" class="cfg-input" style="flex:1;min-width:280px" placeholder="결과 페이지 URL (예: https://asyukk34.../bet/result?id=123)" />
-              <label class="hint">정액 가정<br><input id="bulkStake" class="cfg-input" type="number" value="1000" style="width:90px" />원</label>
-              <button id="bulkResultLoad" class="btn btn-primary">불러와 등록</button>
+              <input id="bulkResultUrl" class="cfg-input" style="flex:1;min-width:280px" placeholder="寃곌낵 ?섏씠吏 URL (?? https://asyukk34.../bet/result?id=123)" />
+              <label class="hint">?뺤븸 媛??br><input id="bulkStake" class="cfg-input" type="number" value="1000" style="width:90px" />??/label>
+              <button id="bulkResultLoad" class="btn btn-primary">遺덈윭? ?깅줉</button>
             </div>
-            <p class="hint" style="margin:6px 0 2px">URL은 <b>Chrome 확장(로그인 세션)</b>을 경유해 가져옵니다(확장 설치 + 배당판 로그인 필요). 실패하면 결과 페이지에서 <b>전체 선택(Ctrl+A)→복사→아래에 붙여넣기</b> 후 [붙여넣기 등록].</p>
-            <p class="hint" style="margin:6px 0 2px">📋 <b>엑셀/스프레드시트 표를 그대로 복사</b>해 붙여넣어도 됩니다(탭 구분 텍스트). 첫 줄이 헤더(구분/경주지역/라운드/1착/2착/3착/단승/복승/…/삼복승)면 자동 인식 → 경마장+경주번호로 분석 로그와 매칭.</p>
-            <textarea id="bulkResultHtml" class="cfg-input" style="width:100%;height:110px;font-family:monospace;font-size:12px" placeholder="결과 페이지 HTML, 또는 엑셀 표(탭 구분) 전체를 붙여넣기&#10;예) 구분⇥경주지역⇥라운드⇥1착⇥2착⇥3착⇥단승⇥복승⇥…⇥삼복승"></textarea>
+            <p class="hint" style="margin:6px 0 2px">URL? <b>Chrome ?뺤옣(濡쒓렇???몄뀡)</b>??寃쎌쑀??媛?몄샃?덈떎(?뺤옣 ?ㅼ튂 + 諛곕떦??濡쒓렇???꾩슂). ?ㅽ뙣?섎㈃ 寃곌낵 ?섏씠吏?먯꽌 <b>?꾩껜 ?좏깮(Ctrl+A)?믩났?р넂?꾨옒??遺숈뿬?ｊ린</b> ??[遺숈뿬?ｊ린 ?깅줉].</p>
+            <p class="hint" style="margin:6px 0 2px">?뱥 <b>?묒?/?ㅽ봽?덈뱶?쒗듃 ?쒕? 洹몃?濡?蹂듭궗</b>??遺숈뿬?ｌ뼱???⑸땲????援щ텇 ?띿뒪??. 泥?以꾩씠 ?ㅻ뜑(援щ텇/寃쎌＜吏???쇱슫??1李?2李?3李??⑥듅/蹂듭듅/???쇰났??硫??먮룞 ?몄떇 ??寃쎈쭏??寃쎌＜踰덊샇濡?遺꾩꽍 濡쒓렇? 留ㅼ묶.</p>
+            <textarea id="bulkResultHtml" class="cfg-input" style="width:100%;height:110px;font-family:monospace;font-size:12px" placeholder="寃곌낵 ?섏씠吏 HTML, ?먮뒗 ?묒? ????援щ텇) ?꾩껜瑜?遺숈뿬?ｊ린&#10;?? 援щ텇?κ꼍二쇱???눆?쇱슫?쒋눆1李⒱눆2李⒱눆3李⒱눆?⑥듅?λ났?밟눆?╈눆?쇰났??></textarea>
             <div class="cfg-row" style="margin-top:6px">
-              <button id="bulkResultParse" class="btn btn-primary">붙여넣기 등록</button>
+              <button id="bulkResultParse" class="btn btn-primary">遺숈뿬?ｊ린 ?깅줉</button>
             </div>
             <div id="bulkResultSummary" style="margin-top:10px"></div>
           </div>
           <hr style="border:none;border-top:1px solid #2b3648;margin:16px 0" />
-          <h3 style="font-size:15px">📸 결과 사진 첨부 → 자동 반영</h3>
-          <p class="hint">경주결과 화면 <b>사진(스크린샷)</b>을 첨부하면 표의 모든 경주(1~3착·복승/삼복승 배당)를 자동 판독해 분석한 경주와 매칭·적중판정·학습합니다. <b>확장·로그인 불필요</b>.</p>
+          <h3 style="font-size:15px">?벝 寃곌낵 ?ъ쭊 泥⑤? ???먮룞 諛섏쁺</h3>
+          <p class="hint">寃쎌＜寃곌낵 ?붾㈃ <b>?ъ쭊(?ㅽ겕由곗꺑)</b>??泥⑤??섎㈃ ?쒖쓽 紐⑤뱺 寃쎌＜(1~3李㈑룸났???쇰났??諛곕떦)瑜??먮룞 ?먮룆??遺꾩꽍??寃쎌＜? 留ㅼ묶쨌?곸쨷?먯젙쨌?숈뒿?⑸땲?? <b>?뺤옣쨌濡쒓렇??遺덊븘??/b>.</p>
           <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
             <input id="resultPhotoFile" type="file" accept="image/*" class="cfg-input" style="flex:1;min-width:240px" />
-            <label class="hint">정액 가정<br><input id="resultPhotoStake" class="cfg-input" type="number" value="1000" style="width:90px" />원</label>
-            <button id="resultPhotoSubmit" class="btn btn-primary">📸 사진 판독·자동 반영</button>
+            <label class="hint">?뺤븸 媛??br><input id="resultPhotoStake" class="cfg-input" type="number" value="1000" style="width:90px" />??/label>
+            <button id="resultPhotoSubmit" class="btn btn-primary">?벝 ?ъ쭊 ?먮룆쨌?먮룞 諛섏쁺</button>
           </div>
           <div id="resultPhotoPreview" style="margin-top:6px"></div>
           <div id="resultPhotoSummary" style="margin-top:10px"></div>
           <hr style="border:none;border-top:1px solid #2b3648;margin:16px 0" />
-          <h3 style="font-size:15px">⚡ 순서대로 빠른 입력</h3>
-          <p class="hint">분석한 경주를 <b>시간순</b>으로 나열합니다. 경주명은 자동 매칭되므로 <b>1~3착(+4착·배당)만</b> 순서대로 입력하고 [저장]하면 즉시 적중판정·복기가 실행됩니다.</p>
+          <h3 style="font-size:15px">???쒖꽌?濡?鍮좊Ⅸ ?낅젰</h3>
+          <p class="hint">遺꾩꽍??寃쎌＜瑜?<b>?쒓컙??/b>?쇰줈 ?섏뿴?⑸땲?? 寃쎌＜紐낆? ?먮룞 留ㅼ묶?섎?濡?<b>1~3李?+4李㈑룸같??留?/b> ?쒖꽌?濡??낅젰?섍퀬 [????섎㈃ 利됱떆 ?곸쨷?먯젙쨌蹂듦린媛 ?ㅽ뻾?⑸땲??</p>
           <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
-            <label class="hint">날짜 <input id="quickDate" class="cfg-input" type="date" style="width:150px" /></label>
-            <label class="hint"><input id="quickPendingOnly" type="checkbox" checked /> 미입력만</label>
-            <button id="quickLoad" class="btn btn-primary">🔄 경주 불러오기</button>
-            <button id="quickSaveAll" class="btn">💾 입력한 경주 전체 저장</button>
+            <label class="hint">?좎쭨 <input id="quickDate" class="cfg-input" type="date" style="width:150px" /></label>
+            <label class="hint"><input id="quickPendingOnly" type="checkbox" checked /> 誘몄엯?λ쭔</label>
+            <button id="quickLoad" class="btn btn-primary">?봽 寃쎌＜ 遺덈윭?ㅺ린</button>
+            <button id="quickSaveAll" class="btn">?뮶 ?낅젰??寃쎌＜ ?꾩껜 ???/button>
             <span id="quickMsg" class="hint"></span>
           </div>
           <div id="quickEntryList" style="margin-top:10px"></div>
         </div>
 
-        <!-- 명예의전당 -->
+        <!-- 紐낆삁?섏쟾??-->
         <div class="subtab-panel" data-sub="hall" style="display:none">
-          <h3 style="font-size:15px;margin-top:0">🏆 고배당 명예의 전당</h3>
-          <p class="hint">복승 30배+ / 삼복승 100배+ 적중이 자동 등록됩니다. 카드를 누르면 추천 근거·배당 타임라인을 재현합니다.</p>
+          <h3 style="font-size:15px;margin-top:0">?룇 怨좊같??紐낆삁???꾨떦</h3>
+          <p class="hint">蹂듭듅 30諛? / ?쇰났??100諛? ?곸쨷???먮룞 ?깅줉?⑸땲?? 移대뱶瑜??꾨Ⅴ硫?異붿쿇 洹쇨굅쨌諛곕떦 ??꾨씪?몄쓣 ?ы쁽?⑸땲??</p>
           <div id="highlightWins" class="hl-grid"></div>
         </div>
 
-        <!-- 리포트 -->
+        <!-- 由ы룷??-->
         <div class="subtab-panel" data-sub="report" style="display:none">
-          <h3 style="font-size:15px;margin-top:0">📄 경주 재현 리포트</h3>
-          <p class="hint">결과 입력한 경주의 "왜 추천했는지"를 단계별 스토리·배당 타임라인·전적·이상감지로 재현합니다.</p>
+          <h3 style="font-size:15px;margin-top:0">?뱞 寃쎌＜ ?ы쁽 由ы룷??/h3>
+          <p class="hint">寃곌낵 ?낅젰??寃쎌＜??"??異붿쿇?덈뒗吏"瑜??④퀎蹂??ㅽ넗由?룸같????꾨씪?맞룹쟾?겶룹씠?곴컧吏濡??ы쁽?⑸땲??</p>
           <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap">
             <select id="reportSelect" class="cfg-input" style="flex:1;min-width:240px"></select>
-            <button id="reportLoad" class="btn btn-primary">리포트 열기</button>
-            <button id="reportRefresh" class="btn">목록 새로고침</button>
+            <button id="reportLoad" class="btn btn-primary">由ы룷???닿린</button>
+            <button id="reportRefresh" class="btn">紐⑸줉 ?덈줈怨좎묠</button>
           </div>
           <div id="raceReportView" style="margin-top:12px"></div>
-          <!-- [복기 저장] 확장 팝업 🧠 복기 저장으로 저장한 신호+결과 스냅샷 목록 -->
+          <!-- [蹂듦린 ??? ?뺤옣 ?앹뾽 ?쭬 蹂듦린 ??μ쑝濡???ν븳 ?좏샇+寃곌낵 ?ㅻ깄??紐⑸줉 -->
           <div style="margin-top:18px;border-top:1px solid #334155;padding-top:12px">
-            <h3 style="font-size:15px;margin:0 0 4px">🧠 확장 복기 로그 <span class="hint" style="font-weight:400">(팝업 🧠 복기 저장)</span></h3>
-            <p class="hint">확장 팝업에서 저장한 중요 신호(급락·역배열·스마트머니·확신도)+결과 묶음입니다.</p>
-            <button id="reviewLogRefresh" class="btn" style="margin-bottom:8px">복기 목록 새로고침</button>
+            <h3 style="font-size:15px;margin:0 0 4px">?쭬 ?뺤옣 蹂듦린 濡쒓렇 <span class="hint" style="font-weight:400">(?앹뾽 ?쭬 蹂듦린 ???</span></h3>
+            <p class="hint">?뺤옣 ?앹뾽?먯꽌 ??ν븳 以묒슂 ?좏샇(湲됰씫쨌??같?는룹뒪留덊듃癒몃땲쨌?뺤떊??+寃곌낵 臾띠쓬?낅땲??</p>
+            <button id="reviewLogRefresh" class="btn" style="margin-bottom:8px">蹂듦린 紐⑸줉 ?덈줈怨좎묠</button>
             <div id="reviewLogView"></div>
           </div>
         </div>
-        <!-- [분석기록] 검색 가능한 전 종목 분석/배팅 기록 -->
+        <!-- [遺꾩꽍湲곕줉] 寃??媛?ν븳 ??醫낅ぉ 遺꾩꽍/諛고똿 湲곕줉 -->
         <div class="subtab-panel" data-sub="records" style="display:none">
-          <h3 style="font-size:15px;margin-top:0">🔎 분석 기록 검색 <span class="hint" style="font-weight:400">전 종목(경마·경륜·경정·바이크·한국)</span></h3>
-          <p class="hint">배당을 수집·분석한 모든 경주가 자동으로 쌓입니다. <b>어떻게 분석했는지(유력마·이상감지·추천)와 결과·적중</b>을 검색해 복기하세요.</p>
+          <h3 style="font-size:15px;margin-top:0">?뵊 遺꾩꽍 湲곕줉 寃??<span class="hint" style="font-weight:400">??醫낅ぉ(寃쎈쭏쨌寃쎈쪣쨌寃쎌젙쨌諛붿씠??룻븳援?</span></h3>
+          <p class="hint">諛곕떦???섏쭛쨌遺꾩꽍??紐⑤뱺 寃쎌＜媛 ?먮룞?쇰줈 ?볦엯?덈떎. <b>?대뼸寃?遺꾩꽍?덈뒗吏(?좊젰留댟룹씠?곴컧吏쨌異붿쿇)? 寃곌낵쨌?곸쨷</b>??寃?됲빐 蹂듦린?섏꽭??</p>
           <div class="cfg-row" style="gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
-            <input id="recSearchInput" class="cfg-input" type="text" placeholder="🔎 경주명·날짜·유력마·요약 검색" style="flex:1;min-width:240px" />
-            <button id="recRefreshBtn" class="btn">목록 새로고침</button>
+            <input id="recSearchInput" class="cfg-input" type="text" placeholder="?뵊 寃쎌＜紐끒룸궇吏쑣룹쑀?λ쭏쨌?붿빟 寃?? style="flex:1;min-width:240px" />
+            <button id="recRefreshBtn" class="btn">紐⑸줉 ?덈줈怨좎묠</button>
           </div>
           <div id="recCatChips" style="display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px">
-            <button type="button" class="rec-cat-chip active" data-cat="all">전체</button>
-            <button type="button" class="rec-cat-chip" data-cat="horse">🏇 경마</button>
-            <button type="button" class="rec-cat-chip" data-cat="japan_local">🇯🇵 지방</button>
-            <button type="button" class="rec-cat-chip" data-cat="japan_central">🏇 중앙</button>
-            <button type="button" class="rec-cat-chip" data-cat="cycle">🚴 경륜</button>
-            <button type="button" class="rec-cat-chip" data-cat="boat">🚤 경정</button>
-            <button type="button" class="rec-cat-chip" data-cat="bike">🏍 바이크</button>
-            <button type="button" class="rec-cat-chip" data-cat="korea">🇰🇷 한국</button>
+            <button type="button" class="rec-cat-chip active" data-cat="all">?꾩껜</button>
+            <button type="button" class="rec-cat-chip" data-cat="horse">?룈 寃쎈쭏</button>
+            <button type="button" class="rec-cat-chip" data-cat="japan_local">?눓?눝 吏諛?/button>
+            <button type="button" class="rec-cat-chip" data-cat="japan_central">?룈 以묒븰</button>
+            <button type="button" class="rec-cat-chip" data-cat="cycle">?슫 寃쎈쪣</button>
+            <button type="button" class="rec-cat-chip" data-cat="boat">?슕 寃쎌젙</button>
+            <button type="button" class="rec-cat-chip" data-cat="bike">?룏 諛붿씠??/button>
+            <button type="button" class="rec-cat-chip" data-cat="korea">?눖?눟 ?쒓뎅</button>
           </div>
           <div class="cfg-row" style="gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 8px">
-            <label class="hint">정렬
+            <label class="hint">?뺣젹
               <select id="recSortSel" class="cfg-input" style="width:auto">
-                <option value="latest">최신순</option>
-                <option value="won">적중순</option>
-                <option value="pnl">손익순</option>
+                <option value="latest">理쒖떊??/option>
+                <option value="won">?곸쨷??/option>
+                <option value="pnl">?먯씡??/option>
               </select>
             </label>
-            <label class="hint">기간
+            <label class="hint">湲곌컙
               <select id="recPeriodSel" class="cfg-input" style="width:auto">
-                <option value="all">전체</option>
-                <option value="7d">최근 7일</option>
-                <option value="30d">최근 30일</option>
+                <option value="all">?꾩껜</option>
+                <option value="7d">理쒓렐 7??/option>
+                <option value="30d">理쒓렐 30??/option>
               </select>
             </label>
           </div>
           <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
-            <div id="recAnalysisList" style="flex:1;min-width:280px;max-height:70vh;overflow:auto"><p class="hint">불러오는 중…</p></div>
+            <div id="recAnalysisList" style="flex:1;min-width:280px;max-height:70vh;overflow:auto"><p class="hint">遺덈윭?ㅻ뒗 以묅?/p></div>
             <div id="recAnalysisDetail" style="flex:1.4;min-width:300px"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- [6번] 기수 DB -->
+    <!-- [6踰? 湲곗닔 DB -->
     <section id="tab-jockeydb" class="tab-panel">
       <div class="panel-card">
-        <h2>🏇 기수 DB (리딩 순위 · 거리/주로/마필 적성)</h2>
-        <p class="hint">기수별 성적은 결과기록 시 자동 갱신됩니다(거리·주로상태·기수-마필 조합·최근 30경주). 분석 시 자동 반영됩니다.</p>
+        <h2>?룈 湲곗닔 DB (由щ뵫 ?쒖쐞 쨌 嫄곕━/二쇰줈/留덊븘 ?곸꽦)</h2>
+        <p class="hint">湲곗닔蹂??깆쟻? 寃곌낵湲곕줉 ???먮룞 媛깆떊?⑸땲??嫄곕━쨌二쇰줈?곹깭쨌湲곗닔-留덊븘 議고빀쨌理쒓렐 30寃쎌＜). 遺꾩꽍 ???먮룞 諛섏쁺?⑸땲??</p>
         <div class="cfg-row">
-          <label class="hint">기수 상세<br><select id="jockeySelect" class="cfg-input" style="width:160px"></select></label>
+          <label class="hint">湲곗닔 ?곸꽭<br><select id="jockeySelect" class="cfg-input" style="width:160px"></select></label>
         </div>
         <div id="jockeyDbView"></div>
       </div>
     </section>
 
-    <!-- 통계 -->
+    <!-- ?듦퀎 -->
     <section id="tab-stats" class="tab-panel">
       <div class="panel-card">
-        <h2>통계 대시보드</h2>
+        <h2>?듦퀎 ??쒕낫??/h2>
         <div id="statsDashboard"></div>
       </div>
 
-      <!-- [경쟁 AI 벤치마킹] 저쪽 추천 vs 우리 추천 비교 통계 -->
+      <!-- [寃쎌웳 AI 踰ㅼ튂留덊궧] ?履?異붿쿇 vs ?곕━ 異붿쿇 鍮꾧탳 ?듦퀎 -->
       <div class="panel-card">
-        <h2>📊 경쟁 AI 분석 <span class="hint" style="font-weight:400;font-size:13px">저쪽 추천 vs 우리 추천 비교·역추산</span></h2>
-        <p class="hint">경쟁 AI 추천을 <code>py tools\register_competitor.py</code> 로 입력하면 축·연결마·적중을 우리와 비교해 누적합니다. 저쪽이 잘 맞히는 패턴(고배당·축 선정)을 역추산해 개선에 활용하세요.</p>
-        <div class="cfg-row"><button id="competitorRefresh" class="btn btn-primary">🔄 경쟁 분석 새로고침</button></div>
-        <div id="competitorPanel" style="margin-top:10px"><p class="hint">[경쟁 분석 새로고침]을 누르세요.</p></div>
+        <h2>?뱤 寃쎌웳 AI 遺꾩꽍 <span class="hint" style="font-weight:400;font-size:13px">?履?異붿쿇 vs ?곕━ 異붿쿇 鍮꾧탳쨌??텛??/span></h2>
+        <p class="hint">寃쎌웳 AI 異붿쿇??<code>py tools\register_competitor.py</code> 濡??낅젰?섎㈃ 異빧룹뿰寃곕쭏쨌?곸쨷???곕━? 鍮꾧탳???꾩쟻?⑸땲?? ?履쎌씠 ??留욏엳???⑦꽩(怨좊같?뮤룹텞 ?좎젙)????텛?고빐 媛쒖꽑???쒖슜?섏꽭??</p>
+        <div class="cfg-row"><button id="competitorRefresh" class="btn btn-primary">?봽 寃쎌웳 遺꾩꽍 ?덈줈怨좎묠</button></div>
+        <div id="competitorPanel" style="margin-top:10px"><p class="hint">[寃쎌웳 遺꾩꽍 ?덈줈怨좎묠]???꾨Ⅴ?몄슂.</p></div>
       </div>
 
-      <!-- [6번] 내 코멘트 모아보기 — 최고중요 경주·키워드 통계·near_miss 패턴 -->
+      <!-- [6踰? ??肄붾찘??紐⑥븘蹂닿린 ??理쒓퀬以묒슂 寃쎌＜쨌?ㅼ썙???듦퀎쨌near_miss ?⑦꽩 -->
       <div class="panel-card">
-        <h2>💬 내 코멘트 모아보기 <span class="hint" style="font-weight:400">(확장 팝업 결과입력 코멘트)</span></h2>
-        <p class="hint">경주 결과 저장 시 남긴 자유 코멘트를 모아봅니다. 중요도·키워드로 복기하세요.</p>
-        <div class="cfg-row"><button id="reviewStatsRefresh" class="btn btn-primary">🔄 코멘트 통계 새로고침</button></div>
-        <div id="reviewStatsView" style="margin-top:10px"><p class="hint">[코멘트 통계 새로고침]을 누르세요.</p></div>
+        <h2>?뮠 ??肄붾찘??紐⑥븘蹂닿린 <span class="hint" style="font-weight:400">(?뺤옣 ?앹뾽 寃곌낵?낅젰 肄붾찘??</span></h2>
+        <p class="hint">寃쎌＜ 寃곌낵 ??????④릿 ?먯쑀 肄붾찘?몃? 紐⑥븘遊낅땲?? 以묒슂?꽷룻궎?뚮뱶濡?蹂듦린?섏꽭??</p>
+        <div class="cfg-row"><button id="reviewStatsRefresh" class="btn btn-primary">?봽 肄붾찘???듦퀎 ?덈줈怨좎묠</button></div>
+        <div id="reviewStatsView" style="margin-top:10px"><p class="hint">[肄붾찘???듦퀎 ?덈줈怨좎묠]???꾨Ⅴ?몄슂.</p></div>
       </div>
 
-      <!-- [복기 학습] 실패 유형 분포 · 놓친 신호 패턴 · 자동 규칙 · 개선 전/후 -->
+      <!-- [蹂듦린 ?숈뒿] ?ㅽ뙣 ?좏삎 遺꾪룷 쨌 ?볦튇 ?좏샇 ?⑦꽩 쨌 ?먮룞 洹쒖튃 쨌 媛쒖꽑 ????-->
       <div class="panel-card">
-        <h2>📚 복기 학습 현황</h2>
+        <h2>?뱴 蹂듦린 ?숈뒿 ?꾪솴</h2>
         <div class="cfg-row">
-          <button id="failReviewRefresh" class="btn btn-primary">🔄 복기 통계 새로고침</button>
+          <button id="failReviewRefresh" class="btn btn-primary">?봽 蹂듦린 ?듦퀎 ?덈줈怨좎묠</button>
         </div>
-        <div id="failReviewDashboard" style="margin-top:10px"><p class="hint">[복기 통계 새로고침]을 누르세요. 미적중 경주가 쌓이면 실패 유형이 자동 분류됩니다.</p></div>
+        <div id="failReviewDashboard" style="margin-top:10px"><p class="hint">[蹂듦린 ?듦퀎 ?덈줈怨좎묠]???꾨Ⅴ?몄슂. 誘몄쟻以?寃쎌＜媛 ?볦씠硫??ㅽ뙣 ?좏삎???먮룞 遺꾨쪟?⑸땲??</p></div>
       </div>
 
-      <!-- [데이터 보호] 학습 코퍼스 자동/수동 GitHub 백업 현황 -->
+      <!-- [?곗씠??蹂댄샇] ?숈뒿 肄뷀띁???먮룞/?섎룞 GitHub 諛깆뾽 ?꾪솴 -->
       <div class="panel-card">
-        <h2>🛡️ 데이터 보호 (자동 GitHub 백업)</h2>
-        <p class="hint">결과를 입력하면 학습 코퍼스(결과·분석로그·AI학습·패턴)가 <b>자동으로 GitHub에 백업</b>됩니다(5초 디바운스). 아래에서 즉시 백업하거나 보호 현황을 확인할 수 있습니다.</p>
+        <h2>?썳截??곗씠??蹂댄샇 (?먮룞 GitHub 諛깆뾽)</h2>
+        <p class="hint">寃곌낵瑜??낅젰?섎㈃ ?숈뒿 肄뷀띁??寃곌낵쨌遺꾩꽍濡쒓렇쨌AI?숈뒿쨌?⑦꽩)媛 <b>?먮룞?쇰줈 GitHub??諛깆뾽</b>?⑸땲??5珥??붾컮?댁뒪). ?꾨옒?먯꽌 利됱떆 諛깆뾽?섍굅??蹂댄샇 ?꾪솴???뺤씤?????덉뒿?덈떎.</p>
         <div class="cfg-row">
-          <button id="dataBackupBtn" class="btn btn-primary">☁️ 지금 즉시 백업</button>
-          <button id="dataStatusBtn" class="btn">🔄 보호 현황</button>
+          <button id="dataBackupBtn" class="btn btn-primary">?곻툘 吏湲?利됱떆 諛깆뾽</button>
+          <button id="dataStatusBtn" class="btn">?봽 蹂댄샇 ?꾪솴</button>
           <span id="dataBackupMsg" class="hint" style="margin-left:6px"></span>
         </div>
         <div id="dataStatusView" style="margin-top:10px"></div>
       </div>
 
-      <!-- [5번] 고배당 적중 명예의 전당 -->
+      <!-- [5踰? 怨좊같???곸쨷 紐낆삁???꾨떦 -->
       <div class="panel-card">
-        <h2>🏆 고배당 적중 명예의 전당</h2>
+        <h2>?룇 怨좊같???곸쨷 紐낆삁???꾨떦</h2>
         <div class="cfg-row">
-          <button id="hallRefresh" class="btn btn-primary">🔄 새로고침</button>
-          <span class="hint">복승 30배+ / 삼복승 100배+ 적중이 자동 등록됩니다.</span>
+          <button id="hallRefresh" class="btn btn-primary">?봽 ?덈줈怨좎묠</button>
+          <span class="hint">蹂듭듅 30諛? / ?쇰났??100諛? ?곸쨷???먮룞 ?깅줉?⑸땲??</span>
         </div>
         <div id="hallOfFame" style="margin-top:10px"></div>
       </div>
 
-      <!-- [5번] 한국경마 경주별 분석 히스토리 (data/korea_history) -->
+      <!-- [5踰? ?쒓뎅寃쎈쭏 寃쎌＜蹂?遺꾩꽍 ?덉뒪?좊━ (data/korea_history) -->
       <div class="panel-card">
-        <h2>🏇 경주 분석 히스토리 (한국)</h2>
+        <h2>?룈 寃쎌＜ 遺꾩꽍 ?덉뒪?좊━ (?쒓뎅)</h2>
         <div class="cfg-row">
-          <button id="koreaHistRefreshBtn" class="btn btn-primary">🔄 목록 새로고침</button>
-          <button id="koreaHistBackupBtn" class="btn">☁️ GitHub 백업</button>
+          <button id="koreaHistRefreshBtn" class="btn btn-primary">?봽 紐⑸줉 ?덈줈怨좎묠</button>
+          <button id="koreaHistBackupBtn" class="btn">?곻툘 GitHub 諛깆뾽</button>
         </div>
         <div class="cfg-row" style="margin-top:12px;gap:16px;align-items:flex-start">
           <div style="min-width:250px">
-            <h3 style="font-size:14px">날짜 · 경마장별 경주</h3>
-            <div id="koreaHistList" class="report-area"><p class="hint">[목록 새로고침]을 누르세요.</p></div>
+            <h3 style="font-size:14px">?좎쭨 쨌 寃쎈쭏?λ퀎 寃쎌＜</h3>
+            <div id="koreaHistList" class="report-area"><p class="hint">[紐⑸줉 ?덈줈怨좎묠]???꾨Ⅴ?몄슂.</p></div>
           </div>
           <div style="flex:1">
-            <h3 style="font-size:14px">분석 상세 · 배당 타임라인</h3>
-            <div id="koreaHistDetail" class="report-area"><p class="hint">경주를 선택하면 당시 분석 결과 전체가 표시됩니다.</p></div>
+            <h3 style="font-size:14px">遺꾩꽍 ?곸꽭 쨌 諛곕떦 ??꾨씪??/h3>
+            <div id="koreaHistDetail" class="report-area"><p class="hint">寃쎌＜瑜??좏깮?섎㈃ ?뱀떆 遺꾩꽍 寃곌낵 ?꾩껜媛 ?쒖떆?⑸땲??</p></div>
           </div>
         </div>
       </div>
 
-      <!-- [5번] 배당 변동 히스토리 + 자동학습 대시보드 -->
+      <!-- [5踰? 諛곕떦 蹂???덉뒪?좊━ + ?먮룞?숈뒿 ??쒕낫??-->
       <div class="panel-card">
-        <h2>📈 배당 변동 히스토리 & 자동학습</h2>
+        <h2>?뱢 諛곕떦 蹂???덉뒪?좊━ & ?먮룞?숈뒿</h2>
         <div class="cfg-row">
-          <button id="histRefreshBtn" class="btn btn-primary">🔄 경주 목록 새로고침</button>
-          <button id="learnStatsBtn" class="btn">📊 학습 통계</button>
+          <button id="histRefreshBtn" class="btn btn-primary">?봽 寃쎌＜ 紐⑸줉 ?덈줈怨좎묠</button>
+          <button id="learnStatsBtn" class="btn">?뱤 ?숈뒿 ?듦퀎</button>
         </div>
         <div id="learnDashboard" style="margin-top:10px"></div>
         <div class="cfg-row" style="margin-top:12px;gap:16px;align-items:flex-start">
           <div style="min-width:230px">
-            <h3 style="font-size:14px">경주 목록</h3>
+            <h3 style="font-size:14px">寃쎌＜ 紐⑸줉</h3>
             <div id="histRaceList" class="report-area"></div>
           </div>
           <div style="flex:1">
-            <h3 style="font-size:14px">타임라인 · 이상감지 vs 결과</h3>
-            <div id="histTimeline" class="report-area"><p class="hint">경주를 선택하면 배당 변동 타임라인이 표시됩니다.</p></div>
+            <h3 style="font-size:14px">??꾨씪??쨌 ?댁긽媛먯? vs 寃곌낵</h3>
+            <div id="histTimeline" class="report-area"><p class="hint">寃쎌＜瑜??좏깮?섎㈃ 諛곕떦 蹂????꾨씪?몄씠 ?쒖떆?⑸땲??</p></div>
           </div>
         </div>
       </div>
 
-      <!-- [분석 로그] 완전 저장 시스템: 왜 이 말을 추천했는지까지 추적 -->
+      <!-- [遺꾩꽍 濡쒓렇] ?꾩쟾 ????쒖뒪?? ????留먯쓣 異붿쿇?덈뒗吏源뚯? 異붿쟻 -->
       <div class="panel-card">
-        <h2>📒 분석 로그 (완전 기록)</h2>
+        <h2>?뱬 遺꾩꽍 濡쒓렇 (?꾩쟾 湲곕줉)</h2>
         <div class="cfg-row">
-          <button id="logRefreshBtn" class="btn btn-primary">🔄 로그 목록</button>
-          <button id="logBackfillBtn" class="btn">📝 오늘 로그 즉시 생성</button>
-          <button id="logBackupBtn" class="btn">☁️ GitHub 백업</button>
+          <button id="logRefreshBtn" class="btn btn-primary">?봽 濡쒓렇 紐⑸줉</button>
+          <button id="logBackfillBtn" class="btn">?뱷 ?ㅻ뒛 濡쒓렇 利됱떆 ?앹꽦</button>
+          <button id="logBackupBtn" class="btn">?곻툘 GitHub 諛깆뾽</button>
         </div>
         <div id="logMsg" class="hint" style="margin-top:6px"></div>
         <div class="cfg-row" style="margin-top:12px;gap:16px;align-items:flex-start">
           <div style="min-width:240px">
-            <h3 style="font-size:14px">날짜별 경주</h3>
-            <div id="logRaceList" class="report-area"><p class="hint">[로그 목록]을 누르세요.</p></div>
+            <h3 style="font-size:14px">?좎쭨蹂?寃쎌＜</h3>
+            <div id="logRaceList" class="report-area"><p class="hint">[濡쒓렇 紐⑸줉]???꾨Ⅴ?몄슂.</p></div>
           </div>
           <div style="flex:1">
-            <h3 style="font-size:14px">분석 로그 상세 (입력·타임라인·추천 이유·결과)</h3>
-            <div id="logDetail" class="report-area"><p class="hint">경주를 선택하면 당시 분석 전 과정이 표시됩니다.</p></div>
+            <h3 style="font-size:14px">遺꾩꽍 濡쒓렇 ?곸꽭 (?낅젰쨌??꾨씪?맞룹텛泥??댁쑀쨌寃곌낵)</h3>
+            <div id="logDetail" class="report-area"><p class="hint">寃쎌＜瑜??좏깮?섎㈃ ?뱀떆 遺꾩꽍 ??怨쇱젙???쒖떆?⑸땲??</p></div>
           </div>
         </div>
       </div>
@@ -758,10 +758,10 @@
 
   <div id="loadingOverlay" class="loading-overlay hidden">
     <div class="spinner"></div>
-    <p id="loadingText">AI 분석 중...</p>
+    <p id="loadingText">AI 遺꾩꽍 以?..</p>
   </div>
 
-  <!-- [1번] 복승→쌍승 전환 카운트다운 오버레이 -->
+  <!-- [1踰? 蹂듭듅?믪뙇???꾪솚 移댁슫?몃떎???ㅻ쾭?덉씠 -->
   <div id="capCountdown" class="cap-countdown hidden"></div>
 
   <script src="js/matrix_board.js"></script>
@@ -769,27 +769,28 @@
   <script src="js/pdf-parser.js"></script>
   <script src="js/analysis.js"></script>
   <script src="js/history.js"></script>
-  <!-- 🔴 [2026-08-10] 버전 쿼리 — 브라우저가 옛 app.js 를 계속 쓰면 새 기능이 화면에 안 나온다.
-       「신호 이력」 버튼이 안 보인다는 보고가 이 경로로 한 번 났다(코드는 붙어 있었다).
-       ⚠ app.js 를 고칠 때 이 숫자도 함께 올릴 것. 안 올리면 같은 일이 또 난다. -->
-  <script src="js/app.js?v=20260810b"></script>
+  <!-- ?뵶 [2026-08-10] 踰꾩쟾 荑쇰━ ??釉뚮씪?곗?媛 ??app.js 瑜?怨꾩냽 ?곕㈃ ??湲곕뒫???붾㈃?????섏삩??
+       ?뚯떊???대젰??踰꾪듉????蹂댁씤?ㅻ뒗 蹂닿퀬媛 ??寃쎈줈濡???踰??щ떎(肄붾뱶??遺숈뼱 ?덉뿀??.
+       ??app.js 瑜?怨좎튌 ?????レ옄???④퍡 ?щ┫ 寃? ???щ━硫?媛숈? ?쇱씠 ???쒕떎. -->
+  <script src="js/app.js?v=20260810c"></script>
   <script>
-    // [4번] KRA data.go.kr API 키 저장/상태 (fetch_kra.py 와 data/kra_key.txt 공유)
+    // [4踰? KRA data.go.kr API ??????곹깭 (fetch_kra.py ? data/kra_key.txt 怨듭쑀)
     (function () {
       var inp = document.getElementById('kraKeyInput');
       var btn = document.getElementById('kraKeySave');
       var st = document.getElementById('kraKeyStatus');
-      function setStatus(has) { st.textContent = has ? '🟢 저장됨' : '⬜ 미설정'; }
+      function setStatus(has) { st.textContent = has ? '?윟 ??λ맖' : '燧?誘몄꽕??; }
       fetch('/api/kra/key').then(function (r) { return r.json(); })
         .then(function (d) { setStatus(d.hasKey); }).catch(function () {});
       btn.addEventListener('click', function () {
         var key = inp.value.trim();
         fetch('/api/kra/key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key }) })
           .then(function (r) { return r.json(); })
-          .then(function (d) { setStatus(d.hasKey); inp.value = ''; alert(d.hasKey ? '✅ KRA API 키 저장됨\n\n수집: python tools/fetch_kra.py --from 20260101 --to 20260131 --jockeys' : '키가 비어 있습니다.'); })
-          .catch(function () { alert('저장 실패 — 서버 확인'); });
+          .then(function (d) { setStatus(d.hasKey); inp.value = ''; alert(d.hasKey ? '??KRA API ????λ맖\n\n?섏쭛: python tools/fetch_kra.py --from 20260101 --to 20260131 --jockeys' : '?ㅺ? 鍮꾩뼱 ?덉뒿?덈떎.'); })
+          .catch(function () { alert('????ㅽ뙣 ???쒕쾭 ?뺤씤'); });
       });
     })();
   </script>
 </body>
 </html>
+

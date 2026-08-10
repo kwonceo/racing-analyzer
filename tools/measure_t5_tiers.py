@@ -125,7 +125,23 @@ def collect(pattern):
             r = pay / mk if mk else None
             if r is not None and not (CLEAN_LO <= r <= CLEAN_HI):
                 continue
-        rows.append({"rk": rk, "main": main, "late": last - main,
+        # 💎 컷 고배당 — 서버와 **같은 함수**를 쓴다(규칙을 두 곳에 두지 않는다).
+        dark = set()
+        try:
+            import importlib.util
+            if not hasattr(collect, "_appmod"):
+                sp = importlib.util.spec_from_file_location(
+                    "appmod_t5", os.path.join(ROOT, "app.py"))
+                m = importlib.util.module_from_spec(sp)
+                sp.loader.exec_module(m)
+                collect._appmod = m
+            cp = doc.get("corePicks") or {}
+            for x in (collect._appmod._cut_tier_candidates(rk, doc, cp) or []):
+                if x.get("tier") == "dark" and len(x.get("combo") or []) == 2:
+                    dark.add(tuple(sorted(int(v) for v in x["combo"])))
+        except Exception:
+            dark = set()
+        rows.append({"rk": rk, "main": main, "late": last - main, "dark": dark,
                      "last": last, "top2": top2, "pay": pay})
     return rows
 
@@ -186,6 +202,11 @@ def main():
         ("★ 본선만", lambda r: r["main"]),
         ("⚡ 추가만", lambda r: r["late"]),
         ("★+⚡ 전체(동결 적용)", lambda r: r["main"] | r["late"]),
+        # 🔴 [배당 컷 등급 (2026-08-10)] 컷에 걸려 화면에서 사라지던 조합을 등급으로 살렸다.
+        #   회원이 고를 수 있는 조합마다 따로 재야 한다 — 하나의 회수율은 의미가 없다.
+        ("★+💎 (본선+컷 고배당)", lambda r: r["main"] | r["dark"]),
+        ("💎 컷 고배당만", lambda r: r["dark"]),
+        ("전체(★+⚡+💎)", lambda r: r["main"] | r["late"] | r["dark"]),
     ]
     print()
     for name, f in plans:
