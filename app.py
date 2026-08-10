@@ -9511,6 +9511,7 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
     #   짝 선택은 **단승 최저(머리)가 낀 것 우선** — 대표 지시 「머리로 팔리는 말의 짝은 필수」.
     #   ⚠ 순위 순(②-A)보다 소급이 낫다: 한계 100.3% → **103.1%** · 3제외 79.6 → **80.5%**.
     #   ⚠ 단승이 없는 종목(경륜)에서는 자연히 순위 순과 같아진다 — 별도 분기를 두지 않는다.
+    _KP_MARK = []                                     # 이 경주에서 편입한 유력마 짝(상한 면제용)
     try:
         if KEY_PAIR_ENABLED:
             _kh2 = []
@@ -9552,12 +9553,14 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                         if tuple(sorted((int(_a2), int(_b2)))) == _pick:
                             _od2 = _o3
                             break
-                    final_q.append({
+                    _kp_new = {
                         "combo": list(_pick), "odds": _od2, "stars": 3, "keyPair": True,
                         "reason": "유력마끼리 짝(%s) — 축 하나로만 쓰던 유력마를 교차"
                                   % "+".join(str(x) for x in _pick),
                         "basis": _combo_basis(list(_pick)),
-                        "summary": "유력마 교차(필수 편입)"})
+                        "summary": "유력마 교차(필수 편입)"}
+                    final_q.append(_kp_new)
+                    _KP_MARK.append(_kp_new)          # 🔴 반환 직전 상한 면제에서 되살릴 목록
                     _gate_hit("key_pair", rk=None,
                               reason="편입 %s" % "+".join(str(x) for x in _pick))
     except Exception as _kpe:
@@ -9582,6 +9585,24 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                 _dansung_suspect = True
         except (TypeError, ValueError):
             _dansung_suspect = False
+    # 🔴 [유력마 짝 상한 면제 (2026-08-10 승인)] 편입은 됐는데 **개수 상한에서 잘려** 최종 명단에
+    #   안 남는 경주가 있었다(다치카와 8R: 유력마 2·7·4·5 인데 추천 4+7·2+7·1+7 로 max_q=3 이 꽉 참).
+    #   ⚠ 위치 이동이 아니라 **면제**로 간다 — 소급 측정이 구좌 3,360 → 4,908 로 늘어난 값이라
+    #     다른 조합을 밀어내면 그 측정과 달라진다. 대표 결정: 구좌 증가는 문제가 아니다.
+    #   ⚠ **다른 조합은 지금대로 상한을 지킨다** — 여기서는 keyPair 표식이 붙은 것만 되살린다.
+    try:
+        if KEY_PAIR_ENABLED and _KP_MARK:
+            _cur_set = {tuple(sorted(int(x) for x in (q.get("combo") or []))) for q in final_q}
+            for _kp_item in _KP_MARK:
+                _kk = tuple(sorted(int(x) for x in (_kp_item.get("combo") or [])))
+                if len(_kk) == 2 and _kk not in _cur_set:
+                    final_q.append(_kp_item)
+                    _cur_set.add(_kk)
+                    _gate_hit("key_pair_exempt", rk=None,
+                              reason="상한 면제 복원 %s" % "+".join(str(x) for x in _kk))
+    except Exception as _kpx:
+        print("[유력마짝] 상한 면제 실패(무시):", _kpx)
+
     return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
             # [배지 숨김] 오염 의심 시 dansung 표시 플래그만 False(배지 미표시) — dansungPlan/편성은 보존(판정 무관)
             "dansung": bool(DANSUNG and not _dansung_suspect), "dansungSuspect": _dansung_suspect,
