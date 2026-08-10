@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "코치 3경주",
-      "horse_no": 8,
-      "recent_avg": 8.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-02"
-    },
-    {
-      "race": "코치 3경주",
       "horse_no": 2,
       "recent_avg": 7.4,
       "win_place": 3,
@@ -4803,16 +4793,24 @@
         "복승이상감지"
       ],
       "date": "2026-08-10"
+    },
+    {
+      "race": "우라와 11경주",
+      "horse_no": 11,
+      "recent_avg": 6.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-10"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3098,
-      "hit": 561
+      "count": 3105,
+      "hit": 562
     },
     "전체부진마": {
-      "count": 5399,
-      "hit": 1451
+      "count": 5407,
+      "hit": 1452
     },
     "대규모급락": {
       "count": 18,
@@ -4822,7 +4820,7 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2301,
+      "count": 2302,
       "hit": 890
     },
     "급락동반": {
