@@ -1660,13 +1660,20 @@
           //   마쓰도 4R: 보조 1+2+5가 화면 밖에서 적중 → 이제 여기서 실시간으로 볼 수 있게(소형·회색 점선).
           var _aux = _ft.slice(2);
           if (_aux.length) {
+            // 🔴 [화면 축소 (2026-08-10)] 판정 제외인데 4줄이 늘 보여 화면을 채웠다 → **접는다.**
+            //   ⚠ 목록·개수는 그대로다(무삭제). 기본 상태만 접힘으로 바꿨다.
             var auxBox = mk('div', 'margin-top:5px;padding:5px 8px;border:1px dashed #64748b;border-radius:7px;background:rgba(100,116,139,.10)');
-            auxBox.appendChild(mk('div', 'font-weight:700;color:#94a3b8;font-size:11.5px', '🧩 보조 조합 (참고 · 적중 판정 제외)'));
+            var _adt = document.createElement('details');
+            var _asm = document.createElement('summary');
+            _asm.style.cssText = 'cursor:pointer;font-weight:700;color:#94a3b8;font-size:11.5px;user-select:none';
+            _asm.textContent = '🧩 보조 조합 ' + Math.min(4, _aux.length) + '개 (참고 · 적중 판정 제외)';
+            _adt.appendChild(_asm);
             _aux.slice(0, 4).forEach(function (t) {
               var _aod = t.odds != null ? (t.oddsEst ? ' (~' + t.odds + '배·추정)' : ' (' + t.odds + '배)') : '';   // [추정 표기]
-              auxBox.appendChild(mk('div', 'font-size:12.5px;color:#cbd5e1;margin-top:2px',
+              _adt.appendChild(mk('div', 'font-size:12.5px;color:#cbd5e1;margin-top:2px',
                 '삼복승 ' + (t.combo || []).join('+') + _aod + (t.reason ? ' · ' + t.reason : '')));
             });
+            auxBox.appendChild(_adt);
             cpBox.appendChild(auxBox);
           }
           // 🔴 [배당 컷 등급 (2026-08-10 대표 결정)] 「자르지 말고 표시로 나누고 회원이 결정한다」
@@ -1674,20 +1681,40 @@
           //   ⚠ 판정 명단이 아니다(적중 판정 제외) · 컷 상수·`_final_picks` 무변경 — 표시 계층 전용.
           //   실물: 오비히로 3R 정답 4+9(49.3배)가 여기 뜬다(9번 전적 1위 · 4번 시장 2위).
           try {
+            // 🔴 [화면 축소 (2026-08-10 대표)] 「너무 많다 헷갈린다」 — 조합이 스물 몇 개 나왔다.
+            //   ⇒ 💎 는 **딱 하나**만 기본 노출한다(전적 순위가 가장 높은 것 = 서버 정렬 1순위).
+            //     ⚠ 참고 6개는 「근거 약함」이라고 스스로 적어 둔 것들이다 — **접는다.**
+            //   ⚠ 데이터는 그대로 온다(판정·측정 무영향). 화면에서만 접는다.
             var _ct = (d.recTrail && d.recTrail.cutTiers) || (cp && cp.cutTiers) || [];
             if (_ct.length) {
-              var ctBox = mk('div', 'margin-top:8px;padding:7px 9px;border:1px dashed #f59e0b;border-radius:8px;background:rgba(245,158,11,.09)');
-              ctBox.appendChild(mk('div', 'font-weight:800;color:#fbbf24;font-size:13px', '🎯 배당 컷에 걸린 조합 (참고 · 판정 제외)'));
-              _ct.slice(0, 6).forEach(function (x) {
-                var _c2 = (x.combo || []).join('+');
-                var _o2 = x.odds != null ? '  (' + x.odds + '배)' : '';
-                ctBox.appendChild(mk('div', 'font-weight:800;font-size:13.5px;margin-top:3px;color:'
-                  + (x.tier === 'dark' ? '#fcd34d' : '#cbd5e1'),
-                  (x.tierLabel || '') + ' ' + _c2 + _o2));
-                if (x.reason) {
-                  ctBox.appendChild(mk('div', 'font-size:11px;color:#94a3b8;margin-left:10px', x.reason));
-                }
+              var _dark1 = null, _rest = [];
+              _ct.forEach(function (x) {
+                if (!_dark1 && x.tier === 'dark') { _dark1 = x; return; }
+                _rest.push(x);
               });
+              var ctBox = mk('div', 'margin-top:8px;padding:7px 9px;border:1px dashed #f59e0b;border-radius:8px;background:rgba(245,158,11,.09)');
+              if (_dark1) {
+                ctBox.appendChild(mk('div', 'font-weight:800;font-size:14px;color:#fcd34d',
+                  (_dark1.tierLabel || '💎 고배당') + ' ' + (_dark1.combo || []).join('+')
+                  + (_dark1.odds != null ? '  (' + _dark1.odds + '배)' : '')));
+                if (_dark1.reason) {
+                  ctBox.appendChild(mk('div', 'font-size:11px;color:#94a3b8;margin-left:10px', _dark1.reason));
+                }
+              }
+              if (_rest.length) {
+                var _dt = document.createElement('details');
+                _dt.style.cssText = 'margin-top:4px';
+                var _sm = document.createElement('summary');
+                _sm.style.cssText = 'cursor:pointer;font-size:11.5px;color:#94a3b8;user-select:none';
+                _sm.textContent = '컷에 걸린 나머지 ' + _rest.length + '개 (근거 약함 · 판정 제외)';
+                _dt.appendChild(_sm);
+                _rest.forEach(function (x) {
+                  _dt.appendChild(mk('div', 'font-size:12px;color:#cbd5e1;margin-top:2px',
+                    (x.tierLabel || '') + ' ' + (x.combo || []).join('+')
+                    + (x.odds != null ? '  (' + x.odds + '배)' : '')));
+                });
+                ctBox.appendChild(_dt);
+              }
               cpBox.appendChild(ctBox);
             }
           } catch (_ce) { /* 표시 실패는 무시 — 추천 본문에 영향 주지 않는다 */ }

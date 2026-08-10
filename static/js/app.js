@@ -2629,35 +2629,62 @@
     if (rt.confTop1 != null) h += `<div class="hint" style="margin-top:4px">확신도 1위: ${esc(String(rt.confTop1))}번${rt.confTop1Conf != null ? ` (${esc(String(rt.confTop1Conf))}점)` : ''}</div>`;
     // [표시=판정 일치 (2026-07-21)] 복승 전체 + 삼복승 상위 2 = 화면 표시·판정 대상 / 그 외 = 보조(판정 제외)
     h += `<div class="hint" style="margin-top:2px;font-size:11.5px">판정 대상 = 복승 전체 + 삼복승 상위 2 (마감 시점 동결) · 나머지는 보조(참고)</div>`;
-    (rt.quinellas || []).forEach((q) => { h += row(q, '복승', '#38d39f'); });
-    (rt.trifectas || []).forEach((t, i) => { h += row(t, i < 2 ? '삼복승' : '삼복승·보조(판정제외)', i < 2 ? '#4ea1ff' : '#94a3b8'); });
-    (rt.special || []).forEach((s) => { h += row(s, '💎복병(판정제외)', '#c084fc'); });
+    // 🔴 [화면 축소 (2026-08-10 대표)] 「너무 많다 헷갈린다」 — 스물 몇 줄이 한 번에 나왔다.
+    //   기본은 **복승 3 · 삼복승 2 · 💎 1** 만 보이고 나머지는 전부 접는다.
+    //   ⚠ 목록·개수·판정은 그대로다(무삭제). **기본 상태만** 접힘으로 바꿨다.
+    const _fold = (label, items, fn) => {
+      if (!items.length) return '';
+      return `<details style="margin-top:3px"><summary style="cursor:pointer;font-size:11.5px;color:#94a3b8;user-select:none">${esc(label)}</summary>`
+        + items.map(fn).join('') + `</details>`;
+    };
+    const _q = rt.quinellas || [];
+    _q.slice(0, 3).forEach((q) => { h += row(q, '복승', '#38d39f'); });
+    h += _fold(`복승 나머지 ${_q.length - 3}개`, _q.slice(3), (q) => row(q, '복승', '#94a3b8'));
+    // 🔴 삼복승·복병은 **통째로 접는다** — 대표 지시는 「복승 3 · 💎 1 · ⚠ 1줄」이다.
+    //   ⚠ 삼복승 상위 2는 판정 대상이지만 **메인 추천 박스에 이미 크게 나온다**(중복 노출).
+    //     여기서는 접어도 정보가 사라지지 않는다. 목록·판정 무변경.
+    const _t = rt.trifectas || [];
+    h += _fold(`삼복승 ${_t.length}개 (상위 2 판정 대상 · 나머지 보조)`, _t,
+      (t, i) => row(t, i < 2 ? '삼복승' : '삼복승·보조', i < 2 ? '#4ea1ff' : '#94a3b8'));
+    const _s = rt.special || [];
+    h += _fold(`💎복병 ${_s.length}개 (판정 제외)`, _s, (s) => row(s, '💎복병', '#c084fc'));
     // 🔴 [배당 컷을 등급으로 (2026-08-10 대표 결정)] 「자르지 말고 표시로 나누고 회원이 결정한다」
     //   메인 컷(경륜 5배·경마 20~35배)에 걸려 **화면에서 통째로 사라지던** 조합을 여기 되살린다.
     //   ⚠ 판정 명단이 아니다 — 회원이 고를 수 있게 보여주는 것뿐이고 컷 상수는 그대로다.
     //   실물: 2026-08-10 오비히로 3R 정답 4+9(49.3배)가 이 목록 3번째에 뜬다(9번 전적 1위·4번 시장 2위).
-    if ((rt.cutTiers || []).length) {
-      h += `<div style="font-weight:700;color:#c084fc;font-size:12px;margin-top:8px">🎯 배당 컷에 걸린 조합 (판정 제외 · 참고)</div>`;
-      (rt.cutTiers || []).forEach((x) => {
+    // 🔴 💎 는 **딱 하나**만 기본 노출(서버 정렬 1순위 = 전적 순위가 가장 높은 것).
+    //   ⚠ 참고 6개는 스스로 「근거 약함」이라 적어 둔 것들이다 — 여덟 개를 다 보이면 못 고른다.
+    const _ct = rt.cutTiers || [];
+    if (_ct.length) {
+      const _d1 = _ct.find((x) => x.tier === 'dark');
+      const _cr = _ct.filter((x) => x !== _d1);
+      const _crow = (x) => {
         const col = x.tier === 'dark' ? '#f59e0b' : '#94a3b8';
-        h += `<div style="font-size:12.5px;margin-top:3px"><b style="color:${col}">${esc(x.tierLabel || '')}</b> `
+        return `<div style="font-size:12.5px;margin-top:3px"><b style="color:${col}">${esc(x.tierLabel || '')}</b> `
           + `<b>${esc((x.combo || []).join('+'))}</b>${x.odds != null ? ` · ${esc(String(x.odds))}배` : ''}`
           + `<div class="hint" style="margin-left:12px;font-size:11px">${esc(x.reason || '')}`
           + `${(x.rank || []).length ? ` · 전적순위 ${esc((x.rank || []).join('/'))}` : ''}`
           + `${(x.mktRank || []).length ? ` · 시장순위 ${esc((x.mktRank || []).join('/'))}` : ''}</div></div>`;
-      });
+      };
+      h += `<div style="font-weight:700;color:#c084fc;font-size:12px;margin-top:8px">🎯 배당 컷에 걸린 조합 (판정 제외 · 참고)</div>`;
+      if (_d1) h += _crow(_d1);
+      h += _fold(`컷에 걸린 나머지 ${_cr.length}개 (근거 약함)`, _cr, _crow);
     }
     // 🔴 [빠진 조합] 대표가 매번 물어봐야 알던 것 — 부산 4R 5+8 이 4초만 본선이었고 96배였다.
-    if ((rt.lost || []).length) {
-      h += `<div style="font-weight:700;color:#f87171;font-size:12px;margin-top:8px">🔴 한 번 올라왔다 빠진 조합</div>`;
-      (rt.lost || []).forEach((x) => {
-        h += `<div style="font-size:12.5px;margin-top:2px;color:#fca5a5"><b>${esc(x.combo || '')}</b>`
-          + (x.odds != null ? ` · <b>${esc(String(x.odds))}배</b>` : ' · <span class="hint">배당 미상</span>')
-          + ` <span class="hint">${esc(x.at || '')}${x.mb != null ? ' · 마감 ' + esc(String(x.mb)) + '분 전' : ''} · ${esc(x.src || '')}</span></div>`;
-      });
+    // ⚠ 주의 1줄 — 빠진 조합은 **한 줄로 요약**하고 상세는 접는다(3초에 읽혀야 한다).
+    const _ls = rt.lost || [];
+    if (_ls.length) {
+      const _top = _ls.slice().sort((a, b) => (b.odds || 0) - (a.odds || 0))[0];
+      h += `<div style="font-size:12.5px;margin-top:8px;color:#fca5a5"><b>⚠ 빠진 조합 ${_ls.length}개</b>`
+        + ` — 최고 <b>${esc(_top.combo || '')}</b>${_top.odds != null ? ` ${esc(String(_top.odds))}배` : ''}</div>`;
+      h += _fold(`빠진 조합 전체 보기`, _ls, (x) =>
+        `<div style="font-size:12px;margin-top:2px;color:#fca5a5">${esc(x.combo || '')}`
+        + (x.odds != null ? ` · ${esc(String(x.odds))}배` : '')
+        + ` <span class="hint">${esc(x.at || '')}${x.mb != null ? ' · 마감 ' + esc(String(x.mb)) + '분 전' : ''}</span></div>`);
     }
     if ((rt.history || []).length) {
-      h += `<div style="font-weight:700;color:#94a3b8;font-size:12px;margin-top:6px">추천 변경 이력</div>`;
+      // 🔴 이력 14줄이 늘 펼쳐져 있어 화면의 절반을 차지했다 — 접는다(내용 무삭제).
+      h += `<details style="margin-top:6px"><summary style="cursor:pointer;font-weight:700;color:#94a3b8;font-size:12px;user-select:none">추천 변경 이력 ${(rt.history || []).length}줄</summary>`;
       // 🔴 직전 행과 비교해 **무엇이 붙고 빠졌는지**를 함께 보인다(종전엔 결과만 나열해 변화가 안 보였다).
       let _prev = null;
       (rt.history || []).forEach((e) => {
@@ -2678,6 +2705,7 @@
           + `${e.minutes_before != null ? ` (T-${esc(String(e.minutes_before))})` : ''}${e.closed ? ' 🔒' : ''}`
           + ` — ${esc(parts.join(' · ') || '—')}${chg}</div>`;
       });
+      h += `</details>`;
     }
     h += `</div>`;
     return h;
