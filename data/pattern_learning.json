@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "코치 9경주",
-      "horse_no": 8,
-      "recent_avg": 6.8,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-08-01"
-    },
-    {
-      "race": "코치 9경주",
-      "horse_no": 10,
-      "recent_avg": 4.4,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-01"
-    },
-    {
-      "race": "코치 9경주",
-      "horse_no": 11,
-      "recent_avg": 6.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-01"
-    },
-    {
       "race": "코치 10경주",
       "horse_no": 3,
       "recent_avg": 4.4,
@@ -4798,16 +4772,46 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-08-10"
+    },
+    {
+      "race": "카나자와 1경주",
+      "horse_no": 7,
+      "recent_avg": 5.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "카나자와 1경주",
+      "horse_no": 1,
+      "recent_avg": 5.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "카나자와 1경주",
+      "horse_no": 2,
+      "recent_avg": 5.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3033,
+      "count": 3034,
       "hit": 548
     },
     "전체부진마": {
-      "count": 5254,
-      "hit": 1414
+      "count": 5260,
+      "hit": 1417
     },
     "대규모급락": {
       "count": 18,
@@ -4817,8 +4821,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2221,
-      "hit": 866
+      "count": 2226,
+      "hit": 869
     },
     "급락동반": {
       "count": 457,
