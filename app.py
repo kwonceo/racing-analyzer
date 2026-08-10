@@ -13438,6 +13438,27 @@ def _apply_t5_freeze(rk, an):
                                     "late": sum(1 for q in fq if q.get("pickTier") == "late")}}
         return
     # ── 삭제 발생 ── 🔴 막았을 때와 안 막았을 때를 둘 다 기록한다
+    # ⚠ [2026-08-10] 같은 삭제 집합이 폴링마다 다시 기록돼 하루 530건으로 불었다.
+    #   **집합이 바뀔 때만** 남긴다(내용 동일하면 침묵) — 로그가 도배되면 읽지 않게 된다.
+    _lost_key = "|".join("+".join(str(x) for x in c) for c in lost)
+    if st.get("lastLost") == _lost_key:
+        an["t5Freeze"] = {"frozen": True, "at": st["at"], "mb": st["mb"], "n": len(st["combos"]),
+                          "lost": ["+".join(str(x) for x in c) for c in lost],
+                          "enabled": bool(T5_FREEZE_ENABLED), "repeat": True}
+        if T5_FREEZE_ENABLED:                        # 복원은 계속 해야 한다(로그만 생략)
+            try:
+                for c in lost:
+                    _it = dict((st.get("items") or {}).get(c) or {})
+                    _it["combo"] = list(c)
+                    _it["t5Restored"] = True
+                    _it["reason"] = ((_it.get("reason") or "") + " · T-5 확정 후 삭제 금지(복원)").strip(" ·")
+                    fq.append(_it)
+                cp["finalQuinellas"] = fq
+                _t5_mark_tiers(fq, _base)
+            except Exception:
+                pass
+        return
+    st["lastLost"] = _lost_key
     _gate_hit("t5_freeze", rk=rk, reason="T-5 이후 삭제 감지")
     _now = ["+".join(str(x) for x in c) for c in sorted(cur_set)]
     _with = ["+".join(str(x) for x in c) for c in sorted(cur_set | set(lost))]
@@ -35268,6 +35289,19 @@ def _timeline_snap_tick(races, now, db):
                              .get("displayedCombos")) or {}
                 _fq2 = {tuple(sorted(int(x) for x in c)) for c in (_dcf2.get("quinellas") or [])}
                 _ft2 = {tuple(sorted(int(x) for x in c)) for c in (_dcf2.get("trifectas") or [])}
+                # 🔴 [2026-08-10] T-5 복원분은 **알림에서 뺀다.**
+                #   복원은 「새 신호」가 아니라 「아까 있던 것을 되살린 것」이다. 그걸 '추천 변경'
+                #   으로 보내면 회원은 번복으로 읽는다(대표 신고: 「신호가 계속 온다」).
+                #   실측: 오늘 즉시변경 15건 중 **5건이 T5 복원분** 때문에 나갔다.
+                #   ⚠ 화면·판정 명단에는 그대로 남는다 — **카톡에서만** 뺀다.
+                _t5r = set()
+                try:
+                    _cpf2 = (json.load(open(_lpc2, encoding="utf-8")) or {}).get("corePicks") or {}
+                    for _q5 in (_cpf2.get("finalQuinellas") or []):
+                        if _q5.get("t5Restored") and len(_q5.get("combo") or []) == 2:
+                            _t5r.add(tuple(sorted(int(x) for x in _q5["combo"])))
+                except Exception:
+                    _t5r = set()
                 _sq2 = {tuple(c) for c in (_ks_l.get("quinellas") or [])}
                 _st2 = {tuple(c) for c in (_ks_l.get("trifectas") or [])}
                 if (_fq2 or _ft2) and (_fq2 != _sq2 or _ft2 != _st2):
@@ -35279,13 +35313,13 @@ def _timeline_snap_tick(races, now, db):
                     _after_t2 = left <= 120
                     _title2 = "🔁 %s 추천 변경" % rk
                     if _after_t2:
-                        if (_fq2 - _sq2) and not (_sq2 - _fq2):
-                            _ln2.append("복승 추가 방어: " + _fmt2(_fq2 - _sq2))
+                        if ((_fq2 - _sq2) - _t5r) and not (_sq2 - _fq2):
+                            _ln2.append("복승 추가 방어: " + _fmt2((_fq2 - _sq2) - _t5r))
                             _title2 = "➕ %s 추가 방어" % rk
                         # 그 외(복승 제외·교체·삼복승 변경)는 T-2 이후 발송 안 함 → _ln2 비어 무발송
                     else:
-                        if _fq2 - _sq2:
-                            _ln2.append("복승 추가: " + _fmt2(_fq2 - _sq2))
+                        if (_fq2 - _sq2) - _t5r:            # 🔴 복원분 제외
+                            _ln2.append("복승 추가: " + _fmt2((_fq2 - _sq2) - _t5r))
                         if _sq2 - _fq2:
                             _ln2.append("복승 제외: " + _fmt2(_sq2 - _fq2))
                         if _ft2 - _st2:
