@@ -13294,7 +13294,10 @@ _GRADE_LOCK = {}
 #  ⚠ mb 가 없는 경주(deadline 미상)에는 걸지 않는다. 틀린 mb 로 동결하면 엉뚱한 시점이 확정된다.
 #  🔴 첫날은 **로그만**(T5_FREEZE_ENABLED=False) — 막았을 때와 안 막았을 때를 둘 다 기록한다.
 #    롤백은 이 한 줄을 False 로 되돌리는 것뿐이다.
-T5_FREEZE_ENABLED = False        # 🔴 True 로 바꾸면 실제 복원(표시·판정 반영). False = 로그만.
+# 🔴 [2026-08-10 대표 결정] **구좌 증가는 문제가 아니다. 표시만 제대로 하고 회원이 결정한다.**
+#   「구좌를 넘는 개선이 있어야 실적용」이라는 종전 조건은 **철회됐다.**
+#   ⇒ 실적용으로 켠다. 롤백은 이 한 줄을 False 로 되돌리는 것뿐이다.
+T5_FREEZE_ENABLED = True         # 🔴 True = 실제 복원(표시·판정 반영). False = 로그만.
 T5_FREEZE_MB = 5                 # 확정 시작 시점(분)
 _T5_FROZEN = {}                  # {rk: {"day","combos":set,"at","mb","n"}}
 #   ⚠ 이 프로젝트에 BASE_DIR 는 없다. DET_REVIEW_DIR(15642) 와 같은 방식을 그대로 쓴다.
@@ -13324,6 +13327,34 @@ def _t5_combos(fq):
     return out
 
 
+# ══════════ [추천 등급 3분류 (2026-08-10 대표 지시)] ══════════
+#  왜: 우리가 구좌를 정하지 않는다. **회원이 등급을 보고 고른다.**
+#    그래서 하나의 명단·하나의 회수율이 아니라 「무엇이 본선이고 무엇이 나중에 붙은 것인가」를
+#    화면에서 갈라 보여준다.
+#  🔴 **정정이 아니라 추가다.** "아까 것 취소"가 아니라 "이것도 붙일 만합니다" 라는 뜻으로 읽혀야 한다.
+#    그래서 late 의 문구를 「추가」로 고정하고, main 을 빼거나 순서를 밀지 않는다.
+T5_TIER_MAIN = ("main", "★ 본선", "T-5 확정 — 마감 5분 전에 이미 올라와 있던 조합")
+T5_TIER_LATE = ("late", "⚡ 마감 신호", "T-5 이후 **추가**된 조합 — 앞의 본선을 취소하는 것이 아니다")
+T5_TIER_DARK = ("dark", "💎 복병", "고배당 한 자리 — 신호가 붙은 고배당 조합")
+
+
+def _t5_mark_tiers(fq, frozen):
+    """복승 목록에 등급 표식을 붙인다. **순서·개수는 바꾸지 않는다**(표시 계층 전용).
+
+    frozen 이 None 이면(아직 T-5 전) 전부 본선으로 둔다 — 그 시점엔 '나중에 붙은 것'이 없다.
+    """
+    for _q in (fq or []):
+        _c = _q.get("combo") or []
+        if len(_c) != 2:
+            continue
+        try:
+            _k = tuple(sorted(int(x) for x in _c))
+        except (TypeError, ValueError):
+            continue
+        _t = T5_TIER_MAIN if (frozen is None or _k in frozen) else T5_TIER_LATE
+        _q["pickTier"], _q["tierLabel"], _q["tierNote"] = _t
+
+
 def _t5_items(fq):
     """조합 → 원본 항목(배당·근거) 매핑. 복원 시 빈 껍데기가 아니라 원래 값을 되살리기 위함."""
     out = {}
@@ -13350,6 +13381,12 @@ def _apply_t5_freeze(rk, an):
     if st and st.get("day") != today:
         st = None
         _T5_FROZEN.pop(rk, None)
+    # 💎 복병은 동결과 무관한 별도 목록(bmedSpecial)이다 — 마감 전후·확정 전후 항상 붙인다.
+    try:
+        for _sq in ((an.get("corePicks") or {}).get("bmedSpecial") or []):
+            _sq["pickTier"], _sq["tierLabel"], _sq["tierNote"] = T5_TIER_DARK
+    except Exception:
+        pass
     if an.get("recommendClosed") or an.get("afterClose"):
         return                                       # 마감 후 무개입(동결 명단 갱신도 안 한다)
     _mb = an.get("minutesBefore")
@@ -13369,6 +13406,9 @@ def _apply_t5_freeze(rk, an):
     cur_set = set(cur)
     if st is None:                                   # ── 확정 시점 ──
         _T5_FROZEN[rk] = {"day": today, "combos": set(cur_set),
+                          # 🔴 base = **T-5 확정 당시 집합**(불변). combos 는 추가분을 흡수해 커지므로
+                          #   등급 판정에는 쓰면 안 된다 — 쓰면 나중에 붙은 것도 ★ 본선이 된다.
+                          "base": set(cur_set),
                           "at": time.strftime("%H:%M:%S"), "mb": _mb, "n": len(cur_set),
                           # 복원 시 배당·근거를 그대로 살리기 위해 원본 항목을 보관한다(표시 품질).
                           #   ⚠ zip(cur, fq) 로 짝지으면 combo 없는 항목이 섞일 때 어긋난다 — 직접 만든다.
@@ -13379,6 +13419,7 @@ def _apply_t5_freeze(rk, an):
                  "combos": ["+".join(str(x) for x in c) for c in sorted(cur_set)],
                  "dl": an.get("deadlineEpoch") or an.get("deadline_epoch"),
                  "enabled": bool(T5_FREEZE_ENABLED)})
+        _t5_mark_tiers(fq, cur_set)                  # 확정 시점 = 전부 ★ 본선
         an["t5Freeze"] = {"frozen": True, "at": time.strftime("%H:%M:%S"), "mb": _mb,
                           "n": len(cur_set), "lost": [], "enabled": bool(T5_FREEZE_ENABLED)}
         return
@@ -13386,9 +13427,15 @@ def _apply_t5_freeze(rk, an):
     added = [c for c in sorted(cur_set) if c not in st["combos"]]
     if added:
         st["combos"] |= set(added)                   # 추가는 그대로 허용(집합에 편입)
+    # 🔴 등급은 **삭제 여부와 무관하게 매 틱** 붙인다 — 안 그러면 추가만 된 경주에서 ⚡ 가 안 뜬다.
+    #   기준은 「T-5 확정 당시 집합(_t5_base)」이다. added 로 커진 st["combos"] 를 쓰면 전부 본선이 된다.
+    _base = st.get("base") or st["combos"]
+    _t5_mark_tiers(fq, _base)
     if not lost:
         an["t5Freeze"] = {"frozen": True, "at": st["at"], "mb": st["mb"],
-                          "n": len(st["combos"]), "lost": [], "enabled": bool(T5_FREEZE_ENABLED)}
+                          "n": len(st["combos"]), "lost": [], "enabled": bool(T5_FREEZE_ENABLED),
+                          "tiers": {"main": sum(1 for q in fq if q.get("pickTier") == "main"),
+                                    "late": sum(1 for q in fq if q.get("pickTier") == "late")}}
         return
     # ── 삭제 발생 ── 🔴 막았을 때와 안 막았을 때를 둘 다 기록한다
     _gate_hit("t5_freeze", rk=rk, reason="T-5 이후 삭제 감지")
@@ -13416,6 +13463,10 @@ def _apply_t5_freeze(rk, an):
             _item["reason"] = ((_item.get("reason") or "") + " · T-5 확정 후 삭제 금지(복원)").strip(" ·")
             fq.append(_item)
         cp["finalQuinellas"] = fq
+        _t5_mark_tiers(fq, _base)                    # 복원분은 T-5 에 있던 것이므로 ★ 본선이 된다
+        an["t5Freeze"]["tiers"] = {
+            "main": sum(1 for q in fq if q.get("pickTier") == "main"),
+            "late": sum(1 for q in fq if q.get("pickTier") == "late")}
     except Exception as _re:
         print("[T5동결] 복원 실패(무시·원본 표시):", _re)
 
