@@ -1,61 +1,6 @@
 {
   "patterns": [
     {
-      "race": "코치 3경주",
-      "horse_no": 3,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-01"
-    },
-    {
-      "race": "코치 4경주",
-      "horse_no": 7,
-      "recent_avg": 4.2,
-      "win_place": 2,
-      "conditions": [
-        "급락56%",
-        "복승이상감지"
-      ],
-      "date": "2026-08-01"
-    },
-    {
-      "race": "코치 5경주",
-      "horse_no": 5,
-      "recent_avg": 4.2,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-08-01"
-    },
-    {
-      "race": "코치 5경주",
-      "horse_no": 12,
-      "recent_avg": 6.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-01"
-    },
-    {
-      "race": "코치 5경주",
-      "horse_no": 9,
-      "recent_avg": 5.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-01"
-    },
-    {
-      "race": "코치 6경주",
-      "horse_no": 6,
-      "recent_avg": 4.4,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-01"
-    },
-    {
       "race": "코치 6경주",
       "horse_no": 9,
       "recent_avg": 8.8,
@@ -4799,16 +4744,74 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-10"
+    },
+    {
+      "race": "모리오카 5경주",
+      "horse_no": 7,
+      "recent_avg": 4.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "모리오카 5경주",
+      "horse_no": 9,
+      "recent_avg": 6.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "모리오카 5경주",
+      "horse_no": 2,
+      "recent_avg": 6.5,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "우라와 2경주",
+      "horse_no": 4,
+      "recent_avg": 5.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "우라와 2경주",
+      "horse_no": 9,
+      "recent_avg": 7.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "우라와 2경주",
+      "horse_no": 2,
+      "recent_avg": 5.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3010,
-      "hit": 545
+      "count": 3023,
+      "hit": 546
     },
     "전체부진마": {
-      "count": 5222,
-      "hit": 1405
+      "count": 5243,
+      "hit": 1411
     },
     "대규모급락": {
       "count": 18,
@@ -4818,8 +4821,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2212,
-      "hit": 860
+      "count": 2220,
+      "hit": 865
     },
     "급락동반": {
       "count": 457,
@@ -5196,26 +5199,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 944,
-    "hit": 767,
+    "count": 945,
+    "hit": 768,
     "cases": [
-      {
-        "race": "와카야마 2경주",
-        "date": "2026-08-08",
-        "smart_horses": [
-          4,
-          5,
-          2
-        ],
-        "placed": [
-          5,
-          2
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 4.3,
-        "high_odds": false
-      },
       {
         "race": "와카야마 1경주",
         "date": "2026-08-08",
@@ -6762,9 +6748,27 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "우라와 2경주",
+        "date": "2026-08-10",
+        "smart_horses": [
+          4,
+          2,
+          1,
+          3
+        ],
+        "placed": [
+          4,
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 3.5,
+        "high_odds": false
       }
     ],
-    "rate": 81.2,
+    "rate": 81.3,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
