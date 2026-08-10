@@ -769,7 +769,10 @@
   <script src="js/pdf-parser.js"></script>
   <script src="js/analysis.js"></script>
   <script src="js/history.js"></script>
-  <script src="js/app.js"></script>
+  <!-- 🔴 [2026-08-10] 버전 쿼리 — 브라우저가 옛 app.js 를 계속 쓰면 새 기능이 화면에 안 나온다.
+       「신호 이력」 버튼이 안 보인다는 보고가 이 경로로 한 번 났다(코드는 붙어 있었다).
+       ⚠ app.js 를 고칠 때 이 숫자도 함께 올릴 것. 안 올리면 같은 일이 또 난다. -->
+  <script src="js/app.js?v=20260810b"></script>
   <script>
     // [4번] KRA data.go.kr API 키 저장/상태 (fetch_kra.py 와 data/kra_key.txt 공유)
     (function () {
