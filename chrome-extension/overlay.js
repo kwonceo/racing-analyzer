@@ -1662,18 +1662,32 @@
           if (_aux.length) {
             // 🔴 [화면 축소 (2026-08-10)] 판정 제외인데 4줄이 늘 보여 화면을 채웠다 → **접는다.**
             //   ⚠ 목록·개수는 그대로다(무삭제). 기본 상태만 접힘으로 바꿨다.
+            // 🔴 [2026-08-10 · 오버레이 미표시 신고] 이 블록에 try 가 없어서, 여기서 한 번 죽으면
+            //   **추천 패널 전체가 안 그려진다.** 접기 실패 시 **예전 방식(펼침)으로 폴백**한다.
             var auxBox = mk('div', 'margin-top:5px;padding:5px 8px;border:1px dashed #64748b;border-radius:7px;background:rgba(100,116,139,.10)');
-            var _adt = document.createElement('details');
-            var _asm = document.createElement('summary');
-            _asm.style.cssText = 'cursor:pointer;font-weight:700;color:#94a3b8;font-size:11.5px;user-select:none';
-            _asm.textContent = '🧩 보조 조합 ' + Math.min(4, _aux.length) + '개 (참고 · 적중 판정 제외)';
-            _adt.appendChild(_asm);
-            _aux.slice(0, 4).forEach(function (t) {
-              var _aod = t.odds != null ? (t.oddsEst ? ' (~' + t.odds + '배·추정)' : ' (' + t.odds + '배)') : '';   // [추정 표기]
-              _adt.appendChild(mk('div', 'font-size:12.5px;color:#cbd5e1;margin-top:2px',
-                '삼복승 ' + (t.combo || []).join('+') + _aod + (t.reason ? ' · ' + t.reason : '')));
-            });
-            auxBox.appendChild(_adt);
+            var _auxOk = false;
+            try {
+              var _adt = document.createElement('details');
+              var _asm = document.createElement('summary');
+              _asm.style.cssText = 'cursor:pointer;font-weight:700;color:#94a3b8;font-size:11.5px;user-select:none';
+              _asm.textContent = '🧩 보조 조합 ' + Math.min(4, _aux.length) + '개 (참고 · 적중 판정 제외)';
+              _adt.appendChild(_asm);
+              _aux.slice(0, 4).forEach(function (t) {
+                var _aod = t.odds != null ? (t.oddsEst ? ' (~' + t.odds + '배·추정)' : ' (' + t.odds + '배)') : '';
+                _adt.appendChild(mk('div', 'font-size:12.5px;color:#cbd5e1;margin-top:2px',
+                  '삼복승 ' + (t.combo || []).join('+') + _aod + (t.reason ? ' · ' + t.reason : '')));
+              });
+              auxBox.appendChild(_adt);
+              _auxOk = true;
+            } catch (_axe) { _auxOk = false; }
+            if (!_auxOk) {                       // 폴백 — 기존 동작(항상 펼침) 그대로
+              auxBox.appendChild(mk('div', 'font-weight:700;color:#94a3b8;font-size:11.5px', '🧩 보조 조합 (참고 · 적중 판정 제외)'));
+              _aux.slice(0, 4).forEach(function (t) {
+                var _aod2 = t.odds != null ? (t.oddsEst ? ' (~' + t.odds + '배·추정)' : ' (' + t.odds + '배)') : '';
+                auxBox.appendChild(mk('div', 'font-size:12.5px;color:#cbd5e1;margin-top:2px',
+                  '삼복승 ' + (t.combo || []).join('+') + _aod2 + (t.reason ? ' · ' + t.reason : '')));
+              });
+            }
             cpBox.appendChild(auxBox);
           }
           // 🔴 [배당 컷 등급 (2026-08-10 대표 결정)] 「자르지 말고 표시로 나누고 회원이 결정한다」
