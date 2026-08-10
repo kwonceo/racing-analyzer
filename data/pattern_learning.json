@@ -4789,6 +4789,19 @@
       "recommended_hit": true,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1786280318.789663
+    },
+    {
+      "pattern": "대규모급락",
+      "raceKey": "히라츠카 3경주",
+      "total_combos_dropped": 5,
+      "drop_ratio": 0.357,
+      "result": "3+5",
+      "result_odds": "저배당",
+      "result_quinella_odds": 1.9,
+      "signal_result_combo": "4010.5%",
+      "recommended_hit": false,
+      "lesson": "전체급락 시 이변 가능성 높음",
+      "t": 1786322038.2113116
     }
   ],
   "condition_stats": {
@@ -4801,11 +4814,11 @@
       "hit": 1392
     },
     "대규모급락": {
-      "count": 17,
+      "count": 18,
       "high_odds": 0,
       "recommended_hit": 6,
       "high_odds_rate": 0.0,
-      "hit_rate": 35.3
+      "hit_rate": 33.3
     },
     "이상감지동반": {
       "count": 2197,
