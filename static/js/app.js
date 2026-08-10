@@ -179,8 +179,11 @@
   }
   function dayRaceCardHtml(c) {
     const top3 = (c.result && c.result.top3 || []).join(' → ');
-    const hitBadge = c.hit ? '<span style="color:#38d39f;font-weight:800">✅ 적중</span>'
-      : '<span style="color:#ef4444;font-weight:800">❌</span>';
+    // ⚠ 진행 중 경주에 ❌ 를 띄우면 '틀렸다'로 보인다 — 아직 판정 전이므로 뱃지를 비운다.
+    const hitBadge = c.inProgress
+      ? '<span style="color:#38bdf8;font-weight:800">⏳</span>'
+      : (c.hit ? '<span style="color:#38d39f;font-weight:800">✅ 적중</span>'
+        : '<span style="color:#ef4444;font-weight:800">❌</span>');
     const darkBadge = c.dark_hit ? '<span style="color:#f59e0b;font-weight:800">🐎 복병적중</span>' : '';
     // [스냅샷 표기 제거 (2026-07-29 권대표 지시)] 대부분의 경주에 T-5 스크린샷이 없어
     //   'T-5 스크린샷 없음' 문구만 전 카드에 깔려 화면을 어지럽혔다. 있으면 보여주고, 없으면 아무것도 안 낸다.
@@ -236,7 +239,9 @@
       </div>
       ${susBanner}
       ${comboLine}
-      <div style="margin-top:3px;font-size:13.5px">결과 <b>${esc(top3 || '-')}</b>${oddsTxt}</div>
+      <div style="margin-top:3px;font-size:13.5px">결과 ${c.inProgress
+        ? '<b style="color:#38bdf8">⏳ 진행 중</b> <span class="hint">마감 후 자동으로 채워집니다</span>'
+        : `<b>${esc(top3 || '-')}</b>${oddsTxt}`}</div>
       ${cardTimelineHtml(c.race || '')}
       ${shot}
     </div>`;

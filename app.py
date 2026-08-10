@@ -14849,6 +14849,24 @@ def triple_analyze():
         else:
             rk = max(db.keys(), key=lambda k: db[k].get("t", 0))
     an = _triple_analyze(rk, db.get(rk) or {})
+    # 🔴 [배당 컷 등급 · 실시간 (2026-08-10)] 대표는 경주 중 **배당판(오버레이)** 을 보고 있다.
+    #   컷에 걸려 사라진 조합을 그 화면에서 바로 보게 하려면 이 응답에 실려야 한다.
+    #   ⚠ **응답에만 싣는다** — `_history_save_analysis`·`_analysis_log_save` 는 이 필드를 안 만든다
+    #     (저장 스키마 무변경). ⚠ 마감 15분 이내에만 계산해 폴링 부하를 막는다.
+    try:
+        _mb_ct = an.get("minutesBefore")
+        if CUT_TIER_DISPLAY and isinstance(_mb_ct, (int, float)) and _mb_ct <= 15:
+            _lp_ct, _, _ = _analysis_log_path(_canonical_log_key(rk))
+            _doc_ct = {}
+            if _lp_ct and os.path.exists(_lp_ct):
+                _doc_ct = json.load(open(_lp_ct, encoding="utf-8")) or {}
+            if not (_doc_ct.get("horses") or []):
+                _doc_ct = {"horses": (an.get("form") or [])}   # 로그가 아직 없으면 분석 결과로
+            _ct_list = _cut_tier_candidates(rk, _doc_ct, an.get("corePicks") or {})
+            if _ct_list:
+                (an.setdefault("corePicks", {}))["cutTiers"] = _ct_list
+    except Exception as _cte3:
+        print("[컷 등급·실시간] 스킵(무시):", _cte3)
     # [복기] 분석 시점의 전적/제거/신호/추천을 히스토리 파일에 보존(통계 탭 복기용)
     try:
         _history_save_analysis(rk, an)
@@ -21776,6 +21794,46 @@ def day_races():
         "bySignal": {k: {"hit": v[0], "total": v[1], "rate": round(v[0] / v[1] * 100, 1) if v[1] else 0}
                      for k, v in sig_stat.items()},
     }
+    # 🔴 [진행 중 경주도 카드로 (2026-08-10 대표 지시)] 종전엔 `race_results` 만 순회해
+    #   **결과가 저장된 경주만** 카드가 됐다. 그래서 경주 중에는 카드 자체가 없었고,
+    #   대표 요청 원문(「경주 중에 중요한 신호가 나왔을 때 내가 물어보지 않게」)이 구조적으로 불가능했다.
+    #   ⇒ 같은 날짜 analysis_log 중 결과가 아직 없는 것을 **진행 중 카드**로 덧붙인다.
+    #   ⚠ KPI(적중률)는 건드리지 않는다 — 결과가 없는 경주를 분모에 넣으면 통계가 흔들린다.
+    try:
+        _have = {str(c.get("race") or "") for c in cards}
+        _pref = date_dash.replace("-", "_")
+        for _fn in sorted(os.listdir(ANALYSIS_LOG_DIR) if os.path.isdir(ANALYSIS_LOG_DIR) else []):
+            if not _fn.endswith(".json") or not _fn.startswith(_pref):
+                continue
+            _rk2 = _fn[:-5][11:]                      # 날짜 접두 제거 → 「히라츠카 3경주」
+            _rk2 = _rk2.replace("_", " ")
+            if _rk2 in _have:
+                continue
+            try:
+                _d2 = json.load(open(os.path.join(ANALYSIS_LOG_DIR, _fn), encoding="utf-8"))
+            except Exception:
+                continue
+            _cp2 = _d2.get("corePicks") or {}
+            _dc2 = (_cp2.get("displayedCombos") or {}).get("quinellas") or []
+            _cb2 = ["+".join(str(v) for v in sorted(int(z) for z in c2)) for c2 in _dc2 if len(c2) == 2]
+            if not _cb2:
+                _cb2 = ["+".join(str(v) for v in sorted(int(z) for z in (q.get("combo") or [])))
+                        for q in (_cp2.get("finalQuinellas") or []) if len(q.get("combo") or []) == 2]
+            if not _cb2:
+                continue                              # 추천이 아직 없으면 카드로 올릴 것이 없다
+            cards.append({
+                "race": _rk2, "horses": _cp2.get("raceHorseCount"),
+                "combos": _cb2, "hitCombo": "", "hit": False, "dark_hit": False,
+                "result": None, "inProgress": True,   # 🔴 프론트가 「진행 중」으로 그린다
+                "betGrade": (_d2.get("raceGrade") or {}).get("label") or _cp2.get("betGrade"),
+                "prediction": {"main": _cb2[0] if _cb2 else ""},
+                "oddsSuspect": bool(_cp2.get("oddsSuspect")),
+                "oddsSuspectSoft": bool(_cp2.get("oddsSuspectSoft")),
+                "oddsSuspectReason": _cp2.get("oddsSuspectReason"),
+                "sport": _d2.get("sport"), "snapshot": None,
+            })
+    except Exception as _ipe:
+        print("[진행중 카드] 스킵(무시):", _ipe)
     cards.sort(key=lambda c: c.get("race") or "")
     return jsonify({"date": date_dash, "count": len(cards), "kpi": kpi, "cards": cards})
 

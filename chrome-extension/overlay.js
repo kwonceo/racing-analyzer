@@ -1669,6 +1669,42 @@
             });
             cpBox.appendChild(auxBox);
           }
+          // 🔴 [배당 컷 등급 (2026-08-10 대표 결정)] 「자르지 말고 표시로 나누고 회원이 결정한다」
+          //   대표는 경주 중 **배당판을 보고 있다** — 컷에 걸려 사라진 조합을 여기서 바로 보게 한다.
+          //   ⚠ 판정 명단이 아니다(적중 판정 제외) · 컷 상수·`_final_picks` 무변경 — 표시 계층 전용.
+          //   실물: 오비히로 3R 정답 4+9(49.3배)가 여기 뜬다(9번 전적 1위 · 4번 시장 2위).
+          try {
+            var _ct = (d.recTrail && d.recTrail.cutTiers) || (cp && cp.cutTiers) || [];
+            if (_ct.length) {
+              var ctBox = mk('div', 'margin-top:8px;padding:7px 9px;border:1px dashed #f59e0b;border-radius:8px;background:rgba(245,158,11,.09)');
+              ctBox.appendChild(mk('div', 'font-weight:800;color:#fbbf24;font-size:13px', '🎯 배당 컷에 걸린 조합 (참고 · 판정 제외)'));
+              _ct.slice(0, 6).forEach(function (x) {
+                var _c2 = (x.combo || []).join('+');
+                var _o2 = x.odds != null ? '  (' + x.odds + '배)' : '';
+                ctBox.appendChild(mk('div', 'font-weight:800;font-size:13.5px;margin-top:3px;color:'
+                  + (x.tier === 'dark' ? '#fcd34d' : '#cbd5e1'),
+                  (x.tierLabel || '') + ' ' + _c2 + _o2));
+                if (x.reason) {
+                  ctBox.appendChild(mk('div', 'font-size:11px;color:#94a3b8;margin-left:10px', x.reason));
+                }
+              });
+              cpBox.appendChild(ctBox);
+            }
+          } catch (_ce) { /* 표시 실패는 무시 — 추천 본문에 영향 주지 않는다 */ }
+          // 🔴 [빠진 조합] 부산 4R 5+8 이 4초만 본선이었고 96배였는데 대표가 물어보고서야 알았다.
+          try {
+            var _lost = (d.recTrail && d.recTrail.lost) || [];
+            if (_lost.length) {
+              var lsBox = mk('div', 'margin-top:6px;padding:6px 9px;border:1px solid #ef4444;border-radius:8px;background:rgba(239,68,68,.10)');
+              lsBox.appendChild(mk('div', 'font-weight:800;color:#fca5a5;font-size:12.5px', '🔴 한 번 올라왔다 빠진 조합'));
+              _lost.slice(0, 5).forEach(function (x) {
+                lsBox.appendChild(mk('div', 'font-size:12.5px;color:#fecaca;margin-top:2px',
+                  (x.combo || '') + (x.odds != null ? '  ' + x.odds + '배' : '')
+                  + '   ' + (x.at || '') + (x.mb != null ? ' · 마감 ' + x.mb + '분 전' : '')));
+              });
+              cpBox.appendChild(lsBox);
+            }
+          } catch (_le2) { /* 무시 */ }
           // [BMED 특별 감지 💎] 고배당+강신호 별도 섹션(하단·최대 2개)
           var _sp = (cp && cp.bmedSpecial) || [];
           if (_sp.length) {
