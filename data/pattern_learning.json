@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "후나바시 6경주",
-      "horse_no": 7,
-      "recent_avg": 4.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-02"
-    },
-    {
-      "race": "후나바시 6경주",
-      "horse_no": 5,
-      "recent_avg": 5.6,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-02"
-    },
-    {
       "race": "모리오카 9경주",
       "horse_no": 6,
       "recent_avg": 7.8,
@@ -4803,16 +4785,34 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-10"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 12,
+      "recent_avg": 7.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-10"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 9,
+      "recent_avg": 5.6,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-10"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3110,
-      "hit": 564
+      "count": 3118,
+      "hit": 565
     },
     "전체부진마": {
-      "count": 5415,
-      "hit": 1455
+      "count": 5425,
+      "hit": 1457
     },
     "대규모급락": {
       "count": 18,
@@ -4822,8 +4822,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2305,
-      "hit": 891
+      "count": 2307,
+      "hit": 892
     },
     "급락동반": {
       "count": 486,
@@ -5200,24 +5200,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 966,
+    "count": 967,
     "hit": 785,
     "cases": [
-      {
-        "race": "사세보 3경주",
-        "date": "2026-08-08",
-        "smart_horses": [
-          2,
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "이와키타이라 3경주",
         "date": "2026-08-08",
@@ -6770,9 +6755,23 @@
         "trifecta_odds": null,
         "quinella_odds": 23.6,
         "high_odds": true
+      },
+      {
+        "race": "우라와 12경주",
+        "date": "2026-08-10",
+        "smart_horses": [
+          6,
+          10,
+          3
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 81.3,
+    "rate": 81.2,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
