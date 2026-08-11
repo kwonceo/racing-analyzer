@@ -164,6 +164,41 @@ DANGER_HEADERS = {
 }
 
 
+def _key_drift():
+    """[③] `tools/audit_key_drift.py` 를 **그대로 재사용**해 파서↔저장행 차집합을 얻는다.
+
+    🔴 로직을 베끼지 않는다 — 같은 규칙을 두 곳에 두면 갈린다(원칙 계열).
+    ⚠ 실패하면 사유를 그대로 돌려준다. 빈 목록으로 덮지 않는다.
+    """
+    try:
+        import importlib.util
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit_key_drift.py")
+        if not os.path.exists(p):
+            return {"error": "tools/audit_key_drift.py 가 없다"}
+        spec = importlib.util.spec_from_file_location("_akd", p)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        rows = []
+        for parser, store, label in getattr(mod, "PAIRS", []):
+            try:
+                # ⚠ `get_keys` 는 **AST 노드**를 받는다(이름 문자열이 아니다).
+                #   실측으로 잡았다: 이름을 넘겨 4쌍 전부 「'str' object has no attribute '_fields'」였다.
+                a = mod.get_keys(mod.func_node(parser))
+                b = mod.get_keys(mod.func_node(store))
+            except Exception as e:
+                rows.append({"parser": parser, "store": store,
+                             "missing": ["조회 실패: %s" % str(e)[:60]]})
+                continue
+            if not a:
+                continue
+            miss = sorted(set(a) - set(b or []))
+            if miss:
+                rows.append({"parser": parser, "store": store, "missing": miss})
+        return {"rows": rows}
+    except Exception as e:
+        return {"error": str(e)[:160]}
+
+
 def _is_empty_lit(n):
     if isinstance(n, ast.Dict):
         if not n.keys:
@@ -396,8 +431,28 @@ def main():
                  % (x["file"], x["line"], x["tmp"], "✅" if x["pid"] else "❌",
                     "✅" if x["tid"] else "❌", "✅" if x["lock"] else "🔴",
                     "✅" if x["retry"] else "—"))
-    R += ["", "## ③ 파서 → 저장행 키 차집합", "", DANGER_HEADERS["③"], "",
-          "⚠ 이 항목은 기존 도구를 재사용합니다(새로 만들지 않음): `python tools/audit_key_drift.py`", ""]
+    # 🔴 [③ 실측 적재 (2026-08-12)] 종전에는 "다른 도구를 돌려라"는 안내 한 줄뿐이라
+    #   위험목록만 봐서는 **무엇이 빠졌는지 알 수 없었다**(00_INDEX 요약에도 ③이 없었다).
+    #   ⇒ `tools/audit_key_drift.py` 를 **그대로 import 해서** 결과를 여기에 싣는다.
+    #   ⚠ 로직을 베끼지 않는다 — 같은 규칙을 두 곳에 두면 갈린다.
+    #   ⚠ 실패하면 사유를 그대로 남긴다. 빈 목록으로 덮지 않는다(원칙 9).
+    R += ["", "## ③ 파서 → 저장행 키 차집합", "", DANGER_HEADERS["③"], ""]
+    _d3 = _key_drift()
+    if _d3.get("error"):
+        R += ["🔴 자동 추출 실패: %s" % _d3["error"],
+              "⚠ 수동 확인: `python tools/audit_key_drift.py`", ""]
+    elif not _d3.get("rows"):
+        R += ["차집합 없음(또는 짝을 찾지 못함).",
+              "⚠ 수동 확인: `python tools/audit_key_drift.py`", ""]
+    else:
+        R += ["총 **%d쌍**" % len(_d3["rows"]), "",
+              "| 파서 | 저장행 | 탈락 키 |", "|---|---|---|"]
+        for x in _d3["rows"]:
+            R.append("| `%s` | `%s` | %s |"
+                     % (x["parser"], x["store"],
+                        ", ".join("`%s`" % k for k in x["missing"][:12])
+                        + (" …(%d개)" % len(x["missing"]) if len(x["missing"]) > 12 else "")))
+        R.append("")
     R += ["## ④ 전역 상수", "", DANGER_HEADERS["④"], "",
           "총 **%d개**" % len(D["④"]), "", "| 파일:줄 | 이름 | 값 | 참조 수 |", "|---|---|---|---|"]
     for x in sorted(D["④"], key=lambda v: -v["refs"])[:60]:
@@ -418,13 +473,35 @@ def main():
 
     # ── INDEX ──
     nodesc = sum(1 for f in all_funcs if not f["descFrom"])
-    I = ["# 코드맵 색인", "", "> 🤖 자동 생성 · %s" % ts, "",
-         "| 섹션 | 함수 수 |", "|---|---|"]
+    # 🔴 [신선도 배너 (2026-08-12)] 소스 sha256 을 직전 상태와 대조해 **낡음을 맨 위에 알린다.**
+    #   ⚠ **차단하지 않는다** — 라이브 중 커밋을 막으면 안 된다. 알리기만 한다.
+    _stale = []
+    try:
+        if os.path.exists(STATE):
+            _old = (json.load(open(STATE, encoding="utf-8")) or {}).get("sources") or {}
+            _now = _hashes()
+            for _f, _v in _now.items():
+                _o = _old.get(_f) or {}
+                if _o and _o.get("sha256") != _v.get("sha256"):
+                    _stale.append("%s (%d → %d줄)" % (_f, _o.get("lines") or 0, _v.get("lines") or 0))
+    except Exception as _se:
+        _stale = ["신선도 대조 실패: %s" % str(_se)[:80]]
+    I = ["# 코드맵 색인", ""]
+    if _stale:
+        I += ["> 🔴 **직전 생성 이후 바뀐 소스 %d개** — 아래 목록은 **이번 실행 기준**이다."
+              % len(_stale),
+              "> " + " · ".join(_stale[:6]) + (" 외" if len(_stale) > 6 else ""),
+              "> ⚠ 차단하지 않는다. 낡았으면 `python tools/build_codemap.py` 를 다시 돌린다.", ""]
+    else:
+        I += ["> 🟢 직전 생성 이후 소스 변경 없음", ""]
+    I += ["> 🤖 자동 생성 · %s" % ts, "",
+          "| 섹션 | 함수 수 |", "|---|---|"]
     for sec, title in SECTIONS:
         I.append("| [%s](%s.md) — %s | %d |" % (sec, sec, title.split(" — ")[1],
                                                 sum(1 for f in all_funcs if f["section"] == sec)))
-    I += ["| [위험목록](위험목록.md) | ① %d · ② %d · ④ %d · ⑤ %d · ⑥ %d |"
-          % (len(D["①"]), len(D["②"]), len(D["④"]), len(D["⑤"]), len(D["⑥"])), "",
+    I += ["| [위험목록](위험목록.md) | ① %d · ② %d · ③ %d · ④ %d · ⑤ %d · ⑥ %d |"
+          % (len(D["①"]), len(D["②"]), len(_d3.get("rows") or []),
+             len(D["④"]), len(D["⑤"]), len(D["⑥"])), "",
           "**총 함수 %d개** · 설명 자동 추출 **%d개 (%.1f%%)** · ⚠ 설명 없음 %d개"
           % (len(all_funcs), len(all_funcs) - nodesc,
              100.0 * (len(all_funcs) - nodesc) / len(all_funcs) if all_funcs else 0, nodesc)]
