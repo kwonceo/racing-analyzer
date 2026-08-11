@@ -1853,7 +1853,15 @@ def _combo_count_dip(prev_q, cur_q, ratio=_DIP_RATIO, min_prev=_DIP_MIN_PREV):
     pm, cm = _as_qmap(prev_q), _as_qmap(cur_q)
     if len(pm) < min_prev or not cm:
         return False
-    return (len(cm) / len(pm)) < ratio
+    # 🔴 [계수기 신설 2026-08-11] 이 함수는 만든 뒤로 `_gate_hit` 호출이 **0회**였다 —
+    #   도는지 안 도는지 알 방법이 없었다(원칙 24 유형). 판정식은 한 줄도 안 바꾸고 세기만 한다.
+    #   ⚠ reach 는 폴링 단위다. 발동률 0% 면 문턱이 높은 것이고, 100% 면 본 경로가 죽은 것이다.
+    _gate_hit("combo_count_dip", None, None, reach_only=True)
+    _r = (len(cm) / len(pm))
+    if _r < ratio:
+        _gate_hit("combo_count_dip", None, "조합 %d→%d (%.0f%%)" % (len(pm), len(cm), _r * 100))
+        return True
+    return False
 
 
 def _column_shift_suspect(prev_q, cur_q, min_adj=5, min_common=10, tol=0.06):
@@ -1872,6 +1880,8 @@ def _column_shift_suspect(prev_q, cur_q, min_adj=5, min_common=10, tol=0.06):
     pm, cm = _as_qmap(prev_q), _as_qmap(cur_q)
     if len(pm) < min_common or len(cm) < min_common or len(cm) != len(pm):
         return False
+    # 🔴 [계수기 신설 2026-08-11] 위와 같은 이유. 판정식 무변경 · 세기만.
+    _gate_hit("column_shift_suspect", None, None, reach_only=True)
 
     def _close(a, b):
         return a and b and abs(a - b) / max(a, b) <= tol
@@ -1890,7 +1900,10 @@ def _column_shift_suspect(prev_q, cur_q, min_adj=5, min_common=10, tol=0.06):
             if _close(v, pm.get(k2)):
                 adj += 1
                 break
-    return adj >= min_adj and adj > same * 0.5
+    _hit = adj >= min_adj and adj > same * 0.5
+    if _hit:
+        _gate_hit("column_shift_suspect", None, "밀림 %d ↔ 정상 %d (조합 %d)" % (adj, same, len(cm)))
+    return _hit
 
 
 def _triple_prune_stale(db, keep_rk=None, max_age=STALE_ACTIVE_SEC):
@@ -2441,11 +2454,19 @@ def _oddspark_mapping_suspect(prev_q, new_q, min_pairs=6):
     pm, nm = _combo_map(prev_q), _combo_map(new_q)
     if len(pm) < min_pairs or len(nm) < min_pairs:
         return False
+    # 🔴 [계수기 신설 2026-08-11] 판정식 무변경 · 세기만.
+    _gate_hit("oddspark_mapping_suspect", None, None, reach_only=True)
     pv, nv = _combo_value_multiset(prev_q), _combo_value_multiset(new_q)
     if sum((pv & nv).values()) < min_pairs:
+        # ⚠ 여기서 걸러지는 것이 「값이 아예 달라 다른 경주」다 — 별도로 센다.
+        #   히라츠카 4R(어제 우라와 배당 혼입)이 정확히 이 갈래에 해당한다.
+        _gate_hit("oddspark_mapping_othrace", None, "값 공통 %d 미만 — 다른 경주로 봄" % min_pairs)
         return False                               # 값 자체가 다름 = 다른 경주(밀림 아님)
     same = sum(1 for k, v in nm.items() if pm.get(k) == v)
-    return (same / max(1, len(nm))) < 0.5          # 같은 말번호쌍 배당이 절반도 안 맞으면 밀림
+    _hit = (same / max(1, len(nm))) < 0.5          # 같은 말번호쌍 배당이 절반도 안 맞으면 밀림
+    if _hit:
+        _gate_hit("oddspark_mapping_suspect", None, "말번호 일치 %d/%d" % (same, len(nm)))
+    return _hit
 
 
 @app.route("/api/odds/triple/ingest", methods=["POST"])
@@ -2598,10 +2619,15 @@ def _arity_guard(kind, combos, label, source=None):
     exp = _arity_expect(kind, n)
     if not exp:
         return combos
+    # 🔴 [계수기 신설 2026-08-11] 판정식 무변경 · 세기만. 종류별로 나눠 센다
+    #   (복승만 도는지 삼복승도 도는지가 구분돼야 한다).
+    _gate_hit("arity_guard_%s" % kind, None, None, reach_only=True)
     ratio = len(combos) / exp
     too_many = ratio > _ARITY_MAX
     too_few = (kind != "trio") and (ratio < _ARITY_MIN)
     if too_many or too_few:
+        _gate_hit("arity_guard_%s" % kind, None,
+                  "%d개 / 기대 %d (%d두 · %.0f%%) src=%s" % (len(combos), exp, n, ratio * 100, source or "확장"))
         print(f"⚠️ {label} 조합 수 이상 - 저장 거부 "
               f"({len(combos)}개 / 기대 {exp}개 · {n}두 · {ratio * 100:.0f}% · source={source or '확장'})")
         return []
@@ -16147,6 +16173,78 @@ def _race_type_of(rk, sport=None):
     return str(sport or "")
 
 
+# 🔴🔴 [골격 + 고배당 판정 편입 (2026-08-11 대표 승인)]
+#   배경: 💎 복병(bmedSpecial)과 경륜 라인 짝(keirinLinePairs)은 **둘 다 이미 화면에 나간다**
+#     (app.js 2558·7559 `cp.bmedSpecial[0]` · 7516 `keirinFlowSim.linePairs`).
+#     그런데 판정 명단(displayedCombos)에는 없어 **표시 ≠ 판정** 이었다.
+#   🔴 판정 기준을 **축마다 나눈다**(대표 지시) — 하나의 회수율로 둘을 재면 안 된다:
+#     · 골격(라인 짝) = **상위 3건 제외 회수율**로 본다   → 판정선 74.5%
+#     · 고배당(💎)   = **적중배당 중앙**으로 본다        → 회수율로 기각하지 않는다
+#
+#   소급 실측 (2,540경주 · 확정배당 기준 · 상위3 제외 병기):
+#     현행                  구좌 3640 · 적중 675 · 회수율 97.7% · 3제외 74.2% · 배당중앙  2.8배
+#     🟢 현행 + 라인짝 2     구좌 4931 · 적중 801 · 회수율 96.9% · 3제외 **78.4%** · 배당중앙 2.9배
+#                           한계 회수율 **94.4%** — 추가 매수가 회수를 거의 그대로 만든다
+#     현행 + 라인짝 1        구좌 4182 · 적중 749 · 회수율 97.6% · 3제외 76.0% · 한계 96.9%
+#     🟢 💎 상위1 단독       구좌 1044 · 적중  33 · 회수율 60.3% · 3제외 48.7% · 배당중앙 **15.7배**
+#                           🔴 10배 이상 적중 **23/33(70%)** ↔ 현행 49/675(7.3%)
+#
+#   ⚠ **대체가 아니라 더하기다.** 처음 잰 「라인 짝 대체」(경륜 현행 명단을 라인 짝으로 교체)는
+#     3제외 76.6% 로 더하기(78.4%)보다 **낮고** 기존 추천을 지운다 — 삭제 금지 원칙과도 부딪힌다.
+#     ⇒ 대체안은 **채택하지 않았다.**
+#   🔴 💎 는 회수율 60.3% 로 판정선 아래다. **그걸 알고 넣는다** — 고배당 축의 판정 기준은
+#     배당중앙(15.7배)이고, 그 값이 현행의 5.6배다. 사업 원칙(고배당·중배당이 기본)에 부합한다.
+#     ⚠ 적중 33건이라 회수율 자체는 **판정 불가**(원칙 1). 「사면 번다」로 읽지 말 것.
+#   🔧 되돌리기: 아래 두 스위치를 False 로 둔다. 각각 독립이다.
+DIA_JUDGE_ENABLED = True         # 💎 복병 상위 N개를 판정 명단에 넣는다
+DIA_JUDGE_TOPN = 1               # 🔴 상위 1개만(대표 지시). 2개면 배당중앙 14.6배로 내려간다
+LINE_PAIR_JUDGE_ENABLED = True   # 경륜 라인 짝 상위 N개를 판정 명단에 넣는다
+LINE_PAIR_JUDGE_TOPN = 2         # 3제외 78.4%(1개는 76.0%) — 2개가 실측 최고
+LINE_PAIR_JUDGE_SPORTS = ("cycle",)   # 🔴 경륜만. 다른 종목은 현행 유지
+
+
+def _judge_extra_quinellas(cp, sport, already):
+    """[판정 편입] 화면에는 나가는데 판정 밖이던 조합을 명단에 더한다.
+
+    🔴 **더하기 전용이다** — 기존 명단(already)에서 무엇도 빼지 않는다.
+    반환: [(combo, 출처)] · 이미 있는 조합은 돌려주지 않는다(중복 구좌 방지).
+    """
+    out, seen = [], set(tuple(sorted(c)) for c in (already or []))
+
+    def _take(src, tag):
+        for _q in (src or []):
+            _c = _q.get("combo") if isinstance(_q, dict) else _q
+            try:
+                _c = sorted(int(x) for x in (_c or []))
+            except Exception:
+                continue
+            if len(_c) != 2:
+                continue
+            _t = tuple(_c)
+            if _t in seen:
+                continue
+            seen.add(_t)
+            out.append((_c, tag))
+
+    try:
+        if LINE_PAIR_JUDGE_ENABLED and str(sport or "").lower() in LINE_PAIR_JUDGE_SPORTS:
+            _take((cp.get("keirinLinePairs") or [])[:LINE_PAIR_JUDGE_TOPN], "linePair")
+    except Exception as _lpe:
+        print("[판정 편입] 라인 짝 스킵(무시):", str(_lpe)[:80])
+    try:
+        if DIA_JUDGE_ENABLED:
+            # 🔴 도달을 따로 센다(원칙 23) — 💎 가 **있었는데 중복이라 안 들어간** 경우와
+            #   💎 자체가 없는 경우를 구분해야 한다. 히라츠카 4R 이 정확히 전자였다
+            #   (💎 1+4 = 라인 짝 1+4 라 중복 제외 · 편입 0 이지만 정상 동작이다).
+            _dq = (cp.get("bmedSpecial") or [])[:DIA_JUDGE_TOPN]
+            if _dq:
+                _gate_hit("judge_extra_dark", None, "💎 후보 있음", reach_only=True)
+            _take(_dq, "dark")
+    except Exception as _die:
+        print("[판정 편입] 복병 스킵(무시):", str(_die)[:80])
+    return out
+
+
 def _build_analysis_log(rk, an=None):
     """_triple_analyze 결과 + odds_history(타임라인/결과) + 전적을 종합해 리치 로그를 만들고 저장.
     기존 로그가 있으면 사용자 입력(analyzed_at·복기 메모·profit)은 보존한다."""
@@ -16437,6 +16535,20 @@ def _build_analysis_log(rk, an=None):
                                for t in (_cp_dc.get("finalTrifectas") or [])[:2] if t.get("combo")]),
                 "at": time.strftime("%H:%M:%S", time.localtime()),
             }
+            # 🔴 [골격 + 고배당 판정 편입 (2026-08-11 승인)] 화면에는 나가는데 판정 밖이던
+            #   경륜 라인 짝·💎 복병을 명단에 **더한다**(빼는 것 없음 · 위 _judge_extra_quinellas 참조).
+            #   ⚠ 마감 후에는 이 블록에 오지 않는다(위 afterClose 분기에서 동결본을 그대로 쓴다).
+            try:
+                _extra = _judge_extra_quinellas(_cp_dc, an.get("sport"), _dc_out["quinellas"])
+                if _extra:
+                    _dc_out["quinellas"] = _dc_out["quinellas"] + [c for c, _ in _extra]
+                    _dc_out["extra"] = [{"combo": c, "src": t} for c, t in _extra]
+                    for _c, _t in _extra:
+                        _gate_hit("judge_extra_" + _t, rk,
+                                  "판정 편입 %s" % "+".join(str(x) for x in _c),
+                                  once_key="%s|%s" % (rk, "+".join(str(x) for x in _c)))
+            except Exception as _jxe:
+                print("[판정 편입] 스킵(무시):", str(_jxe)[:80])
             if not (_dc_out["quinellas"] or _dc_out["trifectas"]):
                 _dc_out = _old_dc                    # 빈 추천으로 기존 기록 덮지 않음(보존 원칙 동일)
         if isinstance(core_picks_out, dict) and _dc_out:

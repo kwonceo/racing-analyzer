@@ -15702,5 +15702,13 @@
   "reason": "읽기 실패: 'utf-8' codec can't decode byte 0xb7 in position 184202: invalid start byte",
   "quarantined": null,
   "time": "09:10:56"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_11_히라츠카_4경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_11_히라츠카_4경주.json'",
+  "quarantined": null,
+  "time": "09:55:55"
  }
 ]

@@ -2212,18 +2212,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "히라츠카 3경주",
-        "date": "2026-08-10",
-        "horses": [
-          7
-        ],
-        "placed": [
-          7
-        ],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
         "race": "히라츠카 5경주",
         "date": "2026-08-10",
         "horses": [
@@ -2442,11 +2430,11 @@
         "trifecta_hit": true
       }
     ],
-    "count": 83,
+    "count": 82,
     "hit_quinella": 42,
     "hit_trifecta": 30,
-    "rate_quinella": 50.6,
-    "rate_trifecta": 36.1,
+    "rate_quinella": 51.2,
+    "rate_trifecta": 36.6,
     "reliable": true
   },
   "급락": {
@@ -4895,28 +4883,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "히라츠카 3경주",
-        "date": "2026-08-10",
-        "horses": [
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
-        "race": "히라츠카 4경주",
-        "date": "2026-08-10",
-        "horses": [
-          2
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
         "race": "히라츠카 5경주",
         "date": "2026-08-10",
         "horses": [
@@ -5873,13 +5839,33 @@
         "placed": [],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "히라츠카 3경주",
+        "date": "2026-08-11",
+        "horses": [
+          3
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "히라츠카 4경주",
+        "date": "2026-08-11",
+        "horses": [
+          3
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
     "count": 318,
     "hit_quinella": 199,
-    "hit_trifecta": 131,
+    "hit_trifecta": 130,
     "rate_quinella": 62.6,
-    "rate_trifecta": 41.2,
+    "rate_trifecta": 40.9,
     "reliable": true
   },
   "전적이중수렴": {
@@ -8258,30 +8244,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "히라츠카 3경주",
-        "date": "2026-08-10",
-        "horses": [
-          4
-        ],
-        "placed": [],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
-        "race": "히라츠카 4경주",
-        "date": "2026-08-10",
-        "horses": [
-          1,
-          4
-        ],
-        "placed": [
-          1,
-          4
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
         "race": "히라츠카 5경주",
         "date": "2026-08-10",
         "horses": [
@@ -9361,13 +9323,38 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "히라츠카 3경주",
+        "date": "2026-08-11",
+        "horses": [
+          5
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "히라츠카 4경주",
+        "date": "2026-08-11",
+        "horses": [
+          2,
+          4,
+          5
+        ],
+        "placed": [
+          2,
+          5
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
     "count": 253,
     "hit_quinella": 168,
-    "hit_trifecta": 113,
+    "hit_trifecta": 112,
     "rate_quinella": 66.4,
-    "rate_trifecta": 44.7,
+    "rate_trifecta": 44.3,
     "reliable": true
   },
   "집중급락": {
