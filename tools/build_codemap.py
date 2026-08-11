@@ -36,6 +36,7 @@ SECTIONS = [("01_수집", "수집 — fetch·파서·수집 진입점"),
             ("04_필터", "필터 — 게이트·면제·상한"),
             ("05_출력", "출력 — 화면 API·카카오"),
             ("06_검증", "검증 — 테스트·가드·체크리스트"),
+            ("07_헬퍼", "헬퍼 — 짧은 변환 도구(파이프라인 아님)"),
             ("99_미분류", "미분류 — 분류 규칙에 걸리지 않은 함수")]
 
 # ── 분류 규칙 ──────────────────────────────────────────────────────────
@@ -111,8 +112,27 @@ def _calls(node):
     return out
 
 
+# 🔴 [07_헬퍼 신설 (2026-08-12 승인)] 짧은 변환 함수는 파이프라인이 아니라 **도구**다.
+#   여섯 섹션에 억지로 넣으면 지도가 흐려진다. 실측 40개.
+HELPER_RULE = r"^_(fmt|esc|num|to|as|is|has|safe|str|int|float|list|dict|key|val|pick|hms|ymd|ep|sec)\b|^_(fmt|esc|num|to|as|is|has|safe)[A-Z_]"
+
+# 🔴 [도메인 2차 규칙 (2026-08-12 승인)] 지금 규칙 여섯은 **전부 동사**(_save·_fetch·_analyze)라
+#   `_kra_g` `_jra_num` 처럼 **도메인 접두 + 짧은 이름**인 함수에 닿지 못한다.
+#   실측: 미분류 734개 중 동사 규칙 매치가 **0개**였다. 적용 순서 문제가 아니라 규칙이 안 닿는다.
+#   ⇒ 이름 안 **어디에든** 동사 조각이 있으면 그 섹션으로 보낸다(2차 · 느슨한 매치).
+#   ⚠ 여기서도 안 걸리면 미분류로 남긴다. **억지로 넣지 않는다**(대표 지시).
+DOMAIN_RULES = [
+    ("01_수집", r"(fetch|parse|collect|ingest|scrape|crawl|_url|_api_key|_key$|matrix_rows|_rows$)"),
+    ("02_저장", r"(save|store|append|record|persist|backup|_path$|_dir$|_file$|dump)"),
+    ("03_분석", r"(analy|score|pick|strateg|confid|grade|rank|predict|learn|stat|simulate|bonus|combo|signal|odds|band|hitrate)"),
+    ("04_필터", r"(filter|exempt|gate|_cut|suspect|dedupe|prune|limit|_cap|block|skip|valid)"),
+    ("05_출력", r"(kakao|notify|send|render|html|_page|_msg|_text$|label|overlay|badge|card)"),
+    ("06_검증", r"(check|verify|audit|health|sanity|midcheck|selfchk|diag|probe)"),
+]
+
+
 def classify(fn, lines):
-    """① 데코레이터 → ② 이름 → ③ 본문(직접 os.replace 만). 첫 매치에서 확정."""
+    """① 데코레이터 → ② 이름(동사) → ③ 본문(직접 os.replace) → ④ 헬퍼 → ⑤ 도메인 2차."""
     decs = " ".join(_decorators(fn, lines))
     if "@app.route" in decs:
         return "05_출력", "데코레이터 @app.route"
@@ -125,6 +145,13 @@ def classify(fn, lines):
                 and n.func.attr == "replace" and isinstance(n.func.value, ast.Name) \
                 and n.func.value.id == "os":
             return "02_저장", "본문에서 os.replace 직접 호출"
+    # ④ 헬퍼 — 짧은 변환 도구
+    if re.search(HELPER_RULE, fn.name):
+        return "07_헬퍼", "헬퍼 규칙"
+    # ⑤ 도메인 2차 — 이름 안 어디에든 동사 조각이 있으면
+    for sec, pat in DOMAIN_RULES:
+        if re.search(pat, fn.name, re.I):
+            return sec, "도메인 2차 %s" % pat[:28]
     return "99_미분류", "규칙 미매치"
 
 
@@ -162,6 +189,42 @@ DANGER_HEADERS = {
     "⑥": "⚠ 오늘 사고: readonly 가 '마감 후 첫 저장'에 걸려 그 저장에 이미 마감 후 값이 들어간 채 굳었다. "
          "즉 readonly 는 두 번째 오염부터 막고 첫 오염은 통과시킨다.",
 }
+
+
+def _git_touch_counts(days=30):
+    """[미분류 우선순위] 최근 N일 커밋에서 **각 함수명이 diff 에 등장한 횟수**.
+
+    🔴 정확한 「함수 단위 수정 횟수」가 아니다 — diff 본문에 이름이 나온 커밋 수다.
+      호출부 변경도 함께 세므로 **과대 추정**이다. 그 한계를 그대로 적는다.
+    ⚠ 실패하면 빈 dict 를 돌려준다(정렬만 못 하고 목록은 그대로 나온다).
+    """
+    try:
+        import subprocess
+        import collections as _co       # ⚠ 모듈 전역에 collections 가 없다(실측으로 잡았다)
+        r = subprocess.run(["git", "log", "--since=%d days ago" % days, "-p", "--unified=0",
+                            "--", "app.py"],
+                           cwd=BASE, capture_output=True, text=True,
+                           encoding="utf-8", errors="ignore", timeout=180)
+        cnt = _co.Counter()
+        cur = set()
+        for ln in (r.stdout or "").split("\n"):
+            if ln.startswith("commit "):
+                for n in cur:
+                    cnt[n] += 1
+                cur = set()
+            elif ln.startswith("@@"):
+                m = re.search(r"@@.*@@\s*def\s+(\w+)", ln)
+                if m:
+                    cur.add(m.group(1))
+            elif ln[:1] in "+-" and not ln.startswith(("+++", "---")):
+                for m in re.finditer(r"\b(_[a-z][\w]{3,})\b", ln):
+                    cur.add(m.group(1))
+        for n in cur:
+            cnt[n] += 1
+        return cnt
+    except Exception as e:
+        print("  [미분류 우선순위] git 조회 실패:", str(e)[:80])
+        return {}
 
 
 def _key_drift():
@@ -370,6 +433,17 @@ def main():
         for c in f["calls"]:
             callers.setdefault(c, []).append(f)
 
+    # 🔴🔴 [미분류 우선순위 (2026-08-12 대표 지시)]
+    #   **지도의 목적은 「고칠 때 찾는 것」이다.** 자주 고치는 함수부터 분류하면 되고,
+    #   한 번도 안 건드린 함수는 미분류로 둬도 된다.
+    #   ⇒ 남은 미분류를 ⓐ최근 30일 수정 횟수 ⓑ호출되는 횟수 로 줄 세워 상위만 낸다.
+    #   ⚠ 나머지는 **미분류로 남기고 그렇다고 명시**한다. 억지로 채우지 않는다.
+    _touch = _git_touch_counts(30)
+    unc = [f for f in all_funcs if f["section"] == "99_미분류"]
+    for f in unc:
+        f["_touch"] = _touch.get(f["name"], 0)
+        f["_calledBy"] = len(callers.get(f["name"], []))
+
     # ── 위험목록 (수정 2: 여기 걸린 함수는 Caller 전수 나열) ──
     D = {"①": [], "②": [], "③": [], "④": [], "⑤": [], "⑥": []}
     for rel, lines in per_lines.items():
@@ -393,6 +467,29 @@ def main():
              ">   (`gemini_reviewer`·`health_check` 가 실제로 `importlib` 경유입니다).", "",
              "총 **%d개** 함수", ""]
         L[-2] = L[-2] % len(fs)
+        # 🔴 [미분류 우선순위] 「고칠 때 찾는 것」이 지도의 목적이다.
+        #   자주 고치거나 많이 불리는 것부터 위에 세운다. 나머지는 그대로 둔다.
+        if sec == "99_미분류" and fs:
+            _t50 = sorted(fs, key=lambda x: (-x.get("_touch", 0), -x.get("_calledBy", 0)))[:50]
+            _c50 = sorted(fs, key=lambda x: (-x.get("_calledBy", 0), -x.get("_touch", 0)))[:50]
+            _ov = {x["name"] for x in _t50} & {x["name"] for x in _c50}
+            L += ["## 🔴 먼저 볼 것 — 최근 30일 손댄 횟수 상위 50", "",
+                  "⚠ diff 본문에 이름이 등장한 커밋 수다. **호출부 변경도 함께 세므로 과대 추정**이다.",
+                  "⚠ 이 50개만 손으로 분류하면 실용상 충분하다. 🔴 **나머지 %d개는 미분류로 남긴다.**"
+                  % max(0, len(fs) - 50), "",
+                  "| 함수 | 줄 | 손댐 | 호출됨 |", "|---|---|---|---|"]
+            for x in _t50:
+                L.append("| `%s` | %s:%d | %d | %d |"
+                         % (x["name"], x["file"], x["line"], x.get("_touch", 0), x.get("_calledBy", 0)))
+            L += ["", "## 🔴 먼저 볼 것 — 호출되는 횟수 상위 50", "",
+                  "⚠ 많이 불리는 함수가 고장나면 파급이 크다.",
+                  "🔴 위 목록과 **겹치는 함수 %d개** — 그것이 최우선이다." % len(_ov), "",
+                  "| 함수 | 줄 | 호출됨 | 손댐 | 위 목록과 겹침 |", "|---|---|---|---|---|"]
+            for x in _c50:
+                L.append("| `%s` | %s:%d | %d | %d | %s |"
+                         % (x["name"], x["file"], x["line"], x.get("_calledBy", 0),
+                            x.get("_touch", 0), "🔴 예" if x["name"] in _ov else "—"))
+            L += ["", "---", "", "## 전체 목록", ""]
         for f in fs:
             cs = callers.get(f["name"], [])
             full = f["name"] in danger_names          # 수정 2
