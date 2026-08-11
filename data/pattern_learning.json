@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "후나바시 8경주",
-      "horse_no": 6,
-      "recent_avg": 5.2,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-08-02"
-    },
-    {
-      "race": "후나바시 8경주",
-      "horse_no": 3,
-      "recent_avg": 7.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-02"
-    },
-    {
-      "race": "후나바시 9경주",
-      "horse_no": 11,
-      "recent_avg": 4.6,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-02"
-    },
-    {
       "race": "후나바시 9경주",
       "horse_no": 3,
       "recent_avg": 4.8,
@@ -4795,16 +4769,44 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-11"
+    },
+    {
+      "race": "모리오카 1경주",
+      "horse_no": 5,
+      "recent_avg": 5.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "모리오카 1경주",
+      "horse_no": 6,
+      "recent_avg": 7.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "모리오카 1경주",
+      "horse_no": 3,
+      "recent_avg": 5.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-11"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3132,
-      "hit": 568
+      "count": 3136,
+      "hit": 569
     },
     "전체부진마": {
-      "count": 5451,
-      "hit": 1465
+      "count": 5459,
+      "hit": 1468
     },
     "대규모급락": {
       "count": 18,
@@ -4814,8 +4816,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2319,
-      "hit": 897
+      "count": 2323,
+      "hit": 899
     },
     "급락동반": {
       "count": 486,
