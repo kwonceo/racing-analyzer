@@ -1,39 +1,6 @@
 {
   "patterns": [
     {
-      "race": "모리오카 5경주",
-      "horse_no": 3,
-      "recent_avg": 6.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
-      "race": "모리오카 5경주",
-      "horse_no": 8,
-      "recent_avg": 7.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
-      "pattern": "대규모급락",
-      "raceKey": "오다와라 7경주",
-      "total_combos_dropped": 5,
-      "drop_ratio": 0.417,
-      "result": "2+9",
-      "result_odds": "저배당",
-      "result_quinella_odds": 6.0,
-      "signal_result_combo": null,
-      "recommended_hit": false,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1785821447.5902147
-    },
-    {
       "race": "모리오카 6경주",
       "horse_no": 3,
       "recent_avg": 6.8,
@@ -4783,16 +4750,44 @@
         "복승이상감지"
       ],
       "date": "2026-08-11"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 4,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 11,
+      "recent_avg": 6.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "우라와 12경주",
+      "horse_no": 5,
+      "recent_avg": 7.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-11"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3293,
-      "hit": 599
+      "count": 3301,
+      "hit": 600
     },
     "전체부진마": {
-      "count": 5778,
-      "hit": 1558
+      "count": 5790,
+      "hit": 1561
     },
     "대규모급락": {
       "count": 17,
@@ -4802,8 +4797,8 @@
       "hit_rate": 29.4
     },
     "이상감지동반": {
-      "count": 2485,
-      "hit": 959
+      "count": 2489,
+      "hit": 961
     },
     "급락동반": {
       "count": 539,
