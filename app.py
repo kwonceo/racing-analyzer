@@ -8339,6 +8339,11 @@ HEAD_PAIR_ADD = 1            # 몇 개를 끼워 넣나(대표 지시: 하나만
 KEY_PAIR_ENABLED = True
 KEY_PAIR_ADD = 1             # 하나만
 
+# 🔴 [자체 검사 ③ (2026-08-12 승인)] 조합에 두 번 이상 등장한 말끼리의 짝이 빠졌으면 채운다.
+#   소급: 회수율 93.1 → **110.6%** · 3제외 72.8 → **74.7%** · 구좌 +3% · 발동 58건.
+SELFCHK_PAIR_ENABLED = True
+SELFCHK_PAIR_MAX = 2         # 경주당 최대 편입 수(소급 실측 평균 1개 남짓)
+
 
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                  reversal_quinellas=None, dark_quinellas=None, signal_horses=None, sig_meta=None, sport=None):
@@ -9591,6 +9596,69 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                               reason="편입 %s" % "+".join(str(x) for x in _pick))
     except Exception as _kpe:
         print("[유력마짝] 편입 실패(무시):", _kpe)
+
+    # 🔴🔴 [자체 검사 ③ · 중복마끼리 짝 (2026-08-12 대표 승인)]
+    #   배경: 대표가 어제 여덟 번 한 실수를 시스템도 한다 — **조합에 두 번 이상 등장한 말끼리의
+    #     짝이 빠져 있는 것**이다. 확정 직전에 그것만 채운다.
+    #   ⚠ **조합 선택 로직은 그대로 두고 빠진 것만 채운다.** 무엇도 밀어내거나 지우지 않는다.
+    #
+    #   소급 1,935경주(자체 검사 넷을 각각 켜서 비교):
+    #     현행                  구좌 4216 · 회수율  93.1% · 3제외 72.8%
+    #     🟢 ③ 중복마 짝         구좌 4322 · 회수율 **110.6%** · 3제외 **74.7%** · 발동 58건(구좌 +3%)
+    #     ❌ ① 신호 지목마 편입    구좌 5081 · 회수율  87.4% · 3제외 70.5% (구좌 +21%)
+    #     ❌ ② 축 밖 짝          구좌 5079 · 회수율  90.8% · 3제외 73.1% (구좌 +20%)
+    #     ❌ ④ 시장 최저1·2      구좌 5322 · 회수율  89.8% · 3제외 72.6% (구좌 +26%)
+    #     ❌ 넷 다              구좌 7275 · 회수율  95.3% · 3제외 **74.0%**(판정선 아래) · 구좌 +73%
+    #   🔴 ③만 **유일하게 판정선(74.5%)을 넘고** 구좌는 3% 만 는다.
+    #   ⚠ ① 을 신호별로 갈라 다시 쟀다 — 나쁜 값은 **복병(보유율 55.8%)이 만든 것**이었다:
+    #     복병 ★★☆ 강제편입 87.2%/3제외 70.6%(구좌 +22%) · 집중급락 100.2%/74.3%(구좌 +2%) ·
+    #     복승불일치 focus 는 **발동 13건뿐이라 판정 불가**(8/11 4전 4승은 그 13건의 일부다).
+    #     ⇒ 갈라도 ③ 을 넘는 것이 없어 ①②④ 는 기각한다.
+    #   🔧 되돌리기: `SELFCHK_PAIR_ENABLED = False`.
+    _SC_MARK = []
+    try:
+        if SELFCHK_PAIR_ENABLED:
+            _sc_have = set()
+            for _q0 in final_q:
+                _c0 = _q0.get("combo") if isinstance(_q0, dict) else _q0
+                if _c0 and len(_c0) == 2:
+                    try:
+                        _sc_have.add(tuple(sorted(int(x) for x in _c0)))
+                    except (TypeError, ValueError):
+                        pass
+            _gate_hit("selfchk_pair", rk=None, reach_only=True)
+            _sc_cnt = collections.Counter(x for c in _sc_have for x in c)
+            _sc_multi = sorted(n for n, v in _sc_cnt.items() if v >= 2)
+            _sc_add = 0
+            for _i in range(len(_sc_multi)):
+                for _j in range(_i + 1, len(_sc_multi)):
+                    if _sc_add >= SELFCHK_PAIR_MAX:
+                        break
+                    _t = tuple(sorted((_sc_multi[_i], _sc_multi[_j])))
+                    if _t in _sc_have:
+                        continue
+                    if valid_nos and not set(_t).issubset(set(valid_nos)):
+                        continue          # ⚠ 명단 밖 마번은 넣지 않는다(유령 마번 방지)
+                    # ⚠ 배당 조회는 바로 위 유력마 짝 블록과 **같은 방식**이다(규칙을 두 곳에 두지 않는다).
+                    _sc_o = None
+                    for (_a3, _b3), _o4 in (curQ or {}).items():
+                        if tuple(sorted((int(_a3), int(_b3)))) == _t:
+                            _sc_o = _o4
+                            break
+                    _sc_new = {"combo": list(_t), "odds": _sc_o, "stars": 2,
+                               "reason": "자체검사 · 중복 등장마 교차(빠진 짝 보충)",
+                               "basis": _combo_basis(list(_t)),
+                               "summary": "중복마 교차(자체검사 편입)", "selfCheck": "pair"}
+                    final_q.append(_sc_new)
+                    _SC_MARK.append(_sc_new)
+                    _sc_have.add(_t)
+                    _sc_add += 1
+                    _gate_hit("selfchk_pair", rk=None,
+                              reason="편입 %s" % "+".join(str(x) for x in _t))
+                if _sc_add >= SELFCHK_PAIR_MAX:
+                    break
+    except Exception as _sce:
+        print("[자체검사·중복마짝] 편입 실패(무시):", _sce)
 
     # [시나리오 조합 자동생성] 시나리오A(유력마 축)+B(편성 유리) — 각질 편성 기반(axisPlan·paceAnalysis 종합)
     scenario_plan = None

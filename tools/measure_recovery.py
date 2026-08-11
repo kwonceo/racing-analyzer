@@ -38,6 +38,29 @@ PAYBACK = 74.5          # 🔴 판정선 = 경륜 복승 실측 환급률(Σ1/�
 CLEAN_LO, CLEAN_HI = 0.5, 2.0   # 확정/배당판 괴리 정제 범위
 BOOT_N = 2000
 
+# 🔴🔴 [표본 게이트 (2026-08-12 대표 지시)] **표본이 적은데 숫자를 내면 한 건으로 일반화한다.**
+#   실사고: 2026-08-11 복승불일치가 「4전 4승」으로 보였는데, 전 기간 발동이 **13건**뿐이라
+#     그 하루가 표본의 대부분이었다. 그것으로 규칙을 만들 뻔했다.
+#   ⇒ 아래 두 조건 중 하나라도 걸리면 **숫자 옆에 「판정 불가」를 강제로 찍는다.**
+#     ⓐ 적중이 MIN_HITS 미만        (원칙 1 과 같은 값 30 — 🔴 새 숫자를 만들지 않는다)
+#     ⓑ 상위 3건을 뺐을 때 회수가 0 이하 (극단값 하나가 만든 값)
+#   ⚠ 값을 **감추지 않는다** — 그대로 내되 판정 불가임을 함께 적는다.
+MIN_HITS = 30
+
+
+def sample_verdict(hits, ex3_sum=None):
+    """[표본 게이트] 판정 불가 사유 문자열. 통과면 빈 문자열.
+
+    hits    : 적중 건수(int) 또는 적중 배당 리스트
+    ex3_sum : 상위 3건 제외 후 회수 합(없으면 ⓑ 검사 생략)
+    """
+    n = len(hits) if isinstance(hits, (list, tuple)) else int(hits or 0)
+    if n < MIN_HITS:
+        return "⚠판정불가(적중 %d<%d)" % (n, MIN_HITS)
+    if ex3_sum is not None and ex3_sum <= 0:
+        return "⚠판정불가(3제외 0)"
+    return ""
+
 
 def _loadh(base):
     """odds_history 로드. ⚠ `base` 는 analysis_log 경로에서 파생 — 날짜가 이미 포함돼 있다."""
@@ -404,8 +427,11 @@ def report_trio_dark(rows, label, drank=1):
     ex1 = 100.0 * sum(hits[1:]) / max(n - 1, 1)
     ex3 = 100.0 * sum(hits[3:]) / max(n - 3, 1)
     med = statistics.median(hits) if hits else 0
-    print("  %-18s 구좌 %4d · 적중 %3d · 회수율 %6.1f%% · 1제외 %6.1f%% · 3제외 %6.1f%% · 배당중앙 %.1f배 %s"
-          % (label, n, len(hits), rr, ex1, ex3, med, "⚠n<30" if n < 30 else ""))
+    # 🔴 표본 게이트 — 적중 30건 미만이거나 3제외 후 회수 0 이하면 「판정 불가」를 강제로 찍는다.
+    _vd = sample_verdict(hits, sum(hits[3:]))
+    print("  %-18s 구좌 %4d · 적중 %3d · 회수율 %6.1f%% · 1제외 %6.1f%% · 3제외 %6.1f%% · 배당중앙 %.1f배 %s%s"
+          % (label, n, len(hits), rr, ex1, ex3, med,
+             "⚠n<30 " if n < 30 else "", _vd))
 
 
 def _bm_cross(r, drank=None):
