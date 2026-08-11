@@ -19966,6 +19966,129 @@ def _report_append(title, part1="", part2="", part3="", meta=None):
         return False
 
 
+# 🔴🔴 [명령어 창구 (2026-08-12 대표 지시)] 지금은 대표가 명령어를 **복사해 붙여넣는다.**
+#   서버에 써두면 그 손이 사라진다. 세션 시작 때 `/api/next?n=1` 을 먼저 읽는다.
+#   🔴 **로컬에서만 받는다** — 외부 노출 금지. 아래 `_next_local_only()` 가 막는다.
+NEXT_FILE = os.path.join(os.path.dirname(__file__), "docs", "NEXT.md")
+NEXT_SEP = "<!--NEXT-->"
+NEXT_ROTATE_BYTES = 400 * 1024
+
+
+def _next_local_only():
+    """🔴 로컬(127.0.0.1 · ::1)에서 온 요청만 허용. 아니면 사유 문자열을 돌려준다."""
+    try:
+        ip = str(request.remote_addr or "")
+        if ip in ("127.0.0.1", "::1", "localhost"):
+            return None
+        return "로컬에서만 허용된다 (요청 IP %s)" % ip
+    except Exception:
+        return "요청 주소 확인 실패"
+
+
+def _next_cors(resp):
+    """⚠ localhost 출처만 CORS 허용 — 외부 도메인은 헤더를 주지 않는다."""
+    try:
+        org = request.headers.get("Origin") or ""
+        if re.match(r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$", org):
+            resp.headers["Access-Control-Allow-Origin"] = org
+            resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+            resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+            resp.headers["Vary"] = "Origin"
+    except Exception:
+        pass
+    return resp
+
+
+@app.route("/api/next", methods=["GET", "POST", "OPTIONS"])
+def next_api():
+    """[명령어 창구] POST 로 쌓고 GET 으로 읽는다. 🔴 로컬 전용.
+
+    POST  본문(text/plain 또는 {"text": ...})을 `docs/NEXT.md` 에 **최신이 위로** 쌓는다.
+    GET   ?n=1 (기본 1 · 0 이면 전체) · `?ack=1` 이면 읽은 건을 **처리됨**으로 표시한다.
+          ⚠ ack 는 지우지 않는다 — 표식만 붙인다(원문 보존).
+    """
+    if request.method == "OPTIONS":
+        return _next_cors(Response("", status=204))
+    bad = _next_local_only()
+    if bad:
+        return _next_cors(jsonify({"ok": False, "error": bad})), 403
+
+    if request.method == "POST":
+        txt = ""
+        try:
+            if request.is_json:
+                j = request.get_json(silent=True) or {}
+                txt = str(j.get("text") or j.get("cmd") or "")
+            if not txt:
+                txt = (request.get_data(as_text=True) or "").strip()
+            if not txt and request.form:
+                txt = str(request.form.get("text") or "")
+        except Exception as e:
+            return _next_cors(jsonify({"ok": False, "error": str(e)[:200]})), 400
+        if not txt.strip():
+            return _next_cors(jsonify({"ok": False, "error": "본문이 비었다"})), 400
+        try:
+            os.makedirs(os.path.dirname(NEXT_FILE), exist_ok=True)
+            prev = ""
+            if os.path.exists(NEXT_FILE):
+                prev = io.open(NEXT_FILE, encoding="utf-8").read()
+                if len(prev.encode("utf-8")) > NEXT_ROTATE_BYTES:
+                    ad = os.path.join(os.path.dirname(__file__), "docs", "next_archive")
+                    os.makedirs(ad, exist_ok=True)
+                    io.open(os.path.join(ad, time.strftime("%Y%m%d_%H%M%S") + ".md"),
+                            "w", encoding="utf-8").write(prev)
+                    prev = ""
+            blk = "%s\n## %s\n\n%s\n" % (NEXT_SEP, time.strftime("%Y-%m-%d %H:%M:%S"),
+                                         txt.rstrip())
+            tmp = NEXT_FILE + ".tmp"
+            io.open(tmp, "w", encoding="utf-8").write(blk + "\n" + prev)
+            os.replace(tmp, NEXT_FILE)
+            _gate_hit("next_post", None, "%d자 접수" % len(txt))
+            print("[명령어] 접수 %d자" % len(txt))
+            return _next_cors(jsonify({"ok": True, "chars": len(txt),
+                                       "at": time.strftime("%Y-%m-%d %H:%M:%S")}))
+        except Exception as e:
+            return _next_cors(jsonify({"ok": False, "error": str(e)[:200]})), 500
+
+    # ── GET ──
+    try:
+        n = int(request.args.get("n") or 1)
+    except (TypeError, ValueError):
+        n = 1
+    if not os.path.exists(NEXT_FILE):
+        return _next_cors(jsonify({"ok": True, "total": 0, "count": 0, "items": [],
+                                   "text": "", "note": "대기 중인 명령어가 없다"}))
+    try:
+        raw = io.open(NEXT_FILE, encoding="utf-8").read()
+    except Exception as e:
+        return _next_cors(jsonify({"ok": False, "error": str(e)[:200]})), 500
+    parts = [x.strip("\n") for x in raw.split(NEXT_SEP) if x.strip()]
+    # ⚠ 표식은 `[처리됨 07:21:24]` 처럼 **시각이 붙는다** — `"[처리됨]"` 으로 찾으면 영영 안 걸린다.
+    #   실측으로 잡았다: ack=1 을 눌러도 pending 이 그대로 1 이었다.
+    pend = [x for x in parts if "[처리됨" not in x.split("\n")[0]]
+    items = pend if n <= 0 else pend[:n]
+    if (request.args.get("ack") or "") in ("1", "true", "yes") and items:
+        try:
+            out = raw
+            for it in items:
+                head = it.split("\n")[0]
+                if "[처리됨" not in head:
+                    out = out.replace(head, head + "  [처리됨 %s]"
+                                      % time.strftime("%H:%M:%S"), 1)
+            tmp = NEXT_FILE + ".tmp"
+            io.open(tmp, "w", encoding="utf-8").write(out)
+            os.replace(tmp, NEXT_FILE)
+            _gate_hit("next_ack", None, "%d건 처리 표시" % len(items))
+        except Exception as e:
+            print("[명령어] ack 실패(무시):", str(e)[:80])
+    body = ("\n\n" + NEXT_SEP + "\n\n").join(items)
+    if (request.args.get("format") or "").lower() in ("txt", "text", "md"):
+        return _next_cors(Response(body, mimetype="text/markdown; charset=utf-8"))
+    return _next_cors(jsonify({"ok": True, "total": len(parts), "pending": len(pend),
+                               "count": len(items), "items": items, "text": body,
+                               "file": os.path.relpath(NEXT_FILE, os.path.dirname(__file__))}))
+
+
 @app.route("/api/report", methods=["GET"])
 def report_api():
     """[보고 조회] 완전 읽기 전용. ?n=1 (기본 1 · 0 이면 전체)
