@@ -1,52 +1,6 @@
 {
   "patterns": [
     {
-      "race": "코치 10경주",
-      "horse_no": 8,
-      "recent_avg": 4.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-02"
-    },
-    {
-      "race": "코치 10경주",
-      "horse_no": 7,
-      "recent_avg": 5.4,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-02"
-    },
-    {
-      "race": "후나바시 11경주",
-      "horse_no": 9,
-      "recent_avg": 4.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-02"
-    },
-    {
-      "race": "후나바시 11경주",
-      "horse_no": 7,
-      "recent_avg": 5.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-02"
-    },
-    {
-      "race": "후나바시 11경주",
-      "horse_no": 3,
-      "recent_avg": 6.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-02"
-    },
-    {
       "race": "코치 11경주",
       "horse_no": 2,
       "recent_avg": 7.0,
@@ -4794,16 +4748,69 @@
         "복승이상감지"
       ],
       "date": "2026-08-11"
+    },
+    {
+      "race": "카사마츠 5경주",
+      "horse_no": 3,
+      "recent_avg": 11.4,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "카사마츠 5경주",
+      "horse_no": 8,
+      "recent_avg": 4.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "모리오카 3경주",
+      "horse_no": 7,
+      "recent_avg": 7.4,
+      "win_place": 3,
+      "conditions": [
+        "급락52%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "모리오카 3경주",
+      "horse_no": 4,
+      "recent_avg": 4.2,
+      "win_place": 2,
+      "conditions": [
+        "급락52%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "모리오카 3경주",
+      "horse_no": 3,
+      "recent_avg": 8.2,
+      "win_place": 1,
+      "conditions": [
+        "급락67%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3149,
+      "count": 3153,
       "hit": 572
     },
     "전체부진마": {
-      "count": 5484,
-      "hit": 1477
+      "count": 5499,
+      "hit": 1482
     },
     "대규모급락": {
       "count": 18,
@@ -4813,12 +4820,12 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2335,
-      "hit": 905
+      "count": 2346,
+      "hit": 910
     },
     "급락동반": {
-      "count": 486,
-      "hit": 134
+      "count": 494,
+      "hit": 137
     }
   },
   "bokbyeong_patterns": [
