@@ -1,6 +1,6 @@
 {
-  "count": 154,
-  "placed": 25,
+  "count": 165,
+  "placed": 28,
   "cases": [
     {
       "race": "도야마 5경주",
@@ -1735,18 +1735,145 @@
       ],
       "placed": false,
       "won": false
+    },
+    {
+      "race": "부산 6경주",
+      "date": "2026-08-09",
+      "no": 10,
+      "odds": 11.5,
+      "signals": [
+        "집중급락",
+        "전적A/B"
+      ],
+      "placed": true,
+      "won": false
+    },
+    {
+      "race": "부산 6경주",
+      "date": "2026-08-09",
+      "no": 1,
+      "odds": 45.2,
+      "signals": [
+        "집중급락",
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "부산 6경주",
+      "date": "2026-08-09",
+      "no": 6,
+      "odds": 25.7,
+      "signals": [
+        "집중급락"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "부산 6경주",
+      "date": "2026-08-09",
+      "no": 11,
+      "odds": 68.4,
+      "signals": [
+        "전적A/B"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "부산 6경주",
+      "date": "2026-08-09",
+      "no": 3,
+      "odds": 71.6,
+      "signals": [
+        "집중급락"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "사가 1경주",
+      "date": "2026-08-09",
+      "no": 6,
+      "odds": 25.7,
+      "signals": [
+        "급락",
+        "스마트머니",
+        "집중급락"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "사가 1경주",
+      "date": "2026-08-09",
+      "no": 1,
+      "odds": 45.2,
+      "signals": [
+        "급락",
+        "집중급락"
+      ],
+      "placed": true,
+      "won": false
+    },
+    {
+      "race": "사가 1경주",
+      "date": "2026-08-09",
+      "no": 3,
+      "odds": 71.6,
+      "signals": [
+        "급락",
+        "집중급락"
+      ],
+      "placed": true,
+      "won": false
+    },
+    {
+      "race": "사가 1경주",
+      "date": "2026-08-09",
+      "no": 10,
+      "odds": 11.5,
+      "signals": [
+        "급락"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "사가 1경주",
+      "date": "2026-08-09",
+      "no": 7,
+      "odds": 100.0,
+      "signals": [
+        "집중급락"
+      ],
+      "placed": false,
+      "won": false
+    },
+    {
+      "race": "사가 1경주",
+      "date": "2026-08-09",
+      "no": 9,
+      "odds": 100.0,
+      "signals": [
+        "집중급락"
+      ],
+      "placed": false,
+      "won": false
     }
   ],
   "by_signal": {
     "급락": {
-      "count": 24,
-      "placed": 5,
-      "rate": 20.8
+      "count": 28,
+      "placed": 7,
+      "rate": 25.0
     },
     "전적A/B": {
-      "count": 130,
-      "placed": 22,
-      "rate": 16.9
+      "count": 133,
+      "placed": 23,
+      "rate": 17.3
     },
     "역배열": {
       "count": 29,
@@ -1754,16 +1881,16 @@
       "rate": 17.2
     },
     "집중급락": {
-      "count": 8,
-      "placed": 0,
-      "rate": 0.0
+      "count": 17,
+      "placed": 3,
+      "rate": 17.6
     },
     "스마트머니": {
-      "count": 3,
+      "count": 4,
       "placed": 0,
       "rate": 0.0
     }
   },
-  "rate": 16.2,
+  "rate": 17.0,
   "note": "중고배당 유력마(복승10배+&강한신호) 실제 입상 자동 집계. 표본 적으면 참고만(50+ 유의)."
 }

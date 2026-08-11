@@ -1,0 +1,323 @@
+{
+ "raceKey": "우라와 12경주",
+ "entries": [
+  {
+   "time": "19:20:38",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      5,
+      10
+     ],
+     [
+      10,
+      12
+     ],
+     [
+      3,
+      10
+     ],
+     [
+      5,
+      12
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      5,
+      10
+     ],
+     [
+      3,
+      5,
+      10
+     ],
+     [
+      2,
+      10,
+      12
+     ],
+     [
+      2,
+      5,
+      12
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "19:30:24",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "19:38:00",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       7,
+       8
+      ],
+      "prev": 31.5,
+      "cur": 4.7,
+      "pct": -85.1
+     },
+     {
+      "combo": [
+       1,
+       8
+      ],
+      "prev": 88.7,
+      "cur": 19.5,
+      "pct": -78.0
+     },
+     {
+      "combo": [
+       6,
+       7
+      ],
+      "prev": 95.8,
+      "cur": 23.4,
+      "pct": -75.6
+     },
+     {
+      "combo": [
+       6,
+       8
+      ],
+      "prev": 55.7,
+      "cur": 14.1,
+      "pct": -74.7
+     },
+     {
+      "combo": [
+       1,
+       7
+      ],
+      "prev": 82.6,
+      "cur": 25.0,
+      "pct": -69.7
+     },
+     {
+      "combo": [
+       8,
+       10
+      ],
+      "prev": 17.4,
+      "cur": 6.2,
+      "pct": -64.4
+     },
+     {
+      "combo": [
+       7,
+       10
+      ],
+      "prev": 25.2,
+      "cur": 10.3,
+      "pct": -59.1
+     },
+     {
+      "combo": [
+       1,
+       10
+      ],
+      "prev": 72.5,
+      "cur": 30.7,
+      "pct": -57.7
+     },
+     {
+      "combo": [
+       1,
+       6
+      ],
+      "prev": 149.7,
+      "cur": 77.9,
+      "pct": -48.0
+     }
+    ],
+    "finalQuinellas": [
+     [
+      7,
+      8
+     ],
+     [
+      8,
+      10
+     ],
+     [
+      7,
+      10
+     ],
+     [
+      6,
+      8
+     ],
+     [
+      1,
+      8
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      7,
+      8,
+      10
+     ],
+     [
+      6,
+      7,
+      8
+     ],
+     [
+      2,
+      8,
+      10
+     ],
+     [
+      6,
+      8,
+      9
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "19:38:03",
+   "minutesBefore": -8,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       3,
+       10
+      ],
+      "prev": 73.7,
+      "cur": 10.0,
+      "pct": -86.4
+     },
+     {
+      "combo": [
+       3,
+       11
+      ],
+      "prev": 182.9,
+      "cur": 39.6,
+      "pct": -78.3
+     },
+     {
+      "combo": [
+       2,
+       4
+      ],
+      "prev": 350.2,
+      "cur": 87.4,
+      "pct": -75.0
+     },
+     {
+      "combo": [
+       2,
+       11
+      ],
+      "prev": 398.2,
+      "cur": 104.5,
+      "pct": -73.8
+     },
+     {
+      "combo": [
+       3,
+       9
+      ],
+      "prev": 128.5,
+      "cur": 40.6,
+      "pct": -68.4
+     },
+     {
+      "combo": [
+       3,
+       4
+      ],
+      "prev": 161.8,
+      "cur": 52.2,
+      "pct": -67.7
+     },
+     {
+      "combo": [
+       4,
+       10
+      ],
+      "prev": 55.9,
+      "cur": 23.9,
+      "pct": -57.2
+     },
+     {
+      "combo": [
+       4,
+       9
+      ],
+      "prev": 127.7,
+      "cur": 68.0,
+      "pct": -46.8
+     },
+     {
+      "combo": [
+       5,
+       7
+      ],
+      "prev": 362.7,
+      "cur": 247.7,
+      "pct": -31.7
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

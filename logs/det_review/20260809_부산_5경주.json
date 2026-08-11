@@ -1,0 +1,75 @@
+{
+ "raceKey": "부산 5경주",
+ "entries": [
+  {
+   "time": "14:54:09",
+   "minutesBefore": 20,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      9,
+      10
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      5,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      9,
+      10
+     ],
+     [
+      8,
+      9,
+      10
+     ],
+     [
+      3,
+      8,
+      9
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:15:04",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

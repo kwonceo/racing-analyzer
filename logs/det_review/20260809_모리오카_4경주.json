@@ -1,0 +1,103 @@
+{
+ "raceKey": "모리오카 4경주",
+ "entries": [
+  {
+   "time": "15:05:09",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      7
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      3,
+      10
+     ],
+     [
+      2,
+      3
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      7,
+      10
+     ],
+     [
+      3,
+      6,
+      7
+     ],
+     [
+      3,
+      6,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:15:07",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       3,
+       8
+      ],
+      "prev": 29.2,
+      "cur": 10.5,
+      "pct": -64.0
+     },
+     {
+      "combo": [
+       3,
+       6
+      ],
+      "prev": 5.1,
+      "cur": 3.4,
+      "pct": -33.3
+     },
+     {
+      "combo": [
+       2,
+       8
+      ],
+      "prev": 585.5,
+      "cur": 401.4,
+      "pct": -31.4
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

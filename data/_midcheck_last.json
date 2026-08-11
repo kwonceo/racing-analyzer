@@ -145,14 +145,90 @@
     "두 소스 괴리 3경주"
    ],
    "error": null
+  },
+  "2026-08-08/22": {
+   "at": "2026-08-08 22:00:21",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +8건",
+    "두 소스 괴리 6경주"
+   ],
+   "error": null
+  },
+  "2026-08-09/09": {
+   "at": "2026-08-09 09:00:24",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [],
+   "error": null
+  },
+  "2026-08-09/14": {
+   "at": "2026-08-09 14:00:07",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "저장 실패 +45",
+    "JSON 손상 +1건"
+   ],
+   "error": null
+  },
+  "2026-08-09/22": {
+   "at": "2026-08-09 22:00:00",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "저장 실패 +83",
+    "JSON 손상 +15건"
+   ],
+   "error": null
+  },
+  "2026-08-10/09": {
+   "at": "2026-08-10 09:00:25",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "저장 실패 +237",
+    "JSON 손상 +18건"
+   ],
+   "error": null
+  },
+  "2026-08-10/14": {
+   "at": "2026-08-10 14:00:40",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "저장 실패 +115",
+    "JSON 손상 +3건"
+   ],
+   "error": null
+  },
+  "2026-08-10/22": {
+   "at": "2026-08-10 22:00:54",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +145건",
+    "두 소스 괴리 3경주"
+   ],
+   "error": null
+  },
+  "2026-08-11/09": {
+   "at": "2026-08-11 09:00:15",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +1459건"
+   ],
+   "error": null
   }
  },
- "lastRun": "2026-08-08 14:00:08",
- "lastSlot": 14,
+ "lastRun": "2026-08-11 09:00:15",
+ "lastSlot": 9,
  "last": {
-  "saveFail": 315,
+  "saveFail": 598,
   "gap": 0,
-  "corrupt": 97,
-  "at": "2026-08-08 14:00:08"
+  "corrupt": 1641,
+  "at": "2026-08-11 09:00:15"
  }
 }

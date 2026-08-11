@@ -1,0 +1,65 @@
+{
+ "raceKey": "우라와 9경주",
+ "entries": [
+  {
+   "time": "00:00:33",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      5,
+      8
+     ],
+     [
+      5,
+      10
+     ],
+     [
+      8,
+      10
+     ],
+     [
+      9,
+      10
+     ],
+     [
+      5,
+      9
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      5,
+      8,
+      9
+     ],
+     [
+      5,
+      8,
+      10
+     ],
+     [
+      5,
+      9,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

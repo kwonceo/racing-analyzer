@@ -1,0 +1,212 @@
+{
+ "raceKey": "니가타 3경주",
+ "entries": [
+  {
+   "time": "10:26:00",
+   "minutesBefore": 13,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      12
+     ],
+     [
+      3,
+      12
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      1,
+      12
+     ],
+     [
+      8,
+      12
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      4,
+      12
+     ],
+     [
+      3,
+      4,
+      12
+     ],
+     [
+      1,
+      3,
+      12
+     ],
+     [
+      1,
+      3,
+      4
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "10:40:12",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       1,
+       13
+      ],
+      "prev": 311.1,
+      "cur": 178.8,
+      "pct": -42.5
+     },
+     {
+      "combo": [
+       12,
+       13
+      ],
+      "prev": 77.5,
+      "cur": 50.2,
+      "pct": -35.2
+     },
+     {
+      "combo": [
+       7,
+       13
+      ],
+      "prev": 535.4,
+      "cur": 362.9,
+      "pct": -32.2
+     },
+     {
+      "combo": [
+       6,
+       13
+      ],
+      "prev": 2860.0,
+      "cur": 1958.6,
+      "pct": -31.5
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "10:40:42",
+   "minutesBefore": 19,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      12
+     ],
+     [
+      3,
+      12
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      12
+     ],
+     [
+      8,
+      12
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      12,
+      13
+     ],
+     [
+      3,
+      4,
+      12
+     ],
+     [
+      3,
+      12,
+      13
+     ],
+     [
+      1,
+      4,
+      12
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "10:42:22",
+   "minutesBefore": -2,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

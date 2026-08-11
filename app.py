@@ -16123,6 +16123,30 @@ def _raw_profile_snapshot(rk):
     return out
 
 
+# 🔴 [손분석 축 저장 (2026-08-11)] 스위치 — False 면 네 키를 담지 않는다(기존 키는 무영향).
+#   ⚠ 저장 전용이다. 점수·판정·추천 어디에도 들어가지 않는다.
+HAND_AXIS_SAVE = True
+
+# 🔴 [반에이 종목 태그 (2026-08-11 대표 지시)] 오비히로 72경주가 전부 `horse/japan_local` 이라
+#   반에이 성적을 **따로 잴 수 없었다**. app.py 에 `ばんえい`·`banei` 가 **0회** — 구분 코드가 없다.
+#   ⚠ 반에이는 **오비히로 한 곳뿐**이라 경기장명으로 가른다.
+#   🔴 `sport` 는 건드리지 않는다 — 판정·집계가 전부 그 값을 쓴다(원칙 22 계열).
+#     대신 `raceType` 이라는 **새 키**를 추가만 한다. 측정 도구가 이것으로 분리하면 된다.
+#   🔧 되돌리기: BANEI_TAG 를 False 로 둔다.
+BANEI_TAG = True
+_BANEI_RE = re.compile(r"(오비히로|帯広|obihiro|ばんえい|반에이)")
+
+
+def _race_type_of(rk, sport=None):
+    """[읽기 전용] 반에이면 'banei', 아니면 기존 sport 를 그대로 돌려준다."""
+    try:
+        if BANEI_TAG and _BANEI_RE.search(str(rk or "")):
+            return "banei"
+    except Exception:
+        pass
+    return str(sport or "")
+
+
 def _build_analysis_log(rk, an=None):
     """_triple_analyze 결과 + odds_history(타임라인/결과) + 전적을 종합해 리치 로그를 만들고 저장.
     기존 로그가 있으면 사용자 입력(analyzed_at·복기 메모·profit)은 보존한다."""
@@ -16210,6 +16234,22 @@ def _build_analysis_log(rk, an=None):
                            or [pr.get("last3f") for pr in (f.get("past") or [])]),
             "pastDistances": (f.get("pastDistances")
                               or [pr.get("distance") for pr in (f.get("past") or [])]),
+            # ── 🔴🔴 [손분석 축 저장 (2026-08-11 대표 지시)] ─────────────────────────
+            #   대표가 실제로 쓰는 축 넷이 `horses[]` 에 **0%** 였다(8월 1,199경주 실측).
+            #   원문·`starters_store` 에는 있는데 **여기서 옮기지 않아** 분석로그까지 오지 못했다 —
+            #   `corners`·`fieldSizes` 와 **완전히 같은 유형**이다(바로 위 주석 참조).
+            #   실물: 2026-08-10 오비히로 2R 55.3배가 「부담 대비 마체중」+「마체중 증가폭」 둘로 나왔다.
+            #   ⚠ **저장만 한다** — `record_score`·판정·추천 경로는 이 값을 쓰지 않는다.
+            #   ⚠ 점수 반영은 며칠 쌓아 측정한 뒤 별도 승인. **판정선 74.5 는 낮추지 않는다.**
+            #   🔧 되돌리기: HAND_AXIS_SAVE 를 False 로 두면 네 키가 None/빈 값으로 남는다.
+            #   🔴 **소급 불가 — 넣은 날부터 쌓인다.**
+            "bodyWeight": (f.get("bodyWeight") if HAND_AXIS_SAVE else None),
+            "burdenWeight": (f.get("weight") if HAND_AXIS_SAVE else None),
+            "marginList": ([pr.get("margin") for pr in (f.get("past") or [])]
+                           if HAND_AXIS_SAVE else []),
+            "pastPlacings": ((f.get("pastPlacings")
+                              or [pr.get("placing") for pr in (f.get("past") or [])])
+                             if HAND_AXIS_SAVE else []),
             "odds": win.get(str(no)) if isinstance(win, dict) else None,
             "grade": grade_by.get(no) or f.get("grade") or h.get("tier") or h.get("verdict"),
             "grade_reason": h.get("reason"),
@@ -16438,6 +16478,10 @@ def _build_analysis_log(rk, an=None):
         # [분석기록] 종목 태그 저장 → 기록 페이지에서 종목별 검색·필터. 기존 값 보존(재분석 시).
         "sport": rec.get("sport") or (doc.get("sport") if doc else None) or "horse",
         "category": rec.get("category") or (doc.get("category") if doc else None) or "japan_local",
+        # 🔴 [반에이 태그 (2026-08-11)] `sport` 는 그대로 두고 **새 키만 추가**한다.
+        #   오비히로 72경주가 전부 horse/japan_local 이라 반에이를 따로 잴 수 없었다.
+        #   ⚠ 판정·집계는 `sport` 를 쓰므로 무영향이다. 측정 도구가 이 키로 분리한다.
+        "raceType": _race_type_of(rk, rec.get("sport") or (doc.get("sport") if doc else None)),
         "date": date, "race": race,
         "analyzed_at": (doc.get("analyzed_at") if doc else None) or time.strftime("%H:%M:%S", time.localtime()),
         "updated_at": time.strftime("%H:%M:%S", time.localtime()),

@@ -1,0 +1,86 @@
+{
+ "raceKey": "모리오카 1경주",
+ "entries": [
+  {
+   "time": "13:20:27",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      8
+     ],
+     [
+      2,
+      7
+     ],
+     [
+      2,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      7,
+      8
+     ],
+     [
+      2,
+      4,
+      8
+     ],
+     [
+      2,
+      4,
+      7
+     ],
+     [
+      2,
+      3,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "13:30:04",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       1,
+       7
+      ],
+      "prev": 141.0,
+      "cur": 96.0,
+      "pct": -31.9
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

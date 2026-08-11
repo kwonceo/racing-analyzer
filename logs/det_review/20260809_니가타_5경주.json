@@ -1,0 +1,153 @@
+{
+ "raceKey": "니가타 5경주",
+ "entries": [
+  {
+   "time": "11:26:03",
+   "minutesBefore": 13,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      9,
+      12
+     ],
+     [
+      11,
+      12
+     ],
+     [
+      9,
+      11
+     ],
+     [
+      2,
+      11
+     ],
+     [
+      2,
+      12
+     ],
+     [
+      2,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      9,
+      12
+     ],
+     [
+      9,
+      11,
+      12
+     ],
+     [
+      2,
+      11,
+      12
+     ],
+     [
+      2,
+      9,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "11:29:04",
+   "minutesBefore": 10,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      9,
+      12
+     ],
+     [
+      2,
+      12
+     ],
+     [
+      11,
+      12
+     ],
+     [
+      2,
+      9
+     ],
+     [
+      9,
+      11
+     ],
+     [
+      2,
+      11
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      9,
+      12,
+      13
+     ],
+     [
+      9,
+      12,
+      15
+     ],
+     [
+      11,
+      12,
+      13
+     ],
+     [
+      2,
+      9,
+      12
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "11:40:02",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

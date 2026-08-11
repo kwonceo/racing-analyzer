@@ -1,0 +1,66 @@
+{
+ "raceKey": "모리오카 7경주",
+ "entries": [
+  {
+   "time": "00:00:27",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      7
+     ],
+     [
+      2,
+      11
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      11
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      4,
+      11
+     ],
+     [
+      2,
+      4,
+      6
+     ],
+     [
+      2,
+      7,
+      11
+     ],
+     [
+      4,
+      7,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

@@ -1,0 +1,83 @@
+{
+ "raceKey": "삿포로 11경주",
+ "entries": [
+  {
+   "time": "15:10:29",
+   "minutesBefore": 14,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      10
+     ],
+     [
+      3,
+      14
+     ],
+     [
+      10,
+      14
+     ],
+     [
+      13,
+      14
+     ],
+     [
+      3,
+      13
+     ],
+     [
+      10,
+      13
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      10,
+      13
+     ],
+     [
+      3,
+      10,
+      14
+     ],
+     [
+      3,
+      13,
+      14
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:25:08",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
