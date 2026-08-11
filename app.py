@@ -19838,6 +19838,95 @@ def race_full_api():
         return jsonify({"ok": False, "raceKey": rk, "error": str(e)[:300]}), 500
 
 
+# 🔴🔴 [보고 파일화 (2026-08-12 대표 지시)] 지금은 대표가 보고를 **손으로 붙여넣는다.**
+#   길면 잘리고, 외부에 있을 때는 아예 못 한다. 파일에 남기고 API 로 읽으면 그 손이 사라진다.
+#   ⚠ 완전 읽기 전용 계층이다 — 판정·추천·수집 경로에 일절 개입하지 않는다.
+REPORT_FILE = os.path.join(os.path.dirname(__file__), "docs", "REPORT.md")
+REPORT_ARCHIVE_DIR = os.path.join(os.path.dirname(__file__), "docs", "report_archive")
+REPORT_SEP = "<!--REPORT-->"          # 🔴 본문의 가로줄(---)과 겹치지 않는 고유 표식
+REPORT_ROTATE_BYTES = 400 * 1024      # 이보다 커지면 날짜 파일로 회전
+
+
+def _report_head():
+    """지금 HEAD 커밋 해시. ⚠ 보고를 **쓰는 시점** 값이라 그 보고가 담긴 커밋과 한 칸 어긋난다."""
+    try:
+        import subprocess
+        r = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                           cwd=os.path.dirname(__file__), capture_output=True,
+                           text=True, timeout=10)
+        return (r.stdout or "").strip() or None
+    except Exception:
+        return None
+
+
+def _report_append(title, part1="", part2="", part3="", meta=None):
+    """[3단 보고 적재] 맨 위가 최신이 되게 **prepend** 한다. 🔴 덮어쓰지 않는다."""
+    try:
+        os.makedirs(os.path.dirname(REPORT_FILE), exist_ok=True)
+        prev = ""
+        if os.path.exists(REPORT_FILE):
+            prev = io.open(REPORT_FILE, encoding="utf-8").read()
+            # 회전: 커지면 통째로 날짜 파일로 옮기고 본문을 비운다(지우지 않는다)
+            if len(prev.encode("utf-8")) > REPORT_ROTATE_BYTES:
+                os.makedirs(REPORT_ARCHIVE_DIR, exist_ok=True)
+                ap = os.path.join(REPORT_ARCHIVE_DIR,
+                                  time.strftime("%Y%m%d_%H%M%S") + ".md")
+                io.open(ap, "w", encoding="utf-8").write(prev)
+                print("[보고] 회전: %s (%d bytes)" % (os.path.basename(ap), len(prev)))
+                prev = ""
+        blk = [REPORT_SEP,
+               "# %s" % (title or "보고"),
+               "",
+               "- 시각: %s" % time.strftime("%Y-%m-%d %H:%M:%S"),
+               "- 커밋(작성 시점 HEAD): %s" % (_report_head() or "확인 실패"),
+               "  ⚠ 이 보고가 담긴 커밋은 보통 **그 다음 커밋**이다(작성 후 커밋하므로).",
+               ""]
+        for h, body in (("## 1부. 쉬운 설명", part1),
+                        ("## 2부. 예상", part2),
+                        ("## 3부. 결과", part3)):
+            if body:
+                blk += [h, "", str(body).rstrip(), ""]
+        if meta:
+            blk += ["## 메타", "", "```", json.dumps(meta, ensure_ascii=False, indent=1), "```", ""]
+        out = "\n".join(blk) + "\n" + prev
+        tmp = REPORT_FILE + ".tmp"
+        io.open(tmp, "w", encoding="utf-8").write(out)
+        os.replace(tmp, REPORT_FILE)
+        return True
+    except Exception as e:
+        print("[보고] 적재 실패(무시):", str(e)[:120])
+        return False
+
+
+@app.route("/api/report", methods=["GET"])
+def report_api():
+    """[보고 조회] 완전 읽기 전용. ?n=1 (기본 1 · 0 이면 전체)
+
+    🔴 원문 그대로 낸다 — 자르지 않는다. 한글은 UTF-8 로 그대로 실린다.
+    """
+    try:
+        n = int(request.args.get("n") or 1)
+    except (TypeError, ValueError):
+        n = 1
+    if not os.path.exists(REPORT_FILE):
+        return jsonify({"ok": True, "count": 0, "items": [], "text": "",
+                        "note": "아직 보고가 없다"}), 200
+    try:
+        raw = io.open(REPORT_FILE, encoding="utf-8").read()
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)[:200]}), 500
+    parts = [x.strip("\n") for x in raw.split(REPORT_SEP) if x.strip()]
+    items = parts if n <= 0 else parts[:n]
+    body = ("\n\n" + REPORT_SEP + "\n\n").join(items)
+    if (request.args.get("format") or "").lower() in ("txt", "text", "md"):
+        return Response(body, mimetype="text/markdown; charset=utf-8")
+    return jsonify({"ok": True, "total": len(parts), "count": len(items),
+                    "items": items, "text": body,
+                    "file": os.path.relpath(REPORT_FILE, os.path.dirname(__file__)),
+                    "archives": (sorted(os.listdir(REPORT_ARCHIVE_DIR), reverse=True)
+                                 if os.path.isdir(REPORT_ARCHIVE_DIR) else [])})
+
+
 @app.route("/api/race/odds", methods=["GET"])
 def race_odds_api():
     """[경주 지정 배당] 완전 읽기 전용. ?track=구마모토&race=3[&date=...]
