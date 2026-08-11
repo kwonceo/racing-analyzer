@@ -19484,21 +19484,70 @@ def _rf_resolve_rk(track, race, date=None):
 #   ⚠ **표시 전용이다** — 조합 선택 로직(`_final_picks`)·판정 명단 무변경.
 #   🔧 되돌리기: `STAKE_PLAN_ENABLED = False`.
 STAKE_PLAN_ENABLED = True
-STAKE_PLAN_WARN = 100.0     # 이 아래면 «맞아도 원금을 못 건집니다»
-STAKE_PLAN_GOOD = 150.0     # 이 위만 매수 권장
+STAKE_PLAN_WARN = 100.0     # 이 아래면 «맞아도 원금을 못 건집니다» — 🔴 내부용
+STAKE_PLAN_GOOD = 150.0     # 이 위만 매수 권장 — 🔴 내부용
+
+# 🔴🔴 [고배당 가중 (2026-08-12 대표 승인)] 역수 배분은 **고배당을 맞혀도 크게 못 번다.**
+#   야히코 4R 에서 30.4배 조합에 **4.0%** 만 갔고 회수가 121% 였다.
+#   ⇒ 15배 이상 조합에만 가중을 곱한 뒤 정규화한다.
+#   소급 1,822경주(추천 전 조합 배당 보유):
+#     ① 균등            회수율 87.5% · 3제외 74.8% · 고배당 적중 시 회수중앙  9.50
+#     ② 역수            회수율 89.5% · 3제외 77.3% · 고배당 회수중앙  3.43
+#     🟢 ③ 가중 15배+ x6  회수율 **91.2%** · 3제외 **79.0%** · 고배당 회수중앙 **10.34**
+#     ❌ ④ 최고배당 70%   회수율 88.2% · 3제외 **72.0%**(판정선 아래) — **기각**
+#   🔴 몰아주기가 기각된 이유: 회수액만 조금 크고(12.88) 3제외가 판정선 밑으로 떨어진다.
+#     승부 경주(사후 등급 🔥 152경주)에서는 더 나쁘다 — 71.1% / 3제외 47.9%.
+#     ⚠ 「승부 경주에서 과감히 지른다」는 방향은 데이터로 지지되지 않았다.
+#   🟢 가중은 **회수율과 회원 체감을 동시에** 올린다 — 역수 대비 회수율 +1.7%p, 회수액 3배.
+#   ⚠ 원금 회수율(1/Σ(1/배당))은 **배분과 무관하다** — 가중을 켜도 그 값은 안 바뀐다.
+#   🔧 되돌리기: `STAKE_PLAN_MODE = "dutch"` (순수 역수).
+STAKE_PLAN_MODE = "weighted"   # "dutch" | "weighted"
+STAKE_HI_ODDS = 15.0           # 이 배당 이상이면 가중 (⚠ 10·20배와 비교 대상 · 며칠 뒤 재측정)
+STAKE_HI_BOOST = 6.0           # 가중 배수 (⚠ 4·8배와 비교 대상)
 
 
-def _stake_plan(combos, odds_map, total=100.0):
-    """[원금 회수율] 조합 목록 → 역수 배분 비율·원금 회수율. 🔴 완전 읽기 전용.
+def _stake_weight(o):
+    """조합 하나의 배분 가중치. 🔴 여기만 바꾸면 배분안이 통째로 바뀐다."""
+    w = 1.0 / o
+    if STAKE_PLAN_MODE == "weighted" and o >= STAKE_HI_ODDS:
+        w *= STAKE_HI_BOOST
+    return w
+
+
+def _stake_plan(combos, odds_map, total=100.0, guard=None):
+    """[원금 회수율] 조합 목록 → 배분 비율·원금 회수율. 🔴 완전 읽기 전용.
 
     combos   : [(a,b), ...] 또는 [[a,b], ...]
     odds_map : {(a,b): 배당}
-    반환 None = 배당을 몰라 계산 불가(빈 값으로 채우지 않는다 · 원칙 9).
+    guard    : {"source":..., "horseCount":..., "comboCount":...} — 오염 차단용(선택)
+    반환 None = 계산 불가·차단(빈 값으로 채우지 않는다 · 원칙 9).
+
+    🔴 [안전 게이트 (2026-08-12 지시)] **틀린 배당으로 만든 비율은 틀린 비율이다.**
+      2026-08-11 하루에만 다른 경주 배당이 들어온 사고가 다섯 건이었다.
+      ⓐ `source` 가 확장(private)이면 **비율을 아예 안 낸다**
+      ⓑ 두수와 배당 조합 수가 nC2 와 안 맞으면 안 낸다(마지막 마번 누락 유형)
+      ⚠ 두수를 모르면 **통과시킨다** — 판정 불가를 차단으로 바꾸지 않는다.
     """
     if not STAKE_PLAN_ENABLED or not combos:
         return None
-    rows, inv = [], 0.0
-    miss = 0
+    g = guard or {}
+    src = str(g.get("source") or "")
+    if src and ("private" in src or "ks1." in src or "asyukk" in src):
+        _gate_hit("stake_plan_block", g.get("rk"), "확장 소스(%s) — 비율 미산출" % src[:40])
+        return None
+    try:
+        nh, nc = g.get("horseCount"), g.get("comboCount")
+        if nh and nc and int(nh) >= 2:
+            exp = int(nh) * (int(nh) - 1) // 2
+            if int(nc) != exp:
+                _gate_hit("stake_plan_block", g.get("rk"),
+                          "두수 %s ↔ 조합 %s (기대 %d) — 비율 미산출" % (nh, nc, exp))
+                return None
+    except (TypeError, ValueError):
+        pass
+
+    rows, inv, wsum = [], 0.0, 0.0
+    miss = []
     for c in combos:
         try:
             k = tuple(sorted(int(x) for x in c))
@@ -19510,33 +19559,54 @@ def _stake_plan(combos, odds_map, total=100.0):
         except (TypeError, ValueError):
             o = None
         if not o or o <= 0:
-            miss += 1
+            miss.append(list(k))          # 🔴 배당 null 조합은 비율에서 빼고 사실을 남긴다
             continue
-        rows.append([k, o])
-        inv += 1.0 / o
-    if not rows or inv <= 0:
+        w = _stake_weight(o)
+        rows.append([k, o, w])
+        inv += 1.0 / o                    # ⚠ 원금 회수율은 **가중과 무관**하게 순수 역수합이다
+        wsum += w
+    if miss:
+        _gate_hit("stake_plan_odds_missing", g.get("rk"),
+                  "배당 없음 %s — 비율에서 제외" % (miss[:4],))
+    if not rows or inv <= 0 or wsum <= 0:
         return None
     rate = 100.0 / inv
+
+    # 🔴 [정수 보정] 반올림 오차를 **최저배당(1순위) 조합에 가감**해 합계를 정확히 100%로 만든다.
+    #   ⚠ 회원이 보는 숫자다 — 99%나 101%가 나오면 안 된다.
     out = []
-    for k, o in rows:
-        w = (1.0 / o) / inv
-        out.append({"combo": list(k), "odds": o,
-                    "pct": round(w * 100, 1), "stake": round(total * w, 1),
-                    "payout": round(total * w * o, 1)})
-    out.sort(key=lambda x: -x["pct"])
+    for k, o, w in rows:
+        out.append({"combo": list(k), "odds": o, "_w": w / wsum})
+    out.sort(key=lambda x: -x["_w"])
+    ints = [int(round(x["_w"] * 100)) for x in out]
+    diff = 100 - sum(ints)
+    if ints:
+        _lo = min(range(len(out)), key=lambda i: out[i]["odds"])   # 최저배당 = 1순위
+        ints[_lo] = max(0, ints[_lo] + diff)
+    for x, pct in zip(out, ints):
+        x["pct"] = pct
+        x["stake"] = round(total * pct / 100.0, 1)
+        x["payout"] = round(total * pct / 100.0 * x["odds"], 1)
+        x.pop("_w", None)
+
     if rate < STAKE_PLAN_WARN:
-        verdict, note = "warn", "🔴 맞아도 원금을 못 건집니다 (회수율 %.0f%%)" % rate
+        verdict, note = "warn", "🔴 맞아도 원금을 못 건집니다 (적중 시 회수 %.0f%%)" % rate
     elif rate >= STAKE_PLAN_GOOD:
-        verdict, note = "good", "🟢 매수 권장 — 어느 조합이 맞아도 원금 %.0f%%" % rate
+        verdict, note = "good", "🟢 매수 권장 — 어느 조합이 맞아도 적중 시 회수 %.0f%%" % rate
     else:
-        verdict, note = "thin", "⚠ 얇습니다 — 회수율 %.0f%% (권장선 %.0f%%)" % (rate, STAKE_PLAN_GOOD)
+        verdict, note = "thin", "⚠ 얇습니다 — 적중 시 회수 %.0f%% (권장선 %.0f%%)" % (rate, STAKE_PLAN_GOOD)
     return {"invSum": round(inv, 4), "recoveryPct": round(rate, 1),
-            "verdict": verdict, "note": note, "total": total,
-            "rows": out, "oddsMissing": miss,
+            # 🔴 「원금 회수율 190%」를 그대로 쓰지 않는다 — 실제 회수율은 66.6% 다.
+            #   190% 는 **맞았을 때** 값이다. 회원이 매번 90% 번다고 오해하면 더 큰 불신이 온다.
+            "recoveryLabel": "적중 시 회수 %.0f%%" % rate,
+            "verdict": verdict, "note": note, "internalOnly": True,
+            "total": total, "pctSum": sum(ints),
+            "rows": out, "oddsMissing": len(miss), "oddsMissingCombos": (miss or None),
+            "mode": STAKE_PLAN_MODE, "hiOdds": STAKE_HI_ODDS, "hiBoost": STAKE_HI_BOOST,
             "warnLine": STAKE_PLAN_WARN, "goodLine": STAKE_PLAN_GOOD}
 
 
-def _stake_plan_from_cp(cp, combos=None):
+def _stake_plan_from_cp(cp, combos=None, guard=None):
     """corePicks 에서 배당을 그러모아 `_stake_plan` 을 만든다(추천 목록 기준)."""
     if not isinstance(cp, dict):
         return None
@@ -19553,7 +19623,7 @@ def _stake_plan_from_cp(cp, combos=None):
                     pass
     if combos is None:
         combos = ((cp.get("displayedCombos") or {}).get("quinellas") or [])
-    return _stake_plan(combos, om)
+    return _stake_plan(combos, om, guard=guard)
 
 
 def _rf_signals(doc):
@@ -19721,8 +19791,12 @@ def _race_full(rk):
         "finalTrifectas": cp.get("finalTrifectas") or None,
         "bmedSpecial": cp.get("bmedSpecial") or None,
         "keirinLinePairs": cp.get("keirinLinePairs") or None,
-        # 🔴 [원금 회수율] 역수 배분 비율 + 1/Σ(1/배당). 표시 전용(_stake_plan 주석 참조)
-        "stakePlan": _stake_plan_from_cp(cp),
+        # 🔴 [배분 비율] 고배당 가중 + 1/Σ(1/배당). 표시 전용(_stake_plan 주석 참조)
+        #   ⚠ 오염 차단 가드를 함께 넘긴다 — 확장(private) 소스·nC2 불일치면 None 이 온다.
+        "stakePlan": _stake_plan_from_cp(cp, guard={
+            "rk": rk, "source": out["odds"].get("source"),
+            "horseCount": out["odds"]["counts"].get("maxNo"),
+            "comboCount": out["odds"]["counts"].get("quinella")}),
     }
 
     # ── 빠진 조합 + 그때 배당 (card-timeline 재사용 · 같은 규칙을 두 곳에 두지 않는다) ──
@@ -35811,16 +35885,27 @@ def _kakao_rich_message(rk, phase, an):
     #   ⚠ **총액은 회원이 정한다** — 비율(%)만 알린다. 금액을 지정하지 않는다.
     #   ⚠ 임의 비중(80/20)은 기각됐다 — 시장최저 집중은 80.9% 로 균등보다 나빴다.
     #   ⚠ 판정 명단이 아니라 **발송 조합(위 lines 에 실린 복승)** 기준으로 계산한다.
+    #   🔴 [회원용 문구 (2026-08-12 지시)] **비율만 낸다.**
+    #     ⓐ 회수율 수치를 안 쓴다 — 「원금 회수율 190%」는 **맞았을 때** 값이고 실제 회수율은
+    #        66.6% 다. 회원이 매번 90% 번다고 오해하면 나중에 더 큰 불신이 온다.
+    #     ⓑ 「매수 권장」도 안 쓴다 — 150% 이상이 **77.8%** 라 거의 항상 뜬다. 안 뜨는 22%가
+    #        「사지 말라」로 읽히는데, 200% 미만을 거르면 오히려 악화한다는 측정과 모순된다.
+    #     ⓒ 경고도 안 쓴다 — 배당 하락 시 회원 불신을 만든다. **내부 로그·API 에만** 남긴다.
     try:
         _sp_combos = [q.get("combo") for q in (cp.get("finalQuinellas") or [])[:3] if q.get("combo")]
-        _sp = _stake_plan_from_cp(cp, _sp_combos) if _sp_combos else None
+        _sp_guard = {"rk": rk, "source": (an.get("oddsSource") or an.get("source")),
+                     "horseCount": an.get("raceHorseCount"),
+                     "comboCount": len(an.get("quinella") or [])}
+        _sp = _stake_plan_from_cp(cp, _sp_combos, guard=_sp_guard) if _sp_combos else None
         if _sp:
-            _pct = " · ".join("%s %s%%" % ("+".join(map(str, r["combo"])), r["pct"])
+            _pct = " · ".join("%s %d%%" % ("+".join(map(str, r["combo"])), r["pct"])
                               for r in _sp["rows"])
-            lines.append("💰 배분 " + _pct)
-            lines.append("원금 회수율 %.0f%% — %s" % (_sp["recoveryPct"], _sp["note"]))
-            _gate_hit("kakao_stake_plan", rk, "회수율 %.0f%% · %d조합"
-                      % (_sp["recoveryPct"], len(_sp["rows"])))
+            lines.append("💰 권장 비중 " + _pct + "  (금액은 회원님이 정하세요)")
+            # 🔴 회수율·권장·경고는 **회원에게 안 나간다.** 내부 로그로만 남긴다.
+            _gate_hit("kakao_stake_plan", rk, "%s · 합계 %d%% · %s · %d조합"
+                      % (_sp["recoveryLabel"], _sp["pctSum"], _sp["verdict"], len(_sp["rows"])))
+            if _sp["verdict"] == "warn":
+                print("🔴 [내부·비발송] %s: %s" % (rk, _sp["note"]))
     except Exception as _spe:
         print("[카톡 배분] 스킵(무시):", str(_spe)[:80])
     try:
