@@ -19346,6 +19346,277 @@ def race_card_timeline_api():
     return jsonify({"ok": True, "data": data})
 
 
+# 🔴🔴 [배당판 전체 API (2026-08-11 대표 지시)] 대표가 배당을 손으로 붙여넣고 있다.
+#   ⇒ 브라우저 URL 하나로 그 경주의 **모든 것**을 받아간다.
+#   🔴 **완전 읽기 전용이다** — 새 저장소를 만들지 않고, 이미 쌓이는 것만 조립한다.
+#     (`card-timeline` 과 같은 방식 · 판정 로직·저장 스키마 무변경)
+#   ⚠ 값이 없으면 **null** 로 명시한다. 빈 문자열을 쓰지 않는다 — 「없다」와 「비었다」가 구분돼야 한다.
+#   ⚠ 배당은 **반올림하지 않는다.** 원본 float 그대로 싣는다.
+
+
+def _rf_num(v):
+    """숫자로 바꿀 수 있으면 float, 아니면 None. 🔴 반올림하지 않는다."""
+    if v is None:
+        return None
+    if isinstance(v, (list, tuple)):
+        v = v[0] if v else None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _rf_combo_map(src, arity=2):
+    """복승/쌍승/삼복승 원본을 {"1+2": 배당} 으로 편다. dict·list 두 형태를 다 받는다."""
+    out = {}
+    if isinstance(src, dict):
+        for k, v in src.items():
+            nums = [x for x in re.split(r"[^0-9]+", str(k)) if x]
+            if len(nums) != arity:
+                continue
+            out["+".join(str(int(x)) for x in nums)] = _rf_num(v)
+    elif isinstance(src, list):
+        for e in src:
+            if isinstance(e, dict):
+                c = e.get("combo") or e.get("pair") or e.get("key")
+                val = e.get("odds", e.get("value"))
+            elif isinstance(e, (list, tuple)) and len(e) >= 2:
+                c, val = e[0], e[1]
+            else:
+                continue
+            if isinstance(c, (list, tuple)):
+                nums = [str(int(x)) for x in c]
+            else:
+                nums = [x for x in re.split(r"[^0-9]+", str(c)) if x]
+            if len(nums) != arity:
+                continue
+            out["+".join(str(int(x)) for x in nums)] = _rf_num(val)
+    return out or None
+
+
+def _rf_resolve_rk(track, race, date=None):
+    """경기장명 + 경주번호(+날짜) → 실제 저장 키. 🔴 별칭·표기 변형은 `_track_norm` 에 맡긴다.
+
+    ⚠ 새 별칭 목록을 만들지 않는다(원칙 25 · 목록을 두 곳에 두면 갈린다).
+    반환 (rk, 후보목록). 못 찾으면 (None, 후보목록).
+    """
+    t = (track or "").strip()
+    try:
+        std = _track_norm(t) or t
+    except Exception:
+        std = t
+    ymd = (date or time.strftime("%Y-%m-%d")).replace("-", "_").replace(".", "_")
+    want = None
+    try:
+        want = int(re.sub(r"[^0-9]", "", str(race) or ""))
+    except (TypeError, ValueError):
+        want = None
+    cands, exact = [], None
+    d = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
+    if os.path.isdir(d):
+        for fn in os.listdir(d):
+            if not fn.endswith(".json") or not fn.startswith(ymd):
+                continue
+            body = fn[len(ymd) + 1:-5]              # "히라츠카_6경주"
+            parts = body.rsplit("_", 1)
+            if len(parts) != 2:
+                continue
+            vn, rn = parts
+            try:
+                vstd = _track_norm(vn) or vn
+            except Exception:
+                vstd = vn
+            try:
+                num = int(re.sub(r"[^0-9]", "", rn))
+            except (TypeError, ValueError):
+                continue
+            cands.append({"track": vn, "race": num})
+            if vstd == std and (want is None or num == want):
+                exact = "%s %d경주" % (vn, num)
+    return exact, sorted(cands, key=lambda x: (x["track"], x["race"]))
+
+
+def _race_full(rk):
+    """[배당판 전체] 이미 쌓이는 것만 조립한다. 🔴 읽기 전용 · 새 계산 없음."""
+    out = {"raceKey": rk}
+    lp = None
+    try:
+        lp, _, _ = _analysis_log_path(_canonical_log_key(rk))
+    except Exception:
+        pass
+    doc = {}
+    if lp and os.path.exists(lp):
+        try:
+            doc = json.load(open(lp, encoding="utf-8")) or {}
+        except Exception:
+            doc = {}
+    cp = doc.get("corePicks") or {}
+
+    # ── 경주 기본 ──
+    m = re.match(r"^(.*?)\s*(\d+)\s*경주$", rk)
+    dl = doc.get("deadline_epoch") or doc.get("deadlineEpoch")
+    out["race"] = {
+        "track": (m.group(1) if m else None) or None,
+        "raceNo": int(m.group(2)) if m else None,
+        "date": (os.path.basename(lp)[:10].replace("_", "-") if lp else None),
+        "sport": doc.get("sport") or None,
+        "raceType": doc.get("raceType") or None,
+        "category": doc.get("category") or None,
+        "horseCount": doc.get("raceHorseCount") or None,
+        "postTime": doc.get("postTime") or None,
+        "deadlineEpoch": _rf_num(dl),
+        "deadlineLocal": (time.strftime("%H:%M:%S", time.localtime(float(dl))) if dl else None),
+        "minutesBefore": _rf_num(doc.get("minutesBefore")),
+        "afterClose": doc.get("afterClose"),
+        "updatedAt": doc.get("updated_at") or doc.get("analyzed_at") or None,
+    }
+
+    # ── 배당 전 조합 (활성 캐시 우선 · 없으면 마지막 스냅샷) ──
+    #   ⚠ 마감시각은 analysis_log 에 없을 때가 많다 — odds_history 의 `deadline_epoch` 를 폴백으로 읽는다
+    #     (실측: 히라츠카 4R 은 로그에 없고 파일에만 있었다).
+    src, rec = None, (_triple_load().get(rk) or {})
+    _hp = _card_odds_path(rk)
+    _hdoc = {}
+    if os.path.exists(_hp):
+        try:
+            _hdoc = json.load(open(_hp, encoding="utf-8")) or {}
+        except Exception:
+            _hdoc = {}
+    if not out["race"]["deadlineEpoch"]:
+        _de = _rf_num(_hdoc.get("deadline_epoch"))
+        if _de:
+            out["race"]["deadlineEpoch"] = _de
+            out["race"]["deadlineLocal"] = time.strftime("%H:%M:%S", time.localtime(_de))
+    if rec.get("quinella"):
+        src = rec.get("source") or "활성 캐시"
+    else:
+        sn = _hdoc.get("snapshots") or []
+        if sn:
+            rec, src = sn[-1], (sn[-1].get("src") or "마지막 스냅샷")
+    out["odds"] = {
+        "source": src,
+        "at": _rf_num(rec.get("t")),
+        "atLocal": (time.strftime("%H:%M:%S", time.localtime(float(rec["t"])))
+                    if _rf_num(rec.get("t")) else None),
+        "minutesBefore": _rf_num(rec.get("minutes_before")),
+        "quinella": _rf_combo_map(rec.get("quinella"), 2),
+        "exacta": _rf_combo_map(rec.get("exacta"), 2),
+        "trio": _rf_combo_map(rec.get("trio"), 3),
+        "win": _rf_combo_map(rec.get("win"), 1),
+    }
+    _q = out["odds"]["quinella"] or {}
+    out["odds"]["counts"] = {
+        "quinella": len(_q), "exacta": len(out["odds"]["exacta"] or {}),
+        "trio": len(out["odds"]["trio"] or {}), "win": len(out["odds"]["win"] or {}),
+        "maxNo": (max(int(x) for k in _q for x in k.split("+")) if _q else None)}
+
+    # ── 출주표 요약 ──
+    st = (_starters_load().get(rk) or {}) if "_starters_load" in globals() else {}
+    hs = st.get("horses") or []
+    rows = []
+    for h in sorted(hs, key=lambda x: int(x.get("no") or 0)):
+        rows.append({
+            "no": int(h.get("no")) if h.get("no") is not None else None,
+            "name": h.get("name") or None,
+            "jockey": h.get("jockey") or None,
+            "competScore": _rf_num(h.get("competScore")),
+            "totalScore": _rf_num(h.get("totalScore")),
+            "styleType": h.get("styleType") or None,
+            "declaredStyle": h.get("declaredStyle") or None,
+            "kimarite": h.get("kimarite") or None,
+            "kimariteRatio": h.get("kimariteRatio") or None,
+            "rentai": _rf_num(h.get("rentai")),
+            "recentPlacings": h.get("recentPlacings") or None,
+            "chaku": h.get("chaku") or None,
+            "grade": h.get("absGrade") or h.get("classGrade") or None,
+            "bodyWeight": _rf_num(h.get("bodyWeight")),
+            "burdenWeight": _rf_num(h.get("burdenWeight")),
+        })
+    out["starters"] = {
+        "count": len(rows) or None,
+        "line": st.get("line") or None,
+        "tendency": st.get("tendency") or None,
+        "comment": st.get("comment") or None,
+        "source": st.get("source") or None,
+        "rows": rows or None,
+    }
+
+    # ── 분석 점수(분석 로그 horses — 출주표와 다른 축이다) ──
+    ah = []
+    for h in (doc.get("horses") or []):
+        ah.append({"no": h.get("no"), "record_score": _rf_num(h.get("record_score")),
+                   "paceBonus": _rf_num(h.get("paceBonus")),
+                   "paceBonusBase": _rf_num(h.get("paceBonusBase")),
+                   "gradeAtBonus": h.get("gradeAtBonus") or None,
+                   "gait": h.get("gait") or None, "grade": h.get("grade") or None,
+                   "odds": _rf_num(h.get("odds"))})
+    out["scores"] = ah or None
+
+    # ── 신호 ──
+    out["signals"] = {
+        "drops": doc.get("drops") or None,
+        "reversals": doc.get("reversals") or None,
+        "mismatch": doc.get("quinellaMismatch") or doc.get("mismatch") or None,
+        "excessDrop": doc.get("excessDrop") or None,
+        "strong": doc.get("strong_signals") or None,
+        "detected": doc.get("signals_detected") or None,
+        "raceGrade": cp.get("raceGrade") or None,
+    }
+
+    # ── 추천 ──
+    dc = cp.get("displayedCombos") or {}
+    out["picks"] = {
+        "keyHorses": doc.get("keyHorses") or None,
+        "confidence": _rf_num(doc.get("confidence")),
+        "judged": {"quinellas": dc.get("quinellas") or None,
+                   "trifectas": dc.get("trifectas") or None,
+                   "extra": dc.get("extra") or None,
+                   "at": dc.get("at") or None},
+        "finalQuinellas": cp.get("finalQuinellas") or None,
+        "finalTrifectas": cp.get("finalTrifectas") or None,
+        "bmedSpecial": cp.get("bmedSpecial") or None,
+        "keirinLinePairs": cp.get("keirinLinePairs") or None,
+    }
+
+    # ── 빠진 조합 + 그때 배당 (card-timeline 재사용 · 같은 규칙을 두 곳에 두지 않는다) ──
+    try:
+        tl = _race_card_timeline(rk)
+        out["lost"] = tl.get("lost") or None
+        out["tiers"] = tl.get("tiers") or None
+        out["result"] = tl.get("result") or None
+    except Exception as _te:
+        out["lost"] = None
+        out["timelineError"] = str(_te)[:120]
+    return out
+
+
+@app.route("/api/race/full", methods=["GET"])
+def race_full_api():
+    """[배당판 전체] 완전 읽기 전용. ?track=히라츠카&race=6[&date=2026-08-11]
+
+    🔴 raceKey 를 몰라도 경기장명·경주번호만으로 열린다. 한글 파라미터는 Flask 가
+      UTF-8 로 디코드하므로 그대로 쓴다(브라우저 주소창에 한글을 쳐도 된다).
+    """
+    track = (request.args.get("track") or "").strip()
+    race = (request.args.get("race") or "").strip()
+    date = (request.args.get("date") or "").strip() or None
+    rk = (request.args.get("raceKey") or "").strip()
+    if not rk:
+        if not track:
+            return jsonify({"ok": False, "error": "track 필요 (예: ?track=히라츠카&race=6)"}), 400
+        rk, cands = _rf_resolve_rk(track, race, date)
+        if not rk:
+            return jsonify({"ok": False,
+                            "error": "그 날짜에 해당 경주가 없다",
+                            "asked": {"track": track, "race": race,
+                                      "date": date or time.strftime("%Y-%m-%d")},
+                            "available": cands or None}), 404
+    try:
+        return jsonify({"ok": True, "data": _race_full(rk)})
+    except Exception as e:
+        return jsonify({"ok": False, "raceKey": rk, "error": str(e)[:300]}), 500
+
+
 @app.route("/api/race-report/list", methods=["GET"])
 def race_report_list():
     """[신규 1번] 저장된 경주 재현 리포트 목록 → [{slug,race,date,hit,hit_type,odds,win_tags}]."""
