@@ -1,0 +1,63 @@
+{
+ "raceKey": "욧카이치 7경주",
+ "entries": [
+  {
+   "time": "00:00:55",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 1개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      2
+     ],
+     [
+      3,
+      7
+     ],
+     [
+      1,
+      3
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      2,
+      3
+     ],
+     [
+      4,
+      5,
+      7
+     ],
+     [
+      1,
+      2,
+      7
+     ],
+     [
+      2,
+      3,
+      7
+     ]
+    ],
+    "linePairs": [
+     [
+      4,
+      5
+     ]
+    ]
+   }
+  }
+ ]
+}

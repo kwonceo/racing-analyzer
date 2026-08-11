@@ -1,0 +1,71 @@
+{
+ "raceKey": "마쓰야마 7경주",
+ "entries": [
+  {
+   "time": "00:00:46",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      7
+     ],
+     [
+      3,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      4,
+      9
+     ],
+     [
+      1,
+      2,
+      4
+     ],
+     [
+      1,
+      2,
+      7
+     ],
+     [
+      1,
+      4,
+      7
+     ]
+    ],
+    "linePairs": [
+     [
+      2,
+      7
+     ],
+     [
+      9,
+      3
+     ],
+     [
+      4,
+      1
+     ]
+    ]
+   }
+  }
+ ]
+}

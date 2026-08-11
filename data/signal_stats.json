@@ -202,6 +202,28 @@
         "trifecta_hit": false
       },
       {
+        "race": "카와사키 9경주",
+        "date": "2026-08-11",
+        "horses": [
+          4
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "욧카이치 8경주",
+        "date": "2026-08-11",
+        "horses": [
+          4
+        ],
+        "placed": [
+          4
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
         "race": "욧카이치 7경주",
         "date": "2026-08-11",
         "horses": [
@@ -214,11 +236,11 @@
         "trifecta_hit": false
       }
     ],
-    "count": 10,
-    "hit_quinella": 5,
-    "hit_trifecta": 2,
+    "count": 12,
+    "hit_quinella": 6,
+    "hit_trifecta": 3,
     "rate_quinella": 50.0,
-    "rate_trifecta": 20.0,
+    "rate_trifecta": 25.0,
     "reliable": false
   },
   "전적이중수렴": {
@@ -332,6 +354,34 @@
         "trifecta_hit": false
       },
       {
+        "race": "카와사키 9경주",
+        "date": "2026-08-11",
+        "horses": [
+          1,
+          2
+        ],
+        "placed": [
+          1,
+          2
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "욧카이치 8경주",
+        "date": "2026-08-11",
+        "horses": [
+          1,
+          2,
+          3
+        ],
+        "placed": [
+          2
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
         "race": "욧카이치 7경주",
         "date": "2026-08-11",
         "horses": [
@@ -345,11 +395,11 @@
         "trifecta_hit": false
       }
     ],
-    "count": 9,
-    "hit_quinella": 5,
-    "hit_trifecta": 2,
-    "rate_quinella": 55.6,
-    "rate_trifecta": 22.2,
+    "count": 11,
+    "hit_quinella": 6,
+    "hit_trifecta": 3,
+    "rate_quinella": 54.5,
+    "rate_trifecta": 27.3,
     "reliable": false
   },
   "크로스역배열": {
@@ -439,13 +489,23 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "욧카이치 8경주",
+        "date": "2026-08-11",
+        "horses": [
+          1
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 6,
+    "count": 7,
     "hit_quinella": 2,
     "hit_trifecta": 1,
-    "rate_quinella": 33.3,
-    "rate_trifecta": 16.7,
+    "rate_quinella": 28.6,
+    "rate_trifecta": 14.3,
     "reliable": false
   }
 }

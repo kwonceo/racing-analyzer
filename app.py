@@ -13398,6 +13398,33 @@ def _triple_analyze(rk, rec):
         else:
             _tier = {"tier": "C", "label": "🛡 참고·패스", "color": "#94a3b8"}
         _tier["basis"] = "신호 %d개 · 확신도 %s%s" % (_gs, round(_gc, 1), " · 단통" if _dan_g else "")
+        # 🔴 [확신도 저장 (2026-08-12 대표 지시)] 종전엔 `basis` **문자열 안에만** 있어
+        #   구간별 측정이 불가능했다(실측 보유율 **0%**). 숫자로 따로 남긴다.
+        #   ⚠ 저장 전용 — 판정·점수 경로 무개입. 🔴 소급 불가(오늘부터 쌓인다).
+        try:
+            _tier["confidence"] = round(float(_gc), 1)
+            _tier["signalCount"] = int(_gs)
+            _tier["danger"] = bool(_dan_g)
+        except (TypeError, ValueError):
+            pass
+        # 🔴🔴 [판정용 등급 동결 (2026-08-12 대표 승인)] 실측: `locked=True` 가 저장 로그에 **0건**이고
+        #   마감 전 스냅샷과 일치율 **30.4%** 였다. 아래 표시 동결(`_GRADE_LOCK`)은 마감 **후**에만
+        #   붙는데, 마감 후에는 corePicks 자체가 갱신되지 않아 **파일에는 영영 안 남는다.**
+        #   ⇒ 등급 기반 판단이 전부 «사후 해석»이 된다.
+        #   ✅ T-5 동결과 같은 방식으로 **mb <= T5_FREEZE_MB 시점의 등급을 판정용으로 1회 박는다.**
+        #     🔴 표시(`raceGrade`)는 계속 갱신한다 — 판정용 값(`raceGradeJudge`)만 따로 둔다.
+        #   🔧 되돌리기: `GRADE_JUDGE_FREEZE = False`.
+        try:
+            if GRADE_JUDGE_FREEZE and isinstance(_cpg, dict):
+                _mbj = _an_out.get("minutesBefore")
+                _prev = _cpg.get("raceGradeJudge")
+                if not _prev and _mbj is not None and 0 <= float(_mbj) <= T5_FREEZE_MB:
+                    _cpg["raceGradeJudge"] = dict(_tier, judgeAt=time.strftime("%H:%M:%S"),
+                                                  judgeMb=float(_mbj), locked=True)
+                    _gate_hit("grade_judge_freeze", rk, "등급 %s 확정(mb=%s)"
+                              % (_tier.get("tier"), _mbj), once_key=rk)
+        except Exception as _gjf:
+            print("[등급 판정동결] 스킵(무시):", str(_gjf)[:80])
         # [등급 마감 동결 (2026-07-22 사세보 6R)] 등급이 라이브 재계산이라 마감 후 배당·신호 변화로
         #   흔들림(🔥 강력승부 적중 경주가 사후 조회 시 ⚖️ 관찰로 표시). corePicks 동결과 동일 원칙:
         #   마감 전 마지막 등급을 잠그고 마감 후엔 그 값만 표시(locked=True). 서버 재시작 대비로
@@ -13471,6 +13498,10 @@ _REC_HYST = {}   # {rk: {"main": (a,b), "item": dict, "streak_m": (a,b)|None, "s
 # [등급 마감 동결 (2026-07-22)] {rk: {"day": "YYYY-MM-DD", "tier": dict}} — 마감 전 마지막 등급 저장.
 #   마감 후 _triple_analyze 가 이 값을 반환(locked=True). 재시작 시 분석 로그 corePicks.raceGrade 복원.
 _GRADE_LOCK = {}
+
+# 🔴 [판정용 등급 동결 (2026-08-12 승인)] mb<=T5_FREEZE_MB 시점 등급을 `corePicks.raceGradeJudge`
+#   에 1회 박는다. 표시용 `raceGrade` 는 그대로 갱신된다(둘을 분리하는 것이 이 배선의 핵심).
+GRADE_JUDGE_FREEZE = True
 
 # ══════════ [T-5 확정 후 삭제 금지 (2026-08-10)] ══════════
 #  왜: 마감 5분 전에 있던 조합이 마감 직전에 **빠지는** 일이 실측 43.5%(47/108경주)로 잦다.
@@ -19436,6 +19467,95 @@ def _rf_resolve_rk(track, race, date=None):
     return exact, sorted(cands, key=lambda x: (x["track"], x["race"]))
 
 
+# 🔴🔴 [원금 회수율 · 역수 배분 (2026-08-12 대표 결정)]
+#   배당 역수에 비례해 걸면 **어느 조합이 맞아도 회수액이 같아진다**(등환수 더치).
+#     배팅액 = 총액 × (1/배당) ÷ Σ(1/배당)
+#     원금 회수율 = 1 ÷ Σ(1/배당)
+#   실물(부산 총 50만): 6.2/7.3/9.1/16.2/18.2배에 16/13/10/6/5만 → 기대금 전부 91~99만 · 190%.
+#
+#   소급 실측(1,813경주 · 추천 전 조합의 배당을 아는 경주 93.7%):
+#     균등 배분  회수율 87.5% · 3제외 74.8%
+#     🟢 역수 배분 회수율 **89.4%** · 3제외 **77.1%**
+#     🔴 2026-08-11 만: 균등 58.2%/42.2% → 역수 **66.6%/58.1%**(3제외 +15.9%p)
+#   ⚠ 역수가 나은 이유는 **적중이 저배당에 몰리는데 균등은 고배당에 같은 돈을 넣기 때문**이다.
+#   원금 회수율 분포: 중앙 **190%** · 100% 이상 99.2% · 150% 이상 77.8% · 200% 이상 45.9%.
+#     🔴 100% 미만은 **0.8%(15/1813)** 뿐이라 걸러도 성적은 안 바뀐다(87.5 → 87.4%).
+#     ⇒ 경고는 **회원 보호용**이지 성적 개선책이 아니다. 그렇게 표기한다.
+#   ⚠ **표시 전용이다** — 조합 선택 로직(`_final_picks`)·판정 명단 무변경.
+#   🔧 되돌리기: `STAKE_PLAN_ENABLED = False`.
+STAKE_PLAN_ENABLED = True
+STAKE_PLAN_WARN = 100.0     # 이 아래면 «맞아도 원금을 못 건집니다»
+STAKE_PLAN_GOOD = 150.0     # 이 위만 매수 권장
+
+
+def _stake_plan(combos, odds_map, total=100.0):
+    """[원금 회수율] 조합 목록 → 역수 배분 비율·원금 회수율. 🔴 완전 읽기 전용.
+
+    combos   : [(a,b), ...] 또는 [[a,b], ...]
+    odds_map : {(a,b): 배당}
+    반환 None = 배당을 몰라 계산 불가(빈 값으로 채우지 않는다 · 원칙 9).
+    """
+    if not STAKE_PLAN_ENABLED or not combos:
+        return None
+    rows, inv = [], 0.0
+    miss = 0
+    for c in combos:
+        try:
+            k = tuple(sorted(int(x) for x in c))
+        except (TypeError, ValueError):
+            continue
+        o = odds_map.get(k)
+        try:
+            o = float(o)
+        except (TypeError, ValueError):
+            o = None
+        if not o or o <= 0:
+            miss += 1
+            continue
+        rows.append([k, o])
+        inv += 1.0 / o
+    if not rows or inv <= 0:
+        return None
+    rate = 100.0 / inv
+    out = []
+    for k, o in rows:
+        w = (1.0 / o) / inv
+        out.append({"combo": list(k), "odds": o,
+                    "pct": round(w * 100, 1), "stake": round(total * w, 1),
+                    "payout": round(total * w * o, 1)})
+    out.sort(key=lambda x: -x["pct"])
+    if rate < STAKE_PLAN_WARN:
+        verdict, note = "warn", "🔴 맞아도 원금을 못 건집니다 (회수율 %.0f%%)" % rate
+    elif rate >= STAKE_PLAN_GOOD:
+        verdict, note = "good", "🟢 매수 권장 — 어느 조합이 맞아도 원금 %.0f%%" % rate
+    else:
+        verdict, note = "thin", "⚠ 얇습니다 — 회수율 %.0f%% (권장선 %.0f%%)" % (rate, STAKE_PLAN_GOOD)
+    return {"invSum": round(inv, 4), "recoveryPct": round(rate, 1),
+            "verdict": verdict, "note": note, "total": total,
+            "rows": out, "oddsMissing": miss,
+            "warnLine": STAKE_PLAN_WARN, "goodLine": STAKE_PLAN_GOOD}
+
+
+def _stake_plan_from_cp(cp, combos=None):
+    """corePicks 에서 배당을 그러모아 `_stake_plan` 을 만든다(추천 목록 기준)."""
+    if not isinstance(cp, dict):
+        return None
+    om = {}
+    for key in ("finalQuinellas", "bmedSpecial", "quinellaRef", "confQuinellas"):
+        for q in (cp.get(key) or []):
+            if not isinstance(q, dict):
+                continue
+            c, o = q.get("combo"), q.get("odds")
+            if c and len(c) == 2 and o:
+                try:
+                    om[tuple(sorted(int(x) for x in c))] = float(o)
+                except (TypeError, ValueError):
+                    pass
+    if combos is None:
+        combos = ((cp.get("displayedCombos") or {}).get("quinellas") or [])
+    return _stake_plan(combos, om)
+
+
 def _rf_signals(doc):
     """[신호 모음] 🔴 **실제 저장 위치에서 읽는다.**
 
@@ -19601,6 +19721,8 @@ def _race_full(rk):
         "finalTrifectas": cp.get("finalTrifectas") or None,
         "bmedSpecial": cp.get("bmedSpecial") or None,
         "keirinLinePairs": cp.get("keirinLinePairs") or None,
+        # 🔴 [원금 회수율] 역수 배분 비율 + 1/Σ(1/배당). 표시 전용(_stake_plan 주석 참조)
+        "stakePlan": _stake_plan_from_cp(cp),
     }
 
     # ── 빠진 조합 + 그때 배당 (card-timeline 재사용 · 같은 규칙을 두 곳에 두지 않는다) ──
@@ -19690,6 +19812,7 @@ def race_odds_api():
         "bmedSpecial": pk.get("bmedSpecial"),
         "picks": pk.get("judged"),
         "finalQuinellas": pk.get("finalQuinellas"),
+        "stakePlan": pk.get("stakePlan"),   # 🔴 원금 회수율·조합별 비율
         "lost": f.get("lost"),
     }
     return jsonify({"ok": True, "data": data})
@@ -35681,6 +35804,25 @@ def _kakao_rich_message(rk, phase, an):
         lines.append("💎복병 %s%s ★★ 참고" % ("+".join(map(str, s.get("combo") or [])), _o))
     if not lines:
         lines.append("추천 조합 미형성 — 신호 대기(패스 권장)")
+    # 🔴🔴 [배팅 비율 발송 (2026-08-12 대표 승인)] 종전엔 **조합만** 나가서 회원이 균등으로 산다.
+    #   소급 1,813경주: 균등 87.5%/3제외 74.8% ↔ **역수 배분 89.4%/77.1%**.
+    #     🔴 2026-08-11 만 보면 3제외 42.2% → **58.1%**(+15.9%p).
+    #   ⇒ 비율을 함께 보내면 **회원 성적이 우리 측정과 같아진다.**
+    #   ⚠ **총액은 회원이 정한다** — 비율(%)만 알린다. 금액을 지정하지 않는다.
+    #   ⚠ 임의 비중(80/20)은 기각됐다 — 시장최저 집중은 80.9% 로 균등보다 나빴다.
+    #   ⚠ 판정 명단이 아니라 **발송 조합(위 lines 에 실린 복승)** 기준으로 계산한다.
+    try:
+        _sp_combos = [q.get("combo") for q in (cp.get("finalQuinellas") or [])[:3] if q.get("combo")]
+        _sp = _stake_plan_from_cp(cp, _sp_combos) if _sp_combos else None
+        if _sp:
+            _pct = " · ".join("%s %s%%" % ("+".join(map(str, r["combo"])), r["pct"])
+                              for r in _sp["rows"])
+            lines.append("💰 배분 " + _pct)
+            lines.append("원금 회수율 %.0f%% — %s" % (_sp["recoveryPct"], _sp["note"]))
+            _gate_hit("kakao_stake_plan", rk, "회수율 %.0f%% · %d조합"
+                      % (_sp["recoveryPct"], len(_sp["rows"])))
+    except Exception as _spe:
+        print("[카톡 배분] 스킵(무시):", str(_spe)[:80])
     try:
         _sigc = int((an.get("strongSignals") or {}).get("count") or 0)
     except Exception:

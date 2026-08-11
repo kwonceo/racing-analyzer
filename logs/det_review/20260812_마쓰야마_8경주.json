@@ -1,0 +1,71 @@
+{
+ "raceKey": "마쓰야마 8경주",
+ "entries": [
+  {
+   "time": "00:00:59",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      5
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      3,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      5,
+      7
+     ],
+     [
+      1,
+      5,
+      9
+     ],
+     [
+      3,
+      5,
+      9
+     ],
+     [
+      1,
+      7,
+      9
+     ]
+    ],
+    "linePairs": [
+     [
+      3,
+      9
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      6,
+      8
+     ]
+    ]
+   }
+  }
+ ]
+}
