@@ -1,39 +1,6 @@
 {
   "patterns": [
     {
-      "race": "후나바시 12경주",
-      "horse_no": 5,
-      "recent_avg": 8.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-03"
-    },
-    {
-      "pattern": "대규모급락",
-      "raceKey": "히로시마 5경주",
-      "total_combos_dropped": 7,
-      "drop_ratio": 0.412,
-      "result": "2+7",
-      "result_odds": "저배당",
-      "result_quinella_odds": 3.5,
-      "signal_result_combo": "-79.2%",
-      "recommended_hit": true,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1785807036.9898076
-    },
-    {
-      "race": "모리오카 1경주",
-      "horse_no": 10,
-      "recent_avg": 6.4,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
       "race": "모리오카 1경주",
       "horse_no": 3,
       "recent_avg": 8.0,
@@ -4781,16 +4748,48 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-11"
+    },
+    {
+      "race": "우라와 8경주",
+      "horse_no": 11,
+      "recent_avg": 5.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "모리오카 10경주",
+      "horse_no": 3,
+      "recent_avg": 4.0,
+      "win_place": 2,
+      "conditions": [
+        "급락46%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "모리오카 10경주",
+      "horse_no": 2,
+      "recent_avg": 6.6,
+      "win_place": 3,
+      "conditions": [
+        "급락49%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3262,
+      "count": 3269,
       "hit": 597
     },
     "전체부진마": {
-      "count": 5715,
-      "hit": 1544
+      "count": 5730,
+      "hit": 1547
     },
     "대규모급락": {
       "count": 18,
@@ -4800,12 +4799,12 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2453,
-      "hit": 947
+      "count": 2461,
+      "hit": 950
     },
     "급락동반": {
-      "count": 520,
-      "hit": 144
+      "count": 525,
+      "hit": 146
     }
   },
   "bokbyeong_patterns": [
