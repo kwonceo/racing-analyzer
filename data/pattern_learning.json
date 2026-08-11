@@ -1,44 +1,6 @@
 {
   "patterns": [
     {
-      "race": "모리오카 3경주",
-      "horse_no": 1,
-      "recent_avg": 6.4,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-03"
-    },
-    {
-      "race": "모리오카 3경주",
-      "horse_no": 7,
-      "recent_avg": 5.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-03"
-    },
-    {
-      "race": "모리오카 3경주",
-      "horse_no": 4,
-      "recent_avg": 8.0,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-03"
-    },
-    {
-      "race": "모리오카 4경주",
-      "horse_no": 6,
-      "recent_avg": 5.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-03"
-    },
-    {
       "race": "모리오카 4경주",
       "horse_no": 7,
       "recent_avg": 5.2,
@@ -4802,16 +4764,56 @@
         "복승이상감지"
       ],
       "date": "2026-08-11"
+    },
+    {
+      "race": "모리오카 5경주",
+      "horse_no": 10,
+      "recent_avg": 5.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "모리오카 5경주",
+      "horse_no": 3,
+      "recent_avg": 6.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "우라와 2경주",
+      "horse_no": 8,
+      "recent_avg": 4.6,
+      "win_place": 3,
+      "conditions": [
+        "급락69%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
+    },
+    {
+      "race": "우라와 2경주",
+      "horse_no": 7,
+      "recent_avg": 6.8,
+      "win_place": 1,
+      "conditions": [
+        "급락36%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-11"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3159,
-      "hit": 573
+      "count": 3167,
+      "hit": 574
     },
     "전체부진마": {
-      "count": 5527,
-      "hit": 1489
+      "count": 5544,
+      "hit": 1493
     },
     "대규모급락": {
       "count": 18,
@@ -4821,12 +4823,12 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2368,
-      "hit": 916
+      "count": 2377,
+      "hit": 919
     },
     "급락동반": {
-      "count": 502,
-      "hit": 139
+      "count": 508,
+      "hit": 141
     }
   },
   "bokbyeong_patterns": [
@@ -5199,25 +5201,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 982,
-    "hit": 796,
+    "count": 983,
+    "hit": 797,
     "cases": [
-      {
-        "race": "사가 8경주",
-        "date": "2026-08-08",
-        "smart_horses": [
-          5,
-          1,
-          2
-        ],
-        "placed": [
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "이와키타이라 10경주",
         "date": "2026-08-08",
@@ -6763,6 +6749,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 1.4,
+        "high_odds": false
+      },
+      {
+        "race": "우라와 2경주",
+        "date": "2026-08-11",
+        "smart_horses": [
+          1,
+          5,
+          4
+        ],
+        "placed": [
+          1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
