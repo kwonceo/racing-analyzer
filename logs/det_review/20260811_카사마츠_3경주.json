@@ -1,0 +1,120 @@
+{
+ "raceKey": "카사마츠 3경주",
+ "entries": [
+  {
+   "time": "11:24:00",
+   "minutesBefore": 35,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      5,
+      7
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      5,
+      7
+     ],
+     [
+      2,
+      5,
+      7
+     ],
+     [
+      3,
+      4,
+      5
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "11:45:05",
+   "minutesBefore": 14,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       7,
+       9
+      ],
+      "prev": 100.1,
+      "cur": 70.1,
+      "pct": -30.0
+     }
+    ],
+    "finalQuinellas": [
+     [
+      4,
+      5
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      2,
+      5
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      4,
+      5
+     ],
+     [
+      4,
+      5,
+      9
+     ],
+     [
+      2,
+      5,
+      7
+     ],
+     [
+      4,
+      5,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

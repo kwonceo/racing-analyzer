@@ -19436,6 +19436,38 @@ def _rf_resolve_rk(track, race, date=None):
     return exact, sorted(cands, key=lambda x: (x["track"], x["race"]))
 
 
+def _rf_signals(doc):
+    """[신호 모음] 🔴 **실제 저장 위치에서 읽는다.**
+
+    ✏️ 정정(2026-08-11): 처음 `/api/race/full` 을 만들 때 `doc["drops"]`·`doc["reversals"]`·
+      `doc["quinellaMismatch"]` 를 읽었는데 **최상위에 그 키가 없다.** 조용히 전부 null 이 나왔다.
+      원자료 40건을 열어 확인한 실제 위치는 아래와 같다(원칙 8-E — 없다고 하기 전에 원자료를 연다):
+        급락        `drops_raw`                              (보유 34/40)
+        쌍승역전     `signal_quality_full.winExactaReversals`  (40/40)
+        복승불일치   `signal_quality_full.quinellaMismatch`    (40/40 · 값 자체는 null 가능)
+        집중급락     `signal_quality_full.excess`             (40/40)
+        신뢰도       `signal_quality_full.signalConfidence`   (40/40)
+    ⚠ 기존 최상위 키도 **폴백으로 남긴다** — 구데이터·다른 경로 저장분 호환(삭제하지 않는다).
+    """
+    sq = doc.get("signal_quality_full") or {}
+    ex = sq.get("excess") or {}
+    return {
+        "drops": doc.get("drops_raw") or doc.get("drops") or None,
+        "reversals": sq.get("winExactaReversals") or doc.get("reversals") or None,
+        "quinellaMismatch": sq.get("quinellaMismatch") or doc.get("quinellaMismatch") or None,
+        "excessDrop": ex or doc.get("excessDrop") or None,
+        "concentrated": (ex.get("concentrated") or None) if isinstance(ex, dict) else None,
+        "signalConfidence": sq.get("signalConfidence") or None,
+        "situation": sq.get("situation") or None,
+        "advanced": sq.get("advanced") or None,
+        "strong": doc.get("strong_signals") or None,
+        "detected": doc.get("signals_detected") or None,
+        "anomalyHistory": doc.get("anomaly_history") or None,
+        "compression": doc.get("compression_pattern") or None,
+        "thirdPlaceHunt": doc.get("third_place_hunt") or None,
+    }
+
+
 def _race_full(rk):
     """[배당판 전체] 이미 쌓이는 것만 조립한다. 🔴 읽기 전용 · 새 계산 없음."""
     out = {"raceKey": rk}
@@ -19552,16 +19584,9 @@ def _race_full(rk):
                    "odds": _rf_num(h.get("odds"))})
     out["scores"] = ah or None
 
-    # ── 신호 ──
-    out["signals"] = {
-        "drops": doc.get("drops") or None,
-        "reversals": doc.get("reversals") or None,
-        "mismatch": doc.get("quinellaMismatch") or doc.get("mismatch") or None,
-        "excessDrop": doc.get("excessDrop") or None,
-        "strong": doc.get("strong_signals") or None,
-        "detected": doc.get("signals_detected") or None,
-        "raceGrade": cp.get("raceGrade") or None,
-    }
+    # ── 신호 ── 🔴 실제 저장 위치에서 읽는다(_rf_signals 주석 참조)
+    out["signals"] = _rf_signals(doc)
+    out["signals"]["raceGrade"] = cp.get("raceGrade") or None
 
     # ── 추천 ──
     dc = cp.get("displayedCombos") or {}
@@ -19615,6 +19640,59 @@ def race_full_api():
         return jsonify({"ok": True, "data": _race_full(rk)})
     except Exception as e:
         return jsonify({"ok": False, "raceKey": rk, "error": str(e)[:300]}), 500
+
+
+@app.route("/api/race/odds", methods=["GET"])
+def race_odds_api():
+    """[경주 지정 배당] 완전 읽기 전용. ?track=구마모토&race=3[&date=...]
+
+    🔴 왜 따로 두나: `/api/day/races` 는 진행 중 경주에 **조합만** 주고 배당을 안 준다.
+      배당 매트릭스는 화면에 떠 있는 한 경주만 나와 **원하는 경주의 배당을 못 가져온다.**
+    ⚠ `/api/race/full` 의 축약본이다 — 같은 조립 함수를 쓰고 **배당·신호·마감**만 남긴다
+      (같은 규칙을 두 곳에 두지 않는다). 새 저장소 없음 · 판정 로직 무변경.
+    """
+    track = (request.args.get("track") or "").strip()
+    race = (request.args.get("race") or "").strip()
+    date = (request.args.get("date") or "").strip() or None
+    rk = (request.args.get("raceKey") or "").strip()
+    if not rk:
+        if not track:
+            return jsonify({"ok": False, "error": "track 필요 (예: ?track=구마모토&race=3)"}), 400
+        rk, cands = _rf_resolve_rk(track, race, date)
+        if not rk:
+            return jsonify({"ok": False, "error": "그 날짜에 해당 경주가 없다",
+                            "asked": {"track": track, "race": race,
+                                      "date": date or time.strftime("%Y-%m-%d")},
+                            "available": cands or None}), 404
+    try:
+        f = _race_full(rk)
+    except Exception as e:
+        return jsonify({"ok": False, "raceKey": rk, "error": str(e)[:300]}), 500
+    r, o, pk = f.get("race") or {}, f.get("odds") or {}, f.get("picks") or {}
+    # 🔴 마감까지 남은 시간 — 이미 있는 deadlineEpoch 로 계산만 한다(새 값을 만들지 않는다)
+    left = None
+    if r.get("deadlineEpoch"):
+        left = int(float(r["deadlineEpoch"]) - time.time())
+    data = {
+        "raceKey": rk,
+        "track": r.get("track"), "raceNo": r.get("raceNo"), "date": r.get("date"),
+        "sport": r.get("sport"), "raceType": r.get("raceType"),
+        "deadlineLocal": r.get("deadlineLocal"),
+        "secondsToClose": left,
+        "minutesToClose": (round(left / 60.0, 1) if left is not None else None),
+        "closed": (left is not None and left <= 0),
+        "oddsSource": o.get("source"), "oddsAt": o.get("atLocal"),
+        "counts": o.get("counts"),
+        "quinella": o.get("quinella"), "trio": o.get("trio"),
+        "exacta": o.get("exacta"), "win": o.get("win"),
+        "signals": f.get("signals"),
+        "keyHorses": pk.get("keyHorses"), "confidence": pk.get("confidence"),
+        "bmedSpecial": pk.get("bmedSpecial"),
+        "picks": pk.get("judged"),
+        "finalQuinellas": pk.get("finalQuinellas"),
+        "lost": f.get("lost"),
+    }
+    return jsonify({"ok": True, "data": data})
 
 
 @app.route("/api/race-report/list", methods=["GET"])
@@ -24942,6 +25020,42 @@ def keirin_card():
     return jsonify({"ok": True, "url": url, "card": card, "analysis": an, "linkedRaceKey": linked})
 
 
+# 🔴🔴 [전적 하루 넘김 차단 (2026-08-11 대표 승인)] 실사고: 2026-08-11 히라츠카 1~7경주가
+#   **어제(8/10) 전적**으로 분석됐다. 저장 시각 `2026-08-10 09:36:51` 이 원문 파일
+#   `keirin_093651` 과 초 단위로 일치했고, 그 원문 제목이 **8월 10일 히라츠카 5R** 이었다.
+#   🔴 원인은 파서가 아니다 — `starters_store` 키에 **날짜가 없다**(「히라츠카 5경주」).
+#     `_starters_prune` 이 24시간 보존하므로 어제 같은 번호 경주가 그대로 남고,
+#     재수집 스킵 조건이 「이미 있으면 건너뛴다」라 **영원히 갱신되지 않는다.**
+#   🔴 그 함수 주석(app.py 3254)은 *"form 조회는 raceKey 정확 일치라 타 경주 잔존은 분석에
+#     혼입되지 않음"* 이라 적고 있었다. **안전하다고 적어둔 그 근거가 정확히 사고 경로였다**(원칙 26).
+#   ⚠ 키 구조는 바꾸지 않는다 — `starters_store` 참조가 **79곳**(app.py 32 · 도구 46 · 테스트 1)이라
+#     날짜 키 전환은 범위가 크다. **급한 불만 끄고 별건으로 남긴다.**
+#   실측(2026-08-11): 저장일이 오늘이 아닌 것 **84건**(경륜 60 · 경마 24) ↔ 오늘 저장 48건.
+#     🔴 그중 **오늘 분석에 실제로 쓰인 것 8건**(히라츠카 1~7R · 카나자와 10R).
+#   요청 증가: 재수집은 **그 경주 수집 창에서 경주당 1회**만 돈다(오늘 개최분에만 발생).
+#     경륜 1경주=1요청 · 지방경마 1경주=약 5요청. 하루 최다 144경주여도 상한 144~720건이고
+#     배당 수집(30초 주기)에 비하면 무시할 수준이다.
+#   🔧 되돌리기: `FORM_DAY_GUARD = False`.
+FORM_DAY_GUARD = True
+
+
+def _form_is_today(rec):
+    """저장된 전적이 **오늘 것인가**. 🔴 판정 기준은 저장 시각(`t`)의 날짜다.
+
+    ⚠ `t` 가 없으면 **오늘로 본다**(판정 불가를 재수집으로 바꾸지 않는다 — 구데이터 보호).
+    ⚠ 게이트가 꺼져 있으면 항상 True → 기존 동작 그대로.
+    """
+    if not FORM_DAY_GUARD:
+        return True
+    try:
+        t = (rec or {}).get("t")
+        if not t:
+            return True
+        return time.strftime("%Y-%m-%d", time.localtime(float(t))) == time.strftime("%Y-%m-%d")
+    except Exception:
+        return True
+
+
 def _keirin_autocollect_form(rk, jo, ymd, race):
     """[경륜 출마표 전적 자동 수집] 배당 수집 시 동시에 oddspark 출마표에서 전적(競走得点·착순·결정수·각질) 수집·저장.
     이미 저장(source=keirin)됐으면 재fetch 생략(전적은 경주 중 불변). 실패해도 무시(배당 흐름 무영향).
@@ -24952,7 +25066,13 @@ def _keirin_autocollect_form(rk, jo, ymd, race):
         sdb = _starters_load()
         _ex = sdb.get(rk)
         if _ex and _ex.get("source") == "keirin" and _ex.get("horses"):
-            return _ex.get("horses")               # 이미 수집됨 → 재fetch 생략
+            # 🔴 [전적 하루 넘김 차단] 저장분이 **어제 것이면 다시 받는다**(위 FORM_DAY_GUARD 참조).
+            if _form_is_today(_ex):
+                return _ex.get("horses")           # 이미 수집됨 → 재fetch 생략
+            _gate_hit("form_day_guard_keirin", rk, "저장 %s → 재수집"
+                      % time.strftime("%m-%d %H:%M", time.localtime(float(_ex.get("t") or 0))),
+                      once_key=rk)
+            print("🔴 [전적 갱신] %s: 저장분이 오늘이 아니다 → 재수집" % rk)
         html = _keirin_fetch(_keirin_url(jo, ymd, race))
         card = _keirin_parse_card(html)
         if not card.get("riders"):
@@ -26097,9 +26217,22 @@ def _keiba_autocollect_form(rk, op_track, sponsor, ymd, race_nb):
     try:
         if not (rk and op_track and sponsor and race_nb):
             return False
+        _ex = _starters_load().get(rk)                       # 이미 이 경주 oddspark 전적 있으면 스킵(재시작 대비)
+        # 🔴 [전적 하루 넘김 차단] 저장분이 어제 것이면 done 플래그까지 풀고 다시 받는다.
+        #   ⚠ `_KEIBA_FORM_DONE` 은 **메모리 집합이라 날짜 정보가 없다** — 여기서 풀지 않으면
+        #     날이 바뀌어도 계속 「수집 완료」로 남아 재수집이 영원히 막힌다.
+        if _ex and not _form_is_today(_ex):
+            try:
+                _KEIBA_FORM_DONE.discard(rk)
+            except Exception:
+                pass
+            _gate_hit("form_day_guard_keiba", rk, "저장 %s → 재수집"
+                      % time.strftime("%m-%d %H:%M", time.localtime(float(_ex.get("t") or 0))),
+                      once_key=rk)
+            print("🔴 [전적 갱신] %s: 저장분이 오늘이 아니다 → 재수집" % rk)
+            _ex = None
         if rk in _KEIBA_FORM_DONE:
             return True
-        _ex = _starters_load().get(rk)                       # 이미 이 경주 oddspark 전적 있으면 스킵(재시작 대비)
         if _ex and _ex.get("horses") and _ex.get("source") == "oddspark":
             _KEIBA_FORM_DONE.add(rk)
             return True
