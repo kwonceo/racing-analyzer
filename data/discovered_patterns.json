@@ -1,6 +1,6 @@
 {
- "generated_at": 1786440044.4320374,
- "races_with_result": 2703,
+ "generated_at": 1786441172.528164,
+ "races_with_result": 2704,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -38,12 +38,12 @@
   {
    "type": "전적점수",
    "key": "form_range",
-   "desc": "적중 경주 상위등급마 전적점수 주로 67.5~105 구간",
+   "desc": "적중 경주 상위등급마 전적점수 주로 67.5~105.0 구간",
    "range": [
     67.5,
-    105
+    105.0
    ],
-   "support": 3897
+   "support": 3902
   }
  ],
  "baseline_hit_rate": 44.9
