@@ -1,0 +1,135 @@
+{
+ "raceKey": "몬베츠 7경주",
+ "entries": [
+  {
+   "time": "17:50:35",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      9,
+      10
+     ],
+     [
+      4,
+      9
+     ],
+     [
+      4,
+      10
+     ],
+     [
+      2,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      8,
+      9
+     ],
+     [
+      2,
+      4,
+      9
+     ],
+     [
+      2,
+      8,
+      9
+     ],
+     [
+      6,
+      9,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:00:06",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       5,
+       10
+      ],
+      "prev": 304.0,
+      "cur": 176.6,
+      "pct": -41.9
+     },
+     {
+      "combo": [
+       2,
+       10
+      ],
+      "prev": 21.7,
+      "cur": 14.2,
+      "pct": -34.6
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "23:27:10",
+   "minutesBefore": -327,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "23:30:09",
+   "minutesBefore": -330,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

@@ -221,14 +221,35 @@
     "JSON 손상 +1459건"
    ],
    "error": null
+  },
+  "2026-08-11/14": {
+   "at": "2026-08-11 14:00:16",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +327건",
+    "두 소스 괴리 4경주"
+   ],
+   "error": null
+  },
+  "2026-08-11/22": {
+   "at": "2026-08-11 22:00:46",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "수집 공백 +3건",
+    "JSON 손상 +12건",
+    "두 소스 괴리 8경주"
+   ],
+   "error": null
   }
  },
- "lastRun": "2026-08-11 09:00:15",
- "lastSlot": 9,
+ "lastRun": "2026-08-11 22:00:46",
+ "lastSlot": 22,
  "last": {
-  "saveFail": 598,
-  "gap": 0,
-  "corrupt": 1641,
-  "at": "2026-08-11 09:00:15"
+  "saveFail": 167,
+  "gap": 3,
+  "corrupt": 1980,
+  "at": "2026-08-11 22:00:46"
  }
 }

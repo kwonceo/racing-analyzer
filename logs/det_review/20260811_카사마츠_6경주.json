@@ -1,0 +1,84 @@
+{
+ "raceKey": "카사마츠 6경주",
+ "entries": [
+  {
+   "time": "13:30:24",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      2,
+      8
+     ],
+     [
+      3,
+      8
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      3,
+      8
+     ],
+     [
+      2,
+      3,
+      4
+     ],
+     [
+      2,
+      3,
+      6
+     ],
+     [
+      2,
+      6,
+      8
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "13:40:05",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

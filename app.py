@@ -28219,6 +28219,11 @@ def keirin_today_stats():
 #  판정 = _live_exact_hit(라이브 추천만·마감 후 기록 제외·noRec=패스) 재사용 — 적중판정 기준 불변(표시 계층만 신설).
 #  ROI = 판정 대상 경주당 1만원 균일 배팅 가정. 회수는 공식 확정배당(payouts.quinella/trifecta)만 인정 —
 #  확정배당 없는 적중은 unconfirmedHits 로 분리(부풀리기 금지·정직 원칙).
+# 🔴 [구좌 집계 정정 (2026-08-11 승인)] 스코어보드 투자액을 **판정 명단 조합 개수**로 센다.
+#   False 로 두면 종전(경주당 1구좌) 동작으로 되돌아간다.
+SCOREBOARD_SEAT_COUNT = True
+
+
 def _scoreboard_daily(date=None):
     date = date or time.strftime("%Y-%m-%d")
     prefix = date.replace("-", "_")
@@ -28276,12 +28281,39 @@ def _scoreboard_daily(date=None):
             ra = doc.get("result_analysis") or {}
             hit = (bool(lx["hit"] or lx["trioHit"]) if lx is not None else bool(ra.get("main_hit")))
             judged += 1
-            invested += STAKE
+            # 🔴🔴 [구좌 집계 정정 (2026-08-11 대표 승인)] 종전엔 `invested += STAKE` 로
+            #   **경주당 1구좌**만 셌다. 회수는 적중 배당 전액(qo * STAKE)을 더하므로
+            #   투자만 4분의 1로 잡혀 회수율이 통째로 부풀려졌다.
+            #   🔴 실물: 2026-08-11 화면 **275% · +232만원** ↔ 실제 **64.3% · -19.8만원**.
+            #     적중배당 합 356.7 ÷ 128경주 = 279% 로 화면값과 거의 같았다(= 경주당 1구좌 계산).
+            #   ⚠ 회원 화면(app.js 2050 「오늘 회수율(확정)」)에 그대로 나가고 있었다.
+            #   ✅ 승인안: **판정 명단(displayedCombos.quinellas) 개수를 그대로 구좌로 쓴다.**
+            #     화면과 판정이 완전히 같아지고, 오늘 편입한 💎·라인짝도 자동으로 포함된다.
+            #   ⚠ 회수 쪽(아래 `ret = qo * STAKE`)은 **건드리지 않았다** — 적중 1회당 배당 1회분이 맞다.
+            #   ⚠ 명단을 못 읽으면 **종전대로 1구좌**로 둔다(집계가 0이 되면 안 된다).
+            #   🔧 되돌리기: `SCOREBOARD_SEAT_COUNT = False`.
+            _seats = 1
+            if SCOREBOARD_SEAT_COUNT:
+                try:
+                    _slp, _, _ = _analysis_log_path(_canonical_log_key(rk))
+                    _sdoc = json.load(open(_slp, encoding="utf-8")) if (_slp and os.path.exists(_slp)) else {}
+                    _sdc = ((_sdoc.get("corePicks") or {}).get("displayedCombos") or {})
+                    _sq = [c for c in (_sdc.get("quinellas") or []) if c and len(c) == 2]
+                    _st = [c for c in (_sdc.get("trifectas") or []) if c and len(c) == 3]
+                    if _sq or _st:
+                        _seats = len(_sq) + len(_st)
+                except Exception:
+                    _seats = 1
+            invested += STAKE * _seats
             qo = po.get("quinella") if isinstance(po, dict) else None
             to = po.get("trifecta") if isinstance(po, dict) else None
-            # [💎 복병 적중 배지 (2026-07-21 승인)] bmedSpecial(★★ 참고) 조합의 정확 적중(1·2착 일치)을
-            #   '표시 전용'으로 판정 — judged/hits/회수율 헤드라인 집계에는 미포함(정직 판정 유지).
-            #   메인이 빗나가도 복병이 맞은 경주를 성적표에서 복기 가능하게(고배당·학습 가치 보존, 추가만).
+            # [💎 복병 적중 배지 (2026-07-21 승인)] bmedSpecial(★★ 참고) 조합의 정확 적중(1·2착 일치).
+            # ✏️ 정정 (2026-08-11 승인): 종전 주석은 *"헤드라인 집계에는 미포함(정직 판정 유지)"* 였다.
+            #   그때는 💎 가 **판정 명단 밖**이었으므로 그것이 옳았다. 오늘 💎 상위1을 판정에
+            #   편입했으므로(`_judge_extra_quinellas`) **화면도 포함해야 판정과 일치**한다.
+            #   🔴 위 `_seats` 가 `displayedCombos` 를 세므로 💎 편입분은 **투자에 자동 포함**되고,
+            #     적중 여부(`hit`)도 `_live_exact_hit` 이 그 명단으로 판정한다 → 별도 가산 불필요.
+            #   ⚠ 아래 `dark_hits` 는 **배지 표시 전용 카운트 그대로 둔다**(중복 가산 금지).
             _dark_hit, _dark_combo, _dark_odds = False, None, None
             try:
                 _dlp0, _, _ = _analysis_log_path(_canonical_log_key(rk))
@@ -28316,7 +28348,10 @@ def _scoreboard_daily(date=None):
             a = agg.setdefault(sport, {"judged": 0, "hits": 0, "invested": 0, "returned": 0.0})
             a["judged"] += 1
             a["hits"] += int(hit)
-            a["invested"] += STAKE
+            # 🔴 [구좌 집계 정정 (2026-08-11)] 헤드라인과 **같은 구좌**를 쓴다.
+            #   ⚠ 여기를 안 고치면 헤드라인만 62% 로 내려가고 종목별은 247~287% 로 남아
+            #     같은 화면 안에서 두 숫자가 어긋난다(실측으로 확인했다).
+            a["invested"] += STAKE * _seats
             a["returned"] += (ret if (ret and not _approx) else 0.0)   # [근사 분리] 종목별도 확정만
             rows.append({"raceKey": rk, "sport": sport, "verdict": ("hit" if hit else "miss"),
                          "darkHit": _dark_hit, "darkCombo": _dark_combo, "darkOdds": _dark_odds,   # [💎 복병 적중 배지] 표시 전용

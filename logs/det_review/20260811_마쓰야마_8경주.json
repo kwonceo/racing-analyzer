@@ -1,0 +1,125 @@
+{
+ "raceKey": "마쓰야마 8경주",
+ "entries": [
+  {
+   "time": "18:36:12",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      5
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      3,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      5,
+      9
+     ],
+     [
+      1,
+      5,
+      7
+     ],
+     [
+      5,
+      7,
+      9
+     ],
+     [
+      1,
+      7,
+      9
+     ]
+    ],
+    "linePairs": [
+     [
+      3,
+      9
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      6,
+      8
+     ]
+    ]
+   }
+  },
+  {
+   "time": "18:46:12",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "23:27:14",
+   "minutesBefore": -281,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "23:30:13",
+   "minutesBefore": -284,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
