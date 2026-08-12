@@ -7,9 +7,9 @@
    "rate": 22.1
   },
   "rank2": {
-   "hit": 291,
+   "hit": 294,
    "total": 738,
-   "rate": 39.4
+   "rate": 39.8
   },
   "rank3": {
    "hit": 328,
@@ -19,9 +19,9 @@
  },
  "bySignal": {
   "초기급락 보존": {
-   "hit": 531,
-   "total": 1512,
-   "rate": 35.1,
+   "hit": 532,
+   "total": 1507,
+   "rate": 35.3,
    "weightReady": true
   },
   "크로스역배열": {
@@ -31,8 +31,8 @@
    "weightReady": true
   },
   "스마트머니": {
-   "hit": 120,
-   "total": 250,
+   "hit": 122,
+   "total": 254,
    "rate": 48.0,
    "weightReady": true
   },
@@ -44,8 +44,8 @@
   },
   "역배열": {
    "hit": 39,
-   "total": 97,
-   "rate": 40.2,
+   "total": 98,
+   "rate": 39.8,
    "weightReady": true
   },
   "급락": {
@@ -63,35 +63,35 @@
  },
  "byBand": {
   "15~30": {
-   "hit": 113,
-   "total": 450,
-   "rate": 25.1,
+   "hit": 110,
+   "total": 448,
+   "rate": 24.6,
    "weightReady": true
   },
   "50~100": {
    "hit": 15,
-   "total": 169,
-   "rate": 8.9,
+   "total": 170,
+   "rate": 8.8,
    "weightReady": true
   },
   "30~50": {
-   "hit": 28,
+   "hit": 29,
    "total": 219,
-   "rate": 12.8,
+   "rate": 13.2,
    "weightReady": true
   },
   "100+": {
    "hit": 7,
-   "total": 72,
-   "rate": 9.7,
+   "total": 71,
+   "rate": 9.9,
    "weightReady": true
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 373,
+   "hit": 376,
    "total": 1078,
-   "rate": 34.6,
+   "rate": 34.9,
    "weightReady": true
   },
   "keirin": {
@@ -109,17 +109,17 @@
  },
  "missedRaces": 229,
  "dansung": {
-  "races": 119,
-  "horseWonRate": 37.0,
-  "horseWon": 44,
-  "horsePlaced": 91,
-  "darkHitRate": 78.2,
-  "darkHit": 93,
+  "races": 116,
+  "horseWonRate": 37.1,
+  "horseWon": 43,
+  "horsePlaced": 88,
+  "darkHitRate": 78.4,
+  "darkHit": 91,
   "winnerSignals": {
    "기타": 8,
-   "복병": 33,
+   "복병": 31,
    "실질유력": 27
   }
  },
- "updated_at": "2026-08-12 14:21:46"
+ "updated_at": "2026-08-12 14:49:46"
 }
