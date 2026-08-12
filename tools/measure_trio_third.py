@@ -57,7 +57,13 @@ for p in sorted(glob.glob("data/analysis_log/2026_08_*.json")):
         continue
     if len(axis) != 2:
         continue
-    trio_odds = ((r.get("payouts") or {}).get("trio"))
+    # 🔴 [2026-08-12 정정] 삼복승은 종목마다 키가 다르다(app.py 21428 주석과 같은 규칙):
+    #   trio 가 있으면 그것이 3連複. 중앙경마만 trifecta 에 3連単 을 넣는다.
+    #   지방·경륜·사설은 trifecta = 삼복승이다.
+    _rp = (r.get("payouts") or {})
+    trio_odds = _rp.get("trio")
+    if trio_odds is None:
+        trio_odds = _rp.get("trifecta")
     key = set(int(x) for x in (d.get("keyHorses") or cp.get("keyHorses") or []))
     dbh = drop_by_horse(d.get("drops_raw"))
     dark = cp.get("darkHorsePicks") or []
@@ -171,19 +177,21 @@ def run(name, fn, n):
     hr = (hits / fired * 100) if fired else 0.0
     rr = (ret / p_seats * 100) if p_seats else 0.0
     med = sorted(pays)[len(pays) // 2] if pays else None
-    return fired, seats, hits, hr, p_seats, p_hits, rr, med
+    # 🔴 원칙 2 — 상위 3건 제외를 병기한다(극단값 의존 확인)
+    ex3 = (sum(sorted(pays)[:-3]) / p_seats * 100) if (p_seats and len(pays) > 3) else 0.0
+    return fired, seats, hits, hr, p_seats, p_hits, rr, ex3, med
 
 
 for n in (1, 2, 3):
     print("=" * 82)
     print("== 삼복승 %d조합 ==" % n)
-    print("  후보                 발동  구좌  적중  적중률 | 배당구좌 적중 회수율 배당중앙 판정")
+    print("  후보                 발동  구좌  적중  적중률 | 배당적중 회수율  3제외  배당중앙 판정")
     for name, fn in CANDS:
-        fired, seats, hits, hr, ps, ph, rr, med = run(name, fn, n)
+        fired, seats, hits, hr, ps, ph, rr, ex3, med = run(name, fn, n)
         verdict = ("판정불가(배당적중%d<%d)" % (ph, MIN_HITS)) if ph < MIN_HITS else (
             "🟢 통과" if rr >= PAYBACK else "미달")
-        print("   %-18s %5d %5d %5d %6.1f%% | %6d %4d %6.1f%% %7s  %s" % (
-            name, fired, seats, hits, hr, ps, ph, rr,
+        print("   %-18s %5d %5d %5d %6.1f%% | %6d %6.1f%% %6.1f%% %7s  %s" % (
+            name, fired, seats, hits, hr, ph, rr, ex3,
             ("%.1f" % med) if med else "-", verdict))
     print()
 
