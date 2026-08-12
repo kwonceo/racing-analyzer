@@ -1,58 +1,10 @@
 {
- "raceKey": "구마모토 4경주",
+ "raceKey": "도야마 4경주",
  "entries": [
   {
-   "time": "11:52:19",
+   "time": "12:19:31",
    "minutesBefore": 9,
-   "status": "SAFE",
-   "checked": [
-    "삼복승정합"
-   ],
-   "skipped": [
-    "B라인누락: 라인 페어 0개(2개 미만)",
-    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
-   ],
-   "issues": [],
-   "input": {
-    "drops": [],
-    "finalQuinellas": [
-     [
-      2,
-      7
-     ],
-     [
-      2,
-      4
-     ],
-     [
-      4,
-      7
-     ]
-    ],
-    "finalTrifectas": [
-     [
-      1,
-      2,
-      7
-     ],
-     [
-      2,
-      4,
-      7
-     ],
-     [
-      1,
-      2,
-      4
-     ]
-    ],
-    "linePairs": []
-   }
-  },
-  {
-   "time": "11:54:39",
-   "minutesBefore": 7,
-   "status": "SAFE",
+   "status": "WARNING",
    "checked": [
     "B라인누락",
     "삼복승정합"
@@ -60,21 +12,47 @@
    "skipped": [
     "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
    ],
-   "issues": [],
+   "issues": [
+    {
+     "code": "B라인누락",
+     "detail": "2번째 라인 페어 [3, 6] 가 삼복승 추천 어디에도 포함되지 않음",
+     "pair": [
+      3,
+      6
+     ],
+     "trifectas": [
+      [
+       1,
+       2,
+       5
+      ],
+      [
+       2,
+       5,
+       7
+      ],
+      [
+       2,
+       3,
+       5
+      ]
+     ]
+    }
+   ],
    "input": {
     "drops": [],
     "finalQuinellas": [
      [
       2,
+      5
+     ],
+     [
+      5,
       7
      ],
      [
       2,
-      4
-     ],
-     [
-      1,
-      4
+      7
      ]
     ],
     "finalTrifectas": [
@@ -86,33 +64,28 @@
      [
       2,
       3,
-      7
-     ],
-     [
-      1,
-      4,
-      7
+      5
      ],
      [
       1,
       2,
-      7
+      5
      ]
     ],
     "linePairs": [
      [
-      4,
-      1
+      2,
+      5
      ],
      [
-      2,
-      7
+      6,
+      3
      ]
     ]
    }
   },
   {
-   "time": "12:02:05",
+   "time": "12:29:36",
    "minutesBefore": -1,
    "status": "NO_DATA",
    "checked": [],

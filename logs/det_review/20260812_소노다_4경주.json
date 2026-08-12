@@ -1,0 +1,165 @@
+{
+ "raceKey": "소노다 4경주",
+ "entries": [
+  {
+   "time": "12:03:06",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       6,
+       7
+      ],
+      "prev": 62.0,
+      "cur": 8.2,
+      "pct": -86.8
+     },
+     {
+      "combo": [
+       5,
+       7
+      ],
+      "prev": 236.5,
+      "cur": 70.7,
+      "pct": -70.1
+     },
+     {
+      "combo": [
+       1,
+       5
+      ],
+      "prev": 546.5,
+      "cur": 191.0,
+      "pct": -65.1
+     },
+     {
+      "combo": [
+       5,
+       8
+      ],
+      "prev": 622.1,
+      "cur": 269.3,
+      "pct": -56.7
+     },
+     {
+      "combo": [
+       1,
+       9
+      ],
+      "prev": 204.2,
+      "cur": 91.9,
+      "pct": -55.0
+     },
+     {
+      "combo": [
+       2,
+       5
+      ],
+      "prev": 586.1,
+      "cur": 263.6,
+      "pct": -55.0
+     },
+     {
+      "combo": [
+       8,
+       9
+      ],
+      "prev": 142.4,
+      "cur": 74.2,
+      "pct": -47.9
+     },
+     {
+      "combo": [
+       3,
+       4
+      ],
+      "prev": 282.8,
+      "cur": 148.5,
+      "pct": -47.5
+     }
+    ],
+    "finalQuinellas": [
+     [
+      9,
+      11
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      6,
+      11
+     ],
+     [
+      1,
+      9
+     ],
+     [
+      1,
+      11
+     ],
+     [
+      7,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      9,
+      11
+     ],
+     [
+      9,
+      10,
+      11
+     ],
+     [
+      1,
+      7,
+      9
+     ],
+     [
+      6,
+      7,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "12:15:04",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
