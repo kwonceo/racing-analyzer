@@ -19938,7 +19938,9 @@ def _rf_resolve_rk(track, race, date=None):
 #   🔧 되돌리기: `STAKE_PLAN_ENABLED = False`.
 STAKE_PLAN_ENABLED = True
 STAKE_PLAN_WARN = 100.0     # 이 아래면 «맞아도 원금을 못 건집니다» — 🔴 내부용
-STAKE_PLAN_GOOD = 150.0     # 이 위만 매수 권장 — 🔴 내부용
+# 🔴 [2026-08-13] 「권장선」이 아니라 **참고선**이다. 손익분기는 1/적중률 = **270%**
+#   (전체 적중률 37.1% · 1292경주 실측). 150% 는 그 아래이므로 권장이라 부르지 않는다.
+STAKE_PLAN_GOOD = 150.0     # 이 위는 **참고** 표기 — 🔴 내부용 · 손익분기(270%) 아님
 
 # 🔴🔴 [고배당 가중 (2026-08-12 대표 승인)] 역수 배분은 **고배당을 맞혀도 크게 못 번다.**
 #   야히코 4R 에서 30.4배 조합에 **4.0%** 만 갔고 회수가 121% 였다.
@@ -20045,9 +20047,12 @@ def _stake_plan(combos, odds_map, total=100.0, guard=None):
     if rate < STAKE_PLAN_WARN:
         verdict, note = "warn", "🔴 맞아도 원금을 못 건집니다 (적중 시 회수 %.0f%%)" % rate
     elif rate >= STAKE_PLAN_GOOD:
-        verdict, note = "good", "🟢 매수 권장 — 어느 조합이 맞아도 적중 시 회수 %.0f%%" % rate
+        # 🔴 [2026-08-13 대표 지시] 「매수 권장」이라 부르지 않는다.
+        #   실측 손익분기는 **1/적중률 = 270%**(전체 적중률 37.1%)인데 이 선은 150% 다.
+        #   손익분기 아래를 「권장」이라 하면 회원이 오해한다. **참고**로만 표기한다.
+        verdict, note = "good", "🔎 참고 — 어느 조합이 맞아도 적중 시 회수 %.0f%%" % rate
     else:
-        verdict, note = "thin", "⚠ 얇습니다 — 적중 시 회수 %.0f%% (권장선 %.0f%%)" % (rate, STAKE_PLAN_GOOD)
+        verdict, note = "thin", "⚠ 얇습니다 — 적중 시 회수 %.0f%% (참고선 %.0f%%)" % (rate, STAKE_PLAN_GOOD)
     return {"invSum": round(inv, 4), "recoveryPct": round(rate, 1),
             # 🔴 「원금 회수율 190%」를 그대로 쓰지 않는다 — 실제 회수율은 66.6% 다.
             #   190% 는 **맞았을 때** 값이다. 회원이 매번 90% 번다고 오해하면 더 큰 불신이 온다.
