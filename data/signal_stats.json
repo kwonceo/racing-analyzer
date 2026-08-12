@@ -92,13 +92,23 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "기후 7경주",
+        "date": "2026-08-12",
+        "horses": [
+          5
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 7,
-    "hit_quinella": 3,
+    "count": 8,
+    "hit_quinella": 4,
     "hit_trifecta": 1,
-    "rate_quinella": 42.9,
-    "rate_trifecta": 14.3,
+    "rate_quinella": 50.0,
+    "rate_trifecta": 12.5,
     "reliable": false
   },
   "급락": {
@@ -296,13 +306,35 @@
         "placed": [],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "소노다 1경주",
+        "date": "2026-08-12",
+        "horses": [
+          9
+        ],
+        "placed": [
+          9
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "기후 7경주",
+        "date": "2026-08-12",
+        "horses": [
+          5
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 18,
-    "hit_quinella": 12,
+    "count": 20,
+    "hit_quinella": 14,
     "hit_trifecta": 8,
-    "rate_quinella": 66.7,
-    "rate_trifecta": 44.4,
+    "rate_quinella": 70.0,
+    "rate_trifecta": 40.0,
     "reliable": false
   },
   "전적이중수렴": {
@@ -543,13 +575,26 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "기후 7경주",
+        "date": "2026-08-12",
+        "horses": [
+          3,
+          7
+        ],
+        "placed": [
+          3
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 17,
-    "hit_quinella": 12,
+    "count": 18,
+    "hit_quinella": 13,
     "hit_trifecta": 8,
-    "rate_quinella": 70.6,
-    "rate_trifecta": 47.1,
+    "rate_quinella": 72.2,
+    "rate_trifecta": 44.4,
     "reliable": false
   },
   "크로스역배열": {
@@ -649,13 +694,23 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "기후 7경주",
+        "date": "2026-08-12",
+        "horses": [
+          2
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 7,
-    "hit_quinella": 2,
+    "count": 8,
+    "hit_quinella": 3,
     "hit_trifecta": 1,
-    "rate_quinella": 28.6,
-    "rate_trifecta": 14.3,
+    "rate_quinella": 37.5,
+    "rate_trifecta": 12.5,
     "reliable": false
   }
 }
