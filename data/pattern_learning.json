@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "카나자와 2경주",
-      "horse_no": 9,
-      "recent_avg": 12.4,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-08-04"
-    },
-    {
-      "race": "모리오카 8경주",
-      "horse_no": 8,
-      "recent_avg": 5.6,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
       "race": "모리오카 8경주",
       "horse_no": 4,
       "recent_avg": 6.4,
@@ -4794,16 +4776,32 @@
       "recommended_hit": false,
       "lesson": "전체급락 시 이변 가능성 높음",
       "t": 1786502364.094794
+    },
+    {
+      "race": "소노다 3경주",
+      "horse_no": 2,
+      "recent_avg": 6.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-12"
+    },
+    {
+      "race": "소노다 3경주",
+      "horse_no": 7,
+      "recent_avg": 9.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-12"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3326,
-      "hit": 600
+      "count": 3332,
+      "hit": 602
     },
     "전체부진마": {
-      "count": 5846,
-      "hit": 1575
+      "count": 5854,
+      "hit": 1577
     },
     "대규모급락": {
       "count": 18,
@@ -4813,7 +4811,7 @@
       "hit_rate": 38.9
     },
     "이상감지동반": {
-      "count": 2520,
+      "count": 2522,
       "hit": 975
     },
     "급락동반": {
@@ -5191,23 +5189,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1032,
-    "hit": 835,
+    "count": 1033,
+    "hit": 836,
     "cases": [
-      {
-        "race": "모리오카 11경주",
-        "date": "2026-08-09",
-        "smart_horses": [
-          8
-        ],
-        "placed": [
-          8
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "사가 8경주",
         "date": "2026-08-09",
@@ -6754,6 +6738,21 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 12.3,
+        "high_odds": false
+      },
+      {
+        "race": "구마모토 3경주",
+        "date": "2026-08-12",
+        "smart_horses": [
+          6,
+          4
+        ],
+        "placed": [
+          4
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
