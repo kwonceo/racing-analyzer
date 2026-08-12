@@ -7,27 +7,27 @@
    "rate": 21.7
   },
   "rank2": {
-   "hit": 296,
+   "hit": 295,
    "total": 739,
-   "rate": 40.1
+   "rate": 39.9
   },
   "rank3": {
-   "hit": 322,
-   "total": 682,
-   "rate": 47.2
+   "hit": 323,
+   "total": 681,
+   "rate": 47.4
   }
  },
  "bySignal": {
   "초기급락 보존": {
-   "hit": 527,
-   "total": 1501,
+   "hit": 526,
+   "total": 1499,
    "rate": 35.1,
    "weightReady": true
   },
   "크로스역배열": {
-   "hit": 29,
+   "hit": 30,
    "total": 88,
-   "rate": 33.0,
+   "rate": 34.1,
    "weightReady": true
   },
   "스마트머니": {
@@ -50,8 +50,8 @@
   },
   "급락": {
    "hit": 11,
-   "total": 108,
-   "rate": 10.2,
+   "total": 109,
+   "rate": 10.1,
    "weightReady": true
   },
   "집중급락 회": {
@@ -63,41 +63,41 @@
  },
  "byBand": {
   "15~30": {
-   "hit": 112,
+   "hit": 110,
    "total": 454,
-   "rate": 24.7,
+   "rate": 24.2,
    "weightReady": true
   },
   "50~100": {
    "hit": 16,
-   "total": 181,
+   "total": 182,
    "rate": 8.8,
    "weightReady": true
   },
   "30~50": {
-   "hit": 28,
-   "total": 219,
-   "rate": 12.8,
+   "hit": 29,
+   "total": 218,
+   "rate": 13.3,
    "weightReady": true
   },
   "100+": {
    "hit": 5,
-   "total": 73,
-   "rate": 6.8,
+   "total": 72,
+   "rate": 6.9,
    "weightReady": true
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 366,
-   "total": 1079,
+   "hit": 365,
+   "total": 1078,
    "rate": 33.9,
    "weightReady": true
   },
   "keirin": {
-   "hit": 414,
+   "hit": 415,
    "total": 1098,
-   "rate": 37.7,
+   "rate": 37.8,
    "weightReady": true
   },
   "korea": {
@@ -107,13 +107,13 @@
    "weightReady": false
   }
  },
- "missedRaces": 228,
+ "missedRaces": 230,
  "dansung": {
-  "races": 117,
-  "horseWonRate": 36.8,
-  "horseWon": 43,
-  "horsePlaced": 89,
-  "darkHitRate": 76.9,
+  "races": 116,
+  "horseWonRate": 36.2,
+  "horseWon": 42,
+  "horsePlaced": 88,
+  "darkHitRate": 77.6,
   "darkHit": 90,
   "winnerSignals": {
    "기타": 8,
@@ -121,5 +121,5 @@
    "실질유력": 28
   }
  },
- "updated_at": "2026-08-12 18:46:48"
+ "updated_at": "2026-08-12 20:26:26"
 }
