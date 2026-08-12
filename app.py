@@ -1557,6 +1557,12 @@ def _sanitize_starters(horses):
     return [by_no[k] for k in sorted(by_no)]
 
 
+# 🔴 [부담중량·과거착순 전달 (2026-08-12 승인)] `_form_from_starters` 가 저장소의
+#   `weight`(90%) · `pastPlacings`(59%) 를 `form` 으로 안 옮겨 분석로그에서 0% 였다.
+#   ⚠ 전달만 한다 — 점수 경로 무개입. 🔧 되돌리기: 이 한 줄을 False.
+FORM_PASS_WEIGHT = True
+
+
 def _form_from_starters(rk, drops, sport=None, valid_nos=None):
     """저장된 전적으로 마필 점수·등급 계산. 배당 급락마는 이상감지 상향 반영.
     - 일본(출마표2): recent 착순으로 점수 재계산
@@ -1647,6 +1653,18 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
                 "last3fList": h.get("last3fList") or [],
                 "pastDistances": h.get("pastDistances") or [],
                 "past": h.get("past") or [],
+                # 🔴🔴 [부담중량·과거착순 전달 (2026-08-12 승인)] 바로 위 corners 계열과 **같은 유형**이다.
+                #   실측: `starters_store` 에 `weight` **90%**(oddspark) · `pastPlacings` **59%** 있는데
+                #     이 함수의 키 목록 35개에 **그 둘이 아예 없어** `form` 까지 오지 못했다.
+                #     그래서 분석로그 `horses[]` 에서 부담중량이 **0%** 였고, 「부담 대비 마체중 비율」을
+                #     쟀을 때 **둘 다 가진 말이 0두**로 나와 측정 자체가 불가능했다(2026-08-12 조사).
+                #   ⚠ **순수 전달만 한다** — 점수·판정·추천 경로는 이 값을 쓰지 않는다.
+                #     추가 전후로 40경주를 대조해 `totalScore`·`grade`·`recentPlacings` 가
+                #     한 건도 안 바뀌는 것을 확인한 뒤에 남긴다(바뀌면 즉시 되돌린다).
+                #   🔴 소급 불가 — 넣은 날부터 쌓인다.
+                #   🔧 되돌리기: `FORM_PASS_WEIGHT = False`.
+                "weight": (h.get("weight") if FORM_PASS_WEIGHT else None),
+                "pastPlacings": ((h.get("pastPlacings") or []) if FORM_PASS_WEIGHT else []),
                 "baseScore": round(ts or 0, 1), "courseBonus": 0, "jockeyBonus": 0,
                 # [신규 근거 전달] 저장된 근거 문장(detail)·마체중·거리적성·기수복승률을 그대로 전달 → 패널 표시
                 "totalScore": round(ts or 0, 1), "detail": h.get("detail") or [], "flags": [], "anomaly": an,

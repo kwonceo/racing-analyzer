@@ -2,82 +2,6 @@
  "raceKey": "기후 5경주",
  "entries": [
   {
-   "time": "09:49:30",
-   "minutesBefore": 3,
-   "status": "SAFE",
-   "checked": [
-    "B라인누락",
-    "삼복승정합"
-   ],
-   "skipped": [
-    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
-   ],
-   "issues": [],
-   "input": {
-    "drops": [
-     {
-      "combo": [
-       2,
-       4
-      ],
-      "prev": 32.5,
-      "cur": 20.6,
-      "pct": -36.6
-     }
-    ],
-    "finalQuinellas": [
-     [
-      2,
-      5
-     ],
-     [
-      5,
-      7
-     ],
-     [
-      1,
-      5
-     ],
-     [
-      2,
-      7
-     ]
-    ],
-    "finalTrifectas": [
-     [
-      2,
-      5,
-      7
-     ],
-     [
-      1,
-      2,
-      5
-     ],
-     [
-      4,
-      5,
-      7
-     ],
-     [
-      1,
-      5,
-      7
-     ]
-    ],
-    "linePairs": [
-     [
-      5,
-      2
-     ],
-     [
-      7,
-      1
-     ]
-    ]
-   }
-  },
-  {
    "time": "09:49:37",
    "minutesBefore": 2,
    "status": "WARNING",
@@ -3300,6 +3224,24 @@
   {
    "time": "10:12:52",
    "minutesBefore": -20,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "10:26:51",
+   "minutesBefore": -34,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [
