@@ -8449,6 +8449,9 @@ KEY_PAIR_ADD = 1             # 하나만
 #   소급: 회수율 93.1 → **110.6%** · 3제외 72.8 → **74.7%** · 구좌 +3% · 발동 58건.
 SELFCHK_PAIR_ENABLED = True
 SELFCHK_PAIR_MAX = 2         # 경주당 최대 편입 수(소급 실측 평균 1개 남짓)
+# 🔴 [면제 (2026-08-12)] 편입만으로는 뒤의 EV 필터·배당 컷에 전부 잘려 **무동작**이었다
+#   (오늘 편입 383회 ↔ 최종 잔존 0). 유력마 짝과 같은 방식으로 되살린다.
+SELFCHK_PAIR_EXEMPT = True
 
 
 def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
@@ -9802,6 +9805,29 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
                               reason="상한 면제 복원 %s" % "+".join(str(x) for x in _kk))
     except Exception as _kpx:
         print("[유력마짝] 상한 면제 실패(무시):", _kpx)
+
+    # 🔴🔴 [자체검사 짝 면제 (2026-08-12)] 바로 위 유력마 짝과 **같은 자리·같은 방식**이다.
+    #   실측으로 잡았다: 편입 계수기가 오늘 **383회** 찍혔는데 최종 `finalQuinellas` 59개 중
+    #     `selfCheck` 표식이 **0개**였다. 대신 `quinellaRef`(강등 목록)에 6건이 들어 있었다.
+    #     ⇒ 편입 뒤 **EV 필터·배당 컷이 전부 잘라낸다.** 유력마 짝은 `_KP_MARK` 면제로 살아남는데
+    #       자체검사 조합은 그 표식이 없어 그냥 잘렸다.
+    #   🔴 그래서 소급 실측(회수율 110.6% · 3제외 74.7%)이 **실전에서 실현되지 않았다.**
+    #     작동하는 것처럼 보이는데 실제로는 아무것도 안 하는 상태였다.
+    #   ⚠ 승인분(③)이 의도대로 돌게 하는 수정이다 — 새 기능이 아니다.
+    #   ⚠ 다른 조합은 지금대로 상한을 지킨다. 여기서는 `selfCheck` 표식이 붙은 것만 되살린다.
+    #   🔧 되돌리기: `SELFCHK_PAIR_EXEMPT = False`(그러면 종전처럼 잘려 무동작이 된다).
+    try:
+        if SELFCHK_PAIR_ENABLED and SELFCHK_PAIR_EXEMPT and _SC_MARK:
+            _cur_set2 = {tuple(sorted(int(x) for x in (q.get("combo") or []))) for q in final_q}
+            for _sc_item in _SC_MARK:
+                _sk = tuple(sorted(int(x) for x in (_sc_item.get("combo") or [])))
+                if len(_sk) == 2 and _sk not in _cur_set2:
+                    final_q.append(_sc_item)
+                    _cur_set2.add(_sk)
+                    _gate_hit("selfchk_pair_exempt", rk=None,
+                              reason="상한 면제 복원 %s" % "+".join(str(x) for x in _sk))
+    except Exception as _scx:
+        print("[자체검사짝] 상한 면제 실패(무시):", _scx)
 
     return {"quinellas": final_q, "trifectas": final_t, "bmedSpecial": special_q,
             # [배지 숨김] 오염 의심 시 dansung 표시 플래그만 False(배지 미표시) — dansungPlan/편성은 보존(판정 무관)

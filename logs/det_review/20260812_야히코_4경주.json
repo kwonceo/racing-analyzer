@@ -1,15 +1,15 @@
 {
- "raceKey": "야히코 3경주",
+ "raceKey": "야히코 4경주",
  "entries": [
   {
-   "time": "11:19:34",
+   "time": "11:41:11",
    "minutesBefore": 9,
    "status": "SAFE",
    "checked": [
-    "B라인누락",
     "삼복승정합"
    ],
    "skipped": [
+    "B라인누락: 라인 페어 1개(2개 미만)",
     "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
    ],
    "issues": [],
@@ -17,61 +17,41 @@
     "drops": [],
     "finalQuinellas": [
      [
-      2,
-      7
-     ],
-     [
-      4,
-      7
-     ],
-     [
       1,
       4
      ],
      [
-      1,
-      2
+      3,
+      5
      ],
      [
       1,
-      7
-     ],
-     [
-      2,
-      4
+      5
      ]
     ],
     "finalTrifectas": [
      [
       1,
-      2,
-      7
+      4,
+      5
      ],
      [
       1,
-      2,
+      3,
       4
      ],
      [
       2,
-      4,
-      7
+      3,
+      4
      ],
      [
       1,
-      4,
-      7
+      3,
+      5
      ]
     ],
     "linePairs": [
-     [
-      4,
-      1
-     ],
-     [
-      7,
-      2
-     ],
      [
       3,
       5
@@ -80,7 +60,7 @@
    }
   },
   {
-   "time": "11:29:07",
+   "time": "11:51:03",
    "minutesBefore": -1,
    "status": "NO_DATA",
    "checked": [],
@@ -98,8 +78,26 @@
    }
   },
   {
-   "time": "11:55:08",
-   "minutesBefore": -26,
+   "time": "11:54:32",
+   "minutesBefore": -3,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "11:55:09",
+   "minutesBefore": -4,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [
