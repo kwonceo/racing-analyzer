@@ -1,0 +1,62 @@
+{
+ "raceKey": "오이 6경주",
+ "entries": [
+  {
+   "time": "00:00:05",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      4
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      1,
+      11
+     ],
+     [
+      4,
+      11
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      3,
+      4
+     ],
+     [
+      1,
+      4,
+      7
+     ],
+     [
+      1,
+      7,
+      11
+     ],
+     [
+      1,
+      3,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

@@ -259,14 +259,23 @@
     "JSON 손상 +4건"
    ],
    "error": null
+  },
+  "2026-08-12/22": {
+   "at": "2026-08-12 22:00:02",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +1건"
+   ],
+   "error": null
   }
  },
- "lastRun": "2026-08-12 14:00:18",
- "lastSlot": 14,
+ "lastRun": "2026-08-12 22:00:02",
+ "lastSlot": 22,
  "last": {
-  "saveFail": 154,
+  "saveFail": 102,
   "gap": 0,
-  "corrupt": 4,
-  "at": "2026-08-12 14:00:18"
+  "corrupt": 5,
+  "at": "2026-08-12 22:00:02"
  }
 }

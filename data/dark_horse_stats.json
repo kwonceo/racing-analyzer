@@ -1,26 +1,26 @@
 {
- "races": 1586,
+ "races": 1588,
  "byRank": {
   "rank1": {
-   "hit": 167,
-   "total": 771,
+   "hit": 168,
+   "total": 774,
    "rate": 21.7
   },
   "rank2": {
    "hit": 295,
-   "total": 739,
-   "rate": 39.9
+   "total": 743,
+   "rate": 39.7
   },
   "rank3": {
-   "hit": 323,
-   "total": 681,
-   "rate": 47.4
+   "hit": 322,
+   "total": 685,
+   "rate": 47.0
   }
  },
  "bySignal": {
   "초기급락 보존": {
-   "hit": 526,
-   "total": 1499,
+   "hit": 527,
+   "total": 1502,
    "rate": 35.1,
    "weightReady": true
   },
@@ -31,27 +31,27 @@
    "weightReady": true
   },
   "스마트머니": {
-   "hit": 121,
-   "total": 257,
-   "rate": 47.1,
+   "hit": 122,
+   "total": 262,
+   "rate": 46.6,
    "weightReady": true
   },
   "스마트머니+역배열": {
    "hit": 58,
-   "total": 135,
-   "rate": 43.0,
+   "total": 136,
+   "rate": 42.6,
    "weightReady": true
   },
   "역배열": {
-   "hit": 37,
-   "total": 95,
-   "rate": 38.9,
+   "hit": 35,
+   "total": 92,
+   "rate": 38.0,
    "weightReady": true
   },
   "급락": {
    "hit": 11,
-   "total": 109,
-   "rate": 10.1,
+   "total": 114,
+   "rate": 9.6,
    "weightReady": true
   },
   "집중급락 회": {
@@ -64,40 +64,40 @@
  "byBand": {
   "15~30": {
    "hit": 110,
-   "total": 454,
-   "rate": 24.2,
+   "total": 453,
+   "rate": 24.3,
    "weightReady": true
   },
   "50~100": {
-   "hit": 16,
-   "total": 182,
-   "rate": 8.8,
+   "hit": 18,
+   "total": 191,
+   "rate": 9.4,
    "weightReady": true
   },
   "30~50": {
    "hit": 29,
-   "total": 218,
-   "rate": 13.3,
+   "total": 221,
+   "rate": 13.1,
    "weightReady": true
   },
   "100+": {
    "hit": 5,
-   "total": 72,
-   "rate": 6.9,
+   "total": 75,
+   "rate": 6.7,
    "weightReady": true
   }
  },
  "bySport": {
   "keiba": {
    "hit": 365,
-   "total": 1078,
-   "rate": 33.9,
+   "total": 1079,
+   "rate": 33.8,
    "weightReady": true
   },
   "keirin": {
    "hit": 415,
-   "total": 1098,
-   "rate": 37.8,
+   "total": 1108,
+   "rate": 37.5,
    "weightReady": true
   },
   "korea": {
@@ -107,19 +107,19 @@
    "weightReady": false
   }
  },
- "missedRaces": 230,
+ "missedRaces": 231,
  "dansung": {
-  "races": 116,
-  "horseWonRate": 36.2,
-  "horseWon": 42,
-  "horsePlaced": 88,
-  "darkHitRate": 77.6,
-  "darkHit": 90,
+  "races": 119,
+  "horseWonRate": 37.8,
+  "horseWon": 45,
+  "horsePlaced": 91,
+  "darkHitRate": 76.5,
+  "darkHit": 91,
   "winnerSignals": {
-   "기타": 8,
+   "기타": 9,
    "복병": 31,
-   "실질유력": 28
+   "실질유력": 27
   }
  },
- "updated_at": "2026-08-12 20:26:26"
+ "updated_at": "2026-08-12 23:46:37"
 }
