@@ -4464,9 +4464,12 @@
       }).join('');
     }
     if (rem.length) {
-      html += `<div class="matrix-title" style="font-size:13px;color:#f87171;margin-top:6px">🔴 제거(흐름 없음) <span class="hint" style="font-weight:400">저배당이어도 흐름 없으면 제거 · 죽은인기/연속상승/페이크/역배열반대</span></div>`;
+      // 🔴 [2026-08-12 대표 지시] 「제거」라는 말을 쓰지 않는다.
+      //   실제 제거 목록(elimination.eliminated)은 **비어 있는데** 이 목록이 「제거」로 보여
+      //   같은 말이 복병이면서 제거인 것처럼 읽혔다(소노다 3R). 이것은 배당 흐름 점수일 뿐이다.
+      html += `<div class="matrix-title" style="font-size:13px;color:#f87171;margin-top:6px">🔻 흐름 약함 <span class="hint" style="font-weight:400">제거가 아니라 배당 흐름 점수 · 죽은인기/연속상승/페이크/역배열반대</span></div>`;
       html += rem.slice(0, 5).map((r) => `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:4px 8px;font-size:12px;border-radius:6px;margin:2px 0;background:rgba(248,113,113,.06);border-left:3px solid #f87171">
-          <b style="min-width:30px;color:#f87171">🔴제거</b>
+          <b style="min-width:30px;color:#f87171">🔻흐름</b>
           <b style="min-width:32px">${r.no}번</b>
           <span class="hint">${r.rep != null ? r.rep + '배' : '배당-'}</span>
           <span class="chip" style="border-color:#f87171;color:#f87171">흐름점수 ${r.score != null ? r.score : '-'}점</span>

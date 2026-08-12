@@ -3606,7 +3606,28 @@ def triple_latest():
     rec = db.get(rk) or {}
     # [경주전환 잔존 방어] 30분+ 미갱신 최신 경주 = 끝난 경주 → stale 표기(프론트가 표시 억제)
     age = time.time() - (rec.get("t") or 0)
-    return jsonify({"raceKey": rk, "quinella": rec.get("quinella", []),
+    # 🔴 [매트릭스 교정 · 2026-08-12 승인] 회원이 보는 배당판과 추천 근거를 같은 값으로 맞춘다.
+    #   종전에는 이 함수가 저장 원본을 **그대로** 내보내고 `_curq_shrink_guard` 를 한 번도
+    #   부르지 않았다. 추천은 교정 후 값(`cur_q`)을 쓰므로 **둘이 갈렸다.**
+    #   실물 — 카사마츠 3경주: 매트릭스는 오염인데 finalQuinellas 는 정상이었다.
+    #   소급 실측(8월 866경주): 값이 바뀌는 경주 **20건(2.3%)**
+    #     japan_local 12 · cycle 5 · korea 3 · 와카야마·카나자와 각 3
+    #     예: 와카야마 7경주 마지막 틱 2두(1조합) → 넓은 틱 9두(36조합)
+    #   ⚠ 저장은 건드리지 않는다. 바꾸는 것은 **응답 하나**다(추천은 이미 교정값을 쓴다).
+    #   🔧 되돌리기: MATRIX_SHRINK_GUARD = False
+    _q_out = rec.get("quinella", [])
+    if MATRIX_SHRINK_GUARD:
+        try:
+            _cm = _odds_map_un(_q_out)
+            _fx = _curq_shrink_guard(rk, dict(_cm), rec.get("history") or []) if _cm else None
+            if _fx and set(_fx.keys()) != set(_cm.keys()):
+                _q_out = [{"combo": list(k), "odds": v} for k, v in _fx.items()]
+                _gate_hit("matrix_shrink_guard", rk,
+                          "매트릭스 교정 %d조합 → %d조합" % (len(_cm), len(_fx)),
+                          once_key=rk)
+        except Exception as _mge:
+            print("[매트릭스 교정] 스킵(무시):", str(_mge)[:80])
+    return jsonify({"raceKey": rk, "quinella": _q_out,
                     "exacta": rec.get("exacta", []), "trio": rec.get("trio", []),
                     "sport": rec.get("sport") or "horse",
                     "ageSeconds": round(age), "stale": (not explicit) and age > STALE_ACTIVE_SEC})
@@ -13690,7 +13711,16 @@ def _triple_analyze(rk, rec):
             _tier = {"tier": "B", "label": "⚖️ 관찰", "color": "#fbbf24"}
         else:
             _tier = {"tier": "C", "label": "🛡 참고·패스", "color": "#94a3b8"}
-        _tier["basis"] = "신호 %d개 · 확신도 %s%s" % (_gs, round(_gc, 1), " · 단통" if _dan_g else "")
+        # 🔴 [2026-08-12 대표 지시] 「신호 N개」가 오해를 낳았다.
+        #   `count` 는 **종류 수**다(고유 type). 소노다 3R 은 항목이 15건인데 종류가 4종이라
+        #   화면에 「신호 4개」로 나가 회원이 항목 수로 읽는다. 둘을 함께 적는다.
+        #   ⚠ 표시 문구만 바꾼다 — `_gs` 값과 등급 판정식은 그대로다.
+        try:
+            _gn = len(((_an_out.get("strongSignals") or {}).get("signals")) or [])
+        except Exception:
+            _gn = 0
+        _sig_txt = ("신호 %d종(%d건)" % (_gs, _gn)) if _gn and _gn != _gs else ("신호 %d개" % _gs)
+        _tier["basis"] = "%s · 확신도 %s%s" % (_sig_txt, round(_gc, 1), " · 단통" if _dan_g else "")
         # 🔴 [확신도 저장 (2026-08-12 대표 지시)] 종전엔 `basis` **문자열 안에만** 있어
         #   구간별 측정이 불가능했다(실측 보유율 **0%**). 숫자로 따로 남긴다.
         #   ⚠ 저장 전용 — 판정·점수 경로 무개입. 🔴 소급 불가(오늘부터 쌓인다).
@@ -16540,6 +16570,7 @@ LINE_PAIR_JUDGE_SPORTS = ("cycle",)   # 🔴 경륜만. 다른 종목은 현행 
 #     · 🔴 `src` 가 비어 있는 틱이 섞이면 → **판정 불가로 보고 통과**
 #       캐시 이력의 `src` 는 2026-08-12부터 채워진다. 그전 틱은 전부 비어 있어
 #       그것을 확장으로 세면 **정상 경주를 막는다.** 새 틱이 쌓이며 자연히 판정 가능해진다.
+MATRIX_SHRINK_GUARD = True       # 🔧 되돌리기: False — 매트릭스 응답에 축소 교정을 태운다
 PRIVATE_ONLY_NO_PICK = True      # 🔧 되돌리기: False
 PRIVATE_ONLY_MIN_TICKS = 3       # 틱이 이보다 적으면 판정하지 않는다(표본 부족)
 
