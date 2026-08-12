@@ -2447,6 +2447,80 @@ def _curq_shrink_guard(rk, cur_map, hist):
     return out
 
 
+# 🔴🔴 [죽은 값 감지 (2026-08-12 대표 지시 · 관찰 모드)]
+#   확장이 보낸 배당이 **몇 분 동안 한 글자도 안 바뀌는** 일이 있다.
+#   마감 직전인데 멈춰 있으면 살아 있는 시장이 아니라 **죽은 값**이다.
+#   실물(2026-08-11 · 하루 세 건):
+#     모리오카 2R  12:09:52~12:13:52 **4분 고정** — 실제로는 카사마츠 2R 배당이었다
+#     우라와  1R  13:27:53~13:29:53 고정 — 카사마츠 1R(두 시간 반 전) 배당이었다
+#     야히코  7R  12:54:53~12:56:52 1+5=9.7 고정 — 살아나며 **가짜 급락 -78.4%** 를 만들었다
+#   🔴 임계 4분의 근거(전 기간 실측):
+#     oddspark  3분 이상 고정 0.4% · **4분 이상 0건** · 최대 3.8분
+#     private   4분 이상 **3.8%** · 5분 이상 3.1% · 최대 177.7분
+#     ⇒ 4분에서 **oddspark 오탐 0건**이다. 두수와 무관하게 잡히는 것이 이 게이트의 장점이다
+#       (축소 가드·조합 딥은 두수가 같으면 구조적으로 못 잡는다).
+#   ⚠ **관찰 모드다 — 폐기하지 않는다.** 계수기만 찍는다. 며칠 세고 나서 판단한다(원칙 20).
+#   ⚠ 「고정」과 「미수집」은 다르다 — 틱 수를 함께 남긴다. 틱이 2개뿐이면 판단 근거가 얇다.
+#   🔧 되돌리기: `DEAD_ODDS_DETECT = False`.
+DEAD_ODDS_DETECT = True
+DEAD_ODDS_MIN_SEC = 240.0     # 4분
+DEAD_ODDS_MIN_TICKS = 3       # 이 미만이면 판정하지 않는다(미수집과 구분)
+
+
+def _dead_odds_suspect(rk, hist, cur_q, src=None):
+    """[죽은 값] 직전 이력에서 **값까지 같은** 상태가 얼마나 이어졌나. 🔴 읽기 전용·관찰만.
+
+    반환 None = 판정 안 함 / dict = 죽은 값 의심(계수기는 호출부에서 찍는다).
+    """
+    if not DEAD_ODDS_DETECT or not hist or not cur_q:
+        return None
+    try:
+        def _sig(q):
+            m = _as_qmap(q) if "_as_qmap" in globals() else None
+            if not m:
+                return None
+            return tuple(sorted((k, round(float(v), 2)) for k, v in m.items()))
+        cs = _sig(cur_q)
+        if not cs or len(cs) < 6:
+            return None
+
+        # 🔴 [소스별로 이어서 본다 (2026-08-12 실측으로 잡음)]
+        #   두 소스가 **한 틱씩 번갈아** 들어오는 경주가 있다(모리오카 2R: private↔oddspark 교대).
+        #   전체 이력을 그대로 거꾸로 훑으면 **바로 앞이 다른 소스라 첫 비교에서 끊긴다.**
+        #   ⇒ 같은 소스의 틱만 골라 이어서 본다. 그래야 「그 소스가 멈췄는가」를 잰다.
+        def _fam(v):
+            v = str(v or "")
+            if "oddspark" in v:
+                return "oddspark"
+            if "private" in v or "ks1." in v or "asyukk" in v:
+                return "private"
+            return v[:20] or "?"
+
+        _me = _fam(src)
+        same, first_t, last_t = 0, None, None
+        for h in reversed(hist):
+            if _fam(h.get("src")) != _me:
+                continue                      # 다른 소스 틱은 건너뛴다(끊지 않는다)
+            if _sig(h.get("quinella")) != cs:
+                break
+            same += 1
+            t = h.get("t")
+            if t:
+                first_t = float(t)
+                if last_t is None:
+                    last_t = float(t)
+        if same < DEAD_ODDS_MIN_TICKS or first_t is None or last_t is None:
+            return None
+        span = abs(last_t - first_t)
+        if span < DEAD_ODDS_MIN_SEC:
+            return None
+        return {"ticks": same, "spanSec": round(span, 1),
+                "spanMin": round(span / 60.0, 1), "src": str(src or "")[:40],
+                "combos": len(cs)}
+    except Exception:
+        return None
+
+
 def _oddspark_mapping_suspect(prev_q, new_q, min_pairs=6):
     """[③ 말번호 밀림 감지] 직전(배당판) 복승 조합 vs 새(oddspark) 복승 조합 비교.
     배당 '값'은 거의 같은데(=같은 경주) '말번호 매핑'이 절반 이상 다르면 밀림으로 판정.
@@ -2827,6 +2901,20 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     except Exception as _pe2:
         print("[한국 발주시각·PDF] 실패(무시):", str(_pe2)[:80])
 
+    # 🔴 [죽은 값 감지 · 관찰 모드] 같은 값이 4분 이상 이어지면 기록만 한다(_dead_odds_suspect 주석).
+    #   ⚠ 폐기하지 않는다 — 배당은 그대로 저장된다. 계수기와 로그만 남긴다.
+    try:
+        _dv = _dead_odds_suspect(rk, ((_triple_load().get(rk) or {}).get("history") or []),
+                                 q, source)
+        if _dv:
+            _gate_hit("dead_odds", rk,
+                      "%s · %d틱 %s분 고정 · 조합 %d"
+                      % (_dv["src"] or "소스없음", _dv["ticks"], _dv["spanMin"], _dv["combos"]),
+                      once_key="%s|%d" % (rk, int(_dv["spanSec"] // 60)))
+            print("🔴 [죽은 값 의심·관찰] %s: %d틱 %s분 동안 배당 무변동 (src=%s · 폐기 안 함)"
+                  % (rk, _dv["ticks"], _dv["spanMin"], _dv["src"] or "없음"))
+    except Exception as _dve:
+        print("[죽은 값 감지] 스킵(무시):", str(_dve)[:80])
 
     # 🔴🔴 [2026-08-09] **경주 간 배당 지문 대조 — 지금은 기록만 한다(섀도우).**
     #   실물: 8/8 12:39 에 `서울 1경주` 와 `제주 1경주` 가 **45조합 전부 같은 값**이었다
