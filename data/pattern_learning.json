@@ -1,54 +1,6 @@
 {
   "patterns": [
     {
-      "race": "후나바시 12경주",
-      "horse_no": 12,
-      "recent_avg": 4.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
-      "race": "후나바시 12경주",
-      "horse_no": 13,
-      "recent_avg": 5.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-04"
-    },
-    {
-      "race": "카나자와 10경주",
-      "horse_no": 6,
-      "recent_avg": 4.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-04"
-    },
-    {
-      "race": "소노다 1경주",
-      "horse_no": 5,
-      "recent_avg": 5.0,
-      "win_place": 3,
-      "conditions": [
-        "급락88%",
-        "복승이상감지"
-      ],
-      "date": "2026-08-05"
-    },
-    {
-      "race": "소노다 1경주",
-      "horse_no": 6,
-      "recent_avg": 6.8,
-      "win_place": 2,
-      "conditions": [
-        "급락82%",
-        "복승이상감지"
-      ],
-      "date": "2026-08-05"
-    },
-    {
       "pattern": "대규모급락",
       "raceKey": "소노다 1경주",
       "total_combos_dropped": 8,
@@ -4802,16 +4754,64 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-08-12"
+    },
+    {
+      "race": "소노다 11경주",
+      "horse_no": 4,
+      "recent_avg": 4.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-12"
+    },
+    {
+      "race": "소노다 11경주",
+      "horse_no": 3,
+      "recent_avg": 8.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-12"
+    },
+    {
+      "race": "몬베츠 4경주",
+      "horse_no": 2,
+      "recent_avg": 4.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-12"
+    },
+    {
+      "race": "몬베츠 4경주",
+      "horse_no": 8,
+      "recent_avg": 4.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-12"
+    },
+    {
+      "race": "몬베츠 4경주",
+      "horse_no": 3,
+      "recent_avg": 6.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-12"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3429,
-      "hit": 612
+      "count": 3439,
+      "hit": 613
     },
     "전체부진마": {
-      "count": 6028,
-      "hit": 1624
+      "count": 6045,
+      "hit": 1629
     },
     "대규모급락": {
       "count": 18,
@@ -4821,8 +4821,8 @@
       "hit_rate": 38.9
     },
     "이상감지동반": {
-      "count": 2599,
-      "hit": 1012
+      "count": 2606,
+      "hit": 1016
     },
     "급락동반": {
       "count": 570,
