@@ -1,26 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 6경주",
-      "horse_no": 6,
-      "recent_avg": 7.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
-      "race": "몬베츠 6경주",
-      "horse_no": 1,
-      "recent_avg": 6.8,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
       "race": "모리오카 10경주",
       "horse_no": 5,
       "recent_avg": 6.6,
@@ -4793,16 +4773,34 @@
         "복승이상감지"
       ],
       "date": "2026-08-12"
+    },
+    {
+      "race": "우라와 2경주",
+      "horse_no": 6,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-12"
+    },
+    {
+      "race": "우라와 2경주",
+      "horse_no": 9,
+      "recent_avg": 8.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-12"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3355,
-      "hit": 605
+      "count": 3366,
+      "hit": 606
     },
     "전체부진마": {
-      "count": 5905,
-      "hit": 1592
+      "count": 5919,
+      "hit": 1594
     },
     "대규모급락": {
       "count": 18,
@@ -4812,8 +4810,8 @@
       "hit_rate": 38.9
     },
     "이상감지동반": {
-      "count": 2550,
-      "hit": 987
+      "count": 2553,
+      "hit": 988
     },
     "급락동반": {
       "count": 562,
@@ -5190,27 +5188,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1040,
-    "hit": 842,
+    "count": 1041,
+    "hit": 843,
     "cases": [
-      {
-        "race": "카와사키 4경주",
-        "date": "2026-08-09",
-        "smart_horses": [
-          1,
-          6,
-          2,
-          7
-        ],
-        "placed": [
-          1,
-          2
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "카와사키 5경주",
         "date": "2026-08-09",
@@ -6742,6 +6722,22 @@
         "placed": [
           2,
           8
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "우라와 2경주",
+        "date": "2026-08-12",
+        "smart_horses": [
+          6,
+          9
+        ],
+        "placed": [
+          6,
+          9
         ],
         "hit": true,
         "trifecta_odds": null,
