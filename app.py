@@ -2377,6 +2377,12 @@ def _odds_suspect_verdict(rk, an):
 
 CURQ_SHRINK_GUARD = True      # 🔧 되돌리기: False
 
+# 🔴 [서버 우선 (2026-08-12 승인)] 확장(private) 값이 마지막이고 최근 창 안에 oddspark 틱이
+#   있으면 **분석은 서버 값으로** 한다. 🔴 한국(category=korea)은 서버 경로가 0% 라 제외한다.
+#   ⚠ 저장은 두 소스 다 유지. 바꾸는 것은 분석이 읽는 배당 하나뿐이다.
+SERVER_ODDS_PREFER = True
+SERVER_ODDS_WINDOW_SEC = 300.0   # 이보다 오래된 서버 틱은 쓰지 않는다(낡은 값 방지)
+
 
 def _curq_shrink_guard(rk, cur_map, hist):
     """[축소 오염 교정 · 2026-08-05 승인 C안] 마지막 틱이 **직전보다 좁으면** 넓은 틱을 쓴다.
@@ -3262,7 +3268,12 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
         print(f"[혼입가드] {rk}: 마감 후 기준재설정 요청 무시 — 히스토리 보존(시계열 삭제 차단)")
         baseline_reset = False
     hist = [] if baseline_reset else list(prev_hist)   # 이전(다른 경주·다른 종목·오래된) 배당 완전 제거
-    hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win})
+    # 🔴 [소스 기록 (2026-08-12)] 종전에는 캐시 이력에 **`src` 가 없었다.**
+    #   `odds_history` 파일에는 있는데 여기엔 없어서, 「서버 우선」·「죽은 값 감지」가
+    #   **어느 소스의 틱인지 알 수 없어 발동하지 못했다**(실측: 도달 175 · 발동 0).
+    #   ⚠ 키 하나 추가일 뿐이다 — 기존 소비처는 `.get("src")` 가 없으면 종전대로 동작한다.
+    hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win,
+                 "src": (source or None)})
     hist = hist[-12:]
     # [수정#3 경륜/경정] 종목 태그 저장(horse|cycle|boat|bike). 기본 horse(경마) → 기존 동작 불변.
     #   ⚠ 종목 전환 시엔 새 종목을 우선(이전 sport 상속 금지) → 경마→경륜 전환이 sport 상속으로 묻히지 않게.
@@ -10880,6 +10891,59 @@ def _triple_analyze(rk, rec):
             curQ = _wide_q
     except Exception as _sge:
         print("[축소 교정] 실패(무시) %s: %s" % (rk, str(_sge)[:80]))
+
+    # 🔴🔴 [서버 우선 (2026-08-12 대표 승인)] 확장이 보낸 값이 화면·추천을 오염시킨다.
+    #   실물(사흘 · 확인된 것만): 8/10 히라츠카 4R(어제 우라와 배당) · 8/11 모리오카 2R(카사마츠 2R) ·
+    #     우라와 1R(카사마츠 1R · 2시간 반 전) · 야히코 7R(죽은 값 고정) · 8/12 기후 6R(66→36→21 조합).
+    #     🔴 **다섯 건 전부 확장(private)** 이고, 같은 시각 oddspark 는 정상값을 보내고 있었다.
+    #   ⇒ **oddspark 틱이 최근에 있으면 그 값으로 분석한다.** 확장 값은 저장만 되고 분석에 안 들어간다.
+    #
+    #   🔴 **한국은 건드리지 않는다** — 실측으로 확정했다(2026-08-12 · 8월 전 경주):
+    #     cycle/cycle        460경주 중 서버 **460 (100%)**
+    #     horse/japan_local  267 중 241 (90.3%)
+    #     horse/japan_central 64 중  63 (98.4%)
+    #     🔴 horse/korea      48 중   **0 (0%)** — 서버 수집 경로가 **아예 없다**(PDF·확장 전용)
+    #     ⇒ 한국에 이 규칙을 걸면 **서울·부산·제주 서비스가 통째로 멈춘다.**
+    #       배선 전에 분포를 재서 잡았다(원칙 20 — 가드는 오탐률을 재기 전에 켜지 않는다).
+    #   ⚠ 확장만 있는 경주는 **그대로 쓴다.** 배제하지 않는다(대표 승인).
+    #   ⚠ 낡은 서버 값을 쓰면 안 되므로 **최근 창(기본 5분) 안**의 oddspark 틱만 본다.
+    #   ⚠ 저장은 두 소스 다 그대로 남는다 — 여기서 바꾸는 것은 **분석이 읽는 배당** 하나뿐이다.
+    #   🔧 되돌리기: `SERVER_ODDS_PREFER = False`.
+    try:
+        if SERVER_ODDS_PREFER and hist:
+            _cat = str(rec.get("category") or "").lower()
+            _sp0 = str(rec.get("sport") or "").lower()
+            _is_kr = ("korea" in _cat) or bool(_KRA_TRACK_RE.search(str(rk or "")))
+            if not _is_kr:
+                _gate_hit("server_odds_prefer", rk, None, reach_only=True)
+                _now0 = time.time()
+                _srv = None
+                for _h in reversed(hist):
+                    _hs = str(_h.get("src") or "")
+                    if ("oddspark" not in _hs) and ("netkeiba" not in _hs):
+                        continue
+                    try:
+                        if _now0 - float(_h.get("t") or 0) > SERVER_ODDS_WINDOW_SEC:
+                            break
+                    except (TypeError, ValueError):
+                        break
+                    _srv = _h
+                    break
+                _last_src = str((hist[-1] or {}).get("src") or "")
+                _last_is_priv = ("private" in _last_src) or ("ks1." in _last_src) or ("asyukk" in _last_src)
+                if _srv and _last_is_priv:
+                    _sq = _odds_map_un(_srv.get("quinella"))
+                    if _sq and len(_sq) >= 6:
+                        _gate_hit("server_odds_prefer", rk,
+                                  "확장 %d조합 → 서버 %d조합 (%s)"
+                                  % (len(curQ), len(_sq), _srv.get("time") or ""),
+                                  once_key=rk)
+                        print("🔴 [서버 우선] %s: 확장 %d조합 → oddspark %d조합 으로 분석(저장은 둘 다 유지)"
+                              % (rk, len(curQ), len(_sq)))
+                        curQ = _sq
+    except Exception as _spe0:
+        print("[서버 우선] 실패(무시) %s: %s" % (rk, str(_spe0)[:80]))
+
     prevQ = _odds_map_un(prev.get("quinella")) if prev else {}
 
     # [경주전환 방어] 직전 대비 다수 조합 95%+ 급락 = 다른 경주 배당 잔존 → 기준값 재설정(변동 계산 안 함)
