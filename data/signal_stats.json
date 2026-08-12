@@ -1580,13 +1580,33 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "몬베츠 8경주",
+        "date": "2026-08-12",
+        "horses": [
+          4
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "마쓰야마 7경주",
+        "date": "2026-08-12",
+        "horses": [
+          1
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 98,
-    "hit_quinella": 69,
-    "hit_trifecta": 43,
-    "rate_quinella": 70.4,
-    "rate_trifecta": 43.9,
+    "count": 100,
+    "hit_quinella": 71,
+    "hit_trifecta": 44,
+    "rate_quinella": 71.0,
+    "rate_trifecta": 44.0,
     "reliable": true
   },
   "전적이중수렴": {
@@ -2622,13 +2642,41 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "몬베츠 8경주",
+        "date": "2026-08-12",
+        "horses": [
+          5
+        ],
+        "placed": [
+          5
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "마쓰야마 7경주",
+        "date": "2026-08-12",
+        "horses": [
+          2,
+          5,
+          9
+        ],
+        "placed": [
+          2,
+          5,
+          9
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 75,
-    "hit_quinella": 52,
-    "hit_trifecta": 34,
-    "rate_quinella": 69.3,
-    "rate_trifecta": 45.3,
+    "count": 77,
+    "hit_quinella": 54,
+    "hit_trifecta": 35,
+    "rate_quinella": 70.1,
+    "rate_trifecta": 45.5,
     "reliable": true
   },
   "크로스역배열": {

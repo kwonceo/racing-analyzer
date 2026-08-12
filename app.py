@@ -16570,6 +16570,65 @@ LINE_PAIR_JUDGE_SPORTS = ("cycle",)   # 🔴 경륜만. 다른 종목은 현행 
 #     · 🔴 `src` 가 비어 있는 틱이 섞이면 → **판정 불가로 보고 통과**
 #       캐시 이력의 `src` 는 2026-08-12부터 채워진다. 그전 틱은 전부 비어 있어
 #       그것을 확장으로 세면 **정상 경주를 막는다.** 새 틱이 쌓이며 자연히 판정 가능해진다.
+# ══════════ [삼복승 후보 A · 관찰 모드 · 2026-08-12 승인] ══════════
+#   대표: "그래 그렇게 해봐 더 지켜보자"
+#   후보 A = 복승 본선 1위 두 마리 + **급락 1위 말** 한 조합.
+#   소급 실측(1조합 · 배당 보유 1256경주):
+#     A 급락1위   적중률 10.4% · 회수율 **73.1%** · 3제외 62.4% · 배당중앙 4.8
+#     F 현행 보험 적중률  9.6% · 회수율   62.4% · 3제외 55.3% · 배당중앙 4.1
+#   🟢 회수율 +10.7%p · 적중률 +0.8%p · 3제외에서도 +7.1%p — 극단값 의존이 아니다.
+#   ⚠ 그러나 **절대 판정선 74.5% 를 1.4%p 못 넘는다.** 그래서 판정에 넣지 않는다.
+#   🔴 판정 명단(displayedCombos)·회수율 집계에 **넣지 않는다.** 화면에 「관찰」로만 낸다.
+#   🔴 현행 보험(finalTrifectas)은 **한 줄도 건드리지 않는다.**
+#   겹침 실측: 후보 A 가 현행 보험에 이미 있는 경주 62.6% · **새 조합 37.4%**
+#     ⇒ 관찰할 값이 있다(같은 것만 고르면 볼 이유가 없다).
+#   🔧 되돌리기: TRIO_OBSERVE_ENABLED = False
+TRIO_OBSERVE_ENABLED = True
+
+
+def _trio_observe(cp, an):
+    """[관찰 전용] 복승 본선 1위 두 마리 + 급락 1위 말.
+
+    🔴 판정·회수율·발송 어디에도 개입하지 않는다. 저장과 표시만 한다.
+    """
+    if not TRIO_OBSERVE_ENABLED:
+        return None
+    try:
+        fq = (cp or {}).get("finalQuinellas") or []
+        if not fq:
+            return None
+        axis = sorted(int(x) for x in (fq[0].get("combo") or []))
+        if len(axis) != 2:
+            return None
+        best, bp = None, 0.0
+        for e in ((an or {}).get("drops") or []):
+            try:
+                pct = float(e.get("pct"))
+            except (TypeError, ValueError):
+                continue
+            if pct >= 0:
+                continue
+            for n in (e.get("combo") or []):
+                try:
+                    n = int(n)
+                except (TypeError, ValueError):
+                    continue
+                if n in axis:
+                    continue
+                if -pct > bp:
+                    bp, best = -pct, n
+        if best is None:
+            return None
+        return {"combo": sorted(axis + [best]), "third": best,
+                "dropPct": round(-bp, 1), "mode": "observe",
+                "label": "🔬 관찰(판정 제외)",
+                "reason": "복승 본선 + 급락 1위(%.1f%%)" % (-bp),
+                "note": "소급 회수율 73.1%(현행 62.4%) · 판정선 74.5% 미달로 관찰만 한다"}
+    except Exception as _toe:
+        print("[삼복승 관찰] 스킵(무시):", str(_toe)[:80])
+        return None
+
+
 MATRIX_SHRINK_GUARD = True       # 🔧 되돌리기: False — 매트릭스 응답에 축소 교정을 태운다
 PRIVATE_ONLY_NO_PICK = True      # 🔧 되돌리기: False
 PRIVATE_ONLY_MIN_TICKS = 3       # 틱이 이보다 적으면 판정하지 않는다(표본 부족)
@@ -16967,6 +17026,18 @@ def _build_analysis_log(rk, an=None):
         if isinstance(core_picks_out, dict) and _dc_out:
             core_picks_out = dict(core_picks_out)
             core_picks_out["displayedCombos"] = _dc_out
+        # 🔬 [삼복승 후보 A · 관찰 · 2026-08-12] displayedCombos 를 만든 **뒤**에 붙인다.
+        #   🔴 판정 명단에 넣지 않는다 — 위 _dc_out 에는 손대지 않는다.
+        try:
+            _tobs = _trio_observe(core_picks_out, an)
+            if _tobs and isinstance(core_picks_out, dict):
+                core_picks_out = dict(core_picks_out)
+                core_picks_out["trioObserve"] = _tobs
+                _gate_hit("trio_observe", rk,
+                          "관찰 %s (급락 %s%%)" % ("+".join(str(x) for x in _tobs["combo"]),
+                                                 _tobs["dropPct"]), once_key=rk)
+        except Exception as _tox:
+            print("[삼복승 관찰] 기록 스킵(무시):", str(_tox)[:80])
     except Exception as _dce:
         print("[표시조합 기록] 스킵(무시):", _dce)
 

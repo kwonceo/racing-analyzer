@@ -2,32 +2,32 @@
  "races": 1586,
  "byRank": {
   "rank1": {
-   "hit": 169,
-   "total": 770,
-   "rate": 21.9
+   "hit": 167,
+   "total": 771,
+   "rate": 21.7
   },
   "rank2": {
-   "hit": 297,
-   "total": 738,
-   "rate": 40.2
+   "hit": 296,
+   "total": 739,
+   "rate": 40.1
   },
   "rank3": {
-   "hit": 323,
+   "hit": 322,
    "total": 682,
-   "rate": 47.4
+   "rate": 47.2
   }
  },
  "bySignal": {
   "초기급락 보존": {
-   "hit": 530,
+   "hit": 527,
    "total": 1501,
-   "rate": 35.3,
+   "rate": 35.1,
    "weightReady": true
   },
   "크로스역배열": {
    "hit": 29,
-   "total": 86,
-   "rate": 33.7,
+   "total": 88,
+   "rate": 33.0,
    "weightReady": true
   },
   "스마트머니": {
@@ -49,9 +49,9 @@
    "weightReady": true
   },
   "급락": {
-   "hit": 12,
+   "hit": 11,
    "total": 108,
-   "rate": 11.1,
+   "rate": 10.2,
    "weightReady": true
   },
   "집중급락 회": {
@@ -63,41 +63,41 @@
  },
  "byBand": {
   "15~30": {
-   "hit": 113,
-   "total": 453,
-   "rate": 24.9,
+   "hit": 112,
+   "total": 454,
+   "rate": 24.7,
    "weightReady": true
   },
   "50~100": {
-   "hit": 18,
+   "hit": 16,
    "total": 181,
-   "rate": 9.9,
+   "rate": 8.8,
    "weightReady": true
   },
   "30~50": {
    "hit": 28,
-   "total": 218,
+   "total": 219,
    "rate": 12.8,
    "weightReady": true
   },
   "100+": {
-   "hit": 6,
+   "hit": 5,
    "total": 73,
-   "rate": 8.2,
+   "rate": 6.8,
    "weightReady": true
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 368,
+   "hit": 366,
    "total": 1079,
-   "rate": 34.1,
+   "rate": 33.9,
    "weightReady": true
   },
   "keirin": {
-   "hit": 416,
-   "total": 1096,
-   "rate": 38.0,
+   "hit": 414,
+   "total": 1098,
+   "rate": 37.7,
    "weightReady": true
   },
   "korea": {
@@ -121,5 +121,5 @@
    "실질유력": 28
   }
  },
- "updated_at": "2026-08-12 18:26:28"
+ "updated_at": "2026-08-12 18:46:48"
 }
