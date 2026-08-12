@@ -1,36 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 5경주",
-      "horse_no": 1,
-      "recent_avg": 5.0,
-      "win_place": 3,
-      "conditions": [
-        "급락78%",
-        "복승이상감지"
-      ],
-      "date": "2026-08-05"
-    },
-    {
-      "race": "소노다 5경주",
-      "horse_no": 11,
-      "recent_avg": 4.8,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-08-05"
-    },
-    {
-      "race": "소노다 6경주",
-      "horse_no": 11,
-      "recent_avg": 4.6,
-      "win_place": 1,
-      "conditions": [
-        "급락89%",
-        "복승이상감지"
-      ],
-      "date": "2026-08-05"
-    },
-    {
       "race": "소노다 6경주",
       "horse_no": 10,
       "recent_avg": 11.0,
@@ -4790,16 +4760,44 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-08-12"
+    },
+    {
+      "race": "우라와 8경주",
+      "horse_no": 4,
+      "recent_avg": 7.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-12"
+    },
+    {
+      "race": "우라와 8경주",
+      "horse_no": 2,
+      "recent_avg": 7.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-12"
+    },
+    {
+      "race": "우라와 8경주",
+      "horse_no": 5,
+      "recent_avg": 9.0,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-12"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3462,
-      "hit": 615
+      "count": 3470,
+      "hit": 616
     },
     "전체부진마": {
-      "count": 6073,
-      "hit": 1634
+      "count": 6085,
+      "hit": 1637
     },
     "대규모급락": {
       "count": 18,
@@ -4809,8 +4807,8 @@
       "hit_rate": 38.9
     },
     "이상감지동반": {
-      "count": 2611,
-      "hit": 1019
+      "count": 2615,
+      "hit": 1021
     },
     "급락동반": {
       "count": 570,
