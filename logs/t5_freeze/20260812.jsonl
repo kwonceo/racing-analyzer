@@ -1,2 +1,10 @@
 {"ev": "freeze", "rk": "기후 1경주", "at": "08:24:28", "mb": 5, "combos": ["3+7"], "dl": null, "enabled": true}
 {"ev": "freeze", "rk": "기후 2경주", "at": "08:44:14", "mb": 5, "combos": ["3+4"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "기후 3경주", "at": "09:05:05", "mb": 5, "combos": ["3+5"], "dl": null, "enabled": true}
+{"ev": "lost", "rk": "기후 3경주", "at": "09:06:45", "mb": 4, "frozenAt": "09:05:05", "frozenMb": 5, "lost": ["2+7"], "withoutFreeze": ["3+5"], "withFreeze": ["2+7", "3+5"], "seatsNow": 1, "seatsWithFreeze": 2, "dl": null, "enabled": true}
+{"ev": "lost", "rk": "기후 3경주", "at": "09:08:15", "mb": 2, "frozenAt": "09:05:05", "frozenMb": 5, "lost": ["2+3", "2+7"], "withoutFreeze": ["3+5"], "withFreeze": ["2+3", "2+7", "3+5"], "seatsNow": 1, "seatsWithFreeze": 3, "dl": null, "enabled": true}
+{"ev": "lost", "rk": "기후 3경주", "at": "09:08:45", "mb": 2, "frozenAt": "09:05:05", "frozenMb": 5, "lost": ["2+3"], "withoutFreeze": ["2+7", "3+5"], "withFreeze": ["2+3", "2+7", "3+5"], "seatsNow": 2, "seatsWithFreeze": 3, "dl": null, "enabled": true}
+{"ev": "lost", "rk": "기후 3경주", "at": "09:09:16", "mb": 1, "frozenAt": "09:05:05", "frozenMb": 5, "lost": ["2+3", "2+7"], "withoutFreeze": ["1+5", "3+5"], "withFreeze": ["1+5", "2+3", "2+7", "3+5"], "seatsNow": 2, "seatsWithFreeze": 4, "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "기후 4경주", "at": "09:26:18", "mb": 5, "combos": ["1+7", "2+5"], "dl": null, "enabled": true}
+{"ev": "lost", "rk": "기후 4경주", "at": "09:26:22", "mb": 5, "frozenAt": "09:26:18", "frozenMb": 5, "lost": ["2+5"], "withoutFreeze": ["1+7", "5+7"], "withFreeze": ["1+7", "2+5", "5+7"], "seatsNow": 2, "seatsWithFreeze": 3, "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "기후 5경주", "at": "09:46:40", "mb": 5, "combos": ["2+5"], "dl": null, "enabled": true}
