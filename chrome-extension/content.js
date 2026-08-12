@@ -94,6 +94,29 @@
     return null;
   }
 
+  // ══════════ [2026-08-12 승인] 긁는 동안 경주가 바뀌면 버린다 ══════════
+  //   🔴 왜: raceKey 는 **수집 시작 전 한 번** 뽑고, 탭을 옮겨 다니며 긁는 수십 초 동안 그대로 쓴다.
+  //     그 사이 배당판이 다음 경주로 넘어가면 **A경주 키에 B경주 배당**이 실려 서버로 간다.
+  //     실물: 히라츠카 4R(8/10) · 모리오카 2R·우라와 1R·야히코 7R(8/11) · 기후 4·6·7R(8/12).
+  //   ⚠ 서버는 이것을 **구조적으로 못 잡는다** — 두수가 같으면 명단 게이트도 통과한다.
+  //     확장만이 "긁기 전"과 "긁은 뒤"를 비교할 수 있다.
+  //   ⚠ 안전: 재추출이 실패(빈 값)하면 **통과시킨다**. 못 읽은 것을 오염으로 보면 정상 수집이 멎는다.
+  //     원칙 20(가드는 오탐률을 재기 전에 켜지 않는다) — 확신이 없으면 막지 않는다.
+  const RK_GUARD_ENABLED = true;
+  function rkGuard(rk0, payload, tag) {
+    if (!RK_GUARD_ENABLED) return true;
+    let rk1 = '';
+    try { rk1 = (extractRaceKey() || '').trim(); } catch (_) { rk1 = ''; }
+    // 못 읽었으면 막지 않는다(원문 그대로 진행)
+    if (!rk1 || !rk0) { if (payload) payload.rkVerify = null; return true; }
+    if (payload) { payload.rkVerify = rk1; payload.rkVerifiedAt = new Date().toISOString(); }
+    if (rk1 === String(rk0).trim()) return true;
+    // 🔴 조용히 버리지 않는다 — 콘솔과 화면에 남긴다
+    console.warn(`[경주전환 감지] 긁기 시작 "${rk0}" → 전송 직전 "${rk1}" · ${tag} 전송을 버립니다`);
+    try { setTripleProgress(`⚠️ 경주가 바뀌었습니다(${rk0} → ${rk1}) · 전송 취소`, true); } catch (_) { /* noop */ }
+    return false;
+  }
+
   function extractRaceKey() {
     const q = new URLSearchParams(location.search);
     let date = '', track = '', raceNo = '';
@@ -1195,6 +1218,10 @@
       if (!payload.quinella.length && !payload.exacta.length && !payload.trio.length) {
         setTripleProgress('❌ 3종 배당 없음(발매 시간 확인)', true);
         return { ok: false, error: '3종 배당을 찾지 못했습니다(발매 시간/경주 확인).' };
+      }
+      // 🔴 [2026-08-12] 긁는 동안 경주가 바뀌었으면 버린다(위 rkGuard 주석 참조)
+      if (!rkGuard(payload.raceKey, payload, 'keiba 3종배당')) {
+        return { ok: false, error: `경주가 바뀌어 전송을 취소했습니다(${payload.raceKey} → ${payload.rkVerify}).` };
       }
       setTripleProgress('서버 전송중…');
       const res = await chrome.runtime.sendMessage({ type: 'POST_TRIPLE', payload, reason });
@@ -2330,6 +2357,10 @@
         setTripleProgress('❌ 배당·전적 모두 없음(콘솔 로그 확인)', true);
         return { ok: false, error: '배당·전적을 찾지 못했습니다. F12 콘솔의 로그를 확인하세요.' };
       }
+      // 🔴 [2026-08-12] 긁는 동안 경주가 바뀌었으면 버린다 — 이 경로가 사설 배당판 주력이다
+      if (!rkGuard(payload.raceKey, payload, '사설 배당판')) {
+        return { ok: false, error: `경주가 바뀌어 전송을 취소했습니다(${payload.raceKey} → ${payload.rkVerify}).` };
+      }
       setTripleProgress('서버 전송중…');
       const res = await chrome.runtime.sendMessage({ type: 'POST_TRIPLE', payload, reason });
       // [3번] 전적이 있으면 배당+전적 통합 분석 엔드포인트로 전송
@@ -2413,6 +2444,10 @@
       return { ok: false, error: '전송할 복승 매트릭스가 없습니다. 배당판 페이지인지 확인하세요.', payload };
     }
     const parts = [];
+    // 🔴 [2026-08-12] 매트릭스 경로도 같은 가드를 탄다
+    if (!rkGuard(payload.raceKey, payload, '복승 매트릭스')) {
+      return { ok: false, error: `경주가 바뀌어 전송을 취소했습니다(${payload.raceKey} → ${payload.rkVerify}).`, payload };
+    }
     // 복승 매트릭스 → triple ingest (매트릭스 UI 용)
     if (pairs.length) {
       const quinella = pairs

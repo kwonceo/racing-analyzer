@@ -2383,6 +2383,11 @@ CURQ_SHRINK_GUARD = True      # 🔧 되돌리기: False
 SERVER_ODDS_PREFER = True
 SERVER_ODDS_WINDOW_SEC = 300.0   # 이보다 오래된 서버 틱은 쓰지 않는다(낡은 값 방지)
 
+# 🔴 [2026-08-12 승인] 확장 2차 대조 스위치 — False 로 되돌리면 종전대로 전부 받는다
+#   ⚠ `rkVerify` 가 없는 전송(재로드 전 옛 확장)은 이 값과 무관하게 **항상 통과**한다.
+#     막으면 대표가 확장을 재로드하기 전까지 수집이 통째로 멎는다(원칙 20).
+INGEST_RK_VERIFY = True
+
 
 def _curq_shrink_guard(rk, cur_map, hist):
     """[축소 오염 교정 · 2026-08-05 승인 C안] 마지막 틱이 **직전보다 좁으면** 넓은 틱을 쓴다.
@@ -2582,6 +2587,30 @@ def triple_ingest():
     #   ⚠ **소급 정규화가 아니다**(2026-07-31 결정 유지) — 과거 파일은 그대로 두고 **앞으로 들어오는 것만** 통일한다.
     #     🔴 그래서 기존 분리가 즉시 해소되지는 않는다. 조회 계층 정규화는 별건으로 남긴다.
     rk = _ingest_normalize_rk(rk, body)
+    # 🔴 [2026-08-12 승인] 확장 2차 대조 — 긁는 동안 경주가 바뀐 전송을 서버에서도 막는다
+    #   확장(content.js rkGuard)이 1차로 버리지만, 그것은 **재로드한 확장에서만** 돈다.
+    #   ⚠ `rkVerify` 가 **없으면 그대로 받는다** — 옛 확장(재로드 전)을 막으면 수집이 통째로 멎는다.
+    #     원칙 20: 확신이 없으면 막지 않는다. 있는 것만 대조한다.
+    #   ⚠ 비교는 **같은 정규화를 거친 뒤** 한다(원칙 8) — 원문끼리 비교하면 표기 변형이 오탐이 된다.
+    if INGEST_RK_VERIFY:
+        _rkv = str(body.get("rkVerify") or "").strip()
+        if _rkv:
+            _gate_hit("ingest_rk_verify", rk, "확장이 대조값을 보냈다", reach_only=True)
+            try:
+                _rkv_n = _ingest_normalize_rk(_canon_rk(_rkv), dict(body))
+            except Exception:
+                _rkv_n = ""
+            if _rkv_n and _rkv_n != rk:
+                _gate_hit("ingest_rk_mismatch", rk,
+                          "긁기 시작 %s ↔ 전송 직전 %s" % (rk, _rkv_n))
+                print("[수신거부] 경주 전환 감지 %s → %s (확장 대조)" % (rk, _rkv_n))
+                try:
+                    _ingest_reject_log(rk, "경주 전환(확장 대조 %s)" % _rkv_n,
+                                       body.get("source"), {"rkVerify": _rkv_n})
+                except Exception:
+                    pass
+                return jsonify({"ok": False, "error": "경주 전환 감지(rkVerify 불일치)",
+                                "raceKey": rk, "rkVerify": _rkv_n}), 409
     # [긴급수정 ② 사설 우선] 확장(사설 배당판·화면수집)은 사용자가 실제로 보고 베팅하는 화면 → 권위 소스.
     #   과거엔 oddspark 서버수집 중이면 확장을 스킵(oddspark 우선)했으나, oddspark 말번호 밀림으로 분석패널이
     #   배당판과 어긋나는 문제가 있어 '사설 우선'으로 전환한다. 확장 전송은 스킵하지 않고 그대로 저장하며,

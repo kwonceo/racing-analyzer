@@ -249,14 +249,24 @@
    "quiet": false,
    "abnormal": [],
    "error": null
+  },
+  "2026-08-12/14": {
+   "at": "2026-08-12 14:00:18",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "저장 실패 +57",
+    "JSON 손상 +4건"
+   ],
+   "error": null
   }
  },
- "lastRun": "2026-08-12 09:00:18",
- "lastSlot": 9,
+ "lastRun": "2026-08-12 14:00:18",
+ "lastSlot": 14,
  "last": {
-  "saveFail": 97,
+  "saveFail": 154,
   "gap": 0,
-  "corrupt": 0,
-  "at": "2026-08-12 09:00:18"
+  "corrupt": 4,
+  "at": "2026-08-12 14:00:18"
  }
 }

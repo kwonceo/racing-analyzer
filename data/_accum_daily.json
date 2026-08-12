@@ -390,25 +390,49 @@
   }
  },
  "2026-08-12": {
-  "pastPops": 0,
-  "popDeno": 0,
-  "k5have": 0,
-  "k5deno": 0,
-  "p2hHave": 0,
-  "p2hDeno": 0,
-  "p6hHave": 0,
-  "p6hDeno": 0,
-  "k5allHave": 0,
-  "k5allDeno": 21,
-  "k5hHave": 0,
-  "k5hDeno": 0,
+  "pastPops": 20,
+  "popDeno": 99,
+  "k5have": 97,
+  "k5deno": 99,
+  "p2hHave": 143,
+  "p2hDeno": 145,
+  "p6hHave": 97,
+  "p6hDeno": 145,
+  "k5allHave": 97,
+  "k5allDeno": 371,
+  "k5hHave": 97,
+  "k5hDeno": 145,
   "srcs": {
-   "keirin": 21
+   "keirin": 226,
+   "oddspark": 79,
+   "keiba_ext": 46,
+   "keiba_nar": 20,
+   "none": 0
   },
-  "races": 3,
+  "races": 49,
   "bySrc": {
    "keirin": {
-    "n": 21,
+    "n": 226,
+    "k5": 0,
+    "pop": 0
+   },
+   "oddspark": {
+    "n": 79,
+    "k5": 77,
+    "pop": 0
+   },
+   "keiba_ext": {
+    "n": 46,
+    "k5": 0,
+    "pop": 0
+   },
+   "keiba_nar": {
+    "n": 20,
+    "k5": 20,
+    "pop": 20
+   },
+   "none": {
+    "n": 0,
     "k5": 0,
     "pop": 0
    }

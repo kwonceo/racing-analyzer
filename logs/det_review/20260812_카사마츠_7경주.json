@@ -1,0 +1,120 @@
+{
+ "raceKey": "카사마츠 7경주",
+ "entries": [
+  {
+   "time": "14:05:55",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      7
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      4,
+      7
+     ],
+     [
+      4,
+      5,
+      7
+     ],
+     [
+      1,
+      4,
+      5
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "14:15:10",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       2,
+       5
+      ],
+      "prev": 18.5,
+      "cur": 10.5,
+      "pct": -43.2
+     },
+     {
+      "combo": [
+       2,
+       3
+      ],
+      "prev": 41.4,
+      "cur": 24.5,
+      "pct": -40.8
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "14:26:31",
+   "minutesBefore": -11,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
