@@ -1,37 +1,6 @@
 {
   "patterns": [
     {
-      "race": "후나바시 9경주",
-      "horse_no": 2,
-      "recent_avg": 5.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
-      "race": "후나바시 9경주",
-      "horse_no": 6,
-      "recent_avg": 7.6,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
-      "race": "후나바시 9경주",
-      "horse_no": 1,
-      "recent_avg": 7.4,
-      "win_place": 3,
-      "conditions": [
-        "급락71%",
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
       "race": "후나바시 10경주",
       "horse_no": 4,
       "recent_avg": 8.4,
@@ -4803,16 +4772,44 @@
         "복승이상감지"
       ],
       "date": "2026-08-12"
+    },
+    {
+      "race": "몬베츠 3경주",
+      "horse_no": 2,
+      "recent_avg": 4.3,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-12"
+    },
+    {
+      "race": "몬베츠 3경주",
+      "horse_no": 7,
+      "recent_avg": 4.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-12"
+    },
+    {
+      "race": "몬베츠 3경주",
+      "horse_no": 1,
+      "recent_avg": 6.7,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-12"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3402,
-      "hit": 610
+      "count": 3411,
+      "hit": 611
     },
     "전체부진마": {
-      "count": 5993,
-      "hit": 1616
+      "count": 6004,
+      "hit": 1619
     },
     "대규모급락": {
       "count": 18,
@@ -4822,8 +4819,8 @@
       "hit_rate": 38.9
     },
     "이상감지동반": {
-      "count": 2591,
-      "hit": 1006
+      "count": 2593,
+      "hit": 1008
     },
     "급락동반": {
       "count": 570,
@@ -5200,26 +5197,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1047,
-    "hit": 847,
+    "count": 1048,
+    "hit": 848,
     "cases": [
-      {
-        "race": "도야마 8경주",
-        "date": "2026-08-10",
-        "smart_horses": [
-          3,
-          5,
-          7
-        ],
-        "placed": [
-          3,
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "도야마 9경주",
         "date": "2026-08-10",
@@ -6750,6 +6730,22 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 6.8,
+        "high_odds": false
+      },
+      {
+        "race": "몬베츠 3경주",
+        "date": "2026-08-12",
+        "smart_horses": [
+          4,
+          8,
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
