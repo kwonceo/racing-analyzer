@@ -16527,6 +16527,52 @@ LINE_PAIR_JUDGE_TOPN = 2         # 3제외 78.4%(1개는 76.0%) — 2개가 실�
 LINE_PAIR_JUDGE_SPORTS = ("cycle",)   # 🔴 경륜만. 다른 종목은 현행 유지
 
 
+# ══════════ [확장만 있는 경주는 추천을 내지 않는다 · 2026-08-12 승인] ══════════
+#   🔴 대표 지시: "틀린 추천을 내는 것보다 안 내는 것이 낫다."
+#   🔴 한국은 제외한다 — 서버 수집 경로가 **0%**(8월 48경주 전부 확장만)라
+#     막으면 한국 경마 추천이 통째로 멎는다. 서버 우선(SERVER_ODDS_PREFER)과 같은 판단이다.
+#   실측(8월 · 배당 든 871경주): 확장만 77건(8.8%) 중 **한국이 48건(62.3%)**.
+#     한국을 빼면 실제 차단 대상은 **29건**이다. 🟢 경륜은 **0건** — 영향 없다.
+#     내역: 쿠마모토 7 · 마츠야마 4 · 소노다 3 · 카나자와 3 · 후나바시 2 · 사가 2 …
+#   ⚠ 저장은 두 소스 다 남긴다(사후 대조에 필요). 막는 것은 **판정 명단 하나**다.
+#   🔴 [원칙 20] 오탐이면 정상 추천을 막는다 — 그래서 **확신이 없으면 막지 않는다**:
+#     · 서버 틱이 하나라도 있으면      → 통과(확장만이 아니다)
+#     · 🔴 `src` 가 비어 있는 틱이 섞이면 → **판정 불가로 보고 통과**
+#       캐시 이력의 `src` 는 2026-08-12부터 채워진다. 그전 틱은 전부 비어 있어
+#       그것을 확장으로 세면 **정상 경주를 막는다.** 새 틱이 쌓이며 자연히 판정 가능해진다.
+PRIVATE_ONLY_NO_PICK = True      # 🔧 되돌리기: False
+PRIVATE_ONLY_MIN_TICKS = 3       # 틱이 이보다 적으면 판정하지 않는다(표본 부족)
+
+
+def _private_only_race(rk, an):
+    """[확장 전용 경주 판정] 확장(private)만으로 만들어진 경주인가.
+
+    🔴 확신이 없으면 **False**(막지 않는다)를 돌려준다.
+    """
+    if not PRIVATE_ONLY_NO_PICK:
+        return False
+    try:
+        _cat = str((an or {}).get("category") or "")
+        if "korea" in _cat or _KRA_TRACK_RE.search(str(rk or "")):
+            return False                      # 🔴 한국은 서버 경로가 없다 — 제외
+        _rec = (_triple_load() or {}).get(rk) or {}
+        _hist = _rec.get("history") or []
+        if len(_hist) < PRIVATE_ONLY_MIN_TICKS:
+            return False                      # 표본 부족 — 판정하지 않는다
+        _srcs = [str(h.get("src") or "") for h in _hist]
+        if any(("oddspark" in s or "netkeiba" in s) for s in _srcs):
+            return False                      # 서버 틱이 있다 — 확장만이 아니다
+        if any((not s) for s in _srcs):
+            _gate_hit("private_only_unknown", rk,
+                      "src 미기록 틱 %d개 — 판정 불가로 통과" % sum(1 for s in _srcs if not s),
+                      reach_only=True, once_key=rk)
+            return False                      # 🔴 판정 불가 — 막지 않는다
+        return all("private" in s for s in _srcs)
+    except Exception as _poe:
+        print("[확장전용 판정] 스킵(무시):", str(_poe)[:80])
+        return False
+
+
 def _judge_extra_quinellas(cp, sport, already):
     """[판정 편입] 화면에는 나가는데 판정 밖이던 조합을 명단에 더한다.
 
@@ -16873,7 +16919,19 @@ def _build_analysis_log(rk, an=None):
                                   once_key="%s|%s" % (rk, "+".join(str(x) for x in _c)))
             except Exception as _jxe:
                 print("[판정 편입] 스킵(무시):", str(_jxe)[:80])
-            if not (_dc_out["quinellas"] or _dc_out["trifectas"]):
+            # 🔴 [확장만 차단 · 2026-08-12 승인] 확장 값만으로 만들어진 경주는 판정 명단을 비운다.
+            #   ⚠ 아래 「빈 추천으로 덮지 않음」 폴백보다 **먼저** 판단해야 한다 —
+            #     그 폴백이 되살리면 차단이 무효가 된다.
+            #   ⚠ 생성물(finalQuinellas·bmedSpecial 등)은 **그대로 남긴다.** 사후 대조에 필요하다.
+            if _private_only_race(rk, an):
+                _gate_hit("private_only_nopick", rk,
+                          "확장 값만 있는 경주 — 판정 명단 보류", once_key=rk)
+                print("[확장전용] %s 추천 보류(배당 근거가 확장뿐)" % rk)
+                _dc_out = {"quinellas": [], "trifectas": [],
+                           "at": time.strftime("%H:%M:%S", time.localtime()),
+                           "blocked": "privateOnly",
+                           "blockedNote": "배당 근거가 확장(private)뿐이라 추천을 내지 않았다"}
+            elif not (_dc_out["quinellas"] or _dc_out["trifectas"]):
                 _dc_out = _old_dc                    # 빈 추천으로 기존 기록 덮지 않음(보존 원칙 동일)
         if isinstance(core_picks_out, dict) and _dc_out:
             core_picks_out = dict(core_picks_out)

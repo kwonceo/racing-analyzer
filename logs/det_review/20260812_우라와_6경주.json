@@ -1,0 +1,102 @@
+{
+ "raceKey": "우라와 6경주",
+ "entries": [
+  {
+   "time": "15:40:43",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      10
+     ],
+     [
+      10,
+      11
+     ],
+     [
+      9,
+      10
+     ],
+     [
+      1,
+      10
+     ],
+     [
+      4,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      9,
+      10
+     ],
+     [
+      1,
+      4,
+      10
+     ],
+     [
+      9,
+      10,
+      11
+     ],
+     [
+      1,
+      9,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:50:13",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:59:08",
+   "minutesBefore": -9,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
