@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "몬베츠 6경주",
-      "horse_no": 7,
-      "recent_avg": 7.8,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-04"
-    },
-    {
-      "race": "몬베츠 6경주",
       "horse_no": 6,
       "recent_avg": 7.2,
       "win_place": 3,
@@ -4793,16 +4783,26 @@
         "복승이상감지"
       ],
       "date": "2026-08-12"
+    },
+    {
+      "race": "소노다 6경주",
+      "horse_no": 3,
+      "recent_avg": 4.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-12"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3353,
+      "count": 3355,
       "hit": 605
     },
     "전체부진마": {
-      "count": 5901,
-      "hit": 1591
+      "count": 5905,
+      "hit": 1592
     },
     "대규모급락": {
       "count": 18,
@@ -4812,8 +4812,8 @@
       "hit_rate": 38.9
     },
     "이상감지동반": {
-      "count": 2548,
-      "hit": 986
+      "count": 2550,
+      "hit": 987
     },
     "급락동반": {
       "count": 562,
