@@ -1,0 +1,98 @@
+{
+ "raceKey": "소노다 1경주",
+ "entries": [
+  {
+   "time": "10:35:28",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      3
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      6,
+      9
+     ],
+     [
+      1,
+      9
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      1,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      3,
+      10
+     ],
+     [
+      1,
+      3,
+      6
+     ],
+     [
+      3,
+      9,
+      10
+     ],
+     [
+      3,
+      6,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "10:45:01",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       1,
+       9
+      ],
+      "prev": 17.6,
+      "cur": 8.4,
+      "pct": -52.3
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
