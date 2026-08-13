@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "후나바시 4경주",
-      "horse_no": 4,
-      "recent_avg": 4.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-06"
-    },
-    {
-      "race": "후나바시 4경주",
-      "horse_no": 5,
-      "recent_avg": 4.4,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-06"
-    },
-    {
       "race": "후나바시 5경주",
       "horse_no": 8,
       "recent_avg": 4.6,
@@ -4761,16 +4743,36 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-08-13"
+    },
+    {
+      "race": "몬베츠 8경주",
+      "horse_no": 6,
+      "recent_avg": 4.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-13"
+    },
+    {
+      "race": "몬베츠 8경주",
+      "horse_no": 4,
+      "recent_avg": 7.2,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-13"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3638,
+      "count": 3643,
       "hit": 641
     },
     "전체부진마": {
-      "count": 6340,
-      "hit": 1702
+      "count": 6347,
+      "hit": 1704
     },
     "대규모급락": {
       "count": 17,
@@ -4780,8 +4782,8 @@
       "hit_rate": 35.3
     },
     "이상감지동반": {
-      "count": 2702,
-      "hit": 1061
+      "count": 2704,
+      "hit": 1063
     },
     "급락동반": {
       "count": 572,
