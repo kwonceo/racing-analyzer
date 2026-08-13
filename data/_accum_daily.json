@@ -440,24 +440,42 @@
  },
  "2026-08-13": {
   "pastPops": 0,
-  "popDeno": 0,
-  "k5have": 0,
-  "k5deno": 0,
-  "p2hHave": 0,
-  "p2hDeno": 0,
-  "p6hHave": 0,
-  "p6hDeno": 0,
-  "k5allHave": 0,
-  "k5allDeno": 28,
-  "k5hHave": 0,
-  "k5hDeno": 0,
+  "popDeno": 61,
+  "k5have": 55,
+  "k5deno": 61,
+  "p2hHave": 128,
+  "p2hDeno": 134,
+  "p6hHave": 55,
+  "p6hDeno": 134,
+  "k5allHave": 55,
+  "k5allDeno": 363,
+  "k5hHave": 55,
+  "k5hDeno": 134,
   "srcs": {
-   "keirin": 28
+   "oddspark": 61,
+   "keirin": 229,
+   "keiba_ext": 73,
+   "none": 0
   },
-  "races": 4,
+  "races": 50,
   "bySrc": {
+   "oddspark": {
+    "n": 61,
+    "k5": 55,
+    "pop": 0
+   },
    "keirin": {
-    "n": 28,
+    "n": 229,
+    "k5": 0,
+    "pop": 0
+   },
+   "keiba_ext": {
+    "n": 73,
+    "k5": 0,
+    "pop": 0
+   },
+   "none": {
+    "n": 0,
     "k5": 0,
     "pop": 0
    }

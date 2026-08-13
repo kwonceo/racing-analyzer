@@ -1,0 +1,165 @@
+{
+ "raceKey": "소노다 8경주",
+ "entries": [
+  {
+   "time": "14:05:16",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      6,
+      7
+     ],
+     [
+      2,
+      7
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      6,
+      8
+     ],
+     [
+      4,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      6,
+      7
+     ],
+     [
+      4,
+      6,
+      7
+     ],
+     [
+      2,
+      4,
+      7
+     ],
+     [
+      2,
+      4,
+      6
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "14:15:14",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       4,
+       5
+      ],
+      "prev": 132.7,
+      "cur": 39.6,
+      "pct": -70.2
+     },
+     {
+      "combo": [
+       3,
+       4
+      ],
+      "prev": 112.3,
+      "cur": 41.6,
+      "pct": -63.0
+     },
+     {
+      "combo": [
+       4,
+       10
+      ],
+      "prev": 79.3,
+      "cur": 32.4,
+      "pct": -59.1
+     },
+     {
+      "combo": [
+       3,
+       10
+      ],
+      "prev": 345.4,
+      "cur": 179.2,
+      "pct": -48.1
+     },
+     {
+      "combo": [
+       5,
+       6
+      ],
+      "prev": 103.3,
+      "cur": 58.0,
+      "pct": -43.9
+     },
+     {
+      "combo": [
+       5,
+       10
+      ],
+      "prev": 291.4,
+      "cur": 169.8,
+      "pct": -41.7
+     },
+     {
+      "combo": [
+       3,
+       5
+      ],
+      "prev": 300.8,
+      "cur": 182.5,
+      "pct": -39.3
+     },
+     {
+      "combo": [
+       6,
+       10
+      ],
+      "prev": 70.9,
+      "cur": 49.3,
+      "pct": -30.5
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

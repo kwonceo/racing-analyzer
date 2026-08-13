@@ -275,14 +275,24 @@
    "quiet": false,
    "abnormal": [],
    "error": null
+  },
+  "2026-08-13/14": {
+   "at": "2026-08-13 14:00:26",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "수집 공백 +15건",
+    "JSON 손상 +1건"
+   ],
+   "error": null
   }
  },
- "lastRun": "2026-08-13 09:00:06",
- "lastSlot": 9,
+ "lastRun": "2026-08-13 14:00:26",
+ "lastSlot": 14,
  "last": {
-  "saveFail": 78,
-  "gap": 0,
-  "corrupt": 0,
-  "at": "2026-08-13 09:00:06"
+  "saveFail": 77,
+  "gap": 15,
+  "corrupt": 1,
+  "at": "2026-08-13 14:00:26"
  }
 }

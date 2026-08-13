@@ -1,8 +1,8 @@
 {
- "raceKey": "地方 7경주",
+ "raceKey": "地方 9경주",
  "entries": [
   {
-   "time": "13:29:13",
+   "time": "14:34:43",
    "minutesBefore": 35,
    "status": "SAFE",
    "checked": [
@@ -14,34 +14,50 @@
    ],
    "issues": [],
    "input": {
-    "drops": [],
+    "drops": [
+     {
+      "combo": [
+       6,
+       7
+      ],
+      "prev": 639.0,
+      "cur": 203.7,
+      "pct": -68.1
+     }
+    ],
     "finalQuinellas": [
      [
-      3,
-      6
-     ],
-     [
-      3,
+      4,
       5
      ],
      [
-      2,
-      3
+      1,
+      5
      ],
      [
-      2,
+      5,
       6
      ]
     ],
     "finalTrifectas": [
      [
-      2,
-      3,
+      4,
+      5,
       6
      ],
      [
-      2,
+      4,
+      5,
+      7
+     ],
+     [
+      1,
+      5,
+      6
+     ],
+     [
       3,
+      4,
       5
      ]
     ],
@@ -49,7 +65,7 @@
    }
   },
   {
-   "time": "14:05:51",
+   "time": "15:10:10",
    "minutesBefore": -1,
    "status": "NO_DATA",
    "checked": [],
