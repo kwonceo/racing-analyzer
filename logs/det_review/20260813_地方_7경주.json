@@ -1,0 +1,52 @@
+{
+ "raceKey": "地方 7경주",
+ "entries": [
+  {
+   "time": "13:29:13",
+   "minutesBefore": 35,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      6
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      3,
+      6
+     ],
+     [
+      2,
+      3,
+      5
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}
