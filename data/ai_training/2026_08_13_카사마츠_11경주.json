@@ -1,0 +1,336 @@
+{
+ "schema_version": "1.0",
+ "race_id": "2026_08_13_카사마츠_11경주",
+ "race_info": {
+  "date": "2026-08-13",
+  "track": "카사마츠",
+  "round": 11,
+  "distance": null,
+  "condition": null,
+  "weather": null,
+  "horse_count": 9,
+  "grade": null
+ },
+ "horses": [
+  {
+   "no": 3,
+   "name": "ミカエル",
+   "jockey": "望月洵（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    2,
+    9,
+    9,
+    1
+   ],
+   "record_score": 77.5,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 5,
+   "name": "キャンティ",
+   "jockey": "加藤聡（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    1,
+    7,
+    2,
+    2,
+    4
+   ],
+   "record_score": 70.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 6,
+   "name": "マスカットオマーン",
+   "jockey": "森島貴（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    3,
+    2,
+    4,
+    2
+   ],
+   "record_score": 45.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 2,
+   "name": "ツマミグイ",
+   "jockey": "松本一（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    2,
+    11,
+    10,
+    8,
+    9
+   ],
+   "record_score": 40.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 1,
+   "name": "プレヒティヒ",
+   "jockey": "大原浩（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    3,
+    5,
+    13,
+    12,
+    10
+   ],
+   "record_score": 30.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 9,
+   "name": "アメリカンビッキー",
+   "jockey": "筒井勇（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    5,
+    4,
+    3,
+    5,
+    3
+   ],
+   "record_score": 20.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 7,
+   "name": "ホワイトラビット",
+   "jockey": "井口裕（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    6,
+    8,
+    2,
+    6
+   ],
+   "record_score": 13.8,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 4,
+   "name": "タカラプレスト",
+   "jockey": "塚本征（愛知）",
+   "jockey_winrate": null,
+   "recent_results": [
+    4,
+    7,
+    5,
+    7,
+    5
+   ],
+   "record_score": 10.0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  },
+  {
+   "no": 8,
+   "name": "ミリオンダラベイブ",
+   "jockey": "東川慎（笠松）",
+   "jockey_winrate": null,
+   "recent_results": [
+    8,
+    12,
+    12,
+    9
+   ],
+   "record_score": 0,
+   "distance_score": null,
+   "interval_days": null,
+   "weight_change": null,
+   "odds": null
+  }
+ ],
+ "odds_features": {
+  "timeline": [
+   {
+    "time": "16:23:53",
+    "quinella": {
+     "3+5": 2.9,
+     "3+6": 6.3,
+     "3+7": 7.3,
+     "3+9": 9.8,
+     "1+3": 11.3,
+     "5+6": 17.1,
+     "7+9": 23.7,
+     "5+7": 24.1,
+     "6+7": 27.3,
+     "5+9": 27.7,
+     "1+7": 28.2,
+     "2+3": 31.6,
+     "6+9": 35.9,
+     "3+4": 37.7,
+     "1+9": 41.9,
+     "1+5": 43.5,
+     "1+6": 52.0,
+     "2+7": 75.1,
+     "2+5": 75.9,
+     "4+7": 92.7,
+     "1+2": 108.7,
+     "2+9": 109.8,
+     "2+6": 126.1,
+     "1+4": 145.5,
+     "4+9": 145.5,
+     "3+8": 170.2,
+     "4+5": 171.9,
+     "4+6": 203.8,
+     "2+4": 391.3,
+     "5+8": 515.8,
+     "8+9": 531.9,
+     "6+8": 567.4,
+     "2+8": 597.3,
+     "7+8": 630.5,
+     "4+8": 810.6,
+     "1+8": 945.7
+    }
+   },
+   {
+    "time": "16:23:53",
+    "quinella": {
+     "3+5": 2.9,
+     "3+6": 6.3,
+     "3+7": 7.3,
+     "3+9": 9.8,
+     "1+3": 11.3,
+     "5+6": 17.1,
+     "7+9": 23.7,
+     "5+7": 24.1,
+     "6+7": 27.3,
+     "5+9": 27.7,
+     "1+7": 28.2,
+     "2+3": 31.6,
+     "6+9": 35.9,
+     "3+4": 37.7,
+     "1+9": 41.9,
+     "1+5": 43.5,
+     "1+6": 52.0,
+     "2+7": 75.1,
+     "2+5": 75.9,
+     "4+7": 92.7,
+     "1+2": 108.7,
+     "2+9": 109.8,
+     "2+6": 126.1,
+     "1+4": 145.5,
+     "4+9": 145.5,
+     "3+8": 170.2,
+     "4+5": 171.9,
+     "4+6": 203.8,
+     "2+4": 391.3,
+     "5+8": 515.8,
+     "8+9": 531.9,
+     "6+8": 567.4,
+     "2+8": 597.3,
+     "7+8": 630.5,
+     "4+8": 810.6,
+     "1+8": 945.7
+    }
+   }
+  ],
+  "drop_rates": {},
+  "excess_drops": {},
+  "drop_speed": {},
+  "exacta_reversal": false,
+  "reversal_ratio": null,
+  "quinella_mismatch": null,
+  "refund_rate": 0.746,
+  "consecutive_drops": {},
+  "fake_betting": false,
+  "large_scale_drop": false
+ },
+ "thresholds_used": {
+  "excess_drop_min": 10.0,
+  "reversal_ratio_max": 0.95,
+  "consecutive_min": 3,
+  "pre_close_min": 30
+ },
+ "prediction": {
+  "candidates": [
+   3,
+   5,
+   6,
+   9,
+   1,
+   7,
+   2,
+   4
+  ],
+  "eliminated": [
+   8
+  ],
+  "recommend": null,
+  "strategy": null,
+  "confidence": 0,
+  "signal_quality": null
+ },
+ "result": {
+  "1st": 3,
+  "2nd": 6,
+  "3rd": 2,
+  "4th": null,
+  "quinella_odds": null,
+  "exacta_odds": null,
+  "hit": false,
+  "hit_pattern": null
+ },
+ "labels": {
+  "quinella_hit": false,
+  "winner": 3,
+  "second": 6,
+  "odds_range": null
+ },
+ "signal_hit": {
+  "excess_drop_horse": null,
+  "excess_drop_horse_placed": null,
+  "excess_drop_value": null,
+  "reversal_horse": null,
+  "reversal_horse_placed": null,
+  "reversal_ratio": null,
+  "consecutive_horse": null,
+  "consecutive_horse_placed": null
+ },
+ "saved_at": "2026-08-13 16:46:29",
+ "quality": {
+  "score": 60,
+  "grade": "참고용",
+  "complete": false,
+  "ai_ready": false,
+  "missing": [
+   "이상감지 결과",
+   "확정 배당"
+  ],
+  "errors": []
+ }
+}
