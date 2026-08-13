@@ -1,34 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 2경주",
-      "horse_no": 4,
-      "recent_avg": 6.5,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-06"
-    },
-    {
-      "race": "몬베츠 2경주",
-      "horse_no": 10,
-      "recent_avg": 9.0,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-08-06"
-    },
-    {
-      "race": "몬베츠 2경주",
-      "horse_no": 3,
-      "recent_avg": 6.7,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-06"
-    },
-    {
       "race": "소노다 10경주",
       "horse_no": 6,
       "recent_avg": 8.6,
@@ -4774,16 +4746,44 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-08-13"
+    },
+    {
+      "race": "몬베츠 3경주",
+      "horse_no": 8,
+      "recent_avg": 5.3,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-13"
+    },
+    {
+      "race": "몬베츠 3경주",
+      "horse_no": 1,
+      "recent_avg": 6.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-13"
+    },
+    {
+      "race": "몬베츠 3경주",
+      "horse_no": 7,
+      "recent_avg": 5.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-13"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3586,
-      "hit": 635
+      "count": 3592,
+      "hit": 636
     },
     "전체부진마": {
-      "count": 6273,
-      "hit": 1689
+      "count": 6283,
+      "hit": 1692
     },
     "대규모급락": {
       "count": 17,
@@ -4793,8 +4793,8 @@
       "hit_rate": 35.3
     },
     "이상감지동반": {
-      "count": 2687,
-      "hit": 1054
+      "count": 2691,
+      "hit": 1056
     },
     "급락동반": {
       "count": 572,
