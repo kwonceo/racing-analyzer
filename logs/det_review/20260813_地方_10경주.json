@@ -65,6 +65,34 @@
     ],
     "linePairs": []
    }
+  },
+  {
+   "time": "15:50:01",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       2,
+       3
+      ],
+      "prev": 20.0,
+      "cur": 7.9,
+      "pct": -60.5
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
   }
  ]
 }
