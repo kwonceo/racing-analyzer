@@ -16,6 +16,13 @@
 
 (() => {
   'use strict';
+  // 🔴 [2026-08-14] 재로드 확인용 — 이 줄의 버전이 팝업 버전과 같아야 재로드된 것이다.
+  //   overlay.js 로그가 안 보일 때, 이 줄까지 옛 버전이면 **확장이 재로드 안 된 것**이고
+  //   이 줄만 새 버전이면 **overlay.js 가 그 페이지에 안 붙은 것**이다. 둘을 가른다.
+  try {
+    console.log('%c[수집] content.js v2.1.156 · ' + location.host,
+      'background:#1e293b;color:#fbbf24;padding:2px 6px;border-radius:3px');
+  } catch (_) { /* */ }
 
   // ── 숫자/텍스트 유틸 ────────────────────────────────────────────────
   const txt = (el) => (el ? (el.textContent || '').replace(/\s+/g, ' ').trim() : '');

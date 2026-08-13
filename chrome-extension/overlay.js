@@ -16,6 +16,13 @@
  * =======================================================================*/
 (function () {
   'use strict';
+  // 🔴 [2026-08-14] **가장 먼저 찍는다.** 이 줄이 F12 에 없으면 overlay.js 가 이 페이지에
+  //   아예 안 붙은 것이거나 확장이 재로드되지 않은 것이다.
+  //   ⚠ 종전 로그는 파일 2000행 뒤에 있어서, 그 앞에서 예외가 나면 한 줄도 안 나왔다.
+  try {
+    console.log('%c[오버레이] overlay.js 진입 · v2.1.156 · ' + location.host,
+      'background:#0f172a;color:#38bdf8;padding:2px 6px;border-radius:3px');
+  } catch (_) { /* */ }
   try {
     var ID_CHIP = 'kbOvToggle', ID_PANEL = 'kbOvPanel';
     var enabled = false, killed = false, timer = null;
@@ -2116,7 +2123,14 @@
         });
       } catch (_) { /* */ }
     } catch (_) { /* storage 접근 실패해도 페이지/수집 영향 없음 */ }
-  } catch (_) {
-    /* 최상위 보호막 — 어떤 예외도 페이지/수집 엔진에 전파되지 않는다. */
+  } catch (e) {
+    /* 최상위 보호막 — 어떤 예외도 페이지/수집 엔진에 전파되지 않는다.
+       🔴 [2026-08-14] 종전에는 여기서 **조용히 삼켰다**. 그래서 오버레이가 통째로
+       안 떠도 F12 에 한 줄도 안 나왔다. 이제 이유를 남긴다(전파는 여전히 안 한다). */
+    try {
+      console.error('[오버레이] 🔴 초기화 실패 — 오버레이가 통째로 안 뜹니다:',
+        (e && e.message) || e);
+      console.error('[오버레이] 위치:', (e && e.stack || '').split('\n').slice(1, 3).join(' | '));
+    } catch (_) { /* */ }
   }
 })();

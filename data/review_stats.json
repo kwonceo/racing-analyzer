@@ -28474,8 +28474,1352 @@
    "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [5, 7]",
    "raceKey": "카사마츠 9경주",
    "date": "2026-08-12"
+  },
+  "2026_08_13_구마모토_10경주.json": {
+   "top3": [
+    1,
+    7,
+    6
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 2.2,
+    "official": 2.2,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "구마모토 10경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_11경주.json": {
+   "top3": [
+    7,
+    1,
+    2
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 3.4,
+    "official": 3.5,
+    "deltaPct": 2.9
+   },
+   "type": "hit",
+   "raceKey": "구마모토 11경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_12경주.json": {
+   "top3": [
+    7,
+    4,
+    5
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [4, 7]",
+   "raceKey": "구마모토 12경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_1경주.json": {
+   "top3": [
+    1,
+    7,
+    4
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 4.1,
+    "official": 4.1,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "구마모토 1경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_2경주.json": {
+   "top3": [
+    1,
+    3,
+    5
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [1, 3]",
+   "raceKey": "구마모토 2경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_3경주.json": {
+   "top3": [
+    4,
+    5,
+    3
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [4, 5]",
+   "raceKey": "구마모토 3경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_4경주.json": {
+   "top3": [
+    3,
+    4,
+    5
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 1.3,
+    "official": 1.4,
+    "deltaPct": 7.7
+   },
+   "type": "hit",
+   "raceKey": "구마모토 4경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_5경주.json": {
+   "top3": [
+    6,
+    4,
+    2
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [4, 6]",
+   "raceKey": "구마모토 5경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_6경주.json": {
+   "top3": [
+    2,
+    1,
+    3
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [1, 2]",
+   "raceKey": "구마모토 6경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_7경주.json": {
+   "top3": [
+    3,
+    1,
+    7
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [1, 3]",
+   "raceKey": "구마모토 7경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_8경주.json": {
+   "top3": [
+    3,
+    5,
+    7
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "구마모토 8경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_구마모토_9경주.json": {
+   "top3": [
+    1,
+    4,
+    6
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 1.7,
+    "official": 1.7,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "구마모토 9경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_기후_1경주.json": {
+   "top3": [
+    2,
+    6,
+    7
+   ],
+   "hit": true,
+   "displayedQ": 5,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 9.2,
+    "official": 9.2,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "기후 1경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_기후_2경주.json": {
+   "top3": [
+    5,
+    3,
+    2
+   ],
+   "hit": true,
+   "displayedQ": 4,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 3.3,
+    "official": 3.3,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "기후 2경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_기후_3경주.json": {
+   "top3": [
+    5,
+    2,
+    4
+   ],
+   "hit": true,
+   "displayedQ": 4,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 6.1,
+    "official": 6.2,
+    "deltaPct": 1.6
+   },
+   "type": "hit",
+   "raceKey": "기후 3경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_기후_4경주.json": {
+   "top3": [
+    4,
+    1,
+    7
+   ],
+   "hit": true,
+   "displayedQ": 3,
+   "displayedT": 0,
+   "type": "hit",
+   "raceKey": "기후 4경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_기후_5경주.json": {
+   "top3": [
+    4,
+    2,
+    5
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [2, 4]",
+   "raceKey": "기후 5경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_기후_6경주.json": {
+   "top3": [
+    5,
+    1,
+    4
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 1.3,
+    "official": 1.3,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "기후 6경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_기후_7경주.json": {
+   "top3": [
+    1,
+    5,
+    6
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "기후 7경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_다케오_1경주.json": {
+   "top3": [
+    3,
+    1,
+    6
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [1, 3]",
+   "raceKey": "다케오 1경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_다케오_2경주.json": {
+   "top3": [
+    1,
+    4,
+    2
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [1, 4]",
+   "raceKey": "다케오 2경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_다케오_3경주.json": {
+   "top3": [
+    4,
+    2,
+    3
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 2.6,
+    "official": 2.6,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "다케오 3경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_10경주.json": {
+   "top3": [
+    1,
+    9,
+    6
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 3.1,
+    "official": 3.4,
+    "deltaPct": 9.7
+   },
+   "type": "hit",
+   "raceKey": "마쓰야마 10경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_11경주.json": {
+   "top3": [
+    1,
+    9,
+    5
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 2.3,
+    "official": 2.3,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "마쓰야마 11경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_1경주.json": {
+   "top3": [
+    9,
+    4,
+    7
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "no_signal_forced",
+   "detail": "신호 0 경주에 추천 2개 노출 — 패스 후보",
+   "raceKey": "마쓰야마 1경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_2경주.json": {
+   "top3": [
+    5,
+    1,
+    6
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 2.3,
+    "official": 2.3,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "마쓰야마 2경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_3경주.json": {
+   "top3": [
+    2,
+    9,
+    1
+   ],
+   "hit": false,
+   "displayedQ": 3,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [2, 9]",
+   "raceKey": "마쓰야마 3경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_4경주.json": {
+   "top3": [
+    2,
+    9,
+    5
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 9.8,
+    "official": 7.7,
+    "deltaPct": -21.4
+   },
+   "type": "hit",
+   "raceKey": "마쓰야마 4경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_5경주.json": {
+   "top3": [
+    3,
+    2,
+    7
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [2, 3]",
+   "raceKey": "마쓰야마 5경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_6경주.json": {
+   "top3": [
+    3,
+    9,
+    7
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 3.0,
+    "official": 3.0,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "마쓰야마 6경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_7경주.json": {
+   "top3": [
+    4,
+    5,
+    1
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [4, 5]",
+   "raceKey": "마쓰야마 7경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_8경주.json": {
+   "top3": [
+    7,
+    1,
+    3
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 4.1,
+    "official": 4.1,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "마쓰야마 8경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_마쓰야마_9경주.json": {
+   "top3": [
+    3,
+    7,
+    1
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 1.9,
+    "official": 1.9,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "마쓰야마 9경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_10경주.json": {
+   "top3": [
+    8,
+    4,
+    3
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [4, 8]",
+   "raceKey": "몬베츠 10경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_11경주.json": {
+   "top3": [
+    9,
+    4,
+    10
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "몬베츠 11경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_12경주.json": {
+   "top3": [
+    6,
+    4,
+    7
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "몬베츠 12경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_1경주.json": {
+   "top3": [
+    10,
+    8,
+    12
+   ],
+   "hit": false,
+   "displayedQ": 3,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [8, 10]",
+   "raceKey": "몬베츠 1경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_2경주.json": {
+   "top3": [
+    3,
+    9,
+    6
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 2.2,
+    "official": 2.2,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "몬베츠 2경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_3경주.json": {
+   "top3": [
+    8,
+    1,
+    7
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [1, 8]",
+   "raceKey": "몬베츠 3경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_4경주.json": {
+   "top3": [
+    4,
+    8,
+    1
+   ],
+   "hit": true,
+   "displayedQ": 3,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 6.0,
+    "official": 5.9,
+    "deltaPct": -1.7
+   },
+   "type": "hit",
+   "raceKey": "몬베츠 4경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_5경주.json": {
+   "top3": [
+    9,
+    11,
+    5
+   ],
+   "hit": false,
+   "displayedQ": 3,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [9, 11]",
+   "raceKey": "몬베츠 5경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_6경주.json": {
+   "top3": [
+    4,
+    5,
+    8
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [4, 5]",
+   "raceKey": "몬베츠 6경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_7경주.json": {
+   "top3": [
+    2,
+    11,
+    8
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "near_structure",
+   "detail": "정답 일부만 인지([2]) — 축/상대 선택 미스",
+   "raceKey": "몬베츠 7경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_8경주.json": {
+   "top3": [
+    6,
+    4,
+    9
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [4, 6]",
+   "raceKey": "몬베츠 8경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_몬베츠_9경주.json": {
+   "top3": [
+    11,
+    8,
+    7
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "near_structure",
+   "detail": "정답 일부만 인지([11]) — 축/상대 선택 미스",
+   "raceKey": "몬베츠 9경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_세이부엔_1경주.json": {
+   "top3": [
+    7,
+    3,
+    6
+   ],
+   "hit": true,
+   "displayedQ": 4,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 1.9,
+    "official": 1.5,
+    "deltaPct": -21.1
+   },
+   "type": "hit",
+   "raceKey": "세이부엔 1경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_세이부엔_2경주.json": {
+   "top3": [
+    4,
+    1,
+    7
+   ],
+   "hit": true,
+   "displayedQ": 4,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 2.0,
+    "official": 1.4,
+    "deltaPct": -30.0
+   },
+   "type": "hit",
+   "raceKey": "세이부엔 2경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_세이부엔_3경주.json": {
+   "top3": [
+    3,
+    7,
+    2
+   ],
+   "hit": true,
+   "displayedQ": 3,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 2.4,
+    "official": 2.6,
+    "deltaPct": 8.3
+   },
+   "type": "hit",
+   "raceKey": "세이부엔 3경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_세이부엔_4경주.json": {
+   "top3": [
+    1,
+    5,
+    6
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 3.4,
+    "official": 3.0,
+    "deltaPct": -11.8
+   },
+   "type": "hit",
+   "raceKey": "세이부엔 4경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_세이부엔_5경주.json": {
+   "top3": [
+    4,
+    3,
+    5
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 3.7,
+    "official": 2.1,
+    "deltaPct": -43.2
+   },
+   "type": "hit",
+   "raceKey": "세이부엔 5경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_세이부엔_6경주.json": {
+   "top3": [
+    4,
+    2,
+    3
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [2, 4]",
+   "raceKey": "세이부엔 6경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_세이부엔_7경주.json": {
+   "top3": [
+    5,
+    1,
+    6
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 1.0,
+    "official": 1.0,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "세이부엔 7경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_10경주.json": {
+   "top3": [
+    3,
+    10,
+    4
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [3, 10]",
+   "raceKey": "소노다 10경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_11경주.json": {
+   "top3": [
+    10,
+    7,
+    9
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [7, 10]",
+   "raceKey": "소노다 11경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_12경주.json": {
+   "top3": [
+    8,
+    7,
+    12
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [7, 8]",
+   "raceKey": "소노다 12경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_1경주.json": {
+   "top3": [
+    10,
+    7,
+    6
+   ],
+   "hit": true,
+   "displayedQ": 4,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 21.7,
+    "official": 7.0,
+    "deltaPct": -67.7
+   },
+   "type": "hit",
+   "raceKey": "소노다 1경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_2경주.json": {
+   "top3": [
+    9,
+    2,
+    8
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "소노다 2경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_3경주.json": {
+   "top3": [
+    1,
+    6,
+    3
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 3.1,
+    "official": 3.2,
+    "deltaPct": 3.2
+   },
+   "type": "hit",
+   "raceKey": "소노다 3경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_4경주.json": {
+   "top3": [
+    10,
+    1,
+    8
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "소노다 4경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_5경주.json": {
+   "top3": [
+    7,
+    2,
+    12
+   ],
+   "hit": false,
+   "displayedQ": 3,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [2, 7]",
+   "raceKey": "소노다 5경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_6경주.json": {
+   "top3": [
+    5,
+    7,
+    4
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [5, 7]",
+   "raceKey": "소노다 6경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_7경주.json": {
+   "top3": [
+    8,
+    6,
+    9
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [6, 8]",
+   "raceKey": "소노다 7경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_8경주.json": {
+   "top3": [
+    6,
+    4,
+    2
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "소노다 8경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_소노다_9경주.json": {
+   "top3": [
+    7,
+    2,
+    5
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "소노다 9경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_아오모리_1경주.json": {
+   "top3": [
+    2,
+    1,
+    3
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "아오모리 1경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_아오모리_2경주.json": {
+   "top3": [
+    1,
+    3,
+    4
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 4.5,
+    "official": 3.1,
+    "deltaPct": -31.1
+   },
+   "type": "hit",
+   "raceKey": "아오모리 2경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_아오모리_3경주.json": {
+   "top3": [
+    1,
+    3,
+    7
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 2.1,
+    "official": 2.1,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "아오모리 3경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_10경주.json": {
+   "top3": [
+    3,
+    7,
+    5
+   ],
+   "hit": true,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 2.5,
+    "official": 2.5,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "야히코 10경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_11경주.json": {
+   "top3": [
+    6,
+    5,
+    1
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [5, 6]",
+   "raceKey": "야히코 11경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_12경주.json": {
+   "top3": [
+    3,
+    7,
+    2
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [3, 7]",
+   "raceKey": "야히코 12경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_1경주.json": {
+   "top3": [
+    5,
+    2,
+    3
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "야히코 1경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_2경주.json": {
+   "top3": [
+    2,
+    7,
+    4
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [2, 7]",
+   "raceKey": "야히코 2경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_3경주.json": {
+   "top3": [
+    5,
+    2,
+    4
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [2, 5]",
+   "raceKey": "야히코 3경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_4경주.json": {
+   "top3": [
+    7,
+    1,
+    4
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 4.3,
+    "official": 4.0,
+    "deltaPct": -7.0
+   },
+   "type": "hit",
+   "raceKey": "야히코 4경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_5경주.json": {
+   "top3": [
+    1,
+    4,
+    7
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [1, 4]",
+   "raceKey": "야히코 5경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_6경주.json": {
+   "top3": [
+    5,
+    4,
+    1
+   ],
+   "hit": true,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "slippage": {
+    "locked": 4.4,
+    "official": 4.4,
+    "deltaPct": 0.0
+   },
+   "type": "hit",
+   "raceKey": "야히코 6경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_7경주.json": {
+   "top3": [
+    1,
+    3,
+    2
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [1, 3]",
+   "raceKey": "야히코 7경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_8경주.json": {
+   "top3": [
+    5,
+    1
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [1, 5]",
+   "raceKey": "야히코 8경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_야히코_9경주.json": {
+   "top3": [
+    3,
+    5,
+    6
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "야히코 9경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_카사마츠_11경주.json": {
+   "top3": [
+    3,
+    6,
+    2
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [3, 6]",
+   "raceKey": "카사마츠 11경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_카사마츠_1경주.json": {
+   "top3": [
+    2,
+    5,
+    6
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "카사마츠 1경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_카사마츠_2경주.json": {
+   "top3": [
+    5,
+    6,
+    7
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [5, 6]",
+   "raceKey": "카사마츠 2경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_카사마츠_3경주.json": {
+   "top3": [
+    5,
+    2,
+    3
+   ],
+   "hit": false,
+   "displayedQ": 1,
+   "displayedT": 0,
+   "type": "near_structure",
+   "detail": "정답 일부만 인지([5]) — 축/상대 선택 미스",
+   "raceKey": "카사마츠 3경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_카사마츠_4경주.json": {
+   "top3": [
+    10,
+    9,
+    5
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "no_signal_forced",
+   "detail": "신호 0 경주에 추천 2개 노출 — 패스 후보",
+   "raceKey": "2026-08-13 카사마츠 4경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_카사마츠_5경주.json": {
+   "top3": [
+    8,
+    2,
+    6
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "caught_then_lost",
+   "detail": "정답 조합이 추천 이력에 존재했으나 최종 표시에서 밀림",
+   "raceKey": "카사마츠 5경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_카사마츠_6경주.json": {
+   "top3": [
+    4,
+    1,
+    3
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 0,
+   "type": "no_signal_forced",
+   "detail": "신호 0 경주에 추천 2개 노출 — 패스 후보",
+   "raceKey": "카사마츠 6경주",
+   "date": "2026-08-13"
+  },
+  "2026_08_13_카사마츠_8경주.json": {
+   "top3": [
+    4,
+    5,
+    8
+   ],
+   "hit": false,
+   "displayedQ": 2,
+   "displayedT": 2,
+   "type": "composition_miss",
+   "detail": "정답 1·2착 말을 전부 인지(신호·유력마)했으나 조합 미편성: [4, 5]",
+   "raceKey": "카사마츠 8경주",
+   "date": "2026-08-13"
   }
  },
  "note": "복기 분류(계획서 v4 [1]) — 경주 파일 무수정·읽기 전용 분류",
- "updated": "2026-08-12 22:05:04"
+ "updated": "2026-08-13 22:05:22"
 }

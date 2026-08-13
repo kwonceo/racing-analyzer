@@ -439,38 +439,34 @@
   }
  },
  "2026-08-13": {
-  "pastPops": 0,
-  "popDeno": 61,
-  "k5have": 55,
-  "k5deno": 61,
-  "p2hHave": 128,
-  "p2hDeno": 134,
-  "p6hHave": 55,
-  "p6hDeno": 134,
-  "k5allHave": 55,
-  "k5allDeno": 363,
-  "k5hHave": 55,
-  "k5hDeno": 134,
+  "pastPops": 71,
+  "popDeno": 298,
+  "k5have": 275,
+  "k5deno": 298,
+  "p2hHave": 473,
+  "p2hDeno": 496,
+  "p6hHave": 275,
+  "p6hDeno": 496,
+  "k5allHave": 275,
+  "k5allDeno": 929,
+  "k5hHave": 275,
+  "k5hDeno": 496,
   "srcs": {
-   "oddspark": 61,
-   "keirin": 229,
-   "keiba_ext": 73,
-   "none": 0
+   "oddspark": 206,
+   "keirin": 433,
+   "none": 0,
+   "keiba_ext": 198,
+   "keiba_nar": 92
   },
-  "races": 50,
+  "races": 112,
   "bySrc": {
    "oddspark": {
-    "n": 61,
-    "k5": 55,
+    "n": 206,
+    "k5": 200,
     "pop": 0
    },
    "keirin": {
-    "n": 229,
-    "k5": 0,
-    "pop": 0
-   },
-   "keiba_ext": {
-    "n": 73,
+    "n": 433,
     "k5": 0,
     "pop": 0
    },
@@ -478,6 +474,16 @@
     "n": 0,
     "k5": 0,
     "pop": 0
+   },
+   "keiba_ext": {
+    "n": 198,
+    "k5": 0,
+    "pop": 0
+   },
+   "keiba_nar": {
+    "n": 92,
+    "k5": 75,
+    "pop": 71
    }
   }
  }
