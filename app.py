@@ -13562,6 +13562,14 @@ def _triple_analyze(rk, rec):
         bmed = None           # BMED 배분 표도 비움(신호 대기 상태에선 배분 없음)
         mass_drop_strategy = None
 
+    # 🔴 [조합 수 상한 · 2026-08-13 보충] **여기서 잘라야 회원에게 닿는다.**
+    #   대표 실측(세이부엔 6R): picks 는 1개인데 finalQuinellas 가 3개라 화면이 「복승 3개」로 떴다.
+    #   확인 결과 회원이 보는 곳이 전부 `an["corePicks"]["finalQuinellas"]` 다:
+    #     화면 app.js 2309·2514·2572·7381·7576 · 카톡 _kakao_rich_message 36569·36615
+    #   `_build_analysis_log` 의 상한은 **로그 문서에만** 걸려 화면·카톡에는 닿지 않았다.
+    #   ⚠ 멱등이다 — 이미 잘린 뒤 다시 불려도 아무것도 안 한다.
+    core_picks = _apply_combo_cap(rk, core_picks)
+
     _an_out = {
         "raceKey": rk, "hasPrev": bool(prev),
         "recommendGated": recommend_gated,   # [3번] 저배당 무조건 추천 차단(신호 대기) 여부 → 프론트 '⏳ 신호 대기 중'
@@ -16594,6 +16602,53 @@ COMBO_CAP_B2 = 6.0      # 3~6배   → 2조합
 COMBO_CAP_B3 = 10.0     # 6~10배  → 3조합 · 10배 이상 → 4조합
 
 
+def _combo_cap_of(cp):
+    """[상한 산출] 시장 최저 배당 → (상한, 최저배당). 판정 불가면 (None, None)."""
+    mn = None
+    for q in ((cp or {}).get("finalQuinellas") or []):
+        try:
+            o = float(q.get("odds"))
+        except (TypeError, ValueError):
+            continue
+        if o > 0 and (mn is None or o < mn):
+            mn = o
+    if mn is None:
+        return None, None
+    return (1 if mn < COMBO_CAP_B1 else 2 if mn < COMBO_CAP_B2
+            else 3 if mn < COMBO_CAP_B3 else 4), mn
+
+
+def _apply_combo_cap(rk, cp):
+    """[조합 수 상한] `finalQuinellas` 를 상한까지 자르고 나머지는 `quinellaRef` 로 옮긴다.
+
+    🔴 **멱등이다** — 이미 상한 이하면 원본을 그대로 돌려준다(두 번 불려도 안전).
+    ⚠ 복승만 자른다. 삼복승·💎 는 건드리지 않는다(대표 지시).
+    """
+    if not COMBO_CAP_ENABLED or not isinstance(cp, dict):
+        return cp
+    try:
+        fq = list(cp.get("finalQuinellas") or [])
+        cap, mn = _combo_cap_of(cp)
+        if cap is None or len(fq) <= cap:
+            return cp
+        out = dict(cp)
+        out["finalQuinellas"] = fq[:cap]
+        ref = list(out.get("quinellaRef") or [])
+        for q in fq[cap:]:
+            q2 = dict(q)
+            q2["refReason"] = "조합 수 상한(시장 최저 %.1f배 → %d조합)" % (mn, cap)
+            ref.append(q2)
+        out["quinellaRef"] = ref
+        out["comboCap"] = {"cap": cap, "minOdds": round(mn, 1), "before": len(fq),
+                           "note": "최저 %.1f배라 최대 %d조합 — 그보다 많으면 맞아도 손해다" % (mn, cap)}
+        _gate_hit("combo_cap_picks", rk,
+                  "최저 %.1f배 · %d → %d조합" % (mn, len(fq), cap), once_key=rk)
+        return out
+    except Exception as e:
+        print("[조합 수 상한] 스킵(무시):", str(e)[:80])
+        return cp
+
+
 def _trio_observe(cp, an):
     """[관찰 전용] 복승 본선 1위 두 마리 + 급락 1위 말.
 
@@ -17054,6 +17109,27 @@ def _build_analysis_log(rk, an=None):
                                 _keep = set(tuple(c) for c in _dc_out["quinellas"])
                                 _dc_out["extra"] = [e for e in _dc_out["extra"]
                                                     if tuple(e.get("combo") or []) in _keep] or None
+                            # 🔴 [2026-08-13 보충] `finalQuinellas` 도 **같이 자른다.**
+                            #   대표 실측(세이부엔 6R): picks 는 1개인데 finalQuinellas 가 3개라
+                            #   화면에 「복승 3개 추천」으로 떴다. 상한이 판정 명단에만 걸렸던 것이다.
+                            #   🔴 확인 결과 **회원이 보는 곳이 전부 finalQuinellas 다**:
+                            #     화면 app.js 2309·2514·2572·7381·7576 · 카톡 _kakao_rich_message 36569·36615
+                            #     판정만 displayedCombos 를 쓴다 ⇒ **받는 것과 재는 것이 달랐다.**
+                            #   ⇒ 회원이 받는 쪽을 자르는 것이 맞다. 화면 5곳·카톡 2곳을 고치는 것보다 좁고,
+                            #     무엇보다 **받은 것이 곧 판정 대상**이 되어야 한다.
+                            #   ⚠ 잘린 것은 버리지 않고 `quinellaRef`(참고)로 옮긴다 — 사후 대조용.
+                            _fq_all = list(_cp_dc.get("finalQuinellas") or [])
+                            if len(_fq_all) > _cap:
+                                core_picks_out = dict(core_picks_out or {})
+                                core_picks_out["finalQuinellas"] = _fq_all[:_cap]
+                                _ref = list(core_picks_out.get("quinellaRef") or [])
+                                for _qq in _fq_all[_cap:]:
+                                    _q2 = dict(_qq)
+                                    _q2["refReason"] = ("조합 수 상한(시장 최저 %.1f배 → %d조합)"
+                                                        % (_mn, _cap))
+                                    _ref.append(_q2)
+                                core_picks_out["quinellaRef"] = _ref
+                                _cp_dc = core_picks_out
                             _gate_hit("combo_cap", rk,
                                       "최저 %.1f배 · %d → %d조합" % (_mn, _before, _cap),
                                       once_key=rk)

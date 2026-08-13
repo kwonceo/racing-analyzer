@@ -94,16 +94,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "기후 7경주",
-        "date": "2026-08-12",
-        "horses": [
-          5
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "카사마츠 1경주",
         "date": "2026-08-12",
         "horses": [
@@ -563,11 +553,11 @@
         "trifecta_hit": false
       }
     ],
-    "count": 42,
-    "hit_quinella": 29,
+    "count": 41,
+    "hit_quinella": 28,
     "hit_trifecta": 16,
-    "rate_quinella": 69.0,
-    "rate_trifecta": 38.1,
+    "rate_quinella": 68.3,
+    "rate_trifecta": 39.0,
     "reliable": false
   },
   "급락": {
@@ -705,26 +695,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "기후 5경주",
-        "date": "2026-08-12",
-        "horses": [
-          1
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
-        "race": "기후 6경주",
-        "date": "2026-08-12",
-        "horses": [
-          5
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
         "race": "소노다 1경주",
         "date": "2026-08-12",
         "horses": [
@@ -733,16 +703,6 @@
         "placed": [
           9
         ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
-        "race": "기후 7경주",
-        "date": "2026-08-12",
-        "horses": [
-          5
-        ],
-        "placed": [],
         "quinella_hit": true,
         "trifecta_hit": false
       },
@@ -1981,13 +1941,79 @@
         "placed": [],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "기후 5경주",
+        "date": "2026-08-13",
+        "horses": [
+          4
+        ],
+        "placed": [
+          4
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "세이부엔 4경주",
+        "date": "2026-08-13",
+        "horses": [
+          2
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "기후 6경주",
+        "date": "2026-08-13",
+        "horses": [
+          4
+        ],
+        "placed": [
+          4
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "세이부엔 5경주",
+        "date": "2026-08-13",
+        "horses": [
+          7
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "기후 7경주",
+        "date": "2026-08-13",
+        "horses": [
+          7
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "세이부엔 6경주",
+        "date": "2026-08-13",
+        "horses": [
+          3
+        ],
+        "placed": [
+          3
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 131,
-    "hit_quinella": 93,
-    "hit_trifecta": 54,
-    "rate_quinella": 71.0,
-    "rate_trifecta": 41.2,
+    "count": 134,
+    "hit_quinella": 95,
+    "hit_trifecta": 55,
+    "rate_quinella": 70.9,
+    "rate_trifecta": 41.0,
     "reliable": true
   },
   "전적이중수렴": {
@@ -2139,47 +2165,6 @@
           1
         ],
         "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
-        "race": "기후 5경주",
-        "date": "2026-08-12",
-        "horses": [
-          2,
-          5
-        ],
-        "placed": [
-          2,
-          5
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
-        "race": "기후 6경주",
-        "date": "2026-08-12",
-        "horses": [
-          1,
-          4
-        ],
-        "placed": [
-          1,
-          4
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
-        "race": "기후 7경주",
-        "date": "2026-08-12",
-        "horses": [
-          3,
-          7
-        ],
-        "placed": [
-          3
-        ],
-        "quinella_hit": true,
         "trifecta_hit": false
       },
       {
@@ -3419,13 +3404,98 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "기후 5경주",
+        "date": "2026-08-13",
+        "horses": [
+          2,
+          4,
+          5,
+          7
+        ],
+        "placed": [
+          2,
+          4,
+          5
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "세이부엔 4경주",
+        "date": "2026-08-13",
+        "horses": [
+          1,
+          7
+        ],
+        "placed": [
+          1
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "기후 6경주",
+        "date": "2026-08-13",
+        "horses": [
+          1,
+          5
+        ],
+        "placed": [
+          1,
+          5
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "세이부엔 5경주",
+        "date": "2026-08-13",
+        "horses": [
+          3,
+          4
+        ],
+        "placed": [
+          3,
+          4
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "기후 7경주",
+        "date": "2026-08-13",
+        "horses": [
+          1,
+          5
+        ],
+        "placed": [
+          1,
+          5
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "세이부엔 6경주",
+        "date": "2026-08-13",
+        "horses": [
+          2,
+          7
+        ],
+        "placed": [
+          2
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 104,
-    "hit_quinella": 73,
-    "hit_trifecta": 44,
-    "rate_quinella": 70.2,
-    "rate_trifecta": 42.3,
+    "count": 107,
+    "hit_quinella": 75,
+    "hit_trifecta": 45,
+    "rate_quinella": 70.1,
+    "rate_trifecta": 42.1,
     "reliable": true
   },
   "크로스역배열": {
@@ -3496,13 +3566,37 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "세이부엔 5경주",
+        "date": "2026-08-13",
+        "horses": [
+          4
+        ],
+        "placed": [
+          4
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "기후 7경주",
+        "date": "2026-08-13",
+        "horses": [
+          6
+        ],
+        "placed": [
+          6
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
       }
     ],
-    "count": 6,
-    "hit_quinella": 3,
-    "hit_trifecta": 0,
-    "rate_quinella": 50.0,
-    "rate_trifecta": 0.0,
+    "count": 8,
+    "hit_quinella": 5,
+    "hit_trifecta": 1,
+    "rate_quinella": 62.5,
+    "rate_trifecta": 12.5,
     "reliable": false
   },
   "역배열": {
@@ -3581,16 +3675,6 @@
         ],
         "placed": [],
         "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
-        "race": "기후 7경주",
-        "date": "2026-08-12",
-        "horses": [
-          2
-        ],
-        "placed": [],
-        "quinella_hit": true,
         "trifecta_hit": false
       },
       {
@@ -3855,6 +3939,18 @@
         ],
         "placed": [
           3
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "세이부엔 5경주",
+        "date": "2026-08-13",
+        "horses": [
+          5
+        ],
+        "placed": [
+          5
         ],
         "quinella_hit": true,
         "trifecta_hit": false
