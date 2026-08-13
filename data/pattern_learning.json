@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "후나바시 5경주",
-      "horse_no": 8,
-      "recent_avg": 4.6,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-06"
-    },
-    {
-      "race": "후나바시 5경주",
       "horse_no": 9,
       "recent_avg": 8.5,
       "win_place": 3,
@@ -4763,16 +4753,24 @@
         "복승이상감지"
       ],
       "date": "2026-08-13"
+    },
+    {
+      "race": "몬베츠 9경주",
+      "horse_no": 8,
+      "recent_avg": 5.5,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-13"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3643,
-      "hit": 641
+      "count": 3650,
+      "hit": 642
     },
     "전체부진마": {
-      "count": 6347,
-      "hit": 1704
+      "count": 6354,
+      "hit": 1705
     },
     "대규모급락": {
       "count": 17,
