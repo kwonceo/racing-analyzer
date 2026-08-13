@@ -16619,6 +16619,37 @@ def _combo_cap_of(cp):
             else 3 if mn < COMBO_CAP_B3 else 4), mn
 
 
+def _combo_signal_rank(q):
+    """[동점 갈림 · 2026-08-13 승인] 배당이 같으면 **신호 있는 쪽을 앞으로**.
+
+    🔴 실물 카사마츠 9경주(地方 9경주로 저장됨): 1+5 와 4+5 가 **둘 다 2.3배** 동점이라
+      순서가 안 바뀌어 1+5 가 남았다. 그런데 신호는 4+5 쪽에 있었다:
+        1+5  basis [] · trendTag 없음
+        4+5  basis ["4번: 복병"] · trendTag "🔻 진성급락(반등없음)"
+      ⇒ 낮을수록 앞. 신호가 없으면 맨 뒤.
+    ⚠ 대표 지정 순서: 급락 → 집중급락 → 역배열 → 복승불일치 → 다이아(복병)
+    """
+    try:
+        txt = "%s %s %s" % (q.get("reason") or "", q.get("trendTag") or "",
+                            " ".join(str(x) for x in (q.get("basis") or [])))
+    except Exception:
+        return 99
+    for i, k in enumerate(("진성급락", "급락", "집중", "역배열", "불일치", "복병")):
+        if k in txt:
+            return i
+    return 90 if (q.get("basis") or q.get("trendTag")) else 99
+
+
+def _combo_sort_key(q):
+    """[정렬 키] Override 뒤로 → 배당 낮은 순 → **동점이면 신호 있는 쪽**."""
+    try:
+        o = float(q.get("odds"))
+    except (TypeError, ValueError):
+        o = 9e9                      # 배당 없는 것은 맨 뒤
+    return (1 if "Override" in str(q.get("reason") or "") else 0,
+            round(o, 1), _combo_signal_rank(q))
+
+
 def _apply_combo_cap(rk, cp):
     """[조합 수 상한] `finalQuinellas` 를 상한까지 자르고 나머지는 `quinellaRef` 로 옮긴다.
 
@@ -16630,7 +16661,18 @@ def _apply_combo_cap(rk, cp):
     try:
         fq = list(cp.get("finalQuinellas") or [])
         cap, mn = _combo_cap_of(cp)
-        if cap is None or len(fq) <= cap:
+        if cap is None:
+            return cp
+        # 🔴 [2026-08-13 승인] 상한이 안 걸려도 **항상 정렬한다.**
+        #   종전에는 자를 때만 정렬해서, 조합 수가 상한 이하면 종전 순서 그대로였다.
+        #   ⚠ 소급 실측: 항상 정렬해도 **회수율·3제외가 완전히 같다**(68.1 / 65.0).
+        #     자르지 않으면 집합이 같아 성적이 안 바뀐다 — 바뀌는 것은 **표시 순서**뿐이다.
+        #     그래도 넣는 이유: 회원이 보는 첫 조합이 배당 낮은 순으로 통일된다.
+        if len(fq) <= cap:
+            if COMBO_CAP_SORT and len(fq) > 1:
+                out = dict(cp)
+                out["finalQuinellas"] = sorted(fq, key=_combo_sort_key)
+                return out
             return cp
         # 🔴 [정렬 · 2026-08-13 승인] 자를 때 **무엇을 남기느냐**가 성적을 가른다.
         #   소급 실측(1306경주 · 상한 적용 후 회수율 / 3제외):
@@ -16644,13 +16686,7 @@ def _apply_combo_cap(rk, cp):
         #   ⚠ 실물 근거(카사마츠 1R): 정답 2+5(5.6배)가 5+7(74.8배 Override)에 밀려 잘렸다.
         #   🔧 되돌리기: COMBO_CAP_SORT = False (저장 순서 그대로 자른다)
         if COMBO_CAP_SORT:
-            def _ck(q):
-                try:
-                    o = float(q.get("odds"))
-                except (TypeError, ValueError):
-                    o = 9e9                      # 배당 없는 것은 맨 뒤
-                return (1 if "Override" in str(q.get("reason") or "") else 0, o)
-            fq = sorted(fq, key=_ck)
+            fq = sorted(fq, key=_combo_sort_key)
         out = dict(cp)
         out["finalQuinellas"] = fq[:cap]
         ref = list(out.get("quinellaRef") or [])

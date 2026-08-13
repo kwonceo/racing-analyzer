@@ -1,25 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 11경주",
-      "horse_no": 10,
-      "recent_avg": 8.2,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-06"
-    },
-    {
-      "race": "몬베츠 4경주",
-      "horse_no": 4,
-      "recent_avg": 6.2,
-      "win_place": 1,
-      "conditions": [
-        "급락72%",
-        "복승이상감지"
-      ],
-      "date": "2026-08-06"
-    },
-    {
       "race": "몬베츠 4경주",
       "horse_no": 9,
       "recent_avg": 5.4,
@@ -4768,16 +4749,34 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-13"
+    },
+    {
+      "race": "몬베츠 7경주",
+      "horse_no": 8,
+      "recent_avg": 8.5,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-13"
+    },
+    {
+      "race": "몬베츠 7경주",
+      "horse_no": 11,
+      "recent_avg": 7.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-13"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3622,
-      "hit": 639
+      "count": 3630,
+      "hit": 640
     },
     "전체부진마": {
-      "count": 6320,
-      "hit": 1698
+      "count": 6330,
+      "hit": 1700
     },
     "대규모급락": {
       "count": 17,
@@ -4787,8 +4786,8 @@
       "hit_rate": 35.3
     },
     "이상감지동반": {
-      "count": 2698,
-      "hit": 1059
+      "count": 2700,
+      "hit": 1060
     },
     "급락동반": {
       "count": 572,
@@ -5165,26 +5164,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1070,
+    "count": 1071,
     "hit": 865,
     "cases": [
-      {
-        "race": "카와사키 5경주",
-        "date": "2026-08-10",
-        "smart_horses": [
-          3,
-          2,
-          6
-        ],
-        "placed": [
-          3,
-          2
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "욧카이치 5경주",
         "date": "2026-08-10",
@@ -6719,6 +6701,21 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 2.3,
+        "high_odds": false
+      },
+      {
+        "race": "몬베츠 7경주",
+        "date": "2026-08-13",
+        "smart_horses": [
+          7,
+          10,
+          5,
+          12
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],

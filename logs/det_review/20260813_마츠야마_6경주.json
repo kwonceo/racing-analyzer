@@ -1,9 +1,9 @@
 {
- "raceKey": "地方 7경주",
+ "raceKey": "마츠야마 6경주",
  "entries": [
   {
-   "time": "13:29:13",
-   "minutesBefore": 35,
+   "time": "17:41:46",
+   "minutesBefore": 1,
    "status": "SAFE",
    "checked": [
     "삼복승정합"
@@ -18,38 +18,52 @@
     "finalQuinellas": [
      [
       3,
-      6
+      9
+     ],
+     [
+      5,
+      9
+     ],
+     [
+      5,
+      8
+     ],
+     [
+      3,
+      7
      ],
      [
       3,
       5
-     ],
-     [
-      2,
-      3
-     ],
-     [
-      2,
-      6
      ]
     ],
     "finalTrifectas": [
      [
-      2,
       3,
-      6
+      6,
+      9
      ],
      [
-      2,
       3,
-      5
+      7,
+      9
+     ],
+     [
+      5,
+      6,
+      9
+     ],
+     [
+      3,
+      5,
+      9
      ]
     ],
     "linePairs": []
    }
   },
   {
-   "time": "14:05:51",
+   "time": "17:43:41",
    "minutesBefore": -1,
    "status": "NO_DATA",
    "checked": [],
@@ -67,8 +81,8 @@
    }
   },
   {
-   "time": "17:49:12",
-   "minutesBefore": -224,
+   "time": "17:49:29",
+   "minutesBefore": -5,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [
@@ -85,8 +99,8 @@
    }
   },
   {
-   "time": "17:50:22",
-   "minutesBefore": -225,
+   "time": "17:51:47",
+   "minutesBefore": -8,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [
@@ -103,26 +117,8 @@
    }
   },
   {
-   "time": "17:51:31",
-   "minutesBefore": -226,
-   "status": "NO_DATA",
-   "checked": [],
-   "skipped": [
-    "B라인누락: 라인 페어 0개(2개 미만)",
-    "삼복승정합: 복승 1순위 없음",
-    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
-   ],
-   "issues": [],
-   "input": {
-    "drops": [],
-    "finalQuinellas": [],
-    "finalTrifectas": [],
-    "linePairs": []
-   }
-  },
-  {
-   "time": "17:53:02",
-   "minutesBefore": -228,
+   "time": "17:53:41",
+   "minutesBefore": -10,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [

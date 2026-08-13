@@ -2,32 +2,32 @@
  "races": 1589,
  "byRank": {
   "rank1": {
-   "hit": 172,
+   "hit": 171,
    "total": 775,
-   "rate": 22.2
+   "rate": 22.1
   },
   "rank2": {
-   "hit": 294,
+   "hit": 295,
    "total": 745,
-   "rate": 39.5
+   "rate": 39.6
   },
   "rank3": {
    "hit": 329,
-   "total": 682,
-   "rate": 48.2
+   "total": 681,
+   "rate": 48.3
   }
  },
  "bySignal": {
   "초기급락 보존": {
    "hit": 537,
-   "total": 1515,
-   "rate": 35.4,
+   "total": 1513,
+   "rate": 35.5,
    "weightReady": true
   },
   "크로스역배열": {
    "hit": 31,
-   "total": 90,
-   "rate": 34.4,
+   "total": 88,
+   "rate": 35.2,
    "weightReady": true
   },
   "스마트머니": {
@@ -44,14 +44,14 @@
   },
   "역배열": {
    "hit": 36,
-   "total": 92,
-   "rate": 39.1,
+   "total": 93,
+   "rate": 38.7,
    "weightReady": true
   },
   "급락": {
    "hit": 11,
-   "total": 109,
-   "rate": 10.1,
+   "total": 111,
+   "rate": 9.9,
    "weightReady": true
   },
   "집중급락 회": {
@@ -63,27 +63,27 @@
  },
  "byBand": {
   "15~30": {
-   "hit": 107,
-   "total": 455,
-   "rate": 23.5,
+   "hit": 108,
+   "total": 456,
+   "rate": 23.7,
    "weightReady": true
   },
   "50~100": {
-   "hit": 18,
-   "total": 184,
-   "rate": 9.8,
+   "hit": 17,
+   "total": 183,
+   "rate": 9.3,
    "weightReady": true
   },
   "30~50": {
-   "hit": 29,
-   "total": 218,
-   "rate": 13.3,
+   "hit": 30,
+   "total": 215,
+   "rate": 14.0,
    "weightReady": true
   },
   "100+": {
    "hit": 5,
-   "total": 75,
-   "rate": 6.7,
+   "total": 76,
+   "rate": 6.6,
    "weightReady": true
   }
  },
@@ -96,7 +96,7 @@
   },
   "keirin": {
    "hit": 424,
-   "total": 1108,
+   "total": 1107,
    "rate": 38.3,
    "weightReady": true
   },
@@ -107,7 +107,7 @@
    "weightReady": false
   }
  },
- "missedRaces": 235,
+ "missedRaces": 237,
  "dansung": {
   "races": 115,
   "horseWonRate": 33.0,
@@ -121,5 +121,5 @@
    "실질유력": 27
   }
  },
- "updated_at": "2026-08-13 16:27:57"
+ "updated_at": "2026-08-13 17:48:45"
 }

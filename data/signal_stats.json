@@ -192,49 +192,11 @@
         "trifecta_hit": true
       },
       {
-        "race": "소노다 12경주",
-        "date": "2026-08-12",
-        "horses": [
-          7,
-          3
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
-        "race": "몬베츠 5경주",
-        "date": "2026-08-12",
-        "horses": [
-          8,
-          7,
-          5
-        ],
-        "placed": [
-          8,
-          5
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
         "race": "우라와 9경주",
         "date": "2026-08-12",
         "horses": [
           6,
           10
-        ],
-        "placed": [],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
-        "race": "몬베츠 6경주",
-        "date": "2026-08-12",
-        "horses": [
-          8,
-          7,
-          9
         ],
         "placed": [],
         "quinella_hit": false,
@@ -432,12 +394,25 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "몬베츠 7경주",
+        "date": "2026-08-13",
+        "horses": [
+          7,
+          10,
+          5,
+          12
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 32,
-    "hit_quinella": 23,
-    "hit_trifecta": 16,
-    "rate_quinella": 71.9,
+    "count": 30,
+    "hit_quinella": 22,
+    "hit_trifecta": 15,
+    "rate_quinella": 73.3,
     "rate_trifecta": 50.0,
     "reliable": false
   },
@@ -786,18 +761,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "카사마츠 11경주",
-        "date": "2026-08-12",
-        "horses": [
-          2
-        ],
-        "placed": [
-          2
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "우라와 7경주",
         "date": "2026-08-12",
         "horses": [
@@ -822,38 +785,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "소노다 12경주",
-        "date": "2026-08-12",
-        "horses": [
-          9
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
-        "race": "몬베츠 5경주",
-        "date": "2026-08-12",
-        "horses": [
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
-        "race": "마쓰야마 4경주",
-        "date": "2026-08-12",
-        "horses": [
-          5
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "우라와 8경주",
         "date": "2026-08-12",
         "horses": [
@@ -870,26 +801,6 @@
         "date": "2026-08-12",
         "horses": [
           1
-        ],
-        "placed": [],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
-        "race": "몬베츠 7경주",
-        "date": "2026-08-12",
-        "horses": [
-          1
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
-        "race": "몬베츠 6경주",
-        "date": "2026-08-12",
-        "horses": [
-          8
         ],
         "placed": [],
         "quinella_hit": false,
@@ -1944,13 +1855,77 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "카사마츠 11경주",
+        "date": "2026-08-13",
+        "horses": [
+          9
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "소노다 12경주",
+        "date": "2026-08-13",
+        "horses": [
+          8
+        ],
+        "placed": [
+          8
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "몬베츠 5경주",
+        "date": "2026-08-13",
+        "horses": [
+          1
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "몬베츠 6경주",
+        "date": "2026-08-13",
+        "horses": [
+          6
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "마쓰야마 4경주",
+        "date": "2026-08-13",
+        "horses": [
+          5
+        ],
+        "placed": [
+          5
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "몬베츠 7경주",
+        "date": "2026-08-13",
+        "horses": [
+          9
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
     "count": 138,
-    "hit_quinella": 93,
-    "hit_trifecta": 58,
-    "rate_quinella": 67.4,
-    "rate_trifecta": 42.0,
+    "hit_quinella": 90,
+    "hit_trifecta": 56,
+    "rate_quinella": 65.2,
+    "rate_trifecta": 40.6,
     "reliable": true
   },
   "전적이중수렴": {
@@ -2306,19 +2281,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "카사마츠 11경주",
-        "date": "2026-08-12",
-        "horses": [
-          1,
-          10
-        ],
-        "placed": [
-          1
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "도야마 11경주",
         "date": "2026-08-12",
         "horses": [
@@ -2332,34 +2294,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "몬베츠 5경주",
-        "date": "2026-08-12",
-        "horses": [
-          1,
-          8
-        ],
-        "placed": [
-          1,
-          8
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
-        "race": "마쓰야마 4경주",
-        "date": "2026-08-12",
-        "horses": [
-          1,
-          7
-        ],
-        "placed": [
-          1,
-          7
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "우라와 9경주",
         "date": "2026-08-12",
         "horses": [
@@ -2370,21 +2304,6 @@
         ],
         "quinella_hit": false,
         "trifecta_hit": false
-      },
-      {
-        "race": "몬베츠 7경주",
-        "date": "2026-08-12",
-        "horses": [
-          5,
-          10,
-          4
-        ],
-        "placed": [
-          10,
-          4
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
       },
       {
         "race": "마쓰야마 6경주",
@@ -3509,13 +3428,72 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "카사마츠 11경주",
+        "date": "2026-08-13",
+        "horses": [
+          3,
+          5
+        ],
+        "placed": [
+          3
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
+      },
+      {
+        "race": "소노다 12경주",
+        "date": "2026-08-13",
+        "horses": [
+          3
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "몬베츠 5경주",
+        "date": "2026-08-13",
+        "horses": [
+          1,
+          11
+        ],
+        "placed": [
+          11
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "마쓰야마 4경주",
+        "date": "2026-08-13",
+        "horses": [
+          1,
+          7
+        ],
+        "placed": [],
+        "quinella_hit": false,
+        "trifecta_hit": false
+      },
+      {
+        "race": "몬베츠 7경주",
+        "date": "2026-08-13",
+        "horses": [
+          2
+        ],
+        "placed": [
+          2
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 115,
-    "hit_quinella": 81,
-    "hit_trifecta": 53,
-    "rate_quinella": 70.4,
-    "rate_trifecta": 46.1,
+    "count": 116,
+    "hit_quinella": 79,
+    "hit_trifecta": 51,
+    "rate_quinella": 68.1,
+    "rate_trifecta": 44.0,
     "reliable": true
   },
   "크로스역배열": {
@@ -3754,16 +3732,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "몬베츠 6경주",
-        "date": "2026-08-12",
-        "horses": [
-          3
-        ],
-        "placed": [],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
         "race": "마쓰야마 6경주",
         "date": "2026-08-12",
         "horses": [
@@ -3934,6 +3902,18 @@
         "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
+      },
+      {
+        "race": "마쓰야마 4경주",
+        "date": "2026-08-13",
+        "horses": [
+          5
+        ],
+        "placed": [
+          5
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
     "count": 31,
@@ -3963,33 +3943,6 @@
         ],
         "placed": [
           3
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
-        "race": "카사마츠 11경주",
-        "date": "2026-08-12",
-        "horses": [
-          1,
-          10
-        ],
-        "placed": [
-          1
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
-        "race": "몬베츠 5경주",
-        "date": "2026-08-12",
-        "horses": [
-          1,
-          8
-        ],
-        "placed": [
-          1,
-          8
         ],
         "quinella_hit": true,
         "trifecta_hit": true
@@ -4046,13 +3999,26 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": true
+      },
+      {
+        "race": "소노다 12경주",
+        "date": "2026-08-13",
+        "horses": [
+          3,
+          7
+        ],
+        "placed": [
+          7
+        ],
+        "quinella_hit": false,
+        "trifecta_hit": false
       }
     ],
-    "count": 7,
-    "hit_quinella": 6,
-    "hit_trifecta": 3,
-    "rate_quinella": 85.7,
-    "rate_trifecta": 42.9,
+    "count": 6,
+    "hit_quinella": 4,
+    "hit_trifecta": 2,
+    "rate_quinella": 66.7,
+    "rate_trifecta": 33.3,
     "reliable": false
   }
 }
