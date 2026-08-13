@@ -203,19 +203,6 @@
         "trifecta_hit": false
       },
       {
-        "race": "다케오 1경주",
-        "date": "2026-08-12",
-        "horses": [
-          6,
-          1
-        ],
-        "placed": [
-          1
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
         "race": "아오모리 6경주",
         "date": "2026-08-12",
         "horses": [
@@ -409,11 +396,11 @@
         "trifecta_hit": false
       }
     ],
-    "count": 30,
-    "hit_quinella": 22,
+    "count": 29,
+    "hit_quinella": 21,
     "hit_trifecta": 15,
-    "rate_quinella": 73.3,
-    "rate_trifecta": 50.0,
+    "rate_quinella": 72.4,
+    "rate_trifecta": 51.7,
     "reliable": false
   },
   "급락": {
@@ -836,50 +823,6 @@
         ],
         "placed": [],
         "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
-        "race": "아오모리 1경주",
-        "date": "2026-08-12",
-        "horses": [
-          4
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
-        "race": "다케오 1경주",
-        "date": "2026-08-12",
-        "horses": [
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
-        "race": "아오모리 2경주",
-        "date": "2026-08-12",
-        "horses": [
-          4
-        ],
-        "placed": [],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
-        "race": "다케오 2경주",
-        "date": "2026-08-12",
-        "horses": [
-          4
-        ],
-        "placed": [
-          4
-        ],
-        "quinella_hit": false,
         "trifecta_hit": false
       },
       {
@@ -1915,13 +1858,55 @@
         "placed": [],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "아오모리 1경주",
+        "date": "2026-08-13",
+        "horses": [
+          4
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "아오모리 2경주",
+        "date": "2026-08-13",
+        "horses": [
+          4
+        ],
+        "placed": [
+          4
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "다케오 2경주",
+        "date": "2026-08-13",
+        "horses": [
+          5
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "다케오 1경주",
+        "date": "2026-08-13",
+        "horses": [
+          4
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
     "count": 138,
-    "hit_quinella": 92,
-    "hit_trifecta": 58,
-    "rate_quinella": 66.7,
-    "rate_trifecta": 42.0,
+    "hit_quinella": 93,
+    "hit_trifecta": 59,
+    "rate_quinella": 67.4,
+    "rate_trifecta": 42.8,
     "reliable": true
   },
   "전적이중수렴": {
@@ -2321,40 +2306,6 @@
         "placed": [
           1
         ],
-        "quinella_hit": false,
-        "trifecta_hit": false
-      },
-      {
-        "race": "다케오 1경주",
-        "date": "2026-08-12",
-        "horses": [
-          2
-        ],
-        "placed": [
-          2
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": false
-      },
-      {
-        "race": "아오모리 2경주",
-        "date": "2026-08-12",
-        "horses": [
-          1
-        ],
-        "placed": [
-          1
-        ],
-        "quinella_hit": true,
-        "trifecta_hit": true
-      },
-      {
-        "race": "다케오 2경주",
-        "date": "2026-08-12",
-        "horses": [
-          3
-        ],
-        "placed": [],
         "quinella_hit": false,
         "trifecta_hit": false
       },
@@ -3505,13 +3456,57 @@
         ],
         "quinella_hit": true,
         "trifecta_hit": false
+      },
+      {
+        "race": "아오모리 1경주",
+        "date": "2026-08-13",
+        "horses": [
+          2
+        ],
+        "placed": [
+          2
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "아오모리 2경주",
+        "date": "2026-08-13",
+        "horses": [
+          3
+        ],
+        "placed": [
+          3
+        ],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "다케오 2경주",
+        "date": "2026-08-13",
+        "horses": [
+          3
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": true
+      },
+      {
+        "race": "다케오 1경주",
+        "date": "2026-08-13",
+        "horses": [
+          2
+        ],
+        "placed": [],
+        "quinella_hit": true,
+        "trifecta_hit": false
       }
     ],
-    "count": 117,
-    "hit_quinella": 81,
-    "hit_trifecta": 52,
-    "rate_quinella": 69.2,
-    "rate_trifecta": 44.4,
+    "count": 118,
+    "hit_quinella": 83,
+    "hit_trifecta": 54,
+    "rate_quinella": 70.3,
+    "rate_trifecta": 45.8,
     "reliable": true
   },
   "크로스역배열": {

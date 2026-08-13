@@ -9286,7 +9286,9 @@
   async function keibaDetectCurrentRace(rk, left) {
     if (!_keibaOdds.enabled || _keibaOdds.detecting) return;
     if (_keibaOdds.pinnedRk) return;                     // 경주 지정 시 자동추종 안 함
-    if (!rk || jpIsKoreaName(rk) || jpIsCentralName(rk)) return;   // 한국·중앙경마는 oddspark 대상 아님
+    // 🔴 [2026-08-13] 경륜·경정도 제외한다. 종전에는 한국·중앙만 걸러서
+    //   「다케오 1경주」(경륜) 같은 경주에서 경마 자동추종을 8초마다 불러 422 가 쌓였다.
+    if (!rk || jpIsKoreaName(rk) || jpIsCentralName(rk) || jpIsKeirinName(rk)) return;
     if (!/\d+\s*경주/.test(rk)) return;                  // 경주번호 없는 raceKey 제외
     const detIv = (left <= 180000 || _keibaOdds.lastWaiting) ? 8000 : 25000;
     const now = Date.now();
@@ -9760,6 +9762,19 @@
   const JP_CENTRAL_TRACKS = ['도쿄', '나카야마', '한신', '쿄토', '교토', '삿포로', '하코다테', '후쿠시마', '니가타', '주쿄', '고쿠라', '코쿠라',
     '東京', '中山', '阪神', '京都', '札幌', '函館', '福島', '新潟', '中京', '小倉'];
   function jpIsCentralName(s) { return JP_CENTRAL_TRACKS.some((t) => (s || '').indexOf(t) >= 0); }
+  // 🔴 [2026-08-13] 경륜·경정 전용 지명. **oddspark 경마 자동추종에서 제외**해야 한다.
+  //   실물: 「다케오 1경주」(경륜장)를 보는 동안 /api/keiba/current 를 8초마다 불러
+  //   422(개최 목록에 없음)가 콘솔을 가득 채웠다. 스크린샷에서 121건이 쌓여 있었다.
+  //   ⚠ 이중소속 지명(고치·나고야·카와사키·고쿠라)은 넣지 않는다 — 경마 개최도 있다.
+  const JP_KEIRIN_TRACKS = ['다케오', '武雄', '마에바시', '前橋', '다치카와', '타치카와', '立川',
+    '히라츠카', '平塚', '기후', '岐阜', '도야마', '토야마', '富山', '욧카이치', '四日市',
+    '와카야마', '和歌山', '사세보', '佐世保', '이와키타이라', 'いわき平', '이토', '伊東',
+    '오다와라', '小田原', '야히코', '弥彦', '케이오카쿠', '京王閣', '세이부엔', '西武園',
+    '마쓰도', '松戸', '기시와다', '岸和田', '다마노', '타마노', '玉野', '도요하시', '토요하시', '豊橋',
+    '우쓰노미야', '宇都宮', '시즈오카', '静岡', '히로시마', '広島', '고마쓰시마', '小松島',
+    '벳푸', '別府', '도리데', '取手', '나라', '奈良', '호후', '防府', '아오모리', '青森',
+    '구마모토', '쿠마모토', '熊本', '도쿠야마', '徳山', '도다', '戸田', '에도가와', '江戸川'];
+  function jpIsKeirinName(s) { return JP_KEIRIN_TRACKS.some((t) => (s || '').indexOf(t) >= 0); }
   function jpIsJapanName(s) { s = (s || '').trim(); return !!s && !jpIsKoreaName(s) && !/TEST/i.test(s); }
   function jpTodayStr() { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; }
   function jpRecSummary(fr) {
