@@ -180,9 +180,26 @@
   function dayRaceCardHtml(c) {
     const top3 = (c.result && c.result.top3 || []).join(' → ');
     // ⚠ 진행 중 경주에 ❌ 를 띄우면 '틀렸다'로 보인다 — 아직 판정 전이므로 뱃지를 비운다.
+    // 🔴 [실제 회수 표시 · 2026-08-13 대표 지시] 「조합 수가 배당보다 많으면 적중이 아니다」
+    //   균등 매수면 필요 배당 = 조합 수다. 6조합에 2.3배는 회수 38% 인데 종전엔 그냥 ✅ 적중이었다.
+    //   소급 실측: 적중 515건 중 **126건(24.5%)** 이 회수 100% 미만이었다.
+    //   ⚠ 100% 미만이면 「적중」을 크게 쓰지 않는다. 맞았지만 손해라고 정직하게 적는다.
+    //   ⚠ 저장값으로 계산하므로 **과거 기록도 자동으로 같은 기준**이 된다(소급 표시).
+    //   ⚠ 필드명은 실제 응답으로 확인했다: 카드 최상위 `combos` · `quinellaOdds`
+    //     (prediction 은 {main,sub} 요약이고 result 는 {top3} 뿐이다)
+    const _seats = (c.combos || []).length;
+    const _pay = Number(c.quinellaOdds) || 0;
+    const _rec = (c.hit && _seats > 0 && _pay > 0) ? (_pay / _seats * 100) : null;
+    const _recTxt = (_rec == null) ? ''
+      : `<span style="font-size:11px;font-weight:700;color:${_rec >= 100 ? '#38d39f' : '#f59e0b'}">`
+        + `${_pay.toFixed(1)}배 ÷ ${_seats}조합 = 회수 ${Math.round(_rec)}%</span>`;
     const hitBadge = c.inProgress
       ? '<span style="color:#38bdf8;font-weight:800">⏳</span>'
-      : (c.hit ? '<span style="color:#38d39f;font-weight:800">✅ 적중</span>'
+      : (c.hit
+        ? (_rec != null && _rec < 100
+          // 맞았지만 손해 — 초록 굵은 「적중」을 쓰지 않는다
+          ? `<span style="color:#f59e0b;font-weight:700">맞았지만 손해</span> ${_recTxt}`
+          : `<span style="color:#38d39f;font-weight:800">✅ 적중</span> ${_recTxt}`)
         : '<span style="color:#ef4444;font-weight:800">❌</span>');
     const darkBadge = c.dark_hit ? '<span style="color:#f59e0b;font-weight:800">🐎 복병적중</span>' : '';
     // [스냅샷 표기 제거 (2026-07-29 권대표 지시)] 대부분의 경주에 T-5 스크린샷이 없어

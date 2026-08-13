@@ -2,26 +2,26 @@
  "races": 1588,
  "byRank": {
   "rank1": {
-   "hit": 168,
+   "hit": 169,
    "total": 774,
-   "rate": 21.7
+   "rate": 21.8
   },
   "rank2": {
-   "hit": 295,
+   "hit": 299,
    "total": 743,
-   "rate": 39.7
+   "rate": 40.2
   },
   "rank3": {
-   "hit": 322,
+   "hit": 321,
    "total": 685,
-   "rate": 47.0
+   "rate": 46.9
   }
  },
  "bySignal": {
   "초기급락 보존": {
    "hit": 527,
-   "total": 1502,
-   "rate": 35.1,
+   "total": 1497,
+   "rate": 35.2,
    "weightReady": true
   },
   "크로스역배열": {
@@ -31,27 +31,27 @@
    "weightReady": true
   },
   "스마트머니": {
-   "hit": 122,
-   "total": 262,
+   "hit": 123,
+   "total": 264,
    "rate": 46.6,
    "weightReady": true
   },
   "스마트머니+역배열": {
-   "hit": 58,
-   "total": 136,
-   "rate": 42.6,
+   "hit": 59,
+   "total": 138,
+   "rate": 42.8,
    "weightReady": true
   },
   "역배열": {
-   "hit": 35,
+   "hit": 36,
    "total": 92,
-   "rate": 38.0,
+   "rate": 39.1,
    "weightReady": true
   },
   "급락": {
-   "hit": 11,
-   "total": 114,
-   "rate": 9.6,
+   "hit": 12,
+   "total": 115,
+   "rate": 10.4,
    "weightReady": true
   },
   "집중급락 회": {
@@ -64,26 +64,26 @@
  "byBand": {
   "15~30": {
    "hit": 110,
-   "total": 453,
-   "rate": 24.3,
+   "total": 449,
+   "rate": 24.5,
    "weightReady": true
   },
   "50~100": {
-   "hit": 18,
-   "total": 191,
-   "rate": 9.4,
+   "hit": 17,
+   "total": 189,
+   "rate": 9.0,
    "weightReady": true
   },
   "30~50": {
-   "hit": 29,
-   "total": 221,
-   "rate": 13.1,
+   "hit": 30,
+   "total": 220,
+   "rate": 13.6,
    "weightReady": true
   },
   "100+": {
    "hit": 5,
-   "total": 75,
-   "rate": 6.7,
+   "total": 77,
+   "rate": 6.5,
    "weightReady": true
   }
  },
@@ -95,9 +95,9 @@
    "weightReady": true
   },
   "keirin": {
-   "hit": 415,
+   "hit": 419,
    "total": 1108,
-   "rate": 37.5,
+   "rate": 37.8,
    "weightReady": true
   },
   "korea": {
@@ -107,19 +107,19 @@
    "weightReady": false
   }
  },
- "missedRaces": 231,
+ "missedRaces": 230,
  "dansung": {
-  "races": 119,
-  "horseWonRate": 37.8,
-  "horseWon": 45,
-  "horsePlaced": 91,
-  "darkHitRate": 76.5,
-  "darkHit": 91,
+  "races": 118,
+  "horseWonRate": 34.7,
+  "horseWon": 41,
+  "horsePlaced": 89,
+  "darkHitRate": 75.4,
+  "darkHit": 89,
   "winnerSignals": {
-   "기타": 9,
+   "기타": 10,
    "복병": 31,
-   "실질유력": 27
+   "실질유력": 29
   }
  },
- "updated_at": "2026-08-12 23:46:37"
+ "updated_at": "2026-08-13 09:46:39"
 }

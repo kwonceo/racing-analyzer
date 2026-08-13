@@ -1,102 +1,9 @@
 {
- "raceKey": "세이부엔 1경주",
+ "raceKey": "기후 4경주",
  "entries": [
   {
-   "time": "08:30:09",
+   "time": "09:20:16",
    "minutesBefore": 9,
-   "status": "WARNING",
-   "checked": [
-    "B라인누락",
-    "삼복승정합"
-   ],
-   "skipped": [
-    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
-   ],
-   "issues": [
-    {
-     "code": "B라인누락",
-     "detail": "2번째 라인 페어 [4, 5] 가 삼복승 추천 어디에도 포함되지 않음",
-     "pair": [
-      4,
-      5
-     ],
-     "trifectas": [
-      [
-       3,
-       5,
-       7
-      ],
-      [
-       1,
-       3,
-       7
-      ],
-      [
-       3,
-       5,
-       6
-      ],
-      [
-       1,
-       6,
-       7
-      ]
-     ]
-    }
-   ],
-   "input": {
-    "drops": [],
-    "finalQuinellas": [
-     [
-      3,
-      7
-     ],
-     [
-      1,
-      3
-     ],
-     [
-      3,
-      6
-     ]
-    ],
-    "finalTrifectas": [
-     [
-      3,
-      5,
-      7
-     ],
-     [
-      1,
-      3,
-      7
-     ],
-     [
-      3,
-      5,
-      6
-     ],
-     [
-      1,
-      6,
-      7
-     ]
-    ],
-    "linePairs": [
-     [
-      3,
-      6
-     ],
-     [
-      5,
-      4
-     ]
-    ]
-   }
-  },
-  {
-   "time": "08:39:18",
-   "minutesBefore": 0,
    "status": "SAFE",
    "checked": [
     "B라인누락",
@@ -110,54 +17,54 @@
     "drops": [],
     "finalQuinellas": [
      [
-      3,
-      6
+      2,
+      3
      ],
      [
       1,
-      7
+      4
      ],
      [
-      1,
+      2,
       5
      ]
     ],
     "finalTrifectas": [
      [
       1,
-      5,
-      6
+      2,
+      3
      ],
      [
-      1,
-      3,
-      5
-     ],
-     [
-      1,
+      2,
       3,
       7
      ],
      [
+      1,
+      2,
+      4
+     ],
+     [
+      1,
       3,
-      5,
-      6
+      4
      ]
     ],
     "linePairs": [
      [
-      3,
-      6
+      5,
+      2
      ],
      [
-      5,
+      1,
       4
      ]
     ]
    }
   },
   {
-   "time": "08:40:54",
+   "time": "09:29:31",
    "minutesBefore": -1,
    "status": "NO_DATA",
    "checked": [],
@@ -175,8 +82,26 @@
    }
   },
   {
-   "time": "09:40:32",
-   "minutesBefore": -60,
+   "time": "09:36:47",
+   "minutesBefore": -7,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "09:37:47",
+   "minutesBefore": -8,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [

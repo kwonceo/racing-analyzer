@@ -16585,6 +16585,14 @@ LINE_PAIR_JUDGE_SPORTS = ("cycle",)   # 🔴 경륜만. 다른 종목은 현행 
 #   🔧 되돌리기: TRIO_OBSERVE_ENABLED = False
 TRIO_OBSERVE_ENABLED = True
 
+# 🔴 [조합 수 상한 · 2026-08-13 승인] 시장 최저 배당으로 복승 조합 수를 제한한다.
+#   근거는 아래 displayedCombos 조립부 주석 참조(소급 1292경주 실측).
+#   🔧 되돌리기: COMBO_CAP_ENABLED = False
+COMBO_CAP_ENABLED = True
+COMBO_CAP_B1 = 3.0      # 최저 3배 미만 → 1조합
+COMBO_CAP_B2 = 6.0      # 3~6배   → 2조합
+COMBO_CAP_B3 = 10.0     # 6~10배  → 3조합 · 10배 이상 → 4조합
+
 
 def _trio_observe(cp, an):
     """[관찰 전용] 복승 본선 1위 두 마리 + 급락 1위 말.
@@ -17009,6 +17017,48 @@ def _build_analysis_log(rk, an=None):
                                   once_key="%s|%s" % (rk, "+".join(str(x) for x in _c)))
             except Exception as _jxe:
                 print("[판정 편입] 스킵(무시):", str(_jxe)[:80])
+            # 🔴 [조합 수 상한 · 2026-08-13 승인] 조합 수가 배당보다 많으면 맞아도 손해다.
+            #   대표: "배당 2.3배에 6개 추천이야. 이러면 사람들이 비웃는다"
+            #   균등 매수면 **필요 배당 = 조합 수**다. 6조합에 2.3배는 회수 38% 인데 화면엔 적중으로 뜬다.
+            #   소급 실측(1292경주 · 적중 515):
+            #     맞았는데 회수 100% 미만 **126건(24.5%)** · 그중 50% 미만 37건
+            #     조합 수별 손해율 1개 0% · 2개 16.7% · 🔴 3개 64.6% · 4개 44.9% · 5개 60.0% · 6+ 47.4%
+            #   상한 적용 시: 구좌 3001→1805 · 회수율 67.7→**72.1%** · 3제외 64.8→**67.7%**
+            #                손해적중 126→**2건** · 적중률 39.9→30.5%(감수)
+            #   ⚠ 고정 상한(1·2·3개)은 전부 이보다 못하다 — **배당을 보고 정하는 것이 낫다.**
+            #   ⚠ 복승만 자른다. 삼복승 보험·💎 관찰은 상한 밖(대표 지시).
+            #   ⚠ 생성물(finalQuinellas)은 그대로 둔다 — 자르는 것은 **판정 명단** 하나다.
+            #   🔧 되돌리기: COMBO_CAP_ENABLED = False
+            if COMBO_CAP_ENABLED and _dc_out.get("quinellas"):
+                try:
+                    _mn = None
+                    for _q in (_cp_dc.get("finalQuinellas") or []):
+                        try:
+                            _o = float(_q.get("odds"))
+                        except (TypeError, ValueError):
+                            continue
+                        if _o > 0 and (_mn is None or _o < _mn):
+                            _mn = _o
+                    if _mn is not None:
+                        _cap = (1 if _mn < COMBO_CAP_B1 else 2 if _mn < COMBO_CAP_B2
+                                else 3 if _mn < COMBO_CAP_B3 else 4)
+                        _before = len(_dc_out["quinellas"])
+                        if _before > _cap:
+                            _dc_out["quinellas"] = _dc_out["quinellas"][:_cap]
+                            _dc_out["cap"] = {"cap": _cap, "minOdds": round(_mn, 1),
+                                              "before": _before,
+                                              "note": "최저 %.1f배 → 최대 %d조합(맞아도 손해가 되지 않게)"
+                                                      % (_mn, _cap)}
+                            # extra 표기도 잘린 것에 맞춘다(없는 조합을 근거로 남기지 않는다)
+                            if _dc_out.get("extra"):
+                                _keep = set(tuple(c) for c in _dc_out["quinellas"])
+                                _dc_out["extra"] = [e for e in _dc_out["extra"]
+                                                    if tuple(e.get("combo") or []) in _keep] or None
+                            _gate_hit("combo_cap", rk,
+                                      "최저 %.1f배 · %d → %d조합" % (_mn, _before, _cap),
+                                      once_key=rk)
+                except Exception as _cce:
+                    print("[조합 수 상한] 스킵(무시):", str(_cce)[:80])
             # 🔴 [확장만 차단 · 2026-08-12 승인] 확장 값만으로 만들어진 경주는 판정 명단을 비운다.
             #   ⚠ 아래 「빈 추천으로 덮지 않음」 폴백보다 **먼저** 판단해야 한다 —
             #     그 폴백이 되살리면 차단이 무효가 된다.
