@@ -17431,8 +17431,78 @@ def _race_result_path(rk):
     return canonical, rid, date
 
 
-def _validate_race_result(data):
-    """[4번] 데이터 품질 검증 — 마번 1~16, 배당 1.0~9999, 날짜 형식, 필수값. 오류 리스트 반환(빈=정상)."""
+RESULT_ROSTER_GUARD = True   # 🔧 되돌리기: False — 착순 마번이 그 경주 명단을 넘으면 거부
+
+
+def _result_roster_nos(rk):
+    """[명단 근거] 그 경주에 실제로 존재한 마번 — **합집합**으로 모은다(원칙 22).
+
+    출마표 단독으로 판정하면 부분수집을 오염으로 오판한다(2026-08-02 오탐 83.3% 전례).
+    반환 (마번집합, 연속인가). 근거가 얇으면 (set(), False).
+    """
+    ref = set()
+    try:
+        # ⚠ `_analysis_log_path` 는 **(경로, 날짜, 경주) 세 값**을 돌려준다(원칙 8-E — 실호출로 확인).
+        _p, _, _ = _analysis_log_path(_canonical_log_key(rk))
+        if _p and os.path.exists(_p):
+            _d = json.load(io.open(_p, encoding="utf-8"))
+            _cp = _d.get("corePicks") or {}
+            for _x in (_cp.get("rosterNos") or []):
+                try:
+                    ref.add(int(_x))
+                except (TypeError, ValueError):
+                    pass
+            for _h in (_d.get("horses") or []):
+                try:
+                    ref.add(int(_h["no"]))
+                except (KeyError, TypeError, ValueError):
+                    pass
+        _op = _card_odds_path(rk) if "_card_odds_path" in globals() else None
+        if _op and os.path.exists(_op):
+            _od = json.load(io.open(_op, encoding="utf-8"))
+            for _s in ((_od.get("snapshots") or []) + (_od.get("archive_snapshots") or [])):
+                for _n in _combo_nos_of(_s.get("quinella")):
+                    ref.add(_n)
+    except Exception as _re_:
+        print("[착순 명단 조회] 스킵(무시):", str(_re_)[:70])
+        return set(), False
+    if len(ref) < 3:
+        return set(), False
+    return ref, (ref == set(range(1, max(ref) + 1)))
+
+
+def _combo_nos_of(q):
+    """복승 맵/리스트에서 마번을 뽑는다(두 형식 모두 지원)."""
+    out = set()
+    if isinstance(q, dict):
+        for k in q:
+            for x in re.split(r"[^0-9]+", str(k)):
+                if x:
+                    try:
+                        out.add(int(x))
+                    except ValueError:
+                        pass
+    elif isinstance(q, list):
+        for e in q:
+            for x in ((e or {}).get("combo") or []):
+                try:
+                    out.add(int(x))
+                except (TypeError, ValueError):
+                    pass
+    return out
+
+
+def _validate_race_result(data, rk=None):
+    """[4번] 데이터 품질 검증 — 마번 1~16, 배당 1.0~9999, 날짜 형식, 필수값. 오류 리스트 반환(빈=정상).
+
+    🔴 [2026-08-13 추가] 절대 범위(1~16)만으로는 **다른 경주 착순**을 못 잡는다.
+      실물 카사마츠 4경주: 8두 경주인데 착순 10-9-5 가 들어왔다. 10·9 는 1~16 안이라 통과했다.
+      실제 착순은 8-6-1 이고 정답 복승 6+8 은 본선이었다 — **적중인데 미적중으로 판정됐다.**
+      ⇒ 결과가 틀리면 적중 판정·회수율·학습이 전부 틀어진다. 배당 오염보다 무겁다.
+      소급 실측: 1368경주 중 **5건(0.37%)** · 그중 1건은 미적중으로 굳어 있었다.
+    ⚠ 오탐 방지(원칙 20·22): 명단이 **1..N 연속일 때만** 판정한다.
+      구멍이 있으면 부분수집이므로 판정하지 않는다(실측 2건이 그 경우였다).
+    """
     errs = []
     if not re.match(r"^\d{4}-\d{2}-\d{2}$", str(data.get("date") or "")):
         errs.append("날짜 형식 오류(YYYY-MM-DD)")
@@ -17446,6 +17516,30 @@ def _validate_race_result(data):
             errs.append(f"마번 숫자 아님: {n}")
     if len(nums) != len(set(int(n) for n in nums if str(n).lstrip('-').isdigit())):
         errs.append("착순 마번 중복")
+    # 🔴 그 경주 명단과 대조 — 다른 경주 착순을 여기서 막는다
+    if RESULT_ROSTER_GUARD and rk:
+        try:
+            _ref, _cont = _result_roster_nos(rk)
+            if _ref and _cont:
+                _fin = set()
+                for n in nums:
+                    try:
+                        _fin.add(int(n))
+                    except (TypeError, ValueError):
+                        pass
+                _ghost = sorted(_fin - _ref)
+                if _ghost:
+                    errs.append("🔴 이 경주에 없는 마번: %s (명단 1~%d)"
+                                % (_ghost, max(_ref)))
+                    _gate_hit("result_ghost_no", rk,
+                              "착순 %s · 유령 %s · 명단 1~%d"
+                              % (sorted(_fin), _ghost, max(_ref)))
+                    print("[착순거부] %s 이 경주에 없는 마번 %s (명단 1~%d)"
+                          % (rk, _ghost, max(_ref)))
+                else:
+                    _gate_hit("result_roster_ok", rk, None, reach_only=True)
+        except Exception as _rg:
+            print("[착순 명단 가드] 스킵(무시):", str(_rg)[:70])
     # 배당 범위(확정배당·시작배당)
     for label, odds in (("확정복승", (data.get("investment") or {}).get("quinella_odds")),
                         ("확정삼복승", (data.get("investment") or {}).get("trifecta_odds"))):
@@ -17630,7 +17724,7 @@ def _save_race_result(rk, an, record, result, top4, inputs=None):
     except Exception as e:
         print("[결과저장] 조립 실패:", e)
         return {"ok": False, "errors": [f"조립 실패: {e}"]}
-    errors = _validate_race_result(data)
+    errors = _validate_race_result(data, rk)   # 🔴 rk 를 넘겨야 명단 대조가 돈다
     data["validation"] = {"ok": not errors, "errors": errors}
     path, rid, _ = _race_result_path(rk)
     try:
