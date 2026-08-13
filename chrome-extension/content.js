@@ -111,10 +111,16 @@
     if (!rk1 || !rk0) { if (payload) payload.rkVerify = null; return true; }
     if (payload) { payload.rkVerify = rk1; payload.rkVerifiedAt = new Date().toISOString(); }
     if (rk1 === String(rk0).trim()) return true;
-    // 🔴 조용히 버리지 않는다 — 콘솔과 화면에 남긴다
-    console.warn(`[경주전환 감지] 긁기 시작 "${rk0}" → 전송 직전 "${rk1}" · ${tag} 전송을 버립니다`);
-    try { setTripleProgress(`⚠️ 경주가 바뀌었습니다(${rk0} → ${rk1}) · 전송 취소`, true); } catch (_) { /* noop */ }
-    return false;
+    // 🔴 [2026-08-13 대표 지시] **막지 않는다. 경고만 한다.**
+    //   어제는 여기서 전송을 버렸는데, 그러면 대조가 어긋나는 동안 수집이 통째로 멎는다.
+    //   실제로 오늘 경기장 이름이 地方 으로 들어온 경주가 7건 있었다 — 그런 상황에서
+    //   대조가 계속 어긋나면 화면이 비어 버린다. **회원 서비스가 멈추는 쪽이 더 나쁘다.**
+    //   ⚠ 방어는 서버에 남아 있다 — `rkVerify` 를 실어 보내고 서버가 409 로 거부한다.
+    //     서버 거부는 저장만 막고 화면은 살려 둔다.
+    console.warn(`[경주전환 감지] 긁기 시작 "${rk0}" → 전송 직전 "${rk1}" · ${tag} · 경고만(전송은 진행)`);
+    try { setTripleProgress(`⚠️ 경주가 바뀐 것 같습니다(${rk0} → ${rk1})`, true); } catch (_) { /* noop */ }
+    if (payload) payload.rkMismatch = true;
+    return true;                        // 🔴 막지 않는다
   }
 
   function extractRaceKey() {

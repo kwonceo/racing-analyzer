@@ -61,7 +61,7 @@
     function pollOverlayAnalyze() {
       if (killed) return;
       try {
-        chrome.storage.local.get({ raceKey: '', overlayEnabled: false }, function (v) {
+        chrome.storage.local.get({ raceKey: '', overlayEnabled: true }, function (v) {
           if (!v || !v.overlayEnabled) return;
           var _rk = (_tabAnFresh() && _tabAn.raceKey) ? _tabAn.raceKey : (v.raceKey || '');   // [v2.1.144] 탭 raceKey 우선
           if (!_rk) return;   // [v2.1.140] raceKey 비어있으면 분석 요청 생략 → "새 경주 분석 중" 무한루프 방지
@@ -2038,7 +2038,7 @@
 
     // ── 초기화 ──────────────────────────────────────────────────────────
     try {
-      chrome.storage.local.get({ overlayEnabled: false, overlayKill: false, overlayPos: null, overlaySound: false }, function (v) {
+      chrome.storage.local.get({ overlayEnabled: true, overlayKill: false, overlayPos: null, overlaySound: false }, function (v) {
         try {
           killed = !!(v && v.overlayKill);
           enabled = !!(v && v.overlayEnabled);
