@@ -16600,6 +16600,7 @@ COMBO_CAP_ENABLED = True
 COMBO_CAP_B1 = 3.0      # 최저 3배 미만 → 1조합
 COMBO_CAP_B2 = 6.0      # 3~6배   → 2조합
 COMBO_CAP_B3 = 10.0     # 6~10배  → 3조합 · 10배 이상 → 4조합
+COMBO_CAP_SORT = True   # 🔧 되돌리기: False — 자를 때 배당 낮은 순 · Override 뒤로
 
 
 def _combo_cap_of(cp):
@@ -16631,6 +16632,25 @@ def _apply_combo_cap(rk, cp):
         cap, mn = _combo_cap_of(cp)
         if cap is None or len(fq) <= cap:
             return cp
+        # 🔴 [정렬 · 2026-08-13 승인] 자를 때 **무엇을 남기느냐**가 성적을 가른다.
+        #   소급 실측(1306경주 · 상한 적용 후 회수율 / 3제외):
+        #     현행 순서 71.6 / 67.2   ← 저장 순서 그대로였다
+        #     T-5 복원 우선 70.9 / 66.5   🔴 오히려 나빠진다
+        #     Override 뒤로 74.0 / 69.6
+        #     🟢 배당 낮은 순 **74.9 / 70.6**  ← 최고
+        #     Override 뒤 + 배당낮은순 74.9 / 70.6  ← 배당 낮은 순과 **완전히 같다**
+        #   ⇒ Override 가 대개 고배당이라 배당 정렬만으로 자동으로 뒤로 간다.
+        #     그래도 두 키를 함께 둔다 — 저배당 Override 가 나오면 그때 갈린다.
+        #   ⚠ 실물 근거(카사마츠 1R): 정답 2+5(5.6배)가 5+7(74.8배 Override)에 밀려 잘렸다.
+        #   🔧 되돌리기: COMBO_CAP_SORT = False (저장 순서 그대로 자른다)
+        if COMBO_CAP_SORT:
+            def _ck(q):
+                try:
+                    o = float(q.get("odds"))
+                except (TypeError, ValueError):
+                    o = 9e9                      # 배당 없는 것은 맨 뒤
+                return (1 if "Override" in str(q.get("reason") or "") else 0, o)
+            fq = sorted(fq, key=_ck)
         out = dict(cp)
         out["finalQuinellas"] = fq[:cap]
         ref = list(out.get("quinellaRef") or [])
