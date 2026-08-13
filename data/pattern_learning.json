@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "몬베츠 1경주",
-      "horse_no": 2,
-      "recent_avg": 4.0,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-06"
-    },
-    {
-      "race": "몬베츠 1경주",
       "horse_no": 7,
       "recent_avg": 7.0,
       "win_place": 2,
@@ -4780,16 +4770,26 @@
         "복승이상감지"
       ],
       "date": "2026-08-13"
+    },
+    {
+      "race": "소노다 8경주",
+      "horse_no": 6,
+      "recent_avg": 9.3,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-13"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3554,
+      "count": 3557,
       "hit": 631
     },
     "전체부진마": {
-      "count": 6233,
-      "hit": 1680
+      "count": 6238,
+      "hit": 1681
     },
     "대규모급락": {
       "count": 17,
@@ -4799,8 +4799,8 @@
       "hit_rate": 35.3
     },
     "이상감지동반": {
-      "count": 2679,
-      "hit": 1049
+      "count": 2681,
+      "hit": 1050
     },
     "급락동반": {
       "count": 572,
@@ -5177,23 +5177,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1066,
-    "hit": 861,
+    "count": 1067,
+    "hit": 862,
     "cases": [
-      {
-        "race": "우라와 12경주",
-        "date": "2026-08-10",
-        "smart_horses": [
-          6,
-          10,
-          3
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "마에바시 11경주",
         "date": "2026-08-10",
@@ -6720,6 +6706,22 @@
           7,
           1,
           3
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "소노다 8경주",
+        "date": "2026-08-13",
+        "smart_horses": [
+          10,
+          5,
+          4
+        ],
+        "placed": [
+          4
         ],
         "hit": true,
         "trifecta_odds": null,
