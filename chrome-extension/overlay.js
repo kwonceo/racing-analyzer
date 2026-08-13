@@ -2033,10 +2033,21 @@
             } catch (_) { /* */ }
           }, 2000);
         }
-      } catch (_) { /* 렌더 실패는 무시 */ }
+      } catch (e) {
+        // 🔴 [2026-08-13] 종전에는 렌더 실패를 **조용히 삼켰다**(catch (_) {}).
+        //   그러면 오버레이가 안 떠도 아무 흔적이 없다. 원인 추적이 불가능했다.
+        try {
+          console.error('[오버레이] 🔴 그리기 실패:', (e && e.message) || e);
+          console.error('[오버레이] 위치:', (e && e.stack || '').split('\n')[1] || '(없음)');
+        } catch (_) { /* */ }
+      }
     }
 
     // ── 초기화 ──────────────────────────────────────────────────────────
+    // 🔴 [2026-08-13] **스크립트가 이 페이지에 붙었는지**부터 알린다.
+    //   이 줄이 F12 에 안 보이면 확장이 그 주소에 아예 안 붙은 것이다(manifest 주소 불일치).
+    try { console.log('%c[오버레이] 스크립트 붙음 · ' + location.host,
+      'background:#0f172a;color:#38bdf8;padding:2px 6px;border-radius:3px'); } catch (_) { /* */ }
     try {
       chrome.storage.local.get({ overlayEnabled: true, overlayKill: false, overlayPos: null, overlaySound: false }, function (v) {
         try {
@@ -2044,7 +2055,20 @@
           enabled = !!(v && v.overlayEnabled);
           savedPos = (v && v.overlayPos) || null;   // [보완#2] 저장된 위치 복원
           soundOn = !!(v && v.overlaySound);         // [보완#3] 알림음 옵션 복원
-          if (killed) { removeAll(); return; }
+          // 🔴 [2026-08-13] 안 그릴 때 **이유를 콘솔에 찍는다**(대표 지시 — 추측을 멈춘다).
+          //   F12 를 눌러 이 한 줄만 읽으면 어디서 막혔는지 바로 알 수 있다.
+          console.log('%c[오버레이] 시작 · 스위치=' + (enabled ? '켜짐' : '🔴꺼짐')
+            + ' · 완전끄기=' + (killed ? '🔴켜짐(오버레이 안 뜸)' : '아님')
+            + ' · 주소=' + location.host + ' · 버전 2.1.155',
+            'background:#1e293b;color:#38d39f;padding:2px 6px;border-radius:3px');
+          if (killed) {
+            console.warn('[오버레이] 🔴 완전끄기(overlayKill)가 켜져 있어 안 그립니다. 팝업에서 해제하세요.');
+            removeAll();
+            return;
+          }
+          if (!enabled) {
+            console.warn('[오버레이] 🔴 스위치(overlayEnabled)가 꺼져 있어 안 그립니다. 팝업에서 켜세요.');
+          }
           render();
           startOverlayAnalyzePoll();   // [분석 자동화] 자동전송 없이도 주기 분석 갱신 시작
         } catch (_) { /* */ }
