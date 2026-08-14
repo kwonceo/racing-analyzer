@@ -1,6 +1,6 @@
 {
- "generated_at": 1786711212.6283853,
- "races_with_result": 3047,
+ "generated_at": 1786712391.634614,
+ "races_with_result": 3048,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -9,10 +9,10 @@
    "type": "시점",
    "key": "timing:T-3분",
    "desc": "급락이 T-3분에 발생한 경주",
-   "rate": 63.0,
-   "baseline": 47.2,
-   "lift": 15.8,
-   "support": 373,
+   "rate": 62.8,
+   "baseline": 47.1,
+   "lift": 15.7,
+   "support": 374,
    "hit": 235
   },
   {
@@ -20,8 +20,8 @@
    "key": "timing:T-10분",
    "desc": "급락이 T-10분에 발생한 경주",
    "rate": 60.5,
-   "baseline": 47.2,
-   "lift": 13.3,
+   "baseline": 47.1,
+   "lift": 13.4,
    "support": 681,
    "hit": 412
   },
@@ -30,7 +30,7 @@
    "key": "timing:T-5분",
    "desc": "급락이 T-5분에 발생한 경주",
    "rate": 60.5,
-   "baseline": 47.2,
+   "baseline": 47.1,
    "lift": 13.3,
    "support": 410,
    "hit": 248
@@ -46,5 +46,5 @@
    "support": 4839
   }
  ],
- "baseline_hit_rate": 47.2
+ "baseline_hit_rate": 47.1
 }
