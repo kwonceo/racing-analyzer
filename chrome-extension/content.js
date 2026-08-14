@@ -20,7 +20,7 @@
   //   overlay.js 로그가 안 보일 때, 이 줄까지 옛 버전이면 **확장이 재로드 안 된 것**이고
   //   이 줄만 새 버전이면 **overlay.js 가 그 페이지에 안 붙은 것**이다. 둘을 가른다.
   try {
-    console.log('%c[수집] content.js v2.1.158 · ' + location.host,
+    console.log('%c[수집] content.js v2.1.159 · ' + location.host,
       'background:#1e293b;color:#fbbf24;padding:2px 6px;border-radius:3px');
   } catch (_) { /* */ }
 
@@ -2112,12 +2112,27 @@
           sig = oddsSignature();
           _v1 = verifyActiveBetTab('복승');
         }
-        if (!r1.clicked || _v1 === false) {
+        // 🔴 [2026-08-14 긴급] 한국은 **복승만 발매**한다 → 탭 버튼을 못 찾아도 화면은 복승이다.
+        //   실물: 2026-08-14 부산 3경주 배당판(user_frame.php?PLACE_TYPE=H)에서
+        //     `.bet_type_btn` 정확일치 실패 → 폴백도 실패 → **복승 0·쌍승 0·삼복승 0** 으로 종일 수집 0.
+        //     그런데 화면에는 복승 매트릭스가 정상 표시돼 있었고 복승 탭이 활성이었다.
+        //   ⇒ 오염 방지가 목적이었는데 **한국에서는 오염원 자체가 없다**(다른 탭을 안 쓴다).
+        //      그 가드가 한국 서비스를 통째로 멈추고 있었다. 원칙 20(가드는 오탐을 먼저 잰다) 위반이다.
+        //   ⚠ `_v1 === false`(활성 탭이 복승이 **아니라고 확정**)는 여전히 막는다 — 그건 진짜 증거다.
+        //   ⚠ 일본은 쌍승·삼복승 탭을 오가므로 종전 동작을 그대로 둔다(무변경).
+        //   🟢 파싱 뒤 [오염방지 2] 조합 수 검증(nC2 대조)이 한 번 더 받쳐준다.
+        const _koreaTabless = isKorea && !r1.clicked && _v1 !== false;
+        if ((!r1.clicked || _v1 === false) && !_koreaTabless) {
           console.warn('[복승수집] ⚠ 복승 탭 '
             + (_v1 === false ? '활성 확정 불일치' : '버튼을 찾지 못함')
             + ' → 복승 수집 포기(빈 배열 전송·다른 탭 데이터 오염 방지)');
           setTripleProgress('복승 탭 확보 실패 — 수집 생략(오염 방지)');
         } else {
+          if (_koreaTabless) {
+            console.warn('%c[복승수집] 🇰🇷 한국 — 복승 탭 버튼을 못 찾았으나 '
+              + '한국은 복승 전용 발매라 현재 화면을 그대로 읽습니다(수집 계속)',
+              'background:#1e293b;color:#fbbf24;padding:2px 6px;border-radius:3px');
+          }
           const quinMap = {};
           for (const p of currentMatrixPairs(oddsClass)) {
             if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
