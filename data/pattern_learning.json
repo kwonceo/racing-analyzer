@@ -1,24 +1,6 @@
 {
   "patterns": [
     {
-      "race": "우라와 1경주",
-      "horse_no": 1,
-      "recent_avg": 5.4,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-07"
-    },
-    {
-      "race": "우라와 1경주",
-      "horse_no": 3,
-      "recent_avg": 8.2,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-07"
-    },
-    {
       "pattern": "대규모급락",
       "raceKey": "도요하시 6경주",
       "total_combos_dropped": 7,
@@ -4767,16 +4749,36 @@
         "복승이상감지"
       ],
       "date": "2026-08-14"
+    },
+    {
+      "race": "소노다 3경주",
+      "horse_no": 8,
+      "recent_avg": 5.4,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-14"
+    },
+    {
+      "race": "소노다 3경주",
+      "horse_no": 2,
+      "recent_avg": 7.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-14"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3702,
+      "count": 3708,
       "hit": 648
     },
     "전체부진마": {
-      "count": 6435,
-      "hit": 1728
+      "count": 6444,
+      "hit": 1730
     },
     "대규모급락": {
       "count": 17,
@@ -4786,8 +4788,8 @@
       "hit_rate": 35.3
     },
     "이상감지동반": {
-      "count": 2733,
-      "hit": 1080
+      "count": 2736,
+      "hit": 1082
     },
     "급락동반": {
       "count": 572,
