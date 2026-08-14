@@ -16601,6 +16601,15 @@ COMBO_CAP_B1 = 3.0      # 최저 3배 미만 → 1조합
 COMBO_CAP_B2 = 6.0      # 3~6배   → 2조합
 COMBO_CAP_B3 = 10.0     # 6~10배  → 3조합 · 10배 이상 → 4조합
 COMBO_CAP_SORT = True   # 🔧 되돌리기: False — 자를 때 배당 낮은 순 · Override 뒤로
+# 🔴 [2026-08-14 대표 결정] 상한을 **저배당 경주에만** 남긴다(사실상 되돌리기).
+#   근거(대표 판단): 상한을 넣으면 적중률이 떨어지고 회수율은 74.9 → 67.7 로 내린다.
+#     🔴 **둘 다 100 아래다. 어차피 못 이긴다면 적중률이 높은 쪽이 회원에게 낫다.**
+#   ⚠ 실측(8/13 경륜)에서도 상한 후 적중률 73.3% → 44.9% 로 떨어졌다(적중 11·22건이라 판정 불가).
+#   🟢 다만 **저배당은 예외로 남긴다** — 어제 시장 최저 2.3배 경주에 6개를 추천한 것이 문제였다.
+#      3배 미만이면 종전대로 1조합으로 자른다.
+#   ⚠ 정렬(COMBO_CAP_SORT)은 **그대로 둔다** — 배당 낮은 순은 손해가 없었다(대표 지시).
+#   🔧 되돌리기: False 로 두면 전 구간 상한이 다시 걸린다.
+COMBO_CAP_LOW_ONLY = True
 
 
 def _combo_cap_of(cp):
@@ -16615,6 +16624,9 @@ def _combo_cap_of(cp):
             mn = o
     if mn is None:
         return None, None
+    # 🔴 [2026-08-14 대표 결정] 저배당(3배 미만)만 상한을 건다. 그 외는 자르지 않는다.
+    if COMBO_CAP_LOW_ONLY and mn >= COMBO_CAP_B1:
+        return None, mn
     return (1 if mn < COMBO_CAP_B1 else 2 if mn < COMBO_CAP_B2
             else 3 if mn < COMBO_CAP_B3 else 4), mn
 
@@ -16662,6 +16674,12 @@ def _apply_combo_cap(rk, cp):
         fq = list(cp.get("finalQuinellas") or [])
         cap, mn = _combo_cap_of(cp)
         if cap is None:
+            # 🔴 [2026-08-14] 상한이 없어도 **정렬은 한다**(대표 지시: 정렬은 그대로 둔다).
+            #   종전에는 여기서 그냥 반환해 저배당 밖 경주가 정렬을 못 받았다.
+            if COMBO_CAP_SORT and len(fq) > 1:
+                out = dict(cp)
+                out["finalQuinellas"] = sorted(fq, key=_combo_sort_key)
+                return out
             return cp
         # 🔴 [2026-08-13 승인] 상한이 안 걸려도 **항상 정렬한다.**
         #   종전에는 자를 때만 정렬해서, 조합 수가 상한 이하면 종전 순서 그대로였다.
