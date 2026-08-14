@@ -20,7 +20,7 @@
   //   아예 안 붙은 것이거나 확장이 재로드되지 않은 것이다.
   //   ⚠ 종전 로그는 파일 2000행 뒤에 있어서, 그 앞에서 예외가 나면 한 줄도 안 나왔다.
   try {
-    console.log('%c[오버레이] overlay.js 진입 · v2.1.157 · ' + location.host,
+    console.log('%c[오버레이] overlay.js 진입 · v2.1.158 · ' + location.host,
       'background:#0f172a;color:#38bdf8;padding:2px 6px;border-radius:3px');
   } catch (_) { /* */ }
   try {
@@ -198,29 +198,54 @@
     //   ⚠ 칩(ID_CHIP)은 right 기준(298행)이라 창이 좁아도 항상 보인다.
     //     그래서 "칩은 보이는데 패널만 없다"가 된다. 칩은 건드리지 않는다.
     var _posClampedOnce = false;
+    // 🔴 [2026-08-14 오후] **오른쪽 기준(right)으로 바꿨다.** 이것이 근본 수정이다.
+    //   종전은 왼쪽에서 몇 px 로 저장했다(left 고정). 그러면 창 폭이 바뀔 때마다
+    //   화면 밖으로 나갈 수 있고, 오전에 넣은 「안으로 당기기」는 **그때그때 막는 땜질**이었다.
+    //   🟢 칩(ID_CHIP)은 처음부터 `right:12px` 라 창 폭과 무관하게 **한 번도 사라진 적이 없다.**
+    //     패널도 같은 방식으로 두면 이 문제가 구조적으로 사라진다.
+    //   ⚠ 드래그로 옮기는 기능은 그대로 둔다. 저장 형식만 바뀐다.
+    //   ⚠ 기존 {left,top} 저장값은 첫 복원 때 {right,top} 으로 환산해 다시 저장한다(1회 이행).
+    function _panelW(panel) {
+      try { return panel.offsetWidth || 252; } catch (_) { return 252; }
+    }
     function applyPos(panel) {
       try {
-        if (!(savedPos && typeof savedPos.left === 'number' && typeof savedPos.top === 'number')) return;
+        if (!savedPos) return;
         var vw = window.innerWidth || 1200, vh = window.innerHeight || 800;
-        // 최소 이만큼은 화면 안에 남긴다(잡아서 다시 끌 수 있어야 한다).
-        var KEEP_X = 120, KEEP_Y = 40;
-        var left = Math.max(0, Math.min(vw - KEEP_X, savedPos.left));
-        var top = Math.max(0, Math.min(vh - KEEP_Y, savedPos.top));
-        panel.style.left = left + 'px';
+        var KEEP_X = 120, KEEP_Y = 40;   // 최소 이만큼은 화면 안에 남긴다(잡아서 다시 끌 수 있어야 한다)
+        var pw = _panelW(panel);
+        var right = null, migrated = false;
+
+        if (typeof savedPos.right === 'number') {
+          right = savedPos.right;
+        } else if (typeof savedPos.left === 'number') {
+          // [1회 이행] 왼쪽 기준 저장값 → 오른쪽 기준으로 환산
+          right = vw - (savedPos.left + pw);
+          migrated = true;
+        } else {
+          return;
+        }
+        // 오른쪽 기준에서도 화면 밖은 막는다(음수면 왼쪽으로 밀려난 것).
+        right = Math.max(0, Math.min(vw - KEEP_X, right));
+        var top = Math.max(0, Math.min(vh - KEEP_Y,
+          (typeof savedPos.top === 'number' ? savedPos.top : 96)));
+
+        panel.style.right = right + 'px';
+        panel.style.left = 'auto';        // 🔴 left 를 반드시 풀어야 right 가 먹는다
         panel.style.top = top + 'px';
-        panel.style.right = 'auto';
-        if (left !== savedPos.left || top !== savedPos.top) {
+
+        var changed = migrated || right !== savedPos.right || top !== savedPos.top;
+        if (changed) {
           if (!_posClampedOnce) {
             _posClampedOnce = true;
             try {
-              console.log('%c[오버레이] 저장된 위치가 창 밖이라 안으로 당겼습니다 · 저장 '
-                + savedPos.left + ',' + savedPos.top + ' → ' + left + ',' + top
-                + ' (창 ' + vw + 'x' + vh + ')',
+              console.log('%c[오버레이] 분석창 위치를 오른쪽 기준으로 맞췄습니다 · right '
+                + right + ' · top ' + top + ' (창 ' + vw + 'x' + vh + ')'
+                + (migrated ? ' · 기존 왼쪽기준 ' + savedPos.left + ' 에서 옮김' : ''),
                 'background:#1e293b;color:#fbbf24;padding:2px 6px;border-radius:3px');
             } catch (_) { /* */ }
           }
-          // 🔴 저장값도 갱신한다. 안 그러면 다음 열 때 또 밖으로 나간다.
-          savedPos = { left: left, top: top };
+          savedPos = { right: right, top: top };
           try { chrome.storage.local.set({ overlayPos: savedPos }); } catch (_) { /* */ }
         }
       } catch (_) { /* */ }
@@ -247,18 +272,23 @@
         var offX = e.clientX - rect.left, offY = e.clientY - rect.top;
         function move(ev) {
           try {
-            var left = Math.max(0, Math.min((window.innerWidth || 1200) - 40, ev.clientX - offX));
+            // 끄는 동안은 left 로 따라오게 둔다(마우스와 어긋나지 않게).
+            var vw = window.innerWidth || 1200;
+            var left = Math.max(0, Math.min(vw - 40, ev.clientX - offX));
             var top = Math.max(0, Math.min((window.innerHeight || 800) - 20, ev.clientY - offY));
             panel.style.left = left + 'px';
             panel.style.top = top + 'px';
             panel.style.right = 'auto';
-            savedPos = { left: left, top: top };
+            // 🔴 저장은 **오른쪽 기준**으로 한다. 창 폭이 바뀌어도 화면 밖으로 안 나간다.
+            savedPos = { right: Math.max(0, vw - (left + _panelW(panel))), top: top };
           } catch (_) { /* */ }
         }
         function up() {
           try { document.removeEventListener('mousemove', move); } catch (_) { /* */ }
           try { document.removeEventListener('mouseup', up); } catch (_) { /* */ }
           try { chrome.storage.local.set({ overlayPos: savedPos }); } catch (_) { /* */ }
+          // 놓는 순간 오른쪽 기준으로 다시 적용한다(다음 창 크기 변화에 바로 대응).
+          try { applyPos(panel); } catch (_) { /* */ }
         }
         document.addEventListener('mousemove', move);
         document.addEventListener('mouseup', up);
@@ -2104,7 +2134,7 @@
           //   F12 를 눌러 이 한 줄만 읽으면 어디서 막혔는지 바로 알 수 있다.
           console.log('%c[오버레이] 시작 · 스위치=' + (enabled ? '켜짐' : '🔴꺼짐')
             + ' · 완전끄기=' + (killed ? '🔴켜짐(오버레이 안 뜸)' : '아님')
-            + ' · 주소=' + location.host + ' · 버전 2.1.157',
+            + ' · 주소=' + location.host + ' · 버전 2.1.158',
             'background:#1e293b;color:#38d39f;padding:2px 6px;border-radius:3px');
           if (killed) {
             console.warn('[오버레이] 🔴 완전끄기(overlayKill)가 켜져 있어 안 그립니다. 팝업에서 해제하세요.');
