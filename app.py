@@ -37187,7 +37187,7 @@ def _timeline_snap_save(rk, phase, an):
 #  ⚠ 일본 경로는 한 줄도 건드리지 않는다 — 한국 목록을 **따로 만들어 뒤에 덧붙이기만** 한다.
 #  🔴 첫날은 로그만: KOREA_KAKAO_ENABLED=False 면 스냅샷·자동분석까지만 하고 **발송은 안 한다.**
 #    롤백은 이 한 줄을 False 로 두는 것뿐이다.
-KOREA_KAKAO_ENABLED = False      # 🔴 True 로 바꿔야 실제 카톡이 나간다(대표 승인 후)
+KOREA_KAKAO_ENABLED = True       # 🟢 [2026-08-14 대표 지시] 실제 발송 켬 · 롤백은 False 한 줄
 
 
 def _korea_kakao_targets(now):
