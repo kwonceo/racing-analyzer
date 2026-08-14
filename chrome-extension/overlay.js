@@ -20,7 +20,7 @@
   //   아예 안 붙은 것이거나 확장이 재로드되지 않은 것이다.
   //   ⚠ 종전 로그는 파일 2000행 뒤에 있어서, 그 앞에서 예외가 나면 한 줄도 안 나왔다.
   try {
-    console.log('%c[오버레이] overlay.js 진입 · v2.1.159 · ' + location.host,
+    console.log('%c[오버레이] overlay.js 진입 · v2.1.160 · ' + location.host,
       'background:#0f172a;color:#38bdf8;padding:2px 6px;border-radius:3px');
   } catch (_) { /* */ }
   try {
@@ -2134,7 +2134,7 @@
           //   F12 를 눌러 이 한 줄만 읽으면 어디서 막혔는지 바로 알 수 있다.
           console.log('%c[오버레이] 시작 · 스위치=' + (enabled ? '켜짐' : '🔴꺼짐')
             + ' · 완전끄기=' + (killed ? '🔴켜짐(오버레이 안 뜸)' : '아님')
-            + ' · 주소=' + location.host + ' · 버전 2.1.159',
+            + ' · 주소=' + location.host + ' · 버전 2.1.160',
             'background:#1e293b;color:#38d39f;padding:2px 6px;border-radius:3px');
           if (killed) {
             console.warn('[오버레이] 🔴 완전끄기(overlayKill)가 켜져 있어 안 그립니다. 팝업에서 해제하세요.');

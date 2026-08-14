@@ -20,7 +20,7 @@
   //   overlay.js 로그가 안 보일 때, 이 줄까지 옛 버전이면 **확장이 재로드 안 된 것**이고
   //   이 줄만 새 버전이면 **overlay.js 가 그 페이지에 안 붙은 것**이다. 둘을 가른다.
   try {
-    console.log('%c[수집] content.js v2.1.159 · ' + location.host,
+    console.log('%c[수집] content.js v2.1.160 · ' + location.host,
       'background:#1e293b;color:#fbbf24;padding:2px 6px;border-radius:3px');
   } catch (_) { /* */ }
 
@@ -2119,18 +2119,25 @@
         //   ⇒ 오염 방지가 목적이었는데 **한국에서는 오염원 자체가 없다**(다른 탭을 안 쓴다).
         //      그 가드가 한국 서비스를 통째로 멈추고 있었다. 원칙 20(가드는 오탐을 먼저 잰다) 위반이다.
         //   ⚠ `_v1 === false`(활성 탭이 복승이 **아니라고 확정**)는 여전히 막는다 — 그건 진짜 증거다.
-        //   ⚠ 일본은 쌍승·삼복승 탭을 오가므로 종전 동작을 그대로 둔다(무변경).
         //   🟢 파싱 뒤 [오염방지 2] 조합 수 검증(nC2 대조)이 한 번 더 받쳐준다.
-        const _koreaTabless = isKorea && !r1.clicked && _v1 !== false;
-        if ((!r1.clicked || _v1 === false) && !_koreaTabless) {
+        //
+        // 🔴 [2026-08-14 2차 · 전 종목으로 넓힘] 한국 한정으로 열었더니 **일본에서 그대로 막혔다.**
+        //   실물: 마츠야마 1경주(경륜인데 `category=japan_central` 로 오판)에서
+        //     복승 0·쌍승 0·삼복승 0 → 오버레이 창은 뜨는데 **내용이 비었다**(그릴 배당이 없다).
+        //   ⇒ 탭 버튼을 못 찾는 것은 **종목 문제가 아니라 배당판 구조 문제**다. 한국만 열 이유가 없다.
+        //   🔴 근거: 탭 버튼을 못 찾으면 **탭 전환 자체가 불가능**하다 → 화면은 계속 그 자리(복승)다.
+        //     '다른 탭 데이터 오염'은 탭을 옮길 수 있을 때 생기는 위험인데, 지금은 옮길 수가 없다.
+        //   ⚠ 그래도 **화면에 표가 있을 때만** 진행한다(sig 가 비면 읽을 것이 없다 → 종전대로 포기).
+        const _tabless = !r1.clicked && _v1 !== false && (sig || '').length > 0;
+        if ((!r1.clicked || _v1 === false) && !_tabless) {
           console.warn('[복승수집] ⚠ 복승 탭 '
             + (_v1 === false ? '활성 확정 불일치' : '버튼을 찾지 못함')
             + ' → 복승 수집 포기(빈 배열 전송·다른 탭 데이터 오염 방지)');
           setTripleProgress('복승 탭 확보 실패 — 수집 생략(오염 방지)');
         } else {
-          if (_koreaTabless) {
-            console.warn('%c[복승수집] 🇰🇷 한국 — 복승 탭 버튼을 못 찾았으나 '
-              + '한국은 복승 전용 발매라 현재 화면을 그대로 읽습니다(수집 계속)',
+          if (_tabless) {
+            console.warn('%c[복승수집] ⚠ 복승 탭 버튼을 못 찾았으나 탭 전환이 불가능한 상태라 '
+              + '현재 화면(복승)을 그대로 읽습니다 — 수집 계속',
               'background:#1e293b;color:#fbbf24;padding:2px 6px;border-radius:3px');
           }
           const quinMap = {};
