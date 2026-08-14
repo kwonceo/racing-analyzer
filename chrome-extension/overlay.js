@@ -20,7 +20,7 @@
   //   아예 안 붙은 것이거나 확장이 재로드되지 않은 것이다.
   //   ⚠ 종전 로그는 파일 2000행 뒤에 있어서, 그 앞에서 예외가 나면 한 줄도 안 나왔다.
   try {
-    console.log('%c[오버레이] overlay.js 진입 · v2.1.156 · ' + location.host,
+    console.log('%c[오버레이] overlay.js 진입 · v2.1.157 · ' + location.host,
       'background:#0f172a;color:#38bdf8;padding:2px 6px;border-radius:3px');
   } catch (_) { /* */ }
   try {
@@ -188,13 +188,51 @@
     }
 
     // [보완#2] 저장된 위치를 패널에 적용(없으면 기본 우측상단 유지)
+    // 🔴 [2026-08-14] **화면 밖 보정**을 넣었다. 이것이 "오버레이가 안 뜬다"의 원인이었다.
+    //   실측: panel.style.left = 1607px 로 저장돼 있었다(대표가 넓은 창에서 오른쪽으로 드래그).
+    //   배당판을 좁은 창으로 열면 1607px 는 창 밖이라 패널이 통째로 안 보인다.
+    //   ⚠ 저장값은 chrome.storage 에 남으므로 **확장을 재로드해도 그대로 밖에 있다.**
+    //     "몇 번을 다시 해도 안 뜬다"가 정확히 이 모양이다.
+    //   🔴 드래그 처리(startDrag 의 move)에는 창 안으로 제한하는 코드가 **이미 있었다**.
+    //     복원 경로에만 없었다 — 한쪽만 막고 있었다.
+    //   ⚠ 칩(ID_CHIP)은 right 기준(298행)이라 창이 좁아도 항상 보인다.
+    //     그래서 "칩은 보이는데 패널만 없다"가 된다. 칩은 건드리지 않는다.
+    var _posClampedOnce = false;
     function applyPos(panel) {
       try {
-        if (savedPos && typeof savedPos.left === 'number' && typeof savedPos.top === 'number') {
-          panel.style.left = savedPos.left + 'px';
-          panel.style.top = savedPos.top + 'px';
-          panel.style.right = 'auto';
+        if (!(savedPos && typeof savedPos.left === 'number' && typeof savedPos.top === 'number')) return;
+        var vw = window.innerWidth || 1200, vh = window.innerHeight || 800;
+        // 최소 이만큼은 화면 안에 남긴다(잡아서 다시 끌 수 있어야 한다).
+        var KEEP_X = 120, KEEP_Y = 40;
+        var left = Math.max(0, Math.min(vw - KEEP_X, savedPos.left));
+        var top = Math.max(0, Math.min(vh - KEEP_Y, savedPos.top));
+        panel.style.left = left + 'px';
+        panel.style.top = top + 'px';
+        panel.style.right = 'auto';
+        if (left !== savedPos.left || top !== savedPos.top) {
+          if (!_posClampedOnce) {
+            _posClampedOnce = true;
+            try {
+              console.log('%c[오버레이] 저장된 위치가 창 밖이라 안으로 당겼습니다 · 저장 '
+                + savedPos.left + ',' + savedPos.top + ' → ' + left + ',' + top
+                + ' (창 ' + vw + 'x' + vh + ')',
+                'background:#1e293b;color:#fbbf24;padding:2px 6px;border-radius:3px');
+            } catch (_) { /* */ }
+          }
+          // 🔴 저장값도 갱신한다. 안 그러면 다음 열 때 또 밖으로 나간다.
+          savedPos = { left: left, top: top };
+          try { chrome.storage.local.set({ overlayPos: savedPos }); } catch (_) { /* */ }
         }
+      } catch (_) { /* */ }
+    }
+    // 창 크기가 바뀌면 다시 보정한다(넓은 창 → 좁은 창으로 줄일 때 사라지는 것 방지).
+    var _posResizeBound = false;
+    function bindPosReclamp() {
+      if (_posResizeBound) return; _posResizeBound = true;
+      try {
+        window.addEventListener('resize', function () {
+          try { var p = byId(ID_PANEL); if (p) applyPos(p); } catch (_) { /* */ }
+        });
       } catch (_) { /* */ }
     }
 
@@ -2029,7 +2067,7 @@
           if (timer) { clearInterval(timer); timer = null; }
           return;
         }
-        if (!panel) { panel = mk('div', PANEL_CSS); panel.id = ID_PANEL; root().appendChild(panel); applyPos(panel); }
+        if (!panel) { panel = mk('div', PANEL_CSS); panel.id = ID_PANEL; root().appendChild(panel); applyPos(panel); bindPosReclamp(); }
         readData().then(function (st) { var p = byId(ID_PANEL); if (p && enabled && !killed) updatePanel(p, st); });
         // 2초 주기 경량 갱신(카운트다운/데이터) — storage 읽기만
         if (!timer) {
@@ -2066,7 +2104,7 @@
           //   F12 를 눌러 이 한 줄만 읽으면 어디서 막혔는지 바로 알 수 있다.
           console.log('%c[오버레이] 시작 · 스위치=' + (enabled ? '켜짐' : '🔴꺼짐')
             + ' · 완전끄기=' + (killed ? '🔴켜짐(오버레이 안 뜸)' : '아님')
-            + ' · 주소=' + location.host + ' · 버전 2.1.155',
+            + ' · 주소=' + location.host + ' · 버전 2.1.157',
             'background:#1e293b;color:#38d39f;padding:2px 6px;border-radius:3px');
           if (killed) {
             console.warn('[오버레이] 🔴 완전끄기(overlayKill)가 켜져 있어 안 그립니다. 팝업에서 해제하세요.');
