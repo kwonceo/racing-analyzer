@@ -2,16 +2,6 @@
   "patterns": [
     {
       "race": "우라와 2경주",
-      "horse_no": 4,
-      "recent_avg": 5.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-07"
-    },
-    {
-      "race": "우라와 2경주",
       "horse_no": 7,
       "recent_avg": 5.0,
       "win_place": 1,
@@ -4765,16 +4755,24 @@
         "복승이상감지"
       ],
       "date": "2026-08-14"
+    },
+    {
+      "race": "카사마츠 11경주",
+      "horse_no": 5,
+      "recent_avg": 4.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-14"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3719,
-      "hit": 648
+      "count": 3723,
+      "hit": 649
     },
     "전체부진마": {
-      "count": 6458,
-      "hit": 1732
+      "count": 6465,
+      "hit": 1733
     },
     "대규모급락": {
       "count": 17,
@@ -4784,7 +4782,7 @@
       "hit_rate": 35.3
     },
     "이상감지동반": {
-      "count": 2739,
+      "count": 2742,
       "hit": 1084
     },
     "급락동반": {
