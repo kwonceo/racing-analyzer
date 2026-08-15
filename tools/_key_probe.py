@@ -132,3 +132,79 @@ if __name__ == "__main__":
     run("cycle", None, "경륜")
     run("horse", True, "한국(경마 중)")
     run("horse", False, "일본 경마")
+
+
+def run2(sport, only_kr=None, tag=""):
+    """[작업1·3] 화면 전적 점수(record_score)로 재기 + 배당 깎기 유무."""
+    meta = build()
+    rs = []
+    for r in M.load_races(sport=sport, pattern="2026_0*"):
+        if not clean(r):
+            continue
+        m = meta.get((r["top2"][0], r["top2"][1], r["po"]))
+        if not m or not m['hs']:
+            continue
+        if only_kr is not None and m['kr'] != only_kr:
+            continue
+        r.update(m)
+        rs.append(r)
+    if not rs:
+        print("%s 데이터 없음" % tag)
+        return
+    print("=" * 112)
+    print("%s %d경주 — 화면 전적 점수로 재기" % (tag, len(rs)))
+
+    def combos(order, r):
+        v = [h for h in order if h in {x for k in r["q"] for x in k}][:3]
+        return [list(c) for c in itertools.combinations(sorted(v), 2)] if len(v) >= 2 else []
+
+    def mix(r, w, use_rec, cut=True):
+        _, best = mkt_rank(r)
+        mx = max([h['rec'] for h in r['hs']] or [0]) or 1.0
+        sc = {}
+        for h in r['hs']:
+            n = h['no']; o = best.get(n)
+            mkt = (1.0 / o * 0.75) if o else 0.0
+            f = (h['rec'] / mx) if use_rec else h['top3']
+            if cut and o:                      # 지금 코드의 배당 가감
+                if o >= 10:
+                    f *= 0.7
+                elif o <= 5:
+                    f = min(1.0, f * 1.1)
+            sc[n] = mkt * (1 - w) + f * w
+        return [n for n, _ in sorted(sc.items(), key=lambda kv: -kv[1])]
+
+    line("현행 keyHorses", [(r, combos(r['kh'], r)) for r in rs])
+    for w in (0.3, 0.5, 0.7, 1.0):
+        line("화면점수 %d%%" % int(w * 100), [(r, combos(mix(r, w, True), r)) for r in rs])
+    print("  -- 배당 깎기(10배+ ×0.7)를 없애면 --")
+    for w in (0.3, 0.5, 0.7):
+        line("  화면점수 %d%% 깎기없음" % int(w * 100),
+             [(r, combos(mix(r, w, True, cut=False), r)) for r in rs])
+        line("  3착률   %d%% 깎기없음" % int(w * 100),
+             [(r, combos(mix(r, w, False, cut=False), r)) for r in rs])
+
+
+def compare_forms():
+    """[작업2] 두 전적이 얼마나 다르고, 어느 쪽이 3착권을 잘 맞히나."""
+    meta = build()
+    same = tot = 0
+    hit_rec = hit_top3 = n = 0
+    for r in M.load_races(sport="cycle", pattern="2026_0*"):
+        if not clean(r):
+            continue
+        m = meta.get((r["top2"][0], r["top2"][1], r["po"]))
+        if not m or len(m['hs']) < 4:
+            continue
+        hs = m['hs']
+        a = [h['no'] for h in sorted(hs, key=lambda x: -x['rec'])][:3]
+        b = [h['no'] for h in sorted(hs, key=lambda x: -x['top3'])][:3]
+        same += len(set(a) & set(b)); tot += 3
+        t2 = set(r["top2"])
+        hit_rec += len(t2 & set(a)); hit_top3 += len(t2 & set(b)); n += 1
+    print("=" * 112)
+    print("두 전적 비교 (경륜 %d경주)" % n)
+    print("  상위3이 겹치는 정도  %.2f / 3" % (same / (tot / 3) if tot else 0))
+    print("  1·2착을 상위3에 담은 수(2점 만점)")
+    print("    화면 전적 점수  %.2f" % (hit_rec / n if n else 0))
+    print("    최근 5경주 3착률 %.2f" % (hit_top3 / n if n else 0))
