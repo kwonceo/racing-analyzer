@@ -38616,6 +38616,16 @@ def _start_review_scheduler():
     except Exception as e:
         print("[복기] 모듈 로드 실패 — 스케줄러 미기동(무시):", str(e)[:120])
         return
+    # [놓친 이유 여섯 유형] 같은 방식으로 읽어들인다. 실패해도 복기 본체는 계속 돈다.
+    _miss_type_mod = None
+    try:
+        import importlib.util as _ilu
+        _mp = os.path.join(os.path.dirname(__file__), "tools", "miss_type.py")
+        _msp = _ilu.spec_from_file_location("miss_type", _mp)
+        _miss_type_mod = _ilu.module_from_spec(_msp)
+        _msp.loader.exec_module(_miss_type_mod)
+    except Exception as e:
+        print("[유형분류] 모듈 로드 실패(무시 · 복기는 계속):", str(e)[:120])
 
     def _loop():
         while True:
@@ -38630,6 +38640,19 @@ def _start_review_scheduler():
                     _gate_hit("review_autowrite", reason="복기 저장 %d건" % w)   # 발동
                     print("[복기] 저장 %d건 · 변경일 %s" % (w, res.get("changed")))
                 _review_pattern_alert(int(res.get("p2_cum") or 0))
+                # 🟢 [놓친 이유 여섯 유형 · 2026-08-16 승인] 하루 한 장으로 남긴다.
+                #   🔴 완전 읽기 전용 — analysis_log 를 읽고 logs/miss_type/ 에만 쓴다.
+                #     실패해도 복기 본체와 추천·수집에 개입하지 않는다(별도 try).
+                #   ⚠ 마1(둘 다 신호)·마2(한쪽만)를 나눠 센다. 마1 이 진짜 크기다
+                #     — 8월 실측에서 고배당(20배+)의 32.8% 였다.
+                try:
+                    for _dy in ((today, yday) if _miss_type_mod else ()):
+                        _mt = _miss_type_mod.daily(_dy)
+                        if _dy == today and (_mt or {}).get('races'):
+                            _gate_hit("miss_type_daily", reason="%s %d경주 · 적중 %d"
+                                      % (_dy, _mt['races'], _mt['hit']), once_key=_dy)
+                except Exception as _mte:
+                    print("[유형분류] 스킵(무시):", str(_mte)[:120])
             except Exception as e:
                 print("[복기] 스케줄러 오류(무시):", str(e)[:150])
 
