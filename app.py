@@ -1731,6 +1731,26 @@ STALE_ACTIVE_SEC = 1800  # [경주전환 잔존 방어] 활성 3종 배당이 �
 #   ⚠ 판정식과 tier 키(S/A/B/C)는 무변경 — 표시 문구·색만 바꾼다(적용 지점 app.py 약 13715).
 #   🔧 되돌리기: False
 GRADE_LABEL_NEUTRAL = True
+# 🟢 [교차 짝 · 2026-08-15 대표 승인] 우리가 짚은 말끼리 묶은 짝을 **하나만** 더한다.
+#   왜: 나흘간 여섯 번, 두 말이 **각각** 우리 조합 안에 있었는데 그 둘을 묶은 짝만 없어서 놓쳤다.
+#     소노다 2R 7+8 117배 · 야히코 10R 4+7 41.6배 · 소노다 9R 3+8 6.2배 · 세이부엔 3R 4+6 15.2배
+#   🔴 종전 규칙은 **2회 이상 등장한 말끼리만** 봤다. 위 네 건은 전부 1회만 등장해 대상 밖이었다.
+#   소급 실측(경륜 1170경주 · 놓친 663경주 중 127경주(19.2%)가 이 방법으로 잡힌다):
+#     현행            적중 43.3% · 3제외 67.3% · 배당중앙 4.30 · 구좌 2371
+#     🟢 상위4 6~30배 1개 적중 47.9% · 3제외 73.9% · 배당중앙 6.00 · 구좌 +24.7%
+#     기간 반 분할에서도 앞뒤 **양쪽 다** 같은 방향(전반 52.8→65.2 · 후반 67.9→73.5).
+#     경마 502경주도 통과(3제외 66.0→69.1 · 배당중앙 6.00→7.40 · 구좌 +27.4%).
+#   ⚠ 추가분만 보면 적중 13.8% · 배당중앙 20.8배다 — **드물게 맞고 크게 먹는 자리**다.
+#     그래서 화면에 「교차 짝」 라벨과 설명을 붙여 회원이 성격을 알고 보게 한다.
+#   ⚠ 복승만이다. 삼복승·💎 는 건드리지 않는다(대표 지시).
+#   🔧 되돌리기: CROSS_PAIR_ENABLED = False
+CROSS_PAIR_ENABLED = True       # 🟢 2026-08-15 12:10 켬 · 소급 대조 일치 확인 후(3제외 73.9 · 구좌 +24.6%)
+CROSS_PAIR_TOPN = 4             # 추천에 많이 등장한 상위 N마리까지를 후보로
+CROSS_PAIR_LO = 6.0             # 이 배당대의 짝만 더한다(소급 최적)
+CROSS_PAIR_HI = 30.0
+CROSS_PAIR_LABEL = "교차 짝"
+CROSS_PAIR_NOTE = ("자주 맞지는 않고 맞으면 배당이 큽니다. "
+                   "우리가 짚은 말끼리 묶은 자리입니다.")
 # [종목 오분석 근본수정] 한국 경마장명 → sport=horse·category=korea 강제 판정용(확장 KRA_TRACK_RE 와 동일 커버).
 _KRA_TRACK_RE = re.compile(r"(서울|부산경남|부경|부산|제주|과천|렛츠런|한국마사회|경마공원|KRA)")
 # [경륜 전용 지명] 경정장이 없는 '경륜 전용' 경마장명 → sport=cycle 강제(boat 오분석 차단).
@@ -16822,6 +16842,59 @@ def _private_only_race(rk, an):
         return False
 
 
+def _cross_pair_pick(qlist, already):
+    """[교차 짝] 이미 낸 조합에 등장한 상위 N마리 사이의 짝 중 6~30배 **최저 1개**.
+
+    반환: (배당, [a, b]) · 없으면 None.
+    🔴 이미 있는 조합은 돌려주지 않는다(중복 구좌 방지).
+    🔴 배당판에 없는 조합도 돌려주지 않는다 — 살 수 없는 것을 추천하면 안 된다.
+    ⚠ 판정·점수 경로에 개입하지 않는다. 목록을 하나 고르기만 한다.
+    """
+    if not CROSS_PAIR_ENABLED or not already:
+        return None
+    from collections import Counter
+    from itertools import combinations
+    cnt = Counter()
+    for c in already:
+        for h in (c or []):
+            try:
+                cnt[int(h)] += 1
+            except (TypeError, ValueError):
+                pass
+    cand = [h for h, _ in cnt.most_common()][:CROSS_PAIR_TOPN]
+    if len(cand) < 2:
+        return None
+    have = set()
+    for c in already:
+        try:
+            have.add(tuple(sorted(int(x) for x in (c or []))))
+        except (TypeError, ValueError):
+            pass
+    om = {}
+    for c in (qlist or []):
+        cb = c.get("combo") or []
+        try:
+            o = float(c.get("odds") or 0)
+        except (TypeError, ValueError):
+            continue
+        if len(cb) != 2 or o <= 0:
+            continue
+        k = tuple(sorted(int(x) for x in cb))
+        if om.get(k) is None or o < om[k]:
+            om[k] = o
+    best = None
+    for a, b in combinations(sorted(cand), 2):
+        k = (a, b)
+        if k in have:
+            continue
+        o = om.get(k)
+        if o is None or not (CROSS_PAIR_LO <= o <= CROSS_PAIR_HI):
+            continue
+        if best is None or o < best[0]:
+            best = (o, [a, b])
+    return best
+
+
 def _judge_extra_quinellas(cp, sport, already):
     """[판정 편입] 화면에는 나가는데 판정 밖이던 조합을 명단에 더한다.
 
@@ -17231,6 +17304,34 @@ def _build_analysis_log(rk, an=None):
                                       once_key=rk)
                 except Exception as _cce:
                     print("[조합 수 상한] 스킵(무시):", str(_cce)[:80])
+            # 🟢 [교차 짝 · 2026-08-15 승인] 짚은 말끼리 묶은 짝을 **하나만** 더한다.
+            #   🔴 조합 수 상한 **뒤**에 넣는다 — 앞에 넣으면 저배당 경주에서 상한(1조합)에 잘린다.
+            #   ⚠ 마감 후에는 넣지 않는다(위 afterClose 분기는 동결본을 쓴다 — 여기 오지도 않지만 이중 방어).
+            #   ⚠ 판정 명단(_dc_out)과 회원이 보는 곳(finalQuinellas) **둘 다**에 넣는다.
+            #     둘이 어긋나면 「받은 것과 재는 것이 다른」 문제가 재발한다(2026-08-13 실측).
+            if CROSS_PAIR_ENABLED and not an.get("afterClose") and isinstance(_dc_out, dict):
+                try:
+                    _cx = _cross_pair_pick(an.get("quinella"), _dc_out.get("quinellas") or [])
+                    if _cx:
+                        _cxo, _cxc = _cx
+                        _dc_out["quinellas"] = list(_dc_out.get("quinellas") or []) + [_cxc]
+                        _ex = list(_dc_out.get("extra") or [])
+                        _ex.append({"combo": _cxc, "src": "crossPair", "odds": _cxo,
+                                    "label": CROSS_PAIR_LABEL, "note": CROSS_PAIR_NOTE})
+                        _dc_out["extra"] = _ex
+                        core_picks_out = dict(core_picks_out or {})
+                        _fq = list(core_picks_out.get("finalQuinellas") or [])
+                        _fq.append({"combo": _cxc, "odds": _cxo, "crossPair": True,
+                                    "label": CROSS_PAIR_LABEL, "reason": CROSS_PAIR_NOTE})
+                        core_picks_out["finalQuinellas"] = _fq
+                        _cp_dc = core_picks_out
+                        _gate_hit("cross_pair", rk,
+                                  "교차 짝 %s (%.1f배)" % ("+".join(str(x) for x in _cxc), _cxo),
+                                  once_key=rk)
+                        print("[교차 짝] %s %s (%.1f배) 편입"
+                              % (rk, "+".join(str(x) for x in _cxc), _cxo))
+                except Exception as _cxe:
+                    print("[교차 짝] 스킵(무시):", str(_cxe)[:80])
             # 🔴 [확장만 차단 · 2026-08-12 승인] 확장 값만으로 만들어진 경주는 판정 명단을 비운다.
             #   ⚠ 아래 「빈 추천으로 덮지 않음」 폴백보다 **먼저** 판단해야 한다 —
             #     그 폴백이 되살리면 차단이 무효가 된다.
