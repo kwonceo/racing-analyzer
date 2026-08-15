@@ -169,3 +169,56 @@ def verify(sport="cycle"):
         b = line("  %s 현행" % tag, [(r, r["dc"]) for r in sub])
         line("  %s 상위4 6~30배 1개" % tag, [(r, pick(r, 4, 6, 30)) for r in sub], b)
         line("  %s 상위4 10~50배 1개" % tag, [(r, pick(r, 4, 10, 50)) for r in sub], b)
+
+
+def widen(sport="cycle"):
+    """[추가] 교차 짝 후보를 넓히는 안 — 지금은 '이미 낸 조합의 말'만 본다."""
+    import glob as _g, json as _j, os as _o, itertools
+    meta = {}
+    for f in _g.glob('data/analysis_log/2026_0*.json'):
+        try:
+            d = _j.load(open(f, encoding='utf-8'))
+        except Exception:
+            continue
+        res = d.get('result') or {}
+        po = (res.get('payouts') or {}).get('quinella')
+        if po is None or res.get('1st') is None or res.get('2nd') is None:
+            continue
+        t = sorted({res['1st'], res['2nd']})
+        meta[(t[0], t[1], float(po))] = {
+            'kh': [int(x) for x in (d.get('keyHorses') or []) if str(x).isdigit()],
+            'star': [int(x) for x in ((d.get('corePicks') or {}).get('starHorses') or [])
+                     if str(x).isdigit()]}
+    rs = [r for r in M.load_races(sport=sport, pattern="2026_0*") if clean(r)]
+    for r in rs:
+        r.update(meta.get((r["top2"][0], r["top2"][1], r["po"]), {'kh': [], 'star': []}))
+
+    def pick(r, pool, lo=6.0, hi=30.0):
+        have = {tuple(sorted(c)) for c in r["dc"]}
+        best = None
+        for a, b in itertools.combinations(sorted(set(pool)), 2):
+            k = (a, b)
+            if k in have:
+                continue
+            o = r["q"].get(k)
+            if o is None or not (lo <= o <= hi):
+                continue
+            if best is None or o < best[0]:
+                best = (o, [a, b])
+        return r["dc"] + ([best[1]] if best else [])
+
+    def pool_now(r):
+        c = collections.Counter()
+        for combo in r["dc"]:
+            for h in combo:
+                c[h] += 1
+        return [h for h, _ in c.most_common()][:4]
+
+    print("=" * 116)
+    print("%s %d경주 — 교차 짝 후보를 넓히면" % (sport, len(rs)))
+    base = line("현행(짝 없음)", [(r, r["dc"]) for r in rs])
+    line("  지금 방식(낸 조합의 말 상위4)", [(r, pick(r, pool_now(r))) for r in rs], base)
+    line("  + 유력마(keyHorses)", [(r, pick(r, pool_now(r) + r['kh'][:4])) for r in rs], base)
+    line("  + 화면 별표(starHorses)", [(r, pick(r, pool_now(r) + r['star'][:4])) for r in rs], base)
+    line("  + 둘 다", [(r, pick(r, pool_now(r) + r['kh'][:4] + r['star'][:4])) for r in rs], base)
+    line("  유력마만(상위4)", [(r, pick(r, r['kh'][:4])) for r in rs], base)
