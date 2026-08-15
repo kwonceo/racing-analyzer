@@ -50,8 +50,10 @@ def classify(d):
         return ('라 다이아', ans, None)
     if ans[0] in mine and ans[1] in mine:
         return ('나 짝만없음', ans, None)
-    if (ans[0] in sig or ans[1] in sig) and not (ans[0] in mine and ans[1] in mine):
-        return ('마 신호무시', ans, None)
+    if ans[0] in sig and ans[1] in sig:
+        return ('마1 둘다신호', ans, None)
+    if ans[0] in sig or ans[1] in sig:
+        return ('마2 한쪽신호', ans, None)
     if ans[0] not in cand and ans[1] not in cand:
         return ('가 후보에도없음', ans, None)
     return ('바 근거없음', ans, None)
@@ -84,7 +86,8 @@ def run(pattern="2026_08_*", only=None, hi_only=False):
         print("  대상 0경주")
         return
     print("  대상 %d경주" % n)
-    for k in ('적중', '다 잘림', '라 다이아', '나 짝만없음', '마 신호무시', '가 후보에도없음', '바 근거없음'):
+    for k in ('적중', '다 잘림', '라 다이아', '나 짝만없음', '마1 둘다신호', '마2 한쪽신호',
+              '가 후보에도없음', '바 근거없음'):
         v = cnt.get(k, 0)
         if not v:
             continue
