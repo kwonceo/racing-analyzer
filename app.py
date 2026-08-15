@@ -1745,6 +1745,23 @@ GRADE_LABEL_NEUTRAL = True
 #   ⚠ 복승만이다. 삼복승·💎 는 건드리지 않는다(대표 지시).
 #   🔧 되돌리기: CROSS_PAIR_ENABLED = False
 CROSS_PAIR_ENABLED = True       # 🟢 2026-08-15 12:10 켬 · 소급 대조 일치 확인 후(3제외 73.9 · 구좌 +24.6%)
+# 🟢 [신호 가중 · 2026-08-16 대표 승인] 급락 신호가 유력마 순위를 실제로 바꾸게 한다.
+#   🔴 왜: 종전 정렬 키는 `combinedProb*1000 + total` 인데 combinedProb 는 0~100 이다.
+#     0.1 차이가 100점이라 신호가 줄 수 있는 최대 +50(_elim_score)이 **묻힌다.**
+#     경로는 있으나 힘이 없었다 — 8월 미적중 분류에서 「둘 다 신호가 왔는데 안 넣음」이
+#     전체 15.6% · **고배당(20배+)의 32.8%** 였다.
+#   소급 실측(상위3 전조합 대리정책):
+#     경륜 1210경주  K=0 적중43.9 3제외64.7 배당11.20 → K=1.0 적중40.4 3제외71.2 배당14.60
+#     🟢 경륜 고배당 227경주 K=0 적중9.7 3제외72.7 → K=1.0 적중14.5 **3제외115.9** 배당15.20
+#     경마 524경주   K=0 적중36.6 3제외64.1 → K=0.5 적중37.2 3제외66.4 · K=1.0 은 61.7 로 악화
+#   ⚠ 고배당만 골라 잰 표는 **사후 선택**이다. 실전은 그 경주가 고배당일지 미리 모른다.
+#     그래서 전 경주에 같은 K 를 쓴다. 고배당 표는 방향의 근거일 뿐이다.
+#   🔴 한국·경정은 **0(미적용)** — 한국은 확정배당이 거의 없어 측정 자체를 못 했고,
+#     경정은 8월 표본이 0경주다. **검증 못 한 곳에 켜지 않는다**(원칙 20).
+#   🔧 되돌리기: 값을 0.0 으로 두면 종전과 완전히 같다.
+SIG_WEIGHT = {"cycle": 1.0, "horse": 0.5, "boat": 0.0, "bike": 0.0}
+SIG_WEIGHT_KOREA = 0.0          # 🔴 한국은 미검증 — 며칠 쌓은 뒤 판단
+SIG_WEIGHT_DROP_PCT = -20.0     # 이 정도 급락부터 신호로 센다(측정과 동일)
 CROSS_PAIR_TOPN = 4             # 추천에 많이 등장한 상위 N마리까지를 후보로
 CROSS_PAIR_LO = 6.0             # 이 배당대의 짝만 더한다(소급 최적)
 CROSS_PAIR_HI = 30.0
@@ -11516,6 +11533,46 @@ def _triple_analyze(rk, rec):
                      if h.get("no") is not None and int(h["no"]) not in _demote]
             _ins = [int(h["no"]) for h in _integ
                     if h.get("no") is not None and int(h["no"]) in _demote]
+            # 🟢 [신호 가중 · 2026-08-16 승인] 급락 신호로 _main 안에서만 순위를 다시 매긴다.
+            #   🔴 보험 하향(_ins)은 건드리지 않는다 — 뒤로 미는 그 취지를 그대로 둔다.
+            #   점수 = 순위 점수(1위 100 · 2위 90 …) + K × (그 말의 급락폭 합 ÷ 최대값 × 100)
+            #   ⚠ 소급 측정과 **같은 스케일**이다. combinedProb*1000 위에 얹으면 재현이 안 된다.
+            #   ⚠ 한국 판정은 raceKey 로 한다 — 이 스코프에 category 변수가 없다.
+            #     한국 raceKey 는 「부산 1경주」 형태라 _KRA_TRACK_RE 로 잡힌다(app.py 1729).
+            try:
+                _k = (SIG_WEIGHT_KOREA if _KRA_TRACK_RE.search(str(rk or ""))
+                      else float(SIG_WEIGHT.get(str(sport or ""), 0.0)))
+            except Exception:
+                _k = 0.0
+            if _k > 0 and len(_main) >= 2:
+                _sigsc = {}
+                for _d in (drops or []):
+                    try:
+                        _p = float(_d.get("pct") or 0)
+                    except (TypeError, ValueError):
+                        continue
+                    if _p > SIG_WEIGHT_DROP_PCT:
+                        continue
+                    for _h in (_d.get("combo") or []):
+                        try:
+                            _hn = int(_h)
+                        except (TypeError, ValueError):
+                            continue
+                        _sigsc[_hn] = _sigsc.get(_hn, 0.0) + abs(_p)
+                if _sigsc:
+                    # 🔴 base 는 **상위 5마리까지만** 준다(그 아래는 0).
+                    #   소급 측정이 그 형태였다 — 유력마 밖이라도 신호가 크면 올라올 수 있어야
+                    #   「둘 다 신호가 왔는데 안 넣음」(고배당의 32.8%)이 잡힌다.
+                    #   ⚠ _main 전체에 100-i*10 을 주면 하위가 음수가 되어 신호가 이겨도 못 올라온다.
+                    #     그러면 재현이 안 된다(실제로 3제외 71.2 가 65.6 으로 나왔다).
+                    _mx = max(_sigsc.values()) or 1.0
+                    _base = {n: 100 - i * 10 for i, n in enumerate(_main[:5])}
+                    _before = list(_main)
+                    _main = sorted(_main, key=lambda n: -(_base.get(n, 0)
+                                                          + _k * (_sigsc.get(n, 0.0) / _mx * 100)))
+                    if _main[:3] != _before[:3]:
+                        _gate_hit("sig_weight_reorder", rk,
+                                  "K=%.1f · %s → %s" % (_k, _before[:3], _main[:3]), once_key=rk)
             _io = _main + _ins
             if len(_io) >= 2:
                 key_horses = _io[:3]                          # 베팅 추천 근간을 통합 유력마로 정렬(보험하향 후순위)
