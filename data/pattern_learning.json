@@ -4771,7 +4771,7 @@
       "hit": 652
     },
     "전체부진마": {
-      "count": 6492,
+      "count": 6496,
       "hit": 1739
     },
     "대규모급락": {
@@ -4782,11 +4782,11 @@
       "hit_rate": 35.3
     },
     "이상감지동반": {
-      "count": 2747,
+      "count": 2751,
       "hit": 1087
     },
     "급락동반": {
-      "count": 572,
+      "count": 573,
       "hit": 158
     }
   },
@@ -5160,27 +5160,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1098,
-    "hit": 885,
+    "count": 1099,
+    "hit": 886,
     "cases": [
-      {
-        "race": "마에바시 2경주",
-        "date": "2026-08-11",
-        "smart_horses": [
-          7,
-          2,
-          3,
-          1
-        ],
-        "placed": [
-          7,
-          2
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 4.4,
-        "high_odds": false
-      },
       {
         "race": "몬베츠 4경주",
         "date": "2026-08-11",
@@ -6695,6 +6677,23 @@
         ],
         "placed": [],
         "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "제주 1경주",
+        "date": "2026-08-15",
+        "smart_horses": [
+          5,
+          6,
+          1
+        ],
+        "placed": [
+          6,
+          1
+        ],
+        "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
