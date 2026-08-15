@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "우라와 5경주",
-      "horse_no": 7,
-      "recent_avg": 9.4,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-07"
-    },
-    {
-      "race": "우라와 5경주",
-      "horse_no": 4,
-      "recent_avg": 7.8,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-07"
-    },
-    {
-      "race": "제주 4경주",
-      "horse_no": 1,
-      "recent_avg": 4.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-07"
-    },
-    {
       "race": "제주 4경주",
       "horse_no": 10,
       "recent_avg": 6.4,
@@ -4765,16 +4739,46 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-15"
+    },
+    {
+      "race": "사가 3경주",
+      "horse_no": 11,
+      "recent_avg": 8.2,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-15"
+    },
+    {
+      "race": "사가 3경주",
+      "horse_no": 7,
+      "recent_avg": 8.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-15"
+    },
+    {
+      "race": "사가 3경주",
+      "horse_no": 4,
+      "recent_avg": 7.6,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-15"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3773,
+      "count": 3780,
       "hit": 654
     },
     "전체부진마": {
-      "count": 6534,
-      "hit": 1746
+      "count": 6545,
+      "hit": 1749
     },
     "대규모급락": {
       "count": 17,
@@ -4784,8 +4788,8 @@
       "hit_rate": 35.3
     },
     "이상감지동반": {
-      "count": 2761,
-      "hit": 1092
+      "count": 2765,
+      "hit": 1095
     },
     "급락동반": {
       "count": 573,
