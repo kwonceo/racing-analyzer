@@ -1725,6 +1725,12 @@ def _drop_placeholder_combos(combos, label=""):
         return combos
 OPENING_DROP = -80.0    # opening 배당이 실배당으로 정착할 때의 기계적 급락(신호 아님)
 STALE_ACTIVE_SEC = 1800  # [경주전환 잔존 방어] 활성 3종 배당이 이 시간(30분) 넘게 미갱신 → 끝난 경주로 간주(활성 캐시서 정리)
+# 🔴 [2026-08-14 대표 지시] 경주 등급 라벨에서 **자신감 문구를 뺀다**(신뢰 문제 · 원인 조사보다 먼저).
+#   실측(경륜 8월 935경주): 🔥 강력승부 20경주가 **3제외 28.4%** — 전체 66.6% 의 절반도 안 된다.
+#   ⚖️ 관찰(65.6%)이 오히려 가장 좋았다. **가장 나쁜 경주를 「강력승부」로 팔고 있었다.**
+#   ⚠ 판정식과 tier 키(S/A/B/C)는 무변경 — 표시 문구·색만 바꾼다(적용 지점 app.py 약 13715).
+#   🔧 되돌리기: False
+GRADE_LABEL_NEUTRAL = True
 # [종목 오분석 근본수정] 한국 경마장명 → sport=horse·category=korea 강제 판정용(확장 KRA_TRACK_RE 와 동일 커버).
 _KRA_TRACK_RE = re.compile(r"(서울|부산경남|부경|부산|제주|과천|렛츠런|한국마사회|경마공원|KRA)")
 # [경륜 전용 지명] 경정장이 없는 '경륜 전용' 경마장명 → sport=cycle 강제(boat 오분석 차단).
@@ -13711,14 +13717,30 @@ def _triple_analyze(rk, rec):
         _cpg = _an_out.get("corePicks") or {}
         _dan_g = bool(_cpg.get("dansung"))
         _rec_g = bool(_cpg.get("finalQuinellas") or _cpg.get("finalTrifectas"))
+        # 🔴 [2026-08-14 대표 지시 · 신뢰 문제] 자신감을 나타내는 문구를 **전부 뺐다.**
+        #   실측(경륜 8월 935경주): 🔥 강력승부로 표시한 20경주가 **3제외 28.4%** 로 가장 나빴다.
+        #     전체 평균 66.6% 의 절반도 안 된다. ⚖️ 관찰(65.6%)이 오히려 가장 좋았다.
+        #   ⇒ **가장 나쁜 경주를 「강력승부」라고 회원에게 팔고 있었다.** 원인 조사보다 이것이 먼저다.
+        #   ⚠ 판정식(_gs·_gc 조건)과 tier 키(S/A/B/C)는 **한 글자도 안 바꿨다** — 표시 문구·색만이다.
+        #     tier 키로 매칭하는 코드가 있으므로 그것을 건드리면 다른 곳이 깨진다.
+        #   ⚠ 색도 빨강(#f43f5e)을 뺐다. 눈에 띄는 색 자체가 「사라」는 신호로 읽힌다.
+        #   🔧 되돌리기: GRADE_LABEL_NEUTRAL = False
         if _gs >= 2 and _gc >= 65:
-            _tier = {"tier": "S", "label": "🔥 강력승부", "color": "#f43f5e"}
+            _tier = ({"tier": "S", "label": "📊 신호 많음", "color": "#94a3b8"}
+                     if GRADE_LABEL_NEUTRAL else
+                     {"tier": "S", "label": "🔥 강력승부", "color": "#f43f5e"})
         elif _rec_g and _gs >= 1 and _gc >= 50:
-            _tier = {"tier": "A", "label": "✅ 추천", "color": "#38d39f"}
+            _tier = ({"tier": "A", "label": "📊 신호 보통", "color": "#94a3b8"}
+                     if GRADE_LABEL_NEUTRAL else
+                     {"tier": "A", "label": "✅ 추천", "color": "#38d39f"})
         elif _rec_g and (_gs >= 1 or _gc >= 40) and not _dan_g:
-            _tier = {"tier": "B", "label": "⚖️ 관찰", "color": "#fbbf24"}
+            _tier = ({"tier": "B", "label": "📊 신호 적음", "color": "#94a3b8"}
+                     if GRADE_LABEL_NEUTRAL else
+                     {"tier": "B", "label": "⚖️ 관찰", "color": "#fbbf24"})
         else:
-            _tier = {"tier": "C", "label": "🛡 참고·패스", "color": "#94a3b8"}
+            _tier = ({"tier": "C", "label": "📊 신호 없음", "color": "#94a3b8"}
+                     if GRADE_LABEL_NEUTRAL else
+                     {"tier": "C", "label": "🛡 참고·패스", "color": "#94a3b8"})
         # 🔴 [2026-08-12 대표 지시] 「신호 N개」가 오해를 낳았다.
         #   `count` 는 **종류 수**다(고유 type). 소노다 3R 은 항목이 15건인데 종류가 4종이라
         #   화면에 「신호 4개」로 나가 회원이 항목 수로 읽는다. 둘을 함께 적는다.
