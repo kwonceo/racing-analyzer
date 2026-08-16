@@ -1762,6 +1762,19 @@ CROSS_PAIR_ENABLED = True       # 🟢 2026-08-15 12:10 켬 · 소급 대조 일
 SIG_WEIGHT = {"cycle": 1.0, "horse": 0.5, "boat": 0.0, "bike": 0.0}
 SIG_WEIGHT_KOREA = 0.0          # 🔴 한국은 미검증 — 며칠 쌓은 뒤 판단
 SIG_WEIGHT_DROP_PCT = -20.0     # 이 정도 급락부터 신호로 센다(측정과 동일)
+# 🟢 [두수별 복원 · 2026-08-16 대표 승인] 잘린 조합(quinellaRef) 중 최저배당 **하나**를 되살린다.
+#   🔴 두수마다 답이 **정반대**다. 그래서 구간을 나눈다:
+#     6~7두  1133경주  현행 적중44.6 대박뺀회수68.0 배당4.00 → 복원 55.3 / 68.8 / 5.10  🟢
+#     8~9두   314경주  현행 39.2 / 72.5 / 5.60          → 복원 45.2 / **63.5** / 6.30  🔴 나빠진다
+#     10두+   292경주  현행 30.5 / 55.9 / 7.10          → 복원 41.8 / **62.5** / 7.30  🟢
+#   🟢 기간 반 분할(경계 2026_08_03)에서 **세 구간 다 앞뒤가 같은 방향**이다. 우연이 아니다.
+#     6~7두 전반 57.9→61.5 · 후반 67.0→68.1 / 8~9두 전반 50.4→43.5 · 후반 72.0→64.4
+#     10두+ 전반 43.2→55.7 · 후반 53.4→59.9
+#   ⚠ 두수는 `form` 길이로 센다 — 소급 측정이 analysis_log 의 horses 수를 썼기 때문이다.
+#   🔧 되돌리기: 해당 구간을 False. 전부 끄려면 셋 다 False.
+REVIVE_CUT_67 = True            # 6~7두
+REVIVE_CUT_89 = False           # 🔴 8~9두는 복원하면 나빠진다 — 켜지 않는다
+REVIVE_CUT_10 = True            # 10두 이상
 CROSS_PAIR_TOPN = 4             # 추천에 많이 등장한 상위 N마리까지를 후보로
 CROSS_PAIR_LO = 6.0             # 이 배당대의 짝만 더한다(소급 최적)
 CROSS_PAIR_HI = 30.0
@@ -17361,6 +17374,57 @@ def _build_analysis_log(rk, an=None):
                                       once_key=rk)
                 except Exception as _cce:
                     print("[조합 수 상한] 스킵(무시):", str(_cce)[:80])
+            # 🟢 [두수별 복원 · 2026-08-16 승인] 잘린 조합 중 최저배당 하나를 되살린다.
+            #   🔴 8~9두는 켜지 않는다 — 그 구간만 복원하면 대박 뺀 회수율이 내려간다(72.5 → 63.5).
+            #   ⚠ 조합 수 상한 **뒤**에 둔다. 앞이면 되살린 것이 다시 잘린다.
+            if not an.get("afterClose") and isinstance(_dc_out, dict):
+                try:
+                    _nh = len(an.get("form") or [])
+                    _rv_on = (REVIVE_CUT_67 if 0 < _nh <= 7 else
+                              REVIVE_CUT_89 if _nh <= 9 else
+                              REVIVE_CUT_10 if _nh > 9 else False)
+                    if _rv_on:
+                        _have = {tuple(sorted(c)) for c in (_dc_out.get("quinellas") or [])}
+                        _om = {}
+                        for _q in (an.get("quinella") or []):
+                            _cb = _q.get("combo") or []
+                            try:
+                                _o = float(_q.get("odds") or 0)
+                            except (TypeError, ValueError):
+                                continue
+                            if len(_cb) == 2 and _o > 0:
+                                _kk = tuple(sorted(int(x) for x in _cb))
+                                if _om.get(_kk) is None or _o < _om[_kk]:
+                                    _om[_kk] = _o
+                        _cands = []
+                        for _x in ((_cp_dc or {}).get("quinellaRef") or []):
+                            _cb = _x.get("combo") or []
+                            if len(_cb) != 2:
+                                continue
+                            _kk = tuple(sorted(int(v) for v in _cb))
+                            if _kk in _have or _om.get(_kk) is None:
+                                continue
+                            _cands.append((_om[_kk], list(_kk)))
+                        if _cands:
+                            _cands.sort()
+                            _ro, _rc = _cands[0]
+                            _dc_out["quinellas"] = list(_dc_out.get("quinellas") or []) + [_rc]
+                            _ex2 = list(_dc_out.get("extra") or [])
+                            _ex2.append({"combo": _rc, "src": "reviveCut", "odds": _ro,
+                                         "label": "되살린 조합",
+                                         "note": "한 번 걸렀다가 다시 넣은 자리입니다."})
+                            _dc_out["extra"] = _ex2
+                            core_picks_out = dict(core_picks_out or {})
+                            _fq2 = list(core_picks_out.get("finalQuinellas") or [])
+                            _fq2.append({"combo": _rc, "odds": _ro, "reviveCut": True,
+                                         "label": "되살린 조합",
+                                         "reason": "한 번 걸렀다가 다시 넣은 자리입니다."})
+                            core_picks_out["finalQuinellas"] = _fq2
+                            _cp_dc = core_picks_out
+                            _gate_hit("revive_cut", rk, "%d두 · %s (%.1f배)"
+                                      % (_nh, "+".join(str(v) for v in _rc), _ro), once_key=rk)
+                except Exception as _rve:
+                    print("[두수별 복원] 스킵(무시):", str(_rve)[:80])
             # 🟢 [교차 짝 · 2026-08-15 승인] 짚은 말끼리 묶은 짝을 **하나만** 더한다.
             #   🔴 조합 수 상한 **뒤**에 넣는다 — 앞에 넣으면 저배당 경주에서 상한(1조합)에 잘린다.
             #   ⚠ 마감 후에는 넣지 않는다(위 afterClose 분기는 동결본을 쓴다 — 여기 오지도 않지만 이중 방어).
