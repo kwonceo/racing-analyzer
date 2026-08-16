@@ -1,0 +1,160 @@
+{
+ "raceKey": "니가타 10경주",
+ "entries": [
+  {
+   "time": "17:00:46",
+   "minutesBefore": 14,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      5,
+      9
+     ],
+     [
+      9,
+      10
+     ],
+     [
+      5,
+      10
+     ],
+     [
+      9,
+      13
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      4,
+      9
+     ],
+     [
+      5,
+      13
+     ],
+     [
+      10,
+      13
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      5,
+      9,
+      13
+     ],
+     [
+      5,
+      9,
+      10
+     ],
+     [
+      9,
+      10,
+      13
+     ],
+     [
+      5,
+      10,
+      13
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:15:28",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       12,
+       15
+      ],
+      "prev": 431.8,
+      "cur": 176.9,
+      "pct": -59.0
+     },
+     {
+      "combo": [
+       11,
+       12
+      ],
+      "prev": 316.8,
+      "cur": 150.9,
+      "pct": -52.4
+     },
+     {
+      "combo": [
+       7,
+       12
+      ],
+      "prev": 1368.8,
+      "cur": 676.8,
+      "pct": -50.6
+     },
+     {
+      "combo": [
+       9,
+       11
+      ],
+      "prev": 33.1,
+      "cur": 20.6,
+      "pct": -37.8
+     },
+     {
+      "combo": [
+       9,
+       15
+      ],
+      "prev": 34.0,
+      "cur": 21.7,
+      "pct": -36.2
+     },
+     {
+      "combo": [
+       10,
+       15
+      ],
+      "prev": 296.5,
+      "cur": 197.0,
+      "pct": -33.6
+     },
+     {
+      "combo": [
+       11,
+       15
+      ],
+      "prev": 616.4,
+      "cur": 421.7,
+      "pct": -31.6
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

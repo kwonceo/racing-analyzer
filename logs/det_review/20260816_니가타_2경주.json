@@ -1,0 +1,115 @@
+{
+ "raceKey": "니가타 2경주",
+ "entries": [
+  {
+   "time": "09:56:03",
+   "minutesBefore": 13,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      14,
+      15
+     ],
+     [
+      5,
+      15
+     ],
+     [
+      8,
+      15
+     ],
+     [
+      3,
+      15
+     ],
+     [
+      12,
+      15
+     ],
+     [
+      6,
+      15
+     ],
+     [
+      3,
+      14
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      14,
+      15
+     ],
+     [
+      5,
+      14,
+      15
+     ],
+     [
+      3,
+      5,
+      15
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "10:11:41",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       10,
+       15
+      ],
+      "prev": 172.1,
+      "cur": 108.3,
+      "pct": -37.1
+     },
+     {
+      "combo": [
+       7,
+       15
+      ],
+      "prev": 44.4,
+      "cur": 28.4,
+      "pct": -36.0
+     },
+     {
+      "combo": [
+       8,
+       10
+      ],
+      "prev": 341.5,
+      "cur": 232.5,
+      "pct": -31.9
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

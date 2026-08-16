@@ -1,0 +1,88 @@
+{
+ "raceKey": "제주 5경주",
+ "entries": [
+  {
+   "time": "15:49:15",
+   "minutesBefore": 21,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      5,
+      9
+     ],
+     [
+      5,
+      10
+     ],
+     [
+      9,
+      10
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      9
+     ],
+     [
+      1,
+      10
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      5,
+      9
+     ],
+     [
+      5,
+      9,
+      10
+     ],
+     [
+      1,
+      5,
+      10
+     ],
+     [
+      1,
+      9,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:52:18",
+   "minutesBefore": -2,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

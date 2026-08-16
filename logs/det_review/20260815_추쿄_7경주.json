@@ -1,0 +1,98 @@
+{
+ "raceKey": "추쿄 7경주",
+ "entries": [
+  {
+   "time": "15:31:43",
+   "minutesBefore": 13,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      5,
+      7
+     ],
+     [
+      2,
+      7
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      2,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      5,
+      7
+     ],
+     [
+      2,
+      5,
+      7
+     ],
+     [
+      2,
+      4,
+      7
+     ],
+     [
+      2,
+      4,
+      5
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:45:29",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       1,
+       6
+      ],
+      "prev": 46.9,
+      "cur": 32.4,
+      "pct": -30.9
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

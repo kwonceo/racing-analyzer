@@ -1,0 +1,188 @@
+{
+ "raceKey": "오이 5경주",
+ "entries": [
+  {
+   "time": "17:40:39",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      5
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      5,
+      13
+     ],
+     [
+      5,
+      14
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      5,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      3,
+      5,
+      14
+     ],
+     [
+      4,
+      5,
+      14
+     ],
+     [
+      3,
+      5,
+      9
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:50:32",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       7,
+       13
+      ],
+      "prev": 169.5,
+      "cur": 90.1,
+      "pct": -46.8
+     },
+     {
+      "combo": [
+       7,
+       14
+      ],
+      "prev": 197.7,
+      "cur": 110.6,
+      "pct": -44.1
+     },
+     {
+      "combo": [
+       1,
+       13
+      ],
+      "prev": 254.6,
+      "cur": 146.0,
+      "pct": -42.7
+     },
+     {
+      "combo": [
+       6,
+       13
+      ],
+      "prev": 304.9,
+      "cur": 180.1,
+      "pct": -40.9
+     },
+     {
+      "combo": [
+       1,
+       14
+      ],
+      "prev": 275.9,
+      "cur": 189.7,
+      "pct": -31.2
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:52:56",
+   "minutesBefore": -2,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:54:41",
+   "minutesBefore": -4,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:55:41",
+   "minutesBefore": -5,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

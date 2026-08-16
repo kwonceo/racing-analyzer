@@ -1,0 +1,236 @@
+{
+ "raceKey": "추쿄 1경주",
+ "entries": [
+  {
+   "time": "09:35:54",
+   "minutesBefore": 14,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      15
+     ],
+     [
+      4,
+      15
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      7,
+      15
+     ],
+     [
+      14,
+      15
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      4,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      7,
+      15
+     ],
+     [
+      1,
+      4,
+      15
+     ],
+     [
+      4,
+      7,
+      15
+     ],
+     [
+      1,
+      14,
+      15
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "09:42:28",
+   "minutesBefore": 7,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       11,
+       12
+      ],
+      "prev": 3118.0,
+      "cur": 1763.1,
+      "pct": -43.5
+     }
+    ],
+    "finalQuinellas": [
+     [
+      1,
+      15
+     ],
+     [
+      7,
+      15
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      8,
+      15
+     ],
+     [
+      4,
+      15
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      7,
+      15
+     ],
+     [
+      1,
+      6,
+      15
+     ],
+     [
+      6,
+      7,
+      15
+     ],
+     [
+      1,
+      13,
+      15
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "09:46:48",
+   "minutesBefore": 3,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      15
+     ],
+     [
+      15,
+      16
+     ],
+     [
+      7,
+      15
+     ],
+     [
+      4,
+      15
+     ],
+     [
+      14,
+      15
+     ],
+     [
+      1,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      15,
+      16
+     ],
+     [
+      1,
+      6,
+      15
+     ],
+     [
+      6,
+      15,
+      16
+     ],
+     [
+      1,
+      7,
+      15
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "09:50:21",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

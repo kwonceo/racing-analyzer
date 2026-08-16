@@ -1775,6 +1775,27 @@ SIG_WEIGHT_DROP_PCT = -20.0     # 이 정도 급락부터 신호로 센다(측�
 REVIVE_CUT_67 = True            # 6~7두
 REVIVE_CUT_89 = False           # 🔴 8~9두는 복원하면 나빠진다 — 켜지 않는다
 REVIVE_CUT_10 = True            # 10두 이상
+# ── [기대값 문턱 낮추기 (2026-08-16 승인 · tools/_ev_thresh.py)] ──────────────
+#   문제: 기대값 = 배당 × **그 배당대 실측 적중률**(data/ev_bands.json)이고 1.0 미만이면 강등한다.
+#     5~15배 밴드의 실측 적중률이 **8.8%**(221/2511)라 1.0 을 넘으려면 배당이 **11.4배 이상**이어야 한다.
+#     ⇒ 🔴 **8~11.4배는 어떤 조합이든 구조적으로 전부 잘린다.**
+#     실물: 2026-08-16 서울 1경주 — 유력마 8·9·3 으로 만든 조합이 5.7·5.8·6.8배뿐인데
+#       1번을 낀 8.5배·8.6배 두 개가 이 사각지대에서 잘렸다(그 경주 우리 최고가 8.6배였다).
+#   실측(경륜 1223 · 경마 529 · 확정배당 · 정제):
+#     잘린 것 중 정답 비율은 **5~8배가 가장 높다**(경륜 18.3% · 경마 15.6%).
+#     ⚠ 대표가 지목한 8~11.4배는 경륜 6.1% 로 오히려 낮다.
+#     🟢 26배 이상 강등분(경륜 69 · 경마 16)은 **정답 0건** — 그 구간은 자르는 것이 옳다.
+#   문턱별 대박 뺀 회수율:
+#     경륜 1.0 → 68.2 / 0.9 → 68.9 / 0.8 → 69.5 / 0.7 → 69.3 / **0.6 → 70.6**
+#     경마 1.0 → 68.3 / 0.9 → 68.5 / 0.8 → 69.8 / **0.7 → 71.8** / 0.6 → 71.7
+#   🟢 판정 기준 넷(회수율↑·적중률 유지·배당중앙 유지·구좌 30% 이내)을 **다 넘고**,
+#     기간 반 분할에서 **전반·후반 둘 다 개선**이다(경륜 0.6 · 경마 0.7).
+#   ⚠ 저배당 편중이 풀리지는 않는다 — 살아나는 것이 주로 5~8배라 배당중앙은 경륜 4.40→4.60뿐이다.
+#   🔴 한국은 확정배당 보유 0경주라 **측정 불가** → 문턱을 건드리지 않는다(1.0 유지).
+#   🔧 되돌리기: EV_MIN_ENABLED = False (그 한 줄).
+EV_MIN_ENABLED = True           # 🟢 2026-08-16 소급 대조 확인 후 켬(대표 승인)
+EV_MIN = {"cycle": 0.6, "horse": 0.7}
+EV_MIN_DEFAULT = 1.0            # 한국·경정·바이크 — 측정 못 했으므로 지금 값 그대로
 CROSS_PAIR_TOPN = 4             # 추천에 많이 등장한 상위 N마리까지를 후보로
 CROSS_PAIR_LO = 6.0             # 이 배당대의 짝만 더한다(소급 최적)
 CROSS_PAIR_HI = 30.0
@@ -10270,11 +10291,25 @@ def _apply_profit_strategy(cp, curQ, valid_nos, sig_meta=None, sport=None, categ
                            or (frozenset(_combo2) in _conn_ex)          # 축-연결 조합(favAxis×연결마 top1)
                            or any(t in _rsn2 for t in ("유력마 1·2위", "리프라이싱 리더", "라인 페어", "급락", "역배열",
                                                        "확신도", "이중수렴", "시장 최저복승", "시장유력")))
-                if _ev is not None and _ev < 1.0 and not _exempt:
+                # [기대값 문턱 · 2026-08-16] 종목별로 다르다(경륜 0.6 · 경마 0.7 · 그 외 1.0).
+                #   🔴 한국은 측정 불가라 EV_MIN_DEFAULT(1.0)를 그대로 쓴다.
+                _evmin = 1.0
+                if EV_MIN_ENABLED:
+                    try:
+                        _evmin = (EV_MIN_DEFAULT if "korea" in str(category or "")
+                                  else float(EV_MIN.get(str(sport or ""), EV_MIN_DEFAULT)))
+                    except (TypeError, ValueError):
+                        _evmin = 1.0
+                if _ev is not None and _ev < _evmin and not _exempt:
                     _demote(_q, "기대값 %.2f 미달(배당 %s배 × 추정적중률 %d%%)" % (_ev, _o, round(_p * 100)))
                     _ev_cut.append(_q)
                 else:
-                    if _ev is not None and _ev < 1.0 and _exempt:
+                    # [계수기 · 원칙 23] 문턱을 낮춰서 살아남은 자리를 센다.
+                    #   🔴 이것이 0 이면 배선이 안 탄 것이다(조건 문제가 아니다).
+                    if _ev is not None and _evmin < 1.0 and _evmin <= _ev < 1.0:
+                        _gate_hit("ev_min_saved", reason="%s · %s배 · 기대값 %.2f (문턱 %.1f)"
+                                  % (_q.get("combo"), _o, _ev, _evmin))
+                    if _ev is not None and _ev < _evmin and _exempt:
                         _q["reason"] = _rsn2 + " · 신호 근거로 기대값 면제"
                     _kept3.append(_q)
             fq = _kept3
@@ -38691,6 +38726,19 @@ def _start_review_scheduler():
     except Exception as e:
         print("[유형분류] 모듈 로드 실패(무시 · 복기는 계속):", str(e)[:120])
 
+    # [자동 발견 · 네 단계 문턱] 2026-08-16 대표 지시.
+    #   🔴 1단계(발견)·2단계(검증)까지만 자동이다. **3단계(반영)는 절대 자동으로 켜지 않는다.**
+    #   ⚠ 전 기간을 훑으므로 무겁다 → 하루 한 번만(그날 파일이 있으면 건너뛴다).
+    _autofind_mod = None
+    try:
+        import importlib.util as _ilu2
+        _ap = os.path.join(os.path.dirname(__file__), "tools", "auto_finding.py")
+        _asp = _ilu2.spec_from_file_location("auto_finding", _ap)
+        _autofind_mod = _ilu2.module_from_spec(_asp)
+        _asp.loader.exec_module(_autofind_mod)
+    except Exception as e:
+        print("[자동발견] 모듈 로드 실패(무시 · 복기는 계속):", str(e)[:120])
+
     def _loop():
         while True:
             try:
@@ -38717,6 +38765,22 @@ def _start_review_scheduler():
                                       % (_dy, _mt['races'], _mt['hit']), once_key=_dy)
                 except Exception as _mte:
                     print("[유형분류] 스킵(무시):", str(_mte)[:120])
+                # 🟢 [자동 발견 · 하루 1회] 조건별 성적을 재서 1·2단계 후보를 목록으로 남긴다.
+                #   🔴 여기서 켜는 것은 아무것도 없다. 목록만 만든다(3단계는 대표가 정한다).
+                try:
+                    if _autofind_mod:
+                        _afp = os.path.join(_autofind_mod.OUT_DIR, "%s.json" % today)
+                        if not os.path.exists(_afp):
+                            _af = _autofind_mod.run()
+                            if not (_af or {}).get("error"):
+                                _gate_hit("auto_finding_daily",
+                                          reason="%d경주 · 1단계 %d · 2단계 %d"
+                                          % (_af["races"], _af["stage1"], _af["stage2"]),
+                                          once_key=today)
+                                print("[자동발견] %s — 1단계 %d개 · 2단계 %d개"
+                                      % (today, _af["stage1"], _af["stage2"]))
+                except Exception as _afe:
+                    print("[자동발견] 스킵(무시):", str(_afe)[:120])
             except Exception as e:
                 print("[복기] 스케줄러 오류(무시):", str(e)[:150])
 

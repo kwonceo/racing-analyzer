@@ -295,14 +295,83 @@
     "수집 공백 +6건"
    ],
    "error": null
+  },
+  "2026-08-14/09": {
+   "at": "2026-08-14 09:00:30",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "무결성 이상 1"
+   ],
+   "error": null
+  },
+  "2026-08-14/14": {
+   "at": "2026-08-14 14:00:16",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +2건",
+    "무결성 이상 1"
+   ],
+   "error": null
+  },
+  "2026-08-14/22": {
+   "at": "2026-08-14 22:00:53",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "수집 공백 +3건",
+    "JSON 손상 +2건",
+    "무결성 이상 1"
+   ],
+   "error": null
+  },
+  "2026-08-15/09": {
+   "at": "2026-08-15 09:00:13",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 누적 2건",
+    "무결성 이상 1"
+   ],
+   "error": null
+  },
+  "2026-08-15/14": {
+   "at": "2026-08-15 14:00:31",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +2건",
+    "무결성 이상 1"
+   ],
+   "error": null
+  },
+  "2026-08-15/22": {
+   "at": "2026-08-15 22:00:38",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +3건",
+    "무결성 이상 1"
+   ],
+   "error": null
+  },
+  "2026-08-16/09": {
+   "at": "2026-08-16 09:00:19",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "무결성 이상 1"
+   ],
+   "error": null
   }
  },
- "lastRun": "2026-08-13 22:00:40",
- "lastSlot": 22,
+ "lastRun": "2026-08-16 09:00:19",
+ "lastSlot": 9,
  "last": {
-  "saveFail": 113,
-  "gap": 21,
-  "corrupt": 1,
-  "at": "2026-08-13 22:00:40"
+  "saveFail": null,
+  "gap": 0,
+  "corrupt": 0,
+  "at": "2026-08-16 09:00:19"
  }
 }

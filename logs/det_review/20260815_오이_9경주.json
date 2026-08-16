@@ -1,0 +1,88 @@
+{
+ "raceKey": "오이 9경주",
+ "entries": [
+  {
+   "time": "20:00:24",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      11
+     ],
+     [
+      2,
+      7
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      2,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      7,
+      11
+     ],
+     [
+      2,
+      5,
+      11
+     ],
+     [
+      1,
+      2,
+      7
+     ],
+     [
+      1,
+      2,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "20:10:22",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

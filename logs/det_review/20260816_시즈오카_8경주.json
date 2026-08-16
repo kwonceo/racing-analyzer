@@ -1,0 +1,82 @@
+{
+ "raceKey": "시즈오카 8경주",
+ "entries": [
+  {
+   "time": "00:00:00",
+   "minutesBefore": null,
+   "status": "WARNING",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [
+    {
+     "code": "B라인누락",
+     "detail": "2번째 라인 페어 [5, 6] 가 삼복승 추천 어디에도 포함되지 않음",
+     "pair": [
+      5,
+      6
+     ],
+     "trifectas": [
+      [
+       1,
+       2,
+       3
+      ],
+      [
+       1,
+       2,
+       4
+      ]
+     ]
+    }
+   ],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      2
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      2,
+      4
+     ],
+     [
+      1,
+      2,
+      3
+     ]
+    ],
+    "linePairs": [
+     [
+      1,
+      2
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      7,
+      3
+     ]
+    ]
+   }
+  }
+ ]
+}

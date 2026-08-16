@@ -1,0 +1,88 @@
+{
+ "raceKey": "소노다 12경주",
+ "entries": [
+  {
+   "time": "20:19:47",
+   "minutesBefore": 10,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      11
+     ],
+     [
+      2,
+      9
+     ],
+     [
+      9,
+      11
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      2,
+      7
+     ],
+     [
+      7,
+      11
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      7,
+      11
+     ],
+     [
+      2,
+      9,
+      11
+     ],
+     [
+      2,
+      7,
+      9
+     ],
+     [
+      7,
+      9,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "20:30:02",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

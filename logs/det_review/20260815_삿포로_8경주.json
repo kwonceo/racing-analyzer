@@ -1,0 +1,227 @@
+{
+ "raceKey": "삿포로 8경주",
+ "entries": [
+  {
+   "time": "13:29:50",
+   "minutesBefore": 20,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      9,
+      10
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      7,
+      10
+     ],
+     [
+      3,
+      7
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      3,
+      10
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      9,
+      10
+     ],
+     [
+      7,
+      9,
+      10
+     ],
+     [
+      3,
+      7,
+      9
+     ],
+     [
+      3,
+      7,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "13:39:18",
+   "minutesBefore": 10,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      9,
+      10
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      3,
+      10
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      9,
+      10
+     ],
+     [
+      1,
+      9,
+      10
+     ],
+     [
+      2,
+      7,
+      9
+     ],
+     [
+      3,
+      9,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "13:50:28",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       5,
+       7
+      ],
+      "prev": 120.3,
+      "cur": 47.0,
+      "pct": -60.9
+     },
+     {
+      "combo": [
+       5,
+       6
+      ],
+      "prev": 141.4,
+      "cur": 70.9,
+      "pct": -49.9
+     },
+     {
+      "combo": [
+       5,
+       8
+      ],
+      "prev": 360.1,
+      "cur": 184.2,
+      "pct": -48.8
+     },
+     {
+      "combo": [
+       4,
+       5
+      ],
+      "prev": 356.0,
+      "cur": 194.2,
+      "pct": -45.4
+     },
+     {
+      "combo": [
+       5,
+       9
+      ],
+      "prev": 63.4,
+      "cur": 35.3,
+      "pct": -44.3
+     },
+     {
+      "combo": [
+       6,
+       8
+      ],
+      "prev": 115.2,
+      "cur": 66.3,
+      "pct": -42.4
+     },
+     {
+      "combo": [
+       4,
+       8
+      ],
+      "prev": 300.0,
+      "cur": 181.1,
+      "pct": -39.6
+     },
+     {
+      "combo": [
+       4,
+       7
+      ],
+      "prev": 104.9,
+      "cur": 70.6,
+      "pct": -32.7
+     },
+     {
+      "combo": [
+       8,
+       9
+      ],
+      "prev": 31.1,
+      "cur": 21.0,
+      "pct": -32.5
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

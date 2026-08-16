@@ -1,0 +1,167 @@
+{
+ "raceKey": "오이 10경주",
+ "entries": [
+  {
+   "time": "00:00:18",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      7
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      3,
+      10
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      7,
+      9
+     ],
+     [
+      3,
+      7,
+      10
+     ],
+     [
+      3,
+      9,
+      10
+     ],
+     [
+      3,
+      5,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "00:00:23",
+   "minutesBefore": -190,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "20:40:26",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      8
+     ],
+     [
+      2,
+      9
+     ],
+     [
+      2,
+      12
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      8,
+      12
+     ],
+     [
+      8,
+      14
+     ],
+     [
+      1,
+      8
+     ],
+     [
+      9,
+      12
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      8,
+      9
+     ],
+     [
+      2,
+      8,
+      14
+     ],
+     [
+      2,
+      9,
+      14
+     ],
+     [
+      1,
+      2,
+      9
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "20:50:03",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
