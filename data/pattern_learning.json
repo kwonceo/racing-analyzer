@@ -1,17 +1,6 @@
 {
   "patterns": [
     {
-      "race": "제주 1경주",
-      "horse_no": 4,
-      "recent_avg": 7.0,
-      "win_place": 1,
-      "conditions": [
-        "급락78%",
-        "복승이상감지"
-      ],
-      "date": "2026-08-08"
-    },
-    {
       "pattern": "대규모급락",
       "raceKey": "제주 1경주",
       "total_combos_dropped": 8,
@@ -4786,16 +4775,24 @@
         "복승이상감지"
       ],
       "date": "2026-08-16"
+    },
+    {
+      "race": "서울 6경주",
+      "horse_no": 8,
+      "recent_avg": 8.2,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-16"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3854,
-      "hit": 665
+      "count": 3857,
+      "hit": 666
     },
     "전체부진마": {
-      "count": 6670,
-      "hit": 1782
+      "count": 6674,
+      "hit": 1783
     },
     "대규모급락": {
       "count": 15,
@@ -4805,7 +4802,7 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2816,
+      "count": 2817,
       "hit": 1117
     },
     "급락동반": {
