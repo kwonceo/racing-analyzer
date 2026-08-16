@@ -1,16 +1,6 @@
 {
   "patterns": [
     {
-      "race": "사가 1경주",
-      "horse_no": 4,
-      "recent_avg": 6.3,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-08"
-    },
-    {
       "pattern": "대규모급락",
       "raceKey": "다치카와 12경주",
       "total_combos_dropped": 12,
@@ -4769,6 +4759,16 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-16"
+    },
+    {
+      "race": "모리오카 8경주",
+      "horse_no": 7,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-16"
     }
   ],
   "condition_stats": {
@@ -4777,8 +4777,8 @@
       "hit": 669
     },
     "전체부진마": {
-      "count": 6714,
-      "hit": 1792
+      "count": 6721,
+      "hit": 1793
     },
     "대규모급락": {
       "count": 15,
@@ -4788,8 +4788,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2833,
-      "hit": 1123
+      "count": 2840,
+      "hit": 1124
     },
     "급락동반": {
       "count": 586,
@@ -5166,21 +5166,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1124,
-    "hit": 904,
+    "count": 1125,
+    "hit": 905,
     "cases": [
-      {
-        "race": "기후 7경주",
-        "date": "2026-08-12",
-        "smart_horses": [
-          5
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": 13.3,
-        "high_odds": false
-      },
       {
         "race": "카사마츠 1경주",
         "date": "2026-08-12",
@@ -6692,6 +6680,23 @@
         ],
         "placed": [
           2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 8경주",
+        "date": "2026-08-16",
+        "smart_horses": [
+          10,
+          1,
+          9,
+          7
+        ],
+        "placed": [
+          7
         ],
         "hit": true,
         "trifecta_odds": null,
