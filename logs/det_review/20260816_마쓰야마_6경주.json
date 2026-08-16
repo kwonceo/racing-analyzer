@@ -1,0 +1,120 @@
+{
+ "raceKey": "마쓰야마 6경주",
+ "entries": [
+  {
+   "time": "17:35:22",
+   "minutesBefore": 8,
+   "status": "WARNING",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [
+    {
+     "code": "B라인누락",
+     "detail": "2번째 라인 페어 [1, 8] 가 삼복승 추천 어디에도 포함되지 않음",
+     "pair": [
+      1,
+      8
+     ],
+     "trifectas": [
+      [
+       2,
+       3,
+       5
+      ],
+      [
+       2,
+       3,
+       7
+      ],
+      [
+       2,
+       5,
+       9
+      ],
+      [
+       2,
+       4,
+       5
+      ]
+     ]
+    }
+   ],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      3
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      4,
+      5
+     ],
+     [
+      2,
+      5,
+      9
+     ],
+     [
+      2,
+      3,
+      7
+     ],
+     [
+      2,
+      3,
+      5
+     ]
+    ],
+    "linePairs": [
+     [
+      7,
+      3
+     ],
+     [
+      8,
+      1
+     ],
+     [
+      4,
+      9
+     ]
+    ]
+   }
+  },
+  {
+   "time": "17:44:04",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

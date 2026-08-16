@@ -14,5 +14,29 @@
   "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_16_모리오카_1경주.json'",
   "quarantined": null,
   "time": "12:32:18"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_16_서울_8경주.json",
+  "tag": "odds_history/_history_save_analysis",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_16_서울_8경주.json'",
+  "quarantined": null,
+  "time": "16:46:19"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_16_부산_7경주.json",
+  "tag": "odds_history/_history_append",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_16_부산_7경주.json'",
+  "quarantined": null,
+  "time": "17:01:19"
+ },
+ {
+  "type": "corrupt",
+  "file": "2026_08_16_서울_10경주.json",
+  "tag": "roster",
+  "reason": "읽기 실패: [Errno 13] Permission denied: 'C:\\\\Users\\\\Administrator\\\\Desktop\\\\경마분석서버\\\\data\\\\odds_history\\\\2026_08_16_서울_10경주.json'",
+  "quarantined": null,
+  "time": "17:53:03"
  }
 ]
