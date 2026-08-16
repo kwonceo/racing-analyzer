@@ -1,19 +1,6 @@
 {
   "patterns": [
     {
-      "pattern": "대규모급락",
-      "raceKey": "다치카와 12경주",
-      "total_combos_dropped": 12,
-      "drop_ratio": 0.571,
-      "result": "4+6",
-      "result_odds": "미상",
-      "result_quinella_odds": null,
-      "signal_result_combo": null,
-      "recommended_hit": false,
-      "lesson": "전체급락 시 이변 가능성 높음",
-      "t": 1786173118.942844
-    },
-    {
       "race": "서울 5경주",
       "horse_no": 4,
       "recent_avg": 5.0,
@@ -4769,16 +4756,27 @@
         "복승이상감지"
       ],
       "date": "2026-08-16"
+    },
+    {
+      "race": "부산 7경주",
+      "horse_no": 7,
+      "recent_avg": 4.8,
+      "win_place": 2,
+      "conditions": [
+        "급락60%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-16"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3881,
+      "count": 3882,
       "hit": 669
     },
     "전체부진마": {
-      "count": 6721,
-      "hit": 1793
+      "count": 6723,
+      "hit": 1794
     },
     "대규모급락": {
       "count": 15,
@@ -4788,12 +4786,12 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2840,
-      "hit": 1124
+      "count": 2841,
+      "hit": 1125
     },
     "급락동반": {
-      "count": 586,
-      "hit": 160
+      "count": 587,
+      "hit": 161
     }
   },
   "bokbyeong_patterns": [
@@ -5166,25 +5164,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1125,
-    "hit": 905,
+    "count": 1126,
+    "hit": 906,
     "cases": [
-      {
-        "race": "카사마츠 1경주",
-        "date": "2026-08-12",
-        "smart_horses": [
-          4,
-          7,
-          2
-        ],
-        "placed": [
-          7
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "야히코 2경주",
         "date": "2026-08-12",
@@ -6702,9 +6684,26 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "부산 7경주",
+        "date": "2026-08-16",
+        "smart_horses": [
+          4,
+          7,
+          6
+        ],
+        "placed": [
+          4,
+          7
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 80.4,
+    "rate": 80.5,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
