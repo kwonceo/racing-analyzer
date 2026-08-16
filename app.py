@@ -1794,6 +1794,19 @@ REVIVE_CUT_10 = True            # 10두 이상
 #   🔴 한국은 확정배당 보유 0경주라 **측정 불가** → 문턱을 건드리지 않는다(1.0 유지).
 #   🔧 되돌리기: EV_MIN_ENABLED = False (그 한 줄).
 EV_MIN_ENABLED = True           # 🟢 2026-08-16 소급 대조 확인 후 켬(대표 승인)
+# ── [상품 분리 · 저장만 (2026-08-16 승인 · docs/상품분리_설계안.md)] ────────────
+#   왜: 하나의 명단을 회수율 하나로 재면 **싼 것을 많이 맞히는 쪽**이 이긴다.
+#     그래서 시스템이 계속 저배당으로 간다(2026-08-16 서울 1경주 — 우리 최고가 8.6배였다).
+#     반대로 고배당을 회수율로 재면 무조건 기각된다 — 💎 복병 상위1은 회수율 60.3%(판정선 아래)인데
+#     적중배당 중앙 **15.7배**로 현행의 5.6배다. 🔴 **하나의 잣대로는 이것을 살릴 수 없다.**
+#   🔴 이 단계에서는 **저장에만 표식을 남긴다.** 화면·판정 명단·조합 수 어느 것도 바꾸지 않는다.
+#     성적을 며칠 따로 쌓아 「한방」이 최소선(30경주에 적중 1건)을 넘는지 본 뒤에 화면을 나눈다.
+#     ⚠ 화면을 먼저 바꾸면 성적을 모르는 채로 회원에게 나가고, 되돌리기도 어렵다.
+#   가르는 규칙 — 한방은 셋뿐이다(그 외 전부 본선):
+#     ① 교차 짝(crossPair)  ② 기대값 복원 12~30배(evRescue)  ③ 💎 복병 편입분(extra src=dark)
+#   🔧 되돌리기: PRODUCT_SPLIT_ENABLED = False (표식만 안 남는다 · 다른 영향 없음).
+PRODUCT_SPLIT_ENABLED = True
+PRODUCT_SPLIT_MIN_HIT_PER = 30  # 한방 최소선 — 이만큼의 경주에 적중 1건은 나와야 한다
 EV_MIN = {"cycle": 0.6, "horse": 0.7}
 EV_MIN_DEFAULT = 1.0            # 한국·경정·바이크 — 측정 못 했으므로 지금 값 그대로
 CROSS_PAIR_TOPN = 4             # 추천에 많이 등장한 상위 N마리까지를 후보로
@@ -17488,6 +17501,29 @@ def _build_analysis_log(rk, an=None):
                               % (rk, "+".join(str(x) for x in _cxc), _cxo))
                 except Exception as _cxe:
                     print("[교차 짝] 스킵(무시):", str(_cxe)[:80])
+            # ── [상품 분리 · 저장만] 판정 명단을 본선과 한방으로 갈라 **표식만** 남긴다 ──
+            #   🔴 _dc_out["quinellas"] 자체는 손대지 않는다 — 화면도 판정도 그대로다.
+            #     여기서 만드는 것은 사후에 성적을 따로 재기 위한 이름표뿐이다.
+            #   ⚠ 모든 편입(되살린 조합·교차 짝)이 끝난 **뒤**에 놓아야 빠짐이 없다.
+            if PRODUCT_SPLIT_ENABLED and isinstance(_dc_out, dict):
+                try:
+                    _bombk = set()
+                    for _e in (_dc_out.get("extra") or []):
+                        if str(_e.get("src") or "") in ("crossPair", "dark"):
+                            _bombk.add(tuple(sorted(int(x) for x in (_e.get("combo") or []))))
+                    for _q in ((core_picks_out or {}).get("finalQuinellas") or []):
+                        if _q.get("crossPair") or _q.get("evRescue"):
+                            _bombk.add(tuple(sorted(int(x) for x in (_q.get("combo") or []))))
+                    _psm, _psb = [], []
+                    for _c in (_dc_out.get("quinellas") or []):
+                        _k = tuple(sorted(int(x) for x in _c))
+                        (_psb if _k in _bombk else _psm).append(list(_k))
+                    _dc_out["productSplit"] = {"main": _psm, "bomb": _psb}
+                    if _psb:
+                        _gate_hit("product_split", rk, "본선 %d · 한방 %d"
+                                  % (len(_psm), len(_psb)), once_key=rk)
+                except Exception as _pse:
+                    print("[상품분리] 스킵(무시):", str(_pse)[:80])
             # 🔴 [확장만 차단 · 2026-08-12 승인] 확장 값만으로 만들어진 경주는 판정 명단을 비운다.
             #   ⚠ 아래 「빈 추천으로 덮지 않음」 폴백보다 **먼저** 판단해야 한다 —
             #     그 폴백이 되살리면 차단이 무효가 된다.
@@ -38739,6 +38775,17 @@ def _start_review_scheduler():
     except Exception as e:
         print("[자동발견] 모듈 로드 실패(무시 · 복기는 계속):", str(e)[:120])
 
+    # [상품 분리 성적] 본선과 한방을 **따로** 잰다(잣대가 다르다). 하루 한 번.
+    _psplit_mod = None
+    try:
+        import importlib.util as _ilu3
+        _pp = os.path.join(os.path.dirname(__file__), "tools", "product_split.py")
+        _psp = _ilu3.spec_from_file_location("product_split", _pp)
+        _psplit_mod = _ilu3.module_from_spec(_psp)
+        _psp.loader.exec_module(_psplit_mod)
+    except Exception as e:
+        print("[상품분리] 모듈 로드 실패(무시 · 복기는 계속):", str(e)[:120])
+
     def _loop():
         while True:
             try:
@@ -38781,6 +38828,23 @@ def _start_review_scheduler():
                                       % (today, _af["stage1"], _af["stage2"]))
                 except Exception as _afe:
                     print("[자동발견] 스킵(무시):", str(_afe)[:120])
+                # 🟢 [상품 분리 성적 · 하루 1회] 본선은 대박 뺀 회수율 · 한방은 적중배당 중앙.
+                #   🔴 합산 회수율은 만들지 않는다. 섞으면 분리 자체가 무의미해진다.
+                try:
+                    if _psplit_mod:
+                        _psp2 = os.path.join(_psplit_mod.OUT_DIR, "%s.json" % today)
+                        if not os.path.exists(_psp2):
+                            _ps = _psplit_mod.run()
+                            _bb = ((_ps or {}).get("all") or {}).get("bomb") or {}
+                            if _bb:
+                                _gate_hit("product_split_daily",
+                                          reason="한방 %d경주 적중 %d · 배당중앙 %.2f · 최소선 %s"
+                                          % (_bb.get("n", 0), _bb.get("hits", 0),
+                                             _bb.get("medHit", 0),
+                                             "통과" if _bb.get("passMin") else "미달"),
+                                          once_key=today)
+                except Exception as _pse2:
+                    print("[상품분리] 스킵(무시):", str(_pse2)[:120])
             except Exception as e:
                 print("[복기] 스케줄러 오류(무시):", str(e)[:150])
 

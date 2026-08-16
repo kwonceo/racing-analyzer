@@ -1,0 +1,78 @@
+{
+ "at": "2026-08-16 12:17:11",
+ "races": 2120,
+ "tagged": 0,
+ "minHitPer": 30,
+ "payback": 74.5,
+ "bySport": {
+  "cycle": {
+   "main": {
+    "n": 1343,
+    "slots": 2577,
+    "hits": 565,
+    "hitRate": 42.1,
+    "ex3": 73.1,
+    "medHit": 2.2
+   },
+   "bomb": {
+    "n": 140,
+    "slots": 143,
+    "hits": 7,
+    "hitRate": 5.0,
+    "medHit": 17.5,
+    "maxHit": 21.7,
+    "over10": 4,
+    "over20": 2,
+    "refRecovery": 70.5,
+    "needHits": 4.7,
+    "passMin": true
+   }
+  },
+  "horse": {
+   "main": {
+    "n": 777,
+    "slots": 1855,
+    "hits": 249,
+    "hitRate": 32.0,
+    "ex3": 62.3,
+    "medHit": 3.6
+   },
+   "bomb": {
+    "n": 45,
+    "slots": 46,
+    "hits": 3,
+    "hitRate": 6.7,
+    "medHit": 13.2,
+    "maxHit": 30.8,
+    "over10": 3,
+    "over20": 1,
+    "refRecovery": 122.2,
+    "needHits": 1.5,
+    "passMin": true
+   }
+  }
+ },
+ "all": {
+  "main": {
+   "n": 2120,
+   "slots": 4432,
+   "hits": 814,
+   "hitRate": 38.4,
+   "ex3": 70.0,
+   "medHit": 2.6
+  },
+  "bomb": {
+   "n": 185,
+   "slots": 189,
+   "hits": 10,
+   "hitRate": 5.4,
+   "medHit": 15.35,
+   "maxHit": 30.8,
+   "over10": 7,
+   "over20": 3,
+   "refRecovery": 83.1,
+   "needHits": 6.2,
+   "passMin": true
+  }
+ }
+}

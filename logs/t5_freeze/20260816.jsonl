@@ -75,3 +75,18 @@
 {"ev": "freeze", "rk": "서울 3경주", "at": "11:59:19", "mb": 5, "combos": ["2+3", "2+4", "2+6", "3+4", "4+6"], "dl": null, "enabled": true}
 {"ev": "freeze", "rk": "서울 3경주", "at": "11:59:19", "mb": 5, "combos": ["2+3", "2+4", "2+6", "3+4", "4+6"], "dl": null, "enabled": true}
 {"ev": "lost", "rk": "서울 3경주", "at": "12:00:23", "mb": 5, "frozenAt": "11:59:19", "frozenMb": 5, "lost": ["2+3", "3+4"], "withoutFreeze": ["2+4", "2+6", "4+6"], "withFreeze": ["2+3", "2+4", "2+6", "3+4", "4+6"], "seatsNow": 3, "seatsWithFreeze": 5, "dl": null, "enabled": true}
+{"ev": "lost", "rk": "서울 3경주", "at": "12:03:27", "mb": 1, "frozenAt": "11:59:19", "frozenMb": 5, "lost": ["1+4", "1+6", "2+3", "3+4", "4+6"], "withoutFreeze": ["1+2", "2+4", "2+6"], "withFreeze": ["1+2", "1+4", "1+6", "2+3", "2+4", "2+6", "3+4", "4+6"], "seatsNow": 3, "seatsWithFreeze": 8, "dl": null, "enabled": true}
+{"ev": "lost", "rk": "서울 3경주", "at": "12:03:29", "mb": 1, "frozenAt": "11:59:19", "frozenMb": 5, "lost": ["1+2", "1+4", "1+6"], "withoutFreeze": ["2+3", "2+4", "2+6", "3+4", "3+6", "4+6"], "withFreeze": ["1+2", "1+4", "1+6", "2+3", "2+4", "2+6", "3+4", "3+6", "4+6"], "seatsNow": 6, "seatsWithFreeze": 9, "dl": null, "enabled": true}
+{"ev": "lost", "rk": "서울 3경주", "at": "12:04:47", "mb": 0, "frozenAt": "11:59:19", "frozenMb": 5, "lost": ["1+2", "1+4", "1+6", "2+3", "3+4", "3+6"], "withoutFreeze": ["2+4", "2+6", "4+6"], "withFreeze": ["1+2", "1+4", "1+6", "2+3", "2+4", "2+6", "3+4", "3+6", "4+6"], "seatsNow": 3, "seatsWithFreeze": 9, "dl": null, "enabled": true}
+{"ev": "lost", "rk": "서울 3경주", "at": "12:04:51", "mb": 0, "frozenAt": "11:59:19", "frozenMb": 5, "lost": ["1+2", "1+4", "1+6"], "withoutFreeze": ["2+3", "2+4", "2+6", "3+4", "3+6", "4+6"], "withFreeze": ["1+2", "1+4", "1+6", "2+3", "2+4", "2+6", "3+4", "3+6", "4+6"], "seatsNow": 6, "seatsWithFreeze": 9, "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "케이오카쿠 5경주", "at": "12:07:26", "mb": 5, "combos": ["2+7"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "케이오카쿠 5경주", "at": "12:11:35", "mb": 1, "combos": ["2+7"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "게이오카쿠 4경주", "at": "12:14:09", "mb": 5, "combos": ["2+5"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "삿포로 5경주", "at": "12:14:11", "mb": 5, "combos": ["8+11", "11+12"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "나라 5경주", "at": "12:17:33", "mb": 5, "combos": ["3+7"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "나라 5경주", "at": "12:18:07", "mb": 5, "combos": ["3+7"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "게이오카쿠 4경주", "at": "12:18:19", "mb": 1, "combos": ["2+5"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "나라 5경주", "at": "12:18:27", "mb": 5, "combos": ["3+7"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "게이오카쿠 4경주", "at": "12:19:19", "mb": 0, "combos": ["2+5"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "삿포로 5경주", "at": "12:19:41", "mb": 0, "combos": ["8+11", "11+12"], "dl": null, "enabled": true}
+{"ev": "lost", "rk": "나라 5경주", "at": "12:21:18", "mb": 2, "frozenAt": "12:18:27", "frozenMb": 5, "lost": ["3+7"], "withoutFreeze": ["2+4"], "withFreeze": ["2+4", "3+7"], "seatsNow": 1, "seatsWithFreeze": 2, "dl": null, "enabled": true}
