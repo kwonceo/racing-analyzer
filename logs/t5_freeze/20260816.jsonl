@@ -72,3 +72,6 @@
 {"ev": "freeze", "rk": "나라 3경주", "at": "11:50:05", "mb": 0, "combos": ["1+7", "2+7"], "dl": null, "enabled": true}
 {"ev": "freeze", "rk": "게이오카쿠 4경주", "at": "11:50:22", "mb": 0, "combos": ["2+5"], "dl": null, "enabled": true}
 {"ev": "freeze", "rk": "나라 4경주", "at": "11:56:25", "mb": 5, "combos": ["3+5"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "서울 3경주", "at": "11:59:19", "mb": 5, "combos": ["2+3", "2+4", "2+6", "3+4", "4+6"], "dl": null, "enabled": true}
+{"ev": "freeze", "rk": "서울 3경주", "at": "11:59:19", "mb": 5, "combos": ["2+3", "2+4", "2+6", "3+4", "4+6"], "dl": null, "enabled": true}
+{"ev": "lost", "rk": "서울 3경주", "at": "12:00:23", "mb": 5, "frozenAt": "11:59:19", "frozenMb": 5, "lost": ["2+3", "3+4"], "withoutFreeze": ["2+4", "2+6", "4+6"], "withFreeze": ["2+3", "2+4", "2+6", "3+4", "4+6"], "seatsNow": 3, "seatsWithFreeze": 5, "dl": null, "enabled": true}
