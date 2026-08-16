@@ -1,0 +1,92 @@
+{
+ "raceKey": "사가 6경주",
+ "entries": [
+  {
+   "time": "18:35:29",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      10,
+      12
+     ],
+     [
+      9,
+      10
+     ],
+     [
+      9,
+      12
+     ],
+     [
+      1,
+      9
+     ],
+     [
+      1,
+      10
+     ],
+     [
+      8,
+      10
+     ],
+     [
+      1,
+      12
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      10,
+      12
+     ],
+     [
+      9,
+      10,
+      12
+     ],
+     [
+      1,
+      9,
+      12
+     ],
+     [
+      1,
+      9,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:45:41",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

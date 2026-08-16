@@ -27519,6 +27519,23 @@ def _keiba_build_form(shutsuba, details):
     for h in shutsuba.get("horses", []):
         past = (details or {}).get(h.get("lineageNb")) or []
         placings = [pr.get("placing") for pr in past if pr.get("placing")]
+        # ── [반에이 전적 폴백 (2026-08-16 승인)] ────────────────────────────
+        #   🔴 오비히로(반에이)는 말별 전적표(details)가 안 들어와 placings 가 비고 점수가 0 이 된다.
+        #     그런데 **전적이 없는 게 아니다** — 출주표에 `pastClassPlacings` 로 들어와 있다
+        #     (실측: 오비히로 1경주 1번 [9, 9, 6, 2, 5] · career 1착1·2착3·3착1).
+        #     점수 계산이 그 칸을 안 봐서 0 점이 됐고, 그 말이 A등급으로 추천에 올랐다.
+        #   ⚠ details 가 있으면 **그쪽이 우선**이다. 비었을 때만 폴백한다(값을 덮지 않는다).
+        #   ⚠ 오늘 같은 유형 세 번째다 — 데이터는 있는데 코드가 딴 곳을 본다.
+        #   🔧 되돌리기: BANEI_FORM_FALLBACK = False
+        if not placings and BANEI_FORM_FALLBACK:
+            try:
+                placings = [int(x) for x in (h.get("pastClassPlacings") or [])
+                            if isinstance(x, (int, float)) and int(x) >= 1][:5]
+                if placings:
+                    _gate_hit("banei_form_fallback", None,
+                              "%s번 전적 %s (출주표에서 폴백)" % (h.get("no"), placings))
+            except (TypeError, ValueError):
+                placings = []
         base = base_form_score(placings)
         style, sbonus, sdetail = _keiba_corner_style(past)
         # 거리 변화: 직전 경주 거리 vs 이번 거리(재사용: distance_change_bonus)
@@ -33637,6 +33654,9 @@ def _extract_korea_post_time(text):
 #   ⚠ 원본은 `recentPlacingsRaw` 에 남긴다 — 사후 대조에 필요하다.
 #   🔧 되돌리기: KOREA_PLACINGS_FROM_PAST = False
 KOREA_PLACINGS_FROM_PAST = True
+# [반에이 전적 폴백] 오비히로는 details 가 안 와서 점수 0 인데 출주표에 pastClassPlacings 가 있다.
+#   상세는 `_keiba_build_form` 안 폴백 블록 주석 참조.
+BANEI_FORM_FALLBACK = True
 
 
 def _korea_fix_placings(horses):

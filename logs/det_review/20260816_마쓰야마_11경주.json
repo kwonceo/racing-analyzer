@@ -1,0 +1,85 @@
+{
+ "raceKey": "마쓰야마 11경주",
+ "entries": [
+  {
+   "time": "20:20:25",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 1개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      9
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      7,
+      9
+     ],
+     [
+      4,
+      6,
+      9
+     ],
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      3,
+      4,
+      9
+     ]
+    ],
+    "linePairs": [
+     [
+      5,
+      8
+     ]
+    ]
+   }
+  },
+  {
+   "time": "20:30:38",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
