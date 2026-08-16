@@ -2,38 +2,38 @@
  "races": 1622,
  "byRank": {
   "rank1": {
-   "hit": 173,
+   "hit": 172,
    "total": 798,
-   "rate": 21.7
+   "rate": 21.6
   },
   "rank2": {
-   "hit": 295,
+   "hit": 294,
    "total": 766,
-   "rate": 38.5
+   "rate": 38.4
   },
   "rank3": {
-   "hit": 331,
-   "total": 706,
-   "rate": 46.9
+   "hit": 330,
+   "total": 708,
+   "rate": 46.6
   }
  },
  "bySignal": {
   "초기급락 보존": {
-   "hit": 534,
-   "total": 1552,
-   "rate": 34.4,
+   "hit": 532,
+   "total": 1554,
+   "rate": 34.2,
    "weightReady": true
   },
   "크로스역배열": {
-   "hit": 35,
-   "total": 94,
-   "rate": 37.2,
+   "hit": 36,
+   "total": 95,
+   "rate": 37.9,
    "weightReady": true
   },
   "스마트머니": {
-   "hit": 115,
+   "hit": 114,
    "total": 252,
-   "rate": 45.6,
+   "rate": 45.2,
    "weightReady": true
   },
   "스마트머니+역배열": {
@@ -49,9 +49,9 @@
    "weightReady": true
   },
   "급락": {
-   "hit": 16,
-   "total": 125,
-   "rate": 12.8,
+   "hit": 15,
+   "total": 124,
+   "rate": 12.1,
    "weightReady": true
   },
   "집중급락 회": {
@@ -69,9 +69,9 @@
    "weightReady": true
   },
   "50~100": {
-   "hit": 19,
-   "total": 187,
-   "rate": 10.2,
+   "hit": 18,
+   "total": 189,
+   "rate": 9.5,
    "weightReady": true
   },
   "30~50": {
@@ -82,22 +82,22 @@
   },
   "100+": {
    "hit": 8,
-   "total": 91,
-   "rate": 8.8,
+   "total": 93,
+   "rate": 8.6,
    "weightReady": true
   }
  },
  "bySport": {
   "keiba": {
-   "hit": 365,
-   "total": 1108,
-   "rate": 32.9,
+   "hit": 364,
+   "total": 1109,
+   "rate": 32.8,
    "weightReady": true
   },
   "keirin": {
-   "hit": 430,
-   "total": 1147,
-   "rate": 37.5,
+   "hit": 428,
+   "total": 1148,
+   "rate": 37.3,
    "weightReady": true
   },
   "korea": {
@@ -107,19 +107,19 @@
    "weightReady": false
   }
  },
- "missedRaces": 234,
+ "missedRaces": 236,
  "dansung": {
   "races": 115,
   "horseWonRate": 37.4,
   "horseWon": 43,
-  "horsePlaced": 88,
+  "horsePlaced": 89,
   "darkHitRate": 74.8,
   "darkHit": 86,
   "winnerSignals": {
    "기타": 9,
    "복병": 30,
-   "실질유력": 25
+   "실질유력": 26
   }
  },
- "updated_at": "2026-08-16 15:33:10"
+ "updated_at": "2026-08-16 16:20:14"
 }

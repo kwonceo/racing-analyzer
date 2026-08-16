@@ -33623,6 +33623,50 @@ def _extract_korea_post_time(text):
     return None
 
 
+# ── [한국 PDF 착순 파생 (2026-08-16 승인)] ────────────────────────────────
+#   문제: 같은 착순을 **두 곳에 따로 적게** 해 놓았다 —
+#     `recentPlacings`(배열)와 `pastRaces[].placing`. 둘 다 Claude Vision 이 읽는다.
+#     🔴 같은 것을 두 번 읽게 하면 어긋난다. 실제로 8월 117마리 중 **36마리(30.8%)** 가 어긋났고
+#       경주로는 15경주 중 7경주(46.7%)다.
+#     실물: 2026-08-16 부산 1경주 — 7번은 pastRaces 3착인데 recentPlacings 는 1 로 적혀
+#       **125점**을 받았고, 2번은 4착↔3 으로 어긋나 75점을 받았다.
+#       점수가 1착 125 · 2착 100 … 25점 간격이라 착순이 틀리면 **점수가 통째로 뒤집힌다.**
+#   고침: `recentPlacings` 를 묻지 말고 **`pastRaces[].placing` 에서 파생**시킨다.
+#     한 곳에서만 읽으면 어긋날 수 없다.
+#   ⚠ pastRaces 가 비어 있으면 **손대지 않는다**(있는 값을 지우지 않는다).
+#   ⚠ 원본은 `recentPlacingsRaw` 에 남긴다 — 사후 대조에 필요하다.
+#   🔧 되돌리기: KOREA_PLACINGS_FROM_PAST = False
+KOREA_PLACINGS_FROM_PAST = True
+
+
+def _korea_fix_placings(horses):
+    """recentPlacings 를 pastRaces[].placing 에서 파생. 고친 마릿수를 돌려준다."""
+    if not KOREA_PLACINGS_FROM_PAST:
+        return 0
+    n = 0
+    for h in (horses or []):
+        try:
+            pr = [int(x.get("placing")) for x in (h.get("pastRaces") or [])
+                  if isinstance(x, dict) and isinstance(x.get("placing"), (int, float))
+                  and int(x.get("placing")) >= 1]
+        except (TypeError, ValueError):
+            continue
+        if not pr:
+            continue                      # 🔴 근거가 없으면 손대지 않는다
+        old = []
+        for x in (h.get("recentPlacings") or []):
+            try:
+                old.append(int(x))
+            except (TypeError, ValueError):
+                pass
+        new = pr[:5]
+        if old[:len(new)] != new:
+            h["recentPlacingsRaw"] = h.get("recentPlacings") or []
+            h["recentPlacings"] = new
+            n += 1
+    return n
+
+
 def _korea_extract_race(doc, race, api_key=None):
     """요약 페이지 1장에서 메인표+조교표를 추출·병합해 출전마 리스트 반환 (app.js extractRaceFull).
     부수적으로 요약 페이지 텍스트에서 발주시각을 추출해 race['postTime']에 채운다(추후 마감 알림 자동화)."""
@@ -33647,6 +33691,15 @@ def _korea_extract_race(doc, race, api_key=None):
                     h["training"] = ((h.get("training") or "") + f" 조교사 {t['trainer']} {t.get('mark', '')}").strip()
     except Exception as e:
         print("[한국] 조교 추출 실패:", e)
+    # 🔴 [착순 파생] 판독 직후 한 번만 고친다 — 이 뒤의 저장·점수·추천이 전부 이 값을 쓴다.
+    try:
+        _fx = _korea_fix_placings(horses)
+        if _fx:
+            _gate_hit("korea_placings_fix", str(race.get("key") or race.get("raceNo") or ""),
+                      "착순 파생으로 %d마리 정정" % _fx)
+            print("[한국] 착순 파생 정정 %d마리 (경주 %s)" % (_fx, race.get("raceNo")))
+    except Exception as _fe:
+        print("[한국] 착순 파생 스킵(무시):", str(_fe)[:80])
     return horses
 
 

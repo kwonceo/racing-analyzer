@@ -1,9 +1,9 @@
 {
- "raceKey": "서울 6경주",
+ "raceKey": "사가 1경주",
  "entries": [
   {
-   "time": "10:11:42",
-   "minutesBefore": 278,
+   "time": "15:45:35",
+   "minutesBefore": 9,
    "status": "SAFE",
    "checked": [
     "삼복승정합"
@@ -18,97 +18,48 @@
     "finalQuinellas": [
      [
       4,
-      6
+      5
      ],
      [
-      2,
-      6
+      4,
+      7
      ],
      [
-      3,
-      6
+      4,
+      11
+     ],
+     [
+      5,
+      11
      ]
     ],
     "finalTrifectas": [
      [
-      1,
-      4,
-      6
-     ],
-     [
       2,
       4,
-      6
-     ],
-     [
-      1,
-      2,
-      6
+      5
      ],
      [
       4,
       5,
-      6
+      7
+     ],
+     [
+      2,
+      4,
+      11
+     ],
+     [
+      4,
+      7,
+      11
      ]
     ],
     "linePairs": []
    }
   },
   {
-   "time": "12:40:41",
-   "minutesBefore": 129,
-   "status": "SAFE",
-   "checked": [
-    "삼복승정합"
-   ],
-   "skipped": [
-    "B라인누락: 라인 페어 0개(2개 미만)",
-    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
-   ],
-   "issues": [],
-   "input": {
-    "drops": [],
-    "finalQuinellas": [
-     [
-      4,
-      6
-     ],
-     [
-      2,
-      6
-     ],
-     [
-      3,
-      6
-     ]
-    ],
-    "finalTrifectas": [
-     [
-      1,
-      4,
-      6
-     ],
-     [
-      2,
-      4,
-      6
-     ],
-     [
-      1,
-      2,
-      6
-     ],
-     [
-      4,
-      5,
-      6
-     ]
-    ],
-    "linePairs": []
-   }
-  },
-  {
-   "time": "14:51:52",
+   "time": "15:55:01",
    "minutesBefore": -1,
    "status": "NO_DATA",
    "checked": [],
@@ -126,8 +77,65 @@
    }
   },
   {
-   "time": "16:06:21",
-   "minutesBefore": -76,
+   "time": "15:55:02",
+   "minutesBefore": 0,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      4,
+      11
+     ],
+     [
+      5,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      4,
+      5
+     ],
+     [
+      4,
+      5,
+      7
+     ],
+     [
+      2,
+      4,
+      11
+     ],
+     [
+      4,
+      7,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:55:02",
+   "minutesBefore": -1,
    "status": "NO_DATA",
    "checked": [],
    "skipped": [
