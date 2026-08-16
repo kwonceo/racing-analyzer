@@ -4771,11 +4771,11 @@
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 3896,
+      "count": 3901,
       "hit": 670
     },
     "전체부진마": {
-      "count": 6743,
+      "count": 6750,
       "hit": 1800
     },
     "대규모급락": {
@@ -4786,7 +4786,7 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 2847,
+      "count": 2849,
       "hit": 1130
     },
     "급락동반": {
@@ -5164,24 +5164,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1128,
-    "hit": 907,
+    "count": 1129,
+    "hit": 908,
     "cases": [
-      {
-        "race": "야히코 1경주",
-        "date": "2026-08-12",
-        "smart_horses": [
-          3,
-          4
-        ],
-        "placed": [
-          3
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "카사마츠 2경주",
         "date": "2026-08-12",
@@ -6700,6 +6685,22 @@
         "hit": false,
         "trifecta_odds": null,
         "quinella_odds": 3.1,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 9경주",
+        "date": "2026-08-16",
+        "smart_horses": [
+          2,
+          7,
+          5
+        ],
+        "placed": [
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 2.3,
         "high_odds": false
       }
     ],
