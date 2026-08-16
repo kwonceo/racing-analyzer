@@ -1,0 +1,62 @@
+{
+ "raceKey": "서울 9경주",
+ "entries": [
+  {
+   "time": "13:42:25",
+   "minutesBefore": 222,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      4
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      2,
+      10
+     ],
+     [
+      2,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      7,
+      9
+     ],
+     [
+      1,
+      4,
+      7
+     ],
+     [
+      2,
+      7,
+      9
+     ],
+     [
+      1,
+      2,
+      6
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

@@ -38344,6 +38344,20 @@ def _health_kakao_text(rep):
             lines.append("· %s: %s (목표 %s)" % (x.get("name"), x.get("current"), x.get("target")))
     else:
         lines.append("🟢 무결성 정상")
+    # 🔴 [입력 검증 · 2026-08-16] 우리 숫자가 맞는지. 걸린 것만 한 줄 붙인다.
+    #   왜: 그날 찾은 결함을 전부 대표가 눈으로 찾았다. 시스템이 하나도 못 찾았다.
+    #   ⚠ 발송 코어 무변경 · 실패해도 그 줄만 빠진다.
+    try:
+        import importlib.util as _ilu5
+        _p5 = os.path.join(os.path.dirname(__file__), "tools", "input_check.py")
+        _s5 = _ilu5.spec_from_file_location("input_check", _p5)
+        _m5 = _ilu5.module_from_spec(_s5)
+        _s5.loader.exec_module(_m5)
+        _l5 = _m5.kakao_line(_m5.daily(time.strftime("%Y-%m-%d"), save=False))
+        if _l5:
+            lines.append(_l5)
+    except Exception:
+        pass
     lines.append("")
     # ⚠ 완료조건은 무결성과 **분리해서** 센다 — 섞으면 구조적 미달이 완료선을 영원히 막는다.
     _cmp = rep.get("completion") or {}
@@ -38786,6 +38800,19 @@ def _start_review_scheduler():
     except Exception as e:
         print("[상품분리] 모듈 로드 실패(무시 · 복기는 계속):", str(e)[:120])
 
+    # [입력 검증] 🔴 우리 숫자가 맞는지 매일 본다. 복기(놓쳤나)와는 **다른 것을 잰다.**
+    #   2026-08-16 — 그날 찾은 결함을 전부 대표가 눈으로 찾았다. 시스템이 하나도 못 찾았다.
+    #   ⚠ 막지 않는다. 보이게만 한다.
+    _inchk_mod = None
+    try:
+        import importlib.util as _ilu4
+        _ip = os.path.join(os.path.dirname(__file__), "tools", "input_check.py")
+        _isp = _ilu4.spec_from_file_location("input_check", _ip)
+        _inchk_mod = _ilu4.module_from_spec(_isp)
+        _isp.loader.exec_module(_inchk_mod)
+    except Exception as e:
+        print("[입력검증] 모듈 로드 실패(무시 · 복기는 계속):", str(e)[:120])
+
     def _loop():
         while True:
             try:
@@ -38845,6 +38872,17 @@ def _start_review_scheduler():
                                           once_key=today)
                 except Exception as _pse2:
                     print("[상품분리] 스킵(무시):", str(_pse2)[:120])
+                # 🟢 [입력 검증 · 폴링마다 오늘분 갱신] 경주가 계속 들어오므로 하루 1회로 막지 않는다.
+                #   🔴 걸린 것이 있으면 계수기에 남긴다 — 그 자체가 「보이게 하는」 장치다.
+                try:
+                    if _inchk_mod:
+                        _ic = _inchk_mod.daily(today)
+                        if (_ic or {}).get("alerts"):
+                            _gate_hit("input_check_alert",
+                                      reason="%s — %s" % (today, " · ".join(_ic["alerts"])),
+                                      once_key="%s|%s" % (today, ",".join(_ic["alerts"])))
+                except Exception as _ice:
+                    print("[입력검증] 스킵(무시):", str(_ice)[:120])
             except Exception as e:
                 print("[복기] 스케줄러 오류(무시):", str(e)[:150])
 

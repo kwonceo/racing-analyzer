@@ -1,0 +1,144 @@
+{
+ "raceKey": "모리오카 4경주",
+ "entries": [
+  {
+   "time": "14:10:35",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      9
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      5,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      5,
+      9
+     ],
+     [
+      2,
+      7,
+      9
+     ],
+     [
+      2,
+      4,
+      5
+     ],
+     [
+      2,
+      5,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "14:20:14",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       2,
+       4
+      ],
+      "prev": 11.8,
+      "cur": 6.3,
+      "pct": -46.6
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:26:48",
+   "minutesBefore": -66,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:27:39",
+   "minutesBefore": -67,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:31:45",
+   "minutesBefore": -71,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

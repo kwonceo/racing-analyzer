@@ -1,0 +1,170 @@
+{
+ "raceKey": "케이오카쿠 8경주",
+ "entries": [
+  {
+   "time": "13:09:25",
+   "minutesBefore": 9,
+   "status": "WARNING",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [
+    {
+     "code": "B라인누락",
+     "detail": "2번째 라인 페어 [2, 6] 가 삼복승 추천 어디에도 포함되지 않음",
+     "pair": [
+      2,
+      6
+     ],
+     "trifectas": [
+      [
+       3,
+       4,
+       6
+      ],
+      [
+       1,
+       3,
+       7
+      ],
+      [
+       1,
+       4,
+       7
+      ],
+      [
+       3,
+       4,
+       7
+      ]
+     ]
+    }
+   ],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      4
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      4,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      4,
+      6
+     ],
+     [
+      3,
+      4,
+      7
+     ],
+     [
+      1,
+      4,
+      7
+     ],
+     [
+      1,
+      3,
+      7
+     ]
+    ],
+    "linePairs": [
+     [
+      7,
+      1
+     ],
+     [
+      2,
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "time": "13:19:06",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:26:44",
+   "minutesBefore": -127,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:27:36",
+   "minutesBefore": -128,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "15:31:41",
+   "minutesBefore": -132,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

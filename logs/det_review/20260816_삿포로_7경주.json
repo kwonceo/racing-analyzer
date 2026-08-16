@@ -1,0 +1,124 @@
+{
+ "raceKey": "삿포로 7경주",
+ "entries": [
+  {
+   "time": "13:10:48",
+   "minutesBefore": 14,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      14,
+      16
+     ],
+     [
+      6,
+      14
+     ],
+     [
+      6,
+      16
+     ],
+     [
+      6,
+      7
+     ],
+     [
+      6,
+      12
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      7,
+      14
+     ],
+     [
+      7,
+      16
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      7,
+      14,
+      16
+     ],
+     [
+      6,
+      14,
+      16
+     ],
+     [
+      6,
+      7,
+      14
+     ],
+     [
+      6,
+      7,
+      16
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "13:25:19",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       9,
+       16
+      ],
+      "prev": 184.8,
+      "cur": 116.5,
+      "pct": -37.0
+     },
+     {
+      "combo": [
+       7,
+       9
+      ],
+      "prev": 157.9,
+      "cur": 106.3,
+      "pct": -32.7
+     },
+     {
+      "combo": [
+       9,
+       12
+      ],
+      "prev": 322.1,
+      "cur": 223.8,
+      "pct": -30.5
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

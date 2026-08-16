@@ -1,0 +1,62 @@
+{
+ "raceKey": "부산 7경주",
+ "entries": [
+  {
+   "time": "12:51:28",
+   "minutesBefore": 243,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      11
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      4,
+      11
+     ],
+     [
+      2,
+      4,
+      11
+     ],
+     [
+      1,
+      4,
+      5
+     ],
+     [
+      4,
+      7,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}
