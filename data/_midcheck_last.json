@@ -374,14 +374,34 @@
     "무결성 이상 1"
    ],
    "error": null
+  },
+  "2026-08-16/22": {
+   "at": "2026-08-16 22:00:53",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +16건",
+    "무결성 이상 1"
+   ],
+   "error": null
+  },
+  "2026-08-17/09": {
+   "at": "2026-08-17 09:00:15",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 누적 2건",
+    "무결성 이상 1"
+   ],
+   "error": null
   }
  },
- "lastRun": "2026-08-16 14:00:58",
- "lastSlot": 14,
+ "lastRun": "2026-08-17 09:00:15",
+ "lastSlot": 9,
  "last": {
   "saveFail": null,
   "gap": 0,
   "corrupt": 2,
-  "at": "2026-08-16 14:00:58"
+  "at": "2026-08-17 09:00:15"
  }
 }

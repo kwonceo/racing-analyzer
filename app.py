@@ -13126,9 +13126,23 @@ def _triple_analyze(rk, rec):
             # 삼복승 2+3+6 → {2+3, 2+6, 3+6} 자동 생성 → 엉뚱 조합 오염 차단
             try:
                 _ft_main = (core_picks.get('finalTrifectas') or [])
+                # 🔴 [2026-08-17] 배열 **첫 번째**가 아니라 **이름표가 메인**인 것을 고른다.
+                #   버그: 첫 번째만 쓰는데 메인이 두 번째인 경주가 **733/3053 = 24.0%** 다.
+                #     실물 2026-08-17 벳푸 5경주 — [0]이 「삼복승 보험」이고 [1]이 「삼복승 메인」이었다.
+                #     즉 네 경주 중 하나꼴로 **엉뚱한 삼복승의 짝**을 복승에 넣고 있었다.
+                #   ⚠ 메인 표식이 없는 경주(2건·0.1%)는 종전대로 첫 번째를 쓴다.
+                #   🔧 되돌리기: TRIO_MAIN_BY_LABEL = False
+                _ft_pick = None
+                if TRIO_MAIN_BY_LABEL:
+                    for _t in _ft_main:
+                        if '메인' in str(_t.get('reason') or ''):
+                            _ft_pick = _t
+                            break
+                if _ft_pick is None:
+                    _ft_pick = _ft_main[0] if _ft_main else None
                 _fq_set = set(frozenset(q['combo']) for q in (core_picks.get('finalQuinellas') or []) if q.get('combo'))
                 _tc_adds = []
-                for _tri in _ft_main[:1]:  # 메인 삼복승 1개만
+                for _tri in ([_ft_pick] if _ft_pick else []):  # 메인 삼복승 1개만
                     _tc = sorted(int(x) for x in (_tri.get('combo') or []))
                     if len(_tc) == 3:
                         for _pa, _pb in [(_tc[0],_tc[1]),(_tc[0],_tc[2]),(_tc[1],_tc[2])]:
@@ -17478,6 +17492,59 @@ def _build_analysis_log(rk, an=None):
             #   ⚠ 마감 후에는 넣지 않는다(위 afterClose 분기는 동결본을 쓴다 — 여기 오지도 않지만 이중 방어).
             #   ⚠ 판정 명단(_dc_out)과 회원이 보는 곳(finalQuinellas) **둘 다**에 넣는다.
             #     둘이 어긋나면 「받은 것과 재는 것이 다른」 문제가 재발한다(2026-08-13 실측).
+            # ── [삼복승 메인의 짝 하나] 개수 상한 **뒤**에 넣는다 — 상한에 잘리면 의미가 없다 ──
+            #   🔴 경륜만. 경마는 소급에서 악화라 켜지 않는다(TRIO_PAIR_ONE_SPORTS).
+            if (TRIO_PAIR_ONE and not an.get("afterClose") and isinstance(_dc_out, dict)
+                    and str(sport or "") in TRIO_PAIR_ONE_SPORTS):
+                try:
+                    _tp_ft = (core_picks_out or {}).get("finalTrifectas") or []
+                    _tp_main = None
+                    for _t in _tp_ft:
+                        if "메인" in str(_t.get("reason") or ""):
+                            _tp_main = _t
+                            break
+                    if _tp_main is None and _tp_ft:
+                        _tp_main = _tp_ft[0]
+                    _tp_c = sorted(int(x) for x in (_tp_main.get("combo") or [])) if _tp_main else []
+                    if len(_tp_c) == 3:
+                        _tp_have = set()
+                        for _c in (_dc_out.get("quinellas") or []):
+                            _tp_have.add(tuple(sorted(int(x) for x in _c)))
+                        _tp_best = None
+                        for _i in range(3):
+                            for _j in range(_i + 1, 3):
+                                _k = (_tp_c[_i], _tp_c[_j])
+                                if _k in _tp_have:
+                                    continue
+                                _o = (curQ or {}).get(_k) or (curQ or {}).get((_k[1], _k[0]))
+                                try:
+                                    _o = float(_o or 0)
+                                except (TypeError, ValueError):
+                                    _o = 0
+                                if _o <= 0 or _o > 50.0:
+                                    continue
+                                if _tp_best is None or _o < _tp_best[0]:
+                                    _tp_best = (_o, list(_k))
+                        if _tp_best:
+                            _tpo, _tpc = _tp_best
+                            _dc_out["quinellas"] = list(_dc_out.get("quinellas") or []) + [_tpc]
+                            _tpx = list(_dc_out.get("extra") or [])
+                            _tpx.append({"combo": _tpc, "src": "trioPair", "odds": _tpo,
+                                         "label": "삼복승 짝",
+                                         "note": "삼복승으로 짚은 세 마리 중 두 마리를 묶은 자리입니다."})
+                            _dc_out["extra"] = _tpx
+                            core_picks_out = dict(core_picks_out or {})
+                            _tpq = list(core_picks_out.get("finalQuinellas") or [])
+                            _tpq.append({"combo": _tpc, "odds": _tpo, "trioPair": True,
+                                         "label": "삼복승 짝",
+                                         "reason": "삼복승으로 짚은 세 마리 중 두 마리를 묶은 자리입니다."})
+                            core_picks_out["finalQuinellas"] = _tpq
+                            _cp_dc = core_picks_out
+                            _gate_hit("trio_pair_one", rk, "삼복승 %s → 짝 %s (%.1f배)"
+                                      % ("+".join(str(x) for x in _tp_c),
+                                         "+".join(str(x) for x in _tpc), _tpo), once_key=rk)
+                except Exception as _tpe:
+                    print("[삼복승 짝] 스킵(무시):", str(_tpe)[:80])
             if CROSS_PAIR_ENABLED and not an.get("afterClose") and isinstance(_dc_out, dict):
                 try:
                     _cx = _cross_pair_pick(an.get("quinella"), _dc_out.get("quinellas") or [])
@@ -33657,6 +33724,24 @@ KOREA_PLACINGS_FROM_PAST = True
 # [반에이 전적 폴백] 오비히로는 details 가 안 와서 점수 0 인데 출주표에 pastClassPlacings 가 있다.
 #   상세는 `_keiba_build_form` 안 폴백 블록 주석 참조.
 BANEI_FORM_FALLBACK = True
+# [삼복승 메인 선택] 배열 첫 번째가 아니라 이름표가 메인인 것을 쓴다(어긋남 24.0%).
+TRIO_MAIN_BY_LABEL = True
+# ── [삼복승 메인의 짝 하나 (2026-08-17 승인 · tools/_trio_pairs.py)] ────────────
+#   왜: 이틀 연속 같은 자리에서 놓쳤다 — 08-16 삿포로 1경주 · 08-17 벳푸 5경주.
+#     삼복승으로는 세 마리를 짚었는데 그 **짝을 복승에 안 냈다.**
+#   ⚠ 어제 기각한 「삼복승 마번을 교차 짝 후보에」와 다르다. 그건 후보 풀을 넓히는 것이었고
+#     이건 **삼복승 조합 자체의 짝**을 넣는 것이다.
+#   실측(경륜 1290경주 · 이름표로 고른 메인 기준):
+#     대박 뺀 회수율 68.8 → **76.7%**(판정선 74.5 넘음) · 적중률 44.0 → 52.7 ·
+#     배당중앙 4.40 → 6.20 · 구좌 +38.9% · **전반 후반 둘 다 개선**
+#     추가된 짝의 정답률 **10.88%** — 짝 셋을 다 넣을 때(7.86%)보다 높다. 🔴 싼 짝이 더 잘 맞는다.
+#   🔴 경마는 71.0 → 66.9 로 악화라 켜지 않는다(앞뒤 둘 다 악화).
+#   ⚠ 구좌가 38.9% 늘어 기준 30%를 넘는다. 그러나 **회수율이 이미 구좌를 벌한다**(분모가 구좌다).
+#     총투자를 고정하면 구좌 증가는 원금이 느는 것이 아니라 한 조합에 거는 돈이 주는 것이고,
+#     그 대가는 회수율에 전부 반영돼 있다. ⇒ 구좌로 또 자르면 두 번 세는 것이다(대표 판단).
+#   🔧 되돌리기: TRIO_PAIR_ONE = False
+TRIO_PAIR_ONE = True
+TRIO_PAIR_ONE_SPORTS = ("cycle",)
 
 
 def _korea_fix_placings(horses):
