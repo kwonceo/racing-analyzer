@@ -1,0 +1,106 @@
+{
+ "raceKey": "오이 2경주",
+ "entries": [
+  {
+   "time": "16:02:32",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      2,
+      11
+     ],
+     [
+      11,
+      12
+     ],
+     [
+      11,
+      13
+     ],
+     [
+      4,
+      11
+     ],
+     [
+      11,
+      14
+     ],
+     [
+      2,
+      13
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      2,
+      11,
+      13
+     ],
+     [
+      2,
+      4,
+      11
+     ],
+     [
+      2,
+      11,
+      12
+     ],
+     [
+      4,
+      11,
+      12
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "16:12:21",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:52:54",
+   "minutesBefore": -160,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
