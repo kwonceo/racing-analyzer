@@ -1,0 +1,256 @@
+{
+ "raceKey": "大垣 5경주",
+ "entries": [
+  {
+   "time": "12:27:26",
+   "minutesBefore": 9,
+   "status": "WARNING",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [
+    {
+     "code": "B라인누락",
+     "detail": "2번째 라인 페어 [1, 7] 가 삼복승 추천 어디에도 포함되지 않음",
+     "pair": [
+      1,
+      7
+     ],
+     "trifectas": [
+      [
+       3,
+       4,
+       6
+      ],
+      [
+       2,
+       3,
+       4
+      ],
+      [
+       2,
+       3,
+       6
+      ]
+     ]
+    }
+   ],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      4
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      4,
+      6
+     ],
+     [
+      2,
+      3,
+      4
+     ],
+     [
+      2,
+      3,
+      6
+     ]
+    ],
+    "linePairs": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      1
+     ],
+     [
+      6,
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "time": "12:36:09",
+   "minutesBefore": 0,
+   "status": "SAFE",
+   "checked": [
+    "B라인누락",
+    "삼복승정합"
+   ],
+   "skipped": [
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      4,
+      5
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      3,
+      4,
+      7
+     ],
+     [
+      3,
+      5,
+      7
+     ],
+     [
+      2,
+      3,
+      5
+     ]
+    ],
+    "linePairs": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      1
+     ],
+     [
+      6,
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "time": "12:37:20",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "12:39:55",
+   "minutesBefore": -2,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "12:41:09",
+   "minutesBefore": -4,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "12:59:47",
+   "minutesBefore": -22,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "14:26:49",
+   "minutesBefore": -109,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

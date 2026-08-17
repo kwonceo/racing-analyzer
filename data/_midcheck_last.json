@@ -394,14 +394,24 @@
     "무결성 이상 1"
    ],
    "error": null
+  },
+  "2026-08-17/14": {
+   "at": "2026-08-17 14:00:46",
+   "sent": true,
+   "quiet": false,
+   "abnormal": [
+    "JSON 손상 +3건",
+    "무결성 이상 1"
+   ],
+   "error": null
   }
  },
- "lastRun": "2026-08-17 09:00:15",
- "lastSlot": 9,
+ "lastRun": "2026-08-17 14:00:46",
+ "lastSlot": 14,
  "last": {
   "saveFail": null,
   "gap": 0,
-  "corrupt": 2,
-  "at": "2026-08-17 09:00:15"
+  "corrupt": 5,
+  "at": "2026-08-17 14:00:46"
  }
 }

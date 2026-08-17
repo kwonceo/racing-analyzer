@@ -666,24 +666,48 @@
  },
  "2026-08-17": {
   "pastPops": 0,
-  "popDeno": 0,
-  "k5have": 0,
-  "k5deno": 0,
-  "p2hHave": 7,
-  "p2hDeno": 7,
-  "p6hHave": 0,
-  "p6hDeno": 7,
-  "k5allHave": 0,
-  "k5allDeno": 17,
-  "k5hHave": 0,
-  "k5hDeno": 7,
+  "popDeno": 35,
+  "k5have": 35,
+  "k5deno": 35,
+  "p2hHave": 57,
+  "p2hDeno": 115,
+  "p6hHave": 35,
+  "p6hDeno": 115,
+  "k5allHave": 35,
+  "k5allDeno": 269,
+  "k5hHave": 35,
+  "k5hDeno": 115,
   "srcs": {
-   "keirin": 17
+   "keirin": 143,
+   "keiba_ext": 33,
+   "oddspark": 35,
+   "korea": 58,
+   "none": 0
   },
-  "races": 3,
+  "races": 38,
   "bySrc": {
    "keirin": {
-    "n": 17,
+    "n": 143,
+    "k5": 0,
+    "pop": 0
+   },
+   "keiba_ext": {
+    "n": 33,
+    "k5": 0,
+    "pop": 0
+   },
+   "oddspark": {
+    "n": 35,
+    "k5": 35,
+    "pop": 0
+   },
+   "korea": {
+    "n": 58,
+    "k5": 0,
+    "pop": 0
+   },
+   "none": {
+    "n": 0,
     "k5": 0,
     "pop": 0
    }

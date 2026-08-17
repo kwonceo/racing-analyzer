@@ -1947,6 +1947,51 @@ _DIP_RATIO = 0.70          # 직전 대비 조합 수가 이 비율 미만이면
 _DIP_MIN_PREV = 10         # 직전 조합이 이 미만이면 판정하지 않음(표본 부족)
 
 
+# ── [값 통째로 튐 (2026-08-17 승인)] ─────────────────────────────────────────
+#   왜: 기존 가드 셋이 **조합 수**나 **인접 일치**만 본다. 조합 수가 거의 같은데
+#     값만 통째로 다른 틱은 하나도 못 잡는다.
+#     실물 2026-08-17 서울 5경주 — 44조합 틱과 45조합 틱이 번갈아 들어오는데
+#     **공통 44조합의 값이 하나도 같지 않고** 22개가 3배 이상 튄다(1+6 이 1474.5 ↔ 27.5).
+#     1474배는 복승에 나올 수 없다 — 다른 표를 긁어온 것이다.
+#     🔴 조합 수가 44↔45(97.8%)라 딥 게이트(70% 문턱)를 못 넘어 `suspect=None` 이었다.
+#   실측(8월 · 틱 대조 17549회): 발동 **488회 = 2.78%** · 경주 856개 중 49개(5.7%)
+#     발동 사례를 눈으로 확인했다(원칙 4·20) — 도야마 3경주 4+7 이 3.2↔100.0 ·
+#     마츠야마 4경주 1+7 이 1497.8→4.3(348배) · 모리오카 10경주 7+9 가 453.1→2.7(168배).
+#     🟢 **오탐이 보이지 않는다.** 전부 진짜 오염이다.
+#   ⚠ 발동률 2.78% 는 감시 적정 구간(5~30%) 아래지만, 교정 규칙은 **정밀도가 우선**이다(원칙 18).
+#   🔴 **막지 않는다.** 배당은 그대로 저장하고 **그 틱의 급락 계산만 보류**한다(기존 셋과 같은 방식).
+#   🔧 되돌리기: ODDS_JUMP_GATE = False
+ODDS_JUMP_GATE = True
+ODDS_JUMP_X = 3.0        # 몇 배 이상 벌어지면 「튀었다」로 보나
+ODDS_JUMP_FRAC = 0.5     # 공통 조합 중 이 비율을 넘으면 보류
+ODDS_JUMP_MIN = 10       # 공통 조합이 이보다 적으면 판정하지 않는다
+
+
+def _odds_jump_suspect(prev_q, cur_q, x=None, frac=None, minc=None):
+    """직전 틱과 공통 조합의 값이 x배 이상 벌어진 것이 frac 을 넘으면 (튄수, 공통수) 반환."""
+    x = ODDS_JUMP_X if x is None else x
+    frac = ODDS_JUMP_FRAC if frac is None else frac
+    minc = ODDS_JUMP_MIN if minc is None else minc
+    try:
+        a, b = _as_qmap(prev_q), _as_qmap(cur_q)
+    except Exception:
+        return None
+    com = set(a) & set(b)
+    if len(com) < minc:
+        return None
+    big = 0
+    for k in com:
+        try:
+            va, vb = float(a[k]), float(b[k])
+        except (TypeError, ValueError):
+            continue
+        if va <= 0 or vb <= 0:
+            continue
+        if max(va, vb) / min(va, vb) >= x:
+            big += 1
+    return (big, len(com)) if big / len(com) >= frac else None
+
+
 def _combo_count_dip(prev_q, cur_q, ratio=_DIP_RATIO, min_prev=_DIP_MIN_PREV):
     """[3번 조합 수 딥] 직전 대비 복승 조합 수가 급감했는지. 실측 112건/23,230틱(0.48%).
 
@@ -15990,6 +16035,12 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
                                                           len(_as_qmap(quinella)))
                 elif _column_shift_suspect(_lastq, quinella):
                     odds_suspect = "배당 열 밀림 의심(인접 조합 값 일치)"
+                elif ODDS_JUMP_GATE:
+                    _jr = _odds_jump_suspect(_lastq, quinella)
+                    if _jr:
+                        odds_suspect = "값 통째로 튐(공통 %d조합 중 %d개가 %.0f배+)" % (
+                            _jr[1], _jr[0], ODDS_JUMP_X)
+                        _gate_hit("odds_jump_suspect", rk, odds_suspect)
                 if odds_suspect:
                     print("⚠️ [수신값 검증] %s · %s → 이 틱 급락 계산 보류(배당은 저장)"
                           % (rk, odds_suspect))
@@ -17494,9 +17545,24 @@ def _build_analysis_log(rk, an=None):
             #     둘이 어긋나면 「받은 것과 재는 것이 다른」 문제가 재발한다(2026-08-13 실측).
             # ── [삼복승 메인의 짝 하나] 개수 상한 **뒤**에 넣는다 — 상한에 잘리면 의미가 없다 ──
             #   🔴 경륜만. 경마는 소급에서 악화라 켜지 않는다(TRIO_PAIR_ONE_SPORTS).
+            #   🔴 [2026-08-17 수정] 이 함수에는 `sport`·`curQ` 가 **없다**(`_build_analysis_log`).
+            #     첫 배선이 그 둘을 그대로 써서 NameError 로 **조용히 죽었다** — 계수기가 0이었다.
+            #     ⚠ 문법 검사는 통과한다(원칙: ast.parse 는 NameError 를 못 잡는다).
+            #     교차 짝이 쓰는 것과 같은 `an.get("sport")` · `an.get("quinella")` 로 바꾼다.
             if (TRIO_PAIR_ONE and not an.get("afterClose") and isinstance(_dc_out, dict)
-                    and str(sport or "") in TRIO_PAIR_ONE_SPORTS):
+                    and str(an.get("sport") or "") in TRIO_PAIR_ONE_SPORTS):
                 try:
+                    _tp_q = {}
+                    for _c in (an.get("quinella") or []):
+                        if not isinstance(_c, dict):
+                            continue
+                        _cb = _c.get("combo") or []
+                        if len(_cb) != 2:
+                            continue
+                        try:
+                            _tp_q[tuple(sorted(int(x) for x in _cb))] = float(_c.get("odds") or 0)
+                        except (TypeError, ValueError):
+                            pass
                     _tp_ft = (core_picks_out or {}).get("finalTrifectas") or []
                     _tp_main = None
                     for _t in _tp_ft:
@@ -17516,11 +17582,7 @@ def _build_analysis_log(rk, an=None):
                                 _k = (_tp_c[_i], _tp_c[_j])
                                 if _k in _tp_have:
                                     continue
-                                _o = (curQ or {}).get(_k) or (curQ or {}).get((_k[1], _k[0]))
-                                try:
-                                    _o = float(_o or 0)
-                                except (TypeError, ValueError):
-                                    _o = 0
+                                _o = _tp_q.get(_k) or 0
                                 if _o <= 0 or _o > 50.0:
                                     continue
                                 if _tp_best is None or _o < _tp_best[0]:
@@ -19689,6 +19751,27 @@ def _discovered_save(out):
 
 # [4번] 고배당 적중 하이라이트 저장소
 HIGHLIGHT_FILE = os.path.join(os.path.dirname(__file__), "data", "highlight_wins.json")
+
+
+def _trio_payout(payouts):
+    """[삼복승 확정배당 읽기 · 2026-08-17] 🔴 **`trifecta` 는 경로마다 뜻이 다르다.**
+
+    JRA(중앙) 파서   `3連複` → **trio** · `3連単` → **trifecta**(=삼쌍승)
+    NAR·경륜 파서    三連複 → **trifecta**(삼복승)  · trio 는 안 쓴다
+
+    실측: 둘 다 있는 94경주에서 **값이 같은 것 0건**이고 `trifecta` 가 `trio` 의 **중앙 4.64배**다
+      (니가타 11경주 trio 22.6 ↔ trifecta 97.2). ⇒ 서로 다른 마권이 맞다.
+    보유 분포: JRA중앙 trifecta 219·trio 95 / 경륜 trifecta 1347·trio 0 / 지방 trifecta 968·trio 0
+
+    🔴 그래서 「둘 다 더해서 읽기」를 하면 **삼쌍승을 삼복승으로 잘못 쓴다.**
+      규칙: **`trio` 가 있으면 그것만 쓴다**(JRA 경로). 없을 때만 `trifecta`(NAR·경륜 경로).
+    ⚠ 저장 쪽 이름 통일은 별건이다 — 과거 값의 뜻이 바뀌면 안 되므로 읽기에서만 가른다.
+    """
+    po = payouts or {}
+    v = po.get("trio")
+    if v is not None:
+        return v
+    return po.get("trifecta")
 
 
 def _safe_num(v):
@@ -34517,6 +34600,111 @@ def korea_reextract():
 def korea_prerace_list():
     """[사전분석] 저장된 경주 목록(index) — 경주 선택 UI/즉시 로드용. 리포트 본문은 제외(경량)."""
     return jsonify({"races": _prerace_index_load()})
+
+
+@app.route("/api/korea/pdf", methods=["GET"])
+def korea_pdf_full():
+    """[PDF 한 장 · 2026-08-17 대표 지시] 판독값·분석문·원문 글자를 **한 번에** 돌려준다.
+
+    왜: 지금은 대표가 화면을 복사해 붙여넣어야 내가 본다. 부산 1경주 착순 뒤집힘도 그렇게 찾았다.
+      직접 읽으면 **경주 전에** 이상한 것을 잡을 수 있다.
+    ⚠ `/api/race/full` 은 건드리지 않았다 — 기존 응답을 바꾸지 않기 위해 새 주소로 낸다.
+    🔴 완전 읽기 전용 · 127.0.0.1 전용(`_next_local_only`).
+
+    GET /api/korea/pdf?date=2026-08-17&track=서울&race=5
+      date 생략 시 오늘 · race 생략 시 그 경마장 전 경주 목록(경량)
+      &raw=1 이면 fitz 원문 글자도 함께(길다)
+    """
+    bad = _next_local_only()
+    if bad:
+        return bad
+    date = (request.args.get("date") or time.strftime("%Y-%m-%d")).strip()
+    track = (request.args.get("track") or "").strip()
+    race = (request.args.get("race") or "").strip()
+    want_raw = request.args.get("raw") in ("1", "true", "yes")
+    base = os.path.join(os.path.dirname(__file__), "data", "prerace")
+    try:
+        names = sorted(os.listdir(base))
+    except Exception:
+        return jsonify({"error": "prerace 디렉터리 없음", "date": date}), 404
+    pref = "%s_" % date
+    files = [n for n in names if n.startswith(pref) and n.endswith(".json")]
+    if track:
+        files = [n for n in files if ("_%s_" % track) in n]
+    if race:
+        files = [n for n in files if n.endswith("_%s.json" % race)]
+    if not files:
+        return jsonify({"error": "해당 PDF 판독분이 없습니다.", "date": date,
+                        "track": track, "race": race,
+                        "있는것": [n.replace(".json", "") for n in names if n.startswith(pref)][:40]}), 404
+    out = []
+    for n in files:
+        try:
+            d = json.load(open(os.path.join(base, n), encoding="utf-8"))
+        except Exception as e:
+            out.append({"file": n, "error": str(e)[:120]})
+            continue
+        hs = d.get("horses") or []
+        rep = d.get("report") or {}
+        rmap = {}
+        for rh in (rep.get("horses") or []):
+            try:
+                rmap[int(rh.get("no"))] = rh
+            except (TypeError, ValueError):
+                pass
+        rows = []
+        for h in hs:
+            try:
+                no = int(h.get("horseNum"))
+            except (TypeError, ValueError):
+                no = h.get("horseNum")
+            r = rmap.get(no) or {}
+            pr = [x.get("placing") for x in (h.get("pastRaces") or [])]
+            rp = h.get("recentPlacings") or []
+            rows.append({
+                "마번": no, "마명": h.get("horseName"), "기수": h.get("jockey"),
+                "부담중량": h.get("weight"), "레이팅": h.get("rating"),
+                "등급": h.get("grade"), "조교": h.get("training"),
+                "건강": h.get("health"), "최근출전": h.get("recentRecord"),
+                "최근착순": rp, "과거경주착순": pr,
+                "🔴착순어긋남": bool(rp and pr and list(rp)[:1] != list(pr)[:1]),
+                "원본착순": h.get("recentPlacingsRaw"),
+                "과거경주": h.get("pastRaces") or [],
+                "분석등급": r.get("grade"), "분석점수": r.get("score"),
+                "분석근거": r.get("reason"), "근거요약": r.get("evidence"),
+            })
+        item = {"file": n.replace(".json", ""), "경주": d.get("title"),
+                "경마장": d.get("venue"), "경주번호": d.get("raceNo"),
+                "거리": d.get("distance"), "발주": d.get("postTime"),
+                "저장시각": d.get("savedAt"), "두수": len(hs),
+                "🔴착순어긋남_마릿수": sum(1 for x in rows if x["🔴착순어긋남"]),
+                "출전마": rows,
+                "분석문": {"총평": rep.get("race_summary"), "분석": rep.get("analysis"),
+                          "추천": rep.get("betting_recommend"), "등급픽": rep.get("grade_picks"),
+                          "주의점": rep.get("special_notes"),
+                          "결정론": rep.get("deterministic"),
+                          "패턴2": rep.get("pattern2_horses")}}
+        out.append(item)
+    res = {"date": date, "track": track or None, "race": race or None,
+           "건수": len(out), "경주": out}
+    if want_raw:
+        cache = os.path.join(os.path.dirname(__file__), "data", "korea_pdf_cache")
+        texts = []
+        try:
+            for cn in sorted(os.listdir(cache))[:12]:
+                try:
+                    cd = json.load(open(os.path.join(cache, cn), encoding="utf-8"))
+                except Exception:
+                    continue
+                t = cd.get("text") or cd.get("raw") or ""
+                if track and track not in str(t)[:4000]:
+                    continue
+                texts.append({"file": cn, "글자수": len(str(t)), "원문": str(t)[:20000]})
+        except Exception:
+            pass
+        res["원문"] = texts
+        res["원문안내"] = "fitz 판독 원문 캐시. 각 20000자까지."
+    return jsonify(res)
 
 
 @app.route("/api/korea/prerace/<key>", methods=["GET"])
