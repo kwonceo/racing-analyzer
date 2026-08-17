@@ -2,14 +2,6 @@
   "patterns": [
     {
       "race": "부산 7경주",
-      "horse_no": 11,
-      "recent_avg": 5.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-09"
-    },
-    {
-      "race": "부산 7경주",
       "horse_no": 6,
       "recent_avg": 8.8,
       "win_place": 1,
@@ -5180,24 +5172,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1144,
-    "hit": 917,
+    "count": 1145,
+    "hit": 918,
     "cases": [
-      {
-        "race": "구마모토 11경주",
-        "date": "2026-08-12",
-        "smart_horses": [
-          4,
-          2
-        ],
-        "placed": [
-          4
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 2.3,
-        "high_odds": false
-      },
       {
         "race": "우라와 5경주",
         "date": "2026-08-12",
@@ -6708,6 +6685,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 9.4,
+        "high_odds": false
+      },
+      {
+        "race": "大垣 7경주",
+        "date": "2026-08-17",
+        "smart_horses": [
+          5,
+          6,
+          2
+        ],
+        "placed": [
+          5,
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 6.6,
         "high_odds": false
       }
     ],
