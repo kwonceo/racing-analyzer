@@ -1,0 +1,98 @@
+{
+ "raceKey": "카나자와 7경주",
+ "entries": [
+  {
+   "time": "00:00:39",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      7
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      4,
+      8
+     ],
+     [
+      3,
+      8
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      4,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      7,
+      10
+     ],
+     [
+      3,
+      7,
+      8
+     ],
+     [
+      2,
+      3,
+      4
+     ],
+     [
+      3,
+      4,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:45:08",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       3,
+       4
+      ],
+      "prev": 399.9,
+      "cur": 240.8,
+      "pct": -39.8
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

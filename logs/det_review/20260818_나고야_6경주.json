@@ -1,0 +1,116 @@
+{
+ "raceKey": "나고야 6경주",
+ "entries": [
+  {
+   "time": "17:06:08",
+   "minutesBefore": 8,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      7,
+      11
+     ],
+     [
+      5,
+      10
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      7,
+      10
+     ],
+     [
+      10,
+      11
+     ],
+     [
+      5,
+      11
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      7,
+      11
+     ],
+     [
+      2,
+      7,
+      11
+     ],
+     [
+      5,
+      7,
+      10
+     ],
+     [
+      5,
+      7,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "17:15:55",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       8,
+       11
+      ],
+      "prev": 767.0,
+      "cur": 356.0,
+      "pct": -53.6
+     },
+     {
+      "combo": [
+       3,
+       11
+      ],
+      "prev": 613.6,
+      "cur": 309.0,
+      "pct": -49.6
+     },
+     {
+      "combo": [
+       6,
+       11
+      ],
+      "prev": 438.3,
+      "cur": 264.1,
+      "pct": -39.7
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

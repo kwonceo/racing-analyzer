@@ -1,47 +1,47 @@
 {
- "updated_at": "2026-08-16 22:01:27",
+ "updated_at": "2026-08-18 22:36:05",
  "signals": {
   "복승불일치": {
-   "total": 153,
-   "hit": 50,
-   "hit_rate": 0.327,
-   "avg_odds": 5.98,
-   "roi": 1.95
+   "total": 168,
+   "hit": 56,
+   "hit_rate": 0.333,
+   "avg_odds": 5.99,
+   "roi": 2.0
   },
   "급락50+": {
-   "total": 145,
-   "hit": 52,
-   "hit_rate": 0.359,
-   "avg_odds": 4.84,
-   "roi": 1.74
+   "total": 165,
+   "hit": 62,
+   "hit_rate": 0.376,
+   "avg_odds": 4.89,
+   "roi": 1.84
   },
   "급락30+": {
-   "total": 19,
-   "hit": 6,
-   "hit_rate": 0.316,
-   "avg_odds": 4.37,
+   "total": 26,
+   "hit": 9,
+   "hit_rate": 0.346,
+   "avg_odds": 4.39,
+   "roi": 1.52
+  },
+  "배당압축": {
+   "total": 27,
+   "hit": 5,
+   "hit_rate": 0.185,
+   "avg_odds": 7.46,
    "roi": 1.38
   },
   "쌍승역전": {
-   "total": 63,
-   "hit": 19,
-   "hit_rate": 0.302,
-   "avg_odds": 4.42,
-   "roi": 1.33
-  },
-  "배당압축": {
-   "total": 23,
-   "hit": 3,
-   "hit_rate": 0.13,
-   "avg_odds": 8.4,
-   "roi": 1.1
+   "total": 74,
+   "hit": 21,
+   "hit_rate": 0.284,
+   "avg_odds": 4.33,
+   "roi": 1.23
   },
   "연속하락": {
-   "total": 47,
-   "hit": 7,
-   "hit_rate": 0.149,
-   "avg_odds": 2.77,
-   "roi": 0.41
+   "total": 69,
+   "hit": 18,
+   "hit_rate": 0.261,
+   "avg_odds": 4.61,
+   "roi": 1.2
   }
  }
 }

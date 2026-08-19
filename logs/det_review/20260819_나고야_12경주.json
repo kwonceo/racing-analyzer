@@ -1,0 +1,66 @@
+{
+ "raceKey": "나고야 12경주",
+ "entries": [
+  {
+   "time": "00:01:07",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      6,
+      10
+     ],
+     [
+      6,
+      11
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      6,
+      8
+     ],
+     [
+      5,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      5,
+      6,
+      10
+     ],
+     [
+      6,
+      10,
+      11
+     ],
+     [
+      1,
+      6,
+      11
+     ],
+     [
+      1,
+      8,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

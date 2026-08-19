@@ -1,0 +1,107 @@
+{
+ "raceKey": "모리오카 2경주",
+ "entries": [
+  {
+   "time": "12:10:03",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      6
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      3,
+      7
+     ],
+     [
+      6,
+      7
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      6,
+      7
+     ],
+     [
+      3,
+      4,
+      6
+     ],
+     [
+      3,
+      4,
+      7
+     ],
+     [
+      4,
+      6,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "12:20:32",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       1,
+       3
+      ],
+      "prev": 65.3,
+      "cur": 27.9,
+      "pct": -57.3
+     },
+     {
+      "combo": [
+       6,
+       7
+      ],
+      "prev": 14.7,
+      "cur": 9.7,
+      "pct": -34.0
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

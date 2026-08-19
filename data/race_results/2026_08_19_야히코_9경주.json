@@ -1,0 +1,69 @@
+{
+ "race_id": "2026_08_19_야히코_9경주",
+ "raceKey": "야히코 9경주",
+ "date": "2026-08-19",
+ "sport": "cycle",
+ "category": "cycle",
+ "track": "야히코",
+ "round": 9,
+ "distance": null,
+ "track_condition": null,
+ "weather": null,
+ "horse_count": 7,
+ "result": {
+  "1st": 2,
+  "2nd": 6,
+  "3rd": 5
+ },
+ "payouts": {
+  "quinella": 2.7,
+  "trifecta": 33.2
+ },
+ "payouts_approx": false,
+ "odds_at_start": {},
+ "odds_timeline": [],
+ "anomalies": [],
+ "prediction": {
+  "candidates": [
+   1,
+   2,
+   4,
+   5,
+   6,
+   7
+  ],
+  "eliminated": [
+   3
+  ],
+  "recommend_main": null,
+  "recommend_sub": null,
+  "strategy": null,
+  "signal_quality": null,
+  "confidence": 0,
+  "inverse": false
+ },
+ "result_analysis": {
+  "main_hit": true,
+  "sub_hit": false,
+  "hit_reason": "제거 적중",
+  "miss_reason": null,
+  "pattern_tags": [],
+  "anomaly_correct": false,
+  "form_pick_hit": false
+ },
+ "investment": {
+  "budget": 0,
+  "main_bet": 0,
+  "sub_bet": 0,
+  "quinella_odds": 2.7,
+  "trifecta_odds": 33.2,
+  "actual_return": null,
+  "profit": 1700
+ },
+ "memo": null,
+ "saved_at": "2026-08-19 00:00:38",
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

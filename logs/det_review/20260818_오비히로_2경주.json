@@ -1,0 +1,70 @@
+{
+ "raceKey": "오비히로 2경주",
+ "entries": [
+  {
+   "time": "00:00:10",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      3,
+      5
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      3,
+      7
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      4,
+      5
+     ],
+     [
+      3,
+      5,
+      8
+     ],
+     [
+      1,
+      5,
+      7
+     ],
+     [
+      5,
+      7,
+      8
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

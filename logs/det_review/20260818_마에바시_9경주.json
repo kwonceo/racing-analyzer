@@ -1,0 +1,63 @@
+{
+ "raceKey": "마에바시 9경주",
+ "entries": [
+  {
+   "time": "00:00:08",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 1개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      1,
+      2
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      2,
+      5
+     ],
+     [
+      1,
+      5,
+      7
+     ],
+     [
+      1,
+      2,
+      7
+     ],
+     [
+      2,
+      5,
+      7
+     ]
+    ],
+    "linePairs": [
+     [
+      4,
+      2
+     ]
+    ]
+   }
+  }
+ ]
+}

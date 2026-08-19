@@ -1,0 +1,61 @@
+{
+ "raceKey": "모리오카 10경주",
+ "entries": [
+  {
+   "time": "00:00:16",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      6,
+      8
+     ],
+     [
+      8,
+      11
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      3,
+      8
+     ],
+     [
+      6,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      6,
+      8,
+      9
+     ],
+     [
+      6,
+      8,
+      11
+     ],
+     [
+      8,
+      9,
+      11
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

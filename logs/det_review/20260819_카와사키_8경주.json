@@ -1,0 +1,67 @@
+{
+ "raceKey": "카와사키 8경주",
+ "entries": [
+  {
+   "time": "00:01:08",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       3,
+       10
+      ],
+      "prev": 163.7,
+      "cur": 113.6,
+      "pct": -30.6
+     }
+    ],
+    "finalQuinellas": [
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      5,
+      7
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      5,
+      10
+     ],
+     [
+      3,
+      5,
+      6
+     ],
+     [
+      3,
+      6,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

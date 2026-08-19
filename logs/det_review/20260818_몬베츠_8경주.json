@@ -1,0 +1,102 @@
+{
+ "raceKey": "몬베츠 8경주",
+ "entries": [
+  {
+   "time": "18:05:49",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      8,
+      11
+     ],
+     [
+      10,
+      11
+     ],
+     [
+      8,
+      10
+     ],
+     [
+      3,
+      10
+     ],
+     [
+      1,
+      11
+     ],
+     [
+      1,
+      8
+     ],
+     [
+      1,
+      10
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      1,
+      8,
+      11
+     ],
+     [
+      8,
+      10,
+      11
+     ],
+     [
+      1,
+      10,
+      11
+     ],
+     [
+      1,
+      8,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "18:16:26",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [
+     {
+      "combo": [
+       4,
+       9
+      ],
+      "prev": 6045.0,
+      "cur": 3146.2,
+      "pct": -48.0
+     }
+    ],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

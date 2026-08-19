@@ -1,94 +1,4 @@
 {
- "2026-08-04": {
-  "pastPops": 72,
-  "popDeno": 208,
-  "k5have": 207,
-  "k5deno": 208,
-  "k5allHave": 207,
-  "k5allDeno": 991,
-  "k5hHave": 207,
-  "k5hDeno": 411,
-  "srcs": {
-   "keirin": 580,
-   "none": 0,
-   "oddspark": 129,
-   "keiba_ext": 203,
-   "keiba_nar": 79
-  },
-  "races": 137,
-  "bySrc": {
-   "keirin": {
-    "n": 580,
-    "k5": 0,
-    "pop": 0
-   },
-   "none": {
-    "n": 0,
-    "k5": 0,
-    "pop": 0
-   },
-   "oddspark": {
-    "n": 129,
-    "k5": 128,
-    "pop": 0
-   },
-   "keiba_ext": {
-    "n": 203,
-    "k5": 0,
-    "pop": 0
-   },
-   "keiba_nar": {
-    "n": 79,
-    "k5": 79,
-    "pop": 72
-   }
-  }
- },
- "2026-08-05": {
-  "pastPops": 61,
-  "popDeno": 167,
-  "k5have": 132,
-  "k5deno": 167,
-  "k5allHave": 132,
-  "k5allDeno": 778,
-  "k5hHave": 132,
-  "k5hDeno": 294,
-  "srcs": {
-   "keirin": 498,
-   "none": 0,
-   "keiba_ext": 113,
-   "oddspark": 85,
-   "keiba_nar": 82
-  },
-  "races": 114,
-  "bySrc": {
-   "keirin": {
-    "n": 498,
-    "k5": 0,
-    "pop": 0
-   },
-   "none": {
-    "n": 0,
-    "k5": 0,
-    "pop": 0
-   },
-   "keiba_ext": {
-    "n": 113,
-    "k5": 0,
-    "pop": 0
-   },
-   "oddspark": {
-    "n": 85,
-    "k5": 70,
-    "pop": 0
-   },
-   "keiba_nar": {
-    "n": 82,
-    "k5": 62,
-    "pop": 61
-   }
-  }
- },
  "2026-08-06": {
   "pastPops": 100,
   "popDeno": 191,
@@ -665,44 +575,124 @@
   }
  },
  "2026-08-17": {
-  "pastPops": 0,
-  "popDeno": 35,
-  "k5have": 35,
-  "k5deno": 35,
-  "p2hHave": 57,
-  "p2hDeno": 115,
-  "p6hHave": 35,
-  "p6hDeno": 115,
-  "k5allHave": 35,
-  "k5allDeno": 269,
-  "k5hHave": 35,
-  "k5hDeno": 115,
+  "pastPops": 77,
+  "popDeno": 348,
+  "k5have": 248,
+  "k5deno": 348,
+  "p2hHave": 324,
+  "p2hDeno": 528,
+  "p6hHave": 248,
+  "p6hDeno": 528,
+  "k5allHave": 248,
+  "k5allDeno": 938,
+  "k5hHave": 248,
+  "k5hDeno": 528,
   "srcs": {
-   "keirin": 143,
-   "keiba_ext": 33,
-   "oddspark": 35,
-   "korea": 58,
-   "none": 0
+   "keirin": 427,
+   "keiba_ext": 87,
+   "oddspark": 266,
+   "none": 0,
+   "korea": 76,
+   "keiba_nar": 82
   },
-  "races": 38,
+  "races": 129,
   "bySrc": {
    "keirin": {
-    "n": 143,
+    "n": 427,
     "k5": 0,
     "pop": 0
    },
    "keiba_ext": {
-    "n": 33,
+    "n": 87,
     "k5": 0,
     "pop": 0
    },
    "oddspark": {
-    "n": 35,
-    "k5": 35,
+    "n": 266,
+    "k5": 166,
+    "pop": 0
+   },
+   "none": {
+    "n": 0,
+    "k5": 0,
     "pop": 0
    },
    "korea": {
-    "n": 58,
+    "n": 76,
+    "k5": 0,
+    "pop": 0
+   },
+   "keiba_nar": {
+    "n": 82,
+    "k5": 82,
+    "pop": 77
+   }
+  }
+ },
+ "2026-08-18": {
+  "pastPops": 0,
+  "popDeno": 150,
+  "k5have": 149,
+  "k5deno": 150,
+  "p2hHave": 247,
+  "p2hDeno": 248,
+  "p6hHave": 149,
+  "p6hDeno": 248,
+  "k5allHave": 149,
+  "k5allDeno": 766,
+  "k5hHave": 149,
+  "k5hDeno": 248,
+  "srcs": {
+   "oddspark": 150,
+   "keirin": 560,
+   "none": 0,
+   "keiba_ext": 56
+  },
+  "races": 139,
+  "bySrc": {
+   "oddspark": {
+    "n": 150,
+    "k5": 149,
+    "pop": 0
+   },
+   "keirin": {
+    "n": 560,
+    "k5": 0,
+    "pop": 0
+   },
+   "none": {
+    "n": 0,
+    "k5": 0,
+    "pop": 0
+   },
+   "keiba_ext": {
+    "n": 56,
+    "k5": 0,
+    "pop": 0
+   }
+  }
+ },
+ "2026-08-19": {
+  "pastPops": 0,
+  "popDeno": 0,
+  "k5have": 0,
+  "k5deno": 0,
+  "p2hHave": 0,
+  "p2hDeno": 7,
+  "p6hHave": 0,
+  "p6hDeno": 7,
+  "k5allHave": 0,
+  "k5allDeno": 25,
+  "k5hHave": 0,
+  "k5hDeno": 7,
+  "srcs": {
+   "keirin": 25,
+   "none": 0
+  },
+  "races": 5,
+  "bySrc": {
+   "keirin": {
+    "n": 25,
     "k5": 0,
     "pop": 0
    },

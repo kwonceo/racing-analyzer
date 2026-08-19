@@ -24003,6 +24003,39 @@ def day_races():
     if len(date) != 8:
         date = time.strftime("%Y%m%d")
     date_dash = "%s-%s-%s" % (date[:4], date[4:6], date[6:8])
+    # ── [응답 파일 캐시 (2026-08-19 승인)] ────────────────────────────────
+    #   왜: 이 화면이 45초 걸려 대표가 경주를 못 봤다. 브라우저가 기다리다 포기한다.
+    #     구간을 하나씩 재보니 개별로는 다 빠르고(합계 3초) 서버 안에서만 느리다 —
+    #     수집 6병렬과 겹쳐 밀린다. 그리고 🔴 **메모리 캐시라 재기동하면 통째로 빈다.**
+    #     그날 서버가 두 번 죽었고 그때마다 다시 45초가 됐다.
+    #   ⇒ 응답을 **파일로** 남긴다. 재기동해도 유지된다.
+    #   ⚠ 무효화: 그 날짜 결과 파일들의 **최대 mtime + 개수**가 바뀌면 다시 만든다.
+    #     (뒤늦은 결과 백필로 과거 날짜도 바뀔 수 있다 — 영구 캐시로 두면 안 된다)
+    #   🔧 되돌리기: DAY_CARDS_CACHE = False
+    _dc_stamp = None
+    if DAY_CARDS_CACHE:
+        try:
+            _pref = date_dash.replace("-", "_")
+            _mx, _cnt = 0.0, 0
+            for _dn in (RACE_RESULTS_DIR, ANALYSIS_LOG_DIR):
+                if not os.path.isdir(_dn):
+                    continue
+                for _fn in os.listdir(_dn):
+                    if _fn.startswith(_pref) and _fn.endswith(".json"):
+                        _cnt += 1
+                        try:
+                            _mx = max(_mx, os.path.getmtime(os.path.join(_dn, _fn)))
+                        except Exception:
+                            pass
+            _dc_stamp = "%d|%.0f" % (_cnt, _mx)
+            _cp = os.path.join(DAY_CARDS_CACHE_DIR, "%s.json" % date_dash)
+            if os.path.exists(_cp):
+                _cd = json.load(open(_cp, encoding="utf-8"))
+                if _cd.get("_stamp") == _dc_stamp:
+                    _cd.pop("_stamp", None)
+                    return jsonify(_cd)
+        except Exception as _dce0:
+            print("[날짜별카드] 캐시 조회 실패(무시):", str(_dce0)[:100])
     cards = []
     q_hit = q_tot = dark_hit = 0
     sig_stat = {}
@@ -24163,7 +24196,17 @@ def day_races():
     except Exception as _ipe:
         print("[진행중 카드] 스킵(무시):", _ipe)
     cards.sort(key=lambda c: c.get("race") or "")
-    return jsonify({"date": date_dash, "count": len(cards), "kpi": kpi, "cards": cards})
+    _out = {"date": date_dash, "count": len(cards), "kpi": kpi, "cards": cards}
+    if DAY_CARDS_CACHE and _dc_stamp:
+        try:
+            os.makedirs(DAY_CARDS_CACHE_DIR, exist_ok=True)
+            _tmp = os.path.join(DAY_CARDS_CACHE_DIR, "%s.json.tmp%d" % (date_dash, os.getpid()))
+            with open(_tmp, "w", encoding="utf-8") as _f:
+                json.dump(dict(_out, _stamp=_dc_stamp), _f, ensure_ascii=False)
+            os.replace(_tmp, os.path.join(DAY_CARDS_CACHE_DIR, "%s.json" % date_dash))
+        except Exception as _dce1:
+            print("[날짜별카드] 캐시 저장 실패(무시):", str(_dce1)[:100])
+    return jsonify(_out)
 
 
 # ── [카카오 알림] 큐 조회(사업자 등록 전 감사·수동발송용) ──
@@ -33835,6 +33878,9 @@ TRIO_MAIN_BY_LABEL = True
 #     총투자를 고정하면 구좌 증가는 원금이 느는 것이 아니라 한 조합에 거는 돈이 주는 것이고,
 #     그 대가는 회수율에 전부 반영돼 있다. ⇒ 구좌로 또 자르면 두 번 세는 것이다(대표 판단).
 #   🔧 되돌리기: TRIO_PAIR_ONE = False
+# [날짜별 카드 응답 파일 캐시 · 2026-08-19] 상세는 day_races 안 주석 참조.
+DAY_CARDS_CACHE = True
+DAY_CARDS_CACHE_DIR = os.path.join(os.path.dirname(__file__), "data", "day_cards_cache")
 TRIO_PAIR_ONE = True
 TRIO_PAIR_ONE_SPORTS = ("cycle",)
 
@@ -39202,7 +39248,10 @@ def _start_review_scheduler():
                 try:
                     if _autofind_mod:
                         _afp = os.path.join(_autofind_mod.OUT_DIR, "%s.json" % today)
-                        if not os.path.exists(_afp):
+                        # 🔴 [2026-08-19] 이 계산이 27.5초 걸린다. 그동안 서버가 다른 일을 못 한다.
+                        #   개최 중에 돌면 화면 응답이 통째로 밀린다 → **경주 없는 새벽에만** 돌린다.
+                        _afh = int(time.strftime("%H"))
+                        if (not os.path.exists(_afp)) and (5 <= _afh <= 8):
                             _af = _autofind_mod.run()
                             if not (_af or {}).get("error"):
                                 _gate_hit("auto_finding_daily",

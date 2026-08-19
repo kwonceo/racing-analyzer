@@ -1,0 +1,48 @@
+{
+ "raceKey": "오이 3경주",
+ "entries": [
+  {
+   "time": "00:00:58",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      7,
+      8
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      4,
+      8
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      7,
+      8
+     ],
+     [
+      4,
+      5,
+      7
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

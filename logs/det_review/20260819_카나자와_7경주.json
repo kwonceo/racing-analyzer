@@ -1,0 +1,62 @@
+{
+ "raceKey": "카나자와 7경주",
+ "entries": [
+  {
+   "time": "00:00:04",
+   "minutesBefore": null,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      7
+     ],
+     [
+      6,
+      7
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      6,
+      7,
+      10
+     ],
+     [
+      4,
+      6,
+      7
+     ],
+     [
+      1,
+      7,
+      10
+     ],
+     [
+      1,
+      6,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  }
+ ]
+}

@@ -1,0 +1,76 @@
+{
+ "raceKey": "오비히로 12경주",
+ "entries": [
+  {
+   "time": "20:20:34",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      4,
+      7
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      4,
+      7,
+      10
+     ],
+     [
+      4,
+      5,
+      7
+     ],
+     [
+      3,
+      4,
+      7
+     ],
+     [
+      4,
+      5,
+      10
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "20:30:12",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}

@@ -1,0 +1,92 @@
+{
+ "raceKey": "오이 8경주",
+ "entries": [
+  {
+   "time": "19:20:24",
+   "minutesBefore": 9,
+   "status": "SAFE",
+   "checked": [
+    "삼복승정합"
+   ],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [
+     [
+      9,
+      12
+     ],
+     [
+      2,
+      12
+     ],
+     [
+      2,
+      9
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      3,
+      12
+     ],
+     [
+      3,
+      9
+     ]
+    ],
+    "finalTrifectas": [
+     [
+      3,
+      9,
+      12
+     ],
+     [
+      2,
+      9,
+      12
+     ],
+     [
+      2,
+      3,
+      12
+     ],
+     [
+      2,
+      3,
+      9
+     ]
+    ],
+    "linePairs": []
+   }
+  },
+  {
+   "time": "19:32:05",
+   "minutesBefore": -1,
+   "status": "NO_DATA",
+   "checked": [],
+   "skipped": [
+    "B라인누락: 라인 페어 0개(2개 미만)",
+    "삼복승정합: 복승 1순위 없음",
+    "급락미반영: 항목 비활성(DET_ITEM_DROP_ENABLED=False)"
+   ],
+   "issues": [],
+   "input": {
+    "drops": [],
+    "finalQuinellas": [],
+    "finalTrifectas": [],
+    "linePairs": []
+   }
+  }
+ ]
+}
