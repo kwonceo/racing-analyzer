@@ -17433,15 +17433,34 @@ def _build_analysis_log(rk, an=None):
             _dc_out = _old_dc                        # 마감 후 → 동결(마감 전 기록 유지)
         else:
             _cp_dc = core_picks_out or {}
+            # 🔴 [경륜 삼복승 1순위 해제 (2026-08-20 승인)] 섀도우로 통째 막던 것 중 **1순위 하나만** 연다.
+            #   왜: 회원이 겪는 것이 저배당 일색이었다 — 복승 적중 배당중앙 2.40배 · 10배 이상 6.1% ·
+            #       50배 이상은 8월 내내 0건. 「역전의 쾌감」이 나올 자리가 구조적으로 없었다.
+            #   소급 대조(8월 경륜 1,386경주 · 삼복승 확정배당 100%):
+            #       추가분 회수 88.0% · 대박 뺀 79.3% · 배당중앙 4.50 · 10배 이상 15.8%
+            #       합산 10배 이상 적중 40건 → 69건(+72%) · 배당중앙 2.40 → 2.70
+            #   ⚠ 합산 회수율은 76.2% 로 **100% 미만이다** — 「사면 번다」가 아니라
+            #     「덜 잃으면서 훨씬 재미있어진다」이다. 광고 문구를 그렇게 쓰면 안 된다.
+            #   🔴 경마는 제외한다 — 추가분 대박 뺀 회수가 43.1% 로 무너진다.
+            #   ⚠ 정렬(_cands.sort)은 한 줄도 안 건드렸다. 1순위는 지금 코드가 정하는 그대로다.
+            #   🔧 되돌리기: TRIO_TOP1_OPEN = False 한 줄.
+            _tri_open = bool(TRIO_TOP1_OPEN
+                             and str(an.get("sport") or "") in TRIO_TOP1_OPEN_SPORTS)
+            _tri_all = [sorted(int(x) for x in (t.get("combo") or []))
+                        for t in (_cp_dc.get("finalTrifectas") or []) if t.get("combo")]
+            if an.get("trioShadow"):
+                _tri_out = _tri_all[:TRIO_TOP1_OPEN_N] if _tri_open else []
+                if _tri_open and _tri_out:
+                    _gate_hit("trio_top1_open", rk, "삼복승 1순위 해제")
+            else:
+                _tri_out = _tri_all[:2]
             _dc_out = {
                 "quinellas": [sorted(int(x) for x in (q.get("combo") or []))
                               for q in (_cp_dc.get("finalQuinellas") or []) if q.get("combo")],
                 # [삼복승 섀도우 (2026-07-29)] trioShadow 면 판정 명단에서 제외한다 — 회원에게 추천하지
                 #   않는 조합을 성적표에 넣으면 회수율이 다시 왜곡된다. 생성물(finalTrifectas·
                 #   shadowTrifectas)은 그대로 남아 대표님 전용 확인과 시뮬에 계속 쓰인다.
-                "trifectas": ([] if an.get("trioShadow") else
-                              [sorted(int(x) for x in (t.get("combo") or []))
-                               for t in (_cp_dc.get("finalTrifectas") or [])[:2] if t.get("combo")]),
+                "trifectas": _tri_out,
                 "at": time.strftime("%H:%M:%S", time.localtime()),
             }
             # 🔴 [골격 + 고배당 판정 편입 (2026-08-11 승인)] 화면에는 나가는데 판정 밖이던
@@ -37548,6 +37567,13 @@ KAKAO_ANCHOR_DIR = os.path.join(os.path.dirname(__file__), "data", "kakao_sent")
 # 🔴 [카톡 삼복승 개수 (2026-08-10 대표 결정)] 발송 전용 상한. 화면·판정에는 영향 없다.
 #   1 = 대표 결정(trifecta_main 만) · 2 = 종전 · 0 = 완전 제외(측정상 99.5%지만 고배당 기회를 버린다)
 KAKAO_TRIO_MAX = 1
+
+# 🔴 [경륜 삼복승 1순위 해제 (2026-08-20 승인)] 섀도우로 통째 막던 것 중 1순위 하나만 판정 명단에 넣는다.
+#   ⚠ 카톡 발송 개수는 안 바뀐다(KAKAO_TRIO_MAX=1 그대로) — 바뀌는 것은 **성적표에 들어가느냐**다.
+#   🔧 되돌리기: TRIO_TOP1_OPEN = False. 사흘 지켜보고 나쁘면 되돌린다.
+TRIO_TOP1_OPEN = True
+TRIO_TOP1_OPEN_SPORTS = ("cycle",)   # 🔴 경마 제외 — 추가분 대박 뺀 회수 43.1% 로 무너진다
+TRIO_TOP1_OPEN_N = 1
 
 
 def _kakao_anchor_log(rk, phase, text, result, an=None):
