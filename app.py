@@ -37571,6 +37571,11 @@ KAKAO_TRIO_MAX = 1
 # 🔴 [경륜 삼복승 1순위 해제 (2026-08-20 승인)] 섀도우로 통째 막던 것 중 1순위 하나만 판정 명단에 넣는다.
 #   ⚠ 카톡 발송 개수는 안 바뀐다(KAKAO_TRIO_MAX=1 그대로) — 바뀌는 것은 **성적표에 들어가느냐**다.
 #   🔧 되돌리기: TRIO_TOP1_OPEN = False. 사흘 지켜보고 나쁘면 되돌린다.
+# 🔴 [발주 후 변경알림 폐지 (2026-08-20 승인)] T+1 = 발주 1분 뒤. 회원이 살 수 없는 시점이다.
+#   그 조합이 판정 명단에 들어가 성적을 부풀렸다 — 8/19~20 회수율 68.9% → 72.5%(+3.6%p).
+#   ⚠ 잃는 것이 없다. 끄면 측정이 정직해진다. 🔧 되돌리기: True.
+KAKAO_T1_CHANGE_ENABLED = False
+
 TRIO_TOP1_OPEN = True
 TRIO_TOP1_OPEN_SPORTS = ("cycle",)   # 🔴 경마 제외 — 추가분 대박 뺀 회수 43.1% 로 무너진다
 TRIO_TOP1_OPEN_N = 1
@@ -38395,7 +38400,16 @@ def _timeline_snap_tick(races, now, db):
                     _ks = _KAKAO_SENT.pop(rk, None)
                     if _ks is not None:
                         _kakao_sent_save()   # [리로드 생존] 정리 즉시 영속화
-                    if _ks and _ks.get("day") == time.strftime("%Y-%m-%d") \
+                    # 🔴 [발주 후 알림 폐지 (2026-08-20 승인)] T+1 은 **발주 1분 뒤**라 회원이 살 수 없다.
+                    #   그런데 그 조합이 판정 명단에 들어가 **우리 성적을 부풀리고 있었다** —
+                    #   8/19~20 실측: 회수율 68.9% → 72.5%(+3.6%p)가 못 사는 조합에서 나왔다.
+                    #   발송도 54.4% 경주에서 나가 소음이었다.
+                    #   ⚠ 잃는 것이 없다 — 못 사는 시점의 통보다. 끄면 측정이 정직해진다.
+                    #   🔧 되돌리기: KAKAO_T1_CHANGE_ENABLED = True 한 줄.
+                    if _ks and not KAKAO_T1_CHANGE_ENABLED:
+                        _gate_hit("kakao_t1_off", rk, "발주 후 변경알림 폐지", once_key=rk)
+                    if KAKAO_T1_CHANGE_ENABLED \
+                            and _ks and _ks.get("day") == time.strftime("%Y-%m-%d") \
                             and (_ks.get("quinellas") or _ks.get("trifectas")):
                         _dcf = {}
                         _lpc, _, _ = _analysis_log_path(_canonical_log_key(rk))
