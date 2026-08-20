@@ -8803,6 +8803,30 @@ def _final_picks(cp, curQ, valid_nos, smart_quinella=None, max_q=2,
         _special_max = 2
     meta = sig_meta or {}
 
+    # 🔴 [2026-08-20] sig_meta 를 저장에 남긴다 — **저장만이다. 판정·정렬은 한 줄도 안 바꾼다.**
+    #   왜: 삼복승 3착 후보 정렬(_apply_profit_strategy 의 `_cands.sort(reverse=True)`)이
+    #       급락 폭 큰 순인데, 급락 크기별 적중률은 20~30%가 정점인 역U자다.
+    #       그런데 sig_meta 가 저장되지 않아 **정렬을 바꿨을 때를 잴 수가 없다** —
+    #       drops_raw 로 추정해 재봤더니 현재 1순위를 되살린 것이 37.0%뿐이라 판정 불가였다.
+    #   ⚠ 소급 불가. 며칠 쌓인 뒤에 정렬 교체를 다시 잰다.
+    try:
+        if isinstance(cp, dict) and meta:
+            _sm_out = {}
+            for _n, _m in meta.items():
+                if not isinstance(_m, dict):
+                    continue
+                try:
+                    _n = int(_n)
+                except (TypeError, ValueError):
+                    continue
+                _sm_out[str(_n)] = {"drop": _m.get("drop"), "rev": bool(_m.get("rev")),
+                                    "smart": bool(_m.get("smart")), "dark": bool(_m.get("dark")),
+                                    "score": _m.get("score")}
+            if _sm_out:
+                cp["sigMeta"] = _sm_out
+    except Exception:
+        pass
+
     def _mh(no):
         return meta.get(int(no)) or meta.get(str(no)) or {}
 
@@ -27621,8 +27645,24 @@ def _keiba_parse_shutsuba(html):
             name_cell = max(kata, key=len) if kata else ""
         name = ""
         sex_age = ""
+        name_src = None
         if name_cell:
-            name = re.split(r"[\s　]", name_cell.strip())[0]
+            # 🔴 [2026-08-20] 종전에는 **첫 토막**을 마명으로 썼다. 그 자리는 마명이 아니라 **부마(父馬)**다.
+            #   실물: 「ディーマジェスティ ワンダーアンジェ 牝4 青毛 ワンダーポピュレル (ケイムホーム)」
+            #         = [父馬, 마명, 성별나이, 모색, 母馬, (母父)]
+            #   원문 5,104행 실측 — 성별토큰이 2번째인 것이 92.3%. 즉 92.3%가 아비 이름으로 저장돼 있었다.
+            #   그래서 같은 아비를 둔 말이 한 경주에 둘 이상이면 마명이 겹쳤다(166/762경주 = 21.8%).
+            #   ⇒ **성별토큰 바로 앞 토막**을 마명으로 잡는다(자리 수를 세지 않으므로 3번째여도 맞다).
+            _tks = [t for t in re.split(r"[\s　]+", name_cell.strip()) if t]
+            _si = next((i for i, t in enumerate(_tks) if re.match(r"^[牡牝セ]\s*\d", t)), None)
+            if _si is not None and _si >= 1:
+                name = _tks[_si - 1]
+                name_src = "sexAnchor"
+            else:
+                # ⚠ 성별토큰이 없는 7.1% — 과거 전적 행이 섞여 들어온 별개 문제다.
+                #   여기서는 손대지 않고 종전 동작(첫 토막)을 그대로 두되 **표식만 남긴다.**
+                name = _tks[0] if _tks else ""
+                name_src = "firstToken"
             msa = re.search(r"([牡牝セ]\s*\d+)", name_cell)
             sex_age = re.sub(r"\s+", "", msa.group(1)) if msa else ""
         # 기수 셀: '福原杏 (兵庫) 57.0 …' — (소속) + 부담중량. 부담중량은 소수/정수 모두 허용.
@@ -27645,6 +27685,9 @@ def _keiba_parse_shutsuba(html):
         _pg = _pg_by_no.get(i) or {}
         out["horses"].append({
             "no": i + 1, "name": name, "sexAge": sex_age, "jockey": jockey,
+            # 🔴 마명을 어떻게 잡았는지 표식 — sexAnchor(성별토큰 앞·정상) / firstToken(성별토큰 없음·불확실)
+            #   ⚠ 표식이 없으면 「고쳤는데 왜 아직 이상한가」를 다음에 또 못 가른다.
+            "nameSrc": name_src,
             "weight": weight, "winOdds": win_odds, "pop": pop, "lineageNb": lineage,
             "detailUrl": ("https://www.oddspark.com/keiba/HorseDetail.do?lineageNb=%s" % lineage) if lineage else None,
             # [2026-08-06] 독립 축 — `grade`(통합등급)·`grade_bonus` 와 이름·경로가 겹치지 않는다.
