@@ -22721,11 +22721,14 @@ def _ml_row_build(rk, an, result, top3, payouts, was_hit):
     #   ⇒ 동결 저장분(drops_raw)을 우선 읽는다. _rf_signals 가 쓰는 것과 같은 소스다.
     #   ⚠ an["drops"] 는 폴백으로 남긴다(구데이터·다른 호출 경로 호환).
     drops = an.get("drops") or []
+    _drop_src = "live" if drops else None
     if not drops:
         try:
             _p, _, _ = _analysis_log_path(rk)
             _doc = json.load(open(_p, encoding="utf-8"))
             drops = _doc.get("drops_raw") or []
+            if drops:
+                _drop_src = "frozen"   # 🔴 폴백이 탔다는 표식 — 안 남기면 소급분과 구분되지 않는다
         except Exception:
             drops = []
     _dps = [d.get("pct") for d in drops if isinstance(d.get("pct"), (int, float))]
@@ -22746,6 +22749,7 @@ def _ml_row_build(rk, an, result, top3, payouts, was_hit):
     _win = (top3 or [None])[0]
     feat = {
         "max_drop_pct": (min(_dps) if _dps else None),
+        "drop_source": (_drop_src if _dps else None),
         "drop_timing_min": cur_mb,
         "reversal_strength": (round((lead.get("diffPct") or 0) / 100.0, 3) if lead else 0.0) if _has_inv else None,
         "form_score": top_form.get("totalScore"),
