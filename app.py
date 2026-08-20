@@ -37713,6 +37713,75 @@ def _kakao_sent_save():
         pass
 
 
+# 🔴 [상품 분리 화면 + 근거 한 줄 (2026-08-20 승인)] ───────────────────────────
+#   ② 회원 화면이 본선과 한방을 **섞어서** 보여준다. 그래서 한방이 빗나가면 「또 틀렸네」가 되고
+#      본선이 맞아도 「2배네」가 된다. 같은 성적으로도 체감이 완전히 달라지므로 두 상자로 나눈다.
+#   ③ 🔴 셋 중 가장 값어치가 큰 것 — **왜 이 말을 넣었는지 한 줄.**
+#      실물: 2026-08-20 나라 1경주 4번은 전적 최하위(60.5)·등급 C·페이스 감점인데
+#            「쌍승 역배열」 하나로 집어 삼복승 1순위 23배 적중이었다. 회원은 그걸 못 봤다.
+#      열광은 「맞았다」가 아니라 **「저걸 어떻게 알았지」**에서 온다.
+#   🔧 되돌리기: KAKAO_PRODUCT_SPLIT_VIEW = False 한 줄(종전 한 덩어리 표시로 돌아간다).
+KAKAO_PRODUCT_SPLIT_VIEW = True
+KAKAO_WHY_LINE = True
+_PS_STAT_CACHE = {"t": 0.0, "v": None}
+
+
+def _kakao_product_stats():
+    """최근 실적 한 줄 — logs/product_split 의 최신 집계를 읽는다(10분 캐시 · 완전 읽기 전용)."""
+    if time.time() - (_PS_STAT_CACHE.get("t") or 0) < 600:
+        return _PS_STAT_CACHE.get("v")
+    out = None
+    try:
+        _d = os.path.join(os.path.dirname(__file__), "logs", "product_split")
+        _fs = sorted(os.path.join(_d, _n) for _n in os.listdir(_d) if _n.endswith(".json"))
+        if _fs:
+            _j = json.load(open(_fs[-1], encoding="utf-8"))
+            _a = (_j.get("all") or {})
+            _m, _b = (_a.get("main") or {}), (_a.get("bomb") or {})
+            if _m.get("hits") and _b.get("hits"):
+                out = ("최근 실적 · 본선 적중 %.0f%% 배당중앙 %.1f배  |  한방 적중 %.0f%% 배당중앙 %.1f배"
+                       % (_m.get("hitRate") or 0, _m.get("medHit") or 0,
+                          _b.get("hitRate") or 0, _b.get("medHit") or 0))
+    except Exception:
+        out = None
+    _PS_STAT_CACHE["t"] = time.time()
+    _PS_STAT_CACHE["v"] = out
+    return out
+
+
+def _why_line(combo, cp, an):
+    """🔴 왜 이 조합인가 — 한 줄. 근거가 없으면 아무것도 내지 않는다(빈 말 금지)."""
+    if not KAKAO_WHY_LINE:
+        return None
+    try:
+        sm = (cp.get("sigMeta") or {})
+        rev, drops, smart, dark = [], [], [], []
+        for n in (combo or []):
+            _m = sm.get(str(int(n))) or {}
+            if _m.get("rev"):
+                rev.append(int(n))
+            if _m.get("smart"):
+                smart.append(int(n))
+            if _m.get("dark"):
+                dark.append(int(n))
+            _dp = _m.get("drop")
+            if isinstance(_dp, (int, float)) and float(_dp) <= -10:
+                drops.append((int(n), float(_dp)))
+        if rev:
+            return ("↳ 쌍승 역배열 — 시장 순위와 쌍승이 다른 말(%s번)을 가리킵니다"
+                    % "·".join(map(str, rev[:2])))
+        if drops:
+            _n, _p = min(drops, key=lambda x: x[1])
+            return "↳ 마감 직전 %d번 배당이 %.0f%% 급락 — 돈이 몰렸습니다" % (_n, abs(_p))
+        if smart:
+            return "↳ 스마트머니 — %s번에 큰 돈이 조용히 들어왔습니다" % "·".join(map(str, smart[:2]))
+        if dark:
+            return "↳ 복병 — %s번은 시장이 낮게 보지만 근거가 있습니다" % "·".join(map(str, dark[:2]))
+    except Exception:
+        return None
+    return None
+
+
 def _kakao_rich_message(rk, phase, an):
     """[카톡 추천 상세 (2026-07-21 권대표 피드백)] '홍보 문구만 보인다' → 해당 경주의 실제 추천 내역을
     본문에 담는다: 복승 ①②③(배당·★·근거) + 삼복승 상위 2 + 💎복병 + 확신도 1위 + 신호 개수.
@@ -37723,11 +37792,45 @@ def _kakao_rich_message(rk, phase, an):
     def _star(n):
         return "★" * max(0, min(3, int(n or 0)))
     _circ = "①②③"
-    for i, q in enumerate((cp.get("finalQuinellas") or [])[:3]):
-        _o = (" (%s배)" % q.get("odds")) if q.get("odds") else ""
-        _rs = (" · %s" % str(q.get("reason"))[:22]) if q.get("reason") else ""
-        lines.append("복승%s %s%s %s%s" % (_circ[i] if i < 3 else "", "+".join(map(str, q.get("combo") or [])),
-                                           _o, _star(q.get("stars")), _rs))
+    _fq3 = (cp.get("finalQuinellas") or [])[:3]
+    if KAKAO_PRODUCT_SPLIT_VIEW:
+        # 🔴 본선과 한방을 **두 상자로** 나눈다(탭 아님 · 한 화면에 같이 보인다).
+        #   갈래 기준은 저장된 상품 분리와 같다 — 교차 짝·기대값 복원·💎 편입분이 한방이다.
+        _main, _bomb = [], []
+        for i, q in enumerate(_fq3):
+            (_bomb if (q.get("crossPair") or q.get("evRescue")) else _main).append((i, q))
+
+        def _row(i, q, mark):
+            _o = (" (%s배)" % q.get("odds")) if q.get("odds") else ""
+            return ("%s %s%s %s" % (mark, "+".join(map(str, q.get("combo") or [])),
+                                    _o, _star(q.get("stars")))).rstrip()
+        if _main:
+            lines.append("━ 본선 · 자주 맞고 배당이 작습니다")
+            for i, q in _main:
+                lines.append(_row(i, q, "복승%s" % (_circ[i] if i < 3 else "")))
+                _w = _why_line(q.get("combo"), cp, an)
+                if _w:
+                    lines.append("  " + _w)
+        _bl = []
+        for i, q in _bomb:
+            _bl.append((_row(i, q, "복승%s" % (_circ[i] if i < 3 else "")), q.get("combo")))
+        for s in (cp.get("bmedSpecial") or [])[:1]:
+            _o = (" (%s배)" % s.get("odds")) if s.get("odds") else ""
+            _bl.append(("💎복병 %s%s ★★" % ("+".join(map(str, s.get("combo") or [])), _o),
+                        s.get("combo")))
+        if _bl:
+            lines.append("━ 한방 · 드물게 맞고 맞으면 큽니다")
+            for _txt, _cb in _bl:
+                lines.append(_txt)
+                _w = _why_line(_cb, cp, an)
+                if _w:
+                    lines.append("  " + _w)
+    else:
+        for i, q in enumerate(_fq3):
+            _o = (" (%s배)" % q.get("odds")) if q.get("odds") else ""
+            _rs = (" · %s" % str(q.get("reason"))[:22]) if q.get("reason") else ""
+            lines.append("복승%s %s%s %s%s" % (_circ[i] if i < 3 else "", "+".join(map(str, q.get("combo") or [])),
+                                               _o, _star(q.get("stars")), _rs))
     # 🔴 [2026-08-10 대표 결정] **카톡 삼복승을 1개로 줄인다.**
     #   소급 2,472경주(회원에게 나간 순서 기준):
     #     상위1 **82.9%**(판정선 +8.4) ↔ 상위2 72.5% ↔ 상위3 71.3% ↔ 현행(전부) 71.6%
@@ -37750,11 +37853,18 @@ def _kakao_rich_message(rk, phase, an):
         #   ⚠ **지우지 않는다** — 줄은 그대로 나가고 「참고」 꼬리표만 붙인다(참고자료로 남긴다).
         #   🔧 롤백: 아래 `· 참고` 를 지운다.
         lines.append("삼복승 %s%s · 참고" % ("+".join(map(str, t.get("combo") or [])), _o))
-    for s in (cp.get("bmedSpecial") or [])[:1]:
-        _o = (" (%s배)" % s.get("odds")) if s.get("odds") else ""
-        lines.append("💎복병 %s%s ★★ 참고" % ("+".join(map(str, s.get("combo") or [])), _o))
+    if not KAKAO_PRODUCT_SPLIT_VIEW:      # ⚠ 분리 표시일 때는 위 「한방」 상자에 이미 들어갔다
+        for s in (cp.get("bmedSpecial") or [])[:1]:
+            _o = (" (%s배)" % s.get("odds")) if s.get("odds") else ""
+            lines.append("💎복병 %s%s ★★ 참고" % ("+".join(map(str, s.get("combo") or [])), _o))
     if not lines:
         lines.append("추천 조합 미형성 — 신호 대기(패스 권장)")
+    else:
+        # 🔴 최근 실적을 숫자로 함께 낸다 — 두 상자의 성격 차이가 말이 아니라 숫자로 보여야 한다.
+        #   ⚠ 회수율은 쓰지 않는다(100% 미만이라 「사면 번다」로 오해된다).
+        _ps = _kakao_product_stats() if KAKAO_PRODUCT_SPLIT_VIEW else None
+        if _ps:
+            lines.append(_ps)
     # 🔴🔴 [배팅 비율 발송 (2026-08-12 대표 승인)] 종전엔 **조합만** 나가서 회원이 균등으로 산다.
     #   소급 1,813경주: 균등 87.5%/3제외 74.8% ↔ **역수 배분 89.4%/77.1%**.
     #     🔴 2026-08-11 만 보면 3제외 42.2% → **58.1%**(+15.9%p).
