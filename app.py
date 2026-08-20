@@ -22716,7 +22716,18 @@ def _validate_learning_data(rk, result, top3, sport=None):
 def _ml_row_build(rk, an, result, top3, payouts, was_hit):
     """[ML 학습셋] 경주 1건 → {features, label}. 있는 값만 채우고 없으면 None(관대)."""
     an = an or {}
+    # 🔴 [2026-08-20] an 은 _apply_result_learning 이 결과 입력 시점에 재계산한 값이라
+    #   마감 후에는 급락이 억제돼 비어 있다. 실측: 학습셋 max_drop_pct 11.8% ↔ 분석로그 93.5%.
+    #   ⇒ 동결 저장분(drops_raw)을 우선 읽는다. _rf_signals 가 쓰는 것과 같은 소스다.
+    #   ⚠ an["drops"] 는 폴백으로 남긴다(구데이터·다른 호출 경로 호환).
     drops = an.get("drops") or []
+    if not drops:
+        try:
+            _p, _, _ = _analysis_log_path(rk)
+            _doc = json.load(open(_p, encoding="utf-8"))
+            drops = _doc.get("drops_raw") or []
+        except Exception:
+            drops = []
     _dps = [d.get("pct") for d in drops if isinstance(d.get("pct"), (int, float))]
     inv = an.get("inverse") or {}
     lead = (inv.get("invLead") or {}) if inv.get("detected") else {}
