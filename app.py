@@ -18252,8 +18252,14 @@ def _missing_results(date=None):
                 done.add(os.path.splitext(fn)[0])
     if not os.path.isdir(ANALYSIS_LOG_DIR):
         return {"date": date, "missing": [], "count": 0}
+    # 🔴 [2026-08-19] 종전엔 analysis_log **3,800개를 전부 연 뒤**에 날짜를 봤다(85초).
+    #   파일명이 `YYYY_MM_DD_` 접두라 **파싱 전에** 거를 수 있다.
+    #   ⚠ 기존 `d["date"]` 검사는 그대로 둔다 — 파일명과 안쪽 날짜가 다른 경우를 위해.
+    _pref2 = str(date).replace("-", "_")
     for fn in sorted(os.listdir(ANALYSIS_LOG_DIR)):
         if not fn.endswith(".json"):
+            continue
+        if len(fn) > 10 and fn[:10].replace("-", "_") != _pref2 and fn[4] in "_-":
             continue
         try:
             d = json.load(open(os.path.join(ANALYSIS_LOG_DIR, fn), encoding="utf-8"))
@@ -21650,13 +21656,28 @@ def odds_archive_compress():
 @app.route("/api/history/list", methods=["GET", "POST"])
 def history_list():
     """저장된 경주 히스토리 목록 → [{file,date,race,raceKey,snaps,hasResult}]."""
+    # ── [목록 캐시 (2026-08-19 승인)] ────────────────────────────────────
+    #   왜: **36초** 걸린다. odds_history 5,000개를 매 요청마다 전부 열고
+    #     그 안 스냅샷을 전부 훑어 이상감지 문구를 만든다(파일당 수십~수백 틱).
+    #   ⇒ 파일별 mtime 캐시. 끝난 경주는 파일이 안 바뀌므로 한 번만 만든다.
+    #   🔧 되돌리기: HIST_LIST_CACHE = False
     out = []
     if os.path.isdir(ODDS_HISTORY_DIR):
         for fn in sorted(os.listdir(ODDS_HISTORY_DIR), reverse=True):
             if not fn.endswith(".json"):
                 continue
+            _hp = os.path.join(ODDS_HISTORY_DIR, fn)
+            if HIST_LIST_CACHE:
+                try:
+                    _hmt = os.path.getmtime(_hp)
+                except Exception:
+                    continue
+                _hc = _HIST_LIST_CACHE.get(fn)
+                if _hc and _hc[0] == _hmt:
+                    out.append(_hc[1])
+                    continue
             try:
-                d = json.load(open(os.path.join(ODDS_HISTORY_DIR, fn), encoding="utf-8"))
+                d = json.load(open(_hp, encoding="utf-8"))
             except Exception:
                 continue
             # [이상감지 히스토리] 스냅샷의 이상감지를 중복제거해 개수 집계(경주별 분리 표시용)
@@ -21664,10 +21685,18 @@ def history_list():
             for _s in (d.get("snapshots") or []):
                 for _raw in (_s.get("anomalies") or []):
                     _seen.add(_anomaly_pretty(_raw)["text"])
-            out.append({"file": fn, "date": d.get("date"), "race": d.get("race"),
-                        "raceKey": d.get("raceKey"), "snaps": len(d.get("snapshots") or []),
-                        "anomalyCount": len(_seen), "hasResult": bool(d.get("result")),
-                        "lastT": (d.get("snapshots") or [{}])[-1].get("t") if d.get("snapshots") else None})
+            _hrow = {"file": fn, "date": d.get("date"), "race": d.get("race"),
+                     "raceKey": d.get("raceKey"), "snaps": len(d.get("snapshots") or []),
+                     "anomalyCount": len(_seen), "hasResult": bool(d.get("result")),
+                     "lastT": (d.get("snapshots") or [{}])[-1].get("t") if d.get("snapshots") else None}
+            out.append(_hrow)
+            if HIST_LIST_CACHE:
+                if len(_HIST_LIST_CACHE) > 8000:
+                    _HIST_LIST_CACHE.clear()
+                try:
+                    _HIST_LIST_CACHE[fn] = (os.path.getmtime(_hp), _hrow)
+                except Exception:
+                    pass
     return jsonify({"races": out})
 
 
@@ -25993,33 +26022,63 @@ def results_auto_status():
 @app.route("/api/analysis-log/list", methods=["GET", "POST"])
 def analysis_log_list():
     """저장된 분석 로그 목록(날짜별 정렬) → [{file,race_id,date,race,analyzed_at,snaps,hasResult}]."""
+    # ── [목록 캐시 (2026-08-19 승인)] ────────────────────────────────────
+    #   왜: 이 주소가 **76초** 걸리고 응답이 2.9MB 다. 화면이 이걸 기다린다.
+    #     analysis_log **3,800개를 매 요청마다 전부 연다**(필터가 없다).
+    #   ⇒ ⓐ 파일별 mtime 캐시로 **바뀐 것만** 다시 읽는다(응답 구조 무변경).
+    #     ⓑ `?date=YYYY-MM-DD` 를 받으면 파일명 접두로 **파싱 전에** 거른다.
+    #       ⚠ 프론트는 지금 date 를 안 보낸다(전체를 받아 클라이언트에서 거른다).
+    #         하위호환으로 **없으면 종전대로 전체**를 준다.
+    #   🔧 되돌리기: ANALOG_LIST_CACHE = False
+    _dt = (request.args.get("date") or "").strip()
+    _pref = _dt.replace("-", "_") if len(_dt) == 10 else None
     out = []
     if os.path.isdir(ANALYSIS_LOG_DIR):
         for fn in sorted(os.listdir(ANALYSIS_LOG_DIR), reverse=True):
             if not fn.endswith(".json"):
                 continue
+            if _pref and not fn.startswith(_pref):
+                continue
+            _fp = os.path.join(ANALYSIS_LOG_DIR, fn)
+            if ANALOG_LIST_CACHE:
+                try:
+                    _mt = os.path.getmtime(_fp)
+                except Exception:
+                    continue
+                _c = _ANALOG_LIST_CACHE.get(fn)
+                if _c and _c[0] == _mt:
+                    out.append(_c[1])
+                    continue
             try:
-                d = json.load(open(os.path.join(ANALYSIS_LOG_DIR, fn), encoding="utf-8"))
+                d = json.load(open(_fp, encoding="utf-8"))
             except Exception:
                 continue
             res = d.get("result") or {}
             hit = d.get("hit") or {}
             # [분석기록] 적중 여부(복승/삼복승 중 하나라도 적중) — 목록에서 배지 표시용
             won = bool(hit.get("quinella_hit") or hit.get("trifecta_hit") or hit.get("was_hit"))
-            out.append({"file": fn, "race_id": d.get("race_id"), "date": d.get("date"),
-                        "race": d.get("race"), "raceKey": d.get("raceKey") or d.get("race"),
-                        "sport": d.get("sport") or "horse",
-                        "category": d.get("category") or "japan_local",
-                        "summary": d.get("summary") or "",
-                        "keyHorses": d.get("keyHorses") or [],
-                        "analyzed_at": d.get("analyzed_at"),
-                        "snaps": len(d.get("odds_timeline") or []),
-                        "signals": len(d.get("signals_detected") or []),
-                        "top3": [res.get("1st"), res.get("2nd"), res.get("3rd")] if res else [],
-                        "pnl": hit.get("pnl"),   # [보완3] 손익(정렬용) — 결과 미입력이면 None
-                        "reviewed": bool(d.get("reviewed")),   # [복기 표식] 복기 완료 여부
-                        "reviewed_at": d.get("reviewed_at"),
-                        "hasResult": bool(d.get("result")), "won": won})
+            _row = {"file": fn, "race_id": d.get("race_id"), "date": d.get("date"),
+                    "race": d.get("race"), "raceKey": d.get("raceKey") or d.get("race"),
+                    "sport": d.get("sport") or "horse",
+                    "category": d.get("category") or "japan_local",
+                    "summary": d.get("summary") or "",
+                    "keyHorses": d.get("keyHorses") or [],
+                    "analyzed_at": d.get("analyzed_at"),
+                    "snaps": len(d.get("odds_timeline") or []),
+                    "signals": len(d.get("signals_detected") or []),
+                    "top3": [res.get("1st"), res.get("2nd"), res.get("3rd")] if res else [],
+                    "pnl": hit.get("pnl"),
+                    "reviewed": bool(d.get("reviewed")),
+                    "reviewed_at": d.get("reviewed_at"),
+                    "hasResult": bool(d.get("result")), "won": won}
+            out.append(_row)
+            if ANALOG_LIST_CACHE:
+                if len(_ANALOG_LIST_CACHE) > 6000:
+                    _ANALOG_LIST_CACHE.clear()
+                try:
+                    _ANALOG_LIST_CACHE[fn] = (os.path.getmtime(_fp), _row)
+                except Exception:
+                    pass
     return jsonify({"logs": out})
 
 
@@ -36941,6 +37000,42 @@ def multi_collect_now():
     return jsonify({"ok": True, "collected": collected, "skipped": skipped})
 
 
+# ── [대시보드 카드 캐시 (2026-08-19 승인)] ──────────────────────────────
+#   왜: 이 화면이 30초마다 도는데 한 바퀴에 90초 넘게 걸렸다. 요청이 쌓인다.
+#     실측 `_multi_card` 가 **한 장에 0.64초** — 71장이면 45초다.
+#     로그를 보면 카드를 만들 때마다 축 교정·껍데기 필터가 다시 찍힌다.
+#     🔴 목록만 보여주면 되는데 **매 카드마다 분석을 통째로 다시 돌리고 있었다.**
+#   ⇒ 배당 갱신 시각(rec["t"])을 열쇠로 캐시한다.
+#     🟢 진행 중 경주는 배당이 바뀌므로 t 가 바뀌어 **지금과 똑같이 다시 만든다.**
+#     🟢 끝난 경주는 t 가 안 바뀌므로 한 번 만든 것을 그대로 쓴다.
+#   🔧 되돌리기: MULTI_CARD_CACHE = False
+# [분석로그 목록 캐시 · 2026-08-19] 상세는 analysis_log_list 안 주석 참조.
+# [히스토리 목록 캐시 · 2026-08-19]
+HIST_LIST_CACHE = True
+_HIST_LIST_CACHE = {}
+ANALOG_LIST_CACHE = True
+_ANALOG_LIST_CACHE = {}
+MULTI_CARD_CACHE = True
+_MULTI_CARD_CACHE = {}          # raceKey -> (t, card)
+
+
+def _multi_card_cached(key, rec):
+    if not MULTI_CARD_CACHE:
+        return _multi_card(key, rec)
+    try:
+        _t = float(rec.get("t") or 0)
+    except (TypeError, ValueError):
+        _t = 0
+    _c = _MULTI_CARD_CACHE.get(key)
+    if _c and _c[0] == _t:
+        return _c[1]
+    _card = _multi_card(key, rec)
+    if len(_MULTI_CARD_CACHE) > 3000:
+        _MULTI_CARD_CACHE.clear()
+    _MULTI_CARD_CACHE[key] = (_t, _card)
+    return _card
+
+
 @app.route("/api/multi/dashboard", methods=["GET"])
 def multi_dashboard():
     """[3번] 다중 경주 대시보드 카드 — 배당 수집된 경주(분석 카드) + 아직 수집 전인 예정 경주(카운트다운) 병합.
@@ -36949,7 +37044,7 @@ def multi_dashboard():
     cards = []
     collected_keys = set()
     for key, rec in db.items():
-        c = _multi_card(key, rec)
+        c = _multi_card_cached(key, rec)
         if c:
             cards.append(c)
             collected_keys.add(key)
@@ -36969,7 +37064,7 @@ def multi_dashboard():
             _rec2 = dict(rec)
             _rec2.setdefault("venue", _va)
             _rec2.setdefault("raceNo", _nu)
-            c = _multi_card(key, _rec2)
+            c = _multi_card_cached(key, _rec2)
             if c and (c.get("secondsLeft") is None or c["secondsLeft"] > -300):
                 cards.append(c)
                 collected_keys.add(key)
@@ -40564,11 +40659,22 @@ if os.environ.get("SERVER_SOFTWARE", "").startswith("gunicorn"):
 
 
 if __name__ == "__main__":
-    # [Railway/배포] PORT 환경변수 우선(미설정 시 로컬 8011). PORT 있으면 외부바인드(0.0.0.0)·FLASK_ENV=production 이면 debug OFF.
-    _port = int(os.environ.get("PORT", 8011))
-    _host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
+    # [2026-08-20] dev/운영 차이를 DEV_MODE 하나로 몬다.
+    #   🔴 dev/app.py 를 따로 고치지 않는다 — 두 곳에 적으면 갈린다(목록 셋 사고와 같은 구조).
+    #   ⚠ PORT 환경변수는 쓰지 않는다 — 0.0.0.0 으로 열려 .env·/admin 이 노출된다.
+    _is_dev = os.environ.get("DEV_MODE") == "1"
+
+    # 🔴 조용히 가짜 운영이 되는 것을 막는 트립와이어
+    _root = os.path.dirname(os.path.abspath(__file__))
+    if not _is_dev and os.path.basename(_root).lower() in ("dev", "dev_old"):
+        raise SystemExit("🔴 dev 폴더에서 DEV_MODE 없이 기동하려 했다. "
+                         "DEV_MODE=1 을 주거나 운영 폴더에서 실행하라.")
+
+    _port = 8012 if _is_dev else 8011
+    _host = "127.0.0.1"          # 🔴 운영·dev 모두 외부 바인딩하지 않는다
     _debug = os.environ.get("FLASK_ENV") != "production"
-    print(f"서버 시작: http://{_host}:{_port} (debug={_debug}, 로컬은 자동 리로드 ON)")
+    print("서버 시작: http://%s:%d (debug=%s · %s)"
+          % (_host, _port, _debug, "🧪 DEV" if _is_dev else "🟢 운영"))
     # [일시 중단 상태 가시화 (2026-07-30)] 플래그가 꺼진 걸 모르고 "Gemini 가 안 돈다"고 오해하지 않도록
     #   시작 로그에 명시한다. ⚠ 경주 추천 카카오(T-7/T-5분)는 별개 경로라 영향 없음.
     try:
@@ -40595,7 +40701,18 @@ if __name__ == "__main__":
     # debug=True: 코드 저장 시 자동 재기동(stale 서버로 인한 405 재발 방지). 로컬 전용(127.0.0.1).
     # threaded=True: 브라우저의 다중 keep-alive 연결을 동시 처리(단일 스레드 멈춤 방지).
     # 재개는 리로더의 실제 작업 프로세스(WERKZEUG_RUN_MAIN)에서만 1회 수행.
-    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    # [2026-08-20] 함정 1: debug=False 면 WERKZEUG_RUN_MAIN 이 영영 설정되지 않아
+    #   배경 데몬이 조용히 안 뜬다(werkzeug/_reloader.py:274 가 유일한 설정 지점).
+    # [A19] dev 는 배경 데몬을 띄우지 않는다 — 외부 요청을 안 해야 요청 제한 카운터가 안 갈린다.
+    _bg_ready  = (os.environ.get("WERKZEUG_RUN_MAIN") == "true") or (not _debug)
+    _bg_should = _bg_ready and not _is_dev
+    if _bg_should:
         _race_pin_expire_stale()   # [날짜 초기화] 서버 시작 시 어제 고정 경주 자동 해제 → 오늘로 초기화
         _boot_background()
+        print("🟢 [배경 데몬] 기동함 (debug=%s · reloader_child=%s)"
+              % (_debug, os.environ.get("WERKZEUG_RUN_MAIN") == "true"))
+    elif _is_dev:
+        print("🧪 [dev] 배경 데몬 정지 — 수집·발송·백필 없음(화면·API 검증 전용)")
+    else:
+        print("⏸️ [배경 데몬] 이 프로세스에서는 안 띄움(리로더 부모)")
     app.run(host=_host, port=_port, debug=_debug, threaded=True)

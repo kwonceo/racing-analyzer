@@ -58,6 +58,9 @@ def load(sport):
         m = re.match(r'(\d{4}_\d{2}_\d{2})', b)
         out.append({'race': b.replace('.json', ''), 'date': m.group(1) if m else '',
                     'ft': ft, 'kh': kh, 'dk': dk, 'axis': ax, 'tp': float(tp),
+                    'dcq': [tuple(sorted(int(v) for v in c))
+                            for c in ((cp.get('displayedCombos') or {}).get('quinellas') or [])
+                            if len(c) == 2],
                     'ans': tuple(sorted([res['1st'], res['2nd'], res['3rd']])),
                     'top2': tuple(sorted([res['1st'], res['2nd']])),
                     'third_actual': res['3rd']})
@@ -85,7 +88,19 @@ def thirds(r, mode, n=2):
     ax = r['axis'] if len(r['axis']) >= 2 else r['kh'][:2]
     if len(ax) < 2:
         return []
-    pool = r['dk'] if mode == 'dark' else [x for x in r['kh'] if x not in ax]
+    if mode == 'dark':
+        pool = r['dk']
+    elif mode == 'quin':
+        # 🔴 [2026-08-19] 복승 조합에 든 말에서만 3착을 고른다(대표 지시).
+        #   실물 셋 다 정답 3착이 복승 조합 안에 이미 있었다:
+        #   도요하시 5번(1+5) · 다치카와 5번(2+5) · 코치 5번(1+5)
+        seen, pool = set(), []
+        for c in (r.get('dcq') or []):
+            for h in c:
+                if h not in seen:
+                    seen.add(h); pool.append(h)
+    else:
+        pool = [x for x in r['kh'] if x not in ax]
     out = []
     for t in pool:
         if t in ax:
@@ -102,7 +117,8 @@ def run(rs, tag):
     print("[%s] 삼복승 3착 자리 — %d경주" % (tag, len(rs)))
     base = [(r, [c for c, _ in r['ft']][:2]) for r in rs]
     b = score(base, "지금(finalTrifectas 상위2)")
-    for mode, lab in (('dark', '복병에서 3착'), ('key', '유력마에서 3착')):
+    for mode, lab in (('dark', '복병에서 3착'), ('key', '유력마에서 3착'),
+                      ('quin', '복승 조합 말에서 3착')):
         rows = [(r, thirds(r, mode, 2)) for r in rs]
         rows = [(r, c) for r, c in rows if c]
         score(rows, lab, b['slots'] if b else None)

@@ -67,6 +67,33 @@ def server_pids(port=SERVER_PORT):
 def python_procs():
     """python.exe 프로세스 (PID, 커맨드라인)."""
     rows = []
+    # 🔴 [2026-08-20] Windows 11 에서 `wmic` 이 제거돼 **명령줄을 못 읽고 대상 0개**가 됐다.
+    #   0개가 나오면 「죽일 게 없다」와 「못 읽었다」가 구분되지 않는다 — 조용히 틀리는 유형이다.
+    #   ⇒ PowerShell Get-CimInstance 를 **먼저** 쓰고, 실패하면 종전 wmic 으로 폴백한다.
+    try:
+        r = subprocess.run(
+            ["powershell", "-NoProfile", "-Command",
+             "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | "
+             "ForEach-Object { \"ProcessId=\" + $_.ProcessId; \"CommandLine=\" + $_.CommandLine; \"\" }"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
+        cur = {}
+        for line in (r.stdout or "").splitlines():
+            line = line.strip()
+            if not line:
+                if cur.get("ProcessId"):
+                    rows.append((int(cur["ProcessId"]), cur.get("CommandLine", "")))
+                cur = {}
+                continue
+            if "=" in line:
+                k, v = line.split("=", 1)
+                cur[k.strip()] = v.strip()
+        if cur.get("ProcessId"):
+            rows.append((int(cur["ProcessId"]), cur.get("CommandLine", "")))
+    except Exception as e:
+        print("⚠ PowerShell 조회 실패(무시·wmic 폴백):", str(e)[:80])
+    if rows:
+        _me = os.getpid()
+        return [(pid, cl) for pid, cl in rows if pid != _me]
     try:
         r = subprocess.run(
             ["wmic", "process", "where", "name='python.exe'", "get", "ProcessId,CommandLine", "/format:list"],

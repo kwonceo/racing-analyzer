@@ -2083,7 +2083,19 @@
       + `</div>`;
   }
 
+  // ── [폴링 겹침 방지 (2026-08-19 승인)] ──────────────────────────────
+  //   왜: 30초마다 부르는데 응답이 90초 걸리던 때가 있었다. 그러면 요청이 계속 쌓인다.
+  //     하루 종일 켜두면 밀린 요청이 누적돼 브라우저가 무거워진다.
+  //   ⇒ 앞엣것이 안 끝났으면 이번 차례는 **건너뛴다**(큐에 쌓지 않는다).
+  //   ⚠ 서버는 그대로다. 화면만 바뀐다.
+  let _mdBusy = false;
   async function renderMultiDashboard() {
+    if (_mdBusy) return;                 // 앞엣것이 아직 안 끝났다 → 이번엔 건너뛴다
+    _mdBusy = true;
+    try { return await _renderMultiDashboardInner(); }
+    finally { _mdBusy = false; }
+  }
+  async function _renderMultiDashboardInner() {
     const box = $('#multiCards'), status = $('#multiStatus'); if (!box) return;
     try { _renderScoreBar(); } catch (_) { /* */ }
     let d;
