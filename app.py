@@ -22736,13 +22736,18 @@ def _ml_row_build(rk, an, result, top3, payouts, was_hit):
     form = an.get("form") or []
     top_form = form[0] if form else {}
     cur_mb = an.get("minutesBefore")
+    # 🔴 [2026-08-20] bool 은 「없음」과 「아님」을 구분하지 못한다.
+    #   an 이 마감 후 재계산이라 비어 있으면 전부 False 로 찍혀 **관측 안 한 것이 부정 근거**가 된다.
+    #   ⇒ 근거가 되는 원자료가 아예 없으면 None 으로 남긴다(있는 값만 채운다는 이 함수의 규칙 그대로).
+    _has_dark = an.get("darkHorses") is not None
     _smart = any((h or {}).get("smartMoney") for h in (an.get("darkHorses") or []))
+    _has_inv = an.get("inverse") is not None
     _venue, _ = _area_num(rk)
     _win = (top3 or [None])[0]
     feat = {
         "max_drop_pct": (min(_dps) if _dps else None),
         "drop_timing_min": cur_mb,
-        "reversal_strength": round((lead.get("diffPct") or 0) / 100.0, 3) if lead else 0.0,
+        "reversal_strength": (round((lead.get("diffPct") or 0) / 100.0, 3) if lead else 0.0) if _has_inv else None,
         "form_score": top_form.get("totalScore"),
         "gait_type": top_form.get("gait") or top_form.get("styleType"),
         "pace_type": jp.get("pace") or pace_an.get("pace"),
@@ -22753,10 +22758,11 @@ def _ml_row_build(rk, an, result, top3, payouts, was_hit):
         "horse_count": len(form) or None,
         "gate_no": _win,
         "weight_change": top_form.get("bodyWeightBonus"),
-        "jockey_change": bool(top_form.get("jockeyChanged") or top_form.get("jockeyChangeBonus")),
-        "t1_drop": bool(cur_mb is not None and cur_mb <= 3 and _dps),
-        "reversal": bool(inv.get("detected")),
-        "smart_money": bool(_smart),
+        "jockey_change": (bool(top_form.get("jockeyChanged") or top_form.get("jockeyChangeBonus"))
+                          if top_form else None),
+        "t1_drop": (bool(cur_mb <= 3 and _dps) if (cur_mb is not None and drops) else None),
+        "reversal": (bool(inv.get("detected")) if _has_inv else None),
+        "smart_money": (bool(_smart) if _has_dark else None),
     }
     _oddsp = None
     try:
