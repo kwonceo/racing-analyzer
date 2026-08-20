@@ -17184,6 +17184,10 @@ def _build_analysis_log(rk, an=None):
         rp = f.get("recentPlacings") or []
         horses.append({
             "no": no, "name": f.get("name") or h.get("name") or "",
+            # 🔴 [2026-08-20] 말 고유번호 — 착순 검증의 유일한 식별자.
+            #   name 에 부마명이 들어가는 경우가 있어(같은 경주 안 중복 21.8%) 이름으로는 못 찾는다.
+            #   ⚠ 저장만이다. 점수·판정 경로 무개입 · 소급 불가(넣은 날부터 쌓인다).
+            "lineageNb": f.get("lineageNb"),
             "jockey": f.get("jockey") or "",
             "record_score": f.get("totalScore"),
             "record_detail": ("최근 " + "-".join(str(x) for x in rp)) if rp else "",
@@ -27749,6 +27753,11 @@ def _keiba_starter_store_row(h):
     """일본경마 전적 저장 행(공용) — totalScore·근거(detail)·신규 지표(마체중·거리적성·기수복승률) 포함.
     3개 수집 경로(지방 autocollect·지방 API·중앙 JRA)가 동일 스키마로 저장하도록 통일(무삭제·확장만)."""
     return {"no": h["no"], "name": h.get("name", ""), "jockey": h.get("jockey", ""),
+            # 🔴 [2026-08-20] 말 고유번호. **착순 검증의 유일한 식별자**다.
+            #   name 은 마명이 아니라 부마명(父馬)이 들어가는 경우가 있어(같은 경주 안 중복 21.8%)
+            #   이름으로는 같은 말을 찾을 수 없다. lineageNb 는 oddspark 가 주는 말 단위 키다.
+            #   ⚠ 이름은 그대로 둔다 — 번호만 추가한다(화면 무개입 · 소급 불가).
+            "lineageNb": h.get("lineageNb"),
             "totalScore": h["totalScore"], "recentPlacings": h.get("recentPlacings") or [],
             "styleType": h.get("styleType"), "grade": h.get("grade"),
             # ── [클래스 축 (2026-08-06)] 과거 경주별 등급·통산 성적 ──
