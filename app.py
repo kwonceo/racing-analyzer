@@ -17150,6 +17150,27 @@ def _judge_extra_quinellas(cp, sport, already):
     return out
 
 
+def _race_shape_label(an):
+    """[판형 분석기 1단계] 선행 마릿수로 판형 이름을 붙인다. 🔴 저장 전용 — 아무것도 안 바꾼다.
+
+    반환 {shape, leadCount, horseCount, gaitCoverage} · 각질을 하나도 못 읽으면 None.
+    ⚠ 묶음은 실측으로 정했다 — 2와 3이 회수 69.4% ↔ 69.9% 로 사실상 같아 하나로 묶는다.
+      🔴 그래도 `leadCount` 원본을 함께 남긴다. 나중에 다르게 묶을 수 있어야 한다(원칙 26).
+    """
+    try:
+        hs = (an or {}).get("form") or (an or {}).get("integrated") or []
+        gs = [str(h.get("gait") or h.get("styleType") or "") for h in hs]
+        known = [g for g in gs if g]
+        if not known:
+            return None
+        lead = sum(1 for g in gs if ("선행" in g or "逃げ" in g or "nige" in g.lower()))
+        label = "느린 판" if lead <= 1 else ("정석" if lead <= 3 else "난전")
+        return {"shape": label, "leadCount": lead, "horseCount": len(hs),
+                "gaitCoverage": round(len(known) / len(hs) * 100, 1) if hs else 0.0}
+    except Exception:
+        return None
+
+
 def _build_analysis_log(rk, an=None):
     """_triple_analyze 결과 + odds_history(타임라인/결과) + 전적을 종합해 리치 로그를 만들고 저장.
     기존 로그가 있으면 사용자 입력(analyzed_at·복기 메모·profit)은 보존한다."""
@@ -17198,6 +17219,23 @@ def _build_analysis_log(rk, an=None):
             for x in d.get("combo", []):
                 drop_set.add(x)
     form_by = {h.get("no"): h for h in (an.get("form") or [])}
+    # 🔴 [판형 분석기 1단계 (2026-08-21 승인)] 라인 원본(並び)의 말별 위치를 남긴다.
+    #   왜: 라인 판형을 만들려면 「누가 누구 뒤에 붙었나」가 필요한데
+    #     `line` 은 **경주 단위 배열**이라 horses[] 만 봐서는 알 수 없다.
+    #     그리고 `starters_store` 는 라이브 캐시라 30분 뒤 정리된다 ⇒ **소급 불가**.
+    #   ⚠ 저장만이다. 점수·판정·화면 어디에도 안 쓴다. lineageNb·sigMeta 와 같은 성격이다.
+    #   ⚠ 휴리스틱으로 그룹을 나누지 않는다 — **원본 순서 그대로** 남기고 해석은 나중에 한다.
+    _line_pos = {}
+    try:
+        _lo = ((_raw_profile_snapshot(rk) or {}).get("line")
+               or ((doc.get("raw_profile") or {}).get("line") if doc else None) or [])
+        for _i, _n in enumerate(_lo):
+            try:
+                _line_pos[int(_n)] = _i
+            except (TypeError, ValueError):
+                continue
+    except Exception:
+        _line_pos = {}
     elim = an.get("elimination") or {}
     ehorses = elim.get("horses") or []
     win = an.get("single") or {}
@@ -17212,6 +17250,7 @@ def _build_analysis_log(rk, an=None):
             #   name 에 부마명이 들어가는 경우가 있어(같은 경주 안 중복 21.8%) 이름으로는 못 찾는다.
             #   ⚠ 저장만이다. 점수·판정 경로 무개입 · 소급 불가(넣은 날부터 쌓인다).
             "lineageNb": f.get("lineageNb"),
+            "linePos": _line_pos.get(no),   # 🔴 라인 원본(並び)에서 이 말의 자리. 저장만.
             "jockey": f.get("jockey") or "",
             "record_score": f.get("totalScore"),
             "record_detail": ("최근 " + "-".join(str(x) for x in rp)) if rp else "",
@@ -17812,6 +17851,18 @@ def _build_analysis_log(rk, an=None):
         #   paceBonus 와 같은 구조 — **검증 도구의 입력이 저장되지 않는 문제**다.
         #   ⚠ 이게 있어야 "그때 왜 WARNING 이었나"를 사후 재현할 수 있다. 빈값 덮어쓰기 방지.
         "drops_raw": (an.get("drops") or (doc.get("drops_raw") if doc else None)),
+        # 🔴 [판형 분석기 1단계 (2026-08-21 승인)] 이 경주가 어떤 판인가 — **이름표만** 붙인다.
+        #   🔴 화면·추천 어디에도 안 쓴다. 조합을 한 개도 바꾸지 않는다.
+        #     (전개로 **조합을 고르는** 안은 이 프로젝트에서 세 번 기각됐다 —
+        #      _scenario_plan 부스팅 z=-2.80 · flow_table 생존 셀 0 · 라인 축 엣지 하한 미달.
+        #      🟢 이 안은 **판형에 이름을 붙일 뿐**이라 그 기각 이력에 걸리지 않는다.)
+        #   소급 대조(8월 경륜 · 정제 1,346경주 · 판정 명단 기준):
+        #     느린 판(0~1) 회수 76.5% · 정석(2~3) 69.7% · **난전(4+) 82.7% · 배당중앙 2.95**
+        #     🟢 난전만 전·후반 둘 다 82%대로 유지된다(82.9 ↔ 82.6). 배당중앙은 2.40 → 3.60 으로 오른다.
+        #     ⚠ 느린 판은 앞뒤가 갈린다(62.3 ↔ 84.8 · n=141) — **확정 아님.**
+        #     ⚠ 대박 뺀 회수율도 난전이 51.9 ↔ 69.4 로 갈린다 — 며칠 쌓은 뒤 다시 잰다.
+        #   ⚠ 라벨과 함께 **원본 선행 마릿수**를 남긴다 — 나중에 다르게 묶고 싶을 때 재계산할 수 있다.
+        "raceShape": _race_shape_label(an),
         # [소실 방지 (2026-07-29)] 각질·페이스의 **원본 입력**(코너통과·당시 두수·거리/마장·결정수
         #   시행수·경륜 라인)을 보존. 경주 종료 시 출마표가 내려가 영구 소실되는 값들이며, 이것 없이는
         #   임계값을 바꿔도 과거를 재계산할 수 없다. 빈값 덮어쓰기 방지(기존 기록 유지).
