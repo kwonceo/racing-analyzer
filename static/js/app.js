@@ -2071,6 +2071,12 @@
     bar.innerHTML =
       `<div style="background:linear-gradient(90deg,#14202e,#101a26);border:1px solid #2b3a4f;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">`
       + `<div><span style="font-size:26px;font-weight:900;color:#38d39f">${esc(roiTxt)}</span> <span style="font-size:11px;color:#94a3b8">오늘 회수율(확정)</span></div>`
+      // 🔴 [실적 화면 정직화 (2026-08-21 승인)] 대박 뺀 회수율을 **헤드라인 옆에** 나란히 낸다.
+      //   실물: 2026-08-11 화면 160% 인데 149.9배 한 건이 전체 회수의 32% 였다(대박 뺀 79%).
+      //   한 건이 만든 숫자를 그대로 두면 회원이 그것을 실력으로 읽는다.
+      + ((sb.roiEx3 != null)
+          ? `<div><span style="font-size:20px;font-weight:800;color:#94a3b8">${esc(sb.roiEx3 + '%')}</span> <span style="font-size:11px;color:#94a3b8">대박 뺀 회수율</span></div>`
+          : '')
       + `<div style="width:1px;height:30px;background:#2b3a4f"></div>`
       + `<div style="font-size:12.5px;color:#94a3b8"><b style="color:#e2e8f0">${sb.judged}전 ${sb.hits}중</b> · 패스 ${sb.passes || 0}</div>`
       + `<div style="width:1px;height:30px;background:#2b3a4f"></div>`
@@ -2080,7 +2086,9 @@
       + hl
       + ((sb.approxUsed || 0) > 0 ? `<span style="font-size:11px;color:#64748b">근사 포함 참고 ${sb.roiWithApprox != null ? sb.roiWithApprox + '%' : '—'}</span>` : '')
       + `<span style="margin-left:auto;font-size:11px;color:#94a3b8;border:1px solid #6d28d9;border-radius:8px;padding:3px 9px;background:rgba(139,92,246,.10)">🔒 <b style="color:#c4b5fd">타임락 검증</b> — 마감 전 기록·변경 불가</span>`
-      + `</div>`;
+      + `</div>`
+      // 🔴 숫자만 바꾸고 이유를 안 적으면 「성적이 나빠졌다」로 읽힌다. 왜 그런지를 적는 것이 신뢰가 된다.
+      + (sb.honestNote ? `<div style="margin-top:6px;font-size:11px;color:#64748b;line-height:1.5">※ ${esc(sb.honestNote)}</div>` : '');
   }
 
   // ── [폴링 겹침 방지 (2026-08-19 승인)] ──────────────────────────────

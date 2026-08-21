@@ -30072,6 +30072,27 @@ def keirin_today_stats():
 #   False 로 두면 종전(경주당 1구좌) 동작으로 되돌아간다.
 SCOREBOARD_SEAT_COUNT = True
 
+# 🔴🔴 [실적 화면 정직화 (2026-08-21 대표 승인)] 스위치 둘 · 서로 독립 ─────────────
+#   ① 괴리 정제 — 확정배당 ÷ 마감 직전 배당이 0.5~2.0배 밖이면 그 경주를 집계에서 뺀다.
+#      measure_recovery 의 CLEAN_LO/HI 와 **같은 규칙**이다(두 곳에 다른 기준을 두지 않는다).
+#      🔴 실물: 2026-08-11 화면 160% ↔ 정제 적용 68.3%(12경주 제외).
+#      ⚠ 「숫자를 낮추는 장치」가 아니다 — 8/20 은 74.4% → 82.0% 로 **오른다.**
+#        믿을 수 있는 경주만 세는 장치이고, 그날그날 오르거나 내린다.
+#   ② 대박 뺀 회수율 — 적중 회수 상위 3건을 뺀 값을 함께 낸다.
+#      🔴 실물: 2026-08-11 은 149.9배 한 건이 전체 회수의 32% 였다(상위3 제외 78.9%).
+#      한 건에 좌우되는 숫자를 그대로 보여주면 회원이 그걸 실력으로 읽는다.
+#   🔧 되돌리기: 각각 False. 서로 독립이다.
+#   🔴🔴 ①은 **끈 채로 둔다** — 켜 보니 반대로 작동했다(2026-08-21 실측).
+#      8/11  정제 끔 회수 160%(적중 35%)  ↔  정제 켬 회수 **284%**(적중 47%)
+#      🔴 적중률이 35% → 47% 로 올랐다. **미적중 경주를 골라 빼고 있다.**
+#      원인: 정답 조합의 확정↔마감 괴리를 보는데, **고배당 정답일수록 그 괴리가 크다.**
+#        고배당 정답 = 대개 미적중 경주다 ⇒ 미적중만 걸러져 회수율이 부풀린다. **선택 편향**이다.
+#      ⚠ measure_recovery 에서는 같은 필터가 옳다 — 거기서는 여러 안을 **같은 경주 집합**으로
+#        비교하므로 편향이 상쇄된다. 헤드라인 하나를 낼 때는 그렇지 않다.
+#      🔴 원칙: 같은 규칙이라도 **비교용**과 **단일 수치용**은 다르다.
+SCOREBOARD_CLEAN_FILTER = False
+SCOREBOARD_EX3 = True
+
 
 def _scoreboard_daily(date=None):
     date = date or time.strftime("%Y-%m-%d")
@@ -30082,6 +30103,8 @@ def _scoreboard_daily(date=None):
     invested = returned = 0.0
     approx_returned = 0.0   # [근사 분리 (2026-07-20)] 근사 배당 회수는 헤드라인과 분리(참고 표기 전용)
     dark_hits = 0           # [💎 복병 적중 배지 (2026-07-21 승인)] 표시 전용 카운트(헤드라인 집계 미포함)
+    clean_excluded = 0      # 🔴 [괴리 정제] 확정↔마감 배당이 어긋나 집계에서 뺀 경주 수(화면에 표시한다)
+    hit_returns = []        # 🔴 [대박 뺀 회수율] 적중 회수 목록 — 상위 3건을 빼고 다시 계산한다
 
     def _sport_label(doc, rk):
         sp = (doc.get("sport") or "").lower()
@@ -30129,6 +30152,35 @@ def _scoreboard_daily(date=None):
                 continue
             ra = doc.get("result_analysis") or {}
             hit = (bool(lx["hit"] or lx["trioHit"]) if lx is not None else bool(ra.get("main_hit")))
+            # 🔴 [괴리 정제] 확정배당이 마감 직전 배당과 크게 어긋나면 그 경주는 안 센다.
+            #   어긋난 값은 「오염」이지 성적이 아니다. 적중·미적중 어느 쪽도 세지 않는다.
+            if SCOREBOARD_CLEAN_FILTER:
+                try:
+                    _cq = po.get("quinella") if isinstance(po, dict) else None
+                    if isinstance(_cq, (int, float)) and float(_cq) > 0 and len(top3) >= 2 \
+                            and top3[0] is not None and top3[1] is not None:
+                        _cans = tuple(sorted(int(x) for x in top3[:2]))
+                        _chp, _, _ = _hist_path(_canonical_log_key(rk))
+                        _cmo = None
+                        _ch, _ = _json_load_guard(_chp, {}, "스코어보드 정제")
+                        _cdl = _ch.get("deadline_epoch")
+                        _csn = [s for s in (_ch.get("snapshots") or [])
+                                if s.get("t") and _cdl and -8 <= (s["t"] - _cdl) / 60 <= 0 and s.get("quinella")]
+                        if _csn:
+                            for _ck, _cv in (max(_csn, key=lambda s: s["t"]).get("quinella") or {}).items():
+                                try:
+                                    if tuple(sorted(int(z) for z in str(_ck).replace("-", "+").split("+"))) == _cans:
+                                        _cmo = float(_cv)
+                                        break
+                                except (TypeError, ValueError):
+                                    continue
+                        if _cmo and not (0.5 <= float(_cq) / _cmo <= 2.0):
+                            clean_excluded += 1
+                            _gate_hit("scoreboard_clean_cut", rk,
+                                      "확정 %.1f ↔ 마감 %.1f" % (float(_cq), _cmo), once_key=rk)
+                            continue
+                except Exception:
+                    pass
             judged += 1
             # 🔴🔴 [구좌 집계 정정 (2026-08-11 대표 승인)] 종전엔 `invested += STAKE` 로
             #   **경주당 1구좌**만 셌다. 회수는 적중 배당 전액(qo * STAKE)을 더하므로
@@ -30194,6 +30246,7 @@ def _scoreboard_daily(date=None):
                     # 실측: 오전 오염 구간 스냅샷이 근사값을 크게 부풀림(마쓰도 2R 62.2배 vs 실제 19.1배)
                 else:
                     returned += ret
+                    hit_returns.append(float(ret))   # 🔴 [대박 뺀 회수율] 확정 회수만 모은다
             a = agg.setdefault(sport, {"judged": 0, "hits": 0, "invested": 0, "returned": 0.0})
             a["judged"] += 1
             a["hits"] += int(hit)
@@ -30226,6 +30279,14 @@ def _scoreboard_daily(date=None):
             "roi": (round(returned / invested * 100) if invested else None),
             "invested": int(invested), "returned": int(returned),
             "profit": int(returned - invested), "unconfirmedHits": unconfirmed,
+            # 🔴 [실적 화면 정직화 (2026-08-21)] 화면이 이 셋을 함께 보여야 한 건에 안 속는다.
+            "roiEx3": ((round((returned - sum(sorted(hit_returns, reverse=True)[:3])) / invested * 100)
+                        if invested else None) if SCOREBOARD_EX3 else None),
+            "cleanExcluded": clean_excluded,
+            "cleanFilter": bool(SCOREBOARD_CLEAN_FILTER),
+            "honestNote": ("표시한 조합 전부를 산 것으로 계산합니다(맞은 것만 세지 않습니다) · "
+                           "대박 한 건에 좌우되지 않도록 대박 뺀 회수율을 함께 냅니다 · "
+                           "그날그날 숫자는 크게 오르내립니다"),
             "approxUsed": sum(1 for _rw in rows if _rw.get("approx")),   # [회수율 정직화] 근사 배당 사용 건수
             "approxReturned": int(approx_returned),                       # [근사 분리] 참고 전용(헤드라인 제외)
             "roiWithApprox": (round((returned + approx_returned) / invested * 100) if invested else None),
