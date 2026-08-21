@@ -10535,7 +10535,8 @@ def _pace_log_record(rk, date, pace_analysis, top3, form, scenario_plan=None):
             scen_hit = {"a": _hit(scenario_plan.get("scenarioA")), "b": _hit(scenario_plan.get("scenarioB"))}
         rec = {"raceKey": rk, "date": date, "pace": pace_analysis.get("pace"),
                "counts": pace_analysis.get("counts"), "placed": placed, "scenHit": scen_hit}
-        fn = os.path.join(PACE_LOG_DIR, _canonical_log_key(rk).replace("/", "_").replace(" ", "_") + ".json")
+        # 🔴 [2026-08-22] 날짜 접두. 종전엔 **564/580(97.2%)** 이 날짜 없이 날마다 덮어썼다.
+        fn = _dated_race_path(PACE_LOG_DIR, rk)
         json.dump(rec, open(fn, "w", encoding="utf-8"), ensure_ascii=False)
         _pace_stats_recompute()
     except Exception as e:
@@ -10734,9 +10735,40 @@ def _dark_combo_section(key_horses, dark_horses, curQ):
             "title": "🐎 복병 조합: 유력%d+복병%d+복병%d" % (fav, d1, d2)}
 
 
+def _dated_race_path(dirpath, rk, ext=".json"):
+    """🔴 [파일명 날짜 (2026-08-22 승인)] 경주 파일명에 **날짜를 붙인다.**
+
+    왜: 같은 경기장·경주번호가 날마다 덮어썼다. 실측 —
+      dark_horse_log 745/1735(42.9%) · timeline_snapshot 629/629(100%) · pace_analysis 564/580(97.2%)
+      🔴 덮어쓴 것은 **소급 불가**다. 오늘 안 고치면 오늘치를 잃는다.
+    ⚠ 원칙 16(파일 매칭은 날짜까지 포함한다)의 **저장 쪽** 짝이다.
+      조회에서만 날짜를 봐도, 저장이 덮어쓰면 볼 것 자체가 없다.
+    ⚠ 옛 파일명은 **지우지 않는다.** 읽기는 `_dated_race_path_read` 가 둘 다 본다.
+    """
+    # 🔴 날짜는 **rk 에 적힌 것**을 쓰고, 없으면 오늘로 한다.
+    #   ⚠ `_canonical_log_key` 를 통과시키면 안 된다 — 그 함수는 같은 경기장·경주번호의
+    #     **기존 로그 키를 재사용**하므로 오늘 경주가 **어제 날짜**로 저장된다(실측 확인).
+    #     실물: `_canonical_log_key("2026-08-22 도야마 3경주")` → `2026-08-21 도야마 3경주`
+    m = re.search(r"(\d{4})[-_]?(\d{2})[-_]?(\d{2})", rk or "")
+    date = "%s_%s_%s" % m.groups() if m else time.strftime("%Y_%m_%d", time.localtime())
+    race = re.sub(r"\d{4}[-_]?\d{2}[-_]?\d{2}", "", rk or "").strip() or (rk or "race")
+    safe = re.sub(r"[^\w가-힣]+", "_", "%s_%s" % (date, race)).strip("_")
+    os.makedirs(dirpath, exist_ok=True)
+    return os.path.join(dirpath, safe + ext)
+
+
+def _dated_race_path_read(dirpath, rk, ext=".json"):
+    """읽기용 — 날짜 파일이 있으면 그것, 없으면 **옛 이름**으로 폴백(무삭제)."""
+    p = _dated_race_path(dirpath, rk, ext)
+    if os.path.exists(p):
+        return p
+    old = os.path.join(dirpath, re.sub(r"[^\w가-힣]", "_", rk or "") + ext)
+    return old if os.path.exists(old) else p
+
+
 def _dark_log_path(rk):
-    safe = re.sub(r"[^\w가-힣]", "_", rk)
-    return os.path.join(DARK_LOG_DIR, safe + ".json")
+    # 🔴 날짜 접두로 바꿨다(2026-08-22). 옛 파일은 그대로 두고 읽기만 폴백한다.
+    return _dated_race_path(DARK_LOG_DIR, rk)
 
 
 def _dark_log_record(rk, an):
@@ -10776,9 +10808,13 @@ def _dark_log_apply_result(rk, top3, an, quinella_odds=None):
     """[결과 시점 분석] 복병 rank1~3 입상 판정 + 미감지 사후분석 → dark_horse_log 갱신 + 통계 재계산."""
     try:
         p = _dark_log_path(rk)
+        # ⚠ 오늘 파일명을 바꿨다 — 그 전에 옛 이름으로 적힌 예측이 있으면 그것을 읽는다(무삭제).
+        _pr = _dated_race_path_read(DARK_LOG_DIR, rk)
         doc = {}
         if os.path.exists(p):
             doc = json.load(open(p, encoding="utf-8"))
+        elif os.path.exists(_pr):
+            doc = json.load(open(_pr, encoding="utf-8"))
         else:
             # 예측 기록이 없으면 지금 분석으로 생성(역산·수동 결과입력 대비)
             _dark_log_record(rk, an)
@@ -38292,7 +38328,9 @@ def _kakao_notify_race(rk, phase, an, snap):
 
 
 def _timeline_snap_path(rk):
-    return os.path.join(TIMELINE_SNAP_DIR, re.sub(r"[^\w가-힣]", "_", rk) + ".json")
+    # 🔴 [2026-08-22] 날짜 접두. 종전엔 **629/629(100%)** 가 날짜 없이 날마다 덮어썼다.
+    #   ⚠ 이 폴더는 T-5/T-7 시점 명단이 들어 있다 — 회원 기준 측정의 유일한 원본이다.
+    return _dated_race_path(TIMELINE_SNAP_DIR, rk)
 
 
 def _timeline_extract(an):
