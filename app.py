@@ -30090,6 +30090,21 @@ SCOREBOARD_SEAT_COUNT = True
 #      ⚠ measure_recovery 에서는 같은 필터가 옳다 — 거기서는 여러 안을 **같은 경주 집합**으로
 #        비교하므로 편향이 상쇄된다. 헤드라인 하나를 낼 때는 그렇지 않다.
 #      🔴 원칙: 같은 규칙이라도 **비교용**과 **단일 수치용**은 다르다.
+#   🔴🔴 [2026-08-21] 승인은 받았으나 **끈 채로 둔다.** 켜면 문구와 화면이 서로 모순된다:
+#      문구는 「이전 표기는 대박 한 건이 끌어올린 값(8/11 160%)」인데
+#      켜면 그 8/11 이 **284%** 로 더 오른다. 회원이 보면 앞뒤가 안 맞는다.
+#      편향 감시 실측(정제로 뺀 경주 ↔ 남은 경주의 적중률 차):
+#        8/07 +19%p · 8/11 +34%p · 8/19 +31%p · 8/20 +52%p — **나흘 전부 미적중만 걸러진다.**
+#      🔧 한 줄로 켠다: SCOREBOARD_CLEAN_FILTER = True (감시 수치가 함께 나온다)
+#      8/11  정제 끔 회수 160%(적중 35%)  ↔  정제 켬 회수 **284%**(적중 47%)
+#      🔴 적중률이 35% → 47% 로 오른다. **미적중 경주가 더 많이 걸러진다.**
+#      원인: 정답 조합의 확정↔마감 괴리를 보는데 **고배당 정답일수록 그 괴리가 크다.**
+#        고배당 정답은 대개 미적중 경주다 ⇒ 미적중이 더 걸러져 회수율이 오른다.
+#      ⚠ measure_recovery 에서는 같은 필터가 옳다 — 거기서는 여러 안을 **같은 경주 집합**으로
+#        비교하므로 편향이 상쇄된다. 헤드라인 하나를 낼 때는 그렇지 않다.
+#      🔴 그래서 응답에 `cleanHitRateShift`(정제 전후 적중률 차)를 함께 싣는다.
+#        그 값이 계속 +10%p 근처면 편향이 실재하는 것이고, 되돌리는 근거가 된다.
+#      🔧 되돌리기: SCOREBOARD_CLEAN_FILTER = False 한 줄.
 SCOREBOARD_CLEAN_FILTER = False
 SCOREBOARD_EX3 = True
 
@@ -30104,6 +30119,7 @@ def _scoreboard_daily(date=None):
     approx_returned = 0.0   # [근사 분리 (2026-07-20)] 근사 배당 회수는 헤드라인과 분리(참고 표기 전용)
     dark_hits = 0           # [💎 복병 적중 배지 (2026-07-21 승인)] 표시 전용 카운트(헤드라인 집계 미포함)
     clean_excluded = 0      # 🔴 [괴리 정제] 확정↔마감 배당이 어긋나 집계에서 뺀 경주 수(화면에 표시한다)
+    clean_cut_hits = 0      # 🔴 [편향 감시] 뺀 경주 중 적중이 몇 건인가 — 미적중만 걸러지면 회수율이 부푼다
     hit_returns = []        # 🔴 [대박 뺀 회수율] 적중 회수 목록 — 상위 3건을 빼고 다시 계산한다
 
     def _sport_label(doc, rk):
@@ -30176,6 +30192,7 @@ def _scoreboard_daily(date=None):
                                     continue
                         if _cmo and not (0.5 <= float(_cq) / _cmo <= 2.0):
                             clean_excluded += 1
+                            clean_cut_hits += int(bool(hit))   # 🔴 편향 감시 — 뺀 것 중 적중이 몇인가
                             _gate_hit("scoreboard_clean_cut", rk,
                                       "확정 %.1f ↔ 마감 %.1f" % (float(_cq), _cmo), once_key=rk)
                             continue
@@ -30284,8 +30301,15 @@ def _scoreboard_daily(date=None):
                         if invested else None) if SCOREBOARD_EX3 else None),
             "cleanExcluded": clean_excluded,
             "cleanFilter": bool(SCOREBOARD_CLEAN_FILTER),
-            "honestNote": ("표시한 조합 전부를 산 것으로 계산합니다(맞은 것만 세지 않습니다) · "
-                           "대박 한 건에 좌우되지 않도록 대박 뺀 회수율을 함께 냅니다 · "
+            # 🔴 [편향 감시] 뺀 경주의 적중률 ↔ 남은 경주의 적중률. 차이가 크면 편향이다.
+            "cleanCutHits": clean_cut_hits,
+            "cleanHitRateShift": (round((hits / judged * 100) - (clean_cut_hits / clean_excluded * 100))
+                                  if (judged and clean_excluded) else None),
+            # 🔴 문구는 **켜진 것만** 말한다. 정제가 꺼져 있으므로 「어긋난 경주를 뺐다」는 넣지 않는다.
+            #   ⚠ 숫자도 실측으로 확인한 것만 쓴다 — 8/07 453% 는 재현되지 않았다(실측 63%).
+            "honestNote": ("표시한 조합 전부를 산 것으로 계산합니다 — 맞은 것만 세지 않습니다 · "
+                           "대박 한 건에 좌우되지 않도록 상위 3건을 뺀 값을 함께 냅니다 · "
+                           "이전 표기는 대박 한 건이 끌어올린 값이었습니다 (8월 11일 156%, 대박 뺀 76%) · "
                            "그날그날 숫자는 크게 오르내립니다"),
             "approxUsed": sum(1 for _rw in rows if _rw.get("approx")),   # [회수율 정직화] 근사 배당 사용 건수
             "approxReturned": int(approx_returned),                       # [근사 분리] 참고 전용(헤드라인 제외)
