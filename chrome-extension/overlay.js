@@ -20,7 +20,7 @@
   //   아예 안 붙은 것이거나 확장이 재로드되지 않은 것이다.
   //   ⚠ 종전 로그는 파일 2000행 뒤에 있어서, 그 앞에서 예외가 나면 한 줄도 안 나왔다.
   try {
-    console.log('%c[오버레이] overlay.js 진입 · v2.1.160 · ' + location.host,
+    console.log('%c[오버레이] overlay.js 진입 · v2.1.161 · ' + location.host,
       'background:#0f172a;color:#38bdf8;padding:2px 6px;border-radius:3px');
   } catch (_) { /* */ }
   try {
@@ -33,6 +33,28 @@
     var boardActive = false;  // [배당판 위 정렬 오버레이] 실제 배당판 위 강조 렌더 성공 여부(패널 격자 생략 판단)
     // [강한 신호 8유형·막판 보존] T-2분 이후 감지된 강신호를 경주 종료 후에도 유지(새 경주 rk 변경 시에만 초기화)
     var preservedSig = null, preservedRk = '', preservedLabel = '';
+
+    // 🔴🔴 [화면 = 판정 (2026-08-22 승인)] 배당판 위 강조·추천 박스를 **판정 명단으로 통일**한다.
+    //   왜: 여기는 corePicks.finalQuinellas 를 쓰는데 채점은 displayedCombos.quinellas 를 썼다.
+    //     조합 수 상한이 판정 명단에만 걸려 8/22 서울 7경주에서 화면 6개 ↔ 판정 3개였다.
+    //   🔴 판정 명단이 없거나 비면 종전 그대로 — 화면이 비면 안 된다.
+    //   ⚠ 새 목록을 만들지 않는다. 서버가 이미 만든 것을 읽기만 한다(읽기 전용 원칙 유지).
+    function ovJudgeQ(cp) {
+      try {
+        cp = cp || {};
+        var fq = cp.finalQuinellas || [];
+        var dc = (cp.displayedCombos || {}).quinellas;
+        if (!dc || !dc.length) return fq;
+        var key = function (c) {
+          return (c || []).slice().map(Number).sort(function (x, y) { return x - y; }).join('+');
+        };
+        var pool = {};
+        [].concat(fq, cp.quinellaRef || [], cp.bmedSpecial || []).forEach(function (q) {
+          if (q && q.combo && !pool[key(q.combo)]) pool[key(q.combo)] = q;
+        });
+        return dc.map(function (c) { return pool[key(c)] || { combo: (c || []).slice(), odds: null }; });
+      } catch (_) { return (cp && cp.finalQuinellas) || []; }
+    }
 
     // [보완#3] 중요 신호 강조 알림음 — 짧은 2단 삑(Web Audio). 실패는 무시(무해).
     function beep() {
@@ -702,7 +724,7 @@
         // [오버레이-패널 통일 2단계] '지금 사세요' 박스도 패널·배당판 강조와 동일한 corePicks.finalQuinellas 1순위를
         //   우선 사용(+현재 배당 표기 — 10초 재분석마다 갱신). 없으면 기존 betRecommend 경로 폴백(무삭제).
         var _cp = d.corePicks || {};
-        var _cfq = _cp.finalQuinellas || [];
+        var _cfq = ovJudgeQ(_cp);                     // 🔴 화면=판정 (2026-08-22)
         if (_cfq.length && _cfq[0].combo && _cfq[0].combo.length === 2) {
           quinella = _cfq[0].combo.join('+') + (_cfq[0].odds != null ? ' (' + _cfq[0].odds + '배)' : '');
         }
@@ -844,7 +866,7 @@
       var recSet = {};
       // [오버레이-패널 통일 2단계] 간이 매트릭스 초록테도 패널·배당판 강조와 동일한 corePicks.finalQuinellas 기준.
       //   finalQuinellas 비면 기존 betRecommend 폴백(구데이터 호환·무삭제) — app.py _pub_matrix 초록과 동일 규칙.
-      var _rfq = (d.corePicks && d.corePicks.finalQuinellas) || [];
+      var _rfq = ovJudgeQ(d.corePicks);               // 🔴 화면=판정 (2026-08-22)
       _rfq.forEach(function (q) {
         var c = (q.combo || []).map(Number);
         if (c.length === 2) recSet[Math.min(c[0], c[1]) + '|' + Math.max(c[0], c[1])] = 1;
@@ -1231,7 +1253,7 @@
 
       // [초록·파랑 = 패널 finalQuinellas 랭킹順] 상위 greenMax → 초록, 그다음 blueMax → 파랑(패널과 100% 동일 조합).
       //   기존 '저배당+신호 독립 휴리스틱'은 패널과 다른 조합을 뽑아 불일치를 유발 → 사용자 요청대로 패널 소스로 대체.
-      var _fq = (d.corePicks && d.corePicks.finalQuinellas) || [];
+      var _fq = ovJudgeQ(d.corePicks);                // 🔴 화면=판정 (2026-08-22)
       // [패널 일치 폴백] finalQuinellas 가 비면(엄격 게이트로 메인 0) 패널과 동일하게 confQuinellas→quinella 로 강조
       //   → 패널 추천 조합(1+5·1+7 등)이 배당판에도 반드시 초록/파랑으로 표시됨(불일치 제거).
       // [수익성 3분류 (2026-07-19)] 저배당 경주(profitTier=low)는 복승 의도적 0개 — 폴백 금지(삼복승 집중)
@@ -1649,7 +1671,7 @@
         // [핵심 추천·추천 과다 근본정리] 딱 이것만 — 최종 복승 ≤2 · 삼복승 ≤2 (총 4개)만 크게 표시.
         //   서버 _final_picks가 모든 파생추천(확신도·복병·급락보존·스마트머니·밀집박스)을 4개로 압축(나머지는 숨김).
         var cp = d.corePicks;
-        var _fq = (cp && cp.finalQuinellas) || [];
+        var _fq = ovJudgeQ(cp);                       // 🔴 화면=판정 (2026-08-22)
         var _ft = (cp && cp.finalTrifectas) || [];
         var _dansung = !!(cp && cp.dansung);   // [단통] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림
         var _spAll = (cp && cp.bmedSpecial) || [];
@@ -2134,7 +2156,7 @@
           //   F12 를 눌러 이 한 줄만 읽으면 어디서 막혔는지 바로 알 수 있다.
           console.log('%c[오버레이] 시작 · 스위치=' + (enabled ? '켜짐' : '🔴꺼짐')
             + ' · 완전끄기=' + (killed ? '🔴켜짐(오버레이 안 뜸)' : '아님')
-            + ' · 주소=' + location.host + ' · 버전 2.1.160',
+            + ' · 주소=' + location.host + ' · 버전 2.1.161',
             'background:#1e293b;color:#38d39f;padding:2px 6px;border-radius:3px');
           if (killed) {
             console.warn('[오버레이] 🔴 완전끄기(overlayKill)가 켜져 있어 안 그립니다. 팝업에서 해제하세요.');

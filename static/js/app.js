@@ -118,6 +118,36 @@
     if (btn) btn.addEventListener('click', () => startBoardTab());
   }
 
+  // 🔴🔴 [화면 = 판정 (2026-08-22 승인)] 회원이 보는 조합을 **판정 명단으로 통일한다.**
+  //   왜: 화면은 `corePicks.finalQuinellas`, 판정(채점)은 `displayedCombos.quinellas` 를 썼다.
+  //     조합 수 상한이 판정 명단에만 걸려서 8/22 세 경주에서 서로 다른 조합이 나왔다
+  //     (서울 7경주 실측 — 화면 6개 ↔ 판정 3개 · 판정의 1+3 이 화면에 없었다).
+  //   ⚠ 판정 명단은 **마번만** 담는다. 배당·근거는 finalQuinellas / quinellaRef / bmedSpecial 에서 찾아 붙인다.
+  //   🔴 화면이 비면 안 된다 — 판정 명단이 없거나 비면 **종전 finalQuinellas 를 그대로** 쓴다.
+  //   ⚠ 새 목록을 만들지 않는다. 서버가 이미 만든 displayedCombos 를 그대로 읽는다.
+  function _judgeQuinellas(cp) {
+    if (!cp) return [];
+    const fq = cp.finalQuinellas || [];
+    const dc = (cp.displayedCombos || {}).quinellas;
+    if (!Array.isArray(dc) || !dc.length) return fq;          // 폴백 — 화면을 비우지 않는다
+    const key = (c) => (c || []).slice().map(Number).sort((x, y) => x - y).join('+');
+    const pool = new Map();
+    [].concat(fq, cp.quinellaRef || [], cp.bmedSpecial || []).forEach((q) => {
+      if (q && q.combo && !pool.has(key(q.combo))) pool.set(key(q.combo), q);
+    });
+    return dc.map((c) => pool.get(key(c)) || { combo: (c || []).slice(), odds: null });
+  }
+  function _judgeTrifectas(cp) {
+    if (!cp) return [];
+    const ft = cp.finalTrifectas || [];
+    const dt = (cp.displayedCombos || {}).trifectas;
+    if (!Array.isArray(dt) || !dt.length) return ft;
+    const key = (c) => (c || []).slice().map(Number).sort((x, y) => x - y).join('+');
+    const pool = new Map();
+    ft.forEach((t) => { if (t && t.combo && !pool.has(key(t.combo))) pool.set(key(t.combo), t); });
+    return dt.map((c) => pool.get(key(c)) || { combo: (c || []).slice(), odds: null });
+  }
+
   // ---------- [전날 경주 목록 + 스크린샷] 🗓 날짜별 경주 기록 ----------
   let _dayRacesInit = false;
   // [로컬 날짜] toISOString()은 UTC 라 한국시간 09시 이전엔 하루 밀린다. 로컬 기준으로 만든다.
@@ -2332,8 +2362,8 @@
     // [배당 실시간·가독성 수정 (2026-07-19)] ① 번호와 배당이 붙어 "2+106.2배"로 읽히던 문제 →
     //   줄 분리(라벨/말번호 28px/현재 배당 22px 노랑) + 충분한 줄간격. ② 배당은 data-live-odds 로 표시해
     //   상세 열 때·30초마다 실시간 배당(/api/odds/triple/latest)으로 자동 갱신(분석 시점 고정값 문제 해소).
-    const fq = (cp.finalQuinellas || []).slice(0, 3);
-    const ft = (cp.finalTrifectas || [])[0] || null;
+    const fq = _judgeQuinellas(cp).slice(0, 3);            // 🔴 화면=판정 (2026-08-22)
+    const ft = _judgeTrifectas(cp)[0] || null;
     if (fq.length || ft) {
       const CIRC = ['①', '②', '③'];
       const _numTxt = (combo) => (combo || []).map((n) => `${n}번`).join(' + ');
@@ -2461,7 +2491,8 @@
   //   매트릭스(30초 갱신)와 상세 카드가 다른 시점을 보던 불일치 해소. 전 종목 상세 공통(무삭제·추가만).
   let _krLastCombos = null;
   function _mdCombosOf(a) {
-    return (((a || {}).corePicks || {}).finalQuinellas || [])
+    // 🔴 화면=판정 (2026-08-22) — 안 바꾸면 화면에 없는 조합으로 "추가됨" 배너가 뜬다
+    return _judgeQuinellas((a || {}).corePicks || {})
       .map((q) => (q.combo || []).map(Number).slice().sort((x, y) => x - y).join('+'));
   }
   async function _krRecoRefresh(key) {
@@ -2537,7 +2568,7 @@
         return `<div style="font-size:16px;font-weight:800;margin:3px 0;color:${ok ? '#7fd14f' : '#9ca3af'}">복승 ${CIRC[i] || (i + 1)} ${esc(ck)} ${ok ? '✅ 적중!' : '❌'}</div>`;
       }).join('');
     } else {
-      const fq = (((a.corePicks || {}).finalQuinellas) || []).slice(0, 3);
+      const fq = _judgeQuinellas(a.corePicks || {}).slice(0, 3);   // 🔴 화면=판정 (2026-08-22)
       qRows = fq.length ? fq.map((q, i) => {
         const ck = (q.combo || []).map(Number).sort((x, y) => x - y).join('+');
         const ok = ck === winSet;
@@ -2595,7 +2626,7 @@
       S.push(`<div style="margin:0 0 6px;padding:7px 11px;border-radius:9px;font-weight:900;font-size:15px;border:2px solid ${_rg0.color || '#94a3b8'};color:${_rg0.color || '#94a3b8'};background:rgba(255,255,255,.04)">${esc(_rg0.label)} · <span style="font-weight:600;font-size:12.5px">${esc(_rg0.basis || '')}</span></div>`);
     }
     // ── 2. 최종 추천(크게·고정) ──
-    let fq = (cp.finalQuinellas || []).slice(0, 2);
+    let fq = _judgeQuinellas(cp).slice(0, 2);              // 🔴 화면=판정 (2026-08-22)
     if (!fq.length && (cp.confQuinellas || []).length) fq = cp.confQuinellas.slice(0, 2);
     const ft = (cp.finalTrifectas || [])[0] || null;
     const sp0 = (cp.bmedSpecial || [])[0] || null;
@@ -7404,8 +7435,8 @@
   function renderCorePicks(a) {
     const cp = a && a.corePicks;
     if (!cp || a.recommendClosed) return '';
-    let fq = cp.finalQuinellas || [];
-    let ft = cp.finalTrifectas || [];
+    let fq = _judgeQuinellas(cp);                          // 🔴 화면=판정 (2026-08-22)
+    let ft = _judgeTrifectas(cp);
     // [단통 경주] 복승 최저배당 ≤1.5배 = 시장 과도 쏠림. 저배당 폴백 금지(1.5배 조합 재노출 방지)·복병 집중 유도.
     const dansung = !!cp.dansung;
     const special0 = cp.bmedSpecial || [];
@@ -7599,7 +7630,7 @@
   function renderKeirinProHeader(a) {
     if (!a || (a.category || '') !== 'cycle') return '';
     const cp = a.corePicks || {};
-    let fq = (cp.finalQuinellas || []).slice(0, 2);
+    let fq = _judgeQuinellas(cp).slice(0, 2);              // 🔴 화면=판정 (2026-08-22)
     if (!fq.length && (cp.confQuinellas || []).length) fq = cp.confQuinellas.slice(0, 2);
     const ft = (cp.finalTrifectas || [])[0] || null;
     const sp0 = (cp.bmedSpecial || [])[0] || null;

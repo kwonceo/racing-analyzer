@@ -15986,8 +15986,47 @@ def triple_analyze():
     except Exception as _sfe:
         print("[3층·저장플래그] 실패(무시):", str(_sfe)[:80])
     # [분석 로그] 배당 수집·이상감지·추천이 갱신될 때마다 완전 로그 갱신(추적 가능 기록)
+    _log_out = None
     if not _skip_log:
-        _analysis_log_save(rk, an)
+        _log_out = _analysis_log_save(rk, an)
+    # 🔴🔴 [화면 = 판정 (2026-08-22 승인)] 응답에 **판정 명단을 함께 싣는다.**
+    #   왜: 화면은 `corePicks.finalQuinellas`, 판정은 `displayedCombos.quinellas` 를 쓰는데
+    #     조립이 `_build_analysis_log` 안에만 있어 **응답에는 판정 명단이 아예 없었다.**
+    #     그래서 8/22 세 경주에서 화면과 판정이 서로 다른 조합을 보였다
+    #     (제주 1R 판정 [4,8][2,8] 이 화면에 없음 · 서울 1R 화면 6+7 은 취소마).
+    #   ⚠ 「저장된 로그를 읽어 싣는 안(ⓑ)」이 아니다 — `_analysis_log_save` 는 **이 요청 안에서**
+    #     방금 조립한 값을 돌려주므로 신선도가 함수 추출(ⓐ)과 같다. 조립 코드는 한 곳뿐이고
+    #     그것을 그대로 재사용한다(새 목록·새 필드를 만들지 않는다).
+    #   ⚠ 저장을 건너뛴 경우(_skip_log = 마감 후 120분 초과)는 **동결본**을 읽는다 — 그때는
+    #     저장 시점 값이 곧 마감 시점 값이라 어긋나지 않는다.
+    #   🔧 되돌리기: DISPLAY_FOLLOWS_JUDGE = False
+    try:
+        if DISPLAY_FOLLOWS_JUDGE and isinstance(an.get("corePicks"), dict):
+            # 🔴 도달은 **조건 밖**에서 센다 — 안에서 세면 「안 왔다」와 「조건이 안 맞았다」가
+            #   구분되지 않는다(원칙 23). 실제로 첫 배선에서 이것 때문에 계수기가 0이었다.
+            _gate_hit("display_judge_mismatch", rk,
+                      "skipLog=%s · log=%s" % (bool(_skip_log), bool(_log_out)), reach_only=True)
+            _dcj = ((_log_out or {}).get("corePicks") or {}).get("displayedCombos")
+            if _dcj is None and _skip_log:
+                try:
+                    _p_dcj, _, _ = _analysis_log_path(rk)
+                    _d_dcj, _ = _json_load_guard(_p_dcj, {}, tag="판정명단")
+                    _dcj = ((_d_dcj.get("corePicks") or {}).get("displayedCombos"))
+                except Exception:
+                    _dcj = None
+            _fqj = [sorted(int(x) for x in (q.get("combo") or []))
+                    for q in (an["corePicks"].get("finalQuinellas") or []) if q.get("combo")]
+            if _dcj and (_dcj.get("quinellas") or _dcj.get("trifectas")):
+                an["corePicks"]["displayedCombos"] = _dcj
+                _jset = set(tuple(c) for c in (_dcj.get("quinellas") or []))
+                if _jset != set(tuple(c) for c in _fqj):
+                    _gate_hit("display_judge_mismatch", rk,
+                              "화면 %d ↔ 판정 %d" % (len(_fqj), len(_jset)), once_key=rk)
+            elif _fqj:
+                # 🔴 판정 명단이 비면 **화면을 비우지 않는다** — 종전 finalQuinellas 를 그대로 쓴다.
+                _gate_hit("display_fallback_empty", rk, "판정 명단 없음 — 종전 표시 유지", once_key=rk)
+    except Exception as _dje:
+        print("[화면=판정] 스킵(무시):", str(_dje)[:80])
     # [신규 1번] 유의미한 배당급변 경고를 data/alerts/ 에 완전 기록(중복 제외)
     try:
         _record_alert(rk, an)
@@ -16669,6 +16708,9 @@ def _json_load_guard(path, default, tag=""):
 
 
 ANALYSIS_LOG_DIR = os.path.join(os.path.dirname(__file__), "data", "analysis_log")
+
+
+DISPLAY_FOLLOWS_JUDGE = True   # 🔧 되돌리기: False — 화면이 종전 finalQuinellas 만 본다(2026-08-22)
 
 
 def _analysis_log_path(rk):
@@ -38279,6 +38321,34 @@ def _why_line(combo, cp, an):
     return None
 
 
+def _judge_quinellas(cp):
+    """🔴 [화면 = 판정 (2026-08-22 승인)] 회원에게 나가는 복승을 **판정 명단 기준**으로 돌려준다.
+
+    왜: 카톡은 `finalQuinellas`, 판정(채점)은 `displayedCombos.quinellas` 를 썼다.
+      조합 수 상한이 판정 명단에만 걸려서 **받은 것과 재는 것이 달랐다**
+      (8/22 서울 7경주 실측 — 화면 6개 ↔ 판정 3개).
+    ⚠ 판정 명단은 마번만 담으므로 배당·근거는 `finalQuinellas`/`quinellaRef`/`bmedSpecial`에서 찾아 붙인다.
+    🔴 판정 명단이 없거나 비면 **종전 그대로** 돌려준다 — 카톡이 비면 안 된다.
+    ⚠ 새 목록을 만들지 않는다. 이미 조립된 displayedCombos 를 읽기만 한다.
+    """
+    cp = cp or {}
+    fq = cp.get("finalQuinellas") or []
+    dc = ((cp.get("displayedCombos") or {}).get("quinellas")) or []
+    if not dc:
+        return fq
+    try:
+        def _k(c):
+            return tuple(sorted(int(x) for x in (c or [])))
+        pool = {}
+        for q in list(fq) + list(cp.get("quinellaRef") or []) + list(cp.get("bmedSpecial") or []):
+            if q and q.get("combo"):
+                pool.setdefault(_k(q["combo"]), q)
+        return [pool.get(_k(c)) or {"combo": list(c), "odds": None} for c in dc]
+    except Exception as _jqe:
+        print("[화면=판정·카톡] 스킵(무시):", str(_jqe)[:80])
+        return fq
+
+
 def _kakao_rich_message(rk, phase, an):
     """[카톡 추천 상세 (2026-07-21 권대표 피드백)] '홍보 문구만 보인다' → 해당 경주의 실제 추천 내역을
     본문에 담는다: 복승 ①②③(배당·★·근거) + 삼복승 상위 2 + 💎복병 + 확신도 1위 + 신호 개수.
@@ -38289,7 +38359,7 @@ def _kakao_rich_message(rk, phase, an):
     def _star(n):
         return "★" * max(0, min(3, int(n or 0)))
     _circ = "①②③"
-    _fq3 = (cp.get("finalQuinellas") or [])[:3]
+    _fq3 = _judge_quinellas(cp)[:3]          # 🔴 화면=판정 (2026-08-22)
     if KAKAO_PRODUCT_SPLIT_VIEW:
         # 🔴 본선과 한방을 **두 상자로** 나눈다(탭 아님 · 한 화면에 같이 보인다).
         #   갈래 기준은 저장된 상품 분리와 같다 — 교차 짝·기대값 복원·💎 편입분이 한방이다.
@@ -38376,7 +38446,7 @@ def _kakao_rich_message(rk, phase, an):
     #        「사지 말라」로 읽히는데, 200% 미만을 거르면 오히려 악화한다는 측정과 모순된다.
     #     ⓒ 경고도 안 쓴다 — 배당 하락 시 회원 불신을 만든다. **내부 로그·API 에만** 남긴다.
     try:
-        _sp_combos = [q.get("combo") for q in (cp.get("finalQuinellas") or [])[:3] if q.get("combo")]
+        _sp_combos = [q.get("combo") for q in _judge_quinellas(cp)[:3] if q.get("combo")]   # 🔴 화면=판정
         _sp_guard = {"rk": rk, "source": (an.get("oddsSource") or an.get("source")),
                      "horseCount": an.get("raceHorseCount"),
                      "comboCount": len(an.get("quinella") or [])}
