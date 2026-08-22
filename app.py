@@ -41210,6 +41210,21 @@ def _boot_background():
         _archive_compress_old(7)         # 7일+ 경주 배당 .gz 압축 보관(데이터 삭제 없음)
     except Exception as e:
         print("[부팅] 아카이브 압축 실패(무시):", e)
+    # 🔴 [2단계 2-2 스탬프 (2026-08-22)] **여기까지 왔다는 증거**를 파일로 남긴다.
+    #   왜: 배경 데몬은 「기동됨」 로그만 있고 **탔다는 증거가 없었다.**
+    #     리로더를 끄면 WERKZEUG_RUN_MAIN 이 안 잡혀 조용히 안 뜬다(함정 1) —
+    #     그때 로그를 놓치면 며칠 뒤에도 모른다. 원칙 23(「됐다」와 「탔다」는 다르다).
+    #   ⚠ append 가 아니라 마지막 기동 시각 한 줄이다(파일이 커지지 않는다).
+    #   ⚠ dev 는 여기 오지 않는다(_bg_should 가 False).
+    try:
+        with open(os.path.join(os.path.dirname(__file__), "data", "_bg_boot_last.txt"),
+                  "w", encoding="utf-8") as _f:
+            _f.write("%s pid=%d reloader_child=%s debug=%s\n"
+                     % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), os.getpid(),
+                        os.environ.get("WERKZEUG_RUN_MAIN") == "true",
+                        os.environ.get("FLASK_ENV") != "production"))
+    except Exception as _se:
+        print("[부팅] 스탬프 기록 실패(무시):", str(_se)[:60])
     print("[부팅] 백그라운드 작업 기동 완료(자동수집·백업·학습·날짜정리)")
 
 

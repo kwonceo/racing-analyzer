@@ -116,10 +116,31 @@ def python_procs():
     return rows
 
 
+def listening_pids(port):
+    """그 포트를 LISTEN 중인 PID 목록. 🔴 매번 새로 조회한다(캐시 금지)."""
+    out = []
+    try:
+        r = subprocess.run(["powershell", "-NoProfile", "-Command",
+                            "Get-NetTCPConnection -LocalPort %d -State Listen | "
+                            "Select-Object -ExpandProperty OwningProcess" % port],
+                           capture_output=True, text=True, timeout=20)
+        for line in (r.stdout or "").splitlines():
+            line = line.strip()
+            if line.isdigit():
+                out.append(int(line))
+    except Exception:
+        pass
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--match", help="커맨드라인에 이 문자열이 든 프로세스만 대상")
     ap.add_argument("--apply", action="store_true", help="실제로 종료(기본은 미실행)")
+    # 🔴 [2026-08-22] dev(8012)와 운영(8011)은 **명령줄이 똑같다**(둘 다 `python.exe app.py`).
+    #   그래서 --match 로는 가를 수 없다. 포트로 지정한다 — 8011 은 여전히 제외 대상이다.
+    ap.add_argument("--port", type=int, default=None,
+                    help="이 포트를 LISTEN 중인 프로세스만 대상(8011 서버는 항상 제외)")
     ap.add_argument("--list", action="store_true", help="현황만 출력")
     # 🔴 [ⓐ 2026-08-03 승인] **서버를 일부러 끄는 모드**(추가만 · 기존 동작 무변경).
     #   배경: 이 도구는 원래 "서버를 실수로 죽이지 않기" 위해 만들어져 8011 LISTEN PID 를
@@ -201,6 +222,31 @@ def main():
             print("\n🔴 아직 %d 포트를 LISTEN 하는 PID 가 있다: %s — **종료 실패**" % (SERVER_PORT, sorted(left)))
             return 1
         print("\n🟢 종료 완료 — %d 포트를 LISTEN 하는 프로세스가 없다." % SERVER_PORT)
+        return 0
+    if a.port:
+        # 🔴 포트로 지정 — dev(8012)와 운영(8011)은 명령줄이 `python.exe app.py` 로 **똑같아서**
+        #   --match 로는 가를 수 없다(2026-08-22 실측). 포트가 유일한 구분자다.
+        if a.port == SERVER_PORT:
+            print("\n🔴 %d 는 운영 포트다. 이 도구로 끄지 않는다." % SERVER_PORT)
+            return 1
+        want = set(listening_pids(a.port)) - set(sp)
+        targets = [(p, c) for p, c in procs if p in want]
+        print("\n🔴 종료 대상 %d개 (port=%d · 운영 PID 제외 후):" % (len(targets), a.port))
+        for pid, cmd in targets:
+            print("   %-7d %s" % (pid, (cmd or "")[:100]))
+        if not targets:
+            print("   (없음)")
+            return 0
+        if not a.apply:
+            print("\n⚠ DRY-RUN 이다. 실제 종료는 `--apply`.")
+            return 0
+        for pid, _ in targets:
+            if pid in server_pids():      # ⚠ 종료 직전 한 번 더(그 사이 재기동 대비)
+                print("   ⏭ %d 는 지금 운영 서버다 — 건너뛴다" % pid)
+                continue
+            subprocess.run(["taskkill", "/PID", str(pid), "/F"], capture_output=True, timeout=15)
+            print("   ✅ 종료 %d" % pid)
+        print("\n🟢 운영 PID: %s" % (sorted(server_pids() or []) or "**없음 — 즉시 재기동할 것**"))
         return 0
     if not a.match:
         print("\n⚠ `--match` 가 없다. 무엇을 죽일지 지정하지 않으면 **아무것도 하지 않는다.**")
