@@ -855,6 +855,13 @@ def _payout_suspect_check(rk, top2, q_official, source=None):
         q = _safe_num(q_official)
         if not q or q <= 0 or not top2 or len(top2) != 2:
             return None
+        # 🔴 [2026-08-22 자기수정] rk 에 날짜가 없으면 **비교하지 않는다.**
+        #   `_hist_path` 는 날짜가 없으면 **오늘**로 채운다 → 다른 날 배당판과 대조하게 된다.
+        #   실물: learning.json 의 「서울 1경주」(날짜 없음)를 오늘 8/22 배당판과 비교해
+        #     「저장 7.1 ↔ 배당판 102.1」이라는 가짜 발동 2건이 나왔다. 둘 다 무효다.
+        #   ⚠ 원칙 16(파일 매칭은 날짜까지)을 **내가 만든 가드가 그대로 어겼다.**
+        if not re.search(r"\d{4}[-_]?\d{2}[-_]?\d{2}", rk or ""):
+            return None
         _gate_hit("payouts_suspect", rk, None, reach_only=True)
         p, _, _ = _hist_path(rk)
         doc, _ = _json_load_guard(p, {}, "배당 정합")
