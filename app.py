@@ -1937,6 +1937,9 @@ REVIVE_CUT_10 = True            # 10두 이상
 CANCELLED_COMBO_DROP = True     # 🔴 [2026-08-22 승인] 취소마가 든 조합 제외. 🔧 되돌리기: False
 CANCELLED_MIN_TICKS = 3         # 최근 몇 틱이 연속으로 없어야 취소로 보는가(우발 결손 방어)
 CANCELLED_MIN_NOS = 4           # 최근 틱 마번이 이보다 적으면 판정하지 않는다(부분수집 방어)
+CANCELLED_FRESHEST_TICK = True  # 🔴 [2026-08-23] 최근 틱의 **합집합**이 아니라 조합 수 최소인 틱만 본다.
+#   왜: 확장이 갱신 멈춘 옛 화면(취소 전 표)을 섞어 보내 합집합에 취소마가 되살아난다.
+#   실측 2026-08-22 도달 4,518 · 발동 0 — 구조적으로 못 걸렸다. 🔧 되돌리기: False
 EV_MIN_ENABLED = True           # 🟢 2026-08-16 소급 대조 확인 후 켬(대표 승인)
 # ── [상품 분리 · 저장만 (2026-08-16 승인 · docs/상품분리_설계안.md)] ────────────
 #   왜: 하나의 명단을 회수율 하나로 재면 **싼 것을 많이 맞히는 쪽**이 이긴다.
@@ -2134,6 +2137,67 @@ def _odds_jump_suspect(prev_q, cur_q, x=None, frac=None, minc=None):
         if max(va, vb) / min(va, vb) >= x:
             big += 1
     return (big, len(com)) if big / len(com) >= frac else None
+
+
+STALE_BOARD_SKIP = False    # 🔴 [2026-08-23] **끈 채로 둔다.** 소급 발동률 57.8%(1,481/2,561틱 · 279경주)로
+#   원칙 18의 적정 구간(5~30%)을 크게 넘었다. 판정식이 「앞선 14틱 중 하나와 값이 같으면」이라
+#   **마감 한참 전이라 배당이 안 움직이는 정상 틱**까지 전부 잡는다.
+#   ⚠ 설계 근거였던 3.4%(98/2,851경주)는 「그 경주 안 큰쪽 조합 수 틱들의 값이 **전부 한 종류**」였다.
+#     즉 경주 단위 판정인데 틱 단위로 옮기며 뜻이 달라졌다(원칙 4 — 발동 사례를 먼저 본다).
+#   ⇒ 코드는 남긴다. 판정식을 경주 단위로 다시 짠 뒤 오탐률을 재고 켠다. 🔧 되돌리기: True
+
+
+def _stale_board_suspect(snaps, cur_q, lookback=14):
+    """[옛 화면] 갱신이 멈춘 배당판이 섞여 들어왔는지.
+
+    🔴 [2026-08-23 승인] 확장이 `odds_content` 로 표를 지정해 놓고도 **페이지의 모든 <table>** 을
+      다시 담아(동일출처 iframe 포함), 갱신이 멈춘 **취소 전 표**가 같이 잡혔다.
+      실물 2026-08-22 서울 1경주 — 45조합 틱과 36조합 틱이 번갈아 오고,
+      45조합 쪽 값은 12:50:42 이후 **한 종류로 고정**이었다(살아 있는 화면이면 불가능하다).
+      그 틱이 취소마 7번을 되살려 취소마 게이트가 영영 발동하지 못했다(도달 4,518 · 발동 0).
+
+    판정: 직전보다 조합 수가 **늘었고**, 그 값이 앞선 스냅샷 중 하나와 **완전히 같으면** 옛 화면이다.
+      ⚠ 늘어난 틱만 본다 — 정상적으로 두수가 회복되는 경우는 값이 다르므로 안 걸린다.
+    ⚠ 소급 오탐 범위(8월 전수): 조합 수가 두 종류인 경주 457/2,851(16.0%) 중
+      **큰쪽 값이 완전히 고정인 것 98경주(3.4%)** 만 해당한다. 나머지 12.6%는 정상 변동이다.
+    🔴 배당 저장은 그대로 한다. **급락 계산만** 건너뛴다(원칙 9 — 지우지 않는다).
+    """
+    if not STALE_BOARD_SKIP:
+        return False
+    try:
+        cur = _as_qmap(cur_q) or {}
+        if len(cur) < 6:
+            return False
+        prev = None
+        for _s in reversed(snaps or []):
+            if _s.get("quinella"):
+                prev = _as_qmap(_s.get("quinella")) or {}
+                break
+        if not prev or len(cur) <= len(prev):
+            return False                      # 늘어난 틱만 본다
+
+        def _fp(m):
+            out = []
+            for k, v in (m or {}).items():
+                try:
+                    out.append((str(k), round(float(v[0] if isinstance(v, list) else v), 2)))
+                except (TypeError, ValueError):
+                    continue
+            return tuple(sorted(out))
+
+        _cf = _fp(cur)
+        if not _cf:
+            return False
+        for _s in list(snaps or [])[-lookback:]:
+            _q = _s.get("quinella")
+            if not _q:
+                continue
+            _m = _as_qmap(_q) or {}
+            if len(_m) == len(cur) and _fp(_m) == _cf:
+                return True                   # 앞선 틱과 값이 한 자리도 안 다르다 = 갱신 정지
+        return False
+    except Exception:
+        return False
 
 
 def _combo_count_dip(prev_q, cur_q, ratio=_DIP_RATIO, min_prev=_DIP_MIN_PREV):
@@ -13393,12 +13457,35 @@ def _triple_analyze(rk, rec):
                         _cd = _hist_read_any(_cp2) or {}
                         _csn = [s for s in (_cd.get("snapshots") or []) if s.get("quinella")]
                         _csn = _csn[-CANCELLED_MIN_TICKS:]
-                        _seen = set()
+                        # 🔴🔴 [2026-08-23 승인] 종전에는 최근 3틱의 **합집합**을 봤다. 그래서 영영 발동하지 못했다.
+                        #   실측 2026-08-22: 도달 4,518 · 발동 **0**.
+                        #   원인: 확장이 갱신이 멈춘 **옛 화면(취소 전 표)** 을 섞어 보낸다.
+                        #     서울 1경주 12:54:55 시점 최근 3틱 = 12:54:17(36조합) · 12:54:29(36) · 12:54:48(**45**)
+                        #     45조합 틱이 7번을 되살려 「3틱 연속 부재」가 구조적으로 깨진다.
+                        #   ⇒ **조합 수가 가장 작은 틱** 하나만 본다. 옛 화면은 취소 전이라 **항상 조합이 더 많다.**
+                        #   ⚠ 안전장치는 그대로다 — 최근 N틱 확보 · 마번 4개 이상 · 전멸 시 원복.
+                        #   ⚠ 확장 2.1.162 가 옛 화면 혼입을 막지만, **재로드 전 탭은 옛 코드**라 서버 쪽도 막는다.
+                        #   🔧 되돌리기: CANCELLED_FRESHEST_TICK = False → 종전 합집합으로 돌아간다.
+                        _by_tick = []
                         for _s in _csn:
-                            for _k in (_s.get("quinella") or {}):
+                            _q = _s.get("quinella") or {}
+                            _ns = set()
+                            for _k in _q:
                                 for _x in str(_k).replace("-", "+").split("+"):
                                     if _x.isdigit():
-                                        _seen.add(int(_x))
+                                        _ns.add(int(_x))
+                            _by_tick.append((len(_q), _ns))
+                        _union = set()
+                        for _n, _ns in _by_tick:
+                            _union |= _ns
+                        if CANCELLED_FRESHEST_TICK and _by_tick:
+                            _seen = min(_by_tick, key=lambda t: t[0])[1]
+                        else:
+                            _seen = _union
+                        if _seen != _union:
+                            _gate_hit("cancelled_freshest_tick", rk,
+                                      "옛 화면 배제 — 최소틱 마번 %d ↔ 합집합 %d"
+                                      % (len(_seen), len(_union)), once_key=rk)
                         _gone = sorted(n for n in (_roster or set()) if n not in _seen)
                         if len(_csn) >= CANCELLED_MIN_TICKS and len(_seen) >= CANCELLED_MIN_NOS:
                             _gate_hit("cancelled_combo_drop", rk,
@@ -16340,6 +16427,11 @@ def _history_append(rk, quinella, exacta, deadline=None, win=None, baseline_rese
                                                           len(_as_qmap(quinella)))
                 elif _column_shift_suspect(_lastq, quinella):
                     odds_suspect = "배당 열 밀림 의심(인접 조합 값 일치)"
+                elif _stale_board_suspect(doc["snapshots"], quinella):
+                    # 🔴 [2026-08-23] 갱신 멈춘 옛 화면(취소 전 표)이 섞여 들어온 틱
+                    odds_suspect = "옛 화면 의심(조합 %d→%d 증가인데 값이 앞선 틱과 완전 동일)" % (
+                        len(_as_qmap(_lastq)), len(_as_qmap(quinella)))
+                    _gate_hit("stale_board_skip", rk, odds_suspect)
                 elif ODDS_JUMP_GATE:
                     _jr = _odds_jump_suspect(_lastq, quinella)
                     if _jr:
@@ -19241,11 +19333,25 @@ def _run_data_git_backup(label):
         paths = [p for p in DATA_BACKUP_PATHS if os.path.exists(os.path.join(root, p))]
         if not paths:
             return
-        subprocess.run(["git", "add"] + paths, cwd=root, timeout=60, capture_output=True)
+        # 🔴 [2026-08-23] `git add` 반환값을 보지 않아 **실패가 조용히 지나갔다.**
+        #   실측: `data/analysis_log` 가 .gitignore 대상인데 이 목록에 있어 git 이 rc=1 로 거부하고
+        #     **나머지 경로까지 전부 add 되지 않는다**("The following paths are ignored…").
+        #   ⚠ 목록은 건드리지 않는다(지시) — 실패를 **보이게만** 한다.
+        #   ⚠ pathspec commit 은 워킹트리에서 직접 가져오므로 add 실패와 무관하게 커밋 자체는 된다.
+        _ar = subprocess.run(["git", "add"] + paths, cwd=root, timeout=60,
+                             capture_output=True, text=True, errors="replace")
+        if _ar.returncode != 0:
+            _ae = " ".join(((_ar.stderr or "") + (_ar.stdout or "")).split())
+            print("[데이터백업] ⚠ git add 실패(rc=%s): %s" % (_ar.returncode, _ae[:200]))
+            _gate_hit("backup_add_fail", None, _ae[:120])
         msg = (label or "데이터 자동 백업").strip()
         # pathspec commit: 지정 경로 변경만 커밋(다른 스테이징 변경 미포함) → 안전
+        # 🔴 `errors="replace"` 가 없으면 **cp949 디코딩 실패로 stdout/stderr 가 통째로 비고**,
+        #   그러면 "nothing to commit" 판정에 못 걸려 정상인데도 「commit 건너뜀」으로 찍힌 뒤
+        #   **push 를 안 하고 return** 한다. 실측 268회 전부 빈 문자열이었다.
         r = subprocess.run(["git", "commit", "-m", msg, "--"] + paths,
-                           cwd=root, timeout=60, capture_output=True, text=True)
+                           cwd=root, timeout=60, capture_output=True, text=True,
+                           errors="replace")
         out = ((r.stdout or "") + (r.stderr or "")).strip()
         if r.returncode != 0:
             if any(k in out for k in ("nothing to commit", "no changes", "변경 사항", "커밋할", "working tree clean")):

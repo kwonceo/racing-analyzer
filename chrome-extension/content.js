@@ -565,8 +565,24 @@
         const t = c.closest('table'); if (t) tables.add(t);
       }
     }
-    // .odds_table 또는 (범용) 모든 표 — [프레임 대응] 동일출처 iframe(예: frm_race_run) 내부 표까지 스캔
-    for (const t of queryAllDocs('table.odds_table, table')) tables.add(t);
+    // 🔴 [2026-08-23 승인] oddsClass 로 표가 하나라도 잡혔으면 **범용 table 스캔을 하지 않는다.**
+    //   왜: 종전에는 `odds_content` 로 정확히 지정해 놓고 바로 다음 줄에서 페이지의 **모든 <table>** 을
+    //     다시 담았다(queryAllDocs 는 동일출처 iframe 안까지 훑는다). 지정이 무의미해진다.
+    //     그리고 아래 577~578 이 같은 조합을 **더 싼 값으로 덮으므로**, 갱신이 멈춘 옛 화면(취소 전 표)이
+    //     같이 잡히면 두 표의 값이 조합마다 섞인다.
+    //   🔴 실측(2026-08-22 서울 1경주): 45조합 틱과 36조합 틱이 번갈아 오고, 45조합 쪽 값은
+    //     12:50:42 이후 **한 종류로 고정**이었다(= 살아 있는 화면이 아니다).
+    //     그 틱이 취소마 7번을 되살려 서버 취소마 게이트(3틱 연속 부재)가 영영 발동하지 못했다.
+    //   ⚠ 8월 전수 오탐 범위: 조합 수가 두 종류인 경주 457/2851(16.0%) 중
+    //     **큰쪽 값이 완전히 고정인 것 98경주(3.4%)** 만이 이 결함이다. 나머지는 정상 변동이다.
+    //   ⚠ keiba·generic 사이트는 oddsClass 가 null 이라 **종전과 동일하게** 범용 스캔을 탄다(무회귀).
+    //   🔧 되돌리기: 아래 if 조건을 지우고 무조건 스캔하게 되돌린다.
+    if (!tables.size) {
+      // .odds_table 또는 (범용) 모든 표 — [프레임 대응] 동일출처 iframe(예: frm_race_run) 내부 표까지 스캔
+      for (const t of queryAllDocs('table.odds_table, table')) tables.add(t);
+    } else {
+      try { console.log('[수집] odds_class 표 %d개만 사용 — 범용 table 스캔 생략(옛 화면 혼입 차단)', tables.size); } catch (_) { /* */ }
+    }
 
     const pairsMap = {}; // "a-b"(a<b) -> odds (최소값 유지)
     const singleMap = {}; // no -> {no,win,place}

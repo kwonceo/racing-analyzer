@@ -715,6 +715,62 @@ def check_backup_alive():
                note="마지막 %s · %s" % (time.strftime("%m-%d %H:%M", time.localtime(last)), _INTEG_DAYS))
 
 
+STALE_CODE_SLACK_SEC = 5.0   # app.py 수정과 부팅 스탬프의 허용 오차(초)
+
+
+def check_stale_code():
+    """[I8] 🔴 **지금 도는 서버가 최신 app.py 인가** — 리로더를 끈 상태의 유일한 위험을 잡는다.
+
+    왜 필요한가 (2026-08-23)
+      오늘 리로더 재기동이 **43회**였고 그중 6회가 사고, 한 번은 서버가 완전히 죽었다(00:10).
+      그래서 운영을 `debug=False`(리로더 끔)로 돌렸다. 배경 데몬은 정상 기동을 확인했다.
+      🔴 그런데 `debug=False` 의 유일한 단점이 **「고쳐도 반영이 안 되는데 아무도 모른다」**이다.
+        CLAUDE.md 의 405 사고가 정확히 그 유형이고, 이 프로젝트가 가장 경계하는 **조용한 실패**다.
+      ⇒ `app.py` 수정 시각과 부팅 스탬프를 대조하면 **시끄럽게** 만들 수 있다.
+        이미 있는 두 값만 비교한다. 새 저장소를 만들지 않는다.
+
+    ⚠ 판정: app.py mtime > 마지막 부팅 시각 + 5초 → 🔴 옛 코드 실행 중(재기동 필요).
+    ⚠ 스탬프가 없으면 판정 보류(ok=None) — 배선 전 서버일 수 있다. 추측하지 않는다.
+    """
+    ap = os.path.join(BASE, "app.py")
+    sp = os.path.join(BASE, "data", "_bg_boot_last.txt")
+    try:
+        mt = os.path.getmtime(ap)
+    except Exception:
+        return _mk("I8", "🔴 무결성", "서버가 최신 app.py 인가",
+                   "app.py mtime ↔ data/_bg_boot_last.txt", current=None, target="최신",
+                   ok=None, n=None, note="app.py 를 읽지 못했다 — 판정 보류")
+    last = None
+    try:
+        for ln in reversed(open(sp, encoding="utf-8").read().strip().split("\n")):
+            ln = ln.strip()
+            if not ln:
+                continue
+            last = float(ln.split("\t")[0])
+            break
+    except Exception:
+        last = None
+    if last is None:
+        return _mk("I8", "🔴 무결성", "서버가 최신 app.py 인가",
+                   "app.py mtime ↔ data/_bg_boot_last.txt", current=None, target="최신",
+                   ok=None, n=None,
+                   note="부팅 스탬프 없음 — 판정 보류(스탬프 배선 전 서버일 수 있다)")
+    gap = mt - last
+    stale = gap > STALE_CODE_SLACK_SEC
+    return _mk("I8", "🔴 무결성", "서버가 최신 app.py 인가",
+               "app.py mtime ↔ data/_bg_boot_last.txt",
+               current=("🔴 옛 코드(+%.0f초)" % gap) if stale else "최신",
+               target="최신", ok=(not stale), n=1,
+               note=("🔴 app.py 를 고친 뒤 재기동하지 않았다 — 지금 도는 것은 옛 코드다. "
+                     "수정 %s · 기동 %s. 리로더가 꺼져 있어 자동 반영되지 않는다."
+                     % (time.strftime("%m-%d %H:%M:%S", time.localtime(mt)),
+                        time.strftime("%m-%d %H:%M:%S", time.localtime(last))))
+               if stale else
+               ("기동 %s · 코드 %s"
+                % (time.strftime("%m-%d %H:%M:%S", time.localtime(last)),
+                   time.strftime("%m-%d %H:%M:%S", time.localtime(mt)))))
+
+
 SERVER_LOG_MAX_MIN = 15.0   # 🔴 이 시간 이상 콘솔 로그가 안 늘면 이상
 
 
@@ -1013,6 +1069,10 @@ def build_checklist():
              # 🔴 무결성 감시(매일·자동) — 성능 측정과 성격이 다르다. 절대 줄이지 않는다.
              check_payout_coverage(), check_backup_alive(), check_daemon_alive(),
              check_server_log_alive(),   # I7 — 로그가 지금도 쌓이는가(검증 신뢰성의 전제)
+             # 🔴 [2026-08-23] I8 — 리로더를 끈 운영의 **유일한 위험**을 잡는다.
+             #   debug=False 로 돌리면 고쳐도 반영이 안 되는데 아무도 모른다(405 사고 유형).
+             #   app.py mtime ↔ 부팅 스탬프 대조로 그 조용한 실패를 시끄럽게 만든다.
+             check_stale_code(),
              # 🔴 [2026-08-01 · 권대표 결정] `check_snapshot_ingest()`(I6) **체크리스트에서 뺀다.**
              #   같은 날 아침에 넣었다가 같은 날 뺐다 — 스냅샷 **판정 경로를 중단**하기로 결정됐기 때문이다.
              #   **원칙 18: 안 쓰는 것을 감시하면 노이즈다.** 안 쓰기로 한 데이터가 안 들어온다고
