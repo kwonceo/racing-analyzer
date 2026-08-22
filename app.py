@@ -839,7 +839,7 @@ PAYOUT_SUSPECT_HI = 3.0      # 확정 ÷ 배당판이 3배 이상이면 표식
 PAYOUT_SUSPECT_LO = 0.34     # 반대 방향도 같은 폭
 
 
-def _payout_suspect_check(rk, top2, q_official, source=None):
+def _payout_suspect_check(rk, top2, q_official, source=None, estimated=False, when=None):
     """🔴 [배당 정합 표식 (2026-08-22 승인)] 확정배당이 마감 배당판과 크게 어긋나면 **표식만** 남긴다.
 
     🔴 **막지 않는다.** 값은 그대로 쓰고 필드만 붙인다(원칙 20 — 가드는 오탐률을 재기 전에 켜지 않는다).
@@ -855,13 +855,25 @@ def _payout_suspect_check(rk, top2, q_official, source=None):
         q = _safe_num(q_official)
         if not q or q <= 0 or not top2 or len(top2) != 2:
             return None
-        # 🔴 [2026-08-22 자기수정] rk 에 날짜가 없으면 **비교하지 않는다.**
+        # 🔴 ① 추정배당은 판정하지 않는다.
+        #   `payouts_estimated` 는 확정이 아니라 추정이다. 배당판과 어긋나는 것이 **정상**이므로
+        #   그것을 오염으로 잡으면 전부 오탐이 된다. app.py 의 「근사 둔갑 차단」과 같은 판단이다.
+        #   실물: 오탐 2건(서울 1경주 7.1 · 제주 1경주 2.5)이 **전부 추정값**이었다.
+        if estimated:
+            return None
+        # 🔴 ② 날짜 없는 키는 **날짜를 만들어 붙인다.** 없으면 비교하지 않는다.
         #   `_hist_path` 는 날짜가 없으면 **오늘**로 채운다 → 다른 날 배당판과 대조하게 된다.
-        #   실물: learning.json 의 「서울 1경주」(날짜 없음)를 오늘 8/22 배당판과 비교해
-        #     「저장 7.1 ↔ 배당판 102.1」이라는 가짜 발동 2건이 나왔다. 둘 다 무효다.
+        #   실물: learning.json 의 「서울 1경주」(2026-08-16 레코드)를 오늘 8/22 배당판과 비교해
+        #     「저장 7.1 ↔ 배당판 102.1」이 나왔다. 같은 날(8/16) 배당판은 **7.0** 으로 정상이었다.
         #   ⚠ 원칙 16(파일 매칭은 날짜까지)을 **내가 만든 가드가 그대로 어겼다.**
         if not re.search(r"\d{4}[-_]?\d{2}[-_]?\d{2}", rk or ""):
-            return None
+            if not when:
+                return None
+            try:
+                rk = "%s %s" % (time.strftime("%Y-%m-%d", time.localtime(float(when))),
+                                str(rk).strip())
+            except (TypeError, ValueError):
+                return None
         _gate_hit("payouts_suspect", rk, None, reach_only=True)
         p, _, _ = _hist_path(rk)
         doc, _ = _json_load_guard(p, {}, "배당 정합")
@@ -18468,7 +18480,9 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
     #     (부산 2경주 저장 81.9 = 같은 날 부산 4경주 [3+8] 81.9).
     _pay_suspect = _payout_suspect_check(
         rk, _t2win, _q_odds_fb,
-        source=("inputs" if _safe_num(inputs.get("quinella_odds")) else "fallback"))
+        source=("inputs" if _safe_num(inputs.get("quinella_odds")) else "fallback"),
+        estimated=bool(record.get("payouts_estimated")),
+        when=(record.get("t") or time.time()))
     inv = {
         "budget": _safe_num(inputs.get("budget")) or 0,
         "main_bet": _safe_num(inputs.get("main_bet")) or 0,
@@ -41218,10 +41232,10 @@ def _boot_background():
     #   ⚠ dev 는 여기 오지 않는다(_bg_should 가 False).
     try:
         with open(os.path.join(os.path.dirname(__file__), "data", "_bg_boot_last.txt"),
-                  "w", encoding="utf-8") as _f:
-            _f.write("%s pid=%d reloader_child=%s debug=%s\n"
-                     % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), os.getpid(),
-                        os.environ.get("WERKZEUG_RUN_MAIN") == "true",
+                  "a", encoding="utf-8") as _f:   # 🔴 append — 몇 번 탔는지를 센다(원칙 9)
+            _f.write("%d\t%d\t%s\t%s\n"
+                     % (int(time.time()), os.getpid(),
+                        os.environ.get("WERKZEUG_RUN_MAIN", ""),
                         os.environ.get("FLASK_ENV") != "production"))
     except Exception as _se:
         print("[부팅] 스탬프 기록 실패(무시):", str(_se)[:60])
