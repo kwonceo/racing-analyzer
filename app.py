@@ -834,6 +834,106 @@ def _img_from_dataurl(img):
     return img if isinstance(img, dict) else None
 
 
+PAYOUT_SUSPECT_DIR = os.path.join(os.path.dirname(__file__), "logs", "payout_suspect")
+PAYOUT_SUSPECT_HI = 3.0      # 확정 ÷ 배당판이 3배 이상이면 표식
+PAYOUT_SUSPECT_LO = 0.34     # 반대 방향도 같은 폭
+
+
+def _payout_suspect_check(rk, top2, q_official, source=None):
+    """🔴 [배당 정합 표식 (2026-08-22 승인)] 확정배당이 마감 배당판과 크게 어긋나면 **표식만** 남긴다.
+
+    🔴 **막지 않는다.** 값은 그대로 쓰고 필드만 붙인다(원칙 20 — 가드는 오탐률을 재기 전에 켜지 않는다).
+    판정: ratio = 확정 ÷ 마감 배당판(정답 조합)
+      ratio >= 3.0 또는 <= 0.34            → payouts_suspect
+      🔴 배당판 값이 그 경주 **최저배당**인데 ratio >= 3 → payouts_impossible
+         (시장 1인기 조합이 80배로 확정되는 일은 없다)
+    소급 실측(8월 한국 74건): 발동 16건 = 21.6% — 적정 구간(5~30%) 안이다.
+      그중 물리적으로 불가능 6건. 나머지 10건은 「크게 어긋난다」까지다.
+    반환 dict 또는 None. 실패해도 None(저장 경로에 영향 없음).
+    """
+    try:
+        q = _safe_num(q_official)
+        if not q or q <= 0 or not top2 or len(top2) != 2:
+            return None
+        _gate_hit("payouts_suspect", rk, None, reach_only=True)
+        p, _, _ = _hist_path(rk)
+        doc, _ = _json_load_guard(p, {}, "배당 정합")
+        sn = [s for s in (doc.get("snapshots") or []) if s.get("quinella")]
+        if not sn:
+            return None
+        last = max(sn, key=lambda s: s.get("t") or 0)
+        board = {}
+        raw = last.get("quinella")
+        it = raw if isinstance(raw, list) else [
+            {"combo": str(k).replace("-", "+").split("+"), "odds": v} for k, v in (raw or {}).items()]
+        for e in it:
+            try:
+                c = tuple(sorted(int(x) for x in (e.get("combo") or [])))
+                if len(c) == 2:
+                    board[c] = float(e.get("odds"))
+            except (TypeError, ValueError):
+                continue
+        key = tuple(sorted(int(x) for x in top2))
+        m = board.get(key)
+        if not m or m <= 0:
+            return None
+        ratio = q / m
+        if PAYOUT_SUSPECT_LO < ratio < PAYOUT_SUSPECT_HI:
+            return None
+        lo = min(board.values()) if board else None
+        impossible = bool(lo and abs(m - lo) < 1e-9 and ratio >= PAYOUT_SUSPECT_HI)
+        out = {"ratio": round(ratio, 2), "boardOdds": m, "boardMin": lo,
+               "official": q, "source": source, "impossible": impossible}
+        _gate_hit("payouts_suspect", rk, "확정 %.1f ↔ 배당판 %.1f (%.1f배)" % (q, m, ratio), once_key=rk)
+        if impossible:
+            _gate_hit("payouts_impossible", rk,
+                      "정답이 시장 최저(%.1f)인데 확정 %.1f" % (m, q), once_key=rk)
+        try:
+            os.makedirs(PAYOUT_SUSPECT_DIR, exist_ok=True)
+            with open(os.path.join(PAYOUT_SUSPECT_DIR,
+                                   time.strftime("%Y%m%d", time.localtime()) + ".jsonl"),
+                      "a", encoding="utf-8") as f:
+                f.write(json.dumps(dict(out, rk=rk, top2=list(key),
+                                        at=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())),
+                                   ensure_ascii=False) + "\n")
+        except Exception:
+            pass
+        return out
+    except Exception:
+        return None
+
+
+RESULT_OCR_LOG_DIR = os.path.join(os.path.dirname(__file__), "logs", "result_ocr")
+
+
+def _result_ocr_log(out, rows, summary=None, note=None):
+    """🔴 [OCR 판독 결과 보존 (2026-08-22 승인)] 결과표 판독분을 **그대로** 남긴다.
+
+    왜: 한국 확정배당 오염 16건의 출처가 이 경로인데, **판독 결과가 저장되지 않아**
+      두 달 동안 재현이 불가능했다(CLAUDE.md — 「일괄등록 원본 rows 미저장」과 같은 계열).
+      실물: 부산 2경주 저장 81.9배 = **같은 날 부산 4경주 [3+8] 81.9배** — 표에서 다른 행을 읽었다.
+    ⚠ **기록만이다.** 판독·등록 동작은 한 줄도 바꾸지 않는다.
+    ⚠ 이미지는 담지 않는다(용량). **판독 결과만 있어도 재현된다.**
+    ⚠ append 전용 — 덮어쓰지 않는다(원칙 9).
+    """
+    try:
+        os.makedirs(RESULT_OCR_LOG_DIR, exist_ok=True)
+        p = os.path.join(RESULT_OCR_LOG_DIR, time.strftime("%Y%m%d", time.localtime()) + ".jsonl")
+        rec = {"at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+               "parsed": (out or {}).get("results") or [],
+               "rows": rows or [],
+               "matched": (summary or {}).get("matched"),
+               "unmatched": (summary or {}).get("unmatched"),
+               "registered": (summary or {}).get("registered"),
+               "note": note}
+        with open(p, "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        _gate_hit("result_ocr_log", None, "판독 %d행 · 등록 %s"
+                  % (len(rows or []), (summary or {}).get("registered")))
+    except Exception as e:
+        print("[OCR 기록] 실패(무시):", str(e)[:80])
+
+
 @app.route("/api/result/ocr", methods=["POST"])
 def result_ocr():
     """경주결과 화면 캡쳐 이미지 → 결과표(여러 경주) 판독 → 분석경주 자동매칭·등록·학습.
@@ -868,10 +968,12 @@ def result_ocr():
                      "qOdds": _safe_num(r.get("quinellaOdds")),
                      "tOdds": _safe_num(r.get("trioOdds"))})
     if not rows:
+        _result_ocr_log(out, rows, None, "결과 행을 읽지 못했습니다")
         return jsonify({"ok": True, "registered": 0, "hits": 0, "profit": 0,
                         "matched": [], "unmatched": [], "parsed": results,
                         "note": "결과 행을 읽지 못했습니다(결과 화면이 선명한지 확인)."})
     summary = _register_result_rows(rows, _safe_num(body.get("stake")) or 1000)
+    _result_ocr_log(out, rows, summary)   # 🔴 판독 결과 보존 — 기록만, 동작 무변경
     summary["parsed"] = results
     return jsonify(summary)
 
@@ -18353,6 +18455,13 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
     _t_odds_fb = (_safe_num(inputs.get("trifecta_odds"))
                   or _safe_num((record.get("payouts") or {}).get("trifecta"))
                   or _safe_num(((result or {}).get("payouts") or {}).get("trifecta")))
+    # 🔴 [배당 정합 표식 (2026-08-22 승인)] 확정배당이 마감 배당판과 크게 어긋나면 표식만 남긴다.
+    #   🔴 **저장을 막지 않는다.** 값은 그대로 쓰고 `payouts_suspect` 필드만 붙인다.
+    #   근거: 한국 확정배당 16건이 OCR 오독으로 다른 경주 값을 물고 왔다
+    #     (부산 2경주 저장 81.9 = 같은 날 부산 4경주 [3+8] 81.9).
+    _pay_suspect = _payout_suspect_check(
+        rk, _t2win, _q_odds_fb,
+        source=("inputs" if _safe_num(inputs.get("quinella_odds")) else "fallback"))
     inv = {
         "budget": _safe_num(inputs.get("budget")) or 0,
         "main_bet": _safe_num(inputs.get("main_bet")) or 0,
@@ -18391,6 +18500,8 @@ def _build_race_result(rk, an, record, result, top4, inputs=None):
         "result": {k: result.get(k) for k in ("1st", "2nd", "3rd", "4th") if result.get(k) not in (None, "")},
         "payouts": (_payouts_top or None),                                        # [회수율 정직화] 성적표 참조 위치
         "payouts_approx": bool(_payouts_top.get("quinella") is not None and _q_official is None),
+        # 🔴 확정배당이 마감 배당판과 크게 어긋날 때만 붙는다(정상이면 None). 막지 않는다 — 표식이다.
+        "payouts_suspect": _pay_suspect,
         "odds_at_start": odds_start,
         "odds_timeline": timeline,
         "anomalies": anomalies,
