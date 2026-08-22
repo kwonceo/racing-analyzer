@@ -868,17 +868,26 @@ def _payout_suspect_check(rk, top2, q_official, source=None, estimated=False, wh
         #   ⚠ 원칙 16(파일 매칭은 날짜까지)을 **내가 만든 가드가 그대로 어겼다.**
         if not re.search(r"\d{4}[-_]?\d{2}[-_]?\d{2}", rk or ""):
             if not when:
+                _gate_hit("payouts_suspect_skip_nodate", rk, "날짜 복원 불가(when 없음)")
                 return None
             try:
                 rk = "%s %s" % (time.strftime("%Y-%m-%d", time.localtime(float(when))),
                                 str(rk).strip())
             except (TypeError, ValueError):
+                _gate_hit("payouts_suspect_skip_nodate", rk, "날짜 복원 실패(when 형식)")
                 return None
         _gate_hit("payouts_suspect", rk, None, reach_only=True)
         p, _, _ = _hist_path(rk)
-        doc, _ = _json_load_guard(p, {}, "배당 정합")
+        # 🔴 [2026-08-22] `_json_load_guard` 는 **.json 만** 읽는다. 그런데 7일 지난 배당판은
+        #   `.json.gz` 로 압축된다 — 한국 8월 확정배당 102경주 중 **60경주(58.8%)가 gz 뿐**이었다.
+        #   ⇒ 그 60경주는 대조 상대가 없어 **판정 자체를 못 했다.** 소급 실측이 74~78경주만 잡히고
+        #     발동이 8건에 그친 원인이 이것이다(대표 실측 16건과의 차이).
+        doc = _hist_read_any(p) or {}
         sn = [s for s in (doc.get("snapshots") or []) if s.get("quinella")]
         if not sn:
+            # 🔴 배당판 이력이 없으면 대조 상대가 없다 — 스킵을 **센다**(원칙 23·24).
+            #   ⚠ 스킵이 90% 를 넘으면 가드가 「걸리지 않는 것」이 아니라 **살아 있지 않은 것**이다.
+            _gate_hit("payouts_suspect_skip_nohist", rk, "배당판 이력 없음")
             return None
         last = max(sn, key=lambda s: s.get("t") or 0)
         board = {}
@@ -1914,6 +1923,9 @@ REVIVE_CUT_10 = True            # 10두 이상
 #   ⚠ 저배당 편중이 풀리지는 않는다 — 살아나는 것이 주로 5~8배라 배당중앙은 경륜 4.40→4.60뿐이다.
 #   🔴 한국은 확정배당 보유 0경주라 **측정 불가** → 문턱을 건드리지 않는다(1.0 유지).
 #   🔧 되돌리기: EV_MIN_ENABLED = False (그 한 줄).
+CANCELLED_COMBO_DROP = True     # 🔴 [2026-08-22 승인] 취소마가 든 조합 제외. 🔧 되돌리기: False
+CANCELLED_MIN_TICKS = 3         # 최근 몇 틱이 연속으로 없어야 취소로 보는가(우발 결손 방어)
+CANCELLED_MIN_NOS = 4           # 최근 틱 마번이 이보다 적으면 판정하지 않는다(부분수집 방어)
 EV_MIN_ENABLED = True           # 🟢 2026-08-16 소급 대조 확인 후 켬(대표 승인)
 # ── [상품 분리 · 저장만 (2026-08-16 승인 · docs/상품분리_설계안.md)] ────────────
 #   왜: 하나의 명단을 회수율 하나로 재면 **싼 것을 많이 맞히는 쪽**이 이긴다.
@@ -3610,7 +3622,12 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
         _history_append(rk, q, x, deadline, win, baseline_reset=baseline_reset,
                         source=("oddspark" if _src_is_oddspark(source)
                                 else ("netkeiba" if str(source or "").startswith("netkeiba")
-                                      else "private")))
+                                      else ("kra_api" if str(source or "").startswith("kra")
+                                            else "private"))))
+        # 🔴 [2026-08-22] `kra` 로 시작하는 것을 **네 번째 값**으로 뺀다.
+        #   종전엔 KRA 공식 API 수집분이 확장(사설)과 똑같이 `private` 로 뭉쳐 기록돼
+        #   **두 소스를 대조할 방법이 구조적으로 없었다**(netkeiba 를 뺀 이유와 같다).
+        #   ⚠ 기존 세 값(oddspark·netkeiba·private)은 하나도 바꾸지 않는다.
     except Exception as e:
         # [관측 개통 (2026-07-29)] 여기서 실패하면 그 경주는 **스냅샷 0**이 되는데, 지금까지는 콘솔
         #   print 로만 남아 서버 창을 놓치면 흔적이 사라졌다(실측: 나고야 12R 등 archive_snapshots 키가
@@ -13350,6 +13367,57 @@ def _triple_analyze(rk, rec):
                         print("🔴 [출주명단 게이트] %s: 명단 밖 마번 조합 %d개 제외 (출마표 %s) → %s"
                               % (rk, len(_drops), sorted(_roster),
                                  [d["combo"] for d in _drops][:6]))
+                # ── 🔴🔴 [2026-08-22 승인] 취소마 조합 제외 ────────────────────────────────
+                #   실사고: 2026-08-22 서울 1경주 — **취소된 7번**이 든 6+7 이 추천 ②로 나갔다.
+                #     6틱 중 4틱에 있었다. 우발이 아니다. **회원이 살 수 없는 조합을 판 것이다.**
+                #   🔴 위 명단 게이트는 **합집합(넓은 쪽)** 이라 구조적으로 못 잡는다 —
+                #     취소마는 출마표(form)에 그대로 남아 있고 **배당판에서만 사라지기** 때문이다.
+                #     (그 합집합은 2026-08-02 에 오탐 83.3% 를 고치며 일부러 넓힌 것이다. 그대로 둔다.)
+                #   ⇒ 새 목록을 만들지 않고 **같은 게이트 안에서 배당판 최근 틱만** 따로 본다.
+                #   ⚠ 막지 않는다. **그 조합만** 뺀다. 다 빠지면 되돌린다(화면이 비면 안 된다).
+                #   ⚠ 안전장치 셋: 최근 3틱 **연속** 부재 · 최근 틱 마번 4개 이상 · 전멸 시 원복.
+                if CANCELLED_COMBO_DROP:
+                    try:
+                        _cp2, _, _ = _hist_path(rk)
+                        _cd = _hist_read_any(_cp2) or {}
+                        _csn = [s for s in (_cd.get("snapshots") or []) if s.get("quinella")]
+                        _csn = _csn[-CANCELLED_MIN_TICKS:]
+                        _seen = set()
+                        for _s in _csn:
+                            for _k in (_s.get("quinella") or {}):
+                                for _x in str(_k).replace("-", "+").split("+"):
+                                    if _x.isdigit():
+                                        _seen.add(int(_x))
+                        _gone = sorted(n for n in (_roster or set()) if n not in _seen)
+                        if len(_csn) >= CANCELLED_MIN_TICKS and len(_seen) >= CANCELLED_MIN_NOS:
+                            _gate_hit("cancelled_combo_drop", rk,
+                                      "최근%d틱 마번 %d · 취소후보 %s" % (len(_csn), len(_seen), _gone),
+                                      reach_only=True)
+                            if _gone:
+                                _gset = set(_gone)
+                                _cdrops = []
+                                for _key in ("quinellas", "trifectas", "bmedSpecial"):
+                                    _src = _fp.get(_key) or []
+                                    _keep = [_it for _it in _src
+                                             if not (set(int(x) for x in (_it.get("combo") or []))
+                                                     & _gset)]
+                                    if _src and not _keep:
+                                        continue          # 🔴 전멸이면 되돌린다 — 화면이 비면 안 된다
+                                    for _it in _src:
+                                        if _it not in _keep:
+                                            _cdrops.append({"list": _key, "combo": _it.get("combo"),
+                                                            "odds": _it.get("odds")})
+                                    _fp[_key] = _keep
+                                if _cdrops:
+                                    core_picks["cancelledDropped"] = _cdrops
+                                    core_picks["cancelledNos"] = _gone
+                                    _gate_hit("cancelled_combo_drop", rk,
+                                              "취소마 %s · 조합 %d개 제외" % (_gone, len(_cdrops)))
+                                    print("🔴 [취소마 게이트] %s: 취소마 %s 가 든 조합 %d개 제외 → %s"
+                                          % (rk, _gone, len(_cdrops),
+                                             [d["combo"] for d in _cdrops][:6]))
+                    except Exception as _cge:
+                        print("[취소마 게이트] 실패(무시):", str(_cge)[:100])
             except Exception as _rge:
                 print("[출주명단 게이트] 실패(무시):", str(_rge)[:100])
             core_picks["finalQuinellas"] = _fp["quinellas"]
@@ -28907,11 +28975,60 @@ _KRA_WATCH_FAIL_MAX = 20     # 연속 실패 20회(=약 10분) → 자동 해제
 _KRA_WATCH_MAX_AGE = 10800   # 등록 후 3시간 경과 → 자동 해제(한 경주 발주~마감은 길어야 수십 분)
 
 
+KRA_AUTO_ENROLL = True          # 🔧 되돌리기: False 한 줄
+KRA_ENROLL_BEFORE_SEC = 1800    # 발주 30분 전부터 등록
+KRA_ENROLL_AFTER_SEC = 180      # 발주 3분 뒤까지 유지
+
+
+def _kra_auto_enroll(now=None):
+    """🔴 [KRA 자동 등록 (2026-08-22 승인)] 오늘 한국 경주를 30초 수집 감시에 **자동으로** 넣는다.
+
+    왜: 배당을 받아오는 코드도, 30초 데몬도 **이미 다 있었다.**
+      그런데 감시 목록에 넣는 곳이 `POST /api/kra/watch` 하나뿐이고 **그것을 부르는 코드가 없었다.**
+      ⇒ 감시 목록이 늘 0경주였고, 한국 배당은 **대표가 배당판을 열어둔 경주만**(확장·src=private)
+        들어왔다. 어제 12경주만 쌓인 것이 그 결과다.
+      일본은 스케줄에서 대상을 자동으로 뽑는데 **한국만 그 한 줄이 비어 있었다.**
+    ⚠ 확장(private)을 끄지 않는다 — 둘 다 받아 대조한다(원칙 22 계열: 소스 하나로 판정하지 않는다).
+    ⚠ `POST /api/kra/watch` 수동 경로는 그대로 둔다.
+    ⚠ 오늘 세션이 아니면 아무것도 하지 않는다(`_korea_kakao_targets` 가 이미 그렇게 막는다).
+    """
+    if not KRA_AUTO_ENROLL:
+        return 0
+    now = now or time.time()
+    added = 0
+    try:
+        for pe, venue, rno, rk in (_korea_kakao_targets(now) or []):
+            if not (pe and venue and rno):
+                continue
+            if not (-KRA_ENROLL_BEFORE_SEC <= (pe - now) <= KRA_ENROLL_BEFORE_SEC):
+                continue
+            if (now - pe) > KRA_ENROLL_AFTER_SEC:
+                continue                       # 발주 3분 지난 경주는 넣지 않는다
+            meet = _kra_meet_code(venue)
+            if not meet:
+                continue
+            with _KRA_WATCH_LOCK:
+                if rk in _KRA_WATCH:
+                    continue
+                _KRA_WATCH[rk] = {"meet": meet, "rc_date": time.strftime("%Y%m%d", time.localtime(pe)),
+                                  "rc_no": str(rno), "t": now, "auto": True}
+            added += 1
+            _gate_hit("kra_watch_enroll", rk, "%s %s경주 · 발주 %s"
+                      % (venue, rno, time.strftime("%H:%M", time.localtime(pe))), once_key=rk)
+            print("[KRA 자동등록] %s (발주 %s)" % (rk, time.strftime("%H:%M", time.localtime(pe))))
+    except Exception as e:
+        print("[KRA 자동등록] 스킵(무시):", str(e)[:80])
+    if _KRA_WATCH:
+        _gate_hit("kra_watch_active", None, "감시 %d경주" % len(_KRA_WATCH))
+    return added
+
+
 def _kra_auto_loop():
     """30초 간격으로 watch 등록된 KRA 경주 배당 자동수집(데몬). 수집 결과(시각·건수·성공)를 watch 레코드에 기록.
     [할당량 보호] 지난 날짜·장기 미해제·연속 실패 watch 는 자동 해제해 배당 API 낭비 호출을 막는다(기존 수집 로직 불변)."""
     while True:
         try:
+            _kra_auto_enroll()          # 🔴 오늘 한국 경주를 자동으로 감시 목록에 넣는다(2026-08-22)
             _today = time.strftime("%Y%m%d")
             with _KRA_WATCH_LOCK:
                 targets = list(_KRA_WATCH.items())
@@ -41220,6 +41337,10 @@ def _boot_background():
     _start_multi_race_bg()               # [핵심] 다중 경주(지방경마·경륜·한국) 24시간 자동수집
     _weather_auto_start()                # [날씨] 경주장별 실시간 날씨·주로 상태 자동수집(30분 캐시)
     _kra_backfill_start()                # [KRA 결과 백필] 20분 주기·당일 미입력 한국경주 결과 자동수집(watch 무관·복기/학습/복병 자동화)
+    try:
+        _kra_auto_start()                # 🔴 [KRA 배당 30초 수집 2026-08-22] 종전엔 POST /api/kra/watch 안에서만
+    except Exception as e:               #   데몬을 띄워서, 아무도 POST 를 안 하면 **데몬 자체가 안 떴다**.
+        print("[KRA] 자동수집 데몬 기동 실패(무시):", e)   # 그래서 한국 배당이 확장(private)에만 의존했다.
     try:
         _archive_compress_old(7)         # 7일+ 경주 배당 .gz 압축 보관(데이터 삭제 없음)
     except Exception as e:
