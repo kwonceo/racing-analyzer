@@ -17186,6 +17186,46 @@ def _judge_extra_quinellas(cp, sport, already):
     return out
 
 
+def _prerace_report_for(rk):
+    """[사전분석 보존] `data/prerace/<날짜>_<경기장>_<라운드>.json` 의 총평·말별 근거를 복사해 온다.
+
+    🔴 **완전 읽기 전용**이다. prerace 를 지우거나 고치지 않는다.
+    담는 것: race_summary(총평) · special_notes · analysis(분석문) ·
+             horses[](no·name·grade·score·reason) · grade_picks
+    ⚠ betting_recommend(조합)는 **안 담는다** — 추천 경로와 섞이면 안 된다.
+    ⚠ 한국 경주만 대상이다. 못 찾으면 None(기존 기록을 덮지 않는다).
+    """
+    try:
+        m = re.search(r"(\d{4})[-_]?(\d{2})[-_]?(\d{2})", rk or "")
+        date = "%s-%s-%s" % m.groups() if m else time.strftime("%Y-%m-%d", time.localtime())
+        body = re.sub(r"\d{4}[-_]?\d{2}[-_]?\d{2}", "", rk or "").strip()
+        mv = re.match(r"([가-힣A-Za-z]+)\D*(\d+)", body)
+        if not mv:
+            return None
+        venue, rno = mv.group(1), int(mv.group(2))
+        if not re.search(r"서울|부산|부경|제주|과천", venue):
+            return None                      # 🔴 한국만 — 일본은 PDF 사전분석이 없다
+        p = os.path.join(KOREA_PRERACE_DIR, "%s_%s_%d.json" % (date, venue, rno))
+        if not os.path.exists(p):
+            return None
+        d = json.load(open(p, encoding="utf-8"))
+        r = d.get("report") or {}
+        if not isinstance(r, dict):
+            return None
+        hs = []
+        for h in (r.get("horses") or []):
+            if not isinstance(h, dict):
+                continue
+            hs.append({"no": h.get("no"), "name": h.get("name"), "grade": h.get("grade"),
+                       "score": h.get("score"), "reason": h.get("reason")})
+        out = {"raceSummary": r.get("race_summary"), "specialNotes": r.get("special_notes"),
+               "analysis": r.get("analysis"), "gradePicks": r.get("grade_picks"),
+               "horses": hs, "savedFrom": os.path.basename(p)}
+        return out if (out["raceSummary"] or hs) else None
+    except Exception:
+        return None
+
+
 def _race_shape_label(an):
     """[판형 분석기 1단계] 선행 마릿수로 판형 이름을 붙인다. 🔴 저장 전용 — 아무것도 안 바꾼다.
 
@@ -17887,6 +17927,13 @@ def _build_analysis_log(rk, an=None):
         #   paceBonus 와 같은 구조 — **검증 도구의 입력이 저장되지 않는 문제**다.
         #   ⚠ 이게 있어야 "그때 왜 WARNING 이었나"를 사후 재현할 수 있다. 빈값 덮어쓰기 방지.
         "drops_raw": (an.get("drops") or (doc.get("drops_raw") if doc else None)),
+        # 🔴 [사전분석 보존 (2026-08-22 승인)] PDF 총평·말별 근거를 **복사해 둔다.**
+        #   왜: 지금은 `data/prerace/` 에만 있고 그건 **다음 업로드 때 초기화**된다(`_prerace_clear`).
+        #     하루 뒤면 「왜 그 말을 A로 봤나」가 사라진다 — lineageNb·sigMeta 와 같은 소급 불가 성격이다.
+        #   ⚠ **복사만이다.** 지우는 쪽(prerace)은 그대로 두고, 화면·추천·점수에 안 쓴다.
+        #   ⚠ 한국 경주만 채워진다(일본은 PDF 사전분석이 없다).
+        "prerace_report": (_prerace_report_for(rk)
+                           or (doc.get("prerace_report") if doc else None)),
         # 🔴 [판형 분석기 1단계 (2026-08-21 승인)] 이 경주가 어떤 판인가 — **이름표만** 붙인다.
         #   🔴 화면·추천 어디에도 안 쓴다. 조합을 한 개도 바꾸지 않는다.
         #     (전개로 **조합을 고르는** 안은 이 프로젝트에서 세 번 기각됐다 —
