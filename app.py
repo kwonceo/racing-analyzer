@@ -1701,10 +1701,17 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
       경륜 전적은 oddspark 출마표 분석(source=keirin)으로만 채운다.
     - valid_nos(현재 배당에 등장하는 마번 집합) 지정 시: 이전 경주 잔존마(배당 없는 마번)를 자동 제외."""
     rec = _starters_load().get(rk)
+    # 🔴 [출구 계수기 · 2026-08-22 승인] **세기만 한다.** 조건·return 위치·값 무변경.
+    #   왜: 한국 전적 결손 22경주(19.6%)가 이 함수의 **네 출구 중 어디로 나가는지** 기록이 없었다.
+    #     ①만 print 조차 없어 「명단이 저장소에 없다」를 사후에 셀 수 없었다(원칙 23·24).
+    _gate_hit("form_gate", rk, None, reach_only=True)
     if not rec or not rec.get("horses"):
+        _gate_hit("form_skip_nostore", rk,
+                  "starters_store 에 없음" if not rec else "horses 비었음", once_key=rk)
         return None
     # [오매칭 차단] 6명 종목(경륜·경정·바이크)에 한국경마 전적이 raceKey 충돌로 들어간 경우 사용 금지.
     if sport in ("cycle", "boat", "bike") and rec.get("source") == "korea":
+        _gate_hit("form_skip_sport", rk, "%s 에 한국 전적" % sport, once_key=rk)
         return None
     # ── [승인 B · 2026-08-01] 경마도 차단 — **경기장으로 가른다** ─────────────────
     # 🔴 왜: 위 줄이 경륜·경정·바이크만 막아, JRA·일부 지방 경마에 한국 PDF 전적이 그대로 들어가
@@ -1719,6 +1726,7 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
     #   정확일치면 재표기된 순간 **이 가드에 안 걸려 오염 전적이 다시 점수에 들어간다.**
     if str(rec.get("source") or "").startswith("korea") and not _KRA_TRACK_RE.search(str(rk or "")):
         print("[전적 오매칭 차단] %s: 한국 전적(source=korea)이 한국 경마장이 아닌 경주에 붙어 있다 → 전적 미사용" % rk)
+        _gate_hit("form_skip_track", rk, "한국 전적 ↔ 비한국 경기장", once_key=rk)
         return None
     # 🔴 [2026-08-05 승인] **한국 명단 날짜 대조** — PDF 날짜가 오늘과 다르면 쓰지 않는다.
     #   왜: 7/30 부산 3경주가 **4일 지난 7/26 명단**으로 판정됐다(미개최일에 확장이 배당을 보냄).
@@ -1730,6 +1738,7 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
         if str(rec.get("pdfDate"))[:10] != time.strftime("%Y-%m-%d"):
             print("[한국 명단 날짜불일치] %s: PDF %s ≠ 오늘 → 명단 미사용(오래된 명단 방지)"
                   % (rk, rec.get("pdfDate")))
+            _gate_hit("form_skip_pdfdate", rk, "PDF %s ≠ 오늘" % rec.get("pdfDate"), once_key=rk)
             return None
     anomaly_by_no = {}
     for d in drops or []:
@@ -1814,6 +1823,7 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
             })
         classify_grades(scored)
         scored.sort(key=lambda x: -x["totalScore"])
+        _gate_hit("form_ok", rk, "한국 PDF 사전점수 %d두" % len(scored), once_key=rk)
         return scored
     # [일본경마] 출마표2 착순으로 재계산 (착순이 비면 KRA 실전적으로 백필 — 한국 마명만 매칭)
     kra_hist = _kra_load_history()
@@ -1826,6 +1836,7 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
                        "recentPlacings": rp, "currentWeight": h.get("weight")})
     scored = compute_horse_scores({}, horses, None, anomaly_by_no)
     scored.sort(key=lambda x: -x["totalScore"])
+    _gate_hit("form_ok", rk, "재계산 %d두" % len(scored), once_key=rk)
     return scored
 
 
@@ -34749,7 +34760,38 @@ def _prerace_load(key):
 
 
 def _prerace_clear():
-    """data/prerace/ 전체 삭제('새 PDF 업로드' 초기화 시). 폴더 없으면 무시."""
+    """data/prerace/ 전체 삭제('새 PDF 업로드' 초기화 시). 폴더 없으면 무시.
+
+    🔴 [2026-08-22 승인] **무엇을 지웠는지 기록한다.** 지우는 동작은 한 줄도 안 바꾼다.
+      실사고: 2026-08-22 하루에 **두 번** 이 함수가 폴더를 통째로 비웠다.
+        아침 한 번(git 으로 복구) · 22:06 내일(8/23) PDF 업로드 때 또 한 번.
+        🔴 두 번째에서 **당일(8/22) 파일 17개가 영구 소실**됐다 — 커밋 전이라 복구 불가다.
+        그 파일 위에서 예상문 피드백·전적 결손 측정을 하고 있었다.
+      ⚠ 종전에는 로그가 **한 줄도 없어** 「언제 누가 지웠나」를 사후에 알 수 없었다(원칙 24).
+    ⚠ append 로만 남긴다(원칙 9 — 덮어쓰지 않는다). 지우기 자체는 막지 않는다.
+    """
+    _names = []
+    try:
+        _names = [fn for fn in os.listdir(KOREA_PRERACE_DIR) if fn.endswith(".json")]
+    except FileNotFoundError:
+        pass
+    except Exception:
+        pass
+    try:
+        if _names:
+            _dates = sorted({fn[:10] for fn in _names if re.match(r"\d{4}-\d{2}-\d{2}", fn)})
+            _gate_hit("prerace_clear", None, "%d파일 삭제 · 날짜 %s"
+                      % (len(_names), ",".join(_dates) if _dates else "?"))
+            print("🔴 [사전분석 초기화] data/prerace %d파일 삭제 — 날짜 %s"
+                  % (len(_names), ",".join(_dates) if _dates else "?"))
+            _p_log = os.path.join(os.path.dirname(__file__), "logs", "prerace_clear.jsonl")
+            os.makedirs(os.path.dirname(_p_log), exist_ok=True)
+            with io.open(_p_log, "a", encoding="utf-8") as _pf:   # 🔴 append 전용
+                _pf.write(json.dumps({"at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                                      "count": len(_names), "dates": _dates,
+                                      "files": sorted(_names)[:200]}, ensure_ascii=False) + "\n")
+    except Exception as _pce:
+        print("[사전분석 초기화] 기록 실패(무시):", str(_pce)[:80])
     try:
         for fn in os.listdir(KOREA_PRERACE_DIR):
             try:
