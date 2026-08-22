@@ -1,0 +1,170 @@
+{
+ "date": "2026-08-22",
+ "results_summary": {
+  "total_races": 106,
+  "hits": 85,
+  "hit_rate": 80.2,
+  "profit": {
+   "net": 179300,
+   "settled": 115
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 4347,
+  "quality_score": 72,
+  "ai_ready_races": 74,
+  "patterns_tagged": []
+ },
+ "bigdata": {
+  "by_track": {
+   "도야마": {
+    "n": 12,
+    "hits": 11,
+    "hit_rate": 91.7
+   },
+   "마쓰도": {
+    "n": 12,
+    "hits": 9,
+    "hit_rate": 75.0
+   },
+   "세이부엔": {
+    "n": 12,
+    "hits": 12,
+    "hit_rate": 100.0
+   },
+   "나라": {
+    "n": 11,
+    "hits": 8,
+    "hit_rate": 72.7
+   },
+   "다마노": {
+    "n": 11,
+    "hits": 10,
+    "hit_rate": 90.9
+   },
+   "사가": {
+    "n": 10,
+    "hits": 8,
+    "hit_rate": 80.0
+   },
+   "서울": {
+    "n": 10,
+    "hits": 8,
+    "hit_rate": 80.0
+   },
+   "다치카와": {
+    "n": 7,
+    "hits": 5,
+    "hit_rate": 71.4
+   },
+   "다케오": {
+    "n": 7,
+    "hits": 6,
+    "hit_rate": 85.7
+   },
+   "제주": {
+    "n": 7,
+    "hits": 2,
+    "hit_rate": 28.6
+   },
+   "마쓰야마": {
+    "n": 4,
+    "hits": 3,
+    "hit_rate": 75.0
+   },
+   "오가키": {
+    "n": 3,
+    "hits": 3,
+    "hit_rate": 100.0
+   }
+  },
+  "by_field_size": {
+   "소두수(≤8)": {
+    "n": 71,
+    "hits": 61,
+    "hit_rate": 85.9
+   },
+   "중두수(9~12)": {
+    "n": 27,
+    "hits": 19,
+    "hit_rate": 70.4
+   },
+   "미상": {
+    "n": 8,
+    "hits": 5,
+    "hit_rate": 62.5
+   }
+  },
+  "by_time_zone": {
+   "오후": {
+    "n": 46,
+    "hits": 37,
+    "hit_rate": 80.4
+   },
+   "저녁": {
+    "n": 39,
+    "hits": 32,
+    "hit_rate": 82.1
+   },
+   "오전": {
+    "n": 21,
+    "hits": 16,
+    "hit_rate": 76.2
+   }
+  },
+  "by_grade": {
+   "미수집": {
+    "n": 106,
+    "hits": 85,
+    "hit_rate": 80.2
+   }
+  },
+  "by_condition": {
+   "미수집": {
+    "n": 106,
+    "hits": 85,
+    "hit_rate": 80.2
+   }
+  },
+  "by_weather": {
+   "미수집": {
+    "n": 106,
+    "hits": 85,
+    "hit_rate": 80.2
+   }
+  },
+  "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
+ },
+ "cumulative_pattern_reliability": {
+  "마감급락": {
+   "label": "급락 감지 적중",
+   "hit": 70,
+   "n": 83,
+   "rate": 84.3
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 4,
+   "n": 19,
+   "rate": 21.1
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 292,
+   "n": 518,
+   "rate": 56.4
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 690,
+   "n": 1675,
+   "rate": 41.2
+  }
+ },
+ "key_learnings": [],
+ "missed_opportunities": [],
+ "pattern_discoveries": [],
+ "system_improvements": [],
+ "tomorrow_focus": [],
+ "generated_at": "2026-08-22 22:00:52"
+}
