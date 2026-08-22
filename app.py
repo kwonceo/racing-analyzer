@@ -34379,6 +34379,7 @@ KOREA_PDF = os.path.join(os.path.dirname(__file__), "data", "korea_last.pdf")
 KOREA_PDF_KEEP_DAYS = 90
 # [사전분석] 경주별 분석결과를 파일로 영구 저장 → 경주 선택 시 개별 즉시 로드.
 KOREA_PRERACE_DIR = os.path.join(os.path.dirname(__file__), "data", "prerace")
+PRERACE_BACKUP_ON_CLEAR = True   # 🔧 되돌리기: False — 지우기 전 사본을 안 만든다(2026-08-22)
 # [병렬화] 동시 Vision 호출 개수(3~4). [해시캐싱] 완료된 PDF 분석 결과 캐시 폴더.
 KOREA_WORKERS = 4
 KOREA_PDF_CACHE = os.path.join(os.path.dirname(__file__), "data", "korea_pdf_cache")
@@ -34792,6 +34793,30 @@ def _prerace_clear():
                                       "files": sorted(_names)[:200]}, ensure_ascii=False) + "\n")
     except Exception as _pce:
         print("[사전분석 초기화] 기록 실패(무시):", str(_pce)[:80])
+    # 🔴 [2026-08-22 승인] 지우기 **전에 사본**을 만든다.
+    #   🔴 이동이 아니라 **사본**이다(원칙 9) — 옮기면 그것도 소실된다.
+    #   왜: 22:06 에 8/22 파일 17개가 커밋 전이라 영구 소실됐다. 그 위에서 측정 셋을 했고
+    #     지금 재현이 안 된다. 커밋만으로는 「커밋과 삭제 사이」가 계속 비어 있다.
+    #   ⚠ 지우는 동작은 한 줄도 바꾸지 않는다. 사본만 남긴다.
+    #   🔧 되돌리기: PRERACE_BACKUP_ON_CLEAR = False
+    if PRERACE_BACKUP_ON_CLEAR and _names:
+        try:
+            import shutil
+            _bdir = os.path.join(os.path.dirname(__file__), "backups",
+                                 "prerace_%s" % time.strftime("%Y%m%d_%H%M%S"))
+            os.makedirs(_bdir, exist_ok=True)
+            _cp = 0
+            for _fn in _names:
+                try:
+                    shutil.copy2(os.path.join(KOREA_PRERACE_DIR, _fn),
+                                 os.path.join(_bdir, _fn))
+                    _cp += 1
+                except Exception:
+                    pass
+            print("🟢 [사전분석 초기화] 사본 %d/%d → %s" % (_cp, len(_names), _bdir))
+            _gate_hit("prerace_backup", None, "사본 %d파일" % _cp)
+        except Exception as _pbe:
+            print("[사전분석 초기화] 사본 실패(무시):", str(_pbe)[:80])
     try:
         for fn in os.listdir(KOREA_PRERACE_DIR):
             try:
