@@ -17077,6 +17077,7 @@ TRIO_OBSERVE_ENABLED = True
 #   근거는 아래 displayedCombos 조립부 주석 참조(소급 1292경주 실측).
 #   🔧 되돌리기: COMBO_CAP_ENABLED = False
 COMBO_CAP_ENABLED = True
+COMBO_CAP_DELEGATE = True   # 🔧 되돌리기: False — 판정 명단 인라인 계산으로 복귀(2026-08-22)
 COMBO_CAP_B1 = 3.0      # 최저 3배 미만 → 1조합
 COMBO_CAP_B2 = 6.0      # 3~6배   → 2조합
 COMBO_CAP_B3 = 10.0     # 6~10배  → 3조합 · 10배 이상 → 4조합
@@ -17092,8 +17093,20 @@ COMBO_CAP_SORT = True   # 🔧 되돌리기: False — 자를 때 배당 낮은 
 COMBO_CAP_LOW_ONLY = True
 
 
-def _combo_cap_of(cp):
-    """[상한 산출] 시장 최저 배당 → (상한, 최저배당). 판정 불가면 (None, None)."""
+def _combo_cap_of(cp, low_only=None):
+    """[상한 산출] 시장 최저 배당 → (상한, 최저배당). 판정 불가면 (None, None).
+
+    🔴 [2026-08-22] `low_only` 인자를 더했다. **기본값(None)은 종전과 완전히 같다.**
+      왜: 같은 계산이 판정 명단 조립부(17796~)에 **인라인으로 한 벌 더** 적혀 있었고,
+        그쪽은 `COMBO_CAP_LOW_ONLY` 조건이 없어 **항상 상한을 걸었다.**
+        규칙이 두 곳에서 갈리면 화면과 판정이 어긋난다(8/22 제주 1R 판정 4 ↔ 화면 3).
+      ⇒ 계산을 이 함수 하나로 모으되, **동작은 한 쪽도 바꾸지 않는다** —
+        인라인은 `low_only=False` 로 부르면 종전과 글자 그대로 같은 값을 받는다.
+      ⚠ 소급 실측(8월 정제 1,790경주)에서 두 규칙은 성적이 다르다.
+        ⓑ 항상 상한 : 회수 88.0% · 대박 뺀 74.3% · 구좌 2,733
+        ⓐ 3배 면제  : 회수 83.5% · 대박 뺀 74.0% · 구좌 4,018 (+47%)
+        전·후반 둘 다 ⓐ가 낮다(70.4→69.4 · 74.4→73.7) ⇒ **규칙 통일은 별도 승인 사항이다.**
+    """
     mn = None
     for q in ((cp or {}).get("finalQuinellas") or []):
         try:
@@ -17105,7 +17118,8 @@ def _combo_cap_of(cp):
     if mn is None:
         return None, None
     # 🔴 [2026-08-14 대표 결정] 저배당(3배 미만)만 상한을 건다. 그 외는 자르지 않는다.
-    if COMBO_CAP_LOW_ONLY and mn >= COMBO_CAP_B1:
+    _lo = COMBO_CAP_LOW_ONLY if low_only is None else bool(low_only)
+    if _lo and mn >= COMBO_CAP_B1:
         return None, mn
     return (1 if mn < COMBO_CAP_B1 else 2 if mn < COMBO_CAP_B2
             else 3 if mn < COMBO_CAP_B3 else 4), mn
@@ -17795,17 +17809,27 @@ def _build_analysis_log(rk, an=None):
             #   🔧 되돌리기: COMBO_CAP_ENABLED = False
             if COMBO_CAP_ENABLED and _dc_out.get("quinellas"):
                 try:
-                    _mn = None
-                    for _q in (_cp_dc.get("finalQuinellas") or []):
-                        try:
-                            _o = float(_q.get("odds"))
-                        except (TypeError, ValueError):
-                            continue
-                        if _o > 0 and (_mn is None or _o < _mn):
-                            _mn = _o
-                    if _mn is not None:
-                        _cap = (1 if _mn < COMBO_CAP_B1 else 2 if _mn < COMBO_CAP_B2
-                                else 3 if _mn < COMBO_CAP_B3 else 4)
+                    # 🔴 [2026-08-22] 같은 계산이 `_combo_cap_of`(17095)에 이미 있다. 그쪽에 위임한다.
+                    #   ⚠ **동작은 한 글자도 바뀌지 않는다** — 여기는 `COMBO_CAP_LOW_ONLY` 조건이
+                    #     없었으므로 `low_only=False` 로 부른다(= 3배 이상도 항상 상한).
+                    #   ⚠ 규칙을 ⓐ(3배 면제)로 통일하는 것은 **성적이 달라진다**(위 함수 주석의 실측).
+                    #     그건 별도 승인 사항이라 여기서 하지 않는다.
+                    #   🔧 되돌리기: COMBO_CAP_DELEGATE = False (아래 인라인 계산으로 돌아간다)
+                    if COMBO_CAP_DELEGATE:
+                        _cap, _mn = _combo_cap_of(_cp_dc, low_only=False)
+                    else:
+                        _mn = None
+                        for _q in (_cp_dc.get("finalQuinellas") or []):
+                            try:
+                                _o = float(_q.get("odds"))
+                            except (TypeError, ValueError):
+                                continue
+                            if _o > 0 and (_mn is None or _o < _mn):
+                                _mn = _o
+                        _cap = (None if _mn is None
+                                else (1 if _mn < COMBO_CAP_B1 else 2 if _mn < COMBO_CAP_B2
+                                      else 3 if _mn < COMBO_CAP_B3 else 4))
+                    if _mn is not None and _cap is not None:
                         _before = len(_dc_out["quinellas"])
                         if _before > _cap:
                             _dc_out["quinellas"] = _dc_out["quinellas"][:_cap]

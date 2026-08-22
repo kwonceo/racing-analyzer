@@ -150,6 +150,45 @@ def _pop_map(d, alog_path):
     return {}, "없음"
 
 
+KOREA_PAYOUT_FALLBACK = True    # 🔧 되돌리기: False
+_KOREA_RE = re.compile(r"서울|부산|부경|제주|과천")
+
+
+def _korea_result_fallback(log_path, res, po):
+    """🔴 [2026-08-22 승인] 한국만 `data/race_results` 를 폴백으로 읽는다.
+
+    저장소  : data/race_results/<같은 파일명>.json → **최상위** payouts.quinella
+    날짜    : analysis_log 파일명을 그대로 쓰므로 날짜가 이미 포함된다(원칙 16)
+    분모    : 근사(payouts_approx)·추정(payouts_estimated)은 제외한다
+    되돌리기: KOREA_PAYOUT_FALLBACK = False
+
+    왜: 한국 확정배당은 `analysis_log` 에 **0건**이고 `race_results` 에만 있다.
+      그래서 한국 8월 134경주 중 이 도구의 분모를 충족한 경주가 **0경주**였다 —
+      🔴 **한국은 공식 도구로 한 번도 측정된 적이 없다.**
+      CLAUDE.md 2026-08-16 에 이미 적혀 있던 항목이다.
+    ⚠ 일본 경로는 한 줄도 바꾸지 않는다 — 한국 파일명일 때만 탄다.
+    """
+    b = os.path.basename(log_path)
+    if not _KOREA_RE.search(b):
+        return res, po
+    p = os.path.join(BASE, "data", "race_results", b)
+    if not os.path.exists(p):
+        return res, po
+    try:
+        r2 = json.load(open(p, encoding="utf-8"))
+    except Exception:
+        return res, po
+    if r2.get("payouts_approx") or r2.get("payouts_estimated"):
+        return res, po                                  # ⚠ 근사·추정은 확정배당이 아니다
+    po2 = (r2.get("payouts") or {}).get("quinella")
+    res2 = r2.get("result") or {}
+    out = dict(res or {})
+    for k in ("1st", "2nd", "3rd"):
+        if out.get(k) is None and res2.get(k) is not None:
+            out[k] = res2[k]
+    return out, (po if po is not None else po2)
+
+
 def load_races(sport="cycle", pattern="2026_07_*"):
     """🔴 날짜 안전: analysis_log 파일 하나에서 odds_history 경로를 **파생**한다."""
     out = []
@@ -162,6 +201,8 @@ def load_races(sport="cycle", pattern="2026_07_*"):
             continue
         res = d.get("result") or {}
         po = (res.get("payouts") or {}).get("quinella")
+        if (po is None or not res.get("1st")) and KOREA_PAYOUT_FALLBACK:
+            res, po = _korea_result_fallback(f, res, po)
         if not res.get("1st") or not po:
             continue                                   # ② 확정배당 기준
         cp = d.get("corePicks") or {}
