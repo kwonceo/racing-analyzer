@@ -277,11 +277,26 @@ RACE_SHEET_SCHEMA = {
                             "additionalProperties": False,
                         },
                     },
+                    # 🔴🔴 [2026-08-24 대표 지시] **마체중·성별·부담증감** — PDF 에 있는데 안 읽고 있었다.
+                    #   대표: "마체중이 엄청 중요한데? 암말과 숫말의 부담중량 차이는 엄청 커"
+                    #   실측 prerace 343두 — 부담중량 100% · 🔴 마체중 0% · 성별 0% · 부담증감 0%
+                    #   종전엔 마체중이 `health`(자유 텍스트 메모)에만 섞여 들어가 계산에 못 썼다.
+                    #   ⚠ 소급 불가 — 넣은 날부터 쌓인다. ⚠ `health` 는 그대로 둔다(무삭제).
+                    "sex": {"type": "string",
+                            "description": "성별: 수/암/거(거세) 중 하나. 표기가 다르면 그대로. 못 읽으면 ''"},
+                    "bodyWeight": {"type": "string",
+                                   "description": "마체중(kg 숫자만, 예 '437'). 못 읽으면 ''"},
+                    "bodyWeightChange": {"type": "string",
+                                         "description": "직전 대비 마체중 증감(부호 포함, 예 '-4' '+2' '0'). 못 읽으면 ''"},
+                    "weightChange": {"type": "string",
+                                     "description": "직전 대비 부담중량 증감('부담증감' 칸, 예 '-1' '0'). 없으면 ''"},
                     "health": {"type": "string"},
                     "training": {"type": "string"},
                 },
                 "required": ["horseNum", "horseName", "jockey", "weight", "rating", "grade",
-                             "recentRecord", "recentPlacings", "pastRaces", "health", "training"],
+                             "recentRecord", "recentPlacings", "pastRaces",
+                             "sex", "bodyWeight", "bodyWeightChange", "weightChange",
+                             "health", "training"],
                 "additionalProperties": False,
             },
         },
@@ -749,6 +764,15 @@ def _do_extract_race(img, api_key=None):
         "position(초반위치 선행/중단/후방)} 로 채우세요. "
         "position은 통과순위나 기록으로 추정 — 초반 선두권이면 '선행', 중위권이면 '중단', 후미면 '후방'. "
         "모르는 칸은 '' (placing만 0). 전적 상세가 표에 없으면 pastRaces=[].\n"
+        # 🔴 [2026-08-24] 마체중·성별·부담증감 — 계산에 쓸 수 있게 **칸별로** 뽑는다.
+        "- sex: 성별. 마명 옆이나 산지/성별/나이 칸에 '수/암/거'(또는 牡/牝/セ)로 표기됩니다. "
+        "수말=수, 암말=암, 거세마=거 로 적으세요. 못 읽으면 ''.\n"
+        "- bodyWeight: 마체중(kg). 숫자만(예 '437','475'). "
+        "'437(-4)' 처럼 괄호가 붙으면 괄호 **앞** 숫자만 넣습니다. 못 읽으면 ''.\n"
+        "- bodyWeightChange: 직전 대비 마체중 증감 = 위 괄호 **안** 값(예 '437(-4)' → '-4'). "
+        "부호를 유지하고 증가면 '+2'. 변동 없으면 '0'. 칸이 없으면 ''.\n"
+        "- weightChange: '부담증감' 칸의 값(예 '-1','0','+1'). "
+        "🔴 부담중량(weight)과 **다른 칸**입니다 — 혼동하지 마세요. 칸이 없으면 ''.\n"
         "- health: 마체중/건강 메모가 있으면, 없으면 ''.\n"
         "- training: 조교 메모(예 '주행미합','연습주행')가 있으면, 없으면 ''.\n"
         "raceNo(경주 번호, 모르면 0), raceTitle(예 '제1경주', 모르면 '').\n"
