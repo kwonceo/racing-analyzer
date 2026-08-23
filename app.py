@@ -17538,6 +17538,10 @@ EXACTA_KEEP_PREV_SEC = 300      # 직전 쌍승을 이어받는 시간 창(초)
 KAKAO_JUDGE_ENABLED = True      # 🔧 되돌리기: False
 # 🔴 [2026-08-23 대표 지시] 모든 편입이 끝난 뒤 **최종 상한**을 한 번 더 건다.
 #   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천하던 모순을 없앤다.
+# 🔴 [2026-08-24 대표 승인] 짝 채우기 — 판정 명단에 2회 이상 나온 말끼리 묶는다.
+#   8/23 한국 실측: 놓친 9경주 중 5경주가 「두 말을 다 짚어놓고 그 둘만 안 묶은」 것이었다.
+PAIR_FILL_ENABLED = True        # 🔧 되돌리기: False
+PAIR_FILL_MIN_COUNT = 2         # 명단에 이만큼 등장한 말끼리만 묶는다(새 말은 넣지 않는다)
 FINAL_CAP_ENABLED = True        # 🔧 되돌리기: False
 FINAL_CAP_KEEP_DIA = 1          # 💎 보장 자리(0이면 보장 없음 — 💎가 늘 먼저 잘린다)
 _KAKAO_JUDGE_CACHE = {"path": None, "mtime": 0.0, "map": {}}
@@ -18350,6 +18354,45 @@ def _build_analysis_log(rk, an=None):
                                   % (_fmn, _before2, len(_keep)), once_key=rk)
                 except Exception as _fce:
                     print("[최종 상한] 스킵(무시):", str(_fce)[:80])
+            # 🔴🔴 [2026-08-24 대표 승인] **짝 채우기** — 이미 짚은 말끼리 묶는다.
+            #   실사고(8/23 한국): 16경주 중 9경주를 놓쳤는데 그중 5경주가
+            #   **두 말을 이미 명단에 넣어놓고 그 둘만 안 묶은** 것이었다.
+            #     부산 7경주 정답 5+11 — 2+11·1+11·2+5·1+5 는 있는데 5+11 이 없다(42.5배)
+            #   ⇒ 명단에 **2회 이상 등장한 말끼리**의 조합 중 빠진 것을 더한다.
+            #     🔴 새 말은 넣지 않는다. 우리가 이미 짚은 말끼리만 묶는다.
+            #   소급(일본·경륜 2,979경주 · 확정배당 · 정제 0.5~2.0):
+            #     대박3뺀 67.8 → 69.2 (+1.4%p) · 한계 회수율 125.4% · 구좌 +3.5%(2.54→2.63)
+            #     기간(발동구간 8/05~) +3.1%p / +0.1%p · 종목 경륜 +1.3%p / 경마 +1.0%p — 넷 다 양수
+            #   ⚠ 판정 1단계는 **미달**이다 — 추가 적중이 17건이라 30건 문턱에 못 미친다(원칙 1).
+            #     방향은 일관되나 확정은 아니다. **추가 적중 30건에 도달하면 재측정한다.**
+            #   🔴 「명단 말 전조합」(더 넓은 안)은 기각했다 — 후반 -1.3%p · 경륜 -1.7%p 로 갈린다.
+            #   ⚠ 최종 상한 **뒤**에 둔다 — 소급 측정이 상한 없는 상태에서 잰 값이라
+            #     여기서 자르면 그 수치를 재현하지 못한다(원칙 3).
+            #   ⚠ 전반(8/04 이전) 발동률은 0.7% 다 — 그때는 명단이 좁아 발동할 수 없었다(원칙 30).
+            #   🔧 되돌리기: PAIR_FILL_ENABLED = False
+            if PAIR_FILL_ENABLED and isinstance(_dc_out, dict) and _dc_out.get("quinellas"):
+                try:
+                    _pf_cnt = {}
+                    for _c in _dc_out["quinellas"]:
+                        for _x in _c:
+                            _pf_cnt[_x] = _pf_cnt.get(_x, 0) + 1
+                    _pool = sorted(k for k, v in _pf_cnt.items() if v >= PAIR_FILL_MIN_COUNT)
+                    _have = {tuple(sorted(c)) for c in _dc_out["quinellas"]}
+                    _pfill = []
+                    for _i in range(len(_pool)):
+                        for _j in range(_i + 1, len(_pool)):
+                            _pp = (_pool[_i], _pool[_j])
+                            if _pp not in _have:
+                                _pfill.append([_pp[0], _pp[1]])
+                    if _pfill:
+                        _dc_out["quinellas"] = _dc_out["quinellas"] + _pfill
+                        _dc_out["pairFill"] = _pfill
+                        _gate_hit("pair_fill", rk,
+                                  "짝 채우기 %d조합 (%d회+ 등장 %d두)"
+                                  % (len(_pfill), PAIR_FILL_MIN_COUNT, len(_pool)),
+                                  once_key=rk)
+                except Exception as _pfe:
+                    print("[짝 채우기] 스킵(무시):", str(_pfe)[:80])
             # 🔴 [2026-08-23] **표기를 사실에 맞춘다.**
             #   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천했다.
             #   최종 상한을 저배당(3배 미만)에만 걸기로 했으므로 중배당 경주에서는 편입분이 남는다.
