@@ -2,14 +2,6 @@
   "patterns": [
     {
       "race": "몬베츠 2경주",
-      "horse_no": 6,
-      "recent_avg": 5.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-13"
-    },
-    {
-      "race": "몬베츠 2경주",
       "horse_no": 9,
       "recent_avg": 6.0,
       "win_place": 2,
@@ -4736,16 +4728,26 @@
         "복승이상감지"
       ],
       "date": "2026-08-23"
+    },
+    {
+      "race": "사가 4경주",
+      "horse_no": 2,
+      "recent_avg": 6.4,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-23"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 4777,
+      "count": 4783,
       "hit": 794
     },
     "전체부진마": {
-      "count": 8208,
-      "hit": 2172
+      "count": 8215,
+      "hit": 2173
     },
     "대규모급락": {
       "count": 15,
@@ -4755,8 +4757,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 3431,
-      "hit": 1378
+      "count": 3432,
+      "hit": 1379
     },
     "급락동반": {
       "count": 640,
