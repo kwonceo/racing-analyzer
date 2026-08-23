@@ -28361,6 +28361,15 @@ def _keiba_starter_store_row(h):
             #   ⚠ 실제 피해: `weight_change_bonus` 공식이 부담중량을 쓰는데 **입력값이 안 남아 재계산 불가**였고,
             #     총평 겹침률 검증조차 배당이 store 에 없어 odds_history 로 우회해야 했다.
             "weight": h.get("weight"),          # 부담중량(kg)
+            # 🔴 [2026-08-23] **성별·나이** — 부담중량을 해석하는 데 필수다. 저장만 추가한다.
+            #   왜: 암말은 감량을 받는다. 성별을 모르면 부담중량 비교가 성립하지 않는다.
+            #   실측 8월 19,687두 — 성별 없이 부담중량만 보면 최대 2.5%p 차이로 사실상 무의미했다
+            #   (가벼움 -1.6%p · 중간 +0.2%p · 무거움 +0.9%p). 암말 감량분과 강한 말 증량분이 섞인다.
+            #   🔴 파서(`_keiba_parse_shutsuba` 28223)는 `sexAge` 를 이미 뽑는다 — 저장행에서만 빠져 있었다.
+            #     성별토큰(牡牝セ) 파싱은 원문 5,104행으로 검증돼 있다(app.py 28189 주석).
+            #   ⚠ corners·kimarite·weight·winOdds·pop 과 같은 유형의 소실이다(스키마 드리프트).
+            #   ⚠ 키 추가만이다. record_score 계산 경로 무변경. 🔴 소급 불가 — 넣은 날부터 쌓인다.
+            "sexAge": h.get("sexAge"),          # 예: "牡4" · "牝3" · "セ5"
             "winOdds": h.get("winOdds"),        # 발주 시점 단승 예상배당 = 시장 인기의 1차 지표
             "pop": h.get("pop"),                # 인기 순위
             "corners": [pr.get("corner") for pr in (h.get("past") or [])],
