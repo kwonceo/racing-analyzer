@@ -3468,6 +3468,27 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
         print(f"[빈수집가드] {rk}: 빈 복승 수집 무시(발신 {source}) — 기존 신선 데이터 유지")
         _ingest_reject_log(rk, "빈 수집", source, {"combos": 0})
         return {"ok": True, "skipped": True, "raceKey": rk, "reason": "빈 수집 — 기존 신선 데이터 유지"}
+    # 🔴🔴 [2026-08-23] **쌍승 빈 값 덮어쓰기 방어** — 원칙 9 그대로다.
+    #   위 복승 가드는 payload 를 통째로 버리는데, 지금 문제는 **복승은 정상이고 쌍승만 0** 인 경우다.
+    #   통째로 버리면 복승까지 잃으므로 **쌍승만 직전 값을 이어받는다.**
+    #   실사고(2026-08-23 다케오 7경주):
+    #     10:29:30 oddspark ex=42 → 10:29:44 private ex=0 → 10:30:03 oddspark ex=42 → 10:30:23 private ex=0
+    #     마지막이 확장이라 **최종값이 0으로 굳었다.**
+    #   원인: 확장이 경륜장을 `japan_central` 로 오판해 쌍승 수집을 스스로 건너뛴다(2.1.163 에서 수정).
+    #   규모(8/23 실측): 확장 틱 **114개 전부 쌍승 0(100%)** · 기존 값을 덮은 횟수 **83회(72.8%)**
+    #     쌍승을 받은 적 있는 25경주 중 **8경주가 최종 0** (다케오 3·4·7 · 다치카와 3·4·6 · 세이부엔 1 · 서울 1)
+    #   ⚠ 오탐 위험이 구조적으로 낮다 — 쌍승이 **진짜** 0인 정상 상황은 「아직 한 번도 안 받음」뿐이고
+    #     그때는 `prev` 자체가 없어 발동하지 않는다.
+    #   ⚠ 이어받은 틱에는 `exactaKept` 표식을 남긴다(원칙 24 — 폴백이 만든 값은 구분 가능해야 한다).
+    #   🟢 확장 2.1.163 이 반영되면 발동률이 급감해야 정상이다. 안 줄면 재로드가 안 된 것이다.
+    #   🔧 되돌리기: EXACTA_KEEP_PREV = False
+    _x_kept = False
+    if EXACTA_KEEP_PREV and (not x) and prev.get("exacta") \
+            and (now - (prev.get("t") or 0)) <= EXACTA_KEEP_PREV_SEC:
+        x = list(prev.get("exacta") or [])
+        _x_kept = True
+        _gate_hit("exacta_keep_prev", rk,
+                  "쌍승 빈 값(발신 %s) → 직전 %d조합 유지" % (source, len(x)), once_key=rk)
     # 🔴🔴 [1층 · 입구 차단 (2026-08-04 승인)] ────────────────────────────────
     #   🔴 **유령 마번이 하나라도 있으면 payload 를 통째로 버린다. 조합만 빼지 않는다.**
     #     근거: 히로시마 5R 은 유령 8·9 를 감지하고도 **조합만 걸러** 남은 1~7번의 오염 배당을 그대로 썼다
@@ -3655,7 +3676,10 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     #   **어느 소스의 틱인지 알 수 없어 발동하지 못했다**(실측: 도달 175 · 발동 0).
     #   ⚠ 키 하나 추가일 뿐이다 — 기존 소비처는 `.get("src")` 가 없으면 종전대로 동작한다.
     hist.append({"t": now, "quinella": q, "exacta": x, "trio": tr, "win": win,
-                 "src": (source or None)})
+                 "src": (source or None),
+                 # 🔴 [2026-08-23] 쌍승을 직전 틱에서 이어받았으면 표식을 남긴다(원칙 24).
+                 #   이 틱의 쌍승은 **그 시점에 실제로 받은 값이 아니다** — 사후 분석에서 구분되어야 한다.
+                 **({"exactaKept": True} if _x_kept else {})})
     hist = hist[-12:]
     # [수정#3 경륜/경정] 종목 태그 저장(horse|cycle|boat|bike). 기본 horse(경마) → 기존 동작 불변.
     #   ⚠ 종목 전환 시엔 새 종목을 우선(이전 sport 상속 금지) → 경마→경륜 전환이 sport 상속으로 묻히지 않게.
@@ -17507,6 +17531,10 @@ def _cross_pair_pick(qlist, already):
 #   ⇒ 성적표가 회원 경험을 반영하지 못했다. 맞아도 안 잡히고 틀려도 안 잡힌다.
 #   ⚠ 넣으면 회수율은 내려간다(💎 단독 49.9% · 대박3건 뺀 41.8%). 원래 그랬던 것이 드러날 뿐이다.
 #     판정 기준은 2026-08-16 상품 분리대로 — **「한방」은 적중배당 중앙으로 본다**(💎 13.2배 · 10배+ 61%).
+# 🔴 [2026-08-23] 쌍승 빈 값 덮어쓰기 방어 — 확장이 쌍승 0 을 보내 oddspark 42조합을 덮던 것.
+#   8/23 실측: 확장 틱 114개 전부 쌍승 0 · 기존 값을 덮은 횟수 83회(72.8%) · 25경주 중 8경주 최종 0.
+EXACTA_KEEP_PREV = True         # 🔧 되돌리기: False
+EXACTA_KEEP_PREV_SEC = 300      # 직전 쌍승을 이어받는 시간 창(초)
 KAKAO_JUDGE_ENABLED = True      # 🔧 되돌리기: False
 # 🔴 [2026-08-23 대표 지시] 모든 편입이 끝난 뒤 **최종 상한**을 한 번 더 건다.
 #   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천하던 모순을 없앤다.
