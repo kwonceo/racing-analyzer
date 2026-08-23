@@ -1,42 +1,6 @@
 {
   "patterns": [
     {
-      "race": "몬베츠 7경주",
-      "horse_no": 11,
-      "recent_avg": 7.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-13"
-    },
-    {
-      "race": "몬베츠 8경주",
-      "horse_no": 6,
-      "recent_avg": 4.2,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-13"
-    },
-    {
-      "race": "몬베츠 8경주",
-      "horse_no": 4,
-      "recent_avg": 7.2,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-13"
-    },
-    {
-      "race": "몬베츠 9경주",
-      "horse_no": 8,
-      "recent_avg": 5.5,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-13"
-    },
-    {
       "race": "몬베츠 10경주",
       "horse_no": 8,
       "recent_avg": 4.0,
@@ -4742,16 +4706,54 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-23"
+    },
+    {
+      "race": "카나자와 7경주",
+      "horse_no": 8,
+      "recent_avg": 9.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-23"
+    },
+    {
+      "race": "카나자와 7경주",
+      "horse_no": 2,
+      "recent_avg": 8.8,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-23"
+    },
+    {
+      "race": "카나자와 7경주",
+      "horse_no": 3,
+      "recent_avg": 11.0,
+      "win_place": 2,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-23"
+    },
+    {
+      "race": "사가 8경주",
+      "horse_no": 8,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-23"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 4826,
-      "hit": 798
+      "count": 4833,
+      "hit": 799
     },
     "전체부진마": {
-      "count": 8277,
-      "hit": 2187
+      "count": 8290,
+      "hit": 2191
     },
     "대규모급락": {
       "count": 15,
@@ -4761,8 +4763,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 3451,
-      "hit": 1389
+      "count": 3457,
+      "hit": 1392
     },
     "급락동반": {
       "count": 640,
@@ -5139,25 +5141,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1410,
-    "hit": 1114,
+    "count": 1411,
+    "hit": 1115,
     "cases": [
-      {
-        "race": "나고야 8경주",
-        "date": "2026-08-20",
-        "smart_horses": [
-          6,
-          2,
-          4
-        ],
-        "placed": [
-          6
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "다마노 6경주",
         "date": "2026-08-20",
@@ -6654,6 +6640,21 @@
         ],
         "placed": [
           1
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "사가 8경주",
+        "date": "2026-08-23",
+        "smart_horses": [
+          8,
+          6
+        ],
+        "placed": [
+          8
         ],
         "hit": true,
         "trifecta_odds": null,
