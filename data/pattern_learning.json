@@ -1,14 +1,6 @@
 {
   "patterns": [
     {
-      "race": "우라와 10경주",
-      "horse_no": 3,
-      "recent_avg": 7.0,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-12"
-    },
-    {
       "race": "몬베츠 8경주",
       "horse_no": 5,
       "recent_avg": 6.8,
@@ -4735,16 +4727,24 @@
         "복승이상감지"
       ],
       "date": "2026-08-22"
+    },
+    {
+      "race": "부산 1경주",
+      "horse_no": 11,
+      "recent_avg": 11.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-23"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 4687,
-      "hit": 781
+      "count": 4689,
+      "hit": 782
     },
     "전체부진마": {
-      "count": 8054,
-      "hit": 2128
+      "count": 8056,
+      "hit": 2129
     },
     "대규모급락": {
       "count": 15,
