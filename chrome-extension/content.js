@@ -1079,11 +1079,31 @@
   //   우선순위: ①raceKey에 경마장명 → 무조건 경마(팝업이 경륜/경정이어도 정정) ②URL/제목의 명시 종목어(競輪/競艇/
   //   오토) → 그 종목으로 정정(팝업 stale 방지) ③강한 신호 없으면 팝업 수동선택 존중 ④그것도 없으면 본문 보조감지.
   //   → 사이트 전환 시 팝업에 남은 이전 종목 태그가 그대로 전송되던 문제(경마↔경륜) 차단.
+  // 🔴 [2026-08-23] 경륜 전용 지명 — app.py `_KEIRIN_ONLY_RE` 와 **같은 목록**을 옮긴 것이다.
+  //   ⚠ 한쪽만 고치면 갈린다. app.py 를 고치면 여기도 함께 고친다(2026-08-10 토야마 사고와 같은 계열).
+  const _KEIRIN_ONLY_VENUES = new RegExp(
+    '세이부엔|西武園|야히코|弥彦|마에바시|前橋|우쓰노미야|宇都宮|케이오카쿠|京王閣|케이오각|'
+    + '이즈|伊豆|다치카와|타치카와|立川|마쓰도|松戸|오다와라|小田原|기후|岐阜|시즈오카|静岡|'
+    + '기시와다|岸和田|도요하시|토요하시|豊橋|구마모토|熊本|도야마|토야마|富山|마쓰사카|松阪|'
+    + '사세보|佐世保|구루메|久留米|다마노|타마노|玉野|히로시마|広島|아오모리|青森|다카마쓰|高松|'
+    + 'いわき平|이와키평|이와키타이라|伊東|이토|와카야마|和歌山|'
+    + '別府|벳푸|武雄|다케오|타케오|平塚|히라츠카|防府|호후|'
+    + '경륜|競輪|keirin');
+
   function resolveSport(popupSport, raceKey) {
     try {
       const rk = raceKey || '';
       // [수정1·한국 강제] 한국 경마장(부산/서울/제주 등) raceKey = 무조건 경마(horse) → 경정/경륜 오탐 완전 차단.
       if (isKoreaByRaceKey(rk) || (KRA_TRACK_RE.test(location.href))) return 'horse';
+      // 🔴🔴 [2026-08-23] **경륜 전용 지명 = 경륜 확정.** 팝업 토글보다 앞선다.
+      //   실사고: 타치카와·타케오(둘 다 경륜장)가 `category=japan_central` 로 판정됐다.
+      //   원인은 두 겹 — ⓐ 팝업 종목이 '경마'로 남아 있고 ⓑ 일본 토글이 '중앙'이라
+      //   `computeCategory` 의 cycle 분기를 못 타고 japan_central 로 떨어졌다.
+      //   ⇒ 전적 수집 생략 · 삼복승 생략 · 쌍승 0. **오버레이는 떴는데 내용이 반쪽이었다.**
+      //   🔴 사람이 팝업을 매번 맞춰야 하는 구조라 "하루에 한 번씩" 재발했다. 지명으로 확정해 끊는다.
+      //   ⚠ 목록은 app.py `_KEIRIN_ONLY_RE` 와 같은 원칙 — **경마장·경정장이 없는 경륜 전용 지명만**.
+      //     이중소속(고치·나고야·카와사키·고쿠라)은 넣지 않는다. `平`(한 글자)도 넣지 않는다(平塚 충돌).
+      if (_KEIRIN_ONLY_VENUES.test(rk)) return 'cycle';
       // ① 경마장명 raceKey = 명백한 경마(가장 강한 신호) → 팝업 경륜/경정 정정
       //   [v2.1.146] 이중소속 지명(고치·나고야·카와사키)만으로는 경마 확정 금지(경륜장과 겹침)
       if (_horseTrackStrong(rk)) return 'horse';
@@ -1561,6 +1581,35 @@
   }
 
   // 현재 화면 매트릭스에서 (행 마번 × 열 마번) 쌍 원본 추출 (dedupe 없음)
+  // 🔴🔴 [2026-08-23] **화면이 정말 복승인가를 데이터로 판정한다.**
+  //   실사고: 타치카와 4경주 — 화면 탭이 「쌍승」인데 복승 탭 클릭에 실패했고,
+  //   `_tabless` 폴백(2026-08-14)이 "탭을 못 찾으면 화면은 복승일 것"이라 **가정**해 그대로 읽었다.
+  //   결과: 쌍승 매트릭스의 양방향 중 **싼 쪽**이 복승 배당으로 저장됐다(4-6=4.1 · 4-5=4.4 …).
+  //   ⇒ 저배당·기대값 필터·회수율이 통째로 틀린 값 위에서 돌았다.
+  //   🟢 판정 근거: **복승은 (a,b)=(b,a) 이고 쌍승은 방향마다 다르다.** DOM·클래스에 의존하지 않는다.
+  //   ⚠ 복승 표가 삼각형(한쪽만 채움)이면 both=0 → 판정하지 않는다(종전대로 진행 · 무회귀).
+  const QUIN_DIRECTIONAL_GUARD = true;   // 🔧 되돌리기: false
+  const QUIN_DIRECTIONAL_MIN = 0.30;     // 양방향 쌍 중 값이 다른 비율이 이 이상이면 쌍승으로 본다
+  const QUIN_DIRECTIONAL_BOTH_MIN = 6;   // 양방향 쌍이 이만큼은 있어야 판정한다(표본)
+  function _matrixDirectionality(pairs) {
+    const m = {};
+    for (const p of (pairs || [])) {
+      if (!isHorseNo(p.a) || !isHorseNo(p.b) || p.a === p.b) continue;
+      if (!(p.odds > 0)) continue;
+      m[`${p.a}>${p.b}`] = p.odds;
+    }
+    let both = 0, diff = 0;
+    for (const k of Object.keys(m)) {
+      const ab = k.split('>');
+      const rev = m[`${ab[1]}>${ab[0]}`];
+      if (rev == null) continue;
+      both++;
+      const x = m[k], y = rev;
+      if (Math.abs(x - y) / Math.max(x, y) > 0.02) diff++;   // 2% 초과면 서로 다른 값
+    }
+    return { both: Math.floor(both / 2), diff: Math.floor(diff / 2), ratio: both ? diff / both : 0 };
+  }
+
   function currentMatrixPairs(oddsClass) {
     const tables = new Set();
     for (const c of document.querySelectorAll('.' + (oddsClass || 'odds_content'))) {
@@ -2145,11 +2194,28 @@
         //     '다른 탭 데이터 오염'은 탭을 옮길 수 있을 때 생기는 위험인데, 지금은 옮길 수가 없다.
         //   ⚠ 그래도 **화면에 표가 있을 때만** 진행한다(sig 가 비면 읽을 것이 없다 → 종전대로 포기).
         const _tabless = !r1.clicked && _v1 !== false && (sig || '').length > 0;
-        if ((!r1.clicked || _v1 === false) && !_tabless) {
+        // 🔴 [2026-08-23] `_tabless` 는 "화면이 복승일 것"이라 **가정**한다. 그 가정을 데이터로 검산한다.
+        let _dirBad = false, _dirInfo = null;
+        if (_tabless && QUIN_DIRECTIONAL_GUARD) {
+          try {
+            _dirInfo = _matrixDirectionality(currentMatrixPairs(oddsClass));
+            _dirBad = _dirInfo.both >= QUIN_DIRECTIONAL_BOTH_MIN && _dirInfo.ratio >= QUIN_DIRECTIONAL_MIN;
+            if (_dirBad) {
+              console.warn('%c[복승수집] 🔴 화면이 복승이 아니다 — 매트릭스가 방향성을 가진다'
+                + ` (양방향 쌍 ${_dirInfo.both}개 중 값이 다른 것 ${_dirInfo.diff}개 · ${(_dirInfo.ratio * 100).toFixed(1)}%).`
+                + ' 복승은 (a,b)=(b,a) 라 이럴 수 없다 → **쌍승 화면으로 판단**하고 복승 수집을 포기한다.',
+                'background:#7f1d1d;color:#fff;padding:2px 6px;border-radius:3px');
+            } else if (_dirInfo.both >= QUIN_DIRECTIONAL_BOTH_MIN) {
+              console.log(`[복승수집] 🟢 매트릭스 대칭 확인(양방향 ${_dirInfo.both}쌍 · 불일치 ${_dirInfo.diff}) → 복승 화면이 맞다`);
+            }
+          } catch (_e) { _dirBad = false; }
+        }
+        if (((!r1.clicked || _v1 === false) && !_tabless) || _dirBad) {
           console.warn('[복승수집] ⚠ 복승 탭 '
-            + (_v1 === false ? '활성 확정 불일치' : '버튼을 찾지 못함')
+            + (_dirBad ? '미확보 + 화면이 쌍승(매트릭스 비대칭)'
+              : (_v1 === false ? '활성 확정 불일치' : '버튼을 찾지 못함'))
             + ' → 복승 수집 포기(빈 배열 전송·다른 탭 데이터 오염 방지)');
-          setTripleProgress('복승 탭 확보 실패 — 수집 생략(오염 방지)');
+          setTripleProgress(_dirBad ? '화면이 쌍승 — 복승 수집 생략(오염 방지)' : '복승 탭 확보 실패 — 수집 생략(오염 방지)');
         } else {
           if (_tabless) {
             console.warn('%c[복승수집] ⚠ 복승 탭 버튼을 못 찾았으나 탭 전환이 불가능한 상태라 '
