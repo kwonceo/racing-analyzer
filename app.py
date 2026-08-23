@@ -35005,6 +35005,87 @@ def _korea_fix_placings(horses):
     return n
 
 
+# 🔴🔴 [2026-08-24 대표 지시] **상세 페이지에서 과거 마체중을 뽑는다** — Vision 없이 좌표만(비용 0).
+#   대표: "마체중이 엄청 중요한데?"  그런데 실측 prerace 343두에서 마체중 **0%** 였다.
+#   원자료를 열어 보니(원칙 8-E):
+#     ① 「마체중」 라벨은 45페이지 전체에 **0회**다. 한국은 당일 마체중을 발주 직전 공개하므로
+#        출주표 PDF 에는 **이번 경주 마체중이 없다.** 대표가 표시한 437(-4)·475kg 은
+#        **과거 전적표 줄 끝의 마체중**이다.
+#     ② 그 과거 전적은 **상세 페이지(summaryPage+1)** 에 있는데 `_korea_extract_race` 는
+#        요약 페이지 한 장만 읽는다 ⇒ 부산 1경주 11두의 pastRaces 가 **총 2건**이었다.
+#   구조(실측): 말 블록이 y 0.0955 간격 · 과거 경주가 x 0.329/0.494/0.659/0.824 열로 가로 배열
+#     · 열 끝에 `485(+9)` 또는 `472kg` · 11두면 1번마가 **요약 페이지 하단(y>0.90)** 에 있다
+#   🟢 검증(8/23 · 17경주 · 과거체중 898건)
+#     행수 == 두수 **17/17 (100%)**
+#     🎯 연쇄 정합 **483/504 (95.8%)** — kg[i] - chg[i] == kg[i+1] 이어야 한다
+#        (472(+3)→469 = 다음 항목 469(-6) 의 kg). 이름 매칭보다 훨씬 강한 자체 검증이다.
+#   🔴 행 수가 두수와 다르면 **아무것도 돌려주지 않는다** — 잘못 매칭하느니 비운다(원칙 20).
+#   ⚠ 저장만이다. 점수·판정 경로에 넣지 않는다. ⚠ 소급 불가.
+#   🔧 되돌리기: KOREA_DETAIL_BW = False
+KOREA_DETAIL_BW = True
+_KBW_PAREN = re.compile(r"^(\d{3})\(([-+]?\d+)\)$")
+_KBW_KG = re.compile(r"^(\d{3})[kK][gG]$")
+
+
+def _korea_bw_rows(page, ymin=0.0):
+    """한 페이지에서 '말 한 마리 = 한 행'으로 과거 마체중을 묶어 돌려준다."""
+    R = page.rect
+    hits = []
+    for x0, y0, _x1, _y1, t, *_rest in page.get_text("words"):
+        y = y0 / R.height
+        if y < ymin:
+            continue
+        chg = None
+        m = _KBW_PAREN.match(t)
+        if m:
+            kg = int(m.group(1))
+            chg = int(m.group(2))
+        else:
+            m2 = _KBW_KG.match(t)
+            if not m2:
+                continue
+            kg = int(m2.group(1))
+        if not (300 <= kg <= 700):        # 마체중 범위 밖은 다른 숫자다
+            continue
+        hits.append((y, x0 / R.width, kg, chg))
+    hits.sort()
+    rows = []
+    for y, x, kg, chg in hits:
+        if rows and abs(y - rows[-1][0]) < 0.02:
+            rows[-1][1].append((x, kg, chg))
+        else:
+            rows.append([y, [(x, kg, chg)]])
+    out = []
+    for _y, items in rows:
+        items.sort()                      # x 작을수록 최근 경주
+        seen, past = set(), []
+        for x, kg, chg in items:
+            k = (round(x, 2), kg, chg)
+            if k in seen:                 # 요약칸 중복 제거
+                continue
+            seen.add(k)
+            past.append({"kg": kg, "chg": chg})
+        out.append(past)
+    return out
+
+
+def _korea_detail_bodyweights(doc, summary_page, n_horses):
+    """상세 페이지 → 마번 순서대로 과거 마체중 목록. 행수가 두수와 다르면 [] (안전 우선)."""
+    try:
+        sp = int(summary_page or 0)
+        if sp <= 0 or sp >= doc.page_count:
+            return []
+        rows = _korea_bw_rows(doc[sp - 1], ymin=0.90) + _korea_bw_rows(doc[sp])
+        if len(rows) != int(n_horses or 0):
+            _gate_hit("korea_bw_rowmismatch", None,
+                      "행 %d ↔ 두수 %s — 매칭 포기" % (len(rows), n_horses))
+            return []
+        return rows
+    except Exception as e:
+        print("[한국 마체중] 파싱 실패(무시):", str(e)[:80])
+        return []
+
+
 def _korea_extract_race(doc, race, api_key=None):
     """요약 페이지 1장에서 메인표+조교표를 추출·병합해 출전마 리스트 반환 (app.js extractRaceFull).
     부수적으로 요약 페이지 텍스트에서 발주시각을 추출해 race['postTime']에 채운다(추후 마감 알림 자동화)."""
@@ -35017,6 +35098,29 @@ def _korea_extract_race(doc, race, api_key=None):
         print("[한국] 발주시각 추출 실패:", e)
     sheet = _do_extract_race(_render_band(pg), api_key)
     horses = sheet.get("horses") or []
+    # 🔴 [2026-08-24] 상세 페이지에서 **과거 마체중**을 좌표로 붙인다(Vision 없음 · 비용 0).
+    #   요약 페이지에는 이번 경주 마체중이 아예 없다 — 한국은 발주 직전에 공개한다.
+    #   ⚠ 저장만이다. 점수·판정 경로 무개입. 🔧 되돌리기: KOREA_DETAIL_BW = False
+    if KOREA_DETAIL_BW and horses:
+        try:
+            _bw = _korea_detail_bodyweights(doc, race.get("summaryPage"), len(horses))
+            if _bw:
+                for _i, _h in enumerate(horses):
+                    _past = _bw[_i] if _i < len(_bw) else []
+                    if not _past:
+                        continue
+                    _h["pastBodyWeights"] = _past
+                    # ⚠ 이것은 **직전 경주** 마체중이다(이번 경주 값이 아니다). 표식을 남긴다(원칙 24).
+                    if not str(_h.get("bodyWeight") or "").strip():
+                        _h["bodyWeight"] = str(_past[0]["kg"])
+                        _h["bodyWeightSrc"] = "past"
+                    if _past[0]["chg"] is not None and not str(_h.get("bodyWeightChange") or "").strip():
+                        _h["bodyWeightChange"] = "%+d" % _past[0]["chg"]
+                _n = sum(len(x) for x in _bw)
+                _gate_hit("korea_detail_bw", race.get("key") or str(race.get("raceNo")),
+                          "과거 마체중 %d건 · %d두" % (_n, len(_bw)))
+        except Exception as _bwe:
+            print("[한국 마체중] 배선 실패(무시):", str(_bwe)[:80])
     try:
         tr = _do_extract_training(_render_train(pg), api_key)
         tmap = {t.get("horseNum"): t for t in (tr.get("horses") or [])}
