@@ -17508,16 +17508,24 @@ def _cross_pair_pick(qlist, already):
 #   ⚠ 넣으면 회수율은 내려간다(💎 단독 49.9% · 대박3건 뺀 41.8%). 원래 그랬던 것이 드러날 뿐이다.
 #     판정 기준은 2026-08-16 상품 분리대로 — **「한방」은 적중배당 중앙으로 본다**(💎 13.2배 · 10배+ 61%).
 KAKAO_JUDGE_ENABLED = True      # 🔧 되돌리기: False
+# 🔴 [2026-08-23 대표 지시] 모든 편입이 끝난 뒤 **최종 상한**을 한 번 더 건다.
+#   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천하던 모순을 없앤다.
+FINAL_CAP_ENABLED = True        # 🔧 되돌리기: False
+FINAL_CAP_KEEP_DIA = 1          # 💎 보장 자리(0이면 보장 없음 — 💎가 늘 먼저 잘린다)
 _KAKAO_JUDGE_CACHE = {"path": None, "mtime": 0.0, "map": {}}
 _KAKAO_ADD_RE = re.compile(r"(\d{1,2})\s*\+\s*(\d{1,2})")
 
 
 def _kakao_sent_quinellas(rk):
-    """그 경주에 **회원이 실제로 받은 복승 조합**을 돌려준다(발송 시각순 반영).
+    """그 경주에 **회원이 받은 💎복병**을 돌려준다.
 
-    우선순위 ① `sentQuinellas`(2026-08-23 이후 구조화 기록)
-             ② `quinellas` + 본문의 `💎복병 N+M`(과거분 소급)
-    본문의 `복승 추가:` 는 더하고 `복승 제외:` 는 뺀다 — 회원이 최종적으로 들고 있는 명단에 맞춘다.
+    🔴 [2026-08-23 대표 지시] **💎만** 본다. 「복승 추가」통보분은 편입하지 않는다.
+      소급 실측 — 전부 편입하면 구좌 6078→7313 인데 배당중앙은 2.6→2.7 로 제자리였다
+      (한계 회수율 56.0%). 늘어난 것 대부분이 💎가 아니라 본선 추가분이었기 때문이다.
+      💎 단독은 적중배당 중앙 13.2배 · 10배 이상 적중 61% — 「한방」 기준을 충족한다.
+    우선순위 ① `sentDia`(2026-08-23 이후 구조화 기록)
+             ② 본문의 `💎복병 N+M`(과거분 소급)
+    본문에 `복승 제외:` 로 빠진 것은 뺀다 — 회원이 최종적으로 들고 있는 것에 맞춘다.
     ⚠ 읽기 전용 · 실패하면 빈 리스트(판정을 막지 않는다).
     """
     try:
@@ -17538,7 +17546,8 @@ def _kakao_sent_quinellas(rk):
                 if not k:
                     continue
                 cur = m.setdefault(k, [])
-                for q in (row.get("sentQuinellas") or row.get("quinellas") or []):
+                _has_dia_field = row.get("sentDia") is not None
+                for q in (row.get("sentDia") or []):
                     cb = q.get("combo") if isinstance(q, dict) else q
                     if cb and len(cb) == 2:
                         s = sorted(int(x) for x in cb)
@@ -17546,10 +17555,11 @@ def _kakao_sent_quinellas(rk):
                             cur.append(s)
                 txt = str(row.get("text") or "")
                 for line in txt.split("\n"):
-                    add = "추가" in line and "복승" in line
                     rem = "제외" in line and "복승" in line
                     dia = "💎" in line
-                    if not (add or rem or dia):
+                    # 🔴 구조화 기록(sentDia)이 있으면 본문 💎 파싱은 건너뛴다(중복 방지).
+                    #   과거분에는 그 필드가 없으므로 본문에서 소급한다.
+                    if not (rem or (dia and not _has_dia_field)):
                         continue
                     for mm in _KAKAO_ADD_RE.finditer(line):
                         s = sorted([int(mm.group(1)), int(mm.group(2))])
@@ -18259,6 +18269,74 @@ def _build_analysis_log(rk, an=None):
                                       once_key="%s|%s" % (rk, "+".join(str(x) for x in _c)))
                 except Exception as _kje:
                     print("[카톡 판정편입] 스킵(무시):", str(_kje)[:80])
+            # 🔴🔴 [2026-08-23 대표 지시] **최종 상한을 맞춘다.**
+            #   실사고(부산 4경주): 화면이 「조합 수 상한(시장 최저 5.8배 → 2조합)」이라 써 놓고
+            #   복승 4개를 추천했다. 되살린 조합·교차 짝·💎가 상한 **뒤**에 붙기 때문이다.
+            #   호후 3경주도 같다(cap 1 → 실제 3개). 회원이 보면 그냥 모순이다.
+            #   ⇒ 모든 편입이 끝난 뒤 **한 번 더** 상한을 적용해 표기와 실제를 일치시킨다.
+            #   ⚠ 자르는 순서는 **뒤에서부터** — 앞은 배당 낮은 순 본선이고 편입분이 뒤에 붙는다.
+            #   🔴 다만 `FINAL_CAP_KEEP_DIA` 만큼 **💎 자리는 보장**한다. 안 그러면 💎가 늘 먼저
+            #     잘려 편입 자체가 무의미해진다(💎는 고배당이라 항상 뒤에 있다).
+            #     ⚠ 이 한 자리를 줄지는 성적으로 판단할 사항이다 — 스위치로 둔다.
+            #   🔧 되돌리기: FINAL_CAP_ENABLED = False (종전처럼 편입분이 상한을 넘어간다)
+            if FINAL_CAP_ENABLED and isinstance(_dc_out, dict) and _dc_out.get("quinellas"):
+                try:
+                    # 🔴 `low_only=True` — **저배당(3배 미만)에만** 건다.
+                    #   2026-08-14 대표 결정과 같은 규칙이다: "어차피 못 이기면 적중률 높은 쪽이 낫다".
+                    #   실측으로도 전 구간(low_only=False)보다 낫다 —
+                    #     전구간·💎보장  구좌3374 적중541 대박3뺀 62.9% 배당중앙 2.8배
+                    #     저배당만·💎보장 구좌4505 적중635 대박3뺀 64.8% 배당중앙 **3.2배**
+                    _fcap, _fmn = _combo_cap_of(_cp_dc, low_only=True)
+                    _cur = list(_dc_out.get("quinellas") or [])
+                    if _fcap is not None and len(_cur) > _fcap:
+                        _diak = [tuple(c) for c in (_dc_out.get("kakaoExtra") or [])]
+                        _keep, _seen = [], set()
+                        # ① 💎 보장분 먼저 확보(자리를 뺏기지 않게)
+                        for _c in _cur:
+                            if len(_keep) >= min(FINAL_CAP_KEEP_DIA, _fcap):
+                                break
+                            if tuple(_c) in _diak and tuple(_c) not in _seen:
+                                _keep.append(_c)
+                                _seen.add(tuple(_c))
+                        # ② 남은 자리를 앞에서부터(본선 우선) 채운다
+                        for _c in _cur:
+                            if len(_keep) >= _fcap:
+                                break
+                            if tuple(_c) not in _seen:
+                                _keep.append(_c)
+                                _seen.add(tuple(_c))
+                        _before2 = len(_cur)
+                        _dc_out["quinellas"] = _keep
+                        _dc_out["finalCap"] = {"cap": _fcap, "minOdds": round(_fmn, 1),
+                                               "before": _before2,
+                                               "keptDia": sum(1 for c in _keep if tuple(c) in _diak)}
+                        # 표기도 잘린 것에 맞춘다 — 없는 조합을 근거로 남기지 않는다
+                        _keepk = {tuple(c) for c in _keep}
+                        if _dc_out.get("extra"):
+                            _dc_out["extra"] = [e for e in _dc_out["extra"]
+                                                if tuple(e.get("combo") or []) in _keepk] or None
+                        if _dc_out.get("kakaoExtra"):
+                            _dc_out["kakaoExtra"] = [c for c in _dc_out["kakaoExtra"]
+                                                     if tuple(c) in _keepk] or None
+                        _gate_hit("final_cap", rk, "최저 %.1f배 · %d → %d조합"
+                                  % (_fmn, _before2, len(_keep)), once_key=rk)
+                except Exception as _fce:
+                    print("[최종 상한] 스킵(무시):", str(_fce)[:80])
+            # 🔴 [2026-08-23] **표기를 사실에 맞춘다.**
+            #   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천했다.
+            #   최종 상한을 저배당(3배 미만)에만 걸기로 했으므로 중배당 경주에서는 편입분이 남는다.
+            #   ⇒ 상한이 실제로 안 지켜졌으면 **note 에 그 사실을 적는다.** 숫자를 숨기지 않는다.
+            #   ⚠ 조합을 자르지 않는다 — 표기만 고친다(성적·명단 무영향).
+            try:
+                _capinfo = (_dc_out or {}).get("cap")
+                _nq = len((_dc_out or {}).get("quinellas") or [])
+                if isinstance(_capinfo, dict) and _capinfo.get("cap") is not None and _nq > _capinfo["cap"]:
+                    _capinfo["finalCount"] = _nq
+                    _capinfo["note"] = ("최저 %.1f배 → 본선 %d조합 + 편입 %d개 = 총 %d조합"
+                                        % (float(_capinfo.get("minOdds") or 0),
+                                           _capinfo["cap"], _nq - _capinfo["cap"], _nq))
+            except Exception:
+                pass
             # ── [상품 분리 · 저장만] 판정 명단을 본선과 한방으로 갈라 **표식만** 남긴다 ──
             #   🔴 _dc_out["quinellas"] 자체는 손대지 않는다 — 화면도 판정도 그대로다.
             #     여기서 만드는 것은 사후에 성적을 따로 재기 위한 이름표뿐이다.
@@ -38426,12 +38504,17 @@ def _kakao_anchor_log(rk, phase, text, result, an=None):
             "phase": phase,
             "minutesBefore": (an or {}).get("minutesBefore") if isinstance(an, dict) else None,
             "quinellas": _combos("finalQuinellas"),
-            # 🔴 [2026-08-23] **회원이 실제로 받은 복승 전부**를 구조화해 남긴다.
+            # 🔴 [2026-08-23] **회원이 실제로 받은 복승**을 구조화해 남긴다.
             #   종전엔 `finalQuinellas` 만 기록해 **💎복병이 본문에만 있고 필드에는 없었다.**
             #   그래서 판정 명단과 대조할 방법이 없었고, 실측 결과 카톡 💎 612경주 중
             #   **488경주(79.7%)가 판정 명단에 없었다**(호후 3경주 5+7 이 그 실물이다).
             #   ⚠ 기존 `quinellas` 키는 **건드리지 않는다**(하위호환 · 소비처 무영향).
             "sentQuinellas": _combos("finalQuinellas") + _combos("bmedSpecial"),
+            # 🔴 [2026-08-23 대표 지시] **💎만 따로** 남긴다 — 판정 편입 대상은 이것 하나다.
+            #   「복승 추가」통보분까지 편입했더니 배당중앙이 2.6→2.7 로 거의 안 오르고
+            #   구좌만 늘었다(한계 회수율 56.0%). 고배당을 얻는 거래가 아니었다.
+            #   💎 단독은 적중배당 중앙 13.2배 · 10배 이상 적중 61% 로 「한방」 기준을 충족한다.
+            "sentDia": _combos("bmedSpecial"),
             "trifectas": _combos("finalTrifectas"),
             "displayedCombos": cp.get("displayedCombos"),
             "betGrade": cp.get("betGrade"),
