@@ -17496,6 +17496,77 @@ def _cross_pair_pick(qlist, already):
     return best
 
 
+# 🔴🔴 [2026-08-23] **회원에게 나간 조합은 판정 명단에 반드시 넣는다.**
+#   실사고(호후 3경주): 카톡 T-5 에 `💎복병 5+7 (17.0배)` 이 나갔는데
+#   5분 뒤 동결(11:36:58)에는 `[[3,7],[1,5],[1,7]]` 뿐이었다. **그 5+7 이 적중했다.**
+#   원인은 배선이 아니라 **입력**이다 — 💎는 신호 기반인데 마감 직전 신호가 억제되면
+#   `bmedSpecial` 이 통째로 비고, 그 빈 상태가 동결된다(2026-08-20 「마감 후 재계산이
+#   학습셋을 비운다」와 같은 뿌리).
+#   실측: 카톡 💎 612경주 중 판정 편입 **124(20.3%)** · 미편입 **488(79.7%)**
+#         카톡💎 ↔ 동결 bmedSpecial — 그대로 33.2% · 빔 21.7% · **다른 조합 45.1%**
+#   ⇒ 성적표가 회원 경험을 반영하지 못했다. 맞아도 안 잡히고 틀려도 안 잡힌다.
+#   ⚠ 넣으면 회수율은 내려간다(💎 단독 49.9% · 대박3건 뺀 41.8%). 원래 그랬던 것이 드러날 뿐이다.
+#     판정 기준은 2026-08-16 상품 분리대로 — **「한방」은 적중배당 중앙으로 본다**(💎 13.2배 · 10배+ 61%).
+KAKAO_JUDGE_ENABLED = True      # 🔧 되돌리기: False
+_KAKAO_JUDGE_CACHE = {"path": None, "mtime": 0.0, "map": {}}
+_KAKAO_ADD_RE = re.compile(r"(\d{1,2})\s*\+\s*(\d{1,2})")
+
+
+def _kakao_sent_quinellas(rk):
+    """그 경주에 **회원이 실제로 받은 복승 조합**을 돌려준다(발송 시각순 반영).
+
+    우선순위 ① `sentQuinellas`(2026-08-23 이후 구조화 기록)
+             ② `quinellas` + 본문의 `💎복병 N+M`(과거분 소급)
+    본문의 `복승 추가:` 는 더하고 `복승 제외:` 는 뺀다 — 회원이 최종적으로 들고 있는 명단에 맞춘다.
+    ⚠ 읽기 전용 · 실패하면 빈 리스트(판정을 막지 않는다).
+    """
+    try:
+        p = os.path.join(KAKAO_ANCHOR_DIR, time.strftime("%Y%m%d") + ".json")
+        if not os.path.exists(p):
+            return []
+        mt = os.path.getmtime(p)
+        c = _KAKAO_JUDGE_CACHE
+        if c["path"] != p or c["mtime"] != mt:
+            rows, _corrupt = _json_load_guard(p, [], tag="kakao_sent/judge")
+            if _corrupt or not isinstance(rows, list):
+                return []
+            m = {}
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                k = str(row.get("raceKey") or "")
+                if not k:
+                    continue
+                cur = m.setdefault(k, [])
+                for q in (row.get("sentQuinellas") or row.get("quinellas") or []):
+                    cb = q.get("combo") if isinstance(q, dict) else q
+                    if cb and len(cb) == 2:
+                        s = sorted(int(x) for x in cb)
+                        if s not in cur:
+                            cur.append(s)
+                txt = str(row.get("text") or "")
+                for line in txt.split("\n"):
+                    add = "추가" in line and "복승" in line
+                    rem = "제외" in line and "복승" in line
+                    dia = "💎" in line
+                    if not (add or rem or dia):
+                        continue
+                    for mm in _KAKAO_ADD_RE.finditer(line):
+                        s = sorted([int(mm.group(1)), int(mm.group(2))])
+                        if not all(1 <= x <= 18 for x in s):
+                            continue
+                        if rem:
+                            if s in cur:
+                                cur.remove(s)
+                        elif s not in cur:
+                            cur.append(s)
+            c["path"], c["mtime"], c["map"] = p, mt, m
+        return list(c["map"].get(str(rk) or "", []))
+    except Exception as e:
+        print("[카톡 판정편입] 조회 실패(무시):", str(e)[:80])
+        return []
+
+
 def _judge_extra_quinellas(cp, sport, already):
     """[판정 편입] 화면에는 나가는데 판정 밖이던 조합을 명단에 더한다.
 
@@ -18160,6 +18231,34 @@ def _build_analysis_log(rk, an=None):
                               % (rk, "+".join(str(x) for x in _cxc), _cxo))
                 except Exception as _cxe:
                     print("[교차 짝] 스킵(무시):", str(_cxe)[:80])
+            # 🔴🔴 [2026-08-23] **회원에게 나간 조합을 판정 명단에 고정한다**(위 `_kakao_sent_quinellas`).
+            #   💎는 신호 기반이라 마감 직전 신호가 억제되면 통째로 사라지는데,
+            #   회원은 이미 T-5 에 받았다. 호후 3경주가 실물이다 —
+            #     카톡 11:31:40 `💎복병 5+7 (17.0배)` → 동결 11:36:58 `[[3,7],[1,5],[1,7]]` (5+7 없음)
+            #   실측: 카톡 💎 612경주 중 판정 편입 124(20.3%) · **미편입 488(79.7%)**
+            #   ⇒ 성적표가 회원 경험을 반영하지 못했다. 맞아도 안 잡히고 틀려도 안 잡힌다.
+            #   🔴 **반드시 조합 수 상한 뒤에 놓는다** — 회원이 이미 받은 것을 상한으로 자르면
+            #     원래 문제로 되돌아간다(되살린 조합·교차 짝이 상한 뒤에 붙는 것과 같은 이유).
+            #   ⚠ 넣으면 회수율은 내려간다(💎 단독 49.9% · 대박3건 뺀 41.8%).
+            #     원래 그랬던 것이 드러날 뿐이다. 「한방」 판정은 적중배당 중앙으로 본다(💎 13.2배).
+            #   🔧 되돌리기: KAKAO_JUDGE_ENABLED = False
+            if KAKAO_JUDGE_ENABLED and isinstance(_dc_out, dict):
+                try:
+                    _ksent = _kakao_sent_quinellas(rk)
+                    if _ksent:
+                        _gate_hit("judge_kakao_reach", rk, "발송 %d조합" % len(_ksent),
+                                  reach_only=True, once_key=rk)
+                    _have = {tuple(c) for c in (_dc_out.get("quinellas") or [])}
+                    _kadd = [c for c in _ksent if tuple(c) not in _have]
+                    if _kadd:
+                        _dc_out["quinellas"] = (_dc_out.get("quinellas") or []) + _kadd
+                        _dc_out["kakaoExtra"] = _kadd
+                        for _c in _kadd:
+                            _gate_hit("judge_kakao", rk,
+                                      "회원 발송분 편입 %s" % "+".join(str(x) for x in _c),
+                                      once_key="%s|%s" % (rk, "+".join(str(x) for x in _c)))
+                except Exception as _kje:
+                    print("[카톡 판정편입] 스킵(무시):", str(_kje)[:80])
             # ── [상품 분리 · 저장만] 판정 명단을 본선과 한방으로 갈라 **표식만** 남긴다 ──
             #   🔴 _dc_out["quinellas"] 자체는 손대지 않는다 — 화면도 판정도 그대로다.
             #     여기서 만드는 것은 사후에 성적을 따로 재기 위한 이름표뿐이다.
@@ -18173,6 +18272,10 @@ def _build_analysis_log(rk, an=None):
                     for _q in ((core_picks_out or {}).get("finalQuinellas") or []):
                         if _q.get("crossPair") or _q.get("evRescue"):
                             _bombk.add(tuple(sorted(int(x) for x in (_q.get("combo") or []))))
+                    # 🔴 [2026-08-23] 카톡 편입분은 대부분 💎(고배당)다 → **한방**으로 센다.
+                    #   본선이었다면 이미 판정 명단에 있어 편입 자체가 일어나지 않는다.
+                    for _c in (_dc_out.get("kakaoExtra") or []):
+                        _bombk.add(tuple(sorted(int(x) for x in _c)))
                     _psm, _psb = [], []
                     for _c in (_dc_out.get("quinellas") or []):
                         _k = tuple(sorted(int(x) for x in _c))
@@ -38323,6 +38426,12 @@ def _kakao_anchor_log(rk, phase, text, result, an=None):
             "phase": phase,
             "minutesBefore": (an or {}).get("minutesBefore") if isinstance(an, dict) else None,
             "quinellas": _combos("finalQuinellas"),
+            # 🔴 [2026-08-23] **회원이 실제로 받은 복승 전부**를 구조화해 남긴다.
+            #   종전엔 `finalQuinellas` 만 기록해 **💎복병이 본문에만 있고 필드에는 없었다.**
+            #   그래서 판정 명단과 대조할 방법이 없었고, 실측 결과 카톡 💎 612경주 중
+            #   **488경주(79.7%)가 판정 명단에 없었다**(호후 3경주 5+7 이 그 실물이다).
+            #   ⚠ 기존 `quinellas` 키는 **건드리지 않는다**(하위호환 · 소비처 무영향).
+            "sentQuinellas": _combos("finalQuinellas") + _combos("bmedSpecial"),
             "trifectas": _combos("finalTrifectas"),
             "displayedCombos": cp.get("displayedCombos"),
             "betGrade": cp.get("betGrade"),
