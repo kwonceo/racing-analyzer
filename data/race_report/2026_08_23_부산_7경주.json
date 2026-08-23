@@ -1,0 +1,219 @@
+{
+ "race": "부산 7경주",
+ "raceKey": "부산 7경주",
+ "date": "2026-08-23",
+ "result": {
+  "1st": 11,
+  "2nd": 5,
+  "3rd": 2,
+  "4th": null
+ },
+ "hit": true,
+ "hit_type": null,
+ "odds": "미상",
+ "win_odds": 0,
+ "why_recommended": {
+  "signal_11": {
+   "horse": 11,
+   "placed": true,
+   "recommended": false,
+   "place_rank": 1,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    3,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:54:36",
+     "minutes_before": 0,
+     "odds": 11.6,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:55:22",
+     "minutes_before": 0,
+     "odds": 11.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 93.8,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_5": {
+   "horse": 5,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 2,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    3,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:54:36",
+     "minutes_before": 0,
+     "odds": 11.6,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:55:22",
+     "minutes_before": 0,
+     "odds": 11.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.893,
+   "record_score": 122.5,
+   "confidence": 0.6,
+   "reason": "쌍승역전"
+  },
+  "signal_2": {
+   "horse": 2,
+   "placed": true,
+   "recommended": true,
+   "place_rank": 3,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    2,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:54:36",
+     "minutes_before": 0,
+     "odds": 13.1,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:55:22",
+     "minutes_before": 0,
+     "odds": 13.1,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": false,
+   "reversal_ratio": null,
+   "record_score": 93.8,
+   "confidence": null,
+   "reason": "전적상위"
+  },
+  "signal_3": {
+   "horse": 3,
+   "placed": false,
+   "recommended": true,
+   "place_rank": null,
+   "excess_drop": null,
+   "avg_drop": null,
+   "grade": null,
+   "rep_combo": [
+    3,
+    5
+   ],
+   "drop_timeline": [
+    {
+     "time": "16:54:36",
+     "minutes_before": 0,
+     "odds": 11.6,
+     "change": null,
+     "excluded": false,
+     "exclReason": null
+    },
+    {
+     "time": "16:55:22",
+     "minutes_before": 0,
+     "odds": 11.6,
+     "change": 0.0,
+     "excluded": false,
+     "exclReason": null
+    }
+   ],
+   "exacta_reversal": true,
+   "reversal_ratio": 0.866,
+   "record_score": 105,
+   "confidence": 3.0,
+   "reason": "쌍승역전"
+  }
+ },
+ "recommended_horses": [
+  3,
+  5,
+  2
+ ],
+ "recommendation_process": [
+  "1. 전적 분석: 11번 93.8점",
+  "2. 배당 수집 시작 16:54:36",
+  "4. 쌍승 역전: 4→2(25.1) < 2→4(39.2) → 4번 실질 상위 신호",
+  "4. 쌍승 역전: 7→2(29.3) < 2→7(39.9) → 7번 실질 상위 신호",
+  "5. 종합 신뢰도 0점(하) 판정",
+  "6. BMED 전략: 역배열형 적용",
+  "7. 최종 추천: 복승 메인 3+5"
+ ],
+ "confidence_breakdown": {
+  "horse": 11,
+  "excess_drop_score": 0,
+  "exacta_reversal_score": 0,
+  "quinella_mismatch_score": 0,
+  "record_score": 93.8,
+  "total": 0,
+  "grade": "하"
+ },
+ "win_tags": [
+  "쌍승역전_적중",
+  "전적보조_적중"
+ ],
+ "combo_tags": true,
+ "hit_basis": {
+  "formScore": 93.8,
+  "dropAmt": null,
+  "dropScore": 0,
+  "inverse": true,
+  "inverseHorses": [
+   4,
+   7,
+   6
+  ],
+  "inverseHit": [],
+  "confidence": 0.6,
+  "reason": "제거 적중"
+ },
+ "signal_change_history": {
+  "changes": [],
+  "confirmed": [],
+  "candidates": [],
+  "events": {},
+  "finalSignal": null,
+  "finalConfirmed": false,
+  "excluded": {
+   "after_close": 0,
+   "next_race": 0
+  },
+  "validCount": 1
+ },
+ "pnl": -1000,
+ "stake": 1000,
+ "generated_at": "2026-08-23 17:07:43"
+}
