@@ -709,6 +709,10 @@ PLANS = [
     ("유력마 5~50배 추가", lambda r: r["dc"] + [c for c in _allc(r["kh"])
                                             if r["q"].get(tuple(c)) and 5 <= r["q"][tuple(c)] <= 50]),
     ("시장 3두 전조합", lambda r: _allc(_mkt3(r))),
+    # 🔴 [2026-08-24] **더하는 안** — 위 「시장 3두 전조합」은 명단을 통째로 **교체**한다.
+    #   회원이 받는 추천을 버리는 것이라 실전 배선에는 쓸 수 없다(기존 기능 삭제 금지).
+    #   ⇒ 현행 명단에 시장 3두 조합을 **더한 것**을 따로 잰다. 구좌는 더 늘지만 삭제가 없다.
+    ("현행 + 시장3두(더하기)", lambda r: [list(c) for c in r["dc"]] + _allc(_mkt3(r))),
     ("paceBonus ① 현행", lambda r: _allc(_pace(r, +1))),
     ("paceBonus ② 반전", lambda r: _allc(_pace(r, -1))),
     ("paceBonus ③ 제거", lambda r: _allc(_pace(r, 0))),

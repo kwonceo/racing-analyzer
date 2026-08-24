@@ -17564,6 +17564,48 @@ KAKAO_JUDGE_ENABLED = True      # 🔧 되돌리기: False
 #   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천하던 모순을 없앤다.
 # 🔴 [2026-08-24 대표 승인] 짝 채우기 — 판정 명단에 2회 이상 나온 말끼리 묶는다.
 #   8/23 한국 실측: 놓친 9경주 중 5경주가 「두 말을 다 짚어놓고 그 둘만 안 묶은」 것이었다.
+# 🔴🔴 [2026-08-24 대표 승인] **시장 3두 전조합 더하기 — 일본 경마 한정**
+#   실측(8월 · 확정배당 · 정제 · 3제외 회수율)
+#     일본경마 8/01~09 60.3→63.7(+3.4) · 8/10~19 59.1→68.1(+9.0) · 8/20~ 63.6→64.2(+0.6)
+#       🟢 세 구간 모두 양수 · 배당중앙 3.1→4.1 · 4.2→4.8 · 3.7→3.8 (고배당 원칙에 부합)
+#     🔴 경륜 8/01~09 67.3→61.9 · 8/10~19 67.1→66.8 · 8/20~ 57.0→55.7 — **세 구간 모두 악화**
+#   ⇒ 종목별로 정반대다. CLAUDE.md 에 이 안이 기각돼 있던 것은 **경륜을 섞은 값**이었다.
+#   ⚠ 도구의 「시장 3두 전조합」은 명단을 **교체**하는 안이다(3제외가 더 높다).
+#     그러나 회원 추천을 버리는 것이라 쓰지 않는다 — **더하기**로만 배선한다(기존 기능 삭제 금지).
+#   ⚠ 판정선 74.5% 는 못 넘는다(3제외 63.7~68.1%). **덜 지는 것**이지 이기는 것이 아니다.
+#   🔴 이것은 「시장을 이기는 것」이 아니다 — 일본 경마에서 **우리 유력마 선정이 시장보다 못해서**
+#     시장을 베끼면 나아지는 것이다(원칙 14 가 경고하는 시장 복사). 근본 수리는 따로 필요하다.
+#   🔧 되돌리기: MARKET3_ADD_ENABLED = False
+MARKET3_ADD_ENABLED = True
+MARKET3_ADD_TOPN = 3            # 상위 N두 전조합(3두 → 3조합)
+
+
+def _market_top3_from_quin(qlist, topn=3):
+    """복승 배당 목록 → 각 말의 내재확률 합(Σ 1/배당) 상위 N두.
+
+    🔴 `tools/measure_recovery.py` 의 `_mkt3` 와 **같은 규칙**이다.
+      규칙을 두 곳에 두면 갈리므로, 바꿀 때는 반드시 함께 바꾼다.
+    """
+    im = {}
+    for e in (qlist or []):
+        if not isinstance(e, dict):
+            continue
+        cb = e.get("combo") or []
+        try:
+            o = float(e.get("odds"))
+        except (TypeError, ValueError):
+            continue
+        if not cb or not (o > 0):
+            continue
+        for x in cb:
+            try:
+                xi = int(x)
+            except (TypeError, ValueError):
+                continue
+            im[xi] = im.get(xi, 0.0) + 1.0 / o
+    return [x for x, _ in sorted(im.items(), key=lambda y: -y[1])][:topn]
+
+
 PAIR_FILL_ENABLED = True        # 🔧 되돌리기: False
 PAIR_FILL_MIN_COUNT = 2         # 명단에 이만큼 등장한 말끼리만 묶는다(새 말은 넣지 않는다)
 FINAL_CAP_ENABLED = True        # 🔧 되돌리기: False
@@ -18417,6 +18459,36 @@ def _build_analysis_log(rk, an=None):
                                   once_key=rk)
                 except Exception as _pfe:
                     print("[짝 채우기] 스킵(무시):", str(_pfe)[:80])
+            # 🔴🔴 [2026-08-24 대표 승인] **시장 3두 전조합 더하기 — 일본 경마 한정**
+            #   (근거·실측은 위 MARKET3_ADD_ENABLED 주석 참조)
+            #   🔴 한국 제외 — 한국도 sport=horse 다. 한국은 이 안을 **측정한 적이 없다.**
+            #   🔴 경륜 제외 — 세 구간 모두 악화한다.
+            #   ⚠ 짝 채우기 **뒤**에 둔다. 측정은 「현행 + 시장3두」였으므로
+            #     실전에서는 짝 채우기까지 더해져 **구좌가 측정보다 더 는다.** 그 사실을 명시한다.
+            if MARKET3_ADD_ENABLED and isinstance(_dc_out, dict) and _dc_out.get("quinellas"):
+                try:
+                    _sp3 = str(an.get("sport") or "").lower()
+                    _cat3 = str(an.get("category") or "").lower()
+                    _is_kr = bool(_KRA_TRACK_RE.search(str(rk))) or _cat3 == "korea"
+                    if _sp3 == "horse" and not _is_kr:
+                        _top3 = _market_top3_from_quin(rec.get("quinella"), MARKET3_ADD_TOPN)
+                        if len(_top3) >= 2:
+                            _have3 = {tuple(sorted(c)) for c in _dc_out["quinellas"]}
+                            _m3add = []
+                            for _i in range(len(_top3)):
+                                for _j in range(_i + 1, len(_top3)):
+                                    _pp = tuple(sorted((_top3[_i], _top3[_j])))
+                                    if _pp not in _have3 and list(_pp) not in _m3add:
+                                        _m3add.append([_pp[0], _pp[1]])
+                            if _m3add:
+                                _dc_out["quinellas"] = _dc_out["quinellas"] + _m3add
+                                _dc_out["market3Add"] = _m3add
+                                _gate_hit("market3_add", rk,
+                                          "시장 상위 %s → %d조합 편입"
+                                          % ("+".join(str(x) for x in _top3), len(_m3add)),
+                                          once_key=rk)
+                except Exception as _m3e:
+                    print("[시장3두] 스킵(무시):", str(_m3e)[:80])
             # 🔴 [2026-08-23] **표기를 사실에 맞춘다.**
             #   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천했다.
             #   최종 상한을 저배당(3배 미만)에만 걸기로 했으므로 중배당 경주에서는 편입분이 남는다.
