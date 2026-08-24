@@ -226,16 +226,17 @@
     // 🔴 [2026-08-13 보충] 100~120%대는 **본전**이다. 「적중」이라고 크게 쓰지 않는다.
     //   실물: 세이부엔 7경주에서 1.0배 조합이 ✅ 적중으로 떴다.
     //   회원 입장에서는 건 돈을 그대로 돌려받은 것이다.
+    // 🔴 [2026-08-24 대표 지시] **적중이면 무조건 초록**으로 쓴다.
+    //   종전에는 회수 100% 미만을 「맞았지만 손해」(주황) · 120% 미만을 「본전」(회색)으로 썼다
+    //   (2026-08-13 지시). 그런데 실측상 **일본·경륜 적중 67건 중 초록이 36건(54%)** 뿐이라
+    //   맞췄는데도 화면이 초록이 아니었다 → 대표: "적중이면 초록으로 변경해".
+    //   ⚠ 회수율 병기(`_recTxt`)는 **그대로 둔다** — 정보를 지우지 않는다.
+    //     그 안에서 100% 미만은 여전히 주황으로 보이므로 손해인 적중은 계속 구분된다.
+    //   🔧 되돌리기: 아래 한 줄을 종전 3단 분기(손해/본전/적중)로 되돌린다.
     const hitBadge = c.inProgress
       ? '<span style="color:#38bdf8;font-weight:800">⏳</span>'
       : (c.hit
-        ? (_rec == null
-          ? `<span style="color:#38d39f;font-weight:800">✅ 적중</span>`
-          : (_rec < 100
-            ? `<span style="color:#f59e0b;font-weight:700">맞았지만 손해</span> ${_recTxt}`
-            : (_rec < 120
-              ? `<span style="color:#94a3b8;font-weight:700">본전</span> ${_recTxt}`
-              : `<span style="color:#38d39f;font-weight:800">✅ 적중</span> ${_recTxt}`)))
+        ? `<span style="color:#38d39f;font-weight:800">✅ 적중</span> ${_recTxt}`
         : '<span style="color:#ef4444;font-weight:800">❌</span>');
     const darkBadge = c.dark_hit ? '<span style="color:#f59e0b;font-weight:800">🐎 복병적중</span>' : '';
     // [스냅샷 표기 제거 (2026-07-29 권대표 지시)] 대부분의 경주에 T-5 스크린샷이 없어
