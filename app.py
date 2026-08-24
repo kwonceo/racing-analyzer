@@ -17658,6 +17658,62 @@ def _market_top3_from_quin(qlist, topn=3):
     return [x for x, _ in sorted(im.items(), key=lambda y: -y[1])][:topn]
 
 
+# 🔴🔴 [2026-08-24 대표 승인] **경주 유형별 분기 — 경륜 「집중」만 좁힌다**
+#   대표: "난 경주 흐름·정확한 축이 없는 경주를 보고 터진다/안터진다를 직감적으로 안다."
+#   그 직감을 배당판만으로 계산되는 지표로 옮겼다(마감 전 판정 가능 · 결과 불필요).
+#     집중도 = **상위3두 내재확률 합**(Σ 1/배당 정규화)
+#   실측(8월 · 정제 · 확정배당) — 유형이 갈리면 정답 배당이 갈린다
+#     집중 65%+  정답배당중앙 4.6배 · 20배+ 18%
+#     중간 55~65 정답배당중앙 10.0배
+#     분산 ≤55%  정답배당중앙 13.4~22.6배 · 20배+ 46%
+#   🔴 그런데 우리는 셋을 **똑같이** 다루고 있었다(회수율 65.3/68.1/69.8% 로 거의 같다).
+#
+#   🟢 경륜 집중 1,384경주 — 현행 3제외 66.5% → **상위1개만 75.6%**(판정선 74.5% 돌파)
+#     기간 반 분할 **세 구간 모두 양수** — +3.6 / +15.6 / +10.6 %p (표본 512·547·325)
+#     🔴 구좌가 3520 → 1384 로 **줄어든다**(경주당 2.5 → 1.0). 늘리는 안이 아니다.
+#     ⚠ 대가: 적중률 51.7% → 38.8%. 2026-08-14 「적중률 높은 쪽이 낫다」와 충돌하나
+#       회수율이 판정선을 넘는 유일한 안이라 대표가 채택했다.
+#   🔴 「중간 → 시장상위6두」(3제외 77.2%)는 **배선하지 않는다** —
+#     구좌가 752 → 3,826(경주당 3.0 → 15.2)으로 5배다. 실전에 쓸 수 없다.
+#   🔴 경마는 **제외** — 8/20~ 구간에서 71.8→59.4 로 갈린다(표본 124~226으로 얇다).
+#   🔴 분산(≤55%)은 **손대지 않는다** — 경륜 5~19경주로 판정 불가다.
+#   🔧 되돌리기: RACETYPE_NARROW_ENABLED = False
+RACETYPE_NARROW_ENABLED = True
+RACETYPE_SHARP_MIN = 0.65      # 상위3두 내재확률 합이 이 이상이면 「집중」
+RACETYPE_SHARP_KEEP = 1        # 집중 경주에서 남길 조합 수(배당 싼 순)
+RACETYPE_SPORTS = ("cycle",)   # 🔴 경륜만. 경마는 기간 분할에서 갈렸다
+
+
+def _race_concentration(qlist):
+    """복승 배당 목록 → 상위3두 내재확률 합(0~1). 배당판만으로 계산된다.
+
+    🔴 `tools/measure_racetype.py` 의 `rtype` 과 **같은 규칙**이다.
+      규칙이 두 곳에 있으니 바꿀 때는 반드시 함께 바꾼다.
+    """
+    im = {}
+    for e in (qlist or []):
+        if not isinstance(e, dict):
+            continue
+        cb = e.get("combo") or []
+        try:
+            o = float(e.get("odds"))
+        except (TypeError, ValueError):
+            continue
+        if len(cb) != 2 or not (o > 0):
+            continue
+        for x in cb:
+            try:
+                xi = int(x)
+            except (TypeError, ValueError):
+                continue
+            im[xi] = im.get(xi, 0.0) + 1.0 / o
+    if not im:
+        return None
+    tot = sum(im.values()) or 1.0
+    pr = sorted((v / tot for v in im.values()), reverse=True)
+    return sum(pr[:3])
+
+
 PAIR_FILL_ENABLED = True        # 🔧 되돌리기: False
 PAIR_FILL_MIN_COUNT = 2         # 명단에 이만큼 등장한 말끼리만 묶는다(새 말은 넣지 않는다)
 FINAL_CAP_ENABLED = True        # 🔧 되돌리기: False
@@ -18511,6 +18567,48 @@ def _build_analysis_log(rk, an=None):
                                   once_key=rk)
                 except Exception as _pfe:
                     print("[짝 채우기] 스킵(무시):", str(_pfe)[:80])
+            # 🔴🔴 [2026-08-24 대표 승인] **경륜 「집중」 경주는 좁힌다**(근거는 위 주석).
+            #   ⚠ 모든 편입이 끝난 **뒤**에 놓는다 — 집중 경주에서는 짝 채우기·되살림이
+            #     사실상 무의미해지는데, 그것이 측정 결과가 말하는 바다(좁힐수록 낫다).
+            #   ⚠ 자르는 기준은 **배당 싼 순** — 측정과 같다.
+            if RACETYPE_NARROW_ENABLED and isinstance(_dc_out, dict) and _dc_out.get("quinellas"):
+                try:
+                    if str(an.get("sport") or "").lower() in RACETYPE_SPORTS:
+                        _conc = _race_concentration(rec.get("quinella"))
+                        if _conc is not None and _conc >= RACETYPE_SHARP_MIN:
+                            _qm = {}
+                            for _e in (rec.get("quinella") or []):
+                                if not isinstance(_e, dict):
+                                    continue
+                                _cb = _e.get("combo") or []
+                                try:
+                                    _o = float(_e.get("odds"))
+                                except (TypeError, ValueError):
+                                    continue
+                                if len(_cb) == 2 and _o > 0:
+                                    _qm[tuple(sorted(int(x) for x in _cb))] = _o
+                            _cur = list(_dc_out.get("quinellas") or [])
+                            if len(_cur) > RACETYPE_SHARP_KEEP:
+                                _keep = sorted(_cur, key=lambda c: _qm.get(tuple(sorted(c)), 9e9))
+                                _keep = _keep[:RACETYPE_SHARP_KEEP]
+                                _kk = {tuple(sorted(c)) for c in _keep}
+                                _dc_out["quinellas"] = _keep
+                                _dc_out["raceType"] = {"conc": round(_conc, 3), "type": "sharp",
+                                                       "before": len(_cur), "keep": len(_keep)}
+                                for _k in ("extra", "kakaoExtra", "pairFill", "market3Add"):
+                                    _v = _dc_out.get(_k)
+                                    if not _v:
+                                        continue
+                                    if _k == "extra":
+                                        _dc_out[_k] = [e for e in _v
+                                                       if tuple(sorted(e.get("combo") or [])) in _kk] or None
+                                    else:
+                                        _dc_out[_k] = [c for c in _v if tuple(sorted(c)) in _kk] or None
+                                _gate_hit("racetype_narrow", rk,
+                                          "집중 %.2f · %d → %d조합" % (_conc, len(_cur), len(_keep)),
+                                          once_key=rk)
+                except Exception as _rte:
+                    print("[유형 분기] 스킵(무시):", str(_rte)[:80])
             # 🔴🔴 [2026-08-24 대표 승인] **시장 3두 전조합 더하기 — 일본 경마 한정**
             #   (근거·실측은 위 MARKET3_ADD_ENABLED 주석 참조)
             #   🔴 한국 제외 — 한국도 sport=horse 다. 한국은 이 안을 **측정한 적이 없다.**
