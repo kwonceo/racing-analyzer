@@ -317,6 +317,13 @@ def _allc(l):
     return [list(c) for c in itertools.combinations(sorted(l), 2)]
 
 
+def _band_add(r, lo, hi, n):
+    """시장 배당판에서 [lo, hi) 구간 조합을 **싼 것부터** n개. 이미 명단에 있는 것은 제외."""
+    have = {tuple(sorted(c)) for c in r["dc"]}
+    cand = sorted(((o, c) for c, o in r["q"].items() if lo <= o < hi and tuple(sorted(c)) not in have))
+    return [list(c) for _o, c in cand[:n]]
+
+
 def _mkt3(r):
     im = {}
     for k, o in r["q"].items():
@@ -708,6 +715,13 @@ PLANS = [
     ("유력마 3두 전조합", lambda r: _allc(r["kh"])),
     ("유력마 5~50배 추가", lambda r: r["dc"] + [c for c in _allc(r["kh"])
                                             if r["q"].get(tuple(c)) and 5 <= r["q"][tuple(c)] <= 50]),
+    # 🔴 [2026-08-24] **12~20배 섬** — 배당대별 실측에서 그 구간만 회수율이 튄다.
+    #   8월 일본경마+경륜 5,993구좌: ~2배 79.9% · 8~12배 67.0% · **12~20배 76.2%** · 20~50배 57.5%
+    #   ⇒ 앞뒤가 골짜기인데 12~20 만 높다. 저배당(79.9%)과 회수율이 비슷한데 배당은 6~10배다.
+    #   대표 지시("저배당 추천을 다른 방식으로 바꾸고 적중률을 높일 수 있나")에 대한 후보다.
+    ("현행 + 12~20배 1개", lambda r: [list(c) for c in r["dc"]] + _band_add(r, 12.0, 20.0, 1)),
+    ("현행 + 12~20배 2개", lambda r: [list(c) for c in r["dc"]] + _band_add(r, 12.0, 20.0, 2)),
+    ("현행 + 8~20배 1개", lambda r: [list(c) for c in r["dc"]] + _band_add(r, 8.0, 20.0, 1)),
     ("시장 3두 전조합", lambda r: _allc(_mkt3(r))),
     # 🔴 [2026-08-24] **더하는 안** — 위 「시장 3두 전조합」은 명단을 통째로 **교체**한다.
     #   회원이 받는 추천을 버리는 것이라 실전 배선에는 쓸 수 없다(기존 기능 삭제 금지).
