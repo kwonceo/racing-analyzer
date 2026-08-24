@@ -317,6 +317,29 @@ def _allc(l):
     return [list(c) for c in itertools.combinations(sorted(l), 2)]
 
 
+def _axis_pair(r, topn):
+    """유력마 1위를 축으로 고정하고 2·3위와 묶는다(2조합)."""
+    kh = r.get("kh") or []
+    if len(kh) < 2:
+        return [list(c) for c in r["dc"]]
+    return [[kh[0], x] if kh[0] < x else [x, kh[0]] for x in kh[1:topn]]
+
+
+def _axis_mkt(r, topn):
+    """유력마 1위를 축으로, **시장 내재확률 상위 topn 두** 와 묶는다."""
+    kh = r.get("kh") or []
+    if not kh:
+        return [list(c) for c in r["dc"]]
+    im = {}
+    for k, o in r["q"].items():
+        if o > 0:
+            for x in k:
+                im[x] = im.get(x, 0) + 1.0 / o
+    pool = [x for x, _ in sorted(im.items(), key=lambda y: -y[1])][:topn]
+    a = kh[0]
+    return [[a, x] if a < x else [x, a] for x in pool if x != a]
+
+
 def _band_add(r, lo, hi, n):
     """시장 배당판에서 [lo, hi) 구간 조합을 **싼 것부터** n개. 이미 명단에 있는 것은 제외."""
     have = {tuple(sorted(c)) for c in r["dc"]}
@@ -713,6 +736,14 @@ PLANS = [
     ("현행 +2", lambda r: r["dc"] + _allc(r["kh"])[:2]),
     ("현행 +3", lambda r: r["dc"] + _allc(r["kh"])[:3]),
     ("유력마 3두 전조합", lambda r: _allc(r["kh"])),
+    # 🔴 [2026-08-24] **축 고정** — 대표 지적(나고야 8경주 "7번 축인데 7+8 이 없다").
+    #   실측: 8/20~ 543경주 중 **70.7%** 가 「추천 말끼리인데 안 묶은 조합」을 갖는다(경주당 1.9개).
+    #     그중 정답이 그 안에 있던 경주 35건(6.4%).
+    #   원인: 시스템에 「축」 개념이 없다 — 조합은 저배당+신호로 만들고 유력마를 보지 않는다.
+    #   ⚠ 2026-07-31 에 하루 54경주로 기각된 적이 있다. 이제 543경주로 다시 잰다.
+    ("축1 × 유력마 2·3위", lambda r: _axis_pair(r, 3)),
+    ("축1 × 시장 상위4두", lambda r: _axis_mkt(r, 4)),
+    ("축1 × 시장 상위6두", lambda r: _axis_mkt(r, 6)),
     ("유력마 5~50배 추가", lambda r: r["dc"] + [c for c in _allc(r["kh"])
                                             if r["q"].get(tuple(c)) and 5 <= r["q"][tuple(c)] <= 50]),
     # 🔴 [2026-08-24] **12~20배 섬** — 배당대별 실측에서 그 구간만 회수율이 튄다.
