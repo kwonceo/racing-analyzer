@@ -1,17 +1,6 @@
 {
   "patterns": [
     {
-      "race": "모리오카 1경주",
-      "horse_no": 2,
-      "recent_avg": 8.2,
-      "win_place": 3,
-      "conditions": [
-        "급락66%",
-        "복승이상감지"
-      ],
-      "date": "2026-08-16"
-    },
-    {
       "pattern": "대규모급락",
       "raceKey": "모리오카 1경주",
       "total_combos_dropped": 28,
@@ -4723,16 +4712,24 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-24"
+    },
+    {
+      "race": "나고야 8경주",
+      "horse_no": 8,
+      "recent_avg": 6.4,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-24"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 5011,
-      "hit": 831
+      "count": 5017,
+      "hit": 832
     },
     "전체부진마": {
-      "count": 8538,
-      "hit": 2259
+      "count": 8546,
+      "hit": 2260
     },
     "대규모급락": {
       "count": 15,
@@ -4742,7 +4739,7 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 3527,
+      "count": 3529,
       "hit": 1428
     },
     "급락동반": {
@@ -5120,37 +5117,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1433,
+    "count": 1435,
     "hit": 1131,
     "cases": [
-      {
-        "race": "나고야 8경주",
-        "date": "2026-08-21",
-        "smart_horses": [
-          10,
-          2
-        ],
-        "placed": [
-          10
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 5.7,
-        "high_odds": false
-      },
-      {
-        "race": "나고야 9경주",
-        "date": "2026-08-21",
-        "smart_horses": [
-          7,
-          8
-        ],
-        "placed": [],
-        "hit": false,
-        "trifecta_odds": null,
-        "quinella_odds": 6.1,
-        "high_odds": false
-      },
       {
         "race": "다마노 8경주",
         "date": "2026-08-21",
@@ -6638,9 +6607,35 @@
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
+      },
+      {
+        "race": "나고야 8경주",
+        "date": "2026-08-24",
+        "smart_horses": [
+          2,
+          3,
+          9
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "마쓰도 7경주",
+        "date": "2026-08-24",
+        "smart_horses": [
+          1
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
       }
     ],
-    "rate": 78.9,
+    "rate": 78.8,
     "note": "스마트머니(상승후급락) 감지 말 복병 편입 자동 집계. 표본 적으면 참고만(50+ 유의)."
   }
 }
