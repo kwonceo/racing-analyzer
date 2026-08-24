@@ -1,26 +1,6 @@
 {
   "patterns": [
     {
-      "race": "서울 4경주",
-      "horse_no": 1,
-      "recent_avg": 4.8,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-15"
-    },
-    {
-      "race": "서울 4경주",
-      "horse_no": 6,
-      "recent_avg": 5.0,
-      "win_place": 2,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-15"
-    },
-    {
       "race": "제주 4경주",
       "horse_no": 4,
       "recent_avg": 5.0,
@@ -4732,16 +4712,34 @@
         "복승이상감지"
       ],
       "date": "2026-08-24"
+    },
+    {
+      "race": "모리오카 8경주",
+      "horse_no": 2,
+      "recent_avg": 4.6,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-24"
+    },
+    {
+      "race": "모리오카 8경주",
+      "horse_no": 9,
+      "recent_avg": 6.4,
+      "win_place": 1,
+      "conditions": [],
+      "date": "2026-08-24"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 4918,
-      "hit": 815
+      "count": 4926,
+      "hit": 816
     },
     "전체부진마": {
-      "count": 8409,
-      "hit": 2226
+      "count": 8420,
+      "hit": 2228
     },
     "대규모급락": {
       "count": 15,
@@ -4751,8 +4749,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 3491,
-      "hit": 1411
+      "count": 3494,
+      "hit": 1412
     },
     "급락동반": {
       "count": 640,
@@ -5129,23 +5127,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1422,
+    "count": 1423,
     "hit": 1124,
     "cases": [
-      {
-        "race": "나라 8경주",
-        "date": "2026-08-21",
-        "smart_horses": [
-          5
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 3.7,
-        "high_odds": false
-      },
       {
         "race": "도야마 8경주",
         "date": "2026-08-21",
@@ -6641,6 +6625,19 @@
           6
         ],
         "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "모리오카 8경주",
+        "date": "2026-08-24",
+        "smart_horses": [
+          6,
+          4
+        ],
+        "placed": [],
+        "hit": false,
         "trifecta_odds": null,
         "quinella_odds": null,
         "high_odds": false
