@@ -154,6 +154,11 @@ KOREA_PAYOUT_FALLBACK = True    # 🔧 되돌리기: False
 _KOREA_RE = re.compile(r"서울|부산|부경|제주|과천")
 
 
+# 🔴 [2026-08-24] 한국 전용 — 근사(배당판) 배당을 허용해 회수율을 **재기라도 한다**.
+#   기본은 꺼짐(종전 동작 무변경). `KOREA_ALLOW_APPROX=1` 환경변수로만 켠다.
+KOREA_ALLOW_APPROX = os.environ.get("KOREA_ALLOW_APPROX") == "1"
+
+
 def _korea_result_fallback(log_path, res, po):
     """🔴 [2026-08-22 승인] 한국만 `data/race_results` 를 폴백으로 읽는다.
 
@@ -178,9 +183,27 @@ def _korea_result_fallback(log_path, res, po):
         r2 = json.load(open(p, encoding="utf-8"))
     except Exception:
         return res, po
-    if r2.get("payouts_approx") or r2.get("payouts_estimated"):
-        return res, po                                  # ⚠ 근사·추정은 확정배당이 아니다
-    po2 = (r2.get("payouts") or {}).get("quinella")
+    _approx = bool(r2.get("payouts_approx") or r2.get("payouts_estimated"))
+    if KOREA_ALLOW_APPROX:
+        # 🔴 [2026-08-24] **근사 허용 모드** — 한국은 복승 확정배당 소스가 아예 없다.
+        #   실측(8월 race_results): 적중 경주는 **전부** payouts_approx=True 이고
+        #   확정으로 표시된 것은 미적중뿐이다(적중 0 / 미적중 97).
+        #   원인: `_apply_result_learning` 이 **적중일 때만** 배당판에서 배당을 추정하고
+        #     (`_q_estimated=True`), 미적중은 payouts.quinella=0 이라
+        #     `_q_official = 0` 이 되어 `is None` 검사를 통과해 approx=False 로 찍힌다.
+        #   🔴 그래서 근사를 제외하면 **적중이 통째로 빠져 회수율이 0% 로 나온다.**
+        #     한국이 이 도구로 한 번도 측정되지 않은 진짜 이유다.
+        #   ⇒ 적중·미적중 **둘 다 `payouts_raw`(원본 보존)** 로 통일해 같은 출처로 만든다.
+        #   ⚠ 이것은 **확정배당이 아니라 마감 배당판 근사**다(원칙 15).
+        #     27%가 확정 대비 30% 넘게 벗어난다 — 절대값을 확정으로 인용하지 말 것.
+        #     정제 필터(확정÷배당판)도 확정이 없어 적용되지 않는다.
+        #   🔧 되돌리기: 환경변수를 빼면 종전대로 근사를 제외한다.
+        po2 = ((r2.get("payouts_raw") or {}).get("quinella")
+               or (r2.get("payouts") or {}).get("quinella"))
+    else:
+        if _approx:
+            return res, po                              # ⚠ 근사·추정은 확정배당이 아니다
+        po2 = (r2.get("payouts") or {}).get("quinella")
     res2 = r2.get("result") or {}
     out = dict(res or {})
     for k in ("1st", "2nd", "3rd"):
