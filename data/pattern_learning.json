@@ -1,42 +1,6 @@
 {
   "patterns": [
     {
-      "race": "소노다 4경주",
-      "horse_no": 6,
-      "recent_avg": 6.5,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-14"
-    },
-    {
-      "race": "소노다 4경주",
-      "horse_no": 4,
-      "recent_avg": 4.4,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-14"
-    },
-    {
-      "race": "카사마츠 11경주",
-      "horse_no": 5,
-      "recent_avg": 4.2,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-14"
-    },
-    {
-      "race": "소노다 5경주",
-      "horse_no": 9,
-      "recent_avg": 5.4,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-14"
-    },
-    {
       "race": "소노다 5경주",
       "horse_no": 1,
       "recent_avg": 5.4,
@@ -4730,16 +4694,52 @@
       "win_place": 2,
       "conditions": [],
       "date": "2026-08-24"
+    },
+    {
+      "race": "모리오카 7경주",
+      "horse_no": 5,
+      "recent_avg": 4.3,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-24"
+    },
+    {
+      "race": "모리오카 7경주",
+      "horse_no": 1,
+      "recent_avg": 5.0,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-24"
+    },
+    {
+      "race": "모리오카 7경주",
+      "horse_no": 8,
+      "recent_avg": 5.8,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-24"
+    },
+    {
+      "race": "후나바시 2경주",
+      "horse_no": 6,
+      "recent_avg": 5.4,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-24"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 4903,
-      "hit": 812
+      "count": 4907,
+      "hit": 814
     },
     "전체부진마": {
-      "count": 8383,
-      "hit": 2216
+      "count": 8390,
+      "hit": 2220
     },
     "대규모급락": {
       "count": 15,
@@ -4749,8 +4749,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 3480,
-      "hit": 1404
+      "count": 3483,
+      "hit": 1406
     },
     "급락동반": {
       "count": 640,
