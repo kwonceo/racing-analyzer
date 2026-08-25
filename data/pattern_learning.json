@@ -1,26 +1,6 @@
 {
   "patterns": [
     {
-      "race": "사가 10경주",
-      "horse_no": 1,
-      "recent_avg": 6.8,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-16"
-    },
-    {
-      "race": "서울 3경주",
-      "horse_no": 7,
-      "recent_avg": 5.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-17"
-    },
-    {
       "race": "서울 3경주",
       "horse_no": 8,
       "recent_avg": 5.2,
@@ -4708,6 +4688,28 @@
         "복승이상감지"
       ],
       "date": "2026-08-25"
+    },
+    {
+      "race": "카사마츠 9경주",
+      "horse_no": 7,
+      "recent_avg": 4.6,
+      "win_place": 2,
+      "conditions": [
+        "급락30%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-25"
+    },
+    {
+      "race": "카사마츠 9경주",
+      "horse_no": 2,
+      "recent_avg": 4.2,
+      "win_place": 3,
+      "conditions": [
+        "급락51%",
+        "복승이상감지"
+      ],
+      "date": "2026-08-25"
     }
   ],
   "condition_stats": {
@@ -4716,8 +4718,8 @@
       "hit": 846
     },
     "전체부진마": {
-      "count": 8718,
-      "hit": 2307
+      "count": 8725,
+      "hit": 2309
     },
     "대규모급락": {
       "count": 15,
@@ -4727,12 +4729,12 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 3597,
-      "hit": 1461
+      "count": 3604,
+      "hit": 1463
     },
     "급락동반": {
-      "count": 645,
-      "hit": 176
+      "count": 649,
+      "hit": 178
     }
   },
   "bokbyeong_patterns": [
@@ -5105,25 +5107,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1464,
-    "hit": 1150,
+    "count": 1465,
+    "hit": 1151,
     "cases": [
-      {
-        "race": "마쓰도 3경주",
-        "date": "2026-08-22",
-        "smart_horses": [
-          8,
-          5,
-          9
-        ],
-        "placed": [
-          5
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.5,
-        "high_odds": false
-      },
       {
         "race": "사가 3경주",
         "date": "2026-08-22",
@@ -6622,6 +6608,24 @@
           4
         ],
         "placed": [
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "카사마츠 9경주",
+        "date": "2026-08-25",
+        "smart_horses": [
+          7,
+          4,
+          2,
+          9
+        ],
+        "placed": [
+          7,
           2
         ],
         "hit": true,
