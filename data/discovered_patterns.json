@@ -1,6 +1,6 @@
 {
- "generated_at": 1787655234.337838,
- "races_with_result": 4398,
+ "generated_at": 1787656544.210625,
+ "races_with_result": 4400,
  "target": 50,
  "sufficiency": 100,
  "min_races": 10,
@@ -10,7 +10,7 @@
    "key": "timing:T-5분",
    "desc": "급락이 T-5분에 발생한 경주",
    "rate": 66.7,
-   "baseline": 53.9,
+   "baseline": 54.0,
    "lift": 12.7,
    "support": 657,
    "hit": 438
@@ -18,13 +18,13 @@
   {
    "type": "전적점수",
    "key": "form_range",
-   "desc": "적중 경주 상위등급마 전적점수 주로 68.1~104.9 구간",
+   "desc": "적중 경주 상위등급마 전적점수 주로 68.1~105 구간",
    "range": [
     68.1,
-    104.9
+    105
    ],
-   "support": 8473
+   "support": 8478
   }
  ],
- "baseline_hit_rate": 53.9
+ "baseline_hit_rate": 54.0
 }
