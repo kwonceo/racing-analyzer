@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "모리오카 2경주",
-      "horse_no": 4,
-      "recent_avg": 7.8,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-17"
-    },
-    {
-      "race": "모리오카 2경주",
-      "horse_no": 6,
-      "recent_avg": 5.6,
-      "win_place": 2,
-      "conditions": [],
-      "date": "2026-08-17"
-    },
-    {
-      "race": "다치카와 4경주",
-      "horse_no": 7,
-      "recent_avg": 7.2,
-      "win_place": 3,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-17"
-    },
-    {
       "race": "다치카와 4경주",
       "horse_no": 4,
       "recent_avg": 7.8,
@@ -4706,16 +4680,44 @@
         "복승이상감지"
       ],
       "date": "2026-08-26"
+    },
+    {
+      "race": "소노다 2경주",
+      "horse_no": 5,
+      "recent_avg": 5.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-26"
+    },
+    {
+      "race": "소노다 2경주",
+      "horse_no": 3,
+      "recent_avg": 7.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-26"
+    },
+    {
+      "race": "소노다 2경주",
+      "horse_no": 1,
+      "recent_avg": 5.0,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-26"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 5136,
-      "hit": 849
+      "count": 5139,
+      "hit": 850
     },
     "전체부진마": {
-      "count": 8747,
-      "hit": 2317
+      "count": 8754,
+      "hit": 2320
     },
     "대규모급락": {
       "count": 15,
@@ -4725,8 +4727,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 3611,
-      "hit": 1468
+      "count": 3615,
+      "hit": 1470
     },
     "급락동반": {
       "count": 649,
