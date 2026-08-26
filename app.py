@@ -597,10 +597,7 @@ def _log_api_usage(usage, model, label=""):
             bm["output_tokens"] += out_tok
             bm["estimated_cost_usd"] = round(bm["estimated_cost_usd"] + cost, 4)
             os.makedirs(os.path.dirname(API_USAGE_FILE), exist_ok=True)
-            tmp = API_USAGE_FILE + ".tmp"
-            with open(tmp, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-            os.replace(tmp, API_USAGE_FILE)
+            _json_atomic(API_USAGE_FILE, data, indent=2)
     except Exception as e:
         print("[비용추적] 기록 실패:", e)
 
@@ -3262,9 +3259,7 @@ def _ingest_reject_log(rk, reason, source=None, extra=None, throttle=60):
         if extra:
             row.update(extra)
         doc["archive_snapshots"].append(row)
-        tmp = path + ".tmp"
-        json.dump(doc, open(tmp, "w", encoding="utf-8"), ensure_ascii=False)
-        os.replace(tmp, path)
+        _json_atomic(path, doc)
     except Exception:
         pass
 
@@ -16760,7 +16755,9 @@ def _json_atomic(path, obj, indent=None):
        RLock 이라 같은 스레드가 중첩 호출해도 데드락이 나지 않는다.
     ③ `os.replace` 실패 시 **50ms × 3회 재시도(상한 150ms)**, 그래도 실패하면 예외를 그대로 올린다.
        바이러스 검사·다른 리더가 순간적으로 파일을 잡은 경우를 흡수한다. 무한 대기는 없다.
-    ⚠ 개별 17곳(`path + ".tmp"` · PID조차 없음)은 이번 범위 밖 — ①②③ 효과 실측 후 별건."""
+    ✅ [2026-08-27] 개별 호출부 **17곳 전부 흡수 완료**(JSON 14 + 텍스트 3은 `_text_atomic`).
+       종전 주석의 「이번 범위 밖」은 한 달간 그대로 남아 있었고, 그 사이 8/26 하루에만
+       저장 실패 616건이 났다(분석로그 440 · 복기 131 · 다중경주 35). ⇒ 범위를 미루면 잊는다."""
     _lk = _FILE_LOCKS[hash(path) % _FILE_LOCK_SLOTS]
     with _lk:
         tmp = "%s.tmp%d_%d" % (path, os.getpid(), threading.get_ident())
@@ -16774,6 +16771,31 @@ def _json_atomic(path, obj, indent=None):
                 if _i >= _ATOMIC_RETRY:
                     try:
                         os.remove(tmp)          # 최종 실패 시 tmp 잔재 정리(원본은 손대지 않음)
+                    except Exception:
+                        pass
+                    raise
+                time.sleep(_ATOMIC_RETRY_SLEEP)
+
+
+def _text_atomic(path, text):
+    """[텍스트 원자적 저장 2026-08-27] `_json_atomic` 의 텍스트판.
+
+    REPORT.md·NEXT.md 가 `path + ".tmp"` 를 공유하고 있었다(문자열이라 `_json_atomic` 을 못 쓴다).
+    쓰기 빈도는 낮지만 **깨지면 대표 보고·대기 명령이 통째로 날아간다.**
+    같은 3층 보강 — 스레드ID tmp · 경로별 락 · 재시도. 예외는 삼키지 않는다."""
+    _lk = _FILE_LOCKS[hash(path) % _FILE_LOCK_SLOTS]
+    with _lk:
+        tmp = "%s.tmp%d_%d" % (path, os.getpid(), threading.get_ident())
+        with io.open(tmp, "w", encoding="utf-8") as _f:
+            _f.write(text)
+        for _i in range(_ATOMIC_RETRY + 1):
+            try:
+                os.replace(tmp, path)
+                return
+            except Exception:
+                if _i >= _ATOMIC_RETRY:
+                    try:
+                        os.remove(tmp)
                     except Exception:
                         pass
                     raise
@@ -20295,10 +20317,7 @@ def _start_daily_learning_scheduler():
                             _rdir = os.path.join(os.path.dirname(__file__), "data", "review_replay")
                             os.makedirs(_rdir, exist_ok=True)
                             _rp_path = os.path.join(_rdir, today + ".json")
-                            with open(_rp_path + ".tmp", "w", encoding="utf-8") as _rf:
-                                json.dump({"date": today, "sweep": _sw, "replay": _rp},
-                                          _rf, ensure_ascii=False, indent=1)
-                            os.replace(_rp_path + ".tmp", _rp_path)
+                            _json_atomic(_rp_path, {"date": today, "sweep": _sw, "replay": _rp}, indent=1)
                             _bt = (_sw or {}).get("byType") or {}
                             print(f"[복기 상설화] {today} 분류 {sum(_bt.values())}건({_bt}) · 리플레이 저장 완료")
                     except Exception as _rev_e:
@@ -20518,10 +20537,7 @@ def _signal_stats_load():
 def _signal_stats_save(d):
     try:
         os.makedirs(os.path.dirname(SIGNAL_STATS_FILE), exist_ok=True)
-        tmp = SIGNAL_STATS_FILE + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(d, f, ensure_ascii=False, indent=2)
-        os.replace(tmp, SIGNAL_STATS_FILE)
+        _json_atomic(SIGNAL_STATS_FILE, d, indent=2)
     except Exception as e:
         print("[신호통계] 저장 실패:", e)
 
@@ -20579,10 +20595,7 @@ def _mid_high_stats_load():
 def _mid_high_stats_save(d):
     try:
         os.makedirs(os.path.dirname(MID_HIGH_STATS_FILE), exist_ok=True)
-        tmp = MID_HIGH_STATS_FILE + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(d, f, ensure_ascii=False, indent=2)
-        os.replace(tmp, MID_HIGH_STATS_FILE)
+        _json_atomic(MID_HIGH_STATS_FILE, d, indent=2)
     except Exception as e:
         print("[중고배당학습] 저장 실패:", e)
 
@@ -22264,9 +22277,7 @@ def _report_append(title, part1="", part2="", part3="", meta=None):
         if meta:
             blk += ["## 메타", "", "```", json.dumps(meta, ensure_ascii=False, indent=1), "```", ""]
         out = "\n".join(blk) + "\n" + prev
-        tmp = REPORT_FILE + ".tmp"
-        io.open(tmp, "w", encoding="utf-8").write(out)
-        os.replace(tmp, REPORT_FILE)
+        _text_atomic(REPORT_FILE, out)
         return True
     except Exception as e:
         print("[보고] 적재 실패(무시):", str(e)[:120])
@@ -22347,9 +22358,7 @@ def next_api():
                     prev = ""
             blk = "%s\n## %s\n\n%s\n" % (NEXT_SEP, time.strftime("%Y-%m-%d %H:%M:%S"),
                                          txt.rstrip())
-            tmp = NEXT_FILE + ".tmp"
-            io.open(tmp, "w", encoding="utf-8").write(blk + "\n" + prev)
-            os.replace(tmp, NEXT_FILE)
+            _text_atomic(NEXT_FILE, blk + "\n" + prev)
             _gate_hit("next_post", None, "%d자 접수" % len(txt))
             print("[명령어] 접수 %d자" % len(txt))
             return _next_cors(jsonify({"ok": True, "chars": len(txt),
@@ -22382,9 +22391,7 @@ def next_api():
                 if "[처리됨" not in head:
                     out = out.replace(head, head + "  [처리됨 %s]"
                                       % time.strftime("%H:%M:%S"), 1)
-            tmp = NEXT_FILE + ".tmp"
-            io.open(tmp, "w", encoding="utf-8").write(out)
-            os.replace(tmp, NEXT_FILE)
+            _text_atomic(NEXT_FILE, out)
             _gate_hit("next_ack", None, "%d건 처리 표시" % len(items))
         except Exception as e:
             print("[명령어] ack 실패(무시):", str(e)[:80])
@@ -24803,10 +24810,7 @@ def _high_odds_review_one(rk, save=True, rr=None):
             os.makedirs(HIGH_ODDS_REVIEW_DIR, exist_ok=True)
             safe = re.sub(r"[^0-9A-Za-z가-힣]", "_", rk)
             p = os.path.join(HIGH_ODDS_REVIEW_DIR, (review["date"] or "nodate") + "_" + safe + ".json")
-            tmp = p + ".tmp"
-            with open(tmp, "w", encoding="utf-8") as f:
-                json.dump(review, f, ensure_ascii=False, indent=1)
-            os.replace(tmp, p)
+            _json_atomic(p, review, indent=1)
         except Exception as e:
             print("[고배당복기] 저장 실패:", e)
     return {"ok": True, **review}
@@ -25438,10 +25442,7 @@ def _high_odds_case_save(case):
     c.setdefault("saved_at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     safe = re.sub(r"[^0-9A-Za-z가-힣]", "_", str(c.get("race") or "case"))
     p = os.path.join(HIGH_ODDS_REVIEW_DIR, (c.get("date") or "nodate") + "_" + safe + "_case.json")
-    tmp = p + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(c, f, ensure_ascii=False, indent=1)
-    os.replace(tmp, p)
+    _json_atomic(p, c, indent=1)
     return p
 
 
@@ -35119,10 +35120,7 @@ def _pdf_cache_save(sess):
         return
     try:
         os.makedirs(KOREA_PDF_CACHE, exist_ok=True)
-        tmp = _pdf_cache_path(md5) + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(sess, f, ensure_ascii=False)
-        os.replace(tmp, _pdf_cache_path(md5))
+        _json_atomic(_pdf_cache_path(md5), sess)
     except Exception as e:
         print("[한국] PDF 캐시 저장 실패:", e)
 _BAND = (0.0, 0.10, 1.0, 0.41)          # 메인 출전마 표 밴드
@@ -35150,10 +35148,7 @@ def _korea_save(sess):
     sess["updatedAt"] = time.time()
     with _korea_lock:
         os.makedirs(os.path.dirname(KOREA_SESSION), exist_ok=True)
-        tmp = KOREA_SESSION + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(sess, f, ensure_ascii=False)
-        os.replace(tmp, KOREA_SESSION)
+        _json_atomic(KOREA_SESSION, sess)
 
 
 def _render_region_b64(page, frac, target_w):
@@ -35492,10 +35487,7 @@ def _prerace_save_race(date, race):
             "savedAt": time.time(),
         }
         path = os.path.join(KOREA_PRERACE_DIR, key + ".json")
-        tmp = path + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False)
-        os.replace(tmp, path)
+        _json_atomic(path, payload)
         _prerace_index_update({"key": key, "date": date, "venue": payload["venue"],
                                "raceNo": payload["raceNo"], "distance": payload["distance"],
                                "title": payload["title"], "status": payload["status"],
@@ -35517,10 +35509,7 @@ def _prerace_index_update(entry):
     idx = [e for e in idx if e.get("key") != entry.get("key")]
     idx.append(entry)
     idx.sort(key=lambda e: e.get("savedAt") or 0, reverse=True)
-    tmp = _prerace_index_path() + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(idx, f, ensure_ascii=False)
-    os.replace(tmp, _prerace_index_path())
+    _json_atomic(_prerace_index_path(), idx)
 
 
 def _prerace_index_load():
@@ -36563,10 +36552,7 @@ def _schedule_load():
 def _schedule_save(sched):
     try:
         os.makedirs(os.path.dirname(SCHEDULE_FILE), exist_ok=True)
-        tmp = SCHEDULE_FILE + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(sched, f, ensure_ascii=False)
-        os.replace(tmp, SCHEDULE_FILE)
+        _json_atomic(SCHEDULE_FILE, sched)
     except Exception as e:
         print("[스케줄] 저장 실패:", e)
 
@@ -39122,9 +39108,7 @@ except Exception:
 def _kakao_sent_save():
     try:
         os.makedirs(os.path.dirname(_KAKAO_SENT_FILE), exist_ok=True)
-        with open(_KAKAO_SENT_FILE + ".tmp", "w", encoding="utf-8") as _f:
-            json.dump(_KAKAO_SENT, _f, ensure_ascii=False)
-        os.replace(_KAKAO_SENT_FILE + ".tmp", _KAKAO_SENT_FILE)
+        _json_atomic(_KAKAO_SENT_FILE, _KAKAO_SENT)
     except Exception:
         pass
 
