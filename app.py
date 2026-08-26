@@ -17604,6 +17604,9 @@ def _cross_pair_pick(qlist, already):
 EXACTA_KEEP_PREV = True         # 🔧 되돌리기: False
 EXACTA_KEEP_PREV_SEC = 300      # 직전 쌍승을 이어받는 시간 창(초)
 KAKAO_JUDGE_ENABLED = True      # 🔧 되돌리기: False
+# 🔴 [2026-08-26 대표 승인 · 3안] 💎를 **화면(finalQuinellas)에도** 함께 넣어
+#   「표시 = 판정 = 발송」을 맞춘다. 더하기 전용 — 본선을 자르지 않는다.
+KAKAO_SYNC_FINAL = True         # 🔧 되돌리기: False
 # 🔴 [2026-08-23 대표 지시] 모든 편입이 끝난 뒤 **최종 상한**을 한 번 더 건다.
 #   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천하던 모순을 없앤다.
 # 🔴 [2026-08-24 대표 승인] 짝 채우기 — 판정 명단에 2회 이상 나온 말끼리 묶는다.
@@ -17732,6 +17735,9 @@ FINAL_CAP_ENABLED = True        # 🔧 되돌리기: False
 #     그것이 어제 측정한 ⑥안(저배당상한·보장없음)이고 대박3뺀 66.7% 로 ⑤(64.8%)보다 높았다.
 #     ⑤를 고른 이유는 배당중앙(3.2 ↔ 2.4배)이었는데, **본선 전멸이라는 대가를 몰랐다.**
 FINAL_CAP_KEEP_DIA = 0          # 🔴 [2026-08-26] 1 → 0 (본선 전멸 사고로 되돌림)
+# 🔴 [2026-08-26 대표 승인 · 3안] 회원에게 **이미 발송된 조합은 최종 상한에서 면제**한다.
+#   자르면 「받은 것 ≠ 재는 것」이 된다 — KEEP_DIA=1 사고와 같은 병의 반대 방향이다.
+FINAL_CAP_EXEMPT_SENT = True    # 🔧 되돌리기: False
 _KAKAO_JUDGE_CACHE = {"path": None, "mtime": 0.0, "map": {}}
 _KAKAO_ADD_RE = re.compile(r"(\d{1,2})\s*\+\s*(\d{1,2})")
 
@@ -18483,6 +18489,49 @@ def _build_analysis_log(rk, an=None):
                     if _kadd:
                         _dc_out["quinellas"] = (_dc_out.get("quinellas") or []) + _kadd
                         _dc_out["kakaoExtra"] = _kadd
+                        # 🔴🔴 [2026-08-26 대표 승인 · 3안] **화면에도 함께 넣는다.**
+                        #   왜: 종전에는 💎가 판정 명단에만 들어가 **화면(finalQuinellas)과 갈렸다.**
+                        #     실사고(나라 9경주) — 화면은 「🔒 강축 1.5배」인데 판정·발송은 40.3배 `4+7`.
+                        #     8/24~26 판정명단 보유 319경주 중 **107경주(33.5%)** 에서 어긋났다.
+                        #   ⇒ 회원이 보는 곳(app.js 2309·2514·2572·7381·7576 · 카톡 _kakao_rich_message)이
+                        #     전부 `finalQuinellas` 다. 거기에 넣어야 **표시 = 판정 = 발송**이 된다.
+                        #   ⚠ **더하기 전용이다.** 본선을 자르지 않는다(그것이 사고의 원인이었다).
+                        #   ⚠ 성적으로 고른 것이 아니다 — 💎와 본선 중 어느 쪽이 나은지는
+                        #     기간 분할에서 갈렸다(8/24 본선 승 · 8/25 💎 승 · 표본 103건뿐).
+                        #     **모르므로 둘 다 남기고 원칙(표시=판정)을 지킨다.**
+                        #   🔧 되돌리기: KAKAO_SYNC_FINAL = False
+                        if KAKAO_SYNC_FINAL:
+                            try:
+                                _fq_now = list((core_picks_out or {}).get("finalQuinellas") or [])
+                                _fq_have = {tuple(sorted(int(x) for x in (q.get("combo") or [])))
+                                            for q in _fq_now if q.get("combo")}
+                                _qm2 = {}
+                                for _e in (rec.get("quinella") or []):
+                                    if not isinstance(_e, dict):
+                                        continue
+                                    _cb2 = _e.get("combo") or []
+                                    try:
+                                        _o2 = float(_e.get("odds"))
+                                    except (TypeError, ValueError):
+                                        continue
+                                    if len(_cb2) == 2 and _o2 > 0:
+                                        _qm2[tuple(sorted(int(x) for x in _cb2))] = _o2
+                                _sync = []
+                                for _c in _kadd:
+                                    _k2 = tuple(sorted(_c))
+                                    if _k2 in _fq_have:
+                                        continue
+                                    _sync.append({"combo": list(_k2), "odds": _qm2.get(_k2),
+                                                  "dark": True, "kakaoSync": True,
+                                                  "reason": "회원에게 발송된 💎복병 — 화면·판정 일치"})
+                                if _sync:
+                                    core_picks_out = dict(core_picks_out or {})
+                                    core_picks_out["finalQuinellas"] = _fq_now + _sync
+                                    _cp_dc = core_picks_out
+                                    _gate_hit("kakao_sync_final", rk,
+                                              "화면 편입 %d조합" % len(_sync), once_key=rk)
+                            except Exception as _kse:
+                                print("[카톡 화면동기] 스킵(무시):", str(_kse)[:80])
                         for _c in _kadd:
                             _gate_hit("judge_kakao", rk,
                                       "회원 발송분 편입 %s" % "+".join(str(x) for x in _c),
@@ -18511,16 +18560,31 @@ def _build_analysis_log(rk, an=None):
                     if _fcap is not None and len(_cur) > _fcap:
                         _diak = [tuple(c) for c in (_dc_out.get("kakaoExtra") or [])]
                         _keep, _seen = [], set()
-                        # ① 💎 보장분 먼저 확보(자리를 뺏기지 않게)
-                        for _c in _cur:
-                            if len(_keep) >= min(FINAL_CAP_KEEP_DIA, _fcap):
-                                break
-                            if tuple(_c) in _diak and tuple(_c) not in _seen:
-                                _keep.append(_c)
-                                _seen.add(tuple(_c))
+                        # 🔴🔴 [2026-08-26 대표 승인 · 3안] **회원이 이미 받은 조합은 상한에서 면제**한다.
+                        #   왜: 상한이 자르면 **카톡으로 나간 조합이 판정에서 빠진다.**
+                        #     종전 KEEP_DIA=1 은 반대로 본선을 죽였다(나라 9경주 1.5배 강축이 잘렸다 · 33.5%).
+                        #     둘 다 「받은 것 ≠ 재는 것」이라는 같은 병이다.
+                        #   ⇒ 발송분은 **자르지 않고**, 상한은 **나머지에만** 적용한다.
+                        #     그러면 회원이 받은 것은 전부 판정되고, 본선도 상한만큼 산다.
+                        #   ⚠ 구좌가 상한보다 늘 수 있다 — 표기 정정 블록이 그 사실을 note 에 적는다.
+                        #   🔧 되돌리기: FINAL_CAP_EXEMPT_SENT = False
+                        if FINAL_CAP_EXEMPT_SENT and _diak:
+                            for _c in _cur:
+                                if tuple(_c) in _diak and tuple(_c) not in _seen:
+                                    _keep.append(_c)
+                                    _seen.add(tuple(_c))
+                        else:
+                            # ① 💎 보장분 먼저 확보(자리를 뺏기지 않게)
+                            for _c in _cur:
+                                if len(_keep) >= min(FINAL_CAP_KEEP_DIA, _fcap):
+                                    break
+                                if tuple(_c) in _diak and tuple(_c) not in _seen:
+                                    _keep.append(_c)
+                                    _seen.add(tuple(_c))
                         # ② 남은 자리를 앞에서부터(본선 우선) 채운다
+                        _room = _fcap + (len(_keep) if FINAL_CAP_EXEMPT_SENT and _diak else 0)
                         for _c in _cur:
-                            if len(_keep) >= _fcap:
+                            if len(_keep) >= _room:
                                 break
                             if tuple(_c) not in _seen:
                                 _keep.append(_c)
