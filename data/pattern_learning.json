@@ -1,14 +1,6 @@
 {
   "patterns": [
     {
-      "race": "제주 2경주",
-      "horse_no": 8,
-      "recent_avg": 7.0,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-08-17"
-    },
-    {
       "race": "모리오카 3경주",
       "horse_no": 7,
       "recent_avg": 7.0,
@@ -4708,16 +4700,26 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-26"
+    },
+    {
+      "race": "카사마츠 1경주",
+      "horse_no": 4,
+      "recent_avg": 4.8,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-26"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 5143,
+      "count": 5148,
       "hit": 851
     },
     "전체부진마": {
-      "count": 8761,
-      "hit": 2323
+      "count": 8768,
+      "hit": 2324
     },
     "대규모급락": {
       "count": 15,
@@ -4727,8 +4729,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 3618,
-      "hit": 1472
+      "count": 3620,
+      "hit": 1473
     },
     "급락동반": {
       "count": 649,
@@ -5105,25 +5107,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1491,
+    "count": 1492,
     "hit": 1168,
     "cases": [
-      {
-        "race": "호후 6경주",
-        "date": "2026-08-23",
-        "smart_horses": [
-          7,
-          1
-        ],
-        "placed": [
-          7,
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 1.4,
-        "high_odds": false
-      },
       {
         "race": "모리오카 2경주",
         "date": "2026-08-23",
@@ -6617,6 +6603,20 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": null,
+        "high_odds": false
+      },
+      {
+        "race": "카사마츠 1경주",
+        "date": "2026-08-26",
+        "smart_horses": [
+          9,
+          3,
+          1
+        ],
+        "placed": [],
+        "hit": false,
+        "trifecta_odds": null,
+        "quinella_odds": 2.1,
         "high_odds": false
       }
     ],
