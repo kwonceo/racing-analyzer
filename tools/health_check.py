@@ -41,6 +41,13 @@ SNAP_MIN_N = 10             # 이보다 표본이 적으면 판정하지 않는�
 #   ⚠ 이 목록을 줄이는 것이 곧 완료선 하향이다. 바꾸려면 CLAUDE.md 를 먼저 고칠 것.
 SCHEMA_RED_FIELDS = ["winOdds", "pop", "weight", "surface", "trackCond"]
 
+# 🔴 [2026-08-27] D2 계측 신뢰성 — 「실패가 없다」와 「로그가 없다」를 구분한다.
+#   실사고: 06:12 에 당일 로그가 덮어써져 8/26 의 616건이 사라졌는데 D2a 는 0 = 초록이었다.
+_ACTIVITY_MARKERS = ("[3종 수집]", "[각질편성]", "[경륜전개]", "[일본전개]",
+                     "[분석로그]", "[복기저장]", "[수집관측]", "[결과기록]")
+ACTIVITY_MIN_RACES = 5       # 발주 지난 경주가 이보다 적으면 판정 보류(이른 시각)
+ACTIVITY_MIN_LINES = 20      # 로그에 활동 흔적이 이보다 적으면 로그가 잘린 것으로 본다
+
 # 🔴 [2026-08-01 · 승인③] **당일 데이터에 의존하는 완료조건** — 여기에만 `⏳미확정` 을 붙인다.
 #   왜: 2026-07-31 저녁 `4/23` → 08-01 06:21 `1/23`. **같은 코드인데 값이 떨어졌다.**
 #      성능이 나빠진 것이 아니라 **아직 안 잰 것**인데 화면에는 후퇴로 보인다(I1·I4 와 같은 구조).
@@ -154,6 +161,23 @@ def check_snapshot_coverage(today=None):
                n=day_n, note=note)
 
 
+def _races_started_today():
+    """오늘 스케줄에서 **발주 시각이 지난** 경주 수. D2b 의 판정 보류 기준."""
+    try:
+        d = json.load(open(os.path.join(BASE, "data", "today_schedule.json"), encoding="utf-8"))
+    except Exception:
+        return 0
+    now = time.time()
+    n = 0
+    for t in (d.get("tracks") or []):
+        for r in (t.get("races") or []):
+            e = r.get("postEpoch")
+            if e and float(e) <= now:
+                n += 1
+    return n
+
+
+
 def _today_logs():
     """당일 stdout 로그 파일들(회전본 포함). 회전본은 `server_stdout.log.<YYYYMMDD_HHMMSS>`."""
     ymd = time.strftime("%Y%m%d")
@@ -171,56 +195,87 @@ def _today_logs():
 
 
 def _count_save_failures():
-    """당일 stdout 로그(회전본 포함)에서 WinError 를 **발생 지점별로** 센다.
+    """당일 stdout 로그에서 **저장 실패 전수**를 태그별로 센다.
 
-    분모 = **당일 로그 전체**(회전본 포함). 현재 로그만 보면 재기동으로 카운트가 리셋돼
-      '고쳐진 것처럼' 보인다 — 2026-07-30 에 실제로 누적치와 구간치를 혼동한 적이 있다.
+    🔴 [2026-08-27] 계수 기준을 고쳤다 — 종전 방식은 세 군데가 틀렸다.
+      ① **`WinError` 가 든 줄만** 셌다. 실측으로 WinError 없는 실패가 실재한다([다중경주] 6건).
+      ② **태그를 '수정/미수정'으로 갈랐다.** 2026-08-27 에 `path + ".tmp"` **17곳을 전부 흡수**해
+         `_json_atomic`/`_text_atomic` 으로 바꿨으므로 그 구분이 더는 성립하지 않는다
+         (원칙 19 — 고치면 측정 대상에서 빠지는 정의는 잘못된 정의다).
+      ③ 🔴 **로그가 잘리면 0 으로 초록이 된다.** 실제로 2026-08-27 06:12 에
+         `Start-Process -RedirectStandardOutput` 이 당일 로그를 덮어써 8/26 원자료(616건)가 사라졌고,
+         그 상태에서 D2a 는 0 = 초록으로 보였다. 「실패가 없다」와 「로그가 없다」가 구분되지 않는 것은
+         이 프로젝트가 가장 경계하는 조용한 실패다.
+      ⇒ 전수 계수(D2a) + **신뢰성 판정**(D2b)으로 나눈다.
     """
-    fixed = unfixed = other = 0
+    tags = collections.Counter()
+    activity = 0
     files = _today_logs()
-    for p in files:
+    for _p in files:
         try:
-            txt = open(p, encoding="utf-8", errors="replace").read()
+            txt = open(_p, encoding="utf-8", errors="replace").read()
         except Exception:
             continue
-        for line in txt.split("\n"):
-            if "WinError" not in line:
+        for line in txt.split(chr(10)):
+            for _m in _ACTIVITY_MARKERS:
+                if _m in line:
+                    activity += 1
+                    break
+            if "저장 실패" not in line and not ("실패" in line and "WinError" in line):
                 continue
-            if "[복기저장]" in line or "[히스토리]" in line:
-                fixed += 1              # `_json_atomic` 계열 — 2026-07-30 수정 완료 경로
-            elif "[분석로그]" in line or "[다중경주]" in line:
-                unfixed += 1            # `path + ".tmp"` 17곳 — 미수정(ⓐ 작업 대상)
-            else:
-                other += 1
-    return fixed, unfixed, other, len(files)
+            t = line.strip()
+            tag = "기타"
+            if t.startswith("["):
+                k = t.find("]")
+                if 0 < k <= 15:
+                    tag = t[1:k]
+            tags[tag] += 1
+    return tags, activity, len(files)
 
 
 def check_save_failures_fixed():
-    """④-2a 저장 실패 — **수정 경로**(`_json_atomic` 계열).
+    """④-2a 저장 실패 — **전수**(태그 무관 · WinError 유무 무관).
 
-    D2 를 하나로 두면 진행이 보이지 않는다(권대표 지시 2026-07-30):
-      수정분 176건이 자정에 리셋되면 '고쳐진 것처럼' 보이고,
-      미수정분이 줄어도 합계에 묻힌다. → **발생 지점별로 분리해 각각 완료선을 둔다.**
+    🔴 [2026-08-27] 종전 「수정 경로만」에서 **전수**로 바꿨다.
+      17곳을 전부 `_json_atomic`/`_text_atomic` 으로 흡수했으므로 '수정/미수정' 분리가 무의미해졌다.
+      기준값: **2026-08-26 하루 616건**(분석로그 440 · 복기저장 131 · 다중경주 35).
+      ⚠ 그 원자료 로그는 2026-08-27 06:12 에 내가 덮어써 사라졌다 — 숫자만 여기 남긴다.
+    ⚠ 이 값이 0 이어도 **D2b(계측 신뢰성)가 통과해야** 의미가 있다.
     """
-    fixed, unfixed, other, nf = _count_save_failures()
-    return _mk("D2a", "④ 데이터 보전", "저장 실패(WinError) — 수정 경로",
-               "당일 stdout 로그 전체(회전본 포함) 중 `_json_atomic` 계열([복기저장]·[히스토리])",
-               current=fixed, target=0, ok=(fixed == 0), n=nf,
-               note="tmp 스레드ID·경로별 락·replace 재시도 적용분(2026-07-30). "
-                    "잔여는 '리더가 파일을 잡고 있는' 경우로 관측됨(ⓒ 읽기 락 후보).")
+    tags, activity, nf = _count_save_failures()
+    total = sum(tags.values())
+    brk = " · ".join("%s %d" % (k, v) for k, v in tags.most_common(6)) or "없음"
+    return _mk("D2a", "④ 데이터 보전", "저장 실패 전수",
+               "당일 stdout 로그 전체(회전본 포함)의 저장 실패 줄 전수",
+               current=total, target=0, ok=(total == 0), n=nf,
+               note="내역: %s / 기준값 8-26 = 616건" % brk)
 
 
 def check_save_failures_unfixed():
-    """④-2b 저장 실패 — **미수정 17곳**(`path + ".tmp"` · PID 조차 없음). ⓐ 작업 대상.
+    """④-2b 저장 실패 **계측이 믿을 만한가** — 로그가 당일 활동을 실제로 담고 있나.
 
-    ⚠ 이 항목이 0 이 되는 것이 ⓐ(17곳 tmp 고유화)의 완료 판정이다.
-      D2a 와 분리해 두면 "고쳐도 안 줄었다"는 잘못된 결론을 막을 수 있다.
+    🔴 [2026-08-27] 항목의 뜻을 바꿨다. 종전은 「미수정 17곳의 실패 건수」였는데
+      그 17곳이 **전부 없어져** 분모가 0 이 됐다(원칙 19).
+      대신 **D2a 를 믿어도 되는가**를 잰다. 실사고가 그 자리에 있다:
+        2026-08-27 06:12 에 당일 로그가 덮어써져 8/26 의 616건이 사라졌는데
+        그 상태에서 D2a 는 **0 = 초록**이었다.
+      ⇒ 발주가 지난 경주가 있는데 로그에 수집·분석 흔적이 없으면 **판정 보류(ok=None)** 한다.
+    ⚠ 「실패가 없다」와 「로그가 없다」를 구분하는 것이 이 항목의 전부다.
     """
-    fixed, unfixed, other, nf = _count_save_failures()
-    return _mk("D2b", "④ 데이터 보전", "저장 실패(WinError) — 미수정 17곳",
-               "당일 stdout 로그 전체(회전본 포함) 중 `path+\".tmp\"` 계열([분석로그]·[다중경주])",
-               current=unfixed, target=0, ok=(unfixed == 0), n=nf,
-               note="ⓐ 17곳 tmp 고유화의 완료 판정 항목. 기타 분류 %d건은 어느 쪽도 아님." % other)
+    tags, activity, nf = _count_save_failures()
+    done = _races_started_today()
+    if done < ACTIVITY_MIN_RACES:
+        return _mk("D2b", "④ 데이터 보전", "저장 실패 계측 신뢰성",
+                   "로그가 당일 활동을 담고 있나",
+                   current=None, target="담고 있음", ok=None, n=nf,
+                   note="발주 지난 경주 %d건 < %d — 판정 보류(아직 이른 시각)" % (done, ACTIVITY_MIN_RACES))
+    ok = activity >= ACTIVITY_MIN_LINES
+    return _mk("D2b", "④ 데이터 보전", "저장 실패 계측 신뢰성",
+               "로그가 당일 활동을 담고 있나",
+               current=("활동 %d줄" % activity), target=("%d줄+" % ACTIVITY_MIN_LINES),
+               ok=ok, n=nf,
+               note=("발주 지난 경주 %d건 · 로그 활동 %d줄. " % (done, activity)) +
+                    ("" if ok else "🔴 로그가 잘렸거나 비었다 — D2a 의 0 을 믿지 말 것."))
 
 
 def check_schema_contract():
