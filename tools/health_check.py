@@ -272,7 +272,16 @@ def _red_field_rates():
             if is_today:
                 day_rows += 1
             for f in SCHEMA_RED_FIELDS:
-                if h.get(f) not in (None, "", []):
+                # 🔴 [2026-08-26] `surface`·`trackCond` 는 **말이 아니라 경주 속성**이라
+                #   레코드 **최상위**에 저장된다. 종전에는 `horses` 행에서만 찾아
+                #   실제로 17/17(100%) 채워져 있는데도 **영원히 0%** 가 나왔다.
+                #   ⚠ CLAUDE.md 의 "1계층 재수집이 선행 조건이라 0%가 정확한 판정" 도
+                #     그때 잘못 진단한 것이다 — 원칙 8-E(없다고 하기 전에 원자료를 연다).
+                #   실물: 소노다 1경주 distance=820 · surface=더트 · trackCond=重
+                _v = h.get(f)
+                if _v in (None, "", []):
+                    _v = rec.get(f)        # 경주 최상위 폴백
+                if _v not in (None, "", []):
                     cum_have[f] += 1
                     if is_today:
                         day_have[f] += 1
@@ -297,7 +306,7 @@ def check_schema_drift():
                    denom, current=None, target=90.0, ok=None, n=None, reason=err)
     cum_txt = ", ".join("%s %.1f%%" % (f, 100.0 * cum[f] / cum_rows if cum_rows else 0)
                         for f in SCHEMA_RED_FIELDS)
-    note = "누적(%d행): %s · surface/trackCond 는 1계층 재수집 선행 조건이라 0%%가 정확한 판정" % (
+    note = "누적(%d행): %s · surface/trackCond 는 경주 최상위에 저장된다(2026-08-26 정정)" % (
         cum_rows, cum_txt)
     if day_rows < SNAP_MIN_N:
         return _mk("D4", "④ 데이터 보전", "스키마 드리프트 🔴 필드 보유율",
