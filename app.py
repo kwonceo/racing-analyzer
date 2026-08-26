@@ -18987,9 +18987,13 @@ def _build_analysis_log(rk, an=None):
     # [원자적 저장 (2026-07-21 도야마 1R)] 이중 분석 소스가 같은 로그를 동시 기록 → 쓰는 도중 파일을
     #   읽은 쪽이 JSON 파싱 실패(doc=None) → recommendation_history 가 통째로 초기화되던 소실 버그.
     #   tmp 기록 후 os.replace 교체로 '읽는 쪽은 항상 완전한 파일'만 보게 함(추가 보강·동작 동일).
-    _tmp_path = path + ".tmp"
-    json.dump(log, open(_tmp_path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    os.replace(_tmp_path, path)
+    # 🔴 [2026-08-27] `path + ".tmp"` → **`_json_atomic`** 으로 교체.
+    #   같은 tmp 를 두 스레드가 공유해 WinError 32/5 가 났다.
+    #   실측(8/26 하루): [분석로그] 저장 실패 **440건**(WinError 5:268 · 32:168 · 2:4)
+    #   `_json_atomic` 은 tmp 에 **스레드ID**를 붙이고 **경로별 락**으로 직렬화하며
+    #   replace 실패 시 **50ms×3회 재시도**한다(2026-07-30 배선분).
+    #   ⚠ 예외는 그대로 올린다 — 호출부 `_analysis_log_save` 의 try 가 받는다(동작 불변).
+    _json_atomic(path, log, indent=1)
     return log
 
 
@@ -20216,10 +20220,8 @@ def _daily_learning_generate(date=None, extra=None):
     journal["generated_at"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     try:
         os.makedirs(DAILY_LEARNING_DIR, exist_ok=True)
-        tmp = path + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(journal, f, ensure_ascii=False, indent=1)
-        os.replace(tmp, path)
+        # 🔴 [2026-08-27] tmp 공유 → `_json_atomic`(스레드ID tmp · 경로별 락 · 재시도)
+        _json_atomic(path, journal, indent=1)
     except Exception as e:
         print("[학습일지] 저장 실패:", e)
     return journal
@@ -36544,10 +36546,8 @@ def _multi_store_save(db):
     """원자적 쓰기(tmp→replace)로 저장소 손상 방지."""
     try:
         os.makedirs(os.path.dirname(MULTI_STORE_FILE), exist_ok=True)
-        tmp = MULTI_STORE_FILE + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(db, f, ensure_ascii=False)
-        os.replace(tmp, MULTI_STORE_FILE)
+        # 🔴 [2026-08-27] tmp 공유 → `_json_atomic`. 실측 8/26 저장 실패 35건.
+        _json_atomic(MULTI_STORE_FILE, db)
     except Exception as e:
         print("[다중경주] 저장 실패:", e)
 
