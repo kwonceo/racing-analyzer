@@ -17721,6 +17721,51 @@ MARKET3_ADD_ENABLED = False
 MARKET3_ADD_TOPN = 3            # 상위 N두 전조합(3두 → 3조합)
 
 
+# 🔴🔴 [2026-08-27 대표 승인] **12~20배 1개 더하기 — 경륜 한정**
+#   실측(8월 · 확정배당 · 정제 1,762경주 · 대박3뺀 회수율)
+#     경륜 8/01~09 67.3→73.3(+6.0) · 8/10~19 67.1→75.0(+7.9) · 8/20~ 58.8→62.4(+3.6)
+#       🟢 **세 구간 모두 양수** · 전체 67.4→72.8 · 회수율 70.1→74.8%(판정선 74.5 통과)
+#       🟢 적중 839→931(+11.0%) · 배당중앙 2.4→2.6배(고배당 원칙과 같은 방향)
+#     🔴 경마는 8/20~ 구간이 +0.1%p 로 사실상 0 이다 ⇒ **경륜만** 켠다.
+#   ⚠ 대가: 경주당 조합이 **2.53 → 3.40개**로 는다. 대표가 정한 「3개 이하」를 넘는다.
+#     이것을 알고 켠 것이다 — 숨기지 않는다. 되돌리기는 아래 한 줄.
+#   ⚠ 2026-08-24 에 기각된 「12~20배 섬」과 **다른 안**이다. 그때 기각된 것은
+#     「배당판의 아무거나」를 사는 안이었고, 이것은 **그 구간에서 가장 싼 1개**만 더한다.
+#   🔧 되돌리기: KEIRIN_BAND_ADD_ENABLED = False
+KEIRIN_BAND_ADD_ENABLED = True
+KEIRIN_BAND_LO = 12.0
+KEIRIN_BAND_HI = 20.0
+KEIRIN_BAND_N = 1
+
+
+def _band_add_from_quin(qlist, lo, hi, n, have):
+    """시장 배당판에서 [lo, hi) 구간 조합을 **싼 것부터** n개. 이미 있는 것은 제외.
+
+    🔴 `tools/measure_recovery.py` 의 `_band_add` 와 **같은 규칙**이다.
+      규칙을 두 곳에 두면 갈리므로 바꿀 때는 반드시 함께 바꾼다."""
+    cand = []
+    for e in (qlist or []):
+        if not isinstance(e, dict):
+            continue
+        cb = e.get("combo") or []
+        try:
+            o = float(e.get("odds"))
+        except (TypeError, ValueError):
+            continue
+        if len(cb) != 2 or not (lo <= o < hi):
+            continue
+        try:
+            pk = tuple(sorted(int(x) for x in cb))
+        except (TypeError, ValueError):
+            continue
+        if pk in have:
+            continue
+        cand.append((o, pk))
+    cand.sort()
+    return [[k[0], k[1]] for _o, k in cand[:max(0, int(n))]]
+
+
+
 def _market_top3_from_quin(qlist, topn=3):
     """복승 배당 목록 → 각 말의 내재확률 합(Σ 1/배당) 상위 N두.
 
@@ -18803,6 +18848,23 @@ def _build_analysis_log(rk, an=None):
                                           once_key=rk)
                 except Exception as _m3e:
                     print("[시장3두] 스킵(무시):", str(_m3e)[:80])
+                # 🔴🔴 [2026-08-27 대표 승인] **12~20배 1개 더하기 — 경륜 한정**
+                #   (근거·실측·대가는 위 KEIRIN_BAND_ADD_ENABLED 주석 참조)
+                #   ⚠ 시장3두 **뒤**에 둔다 — 이미 들어간 조합은 제외하므로 순서가 중복을 막는다.
+                if KEIRIN_BAND_ADD_ENABLED and isinstance(_dc_out, dict) and _dc_out.get("quinellas"):
+                    try:
+                        if str(an.get("sport") or "").lower() == "cycle":
+                            _haveb = {tuple(sorted(int(x) for x in c)) for c in _dc_out["quinellas"]}
+                            _badd = _band_add_from_quin(rec.get("quinella"), KEIRIN_BAND_LO,
+                                                        KEIRIN_BAND_HI, KEIRIN_BAND_N, _haveb)
+                            if _badd:
+                                _dc_out["quinellas"] = _dc_out["quinellas"] + _badd
+                                _dc_out["bandAdd"] = _badd
+                                _gate_hit("keirin_band_add", rk,
+                                          "%.0f~%.0f배 %d조합 편입" % (KEIRIN_BAND_LO, KEIRIN_BAND_HI, len(_badd)),
+                                          once_key=rk)
+                    except Exception as _bae:
+                        print("[경륜 밴드] 스킵(무시):", str(_bae)[:80])
             # 🔴 [2026-08-23] **표기를 사실에 맞춘다.**
             #   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천했다.
             #   최종 상한을 저배당(3배 미만)에만 걸기로 했으므로 중배당 경주에서는 편입분이 남는다.
@@ -24399,6 +24461,44 @@ def _failure_autorule(d, mpat, ftype, rk, stats):
     print(f"[실패복기] 📋 검토 후보 규칙(수동): {rule_text} (근거: {cnt}건, 표본 {PATTERN_SAMPLE_MIN}+ 충족)")
 
 
+FAILURE_USE_FROZEN = True        # 🔧 되돌리기: False (한 줄)
+
+
+def _frozen_displayed(rk):
+    """복기 채점용 **동결 명단** — 회원에게 실제 나간 조합(`displayedCombos`).
+
+    🔴 [2026-08-27] 왜 필요한가 — 복기가 **추천한 적 없는 조합을 채점하고 있었다.**
+      `_failure_report` 는 마감 뒤 `_triple_analyze` 를 다시 돌려 그때 나온 `betRecommend` 로
+      실패를 분류한다. 마감 후에는 급락이 억제되고 명단이 재구성되므로 실전과 달라진다.
+      실측(2026-08-27 · 복기 500건 중 대조 가능 421건):
+        🟢 복기가 쓴 조합 == 동결 명단  **55건(13.1%)**
+        🔴 다르다                    **366건(86.9%)**
+        실물 8/14 다케오 2R — 동결 `1+4` 하나인데 복기는 `1+3·1+4·3+4` 셋으로 채점했다.
+      ⇒ 「전적오판 63.7%(1,862건)」 같은 유형 분포의 근거가 통째로 흔들린다.
+    ⚠ `_apply_result_learning` 은 같은 함정을 알고 corePicks 를 병합해 이미 막고 있다.
+      **여기에만 방어가 없었다** — 같은 방어를 같은 방식으로 넣는다.
+    ⚠ 동결 명단이 없으면 None 을 돌려 **종전 동작(재계산)으로 되돌아간다**(무회귀)."""
+    try:
+        _p, _dt, _rc = _analysis_log_path(rk)   # 🔴 튜플이다 — 문자열로 쓰면 조용히 None 이 된다
+        if not _p or not os.path.exists(_p):
+            return None
+        _doc = json.load(open(_p, encoding="utf-8"))
+        _dc = ((_doc.get("corePicks") or {}).get("displayedCombos") or {})
+        _out = []
+        for _key in ("quinellas", "trifectas"):
+            for _c in (_dc.get(_key) or []):
+                try:
+                    _cc = [int(x) for x in (_c if isinstance(_c, (list, tuple)) else (_c or {}).get("combo") or [])]
+                except (TypeError, ValueError):
+                    continue
+                if _cc:
+                    _out.append(_cc)
+        return _out or None
+    except Exception:
+        return None
+
+
+
 def _failure_report(rk):
     """[2·3번] 미적중 경주 복기 리포트 생성(온디맨드). 히스토리 결과+스냅샷에서 재구성.
     반환 {ok, raceKey, top3, recommended, was_hit, failure, timelines(1·2·3착), text}."""
@@ -24416,6 +24516,14 @@ def _failure_report(rk):
     if not (rec.get("quinella") or rec.get("history")):
         rec = _rec_from_history(rk) or rec
     an = _triple_analyze(rk, rec)
+    # 🔴 [2026-08-27] 복기는 **회원에게 실제 나간 동결 명단**으로 채점한다(재계산본이 아니라).
+    #   `an` 을 얕은 사본으로 바꿔 넣으므로 `_classify_failure` 도 같은 명단을 쓴다(호출부 무변경).
+    _fz = _frozen_displayed(rk) if FAILURE_USE_FROZEN else None
+    if _fz:
+        an = dict(an)
+        an["betRecommend"] = [{"combo": _c, "frozen": True} for _c in _fz]
+        an["recSource"] = "frozen"
+        _gate_hit("failure_frozen", rk, "동결 %d조합으로 채점" % len(_fz), once_key=rk)
     rec_bets = an.get("betRecommend") or []
     recommended = ["+".join(map(str, b.get("combo") or [])) for b in rec_bets[:6]]
 
