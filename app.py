@@ -3264,6 +3264,28 @@ def _ingest_reject_log(rk, reason, source=None, extra=None, throttle=60):
         pass
 
 
+# 🔴 [2026-08-27] 배당 지문 대조에서 제외할 상한값(사설 배당판 화면 상한).
+#   8월 실측: 5분 내 다른 경주 쌍 265,899회 중 100% 일치 **314건**이 전부 `private`(확장)가 낀 것이고
+#   **`oddspark ↔ oddspark` 는 0건**이다 ⇒ 우연이 아니라 오염이다(오염 의심 경주 16/866 = 1.8%).
+_TWIN_CAP = 100.0
+QUIN_TWIN_DISCARD = True          # 🔧 되돌리기: False (한 줄)
+_TWIN_MIN_COMMON = 10             # 상한 제외 후 공통 조합이 이보다 적으면 판정하지 않는다
+_TWIN_TRUSTED = ("oddspark", "kra_api", "keiba", "netkeiba", "nar")
+
+
+def _twin_src_trusted(src):
+    """서버가 **직접** 받은 소스인가. 확장(private·사설 화면 수집)만 폐기 대상이다.
+
+    🔴 근거(2026-08-27 실측 · 8/21~27 · 866경주 · 27,648틱):
+      5분 내 다른 경주 쌍 **265,899회** 비교(상한 제외·공통 10+) 중 100% 일치 **314건**이
+      전부 `private` 가 낀 것이고 **`oddspark ↔ oddspark` 는 0건**이다.
+      ⇒ 100% 일치는 우연이 아니라 오염이고, **오탐률 실측이 0** 이다(원칙 20 충족).
+    ⚠ 그래도 **신뢰 소스는 절대 버리지 않는다** — 확장이 유일 소스인 경주에서 서버 값을
+      버리면 되돌릴 수 없다. 버리는 쪽은 언제나 들어온 확장 틱이다."""
+    s = str(src or "").lower()
+    return any(t in s for t in _TWIN_TRUSTED)
+
+
 def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None, scratched=None):
     """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
     확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
@@ -3352,6 +3374,7 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     #     며칠 세고 «100% 일치 중 정상이 하나라도 있나» 를 본 뒤에 실폐기로 전환한다.
     #   ⚠ 임계는 **100% 만** 센다 — 두수가 같고 인기가 비슷하면 90% 는 우연히 날 수 있다.
     #     45조합이 **전부** 같은 것은 정상적으로 나오지 않는다. 분포 확인용으로 95·90 도 함께 센다.
+    _twin_drop = None
     try:
         if q and len(q) >= 10:
             _now = time.time()
@@ -3376,7 +3399,12 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                         _o2[tuple(sorted(int(x) for x in str(_k).replace("-", "+").split("+")))] = float(_v)
                     except Exception:
                         pass
-                _com = [c for c in _fp if c in _o2]
+                # 🔴 [2026-08-27] **상한(100배) 칸을 비교에서 뺀다** — 이것 때문에 가드가 침묵했다.
+                #   실사고: 이토 3경주에 코치 2경주 배당이 들어왔는데 일치율이 **76.2%(16/21)** 로 나와
+                #     90% 문턱을 못 넘었다. 안 맞은 5개가 **전부 확장의 100 상한**이었다
+                #     (확장 100.0 ↔ 실제 102.8·167.6·196.8·119.1·119.1). 상한을 빼면 **16/16 = 100%** 다.
+                #   ⚠ 확장은 사설 배당판 화면을 읽는데 그 화면이 100배에서 잘린다. 서버 직접수집엔 그 상한이 없다.
+                _com = [c for c in _fp if c in _o2 and _fp[c] < _TWIN_CAP and _o2[c] < _TWIN_CAP]
                 if len(_com) < 10:
                     continue
                 _same = sum(1 for c in _com if abs(_fp[c] - _o2[c]) < 0.05)
@@ -3387,9 +3415,26 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                               reason="%s 와 배당 %d/%d 일치" % (_ork, _same, len(_com)))
                     print("🔴 [배당 지문 중복·%s] %s ↔ %s : 공통 %d 중 %d 일치 "
                           "(기록만 · 폐기하지 않는다)" % (_lv, rk, _ork, len(_com), _same))
+                    if (_r >= 1.0 and len(_com) >= _TWIN_MIN_COMMON
+                            and not _twin_src_trusted(source)):
+                        _twin_drop = (_ork, _same, len(_com))
                     break
     except Exception as _twe:
         print("[배당 지문 대조] 실패(무시):", str(_twe)[:80])
+    # 🔴 [2026-08-27] **배당 지문 100% 중복 → 확장 payload 폐기**(1층 입구차단과 같은 방식).
+    #   실사고: 이토 3경주에 **코치 2경주 배당이 16/16 완전 일치**로 들어왔고, 하필 T-5(동결)라
+    #     회원 화면에 나간 유일한 복승 `3+5` 에 **남의 배당 2.5배**가 붙었다(실제 156.1배).
+    #     진짜 2.5배인 `2+7` 은 화면에서 빠졌다.
+    #   ⚠ 신뢰 소스(oddspark·kra_api 등)는 버리지 않는다 — 버리는 쪽은 언제나 들어온 확장 틱이다.
+    if QUIN_TWIN_DISCARD and _twin_drop:
+        _to, _ts, _tn = _twin_drop
+        print("🔴 [배당 지문 중복·폐기] %s ← **%s 와 %d/%d 완전 일치** → payload 통째 폐기(발신 %s)"
+              % (rk, _to, _ts, _tn, source))
+        _ingest_reject_log(rk, "배당 지문 중복 — payload 폐기", source,
+                           {"twinOf": _to, "same": _ts, "common": _tn, "combos": len(q or [])})
+        _gate_hit("odds_twin_drop", rk, "%s 와 %d/%d 일치" % (_to, _ts, _tn))
+        return {"ok": True, "skipped": True, "raceKey": rk, "twinDropped": True,
+                "reason": "다른 경주 배당과 완전 일치 — 오염으로 판단해 폐기"}
     # [경륜 종목 강제·세이부엔 등] 경륜 전용 지명(경정장 없음) → sport=cycle 강제. 확장이 boat 로 오분류해 보내도 서버 최종 방어.
     #   한국경마 아니고(위에서 이미 처리), 종목이 미지정/boat/bike/horse 로 온 경우 정정(정상 cycle 은 그대로).
     #   [플립 원천 차단 (2026-07-19)] 조건에 "horse" 추가 — 새 ks1 배당판은 본문에 타 종목 메뉴·배너의
