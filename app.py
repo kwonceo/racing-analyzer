@@ -63,6 +63,30 @@ APP_VERSION = "2.3.0"  # 서버 버전(공개 /api/health 노출용) — CHANGEL
 
 
 # ---------- .env 로더 (dotenv 의존성 없이) ----------
+# ══════════════ [git 소유권 거부 우회 (2026-08-28)] ══════════════
+#  🔴 실사고: 자동 백업이 **2026-08-26 12:54 부터 통째로 멈췄다.**
+#    로그에 `fatal: detected dubious ownership in repository` 가 **264회**.
+#    git 은 「폴더 소유자 ↔ 지금 git 을 돌리는 계정」이 다르면 **모든 작업을 거부**한다.
+#    오류 원문: 폴더 소유자 = `DESKTOP-LIG63HU/Administrator`.
+#    ⇒ 서버 프로세스가 **다른 계정(또는 승격 토큰)** 으로 돌고 있다는 뜻이다.
+#    실제로 8/26 12:54(마지막 성공) 직후 **13:09 에 지금 프로세스(PID 26388)가 떴고**,
+#    이 세션에서는 그 프로세스를 **죽이지도 소유자를 조회하지도 못한다**(액세스 거부).
+#  ⚠ 8/25 까지는 하루 70~106건씩 정상 백업됐다 — 「원래 안 되던 것」이 아니라 **그날 멈춘 것**이다.
+#
+#  🔧 고치는 법 셋 중 **하나만 관리자 권한 없이 가능**하다:
+#    ① 서버를 Administrator 로 다시 띄운다 — 🔴 그 프로세스를 못 죽인다(대표만 가능)
+#    ② `git config --system` / SYSTEM 계정 gitconfig — 🔴 관리자 권한 필요
+#    🟢 ③ **우리 git 호출에만 `-c safe.directory` 를 붙인다** — 계정을 몰라도 동작한다
+#  ⚠ `-c` 는 **그 명령 한 번에만** 적용된다. 전역·시스템 설정을 건드리지 않으므로
+#    되돌리기는 이 블록을 지우는 것뿐이고, 다른 저장소·다른 도구에 영향이 없다.
+#  ⚠ 경로에 한글이 있어 인코딩 차이로 매칭이 빗나갈 수 있다 ⇒ 슬래시·역슬래시 두 형태를
+#    모두 넣고, 마지막에 `*` 를 둔다. 이 프로세스의 git 호출은 **자기 저장소 안에서만** 돌고
+#    add/commit/push/ls-files/rev-parse 뿐이라 실질 위험이 없다.
+_GIT_ROOT_ABS = os.path.dirname(os.path.abspath(__file__))
+_GIT = ["git",
+        "-c", "safe.directory=" + _GIT_ROOT_ABS,
+        "-c", "safe.directory=" + _GIT_ROOT_ABS.replace("\\", "/"),
+        "-c", "safe.directory=*"]
 def load_env():
     path = os.path.join(os.path.dirname(__file__), ".env")
     if not os.path.exists(path):
@@ -20107,12 +20131,12 @@ def _analysis_log_git_backup(label):
     """data/analysis_log/ 를 커밋(+가능하면 push). 원격/인증 미설정이면 조용히 건너뜀."""
     root = os.path.dirname(os.path.abspath(__file__))
     try:
-        subprocess.run(["git", "add", "data/analysis_log"], cwd=root, timeout=30, capture_output=True)
-        r = subprocess.run(["git", "commit", "-m", (label or "분석 로그 백업").strip()],
+        subprocess.run(_GIT + ["add", "data/analysis_log"], cwd=root, timeout=30, capture_output=True)
+        r = subprocess.run(_GIT + ["commit", "-m", (label or "분석 로그 백업").strip()],
                            cwd=root, timeout=30, capture_output=True, text=True)
         if r.returncode != 0:
             return {"committed": False, "msg": ((r.stdout or "") + (r.stderr or "")).strip()[:200]}
-        pr = subprocess.run(["git", "push"], cwd=root, timeout=90, capture_output=True, text=True)
+        pr = subprocess.run(_GIT + ["push"], cwd=root, timeout=90, capture_output=True, text=True)
         return {"committed": True, "pushed": pr.returncode == 0,
                 "msg": (pr.stderr or "").strip()[:200] if pr.returncode != 0 else "pushed"}
     except Exception as e:
@@ -20150,7 +20174,7 @@ def _run_data_git_backup(label):
         #     **나머지 경로까지 전부 add 되지 않는다**("The following paths are ignored…").
         #   ⚠ 목록은 건드리지 않는다(지시) — 실패를 **보이게만** 한다.
         #   ⚠ pathspec commit 은 워킹트리에서 직접 가져오므로 add 실패와 무관하게 커밋 자체는 된다.
-        _ar = subprocess.run(["git", "add"] + paths, cwd=root, timeout=60,
+        _ar = subprocess.run(_GIT + ["add"] + paths, cwd=root, timeout=60,
                              capture_output=True, text=True, errors="replace")
         if _ar.returncode != 0:
             _ae = " ".join(((_ar.stderr or "") + (_ar.stdout or "")).split())
@@ -20161,7 +20185,7 @@ def _run_data_git_backup(label):
         # 🔴 `errors="replace"` 가 없으면 **cp949 디코딩 실패로 stdout/stderr 가 통째로 비고**,
         #   그러면 "nothing to commit" 판정에 못 걸려 정상인데도 「commit 건너뜀」으로 찍힌 뒤
         #   **push 를 안 하고 return** 한다. 실측 268회 전부 빈 문자열이었다.
-        r = subprocess.run(["git", "commit", "-m", msg, "--"] + paths,
+        r = subprocess.run(_GIT + ["commit", "-m", msg, "--"] + paths,
                            cwd=root, timeout=60, capture_output=True, text=True,
                            errors="replace")
         out = ((r.stdout or "") + (r.stderr or "")).strip()
@@ -20170,7 +20194,7 @@ def _run_data_git_backup(label):
                 return   # 변경 없음(정상)
             print("[데이터백업] commit 건너뜀:", out[:200])
             return
-        pr = subprocess.run(["git", "push"], cwd=root, timeout=120, capture_output=True, text=True)
+        pr = subprocess.run(_GIT + ["push"], cwd=root, timeout=120, capture_output=True, text=True)
         if pr.returncode != 0:
             print("[데이터백업] ⚠ push 실패(원격/인증/분기 diverge?):", (pr.stderr or "").strip()[:200])
         else:
@@ -22445,7 +22469,7 @@ def _report_head():
     """지금 HEAD 커밋 해시. ⚠ 보고를 **쓰는 시점** 값이라 그 보고가 담긴 커밋과 한 칸 어긋난다."""
     try:
         import subprocess
-        r = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+        r = subprocess.run(_GIT + ["rev-parse", "--short", "HEAD"],
                            cwd=os.path.dirname(__file__), capture_output=True,
                            text=True, timeout=10)
         return (r.stdout or "").strip() or None
@@ -34309,7 +34333,7 @@ def data_status():
         else:
             out.append({"path": p, "exists": False, "files": 0})
     try:
-        tracked = subprocess.run(["git", "ls-files", "data/"], cwd=root, timeout=20,
+        tracked = subprocess.run(_GIT + ["ls-files", "data/"], cwd=root, timeout=20,
                                  capture_output=True, text=True)
         tracked_n = len([l for l in (tracked.stdout or "").splitlines() if l.strip()])
     except Exception:
@@ -36013,14 +36037,14 @@ def _korea_git_backup(label):
     원격/인증 미설정이면 조용히 건너뜀."""
     root = os.path.dirname(os.path.abspath(__file__))
     try:
-        subprocess.run(["git", "add", "data/korea_session.json", "data/korea_history", "data/prerace"],
+        subprocess.run(_GIT + ["add", "data/korea_session.json", "data/korea_history", "data/prerace"],
                        cwd=root, timeout=30, capture_output=True)
         msg = (f"한국경마 세션 백업 {label}").strip()
-        r = subprocess.run(["git", "commit", "-m", msg], cwd=root, timeout=30, capture_output=True, text=True)
+        r = subprocess.run(_GIT + ["commit", "-m", msg], cwd=root, timeout=30, capture_output=True, text=True)
         if r.returncode != 0:
             print("[한국] git commit 없음/실패:", ((r.stdout or "") + (r.stderr or "")).strip()[:200])
             return
-        pr = subprocess.run(["git", "push"], cwd=root, timeout=90, capture_output=True, text=True)
+        pr = subprocess.run(_GIT + ["push"], cwd=root, timeout=90, capture_output=True, text=True)
         if pr.returncode == 0:
             print("[한국] GitHub 백업 완료:", label)
         else:
