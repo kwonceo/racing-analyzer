@@ -3395,6 +3395,14 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
     _twin_drop = None
     try:
         if q and len(q) >= 10:
+            # 🔴 [2026-08-28] **도달·최고일치율 계수기** — 없으면 「안 걸렸다」의 원인을 못 가른다.
+            #   실사고: 8/27 09:42 이토 3경주에 코치 4경주 배당이 또 들어왔는데(공통 17/17 = 100%)
+            #   폐기가 안 됐다. 조건을 실데이터로 재현하니 **전부 충족**이었다.
+            #   ⇒ 「그 줄에 안 왔다」인지 「왔는데 대조 상대가 캐시에 없었다」인지 구분이 안 됐다(원칙 23).
+            #   ⚠ 마감 후 틱이라 판정 피해는 없었다. 그래도 원인을 모르는 채 두지 않는다.
+            _gate_hit("odds_twin_reach", rk, "대조 시작 %d조합" % len(q), reach_only=True)
+            _twin_best = 0.0
+            _twin_cands = 0
             _now = time.time()
             _fp = {}
             for _k, _v in (q.items() if isinstance(q, dict) else []):
@@ -3428,6 +3436,8 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                     continue
                 _same = sum(1 for c in _com if abs(_fp[c] - _o2[c]) < 0.05)
                 _r = _same / float(len(_com))
+                _twin_cands += 1
+                _twin_best = max(_twin_best, _r)
                 if _r >= 0.90:
                     _lv = "100%" if _r >= 1.0 else ("95%" if _r >= 0.95 else "90%")
                     _gate_hit("odds_twin_%s" % _lv.replace("%", ""), rk=rk,
@@ -3438,6 +3448,12 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                             and not _twin_src_trusted(source)):
                         _twin_drop = (_ork, _same, len(_com))
                     break
+        if _twin_cands and _twin_best < 0.90:
+            _gate_hit("odds_twin_nomatch", rk,
+                      "후보 %d경주 · 최고 일치 %.0f%%" % (_twin_cands, _twin_best * 100),
+                      once_key=rk)
+        elif not _twin_cands:
+            _gate_hit("odds_twin_nocand", rk, "5분 내 대조 상대 없음", once_key=rk)
     except Exception as _twe:
         print("[배당 지문 대조] 실패(무시):", str(_twe)[:80])
     # 🔴 [2026-08-27] **배당 지문 100% 중복 → 확장 payload 폐기**(1층 입구차단과 같은 방식).
