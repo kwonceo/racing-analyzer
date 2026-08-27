@@ -83,7 +83,16 @@ BLOCKING_SUITES = ["tests/run_report.py", "tests/run_formula.py", "tests/run_flo
                    #  ⚠ 비용이 낮다 — 네트워크·서버·실전 데이터를 쓰지 않고 임시 디렉터리에서만 돈다.
                    #  ⚠ 위험: app.py 앵커(구간 시작 문자열)가 바뀌면 커밋이 막힌다.
                    #    ⇒ 그때는 **앵커를 고치는 것이 맞다**(구간이 옮겨졌다는 뜻이므로).
-                   "tests/run_gate_selfcheck.py"]
+                   "tests/run_gate_selfcheck.py",
+                   # 🔴🔴 [2026-08-28] **schema contract test** — 차단 등급.
+                   #  왜 차단인가 — 같은 유형의 소실이 **네 번** 반복됐다
+                   #    (distance/surface/trackCond · corners 계열 · kimarite · declaredStyle).
+                   #    전부 **파서는 뽑는데 저장행에서 빠지고 예외가 안 나서 아무도 몰랐다.**
+                   #    한 번 소실되면 그 경주는 **소급 불가**다 — 커밋 전에 막는 것이 유일한 방법이다.
+                   #  ⚠ 비용이 낮다 — AST 정적 분석만이라 네트워크·서버·실데이터를 쓰지 않는다.
+                   #  ⚠ 폐기로 분류하려면 `tools/schema_contract.py` 에 **사유를 반드시 적는다.**
+                   #    사유가 비면 그것도 실패다(「실수인지 의도인지」를 구분하기 위해서다).
+                   "tests/run_schema_contract.py"]
 
 # 🟡 아직 고치지 않은 결함을 재현하는 테스트 — 실패해도 커밋을 막지 않는다.
 #
