@@ -3286,6 +3286,24 @@ def _twin_src_trusted(src):
     return any(t in s for t in _TWIN_TRUSTED)
 
 
+
+def _twin_same_race(a, b):
+    """두 raceKey 가 **같은 경주의 표기 변형**인가(마츠도 ↔ 마쓰도 · 마츠사카 ↔ 마쓰사카).
+
+    🔴 [2026-08-27] 이 대조가 없으면 **표기 갈림을 오염으로 보고 정상 틱을 버린다.**
+      실측으로 8/22·8/23·8/24 마츠도, 8/26 마츠사카가 그 상태였다 — 같은 경주라 배당이
+      같은 것이 당연한데 100% 일치로 잡혔다. 별칭을 넣어도 **새 변형은 또 생긴다**(원칙 25).
+    ⚠ 그래서 별칭 추가와 **별개로** 이 방어를 둔다. 둘 중 하나만으로는 부족하다."""
+    def _part(rk):
+        s = str(rk or "").strip()
+        mm = re.search(r"(\d+)\s*(?:경주|R)\s*$", s)
+        if not mm:
+            return None
+        return (_track_norm(s[:mm.start()].strip()), mm.group(1))
+    pa, pb = _part(a), _part(b)
+    return bool(pa and pb and pa == pb)
+
+
 def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None, deadline=None, scratched=None):
     """[코어] 3종 배당 스냅샷 저장 + 히스토리 누적 → 역배열·배당변화·이상감지 파이프라인 공용.
     확장(triple_ingest)과 oddspark 직접조회(keirin_odds)가 함께 사용."""
@@ -3385,7 +3403,8 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                 except Exception:
                     pass
             for _ork, _orec in list(_triple_load().items()):
-                if _ork == rk or (_now - float(_orec.get("t") or 0)) > 300:
+                if (_ork == rk or _twin_same_race(_ork, rk)
+                        or (_now - float(_orec.get("t") or 0)) > 300):
                     continue                      # 5분 안에 갱신된 다른 경주만 본다
                 _oq = _orec.get("quinella")
                 if isinstance(_oq, list):
@@ -26607,6 +26626,16 @@ for _std, _extra in {
         if _x not in _cur:
             _cur.append(_x)
 # 역방향 조회맵: 별칭(소문자) → 한국어 표준 + 한국어 자기자신도 포함
+# 🔴 [2026-08-27] **츠/쓰 표기 갈림 보강**(원칙 25) — 확장이 `마츠도`, 서버 표준은 `마쓰도` 였다.
+#   실측: odds_history/analysis_log 저장 토큰 **마쓰도 48 ↔ 마츠도 11 · 마쓰사카 22 ↔ 마츠사카 5**.
+#   같은 경주가 두 키로 갈려 배당 지문 대조가 **정상 틱을 오염으로 볼 뻔했다**.
+#   오탐 범위 실측(토큰 108종 전·후 대조): 달라지는 토큰 **2개(마츠도·마츠사카)** · 의도 밖 변경 **0건**.
+#   ⚠ `카사마츠`(笠松)·`고마쓰시마` 와 겹치지 않는 것을 함께 확인했다 — 부분문자열 별칭을 쓰지 않는다.
+for _std, _al in (("마쓰도", "마츠도"), ("마쓰사카", "마츠사카"), ("마쓰야마", "마츠야마")):
+    if _al not in _TRACK_GROUPS.setdefault(_std, []):
+        _TRACK_GROUPS[_std].append(_al)
+
+
 _TRACK_REVERSE = {}
 for _std, _als in _TRACK_GROUPS.items():
     _TRACK_REVERSE[_std.lower()] = _std
