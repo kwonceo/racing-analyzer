@@ -11160,7 +11160,7 @@ def _dark_log_record(rk, an):
             dansung_info = {"dansungHorse": _dp.get("dansungHorse"), "dansungOdds": _dp.get("dansungOdds"),
                             "realFavorites": _dp.get("realFavorites") or [], "darkHorses": _dp.get("darkHorses") or []}
         doc.update({
-            "race": rk, "date": time.strftime("%Y-%m-%d"),
+            "race": rk, "date": _review_race_date(rk),
             "sport": _dark_sport_of(rk, an),
             "dark_horses": ranks,
             "dansung": dansung_info,
@@ -23929,6 +23929,21 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
                 _json_atomic(path, doc)
             except Exception as _e2:
                 print("[복기저장] 실패분류 저장 실패:", _e2)
+        else:
+            # 🔴 [2026-08-27] **적중 경주도 남긴다** — 종전엔 실패만 쌓여 대조군이 없었다.
+            #   「무엇이 갈랐나」는 적중·미적중을 **같은 축으로** 재야 나온다.
+            #   ⚠ failure_review.json 에는 넣지 않는다 — 유형 카운트를 오염시키지 않기 위해서다.
+            #     append-only 아카이브(logs/review_cases/)에만 hit=True 로 남긴다.
+            try:
+                _review_case_append({
+                    "race": rk, "date": _review_race_date(rk), "top3": top3,
+                    "hit": True, "t": time.time(),
+                    "recommended": ["+".join(map(str, _b.get("combo") or []))
+                                    for _b in (an.get("betRecommend") or [])[:6]],
+                    "observed": _review_observed(doc, top3),
+                })
+            except Exception as _hce:
+                print("[복기사례] 적중 기록 실패(무시):", str(_hce)[:80])
     except Exception as e:
         print("[실패복기] 분류/학습 실패:", e)
     print(f"[자동학습] {rk} 결과 {top3} → 추천적중 {was_hit}, 급락적중 {anomaly_correct}, "
@@ -24395,6 +24410,108 @@ def _classify_failure(rk, an, top3, doc):
     }
 
 
+REVIEW_CASES_DIR = os.path.join(os.path.dirname(__file__), "logs", "review_cases")
+
+
+def _review_race_date(rk):
+    """복기 사례의 날짜 — **경주 날짜**를 쓴다.
+
+    🔴 [2026-08-27] 종전은 `time.strftime("%Y-%m-%d")` = **오늘**이었다.
+      결과가 늦게 들어오거나 백필되면 케이스 날짜가 실제 경주일과 어긋나고,
+      그러면 분석로그와 조인이 안 돼 사후 재측정이 통째로 불가능해진다(원칙 16).
+    ⚠ 못 구하면 종전대로 오늘을 쓴다(무회귀)."""
+    try:
+        _d = _race_result_id(rk)[1]
+        if _d and len(str(_d)) >= 8:
+            return str(_d)
+    except Exception:
+        pass
+    return time.strftime("%Y-%m-%d")
+
+
+def _review_observed(doc, nos):
+    """복기용 **마감 전 관측값**만 뽑는다(원칙 27 — 그 시점에 존재한 값만).
+
+    🔴 왜 필요한가: 지금 `cases` 에는 `focus`·`maxDrop` 뿐이라 축을 바꿔 다시 재려면
+      매번 `analysis_log` 를 조인해야 한다 — 느리고, 과거 파일이 정리되면 영영 못 잰다.
+      2026-08-27 측정에서 실제로 매번 조인해야 했다.
+    🔴 마감 **후** 스냅샷을 쓰면 안 된다 — 급락이 억제되고 명단이 재구성돼 실전과 달라진다.
+      `minutes_before >= 0` 인 **마지막** 틱만 쓴다.
+    반환 {mb, conc(상위3두 내재확률 비중), nHorses, horses{no:{odds,mktRank,scoreRank,...}}}"""
+    out = {"mb": None, "conc": None, "nHorses": None, "horses": {}}
+    try:
+        snap = None
+        for s in (doc.get("odds_timeline") or []):
+            _mb = s.get("minutes_before")
+            if isinstance(_mb, (int, float)) and _mb >= 0 and s.get("quinella"):
+                snap = s
+        if not snap:
+            return out
+        out["mb"] = snap.get("minutes_before")
+        q = snap.get("quinella") or {}
+        im, mino = {}, {}
+        for k, v in (q.items() if isinstance(q, dict) else []):
+            try:
+                o = float(v)
+                ns = [int(x) for x in str(k).replace("-", "+").split("+")]
+            except (TypeError, ValueError):
+                continue
+            if o <= 0 or len(ns) != 2:
+                continue
+            for x in ns:
+                im[x] = im.get(x, 0) + 1.0 / o
+                if x not in mino or o < mino[x]:
+                    mino[x] = o
+        if not im:
+            return out
+        tot = sum(im.values())
+        out["nHorses"] = len(im)
+        if tot > 0:
+            out["conc"] = round(sum(sorted(im.values(), reverse=True)[:3]) / tot, 4)
+        mrank = {n: i + 1 for i, (n, _v) in enumerate(sorted(im.items(), key=lambda z: -z[1]))}
+        hs = {}
+        for h in (doc.get("horses") or []):
+            try:
+                hs[int(h.get("no"))] = h
+            except (TypeError, ValueError):
+                pass
+        srank = {n: i + 1 for i, (n, _v) in enumerate(
+            sorted(((k, float(v.get("record_score") or 0)) for k, v in hs.items()),
+                   key=lambda z: -z[1]))}
+        for n in (nos or []):
+            try:
+                n = int(n)
+            except (TypeError, ValueError):
+                continue
+            h = hs.get(n) or {}
+            out["horses"][str(n)] = {
+                "odds": mino.get(n), "mktRank": mrank.get(n), "scoreRank": srank.get(n),
+                "score": h.get("record_score"), "gait": h.get("gait"),
+                "grade": h.get("grade"), "paceBonus": h.get("paceBonus"),
+            }
+    except Exception:
+        pass
+    return out
+
+
+def _review_case_append(row):
+    """복기 사례를 **append-only** 로 남긴다(상한 없음).
+
+    🔴 왜: `failure_review.json` 의 `cases` 는 **최근 500건 상한**이라
+      유형 카운트(2,935)와 어긋나고 원자료가 조용히 사라진다(원칙 9 계열).
+    🔴 **적중 경주도 함께** 남긴다 — 종전엔 `if not was_hit` 이라 실패만 쌓였고,
+      **대조군이 없어 「무엇이 갈랐나」를 잴 수 없었다.**
+    ⚠ 순수 관찰자 — 판정·추천·기존 저장소에 개입하지 않는다."""
+    try:
+        os.makedirs(REVIEW_CASES_DIR, exist_ok=True)
+        _d = str(row.get("date") or time.strftime("%Y-%m-%d")).replace("-", "")[:8]
+        _p = os.path.join(REVIEW_CASES_DIR, (_d or time.strftime("%Y%m%d")) + ".jsonl")
+        with io.open(_p, "a", encoding="utf-8") as _f:
+            _f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    except Exception as _e:
+        print("[복기사례] 적재 실패(무시):", str(_e)[:80])
+
+
 def _failure_record(rk, an, top3, doc, record, stats):
     """[1·4·7번] 실패 분류 → failure_review.json 누적(유형 카운트·놓친 패턴) + 규칙 자동 생성.
     반환: 이 경주의 분류 dict(레코드/히스토리에 첨부)."""
@@ -24418,9 +24535,13 @@ def _failure_record(rk, an, top3, doc, record, stats):
         "recommended": ["+".join(map(str, b.get("combo") or [])) for b in rec_bets[:6]],
         "type": ftype, "label": fail["label"], "missed_signal": mpat,
         "reason": fail["reason"], "improvement": fail["improvement"],
-        "maxDrop": fail["maxDrop"], "t": time.time(),
+            "maxDrop": fail["maxDrop"], "t": time.time(),
+            "observed": _review_observed(doc, list(top3) + [fail.get("focus")]),
     })
     d["cases"] = d["cases"][-500:]
+    # 🔴 `cases` 는 최근 500건 상한이라 원자료가 조용히 사라진다(유형 카운트 2,935 ↔ 사례 500).
+    #   append-only 아카이브에 **같은 행을 한 번 더** 남긴다 — 상한이 없다(원칙 9 계열).
+    _review_case_append(dict(d["cases"][-1], hit=False))
     # [7번] 같은 놓친 패턴이 임계치+ 반복 → 개선 규칙 자동 생성(중복 방지)
     try:
         _failure_autorule(d, mpat, ftype, rk, stats)
