@@ -18848,23 +18848,23 @@ def _build_analysis_log(rk, an=None):
                                           once_key=rk)
                 except Exception as _m3e:
                     print("[시장3두] 스킵(무시):", str(_m3e)[:80])
-                # 🔴🔴 [2026-08-27 대표 승인] **12~20배 1개 더하기 — 경륜 한정**
-                #   (근거·실측·대가는 위 KEIRIN_BAND_ADD_ENABLED 주석 참조)
-                #   ⚠ 시장3두 **뒤**에 둔다 — 이미 들어간 조합은 제외하므로 순서가 중복을 막는다.
-                if KEIRIN_BAND_ADD_ENABLED and isinstance(_dc_out, dict) and _dc_out.get("quinellas"):
-                    try:
-                        if str(an.get("sport") or "").lower() == "cycle":
-                            _haveb = {tuple(sorted(int(x) for x in c)) for c in _dc_out["quinellas"]}
-                            _badd = _band_add_from_quin(rec.get("quinella"), KEIRIN_BAND_LO,
-                                                        KEIRIN_BAND_HI, KEIRIN_BAND_N, _haveb)
-                            if _badd:
-                                _dc_out["quinellas"] = _dc_out["quinellas"] + _badd
-                                _dc_out["bandAdd"] = _badd
-                                _gate_hit("keirin_band_add", rk,
-                                          "%.0f~%.0f배 %d조합 편입" % (KEIRIN_BAND_LO, KEIRIN_BAND_HI, len(_badd)),
-                                          once_key=rk)
-                    except Exception as _bae:
-                        print("[경륜 밴드] 스킵(무시):", str(_bae)[:80])
+            # 🔴🔴 [2026-08-27 대표 승인] **12~20배 1개 더하기 — 경륜 한정**
+            #   (근거·실측·대가는 위 KEIRIN_BAND_ADD_ENABLED 주석 참조)
+            #   ⚠ 시장3두 **뒤**에 둔다 — 이미 들어간 조합은 제외하므로 순서가 중복을 막는다.
+            if KEIRIN_BAND_ADD_ENABLED and isinstance(_dc_out, dict) and _dc_out.get("quinellas"):
+                try:
+                    if str(an.get("sport") or "").lower() == "cycle":
+                        _haveb = {tuple(sorted(int(x) for x in c)) for c in _dc_out["quinellas"]}
+                        _badd = _band_add_from_quin(rec.get("quinella"), KEIRIN_BAND_LO,
+                                                    KEIRIN_BAND_HI, KEIRIN_BAND_N, _haveb)
+                        if _badd:
+                            _dc_out["quinellas"] = _dc_out["quinellas"] + _badd
+                            _dc_out["bandAdd"] = _badd
+                            _gate_hit("keirin_band_add", rk,
+                                      "%.0f~%.0f배 %d조합 편입" % (KEIRIN_BAND_LO, KEIRIN_BAND_HI, len(_badd)),
+                                      once_key=rk)
+                except Exception as _bae:
+                    print("[경륜 밴드] 스킵(무시):", str(_bae)[:80])
             # 🔴 [2026-08-23] **표기를 사실에 맞춘다.**
             #   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천했다.
             #   최종 상한을 저배당(3배 미만)에만 걸기로 했으므로 중배당 경주에서는 편입분이 남는다.
