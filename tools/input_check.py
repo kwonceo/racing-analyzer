@@ -79,7 +79,14 @@ def _logs(date_ymd):
 def check_bcd(date_ymd):
     """B 전적 없는 말이 추천에 · C 목록 셋 차이 · D 배당 미부착."""
     b = {'name': '전적 없는 말이 추천에', 'races': 0, 'bad': 0, 'rows': []}
-    c = {'name': '유력마 목록 셋 차이', 'races': 0, 'same': 0, 'diff': 0, 'rows': []}
+    # 🔴 [2026-08-28] **두 개의 다른 문제를 합쳐 세고 있었다** — 93%가 나와 변별력을 잃었다(원칙 18).
+    #   ⓐ 전적 상위3 ↔ keyHorses : keyHorses 는 **배당 기반**이라 다른 것이 **설계대로**다
+    #      (2026-08-24 실측 — 전적을 섞으면 성적이 나빠져 기각했다). 이건 경보가 아니라 정보다.
+    #   🔴 ⓑ keyHorses ↔ starHorses : starHorses 는 **실제 추천 조합에 나온 말**이다.
+    #      다르다는 것은 「유력마로 뽑았는데 조합에 안 들어갔다」는 뜻이고 **회원 화면이 갈린다.**
+    #      8/27 실측 — ⓐ 19% 일치(정상) · 🔴 ⓑ **42% 일치(58% 불일치)**.
+    c = {'name': '유력마 목록 셋 차이', 'races': 0, 'same': 0, 'diff': 0, 'rows': [],
+         'axisDiff': 0, 'starDiff': 0, 'starRaces': 0}
     d = {'name': '배당 안 붙은 조합', 'races': 0, 'combos': 0, 'bad': 0, 'rows': []}
     for f, doc in _logs(date_ymd):
         nm = os.path.basename(f).replace('.json', '')
@@ -114,6 +121,12 @@ def check_bcd(date_ymd):
         sh = [x for x in sh if x is not None]
         if top3 and kh:
             c['races'] += 1
+            if set(top3) != set(kh):
+                c['axisDiff'] += 1          # 설계상 축 차이 — 정보
+            if sh:
+                c['starRaces'] += 1
+                if set(kh) != set(sh):
+                    c['starDiff'] += 1      # 🔴 진짜 문제 — 유력마가 조합에 안 들어갔다
             if set(top3) == set(kh) == (set(sh) if sh else set(kh)):
                 c['same'] += 1
             else:
@@ -208,7 +221,11 @@ def kakao_line(doc):
         elif x['name'].startswith('전적'):
             out.append('전적 없는 말 추천 %d경주' % x['bad'])
         elif x['name'].startswith('유력마'):
-            out.append('유력마 목록 불일치 %d경주(%.0f%%)' % (x['diff'], x['pct']))
+            # 🔴 진짜 문제만 경보로 낸다 — 축 차이는 설계대로라 넣지 않는다(원칙 18).
+            _sr = x.get('starRaces') or 0
+            if _sr:
+                out.append('유력마↔추천조합 불일치 %d경주(%.0f%%)'
+                           % (x.get('starDiff') or 0, 100.0 * (x.get('starDiff') or 0) / _sr))
         else:
             out.append('배당 미부착 %d조합' % x['bad'])
     return '🔴 입력 검증 — ' + ' · '.join(out)
