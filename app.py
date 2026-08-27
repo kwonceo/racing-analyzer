@@ -24721,6 +24721,20 @@ def _failure_record(rk, an, top3, doc, record, stats):
     반환: 이 경주의 분류 dict(레코드/히스토리에 첨부)."""
     if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
         return None
+    # 🔴🔴 [2026-08-27 정정] **실전 학습 경로에도 동결 명단을 쓴다.**
+    #   앞서 `_failure_report`(온디맨드 **조회**)에만 넣었는데, 실전 결과 학습은
+    #   `_failure_record` → `_classify_failure` 를 탄다. **다른 함수였다.**
+    #   실측(8/27 미적중 32건): 복기가 저장한 명단 ↔ 동결 명단이 **32/32 전부 달랐다.**
+    #     실물 카사마츠 3R — 저장 `1+6·1+7·6+7…` ↔ 동결 `1+2·1+7·2+7`
+    #   ⇒ 「배선했다」와 「실전에 탔다」는 다르다(원칙 23). 계수기가 잡았다 —
+    #     `failure_frozen` 6건이 전부 내가 검증용으로 부른 것이었고 실전은 0건이었다.
+    #   ⚠ `an` 을 얕은 사본으로 바꿔 넣으므로 `_classify_failure` 와 아래 `rec_bets` 가 같은 명단을 쓴다.
+    _fzr = _frozen_displayed(rk) if FAILURE_USE_FROZEN else None
+    if _fzr:
+        an = dict(an)
+        an["betRecommend"] = [{"combo": _c, "frozen": True} for _c in _fzr]
+        an["recSource"] = "frozen"
+        _gate_hit("failure_frozen_learn", rk, "동결 %d조합으로 학습" % len(_fzr), once_key=rk)
     fail = _classify_failure(rk, an, top3, doc)
     if not fail:
         return None
@@ -24806,7 +24820,14 @@ def _frozen_displayed(rk):
       **여기에만 방어가 없었다** — 같은 방어를 같은 방식으로 넣는다.
     ⚠ 동결 명단이 없으면 None 을 돌려 **종전 동작(재계산)으로 되돌아간다**(무회귀)."""
     try:
-        _p, _dt, _rc = _analysis_log_path(rk)   # 🔴 튜플이다 — 문자열로 쓰면 조용히 None 이 된다
+        # 🔴 [2026-08-28] rk 에 날짜가 없으면 `_analysis_log_path` 가 **오늘**로 해석한다.
+        #   실전 당일에는 맞지만 **결과가 늦게 들어오거나 백필되면 빗나간다**(원칙 16).
+        #   ⇒ 날짜가 없으면 경주 날짜를 붙여 한 번 더 찾는다. 못 찾으면 종전대로 None(무회귀).
+        _p, _dt, _rc = _analysis_log_path(rk)
+        if not os.path.exists(_p) and not re.search(r"\d{4}-\d{2}-\d{2}", str(rk or "")):
+            _p2, _d2, _r2 = _analysis_log_path("%s %s" % (_review_race_date(rk), rk))
+            if os.path.exists(_p2):
+                _p = _p2
         if not _p or not os.path.exists(_p):
             return None
         _doc = json.load(open(_p, encoding="utf-8"))
