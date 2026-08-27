@@ -23941,6 +23941,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
                     "recommended": ["+".join(map(str, _b.get("combo") or []))
                                     for _b in (an.get("betRecommend") or [])[:6]],
                     "observed": _review_observed(doc, top3, rk),
+                    "answerOdds": _review_answer_odds(doc),
                 })
             except Exception as _hce:
                 print("[복기사례] 적중 기록 실패(무시):", str(_hce)[:80])
@@ -24513,6 +24514,62 @@ def _review_observed(doc, nos, rk=None):
     return out
 
 
+def _review_answer_odds(doc):
+    """정답 복승(1·2착)의 **확정배당**. 복기를 「돈」으로 말하게 한다.
+
+    🔴 왜: 지금 복기는 「놓쳤다」까지만 말한다. 그런데 **1.1배를 놓친 것과 240.8배를 놓친 것은
+      완전히 다른 사건**인데 같은 한 줄로 쌓인다(둘 다 오늘 실물이다).
+      배당이 붙으면 「우리가 놓치는 것이 싼 것인가 비싼 것인가」를 처음으로 잴 수 있다.
+    ⚠ 확정배당이 없으면 None — **마감 배당으로 대체하지 않는다**(원칙 15)."""
+    try:
+        _v = ((doc.get("result") or {}).get("payouts") or {}).get("quinella")
+        return float(_v) if _v not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _health_review_line():
+    """체크리스트 카카오에 붙일 **복기 한 줄**.
+
+    🔴 왜: 복기가 「핵심」인데 **대표에게 가는 창구가 하나도 없었다.**
+      카카오·체크리스트 어디에도 없어서 두 달간 쌓이기만 하고 아무도 안 봤다.
+      보이지 않는 것은 고쳐지지 않는다.
+    ⚠ 순수 읽기 — `logs/review_cases/<오늘>.jsonl` 만 본다. 실패해도 그 줄만 빠진다."""
+    try:
+        _p = os.path.join(REVIEW_CASES_DIR, time.strftime("%Y%m%d") + ".jsonl")
+        if not os.path.exists(_p):
+            return ""
+        _rows = []
+        for _l in io.open(_p, encoding="utf-8"):
+            _l = _l.strip()
+            if not _l:
+                continue
+            try:
+                _rows.append(json.loads(_l))
+            except Exception:
+                pass
+        if not _rows:
+            return ""
+        _hit = [r for r in _rows if r.get("hit")]
+        _mis = [r for r in _rows if not r.get("hit")]
+        _mo = sorted(float(r["answerOdds"]) for r in _mis
+                     if r.get("answerOdds") not in (None, ""))
+        _ty = {}
+        for r in _mis:
+            _t = str(r.get("type") or "")
+            if _t:
+                _ty[_t] = _ty.get(_t, 0) + 1
+        _s = "📒 복기 %d건(적중 %d)" % (len(_rows), len(_hit))
+        if _mo:
+            _s += " · 놓친 배당중앙 %.1f배" % _mo[len(_mo) // 2]
+        if _ty:
+            _k = max(_ty.items(), key=lambda z: z[1])
+            _s += " · %s %d" % (_k[0], _k[1])
+        return _s
+    except Exception:
+        return ""
+
+
 def _review_case_append(row):
     """복기 사례를 **append-only** 로 남긴다(상한 없음).
 
@@ -24556,6 +24613,7 @@ def _failure_record(rk, an, top3, doc, record, stats):
         "reason": fail["reason"], "improvement": fail["improvement"],
             "maxDrop": fail["maxDrop"], "t": time.time(),
             "observed": _review_observed(doc, list(top3) + [fail.get("focus")], rk),
+            "answerOdds": _review_answer_odds(doc),
     })
     d["cases"] = d["cases"][-500:]
     # 🔴 `cases` 는 최근 500건 상한이라 원자료가 조용히 사라진다(유형 카운트 2,935 ↔ 사례 500).
@@ -40825,6 +40883,15 @@ def _health_kakao_text(rep):
         _l5 = _m5.kakao_line(_m5.daily(time.strftime("%Y-%m-%d"), save=False))
         if _l5:
             lines.append(_l5)
+    except Exception:
+        pass
+    # 🔴 [2026-08-27] **복기 한 줄** — 대표에게 가는 창구가 하나도 없었다.
+    #   복기가 「핵심」인데 두 달간 아무도 안 봤다. 보이지 않는 것은 고쳐지지 않는다.
+    #   ⚠ 발송 코어 무변경 · 실패해도 그 줄만 빠진다.
+    try:
+        _rl = _health_review_line()
+        if _rl:
+            lines.append(_rl)
     except Exception:
         pass
     lines.append("")
