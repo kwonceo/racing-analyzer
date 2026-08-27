@@ -23940,7 +23940,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
                     "hit": True, "t": time.time(),
                     "recommended": ["+".join(map(str, _b.get("combo") or []))
                                     for _b in (an.get("betRecommend") or [])[:6]],
-                    "observed": _review_observed(doc, top3),
+                    "observed": _review_observed(doc, top3, rk),
                 })
             except Exception as _hce:
                 print("[복기사례] 적중 기록 실패(무시):", str(_hce)[:80])
@@ -24429,21 +24429,32 @@ def _review_race_date(rk):
     return time.strftime("%Y-%m-%d")
 
 
-def _review_observed(doc, nos):
+def _review_observed(doc, nos, rk=None):
     """복기용 **마감 전 관측값**만 뽑는다(원칙 27 — 그 시점에 존재한 값만).
 
-    🔴 왜 필요한가: 지금 `cases` 에는 `focus`·`maxDrop` 뿐이라 축을 바꿔 다시 재려면
-      매번 `analysis_log` 를 조인해야 한다 — 느리고, 과거 파일이 정리되면 영영 못 잰다.
-      2026-08-27 측정에서 실제로 매번 조인해야 했다.
+    🔴 왜 필요한가: 사례에 `focus`·`maxDrop` 뿐이라 축을 바꿔 다시 재려면 매번
+      `analysis_log` 를 조인해야 한다 — 느리고, 과거 파일이 정리되면 영영 못 잰다.
     🔴 마감 **후** 스냅샷을 쓰면 안 된다 — 급락이 억제되고 명단이 재구성돼 실전과 달라진다.
       `minutes_before >= 0` 인 **마지막** 틱만 쓴다.
+    🔴 오염 틱(`odds_suspect`·`baseline_reset`·`next_race_blocked`)은 건너뛴다 —
+      2026-08-27 이토 3경주처럼 남의 경주 배당이 들어오면 관측값이 통째로 거짓이 된다.
+    ⚠ [2026-08-27 정정] 호출부는 **odds_history 문서**를 넘긴다(`snapshots`).
+      처음에 `analysis_log` 필드(`odds_timeline`·`horses`)만 읽어 실전에서 **전부 None** 이었다.
+      ⇒ 둘 다 받고, `horses` 는 없으면 분석로그에서 따로 읽는다(원칙 5 — 실데이터로 확인).
     반환 {mb, conc(상위3두 내재확률 비중), nHorses, horses{no:{odds,mktRank,scoreRank,...}}}"""
     out = {"mb": None, "conc": None, "nHorses": None, "horses": {}}
     try:
+        _ticks = list(doc.get("odds_timeline") or [])
+        if not _ticks:
+            _ticks = list(doc.get("archive_snapshots") or []) + list(doc.get("snapshots") or [])
         snap = None
-        for s in (doc.get("odds_timeline") or []):
+        for s in _ticks:
+            if not isinstance(s, dict) or not s.get("quinella"):
+                continue
+            if s.get("odds_suspect") or s.get("baseline_reset") or s.get("next_race_blocked"):
+                continue                      # 오염 틱 — 관측값으로 쓰지 않는다
             _mb = s.get("minutes_before")
-            if isinstance(_mb, (int, float)) and _mb >= 0 and s.get("quinella"):
+            if isinstance(_mb, (int, float)) and _mb >= 0:
                 snap = s
         if not snap:
             return out
@@ -24469,8 +24480,16 @@ def _review_observed(doc, nos):
         if tot > 0:
             out["conc"] = round(sum(sorted(im.values(), reverse=True)[:3]) / tot, 4)
         mrank = {n: i + 1 for i, (n, _v) in enumerate(sorted(im.items(), key=lambda z: -z[1]))}
+        _hl = doc.get("horses")
+        if not _hl and rk:                    # odds_history 에는 horses 가 없다 → 분석로그에서
+            try:
+                _ap, _ad, _ar = _analysis_log_path(rk)
+                if os.path.exists(_ap):
+                    _hl = (json.load(open(_ap, encoding="utf-8")) or {}).get("horses")
+            except Exception:
+                _hl = None
         hs = {}
-        for h in (doc.get("horses") or []):
+        for h in (_hl or []):
             try:
                 hs[int(h.get("no"))] = h
             except (TypeError, ValueError):
@@ -24536,7 +24555,7 @@ def _failure_record(rk, an, top3, doc, record, stats):
         "type": ftype, "label": fail["label"], "missed_signal": mpat,
         "reason": fail["reason"], "improvement": fail["improvement"],
             "maxDrop": fail["maxDrop"], "t": time.time(),
-            "observed": _review_observed(doc, list(top3) + [fail.get("focus")]),
+            "observed": _review_observed(doc, list(top3) + [fail.get("focus")], rk),
     })
     d["cases"] = d["cases"][-500:]
     # 🔴 `cases` 는 최근 500건 상한이라 원자료가 조용히 사라진다(유형 카운트 2,935 ↔ 사례 500).
