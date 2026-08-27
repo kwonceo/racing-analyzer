@@ -293,6 +293,36 @@ def check_schema_contract():
                note="계약 파일 미존재 = 미구현. 미구현은 통과가 아니다(CLAUDE.md 설계안 참조).")
 
 
+def _zero_odds_races():
+    """배당(`winOdds`)이 **통째로 없는 경주** 수. D4 분모를 좁힌 대가를 숨기지 않기 위한 것.
+
+    🔴 왜: 2026-08-28 에 「출주하지 않는 말」을 분모에서 뺐다(정당하다 — 배당이 없는 것이 정상이다).
+      그러나 **분모를 좁히면 가장 실패한 것이 통계에서 사라진다**(이 체크리스트의 제1 규약).
+      실측: 8/27 oddspark 35경주 중 **11경주가 배당 0** 이고 **전부 몬베츠**였다.
+      나머지 24경주는 출주마 기준 **100%** 다 — 즉 파서는 정상이고 **경기장별 문제**다.
+    ⇒ 비율 옆에 이 숫자를 함께 적어 그 사실이 매일 보이게 한다.
+    반환 (배당0 경주 수, 전체 경주 수, 이름 표본)."""
+    store = os.path.join(BASE, "starters_store.json")
+    try:
+        db = json.load(open(store, encoding="utf-8"))
+    except Exception:
+        return 0, 0, []
+    zero = total = 0
+    names = []
+    for rk, rec in (db.items() if isinstance(db, dict) else []):
+        rec = rec or {}
+        if str(rec.get("source") or "") != "oddspark":
+            continue
+        st = [h for h in (rec.get("horses") or [])
+              if isinstance(h, dict) and (h.get("jockey") or h.get("weight"))]
+        if not st:
+            continue
+        total += 1
+        if not any(h.get("winOdds") not in (None, "", []) for h in st):
+            zero += 1
+            if len(names) < 6:
+                names.append(str(rk))
+    return zero, total, names
 def _red_field_rates():
     """🔴 필드 보유율을 **당일분 / 누적**으로 각각 산출. 반환 (day, cum, day_rows, cum_rows, note).
 
@@ -323,6 +353,14 @@ def _red_field_rates():
             continue                       # 경마 出走表 파서를 탄 경주만
         is_today = (rec.get("t") or 0) >= day0
         for h in (rec.get("horses") or []):
+            # 🔴 [2026-08-28] **출주하지 않는 말은 분모에서 뺀다.**
+            #   실측(8/27 oddspark 350행): 그런 행이 **35개(10%)** 였고, 전부 배당판에도 없다.
+            #   배당·기수가 없는 것이 **정상**인 행을 분모에 넣으면 보유율이 구조적으로 안 100% 가 된다.
+            #   판정: 기수도 부담중량도 없으면 출주하지 않는다.
+            #   ⚠ 분모를 좁히는 것은 위험하다(가장 실패한 것이 통계에서 사라진다) — 그래서
+            #     🔴 **배당이 통째로 없는 경주 수를 note 에 함께 적어** 진짜 결함이 숨지 않게 한다.
+            if not (h.get("jockey") or h.get("weight")):
+                continue
             cum_rows += 1
             if is_today:
                 day_rows += 1
@@ -363,6 +401,10 @@ def check_schema_drift():
                         for f in SCHEMA_RED_FIELDS)
     note = "누적(%d행): %s · surface/trackCond 는 경주 최상위에 저장된다(2026-08-26 정정)" % (
         cum_rows, cum_txt)
+    _zr, _tr, _zn = _zero_odds_races()
+    if _zr:
+        note += (" · 🔴 배당 통째로 없는 경주 %d/%d (%s)"
+                 % (_zr, _tr, ", ".join(_zn[:3])))
     if day_rows < SNAP_MIN_N:
         return _mk("D4", "④ 데이터 보전", "스키마 드리프트 🔴 필드 보유율",
                    denom, current=None, target=90.0, ok=None, n=day_rows,
