@@ -17737,6 +17737,27 @@ KEIRIN_BAND_LO = 12.0
 KEIRIN_BAND_HI = 20.0
 KEIRIN_BAND_N = 1
 
+# 🔴🔴 [2026-08-27 판단] **경마 분산 경주에 8~20배 1개 더하기**
+#   분산 = 상위3두 내재확률 합 < 0.65 (`_race_concentration` · `RACETYPE_SHARP_MIN` 재사용)
+#   실측(8월 · 확정배당 · 경마 분산 438경주 · 대박3뺀 회수율)
+#     8/01~09 44.6→56.5(+11.9) · 8/10~19 55.9→63.3(+7.5) · 8/20~ 51.4→59.0(+7.6)
+#     🟢 세 구간 모두 양수 · 전체 57.5→65.5% · 회수 62.0→69.0% · 배당중앙 6.1→7.5배
+#   🔴 **결정적 근거 — 한계 회수율 91.2%**(추가 구좌 426 · 적중 36 · 대박3뺀 79.4%).
+#     늘어난 구좌가 자기 몫을 훨씬 넘게 한다. 이 프로젝트에서 「조합을 늘리면 회수율이 떨어진다」는
+#     반복 패턴을 **처음으로 벗어난 안**이다. 추가분 적중배당 중앙 **9.9배** — 고배당 원칙과 같은 방향.
+#   ⚠ 경주당: 분산 경주만 3.10 → 4.07 이지만 **경마 전체로는 2.65 → 3.06개**(분산이 42%라서).
+#     「3개 이하」를 사실상 지킨다. 4.07 은 분산 경주만의 숫자다 — 혼동하지 말 것.
+#   🔴 대안 `상위2 + 8~20배 1개`(경주당 2.95)는 **마지막 구간이 +0.6%p 로 사실상 0** 이라 버렸다.
+#     가장 최근 구간에 효과가 없다는 것은 미래에 가장 가까운 신호가 없다는 뜻이다.
+#   ⚠ 한계: 회수 69.0% 는 **판정선 74.5% 를 못 넘는다**(덜 지는 것이지 이기는 것이 아니다).
+#     8/01~09 구간 적중 26건으로 **원칙 1(적중 30건) 미달** — 그 구간은 방향까지만.
+#   🔴 경륜 분산은 **통과 안이 하나도 없었다**(상위2 -11.5 · 12~20배 -11.1 · 20~50배 -3.8) ⇒ 경마만.
+#   🔧 되돌리기: HORSE_DISPERSE_ENABLED = False
+HORSE_DISPERSE_ENABLED = True
+HORSE_DISPERSE_LO = 8.0
+HORSE_DISPERSE_HI = 20.0
+HORSE_DISPERSE_N = 1
+
 
 def _band_add_from_quin(qlist, lo, hi, n, have):
     """시장 배당판에서 [lo, hi) 구간 조합을 **싼 것부터** n개. 이미 있는 것은 제외.
@@ -18865,6 +18886,29 @@ def _build_analysis_log(rk, an=None):
                                       once_key=rk)
                 except Exception as _bae:
                     print("[경륜 밴드] 스킵(무시):", str(_bae)[:80])
+            # 🔴🔴 [2026-08-27 판단] **경마 분산 경주 + 8~20배 1개**
+            #   (근거·한계·대가는 위 HORSE_DISPERSE_ENABLED 주석 참조)
+            #   ⚠ 집중도 문턱은 `RACETYPE_SHARP_MIN`(0.65)을 **그대로 재사용**한다 — 두 곳에 두지 않는다.
+            #   🔴 한국 제외 — 한국도 sport=horse 다. 한국은 이 안을 측정한 적이 없다.
+            if HORSE_DISPERSE_ENABLED and isinstance(_dc_out, dict) and _dc_out.get("quinellas"):
+                try:
+                    _spd = str(an.get("sport") or "").lower()
+                    _catd = str(an.get("category") or "").lower()
+                    _krd = bool(_KRA_TRACK_RE.search(str(rk))) or _catd == "korea"
+                    if _spd == "horse" and not _krd:
+                        _cd = _race_concentration(rec.get("quinella"))
+                        if _cd is not None and _cd < RACETYPE_SHARP_MIN:
+                            _hd = {tuple(sorted(int(x) for x in c)) for c in _dc_out["quinellas"]}
+                            _dadd = _band_add_from_quin(rec.get("quinella"), HORSE_DISPERSE_LO,
+                                                        HORSE_DISPERSE_HI, HORSE_DISPERSE_N, _hd)
+                            if _dadd:
+                                _dc_out["quinellas"] = _dc_out["quinellas"] + _dadd
+                                _dc_out["disperseAdd"] = _dadd
+                                _gate_hit("horse_disperse_add", rk,
+                                          "집중도 %.2f · 8~20배 %d조합 편입" % (_cd, len(_dadd)),
+                                          once_key=rk)
+                except Exception as _dae:
+                    print("[경마 분산] 스킵(무시):", str(_dae)[:80])
             # 🔴 [2026-08-23] **표기를 사실에 맞춘다.**
             #   부산 4경주가 화면에 「최저 5.8배 → 2조합」이라 쓰고 4개를 추천했다.
             #   최종 상한을 저배당(3배 미만)에만 걸기로 했으므로 중배당 경주에서는 편입분이 남는다.
