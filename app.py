@@ -18143,6 +18143,24 @@ def _build_analysis_log(rk, an=None):
     ehorses = elim.get("horses") or []
     win = an.get("single") or {}
     horses = []
+    # ── [D5 · 점수 분해 보존 (2026-08-28)] ───────────────────────────────
+    #   🔴 왜: 이 프로젝트는 **리플레이로 의사결정한다.** 그런데 「그때 왜 그 점수였나」를
+    #     되짚을 값이 없어 공식이 바뀌면 **과거 재현이 불가**해진다. 실제로 EV 곡선·tier 경계·
+    #     페이크급락 필터가 최근 2주에만 여러 번 바뀌었다.
+    #   ⚠ `rank` 는 **전적 총점(totalScore) 내림차순 순위**(1부터)다. 통합등급 순위가 아니다.
+    #     뜻이 모호하면 나중에 못 쓰므로 정의를 여기 박아 둔다.
+    #   ⚠ 아래 `sorted(ehorses, key=total)` 을 쓰지 않는다 — 경륜에는 `total` 이 없어
+    #     전 항목 0 이 되어 정렬이 무의미해진다(원칙 13).
+    #   ⚠ 저장만이다 — 점수·판정·추천 무개입. 🔴 소급 불가(오늘부터 쌓인다).
+    _rank_by = {}
+    try:
+        _rk_src = [(_n, float(_v.get("totalScore")))
+                   for _n, _v in (form_by or {}).items()
+                   if isinstance(_v, dict) and _v.get("totalScore") is not None]
+        _rk_src.sort(key=lambda z: -z[1])
+        _rank_by = {_n: _i + 1 for _i, (_n, _s) in enumerate(_rk_src)}
+    except Exception:
+        _rank_by = {}
     for h in sorted(ehorses, key=lambda x: -(x.get("total") or 0)):
         no = h.get("no")
         f = form_by.get(no, {})
@@ -18228,6 +18246,8 @@ def _build_analysis_log(rk, an=None):
             #     `_integrated_adaptive`(4247) 는 **새 리스트(out)에만** 등급을 부여해 form 을 변형하지 않는다.
             #     따라서 여기서 읽는 `f["grade"]` 가 곧 보너스 계산 시점의 전적 등급이다.
             "gradeAtBonus": f.get("grade"),                           # 보너스 시점 전적 등급(저장만)
+            "baseScore": f.get("baseScore"),        # [D5] 보너스 전 기본 점수
+            "rank": _rank_by.get(no),               # [D5] 전적 총점 내림차순 순위(1부터)
         })
 
     cand = [h["no"] for h in ehorses if h.get("keep") or h.get("override")]
