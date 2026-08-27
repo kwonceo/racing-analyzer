@@ -23942,6 +23942,7 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
                                     for _b in (an.get("betRecommend") or [])[:6]],
                     "observed": _review_observed(doc, top3, rk),
                     "answerOdds": _review_answer_odds(doc),
+                    "member": _review_sent_view(rk, _review_race_date(rk), top3),
                 })
             except Exception as _hce:
                 print("[복기사례] 적중 기록 실패(무시):", str(_hce)[:80])
@@ -24570,6 +24571,89 @@ def _health_review_line():
         return ""
 
 
+def _review_sent_view(rk, date, top3):
+    """그 경주에 **회원이 실제로 받은** 복승 조합 + 회원 기준 적중 여부.
+
+    🔴 왜: 복기는 **판정 명단**(`displayedCombos`)으로 채점하는데,
+      2026-08-21 실측에서 **회원 명단과 25.8% 가 서로 다른 조합**이었다
+      (같음 54.2% · 화면이 더 많다 12.6% · 카톡이 더 많다 7.5% · **서로 다르다 25.8%**).
+      즉 「우리가 놓쳤다」와 「회원이 놓쳤다」가 **넷에 하나꼴로 다르다.**
+      ⇒ 회원 기준을 함께 남겨야 복기가 **회원의 현실**을 말한다.
+    ⚠ `_kakao_sent_quinellas` 는 **💎만** 본다(판정 편입 전용). 이건 **전부**다 — 용도가 다르다.
+    ⚠ 읽기 전용 · 실패하면 {sent: [], sentHit: None} — 판정을 막지 않는다."""
+    out = {"sent": [], "sentHit": None, "sentPhase": None, "sentChanges": 0}
+    try:
+        _d = str(date or time.strftime("%Y-%m-%d")).replace("-", "")[:8]
+        _p = os.path.join(KAKAO_ANCHOR_DIR, _d + ".json")
+        if not os.path.exists(_p):
+            return out
+        _rows, _c = _json_load_guard(_p, [], tag="kakao_sent/review")
+        if _c or not isinstance(_rows, list):
+            return out
+        # 🔴 [2026-08-27] **마지막 발송이 아니라 「마지막으로 비어 있지 않은 명단」**을 쓴다.
+        #   `즉시변경` 행은 **변경분만** 담아 `quinellas` 가 비어 있다
+        #   (나라 1경주 실물: T-5 뒤 즉시변경 2건이 모두 빈 리스트).
+        #   마지막 행을 그대로 쓰면 회원 명단이 통째로 빈다 — 실제로 그렇게 나왔다.
+        _cands = []
+        for _r in _rows:
+            if not isinstance(_r, dict) or str(_r.get("raceKey") or "") != str(rk):
+                continue
+            try:
+                _t = float(_r.get("sentEpoch") or 0)
+            except (TypeError, ValueError):
+                _t = 0.0
+            _cands.append((_t, _r))
+        _cands.sort(key=lambda z: z[0])
+        _seen, _pick_t, _phase = [], -1.0, None
+        _applied = 0
+        for _t, _r in _cands:
+            _cur = []
+            for _key in ("sentQuinellas", "quinellas"):
+                for _e in (_r.get(_key) or []):
+                    _cb = _e.get("combo") if isinstance(_e, dict) else _e
+                    try:
+                        _pk = tuple(sorted(int(x) for x in (_cb or [])))
+                    except (TypeError, ValueError):
+                        continue
+                    if len(_pk) == 2 and list(_pk) not in _cur:
+                        _cur.append(list(_pk))
+            if _cur:
+                _seen, _pick_t, _phase = _cur, _t, _r.get("phase")
+        # 🔴 [2026-08-27] **변경 통보를 반영해 「회원이 최종적으로 들고 있는 것」으로 만든다.**
+        #   `즉시변경` 행은 명단이 비어 있고 본문에만 `복승 추가: 1+4 · 2+5` / `복승 제외: N+M` 이 있다.
+        #   반영하지 않으면 `sent` 는 T-5 시점 근사에 머문다 — 오늘 실측 **46경주 전부**가 그 상태였다.
+        #   ⚠ `삼복승` 은 제외한다(뒤돌아보기 `(?<!삼)`). 복승만 본다.
+        #   ⚠ `.` 는 줄바꿈을 안 넘으므로 한 줄만 잡는다.
+        for _t, _r in _cands:
+            if _t <= _pick_t:
+                continue
+            _tx = str(_r.get("text") or "")
+            for _kind, _pat in (("add", r"(?<!삼)복승\s*추가\s*:\s*(.+)"),
+                                ("del", r"(?<!삼)복승\s*제외\s*:\s*(.+)")):
+                for _seg in re.findall(_pat, _tx):
+                    for _one in re.findall(r"(\d+)\s*\+\s*(\d+)", _seg):
+                        _pk = sorted([int(_one[0]), int(_one[1])])
+                        if _kind == "add":
+                            if _pk not in _seen:
+                                _seen.append(_pk)
+                        elif _pk in _seen:
+                            _seen.remove(_pk)
+                        _applied += 1
+        out["sent"] = _seen
+        out["sentPhase"] = _phase
+        # 🔴 고른 발송 **뒤에 온 변경 통보 수**. `즉시변경` 행은 변경분만 담아 명단이 비어 있어
+        #   여기 담긴 `sent` 에 반영되지 않는다. ⇒ 이 값이 0 이 아니면 `sent` 는 **근사**다.
+        #   숨기지 않고 기록이 스스로 말하게 한다(원칙 24 — 폴백에는 표식을 남긴다).
+        out["sentChanges"] = sum(1 for _t, _r in _cands if _t > _pick_t)
+        out["sentApplied"] = _applied   # 본문에서 실제 반영한 추가·제외 수
+        _t2 = set(int(x) for x in (top3 or [])[:2] if x not in (None, ""))
+        if _seen and len(_t2) == 2:
+            out["sentHit"] = any(set(c) == _t2 for c in _seen)
+    except Exception:
+        pass
+    return out
+
+
 def _review_case_append(row):
     """복기 사례를 **append-only** 로 남긴다(상한 없음).
 
@@ -24614,6 +24698,7 @@ def _failure_record(rk, an, top3, doc, record, stats):
             "maxDrop": fail["maxDrop"], "t": time.time(),
             "observed": _review_observed(doc, list(top3) + [fail.get("focus")], rk),
             "answerOdds": _review_answer_odds(doc),
+            "member": _review_sent_view(rk, _review_race_date(rk), top3),
     })
     d["cases"] = d["cases"][-500:]
     # 🔴 `cases` 는 최근 500건 상한이라 원자료가 조용히 사라진다(유형 카운트 2,935 ↔ 사례 500).
