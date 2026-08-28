@@ -22078,6 +22078,56 @@ def _race_card_timeline(rk):
     return out
 
 
+# 🟢 [2026-08-28 대표 지시] 회원용 **예상문** 조회 API — 완전 읽기 전용
+#   대표: 「1번말은 선행형으로 직전 경주 아쉽게도 3착… 이런 디테일한 예상이 필요하다」
+#   확인 결과 일본 경마·경륜에는 회원이 읽을 예상문이 **아예 없었다**
+#   (race_summary·analysis 는 한국 PDF 전용이고 summary 는 기술 요약이다).
+#   🔴 문장 규칙은 `tools/build_preview.py` 한 곳에만 둔다 — 여기 복사하지 않는다.
+#   🔴 저장된 값에서만 문장을 만든다(환각 금지) · LLM 미사용 · 근거를 함께 돌려준다.
+#   ⚠ 추천·판정·수집에 개입하지 않는다. 읽어서 글만 만든다.
+PREVIEW_API_ENABLED = True
+try:
+    import sys as _pv_sys          # 🔴 이 지점에는 전역 sys 가 아직 없다(실측: name 'sys' is not defined)
+    _pv_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools")
+    if _pv_dir not in _pv_sys.path:
+        _pv_sys.path.insert(0, _pv_dir)
+    import build_preview as _PREVIEW
+except Exception as _pv_e:                      # 모듈이 없어도 서버는 살아야 한다
+    _PREVIEW = None
+    print("[예상문] 모듈 로드 실패(무시):", str(_pv_e)[:100])
+
+
+@app.route("/api/race/preview", methods=["GET"])
+def race_preview_api():
+    """?raceKey=... → 회원용 예상문. 완전 읽기 전용."""
+    rk = (request.args.get("raceKey") or "").strip()
+    if not rk:
+        return jsonify({"ok": False, "error": "raceKey 필요"}), 400
+    if not PREVIEW_API_ENABLED or _PREVIEW is None:
+        return jsonify({"ok": False, "error": "예상문 기능이 꺼져 있습니다"}), 503
+    try:
+        _p = _analysis_log_path(rk)
+        _path = _p[0] if isinstance(_p, (tuple, list)) else _p
+        if not _path or not os.path.exists(_path):
+            return jsonify({"ok": False, "error": "분석 로그 없음", "raceKey": rk}), 404
+        _r = _PREVIEW.build(_path)
+        if not _r or not _r.get("lines"):
+            return jsonify({"ok": False, "error": "예상문 생성 불가(재료 부족)",
+                            "raceKey": rk}), 200
+        _member = (request.args.get("view") or "") != "admin"
+        return jsonify({
+            "ok": True, "raceKey": _r.get("raceKey"), "sport": _r.get("sport"),
+            "head": _r["lines"][0][0],
+            "lines": [t for t, _ in _r["lines"][1:]],
+            # 🔴 근거는 대표 확인용이다 — 회원 화면에는 보내지 않는다(view=admin 일 때만)
+            "basis": None if _member else [w for _, w in _r["lines"][1:]],
+            "note": "저장된 값에서만 생성 · 추측 없음",
+        })
+    except Exception as _e:
+        print("[예상문] 생성 실패(무시):", str(_e)[:120])
+        return jsonify({"ok": False, "error": "생성 실패"}), 200
+
+
 @app.route("/api/race/card-timeline", methods=["GET"])
 def race_card_timeline_api():
     """[경주 카드 신호 이력] 완전 읽기 전용. ?raceKey=... (&view=member 면 회원용 축약)"""
