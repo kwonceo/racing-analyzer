@@ -39897,7 +39897,7 @@ def _kakao_product_stats():
     return out
 
 
-def _why_line(combo, cp, an):
+def _why_line(combo, cp, an, rk=None):
     """🔴 왜 이 조합인가 — 한 줄. 근거가 없으면 아무것도 내지 않는다(빈 말 금지)."""
     if not KAKAO_WHY_LINE:
         return None
@@ -39942,13 +39942,25 @@ def _why_line(combo, cp, an):
                             _wh[int(_x.get("no"))] = _x
                         except (TypeError, ValueError):
                             pass
+                    # 🔴 [2026-08-28 정정] 카톡 시점 `an` 에는 **raw_profile 이 없다.**
+                    #   그것은 `_build_analysis_log` 에서만 만들어진다(_triple_analyze 는 안 만든다).
+                    #   실물 확인: 새 문구가 「1번 추입형 / 3번 선행형」으로 **각질만** 나갔다 —
+                    #   결정수·직전 개최 성적이 통째로 빠졌다. 원칙 5(실데이터 확인) 재발이다.
+                    #   ⇒ 없으면 `_raw_profile_snapshot(rk)` 로 직접 읽는다.
+                    #     그 함수는 **순수 복사**다(새 fetch 없음 · starters_store 만 읽는다).
+                    _rp = an.get("raw_profile")
+                    if not _rp:
+                        try:
+                            _rp = _raw_profile_snapshot(rk) or {}
+                        except Exception:
+                            _rp = {}
                     _we = {}
-                    for _e in ((an.get("raw_profile") or {}).get("entries") or []):
+                    for _e in ((_rp or {}).get("entries") or []):
                         try:
                             _we[int(_e.get("no"))] = _e
                         except (TypeError, ValueError):
                             pass
-                    _wd = (an.get("raw_profile") or {}).get("distance")
+                    _wd = (_rp or {}).get("distance")
                     _bits = []
                     for _n in dark[:2]:
                         _f = _PREVIEW.fact_short(_wh.get(_n) or {}, _we.get(_n), _wd)
@@ -40015,10 +40027,13 @@ def _kakao_rich_message(rk, phase, an):
             return ("%s %s%s %s" % (mark, "+".join(map(str, q.get("combo") or [])),
                                     _o, _star(q.get("stars")))).rstrip()
         if _main:
-            lines.append("━ 본선 · 자주 맞고 배당이 작습니다")
+            # 🔴 [2026-08-28 대표 지시] 「자주 맞고 배당이 작습니다」는 설명문이지 카피가 아니다.
+            #   대표: 「신선한 멘트가 좋겠다. 회원들이 좋아할만한」
+            #   ⚠ 수치(적중률·배당중앙)는 아래 「최근 실적」 줄에 그대로 남는다 — 숨기지 않는다.
+            lines.append("━ 본선 · 오늘 가장 단단한 자리")
             for i, q in _main:
                 lines.append(_row(i, q, "복승%s" % (_circ[i] if i < 3 else "")))
-                _w = _why_line(q.get("combo"), cp, an)
+                _w = _why_line(q.get("combo"), cp, an, rk)
                 if _w:
                     lines.append("  " + _w)
         _bl = []
@@ -40029,10 +40044,10 @@ def _kakao_rich_message(rk, phase, an):
             _bl.append(("💎복병 %s%s ★★" % ("+".join(map(str, s.get("combo") or [])), _o),
                         s.get("combo")))
         if _bl:
-            lines.append("━ 한방 · 드물게 맞고 맞으면 큽니다")
+            lines.append("━ 한방 · 한 번에 뒤집는 자리")
             for _txt, _cb in _bl:
                 lines.append(_txt)
-                _w = _why_line(_cb, cp, an)
+                _w = _why_line(_cb, cp, an, rk)
                 if _w:
                     lines.append("  " + _w)
     else:
