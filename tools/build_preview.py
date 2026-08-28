@@ -315,6 +315,26 @@ def fact_short(h, ent=None, dist=None):
         pv = _prev_last((ent or {}).get("prev1"))
         if pv:
             bits.append("직전 %s %s" % (pv[0], "우승" if pv[1] == 1 else "%d착" % pv[1]))
+    # 🔴🔴 [2026-08-28 대표 지적] **기수 성적** — 「기수 능력에 따라 배당이 판이하게 바뀐다」
+    #   일본은 h["jockeyRate"](복승률·오늘 로그 배선분) · 한국은 ent["jockeyStat"] 을 쓴다.
+    #   ⚠ 값이 없으면 이 조각을 안 쓴다(환각 금지).
+    _jr = h.get("jockeyRate")
+    _js = (ent or {}).get("jockeyStat") or {}
+    if _jr is None and _js:
+        _jr = _js.get("placeRate")
+    try:
+        _jr = float(_jr) if _jr is not None else None
+    except (TypeError, ValueError):
+        _jr = None
+    if _jr is not None and len(bits) < 3:
+        _rides = _js.get("rides") if _js else None
+        _rt = ("기수 복승률 %.0f%%" % _jr) + (" %d기승" % _rides if _rides and _rides >= 500 else "")
+        if _jr >= 30:
+            bits.append(_rt + " 강세")
+        elif _jr <= 12:
+            bits.append(_rt)
+        elif _rides and _rides >= 3000:
+            bits.append("경험 많은 기수(%d기승)" % _rides)
     # 🟢 [2026-08-28] 기수 변경 — 대표 예시의 「경험 많은 기수로 변경되어」
     #   ⚠ pastJockeys 는 2026-08-28 배선분이라 **그날 이후 경주에만** 있다(소급 없음).
     _jk = (h.get("jockey") or "").strip()

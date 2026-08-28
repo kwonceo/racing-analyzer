@@ -18393,7 +18393,19 @@ def _build_analysis_log(rk, an=None):
             #     `_jra_build_form`(26603) 이 **빌드 시점에** 넣고, `_integrated_grades`(3979)·
             #     `_integrated_adaptive`(4247) 는 **새 리스트(out)에만** 등급을 부여해 form 을 변형하지 않는다.
             #     따라서 여기서 읽는 `f["grade"]` 가 곧 보너스 계산 시점의 전적 등급이다.
-            "gradeAtBonus": f.get("grade"),                           # 보너스 시점 전적 등급(저장만)
+            "gradeAtBonus": f.get("grade"),
+            # 🔴🔴 [2026-08-28 대표 지적] **기수 성적을 로그에 남긴다.**
+            #   대표: 「기수 능력에 따라 배당이 판이하게 바뀐다. 기본 중에 기본이야」
+            #   실태: `_keiba_build_form`·`_jra_build_form` 이 `jockeyRate` 를 **이미 만들고**
+            #     `jockeyBonus`(±10)가 totalScore 에 **실제로 가산**되는데,
+            #     분석 로그에는 **13,762마 중 0마(0.0%)** 로 통째 탈락해 왔다.
+            #   ⇒ 사후에 「기수가 얼마나 기여했나」를 잴 수 없었고 예상문에도 못 썼다.
+            #   ⚠ 필드 추가만이다 — 점수·판정·추천 경로 무변경. 🔴 소급 불가.
+            "jockeyRate": f.get("jockeyRate"),
+            "jockeyDistRate": f.get("jockeyDistRate"),
+            "jockeyVenueRate": f.get("jockeyVenueRate"),
+            "jockeyBonus": f.get("jockeyBonus"),
+            "jockeyChangeBonus": f.get("jockeyChangeBonus"),                           # 보너스 시점 전적 등급(저장만)
             "baseScore": f.get("baseScore"),        # [D5] 보너스 전 기본 점수
             "rank": _rank_by.get(no),               # [D5] 전적 총점 내림차순 순위(1부터)
         })
