@@ -17995,6 +17995,72 @@ def _kakao_sent_quinellas(rk):
         return []
 
 
+# 🔴🔴 [2026-08-28 측정 · 승인] **시장순위 쌍 교체** — 구좌를 안 늘리고 자리만 바꾼다
+#   근거·판정은 tools/patch_rank_pair_swap.py 상단과 CLAUDE.md 참조.
+#   경륜 8월 실측: 회수 71.4 → 82.2% · 대박3뺀 68.9 → 79.2% · 배당중앙 2.4 → 4.1배
+#   🔴 경마 제외(대박3뺀 판정선 미달) · 🔧 되돌리기 RANK_PAIR_SWAP_ENABLED = False
+# 🔴🔴 [2026-08-28 15:47] **즉시 껐다** — 배선 위치가 틀렸다(실발동 1건에서 잡혔다).
+#   ① 훅이 조합 수 상한 **앞**이라 교체분이 [:cap] 으로 가장 먼저 잘린다.
+#      실물 마에바시 11R: 교체 +2+3/-2+9 했는데 최종 명단은 [[2,7],[1,5]] — 2+3 이 없다.
+#   🔴 ② 더 큰 문제: 이 훅은 (판정 명단)만 바꾼다.
+#      바로 아래 주석이 말한다 — **회원이 보는 곳은 전부 finalQuinellas**(화면·카톡)이고
+#      판정만 displayedCombos 를 쓴다. ⇒ 지금 켜면 **받는 것은 그대로인데 성적표만 좋아진다.**
+#      그것은 2026-08-13 에 고쳐 놓은 「받은 것과 재는 것이 다르다」를 되살리는 것이다.
+#   ⇒ 다시 켜려면 ⓐ 훅을 상한 **뒤**로 옮기고 ⓑ finalQuinellas 도 함께 바꿔야 한다.
+#     ⓑ는 회원이 받는 것을 실제로 바꾸는 것이라 **대표 승인 사항**이다.
+RANK_PAIR_SWAP_ENABLED = False
+RANK_PAIR_SWAP_SPORTS = ("cycle",)
+RANK_PAIR_SWAP_N = 2          # 뒤쪽 N개를 교체. 0이면 무동작
+
+
+def _market_rank_from_quin(qmap):
+    """말별 시장 내재확률 순위 — 그 말이 낀 조합의 1/배당 합.
+    ⚠ 순위만 쓴다(값 자체는 정규화하지 않는다). 4두 미만이면 None."""
+    w = {}
+    for (a, b), o in (qmap or {}).items():
+        try:
+            o = float(o)
+        except (TypeError, ValueError):
+            continue
+        if o <= 1.0:
+            continue
+        w[a] = w.get(a, 0.0) + 1.0 / o
+        w[b] = w.get(b, 0.0) + 1.0 / o
+    if len(w) < 4:
+        return None
+    return {no: i + 1 for i, (no, _) in enumerate(sorted(w.items(), key=lambda kv: -kv[1]))}
+
+
+def _rank_pair_swap(quin, current, n):
+    """시장 **1위 + 4~5위** 조합으로 명단 뒤쪽 n개를 교체한다.
+    반환 (새 명단, 넣은 것, 뺀 것) · 조건 미달이면 None(종전 동작 유지)."""
+    if n <= 0 or not current:
+        return None
+    qm = _as_qmap(quin)
+    mr = _market_rank_from_quin(qm)
+    if not mr:
+        return None
+    r1 = [no for no, r in mr.items() if r == 1]
+    r45 = [no for no, r in mr.items() if 4 <= r <= 5]
+    if not r1 or not r45:
+        return None
+    have = set(tuple(sorted(c)) for c in current)
+    cand = []
+    for a in r1:
+        for b in r45:
+            c = tuple(sorted((a, b)))
+            if c in have or c not in qm:
+                continue
+            cand.append((qm[c], list(c)))
+    if not cand:
+        return None
+    cand.sort()                                  # 같은 자리면 싼 쪽 먼저
+    add = [c for _, c in cand[:n]]
+    keep = current[:max(0, len(current) - len(add))]
+    drop = current[max(0, len(current) - len(add)):]
+    return (keep + add, add, drop)
+
+
 def _judge_extra_quinellas(cp, sport, already):
     """[판정 편입] 화면에는 나가는데 판정 밖이던 조합을 명단에 더한다.
 
@@ -18463,6 +18529,29 @@ def _build_analysis_log(rk, an=None):
                                   once_key="%s|%s" % (rk, "+".join(str(x) for x in _c)))
             except Exception as _jxe:
                 print("[판정 편입] 스킵(무시):", str(_jxe)[:80])
+            # 🔴🔴 [2026-08-28] **시장순위 쌍 교체** — 명단 뒤쪽 N개를 「시장 1위+4~5위」로 바꾼다.
+            #   ⚠ 더하는 것이 아니라 **바꾸는 것**이라 구좌가 늘지 않는다(경주당 2.55 유지).
+            #   ⚠ 위 판정 편입(_judge_extra_quinellas) **뒤**에 둔다 — 편입분까지 포함한
+            #     최종 명단을 기준으로 뒤쪽을 바꿔야 실제 회원이 받는 것과 같아진다.
+            #   ⚠ 실패해도 종전 명단을 그대로 쓴다(try/except · 조건 미달이면 None).
+            try:
+                if (RANK_PAIR_SWAP_ENABLED
+                        and str(an.get("sport") or "") in RANK_PAIR_SWAP_SPORTS):
+                    _gate_hit("rank_pair_swap", rk, "도달", reach_only=True)
+                    _sw = _rank_pair_swap(rec.get("quinella"), _dc_out["quinellas"],
+                                          RANK_PAIR_SWAP_N)
+                    if _sw:
+                        _dc_out["quinellas"] = _sw[0]
+                        _dc_out["rankPairSwap"] = {
+                            "added": _sw[1], "dropped": _sw[2],
+                        }
+                        _gate_hit("rank_pair_swap", rk,
+                                  "교체 +%s / -%s"
+                                  % (",".join("+".join(str(x) for x in c) for c in _sw[1]),
+                                     ",".join("+".join(str(x) for x in c) for c in _sw[2])),
+                                  once_key=rk)
+            except Exception as _rpe:
+                print("[시장순위 쌍 교체] 스킵(무시):", str(_rpe)[:80])
             # 🔴 [조합 수 상한 · 2026-08-13 승인] 조합 수가 배당보다 많으면 맞아도 손해다.
             #   대표: "배당 2.3배에 6개 추천이야. 이러면 사람들이 비웃는다"
             #   균등 매수면 **필요 배당 = 조합 수**다. 6조합에 2.3배는 회수 38% 인데 화면엔 적중으로 뜬다.
