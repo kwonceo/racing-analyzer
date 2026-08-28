@@ -18138,9 +18138,35 @@ def _prerace_report_for(rk):
                 continue
             hs.append({"no": h.get("no"), "name": h.get("name"), "grade": h.get("grade"),
                        "score": h.get("score"), "reason": h.get("reason")})
+        # 🔴🔴 [2026-08-28] **판독 원본을 함께 남긴다** — 지금까지 버려지고 있었다.
+        #   `report.horses` 는 Vision 판정(no·name·grade·score·reason)만이고,
+        #   그 판정의 **근거가 된 원본**(조교사 마크·레이팅·마체중 증감·직전 통과 위치)은
+        #   파일 최상위 `horses[]` 에 있는데 복사되지 않았다.
+        #   🔴 `data/prerace/` 는 **매일 지워진다**(_prerace_clear) ⇒ 그 순간이 지나면 영구 소실이다.
+        #   실측(2026-08-28): analysis_log 한국 168건 중 prerace_report 보유 48건인데
+        #     training·rating·pastRaces 는 **0건**이라 소급 측정이 불가능했다.
+        #   ⚠ 순수 복사만 한다 — 판정·추천·학습 경로에 일절 개입하지 않는다.
+        #   ⚠ 소급 불가 — 넣은 날부터 쌓인다.
+        raw = []
+        for h in (d.get("horses") or []):
+            if not isinstance(h, dict):
+                continue
+            raw.append({
+                "no": h.get("horseNum"), "name": h.get("horseName"),
+                "jockey": h.get("jockey"),
+                "training": h.get("training"),          # 조교사 마크(★최우수 ◎우수 ○양호 ※주의 △)
+                "rating": h.get("rating"),
+                "weight": h.get("weight"), "weightChange": h.get("weightChange"),
+                "bodyWeight": h.get("bodyWeight"), "bodyWeightChange": h.get("bodyWeightChange"),
+                "pastBodyWeights": h.get("pastBodyWeights"),
+                "recentPlacings": h.get("recentPlacings"),
+                # 직전 경주들의 거리·주로상태·기수·부담·착순·**통과 위치**(선행/중단/후방)
+                "pastRaces": h.get("pastRaces"),
+                "sex": h.get("sex"), "health": h.get("health"),
+            })
         out = {"raceSummary": r.get("race_summary"), "specialNotes": r.get("special_notes"),
                "analysis": r.get("analysis"), "gradePicks": r.get("grade_picks"),
-               "horses": hs, "savedFrom": os.path.basename(p)}
+               "horses": hs, "rawHorses": raw or None, "savedFrom": os.path.basename(p)}
         return out if (out["raceSummary"] or hs) else None
     except Exception:
         return None
