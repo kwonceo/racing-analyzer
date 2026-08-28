@@ -39924,7 +39924,41 @@ def _why_line(combo, cp, an):
         if smart:
             return "↳ 스마트머니 — %s번에 큰 돈이 조용히 들어왔습니다" % "·".join(map(str, smart[:2]))
         if dark:
-            return "↳ 복병 — %s번은 시장이 낮게 보지만 근거가 있습니다" % "·".join(map(str, dark[:2]))
+            # 🔴🔴 [2026-08-28 대표 지시] 「근거가 있습니다」를 **실제 근거**로 바꾼다.
+            #   대표: 「근거가 있습니다 이런 멘트는 회원들이 안 좋아한다. 어떤 근거인지 말해줘야지」
+            #   🔴 그리고 그 문구는 **사실과 반대로도 붙었다** — 기시와다 6R 에서 시장 1위(1번)·
+            #     2위(5번) 조합(3.2배)에 「시장이 낮게 보지만」이 나갔다. 회원은 배당판을 본다.
+            #   원인: `dark` 는 8월 전수 **6,226명 중 4,812명(77.3%)** 에 붙는다.
+            #     경주 내 전원이 dark 인 경주가 **507건(44%)** — 라벨에 변별력이 없다(원칙 18).
+            #   ⇒ 라벨을 버리고 **저장된 사실**(각질·직전 성적·결정수·연대율)을 쓴다.
+            #   🔴 규칙은 tools/build_preview.py 한 곳에만 둔다 — 여기 복사하지 않는다.
+            #   ⚠ 사실을 못 만들면 **아무 말도 하지 않는다** — 이 함수 독스트링 그대로다.
+            try:
+                if _PREVIEW is not None:
+                    _wf = (an.get("form") or an.get("horses") or [])
+                    _wh = {}
+                    for _x in _wf:
+                        try:
+                            _wh[int(_x.get("no"))] = _x
+                        except (TypeError, ValueError):
+                            pass
+                    _we = {}
+                    for _e in ((an.get("raw_profile") or {}).get("entries") or []):
+                        try:
+                            _we[int(_e.get("no"))] = _e
+                        except (TypeError, ValueError):
+                            pass
+                    _wd = (an.get("raw_profile") or {}).get("distance")
+                    _bits = []
+                    for _n in dark[:2]:
+                        _f = _PREVIEW.fact_short(_wh.get(_n) or {}, _we.get(_n), _wd)
+                        if _f:
+                            _bits.append("%d번 %s" % (_n, _f))
+                    if _bits:
+                        return "↳ " + " / ".join(_bits)
+            except Exception as _wfe:
+                print("[근거 한 줄] 생성 실패(무시):", str(_wfe)[:80])
+            return None
     except Exception:
         return None
     return None

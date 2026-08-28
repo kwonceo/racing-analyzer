@@ -90,7 +90,23 @@ def horse_lines(h, ent, dist, mrank, nH, sport, l3rank=None):
     s1 = "%s번은 " % no
     if gl:
         s1 += "%s으로 " % gl; why.append("각질=%s" % gait)
-    rp = [x for x in (h.get("recentPlacings") or h.get("pastPlacings") or []) if x]
+    # ⚠ 경륜은 착순이 문자열로 들어오는 경우가 있다 — 정수로만 받는다(실측 TypeError)
+    # 🔴 [2026-08-28] **리스트가 아니면 통째로 버린다.**
+    #   실사고: 경륜 `recentPlacings` 가 `"8/27 "`(날짜 문자열)이라 문자 단위로 순회돼
+    #   첫 글자 '8' 을 착순으로 읽었다 → 전원 「직전 8착」. 문자열은 착순 배열이 아니다.
+    _rpsrc = h.get("recentPlacings")
+    if not isinstance(_rpsrc, (list, tuple)):
+        _rpsrc = h.get("pastPlacings")
+    if not isinstance(_rpsrc, (list, tuple)):
+        _rpsrc = []
+    rp = []
+    for x in _rpsrc:
+        try:
+            v = int(str(x).strip())
+        except (TypeError, ValueError):
+            continue
+        if v > 0:
+            rp.append(v)
     if rp:
         p0 = rp[0]; why.append("직전착순=%d" % p0)
         if p0 == 1:
@@ -266,6 +282,54 @@ def main():
         done += 1
         if done >= n:
             break
+
+
+def fact_short(h, ent=None, dist=None):
+    """카톡 한 줄용 **짧은 근거**. 저장된 값에서만 만든다.
+    예: '선행형·직전 3착·도주 62%' · 만들 게 없으면 None(빈 말 금지).
+    🔴 app.py `_why_line` 이 이걸 부른다 — 규칙을 두 곳에 두지 않기 위해서다."""
+    h = h or {}
+    bits = []
+    g = (h.get("gait") or (ent or {}).get("declaredStyleLabel") or "").strip()
+    if g:
+        bits.append(g if g.endswith(("형", "각)")) else g + "형")
+    # 🔴 [2026-08-28] **리스트가 아니면 통째로 버린다.**
+    #   실사고: 경륜 `recentPlacings` 가 `"8/27 "`(날짜 문자열)이라 문자 단위로 순회돼
+    #   첫 글자 '8' 을 착순으로 읽었다 → 전원 「직전 8착」. 문자열은 착순 배열이 아니다.
+    _rpsrc = h.get("recentPlacings")
+    if not isinstance(_rpsrc, (list, tuple)):
+        _rpsrc = h.get("pastPlacings")
+    if not isinstance(_rpsrc, (list, tuple)):
+        _rpsrc = []
+    rp = []
+    for x in _rpsrc:
+        try:
+            v = int(str(x).strip())
+        except (TypeError, ValueError):
+            continue
+        if v > 0:
+            rp.append(v)
+    if rp:
+        bits.append("직전 %d착" % rp[0] if rp[0] != 1 else "직전 우승")
+    else:
+        pv = _prev_last((ent or {}).get("prev1"))
+        if pv:
+            bits.append("직전 %s %s" % (pv[0], "우승" if pv[1] == 1 else "%d착" % pv[1]))
+    kr = (ent or {}).get("kimariteRatio") or {}
+    if kr:
+        t = max(kr.items(), key=lambda kv: kv[1])
+        if t[1] >= 50:
+            bits.append("%s %.0f%%" % (t[0], t[1]))
+    rt = (ent or {}).get("rentai")
+    if isinstance(rt, (int, float)) and rt >= 50 and len(bits) < 3:
+        bits.append("연대율 %.0f%%" % rt)
+    pd = [int(x) for x in (h.get("pastDistances") or []) if x]
+    if dist and pd and int(dist) not in pd and len(bits) < 3:
+        bits.append("%dm 첫 경험" % int(dist))
+    cm = _corner_move(h.get("corners"))
+    if cm is not None and cm >= 0.20 and len(bits) < 3:
+        bits.append("막판 추입 강함")
+    return "·".join(bits[:3]) if bits else None
 
 
 if __name__ == "__main__":
