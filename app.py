@@ -18147,11 +18147,40 @@ def _prerace_report_for(rk):
         #     training·rating·pastRaces 는 **0건**이라 소급 측정이 불가능했다.
         #   ⚠ 순수 복사만 한다 — 판정·추천·학습 경로에 일절 개입하지 않는다.
         #   ⚠ 소급 불가 — 넣은 날부터 쌓인다.
+        # 🔴🔴 [2026-08-28 대표 지적] **기수 성적도 함께 남긴다.**
+        #   `korea_session.jockeyStats` 에 **108명**의 통계가 있다 —
+        #     winRate(승률) · placeRate(복승권율) · rides(기승수) · recent30 · byDistance
+        #   그런데 지금은 `_leader_jockeys`(리딩기수 판별)에만 쓰이고 **저장에는 이름만** 남았다.
+        #   🔴 `korea_session.json` 은 **하루 세션**이라 다음 날 덮어써진다 ⇒ 통계도 함께 소실된다.
+        #   ⚠ 순수 복사다 — 새 조회 없이 이미 읽어 둔 세션값을 옮긴다.
+        _jst = {}
+        try:
+            _ks = os.path.join(os.path.dirname(KOREA_PRERACE_DIR), "korea_session.json")
+            if os.path.exists(_ks):
+                _kd = json.load(open(_ks, encoding="utf-8"))
+                if str(_kd.get("date") or "") == date:      # 🔴 날짜가 같을 때만(원칙 16)
+                    _jst = _kd.get("jockeyStats") or {}
+        except Exception:
+            _jst = {}
         raw = []
         for h in (d.get("horses") or []):
             if not isinstance(h, dict):
                 continue
+            # 🔴 [2026-08-28] PDF 는 기수 이름을 **줄여 적는다**(「서승운」→「승운」).
+            #   그대로 조회하면 매칭이 **18%**뿐이다. 뒤에서 겹치면 같은 사람으로 본다 → **92%**.
+            #   ⚠ 후보가 둘 이상이면(「준호」→ 모준호·김준호) **비운다** — 추측하지 않는다.
+            _jk = (h.get("jockey") or "").strip()
+            _js = _jst.get(_jk) if _jk else None
+            if _jk and not _js and _jst:
+                _cand = [v for k, v in _jst.items()
+                         if k.endswith(_jk) or _jk.endswith(k)]
+                if len(_cand) == 1:
+                    _js = _cand[0]
             raw.append({
+                # 🔴 기수 성적 — 승률·복승권율·기승수·최근30경주(표본 가중에 필수)
+                "jockeyStat": ({"winRate": _js.get("winRate"), "placeRate": _js.get("placeRate"),
+                                "rides": _js.get("rides"), "recent30": _js.get("recent30"),
+                                "track": _js.get("track")} if isinstance(_js, dict) else None),
                 "no": h.get("horseNum"), "name": h.get("horseName"),
                 "jockey": h.get("jockey"),
                 "training": h.get("training"),          # 조교사 마크(★최우수 ◎우수 ○양호 ※주의 △)
