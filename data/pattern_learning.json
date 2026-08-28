@@ -1,32 +1,6 @@
 {
   "patterns": [
     {
-      "race": "나고야 2경주",
-      "horse_no": 10,
-      "recent_avg": 9.2,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-21"
-    },
-    {
-      "race": "부산 4경주",
-      "horse_no": 7,
-      "recent_avg": 4.7,
-      "win_place": 1,
-      "conditions": [],
-      "date": "2026-08-21"
-    },
-    {
-      "race": "부산 4경주",
-      "horse_no": 10,
-      "recent_avg": 6.3,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-21"
-    },
-    {
       "race": "나고야 3경주",
       "horse_no": 4,
       "recent_avg": 8.0,
@@ -4682,16 +4656,44 @@
       "win_place": 1,
       "conditions": [],
       "date": "2026-08-28"
+    },
+    {
+      "race": "후나바시 12경주",
+      "horse_no": 12,
+      "recent_avg": 5.6,
+      "win_place": 1,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-28"
+    },
+    {
+      "race": "후나바시 12경주",
+      "horse_no": 13,
+      "recent_avg": 5.2,
+      "win_place": 3,
+      "conditions": [
+        "복승이상감지"
+      ],
+      "date": "2026-08-28"
+    },
+    {
+      "race": "후나바시 12경주",
+      "horse_no": 7,
+      "recent_avg": 8.0,
+      "win_place": 2,
+      "conditions": [],
+      "date": "2026-08-28"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 5755,
-      "hit": 924
+      "count": 5764,
+      "hit": 925
     },
     "전체부진마": {
-      "count": 9677,
-      "hit": 2557
+      "count": 9690,
+      "hit": 2560
     },
     "대규모급락": {
       "count": 15,
@@ -4701,8 +4703,8 @@
       "hit_rate": 33.3
     },
     "이상감지동반": {
-      "count": 3922,
-      "hit": 1633
+      "count": 3926,
+      "hit": 1635
     },
     "급락동반": {
       "count": 655,
@@ -5079,25 +5081,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1566,
-    "hit": 1225,
+    "count": 1567,
+    "hit": 1226,
     "cases": [
-      {
-        "race": "모리오카 8경주",
-        "date": "2026-08-25",
-        "smart_horses": [
-          3,
-          1,
-          8
-        ],
-        "placed": [
-          3
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": 9.0,
-        "high_odds": false
-      },
       {
         "race": "마쓰사카 2경주",
         "date": "2026-08-25",
@@ -6591,6 +6577,23 @@
         "hit": true,
         "trifecta_odds": null,
         "quinella_odds": 2.3,
+        "high_odds": false
+      },
+      {
+        "race": "기시와다 2경주",
+        "date": "2026-08-28",
+        "smart_horses": [
+          1,
+          2,
+          5
+        ],
+        "placed": [
+          1,
+          2
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": null,
         "high_odds": false
       }
     ],
