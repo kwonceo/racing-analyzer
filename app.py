@@ -17337,6 +17337,9 @@ def _raw_profile_snapshot(rk):
         for k in ("corners", "fieldSizes", "pastDistances", "last3fList", "pastPlacings",
                   "pastPops",                               # 🔴 [ⓓ 2026-08-03] 과거 인기 시계열(P4 입력)
                   "pastGrades",                             # 🔴 [2026-08-05] 과거 등급 시계열(승급 판정 입력)
+                  # 🔴 [2026-08-28] 과거 기수·마체중·부담중량 — 「기수 변경」·「마체중 증감」을
+                  #   회원 예상문에 쓰려면 필요하다. 파서는 이미 뽑고 있었고 저장에서만 빠져 있었다.
+                  "pastJockeys", "pastBodyWeights", "pastBurdens",
                   "kimarite", "kimariteRatio", "chaku", "rentai", "gear", "classGrade",
                   "declaredStyle", "declaredStyleLabel",    # [표기 각질 병기 2026-07-30]
                   "weight", "winOdds", "pop",               # [발주 시점 값 보존 2026-07-30]
@@ -22108,6 +22111,20 @@ def race_preview_api():
     try:
         _p = _analysis_log_path(rk)
         _path = _p[0] if isinstance(_p, (tuple, list)) else _p
+        if not _path or not os.path.exists(_path):
+            # 🔴 [2026-08-28] `_analysis_log_path` 는 rk 에 날짜가 없으면 **오늘**을 쓴다.
+            #   그래서 자정이 지나거나 지난 경주를 열면 못 찾는다(실측: 8/29 에 8/28 경주 404).
+            #   ⇒ 경기장·경주번호로 **가장 최근 파일**을 찾는다(원칙 16 — 날짜를 무시하지 않고
+            #     날짜를 붙여 찾되, 못 찾으면 최신 날짜분으로 폴백한다).
+            try:
+                _base = os.path.basename(_path)[:-5]
+                _tail = _base.split("_", 3)[-1] if _base.count("_") >= 3 else _base
+                import glob as _pv_glob   # 🔴 전역에 glob 이 없다 — except 가 NameError 를 삼켰다
+                _cand = sorted(_pv_glob.glob(os.path.join(ANALYSIS_LOG_DIR, "*_" + _tail + ".json")))
+                if _cand:
+                    _path = _cand[-1]
+            except Exception:
+                pass
         if not _path or not os.path.exists(_path):
             return jsonify({"ok": False, "error": "분석 로그 없음", "raceKey": rk}), 404
         _r = _PREVIEW.build(_path)
@@ -29720,7 +29737,16 @@ def _keiba_starter_store_row(h):
             #   (실측 `raw_profile.entries` 의 past/pastPops 구조 보유 **0건 / 3,990건**).
             #   ⚠ 바로 위 "pop" 키는 **현재 경주 인기**다 — 이것과 혼동하면 안 된다.
             #   ⚠ 키 추가만이다. 기존 키·`record_score` 계산 경로 무변경. 🔴 소급 불가(넣은 날부터 쌓인다).
-            "pastPops": [pr.get("pop") for pr in (h.get("past") or [])]}
+            "pastPops": [pr.get("pop") for pr in (h.get("past") or [])],
+            # 🔴 [2026-08-28 대표 지시] 「경험 많은 **기수로 변경**되어」·「마체중 증감」을
+            #   회원 예상문에 쓰려면 **과거 기수·마체중 시계열**이 필요하다.
+            #   실태: 파서(`_keiba_parse_shutsuba`·`_nar_parse_deba`)는 jockey·weight·bodyWeight 를
+            #   **이미 뽑고 있는데** 저장행에서 탈락해 왔다 — pastPops 와 같은 유형의 소실이다.
+            #   ⚠ `pastPops` 와 **똑같은 파생 방식**이다(새 수집 없음 · 이미 있는 past 를 옮긴다).
+            #   🔴 소급 불가 — 넣은 날부터 쌓인다.
+            "pastJockeys": [pr.get("jockey") for pr in (h.get("past") or [])],
+            "pastBodyWeights": [pr.get("bodyWeight") for pr in (h.get("past") or [])],
+            "pastBurdens": [pr.get("weight") for pr in (h.get("past") or [])]}
 
 
 def _keiba_build_form(shutsuba, details):

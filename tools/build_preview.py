@@ -315,6 +315,20 @@ def fact_short(h, ent=None, dist=None):
         pv = _prev_last((ent or {}).get("prev1"))
         if pv:
             bits.append("직전 %s %s" % (pv[0], "우승" if pv[1] == 1 else "%d착" % pv[1]))
+    # 🟢 [2026-08-28] 기수 변경 — 대표 예시의 「경험 많은 기수로 변경되어」
+    #   ⚠ pastJockeys 는 2026-08-28 배선분이라 **그날 이후 경주에만** 있다(소급 없음).
+    _jk = (h.get("jockey") or "").strip()
+    _pj = [str(x).strip() for x in ((ent or {}).get("pastJockeys") or []) if x]
+    if _jk and _pj and _pj[0] and _pj[0] != _jk:
+        bits.append("기수 %s→%s 교체" % (_pj[0], _jk))
+    # 🟢 마체중 증감 — 직전 대비
+    try:
+        _bw = float(h.get("bodyWeight"))
+        _pb = [float(x) for x in ((ent or {}).get("pastBodyWeights") or []) if x]
+        if _bw and _pb and abs(_bw - _pb[0]) >= 6:
+            bits.append("마체중 %+dkg" % int(round(_bw - _pb[0])))
+    except (TypeError, ValueError):
+        pass
     kr = (ent or {}).get("kimariteRatio") or {}
     if kr:
         t = max(kr.items(), key=lambda kv: kv[1])

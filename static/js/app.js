@@ -2692,6 +2692,30 @@
   // [공용 렌더러] openMultiDetail 과 30초 재조회가 같은 화면을 그리도록 추출(동작 동일·중복 방지)
   // [추천 내역 상세 (2026-07-21)] 카드 상세 하단 — 표시 추천 + 생성됐지만 노출 제외된 조합 + 변경 이력 공개.
   //   배경: 마쓰도 1R 확신도 보험 1+3+6(89.9배) 미노출 → "6번 조합이 없다" 오해. 전부 공개해 설득 근거 제공.
+  // 🟢🟢 [2026-08-28 대표 지시] 화면에도 **예상문**을 띄운다 — 「어떻게 봤나」
+  //   대표: 「우린 분석가야. 어떻게 예상하는지 알려줘야 하잖아」
+  //   서버 `/api/race/preview` 를 부른다(완전 읽기 전용 · 추천·판정 무개입).
+  //   🔴 문장은 서버가 만든다 — 프론트에 규칙을 복사하지 않는다.
+  //   ⚠ 실패하면 그 블록만 빠진다(팝업 나머지는 그대로).
+  async function _previewHtml(raceKey) {
+    if (!raceKey) return '';
+    try {
+      const r = await fetch('/api/race/preview?raceKey=' + encodeURIComponent(raceKey));
+      const d = await r.json();
+      if (!d || !d.ok || !(d.lines || []).length) return '';
+      const rows = d.lines.map(function (t) {
+        return '<div style="font-size:12.5px;margin-top:4px;line-height:1.55">' + esc(String(t)) + '</div>';
+      }).join('');
+      return '<div style="margin-top:10px;border:1px solid #334155;border-radius:10px;'
+        + 'padding:10px 12px;background:#0f172a">'
+        + '<div style="font-weight:800;color:#86efac;font-size:13.5px">🧭 어떻게 봤나</div>'
+        + (d.head ? '<div class="hint" style="margin-top:3px">' + esc(String(d.head)) + '</div>' : '')
+        + rows
+        + '<div class="hint" style="margin-top:6px;font-size:11px">저장된 값에서만 만든 글입니다 · 추측 없음</div>'
+        + '</div>';
+    } catch (_) { return ''; }
+  }
+
   function _recTrailHtml(a) {
     const rt = a && a.recTrail; if (!rt) return '';
     const co = (c) => (c || []).join('+');
@@ -2807,6 +2831,15 @@
     }
     // [추천 내역 상세 (2026-07-21)] 권대표 요청 — 적중 대조 배너 바로 아래(맨 위)에 표시(하단 → 상단 이동)
     let _trail = ''; try { _trail = _recTrailHtml(a); } catch (_) { /* */ }
+    // 🟢 [2026-08-28] 예상문은 비동기라 자리만 먼저 만들고 채운다(팝업 지연 없음)
+    const _pvId = 'pv_' + Math.random().toString(36).slice(2, 9);
+    _trail = '<div id="' + _pvId + '"></div>' + _trail;
+    try {
+      const _pvRk = (a && (a.raceKey || a.rk)) || '';
+      if (_pvRk) _previewHtml(_pvRk).then(function (h) {
+        const el = document.getElementById(_pvId); if (el && h) el.innerHTML = h;
+      });
+    } catch (_) { /* */ }
     html = compare + _trail + html;
     html += `<div style="margin-top:10px"><button class="btn btn-primary" style="min-height:56px;font-size:15px" onclick="document.querySelector('.tab-btn[data-tab=&quot;result&quot;]').click()">📝 결과 입력하러 가기</button></div>`;
     return { html, isKr: _isKr };
