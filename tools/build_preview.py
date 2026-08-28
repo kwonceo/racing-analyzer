@@ -79,7 +79,7 @@ def _corner_move(corners):
     return (sum(mv) / len(mv)) if len(mv) >= 2 else None
 
 
-def horse_lines(h, ent, dist, mrank, nH, sport):
+def horse_lines(h, ent, dist, mrank, nH, sport, l3rank=None):
     """말 한 마리를 **두 문장**으로 서술한다. 반환 (문장, 근거목록).
     🔴 값이 없는 항목은 문장에서 통째로 뺀다 — 추측해서 채우지 않는다."""
     no, why = h.get("no"), []
@@ -115,6 +115,22 @@ def horse_lines(h, ent, dist, mrank, nH, sport):
         else:
             s1 += "이번 경주에 나섭니다."
 
+    # 🔴 [2026-08-28] 직전 **인기 대비 착순** — 「기대를 받았는데 못했다 / 평가를 뒤집었다」
+    #   ⚠ pastPops 는 경마 raw_profile.entries 에만 있다(보유 79%). 없으면 이 문장을 쓰지 않는다.
+    pops = [x for x in ((ent or {}).get("pastPops") or []) if x]
+    if pops and rp:
+        p0, q0 = rp[0], pops[0]
+        if q0 <= 3 and p0 >= 6:
+            s1 = s1.rstrip(".") + "만, %d인기의 기대를 받고도 %d착에 그친 것이 아쉽습니다." % (q0, p0)
+            why.append("직전 %d인기 → %d착" % (q0, p0))
+        elif q0 >= 6 and p0 <= 3:
+            s1 = s1.rstrip(".") + ". %d인기 평가를 뒤집은 결과였습니다." % q0
+            why.append("직전 %d인기 → %d착(평가 상회)" % (q0, p0))
+        beat = sum(1 for a, b in zip(rp, pops) if a < b)
+        if len(pops) >= 4 and beat >= len(pops) - 1:
+            s1 += " 최근 경주마다 인기 이상으로 달리고 있습니다."
+            why.append("인기 상회 %d/%d전" % (beat, len(pops)))
+
     # ── 문장 2: 이번 경주의 조건 ────────────────────────────
     cl = []
     pd = [int(x) for x in (h.get("pastDistances") or []) if x]
@@ -135,6 +151,14 @@ def horse_lines(h, ent, dist, mrank, nH, sport):
         elif cm <= -0.15:
             cl.append(("앞서 가다 막판에 처지는 흐름이라", "앞서 가다 막판에 처지는 흐름이라 스태미너가 관건입니다"))
             why.append("코너 상대위치 %.2f" % cm)
+    if l3rank and no in l3rank:
+        r3, n3 = l3rank[no]
+        if r3 == 1:
+            cl.append(("막판 스피드는 이 경주에서 가장 빠르고", "막판 스피드는 이 경주에서 가장 빠릅니다"))
+            why.append("상3F 경주 내 1위")
+        elif n3 >= 6 and r3 <= max(2, n3 // 3):
+            cl.append(("막판 스피드가 상위권이며", "막판 스피드가 상위권입니다"))
+            why.append("상3F 경주 내 %d/%d위" % (r3, n3))
     kr = (ent or {}).get("kimariteRatio") or {}
     if kr:
         t = max(kr.items(), key=lambda kv: kv[1])
@@ -152,6 +176,10 @@ def horse_lines(h, ent, dist, mrank, nH, sport):
     elif r and nH and r >= max(6, nH - 2):
         cl.append(("인기는 낮은 편이지만", "인기는 낮은 편입니다")); why.append("시장순위 %d위" % r)
 
+    # ⚠ 조각이 많으면 문장이 장황해진다 — **3개까지만** 쓴다(뒤쪽은 버린다).
+    #   순서상 뒤가 시장 인기이므로, 넘칠 때는 가운데를 버려 「조건 + 인기」를 남긴다.
+    if len(cl) > 3:
+        cl = cl[:2] + cl[-1:]
     s2 = ""
     if cl:
         # 마지막 조각만 종결형, 나머지는 연결형으로 잇는다
@@ -159,7 +187,7 @@ def horse_lines(h, ent, dist, mrank, nH, sport):
         body = (body + " " if body else "") + cl[-1][1]
         s2 = " " + body
     if rp and len(rp) >= 3:
-        s2 = s2.rstrip() + " (최근 %s)" % "-".join(str(x) for x in rp[:5])
+        s2 = (s2.rstrip() if s2.rstrip().endswith(".") else s2.rstrip() + ".") + " (최근 %s)" % "-".join(str(x) for x in rp[:5])
         why.append("최근=%s" % rp[:5])
     return (s1 + s2, why)
 
@@ -183,6 +211,17 @@ def build(rk_path):
     mr = _mkt_rank(d, base)
     inv = sorted(mr.items(), key=lambda kv: kv[1])
     top = [n for n, _ in inv[:3]]
+    # 상3F(막판 스피드) 경주 내 순위 — 최근 3경주 평균(작을수록 빠르다)
+    l3 = []
+    for x in hs:
+        v = [float(y) for y in (x.get("last3fList") or [])[:3]
+             if isinstance(y, (int, float)) and y > 0]
+        if v:
+            l3.append((sum(v) / len(v), x.get("no")))
+    l3rank = {}
+    if len(l3) >= 4:
+        l3.sort()
+        l3rank = {no: (i + 1, len(l3)) for i, (_, no) in enumerate(l3)}
     pa = (d.get("corePicks") or {}).get("paceAnalysis") or {}
 
     L = []
@@ -197,7 +236,7 @@ def build(rk_path):
         h = next((x for x in hs if x.get("no") == no), None)
         if not h:
             continue
-        txt, why = horse_lines(h, ents.get(no), dist, mr, nH, sport)
+        txt, why = horse_lines(h, ents.get(no), dist, mr, nH, sport, l3rank)
         if not why:
             continue
         L.append((txt, " · ".join(why)))
