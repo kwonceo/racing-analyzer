@@ -332,5 +332,37 @@ def fact_short(h, ent=None, dist=None):
     return "·".join(bits[:3]) if bits else None
 
 
+def kakao_lines(hs, ents=None, dist=None, mrank=None, pace=None, topn=3):
+    """카톡용 **짧은 예상문** — 「어떻게 봤나」 블록.
+    주목마 topn 두를 한 줄씩 + 관전 포인트 한 줄. 만들 게 없으면 빈 리스트.
+    🔴 fact_short 를 그대로 쓴다 — 규칙을 두 곳에 두지 않는다.
+    ⚠ 카톡은 길면 안 읽힌다. 한 줄 40자 안쪽을 목표로 한다."""
+    hs = {int(k): v for k, v in (hs or {}).items()}
+    ents = {int(k): v for k, v in (ents or {}).items()}
+    mrank = {int(k): v for k, v in (mrank or {}).items()}
+    order = [n for n, _ in sorted(mrank.items(), key=lambda kv: kv[1])] if mrank else sorted(hs)
+    out, used = [], []
+    for no in order:
+        if len(out) >= topn:
+            break
+        f = fact_short(hs.get(no) or {}, ents.get(no), dist)
+        if not f:
+            continue
+        r = mrank.get(no)
+        tag = " (시장 %d위)" % r if r and r <= 3 else ""
+        out.append(" %d번 %s%s" % (no, f, tag))
+        used.append(no)
+    if not out:
+        return []
+    tail = ""
+    if pace:
+        tail += str(pace).replace("페이스", "").strip() + " 페이스"
+    if len(used) >= 2:
+        tail += (" · " if tail else "") + "%d번과 %d번의 우승 경합이 관전 포인트" % (used[0], used[1])
+    if tail:
+        out.append(" " + tail)
+    return out
+
+
 if __name__ == "__main__":
     main()

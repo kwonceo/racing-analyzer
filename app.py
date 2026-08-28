@@ -40056,6 +40056,44 @@ def _kakao_rich_message(rk, phase, an):
             _rs = (" · %s" % str(q.get("reason"))[:22]) if q.get("reason") else ""
             lines.append("복승%s %s%s %s%s" % (_circ[i] if i < 3 else "", "+".join(map(str, q.get("combo") or [])),
                                                _o, _star(q.get("stars")), _rs))
+    # 🟢🟢 [2026-08-28 대표 지시] **「어떻게 봤나」 — 분석 근거를 카톡에 싣는다.**
+    #   대표: 「우리는 분석가야. 어떻게 예상하는지 알려줘야 하잖아」
+    #   ⚠ 길이 여유는 충분하다 — 카톡 상한 1,900자 · 실제 발송 최대 613자(중앙 74자).
+    #   🔴 문장 규칙은 `tools/build_preview.kakao_lines` **한 곳**에만 둔다(여기 복사 안 함).
+    #   🔴 저장된 값에서만 만든다(환각 금지) · 만들 게 없으면 **블록 자체를 넣지 않는다**.
+    #   ⚠ 카톡 시점 `an` 에는 raw_profile 이 없다 → `_raw_profile_snapshot(rk)` 로 읽는다
+    #     (순수 복사 · 새 fetch 없음 · 부하 0). 실패해도 나머지 메시지는 그대로 나간다.
+    try:
+        if _PREVIEW is not None:
+            _pv_hs = {}
+            for _x in (an.get("form") or an.get("horses") or []):
+                try:
+                    _pv_hs[int(_x.get("no"))] = _x
+                except (TypeError, ValueError):
+                    pass
+            _pv_rp = an.get("raw_profile") or (_raw_profile_snapshot(rk) or {})
+            _pv_en = {}
+            for _e in (_pv_rp.get("entries") or []):
+                try:
+                    _pv_en[int(_e.get("no"))] = _e
+                except (TypeError, ValueError):
+                    pass
+            _pv_mr = {}
+            try:
+                _pv_mr = _market_rank_from_quin(
+                    _as_qmap((_triple_load().get(rk) or {}).get("quinella"))) or {}
+            except Exception:
+                _pv_mr = {}
+            _pv_pace = ((cp.get("paceAnalysis") or {}).get("paceLabel")
+                        or (cp.get("paceAnalysis") or {}).get("pace"))
+            _pv_lines = _PREVIEW.kakao_lines(_pv_hs, _pv_en, _pv_rp.get("distance"),
+                                             _pv_mr, _pv_pace, 3)
+            if _pv_lines:
+                lines.append("━ 어떻게 봤나")
+                lines.extend(_pv_lines)
+    except Exception as _pve:
+        print("[카톡 예상문] 생략(무시):", str(_pve)[:90])
+
     # 🔴 [2026-08-10 대표 결정] **카톡 삼복승을 1개로 줄인다.**
     #   소급 2,472경주(회원에게 나간 순서 기준):
     #     상위1 **82.9%**(판정선 +8.4) ↔ 상위2 72.5% ↔ 상위3 71.3% ↔ 현행(전부) 71.6%
