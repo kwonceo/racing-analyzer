@@ -20174,12 +20174,29 @@ def _run_data_git_backup(label):
         #     **나머지 경로까지 전부 add 되지 않는다**("The following paths are ignored…").
         #   ⚠ 목록은 건드리지 않는다(지시) — 실패를 **보이게만** 한다.
         #   ⚠ pathspec commit 은 워킹트리에서 직접 가져오므로 add 실패와 무관하게 커밋 자체는 된다.
-        _ar = subprocess.run(_GIT + ["add"] + paths, cwd=root, timeout=60,
-                             capture_output=True, text=True, errors="replace")
-        if _ar.returncode != 0:
-            _ae = " ".join(((_ar.stderr or "") + (_ar.stdout or "")).split())
-            print("[데이터백업] ⚠ git add 실패(rc=%s): %s" % (_ar.returncode, _ae[:200]))
-            _gate_hit("backup_add_fail", None, _ae[:120])
+        # 🔴 [2026-08-28] **경로를 하나씩 add 한다** — 한 곳이 실패해도 나머지가 담긴다.
+        #   실사고: `git add <11개 경로>` 가 rc=1 로 거부하면 **나머지 경로까지 전부 안 담긴다.**
+        #   원인: `data/analysis_log` 는 `.gitignore` 대상인데 **추적 중인 파일 4개가 남아 있고**
+        #     실제 파일 5,153개는 무시 대상이라 git 이 "The following paths are ignored" 로 거부한다.
+        #     (2026-07-20 [C안] 전환 때 `git rm -r --cached` 가 끝까지 안 된 잔재다.)
+        #   ⚠ `git check-ignore` 로 미리 거르려 했으나 **디렉터리·부분추적 상태에서 rc=1(추적)로 답해** 못 쓴다.
+        #     ⇒ 판정을 흉내내지 말고 **git 이 실제로 거부하는지**로 가른다(원칙 8 — 같은 것을 재라).
+        #   ⚠ 목록(DATA_BACKUP_PATHS)은 건드리지 않는다(2026-08-23 지시).
+        _added, _add_fail = [], []
+        for _bp in paths:
+            _one = subprocess.run(_GIT + ["add", _bp], cwd=root, timeout=30,
+                                  capture_output=True, text=True, errors="replace")
+            if _one.returncode == 0:
+                _added.append(_bp)
+            else:
+                _add_fail.append(_bp)
+        if _add_fail:
+            print("[데이터백업] ⚠ add 제외 %d곳(나머지 %d곳은 담겼다): %s"
+                  % (len(_add_fail), len(_added), ", ".join(_add_fail)))
+            _gate_hit("backup_add_fail", None, ",".join(_add_fail)[:120])
+        if not _added:
+            print("[데이터백업] 🔴 담긴 경로가 하나도 없다 — 커밋을 건너뛴다")
+            return
         msg = (label or "데이터 자동 백업").strip()
         # pathspec commit: 지정 경로 변경만 커밋(다른 스테이징 변경 미포함) → 안전
         # 🔴 `errors="replace"` 가 없으면 **cp949 디코딩 실패로 stdout/stderr 가 통째로 비고**,
@@ -20192,7 +20209,9 @@ def _run_data_git_backup(label):
         if r.returncode != 0:
             if any(k in out for k in ("nothing to commit", "no changes", "변경 사항", "커밋할", "working tree clean")):
                 return   # 변경 없음(정상)
-            print("[데이터백업] commit 건너뜀:", out[:200])
+            # 🔴 [2026-08-28] 200자로 자르니 **커밋 게이트 배너만 보이고 진짜 원인이 안 보였다.**
+            #   서버 계정에서만 훅이 실패하는데(내 셸에선 rc=0) 재현이 안 되므로 **원문을 길게 남긴다.**
+            print("[데이터백업] commit 건너뜀(rc=%s):" % r.returncode, out[:1200])
             return
         pr = subprocess.run(_GIT + ["push"], cwd=root, timeout=120, capture_output=True, text=True)
         if pr.returncode != 0:

@@ -25,7 +25,21 @@ echo "════════ 커밋 게이트: python tests/run_precommit.py �
 #   `UnicodeEncodeError` 로 종료 → rc≠0 → **테스트는 전부 통과했는데 커밋이 막혔다.**
 #   ⚠ 이건 "게이트가 일한 것"이 아니라 **게이트 자체의 고장**이다. 둘을 혼동하면
 #     진짜 실패를 인코딩 문제로 오해해 `--no-verify` 로 넘기게 된다.
-OUT="$(PYTHONIOENCODING=utf-8 python tests/run_precommit.py 2>&1)"
+# 🔴 [2026-08-28] **파이썬을 PATH 에만 의존하지 않는다.**
+#   실사고: 자동 백업 커밋이 훅에서 막혔는데 원인이
+#     `.git/hooks/pre-commit: line 28: python: command not found` 였다.
+#   서버 프로세스가 도는 계정의 PATH 에 파이썬이 없다(내 셸에는 있어 재현이 안 됐다).
+#   ⇒ 게이트가 「일한 것」이 아니라 **게이트가 실행조차 못 된 것**이다. 둘을 혼동하면 안 된다.
+#   ⚠ 폴백 순서: PATH 의 python → py 런처 → 알려진 설치 경로.
+#     하나도 없으면 **커밋을 막는다**(게이트를 못 돌린 채 통과시키면 게이트가 없는 것과 같다).
+PY="$(command -v python 2>/dev/null || true)"
+[ -z "$PY" ] && PY="$(command -v py 2>/dev/null || true)"
+[ -z "$PY" ] && [ -x "/c/Users/Administrator/AppData/Local/Programs/Python/Python312/python.exe" ]   && PY="/c/Users/Administrator/AppData/Local/Programs/Python/Python312/python.exe"
+if [ -z "$PY" ]; then
+  echo "🔴 커밋 차단 — 파이썬을 찾지 못해 게이트를 돌릴 수 없다(PATH·설치 경로 확인)."
+  exit 1
+fi
+OUT="$(PYTHONIOENCODING=utf-8 "$PY" tests/run_precommit.py 2>&1)"
 RC=$?
 echo "$OUT"
 if [ $RC -ne 0 ]; then
