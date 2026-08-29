@@ -22162,8 +22162,10 @@ try:
     if _pv_dir not in _pv_sys.path:
         _pv_sys.path.insert(0, _pv_dir)
     import build_preview as _PREVIEW
+    import late_drop as _LATE_DROP
 except Exception as _pv_e:                      # 모듈이 없어도 서버는 살아야 한다
     _PREVIEW = None
+    _LATE_DROP = None
     print("[예상문] 모듈 로드 실패(무시):", str(_pv_e)[:100])
 
 
@@ -40097,6 +40099,62 @@ def _judge_quinellas(cp):
         return fq
 
 
+# 🟢🟢 [2026-08-28 대표 승인] **마감 직전 진성 급락 알림** — 「추가만 보내는 형태로 열어」
+#   근거·판정은 tools/late_drop.py 상단과 CLAUDE.md 참조.
+#   엣지 1.416(CI 하한 1.206) · 대박3뺀 134.9% · 경주당 2.03 · 배당중앙 45.4배
+#   🔴 **판정 명단(displayedCombos)·회원 수신(finalQuinellas)을 한 줄도 안 바꾼다.**
+#     2026-08-28 아침 「판정만 바꾸고 회원은 그대로」 사고를 반복하지 않기 위해서다.
+#     이건 **별도 알림**이고 성적도 따로 잰다(logs/late_drop/).
+#   ⚠ 기존 추천을 취소하지 않는다 — 「추가」로만 나간다([T-2 번복 차단] 원칙과 충돌 없음).
+#   🔧 되돌리기: LATE_DROP_ALERT_ENABLED = False
+LATE_DROP_ALERT_ENABLED = True
+LATE_DROP_SPORTS = ("horse",)        # 🔴 경마부터 — 경륜은 CI 하한 0.874 로 미달
+LATE_DROP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "late_drop")
+_LATE_DROP_SENT = set()              # 경주당 1회
+
+
+def _late_drop_alert(rk, an, db):
+    """마감 직전 진성 급락을 **별도 알림**으로 보낸다. 판정·추천 경로 무개입."""
+    if not LATE_DROP_ALERT_ENABLED or _LATE_DROP is None or rk in _LATE_DROP_SENT:
+        return
+    if str((an or {}).get("sport") or "") not in LATE_DROP_SPORTS:
+        return
+    try:
+        _gate_hit("late_drop", rk, "도달", reach_only=True)
+        doc = (db or {}).get(rk) or {}
+        hist = list(doc.get("history") or [])
+        if len(hist) < 3:
+            return
+        _cp = (an.get("corePicks") or {})
+        ex = set()
+        for q in (_cp.get("finalQuinellas") or []):
+            c = q.get("combo") if isinstance(q, dict) else q
+            if isinstance(c, (list, tuple)) and len(c) >= 2:
+                ex.add((min(int(c[0]), int(c[1])), max(int(c[0]), int(c[1]))))
+        ps = _LATE_DROP.picks(hist, ex)
+        if not ps:
+            return
+        _ln = _LATE_DROP.lines(ps)
+        _txt = "[적중왕] " + str(rk) + "\n" + "\n".join(_ln)
+        _sr = _kakao_send_to_me(_txt)
+        _LATE_DROP_SENT.add(rk)
+        _gate_hit("late_drop", rk, "발송 %d개" % len(ps), once_key=rk)
+        try:
+            os.makedirs(LATE_DROP_DIR, exist_ok=True)
+            with io.open(os.path.join(LATE_DROP_DIR, time.strftime("%Y%m%d") + ".jsonl"),
+                         "a", encoding="utf-8") as _f:
+                _f.write(json.dumps({"t": time.time(), "rk": rk, "ok": bool(_sr.get("ok")),
+                                     "picks": [{"combo": list(c), "odds": o,
+                                                "drop": round(d, 1), "mb": mb}
+                                               for c, o, d, mb in ps]},
+                                    ensure_ascii=False) + "\n")
+        except Exception:
+            pass
+        print("[마감직전 신호] %s: %s" % (rk, " / ".join(_ln[1:-1])))
+    except Exception as _lde:
+        print("[마감직전 신호] 스킵(무시):", str(_lde)[:90])
+
+
 def _kakao_rich_message(rk, phase, an):
     """[카톡 추천 상세 (2026-07-21 권대표 피드백)] '홍보 문구만 보인다' → 해당 경주의 실제 추천 내역을
     본문에 담는다: 복승 ①②③(배당·★·근거) + 삼복승 상위 2 + 💎복병 + 확신도 1위 + 신호 개수.
@@ -40706,6 +40764,12 @@ def _timeline_snap_tick(races, now, db):
                             print("[카톡 변경알림·즉시] %s (남은 %ds): %s" % (rk, left, " / ".join(_ln2)))
         except Exception as _kle:
             print("[카톡 변경알림·즉시] 스킵(무시):", _kle)
+        # 🟢 [2026-08-28] 마감 직전 진성 급락 — **추가만** 보낸다(취소 통보 없음)
+        try:
+            if left is not None and 0 <= left <= 150:
+                _late_drop_alert(rk, an, db)
+        except Exception as _lda:
+            print("[마감직전 신호] 호출 스킵(무시):", str(_lda)[:80])
         phase = _timeline_phase_of(left)
         if not phase or (rk, phase) in _timeline_saved:
             continue
