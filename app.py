@@ -2436,6 +2436,26 @@ def _combo_map(combos):
 SRC_DIVERGE_PCT = 50.0        # 공통 조합 중 '2배 이상 어긋난' 비율이 이 값 이상이면 사설 폐기
 SRC_DIVERGE_MIN_PAIRS = 8     # 그 판정에 필요한 최소 공통 조합 수
 
+# ══════════ [한국 · 배당판 우선 (2026-08-29 대표 승인)] ══════════
+#   🔴 실사고: 제주 7경주 같은 순간 `2+8` — kra_api **7.2배** ↔ 배당판(private) **100.0배**(13.9배).
+#     그 7.2배가 카톡 「복승① 2+8 (7.2배) ★★★」로 회원에게 나갔다.
+#     서울 2경주에서는 `2+10` 을 9.4배로 보냈는데 실제 **136.9배**였다(14.6배).
+#   원인: **KRA 공개 API(data.go.kr)가 실시간이 아니다.** 마감 직전 T-8~T-1 구간이 통째로 정지했다가
+#     T-0 에 한 번에 점프한다. 응답에 갱신 시각 필드조차 없어(rcDate=날짜뿐) 신선도를 알 수 없다.
+#     실측: 한국 T-8~T-1 정지 **20/31 = 64.5%** ↔ 일본(oddspark) **0/372 = 0.0%** — 한국만의 문제다.
+#   🔴 공정 대조(같은 60초 안 · 마감 10분 이내 · **325쌍**):
+#       최종배당과의 오차 중앙   private **3.2%**  ↔  kra_api **62.8%**
+#       private 우세 274(84%) · kra 우세 48(15%)
+#     원칙 20(오탐률 먼저): 바꾸면 **이득 중앙 60.4%p 를 84%에서** 얻고
+#       **손실 중앙 38.6%p 를 15%에서** 낸다.
+#   ⚠ 일본 「사설 우선」 블록과 **같은 모양**이다(새 경로를 만들지 않았다). 방향만 반대다 —
+#     일본은 사설이 어긋나면 버리고, 한국은 **kra_api 를 뒤로 물린다.**
+#   ⚠ private 이 없는 경주(8월 46경주 중 26)는 kra_api 단독이라 **무영향**이다.
+#   ⚠ 확장이 멈추면 신선도 가드가 풀려 **kra_api 가 자동으로 인계**한다(끊기지 않는다).
+#   🔧 되돌리기: KOREA_PRIVATE_FIRST = False 한 줄.
+KOREA_PRIVATE_FIRST = True
+KOREA_PRIVATE_FRESH_SEC = 200     # 일본 「사설 우선」과 같은 값
+
 
 def _src_divergence(prev_q, new_q):
     """두 소스의 공통 조합 배당을 대조 → {n, off(%), med} 또는 None.
@@ -3703,6 +3723,29 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                                {"combos": len(q or []), "prevSrc": _prev_src, "mappingSuspect": bool(_suspect)})
             return {"ok": True, "skipped": True, "raceKey": rk, "mappingSuspect": _suspect,
                     "reason": "사설/배당판 우선 — oddspark 백업 덮어쓰기 생략"}
+    # ══════════ [한국 · 배당판 우선 (2026-08-29 대표 승인)] ══════════
+    #   들어온 것이 kra_api 이고 **배당판 화면이 최근에 이 경주를 수집했으면** kra_api 를 뒤로 물린다.
+    #   ⚠ 위 일본 블록과 같은 방식·같은 신선도(200초)다. 근거는 KOREA_PRIVATE_FIRST 주석 참조.
+    if KOREA_PRIVATE_FIRST and str(source or "").startswith("kra") and prev:
+        try:
+            _kp_src = str(prev.get("source") or "")
+            _kp_fresh = (now - (prev.get("t") or 0)) <= KOREA_PRIVATE_FRESH_SEC
+            _gate_hit("korea_private_first", rk, "도달", reach_only=True)
+            if _kp_src and _kp_fresh and (not _kp_src.startswith("kra")) and not _src_is_oddspark(_kp_src):
+                _kdv = _src_divergence(prev.get("quinella"), q)
+                print("🟢 [배당판 우선·한국] %s: 배당판(src=%s) 유지 → kra_api 덮어쓰기 생략%s"
+                      % (rk, _kp_src,
+                         (" · 괴리 %.0f%%(공통 %d)" % (_kdv["off"], _kdv["n"])) if _kdv else ""))
+                _ingest_reject_log(rk, "배당판 우선(한국) — kra_api 덮어쓰기 생략", source,
+                                   {"combos": len(q or []), "prevSrc": _kp_src,
+                                    "offPct": (round(_kdv["off"], 1) if _kdv else None),
+                                    "common": (_kdv["n"] if _kdv else None)})
+                _gate_hit("korea_private_first", rk,
+                          "kra_api 생략(배당판 유지)%s" % ((" 괴리 %.0f%%" % _kdv["off"]) if _kdv else ""))
+                return {"ok": True, "skipped": True, "raceKey": rk,
+                        "reason": "배당판 우선(한국) — kra_api 덮어쓰기 생략"}
+        except Exception as _kpe:
+            print("[배당판 우선·한국] 판정 실패(무시·기존 동작 유지):", str(_kpe)[:100])
     # 변동 추적용 히스토리(최근 12회) — 직전 대비 급락/순위/역전 계산에 사용
     prev_hist = prev.get("history") or []
     # [1·3번] 경주 전환 방어: 직전 배당 대비 다수 조합 95%+ 급락 = 다른 경주 잔존 → 기준값 재설정
@@ -42173,6 +42216,7 @@ MIDCHECK_TH_SAVEFAIL = 30     # 8/3 하루 230건 = 10분당 2.6건. 점검 간�
 MIDCHECK_TH_GAP = 3           # 8/3 경주 내 5분 초과 공백 5건/106경주. 점검 간격당 3건이면 이상.
 MIDCHECK_TH_CORRUPT = 1       # 8월 전수 신규 0건 → 1건이면 즉시 이상.
 MIDCHECK_TH_DIVERGE = 2       # 8/3 공존 37경주 중 17건 불일치(45.9%). 🔴 발동률이 높을 수 있어 관찰부터.
+MIDCHECK_TH_KR_FREEZE = 1     # 🔴 한국 배당 정지·값 괴리 — 일본 실측 0.0%(0/372) 라 1건이면 이상
 MIDCHECK_TH_COUNTER_MIN = 90  # 계수기 마지막 갱신이 이보다 오래되면 계수기가 죽은 것으로 본다.
 
 
@@ -42300,6 +42344,90 @@ def _mc_q_shape(q):
         return (len(keys), (max(nos) if nos else None))
     except Exception:
         return (None, None)
+
+
+def _midcheck_odds_freeze():
+    """[2026-08-29 신설] 오늘 **한국 배당이 정지했나** — (정지 경주, 대상 경주, 괴리 경주).
+
+    🔴 왜 필요한가: 8/29 제주 7R 에서 같은 순간 `2+8` 이 kra_api **7.2배** ↔ 배당판 **100.0배**였고,
+      그 7.2배가 카톡으로 나갔다. 그런데 중간점검은 「무결성 정상 · 두소스 괴리 0/8」이었다.
+      ⇒ `_midcheck_diverge` 는 ⓐ src 를 oddspark/private **둘로만** 묶어 kra_api 가 private 에 섞이고
+        ⓑ **조합 수·최대 마번만** 보고 **값을 안 본다**. 그래서 13.9배 괴리를 구조적으로 못 잡는다.
+      이 함수는 **값을 본다.** 새 수집 없이 저장된 스냅샷만 읽는다(완전 읽기 전용).
+
+    판정 ① 정지 : T-8~T-1 구간의 첫 틱과 마지막 틱이 **모든 공통 조합에서 완전 동일**
+      ⚠ 근거: 일본 실측 **0/372 = 0.0%** ↔ 한국 **20/31 = 64.5%**. 1건이라도 뜨면 이상이다.
+    판정 ② 괴리 : 같은 60초 안의 kra_api ↔ 배당판 값이 **2배 이상 어긋난 조합 30%+**
+    """
+    d = os.path.join(os.path.dirname(__file__), "data", "odds_history")
+    pre = time.strftime("%Y_%m_%d") + "_"
+    try:
+        names = [x for x in os.listdir(d) if x.startswith(pre) and x.endswith(".json")]
+    except Exception:
+        return (None, None, None)
+
+    def _qm(sn):
+        out = {}
+        for k, v in (sn.get("quinella") or {}).items():
+            try:
+                kk = tuple(sorted(int(x) for x in str(k).replace("-", "+").split("+")[:2]))
+                out[kk] = float(v.get("odds") if isinstance(v, dict) else v)
+            except Exception:
+                continue
+        return out
+
+    def _sec(t):
+        try:
+            h, mi, ss = str(t).split(":")
+            return int(h) * 3600 + int(mi) * 60 + int(ss)
+        except Exception:
+            return None
+
+    froz, tot, div = 0, 0, 0
+    for nm in names:
+        try:
+            with io.open(os.path.join(d, nm), encoding="utf-8") as fh:
+                doc = json.load(fh)
+            sn = [x for x in (doc.get("snapshots") or []) if isinstance(x, dict) and x.get("quinella")]
+            if not any(str(x.get("src") or "").startswith("kra") for x in sn):
+                continue          # 한국(kra_api) 경주만 본다
+            win = [x for x in sn if isinstance(x.get("minutes_before"), (int, float))
+                   and 1 <= x["minutes_before"] <= 8]
+            if len(win) >= 3:
+                a0, aN = _qm(win[0]), _qm(win[-1])
+                com = set(a0) & set(aN)
+                if len(com) >= 10:
+                    tot += 1
+                    if all(abs(a0[c] - aN[c]) < 1e-9 for c in com):
+                        froz += 1
+            # ② 같은 60초 안 값 괴리
+            pv = [x for x in sn if not str(x.get("src") or "").startswith("kra")
+                  and not _src_is_oddspark(str(x.get("src") or ""))]
+            ka = [x for x in sn if str(x.get("src") or "").startswith("kra")]
+            hit = False
+            for x in pv:
+                t1 = _sec(x.get("time"))
+                if t1 is None:
+                    continue
+                for y in ka:
+                    t2 = _sec(y.get("time"))
+                    if t2 is None or abs(t2 - t1) > 60:
+                        continue
+                    A, B = _qm(x), _qm(y)
+                    com = [c for c in A if c in B and A[c] > 0 and B[c] > 0]
+                    if len(com) < 10:
+                        continue
+                    off = sum(1 for c in com if not (0.5 <= A[c] / B[c] <= 2.0)) / float(len(com))
+                    if off >= 0.30:
+                        hit = True
+                        break
+                if hit:
+                    break
+            if hit:
+                div += 1
+        except Exception:
+            continue
+    return (froz, tot, div)
 
 
 def _midcheck_diverge():
@@ -42563,6 +42691,11 @@ def _midcheck_collect(prev):
         f[_k + "Delta"] = ((_cv - _pv) if (isinstance(_cv, int) and isinstance(_pv, int)
                                            and _cv >= _pv) else None)
     f["diverge"], f["divergeBoth"] = _midcheck_diverge()
+    try:
+        f["krFroz"], f["krTot"], f["krDiv"] = _midcheck_odds_freeze()
+    except Exception as _kfe:
+        f["krFroz"] = f["krTot"] = f["krDiv"] = None
+        print("[중간점검] 한국 배당 정지 측정 실패(무시):", str(_kfe)[:100])
     f["kakao"], f["kakaoLast"] = _midcheck_kakao()
     f["gate"] = _midcheck_gate()
     try:
@@ -42600,6 +42733,11 @@ def _midcheck_abnormal(f):
         _use, _is_delta = ((_dv, True) if isinstance(_dv, int) else (f.get(_key), False))
         if isinstance(_use, int) and _use >= _th:
             bad.append("%s %s%d건" % (_label, ("+" if _is_delta else "누적 "), _use))
+    # 🔴 [2026-08-29] 한국 배당 정지 — 일본 실측 0.0% 이므로 **1건이라도 이상**이다.
+    if isinstance(f.get("krFroz"), int) and f["krFroz"] >= MIDCHECK_TH_KR_FREEZE:
+        bad.append("한국 배당 정지 %d/%s경주" % (f["krFroz"], f.get("krTot")))
+    if isinstance(f.get("krDiv"), int) and f["krDiv"] >= MIDCHECK_TH_KR_FREEZE:
+        bad.append("한국 두소스 값 괴리 %d경주" % f["krDiv"])
     if isinstance(f.get("diverge"), int) and f["diverge"] >= MIDCHECK_TH_DIVERGE:
         bad.append("두 소스 괴리 %d경주" % f["diverge"])
     if f.get("integBad"):
@@ -42629,6 +42767,11 @@ def _midcheck_text(slot, f, prev_stamp):
             return "+%d(누적%s)" % (_dv, f.get(key))
         return "?" if f.get(key) is None else "누적%d" % f[key]
     L.append("· 수집공백 %s · JSON손상 %s" % (_gv("gap"), _gv("corrupt")))
+    _kf, _kt, _kd = f.get("krFroz"), f.get("krTot"), f.get("krDiv")
+    if _kt:
+        L.append("· 한국 배당정지 %s/%s%s · 값괴리 %s%s"
+                 % (_kf, _kt, " 🔴" if (isinstance(_kf, int) and _kf) else "",
+                    _kd, " 🔴" if (isinstance(_kd, int) and _kd) else ""))
     L.append("· 두소스 괴리 %s/%s"
              % ("?" if f.get("diverge") is None else f["diverge"],
                 "?" if f.get("divergeBoth") is None else f["divergeBoth"]))
