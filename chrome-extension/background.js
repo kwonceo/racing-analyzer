@@ -695,23 +695,53 @@ function _ensureFineLoop() {
   if (!_keepaliveTimer) _keepaliveTimer = setInterval(() => { try { chrome.runtime.getPlatformInfo(() => {}); } catch (_) { /* */ } }, 20000);
 }
 
+const _ODDS_TAB_URLS = ['*://*.keiba.go.jp/*', '*://*.qwqwd25.net/*', '*://*.dke-d11diw.site/*'];
+
+/* 🔴🔴 [A안 · 2026-08-30 대표 승인] **열린 배당판 탭 전부**에서 수집한다.
+ *   왜: 종전 `_findOddsTab` 은 매칭 탭 중 **하나만** 골랐다(`tabs.find(...) || tabs[0]`).
+ *     ⇒ 일본 배당판과 한국 배당판을 같이 열어두면 **어느 쪽이 잡힐지 탭 순서에 달렸다.**
+ *   실측(2026-08-29 한국 17경주): 배당판 틱이 들어온 경주 **7/17 = 41%** 뿐이었고,
+ *     그 사이 KRA API 는 마감 직전 정지해 `2+8` 을 7.2배(실제 100배)로 카톡에 실어 보냈다.
+ *   ⚠ 확장은 **포그라운드가 아니어도** 수집한다(URL 로만 찾는다). 열어두기만 하면 된다.
+ *   🔧 되돌리기: MULTI_TAB_COLLECT = false 한 줄 → 종전(탭 1개)으로 돌아간다. */
+const MULTI_TAB_COLLECT = true;
+
 async function _findOddsTab() {
-  const tabs = await chrome.tabs.query({ url: ['*://*.keiba.go.jp/*', '*://*.qwqwd25.net/*', '*://*.dke-d11diw.site/*'] });
+  const tabs = await chrome.tabs.query({ url: _ODDS_TAB_URLS });
   if (!tabs.length) return null;
   return tabs.find((t) => /Odds|배당|TodayRaceInfo|DebaTable/i.test(t.url || '')) || tabs[0];
 }
+/* 열린 배당판 탭 **전부**(배당 화면으로 보이는 것 우선). 순서는 안정적으로 둔다. */
+async function _findOddsTabs() {
+  const tabs = (await chrome.tabs.query({ url: _ODDS_TAB_URLS })).filter((t) => t && t.id != null);
+  const hot = tabs.filter((t) => /Odds|배당|TodayRaceInfo|DebaTable/i.test(t.url || ''));
+  const rest = tabs.filter((t) => !hot.includes(t));
+  return hot.concat(rest);
+}
 async function _collectOnce() {
-  const tab = await _findOddsTab();
-  if (!tab) { _setAutoStatus({ running: true, warn: '배당판 탭이 열려있지 않음' }); return null; }
-  try {
-    const r = await chrome.tabs.sendMessage(tab.id, { type: 'AUTO_COLLECT', reason: 'bg' });
-    // [수정2] 경기 마감 감지 시 자동수집 엔진 정지
-    if (r && r.closed) { await _onRaceClosed(r.closeReason || ''); }
-    return r;
-  } catch (e) {
+  const tabs = MULTI_TAB_COLLECT ? await _findOddsTabs()
+                                 : [await _findOddsTab()].filter(Boolean);
+  if (!tabs.length) { _setAutoStatus({ running: true, warn: '배당판 탭이 열려있지 않음' }); return null; }
+  const results = [];
+  for (const tab of tabs) {                      // 🔴 순차 — 동시에 쏘지 않는다(부하·중복 억제)
+    try {
+      const r = await chrome.tabs.sendMessage(tab.id, { type: 'AUTO_COLLECT', reason: 'bg' });
+      if (r) results.push(r);
+    } catch (e) { /* 이 탭만 응답 없음 — 나머지는 계속한다 */ }
+  }
+  if (!results.length) {
     _setAutoStatus({ running: true, warn: '수집 탭 응답 없음(페이지 새로고침 필요)' });
     return null;
   }
+  // 🔴 [수정2 유지 + A안 보정] 마감이면 엔진을 멈추는데, **전부 마감일 때만** 멈춘다.
+  //   한 탭이 끝난 경주를 띄우고 있어도 다른 탭이 진행 중이면 계속 수집해야 한다.
+  //   (`_onRaceClosed` 는 확정 마감 시 autoSend 를 **꺼버린다** — 한 탭 때문에 전체가 죽으면 안 된다.)
+  const closed = results.filter((r) => r && r.closed);
+  if (closed.length === results.length) { await _onRaceClosed(closed[0].closeReason || ''); }
+  if (MULTI_TAB_COLLECT && results.length > 1) {
+    _setAutoStatus({ running: true, tabs: results.length, closedTabs: closed.length });
+  }
+  return results.find((r) => !r || !r.closed) || results[0];   // 대표값 = 진행 중인 것 우선
 }
 
 // [마감 처리] 확정 마감(DOM 발매마감)만 완전 정지, 무변동(추정)은 자동 재개되는 소프트 일시중지.
