@@ -40146,6 +40146,37 @@ def _judge_quinellas(cp):
 # 🔴 [2026-08-29] 판정 명단을 회원 실수신과 맞춘다 (회원이 받는 것은 무변경)
 JUDGE_MATCH_MEMBER = True
 
+# 🔴🔴 [2026-08-29 대표 승인] **삼복승 1순위를 「참고」에서 정식 추천으로 올린다.**
+#   계기: 마에바시 1경주(착순 9-2-3) — 우리가 짚은 삼복승 2+3+9 가 **41.9배**로 들어왔는데
+#     카톡에는 「삼복승 2+3+9 · 참고」 한 줄로 나갔고 권장 비중에도 없었다. 회원이 살 이유가 없었다.
+#   🔴 결정 둘이 충돌하고 있었다:
+#     2026-08-09 「회원 발송은 복승만 · 삼복승은 참고」  ↔  TRIO_TOP1_OPEN=True 「1순위를 판정에 넣는다」
+#     ⇒ **판정에는 들어가고 회원에겐 참고**였다(오늘 아침 고친 복승 불일치의 거울상).
+#   전수(8월 경륜 637경주 · 결과 보유): 적중 79(12.4%) · 배당중앙 **4.5배**(복승 2.7배의 1.7배)
+#     · 회수 **86.8%**(복승 69.9%보다 높다) · 10배+ 17건 · 20배+ 6건 · 최대 37.1배
+#   ⚠ 86.8% 는 **100% 미만**이다 — 「사면 번다」가 아니라 「덜 잃으면서 훨씬 재미있어진다」.
+#     광고 문구로 쓰지 않는다(TRIO_TOP1_OPEN 도입 때 적어둔 그대로).
+#   🔴 **정식 대상은 「판정 명단에 실제로 들어간 삼복승」뿐이다**(`displayedCombos.trifectas`).
+#     _judge_quinellas 와 같은 방식 — 새 조건을 만들지 않는다. 그래야 **카톡과 판정이 절대 안 갈린다.**
+#     ⇒ 경마·한국은 판정에서 제외되므로 **자동으로 「참고」가 유지**된다(2026-08-09 결정 그대로).
+#   ⚠ 권장 비중(💰)은 **한 줄도 안 건드렸다** — 그 역수 배분은 복승 원금 배분으로 측정된 것이고
+#     `_stake_plan` 은 2두 조합만 받는다. 삼복승을 섞으면 측정 근거가 사라진다(원칙 3).
+#   🔧 되돌리기: KAKAO_TRIO_OFFICIAL = False 한 줄 → 종전 「· 참고」로 돌아간다.
+KAKAO_TRIO_OFFICIAL = True
+
+
+def _kakao_trio_official(cp):
+    """판정 명단에 들어간 삼복승 = 정식 발송 대상. 없으면 빈 목록(→ 종전 「참고」 유지)."""
+    if not KAKAO_TRIO_OFFICIAL:
+        return []
+    try:
+        dt = ((cp or {}).get("displayedCombos") or {}).get("trifectas") or []
+        return [tuple(sorted(int(x) for x in c)) for c in dt if c and len(c) == 3]
+    except Exception as _te:
+        print("[카톡 삼복승 정식] 스킵(무시):", str(_te)[:80])
+        return []
+
+
 # 🟢🟢 [2026-08-28 대표 승인] **마감 직전 진성 급락 알림** — 「추가만 보내는 형태로 열어」
 #   근거·판정은 tools/late_drop.py 상단과 CLAUDE.md 참조.
 #   엣지 1.416(CI 하한 1.206) · 대박3뺀 134.9% · 경주당 2.03 · 배당중앙 45.4배
@@ -40213,6 +40244,20 @@ def _kakao_rich_message(rk, phase, an):
         return "★" * max(0, min(3, int(n or 0)))
     _circ = "①②③"
     _fq3 = _judge_quinellas(cp)[:3]          # 🔴 화면=판정 (2026-08-22)
+    # 🔴 [2026-08-29 대표 승인] 정식 삼복승 = **판정 명단에 실제로 들어간 삼복승**(KAKAO_TRIO_OFFICIAL).
+    _tri_official = set(_kakao_trio_official(cp))
+    _tri_odds = {}
+    for _t in (cp.get("finalTrifectas") or []):
+        try:
+            _tk = tuple(sorted(int(x) for x in (_t.get("combo") or [])))
+        except (TypeError, ValueError):
+            continue
+        if _t.get("odds") and _t.get("oddsEst"):
+            _tri_odds[_tk] = " (~%s배·추정)" % _t.get("odds")
+        elif _t.get("odds"):
+            _tri_odds[_tk] = " (%s배)" % _t.get("odds")
+    if _tri_official:
+        _gate_hit("kakao_trio_official", rk, "정식 삼복승 %d개" % len(_tri_official), once_key=rk)
     if KAKAO_PRODUCT_SPLIT_VIEW:
         # 🔴 본선과 한방을 **두 상자로** 나눈다(탭 아님 · 한 화면에 같이 보인다).
         #   갈래 기준은 저장된 상품 분리와 같다 — 교차 짝·기대값 복원·💎 편입분이 한방이다.
@@ -40241,11 +40286,16 @@ def _kakao_rich_message(rk, phase, an):
             _o = (" (%s배)" % s.get("odds")) if s.get("odds") else ""
             _bl.append(("💎복병 %s%s ★★" % ("+".join(map(str, s.get("combo") or [])), _o),
                         s.get("combo")))
+        # 🔴 [2026-08-29] 정식 삼복승을 **한방 상자 안**으로 옮긴다(종전엔 상자 밖 「· 참고」였다).
+        #   ⚠ 근거 한 줄(_why_line)은 붙이지 않는다 — 그 함수는 2두 조합 전용이다.
+        for _tc in _tri_official:
+            _to = _tri_odds.get(_tc) or ""
+            _bl.append(("삼복승 %s%s ★★★" % ("+".join(map(str, _tc)), _to), None))
         if _bl:
             lines.append("━ 한방 · 한 번에 뒤집는 자리")
             for _txt, _cb in _bl:
                 lines.append(_txt)
-                _w = _why_line(_cb, cp, an, rk)
+                _w = _why_line(_cb, cp, an, rk) if (_cb and len(_cb) == 2) else None
                 if _w:
                     lines.append("  " + _w)
     else:
@@ -40302,6 +40352,13 @@ def _kakao_rich_message(rk, phase, an):
     #   ⚠ 화면·오버레이는 그대로 둔다 — **발송만** 줄인다(참고 표시는 유지).
     #   🔧 롤백: KAKAO_TRIO_MAX 를 2 로 되돌린다.
     for t in (cp.get("finalTrifectas") or [])[:KAKAO_TRIO_MAX]:
+        # 🔴 [2026-08-29] 위 한방 상자에 **정식**으로 이미 실린 조합은 여기서 건너뛴다(중복 방지).
+        #   ⚠ 정식이 아닌 것(경마·한국 등 판정 제외분)은 종전대로 「· 참고」로 나간다.
+        try:
+            if tuple(sorted(int(x) for x in (t.get("combo") or []))) in _tri_official:
+                continue
+        except (TypeError, ValueError):
+            pass
         if t.get("odds") and t.get("oddsEst"):
             _o = " (~%s배·추정)" % t.get("odds")     # [추정 표기] 실배당 미수집 조합(다마노 3R 둔갑 방지)
         elif t.get("odds"):
