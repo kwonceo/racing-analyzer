@@ -19186,6 +19186,50 @@ def _build_analysis_log(rk, an=None):
                 _dc_out = _old_dc                    # 빈 추천으로 기존 기록 덮지 않음(보존 원칙 동일)
         if isinstance(core_picks_out, dict) and _dc_out:
             core_picks_out = dict(core_picks_out)
+            # 🔴🔴 [2026-08-29] **판정 명단을 「회원이 실제로 받는 것」과 일치시킨다.**
+            #   실태(8월 정제 2,989경주 · 실측):
+            #     ① 판정(displayedCombos)      경주당 2.62 · 회수 69.9%
+            #     ③ 회원 실수신(finalQuinellas + 💎 상위1 + kakaoExtra)  경주당 **3.34**
+            #     🔴 판정 == 회원 실수신인 경주가 **44.5%뿐** · 회원에만 있는 경주 **51.1%**
+            #   ⇒ 우리는 2.62개로 재는데 회원은 3.34개를 받는다. 성적표가 실제와 다르다.
+            #   🔴 편입 경로 다섯(extra·kakaoExtra·pairFill·bandAdd·disperseAdd)이
+            #     **판정에만** 들어가 왔다(423경주·11.8%). pairFill 은 주석대로 최종 상한 뒤라
+            #     `finalQuinellas` 를 못 탄다.
+            #   ⚠ **회원이 받는 것은 한 줄도 안 바꾼다** — 판정 쪽을 회원에 맞출 뿐이다.
+            #     그래서 이 변경은 회원 화면·카톡에 아무 영향이 없다.
+            #   ⚠ 회수율은 거의 안 바뀐다(69.9% ↔ 69.9%). **구좌 수가 정확해진다**(2.62 → 3.34).
+            #     🔴 그 결과 「경주당 3개 이하」를 이미 넘고 있다는 사실이 드러난다 — 그것이 목적이다.
+            #   🔧 되돌리기: JUDGE_MATCH_MEMBER = False
+            if JUDGE_MATCH_MEMBER and isinstance(_dc_out, dict):
+                try:
+                    def _jm_cb(_x):
+                        _c = _x.get("combo") if isinstance(_x, dict) else _x
+                        if isinstance(_c, (list, tuple)) and len(_c) >= 2:
+                            try:
+                                return [min(int(_c[0]), int(_c[1])), max(int(_c[0]), int(_c[1]))]
+                            except (TypeError, ValueError):
+                                return None
+                        return None
+                    _real, _seen = [], set()
+                    for _src in ((_cp_dc.get("finalQuinellas") or []),
+                                 (_cp_dc.get("bmedSpecial") or [])[:1],      # 카톡 💎 1개
+                                 (_dc_out.get("kakaoExtra") or [])):
+                        for _x in _src:
+                            _c = _jm_cb(_x)
+                            if _c and tuple(_c) not in _seen:
+                                _seen.add(tuple(_c))
+                                _real.append(_c)
+                    if _real:
+                        _before = list(_dc_out.get("quinellas") or [])
+                        if [sorted(c) for c in _before] != _real:
+                            _dc_out["quinellas"] = _real
+                            _dc_out["judgeMatch"] = {"before": _before, "after": _real}
+                            _gate_hit("judge_match_member", rk,
+                                      "판정 %d → 회원 %d" % (len(_before), len(_real)),
+                                      once_key=rk)
+                except Exception as _jme:
+                    print("[판정↔회원 정렬] 스킵(무시):", str(_jme)[:80])
+
             core_picks_out["displayedCombos"] = _dc_out
         # 🔬 [삼복승 후보 A · 관찰 · 2026-08-12] displayedCombos 를 만든 **뒤**에 붙인다.
         #   🔴 판정 명단에 넣지 않는다 — 위 _dc_out 에는 손대지 않는다.
@@ -40098,6 +40142,9 @@ def _judge_quinellas(cp):
         print("[화면=판정·카톡] 스킵(무시):", str(_jqe)[:80])
         return fq
 
+
+# 🔴 [2026-08-29] 판정 명단을 회원 실수신과 맞춘다 (회원이 받는 것은 무변경)
+JUDGE_MATCH_MEMBER = True
 
 # 🟢🟢 [2026-08-28 대표 승인] **마감 직전 진성 급락 알림** — 「추가만 보내는 형태로 열어」
 #   근거·판정은 tools/late_drop.py 상단과 CLAUDE.md 참조.
