@@ -47,6 +47,12 @@ PORT = int(os.environ.get("MIRROR_PORT", "8014"))
 # 🔴 화이트리스트 — 이 두 디렉터리 밖은 어떤 경로로도 못 읽는다
 _DIRS = {"analysis_log": os.path.join(DATA, "analysis_log"),
          "odds_history": os.path.join(DATA, "odds_history")}
+# 🔴 [2026-08-31] 보고 문서 — **정확한 파일명만** 담는다(패턴·디렉터리 순회 없음).
+#   대표가 다른 PC 에서 3단 보고를 읽기 위한 것이다. 그 외 파일은 어떤 이름으로도 못 읽는다.
+#   ⚠ CLAUDE.md 는 넣지 않는다 — 1MB+ 이고 내부 판단 기록이다.
+_DOCS = {"report": os.path.join(BASE, "docs", "REPORT.md"),
+         "next": os.path.join(BASE, "docs", "NEXT.md")}
+DOC_MAX = 400 * 1024        # 그 이상은 앞부분만(최신이 위에 온다)
 # 파일명 규격: 날짜_이름.json · 경로 구분자·상위 이동(..) 원천 차단
 _NAME_RE = re.compile(r"^\d{4}_\d{2}_\d{2}_[^\\/:*?\"<>|]{1,80}\.json$")
 
@@ -121,6 +127,45 @@ def read_json(kind, name):
             return json.load(f)
     except Exception:
         return None
+
+
+def read_doc(kind):
+    """보고 문서를 읽는다. 🔴 이름이 화이트리스트에 **정확히** 있을 때만."""
+    p = _DOCS.get(kind)
+    if not p or not os.path.exists(p):
+        return None
+    try:
+        with io.open(p, encoding="utf-8") as f:
+            return f.read(DOC_MAX)
+    except Exception:
+        return None
+
+
+def md_lite(t):
+    """마크다운을 아주 가볍게 HTML 로. 🔴 **먼저 이스케이프**한 뒤에만 태그를 만든다."""
+    t = (t or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    out, code = [], False
+    for ln in t.split("\n"):
+        if ln.startswith("```"):
+            out.append("</pre>" if code else "<pre>")
+            code = not code
+            continue
+        if code:
+            out.append(ln)
+            continue
+        s2 = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", ln)
+        s2 = re.sub(r"`([^`]+)`", r"<code>\1</code>", s2)
+        m = re.match(r"^(#{1,4})\s+(.*)$", s2)
+        if m:
+            lv = min(4, len(m.group(1))) + 1
+            out.append("<h%d>%s</h%d>" % (lv, m.group(2), lv))
+        elif not s2.strip():
+            out.append("<div class='sp'></div>")
+        else:
+            out.append("<div>%s</div>" % s2)
+    if code:
+        out.append("</pre>")
+    return "\n".join(out)
 
 
 def today_files():
@@ -226,6 +271,7 @@ select{background:#141b30;color:#e6edf7;border:1px solid #222d4a;border-radius:7
 </style></head><body><div class="wrap">
 <h1>실시간 분석 미러</h1>
 <div class="sub" id="hd">불러오는 중…</div>
+<div class="sub" style="padding:6px 0"><a id="rp" href="#" style="color:#7dd3fc;text-decoration:none">📄 보고 읽기 →</a></div>
 <div class="card warn">⚠ 서버 저장분을 읽습니다 — 배당판보다 <b>수 초~수십 초 늦습니다</b>.
 <b>관찰용</b>이며 마감 임박 판단에 쓰지 마십시오.</div>
 <select id="sel"></select>
@@ -265,8 +311,28 @@ function tick(){var f=document.getElementById('sel').value;
    .then(function(r){if(!r.ok)throw 0;return r.json()}).then(draw)
    .catch(function(){document.getElementById('hd').textContent='연결 실패 — 토큰/네트워크 확인'})}
 document.getElementById('sel').addEventListener('change',function(){this.dataset.locked='1';tick()});
+document.getElementById('rp').href='/m/report?d=report&t='+encodeURIComponent(T);
 tick();setInterval(tick,10000);
 </script></body></html>"""
+
+
+REPORT_HEAD = u"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>보고</title><style>
+:root{color-scheme:dark}
+body{margin:0;background:#0b1020;color:#e6edf7;font:14px/1.65 -apple-system,"Malgun Gothic",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:14px}
+.nav{padding:8px 0 12px;border-bottom:1px solid #222d4a;margin-bottom:10px}
+.nav a{color:#7dd3fc;text-decoration:none;margin-right:4px}
+h2{font-size:17px;margin:18px 0 6px;color:#fff;border-top:1px solid #222d4a;padding-top:14px}
+h3{font-size:15px;margin:14px 0 4px;color:#cbd5e1}
+h4,h5{font-size:14px;margin:10px 0 4px;color:#a9bcd8}
+pre{background:#141b30;border:1px solid #222d4a;border-radius:8px;padding:10px;
+    overflow-x:auto;font-size:12px;line-height:1.5;white-space:pre;margin:8px 0}
+code{background:#1d2740;padding:1px 5px;border-radius:4px;font-size:12.5px}
+b{color:#fff}.sp{height:7px}
+.card{background:#141b30;border:1px solid #222d4a;border-radius:10px;padding:12px}
+</style></head><body><div class="wrap">"""
 
 
 # ────────────────────────── 핸들러 ──────────────────────────
@@ -320,12 +386,26 @@ class Handler(BaseHTTPRequestHandler):
             _access(ip, u.path, 429)
             return self._send(429, "Too Many Requests", "text/plain; charset=utf-8")
         # 🔴 토큰 불일치는 404 — 401 이 아니다(존재 자체를 알리지 않는다)
-        if u.path not in ("/m", "/m/data") or not token_ok(q):
+        if u.path not in ("/m", "/m/data", "/m/report") or not token_ok(q):
             _access(ip, u.path, 404)
             return self._send(404, "Not Found", "text/plain; charset=utf-8")
         _access(ip, u.path, 200)
         if u.path == "/m":
             return self._send(200, HTML, "text/html; charset=utf-8")
+        if u.path == "/m/report":
+            # 🔴 [2026-08-31] 3단 보고를 다른 PC 에서 읽는다. 화이트리스트에 있는 문서만.
+            kind = (q.get("d") or ["report"])[0]
+            if kind not in _DOCS:
+                _access(ip, u.path, 404)
+                return self._send(404, "Not Found", "text/plain; charset=utf-8")
+            body = read_doc(kind)
+            tok = (q.get("t") or [""])[0]
+            nav = ("<a href='/m?t=%s'>← 실시간</a> · <a href='/m/report?d=report&t=%s'>보고</a>"
+                   " · <a href='/m/report?d=next&t=%s'>명령</a>") % (tok, tok, tok)
+            html = (REPORT_HEAD + "<div class='nav'>" + nav + "</div>"
+                    + (md_lite(body) if body else "<div class='card'>문서가 아직 없습니다.</div>")
+                    + "</div></body></html>")
+            return self._send(200, html, "text/html; charset=utf-8")
         sel = (q.get("r") or [None])[0]
         return self._send(200, json.dumps(payload(sel), ensure_ascii=False),
                           "application/json; charset=utf-8")

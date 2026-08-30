@@ -134,10 +134,34 @@ chk("토큰 불일치 → 404(401 아님)", c == 404, "HTTP %s" % c)
 M._RATE.clear()
 c, _ = req("/m")
 chk("토큰 없음 → 404", c == 404, "HTTP %s" % c)
-for p in ("/", "/admin", "/api/health", "/static/js/app.js", "/.env"):
+for p in ("/", "/admin", "/api/health", "/static/js/app.js", "/.env", "/m/report/x"):
     M._RATE.clear()          # 레이트 리밋과 섞이면 429 가 나와 **다른 것을 재게 된다**(원칙 4)
     c, _ = req(p + "?t=" + T)
     chk("토큰 맞아도 다른 경로 404: %s" % p, c == 404, "HTTP %s" % c)
+
+# ── ④-2 보고 문서 (2026-08-31) ────────────────────────────────
+M._RATE.clear()
+c, b = req("/m/report?d=report&t=" + T)
+chk("보고 문서 200", c == 200 and ("REPORT" in b or "보고" in b or len(b) > 200), "HTTP %s" % c)
+M._RATE.clear()
+c, _ = req("/m/report?d=report")
+chk("보고 · 토큰 없음 → 404", c == 404, "HTTP %s" % c)
+# 🔴 화이트리스트 밖 문서는 어떤 이름으로도 못 읽는다
+for bad in ("claude", "../CLAUDE.md", "../../.env", "app.py", "x"):
+    M._RATE.clear()
+    c, _ = req("/m/report?d=" + bad + "&t=" + T)
+    chk("보고 · 화이트리스트 밖 차단: %r" % bad, c == 404, "HTTP %s" % c)
+# ⚠ `?d=`(빈 값)은 parse_qs 가 키를 버려 **기본 문서(report)** 로 떨어진다 — 화이트리스트 안이라 안전하다.
+#   구멍이 아니라 폴백이므로 404 가 아니라 **기본 문서가 오는지**로 판정한다(원칙 8-D).
+M._RATE.clear()
+c, b = req("/m/report?d=&t=" + T)
+chk("보고 · 빈 d → 기본 문서(report)", c == 200 and "CLAUDE" not in b and len(b) > 200, "HTTP %s" % c)
+chk("read_doc 도 화이트리스트 밖은 None",
+    M.read_doc("../CLAUDE.md") is None and M.read_doc("claude") is None)
+# 🔴 md_lite 는 **먼저 이스케이프**한다(문서에 태그가 있어도 실행되면 안 된다)
+_h = M.md_lite("<script>alert(1)</script>\n**굵게** `코드`")
+chk("md_lite 가 스크립트를 이스케이프한다",
+    "&lt;script&gt;" in _h and "<script>" not in _h and "<b>굵게</b>" in _h)
 
 for mth in ("POST", "PUT", "DELETE", "OPTIONS"):
     M._RATE.clear()
