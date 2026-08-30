@@ -18613,12 +18613,12 @@ def _build_analysis_log(rk, an=None):
                              and str(an.get("sport") or "") in TRIO_TOP1_OPEN_SPORTS)
             _tri_all = [sorted(int(x) for x in (t.get("combo") or []))
                         for t in (_cp_dc.get("finalTrifectas") or []) if t.get("combo")]
-            if an.get("trioShadow"):
-                _tri_out = _tri_all[:TRIO_TOP1_OPEN_N] if _tri_open else []
-                if _tri_open and _tri_out:
-                    _gate_hit("trio_top1_open", rk, "삼복승 1순위 해제")
-            else:
-                _tri_out = _tri_all[:2]
+            # 🔴 [2026-08-30] 규칙을 `_judge_trifectas` **한 곳**으로 모았다(카톡과 갈리지 않게).
+            #   ⚠ 여기서는 displayedCombos 가 아직 없으므로 헬퍼가 계산 분기를 탄다 — 동작 불변.
+            _tri_out = _judge_trifectas({"finalTrifectas": (_cp_dc.get("finalTrifectas") or [])},
+                                        an.get("sport"), shadow=an.get("trioShadow"))
+            if an.get("trioShadow") and _tri_open and _tri_out:
+                _gate_hit("trio_top1_open", rk, "삼복승 1순위 해제")
             _dc_out = {
                 "quinellas": [sorted(int(x) for x in (q.get("combo") or []))
                               for q in (_cp_dc.get("finalQuinellas") or []) if q.get("combo")],
@@ -40186,6 +40186,41 @@ def _judge_quinellas(cp):
         return fq
 
 
+def _judge_trifectas(cp, sport, shadow=None):
+    """[판정 삼복승 · 한 곳] 판정 명단에 들어가는 삼복승을 돌려준다.
+
+    🔴 [2026-08-30] **카톡 시점에는 `displayedCombos` 가 없다.**
+      `_build_analysis_log` 가 만드는 값이고, 카톡은 `_triple_analyze` 를 직접 부른다
+      (HTTP 엔드포인트 `triple_analyze()` 의 DISPLAY_FOLLOWS_JUDGE 주입 경로를 안 탄다).
+      그래서 어제 넣은 「삼복승 정식」이 **실전에서 한 번도 안 탔다** — 오늘 경륜 11경주 전부
+      판정 삼복승을 갖고 있는데 카톡 30건이 전부 「· 참고」로 나갔다(계수기 0).
+      ⚠ 원칙 5 그대로다 — 내 검증은 **저장된 analysis_log**(displayedCombos 있음)로 했는데
+        **실전 입력이 달랐다.** `_why_line`/raw_profile(2026-08-28)과 같은 유형이고 세 번째다.
+    ⇒ 있으면 그것을 쓰고, **없으면 같은 규칙으로 계산한다.** 규칙은 이 함수 **한 곳**에만 둔다.
+    """
+    cp = cp or {}
+    dc = ((cp.get("displayedCombos") or {}).get("trifectas"))
+    if dc:
+        try:
+            return [sorted(int(x) for x in c) for c in dc if c and len(c) == 3]
+        except (TypeError, ValueError):
+            return []
+    _all = []
+    for t in (cp.get("finalTrifectas") or []):
+        c = (t or {}).get("combo")
+        if c:
+            try:
+                _all.append(sorted(int(x) for x in c))
+            except (TypeError, ValueError):
+                continue
+    if shadow is None:
+        shadow = cp.get("trioShadow")
+    if shadow:
+        _open = bool(TRIO_TOP1_OPEN and str(sport or "") in TRIO_TOP1_OPEN_SPORTS)
+        return _all[:TRIO_TOP1_OPEN_N] if _open else []
+    return _all[:2]
+
+
 # 🔴 [2026-08-29] 판정 명단을 회원 실수신과 맞춘다 (회원이 받는 것은 무변경)
 JUDGE_MATCH_MEMBER = True
 
@@ -40208,13 +40243,13 @@ JUDGE_MATCH_MEMBER = True
 KAKAO_TRIO_OFFICIAL = True
 
 
-def _kakao_trio_official(cp):
+def _kakao_trio_official(cp, sport=None):
     """판정 명단에 들어간 삼복승 = 정식 발송 대상. 없으면 빈 목록(→ 종전 「참고」 유지)."""
     if not KAKAO_TRIO_OFFICIAL:
         return []
     try:
-        dt = ((cp or {}).get("displayedCombos") or {}).get("trifectas") or []
-        return [tuple(sorted(int(x) for x in c)) for c in dt if c and len(c) == 3]
+        # 🔴 displayedCombos 가 없으면(카톡 시점이 그렇다) **같은 규칙으로 계산**한다.
+        return [tuple(c) for c in _judge_trifectas(cp, sport)]
     except Exception as _te:
         print("[카톡 삼복승 정식] 스킵(무시):", str(_te)[:80])
         return []
@@ -40288,7 +40323,7 @@ def _kakao_rich_message(rk, phase, an):
     _circ = "①②③"
     _fq3 = _judge_quinellas(cp)[:3]          # 🔴 화면=판정 (2026-08-22)
     # 🔴 [2026-08-29 대표 승인] 정식 삼복승 = **판정 명단에 실제로 들어간 삼복승**(KAKAO_TRIO_OFFICIAL).
-    _tri_official = set(_kakao_trio_official(cp))
+    _tri_official = set(_kakao_trio_official(cp, an.get("sport")))
     _tri_odds = {}
     for _t in (cp.get("finalTrifectas") or []):
         try:
