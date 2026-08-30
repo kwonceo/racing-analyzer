@@ -90,3 +90,10 @@ data/korea_pdf_raw/
 logs/server*
 logs/server_*.log
 logs/server_*.err
+
+# 🔴 [2026-08-30] 읽기 전용 미러 — **토큰은 비밀이다. 절대 커밋하지 않는다.**
+data/_mirror_token.txt
+logs/mirror_access.log
+logs/mirror_stdout.log
+logs/mirror_stderr.log
+data/_mirror_escape_probe.json
