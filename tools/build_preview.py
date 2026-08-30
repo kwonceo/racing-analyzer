@@ -244,7 +244,8 @@ def build(rk_path):
     head = "%s · %d두" % (base.replace("_", " "), nH)
     if dist:
         head += " · %sm" % dist
-    if pa.get("paceLabel") or pa.get("pace"):
+    # 🔴 각질이 안 갈리는 판(한국 = 「자유」뿐)에서는 페이스를 말하지 않는다 — _pace_usable 참조
+    if (pa.get("paceLabel") or pa.get("pace")) and _pace_usable(hs):
         head += " · %s" % str(pa.get("paceLabel") or pa.get("pace")).replace("페이스", "").strip() + " 페이스"
     L.append(("[" + head + "]", "raw_profile / paceAnalysis"))
 
@@ -366,6 +367,37 @@ def fact_short(h, ent=None, dist=None):
     return "·".join(bits[:3]) if bits else None
 
 
+def _pace_usable(hs):
+    """[2026-08-30] 페이스 문장을 쓸 수 있는 판인가 — **각질이 실제로 갈리는가**.
+
+    🔴 왜: 한국 경마는 각질 표기가 사실상 「자유」 하나다.
+      8월 실측 1,749두 — 자유 1,233(71%) · 없음 469(27%) · **선행 5(0.3%)**.
+      `_race_shape_label`·`paceAnalysis` 는 **선행 마릿수**로 판을 가르므로
+      한국은 **37경주 중 36(97%)이 「느린 판」**으로 고정된다. 정보가 0 이다.
+      실사고(부산 2경주): 「어떻게 봤나」가 「🐌 느린 페이스」라고 쓰는 동안
+      같은 화면 아래 「경주 전개 예측」은 **「선행 3두 → 하이페이스」**였다.
+      아래쪽은 `_simulate_race_flow_kra` 로 **KRA 구간기록**(첫 400m·코너 통과위치)을 쓴다 —
+      🔴 **각질 표기가 아니라 실주행을 본다. 그쪽이 맞고 이쪽이 틀렸다.**
+    ⇒ 선행/추입이 **하나도 안 잡히면** 페이스를 말하지 않는다(원칙: 근거 없으면 안 쓴다).
+    ⚠ 일본 경륜은 추입 62 · 선행 40 으로 고르게 갈린다 — **거기서는 그대로 쓴다**(무영향).
+    """
+    hs = hs or []
+    if not hs:
+        return False
+    known = lead = 0
+    for h in hs:
+        g = str(h.get("gait") or h.get("styleType") or h.get("declaredStyleLabel") or "")
+        if not g:
+            continue
+        known += 1
+        if any(k in g for k in ("선행", "逃", "nige")):
+            lead += 1
+    # 🔴 페이스 판정의 **입력은 선행 마릿수**다(_race_shape_label · _apply_pace_analysis 둘 다).
+    #   선행 0두는 「느리다」가 아니라 **「모른다」**이다 — 그걸 「느린 페이스」로 옮겨 적지 않는다.
+    # ⚠ 라벨 보유가 절반 미만이면 역시 판정 불가로 본다(부분 수집).
+    return lead >= 1 and known >= (len(hs) + 1) // 2
+
+
 def kakao_lines(hs, ents=None, dist=None, mrank=None, pace=None, topn=3):
     """카톡용 **짧은 예상문** — 「어떻게 봤나」 블록.
     주목마 topn 두를 한 줄씩 + 관전 포인트 한 줄. 만들 게 없으면 빈 리스트.
@@ -389,7 +421,7 @@ def kakao_lines(hs, ents=None, dist=None, mrank=None, pace=None, topn=3):
     if not out:
         return []
     tail = ""
-    if pace:
+    if pace and _pace_usable(hs):
         tail += str(pace).replace("페이스", "").strip() + " 페이스"
     if len(used) >= 2:
         tail += (" · " if tail else "") + "%d번과 %d번의 우승 경합이 관전 포인트" % (used[0], used[1])

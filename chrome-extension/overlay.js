@@ -1980,13 +1980,25 @@
         // [1번·복병 정리] 복병 최대 3두 + 우선순위: ①스마트머니+집중급락 동시 ②집중급락 횟수 많은 순 ③역배열 감지 말.
         //   기존 6두 나열 → 상위 3두만(가장 강한 신호). 후보를 점수화해 정렬 후 상위 3두 렌더.
         var darkCands = [], darkSeen = {};
+        // 🔴 [2026-08-30] 근거 없는 ★ 억제 스위치 — 위 주석 참조
+        var DARK_STARS_NEED_SIGNAL = true;
         (d.darkHorses || []).forEach(function (h) {
           if (h.no == null || !inV(h.no) || baseKeys.indexOf(Number(h.no)) >= 0 || darkSeen[h.no]) return;
           darkSeen[h.no] = 1;
           var anom = Number(h.anomCount || 0), smart = !!h.smartMoney, forced = !!h.forced;
           var pr = (smart && (forced || anom >= 10)) ? 3 : (forced || anom >= 10) ? 2 : smart ? 2 : 1;  // ①동시=3 ②집중급락=2
           var st = h.stars || pr;   // [복병 등급] 서버 ★ 등급 우선
-          darkCands.push({ no: Number(h.no), pr: st, stars: st, tierLabel: h.tierLabel, anom: anom, smart: smart,
+          /* 🔴 [2026-08-30] **신호가 하나도 없으면 등급표를 붙이지 않는다.**
+           *   실사고(마에바시 4경주): 화면이 「복병 ★★ 강함 4번」이라 써 놓고
+           *   4번이 낀 조합은 **하나도 없었다**(강등 목록에도 없다 = 생성조차 안 됐다).
+           *   저장값: strong_signals.count **0** · darkHorsePicks 의 4번 anomCount 0 · smartMoney false.
+           *   ⇒ ★★ 는 `pr` 폴백이 만든 것이지 근거가 아니었다.
+           *   ⚠ 말은 계속 보여준다(복병 후보라는 정보는 사실이다) — **등급표만 뗀다.**
+           *   🔧 되돌리기: DARK_STARS_NEED_SIGNAL = false 한 줄. */
+          if (DARK_STARS_NEED_SIGNAL && !h.stars && anom === 0 && !smart && !forced) st = 1;
+          darkCands.push({ no: Number(h.no), pr: st, stars: st,
+            // 등급표(★★★/★★)도 신호가 없으면 붙이지 않는다 — 「강함」이라 쓰지 않기 위해서다
+            tierLabel: (DARK_STARS_NEED_SIGNAL && st <= 1) ? '' : h.tierLabel, anom: anom, smart: smart,
             tag: (h.tierReason || h.note || '집중급락'), conf: h.confidence,
             col: (st >= 3) ? '#f472b6' : (st === 2 ? '#c084fc' : '#a78bfa') });
         });
