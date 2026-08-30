@@ -13,12 +13,33 @@ const b2=src.indexOf('async function _forceAnalyze');
 if (a < 0 || b2 < 0 || b2 <= a) { console.error('🔴 background.js 에서 수집 블록을 못 찾았다 — 테스트가 무의미하다'); process.exit(1); }
 const block=src.slice(a, b2);
 if (!/MULTI_TAB_COLLECT/.test(block) || !/_findOddsTabs/.test(block)) { console.error('🔴 A안 코드가 블록에 없다'); process.exit(1); }
-let TABS=[], REPLY={}, closedCalls=[], status=[];
-global.chrome={ tabs:{ query:async()=>TABS,
-  sendMessage:async(id)=>{ const r=REPLY[id]; if(r==='THROW') throw new Error('no receiver'); return r; } } };
+// 🔴 [2026-08-30] 자동 새로고침 가드도 같이 본다 — 탭을 경주별로 맞춰 둔 운용에서
+//   `chrome.tabs.reload` 가 그 탭을 자기 경주에서 튕겨내면 A안이 무의미해진다.
+const r0=src.indexOf('async function _nextRaceRefresh');
+const r1=src.indexOf('async function _nextRaceCollect');
+if (r0 < 0 || r1 < 0 || r1 <= r0) { console.error('🔴 _nextRaceRefresh 를 못 찾았다'); process.exit(1); }
+if (!/MULTI_TAB_NO_RELOAD/.test(src.slice(r0, r1))) { console.error('🔴 새로고침 가드가 없다'); process.exit(1); }
+
+let TABS=[], REPLY={}, closedCalls=[], status=[], reloaded=[];
+global.chrome={ tabs:{ query:async()=>TABS, reload:async(id)=>{ reloaded.push(id); },
+  sendMessage:async(id)=>{ const r=REPLY[id]; if(r==='THROW') throw new Error('no receiver'); return r; } },
+  storage:{ local:{ get:async(d)=>d, set:async()=>{} } },
+  alarms:{ clear:()=>{}, create:()=>{}, get:async()=>null } };
 function _setAutoStatus(s){ status.push(s); }
+function _notify(){}
+async function _autoCfg(){ return { autoSend:true, autoNextRace:true, timerDeadline:0 }; }
+async function doResultFetch(){}
 async function _onRaceClosed(reason){ closedCalls.push(reason||''); }
-eval(block.replace(/async function _onRaceClosed[\s\S]*/, ''));
+// ⚠ 두 조각을 **한 번에** eval 한다 — 따로 하면 const 스코프가 갈려 참조가 깨진다(실측).
+eval(block.replace(/async function _onRaceClosed[\s\S]*/, '') + '\n' + src.slice(r0, r1));
+
+async function runReload(name, tabs, expReload){
+  TABS=tabs; reloaded=[]; status=[];
+  await _nextRaceRefresh();
+  const ok = (reloaded.length === expReload);
+  console.log(`  ${ok?'✅':'🔴'} ${name.padEnd(34)} reload ${reloaded.length}회 (기대 ${expReload})`);
+  return ok;
+}
 
 async function run(name, tabs, reply, expClosed, expTicks){
   TABS=tabs; REPLY=reply; closedCalls=[]; status=[];
@@ -39,6 +60,11 @@ async function run(name, tabs, reply, expClosed, expTicks){
   n++; ok+= await run('탭2 · 하나는 응답 없음',[T(1,'https://ks1.dke-d11diw.site/odds'),T(2,'https://www.keiba.go.jp/x')],{1:'THROW',2:{rk:'나고야 1'}},0);
   n++; ok+= await run('탭2 · 전부 응답 없음',[T(1,'https://ks1.dke-d11diw.site/odds'),T(2,'https://www.keiba.go.jp/x')],{1:'THROW',2:'THROW'},0);
   n++; ok+= await run('탭 0개',[],{},0);
+  // ── 자동 새로고침 가드 ────────────────────────────────
+  n++; ok+= await runReload('탭1 · 종전대로 새로고침',[T(1,'https://ks1.dke-d11diw.site/odds')],1);
+  n++; ok+= await runReload('🔴 탭2 · 새로고침 생략',[T(1,'https://ks1.dke-d11diw.site/a'),T(2,'https://www.keiba.go.jp/x')],0);
+  n++; ok+= await runReload('🔴 탭5 · 새로고침 생략',[1,2,3,4,5].map(i=>T(i,'https://ks1.dke-d11diw.site/'+i)),0);
+  n++; ok+= await runReload('탭0 · 아무것도 안 함',[],0);
   console.log(`\n  ${ok}/${n}`);
   process.exit(ok===n?0:1);
 })();

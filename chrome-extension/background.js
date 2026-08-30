@@ -705,6 +705,8 @@ const _ODDS_TAB_URLS = ['*://*.keiba.go.jp/*', '*://*.qwqwd25.net/*', '*://*.dke
  *   ⚠ 확장은 **포그라운드가 아니어도** 수집한다(URL 로만 찾는다). 열어두기만 하면 된다.
  *   🔧 되돌리기: MULTI_TAB_COLLECT = false 한 줄 → 종전(탭 1개)으로 돌아간다. */
 const MULTI_TAB_COLLECT = true;
+/* 🔴 [2026-08-30] 탭 2개+ 면 자동 새로고침을 건너뛴다 — _nextRaceRefresh 주석 참조 */
+const MULTI_TAB_NO_RELOAD = true;
 
 async function _findOddsTab() {
   const tabs = await chrome.tabs.query({ url: _ODDS_TAB_URLS });
@@ -1003,8 +1005,21 @@ async function _nextRaceRefresh() {
       await doResultFetch(0);
     }
   } catch (_) { /* 결과 미준비면 기존 재시도에 맡김 */ }
-  const tab = await _findOddsTab();
-  if (!tab) { _setAutoStatus({ running: false, nextRace: 'no-tab', warn: '다음경주 새로고침: 배당판 탭 없음' }); return; }
+  const _tabsAll = await _findOddsTabs();
+  if (!_tabsAll.length) { _setAutoStatus({ running: false, nextRace: 'no-tab', warn: '다음경주 새로고침: 배당판 탭 없음' }); return; }
+  /* 🔴 [2026-08-30] **배당판 탭이 2개 이상이면 새로고침하지 않는다.**
+   *   자동 전환은 `chrome.tabs.reload` 로 「그 페이지가 스스로 다음 경주를 띄우는 것」에 기댄다.
+   *   ⇒ 탭을 경주별로 맞춰 둔 운용(A안)에서는 **그 탭을 자기 경주에서 튕겨낸다.**
+   *   ⚠ 한국 배당판은 새로고침해도 경주가 안 넘어간다(대표 실측) — 얻는 것 없이 흐트러뜨리기만 한다.
+   *   ⇒ 탭 1개일 때만 종전대로 새로고침한다(일본 배당판 자동 전환은 그대로 산다).
+   *   🔧 되돌리기: MULTI_TAB_NO_RELOAD = false 한 줄. */
+  if (MULTI_TAB_NO_RELOAD && _tabsAll.length > 1) {
+    _setAutoStatus({ running: false, nextRace: 'manual-tabs', tabs: _tabsAll.length,
+      warn: '배당판 탭 ' + _tabsAll.length + '개 — 자동 새로고침 생략(탭별 경주 유지)' });
+    console.log('[다음경주] 배당판 탭 ' + _tabsAll.length + '개 → 새로고침 생략(탭별 경주를 지킨다)');
+    return;
+  }
+  const tab = _tabsAll[0];
   try { await chrome.tabs.reload(tab.id); } catch (_) { /* */ }
   _setAutoStatus({ running: false, nextRace: 'refreshing', deadline: cfg.timerDeadline, t: Date.now() });
   _notify('nextRefresh', '🔄 다음 경주 준비 중', '배당판을 새로고침했습니다. 곧 자동 수집을 시작합니다.', false);
