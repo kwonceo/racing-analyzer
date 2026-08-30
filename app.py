@@ -40269,9 +40269,32 @@ LATE_DROP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs",
 _LATE_DROP_SENT = set()              # 경주당 1회
 
 
+def _late_drop_ctx(rk):
+    """[2026-08-31] 그 경주의 sport·finalQuinellas 를 **저장분에서** 읽는다(완전 읽기 전용).
+
+    🔴 왜: 호출 지점에 `an` 이 없다(정의 전). `_triple_analyze` 를 새로 부르면 무거운 데다
+      **재분석·저장 부작용**이 있다(2026-07-30 「마감 후 폴링 저장」). 그래서 저장분만 읽는다.
+    ⚠ 배제 집합(finalQuinellas)은 **회원이 실제로 받은 것**이면 되므로 저장분으로 충분하다.
+    """
+    try:
+        _p, _, _ = _analysis_log_path(_canonical_log_key(rk))
+        if not _p or not os.path.exists(_p):
+            return None
+        _d, _ = _json_load_guard(_p, {}, tag="마감직전신호")
+        return _d if isinstance(_d, dict) else None
+    except Exception:
+        return None
+
+
 def _late_drop_alert(rk, an, db):
     """마감 직전 진성 급락을 **별도 알림**으로 보낸다. 판정·추천 경로 무개입."""
     if not LATE_DROP_ALERT_ENABLED or _LATE_DROP is None or rk in _LATE_DROP_SENT:
+        return
+    # 🔴 `an` 이 없거나 **다른 경주 것**이면 저장분에서 다시 읽는다(호출부 주석 참조).
+    if not isinstance(an, dict) or str(an.get("raceKey") or "") != str(rk):
+        an = _late_drop_ctx(rk)
+    if not isinstance(an, dict):
+        _gate_hit("late_drop", rk, "컨텍스트 없음", reach_only=True)
         return
     if str((an or {}).get("sport") or "") not in LATE_DROP_SPORTS:
         return
@@ -40949,7 +40972,13 @@ def _timeline_snap_tick(races, now, db):
         # 🟢 [2026-08-28] 마감 직전 진성 급락 — **추가만** 보낸다(취소 통보 없음)
         try:
             if left is not None and 0 <= left <= 150:
-                _late_drop_alert(rk, an, db)
+                # 🔴 [2026-08-31] 종전엔 `an` 을 넘겼는데 **이 지점은 an 정의 전**이다
+                #   (`an = _triple_analyze(...)` 는 아래 phase 블록 안에 있다).
+                #   ⇒ 첫 회전은 NameError · 이후는 **직전 경주의 an** 이었다.
+                #   except 가 그것을 삼켜 3일간 조용히 죽었다 — 로그에 「호출 스킵」 **857회**.
+                #   ⚠ 원칙 21(방어가 다른 실패를 가린다) · 원칙 23(도달과 발동을 따로 센다) 둘 다다.
+                #   ⇒ 넘기지 않고 **저장분에서 그 경주 것을 직접 읽는다**(_late_drop_ctx).
+                _late_drop_alert(rk, None, db)
         except Exception as _lda:
             print("[마감직전 신호] 호출 스킵(무시):", str(_lda)[:80])
         phase = _timeline_phase_of(left)
