@@ -2,24 +2,6 @@
   "patterns": [
     {
       "race": "나고야 12경주",
-      "horse_no": 11,
-      "recent_avg": 8.2,
-      "win_place": 1,
-      "conditions": [
-        "복승이상감지"
-      ],
-      "date": "2026-08-21"
-    },
-    {
-      "race": "나고야 12경주",
-      "horse_no": 6,
-      "recent_avg": 8.0,
-      "win_place": 3,
-      "conditions": [],
-      "date": "2026-08-21"
-    },
-    {
-      "race": "나고야 12경주",
       "horse_no": 8,
       "recent_avg": 6.2,
       "win_place": 2,
@@ -4672,16 +4654,32 @@
       "win_place": 3,
       "conditions": [],
       "date": "2026-08-29"
+    },
+    {
+      "race": "부산 1경주",
+      "horse_no": 7,
+      "recent_avg": 6.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-30"
+    },
+    {
+      "race": "부산 1경주",
+      "horse_no": 7,
+      "recent_avg": 6.2,
+      "win_place": 3,
+      "conditions": [],
+      "date": "2026-08-30"
     }
   ],
   "condition_stats": {
     "조건없음": {
-      "count": 5834,
-      "hit": 939
+      "count": 5840,
+      "hit": 941
     },
     "전체부진마": {
-      "count": 9793,
-      "hit": 2586
+      "count": 9799,
+      "hit": 2588
     },
     "대규모급락": {
       "count": 15,
@@ -5069,25 +5067,9 @@
     "updated": "2026-07-11"
   },
   "smart_money_stats": {
-    "count": 1589,
-    "hit": 1243,
+    "count": 1590,
+    "hit": 1244,
     "cases": [
-      {
-        "race": "나라 1경주",
-        "date": "2026-08-26",
-        "smart_horses": [
-          3,
-          7,
-          1
-        ],
-        "placed": [
-          1
-        ],
-        "hit": true,
-        "trifecta_odds": null,
-        "quinella_odds": null,
-        "high_odds": false
-      },
       {
         "race": "소노다 3경주",
         "date": "2026-08-26",
@@ -6592,6 +6574,21 @@
         "hit": true,
         "trifecta_odds": 5.8,
         "quinella_odds": 2.0,
+        "high_odds": false
+      },
+      {
+        "race": "와카야마 6경주",
+        "date": "2026-08-30",
+        "smart_horses": [
+          4,
+          1
+        ],
+        "placed": [
+          4
+        ],
+        "hit": true,
+        "trifecta_odds": null,
+        "quinella_odds": 1.4,
         "high_odds": false
       }
     ],
