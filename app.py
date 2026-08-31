@@ -1839,6 +1839,8 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
             scored.append({
                 "no": no, "name": h.get("name", ""), "jockey": h.get("jockey", ""),
                 "recentPlacings": rp,
+                # ⚠ [2026-08-31] 경륜 착순 — **순수 전달만** 한다(판정 경로가 안 읽는 별도 필드).
+                "keirinPlacings": h.get("keirinPlacings") or [],
                 # ── 🔴 [형식 손실 수정 2/2 (2026-08-03)] 시계열 4종을 form 으로 **전달**한다 ──
                 #   `starters_store` 행에는 이 4키가 정상 저장돼 있는데(모리오카 1R 실측:
                 #   corners ['5-4','7-7',…]) **여기서 옮기지 않아** 분석로그까지 오지 못했다.
@@ -18452,6 +18454,11 @@ def _build_analysis_log(rk, an=None):
             #     **`past` 에서 파생**한다(실측: form 객체에 그 4키가 없다 · corners 보유 0%).
             #     ⇒ 여기서도 **같은 방식으로 파생**한다. 직접 키가 있으면 그것을 우선한다(경로별 호환).
             "recentPlacings": rp or [],                        # 최근 착순(최신순)
+            # 🔴 [2026-08-31] 경륜 착순 — 출마표 원문에서 뽑은 것(최신순). **저장 전용**이다.
+            #   `recentPlacings` 와 **합치지 않는다** — 합치면 `_elim_score` 가 읽어
+            #   제거마 판정이 바뀐다(실측 108명·21.5% · 57경주 · 승인 사항).
+            #   ⇒ 결과와 조인해 리플레이로 값어치를 재기 위한 재료로만 쌓는다. 🔴 소급 불가.
+            "keirinPlacings": f.get("keirinPlacings") or [],
             "fieldSizes": (f.get("fieldSizes")
                            or [pr.get("fieldSize") for pr in (f.get("past") or [])]),
             "corners": (f.get("corners")
@@ -28989,6 +28996,38 @@ def _form_is_today(rec):
         return True
 
 
+_KEIRIN_ZEN2HAN = str.maketrans("０１２３４５６７８９", "0123456789")
+_KEIRIN_CHAKU_RE = re.compile(r"([0-9]{1,2})\s*着")
+
+
+def _keirin_placings_from_card(recent=None, prev1=None, prev2=None, limit=8):
+    """[2026-08-31] 경륜 출마표 원문(금·전·전전 개최)에서 **착순만** 뽑는다. 최신이 맨 앞.
+
+    왜: 경륜은 `recentPlacings` 가 **0%** 다(경마·한국과 달리 착순 배열 컬럼이 없다).
+      그런데 원문에는 그대로 들어 있다 —
+      `'奈 良Ｆ２ 8/20 チ予選 １着 9.8  8/21 チ準決 ２着 10.1  8/22 チ決勝 ７着 9.9'`
+      실측: 전적행 **503/503(100%)** 에서 추출 가능 · 선수당 중앙 6개.
+
+    🔴 **저장 전용이다.** `recentPlacings` 에 넣지 않는다 —
+      `_elim_score` 의 `avg_place >= 5 → 제거 -30점` 이 새로 걸려 **판정이 바뀐다**
+      (실측 108명 = 21.5% · 57경주). 그 반영은 리플레이·승인을 거친 뒤에 한다.
+      ⇒ 지금은 **다른 이름으로 쌓기만** 한다(판정·추천·학습 경로 무개입).
+    ⚠ 원문은 날짜 오름차순(오래된 것이 앞)이라 개최마다 **뒤집어서** 붙인다.
+    ⚠ 전각 숫자(`１`)를 반각으로 바꾼 뒤 찾는다. `着外` 는 앞에 숫자가 없어 안 걸린다.
+    """
+    out = []
+    for _t in (recent, prev1, prev2):          # 금 → 전 → 전전 (최신 개최부터)
+        if not _t:
+            continue
+        try:
+            _ps = [int(x) for x in
+                   _KEIRIN_CHAKU_RE.findall(str(_t).translate(_KEIRIN_ZEN2HAN))]
+        except Exception:
+            continue
+        out.extend([p for p in reversed(_ps) if 1 <= p <= 9])
+    return out[:limit]
+
+
 def _keirin_autocollect_form(rk, jo, ymd, race):
     """[경륜 출마표 전적 자동 수집] 배당 수집 시 동시에 oddspark 출마표에서 전적(競走得点·착순·결정수·각질) 수집·저장.
     이미 저장(source=keirin)됐으면 재fetch 생략(전적은 경주 중 불변). 실패해도 무시(배당 흐름 무영향).
@@ -29050,6 +29089,12 @@ def _keirin_autocollect_form(rk, jo, ymd, race):
             "recent": r.get("recent") or None,      # 금개최 성적
             "prev1": r.get("prev1") or None,        # 전개최 성적
             "prev2": r.get("prev2") or None,        # 전전개최 성적
+            # 🔴 [2026-08-31] 위 원문에서 **착순만** 뽑아 따로 쌓는다(최신 순).
+            #   `recentPlacings` 에 넣지 않는 이유는 `_keirin_placings_from_card` 주석 참조 —
+            #   그 필드는 `_elim_score` 가 읽으므로 넣는 순간 **제거마 판정이 바뀐다**(승인 사항).
+            #   ⇒ 여기서는 **저장만** 한다. 리플레이로 값어치를 재기 위한 재료다.
+            "keirinPlacings": _keirin_placings_from_card(
+                r.get("recent"), r.get("prev1"), r.get("prev2")),
             "age": r.get("age") or None,
             "area": r.get("area") or None,
             "ki": r.get("ki") or None,              # 기(期)
