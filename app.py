@@ -1818,7 +1818,19 @@ def _form_from_starters(rk, drops, sport=None, valid_nos=None):
                 ts = h.get("formScore")
             no = h.get("no")
             an = anomaly_by_no.get(int(no)) if no is not None else None
-            rp = (h.get("recent") or h.get("recentPlacings") or [])[:5]
+            # 🔴🔴 [2026-08-31] `recent` 를 착순 배열로 쓰면 안 된다 — **경륜은 문자열**이다.
+            #   `_keirin_parse_card` 의 `recent`/`prev1`/`prev2` 는 금·전·전전 개최 성적의
+            #   **출주표 원문 셀**이다(예 `'奈 良Ｆ２ 8/20 チ予選 １着 …'`).
+            #   종전엔 `[:5]` 로 잘라 넣어 `recentPlacings = "8/30 "` 이 됐다
+            #   — 실측 **경륜 44.6%(328/736)** · 상위값이 `'8/30 '·'8/28 '·'8/29 '` 로 전부 날짜다.
+            #   🟢 downstream 은 무영향이다 — `_placings_list` 가 `isinstance(p,(int,float))` 로
+            #     이미 문자 원소를 전부 버린다(문자열이든 `[]` 든 결과가 같다). **판정 무변경.**
+            #   ⇒ 저장을 **정직하게** 만든다: 착순이 아닌 것을 착순 자리에 넣지 않는다.
+            #   ⚠ 이 수정은 오염을 없앨 뿐 **정보를 늘리지 않는다.**
+            #     `prev1` 에서 실제 착순(`N着`)을 뽑는 것은 `_elimination` 을 바꾸므로 별건·승인 사항이다.
+            _rc, _rp0 = h.get("recent"), h.get("recentPlacings")
+            rp = list(_rc if isinstance(_rc, (list, tuple))
+                      else (_rp0 if isinstance(_rp0, (list, tuple)) else []))[:5]
             if not rp and h.get("name"):
                 rp = _kra_recent_placings(h["name"], kra_hist)   # 저장 전적이 비면 KRA 실전적으로 채움
             # 전적점수가 없고(0/None) KRA 착순을 채웠으면 실전적 기반 점수로 보강(부진마·통합등급 반영)
