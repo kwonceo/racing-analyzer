@@ -16508,15 +16508,23 @@ def _hist_read_any(json_path):
     """[영구보존·4번] odds_history 파일 읽기 — .json 우선, 없으면 7일+ 압축본(.json.gz) 투명 해제.
     미존재 시 None."""
     import gzip
-    try:
-        if os.path.exists(json_path):
-            return json.load(open(json_path, encoding="utf-8"))
-        gz = json_path + ".gz"
-        if os.path.exists(gz):
-            with gzip.open(gz, "rt", encoding="utf-8") as f:
-                return json.load(f)
-    except Exception as e:
-        print("[아카이브 읽기] 실패:", json_path, e)
+    # 🔴 [2026-08-31] `Permission denied` 는 손상이 아니라 **다른 스레드의 os.replace 순간**이다.
+    #   종전엔 한 번 실패하면 곧바로 None → 호출부가 「이력 없음」으로 읽는다.
+    #   `_gate_hit`·`_json_load_guard` 와 **같은 3회 재시도**를 쓴다.
+    _err = None
+    for _try in range(3):
+        try:
+            if os.path.exists(json_path):
+                return json.load(open(json_path, encoding="utf-8"))
+            gz = json_path + ".gz"
+            if os.path.exists(gz):
+                with gzip.open(gz, "rt", encoding="utf-8") as f:
+                    return json.load(f)
+            return None                      # 파일 자체가 없다 — 재시도할 것이 없다
+        except Exception as e:
+            _err = e
+            time.sleep(0.03)
+    print("[아카이브 읽기] 실패 3회:", json_path, _err)
     return None
 
 
@@ -17082,11 +17090,24 @@ def _json_load_guard(path, default, tag=""):
     _d0 = default() if callable(default) else default
     if not os.path.exists(path):
         return _d0, False
-    try:
-        raw = open(path, encoding="utf-8").read()
-    except Exception as _re:
-        _corrupt_note(path, "읽기 실패: %s" % _re, tag)
-        print("🧯 [손상격리] %s: 읽기 실패 → 저장 건너뜀 · %s" % (os.path.basename(path), _re))
+    # 🔴 [2026-08-31] **읽기 실패는 대개 손상이 아니라 「그 순간」이다.**
+    #   실측(로그 397,705줄): `Permission denied`·`WinError 5` 30건이 전부 이 경로였다.
+    #   원인은 다른 스레드의 `os.replace` 순간에 읽은 것이다 — 파일은 멀쩡하다.
+    #   ⚠ 그런데 종전엔 곧바로 `corrupt=True` 라 **그 사이클 저장을 통째로 건너뛴다**(틱 손실).
+    #   ⇒ `_gate_hit` 이 같은 상황을 이미 3회 재시도로 풀고 있다(CLAUDE.md 2026-08-04).
+    #     **같은 방식**을 쓴다 — 3회 다 실패해야 손상으로 본다(종전 동작 보존).
+    raw, _rerr = None, None
+    for _rtry in range(3):
+        try:
+            raw = open(path, encoding="utf-8").read()
+            break
+        except Exception as _re:
+            _rerr = _re
+            time.sleep(0.03)          # replace 순간일 수 있다 — 잠깐 뒤 재시도
+    if raw is None:
+        _corrupt_note(path, "읽기 실패(3회): %s" % _rerr, tag)
+        print("🧯 [손상격리] %s: 읽기 실패 3회 → 저장 건너뜀 · %s"
+              % (os.path.basename(path), _rerr))
         return _d0, True
     if not raw.strip():
         _corrupt_note(path, "빈 파일(0바이트)", tag)
@@ -27531,6 +27552,34 @@ for _std, _als in _TRACK_GROUPS.items():
     _TRACK_REVERSE[_std.lower()] = _std
     for _a in _als:
         _TRACK_REVERSE[_a.lower()] = _std
+
+
+# 🔴🔴 [2026-08-31] **표시 전용 경기장명** — 저장키는 한 글자도 안 바꾼다.
+#   실태: 오늘까지 카톡 1,054건 중 **`小松島` 가 53건** 그대로 나갔다.
+#     회원은 「小松島 8경주」를 받는다 — 읽을 수 없다.
+#   🔴 그런데 **저장키를 한글로 바꾸면 안 된다**(2026-08-05 승인 · 27477행 주석):
+#     명단·oddspark·스케줄이 전부 한자 `小松島` 로 오므로 한글을 표준키로 두면 **명단을 못 찾는다.**
+#     2026-08-10 에 그것을 모르고 한글 표준키를 만들었다가 되돌린 이력이 있다.
+#   ⇒ **저장은 한자 그대로 · 표시만 한글**로 가른다. 판정·수집·매칭 경로에 일절 개입하지 않는다.
+#   ⚠ 목록을 손으로 적지 않는다 — `_TRACK_GROUPS` 에서 **자동 산출**한다.
+#     새 한자 표준키가 생기면 그것도 자동으로 잡힌다(원칙 19 — 고치면 대상에서 빠지는 정의를 피한다).
+_DISP_TRACK = {}
+for _std, _als in _TRACK_GROUPS.items():
+    if re.search(r"[぀-ヿ一-龥]", _std):
+        for _a in _als:
+            if re.search(r"[가-힣]", _a):
+                _DISP_TRACK[_std] = _a
+                break
+
+
+def _disp_rk(rk):
+    """회원에게 보이는 경주 이름(표시 전용). 저장키가 한자인 경기장만 한글로 바꾼다.
+    🔴 이 함수의 반환값을 **저장·매칭·조회에 쓰지 않는다.** 문구를 만들 때만 쓴다."""
+    s = str(rk or "")
+    for _k, _v in _DISP_TRACK.items():
+        if _k in s:
+            s = s.replace(_k, _v)
+    return s
 
 
 def _track_norm(a):
@@ -40357,7 +40406,7 @@ def _late_drop_alert(rk, an, db):
         if not ps:
             return
         _ln = _LATE_DROP.lines(ps)
-        _txt = "[적중왕] " + str(rk) + "\n" + "\n".join(_ln)
+        _txt = "[적중왕] " + _disp_rk(rk) + "\n" + "\n".join(_ln)   # 표시 전용(저장키 무변경)
         _sr = _kakao_send_to_me(_txt)
         _LATE_DROP_SENT.add(rk)
         _gate_hit("late_drop", rk, "발송 %d개" % len(ps), once_key=rk)
@@ -40570,11 +40619,11 @@ def _kakao_rich_message(rk, phase, an):
     # [워딩 정직화 (2026-07-23 사세보 1R)] '최종 확정'이 마감 직전 변동으로 최종이 아닐 수 있음 →
     #   과장 제거 + T-5엔 '변동 시 즉시 변경 알림' 고지(실제로 즉시 알림 발송 — _timeline_snap_tick).
     if phase == "T-7":
-        head = "[적중왕]%s %s — 마감 7분 전 추천 (1차)" % (_gtag, rk)
+        head = "[적중왕]%s %s — 마감 7분 전 추천 (1차)" % (_gtag, _disp_rk(rk))
     elif phase == "T-5":
-        head = "[적중왕]%s %s — 마감 5분 전 추천" % (_gtag, rk)
+        head = "[적중왕]%s %s — 마감 5분 전 추천" % (_gtag, _disp_rk(rk))
     else:
-        head = "[적중왕]%s %s — 현재 추천" % (_gtag, rk)
+        head = "[적중왕]%s %s — 현재 추천" % (_gtag, _disp_rk(rk))
     _note = "\n※ 마감 전 변동 시 🔁 변경 알림 즉시 발송" if phase == "T-5" else ""
     url = "%s/?race=%s" % (PUBLIC_BOARD_URL.rstrip("/"), urllib.parse.quote(rk))
     text = (head + "\n━━━━━━━━━━━━\n" + "\n".join(lines) + "\n━━━━━━━━━━━━\n" + _meta
@@ -40632,10 +40681,10 @@ def _kakao_build_message(rk, phase, an, snap):
         dark_txt = "\n🐎 복병: %d번" % d0 + (" (%s배)" % rep[d0] if rep.get(d0) else "")
     url = "%s/?race=%s" % (PUBLIC_BOARD_URL.rstrip("/"), urllib.parse.quote(rk))
     if phase == "T-7":
-        head = "[적중왕] 🔒 %s 1차 확정" % rk
+        head = "[적중왕] 🔒 %s 1차 확정" % _disp_rk(rk)
         tail = "복승: %s%s ★★★%s\n마감 7분 전" % (main_txt, main_odds, dark_txt)
     else:
-        head = "[적중왕] 🔒 %s 최종 확정" % rk
+        head = "[적중왕] 🔒 %s 최종 확정" % _disp_rk(rk)
         tail = "복승: %s%s ★★★%s\n지금 사세요!" % (main_txt, main_odds, dark_txt)
     text = "%s\n━━━━━━━━━━━━\n%s\n━━━━━━━━━━━━\n📊 배당판 보기 → %s" % (head, tail, url)
     return {"race": rk, "phase": phase, "text": text, "url": url,
@@ -40984,11 +41033,11 @@ def _timeline_snap_tick(races, now, db):
                     #   뒤집는 알림을 발송하지 않는다. 삼복승 꼬리 변경·복승 제외/교체는 침묵.
                     #   아무것도 빠지지 않은 '순수 추가'(방어 조합)만 "추가 방어" 문구로 고지(기존 픽 유지 → 번복 아님).
                     _after_t2 = left <= 120
-                    _title2 = "🔁 %s 추천 변경" % rk
+                    _title2 = "🔁 %s 추천 변경" % _disp_rk(rk)
                     if _after_t2:
                         if ((_fq2 - _sq2) - _t5r) and not (_sq2 - _fq2):
                             _ln2.append("복승 추가 방어: " + _fmt2((_fq2 - _sq2) - _t5r))
-                            _title2 = "➕ %s 추가 방어" % rk
+                            _title2 = "➕ %s 추가 방어" % _disp_rk(rk)
                         # 그 외(복승 제외·교체·삼복승 변경)는 T-2 이후 발송 안 함 → _ln2 비어 무발송
                     else:
                         if (_fq2 - _sq2) - _t5r:            # 🔴 복원분 제외
@@ -41103,7 +41152,7 @@ def _timeline_snap_tick(races, now, db):
                             if _snt_t - _fin_t:
                                 _ln.append("삼복승 제외: " + _fmt(_snt_t - _fin_t))
                             if _ln:
-                                _txt_c = ("[적중왕] 🔁 %s 마감 확정 변경\n" % rk
+                                _txt_c = ("[적중왕] 🔁 %s 마감 확정 변경\n" % _disp_rk(rk)
                                           + "(카톡 발송 후 마감 직전 배당 변동)\n"
                                           + "\n".join(_ln)
                                           + "\n※ 적중 판정은 마감 시점 확정 명단 기준")
