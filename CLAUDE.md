@@ -1,3 +1,85 @@
+# 🟢🟢 [2026-08-31 대표 승인 · C안] **카톡 배당판 링크를 살렸다** — 열지 않고 밀어낸다
+
+> 회원이 매 경주 카톡 맨 아래 「📊 배당판 →」을 눌러 **빈 페이지**로 가고 있었다.
+
+## 원인 (확정)
+```
+회원 → Railway(공개 사이트) → 🔴 **ngrok 무료 터널** → 우리 서버 127.0.0.1:8011
+GET /health → upstream "https://aacf-49-171-48-89.ngrok-free.app" · **upstream_ok: false**
+그 주소는 404 · 이 PC 에 ngrok 이 **설치조차 안 돼 있다**
+⇒ ngrok 무료는 재시작마다 주소가 바뀐다. 한 번 끊기면 그대로 끝난다.
+```
+🟢 코드는 멀쩡했고 **연결만 끊긴 것**이었다. 프록시도 라우트별 **화이트리스트**로 잘 짜여 있었다.
+
+## 🔴 그런데 터널을 다시 열면 안 된다
+```
+터널은 포트를 통째로 넘긴다 ⇒ 프록시를 우회해 `/admin` 으로 직접 들어올 수 있다.
+_request_is_authed 는 **Authorization 헤더가 있기만 하면 통과**한다(어제 확인).
+.env 에 API 키 3종 · PREMIUM_ENFORCED=False · /admin 은 게이트 대상도 아니다.
+⚠ ngrok 이 살아 있던 동안 **8011 전체가 인터넷에 열려 있었다.**
+```
+
+## ✅ C안 — **방향을 뒤집었다**
+```
+(전) Railway  →  터널  →  우리 서버      🔴 인바운드
+(후) 우리 서버  →  HTTPS  →  Railway      🟢 아웃바운드만 · 인바운드 노출 0
+```
+
+### 우리 서버 (`tools/public_snapshot.py` + `app.py`)
+```
+60초마다 공개용 스냅샷을 만들어 gzip 으로 올린다
+  dashboard            /api/multi/dashboard      (순수 · 저장 호출 0 확인)
+  detail[key].latest   /api/odds/triple/latest   (순수 확인)
+  detail[key].timeline /api/odds/signal-timeline (순수 확인)
+  detail[key].analyze  /api/odds/triple/analyze  ⚠ 아래
+실측 **150.1KB → 22.9KB (85% 절감)** · 생성 1.6초 · 상세 7경주
+🔴 토큰은 **헤더로만**(X-BMED-Token) — URL 에 남기지 않는다
+🔴 run-first(sleep-first 금지) · 별도 스레드 · 전 구간 try — 본 서버 무영향
+🔧 되돌리기: PUBLIC_PUSH_ENABLED = False
+```
+⚠ **analyze 만 예외인 이유를 숨기지 않는다** — 그 엔드포인트는 재분석·저장 부작용이 있어
+  미러에서는 안 불렀다(조회자가 부르면 무한정 늘어난다). 여기는 **60초 고정 · 활성 경주만
+  (마감 5분 후까지 · 최대 12개)** 이라 로컬 화면 한 대가 더 붙은 것과 같다.
+⚠ `import gzip`·`urllib.request` 가 app.py 모듈 수준에 **없어서** 지역 import 로 썼다
+  (2026-08-10 `BASE_DIR` · 2026-08-28 `import glob` 과 같은 NameError 함정).
+
+### 공개 사이트 (`bmed-public/app_public.py` · 커밋 `dd72d26` · 브랜치 **main**)
+```
+POST /api/ingest — 이 앱의 **유일한 쓰기 경로**
+  헤더 토큰 · compare_digest · 불일치 **404**(401 아님) · 토큰 미설정이면 아예 안 받는다
+  gzip · 8MB 상한 · os.replace 원자적 교체
+🔴 라우트는 **한 줄도 안 고쳤다** — `_upstream_get/_post` 안에서 스냅샷을 먼저 볼 뿐이다.
+  스냅샷에 없으면 **종전 프록시로 그대로** 내려간다(터널을 되살리면 그대로 동작).
+🔴 SNAP_MAX_AGE(900초) 넘으면 안 쓴다 — **낡은 것을 최신인 척 내보내지 않는다**
+/health 에 source(snapshot|upstream)·age·ingest_ready 를 밝힌다
+```
+
+## 🟢 검증 — 업스트림을 **죽은 주소로 두고** 잰다(끊긴 터널 재현)
+```
+tests/run_snapshot_push.py  **15/15**
+🟢 스냅샷 없음 → 종전대로 503(끊긴 상태 재현)
+🟢 푸시 후 → dashboard **200 · 카드 141개**(업스트림은 여전히 죽어 있다)
+⚪ 토큰 불일치/없음 404 · 깨진 본문 400 · 형식오류 400 · 없는 경주 폴백 · 낡으면 폴백
+🔴 자기검증: 스냅샷 가로채기를 빼면 rc=1 · 원복 rc=0
+```
+⚠ 첫 판이 **거짓 실패**했다 — `jsonify` 가 한글을 유니코드 이스케이프로 내보내는데
+  **문자열로 비교**했다. 파싱해서 값으로 보도록 고쳤다(원칙 8-D · 오늘 두 번째).
+
+## ⏳ 대표가 할 것 — **한 가지**
+```
+🔴 Railway 환경변수에 **BMED_PUSH_TOKEN** 을 넣는다
+   값 = 우리 .env 의 PUBLIC_PUSH_TOKEN 과 **똑같이**
+   ⇒ 그 뒤 서버를 한 번 재기동하면 60초 안에 살아난다
+     (지금은 「[공개푸시] 미설정 — 건너뜀」 로그만 남는다 · .env 를 나중에 넣었기 때문이다)
+확인: https://web-production-d4723.up.railway.app/health → source 가 "snapshot" 이면 된 것이다
+```
+⚠ 무료/프리미엄 구분은 **공개 사이트가 이미 갖고 있다.** 스냅샷은 전부 담고 정책은 그쪽에 맡겼다
+  (2026-08-31 대표 지시 「현재는 전부로 진행 · 이후 변경」).
+⚠ bmed-public 에 **내가 안 건드린 기존 미커밋 변경**이 있다(requirements.txt · matrix_board.js ·
+  templates/index.html · user_db.py · apple-touch-icon.png). **그대로 두었다.**
+
+---
+
 # 🟢 [2026-08-31] 보고 적재 재개 + **미러에서 보고를 읽는다**
 
 ## ✏️ 먼저 내가 어긴 것
