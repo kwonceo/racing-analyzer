@@ -42042,6 +42042,13 @@ def _public_push_once():
     _ps = _ilu.module_from_spec(_sp)
     _sp.loader.exec_module(_ps)
     snap = _ps.build()
+    # 🔴 못 쓸 스냅샷은 **보내지 않는다** — 공개 사이트의 멀쩡한 직전 것을 빈 것으로 덮는다.
+    #   (dashboard 가 타임아웃 나면 카드 0개짜리가 만들어진다. 실측으로 한 번 났다.)
+    if not snap.get("usable"):
+        _gate_hit("public_push_skip", None,
+                  "dashboard 실패 — 푸시 생략(직전 스냅샷 유지)")
+        return False, {"error": "dashboard 실패 — 푸시 생략",
+                       "detail": str((snap.get("dashboard") or {}).get("_err"))[:80]}
     raw = json.dumps(snap, ensure_ascii=False).encode("utf-8")
     body = _gz.compress(raw, 6)                       # 🔴 200KB → 수십 KB(외부 전송량 절감)
     req = _ureq.Request(

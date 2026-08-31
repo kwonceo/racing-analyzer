@@ -27,6 +27,7 @@
 실행(점검용): python tools/public_snapshot.py
 """
 import io
+import os
 import json
 import time
 import urllib.parse
@@ -34,6 +35,7 @@ import urllib.request
 
 LOCAL = "http://127.0.0.1:8011"
 TIMEOUT = 12
+DASH_TIMEOUT = 30           # 🔴 dashboard 는 카드 141개라 무겁다(실측 0.7~12초+) — 넉넉히 준다
 MAX_DETAIL = 12             # 상세를 담을 최대 경주 수(활성 순)
 ACTIVE_BEFORE_SEC = 3600    # 발주 1시간 전부터
 ACTIVE_AFTER_SEC = 300      # 🔴 마감 후 5분까지만 — 그 뒤는 안 부른다(재분석 억제)
@@ -87,10 +89,44 @@ def _active_keys(dash):
     return [k for _, k in out[:MAX_DETAIL]]
 
 
+# 🔴 [2026-08-31] 활성 밖 경주용 **슬림 analyze** — 저장분에서 이 키만 담는다.
+#   왜: 대시보드 카드는 141개인데 상세는 12개뿐이라 나머지를 누르면 404 였다.
+#   전체 analyze 는 경주당 53.6KB 지만 슬림은 10.9KB(80% 절감) — 오늘 전체를 담아도 gzip 약 20KB.
+SLIM_KEYS = ("raceKey", "sport", "category", "summary", "corePicks",
+             "strong_signals", "result", "raceShape")
+LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                       "data", "analysis_log")
+
+
+def _slim_rest(active):
+    """오늘 분석된 경주 중 **활성 밖**의 것 — 저장분에서 슬림 analyze 만.
+
+    🔴 파일만 읽는다(analyze 엔드포인트를 부르지 않는다 — 재분석·저장 부작용).
+    """
+    out = {}
+    pre = time.strftime("%Y_%m_%d") + "_"
+    try:
+        names = [x for x in os.listdir(LOG_DIR) if x.startswith(pre) and x.endswith(".json")]
+    except OSError:
+        return out
+    for nm in names:
+        try:
+            with io.open(os.path.join(LOG_DIR, nm), encoding="utf-8") as f:
+                d = json.load(f)
+        except Exception:
+            continue
+        rk = d.get("raceKey")
+        if not rk or rk in active:
+            continue
+        out[rk] = {"analyze": {k: d[k] for k in SLIM_KEYS if d.get(k) is not None},
+                   "slim": True}
+    return out
+
+
 def build(with_analyze=True):
     """공개 스냅샷 1개를 만든다. 실패한 조각은 `_err` 를 담고 **나머지는 계속**한다."""
     t0 = time.time()
-    dash = _get("/api/multi/dashboard")
+    dash = _get("/api/multi/dashboard", DASH_TIMEOUT)
     detail = {}
     keys = _active_keys(dash) if not dash.get("_err") else []
     for k in keys:
@@ -100,13 +136,23 @@ def build(with_analyze=True):
         if with_analyze:
             d["analyze"] = _post("/api/odds/triple/analyze", {"raceKey": k})
         detail[k] = d
+    # 🔴 활성 밖 경주도 **슬림**으로 담는다(누르면 404 나던 것을 막는다)
+    try:
+        for k, v in _slim_rest(set(keys)).items():
+            detail.setdefault(k, v)
+    except Exception as e:                                   # 실패해도 활성분은 그대로 나간다
+        detail.setdefault("_slimErr", {"analyze": {"_err": str(e)[:80]}})
     snap = {"ver": SNAPSHOT_VER,
             "at": time.strftime("%Y-%m-%d %H:%M:%S"),
             "atEpoch": int(time.time()),
             "buildSec": round(time.time() - t0, 2),
             "dashboard": dash,
             "detail": detail,
-            "detailKeys": keys}
+            "detailKeys": keys,
+            # 🔴 dashboard 를 못 받았으면 **보낼 수 없는 스냅샷**이다.
+            #   그대로 올리면 Railway 의 **멀쩡한 직전 스냅샷을 빈 것으로 덮는다.**
+            #   ⚠ 실측: 서버가 바쁠 때 dashboard 가 12초를 넘겨 timed out 이 났다.
+            "usable": not bool((dash or {}).get("_err")) and len(_cards(dash)) > 0}
     return snap
 
 
