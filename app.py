@@ -3448,10 +3448,26 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
             _twin_best = 0.0
             _twin_cands = 0
             _now = time.time()
+            # 🔴🔴 [2026-08-31] 종전엔 `q.items() if isinstance(q, dict) else []` 라
+            #   **q 가 리스트로 오면 _fp 가 통째로 빈 dict** 가 됐다.
+            #   서버 직접수집은 전부 `[{combo:[a,b], odds}]` **리스트**다
+            #   (`_keirin_parse_quinella` · `_keiba_parse_quinella` 반환형).
+            #   ⇒ 공통 조합이 늘 0 → `_twin_cands` 0 → **`odds_twin_nocand` 가 2192/2192,
+            #     즉 매 호출 「대조 상대 없음」**으로 떨어졌다. 22일간 구조적으로 죽어 있었다.
+            #   🔴 바로 아래 `_o2` 는 **같은 리스트 변환을 하고 있다** — 한쪽만 빠뜨린 것이다.
+            #   ⚠ 계수기가 「상대가 없었다」고 말했지만 **실제로는 있었다**(실측: 마쓰야마 3경주 ↔
+            #     카와사키 3경주 공통 17조합). 계수기의 답 자체가 틀렸다(원칙 24).
+            #   ⚠ 폐기 대상은 그대로 **확장 틱뿐**이다(`_twin_src_trusted`) — 신뢰 소스는 안 버린다.
+            #     ⇒ 이 수정으로 늘어나는 것은 oddspark 경로의 **기록**이지 폐기가 아니다.
+            _qd = q
+            if isinstance(_qd, list):
+                _qd = {"+".join(str(z) for z in (it.get("combo") or [])): it.get("odds")
+                       for it in _qd if isinstance(it, dict)}
             _fp = {}
-            for _k, _v in (q.items() if isinstance(q, dict) else []):
+            for _k, _v in (_qd.items() if isinstance(_qd, dict) else []):
                 try:
-                    _fp[tuple(sorted(int(x) for x in str(_k).replace("-", "+").split("+")))] = float(_v)
+                    _fp[tuple(sorted(int(x) for x in str(_k).replace("-", "+").split("+")))] = float(
+                        _v.get("odds") if isinstance(_v, dict) else _v)
                 except Exception:
                     pass
             for _ork, _orec in list(_triple_load().items()):
@@ -3467,7 +3483,9 @@ def _do_triple_ingest(rk, q, x, tr, win, sport=None, category=None, source=None,
                 _o2 = {}
                 for _k, _v in _oq.items():
                     try:
-                        _o2[tuple(sorted(int(x) for x in str(_k).replace("-", "+").split("+")))] = float(_v)
+                        # ⚠ dict 값(`{"odds": x}`) 형식도 받는다 — _fp 와 **같은 규칙**을 쓴다.
+                        _o2[tuple(sorted(int(x) for x in str(_k).replace("-", "+").split("+")))] = float(
+                            _v.get("odds") if isinstance(_v, dict) else _v)
                     except Exception:
                         pass
                 # 🔴 [2026-08-27] **상한(100배) 칸을 비교에서 뺀다** — 이것 때문에 가드가 침묵했다.
