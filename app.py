@@ -42010,6 +42010,83 @@ def health_send_kakao_api():
                     status=(200 if r.get("ok") else 502))
 
 
+# ══════════ [공개 사이트 푸시 (2026-08-31 대표 승인 · C안)] ══════════
+#   🔴 왜: 카톡 「📊 배당판 →」 링크가 회원에게 **빈 페이지**로 나가고 있었다.
+#     공개 사이트(Railway)가 ngrok 터널로 우리 서버를 읽는 구조였는데 그 터널이 끊겼다.
+#     🔴 터널을 다시 열면 **8011 전체가 인터넷에 노출**된다(`/admin` 인증 없음 · `.env` 키 3종).
+#   ⇒ 열지 않는다. **우리가 공개용만 밖으로 밀어낸다.** 인바운드 노출 0(미러와 같은 원칙).
+#   ⚠ 무료/프리미엄 구분은 **공개 사이트가 이미 갖고 있다** — 여기서는 전부 담고 정책은 그쪽에 맡긴다.
+#   ⚠ 실패해도 본 서버에 무영향(전 구간 try) · 별도 스레드 · 수집/판정/추천 경로 무개입.
+#   🔧 되돌리기: PUBLIC_PUSH_ENABLED = False 한 줄.
+PUBLIC_PUSH_ENABLED = True
+PUBLIC_PUSH_URL = os.environ.get("PUBLIC_PUSH_URL", "").strip()      # 예: https://…/api/ingest
+PUBLIC_PUSH_TOKEN = os.environ.get("PUBLIC_PUSH_TOKEN", "").strip()
+PUBLIC_PUSH_SEC = int(os.environ.get("PUBLIC_PUSH_SEC", "60"))
+_public_push_started = False
+_PUBLIC_PUSH_STAMP = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  "data", "_public_push_last.txt")
+
+
+def _public_push_once():
+    """스냅샷 1개를 만들어 공개 사이트에 올린다. (ok, info)"""
+    if not PUBLIC_PUSH_URL or not PUBLIC_PUSH_TOKEN:
+        return False, {"error": "PUBLIC_PUSH_URL/TOKEN 미설정(.env)"}
+    # 🔴 지역 import — app.py 모듈 수준에 gzip·urllib.request 가 **없다**(실측).
+    #   전역에 넣으면 다른 곳과 부딪힐 수 있고, 없는 이름을 쓰면 NameError 로 조용히 죽는다
+    #   (2026-08-10 BASE_DIR · 2026-08-28 import glob 과 같은 함정).
+    import gzip as _gz
+    import urllib.request as _ureq
+    import importlib.util as _ilu
+    _p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "public_snapshot.py")
+    _sp = _ilu.spec_from_file_location("public_snapshot", _p)
+    _ps = _ilu.module_from_spec(_sp)
+    _sp.loader.exec_module(_ps)
+    snap = _ps.build()
+    raw = json.dumps(snap, ensure_ascii=False).encode("utf-8")
+    body = _gz.compress(raw, 6)                       # 🔴 200KB → 수십 KB(외부 전송량 절감)
+    req = _ureq.Request(
+        PUBLIC_PUSH_URL, data=body,
+        headers={"Content-Type": "application/json", "Content-Encoding": "gzip",
+                 "X-BMED-Token": PUBLIC_PUSH_TOKEN, "User-Agent": "bmed-push/1"})
+    with _ureq.urlopen(req, timeout=25) as r:
+        code = r.status
+    info = {"raw": len(raw), "gz": len(body), "detail": len(snap.get("detail") or {}),
+            "buildSec": snap.get("buildSec"), "http": code}
+    _gate_hit("public_push", None, "%dKB→%dKB · 상세 %d경주"
+              % (len(raw) // 1024, len(body) // 1024, info["detail"]))
+    return True, info
+
+
+def _start_public_push():
+    """[공개 사이트 푸시] 🔴 **run-first** — sleep-first 로 만들지 않는다(재기동마다 공백이 생긴다)."""
+    global _public_push_started
+    if _public_push_started or not PUBLIC_PUSH_ENABLED:
+        return
+    if not PUBLIC_PUSH_URL or not PUBLIC_PUSH_TOKEN:
+        print("[공개푸시] 미설정 — 건너뜀(.env 에 PUBLIC_PUSH_URL·PUBLIC_PUSH_TOKEN 필요)")
+        return
+    _public_push_started = True
+
+    def _loop():
+        while True:
+            try:
+                ok, info = _public_push_once()
+                if ok:
+                    try:
+                        with io.open(_PUBLIC_PUSH_STAMP, "w", encoding="utf-8") as f:
+                            f.write("%d %s" % (int(time.time()), json.dumps(info)))
+                    except Exception:
+                        pass
+                else:
+                    print("[공개푸시] 실패:", str(info)[:120])
+            except Exception as e:
+                print("[공개푸시] 예외(무시):", str(e)[:140])
+            time.sleep(max(20, PUBLIC_PUSH_SEC))
+
+    threading.Thread(target=_loop, daemon=True, name="public-push").start()
+    print("[공개푸시] 시작 · %d초 주기 → %s" % (PUBLIC_PUSH_SEC, PUBLIC_PUSH_URL[:48]))
+
+
 def _start_health_kakao_scheduler():
     """매일 `HEALTH_KAKAO_HOUR`(기본 **21**)시에 체크리스트 1회 발송(멱등·하루 1회).
 
@@ -43592,6 +43669,7 @@ def _boot_background():
     try:
         _start_health_kakao_scheduler()  # [체크리스트 카카오 2026-07-30] 매일 22:00 상태 푸시(기존 추천 발송과 분리)
         _start_midcheck_scheduler()      # [중간점검 2026-08-04] 09·14·22시 · 14시는 이상시만 · 스탬프 필수
+        _start_public_push()             # [공개 사이트 푸시 2026-08-31] 인바운드 노출 없이 밖으로만 민다
         _start_review_scheduler()        # [복기 자동기록 2026-08-06] 180초 폴링 · 스탬프 · 읽기전용
         _start_nar_preload_scheduler()   # [ⓑ NAR 선수집 2026-08-03] 개최일 오전 6~9시 · 수집 창과 전적을 분리
         _start_jra_preload_scheduler()   # [ⓒ 중앙 선수집 2026-08-03] 결손 317두 중 280두가 중앙 · netkeiba_guard 필수
