@@ -123,6 +123,81 @@ def _slim_rest(active):
     return out
 
 
+# ══════════ [경륜 실적 · 2026-08-31] **지어낸 숫자를 실측으로 바꾼다** ══════════
+#   🔴 공개 사이트가 `_DUMMY_CYCLE_RESULTS`(적중률 **100%** · 47건 · 하드코딩 5건)를 내보내고 있었다.
+#     화면에는 「경륜 6개 추천 적중률 100%」가 초록 KPI 로 떴다. **전부 가짜다.**
+#   ⇒ 우리 저장분에서 **실측**을 만들어 스냅샷에 담는다.
+#   ⚠ 평균이 아니라 **중앙값**을 대표값으로 쓴다 — 평균은 소수 고배당에 끌린다(원칙 2).
+#   ⚠ 판정선·회수율은 담지 않는다 — 「사면 번다」로 읽힐 수 있다(CLAUDE.md 광고 문구 금지).
+CYCLE_TTL = 1800            # 전월 전수 스캔이 약 7초 — 30분에 한 번만 다시 센다
+CYCLE_DAYS = 30
+CYCLE_RECORDS = 8
+_CYCLE_CACHE = {"at": 0.0, "data": None}
+RESULT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                          "data", "race_results")
+
+
+def cycle_results():
+    """경륜 실측 성적. 🔴 저장분만 읽는다 · 30분 캐시."""
+    if _CYCLE_CACHE["data"] and (time.time() - _CYCLE_CACHE["at"]) < CYCLE_TTL:
+        return _CYCLE_CACHE["data"]
+    import datetime
+    cut = (datetime.date.today() - datetime.timedelta(days=CYCLE_DAYS)).strftime("%Y_%m_%d")
+    n = 0
+    od = []
+    rec = []
+    try:
+        names = sorted(x for x in os.listdir(LOG_DIR) if x.endswith(".json") and x[:10] >= cut)
+    except OSError:
+        names = []
+    for nm in names:
+        try:
+            with io.open(os.path.join(LOG_DIR, nm), encoding="utf-8") as f:
+                d = json.load(f)
+            if d.get("sport") != "cycle":
+                continue
+            dc = [tuple(sorted(int(x) for x in c))
+                  for c in (((d.get("corePicks") or {}).get("displayedCombos") or {})
+                            .get("quinellas") or []) if c and len(c) == 2]
+            if not dc:
+                continue
+            rp = os.path.join(RESULT_DIR, nm)
+            if not os.path.exists(rp):
+                continue
+            with io.open(rp, encoding="utf-8") as f:
+                rr = json.load(f)
+            if rr.get("payouts_approx") or rr.get("payouts_suspect"):
+                continue
+            r = rr.get("result") or {}
+            po = float((rr.get("payouts") or {}).get("quinella"))      # 🔴 payouts 는 최상위(원칙 8-E)
+            top2 = tuple(sorted((int(r["1st"]), int(r["2nd"]))))
+        except Exception:
+            continue
+        n += 1
+        if top2 in dc:
+            od.append(po)
+            rec.append({"date": nm[5:10].replace("_", "."),
+                        "race": nm[11:-5].replace("_", " "),
+                        "combo": "%d+%d" % top2, "odds": round(po, 1), "hit": True})
+    od_sorted = sorted(od)
+    med = od_sorted[len(od_sorted) // 2] if od_sorted else 0
+    out = {"source": "measured",
+           "kpi": {"winRate": round(100.0 * len(od) / n, 1) if n else 0,
+                   "total": n, "hits": len(od),
+                   "medianOdds": round(med, 1),
+                   "maxOdds": round(max(od), 1) if od else 0,
+                   "over10": sum(1 for x in od if x >= 10),
+                   "days": CYCLE_DAYS},
+           "records": rec[-CYCLE_RECORDS:][::-1],
+           # 🔴 화면이 이 값을 어떻게 불러야 하는지 **여기서 정한다**(문구를 두 곳에 두지 않는다)
+           "labels": {"winRate": "경륜 복승 경주 적중률",
+                      "medianOdds": "적중 배당 중앙값",
+                      "note": "최근 %d일 · 확정배당 보유 %d경주 실측" % (CYCLE_DAYS, n)}}
+    _CYCLE_CACHE["at"] = time.time()
+    _CYCLE_CACHE["data"] = out
+    return out
+
+
 def build(with_analyze=True):
     """공개 스냅샷 1개를 만든다. 실패한 조각은 `_err` 를 담고 **나머지는 계속**한다."""
     t0 = time.time()
@@ -149,6 +224,7 @@ def build(with_analyze=True):
             "dashboard": dash,
             "detail": detail,
             "detailKeys": keys,
+            "cycleResults": cycle_results(),      # 🔴 지어낸 100% 를 실측으로 바꾼다
             # 🔴 dashboard 를 못 받았으면 **보낼 수 없는 스냅샷**이다.
             #   그대로 올리면 Railway 의 **멀쩡한 직전 스냅샷을 빈 것으로 덮는다.**
             #   ⚠ 실측: 서버가 바쁠 때 dashboard 가 12초를 넘겨 timed out 이 났다.
