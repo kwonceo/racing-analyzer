@@ -381,11 +381,20 @@ def _pace_usable(hs):
     ⇒ 선행/추입이 **하나도 안 잡히면** 페이스를 말하지 않는다(원칙: 근거 없으면 안 쓴다).
     ⚠ 일본 경륜은 추입 62 · 선행 40 으로 고르게 갈린다 — **거기서는 그대로 쓴다**(무영향).
     """
+    # 🔴🔴 [2026-08-31] 호출부 둘이 **서로 다른 형식**을 넘긴다.
+    #   248행은 리스트, **424행(`kakao_lines`)은 dict {마번: 말}** 이다(406행에서 그렇게 만든다).
+    #   dict 를 그냥 순회하면 **키(int)** 가 나와 `h.get(...)` 이 터진다
+    #   → `'int' object has no attribute 'get'` → **카톡 「어떻게 봤나」 블록이 통째로 빠졌다**(148건).
+    #   ⚠ `except` 가 삼켜 stdout 에만 남았다 — 회원 카톡에서 조용히 사라지고 있었다.
+    if isinstance(hs, dict):
+        hs = list(hs.values())
     hs = hs or []
     if not hs:
         return False
     known = lead = 0
     for h in hs:
+        if not isinstance(h, dict):
+            continue
         g = str(h.get("gait") or h.get("styleType") or h.get("declaredStyleLabel") or "")
         if not g:
             continue

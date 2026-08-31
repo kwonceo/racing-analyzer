@@ -13226,6 +13226,24 @@ def _triple_analyze(rk, rec):
     #   확신도 70+ 필수 포함 · 확신도1위+2위 · 확신도1위+시장유력 복승 자동 편성 + 확신도상위+이상감지 삼복승.
     #   ⚠ core_picks(기존 축2두)·betRecommend 무삭제 — corePicks에 confQuinellas 등 별도 필드로만 부가.
     try:
+        # 🔴🔴 [2026-08-31] 이 def 는 종전에 **`if conf_q:` 안**에 있었다(들여쓰기 12).
+        #   그런데 아래 **삼복승 축보험**(`if core_picks and not after_close:`)이 이것을 부른다.
+        #   ⇒ 확신도 조합이 없는 경주(`conf_q` 없음)에서는 **NameError** 로 축보험 편성이
+        #     통째로 스킵됐다 — 로그 `[삼복승 축보험] 편성 스킵(무시)` **256건**.
+        #   ⚠ `except` 가 삼켜 stdout 에만 남았다. **회원 추천에서 조합이 실제로 빠졌다.**
+        #   ⇒ 조건 밖으로 올린다. `trio_map`(들여쓰기 4)·`_trio_est`(모듈)은 여기서 이미 보인다.
+        def _tri_odds(cc):
+            if not cc or len(cc) != 3:
+                return None
+            _o = trio_map.get(tuple(sorted(cc)))
+            if _o is not None:
+                return _o
+            try:
+                _ev, _ = _trio_est(list(cc))
+                return round(_ev, 1) if _ev else None
+            except Exception:
+                return None
+
         conf_q = None if after_close else _confidence_picks(
             confidence, curWin, curQ, key_horses, single_rank, anomaly_horse, valid_nos)
         if conf_q:
@@ -13256,18 +13274,8 @@ def _triple_analyze(rk, rec):
                 core_picks["favAxis"] = _new_fav  # 마감 후 or cur_mb 불명: 그대로
 
             # [보완②] 삼복승 예상배당 표기 — 실배당(trio_map) 우선, 없으면 _trio_est 추정.
-            def _tri_odds(cc):
-                if not cc or len(cc) != 3:
-                    return None
-                _o = trio_map.get(tuple(sorted(cc)))
-                if _o is not None:
-                    return _o
-                try:
-                    _ev, _ = _trio_est(list(cc))
-                    return round(_ev, 1) if _ev else None
-                except Exception:
-                    return None
-
+            #   ⚠ `_tri_odds` 정의는 **위 `try:` 바로 아래로 올렸다**(2026-08-31 · 위 주석 참조).
+            #     같은 함수 안에 같은 정의를 두 번 두지 않는다.
             if conf_q.get("trifecta"):
                 core_picks["confTrifecta"] = conf_q["trifecta"]
                 core_picks["confTrifectaOdds"] = _tri_odds(conf_q["trifecta"])
@@ -16265,7 +16273,16 @@ def triple_analyze():
                 _doc_ct = {"horses": (an.get("form") or [])}   # 로그가 아직 없으면 분석 결과로
             _ct_list = _cut_tier_candidates(rk, _doc_ct, an.get("corePicks") or {})
             if _ct_list:
-                (an.setdefault("corePicks", {}))["cutTiers"] = _ct_list
+                # 🔴🔴 [2026-08-31] 종전엔 `an.setdefault("corePicks", {})["cutTiers"] = ...` 였다.
+                #   `corePicks` **키는 있는데 값이 None** 인 경주에서는 setdefault 가 그 None 을
+                #   그대로 돌려주므로 `None["cutTiers"] = ...` 로 터진다
+                #   → `'NoneType' object does not support item assignment` **41,456건**(오늘 로그의 10%).
+                #   ⚠ 표시 계층이라 판정 피해는 없으나 **배당 컷 등급이 화면에 안 붙는 경주**가 생긴다.
+                _cp_ct = an.get("corePicks")
+                if not isinstance(_cp_ct, dict):
+                    _cp_ct = {}
+                    an["corePicks"] = _cp_ct
+                _cp_ct["cutTiers"] = _ct_list
     except Exception as _cte3:
         print("[컷 등급·실시간] 스킵(무시):", _cte3)
     # [복기] 분석 시점의 전적/제거/신호/추천을 히스토리 파일에 보존(통계 탭 복기용)
@@ -18612,6 +18629,13 @@ def _build_analysis_log(rk, an=None):
                 core_picks_out["finalQuinellas"] = _old_fq  # 마감 전 finalQ 보존
             if isinstance(core_picks_out, dict) and _old_ft:
                 core_picks_out["finalTrifectas"] = _old_ft  # 마감 전 finalT 보존
+        # 🔴 [2026-08-31] `_cp_dc` 는 **아래 else 가지에서만** 만들어진다.
+        #   마감 후 동결 가지로 가면 정의되지 않는데 저 아래 「판정↔회원 정렬」이 그것을 참조해
+        #   **NameError 로 조용히 스킵**됐다(로그 406건).
+        #   ⚠ 결과적으로는 **안 도는 것이 맞다** — 마감 후 동결본을 회원 명단으로 덮으면
+        #     T-5 동결이 깨진다. 그래서 「예외로 우연히 안 도는」 상태를
+        #     `None` 초기화 + 명시적 검사로 바꾼다(동작 불변 · 소음만 제거).
+        _cp_dc = None
         if an.get("afterClose") and _old_dc:
             _dc_out = _old_dc                        # 마감 후 → 동결(마감 전 기록 유지)
         else:
@@ -19261,7 +19285,8 @@ def _build_analysis_log(rk, an=None):
             #   ⚠ 회수율은 거의 안 바뀐다(69.9% ↔ 69.9%). **구좌 수가 정확해진다**(2.62 → 3.34).
             #     🔴 그 결과 「경주당 3개 이하」를 이미 넘고 있다는 사실이 드러난다 — 그것이 목적이다.
             #   🔧 되돌리기: JUDGE_MATCH_MEMBER = False
-            if JUDGE_MATCH_MEMBER and isinstance(_dc_out, dict):
+            # ⚠ `_cp_dc` 가 None 이면 **마감 후 동결 가지**다 — 정렬하지 않는다(위 주석 참조).
+            if JUDGE_MATCH_MEMBER and isinstance(_dc_out, dict) and isinstance(_cp_dc, dict):
                 try:
                     def _jm_cb(_x):
                         _c = _x.get("combo") if isinstance(_x, dict) else _x
