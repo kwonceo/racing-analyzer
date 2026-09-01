@@ -29,7 +29,7 @@ CONTRACT = {
         "설명": "경마 出走表 파서 → starters_store 말 행",
         "필수": ["no", "name", "totalScore", "recentPlacings", "styleType",
                  "corners", "fieldSizes", "pastDistances", "last3fList", "pastPlacings"],
-        "선택": ["jockey", "grade", "bodyWeight", "distAptitude", "jockeyRate",
+        "선택": ["jockey", "grade", "bodyWeight", "bodyWeightChange", "distAptitude", "jockeyRate",
                  "weight", "sexAge", "winOdds", "pop", "career", "detail",
                  "lineageNb", "pastGrades", "pastPops", "bodyWeightBonus",
                  "distAptitudeRate", "jockeyDistRate", "pastClassGrades", "pastClassPlacings"],

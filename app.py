@@ -29888,6 +29888,34 @@ def _keiba_parse_shutsuba(html):
             jockey = re.split(r"[\s　（(]", jockey_cell.strip())[0]
             mw = re.search(r"(\d{2}(?:\.\d)?)\b", jockey_cell)
             weight = float(mw.group(1)) if mw else None
+        # ══ [2026-09-01 대표 승인] **마체중 수집** — 「부담 대비 마체중」축을 열기 위해서다 ══
+        #   🔴 실태: `oddspark` 는 부담중량 69% 인데 **마체중 1%**, `keiba_nar` 은 정반대(65% / 0%).
+        #     두 소스가 재료를 **반씩** 갖고 있어 「마체중 ÷ 부담중량」이 **어디서도 계산되지 않았다.**
+        #     2026-08-11 에 「필드는 이미 있다」고 적은 것이 과장이었다(저장행엔 있고 파서가 안 뽑았다).
+        #   🟢 出走表에 컬럼이 **원래 있다** — 헤더 `馬 体 重` · 그 다음이 `連対 時馬 体重`.
+        #     ⚠ 처음에 `体重` 으로 검색해 「없다」고 볼 뻔했다 — HTML 이 `馬<br/>体<br/>重` 로 쪼개 놓는다.
+        #   🔴 셀 개수가 말마다 다르다(마체중 미계측이면 셀 자체가 없다) → **인덱스로 못 잡는다.**
+        #     판별: ⓐ`|` 가 있으면 **연대시 마체중**(`478 | 436`)이므로 제외
+        #           ⓑ`474` 또는 `474 +6` 형태 ⓒ **300~700kg** 범위(그래야 착별성적 `100` 같은 3자리를 안 문다)
+        body_weight = None
+        body_weight_change = None
+        for _c in cells:
+            _t = re.sub(r"\s+", " ", _c).strip()
+            if not _t or "|" in _t or "｜" in _t or "~" in _t or "～" in _t:
+                continue                                  # 연대시 마체중(범위)은 제외
+            _mb = re.match(r"^(\d{3})(?:\s*([+\-±−]\s*\d+))?$", _t)
+            if not _mb:
+                continue
+            _bw = float(_mb.group(1))
+            if not (300.0 <= _bw <= 700.0):               # 마체중 실범위 밖이면 다른 컬럼이다
+                continue
+            body_weight = _bw
+            if _mb.group(2):
+                try:
+                    body_weight_change = float(re.sub(r"[\s±−]", "", _mb.group(2)).replace("+", ""))
+                except ValueError:
+                    body_weight_change = None
+            break
         # 단승배당·인기: '52.4 6人気'
         pop = None
         win_odds = None
@@ -29904,6 +29932,8 @@ def _keiba_parse_shutsuba(html):
             #   ⚠ 표식이 없으면 「고쳤는데 왜 아직 이상한가」를 다음에 또 못 가른다.
             "nameSrc": name_src,
             "weight": weight, "winOdds": win_odds, "pop": pop, "lineageNb": lineage,
+            # 🔴 [2026-09-01 승인] 마체중 — 위 블록 참조. 「부담 대비 마체중」의 나머지 절반이다.
+            "bodyWeight": body_weight, "bodyWeightChange": body_weight_change,
             "detailUrl": ("https://www.oddspark.com/keiba/HorseDetail.do?lineageNb=%s" % lineage) if lineage else None,
             # [2026-08-06] 독립 축 — `grade`(통합등급)·`grade_bonus` 와 이름·경로가 겹치지 않는다.
             "pastClassGrades": _pg.get("pastClassGrades"),
@@ -30025,6 +30055,9 @@ def _keiba_starter_store_row(h):
             "pastClassPlacings": h.get("pastClassPlacings"),
             "career": h.get("career"),
             "detail": h.get("detail") or [], "bodyWeight": h.get("bodyWeight"),
+            # 🔴 [2026-09-01] 出走表의 마체중 **증감**(직전 경주 대비 실측). 소실 방지 — 저장만 한다.
+            #   ⚠ `body_weight_change_bonus` 는 과거 전적에서 **추정**한다. 이쪽이 원본이다.
+            "bodyWeightChange": h.get("bodyWeightChange"),
             "bodyWeightBonus": h.get("bodyWeightBonus"),
             "distAptitude": h.get("distAptitude"), "distAptitudeRate": h.get("distAptitudeRate"),
             "jockeyRate": h.get("jockeyRate"), "jockeyDistRate": h.get("jockeyDistRate"),
@@ -30142,6 +30175,8 @@ def _keiba_build_form(shutsuba, details):
             "gradeBonus": gbonus, "distExpBonus": debonus, "distExperienced": dexp,
             # [신규] 마체중·거리적성·기수복승률 (통합점수 반영 + 근거 표시)
             "bodyWeight": bwkg, "bodyWeightBonus": bwbonus,
+            # 🔴 [2026-09-01] 出走表 마체중 증감을 **그대로 전달**한다(점수 계산 무개입 · 저장용).
+            "bodyWeightChange": h.get("bodyWeightChange"),
             "distAptitude": dagrade, "distAptitudeRate": darate, "distAptitudeBonus": dabonus,
             "jockeyRate": jkctx.get("overall"), "jockeyDistRate": jkctx.get("dist"),
             "jockeyVenueRate": jkctx.get("venue"), "jockeyBonus": jkbonus,
