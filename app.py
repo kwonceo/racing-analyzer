@@ -14905,6 +14905,21 @@ try:
 except Exception:
     CYCLE_T2_APPLY_FROM = 0.0
 
+# ══ [2026-09-01 대표 승인] **t2_strong 을 경륜만으로 되돌린다** ══
+#   🔴 되돌리는 근거: 2026-07-24 확대는 리플레이 `t2_strong_all` 의 **hits(적중 건수)** 만 보고 정했다.
+#     회수율로 다시 재니 방향이 반대였다(2026-08-09 1차 · 2026-09-01 표본 3.7배 재측정).
+#     ⚠ 표본: 경마 삼복승 표시+확정배당 45 → **165경주** · 정제 · 판정선 74.5% · 상위3제외 병기
+#        경마 합계        baseline 74.8%(3제외 71.7) → t2_strong 75.3%(3제외 **71.3**)
+#        경마 1~2행 제외   baseline 75.9%(72.2)      → t2_strong **74.6%**(70.3) · 한계 **71.6%**
+#        경륜 합계        baseline 74.4%(72.4)      → t2_strong **72.0%**(69.9) · 한계 **70.4%**
+#     🔴 어느 쪽도 3제외에서 판정선을 못 넘고 **한계 회수율이 전부 74.5% 아래**다.
+#        「적중은 늘고 돈은 잃는」 모양 — 추가 매수가 회수를 못 만든다.
+#   ⚠ 그래도 **경륜은 남긴다** — 도입 근거(7/22 경륜 적중 13→18·caught_then_lost 회수)가 경륜 것이고,
+#     경마만 확대분을 걷는 것이 「확대를 되돌린다」의 정확한 뜻이다. 원래 설계로 복귀.
+#   ⚠ CI 는 겹친다([67.8,82.6] ↔ [67.0,84.8]) — **「명확히 나쁘다」가 아니라 「개선 증거가 없다」**이다.
+#   🔧 되돌리기: "all" 로 바꾸면 2026-07-24 확대 상태로 즉시 복귀한다(기존 코드 무삭제).
+T2_STRONG_SCOPE = "cycle"          # "cycle" = 경륜만(원래 설계) · "all" = 전 종목(7/24 확대)
+
 
 def _cycle_t2_strong_horses(an):
     """[t2_strong_cycle 예외 편입 판정] 마감 2분(T-2) 이후 '급락 30%+' 또는 '집중급락' 신호에 걸린 말 집합.
@@ -14959,13 +14974,24 @@ def _apply_rec_hysteresis(rk, an):
     #   +5~9(경륜만 +2~6) → sport 조건 제거해 전 종목 적용(기존 로직 무삭제·게이트 확대만). ══
     _sp = str(an.get("sport") or "").lower()
     _mb = an.get("minutesBefore")
-    _cyc_t2 = (time.time() >= CYCLE_T2_APPLY_FROM            # sport 조건 제거(전 종목) — 커트오프·T-2 게이트 유지
+    # 🔴 [2026-09-01 대표 승인] 종목 게이트 복원 — 위 `T2_STRONG_SCOPE` 주석 참조.
+    _scope_ok = (T2_STRONG_SCOPE == "all") or (_sp == "cycle")
+    _t2_win = (time.time() >= CYCLE_T2_APPLY_FROM            # 커트오프·T-2 게이트는 그대로
                and isinstance(_mb, (int, float)) and _mb <= 2)
+    _cyc_t2 = _t2_win and _scope_ok
+    # 🔴 원칙 23 — 도달과 발동을 따로 센다. 「경마인데 범위에서 막혔다」가 실제로 몇 번인지 남긴다.
+    #   ⚠ 이 계수기가 0 이면 되돌리기가 **실전에서 아무것도 안 바꾼 것**이다(그 자체가 관측 결과다).
+    if _t2_win and not _scope_ok:
+        try:
+            _gate_hit("t2_strong_scope_block", rk,
+                      "sport=%s · T-%.1f · 범위 밖(현재 %s)" % (_sp or "?", float(_mb), T2_STRONG_SCOPE))
+        except Exception:
+            pass
     if _cyc_t2:
         _sh = _cycle_t2_strong_horses(an)
         accept = any(h in _sh for h in prop)         # 강급락 말 포함 조합만 교체(예외 편입)·그 외 홀드
         an["cycleT2"] = {"applied": True, "afterT2": True, "minutesBefore": _mb, "sport": _sp,
-                         "scope": "all", "strongHorses": sorted(_sh), "admitted": bool(accept),
+                         "scope": T2_STRONG_SCOPE, "strongHorses": sorted(_sh), "admitted": bool(accept),
                          "proposal": "+".join(str(x) for x in prop)}
     elif st["switches"] < 2:
         _hard = False
