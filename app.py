@@ -40564,7 +40564,19 @@ def _kakao_rich_message(rk, phase, an):
     try:
         if _PREVIEW is not None:
             _pv_hs = {}
-            for _x in (an.get("form") or an.get("horses") or []):
+            # 🔴🔴 [2026-09-01] **dict 를 순회하면 키(int 마번)가 나온다.**
+            #   `_form_from_starters` 는 전적이 없으면 **None** 을 돌려주므로 `an["horses"]` 로
+            #   폴백하는데, 그쪽이 {마번: 말} dict 인 경로가 있다 → `_x.get("no")` 가
+            #   `'int' object has no attribute 'get'` 로 죽어 **「어떻게 봤나」 블록이 통째로 빠졌다**.
+            #   실측: 오늘 148건 · **전부 전적 없는 경주**(전적 있으면 form 이 리스트라 안 걸린다).
+            #   ⚠ 2026-08-31 에 `_pace_usable` 에서 **같은 유형**을 고치고 이 호출부를 놓쳤다.
+            #     그때 적어둔 「같은 헬퍼를 호출부 둘이 다른 형식으로 부르는지 본다」가 여기 그대로 걸렸다.
+            _pv_src = an.get("form") or an.get("horses") or []
+            if isinstance(_pv_src, dict):
+                _pv_src = list(_pv_src.values())
+            for _x in (_pv_src or []):
+                if not isinstance(_x, dict):
+                    continue
                 try:
                     _pv_hs[int(_x.get("no"))] = _x
                 except (TypeError, ValueError):
