@@ -457,21 +457,263 @@ def check_score_decomposition():
                     % (rows, ", ".join("%s %.1f%%" % (f, rates[f]) for f in fields)))
 
 
-# ══════════════ ①②③ 자리 (다음 세션 구현) ══════════════
+# ══════════════ ①②③ 구현분 (2026-09-01) ══════════════
+#  🔴 **한 번 스캔해 여러 항목이 나눠 쓴다** — A1·A2·A4 가 각각 전수 스캔하면 20초가 더 든다.
+#    실측: analysis_log 5,786파일 전수 6.6초 · 체크리스트 전체 13.8초.
+#  🔴 **당일로 판정하고 누적을 병기한다**(D1·D4·D5 와 같은 규칙).
+#    ⚠ 「도입 이후로 좁히지 않는다」는 _PENDING 의 분모 설계를 지킨 것이다 —
+#      당일은 **시간 창**이지 「스키마 도입 이후」가 아니다. 배선 실패가 당일에 그대로 드러난다.
+#      그리고 누적을 함께 내어 **과거가 오염돼 있다는 사실이 화면에서 사라지지 않게** 한다.
+_ALOG_CACHE = {}
+
+
+def _scan_alog():
+    """analysis_log 를 **한 번만** 훑어 horses 필드 보유를 센다(당일·누적).
+
+    반환 {"day": {"rows": n, "have": Counter}, "all": {...}}
+    ⚠ 결과를 캐시한다 — 같은 실행 안에서 A1·A2·A4 가 공유한다.
+    """
+    if _ALOG_CACHE:
+        return _ALOG_CACHE
+    day = time.strftime("%Y_%m_%d")
+    out = {"day": {"rows": 0, "have": collections.Counter()},
+           "all": {"rows": 0, "have": collections.Counter()},
+           "dayRaces": 0, "allRaces": 0}
+    for f in sorted(glob.glob(os.path.join(BASE, "data", "analysis_log", "*.json"))):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        is_day = os.path.basename(f).startswith(day + "_")
+        hs = d.get("horses") or []
+        # drops_raw 는 **경주 단위** 필드다 — 행이 아니라 경주로 센다(원칙 8-C: 분모를 섞지 않는다)
+        _has_dr = d.get("drops_raw") not in (None, "", [], {})
+        for scope in (("all",) + (("day",) if is_day else ())):
+            out["dayRaces" if scope == "day" else "allRaces"] += 1
+            if _has_dr:
+                out[scope]["have"]["drops_raw_race"] += 1
+        for h in hs:
+            for scope in (("all",) + (("day",) if is_day else ())):
+                out[scope]["rows"] += 1
+                for fl in ("gait", "paceBonus", "paceBonusBase", "gradeAtBonus"):
+                    if h.get(fl) not in (None, "", []):
+                        out[scope]["have"][fl] += 1
+    _ALOG_CACHE.update(out)
+    return out
+
+
+def _field_check(cid, name, fields, target, note_extra=""):
+    """analysis_log horses 필드 보유율 공용 판정 — 당일 판정 · 누적 병기."""
+    s = _scan_alog()
+    denom = "analysis_log 의 horses 전체 행(스키마 도입 시점으로 좁히지 않는다) · **당일 판정 · 누적 병기**"
+    dr, ar = s["day"]["rows"], s["all"]["rows"]
+    if dr < SNAP_MIN_N:
+        return _mk(cid, "① 적중왕전개", name, denom, current=None, target=target,
+                   ok=None, n=dr, reason="표본 부족(당일 %d행 < %d)" % (dr, SNAP_MIN_N))
+    d_rate = {f: round(100.0 * s["day"]["have"][f] / dr, 1) for f in fields}
+    a_rate = {f: round(100.0 * s["all"]["have"][f] / ar, 1) for f in fields} if ar else {}
+    worst = min(d_rate.values())
+    return _mk(cid, "① 적중왕전개", name, denom, current=worst, target=target,
+               ok=(worst >= target), n=dr,
+               note="당일(%d행): %s / 누적(%d행): %s%s"
+                    % (dr, ", ".join("%s %.1f%%" % (f, d_rate[f]) for f in fields),
+                       ar, ", ".join("%s %.1f%%" % (f, a_rate.get(f, 0)) for f in fields),
+                       note_extra))
+
+
+def check_a1_pace_fields():
+    """A1 gait·paceBonus·paceBonusBase 보유율."""
+    return _field_check("A1", "gait·paceBonus·paceBonusBase 보유율",
+                        ["gait", "paceBonus", "paceBonusBase"], 90.0)
+
+
+def check_a2_grade_at_bonus():
+    """A2 gradeAtBonus 보유율 — 2026-08-31 배선(그 이전 경주엔 없다)."""
+    return _field_check("A2", "gradeAtBonus 보유율", ["gradeAtBonus"], 90.0,
+                        note_extra=" · 2026-08-31 배선이라 누적은 낮은 것이 정상")
+
+
+def check_a3_declared_style():
+    """A3 declaredStyle 누적 보유율 — 분모는 **경륜** starters_store 행만."""
+    denom = "경륜(source=keirin) starters_store 전체 행 — 경마 행은 대상이 아니라 분모에서 제외"
+    try:
+        db = json.load(open(os.path.join(BASE, "starters_store.json"), encoding="utf-8"))
+    except Exception as e:
+        return _mk("A3", "① 적중왕전개", "declaredStyle 누적 보유율", denom,
+                   current=None, target=70.0, ok=None, reason="읽기 실패: %s" % str(e)[:60])
+    rows = have = 0
+    for v in (db or {}).values():
+        if not isinstance(v, dict) or v.get("source") != "keirin":
+            continue
+        for h in (v.get("horses") or []):
+            rows += 1
+            if h.get("declaredStyle") not in (None, "", []):
+                have += 1
+    if rows < SNAP_MIN_N:
+        return _mk("A3", "① 적중왕전개", "declaredStyle 누적 보유율", denom,
+                   current=None, target=70.0, ok=None, n=rows,
+                   reason="표본 부족(%d행 < %d)" % (rows, SNAP_MIN_N))
+    r = round(100.0 * have / rows, 1)
+    return _mk("A3", "① 적중왕전개", "declaredStyle 누적 보유율", denom,
+               current=r, target=70.0, ok=(r >= 70.0), n=rows,
+               note="경륜 %d행 중 %d · ⚠ starters_store 는 라이브 캐시라 진행 중 경주 위주다" % (rows, have))
+
+
+def check_a4_drops_raw():
+    """A4 drops_raw 보유율 — 🔴 **경주 단위**다(horses 행이 아니다)."""
+    s = _scan_alog()
+    denom = "analysis_log **경주 전체**(drops_raw 는 경주 단위 필드 — 행과 섞지 않는다) · 당일 판정 · 누적 병기"
+    dn, an = s["dayRaces"], s["allRaces"]
+    if dn < SNAP_MIN_N:
+        return _mk("A4", "① 적중왕전개", "drops_raw 보유율", denom, current=None,
+                   target=90.0, ok=None, n=dn,
+                   reason="표본 부족(당일 %d경주 < %d)" % (dn, SNAP_MIN_N))
+    d = round(100.0 * s["day"]["have"]["drops_raw_race"] / dn, 1)
+    a = round(100.0 * s["all"]["have"]["drops_raw_race"] / an, 1) if an else 0
+    return _mk("A4", "① 적중왕전개", "drops_raw 보유율", denom, current=d, target=90.0,
+               ok=(d >= 90.0), n=dn, note="당일 %.1f%%(%d경주) / 누적 %.1f%%(%d경주)" % (d, dn, a, an))
+
+
+def check_b3_ghost_no():
+    """B3 유령 마번 — 추천 조합에 **배당에 없는 마번**이 섞였나.
+
+    🔴 분모는 「배당 스냅샷 보유 경주 전체」다(출주표 유무 무관) —
+      출주표 보유분만 세면 출주표를 못 받은 경주의 유령이 사라진다.
+    """
+    day = time.strftime("%Y_%m_%d")
+    denom = "당일 **배당 스냅샷 보유 경주 전체**(출주표 유무 무관) · 추천 보유분만 대조"
+    tot = bad = 0
+    ex = []
+    for f in sorted(glob.glob(os.path.join(BASE, "data", "analysis_log", day + "_*.json"))):
+        name = os.path.basename(f)[:-5]
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        dc = ((d.get("corePicks") or {}).get("displayedCombos") or {})
+        rec = list(dc.get("quinellas") or []) + list(dc.get("trifectas") or [])
+        if not rec:
+            continue
+        oh = _hist_read(os.path.join(BASE, "data", "odds_history", name + ".json"))
+        # 🔴 [원칙 27] **마감 전 정상 틱**만 쓴다 — 판정 명단은 T-5 에 동결되기 때문이다.
+        #   실사고(2026-09-01 몬베츠 5경주): 마지막 스냅샷이 **마감 후 private 11두**(55조합)라
+        #   마감 전엔 정상 출전이던 5번이 「유령」으로 잡혔다. 취소마이지 유령이 아니다.
+        #   ⇒ after_close·오염 틱을 빼지 않으면 **매일 거짓 경보**가 난다.
+        _BADT = ("odds_suspect", "baseline_reset", "next_race_blocked")
+        sn = [s for s in ((oh or {}).get("snapshots") or [])
+              if s.get("quinella") and not s.get("after_close")
+              and not any(s.get(b) for b in _BADT)
+              and isinstance(s.get("minutes_before"), (int, float))]
+        if not sn:
+            continue
+        nos = set()
+        q = sn[-1].get("quinella")
+        if isinstance(q, list):
+            for it in q:
+                for z in ((it or {}).get("combo") or []):
+                    try:
+                        nos.add(int(z))
+                    except (TypeError, ValueError):
+                        pass
+        else:
+            for k in (q or {}):
+                for z in str(k).replace("-", "+").split("+"):
+                    try:
+                        nos.add(int(z))
+                    except (TypeError, ValueError):
+                        pass
+        if not nos:
+            continue
+        tot += 1
+        g = set()
+        for c in rec:
+            for z in (c or []):
+                try:
+                    if int(z) not in nos:
+                        g.add(int(z))
+                except (TypeError, ValueError):
+                    pass
+        if g:
+            bad += 1
+            if len(ex) < 3:
+                ex.append("%s %s" % (name, sorted(g)))
+    if tot < SNAP_MIN_N:
+        return _mk("B3", "② 배당판 오류", "유령 마번 비율", denom, current=None,
+                   target=0.0, ok=None, n=tot,
+                   reason="표본 부족(당일 %d경주 < %d)" % (tot, SNAP_MIN_N))
+    r = round(100.0 * bad / tot, 1)
+    return _mk("B3", "② 배당판 오류", "유령 마번 비율", denom, current=r, target=0.0,
+               ok=(bad == 0), n=tot,
+               note="당일 %d경주 중 %d건%s" % (tot, bad, (" · 예: " + " / ".join(ex)) if ex else ""))
+
+
+def _hist_read(p):
+    """odds_history 읽기 — .json 우선, 없으면 .gz."""
+    import gzip
+    for path, gz in ((p, False), (p + ".gz", True)):
+        try:
+            if gz:
+                with gzip.open(path, "rt", encoding="utf-8") as f:
+                    return json.load(f)
+            return json.load(open(path, encoding="utf-8"))
+        except Exception:
+            continue
+    return None
+
+
+def check_c2_payout_coverage():
+    """C2 결과 확정배당 보유율 — 분모는 **결과 입력 완료 경주 전체**."""
+    day = time.strftime("%Y_%m_%d")
+    denom = "당일 **결과 입력 완료 경주 전체**(결과가 없으면 확정배당이 존재할 수 없어 분모에서 제외)"
+    tot = have = 0
+    for f in sorted(glob.glob(os.path.join(BASE, "data", "race_results", day + "_*.json"))):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        r = d.get("result") or {}
+        if not (r.get("1st") and r.get("2nd")):
+            continue
+        tot += 1
+        if (d.get("payouts") or {}).get("quinella") is not None:
+            have += 1
+    if tot < SNAP_MIN_N:
+        return _mk("C2", "③ 예상·복기", "결과 확정배당 보유율", denom, current=None,
+                   target=100.0, ok=None, n=tot,
+                   reason="표본 부족(당일 %d경주 < %d)" % (tot, SNAP_MIN_N))
+    r = round(100.0 * have / tot, 1)
+    return _mk("C2", "③ 예상·복기", "결과 확정배당 보유율", denom, current=r, target=100.0,
+               ok=(have == tot), n=tot, note="당일 %d/%d · 미보유는 백필 대기" % (have, tot))
+
+
+def check_c4_kakao_log():
+    """C4 카카오 발송 이력 저장 — 🔴 분모는 **발송 시도 전체**(성공·실패 모두)."""
+    day = time.strftime("%Y%m%d")
+    denom = "당일 발송 시도 전체(성공·실패 모두) — 성공분만 세면 발송 실패가 보이지 않는다"
+    p = os.path.join(BASE, "data", "kakao_sent", day + ".json")
+    if not os.path.exists(p):
+        return _mk("C4", "③ 예상·복기", "카카오 발송 이력 저장", denom, current=0,
+                   target=1, ok=False, n=0,
+                   note="당일 이력 파일 없음 — 발송이 없었는지 **기록이 안 된 것인지 구분되지 않는다**")
+    try:
+        d = json.load(open(p, encoding="utf-8"))
+    except Exception as e:
+        return _mk("C4", "③ 예상·복기", "카카오 발송 이력 저장", denom, current=None,
+                   target=1, ok=None, reason="읽기 실패: %s" % str(e)[:60])
+    rows = d if isinstance(d, list) else (d.get("rows") or d.get("sent") or list((d or {}).values()))
+    n = len(rows or [])
+    fail = sum(1 for r in (rows or []) if isinstance(r, dict) and r.get("ok") is False)
+    return _mk("C4", "③ 예상·복기", "카카오 발송 이력 저장", denom, current=(1 if n else 0),
+               target=1, ok=(n > 0), n=n,
+               note="당일 %d건 기록(실패 %d건 포함) · ⚠ 실패도 남아야 정상이다" % (n, fail))
+
+
+# ══════════════ ①②③ 미구현 자리 ══════════════
 #  ⚠ 미구현 항목도 목록에 남긴다 — **17개 중 몇 개가 미구현인지도 진행 상황**이기 때문이다.
 #  ⚠ 각 항목의 `denominator` 는 **지금 설계해 둔다.** ④에서 드러났듯 분모를 잘못 잡으면
 #    실패가 통계에서 사라지고, 그때는 이미 완료선이 굳어 있어 되돌리기 어렵다.
 _PENDING = [
-    # ① 적중왕전개 준비 (5)
-    ("A1", "① 적중왕전개", "gait·paceBonus·paceBonusBase 보유율", 90.0,
-     "analysis_log **전체 경주**(스키마 도입 이후로 좁히지 않는다)",
-     "'도입 이후만'으로 좁히면 배선 실패가 통계에서 사라진다 — ④ 0틱 제외와 같은 구조"),
-    ("A2", "① 적중왕전개", "gradeAtBonus 보유율", 90.0,
-     "analysis_log 전체 경주", "동상 — 도입 시점으로 분모를 좁히지 않는다"),
-    ("A3", "① 적중왕전개", "declaredStyle 누적 보유율", 70.0,
-     "경륜 starters_store 전체 행", "경륜 전용 필드라 경마 행은 분모에서 제외(대상 아님)"),
-    ("A4", "① 적중왕전개", "drops_raw 보유율", 90.0,
-     "analysis_log 전체 경주", "동상"),
+    # ① 적중왕전개 준비 — 🟢 A1·A2·A3·A4 는 2026-09-01 구현됨(위 함수 참조)
     ("A5", "① 적중왕전개", "paceBonus 3안 비교 표본", 30,
      "결과 보유 경주(착순 확정)", "성적 비교라 결과가 없으면 판정 자체가 불가 — 분모에서 제외가 타당"),
     # ② 배당판 오류 (4)
@@ -479,21 +721,16 @@ _PENDING = [
      "동일 경주에 2개 이상 리스트가 존재하는 스냅샷", "리스트가 1개면 비교 대상이 없어 판정 불가"),
     ("B2", "② 배당판 오류", "quinella ↔ finalQuinellas 불일치 처리", 0.0,
      "finalQuinellas 보유 경주 전체", "추천이 없는 경주는 대조 대상이 아님"),
-    ("B3", "② 배당판 오류", "유령 마번 비율", 0.0,
-     "**배당 스냅샷 보유 경주 전체**(출주표 유무 무관)",
-     "'출주표 보유 경주만'으로 좁히면 출주표를 못 받은 경주의 유령 마번이 사라진다"),
+    # 🟢 B3(유령 마번)은 2026-09-01 구현됨(위 check_b3_ghost_no)
     ("B4", "② 배당판 오류", "화면 불일치 감지 항목 작동", 1,
      "감지 항목 3종", "발동률이 확인된 항목만 대상(CLAUDE.md 「화면 불일치 자동 감지」)"),
     # ③ 예상·복기 (4)
     ("C1", "③ 예상·복기", "발주완료 경주 예상 저장률", 100.0,
      "**당일 스케줄의 발주완료 경주 전체**", "수집 성공분만 세면 수집 실패가 통계에서 사라진다"),
-    ("C2", "③ 예상·복기", "결과 확정배당 보유율", 100.0,
-     "결과 입력 완료 경주 전체", "결과가 없으면 확정배당이 존재할 수 없어 분모에서 제외"),
+    # 🟢 C2(확정배당 보유율)·C4(카카오 발송 이력)는 2026-09-01 구현됨
     ("C3", "③ 예상·복기", "det_review 커버율 · 실패 0건", 100.0,
      "**발주완료 경주 전체**(분석 로그 보유 경주만이 아니다)",
      "'분석 로그 보유분만'으로 좁히면 분석 자체가 안 돈 경주가 사라진다 — ④와 같은 함정"),
-    ("C4", "③ 예상·복기", "카카오 발송 이력 저장", 1,
-     "발송 시도 전체(성공·실패 모두)", "성공분만 세면 발송 실패가 보이지 않는다"),
 ]
 
 
@@ -1189,7 +1426,11 @@ def build_checklist():
              # check_snapshot_ingest(),
              check_measurable_today(),   # ⚠ I5(파일 중복)는 제거 — 중복 자체는 정상이라
              #    영원히 빨간불이 되고 그러면 무시하게 된다. → tests/run_glob_safety.py 로 이관.
-             check_forecast_discard(), check_forecast_vs_market(), check_forecast_highodds()]
+             check_forecast_discard(), check_forecast_vs_market(), check_forecast_highodds(),
+             # 🟢 [2026-09-01] ①②③ 구현분 7종 — 미측정 16 → 9
+             check_a1_pace_fields(), check_a2_grade_at_bonus(), check_a3_declared_style(),
+             check_a4_drops_raw(), check_b3_ghost_no(),
+             check_c2_payout_coverage(), check_c4_kakao_log()]
     for (i, area, name, target, denom, why) in _PENDING:
         items.append(_mk(i, area, name, denom, current=None, target=target,
                          ok=None, n=None, note="분모 근거: " + why, reason="미구현"))
