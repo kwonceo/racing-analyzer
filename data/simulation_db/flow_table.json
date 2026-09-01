@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "built_at": "2026-07-30 11:55:20",
+ "built_at": "2026-09-01 20:14:01",
  "sport": "cycle",
  "min_n": 30,
  "method": {
@@ -21,738 +21,690 @@
  },
  "source_period": {
   "from": "2026-07-07",
-  "to": "2026-07-30"
+  "to": "2026-09-01"
  },
  "cells": {
   "느린|7두": {
    "추입+추입": {
-    "prob": 0.0373,
-    "n": 402,
-    "hits": 15,
+    "prob": 0.0317,
+    "n": 882,
+    "hits": 28,
     "ci": [
-     0.0227,
-     0.0606
+     0.0221,
+     0.0455
     ],
-    "market_implied": 0.0415,
-    "edge": 0.8987,
+    "market_implied": 0.0352,
+    "edge": 0.9015,
     "edge_ci": [
-     0.4955,
-     1.3224
+     0.6196,
+     1.223
     ],
-    "median_odds": 42.3
+    "median_odds": 52.8
    },
    "선행+추입": {
-    "prob": 0.0804,
-    "n": 112,
-    "hits": 9,
+    "prob": 0.0986,
+    "n": 294,
+    "hits": 29,
     "ci": [
-     0.0429,
-     0.1457
+     0.0696,
+     0.1381
     ],
-    "market_implied": 0.0719,
-    "edge": 1.1182,
+    "market_implied": 0.0898,
+    "edge": 1.0988,
     "edge_ci": [
-     0.4841,
-     1.857
+     0.768,
+     1.4355
     ],
-    "median_odds": 25.0
+    "median_odds": 18.4
    },
    "자유+추입": {
-    "prob": null,
-    "n": 8,
+    "prob": 0.0278,
+    "n": 36,
     "hits": 1,
-    "market_implied": 0.0181,
-    "reason": "표본 부족(n<30)"
+    "ci": [
+     0.0049,
+     0.1417
+    ],
+    "market_implied": 0.0126,
+    "edge": 2.2036,
+    "edge_ci": [
+     0.0,
+     7.8395
+    ],
+    "median_odds": 132.4
    },
    "선행+자유": {
     "prob": null,
-    "n": 2,
+    "n": 6,
     "hits": 0,
-    "market_implied": 0.0539,
-    "reason": "표본 부족(n<30)"
-   },
-   "자유+자유": {
-    "prob": null,
-    "n": 1,
-    "hits": 0,
-    "market_implied": 0.0077,
+    "market_implied": 0.0161,
     "reason": "표본 부족(n<30)"
    },
    "_meta": {
-    "races": 25,
-    "combos": 525
+    "races": 58,
+    "combos": 1218
+   }
+  },
+  "느린|9두": {
+   "추입+추입": {
+    "prob": 0.0179,
+    "n": 112,
+    "hits": 2,
+    "ci": [
+     0.0049,
+     0.0628
+    ],
+    "market_implied": 0.0219,
+    "edge": 0.8146,
+    "edge_ci": [
+     0.0,
+     2.0968
+    ],
+    "median_odds": 83.6
+   },
+   "선행+추입": {
+    "prob": 0.0625,
+    "n": 32,
+    "hits": 2,
+    "ci": [
+     0.0173,
+     0.2015
+    ],
+    "market_implied": 0.0483,
+    "edge": 1.2946,
+    "edge_ci": [
+     0.0,
+     3.391
+    ],
+    "median_odds": 34.5
+   },
+   "_meta": {
+    "races": 4,
+    "combos": 144
    }
   },
   "보통|7두": {
    "선행+추입": {
-    "prob": 0.0623,
-    "n": 802,
-    "hits": 50,
+    "prob": 0.0602,
+    "n": 1230,
+    "hits": 74,
     "ci": [
-     0.0476,
-     0.0813
+     0.0482,
+     0.0749
     ],
-    "market_implied": 0.0653,
-    "edge": 0.9552,
+    "market_implied": 0.0662,
+    "edge": 0.909,
     "edge_ci": [
-     0.7223,
-     1.2116
+     0.7438,
+     1.0788
     ],
-    "median_odds": 40.0
+    "median_odds": 32.8
    },
    "추입+추입": {
-    "prob": 0.0302,
-    "n": 794,
-    "hits": 24,
+    "prob": 0.027,
+    "n": 1220,
+    "hits": 33,
     "ci": [
-     0.0204,
-     0.0446
+     0.0193,
+     0.0377
     ],
-    "market_implied": 0.0287,
-    "edge": 1.0525,
+    "market_implied": 0.0246,
+    "edge": 1.0993,
     "edge_ci": [
-     0.6805,
-     1.4448
+     0.747,
+     1.4972
     ],
-    "median_odds": 71.3
+    "median_odds": 69.8
    },
    "선행+선행": {
-    "prob": 0.0741,
-    "n": 81,
-    "hits": 6,
+    "prob": 0.1371,
+    "n": 124,
+    "hits": 17,
     "ci": [
-     0.0344,
-     0.1523
+     0.0874,
+     0.2086
     ],
-    "market_implied": 0.0701,
-    "edge": 1.0564,
+    "market_implied": 0.0994,
+    "edge": 1.3788,
     "edge_ci": [
-     0.3096,
-     2.0719
+     0.8605,
+     1.9174
     ],
-    "median_odds": 15.8
+    "median_odds": 14.4
    },
    "자유+추입": {
     "prob": null,
-    "n": 16,
-    "hits": 1,
-    "market_implied": 0.0072,
+    "n": 20,
+    "hits": 0,
+    "market_implied": 0.0075,
     "reason": "표본 부족(n<30)"
    },
    "선행+자유": {
     "prob": null,
-    "n": 8,
+    "n": 10,
     "hits": 0,
-    "market_implied": 0.0071,
+    "market_implied": 0.0094,
     "reason": "표본 부족(n<30)"
    },
    "_meta": {
-    "races": 81,
-    "combos": 1701
+    "races": 124,
+    "combos": 2604
+   }
+  },
+  "보통|9두": {
+   "추입+추입": {
+    "prob": 0.0286,
+    "n": 105,
+    "hits": 3,
+    "ci": [
+     0.0098,
+     0.0807
+    ],
+    "market_implied": 0.032,
+    "edge": 0.8939,
+    "edge_ci": [
+     0.0,
+     1.5639
+    ],
+    "median_odds": 60.5
+   },
+   "선행+추입": {
+    "prob": 0.0286,
+    "n": 70,
+    "hits": 2,
+    "ci": [
+     0.0079,
+     0.0983
+    ],
+    "market_implied": 0.0228,
+    "edge": 1.2552,
+    "edge_ci": [
+     0.0,
+     3.7748
+    ],
+    "median_odds": 69.8
+   },
+   "선행+선행": {
+    "prob": null,
+    "n": 5,
+    "hits": 0,
+    "market_implied": 0.0101,
+    "reason": "표본 부족(n<30)"
+   },
+   "_meta": {
+    "races": 5,
+    "combos": 180
    }
   },
   "빠른|7두": {
    "선행+추입": {
-    "prob": 0.0537,
-    "n": 1919,
-    "hits": 103,
+    "prob": 0.0498,
+    "n": 2729,
+    "hits": 136,
     "ci": [
-     0.0445,
-     0.0647
+     0.0423,
+     0.0587
     ],
     "market_implied": 0.0501,
-    "edge": 1.0709,
+    "edge": 0.9944,
     "edge_ci": [
-     0.904,
-     1.2378
+     0.8535,
+     1.1432
     ],
-    "median_odds": 44.9
+    "median_odds": 42.1
    },
    "선행+선행": {
-    "prob": 0.0683,
-    "n": 805,
-    "hits": 55,
+    "prob": 0.0642,
+    "n": 1169,
+    "hits": 75,
     "ci": [
-     0.0529,
-     0.0879
+     0.0515,
+     0.0797
     ],
-    "market_implied": 0.0651,
-    "edge": 1.0487,
+    "market_implied": 0.0669,
+    "edge": 0.9592,
     "edge_ci": [
-     0.8157,
-     1.2941
+     0.7641,
+     1.1433
     ],
-    "median_odds": 27.1
+    "median_odds": 23.2
    },
    "추입+추입": {
-    "prob": 0.0111,
-    "n": 722,
-    "hits": 8,
+    "prob": 0.0248,
+    "n": 1049,
+    "hits": 26,
     "ci": [
-     0.0056,
-     0.0217
+     0.017,
+     0.0361
     ],
-    "market_implied": 0.0229,
-    "edge": 0.4848,
+    "market_implied": 0.0208,
+    "edge": 1.1931,
     "edge_ci": [
-     0.1791,
-     0.8214
+     0.7634,
+     1.6242
     ],
-    "median_odds": 75.5
-   },
-   "선행+자유": {
-    "prob": null,
-    "n": 23,
-    "hits": 0,
-    "market_implied": 0.0234,
-    "reason": "표본 부족(n<30)"
+    "median_odds": 79.1
    },
    "자유+추입": {
     "prob": null,
     "n": 15,
     "hits": 0,
-    "market_implied": 0.0217,
+    "market_implied": 0.0075,
     "reason": "표본 부족(n<30)"
    },
-   "자유+자유": {
+   "선행+자유": {
     "prob": null,
-    "n": 2,
+    "n": 15,
     "hits": 0,
-    "market_implied": 0.0022,
+    "market_implied": 0.009,
     "reason": "표본 부족(n<30)"
    },
    "_meta": {
-    "races": 166,
-    "combos": 3486
+    "races": 237,
+    "combos": 4977
    }
   },
   "빠른|9두": {
    "선행+추입": {
-    "prob": 0.0364,
-    "n": 660,
-    "hits": 24,
+    "prob": 0.0385,
+    "n": 650,
+    "hits": 25,
     "ci": [
-     0.0246,
-     0.0535
+     0.0262,
+     0.0562
     ],
-    "market_implied": 0.0363,
-    "edge": 1.0019,
+    "market_implied": 0.0349,
+    "edge": 1.1021,
     "edge_ci": [
-     0.6577,
-     1.3573
+     0.7198,
+     1.5069
     ],
-    "median_odds": 74.0
+    "median_odds": 69.1
    },
    "추입+추입": {
-    "prob": 0.0167,
-    "n": 418,
-    "hits": 7,
-    "ci": [
-     0.0081,
-     0.0342
-    ],
-    "market_implied": 0.015,
-    "edge": 1.1173,
-    "edge_ci": [
-     0.3636,
-     1.9304
-    ],
-    "median_odds": 118.2
-   },
-   "선행+선행": {
-    "prob": 0.022,
-    "n": 182,
+    "prob": 0.0101,
+    "n": 395,
     "hits": 4,
     "ci": [
-     0.0086,
-     0.0551
+     0.0039,
+     0.0257
     ],
-    "market_implied": 0.0263,
-    "edge": 0.8367,
+    "market_implied": 0.0171,
+    "edge": 0.5934,
     "edge_ci": [
-     0.1964,
-     1.6929
+     0.1396,
+     1.2229
     ],
-    "median_odds": 54.2
+    "median_odds": 104.2
+   },
+   "선행+선행": {
+    "prob": 0.0279,
+    "n": 179,
+    "hits": 5,
+    "ci": [
+     0.012,
+     0.0637
+    ],
+    "market_implied": 0.0256,
+    "edge": 1.0927,
+    "edge_ci": [
+     0.2656,
+     1.9697
+    ],
+    "median_odds": 57.2
    },
    "_meta": {
-    "races": 35,
-    "combos": 1260
+    "races": 34,
+    "combos": 1224
    }
   }
  },
  "survivors": [],
  "oos": {
-  "split": "2026-07-26",
+  "split": "2026-08-20",
   "build_period": {
-   "races": 69,
+   "races": 0,
    "survivors": 0
   },
   "test_period": {
-   "races": 238,
+   "races": 462,
    "survivors": 0
   },
   "survived_both": [],
-  "build_table": {
+  "build_table": {},
+  "test_table": {
    "느린|7두": {
     "추입+추입": {
-     "prob": 0.0463,
-     "n": 108,
-     "hits": 5,
+     "prob": 0.0317,
+     "n": 882,
+     "hits": 28,
      "ci": [
-      0.0199,
-      0.1038
+      0.0221,
+      0.0455
      ],
-     "market_implied": 0.0439,
-     "edge": 1.0552,
+     "market_implied": 0.0352,
+     "edge": 0.9015,
      "edge_ci": [
-      0.2514,
-      1.945
+      0.6196,
+      1.223
      ],
-     "median_odds": 39.1
+     "median_odds": 52.8
     },
     "선행+추입": {
-     "prob": null,
-     "n": 18,
-     "hits": 1,
-     "market_implied": 0.0701,
-     "reason": "표본 부족(n<30)"
-    },
-    "_meta": {
-     "races": 6,
-     "combos": 126
-    }
-   },
-   "보통|7두": {
-    "선행+추입": {
-     "prob": 0.0667,
-     "n": 180,
-     "hits": 12,
+     "prob": 0.0986,
+     "n": 294,
+     "hits": 29,
      "ci": [
-      0.0385,
-      0.1129
+      0.0696,
+      0.1381
      ],
-     "market_implied": 0.0648,
-     "edge": 1.0294,
+     "market_implied": 0.0898,
+     "edge": 1.0988,
      "edge_ci": [
-      0.5534,
-      1.5676
+      0.768,
+      1.4355
      ],
-     "median_odds": 50.0
+     "median_odds": 18.4
     },
-    "추입+추입": {
+    "자유+추입": {
      "prob": 0.0278,
-     "n": 180,
-     "hits": 5,
-     "ci": [
-      0.0119,
-      0.0634
-     ],
-     "market_implied": 0.0304,
-     "edge": 0.9133,
-     "edge_ci": [
-      0.2096,
-      1.79
-     ],
-     "median_odds": 73.5
-    },
-    "선행+선행": {
-     "prob": null,
-     "n": 18,
+     "n": 36,
      "hits": 1,
-     "market_implied": 0.0483,
-     "reason": "표본 부족(n<30)"
-    },
-    "_meta": {
-     "races": 18,
-     "combos": 378
-    }
-   },
-   "빠른|7두": {
-    "선행+추입": {
-     "prob": 0.0556,
-     "n": 396,
-     "hits": 22,
      "ci": [
-      0.037,
-      0.0827
+      0.0049,
+      0.1417
      ],
-     "market_implied": 0.0524,
-     "edge": 1.0608,
-     "edge_ci": [
-      0.6908,
-      1.4512
-     ],
-     "median_odds": 41.2
-    },
-    "추입+추입": {
-     "prob": 0.0,
-     "n": 154,
-     "hits": 0,
-     "ci": [
-      0.0,
-      0.0243
-     ],
-     "market_implied": 0.0187,
-     "edge": null,
+     "market_implied": 0.0126,
+     "edge": 2.2036,
      "edge_ci": [
       0.0,
-      0.0
+      7.8395
      ],
-     "median_odds": 77.3
-    },
-    "선행+선행": {
-     "prob": 0.0784,
-     "n": 153,
-     "hits": 12,
-     "ci": [
-      0.0454,
-      0.1321
-     ],
-     "market_implied": 0.0675,
-     "edge": 1.1624,
-     "edge_ci": [
-      0.6202,
-      1.7815
-     ],
-     "median_odds": 24.6
+     "median_odds": 132.4
     },
     "선행+자유": {
      "prob": null,
      "n": 6,
      "hits": 0,
-     "market_implied": 0.0097,
-     "reason": "표본 부족(n<30)"
-    },
-    "자유+추입": {
-     "prob": null,
-     "n": 4,
-     "hits": 0,
-     "market_implied": 0.0014,
-     "reason": "표본 부족(n<30)"
-    },
-    "자유+자유": {
-     "prob": null,
-     "n": 1,
-     "hits": 0,
-     "market_implied": 0.0018,
+     "market_implied": 0.0161,
      "reason": "표본 부족(n<30)"
     },
     "_meta": {
-     "races": 34,
-     "combos": 714
+     "races": 58,
+     "combos": 1218
     }
    },
-   "빠른|9두": {
-    "선행+추입": {
-     "prob": 0.0433,
-     "n": 208,
-     "hits": 9,
-     "ci": [
-      0.0229,
-      0.0802
-     ],
-     "market_implied": 0.0367,
-     "edge": 1.1791,
-     "edge_ci": [
-      0.5815,
-      1.8092
-     ],
-     "median_odds": 87.2
-    },
+   "느린|9두": {
     "추입+추입": {
-     "prob": 0.0076,
-     "n": 132,
-     "hits": 1,
-     "ci": [
-      0.0013,
-      0.0417
-     ],
-     "market_implied": 0.014,
-     "edge": 0.5393,
-     "edge_ci": [
-      0.0,
-      1.744
-     ],
-     "median_odds": 140.9
-    },
-    "선행+선행": {
      "prob": 0.0179,
-     "n": 56,
-     "hits": 1,
+     "n": 112,
+     "hits": 2,
      "ci": [
-      0.0032,
-      0.0945
+      0.0049,
+      0.0628
      ],
-     "market_implied": 0.027,
-     "edge": 0.6609,
+     "market_implied": 0.0219,
+     "edge": 0.8146,
      "edge_ci": [
       0.0,
-      2.4819
+      2.0968
      ],
-     "median_odds": 52.8
-    },
-    "_meta": {
-     "races": 11,
-     "combos": 396
-    }
-   }
-  },
-  "test_table": {
-   "느린|7두": {
-    "추입+추입": {
-     "prob": 0.034,
-     "n": 294,
-     "hits": 10,
-     "ci": [
-      0.0186,
-      0.0615
-     ],
-     "market_implied": 0.0407,
-     "edge": 0.8366,
-     "edge_ci": [
-      0.399,
-      1.3183
-     ],
-     "median_odds": 43.7
+     "median_odds": 83.6
     },
     "선행+추입": {
-     "prob": 0.0851,
-     "n": 94,
-     "hits": 8,
+     "prob": 0.0625,
+     "n": 32,
+     "hits": 2,
      "ci": [
-      0.0438,
-      0.159
+      0.0173,
+      0.2015
      ],
-     "market_implied": 0.0722,
-     "edge": 1.1787,
+     "market_implied": 0.0483,
+     "edge": 1.2946,
      "edge_ci": [
-      0.5097,
-      1.939
+      0.0,
+      3.391
      ],
-     "median_odds": 25.2
-    },
-    "자유+추입": {
-     "prob": null,
-     "n": 8,
-     "hits": 1,
-     "market_implied": 0.0181,
-     "reason": "표본 부족(n<30)"
-    },
-    "선행+자유": {
-     "prob": null,
-     "n": 2,
-     "hits": 0,
-     "market_implied": 0.0539,
-     "reason": "표본 부족(n<30)"
-    },
-    "자유+자유": {
-     "prob": null,
-     "n": 1,
-     "hits": 0,
-     "market_implied": 0.0077,
-     "reason": "표본 부족(n<30)"
+     "median_odds": 34.5
     },
     "_meta": {
-     "races": 19,
-     "combos": 399
+     "races": 4,
+     "combos": 144
     }
    },
    "보통|7두": {
     "선행+추입": {
-     "prob": 0.0611,
-     "n": 622,
-     "hits": 38,
+     "prob": 0.0602,
+     "n": 1230,
+     "hits": 74,
      "ci": [
-      0.0448,
-      0.0827
+      0.0482,
+      0.0749
      ],
-     "market_implied": 0.0654,
-     "edge": 0.9339,
+     "market_implied": 0.0662,
+     "edge": 0.909,
      "edge_ci": [
-      0.6749,
-      1.215
+      0.7438,
+      1.0788
      ],
-     "median_odds": 37.6
+     "median_odds": 32.8
     },
     "추입+추입": {
-     "prob": 0.0309,
-     "n": 614,
-     "hits": 19,
+     "prob": 0.027,
+     "n": 1220,
+     "hits": 33,
      "ci": [
-      0.0199,
-      0.0478
+      0.0193,
+      0.0377
      ],
-     "market_implied": 0.0282,
-     "edge": 1.0965,
+     "market_implied": 0.0246,
+     "edge": 1.0993,
      "edge_ci": [
-      0.6805,
-      1.5591
+      0.747,
+      1.4972
      ],
-     "median_odds": 70.9
+     "median_odds": 69.8
     },
     "선행+선행": {
-     "prob": 0.0794,
-     "n": 63,
-     "hits": 5,
+     "prob": 0.1371,
+     "n": 124,
+     "hits": 17,
      "ci": [
-      0.0344,
-      0.1727
+      0.0874,
+      0.2086
      ],
-     "market_implied": 0.0764,
-     "edge": 1.0393,
+     "market_implied": 0.0994,
+     "edge": 1.3788,
      "edge_ci": [
-      0.2304,
-      2.1112
+      0.8605,
+      1.9174
      ],
-     "median_odds": 13.9
+     "median_odds": 14.4
     },
     "자유+추입": {
      "prob": null,
-     "n": 16,
-     "hits": 1,
-     "market_implied": 0.0072,
+     "n": 20,
+     "hits": 0,
+     "market_implied": 0.0075,
      "reason": "표본 부족(n<30)"
     },
     "선행+자유": {
      "prob": null,
-     "n": 8,
+     "n": 10,
      "hits": 0,
-     "market_implied": 0.0071,
+     "market_implied": 0.0094,
      "reason": "표본 부족(n<30)"
     },
     "_meta": {
-     "races": 63,
-     "combos": 1323
+     "races": 124,
+     "combos": 2604
+    }
+   },
+   "보통|9두": {
+    "추입+추입": {
+     "prob": 0.0286,
+     "n": 105,
+     "hits": 3,
+     "ci": [
+      0.0098,
+      0.0807
+     ],
+     "market_implied": 0.032,
+     "edge": 0.8939,
+     "edge_ci": [
+      0.0,
+      1.5639
+     ],
+     "median_odds": 60.5
+    },
+    "선행+추입": {
+     "prob": 0.0286,
+     "n": 70,
+     "hits": 2,
+     "ci": [
+      0.0079,
+      0.0983
+     ],
+     "market_implied": 0.0228,
+     "edge": 1.2552,
+     "edge_ci": [
+      0.0,
+      3.7748
+     ],
+     "median_odds": 69.8
+    },
+    "선행+선행": {
+     "prob": null,
+     "n": 5,
+     "hits": 0,
+     "market_implied": 0.0101,
+     "reason": "표본 부족(n<30)"
+    },
+    "_meta": {
+     "races": 5,
+     "combos": 180
     }
    },
    "빠른|7두": {
     "선행+추입": {
-     "prob": 0.0532,
-     "n": 1523,
-     "hits": 81,
+     "prob": 0.0498,
+     "n": 2729,
+     "hits": 136,
      "ci": [
-      0.043,
-      0.0656
+      0.0423,
+      0.0587
      ],
-     "market_implied": 0.0495,
-     "edge": 1.0736,
+     "market_implied": 0.0501,
+     "edge": 0.9944,
      "edge_ci": [
-      0.8829,
-      1.2726
+      0.8535,
+      1.1432
      ],
-     "median_odds": 46.3
+     "median_odds": 42.1
     },
     "선행+선행": {
-     "prob": 0.066,
-     "n": 652,
-     "hits": 43,
+     "prob": 0.0642,
+     "n": 1169,
+     "hits": 75,
      "ci": [
-      0.0493,
-      0.0877
+      0.0515,
+      0.0797
      ],
-     "market_implied": 0.0646,
-     "edge": 1.0208,
+     "market_implied": 0.0669,
+     "edge": 0.9592,
      "edge_ci": [
-      0.7619,
-      1.2833
+      0.7641,
+      1.1433
      ],
-     "median_odds": 27.5
+     "median_odds": 23.2
     },
     "추입+추입": {
-     "prob": 0.0141,
-     "n": 568,
-     "hits": 8,
+     "prob": 0.0248,
+     "n": 1049,
+     "hits": 26,
      "ci": [
-      0.0072,
-      0.0275
+      0.017,
+      0.0361
      ],
-     "market_implied": 0.024,
-     "edge": 0.5869,
+     "market_implied": 0.0208,
+     "edge": 1.1931,
      "edge_ci": [
-      0.2264,
-      0.9901
+      0.7634,
+      1.6242
      ],
-     "median_odds": 75.2
-    },
-    "선행+자유": {
-     "prob": null,
-     "n": 17,
-     "hits": 0,
-     "market_implied": 0.0282,
-     "reason": "표본 부족(n<30)"
+     "median_odds": 79.1
     },
     "자유+추입": {
      "prob": null,
-     "n": 11,
+     "n": 15,
      "hits": 0,
-     "market_implied": 0.0291,
+     "market_implied": 0.0075,
      "reason": "표본 부족(n<30)"
     },
-    "자유+자유": {
+    "선행+자유": {
      "prob": null,
-     "n": 1,
+     "n": 15,
      "hits": 0,
-     "market_implied": 0.0026,
+     "market_implied": 0.009,
      "reason": "표본 부족(n<30)"
     },
     "_meta": {
-     "races": 132,
-     "combos": 2772
+     "races": 237,
+     "combos": 4977
     }
    },
    "빠른|9두": {
     "선행+추입": {
-     "prob": 0.0332,
-     "n": 452,
-     "hits": 15,
+     "prob": 0.0385,
+     "n": 650,
+     "hits": 25,
      "ci": [
-      0.0202,
-      0.054
+      0.0262,
+      0.0562
      ],
-     "market_implied": 0.0361,
-     "edge": 0.919,
+     "market_implied": 0.0349,
+     "edge": 1.1021,
      "edge_ci": [
-      0.5272,
-      1.359
+      0.7198,
+      1.5069
      ],
-     "median_odds": 68.2
+     "median_odds": 69.1
     },
     "추입+추입": {
-     "prob": 0.021,
-     "n": 286,
-     "hits": 6,
+     "prob": 0.0101,
+     "n": 395,
+     "hits": 4,
      "ci": [
-      0.0096,
-      0.045
+      0.0039,
+      0.0257
      ],
-     "market_implied": 0.0154,
-     "edge": 1.3603,
+     "market_implied": 0.0171,
+     "edge": 0.5934,
      "edge_ci": [
-      0.4514,
-      2.4148
+      0.1396,
+      1.2229
      ],
-     "median_odds": 108.0
+     "median_odds": 104.2
     },
     "선행+선행": {
-     "prob": 0.0238,
-     "n": 126,
-     "hits": 3,
+     "prob": 0.0279,
+     "n": 179,
+     "hits": 5,
      "ci": [
-      0.0081,
-      0.0677
+      0.012,
+      0.0637
      ],
-     "market_implied": 0.0259,
-     "edge": 0.918,
+     "market_implied": 0.0256,
+     "edge": 1.0927,
      "edge_ci": [
-      0.0,
-      1.9355
+      0.2656,
+      1.9697
      ],
-     "median_odds": 60.8
+     "median_odds": 57.2
     },
     "_meta": {
-     "races": 24,
-     "combos": 864
+     "races": 34,
+     "combos": 1224
     }
    }
   }
