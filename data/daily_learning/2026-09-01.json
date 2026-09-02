@@ -1,0 +1,180 @@
+{
+ "date": "2026-09-01",
+ "results_summary": {
+  "total_races": 128,
+  "hits": 101,
+  "hit_rate": 78.9,
+  "profit": {
+   "net": 385100,
+   "settled": 128
+  }
+ },
+ "ai_training_data": {
+  "races_collected": 5555,
+  "quality_score": 72,
+  "ai_ready_races": 90,
+  "patterns_tagged": []
+ },
+ "bigdata": {
+  "by_track": {
+   "나고야": {
+    "n": 12,
+    "hits": 7,
+    "hit_rate": 58.3
+   },
+   "마쓰야마": {
+    "n": 12,
+    "hits": 12,
+    "hit_rate": 100.0
+   },
+   "모리오카": {
+    "n": 12,
+    "hits": 7,
+    "hit_rate": 58.3
+   },
+   "몬베츠": {
+    "n": 12,
+    "hits": 8,
+    "hit_rate": 66.7
+   },
+   "우쓰노미야": {
+    "n": 12,
+    "hits": 11,
+    "hit_rate": 91.7
+   },
+   "카나자와": {
+    "n": 12,
+    "hits": 8,
+    "hit_rate": 66.7
+   },
+   "카와사키": {
+    "n": 12,
+    "hits": 10,
+    "hit_rate": 83.3
+   },
+   "마쓰도": {
+    "n": 11,
+    "hits": 10,
+    "hit_rate": 90.9
+   },
+   "세이부엔": {
+    "n": 11,
+    "hits": 10,
+    "hit_rate": 90.9
+   },
+   "마쓰사카": {
+    "n": 7,
+    "hits": 5,
+    "hit_rate": 71.4
+   },
+   "와카야마": {
+    "n": 7,
+    "hits": 6,
+    "hit_rate": 85.7
+   },
+   "시즈오카": {
+    "n": 3,
+    "hits": 3,
+    "hit_rate": 100.0
+   },
+   "이와키타이라": {
+    "n": 3,
+    "hits": 3,
+    "hit_rate": 100.0
+   },
+   "기후": {
+    "n": 2,
+    "hits": 1,
+    "hit_rate": 50.0
+   }
+  },
+  "by_field_size": {
+   "소두수(≤8)": {
+    "n": 83,
+    "hits": 73,
+    "hit_rate": 88.0
+   },
+   "미상": {
+    "n": 23,
+    "hits": 17,
+    "hit_rate": 73.9
+   },
+   "중두수(9~12)": {
+    "n": 22,
+    "hits": 11,
+    "hit_rate": 50.0
+   }
+  },
+  "by_time_zone": {
+   "오후": {
+    "n": 55,
+    "hits": 45,
+    "hit_rate": 81.8
+   },
+   "저녁": {
+    "n": 50,
+    "hits": 37,
+    "hit_rate": 74.0
+   },
+   "오전": {
+    "n": 23,
+    "hits": 19,
+    "hit_rate": 82.6
+   }
+  },
+  "by_grade": {
+   "미수집": {
+    "n": 128,
+    "hits": 101,
+    "hit_rate": 78.9
+   }
+  },
+  "by_condition": {
+   "미수집": {
+    "n": 128,
+    "hits": 101,
+    "hit_rate": 78.9
+   }
+  },
+  "by_weather": {
+   "미수집": {
+    "n": 128,
+    "hits": 101,
+    "hit_rate": 78.9
+   }
+  },
+  "note": "grade/condition/weather 는 현재 미수집(슬롯 준비됨) — 수집 배선 시 자동 집계."
+ },
+ "cumulative_pattern_reliability": {
+  "마감급락": {
+   "label": "급락 감지 적중",
+   "hit": 52,
+   "n": 63,
+   "rate": 82.5
+  },
+  "쌍승역전": {
+   "label": "쌍승 역전 적중",
+   "hit": 5,
+   "n": 20,
+   "rate": 25.0
+  },
+  "전적이중수렴": {
+   "label": "전적 유력마 적중(이중수렴 근사)",
+   "hit": 307,
+   "n": 552,
+   "rate": 55.6
+  },
+  "추천종합": {
+   "label": "추천 종합 적중",
+   "hit": 730,
+   "n": 1705,
+   "rate": 42.8
+  }
+ },
+ "key_learnings": [],
+ "missed_opportunities": [],
+ "pattern_discoveries": [],
+ "system_improvements": [],
+ "tomorrow_focus": [],
+ "generated_at": "2026-09-01 22:01:08"
+}
