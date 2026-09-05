@@ -24523,6 +24523,56 @@ def _apply_result_learning(rk, result, top3, final_odds=None, stake=None, payout
 ML_TRAINING_FILE = os.path.join(os.path.dirname(__file__), "data", "ml_training_data.jsonl")
 SIGNAL_PERF_FILE = os.path.join(os.path.dirname(__file__), "data", "signal_performance.json")
 
+# ── [ML 학습셋] 경주일 · 중복 방지 (2026-09-05) ─────────────────────────────
+#  🔴 종전 결함 2개(실측 확인):
+#    ① `"date": time.strftime(...)` = **입력한 날**이었다. 경주일이 아니다(원칙 16).
+#       백필·자정넘김 경주가 다른 달로 잡혀 기간 비교가 통째로 흔들렸다.
+#    ② 중복 방지가 `_RESULT_LEARNED`(메모리)뿐이라 **재기동마다 초기화** →
+#       마감 후 재분석이 돌 때마다 append 됐다.
+#       실측 6,463행 중 고유 경주 **596개**(중복 90.8% · 같은 경주 최다 89회).
+#  ⚠ rk 에 날짜가 없으면(실측 47%) 경주일을 알 방법이 없다 → 종전대로 오늘을 쓰되
+#    **`dateSrc` 로 어느 경로인지 남긴다**(원칙 24 — 폴백이 얼마나 도는지 드러나게).
+_ML_SEEN = None   # (raceKey, date) 집합 — 파일에서 1회 로드하므로 재기동해도 살아난다
+
+
+def _ml_race_date(rk):
+    """[ML 학습셋] 경주일과 그 출처를 돌려준다. 못 구하면 (오늘, 'today')."""
+    try:
+        m = re.search(r"(\d{4})[-_](\d{2})[-_](\d{2})", str(rk or ""))
+        if m:
+            return "%s-%s-%s" % m.groups(), "rk"
+    except Exception:
+        pass
+    return time.strftime("%Y-%m-%d"), "today"
+
+
+def _ml_seen():
+    """[중복 방지] 파일에서 (raceKey, date) 를 1회 읽어 집합으로 든다.
+    🔴 메모리 dict 와 달리 **재기동해도 파일에서 다시 세운다**.
+    ⚠ 읽기 실패 시 빈 집합 — 중복 방지만 무력화되고 기존 데이터는 안 건드린다(원칙 9)."""
+    global _ML_SEEN
+    if _ML_SEEN is not None:
+        return _ML_SEEN
+    s = set()
+    try:
+        with open(ML_TRAINING_FILE, encoding="utf-8") as f:
+            for ln in f:
+                ln = ln.strip()
+                if not ln:
+                    continue
+                try:
+                    r = json.loads(ln)
+                    s.add((r.get("raceKey"), r.get("date")))
+                except Exception:
+                    continue
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        print("[ML수집] 중복색인 로드 실패(중복방지 미적용):", str(e)[:80])
+    _ML_SEEN = s
+    return s
+
+
 
 def _validate_learning_data(rk, result, top3, sport=None):
     """[데이터 검증] 학습·저장 전 자동 오류 체크. 반환 (ok, errors[]).
@@ -24618,7 +24668,8 @@ def _ml_row_build(rk, an, result, top3, payouts, was_hit):
         "odds_place": _oddsp,
         "roi": round(_oddsp, 2) if (_oddsp and was_hit) else (0.0 if not was_hit else None),
     }
-    return {"raceKey": _canon_rk(rk), "date": time.strftime("%Y-%m-%d"),
+    _rd, _rds = _ml_race_date(rk)   # 🔴 입력일이 아니라 **경주일**(구할 수 있으면)
+    return {"raceKey": _canon_rk(rk), "date": _rd, "dateSrc": _rds, "raceKeyRaw": rk,
             "sport": _rk_sport(rk, an), "features": feat, "label": label, "t": time.time()}
 
 
@@ -24627,9 +24678,17 @@ def _ml_append_row(rk, an, result, top3, payouts, was_hit):
     if _learn_suppressed():   # 🔴 [ⓕ 2026-08-03] 관찰 모드 중앙경마 — 글로벌 학습 통계 누적 스킵
         return None
     row = _ml_row_build(rk, an, result, top3, payouts, was_hit)
+    _key = (row.get("raceKey"), row.get("date"))
+    _seen = _ml_seen()
+    if _key in _seen:           # 🔴 같은 경주 재분석분 append 차단(종전 중복 90.8%)
+        _gate_hit("ml_dup_skip", rk, reason="이미 있는 경주 — 중복 append 차단")
+        return None
+    _gate_hit("ml_append", rk, reason="dateSrc=%s" % row.get("dateSrc"))
     os.makedirs(os.path.dirname(ML_TRAINING_FILE), exist_ok=True)
     with open(ML_TRAINING_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    _seen.add(_key)
+    return True
 
 
 # ══════════════ [④ 오염 기록 학습 제외 (2026-07-20)] 데이터 오염 구간 마킹 — 삭제 금지·통계만 제외 ══════════════
