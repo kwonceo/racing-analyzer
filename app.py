@@ -14521,6 +14521,16 @@ def _triple_analyze(rk, rec):
         _apply_tri_hysteresis(rk, _an_out)
     except Exception as _tye:
         print("[삼복승 히스테리시스] 적용 실패(무시·원본 표시):", _tye)
+    # [관측 전용 · 2026-09-06] 이월 배당 수정안의 **오탐률을 재기 위한 재료**를 여기서 남긴다.
+    #   🔴 **여기가 유일한 지점이다** — 그 시점 실제 배당 맵(`curQ`)과 표시 목록(`finalQuinellas`)이
+    #     동시에 살아 있는 스코프는 여기뿐이다. 저장 뒤에는 `curQ` 가 사라져 소급 복원이 불가능하다.
+    #     (2026-09-05 에 수정안 3안이 전부 「오탐률을 못 잰다」로 기각된 이유가 정확히 이것이다.)
+    #   ⚠ 두 히스테리시스 **뒤**에 둔다 — 회원이 실제로 보는 목록으로 재야 의미가 있다.
+    #   ⚠ 추천·판정·표시를 한 줄도 바꾸지 않는다. 실패해도 무시된다. 🔧 CURQ_OBS_ENABLED = False
+    try:
+        _curq_observe(rk, _an_out, curQ, cur_mb, after_close)
+    except Exception:
+        pass
     # [③ 베팅 규칙 v2 (2026-07-29 권대표 승인)] 백테스트로 정한 시장별 규칙 적용 — 아래 BET_RULES 참조.
     #   ⚠ 히스테리시스 뒤에 와야 한다(안정화된 최종 순위에 규칙을 건다). 실패 시 원본 그대로.
     try:
@@ -14941,6 +14951,141 @@ def _cycle_t2_strong_horses(an):
                 except (TypeError, ValueError):
                     continue
     return out
+
+
+# ══════ [관측 전용 · 2026-09-06] `curQ` 보존 — 「이월 배당」 수정안의 **오탐률을 재기 위한 재료** ══════
+#  🔴 왜 이것이 먼저인가 (2026-09-05 진단 → 2026-09-06 배선)
+#    `_apply_rec_hysteresis` 가 후보에서 빠진 1순위를 되살릴 때 `st["item"]` 을 **통째로** 들고 온다
+#    (아래 「보류 → 기존 표시 메인 복원」 분기). 그 안에 **옛 배당(odds)** 이 딸려 와 굳는다.
+#    실물: 제주 6경주 6+7 이 kra_api 시절 **9.6** 으로 고정 · 실제 **58.2배**(+506%).
+#    규모: 이월 표식 보유 **715 / 5,476 경주 = 13.1%**(분모 = analysis_log 중 finalQuinellas 보유분).
+#    ⚠ app.py 의 「표시 계층만 — 분석·이력·학습 원본은 그대로」 주석은 **사실과 다르다** —
+#      `cp["finalQuinellas"] = fq` 로 corePicks 자체가 바뀌고 그 odds 가 recommendation_history 로 복사된다.
+#
+#  🔴 그런데 **고칠 수가 없었다.** 수정안 3안(source·refresh·guard)이 전부 4/4 치명으로 기각됐고
+#    기각 사유가 셋 다 같았다 — **오탐률을 소급으로 잴 수 없다.**
+#    리프라이스의 유일한 입력인 **그 시점 배당 맵 `curQ` 가 어디에도 보존되지 않기** 때문이다.
+#    (odds 는 표시 전용이 아니다: 판정 명단 상한 cap · 카톡 권장 비중 % · EV 밴드 학습 · review_engine
+#     입력으로 흘러간다. 그래서 「그냥 덮어쓰기」는 원칙 20 위반이다.)
+#  ⇒ 이 배선은 **그 재료 하나만** 남긴다. 판정·추천·표시·저장 원본을 **한 줄도 건드리지 않는다.**
+#
+#  ⚠ 위임 범위 「관측 배선 · 추천 경로 무개입」에 해당한다(CLAUDE.md 2026-07-30). 별도 승인 사항이 아니다.
+#  ⚠ 원칙 23 — 도달(`curq_obs` reach)과 발동(fire · 경주당 1회)을 따로 센다.
+#    🔴 계수기가 0 이면 이 배선은 **실전에서 아무것도 안 하고 있는 것**이다(그 자체가 관측 결과다).
+#  🔧 되돌리기: `CURQ_OBS_ENABLED = False` — **한 줄**. 파일도 안 만들어진다.
+CURQ_OBS_ENABLED = True
+CURQ_OBS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "curq_obs")
+# 🔴 [2026-09-06 당일 실측으로 고침] 첫 판은 「경주당 300줄」 하나였는데 **자르는 쪽이 끝이었다.**
+#   실측(오늘 첫 20분 · 8경주 476행): 한국은 폴링 간격 중앙 **1.8초**(서울 0.8초)라
+#   부산 1경주가 20분 만에 292줄을 채웠다. 상한에 걸리면 **마감 직전이 통째로 잘린다** — 가장 중요한 구간이다.
+#   같은 실측에서 **연속 동일 상태가 87%**였다(292줄 → 고유 37). 접으면 정보 손실 없이 8분의 1이 된다.
+#   ⇒ 상한을 올리는 대신 **접는다**. 다만 세 경우는 반드시 남긴다:
+#     ⓐ 상태가 바뀐 순간(전이는 하나도 놓치면 안 된다)
+#     ⓑ 🔴 마감 CURQ_OBS_FULL_MB 분 이내 — **전 해상도**로 남긴다(오탐률을 재는 구간이 바로 여기다)
+#     ⓒ 마지막 기록 후 CURQ_OBS_HEARTBEAT_SEC 초 경과(상태가 안 변해도 「그때 그랬다」를 남긴다)
+CURQ_OBS_MAX_PER_RACE = 900      # 하드 백스톱(원칙 24). 접기가 있으므로 평시엔 안 걸린다
+CURQ_OBS_STALE_PCT = 0.20        # 표시배당 ↔ 실제배당 괴리가 이 이상이면 `stale` 로 센다(관측 지표일 뿐)
+CURQ_OBS_HEARTBEAT_SEC = 60.0    # 상태가 그대로여도 이 간격마다 한 줄
+CURQ_OBS_FULL_MB = 2.5           # 🔴 이 안쪽은 접지 않는다(late_drop 과 같은 창)
+_CURQ_OBS_N = {}                 # rk → 그날 기록 수(날짜가 바뀌면 통째로 비운다)
+_CURQ_OBS_LAST = {}              # rk → (마지막 상태 서명, 마지막 기록 시각)
+_CURQ_OBS_DAY = [""]
+
+
+def _curq_observe(rk, an, curQ, cur_mb, after_close):
+    """[관측 전용] 이 폴링 시점의 **표시 목록 배당 ↔ 실제 배당 맵**을 나란히 한 줄 적재한다.
+
+    🔴 이 함수는 **아무것도 바꾸지 않는다.** `an`·`curQ` 를 읽기만 하고 파일에 append 한다.
+      실패해도 예외를 올리지 않는다 — 관측이 본 기능을 막으면 안 된다(원칙 21).
+    ⚠ 그렇다고 조용히 죽게 두지도 않는다 — 실패는 `curq_obs_err` 계수기로 남는다(원칙 21 ③).
+
+    적재 한 줄이 답하는 것:
+      · 지금 회원에게 보이는 조합의 배당(`o`)과 **같은 순간의 진짜 배당**(`cur`)이 얼마나 벌어졌나
+      · 그 조합이 히스테리시스로 되살아난 것인가(`hy`) · 교체 전 보조인가(`bk`)
+      · 리프라이스하면 **판정 명단 상한(cap)이 바뀌는가** (`capO` ↔ `capCur`)
+    ⇒ 이 셋이 있어야 「고쳤을 때 명단이 몇 % 바뀌고 그중 몇 %가 오탐인가」를 **소급으로** 잴 수 있다.
+    """
+    if not CURQ_OBS_ENABLED:
+        return
+    try:
+        if not isinstance(an, dict) or not curQ:
+            return
+        fq = (an.get("corePicks") or {}).get("finalQuinellas") or []
+        if not fq:
+            return
+        _gate_hit("curq_obs", rk, "도달", reach_only=True)
+        _day = time.strftime("%Y%m%d")
+        if _CURQ_OBS_DAY[0] != _day:                 # 날짜가 바뀌면 카운터를 비운다(메모리 누수 방지)
+            _CURQ_OBS_DAY[0] = _day
+            _CURQ_OBS_N.clear()
+            _CURQ_OBS_LAST.clear()
+        _n = _CURQ_OBS_N.get(rk, 0)
+        if _n >= CURQ_OBS_MAX_PER_RACE:
+            _gate_hit("curq_obs_cap", rk, "경주당 상한 %d 초과" % CURQ_OBS_MAX_PER_RACE, once_key=rk)
+            return
+        rows, stale = [], 0
+        for _q in fq:
+            if not isinstance(_q, dict):
+                continue
+            _c = _q.get("combo")
+            if not (isinstance(_c, (list, tuple)) and len(_c) >= 2):
+                continue
+            try:
+                _pair = (min(int(_c[0]), int(_c[1])), max(int(_c[0]), int(_c[1])))
+            except (TypeError, ValueError):
+                continue
+            try:
+                _so = float(_q.get("odds")) if _q.get("odds") is not None else None
+            except (TypeError, ValueError):
+                _so = None
+            try:
+                _cv = curQ.get(_pair)
+                _co = float(_cv) if _cv is not None else None
+            except (TypeError, ValueError):
+                _co = None
+            if _so is not None and _co and _co > 0 and abs(_so - _co) / _co >= CURQ_OBS_STALE_PCT:
+                stale += 1
+            rows.append({"c": list(_pair), "o": _so, "cur": _co,
+                         "bk": bool(_q.get("switchBackup")),
+                         "hy": ("유지(히스테리시스)" in str(_q.get("reason") or ""))})
+        if not rows:
+            return
+        # 🔴 [접기] 같은 상태를 초당 몇 줄씩 쌓지 않는다. 전이·마감직전·하트비트만 남긴다(위 상수 주석 참조).
+        _now = time.time()
+        _sig = json.dumps([[r["c"], r["o"], r["cur"], r["bk"], r["hy"]] for r in rows],
+                          sort_keys=True, ensure_ascii=False)
+        _psig, _pt = _CURQ_OBS_LAST.get(rk, (None, 0.0))
+        try:
+            _near = (cur_mb is not None and float(cur_mb) <= CURQ_OBS_FULL_MB)
+        except (TypeError, ValueError):
+            _near = False
+        _why = ("전이" if _sig != _psig else
+                ("마감직전" if _near else
+                 ("하트비트" if (_now - _pt) >= CURQ_OBS_HEARTBEAT_SEC else None)))
+        if _why is None:
+            _gate_hit("curq_obs_fold", rk, "동일 상태 접음", reach_only=True)
+            return
+        _os_ = [r["o"] for r in rows if r["o"] is not None]
+        _cs_ = [r["cur"] for r in rows if r["cur"] is not None]
+        _rec = {"t": round(time.time(), 1), "rk": rk, "mb": cur_mb, "why": _why,
+                "sport": an.get("sport"), "cat": an.get("category"),
+                "ac": bool(after_close), "nq": len(curQ),
+                "hyst": an.get("recHysteresis"), "fq": rows, "stale": stale,
+                # 🔴 cap = 판정 명단 상한의 입력. 이 둘이 다르면 **고쳤을 때 명단이 바뀐다**는 뜻이다.
+                "capO": (min(_os_) if _os_ else None), "capCur": (min(_cs_) if _cs_ else None)}
+        os.makedirs(CURQ_OBS_DIR, exist_ok=True)
+        with io.open(os.path.join(CURQ_OBS_DIR, _day + ".jsonl"), "a", encoding="utf-8") as _f:
+            _f.write(json.dumps(_rec, ensure_ascii=False) + "\n")
+        _CURQ_OBS_N[rk] = _n + 1
+        _CURQ_OBS_LAST[rk] = (_sig, _now)            # 🔴 **쓴 뒤에** 갱신한다(쓰기 실패 시 다음에 다시 시도)
+        if _n == 0:                                  # 경주당 1회만 fire 로 센다(원칙 23 단위 통일)
+            _gate_hit("curq_obs", rk, "적재 시작 · 표시 %d조합 · curQ %d조합 · 괴리 %d"
+                      % (len(rows), len(curQ), stale), once_key=rk)
+    except Exception as _cqe:
+        try:
+            _gate_hit("curq_obs_err", rk, str(_cqe)[:60])
+        except Exception:
+            pass
 
 
 def _apply_rec_hysteresis(rk, an):
@@ -39713,6 +39858,78 @@ def _multi_card_cached(key, rec):
     return _card
 
 
+# ══════ [지난 경주 카드 · 2026-09-06] 오늘 끝난 한국 경주가 「⏳ 수집 대기」로 뜨던 것을 고친다 ══════
+#  🔴 실사고(대표 지적 · 화면 캡처): 11:15 에 유력마 1·11·9 와 「마감」이 보이던 **서울 2경주**가
+#    11:30 에 **완전히 빈 카드**가 됐다. 서울 1경주도 이미 달렸는데 「발주 ? · 수집 대기」였다.
+#  🔴 경로를 코드로 확정했다(추정 아님):
+#    ⓐ `triple_store` 는 끝난 경주를 **지운다** — 오늘 11:39 실측 전체 5경주만 잔존(서울 1·2경주 이미 없음)
+#    ⓑ 대시보드 triple 병합이 `STALE_ACTIVE_SEC`(30분) 미갱신을 건너뛴다
+#    ⓒ 🔴 **그런데 아래 스케줄 루프가 그 경주를 「예정」으로 다시 넣는다.**
+#       일본은 `postEpoch` 가 있어 `left < -120` 으로 걸러지는데,
+#       **KRA 는 발주시각 API 가 없어 한국은 `postEpoch=None` → `left=None` → 그 필터를 통과한다.**
+#    ⓓ ⇒ 이미 끝난 경주가 「⏳ 수집 대기 (발주 10분전 자동 시작)」 로 표시된다.
+#  🟢 **재료는 다 있다** — `data/analysis_log/<오늘>_<경주>.json` 에 그대로 남아 있다.
+#    실측(2026-09-06): 서울 1경주 keyHorses [1,2,6] · finalQuinellas 4개 · result 2-7-1 · hit.was_hit True
+#  ⇒ 빈 카드를 만들기 **전에** 저장분을 본다. 있으면 그것으로 카드를 만든다. 없으면 종전 그대로다.
+#  ⚠ **표시 계층만이다** — 분석·판정·추천·저장을 한 줄도 건드리지 않는다(파일을 읽기만 한다).
+#  ⚠ **한국에만 적용**한다 — 일본·경륜 카드 동작은 완전히 그대로다(영향 범위 최소화).
+#  ⚠ 원칙 16 — `_canonical_log_key` 를 쓰지 않는다. 그 함수는 **최근 3일 과거 파일로 라우팅**할 수 있어
+#    어제 경주를 오늘 카드로 그릴 위험이 있다. 여기서는 **오늘 날짜 파일만** 본다.
+#  🔧 되돌리기: PAST_CARD_ENABLED = False
+PAST_CARD_ENABLED = True
+PAST_CARD_SPORTS = ("korea",)        # 발주시각이 없어 위 ⓒ 를 통과하는 종목만
+
+
+def _multi_past_card(key, venue, race_no, sport, post_time=None):
+    """오늘 이미 끝난 경주의 **저장된 분석**으로 카드를 만든다(완전 읽기 전용). 없으면 None → 종전 동작."""
+    if not PAST_CARD_ENABLED or (sport or "") not in PAST_CARD_SPORTS:
+        return None
+    try:
+        _p, _date, _ = _analysis_log_path(key)           # 🔴 날짜 없는 rk 는 **오늘**로 해석된다
+        if _date != time.strftime("%Y-%m-%d") or not _p or not os.path.exists(_p):
+            return None                                  # 오늘 파일이 아니면 손대지 않는다(원칙 16)
+        _d, _ = _json_load_guard(_p, {}, tag="지난경주카드")
+        if not isinstance(_d, dict):
+            return None
+        _cp = _d.get("corePicks") or {}
+        _kh = list(_d.get("keyHorses") or _cp.get("keyHorses") or [])[:3]
+        _fq = _cp.get("finalQuinellas") or []
+        _res = _d.get("result") or {}
+        if not (_kh or _fq or _res.get("1st")):
+            return None                                  # 남길 내용이 없으면 종전대로 빈 카드
+        _gate_hit("past_card", key, "저장분으로 복원 · 유력마 %d · 추천 %d" % (len(_kh), len(_fq)),
+                  once_key=key)
+        _main = None
+        for _q in _fq:
+            if isinstance(_q, dict) and _q.get("combo"):
+                _main = _q["combo"]
+                break
+        _card = {
+            "raceKey": key, "venue": _track_norm(venue), "raceNo": race_no, "sport": sport,
+            "postTime": post_time, "secondsLeft": None, "urgency": "normal",
+            "keyHorses": _kh, "signals": [], "anomaly": False, "midHigh": [],
+            "confidence": _card_conf_value(_d.get("confidence")),
+            "grade": _cp.get("raceGrade") or _d.get("raceGrade"),
+            "quinellaMain": _main,
+            "afterClose": True,          # 끝난 경주다 — 카드에 「마감」으로 나온다
+            "past": True,                # 🔴 저장분에서 되살린 카드라는 표식(원칙 24 — 출처를 남긴다)
+            "updatedSecondsAgo": None,
+        }
+        try:
+            _rs = _race_result_summary(key)              # ✅/❌ 배지·착순은 기존 함수를 그대로 쓴다
+            if _rs:
+                _card["result"] = _rs
+        except Exception:
+            pass
+        return _card
+    except Exception as _pce:
+        try:
+            _gate_hit("past_card_err", key, str(_pce)[:60])
+        except Exception:
+            pass
+        return None
+
+
 @app.route("/api/multi/dashboard", methods=["GET"])
 def multi_dashboard():
     """[3번] 다중 경주 대시보드 카드 — 배당 수집된 경주(분석 카드) + 아직 수집 전인 예정 경주(카운트다운) 병합.
@@ -39766,6 +39983,18 @@ def multi_dashboard():
             urg = "normal"
             if left is not None:
                 urg = "urgent" if left <= MULTI_URGENT_SEC else ("warn" if left <= MULTI_WARN_SEC else "normal")
+            # 🔴 [지난 경주 카드 · 2026-09-06] 빈 「수집 대기」 카드를 만들기 **전에** 오늘 저장분을 본다.
+            #   한국은 발주시각이 없어 위 `left < -120` 필터를 통과하므로, 이미 끝난 경주가 여기로 온다.
+            #   저장분이 있으면 유력마·추천·결과가 담긴 진짜 카드로 바꾼다(위 `_multi_past_card` 주석 참조).
+            #   ⚠ 없으면 아래 종전 카드가 그대로 나간다 — 기존 동작 무변경.
+            try:
+                _pc = _multi_past_card(key, tr.get("venue"), rc.get("raceNo"), _tr_sport, rc.get("postTime"))
+            except Exception:
+                _pc = None
+            if _pc:
+                cards.append(_pc)
+                collected_keys.add(key)
+                continue
             cards.append({"raceKey": key, "venue": _track_norm(tr.get("venue")), "raceNo": rc.get("raceNo"),
                           "sport": _tr_sport, "postTime": rc.get("postTime"), "secondsLeft": left, "urgency": urg,
                           "keyHorses": [], "signals": [], "anomaly": False, "confidence": None,
